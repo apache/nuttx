@@ -6649,3 +6649,7 @@
 	  Add PIO support for the SAM4E (2014-2-21).
 	* configs/stm3220g-eval/nsh/defconfig: Converted to use kconfig-frontends
 	  by Alan Carvalho de Assis (2014-2-10)
+	* configs/*/defconfig: Comment out all CONFIG_APPS_DIR settings.  These
+	  should not be set in the default configurations because we don't know
+	  where the apps/ directly will reside until configuration time (2014-2-21).
+

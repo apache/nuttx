@@ -686,4 +686,4 @@ CONFIG_READLINE_ECHO=y
 
 
 
-CONFIG_APPS_DIR="../apps"
+# CONFIG_APPS_DIR="../apps"
