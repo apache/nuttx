@@ -6643,4 +6643,6 @@
 	  defaults do not apply (2014-2-20).
 	* arch/arm/src/sam34/chip/sam4e_vectors.h:  Add vector definitions
 	  for the SAM4E (2014-2-21).
+	* arch/arm/src/sam34/chip/sam4e_memorymap.h:  Add SAM4E memory map
+	  (2014-2-21).
 
