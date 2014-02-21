@@ -1,8 +1,8 @@
 /****************************************************************************
  * arch/arm/src/sam34/sam_gpio.c
- * General Purpose Input/Output (GPIO) logic for the SAM3U and SAM4S
+ * General Purpose Input/Output (GPIO) logic for the SAM3U, SAM4S and SAM4E
  *
- *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,6 +57,8 @@
 #if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
     defined(CONFIG_ARCH_CHIP_SAM3A)
 #  include "chip/sam3u_pio.h"
+#elif defined(CONFIG_ARCH_CHIP_SAM4E)
+#  include "chip/sam4e_pio.h"
 #elif defined(CONFIG_ARCH_CHIP_SAM4S)
 #  include "chip/sam4s_pio.h"
 #else
@@ -506,7 +508,7 @@ int sam_dumpgpio(uint32_t pinset, const char *msg)
   lldbg("   ABSR: %08x SCIFSR: %08x  DIFSR: %08x IFDGSR: %08x\n",
         getreg32(base + SAM_PIO_ABSR_OFFSET), getreg32(base + SAM_PIO_SCIFSR_OFFSET),
         getreg32(base + SAM_PIO_DIFSR_OFFSET), getreg32(base + SAM_PIO_IFDGSR_OFFSET));
-#elif defined(CONFIG_ARCH_CHIP_SAM4S)
+#elif defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
   lldbg(" ABCDSR: %08x %08x         IFSCSR: %08x  PPDSR: %08x\n",
         getreg32(base + SAM_PIO_ABCDSR1_OFFSET), getreg32(base + SAM_PIO_ABCDSR2_OFFSET),
         getreg32(base + SAM_PIO_IFSCSR_OFFSET), getreg32(base + SAM_PIOC_PPDSR));
@@ -520,12 +522,17 @@ int sam_dumpgpio(uint32_t pinset, const char *msg)
   lldbg(" FRLHSR: %08x LOCKSR: %08x   WPMR: %08x   WPSR: %08x\n",
         getreg32(base + SAM_PIO_FRLHSR_OFFSET), getreg32(base + SAM_PIO_LOCKSR_OFFSET),
         getreg32(base + SAM_PIO_WPMR_OFFSET), getreg32(base + SAM_PIO_WPSR_OFFSET));
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
-  lldbg("   PCMR: %08x PCIMR: %08x   PCISR: %08x   PCRHR: %08x\n",
+#elif defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
+  lldbg("   PCMR: %08x  PCIMR: %08x  PCISR: %08x   PCRHR: %08x\n",
         getreg32(base + SAM_PIO_PCMR_OFFSET), getreg32(base + SAM_PIO_PCIMR_OFFSET),
         getreg32(base + SAM_PIO_PCISR_OFFSET), getreg32(base + SAM_PIO_PCRHR_OFFSET));
+#ifdef CONFIG_ARCH_CHIP_SAM4E
+  lldbg("SCHMITT: %08x DELAYR:%08x\n",
+        getreg32(base + SAM_PIO_SCHMITT_OFFSET));
+#else
   lldbg("SCHMITT: %08x\n",
         getreg32(base + SAM_PIO_SCHMITT_OFFSET));
+#endif
 #endif
   irqrestore(flags);
   return OK;

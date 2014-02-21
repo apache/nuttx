@@ -1,8 +1,8 @@
 /************************************************************************************
- * arch/arm/src/sam34/sam3x_gpio.h
- * General Purpose Input/Output (GPIO) definitions for the SAM3X
+ * arch/arm/src/sam34/sam4e_gpio.h
+ * General Purpose Input/Output (GPIO) definitions for the SAM4E
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAM34_SAM3X_GPIO_H
-#define __ARCH_ARM_SRC_SAM34_SAM3X_GPIO_H
+#ifndef __ARCH_ARM_SRC_SAM34_SAM4E_GPIO_H
+#define __ARCH_ARM_SRC_SAM34_SAM4E_GPIO_H
 
 /************************************************************************************
  * Included Files
@@ -48,41 +48,46 @@
  ************************************************************************************/
 /* Configuration ********************************************************************/
 
-#undef GPIO_HAVE_PULLDOWN
-#undef GPIO_HAVE_PERIPHCD
-#undef GPIO_HAVE_SCHMITT
-#undef GPIO_HAVE_DELAYR
+#define GPIO_HAVE_PULLDOWN         1
+#define GPIO_HAVE_PERIPHCD         1
+#define GPIO_HAVE_SCHMITT          1
+#define GPIO_HAVE_DELAYR           1
 
 /* Bit-encoded input to sam_configgpio() ********************************************/
 
 /* 32-bit Encoding:
  *
- *   ..MM .CCC IIIV PPPB BBBB
+ *   MMMC CCCC III. VPPB BBBB
  */
 
 /* Input/Output mode:
  *
- *   ..MM .... .... .... ....
+ *   MMM. .... .... .... ....
  */
 
-#define GPIO_MODE_SHIFT            (16)        /* Bits 16-17: GPIO mode */
-#define GPIO_MODE_MASK             (3 << GPIO_MODE_SHIFT)
+#define GPIO_MODE_SHIFT            (17)        /* Bits 17-19: GPIO mode */
+#define GPIO_MODE_MASK             (7 << GPIO_MODE_SHIFT)
 #  define GPIO_INPUT               (0 << GPIO_MODE_SHIFT) /* Input */
 #  define GPIO_OUTPUT              (1 << GPIO_MODE_SHIFT) /* Output */
 #  define GPIO_PERIPHA             (2 << GPIO_MODE_SHIFT) /* Controlled by periph A signal */
 #  define GPIO_PERIPHB             (3 << GPIO_MODE_SHIFT) /* Controlled by periph B signal */
+#  define GPIO_PERIPHC             (4 << GPIO_MODE_SHIFT) /* Controlled by periph C signal */
+#  define GPIO_PERIPHD             (5 << GPIO_MODE_SHIFT) /* Controlled by periph D signal */
 
 /* These bits set the configuration of the pin:
+ * NOTE: No definitions for parallel capture mode
  *
- *   .... .CCC .... .... ....
+ *   ...C CCCC .... .... ....
  */
 
-#define GPIO_CFG_SHIFT             (12)        /* Bits 12-14: GPIO configuration bits */
-#define GPIO_CFG_MASK              (7 << GPIO_CFG_SHIFT)
-#  define GPIO_CFG_DEFAULT         (0 << GPIO_CFG_SHIFT) /* Default, no attribute */
-#  define GPIO_CFG_PULLUP          (1 << GPIO_CFG_SHIFT) /* Bit 11: Internal pull-up */
-#  define GPIO_CFG_DEGLITCH        (2 << GPIO_CFG_SHIFT) /* Bit 12: Internal glitch filter */
-#  define GPIO_CFG_OPENDRAIN       (4 << GPIO_CFG_SHIFT) /* Bit 13: Open drain */
+#define GPIO_CFG_SHIFT             (12)        /* Bits 12-16: GPIO configuration bits */
+#define GPIO_CFG_MASK              (31 << GPIO_CFG_SHIFT)
+#  define GPIO_CFG_DEFAULT         (0  << GPIO_CFG_SHIFT) /* Default, no attribute */
+#  define GPIO_CFG_PULLUP          (1  << GPIO_CFG_SHIFT) /* Bit 11: Internal pull-up */
+#  define GPIO_CFG_PULLDOWN        (2  << GPIO_CFG_SHIFT) /* Bit 11: Internal pull-down */
+#  define GPIO_CFG_DEGLITCH        (4  << GPIO_CFG_SHIFT) /* Bit 12: Internal glitch filter */
+#  define GPIO_CFG_OPENDRAIN       (8  << GPIO_CFG_SHIFT) /* Bit 13: Open drain */
+#  define GPIO_CFG_SCHMITT         (16 << GPIO_CFG_SHIFT) /* Bit 13: Schmitt trigger */
 
 /* Additional interrupt modes:
  *
@@ -105,32 +110,29 @@
 
 /* If the pin is an GPIO output, then this identifies the initial output value:
  *
- *   .... .... ...V .... ....
+ *   .... .... .... V... ....
  */
 
-#define GPIO_OUTPUT_SET            (1 << 8)    /* Bit 8: Inital value of output */
+#define GPIO_OUTPUT_SET            (1 << 7)    /* Bit 7: Inital value of output */
 #define GPIO_OUTPUT_CLEAR          (0)
 
 /* This identifies the GPIO port:
  *
- *   .... .... .... PPP. ....
+ *   .... .... .... .PP. ....
  */
 
-#define GPIO_PORT_SHIFT            (5)         /* Bit 5-7:  Port number */
-#define GPIO_PORT_MASK             (7 << GPIO_PORT_SHIFT)
+#define GPIO_PORT_SHIFT            (5)         /* Bit 5-6:  Port number */
+#define GPIO_PORT_MASK             (3 << GPIO_PORT_SHIFT)
 #  define GPIO_PORT_PIOA           (0 << GPIO_PORT_SHIFT)
 #  define GPIO_PORT_PIOB           (1 << GPIO_PORT_SHIFT)
 #  define GPIO_PORT_PIOC           (2 << GPIO_PORT_SHIFT)
-#  define GPIO_PORT_PIOD           (3 << GPIO_PORT_SHIFT)
-#  define GPIO_PORT_PIOE           (4 << GPIO_PORT_SHIFT)
-#  define GPIO_PORT_PIOF           (5 << GPIO_PORT_SHIFT)
 
 /* This identifies the bit in the port:
  *
  *   .... .... .... ...B BBBB
  */
 
-#define GPIO_PIN_SHIFT             0           /* Bits 0-4: GPIO number: 0-31 */
+#define GPIO_PIN_SHIFT             (0)         /* Bits 0-4: GPIO number: 0-31 */
 #define GPIO_PIN_MASK              (31 << GPIO_PIN_SHIFT)
 #define GPIO_PIN0                  (0  << GPIO_PIN_SHIFT)
 #define GPIO_PIN1                  (1  << GPIO_PIN_SHIFT)
@@ -202,4 +204,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_SAM34_SAM3X_GPIO_H */
+#endif /* __ARCH_ARM_SRC_SAM34_SAM4E_GPIO_H */

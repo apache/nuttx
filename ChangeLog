@@ -6645,4 +6645,6 @@
 	  for the SAM4E (2014-2-21).
 	* arch/arm/src/sam34/chip/sam4e_memorymap.h:  Add SAM4E memory map
 	  (2014-2-21).
+	* arch/arm/src/sam34/sam4e_gpio.h, sam4e_periphclks.h, and chip/sam4e_pio.h:
+	  Add PIO support for the SAM4E (2014-2-21).
 

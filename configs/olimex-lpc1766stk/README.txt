@@ -906,6 +906,13 @@ Where <subdir> is one of the following:
        CONFIG_FS_NXFFS=n
        CONFIG_FS_ROMFS=n
 
+    2. This configuration targets Linux using a generic ARM EABI toolchain:
+
+       CONFIG_LINUX=y
+       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL=y
+
+       But that can easily be re-configured.
+
     2. You may also want to define the following in your configuration file.
        Otherwise, you will have not feedback about what is going on:
 
