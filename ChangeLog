@@ -6647,4 +6647,5 @@
 	  (2014-2-21).
 	* arch/arm/src/sam34/sam4e_gpio.h, sam4e_periphclks.h, and chip/sam4e_pio.h:
 	  Add PIO support for the SAM4E (2014-2-21).
-
+	* configs/stm3220g-eval/nsh/defconfig: Converted to use kconfig-frontends
+	  by Alan Carvalho de Assis (2014-2-10)
