@@ -296,42 +296,42 @@ config SAM34_TC1
 config SAM34_TC2
 	bool "Timer/Counter 2 (TC2)"
 	default n
-	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S
+	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S || ARCH_CHIP_SAM4E
 
 config SAM34_TC3
 	bool "Timer/Counter 3 (TC3)"
 	default n
-	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S
+	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S || ARCH_CHIP_SAM4E
 
 config SAM34_TC4
 	bool "Timer/Counter 4 (TC4)"
 	default n
-	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S
+	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S || ARCH_CHIP_SAM4E
 
 config SAM34_TC5
 	bool "Timer/Counter 5 (TC5)"
 	default n
-	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S
+	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S || ARCH_CHIP_SAM4E
 
 config SAM34_TC6
 	bool "Timer/Counter 6 (TC6)"
 	default n
-	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A
+	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4E
 
 config SAM34_TC7
 	bool "Timer/Counter 7 (TC6)"
 	default n
-	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A
+	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4E
 
 config SAM34_TC8
 	bool "Timer/Counter 6 (TC8)"
 	default n
-	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A
+	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4E
 
 config SAM34_PWM
 	bool "Pulse Width Modulation (PWM) Controller"
 	default n
-	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S
+	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S || ARCH_CHIP_SAM4E
 
 config SAM34_TWIM0
 	bool "Two-wire Master Interface 0 (TWIM0)"
@@ -362,13 +362,13 @@ config SAM34_TWIM3
 config SAM34_UART0
 	bool "UART 0"
 	default y
-	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S
+	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S || ARCH_CHIP_SAM4E
 	select ARCH_HAVE_UART0
 
 config SAM34_UART1
 	bool "UART 1"
 	default n
-	depends on ARCH_CHIP_SAM4S
+	depends on ARCH_CHIP_SAM4S || ARCH_CHIP_SAM4E
 	select ARCH_HAVE_UART1
 
 config SAM34_PICOUART
@@ -402,21 +402,32 @@ config SAM34_USART3
 config SAM34_ADC12B
 	bool "12-bit ADC Controller"
 	default n
+	depends on !ARCH_CHIP_SAM4E
 
 config SAM34_ADC
 	bool "10-bit ADC Controller"
 	default n
 	depends on ARCH_CHIP_SAM3U
 
+config SAM34_AFEC0
+	bool "Analog Front End 0"
+	default n
+	depends on ARCH_CHIP_SAM4E
+
+config SAM34_AFEC0
+	bool "Analog Front End 1"
+	default n
+	depends on ARCH_CHIP_SAM4E
+
 config SAM34_DACC
 	bool "Digital To Analog Converter (DAC)"
 	default n
-	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4L || ARCH_CHIP_SAM4S
+	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4L || ARCH_CHIP_SAM4S || ARCH_CHIP_SAM4E
 
 config SAM34_ACC
 	bool "Analog Comparator (AC)"
 	default n
-	depends on ARCH_CHIP_SAM4L || ARCH_CHIP_SAM4S
+	depends on ARCH_CHIP_SAM4L || ARCH_CHIP_SAM4S || ARCH_CHIP_SAM4E
 
 config SAM34_GLOC
 	bool "GLOC"
@@ -433,20 +444,25 @@ config SAM34_TRNG
 	default n
 	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4L
 
+config SAM34_AES
+	bool "AES"
+	default n
+	depends on ARCH_CHIP_SAM4E
+
 config SAM34_EMAC
 	bool "Ethernet MAC (EMAC)"
 	default n
-	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A
+	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4E
 
 config SAM34_CAN0
 	bool "CAN0"
 	default n
-	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A
+	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4E
 
 config SAM34_CAN1
 	bool "CAN1"
 	default n
-	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A
+	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4E
 
 config SAM34_PARC
 	bool "Parallel Capture (PARC)"
@@ -471,7 +487,7 @@ config SAM34_HRAMC1
 config SAM34_SMC
 	bool "Static Memory Controller (SMC)"
 	default n
-	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S
+	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S || ARCH_CHIP_SAM4E
 
 config SAM34_SDRAMC
 	bool "SDRAM Controller (SDRAMC)"
@@ -481,7 +497,7 @@ config SAM34_SDRAMC
 config SAM34_NAND
 	bool "NAND support"
 	default n
-	depends on ARCH_CHIP_SAM3U
+	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM4E
 
 config SAM34_HMATRIX
 	bool "HMATRIX"
@@ -497,7 +513,7 @@ config SAM34_PDCA
 config SAM34_DMA
 	bool "DMA controller"
 	default n
-	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A
+	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4E
 	select ARCH_DMA
 
 config SAM34_CRCCU
@@ -518,7 +534,7 @@ config SAM34_UOTGHS
 config SAM34_UDP
 	bool "USB Device Full Speed"
 	default n
-	depends on ARCH_CHIP_SAM4S
+	depends on ARCH_CHIP_SAM4S || ARCH_CHIP_SAM4E
 
 config SAM34_USBC
 	bool "USB 2.0 Interface"
@@ -538,7 +554,7 @@ config SAM34_CHIPID
 config SAM34_FREQM
 	bool "Frequency Meter (FREQM)"
 	default n
-	depends on ARCH_CHIP_SAM4L
+	depends on ARCH_CHIP_SAM4L || ARCH_CHIP_SAM4E
 
 config SAM34_AST
 	bool "Asynchronous Timer (AST)"
@@ -548,12 +564,12 @@ config SAM34_AST
 config SAM34_RTC
 	bool "Real Time Clock (RTC)"
 	default n
-	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S
+	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S || ARCH_CHIP_SAM4E
 
 config SAM34_RTT
 	bool "Real Time Timer (RTT)"
 	default n
-	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S
+	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S || ARCH_CHIP_SAM4E
 
 config SAM34_WDT
 	bool "Watchdog Timer (WDT)"
@@ -562,12 +578,12 @@ config SAM34_WDT
 config SAM34_EIC
 	bool "External Interrupt Controller (EIC)"
 	default n
-	depends on ARCH_CHIP_SAM4L
+	depends on ARCH_CHIP_SAM4L || ARCH_CHIP_SAM4E
 
 config SAM34_HSMCI
 	bool "High Speed Multimedia Card Interface (HSMCI)"
 	default n
-	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S
+	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S || ARCH_CHIP_SAM4E
 	select ARCH_HAVE_SDIO
 
 endmenu # AT91SAM3/4 Peripheral Support
