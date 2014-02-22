@@ -3155,6 +3155,10 @@ To-Do List
    appear to work with Windows.  Reformatting on Windows can resolve this.
    NOTE:  This is not a SAMA5Dx issue.
 
+   UPDATE: Two important bugs were recently fixed in the NuttX FAT
+   formatting function (mkfatfs).  It is likely that these fixes will
+   eliminate this issue, but that has not yet been verified.
+
 6) CAN testing has not yet been performed due to issues with cabling.  I
    just do not have a good test bed (or sufficient CAN knowledge) for
    good CAN testing.
