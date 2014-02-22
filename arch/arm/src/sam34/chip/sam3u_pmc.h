@@ -185,7 +185,7 @@
  * Clock Status Register common bit-field definitions
  */
 
-#if defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM4S)
 #  define PMC_UOTGCLK                    (1 << 5)  /* Bit 5: Enable USB OTG Clock (48 MHz, USB_48M) for UTMI */
 #endif
 
