@@ -57,7 +57,7 @@
 
 #include "sam_dmac.h"
 #include "sam_periphclks.h"
-#include "chip/sam3u_pmc.h"
+#include "chip/sam_pmc.h"
 #include "chip/sam3u_dmac.h"
 
 /****************************************************************************

@@ -49,7 +49,7 @@
 #include "up_internal.h"
 
 #include "sam_clockconfig.h"
-#include "chip/sam3u_pmc.h"
+#include "chip/sam_pmc.h"
 #include "chip/sam3u_eefc.h"
 #include "chip/sam3u_wdt.h"
 #include "chip/sam3u_supc.h"

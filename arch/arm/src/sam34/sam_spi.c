@@ -59,7 +59,7 @@
 #include "sam_gpio.h"
 #include "sam_spi.h"
 #include "sam_periphclks.h"
-#include "chip/sam3u_pmc.h"
+#include "chip/sam_pmc.h"
 #include "chip/sam_spi.h"
 #include "chip/sam_pinmap.h"
 

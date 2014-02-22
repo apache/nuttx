@@ -65,7 +65,7 @@
 #include "sam_hsmci.h"
 #include "sam_periphclks.h"
 #include "chip/sam3u_dmac.h"
-#include "chip/sam3u_pmc.h"
+#include "chip/sam_pmc.h"
 #include "chip/sam_hsmci.h"
 #include "chip/sam_pinmap.h"
 
