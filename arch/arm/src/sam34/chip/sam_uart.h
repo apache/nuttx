@@ -1,9 +1,9 @@
 /************************************************************************************************
- * arch/arm/src/sam34/chip/sam3u_uart.h
+ * arch/arm/src/sam34/chip/sam_uart.h
  * Universal Asynchronous Receiver Transmitter (UART) and Universal Synchronous Asynchronous
- * Receiver Transmitter (USART) definitions for the SAM3U, SAM3X, SAM3A and SAM4S
+ * Receiver Transmitter (USART) definitions for the SAM3U, SAM3X, SAM3A, SAM4S and SAM4E
  *
- *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,8 +35,8 @@
  *
  ************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_UART_H
-#define __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_UART_H
+#ifndef __ARCH_ARM_SRC_SAM34_CHIP_SAM_UART_H
+#define __ARCH_ARM_SRC_SAM34_CHIP_SAM_UART_H
 
 /************************************************************************************************
  * Included Files
@@ -80,7 +80,7 @@
 #define SAM_UART_WPMR_OFFSET         0x00e4 /* Write Protect Mode Register (USART only) */
 #define SAM_UART_WPSR_OFFSET         0x00e8 /* Write Protect Status Register (USART only) */
                                             /* 0x005c-0xf8: Reserved (USART) */
-#define SAM_UART_VERSION_OFFSET      0x00fc /* Version Register (USART only) */
+#define SAM_UART_VERSION_OFFSET      0x00fc /* Version Register (USART only, Not SAM4E) */
                                             /* 0x0100-0x0124: PDC Area (Common) */
 
 /* UART register adresses ***********************************************************************/
@@ -313,7 +313,7 @@
 #define UART_MR_OVER                 (1 << 19) /* Bit 19: Oversampling Mode (USART only) */
 #define UART_MR_INACK                (1 << 20) /* Bit 20: Inhibit Non Acknowledge (USART only) */
 
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
 #  define UART_MR_WRDBT              (1 << 20) /* Bit 20: Wait Read Data Before Transfer (SPI mode only) */
 #endif
 
@@ -322,6 +322,7 @@
 #define UART_MR_INVDATA              (1 << 23) /* Bit 23: INverted Data (USART only) */
 #define UART_MR_MAXITER_SHIFT        (24)      /* Bits 24-26: Max iterations (ISO7816 T=0 (USART only) */
 #define UART_MR_MAXITER_MASK         (7 << UART_MR_MAXITER_SHIFT)
+#  define UART_MR_MAXITER(n)         ((uint32_t)(n) << UART_MR_MAXITER_SHIFT)
 #define UART_MR_FILTER               (1 << 28) /* Bit 28: Infrared Receive Line Filter (USART only) */
 #define UART_MR_MAN                  (1 << 29) /* Bit 29: Manchester Encoder/Decoder Enable (USART only) */
 #define UART_MR_MODSYNC              (1 << 30) /* Bit 30: Manchester Synchronization Mode (USART only) */
@@ -353,7 +354,7 @@
 #  define UART_INT_LINTC             (1 << 15) /* Bit 15: LIN Transfer Completed Interrupt */
 #endif
 
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
 #  define UART_INT_RIIC              (1 << 16) /* Bit 16: Ring Indicator Input Change */
 #  define UART_INT_DSRIC             (1 << 17) /* Bit 17: Data Set Ready Input Change */
 #  define UART_INT_DCDIC             (1 << 18) /* Bit 18: Data Carrier Detect Input Change Interrupt */
@@ -361,7 +362,7 @@
 
 #define UART_INT_CTSIC               (1 << 19) /* Bit 19: Clear to Send Input Change Interrupt (USART only) */
 
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
 #  define UART_SR_RI                 (1 << 20) /* Bit 20: Image of RI Input */
 #  define UART_SR_DSR                (1 << 21) /* Bit 21: Image of DSR Input */
 #  define UART_SR_DCD                (1 << 22) /* Bit 22: Image of DCD Input */
@@ -430,8 +431,13 @@
 
 /* USART FI DI RATIO Register (USART only) */
 
-#define UART_FIDI_RATIO_SHIFT        (0)       /* Bits 0-10: FI Over DI Ratio Value (USART only) */
-#define UART_FIDI_RATIO_MASK         (0x7ff << UART_FIDI_RATIO_SHIFT)
+#if defined(CONFIG_ARCH_CHIP_SAM4E)
+#  define UART_FIDI_RATIO_SHIFT      (0)       /* Bits 0-15: FI Over DI Ratio Value (USART only) */
+#  define UART_FIDI_RATIO_MASK       (0xffff << UART_FIDI_RATIO_SHIFT)
+#else
+#  define UART_FIDI_RATIO_SHIFT      (0)       /* Bits 0-10: FI Over DI Ratio Value (USART only) */
+#  define UART_FIDI_RATIO_MASK       (0x7ff << UART_FIDI_RATIO_SHIFT)
+#endif
 
 /* USART Number of Errors Register (USART only) */
 
@@ -447,6 +453,7 @@
 
 #define UART_MAN_TXPL_SHIFT          (0)       /* Bits 0-3: Transmitter Preamble Length (USART only) */
 #define UART_MAN_TXPL_MASK           (15 << UART_MAN_TXPL_SHIFT)
+#  define UART_MAN_TXPL(n)           ((uint32_t)(n) << UART_MAN_TXPL_SHIFT)
 #define UART_MAN_TXPP_SHIFT          (8)       /* Bits 8-9: Transmitter Preamble Pattern (USART only) */
 #define UART_MAN_TXPP_MASK           (3 << UART_MAN_TXPP_SHIFT)
 #  define UART_MAN_TXPP_ALLONE       (0 << UART_MAN_TXPP_SHIFT) /* ALL_ONE */
@@ -456,6 +463,7 @@
 #define UART_MAN_TXMPOL              (1 << 12) /* Bit 12: Transmitter Manchester Polarity (USART only) */
 #define UART_MAN_RXPL_SHIFT          (16)      /* Bits 16-19: Receiver Preamble Length (USART only) */
 #define UART_MAN_RXPL_MASK           (15 << UART_MAN_RXPL_SHIFT)
+#  define UART_MAN_RXPL(n)           ((uint32_t)(n) << UART_MAN_RXPL_SHIFT)
 #define UART_MAN_RXPP_SHIFT          (24)      /* Bits 24-25: Receiver Preamble Pattern detected (USART only) */
 #define UART_MAN_RXPP_MASK           (3 << UART_MAN_RXPP_SHIFT)
 #  define UART_MAN_RXPP_ALLONE       (0 << UART_MAN_RXPP_SHIFT) /* ALL_ONE */
@@ -464,12 +472,11 @@
 #  define UART_MAN_RXPP_ONEZERO      (3 << UART_MAN_RXPP_SHIFT) /* ONE_ZERO */
 #define UART_MAN_RXMPOL              (1 << 28) /* Bit 28: Receiver Manchester Polarity (USART only) */
 
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
 #  define UART_MAN_ONE               (1 << 29) /* Bit 29: Must Be Set to 1 */
 #endif
 
 #define UART_MAN_DRIFT               (1 << 30) /* Bit 30: Drift compensation (USART only) */
-
 
 /* LIN Mode Register (USART only) */
 
@@ -529,4 +536,4 @@
  * Public Functions
  ************************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_UART_H */
+#endif /* __ARCH_ARM_SRC_SAM34_CHIP_SAM_UART_H */

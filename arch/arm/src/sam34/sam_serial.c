@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sam34/sam_serial.c
  *
- *   Copyright (C) 2010, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2012-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,8 +62,9 @@
 #include "chip.h"
 
 #if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
-    defined(CONFIG_ARCH_CHIP_SAM3A) || defined(CONFIG_ARCH_CHIP_SAM4S)
-#  include "chip/sam3u_uart.h"
+    defined(CONFIG_ARCH_CHIP_SAM3A) || defined(CONFIG_ARCH_CHIP_SAM4S) || \
+    defined(CONFIG_ARCH_CHIP_SAM4E)
+#  include "chip/sam_uart.h"
 #elif defined(CONFIG_ARCH_CHIP_SAM4L)
 #  include "chip/sam4l_usart.h"
 #else
@@ -311,14 +312,16 @@
 
 /* Select MCU-specific settings
  *
- * For the SAM3U, SAM3A, and SAM3X the USARTs are driven by the main clock
- *   (This could be the MCK/8 but that option has not yet been necessary).
+ * For the SAM3U, SAM3A, SAM3X, SAM4E and SAM4S the USARTs are driven by the
+ *   main clock.  (This could also be the MCK/8 or an external clock but
+ *   those options have not yet been necessary).
  * For the SAM4L, the USARTs are driven by CLK_USART (undivided) which is
  *   selected by the PBADIVMASK register.
  */
 
 #if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
-    defined(CONFIG_ARCH_CHIP_SAM3A) || defined(CONFIG_ARCH_CHIP_SAM4S)
+    defined(CONFIG_ARCH_CHIP_SAM3A) || defined(CONFIG_ARCH_CHIP_SAM4S) || \\
+    defined(CONFIG_ARCH_CHIP_SAM4E)
 #  define SAM_MR_USCLKS    UART_MR_USCLKS_MCK   /* Source = Main clock */
 #  define SAM_USART_CLOCK  BOARD_MCK_FREQUENCY  /* Frequency of the main clock */
 #elif defined(CONFIG_ARCH_CHIP_SAM4L)
