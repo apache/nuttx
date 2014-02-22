@@ -1,6 +1,6 @@
 /****************************************************************************************
  * arch/arm/src/sam34/chip/sam_spi.h
- * Serial Peripheral Interface (SPI) definitions for the SAM3U, SAM4S, and SAM4L
+ * Serial Peripheral Interface (SPI) definitions for the SAM3U, SAM4S, SAM4E, and SAM4L
  *
  *   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -78,7 +78,7 @@
 #endif
                                          /* 0x100-0x124 Reserved for PDC Registers */
 
-/* SPI register adresses ****************************************************************/
+/* SPI register addresses ***************************************************************/
 
 #define SAM_SPI0_CR               (SAM_SPI0_BASE+SAM_SPI_CR_OFFSET)   /* Control Register */
 #define SAM_SPI0_MR               (SAM_SPI0_BASE+SAM_SPI_MR_OFFSET)   /* Mode Register */
@@ -188,7 +188,7 @@
 #define SPI_INT_MODF              (1 << 2)  /* Bit 2:  Mode Fault Error Interrupt */
 #define SPI_INT_OVRES             (1 << 3)  /* Bit 3:  Overrun Error Interrupt */
 
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
 #  define SPI_INT_ENDRX           (1 << 4)  /* Bit 4:  End of RX buffer */
 #  define SPI_INT_ENDTX           (1 << 5)  /* Bit 5:  End of TX buffer */
 #  define SPI_INT_RXBUFF          (1 << 6)  /* Bit 6:  RX Buffer Full */
@@ -220,10 +220,13 @@
 #  define SPI_CSR_BITS16          (8 << SPI_CSR_BITS_SHIFT) /* 16 */
 #define SPI_CSR_SCBR_SHIFT        (8)       /* Bits 8-15: Serial Clock Baud Rate */
 #define SPI_CSR_SCBR_MASK         (0xff << SPI_CSR_SCBR_SHIFT)
+#  define SPI_CSR_SCBR(n)         ((uint32_t)(n) << SPI_CSR_SCBR_SHIFT)
 #define SPI_CSR_DLYBS_SHIFT       (16)      /* Bits 16-23: Delay Before SPCK */
 #define SPI_CSR_DLYBS_MASK        (0xff << SPI_CSR_DLYBS_SHIFT)
+#  define SPI_CSR_DLYBS(n)        ((uint32_t)(n) << SPI_CSR_DLYBS_SHIFT)
 #define SPI_CSR_DLYBCT_SHIFT      (24)      /* Bits 24-31: Delay Between Consecutive Transfers */
 #define SPI_CSR_DLYBCT_MASK       (0xff << SPI_CSR_DLYBCT_SHIFT)
+#  define SPI_CSR_DLYBCT(n)       ((uint32_t)(n) << SPI_CSR_DLYBCT_SHIFT)
 
 /* SPI Write Protection Control Register */
 
