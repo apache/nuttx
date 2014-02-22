@@ -57,7 +57,7 @@
 
 /* 32-bit Encoding:
  *
- *   MMMC CCCC III. VPPB BBBB
+ *   MMMC CCCC IIIV PPPB BBBB
  */
 
 /* Input/Output mode:
@@ -110,22 +110,24 @@
 
 /* If the pin is an GPIO output, then this identifies the initial output value:
  *
- *   .... .... .... V... ....
+ *   .... .... ...V .... ....
  */
 
-#define GPIO_OUTPUT_SET            (1 << 7)    /* Bit 7: Inital value of output */
+#define GPIO_OUTPUT_SET            (1 << 8)    /* Bit 8: Initial value of output */
 #define GPIO_OUTPUT_CLEAR          (0)
 
 /* This identifies the GPIO port:
  *
- *   .... .... .... .PP. ....
+ *   .... .... .... PPP. ....
  */
 
 #define GPIO_PORT_SHIFT            (5)         /* Bit 5-6:  Port number */
-#define GPIO_PORT_MASK             (3 << GPIO_PORT_SHIFT)
+#define GPIO_PORT_MASK             (7 << GPIO_PORT_SHIFT)
 #  define GPIO_PORT_PIOA           (0 << GPIO_PORT_SHIFT)
 #  define GPIO_PORT_PIOB           (1 << GPIO_PORT_SHIFT)
 #  define GPIO_PORT_PIOC           (2 << GPIO_PORT_SHIFT)
+#  define GPIO_PORT_PIOD           (3 << GPIO_PORT_SHIFT)
+#  define GPIO_PORT_PIOE           (4 << GPIO_PORT_SHIFT)
 
 /* This identifies the bit in the port:
  *
