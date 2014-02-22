@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/procfs/fs_procfs.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,13 +69,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define PROCFS_NATTRS     2
+#define PROCFS_NATTRS  2
 
 /****************************************************************************
  * External Definitons
  ****************************************************************************/
 
 extern const struct procfs_operations proc_operations;
+extern const struct procfs_operations cpuload_operations;
 extern const struct procfs_operations uptime_operations;
 extern const struct procfs_operations mtd_procfsoperations;
 extern const struct procfs_operations part_procfsoperations;
@@ -92,23 +93,31 @@ static const struct procfs_entry_s g_procfsentries[] =
   { "[0-9]*/**",        &proc_operations },
   { "[0-9]*",           &proc_operations },
 #endif
+
+#if defined(CONFIG_SCHED_CPULOAD) && !defined(CONFIG_FS_PROCFS_EXCLUDE_CPULOAD)
+  { "cpuload",          &cpuload_operations },
+#endif
+
 #if defined(CONFIG_FS_SMARTFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_SMARTFS)
 //{ "fs/smartfs",       &smartfs_procfsoperations },
   { "fs/smartfs**",     &smartfs_procfsoperations },
 #endif
+
 #if defined(CONFIG_MTD) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MTD)
   { "mtd",              &mtd_procfsoperations },
 #endif
+
 #if defined(CONFIG_MTD_PARTITION) && !defined(CONFIG_FS_PROCFS_EXCLUDE_PARTITON)
   { "partitions",       &part_procfsoperations },
 #endif
+
 #if !defined(CONFIG_FS_PROCFS_EXCLUDE_UPTIME)
   { "uptime",           &uptime_operations },
 #endif
 };
 
 static const uint8_t g_procfsentrycount = sizeof(g_procfsentries) /
-                            sizeof(struct procfs_entry_s);
+                                          sizeof(struct procfs_entry_s);
 
 /****************************************************************************
  * Private Function Prototypes

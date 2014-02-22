@@ -1,7 +1,7 @@
 /************************************************************************
  * sched/sched_processtimer.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
+#include <time.h>
 
 #if CONFIG_RR_INTERVAL > 0
 # include <sched.h>
@@ -50,8 +51,12 @@
 #include "clock_internal.h"
 
 /************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************/
+ 
+#ifndef CONFIG_SCHED_CPULOAD_TIMECONSTANT
+#  define CONFIG_SCHED_CPULOAD_TIMECONSTANT 2
+#endif
 
 /************************************************************************
  * Private Type Declarations
@@ -61,6 +66,12 @@
  * Global Variables
  ************************************************************************/
 
+/* This structure is used when CONFIG_SCHED_CPULOAD to sample CPU usage */
+
+#ifdef CONFIG_SCHED_CPULOAD
+volatile struct cpuload_s g_cpuload;
+#endif
+
 /************************************************************************
  * Private Variables
  ************************************************************************/
@@ -69,16 +80,29 @@
  * Private Functions
  ************************************************************************/
 
-static void sched_process_timeslice(void)
-{
+/************************************************************************
+ * Name:  sched_process_timeslice
+ *
+ * Description:
+ *   Check if the currently executing task has exceeded its time slice.
+ *
+ * Inputs:
+ *   None
+ *
+ * Return Value:
+ *   None
+ *
+ ************************************************************************/
+
 #if CONFIG_RR_INTERVAL > 0
-  struct tcb_s *rtcb;
+static inline void sched_process_timeslice(void)
+{
+  FAR struct tcb_s *rtcb  = (FAR struct tcb_s*)g_readytorun.head;
 
   /* Check if the currently executing task uses round robin
    * scheduling.
    */
 
-  rtcb = (struct tcb_s*)g_readytorun.head;
   if ((rtcb->flags & TCB_FLAG_ROUND_ROBIN) != 0)
     {
       /* Yes, check if decrementing the timeslice counter
@@ -127,8 +151,51 @@ static void sched_process_timeslice(void)
           rtcb->timeslice--;
         }
     }
-#endif
 }
+#else
+#  define sched_process_timeslice()
+#endif
+
+/************************************************************************
+ * Name: sched_process_cpuload
+ *
+ * Description:
+ *   Collect data that can be used for CPU load measurements.
+ *
+ * Inputs:
+ *   None
+ *
+ * Return Value:
+ *   None
+ *
+ ************************************************************************/
+
+#if defined(CONFIG_SCHED_CPULOAD)
+static inline void sched_process_cpuload(void)
+{
+  FAR struct tcb_s *rtcb  = (FAR struct tcb_s*)g_readytorun.head;
+
+  /* Gather stats for cpuload.  cpuload is percent of time cpu is not idle. */
+  /* Is the idle task running */
+
+  if (rtcb->pid == 0)
+    {
+      ++g_cpuload.idle;
+    }
+
+  /* Increment tick count.  If the accumulated tick value exceed a time
+   * constant, then shift the accumulators.
+   */
+
+  if (++g_cpuload.cnt > (CONFIG_SCHED_CPULOAD_TIMECONSTANT * CLOCKS_PER_SEC))
+    {
+      g_cpuload.cnt  >>= 1;
+      g_cpuload.idle >>= 1;
+    }
+}
+#else
+#  define sched_process_cpuload()
+#endif
 
 /************************************************************************
  * Public Functions
@@ -172,6 +239,12 @@ void sched_process_timer(void)
       clock_timer();
     }
 #endif
+
+  /* Perform CPU load measurements (before any timer-initiated context switches
+   * can occur)
+   */
+
+  sched_process_cpuload();
 
   /* Process watchdogs (if in the link) */
 

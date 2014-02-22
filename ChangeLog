@@ -6654,4 +6654,6 @@
 	  where the apps/ directly will reside until configuration time (2014-2-21).
 	* arch/arm/src/sam34/chip/sam4e_pinmap.h:  SAM4E pin multiplexing
 	  definitions (2014-2-21).
-
+	* sched/sched_processtimer.c and fs/procfs/fs_procfscpuload.c:  Add
+	  logic to measure and calculate the CPU load percentage.  From David
+	  Alessio (2014-2-22).

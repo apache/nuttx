@@ -60,6 +60,30 @@ config RR_INTERVAL
 		The round robin timeslice will be set this number of milliseconds;
 		Round robin scheduling can be disabled by setting this value to zero.
 
+config SCHED_CPULOAD
+	bool "Enable CPU load monitoring"
+	default n
+	---help---
+		If this option is selected, the timer interrupt handler will monitor
+		if the system is IDLE or busy at the time of that the timer interrupt
+		occurs.  This is a very coarse measurement, but over a period of time,
+		it can very accurately determined the percentage of the time that the
+		CPU is IDLE.
+
+		The statistics collected in this could be used, for example in the
+		PROCFS file system to provide CPU load measurements when read.
+
+if SCHED_CPULOAD
+
+config SCHED_CPULOAD_TIMECONSTANT
+	int "CPU load time constant"
+	default 2
+	---help---
+		The accumulated CPU count is divided by two when the accumulated
+		tick count exceeds this time constant.
+
+endif # SCHED_CPULOAD
+
 config SCHED_INSTRUMENTATION
 	bool "Monitor system performance"
 	default n

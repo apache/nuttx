@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/clock.h
  *
- *   Copyright (C) 2007-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,7 @@
 #include <nuttx/compiler.h>
 
 /****************************************************************************
- * Pro-processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* Efficient, direct access to OS global timer variables will be supported
@@ -122,7 +122,20 @@
 #define TICK2SEC(tick)        (((tick)+(TICK_PER_SEC/2))/TICK_PER_SEC)   /* Rounds */
 
 /****************************************************************************
- * Global Data
+ * Public Types
+ ****************************************************************************/
+/* This structure is used when CONFIG_SCHED_CPULOAD to sample CPU usage */
+
+#ifdef CONFIG_SCHED_CPULOAD
+struct cpuload_s
+{
+  volatile uint32_t cnt;   /* Total number of clock ticks */
+  volatile uint32_t idle;  /* Total number of clocks ticks with CPU IDLE */
+};
+#endif
+
+/****************************************************************************
+ * Public Data
  ****************************************************************************/
 
 #if !defined(CONFIG_DISABLE_CLOCK)
@@ -149,8 +162,15 @@ extern volatile uint32_t g_system_timer;
 #  endif
 #endif
 
+/* CPU Load Measurements ***************************************************/
+/* This structure is used when CONFIG_SCHED_CPULOAD to sample CPU usage */
+
+#ifdef CONFIG_SCHED_CPULOAD
+extern volatile struct cpuload_s g_cpuload;
+#endif
+
 /****************************************************************************
- * Global Function Prototypes
+ * Public Function Prototypes
  ****************************************************************************/
 
 #ifdef __cplusplus
