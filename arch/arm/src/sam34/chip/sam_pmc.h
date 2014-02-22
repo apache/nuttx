@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/arm/src/sam34/chip/sam3u_pmc.h
+ * arch/arm/src/sam34/chip/sam_pmc.h
  * Power Management Controller (PMC) for the SAM3U, SAM3X, SAM3A, and SAM4S
  *
  *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
@@ -34,8 +34,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_PMC_H
-#define __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_PMC_H
+#ifndef __ARCH_ARM_SRC_SAM34_CHIP_SAM_PMC_H
+#define __ARCH_ARM_SRC_SAM34_CHIP_SAM_PMC_H
 
 /********************************************************************************************
  * Included Files
@@ -529,4 +529,4 @@
  * Public Functions
  ********************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_PMC_H */
+#endif /* __ARCH_ARM_SRC_SAM34_CHIP_SAM_PMC_H */
