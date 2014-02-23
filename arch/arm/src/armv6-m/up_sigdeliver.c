@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/armv6-m/up_sigdeliver.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -109,6 +109,9 @@ void up_sigdeliver(void)
   regs[REG_PC]         = rtcb->xcp.saved_pc;
   regs[REG_PRIMASK]    = rtcb->xcp.saved_primask;
   regs[REG_XPSR]       = rtcb->xcp.saved_xpsr;
+#ifdef CONFIG_NUTTX_KERNEL
+  regs[REG_LR]         = rtcb->xcp.saved_lr;
+#endif
 
   /* Get a local copy of the sigdeliver function pointer. We do this so that
    * we can nullify the sigdeliver function pointer in the TCB and accept
@@ -144,4 +147,3 @@ void up_sigdeliver(void)
 }
 
 #endif /* !CONFIG_DISABLE_SIGNALS */
-
