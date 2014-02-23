@@ -70,7 +70,14 @@ static void sched_releasepid(pid_t pid)
 
   g_pidhash[hash_ndx].tcb   = NULL;
   g_pidhash[hash_ndx].pid   = INVALID_PROCESS_ID;
+
 #ifdef CONFIG_SCHED_CPULOAD
+  /* Decrement the total CPU load count held by this thread from the
+   * total for all threads.  Then we can reset the count on this
+   * defunct thread to zero.
+   */
+
+  g_cpuload_total          -= g_pidhash[hash_ndx].ticks;
   g_pidhash[hash_ndx].ticks = 0;
 #endif
 }

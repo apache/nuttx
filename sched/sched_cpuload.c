@@ -65,6 +65,12 @@
  * Private Variables
  ************************************************************************/
 
+/* This is the total number of clock tick counts.  Essentially the
+ * 'denominator' for all CPU load calculations.
+ */
+
+volatile uint32_t g_cpuload_total;
+
 /************************************************************************
  * Private Functions
  ************************************************************************/
@@ -72,6 +78,57 @@
 /************************************************************************
  * Public Functions
  ************************************************************************/
+
+/************************************************************************
+ * Name: sched_process_cpuload
+ *
+ * Description:
+ *   Collect data that can be used for CPU load measurements.
+ *
+ * Inputs:
+ *   None
+ *
+ * Return Value:
+ *   None
+ *
+ ************************************************************************/
+
+void weak_function sched_process_cpuload(void)
+{
+  FAR struct tcb_s *rtcb  = (FAR struct tcb_s*)g_readytorun.head;
+  int hash_index;
+  int i;
+
+  /* Increment the count on the currently executing thread
+   *
+   * NOTE also that CPU load measurement data is retained in the g_pidhash
+   * table vs. in the TCB which would seem to be the more logic place.  It
+   * is place in the hash table, instead, to facilitate CPU load adjustments
+   * on all threads during timer interrupt handling. sched_foreach() could
+   * do this too, but this would require a little more overhead.
+   */
+
+  hash_index = PIDHASH(rtcb->pid);
+  g_pidhash[hash_index].ticks++;
+
+  /* Increment tick count.  If the accumulated tick value exceed a time
+   * constant, then shift the accumulators.
+   */
+
+  if (++g_cpuload_total > (CONFIG_SCHED_CPULOAD_TIMECONSTANT * CLOCKS_PER_SEC))
+    {
+      /* Divide the tick count for every task by two */
+
+      for (i = 0; i < CONFIG_MAX_TASKS; i++)
+        {
+          g_pidhash[i].ticks >>= 1;
+        }
+
+      /* Divide the total tick count by two */
+
+      g_cpuload_total  >>= 1;
+    }
+}
 
 /****************************************************************************
  * Function:  clock_cpuload

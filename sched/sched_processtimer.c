@@ -66,14 +66,6 @@
  * Public Variables
  ************************************************************************/
 
-#ifdef CONFIG_SCHED_CPULOAD
-/* This is the total number of clock tick counts.  Essentially the
- * 'denominator' for all CPU load calculations.
- */
-
-volatile uint32_t g_cpuload_total;
-#endif
-
 /************************************************************************
  * Private Variables
  ************************************************************************/
@@ -159,54 +151,6 @@ static inline void sched_process_timeslice(void)
 #endif
 
 /************************************************************************
- * Name: sched_process_cpuload
- *
- * Description:
- *   Collect data that can be used for CPU load measurements.
- *
- * Inputs:
- *   None
- *
- * Return Value:
- *   None
- *
- ************************************************************************/
-
-#ifdef CONFIG_SCHED_CPULOAD
-static inline void sched_process_cpuload(void)
-{
-  FAR struct tcb_s *rtcb  = (FAR struct tcb_s*)g_readytorun.head;
-  int hash_index;
-  int i;
-
-  /* Increment the count on the currently executing thread */
-
-  hash_index = PIDHASH(rtcb->pid);
-  g_pidhash[hash_index].ticks++;
-
-  /* Increment tick count.  If the accumulated tick value exceed a time
-   * constant, then shift the accumulators.
-   */
-
-  if (++g_cpuload_total > (CONFIG_SCHED_CPULOAD_TIMECONSTANT * CLOCKS_PER_SEC))
-    {
-      /* Divide the tick count for every task by two */
-
-      for (i = 0; i < CONFIG_MAX_TASKS; i++)
-        {
-          g_pidhash[i].ticks >>= 1;
-        }
-
-      /* Divide the total tick count by two */
-
-      g_cpuload_total  >>= 1;
-    }
-}
-#else
-#  define sched_process_cpuload()
-#endif
-
-/************************************************************************
  * Public Functions
  ************************************************************************/
 
@@ -253,7 +197,14 @@ void sched_process_timer(void)
    * can occur)
    */
 
-  sched_process_cpuload();
+#ifdef CONFIG_SCHED_CPULOAD
+#ifdef CONFIG_HAVE_WEAKFUNCTIONS
+  if (sched_process_cpuload != NULL)
+#endif
+    {
+      sched_process_cpuload();
+    }
+#endif
 
   /* Process watchdogs (if in the link) */
 
