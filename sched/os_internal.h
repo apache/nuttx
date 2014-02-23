@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/os_internal.h
  *
- *   Copyright (C) 2007-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -81,15 +81,24 @@
  * Public Type Definitions
  ****************************************************************************/
 
-/* This structure defines the format of the hash table that
- * is used to (1) determine if a task ID is unique, and (2)
- * to map a process ID to its corresponding TCB.
+/* This structure defines the format of the hash table that is used to (1)
+ * determine if a task ID is unique, and (2) to map a process ID to its
+ * corresponding TCB.
+ *
+ * NOTE also that CPU load measurement data is retained in his table vs. in
+ * the TCB which would seem to be the more logic place.  It is place in the
+ * hash table, instead, to facilitate CPU load adjustments on all threads
+ * during timer interrupt handling. sched_foreach() could do this too, but
+ * this would require a little more overhead.
  */
 
 struct pidhash_s
 {
-  FAR struct tcb_s *tcb;
-  pid_t pid;
+  FAR struct tcb_s *tcb;       /* TCB assigned to this PID */
+  pid_t pid;                   /* The full PID value */
+#ifdef CONFIG_SCHED_CPULOAD
+  uint32_t ticks;              /* Number of ticks on this thread */
+#endif
 };
 
 typedef struct pidhash_s  pidhash_t;
@@ -209,6 +218,14 @@ extern pidhash_t g_pidhash[CONFIG_MAX_TASKS];
  */
 
 extern const tasklist_t g_tasklisttable[NUM_TASK_STATES];
+
+#ifdef CONFIG_SCHED_CPULOAD
+/* This is the total number of clock tick counts.  Essentially the
+ * 'denominator' for all CPU load calculations.
+ */
+
+extern volatile uint32_t g_cpuload_total;
+#endif
 
 /****************************************************************************
  * Public Function Prototypes

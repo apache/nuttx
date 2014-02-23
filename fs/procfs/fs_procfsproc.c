@@ -60,6 +60,10 @@
 #include <nuttx/fs/procfs.h>
 #include <nuttx/fs/dirent.h>
 
+#ifdef CONFIG_SCHED_CPULOAD
+#  include <nuttx/clock.h>
+#endif
+
 #include <arch/irq.h>
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS)
@@ -86,6 +90,9 @@ enum proc_node_e
   PROC_LEVEL0 = 0,                    /* The top-level directory */
   PROC_STATUS,                        /* Task/thread status */
   PROC_CMDLINE,                       /* Task command line */
+#ifdef CONFIG_SCHED_CPULOAD
+  PROC_LOADAVG,                       /* Average CPU utilization */
+#endif
   PROC_STACK,                         /* Task stack info */
   PROC_GROUP,                         /* Group directory */
   PROC_GROUP_STATUS,                  /* Task group status */
@@ -136,6 +143,11 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
 static ssize_t proc_cmdline(FAR struct proc_file_s *procfile,
                  FAR struct tcb_s *tcb, FAR char *buffer, size_t buflen,
                  off_t offset);
+#ifdef CONFIG_SCHED_CPULOAD
+static ssize_t proc_loadavg(FAR struct proc_file_s *procfile,
+                 FAR struct tcb_s *tcb, FAR char *buffer, size_t buflen,
+                 off_t offset);
+#endif
 static ssize_t proc_stack(FAR struct proc_file_s *procfile,
                  FAR struct tcb_s *tcb, FAR char *buffer, size_t buflen,
                  off_t offset);
@@ -211,6 +223,13 @@ static const struct proc_node_s g_cmdline =
   "cmdline",      "cmdline", (uint8_t)PROC_CMDLINE,      DTYPE_FILE        /* Task command line */
 };
 
+#ifdef CONFIG_SCHED_CPULOAD
+static const struct proc_node_s g_loadavg =
+{
+  "loadavg",       "loadavg", (uint8_t)PROC_LOADAVG,     DTYPE_FILE        /* Average CPU utilization */
+};
+#endif
+
 static const struct proc_node_s g_stack =
 {
   "stack",        "stack",   (uint8_t)PROC_STACK,        DTYPE_FILE        /* Task stack info */
@@ -237,6 +256,9 @@ static FAR const struct proc_node_s * const g_nodeinfo[] =
 {
   &g_status,       /* Task/thread status */
   &g_cmdline,      /* Task command line */
+#ifdef CONFIG_SCHED_CPULOAD
+  &g_loadavg,      /* Average CPU utilization */
+#endif
   &g_stack,        /* Task stack info */
   &g_group,        /* Group directory */
   &g_groupstatus,  /* Task group status */
@@ -250,6 +272,9 @@ static const struct proc_node_s * const g_level0info[] =
 {
   &g_status,       /* Task/thread status */
   &g_cmdline,      /* Task command line */
+#ifdef CONFIG_SCHED_CPULOAD
+  &g_loadavg,      /* Average CPU utilization */
+#endif
   &g_stack,        /* Task stack info */
   &g_group,        /* Group directory */
 };
@@ -518,12 +543,61 @@ static ssize_t proc_cmdline(FAR struct proc_file_s *procfile,
 }
 
 /****************************************************************************
+ * Name: proc_loadavg
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_CPULOAD
+static ssize_t proc_loadavg(FAR struct proc_file_s *procfile,
+                            FAR struct tcb_s *tcb, FAR char *buffer,
+                            size_t buflen, off_t offset)
+{
+  struct cpuload_s cpuload;
+  uint32_t intpart;
+  uint32_t fracpart;
+  size_t linesize;
+  size_t copysize;
+  ssize_t ret;
+
+  /* Sample the counts for the thread.  clock_cpuload should only fail if
+   * the PID is not valid.  This could happen if the thread exited sometime
+   * after the procfs entry was opened.
+   */
+
+  ret = (ssize_t)clock_cpuload(procfile->pid, &cpuload);
+
+  /* On the simulator, you may hit cpuload.total == 0, but probably never on
+   * real hardware.
+   */
+
+  if (cpuload.total > 0)
+    {
+      uint32_t tmp;
+
+      tmp      = 1000 - (1000 * cpuload.active) / cpuload.total;
+      intpart  = tmp / 10;
+      fracpart = tmp - 10 * intpart;
+    }
+  else
+    {
+      intpart  = 0;
+      fracpart = 0;
+    }
+
+  linesize = snprintf(procfile->line, STATUS_LINELEN, "%3d.%01d%%\n",
+                      intpart, fracpart);
+  copysize = procfs_memcpy(procfile->line, linesize, buffer, buflen, &offset);
+
+  return copysize;
+}
+#endif
+
+/****************************************************************************
  * Name: proc_stack
  ****************************************************************************/
 
 static ssize_t proc_stack(FAR struct proc_file_s *procfile,
-                 FAR struct tcb_s *tcb, FAR char *buffer, size_t buflen,
-                 off_t offset)
+                          FAR struct tcb_s *tcb, FAR char *buffer,
+                          size_t buflen, off_t offset)
 {
   size_t remaining;
   size_t linesize;
@@ -986,6 +1060,11 @@ static ssize_t proc_read(FAR struct file *filep, FAR char *buffer,
       ret = proc_cmdline(procfile, tcb, buffer, buflen, filep->f_pos);
       break;
 
+#ifdef CONFIG_SCHED_CPULOAD
+    case PROC_LOADAVG: /* Average CPU utilization */
+      ret = proc_loadavg(procfile, tcb, buffer, buflen, filep->f_pos);
+      break;
+#endif
     case PROC_STACK: /* Task stack info */
       ret = proc_stack(procfile, tcb, buffer, buflen, filep->f_pos);
       break;

@@ -63,13 +63,15 @@
  ************************************************************************/
 
 /************************************************************************
- * Global Variables
+ * Public Variables
  ************************************************************************/
 
-/* This structure is used when CONFIG_SCHED_CPULOAD to sample CPU usage */
-
 #ifdef CONFIG_SCHED_CPULOAD
-volatile struct cpuload_s g_cpuload;
+/* This is the total number of clock tick counts.  Essentially the
+ * 'denominator' for all CPU load calculations.
+ */
+
+volatile uint32_t g_cpuload_total;
 #endif
 
 /************************************************************************
@@ -170,27 +172,34 @@ static inline void sched_process_timeslice(void)
  *
  ************************************************************************/
 
-#if defined(CONFIG_SCHED_CPULOAD)
+#ifdef CONFIG_SCHED_CPULOAD
 static inline void sched_process_cpuload(void)
 {
   FAR struct tcb_s *rtcb  = (FAR struct tcb_s*)g_readytorun.head;
+  int hash_index;
+  int i;
 
-  /* Gather stats for cpuload.  cpuload is percent of time cpu is not idle. */
-  /* Is the idle task running */
+  /* Increment the count on the currently executing thread */
 
-  if (rtcb->pid == 0)
-    {
-      ++g_cpuload.idle;
-    }
+  hash_index = PIDHASH(rtcb->pid);
+  g_pidhash[hash_index].ticks++;
 
   /* Increment tick count.  If the accumulated tick value exceed a time
    * constant, then shift the accumulators.
    */
 
-  if (++g_cpuload.cnt > (CONFIG_SCHED_CPULOAD_TIMECONSTANT * CLOCKS_PER_SEC))
+  if (++g_cpuload_total > (CONFIG_SCHED_CPULOAD_TIMECONSTANT * CLOCKS_PER_SEC))
     {
-      g_cpuload.cnt  >>= 1;
-      g_cpuload.idle >>= 1;
+      /* Divide the tick count for every task by two */
+
+      for (i = 0; i < CONFIG_MAX_TASKS; i++)
+        {
+          g_pidhash[i].ticks >>= 1;
+        }
+
+      /* Divide the total tick count by two */
+
+      g_cpuload_total  >>= 1;
     }
 }
 #else

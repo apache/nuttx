@@ -93,6 +93,10 @@ SCHED_SRCS += sched_waitid.c sched_wait.c
 endif
 endif
 
+ifeq ($(CONFIG_SCHED_CPULOAD),y)
+SCHED_SRCS += sched_cpuload.c
+endif
+
 GRP_SRCS  = group_create.c group_join.c group_leave.c group_find.c
 GRP_SRCS += group_setupstreams.c group_setupidlefiles.c group_setuptaskfiles.c
 GRP_SRCS += task_getgroup.c group_foreachchild.c group_killchildren.c

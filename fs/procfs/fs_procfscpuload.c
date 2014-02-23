@@ -207,9 +207,6 @@ static ssize_t cpuload_read(FAR struct file *filep, FAR char *buffer,
                            size_t buflen)
 {
   FAR struct cpuload_file_s *attr;
-  uint32_t cpuload;
-  uint32_t cpuload_int;
-  uint32_t cpuload_frac;
   size_t linesize;
   off_t offset;
   ssize_t ret;
@@ -230,40 +227,37 @@ static ssize_t cpuload_read(FAR struct file *filep, FAR char *buffer,
 
   if (filep->f_pos == 0)
     {
-      uint32_t idle;
-      uint32_t busycnt;
-      uint32_t verify;
+      struct cpuload_s cpuload;
+      uint32_t intpart;
+      uint32_t fracpart;
 
-      /* Sample the counts, repeatedly if necessary to assure that they are
-       * in sync.
+      /* Sample the counts for the IDLE thread.  clock_cpuload should only
+       * fail if the PID is not valid.  This, however, should never happen
+       * for the IDLE thread.
        */
 
-      do
-        {
-          busycnt = g_cpuload.cnt;
-          idle    = g_cpuload.idle;
-          verify  = g_cpuload.cnt;
-        }
-      while (busycnt != verify);
+      DEBUGVERIFY(clock_cpuload(0, &cpuload));
 
-      /* On the simulator, you may hit busycnt == 0, but probably never on
+      /* On the simulator, you may hit cpuload.total == 0, but probably never on
        * real hardware.
        */
 
-      if (busycnt > 0)
+      if (cpuload.total > 0)
         {
-          cpuload      = 1000 - (1000 * idle) / busycnt;
-          cpuload_int  = cpuload / 10;
-          cpuload_frac = cpuload - 10 * cpuload_int;
+          uint32_t tmp;
+
+          tmp      = 1000 - (1000 * cpuload.active) / cpuload.total;
+          intpart  = tmp / 10;
+          fracpart = tmp - 10 * intpart;
         }
       else
         {
-          cpuload_int  = 0;
-          cpuload_frac = 0;
+          intpart  = 0;
+          fracpart = 0;
         }
 
       linesize = snprintf(attr->line, CPULOAD_LINELEN, "%3d.%01d%%\n",
-                          cpuload_int, cpuload_frac);
+                          intpart, fracpart);
 
       /* Save the linesize in case we are re-entered with f_pos > 0 */
 

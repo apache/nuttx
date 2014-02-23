@@ -1,7 +1,7 @@
 /************************************************************************
  * sched/sched_releasetcb.c
  *
- *   Copyright (C) 2007, 2009, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2012-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,8 +68,11 @@ static void sched_releasepid(pid_t pid)
    * following action is atomic
    */
 
-  g_pidhash[hash_ndx].tcb = NULL;
-  g_pidhash[hash_ndx].pid = INVALID_PROCESS_ID;
+  g_pidhash[hash_ndx].tcb   = NULL;
+  g_pidhash[hash_ndx].pid   = INVALID_PROCESS_ID;
+#ifdef CONFIG_SCHED_CPULOAD
+  g_pidhash[hash_ndx].ticks = 0;
+#endif
 }
 
 /************************************************************************

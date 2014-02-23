@@ -132,9 +132,15 @@ static int task_assignpid(FAR struct tcb_s *tcb)
 
       if (!g_pidhash[hash_ndx].tcb)
         {
-          g_pidhash[hash_ndx].tcb = tcb;
-          g_pidhash[hash_ndx].pid = next_pid;
+          /* Assign this PID to the task */
+
+          g_pidhash[hash_ndx].tcb   = tcb;
+          g_pidhash[hash_ndx].pid   = next_pid;
+#ifdef CONFIG_SCHED_CPULOAD
+          g_pidhash[hash_ndx].ticks = 0;
+#endif
           tcb->pid = next_pid;
+
           (void)sched_unlock();
           return OK;
         }

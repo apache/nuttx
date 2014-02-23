@@ -6657,3 +6657,7 @@
 	* sched/sched_processtimer.c and fs/procfs/fs_procfscpuload.c:  Add
 	  logic to measure and calculate the CPU load percentage.  From David
 	  Alessio (2014-2-22).
+	* sched/sched_processtimer.c, sched_cpuload.c, fs/procfs/fs_procfscpuload.c,
+	  and fs_procfscpuload.c:  CPU load logic extended to keep counts on each
+	  thread.  The per-thread CPU is now reported in the procfs under
+	  <pid>/loadavg (2014-2-23).
