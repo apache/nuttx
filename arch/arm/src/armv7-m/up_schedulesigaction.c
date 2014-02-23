@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/armv7-m/up_schedulesigaction.c
  *
- *   Copyright (C) 2009-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -76,7 +76,7 @@
  *   This function is called by the OS when one or more
  *   signal handling actions have been queued for execution.
  *   The architecture specific code must configure things so
- *   that the 'igdeliver' callback is executed on the thread
+ *   that the 'sigdeliver' callback is executed on the thread
  *   specified by 'tcb' as soon as possible.
  *
  *   This function may be called from interrupt handling logic.
@@ -116,16 +116,16 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
       flags = irqsave();
 
-      /* First, handle some special cases when the signal is
-       * being delivered to the currently executing task.
+      /* First, handle some special cases when the signal is being delivered
+       * to the currently executing task.
        */
 
       sdbg("rtcb=0x%p current_regs=0x%p\n", g_readytorun.head, current_regs);
 
       if (tcb == (struct tcb_s*)g_readytorun.head)
         {
-          /* CASE 1:  We are not in an interrupt handler and
-           * a task is signalling itself for some reason.
+          /* CASE 1:  We are not in an interrupt handler and a task is
+           * signalling itself for some reason.
            */
 
           if (!current_regs)
@@ -135,23 +135,18 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
               sigdeliver(tcb);
             }
 
-          /* CASE 2:  We are in an interrupt handler AND the
-           * interrupted task is the same as the one that
-           * must receive the signal, then we will have to modify
-           * the return state as well as the state in the TCB.
-           *
-           * Hmmm... there looks like a latent bug here: The following
-           * logic would fail in the strange case where we are in an
-           * interrupt handler, the thread is signalling itself, but
-           * a context switch to another task has occurred so that
-           * current_regs does not refer to the thread at g_readytorun.head!
+          /* CASE 2:  We are in an interrupt handler AND the interrupted
+           * task is the same as the one that must receive the signal, then
+           * we will have to modify the return state as well as the state in
+           * the TCB.
            */
 
           else
             {
-              /* Save the return lr and cpsr and one scratch register
-               * These will be restored by the signal trampoline after
-               * the signals have been delivered.
+              /* Save the return PC, CPSR and either the BASEPRI or PRIMASK
+               * registers (and perhaps also the LR).  These will be
+               * restored by the signal trampoline after the signal has been
+               * delivered.
                */
 
               tcb->xcp.sigdeliver       = sigdeliver;
@@ -162,7 +157,9 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
               tcb->xcp.saved_primask    = current_regs[REG_PRIMASK];
 #endif
               tcb->xcp.saved_xpsr       = current_regs[REG_XPSR];
-
+#ifdef CONFIG_NUTTX_KERNEL
+              tcb->xcp.saved_lr         = current_regs[REG_LR];
+#endif
               /* Then set up to vector to the trampoline with interrupts
                * disabled.  The kernel-space trampoline must run in
                * privileged thread mode.
@@ -176,28 +173,26 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 #endif
               current_regs[REG_XPSR]    = ARMV7M_XPSR_T;
 #ifdef CONFIG_NUTTX_KERNEL
-              current_regs[REG_XPSR]    = EXC_RETURN_PRIVTHR;
+              current_regs[REG_LR]     = EXC_RETURN_PRIVTHR;
 #endif
-
-              /* And make sure that the saved context in the TCB
-               * is the same as the interrupt return context.
+              /* And make sure that the saved context in the TCB is the same
+               * as the interrupt return context.
                */
 
               up_savestate(tcb->xcp.regs);
             }
         }
 
-      /* Otherwise, we are (1) signaling a task is not running
-       * from an interrupt handler or (2) we are not in an
-       * interrupt handler and the running task is signalling
-       * some non-running task.
+      /* Otherwise, we are (1) signalling a task is not running from an
+       * interrupt handler or (2) we are not in an interrupt handler and the
+       * running task is signalling* some non-running task.
        */
 
       else
         {
-          /* Save the return lr and cpsr and one scratch register
-           * These will be restored by the signal trampoline after
-           * the signals have been delivered.
+          /* Save the return PC, CPSR and either the BASEPRI or PRIMASK
+           * registers (and perhaps also the LR).  These will be restored
+           * by the signal trampoline after the signal has been delivered.
            */
 
           tcb->xcp.sigdeliver       = sigdeliver;
@@ -208,10 +203,12 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
           tcb->xcp.saved_primask    = tcb->xcp.regs[REG_PRIMASK];
 #endif
           tcb->xcp.saved_xpsr       = tcb->xcp.regs[REG_XPSR];
-
+#ifdef CONFIG_NUTTX_KERNEL
+          tcb->xcp.saved_lr         = tcb->xcp.regs[REG_LR];
+#endif
           /* Then set up to vector to the trampoline with interrupts
-           * disabled.  We must already be in privileged thread mode
-           * to be here.
+           * disabled.  We must already be in privileged thread mode to be
+           * here.
            */
 
           tcb->xcp.regs[REG_PC]      = (uint32_t)up_sigdeliver;
@@ -221,6 +218,9 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
           tcb->xcp.regs[REG_PRIMASK] = 1;
 #endif
           tcb->xcp.regs[REG_XPSR]    = ARMV7M_XPSR_T;
+#ifdef CONFIG_NUTTX_KERNEL
+          tcb->xcp.regs[REG_LR]      = EXC_RETURN_PRIVTHR;
+#endif
         }
 
       irqrestore(flags);

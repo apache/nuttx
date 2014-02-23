@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/include/armv6-m/irq.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -178,6 +178,9 @@ struct xcptcontext
   uint32_t saved_pc;
   uint32_t saved_primask;
   uint32_t saved_xpsr;
+#ifdef CONFIG_NUTTX_KERNEL
+  uint32_t saved_lr;
+#endif
 
 # ifdef CONFIG_NUTTX_KERNEL
   /* This is the saved address to use when returning from a user-space
