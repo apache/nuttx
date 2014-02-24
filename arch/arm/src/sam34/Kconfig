@@ -507,7 +507,7 @@ config SAM34_HMATRIX
 config SAM34_PDCA
 	bool "Peripheral DMA controller (PDC)"
 	default n
-	depends on ARCH_CHIP_SAM4L || ARCH_CHIP_SAM4S
+	depends on ARCH_CHIP_SAM4L || ARCH_CHIP_SAM4S || ARCH_CHIP_SAM4E
 	select ARCH_DMA
 
 config SAM34_DMA
