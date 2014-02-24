@@ -1,7 +1,7 @@
 /****************************************************************************************
  * arch/arm/src/sam34/chip/sam_pdc.h
  *
- *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,28 +62,44 @@
 #define SAM_PDC_PTCR_OFFSET          0x120 /* Transfer Control Register */
 #define SAM_PDC_PTSR_OFFSET          0x124 /* Transfer Status Register */
 
-/* PDC register adresses ****************************************************************/
+/* PDC register addresses ***************************************************************/
 
 /* These 10 registers are mapped in the peripheral memory space at the same offset. */
 
 /* PDC register bit definitions *********************************************************/
 
+/* Receive Pointer Register -- 32-bit address value */
+/* Receive Counter Register -- 16-bit counter value */
+
 #define PDC_RCR_RXCTR_SHIFT          (0)      /* Bits 0-15:  Receive Counter Register */
 #define PDC_RCR_RXCTR_MASK           (0xffff << PDC_RCR_RXCTR_SHIFT)
+
+/* Transmit Pointer Register -- 32-bit address value */
+/* Transmit Counter Register -- 16-bit counter value */
 
 #define PDC_TCR_TXCTR_SHIFT          (0)      /* Bits 0-15:  Transmit Counter Register */
 #define PDC_TCR_TXCTR_MASK           (0xffff << PDC_TCR_TXCTR_SHIFT)
 
+/* Receive Next Pointer Register -- 32-bit address value */
+/* Receive Next Counter Register -- 16-bit counter value */
+
 #define PDC_RNCR_RXNCTR_SHIFT        (0)      /* Bits 0-15:  Receive Next Counter */
 #define PDC_RNCR_RXNCTR_MASK         (0xffff << PDC_RNCR_RXNCTR_SHIFT)
 
+/* Transmit Next Pointer Register -- 32-bit address value */
+/* Transmit Next Counter Register -- 16-bit counter value */
+
 #define PDC_TNCR_TXNCTR_SHIFT        (0)      /* Bits 0-15:   Transmit Counter Next */
 #define PDC_TNCR_TXNCTR_MASK         (0xffff << PDC_TNCR_TXNCTR_SHIFT)
+
+/* Transfer Control Register */
 
 #define PDC_PTCR_RXTEN               (1 << 0)  /* Bit 0:  Receiver Transfer Enable */
 #define PDC_PTCR_RXTDIS              (1 << 1)  /* Bit 1:  Receiver Transfer Disable */
 #define PDC_PTCR_TXTEN               (1 << 8)  /* Bit 8:  Transmitter Transfer Enable */
 #define PDC_PTCR_TXTDIS              (1 << 9)  /* Bit 9:  Transmitter Transfer Disable */
+
+/* Transfer Status Register */
 
 #define PDC_PTSR_RXTEN               (1 << 0)  /* Bit 0:  Receiver Transfer Enable */
 #define PDC_PTSR_TXTEN               (1 << 8)  /* Bit 8:  Transmitter Transfer Enable */
