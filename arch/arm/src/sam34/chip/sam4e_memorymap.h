@@ -126,6 +126,7 @@
 #define SAM_CHIPID_BASE        0x400e0740 /* 0x400e0740-0x400e07ff: CHIP ID */
                                           /* 0x400e0800-0x400e09ff: Reserved */
 #define SAM_EEFC_BASE          0x400e0a00 /* 0x400e0a00-0x400e0bff: Enhanced Embedded Flash Controller */
+#  define SAM_EEFC0_BASE       0x400e0a00 /* 0x400e0a00-0x400e0bff: (For compatibility) */
                                           /* 0x400e0c00-0x400e0dff: Reserved */
 #define SAM_PIO_BASE           0x400e0e00 /* 0x400e0e00-0x400e13ff: Parallel I/O Controllers */
 #  define SAM_PION_BASE(n)     (0x400e0e00 + ((n) << 9))

@@ -56,7 +56,7 @@
 #define SAM_PID_RTT            (3)  /* Real Time Timer */
 #define SAM_PID_WDT            (4)  /* Watchdog Timer */
 #define SAM_PID_PMC            (5)  /* Power Management Controller */
-#define SAM_PID_EEFC           (6)  /* Enhanced Embedded Flash Controller */
+#define SAM_PID_EEFC0          (6)  /* Enhanced Embedded Flash Controller */
 #define SAM_PID_UART0          (7)  /* Universal Asynchronous Receiver Transmitter 0 */
 #define SAM_PID_SMC            (8)  /* Static Memory Controller */
 #define SAM_PID_PIOA           (9)  /* Parallel I/O Controller A */
@@ -104,7 +104,7 @@
 #define SAM_IRQ_RTT           (SAM_IRQ_EXTINT+SAM_PID_RTT)    /* Real Time Timer */
 #define SAM_IRQ_WDT           (SAM_IRQ_EXTINT+SAM_PID_WDT)    /* Watchdog Timer */
 #define SAM_IRQ_PMC           (SAM_IRQ_EXTINT+SAM_PID_PMC)    /* Power Management Controller */
-#define SAM_IRQ_EEFC          (SAM_IRQ_EXTINT+SAM_PID_EEFC)   /* Enhanced Embedded Flash Controller */
+#define SAM_IRQ_EEFC0         (SAM_IRQ_EXTINT+SAM_PID_EEFC0)  /* Enhanced Embedded Flash Controller */
 #define SAM_IRQ_UART0         (SAM_IRQ_EXTINT+SAM_PID_UART0)  /* Universal Asynchronous Receiver Transmitter 0 */
 #define SAM_IRQ_PIOA          (SAM_IRQ_EXTINT+SAM_PID_PIOA)   /* Parallel I/O Controller A */
 #define SAM_IRQ_PIOB          (SAM_IRQ_EXTINT+SAM_PID_PIOB)   /* Parallel I/O Controller B */
