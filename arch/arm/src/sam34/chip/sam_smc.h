@@ -1,6 +1,6 @@
 /****************************************************************************************
  * arch/arm/src/sam34/chip/sam_smc.h
- * Static Memory Controller (SMC) definitions for the SAM3U and SAM4S
+ * Static Memory Controller (SMC) definitions for the SAM3U, SAM4E, and SAM4S
  *
  *   Copyright (C) 2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

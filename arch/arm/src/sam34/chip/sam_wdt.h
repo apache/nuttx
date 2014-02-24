@@ -1,8 +1,8 @@
 /****************************************************************************************
- * arch/arm/src/sam34/chip/sam3u_wdt.h
- * Watchdog Timer (WDT) definitions for the SAM3U, SAM3X, SAM3A, and SAM4S
+ * arch/arm/src/sam34/chip/sam_wdt.h
+ * Watchdog Timer (WDT) definitions for the SAM3U, SAM3X, SAM3A, SAM4E, and SAM4S
  *
- *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,12 +74,14 @@
 
 #define WDT_MR_WDV_SHIFT          (0)       /* Bits 0-11:  Watchdog Counter Value */
 #define WDT_MR_WDV_MASK           (0xfff << WDT_MR_WDV_SHIFT)
+#  define WDT_MR_WDV(n)           ((uint32_t)(n) << WDT_MR_WDV_SHIFT)
 #define WDT_MR_WDFIEN             (1 << 12) /* Bit 12: Watchdog Fault Interrupt Enable */
 #define WDT_MR_WDRSTEN            (1 << 13) /* Bit 13: Watchdog Reset Enable */
 #define WDT_MR_WDRPROC            (1 << 14) /* Bit 14: Watchdog Reset Processor */
 #define WDT_MR_WDDIS              (1 << 15) /* Bit 15: Watchdog Disable */
 #define WDT_MR_WDD_SHIFT          (16)      /* Bits 16-27:  Watchdog Delta Value */
 #define WDT_MR_WDD_MASK           (0xfff << WDT_MR_WDD_SHIFT)
+#  define WDT_MR_WDD(n)           ((uint32_t)(n) << WDT_MR_WDD_SHIFT)
 #define WDT_MR_WDDBGHLT           (1 << 28) /* Bit 28: Watchdog Debug Halt */
 #define WDT_MR_WDIDLEHLT          (1 << 29) /* Bit 29: Watchdog Idle Halt */
 

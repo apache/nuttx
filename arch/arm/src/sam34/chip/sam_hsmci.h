@@ -1,7 +1,7 @@
 /****************************************************************************************
  * arch/arm/src/sam34/chip/sam_hsmci.h
  *
- *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -127,15 +127,17 @@
 
 #define HSMCI_MR_CLKDIV_SHIFT         (0)       /* Bits 0-7: Clock Divider */
 #define HSMCI_MR_CLKDIV_MASK          (0xff << HSMCI_MR_CLKDIV_SHIFT)
+#  define HSMCI_MR_CLKDIV(n)          ((uint32_t)(n) << HSMCI_MR_CLKDIV_SHIFT)
 #define HSMCI_MR_PWSDIV_SHIFT         (8)       /* Bits 8-10: Power Saving Divider */
 #define HSMCI_MR_PWSDIV_MASK          (7 << HSMCI_MR_PWSDIV_SHIFT)
+#  define HSMCI_MR_PWSDIV(n)          ((uint32_t)(n) << HSMCI_MR_PWSDIV_SHIFT)
 #  define HSMCI_MR_PWSDIV_MAX         (7 << HSMCI_MR_PWSDIV_SHIFT)
 #define HSMCI_MR_RDPROOF              (1 << 11) /* Bit 11: Read Proof Enable */
 #define HSMCI_MR_WRPROOF              (1 << 12) /* Bit 12: Write Proof Enable */
 #define HSMCI_MR_FBYTE                (1 << 13) /* Bit 13: Force Byte Transfer */
 #define HSMCI_MR_PADV                 (1 << 14) /* Bit 14: Padding Value */
 
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
 #  define HSMCI_MR_PDCMODE            (1 << 15) /* Bit 15: PDC-oriented Mode */
 #endif
 
@@ -144,10 +146,15 @@
 #  define HSMCI_MR_BLKLEN_MASK        (0xffff << HSMCI_MR_BLKLEN_SHIFT)
 #endif
 
+#if defined(CONFIG_ARCH_CHIP_SAM4E)
+#  define HSMCI_MR_CLKODD             (1 << 16) /* Bit 16: Clock divider is odd */
+#endif
+
 /* HSMCI Data Timeout Register */
 
 #define HSMCI_DTOR_DTOCYC_SHIFT       (0)       /* Bits 0-3: Data Timeout Cycle Number */
 #define HSMCI_DTOR_DTOCYC_MASK        (15 << HSMCI_DTOR_DTOCYC_SHIFT)
+#  define HSMCI_DTOR_DTOCYC(n)        ((uint32_t)(n) << HSMCI_DTOR_DTOCYC_SHIFT)
 #  define HSMCI_DTOR_DTOCYC_MAX       (15 << HSMCI_DTOR_DTOCYC_SHIFT)
 #define HSMCI_DTOR_DTOMUL_SHIFT       (4)       /* Bits 4-6: Data Timeout Multiplier */
 #define HSMCI_DTOR_DTOMUL_MASK        (7 << HSMCI_DTOR_DTOMUL_SHIFT)
@@ -178,6 +185,7 @@
 
 #define HSMCI_CMDR_CMDNB_SHIFT        (0)       /* Bits 0-5: Command Number */
 #define HSMCI_CMDR_CMDNB_MASK         (63 << HSMCI_CMDR_CMDNB_SHIFT)
+#  define HSMCI_CMDR_CMDNB(n)         ((uint32_t)(n) << HSMCI_CMDR_CMDNB_SHIFT)
 #define HSMCI_CMDR_RSPTYP_SHIFT       (6)       /* Bits 6-7: Response Type */
 #define HSMCI_CMDR_RSPTYP_MASK        (3 << HSMCI_CMDR_RSPTYP_SHIFT)
 #  define HSMCI_CMDR_RSPTYP_NONE      (0 << HSMCI_CMDR_RSPTYP_SHIFT) /* No response */
@@ -223,13 +231,16 @@
 
 #define HSMCI_BLKR_BCNT_SHIFT         (0)       /* Bits 0-15: MMC/SDIO Block Count - SDIO Byte Count */
 #define HSMCI_BLKR_BCNT_MASK          (0xffff << HSMCI_BLKR_BCNT_SHIFT)
+#  define HSMCI_BLKR_BCNT(n)          ((uint32_t)(n) << HSMCI_BLKR_BCNT_SHIFT)
 #define HSMCI_BLKR_BLKLEN_SHIFT       (16)      /* Bits 16-31: Data Block Length */
 #define HSMCI_BLKR_BLKLEN_MASK        (0xffff << HSMCI_BLKR_BLKLEN_SHIFT)
+#  define HSMCI_BLKR_BLKLEN(n)        ((uint32_t)(n) << HSMCI_BLKR_BLKLEN_SHIFT)
 
 /* HSMCI Completion Signal Timeout Register */
 
 #define HSMCI_CSTOR_CSTOCYC_SHIFT     (0)       /* Bits 0-3: Completion Signal Timeout Cycle Number */
 #define HSMCI_CSTOR_CSTOCYC_MASK      (15 << HSMCI_CSTOR_CSTOCYC_SHIFT)
+#  define HSMCI_CSTOR_CSTOCYC(n)      ((uint32_t)(n) << HSMCI_CSTOR_CSTOCYC_SHIFT)
 #define HSMCI_CSTOR_CSTOMUL_SHIFT     (4)       /* Bits 4-6: Completion Signal Timeout Multiplier */
 #define HSMCI_CSTOR_CSTOMUL_MASK      (7 << HSMCI_CSTOR_CSTOMUL_SHIFT)
 #  define HSMCI_CSTOR_CSTOMUL_1       (0 << HSMCI_CSTOR_CSTOMUL_SHIFT)
@@ -256,7 +267,7 @@
 #define HSMCI_INT_DTIP                (1 << 4)  /* Bit 4:  Data Transfer in Progress */
 #define HSMCI_INT_NOTBUSY             (1 << 5)  /* Bit 6:  HSMCI Not Busy */
 
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
 #  define HSMCI_INT_ENDRX             (1 << 6)  /* Bit 6:  End of RX Buffer */
 #  define HSMCI_INT_ENDTX             (1 << 7)  /* Bit 7:  End of TX Buffer */
 #endif
@@ -265,7 +276,7 @@
 #define HSMCI_INT_SDIOWAIT            (1 << 12) /* Bit 12: SDIO Read Wait Operation Status */
 #define HSMCI_INT_CSRCV               (1 << 13) /* Bit 13: CE-ATA Completion Signal Received */
 
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
 #  define HSMCI_INT_RXBUFF            (1 << 14) /* Bit 14:  RXBUFF: RX Buffer Full */
 #  define HSMCI_INT_TXBUFE            (1 << 15) /* Bit 15:  TXBUFE: TX Buffer Empty */
 #endif

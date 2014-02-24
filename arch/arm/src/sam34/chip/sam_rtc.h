@@ -1,8 +1,8 @@
 /****************************************************************************************
  * arch/arm/src/sam34/chip/sam_rtc.h
- * Real-time Clock (RTC) definitions for the SAM3U and SAM4S
+ * Real-time Clock (RTC) definitions for the SAM3U, SAM4E, and SAM4S
  *
- *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -102,11 +102,12 @@
 
 #define RTC_MR_HRMOD                 (1 << 0)  /* Bit 0:  12-/24-hour Mode */
 
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
 #  define RTC_MR_PERSIAN             (1 << 1)  /* Bit 1:  PERSIAN Calendar */
 #  define RTC_MR_NEGPPM              (1 << 4)  /* Bit 4:  Negative PPM Correction */
 #  define RTC_MR_CORRECTION_SHIFT    (8)       /* Bits 8-14: Slow Clock Correction */
-#  define RTC_MR_CORRECTION_
+#  define RTC_MR_CORRECTION_MASK     (0x7f << RTC_MR_CORRECTION_SHIFT)
+#    define RTC_MR_CORRECTION(n)     ((uint32_t)(n) << RTC_MR_CORRECTION_SHIFT)
 #  define RTC_MR_HIGHPPM             (1 << 15) /* Bit 15: HIGH PPM Correction */
 #  define RTC_MR_OUT0_SHIFT          (16)      /* Bits 16-18: RTCOUT0 Output Source Selection */
 #  define RTC_MR_OUT0_MASK           (7 << RTC_MR_OUT0_SHIFT)
@@ -130,55 +131,66 @@
 #    define RTC_MR_OUT1_PROG_PULSE   (7 << RTC_MR_OUT1_SHIFT) /* Duty cycle programmable pulse */
 #  define RTC_MR_THIGH_SHIFT         (24)      /* Bits 24-26: High Duration of the Output Pulse */
 #  define RTC_MR_THIGH_MASK          (7 << RTC_MR_THIGH_SHIFT)
-#    define RTC_MR_THIGH_ 31MS       (0 << RTC_MR_THIGH_SHIFT) /* 31.2 ms */
-#    define RTC_MR_THIGH_ 16MS       (1 << RTC_MR_THIGH_SHIFT) /* 15.6 ms */
-#    define RTC_MR_THIGH_ 4MS        (2 << RTC_MR_THIGH_SHIFT) /* 3.91 ms */
-#    define RTC_MR_THIGH_ 976US      (3 << RTC_MR_THIGH_SHIFT) /* 976 탎 */
-#    define RTC_MR_THIGH_ 488US      (4 << RTC_MR_THIGH_SHIFT) /* 488 탎 */
-#    define RTC_MR_THIGH_ 22US       (5 << RTC_MR_THIGH_SHIFT) /* 122 탎 */
-#    define RTC_MR_THIGH_ 0US        (6 << RTC_MR_THIGH_SHIFT) /* 30.5 탎 */
-#    define RTC_MR_THIGH_ 15US       (7 << RTC_MR_THIGH_SHIFT) /* 15.2 탎 */
+#    define RTC_MR_THIGH_31MS        (0 << RTC_MR_THIGH_SHIFT) /* 31.2 ms */
+#    define RTC_MR_THIGH_16MS        (1 << RTC_MR_THIGH_SHIFT) /* 15.6 ms */
+#    define RTC_MR_THIGH_4MS         (2 << RTC_MR_THIGH_SHIFT) /* 3.91 ms */
+#    define RTC_MR_THIGH_976US       (3 << RTC_MR_THIGH_SHIFT) /* 976 탎 */
+#    define RTC_MR_THIGH_488US       (4 << RTC_MR_THIGH_SHIFT) /* 488 탎 */
+#    define RTC_MR_THIGH_22US        (5 << RTC_MR_THIGH_SHIFT) /* 122 탎 */
+#    define RTC_MR_THIGH_0US         (6 << RTC_MR_THIGH_SHIFT) /* 30.5 탎 */
+#    define RTC_MR_THIGH_15US        (7 << RTC_MR_THIGH_SHIFT) /* 15.2 탎 */
 #  define RTC_MR_TPERIOD_SHIFT       (28)      /* Bits 28-29: Period of the Output Pulse */
 #  define RTC_MR_TPERIOD_MASK        (3 << RTC_MR_TPERIOD_SHIFT)
-#    define RTC_MR_TPERIOD_ 1S       (0 << RTC_MR_TPERIOD_SHIFT) /* 1 second */
-#    define RTC_MR_TPERIOD_ 500MS    (1 << RTC_MR_TPERIOD_SHIFT) /* 500 ms */
-#    define RTC_MR_TPERIOD_ 250MS    (2 << RTC_MR_TPERIOD_SHIFT) /* 250 ms */
-#    define RTC_MR_TPERIOD_ 125MS    (3 << RTC_MR_TPERIOD_SHIFT) /* 125 ms */
+#    define RTC_MR_TPERIOD_1S        (0 << RTC_MR_TPERIOD_SHIFT) /* 1 second */
+#    define RTC_MR_TPERIOD_500MS     (1 << RTC_MR_TPERIOD_SHIFT) /* 500 ms */
+#    define RTC_MR_TPERIOD_250MS     (2 << RTC_MR_TPERIOD_SHIFT) /* 250 ms */
+#    define RTC_MR_TPERIOD_125MS     (3 << RTC_MR_TPERIOD_SHIFT) /* 125 ms */
 #endif
 
 /* RTC Time Register */
 
 #define RTC_TIMR_SEC_SHIFT           (0)       /* Bits 0-6:  Current Second */
 #define RTC_TIMR_SEC_MASK            (0x7f << RTC_TIMR_SEC_SHIFT)
+#  define RTC_TIMR_SEC(n)            ((uint32_t)(n) << RTC_TIMR_SEC_SHIFT)
 #define RTC_TIMR_MIN_SHIFT           (8)       /* Bits 8-14:  Current Minute */
 #define RTC_TIMR_MIN_MASK            (0x7f <<  RTC_TIMR_MIN_SHIFT)
+#  define RTC_TIMR_MIN(n)            ((uint32_t)(n) <<  RTC_TIMR_MIN_SHIFT)
 #define RTC_TIMR_HOUR_SHIFT          (16)      /* Bits 16-21: Current Hour */
 #define RTC_TIMR_HOUR_MASK           (0x3f << RTC_TIMR_HOUR_SHIFT)
+#  define RTC_TIMR_HOUR(n)           ((uint32_t)(n) << RTC_TIMR_HOUR_SHIFT)
 #define RTC_TIMR_AMPM                (1 << 22) /* Bit 22: Ante Meridiem Post Meridiem Indicator */
 
 /* RTC Calendar Register */
 
 #define RTC_CALR_CENT_SHIFT          (0)       /* Bits 0-6:  Current Century */
 #define RTC_CALR_CENT_MASK           (0x7f << RTC_CALR_CENT_SHIFT)
+#  define RTC_CALR_CENT(n)           ((uint32_t)(n) << RTC_CALR_CENT_SHIFT)
 #define RTC_CALR_YEAR_SHIFT          (8)       /* Bits 8-15:  Current Year */
 #define RTC_CALR_YEAR_MASK           (0xff << RTC_CALR_YEAR_SHIFT)
+#  define RTC_CALR_YEAR(n)           ((uint32_t)(n) << RTC_CALR_YEAR_SHIFT)
 #define RTC_CALR_MONTH_SHIFT         (16)      /* Bits 16-20: Current Month */
 #define RTC_CALR_MONTH_MASK          (0x1f << RTC_CALR_MONTH_SHIFT)
+#  define RTC_CALR_MONTH(n)           ((uint32_t)(n) << RTC_CALR_MONTH_SHIFT)
 #define RTC_CALR_DAY_SHIFT           (21)      /* Bits 21-23: Current Day in Current Week */
 #define RTC_CALR_DAY_MASK            (7 << RTC_CALR_DAY_SHIFT)
+#  define RTC_CALR_DAY(n)            ((uint32_t)(n)7 << RTC_CALR_DAY_SHIFT)
 #define RTC_CALR_DATE_SHIFT          (24)      /* Bits 24-29: Current Day in Current Month */
 #define RTC_CALR_DATE_MASK           (0x3f << RTC_CALR_DATE_SHIFT)
+#  define RTC_CALR_DATE(n)           ((uint32_t)(n) << RTC_CALR_DATE_SHIFT)
 
 /* RTC Time Alarm Register */
 
 #define RTC_TIMALR_SEC_SHIFT         (0)       /* Bits 0-6:  Second Alarm */
 #define RTC_TIMALR_SEC_MASK          (0x7f << RTC_TIMALR_SEC_SHIFT)
+#  define RTC_TIMALR_SEC(n)          ((uint32_t)(n) << RTC_TIMALR_SEC_SHIFT)
 #define RTC_TIMALR_SECEN             (1 << 7)  /* Bit 7:  Second Alarm Enable */
 #define RTC_TIMALR_MIN_SHIFT         (8)       /* Bits 8-14:  Minute Alarm */
 #define RTC_TIMALR_MIN_MASK          (0x7f << RTC_TIMALR_MIN_SHIFT)
+#  define RTC_TIMALR_MIN(n)          ((uint32_t)(n) << RTC_TIMALR_MIN_SHIFT)
 #define RTC_TIMALR_MINEN             (1 << 15) /* Bit 15: Minute Alarm Enable */
 #define RTC_TIMALR_HOUR_SHIFT        (16)      /* Bits 16-21:  Hour Alarm */
 #define RTC_TIMALR_HOUR_MASK         (0x3f << RTC_TIMALR_HOUR_SHIFT)
+#  define RTC_TIMALR_HOUR(n)         ((uint32_t)(n) << RTC_TIMALR_HOUR_SHIFT)
 #define RTC_TIMALR_AMPM              (1 << 22) /* Bit 22: AM/PM Indicator */
 #define RTC_TIMALR_HOUREN            (1 << 23) /* Bit 23: Hour Alarm Enable */
 
@@ -186,9 +198,11 @@
 
 #define RTC_CALALR_MONTH_SHIFT       (16)      /* Bits 16-20:  Month Alarm */
 #define RTC_CALALR_MONTH_MASK        (0x1f << RTC_CALALR_MONTH_SHIFT)
+#  define RTC_CALALR_MONTH(n)        ((uint32_t)(n) << RTC_CALALR_MONTH_SHIFT)
 #define RTC_CALALR_MTHEN             (1 << 23) /* Bit 23: Month Alarm Enable */
 #define RTC_CALALR_DATE_SHIFT        (24)      /* Bits 24-29:  Date Alarm */
 #define RTC_CALALR_DATE_MASK         (0x3f << RTC_CALALR_DATE_SHIFT)
+#  define RTC_CALALR_DATE(n)         ((uint32_t)(n) << RTC_CALALR_DATE_SHIFT)
 #define RTC_CALALR_DATEEN            (1 << 31) /* Bit 31: Date Alarm Enable */
 
 /* RTC Status Register */
@@ -199,7 +213,7 @@
 #define RTC_SR_TIMEV                 (1 << 3)  /* Bit 3:  Time Event */
 #define RTC_SR_CALEV                 (1 << 4)  /* Bit 4:  Calendar Event */
 
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
 #  define RTC_SR_TDERR               (1 << 5)  /* Bit 5:  Time and/or Date Free Running Error */
 #endif
 
@@ -211,7 +225,7 @@
 #define RTC_SCCR_TIMCLR              (1 << 3)  /* Bit 3:  Time Clear */
 #define RTC_SCCR_CALCLR              (1 << 4)  /* Bit 4:  Calendar Clear */
 
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
 #  define RTC_SR_TDERRCLR            (1 << 5)  /* Bit 5:  Time and/or Date Free Running Error Clear */
 #endif
 
@@ -223,7 +237,7 @@
 #define RTC_IER_TIMEN                (1 << 3)  /* Bit 3:  Time Event Interrupt Enable */
 #define RTC_IER_CALEN                (1 << 4)  /* Bit 4:  Calendar Event Interrupt Enable */
 
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
 #  define RTC_SR_TDERREN             (1 << 5)  /* Bit 5:  Time and/or Date Error Interrupt Enable */
 #endif
 
@@ -235,7 +249,7 @@
 #define RTC_IDR_TIMDIS               (1 << 3)  /* Bit 3:  Time Event Interrupt Disable */
 #define RTC_IDR_CALDIS               (1 << 4)  /* Bit 4:  Calendar Event Interrupt Disable */
 
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
 #  define RTC_SR_TDERRDIS            (1 << 5)  /* Bit 5:  Time and/or Date Error Interrupt Disable */
 #endif
 
