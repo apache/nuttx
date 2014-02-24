@@ -1,8 +1,8 @@
 /****************************************************************************************
  * arch/arm/src/sam34/chip/sam_rstc.h
- * Reset Controller (RSTC) definitions for the SAM3U and SAM4S
+ * Reset Controller (RSTC) definitions for the SAM3U, SAM4E, and SAM4S
  *
- *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,12 +64,16 @@
 
 /* RSTC register bit definitions ********************************************************/
 
+/* Reset Controller Control Register */
+
 #define RSTC_CR_PROCRST         (1 << 0)  /* Bit 0:  Processor Reset */
 #define RSTC_CR_PERRST          (1 << 2)  /* Bit 2:  Peripheral Reset */
 #define RSTC_CR_EXTRST          (1 << 3)  /* Bit 3:  External Reset */
 #define RSTC_CR_KEY_SHIFT       (24)      /* Bits 24-31:  Password */
 #define RSTC_CR_KEY_MASK        (0xff << RSTC_CR_KEY_SHIFT)
 #  define RSTC_CR_KEY           (0xa5 << RSTC_CR_KEY_SHIFT)
+
+/* Reset Controller Status Register */
 
 #define RSTC_SR_URSTS           (1 << 0)  /* Bit 0:  User Reset Status */
 #define RSTC_SR_RSTTYP_SHIFT    (8)       /* Bits 8-10:  Reset Type */
@@ -82,10 +86,13 @@
 #define RSTC_SR_NRSTL           (1 << 16) /* Bit 16:  NRST Pin Level */
 #define RSTC_SR_SRCMP           (1 << 17) /* Bit 17:  Software Reset Command in Progress */
 
+/* Reset Controller Mode Register */
+
 #define RSTC_MR_URSTEN          (1 << 0)  /* Bit 0:  User Reset Enable */
 #define RSTC_MR_URSTIEN         (1 << 4)  /* Bit 4:  User Reset Interrupt Enable */
 #define RSTC_MR_ERSTL_SHIFT     (8)       /* Bits 8-11:  External Reset Length */
 #define RSTC_MR_ERSTL_MASK      (15 << RSTC_MR_ERSTL_SHIFT)
+#  define RSTC_MR_ERSTL(n)      ((uint32_t)(n) << RSTC_MR_ERSTL_SHIFT)
 #define RSTC_MR_KEY_SHIFT       (24)      /* Bits 24-31:  Password */
 #define RSTC_MR_KEY_MASK        (0xff << RSTC_CR_KEY_SHIFT)
 #  define RSTC_MR_KEY           (0xa5 << RSTC_CR_KEY_SHIFT)

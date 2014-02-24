@@ -51,7 +51,7 @@
 #include "sam_clockconfig.h"
 #include "chip/sam_pmc.h"
 #include "chip/sam_eefc.h"
-#include "chip/sam3u_wdt.h"
+#include "chip/sam_wdt.h"
 #include "chip/sam_supc.h"
 #include "chip/sam_matrix.h"
 
