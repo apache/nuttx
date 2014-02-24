@@ -237,8 +237,13 @@
 
 /* SPI Write Protection Status Register */
 
-#define SPI_WPSR_WPVS_SHIFT       (0)      /* Bits 0-2: SPI Write Protection Violation Status */
-#define SPI_WPSR_WPVS_MASK        (7 << SPI_WPSR_WPVS_SHIFT)
+#if defined(CONFIG_ARCH_CHIP_SAM4E)
+#  define SPI_WPSR_WPVS           (1 << 0) /* Bit 0: SPI Write Protection Violation Status */
+#else
+#  define SPI_WPSR_WPVS_SHIFT     (0)      /* Bits 0-2: SPI Write Protection Violation Status */
+#  define SPI_WPSR_WPVS_MASK      (7 << SPI_WPSR_WPVS_SHIFT)
+#endif
+
 #define SPI_WPSR_WPVSRC_SHIFT     (8)      /* Bits 8-15: SPI Write Protection Violation Source */
 #define SPI_WPSR_WPVSRC_MASK      (0xff << SPI_WPSR_WPVSRC_SHIFT)
 

@@ -1,8 +1,8 @@
 /****************************************************************************************
- * arch/arm/src/sam34/chip/sam3u_smc.h
+ * arch/arm/src/sam34/chip/sam_smc.h
  * Static Memory Controller (SMC) definitions for the SAM3U and SAM4S
  *
- *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,8 +34,8 @@
  *
  ****************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_SMC_H
-#define __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_SMC_H
+#ifndef __ARCH_ARM_SRC_SAM34_CHIP_SAM_SMC_H
+#define __ARCH_ARM_SRC_SAM34_CHIP_SAM_SMC_H
 
 /****************************************************************************************
  * Included Files
@@ -101,7 +101,7 @@
 #  define SAM_SMC_WPCR_OFFSET          0x01e4 /* Write Protection Control Register */
 #  define SAM_SMC_WPSR_OFFSET          0x01e8 /* Write Protection Status Register */
 
-#elif defined(CONFIG_ARCH_CHIP_SAM4S)
+#elif defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
 #  define SAM_SMCCS_OFFSET(n)          ((n) << 4)
 #    define SAM_SMCCS0_OFFSET          0x0000 /* SMC CS0 offset */
 #    define SAM_SMCCS1_OFFSET          0x0010 /* SMC CS1 offset */
@@ -466,18 +466,33 @@
 
 /* SMC Pulse Register */
 
-#define SMCCS_PULSE_NWEPULSE_SHIFT     (0)       /* Bits 0-5: NWE Pulse Length */
-#define SMCCS_PULSE_NWEPULSE_MASK      (63 << SMCCS_PULSE_NWEPULSE_SHIFT)
-#  define SMCCS_PULSE_NWEPULSE(n)      ((n) << SMCCS_PULSE_NWEPULSE_SHIFT)
-#define SMCCS_PULSE_NCSWRPULSE_SHIFT   (8)       /* Bits 8-13: NCS Pulse Length in WRITE Access */
-#define SMCCS_PULSE_NCSWRPULSE_MASK    (63 << SMCCS_PULSE_NCSWRPULSE_SHIFT)
-#  define SMCCS_PULSE_NCSWRPULSE(n)    ((n) << SMCCS_PULSE_NCSWRPULSE_SHIFT)
-#define SMCCS_PULSE_NRDPULSE_SHIFT     (16)      /* Bits 16-21: NRD Pulse Length */
-#define SMCCS_PULSE_NRDPULSE_MASK      (63 << SMCCS_PULSE_NRDPULSE_SHIFT)
-#  define SMCCS_PULSE_NRDPULSE(n)      ((n) << SMCCS_PULSE_NRDPULSE_SHIFT)
-#define SMCCS_PULSE_NCSRDPULSE_SHIFT   (24)      /* Bits 24-29: NCS Pulse Length in READ Access */
-#define SMCCS_PULSE_NCSRDPULSE_MASK    (63 << SMCCS_PULSE_NCSRDPULSE_SHIFT)
-#  define SMCCS_PULSE_NCSRDPULSE(n)    ((n) << SMCCS_PULSE_NCSRDPULSE_SHIFT)
+#if defined(CONFIG_ARCH_CHIP_SAM4E)
+#  define SMCCS_PULSE_NWEPULSE_SHIFT   (0)       /* Bits 0-6: NWE Pulse Length */
+#  define SMCCS_PULSE_NWEPULSE_MASK    (127 << SMCCS_PULSE_NWEPULSE_SHIFT)
+#    define SMCCS_PULSE_NWEPULSE(n)    ((n) << SMCCS_PULSE_NWEPULSE_SHIFT)
+#  define SMCCS_PULSE_NCSWRPULSE_SHIFT (8)       /* Bits 8-14: NCS Pulse Length in WRITE Access */
+#  define SMCCS_PULSE_NCSWRPULSE_MASK  (127 << SMCCS_PULSE_NCSWRPULSE_SHIFT)
+#    define SMCCS_PULSE_NCSWRPULSE(n)  ((n) << SMCCS_PULSE_NCSWRPULSE_SHIFT)
+#  define SMCCS_PULSE_NRDPULSE_SHIFT   (16)      /* Bits 16-22: NRD Pulse Length */
+#  define SMCCS_PULSE_NRDPULSE_MASK    (127 << SMCCS_PULSE_NRDPULSE_SHIFT)
+#    define SMCCS_PULSE_NRDPULSE(n)    ((n) << SMCCS_PULSE_NRDPULSE_SHIFT)
+#  define SMCCS_PULSE_NCSRDPULSE_SHIFT (24)      /* Bits 24-30: NCS Pulse Length in READ Access */
+#  define SMCCS_PULSE_NCSRDPULSE_MASK  (127 << SMCCS_PULSE_NCSRDPULSE_SHIFT)
+#    define SMCCS_PULSE_NCSRDPULSE(n)  ((n) << SMCCS_PULSE_NCSRDPULSE_SHIFT)
+#else
+#  define SMCCS_PULSE_NWEPULSE_SHIFT   (0)       /* Bits 0-5: NWE Pulse Length */
+#  define SMCCS_PULSE_NWEPULSE_MASK    (63 << SMCCS_PULSE_NWEPULSE_SHIFT)
+#    define SMCCS_PULSE_NWEPULSE(n)    ((n) << SMCCS_PULSE_NWEPULSE_SHIFT)
+#  define SMCCS_PULSE_NCSWRPULSE_SHIFT (8)       /* Bits 8-13: NCS Pulse Length in WRITE Access */
+#  define SMCCS_PULSE_NCSWRPULSE_MASK  (63 << SMCCS_PULSE_NCSWRPULSE_SHIFT)
+#    define SMCCS_PULSE_NCSWRPULSE(n)  ((n) << SMCCS_PULSE_NCSWRPULSE_SHIFT)
+#  define SMCCS_PULSE_NRDPULSE_SHIFT   (16)      /* Bits 16-21: NRD Pulse Length */
+#  define SMCCS_PULSE_NRDPULSE_MASK    (63 << SMCCS_PULSE_NRDPULSE_SHIFT)
+#    define SMCCS_PULSE_NRDPULSE(n)    ((n) << SMCCS_PULSE_NRDPULSE_SHIFT)
+#  define SMCCS_PULSE_NCSRDPULSE_SHIFT (24)      /* Bits 24-29: NCS Pulse Length in READ Access */
+#  define SMCCS_PULSE_NCSRDPULSE_MASK  (63 << SMCCS_PULSE_NCSRDPULSE_SHIFT)
+#    define SMCCS_PULSE_NCSRDPULSE(n)  ((n) << SMCCS_PULSE_NCSRDPULSE_SHIFT)
+#endif
 
 /* SMC Cycle Register */
 
@@ -530,9 +545,11 @@
 
 #define SMCCS_MODE_TDFCYCLES_SHIFT     (16)      /* Bits 16-19: Data Float Time */
 #define SMCCS_MODE_TDFCYCLES_MASK      (15 << SMCCS_MODE_TDFCYCLES_SHIFT)
+#  define SMCCS_MODE_TDFCYCLES(n)      ((uint32_t)(n) << SMCCS_MODE_TDFCYCLES_SHIFT)
 #define SMCCS_MODE_TDFMODE             (1 << 20) /* Bit 20: TDF Optimization */
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM4S) || \
+    defined(CONFIG_ARCH_CHIP_SAM4E)
 #  define SMCCS_MODE_PMEN              (1 << 24) /* Bit 24: Page Mode Enabled */
 #  define SMCCS_MODE_PS_SHIFT          (28) /* Bits 28-29: Page Size */
 #  define SMCCS_MODE_PS_MASK           (3 << SMCCS_MODE_PS_SHIFT)
@@ -545,9 +562,12 @@
 /* SMC OCMS Mode Register */
 
 #define SMC_OCMS_SMSE                  (1 << 0)  /* Bit 0:  Static Memory Controller Scrambling Enable */
-#define SMC_OCMS_SRSE                  (1 << 1)  /* Bit 1:  SRAM Scrambling Enable */
 
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#if !defined(CONFIG_ARCH_CHIP_SAM4E)
+#  define SMC_OCMS_SRSE                (1 << 1)  /* Bit 1:  SRAM Scrambling Enable */
+#endif
+
+#if defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
 #  define SMC_OCMS_CSSE(n)             (1 << ((n)+16)) /*  Chip Select (n=0-3) Scrambling Enable */
 #  define SMC_OCMS_CS0SE               (1 << 16) /* Bit 16: Chip Select 0 Scrambling Enable */
 #  define SMC_OCMS_CS1SE               (1 << 17) /* Bit 17: Chip Select 1 Scrambling Enable */
@@ -559,7 +579,7 @@
 
 /* SMC Write Protect Mode Register */
 
-#define SMC_WPCR_WPPEN                 (1 << 9)  /* Bit 9:  Write Protection Enable */
+#define SMC_WPCR_WPPEN                 (1 << 0)  /* Bit 0:  Write Protection Enable */
 #define SMC_WPCR_WPKEY_SHIFT           (8)       /* Bits 8-31: Write Protection KEY password */
 #define SMC_WPCR_WPKEY_MASK            (0x00ffffff << SMC_WPCR_WPKEY_SHIFT)
 #  define SMC_WPCR_WPKEY               (0x00534d43 << SMC_WPCR_WPKEY_SHIFT)
@@ -574,7 +594,7 @@
 #    define SMC_WPSR_PVS_ RCREG        (1 << SMC_WPSR_PVS_SHIFT) /* Attempt to write a control reg */
 #    define SMC_WPSR_PVS_RESET         (2 << SMC_WPSR_PVS_SHIFT) /* Software reset */
 #    define SMC_WPSR_PVS_BOTH          (3 << SMC_WPSR_PVS_SHIFT) /* Write + reset */
-#elif defined(CONFIG_ARCH_CHIP_SAM4S)
+#elif defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
 #    define SMC_WPSR_WPVS              (1 << 0)  /* Bit 0:  Write Protect Violation Source */
 #endif
 
@@ -593,4 +613,4 @@
  * Public Functions
  ****************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_SMC_H */
+#endif /* __ARCH_ARM_SRC_SAM34_CHIP_SAM_SMC_H */
