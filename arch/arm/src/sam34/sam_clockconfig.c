@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/chip/sam_clockconfig.c
  *
- *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,10 +50,10 @@
 
 #include "sam_clockconfig.h"
 #include "chip/sam_pmc.h"
-#include "chip/sam3u_eefc.h"
+#include "chip/sam_eefc.h"
 #include "chip/sam3u_wdt.h"
 #include "chip/sam3u_supc.h"
-#include "chip/sam3u_matrix.h"
+#include "chip/sam_matrix.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -73,7 +73,7 @@
 #elif defined(CONFIG_ARCH_CHIP_SAM3A) || defined(CONFIG_ARCH_CHIP_SAM3X)
 #  define BOARD_CKGR_PLLAR  (PMC_CKGR_PLLAR_ONE | BOARD_CKGR_PLLAR_MUL | \
                              BOARD_CKGR_PLLAR_COUNT | BOARD_CKGR_PLLAR_DIV)
-#elif defined(CONFIG_ARCH_CHIP_SAM4S)
+#elif defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
 #  define BOARD_CKGR_PLLAR  (PMC_CKGR_PLLAR_ONE | BOARD_CKGR_PLLAR_MUL | \
                              BOARD_CKGR_PLLAR_COUNT | BOARD_CKGR_PLLAR_DIV)
 #endif
@@ -106,7 +106,9 @@
 static inline void sam_efcsetup(void)
 {
   putreg32((BOARD_FWS << EEFC_FMR_FWS_SHIFT), SAM_EEFC0_FMR);
+#if !defined(CONFIG_ARCH_CHIP_SAM4E)
   putreg32((BOARD_FWS << EEFC_FMR_FWS_SHIFT), SAM_EEFC1_FMR);
+#endif
 }
 
 /****************************************************************************
@@ -218,6 +220,16 @@ static inline void sam_pmcsetup(void)
   regval |= PMC_MCKR_CSS_MAIN;
   putreg32(regval, SAM_PMC_MCKR);
   sam_pmcwait(PMC_INT_MCKRDY);
+
+#if defined(CONFIG_ARCH_CHIP_SAM4E)
+  /* Setup the maximum value for the PLLAR multiplier. The PMMR register
+   * "defines the maximum value of multiplication factor that can be sent to
+   * PLLA. Any value of the MULA bitfield ... above PLLA_MMAX is saturated
+   * to PLLA_MMAX.
+   */
+
+  putreg32(PMC_PMMR_MASK, SAM_PMC_CKGR_PMMR);
+#endif
 
   /* Setup PLLA and wait for LOCKA */
 

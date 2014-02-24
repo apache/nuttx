@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sam34/sam_timerisr.c
  *
- *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,16 +57,17 @@
  ****************************************************************************/
 /* Select MCU-specific settings
  *
- * For the SAM3U, SAM3A, and SAM3X, Systickis driven by the main clock
+ * For the SAM3U, SAM3A, and SAM3X, Systick is driven by the main clock
  *   (This could be the MCK/8 but that option has not yet been necessary).
- * For the SAM4L, Systick is driven by the CPU clock which is just the main
- *   clock divided down.
+ * For the SAM4L, SAM4S, and SAM4E, Systick is driven by the CPU clock which
+ *   is just the main clock divided down.
  */
 
 #if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
     defined(CONFIG_ARCH_CHIP_SAM3A)
 #  define SAM_SYSTICK_CLOCK  BOARD_MCK_FREQUENCY  /* Frequency of the main clock */
-#elif defined(CONFIG_ARCH_CHIP_SAM4L) || defined(CONFIG_ARCH_CHIP_SAM4S)
+#elif defined(CONFIG_ARCH_CHIP_SAM4L) || defined(CONFIG_ARCH_CHIP_SAM4S) || \
+      defined(CONFIG_ARCH_CHIP_SAM4E)
 #  define SAM_SYSTICK_CLOCK  BOARD_CPU_FREQUENCY  /* CPU frequency */
 #else
 #  error Unrecognized SAM architecture

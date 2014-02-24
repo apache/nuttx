@@ -1,9 +1,9 @@
 /****************************************************************************************
- * arch/arm/src/sam34/chip/sam3u_eefc.h
- * Enhanced Embedded Flash Controller (EEFC) defintions for the SAM3U, SAM3X, SAM3A and
- * SAM4S
+ * arch/arm/src/sam34/chip/sam_eefc.h
+ * Enhanced Embedded Flash Controller (EEFC) definitions for the SAM3U, SAM3X, SAM3A,
+ * SAM4E, and SAM4S
  *
- *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,8 +35,8 @@
  *
  ****************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_EEFC_H
-#define __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_EEFC_H
+#ifndef __ARCH_ARM_SRC_SAM34_CHIP_SAM_EEFC_H
+#define __ARCH_ARM_SRC_SAM34_CHIP_SAM_EEFC_H
 
 /****************************************************************************************
  * Included Files
@@ -70,10 +70,12 @@
 #define SAM_EEFC0_FSR                (SAM_EEFC0_BASE+SAM_EEFC_FSR_OFFSET)
 #define SAM_EEFC0_FRR                (SAM_EEFC0_BASE+SAM_EEFC_FRR_OFFSET)
 
-#define SAM_EEFC1_FMR                (SAM_EEFC1_BASE+SAM_EEFC_FMR_OFFSET)
-#define SAM_EEFC1_FCR                (SAM_EEFC1_BASE+SAM_EEFC_FCR_OFFSET)
-#define SAM_EEFC1_FSR                (SAM_EEFC1_BASE+SAM_EEFC_FSR_OFFSET)
-#define SAM_EEFC1_FRR                (SAM_EEFC1_BASE+SAM_EEFC_FRR_OFFSET)
+#if !defined(CONFIG_ARCH_CHIP_SAM4E)
+#  define SAM_EEFC1_FMR              (SAM_EEFC1_BASE+SAM_EEFC_FMR_OFFSET)
+#  define SAM_EEFC1_FCR              (SAM_EEFC1_BASE+SAM_EEFC_FCR_OFFSET)
+#  define SAM_EEFC1_FSR              (SAM_EEFC1_BASE+SAM_EEFC_FSR_OFFSET)
+#  define SAM_EEFC1_FRR              (SAM_EEFC1_BASE+SAM_EEFC_FRR_OFFSET)
+#endif
 
 /* EEFC register bit definitions ********************************************************/
 /* EEFC Flash Mode Register */
@@ -83,13 +85,13 @@
 #define EEFC_FMR_FWS_MASK            (15 << EEFC_FMR_FWS_SHIFT)
 #  define EEFC_FMR_FWS(n)            ((n) << EEFC_FMR_FWS_SHIFT)
 
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
 #  define EEFC_FMR_SCOD              (1 << 16) /* Bit 16: Sequential Code Optimization Disable */
 #endif
 
 #define EEFC_FMR_FAM                 (1 << 24) /* Bit 24: Flash Access Mode */
 
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM4S) ||  defined(CONFIG_ARCH_CHIP_SAM4E)
 #  define EEFC_FMR_CLOE              (1 << 26) /* Bit 26: Code Loops Optimization Enable */
 #endif
 
@@ -105,7 +107,7 @@
 #  define EEFC_FCR_FCMD_EWPL         (4  << EEFC_FCR_FCMD_SHIFT) /* Erase page and write page then lock */
 #  define EEFC_FCR_FCMD_EA           (5  << EEFC_FCR_FCMD_SHIFT) /* Erase all */
 
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
 #  define EEFC_FCR_FCMD_EPA          (7  << EEFC_FCR_FCMD_SHIFT) /* Erase Pages */
 #endif
 
@@ -118,11 +120,12 @@
 #  define EEFC_FCR_FCMD_STUI         (14 << EEFC_FCR_FCMD_SHIFT) /* Start Read Unique Identifier */
 #  define EEFC_FCR_FCMD_SPUI         (15 << EEFC_FCR_FCMD_SHIFT) /* Stop Read Unique Identifier */
 
-#if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A) || defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A) || \
+    defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
 #  define EEFC_FCR_FCMD_GCALB        (16 << EEFC_FCR_FCMD_SHIFT) /* Get CALIB Bit */
 #endif
 
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
 #  define EEFC_FCR_FCMD_ES           (17 << EEFC_FCR_FCMD_SHIFT) /* Erase Sector */
 #  define EEFC_FCR_FCMD_WUS          (18 << EEFC_FCR_FCMD_SHIFT) /* Write User Signature */
 #  define EEFC_FCR_FCMD_EUS          (19 << EEFC_FCR_FCMD_SHIFT) /* Erase User Signature */
@@ -132,6 +135,7 @@
 
 #define EEFC_FCR_FARG_SHIFT          (8)       /* Bits 8-23:  Flash Command Argument */
 #define EEFC_FCR_FARG_MASK           (0xffff << EEFC_FCR_FARG_SHIFT)
+#  define EEFC_FCR_FARG(n)           ((uint32_t)(n) << EEFC_FCR_FARG_SHIFT)
 #define EEFC_FCR_FKEY_SHIFT          (24)      /* Bits 24-31:  Flash Writing Protection Key */
 #define EEFC_FCR_FKEY_MASK           (0xff << EEFC_FCR_FKEY_SHIFT)
 #  define EEFC_FCR_FKEY_PASSWD       (0x5a << EEFC_FCR_FKEY_SHIFT)
@@ -142,9 +146,11 @@
 #define EEFC_FSR_FCMDE               (1 << 1)  /* Bit 1:  Flash Command Error Status */
 #define EEFC_FSR_FLOCKE              (1 << 2)  /* Bit 2:  Flash Lock Error Status */
 
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
 #  define EEFC_FSR_FLERR             (1 << 3)  /* Bit 3:  Flash Error Status */
 #endif
+
+/* EEFC Flash Result Register -- 32-bit value */
 
 /****************************************************************************************
  * Public Types
@@ -158,4 +164,4 @@
  * Public Functions
  ****************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_EEFC_H */
+#endif /* __ARCH_ARM_SRC_SAM34_CHIP_SAM_EEFC_H */
