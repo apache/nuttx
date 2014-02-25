@@ -91,6 +91,10 @@ volatile uint32_t g_cpuload_total;
  * Return Value:
  *   None
  *
+ * Assumptions/Limitations:
+ *   This function is called from a timer interrupt handler with all
+ *   interrupts disabled.
+ *
  ************************************************************************/
 
 void weak_function sched_process_cpuload(void)

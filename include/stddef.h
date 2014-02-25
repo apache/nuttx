@@ -75,9 +75,6 @@
  * ptrdiff_t
  *   Signed integer type of the result of subtracting two pointers.
  *
- *     NOTE: This type assumes that ssize_t will cover the largest address
- *     difference.  This might not be true of CONFIG_MM_SMALL is defined.
- *
  * wchar_t
  *   Integer type whose range of values can represent distinct wide-character
  *   codes for all members of the largest character set specified among the
@@ -89,7 +86,7 @@
  * size_t
  *   Unsigned integer type of the result of the sizeof operator.
  *
- *     NOTE: Currently the type definitions of both wchar_t and size_t are
+ * NOTE: Currently the type definitions of ptrdiff_t, wchar_t, and size_t are
  *     in sys/types.h but should be moved here sometime.
  *
  * The implementation shall support one or more programming environments in
@@ -99,7 +96,5 @@
  *
  * Reference: Opengroup.org
  */
-
-typedef ssize_t ptrdiff_t;
 
 #endif /* __INCLUDE_STDDEF_H */

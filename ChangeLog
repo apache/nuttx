@@ -6661,3 +6661,7 @@
 	  and fs_procfscpuload.c:  CPU load logic extended to keep counts on each
 	  thread.  The per-thread CPU is now reported in the procfs under
 	  <pid>/loadavg (2014-2-23).
+	* include/stddef.h:  ptrdiff_t is defined twice in stddef.h and also in
+	  sys/types.h.  stdef.h is the correct location for the definition, but
+	  it includes sys/types.h so, at least for now, the definition will be
+	  retained in sys/types.h (2014-2-25).
