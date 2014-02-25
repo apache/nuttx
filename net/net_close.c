@@ -447,6 +447,7 @@ int psock_close(FAR struct socket *psock)
                   /* Yes... then perform the disconnection now */
 
                   uip_unlisten(conn);                /* No longer accepting connections */
+                  conn->crefs = 0;                   /* Discard our reference to the connection */
                   err = netclose_disconnect(psock);  /* Break any current connections */
                   if (err < 0)
                     {

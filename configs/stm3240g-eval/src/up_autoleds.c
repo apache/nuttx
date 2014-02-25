@@ -224,10 +224,10 @@ static void led_setonoff(unsigned int bits)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_led_initialize
+ * Name: stm32_autoled_initialize
  ****************************************************************************/
 
-void board_led_initialize(void)
+void stm32_autoled_initialize(void)
 {
    /* Configure LED1-4 GPIOs for output */
 
