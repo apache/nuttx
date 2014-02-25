@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/sam34/sam3u_dmac.c
+ * arch/arm/src/sam34/sam_dmac.c
  *
  *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -58,7 +58,7 @@
 #include "sam_dmac.h"
 #include "sam_periphclks.h"
 #include "chip/sam_pmc.h"
-#include "chip/sam3u_dmac.h"
+#include "chip/sam_dmac.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -68,7 +68,7 @@
 
 /* Condition out the whole file unless DMA is selected in the configuration */
 
-#ifdef CONFIG_SAM34_DMA
+#ifdef CONFIG_SAM34_DMAC
 
 /* If AT90SAM3U support is enabled, then OS DMA support should also be enabled */
 
@@ -1715,4 +1715,4 @@ void sam_dmadump(DMA_HANDLE handle, const struct sam_dmaregs_s *regs,
   dmadbg("       CFG[%08x]: %08x\n", dmach->base + SAM_DMACHAN_CFG_OFFSET, regs->cfg);
 }
 #endif /* CONFIG_DEBUG_DMA */
-#endif /* CONFIG_SAM34_DMA */
+#endif /* CONFIG_SAM34_DMAC */

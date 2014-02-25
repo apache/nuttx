@@ -93,10 +93,16 @@
 #  define SAM_TC0_BASE         0x40090000 /* 0x40090000-0x4009003f:   Timer Counter 0 */
 #  define SAM_TC1_BASE         0x40090040 /* 0x40090040-0x4009007f:   Timer Counter 1 */
 #  define SAM_TC2_BASE         0x40090080 /* 0x40090080-0x400900bf:   Timer Counter 2 */
-#define SAM_TC345_BASE         0x40098000 /* 0x40098000-0x40097fff: Timer Counters 3-5 */
-#  define SAM_TC3_BASE         0x40098000 /* 0x40098000-0x4009003f:   Timer Counter 3 */
-#  define SAM_TC4_BASE         0x40098040 /* 0x40098040-0x4009007f:   Timer Counter 4 */
-#  define SAM_TC5_BASE         0x40098080 /* 0x40098080-0x400900bf:   Timer Counter 5 */
+                                          /* 0x400900c0-0x40093fff    Reserved */
+#define SAM_TC345_BASE         0x40094000 /* 0x40094000-0x40094fff: Timer Counters 3-5 */
+#  define SAM_TC3_BASE         0x40094000 /* 0x40094000-0x4009403f:   Timer Counter 3 */
+#  define SAM_TC4_BASE         0x40094040 /* 0x40094040-0x4009407f:   Timer Counter 4 */
+#  define SAM_TC5_BASE         0x40094080 /* 0x40094080-0x400940bf:   Timer Counter 5 */
+                                          /* 0x400940c0-0x40097fff    Reserved */
+#define SAM_TC678_BASE         0x40098000 /* 0x40098000-0x40097fff: Timer Counters 6-8 */
+#  define SAM_TC6_BASE         0x40098000 /* 0x40098000-0x4009003f:   Timer Counter 6 */
+#  define SAM_TC7_BASE         0x40098040 /* 0x40098040-0x4009007f:   Timer Counter 7 */
+#  define SAM_TC8_BASE         0x40098080 /* 0x40098080-0x400900bf:   Timer Counter 8 */
                                           /* 0x4009c000-0x4009ffff: Reserved */
 #define SAM_USART_BASE         0x400a0000 /* 0x400a0000-0x400abfff: USART */
 #  define SAM_USART0_BASE      0x400a0000 /* 0x400a0000-0x400a3fff:   USART0 */
