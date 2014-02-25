@@ -817,7 +817,7 @@ Arduino DUE-specific Configuration Options
     CONFIG_SAM34_PWM         - Pulse Width Modulation
     CONFIG_SAM34_ADC12B      - 12-bit Analog To Digital Converter
     CONFIG_SAM34_DACC        - Digital To Analog Converter
-    CONFIG_SAM34_DMA         - DMA Controller
+    CONFIG_SAM34_DMAC        - DMA Controller
     CONFIG_SAM34_UOTGHS      - USB OTG High Speed
     CONFIG_SAM34_TRNG        - True Random Number Generator
     CONFIG_SAM34_EMAC        - Ethernet MAC
