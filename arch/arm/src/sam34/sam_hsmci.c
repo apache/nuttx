@@ -64,7 +64,7 @@
 #include "sam_dmac.h"
 #include "sam_hsmci.h"
 #include "sam_periphclks.h"
-#include "chip/sam3u_dmac.h"
+#include "chip/sam_dmac.h"
 #include "chip/sam_pmc.h"
 #include "chip/sam_hsmci.h"
 #include "chip/sam_pinmap.h"
@@ -77,8 +77,8 @@
 
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_SAM34_DMA
-#  warning "HSMCI driver requires CONFIG_SAM34_DMA"
+#ifndef CONFIG_SAM34_DMAC
+#  warning "HSMCI driver requires CONFIG_SAM34_DMAC"
 #endif
 
 #ifndef CONFIG_SCHED_WORKQUEUE

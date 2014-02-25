@@ -381,7 +381,7 @@ SAM3U-EK-specific Configuration Options
     CONFIG_SAM34_PWM           - Pulse Width Modulation Controller
     CONFIG_SAM34_ADC12B        - 12-bit ADC Controller
     CONFIG_SAM34_ADC           - 10-bit ADC Controller
-    CONFIG_SAM34_DMA           - DMA Controller
+    CONFIG_SAM34_DMAC          - DMA Controller
     CONFIG_SAM34_UDPHS         - USB Device High Speed
 
   Some subsystems can be configured to operate in different ways. The drivers
@@ -646,7 +646,7 @@ Configurations
 
        System Type->ATSAM3/4 Peripheral Support
          CONFIG_SAM34_HSMCI=y                 : Enable HSMCI support
-         CONFIG_SAM34_DMA=y                   : DMAC support is needed by HSMCI
+         CONFIG_SAM34_DMAC=y                  : DMAC support is needed by HSMCI
 
        System Type
          CONFIG_SAM34_GPIO_IRQ=y              : PIO interrupts needed

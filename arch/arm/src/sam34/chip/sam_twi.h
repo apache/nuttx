@@ -1,8 +1,8 @@
 /****************************************************************************************
  * arch/arm/src/sam34/chip/sam_twi.h
- * Two-wire Interface (TWI) definitions for the SAM3U and SAM4S
+ * Two-wire Interface (TWI) definitions for the SAM3U, SAM4E, and SAM4S
  *
- *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,19 +52,22 @@
 
 /* TWI register offsets *****************************************************************/
 
-#define SAM_TWI_CR_OFFSET          0x00 /* Control Register */
-#define SAM_TWI_MMR_OFFSET         0x04 /* Master Mode Register */
-#define SAM_TWI_SMR_OFFSET         0x08 /* Slave Mode Register */
-#define SAM_TWI_IADR_OFFSET        0x0c /* Internal Address Register */
-#define SAM_TWI_CWGR_OFFSET        0x10 /* Clock Waveform Generator Register */
-#define SAM_TWI_SR_OFFSET          0x20 /* Status Register */
-#define SAM_TWI_IER_OFFSET         0x24 /* Interrupt Enable Register */
-#define SAM_TWI_IDR_OFFSET         0x28 /* Interrupt Disable Register */
-#define SAM_TWI_IMR_OFFSET         0x2c /* Interrupt Mask Register */
-#define SAM_TWI_RHR_OFFSET         0x30 /* Receive Holding Register */
-#define SAM_TWI_THR_OFFSET         0x34 /* Transmit Holding Register */
-                                        /* 0x38-0xfc: Reserved */
-                                        /* 0x100-0x124: Reserved for the PDC */
+#define SAM_TWI_CR_OFFSET          0x0000 /* Control Register */
+#define SAM_TWI_MMR_OFFSET         0x0004 /* Master Mode Register */
+#define SAM_TWI_SMR_OFFSET         0x0008 /* Slave Mode Register */
+#define SAM_TWI_IADR_OFFSET        0x000c /* Internal Address Register */
+#define SAM_TWI_CWGR_OFFSET        0x0010 /* Clock Waveform Generator Register */
+#define SAM_TWI_SR_OFFSET          0x0020 /* Status Register */
+#define SAM_TWI_IER_OFFSET         0x0024 /* Interrupt Enable Register */
+#define SAM_TWI_IDR_OFFSET         0x0028 /* Interrupt Disable Register */
+#define SAM_TWI_IMR_OFFSET         0x002c /* Interrupt Mask Register */
+#define SAM_TWI_RHR_OFFSET         0x0030 /* Receive Holding Register */
+#define SAM_TWI_THR_OFFSET         0x0034 /* Transmit Holding Register */
+                                          /* 0x38-0xfc: Reserved */
+#if defined(CONFIG_ARCH_CHIP_SAM4E)
+#  define SAM_TWI_WPMR_OFFSET      0x00e4 /* Protection Mode Register */
+#  define SAM_TWI_WPSR_OFFSET      0x00e8 /* Protection Status Register */
+#endif
 
 /* TWI register adresses ****************************************************************/
 
@@ -79,6 +82,10 @@
 #define SAM_TWI_IMR(n)             (SAM_TWIN_BASE(n)+SAM_TWI_IMR_OFFSET)
 #define SAM_TWI_RHR(n)             (SAM_TWIN_BASE(n)+SAM_TWI_RHR_OFFSET)
 #define SAM_TWI_THR(n)             (SAM_TWIN_BASE(n)+SAM_TWI_THR_OFFSET)
+#if defined(CONFIG_ARCH_CHIP_SAM4E)
+#  define SAM_TWI_WPMR(n)          (SAM_TWIN_BASE(n)+SAM_TWI_WPMR_OFFSET)
+#  define SAM_TWI_WPSR(n)          (SAM_TWIN_BASE(n)+SAM_TWI_WPSR_OFFSET)
+#endif
 
 #define SAM_TWI0_CR                (SAM_TWI0_BASE+SAM_TWI_CR_OFFSET)
 #define SAM_TWI0_MMR               (SAM_TWI0_BASE+SAM_TWI_MMR_OFFSET)
@@ -91,6 +98,10 @@
 #define SAM_TWI0_IMR               (SAM_TWI0_BASE+SAM_TWI_IMR_OFFSET)
 #define SAM_TWI0_RHR               (SAM_TWI0_BASE+SAM_TWI_RHR_OFFSET)
 #define SAM_TWI0_THR               (SAM_TWI0_BASE+SAM_TWI_THR_OFFSET)
+#if defined(CONFIG_ARCH_CHIP_SAM4E)
+#  define SAM_TWI0_WPMR            (SAM_TWI0_BASE+SAM_TWI_WPMR_OFFSET)
+#  define SAM_TWI0_WPSR            (SAM_TWI0_BASE)+SAM_TWI_WPSR_OFFSET)
+#endif
 
 #define SAM_TWI1_CR                (SAM_TWI1_BASE+SAM_TWI_CR_OFFSET)
 #define SAM_TWI1_MMR               (SAM_TWI1_BASE+SAM_TWI_MMR_OFFSET)
@@ -103,6 +114,10 @@
 #define SAM_TWI1_IMR               (SAM_TWI1_BASE+SAM_TWI_IMR_OFFSET)
 #define SAM_TWI1_RHR               (SAM_TWI1_BASE+SAM_TWI_RHR_OFFSET)
 #define SAM_TWI1_THR               (SAM_TWI1_BASE+SAM_TWI_THR_OFFSET)
+#if defined(CONFIG_ARCH_CHIP_SAM4E)
+#  define SAM_TWI1_WPMR            (SAM_TWI1_BASE+SAM_TWI_WPMR_OFFSET)
+#  define SAM_TWI1_WPSR            (SAM_TWI1_BASE)+SAM_TWI_WPSR_OFFSET)
+#endif
 
 /* TWI register bit definitions *********************************************************/
 
@@ -143,10 +158,13 @@
 
 #define TWI_CWGR_CLDIV_SHIFT       (0)       /* Bits 0-7:  Clock Low Divider */
 #define TWI_CWGR_CLDIV_MASK        (0xff << TWI_CWGR_CLDIV_SHIFT)
+#  define TWI_CWGR_CLDIV(n)        ((uint32_t)(n) << TWI_CWGR_CLDIV_SHIFT)
 #define TWI_CWGR_CHDIV_SHIFT       (8)       /* Bits 8-15:  Clock High Divider */
 #define TWI_CWGR_CHDIV_MASK        (0xff << TWI_CWGR_CLDIV_SHIFT)
+#  define TWI_CWGR_CHDIV(n)        ((uint32_t)(n) << TWI_CWGR_CLDIV_SHIFT)
 #define TWI_CWGR_CKDIV_SHIFT       (16)      /* Bits 16-18:  Clock Divider */
 #define TWI_CWGR_CKDIV_MASK        (7 << TWI_CWGR_CLDIV_SHIFT)
+#  define TWI_CWGR_CKDIV(n)        ((uint32_t)(n) << TWI_CWGR_CLDIV_SHIFT)
 
 /* TWI Status Register, TWI Interrupt Enable Register, TWI Interrupt Disable
  * Register, and TWI Interrupt Mask Register common bit fields.
@@ -177,6 +195,23 @@
 
 #define TWI_THR_TXDATA_SHIFT       (0)       /* Bits 0-7:  Master or Slave Transmit Holding Data */
 #define TWI_THR_TXDATA_MASK        (0xff << TWI_THR_TXDATA_SHIFT)
+
+/* Protection Mode Register */
+
+#if defined(CONFIG_ARCH_CHIP_SAM4E)
+#  define TWI_WPMR_WPEN            (1 << 0)  /* Bit 0:  Write Protect Enable */
+#  define TWI_WPMR_WPKEY_SHIFT     (8)       /* Bits 8-31: Write Protect Key */
+#  define TWI_WPMR_WPKEY_MASK      (0x00ffffff << TWI_WPMR_WPKEY_SHIFT)
+#    define TWI_WPMR_WPKEY         (0x00545749 << TWI_WPMR_WPKEY_SHIFT)
+#endif
+
+/* Protection Status Register */
+
+#if defined(CONFIG_ARCH_CHIP_SAM4E)
+#  define TWI_WPSR_WPVS            (1 << 0)  /* Bit 0:  Write Protect Violation Status */
+#  define TWI_WPSR_WPVSRC_SHIFT    (8)       /* Bits 8-23: Write Protect Violation Source */
+#  define TWI_WPSR_WPVSRC_MASK     (0xffff << TWI_WPSR_WPVSRC_SHIFT)
+#endif
 
 /****************************************************************************************
  * Public Types

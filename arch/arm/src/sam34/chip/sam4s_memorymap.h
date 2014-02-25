@@ -73,11 +73,12 @@
 #define SAM_SSC_BASE           0x40004000 /* 0x40004000-0x40007fff: Synchronous Serial Controller */
 #define SAM_SPI0_BASE          0x40008000 /* 0x40008000-0x4000bfff: Serial Peripheral Interface */
                                           /* 0x4000c000-0x4000ffff: Reserved */
-#define SAM_TC_BASE            0x40010000 /* 0x40010000-0x40017fff: Timer Counters */
+#define SAM_TC012_BASE         0x40010000 /* 0x40010000-0x400100bf: Timer Counters 0-2 */
 #  define SAM_TC0_BASE         0x40080000 /* 0x40010000-0x4001003f:   Timer Counter 0 */
 #  define SAM_TC1_BASE         0x40080040 /* 0x40010040-0x4001007f:   Timer Counter 1 */
 #  define SAM_TC2_BASE         0x40080080 /* 0x40010080-0x400100bf:   Timer Counter 2 */
                                           /* 0x400100c0-0x40013fff    Reserved */
+#define SAM_TC345_BASE         0x40080000 /* 0x40014000-0x400140bf: Timer Counters 3-5 */
 #  define SAM_TC3_BASE         0x40080000 /* 0x40014000-0x4001403f:   Timer Counter 3 */
 #  define SAM_TC4_BASE         0x40080040 /* 0x40014040-0x4001407f:   Timer Counter 4 */
 #  define SAM_TC5_BASE         0x40080080 /* 0x40014080-0x400140bf:   Timer Counter 5 */

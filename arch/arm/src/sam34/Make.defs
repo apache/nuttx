@@ -92,8 +92,8 @@ ifeq ($(CONFIG_NUTTX_KERNEL),y)
 CHIP_CSRCS += sam_userspace.c sam_mpuinit.c
 endif
 
-ifeq ($(CONFIG_SAM34_DMA),y)
-CHIP_CSRCS += sam3u_dmac.c
+ifeq ($(CONFIG_SAM34_DMAC),y)
+CHIP_CSRCS += sam_dmac.c
 endif
 
 ifeq ($(CONFIG_SAM34_PDCA),y)

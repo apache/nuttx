@@ -1,7 +1,8 @@
 /****************************************************************************************
- * arch/arm/src/sam34/chip/sam3u_dmac.h
+ * arch/arm/src/sam34/chip/sam_dmac.h
+ * DMA Controller (DMAC) definitions for the SAM3U, SAM3X, SAM3A, and RCH_CHIP_SAM4E
  *
- *   Copyright (C) 2009-2010, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +34,8 @@
  *
  ****************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_DMAC_H
-#define __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_DMAC_H
+#ifndef __ARCH_ARM_SRC_SAM34_CHIP_SAM_DMAC_H
+#define __ARCH_ARM_SRC_SAM34_CHIP_SAM_DMAC_H
 
 /****************************************************************************************
  * Included Files
@@ -53,36 +54,42 @@
 
 /* Global Registers */
 
-#define SAM_DMAC_GCFG_OFFSET           0x00 /* DMAC Global Configuration Register */
-#define SAM_DMAC_EN_OFFSET             0x04 /* DMAC Enable Register */
-#define SAM_DMAC_SREQ_OFFSET           0x08 /* DMAC Software Single Request Register */
-#define SAM_DMAC_CREQ_OFFSET           0x0c /* DMAC Software Chunk Transfer Request Register */
-#define SAM_DMAC_LAST_OFFSET           0x10 /* DMAC Software Last Transfer Flag Register */
-                                            /* 0x014: Reserved */
-#define SAM_DMAC_EBCIER_OFFSET         0x18 /* DMAC Error Enable */
-#define SAM_DMAC_EBCIDR_OFFSET         0x1C /* DMAC Error Disable */
-#define SAM_DMAC_EBCIMR_OFFSET         0x20 /* DMAC Error Mask */
-#define SAM_DMAC_EBCISR_OFFSET         0x24 /* DMAC Error Status */
-#define SAM_DMAC_CHER_OFFSET           0x28 /* DMAC Channel Handler Enable Register */
-#define SAM_DMAC_CHDR_OFFSET           0x2c /* DMAC Channel Handler Disable Register */
-#define SAM_DMAC_CHSR_OFFSET           0x30 /* DMAC Channel Handler Status Register */
-                                            /* 0x034-0x38: Reserved */
+#define SAM_DMAC_GCFG_OFFSET           0x0000 /* DMAC Global Configuration Register */
+#define SAM_DMAC_EN_OFFSET             0x0004 /* DMAC Enable Register */
+#define SAM_DMAC_SREQ_OFFSET           0x0008 /* DMAC Software Single Request Register */
+#define SAM_DMAC_CREQ_OFFSET           0x000c /* DMAC Software Chunk Transfer Request Register */
+#define SAM_DMAC_LAST_OFFSET           0x0010 /* DMAC Software Last Transfer Flag Register */
+                                              /* 0x014: Reserved */
+#define SAM_DMAC_EBCIER_OFFSET         0x0018 /* DMAC Error Enable */
+#define SAM_DMAC_EBCIDR_OFFSET         0x001C /* DMAC Error Disable */
+#define SAM_DMAC_EBCIMR_OFFSET         0x0020 /* DMAC Error Mask */
+#define SAM_DMAC_EBCISR_OFFSET         0x0024 /* DMAC Error Status */
+#define SAM_DMAC_CHER_OFFSET           0x0028 /* DMAC Channel Handler Enable Register */
+#define SAM_DMAC_CHDR_OFFSET           0x002c /* DMAC Channel Handler Disable Register */
+#define SAM_DMAC_CHSR_OFFSET           0x0030 /* DMAC Channel Handler Status Register */
+                                              /* 0x034-0x38: Reserved */
 /* DMA channel registers */
 
-#define SAM_DMACHAN_OFFSET(n)          (0x3c+((n)*0x28))
-#define SAM_DMACHAN0_OFFSET            0x3c /* 0x3c-0x60: Channel 0 */
-#define SAM_DMACHAN1_OFFSET            0x64 /* 0x64-0x88: Channel 1 */
-#define SAM_DMACHAN2_OFFSET            0x8c /* 0x8c-0xb0: Channel 2 */
-#define SAM_DMACHAN3_OFFSET            0xb4 /* 0xb4-0xd8: Channel 3 */
+#define SAM_DMACHAN_OFFSET(n)          (0x003c+((n)*0x28))
+#define SAM_DMACHAN0_OFFSET            0x003c /* 0x3c-0x60: Channel 0 */
+#define SAM_DMACHAN1_OFFSET            0x0064 /* 0x64-0x88: Channel 1 */
+#define SAM_DMACHAN2_OFFSET            0x008c /* 0x8c-0xb0: Channel 2 */
+#define SAM_DMACHAN3_OFFSET            0x00b4 /* 0xb4-0xd8: Channel 3 */
 
-#define SAM_DMACHAN_SADDR_OFFSET       0x00 /* DMAC Channel Source Address Register */
-#define SAM_DMACHAN_DADDR_OFFSET       0x04 /* DMAC Channel Destination Address Register */
-#define SAM_DMACHAN_DSCR_OFFSET        0x08 /* DMAC Channel Descriptor Address Register */
-#define SAM_DMACHAN_CTRLA_OFFSET       0x0c /* DMAC Channel Control A Register */
-#define SAM_DMACHAN_CTRLB_OFFSET       0x10 /* DMAC Channel Control B Register */
-#define SAM_DMACHAN_CFG_OFFSET         0x14 /* DMAC Channel Configuration Register */
+#define SAM_DMACHAN_SADDR_OFFSET       0x0000 /* DMAC Channel Source Address Register */
+#define SAM_DMACHAN_DADDR_OFFSET       0x0004 /* DMAC Channel Destination Address Register */
+#define SAM_DMACHAN_DSCR_OFFSET        0x0008 /* DMAC Channel Descriptor Address Register */
+#define SAM_DMACHAN_CTRLA_OFFSET       0x000c /* DMAC Channel Control A Register */
+#define SAM_DMACHAN_CTRLB_OFFSET       0x0010 /* DMAC Channel Control B Register */
+#define SAM_DMACHAN_CFG_OFFSET         0x0014 /* DMAC Channel Configuration Register */
                                             /* 0x18-0x24: Reserved */
-                                            /* 0x017c-0x1fc: Reserved */
+
+/* More Global Registers */
+
+#if defined(CONFIG_ARCH_CHIP_SAM4E)
+#  define SAM_DMAC_WPMR_OFFSET         0x01e4 /* DMAC Write Protect Mode Register  */
+#  define SAM_DMAC_WPSR_OFFSET         0x01e8 /* DMAC Write Protect Status Register DMAC_WPSR */
+#endif
 
 /* DMAC register adresses ***************************************************************/
 
@@ -144,6 +151,13 @@
 #define SAM_DMACHAN3_CTRLB             (SAM_DMACHAN3_BASE+SAM_DMACHAN_CTRLB_OFFSET)
 #define SAM_DMACHAN3_CFG               (SAM_DMACHAN3_BASE+SAM_DMACHAN_CFG_OFFSET)
 
+/* More Global Registers */
+
+#if defined(CONFIG_ARCH_CHIP_SAM4E)
+#  define SAM_DMAC_WPMR                  (SAM_DMAC_BASE+SAM_DMAC_WPMR_OFFSET)
+#  define SAM_DMAC_WPSR                  (SAM_DMAC_BASE+SAM_DMAC_WPSR_OFFSET)
+#endif
+
 /* DMAC register bit definitions ********************************************************/
 
 /* Global Registers */
@@ -160,14 +174,14 @@
 
 #define DMAC_SREQ_SHIFT(n)             ((n)<<1)
 #define DMAC_SREQ_MASK(n)              (3 << DMAC_SREQ_SHIFT(n))
-#define DMAC_SREQ0_SHIFT               (0)      /* Bits 0-1:  Channel 0 */
-#define DMAC_SREQ0_MASK                (3 << DMAC_SREQ0_SHIFT)
-#define DMAC_SREQ1_SHIFT               (2)      /* Bits 2-3:  Channel 1 */
-#define DMAC_SREQ1_MASK                (3 << DMAC_SREQ1_SHIFT)
-#define DMAC_SREQ2_SHIFT               (4)      /* Bits 4-5:  Channel 2 */
-#define DMAC_SREQ2_MASK                (3 << DMAC_SREQ2_SHIFT)
-#define DMAC_SREQ3_SHIFT               (6)      /* Bits 6-7:  Channel 3 */
-#define DMAC_SREQ3_MASK                (3 << DMAC_SREQ3_SHIFT)
+#  define DMAC_SREQ0_SHIFT             (0)      /* Bits 0-1:  Channel 0 */
+#  define DMAC_SREQ0_MASK              (3 << DMAC_SREQ0_SHIFT)
+#  define DMAC_SREQ1_SHIFT             (2)      /* Bits 2-3:  Channel 1 */
+#  define DMAC_SREQ1_MASK              (3 << DMAC_SREQ1_SHIFT)
+#  define DMAC_SREQ2_SHIFT             (4)      /* Bits 4-5:  Channel 2 */
+#  define DMAC_SREQ2_MASK              (3 << DMAC_SREQ2_SHIFT)
+#  define DMAC_SREQ3_SHIFT             (6)      /* Bits 6-7:  Channel 3 */
+#  define DMAC_SREQ3_MASK              (3 << DMAC_SREQ3_SHIFT)
 
 #define DMAC_SREQ_SSREQ_SHIFT          (0)      /* Bits 0, 2, 4, 6:   Request a source single transfer */
 #  define DMAC_SREQ_SSREQ(n)           (1 << (DMAC_SREQ_SSREQ_SHIFT+DMAC_SREQ_SHIFT(n)))
@@ -186,14 +200,14 @@
 
 #define DMAC_CREQ_SHIFT(n)             ((n)<<1)
 #define DMAC_CREQ_MASK(n)              (3 << DMAC_CREQ_SHIFT(n))
-#define DMAC_CREQ0_SHIFT               (0)      /* Bits 0-1:  Channel 0 */
-#define DMAC_CREQ0_MASK                (3 << DMAC_CREQ0_SHIFT)
-#define DMAC_CREQ1_SHIFT               (2)      /* Bits 2-3:  Channel 1 */
-#define DMAC_CREQ1_MASK                (3 << DMAC_CREQ1_SHIFT)
-#define DMAC_CREQ2_SHIFT               (4)      /* Bits 4-5:  Channel 2 */
-#define DMAC_CREQ2_MASK                (3 << DMAC_CREQ2_SHIFT)
-#define DMAC_CREQ3_SHIFT               (6)      /* Bits 6-7:  Channel 3 */
-#define DMAC_CREQ3_MASK                (3 << DMAC_CREQ3_SHIFT)
+#  define DMAC_CREQ0_SHIFT             (0)      /* Bits 0-1:  Channel 0 */
+#  define DMAC_CREQ0_MASK              (3 << DMAC_CREQ0_SHIFT)
+#  define DMAC_CREQ1_SHIFT             (2)      /* Bits 2-3:  Channel 1 */
+#  define DMAC_CREQ1_MASK              (3 << DMAC_CREQ1_SHIFT)
+#  define DMAC_CREQ2_SHIFT             (4)      /* Bits 4-5:  Channel 2 */
+#  define DMAC_CREQ2_MASK              (3 << DMAC_CREQ2_SHIFT)
+#  define DMAC_CREQ3_SHIFT             (6)      /* Bits 6-7:  Channel 3 */
+#  define DMAC_CREQ3_MASK              (3 << DMAC_CREQ3_SHIFT)
 
 #define DMAC_CREQ_SCREQ_SHIFT          (0)      /* Bits 0, 2, 4, 6:   Request a source chunk transfer */
 #  define DMAC_CREQ_SCREQ(n)           (1 << (DMAC_CREQ_SCREQ_SHIFT+DMAC_CREQ_SHIFT(n)))
@@ -212,14 +226,14 @@
 
 #define DMAC_LAST_SHIFT(n)             ((n)<<1)
 #define DMAC_LAST_MASK(n)              (3 << DMAC_LAST_SHIFT(n))
-#define DMAC_LAST0_SHIFT               (0)      /* Bits 0-1:  Channel 0 */
-#define DMAC_LAST0_MASK                (3 << DMAC_LAST0_SHIFT)
-#define DMAC_LAST1_SHIFT               (2)      /* Bits 2-3:  Channel 1 */
-#define DMAC_LAST1_MASK                (3 << DMAC_LAST1_SHIFT)
-#define DMAC_LAST2_SHIFT               (4)      /* Bits 4-5:  Channel 2 */
-#define DMAC_LAST2_MASK                (3 << DMAC_LAST2_SHIFT)
-#define DMAC_LAST3_SHIFT               (6)      /* Bits 6-7:  Channel 3 */
-#define DMAC_LAST3_MASK                (3 << DMAC_LAST3_SHIFT)
+#  define DMAC_LAST0_SHIFT             (0)      /* Bits 0-1:  Channel 0 */
+#  define DMAC_LAST0_MASK              (3 << DMAC_LAST0_SHIFT)
+#  define DMAC_LAST1_SHIFT             (2)      /* Bits 2-3:  Channel 1 */
+#  define DMAC_LAST1_MASK              (3 << DMAC_LAST1_SHIFT)
+#  define DMAC_LAST2_SHIFT             (4)      /* Bits 4-5:  Channel 2 */
+#  define DMAC_LAST2_MASK              (3 << DMAC_LAST2_SHIFT)
+#  define DMAC_LAST3_SHIFT             (6)      /* Bits 6-7:  Channel 3 */
+#  define DMAC_LAST3_MASK              (3 << DMAC_LAST3_SHIFT)
 
 #define DMAC_LAST_SLAST_SHIFT          (0)      /* Bits 0, 2, 4, 6:   Indicates the last transfer */
 #  define DMAC_LAST_SLAST(n)           (1 << (DMAC_LAST_SLAST_SHIFT+DMAC_LAST_SHIFT(n)))
@@ -342,17 +356,26 @@
 #  define DMAC_CHSR_STAL3              (1 << (DMAC_CHSR_STAL_SHIFT+3))
 
 /* DMA channel registers */
+/* DMAC Channel n [n = 0..3] Source Address Register -- 32-bit address*/
+/* DMAC Channel n [n = 0..3] Destination Address Register -- 32-bit address*/
+/* DMAC Channel n [n = 0..3] Descriptor Address Register -- 32-bit address*/
 /* DMAC Channel n [n = 0..3] Control A Register */
 
 #define DMACHAN_CTRLA_BTSIZE_MAX       (0xfff)
 #define DMACHAN_CTRLA_BTSIZE_SHIFT     (0)       /* Bits 0-11: Buffer Transfer Size */
 #define DMACHAN_CTRLA_BTSIZE_MASK      (DMACHAN_CTRLA_BTSIZE_MAX << DMACHAN_CTRLA_BTSIZE_SHIFT)
-#define DMACHAN_CTRLA_SCSIZE           (1 << 16) /* Bit 16: Source Chunk Transfer Size */
-#  define DMACHAN_CTRLA_SCSIZE_1       (0)
-#  define DMACHAN_CTRLA_SCSIZE_4       DMACHAN_CTRLA_SCSIZE
-#define DMACHAN_CTRLA_DCSIZE           (1 << 20) /* Bit 20:  Destination Chunk Transfer size */
-#  define DMACHAN_CTRLA_DCSIZE_1       (0)
-#  define DMACHAN_CTRLA_DCSIZE_4       DMACHAN_CTRLA_DCSIZE
+#  define DMACHAN_CTRLA_BTSIZE(n)      ((uint32_t)(n) << DMACHAN_CTRLA_BTSIZE_SHIFT)
+
+#if defined(CONFIG_ARCH_CHIP_SAM3U) ||  defined(CONFIG_ARCH_CHIP_SAM3X) || \
+    defined(CONFIG_ARCH_CHIP_SAM3A)
+#  define DMACHAN_CTRLA_SCSIZE         (1 << 16) /* Bit 16: Source Chunk Transfer Size */
+#    define DMACHAN_CTRLA_SCSIZE_1     (0)
+#    define DMACHAN_CTRLA_SCSIZE_4     DMACHAN_CTRLA_SCSIZE
+#  define DMACHAN_CTRLA_DCSIZE         (1 << 20) /* Bit 20:  Destination Chunk Transfer size */
+#    define DMACHAN_CTRLA_DCSIZE_1     (0)
+#    define DMACHAN_CTRLA_DCSIZE_4     DMACHAN_CTRLA_DCSIZE
+#endif
+
 #define DMACHAN_CTRLA_SRCWIDTH_SHIFT   (24)      /* Bits 24-25 */
 #define DMACHAN_CTRLA_SRCWIDTH_MASK    (3 << DMACHAN_CTRLA_SRCWIDTH_SHIFT)
 #  define DMACHAN_CTRLA_SRCWIDTH_BYTE  (0 << DMACHAN_CTRLA_SRCWIDTH_SHIFT)
@@ -378,10 +401,16 @@
 #define DMACHAN_CTRLB_SRCINCR_SHIFT    (24)      /* Bits 24-25 */
 #define DMACHAN_CTRLB_SRCINCR_MASK     (3 << DMACHAN_CTRLB_SRCINCR_SHIFT)
 #  define DMACHAN_CTRLB_SRCINCR_INCR   (0 << DMACHAN_CTRLB_SRCINCR_SHIFT) /* Incrementing address */
+#  if defined(CONFIG_ARCH_CHIP_SAM4E)
+#    define DMACHAN_CTRLB_SRCINCR_DECR (1 << DMACHAN_CTRLB_SRCINCR_SHIFT) /* Decrementing address */
+#  endif
 #  define DMACHAN_CTRLB_SRCINCR_FIXED  (2 << DMACHAN_CTRLB_SRCINCR_SHIFT) /* Fixed address */
 #define DMACHAN_CTRLB_DSTINCR_SHIFT    (28)      /* Bits 28-29 */
 #define DMACHAN_CTRLB_DSTINCR_MASK     (3 << DMACHAN_CTRLB_DSTINCR_SHIFT)
 #  define DMACHAN_CTRLB_DSTINCR_INCR   (0 << DMACHAN_CTRLB_DSTINCR_SHIFT) /* Incrementing address */
+#  if defined(CONFIG_ARCH_CHIP_SAM4E)
+#    define DMACHAN_CTRLB_DSTINCR_DECR (1 << DMACHAN_CTRLB_DSTINCR_SHIFT) /* Decrementing address */
+#  endif
 #  define DMACHAN_CTRLB_DSTINCR_FIXED  (2 << DMACHAN_CTRLB_DSTINCR_SHIFT) /* Fixed address */
 #define DMACHAN_CTRLB_IEN              (1 << 30)  /* Bit 30:  Clear sets BTC[n] flag in EBCISR */
 
@@ -397,22 +426,59 @@
 #define DMACHAN_CFG_LOCKIF             (1 << 20) /* Bit 20: Enable lock interface capability */
 #define DMACHAN_CFG_LOCKB              (1 << 21) /* Bit 21: Enable AHB Bus Locking capability */
 #define DMACHAN_CFG_LOCKIFL            (1 << 22) /* Bit 22: Lock Master Interface Arbiter */
-#define DMACHAN_CFG_AHBPRO_SHIFT       (24)      /* Bits 24-26: Bus access privilege */
-#define DMACHAN_CFG_AHBPRO_MASK        (7 << DMACHAN_CFG_AHBPRO_SHIFT)
-#  define DMACHAN_CFG_AHBPRO_PRIV      (1 << DMACHAN_CFG_AHBPRO_SHIFT)
-#  define DMACHAN_CFG_AHBPRO_BUFF      (2 << DMACHAN_CFG_AHBPRO_SHIFT)
-#  define DMACHAN_CFG_AHBPRO_CACHE     (4 << DMACHAN_CFG_AHBPRO_SHIFT)
+#define DMACHAN_CFG_AHBPROT_SHIFT      (24)      /* Bits 24-26: Bus access privilege */
+#define DMACHAN_CFG_AHBPROT_MASK       (7 << DMACHAN_CFG_AHBPROT_SHIFT)
+#  define DMACHAN_CFG_AHBPROT_PRIV     (1 << DMACHAN_CFG_AHBPROT_SHIFT)
+#  define DMACHAN_CFG_AHBPROT_BUFF     (2 << DMACHAN_CFG_AHBPROT_SHIFT)
+#  define DMACHAN_CFG_AHBPROT_CACHE    (4 << DMACHAN_CFG_AHBPROT_SHIFT)
 #define DMACHAN_CFG_FIFOCFG_SHIFT      (28)      /* Bits 28-29 */
 #define DMACHAN_CFG_FIFOCFG_MASK       (3 << DMACHAN_CFG_FIFOCFG_SHIFT)
 #  define DMACHAN_CFG_FIFOCFG_LARGEST  (0 << DMACHAN_CFG_FIFOCFG_SHIFT) /* Largest length AHB burst */
 #  define DMACHAN_CFG_FIFOCFG_HALF     (1 << DMACHAN_CFG_FIFOCFG_SHIFT) /* Half FIFO size */
 #  define DMACHAN_CFG_FIFOCFG_SINGLE   (2 << DMACHAN_CFG_FIFOCFG_SHIFT) /* Single AHB access */
 
+/* More Global Registers */
+
+/* DMAC Write Protect Mode Register  */
+
+#if defined(CONFIG_ARCH_CHIP_SAM4E)
+#  define DMAC_WPMR_WPEN           (1 << 0)  /* Bit 0:  Write Protect Enable */
+#  define DMAC_WPMR_WPKEY_SHIFT    (8)       /* Bits 8-31: Write Protect KEY */
+#  define DMAC_WPMR_WPKEY_MASK     (0x00ffffff << DMAC_WPMR_WPKEY_SHIFT)
+#    define DMAC_WPMR_WPKEY        (0x00444d41 << DMAC_WPMR_WPKEY_SHIFT)
+#endif
+
+/* DMAC Write Protect Status Register DMAC_WPSR */
+
+#if defined(CONFIG_ARCH_CHIP_SAM4E)
+#  define DMAC_WPSR_WPVS           (1 << 0)  /* Bit 0:  Write Protect Violation Status */
+#  define DMAC_WPSR_WPVSRC_SHIFT   (8)       /* Bits 8-23: Write Protect Violation Source */
+#  define DMAC_WPSR_WPVSRC_MASK    (0xffff << DMAC_WPSR_WPVSRC_SHIFT)
+#endif
+
 /* DMA Peripheral IDs *******************************************************************/
 
-#define DMACHAN_PID_MCI0               0
-#define DMACHAN_PID_SSC                3
-#define DMACHAN_PID_MCI1               13
+#if defined(CONFIG_ARCH_CHIP_SAM3U) ||  defined(CONFIG_ARCH_CHIP_SAM3X) || \
+    defined(CONFIG_ARCH_CHIP_SAM3A)
+#  define DMACHAN_PID_MCI0             0
+#  define DMACHAN_PID_SSC              3
+#  define DMACHAN_PID_MCI1             13
+#endif
+
+/* Hardware interface numbers */
+
+#if defined(CONFIG_ARCH_CHIP_SAM4E)
+#  define DMAC_INTF_HSMCI              0         /* HSMCI Transmit/Receive */
+#  define DMAC_INTF_SPI0TX             1         /* SPI Transmit */
+#  define DMAC_INTF_SPI0RX             2         /* SPI Receive */
+#  define DMAC_INTF_USART0TX           3         /* USART0 Transmit */
+#  define DMAC_INTF_USART0RX           4         /* USART0 Receive */
+#  define DMAC_INTF_USART1TX           5         /* USART1 Transmit */
+#  define DMAC_INTF_USART1RX           6         /* USART1 Receive */
+#  define DMAC_INTF_AESTX              11        /* AES Transmit */
+#  define DMAC_INTF_AESRX              12        /* AES Receive */
+#  define DMAC_INTF_PWMTX              13        /* PWM Transmit */
+#endif
 
 /****************************************************************************************
  * Public Types
@@ -437,4 +503,4 @@ struct dma_linklist_s
  * Public Functions
  ****************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_DMAC_H */
+#endif /* __ARCH_ARM_SRC_SAM34_CHIP_SAM_DMAC_H */
