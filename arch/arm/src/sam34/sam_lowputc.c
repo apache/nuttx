@@ -151,7 +151,7 @@
  */
 
 #if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
-    defined(CONFIG_ARCH_CHIP_SAM3A) || defined(CONFIG_ARCH_CHIP_SAM4S) || \\
+    defined(CONFIG_ARCH_CHIP_SAM3A) || defined(CONFIG_ARCH_CHIP_SAM4S) || \
     defined(CONFIG_ARCH_CHIP_SAM4E)
 #  define SAM_MR_USCLKS    UART_MR_USCLKS_MCK   /* Source = Main clock */
 #  define SAM_USART_CLOCK  BOARD_MCK_FREQUENCY  /* Frequency of the main clock */

@@ -125,8 +125,8 @@
 
 #include "up_arch.h"
 #include "sam_gpio.h"
-#include "chip/sam3u_pmc.h"
-#include "chip/sam3u_smc.h"
+#include "chip/sam_pmc.h"
+#include "chip/sam_smc.h"
 #include "sam3u-ek.h"
 
 /**************************************************************************************

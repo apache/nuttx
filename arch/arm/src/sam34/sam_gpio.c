@@ -522,13 +522,13 @@ int sam_dumpgpio(uint32_t pinset, const char *msg)
   lldbg(" FRLHSR: %08x LOCKSR: %08x   WPMR: %08x   WPSR: %08x\n",
         getreg32(base + SAM_PIO_FRLHSR_OFFSET), getreg32(base + SAM_PIO_LOCKSR_OFFSET),
         getreg32(base + SAM_PIO_WPMR_OFFSET), getreg32(base + SAM_PIO_WPSR_OFFSET));
-#elif defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
+#if defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
   lldbg("   PCMR: %08x  PCIMR: %08x  PCISR: %08x   PCRHR: %08x\n",
         getreg32(base + SAM_PIO_PCMR_OFFSET), getreg32(base + SAM_PIO_PCIMR_OFFSET),
         getreg32(base + SAM_PIO_PCISR_OFFSET), getreg32(base + SAM_PIO_PCRHR_OFFSET));
 #ifdef CONFIG_ARCH_CHIP_SAM4E
   lldbg("SCHMITT: %08x DELAYR:%08x\n",
-        getreg32(base + SAM_PIO_SCHMITT_OFFSET));
+        getreg32(base + SAM_PIO_SCHMITT_OFFSET), getreg32(base + SAM_PIO_DELAY_OFFSET));
 #else
   lldbg("SCHMITT: %08x\n",
         getreg32(base + SAM_PIO_SCHMITT_OFFSET));
@@ -538,4 +538,3 @@ int sam_dumpgpio(uint32_t pinset, const char *msg)
   return OK;
 }
 #endif
-
