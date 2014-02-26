@@ -57,7 +57,7 @@
 #define SAM_PICOUART_RHR_OFFSET      0x000c /* Receive Holding Register */
 #define SAM_PICOUART_VERSION_OFFSET  0x0020 /* Version Register */
 
-/* PICOUART register adresses ***********************************************************/
+/* PICOUART register addresses **********************************************************/
 
 #define SAM_PICOUART_CR_OFFSET       0x0000 /* Control Register */
 #define SAM_PICOUART_CR_OFFSET       0x0000 /* Control Register */

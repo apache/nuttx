@@ -121,7 +121,7 @@
 #define SAM_PIO_PCRHR_OFFSET       0x0164 /* Parallel Capture Reception Holding Register */
                                           /* 0x0168-0x018c: Reserved for PDC registers */
 
-/* PIO register adresses ****************************************************************/
+/* PIO register addresses ***************************************************************/
 
 #define PIOA                       (0)
 #define PIOB                       (1)

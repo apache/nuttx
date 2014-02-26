@@ -34,8 +34,8 @@
  *
  ****************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_WDT_H
-#define __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_WDT_H
+#ifndef __ARCH_ARM_SRC_SAM34_CHIP_SAM_WDT_H
+#define __ARCH_ARM_SRC_SAM34_CHIP_SAM_WDT_H
 
 /****************************************************************************************
  * Included Files
@@ -50,19 +50,19 @@
  * Pre-processor Definitions
  ****************************************************************************************/
 
-/* WDT register offsets ****************************************************************/
+/* WDT register offsets *****************************************************************/
 
 #define SAM_WDT_CR_OFFSET         0x00 /* Control Register */
 #define SAM_WDT_MR_OFFSET         0x04 /* Mode Register */
 #define SAM_WDT_SR_OFFSET         0x08 /* Status Register */
 
-/* WDT register adresses ***************************************************************/
+/* WDT register addresses ***************************************************************/
 
 #define SAM_WDT_CR                (SAM_WDT_BASE+SAM_WDT_CR_OFFSET)
 #define SAM_WDT_MR                (SAM_WDT_BASE+SAM_WDT_MR_OFFSET)
 #define SAM_WDT_SR                (SAM_WDT_BASE+SAM_WDT_SR_OFFSET)
 
-/* WDT register bit definitions ********************************************************/
+/* WDT register bit definitions *********************************************************/
 /* Watchdog Timer Control Register */
 
 #define WDT_CR_WDRSTT             (1 << 0)   /* Bit 0:  Watchdog Rest */
@@ -102,4 +102,4 @@
  * Public Functions
  ****************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_WDT_H */
+#endif /* __ARCH_ARM_SRC_SAM34_CHIP_SAM_WDT_H */

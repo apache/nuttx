@@ -98,7 +98,7 @@
 #define SAM_SCIF_GCLKVERSION_OFFSET       0x03f8 /* Generic Clock Version Register */
 #define SAM_SCIF_VERSION_OFFSET           0x03fc /* SCIF Version Register */
 
-/* SCIF register adresses ***************************************************************/
+/* SCIF register addresses **************************************************************/
 
 #define SAM_SCIF_IER                      (SAM_SCIF_BASE+SAM_SCIF_IER_OFFSET)
 #define SAM_SCIF_IDR                      (SAM_SCIF_BASE+SAM_SCIF_IDR_OFFSET)

@@ -85,7 +85,7 @@
 #define SAM_BSCIF_OSC32IFAVERSION_OFFSET  0x03f8 /* 32 kHz Oscillator Version Register */
 #define SAM_BSCIF_VERSION_OFFSET          0x03fc /* BSCIF Version Register */
 
-/* BSCIF register adresses **************************************************************/
+/* BSCIF register addresses *************************************************************/
 
 #define SAM_BSCIF_IER                     (SAM_BSCIF_BASE+SAM_BSCIF_IER_OFFSET)
 #define SAM_BSCIF_IDR                     (SAM_BSCIF_BASE+SAM_BSCIF_IDR_OFFSET)

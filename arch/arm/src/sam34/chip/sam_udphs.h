@@ -90,7 +90,7 @@
 #define SAM_UDPHSDMA_CONTROL_OFFSET           0x08 /* UDPHS DMA Channel Control Register */
 #define SAM_UDPHSDMA_STATUS_OFFSET)           0x0c /* UDPHS DMA Channel Status Register */
 
-/* UDPHS register adresses **************************************************************/
+/* UDPHS register addresses *************************************************************/
 
 #define SAM_UDPHS_CTRL                        (SAM_UDPHS_BASE+SAM_UDPHS_CTRL_OFFSET)
 #define SAM_UDPHS_FNUM                        (SAM_UDPHS_BASE+SAM_UDPHS_FNUM_OFFSET)

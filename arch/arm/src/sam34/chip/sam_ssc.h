@@ -77,7 +77,7 @@
                                            /* 0x050-0x0fc: Reserved */
                                            /* 0x100-0x124: Reserved for PDC registers */
 
-/* SSC register adresses ****************************************************************/
+/* SSC register addresses ***************************************************************/
 
 #define SAM_SSC_CR                 (SAM_SSC_BASE+SAM_SSC_CR_OFFSET)
 #define SAM_SSC_CMR                (SAM_SSC_BASE+SAM_SSC_CMR_OFFSET)

@@ -91,7 +91,7 @@
 #  define SAM_DMAC_WPSR_OFFSET         0x01e8 /* DMAC Write Protect Status Register DMAC_WPSR */
 #endif
 
-/* DMAC register adresses ***************************************************************/
+/* DMAC register addresses **************************************************************/
 
 /* Global Registers */
 

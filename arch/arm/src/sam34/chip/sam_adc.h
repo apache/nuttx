@@ -75,7 +75,7 @@
 #define SAM_ADC12B_ACR_OFFSET      0x64 /* Analog Control Register (ADC12B only) */
 #define SAM_ADC12B_EMR_OFFSET      0x68 /* Extended Mode Register (ADC12B only) */
 
-/* ADC register adresses ***************************************************************/
+/* ADC register addresses **************************************************************/
 
 #define SAM_ADC12B_CR              (SAM_ADC12B_BASE+SAM_ADC_CR_OFFSET)
 #define SAM_ADC12B_MR              (SAM_ADC12B_BASE+SAM_ADC_MR_OFFSET)
