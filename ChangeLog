@@ -6668,4 +6668,6 @@
 	* net/net_close.c:  Fix one place where the connection reference count
 	  was not being decremented.  This is really a cosmetic change BUT
 	  when CONFIG_DEBUG_NET is enable, it will cause assertions (2014-2-25).
-
+	* arch/arm/src/sama5/sam_adc.h:  Fix typos in the SAMA5 ADC register
+	  definition header file (2014-2-26).
+	* arch/arm/src/sam34:  The port to the SAM4E is code complete (2014-2-16).
