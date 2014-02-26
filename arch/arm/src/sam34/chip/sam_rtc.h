@@ -65,7 +65,7 @@
 #define SAM_RTC_IMR_OFFSET           0x28 /* Interrupt Mask Register */
 #define SAM_RTC_VER_OFFSET           0x2c /* Valid Entry Register */
 
-/* RTC register adresses ****************************************************************/
+/* RTC register addresses ***************************************************************/
 
 #define SAM_RTC_CR                   (SAM_RTC_BASE+SAM_RTC_CR_OFFSET)
 #define SAM_RTC_MR                   (SAM_RTC_BASE+SAM_RTC_MR_OFFSET)

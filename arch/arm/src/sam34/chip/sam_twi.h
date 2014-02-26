@@ -69,7 +69,7 @@
 #  define SAM_TWI_WPSR_OFFSET      0x00e8 /* Protection Status Register */
 #endif
 
-/* TWI register adresses ****************************************************************/
+/* TWI register addresses ***************************************************************/
 
 #define SAM_TWI_CR(n)              (SAM_TWIN_BASE(n)+SAM_TWI_CR_OFFSET)
 #define SAM_TWI_MMR(n)             (SAM_TWIN_BASE(n)+SAM_TWI_MMR_OFFSET)

@@ -58,7 +58,7 @@
 #define SAM_EEFC_FSR_OFFSET          0x08 /* EEFC Flash Status Register */
 #define SAM_EEFC_FRR_OFFSET          0x0c /* EEFC Flash Result Register */
 
-/* EEFC register adresses ***************************************************************/
+/* EEFC register addresses **************************************************************/
 
 #define SAM_EEFC_FMR(n)              (SAM_EEFCN_BASE(n)+SAM_EEFC_FMR_OFFSET)
 #define SAM_EEFC_FCR(n)              (SAM_EEFCN_BASE(n)+SAM_EEFC_FCR_OFFSET)

@@ -89,7 +89,7 @@
 
 #define SAM_PDCA_VERSION_OFFSET  0x834 /* Version Register */
 
-/* PDCA channel adresses ****************************************************************/
+/* PDCA channel addresses ***************************************************************/
 /* Channel register base addresses */
 
 #define SAM_PDCA_CHAN(n)         (SAM_PDCA_BASE+SAM_PDCA_CHAN_OFFSET(n))
@@ -110,7 +110,7 @@
 #define SAM_PDCA_CHAN14          (SAM_PDCA_BASE+SAM_PDCA_CHAN14_OFFSET)
 #define SAM_PDCA_CHAN15          (SAM_PDCA_BASE+SAM_PDCA_CHAN15_OFFSET)
 
-/* PDCA register adresses ***************************************************************/
+/* PDCA register addresses **************************************************************/
 /* Channel register addresses */
 
 #define SAM_PDCA_MAR(n)          (SAM_PDCA_CHAN(n)+SAM_PDCA_MAR_OFFSET)

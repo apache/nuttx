@@ -1,8 +1,8 @@
 /****************************************************************************************
- * arch/arm/src/sam34/chip/sam_rstc.h
- * Reset Controller (RSTC) definitions for the SAM3U, SAM4E, and SAM4S
+ * arch/arm/src/sam34/chip/sam_rswdt.h
+ * Reinforced Safety Watchdog Timer (RSWDT) for the SAM4E
  *
- *   Copyright (C) 2009, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,8 +34,8 @@
  *
  ****************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAM34_CHIP_SAM_RSTC_H
-#define __ARCH_ARM_SRC_SAM34_CHIP_SAM_RSTC_H
+#ifndef __ARCH_ARM_SRC_SAM34_CHIP_SAM_RSWDT_H
+#define __ARCH_ARM_SRC_SAM34_CHIP_SAM_RSWDT_H
 
 /****************************************************************************************
  * Included Files
@@ -50,52 +50,45 @@
  * Pre-processor Definitions
  ****************************************************************************************/
 
-/* RSTC register offsets ****************************************************************/
+/* RSWDT register offsets ***************************************************************/
 
-#define SAM_RSTC_CR_OFFSET      0x00 /* Control Register */
-#define SAM_RSTC_SR_OFFSET      0x04 /* Status Register */
-#define SAM_RSTC_MR_OFFSET      0x08 /* Mode Register  */
+#define SAM_RSWDT_CR_OFFSET         0x0000 /* Control Register */
+#define SAM_RSWDT_MR_OFFSET         0x0004 /* Mode Register */
+#define SAM_RSWDT_SR_OFFSET         0x0008 /* Status Register */
 
-/* RSTC register addresses **************************************************************/
+/* RSWDT register addresses *************************************************************/
 
-#define SAM_RSTC_CR             (SAM_RSTC_BASE+SAM_RSTC_CR_OFFSET)
-#define SAM_RSTC_SR             (SAM_RSTC_BASE+SAM_RSTC_SR_OFFSET)
-#define SAM_RSTC_MR             (SAM_RSTC_BASE+SAM_RSTC_MR_OFFSET)
+#define SAM_RSWDT_CR                (SAM_RSWDT_BASE+SAM_RSWDT_CR_OFFSET)
+#define SAM_RSWDT_MR                (SAM_RSWDT_BASE+SAM_RSWDT_MR_OFFSET)
+#define SAM_RSWDT_SR                (SAM_RSWDT_BASE+SAM_RSWDT_SR_OFFSET)
 
-/* RSTC register bit definitions ********************************************************/
+/* RSWDT register bit definitions *******************************************************/
+/* Watchdog Timer Control Register */
 
-/* Reset Controller Control Register */
+#define RSWDT_CR_WDRSTT             (1 << 0)   /* Bit 0:  Watchdog Rest */
+#define RSWDT_CR_KEY_SHIFT          (24)       /* Bits 24-31:  Password */
+#define RSWDT_CR_KEY_MASK           (0xff << RSWDT_CR_KEY_SHIFT)
+#  define RSWDT_CR_KEY              (0xc4 << RSWDT_CR_KEY_SHIFT)
 
-#define RSTC_CR_PROCRST         (1 << 0)  /* Bit 0:  Processor Reset */
-#define RSTC_CR_PERRST          (1 << 2)  /* Bit 2:  Peripheral Reset */
-#define RSTC_CR_EXTRST          (1 << 3)  /* Bit 3:  External Reset */
-#define RSTC_CR_KEY_SHIFT       (24)      /* Bits 24-31:  Password */
-#define RSTC_CR_KEY_MASK        (0xff << RSTC_CR_KEY_SHIFT)
-#  define RSTC_CR_KEY           (0xa5 << RSTC_CR_KEY_SHIFT)
+/* Watchdog Timer Mode Register */
 
-/* Reset Controller Status Register */
+#define RSWDT_MR_WDV_SHIFT          (0)       /* Bits 0-11:  Watchdog Counter Value */
+#define RSWDT_MR_WDV_MASK           (0xfff << RSWDT_MR_WDV_SHIFT)
+#  define RSWDT_MR_WDV(n)           ((uint32_t)(n) << RSWDT_MR_WDV_SHIFT)
+#define RSWDT_MR_WDFIEN             (1 << 12) /* Bit 12: Watchdog Fault Interrupt Enable */
+#define RSWDT_MR_WDRSTEN            (1 << 13) /* Bit 13: Watchdog Reset Enable */
+#define RSWDT_MR_WDRPROC            (1 << 14) /* Bit 14: Watchdog Reset Processor */
+#define RSWDT_MR_WDDIS              (1 << 15) /* Bit 15: Watchdog Disable */
+#define RSWDT_MR_WDD_SHIFT          (16)      /* Bits 16-27:  Watchdog Delta Value */
+#define RSWDT_MR_WDD_MASK           (0xfff << RSWDT_MR_WDD_SHIFT)
+#  define RSWDT_MR_WDD(n)           ((uint32_t)(n) << RSWDT_MR_WDD_SHIFT)
+#define RSWDT_MR_WDDBGHLT           (1 << 28) /* Bit 28: Watchdog Debug Halt */
+#define RSWDT_MR_WDIDLEHLT          (1 << 29) /* Bit 29: Watchdog Idle Halt */
 
-#define RSTC_SR_URSTS           (1 << 0)  /* Bit 0:  User Reset Status */
-#define RSTC_SR_RSTTYP_SHIFT    (8)       /* Bits 8-10:  Reset Type */
-#define RSTC_SR_RSTTYP_MASK     (7 << RSTC_SR_RSTTYP_SHIFT)
-#  define RSTC_SR_RSTTYP_PWRUP  (0 << RSTC_SR_RSTTYP_SHIFT) /* General Reset */
-#  define RSTC_SR_RSTTYP_BACKUP (1 << RSTC_SR_RSTTYP_SHIFT) /* Backup Reset */
-#  define RSTC_SR_RSTTYP_WDOG   (2 << RSTC_SR_RSTTYP_SHIFT) /* Watchdog Reset */
-#  define RSTC_SR_RSTTYP_SWRST  (3 << RSTC_SR_RSTTYP_SHIFT) /* Software Reset */
-#  define RSTC_SR_RSTTYP_NRST   (4 << RSTC_SR_RSTTYP_SHIFT) /* User Reset NRST pin */
-#define RSTC_SR_NRSTL           (1 << 16) /* Bit 16:  NRST Pin Level */
-#define RSTC_SR_SRCMP           (1 << 17) /* Bit 17:  Software Reset Command in Progress */
+/* Watchdog Timer Status Register */
 
-/* Reset Controller Mode Register */
-
-#define RSTC_MR_URSTEN          (1 << 0)  /* Bit 0:  User Reset Enable */
-#define RSTC_MR_URSTIEN         (1 << 4)  /* Bit 4:  User Reset Interrupt Enable */
-#define RSTC_MR_ERSTL_SHIFT     (8)       /* Bits 8-11:  External Reset Length */
-#define RSTC_MR_ERSTL_MASK      (15 << RSTC_MR_ERSTL_SHIFT)
-#  define RSTC_MR_ERSTL(n)      ((uint32_t)(n) << RSTC_MR_ERSTL_SHIFT)
-#define RSTC_MR_KEY_SHIFT       (24)      /* Bits 24-31:  Password */
-#define RSTC_MR_KEY_MASK        (0xff << RSTC_CR_KEY_SHIFT)
-#  define RSTC_MR_KEY           (0xa5 << RSTC_CR_KEY_SHIFT)
+#define RSWDT_SR_WDUNF              (1 << 0)  /* Bit 0:  Watchdog Underflow */
+#define RSWDT_SR_WDERR              (1 << 1)  /* Bit 1:  Watchdog Error */
 
 /****************************************************************************************
  * Public Types
@@ -109,4 +102,4 @@
  * Public Functions
  ****************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAM34_CHIP_SAM_RSTC_H */
+#endif /* __ARCH_ARM_SRC_SAM34_CHIP_SAM_RSWDT_H */

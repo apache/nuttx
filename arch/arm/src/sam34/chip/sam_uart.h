@@ -83,7 +83,7 @@
 #define SAM_UART_VERSION_OFFSET      0x00fc /* Version Register (USART only, Not SAM4E) */
                                             /* 0x0100-0x0124: PDC Area (Common) */
 
-/* UART register adresses ***********************************************************************/
+/* UART register addresses **********************************************************************/
 
 #define SAM_UART0_CR                 (SAM_UART0_BASE+SAM_UART_CR_OFFSET)
 #define SAM_UART0_MR                 (SAM_UART0_BASE+SAM_UART_MR_OFFSET)

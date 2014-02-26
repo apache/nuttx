@@ -61,7 +61,7 @@
 #define SAM_WDT_ICR_OFFSET         0x001c /* Interrupt Clear Register */
 #define SAM_WDT_VERSION_OFFSET     0x03fc /* Version Register */
 
-/* WDT register adresses ***************************************************************/
+/* WDT register addresses **************************************************************/
 
 #define SAM_WDT_CTRL               (SAM_WDT_BASE+SAM_WDT_CTRL_OFFSET)
 #define SAM_WDT_CLR                (SAM_WDT_BASE+SAM_WDT_CLR_OFFSET)

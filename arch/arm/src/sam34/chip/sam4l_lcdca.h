@@ -82,7 +82,7 @@
 #define SAM_LCDCA_IMR_OFFSET       0x0060 /* Interrupt Mask Register */
 #define SAM_LCDCA_VERSION_OFFSET   0x0064 /* Version Register */
 
-/* LCDCA register adresses ***********************************************************/
+/* LCDCA register addresses **********************************************************/
 
 #define SAM_LCDCA_CR               (SAM_LCDCA_BASE+SAM_LCDCA_CR_OFFSET)
 #define SAM_LCDCA_CFG              (SAM_LCDCA_BASE+SAM_LCDCA_CFG_OFFSET)

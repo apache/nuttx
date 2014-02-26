@@ -79,7 +79,7 @@
 #define SAM_UART_VERSION_OFFSET      0x00fc /* Version Register */
                                             /* 0x0100-0x0124: PDC Area */
 
-/* USART register adresses **********************************************************************/
+/* USART register addresses *********************************************************************/
 
 #define SAM_USART_CR(n)              (SAM_USARTN_BASE(n)+SAM_UART_CR_OFFSET)
 #define SAM_USART_MR(n)              (SAM_USARTN_BASE(n)+SAM_UART_MR_OFFSET)

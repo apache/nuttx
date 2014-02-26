@@ -126,7 +126,7 @@
 #define SAM_MATRIX_WPSR_OFFSET           0x01e8 /* Write Protect Status Register */
                                                 /* 0x0110 - 0x01fc: Reserved */
 
-/* MATRIX register adresses *************************************************************/
+/* MATRIX register addresses ************************************************************/
 
 #define SAM_MATRIX_MCFG(n))              (SAM_MATRIX_BASE+SAM_MATRIX_MCFG_OFFSET(n))
 #define SAM_MATRIX_MCFG0                 (SAM_MATRIX_BASE+SAM_MATRIX_MCFG0_OFFSET)

@@ -76,7 +76,7 @@
 #  define SAM_GPBR19_OFFSET  0x4c
 #endif
 
-/* GPBR register adresses ***************************************************************/
+/* GPBR register addresses **************************************************************/
 
 #define SAM_GPBR(n))        (SAM_GPBR_BASE+SAM_GPBR_OFFSET(n))
 #define SAM_GPBR0           (SAM_GPBR_BASE+SAM_GPBR0_OFFSET)

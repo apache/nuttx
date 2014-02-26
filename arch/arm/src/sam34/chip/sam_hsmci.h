@@ -83,7 +83,7 @@
                                              /* 0x0100-0x0124: Reserved for PCD registers */
 #define SAM_HSMCI_FIFO_OFFSET         0x0200 /* 0x0200-0x3ffc FIFO Memory Aperture */
 
-/* HSMCI register adresses **************************************************************/
+/* HSMCI register addresses *************************************************************/
 
 #define SAM_HSMCI_CR                  (SAM_MCI_BASE+SAM_HSMCI_CR_OFFSET)
 #define SAM_HSMCI_MR                  (SAM_MCI_BASE+SAM_HSMCI_MR_OFFSET)

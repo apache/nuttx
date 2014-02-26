@@ -109,7 +109,7 @@
                                           /* 0x00ec-0x00f8: Reserved */
                                           /* 0x0100-0x0144: Reserved */
 
-/* PIO register adresses ****************************************************************/
+/* PIO register addresses ***************************************************************/
 
 #define PIOA                       (0)
 #define PIOB                       (1)

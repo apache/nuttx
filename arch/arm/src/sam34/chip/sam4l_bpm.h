@@ -65,7 +65,7 @@
 #define SAM_BPM_IORET_OFFSET         0x0034 /* Input Output Retention Register */
 #define SAM_BPM_VERSION_OFFSET       0x00fc /* Version Register */
 
-/* BPM register adresses ***************************************************************/
+/* BPM register addresses **************************************************************/
 
 #define SAM_BPM_IER                  (SAM_BPM_BASE+SAM_BPM_IER_OFFSET)
 #define SAM_BPM_IDR                  (SAM_BPM_BASE+SAM_BPM_IDR_OFFSET)

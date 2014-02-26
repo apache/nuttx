@@ -123,7 +123,7 @@
 #  error Unrecognized SAM architecture
 #endif
 
-/* SMC register adresses ****************************************************************/
+/* SMC register addresses ***************************************************************/
 
 #if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
     defined(CONFIG_ARCH_CHIP_SAM3A)

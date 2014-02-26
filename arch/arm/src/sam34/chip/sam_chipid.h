@@ -55,7 +55,7 @@
 #define SAM_CHIPID_CIDR                 0x00 /* Chip ID Register */
 #define SAM_CHIPID_EXID                 0x04 /* Chip ID Extension Register */
 
-/* CHIPID register adresses *************************************************************/
+/* CHIPID register addresses ************************************************************/
 
 #define SAM_CHIPID_CIDR                 (SAM_CHIPID_BASE+SAM_CHIPID_CIDR)
 #define SAM_CHIPID_EXID                 (SAM_CHIPID_BASE+SAM_CHIPID_EXID)

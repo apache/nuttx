@@ -66,7 +66,7 @@
 #define SAM_DACC_WPMR_OFFSET       0x00e4 /* Write Protect Mode register */
 #define SAM_DACC_WPSR_OFFSET       0x00e8 /* Write Protect Status register */
 
-/* DACC register adresses ***************************************************************/
+/* DACC register addresses **************************************************************/
 
 #define SAM_DACC_CR                (SAM_DACC_BASE+SAM_DACC_CR_OFFSET)
 #define SAM_DACC_MR                (SAM_DACC_BASE+SAM_DACC_MR_OFFSET)
