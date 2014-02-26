@@ -57,7 +57,7 @@
 #define SAM_RTT_VR_OFFSET      0x08 /* Value Register */
 #define SAM_RTT_SR_OFFSET      0x0c /* Status Register */
 
-/* RTT register adresses ***************************************************************/
+/* RTT register addresses ***************************************************************/
 
 #define SAM_RTT_MR             (SAM_RTT_BASE+SAM_RTT_MR_OFFSET)
 #define SAM_RTT_AR             (SAM_RTT_BASE+SAM_RTT_AR_OFFSET)
