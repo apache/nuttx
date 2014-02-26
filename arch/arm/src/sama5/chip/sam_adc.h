@@ -150,8 +150,8 @@
 
 #define ADC_CR_SWRST               (1 << 0)  /* Bit 0:  Software Reset */
 #define ADC_CR_START               (1 << 1)  /* Bit 1:  Start Conversion */
-#define ADC_CR_TSCALIB             (1 << 0)  /* Bit 2:  Touchscreen Calibration */
-#define ADC_CR_AUTOCAL             (1 << 0)  /* Bit 3:  Automatic Calibration of ADC */
+#define ADC_CR_TSCALIB             (1 << 2)  /* Bit 2:  Touchscreen Calibration */
+#define ADC_CR_AUTOCAL             (1 << 3)  /* Bit 3:  Automatic Calibration of ADC */
 
 /* Mode Register and ADC Mode Register common bit-field definitions */
 
@@ -343,43 +343,43 @@
 
 /* Channel Gain Register */
 
-#define ADC_CGR_GAIN_SHIFT(n)      ((n) << 1) /* n=1..8 */
+#define ADC_CGR_GAIN_SHIFT(n)      ((n) << 1) /* n=0..11 */
 #define ADC_CGR_GAIN_MASK(n)       (3 << ADC_CGR_GAIN_SHIFT(n))
 #  define ADC_CGR_GAIN(n,v)        ((uint32_t)(v) << ADC_CGR_GAIN_SHIFT(n))
-#define ADC_CGR_GAIN0_SHIFT        (0)        /* Bits 0-1: User sequence number 1 */
+#define ADC_CGR_GAIN0_SHIFT        (0)        /* Bits 0-1: Gain for channel 0 */
 #define ADC_CGR_GAIN0_MASK         (3 << ADC_CGR_GAIN0_SHIFT)
 #  define ADC_CGR_GAIN0(v)         ((uint32_t)(v) << ADC_CGR_GAIN0_SHIFT)
-#define ADC_CGR_GAIN1_SHIFT        (2)        /* Bits 2-3: User sequence number 1 */
+#define ADC_CGR_GAIN1_SHIFT        (2)        /* Bits 2-3: Gain for channel 1 */
 #define ADC_CGR_GAIN1_MASK         (3 << ADC_CGR_GAIN1_SHIFT)
 #  define ADC_CGR_GAIN1(v)         ((uint32_t)(v) << ADC_CGR_GAIN1_SHIFT)
-#define ADC_CGR_GAIN2_SHIFT        (4)        /* Bits 4-5: User sequence number 2 */
+#define ADC_CGR_GAIN2_SHIFT        (4)        /* Bits 4-5: Gain for channel 2 */
 #define ADC_CGR_GAIN2_MASK         (3 << ADC_CGR_GAIN2_SHIFT)
 #  define ADC_CGR_GAIN2(v)         ((uint32_t)(v) << ADC_CGR_GAIN2_SHIFT)
-#define ADC_CGR_GAIN3_SHIFT        (6)        /* Bits 6-7: User sequence number 3 */
+#define ADC_CGR_GAIN3_SHIFT        (6)        /* Bits 6-7: Gain for channel 3 */
 #define ADC_CGR_GAIN3_MASK         (3 << ADC_CGR_GAIN3_SHIFT)
 #  define ADC_CGR_GAIN3(v)         ((uint32_t)(v) << ADC_CGR_GAIN3_SHIFT)
-#define ADC_CGR_GAIN4_SHIFT        (8)        /* Bits 8-9: User sequence number 4 */
+#define ADC_CGR_GAIN4_SHIFT        (8)        /* Bits 8-9: Gain for channel 4 */
 #define ADC_CGR_GAIN4_MASK         (3 << ADC_CGR_GAIN4_SHIFT)
 #  define ADC_CGR_GAIN4(v)         ((uint32_t)(v) << ADC_CGR_GAIN4_SHIFT)
-#define ADC_CGR_GAIN5_SHIFT        (10)       /* Bits 10-11: User sequence number 5 */
+#define ADC_CGR_GAIN5_SHIFT        (10)       /* Bits 10-11: Gain for channel 5 */
 #define ADC_CGR_GAIN5_MASK         (3 << ADC_CGR_GAIN5_SHIFT)
 #  define ADC_CGR_GAIN5(v)         ((uint32_t)(v) << ADC_CGR_GAIN5_SHIFT)
-#define ADC_CGR_GAIN6_SHIFT        (12)       /* Bits 12-13: User sequence number 6 */
+#define ADC_CGR_GAIN6_SHIFT        (12)       /* Bits 12-13: Gain for channel 6 */
 #define ADC_CGR_GAIN6_MASK         (3 << ADC_CGR_GAIN6_SHIFT)
 #  define ADC_CGR_GAIN6(v)         ((uint32_t)(v) << ADC_CGR_GAIN6_SHIFT)
-#define ADC_CGR_GAIN7_SHIFT        (14)       /* Bits 14-15: User sequence number 7 */
+#define ADC_CGR_GAIN7_SHIFT        (14)       /* Bits 14-15: Gain for channel 7 */
 #define ADC_CGR_GAIN7_MASK         (3 << ADC_CGR_GAIN7_SHIFT)
 #  define ADC_CGR_GAIN7(v)         ((uint32_t)(v) << ADC_CGR_GAIN7_SHIFT)
-#define ADC_CGR_GAIN8_SHIFT        (16)       /* Bits 16-17: User sequence number 8 */
+#define ADC_CGR_GAIN8_SHIFT        (16)       /* Bits 16-17: Gain for channel 8 */
 #define ADC_CGR_GAIN8_MASK         (3 << ADC_CGR_GAIN8_SHIFT)
 #  define ADC_CGR_GAIN8(v)         ((uint32_t)(v) << ADC_CGR_GAIN8_SHIFT)
-#define ADC_CGR_GAIN9_SHIFT        (18)       /* Bits 18-19: User sequence number 9 */
+#define ADC_CGR_GAIN9_SHIFT        (18)       /* Bits 18-19: Gain for channel 9 */
 #define ADC_CGR_GAIN9_MASK         (3 << ADC_CGR_GAIN9_SHIFT)
 #  define ADC_CGR_GAIN9(v)         ((uint32_t)(v) << ADC_CGR_GAIN9_SHIFT)
-#define ADC_CGR_GAIN10_SHIFT       (20)       /* Bits 20-21: User sequence number 10 */
+#define ADC_CGR_GAIN10_SHIFT       (20)       /* Bits 20-21: Gain for channel 10 */
 #define ADC_CGR_GAIN10_MASK        (3 << ADC_CGR_GAIN10_SHIFT)
 #  define ADC_CGR_GAIN10(v)        ((uint32_t)(v) << ADC_CGR_GAIN10_SHIFT)
-#define ADC_CGR_GAIN11_SHIFT       (22)       /* Bits 22-23: User sequence number 11 */
+#define ADC_CGR_GAIN11_SHIFT       (22)       /* Bits 22-23: Gain for channel 11 */
 #define ADC_CGR_GAIN11_MASK        (3 << ADC_CGR_GAIN11_SHIFT)
 #  define ADC_CGR_GAIN11(v)        ((uint32_t)(v) << ADC_CGR_GAIN11_SHIFT)
 
