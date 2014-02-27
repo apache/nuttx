@@ -6671,3 +6671,6 @@
 	* arch/arm/src/sama5/sam_adc.h:  Fix typos in the SAMA5 ADC register
 	  definition header file (2014-2-26).
 	* arch/arm/src/sam34:  The port to the SAM4E is code complete (2014-2-16).
+	* include/cxx: Fix some bad idempotence defintions in header files
+	  (2014-2-27).
+
