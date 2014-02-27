@@ -75,12 +75,51 @@ config SCHED_CPULOAD
 
 if SCHED_CPULOAD
 
+config SCHED_CPULOAD_EXTCLK
+	bool "Use external clock"
+	default n
+	---help---
+		The CPU load measurements are determined by sampling the active
+		tasks periodically at the occurrence to a timer expiration.  By
+		default, the system clock is used to do that sampling.
+
+		There is a serious issue for the accuracy of measurements if the
+		system clock is used, however.  NuttX threads are often started at
+		the time of the system timer expiration.  Others may be stopped at
+		the time of the system timer expiration (if round-robin time-slicing
+		is enabled).  Such thread behavior occurs synchronously with the
+		system timer and, hence, is not randomly sampled.  As a consequence,
+		the CPU load attributed to these threads that run synchronously with
+		they system timer may be grossly in error.
+
+		The solution is to use some other clock that runs at a different
+		rate and has timer expirations that are asynchronous with the
+		system timer.  Then truly accurate load measurements can be
+		achieved.  This option enables use of such an "external" clock.  The
+		implementation of the clock must be provided by platform-specific
+		logic; that platform-specific logic must call the system function
+		sched_process_cpuload() at each timer expiration with interrupts
+		disabled.
+
+config SCHED_CPULOAD_TICKSPERSEC
+	int "External clock rate"
+	default 100
+	depends on SCHED_CPULOAD_EXTCLK
+	---help---
+		If an external clock is used to drive the sampling for the CPU load
+		calculations, then this value must be provided.  This value provides
+		the rate of the external clock in units of ticks per second.  The
+		default value of 100 corresponds to 100Hz clock.  NOTE: that 100Hz
+		is the default frequency of the system time and, hence, the worst
+		possible choice in most cases.
+
 config SCHED_CPULOAD_TIMECONSTANT
 	int "CPU load time constant"
 	default 2
 	---help---
 		The accumulated CPU count is divided by two when the accumulated
-		tick count exceeds this time constant.
+		tick count exceeds this time constant.  This time constant is in
+		units of seconds.
 
 endif # SCHED_CPULOAD
 

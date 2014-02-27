@@ -182,9 +182,9 @@ static inline void sched_process_timeslice(void)
 
 void sched_process_timer(void)
 {
+#ifndef CONFIG_DISABLE_CLOCK
   /* Increment the system time (if in the link) */
 
-#ifndef CONFIG_DISABLE_CLOCK
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (clock_timer != NULL)
 #endif
@@ -193,11 +193,11 @@ void sched_process_timer(void)
     }
 #endif
 
+#if defined(CONFIG_SCHED_CPULOAD) && !defined(CONFIG_SCHED_CPULOAD_EXTCLK)
   /* Perform CPU load measurements (before any timer-initiated context switches
    * can occur)
    */
 
-#ifdef CONFIG_SCHED_CPULOAD
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (sched_process_cpuload != NULL)
 #endif

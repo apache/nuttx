@@ -6680,3 +6680,7 @@
 	* fs/procfs/fs_procfscpuload.c and fs_procfsproc.c:  Remove the newline
 	  at the end of the percentage so that the returned strings can be
 	  printed on the same line as other values (2014-2-27).
+	* sched/Kconfig, sched_cpuload.c, and nuttx/sched/sched_processtimer.c:
+	  An asynchronous, "external" clock may now be used to drive the CPU
+	  load calculations for more accurate load measurements when needed
+	  (2014-2-27).

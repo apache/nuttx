@@ -52,7 +52,19 @@
 /************************************************************************
  * Pre-processor Definitions
  ************************************************************************/
- 
+/* Are we using the system timer, or an external clock?  Get the rate
+ * of the sampling in ticks per second for the selected timer.
+ */
+
+#ifdef CONFIG_SCHED_CPULOAD_EXTCLK
+#  ifndef CONFIG_SCHED_CPULOAD_TICKSPERSEC
+#    error CONFIG_SCHED_CPULOAD_TICKSPERSEC is not defined
+#  endif
+#  define CPULOAD_TICKSPERSEC CONFIG_SCHED_CPULOAD_TICKSPERSEC
+#else
+#  define CPULOAD_TICKSPERSEC CLOCKS_PER_SEC
+#endif
+
 /************************************************************************
  * Private Type Declarations
  ************************************************************************/
@@ -119,7 +131,7 @@ void weak_function sched_process_cpuload(void)
    * constant, then shift the accumulators.
    */
 
-  if (++g_cpuload_total > (CONFIG_SCHED_CPULOAD_TIMECONSTANT * CLOCKS_PER_SEC))
+  if (++g_cpuload_total > (CONFIG_SCHED_CPULOAD_TIMECONSTANT * CPULOAD_TICKSPERSEC))
     {
       uint32_t total = 0;
 
