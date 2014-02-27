@@ -6673,4 +6673,7 @@
 	* arch/arm/src/sam34:  The port to the SAM4E is code complete (2014-2-16).
 	* include/cxx: Fix some bad idempotence defintions in header files
 	  (2014-2-27).
-
+	* sched/sched_cpuload.c:  Change calulation of the total count when the
+	  time constant related delay elapsed.  The total count is now always
+	  guaranteed to add up to 100% (excepting only truncation errors)
+	  (2014-2-27).

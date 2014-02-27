@@ -121,16 +121,21 @@ void weak_function sched_process_cpuload(void)
 
   if (++g_cpuload_total > (CONFIG_SCHED_CPULOAD_TIMECONSTANT * CLOCKS_PER_SEC))
     {
-      /* Divide the tick count for every task by two */
+      uint32_t total = 0;
+
+      /* Divide the tick count for every task by two and recalculate the
+       * total.
+       */
 
       for (i = 0; i < CONFIG_MAX_TASKS; i++)
         {
           g_pidhash[i].ticks >>= 1;
+          total += g_pidhash[i].ticks;
         }
 
-      /* Divide the total tick count by two */
+      /* Save the new total. */
 
-      g_cpuload_total  >>= 1;
+      g_cpuload_total = total;
     }
 }
 
