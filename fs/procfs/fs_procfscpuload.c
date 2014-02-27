@@ -256,7 +256,7 @@ static ssize_t cpuload_read(FAR struct file *filep, FAR char *buffer,
           fracpart = 0;
         }
 
-      linesize = snprintf(attr->line, CPULOAD_LINELEN, "%3d.%01d%%\n",
+      linesize = snprintf(attr->line, CPULOAD_LINELEN, "%3d.%01d%%",
                           intpart, fracpart);
 
       /* Save the linesize in case we are re-entered with f_pos > 0 */

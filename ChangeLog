@@ -6677,3 +6677,6 @@
 	  time constant related delay elapsed.  The total count is now always
 	  guaranteed to add up to 100% (excepting only truncation errors)
 	  (2014-2-27).
+	* fs/procfs/fs_procfscpuload.c and fs_procfsproc.c:  Remove the newline
+	  at the end of the percentage so that the returned strings can be
+	  printed on the same line as other values (2014-2-27).

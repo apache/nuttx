@@ -583,7 +583,7 @@ static ssize_t proc_loadavg(FAR struct proc_file_s *procfile,
       fracpart = 0;
     }
 
-  linesize = snprintf(procfile->line, STATUS_LINELEN, "%3d.%01d%%\n",
+  linesize = snprintf(procfile->line, STATUS_LINELEN, "%3d.%01d%%",
                       intpart, fracpart);
   copysize = procfs_memcpy(procfile->line, linesize, buffer, buflen, &offset);
 
