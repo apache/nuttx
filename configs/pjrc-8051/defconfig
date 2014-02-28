@@ -41,6 +41,7 @@ CONFIG_ARCH_CHIP_8051=n
 CONFIG_ARCH_CHIP_8052=y
 CONFIG_ARCH_BOARD="pjrc-8051"
 CONFIG_ARCH_BOARD_PJRC_87C52=y
+CONFIG_DEFAULT_SMALL=y
 
 #
 # Architecture-specific settings.  These may mean nothing to

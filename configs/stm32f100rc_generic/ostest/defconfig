@@ -8,6 +8,7 @@ CONFIG_NUTTX_NEWCONFIG=y
 # Build Setup
 #
 # CONFIG_EXPERIMENTAL is not set
+CONFIG_DEFAULT_SMALL=y
 
 #
 # Build Configuration
