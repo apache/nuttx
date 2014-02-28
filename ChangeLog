@@ -6684,3 +6684,7 @@
 	  An asynchronous, "external" clock may now be used to drive the CPU
 	  load calculations for more accurate load measurements when needed
 	  (2014-2-27).
+	* configs/*/defconfig:  If CONFIG_NSH_LIBRARY=y then set CONFIG_NSH_READLINE=y
+	  otherwise the CLE will be selected by default the next time that
+	  make menuconfig is used (2014-2-28).
+ 
