@@ -546,6 +546,8 @@ CONFIG_NSH_WGET_USERAGENT="NuttX/6.xx.x (; http://www.nuttx.org/)"
 # NSH Library
 #
 CONFIG_NSH_LIBRARY=y
+CONFIG_NSH_READLINE=y
+# CONFIG_NSH_CLE is not set
 
 #
 # Disable Individual commands
