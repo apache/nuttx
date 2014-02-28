@@ -6687,4 +6687,5 @@
 	* configs/*/defconfig:  If CONFIG_NSH_LIBRARY=y then set CONFIG_NSH_READLINE=y
 	  otherwise the CLE will be selected by default the next time that
 	  make menuconfig is used (2014-2-28).
+	* include/cxx/cstdbool:  Ignore _Bool8 if CONFIG_C99_BOOL8=y. (2014-2-28).
  
