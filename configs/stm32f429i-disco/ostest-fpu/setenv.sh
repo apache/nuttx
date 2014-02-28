@@ -1,7 +1,7 @@
 #!/bin/bash
 # configs/stm32f429i-disco/ostest-fpu/setenv.sh
 #
-#   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -60,6 +60,7 @@ export TOPDIR=`pwd`/..
 # toolchain under windows.  You will also have to edit this if you install
 # the CodeSourcery toolchain in any other location
 #export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/CodeSourcery/Sourcery G++ Lite/bin"
+#export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/CodeSourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin"
 
 # These are the Cygwin paths to the locations where I installed the Atollic
 # toolchain under windows.  You will also have to edit this if you install
@@ -71,12 +72,8 @@ export TOPDIR=`pwd`/..
 
 # This is the Cygwin path to the location where I build the buildroot
 # toolchain.
-#export TOOLCHAIN_BIN="${WD}/../misc/buildroot/build_arm_nofpu/staging_dir/bin"
-
-#export TOOLCHAIN_BIN="/home/ken/CodeSourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin"
-#export TOOLCHAIN_BIN="/opt/arm-2013.05/bin"
+export TOOLCHAIN_BIN="${WD}/../misc/buildroot/build_arm_nofpu/staging_dir/bin"
 #export TOOLCHAIN_BIN="${TOPDIR}/misc/buildroot/build_arm/staging_dir/bin"
-export TOOLCHAIN_BIN="${TOPDIR}/misc/buildroot/build_arm_hf/staging_dir/bin"
 
 # Add the path to the toolchain to the PATH varialble
 #export PATH="${TOOLCHAIN_BIN}:/sbin:/usr/sbin:${PATH_ORIG}"
