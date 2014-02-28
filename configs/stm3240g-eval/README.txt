@@ -1097,14 +1097,23 @@ Where <subdir> is one of the following:
     CONFIG_NSH_DRIPADDR=(10<<24|0<<16|0<<8|1) : Host IP address 10.0.0.1
 
     NOTES:
-    1. This example assumes that a network is connected.  During its
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configurations using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. This example assumes that a network is connected.  During its
        initialization, it will try to negotiate the link speed.  If you have
        no network connected when you reset the board, there will be a long
        delay (maybe 30 seconds?) before anything happens.  That is the timeout
        before the networking finally gives up and decides that no network is
        available.
 
-    2. This example supports the ADC test (apps/examples/adc) but this must
+    3. This example supports the ADC test (apps/examples/adc) but this must
        be manually enabled by selecting:
 
        CONFIG_ADC=y             : Enable the generic ADC infrastructure
@@ -1120,7 +1129,7 @@ Where <subdir> is one of the following:
 
        CONFIG_DEBUG_ANALOG
 
-    3. This example supports the PWM test (apps/examples/pwm) but this must
+    4. This example supports the PWM test (apps/examples/pwm) but this must
        be manually enabled by selecting eeither
 
        CONFIG_PWM=y                : Enable the generic PWM infrastructure
@@ -1149,7 +1158,7 @@ Where <subdir> is one of the following:
 
        CONFIG_DEBUG_PWM
 
-    4. This example supports the CAN loopback test (apps/examples/can) but this
+    5. This example supports the CAN loopback test (apps/examples/can) but this
        must be manually enabled by selecting:
 
        CONFIG_CAN=y             : Enable the generic CAN infrastructure
@@ -1164,25 +1173,25 @@ Where <subdir> is one of the following:
        CONFIG_DEBUG_CAN
        CONFIG_CAN_REGDEBUG
 
-    5. This example can support an FTP client.  In order to build in FTP client
-       support simply uncomment the following lines in the appconfig file (before
-       configuring) or in the apps/.config file (after configuring):
+    6. This example can support an FTP client.  In order to build in FTP client
+       support simply uncomment the following lines in the defconfig file (before
+       configuring) or in the .config file (after configuring):
 
-       #CONFIGURED_APPS += netutils/ftpc
-       #CONFIGURED_APPS += examples/ftpc
+       CONFIG_NETUTILS_FTPC=y
+       CONFIG_EXAMPLES_FTPC=y
 
-    6. This example can support an FTP server.  In order to build in FTP server
-       support simply uncomment the following lines in the appconfig file (before
-       configuring) or in the apps/.config file (after configuring):
+    7. This example can support an FTP server.  In order to build in FTP server
+       support simply add the following lines in the defconfig file (before
+       configuring) or in the .config file (after configuring):
 
-       #CONFIGURED_APPS += netutils/ftpd
-       #CONFIGURED_APPS += examples/ftpd
+       CONFIG_NETUTILS_FTPD=y
+       CONFIG_EXAMPLES_FTPD=y
 
        And enable poll() support in the NuttX configuration file:
 
        CONFIG_DISABLE_POLL=n
 
-    7. This example supports the watchdog timer test (apps/examples/watchdog)
+    8. This example supports the watchdog timer test (apps/examples/watchdog)
        but this must be manually enabled by selecting:
 
        CONFIG_WATCHDOG=y         : Enables watchdog timer driver support
@@ -1198,43 +1207,40 @@ Where <subdir> is one of the following:
 
        The IWDG timer has a range of about 35 seconds and should not be an issue.
 
-    7. Adding LCD and graphics support:
-
-       appconfig (apps/.config):  Enable the application configurations that you
-       want to use.  Asexamples:
-
-       CONFIGURED_APPS += examples/nx       : Pick one or more
-       CONFIGURED_APPS += examples/nxhello  :
-       CONFIGURED_APPS += examples/nximage  :
-       CONFIGURED_APPS += examples/nxlines  :
+    9. Adding LCD and graphics support:
 
        defconfig (nuttx/.config):
 
-       CONFIG_STM32_FSMC=y                  : FSMC support is required for the LCD
-       CONFIG_NX=y                          : Enable graphics suppport
-       CONFIG_MM_REGIONS=3                  : When FSMC is enabled, so is the on-board SRAM memory region
+       CONFIG_EXAMPLES_nx=y      : Pick one or more
+       CONFIG_EXAMPLES_nxhello=y :
+       CONFIG_EXAMPLES_nximage   :
+       CONFIG_EXAMPLES_nxlines              :
 
-    8. USB OTG FS Device or Host Support
+       CONFIG_STM32_FSMC=y       : FSMC support is required for the LCD
+       CONFIG_NX=y               : Enable graphics suppport
+       CONFIG_MM_REGIONS=3       : When FSMC is enabled, so is the on-board SRAM memory region
 
-       CONFIG_USBDEV          - Enable USB device support, OR
-       CONFIG_USBHOST         - Enable USB host support
-       CONFIG_STM32_OTGFS     - Enable the STM32 USB OTG FS block
-       CONFIG_STM32_SYSCFG    - Needed
-       CONFIG_SCHED_WORKQUEUE - Worker thread support is required
+    10. USB OTG FS Device or Host Support
 
-    9. USB OTG FS Host Support.  The following changes will enable support for
-       a USB host on the STM32F4Discovery, including support for a mass storage
-       class driver:
+       CONFIG_USBDEV             : Enable USB device support, OR
+       CONFIG_USBHOST            : Enable USB host support
+       CONFIG_STM32_OTGFS        : Enable the STM32 USB OTG FS block
+       CONFIG_STM32_SYSCFG       : Needed
+       CONFIG_SCHED_WORKQUEUE    : Worker thread support is required
 
-       CONFIG_USBDEV=n          - Make sure tht USB device support is disabled
-       CONFIG_USBHOST=y         - Enable USB host support
-       CONFIG_STM32_OTGFS=y     - Enable the STM32 USB OTG FS block
-       CONFIG_STM32_SYSCFG=y    - Needed for all USB OTF FS support
-       CONFIG_SCHED_WORKQUEUE=y - Worker thread support is required for the mass
+    11. USB OTG FS Host Support.  The following changes will enable support for
+        a USB host on the STM32F4Discovery, including support for a mass storage
+        class driver:
+
+        CONFIG_USBDEV=n          : Make sure tht USB device support is disabled
+        CONFIG_USBHOST=y         : Enable USB host support
+        CONFIG_STM32_OTGFS=y     : Enable the STM32 USB OTG FS block
+        CONFIG_STM32_SYSCFG=y    : Needed for all USB OTF FS support
+        CONFIG_SCHED_WORKQUEUE=y : Worker thread support is required for the mass
                                   storage class driver.
-       CONFIG_NSH_ARCHINIT=y    - Architecture specific USB initialization
+        CONFIG_NSH_ARCHINIT=y    : Architecture specific USB initialization
                                   is needed for NSH
-       CONFIG_FS_FAT=y          - Needed by the USB host mass storage class.
+        CONFIG_FS_FAT=y          : Needed by the USB host mass storage class.
 
        With those changes, you can use NSH with a FLASH pen driver as shown
        belong.  Here NSH is started with nothing in the USB host slot:
@@ -1281,7 +1287,7 @@ Where <subdir> is one of the following:
 
        nsh> umount /mnt/stuff
 
-    11. By default, this configuration supports /dev/random using the STM32's
+    12. By default, this configuration supports /dev/random using the STM32's
         RNG hardware.  This can be disabled as follows:
 
         -CONFIG_STM32_RNG=y
@@ -1290,7 +1296,7 @@ Where <subdir> is one of the following:
         -CONFIG_DEV_RANDOM=y
         +CONFIG_DEV_RANDOM=n
 
-    12. This configuration requires that jumper JP22 be set to enable RS-232
+    13. This configuration requires that jumper JP22 be set to enable RS-232
        operation.
 
   nsh2:
