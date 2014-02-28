@@ -52,7 +52,7 @@ endchoice
 
 config ARMV7A_OABI_TOOLCHAIN
 	bool "OABI (vs EABI)"
-	default y
+	default n
 	depends on ARMV7A_TOOLCHAIN_BUILDROOT
 	---help---
 		Most of the older buildroot toolchains are OABI and are named arm-nuttx-elf- vs. arm-nuttx-eabi-
