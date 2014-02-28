@@ -6692,4 +6692,5 @@
 	  configurations (2014-2-28).
 	* configs/stm3240g-eval/nsh: Configuration converted to use the
 	  kconfig-frontends tools (2014-2-28).
-` 
+	* configs/stm3240g-eval/ostest:  Remove OS test configuration (2014-2-28)
+	* configs/stm3220g-eval/ostest: Remove OS test configuratin (2014-2-28)` 

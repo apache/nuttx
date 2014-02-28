@@ -1092,14 +1092,6 @@ Where <subdir> is one of the following:
        a Windows machine using the CodeSourcery Windows toolchain.
        That configuration can be easy changed as described in Note 1.
 
-  ostest:
-  ------
-    This configuration directory, performs a simple OS test using
-    examples/ostest.  By default, this project assumes that you are
-    using the DFU bootloader.
-
-    CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
-
   telnetd:
   --------
 
