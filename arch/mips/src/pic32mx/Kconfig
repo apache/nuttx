@@ -1091,7 +1091,8 @@ config PIC32MX_ICESEL
 
 config PIC32MX_PROGFLASHWP
 	hex "Program FLASH write protect"
-	default 0xff
+	default 0x3ff if ARCH_CHIP_PIC32MX1 || ARCH_CHIP_PIC32MX2
+	default 0xff if !ARCH_CHIP_PIC32MX1 && !ARCH_CHIP_PIC32MX2
 	---help---
 		Program FLASH write protect.  Default 0xff (disabled)
 
