@@ -6695,4 +6695,6 @@
 	* configs/*/ostest:  Removed most OS test configurations (except in a few
 	  cases where there wass some good argument to retain the ostest
 	  configuration) (2014-2-28)
-
+	* configurations (2014-2-28).
+        * configs/stm3240g-eval/nsh2: Configuration converted to use the
+          kconfig-frontends tools (2014-3-1).
