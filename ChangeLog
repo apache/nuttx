@@ -6724,4 +6724,6 @@
           tools (2014-3-1).
 	* configs/sim/nsh2: Configuration converted to use the kconfig-frontends
           tools (2014-3-1).
+	* configs/lm3s6432-s2e/nsh: Configuration converted to use the
+          kconfig-frontends tools (2014-3-1)
 
