@@ -1087,45 +1087,37 @@ Where <subdir> is one of the following:
          CONFIG_CDCACM=y         : Enable the CDCACM device
          CONFIG_EXAMPLES_CDCACM=y
 
-    Networking Configurations.
-    -------------------------
-    Several Networking configurations can be enabled and included
-    as NSH built-in built in functions.  The following additional
-    configuration settings are required:
+    3. Networking Configurations
 
-      CONFIG_NET=y              : Enable networking support
-      CONFIG_PIC32MX_ETHERNET=y : Enable the PIC32 Ethernet driver
-      CONFIG_NSH_TELNET=y       : Enable the Telnet NSH console (optional)
+       Several Networking configurations can be enabled and included
+       as NSH built-in built in functions.  The following additional
+       configuration settings are required:
 
-    NOTES:
-    1. This logic will assume that a network is connected.  During its
-       initialization, it will try to negotiate the link speed.  If you have
-       no network connected when you reset the board, there will be a long
-       delay (maybe 30 seconds?) before anything happens.  That is the timeout
-       before the networking finally gives up and decides that no network is
-       available.
+         CONFIG_NET=y              : Enable networking support
+         CONFIG_PIC32MX_ETHERNET=y : Enable the PIC32 Ethernet driver
+         CONFIG_NSH_TELNET=y       : Enable the Telnet NSH console (optional)
 
-    2. This example can support an FTP client.  In order to build in FTP client
-       support simply uncomment the following lines in the appconfig file (before
-       configuring) or in the apps/.config file (after configuring):
+       NOTES:
 
-         CONFIG_EXAMPLES_
-       #CONFIGURED_APPS += netutils/ftpc
-         CONFIG_EXAMPLES_
-       #CONFIGURED_APPS += examples/ftpc
+       a. This logic will assume that a network is connected.  During its
+          initialization, it will try to negotiate the link speed.  If you have
+          no network connected when you reset the board, there will be a long
+          delay (maybe 30 seconds?) before anything happens.  That is the timeout
+          before the networking finally gives up and decides that no network is
+          available.
 
-    3. This example can support an FTP server.  In order to build in FTP server
-       support simply uncomment the following lines in the appconfig file (before
-       configuring) or in the apps/.config file (after configuring):
+       b. This example can support an FTP client.  In order to build in FTP client
+          support simply add the following to the Nuttx configuration file:
 
-         CONFIG_EXAMPLES_
-       #CONFIGURED_APPS += netutils/ftpd
-         CONFIG_EXAMPLES_
-       #CONFIGURED_APPS += examples/ftpd
+         CONFIG_NETUTILS_FTPC=y
+         CONFIG_EXAMPLES_FTPC=y
 
-       And enable poll() support in the NuttX configuration file:
+       c. This example can support an FTP server.  In order to build in FTP server
+          support simply add the following to the Nuttx configuration file:
 
-       CONFIG_DISABLE_POLL=n
+         CONFIG_DISABLE_POLL=n
+         CONFIG_NETUTILS_FTPD=y
+         CONFIG_EXAMPLES_FTPD=y
 
   nsh2:
 
@@ -1199,12 +1191,9 @@ Where <subdir> is one of the following:
       -CONFIG_SYSTEM_USBMSC_DEVPATH1="/dev/mmcsd0"
       +CONFIG_SYSTEM_USBMSC_DEVPATH1="/dev/ram0"
 
-  2. Changes to apps/.config.
+    e) Enable building of the system/usbmsc:
 
-    a) Enable building of the system/usbmsc:
-
-      -# CONFIGURED_APPS += system/usbmsc
-      +  CONFIGURED_APPS += system/usbmsc
+      +CONFIG_SYSTEM_USBMSC=y
 
   3. When NSH first comes up, you must manually create the RAM disk
      before exporting it:
