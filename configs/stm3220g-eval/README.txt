@@ -821,14 +821,23 @@ Where <subdir> is one of the following:
     CONFIG_NSH_DRIPADDR=(192<<24|168<<16|13<<8|1) : Host IP address 192.168.8.1
 
     NOTES:
-    1. This example assumes that a network is connected.  During its
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configurations using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. This example assumes that a network is connected.  During its
        initialization, it will try to negotiate the link speed.  If you have
        no network connected when you reset the board, there will be a long
        delay (maybe 30 seconds?) before anything happens.  That is the timeout
        before the networking finally gives up and decides that no network is
        available.
 
-    2. This example supports the ADC test (apps/examples/adc) but this must
+    3. This example supports the ADC test (apps/examples/adc) but this must
        be manually enabled by selecting:
 
        CONFIG_ADC=y             : Enable the generic ADC infrastructure
@@ -844,7 +853,7 @@ Where <subdir> is one of the following:
 
        CONFIG_DEBUG_ANALOG
 
-    3. This example supports the PWM test (apps/examples/pwm) but this must
+    4. This example supports the PWM test (apps/examples/pwm) but this must
        be manually enabled by selecting eeither
 
        CONFIG_PWM=y                : Enable the generic PWM infrastructure
@@ -873,7 +882,7 @@ Where <subdir> is one of the following:
 
        CONFIG_DEBUG_PWM
 
-    4. This example supports the CAN loopback test (apps/examples/can) but this
+    5. This example supports the CAN loopback test (apps/examples/can) but this
        must be manually enabled by selecting:
 
        CONFIG_CAN=y             : Enable the generic CAN infrastructure
@@ -888,14 +897,14 @@ Where <subdir> is one of the following:
        CONFIG_DEBUG_CAN
        CONFIG_CAN_REGDEBUG
 
-    5. This example can support an FTP client.  In order to build in FTP client
+    6. This example can support an FTP client.  In order to build in FTP client
        support simply uncomment the following lines in the appconfig file (before
        configuring) or in the apps/.config file (after configuring):
 
        #CONFIGURED_APPS += netutils/ftpc
        #CONFIGURED_APPS += examples/ftpc
 
-    6. This example can support an FTP server.  In order to build in FTP server
+    7. This example can support an FTP server.  In order to build in FTP server
        support simply uncomment the following lines in the appconfig file (before
        configuring) or in the apps/.config file (after configuring):
 
@@ -906,7 +915,7 @@ Where <subdir> is one of the following:
 
        CONFIG_DISABLE_POLL=n
 
-    7. This example supports the watchdog timer test (apps/examples/watchdog)
+    8. This example supports the watchdog timer test (apps/examples/watchdog)
        but this must be manually enabled by selecting:
 
        CONFIG_WATCHDOG=y         : Enables watchdog timer driver support
@@ -922,7 +931,7 @@ Where <subdir> is one of the following:
 
        The IWDG timer has a range of about 35 seconds and should not be an issue.
 
-    7. Adding LCD and graphics support:
+    9. Adding LCD and graphics support:
 
        appconfig (apps/.config):  Enable the application configurations that you
        want to use.  Asexamples:
@@ -938,7 +947,7 @@ Where <subdir> is one of the following:
        CONFIG_NX=y                          : Enable graphics suppport
        CONFIG_MM_REGIONS=2                  : When FSMC is enabled, so is the on-board SRAM memory region
 
-    8. USB OTG FS Device or Host Support
+    10. USB OTG FS Device or Host Support
  
        CONFIG_USBDEV          - Enable USB device support, OR
        CONFIG_USBHOST         - Enable USB host support (but not both)
@@ -951,17 +960,17 @@ Where <subdir> is one of the following:
        CONFIG_NSH_ARCHINIT    - Architecture specific USB initialization
                                 is needed
 
-    9. This configuration requires that jumper JP22 be set to enable RS-232 operation.
+    11. This configuration requires that jumper JP22 be set to enable RS-232 operation.
 
   nsh2:
   -----
 
-    This is an alternaitve NSH configuration.  One limitation of the STM3220G-EVAL
+    This is an alternative NSH configuration.  One limitation of the STM3220G-EVAL
     board is that you cannot have both a UART-based NSH console and SDIO support.
     The nsh2 differs from the nsh configuration in the following ways:
 
     -CONFIG_STM32_USART3=y      : USART3 is disabled
-    + CONFIG_STM32_USART3=n
+    +CONFIG_STM32_USART3=n
 
     -CONFIG_STM32_SDIO=n        : SDIO is enabled
     +CONFIG_STM32_SDIO=y
@@ -988,20 +997,29 @@ Where <subdir> is one of the following:
     curious.
 
     NOTES:
-    1. See the notes for the nsh configuration.  Most also apply to the nsh2
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configurations using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. See the notes for the nsh configuration.  Most also apply to the nsh2
        configuration.
 
-    2. RS-232 is disabled, but Telnet is still available for use as a console.
+    3. RS-232 is disabled, but Telnet is still available for use as a console.
        Since RS-232 and SDIO use the same pins (one controlled by JP22), RS232
        and SDIO cannot be used concurrently.
 
-    3. This configuration requires that jumper JP22 be set to enable SDIO
+    4. This configuration requires that jumper JP22 be set to enable SDIO
        operation.  To enable MicroSD Card, which shares same I/Os with RS-232,
        JP22 is not fitted.
 
-    4. In order to use SDIO without overruns, DMA must be used.
+    5. In order to use SDIO without overruns, DMA must be used.
 
-    5. Another SDIO/DMA issue.  This one is probably a software bug.  This is
+    6. Another SDIO/DMA issue.  This one is probably a software bug.  This is
        the bug as stated in the TODO list:
 
        "If you use a large I/O buffer to access the file system, then the
@@ -1012,7 +1030,7 @@ Where <subdir> is one of the following:
        For this reason, CONFIG_MMCSD_MULTIBLOCK_DISABLE=y appears in the defconfig
        file.
 
-    6. Another DMA-related concern.  I see this statement in the reference
+    7. Another DMA-related concern.  I see this statement in the reference
        manual:  "The burst configuration has to be selected in order to respect
        the AHB protocol, where bursts must not cross the 1 KB address boundary
        because the minimum address space that can be allocated to a single slave

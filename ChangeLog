@@ -6698,3 +6698,6 @@
 	* configurations (2014-2-28).
         * configs/stm3240g-eval/nsh2: Configuration converted to use the
           kconfig-frontends tools (2014-3-1).
+        * configs/stm3220g-eval/nsh2: Configuration converted to use the
+          kconfig-frontends tools (2014-3-1).
+
