@@ -484,6 +484,18 @@ as follow:
 Where <subdir> is one of the following:
 
   nsh:
-    Configures the NuttShell (nsh) located at apps/examples/nsh.  The
-    Configuration enables only the serial NSH interfaces.  See notes
-    above for enabling USB host support in this configuration.
+    Configures the NuttShell (nsh) located at apps/examples/nsh.
+
+    NOTES:
+
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configurations using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2.  This configuration enables only the serial NSH interface.  See
+        notes above for enabling USB host support in this configuration.
