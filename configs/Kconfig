@@ -482,7 +482,7 @@ config ARCH_BOARD_PIC32_STARTERKIT
 		(DM320004) with the Multimedia Expansion Board (MEB, DM320005).
 		See www.microchip.com for further information.
 
-config ARCH_BOARD_PIC32_PIC32MX7MMB
+config ARCH_BOARD_PIC32MX7MMB
 	bool "Mikroelektronika PIC32MX7 MMB"
 	depends on ARCH_CHIP_PIC32MX795F512L
 	select ARCH_HAVE_LEDS
@@ -930,7 +930,7 @@ config ARCH_BOARD
 	default "pcblogic-pic32mx"    if ARCH_BOARD_PCBLOGICPIC32MX
 	default "pcduino-a10"         if ARCH_BOARD_PCDUINO_A10
 	default "pic32-starterkit"    if ARCH_BOARD_PIC32_STARTERKIT
-	default "pic32mx7mmb"         if ARCH_BOARD_PIC32_PIC32MX7MMB
+	default "pic32mx7mmb"         if ARCH_BOARD_PIC32MX7MMB
 	default "pirelli_dpl10"       if ARCH_BOARD_PIRELLI_DPL10
 	default "pjrc-8051"           if ARCH_BOARD_PJRC_87C52
 	default "px4fmu-v2_upstream"  if ARCH_BOARD_PX4FMU_V2
@@ -1164,7 +1164,7 @@ endif
 if ARCH_BOARD_PIC32_STARTERKIT
 source "configs/pic32-starterkit/Kconfig"
 endif
-if ARCH_BOARD_PIC32_PIC32MX7MMB
+if ARCH_BOARD_PIC32MX7MMB
 source "configs/pic32mx7mmb/Kconfig"
 endif
 if ARCH_BOARD_PIRELLI_DPL10
