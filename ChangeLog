@@ -6720,4 +6720,6 @@
           kconfig-frontends tools (2014-3-1)
 	* configs/pic32mx7mmb/nsh: Configuration converted to use the
           kconfig-frontends tools (2014-3-1).
+	* configs/ubw32/nsh: Configuration converted to use the kconfig-frontends
+          tools (2014-3-1).
 
