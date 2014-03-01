@@ -304,6 +304,17 @@ Where <subdir> is one of the following:
     Configures the NuttShell (nsh) located at examples/nsh.  The
     Configuration enables both the serial and telnetd NSH interfaces.
 
-The default configuration sets up a console on front-panel RS-232 
-interface, sets up device driver of all supported equipment and 
-links in VSN default applications.
+    The default configuration sets up a console on front-panel RS-232 
+    interface, sets up device driver of all supported equipment and 
+    links in VSN default applications.
+
+    NOTES:
+
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configurations using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.

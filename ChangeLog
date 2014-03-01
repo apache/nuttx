@@ -6710,3 +6710,6 @@
           kconfig-frontends tools (2014-3-1).
         * configs/nucleus2g/nsh: Configuration converted to use the
           kconfig-frontends tools (2014-3-1).
+        * configs/vsn/nsh: Configuration converted to use the kconfig-frontends
+	  tools (2014-3-1).
+
