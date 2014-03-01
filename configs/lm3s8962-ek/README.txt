@@ -466,4 +466,3 @@ Where <subdir> is one of the following:
     Otherwise, the NSH prompt will not come up because the Ethernet
     driver is waiting for the network to come up.  That is probably
     a bug in the Ethernet driver behavior!
-
