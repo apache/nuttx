@@ -532,7 +532,18 @@ Where <subdir> is one of the following:
 
   nsh:
     Configures the NuttShell (nsh) located at examples/nsh.  The
-    Configuration enables only the serial  NSH interfaces.
+    Configuration enables only the serial NSH interface.
+
+    NOTES:
+
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configurations using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
 
   usbserial:
     This configuration directory exercises the USB serial class
