@@ -906,55 +906,67 @@ Where <subdir> is one of the following:
   nsh:
   ----
     This configuration is the NuttShell (NSH) example at examples/nsh/.
-    By default, this project assumes that you are executing directly from
-    SRAM.
 
-      CONFIG_LPC43_BOOT_SRAM=y       : Executing in SRAM
-      CONFIG_LPC43_CODEREDW=y        : Code Red under Windows
+    NOTES:
 
-    To execute from SPIFI, you would need to set:
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configurations using that tool, you should:
 
-      CONFIG_LPC43_BOOT_SPIFI=y      : Executing from SPIFI
-      CONFIG_RAM_SIZE=(128*1024)    : SRAM Bank0 size
-      CONFIG_RAM_START=0x10000000   : SRAM Bank0 base address
-      CONFIG_SPIFI_OFFSET=(512*1024) : SPIFI file system offset
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
 
-    CONFIG_MM_REGIONS should also be increased if you want to other SRAM banks
-    to the memory pool.
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
 
-    This configuration has some special options that can be used to
-    create a block device on the SPIFI FLASH.  NOTE:  CONFIG_LPC43_SPIFI=y
-    must also be defined to enable SPIFI setup support:
+    2. By default, this project assumes that you are executing directly from
+       SRAM.
 
-    SPIFI device geometry:
+         CONFIG_LPC43_BOOT_SRAM=y       : Executing in SRAM
+         CONFIG_LPC43_CODEREDW=y        : Code Red under Windows
 
-      CONFIG_SPIFI_OFFSET - Offset the beginning of the block driver this many
-        bytes into the device address space.  This offset must be an exact
-        multiple of the erase block size (CONFIG_SPIFI_BLKSIZE). Default 0.
-      CONFIG_SPIFI_BLKSIZE - The size of one device erase block.  If not defined
-        then the driver will try to determine the correct erase block size by
-        examining that data returned from spifi_initialize (which sometimes
-        seems bad).
+    3. To execute from SPIFI, you would need to set:
 
-    Other SPIFI options
+         CONFIG_LPC43_BOOT_SPIFI=y      : Executing from SPIFI
+         CONFIG_RAM_SIZE=(128*1024)     : SRAM Bank0 size
+         CONFIG_RAM_START=0x10000000    : SRAM Bank0 base address
+         CONFIG_SPIFI_OFFSET=(512*1024) : SPIFI file system offset
 
-      CONFIG_SPIFI_SECTOR512 - If defined, then the driver will report a more
-        FAT friendly 512 byte sector size and will manage the read-modify-write
-        operations on the larger erase block.
-      CONFIG_SPIFI_READONLY - Define to support only read-only operations.
-      CONFIG_SPIFI_LIBRARY - Don't use the LPC43xx ROM routines but, instead,
-        use an external library implementation of the SPIFI interface.
-      CONFIG_SPIFI_VERIFY - Verify all spifi_program() operations by reading
-        from the SPI address space after each write.
-      CONFIG_DEBUG_SPIFI_DUMP - Debug option to dump read/write buffers.  You
-        probably do not want to enable this unless you want to dig through a
-        *lot* of debug output!  Also required CONFIG_DEBUG, CONFIG_DEBUG_VERBOSE,
-        and CONFIG_DEBUG_FS,
+       CONFIG_MM_REGIONS should also be increased if you want to other SRAM banks
+       to the memory pool.
 
-    In my experience, there were some missing function pointers in the LPC43xx
-    SPIFI ROM routines and the SPIFI configuration could only be built with
-    CONFIG_SPIFI_LIBRARY=y.  The SPIFI library is proprietary and cannot be
-    provided within NuttX open source repository; SPIFI library binaries can
-    be found on the lpcware.com website.  In this build sceneario, you must
-    also provide the patch to the external SPIFI library be defining the make
-    variable EXTRA_LIBS in the top-level Make.defs file.  Good luck!
+    4. This configuration an also be used create a block device on the SPIFI
+       FLASH.  CONFIG_LPC43_SPIFI=y must also be defined to enable SPIFI setup
+       support:
+
+       SPIFI device geometry:
+
+         CONFIG_SPIFI_OFFSET - Offset the beginning of the block driver this many
+           bytes into the device address space.  This offset must be an exact
+           multiple of the erase block size (CONFIG_SPIFI_BLKSIZE). Default 0.
+         CONFIG_SPIFI_BLKSIZE - The size of one device erase block.  If not defined
+           then the driver will try to determine the correct erase block size by
+           examining that data returned from spifi_initialize (which sometimes
+           seems bad).
+
+       Other SPIFI options
+
+         CONFIG_SPIFI_SECTOR512 - If defined, then the driver will report a more
+           FAT friendly 512 byte sector size and will manage the read-modify-write
+           operations on the larger erase block.
+         CONFIG_SPIFI_READONLY - Define to support only read-only operations.
+         CONFIG_SPIFI_LIBRARY - Don't use the LPC43xx ROM routines but, instead,
+           use an external library implementation of the SPIFI interface.
+         CONFIG_SPIFI_VERIFY - Verify all spifi_program() operations by reading
+           from the SPI address space after each write.
+         CONFIG_DEBUG_SPIFI_DUMP - Debug option to dump read/write buffers.  You
+           probably do not want to enable this unless you want to dig through a
+           *lot* of debug output!  Also required CONFIG_DEBUG, CONFIG_DEBUG_VERBOSE,
+           and CONFIG_DEBUG_FS,
+
+    5. In my experience, there were some missing function pointers in the LPC43xx
+       SPIFI ROM routines and the SPIFI configuration could only be built with
+       CONFIG_SPIFI_LIBRARY=y.  The SPIFI library is proprietary and cannot be
+       provided within NuttX open source repository; SPIFI library binaries can
+       be found on the lpcware.com website.  In this build sceneario, you must
+       also provide the patch to the external SPIFI library be defining the make
+       variable EXTRA_LIBS in the top-level Make.defs file.  Good luck!
