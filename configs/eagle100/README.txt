@@ -316,9 +316,6 @@ Eagle100-specific Configuration Options
 
     CONFIG_ARCH_STACKDUMP - Do stack dumps after assertions
 
-    CONFIG_ARCH_BOOTLOADER - Configure to use the MicroMint Eagle-100
-       Ethernet bootloader.
-
     CONFIG_ARCH_LEDS -  Use LEDs to show state. Unique to board architecture.
 
     CONFIG_ARCH_CALIBRATION - Enables some build in instrumentation that
@@ -406,6 +403,27 @@ Where <subdir> is one of the following:
     Configuration enables only the serial NSH interfaces (the telnet
     interface should also be functional, but is not enabled in this
     configuration).
+
+    NOTES:
+
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configurations using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. As a consequence of (1), selection of toolchains differs from
+       the discussion above under GNU Toolchain Options.  You should
+       *not* add the CROSSDEV setting on the make command line.  Rather,
+       you should reconfigure and select the toolchain that you want
+       from the "System Type" menu.
+
+       Eventually, all of the eagle100 configurations will be changed
+       to use the new configuration mechanism and at that time, the
+       above discussion will be corrected for all configurations.
 
   nxflat:
     This builds the NXFLAT example at apps/examples/nxfalt.
