@@ -1032,60 +1032,62 @@ selected as follow:
 Where <subdir> is one of the following:
 
   nsh:
-  ====
-    Description.
-    ------------
+
     This is the NuttShell (NSH) using the NSH startup logic at
     apps/examples/nsh.
 
-    Serial Output.
-    --------------
-    The OS test produces all of its test output on the serial console.
-    This configuration has UART1 enabled as a serial console.  I have
-    been unable to get this UART work on the MEB.  But on the Expansion
-    I/O board, this maps to RX = J11 pin 41 and TX = J11 pin 43
+    NOTES:
 
-    USB Configuations.
-    -----------------
-    Several USB device configurations can be enabled and included
-    as NSH built-in built in functions.  
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configurations using that tool, you should:
 
-    To use USB device, connect the starter kit to the host using a cable
-    with a Type-B micro-plug to the starter kit’s micro-A/B port J5, located
-    on the bottom side of the starter kit. The other end of the cable
-    must have a Type-A plug. Connect it to a USB host. Jumper JP2 should be
-    removed.
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
 
-    All USB device configurations require the following basic setup in
-    your NuttX configuration file to enable USB device support:
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. Serial Output
+
+       The OS test produces all of its test output on the serial console.
+       This configuration has UART1 enabled as a serial console.  I have
+       been unable to get this UART work on the MEB.  But on the Expansion
+       I/O board, this maps to RX = J11 pin 41 and TX = J11 pin 43
+
+    3. SB Configurations
+
+       Several USB device configurations can be enabled and included
+       as NSH built-in built in functions.  
+
+       To use USB device, connect the starter kit to the host using a cable
+       with a Type-B micro-plug to the starter kit’s micro-A/B port J5, located
+       on the bottom side of the starter kit. The other end of the cable
+       must have a Type-A plug. Connect it to a USB host. Jumper JP2 should be
+       removed.
+
+       All USB device configurations require the following basic setup in
+       your NuttX configuration file to enable USB device support:
  
-      CONFIG_USBDEV=y         : Enable basic USB device support
-      CONFIG_PIC32MX_USBDEV=y : Enable PIC32 USB device support
+         CONFIG_USBDEV=y         : Enable basic USB device support
+         CONFIG_PIC32MX_USBDEV=y : Enable PIC32 USB device support
 
-    examples/usbterm - This option can be enabled by uncommenting
-    the following line in the appconfig file:
+       examples/usbterm - This option can be enabled by adding the
+       following line in the NuttX configuration file:
 
-      CONFIGURED_APPS += examples/usbterm
+         CONFIG_EXAMPLES_USBTERM=y
 
-    And by enabling one of the USB serial devices:
+       And by enabling one of the USB serial devices:
 
-      CONFIG_PL2303=y         : Enable the Prolifics PL2303 emulation
-      CONFIG_CDCACM=y         : or the CDC/ACM serial driver (not both)
+         CONFIG_PL2303=y         : Enable the Prolifics PL2303 emulation
+         CONFIG_CDCACM=y         : or the CDC/ACM serial driver (not both)
 
-    system/cdcacm -  The system/cdcacm program can be included as an 
-    function by uncommenting the following line in the appconfig file:
+       system/cdcacm -  The system/cdcacm program can be included by
+       adding the following to the configuration file:
     
-      CONFIGURED_APPS += system/cdcacm
+         CONFIG_CDCACM=y         : Enable the CDCACM device
+         CONFIG_EXAMPLES_CDCACM=y
 
-    and defining the following in your .config file:
-
-      CONFIG_CDCACM=y         : Enable the CDCACM device
-
-    system/usbmsc - There are some hooks in the appconfig file
-    to enable the USB mass storage device.  However, this device cannot
-    work until support for the SD card is also incorporated.
-
-    Networking Configuations.
+    Networking Configurations.
     -------------------------
     Several Networking configurations can be enabled and included
     as NSH built-in built in functions.  The following additional
@@ -1107,14 +1109,18 @@ Where <subdir> is one of the following:
        support simply uncomment the following lines in the appconfig file (before
        configuring) or in the apps/.config file (after configuring):
 
+         CONFIG_EXAMPLES_
        #CONFIGURED_APPS += netutils/ftpc
+         CONFIG_EXAMPLES_
        #CONFIGURED_APPS += examples/ftpc
 
     3. This example can support an FTP server.  In order to build in FTP server
        support simply uncomment the following lines in the appconfig file (before
        configuring) or in the apps/.config file (after configuring):
 
+         CONFIG_EXAMPLES_
        #CONFIGURED_APPS += netutils/ftpd
+         CONFIG_EXAMPLES_
        #CONFIGURED_APPS += examples/ftpd
 
        And enable poll() support in the NuttX configuration file:
@@ -1122,12 +1128,13 @@ Where <subdir> is one of the following:
        CONFIG_DISABLE_POLL=n
 
   nsh2:
-  =====
 
     This is an alternative NSH configuration.  Without the Expansion I/O board,
     there is no way to connect a serial console.  This NSH alternative supports
     only a Telnet console.  The nsh2 differs from the nsh configuration in the
     following ways:
+
+    NOTES:
 
     1. Networking is enabled:
 
