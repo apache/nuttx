@@ -903,51 +903,11 @@ as follow:
 
 Where <subdir> is one of the following:
 
-  ostest:
-  ------
-    This configuration of this directory performs a simple OS test using
-    examples/ostest.  By default, this project assumes that you are
-    executing directly from SRAM.
-
-      CONFIG_LPC43_BOOT_SRAM=y       : Executing in SRAM
-      CONFIG_LPC43_CODEREDW=y        : Code Red under Windows
-
-    This configuration directory, performs a simple test of the USB host
-    HID keyboard class driver using the test logic in examples/hidkbd.
-
-    If you use the Atollic toolchain, then the FPU test can be enabled in the
-    examples/ostest by adding the following your NuttX configuration file:
-
-     -CONFIG_ARCH_FPU=n              : Enable FPU support
-     +CONFIG_ARCH_FPU=y
-
-     -CONFIG_LPC43_CODESOURCERYW=y   : Disable the CodeSourcery toolchain
-     +CONFIG_LPC43_CODESOURCERYW=n
-
-     -CONFIG_LPC43_ATOLLIC_LITE=n    : Enable *one* the Atollic toolchains
-      CONFIG_LPC43_ATOLLIC_PRO=n
-     -CONFIG_LPC43_ATOLLIC_LITE=y    : The "Lite" version, OR
-      CONFIG_LPC43_ATOLLIC_PRO=n     : The "Pro" version (only one)
-
-     -CONFIG_INTELHEX_BINARY=y       : Suppress generation FLASH download formats
-     +CONFIG_INTELHEX_BINARY=n       : (Only necessary with the "Lite" version)
-
-     -CONFIG_HAVE_CXX=y              : Suppress generation of C++ code
-     +CONFIG_HAVE_CXX=n              : (Only necessary with the "Lite" version)
-
-     -CONFIG_SCHED_WAITPID=y         : Enable the waitpid() API needed by the FPU test
-     +CONFIG_SCHED_WAITPID=n
-
-    The FPU test also needs to know the size of the FPU registers save area in
-    bytes (see arch/arm/include/armv7-m/irq_lazyfpu.h):
-
-     +CONFIG_EXAMPLES_OSTEST_FPUSIZE=(4*33)
-
   nsh:
   ----
-    This configuration is the NuttShell (NSH) example at examples/nsh/
-    examples/ostest.    By default, this project assumes that you are
-    executing directly from SRAM.
+    This configuration is the NuttShell (NSH) example at examples/nsh/.
+    By default, this project assumes that you are executing directly from
+    SRAM.
 
       CONFIG_LPC43_BOOT_SRAM=y       : Executing in SRAM
       CONFIG_LPC43_CODEREDW=y        : Code Red under Windows

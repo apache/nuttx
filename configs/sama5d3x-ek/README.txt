@@ -2675,10 +2675,6 @@ Configurations
       UnitTest.  It integrates support for both the SAMA5 LCDC and the
       SAMA5 ADC touchscreen controller and provides a more advance
       graphics demo. It provides an interactive windowing experience.
-   ostest:  This is another configuration that is only useful for bring-up.
-      It executes an exhaustive OS test to verify a correct port of NuttX
-      to the SAMA5D3-EK.  Since it now passes that test, the configuration
-      has little further use other than for reference.
    ov2640:  A test of the SAMA5 ISI using an OV2640 camera.
 
   There may be issues with some of these configurations.  See the details
@@ -3068,62 +3064,6 @@ Configurations
        scaled.
 
     Bottom line:  Not ready for prime time.
-
-  ostest:
-
-    This configuration directory, performs a simple OS test using
-    examples/ostest.
-
-    NOTES:
-
-    1. This configuration uses the default USART1 serial console.  That
-       is easily changed by reconfiguring to (1) enable a different
-       serial peripheral, and (2) selecting that serial peripheral as
-       the console device.
-
-    2. By default, this configuration is set up to build on Windows
-       under either a Cygwin or MSYS environment using a recent, Windows-
-       native, generic ARM EABI GCC toolchain (such as the CodeSourcery
-       toolchain).  Both the build environment and the toolchain
-       selection can easily be changed by reconfiguring:
-
-       CONFIG_HOST_WINDOWS=y                   : Windows operating system
-       CONFIG_WINDOWS_CYGWIN=y                 : POSIX environment under windows
-       CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
-
-       If you are running on Linux, make *certain* that you have
-       CONFIG_HOST_LINUX=y *before* the first make or you will create a
-       corrupt configuration that may not be easy to recover from. See
-       the warning in the section "Information Common to All Configurations"
-       for further information.
-
-    3. This configuration executes out of CS0 NOR flash and can only
-       be loaded via SAM-BA.  These are the relevant configuration options
-       the define the NOR FLASH configuration:
-
-       CONFIG_SAMA5_BOOT_CS0FLASH=y            : Boot from FLASH on CS0
-       CONFIG_BOOT_RUNFROMFLASH=y              : Run in place on FLASH (vs copying to RAM)
-
-       CONFIG_SAMA5_EBICS0=y                   : Enable CS0 external memory
-       CONFIG_SAMA5_EBICS0_SIZE=134217728      : Memory size is 128KB
-       CONFIG_SAMA5_EBICS0_NOR=y               : Memory type is NOR FLASH
-
-       CONFIG_FLASH_START=0x10000000           : Physical FLASH start address
-       CONFIG_FLASH_VSTART=0x10000000          : Virtual FLASH start address
-       CONFIG_FLASH_SIZE=134217728             : FLASH size (again)
-
-       CONFIG_RAM_START=0x00300400             : Data stored after page table
-       CONFIG_RAM_VSTART=0x00300400
-       CONFIG_RAM_SIZE=114688                  : Available size of 128KB - 16KB for page table
-
-       NOTE:  In order to boot in this configuration, you need to close the
-       BMS jumper.
-
-    4. Data resides in ISRAM, but can be moved to SDRAM as described above
-       under "SDRAM Data Configuration."
-
-    STATUS:
-       See the To-Do list below
 
   ov2640:
 

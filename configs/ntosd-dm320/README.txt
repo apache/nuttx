@@ -305,12 +305,6 @@ nsh
 Configures the NuttShell (nsh) located at examples/nsh.  The
 Configuration enables both the serial and telnetd NSH interfaces.
 
-ostest
-^^^^^^
-
-This configuration directory, performs a simple OS test using
-examples/ostest.
-
 poll
 ^^^^
 

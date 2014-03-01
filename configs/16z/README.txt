@@ -274,44 +274,7 @@ nsh
 
         CONFIG_APPS_DIR="..\apps"
 
-      NOTES:
-
-      a. If you need to change the toolchain path used in Make.defs, you
-         will need to use the short 8.3 filenames to avoid spaces.  On my
-         PC, C:\PROGRA~1\ is is C:\Program Files\ and C:\PROGRA~2\ is
-         C:\Program Files (x86)\
-      b. I have not tried to use this configuration with the native
-         Windows build, but I would expect the same issues as is listed
-         for the ostest configuration..
-
-   STATUS:
-
-     1. Note that you must apply the ZNEO patch if you are using ZDS-II 5.0.1.
-        See the README.txt file in the parent directory for more information.
-
-     2. This configuration does not run correctly.  There is currently a
-        problem with the SRAM accesses.
-
-ostest
-------
-
-    This builds the examples/ostest application for execution from FLASH.
-    See the README.txt file in the ostest sub-directory for information
-    about using ZDS-II.  See also apps/examples/README.txt for information
-    about ostest.
-
-    NOTES:
-
-    1. This configuration uses the mconf-based configuration tool.  To
-       change this configuration using that tool, you should:
-
-       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          and misc/tools/
-
-       b. Execute 'make menuconfig' in nuttx/ in order to start the
-          reconfiguration process.
-
-    2. By default, this configuration assumes that you are using the
+    3. By default, this configuration assumes that you are using the
        Cygwin environment on Windows.  An option is to use the native
        CMD.exe window build as described in the top-level README.txt
        file.  To set up that configuration:
@@ -342,7 +305,10 @@ ostest
 
    STATUS:
 
-     1. This configuration does not run correctly.  There is currently a
+     1. Note that you must apply the ZNEO patch if you are using ZDS-II 5.0.1.
+        See the README.txt file in the parent directory for more information.
+
+     2. This configuration does not run correctly.  There is currently a
         problem with the SRAM accesses.
 
 Check out any README.txt files in these <sub-directory>s.

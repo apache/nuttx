@@ -422,10 +422,3 @@ Where <subdir> is one of the following:
     Otherwise, the NSH prompt will not come up because the Ethernet
     driver is waiting for the network to come up.  That is probably
     a bug in the Ethernet driver behavior!
-
-  ostest:
-    This configuration directory, performs a simple OS test using
-    examples/ostest.
-
-    NOTE: as the configuration stands, ostest will hang during the 
-    semaphore test.  This has not been debugged.

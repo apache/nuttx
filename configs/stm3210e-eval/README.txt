@@ -846,14 +846,6 @@ Where <subdir> is one of the following:
     retested since then, but beware if you choose to change the
     toolchain.
 
-  ostest:
-  ------
-    This configuration directory, performs a simple OS test using
-    examples/ostest.  By default, this project assumes that you are
-    using the DFU bootloader.
-
-      CONFIG_STM32_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin
-
   pm:
   --
     This is a configuration that is used to test STM32 power management, i.e.,

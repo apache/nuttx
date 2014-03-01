@@ -1726,9 +1726,6 @@
       </p>
       <ul>
         <li>
-          An OS test configuration that verifies the correct port of NuttX to the part and
-        </li>
-        <li>
           A barebones NuttShell (<a href="NuttShell.html">NSH</a>) configuration that can be used as the basis for further application development.
         </li>
         <li>
@@ -1898,8 +1895,7 @@
         <b>STATUS</b>.
         Initial support for the NUC120 was released in NuttX-6.26.
         This initial support is very minimal:
-        There is an OS test configuration that verifies the correct port of NuttX to the part and
-        a NuttShell (<a href="NuttShell.html">NSH</a>) configuration that might be the basis for an application development.
+        There is a NuttShell (<a href="NuttShell.html">NSH</a>) configuration that might be the basis for an application development.
         As of this writing, more device drivers are needed to make this a more complete port.
         Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/nutiny-nuc120/README.txt">README</a> file for further information.
       </p>
@@ -1957,7 +1953,7 @@ nsh>
         <b>STATUS</b>.
         This is the work of Alan Carvalho de Assis.
         Verified, initial, minimal support for the Freedom KL25Z is in place in NuttX 6.27 and 6.28:
-        There is a working OS test configuration that verifies the correct port of NuttX to the part and a working NuttShell (<a href="NuttShell.html">NSH</a>) configuration that might be the basis for an application development.
+        There is a working NuttShell (<a href="NuttShell.html">NSH</a>) configuration that might be the basis for an application development.
         As of NuttX-6.28 more device driver development would be needed to make this a complete port, particularly to support USB OTG.
         A TSI and a SPI driver were added in NuttX-6.29.
         Alan contributed a PWM driver in NuttX-6.32.
@@ -2016,7 +2012,7 @@ nsh>
     <p>
       <a name="tilm3s6432s2e"><b>TI/Stellaris LM3S6432S2E</b>.</a>
       This port uses Serial-to-Ethernet Reference Design Kit (<a href="http://www.ti.com/tool/rdk-s2e">RDK-S2E</a>) and has similar support as for the other Stellaris family members.
-      Configurations are available for the OS test and for the NuttShell (NSH)
+      A configuration is available for the NuttShell (NSH)
       (see the <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH User Guide</a>).
       The NSH configuration including networking support with a Telnet NSH console.
       This port was contributed by Mike Smith.
@@ -2047,7 +2043,7 @@ nsh>
         <b>STATUS:</b>
           The initial, release of this port was included in NuttX  version 0.4.6.
           The current port includes timer, serial console, Ethernet, SSI, and microSD support.
-          There are working configurations the NuttX OS test, to run the <a href="NuttShell.html">NuttShell
+          There are working configurations to run the <a href="NuttShell.html">NuttShell
           (NSH)</a>, the NuttX networking test, and the uIP web server.
           Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/eagle100/README.txt">README</a> file for further information.
       </p>
@@ -2340,7 +2336,7 @@ nsh>
             logic, interrupt driven serial console, and system timer interrupts.
             The 0.4.13 release added support for SPI, serial FLASH, and USB device.;
             The 4.14 release added support for buttons and SDIO-based MMC/SD and verifed DMA support.
-            Verified configurations are available for NuttX OS test, the NuttShell (NSH) example,
+            Verified configurations are available for the NuttShell (NSH) example,
             the USB serial device class, and the USB mass storage device class example.
           </p>
         </li>
@@ -2414,7 +2410,7 @@ nsh>
       </p>
       <p>
         <b>STATUS:</b>
-        Configurations for the basic OS test and NSH are available and verified.
+        A configuration for the  NuttShell (NSH) is available and verified.
         Networking is functional.
         Support for an external ENCX24J600 network was added in NuttX 6.30.
       </p>
@@ -2546,7 +2542,7 @@ nsh>
     <ul>
       <p>
         <b>STATUS:</b>
-        As of this writing, the basic port is code complete and fully verified configurations exist for the basic NuttX OS test and for the NuttShell <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>).
+        As of this writing, the basic port is code complete and a fully verified configuration exists for the NuttShell <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>).
         The first fully functional Arduino Due port was released in NuttX-6.29.
         Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/arduino-due/README.txt">README</a> file for further information.
       </p>
@@ -2634,9 +2630,6 @@ nsh>
           </li>
         </ul>
       </p>
-      <p>
-        This port includes a NuttX OS test configuration (see <code>apps/examples/ostest</code>).
-      </p>
       </li>
       <li>
         <p><b>Olimex LPC1766-STK</b></p>
@@ -2662,8 +2655,7 @@ nsh>
         </ul>
       </p>
       <p>
-        Verified configurations are now available for the NuttX OS test,
-        for the NuttShell with networking and microSD support(NSH, see the <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH User Guide</a>),
+        Verified configurations are now available for the NuttShell with networking and microSD support(NSH, see the <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH User Guide</a>),
         for the NuttX network test, for the <a href="http://acme.com/software/thttpd">THTTPD</a> webserver,
         for USB serial deive and USB storage devices examples, and for the USB host HID keyboard driver.
         Support for the USB host mass storage device can optionally be configured for the NSH example.
@@ -2676,7 +2668,7 @@ nsh>
         <p>
            An fully verified board configuration is included in NuttX-6.2.
            The Code Red toolchain is supported under either Linux or Windows.
-           Verifed configurations include DHCPD, the NuttShell (NSH), NuttX graphis (NX), the NuttX OS test, THTTPD, and USB mass storage device.
+           Verifed configurations include DHCPD, the NuttShell (NSH), NuttX graphis (NX), THTTPD, and USB mass storage device.
            Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/lpcxpresso-lpc1768/README.txt">README</a> file for further information.
         </p>
       </li>
@@ -2972,7 +2964,7 @@ nsh>
       <li>
         <p><b>NuttX-6.20</b>
           The basic port is complete.
-          The OS test configuration and the basic NSH configurations are present and fully verified.
+          The basic NuttShell (NSH) configuration is present and fully verified.
           This includes verified support for:  SYSTICK system time, pin and GPIO configuration, and a serial console.
         </p>
         <p>
@@ -3021,7 +3013,7 @@ nsh>
     <ul>
       <p>
         <b>STATUS:</b>
-        As of this writing, the basic port is code complete and fully verified configurations exist for the basic NuttX OS test and for the NuttShell <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>).
+        As of this writing, the basic port is code complete and a fully verified configuration exists for the NuttShell <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>).
         The first fully functional LM4F120 LaunchPad port was released in NuttX-6.27.
       </p>
     </ul>
@@ -3042,7 +3034,7 @@ nsh>
     <ul>
       <p>
         <b>STATUS:</b>
-        As of this writing, the basic port is code complete and fully verified configurations exist for the basic NuttX OS test and for the NuttShell <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>).
+        As of this writing, the basic port is code complete and a fully verified configuration exists for the NuttShell <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>).
         The first fully functional SAM4L Xplained Pro port was released in NuttX-6.28.
         Support for the SAM4L Xplained modules was added in NuttX-6.29:
       </p>
@@ -3107,7 +3099,7 @@ Mem:         29232       5920      23312      23312
     <ul>
       <p>
         <b>STATUS:</b>
-        As of this writing, the basic port is code complete and fully verified configurations exist for the basic NuttX OS test and for the NuttShell <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>).
+        As of this writing, the basic port is code complete and a fully verified configuration exists for the the NuttShell <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>).
         The first fully functional SAM4S Xplained port was released in NuttX-6.28.
         Support for the on-board 1MB SRAM was added in NuttX-6.29.
         Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/sam4s-xplained/README.txt">README</a> file for further information.
@@ -3307,7 +3299,7 @@ Mem:         29232       5920      23312      23312
         </li>
       </ul>
       <p>
-        The basic, port (including the verified apps/examples/ostest configuration) was be released in NuttX-5.13.
+        The basic, port was be released in NuttX-5.13.
         A complete port will include drivers for additional AVR32 UC3 devices -- like SPI and USB --- and will be available in a later release,
         time permitting.
         Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/avr32dev1/README.txt">README</a> file for further information.
@@ -3452,9 +3444,8 @@ Mem:         29232       5920      23312      23312
       <p>
         <b>STATUS:</b>
         The basic port is code complete.
-        Two configurations are available:
-        (1) An OS test configuration and a (2) configuration that support the NuttShell (NSH).
         The OS test configuration is fully functional and proves that we have a basically healthy NuttX port to the Mirtoo.
+        A configuration is available for the NuttShell (NSH).
         The NSH configuration includes support for a serial console and for the SST25 serial FLASH and the PGA117 amplifier/multiplexer on board the module.
         The NSH configuration is set up to use the NuttX wear-leveling FLASH file system (NXFFS).
         The PGA117, however, is not yet fully integrated to support ADC sampling.
@@ -3490,7 +3481,7 @@ Mem:         29232       5920      23312      23312
        This NuttX port is code complete and has considerable test testing.
        The port for this board was completed in NuttX 6.11, but still required a few bug fixes before it will be ready for prime time.
        The fully verified port first appeared in NuttX 6.13.
-       Available configurations include the OS test and the NuttShell (NSH - see the <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH User Guide</a>).
+       Available configurations include the NuttShell (NSH - see the <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH User Guide</a>).
        An untested USB device-side driver is available in the source tree.
        A more complete port would include support of the USB OTG port and of the LCD display on this board.
        Those drivers are not yet available as of this writing.
@@ -3509,7 +3500,7 @@ Mem:         29232       5920      23312      23312
     <p>
       <b>STATUS:</b>
       The basic port is code complete and fully verified in NuttX 6.13.
-      Available configurations include the OS test and the NuttShell (NSH - see the <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH User Guide</a>).
+      Available configurations include the NuttShell (NSH - see the <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH User Guide</a>).
       Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/pcblogic-pic32mx/README.txt">README</a> file for further information.
     </p>
     <li><b>UBW32 Board from Sparkfun</b>
@@ -3521,7 +3512,7 @@ Mem:         29232       5920      23312      23312
     <p>
       <b>STATUS:</b>
       The basic port is code complete and fully verified in NuttX 6.18.
-      Available configurations include the OS test and the NuttShell (NSH - see the <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH User Guide</a>).
+      Available configurations include the the NuttShell (NSH - see the <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH User Guide</a>).
       USB has not yet been fully tested but on first pass appears to be functional.
       Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/ubw32/README.txt">README</a> file for further information.
     </p>
@@ -3551,7 +3542,7 @@ Mem:         29232       5920      23312      23312
          The basic Starter Kit (even with the Multimedia Expansion Board, MEB, DM320005)) has no serial port and most NuttX test configurations depend heavily on console output.
       </p>
       <p>
-         Verified configurations for the OS test and the NuttShel (NSH) appeared in NuttX-6.16.
+         A verified configuration is available for the NuttShel (NSH) appeared in NuttX-6.16.
          Board support includes a verified USB (device-side) driver.
          Also included are a a verified Ethernet driver, a partially verified USB device controller driver, and an unverifed SPI driver.
          Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/pic32-starterkit/README.txt">README</a> file for further information.
@@ -3562,8 +3553,7 @@ Mem:         29232       5920      23312      23312
       </li>
       <p>
        <b>STATUS:</b>
-         Two verified configurations are available:
-         (1) The basic OS test configuration that verfies the correctness port of NuttX, and (2) an extensive <a href="NuttShell.html">NuttShell (NSH)</a> configuration.
+         A verified configuration is available for an extensive <a href="NuttShell.html">NuttShell (NSH)</a> configuration.
          The NSH configuration includes:
          (1) Full network support,
          (2) Verified SPI driver,

@@ -576,38 +576,6 @@ Configurations
 Configuration sub-directories
 -----------------------------
 
-  ostest:
-    This configuration directory, performs a simple OS test using
-    apps/examples/ostest.
-
-    NOTES:
-
-    1. The serial console is on UART1.  Therefore, you will need an external
-       RS232 driver or TTL serial-to-USB converter.  The UART1 TX and RX
-       pins are available on:
-
-           TX  -- Pin 53: U1TX/RF8
-           RX  -- Pin 52: U1RX/RF2
-
-       Power for the converter is available from the power point connector:
-
-          GND -- POWER POINT: GND
-          Vcc -- POWER POINT: Vdd (3.3V) -- Or P32_VBUS (+5V)
-                 Or +5V from a USB PC port.
-
-       The serial console is configured for 115200 8N1 by default.
-
-    2. By default, this configuration uses an older Microchip C32 toolchain
-       for Windows (the newer ones seem to be incompatible) and builds under
-       Cygwin (or probably MSYS).  That can easily be reconfigured, of course.
-
-       Build Setup:
-         CONFIG_HOST_WINDOWS=y                     : Builds under Windows
-         CONFIG_WINDOWS_CYGWIN=y                   : Using Cygwin
-
-       System Type:
-         CONFIG_MIPS32_TOOLCHAIN_MICROCHIPW_LITE=y : Older C32 toolchain
-
   nsh:
     This configuration directory holds configuration files tht can
     be used to support the NuttShell (NSH).

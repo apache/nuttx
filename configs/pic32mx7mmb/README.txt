@@ -609,18 +609,6 @@ selected as follow:
 
 Where <subdir> is one of the following:
 
-  ostest:
-  =======
-    Description.
-    ------------
-    This configuration directory, performs a simple OS test using
-    apps/examples/ostest.
-
-    Serial Output.
-    --------------
-    The OS test produces all of its test output on the serial console.
-    This configuration has UART1 enabled as a serial console.
-
   nsh:
   ====
     Description.

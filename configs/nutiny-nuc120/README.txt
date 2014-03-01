@@ -284,35 +284,6 @@ instead of configure.sh:
 
 Where <subdir> is one of the following:
 
-  ostest:
-  ------
-    This configuration directory, performs a simple OS test using
-    apps/examples/ostest.
-
-    NOTES:
- 
-    1. This configuration uses the mconf-based configuration tool.  To
-       change this configuration using that tool, you should:
-
-       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          and misc/tools/
-
-       b. Execute 'make menuconfig' in nuttx/ in order to start the
-          reconfiguration process.
-
-    2. Default toolchain:
-
-       CONFIG_HOST_WINDOWS=y                   : Builds under Windows
-       CONFIG_WINDOWS_CYGWIN=y                 : Using Cygwin
-       CONFIG_ARMV6M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
-
-    3. Serial Console.  A serial console is required to see the OS test
-       output.  The serial console is configured on UART1 which is available
-       on JP5:
-
-       UART1 RX signal (RXD1) is on PB.4, pin 8, and
-       UART1 TX signal (TXD1) is on PB.5, pin 9.
-
   nsh:
   ---
     Configures the NuttShell (nsh) located at apps/examples/nsh.  The

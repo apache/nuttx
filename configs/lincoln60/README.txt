@@ -483,9 +483,6 @@ as follow:
 
 Where <subdir> is one of the following:
 
-  ostest:
-    Builds the NuttX OS test at apps/examples/ostest.
-
   nsh:
     Configures the NuttShell (nsh) located at apps/examples/nsh.  The
     Configuration enables only the serial NSH interfaces.  See notes
