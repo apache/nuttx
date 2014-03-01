@@ -755,16 +755,28 @@ Where <subdir> is one of the following:
   nsh:
     Configures the NuttShell (nsh) located at apps/examples/nsh.  The
     Configuration enables both the serial and telnet NSH interfaces.
-    Support for the board's SPI-based MicroSD card is included
-    (but not passing tests as of this writing).
 
-    NOTE: At present, the value for the SD SPI frequency is too
-    high and the SD will fail.  Setting that frequency to 400000
-    removes the problem. TODO:  Tune this frequency to some optimal
-    value.
+    NOTES:
 
-    Jumpers: J55 must be set to provide chip select PIO1_11 signal as
-    the SD slot chip select.
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configurations using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. This configuration has been used for testing the microSD card.
+       This support is, however, disabled in the base configuration.
+
+       At last attempt, the SPI-based mircroSD does not work at
+       higher fequencies.  Setting the SPI frequency to 400000
+       removes the problem.   There must be some more optimal
+       value that could be determined with additional experimetnation.
+
+       Jumpers: J55 must be set to provide chip select PIO1_11 signal as
+       the SD slot chip select.
 
   nx:
     And example using the NuttX graphics system (NX).  This example
