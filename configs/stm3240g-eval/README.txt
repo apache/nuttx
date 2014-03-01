@@ -1097,6 +1097,7 @@ Where <subdir> is one of the following:
     CONFIG_NSH_DRIPADDR=(10<<24|0<<16|0<<8|1) : Host IP address 10.0.0.1
 
     NOTES:
+
     1. This configuration uses the mconf-based configuration tool.  To
        change this configurations using that tool, you should:
 
@@ -1334,19 +1335,29 @@ Where <subdir> is one of the following:
     curious.
 
     NOTES:
-    1. See the notes for the nsh configuration.  Most also apply to the nsh2
+
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configurations using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. See the notes for the nsh configuration.  Most also apply to the nsh2
        configuration.  Like the nsh configuration, this configuration can
        be modified to support a variety of additional tests.
 
-    2. RS-232 is disabled, but Telnet is still available for use as a console.
+    3. RS-232 is disabled, but Telnet is still available for use as a console.
        Since RS-232 and SDIO use the same pins (one controlled by JP22), RS232
        and SDIO cannot be used concurrently.
 
-    3. This configuration requires that jumper JP22 be set to enable SDIO
+    4. This configuration requires that jumper JP22 be set to enable SDIO
        operation.  To enable MicroSD Card, which shares same I/Os with RS-232,
        JP22 is not fitted.
 
-    4. In order to use SDIO without overruns, DMA must be used.  The STM32 F4
+    5. In order to use SDIO without overruns, DMA must be used.  The STM32 F4
        has 192Kb of SRAM in two banks:  112Kb of "system" SRAM located at
        0x2000:0000 and 64Kb of "CCM" SRAM located at 0x1000:0000. It appears
        that you cannot perform DMA from CCM SRAM.  The work around that I have now
@@ -1358,7 +1369,7 @@ Where <subdir> is one of the following:
        Then DMA works fine. The downside is, of course, is that we lose 64Kb
        of precious SRAM.
 
-    5. Another SDIO/DMA issue.  This one is probably a software bug.  This is
+    6. Another SDIO/DMA issue.  This one is probably a software bug.  This is
        the bug as stated in the TODO list:
 
        "If you use a large I/O buffer to access the file system, then the
@@ -1369,7 +1380,7 @@ Where <subdir> is one of the following:
        For this reason, CONFIG_MMCSD_MULTIBLOCK_DISABLE=y appears in the defconfig
        file.
 
-    6. Another DMA-related concern.  I see this statement in the reference
+    7. Another DMA-related concern.  I see this statement in the reference
        manual:  "The burst configuration has to be selected in order to respect
        the AHB protocol, where bursts must not cross the 1 KB address boundary
        because the minimum address space that can be allocated to a single slave
