@@ -6734,4 +6734,6 @@
 	  stm32_psm.c.  Noted by Max Kriegleder (2014-3-1).
 	* configs/lpc4330-xplorer/nsh Configuration converted to use the
           kconfig-frontends tools (2014-3-1).
+	*  configs/ea3152/ostest: Configuration converted to use the
+          kconfig-frontends tools (2014-3-1).
 
