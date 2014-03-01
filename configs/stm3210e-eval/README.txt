@@ -714,8 +714,9 @@ Where <subdir> is one of the following:
     =========== ======================= ================================
                 nsh                     nsh2
     =========== ======================= ================================
-    Toolchain:  NuttX buildroot for     Codesourcery for Windows (1)
-                Linux or Cygwin (1,2)
+    Platform    Windows with Cygwin (2) Windows with Cygwin (2)
+    ----------- ----------------------- --------------------------------
+    Toolchain:  NuttX buildroot (1)     Codesourcery for Windows (1)
     ----------- ----------------------- --------------------------------
     Loader:     DfuSe                   DfuSe
     ----------- ----------------------- --------------------------------
@@ -769,22 +770,31 @@ Where <subdir> is one of the following:
 
         Failure to do this could result in corruption of the SD card format.
 
-    The nsh2 contains support for some built-in applications that can be
-    enabled by make some additional minor changes:
+    1. Both configurations use the mconf-based configuration tool.  To
+       change these configurations using that tool, you should:
 
-    (1) examples/can.  The CAN test example can be enabled by changing the
-        following settings in nsh2/defconfig:
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
 
-        CONFIG_CAN=y             # Enable CAN "upper-half" driver support
-        CONFIG_STM32_CAN1=y      # Enable STM32 CAN1 "lower-half" driver support
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
 
-        The default CAN settings may need to change in your board board
-        configuration:
+    2. The nsh2 contains support for some built-in applications that can be
+       enabled by make some additional minor changes:
 
-        CONFIG_CAN_EXTID=y       # Support extended IDs
-        CONFIG_CAN1_BAUD=250000  # Bit rate: 250 KHz
-        CONFIG_CAN_TSEG1=12      # 80% sample point
-        CONFIG_CAN_TSEG2=3
+       a. examples/can.  The CAN test example can be enabled by changing the
+          following settings in nsh2/defconfig:
+
+          CONFIG_CAN=y             # Enable CAN "upper-half" driver support
+          CONFIG_STM32_CAN1=y      # Enable STM32 CAN1 "lower-half" driver support
+
+          The default CAN settings may need to change in your board board
+          configuration:
+
+          CONFIG_CAN_EXTID=y       # Support extended IDs
+          CONFIG_CAN1_BAUD=250000  # Bit rate: 250 KHz
+          CONFIG_CAN_TSEG1=12      # 80% sample point
+          CONFIG_CAN_TSEG2=3
   nx:
   ---
     An example using the NuttX graphics system (NX).  This example
