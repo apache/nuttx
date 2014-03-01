@@ -356,19 +356,30 @@ nsh2
   Like nsh, this version uses NSH built-in functions:  The nx, nxhello, and
   nxlines examples are included as built-in functions.
 
-  X11 Configuration
-  -----------------
-  This configuration uses an X11-based framebuffer driver.  Of course, this
-  configuration can only be used in environments that support X11!  (And it
-  may not even be usable in all of those environments without some "tweaking"
-  See discussion below under the nx11 configuration).
+  NOTES:
+  ------ 
+  1. This configuration uses the mconf-based configuration tool.  To
+     change this configuration using that tool, you should:
 
-  Configuring
-  -----------
-  This configuration may be selected as follows:
+     a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+        and misc/tools/
 
-    cd <nuttx-directory>/tools
-    ./configure.sh sim/nsh2
+     b. Execute 'make menuconfig' in nuttx/ in order to start the
+        reconfiguration process.
+
+  2. X11 Configuration
+
+     This configuration uses an X11-based framebuffer driver.  Of course, this
+     configuration can only be used in environments that support X11!  (And it
+     may not even be usable in all of those environments without some "tweaking"
+     See discussion below under the nx11 configuration).
+
+  3. Configuring
+
+     This configuration may be selected as follows:
+
+       cd <nuttx-directory>/tools
+       ./configure.sh sim/nsh2
 
 nx
 
