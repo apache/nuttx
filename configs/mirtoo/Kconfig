@@ -6,9 +6,9 @@
 if ARCH_BOARD_MIRTOO
 
 config MIRTOO_RELEASE
-	int "Mirtoo Release 1 (R1)"
+	int "Mirtoo release number"
 	default 2
 	---help---
-		Select the Mirtoo release number
+		Select the Mirtoo release number.  For example, 1 for release R1.
 
 endif

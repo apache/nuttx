@@ -341,10 +341,10 @@ Toolchains
 
   Toolchain Options:
 
-    CONFIG_PIC32MX_MICROCHIPW      - MicroChip full toolchain for Windows (C32)
-    CONFIG_PIC32MX_MICROCHIPL      - MicroChip full toolchain for Linux (C32)
-    CONFIG_PIC32MX_MICROCHIPW_LITE - MicroChip LITE toolchain for Windows (C32)
-    CONFIG_PIC32MX_MICROCHIPL_LITE - MicroChip LITE toolchain for Linux (C32)
+    CONFIG_MIPS32_TOOLCHAIN_MICROCHIPW      - MicroChip full toolchain for Windows (C32)
+    CONFIG_MIPS32_TOOLCHAIN_MICROCHIPL      - MicroChip full toolchain for Linux (C32)
+    CONFIG_MIPS32_TOOLCHAIN_MICROCHIPW_LITE - MicroChip LITE toolchain for Windows (C32)
+    CONFIG_MIPS32_TOOLCHAIN_MICROCHIPL_LITE - MicroChip LITE toolchain for Linux (C32)
 
   NOTE:  The "Lite" versions of the toolchain does not support C++.  Also
   certain optimization levels are not supported by the Lite toolchain.
@@ -358,7 +358,7 @@ Toolchains
   in this toolchain.  Use this configuration option to select the microchipopen
   toolchain:
 
-    CONFIG_PIC32MX_MICROCHIPOPENL - microchipOpen toolchain for Linux
+    CONFIG_MIPS32_TOOLCHAIN_MICROCHIPOPENL - microchipOpen toolchain for Linux
 
   And set the path appropriately in the setenv.sh file.
 
@@ -396,8 +396,8 @@ Toolchains
   configurations.  Use one of these configuration options to select the Pinguino
   mips-elf toolchain:
 
-    CONFIG_PIC32MX_PINGUINOW        - Pinguino mips-elf toolchain for Windows
-    CONFIG_MIPS32_TOOLCHAIN_GNU_ELF - mips-elf toolchain for Linux or OS X
+    CONFIG_MIPS32_TOOLCHAIN_PINGUINOW - Pinguino mips-elf toolchain for Windows
+    CONFIG_MIPS32_TOOLCHAIN_GNU_ELF   - mips-elf toolchain for Linux or OS X
 
   And set the path appropriately in the setenv.sh file.  These tool configurations
   are untested -- expect some additional integration issues.  Good luck!
@@ -417,7 +417,7 @@ Toolchains
 
      CROSSDEV=xc32-
 
-  2) debug.ld/release.ld:  The like expect some things that are not present in
+  2) debug.ld/release.ld:  The linker expects some things that are not present in
      the current linker scripts (or are expected with different names).  Here
      are some partial fixes:
 
@@ -868,17 +868,28 @@ Where <subdir> is one of the following:
       CONFIG_PIC32MX_UART1=y           : UART1 for serial console
       CONFIG_UART1_SERIAL_CONSOLE=n
 
-    UART2
-    -----
-    If you are not using MPLAB to debug, you may switch to UART2
-    by editting the .config file after configuration to disable UART1
-    and select UART2.  You should also change Make.defs to use the
-    release.ld linker script instead of the debug.ld link script.
+    NOTES:
 
-    This configuration also uses the Microchip C32 toolchain under
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configurations using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. UART2
+
+      If you are not using MPLAB to debug, you may switch to UART2
+      by modifying the NuttX configuration to disable UART1 and to
+      select UART2.  You should also change Make.defs to use the
+      release.ld linker script instead of the debug.ld link script.
+
+    3. This configuration also uses the Microchip C32 toolchain under
     windows by default:
 
-      CONFIG_PIC32MX_MICROCHIPW_LITE=y : Lite version of windows toolchain
+      CONFIG_MIPS32_TOOLCHAIN_MICROCHIPW_LITE=y : Lite version of windows toolchain
 
     To switch to the Linux C32 toolchain you will have to change (1) the
     toolchain selection in .config (after configuration) and (2) the
@@ -905,7 +916,7 @@ Where <subdir> is one of the following:
     1) It uses the Pinguino toolchain be default (this is easily changed,
        see above).
 
-       CONFIG_PIC32MX_PINGUINOW=y
+       CONFIG_MIPS32_TOOLCHAIN_PINGUINOW=y
 
     2) SPI2 is enabled and support is included for the NXFFS file system
        on the 32Mbit SST25 device on the Mirtoo board.  NXFFS is the NuttX
