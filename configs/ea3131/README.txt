@@ -544,8 +544,6 @@ ARM/EA3131-specific Configuration Options
 
     CONFIG_ARCH_STACKDUMP - Do stack dumps after assertions
 
-    CONFIG_ARCH_BOOTLOADER - Set if you are using a bootloader.
-
     CONFIG_ARCH_LEDS -  Use LEDs to show state. Unique to board architecture.
 
     CONFIG_ARCH_BUTTONS -  Enable support for buttons. Unique to board architecture.
