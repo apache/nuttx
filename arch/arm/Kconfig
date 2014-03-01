@@ -70,9 +70,9 @@ config ARCH_CHIP_KL
 
 config ARCH_CHIP_LM
 	bool "TI Stellaris"
-	select ARCH_HAVE_MPU
+	select ARCH_HAVE_CMNVECTOR
 	---help---
-		TI Stellaris LMS3 and LM4F architecutres (ARM Cortex-M3/4)
+		TI Stellaris LMS3 and LM4F architectures (ARM Cortex-M3/4)
 
 config ARCH_CHIP_LPC17XX
 	bool "NXP LPC17xx"
