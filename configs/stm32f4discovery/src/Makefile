@@ -61,7 +61,7 @@ CSRCS += stm32_usb.c
 endif
 
 ifeq ($(CONFIG_PWM),y)
-CSRCS += stm32_psm.c
+CSRCS += stm32_pwm.c
 endif
 
 ifeq ($(CONFIG_QENCODER),y)
