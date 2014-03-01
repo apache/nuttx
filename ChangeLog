@@ -6706,4 +6706,5 @@
           kconfig-frontends tools (2014-3-1).
 	* configs/lincoln60/nsh: Configuration converted to use the
           kconfig-frontends tools (2014-3-1).
-
+	* configs/lpcxpresso-lpc1768/nsh: Configuration converted to use the
+          kconfig-frontends tools (2014-3-1).
