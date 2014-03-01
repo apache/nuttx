@@ -214,7 +214,7 @@ Image Format
   following these steps:
 
   - cd tools/                     # Configure Nuttx
-  - ./configure.sh ea3131/ostest  # (using the ostest configuration for this example)
+  - ./configure.sh ea3131/nsh     # (using the nsh configuration for this example)
   - cd ..                         # Set up environment
   - . ./setenv.sh                 # (see notes below)
   - make                          # Make NuttX.  This will produce nuttx.bin
@@ -628,11 +628,6 @@ Where <subdir> is one of the following:
   nsh:
     Configures the NuttShell (nsh) located at examples/nsh.  The
     Configuration enables only the serial NSH interface.
-
-  ostest:
-    This configuration directory, performs a simple OS test using
-    examples/ostest.  By default, this project assumes that you are
-    using the DFU bootloader.
 
   pgnsh:
     This is the same configuration as nsh, but with On-Demand

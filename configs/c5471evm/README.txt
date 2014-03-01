@@ -115,11 +115,11 @@ ARM/C5471-specific Configuration Options
 defconfig
 ^^^^^^^^^
 The default configuration file, defconfig, performs a
-simple OS test using examples/ostest.  This can be
+simple OS test using examples/nsh.  This can be
 configuration as follows:
 
 	cd tools
-	./configure.sh c5471evm
+	./configure.sh c5471evm/nsh
 	cd -
 	. ./setenv.sh
 

@@ -464,29 +464,6 @@ and can be selected as follow:
 
 Where <subdir> is one of the following:
 
-  ostest:
-  ------
-    This configuration directory, performs a simple OS test using
-    apps/examples/ostest.
-
-    NOTES:
-
-    1. This configuration uses the mconf-based configuration tool.  To
-       change this configuration using that tool, you should:
-
-       a. Build and install the mconf tool.  See nuttx/README.txt and
-          misc/tools/
-
-       b. Execute 'make menuconfig' in nuttx/ in order to start the
-          reconfiguration process.
-
-    2. Default toolchain:
-
-       CONFIG_STM32_CODESOURCERYL=y  : CodeSourcery under Linux / Mac OS X
-
-    3. By default, this project assumes that you are *NOT* using the DFU
-       bootloader.
-
   nsh:
   ---
     Configures the NuttShell (nsh) located at apps/examples/nsh.  The

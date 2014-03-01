@@ -657,29 +657,6 @@ can be selected as follow:
 
 Where <subdir> is one of the following:
 
-  ostest:
-  ------
-    This configuration directory, performs a simple OS test using
-    examples/ostest.
-
-    NOTES:
-
-    1. This configuration uses the mconf-based configuration tool.  To
-       change this configuration using that tool, you should:
-
-       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          and misc/tools/
-
-       b. Execute 'make menuconfig' in nuttx/ in order to start the
-          reconfiguration process.
-
-    2. Default platform/toolchain:
-
-       CONFIG_HOST_LINUX=y                 : Linux (Cygwin under Windows okay too).
-       CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot (arm-nuttx-elf-gcc)
-       CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : The older OABI version
-       CONFIG_RAW_BINARY=y                 : Output formats: ELF and raw binary
-
   nsh:
   ---
     Configures the NuttShell (nsh) located at apps/examples/nsh.  The

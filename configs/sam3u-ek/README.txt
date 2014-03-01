@@ -769,7 +769,3 @@ Configurations
        beginning of FLASH, trashing the FLASH images.
 
        Bottom line:  Still untested.
-
-  ostest:
-    This configuration directory, performs a simple OS test using
-    examples/ostest.

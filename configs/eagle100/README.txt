@@ -97,8 +97,7 @@ CodeSourcery on Linux
     MAXOPTIMIZATION = -O2
 
   The values for TOPDIR is provided by the make system; the value for CONFIG_ARCH_BOARD
-  is provided in your defconfig file.  'ostest' refers to the ostest/ configuration;
-  this would be different for other configurations.
+  is provided in your defconfig file.
 
   For an example of a CodeSourcery-under-Linux Make.defs file, see
   configs/stm3210e-eval/nsh/Make.defs.
@@ -400,8 +399,7 @@ Where <subdir> is one of the following:
 
   httpd:
     This builds the uIP web server example using the examples/uip application
-    (for execution from FLASH). See examples/README.txt for information
-    about ostest.
+    (for execution from FLASH).
 
   nsh:
     Configures the NuttShell (nsh) located at examples/nsh.  The
@@ -415,10 +413,6 @@ Where <subdir> is one of the following:
     NOTE: See note above with regard to the EABI/OABI buildroot
     toolchains.  This example can only be built using the older
     OABI toolchain.
-
-  ostest:
-    This configuration directory, performs a simple OS test using
-    examples/ostest.
 
   thttpd:
     This builds the THTTPD web server example using the THTTPD and

@@ -366,15 +366,6 @@ nsh:
        CONFIG_ARM_TOOLCHAIN_GNU_EABIL=y : Buildroot (arm-nuttx-elf-gcc)
        CONFIG_RAW_BINARY=y             : Output formats: ELF and raw binary
 
-ostest:
--------
-
-  This configuration directory, performs a simple OS test using
-  examples/ostest.
-
-  Default toolchain:  Buildroot
-  Output format:  ELF and binary
-
 usbserial:
 ----------
 

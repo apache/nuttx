@@ -534,10 +534,6 @@ Where <subdir> is one of the following:
     Configures the NuttShell (nsh) located at examples/nsh.  The
     Configuration enables only the serial  NSH interfaces.
 
-  ostest:
-    This configuration directory, performs a simple OS test using
-    examples/ostest.
-
   usbserial:
     This configuration directory exercises the USB serial class
     driver at examples/usbserial.  See examples/README.txt for

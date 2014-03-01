@@ -659,27 +659,6 @@ Configuration sub-directories
 
 Where <subdir> is one of the following:
 
-  ostest:
-  =======
-    Description.
-    ------------
-    This configuration directory, performs a simple OS test using
-    apps/examples/ostest.
-
-    Notes.
-    -----
-    1. By default, this configuration uses an older Microchip C32 toolchain
-       for Windows (the newer ones seem to be incompatible) and builds under
-       Cygwin (or probably MSYS).  That
-       can easily be reconfigured, of course.
-
-       Build Setup:
-         CONFIG_HOST_WINDOWS=y                     : Builds under Windows
-         CONFIG_WINDOWS_CYGWIN=y                   : Using Cygwin
-
-       System Type:
-         CONFIG_MIPS32_TOOLCHAIN_MICROCHIPW_LITE=y : Older C32 toolchain
-
   nsh:
   ====
     Description.

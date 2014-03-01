@@ -1089,8 +1089,7 @@ Where <subdir> is one of the following:
   elf:
   ---
 
-    This configuration derives from the ostest configuration.  It has
-    been modified to us apps/examples/elf in order to test the ELF
+    This configuration uses apps/examples/elf in order to test the ELF
     loader.
 
     NOTES:
@@ -1479,57 +1478,6 @@ Where <subdir> is one of the following:
      subject to the "fat, flat line bug" that I need to fix someday.  See
      http://www.nuttx.org/doku.php?id=wiki:graphics:nxgraphics for a description
      of the fat, flat line bug.
-
-  ostest:
-  ------
-    This configuration directory, performs a simple OS test using
-    apps/examples/ostest.
-
-    NOTES:
-
-    1. This configuration uses the mconf-based configuration tool.  To
-       change this configuration using that tool, you should:
-
-       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          and misc/tools/
-
-       b. Execute 'make menuconfig' in nuttx/ in order to start the
-          reconfiguration process.
-
-    2. Default toolchain:
-
-       CONFIG_STM32_CODESOURCERYL=y  : CodeSourcery under Linux / Mac OS X
-
-    3. By default, this project assumes that you are *NOT* using the DFU
-       bootloader.
-
-    4. If you use the Atollic toolchain, then the FPU test can be enabled in the
-      examples/ostest by adding the following your NuttX configuration file:
-
-      -CONFIG_ARCH_FPU=n              : Enable FPU support
-      +CONFIG_ARCH_FPU=y
-
-      -CONFIG_STM32_CODESOURCERYW=y   : Disable the CodeSourcery toolchain
-      +CONFIG_STM32_CODESOURCERYW=n
-
-      -CONFIG_STM32_ATOLLIC_LITE=n   : Enable *one* the Atollic toolchains
-       CONFIG_STM32_ATOLLIC_PRO=n
-      -CONFIG_STM32_ATOLLIC_LITE=y   : The "Lite" version
-       CONFIG_STM32_ATOLLIC_PRO=n    : The "Pro" version
-
-      -CONFIG_INTELHEX_BINARY=y       : Suppress generation FLASH download formats
-      +CONFIG_INTELHEX_BINARY=n       : (Only necessary with the "Lite" version)
-
-      -CONFIG_HAVE_CXX=y              : Suppress generation of C++ code
-      +CONFIG_HAVE_CXX=n              : (Only necessary with the "Lite" version)
-
-      -CONFIG_SCHED_WAITPID=y         : Enable the waitpid() API needed by the FPU test
-      +CONFIG_SCHED_WAITPID=n
-
-      The FPU test also needs to know the size of the FPU registers save area in
-      bytes (see arch/arm/include/armv7-m/irq_lazyfpu.h):
-
-      -CONFIG_EXAMPLES_OSTEST_FPUSIZE=(4*33)
 
   pm:
   --

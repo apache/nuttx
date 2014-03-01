@@ -467,8 +467,3 @@ Where <subdir> is one of the following:
     driver is waiting for the network to come up.  That is probably
     a bug in the Ethernet driver behavior!
 
-  ostest:
-    This configuration directory, performs a simple OS test using
-    examples/ostest.
-
-

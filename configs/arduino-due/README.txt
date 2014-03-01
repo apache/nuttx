@@ -951,10 +951,6 @@ Configurations
 Configuration sub-directories
 -----------------------------
 
-  ostest:
-    This configuration directory performs a simple OS test using
-    examples/ostest.  See NOTES above.
-
   nsh:
     This configuration directory will built the NuttShell.  See NOTES above.
 

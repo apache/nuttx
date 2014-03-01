@@ -121,10 +121,7 @@ Olimex LPC1766-STK development board
   minicom, whatever) to UART0/RS232_0 and configure the serial port as
   shown above.
 
-  NOTE: The ostest example works fine at 115200, but the other configurations
-  have problems at that rate (probably because they use the interrupt driven
-  serial driver).  Other LPC17xx boards with the same clocking will run at
-  115200.
+  NOTE: These configurations have problems at 115200 baud.
 
   LCD
   ---
@@ -1029,10 +1026,6 @@ Where <subdir> is one of the following:
     An example using the NuttX graphics system (NX).  This example uses
     the Nokia 6100 LCD driver. NOTE:  The Nokia 6100 driver does not
     work on this board as of this writing.
-
-  ostest:
-    This configuration directory, performs a simple OS test using
-    apps/examples/ostest.
 
   slip-httpd:
     This configuration is identical to the thttpd configuration except that

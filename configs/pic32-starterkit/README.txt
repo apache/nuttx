@@ -1031,20 +1031,6 @@ selected as follow:
 
 Where <subdir> is one of the following:
 
-  ostest:
-  =======
-    Description.
-    ------------
-    This configuration directory, performs a simple OS test using
-    apps/examples/ostest.
-
-    Serial Output.
-    --------------
-    The OS test produces all of its test output on the serial console.
-    This configuration has UART1 enabled as a serial console.  I have
-    been unable to get this UART work on the MEB.  But on the Expansion
-    I/O board, this maps to RX = J11 pin 41 and TX = J11 pin 43
-
   nsh:
   ====
     Description.

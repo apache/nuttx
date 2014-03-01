@@ -779,13 +779,6 @@ Where <subdir> is one of the following:
     J45: Close to select SPI clock (Default: closed)
     J46: Close SPI data input (MOSI) (Default:closed)
 
-  ostest:
-    This configuration directory, performs a simple OS test using
-    apps/examples/ostest.
- 
-    Jumpers: Nothing special.  Use the default base board jumper
-    settings.
-
   thttpd:
     This builds the THTTPD web server example using the THTTPD and
     the apps/examples/thttpd application.

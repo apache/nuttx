@@ -644,11 +644,6 @@ Where <subdir> is one of the following:
     (5) Option CONFIG_NSH_ARCHINIT must be enabled in order to call the SDIO slot
         initialization code.
 
-  ostest:
-  ------
-    This configuration directory, performs a simple OS test using
-    apps/examples/ostest.
-
   usbnsh:
   -------
 
