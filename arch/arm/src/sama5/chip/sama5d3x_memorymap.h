@@ -558,7 +558,7 @@
  *    case.
  *
  * Or... the user may specify the address of the page table explicitly be defining
- * CONFIG_PGTABLE_VADDR and CONFIG_PGTABLE_PADDR in the configuration or board.h file.
+ * PGTABLE_BASE_VADDR and PGTABLE_BASE_PADDR in the board.h file.
  */
 
 #undef PGTABLE_IN_HIGHSRAM

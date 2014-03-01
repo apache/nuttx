@@ -299,14 +299,6 @@ config ARCH_LOWVECTORS
 	---help---
 		Support ARM vectors in low memory.
 
-config PGTABLE_VADDR
-	hex "Page table virtual address"
-	default 0x0
-	depends on ARCH_HAVE_MMU
-	---help---
-		Page table virtual address (might be defined in the board.h file).  Not
-		applicable to all architectures.
-
 config ARCH_ROMPGTABLE
 	bool "ROM page table"
 	default n
