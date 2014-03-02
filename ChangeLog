@@ -6752,3 +6752,5 @@
 	  kconfig-frontends tools (2014-3-2)
 	* configs/lpcxpresso-lpc1768/nx: Configuration converted to use the
 	  kconfig-frontends tools (2014-3-2)
+	* configs/lm3s8962-ek/nx: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-2)

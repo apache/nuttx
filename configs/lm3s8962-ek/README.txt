@@ -459,10 +459,52 @@ sub-directory and can be selected as follow:
 Where <subdir> is one of the following:
 
   nsh:
-    Configures the NuttShell (nsh) located at examples/nsh.  The
-    Configuration enables both the serial and telnetd NSH interfaces.
+    Configures the NuttShell (nsh) located at examples/nsh.
 
-    NOTE: As it is configured now, you MUST have a network connected.
-    Otherwise, the NSH prompt will not come up because the Ethernet
-    driver is waiting for the network to come up.  That is probably
-    a bug in the Ethernet driver behavior!
+    NOTES:
+
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configurations using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. This configuration uses Cygwin under Windows with the NuttX buildroot
+       tool chain.  This is eaily change by modifying the following:
+
+         CONFIG_HOST_WINDOWS=y
+         CONFIG_WINDOWS_CYGWIN=y
+         CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y
+
+    3. The configuration enables both the serial and telnetd NSH interfaces.
+
+    4. As it is configured now, you MUST have a network connected. Otherwise,
+       the NSH prompt will not come up because the Ethernet driver is waiting
+       for the network to come up.  That is probably a bug in the Ethernet
+       driver behavior!
+
+  nx
+    An example using the NuttX graphics system (NX).  This example
+    focuses on general window controls, movement, mouse and keyboard
+    input.
+
+    NOTES:
+
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configurations using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. This configuration uses Cygwin under Windows with the NuttX buildroot
+       tool chain.  This is eaily change by modifying the following:
+
+         CONFIG_HOST_WINDOWS=y
+         CONFIG_WINDOWS_CYGWIN=y
+         CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y
