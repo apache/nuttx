@@ -782,14 +782,25 @@ Where <subdir> is one of the following:
     And example using the NuttX graphics system (NX).  This example
     uses the UG-9664HSWAG01 driver.
 
-    Jumpers:  There are several jumper settings needed by the OLED.
-    All are the default settings:
+    NOTES:
+
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configurations using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. Jumpers:  There are several jumper settings needed by the OLED.
+       All are the default settings:
     
-    J42: Close to select the SPI interface (Default: closed)
-    J43: Close to support OLED command/data select (Default: closed)
-    J44: Close to allow control of OLED voltage (Default: closed)
-    J45: Close to select SPI clock (Default: closed)
-    J46: Close SPI data input (MOSI) (Default:closed)
+         J42: Close to select the SPI interface (Default: closed)
+         J43: Close to support OLED command/data select (Default: closed)
+         J44: Close to allow control of OLED voltage (Default: closed)
+         J45: Close to select SPI clock (Default: closed)
+         J46: Close SPI data input (MOSI) (Default:closed)
 
   thttpd:
     This builds the THTTPD web server example using the THTTPD and
