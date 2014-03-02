@@ -138,18 +138,17 @@ config NOKIA6100_FREQUENCY
 	---help---
 		Define to use a different bus frequency
 
-config NOKIA6100_BLINIT
-	bool "Back light initial"
-	default n
-	---help---
-		Initial backlight setting
-		The following may need to be tuned for your hardware:
-
 config NOKIA6100_BPP
 	int "Display bits per pixel"
 	default 8
 	---help---
 		Device supports 8, 12, and 16 bits per pixel.
+
+config NOKIA6100_BLINIT
+	int "Back light initial"
+	default 40
+	---help---
+		Initial backlight setting
 
 config NOKIA6100_INVERT
 	int "Display inversion"

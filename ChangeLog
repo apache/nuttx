@@ -6741,8 +6741,12 @@
 	  kconfig-frontends tools (2014-3-2).
 	* configs/stm3210e-eval/nx: Configuration converted to use the
 	  kconfig-frontends tools (2014-3-2).
-	* configs/mirtoo/nxffs: Configuration converted to use the kconfig-frontends
-	  tools (2014-3-1).
+	* configs/mirtoo/nxffs: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-2).
+	* arch/arm/src/lpc2378/Kconfig: Create Kconfig file for the LPC2378.
+	  Change most configuration variable names to avoid collisions with
+	  other platforms  (2014-3-2)
 	* configs/olimex-lpc2378/nsh: Configuration converted to use the
 	  kconfig-frontends tools (2014-3-2)
-
+	* configs/olimex-lpc1766stk/nx: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-2)
