@@ -859,8 +859,8 @@ selected as follow:
 
 Where <subdir> is one of the following:
 
-  nsh:
-  ====
+  nsh
+
     This configuration directory holds configuration files tht can
     be used to support the NuttShell (NSH).  This configuration use
     UART1 which is available on FUNC 4 and 5 on connector X3:
@@ -881,64 +881,73 @@ Where <subdir> is one of the following:
 
     2. UART2
 
-      If you are not using MPLAB to debug, you may switch to UART2
-      by modifying the NuttX configuration to disable UART1 and to
-      select UART2.  You should also change Make.defs to use the
-      release.ld linker script instead of the debug.ld link script.
+       If you are not using MPLAB to debug, you may switch to UART2
+       by modifying the NuttX configuration to disable UART1 and to
+       select UART2.  You should also change Make.defs to use the
+       release.ld linker script instead of the debug.ld link script.
 
     3. This configuration also uses the Microchip C32 toolchain under
-    windows by default:
+       windows by default:
 
-      CONFIG_MIPS32_TOOLCHAIN_MICROCHIPW_LITE=y : Lite version of windows toolchain
+         CONFIG_MIPS32_TOOLCHAIN_MICROCHIPW_LITE=y : Lite version of windows toolchain
 
-    To switch to the Linux C32 toolchain you will have to change (1) the
-    toolchain selection in .config (after configuration) and (2) the
-    path to the toolchain in setenv.sh.  See notes above with regard to
-    the XC32 toolchain.
+       To switch to the Linux C32 toolchain you will have to change (1) the
+       toolchain selection in .config (after configuration) and (2) the
+       path to the toolchain in setenv.sh.  See notes above with regard to
+       the XC32 toolchain.
 
-    PGA117 Support:
-    --------------
-    The Mirtoo's PGA117 amplifier/multipexer is not used by this configuration
-    but can be enabled by setting:
+    4. PGA117 Support
 
-       CONFIG_ADC=y         : Enable support for analog input devices
-       CONFIG_SPI_OWNBUS=y  : If the PGA117 is the only device on the bus
-       CONFIG_ADC_PGA11X=y  : Enable support for the PGA117
+       The Mirtoo's PGA117 amplifier/multiplexer is not used by this configuration
+       but can be enabled by setting:
 
-  nxffs:
-  ======
+         CONFIG_ADC=y         : Enable support for analog input devices
+         CONFIG_SPI_OWNBUS=y  : If the PGA117 is the only device on the bus
+         CONFIG_ADC_PGA11X=y  : Enable support for the PGA117
+
+  nxffs
+
     This is a configuration very similar to the nsh configuration.  This
     configure also provides the NuttShell (NSH).  And this configuration use
     UART1 which is available on FUNC 4 and 5 on connector X3 (as described
     for the nsh configuration).  This configuration differs from the nsh
     configuration in the following ways:
 
-    1) It uses the Pinguino toolchain be default (this is easily changed,
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configurations using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. It uses the Pinguino toolchain be default (this is easily changed,
        see above).
 
-       CONFIG_MIPS32_TOOLCHAIN_PINGUINOW=y
+         CONFIG_MIPS32_TOOLCHAIN_PINGUINOW=y
 
-    2) SPI2 is enabled and support is included for the NXFFS file system
+    3. SPI2 is enabled and support is included for the NXFFS file system
        on the 32Mbit SST25 device on the Mirtoo board.  NXFFS is the NuttX
        wear-leveling file system.
 
-       CONFIG_PIC32MX_SPI2=y
-       CONFIG_MTD_SST25=y
-       CONFIG_SST25_SECTOR512=y
-       CONFIG_DISABLE_MOUNTPOINT=n
-       CONFIG_FS_NXFFS=y
-       CONFIG_NSH_ARCHINIT=y
+         CONFIG_PIC32MX_SPI2=y
+         CONFIG_MTD_SST25=y
+         CONFIG_SST25_SECTOR512=y
+         CONFIG_DISABLE_MOUNTPOINT=n
+         CONFIG_FS_NXFFS=y
+         CONFIG_NSH_ARCHINIT=y
 
-    3) Many operating system features are suppressed to produce a smaller
+    4. Many operating system features are suppressed to produce a smaller
        footprint.
 
-       CONFIG_SCHED_WAITPID=n
-       CONFIG_DISABLE_POSIX_TIMERS=y
-       CONFIG_DISABLE_PTHREAD=y
-       CONFIG_DISABLE_MQUEUE=y
-       CONFIG_DISABLE_MQUEUE=y
+         CONFIG_SCHED_WAITPID=n
+         CONFIG_DISABLE_POSIX_TIMERS=y
+         CONFIG_DISABLE_PTHREAD=y
+         CONFIG_DISABLE_MQUEUE=y
+         CONFIG_DISABLE_MQUEUE=y
 
-    4) Many NSH commands are suppressed, also for a smaller FLASH footprint
+    5. Many NSH commands are suppressed, also for a smaller FLASH footprint
 
        CONFIG_NSH_DISABLESCRIPT=y
        CONFIG_NSH_DISABLEBG=y
@@ -949,50 +958,49 @@ Where <subdir> is one of the following:
        CONFIG_NSH_DISABLE_GET=y
        CONFIG_NSH_DISABLE_IFCONFIG=y
        CONFIG_NSH_DISABLE_KILL=y
-       CONFIG_NSH_DISABLE_MKFATFS=y
        CONFIG_NSH_DISABLE_MKFIFO=y
        CONFIG_NSH_DISABLE_MKRD=y
-       CONFIG_NSH_DISABLE_NFSMOUNT=y
-       CONFIG_NSH_DISABLE_PING=y
        CONFIG_NSH_DISABLE_PUT=y
        CONFIG_NSH_DISABLE_SH=y
        CONFIG_NSH_DISABLE_TEST=y
        CONFIG_NSH_DISABLE_WGET=y
 
-    When the system boots, you should have the NXFFS file system mounted
-    at /mnt/sst25.
+      When the system boots, you should have the NXFFS file system mounted
+      at /mnt/sst25.
 
-    NOTES:  (1) It takes many seconds to boot the sytem using the NXFFS
-    file system because the entire FLASH must be verified on power up
-    (and longer the first time that NXFFS comes up and has to format the
-    entire FLASH). (2) FAT does not have these delays and this configuration
-    can be modified to use the (larger) FAT file system as described below.
-    But you will, or course, lose the wear-leveling feature if FAT is used.
+      NOTES:
 
-    fat:
-    ----
-    There is no FAT configuration, but the nxffx configuration can be used
-    to support the FAT FS if the following changes are made to the NuttX
-    configuration file:
+      a) It takes many seconds to boot the sytem using the NXFFS
+         file system because the entire FLASH must be verified on power up
+         (and longer the first time that NXFFS comes up and has to format the
+         entire FLASH).
+      b) FAT does not have these delays and this configuration can be modified
+         to use the (larger) FAT file system as described below.  But you will,
+         or course, lose the wear-leveling feature if FAT is used.
 
-      CONFIG_FS_NXFFS=n
-      CONFIG_FS_FAT=y
-      CONFIG_NSH_DISABLE_MKFATFS=n
+    6. FAT
 
-    In this configuration, the FAT file system will not be automatically
-    monounted.  When NuttX boots to the NSH prompt, you will find the
-    SST5 block driver at /dev/mtdblock0.  This can be formatted with a
-    FAT file system and mounted with these commands:
+       There is no FAT configuration, but the nxffx configuration can be used
+       to support the FAT FS if the following changes are made to the NuttX
+       configuration file:
 
-      nsh> mkfatfs /dev/mtdblock0
-      nsh> mount -t vfat /dev/mtdblock0 /mnt/sst25
+         CONFIG_FS_NXFFS=n
+         CONFIG_FS_FAT=y
+         CONFIG_NSH_DISABLE_MKFATFS=n
 
-    PGA117 Support:
-    ---------------
-    The Mirtoo's PGA117 amplifier/multipexer is not used by this configuration
-    but can be enabled by setting:
+       In this configuration, the FAT file system will not be automatically
+       mounted.  When NuttX boots to the NSH prompt, you will find the
+       SST5 block driver at /dev/mtdblock0.  This can be formatted with a
+       FAT file system and mounted with these commands:
 
-      CONFIG_ADC=y         : Enable support for anlog input devices
-      CONFIG_SPI_OWNBUS=n  : The PGA117 is *not* the only device on the bus
-      CONFIG_ADC_PGA11X=y  : Enable support for the PGA117
+         nsh> mkfatfs /dev/mtdblock0
+         nsh> mount -t vfat /dev/mtdblock0 /mnt/sst25
 
+    7. PGA117 Support
+
+       The Mirtoo's PGA117 amplifier/multipexer is not used by this
+       configuration but can be enabled by setting:
+
+         CONFIG_ADC=y         : Enable support for anlog input devices
+         CONFIG_SPI_OWNBUS=n  : The PGA117 is *not* the only device on the bus
+         CONFIG_ADC_PGA11X=y  : Enable support for the PGA117
