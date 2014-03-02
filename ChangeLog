@@ -6736,4 +6736,7 @@
           kconfig-frontends tools (2014-3-1).
 	*  configs/ea3152/ostest: Configuration converted to use the
           kconfig-frontends tools (2014-3-1).
+	* configs/stm3210e-eval/RIDE, nxlines, and nxtext:  Remove some old
+	  style configurations that are not worth converting to use the
+	  kconfig-frontends tools (2014-3-2).
 
