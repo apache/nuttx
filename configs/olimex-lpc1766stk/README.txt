@@ -988,8 +988,6 @@ Where <subdir> is one of the following:
     go through many retries and timeouts before it finally decides that there
     is not SD card in the slot.
 
-    Configuration Notes:
-
     NOTES:
 
     1. This configuration uses the mconf-based configuration tool.  To
@@ -1024,8 +1022,20 @@ Where <subdir> is one of the following:
 
   nx:
     An example using the NuttX graphics system (NX).  This example uses
-    the Nokia 6100 LCD driver. NOTE:  The Nokia 6100 driver does not
-    work on this board as of this writing.
+    the Nokia 6100 LCD driver.
+
+    NOTES:
+
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configuration using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. The Nokia 6100 driver does not work on this board as of this writing.
 
   slip-httpd:
     This configuration is identical to the thttpd configuration except that
