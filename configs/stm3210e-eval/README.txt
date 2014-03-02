@@ -806,7 +806,24 @@ Where <subdir> is one of the following:
 
     NOTES:
 
-    1. This example provides a framework for a number of other standalone
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configurations using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. If you configured the multi-used NX server (which is disabled
+       by default), then you would also need:
+
+         CONFIG_EXAMPLES_NX_CLIENTPRIO=80
+         CONFIG_EXAMPLES_NX_NOTIFYSIGNO=4
+         CONFIG_EXAMPLES_NX_SERVERPRIO=120
+         CONFIG_EXAMPLES_NX_STACKSIZE=2048
+
+    3. This example provides a framework for a number of other standalone
        graphics tests.
 
        a. apps/examples/nxlines:  The NXLINES graphic example illustrates
@@ -876,8 +893,8 @@ Where <subdir> is one of the following:
             CONFIG_EXAMPLES_NXTEXT_PUFONTID=1
             CONFIG_EXAMPLES_NXTEXT_EXTERNINIT=n
 
-          If you conconfigured the multi-used NX server (which is disabled
-          by default), then you would also nee:
+          If you configured the multi-used NX server (which is disabled
+          by default), then you would also need:
 
             CONFIG_EXAMPLES_NXTEXT_STACKSIZE=2048
             CONFIG_EXAMPLES_NXTEXT_CLIENTPRIO=80
