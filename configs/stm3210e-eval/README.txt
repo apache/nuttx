@@ -48,13 +48,13 @@ GNU Toolchain Options
   add one of the following configuration options to your .config (or defconfig)
   file:
 
-    CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
-    CONFIG_STM32_CODESOURCERYL=y  : CodeSourcery under Linux
-    CONFIG_STM32_DEVKITARM=y      : devkitARM under Windows
-    CONFIG_STM32_RAISONANCE=y     : Raisonance RIDE7 under Windows
-    CONFIG_STM32_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y  : CodeSourcery under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL=y  : CodeSourcery under Linux
+    CONFIG_ARMV7M_TOOLCHAIN_DEVKITARM=y      : devkitARM under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_RAISONANCE=y     : Raisonance RIDE7 under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
 
-  If you are not using CONFIG_STM32_BUILDROOT, then you may also have to modify
+  If you are not using CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT, then you may also have to modify
   the PATH in the setenv.h file if your make cannot find the tools.
 
   NOTE: the CodeSourcery (for Windows), devkitARM, and Raisonance toolchains are
@@ -696,7 +696,7 @@ Where <subdir> is one of the following:
     Uses apps/examples/buttons to exercise STM3210E-EVAL buttons and
     button interrupts.
 
-    CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y  : CodeSourcery under Windows
 
   composite
   ---------
@@ -785,15 +785,15 @@ Where <subdir> is one of the following:
        a. examples/can.  The CAN test example can be enabled by changing the
           following settings in nsh2/defconfig:
 
-          CONFIG_CAN=y             # Enable CAN "upper-half" driver support
-          CONFIG_STM32_CAN1=y      # Enable STM32 CAN1 "lower-half" driver support
+          CONFIG_CAN=y             : Enable CAN "upper-half" driver support
+          CONFIG_STM32_CAN1=y      : Enable STM32 CAN1 "lower-half" driver support
 
           The default CAN settings may need to change in your board board
           configuration:
 
-          CONFIG_CAN_EXTID=y       # Support extended IDs
-          CONFIG_CAN1_BAUD=250000  # Bit rate: 250 KHz
-          CONFIG_CAN_TSEG1=12      # 80% sample point
+          CONFIG_CAN_EXTID=y       : Support extended IDs
+          CONFIG_CAN1_BAUD=250000  : Bit rate: 250 KHz
+          CONFIG_CAN_TSEG1=12      : 80% sample point
           CONFIG_CAN_TSEG2=3
   nx:
   ---
@@ -801,8 +801,91 @@ Where <subdir> is one of the following:
     focuses on general window controls, movement, mouse and keyboard
     input.
 
-      CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
+      CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y  : CodeSourcery under Windows
       CONFIG_LCD_RPORTRAIT=y        : 240x320 reverse portrait
+
+    NOTES:
+
+    1. This example provides a framework for a number of other standalone
+       graphics tests.
+
+       a. apps/examples/nxlines:  The NXLINES graphic example illustrates
+          drawing of fat lines in various orientations.  You can modify
+          this configuration so to support the NXLINES example by making
+          the following modifications to the NuttX configuration file:
+
+          Provide the new start-up entry point:
+
+            CONFIG_USER_ENTRYPOINT="nxlines_main"
+
+          Disable apps/examples/nx:
+
+            CONFIG_EXAMPLES_NX=n
+
+          Enable and configure apps/nxlines/nxlines:
+
+            CONFIG_EXAMPLES_NXLINES=y
+            CONFIG_EXAMPLES_NXLINES_VPLANE=0
+            CONFIG_EXAMPLES_NXLINES_DEVNO=0
+            CONFIG_EXAMPLES_NXLINES_DEFAULT_COLORS=n
+            CONFIG_EXAMPLES_NXLINES_BGCOLOR=0x0320
+            CONFIG_EXAMPLES_NXLINES_LINEWIDTH=16
+            CONFIG_EXAMPLES_NXLINES_LINECOLOR=0xffe0
+            CONFIG_EXAMPLES_NXLINES_BORDERWIDTH=4
+            CONFIG_EXAMPLES_NXLINES_BORDERCOLOR=0xffe0
+            CONFIG_EXAMPLES_NXLINES_CIRCLECOLOR=0xf7bb
+            CONFIG_EXAMPLES_NXLINES_BPP=16
+            CONFIG_EXAMPLES_NXLINES_EXTERNINIT=n
+
+       b. apps/examples/nxtext:  Another example using the NuttX graphics
+          system (NX).   This example focuses on placing text on the
+          background while pop-up windows occur.  Text should continue to
+          update normally with  or without the popup windows present.
+
+          You can modify this configuration so to support the NXLINES
+          example by making the following modifications to the NuttX
+          configuration file:
+
+          Provide the new start-up entry point:
+
+            CONFIG_USER_ENTRYPOINT="nxtext_main"
+
+          Disable apps/examples/nx:
+
+            CONFIG_EXAMPLES_NX=n
+
+          Enable an NX font:
+
+            CONFIG_NXFONT_SERIF22X28B=y
+
+          Enable and configure apps/nxlines/nxtext:
+
+            CONFIG_EXAMPLES_NXTEXT=y
+            CONFIG_EXAMPLES_NXTEXT_VPLANE=0
+            CONFIG_EXAMPLES_NXTEXT_DEVNO=0
+            CONFIG_EXAMPLES_NXTEXT_BPP=16
+            CONFIG_EXAMPLES_NXTEXT_BMCACHE=512
+            CONFIG_EXAMPLES_NXTEXT_GLCACHE=16
+            CONFIG_EXAMPLES_NXTEXT_DEFAULT_COLORS=n
+            CONFIG_EXAMPLES_NXTEXT_BGCOLOR=0x0011
+            CONFIG_EXAMPLES_NXTEXT_BGFONTCOLOR=0xffdf
+            CONFIG_EXAMPLES_NXTEXT_PUCOLOR=0xfd20
+            CONFIG_EXAMPLES_NXTEXT_PUFONTCOLOR=0x001f
+            CONFIG_EXAMPLES_NXTEXT_DEFAULT_FONT=n
+            CONFIG_EXAMPLES_NXTEXT_BGFONTID=11
+            CONFIG_EXAMPLES_NXTEXT_PUFONTID=1
+            CONFIG_EXAMPLES_NXTEXT_EXTERNINIT=n
+
+          If you conconfigured the multi-used NX server (which is disabled
+          by default), then you would also nee:
+
+            CONFIG_EXAMPLES_NXTEXT_STACKSIZE=2048
+            CONFIG_EXAMPLES_NXTEXT_CLIENTPRIO=80
+            CONFIG_EXAMPLES_NXTEXT_SERVERPRIO=120
+            CONFIG_EXAMPLES_NXTEXT_NOTIFYSIGNO=4
+
+        c. Others could be similar configured:  apps/examples/nxhello,
+            nximage, ...
 
   nxconsole:
   ----------
@@ -829,32 +912,8 @@ Where <subdir> is one of the following:
 
     Other configuration settings:
 
-      CONFIG_STM32_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin
-      CONFIG_LCD_LANDSCAPE=y        : 320x240 landscape
-
-  nxlines:
-  ------
-    Another example using the NuttX graphics system (NX).   This
-    example focuses on placing lines on the background in various
-    orientations.
-
-      CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
-      CONFIG_LCD_RPORTRAIT=y        : 240x320 reverse portrait
-
-  nxtext:
-  ------
-    Another example using the NuttX graphics system (NX).   This
-    example focuses on placing text on the background while pop-up
-    windows occur.  Text should continue to update normally with
-    or without the popup windows present.
-
-      CONFIG_STM32_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin
-      CONFIG_LCD_RPORTRAIT=y        : 240x320 reverse portrait
-
-    NOTE:  When I tried building this example with the CodeSourcery
-    tools, I got a hardfault inside of its libgcc.  I haven't
-    retested since then, but beware if you choose to change the
-    toolchain.
+      CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : NuttX buildroot under Linux or Cygwin
+      CONFIG_LCD_LANDSCAPE=y              : 320x240 landscape
 
   pm:
   --
@@ -865,7 +924,7 @@ Where <subdir> is one of the following:
     configuration should provide some guideline for power management in your
     STM32 application.
 
-      CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
+      CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y  : CodeSourcery under Windows
 
     CONFIG_PM_CUSTOMINIT and CONFIG_IDLE_CUSTOM are necessary parts of the
     PM configuration:
@@ -903,20 +962,13 @@ Where <subdir> is one of the following:
     STANDBY mode.  This used of the RTC alarm could conflict with other uses of
     the RTC alarm in your application.
 
-  RIDE
-  ----
-    This configuration builds a trivial bring-up binary.  It is
-    useful only because it words with the RIDE7 IDE and R-Link debugger.
-
-      CONFIG_STM32_RAISONANCE=y     : Raisonance RIDE7 under Windows
-
   usbserial:
   ---------
     This configuration directory exercises the USB serial class
     driver at examples/usbserial.  See examples/README.txt for
     more information.
 
-      CONFIG_STM32_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin
+      CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin
 
     USB debug output can be enabled as by changing the following
     settings in the configuration file:
@@ -966,5 +1018,5 @@ Where <subdir> is one of the following:
     class driver at system/usbmsc.  See examples/README.txt for
     more information.
 
-      CONFIG_STM32_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin
+      CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin
 
