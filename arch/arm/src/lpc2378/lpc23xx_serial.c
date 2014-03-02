@@ -136,7 +136,7 @@ static char g_uart2txbuffer[CONFIG_UART2_TXBUFSIZE];
 
 /* This describes the state of the LPC214X uart0 port. */
 
-#ifdef CONFIG_UART0
+#ifdef CONFIG_LPC2378_UART0
 static struct up_dev_s g_uart0priv =
 {
   .uartbase  = UART0_BASE_ADDR,
@@ -164,7 +164,7 @@ static uart_dev_t g_uart0port =
 };
 #endif
 
-#ifdef CONFIG_UART2
+#ifdef CONFIG_LPC2378_UART2
 
 /* This describes the state of the LPC23XX uart2 port. */
 

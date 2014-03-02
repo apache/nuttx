@@ -6,7 +6,7 @@
  *
  * This file is part of the NuttX RTOS and based on the lpc2148 port:
  *
- *   Copyright (C) 2010, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,6 +59,7 @@
 /* Print a character on the UART to show boot status. This macro will
  * modify r0, r1, r2 and r14
  */
+
 #ifdef CONFIG_DEBUG
 	.macro	showprogress, code
 	mov	r0, #\code
@@ -80,7 +81,7 @@
  *
  * Description:
  *   Interrrupt vector table.  This must be located at the beginning
- *   of the memory space (at CONFIG_CODE_BASE).  The first entry in
+ *   of the memory space (at CONFIG_LPC2378_CODE_BASE).  The first entry in
  *   the vector table is the reset vector and this is the code that
  *   will execute whn the processor is reset.
  *
@@ -136,6 +137,7 @@ _vector_table:
 __start:
 
 	/* Call lowlevel init C-function */
+
 	.extern ConfigurePLL
 	ldr	r0, =ConfigurePLL
 	mov	lr, pc
@@ -152,7 +154,6 @@ __start:
 	bl	up_lowsetup
 	
 	showprogress 'A'
-
 
 	/* Setup system stack (and get the BSS range) */
 
@@ -231,4 +232,3 @@ g_idle_topstack:
 	.size	g_idle_topstack, .-g_idle_topstack
 	
 	.end
-
