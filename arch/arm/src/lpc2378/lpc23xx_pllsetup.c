@@ -6,7 +6,7 @@
  *
  * This file is part of the NuttX RTOS:
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2014 Gregory Nutt. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -46,13 +46,13 @@
  *   MEMAP register is set override the settings of the CPU configuration
  *   pins.
  *
- *  CONFIG_EXTMEM_MODE: Code executes from external memory starting at
+ *  CONFIG_LPC2378_EXTMEM_MODE: Code executes from external memory starting at
  *    address 0x8000:0000.
  *
- *  CONFIG_RAM_MODE: Code executes from on-chip RAM at address
+ *  CONFIG_LPC2378_RAM_MODE: Code executes from on-chip RAM at address
  *     0x4000:0000.
  *
- * Starupt Code must be linked to run at the correct address
+ * Start-up Code must be linked to run at the correct address
  * corresponding to the selected mode.
  */
 
@@ -70,10 +70,10 @@
 #include "lpc23xx_pinsel.h"
 #include "lpc23xx_scb.h"
 
-extern void IO_Init(void);
+void IO_Init(void);
 
 /***********************************************************************
- * Definitions
+ * Pre-processor Definitions
  **********************************************************************/
 
 #if ((FOSC < 32000) || (FOSC > 50000000))
@@ -105,8 +105,8 @@ extern void IO_Init(void);
  * RTC                  2
  */
 
-#ifdef CONFIG_PLL_CLKSRC
-#       if ( (CONFIG_PLL_CLKSRC < 0) || (CONFIG_PLL_CLKSRC > 2) )
+#ifdef CONFIG_LPC2378_PLL_CLKSRC
+#       if ( (CONFIG_LPC2378_PLL_CLKSRC < 0) || (CONFIG_LPC2378_PLL_CLKSRC > 2) )
 #               error "PLL clock source not valid, check configuration "
 #       endif
 #else
@@ -138,13 +138,13 @@ extern void IO_Init(void);
 
 /* LPC2378 Rev. '-' errata MAM may not work if fully enabled */
 
-#ifdef CONFIG_MAM_SETUP
-#  ifndef CONFIG_MAMCR_VALUE    /* Can be selected from config file */
-#    define CONFIG_MAMCR_VALUE  (MAMCR_PART)
+#ifdef CONFIG_LPC2378_MAM_SETUP
+#  ifndef CONFIG_LPC2378_MAMCR_VALUE    /* Can be selected from config file */
+#    define CONFIG_LPC2378_MAMCR_VALUE  (MAMCR_PART)
 #  endif
 
-#  ifndef CONFIG_MAMTIM_VALUE   /* Can be selected from config file */
-#    define CONFIG_MAMTIM_VALUE (0x00000003)
+#  ifndef CONFIG_LPC2378_MAMTIM_VALUE   /* Can be selected from config file */
+#    define CONFIG_LPC2378_MAMTIM_VALUE (0x00000003)
 #  endif
 #endif
 
@@ -171,12 +171,15 @@ void ConfigurePLL(void)
   uint32_t MSel, NSel;
 
   /* LPC2378 Rev.'-' errata Enable the Ethernet block to enable 16k EnetRAM */
+
   SCB_PCONP |= PCENET;
 
   /* Vectors are remapped to Flash */
+
   SCB_MEMMAP = MEMMAP2FLASH;
 
   /* Enable PLL, disconnected */
+
   if (SCB_PLLSTAT & (1 << 25))
     {
       SCB_PLLCON = 0x01;
@@ -184,37 +187,48 @@ void ConfigurePLL(void)
     }
 
   /* Disable PLL, disconnected */
+
   SCB_PLLCON = 0;
   up_scbpllfeed();
 
   /* Enable main OSC */
+
   SCB_SCS |= 0x20;
 
   /* Wait until main OSC is usable */
+
   while (!(SCB_SCS & 0x40));
 
   /* select main OSC, 12MHz, as the PLL clock source */
-  SCB_CLKSRCSEL = CONFIG_PLL_CLKSRC;
+
+  SCB_CLKSRCSEL = CONFIG_LPC2378_PLL_CLKSRC;
 
   /* Reconfigure PLL */
+
   SCB_PLLCFG = PLL;
   up_scbpllfeed();
 
   /* Enable PLL */
+
   SCB_PLLCON = 0x01;
   up_scbpllfeed();
 
   /* Set clock divider */
+
   SCB_CCLKCFG = CCLK_DIV;
 
 #ifdef CONFIG_USBDEV
   /* usbclk = 288 MHz/6 = 48 MHz */
+
   SCB_USBCLKCFG = USBCLK_DIV;
+
   /* Turn On USB PCLK */
+
   SCB_PCONP |= PCUSB;
 #endif
 
   /* Wait for PLL to lock */
+
   while ((SCB_PLLSTAT & (1 << 26)) == 0);
 
   MSel = SCB_PLLSTAT & 0x00007FFF;
@@ -222,18 +236,22 @@ void ConfigurePLL(void)
   while ((MSel != PLL_M) && (NSel != PLL_N));
 
   /* Enable and connect */
+
   SCB_PLLCON = 0x03;
   up_scbpllfeed();
 
   /* Check connect bit status */
+
   while ((SCB_PLLSTAT & (1 << 25)) == 0);
 
   /* Set memory accelerater module */
+
   SCB_MAMCR = 0;
-  SCB_MAMTIM = CONFIG_MAMTIM_VALUE;
-  SCB_MAMCR = CONFIG_MAMCR_VALUE;
+  SCB_MAMTIM = CONFIG_LPC2378_MAMTIM_VALUE;
+  SCB_MAMCR = CONFIG_LPC2378_MAMCR_VALUE;
 
   /* Enable FastIO on P0:P1 */
+
   SCB_SCS |= 0x01;
 
   IO_Init();

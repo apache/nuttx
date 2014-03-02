@@ -6696,51 +6696,53 @@
 	  cases where there wass some good argument to retain the ostest
 	  configuration) (2014-2-28)
 	* configurations (2014-2-28).
-        * configs/stm3240g-eval/nsh2: Configuration converted to use the
-          kconfig-frontends tools (2014-3-1).
-        * configs/stm3220g-eval/nsh2: Configuration converted to use the
-          kconfig-frontends tools (2014-3-1).
-        * configs/stm3210e-eval/nsh: Configuration converted to use the
-          kconfig-frontends tools (2014-3-1).
-        * configs/stm3210e-eval/nsh2: Configuration converted to use the
-          kconfig-frontends tools (2014-3-1).
+	* configs/stm3240g-eval/nsh2: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-1).
+	* configs/stm3220g-eval/nsh2: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-1).
+	* configs/stm3210e-eval/nsh: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-1).
+	* configs/stm3210e-eval/nsh2: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-1).
 	* configs/lincoln60/nsh: Configuration converted to use the
-          kconfig-frontends tools (2014-3-1).
+	  kconfig-frontends tools (2014-3-1).
 	* configs/lpcxpresso-lpc1768/nsh: Configuration converted to use the
-          kconfig-frontends tools (2014-3-1).
-        * configs/nucleus2g/nsh: Configuration converted to use the
-          kconfig-frontends tools (2014-3-1).
-        * configs/vsn/nsh: Configuration converted to use the kconfig-frontends
+	  kconfig-frontends tools (2014-3-1).
+	* configs/nucleus2g/nsh: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-1).
+	* configs/vsn/nsh: Configuration converted to use the kconfig-frontends
 	  tools (2014-3-1).
-        * configs/mirtoo/nsh: Configuration converted to use the kconfig-frontends
-          tools (2014-3-1).
-        * configs/pic32-starterkit/nsh: Configuration converted to use the
-          kconfig-frontends tools (2014-3-1).
-        * configs/pic32-starterkit/nsh2: Configuration converted to use the
-          kconfig-frontends tools (2014-3-1)
+	* configs/mirtoo/nsh: Configuration converted to use the kconfig-frontends
+	  tools (2014-3-1).
+	* configs/pic32-starterkit/nsh: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-1).
+	* configs/pic32-starterkit/nsh2: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-1)
 	* configs/pic32mx7mmb/nsh: Configuration converted to use the
-          kconfig-frontends tools (2014-3-1).
+	  kconfig-frontends tools (2014-3-1).
 	* configs/ubw32/nsh: Configuration converted to use the kconfig-frontends
-          tools (2014-3-1).
+	  tools (2014-3-1).
 	* configs/sim/nsh2: Configuration converted to use the kconfig-frontends
-          tools (2014-3-1).
+	  tools (2014-3-1).
 	* configs/lm3s6432-s2e/nsh: Configuration converted to use the
-          kconfig-frontends tools (2014-3-1)
+	  kconfig-frontends tools (2014-3-1)
 	* configs/lm3s8962-ek/nsh: Configuration converted to use the
-          kconfig-frontends tools (2014-3-1).
+	  kconfig-frontends tools (2014-3-1).
 	* configs/eagle100/nsh: Configuration converted to use the
-          kconfig-frontends tools (2014-3-1).
+	  kconfig-frontends tools (2014-3-1).
 	* configs/stm32f4discovery/src/Makefile: Fix type: stm32_pwm.c not
 	  stm32_psm.c.  Noted by Max Kriegleder (2014-3-1).
 	* configs/lpc4330-xplorer/nsh Configuration converted to use the
-          kconfig-frontends tools (2014-3-1).
+	  kconfig-frontends tools (2014-3-1).
 	*  configs/ea3152/ostest: Configuration converted to use the
-          kconfig-frontends tools (2014-3-1).
+	  kconfig-frontends tools (2014-3-1).
 	* configs/stm3210e-eval/RIDE, nxlines, and nxtext:  Remove some old
 	  style configurations that are not worth converting to use the
 	  kconfig-frontends tools (2014-3-2).
 	* configs/stm3210e-eval/nx: Configuration converted to use the
-          kconfig-frontends tools (2014-3-2).
+	  kconfig-frontends tools (2014-3-2).
 	* configs/mirtoo/nxffs: Configuration converted to use the kconfig-frontends
-          tools (2014-3-1).
+	  tools (2014-3-1).
+	* configs/olimex-lpc2378/nsh: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-2)
 

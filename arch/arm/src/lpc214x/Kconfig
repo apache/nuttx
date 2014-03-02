@@ -37,7 +37,7 @@ config DEFAULT_MODE
 endchoice
 
 config CODE_BASE
-	hex "Execuation Base Address"
+	hex "Execution Base Address"
 	default 0x00000000
 	---help---
 		This must match the expected address for the selected "Memory
@@ -45,7 +45,7 @@ config CODE_BASE
 
 		EXTMEM_MODE:  0x8000:0000
 		RAM_MODE:     0x4000:0000
-		DEFAULT)MODE: 0x0000:0000
+		DEFAULT_MODE: 0x0000:0000
 
 config PLL_SETUP
 	bool "Configure the PLL"

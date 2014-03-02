@@ -6,7 +6,7 @@
  *
  * This file is part of the NuttX RTOS and based on the lpc2148 port:
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,17 +49,20 @@
 #include "lpc23xx_vic.h"
 
 /****************************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************************************/
+
 #define scb_getreg(o)    getreg32(LPC23XX_SCB_BASE + (o))
 #define scb_putreg(v,o)  putreg32((v),LPC23XX_SCB_BASE + (o))
 
 /* Memory Accelerator Mode */
+
 #define MAMCR_OFF     0
 #define MAMCR_PART    1
 #define MAMCR_FULL    2
 
 /* Memory Mapping */
+
 #define MEMMAP2BBLK   0 /* Interrupt Vectors in Boot Block */
 #define MEMMAP2FLASH  1 /* Interrupt Vectors in FLASH */
 #define MEMMAP2SRAM   2 /* Interrupt Vectors in RAM */
@@ -68,58 +71,58 @@
 
 /* PLL Control Register Bit Settings */
 
-#define PLLCON_PLLE		(1 << 0) /* PLL Enable */
-#define PLLCON_PLLC		(1 << 1) /* PLL Connect */
+#define PLLCON_PLLE   (1 << 0) /* PLL Enable */
+#define PLLCON_PLLC   (1 << 1) /* PLL Connect */
 
 /* PLL Configuration Register Bit Settings */
 
-#define PLLCFG_MSEL		(0x0000FFFF << 0)  /* PLL Multiplier (minus 1) */
-#define PLLCFG_NSEL		(0x000000FF << 16) /* PLL Divider */
-
+#define PLLCFG_MSEL   (0x0000ffff << 0)  /* PLL Multiplier (minus 1) */
+#define PLLCFG_NSEL   (0x000000ff << 16) /* PLL Divider */
 
 /* PLL Status Register Bit Settings */
 
-#define PLLSTAT_MSEL	(0x7FFF << 0)  /* PLL Multiplier Readback */
-#define PLLSTAT_NSEL	(0xFF << 16)   /* PLL Divider Readback */
-#define PLLSTAT_PLLE	(1 << 24)      /* PLL Enable Readback */
-#define PLLSTAT_PLLC	(1 << 25)      /* PLL Connect Readback */
-#define PLLSTAT_PLOCK	(1 << 26)      /* PLL Lock Status */
+#define PLLSTAT_MSEL  (0x7fff << 0)  /* PLL Multiplier Readback */
+#define PLLSTAT_NSEL  (0xff << 16)   /* PLL Divider Readback */
+#define PLLSTAT_PLLE  (1 << 24)      /* PLL Enable Readback */
+#define PLLSTAT_PLLC  (1 << 25)      /* PLL Connect Readback */
+#define PLLSTAT_PLOCK (1 << 26)      /* PLL Lock Status */
 
 /* PLL Feed Register values */
 
-#define PLLFEED1	0xaa
-#define PLLFEED2	0x55
-
+#define PLLFEED1      0xaa
+#define PLLFEED2      0x55
 
 /* Peripheral Power Control (PCONP) Register 0xE01FC0C4 */
 
-#define PCTIM0		(1 << 1)	/* Timer/Counter 0 */
-#define PCTIM1		(1 << 2)	/* Timer/Counter 1 */
-#define PCUART0		(1 << 3)	/* UART0 power/clock */
-#define PCUART1 	(1 << 4)	/* UART1 power/clock */
-#define PCPWM1		(1 << 5)	/* Unused, always 0 */
-#define PWM1		(1 << 6)	/* Pulse Width Modulation 1 */
-#define PCI2C0		(1 << 7)	/* I2C0 interface */
-#define PCSPI		(1 << 8)	/* SPI */
-#define PCRTC		(1 << 9)	/* Real Time Clock*/
-#define PCSSP1		(1 << 10)	/* SSP1 */
-#define PCEMC		(1 << 11)	/* External Memory Controller */
-#define PCAD		(1 << 12)	/* A/D converter (ADC) Note: Clear the PDN bit in the AD0CR before
-											clearing this bit, and set this bit before setting PDN */
-#define PCAN1		(1 << 13)	/* CAN Controller 1 */
-#define PCAN2		(1 << 14)	/* CAN Controller 2 */
-#define PCI2C1		(1 << 19)	/* The I2C1 interface power/clock control bit */
-#define PCSSP0		(1 << 21)	/* The SSP0 interface power/clock control bit */
-#define PCTIM2		(1 << 22)	/* Timer 2 */
-#define PCTIM3		(1 << 23)	/* Timer 3 */
-#define PCUART2		(1 << 24)	/* UART 2 */
-#define PCUART3		(1 << 25)	/* UART 3 */
-#define PCI2C2		(1 << 26)	/* I2C interface 2 */
-#define PCI2S		(1 << 27)	/* I2S interface */
-#define PCSDC		(1 << 28)	/* SD card interface */
-#define PCGPDMA		(1 << 29)	/* GP DMA function */
-#define PCENET		(1 << 30)	/* Ethernet block */
-#define PCUSB		(1 << 31)	/* USB interface */
+#define PCTIM0        (1 << 1)  /* Timer/Counter 0 */
+#define PCTIM1        (1 << 2)  /* Timer/Counter 1 */
+#define PCUART0       (1 << 3)  /* UART0 power/clock */
+#define PCUART1       (1 << 4)  /* UART1 power/clock */
+#define PCPWM1        (1 << 5)  /* Unused, always 0 */
+#define PWM1          (1 << 6)  /* Pulse Width Modulation 1 */
+#define PCI2C0        (1 << 7)  /* I2C0 interface */
+#define PCSPI         (1 << 8)  /* SPI */
+#define PCRTC         (1 << 9)  /* Real Time Clock*/
+#define PCSSP1        (1 << 10) /* SSP1 */
+#define PCEMC         (1 << 11) /* External Memory Controller */
+#define PCAD          (1 << 12) /* A/D converter (ADC) Note: Clear the PDN
+                                 * bit in the AD0CR before clearing this bit,
+                                 * and set this bit before setting PDN */
+#define PCAN1         (1 << 13) /* CAN Controller 1 */
+#define PCAN2         (1 << 14) /* CAN Controller 2 */
+#define PCI2C1        (1 << 19) /* The I2C1 interface power/clock control bit */
+#define PCSSP0        (1 << 21) /* The SSP0 interface power/clock control bit */
+#define PCTIM2        (1 << 22) /* Timer 2 */
+#define PCTIM3        (1 << 23) /* Timer 3 */
+#define PCUART2       (1 << 24) /* UART 2 */
+#define PCUART3       (1 << 25) /* UART 3 */
+#define PCI2C2        (1 << 26) /* I2C interface 2 */
+#define PCI2S         (1 << 27) /* I2S interface */
+#define PCSDC         (1 << 28) /* SD card interface */
+#define PCGPDMA       (1 << 29) /* GP DMA function */
+#define PCENET        (1 << 30) /* Ethernet block */
+#define PCUSB         (1 << 31) /* USB interface */
+
 /****************************************************************************************************
  * Inline Functions
  ****************************************************************************************************/

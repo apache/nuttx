@@ -6,7 +6,7 @@
  *
  * This is part of the NuttX RTOS and based on the LPC2148 port:
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,34 +48,25 @@
 #include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
-//~ #define LPC23XX_FIO_BASE    0x3fffc000  /* Fast I/O 0 base address */
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* P3.0 : P0.7 PINSEL6 LEDS 1-8 */
-#define LEDBIT(led) (0x01 << (led))
-#define ALL_LEDS	(0xFF)
-#define STATLED		(0x08)
-//~ #ifdef CONFIG_LPC23XX_FIO
-#  define putled8(v,o)  putreg8((v), (LPC23XX_FIO_BASE+(o)))
-#  define putled32(v,r) putreg32((v),(LPC23XX_FIO_BASE+(r)))
-#  define CLRLEDS   putled(ALL_LEDS,FIO3CLR0_OFFSET)
 
-#  define LED_SET_OFFSET FIO3SET0_OFFSET
-#  define LED_CLR_OFFSET FIO3CLR0_OFFSET
-#  define LED_DIR_OFFSET FIO3DIR0_OFFSET
-#  define LED_MASK_OFFSET FIO3MASK0_OFFSET
+#define LEDBIT(led)     (0x01 << (led))
+#define ALL_LEDS        (0xff)
+#define STATLED         (0x08)
 
-//~ #else
-//~ #  define putled(v,r)    putreg32((v),(LPC23XX_GPIO1_BASE+(r)))
-//~ #  define CLRLEDS        putled(STATLED,LPC23XX_GPIO1_SET_OFFSET)
-//~ 
-//~ #  define LED_SET_OFFSET LPC23XX_GPIO_SET_OFFSET
-//~ #  define LED_CLR_OFFSET LPC23XX_GPIO_CLR_OFFSET
-//~ #  define LED_DIR_OFFSET LPC23XX_GPIO_DIR_OFFSET
-//~ #endif
+#define putled8(v,o)    putreg8((v), (LPC23XX_FIO_BASE+(o)))
+#define putled32(v,r)   putreg32((v),(LPC23XX_FIO_BASE+(r)))
+#define CLRLEDS         putled(ALL_LEDS,FIO3CLR0_OFFSET)
+
+#define LED_SET_OFFSET  FIO3SET0_OFFSET
+#define LED_CLR_OFFSET  FIO3CLR0_OFFSET
+#define LED_DIR_OFFSET  FIO3DIR0_OFFSET
+#define LED_MASK_OFFSET FIO3MASK0_OFFSET
 
 /****************************************************************************
  * Private Data
@@ -86,7 +77,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Funtions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -96,7 +87,7 @@
 #ifdef CONFIG_ARCH_LEDS
 void board_led_initialize(void)
 {
-  /* Initilize GIOs P1.16-P1.23 */
+  /* Initialize GIOs P1.16-P1.23 */
 
   putled8(ALL_LEDS, LED_DIR_OFFSET);
   putled8(ALL_LEDS, LED_CLR_OFFSET);
