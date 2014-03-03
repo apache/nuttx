@@ -240,7 +240,7 @@ ARM/LPC214X-specific Configuration Options
 
 	CONFIG_ARCH_BOARD_name - For use in C code
 
-	   CONFIG_ARCH_BOARD_MCU123 (for the Spectrum Digital C5471 EVM)
+	   CONFIG_ARCH_BOARD_MCU123_LPC214X (for theMCU123 LPC214x board)
 
 	CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
 	   of delay loops
@@ -349,22 +349,22 @@ nsh:
   Configures the NuttShell (nsh) located at examples/nsh.  The
   Configuration enables only the serial NSH interfaces.
 
-    NOTES:
+  NOTES:
  
-    1. This configuration uses the mconf-based configuration tool.  To
-       change this configuration using that tool, you should:
+  1. This configuration uses the mconf-based configuration tool.  To
+     change this configuration using that tool, you should:
 
-       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          and misc/tools/
+     a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+        and misc/tools/
 
-       b. Execute 'make menuconfig' in nuttx/ in order to start the
-          reconfiguration process.
+     b. Execute 'make menuconfig' in nuttx/ in order to start the
+        reconfiguration process.
 
-    2. Default platform/toolchain:
+  2. Default platform/toolchain:
 
-       CONFIG_HOST_LINUX=y             : Windows
-       CONFIG_ARM_TOOLCHAIN_GNU_EABIL=y : Buildroot (arm-nuttx-elf-gcc)
-       CONFIG_RAW_BINARY=y             : Output formats: ELF and raw binary
+     CONFIG_HOST_LINUX=y             : Windows
+     CONFIG_ARM_TOOLCHAIN_GNU_EABIL=y : Buildroot (arm-nuttx-elf-gcc)
+     CONFIG_RAW_BINARY=y             : Output formats: ELF and raw binary
 
 usbserial:
 ----------
@@ -386,8 +386,19 @@ usbmsc:
   class driver at system/usbmsc.  See examples/README.txt for
   more information.
 
-  Default toolchain:  Buildroot
-  Output format:  ELF and binary
+  NOTES:
+ 
+  1. This configuration uses the mconf-based configuration tool.  To
+     change this configuration using that tool, you should:
 
-  NOTE:  If you have problems with this configurationt, perhaps it is a
-  consequence of the last USB driver checking (r4359)
+     a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+        and misc/tools/
+
+     b. Execute 'make menuconfig' in nuttx/ in order to start the
+        reconfiguration process.
+
+  2. Default toolchain:  Buildroot
+     Output format:  ELF and binary
+
+  3. If you have problems with this configuration, perhaps it is a
+     consequence of the last USB driver checking (r4359)

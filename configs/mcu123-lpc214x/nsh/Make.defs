@@ -1,7 +1,7 @@
 ##############################################################################
 # configs/mcu123-lpc214x/nsh/Make.defs
 #
-#   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008-2009, 2011, 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,101 +35,90 @@
 
 include ${TOPDIR}/.config
 include ${TOPDIR}/tools/Config.mk
+include ${TOPDIR}/arch/arm/src/arm/Toolchain.defs
 
-# The default value for CROSSDEV can be overridden from the make command line:
-#   make                         -- Will build for the NuttX buildroot toolchain
-#   make CROSSDEV=arm-eabi-      -- Will build for the devkitARM toolchain
-#   make CROSSDEV=arm-none-eabi- -- Will build for the CodeSourcery toolchain
-#   make CROSSDEV=arm-nuttx-elf- -- Will build for the NuttX buildroot toolchain
+ifeq ($(WINTOOL),y)
+  # Windows-native toolchains
+  DIRLINK = $(TOPDIR)/tools/copydir.sh
+  DIRUNLINK = $(TOPDIR)/tools/unlink.sh
+  MKDEP = $(TOPDIR)/tools/mknulldeps.sh
+  ARCHINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}"
+  ARCHXXINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}" -isystem "${shell cygpath -w $(TOPDIR)/include/cxx}"
+  ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/ld.script}"
+else
+  # Linux/Cygwin-native toolchain
+  MKDEP = $(TOPDIR)/tools/mkdeps.sh
+  ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
+  ARCHXXINCLUDES = -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
+  ARCHSCRIPT = -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/ld.script
+endif
 
-CROSSDEV		= arm-nuttx-elf-
-CC			= $(CROSSDEV)gcc
-CXX			= $(CROSSDEV)g++
-CPP			= $(CROSSDEV)gcc -E
-LD			= $(CROSSDEV)ld
-AR			= $(CROSSDEV)ar rcs
-NM			= $(CROSSDEV)nm
-OBJCOPY			= $(CROSSDEV)objcopy
-OBJDUMP			= $(CROSSDEV)objdump
+CC = $(CROSSDEV)gcc
+CXX = $(CROSSDEV)g++
+CPP = $(CROSSDEV)gcc -E
+LD = $(CROSSDEV)ld
+AR = $(CROSSDEV)ar rcs
+NM = $(CROSSDEV)nm
+OBJCOPY = $(CROSSDEV)objcopy
+OBJDUMP = $(CROSSDEV)objdump
 
-HOSTOS			=  ${shell uname -o 2>/dev/null || echo "Other"}
-
-ARCHCCVERSION		= ${shell $(CC) -v 2>&1 | sed -n '/^gcc version/p' | sed -e 's/^gcc version \([0-9\.]\)/\1/g' -e 's/[-\ ].*//g' -e '1q'}
-ARCHCCMAJOR		= ${shell echo $(ARCHCCVERSION) | cut -d'.' -f1}
+ARCHCCVERSION = ${shell $(CC) -v 2>&1 | sed -n '/^gcc version/p' | sed -e 's/^gcc version \([0-9\.]\)/\1/g' -e 's/[-\ ].*//g' -e '1q'}
+ARCHCCMAJOR = ${shell echo $(ARCHCCVERSION) | cut -d'.' -f1}
 
 ifeq ($(ARCHCCMAJOR),4)
 ifneq ($(HOSTOS),Cygwin)
-OBJCOPYARGS		= -R .note -R .note.gnu.build-id -R .comment
+  OBJCOPYARGS = -R .note -R .note.gnu.build-id -R .comment
 endif
 endif
 
-ifeq ($(CROSSDEV),arm-nuttx-elf-)
-  MKDEP			= $(TOPDIR)/tools/mkdeps.sh
-  ARCHINCLUDES		= -I. -isystem $(TOPDIR)/include
-  ARCHXXINCLUDES	= -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
-  ARCHSCRIPT		= -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/ld.script
-  MAXOPTIMIZATION	= -Os
-else
-  WINTOOL		= y
-  DIRLINK		= $(TOPDIR)/tools/copydir.sh
-  DIRUNLINK		= $(TOPDIR)/tools/unlink.sh
-  MKDEP			= $(TOPDIR)/tools/mknulldeps.sh
-  ARCHINCLUDES		= -I. -isystem "${shell cygpath -w $(TOPDIR)/include}"
-  ARCHXXINCLUDES	= -I. -isystem "${shell cygpath -w $(TOPDIR)/include}" -isystem "${shell cygpath -w $(TOPDIR)/include/cxx}"
-  ARCHSCRIPT		= -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/ld.script}"
-  MAXOPTIMIZATION	= -O2
-endif
-
-ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION	= -g
+ifeq ("${CONFIG_DEBUG}","y")
+  ARCHOPTIMIZATION = -g
 endif
 
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION	+= $(MAXOPTIMIZATION) -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
+  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
 endif
 
 ifeq ($(ARCHCCMAJOR),4)
-  ARCHCPUFLAGS		= -mcpu=arm7tdmi -mfloat-abi=soft
+  ARCHCPUFLAGS = -mcpu=arm7tdmi -mfloat-abi=soft
 else
-  ARCHCPUFLAGS		= -mapcs-32 -mcpu=arm7tdmi -msoft-float
+  ARCHCPUFLAGS = -mapcs-32 -mcpu=arm7tdmi -msoft-float
 endif
 
-ARCHCFLAGS		= -fno-builtin
-ARCHCXXFLAGS		= -fno-builtin -fno-exceptions
-ARCHPICFLAGS		= -fpic -msingle-pic-base -mpic-register=r10
-ARCHWARNINGS		= -Wall -Wstrict-prototypes -Wshadow
-ARCHWARNINGSXX		= -Wall -Wshadow
-ARCHDEFINES		=
+ARCHCFLAGS = -fno-builtin
+ARCHCXXFLAGS = -fno-builtin -fno-exceptions
+ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
+ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow
+ARCHWARNINGSXX = -Wall -Wshadow
+ARCHDEFINES =
 
-CFLAGS			= $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
-			  $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES) -pipe
-CPICFLAGS		= $(ARCHPICFLAGS) $(CFLAGS)
-CXXFLAGS		= $(ARCHCXXFLAGS) $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) \
-			  $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES) -pipe
-CXXPICFLAGS		= $(ARCHPICFLAGS) $(CXXFLAGS)
-CPPFLAGS		= $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES)
-AFLAGS			= $(CFLAGS) -D__ASSEMBLY__
+CFLAGS = $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
+         $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES) -pipe
+CPICFLAGS = $(ARCHPICFLAGS) $(CFLAGS)
+CXXFLAGS = $(ARCHCXXFLAGS) $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) \
+           $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES) -pipe
+CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
+CPPFLAGS = $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES)
+AFLAGS = $(CFLAGS) -D__ASSEMBLY__
 
-NXFLATLDFLAGS1		= -r -d -warn-common
-NXFLATLDFLAGS2		= $(NXFLATLDFLAGS1) \
-			  -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-gotoff.ld \
-			  -no-check-sections
-LDNXFLATFLAGS		= -e main -s 2048
+NXFLATLDFLAGS1 = -r -d -warn-common
+NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) \
+                 -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-gotoff.ld \
+                 -no-check-sections
+LDNXFLATFLAGS = -e main -s 2048
 
-OBJEXT			= .o
-LIBEXT			= .a
-EXEEXT			=
+OBJEXT = .o
+LIBEXT = .a
+EXEEXT =
 
 ifneq ($(CROSSDEV),arm-nuttx-elf-)
-  LDFLAGS		+= -nostartfiles -nodefaultlibs
+  LDFLAGS += -nostartfiles -nodefaultlibs
 endif
-ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  LDFLAGS		+= -g
+ifeq ($(CONFIG_DEBUG),y)
+  LDFLAGS += -g
 endif
 
-
-HOSTCC			= gcc
-HOSTINCLUDES		= -I.
-HOSTCFLAGS		= -Wall -Wstrict-prototypes -Wshadow -g -pipe
-HOSTLDFLAGS		=
-
+HOSTCC = gcc
+HOSTINCLUDES = -I.
+HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -g -pipe
+HOSTLDFLAGS =
