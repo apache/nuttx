@@ -150,7 +150,7 @@
  */
 
 #ifndef CONFIG_EZ80_MDCDIV
-#  ifdef CONFIG_EZ80_PHYAM79C874
+#  ifdef CONFIG_ETH0_PHY_AM79C874
 #    define CONFIG_EZ80_MDCDIV EMAC_MDC_DIV20
 #  else
 #    define CONFIG_EZ80_MDCDIV EMAC_MDC_DIV4
@@ -556,7 +556,7 @@ static bool ez80emac_miipoll(FAR struct ez80emac_driver_s *priv, uint32_t offset
  *
  ****************************************************************************/
 
-#ifdef CONFIG_EZ80_PHYAM79C874
+#ifdef CONFIG_ETH0_PHY_AM79C874
 static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
 {
   uint16_t phyval;

@@ -50,7 +50,7 @@ hex "PHY Address"
 		Provides the MII address of the PHY device
 
 # Belongs in net/Kconfig as PHY_AM79C874
-# EZ80_PHYAM79C874 - Define for Am79c874 PHY
+# ETH0_PHY_AM79C874 - Define for Am79c874 PHY
 
 config EZ80_PHYCONFIG
 	int "PHY Configuration"
