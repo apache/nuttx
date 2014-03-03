@@ -117,10 +117,17 @@ config LPC214X_USBDEV_DMA
 	bool "USB Device DMA Support"
 	default n
 
+if LPC214X_USBDEV_DMA
+
+config LPC214X_USBDEV_DMAINTMASK
+	hex "DMA interrupt mask"
+	default 0
+
 config LPC214X_USBDEV_NDMADESCRIPTORS
 	int "Number of USB DMA Descriptors"
 	default 8
-	depends on LPC214X_USBDEV_DMA
+
+endif # LPC214X_USBDEV_DMA
 
 config LPC214X_USBDEV_EPFAST_INTERRUPT
 	bool "USB Device Fast Endpoint Interrupts"
