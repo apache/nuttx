@@ -6784,3 +6784,5 @@
 	  kconfig-frontends tools (2014-3-2)
 	* configs/lpcxpresso-lpc1768/usbmsc: Configuration converted to use the
 	  kconfig-frontends tools (2014-3-2)
+	* configs/stm3210e-eval/usbmsc: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-2)
