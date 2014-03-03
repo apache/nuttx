@@ -277,7 +277,17 @@ nettest
     ./configure.sh sim/nettest
 
   NOTES:
-  - The NuttX network is not, however, functional on the Linux TAP
+  ------
+  1. This configuration uses the mconf-based configuration tool.  To
+     change this configuration using that tool, you should:
+
+     a. Build and install the kconfig mconf tool.  See nuttx/README.txt
+        and misc/tools/
+
+     b. Execute 'make menuconfig' in nuttx/ in order to start the
+        reconfiguration process.
+
+  2. The NuttX network is not, however, functional on the Linux TAP
     device yet.
 
     UPDATE:  The TAP device does apparently work according to a NuttX
@@ -286,16 +296,16 @@ nettest
     waiting from input from the host OS).  My failure to get the TAP
     device working appears to have been a cockpit error.
 
-  - As of NuttX-5.18, when built on Windows, this test does not try
-    to use the TAP device (which is not available on Cygwin anyway), 
-    but inside will try to use the Cygwin WPCAP library.  Only the
-    most preliminary testing has been performed with the Cygwin WPCAP
-    library, however.
+  3. As of NuttX-5.18, when built on Windows, this test does not try
+     to use the TAP device (which is not available on Cygwin anyway), 
+     but inside will try to use the Cygwin WPCAP library.  Only the
+     most preliminary testing has been performed with the Cygwin WPCAP
+     library, however.
 
-    NOTE that the IP address is hard-coded in arch/sim/src/up_wpcap.c.
-    You will either need to edit your configuration files to use 10.0.0.1
-    on the "target" (CONFIG_EXAMPLES_NETTEST_*) or edit up_wpcap.c to
-    select the IP address that you want to use.
+     NOTE that the IP address is hard-coded in arch/sim/src/up_wpcap.c.
+     You will either need to edit your configuration files to use 10.0.0.1
+     on the "target" (CONFIG_EXAMPLES_NETTEST_*) or edit up_wpcap.c to
+     select the IP address that you want to use.
 
 nsh
 
