@@ -92,7 +92,7 @@ CONFIG_ARM_TOOLCHAIN_GNU_EABIL=y
 #
 # LPC214x Configuration Options
 #
-CONFIG_ARCH_CHIP_LPC2148=y
+CONFIG_ARCH_CHIP_LPC214X=y
 
 #
 # LPC214x Initialization Options
