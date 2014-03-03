@@ -90,7 +90,7 @@ httpd:
     about httpd.
 
 nsh
-    This configuratino builds the NuttShell (NSH).  That code can be
+    This configuration builds the NuttShell (NSH).  That code can be
     found in examples/nsh.  For more information see:  examples/nsh/README.txt
     and Documentation/NuttShell.html.
 
