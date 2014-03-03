@@ -832,11 +832,21 @@ Where <subdir> is one of the following:
     class driver at apps/system/usbmsc.  See apps/examples/README.txt
     for more information.
 
-    NOTE: At present, the value for the SD SPI frequency is too
-    high and the SD will fail.  Setting that frequency to 400000
-    removes the problem. TODO:  Tune this frequency to some optimal
-    value.
+    NOTES:
+
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configurations using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. At present, the value for the SD SPI frequency is too high and the
+       SD will fail.  Setting that frequency to 400000 removes the problem.
+       TODO:  Tune this frequency to some optimal value.
  
-    Jumpers: J55 must be set to provide chip select PIO1_11 signal as
-    the SD slot chip select.
+    3. Jumpers: J55 must be set to provide chip select PIO1_11 signal as
+       the SD slot chip select.
 
