@@ -749,8 +749,19 @@ Where <subdir> is one of the following:
     (for execution from FLASH.) See apps/examples/README.txt for information
     about the dhcpd example.
 
-    Jumpers: Nothing special.  Use the default base board jumper
-    settings.
+    NOTES:
+
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configurations using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. Jumpers: Nothing special.  Use the default base board jumper
+       settings.
 
   nsh:
     Configures the NuttShell (nsh) located at apps/examples/nsh.  The
