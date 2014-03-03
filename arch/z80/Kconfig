@@ -497,21 +497,18 @@ config ARCH_CHIP_Z8F6423
 config ARCH_CHIP_EZ80F91
 	bool "EZ80F91"
 	select ARCH_CHIP_EZ80
-	select HAVE_LOWSERIALINIT
 	---help---
 		ZiLOG EZ80F91 (ez80 Acclaim)
 
 config ARCH_CHIP_EZ80F92
 	bool "EZ80F92"
 	select ARCH_CHIP_EZ80
-	select HAVE_LOWSERIALINIT
 	---help---
 		ZiLOG EZ80F92 (ez80 Acclaim)
 
 config ARCH_CHIP_EZ80F93
 	bool "EZ80F93"
 	select ARCH_CHIP_EZ80
-	select HAVE_LOWSERIALINIT
 	---help---
 		ZiLOG EZ80F93 (ez80 Acclaim)
 
@@ -552,6 +549,8 @@ config ARCH_CHIP_Z8
 
 config ARCH_CHIP_EZ80
 	bool
+	select HAVE_LOWSERIALINIT
+	select ARCH_HAVE_PHY
 
 config HAVE_LOWSERIALINIT
 	bool

@@ -6762,3 +6762,5 @@
 	  kconfig-frontends tools (2014-3-3)
 	* configs/eagle100/nettest: Configuration converted to use the
 	  kconfig-frontends tools (2014-3-3).
+	* configs/ez80f910200zco/nettest: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-3).

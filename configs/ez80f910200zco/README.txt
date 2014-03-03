@@ -99,6 +99,17 @@ nettest
     builds examples/nettest.  See examples/README.txt for more information
     about nettest.
 
+    NOTES:
+
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configurations using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
 poll
     This configuration is also used for testing the eZ80F91 EMAC driver.  It
     builds examples/poll.  See examples/README.txt for more information
