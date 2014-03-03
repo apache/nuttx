@@ -27,7 +27,7 @@ Teensy++ 2.0 Features
   o USB Full Speed (12Mbit/s)
   o USB Device Mode
   o 120kbof available FLASH memory for programs.
-  o 8 kbytes SRAM and 4 kbytes of EEPROM 
+  o 8 kbytes SRAM and 4 kbytes of EEPROM
   o USB powered
   o 16MHz crystal
   o 48 General Purpose IO Pins
@@ -150,10 +150,10 @@ SD Connection
 ^^^^^^^^^^^^^
 
 I have the SD-ADP SD/MMC Card Adaptor from www.gravitech.com
-(http://www.gravitech.us/sdcaad.html). Features: 
+(http://www.gravitech.us/sdcaad.html). Features:
 
-  o On-board 3.3V regulator 
-  o Connect directly to 3.3V or 5.0V microcontroller 
+  o On-board 3.3V regulator
+  o Connect directly to 3.3V or 5.0V microcontroller
   o Card detect LED
   o Includes 11-pin male header
   o Board dimension: 2.0”x1.3”
@@ -163,16 +163,16 @@ SD-ADP Pinout / SD Connection
  -- ---- ----------- -------------------------------------------------------
  J2 NAME SD CARD     DESCRIPTION
  -- ---- ----------- -------------------------------------------------------
-  1 VIN   (reguator) Input power to the SD card (3.3V to 6.0V) 
+  1 VIN   (reguator) Input power to the SD card (3.3V to 6.0V)
   2 GND   3,6,12,13  Common (Connects to the housing of the SD socket)
-  3 3V3   4 3.3V     Output voltage from the on-board 3.3V regulator (250mA) 
-  4 NC    9 NC       Connect to pin 9 on the SD card (not used in SPI mode) 
+  3 3V3   4 3.3V     Output voltage from the on-board 3.3V regulator (250mA)
+  4 NC    9 NC       Connect to pin 9 on the SD card (not used in SPI mode)
   5 CS    1 DAT3/CS  Chip select *
   6 DI    2 CMD/DI   Serial input data *
   7 SCK   5 SCK      Serial clock *
-  8 DO    7 DAT0/DO  Serial output data 
-  9 IRQ   8 DAT1/IRQ Interrupt request, connect to pin 8 on the SD card (not used in SPI mode) 
- 10 CD   10 CD       Card detect (active low) 
+  8 DO    7 DAT0/DO  Serial output data
+  9 IRQ   8 DAT1/IRQ Interrupt request, connect to pin 8 on the SD card (not used in SPI mode)
+ 10 CD   10 CD       Card detect (active low)
  11 WP   11 WP       Write protect
  -- ---- ----------- -------------------------------------------------------
 
@@ -257,7 +257,7 @@ Windows Native Toolchains
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
   The WinAVR toolchain is a Windows native toolchain. There are several
-  limitations to using a Windows native toolchain in a Cygwin environment. 
+  limitations to using a Windows native toolchain in a Cygwin environment.
   The three biggest are:
 
   1. The Windows toolchain cannot follow Cygwin paths.  Path conversions are
@@ -357,14 +357,14 @@ Build Notes:
   the flowing point library, then you may have to build avr-lib from sources.
   Below are instructions for building avr-lib from fresh sources:
 
-  1. Download the avr-libc package from: 
+  1. Download the avr-libc package from:
 
      http://savannah.nongnu.org/projects/avr-libc/
 
      I am using avr-lib-1.7.1.tar.bz2
 
-  2. Upack the tarball and cd into the 
- 
+  2. Upack the tarball and cd into the
+
      tar jxf avr-lib-1.7.1.tar.bz2
      cd avr-lib-1.7.1
 
@@ -408,7 +408,7 @@ Teensy++ Configuration Options
        CONFIG_ARCH_CHIP=at90usb
 
     CONFIG_ARCH_CHIP_name - For use in C code to identify the exact
-       chip. 
+       chip.
 
        CONFIG_ARCH_CHIP_AT90USB1286=y
 
@@ -476,7 +476,7 @@ Teensy++ Configuration Options
       CONFIG_AVR_ANACOMP=n
       CONFIG_AVR_ADC=n
       CONFIG_AVR_TWI=n
- 
+
   If the watchdog is enabled, this specifies the initial timeout.  Default
   is maximum supported value.
 
@@ -539,12 +539,26 @@ Where <subdir> is one of the following:
   usbmsc:
     This configuration directory exercises the USB mass storage
     class driver at apps/system/usbmsc.  See apps/examples/README.txt
-    for more information.  NOTE:  THIS CONFIGURATION HAS NOT YET BEEN
-    DEBUGGED AND DOES NOT WORK!!!  ISSUES:  (1) THE SPI DRIVER IS UNTESTED,
-    (2) THE USB DRIVER IS UNTESTED, AND (3) THE RAM USAGE MIGHT BE EXCESSIVE.
+    for more information.
+   NOTES:
 
-    Update 7/11:  (1) The SPI/SD driver has been verified, however, (2) I
-    believe that the current teensy/usbmsc configuration uses too
-    much SRAM for the system to behave sanely.  A lower memory footprint
-    version of the mass storage driver will be required before this can
-    be debugged
+  1. This configuration uses the mconf-based configuration tool.  To
+     change this configuration using that tool, you should:
+
+     a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+        and misc/tools/
+
+     b. Execute 'make menuconfig' in nuttx/ in order to start the
+        reconfiguration process.
+
+  2. NOTE:  THIS CONFIGURATION HAS NOT YET BEEN DEBUGGED AND DOES NOT
+     WORK!!!  ISSUES:  (1) THE SPI DRIVER IS UNTESTED, (2) THE USB DRIVER
+     IS UNTESTED, AND (3) THE RAM USAGE MIGHT BE EXCESSIVE.
+
+
+     Update 7/11:  (1) The SPI/SD driver has been verified, however, (2) I
+     believe that the current teensy/usbmsc configuration uses too
+     much SRAM for the system to behave sanely.  A lower memory footprint
+     version of the mass storage driver will be required before this can
+     be debugged.
+
