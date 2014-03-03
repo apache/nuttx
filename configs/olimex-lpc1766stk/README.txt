@@ -1104,6 +1104,17 @@ Where <subdir> is one of the following:
     class driver at apps/system/usbmsc.  See apps/examples/README.txt
     for more information.
 
+    NOTES:
+
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configuration using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
   zmodem:
     This is an alternative NSH configuration that was used to test Zmodem
     file transfers.  It is similar to the standard NSH configuration but has
