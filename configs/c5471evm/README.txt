@@ -107,43 +107,41 @@ ARM/C5471-specific Configuration Options
   C5471 Ethernet Driver settings
 
 	CONFIG_C5471_NET_STATS
-	CONFIG_C5471_ETHERNET_PHY={ETHERNET_PHY_LU3X31T_T64,ETHERNET_PHY_AC101L}
-	CONFIG_NET_C5471_AUTONEGOTIATION
-	CONFIG_NET_C5471_BASET100
-	CONFIG_NET_C5471_BASET10
+	CONFIG_C5471_PHY_AC101L or C5471_PHY_LU3X31T_T64
+	CONFIG_C5471_AUTONEGOTIATION
+	CONFIG_C5471_BASET100
+	CONFIG_C5471_BASET10
 
-defconfig
-^^^^^^^^^
-The default configuration file, defconfig, performs a
-simple OS test using examples/nsh.  This can be
-configuration as follows:
+Configuration Sub-Directories
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-	cd tools
-	./configure.sh c5471evm/nsh
-	cd -
-	. ./setenv.sh
+Each STM3240G-EVAL configuration is maintained in a sub-directory and
+can be selected as follow:
 
-netconfig
-^^^^^^^^^
-This alternative configuration file, netconfig, may be used
-instead of the default configuration (defconfig). This
-configuration enables networking using the c5471's built-in
-Ethernet interface.  It uses examples/nettest to excercise
-the TCP/IP network.
+    cd tools
+    ./configure.sh c5471evm/<subdir>
+    cd -
+    . ./setenv.sh
 
-nshconfig
-^^^^^^^^^
-This configuration file builds NSH (examples/nsh) using the
-TELNET server front end
+Where <subdir> is one of the following.
 
-dhcpconfig
-^^^^^^^^^^
-This configuration exercises the DHCP client of netutils/dhcpc
-using examples/uip.
+By default, all configurations assume the NuttX Buildroot toolchain under
+Linux (should work under Windows with Cygwin as well).
 
-These alternative configurations can be selected by (using
-uipconfig as example):
+nettest
+-------
 
-	(Seleted the default configuration as show above)
-	cp config/c5471evm/uiponfig .config
+  This configuration enables networking using the c5471's built-in Ethernet
+  interface.  It uses examples/nettest to exercise the TCP/IP network.
+
+nsh
+---
+
+  This configuration file builds NSH (examples/nsh) using the TELNET server
+  front end
+
+httpd
+-----
+
+  This configuration uses the tiny webserver for uiP.
 
