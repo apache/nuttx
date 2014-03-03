@@ -391,8 +391,32 @@ Where <subdir> is one of the following:
 
   nettest:
     This configuration directory may be used to enable networking using the
-    LM3S6918's Ethernet controller. It uses examples/nettest to excercise the
+    LM3S6918's Ethernet controller. It uses examples/nettest to exercise the
     TCP/IP network.
+
+    NOTES:
+
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configurations using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. As a consequence of (1), selection of toolchains differs from
+       the discussion above under GNU Toolchain Options.  You should
+       *not* add the CROSSDEV setting on the make command line.  Rather,
+       you should reconfigure and select the toolchain that you want
+       from the "System Type" menu.
+
+       Eventually, all of the eagle100 configurations will be changed
+       to use the new configuration mechanism and at that time, the
+       above discussion will be corrected for all configurations.
+
+    3. This configuration is set to use Cygwin under Windows and the
+       CodeSourcery toolchain.  That, however, is easily reconfigurable:
 
   httpd:
     This builds the uIP web server example using the examples/uip application
@@ -424,6 +448,9 @@ Where <subdir> is one of the following:
        Eventually, all of the eagle100 configurations will be changed
        to use the new configuration mechanism and at that time, the
        above discussion will be corrected for all configurations.
+
+    3. This configuration is set to use Cygwin under Windows and the
+       devkitARM toolchain.  That, however, is easily reconfigurable:
 
   nxflat:
     This builds the NXFLAT example at apps/examples/nxfalt.
