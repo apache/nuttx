@@ -6766,3 +6766,5 @@
 	  kconfig-frontends tools (2014-3-3).
 	* configs/stm3220g-eval/nettest: Configuration converted to use the
 	  kconfig-frontends tools (2014-3-3).
+	* configs/stm3240g-eval/nettest: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-3).
