@@ -84,6 +84,17 @@ dhcpd:
     (for execution from FLASH.) See apps/examples/README.txt for information
     about the dhcpd example.
 
+    NOTES:
+
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configurations using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
 httpd:
     This builds the uIP web server example using the examples/uip application
     (for execution from FLASH). See apps/examples/README.txt for information
