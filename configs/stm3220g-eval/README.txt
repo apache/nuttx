@@ -53,13 +53,13 @@ GNU Toolchain Options
   add one of the following configuration options to your .config (or defconfig)
   file:
 
-    CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
-    CONFIG_STM32_CODESOURCERYL=y  : CodeSourcery under Linux
-    CONFIG_STM32_ATOLLIC_LITE=y   : The free, "Lite" version of Atollic toolchain under Windows
-    CONFIG_STM32_ATOLLIC_PRO=y    : The paid, "Pro" version of Atollic toolchain under Windows
-    CONFIG_STM32_DEVKITARM=y      : devkitARM under Windows
-    CONFIG_STM32_RAISONANCE=y     : Raisonance RIDE7 under Windows
-    CONFIG_STM32_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y  : CodeSourcery under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL=y  : CodeSourcery under Linux
+    CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC_LITE=y   : The free, "Lite" version of Atollic toolchain under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC_PRO=y    : The paid, "Pro" version of Atollic toolchain under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_DEVKITARM=y      : devkitARM under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_RAISONANCE=y     : Raisonance RIDE7 under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
     CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL : Generic arm-none-eabi toolchain
 
   If you change the default toolchain, then you may also have to modify the PATH in
@@ -791,11 +791,29 @@ Where <subdir> is one of the following:
 
     This builds the DCHP server using the apps/examples/dhcpd application
     (for execution from FLASH.) See apps/examples/README.txt for information
-    about the dhcpd example.  The server address is 10.0.0.1 and it serves
-    IP addresses in the range 10.0.0.2 through 10.0.0.17 (all of which, of
-    course, are configurable).
+    about the dhcpd example.
 
-    CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
+      CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y  : CodeSourcery under Windows
+
+    NOTES:
+
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configurations using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. The server address is 10.0.0.1 and it serves IP addresses in the range
+       10.0.0.2 through 10.0.0.17 (all of which, of course, are configurable).
+
+    3. Default build environment (also easily reconfigured):
+
+      CONFIG_HOST_WINDOWS=y
+      CONFIG_WINDOWS_CYGWIN=y
+      CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y
 
   nettest:
   -------
@@ -823,9 +841,9 @@ Where <subdir> is one of the following:
 
     2. Default build environment:
 
-        CONFIG_HOST_WINDOWS=y         : Windows
-        CONFIG_WINDOWS_CYGWIN=y       : Under Cygwin
-        CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
+        CONFIG_HOST_WINDOWS=y                    : Windows
+        CONFIG_WINDOWS_CYGWIN=y                  : Under Cygwin
+        CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y  : CodeSourcery under Windows
 
        Than can, of course, be easily changes by reconfiguring per Note 1.
 
@@ -834,7 +852,7 @@ Where <subdir> is one of the following:
     Configures the NuttShell (nsh) located at apps/examples/nsh.  The
     Configuration enables both the serial and telnet NSH interfaces.
 
-    CONFIG_STM32_CODESOURCERYW=y                  : CodeSourcery under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y       : CodeSourcery under Windows
     CONFIG_NSH_DHCPC=n                            : DHCP is disabled
     CONFIG_NSH_IPADDR=(192<<24|168<<16|13<<8|161) : Target IP address 192.168.8.161
     CONFIG_NSH_DRIPADDR=(192<<24|168<<16|13<<8|1) : Host IP address 192.168.8.1
@@ -1016,6 +1034,7 @@ Where <subdir> is one of the following:
     curious.
 
     NOTES:
+
     1. This configuration uses the mconf-based configuration tool.  To
        change this configurations using that tool, you should:
 
