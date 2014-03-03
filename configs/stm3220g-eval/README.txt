@@ -793,8 +793,6 @@ Where <subdir> is one of the following:
     (for execution from FLASH.) See apps/examples/README.txt for information
     about the dhcpd example.
 
-      CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y  : CodeSourcery under Windows
-
     NOTES:
 
     1. This configuration uses the mconf-based configuration tool.  To
