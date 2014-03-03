@@ -6777,14 +6777,16 @@
 	* configs/stm3240g-eval/dhcpd: Configuration converted to use the
 	  kconfig-frontends tools (2014-3-3).
 	* configs/lpcxpresso-lpc1768/dhcpd: Configuration converted to use the
-	  kconfig-frontends tools (2014-3-2)
+	  kconfig-frontends tools (2014-3-3)
 	* configs/olimex-lpc1766stk/usbmsc: Configuration converted to use the
-	  kconfig-frontends tools (2014-3-2)
+	  kconfig-frontends tools (2014-3-3)
 	* configs/nucleus2g/usbmsc: Configuration converted to use the
-	  kconfig-frontends tools (2014-3-2)
+	  kconfig-frontends tools (2014-3-3)
 	* configs/lpcxpresso-lpc1768/usbmsc: Configuration converted to use the
-	  kconfig-frontends tools (2014-3-2)
+	  kconfig-frontends tools (2014-3-3)
 	* configs/stm3210e-eval/usbmsc: Configuration converted to use the
-	  kconfig-frontends tools (2014-3-2)
+	  kconfig-frontends tools (2014-3-3)
 	* configs/hymini-stm32v/usbmsc: Configuration converted to use the
-	  kconfig-frontends tools (2014-3-2)
+	  kconfig-frontends tools (2014-3-3)
+	* configs/ea3131/usbmsc: Configuration removed.  It could not possible
+	  useful because there is no MCI driver for the EA3131 (2014-3-3)
