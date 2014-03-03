@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/c5471/c5471_ethernet.c
  *
- *   Copyright (C) 2007, 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009-2010, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Based one a C5471 Linux driver and released under this BSD license with
@@ -83,32 +83,21 @@
  * Default is disabled.
  */
 
-/* CONFIG_C5471_ETHERNET_PHY may be set to one of the following values to
- * select the PHY (or left undefined if there is no PHY)
- */
-
-#ifndef ETHERNET_PHY_LU3X31T_T64
-# define ETHERNET_PHY_LU3X31T_T64 1
-#endif
-#ifndef ETHERNET_PHY_AC101L
-# define ETHERNET_PHY_AC101L 2
-#endif
-
 /* Mode of operation defaults to AUTONEGOTIATION */
 
-#if defined(CONFIG_NET_C5471_AUTONEGOTIATION)
-# undef CONFIG_NET_C5471_BASET100
-# undef CONFIG_NET_C5471_BASET10
-#elif defined(CONFIG_NET_C5471_BASET100)
-# undef CONFIG_NET_C5471_AUTONEGOTIATION
-# undef CONFIG_NET_C5471_BASET10
-#elif defined(CONFIG_NET_C5471_BASET10)
-# undef CONFIG_NET_C5471_AUTONEGOTIATION
-# undef CONFIG_NET_C5471_BASET100
+#if defined(CONFIG_C5471_AUTONEGOTIATION)
+# undef CONFIG_C5471_BASET100
+# undef CONFIG_C5471_BASET10
+#elif defined(CONFIG_C5471_BASET100)
+# undef CONFIG_C5471_AUTONEGOTIATION
+# undef CONFIG_C5471_BASET10
+#elif defined(CONFIG_C5471_BASET10)
+# undef CONFIG_C5471_AUTONEGOTIATION
+# undef CONFIG_C5471_BASET100
 #else
-# define CONFIG_NET_C5471_AUTONEGOTIATION 1
-# undef CONFIG_NET_C5471_BASET100
-# undef CONFIG_NET_C5471_BASET10
+# define CONFIG_C5471_AUTONEGOTIATION 1
+# undef CONFIG_C5471_BASET100
+# undef CONFIG_C5471_BASET10
 #endif
 
 /* This should be disabled unless you are performing very low level debug */
@@ -708,7 +697,7 @@ static int c5471_mdread (int adr, int reg)
  *
  ****************************************************************************/
 
-#if (CONFIG_C5471_ETHERNET_PHY == ETHERNET_PHY_LU3X31T_T64)
+#if defined(CONFIG_C5471_PHY_LU3X31T_T64)
 static int c5471_phyinit (void)
 {
   int phyid;
@@ -751,15 +740,15 @@ static int c5471_phyinit (void)
 
   /* Next, Set desired network rate, 10BaseT, 100BaseT, or auto. */
 
-#ifdef CONFIG_NET_C5471_AUTONEGOTIATION
+#ifdef CONFIG_C5471_AUTONEGOTIATION
   ndbg("Setting PHY Transceiver for Autonegotiation\n");
   c5471_mdwrite(0, MD_PHY_CONTROL_REG, MODE_AUTONEG);
 #endif 
-#ifdef CONFIG_NET_C5471_BASET100
+#ifdef CONFIG_C5471_BASET100
   ndbg("Setting PHY Transceiver for 100BaseT FullDuplex\n");
   c5471_mdwrite(0, MD_PHY_CONTROL_REG, MODE_100MBIT_FULLDUP);
 #endif 
-#ifdef CONFIG_NET_C5471_BASET10
+#ifdef CONFIG_C5471_BASET10
   ndbg("Setting PHY Transceiver for 10BaseT FullDuplex\n");
   c5471_mdwrite(0, MD_PHY_CONTROL_REG, MODE_10MBIT_FULLDUP);
 #endif 
@@ -768,7 +757,7 @@ static int c5471_phyinit (void)
   return status;
 }
 
-#elif (CONFIG_C5471_ETHERNET_PHY == ETHERNET_PHY_AC101L)
+#elif defined(CONFIG_C5471_PHY_AC101L)
 
 static int c5471_phyinit (void)
 {
@@ -787,11 +776,7 @@ static int c5471_phyinit (void)
 
 #else
 #  define c5471_phyinit()
-#  if defined(CONFIG_C5471_ETHERNET_PHY)
-#    error "CONFIG_C5471_ETHERNET_PHY value not recognized"
-#  else
-#    warning "CONFIG_C5471_ETHERNET_PHY not defined -- assumed NO PHY"
-#  endif
+#  warning "Assuming no PHY"
 #endif
 
 /****************************************************************************
@@ -2056,7 +2041,7 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
 
 static void c5471_reset(struct c5471_driver_s *c5471)
 {
-#if (CONFIG_C5471_ETHERNET_PHY == ETHERNET_PHY_LU3X31T_T64)
+#if defined(CONFIG_C5471_PHY_LU3X31T_T64)
   ndbg("EIM reset\n");
   c5471_eimreset(c5471);
 #endif

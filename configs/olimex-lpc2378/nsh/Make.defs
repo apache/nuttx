@@ -72,60 +72,58 @@ ARCHCCMAJOR = ${shell echo $(ARCHCCVERSION) | cut -d'.' -f1}
 
 ifeq ($(ARCHCCMAJOR),4)
 ifneq ($(HOSTOS),Cygwin)
-OBJCOPYARGS		= -R .note -R .note.gnu.build-id -R .comment
+  OBJCOPYARGS = -R .note -R .note.gnu.build-id -R .comment
 endif
 endif
 
 ifeq ("${CONFIG_DEBUG}","y")
-  ARCHOPTIMIZATION	= -g
+  ARCHOPTIMIZATION = -g
 endif
 
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION	+= $(MAXOPTIMIZATION) -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
+  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
 endif
 
 ifeq ($(ARCHCCMAJOR),4)
-  ARCHCPUFLAGS		= -mcpu=arm7tdmi -mfloat-abi=soft
+  ARCHCPUFLAGS = -mcpu=arm7tdmi -mfloat-abi=soft
 else
-  ARCHCPUFLAGS		= -mapcs-32 -mcpu=arm7tdmi -msoft-float
+  ARCHCPUFLAGS = -mapcs-32 -mcpu=arm7tdmi -msoft-float
 endif
 
-ARCHCFLAGS		= -fno-builtin
-ARCHCXXFLAGS		= -fno-builtin -fno-exceptions
-ARCHPICFLAGS		= -fpic -msingle-pic-base -mpic-register=r10
-ARCHWARNINGS		= -Wall -Wstrict-prototypes -Wshadow
-ARCHWARNINGSXX		= -Wall -Wshadow
-ARCHDEFINES		=
+ARCHCFLAGS = -fno-builtin
+ARCHCXXFLAGS = -fno-builtin -fno-exceptions
+ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
+ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow
+ARCHWARNINGSXX = -Wall -Wshadow
+ARCHDEFINES =
 
-CFLAGS			= $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
-			  $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES) -pipe
-CPICFLAGS		= $(ARCHPICFLAGS) $(CFLAGS)
-CXXFLAGS		= $(ARCHCXXFLAGS) $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) \
-			  $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES) -pipe
-CXXPICFLAGS		= $(ARCHPICFLAGS) $(CXXFLAGS)
-CPPFLAGS		= $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES)
-AFLAGS			= $(CFLAGS) -D__ASSEMBLY__
+CFLAGS = $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
+         $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES) -pipe
+CPICFLAGS = $(ARCHPICFLAGS) $(CFLAGS)
+CXXFLAGS = $(ARCHCXXFLAGS) $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) \
+           $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES) -pipe
+CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
+CPPFLAGS = $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES)
+AFLAGS = $(CFLAGS) -D__ASSEMBLY__
 
-NXFLATLDFLAGS1		= -r -d -warn-common
-NXFLATLDFLAGS2		= $(NXFLATLDFLAGS1) \
-			  -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-gotoff.ld \
-			  -no-check-sections
-LDNXFLATFLAGS		= -e main -s 2048
+NXFLATLDFLAGS1 = -r -d -warn-common
+NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) \
+                 -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-gotoff.ld \
+                 -no-check-sections
+LDNXFLATFLAGS = -e main -s 2048
 
-OBJEXT			= .o
-LIBEXT			= .a
-EXEEXT			=
+OBJEXT = .o
+LIBEXT = .a
+EXEEXT =
 
 ifneq ($(CROSSDEV),arm-nuttx-elf-)
-  LDFLAGS		+= -nostartfiles -nodefaultlibs
+  LDFLAGS += -nostartfiles -nodefaultlibs
 endif
 ifeq ($(CONFIG_DEBUG),y)
-  LDFLAGS		+= -g
+  LDFLAGS += -g
 endif
 
-
-HOSTCC			= gcc
-HOSTINCLUDES		= -I.
-HOSTCFLAGS		= -Wall -Wstrict-prototypes -Wshadow -g -pipe
-HOSTLDFLAGS		=
-
+HOSTCC = gcc
+HOSTINCLUDES = -I.
+HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -g -pipe
+HOSTLDFLAGS =

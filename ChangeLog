@@ -6756,3 +6756,5 @@
 	  kconfig-frontends tools (2014-3-2)
 	* configs/sim/nx: Configuration converted to use the kconfig-frontends
 	  tools (2014-3-2)
+	* configs/c5471evm/nettest: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-3)

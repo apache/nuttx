@@ -660,7 +660,7 @@ ifeq ($(CONFIG_RRLOAD_BINARY),y)
 	@echo "MK: $(BIN).rr"
 	$(Q) $(TOPDIR)/tools/mkimage.sh --Prefix $(CROSSDEV) $(BIN) $(BIN).rr
 	$(Q) if [ -w /tftpboot ] ; then \
-		cp -f $(BIN).rr /tftpboot/$\(BIN).rr.$(CONFIG_ARCH); \
+		cp -f $(BIN).rr /tftpboot/$(BIN).rr.$(CONFIG_ARCH); \
 	fi
 endif
 ifeq ($(CONFIG_INTELHEX_BINARY),y)
