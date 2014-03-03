@@ -6,4 +6,30 @@
 if ARCH_AT90USB
 comment "AT90USB Configuration Options"
 
+menu "AT90USB Peripheral Selections"
+
+config AVR_SPI
+	bool "SPI"
+	default n
+
+config AVR_USART1
+	bool "USART1"
+	default n
+
+config AVR_USBDEV
+	bool "USB device"
+	default n
+
+config AVR_WDT
+	bool "Watchdog"
+	default n
+
+endmenu # AT90USB Peripheral Selections
+
+config AVR_GPIOIRQ
+	bool "GPIO pin interrupts"
+	default n
+	---help---
+		Enable support for interrupting GPIO pins
+
 endif

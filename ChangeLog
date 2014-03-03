@@ -6792,3 +6792,5 @@
 	  useful because there is no MCI driver for the EA3131 (2014-3-3)
 	* configs/mcu123-lpc214x/usbmsc: Configuration converted to use the
 	  kconfig-frontends tools (2014-3-3)
+	* configs/teensy/nettest: Configuration converted to use the kconfig-frontends
+	  tools (2014-3-3).
