@@ -43,7 +43,7 @@ GNU Toolchain Options
   1. The CodeSourcery GNU toolchain,
   2. The Atollic Toolchain,
   3. The devkitARM GNU toolchain,
-  4. Raisonance GNU toolchain, 
+  4. Raisonance GNU toolchain,
   5. The NuttX buildroot Toolchain (see below), or
   6. Any generic arm-none-eabi GNU toolchain.
 
@@ -262,7 +262,7 @@ NXFLAT Toolchain
   tools -- just the NXFLAT tools.  The buildroot with the NXFLAT tools can
   be downloaded from the NuttX SourceForge download site
   (https://sourceforge.net/projects/nuttx/files/).
- 
+
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
@@ -752,13 +752,13 @@ STM3220G-EVAL-specific Configuration Options
   STM32 USB OTG FS Host Driver Support
 
   Pre-requisites
- 
+
    CONFIG_USBHOST      - Enable general USB host support
    CONFIG_STM32_OTGFS  - Enable the STM32 USB OTG FS block
    CONFIG_STM32_SYSCFG - Needed
- 
+
   Options:
- 
+
    CONFIG_STM32_OTGFS_RXFIFO_SIZE - Size of the RX FIFO in 32-bit words.
      Default 128 (512 bytes)
    CONFIG_STM32_OTGFS_NPTXFIFO_SIZE - Size of the non-periodic Tx FIFO
@@ -809,6 +809,25 @@ Where <subdir> is one of the following:
     CONFIG_EXAMPLES_NETTEST_IPADDR=(10<<24|0<<16|0<<8|2)   : Target side is IP: 10.0.0.2
     CONFIG_EXAMPLES_NETTEST_DRIPADDR=(10<<24|0<<16|0<<8|1) : Host side is IP: 10.0.0.1
     CONFIG_EXAMPLES_NETTEST_CLIENTIP=(10<<24|0<<16|0<<8|1) : Server address used by which ever is client.
+
+    NOTES:
+
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configuration using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. Default build environment:
+
+        CONFIG_HOST_WINDOWS=y         : Windows
+        CONFIG_WINDOWS_CYGWIN=y       : Under Cygwin
+        CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
+
+       Than can, of course, be easily changes by reconfiguring per Note 1.
 
   nsh:
   ---
@@ -948,7 +967,7 @@ Where <subdir> is one of the following:
        CONFIG_MM_REGIONS=2                  : When FSMC is enabled, so is the on-board SRAM memory region
 
     10. USB OTG FS Device or Host Support
- 
+
        CONFIG_USBDEV          - Enable USB device support, OR
        CONFIG_USBHOST         - Enable USB host support (but not both)
 
@@ -1058,7 +1077,7 @@ Where <subdir> is one of the following:
     Here is the quick summary of the build steps (Assuming that all of
     the required packages are available in a directory ~/nuttx-code):
 
-    1. Intall the nxwm configuration
+    1. Install the nxwm configuration
 
        $ cd ~/nuttx-code/nuttx/tools
        $ ./configure.sh stm3220g-eval/nxwm
@@ -1096,7 +1115,7 @@ Where <subdir> is one of the following:
        $ make
 
     NOTES:
- 
+
     1. This configuration uses the mconf-based configuration tool.  To
        change this configuration using that tool, you should:
 
