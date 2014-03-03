@@ -377,8 +377,19 @@ Configurations:
 
   nettest:
     This configuration directory may be used to enable networking using the
-    an Microchip ENC28J60 SPI ethernet module (see above for connection to
-    STR-P711.
+    an Microchip ENC28J60 SPI Ethernet module (see above for connection to
+    STR-P711).
+
+    NOTES:
+
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configurations using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
 
   nsh:
     Configures the NuttShell (nsh) located at examples/nsh.  The

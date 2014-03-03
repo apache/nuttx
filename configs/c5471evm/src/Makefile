@@ -45,18 +45,14 @@ COBJS = $(CSRCS:.c=$(OBJEXT))
 SRCS = $(ASRCS) $(CSRCS)
 OBJS = $(AOBJS) $(COBJS)
 
-ARCH_SRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
+ARCH_SRCDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src
 
-ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-  CFLAGS += -I$(ARCH_SRCDIR)\chip -I$(ARCH_SRCDIR)\common -I$(ARCH_SRCDIR)\arm
-else
 ifeq ($(WINTOOL),y)
   CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" \
             -I "${shell cygpath -w $(ARCH_SRCDIR)/common}" \
             -I "${shell cygpath -w $(ARCH_SRCDIR)/arm}"
 else
-  CFLAGS += -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/arm
-endif
+  CFLAGS += -I $(ARCH_SRCDIR)$(DELIM)chip -I $(ARCH_SRCDIR)$(DELIM)common -I $(ARCH_SRCDIR)$(DELIM)arm
 endif
 
 all: libboard$(LIBEXT)
