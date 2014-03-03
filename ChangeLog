@@ -6770,3 +6770,5 @@
 	  kconfig-frontends tools (2014-3-3).
 	* configs/sim/nettest: Configuration converted to use the kconfig-frontends
 	  tools (2014-3-3).
+	* configs/ez80f910200zco/dhcpd: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-3).
