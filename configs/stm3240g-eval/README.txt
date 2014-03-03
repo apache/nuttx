@@ -927,11 +927,27 @@ Where <subdir> is one of the following:
 
     This builds the DCHP server using the apps/examples/dhcpd application
     (for execution from FLASH.) See apps/examples/README.txt for information
-    about the dhcpd example.  The server address is 10.0.0.1 and it serves
-    IP addresses in the range 10.0.0.2 through 10.0.0.17 (all of which, of
-    course, are configurable).
+    about the dhcpd example.
 
-    CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
+    NOTES:
+
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configurations using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. The server address is 10.0.0.1 and it serves IP addresses in the range
+       10.0.0.2 through 10.0.0.17 (all of which, of course, are configurable).
+
+    3. Default build environment (also easily reconfigured):
+
+      CONFIG_HOST_WINDOWS=y
+      CONFIG_WINDOWS_CYGWIN=y
+      CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y
 
   discover:
   --------
