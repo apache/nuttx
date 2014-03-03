@@ -1,7 +1,7 @@
 /**************************************************************************
  * arch/arm/src/c5471/c5471_watchdog.c
  *
- *   Copyright (C) 2007, 2009, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2012-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,7 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/irq.h>
+#include <nuttx/watchdog.h>
 #include <arch/watchdog.h>
 
 #include "chip.h"
