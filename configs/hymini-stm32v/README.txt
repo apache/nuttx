@@ -644,6 +644,13 @@ Where <subdir> is one of the following:
     (5) Option CONFIG_NSH_ARCHINIT must be enabled in order to call the SDIO slot
         initialization code.
 
+  usbmsc:
+  -------
+
+    This configuration directory exercises the USB mass storage
+    class driver at system/usbmsc.  See examples/README.txt for
+    more information.
+
   usbnsh:
   -------
 
