@@ -6810,6 +6810,8 @@
 	* fs/fat/fs_fat32.c:  Fix an error in the FAT logic that can cause file
 	  corruption.  The error conditions are rare and only seen with very
 	  large files.  From Andrew Tridgell.  This replaces a previous, partial
-	  fix for the same problem (2014-3-3).
+	  fix for the same problem (2014-3-4).
 	* configs/hymini-stm32v/usbserial: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-4)
+	* configs/ea3131/usbserial: Configuration converted to use the
 	  kconfig-frontends tools (2014-3-4)
