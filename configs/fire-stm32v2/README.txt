@@ -805,7 +805,6 @@ M3 Wildfire-specific Configuration Options
 
     CONFIG_STM32_AM240320_DISABLE
     CONFIG_STM32_SPFD5408B_DISABLE
-    CONFIG_STM32_R61580_DISABLE
 
 Configurations
 ==============
