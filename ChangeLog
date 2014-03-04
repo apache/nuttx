@@ -6819,3 +6819,5 @@
 	  kconfig-frontends tools (2014-3-4)
 	* configs/olimex-lpc1766stk/thttpd: Configuration converted to use the
 	  kconfig-frontends tools (2014-3-4)
+	* configs/lpcxpresso-lpc1768/thttpd: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-4)
