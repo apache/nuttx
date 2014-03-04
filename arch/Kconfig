@@ -170,6 +170,38 @@ config ENDIAN_BIG
 	---help---
 		Select if architecture operates using big-endian byte ordering.
 
+config ARCH_IDLE_CUSTOM
+	bool "Custom IDLE loop"
+	default n
+	---help---
+		Each architecture provides a "default" IDLE loop that exits when the
+		MCU has nothing else to do.  This default IDLE loop can be replaced
+		by a custom, board-specific IDLE loop by setting this option.  Such
+		a custom IDLE loop may do things like a continuous built-in test or
+		perhaps or IDLE low power operations.
+
+		NOTE: As of this writing, this capability is only supported by the
+		STM32.  However, the implementation is trivial:  If CONFIG_ARCH_IDLE_CUSTOM,
+		then the default IDLE loop file is not included in the MCU-specific
+		Make.defs file.
+
+config ARCH_CUSTOM_PMINIT
+	bool "Custom PM initialization"
+	default n
+	depends on PM
+	---help---
+		Each architecture provides default power management (PM)
+		initialization that is called automatically when the system is
+		started. This default PM initialization can be replaced by custom,
+		board-specific PM initialization by setting this option.  Such a
+		custom initialization may do additional PM-related initialization
+		that is unique to the board power management requirements.
+
+		NOTE: As of this writing, this capability is only supported by the
+		STM32.  However, the implementation is trivial:  If CONFIG_ARCH_CUSTOM_PMINIT,
+		then the default PM initialization is not included in the MCU-specific
+		Make.defs file.
+
 config ARCH_HAVE_RAMFUNCS
 	bool
 	default n
