@@ -1527,6 +1527,23 @@ Where <subdir> is one of the following:
     testing the Telnet daemon only because it works in a simpler
     environment than does the nsh configuration.
 
+    NOTES:
+
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configurations using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. Default build environment (also easily reconfigured):
+
+      CONFIG_HOST_WINDOWS=y
+      CONFIG_WINDOWS_CYGWIN=y
+      CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y
+
   xmlrpc
   ------
 

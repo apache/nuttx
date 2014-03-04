@@ -6794,7 +6794,7 @@
 	  kconfig-frontends tools (2014-3-3)
 	* configs/teensy/nettest: Configuration converted to use the kconfig-frontends
 	  tools (2014-3-3).
-	* configs/*/dhcpd:  Add missing DHCPD configuratino settings (2014-3-3).
+	* configs/*/dhcpd:  Add missing DHCPD configuration settings (2014-3-3).
 	* configs/stm32f4discovery/pm: Configuration converted to use the
 	  kconfig-frontends tools (2014-3-4)
 	* configs/stm3210e-eval/pm: Configuration converted to use the
@@ -6802,4 +6802,6 @@
 	* configs/stm3240g-eval/nxconsole: Configuration converted to use the
 	  kconfig-frontends tools (2014-3-4)
 	* configs/stm3210e-eval/nxconsole: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-4)
+	* configs/stm3240g-eval/telnetd: Configuration converted to use the
 	  kconfig-frontends tools (2014-3-4)
