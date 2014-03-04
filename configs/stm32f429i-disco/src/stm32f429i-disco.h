@@ -211,7 +211,7 @@ void stm32_ledpminitialize(void);
  *
  ****************************************************************************************************/
 
-#if defined(CONFIG_PM) && defined(CONFIG_IDLE_CUSTOM) && defined(CONFIG_PM_BUTTONS)
+#if defined(CONFIG_PM) && defined(CONFIG_ARCH_IDLE_CUSTOM) && defined(CONFIG_PM_BUTTONS)
 void stm32_pmbuttons(void);
 #endif
 

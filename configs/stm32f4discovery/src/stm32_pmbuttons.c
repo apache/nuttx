@@ -52,7 +52,7 @@
 #include "stm32_pm.h"
 #include "stm32f4discovery.h"
 
-#if defined(CONFIG_PM) && defined(CONFIG_IDLE_CUSTOM) && defined(CONFIG_PM_BUTTONS)
+#if defined(CONFIG_PM) && defined(CONFIG_ARCH_IDLE_CUSTOM) && defined(CONFIG_PM_BUTTONS)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -145,4 +145,4 @@ void stm32_pm_buttons(void)
 #endif
 }
 
-#endif /* CONFIG_PM && CONFIG_IDLE_CUSTOM && CONFIG_PM_BUTTONS)*/
+#endif /* CONFIG_PM && CONFIG_ARCH_IDLE_CUSTOM && CONFIG_PM_BUTTONS)*/

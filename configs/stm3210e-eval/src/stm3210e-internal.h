@@ -313,7 +313,7 @@ void up_ledpminitialize(void);
  *
  ************************************************************************************/
 
-#if defined(CONFIG_PM) && defined(CONFIG_IDLE_CUSTOM) && defined(CONFIG_PM_BUTTONS)
+#if defined(CONFIG_PM) && defined(CONFIG_ARCH_IDLE_CUSTOM) && defined(CONFIG_PM_BUTTONS)
 void up_pmbuttons(void);
 #endif
 

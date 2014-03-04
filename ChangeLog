@@ -6795,4 +6795,5 @@
 	* configs/teensy/nettest: Configuration converted to use the kconfig-frontends
 	  tools (2014-3-3).
 	* configs/*/dhcpd:  Add missing DHCPD configuratino settings (2014-3-3).
-
+	* configs/stm32f4discovery/pm: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-4)

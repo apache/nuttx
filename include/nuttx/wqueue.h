@@ -417,8 +417,8 @@ int work_usrstart(void);
  *   work   - The work structure to queue
  *   worker - The worker callback to be invoked.  The callback will invoked
  *            on the worker thread of execution.
- *   arg    - The argument that will be passed to the workder callback when
- *            int is invoked.
+ *   arg    - The argument that will be passed to the worker callback when
+ *            it is invoked.
  *   delay  - Delay (in clock ticks) from the time queue until the worker
  *            is invoked. Zero means to perform the work immediately.
  *

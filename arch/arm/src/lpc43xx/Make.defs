@@ -91,7 +91,7 @@ ifeq ($(CONFIG_NUTTX_KERNEL),y)
 CHIP_CSRCS += lpc43_userspace.c lpc43_mpuinit.c
 endif
 
-ifneq ($(CONFIG_IDLE_CUSTOM),y)
+ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += lpc43_idle.c
 endif
 
