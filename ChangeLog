@@ -6817,3 +6817,5 @@
 	  kconfig-frontends tools (2014-3-4)
 	* configs/mcu123-lpc214x/usbserial: Configuration converted to use the
 	  kconfig-frontends tools (2014-3-4)
+	* configs/olimex-lpc1766stk/thttpd: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-4)
