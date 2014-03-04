@@ -100,6 +100,17 @@ httpd:
     (for execution from FLASH). See apps/examples/README.txt for information
     about httpd.
 
+    NOTES:
+
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configurations using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
 nsh
     This configuration builds the NuttShell (NSH).  That code can be
     found in examples/nsh.  For more information see:  examples/nsh/README.txt

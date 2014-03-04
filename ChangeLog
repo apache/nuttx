@@ -6821,3 +6821,9 @@
 	  kconfig-frontends tools (2014-3-4)
 	* configs/lpcxpresso-lpc1768/thttpd: Configuration converted to use the
 	  kconfig-frontends tools (2014-3-4)
+	* configs/eagle100/thttpd: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-4)
+	* configs/eagle100/httpd: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-4)
+	* configs/ez80f910200zco/httpd: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-4)
