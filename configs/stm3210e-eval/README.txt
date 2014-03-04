@@ -910,27 +910,40 @@ Where <subdir> is one of the following:
     from the other, however, in that it uses the NxConsole driver to host
     the NSH shell.
 
-    Some of the differences in this configuration include these settings
-    in the defconfig file:
+    NOTES:
 
-    These select NX Multi-User mode:
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configurations using that tool, you should:
 
-      CONFG_NX_MULTIUSER=y
-      CONFIG_DISABLE_MQUEUE=n
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
 
-    The following definition in the defconfig file to enables the NxConsole
-    driver:
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
 
-      CONFIG_NXCONSOLE=y
+    2. Some of the differences in this configuration include these settings
+       in the defconfig file:
 
-    The appconfig file selects examples/nxconsole instead of examples/nsh:
+       These select NX Multi-User mode:
 
-      CONFIGURED_APPS += examples/nxconsole
+         CONFG_NX_MULTIUSER=y
+         CONFIG_DISABLE_MQUEUE=n
 
-    Other configuration settings:
+       The following definition in the defconfig file to enables the NxConsole
+       driver:
 
-      CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : NuttX buildroot under Linux or Cygwin
-      CONFIG_LCD_LANDSCAPE=y              : 320x240 landscape
+         CONFIG_NXCONSOLE=y
+
+       And this selects apps/examples/nxconsole instead of apps/examples/nsh:
+
+         CONFIG_EXAMPLES_NXCONSOLE=y
+
+       Other configuration settings of interest:
+
+         CONFIG_HOST_WINDOWS=y               : Windows
+         CONFIG_WINDOWS_CYGWIN=y             : with Cygwin
+         CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : NuttX buildroot under Linux or Cygwin
+         CONFIG_LCD_LANDSCAPE=y              : 320x240 landscape
 
   pm:
   --
