@@ -114,8 +114,8 @@ Development Environment
 GNU Toolchain Options
 ^^^^^^^^^^^^^^^^^^^^^
 
-  The NuttX make system has been modified to support the following different
-  toolchain options.
+  The NuttX make system has been modified to support the multiple toolchain
+  options including:
 
   1. The CodeSourcery GNU toolchain,
   2. The devkitARM GNU toolchain,
@@ -126,12 +126,12 @@ GNU Toolchain Options
   the CodeSourcery or devkitARM, you simply need to add one of the following
   configuration options to your .config (or defconfig) file:
 
-    CONFIG_LM_CODESOURCERYW=y   : CodeSourcery under Windows
-    CONFIG_LM_CODESOURCERYL=y   : CodeSourcery under Linux
-    CONFIG_LM_DEVKITARM=y       : devkitARM under Windows
-    CONFIG_LM_BUILDROOT=y       : NuttX buildroot under Linux or Cygwin (default)
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL=y : CodeSourcery under Linux
+    CONFIG_ARMV7M_TOOLCHAIN_DEVKITARM=y     : devkitARM under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y     : NuttX buildroot under Linux or Cygwin (default)
 
-  If you are not using CONFIG_LM_BUILDROOT, then you may also have to modify
+  If you are not using CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT, then you may also have to modify
   the PATH in the setenv.h file if your make cannot find the tools.
 
   NOTE: the CodeSourcery (for Windows) and devkitARM are Windows native toolchains.
