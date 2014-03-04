@@ -46,9 +46,9 @@
  * The driver dynamically selects the LCD based on the reported LCD ID value.  However,
  * code size can be reduced by suppressing support for individual LCDs using:
  *
- *   CONFIG_STM32_AM240320_DISABLE
- *   CONFIG_STM32_SPFD5408B_DISABLE
- *   CONFIG_STM32_R61580_DISABLE
+ *   CONFIG_STM3210E_AM240320_DISABLE
+ *   CONFIG_STM3210E_SPFD5408B_DISABLE
+ *   CONFIG_STM3210E_R61580_DISABLE
  *
  * Omitting the above (or setting them to "n") enables support for the LCD.  Setting
  * any of the above to "y" will disable support for the corresponding LCD.
@@ -90,22 +90,22 @@
 
 /* Backlight */
 
-#ifndef CONFIG_LCD_BACKLIGHT
-#  undef CONFIG_LCD_PWM
+#ifndef CONFIG_STM3210E_LCD_BACKLIGHT
+#  undef CONFIG_STM3210E_LCD_PWM
 #endif
 
-#if defined(CONFIG_LCD_BACKLIGHT) && defined(CONFIG_LCD_PWM)
+#if defined(CONFIG_STM3210E_LCD_BACKLIGHT) && defined(CONFIG_STM3210E_LCD_PWM)
 #  if !defined(CONFIG_STM32_TIM1)
-#    warning "CONFIG_LCD_PWM requires CONFIG_STM32_TIM1"
-#    undef CONFIG_LCD_PWM
+#    warning "CONFIG_STM3210E_LCD_PWM requires CONFIG_STM32_TIM1"
+#    undef CONFIG_STM3210E_LCD_PWM
 #  endif
 #  if defined(CONFIG_STM32_TIM1_FULL_REMAP)
 #    warning "PA8 cannot be configured as TIM1 CH1 with full remap"
-#    undef CONFIG_LCD_PWM
+#    undef CONFIG_STM3210E_LCD_PWM
 #  endif
 #endif
 
-#if defined(CONFIG_LCD_BACKLIGHT) && defined(CONFIG_LCD_PWM)
+#if defined(CONFIG_STM3210E_LCD_BACKLIGHT) && defined(CONFIG_STM3210E_LCD_PWM)
 #  if CONFIG_LCD_MAXPOWER < 2
 #    warning "A larger value of CONFIG_LCD_MAXPOWER is recommended"
 #  endif
@@ -115,7 +115,7 @@
 
 #if !defined(CONFIG_LCD_MAXPOWER) || CONFIG_LCD_MAXPOWER < 1
 #  undef CONFIG_LCD_MAXPOWER
-#  if defined(CONFIG_LCD_BACKLIGHT) && defined(CONFIG_LCD_PWM)
+#  if defined(CONFIG_STM3210E_LCD_BACKLIGHT) && defined(CONFIG_STM3210E_LCD_PWM)
 #    define CONFIG_LCD_MAXPOWER 100
 #  else
 #    define CONFIG_LCD_MAXPOWER 1
@@ -128,8 +128,8 @@
 
 /* PWM Frequency */
 
-#ifndef CONFIG_LCD_PWMFREQUENCY
-#  define CONFIG_LCD_PWMFREQUENCY 100
+#ifndef CONFIG_STM3210E_LCD_PWMFREQUENCY
+#  define CONFIG_STM3210E_LCD_PWMFREQUENCY 100
 #endif
 
 /* Check orientation */
@@ -347,7 +347,7 @@ struct stm3210e_dev_s
 
   struct lcd_dev_s dev;
 
-#if defined(CONFIG_LCD_BACKLIGHT) && defined(CONFIG_LCD_PWM)
+#if defined(CONFIG_STM3210E_LCD_BACKLIGHT) && defined(CONFIG_STM3210E_LCD_PWM)
   uint32_t reload;
 #endif
 
@@ -367,7 +367,7 @@ static uint16_t stm3210e_readreg(uint8_t regaddr);
 static inline void stm3210e_gramselect(void);
 static inline void stm3210e_writegram(uint16_t rgbval);
 static void stm3210e_readsetup(FAR uint16_t *accum);
-#ifndef CONFIG_STM32_AM240320_DISABLE
+#ifndef CONFIG_STM3210E_AM240320_DISABLE
 static void stm3210e_readnosetup(FAR uint16_t *accum);
 #endif
 static uint16_t stm3210e_readshift(FAR uint16_t *accum);
@@ -417,7 +417,7 @@ static int stm3210e_pm_prepare(struct pm_callback_s *cb, enum pm_state_e pmstate
 /* Initialization */
 
 static inline void stm3210e_lcdinitialize(void);
-#ifdef CONFIG_LCD_BACKLIGHT
+#ifdef CONFIG_STM3210E_LCD_BACKLIGHT
 static void stm3210e_backlight(void);
 #else
 #  define stm3210e_backlight()
@@ -572,7 +572,7 @@ static inline void stm3210e_writegram(uint16_t rgbval)
 
 /* Used for SPFD5408B and R61580 */
 
-#if !defined(CONFIG_STM32_SPFD5408B_DISABLE) || !defined(CONFIG_STM32_R61580_DISABLE)
+#if !defined(CONFIG_STM3210E_SPFD5408B_DISABLE) || !defined(CONFIG_STM3210E_R61580_DISABLE)
 static void stm3210e_readsetup(FAR uint16_t *accum)
 {
   /* Read-ahead one pixel */
@@ -583,7 +583,7 @@ static void stm3210e_readsetup(FAR uint16_t *accum)
 
 /* Used only for AM240320 */
 
-#ifndef CONFIG_STM32_AM240320_DISABLE
+#ifndef CONFIG_STM3210E_AM240320_DISABLE
 static void stm3210e_readnosetup(FAR uint16_t *accum)
 {
 }
@@ -608,7 +608,7 @@ static void stm3210e_readnosetup(FAR uint16_t *accum)
  * red and green
  */
 
-#ifndef CONFIG_STM32_SPFD5408B_DISABLE
+#ifndef CONFIG_STM3210E_SPFD5408B_DISABLE
 static uint16_t stm3210e_readshift(FAR uint16_t *accum)
 {
   uint16_t red;
@@ -663,7 +663,7 @@ static uint16_t stm3210e_readshift(FAR uint16_t *accum)
  * swaps colors.
  */
 
-#if !defined(CONFIG_STM32_R61580_DISABLE) || !defined(CONFIG_STM32_AM240320_DISABLE)
+#if !defined(CONFIG_STM3210E_R61580_DISABLE) || !defined(CONFIG_STM3210E_AM240320_DISABLE)
 static uint16_t stm3210e_readnoshift(FAR uint16_t *accum)
 {
   /* Read the value (GRAM register already selected) */
@@ -839,21 +839,21 @@ static int stm3210e_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 
   switch (g_lcddev.type)
    {
-#ifndef CONFIG_STM32_SPFD5408B_DISABLE
+#ifndef CONFIG_STM3210E_SPFD5408B_DISABLE
      case LCD_TYPE_SPFD5408B:
        readsetup = stm3210e_readsetup;
        readgram  = stm3210e_readshift;
        break;
 #endif
 
-#ifndef CONFIG_STM32_R61580_DISABLE
+#ifndef CONFIG_STM3210E_R61580_DISABLE
      case LCD_TYPE_R61580:
        readsetup = stm3210e_readsetup;
        readgram  = stm3210e_readnoshift;
        break;
 #endif
 
-#ifndef CONFIG_STM32_AM240320_DISABLE
+#ifndef CONFIG_STM3210E_AM240320_DISABLE
      case LCD_TYPE_AM240320:
        readsetup = stm3210e_readnosetup;
        readgram  = stm3210e_readnoshift;
@@ -1004,8 +1004,8 @@ static int stm3210e_poweroff(void)
 
   /* Disable timer 1 clocking */
 
-#if defined(CONFIG_LCD_BACKLIGHT)
-# if defined(CONFIG_LCD_PWM)
+#if defined(CONFIG_STM3210E_LCD_BACKLIGHT)
+# if defined(CONFIG_STM3210E_LCD_PWM)
   modifyreg32(STM32_RCC_APB2ENR, RCC_APB2ENR_TIM1EN, 0);
 #endif
 
@@ -1042,7 +1042,7 @@ static int stm3210e_setpower(struct lcd_dev_s *dev, int power)
 
   if (power > 0)
     {
-#if defined(CONFIG_LCD_BACKLIGHT) && defined(CONFIG_LCD_PWM)
+#if defined(CONFIG_STM3210E_LCD_BACKLIGHT) && defined(CONFIG_STM3210E_LCD_PWM)
       uint32_t frac;
       uint32_t duty;
 
@@ -1080,8 +1080,8 @@ static int stm3210e_setpower(struct lcd_dev_s *dev, int power)
 #endif
       /* Then turn the display on */
 
-#ifndef CONFIG_STM32_AM240320_DISABLE
-#  if !defined (CONFIG_STM32_SPFD5408B_DISABLE) || !defined(CONFIG_STM32_R61580_DISABLE)
+#ifndef CONFIG_STM3210E_AM240320_DISABLE
+#  if !defined (CONFIG_STM3210E_SPFD5408B_DISABLE) || !defined(CONFIG_STM3210E_R61580_DISABLE)
       stm3210e_writereg(LCD_REG_7, g_lcddev.type == LCD_TYPE_AM240320 ? 0x0173 : 0x0112);
 #  else
       stm3210e_writereg(LCD_REG_7, 0x0173);
@@ -1154,7 +1154,7 @@ static int stm3210e_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 #ifdef CONFIG_PM
 static void stm3210e_pm_notify(struct pm_callback_s *cb , enum pm_state_e pmstate)
 {
-#ifdef CONFIG_LCD_PWM
+#ifdef CONFIG_STM3210E_LCD_PWM
   uint32_t frac;
   uint32_t duty;
 #endif
@@ -1165,7 +1165,7 @@ static void stm3210e_pm_notify(struct pm_callback_s *cb , enum pm_state_e pmstat
         {
           /* Restore normal LCD operation */
 
-#ifdef CONFIG_LCD_PWM
+#ifdef CONFIG_STM3210E_LCD_PWM
           frac = (g_lcddev.power << 16) / CONFIG_LCD_MAXPOWER;
           duty = (g_lcddev.reload * frac) >> 16;
           if (duty > 0)
@@ -1182,7 +1182,7 @@ static void stm3210e_pm_notify(struct pm_callback_s *cb , enum pm_state_e pmstat
         {
           /* Entering IDLE mode - Reduce LCD light */
 
-#ifdef CONFIG_LCD_PWM
+#ifdef CONFIG_STM3210E_LCD_PWM
           frac = (g_lcddev.power << 16) / CONFIG_LCD_MAXPOWER;
           duty = (g_lcddev.reload * frac) >> 16;
           if (duty > 0)
@@ -1202,7 +1202,7 @@ static void stm3210e_pm_notify(struct pm_callback_s *cb , enum pm_state_e pmstat
         {
           /* Entering STANDBY mode - Turn display backlight off */
 
-#ifdef CONFIG_LCD_PWM
+#ifdef CONFIG_STM3210E_LCD_PWM
           putreg16(0, STM32_TIM1_CCR1);
 #endif
         }
@@ -1320,7 +1320,7 @@ static inline void stm3210e_lcdinitialize(void)
 
   /* Check if the ID is for the SPFD5408B */
 
-#if !defined(CONFIG_STM32_SPFD5408B_DISABLE)
+#if !defined(CONFIG_STM3210E_SPFD5408B_DISABLE)
   if (id == SPFD5408B_ID)
     {
       /* Set the LCD type for the SPFD5408B */
@@ -1425,7 +1425,7 @@ static inline void stm3210e_lcdinitialize(void)
 
   /* Check if the ID is for the almost compatible R61580 */
 
-#if !defined(CONFIG_STM32_R61580_DISABLE)
+#if !defined(CONFIG_STM3210E_R61580_DISABLE)
   if (id == R61580_ID)
     {
       /* Set the LCD type for the R61580 */
@@ -1497,7 +1497,7 @@ static inline void stm3210e_lcdinitialize(void)
   else
 #endif
     {
-#ifndef CONFIG_STM32_AM240320_DISABLE
+#ifndef CONFIG_STM3210E_AM240320_DISABLE
       /* Set the LCD type for the AM240320 */
 
       g_lcddev.type = LCD_TYPE_AM240320;
@@ -1605,10 +1605,10 @@ static inline void stm3210e_lcdinitialize(void)
  *
  **************************************************************************************/
 
-#ifdef CONFIG_LCD_BACKLIGHT
+#ifdef CONFIG_STM3210E_LCD_BACKLIGHT
 static void stm3210e_backlight(void)
 {
-#ifdef CONFIG_LCD_PWM
+#ifdef CONFIG_STM3210E_LCD_PWM
   uint32_t prescaler;
   uint32_t reload;
   uint32_t timclk;
@@ -1619,7 +1619,7 @@ static void stm3210e_backlight(void)
 
   /* Calculate the TIM1 prescaler value */
 
-  prescaler = (STM32_PCLK2_FREQUENCY / CONFIG_LCD_PWMFREQUENCY + 65534) / 65535;
+  prescaler = (STM32_PCLK2_FREQUENCY / CONFIG_STM3210E_LCD_PWMFREQUENCY + 65534) / 65535;
   if (prescaler < 1)
     {
       prescaler = 1;
@@ -1632,7 +1632,7 @@ static void stm3210e_backlight(void)
   /* Calculate the TIM1 reload value */
 
   timclk = STM32_PCLK2_FREQUENCY / prescaler;
-  reload = timclk / CONFIG_LCD_PWMFREQUENCY;
+  reload = timclk / CONFIG_STM3210E_LCD_PWMFREQUENCY;
 
   if (reload < 1)
     {

@@ -9,30 +9,31 @@ comment "STM3210E-EVAL LCD Hardware Configuration"
 config STM3210E_LCD
 	bool "Select support for the STM3210E-EVAL LCD"
 	default y
-	depends on LCD && STM32_FSMC
+	depends on STM32_FSMC
+	select LCD
 	---help---
 		Enable support for the LCD on the STM3210E-EVAL board.  See additional,
 		LCD-common settings in the drivers/lcd Kconfig file.
 
-config LCD_BACKLIGHT
+config STM3210E_LCD_BACKLIGHT
 	bool "LCD backlight support"
 	depends on STM3210E_LCD
 	default n
 	---help---
 		Define to support a backlight.
 
-config LCD_PWM
+config STM3210E_LCD_PWM
 	bool "LCD backlight PWM control"
 	default n
-	depends on LCD_BACKLIGHT && STM32_TIM1
+	depends on STM3210E_LCD_BACKLIGHT && STM32_TIM1
 	---help---
 		If STM32_TIM1 is also defined, then an adjustable backlight will be
 		provided using timer 1 to generate various pulse widthes.  The
-		granularity of the settings is determined by LCD_MAXPOWER.  If LCD_PWM
+		granularity of the settings is determined by LCD_MAXPOWER.  If STM3210E_LCD_PWM
 		(or STM32_TIM1) is not defined, then a simple on/off backlight is
 		provided.
 
-config LCD_RDSHIFT
+config STM3210E_LCD_RDSHIFT
 	int "LCD data shift"
 	default 5
 	depends on STM3210E_LCD
@@ -40,7 +41,7 @@ config LCD_RDSHIFT
 		When reading 16-bit gram data, there appears to be a shift in the returned
 		data.  This value fixes the offset.  Default 5.
 
-config STM32_AM240320_DISABLE
+config STM3210E_AM240320_DISABLE
 	bool "Disable AM240320 support"
 	default n
 	depends on STM3210E_LCD
@@ -49,7 +50,7 @@ config STM32_AM240320_DISABLE
 		ID value.  However, code size can be reduced by suppressing support for
 		individual LCDs using this option
 
-config STM32_SPFD5408B_DISABLE
+config STM3210E_SPFD5408B_DISABLE
 	bool "Disable SPFD5408B support"
 	default n
 	depends on STM3210E_LCD
@@ -58,7 +59,7 @@ config STM32_SPFD5408B_DISABLE
 		ID value.  However, code size can be reduced by suppressing support for
 		individual LCDs using this option
 
-config STM32_R61580_DISABLE
+config STM3210E_R61580_DISABLE
 	bool "Disable R61580 support"
 	default n
 	depends on STM3210E_LCD
