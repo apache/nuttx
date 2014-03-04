@@ -63,15 +63,15 @@
 #include "stm32.h"
 #include "stm3240g-internal.h"
 
-#if !defined(CONFIG_STM32_ILI9320_DISABLE) || !defined(CONFIG_STM32_ILI9325_DISABLE)
+#if !defined(CONFIG_STM3240G_ILI9320_DISABLE) || !defined(CONFIG_STM3240G_ILI9325_DISABLE)
 
 /**************************************************************************************
  * Pre-processor Definitions
  **************************************************************************************/
 /* Configuration **********************************************************************/
-/* CONFIG_STM32_ILI9320_DISABLE may be defined to disabled the AM-240320L8TNQW00H
+/* CONFIG_STM3240G_ILI9320_DISABLE may be defined to disabled the AM-240320L8TNQW00H
  *  (LCD_ILI9320 or LCD_ILI9321)
- * CONFIG_STM32_ILI9325_DISABLE  may be defined to disabled the AM-240320D5TOQW01H
+ * CONFIG_STM3240G_ILI9325_DISABLE may be defined to disabled the AM-240320D5TOQW01H
  *  (LCD_ILI9325)
  */
 
@@ -908,7 +908,7 @@ static int stm3240g_setpower(struct lcd_dev_s *dev, int power)
     {
       /* Then turn the display on */
 
-#if !defined(CONFIG_STM32_ILI9320_DISABLE) || !defined(CONFIG_STM32_ILI9325_DISABLE)
+#if !defined(CONFIG_STM3240G_ILI9320_DISABLE) || !defined(CONFIG_STM3240G_ILI9325_DISABLE)
       stm3240g_writereg(LCD_REG_7, 0x0173);
 #endif
       g_lcddev.power = power;
@@ -970,18 +970,18 @@ static inline void stm3240g_lcdinitialize(void)
 
   /* Check if the ID is for the STM32_ILI9320 (or ILI9321) or STM32_ILI9325 */
 
-#if !defined(CONFIG_STM32_ILI9320_DISABLE) && !defined(CONFIG_STM32_ILI9325_DISABLE)
+#if !defined(CONFIG_STM3240G_ILI9320_DISABLE) && !defined(CONFIG_STM3240G_ILI9325_DISABLE)
   if (id == ILI9320_ID || id == ILI9321_ID || id == ILI9325_ID)
-#elif !defined(CONFIG_STM32_ILI9320_DISABLE) && defined(CONFIG_STM32_ILI9325_DISABLE)
+#elif !defined(CONFIG_STM3240G_ILI9320_DISABLE) && defined(CONFIG_STM3240G_ILI9325_DISABLE)
   if (id == ILI9320_ID || id == ILI9321_ID)
-#else /* if defined(CONFIG_STM32_ILI9320_DISABLE) && !defined(CONFIG_STM32_ILI9325_DISABLE)) */
+#else /* if defined(CONFIG_STM3240G_ILI9320_DISABLE) && !defined(CONFIG_STM3240G_ILI9325_DISABLE)) */
   if (id == ILI9325_ID)
 #endif
     {
       /* Save the LCD type (not actually used at for anything important) */
 
-#if !defined(CONFIG_STM32_ILI9320_DISABLE)
-# if !defined(CONFIG_STM32_ILI9325_DISABLE)
+#if !defined(CONFIG_STM3240G_ILI9320_DISABLE)
+# if !defined(CONFIG_STM3240G_ILI9325_DISABLE)
       if (id == ILI9325_ID)
         {
           g_lcddev.type = LCD_TYPE_ILI9325;
@@ -992,7 +992,7 @@ static inline void stm3240g_lcdinitialize(void)
           g_lcddev.type = LCD_TYPE_ILI9320;
           stm3240g_writereg(LCD_REG_229, 0x8000); /* Set the internal vcore voltage */
         }
-#else /* if !defined(CONFIG_STM32_ILI9325_DISABLE) */
+#else /* if !defined(CONFIG_STM3240G_ILI9325_DISABLE) */
       g_lcddev.type = LCD_TYPE_ILI9325;
 #endif
       lcddbg("LCD type: %d\n", g_lcddev.type);
@@ -1036,8 +1036,8 @@ static inline void stm3240g_lcdinitialize(void)
 
       /* Adjust the Gamma Curve (ILI9320/1) */
 
-#if !defined(CONFIG_STM32_ILI9320_DISABLE)
-# if !defined(CONFIG_STM32_ILI9325_DISABLE)
+#if !defined(CONFIG_STM3240G_ILI9320_DISABLE)
+# if !defined(CONFIG_STM3240G_ILI9325_DISABLE)
     if (g_lcddev.type == LCD_TYPE_ILI9320)
 # endif
       {
@@ -1055,8 +1055,8 @@ static inline void stm3240g_lcdinitialize(void)
 #endif
       /* Adjust the Gamma Curve (ILI9325) */
 
-#if !defined(CONFIG_STM32_ILI9325_DISABLE)
-# if !defined(CONFIG_STM32_ILI9320_DISABLE)
+#if !defined(CONFIG_STM3240G_ILI9325_DISABLE)
+# if !defined(CONFIG_STM3240G_ILI9320_DISABLE)
     else
 # endif
       {
@@ -1206,4 +1206,4 @@ void stm3240g_lcdclear(uint16_t color)
     }
 }
 
-#endif /* !CONFIG_STM32_ILI9320_DISABLE || !CONFIG_STM32_ILI9325_DISABLE */
+#endif /* !CONFIG_STM3240G_ILI9320_DISABLE || !CONFIG_STM3240G_ILI9325_DISABLE */
