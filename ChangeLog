@@ -6831,3 +6831,5 @@
 	  kconfig-frontends tools (2014-3-4)
 	* configs/eagle100/nxflat: Configuration converted to use the
 	  kconfig-frontends tools (2014-3-4)
+	* configs/sim/touchscreen: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-4)
