@@ -863,15 +863,34 @@ the mountpoint /mnt/flash.
 Configurations
 ^^^^^^^^^^^^^^
 
-Each Olimex LPC1766-STK configuration is maintained in a
-sub-directory and can be selected as follow:
+Common Configuration Notes
+--------------------------
 
-    cd tools
-    ./configure.sh olimex-lpc1766stk/<subdir>
-    cd -
-    . ./setenv.sh
+  1. Each Olimex LPC1766-STK configuration is maintained in a
+     sub-directory and can be selected as follow:
 
-Where <subdir> is one of the following:
+       cd tools
+       ./configure.sh olimex-lpc1766stk/<subdir>
+       cd -
+       . ./setenv.sh
+
+     Where <subdir> is one of the sub-directories identified in the following
+     paragraphs.
+
+     Use configure.bat instead of configure.sh if you are building in a
+     Windows native environment.
+
+  2. These configurations use the mconf-based configuration tool.  To
+     change a configuration using that tool, you should:
+
+     a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+        and misc/tools/
+
+     b. Execute 'make menuconfig' in nuttx/ in order to start the
+        reconfiguration process.
+
+Configuration Sub-Directories
+-----------------------------
 
   ftpc:
     This is a simple FTP client shell used to exercise the capabilities
@@ -923,16 +942,7 @@ Where <subdir> is one of the following:
 
     NOTES:
 
-    1. This configuration uses the mconf-based configuration tool.  To
-       change this configuration using that tool, you should:
-
-       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          and misc/tools/
-
-       b. Execute 'make menuconfig' in nuttx/ in order to start the
-          reconfiguration process.
-
-    2. Default platform/toolchain: This is how the build is configured by
+    1. Default platform/toolchain: This is how the build is configured by
        be default.  These options can easily be re-confured, however.
 
        CONFIG_HOST_WINDOWS=y                   : Windows
@@ -946,23 +956,14 @@ Where <subdir> is one of the following:
 
     NOTES:
 
-    1. This configuration uses the mconf-based configuration tool.  To
-       change this configuration using that tool, you should:
-
-       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          and misc/tools/
-
-       b. Execute 'make menuconfig' in nuttx/ in order to start the
-          reconfiguration process.
-
-    2. Default platform/toolchain: This is how the build is configured by
+    1. Default platform/toolchain: This is how the build is configured by
        be default.  These options can easily be re-confured, however.
 
        CONFIG_HOST_WINDOWS=y                   : Windows
        CONFIG_WINDOWS_CYGWIN=y                 : Cygwin environment on Windows
        CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery under Windows
 
-    3. The mouse is really useless with no display and no cursor.  So this
+    2. The mouse is really useless with no display and no cursor.  So this
        configuration is only suited for low-level testing.  It is also awkward
        to use.  Here are the steps:
 
@@ -990,29 +991,20 @@ Where <subdir> is one of the following:
 
     NOTES:
 
-    1. This configuration uses the mconf-based configuration tool.  To
-       change this configuration using that tool, you should:
-
-       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          and misc/tools/
-
-       b. Execute 'make menuconfig' in nuttx/ in order to start the
-          reconfiguration process.
-
-    2. Uses the older, OABI, buildroot toolchain.  But that is easily
+    1. Uses the older, OABI, buildroot toolchain.  But that is easily
        reconfigured:
 
        CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
        CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : Older, OABI toolchain
 
-    3. This configuration supports a network.  You may have to change
+    2. This configuration supports a network.  You may have to change
        these settings for your network:
 
        CONFIG_NSH_IPADDR=0x0a000002        : IP address: 10.0.0.2
        CONFIG_NSH_DRIPADDR=0x0a000001      : Gateway:    10.0.0.1
        CONFIG_NSH_NETMASK=0xffffff00       : Netmask:    255.255.255.0
 
-    4. This configuration supports the SPI-based MMC/SD card slot.
+    3. This configuration supports the SPI-based MMC/SD card slot.
        FAT file system support for FAT long file names is built-in but
        can easily be removed if you are concerned about Microsoft patent
        issues (see the section "FAT Long File Names" in the top-level
@@ -1026,16 +1018,7 @@ Where <subdir> is one of the following:
 
     NOTES:
 
-    1. This configuration uses the mconf-based configuration tool.  To
-       change this configuration using that tool, you should:
-
-       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          and misc/tools/
-
-       b. Execute 'make menuconfig' in nuttx/ in order to start the
-          reconfiguration process.
-
-    2. The Nokia 6100 driver does not work on this board as of this writing.
+    1. The Nokia 6100 driver does not work on this board as of this writing.
 
   slip-httpd:
     This configuration is identical to the thttpd configuration except that
@@ -1092,16 +1075,7 @@ Where <subdir> is one of the following:
 
     NOTES:
 
-    1. This configuration uses the mconf-based configuration tool.  To
-       change this configuration using that tool, you should:
-
-       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          and misc/tools/
-
-       b. Execute 'make menuconfig' in nuttx/ in order to start the
-          reconfiguration process.
-
-    2. Uses the newer, EABI, buildroot toolchain.  But that is easily
+    1. Uses the newer, EABI, buildroot toolchain.  But that is easily
        reconfigured:
 
        CONFIG_HOST_LINUX=y                 : Linux
@@ -1117,17 +1091,6 @@ Where <subdir> is one of the following:
     This configuration directory exercises the USB mass storage
     class driver at apps/system/usbmsc.  See apps/examples/README.txt
     for more information.
-
-    NOTES:
-
-    1. This configuration uses the mconf-based configuration tool.  To
-       change this configuration using that tool, you should:
-
-       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          and misc/tools/
-
-       b. Execute 'make menuconfig' in nuttx/ in order to start the
-          reconfiguration process.
 
   zmodem:
     This is an alternative NSH configuration that was used to test Zmodem
