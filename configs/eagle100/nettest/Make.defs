@@ -95,13 +95,12 @@ OBJEXT = .o
 LIBEXT = .a
 EXEEXT =
 
-ifneq ($(CROSSDEV),arm-nuttx-elf-)
+ifneq ($(CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT),y)
   LDFLAGS += -nostartfiles -nodefaultlibs
 endif
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   LDFLAGS += -g
 endif
-
 
 HOSTCC = gcc
 HOSTINCLUDES = -I.

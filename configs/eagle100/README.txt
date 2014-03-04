@@ -21,29 +21,30 @@ Development Environment
 GNU Toolchain Options
 ^^^^^^^^^^^^^^^^^^^^^
 
-  The NuttX make system has been modified to support the following different
-  toolchain options.
+  The NuttX make system has been modified to support the multiple toolchain
+  options including:
 
   1. The CodeSourcery GNU toolchain,
-  2. The devkitARM GNU toolchain, or
+  2. The devkitARM GNU toolchain,
   3. The NuttX buildroot Toolchain (see below).
 
   All testing has been conducted using the NuttX buildroot toolchain.  However,
   the make system is setup to default to use the devkitARM toolchain.  To use
-  the CodeSourcery or devkitARM GNU toolchain, you simply need to build the
-  system as follows:
+  the CodeSourcery or devkitARM, you simply need to add one of the following
+  configuration options to your .config (or defconfig) file:
 
-     make                         # Will build for the devkitARM toolchain
-     make CROSSDEV=arm-eabi-      # Will build for the devkitARM toolchain
-     make CROSSDEV=arm-none-eabi- # Will build for the CodeSourcery toolchain
-     make CROSSDEV=arm-nuttx-elf- # Will build for the NuttX buildroot toolchain
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL=y : CodeSourcery under Linux
+    CONFIG_ARMV7M_TOOLCHAIN_DEVKITARM=y     : devkitARM under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y     : NuttX buildroot under Linux or Cygwin (default)
 
-  Of course, hard coding this CROSS_COMPILE value in Make.defs file will save
-  some repetitive typing.
+  If you are not using CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT, then you may also have to modify
+  the PATH in the setenv.h file if your make cannot find the tools.
 
-  NOTE: the CodeSourcery and devkitARM toolchains are Windows native toolchains.
-  The NuttX buildroot toolchain is a Cygwin toolchain.  There are several limitations
-  to using a Windows based toolchain in a Cygwin environment.  The three biggest are:
+  NOTE: the CodeSourcery (for Windows) and devkitARM are Windows native toolchains.
+  The CodeSourcey (for Linux) and NuttX buildroot toolchains are Cygwin and/or Linux
+  native toolchains. There are several limitations to using a Windows based
+  toolchain in a Cygwin environment.  The three biggest are:
 
   1. The Windows toolchain cannot follow Cygwin paths.  Path conversions are
      performed automatically in the Cygwin makefiles using the 'cygpath' utility
@@ -58,7 +59,7 @@ GNU Toolchain Options
      directory.  If you use a Windows toolchain, you should get in the habit of
      making like this:
 
-       make clean_context; make CROSSDEV=arm-none-eabi-
+       make clean_context all
 
      An alias in your .bashrc file might make that less painful.
 
@@ -74,33 +75,7 @@ GNU Toolchain Options
 
   NOTE 2: The devkitARM toolchain includes a version of MSYS make.  Make sure that
   the paths to Cygwin's /bin and /usr/bin directories appear BEFORE the devkitARM
-  path or will get the wrong version of make.  It has been reported to me that the
-  devkitARM will require an lower optimization level of -O1.  Currently all of the
-  Make.def files have -O2 for devkitARM -- if you are using this toolchain, you may
-  need to review these settings.
-
-CodeSourcery on Linux
-^^^^^^^^^^^^^^^^^^^^^
-
-  If you select the CodeSourcery toolchain, the make system will assume that you
-  are running a Windows version of the toolchain.  If you are running under Linux,
-  the make will probably fail.  The fix is to edit your Make.defs file and
-  use something like:
-
-    CROSSDEV = arm-none-eabi-
-    WINTOOL = n
-    MKDEP = $(TOPDIR)/tools/mkdeps.sh
-    ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
-    ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
-    ARCHXXINCLUDES = -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
-    ARCHSCRIPT = -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/ld.script
-    MAXOPTIMIZATION = -O2
-
-  The values for TOPDIR is provided by the make system; the value for CONFIG_ARCH_BOARD
-  is provided in your defconfig file.
-
-  For an example of a CodeSourcery-under-Linux Make.defs file, see
-  configs/stm3210e-eval/nsh/Make.defs.
+  path or will get the wrong version of make.
 
 NuttX EABI "buildroot" Toolchain
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -151,18 +126,10 @@ NuttX OABI "buildroot" Toolchain
   The older, OABI buildroot toolchain is also available.  To use the OABI
   toolchain:
 
-  1. When building the buildroot toolchain, either (1) modify the cortexm3-eabi-defconfig-4.6.3
-     configuration to use EABI (using 'make menuconfig'), or (2) use an exising OABI
-     configuration such as cortexm3-defconfig-4.3.3
-
-  2. Modify the Make.defs file to use the OABI conventions:
-
-    +CROSSDEV = arm-nuttx-elf-
-    +ARCHCPUFLAGS = -mtune=cortex-m3 -march=armv7-m -mfloat-abi=soft
-    +NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-gotoff.ld -no-check-sections
-    -CROSSDEV = arm-nuttx-eabi-
-    -ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
-    -NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-pcrel.ld -no-check-sections
+    When building the buildroot toolchain, either (1) modify the
+    cortexm3-eabi-defconfig-4.6.3 configuration to use EABI (using
+    'make menuconfig'), or (2) use an exising OABI configuration such
+    as cortexm3-defconfig-4.3.3
 
 NXFLAT Toolchain
 ^^^^^^^^^^^^^^^^
@@ -405,17 +372,7 @@ Where <subdir> is one of the following:
        b. Execute 'make menuconfig' in nuttx/ in order to start the
           reconfiguration process.
 
-    2. As a consequence of (1), selection of toolchains differs from
-       the discussion above under GNU Toolchain Options.  You should
-       *not* add the CROSSDEV setting on the make command line.  Rather,
-       you should reconfigure and select the toolchain that you want
-       from the "System Type" menu.
-
-       Eventually, all of the eagle100 configurations will be changed
-       to use the new configuration mechanism and at that time, the
-       above discussion will be corrected for all configurations.
-
-    3. This configuration is set to use Cygwin under Windows and the
+    2. This configuration is set to use Cygwin under Windows and the
        CodeSourcery toolchain.  That, however, is easily reconfigurable:
 
          CONFIG_HOST_WINDOWS=y
@@ -437,17 +394,7 @@ Where <subdir> is one of the following:
        b. Execute 'make menuconfig' in nuttx/ in order to start the
           reconfiguration process.
 
-    2. As a consequence of (1), selection of toolchains differs from
-       the discussion above under GNU Toolchain Options.  You should
-       *not* add the CROSSDEV setting on the make command line.  Rather,
-       you should reconfigure and select the toolchain that you want
-       from the "System Type" menu.
-
-       Eventually, all of the eagle100 configurations will be changed
-       to use the new configuration mechanism and at that time, the
-       above discussion will be corrected for all configurations.
-
-    3. This configuration is set to use Cygwin under Windows and the
+    2. This configuration is set to use Cygwin under Windows and the
        CodeSourcery toolchain.  That, however, is easily reconfigurable:
 
          CONFIG_HOST_WINDOWS=y
@@ -474,17 +421,7 @@ Where <subdir> is one of the following:
        b. Execute 'make menuconfig' in nuttx/ in order to start the
           reconfiguration process.
 
-    2. As a consequence of (1), selection of toolchains differs from
-       the discussion above under GNU Toolchain Options.  You should
-       *not* add the CROSSDEV setting on the make command line.  Rather,
-       you should reconfigure and select the toolchain that you want
-       from the "System Type" menu.
-
-       Eventually, all of the eagle100 configurations will be changed
-       to use the new configuration mechanism and at that time, the
-       above discussion will be corrected for all configurations.
-
-    3. This configuration is set to use Cygwin under Windows and the
+    4. This configuration is set to use Cygwin under Windows and the
        devkitARM toolchain.  That, however, is easily reconfigurable:
 
        CONFIG_HOST_WINDOWS=y
@@ -494,9 +431,26 @@ Where <subdir> is one of the following:
   nxflat:
     This builds the NXFLAT example at apps/examples/nxfalt.
 
-    NOTE: See note above with regard to the EABI/OABI buildroot
-    toolchains.  This example can only be built using the older
-    OABI toolchain.
+    NOTES:
+
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configurations using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. This example can only be built using the NuttX buildroot
+       toolchain with the NXFLAT tools.
+
+    3. This configuration is set to use Cygwin under Windows and the
+       devkitARM toolchain.  That, however, is easily reconfigurable:
+
+       CONFIG_HOST_WINDOWS=y
+       CONFIG_WINDOWS_CYGWIN=y
+       CONFIG_ARM7M_TOOLCHAIN_DEVKITARM=y
 
   thttpd:
     This builds the THTTPD web server example using the THTTPD and
@@ -513,17 +467,7 @@ Where <subdir> is one of the following:
        b. Execute 'make menuconfig' in nuttx/ in order to start the
           reconfiguration process.
 
-    2. As a consequence of (1), selection of toolchains differs from
-       the discussion above under GNU Toolchain Options.  You should
-       *not* add the CROSSDEV setting on the make command line.  Rather,
-       you should reconfigure and select the toolchain that you want
-       from the "System Type" menu.
-
-       Eventually, all of the eagle100 configurations will be changed
-       to use the new configuration mechanism and at that time, the
-       above discussion will be corrected for all configurations.
-
-    3. This configuration is set to use Linux and the buildroot toolchain.
+    2. This configuration is set to use Linux and the buildroot toolchain.
        That, however, is easily reconfigurable:
 
          CONFIG_HOST_LINUX=y
