@@ -273,8 +273,8 @@ CONFIG_SCHED_ATEXIT=n
 # (see include/nuttx/power/pm.h for many more standard configuration options)
 #
 CONFIG_PM=y
-CONFIG_PM_CUSTOMINIT=y
-CONFIG_IDLE_CUSTOM=y
+CONFIG_ARCH_CUSTOM_PMINIT=y
+CONFIG_ARCH_IDLE_CUSTOM=y
 CONFIG_PM_SLEEP_WAKEUP=n
 
 #

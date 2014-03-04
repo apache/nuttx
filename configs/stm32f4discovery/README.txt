@@ -1485,46 +1485,63 @@ Where <subdir> is one of the following:
     to test that the board can go into lower and lower states of power usage
     as a result of inactivity.  This configuration is based on the nsh2
     configuration with modifications for testing power management.  This
-    configuration should provide some guideline for power management in your
+    configuration should provide some guidelines for power management in your
     STM32 application.
 
-      CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
+    NOTES:
 
-    CONFIG_PM_CUSTOMINIT and CONFIG_IDLE_CUSTOM are necessary parts of the
-    PM configuration:
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configuration using that tool, you should:
 
-      CONFIG_PM_CUSTOMINIT=y
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
 
-    CONFIG_PM_CUSTOMINIT moves the PM initialization from arch/arm/src/stm32/stm32_pminitialiaze.c
-    to configs/stm3210-eval/src/up_pm.c.  This allows us to support board-
-    specific PM initialization.
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
 
-      CONFIG_IDLE_CUSTOM=y
+    2. Default configuration is Cygwin under windows using the CodeSourcery
+       toolchain:
 
-    The bulk of the PM activities occur in the IDLE loop.  The IDLE loop is
-    special because it is what runs when there is no other task running.  Therefore
-    when the IDLE executes, we can be assure that nothing else is going on; this
-    is the ideal condition for doing reduced power management.
+         CONFIG_HOST_WINDOWS=y         : Windows
+         CONFIG_WINDOWS_CYGWIN=y       : Cygwin
+         CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
 
-    The configuration CONFIG_IDLE_CUSTOM allows us to "steal" the normal STM32
-    IDLE loop (of arch/arm/src/stm32/stm32_idle.c) and replace this with our own
-    custom IDLE loop (at configs/stm3210-eval/src/up_idle.c).
+    3. CONFIG_ARCH_CUSTOM_PMINIT and CONFIG_ARCH_IDLE_CUSTOM are necessary
+       parts of the PM configuration:
 
-    Here are some additional things to note in the configuration:
+         CONFIG_ARCH_CUSTOM_PMINIT=y
 
-      CONFIG_PM_BUTTONS=y
+       CONFIG_ARCH_CUSTOM_PMINIT moves the PM initialization from
+       arch/arm/src/stm32/stm32_pminitialiaze.c to configs/stm3210-eval/src/stm32_pm.c.
+       This allows us to support board-specific PM initialization.
 
-    CONFIG_PM_BUTTONS enables button support for PM testing.  Buttons can drive
-    EXTI interrupts and EXTI interrrupts can be used to wakeup for certain reduced
-    power modes (STOP mode).  The use of the buttons here is for PM testing purposes
-    only; buttons would normally be part the application code and CONFIG_PM_BUTTONS
-    would not be defined.
+         CONFIG_ARCH_IDLE_CUSTOM=y
 
-      CONFIG_RTC_ALARM=y
+       The bulk of the PM activities occur in the IDLE loop.  The IDLE loop
+       is special because it is what runs when there is no other task running.
+       Therefore when the IDLE executes, we can be assure that nothing else
+       is going on; this is the ideal condition for doing reduced power
+       management.
 
-    The RTC alarm is used to wake up from STOP mode and to transition to
-    STANDBY mode.  This used of the RTC alarm could conflict with other uses of
-    the RTC alarm in your application.
+       The configuration CONFIG_ARCH_IDLE_CUSTOM allows us to "steal" the
+       normal STM32 IDLE loop (of arch/arm/src/stm32/stm32_idle.c) and replace
+       this with our own custom IDLE loop (at configs/stm3210-eval/src/up_idle.c).
+
+    4. Here are some additional things to note in the configuration:
+
+        CONFIG_PM_BUTTONS=y
+
+       CONFIG_PM_BUTTONS enables button support for PM testing.  Buttons can
+       drive EXTI interrupts and EXTI interrrupts can be used to wakeup for
+       certain reduced power modes (STOP mode).  The use of the buttons here
+       is for PM testing purposes only; buttons would normally be part the
+       application code and CONFIG_PM_BUTTONS would not be defined.
+
+         CONFIG_RTC_ALARM=y
+
+       The RTC alarm is used to wake up from STOP mode and to transition to
+       STANDBY mode.  This used of the RTC alarm could conflict with other
+       uses of the RTC alarm in your application.
 
   posix_spawn:
   ------------

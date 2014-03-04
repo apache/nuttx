@@ -60,7 +60,7 @@ ifeq ($(CONFIG_NSH_LIBRARY),y)
 CSRCS += stm32_nsh.c
 endif
 
-ifeq ($(CONFIG_IDLE_CUSTOM),y)
+ifeq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CSRCS += stm32_idle.c
 endif
 

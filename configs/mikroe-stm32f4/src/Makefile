@@ -74,11 +74,11 @@ ifeq ($(CONFIG_NSH_ARCHINIT),y)
 CSRCS += up_nsh.c
 endif
 
-ifeq ($(CONFIG_PM_CUSTOMINIT),y)
+ifeq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)
 CSRCS += up_pm.c
 endif
 
-ifeq ($(CONFIG_IDLE_CUSTOM),y)
+ifeq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CSRCS += up_idle.c
 endif
 

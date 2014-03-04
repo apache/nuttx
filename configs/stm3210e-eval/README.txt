@@ -943,23 +943,23 @@ Where <subdir> is one of the following:
 
       CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y  : CodeSourcery under Windows
 
-    CONFIG_PM_CUSTOMINIT and CONFIG_IDLE_CUSTOM are necessary parts of the
+    CONFIG_ARCH_CUSTOM_PMINIT and CONFIG_ARCH_IDLE_CUSTOM are necessary parts of the
     PM configuration:
 
-      CONFIG_PM_CUSTOMINIT=y
+      CONFIG_ARCH_CUSTOM_PMINIT=y
 
-    CONFIG_PM_CUSTOMINIT moves the PM initialization from arch/arm/src/stm32/stm32_pminitialiaze.c
+    CONFIG_ARCH_CUSTOM_PMINIT moves the PM initialization from arch/arm/src/stm32/stm32_pminitialiaze.c
     to configs/stm3210-eval/src/up_pm.c.  This allows us to support board-
     specific PM initialization.
 
-      CONFIG_IDLE_CUSTOM=y
+      CONFIG_ARCH_IDLE_CUSTOM=y
 
     The bulk of the PM activities occur in the IDLE loop.  The IDLE loop is
     special because it is what runs when there is no other task running.  Therefore
     when the IDLE executes, we can be assure that nothing else is going on; this
     is the ideal condition for doing reduced power management.
 
-    The configuration CONFIG_IDLE_CUSTOM allows us to "steal" the normal STM32
+    The configuration CONFIG_ARCH_IDLE_CUSTOM allows us to "steal" the normal STM32
     IDLE loop (of arch/arm/src/stm32/stm32_idle.c) and replace this with our own
     custom IDLE loop (at configs/stm3210-eval/src/up_idle.c).
 

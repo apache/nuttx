@@ -86,13 +86,13 @@
  *
  ****************************************************************************/
 
-void stm32_pminitialize(void)
+void up_pminitialize(void)
 {
   /* Then initialize the NuttX power management subsystem proper */
 
   pm_initialize();
 
-#if defined(CONFIG_IDLE_CUSTOM) && defined(CONFIG_PM_BUTTONS)
+#if defined(CONFIG_ARCH_IDLE_CUSTOM) && defined(CONFIG_PM_BUTTONS)
   /* Initialize the buttons to wake up the system from low power modes */
 
   stm32_pm_buttons();
