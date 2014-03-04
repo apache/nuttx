@@ -6833,3 +6833,5 @@
 	  kconfig-frontends tools (2014-3-4)
 	* configs/sim/touchscreen: Configuration converted to use the
 	  kconfig-frontends tools (2014-3-4)
+	* configs/sim/pashello: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-4)
