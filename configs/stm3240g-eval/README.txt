@@ -1538,7 +1538,7 @@ Where <subdir> is one of the following:
        b. Execute 'make menuconfig' in nuttx/ in order to start the
           reconfiguration process.
 
-    2. Default build environment (also easily reconfigured):
+    2. Default build environment (easily reconfigured):
 
       CONFIG_HOST_WINDOWS=y
       CONFIG_WINDOWS_CYGWIN=y
