@@ -518,6 +518,28 @@ static ssize_t fat_read(FAR struct file *filep, char *buffer, size_t buflen)
     {
       bytesread  = 0;
 
+      /* Check if the current read stream has incremented to the next
+       * cluster boundary
+       */
+
+      if (ff->ff_sectorsincluster < 1)
+        {
+          /* Find the next cluster in the FAT. */
+
+          cluster = fat_getcluster(fs, ff->ff_currentcluster);
+          if (cluster < 2 || cluster >= fs->fs_nclusters)
+            {
+              ret = -EINVAL; /* Not the right error */
+              goto errout_with_semaphore;
+            }
+
+          /* Setup to read the first sector from the new cluster */
+
+          ff->ff_currentcluster   = cluster;
+          ff->ff_currentsector    = fat_cluster2sector(fs, cluster);
+          ff->ff_sectorsincluster = fs->fs_fatsecperclus;
+        }
+
 #ifdef CONFIG_FAT_DMAMEMORY /* Warning avoidance */
 fat_read_restart:
 #endif
@@ -618,28 +640,6 @@ fat_read_restart:
       readsize     += bytesread;
       buflen       -= bytesread;
       sectorindex   = filep->f_pos & SEC_NDXMASK(fs);
-
-      /* Check if the current read stream has incremented to the next
-       * cluster boundary
-       */
-
-      if (buflen > 0 && ff->ff_sectorsincluster < 1)
-        {
-          /* Find the next cluster in the FAT. */
-
-          cluster = fat_getcluster(fs, ff->ff_currentcluster);
-          if (cluster < 2 || cluster >= fs->fs_nclusters)
-            {
-              ret = -EINVAL; /* Not the right error */
-              goto errout_with_semaphore;
-            }
-
-          /* Setup to read the first sector from the new cluster */
-
-          ff->ff_currentcluster   = cluster;
-          ff->ff_currentsector    = fat_cluster2sector(fs, cluster);
-          ff->ff_sectorsincluster = fs->fs_fatsecperclus;
-        }
     }
 
   fat_semgive(fs);
@@ -754,13 +754,45 @@ static ssize_t fat_write(FAR struct file *filep, const char *buffer,
 
   while (buflen > 0)
     {
-      /* Check if the user has provided a buffer large enough to
-       * hold one or more complete sectors.
+      /* Check if the current write stream has incremented to the next
+       * cluster boundary
        */
+
+      if (ff->ff_sectorsincluster < 1)
+        {
+          /* Extend the current cluster by one (unless lseek was used to
+           * move the file position back from the end of the file)
+           */
+
+          cluster = fat_extendchain(fs, ff->ff_currentcluster);
+
+          /* Verify the cluster number */
+
+          if (cluster < 0)
+            {
+              ret = cluster;
+              goto errout_with_semaphore;
+            }
+          else if (cluster < 2 || cluster >= fs->fs_nclusters)
+            {
+              ret = -ENOSPC;
+              goto errout_with_semaphore;
+            }
+
+          /* Setup to write the first sector from the new cluster */
+
+          ff->ff_currentcluster   = cluster;
+          ff->ff_sectorsincluster = fs->fs_fatsecperclus;
+          ff->ff_currentsector    = fat_cluster2sector(fs, cluster);
+        }
 
 #ifdef CONFIG_FAT_DMAMEMORY /* Warning avoidance */
 fat_write_restart:
 #endif
+
+      /* Check if the user has provided a buffer large enough to
+       * hold one or more complete sectors.
+       */
 
       nsectors = buflen / fs->fs_hwsectorsize;
       if (nsectors > 0 && sectorindex == 0 && !force_indirect)
@@ -894,38 +926,6 @@ fat_write_restart:
       byteswritten += writesize;
       buflen       -= writesize;
       sectorindex   = filep->f_pos & SEC_NDXMASK(fs);
-
-      /* Check if the current read stream has incremented to the next
-       * cluster boundary
-       */
-
-      if (buflen > 0 && ff->ff_sectorsincluster < 1)
-        {
-          /* Extend the current cluster by one (unless lseek was used to
-           * move the file position back from the end of the file)
-           */
-
-          cluster = fat_extendchain(fs, ff->ff_currentcluster);
-
-          /* Verify the cluster number */
-
-          if (cluster < 0)
-            {
-              ret = cluster;
-              goto errout_with_semaphore;
-            }
-          else if (cluster < 2 || cluster >= fs->fs_nclusters)
-            {
-              ret = -ENOSPC;
-              goto errout_with_semaphore;
-            }
-
-          /* Setup to write the first sector from the new cluster */
-
-          ff->ff_currentcluster   = cluster;
-          ff->ff_sectorsincluster = fs->fs_fatsecperclus;
-          ff->ff_currentsector    = fat_cluster2sector(fs, cluster);
-        }
    }
 
   /* The transfer has completed without error.  Update the file size */

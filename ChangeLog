@@ -6807,3 +6807,8 @@
 	  kconfig-frontends tools (2014-3-4)
 	* configs/stm3220g-eval/telnetd: Configuration converted to use the
 	  kconfig-frontends tools (2014-3-4)
+	* fs/fat/fs_fat32.c:  Fix an error in the FAT logic that can cause file
+	  corruption.  The error conditions are rare and only seen with very
+	  large files.  From Andrew Tridgell.  This replaces a previous, partial
+	  fix for the same problem (2014-3-3).
+
