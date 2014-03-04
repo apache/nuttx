@@ -54,13 +54,13 @@ GNU Toolchain Options
   add one of the following configuration options to your .config (or defconfig)
   file:
 
-    CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
-    CONFIG_STM32_CODESOURCERYL=y  : CodeSourcery under Linux
-    CONFIG_STM32_ATOLLIC_LITE=y   : The free, "Lite" version of Atollic toolchain under Windows
-    CONFIG_STM32_ATOLLIC_PRO=y    : The paid, "Pro" version of Atollic toolchain under Windows
-    CONFIG_STM32_DEVKITARM=y      : devkitARM under Windows
-    CONFIG_STM32_RAISONANCE=y     : Raisonance RIDE7 under Windows
-    CONFIG_STM32_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y  : CodeSourcery under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL=y  : CodeSourcery under Linux
+    CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC_LITE=y   : The free, "Lite" version of Atollic toolchain under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC_PRO=y    : The paid, "Pro" version of Atollic toolchain under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_DEVKITARM=y      : devkitARM under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_RAISONANCE=y     : Raisonance RIDE7 under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
 
   If you change the default toolchain, then you may also have to modify the PATH in
   the setenv.h file if your make cannot find the tools.
@@ -466,8 +466,8 @@ in order to successfully build NuttX using the Atollic toolchain WITH FPU suppor
   -CONFIG_ARCH_FPU=n              : Enable FPU support
   +CONFIG_ARCH_FPU=y
 
-  -CONFIG_STM32_CODESOURCERYW=y   : Disable the CodeSourcery toolchain
-  +CONFIG_STM32_CODESOURCERYW=n
+  -CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y   : Disable the CodeSourcery toolchain
+  +CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=n
 
   -CONFIG_STM32_ATOLLIC_LITE=n   : Enable *one* the Atollic toolchains
    CONFIG_STM32_ATOLLIC_PRO=n
@@ -873,7 +873,7 @@ STM3240G-EVAL-specific Configuration Options
       In this orientation, the top of the display is to the right
       of the buttons (if the board is held so that the buttons are at the
       botton of the board).
-    CONFIG_LCD_RDSHIFT - When reading 16-bit gram data, there appears
+    CONFIG_STM3240G_LCD_RDSHIFT - When reading 16-bit gram data, there appears
       to be a shift in the returned data.  This value fixes the offset.
       Default 5.
 
@@ -881,8 +881,8 @@ STM3240G-EVAL-specific Configuration Options
     ID value.  However, code size can be reduced by suppressing support for
     individual LCDs using:
 
-    CONFIG_STM32_ILI9320_DISABLE (includes ILI9321)
-    CONFIG_STM32_ILI9325_DISABLE
+    CONFIG_STM3240G_ILI9320_DISABLE (includes ILI9321)
+    CONFIG_STM3240G_ILI9325_DISABLE
 
   STM32 USB OTG FS Host Driver Support
 
@@ -962,10 +962,10 @@ Where <subdir> is one of the following:
     Configuration settings that you may need to change for your
     environment:
 
-      CONFIG_STM32_CODESOURCERYL=y      - CodeSourcery for Linux
-      CONFIG_EXAMPLES_DISCOVER_DHCPC=y  - DHCP Client
-      CONFIG_EXAMPLES_DISCOVER_IPADDR   - (not defined)
-      CONFIG_EXAMPLES_DISCOVER_DRIPADDR - Router IP address
+      CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL=y - CodeSourcery for Linux
+      CONFIG_EXAMPLES_DISCOVER_DHCPC=y        - DHCP Client
+      CONFIG_EXAMPLES_DISCOVER_IPADDR         - (not defined)
+      CONFIG_EXAMPLES_DISCOVER_DRIPADDR       - Router IP address
 
     NOTE:  This configuration uses to the kconfig-mconf configuration tool to
     control the configuration.  See the section entitled "NuttX Configuration
@@ -1096,7 +1096,7 @@ Where <subdir> is one of the following:
     using the STM32's Ethernet controller. It uses apps/examples/nettest to exercise the
     TCP/IP network.
 
-    CONFIG_STM32_CODESOURCERYW=y                           : CodeSourcery under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y                : CodeSourcery under Windows
     CONFIG_EXAMPLES_NETTEST_SERVER=n                       : Target is configured as the client
     CONFIG_EXAMPLES_NETTEST_PERFORMANCE=y                  : Only network performance is verified.
     CONFIG_EXAMPLES_NETTEST_IPADDR=(10<<24|0<<16|0<<8|2)   : Target side is IP: 10.0.0.2
@@ -1119,7 +1119,7 @@ Where <subdir> is one of the following:
     Configures the NuttShell (nsh) located at apps/examples/nsh.  The
     Configuration enables both the serial and telnet NSH interfaces.
 
-    CONFIG_STM32_CODESOURCERYW=y              : CodeSourcery under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y   : CodeSourcery under Windows
     CONFIG_NSH_DHCPC=n                        : DHCP is disabled
     CONFIG_NSH_IPADDR=(10<<24|0<<16|0<<8|2)   : Target IP address 10.0.0.2
     CONFIG_NSH_DRIPADDR=(10<<24|0<<16|0<<8|1) : Host IP address 10.0.0.1
@@ -1424,27 +1424,43 @@ Where <subdir> is one of the following:
     from the others, however, in that it uses the NxConsole driver to host
     the NSH shell.
 
-    Some of the differences in this configuration and the normal nsh configuration
-    include these settings in the defconfig file:
+    NOTES:
 
-    These select NX Multi-User mode:
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configurations using that tool, you should:
 
-      CONFG_NX_MULTIUSER=y
-      CONFIG_DISABLE_MQUEUE=n
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
 
-    The following definition in the defconfig file to enables the NxConsole
-    driver:
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
 
-      CONFIG_NXCONSOLE=y
+    2. Some of the differences in this configuration and the normal nsh
+       configuration include these settings in the defconfig file:
 
-    The appconfig file selects examples/nxconsole instead of examples/nsh:
+       These select NX Multi-User mode:
 
-      CONFIGURED_APPS += examples/nxconsole
+         CONFG_NX_MULTIUSER=y
+         CONFIG_DISABLE_MQUEUE=n
 
-    Other configuration settings:
+       The following definition in the defconfig file to enables the NxConsole
+       driver:
 
-      CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
-      CONFIG_LCD_LANDSCAPE=y        : 320x240 landscape
+         CONFIG_NXCONSOLE=y
+
+       And this selects examples/nxconsole instead of examples/nsh:
+
+         CONFIG_EXAMPLES_NXCONSOLE=y
+
+       LCD Orientation:
+
+         CONFIG_LCD_LANDSCAPE=y        : 320x240 landscape
+
+    3. Default build environment (also easily reconfigured):
+
+         CONFIG_HOST_WINDOWS=y                    : Windows
+         CONFIG_WINDOWS_CYGWIN=y                  : With Cygwin
+         CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y  : CodeSourcery under Windows
 
   nxwm
   ----
