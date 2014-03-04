@@ -1090,9 +1090,23 @@ Where <subdir> is one of the following:
     This builds the THTTPD web server example using the THTTPD and
     the apps/examples/thttpd application.
 
-    NOTE: See note above with regard to the EABI/OABI buildroot
-    toolchains.  This example can only be built using the older
-    OABI toolchain.
+    NOTES:
+
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configuration using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. Uses the newer, EABI, buildroot toolchain.  But that is easily
+       reconfigured:
+
+       CONFIG_HOST_LINUX=y                 : Linux
+       CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
+       CONFIG_ARMV7M_OABI_TOOLCHAIN=n      : Newer, EABI toolchain
 
   usbserial:
     This configuration directory exercises the USB serial class
