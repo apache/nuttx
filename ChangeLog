@@ -6837,3 +6837,5 @@
 	  kconfig-frontends tools (2014-3-4)
 	* configs/sim/nx11: Configuration converted to use the
 	  kconfig-frontends tools (2014-3-4)
+	* configs/ez80f910200zco/nsh: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-4)

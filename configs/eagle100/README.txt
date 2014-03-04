@@ -346,15 +346,31 @@ Eagle100-specific Configuration Options
 Configurations
 ^^^^^^^^^^^^^^
 
-Each Eagle-100 configuration is maintained in a sub-directory and
-can be selected as follow:
+Common Configuration Notes
+--------------------------
 
-    cd tools
-    ./configure.sh eagle100/<subdir>
-    cd -
-    . ./setenv.sh
+  1. Each Eagle-100 configuration is maintained in a sub-directory and
+     can be selected as follow:
 
-Where <subdir> is one of the following:
+       cd tools
+       ./configure.sh eagle100/<subdir>
+       cd -
+       . ./setenv.sh
+
+     Where <subdir> is one of the configuration sub-directories described in
+     the following paragraph.
+
+  2. These configurations use the mconf-based configuration tool.  To
+     change a configurations using that tool, you should:
+
+     a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+        and misc/tools/
+
+     b. Execute 'make menuconfig' in nuttx/ in order to start the
+        reconfiguration process.
+   
+Configuration Sub-Directories
+-----------------------------
 
   nettest:
     This configuration directory may be used to enable networking using the
@@ -363,16 +379,7 @@ Where <subdir> is one of the following:
 
     NOTES:
 
-    1. This configuration uses the mconf-based configuration tool.  To
-       change this configurations using that tool, you should:
-
-       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          and misc/tools/
-
-       b. Execute 'make menuconfig' in nuttx/ in order to start the
-          reconfiguration process.
-
-    2. This configuration is set to use Cygwin under Windows and the
+    1. This configuration is set to use Cygwin under Windows and the
        CodeSourcery toolchain.  That, however, is easily reconfigurable:
 
          CONFIG_HOST_WINDOWS=y
@@ -385,16 +392,7 @@ Where <subdir> is one of the following:
 
     NOTES:
 
-    1. This configuration uses the mconf-based configuration tool.  To
-       change this configurations using that tool, you should:
-
-       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          and misc/tools/
-
-       b. Execute 'make menuconfig' in nuttx/ in order to start the
-          reconfiguration process.
-
-    2. This configuration is set to use Cygwin under Windows and the
+    1. This configuration is set to use Cygwin under Windows and the
        CodeSourcery toolchain.  That, however, is easily reconfigurable:
 
          CONFIG_HOST_WINDOWS=y
@@ -412,16 +410,7 @@ Where <subdir> is one of the following:
 
     NOTES:
 
-    1. This configuration uses the mconf-based configuration tool.  To
-       change this configurations using that tool, you should:
-
-       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          and misc/tools/
-
-       b. Execute 'make menuconfig' in nuttx/ in order to start the
-          reconfiguration process.
-
-    4. This configuration is set to use Cygwin under Windows and the
+    1. This configuration is set to use Cygwin under Windows and the
        devkitARM toolchain.  That, however, is easily reconfigurable:
 
        CONFIG_HOST_WINDOWS=y
@@ -433,19 +422,10 @@ Where <subdir> is one of the following:
 
     NOTES:
 
-    1. This configuration uses the mconf-based configuration tool.  To
-       change this configurations using that tool, you should:
-
-       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          and misc/tools/
-
-       b. Execute 'make menuconfig' in nuttx/ in order to start the
-          reconfiguration process.
-
-    2. This example can only be built using the NuttX buildroot
+    1. This example can only be built using the NuttX buildroot
        toolchain with the NXFLAT tools.
 
-    3. This configuration is set to use Cygwin under Windows and the
+    2. This configuration is set to use Cygwin under Windows and the
        devkitARM toolchain.  That, however, is easily reconfigurable:
 
        CONFIG_HOST_WINDOWS=y
@@ -458,16 +438,7 @@ Where <subdir> is one of the following:
 
     NOTES:
 
-    1. This configuration uses the mconf-based configuration tool.  To
-       change this configurations using that tool, you should:
-
-       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          and misc/tools/
-
-       b. Execute 'make menuconfig' in nuttx/ in order to start the
-          reconfiguration process.
-
-    2. This configuration is set to use Linux and the buildroot toolchain.
+    1. This configuration is set to use Linux and the buildroot toolchain.
        That, however, is easily reconfigurable:
 
          CONFIG_HOST_LINUX=y
@@ -476,8 +447,8 @@ Where <subdir> is one of the following:
        This example can only be built using the buildroot toolchain
        with NXFLAT support
 
-By default, all of these examples are built to be used with the Luminary
-Ethernet Bootloader (you can change the ld.script file in any of these
-sub-directories to change that configuration).
+  By default, all of these examples are built to be used with the Luminary
+  Ethernet Bootloader (you can change the ld.script file in any of these
+  sub-directories to change that configuration).
 
 
