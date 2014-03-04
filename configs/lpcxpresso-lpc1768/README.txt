@@ -817,15 +817,27 @@ Where <subdir> is one of the following:
     This builds the THTTPD web server example using the THTTPD and
     the apps/examples/thttpd application.
 
-    NOTE:  You will need to build the NXFLAT toolchain as described
-    above in order to use this example.
+    NOTES:
 
-    See also note above with regard to the EABI/OABI buildroot
-    toolchains.  This example can only be built using the older
-    OABI toolchain.
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configurations using that tool, you should:
 
-    Jumpers: Nothing special.  Use the default base board jumper
-    settings.
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. You will need to build the NXFLAT toolchain as described above in
+       order to use this example.
+
+    3. Build setup (easily reconfigured):
+
+       CONFIG_HOST_LINUX=y                : Linux
+       CONFIG_ARMV7M_TOOLCHAIN_CODEREDL=y : CodeRed for Linux
+
+    4. Jumpers: Nothing special.  Use the default base board jumper
+       settings.
 
   usbmsc:
     This configuration directory exercises the USB mass storage
