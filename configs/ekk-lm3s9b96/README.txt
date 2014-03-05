@@ -105,9 +105,9 @@ GNU Toolchain Options
     CONFIG_LM_CODESOURCERYW=y   : CodeSourcery under Windows
     CONFIG_LM_CODESOURCERYL=y   : CodeSourcery under Linux
     CONFIG_LM_DEVKITARM=y       : devkitARM under Windows
-    CONFIG_LM_BUILDROOT=y       : NuttX buildroot under Linux or Cygwin (default)
+    CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y       : NuttX buildroot under Linux or Cygwin (default)
 
-  If you are not using CONFIG_LM_BUILDROOT, then you may also have to modify
+  If you are not using CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT, then you may also have to modify
   the PATH in the setenv.h file if your make cannot find the tools.
 
   NOTE: the CodeSourcery (for Windows) and devkitARM are Windows native toolchains.

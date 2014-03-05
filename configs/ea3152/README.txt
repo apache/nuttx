@@ -43,13 +43,13 @@ GNU Toolchain Options
   add one of the following configuration options to your .config (or defconfig)
   file:
 
-    CONFIG_LPC31_CODESOURCERYW=y  : CodeSourcery under Windows
-    CONFIG_LPC31_CODESOURCERYL=y  : CodeSourcery under Linux
-    CONFIG_LPC31_DEVKITARM=y      : devkitARM under Windows
-    CONFIG_LPC31_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
+    CONFIG_ARM_TOOLCHAIN_CODESOURCERYW=y  : CodeSourcery under Windows
+    CONFIG_ARM_TOOLCHAIN_CODESOURCERYL=y  : CodeSourcery under Linux
+    CONFIG_ARM_TOOLCHAIN_DEVKITARM=y      : devkitARM under Windows
+    CONFIG_ARM_TOOLCHAIN_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
     CONFIG_ARM_TOOLCHAIN_GNU_EABIL : Generic arm-none-eabi toolchain
 
-  If you are not using CONFIG_LPC31_BUILDROOT, then you may also have to modify
+  If you are not using CONFIG_ARM_TOOLCHAIN_BUILDROOT, then you may also have to modify
   the PATH in the setenv.h file if your make cannot find the tools.
 
   The toolchain may also be set using the kconfig-mconf utility (make menuconfig)

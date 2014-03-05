@@ -101,7 +101,7 @@ OBJEXT = .o
 LIBEXT = .a
 EXEEXT =
 
-ifneq ($(CONFIG_LPC31_BUILDROOT),y)
+ifneq ($(CONFIG_ARM_TOOLCHAIN_BUILDROOT),y)
   LDFLAGS += -nostartfiles -nodefaultlibs
 endif
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)

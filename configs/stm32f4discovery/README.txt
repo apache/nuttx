@@ -63,13 +63,13 @@ GNU Toolchain Options
   add one of the following configuration options to your .config (or defconfig)
   file:
 
-    CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
-    CONFIG_STM32_CODESOURCERYL=y  : CodeSourcery under Linux
-    CONFIG_STM32_ATOLLIC_LITE=y   : The free, "Lite" version of Atollic toolchain under Windows
-    CONFIG_STM32_ATOLLIC_PRO=y    : The paid, "Pro" version of Atollic toolchain under Windows
-    CONFIG_STM32_DEVKITARM=y      : devkitARM under Windows
-    CONFIG_STM32_RAISONANCE=y     : Raisonance RIDE7 under Windows
-    CONFIG_STM32_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y  : CodeSourcery under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL=y  : CodeSourcery under Linux
+    CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC_LITE=y   : The free, "Lite" version of Atollic toolchain under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC_PRO=y    : The paid, "Pro" version of Atollic toolchain under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_DEVKITARM=y      : devkitARM under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_RAISONANCE=y     : Raisonance RIDE7 under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
 
   If you change the default toolchain, then you may also have to modify the PATH in
   the setenv.h file if your make cannot find the tools.
@@ -466,7 +466,7 @@ CFLAGS
 Only the Atollic toolchain has built-in support for the Cortex-M4 FPU.  You will see
 the following lines in each Make.defs file:
 
-  ifeq ($(CONFIG_STM32_ATOLLIC_LITE),y)
+  ifeq ($(CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC_LITE),y)
     # Atollic toolchain under Windows
     ...
   ifeq ($(CONFIG_ARCH_FPU),y)
@@ -496,13 +496,13 @@ in order to successfully build NuttX using the Atollic toolchain WITH FPU suppor
   -CONFIG_ARCH_FPU=n              : Enable FPU support
   +CONFIG_ARCH_FPU=y
 
-  -CONFIG_STM32_CODESOURCERYW=y   : Disable the CodeSourcery toolchain
-  +CONFIG_STM32_CODESOURCERYW=n
+  -CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y   : Disable the CodeSourcery toolchain
+  +CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=n
 
-  -CONFIG_STM32_ATOLLIC_LITE=n   : Enable *one* the Atollic toolchains
-   CONFIG_STM32_ATOLLIC_PRO=n
-  -CONFIG_STM32_ATOLLIC_LITE=y   : The "Lite" version
-   CONFIG_STM32_ATOLLIC_PRO=n    : The "Pro" version
+  -CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC_LITE=n   : Enable *one* the Atollic toolchains
+   CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC_PRO=n
+  -CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC_LITE=y   : The "Lite" version
+   CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC_PRO=n    : The "Pro" version
 
   -CONFIG_INTELHEX_BINARY=y       : Suppress generation FLASH download formats
   +CONFIG_INTELHEX_BINARY=n       : (Only necessary with the "Lite" version)
@@ -1105,9 +1105,9 @@ Where <subdir> is one of the following:
 
     2. Default platform/toolchain:
 
-       CONFIG_HOST_WINDOWS=y         : Windows
-       CONFIG_WINDOWS_CYGWIN=y       : Cygwin environment on Windows
-       CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
+       CONFIG_HOST_WINDOWS=y                   : Windows
+       CONFIG_WINDOWS_CYGWIN=y                 : Cygwin environment on Windows
+       CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery under Windows
 
     3. By default, this project assumes that you are *NOT* using the DFU
        bootloader.
@@ -1411,8 +1411,8 @@ Where <subdir> is one of the following:
     An example using the NuttX graphics system (NX).   This example focuses on
     placing lines on the background in various orientations.
 
-      CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
-      CONFIG_LCD_LANDSCAPE=y        : 320x240 landscape orientation
+      CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery under Windows
+      CONFIG_LCD_LANDSCAPE=y                  : 320x240 landscape orientation
 
     The STM32F4Discovery board does not have any graphics capability.  This
     configuration assumes that you have connected an SD1289-based LCD as
@@ -1502,9 +1502,9 @@ Where <subdir> is one of the following:
     2. Default configuration is Cygwin under windows using the CodeSourcery
        toolchain:
 
-         CONFIG_HOST_WINDOWS=y         : Windows
-         CONFIG_WINDOWS_CYGWIN=y       : Cygwin
-         CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
+         CONFIG_HOST_WINDOWS=y                   : Windows
+         CONFIG_WINDOWS_CYGWIN=y                 : Cygwin
+         CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery under Windows
 
     3. CONFIG_ARCH_CUSTOM_PMINIT and CONFIG_ARCH_IDLE_CUSTOM are necessary
        parts of the PM configuration:
@@ -1561,9 +1561,9 @@ Where <subdir> is one of the following:
 
     2. Default toolchain:
 
-       CONFIG_HOST_WINDOWS=y         : Builds under windows
-       CONFIG_WINDOWS_CYGWIN=y       : Using Cygwin and
-       CONFIG_STM32_CODESOURCERYW=y  : The native Windows CodeSourcery toolchain
+       CONFIG_HOST_WINDOWS=y                   : Builds under windows
+       CONFIG_WINDOWS_CYGWIN=y                 : Using Cygwin and
+       CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : The native Windows CodeSourcery toolchain
 
     3. By default, this project assumes that you are *NOT* using the DFU
        bootloader.
@@ -1671,9 +1671,9 @@ Where <subdir> is one of the following:
       standard issue, CMD.exe shell:  ConEmu which can be downloaded from:
       http://code.google.com/p/conemu-maximus5/
 
-       CONFIG_HOST_WINDOWS=y         : Windows
-       CONFIG_WINDOWS_NATIVE=y       : Native Windows environment
-       CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
+       CONFIG_HOST_WINDOWS=y                   : Windows
+       CONFIG_WINDOWS_NATIVE=y                 : Native Windows environment
+       CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery under Windows
 
       Build Tools.  The build still relies on some Unix-like commands.  I use
       the GNUWin32 tools that can be downloaded from http://gnuwin32.sourceforge.net/.

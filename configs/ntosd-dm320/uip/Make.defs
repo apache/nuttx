@@ -107,10 +107,9 @@ OBJEXT			= .o
 LIBEXT			= .a
 EXEEXT			=
 
-#[blf] The `ea3131' had this, but despite using buildroot, neuros doesn't...
-###	ifneq ($(CONFIG_LPC313X_BUILDROOT),y)	### change to ...DM320...
-###	  LDFLAGS += -nostartfiles -nodefaultlibs
-###	endif
+ifneq ($(CONFIG_ARM_TOOLCHAIN_BUILDROOT),y)
+   LDFLAGS += -nostartfiles -nodefaultlibs
+endif
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   LDFLAGS		+= -g
 endif

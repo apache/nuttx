@@ -6891,3 +6891,5 @@
 	  kconfig-frontends tools (2014-3-5)
 	* configs/qemu-i486/nsh: Configuration converted to use the
 	  kconfig-frontends tools (2014-3-5)
+	* Many files:  Use common naming for all buildroot toolchains
+	  (2014-3-5).

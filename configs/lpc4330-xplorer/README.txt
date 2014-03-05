@@ -154,9 +154,9 @@ GNU Toolchain Options
     CONFIG_LPC43_ATOLLIC_LITE=y   : The free, "Lite" version of Atollic toolchain under Windows
     CONFIG_LPC43_ATOLLIC_PRO=y    : The paid, "Pro" version of Atollic toolchain under Windows
     CONFIG_LPC43_DEVKITARM=y      : devkitARM under Windows
-    CONFIG_LPC43_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
+    CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
 
-  If you are not using CONFIG_LPC43_BUILDROOT, then you may also have to modify
+  If you are not using CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT, then you may also have to modify
   the PATH in the setenv.h file if your make cannot find the tools.
 
   NOTE: the Code Red, CodeSourcery (for Windows), Atollic and devkitARM toolchains

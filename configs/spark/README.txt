@@ -66,13 +66,13 @@ GNU Toolchain Options
   you simply need to add one of the following configuration options to your
   .config (or defconfig) file:
 
-    CONFIG_STM32_CODESOURCERYW=n  : CodeSourcery under Windows
-    CONFIG_STM32_CODESOURCERYL=y  : CodeSourcery under Linux
-    CONFIG_STM32_ATOLLIC_LITE=n   : The free, "Lite" version of Atollic toolchain under Windows
-    CONFIG_STM32_ATOLLIC_PRO=n    : The paid, "Pro" version of Atollic toolchain under Windows
-    CONFIG_STM32_DEVKITARM=n      : devkitARM under Windows
-    CONFIG_STM32_RAISONANCEny     : Raisonance RIDE7 under Windows
-    CONFIG_STM32_BUILDROOT=n      : NuttX buildroot under Linux or Cygwin (default)
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=n  : CodeSourcery under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL=y  : CodeSourcery under Linux
+    CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC_LITE=n   : The free, "Lite" version of Atollic toolchain under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC_PRO=n    : The paid, "Pro" version of Atollic toolchain under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_DEVKITARM=n      : devkitARM under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_RAISONANCEny     : Raisonance RIDE7 under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=n      : NuttX buildroot under Linux or Cygwin (default)
 
   If you change the default toolchain, then you may also have to modify the PATH in
   the setenv.h file if your make cannot find the tools.

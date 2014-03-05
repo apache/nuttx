@@ -1,7 +1,7 @@
 ############################################################################
 # arch/arm/src/armv/Toolchain.defs
 #
-#   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2012-2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -43,10 +43,6 @@
 #
 
 ifeq ($(filter y, \
-      $(CONFIG_DM320_BUILDROOT) \
-      $(CONFIG_LPC313X_BUILDROOT) \
-      $(CONFIG_LPC31_BUILDROOT) \
-      $(CONFIG_OLIMEX_LPC2378_BUILDROOT) \
       $(CONFIG_ARM_TOOLCHAIN_BUILDROOT) \
     ),y)
   CONFIG_ARM_TOOLCHAIN ?= BUILDROOT
