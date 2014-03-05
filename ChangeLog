@@ -6859,3 +6859,5 @@
 	  kconfig-frontends tools (2014-3-5)
 	* configs/teensy/hello: Configuration converted to use the
 	  kconfig-frontends tools (2014-3-5)
+	* configs/teensy/nsh: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-5)
