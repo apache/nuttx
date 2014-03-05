@@ -68,10 +68,9 @@ GNU Toolchain Options
 
     CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=n  : CodeSourcery under Windows
     CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL=y  : CodeSourcery under Linux
-    CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC_LITE=n   : The free, "Lite" version of Atollic toolchain under Windows
-    CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC_PRO=n    : The paid, "Pro" version of Atollic toolchain under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC=y        : The Atollic toolchain under Windows
     CONFIG_ARMV7M_TOOLCHAIN_DEVKITARM=n      : devkitARM under Windows
-    CONFIG_ARMV7M_TOOLCHAIN_RAISONANCEny     : Raisonance RIDE7 under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_RAISONANCE=y     : Raisonance RIDE7 under Windows
     CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=n      : NuttX buildroot under Linux or Cygwin (default)
 
   If you change the default toolchain, then you may also have to modify the PATH in

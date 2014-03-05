@@ -968,9 +968,9 @@ Where <subdir> is one of the following:
     2. Default configuration is Cygwin under windows using the CodeSourcery
        toolchain:
 
-         CONFIG_HOST_WINDOWS=y         : Windows
-         CONFIG_WINDOWS_CYGWIN=y       : Cygwin
-         CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
+         CONFIG_HOST_WINDOWS=y                   : Windows
+         CONFIG_WINDOWS_CYGWIN=y                 : Cygwin
+         CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery under Windows
 
     3. CONFIG_ARCH_CUSTOM_PMINIT and CONFIG_ARCH_IDLE_CUSTOM are necessary
        parts of the PM configuration:
