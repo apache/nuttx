@@ -6866,3 +6866,5 @@
 	  make space for AVR32.  Populate AVR32 Kconfig file (2014-3-5).
 	* configs/avr32dev1/ostest: Configuration converted to use the
 	  kconfig-frontends tools (2014-3-5)
+	* configs/avr32dev1/nsh: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-5)

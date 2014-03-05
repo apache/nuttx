@@ -9,10 +9,15 @@ comment "AVR32 Configuration Options"
 choice
 	prompt "Toolchain"
 	default AVR32_AVRTOOLSW if HOST_WINDOWS
+	default AVR32_AVRTOOLSL if HOST_LINUX
 
 config AVR32_AVRTOOLSW
 	bool "AVR tools for Windows"
 	depends on HOST_WINDOWS
+
+config AVR32_AVRTOOLSL
+	bool "AVR tools for Windows"
+	depends on HOST_LINUX
 
 endchoice # Toolchain
 endif
