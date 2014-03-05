@@ -221,7 +221,7 @@ Image Format
   - mklpc.sh                      # Make the bootloader binary (nuttx.lpc)
 
   NOTES:
-  
+
     1. setenv.sh just sets up pathes to the toolchain and also to
        configs/ea3131/tools where mklpc.sh resides. Use of setenv.sh is optional.
        If you don't use setenv.sh, then just set your PATH variable appropriately or
@@ -267,7 +267,7 @@ Using OpenOCD and GDB
   I used to start the OpenOCD daemon on my system called oocd.sh.  That
   script would probably require some modifications to work in another
   environment:
-  
+
     - possibly the value of OPENOCD_PATH
     - If you are working under Linux you will need to change any
       occurances of `cygpath -w blablabla` to just blablabla
@@ -312,7 +312,7 @@ On-Demand Paging
   L1 page table.  That leaves 96x1Kb virtual pages in the middle of SRAM for
   the paged memory region; up to 384x1kb of physical pages may be paged into
   this region.  Physical memory map:
-  
+
     11028000 "locked" text region   48x1Kb
     11034000 "paged" text region    96x1Kb
     1104c000 "data" region          32x1Kb
@@ -332,13 +332,13 @@ On-Demand Paging
   The L1 contains a single 1Mb entry to span the entire LPC3131 SRAM memory
   region.  The virtual address for this region is 0x11028000.  The offset into
   the L1 page table is given by:
-  
+
     offset = ((0x11028000 >> 20) << 2) = 0x00000440
 
   The value at that offset into the L1 page table contains the address of the
   L2 page table (0x11056000) plus some extra bits to specify that that entry
   is valid and and points to a 1Kb L1 page table:
-  
+
     11054440 11056013
 
   Why is the address 11056000 used for the address of the L2 page table?  Isn't
@@ -355,7 +355,7 @@ On-Demand Paging
   Only only L2 page table will be used to span the LPC3131 SRAM virtual text
   address region (480x1Kb).  That one entry maps the virtual address range of
   0x11000000 through 0x110ffc00.  Each entry maps a 1Kb page of physical memory:
-  
+
     PAGE      VIRTUAL ADDR L2 OFFSET
     --------- ------------ ---------
     Page 0    0x11000000   0x00000000
@@ -363,10 +363,10 @@ On-Demand Paging
     Page 2    0x11000800   0x00000008
     ...
     Page 1023 0x110ffc00   0x00000ffc
-  
+
   The "locked" text region begins at an offset of 0x00028000 into that region.
   The 48 page table entries needed to make this region begin at:
-  
+
     offset = ((0x00028000 >> 10) << 2) = 0x00000280
 
   Each entry contains the address of a physical page in the "locked" text region
@@ -378,8 +378,8 @@ On-Demand Paging
     ...
 
   The locked region is initially unmapped.  But the data region and page table
-  regions must be mapped in a similar manner.  Those 
-  
+  regions must be mapped in a similar manner.  Those
+
     Data:
        Virtual address  = 0x11094000 Offset = 0x00064000
        Physical address = 0x1104c000
@@ -428,7 +428,7 @@ On-Demand Paging
      basic procedure is already documented in NXP publications: "LPC313x
      Linux Quick Start Guide, Version 2.0" and "AN10811 Programming SPI
      flash on EA3131 boards, V1 (May 1, 2009)."  That procedure may be
-     sufficient, depending on the decisions made in (1) and (2):  
+     sufficient, depending on the decisions made in (1) and (2):
   4. Develop a procedure to boot the locked text image from SPI NOR.
      The references and issues related to this are discussed in (2)
      and (3) above.
@@ -442,7 +442,7 @@ On-Demand Paging
     CONFIG_PAGING_M25PX=y
 
   NOTE:  See the TODO list in the top-level directory:
-  
+
     "arch/arm/src/lpc31xx/lpc31_spi.c may or may not be functional.  It was
      reported to be working, but I was unable to get it working with the
      Atmel at45dbxx serial FLASH driver."
@@ -474,7 +474,7 @@ On-Demand Paging
   1. You would still have to boot the locked section over serial or
      using a bootloader -- it is not clear how the power up boot
      would occur.  For testing, the nuttx.bin file could be both
-     provided on the SD card and loaded over serial. 
+     provided on the SD card and loaded over serial.
   2. If the SD card is not in place, the system will crash.
   3. This means that all of the file system logic and FAT file
      system would have to reside in the locked text region.
@@ -603,17 +603,41 @@ ARM/EA3131-specific Configuration Options
 Configurations
 ^^^^^^^^^^^^^^
 
-Each EA3131 configuration is maintained in a sub-directory and can be
-selected as follow:
+Common Configuration Notes
+--------------------------
 
-    cd tools
-    ./configure.sh ea3131/<subdir>
-    cd -
-    . ./setenv.sh
+  1. Each EA3131 configuration is maintained in a sub-directory and
+     can be selected as follow:
 
-Where <subdir> is one of the following:
+       cd tools
+       ./configure.sh ea3131/<subdir>
+       cd -
+       . ./setenv.sh
 
-  locked
+     Where <subdir> is one of the configuration sub-directories described in
+     the following paragraph.
+
+  2. These configurations use the mconf-based configuration tool.  To
+     change a configurations using that tool, you should:
+
+     a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+        and misc/tools/
+
+     b. Execute 'make menuconfig' in nuttx/ in order to start the
+        reconfiguration process.
+
+  3. By default, all configurations assume the CodeSourcery toolchain
+     under Cygwin with Windows.  This is easily reconfigured, however:
+
+        CONFIG_HOST_WINDOWS=y
+        CONFIG_WINDOWS_CYGWIN=y
+        CONFIG_ARM_TOOLCHAIN_CODESOURCERYW=y
+
+Configuration Sub-Directories
+-----------------------------
+
+  locked:
+
     This is not a configuration.  When on-demand page is enabled
     then we must do a two pass link:  The first pass creates an
     intermediate object that has all of the code that must be
@@ -622,19 +646,22 @@ Where <subdir> is one of the following:
 
     The directory contains the logic necessary to do the platform
     specific first pass link for the EA313x.
- 
-  nsh:
+
+  nsh
+
     Configures the NuttShell (nsh) located at examples/nsh.  The
     Configuration enables only the serial NSH interface.
 
-  pgnsh:
+  pgnsh
+
     This is the same configuration as nsh, but with On-Demand
-    paging enabled.  See http://www.nuttx.org/NuttXDemandPaging.html.
+    paging enabled.  See http://www.nuttx.org/Documentation/NuttXDemandPaging.html.
     This configuration is an experiment for the purposes of test
-    and debug.  At present, this does not produce functioning, 
+    and debug.  At present, this does not produce functioning,
     usable system
- 
-  usbserial:
+
+  usbserial
+
     This configuration directory exercises the USB serial class
     driver at examples/usbserial.  See examples/README.txt for
     more information.
