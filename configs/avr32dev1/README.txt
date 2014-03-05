@@ -343,7 +343,7 @@ AVR32DEV1 Configuration Options
 
     CONFIG_ARCH_architecture - For use in C code:
 
-       CONFIG_ARCH_AVR32=y
+       CONFIG_ARCH_FAMILY_AVR32=y
 
     CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
 
@@ -431,28 +431,51 @@ AVR32DEV1 Configuration Options
 Configurations
 ^^^^^^^^^^^^^^
 
-Each Atmel AVR32DEV configuration is maintained in a sub-directory and
-can be selected as follow:
+Common Configuration Notes
+--------------------------
 
-    cd tools
-    ./configure.sh avr32dev1/<subdir>
-    cd -
-    . ./setenv.sh
+  1. Each Atmel AVR32DEV configuration is maintained in a sub-directory and
+     can be selected as follow:
 
-(Or configure.bat in a native Windows environment).
+       cd tools
+       ./configure.sh avr32dev1/<subdir>
+       cd -
+       . ./setenv.sh
 
-Where <subdir> is one of the following:
+     Where <subdir> is one of the configuration sub-directories described in
+     the following paragraph.
+
+    (Use configure.bat instead of configure.sh in a native Windows environment).
+
+  2. These configurations use the mconf-based configuration tool.  To
+     change a configurations using that tool, you should:
+
+     a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+        and misc/tools/
+
+     b. Execute 'make menuconfig' in nuttx/ in order to start the
+        reconfiguration process.
+
+  3. By default, all configurations assume the AVR toolchain under Cygwin
+     with Windows.  This is easily reconfigured:
+
+        CONFIG_HOST_WINDOWS=y
+        CONFIG_WINDOWS_CYGWIN=y
+        CONFIG_AVR32_AVRTOOLSW=y
+
+Configuration Sub-Directories
+-----------------------------
 
   nsh:
+
     Configures the NuttShell (nsh) located at examples/nsh.  The
     Configuration enables only the serial NSH interface.
 
   ostest:
+
     This configuration directory, performs a simple OS test using
     examples/ostest.
 
     NOTE: Round-robin scheduling is disabled in this test because
     the RR test in examples/ostest declares data structures that
     are too large for the poor little uc3 SRAM.
-
-
