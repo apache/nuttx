@@ -53,7 +53,7 @@
 #  include <stdbool.h>
 #  include <unistd.h>
 #  include <fcntl.h>
-#  ifdef CONFIG_PAGING_SDSLOT
+#  ifdef CONFIG_EA3131_PAGING_SDSLOT
 #    include <stdio.h>
 #    include <sys/mount.h>
 #    include <nuttx/sdio.h>
@@ -80,14 +80,14 @@
 #ifdef CONFIG_ARCH_BOARD_EA3131
 #  define HAVE_SD     1
 #  define HAVE_SPINOR 1
-#  if defined(CONFIG_PAGING_SDSLOT) && CONFIG_PAGING_SDSLOT != 0
+#  if defined(CONFIG_EA3131_PAGING_SDSLOT) && CONFIG_EA3131_PAGING_SDSLOT != 0
 #    error "Only one SD slot"
-#    undef CONFIG_PAGING_SDSLOT
+#    undef CONFIG_EA3131_PAGING_SDSLOT
 #  endif
 #else
    /* Add configuration for new LPC31XX boards here */
 #  error "Unrecognized LPC31XX board"
-#  undef CONFIG_PAGING_SDSLOT
+#  undef CONFIG_EA3131_PAGING_SDSLOT
 #  undef HAVE_SD
 #  undef HAVE_SPINOR
 #endif
@@ -113,9 +113,9 @@
 
    /* Can't support SD if the board does not support SD (duh) */
 
-#  if defined(CONFIG_PAGING_SDSLOT) && !defined(HAVE_SD)
+#  if defined(CONFIG_EA3131_PAGING_SDSLOT) && !defined(HAVE_SD)
 #    error "This board does not support SD"
-#    undef CONFIG_PAGING_SDSLOT
+#    undef CONFIG_EA3131_PAGING_SDSLOT
 #  endif
 
    /* Can't support SD if mountpoints are disabled or if SDIO support
@@ -123,25 +123,25 @@
     */
 
 #  if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_LPC31_MCI)
-#    ifdef CONFIG_PAGING_SDSLOT
+#    ifdef CONFIG_EA3131_PAGING_SDSLOT
 #      error "Mountpoints and/or MCI disabled"
 #    endif
-#    undef CONFIG_PAGING_SDSLOT
+#    undef CONFIG_EA3131_PAGING_SDSLOT
 #    undef HAVE_SD
 #  endif
 
    /* A mountpoint for the FAT file system must be provided */
 
-#  if !defined(CONFIG_PAGING_MOUNTPT) && defined(CONFIG_PAGING_SDSLOT)
-#    error "No CONFIG_PAGING_MOUNTPT provided"
-#    undef CONFIG_PAGING_SDSLOT
+#  if !defined(CONFIG_EA3131_PAGING_MOUNTPT) && defined(CONFIG_EA3131_PAGING_SDSLOT)
+#    error "No CONFIG_EA3131_PAGING_MOUNTPT provided"
+#    undef CONFIG_EA3131_PAGING_SDSLOT
 #    undef HAVE_SD
 #  endif
 
    /* If no minor number is provided, default to zero */
 
-#  ifndef CONFIG_PAGING_MINOR
-#    define CONFIG_PAGING_MINOR 0
+#  ifndef CONFIG_EA3131_PAGING_MINOR
+#    define CONFIG_EA3131_PAGING_MINOR 0
 #  endif
 
 #endif /* CONFIG_PAGING_BINPATH */
@@ -160,14 +160,14 @@
     * of the NuttX binary image.
     */
 
-#  ifndef CONFIG_PAGING_BINOFFSET
-#    define CONFIG_PAGING_BINOFFSET 0
+#  ifndef CONFIG_EA3131_PAGING_BINOFFSET
+#    define CONFIG_EA3131_PAGING_BINOFFSET 0
 #  endif
 
    /* Make sure that some value is defined for the SPI port number */
 
-#  ifndef CONFIG_PAGING_SPIPORT
-#    define CONFIG_PAGING_SPIPORT 0
+#  ifndef CONFIG_EA3131_PAGING_SPIPORT
+#    define CONFIG_EA3131_PAGING_SPIPORT 0
 #  endif
 #endif
 
@@ -232,7 +232,7 @@ static struct pg_source_s g_pgsrc;
 #if defined(CONFIG_PAGING_BINPATH)
 static inline void lpc31_initsrc(void)
 {
-#ifdef CONFIG_PAGING_SDSLOT
+#ifdef CONFIG_EA3131_PAGING_SDSLOT
   FAR struct sdio_dev_s *sdio;
   int ret;
 #endif
@@ -241,7 +241,7 @@ static inline void lpc31_initsrc(void)
 
   if (!g_pgsrc.initialized)
     {
-#ifdef CONFIG_PAGING_SDSLOT
+#ifdef CONFIG_EA3131_PAGING_SDSLOT
       char devname[16];
 #endif
 
@@ -249,16 +249,16 @@ static inline void lpc31_initsrc(void)
 
       /* No, do we need to mount an SD device? */
 
-#ifdef CONFIG_PAGING_SDSLOT
+#ifdef CONFIG_EA3131_PAGING_SDSLOT
 
       /* Yes.. First, get an instance of the SDIO interface */
 
-      sdio = sdio_initialize(CONFIG_PAGING_SDSLOT);
+      sdio = sdio_initialize(CONFIG_EA3131_PAGING_SDSLOT);
       DEBUGASSERT(sdio != NULL);
 
       /* Then bind the SDIO interface to the SD driver */
 
-      ret = mmcsd_slotinitialize(CONFIG_PAGING_MINOR, sdio);
+      ret = mmcsd_slotinitialize(CONFIG_EA3131_PAGING_MINOR, sdio);
       DEBUGASSERT(ret == OK);
   
       /* Then let's guess and say that there is a card in the slot.
@@ -269,11 +269,11 @@ static inline void lpc31_initsrc(void)
 
       /* Now mount the file system */
 
-      snprintf(devname, 16, "/dev/mmcsd%d", CONFIG_PAGING_MINOR);
-      ret = mount(devname, CONFIG_PAGING_MOUNTPT, "vfat", MS_RDONLY, NULL);
+      snprintf(devname, 16, "/dev/mmcsd%d", CONFIG_EA3131_PAGING_MINOR);
+      ret = mount(devname, CONFIG_EA3131_PAGING_MOUNTPT, "vfat", MS_RDONLY, NULL);
       DEBUGASSERT(ret == OK);
 
-#endif /* CONFIG_PAGING_SDSLOT */
+#endif /* CONFIG_EA3131_PAGING_SDSLOT */
 
       /* Open the selected path for read-only access */
 
@@ -305,7 +305,7 @@ static inline void lpc31_initsrc(void)
 
       /* First get an instance of the SPI device interface */
 
-      spi = up_spiinitialize(CONFIG_PAGING_SPIPORT);
+      spi = up_spiinitialize(CONFIG_EA3131_PAGING_SPIPORT);
       DEBUGASSERT(spi != NULL);
 
       /* Then bind the SPI interface to the MTD driver */
@@ -329,7 +329,7 @@ static inline void lpc31_initsrc(void)
       DEBUGASSERT(ret >= 0);
       capacity = g_pgsrc.geo.erasesize*g_pgsrc.geo.neraseblocks;
       pgllvdbg("capacity: %d\n", capacity);
-      DEBUGASSERT(capacity >= (CONFIG_PAGING_BINOFFSET + PG_TEXT_VSIZE));
+      DEBUGASSERT(capacity >= (CONFIG_EA3131_PAGING_BINOFFSET + PG_TEXT_VSIZE));
 #endif
 
       /* We are now initialized */
@@ -454,7 +454,7 @@ int up_fillpage(FAR struct tcb_s *tcb, FAR void *vpage)
    * virtual address.   File offset 0 corresponds to PG_LOCKED_VBASE.
    */
 
-  offset = (off_t)tcb->xcp.far - PG_LOCKED_VBASE + CONFIG_PAGING_BINOFFSET;
+  offset = (off_t)tcb->xcp.far - PG_LOCKED_VBASE + CONFIG_EA3131_PAGING_BINOFFSET;
 
   /* Read the page at the correct offset into the SPI FLASH device */
 

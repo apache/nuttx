@@ -306,14 +306,6 @@ config ARCH_ROMPGTABLE
 	---help---
 		Support a fixed memory mapping use a (read-only) page table in ROM/FLASH.
 
-config PAGING
-	bool "On-demand paging"
-	default n
-	depends on ARCH_HAVE_MMU && !ARCH_ROMPGTABLE
-	---help---
-		If set =y in your configation file, this setting will enable the on-demand
-		paging feature as described in http://www.nuttx.org/NuttXDemandPaging.html.
-
 config DEBUG_HARDFAULT
 	bool "Verbose Hard-Fault Debug"
 	default n

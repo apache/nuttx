@@ -118,8 +118,8 @@
 
 /* CONFIG_PAGING_NPPAGED - This is the number of physical pages available to
  *   support the paged text region.
- * CONFIG_PAGING_NVPAGED - This actual size of the paged text region (in
- *   pages).  This is also the number of virtual pages required to support
+ * CONFIG_PAGING_NVPAGED - This actual size of the virtual paged text region (in
+ *   pages).  This is also the number of virtual pages required to span
  *   the entire paged region. The on-demand paging  feature is intended to
  *   support only the case where the virtual paged text area is much larger
  *   the available physical pages.  Otherwise, why would you enable on-demand
@@ -202,8 +202,8 @@
 
 /* CONFIG_PAGING_DEFPRIO - The default, minimum priority of the page fill
  *   worker thread.  The priority of the page fill work thread will be boosted
- *   boosted dynmically so that it matches the priority of the task on behalf
- *   of which it peforms the fill.  This defines the minimum priority that
+ *   boosted dynamically so that it matches the priority of the task on behalf
+ *   of which it performs the fill.  This defines the minimum priority that
  *   will be used. Default: 50.
  * CONFIG_PAGING_STACKSIZE - Defines the size of the allocated stack
  *   for the page fill worker thread. Default: 1024.

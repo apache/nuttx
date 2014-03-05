@@ -4,4 +4,30 @@
 #
 
 if ARCH_BOARD_EA3131
-endif
+
+if PAGING
+
+config EA3131_PAGING_MINOR
+	int "Page device minor number"
+	default 0
+
+config EA3131_PAGING_MOUNTPT
+	string "Page device mount point"
+	default "/mnt/pgsrc"
+
+config EA3131_PAGING_BINOFFSET
+	int "Volume offset"
+	default 0
+
+config EA3131_PAGING_SDSLOT
+	int "SD page device slot number"
+	default 0
+	depends on MMCSD
+
+config EA3131_PAGING_SPIPORT
+	int "SD SPI port number"
+	default 0
+	depends on SPI
+
+endif # PAGING
+endif # ARCH_BOARD_EA3131
