@@ -513,19 +513,42 @@ Teensy++ Configuration Options
 Configurations
 ^^^^^^^^^^^^^^
 
-Each Teensy++ configuration is maintained in a sub-directory and can
-be selected as follow:
+Common Configuration Notes
+--------------------------
 
-    cd tools
-    ./configure.sh teensy/<subdir>
-    cd -
-    . ./setenv.sh
+  1. Each Teensy++ configuration is maintained in a sub-directory and
+     can be selected as follow:
 
-NOTE: You must also copy avr-libc header files, perhaps like:
+       cd tools
+       ./configure.sh teensy/<subdir>
+       cd -
+       . ./setenv.sh
 
-     cp -a /cygdrive/c/WinAVR/include/avr include/.
+     Where <subdir> is one of the configuration sub-directories described in
+     the following paragraph.
 
-Where <subdir> is one of the following:
+     NOTE: You must also copy avr-libc header files, perhaps like:
+
+       cp -a /cygdrive/c/WinAVR/include/avr include/.
+
+  2. These configurations use the mconf-based configuration tool.  To
+     change a configurations using that tool, you should:
+
+     a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+        and misc/tools/
+
+     b. Execute 'make menuconfig' in nuttx/ in order to start the
+        reconfiguration process.
+
+  3. By default, all configurations assume the NuttX Buildroot toolchain
+     under Cygwin with Windows.  This is easily reconfigured:
+
+        CONFIG_HOST_WINDOWS=y
+        CONFIG_WINDOWS_CYGWIN=y
+        CONFIG_AVR_BUILDROOT=y
+
+Configuration Sub-Directories
+-----------------------------
 
   hello:
     The simple apps/examples/hello "Hello, World!" example.
@@ -540,25 +563,14 @@ Where <subdir> is one of the following:
     This configuration directory exercises the USB mass storage
     class driver at apps/system/usbmsc.  See apps/examples/README.txt
     for more information.
-   NOTES:
 
-  1. This configuration uses the mconf-based configuration tool.  To
-     change this configuration using that tool, you should:
+    NOTE:  THIS CONFIGURATION HAS NOT YET BEEN DEBUGGED AND DOES NOT
+    WORK!!!  ISSUES:  (1) THE SPI DRIVER IS UNTESTED, (2) THE USB DRIVER
+    IS UNTESTED, AND (3) THE RAM USAGE MIGHT BE EXCESSIVE.
 
-     a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-        and misc/tools/
-
-     b. Execute 'make menuconfig' in nuttx/ in order to start the
-        reconfiguration process.
-
-  2. NOTE:  THIS CONFIGURATION HAS NOT YET BEEN DEBUGGED AND DOES NOT
-     WORK!!!  ISSUES:  (1) THE SPI DRIVER IS UNTESTED, (2) THE USB DRIVER
-     IS UNTESTED, AND (3) THE RAM USAGE MIGHT BE EXCESSIVE.
-
-
-     Update 7/11:  (1) The SPI/SD driver has been verified, however, (2) I
-     believe that the current teensy/usbmsc configuration uses too
-     much SRAM for the system to behave sanely.  A lower memory footprint
-     version of the mass storage driver will be required before this can
-     be debugged.
+    Update 7/11:  (1) The SPI/SD driver has been verified, however, (2) I
+    believe that the current teensy/usbmsc configuration uses too
+    much SRAM for the system to behave sanely.  A lower memory footprint
+    version of the mass storage driver will be required before this can
+    be debugged.
 
