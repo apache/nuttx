@@ -6889,3 +6889,5 @@
 	  kconfig-frontends tools (2014-3-5)
 	* configs/qemu-i486/ostest: Configuration converted to use the
 	  kconfig-frontends tools (2014-3-5)
+	* configs/qemu-i486/nsh: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-5)
