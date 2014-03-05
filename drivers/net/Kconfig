@@ -31,6 +31,71 @@ config NET_DM90x0
 		DM9010-DS-F01-103006.pdf) and looking at lots of other DM90x0
 		drivers.
 
+if NET_DM90x0
+
+config DM9X_BASE
+	hex "DM90x0 base address"
+	default 0x0
+
+config DM9X_IRQ
+	int "DM90x0 IRQ number"
+	default 0
+
+choice
+	prompt "DM90x0 bus width"
+	default DM9X_BUSWIDTH16
+
+config DM9X_BUSWIDTH8
+	bool "8-bits"
+
+config DM9X_BUSWIDTH16
+	bool "16-bits"
+
+config DM9X_BUSWIDTH32
+	bool "32-bits"
+
+endchoice # DM90x0 bus width
+
+config DM9X_CHECKSUM
+	bool "Checksum enable"
+	default n
+
+config DM9X_ETRANS
+	bool "TX poll"
+	default n
+
+choice
+	prompt "DM90x0 mode"
+	default DM9X_MODE_AUTO
+
+config DM9X_MODE_AUTO
+	bool "Autonegotion"
+
+config DM9X_MODE_10MHD
+	bool "10BaseT half duplex"
+
+config DM9X_MODE_10MFD
+	bool "10BaseT full duplex"
+
+config DM9X_MODE_100MHD
+	bool "100BaseT half duplex"
+
+config DM9X_MODE_100MFD
+	bool "100BaseT full duplex"
+
+endchoice # DM90x0 mode
+
+config DM9X_NINTERFACES
+	int "Nubmer of DM90x0 interfaces"
+	default 1
+	depends on EXPERIMENTAL
+
+config DM9X_STATS
+	bool "DM90x0 statistics"
+	default n
+
+endif #  NET_DM90x0
+
 config NET_CS89x0
 	bool "CS89x0 support"
 	default n

@@ -282,52 +282,68 @@ ARM/DM320-specific Configuration Options
 Configurations
 ^^^^^^^^^^^^^^
 
-Each Neuros OSD configuration is maintained in a sub-directory and
-can be selected as follow:
+Common Configuration Notes
+--------------------------
 
-	cd tools
-	./configure.sh ntosd-dm320/<subdir>
-	cd -
-	. ./setenv.sh
+  1. Each Neuros OSD configuration is maintained in a sub-directory and
+     can be selected as follow:
 
-Where <subdir> is one of the following:
+       cd tools
+       ./configure.sh ntosd-dm320/<subdir>
+       cd -
+       . ./setenv.sh
 
-nettest
-^^^^^^^
+     Where <subdir> is one of the configuration sub-directories described in
+     the following paragraph.
 
-This alternative configuration directory may be used to
-enable networking using the OSDs DM9000A Ethernet interface.
-It uses examples/nettest to excercise the TCP/IP network.
+  2. These configurations use the mconf-based configuration tool.  To
+     change a configurations using that tool, you should:
 
-nsh
-^^^
+     a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+        and misc/tools/
 
-Configures the NuttShell (nsh) located at examples/nsh.  The
-Configuration enables both the serial and telnetd NSH interfaces.
+     b. Execute 'make menuconfig' in nuttx/ in order to start the
+        reconfiguration process.
 
-poll
-^^^^
+  3. By default, all configurations assume the CodeSourcery toolchain under
+     Linux.  This is easily reconfigured:
 
-This configuration exercises the poll()/select() text at
-examples/poll
+        CONFIG_HOST_LINUX=y
+        CONFIG_ARM_TOOLCHAIN_CODESOURCERYL=y
 
-thttpd
-^^^^^^
+Configuration Sub-Directories
+-----------------------------
 
-This builds the THTTPD web server example using the THTTPD and
-the examples/thttpd application.
+  nettest
 
-udp
-^^^
+    This alternative configuration directory may be used to
+    enable networking using the OSDs DM9000A Ethernet interface.
+    It uses examples/nettest to excercise the TCP/IP network.
 
-This alternative configuration directory is similar to nettest
-except that is use examples/upd to exercise UDP.
+  nsh
 
-uip
-^^^
+    Configures the NuttShell (nsh) located at examples/nsh.  The
+    Configuration enables both the serial and telnetd NSH interfaces.
 
-This configuration file demonstrates the tiny webserver
-at examples/uip.
+  poll
+
+    This configuration exercises the poll()/select() text at
+    examples/poll
+
+  thttpd
+
+    This builds the THTTPD web server example using the THTTPD and
+    the examples/thttpd application.
+
+  udp
+
+    This alternative configuration directory is similar to nettest
+    except that is use examples/upd to exercise UDP.
+
+  uip
+
+    This configuration file demonstrates the tiny webserver
+    at examples/uip.
 
 Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^
