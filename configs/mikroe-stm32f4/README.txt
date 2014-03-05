@@ -62,13 +62,13 @@ GNU Toolchain Options
   add one of the following configuration options to your .config (or defconfig)
   file:
 
-    CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
-    CONFIG_STM32_CODESOURCERYL=y  : CodeSourcery under Linux
-    CONFIG_STM32_ATOLLIC_LITE=y   : The free, "Lite" version of Atollic toolchain under Windows
-    CONFIG_STM32_ATOLLIC_PRO=y    : The paid, "Pro" version of Atollic toolchain under Windows
-    CONFIG_STM32_DEVKITARM=y      : devkitARM under Windows
-    CONFIG_STM32_RAISONANCE=y     : Raisonance RIDE7 under Windows
-    CONFIG_STM32_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y  : CodeSourcery under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL=y  : CodeSourcery under Linux
+    CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC_LITE=y   : The free, "Lite" version of Atollic toolchain under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC_PRO=y    : The paid, "Pro" version of Atollic toolchain under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_DEVKITARM=y      : devkitARM under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_RAISONANCE=y     : Raisonance RIDE7 under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
 
   If you change the default toolchain, then you may also have to modify the PATH in
   the setenv.h file if your make cannot find the tools.
@@ -426,7 +426,7 @@ CFLAGS
 Only the Atollic toolchain has built-in support for the Cortex-M4 FPU.  You will see
 the following lines in each Make.defs file:
 
-  ifeq ($(CONFIG_STM32_ATOLLIC_LITE),y)
+  ifeq ($(CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC_LITE),y)
     # Atollic toolchain under Windows
     ...
   ifeq ($(CONFIG_ARCH_FPU),y)
@@ -453,22 +453,22 @@ Configuration Changes
 Below are all of the configuration changes that I had to make to configs/stm3240g-eval/nsh2
 in order to successfully build NuttX using the Atollic toolchain WITH FPU support:
 
-  -CONFIG_ARCH_FPU=n              : Enable FPU support
+  -CONFIG_ARCH_FPU=n                       : Enable FPU support
   +CONFIG_ARCH_FPU=y
 
-  -CONFIG_STM32_CODESOURCERYW=y   : Disable the CodeSourcery toolchain
-  +CONFIG_STM32_CODESOURCERYW=n
+  -CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : Disable the CodeSourcery toolchain
+  +CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=n
 
-  -CONFIG_STM32_ATOLLIC_LITE=n   : Enable *one* the Atollic toolchains
-   CONFIG_STM32_ATOLLIC_PRO=n
-  -CONFIG_STM32_ATOLLIC_LITE=y   : The "Lite" version
-   CONFIG_STM32_ATOLLIC_PRO=n    : The "Pro" version
+  -CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC_LITE=n  : Enable *one* the Atollic toolchains
+   CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC_PRO=n
+  -CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC_LITE=y  : The "Lite" version
+   CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC_PRO=n   : The "Pro" version
 
-  -CONFIG_INTELHEX_BINARY=y       : Suppress generation FLASH download formats
-  +CONFIG_INTELHEX_BINARY=n       : (Only necessary with the "Lite" version)
+  -CONFIG_INTELHEX_BINARY=y                : Suppress generation FLASH download formats
+  +CONFIG_INTELHEX_BINARY=n                : (Only necessary with the "Lite" version)
 
-  -CONFIG_HAVE_CXX=y              : Suppress generation of C++ code
-  +CONFIG_HAVE_CXX=n              : (Only necessary with the "Lite" version)
+  -CONFIG_HAVE_CXX=y                       : Suppress generation of C++ code
+  +CONFIG_HAVE_CXX=n                       : (Only necessary with the "Lite" version)
 
 See the section above on Toolchains, NOTE 2, for explanations for some of
 the configuration settings.  Some of the usual settings are just not supported
