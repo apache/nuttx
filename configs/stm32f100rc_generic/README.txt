@@ -50,8 +50,7 @@ GNU Toolchain Options
 
     CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y  : CodeSourcery under Windows
     CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL=y  : CodeSourcery under Linux
-    CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC_LITE=y   : The free, "Lite" version of Atollic toolchain under Windows
-    CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC_PRO=y    : The paid, "Pro" version of Atollic toolchain under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC=y        : The Atollic toolchain under Windows
     CONFIG_ARMV7M_TOOLCHAIN_DEVKITARM=y      : devkitARM under Windows
     CONFIG_ARMV7M_TOOLCHAIN_RAISONANCE=y     : Raisonance RIDE7 under Windows
     CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
@@ -471,4 +470,4 @@ Where <subdir> is one of the following:
 
     Default toolchain:
 
-    CONFIG_STM32_CODESOURCERYL=y  : CodeSourcery under Linux / Mac OS X
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL=y  : CodeSourcery under Linux / Mac OS X

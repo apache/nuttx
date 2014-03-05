@@ -148,12 +148,11 @@ GNU Toolchain Options
   the CodeSourcery or devkitARM toolchain, you simply need add one of the
   following configuration options to your .config (or defconfig) file:
 
-    CONFIG_LPC43_CODEREDW=y       : Code Red "RedSuite" under Windows
-    CONFIG_LPC43_CODESOURCERYW=y  : CodeSourcery under Windows
-    CONFIG_LPC43_CODESOURCERYL=y  : CodeSourcery under Linux
-    CONFIG_LPC43_ATOLLIC_LITE=y   : The free, "Lite" version of Atollic toolchain under Windows
-    CONFIG_LPC43_ATOLLIC_PRO=y    : The paid, "Pro" version of Atollic toolchain under Windows
-    CONFIG_LPC43_DEVKITARM=y      : devkitARM under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_CODEREDW=y       : Code Red "RedSuite" under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y  : CodeSourcery under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL=y  : CodeSourcery under Linux
+    CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC=y        : The Atollic toolchain under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_DEVKITARM=y      : devkitARM under Windows
     CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
 
   If you are not using CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT, then you may also have to modify
@@ -425,15 +424,15 @@ Code Red IDE/Tools
   By default, the configurations here assume that you are executing directly
   from SRAM.
 
-    CONFIG_LPC43_BOOT_SRAM=y       : Executing in SRAM
-    CONFIG_LPC43_CODEREDW=y        : Code Red under Windows
+    CONFIG_LPC43_BOOT_SRAM=y           : Executing in SRAM
+    CONFIG_ARMV7M_TOOLCHAIN_CODEREDW=y : Code Red under Windows
 
   To execute from SPIFI, you would need to set:
 
-    CONFIG_LPC43_BOOT_SPIFI=y      : Executing from SPIFI
-    CONFIG_RAM_SIZE=(128*1024)    : SRAM Bank0 size
-    CONFIG_RAM_START=0x10000000   : SRAM Bank0 base address
-    CONFIG_SPIFI_OFFSET=(512*1024) : SPIFI file system offset
+    CONFIG_LPC43_BOOT_SPIFI=y          : Executing from SPIFI
+    CONFIG_RAM_SIZE=(128*1024)         : SRAM Bank0 size
+    CONFIG_RAM_START=0x10000000        : SRAM Bank0 base address
+    CONFIG_SPIFI_OFFSET=(512*1024)     : SPIFI file system offset
 
   To boot the LPC4330-Xplorer from SPIFI the DIP switches should be 1-OFF,
   2-ON, 3-ON, 4-ON (LOW LOW LOW HIGH in Table 19, MSB to LSB).
@@ -616,29 +615,14 @@ must be defined in *all* LPC43xx configuration files.
 CFLAGS
 ------
 
-Only the Atollic toolchain has built-in support for the Cortex-M4 FPU.  You will see
+Only the recent toolchains have built-in support for the Cortex-M4 FPU.  You will see
 the following lines in each Make.defs file:
 
-  ifeq ($(CONFIG_LPC43_ATOLLIC_LITE),y)
-    # Atollic toolchain under Windows
-    ...
   ifeq ($(CONFIG_ARCH_FPU),y)
     ARCHCPUFLAGS = -mcpu=cortex-m4 -mthumb -march=armv7e-m -mfpu=fpv4-sp-d16 -mfloat-abi=hard
   else
     ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
   endif
-  endif
-
-If you are using a toolchain other than the Atollic toolchain, then to use the FPU
-you will also have to modify the CFLAGS to enable compiler support for the ARMv7-M
-FPU.  As of this writing, there are not many GCC toolchains that will support the
-ARMv7-M FPU.
-
-As a minimum you will need to add CFLAG options to (1) enable hardware floating point
-code generation, and to (2) select the FPU implementation.  You might try the same
-options as used with the Atollic toolchain in the Make.defs file:
-
-  ARCHCPUFLAGS = -mcpu=cortex-m4 -mthumb -march=armv7e-m -mfpu=fpv4-sp-d16 -mfloat-abi=hard
 
 Configuration Changes
 ---------------------
@@ -646,22 +630,20 @@ Configuration Changes
 Below are all of the configuration changes that I had to make to configs/stm3240g-eval/nsh2
 in order to successfully build NuttX using the Atollic toolchain WITH FPU support:
 
-  -CONFIG_ARCH_FPU=n              : Enable FPU support
+  -CONFIG_ARCH_FPU=n                       : Enable FPU support
   +CONFIG_ARCH_FPU=y
 
-  -CONFIG_LPC43_CODESOURCERYW=y   : Disable the CodeSourcery toolchain
-  +CONFIG_LPC43_CODESOURCERYW=n
+  -CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : Disable the CodeSourcery toolchain
+  +CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=n
 
-  -CONFIG_LPC43_ATOLLIC_LITE=n    : Enable *one* the Atollic toolchains
-   CONFIG_LPC43_ATOLLIC_PRO=n
-  -CONFIG_LPC43_ATOLLIC_LITE=y    : The "Lite" version, OR
-   CONFIG_LPC43_ATOLLIC_PRO=y     : The "Pro" version (not both)
+  -CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC=n       : Enable the Atollic toolchains
+  +CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC=y       :
 
-  -CONFIG_INTELHEX_BINARY=y       : Suppress generation FLASH download formats
-  +CONFIG_INTELHEX_BINARY=n       : (Only necessary with the "Lite" version)
+  -CONFIG_INTELHEX_BINARY=y                : Suppress generation FLASH download formats
+  +CONFIG_INTELHEX_BINARY=n                : (Only necessary with the "Lite" version)
 
-  -CONFIG_HAVE_CXX=y              : Suppress generation of C++ code
-  +CONFIG_HAVE_CXX=n              : (Only necessary with the "Lite" version)
+  -CONFIG_HAVE_CXX=y                       : Suppress generation of C++ code
+  +CONFIG_HAVE_CXX=n                       : (Only necessary with the "Lite" version)
 
 See the section above on Toolchains, NOTE 2, for explanations for some of
 the configuration settings.  Some of the usual settings are just not supported
@@ -921,8 +903,8 @@ Where <subdir> is one of the following:
     2. By default, this project assumes that you are executing directly from
        SRAM.
 
-         CONFIG_LPC43_BOOT_SRAM=y       : Executing in SRAM
-         CONFIG_LPC43_CODEREDW=y        : Code Red under Windows
+         CONFIG_LPC43_BOOT_SRAM=y           : Executing in SRAM
+         CONFIG_ARMV7M_TOOLCHAIN_CODEREDW=y : Code Red under Windows
 
     3. To execute from SPIFI, you would need to set:
 
