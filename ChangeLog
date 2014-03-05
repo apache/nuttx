@@ -6851,3 +6851,5 @@
 	  kconfig-frontends tools (2014-3-5)
 	* configs/mcu123-lpc214x/composite: Configuration converted to use the
 	  kconfig-frontends tools (2014-3-5)
+	* configs/olimex-strp711/nsh: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-5)
