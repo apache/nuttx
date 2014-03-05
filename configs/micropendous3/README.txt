@@ -510,19 +510,42 @@ Micropendous3 Configuration Options
 Configurations
 ^^^^^^^^^^^^^^
 
-Each Micropendous3 configuration is maintained in a sub-directory and can
-be selected as follow:
+Common Configuration Notes
+--------------------------
 
-    cd tools
-    ./configure.sh micropendous3/<subdir>
-    cd -
-    . ./setenv.sh
+  1. Each Micropendous3 configuration is maintained in a sub-directory and
+     can be selected as follow:
 
-NOTE: You must also copy avr-libc header files, perhaps like:
+       cd tools
+       ./configure.sh micropendous3/<subdir>
+       cd -
+       . ./setenv.sh
 
-     cp -a /cygdrive/c/WinAVR/include/avr include/.
+     Where <subdir> is one of the configuration sub-directories described in
+     the following paragraph.
 
-Where <subdir> is one of the following:
+     NOTE: You must also copy avr-libc header files, perhaps like:
+
+       cp -a /cygdrive/c/WinAVR/include/avr include/.
+
+  2. These configurations use the mconf-based configuration tool.  To
+     change a configurations using that tool, you should:
+
+     a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+        and misc/tools/
+
+     b. Execute 'make menuconfig' in nuttx/ in order to start the
+        reconfiguration process.
+
+  3. By default, all configurations assume the NuttX Buildroot toolchain
+     under Cygwin with Windows.  This is easily reconfigured:
+
+        CONFIG_HOST_WINDOWS=y
+        CONFIG_WINDOWS_CYGWIN=y
+        CONFIG_AVR_BUILDROOT=y
+
+Configuration Sub-Directories
+-----------------------------
 
   hello:
     The simple apps/examples/hello "Hello, World!" example.
