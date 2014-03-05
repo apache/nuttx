@@ -6870,3 +6870,5 @@
 	  kconfig-frontends tools (2014-3-5)
 	* configs/ntosd-dm320/nettest: Configuration converted to use the
 	  kconfig-frontends tools (2014-3-5)
+	* configs/ntosd-dm320/nsh: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-5)
