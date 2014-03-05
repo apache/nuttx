@@ -9,69 +9,44 @@ choice
 	prompt "Atmel AVR chip selection"
 	default ARCH_CHIP_AT32UC3B0256
 
-config ARCH_CHIP_ATMEGA128
-	bool "ATMega128"
+config ARCH_CHIP_ATMEGA
+	bool "ATMega family"
+	select ARCH_FAMILY_AVR
 	---help---
-		Atmel ATMega128 8-bit AVR.
+		Atmel ATMega family of 8-bit AVRs.
 
-config ARCH_CHIP_AT90USB646
-	bool "AT90USB646"
+config ARCH_CHIP_AT90USB
+	bool "AT90USB family"
+	select ARCH_FAMILY_AVR
 	---help---
-		Atmel AT90USB646 8-bit AVR.
+		Atmel AT90USB family of 8-bit AVRs.
 
-config ARCH_CHIP_AT90USB647
-	bool "AT90USB647"
+config ARCH_CHIP_AT32UC3
+	bool "AVR23 AT32UC3* family"
+	select ARCH_FAMILY_AVR32
 	---help---
-		Atmel AT90USB647 8-bit AVR.
-
-config ARCH_CHIP_AT90USB1286
-	bool "AT90USB1286"
-	---help---
-		Atmel AT90USB1286 8-bit AVR.
-
-config ARCH_CHIP_AT90USB1287
-	bool "AT90USB1287"
-	---help---
-		Atmel AT90USB1287 8-bit AVR.
-
-config ARCH_CHIP_AT32UC3B0256
-	bool "AT32UC3B0256"
-	---help---
-		Atmel AT32UC3B0256 32-bit AVR32.
+		Atmel AT32UC3A/B/C family of 32-bit AVR32s.
 
 endchoice
 
 config ARCH_FAMILY_AVR
 	bool
-	default y			if ARCH_CHIP_ATMEGA128 || ARCH_CHIP_AT90USB646 || ARCH_CHIP_AT90USB647 || ARCH_CHIP_AT90USB1286 || ARCH_CHIP_AT90USB1287
-	select ARCH_HAVE_STACKCHECK
+	default n
 
 config ARCH_FAMILY_AVR32
 	bool
-	default y			if ARCH_CHIP_AT32UC3B0256
+	default n
 
 config ARCH_FAMILY
 	string
 	default "avr"		if ARCH_FAMILY_AVR
 	default "avr32"		if ARCH_FAMILY_AVR32
 
-config ARCH_ATMEGA
-	bool
-	default y			if ARCH_CHIP_ATMEGA128
-
-config ARCH_AT90USB
-	bool
-	default y			if ARCH_CHIP_AT90USB646 || ARCH_CHIP_AT90USB647 || ARCH_CHIP_AT90USB1286 || ARCH_CHIP_AT90USB1287
-
-config ARCH_AT32UC3
-	bool
-	default y			if ARCH_CHIP_AT32UC3B0256
-
 config ARCH_CHIP
 	string
-	default "atmega"	if ARCH_ATMEGA
-	default "at90usb"	if ARCH_AT90USB
-	default "at32uc3"	if ARCH_AT32UC3
+	default "atmega"	if ARCH_CHIP_ATMEGA
+	default "at90usb"	if ARCH_CHIP_AT90USB
+	default "at32uc3"	if ARCH_CHIP_AT32UC3
 
 source arch/avr/src/common/Kconfig
 
@@ -80,17 +55,10 @@ source arch/avr/src/avr/Kconfig
 source arch/avr/src/at90usb/Kconfig
 source arch/avr/src/atmega/Kconfig
 endif
+
 if ARCH_FAMILY_AVR32
 source arch/avr/src/avr32/Kconfig
 source arch/avr/src/at32uc3/Kconfig
 endif
 
-config AVR_USART0
-	bool "USART0 specific serial device driver settings"
-	select ARCH_HAVE_USART0
-
-config AVR_USART1
-	bool "USART1 specific serial device driver settings"
-	select ARCH_HAVE_USART1
-
-endif
+endif # ARCH_AVR

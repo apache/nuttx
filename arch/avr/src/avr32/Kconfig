@@ -6,7 +6,13 @@
 if ARCH_FAMILY_AVR32
 comment "AVR32 Configuration Options"
 
-# Note - no toolchain selection here as there is only one
-# supported toolchain.
+choice
+	prompt "Toolchain"
+	default AVR32_AVRTOOLSW if HOST_WINDOWS
 
+config AVR32_AVRTOOLSW
+	bool "AVR tools for Windows"
+	depends on HOST_WINDOWS
+
+endchoice # Toolchain
 endif

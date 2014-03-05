@@ -3,7 +3,200 @@
 # see misc/tools/kconfig-language.txt.
 #
 
-if ARCH_AT32UC3
+if ARCH_CHIP_AT32UC3
 comment "AT32U3 Configuration Options"
 
-endif
+choice
+	prompt "AT32U3 Processor Selection"
+	default ARCH_CHIP_AT32UC3B0256
+
+config ARCH_CHIP_AT32UC3B064
+	bool "AT32UC3B064"
+	select ARCH_CHIP_AT32UC3B
+	select ARCH_CHIP_AT32UC3B0
+
+config ARCH_CHIP_AT32UC3B0128
+	bool "AT32UC3B0128"
+	select ARCH_CHIP_AT32UC3B
+	select ARCH_CHIP_AT32UC3B0
+
+config ARCH_CHIP_AT32UC3B0256
+	bool "AT32UC3B0256"
+	select ARCH_CHIP_AT32UC3B
+	select ARCH_CHIP_AT32UC3B0
+
+config ARCH_CHIP_AT32UC3B0512
+	bool "AT32UC3B0512"
+	select ARCH_CHIP_AT32UC3B
+	select ARCH_CHIP_AT32UC3B0
+
+config ARCH_CHIP_AT32UC3B164
+	bool "AT32UC3B164"
+	select ARCH_CHIP_AT32UC3B
+	select ARCH_CHIP_AT32UC3B1
+
+config ARCH_CHIP_AT32UC3B1128
+	bool "AT32UC3B1128"
+	select ARCH_CHIP_AT32UC3B
+	select ARCH_CHIP_AT32UC3B1
+
+config ARCH_CHIP_AT32UC3B1256
+	bool "AT32UC3B1256"
+	select ARCH_CHIP_AT32UC3B
+	select ARCH_CHIP_AT32UC3B1
+
+config ARCH_CHIP_AT32UC3B1512
+	bool "AT32UC3B1512"
+	select ARCH_CHIP_AT32UC3B
+	select ARCH_CHIP_AT32UC3B1
+
+endchoice # AT32U3 Processor Selection
+
+config ARCH_CHIP_AT32UC3A
+	bool
+	default n
+
+config ARCH_CHIP_AT32UC3B
+	bool
+	default n
+
+config ARCH_CHIP_AT32UC3B0
+	bool
+	default n
+
+config ARCH_CHIP_AT32UC3B1
+	bool
+	default n
+
+menu "AT32U3 Peripheral Selections"
+
+config AVR32_USART0
+	bool "USART0"
+	default n
+	select ARCH_HAVE_USART0
+
+config AVR32_USART1
+	bool "USART1"
+	default n
+	select ARCH_HAVE_USART1
+
+config AVR32_USART2
+	bool "USART2"
+	default n
+	depends on ARCH_CHIP_AT32UC3B0
+	select ARCH_HAVE_USART2
+
+endmenu # AT32U3 Peripheral Selections
+
+if AVR32_USART0
+
+choice
+	prompt "USART0 Function"
+	default AVR32_USART0_RS232
+
+config AVR32_USART0_IRDA
+	bool "USART0 is IRDA"
+
+config AVR32_USART0_ISO786
+	bool "USART0 is ISO786"
+
+config AVR32_USART0_MAN
+	bool "USART0 is Manchester"
+
+config AVR32_USART0_MODEM
+	bool "USART0 is Modem"
+
+config AVR32_USART0_RS232
+	bool "USART0 is RS-232"
+	select USART0_ISUART
+
+config AVR32_USART0_RS485
+	bool "USART0 is RS-485"
+
+config AVR32_USART0_SPI
+	bool "USART0 is SPI"
+	select SPI
+
+endchoice # USART0 Function
+endif # AVR32_USART0
+
+if AVR32_USART1
+
+choice
+	prompt "USART1 Function"
+	default AVR32_USART1_RS232
+
+config AVR32_USART1_IRDA
+	bool "USART1 is IRDA"
+
+config AVR32_USART1_ISO786
+	bool "USART1 is ISO786"
+
+config AVR32_USART1_MAN
+	bool "USART1 is Manchester"
+
+config AVR32_USART1_MODEM
+	bool "USART1 is Modem"
+
+config AVR32_USART1_RS232
+	bool "USART1 is RS-232"
+	select USART1_ISUART
+
+config AVR32_USART1_RS485
+	bool "USART1 is RS-485"
+
+config AVR32_USART1_SPI
+	bool "USART1 is SPI"
+	select SPI
+
+endchoice # USART1 Function
+endif # AVR32_USART1
+
+if AVR32_USART2
+
+choice
+	prompt "USART2 Function"
+	default AVR32_USART2_RS232
+
+config AVR32_USART2_IRDA
+	bool "USART2 is IRDA"
+
+config AVR32_USART2_ISO786
+	bool "USART2 is ISO786"
+
+config AVR32_USART2_MAN
+	bool "USART2 is Manchester"
+
+config AVR32_USART2_MODEM
+	bool "USART2 is Modem"
+
+config AVR32_USART2_RS232
+	bool "USART2 is RS-232"
+	select USART2_ISUART
+
+config AVR32_USART2_RS485
+	bool "USART2 is RS-485"
+
+config AVR32_USART2_SPI
+	bool "USART2 is SPI"
+	select SPI
+
+endchoice # USART2 Function
+endif # AVR32_USART2
+
+config AVR32_GPIOIRQ
+	bool "GPIO IRQ support"
+	default n
+
+if AVR32_GPIOIRQ
+
+config AVR32_GPIOIRQSETA
+	hex "GPIO IRQ set A"
+	default 0x0
+
+config AVR32_GPIOIRQSETB
+	hex "GPIO IRQ set B"
+	default 0x0
+
+endif # AVR32_GPIOIRQ
+endif # ARCH_CHIP_AT32UC3
