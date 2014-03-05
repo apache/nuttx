@@ -372,24 +372,43 @@ ENC28J60 Module
   the ENC28J60 (And I don't have the correct wall wart to power the
   the board).
 
-Configurations:
----------------
+Common Configuration Notes:
+---------------------------
+
+  1. Each Olimex STRP711 configuration is maintained in a sub-directory and
+     can be selected as follow:
+
+       cd tools
+       ./configure.sh olimex-strp711/<subdir>
+       cd -
+       . ./setenv.sh
+
+     Where <subdir> is one of the configuration sub-directories described in
+     the following paragraph.
+
+  2. These configurations use the mconf-based configuration tool.  To
+     change a configurations using that tool, you should:
+
+     a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+        and misc/tools/
+
+     b. Execute 'make menuconfig' in nuttx/ in order to start the
+        reconfiguration process.
+
+  3. By default, all configurations assume the NuttX Buildroot toolchain
+     under Linux (should work under Windows with Cygwin as well).  This
+     is easily reconfigured:
+
+        CONFIG_HOST_LINUX=y
+        CONFIG_ARM_TOOLCHAIN_BUILDROOT=y
+
+Configuration Sub-Directories:
+------------------------------
 
   nettest:
     This configuration directory may be used to enable networking using the
     an Microchip ENC28J60 SPI Ethernet module (see above for connection to
     STR-P711).
-
-    NOTES:
-
-    1. This configuration uses the mconf-based configuration tool.  To
-       change this configurations using that tool, you should:
-
-       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          and misc/tools/
-
-       b. Execute 'make menuconfig' in nuttx/ in order to start the
-          reconfiguration process.
 
   nsh:
     Configures the NuttShell (nsh) located at examples/nsh.  The
@@ -432,4 +451,3 @@ STR71x-Specific Configuration Settings
   CONFIG_UARTn_BITS - The number of bits.  Must be either 7 or 8.
   CONFIG_UARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity, 3=mark 1, 4=space 0
   CONFIG_UARTn_2STOP - Two stop bits
-
