@@ -46,7 +46,7 @@
 #  include <stdint.h>
 #endif
 
-#ifdef CONFIG_ARCH_AVR32
+#ifdef CONFIG_ARCH_FAMILY_AVR32
 # include "avr32_internal.h"
 #else
 # include "avr_internal.h"
