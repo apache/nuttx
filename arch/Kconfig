@@ -145,6 +145,134 @@ config ARCH_NAND_HWECC
 	bool
 	default n
 
+menuconfig PAGING
+	bool "On-demand paging"
+	default n
+	depends on ARCH_HAVE_MMU && !ARCH_ROMPGTABLE
+	---help---
+		If set =y in your configation file, this setting will enable the on-demand
+		paging feature as described in http://www.nuttx.org/NuttXDemandPaging.html.
+
+if PAGING
+
+config PAGING_PAGESIZE
+	int "Page size (bytes)"
+	default 4096
+	---help---
+		The size of one managed page.  This must be a value supported by the
+		processor's memory management unit
+
+config PAGING_NLOCKED
+	int "Number of locked pages"
+	default 48
+	---help---
+		This is the number of locked pages in the memory map.
+
+config PAGING_CUSTOM_BASE
+	bool "Custom paging base address"
+	default n
+	---help---
+		By default, the page begins at RAM_START/VSTART.  That base address
+		can be changed if this value is selected.
+
+if PAGING_CUSTOM_BASE
+
+config PAGING_LOCKED_PBASE
+	hex "Physical base address"
+
+config PAGING_LOCKED_VBASE
+	hex "Virtual base address"
+
+endif # PAGING_CUSTOM_BASE
+
+config PAGING_NPPAGED
+	int "Number of physical pages"
+	default 256
+	---help---
+		This is the number of physical pages available to support the paged
+		text region.
+
+config PAGING_NVPAGED
+	int "Number of virtual pages"
+	default 1024
+	---help---
+		This actual size of the virtual paged text region (in pages).  This
+		is also the number of virtual pages required to span the entire
+		paged region. The on-demand paging  feature is intended to support
+		only the case where the virtual paged text area is much larger the
+		available physical pages.  Otherwise, why would you enable on-demand paging?
+
+config PAGING_NDATA
+	int "Number of data pages"
+	default 256
+	---help---
+		This is the number of data pages in the memory map.  The data region
+		will extend to the end of RAM unless overridden by a setting in the
+		configuration file.
+
+		NOTE:  In some architectures, it may be necessary to take some memory
+		from the end of RAM for page tables or other system usage.  The
+		configuration settings and linker directives must be cognizant of
+		that: PAGING_NDATA should be defined to prevent the data region from
+		extending all the way to the end of memory.
+
+config PAGING_DEFPRIO
+	int "Page fill worker thread priority"
+	default 100
+	---help---
+		The default, minimum priority of the page fill worker thread.  The
+		priority of the page fill work thread will be boosted  boosted
+		dynamically so that it matches the priority of the task on behalf
+		of which it performs the fill.  This defines the minimum priority
+		that will be used. Default: 100.
+
+config PAGING_STACKSIZE
+	int "Page fill worker thread stack size"
+	default 1024
+	---help---
+		Defines the size of the allocated stack for the page fill worker
+		thread. Default: 1024.
+
+config PAGING_BLOCKINGFILL
+	bool "Blocking fill"
+	default n
+	---help---
+		The architecture specific up_fillpage() function may be blocking
+		or non-blocking.  If defined, this setting indicates that the
+		up_fillpage() implementation will block until the transfer is
+		completed. Default:  Undefined (non-blocking).
+
+config PAGING_WORKPERIOD
+	int "Work period (usec)"
+	default 500000
+	---help---
+		The page fill worker thread will wake periodically even if there
+		is no mapping to do.  This selection controls that wake-up period
+		(in microseconds).  This wake-up a failsafe that will handle any
+		cases where a single is lost (that would really be a bug and
+		shouldn't happen!) and also supports timeouts for case of non-
+		blocking, asynchronous fills (see CONFIG_PAGING_TIMEOUT_TICKS).
+
+config PAGING_TIMEOUT
+	bool "Paging timeout"
+	default n
+	---help---
+		If defined, the implementation will monitor the (asynchronous) page
+		fill logic.  If the fill takes longer than than a timeout value,
+		then a fatal error will be declared. Default: No timeouts monitored
+
+config PAGING_TIMEOUT_TICKS
+	int "Paging timeout ticks"
+	default 10
+	depends on PAGING_TIMEOUT
+	---help---
+		If PAGING_TIMEOUT is defined, then implementation will monitor the
+		(asynchronous) page fill logic.  If the fill takes longer than this
+		number if microseconds, then a fatal error will be declared.
+		Default: No timeouts monitored
+
+endif # PAGING
+
 config ARCH_IRQPRIO
 	bool "Prioritized interrupt support"
 	default n
