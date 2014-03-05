@@ -112,36 +112,52 @@ ARM/C5471-specific Configuration Options
 	CONFIG_C5471_BASET100
 	CONFIG_C5471_BASET10
 
+Configurations
+^^^^^^^^^^^^^^
+
+Common Configuration Notes
+--------------------------
+
+  1. Each C5471 configuration is maintained in a sub-directory and
+     can be selected as follow:
+
+       cd tools
+       ./configure.sh c5471evm/<subdir>
+       cd -
+       . ./setenv.sh
+
+     Where <subdir> is one of the configuration sub-directories described in
+     the following paragraph.
+
+  2. These configurations use the mconf-based configuration tool.  To
+     change a configurations using that tool, you should:
+
+     a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+        and misc/tools/
+
+     b. Execute 'make menuconfig' in nuttx/ in order to start the
+        reconfiguration process.
+
+  3. By default, all configurations assume the NuttX Buildroot toolchain
+     under Linux (should work under Windows with Cygwin as well).  This
+     is easily reconfigured:
+
+        CONFIG_HOST_LINUX=y
+        CONFIG_ARM_TOOLCHAIN_BUILDROOT=y
+
 Configuration Sub-Directories
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------------
 
-Each STM3240G-EVAL configuration is maintained in a sub-directory and
-can be selected as follow:
+  nettest
 
-    cd tools
-    ./configure.sh c5471evm/<subdir>
-    cd -
-    . ./setenv.sh
+    This configuration enables networking using the c5471's built-in Ethernet
+    interface.  It uses examples/nettest to exercise the TCP/IP network.
 
-Where <subdir> is one of the following.
+  nsh
 
-By default, all configurations assume the NuttX Buildroot toolchain under
-Linux (should work under Windows with Cygwin as well).
+    This configuration file builds NSH (examples/nsh) using the TELNET server
+    front end
 
-nettest
--------
+  httpd
 
-  This configuration enables networking using the c5471's built-in Ethernet
-  interface.  It uses examples/nettest to exercise the TCP/IP network.
-
-nsh
----
-
-  This configuration file builds NSH (examples/nsh) using the TELNET server
-  front end
-
-httpd
------
-
-  This configuration uses the tiny webserver for uiP.
-
+    This configuration uses the tiny webserver for uiP.
