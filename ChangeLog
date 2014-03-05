@@ -6880,10 +6880,12 @@
 	  kconfig-frontends tools (2014-3-5)
 	* configs/ntosd-dm320/uip: Configuration converted to use the
 	  kconfig-frontends tools (2014-3-5)
-	* configs/ea3131/pgnsh: Configuration converted to use the
-	  kconfig-frontends tools (2014-3-5)
 	* arch/Kconfig, arch/arm/Kconfig, configs/ea3131/Kconfig,
 	  configs/ea3131/pgnsh/defconfig, configs/ea3131/src/up_fillpage.c,
 	  configs/ea3152/Kconfig, nuttx/configs/ea3152/src/up_fillpage.c,
 	  include/nuttx/page.h, and tools/cfgdefine.c:  Add configuration
 	  settings for the on-demand paging option (2014-3-5).
+	* configs/ea3131/pgnsh: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-5)
+	* configs/qemu-i486/ostest: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-5)
