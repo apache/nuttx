@@ -53,12 +53,6 @@ ifeq ($(filter y, \
 endif
 
 ifeq ($(filter y, \
-      $(CONFIG_KINETIS_BUILDROOT) \
-      $(CONFIG_LM_BUILDROOT) \
-      $(CONFIG_LPC17_BUILDROOT) \
-      $(CONFIG_LPC43_BUILDROOT) \
-      $(CONFIG_SAM3U_BUILDROOT) \
-      $(CONFIG_STM32_BUILDROOT) \
       $(CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT) \
     ),y)
   CONFIG_ARMV7M_TOOLCHAIN ?= BUILDROOT
