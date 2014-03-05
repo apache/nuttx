@@ -36,9 +36,9 @@
 -include $(TOPDIR)/Make.defs
 -include chip/Make.defs
 
-ifeq ($(CONFIG_ARCH_AVR32),y)
+ifeq ($(CONFIG_ARCH_FAMILY_AVR32),y)
 ARCH_SUBDIR = avr32
-else ifeq ($(CONFIG_ARCH_AVR),y)
+else ifeq ($(CONFIG_ARCH_FAMILY_AVR),y)
 ARCH_SUBDIR = avr
 endif
 

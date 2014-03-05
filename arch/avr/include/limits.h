@@ -46,7 +46,7 @@
 
 /* Include AVR architecture-specific limits */
 
-#ifdef CONFIG_ARCH_AVR32
+#ifdef CONFIG_ARCH_FAMILY_AVR32
 # include <arch/avr32/limits.h>
 #else
 # include <arch/avr/limits.h>

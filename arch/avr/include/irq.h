@@ -56,7 +56,7 @@
  * save structure and irqsave()/irqrestore() macros
  */
 
-#ifdef CONFIG_ARCH_AVR32
+#ifdef CONFIG_ARCH_FAMILY_AVR32
 # include <arch/avr32/irq.h>
 #else
 # include <arch/avr/irq.h>
