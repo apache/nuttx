@@ -385,7 +385,7 @@ Amber Web Server Configuration Options
 
     CONFIG_ARCH_architecture - For use in C code:
 
-       CONFIG_ARCH_ATMEGA=y
+       CONFIG_ARCH_CHIP_ATMEGA=y
 
     CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
 

@@ -55,10 +55,10 @@ SRCS		= $(ASRCS) $(CSRCS)
 OBJS		= $(AOBJS) $(COBJS)
 
 ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
-ifeq ($(CONFIG_ARCH_AVR32),y)
+ifeq ($(CONFIG_ARCH_FAMILY_AVR32),y)
 ARCH_SUBDIR	= avr32
 endif
-ifeq ($(CONFIG_ARCH_AVR),y)
+ifeq ($(CONFIG_ARCH_FAMILY_AVR),y)
 ARCH_SUBDIR	= avr
 endif
 

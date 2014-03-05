@@ -398,7 +398,7 @@ Micropendous3 Configuration Options
 
     CONFIG_ARCH_architecture - For use in C code:
 
-       CONFIG_ARCH_AT90USB=y
+       CONFIG_ARCH_CHIP_AT90USB=y
 
     CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
 
