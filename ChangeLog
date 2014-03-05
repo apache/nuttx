@@ -6845,3 +6845,7 @@
 	  kconfig-frontends tools (2014-3-4)
 	* configs/c5471evm/nsh: Configuration converted to use the
 	  kconfig-frontends tools (2014-3-5)
+	* configs/compal_e99/nsh_compalram: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-5)
+	* configs/compal_e99/nsh_highram: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-5)
