@@ -320,39 +320,19 @@ ARM/LPC214X-specific Configuration Options
 Configurations
 ^^^^^^^^^^^^^^
 
-Each NXP LPC214x configuration is maintained in a sub-directory and
-can be selected as follow:
+  1. Each NXP LPC214x configuration is maintained in a sub-directory and
+     can be selected as follow:
 
-	cd tools
-	./configure.sh mcu123-lpc214x/<subdir>
-	cd -
-	. ./setenv.sh
+       cd tools
+       ./configure.sh mcu123-lpc214x/<subdir>
+       cd -
+       . ./setenv.sh
 
-Where <subdir> is one of the following:
+     Where <subdir> is one of the configuration sub-directories described in
+     the following paragraph.
 
-composite:
-----------
-
-  A simple test of the USB Composite Device (see
-  apps/examples/README.txt and apps/system/composite)
-
-  Default toolchain:  CodeSourcery for Windows
-  Output format:  ELF and Intel HEX
-
-  NOTE:  I could not get this to work!  Perhaps this is a
-  consequence of the last USB driver checking (r4359). But
-  backing this change out did not fix the configuration.
-
-nsh:
-----
-
-  Configures the NuttShell (nsh) located at examples/nsh.  The
-  Configuration enables only the serial NSH interfaces.
-
-  NOTES:
- 
-  1. This configuration uses the mconf-based configuration tool.  To
-     change this configuration using that tool, you should:
+  2. These configurations use the mconf-based configuration tool.  To
+     change a configurations using that tool, you should:
 
      a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
         and misc/tools/
@@ -360,11 +340,28 @@ nsh:
      b. Execute 'make menuconfig' in nuttx/ in order to start the
         reconfiguration process.
 
-  2. Default platform/toolchain:
+  3. By default, all configurations assume the NuttX Buildroot toolchain
+     under Linux (should work under Windows with Cygwin as well).  This
+     is easily reconfigured:
 
-     CONFIG_HOST_LINUX=y              : Linux
-     CONFIG_ARM_TOOLCHAIN_GNU_EABIL=y : Buildroot (arm-nuttx-elf-gcc)
-     CONFIG_RAW_BINARY=y              : Output formats: ELF and raw binary
+        CONFIG_HOST_LINUX=y
+        CONFIG_ARM_TOOLCHAIN_BUILDROOT=y
+
+composite:
+----------
+
+  A simple test of the USB Composite Device (see
+  apps/examples/README.txt and apps/system/composite)
+
+  NOTE:  I could not get this to work!  Perhaps this is a consequence of the
+  last USB driver checking (r4359). But backing this change out did not fix
+  the configuration.
+
+nsh:
+----
+
+  Configures the NuttShell (nsh) located at examples/nsh.  The
+  Configuration enables only the serial NSH interfaces.
 
 usbserial:
 ----------
@@ -373,25 +370,8 @@ usbserial:
   driver at examples/usbserial.  See examples/README.txt for
   more information.
 
-  NOTES:
- 
-  1. This configuration uses the mconf-based configuration tool.  To
-     change this configuration using that tool, you should:
-
-     a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-        and misc/tools/
-
-     b. Execute 'make menuconfig' in nuttx/ in order to start the
-        reconfiguration process.
-
-  2. Default platform/toolchain:
-
-     CONFIG_HOST_LINUX=y              : Linux
-     CONFIG_ARM_TOOLCHAIN_BUILDROOT=y : Buildroot (arm-nuttx-eabi-gcc)
-     CONFIG_RAW_BINARY=y              : Output formats: ELF and raw binary
-
-  3. If you have problems with this configuration, perhaps it is a
-     consequence of the last USB driver checking (r4359)
+  NOTE: If you have problems with this configuration, perhaps it is a
+  consequence of the last USB driver checking (r4359)
 
 usbmsc:
 -------
@@ -400,19 +380,5 @@ usbmsc:
   class driver at system/usbmsc.  See examples/README.txt for
   more information.
 
-  NOTES:
- 
-  1. This configuration uses the mconf-based configuration tool.  To
-     change this configuration using that tool, you should:
-
-     a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-        and misc/tools/
-
-     b. Execute 'make menuconfig' in nuttx/ in order to start the
-        reconfiguration process.
-
-  2. Default toolchain:  Buildroot
-     Output format:  ELF and binary
-
-  3. If you have problems with this configuration, perhaps it is a
-     consequence of the last USB driver checking (r4359)
+  NOTE: If you have problems with this configuration, perhaps it is a
+  consequence of the last USB driver checking (r4359)
