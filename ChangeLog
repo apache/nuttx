@@ -6853,3 +6853,5 @@
 	  kconfig-frontends tools (2014-3-5)
 	* configs/olimex-strp711/nsh: Configuration converted to use the
 	  kconfig-frontends tools (2014-3-5)
+	* configs/amber/hello: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-5)
