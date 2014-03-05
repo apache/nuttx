@@ -6,4 +6,142 @@
 if ARCH_HSC12
 comment "M9S12 Configuration Options"
 
-endif
+menu "M9S12 Peripheral Selection"
+
+config HCS12_SCI0
+	bool "SCI0"
+	default n
+
+config HCS12_SCI1
+	bool "SCI1"
+	default n
+
+endmenu # M9S12 Peripheral Selection
+
+menu "SCI Configuration"
+	depends on HCS12_SCI0 || HCS12_SCI1
+
+if HCS12_SCI0
+
+config SCI0_RXBUFSIZE
+	int "SCI0 receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config SCI0_TXBUFSIZE
+	int "SCI0 transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config SCI0_BAUD
+	int "SCI0 BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the SCI.
+
+config SCI0_BITS
+	int "SCI0 character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config SCI0_PARITY
+	int "Parity setting"
+	default 0
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config SCI0_2STOP
+	int "SCI0 use 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+endif # HCS12_SCI0
+
+if HCS12_SCI1
+
+config SCI1_RXBUFSIZE
+	int "SCI1 receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config SCI1_TXBUFSIZE
+	int "SCI1 transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config SCI1_BAUD
+	int "SCI1 BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the SCI.
+
+config SCI1_BITS
+	int "SCI1 character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config SCI1_PARITY
+	int "Parity setting"
+	default 0
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config SCI1_2STOP
+	int "SCI1 use 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+endif # HCS12_SCI1
+
+choice
+	prompt "SCI Serial Console"
+	default SCI0_SERIAL_CONSOLE if HCS12_SCI0
+	default SCI1_SERIAL_CONSOLE if !HCS12_SCI0
+
+config NOSCI_SERIAL_CONSOLE
+	bool "No SCI serial console"
+
+config SCI0_SERIAL_CONSOLE
+	bool "SCI0 serial console"
+	depends on HCS12_SCI0
+
+config SCI1_SERIAL_CONSOLE
+	bool "SCI1 serial console"
+	depends on HCS12_SCI1
+
+endchoice
+endmenu # SCI Configuration
+
+menu "HSC12 Build Options"
+
+config HCS12_SERIALMON
+	bool "Freescale serial bootloader"
+	default n
+	---help---
+		Indicates that the target systems uses the Freescale serial
+		bootloader.
+
+config HCS12_NONBANKED
+	bool "Non-banked"
+	default n
+	---help---
+		Indicates that the target systems does not support banking.
+		Only short calls are made; one fixed page is presented in the
+		paging window.  Only 48Kb of FLASH is usable in this configuration:
+		pages 3e, 3d, then 3f will appear as a contiguous address space
+		in memory.
+
+endmenu # HSC12 Build Options
+endif # ARCH_HSC12
