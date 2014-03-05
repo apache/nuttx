@@ -3,8 +3,30 @@
 # see misc/tools/kconfig-language.txt.
 #
 
-if ARCH_ATMEGA
+if ARCH_CHIP_ATMEGA
 comment "ATMega Configuration Options"
 
+choice
+	prompt "Atmel ATmega chip selection"
+	default ARCH_CHIP_ATMEGA128
+
+config ARCH_CHIP_ATMEGA128
+	bool "ATMega128"
+	---help---
+		Atmel ATMega128 8-bit AVR.
+
+endchoice # ATMega Configuration Options
+
+menu "ATMega Peripheral Selections"
+
+config AVR_USART0
+	bool "USART0"
+	select ARCH_HAVE_USART0
+
+config AVR_USART1
+	bool "USART1"
+	select ARCH_HAVE_USART1
+
+endmenu # ATMega Peripheral Selections
 endif
 
