@@ -6896,3 +6896,7 @@
 	* Many files:  Use common naming for rest of the toolchains (2014-3-5).
 	* configs/ne64badge/ostest and demo9s12nec64/ostest: Configurations
 	  converted to use the kconfig-frontends tools (2014-3-5)
+	* fs/nxffs/nxffs_open.c: Missing call to nxffs_freeentry() causes
+	  memory leak.  From Lzyy (2014-3-6).
+	* fs/nxffs/nxffs_stat.c: Looks like stat() has the same problem as
+	  the one reported by Lzyy (2014-3-6).

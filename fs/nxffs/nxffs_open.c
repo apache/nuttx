@@ -428,7 +428,11 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
     {
       FAR struct nxffs_ofile_s *ofile;
 
-      /* It exists.  Is the file already open for reading? */
+      /* It exists.  Release the entry. */
+
+      nxffs_freeentry(&entry);
+
+      /* Is the file already open for reading? */
 
       ofile = nxffs_findofile(volume, name);
       if (ofile)

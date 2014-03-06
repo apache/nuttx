@@ -171,6 +171,10 @@ int nxffs_stat(FAR struct inode *mountpt, FAR const char *relpath,
       buf->st_atime   = entry.utc;
       buf->st_mtime   = entry.utc;
       buf->st_ctime   = entry.utc;
+
+      /* Free inode resources */
+
+      nxffs_freeentry(&entry);
     }
   else
     {
