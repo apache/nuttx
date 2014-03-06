@@ -1,7 +1,7 @@
 /************************************************************************
- * up_irqtest.c
+ * arch/8051/src/up_irqtest.c
  *
- *   Copyright (C) 2007, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -160,13 +160,12 @@ void os_start(void)
 
   IE = 0;
 
-  /* Then verify all of the interrupt */
+  /* Then verify all of the interrupts */
 
   g_irqtest = false;
 
   up_extint0();
-  up_timer0();
-#ifndef CONFIG_8052_TIMER2
+#ifdef CONFIG_ARCH_8051_NOSYSTIMER
   up_timer0();
 #endif
   up_extint1();

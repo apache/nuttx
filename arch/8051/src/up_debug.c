@@ -1,7 +1,7 @@
 /************************************************************************
- * up_assert.c
+ * arch/8051/src/up_debug.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,7 +62,7 @@
  * Private Functions
  ************************************************************************/
 
-#if defined(CONFIG_FRAME_DUMP) && defined(CONFIG_ARCH_BRINGUP)
+#if defined(CONFIG_FRAME_DUMP) && defined(CONFIG_ARCH_8051_BRINGUP)
 static void up_putspace(void) __naked
 {
   _asm
@@ -103,7 +103,7 @@ static void _up_dump8(__code char *ptr, uint8_t b)
  * Name: up_puthex, up_puthex16, up_putnl, up_puts
  ************************************************************************/
 
-#if defined(CONFIG_ARCH_BRINGUP)
+#if defined(CONFIG_ARCH_8051_BRINGUP)
 void up_puthex(uint8_t hex) __naked
 {
   hex; /* To avoid unreferenced argument warning */
@@ -141,7 +141,7 @@ void up_puts(__code char *ptr)
  * Name: up_dumpstack
  ************************************************************************/
 
-#if defined(CONFIG_FRAME_DUMP) && defined(CONFIG_ARCH_BRINGUP)
+#if defined(CONFIG_FRAME_DUMP) && defined(CONFIG_ARCH_8051_BRINGUP)
 void up_dumpstack(void)
 {
   NEAR uint8_t *start = (NEAR uint8_t *)(STACK_BASE & 0xf0);
@@ -177,7 +177,7 @@ void up_dumpstack(void)
  * Name: up_dumpframe
  ************************************************************************/
 
-#if defined(CONFIG_FRAME_DUMP) && defined(CONFIG_ARCH_BRINGUP)
+#if defined(CONFIG_FRAME_DUMP) && defined(CONFIG_ARCH_8051_BRINGUP)
 void up_dumpframe(FAR struct xcptcontext *context)
 {
 #ifdef CONFIG_FRAME_DUMP_SHORT
@@ -238,7 +238,7 @@ void up_dumpframe(FAR struct xcptcontext *context)
  * code to dump the stack pointer at critical locations.
  */
 
-#ifdef CONFIG_ARCH_PJRC
+#ifdef CONFIG_ARCH_8051_BRINGUP
 void up_showsp(uint8_t ch) __naked
 {
   ch;

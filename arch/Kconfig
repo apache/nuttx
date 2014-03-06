@@ -11,7 +11,7 @@ config ARCH_8051
 	bool "8051"
 	select CUSTOM_STACK
 	---help---
-		Intel 8051 architectures and derivaties
+		Intel 8051 architectures and derivatives
 
 config ARCH_ARM
 	bool "ARM"

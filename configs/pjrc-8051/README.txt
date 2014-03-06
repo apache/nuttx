@@ -52,4 +52,3 @@ This configuration was last successfully built and tested with a ca.
 2.6.0 SDCC release.  Support for that older toolchain was removed in
 NuttX revision -r5423.  If you wanted to used those older toolchains,
 you would need to revert to a pre-r5423 revision.
-
