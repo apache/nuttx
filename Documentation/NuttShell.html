@@ -4021,7 +4021,7 @@ mount -t vfat /dev/ram1 /tmp
 
 <p>
   <b>Modifying the ROMFS Image</b>.
-  The contents of the <code>/etc</code> directory are retained in the file <code>apps/nshlib/nsh_romfsimg.h</code> OR, if <code>CONFIG_NSH_ARCHROMFS</code> is defined, <code>include/arch/board/rcs.template</code>.
+  The contents of the <code>/etc</code> directory are retained in the file <code>apps/nshlib/nsh_romfsimg.h</code> OR, if <code>CONFIG_NSH_ARCHROMFS</code> is defined, <code>include/arch/board/nsh_romfsimg.h</code>.
   In order to modify the start-up behavior, there are three things to study:
 </p>
 
@@ -4064,6 +4064,10 @@ mount -t vfat /dev/ram1 /tmp
     <p>
       <code><b>rcS.template</b></code>.
       The file <code>apps/nshlib/rcS.template</code> contains the general form of the <code>rcS</code> file; configured values are plugged into this template file to produce the final <code>rcS</code> file.
+    </p>
+    <p>
+       To generate a custom <code>rcS</code> file a copy of <code>rcS.template</code> needs to be placed at <code>tools/</code> and changed according to the desired start-up behaviour.
+       Running <code>tools/mkromfsimg.h</code> creates <code>nsh_romfsimg.h</code> which needs to be copied to <code>apps/nhslib</code> OR if <code>CONFIG_NSH_ARCHROMFS</code> is defined to <code>configs/&lt;board&gt;/include</code>.
     </p>
 </ol>
 
