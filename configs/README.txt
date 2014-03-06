@@ -60,16 +60,12 @@ following characteristics:
   |-- <config1-dir>
   |   |-- Make.defs
   |   |-- defconfig
-  |   |-- appconfig*
   |   `-- setenv.sh
   |-- <config2-dir>
   |   |-- Make.defs
   |   |-- defconfig
-  |   |-- appconfig*
   |   `-- setenv.sh
   ...
-
-  *optional
 
 Summary of Files
 ^^^^^^^^^^^^^^^^
@@ -131,10 +127,6 @@ defconfig -- This is a configuration file similar to the Linux
     (1) as a makefile fragment included in other makefiles, and
     (2) to generate include/nuttx/config.h which is included by
         most C files in the system.
-
-appconfig -- This is another configuration file that is specific to the
-  application.  This file is copied into the application build directory
-  when NuttX is configured.  See ../apps/README.txt for further details.
 
 setenv.sh -- This is a script that you can include that will be installed at
   the toplevel of the directory structure and can be sourced to set any
@@ -622,12 +614,6 @@ Configuring NuttX requires only copying
   configs/<board-name>/<config-dir>/setenv.sh to ${TOPDIR}/setenv.sh
   configs/<board-name>/<config-dir>/defconfig to ${TOPDIR}/.config
 
-And if configs/<board-name>/<config-dir>/appconfig exists in the board
-configuration directory:
-
-  Copy configs/<board-name>/<config-dir>/appconfig to <app-dir>/.config
-  echo "APPS_LOC=\"<app-dir>\"" >> "${TOPDIR}/.config"
-
 tools/configure.sh
   There is a script that automates these steps.  The following steps will
   accomplish the same configuration:
@@ -643,10 +629,9 @@ tools/configure.sh
 
   See tools/README.txt for more information about these scripts.
 
-  And if configs/<board-name>/<config-dir>/appconfig exists and your
-  application directory is not in the standard loction (../apps), then
-  you should also specify the location of the application directory on the
-  command line like:
+  And if your application directory is not in the standard loction (../apps
+  or ../apps-<version>), then you should also specify the location of the
+  application directory on the command line like:
 
     cd tools
     ./configure.sh -a <app-dir> <board-name>/<config-dir>

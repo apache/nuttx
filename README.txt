@@ -12,7 +12,6 @@ README
     - Instantiating "Canned" Configurations
     - NuttX Configuration Tool
     - Incompatibilities with Older Configurations
-    - Converting Older Configurations to use the Configuration Tool
     - NuttX Configuration Tool under DOS
   o Toolchains
     - Cross-Development Toolchains
@@ -254,14 +253,6 @@ additional file to the directory the NuttX application package (APPSDIR)):
     included in the build and what is not.  This file is also used
     to generate a C configuration header at include/nuttx/config.h.
 
-  Copy configs/<board-name>/<config-dir>/appconfig to ${APPSDIR}/.config
-
-    The appconfig file describes the applications that need to be
-    built in the appliction directory (APPSDIR).  Not all configurations
-    have an appconfig file.  This file is deprecated and will not be
-    used with new defconfig files produced with the kconfig-mconf
-    configuration tool.
-
 General information about configuring NuttX can be found in:
 
   ${TOPDIR}/configs/README.txt
@@ -379,98 +370,25 @@ Incompatibilities with Older Configurations
 
   ***** WARNING *****
 
-  The old legacy, manual configurations and the new kconfig-frontends
-  configurations are not 100% compatible.  Old legacy configurations
-  can *not* be used with the kconfig-frontends tool:  If you run
-  'make menuconfig' with a legacy configuration the resulting
+  The current NuttX build system supports *only* the new configuration
+  files generated using the kconfig-frontends tools.  The older, legacy,
+  manual configurations and the new kconfig-frontends configurations are
+  not compatible.  Old legacy configurations can *not* be used with the kconfig-frontends tool and, hence, cannot be used with recent releases
+  of NuttX:
+
+  If you run 'make menuconfig' with a legacy configuration the resulting
   configuration will probably not be functional.
 
   Q: How can I tell if a configuration is a new kconfig-frontends
      configuration or an older, manual configuration?
 
-  A: a) New kcondfig-frontends configurations will have this setting
-        within the defconfig/.config file":
+  A: Only old, manual configurations will have an appconfig file
 
-          CONFIG_NUTTX_NEWCONFIG=y
-
-     b) Only old, manual configurations will have an appconfig file
-
-Converting Older Configurations to use the Configuration Tool
--------------------------------------------------------------
 
   Q: How can I convert a older, manual configuration into a new,
      kconfig-frontends toolchain.
 
-  A: 1) Look at the appconfig file:  Each application path there
-        will now have to have an enabling setting.  For example,
-        if the old appconfig file had:
-
-          CONFIGURED_APPS = examples/ostest
-
-        Then the new configuration will need:
-
-          CONFIG_EXAMPLES_OSTEST=y
-
-        The appconfig file can then be deleted because it will not
-        be needed after the conversion.
-
-     2) Build the cmpconfig utility at tools:
-
-          cd tools
-          make -f Makefile.host cmpconfig
-
-     3) Perform these steps repeatedly until you are convinced that
-        the configurations are the same:
-
-        a) Repeat the following until you have account for all of the differences:
-
-             cp configs/<board>/<condfiguration>/defconfig .config
-             make menuconfig  (Just exit and save the new .config file)
-             tools/cmpconfig configs/<board>/<condfiguration>/defconfig .config | grep file1
-
-           The final grep will show settings in the old defconfig file that
-           do not appear in the new .config file (or have a different value
-           in the new .config file).  In the new configuration, you will
-           probably have to enable certain groups of features.  Such
-           hierarachical enabling options were not part of the older
-           configuration.
-
-        b) Then make sure these all make sense:
-
-             tools/cmpconfig configs/<board>/<condfiguration>/defconfig .config | grep file2
-
-           The final grep will show settings in the new .config file that
-           do not appear in the older defconfig file (or have a different value
-           in the new .config file).  Here you should see only the new
-           hierarachical enabling options (such as CONFIG_SPI or CONFIG_MMCSD)
-           plus some other internal configuration settings (like CONFIG_ARCH_HAVE_UART0).
-           You will have to convince yourself that these new settings all make sense.
-
-     4) Finally, update the configuration:
-
-          cp .config configs/<board>/<condfiguration>/defconfig
-          rm configs/<board>/<condfiguration>/appconfig
-
-        NOTE:  You should comment out the line containing the CONFIG_APPS_DIR
-        in the new defconfig file.  Why?  Because the application directory
-        may reside at a different location when the configuration is installed
-        at some later time.
-
-          # CONFIG_APPS_DIR="../apps"
-
-     5) The updated configuration can then be instantiated in the normal
-        fashion:
-
-          cd tools
-          ./configure.sh <board>/<condfiguration>
-
-        (or configure.bat for the case of the Windows native build).
-
-        NOTE: If CONFIG_APPS_DIR is not defined in the defconfig file,
-        the configure.sh script will find and add the new, correct path to
-        the application directory (CONFIG_APPS_DIR) when it copies the
-        defconfig file to the .config file.  This is the setting that was
-        commented out in step 4.
+  A: Refer to http://www.nuttx.org/doku.php?id=wiki:howtos:convertconfig
 
 NuttX Configuration Tool under DOS
 ----------------------------------

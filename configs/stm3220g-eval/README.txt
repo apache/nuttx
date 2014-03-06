@@ -933,18 +933,16 @@ Where <subdir> is one of the following:
        CONFIG_CAN_REGDEBUG
 
     6. This example can support an FTP client.  In order to build in FTP client
-       support simply uncomment the following lines in the appconfig file (before
-       configuring) or in the apps/.config file (after configuring):
+       support simply reconfigure NuttX, adding:
 
-       #CONFIGURED_APPS += netutils/ftpc
-       #CONFIGURED_APPS += examples/ftpc
+       CONFIG_NETUTILS_FTPC=y
+       CONFIG_EXAMPLES_FTPC=y
 
     7. This example can support an FTP server.  In order to build in FTP server
-       support simply uncomment the following lines in the appconfig file (before
-       configuring) or in the apps/.config file (after configuring):
+       support simply add the following lines in the NuttX configuration file:
 
-       #CONFIGURED_APPS += netutils/ftpd
-       #CONFIGURED_APPS += examples/ftpd
+       CONFIG_NETUTILS_FTPD=y
+       CONFIG_EXAMPLES_FTPD=y
 
        And enable poll() support in the NuttX configuration file:
 
@@ -968,32 +966,31 @@ Where <subdir> is one of the following:
 
     9. Adding LCD and graphics support:
 
-       appconfig (apps/.config):  Enable the application configurations that you
-       want to use.  Asexamples:
+       Enable the application configurations that you want to use.  As examples:
 
-       CONFIGURED_APPS += examples/nx       : Pick one or more
-       CONFIGURED_APPS += examples/nxhello  :
-       CONFIGURED_APPS += examples/nximage  :
-       CONFIGURED_APPS += examples/nxlines  :
+       CONFIG_EXAMPLES_NX=y      : Pick one or more
+       CONFIG_EXAMPLES_NXHELLO=y :
+       CONFIG_EXAMPLES_NXIMAGE=y :
+       CONFIG_EXAMPLES_NXLINES=y :
 
        defconfig (nuttx/.config):
 
-       CONFIG_STM32_FSMC=y                  : FSMC support is required for the LCD
-       CONFIG_NX=y                          : Enable graphics suppport
-       CONFIG_MM_REGIONS=2                  : When FSMC is enabled, so is the on-board SRAM memory region
+       CONFIG_STM32_FSMC=y       : FSMC support is required for the LCD
+       CONFIG_NX=y               : Enable graphics suppport
+       CONFIG_MM_REGIONS=2       : When FSMC is enabled, so is the on-board SRAM memory region
 
     10. USB OTG FS Device or Host Support
 
-       CONFIG_USBDEV          - Enable USB device support, OR
-       CONFIG_USBHOST         - Enable USB host support (but not both)
+       CONFIG_USBDEV             : Enable USB device support, OR
+       CONFIG_USBHOST            : Enable USB host support (but not both)
 
-       CONFIG_STM32_OTGFS     - Enable the STM32 USB OTG FS block
-       CONFIG_STM32_SYSCFG    - Needed for all USB OTF FS support
+       CONFIG_STM32_OTGFS        : Enable the STM32 USB OTG FS block
+       CONFIG_STM32_SYSCFG       : Needed for all USB OTF FS support
 
-       CONFIG_SCHED_WORKQUEUE - Worker thread support is required for the mass
-                                storage class (both host and device).
-       CONFIG_NSH_ARCHINIT    - Architecture specific USB initialization
-                                is needed
+       CONFIG_SCHED_WORKQUEUE    : Worker thread support is required for the mass
+                                   storage class (both host and device).
+       CONFIG_NSH_ARCHINIT       : Architecture specific USB initialization
+                                   is needed
 
     11. This configuration requires that jumper JP22 be set to enable RS-232 operation.
 

@@ -133,15 +133,12 @@ if [ ! -r "${src_config}" ]; then
 fi
 
 # Extract values needed from the defconfig file.  We need:
-# (1) The CONFIG_NUTTX_NEWCONFIG setting to know if this is a "new" style
-#     configuration,
-# (2) The CONFIG_WINDOWS_NATIVE setting to know it this is target for a
+# (1) The CONFIG_WINDOWS_NATIVE setting to know it this is target for a
 #     native Windows (meaning that we want setenv.bat vs setenv.sh and we need
 #     to use backslashes in the CONFIG_APPS_DIR setting).
-# (3) The CONFIG_APPS_DIR setting to see if there is a configured location for the
+# (2) The CONFIG_APPS_DIR setting to see if there is a configured location for the
 #     application directory.  This can be overridden from the command line.
 
-newconfig=`grep CONFIG_NUTTX_NEWCONFIG= "${src_config}" | cut -d'=' -f2`
 winnative=`grep CONFIG_WINDOWS_NATIVE= "${src_config}" | cut -d'=' -f2`
 
 defappdir=y
@@ -218,16 +215,3 @@ if [ "X${defappdir}" = "Xy" ]; then
     echo "CONFIG_APPS_DIR=\"$posappdir\"" >> "${dest_config}"
   fi
 fi 
-
-# Copy appconfig file.  The appconfig file will be copied to ${appdir}/.config
-# if both (1) ${appdir} is defined and (2) we are not using the new configuration
-# (which does not require a .config file in the appsdir.
-
-if [ ! -z "${appdir}" -a "X${newconfig}" != "Xy" ]; then
-  if [ ! -r "${configpath}/appconfig" ]; then
-    echo "NOTE: No readable appconfig file found in ${configpath}"
-  else
-    install -m 644 "${configpath}/appconfig" "${TOPDIR}/${posappdir}/.config" || \
-      { echo "Failed to copy ${configpath}/appconfig" ; exit 10 ; }
-  fi
-fi

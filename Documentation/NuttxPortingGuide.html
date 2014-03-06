@@ -645,20 +645,14 @@
 |-- <i>&lt;config1-dir&gt;</i>
 |   |-- Make.defs
 |   |-- defconfig
-|   |-- appconfig<sup>1</sup>
 |   `-- setenv.sh
 |-- <i>&lt;config2-dir&gt;</i>
 |   |-- Make.defs
 |   |-- defconfig
-|   |-- appconfig<sup>1</sup>
 |   `-- setenv.sh
 |   ...
 `-- <i>(other board-specific configuration sub-directories)</i>/
-</pre>
-<p><small>
-  <sup>1</sup>Optional
-</small></p>
-</ul>
+</pre></ul>
 
 <h3><a name="summaryofconfigfiles">2.4.2 Summary of Files</a></h3>
 <h4><a name="boardlogic">2.4.2.1 Board Specific Logic</a></h4>
@@ -743,13 +737,6 @@
       <li>to generate <code>include/nuttx/config.h</code> which is included by
           most C files in the system.</li>
     </ol></p>
-  </li>
-  <li>
-    <p>
-      <code>appconfig</code>: This is another configuration file that is specific to the
-      application.  This file is copied into the application build directory
-      when NuttX is configured.  See <code>../apps/README.txt</code> for further details.
-    </p>
   </li>
   <li>
     <p>
@@ -1462,15 +1449,6 @@ netutils/
 </ul>
 
 <p>
-  And if <code>configs/</code><i>&lt;board-name&gt;</i><code>/[</code><i>&lt;config-dir&gt;</i><code>/appconfig</code> exists in the board configuration directory:
-</p>
-<ul>
-  <li>Copy <code>configs/</code><i>&lt;board-name&gt;</i><code>/[</code><i>&lt;config-dir&gt;</i><code>/appconfig</code> to &lt;app-dir&gt;<code>/.config</code></li>
-  <li><code>echo &quot;APPS_LOC=\"&lt;app-dir&gt;\"" &gt;&gt; "${TOPDIR}/.config&quot;</code></li>
-</ul>
-
-</p>
-<p>
   Where <i>&lt;board-name&gt;</i> is the name of one of the sub-directories of the
   NuttX <a href="#DirStructConfigs"><code>configs/</code></a> directory.
   This sub-directory name corresponds to one of the supported boards
@@ -1500,8 +1478,7 @@ netutils/
 </p>
 
 <p>
-  If <code>configs/</code><i>&lt;board-name&gt;</i><code>/[</code><i>&lt;config-dir&gt;</i>]<code>/appconfig</code>
-  exists and your application directory is not in the standard loction (<config>../apps</config>),
+  If your application directory is not in the standard loction (<code>../apps</code> or <code>../apps-&lt;version&gt</code>),
   then you should also specify the location of the application directory on the command line like:
 </p>
 <ul><pre>
