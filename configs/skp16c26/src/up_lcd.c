@@ -47,7 +47,7 @@
 #include "up_internal.h"
 #include "chip.h"
 
-#ifdef CONFIG_ARCH_LCD
+#ifdef CONFIG_LCD
 
 /************************************************************************************
  * Definitions
@@ -280,4 +280,4 @@ void up_lcdputc(char ch)
     }
 }
 
-#endif /* CONFIG_ARCH_LCD */
+#endif /* CONFIG_LCD */

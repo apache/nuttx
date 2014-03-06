@@ -230,7 +230,7 @@ extern void board_led_off(int led);
 
 /* Defined in board/up_lcd.c */
 
-#ifdef CONFIG_ARCH_LCD
+#ifdef CONFIG_LCD_CONSOLE
 extern void up_lcdinit(void);
 extern void up_lcdputc(char ch);
 #else

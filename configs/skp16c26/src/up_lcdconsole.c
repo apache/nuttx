@@ -56,7 +56,7 @@
 #  undef HAVE_SERIALCONSOLE
 #endif
 
-#if !defined(HAVE_SERIALCONSOLE) && defined(CONFIG_ARCH_LCD) && defined(CONFIG_LCD_CONSOLE)
+#if !defined(HAVE_SERIALCONSOLE) && defined(CONFIG_LCD) && defined(CONFIG_LCD_CONSOLE)
 
 /************************************************************************************
  * Definitions
@@ -138,4 +138,4 @@ int up_putc(int ch)
   return ch;
 }
 
-#endif /* !HAVE_SERIALCONSOLE && CONFIG_ARCH_LCD */
+#endif /* !HAVE_SERIALCONSOLE && CONFIG_LCD && CONFIG_LCD_CONSOLE */

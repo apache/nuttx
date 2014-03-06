@@ -5,6 +5,17 @@
 
 comment "Common LCD Settings"
 
+config LCD_CONSOLE
+	bool "LCD console output"
+	default n
+	---help---
+		It is possible to use an LCD to provide console output.  This option
+		enables that possibility.
+
+		At present, only one architecture supports this option (M16C).
+		However, this feature could be provided by other architectures in
+		the future.
+
 config LCD_NOGETRUN
 	bool "Write-only LCD"
 	default n

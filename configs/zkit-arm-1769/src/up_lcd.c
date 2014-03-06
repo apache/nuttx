@@ -1,6 +1,5 @@
 /****************************************************************************
  * configs/zkit-arm-1769/src/up_lcd.c
- * arch/arm/src/board/up_lcd.c
  *
  *   Copyright (C) 2013 Zilogic Systems. All rights reserved.
  *   Author: Manikandan <code@zilogic.com>
@@ -196,4 +195,4 @@ int lpc17_ssp0cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
   return -ENODEV;
 }
 
-#endif /* CONFIG_ARCH_LCDS */
+#endif /* CONFIG_NX_LCDDRIVER */
