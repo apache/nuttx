@@ -6916,3 +6916,5 @@
 	  kconfig-frontends tools (2014-3-6)
 	* configs/rgmp/x86/default: Configuration converted to use the
 	  kconfig-frontends tools (2014-3-6)
+	* configs/rgmp/x86/nsh: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-6)
