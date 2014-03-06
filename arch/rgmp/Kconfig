@@ -20,11 +20,27 @@ config RGMP_SUBARCH_X86
 	---help---
 		RGMP x86 architecture"
 
-endchoice
+endchoice # RGMP Architecture
 
 config RGMP_SUBARCH
 	string
 	default "arm"		if RGMP_SUBARCH_ARM
 	default "x86"		if RGMP_SUBARCH_X86
 
-endif
+menu "x86 Peripheral Selections"
+	depends on RGMP_SUBARCH_X86
+
+config COM1
+	bool "COM1"
+
+config COM2
+	bool "COM1"
+
+config COM3
+	bool "COM1"
+
+config COM4
+	bool "COM1"
+
+endmenu # x86 Peripheral Selections
+endif # ARCH_RGMP

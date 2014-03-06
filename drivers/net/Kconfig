@@ -235,6 +235,22 @@ config NET_E1000
 	bool "E1000 support"
 	default n
 
+if NET_E1000
+
+config E1000_N_TX_DESC
+	int "Number of TX descriptors"
+	default 128
+
+config E1000_N_RX_DESC
+	int "Number of RX descriptors"
+	default 128
+
+config E1000_BUFF_SIZE
+	int "Buffer size"
+	default 2048
+
+endif # NET_E1000
+
 config NET_SLIP
 	bool "SLIP (serial line) support"
 	default n
