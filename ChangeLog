@@ -6942,3 +6942,5 @@
 	  winbuild) with the latest Kconfig files (2014-3-6).
 	* configs/viewtool-stm32f107:  Refresh all configurations with the
 	  latest Kconfig files (2014-3-6).
+	* configs/16z, mikroe-stm32f4, olimex-lpc1766stk, sim, and
+	  stm32f429i-disco: Refresh all configurations (2014-3-6).
