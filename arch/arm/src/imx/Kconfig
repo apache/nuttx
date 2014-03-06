@@ -5,19 +5,45 @@
 
 if ARCH_CHIP_IMX
 
-config IMX_UART0
-	bool "UART0"
-	select ARCH_HAVE_UART0
-	default n
+# choice "iMX Chip Selection"
+
+config ARCH_CHIP_IMX1
+	bool
+	default y
+
+menu "iMX Peripheral Selection"
 
 config IMX_UART1
 	bool "UART1"
-	select ARCH_HAVE_UART1
 	default n
+	select ARCH_HAVE_UART1
 
 config IMX_UART2
 	bool "UART2"
-	select ARCH_HAVE_UART2
 	default n
+	select ARCH_HAVE_UART2
+
+config IMX_UART3
+	bool "UART2"
+	default n
+	select ARCH_HAVE_UART3
+
+config IMX_SPI1
+	bool "SPI1"
+	default n
+	select SPI
+
+config IMX_SPI2
+	bool "SPI2"
+	default n
+	select SPI
+
+endmenu # iMX Peripheral Selection
+
+config RAM_NUTTXENTRY
+	hex "NuttX entry point"
+	default 0x01004000
+	---help---
+		The virtual address of the NuttX entry point
 
 endif
