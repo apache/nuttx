@@ -6906,3 +6906,5 @@
 	  kconfig-frontends tools (2014-3-6)
 	* configs/us7032evb1/nsh: Configuration converted to use the
 	  kconfig-frontends tools (2014-3-6)
+	* configs/mx1ads/ostest: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-6)
