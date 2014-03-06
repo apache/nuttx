@@ -6936,3 +6936,9 @@
 	  some guidelines (2014-3-6).
 	* drivers/serial/Kconfig:  Correct an error introduced in this file
 	  in very recent commits (2013-3-6).
+	* configs/*sam*:  Refresh all SAM* configurations with the latest
+	  Kconfig files (2014-3-6).
+	* configs/stm32f4discovery:  Refresh all configurations (except
+	  winbuild) with the latest Kconfig files (2014-3-6).
+	* configs/viewtool-stm32f107:  Refresh all configurations with the
+	  latest Kconfig files (2014-3-6).
