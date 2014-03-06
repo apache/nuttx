@@ -1,7 +1,7 @@
 RGMP README File
 ================
 
-RGMP stands for RTOS and GPOS on Multi-Processor.  RGMP is a project for 
+RGMP stands for RTOS and GPOS on Multi-Processor.  RGMP is a project for
 running GPOS and RTOS simultaneously on multi-processor platforms. You can
 port your favorite RTOS to RGMP together with an unmodified Linux to form a
 hybrid operating system. This makes your application able to use both RTOS
@@ -80,7 +80,7 @@ Requirements:
 1. Get your running Linux kernel header under /usr/src/linux-headers-$(uname -r)
    directory.
 
-2. Following the Ubuntu steps begin at 3. 
+2. Following the Ubuntu steps begin at 3.
 
 Note: You can configure the RGMP to find Linux kernel header in a different
       place and install RGMP to a different place. See information printed
@@ -88,6 +88,3 @@ Note: You can configure the RGMP to find Linux kernel header in a different
 
       $ cd <rgmp-dir>
       $ ./configure -h
-   
-
-
