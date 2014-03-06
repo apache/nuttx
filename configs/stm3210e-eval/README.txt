@@ -1053,11 +1053,11 @@ Where <subdir> is one of the following:
     USB serial example at apps/examples/usbterm by changing the
     following:
 
-      -CONFIGURED_APPS += examples/usbserial
-      +CONFIGURED_APPS += examples/usbterm
+      -CONFIG_EXAMPLES_USBSERIAL=y
+      +CONFIG_EXAMPLES_USBSERIAL=n
 
-    In either the original appconfig file (before configuring)
-    or in the final apps/.config file (after configuring).
+      -CONFIG_EXAMPLES_USBTERM=n
+      +CONFIG_EXAMPLES_USBTERM=y
 
   usbmsc:
   -------
