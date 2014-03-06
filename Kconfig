@@ -246,6 +246,23 @@ endmenu # Binary Output Formats
 
 menu "Customize Header Files"
 
+config ARCH_STDINT_H
+	bool "stdint.h"
+	default n
+	---help---
+		The stdint.h header file can be found at nuttx/include/stdint.h.
+		However, that header includes logic to redirect the inclusion of an
+		architecture specific header file like:
+
+			#ifdef CONFIG_ARCH_STDINT_H
+			#  include <arch/stdint.h>
+			#else
+			...
+			#endif
+
+		Recall that that include path, include/arch, is a symbolic link and
+		will refer to a version of stdint.h at nuttx/arch/<architecture>/include/stdint.h.
+
 config ARCH_STDBOOL_H
 	bool "stdbool.h"
 	default n

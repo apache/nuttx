@@ -70,6 +70,10 @@ static const char *dequote_list[] =
   "CONFIG_PASS1_OBJECT",               /* Pass1 build object */
   "CONFIG_DEBUG_OPTLEVEL",             /* Custom debug level */
 
+  /* RGMP */
+
+  "CONFIG_RGMP_SUBARCH",               /* RGMP sub-architecture */
+
   /* NxWidgets/NxWM */
 
   "CONFIG_NXWM_BACKGROUND_IMAGE",      /* Name of bitmap image class */

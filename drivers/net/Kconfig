@@ -245,6 +245,14 @@ config NET_VNET
 	bool "VNET support"
 	default n
 
+if NET_VNET
+
+config VNET_NINTERFACES
+	int "Number of VNET interfaces"
+	default 1
+
+endif # NET_VNET
+
 if ARCH_HAVE_PHY
 
 comment "External Ethernet PHY Device Support"

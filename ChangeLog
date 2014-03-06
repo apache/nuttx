@@ -6910,3 +6910,5 @@
 	  kconfig-frontends tools (2014-3-6)
 	* configs/pjrc-8051: Configuration converted to use the kconfig-frontends
 	  tools (2014-3-6)
+	* configs/rgmp/arm/default: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-6)
