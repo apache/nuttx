@@ -2,7 +2,6 @@
 # Automatically generated file; DO NOT EDIT.
 # Nuttx/ Configuration
 #
-CONFIG_NUTTX_NEWCONFIG=y
 
 #
 # Build Setup
