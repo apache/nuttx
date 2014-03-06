@@ -6,4 +6,65 @@
 if ARCH_SH1
 comment "SH-1 Configuration Options"
 
+menu "SH-1 Peripheral Selections"
+
+config SH1_DMAC0
+	bool "DMAC0"
+	default n
+
+config SH1_DMAC1
+	bool "DMAC1"
+	default n
+
+config SH1_DMAC2
+	bool "DMAC2"
+	default n
+
+config SH1_DMAC3
+	bool "DMAC3"
+	default n
+
+config SH1_ITU1
+	bool "ITU2"
+	default n
+
+config SH1_ITU2
+	bool "ITU2"
+	default n
+
+config SH1_ITU3
+	bool "ITU3"
+	default n
+
+config SH1_ITU4
+	bool "ITU4"
+	default n
+
+config SH1_SCI0
+	bool "SCI0"
+	default n
+	select ARCH_HAVE_SCI0
+
+config SH1_SCI1
+	bool "SCI1"
+	default n
+	select ARCH_HAVE_SCI1
+
+config SH1_PCU
+	bool "PCU"
+	default n
+
+config SH1_AD
+	bool "AD"
+	default n
+
+config SH1_WDT
+	bool "WDT"
+	default n
+
+config SH1_CMI
+	bool "CMI"
+	default n
+
+endmenu # SH-1 Peripheral Selections
 endif
