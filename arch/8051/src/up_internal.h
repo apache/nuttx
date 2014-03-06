@@ -1,7 +1,7 @@
 /**************************************************************************
- * up_internal.h
+ * arch/8051/src/up_internal.h
  *
- *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  **************************************************************************/
 
-#ifndef __ARCH_UP_INTERNAL_H
-#define __ARCH_UP_INTERNAL_H
+#ifndef __ARCH_8051_SRC_UP_INTERNAL_H
+#define __ARCH_8051_SRC_UP_INTERNAL_H
 
 /**************************************************************************
  * Included Files
@@ -108,29 +108,30 @@ extern const uint8_t g_ntobit[8];
 #ifndef __ASSEMBLY__
 
 #if CONFIG_MM_REGIONS > 1
-extern void up_addregion(void);
+void up_addregion(void);
 #endif
-extern void up_delay(uint8_t milliseconds) __naked;
-extern void up_irqinitialize(void);
-extern void up_restorecontext(FAR struct xcptcontext *context) _naked;
-extern void up_restoreregisters(FAR uint8_t *regs) _naked;
-extern uint8_t up_savecontext(FAR struct xcptcontext *context) __naked;
-extern void up_saveregisters(FAR uint8_t *regs) _naked;
-extern void up_saveirqcontext(FAR struct xcptcontext *context);
-extern void up_timerinit(void);
+void up_delay(uint8_t milliseconds) __naked;
+void up_irqinitialize(void);
+void up_restorecontext(FAR struct xcptcontext *context) _naked;
+void up_restoreregisters(FAR uint8_t *regs) _naked;
+uint8_t up_savecontext(FAR struct xcptcontext *context) __naked;
+void up_saveregisters(FAR uint8_t *regs) _naked;
+void up_saveirqcontext(FAR struct xcptcontext *context);
+void up_timerinit(void);
 
 /* Defined in up_debug.c */
 
-#if defined(CONFIG_ARCH_BRINGUP)
-extern void up_puthex(uint8_t hex) __naked;
-extern void up_puthex16(int hex) __naked;
-extern void up_putnl(void) __naked;
-extern void up_puts(__code char *ptr);
+#if defined(CONFIG_ARCH_8051_BRINGUP)
+void up_puthex(uint8_t hex) __naked;
+void up_puthex16(int hex) __naked;
+void up_putnl(void) __naked;
+void up_puts(__code char *ptr);
+void up_showsp(uint8_t ch) __naked;
 #endif
 
-#if defined(CONFIG_FRAME_DUMP) && defined(CONFIG_ARCH_BRINGUP)
-extern void up_dumpstack(void);
-extern void up_dumpframe(FAR struct xcptcontext *context);
+#if defined(CONFIG_FRAME_DUMP) && defined(CONFIG_ARCH_8051_BRINGUP)
+void up_dumpstack(void);
+void up_dumpframe(FAR struct xcptcontext *context);
 #else
 # define up_dumpstack()
 # define up_dumpframe(x)
@@ -139,9 +140,9 @@ extern void up_dumpframe(FAR struct xcptcontext *context);
 /* Defined in board/up_leds.c */
 
 #ifdef CONFIG_ARCH_LEDS
-extern void board_led_initialize(void);
-extern void board_led_on(uint8_t led);
-extern void board_led_off(uint8_t led);
+void board_led_initialize(void);
+void board_led_on(uint8_t led);
+void board_led_off(uint8_t led);
 #else
 # define board_led_initialize()
 # define board_led_on(led)
@@ -149,4 +150,4 @@ extern void board_led_off(uint8_t led);
 #endif
 
 #endif /* __ASSEMBLY */
-#endif /* __ARCH_UP_INTERNAL_H */
+#endif /* __ARCH_8051_SRC_UP_INTERNAL_H */

@@ -1,7 +1,7 @@
 /************************************************************************
- * up_timerisr.c
+ * arch/8051/src/up_timerisr.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -92,7 +92,7 @@ int up_timerisr(int irq, FAR uint8_t *frame)
 
 void up_timerinit(void)
 {
-#ifdef CONFIG_8052_TIMER2
+#ifdef CONFIG_ARCH_8051_NOSYSTIMER
   up_disable_irq(TIMER2_IRQ);
 
   /* Set up timer 2 -- See pjrc.h for details */

@@ -1,7 +1,7 @@
 /************************************************************
- * up_head.S
+ * arch/8051/src/up_head.S
  *
- *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,7 @@
 	.area REG_BANK_0	(REL,OVR,DATA)
 	.ds 8
 
-#ifndef CONFIG_8052_TIMER2
+#ifndef CONFIG_ARCH_8051_NOSYSTIMER
 	.area	XSEG
 _g_timer0tick:
 	.ds 1
@@ -99,7 +99,7 @@ _g_timer0tick:
 
 	.org	PM2_VECTOR_TIMER0
 	push	acc
-#ifdef CONFIG_8052_TIMER2
+#ifdef CONFIG_ARCH_8051_NOSYSTIMER
 	mov	a, #TIMER0_IRQ
 	ljmp	_up_interrupt
 #else
@@ -162,7 +162,7 @@ start:
  *
  ************************************************************/
 
-#ifndef CONFIG_8052_TIMER2
+#ifndef CONFIG_ARCH_8051_NOSYSTIMER
 _up_timer0:
 	ar2 = 0x02
 	ar3 = 0x03
