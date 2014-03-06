@@ -78,12 +78,11 @@ Common Configuration Notes
      b. Execute 'make menuconfig' in nuttx/ in order to start the
         reconfiguration process.
 
-  3. By default, all configurations assume the NuttX Buildroot toolchain
-     under Linux (should work under Windows with Cygwin as well).  This
+  3. By default, all configurations assume that you are building under
+     Linux (should work under Windows with Cygwin as well).  This is
      is easily reconfigured:
 
         CONFIG_HOST_LINUX=y
-        CONFIG_ARM_TOOLCHAIN_BUILDROOT=y
 
 Configuration Sub-Directories
 -----------------------------
