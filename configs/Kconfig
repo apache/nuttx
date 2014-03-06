@@ -764,6 +764,7 @@ config ARCH_BOARD_US7032EVB1
 	bool "Hitachi SH-1/US7032EVB1 board"
 	depends on ARCH_CHIP_SH7032
 	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
 	---help---
 		This is a port of the Hitachi SH-1 on the Hitachi SH-1/US7032EVB1 board.
 		STATUS:  Work has just began on this port.

@@ -333,44 +333,99 @@ endif
 #
 
 config ARCH_HAVE_UART
-       bool
+	bool
+	default n
+	select MCU_SERIAL
+
 config ARCH_HAVE_UART0
-       bool
+	bool
+	default n
+
 config ARCH_HAVE_UART1
-       bool
+	bool
+	default n
+	select MCU_SERIAL
+
 config ARCH_HAVE_UART2
-       bool
+	bool
+	default n
+	select MCU_SERIAL
+
 config ARCH_HAVE_UART3
-       bool
+	bool
+	default n
+	select MCU_SERIAL
+
 config ARCH_HAVE_UART4
-       bool
+	bool
+	default n
+	select MCU_SERIAL
+
 config ARCH_HAVE_UART5
-       bool
+	bool
+	default n
+	select MCU_SERIAL
+
 config ARCH_HAVE_UART6
-       bool
+	bool
+	default n
+	select MCU_SERIAL
+
 config ARCH_HAVE_UART7
-       bool
+	bool
+	default n
+	select MCU_SERIAL
+
 config ARCH_HAVE_UART8
-       bool
+	bool
+	default n
+	select MCU_SERIAL
+
+config ARCH_HAVE_SCI0
+	bool
+	default n
+	select MCU_SERIAL
+
+config ARCH_HAVE_SCI1
+	bool
+	default n
+	select MCU_SERIAL
 
 config ARCH_HAVE_USART0
-       bool
+	bool
+	default n
+
 config ARCH_HAVE_USART1
-       bool
+	bool
+	default n
+
 config ARCH_HAVE_USART2
-       bool
+	bool
+	default n
+
 config ARCH_HAVE_USART3
-       bool
+	bool
+	default n
+
 config ARCH_HAVE_USART4
-       bool
+	bool
+	default n
+
 config ARCH_HAVE_USART5
-       bool
+	bool
+	default n
+
 config ARCH_HAVE_USART6
-       bool
+	bool
+	default n
+
 config ARCH_HAVE_USART7
-       bool
+	bool
+	default n
+
 config ARCH_HAVE_USART8
-       bool
+	bool
+	default n
 
 #
 # USARTn configuration.  Is the USART configured to behave like a UART?
@@ -382,54 +437,59 @@ config USART0_ISUART
 	bool "USART0 is a UART"
 	default y
 	depends on ARCH_HAVE_USART0
+	select MCU_SERIAL
 
 config USART1_ISUART
 	bool "USART1 is a UART"
 	default y
 	depends on ARCH_HAVE_USART1
+	select MCU_SERIAL
 
 config USART2_ISUART
 	bool "USART2 is a UART"
 	default y
 	depends on ARCH_HAVE_USART2
+	select MCU_SERIAL
 
 config USART3_ISUART
 	bool "USART3 is a UART"
 	default y
 	depends on ARCH_HAVE_USART3
+	select MCU_SERIAL
 
 config USART4_ISUART
 	bool "USART4 is a UART"
 	default y
 	depends on ARCH_HAVE_USART4
+	select MCU_SERIAL
 
 config USART5_ISUART
 	bool "USART5 is a UART"
 	default y
 	depends on ARCH_HAVE_USART5
+	select MCU_SERIAL
 
 config USART6_ISUART
 	bool "USART6 is a UART"
 	default y
 	depends on ARCH_HAVE_USART6
+	select MCU_SERIAL
 
 config USART7_ISUART
 	bool "USART7 is a UART"
 	default y
 	depends on ARCH_HAVE_USART7
+	select MCU_SERIAL
 
 config USART8_ISUART
 	bool "USART8 is a UART"
 	default y
 	depends on ARCH_HAVE_USART8
+	select MCU_SERIAL
 
 config MCU_SERIAL
 	bool
-	default y if ARCH_HAVE_UART || ARCH_HAVE_UART0 || USART0_ISUART || \
-	ARCH_HAVE_UART1 || USART1_ISUART || ARCH_HAVE_UART2 || USART2_ISUART || \
-	ARCH_HAVE_UART3 || USART3_ISUART || ARCH_HAVE_UART4 || USART4_ISUART || \
-	ARCH_HAVE_UART5 || USART5_ISUART || ARCH_HAVE_UART6 || USART6_ISUART || \
-	ARCH_HAVE_UART7 || USART7_ISUART || ARCH_HAVE_UART8 || USART8_ISUART
+	default n
 
 #
 # Standard serial driver configuration
@@ -546,6 +606,14 @@ config UART8_SERIAL_CONSOLE
 config USART8_SERIAL_CONSOLE
 	bool "USART8"
 	depends on USART8_ISUART
+
+config SCI0_SERIAL_CONSOLE
+	bool "SCI0"
+	depends on ARCH_HAVE_SCI0
+
+config SCI1_SERIAL_CONSOLE
+	bool "SCI1"
+	depends on ARCH_HAVE_SCI1
 
 config NO_SERIAL_CONSOLE
 	bool "No serial console"
@@ -1638,6 +1706,92 @@ config UART8_OFLOWCONTROL
 		Enable UART8 CTS flow control
 
 endmenu
+
+menu "SCI0 Configuration"
+	depends on ARCH_HAVE_SCI0
+
+config SCI0_RXBUFSIZE
+	int "SCI0 receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config SCI0_TXBUFSIZE
+	int "SCI0 transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config SCI0_BAUD
+	int "SCI0 BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the SCI.
+
+config SCI0_BITS
+	int "SCI0 character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config SCI0_PARITY
+	int "Parity setting"
+	default 0
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config SCI0_2STOP
+	int "SCI0 use 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+endmenu # SCI0 Configuration
+
+menu "SCI1 Configuration"
+	depends on ARCH_HAVE_SCI1
+
+config SCI1_RXBUFSIZE
+	int "SCI1 receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config SCI1_TXBUFSIZE
+	int "SCI1 transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config SCI1_BAUD
+	int "SCI1 BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the SCI.
+
+config SCI1_BITS
+	int "SCI1 character size"
+	default 8
+	---help---
+		The number of bits.  Must be either 7 or 8.
+
+config SCI1_PARITY
+	int "Parity setting"
+	default 0
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+config SCI1_2STOP
+	int "SCI1 use 2 stop bits"
+	default 0
+	---help---
+		1=Two stop bits
+
+endmenu # SCI1 Configuration
 
 config SERIAL_IFLOWCONTROL
 	bool

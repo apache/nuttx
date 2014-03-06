@@ -6901,4 +6901,6 @@
 	* fs/nxffs/nxffs_stat.c: Looks like stat() has the same problem as
 	  the one reported by Lzyy (2014-3-6).
 	* configs/skp16c26/ostest: Configuration converted to use the
-	  kconfig-frontends tools (2014-3-5)
+	  kconfig-frontends tools (2014-3-6)
+	* configs/us7032evb1/ostest: Configuration converted to use the
+	  kconfig-frontends tools (2014-3-6)
