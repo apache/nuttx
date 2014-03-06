@@ -6934,3 +6934,5 @@
 	  convert those configurations to use the kconfig-frontends tools.
 	  See http://www.nuttx.org/doku.php?id=wiki:howtos:convertconfig for
 	  some guidelines (2014-3-6).
+	* drivers/serial/Kconfig:  Correct an error introduced in this file
+	  in very recent commits (2013-3-6).

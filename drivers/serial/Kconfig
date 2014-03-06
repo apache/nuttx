@@ -340,6 +340,7 @@ config ARCH_HAVE_UART
 config ARCH_HAVE_UART0
 	bool
 	default n
+	select MCU_SERIAL
 
 config ARCH_HAVE_UART1
 	bool
