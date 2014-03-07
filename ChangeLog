@@ -6944,5 +6944,8 @@
 	  latest Kconfig files (2014-3-6).
 	* configs/16z, mikroe-stm32f4, olimex-lpc1766stk, px4fmu-v2_upstream,
 	  sim, and stm32f429i-disco: Refresh all configurations (2014-3-6).
-	* Documentation/NuttShell.html:  Update per recommendations from Max\
+	* Documentation/NuttShell.html:  Update per recommendations from Max
 	  Kriegleder (2014-3-6).
+	* configs/pic32-starterkit, pic32mx7mmb, stm3210e-eval, stm3220g-eval,
+	  and stm3240g-eval:  Refresh all configurations with the latest
+	  Kconfig files (2014-3-7).
