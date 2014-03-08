@@ -69,10 +69,19 @@ config ARCH_CHIP_KL
 		Freescale Kinetis L Architectures (ARM Cortex-M0+)
 
 config ARCH_CHIP_LM
-	bool "TI Stellaris"
+	bool "TI/Luminary Stellaris"
 	select ARCH_HAVE_CMNVECTOR
+	select ARCH_HAVE_MPU
 	---help---
-		TI Stellaris LMS3 and LM4F architectures (ARM Cortex-M3/4)
+		TI/Luminary Stellaris LMS3 and LM4F architectures (ARM Cortex-M3/4)
+
+config ARCH_CHIP_TIVA
+	bool "TI Tiva"
+	select ARCH_HAVE_CMNVECTOR
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_FPU
+	---help---
+		TI Tiva TM4C architectures (ARM Cortex-M4)
 
 config ARCH_CHIP_LPC17XX
 	bool "NXP LPC17xx"
@@ -221,7 +230,7 @@ config ARCH_CHIP
 	default "imx"		if ARCH_CHIP_IMX
 	default "kinetis"	if ARCH_CHIP_KINETIS
 	default "kl"		if ARCH_CHIP_KL
-	default "lm"		if ARCH_CHIP_LM
+	default "tiva"		if ARCH_CHIP_LM || ARCH_CHIP_TIVA
 	default "lpc17xx"	if ARCH_CHIP_LPC17XX
 	default "lpc214x"	if ARCH_CHIP_LPC214X
 	default "lpc2378"	if ARCH_CHIP_LPC2378
@@ -348,8 +357,8 @@ endif
 if ARCH_CHIP_KL
 source arch/arm/src/kl/Kconfig
 endif
-if ARCH_CHIP_LM
-source arch/arm/src/lm/Kconfig
+if ARCH_CHIP_LM || ARCH_CHIP_TIVA
+source arch/arm/src/tiva/Kconfig
 endif
 if ARCH_CHIP_LPC17XX
 source arch/arm/src/lpc17xx/Kconfig
