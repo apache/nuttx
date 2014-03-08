@@ -6949,3 +6949,7 @@
 	* configs/pic32-starterkit, pic32mx7mmb, stm3210e-eval, stm3220g-eval,
 	  and stm3240g-eval:  Refresh all configurations with the latest
 	  Kconfig files (2014-3-7).
+	* configs/qemu-i486/src:  Files renamed to correspond with current
+	  thinking about naming (2014-3-8).
+	* arch/x86/src/qemu/qemu_keypad.c and qemu_vga.c:  New QEMU keyboard
+	  and VGA drivers from Lizhuoyi (2014-3-8).
