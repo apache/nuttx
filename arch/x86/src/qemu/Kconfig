@@ -19,4 +19,10 @@ config QEMU_VGA
 	---help---
 		Enable support for the QEMU VGA.  See qemu_vga.h for interfaces.
 
+		NOTE:  This VGA driver exports a character driver that can be used
+		to write into the VGA framebuffer. It does *NOT* support a NuttX
+		framebuffer interfaces and, hence, cannot be used with the NuttX
+		graphics subsystem.  Such a conversion to the standard NuttX
+		framebuffer interface would, however, not be a big job.
+
 endif
