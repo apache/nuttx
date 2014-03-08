@@ -1,12 +1,12 @@
 /****************************************************************************
- * configs/olimex-lpc2378/src/up_leds.c
+ * config/olimex-lpc2378/src/lpc2378_nsh.c
  *
  *   Copyright (C) 2010 Rommel Marcelo. All rights reserved.
  *   Author: Rommel Marcelo
  *
  * This is part of the NuttX RTOS and based on the LPC2148 port:
  *
- *   Copyright (C) 2010, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,88 +45,69 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
-#include "chip.h"
-#include "up_arch.h"
-#include "up_internal.h"
+#include <stdio.h>
+#include <debug.h>
+#include <errno.h>
+
+#include <nuttx/spi/spi.h>
+#include <nuttx/mmcsd.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Pre-Processor Definitions
  ****************************************************************************/
 
-/* P3.0 : P0.7 PINSEL6 LEDS 1-8 */
+/* Configuration ************************************************************/
 
-#define LEDBIT(led)     (0x01 << (led))
-#define ALL_LEDS        (0xff)
-#define STATLED         (0x08)
+/* PORT and SLOT number probably depend on the board configuration */
 
-#define putled8(v,o)    putreg8((v), (LPC23XX_FIO_BASE+(o)))
-#define putled32(v,r)   putreg32((v),(LPC23XX_FIO_BASE+(r)))
-#define CLRLEDS         putled(ALL_LEDS,FIO3CLR0_OFFSET)
+#undef NSH_HAVEUSBDEV
+#undef NSH_HAVEMMCSD
 
-#define LED_SET_OFFSET  FIO3SET0_OFFSET
-#define LED_CLR_OFFSET  FIO3CLR0_OFFSET
-#define LED_DIR_OFFSET  FIO3DIR0_OFFSET
-#define LED_MASK_OFFSET FIO3MASK0_OFFSET
+/* Can't support USB features if USB is not enabled */
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+#ifndef CONFIG_USBDEV
+#  undef NSH_HAVEUSBDEV
+#endif
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+/* Can't support MMC/SD features if mountpoints are disabled */
+
+#if defined(CONFIG_DISABLE_MOUNTPOINT)
+#  undef NSH_HAVEMMCSD
+#endif
+
+#ifndef CONFIG_NSH_MMCSDMINOR
+#  define CONFIG_NSH_MMCSDMINOR 0
+#endif
+
+/* Debug ********************************************************************/
+
+#ifdef CONFIG_CPP_HAVE_VARARGS
+#  ifdef CONFIG_DEBUG
+#    define message(...) lowsyslog(__VA_ARGS__)
+#  else
+#    define message(...) printf(__VA_ARGS__)
+#  endif
+#else
+#  ifdef CONFIG_DEBUG
+#    define message lowsyslog
+#  else
+#    define message printf
+#  endif
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_led_initialize
+ * Name: nsh_archinitialize
+ *
+ * Description:
+ *   Perform architecture specific initialization
+ *
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_LEDS
-void board_led_initialize(void)
+int nsh_archinitialize(void)
 {
-  /* Initialize GIOs P1.16-P1.23 */
-
-  putled8(ALL_LEDS, LED_DIR_OFFSET);
-  putled8(ALL_LEDS, LED_CLR_OFFSET);
-  putled8(LEDBIT(0), LED_SET_OFFSET);
+  return OK;
 }
-
-/****************************************************************************
- * Name: board_led_on
- ****************************************************************************/
-
-void board_led_on(int led)
-{
-  putled8(~(LEDBIT(led)), LED_MASK_OFFSET);
-  putled8(LEDBIT(led), LED_SET_OFFSET);
-}
-
-/****************************************************************************
- * Name: board_led_off
- ****************************************************************************/
-
-void board_led_off(int led)
-{
-  putled8(LEDBIT(led), LED_CLR_OFFSET);
-}
-
-/****************************************************************************
- * olimex board STATUS LED 
- ****************************************************************************/
-
-void up_statledoff(void)
-{
-  putled8(~STATLED, FIO1MASK2_OFFSET);
-  putled8(STATLED, FIO1CLR2_OFFSET);
-}
-
-void up_statledon(void)
-{
-  putled8(~STATLED, FIO1MASK2_OFFSET);
-  putled8(STATLED, FIO1SET2_OFFSET);
-}
-
-#endif /* CONFIG_ARCH_LEDS */
