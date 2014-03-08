@@ -169,7 +169,7 @@ IDEs
      on the command line.
 
   Startup files will probably cause you some headaches.  The NuttX startup file
-  is arch/arm/src/lm/lm_vectors.S.
+  is arch/arm/src/tiva/tiva_vectors.S.
 
 NuttX EABI "buildroot" Toolchain
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

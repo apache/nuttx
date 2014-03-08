@@ -45,7 +45,7 @@
 #include <nuttx/compiler.h>
 
 #include "chip.h"
-#include "lm_gpio.h"
+#include "tiva_gpio.h"
 
 /************************************************************************************
  * Definitions

@@ -45,14 +45,14 @@
 
 /* Then get all of the register definitions */
 
-#include "chip/lm_memorymap.h"  /* Memory map */
-#include "chip/lm_syscontrol.h" /* System control module */
-#include "chip/lm_gpio.h"       /* GPIO modules */
-#include "chip/lm_uart.h"       /* UART modules */
-#include "chip/lm_i2c.h"        /* I2C modules */
-#include "chip/lm_ssi.h"        /* SSI modules */
-#include "chip/lm_ethernet.h"   /* Ethernet MAC and PHY */
-#include "chip/lm_flash.h"      /* FLASH */
+#include "chip/tiva_memorymap.h"  /* Memory map */
+#include "chip/tiva_syscontrol.h" /* System control module */
+#include "chip/tiva_gpio.h"       /* GPIO modules */
+#include "chip/tiva_uart.h"       /* UART modules */
+#include "chip/tiva_i2c.h"        /* I2C modules */
+#include "chip/tiva_ssi.h"        /* SSI modules */
+#include "chip/tiva_ethernet.h"   /* Ethernet MAC and PHY */
+#include "chip/tiva_flash.h"      /* FLASH */
 
 /************************************************************************************
  * Pre-processor Definitions

@@ -49,7 +49,7 @@
 
 #include "up_arch.h"
 #include "chip.h"
-#include "lm_gpio.h"
+#include "tiva_gpio.h"
 #include "lm3s6432s2e_internal.h"
 
 #if !defined(CONFIG_SSI0_DISABLE)
@@ -79,7 +79,7 @@
 /* Dump GPIO registers */
 
 #ifdef SSI_VERBOSE
-#  define ssi_dumpgpio(m) lm_dumpgpio(SDCCS_GPIO, m)
+#  define ssi_dumpgpio(m) tiva_dumpgpio(SDCCS_GPIO, m)
 #else
 #  define ssi_dumpgpio(m)
 #endif
@@ -105,18 +105,18 @@ void weak_function lm_ssiinitialize(void)
   /* Configure the SPI CS GPIO */
 
   ssi_dumpgpio("lm_ssiinitialize() Entry)");
-  lm_configgpio(SSICS_GPIO);
+  tiva_configgpio(SSICS_GPIO);
   ssi_dumpgpio("lm_ssiinitialize() Exit");
 }
 
 /****************************************************************************
- * The external functions, lm_spiselect and lm_spistatus must be provided
+ * The external functions, tiva_spiselect and tiva_spistatus must be provided
  * by board-specific logic.  The are implementations of the select and status
  * methods SPI interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h).
  * All othermethods (including up_spiinitialize()) are provided by common
  * logic.  To use this common SPI logic on your board:
  *
- *   1. Provide lm_spiselect() and lm_spistatus() functions in your
+ *   1. Provide tiva_spiselect() and tiva_spistatus() functions in your
  *      board-specific logic.  This function will perform chip selection and
  *      status operations using GPIOs in the way your board is configured.
  *   2. Add a call to up_spiinitialize() in your low level initialization
@@ -128,21 +128,22 @@ void weak_function lm_ssiinitialize(void)
  *
  ****************************************************************************/
 
-void lm_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+void tiva_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   ssidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-  ssi_dumpgpio("lm_spiselect() Entry");
+  ssi_dumpgpio("tiva_spiselect() Entry");
 
   if (devid == SPIDEV_MMCSD)
     {
       /* Assert the CS pin to the card */
 
-      lm_gpiowrite(SDCCS_GPIO, !selected);
+      tiva_gpiowrite(SDCCS_GPIO, !selected);
     }
-  ssi_dumpgpio("lm_spiselect() Exit");
+
+  ssi_dumpgpio("tiva_spiselect() Exit");
 }
 
-uint8_t lm_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t tiva_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
   ssidbg("Returning SPI_STATUS_PRESENT\n");
   return SPI_STATUS_PRESENT;

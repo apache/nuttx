@@ -45,7 +45,7 @@
 #include <nuttx/compiler.h>
 
 #include "chip.h"
-#include "lm_gpio.h"
+#include "tiva_gpio.h"
 
 /************************************************************************************
  * Definitions
@@ -88,7 +88,7 @@
  *
  ************************************************************************************/
 
-extern void weak_function lm_ssiinitialize(void);
+void weak_function lm_ssiinitialize(void);
 
 /****************************************************************************
  * Name: board_led_initialize
@@ -99,7 +99,7 @@ extern void weak_function lm_ssiinitialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-extern void board_led_initialize(void);
+void board_led_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

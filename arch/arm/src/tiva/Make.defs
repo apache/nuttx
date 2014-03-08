@@ -33,7 +33,7 @@
 #
 ############################################################################
 
-HEAD_ASRC  = lm_vectors.S
+HEAD_ASRC  = tiva_vectors.S
 
 CMN_ASRCS  = up_saveusercontext.S up_fullcontextrestore.S up_switchcontext.S
 CMN_ASRCS += vfork.S
@@ -69,18 +69,18 @@ CMN_CSRCS += up_elf.c
 endif
 
 CHIP_ASRCS  =
-CHIP_CSRCS  = lm_allocateheap.c lm_start.c lm_syscontrol.c lm_irq.c
-CHIP_CSRCS += lm_gpio.c lm_gpioirq.c lm_timerisr.c lm_lowputc.c lm_serial.c
-CHIP_CSRCS += lm_ssi.c lm_dumpgpio.c
+CHIP_CSRCS  = tiva_allocateheap.c tiva_start.c tiva_syscontrol.c tiva_irq.c
+CHIP_CSRCS += tiva_gpio.c tiva_gpioirq.c tiva_timerisr.c tiva_lowputc.c
+CHIP_CSRCS += tiva_serial.c tiva_ssi.c tiva_dumpgpio.c
 
 ifeq ($(CONFIG_NUTTX_KERNEL),y)
-CHIP_CSRCS += lm_userspace.c lm_mpuinit.c
+CHIP_CSRCS += tiva_userspace.c tiva_mpuinit.c
 endif
 
 ifdef CONFIG_NET
-CHIP_CSRCS += lm_ethernet.c
+CHIP_CSRCS += tiva_ethernet.c
 endif
 
 ifdef CONFIG_LM_FLASH
-CHIP_CSRCS += lm_flash.c
+CHIP_CSRCS += tiva_flash.c
 endif

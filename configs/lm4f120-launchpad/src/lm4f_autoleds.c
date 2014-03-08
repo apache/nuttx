@@ -48,7 +48,7 @@
 #include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
-#include "lm_gpio.h"
+#include "tiva_gpio.h"
 #include "lmf4120-launchpad.h"
 
 /****************************************************************************
@@ -112,7 +112,7 @@
 /* Dump GPIO registers */
 
 #ifdef CONFIG_DEBUG_LEDS
-#  define led_dumpgpio(m) lm_dumpgpio(LED_GPIO, m)
+#  define led_dumpgpio(m) tiva_dumpgpio(LED_GPIO, m)
 #else
 #  define led_dumpgpio(m)
 #endif
@@ -144,11 +144,11 @@ void lm4f_ledinit(void)
 
   /* Configure Port E, Bit 1 as an output, initial value=OFF */
 
-  led_dumpgpio("lm4f_ledinit before lm_configgpio()");
-  lm_configgpio(GPIO_LED_R);
-  lm_configgpio(GPIO_LED_G);
-  lm_configgpio(GPIO_LED_B);
-  led_dumpgpio("lm4f_ledinit after lm_configgpio()");
+  led_dumpgpio("lm4f_ledinit before tiva_configgpio()");
+  tiva_configgpio(GPIO_LED_R);
+  tiva_configgpio(GPIO_LED_G);
+  tiva_configgpio(GPIO_LED_B);
+  led_dumpgpio("lm4f_ledinit after tiva_configgpio()");
 }
 
 /****************************************************************************
@@ -168,25 +168,25 @@ void board_led_on(int led)
       /* The GREEN component is illuminated at the final initialization step */
 
       case 1:
-        lm_gpiowrite(GPIO_LED_G, false);
+        tiva_gpiowrite(GPIO_LED_G, false);
         break;
 
       /* These will illuminate the BLUE component with on effect no RED and GREEN */
 
       case 2:
-        lm_gpiowrite(GPIO_LED_B, false);
+        tiva_gpiowrite(GPIO_LED_B, false);
         break;
 
       /* This will turn off RED and GREEN and turn RED on */
 
       case 4:
-        lm_gpiowrite(GPIO_LED_G, true);
-        lm_gpiowrite(GPIO_LED_B, true);
+        tiva_gpiowrite(GPIO_LED_G, true);
+        tiva_gpiowrite(GPIO_LED_B, true);
 
       /* This will illuminate the RED component with no effect on RED and GREEN */
 
       case 3:
-        lm_gpiowrite(GPIO_LED_R, false);
+        tiva_gpiowrite(GPIO_LED_R, false);
         break;
     }
 }
@@ -209,14 +209,14 @@ void board_led_off(int led)
       /* These will extinguish the BLUE component with no effect on RED and GREEN */
 
       case 2:
-        lm_gpiowrite(GPIO_LED_B, true);
+        tiva_gpiowrite(GPIO_LED_B, true);
         break;
 
       /* These will extinguish the RED component with on effect on RED and GREEN */
 
       case 3:
       case 4:
-        lm_gpiowrite(GPIO_LED_R, true);
+        tiva_gpiowrite(GPIO_LED_R, true);
         break;
     }
 }

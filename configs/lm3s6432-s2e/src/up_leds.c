@@ -48,7 +48,7 @@
 #include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
-#include "lm_gpio.h"
+#include "tiva_gpio.h"
 #include "lm3s6432s2e_internal.h"
 
 /****************************************************************************
@@ -70,7 +70,7 @@
 /* Dump GPIO registers */
 
 #ifdef CONFIG_DEBUG_LEDS
-#  define led_dumpgpio(m) lm_dumpgpio(LED_GPIO, m)
+#  define led_dumpgpio(m) tiva_dumpgpio(LED_GPIO, m)
 #else
 #  define led_dumpgpio(m)
 #endif
@@ -100,10 +100,10 @@ void board_led_initialize(void)
 
   /* Configure Port F, Bit 2 as an output, initial value=OFF */
 
-  led_dumpgpio("board_led_initialize before lm_configgpio()");
-  lm_configgpio(LED0_GPIO);
-  lm_configgpio(LED1_GPIO);
-  led_dumpgpio("board_led_initialize after lm_configgpio()");
+  led_dumpgpio("board_led_initialize before tiva_configgpio()");
+  tiva_configgpio(LED0_GPIO);
+  tiva_configgpio(LED1_GPIO);
+  led_dumpgpio("board_led_initialize after tiva_configgpio()");
   g_nest = 0;
 }
 
@@ -127,9 +127,9 @@ void board_led_on(int led)
         g_nest++;
       case LED_IRQSENABLED:
       case LED_STACKCREATED:
-        led_dumpgpio("board_led_on: before lm_gpiowrite()");
-        lm_gpiowrite(LED1_GPIO, false);
-        led_dumpgpio("board_led_on: after lm_gpiowrite()");
+        led_dumpgpio("board_led_on: before tiva_gpiowrite()");
+        tiva_gpiowrite(LED1_GPIO, false);
+        led_dumpgpio("board_led_on: after tiva_gpiowrite()");
         break;
     }
 }
@@ -155,9 +155,9 @@ void board_led_off(int led)
       case LED_PANIC:
         if (--g_nest <= 0)
           {
-            led_dumpgpio("board_led_off: before lm_gpiowrite()");
-            lm_gpiowrite(LED1_GPIO, true);
-            led_dumpgpio("board_led_off: after lm_gpiowrite()");
+            led_dumpgpio("board_led_off: before tiva_gpiowrite()");
+            tiva_gpiowrite(LED1_GPIO, true);
+            led_dumpgpio("board_led_off: after tiva_gpiowrite()");
           }
         break;
     }
