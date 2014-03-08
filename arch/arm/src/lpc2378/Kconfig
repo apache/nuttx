@@ -150,6 +150,11 @@ config LPC2378_IC2
 	default n
 	select I2C
 
+config LPC2378_SPI
+	bool "SPI"
+	default n
+	select SPI
+
 endmenu
 
 if LPC2378_USBDEV
