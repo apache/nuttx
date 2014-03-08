@@ -180,16 +180,16 @@ _vectors:
 	.type	handlers, function
 	.thumb_func
 handlers:
-	HANDLER	tiva_reserved, LM_IRQ_RESERVED		/* Unexpected/reserved vector */
-	HANDLER	tiva_nmi, LM_IRQ_NMI				/* Vector  2: Non-Maskable Interrupt (NMI) */
-	HANDLER	tiva_hardfault, LM_IRQ_HARDFAULT	/* Vector  3: Hard fault */
-	HANDLER	tiva_mpu, LM_IRQ_MEMFAULT			/* Vector  4: Memory management (MPU) */
-	HANDLER	tiva_busfault, LM_IRQ_BUSFAULT		/* Vector  5: Bus fault */
-	HANDLER	tiva_usagefault, LM_IRQ_USAGEFAULT	/* Vector  6: Usage fault */
-	HANDLER	tiva_svcall, LM_IRQ_SVCALL			/* Vector 11: SVC call */
-	HANDLER	tiva_dbgmonitor, LM_IRQ_DBGMONITOR	/* Vector 12: Debug Monitor */
-	HANDLER	tiva_pendsv, LM_IRQ_PENDSV			/* Vector 14: Penable system service request */
-	HANDLER	tiva_systick, LM_IRQ_SYSTICK		/* Vector 15: System tick */
+	HANDLER	tiva_reserved, TIVA_IRQ_RESERVED		/* Unexpected/reserved vector */
+	HANDLER	tiva_nmi, TIVA_IRQ_NMI					/* Vector  2: Non-Maskable Interrupt (NMI) */
+	HANDLER	tiva_hardfault, TIVA_IRQ_HARDFAULT		/* Vector  3: Hard fault */
+	HANDLER	tiva_mpu, TIVA_IRQ_MEMFAULT				/* Vector  4: Memory management (MPU) */
+	HANDLER	tiva_busfault, TIVA_IRQ_BUSFAULT		/* Vector  5: Bus fault */
+	HANDLER	tiva_usagefault, TIVA_IRQ_USAGEFAULT	/* Vector  6: Usage fault */
+	HANDLER	tiva_svcall, TIVA_IRQ_SVCALL			/* Vector 11: SVC call */
+	HANDLER	tiva_dbgmonitor, TIVA_IRQ_DBGMONITOR	/* Vector 12: Debug Monitor */
+	HANDLER	tiva_pendsv, TIVA_IRQ_PENDSV			/* Vector 14: Penable system service request */
+	HANDLER	tiva_systick, TIVA_IRQ_SYSTICK			/* Vector 15: System tick */
 
 #undef VECTOR
 #define VECTOR(l,i) HANDLER l, i

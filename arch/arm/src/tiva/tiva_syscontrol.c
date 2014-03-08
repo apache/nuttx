@@ -174,7 +174,7 @@ static inline void tiva_plllock(void)
     {
       /* Check if the PLL is locked on */
 
-      if ((getreg32(LM_SYSCON_RIS) & SYSCON_RIS_PLLLRIS) != 0)
+      if ((getreg32(TIVA_SYSCON_RIS) & SYSCON_RIS_PLLLRIS) != 0)
         {
           /* Yes.. return now */
 
@@ -206,17 +206,17 @@ void tiva_clockconfig(uint32_t newrcc, uint32_t newrcc2)
 
   /* Get the current values of the RCC and RCC2 registers */
 
-  rcc  = getreg32(LM_SYSCON_RCC);
-  rcc2 = getreg32(LM_SYSCON_RCC2);
+  rcc  = getreg32(TIVA_SYSCON_RCC);
+  rcc2 = getreg32(TIVA_SYSCON_RCC2);
 
   /* Temporarily bypass the PLL and system clock dividers */
 
   rcc |= SYSCON_RCC_BYPASS;
   rcc &= ~(SYSCON_RCC_USESYSDIV);
-  putreg32(rcc, LM_SYSCON_RCC);
+  putreg32(rcc, TIVA_SYSCON_RCC);
 
   rcc2 |= SYSCON_RCC2_BYPASS2;
-  putreg32(rcc2, LM_SYSCON_RCC2);
+  putreg32(rcc2, TIVA_SYSCON_RCC2);
 
   /* We are probably using the main oscillator.  The main oscillator is disabled on
    * reset and so probably must be enabled here.  The internal oscillator is enabled
@@ -233,7 +233,7 @@ void tiva_clockconfig(uint32_t newrcc, uint32_t newrcc2)
       /* Enable any selected osciallators (but don't disable any yet) */
 
       rcc &= (~RCC_OSCMASK | (newrcc & RCC_OSCMASK));
-      putreg32(rcc, LM_SYSCON_RCC);
+      putreg32(rcc, TIVA_SYSCON_RCC);
 
       /* Wait for the newly selected oscillator(s) to settle.  This is tricky because
        * the time that we wait can be significant and is determined by the previous
@@ -253,7 +253,7 @@ void tiva_clockconfig(uint32_t newrcc, uint32_t newrcc2)
 
   /* Clear the PLL lock interrupt */
 
-  putreg32(SYSCON_MISC_PLLLMIS, LM_SYSCON_MISC);
+  putreg32(SYSCON_MISC_PLLLMIS, TIVA_SYSCON_MISC);
 
   /* Write the new RCC/RCC2 values.
    *
@@ -269,14 +269,14 @@ void tiva_clockconfig(uint32_t newrcc, uint32_t newrcc2)
 #ifndef LM4F
   if ((rcc2 & SYSCON_RCC2_USERCC2) != 0)
     {
-      putreg32(rcc2, LM_SYSCON_RCC2);
-      putreg32(rcc, LM_SYSCON_RCC);
+      putreg32(rcc2, TIVA_SYSCON_RCC2);
+      putreg32(rcc, TIVA_SYSCON_RCC);
     }
   else
 #endif
     {
-      putreg32(rcc, LM_SYSCON_RCC);
-      putreg32(rcc2, LM_SYSCON_RCC2);
+      putreg32(rcc, TIVA_SYSCON_RCC);
+      putreg32(rcc2, TIVA_SYSCON_RCC2);
     }
 
   /* Wait for the new crystal value and oscillator source to take effect */
@@ -313,11 +313,11 @@ void tiva_clockconfig(uint32_t newrcc, uint32_t newrcc2)
    * before writing the RCC2 register.
    */
 
-  putreg32(rcc, LM_SYSCON_RCC);
+  putreg32(rcc, TIVA_SYSCON_RCC);
 #ifdef LM4F
-  rcc = getreg32(LM_SYSCON_RCC);
+  rcc = getreg32(TIVA_SYSCON_RCC);
 #endif
-  putreg32(rcc2, LM_SYSCON_RCC2);
+  putreg32(rcc2, TIVA_SYSCON_RCC2);
 
   /* Wait for the system divider to be effective */
 
@@ -336,16 +336,16 @@ void tiva_clockconfig(uint32_t newrcc, uint32_t newrcc2)
 void up_clockconfig(void)
 {
 #ifdef CONFIG_LM_REVA2
-  /* Some early silicon returned an increase LDO voltage or 2.75V to work
+  /* Some early LM3 silicon returned an increase LDO voltage or 2.75V to work
    * around a PLL bug
    */
 
-  putreg32(SYSCON_LPDOPCTL_2750MV, LM_SYSCON_LDOPCTL);
+  putreg32(SYSCON_LPDOPCTL_2750MV, TIVA_SYSCON_LDOPCTL);
 #endif
 
   /* Set the clocking to run with the default settings provided in the board.h
    * header file
    */
 
-  tiva_clockconfig(LM_RCC_VALUE, LM_RCC2_VALUE);
+  tiva_clockconfig(TIVA_RCC_VALUE, TIVA_RCC2_VALUE);
 }

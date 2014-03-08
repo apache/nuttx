@@ -44,7 +44,7 @@
 
 #include "chip.h"
 
-#if LM_NETHCONTROLLERS > 1
+#if TIVA_NETHCONTROLLERS > 1
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -99,5 +99,5 @@ int tiva_ethinitialize(int intf);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* LM_NETHCONTROLLERS > 1 */
+#endif /* TIVA_NETHCONTROLLERS > 1 */
 #endif /* __ARCH_ARM_SRC_TIVA_TIVA_ETHERNET_H */

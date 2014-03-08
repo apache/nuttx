@@ -60,64 +60,64 @@
 
 /* NOTE: this is duplicated in tiva_gpio.c */
 
-static const uintptr_t g_gpiobase[LM_NPORTS] =
+static const uintptr_t g_gpiobase[TIVA_NPORTS] =
 {
-#if LM_NPORTS > 0
-    LM_GPIOA_BASE
+#if TIVA_NPORTS > 0
+    TIVA_GPIOA_BASE
 #endif
-#if LM_NPORTS > 1
-  , LM_GPIOB_BASE
+#if TIVA_NPORTS > 1
+  , TIVA_GPIOB_BASE
 #endif
-#if LM_NPORTS > 2
-  , LM_GPIOC_BASE
+#if TIVA_NPORTS > 2
+  , TIVA_GPIOC_BASE
 #endif
-#if LM_NPORTS > 3
-  , LM_GPIOD_BASE
+#if TIVA_NPORTS > 3
+  , TIVA_GPIOD_BASE
 #endif
-#if LM_NPORTS > 4
-  , LM_GPIOE_BASE
+#if TIVA_NPORTS > 4
+  , TIVA_GPIOE_BASE
 #endif
-#if LM_NPORTS > 5
-  , LM_GPIOF_BASE
+#if TIVA_NPORTS > 5
+  , TIVA_GPIOF_BASE
 #endif
-#if LM_NPORTS > 6
-  , LM_GPIOG_BASE
+#if TIVA_NPORTS > 6
+  , TIVA_GPIOG_BASE
 #endif
-#if LM_NPORTS > 7
-  , LM_GPIOH_BASE
+#if TIVA_NPORTS > 7
+  , TIVA_GPIOH_BASE
 #endif
-#if LM_NPORTS > 8
-  , LM_GPIOJ_BASE
+#if TIVA_NPORTS > 8
+  , TIVA_GPIOJ_BASE
 #endif
 };
 
-static const char g_portchar[LM_NPORTS] =
+static const char g_portchar[TIVA_NPORTS] =
 {
-#if LM_NPORTS > 0
+#if TIVA_NPORTS > 0
     'A'
 #endif
-#if LM_NPORTS > 1
+#if TIVA_NPORTS > 1
   , 'B'
 #endif
-#if LM_NPORTS > 2
+#if TIVA_NPORTS > 2
   , 'C'
 #endif
-#if LM_NPORTS > 3
+#if TIVA_NPORTS > 3
   , 'D'
 #endif
-#if LM_NPORTS > 4
+#if TIVA_NPORTS > 4
   , 'E'
 #endif
-#if LM_NPORTS > 5
+#if TIVA_NPORTS > 5
   , 'F'
 #endif
-#if LM_NPORTS > 6
+#if TIVA_NPORTS > 6
   , 'G'
 #endif
-#if LM_NPORTS > 7
+#if TIVA_NPORTS > 7
   , 'H'
 #endif
-#if LM_NPORTS > 8
+#if TIVA_NPORTS > 8
   , 'J'
 #endif
 };
@@ -137,7 +137,7 @@ static const char g_portchar[LM_NPORTS] =
 
 static inline uintptr_t tiva_gpiobaseaddress(int port)
 {
-  return port < LM_NPORTS ? g_gpiobase[port] : 0;
+  return port < TIVA_NPORTS ? g_gpiobase[port] : 0;
 }
 
 /****************************************************************************
@@ -151,7 +151,7 @@ static inline uintptr_t tiva_gpiobaseaddress(int port)
 
 static inline uint8_t tiva_gpioport(int port)
 {
-  return port < LM_NPORTS ? g_portchar[port] : '?';
+  return port < TIVA_NPORTS ? g_portchar[port] : '?';
 }
 
 /****************************************************************************
@@ -182,7 +182,7 @@ int tiva_dumpgpio(uint32_t pinset, const char *msg)
   /* The following requires exclusive access to the GPIO registers */
 
   flags   = irqsave();
-  rcgc2   = getreg32(LM_SYSCON_RCGC2);
+  rcgc2   = getreg32(TIVA_SYSCON_RCGC2);
   enabled = ((rcgc2 & SYSCON_RCGC2_GPIO(port)) != 0);
 
   lldbg("GPIO%c pinset: %08x base: %08x -- %s\n",
@@ -195,16 +195,16 @@ int tiva_dumpgpio(uint32_t pinset, const char *msg)
   if (enabled)
     {
       lldbg("  AFSEL: %02x DEN: %02x DIR: %02x DATA: %02x\n",
-            getreg32(base + LM_GPIO_AFSEL_OFFSET), getreg32(base + LM_GPIO_DEN_OFFSET),
-            getreg32(base + LM_GPIO_DIR_OFFSET), getreg32(base + LM_GPIO_DATA_OFFSET + 0x3fc));
+            getreg32(base + TIVA_GPIO_AFSEL_OFFSET), getreg32(base + TIVA_GPIO_DEN_OFFSET),
+            getreg32(base + TIVA_GPIO_DIR_OFFSET), getreg32(base + TIVA_GPIO_DATA_OFFSET + 0x3fc));
       lldbg("  IS:    %02x IBE: %02x IEV: %02x IM:  %02x RIS: %08x MIS: %08x\n",
-            getreg32(base + LM_GPIO_IEV_OFFSET), getreg32(base + LM_GPIO_IM_OFFSET),
-            getreg32(base + LM_GPIO_RIS_OFFSET), getreg32(base + LM_GPIO_MIS_OFFSET));
+            getreg32(base + TIVA_GPIO_IEV_OFFSET), getreg32(base + TIVA_GPIO_IM_OFFSET),
+            getreg32(base + TIVA_GPIO_RIS_OFFSET), getreg32(base + TIVA_GPIO_MIS_OFFSET));
       lldbg("  2MA:   %02x 4MA: %02x 8MA: %02x ODR: %02x PUR %02x PDR: %02x SLR: %02x\n",
-            getreg32(base + LM_GPIO_DR2R_OFFSET), getreg32(base + LM_GPIO_DR4R_OFFSET),
-            getreg32(base + LM_GPIO_DR8R_OFFSET), getreg32(base + LM_GPIO_ODR_OFFSET),
-            getreg32(base + LM_GPIO_PUR_OFFSET), getreg32(base + LM_GPIO_PDR_OFFSET),
-            getreg32(base + LM_GPIO_SLR_OFFSET));
+            getreg32(base + TIVA_GPIO_DR2R_OFFSET), getreg32(base + TIVA_GPIO_DR4R_OFFSET),
+            getreg32(base + TIVA_GPIO_DR8R_OFFSET), getreg32(base + TIVA_GPIO_ODR_OFFSET),
+            getreg32(base + TIVA_GPIO_PUR_OFFSET), getreg32(base + TIVA_GPIO_PDR_OFFSET),
+            getreg32(base + TIVA_GPIO_SLR_OFFSET));
     }
   irqrestore(flags);
   return OK;

@@ -146,34 +146,34 @@ static const struct gpio_func_s g_funcbits[] =
 
 /* NOTE: this is duplicated in tiva_dumpgpio.c */
 
-static const uintptr_t g_gpiobase[LM_NPORTS] =
+static const uintptr_t g_gpiobase[TIVA_NPORTS] =
 {
-#if LM_NPORTS > 0
-    LM_GPIOA_BASE
+#if TIVA_NPORTS > 0
+    TIVA_GPIOA_BASE
 #endif
-#if LM_NPORTS > 1
-  , LM_GPIOB_BASE
+#if TIVA_NPORTS > 1
+  , TIVA_GPIOB_BASE
 #endif
-#if LM_NPORTS > 2
-  , LM_GPIOC_BASE
+#if TIVA_NPORTS > 2
+  , TIVA_GPIOC_BASE
 #endif
-#if LM_NPORTS > 3
-  , LM_GPIOD_BASE
+#if TIVA_NPORTS > 3
+  , TIVA_GPIOD_BASE
 #endif
-#if LM_NPORTS > 4
-  , LM_GPIOE_BASE
+#if TIVA_NPORTS > 4
+  , TIVA_GPIOE_BASE
 #endif
-#if LM_NPORTS > 5
-  , LM_GPIOF_BASE
+#if TIVA_NPORTS > 5
+  , TIVA_GPIOF_BASE
 #endif
-#if LM_NPORTS > 6
-  , LM_GPIOG_BASE
+#if TIVA_NPORTS > 6
+  , TIVA_GPIOG_BASE
 #endif
-#if LM_NPORTS > 7
-  , LM_GPIOH_BASE
+#if TIVA_NPORTS > 7
+  , TIVA_GPIOH_BASE
 #endif
-#if LM_NPORTS > 8
-  , LM_GPIOJ_BASE
+#if TIVA_NPORTS > 8
+  , TIVA_GPIOJ_BASE
 #endif
 };
 
@@ -197,7 +197,7 @@ static const uintptr_t g_gpiobase[LM_NPORTS] =
 static uintptr_t tiva_gpiobaseaddress(unsigned int port)
 {
   uintptr_t gpiobase = 0;
-  if (port < LM_NPORTS)
+  if (port < TIVA_NPORTS)
     {
       gpiobase = g_gpiobase[port];
     }
@@ -234,10 +234,10 @@ static void tiva_gpiofunc(uint32_t base, uint32_t pinno,
   setbit = (((uint32_t)func->setbits >> ODR_SHIFT) & 1) << pinno;
   clrbit = (((uint32_t)func->clrbits >> ODR_SHIFT) & 1) << pinno;
 
-  regval = getreg32(base + LM_GPIO_ODR_OFFSET);
+  regval = getreg32(base + TIVA_GPIO_ODR_OFFSET);
   regval &= ~clrbit;
   regval |= setbit;
-  putreg32(regval, base + LM_GPIO_ODR_OFFSET);
+  putreg32(regval, base + TIVA_GPIO_ODR_OFFSET);
 
   /* Set/clear the GPIO PUR bit. "The GPIOPUR register is the pull-up control
    * register. When a bit is set to 1, it enables a weak pull-up resistor on the
@@ -250,10 +250,10 @@ static void tiva_gpiofunc(uint32_t base, uint32_t pinno,
 
   if (setbit || clrbit)
     {
-      regval = getreg32(base + LM_GPIO_PUR_OFFSET);
+      regval = getreg32(base + TIVA_GPIO_PUR_OFFSET);
       regval &= ~clrbit;
       regval |= setbit;
-      putreg32(regval, base + LM_GPIO_PUR_OFFSET);
+      putreg32(regval, base + TIVA_GPIO_PUR_OFFSET);
     }
 
   /* Set/clear the GPIO PDR bit. "The GPIOPDR register is the pull-down control
@@ -267,10 +267,10 @@ static void tiva_gpiofunc(uint32_t base, uint32_t pinno,
 
   if (setbit || clrbit)
     {
-      regval = getreg32(base + LM_GPIO_PDR_OFFSET);
+      regval = getreg32(base + TIVA_GPIO_PDR_OFFSET);
       regval &= ~clrbit;
       regval |= setbit;
-      putreg32(regval, base + LM_GPIO_PDR_OFFSET);
+      putreg32(regval, base + TIVA_GPIO_PDR_OFFSET);
     }
 
   /* Set/clear the GPIO DEN bit. "The GPIODEN register is the digital enable
@@ -285,10 +285,10 @@ static void tiva_gpiofunc(uint32_t base, uint32_t pinno,
   setbit = (((uint32_t)func->setbits >> DEN_SHIFT) & 1) << pinno;
   clrbit = (((uint32_t)func->clrbits >> DEN_SHIFT) & 1) << pinno;
 
-  regval = getreg32(base + LM_GPIO_DEN_OFFSET);
+  regval = getreg32(base + TIVA_GPIO_DEN_OFFSET);
   regval &= ~clrbit;
   regval |= setbit;
-  putreg32(regval, base + LM_GPIO_DEN_OFFSET);
+  putreg32(regval, base + TIVA_GPIO_DEN_OFFSET);
 
   /* Set/clear/ignore the GPIO DIR bit. "The GPIODIR register is the data
    * direction register. Bits set to 1 in the GPIODIR register configure
@@ -300,10 +300,10 @@ static void tiva_gpiofunc(uint32_t base, uint32_t pinno,
   setbit = (((uint32_t)func->setbits >> DIR_SHIFT) & 1) << pinno;
   clrbit = (((uint32_t)func->clrbits >> DIR_SHIFT) & 1) << pinno;
 
-  regval = getreg32(base + LM_GPIO_DIR_OFFSET);
+  regval = getreg32(base + TIVA_GPIO_DIR_OFFSET);
   regval &= ~clrbit;
   regval |= setbit;
-  putreg32(regval, base + LM_GPIO_DIR_OFFSET);
+  putreg32(regval, base + TIVA_GPIO_DIR_OFFSET);
 
   /* Set/clear/ignore the GPIO AFSEL bit. "The GPIOAFSEL register is the mode
    * control select register. Writing a 1 to any bit in this register selects
@@ -317,10 +317,10 @@ static void tiva_gpiofunc(uint32_t base, uint32_t pinno,
   setbit = (((uint32_t)func->setbits >> AFSEL_SHIFT) & 1) << pinno;
   clrbit = (((uint32_t)func->clrbits >> AFSEL_SHIFT) & 1) << pinno;
 
-  regval = getreg32(base + LM_GPIO_AFSEL_OFFSET);
+  regval = getreg32(base + TIVA_GPIO_AFSEL_OFFSET);
   regval &= ~clrbit;
   regval |= setbit;
-  putreg32(regval, base + LM_GPIO_AFSEL_OFFSET);
+  putreg32(regval, base + TIVA_GPIO_AFSEL_OFFSET);
 
   /* Set/clear/ignore the GPIO AMSEL bit. "The GPIOAMSEL register controls
    * isolation circuits to the analog side of a unified I/O pad. Because
@@ -334,10 +334,10 @@ static void tiva_gpiofunc(uint32_t base, uint32_t pinno,
   setbit = (((uint32_t)func->setbits >> AMSEL_SHIFT) & 1) << pinno;
   clrbit = (((uint32_t)func->clrbits >> AMSEL_SHIFT) & 1) << pinno;
 
-  regval = getreg32(base + LM_GPIO_AMSEL_OFFSET);
+  regval = getreg32(base + TIVA_GPIO_AMSEL_OFFSET);
   regval &= ~clrbit;
   regval |= setbit;
-  putreg32(regval, base + LM_GPIO_AMSEL_OFFSET);
+  putreg32(regval, base + TIVA_GPIO_AMSEL_OFFSET);
 #endif
 }
 
@@ -374,7 +374,7 @@ static inline void tiva_gpiopadstrength(uint32_t base, uint32_t pin,
            * DRV8 bit in the GPIODR8R register are automatically cleared by hardware."
            */
 
-          regoffset = LM_GPIO_DR2R_OFFSET;
+          regoffset = TIVA_GPIO_DR2R_OFFSET;
         }
         break;
 
@@ -387,7 +387,7 @@ static inline void tiva_gpiopadstrength(uint32_t base, uint32_t pin,
            * in the GPIO DR8R register are automatically cleared by hardware."
            */
 
-          regoffset = LM_GPIO_DR4R_OFFSET;
+          regoffset = TIVA_GPIO_DR4R_OFFSET;
         }
         break;
 
@@ -412,7 +412,7 @@ static inline void tiva_gpiopadstrength(uint32_t base, uint32_t pin,
            * DRV4 bit in the GPIO DR4R register are automatically cleared by hardware."
            */
 
-          regoffset = LM_GPIO_DR8R_OFFSET;
+          regoffset = TIVA_GPIO_DR8R_OFFSET;
         }
         break;
     }
@@ -423,10 +423,10 @@ static inline void tiva_gpiopadstrength(uint32_t base, uint32_t pin,
   regval |= pin;
   putreg32(regval, base + regoffset);
 
-  regval  = getreg32(base + LM_GPIO_SLR_OFFSET);
+  regval  = getreg32(base + TIVA_GPIO_SLR_OFFSET);
   regval &= slrclr;
   regval |= slrset;
-  putreg32(regval, base + LM_GPIO_SLR_OFFSET);
+  putreg32(regval, base + TIVA_GPIO_SLR_OFFSET);
 }
 
 /****************************************************************************
@@ -542,10 +542,10 @@ static inline void tiva_gpiopadtype(uint32_t base, uint32_t pin,
    */
 
 #if 0 /* always overwritten by tiva_gpiofunc */
-  regval = getreg32(base + LM_GPIO_ODR_OFFSET);
+  regval = getreg32(base + TIVA_GPIO_ODR_OFFSET);
   regval &= ~odrclr;
   regval |= odrset;
-  putreg32(regval, base + LM_GPIO_ODR_OFFSET);
+  putreg32(regval, base + TIVA_GPIO_ODR_OFFSET);
 #endif
 
   /* Set/clear the GPIO PUR bit. "The GPIOPUR register is the pull-up control
@@ -554,10 +554,10 @@ static inline void tiva_gpiopadtype(uint32_t base, uint32_t pin,
    * corresponding bit in the GPIO Pull-Down Select (GPIOPDR) register ..."
    */
 
-  regval = getreg32(base + LM_GPIO_PUR_OFFSET);
+  regval = getreg32(base + TIVA_GPIO_PUR_OFFSET);
   regval &= ~purclr;
   regval |= purset;
-  putreg32(regval, base + LM_GPIO_PUR_OFFSET);
+  putreg32(regval, base + TIVA_GPIO_PUR_OFFSET);
 
   /* Set/clear the GPIO PDR bit. "The GPIOPDR register is the pull-down control
    * register. When a bit is set to 1, it enables a weak pull-down resistor on the
@@ -565,10 +565,10 @@ static inline void tiva_gpiopadtype(uint32_t base, uint32_t pin,
    * the corresponding bit in the GPIO Pull-Up Select (GPIOPUR) register ..."
    */
 
-  regval = getreg32(base + LM_GPIO_PDR_OFFSET);
+  regval = getreg32(base + TIVA_GPIO_PDR_OFFSET);
   regval &= ~pdrclr;
   regval |= pdrset;
-  putreg32(regval, base + LM_GPIO_PDR_OFFSET);
+  putreg32(regval, base + TIVA_GPIO_PDR_OFFSET);
 
   /* Set/clear the GPIO DEN bit. "The GPIODEN register is the digital enable
    * register. By default, with the exception of the GPIO signals used for JTAG/SWD
@@ -580,10 +580,10 @@ static inline void tiva_gpiopadtype(uint32_t base, uint32_t pin,
    */
 
 #if 0 /* always overwritten by tiva_gpiofunc */
-  regval = getreg32(base + LM_GPIO_DEN_OFFSET);
+  regval = getreg32(base + TIVA_GPIO_DEN_OFFSET);
   regval &= ~denclr;
   regval |= denset;
-  putreg32(regval, base + LM_GPIO_DEN_OFFSET);
+  putreg32(regval, base + TIVA_GPIO_DEN_OFFSET);
 #endif
 }
 
@@ -628,18 +628,18 @@ static inline void tiva_interrupt(uint32_t base, uint32_t pin, uint32_t cfgset)
    * on that pin. All bits are cleared by a reset."
    */
 
-  regval  = getreg32(base + LM_GPIO_IM_OFFSET);
+  regval  = getreg32(base + TIVA_GPIO_IM_OFFSET);
   regval &= ~pin;
-  putreg32(regval, base + LM_GPIO_IM_OFFSET);
+  putreg32(regval, base + TIVA_GPIO_IM_OFFSET);
 
   /* "The GPIOICR register is the interrupt clear register. Writing a 1 to a bit
    * in this register clears the corresponding interrupt edge detection logic
    * register. Writing a 0 has no effect."
    */
 
-  regval  = getreg32(base + LM_GPIO_ICR_OFFSET);
+  regval  = getreg32(base + TIVA_GPIO_ICR_OFFSET);
   regval |= pin;
-  putreg32(regval, base + LM_GPIO_ICR_OFFSET);
+  putreg32(regval, base + TIVA_GPIO_ICR_OFFSET);
 
   /* Assume rising edge */
 
@@ -695,10 +695,10 @@ static inline void tiva_interrupt(uint32_t base, uint32_t pin, uint32_t cfgset)
    * by a reset.
    */
 
-  regval  = getreg32(base + LM_GPIO_IS_OFFSET);
+  regval  = getreg32(base + TIVA_GPIO_IS_OFFSET);
   regval &= isclr;
   regval |= isset;
-  putreg32(regval, base + LM_GPIO_IS_OFFSET);
+  putreg32(regval, base + TIVA_GPIO_IS_OFFSET);
 
   /* "The GPIO IBE register is the interrupt both-edges register. When the
    * corresponding bit in the GPIO Interrupt Sense (GPIO IS) register ... is
@@ -709,10 +709,10 @@ static inline void tiva_interrupt(uint32_t base, uint32_t pin, uint32_t cfgset)
    * are cleared by a reset.
    */
 
-  regval  = getreg32(base + LM_GPIO_IBE_OFFSET);
+  regval  = getreg32(base + TIVA_GPIO_IBE_OFFSET);
   regval &= ibeclr;
   regval |= ibeset;
-  putreg32(regval, base + LM_GPIO_IBE_OFFSET);
+  putreg32(regval, base + TIVA_GPIO_IBE_OFFSET);
 
   /* "The GPIOIEV register is the interrupt event register. Bits set to
    * High in GPIO IEV configure the corresponding pin to detect rising edges
@@ -722,10 +722,10 @@ static inline void tiva_interrupt(uint32_t base, uint32_t pin, uint32_t cfgset)
    * value in GPIOIS. All bits are cleared by a reset.
    */
 
-  regval  = getreg32(base + LM_GPIO_IEV_OFFSET);
+  regval  = getreg32(base + TIVA_GPIO_IEV_OFFSET);
   regval &= iveclr;
   regval |= iveset;
-  putreg32(regval, base + LM_GPIO_IEV_OFFSET);
+  putreg32(regval, base + TIVA_GPIO_IEV_OFFSET);
 }
 
 /****************************************************************************
@@ -758,11 +758,11 @@ static inline void tiva_portcontrol(uint32_t base, uint32_t pinno,
 
   /* Set the alternate function in the port control register */
 
-  regval  = getreg32(base + LM_GPIO_PCTL_OFFSET);
+  regval  = getreg32(base + TIVA_GPIO_PCTL_OFFSET);
   mask    = GPIO_PCTL_PMC_MASK(pinno);
   regval &= ~mask;
   regval |= (alt << GPIO_PCTL_PMC_SHIFT(pinno)) & mask;
-  putreg32(regval, base + LM_GPIO_PCTL_OFFSET);
+  putreg32(regval, base + TIVA_GPIO_PCTL_OFFSET);
 }
 #else
 #  define tiva_portcontrol(b,p,c,f)
@@ -813,9 +813,9 @@ int tiva_configgpio(uint32_t cfgset)
    * in the RCGC2 register."
    */
 
-  regval = getreg32(LM_SYSCON_RCGC2);
+  regval = getreg32(TIVA_SYSCON_RCGC2);
   regval |= SYSCON_RCGC2_GPIO(port);
-  putreg32(regval, LM_SYSCON_RCGC2);
+  putreg32(regval, TIVA_SYSCON_RCGC2);
 
   /* First, set the port to digital input.  This is the safest state in which
    * to perform reconfiguration.
@@ -890,7 +890,7 @@ void tiva_gpiowrite(uint32_t pinset, bool value)
    * "... All bits are cleared by a reset."
    */
 
-  putreg32((uint32_t)value << pinno, base + LM_GPIO_DATA_OFFSET + (1 << (pinno + 2)));
+  putreg32((uint32_t)value << pinno, base + TIVA_GPIO_DATA_OFFSET + (1 << (pinno + 2)));
 }
 
 /****************************************************************************
@@ -929,6 +929,5 @@ bool tiva_gpioread(uint32_t pinset, bool value)
    *  are cleared by a reset."
    */
 
-  return (getreg32(base + LM_GPIO_DATA_OFFSET + (1 << (pinno + 2))) != 0);
+  return (getreg32(base + TIVA_GPIO_DATA_OFFSET + (1 << (pinno + 2))) != 0);
 }
-

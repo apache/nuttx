@@ -71,34 +71,34 @@ static FAR xcpt_t g_gpioirqvector[NR_GPIO_IRQS];
 
 static const uintptr_t g_gpiobase[] =
 {
-#ifndef CONFIG_LM_DISABLE_GPIOA_IRQS
-    LM_GPIOA_BASE
+#ifndef CONFIG_TIVA_DISABLE_GPIOA_IRQS
+    TIVA_GPIOA_BASE
 #else
     0
 #endif
-#ifndef CONFIG_LM_DISABLE_GPIOB_IRQS
-  , LM_GPIOB_BASE
+#ifndef CONFIG_TIVA_DISABLE_GPIOB_IRQS
+  , TIVA_GPIOB_BASE
 #endif
-#ifndef CONFIG_LM_DISABLE_GPIOC_IRQS
-  , LM_GPIOC_BASE
+#ifndef CONFIG_TIVA_DISABLE_GPIOC_IRQS
+  , TIVA_GPIOC_BASE
 #endif
-#ifndef CONFIG_LM_DISABLE_GPIOD_IRQS
-  , LM_GPIOD_BASE
+#ifndef CONFIG_TIVA_DISABLE_GPIOD_IRQS
+  , TIVA_GPIOD_BASE
 #endif
-#ifndef CONFIG_LM_DISABLE_GPIOE_IRQS
-  , LM_GPIOE_BASE
+#ifndef CONFIG_TIVA_DISABLE_GPIOE_IRQS
+  , TIVA_GPIOE_BASE
 #endif
-#ifndef CONFIG_LM_DISABLE_GPIOF_IRQS
-  , LM_GPIOF_BASE
+#ifndef CONFIG_TIVA_DISABLE_GPIOF_IRQS
+  , TIVA_GPIOF_BASE
 #endif
-#ifndef CONFIG_LM_DISABLE_GPIOG_IRQS
-  , LM_GPIOG_BASE
+#ifndef CONFIG_TIVA_DISABLE_GPIOG_IRQS
+  , TIVA_GPIOG_BASE
 #endif
-#ifndef CONFIG_LM_DISABLE_GPIOH_IRQS
-  , LM_GPIOH_BASE
+#ifndef CONFIG_TIVA_DISABLE_GPIOH_IRQS
+  , TIVA_GPIOH_BASE
 #endif
-#ifndef CONFIG_LM_DISABLE_GPIOJ_IRQS
-  , LM_GPIOJ_BASE
+#ifndef CONFIG_TIVA_DISABLE_GPIOJ_IRQS
+  , TIVA_GPIOJ_BASE
 #endif
 };
 
@@ -156,7 +156,7 @@ static int tiva_gpiohandler(uint32_t regbase, int irqbase, void *context)
    * either no interrupt has been generated, or the interrupt is masked."
    */
 
-  mis = getreg32(regbase + LM_GPIO_MIS_OFFSET) & 0xff;
+  mis = getreg32(regbase + TIVA_GPIO_MIS_OFFSET) & 0xff;
 
   /* Clear all GPIO interrupts that we are going to process.  "The GPIO ICR
    * register is the interrupt clear register. Writing a 1 to a bit in this
@@ -164,7 +164,7 @@ static int tiva_gpiohandler(uint32_t regbase, int irqbase, void *context)
    * Writing a 0 has no effect."
    */
 
-  putreg32(mis, regbase + LM_GPIO_ICR_OFFSET);
+  putreg32(mis, regbase + TIVA_GPIO_ICR_OFFSET);
 
   /* Now process each IRQ pending in the MIS */
 
@@ -179,66 +179,66 @@ static int tiva_gpiohandler(uint32_t regbase, int irqbase, void *context)
   return OK;
 }
 
-#ifndef CONFIG_LM_DISABLE_GPIOA_IRQS
+#ifndef CONFIG_TIVA_DISABLE_GPIOA_IRQS
 static int tiva_gpioahandler(int irq, FAR void *context)
 {
-  return tiva_gpiohandler(LM_GPIOA_BASE, LM_IRQ_GPIOA_0, context);
+  return tiva_gpiohandler(TIVA_GPIOA_BASE, TIVA_IRQ_GPIOA_0, context);
 }
 #endif
 
-#ifndef CONFIG_LM_DISABLE_GPIOB_IRQS
+#ifndef CONFIG_TIVA_DISABLE_GPIOB_IRQS
 static int tiva_gpiobhandler(int irq, FAR void *context)
 {
-  return tiva_gpiohandler(LM_GPIOB_BASE, LM_IRQ_GPIOB_0, context);
+  return tiva_gpiohandler(TIVA_GPIOB_BASE, TIVA_IRQ_GPIOB_0, context);
 }
 #endif
 
-#ifndef CONFIG_LM_DISABLE_GPIOC_IRQS
+#ifndef CONFIG_TIVA_DISABLE_GPIOC_IRQS
 static int tiva_gpiochandler(int irq, FAR void *context)
 {
-  return tiva_gpiohandler(LM_GPIOC_BASE, LM_IRQ_GPIOC_0, context);
+  return tiva_gpiohandler(TIVA_GPIOC_BASE, TIVA_IRQ_GPIOC_0, context);
 }
 #endif
 
-#ifndef CONFIG_LM_DISABLE_GPIOD_IRQS
+#ifndef CONFIG_TIVA_DISABLE_GPIOD_IRQS
 static int tiva_gpiodhandler(int irq, FAR void *context)
 {
-  return tiva_gpiohandler(LM_GPIOD_BASE, LM_IRQ_GPIOD_0, context);
+  return tiva_gpiohandler(TIVA_GPIOD_BASE, TIVA_IRQ_GPIOD_0, context);
 }
 #endif
 
-#ifndef CONFIG_LM_DISABLE_GPIOE_IRQS
+#ifndef CONFIG_TIVA_DISABLE_GPIOE_IRQS
 static int tiva_gpioehandler(int irq, FAR void *context)
 {
-  return tiva_gpiohandler(LM_GPIOE_BASE, LM_IRQ_GPIOE_0, context);
+  return tiva_gpiohandler(TIVA_GPIOE_BASE, TIVA_IRQ_GPIOE_0, context);
 }
 #endif
 
-#ifndef CONFIG_LM_DISABLE_GPIOF_IRQS
+#ifndef CONFIG_TIVA_DISABLE_GPIOF_IRQS
 static int tiva_gpiofhandler(int irq, FAR void *context)
 {
-  return tiva_gpiohandler(LM_GPIOF_BASE, LM_IRQ_GPIOF_0, context);
+  return tiva_gpiohandler(TIVA_GPIOF_BASE, TIVA_IRQ_GPIOF_0, context);
 }
 #endif
 
-#ifndef CONFIG_LM_DISABLE_GPIOG_IRQS
+#ifndef CONFIG_TIVA_DISABLE_GPIOG_IRQS
 static int tiva_gpioghandler(int irq, FAR void *context)
 {
-  return tiva_gpiohandler(LM_GPIOG_BASE, LM_IRQ_GPIOG_0, context);
+  return tiva_gpiohandler(TIVA_GPIOG_BASE, TIVA_IRQ_GPIOG_0, context);
 }
 #endif
 
-#ifndef CONFIG_LM_DISABLE_GPIOH_IRQS
+#ifndef CONFIG_TIVA_DISABLE_GPIOH_IRQS
 static int tiva_gpiohhandler(int irq, FAR void *context)
 {
-  return tiva_gpiohandler(LM_GPIOH_BASE, LM_IRQ_GPIOH_0, context);
+  return tiva_gpiohandler(TIVA_GPIOH_BASE, TIVA_IRQ_GPIOH_0, context);
 }
 #endif
 
-#ifndef CONFIG_LM_DISABLE_GPIOJ_IRQS
+#ifndef CONFIG_TIVA_DISABLE_GPIOJ_IRQS
 static int tiva_gpiojhandler(int irq, FAR void *context)
 {
-  return tiva_gpiohandler(LM_GPIOJ_BASE, LM_IRQ_GPIOJ_0, context);
+  return tiva_gpiohandler(TIVA_GPIOJ_BASE, TIVA_IRQ_GPIOJ_0, context);
 }
 #endif
 
@@ -269,41 +269,41 @@ int gpio_irqinitialize(void)
    * interrupts
    */
 
-#ifndef CONFIG_LM_DISABLE_GPIOA_IRQS
-  irq_attach(LM_IRQ_GPIOA, tiva_gpioahandler);
-  up_enable_irq(LM_IRQ_GPIOA);
+#ifndef CONFIG_TIVA_DISABLE_GPIOA_IRQS
+  irq_attach(TIVA_IRQ_GPIOA, tiva_gpioahandler);
+  up_enable_irq(TIVA_IRQ_GPIOA);
 #endif
-#ifndef CONFIG_LM_DISABLE_GPIOB_IRQS
-  irq_attach(LM_IRQ_GPIOB, tiva_gpiobhandler);
-  up_enable_irq(LM_IRQ_GPIOB);
+#ifndef CONFIG_TIVA_DISABLE_GPIOB_IRQS
+  irq_attach(TIVA_IRQ_GPIOB, tiva_gpiobhandler);
+  up_enable_irq(TIVA_IRQ_GPIOB);
 #endif
-#ifndef CONFIG_LM_DISABLE_GPIOC_IRQS
-  irq_attach(LM_IRQ_GPIOC, tiva_gpiochandler);
-  up_enable_irq(LM_IRQ_GPIOC);
+#ifndef CONFIG_TIVA_DISABLE_GPIOC_IRQS
+  irq_attach(TIVA_IRQ_GPIOC, tiva_gpiochandler);
+  up_enable_irq(TIVA_IRQ_GPIOC);
 #endif
-#ifndef CONFIG_LM_DISABLE_GPIOD_IRQS
-  irq_attach(LM_IRQ_GPIOD, tiva_gpiodhandler);
-  up_enable_irq(LM_IRQ_GPIOD);
+#ifndef CONFIG_TIVA_DISABLE_GPIOD_IRQS
+  irq_attach(TIVA_IRQ_GPIOD, tiva_gpiodhandler);
+  up_enable_irq(TIVA_IRQ_GPIOD);
 #endif
-#ifndef CONFIG_LM_DISABLE_GPIOE_IRQS
-  irq_attach(LM_IRQ_GPIOE, tiva_gpioehandler);
-  up_enable_irq(LM_IRQ_GPIOE);
+#ifndef CONFIG_TIVA_DISABLE_GPIOE_IRQS
+  irq_attach(TIVA_IRQ_GPIOE, tiva_gpioehandler);
+  up_enable_irq(TIVA_IRQ_GPIOE);
 #endif
-#ifndef CONFIG_LM_DISABLE_GPIOF_IRQS
-  irq_attach(LM_IRQ_GPIOF, tiva_gpiofhandler);
-  up_enable_irq(LM_IRQ_GPIOF);
+#ifndef CONFIG_TIVA_DISABLE_GPIOF_IRQS
+  irq_attach(TIVA_IRQ_GPIOF, tiva_gpiofhandler);
+  up_enable_irq(TIVA_IRQ_GPIOF);
 #endif
-#ifndef CONFIG_LM_DISABLE_GPIOG_IRQS
-  irq_attach(LM_IRQ_GPIOG, tiva_gpioghandler);
-  up_enable_irq(LM_IRQ_GPIOG);
+#ifndef CONFIG_TIVA_DISABLE_GPIOG_IRQS
+  irq_attach(TIVA_IRQ_GPIOG, tiva_gpioghandler);
+  up_enable_irq(TIVA_IRQ_GPIOG);
 #endif
-#ifndef CONFIG_LM_DISABLE_GPIOH_IRQS
-  irq_attach(LM_IRQ_GPIOH, tiva_gpiohhandler);
-  up_enable_irq(LM_IRQ_GPIOH);
+#ifndef CONFIG_TIVA_DISABLE_GPIOH_IRQS
+  irq_attach(TIVA_IRQ_GPIOH, tiva_gpiohhandler);
+  up_enable_irq(TIVA_IRQ_GPIOH);
 #endif
-#ifndef CONFIG_LM_DISABLE_GPIOJ_IRQS
-  irq_attach(LM_IRQ_GPIOJ, tiva_gpiojhandler);
-  up_enable_irq(LM_IRQ_GPIOJ);
+#ifndef CONFIG_TIVA_DISABLE_GPIOJ_IRQS
+  irq_attach(TIVA_IRQ_GPIOJ, tiva_gpiojhandler);
+  up_enable_irq(TIVA_IRQ_GPIOJ);
 #endif
 
   return OK;
@@ -381,9 +381,9 @@ void gpio_irqenable(int irq)
        */
 
       flags   = irqsave();
-      regval  = getreg32(base + LM_GPIO_IM_OFFSET);
+      regval  = getreg32(base + TIVA_GPIO_IM_OFFSET);
       regval |= pin;
-      putreg32(regval, base + LM_GPIO_IM_OFFSET);
+      putreg32(regval, base + TIVA_GPIO_IM_OFFSET);
       irqrestore(flags);
     }
 }
@@ -420,9 +420,9 @@ void gpio_irqdisable(int irq)
        */
 
       flags   = irqsave();
-      regval  = getreg32(base + LM_GPIO_IM_OFFSET);
+      regval  = getreg32(base + TIVA_GPIO_IM_OFFSET);
       regval &= ~pin;
-      putreg32(regval, base + LM_GPIO_IM_OFFSET);
+      putreg32(regval, base + TIVA_GPIO_IM_OFFSET);
       irqrestore(flags);
     }
 }

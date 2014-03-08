@@ -48,291 +48,291 @@
 
 /* System Control Register Offsets **********************************************************/
 
-#define LM_SYSCON_DID0_OFFSET         0x000 /* Device Identification 0 */
-#define LM_SYSCON_DID1_OFFSET         0x004 /* Device Identification 1 */
-#define LM_SYSCON_PBORCTL_OFFSET      0x030 /* Brown-Out Reset Control */
-#define LM_SYSCON_RIS_OFFSET          0x050 /* Raw Interrupt Status */
-#define LM_SYSCON_IMC_OFFSET          0x054 /* Interrupt Mask Control */
-#define LM_SYSCON_MISC_OFFSET         0x058 /* Masked Interrupt Status and Clear */
-#define LM_SYSCON_RESC_OFFSET         0x05c /* Reset Cause */
-#define LM_SYSCON_RCC_OFFSET          0x060 /* Run-Mode Clock Configuration */
-#define LM_SYSCON_GPIOHBCTL_OFFSET    0x06c /* GPIO High-Performance Bus Control */
-#define LM_SYSCON_RCC2_OFFSET         0x070 /* Run-Mode Clock Configuration 2 */
-#define LM_SYSCON_MOSCCTL_OFFSET      0x07c /* Main Oscillator Control */
-#define LM_SYSCON_DSLPCLKCFG_OFFSET   0x144 /* Deep Sleep Clock Configuration */
-#define LM_SYSCON_SYSPROP_OFFSET      0x14c /* System Properties */
-#define LM_SYSCON_PIOSCCAL_OFFSET     0x150 /* Precision Internal Oscillator Calibration */
-#define LM_SYSCON_PIOSCSTAT_OFFSET    0x154 /* Precision Internal Oscillator Statistics */
-#define LM_SYSCON_PLLFREQ0_OFFSET     0x160 /* PLL 0 Frequency */
-#define LM_SYSCON_PLLFREQ1_OFFSET     0x164 /* PLL 1 Frequency */
-#define LM_SYSCON_PLLSTAT_OFFSET      0x168 /* PLL Status */
+#define TIVA_SYSCON_DID0_OFFSET       0x000 /* Device Identification 0 */
+#define TIVA_SYSCON_DID1_OFFSET       0x004 /* Device Identification 1 */
+#define TIVA_SYSCON_PBORCTL_OFFSET    0x030 /* Brown-Out Reset Control */
+#define TIVA_SYSCON_RIS_OFFSET        0x050 /* Raw Interrupt Status */
+#define TIVA_SYSCON_IMC_OFFSET        0x054 /* Interrupt Mask Control */
+#define TIVA_SYSCON_MISC_OFFSET       0x058 /* Masked Interrupt Status and Clear */
+#define TIVA_SYSCON_RESC_OFFSET       0x05c /* Reset Cause */
+#define TIVA_SYSCON_RCC_OFFSET        0x060 /* Run-Mode Clock Configuration */
+#define TIVA_SYSCON_GPIOHBCTL_OFFSET  0x06c /* GPIO High-Performance Bus Control */
+#define TIVA_SYSCON_RCC2_OFFSET       0x070 /* Run-Mode Clock Configuration 2 */
+#define TIVA_SYSCON_MOSCCTL_OFFSET    0x07c /* Main Oscillator Control */
+#define TIVA_SYSCON_DSLPCLKCFG_OFFSET 0x144 /* Deep Sleep Clock Configuration */
+#define TIVA_SYSCON_SYSPROP_OFFSET    0x14c /* System Properties */
+#define TIVA_SYSCON_PIOSCCAL_OFFSET   0x150 /* Precision Internal Oscillator Calibration */
+#define TIVA_SYSCON_PIOSCSTAT_OFFSET  0x154 /* Precision Internal Oscillator Statistics */
+#define TIVA_SYSCON_PLLFREQ0_OFFSET   0x160 /* PLL 0 Frequency */
+#define TIVA_SYSCON_PLLFREQ1_OFFSET   0x164 /* PLL 1 Frequency */
+#define TIVA_SYSCON_PLLSTAT_OFFSET    0x168 /* PLL Status */
 
-#define LM_SYSCON_PPWD_OFFSET         0x300 /* Watchdog Timer Peripheral Present */
-#define LM_SYSCON_PPTIMER_OFFSET      0x304 /* 16/32-Bit Timer Peripheral Present */
-#define LM_SYSCON_PPGPIO_OFFSET       0x308 /* GPIO Peripheral Present */
-#define LM_SYSCON_PPDMA_OFFSET        0x30c /* uDMA Peripheral Present */
-#define LM_SYSCON_PPHIB_OFFSET        0x314 /* Hibernation Peripheral Present */
-#define LM_SYSCON_PPUART_OFFSET       0x318 /* UART Present */
-#define LM_SYSCON_PPSSI_OFFSET        0x31c /* SSI Peripheral Present */
-#define LM_SYSCON_PPI2C_OFFSET        0x320 /* I2C Peripheral Present */
-#define LM_SYSCON_PPUSB_OFFSET        0x328 /* USB Peripheral Present */
-#define LM_SYSCON_PPCAN_OFFSET        0x334 /* CAN Peripheral Present */
-#define LM_SYSCON_PPADC_OFFSET        0x338 /* ADC Peripheral Present */
-#define LM_SYSCON_PPACMP_OFFSET       0x33c /* Analog Comparator Peripheral Present */
-#define LM_SYSCON_PPPWM_OFFSET        0x340 /* Pulse Width Modulator Peripheral Present */
-#define LM_SYSCON_PPQEI_OFFSET        0x344 /* Quadrature Encoder Peripheral Present */
-#define LM_SYSCON_PPEEPROM_OFFSET     0x358 /* EEPROM Peripheral Present */
-#define LM_SYSCON_PPWTIMER_OFFSET     0x35c /* 32/64-Bit Wide Timer Peripheral Present */
+#define TIVA_SYSCON_PPWD_OFFSET       0x300 /* Watchdog Timer Peripheral Present */
+#define TIVA_SYSCON_PPTIMER_OFFSET    0x304 /* 16/32-Bit Timer Peripheral Present */
+#define TIVA_SYSCON_PPGPIO_OFFSET     0x308 /* GPIO Peripheral Present */
+#define TIVA_SYSCON_PPDMA_OFFSET      0x30c /* uDMA Peripheral Present */
+#define TIVA_SYSCON_PPHIB_OFFSET      0x314 /* Hibernation Peripheral Present */
+#define TIVA_SYSCON_PPUART_OFFSET     0x318 /* UART Present */
+#define TIVA_SYSCON_PPSSI_OFFSET      0x31c /* SSI Peripheral Present */
+#define TIVA_SYSCON_PPI2C_OFFSET      0x320 /* I2C Peripheral Present */
+#define TIVA_SYSCON_PPUSB_OFFSET      0x328 /* USB Peripheral Present */
+#define TIVA_SYSCON_PPCAN_OFFSET      0x334 /* CAN Peripheral Present */
+#define TIVA_SYSCON_PPADC_OFFSET      0x338 /* ADC Peripheral Present */
+#define TIVA_SYSCON_PPACMP_OFFSET     0x33c /* Analog Comparator Peripheral Present */
+#define TIVA_SYSCON_PPPWM_OFFSET      0x340 /* Pulse Width Modulator Peripheral Present */
+#define TIVA_SYSCON_PPQEI_OFFSET      0x344 /* Quadrature Encoder Peripheral Present */
+#define TIVA_SYSCON_PPEEPROM_OFFSET   0x358 /* EEPROM Peripheral Present */
+#define TIVA_SYSCON_PPWTIMER_OFFSET   0x35c /* 32/64-Bit Wide Timer Peripheral Present */
 
-#define LM_SYSCON_SRWD_OFFSET         0x500 /* Watchdog Timer Software Reset */
-#define LM_SYSCON_SRTIMER_OFFSET      0x504 /* 16/32-Bit Timer Software Reset */
-#define LM_SYSCON_SRGPIO_OFFSET       0x508 /* GPIO Software Reset */
-#define LM_SYSCON_SRDMA_OFFSET        0x50c /* uDMA Software Reset */
-#define LM_SYSCON_SRHIB_OFFSET        0x514 /* Hibernation Software Reset */
-#define LM_SYSCON_SRUART_OFFSET       0x518 /* UART Software Reset*/
-#define LM_SYSCON_SRSSI_OFFSET        0x51c /* SSI Software Reset */
-#define LM_SYSCON_SRI2C_OFFSET        0x520 /* I2C Software Reset */
-#define LM_SYSCON_SRUSB_OFFSET        0x528 /* USB Software Reset */
-#define LM_SYSCON_SRCAN_OFFSET        0x534 /* CAN Software Reset */
-#define LM_SYSCON_SRADC_OFFSET        0x538 /* ADC Software Reset */
-#define LM_SYSCON_SRACMP_OFFSET       0x53c /* Analog Comparator Software Reset */
-#define LM_SYSCON_SREEPROM_OFFSET     0x558 /* EEPROM Software Reset */
-#define LM_SYSCON_SRWTIMER_OFFSET     0x55c /* 32/64-Bit Wide Timer Software Reset */
+#define TIVA_SYSCON_SRWD_OFFSET       0x500 /* Watchdog Timer Software Reset */
+#define TIVA_SYSCON_SRTIMER_OFFSET    0x504 /* 16/32-Bit Timer Software Reset */
+#define TIVA_SYSCON_SRGPIO_OFFSET     0x508 /* GPIO Software Reset */
+#define TIVA_SYSCON_SRDMA_OFFSET      0x50c /* uDMA Software Reset */
+#define TIVA_SYSCON_SRHIB_OFFSET      0x514 /* Hibernation Software Reset */
+#define TIVA_SYSCON_SRUART_OFFSET     0x518 /* UART Software Reset*/
+#define TIVA_SYSCON_SRSSI_OFFSET      0x51c /* SSI Software Reset */
+#define TIVA_SYSCON_SRI2C_OFFSET      0x520 /* I2C Software Reset */
+#define TIVA_SYSCON_SRUSB_OFFSET      0x528 /* USB Software Reset */
+#define TIVA_SYSCON_SRCAN_OFFSET      0x534 /* CAN Software Reset */
+#define TIVA_SYSCON_SRADC_OFFSET      0x538 /* ADC Software Reset */
+#define TIVA_SYSCON_SRACMP_OFFSET     0x53c /* Analog Comparator Software Reset */
+#define TIVA_SYSCON_SREEPROM_OFFSET   0x558 /* EEPROM Software Reset */
+#define TIVA_SYSCON_SRWTIMER_OFFSET   0x55c /* 32/64-Bit Wide Timer Software Reset */
 
-#define LM_SYSCON_RCGCWD_OFFSET       0x600 /* Watchdog Timer Run Mode Clock Gating Control */
-#define LM_SYSCON_RCGCTIMER_OFFSET    0x604 /* 16/32-Bit Timer Run Mode Clock Gating Control */
-#define LM_SYSCON_RCGCGPIO_OFFSET     0x608 /* GPIO Run Mode Clock Gating Control*/
-#define LM_SYSCON_RCGCDMA_OFFSET      0x60c /* uDMA Run Mode Clock Gating Control*/
-#define LM_SYSCON_RCGCHIB_OFFSET      0x614 /* Hibernation Run Mode Clock Gating Control */
-#define LM_SYSCON_RCGCUART_OFFSET     0x618 /* UART Run Mode Clock Gating Control*/
-#define LM_SYSCON_RCGCSSI_OFFSET      0x61c /* SSI Run Mode Clock Gating Control*/
-#define LM_SYSCON_RCGCI2C_OFFSET      0x620 /* I2C Run Mode Clock Gating Control */
-#define LM_SYSCON_RCGCUSB_OFFSET      0x628 /* USB Run Mode Clock Gating Control */
-#define LM_SYSCON_RCGCCAN_OFFSET      0x634 /* CAN Run Mode Clock Gating Control */
-#define LM_SYSCON_RCGCADC_OFFSET      0x638 /* ADC Run Mode Clock Gating Control */
-#define LM_SYSCON_RCGCACMP_OFFSET     0x63c /* Analog Comparator Run Mode Clock Gating Control */
-#define LM_SYSCON_RCGCEEPROM_OFFSET   0x658 /* EEPROM Run Mode Clock Gating Control */
-#define LM_SYSCON_RCGCWTIMER_OFFSET   0x65c /* 32/64-BitWide Timer Run Mode Clock Gating Control */
+#define TIVA_SYSCON_RCGCWD_OFFSET     0x600 /* Watchdog Timer Run Mode Clock Gating Control */
+#define TIVA_SYSCON_RCGCTIMER_OFFSET  0x604 /* 16/32-Bit Timer Run Mode Clock Gating Control */
+#define TIVA_SYSCON_RCGCGPIO_OFFSET   0x608 /* GPIO Run Mode Clock Gating Control*/
+#define TIVA_SYSCON_RCGCDMA_OFFSET    0x60c /* uDMA Run Mode Clock Gating Control*/
+#define TIVA_SYSCON_RCGCHIB_OFFSET    0x614 /* Hibernation Run Mode Clock Gating Control */
+#define TIVA_SYSCON_RCGCUART_OFFSET   0x618 /* UART Run Mode Clock Gating Control*/
+#define TIVA_SYSCON_RCGCSSI_OFFSET    0x61c /* SSI Run Mode Clock Gating Control*/
+#define TIVA_SYSCON_RCGCI2C_OFFSET    0x620 /* I2C Run Mode Clock Gating Control */
+#define TIVA_SYSCON_RCGCUSB_OFFSET    0x628 /* USB Run Mode Clock Gating Control */
+#define TIVA_SYSCON_RCGCCAN_OFFSET    0x634 /* CAN Run Mode Clock Gating Control */
+#define TIVA_SYSCON_RCGCADC_OFFSET    0x638 /* ADC Run Mode Clock Gating Control */
+#define TIVA_SYSCON_RCGCACMP_OFFSET   0x63c /* Analog Comparator Run Mode Clock Gating Control */
+#define TIVA_SYSCON_RCGCEEPROM_OFFSET 0x658 /* EEPROM Run Mode Clock Gating Control */
+#define TIVA_SYSCON_RCGCWTIMER_OFFSET 0x65c /* 32/64-BitWide Timer Run Mode Clock Gating Control */
 
-#define LM_SYSCON_SCGCWD_OFFSET       0x700 /* Watchdog Timer Sleep Mode Clock Gating Control */
-#define LM_SYSCON_SCGCTIMER_OFFSET    0x704 /* 16/32-Bit Timer Sleep Mode Clock Gating Control */
-#define LM_SYSCON_SCGCGPIO_OFFSET     0x708 /* GPIO Sleep Mode Clock Gating Control */
-#define LM_SYSCON_SCGCDMA_OFFSET      0x70c /* uDMA Sleep Mode Clock Gating Control */
-#define LM_SYSCON_SCGCHIB_OFFSET      0x714 /* Hibernation Sleep Mode Clock Gating Control */
-#define LM_SYSCON_SCGCUART_OFFSET     0x718 /* UART Sleep Mode Clock Gating Control */
-#define LM_SYSCON_SCGCSSI_OFFSET      0x71c /* SSI Sleep Mode Clock Gating Control */
-#define LM_SYSCON_SCGCI2C_OFFSET      0x720 /* I2C Sleep Mode Clock Gating Control */
-#define LM_SYSCON_SCGCUSB_OFFSET      0x728 /* USB Sleep Mode Clock Gating Control */
-#define LM_SYSCON_SCGCCAN_OFFSET      0x734 /* CAN Sleep Mode Clock Gating Control */
-#define LM_SYSCON_SCGCADC_OFFSET      0x738 /* ADC Sleep Mode Clock Gating Control */
-#define LM_SYSCON_SCGCACMP_OFFSET     0x73c /* Analog Comparator Sleep Mode Clock Gating Control */
-#define LM_SYSCON_SCGCEEPROM_OFFSET   0x758 /* EEPROM Sleep Mode Clock Gating Control */
-#define LM_SYSCON_SCGCWTIMER_OFFSET   0x75c /* 32/64-BitWide Timer Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_SCGCWD_OFFSET     0x700 /* Watchdog Timer Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_SCGCTIMER_OFFSET  0x704 /* 16/32-Bit Timer Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_SCGCGPIO_OFFSET   0x708 /* GPIO Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_SCGCDMA_OFFSET    0x70c /* uDMA Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_SCGCHIB_OFFSET    0x714 /* Hibernation Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_SCGCUART_OFFSET   0x718 /* UART Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_SCGCSSI_OFFSET    0x71c /* SSI Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_SCGCI2C_OFFSET    0x720 /* I2C Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_SCGCUSB_OFFSET    0x728 /* USB Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_SCGCCAN_OFFSET    0x734 /* CAN Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_SCGCADC_OFFSET    0x738 /* ADC Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_SCGCACMP_OFFSET   0x73c /* Analog Comparator Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_SCGCEEPROM_OFFSET 0x758 /* EEPROM Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_SCGCWTIMER_OFFSET 0x75c /* 32/64-BitWide Timer Sleep Mode Clock Gating Control */
 
-#define LM_SYSCON_DCGCWD_OFFSET       0x800 /* Watchdog Timer Deep-Sleep Mode Clock Gating Control */
-#define LM_SYSCON_DCGCTIMER_OFFSET    0x804 /* Clock Gating Control */
-#define LM_SYSCON_DCGCGPIO_OFFSET     0x808 /* GPIO Deep-Sleep Mode Clock Gating Control */
-#define LM_SYSCON_DCGCDMA_OFFSET      0x80c /* uDMA Deep-Sleep Mode Clock Gating Control */
-#define LM_SYSCON_DCGCHIB_OFFSET      0x814 /* Hibernation Deep-Sleep Mode Clock Gating Control */
-#define LM_SYSCON_DCGCUART_OFFSET     0x818 /* UART Deep-Sleep Mode Clock Gating Control */
-#define LM_SYSCON_DCGCSSI_OFFSET      0x81c /* SSI Deep-Sleep Mode Clock Gating Control */
-#define LM_SYSCON_DCGCI2C_OFFSET      0x820 /* I2C Deep-Sleep Mode Clock Gating Control */
-#define LM_SYSCON_DCGCUSB_OFFSET      0x828 /* USB Deep-Sleep Mode Clock Gating Control */
-#define LM_SYSCON_DCGCCAN_OFFSET      0x834 /* CAN Deep-Sleep Mode Clock Gating Control */
-#define LM_SYSCON_DCGCADC_OFFSET      0x838 /* ADC Deep-Sleep Mode Clock Gating Control */
-#define LM_SYSCON_DCGCACMP_OFFSET     0x83c /* Analog Comparator Deep-Sleep Mode Clock Gating Control */
-#define LM_SYSCON_DCGCEEPROM_OFFSET   0x858 /* EEPROM Deep-Sleep Mode Clock Gating Control */
-#define LM_SYSCON_DCGCWTIMER_OFFSET   0x85c /* 32/64-BitWide Timer Deep-Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_DCGCWD_OFFSET     0x800 /* Watchdog Timer Deep-Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_DCGCTIMER_OFFSET  0x804 /* Clock Gating Control */
+#define TIVA_SYSCON_DCGCGPIO_OFFSET   0x808 /* GPIO Deep-Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_DCGCDMA_OFFSET    0x80c /* uDMA Deep-Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_DCGCHIB_OFFSET    0x814 /* Hibernation Deep-Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_DCGCUART_OFFSET   0x818 /* UART Deep-Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_DCGCSSI_OFFSET    0x81c /* SSI Deep-Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_DCGCI2C_OFFSET    0x820 /* I2C Deep-Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_DCGCUSB_OFFSET    0x828 /* USB Deep-Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_DCGCCAN_OFFSET    0x834 /* CAN Deep-Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_DCGCADC_OFFSET    0x838 /* ADC Deep-Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_DCGCACMP_OFFSET   0x83c /* Analog Comparator Deep-Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_DCGCEEPROM_OFFSET 0x858 /* EEPROM Deep-Sleep Mode Clock Gating Control */
+#define TIVA_SYSCON_DCGCWTIMER_OFFSET 0x85c /* 32/64-BitWide Timer Deep-Sleep Mode Clock Gating Control */
 
-#define LM_SYSCON_PRWD_OFFSET         0xa00 /* Watchdog Timer Peripheral Ready */
-#define LM_SYSCON_PRTIMER_OFFSET      0xa04 /* 16/32-Bit Timer Peripheral Ready */
-#define LM_SYSCON_PRGPIO_OFFSET       0xa08 /* GPIO Peripheral Ready */
-#define LM_SYSCON_PRDMA_OFFSET        0xa0c /* uDMA Peripheral Ready */
-#define LM_SYSCON_PRHIB_OFFSET        0xa14 /* Hibernation Peripheral Ready */
-#define LM_SYSCON_PRUART_OFFSET       0xa18 /* UART Peripheral Ready */
-#define LM_SYSCON_PRSSI_OFFSET        0xa1c /* SSI Peripheral Ready */
-#define LM_SYSCON_PRI2C_OFFSET        0xa20 /* I2C Peripheral Ready */
-#define LM_SYSCON_PRUSB_OFFSET        0xa28 /* USB Peripheral Ready */
-#define LM_SYSCON_PRCAN_OFFSET        0xa34 /* CAN Peripheral Ready */
-#define LM_SYSCON_PRADC_OFFSET        0xa38 /* ADC Peripheral Ready */
-#define LM_SYSCON_PRACMP_OFFSET       0xa3c /* Analog Comparator Peripheral Ready */
-#define LM_SYSCON_PREEPROM_OFFSET     0xa58 /* EEPROM Peripheral Ready */
-#define LM_SYSCON_PRWTIMER_OFFSET     0xa5c /* 2/64-BitWide Timer Peripheral Ready */
+#define TIVA_SYSCON_PRWD_OFFSET       0xa00 /* Watchdog Timer Peripheral Ready */
+#define TIVA_SYSCON_PRTIMER_OFFSET    0xa04 /* 16/32-Bit Timer Peripheral Ready */
+#define TIVA_SYSCON_PRGPIO_OFFSET     0xa08 /* GPIO Peripheral Ready */
+#define TIVA_SYSCON_PRDMA_OFFSET      0xa0c /* uDMA Peripheral Ready */
+#define TIVA_SYSCON_PRHIB_OFFSET      0xa14 /* Hibernation Peripheral Ready */
+#define TIVA_SYSCON_PRUART_OFFSET     0xa18 /* UART Peripheral Ready */
+#define TIVA_SYSCON_PRSSI_OFFSET      0xa1c /* SSI Peripheral Ready */
+#define TIVA_SYSCON_PRI2C_OFFSET      0xa20 /* I2C Peripheral Ready */
+#define TIVA_SYSCON_PRUSB_OFFSET      0xa28 /* USB Peripheral Ready */
+#define TIVA_SYSCON_PRCAN_OFFSET      0xa34 /* CAN Peripheral Ready */
+#define TIVA_SYSCON_PRADC_OFFSET      0xa38 /* ADC Peripheral Ready */
+#define TIVA_SYSCON_PRACMP_OFFSET     0xa3c /* Analog Comparator Peripheral Ready */
+#define TIVA_SYSCON_PREEPROM_OFFSET   0xa58 /* EEPROM Peripheral Ready */
+#define TIVA_SYSCON_PRWTIMER_OFFSET   0xa5c /* 2/64-BitWide Timer Peripheral Ready */
 
 /* System Control Legacy Register Offsets ***************************************************/
 
-#define LM_SYSCON_DC0_OFFSET          0x008 /* Device Capabilities 0 */
-#define LM_SYSCON_DC1_OFFSET          0x010 /* Device Capabilities 1 */
-#define LM_SYSCON_DC2_OFFSET          0x014 /* Device Capabilities 2 */
-#define LM_SYSCON_DC3_OFFSET          0x018 /* Device Capabilities 3 */
-#define LM_SYSCON_DC4_OFFSET          0x01c /* Device Capabilities 4 */
-#define LM_SYSCON_DC5_OFFSET          0x020 /* Device Capabilities 5 */
-#define LM_SYSCON_DC6_OFFSET          0x024 /* Device Capabilities 6 */
-#define LM_SYSCON_DC7_OFFSET          0x028 /* Device Capabilities 7 */
-#define LM_SYSCON_DC8_OFFSET          0x02c /* Device Capabilities 8 */
+#define TIVA_SYSCON_DC0_OFFSET        0x008 /* Device Capabilities 0 */
+#define TIVA_SYSCON_DC1_OFFSET        0x010 /* Device Capabilities 1 */
+#define TIVA_SYSCON_DC2_OFFSET        0x014 /* Device Capabilities 2 */
+#define TIVA_SYSCON_DC3_OFFSET        0x018 /* Device Capabilities 3 */
+#define TIVA_SYSCON_DC4_OFFSET        0x01c /* Device Capabilities 4 */
+#define TIVA_SYSCON_DC5_OFFSET        0x020 /* Device Capabilities 5 */
+#define TIVA_SYSCON_DC6_OFFSET        0x024 /* Device Capabilities 6 */
+#define TIVA_SYSCON_DC7_OFFSET        0x028 /* Device Capabilities 7 */
+#define TIVA_SYSCON_DC8_OFFSET        0x02c /* Device Capabilities 8 */
 
-#define LM_SYSCON_SRCR0_OFFSET        0x040 /* Software Reset Control 0 */
-#define LM_SYSCON_SRCR1_OFFSET        0x044 /* Software Reset Control 1 */
-#define LM_SYSCON_SRCR2_OFFSET        0x048 /* Software Reset Control 2 */
+#define TIVA_SYSCON_SRCR0_OFFSET      0x040 /* Software Reset Control 0 */
+#define TIVA_SYSCON_SRCR1_OFFSET      0x044 /* Software Reset Control 1 */
+#define TIVA_SYSCON_SRCR2_OFFSET      0x048 /* Software Reset Control 2 */
 
-#define LM_SYSCON_RCGC0_OFFSET        0x100 /* Run Mode Clock Gating Control Register 0 */
-#define LM_SYSCON_RCGC1_OFFSET        0x104 /* Run Mode Clock Gating Control Register 1 */
-#define LM_SYSCON_RCGC2_OFFSET        0x108 /* Run Mode Clock Gating Control Register 2 */
+#define TIVA_SYSCON_RCGC0_OFFSET      0x100 /* Run Mode Clock Gating Control Register 0 */
+#define TIVA_SYSCON_RCGC1_OFFSET      0x104 /* Run Mode Clock Gating Control Register 1 */
+#define TIVA_SYSCON_RCGC2_OFFSET      0x108 /* Run Mode Clock Gating Control Register 2 */
 
-#define LM_SYSCON_SCGC0_OFFSET        0x110 /* Sleep Mode Clock Gating Control Register 0 */
-#define LM_SYSCON_SCGC1_OFFSET        0x114 /* Sleep Mode Clock Gating Control Register 1 */
-#define LM_SYSCON_SCGC2_OFFSET        0x118 /* Sleep Mode Clock Gating Control Register 2 */
+#define TIVA_SYSCON_SCGC0_OFFSET      0x110 /* Sleep Mode Clock Gating Control Register 0 */
+#define TIVA_SYSCON_SCGC1_OFFSET      0x114 /* Sleep Mode Clock Gating Control Register 1 */
+#define TIVA_SYSCON_SCGC2_OFFSET      0x118 /* Sleep Mode Clock Gating Control Register 2 */
 
-#define LM_SYSCON_DCGC0_OFFSET        0x120 /* Deep Sleep Mode Clock Gating Control Register 0 */
-#define LM_SYSCON_DCGC1_OFFSET        0x124 /* Deep Sleep Mode Clock Gating Control Register 1 */
-#define LM_SYSCON_DCGC2_OFFSET        0x128 /* Deep Sleep Mode Clock Gating Control Register 2 */
+#define TIVA_SYSCON_DCGC0_OFFSET      0x120 /* Deep Sleep Mode Clock Gating Control Register 0 */
+#define TIVA_SYSCON_DCGC1_OFFSET      0x124 /* Deep Sleep Mode Clock Gating Control Register 1 */
+#define TIVA_SYSCON_DCGC2_OFFSET      0x128 /* Deep Sleep Mode Clock Gating Control Register 2 */
 
-#define LM_SYSCON_DC9_OFFSET          0x190 /* Device Capabilities */
-#define LM_SYSCON_NVMSTAT_OFFSET      0x1a0 /* Non-Volatile Memory Information */
+#define TIVA_SYSCON_DC9_OFFSET        0x190 /* Device Capabilities */
+#define TIVA_SYSCON_NVMSTAT_OFFSET    0x1a0 /* Non-Volatile Memory Information */
 
 /* System Control Register Addresses ********************************************************/
 
-#define LM_SYSCON_DID0                (LM_SYSCON_BASE + LM_SYSCON_DID0_OFFSET)
-#define LM_SYSCON_DID1                (LM_SYSCON_BASE + LM_SYSCON_DID1_OFFSET)
-#define LM_SYSCON_PBORCTL             (LM_SYSCON_BASE + LM_SYSCON_PBORCTL_OFFSET)
-#define LM_SYSCON_RIS                 (LM_SYSCON_BASE + LM_SYSCON_RIS_OFFSET)
-#define LM_SYSCON_IMC                 (LM_SYSCON_BASE + LM_SYSCON_IMC_OFFSET)
-#define LM_SYSCON_MISC                (LM_SYSCON_BASE + LM_SYSCON_MISC_OFFSET)
-#define LM_SYSCON_RESC                (LM_SYSCON_BASE + LM_SYSCON_RESC_OFFSET)
-#define LM_SYSCON_RCC                 (LM_SYSCON_BASE + LM_SYSCON_RCC_OFFSET)
-#define LM_SYSCON_GPIOHBCTL           (LM_SYSCON_BASE + LM_SYSCON_GPIOHBCTL_OFFSET)
-#define LM_SYSCON_RCC2                (LM_SYSCON_BASE + LM_SYSCON_RCC2_OFFSET)
-#define LM_SYSCON_MOSCCTL             (LM_SYSCON_BASE + LM_SYSCON_MOSCCTL_OFFSET)
-#define LM_SYSCON_DSLPCLKCFG          (LM_SYSCON_BASE + LM_SYSCON_DSLPCLKCFG_OFFSET)
-#define LM_SYSCON_SYSPROP             (LM_SYSCON_BASE + LM_SYSCON_SYSPROP_OFFSET)
-#define LM_SYSCON_PIOSCCAL            (LM_SYSCON_BASE + LM_SYSCON_PIOSCCAL_OFFSET)
-#define LM_SYSCON_PIOSCSTAT           (LM_SYSCON_BASE + LM_SYSCON_PIOSCSTAT_OFFSET)
-#define LM_SYSCON_PLLFREQ0            (LM_SYSCON_BASE + LM_SYSCON_PLLFREQ0_OFFSET)
-#define LM_SYSCON_PLLFREQ1            (LM_SYSCON_BASE + LM_SYSCON_PLLFREQ1_OFFSET)
-#define LM_SYSCON_PLLSTAT             (LM_SYSCON_BASE + LM_SYSCON_PLLSTAT_OFFSET)
+#define TIVA_SYSCON_DID0              (TIVA_SYSCON_BASE + TIVA_SYSCON_DID0_OFFSET)
+#define TIVA_SYSCON_DID1              (TIVA_SYSCON_BASE + TIVA_SYSCON_DID1_OFFSET)
+#define TIVA_SYSCON_PBORCTL           (TIVA_SYSCON_BASE + TIVA_SYSCON_PBORCTL_OFFSET)
+#define TIVA_SYSCON_RIS               (TIVA_SYSCON_BASE + TIVA_SYSCON_RIS_OFFSET)
+#define TIVA_SYSCON_IMC               (TIVA_SYSCON_BASE + TIVA_SYSCON_IMC_OFFSET)
+#define TIVA_SYSCON_MISC              (TIVA_SYSCON_BASE + TIVA_SYSCON_MISC_OFFSET)
+#define TIVA_SYSCON_RESC              (TIVA_SYSCON_BASE + TIVA_SYSCON_RESC_OFFSET)
+#define TIVA_SYSCON_RCC               (TIVA_SYSCON_BASE + TIVA_SYSCON_RCC_OFFSET)
+#define TIVA_SYSCON_GPIOHBCTL         (TIVA_SYSCON_BASE + TIVA_SYSCON_GPIOHBCTL_OFFSET)
+#define TIVA_SYSCON_RCC2              (TIVA_SYSCON_BASE + TIVA_SYSCON_RCC2_OFFSET)
+#define TIVA_SYSCON_MOSCCTL           (TIVA_SYSCON_BASE + TIVA_SYSCON_MOSCCTL_OFFSET)
+#define TIVA_SYSCON_DSLPCLKCFG        (TIVA_SYSCON_BASE + TIVA_SYSCON_DSLPCLKCFG_OFFSET)
+#define TIVA_SYSCON_SYSPROP           (TIVA_SYSCON_BASE + TIVA_SYSCON_SYSPROP_OFFSET)
+#define TIVA_SYSCON_PIOSCCAL          (TIVA_SYSCON_BASE + TIVA_SYSCON_PIOSCCAL_OFFSET)
+#define TIVA_SYSCON_PIOSCSTAT         (TIVA_SYSCON_BASE + TIVA_SYSCON_PIOSCSTAT_OFFSET)
+#define TIVA_SYSCON_PLLFREQ0          (TIVA_SYSCON_BASE + TIVA_SYSCON_PLLFREQ0_OFFSET)
+#define TIVA_SYSCON_PLLFREQ1          (TIVA_SYSCON_BASE + TIVA_SYSCON_PLLFREQ1_OFFSET)
+#define TIVA_SYSCON_PLLSTAT           (TIVA_SYSCON_BASE + TIVA_SYSCON_PLLSTAT_OFFSET)
 
-#define LM_SYSCON_PPWD                (LM_SYSCON_BASE + LM_SYSCON_PPWD_OFFSET)
-#define LM_SYSCON_PPTIMER             (LM_SYSCON_BASE + LM_SYSCON_PPTIMER_OFFSET)
-#define LM_SYSCON_PPGPIO              (LM_SYSCON_BASE + LM_SYSCON_PPGPIO_OFFSET)
-#define LM_SYSCON_PPDMA               (LM_SYSCON_BASE + LM_SYSCON_PPDMA_OFFSET)
-#define LM_SYSCON_PPHIB               (LM_SYSCON_BASE + LM_SYSCON_PPHIB_OFFSET)
-#define LM_SYSCON_PPUART              (LM_SYSCON_BASE + LM_SYSCON_PPUART_OFFSET)
-#define LM_SYSCON_PPSSI               (LM_SYSCON_BASE + LM_SYSCON_PPSSI_OFFSET)
-#define LM_SYSCON_PPI2C               (LM_SYSCON_BASE + LM_SYSCON_PPI2C_OFFSET)
-#define LM_SYSCON_PPUSB               (LM_SYSCON_BASE + LM_SYSCON_PPUSB_OFFSET)
-#define LM_SYSCON_PPCAN               (LM_SYSCON_BASE + LM_SYSCON_PPCAN_OFFSET)
-#define LM_SYSCON_PPADC               (LM_SYSCON_BASE + LM_SYSCON_PPADC_OFFSET)
-#define LM_SYSCON_PPACMP              (LM_SYSCON_BASE + LM_SYSCON_PPACMP_OFFSET)
-#define LM_SYSCON_PPPWM               (LM_SYSCON_BASE + LM_SYSCON_PPPWM_OFFSET)
-#define LM_SYSCON_PPQEI               (LM_SYSCON_BASE + LM_SYSCON_PPQEI_OFFSET)
-#define LM_SYSCON_PPEEPROM            (LM_SYSCON_BASE + LM_SYSCON_PPEEPROM_OFFSET)
-#define LM_SYSCON_PPWTIMER            (LM_SYSCON_BASE + LM_SYSCON_PPWTIMER_OFFSET)
+#define TIVA_SYSCON_PPWD              (TIVA_SYSCON_BASE + TIVA_SYSCON_PPWD_OFFSET)
+#define TIVA_SYSCON_PPTIMER           (TIVA_SYSCON_BASE + TIVA_SYSCON_PPTIMER_OFFSET)
+#define TIVA_SYSCON_PPGPIO            (TIVA_SYSCON_BASE + TIVA_SYSCON_PPGPIO_OFFSET)
+#define TIVA_SYSCON_PPDMA             (TIVA_SYSCON_BASE + TIVA_SYSCON_PPDMA_OFFSET)
+#define TIVA_SYSCON_PPHIB             (TIVA_SYSCON_BASE + TIVA_SYSCON_PPHIB_OFFSET)
+#define TIVA_SYSCON_PPUART            (TIVA_SYSCON_BASE + TIVA_SYSCON_PPUART_OFFSET)
+#define TIVA_SYSCON_PPSSI             (TIVA_SYSCON_BASE + TIVA_SYSCON_PPSSI_OFFSET)
+#define TIVA_SYSCON_PPI2C             (TIVA_SYSCON_BASE + TIVA_SYSCON_PPI2C_OFFSET)
+#define TIVA_SYSCON_PPUSB             (TIVA_SYSCON_BASE + TIVA_SYSCON_PPUSB_OFFSET)
+#define TIVA_SYSCON_PPCAN             (TIVA_SYSCON_BASE + TIVA_SYSCON_PPCAN_OFFSET)
+#define TIVA_SYSCON_PPADC             (TIVA_SYSCON_BASE + TIVA_SYSCON_PPADC_OFFSET)
+#define TIVA_SYSCON_PPACMP            (TIVA_SYSCON_BASE + TIVA_SYSCON_PPACMP_OFFSET)
+#define TIVA_SYSCON_PPPWM             (TIVA_SYSCON_BASE + TIVA_SYSCON_PPPWM_OFFSET)
+#define TIVA_SYSCON_PPQEI             (TIVA_SYSCON_BASE + TIVA_SYSCON_PPQEI_OFFSET)
+#define TIVA_SYSCON_PPEEPROM          (TIVA_SYSCON_BASE + TIVA_SYSCON_PPEEPROM_OFFSET)
+#define TIVA_SYSCON_PPWTIMER          (TIVA_SYSCON_BASE + TIVA_SYSCON_PPWTIMER_OFFSET)
 
-#define LM_SYSCON_SRWD                (LM_SYSCON_BASE + LM_SYSCON_SRWD_OFFSET)
-#define LM_SYSCON_SRTIMER             (LM_SYSCON_BASE + LM_SYSCON_SRTIMER_OFFSET)
-#define LM_SYSCON_SRGPIO              (LM_SYSCON_BASE + LM_SYSCON_SRGPIO_OFFSET)
-#define LM_SYSCON_SRDMA               (LM_SYSCON_BASE + LM_SYSCON_SRDMA_OFFSET)
-#define LM_SYSCON_SRHIB               (LM_SYSCON_BASE + LM_SYSCON_SRHIB_OFFSET)
-#define LM_SYSCON_SRUART              (LM_SYSCON_BASE + LM_SYSCON_SRUART_OFFSET)
-#define LM_SYSCON_SRSSI               (LM_SYSCON_BASE + LM_SYSCON_SRSSI_OFFSET)
-#define LM_SYSCON_SRI2C               (LM_SYSCON_BASE + LM_SYSCON_SRI2C_OFFSET)
-#define LM_SYSCON_SRUSB               (LM_SYSCON_BASE + LM_SYSCON_SRUSB_OFFSET)
-#define LM_SYSCON_SRCAN               (LM_SYSCON_BASE + LM_SYSCON_SRCAN_OFFSET)
-#define LM_SYSCON_SRADC               (LM_SYSCON_BASE + LM_SYSCON_SRADC_OFFSET)
-#define LM_SYSCON_SRACMP              (LM_SYSCON_BASE + LM_SYSCON_SRACMP_OFFSET)
-#define LM_SYSCON_SREEPROM            (LM_SYSCON_BASE + LM_SYSCON_SREEPROM_OFFSET)
-#define LM_SYSCON_SRWTIMER            (LM_SYSCON_BASE + LM_SYSCON_SRWTIMER_OFFSET)
+#define TIVA_SYSCON_SRWD              (TIVA_SYSCON_BASE + TIVA_SYSCON_SRWD_OFFSET)
+#define TIVA_SYSCON_SRTIMER           (TIVA_SYSCON_BASE + TIVA_SYSCON_SRTIMER_OFFSET)
+#define TIVA_SYSCON_SRGPIO            (TIVA_SYSCON_BASE + TIVA_SYSCON_SRGPIO_OFFSET)
+#define TIVA_SYSCON_SRDMA             (TIVA_SYSCON_BASE + TIVA_SYSCON_SRDMA_OFFSET)
+#define TIVA_SYSCON_SRHIB             (TIVA_SYSCON_BASE + TIVA_SYSCON_SRHIB_OFFSET)
+#define TIVA_SYSCON_SRUART            (TIVA_SYSCON_BASE + TIVA_SYSCON_SRUART_OFFSET)
+#define TIVA_SYSCON_SRSSI             (TIVA_SYSCON_BASE + TIVA_SYSCON_SRSSI_OFFSET)
+#define TIVA_SYSCON_SRI2C             (TIVA_SYSCON_BASE + TIVA_SYSCON_SRI2C_OFFSET)
+#define TIVA_SYSCON_SRUSB             (TIVA_SYSCON_BASE + TIVA_SYSCON_SRUSB_OFFSET)
+#define TIVA_SYSCON_SRCAN             (TIVA_SYSCON_BASE + TIVA_SYSCON_SRCAN_OFFSET)
+#define TIVA_SYSCON_SRADC             (TIVA_SYSCON_BASE + TIVA_SYSCON_SRADC_OFFSET)
+#define TIVA_SYSCON_SRACMP            (TIVA_SYSCON_BASE + TIVA_SYSCON_SRACMP_OFFSET)
+#define TIVA_SYSCON_SREEPROM          (TIVA_SYSCON_BASE + TIVA_SYSCON_SREEPROM_OFFSET)
+#define TIVA_SYSCON_SRWTIMER          (TIVA_SYSCON_BASE + TIVA_SYSCON_SRWTIMER_OFFSET)
 
-#define LM_SYSCON_RCGCWD              (LM_SYSCON_BASE + LM_SYSCON_RCGCWD_OFFSET)
-#define LM_SYSCON_RCGCTIMER           (LM_SYSCON_BASE + LM_SYSCON_RCGCTIMER_OFFSET)
-#define LM_SYSCON_RCGCGPIO            (LM_SYSCON_BASE + LM_SYSCON_RCGCGPIO_OFFSET)
-#define LM_SYSCON_RCGCDMA             (LM_SYSCON_BASE + LM_SYSCON_RCGCDMA_OFFSET)
-#define LM_SYSCON_RCGCHIB             (LM_SYSCON_BASE + LM_SYSCON_RCGCHIB_OFFSET)
-#define LM_SYSCON_RCGCUART            (LM_SYSCON_BASE + LM_SYSCON_RCGCUART_OFFSET)
-#define LM_SYSCON_RCGCSSI             (LM_SYSCON_BASE + LM_SYSCON_RCGCSSI_OFFSET)
-#define LM_SYSCON_RCGCI2C             (LM_SYSCON_BASE + LM_SYSCON_RCGCI2C_OFFSET)
-#define LM_SYSCON_RCGCUSB             (LM_SYSCON_BASE + LM_SYSCON_RCGCUSB_OFFSET)
-#define LM_SYSCON_RCGCCAN             (LM_SYSCON_BASE + LM_SYSCON_RCGCCAN_OFFSET)
-#define LM_SYSCON_RCGCADC             (LM_SYSCON_BASE + LM_SYSCON_RCGCADC_OFFSET)
-#define LM_SYSCON_RCGCACMP            (LM_SYSCON_BASE + LM_SYSCON_RCGCACMP_OFFSET)
-#define LM_SYSCON_RCGCEEPROM          (LM_SYSCON_BASE + LM_SYSCON_RCGCEEPROM_OFFSET)
-#define LM_SYSCON_RCGCWTIMER          (LM_SYSCON_BASE + LM_SYSCON_RCGCWTIMER_OFFSET)
+#define TIVA_SYSCON_RCGCWD            (TIVA_SYSCON_BASE + TIVA_SYSCON_RCGCWD_OFFSET)
+#define TIVA_SYSCON_RCGCTIMER         (TIVA_SYSCON_BASE + TIVA_SYSCON_RCGCTIMER_OFFSET)
+#define TIVA_SYSCON_RCGCGPIO          (TIVA_SYSCON_BASE + TIVA_SYSCON_RCGCGPIO_OFFSET)
+#define TIVA_SYSCON_RCGCDMA           (TIVA_SYSCON_BASE + TIVA_SYSCON_RCGCDMA_OFFSET)
+#define TIVA_SYSCON_RCGCHIB           (TIVA_SYSCON_BASE + TIVA_SYSCON_RCGCHIB_OFFSET)
+#define TIVA_SYSCON_RCGCUART          (TIVA_SYSCON_BASE + TIVA_SYSCON_RCGCUART_OFFSET)
+#define TIVA_SYSCON_RCGCSSI           (TIVA_SYSCON_BASE + TIVA_SYSCON_RCGCSSI_OFFSET)
+#define TIVA_SYSCON_RCGCI2C           (TIVA_SYSCON_BASE + TIVA_SYSCON_RCGCI2C_OFFSET)
+#define TIVA_SYSCON_RCGCUSB           (TIVA_SYSCON_BASE + TIVA_SYSCON_RCGCUSB_OFFSET)
+#define TIVA_SYSCON_RCGCCAN           (TIVA_SYSCON_BASE + TIVA_SYSCON_RCGCCAN_OFFSET)
+#define TIVA_SYSCON_RCGCADC           (TIVA_SYSCON_BASE + TIVA_SYSCON_RCGCADC_OFFSET)
+#define TIVA_SYSCON_RCGCACMP          (TIVA_SYSCON_BASE + TIVA_SYSCON_RCGCACMP_OFFSET)
+#define TIVA_SYSCON_RCGCEEPROM        (TIVA_SYSCON_BASE + TIVA_SYSCON_RCGCEEPROM_OFFSET)
+#define TIVA_SYSCON_RCGCWTIMER        (TIVA_SYSCON_BASE + TIVA_SYSCON_RCGCWTIMER_OFFSET)
 
-#define LM_SYSCON_SCGCWD              (LM_SYSCON_BASE + LM_SYSCON_SCGCWD_OFFSET)
-#define LM_SYSCON_SCGCTIMER           (LM_SYSCON_BASE + LM_SYSCON_SCGCTIMER_OFFSET)
-#define LM_SYSCON_SCGCGPIO            (LM_SYSCON_BASE + LM_SYSCON_SCGCGPIO_OFFSET)
-#define LM_SYSCON_SCGCDMA             (LM_SYSCON_BASE + LM_SYSCON_SCGCDMA_OFFSET)
-#define LM_SYSCON_SCGCHIB             (LM_SYSCON_BASE + LM_SYSCON_SCGCHIB_OFFSET)
-#define LM_SYSCON_SCGCUART            (LM_SYSCON_BASE + LM_SYSCON_SCGCUART_OFFSET)
-#define LM_SYSCON_SCGCSSI             (LM_SYSCON_BASE + LM_SYSCON_SCGCSSI_OFFSET)
-#define LM_SYSCON_SCGCI2C             (LM_SYSCON_BASE + LM_SYSCON_SCGCI2C_OFFSET)
-#define LM_SYSCON_SCGCUSB             (LM_SYSCON_BASE + LM_SYSCON_SCGCUSB_OFFSET)
-#define LM_SYSCON_SCGCCAN             (LM_SYSCON_BASE + LM_SYSCON_SCGCCAN_OFFSET)
-#define LM_SYSCON_SCGCADC             (LM_SYSCON_BASE + LM_SYSCON_SCGCADC_OFFSET)
-#define LM_SYSCON_SCGCACMP            (LM_SYSCON_BASE + LM_SYSCON_SCGCACMP_OFFSET)
-#define LM_SYSCON_SCGCEEPROM          (LM_SYSCON_BASE + LM_SYSCON_SCGCEEPROM_OFFSET)
-#define LM_SYSCON_SCGCWTIMER          (LM_SYSCON_BASE + LM_SYSCON_SCGCWTIMER_OFFSET)
+#define TIVA_SYSCON_SCGCWD            (TIVA_SYSCON_BASE + TIVA_SYSCON_SCGCWD_OFFSET)
+#define TIVA_SYSCON_SCGCTIMER         (TIVA_SYSCON_BASE + TIVA_SYSCON_SCGCTIMER_OFFSET)
+#define TIVA_SYSCON_SCGCGPIO          (TIVA_SYSCON_BASE + TIVA_SYSCON_SCGCGPIO_OFFSET)
+#define TIVA_SYSCON_SCGCDMA           (TIVA_SYSCON_BASE + TIVA_SYSCON_SCGCDMA_OFFSET)
+#define TIVA_SYSCON_SCGCHIB           (TIVA_SYSCON_BASE + TIVA_SYSCON_SCGCHIB_OFFSET)
+#define TIVA_SYSCON_SCGCUART          (TIVA_SYSCON_BASE + TIVA_SYSCON_SCGCUART_OFFSET)
+#define TIVA_SYSCON_SCGCSSI           (TIVA_SYSCON_BASE + TIVA_SYSCON_SCGCSSI_OFFSET)
+#define TIVA_SYSCON_SCGCI2C           (TIVA_SYSCON_BASE + TIVA_SYSCON_SCGCI2C_OFFSET)
+#define TIVA_SYSCON_SCGCUSB           (TIVA_SYSCON_BASE + TIVA_SYSCON_SCGCUSB_OFFSET)
+#define TIVA_SYSCON_SCGCCAN           (TIVA_SYSCON_BASE + TIVA_SYSCON_SCGCCAN_OFFSET)
+#define TIVA_SYSCON_SCGCADC           (TIVA_SYSCON_BASE + TIVA_SYSCON_SCGCADC_OFFSET)
+#define TIVA_SYSCON_SCGCACMP          (TIVA_SYSCON_BASE + TIVA_SYSCON_SCGCACMP_OFFSET)
+#define TIVA_SYSCON_SCGCEEPROM        (TIVA_SYSCON_BASE + TIVA_SYSCON_SCGCEEPROM_OFFSET)
+#define TIVA_SYSCON_SCGCWTIMER        (TIVA_SYSCON_BASE + TIVA_SYSCON_SCGCWTIMER_OFFSET)
 
-#define LM_SYSCON_DCGCWD              (LM_SYSCON_BASE + LM_SYSCON_DCGCWD_OFFSET)
-#define LM_SYSCON_DCGCTIMER           (LM_SYSCON_BASE + LM_SYSCON_DCGCTIMER_OFFSET)
-#define LM_SYSCON_DCGCGPIO            (LM_SYSCON_BASE + LM_SYSCON_DCGCGPIO_OFFSET)
-#define LM_SYSCON_DCGCDMA             (LM_SYSCON_BASE + LM_SYSCON_DCGCDMA_OFFSET)
-#define LM_SYSCON_DCGCHIB             (LM_SYSCON_BASE + LM_SYSCON_DCGCHIB_OFFSET)
-#define LM_SYSCON_DCGCUART            (LM_SYSCON_BASE + LM_SYSCON_DCGCUART_OFFSET)
-#define LM_SYSCON_DCGCSSI             (LM_SYSCON_BASE + LM_SYSCON_DCGCSSI_OFFSET)
-#define LM_SYSCON_DCGCI2C             (LM_SYSCON_BASE + LM_SYSCON_DCGCI2C_OFFSET)
-#define LM_SYSCON_DCGCUSB             (LM_SYSCON_BASE + LM_SYSCON_DCGCUSB_OFFSET)
-#define LM_SYSCON_DCGCCAN             (LM_SYSCON_BASE + LM_SYSCON_DCGCCAN_OFFSET)
-#define LM_SYSCON_DCGCADC             (LM_SYSCON_BASE + LM_SYSCON_DCGCADC_OFFSET)
-#define LM_SYSCON_DCGCACMP            (LM_SYSCON_BASE + LM_SYSCON_DCGCACMP_OFFSET)
-#define LM_SYSCON_DCGCEEPROM          (LM_SYSCON_BASE + LM_SYSCON_DCGCEEPROM_OFFSET)
-#define LM_SYSCON_DCGCWTIMER          (LM_SYSCON_BASE + LM_SYSCON_DCGCWTIMER_OFFSET)
+#define TIVA_SYSCON_DCGCWD            (TIVA_SYSCON_BASE + TIVA_SYSCON_DCGCWD_OFFSET)
+#define TIVA_SYSCON_DCGCTIMER         (TIVA_SYSCON_BASE + TIVA_SYSCON_DCGCTIMER_OFFSET)
+#define TIVA_SYSCON_DCGCGPIO          (TIVA_SYSCON_BASE + TIVA_SYSCON_DCGCGPIO_OFFSET)
+#define TIVA_SYSCON_DCGCDMA           (TIVA_SYSCON_BASE + TIVA_SYSCON_DCGCDMA_OFFSET)
+#define TIVA_SYSCON_DCGCHIB           (TIVA_SYSCON_BASE + TIVA_SYSCON_DCGCHIB_OFFSET)
+#define TIVA_SYSCON_DCGCUART          (TIVA_SYSCON_BASE + TIVA_SYSCON_DCGCUART_OFFSET)
+#define TIVA_SYSCON_DCGCSSI           (TIVA_SYSCON_BASE + TIVA_SYSCON_DCGCSSI_OFFSET)
+#define TIVA_SYSCON_DCGCI2C           (TIVA_SYSCON_BASE + TIVA_SYSCON_DCGCI2C_OFFSET)
+#define TIVA_SYSCON_DCGCUSB           (TIVA_SYSCON_BASE + TIVA_SYSCON_DCGCUSB_OFFSET)
+#define TIVA_SYSCON_DCGCCAN           (TIVA_SYSCON_BASE + TIVA_SYSCON_DCGCCAN_OFFSET)
+#define TIVA_SYSCON_DCGCADC           (TIVA_SYSCON_BASE + TIVA_SYSCON_DCGCADC_OFFSET)
+#define TIVA_SYSCON_DCGCACMP          (TIVA_SYSCON_BASE + TIVA_SYSCON_DCGCACMP_OFFSET)
+#define TIVA_SYSCON_DCGCEEPROM        (TIVA_SYSCON_BASE + TIVA_SYSCON_DCGCEEPROM_OFFSET)
+#define TIVA_SYSCON_DCGCWTIMER        (TIVA_SYSCON_BASE + TIVA_SYSCON_DCGCWTIMER_OFFSET)
 
-#define LM_SYSCON_PRWD                (LM_SYSCON_BASE + LM_SYSCON_PRWD_OFFSET)
-#define LM_SYSCON_PRTIMER             (LM_SYSCON_BASE + LM_SYSCON_PRTIMER_OFFSET)
-#define LM_SYSCON_PRGPIO              (LM_SYSCON_BASE + LM_SYSCON_PRGPIO_OFFSET)
-#define LM_SYSCON_PRDMA               (LM_SYSCON_BASE + LM_SYSCON_PRDMA_OFFSET)
-#define LM_SYSCON_PRHIB               (LM_SYSCON_BASE + LM_SYSCON_PRHIB_OFFSET)
-#define LM_SYSCON_PRUART              (LM_SYSCON_BASE + LM_SYSCON_PRUART_OFFSET)
-#define LM_SYSCON_PRSSI               (LM_SYSCON_BASE + LM_SYSCON_PRSSI_OFFSET)
-#define LM_SYSCON_PRI2C               (LM_SYSCON_BASE + LM_SYSCON_PRI2C_OFFSET)
-#define LM_SYSCON_PRUSB               (LM_SYSCON_BASE + LM_SYSCON_PRUSB_OFFSET)
-#define LM_SYSCON_PRCAN               (LM_SYSCON_BASE + LM_SYSCON_PRCAN_OFFSET)
-#define LM_SYSCON_PRADC               (LM_SYSCON_BASE + LM_SYSCON_PRADC_OFFSET)
-#define LM_SYSCON_PRACMP              (LM_SYSCON_BASE + LM_SYSCON_PRACMP_OFFSET)
-#define LM_SYSCON_PREEPROM            (LM_SYSCON_BASE + LM_SYSCON_PREEPROM_OFFSET)
-#define LM_SYSCON_PRWTIMER            (LM_SYSCON_BASE + LM_SYSCON_PRWTIMER_OFFSET)
+#define TIVA_SYSCON_PRWD              (TIVA_SYSCON_BASE + TIVA_SYSCON_PRWD_OFFSET)
+#define TIVA_SYSCON_PRTIMER           (TIVA_SYSCON_BASE + TIVA_SYSCON_PRTIMER_OFFSET)
+#define TIVA_SYSCON_PRGPIO            (TIVA_SYSCON_BASE + TIVA_SYSCON_PRGPIO_OFFSET)
+#define TIVA_SYSCON_PRDMA             (TIVA_SYSCON_BASE + TIVA_SYSCON_PRDMA_OFFSET)
+#define TIVA_SYSCON_PRHIB             (TIVA_SYSCON_BASE + TIVA_SYSCON_PRHIB_OFFSET)
+#define TIVA_SYSCON_PRUART            (TIVA_SYSCON_BASE + TIVA_SYSCON_PRUART_OFFSET)
+#define TIVA_SYSCON_PRSSI             (TIVA_SYSCON_BASE + TIVA_SYSCON_PRSSI_OFFSET)
+#define TIVA_SYSCON_PRI2C             (TIVA_SYSCON_BASE + TIVA_SYSCON_PRI2C_OFFSET)
+#define TIVA_SYSCON_PRUSB             (TIVA_SYSCON_BASE + TIVA_SYSCON_PRUSB_OFFSET)
+#define TIVA_SYSCON_PRCAN             (TIVA_SYSCON_BASE + TIVA_SYSCON_PRCAN_OFFSET)
+#define TIVA_SYSCON_PRADC             (TIVA_SYSCON_BASE + TIVA_SYSCON_PRADC_OFFSET)
+#define TIVA_SYSCON_PRACMP            (TIVA_SYSCON_BASE + TIVA_SYSCON_PRACMP_OFFSET)
+#define TIVA_SYSCON_PREEPROM          (TIVA_SYSCON_BASE + TIVA_SYSCON_PREEPROM_OFFSET)
+#define TIVA_SYSCON_PRWTIMER          (TIVA_SYSCON_BASE + TIVA_SYSCON_PRWTIMER_OFFSET)
 
 /* System Control Legacy Register Addresses *************************************************/
 
-#define LM_SYSCON_DC0                 (LM_SYSCON_BASE + LM_SYSCON_DC0_OFFSET)
-#define LM_SYSCON_DC1                 (LM_SYSCON_BASE + LM_SYSCON_DC1_OFFSET)
-#define LM_SYSCON_DC2                 (LM_SYSCON_BASE + LM_SYSCON_DC2_OFFSET)
-#define LM_SYSCON_DC3                 (LM_SYSCON_BASE + LM_SYSCON_DC3_OFFSET)
-#define LM_SYSCON_DC4                 (LM_SYSCON_BASE + LM_SYSCON_DC4_OFFSET)
-#define LM_SYSCON_DC5                 (LM_SYSCON_BASE + LM_SYSCON_DC5_OFFSET)
-#define LM_SYSCON_DC6                 (LM_SYSCON_BASE + LM_SYSCON_DC6_OFFSET)
-#define LM_SYSCON_DC7                 (LM_SYSCON_BASE + LM_SYSCON_DC7_OFFSET)
-#define LM_SYSCON_DC8                 (LM_SYSCON_BASE + LM_SYSCON_DC8_OFFSET)
+#define TIVA_SYSCON_DC0               (TIVA_SYSCON_BASE + TIVA_SYSCON_DC0_OFFSET)
+#define TIVA_SYSCON_DC1               (TIVA_SYSCON_BASE + TIVA_SYSCON_DC1_OFFSET)
+#define TIVA_SYSCON_DC2               (TIVA_SYSCON_BASE + TIVA_SYSCON_DC2_OFFSET)
+#define TIVA_SYSCON_DC3               (TIVA_SYSCON_BASE + TIVA_SYSCON_DC3_OFFSET)
+#define TIVA_SYSCON_DC4               (TIVA_SYSCON_BASE + TIVA_SYSCON_DC4_OFFSET)
+#define TIVA_SYSCON_DC5               (TIVA_SYSCON_BASE + TIVA_SYSCON_DC5_OFFSET)
+#define TIVA_SYSCON_DC6               (TIVA_SYSCON_BASE + TIVA_SYSCON_DC6_OFFSET)
+#define TIVA_SYSCON_DC7               (TIVA_SYSCON_BASE + TIVA_SYSCON_DC7_OFFSET)
+#define TIVA_SYSCON_DC8               (TIVA_SYSCON_BASE + TIVA_SYSCON_DC8_OFFSET)
 
-#define LM_SYSCON_SRCR0               (LM_SYSCON_BASE + LM_SYSCON_SRCR0_OFFSET)
-#define LM_SYSCON_SRCR1               (LM_SYSCON_BASE + LM_SYSCON_SRCR1_OFFSET)
-#define LM_SYSCON_SRCR2               (LM_SYSCON_BASE + LM_SYSCON_SRCR2_OFFSET)
+#define TIVA_SYSCON_SRCR0             (TIVA_SYSCON_BASE + TIVA_SYSCON_SRCR0_OFFSET)
+#define TIVA_SYSCON_SRCR1             (TIVA_SYSCON_BASE + TIVA_SYSCON_SRCR1_OFFSET)
+#define TIVA_SYSCON_SRCR2             (TIVA_SYSCON_BASE + TIVA_SYSCON_SRCR2_OFFSET)
 
-#define LM_SYSCON_RCGC0               (LM_SYSCON_BASE + LM_SYSCON_RCGC0_OFFSET)
-#define LM_SYSCON_RCGC1               (LM_SYSCON_BASE + LM_SYSCON_RCGC1_OFFSET)
-#define LM_SYSCON_RCGC2               (LM_SYSCON_BASE + LM_SYSCON_RCGC2_OFFSET)
+#define TIVA_SYSCON_RCGC0             (TIVA_SYSCON_BASE + TIVA_SYSCON_RCGC0_OFFSET)
+#define TIVA_SYSCON_RCGC1             (TIVA_SYSCON_BASE + TIVA_SYSCON_RCGC1_OFFSET)
+#define TIVA_SYSCON_RCGC2             (TIVA_SYSCON_BASE + TIVA_SYSCON_RCGC2_OFFSET)
 
-#define LM_SYSCON_SCGC0               (LM_SYSCON_BASE + LM_SYSCON_SCGC0_OFFSET)
-#define LM_SYSCON_SCGC1               (LM_SYSCON_BASE + LM_SYSCON_SCGC1_OFFSET)
-#define LM_SYSCON_SCGC2               (LM_SYSCON_BASE + LM_SYSCON_SCGC2_OFFSET)
+#define TIVA_SYSCON_SCGC0             (TIVA_SYSCON_BASE + TIVA_SYSCON_SCGC0_OFFSET)
+#define TIVA_SYSCON_SCGC1             (TIVA_SYSCON_BASE + TIVA_SYSCON_SCGC1_OFFSET)
+#define TIVA_SYSCON_SCGC2             (TIVA_SYSCON_BASE + TIVA_SYSCON_SCGC2_OFFSET)
 
-#define LM_SYSCON_DCGC0               (LM_SYSCON_BASE + LM_SYSCON_DCGC0_OFFSET)
-#define LM_SYSCON_DCGC1               (LM_SYSCON_BASE + LM_SYSCON_DCGC1_OFFSET)
-#define LM_SYSCON_DCGC2               (LM_SYSCON_BASE + LM_SYSCON_DCGC2_OFFSET)
+#define TIVA_SYSCON_DCGC0             (TIVA_SYSCON_BASE + TIVA_SYSCON_DCGC0_OFFSET)
+#define TIVA_SYSCON_DCGC1             (TIVA_SYSCON_BASE + TIVA_SYSCON_DCGC1_OFFSET)
+#define TIVA_SYSCON_DCGC2             (TIVA_SYSCON_BASE + TIVA_SYSCON_DCGC2_OFFSET)
 
-#define LM_SYSCON_DC9                 (LM_SYSCON_BASE + LM_SYSCON_DC9_OFFSET)
-#define LM_SYSCON_NVMSTAT             (LM_SYSCON_BASE + LM_SYSCON_NVMSTAT_OFFSET)
+#define TIVA_SYSCON_DC9               (TIVA_SYSCON_BASE + TIVA_SYSCON_DC9_OFFSET)
+#define TIVA_SYSCON_NVMSTAT           (TIVA_SYSCON_BASE + TIVA_SYSCON_NVMSTAT_OFFSET)
 
 /* System Control Register Bit Definitions **************************************************/
 
@@ -1241,99 +1241,99 @@
 
 /* Device Capabilities 5 */
 
-#define LM_SYSCON_DC5_PWM0            (1 << 0)  /* Bit 0:  PWM0 Pin Present */
-#define LM_SYSCON_DC5_PWM1            (1 << 1)  /* Bit 1:  PWM1 Pin Present */
-#define LM_SYSCON_DC5_PWM2            (1 << 2)  /* Bit 2:  PWM2 Pin Present */
-#define LM_SYSCON_DC5_PWM3            (1 << 3)  /* Bit 3:  PWM3 Pin Present */
-#define LM_SYSCON_DC5_PWM4            (1 << 4)  /* Bit 4:  PWM4 Pin Present */
-#define LM_SYSCON_DC5_PWM5            (1 << 5)  /* Bit 5:  PWM5 Pin Present */
-#define LM_SYSCON_DC5_PWM6            (1 << 6)  /* Bit 6:  PWM6 Pin Present */
-#define LM_SYSCON_DC5_PWM7            (1 << 7)  /* Bit 7:  PWM7 Pin Present */
-#define LM_SYSCON_DC5_PWMESYNC        (1 << 20) /* Bit 20: PWM Extended SYNC Active */
-#define LM_SYSCON_DC5_PWMEFLT         (1 << 21) /* Bit 21: PWM Extended Fault Active */
-#define LM_SYSCON_DC5_PWMFAULT0       (1 << 24) /* Bit 24: PWM Fault 0 Pin Present */
-#define LM_SYSCON_DC5_PWMFAULT1       (1 << 25) /* Bit 25: PWM Fault 1 Pin Present */
-#define LM_SYSCON_DC5_PWMFAULT2       (1 << 26) /* Bit 26: PWM Fault 2 Pin Present */
-#define LM_SYSCON_DC5_PWMFAULT3       (1 << 27) /* Bit 27: PWM Fault 3 Pin Present */
+#define TIVA_SYSCON_DC5_PWM0            (1 << 0)  /* Bit 0:  PWM0 Pin Present */
+#define TIVA_SYSCON_DC5_PWM1            (1 << 1)  /* Bit 1:  PWM1 Pin Present */
+#define TIVA_SYSCON_DC5_PWM2            (1 << 2)  /* Bit 2:  PWM2 Pin Present */
+#define TIVA_SYSCON_DC5_PWM3            (1 << 3)  /* Bit 3:  PWM3 Pin Present */
+#define TIVA_SYSCON_DC5_PWM4            (1 << 4)  /* Bit 4:  PWM4 Pin Present */
+#define TIVA_SYSCON_DC5_PWM5            (1 << 5)  /* Bit 5:  PWM5 Pin Present */
+#define TIVA_SYSCON_DC5_PWM6            (1 << 6)  /* Bit 6:  PWM6 Pin Present */
+#define TIVA_SYSCON_DC5_PWM7            (1 << 7)  /* Bit 7:  PWM7 Pin Present */
+#define TIVA_SYSCON_DC5_PWMESYNC        (1 << 20) /* Bit 20: PWM Extended SYNC Active */
+#define TIVA_SYSCON_DC5_PWMEFLT         (1 << 21) /* Bit 21: PWM Extended Fault Active */
+#define TIVA_SYSCON_DC5_PWMFAULT0       (1 << 24) /* Bit 24: PWM Fault 0 Pin Present */
+#define TIVA_SYSCON_DC5_PWMFAULT1       (1 << 25) /* Bit 25: PWM Fault 1 Pin Present */
+#define TIVA_SYSCON_DC5_PWMFAULT2       (1 << 26) /* Bit 26: PWM Fault 2 Pin Present */
+#define TIVA_SYSCON_DC5_PWMFAULT3       (1 << 27) /* Bit 27: PWM Fault 3 Pin Present */
 
 /* Device Capabilities 6 */
 
-#define LM_SYSCON_DC6_USB0_SHIFT      (0)       /* Bits 0-1: USB Module 0 Present */
-#define LM_SYSCON_DC6_USB0_MASK       (3 << LM_SYSCON_DC6_USB0_SHIFT)
-#  define LM_SYSCON_DC6_USB0_NONE     (1 << LM_SYSCON_DC6_USB0_SHIFT)
-#  define LM_SYSCON_DC6_USB0_DEVICE   (2 << LM_SYSCON_DC6_USB0_SHIFT)
-#  define LM_SYSCON_DC6_USB0_HOST     (3 << LM_SYSCON_DC6_USB0_SHIFT)
-#  define LM_SYSCON_DC6_USB0_OTG      (3 << LM_SYSCON_DC6_USB0_SHIFT)
-#define LM_SYSCON_DC6_USB0PHY         (1 << 4)  /* Bit 4: USB Module 0 PHY Present */
+#define TIVA_SYSCON_DC6_USB0_SHIFT      (0)       /* Bits 0-1: USB Module 0 Present */
+#define TIVA_SYSCON_DC6_USB0_MASK       (3 << TIVA_SYSCON_DC6_USB0_SHIFT)
+#  define TIVA_SYSCON_DC6_USB0_NONE     (1 << TIVA_SYSCON_DC6_USB0_SHIFT)
+#  define TIVA_SYSCON_DC6_USB0_DEVICE   (2 << TIVA_SYSCON_DC6_USB0_SHIFT)
+#  define TIVA_SYSCON_DC6_USB0_HOST     (3 << TIVA_SYSCON_DC6_USB0_SHIFT)
+#  define TIVA_SYSCON_DC6_USB0_OTG      (3 << TIVA_SYSCON_DC6_USB0_SHIFT)
+#define TIVA_SYSCON_DC6_USB0PHY         (1 << 4)  /* Bit 4: USB Module 0 PHY Present */
 
 /* Device Capabilities 7 */
 
-#define LM_SYSCON_DC7_DMACH0          (1 << 0)  /* Bit 0:  DMA Channel 0 */
-#define LM_SYSCON_DC7_DMACH1          (1 << 1)  /* Bit 1:  DMA Channel 1 */
-#define LM_SYSCON_DC7_DMACH2          (1 << 2)  /* Bit 2:  DMA Channel 2 */
-#define LM_SYSCON_DC7_DMACH3          (1 << 3)  /* Bit 3:  DMA Channel 3 */
-#define LM_SYSCON_DC7_DMACH4          (1 << 4)  /* Bit 4:  DMA Channel 4 */
-#define LM_SYSCON_DC7_DMACH5          (1 << 5)  /* Bit 5:  DMA Channel 5 */
-#define LM_SYSCON_DC7_DMACH6          (1 << 6)  /* Bit 6:  DMA Channel 6 */
-#define LM_SYSCON_DC7_DMACH7          (1 << 7)  /* Bit 7:  DMA Channel 7 */
-#define LM_SYSCON_DC7_DMACH8          (1 << 8)  /* Bit 8:  DMA Channel 8 */
-#define LM_SYSCON_DC7_DMACH9          (1 << 9)  /* Bit 9:  DMA Channel 9 */
-#define LM_SYSCON_DC7_DMACH10         (1 << 10) /* Bit 10: DMA Channel 10 */
-#define LM_SYSCON_DC7_DMACH11         (1 << 11) /* Bit 11: DMA Channel 11 */
-#define LM_SYSCON_DC7_DMACH12         (1 << 12) /* Bit 12: DMA Channel 12 */
-#define LM_SYSCON_DC7_DMACH13         (1 << 13) /* Bit 13: DMA Channel 13 */
-#define LM_SYSCON_DC7_DMACH14         (1 << 14) /* Bit 14: DMA Channel 14 */
-#define LM_SYSCON_DC7_DMACH15         (1 << 15) /* Bit 15: DMA Channel 15 */
-#define LM_SYSCON_DC7_DMACH16         (1 << 16) /* Bit 16: DMA Channel 16 */
-#define LM_SYSCON_DC7_DMACH17         (1 << 17) /* Bit 17: DMA Channel 17 */
-#define LM_SYSCON_DC7_DMACH18         (1 << 18) /* Bit 18: DMA Channel 18 */
-#define LM_SYSCON_DC7_DMACH19         (1 << 19) /* Bit 19: DMA Channel 19 */
-#define LM_SYSCON_DC7_DMACH20         (1 << 20) /* Bit 20: DMA Channel 20 */
-#define LM_SYSCON_DC7_DMACH21         (1 << 21) /* Bit 21: DMA Channel 21 */
-#define LM_SYSCON_DC7_DMACH22         (1 << 22) /* Bit 22: DMA Channel 22 */
-#define LM_SYSCON_DC7_DMACH23         (1 << 23) /* Bit 23: DMA Channel 23 */
-#define LM_SYSCON_DC7_DMACH24         (1 << 24) /* Bit 24: DMA Channel 24 */
-#define LM_SYSCON_DC7_DMACH25         (1 << 25) /* Bit 25: DMA Channel 25 */
-#define LM_SYSCON_DC7_DMACH26         (1 << 26) /* Bit 26: DMA Channel 26 */
-#define LM_SYSCON_DC7_DMACH27         (1 << 27) /* Bit 27: DMA Channel 27 */
-#define LM_SYSCON_DC7_DMACH28         (1 << 28) /* Bit 28: DMA Channel 28 */
-#define LM_SYSCON_DC7_DMACH29         (1 << 29) /* Bit 29: DMA Channel 29 */
-#define LM_SYSCON_DC7_DMACH30         (1 << 30) /* Bit 30: DMA Channel 30 */
+#define TIVA_SYSCON_DC7_DMACH0          (1 << 0)  /* Bit 0:  DMA Channel 0 */
+#define TIVA_SYSCON_DC7_DMACH1          (1 << 1)  /* Bit 1:  DMA Channel 1 */
+#define TIVA_SYSCON_DC7_DMACH2          (1 << 2)  /* Bit 2:  DMA Channel 2 */
+#define TIVA_SYSCON_DC7_DMACH3          (1 << 3)  /* Bit 3:  DMA Channel 3 */
+#define TIVA_SYSCON_DC7_DMACH4          (1 << 4)  /* Bit 4:  DMA Channel 4 */
+#define TIVA_SYSCON_DC7_DMACH5          (1 << 5)  /* Bit 5:  DMA Channel 5 */
+#define TIVA_SYSCON_DC7_DMACH6          (1 << 6)  /* Bit 6:  DMA Channel 6 */
+#define TIVA_SYSCON_DC7_DMACH7          (1 << 7)  /* Bit 7:  DMA Channel 7 */
+#define TIVA_SYSCON_DC7_DMACH8          (1 << 8)  /* Bit 8:  DMA Channel 8 */
+#define TIVA_SYSCON_DC7_DMACH9          (1 << 9)  /* Bit 9:  DMA Channel 9 */
+#define TIVA_SYSCON_DC7_DMACH10         (1 << 10) /* Bit 10: DMA Channel 10 */
+#define TIVA_SYSCON_DC7_DMACH11         (1 << 11) /* Bit 11: DMA Channel 11 */
+#define TIVA_SYSCON_DC7_DMACH12         (1 << 12) /* Bit 12: DMA Channel 12 */
+#define TIVA_SYSCON_DC7_DMACH13         (1 << 13) /* Bit 13: DMA Channel 13 */
+#define TIVA_SYSCON_DC7_DMACH14         (1 << 14) /* Bit 14: DMA Channel 14 */
+#define TIVA_SYSCON_DC7_DMACH15         (1 << 15) /* Bit 15: DMA Channel 15 */
+#define TIVA_SYSCON_DC7_DMACH16         (1 << 16) /* Bit 16: DMA Channel 16 */
+#define TIVA_SYSCON_DC7_DMACH17         (1 << 17) /* Bit 17: DMA Channel 17 */
+#define TIVA_SYSCON_DC7_DMACH18         (1 << 18) /* Bit 18: DMA Channel 18 */
+#define TIVA_SYSCON_DC7_DMACH19         (1 << 19) /* Bit 19: DMA Channel 19 */
+#define TIVA_SYSCON_DC7_DMACH20         (1 << 20) /* Bit 20: DMA Channel 20 */
+#define TIVA_SYSCON_DC7_DMACH21         (1 << 21) /* Bit 21: DMA Channel 21 */
+#define TIVA_SYSCON_DC7_DMACH22         (1 << 22) /* Bit 22: DMA Channel 22 */
+#define TIVA_SYSCON_DC7_DMACH23         (1 << 23) /* Bit 23: DMA Channel 23 */
+#define TIVA_SYSCON_DC7_DMACH24         (1 << 24) /* Bit 24: DMA Channel 24 */
+#define TIVA_SYSCON_DC7_DMACH25         (1 << 25) /* Bit 25: DMA Channel 25 */
+#define TIVA_SYSCON_DC7_DMACH26         (1 << 26) /* Bit 26: DMA Channel 26 */
+#define TIVA_SYSCON_DC7_DMACH27         (1 << 27) /* Bit 27: DMA Channel 27 */
+#define TIVA_SYSCON_DC7_DMACH28         (1 << 28) /* Bit 28: DMA Channel 28 */
+#define TIVA_SYSCON_DC7_DMACH29         (1 << 29) /* Bit 29: DMA Channel 29 */
+#define TIVA_SYSCON_DC7_DMACH30         (1 << 30) /* Bit 30: DMA Channel 30 */
 
 /* Device Capabilities 8 */
 
-#define LM_SYSCON_DC8_ADC0AIN0        (1 << 0)  /* Bit 0:  ADC Module 0 AIN0 Pin Present */
-#define LM_SYSCON_DC8_ADC0AIN1        (1 << 1)  /* Bit 1:  ADC Module 0 AIN1 Pin Present */
-#define LM_SYSCON_DC8_ADC0AIN2        (1 << 2)  /* Bit 2:  ADC Module 0 AIN2 Pin Present */
-#define LM_SYSCON_DC8_ADC0AIN3        (1 << 3)  /* Bit 3:  ADC Module 0 AIN3 Pin Present */
-#define LM_SYSCON_DC8_ADC0AIN4        (1 << 4)  /* Bit 4:  ADC Module 0 AIN4 Pin Present */
-#define LM_SYSCON_DC8_ADC0AIN5        (1 << 5)  /* Bit 5:  ADC Module 0 AIN5 Pin Present */
-#define LM_SYSCON_DC8_ADC0AIN6        (1 << 6)  /* Bit 6:  ADC Module 0 AIN6 Pin Present */
-#define LM_SYSCON_DC8_ADC0AIN7        (1 << 7)  /* Bit 7:  ADC Module 0 AIN7 Pin Present */
-#define LM_SYSCON_DC8_ADC0AIN8        (1 << 8)  /* Bit 8:  ADC Module 0 AIN8 Pin Present */
-#define LM_SYSCON_DC8_ADC0AIN9        (1 << 9)  /* Bit 9:  ADC Module 0 AIN9 Pin Present */
-#define LM_SYSCON_DC8_ADC0AIN10       (1 << 10) /* Bit 10: ADC Module 0 AIN10 Pin Present */
-#define LM_SYSCON_DC8_ADC0AIN11       (1 << 11) /* Bit 11: ADC Module 0 AIN11 Pin Present */
-#define LM_SYSCON_DC8_ADC0AIN12       (1 << 12) /* Bit 12: ADC Module 0 AIN12 Pin Present */
-#define LM_SYSCON_DC8_ADC0AIN13       (1 << 13) /* Bit 13: ADC Module 0 AIN13 Pin Present */
-#define LM_SYSCON_DC8_ADC0AIN14       (1 << 14) /* Bit 14: ADC Module 0 AIN14 Pin Present */
-#define LM_SYSCON_DC8_ADC0AIN15       (1 << 15) /* Bit 15: ADC Module 0 AIN15 Pin Present */
-#define LM_SYSCON_DC8_ADC1AIN0        (1 << 16) /* Bit 16: ADC Module 1 AIN0 Pin Present */
-#define LM_SYSCON_DC8_ADC1AIN1        (1 << 17) /* Bit 17: ADC Module 1 AIN1 Pin Present */
-#define LM_SYSCON_DC8_ADC1AIN2        (1 << 18) /* Bit 18: ADC Module 1 AIN2 Pin Present */
-#define LM_SYSCON_DC8_ADC1AIN3        (1 << 19) /* Bit 19: ADC Module 1 AIN3 Pin Present */
-#define LM_SYSCON_DC8_ADC1AIN4        (1 << 20) /* Bit 20: ADC Module 1 AIN4 Pin Present */
-#define LM_SYSCON_DC8_ADC1AIN5        (1 << 21) /* Bit 21: ADC Module 1 AIN5 Pin Present */
-#define LM_SYSCON_DC8_ADC1AIN6        (1 << 22) /* Bit 22: ADC Module 1 AIN6 Pin Present */
-#define LM_SYSCON_DC8_ADC1AIN7        (1 << 23) /* Bit 23: ADC Module 1 AIN7 Pin Present */
-#define LM_SYSCON_DC8_ADC1AIN8        (1 << 24) /* Bit 24: ADC Module 1 AIN8 Pin Present */
-#define LM_SYSCON_DC8_ADC1AIN9        (1 << 25) /* Bit 25: ADC Module 1 AIN9 Pin Present */
-#define LM_SYSCON_DC8_ADC1AIN10       (1 << 26) /* Bit 26: ADC Module 1 AIN10 Pin Present */
-#define LM_SYSCON_DC8_ADC1AIN11       (1 << 27) /* Bit 27: ADC Module 1 AIN11 Pin Present */
-#define LM_SYSCON_DC8_ADC1AIN12       (1 << 28) /* Bit 28: ADC Module 1 AIN12 Pin Present */
-#define LM_SYSCON_DC8_ADC1AIN13       (1 << 29) /* Bit 29: ADC Module 1 AIN13 Pin Present */
-#define LM_SYSCON_DC8_ADC1AIN14       (1 << 30) /* Bit 30: ADC Module 1 AIN14 Pin Present */
-#define LM_SYSCON_DC8_ADC1AIN15       (1 << 31) /* Bit 31: ADC Module 1 AIN15 Pin Present */
+#define TIVA_SYSCON_DC8_ADC0AIN0        (1 << 0)  /* Bit 0:  ADC Module 0 AIN0 Pin Present */
+#define TIVA_SYSCON_DC8_ADC0AIN1        (1 << 1)  /* Bit 1:  ADC Module 0 AIN1 Pin Present */
+#define TIVA_SYSCON_DC8_ADC0AIN2        (1 << 2)  /* Bit 2:  ADC Module 0 AIN2 Pin Present */
+#define TIVA_SYSCON_DC8_ADC0AIN3        (1 << 3)  /* Bit 3:  ADC Module 0 AIN3 Pin Present */
+#define TIVA_SYSCON_DC8_ADC0AIN4        (1 << 4)  /* Bit 4:  ADC Module 0 AIN4 Pin Present */
+#define TIVA_SYSCON_DC8_ADC0AIN5        (1 << 5)  /* Bit 5:  ADC Module 0 AIN5 Pin Present */
+#define TIVA_SYSCON_DC8_ADC0AIN6        (1 << 6)  /* Bit 6:  ADC Module 0 AIN6 Pin Present */
+#define TIVA_SYSCON_DC8_ADC0AIN7        (1 << 7)  /* Bit 7:  ADC Module 0 AIN7 Pin Present */
+#define TIVA_SYSCON_DC8_ADC0AIN8        (1 << 8)  /* Bit 8:  ADC Module 0 AIN8 Pin Present */
+#define TIVA_SYSCON_DC8_ADC0AIN9        (1 << 9)  /* Bit 9:  ADC Module 0 AIN9 Pin Present */
+#define TIVA_SYSCON_DC8_ADC0AIN10       (1 << 10) /* Bit 10: ADC Module 0 AIN10 Pin Present */
+#define TIVA_SYSCON_DC8_ADC0AIN11       (1 << 11) /* Bit 11: ADC Module 0 AIN11 Pin Present */
+#define TIVA_SYSCON_DC8_ADC0AIN12       (1 << 12) /* Bit 12: ADC Module 0 AIN12 Pin Present */
+#define TIVA_SYSCON_DC8_ADC0AIN13       (1 << 13) /* Bit 13: ADC Module 0 AIN13 Pin Present */
+#define TIVA_SYSCON_DC8_ADC0AIN14       (1 << 14) /* Bit 14: ADC Module 0 AIN14 Pin Present */
+#define TIVA_SYSCON_DC8_ADC0AIN15       (1 << 15) /* Bit 15: ADC Module 0 AIN15 Pin Present */
+#define TIVA_SYSCON_DC8_ADC1AIN0        (1 << 16) /* Bit 16: ADC Module 1 AIN0 Pin Present */
+#define TIVA_SYSCON_DC8_ADC1AIN1        (1 << 17) /* Bit 17: ADC Module 1 AIN1 Pin Present */
+#define TIVA_SYSCON_DC8_ADC1AIN2        (1 << 18) /* Bit 18: ADC Module 1 AIN2 Pin Present */
+#define TIVA_SYSCON_DC8_ADC1AIN3        (1 << 19) /* Bit 19: ADC Module 1 AIN3 Pin Present */
+#define TIVA_SYSCON_DC8_ADC1AIN4        (1 << 20) /* Bit 20: ADC Module 1 AIN4 Pin Present */
+#define TIVA_SYSCON_DC8_ADC1AIN5        (1 << 21) /* Bit 21: ADC Module 1 AIN5 Pin Present */
+#define TIVA_SYSCON_DC8_ADC1AIN6        (1 << 22) /* Bit 22: ADC Module 1 AIN6 Pin Present */
+#define TIVA_SYSCON_DC8_ADC1AIN7        (1 << 23) /* Bit 23: ADC Module 1 AIN7 Pin Present */
+#define TIVA_SYSCON_DC8_ADC1AIN8        (1 << 24) /* Bit 24: ADC Module 1 AIN8 Pin Present */
+#define TIVA_SYSCON_DC8_ADC1AIN9        (1 << 25) /* Bit 25: ADC Module 1 AIN9 Pin Present */
+#define TIVA_SYSCON_DC8_ADC1AIN10       (1 << 26) /* Bit 26: ADC Module 1 AIN10 Pin Present */
+#define TIVA_SYSCON_DC8_ADC1AIN11       (1 << 27) /* Bit 27: ADC Module 1 AIN11 Pin Present */
+#define TIVA_SYSCON_DC8_ADC1AIN12       (1 << 28) /* Bit 28: ADC Module 1 AIN12 Pin Present */
+#define TIVA_SYSCON_DC8_ADC1AIN13       (1 << 29) /* Bit 29: ADC Module 1 AIN13 Pin Present */
+#define TIVA_SYSCON_DC8_ADC1AIN14       (1 << 30) /* Bit 30: ADC Module 1 AIN14 Pin Present */
+#define TIVA_SYSCON_DC8_ADC1AIN15       (1 << 31) /* Bit 31: ADC Module 1 AIN15 Pin Present */
 
 /* Software Reset Control 0 */
 
@@ -1496,26 +1496,26 @@
 
 /* Device Capabilities */
 
-#define LM_SYSCON_DC9_ADC0DC0         (1 << 0)  /* Bit 0:  ADC0 DC0 Present */
-#define LM_SYSCON_DC9_ADC0DC1         (1 << 1)  /* Bit 1:  ADC0 DC1 Present */
-#define LM_SYSCON_DC9_ADC0DC2         (1 << 2)  /* Bit 2:  ADC0 DC2 Present */
-#define LM_SYSCON_DC9_ADC0DC3         (1 << 3)  /* Bit 3:  ADC0 DC3 Present */
-#define LM_SYSCON_DC9_ADC0DC4         (1 << 4)  /* Bit 4:  ADC0 DC4 Present */
-#define LM_SYSCON_DC9_ADC0DC5         (1 << 5)  /* Bit 5:  ADC0 DC5 Present */
-#define LM_SYSCON_DC9_ADC0DC6         (1 << 6)  /* Bit 6:  ADC0 DC6 Present */
-#define LM_SYSCON_DC9_ADC0DC7         (1 << 7)  /* Bit 7:  ADC0 DC7 Present */
-#define LM_SYSCON_DC9_ADC1DC0         (1 << 16) /* Bit 16: ADC1 DC0 Present */
-#define LM_SYSCON_DC9_ADC1DC1         (1 << 17) /* Bit 17: ADC1 DC1 Present */
-#define LM_SYSCON_DC9_ADC1DC2         (1 << 18) /* Bit 18: ADC1 DC2 Present */
-#define LM_SYSCON_DC9_ADC1DC3         (1 << 19) /* Bit 19: ADC1 DC3 Present */
-#define LM_SYSCON_DC9_ADC1DC4         (1 << 20) /* Bit 20: ADC1 DC4 Present */
-#define LM_SYSCON_DC9_ADC1DC5         (1 << 21) /* Bit 21: ADC1 DC5 Present */
-#define LM_SYSCON_DC9_ADC1DC6         (1 << 22) /* Bit 22: ADC1 DC6 Present */
-#define LM_SYSCON_DC9_ADC1DC7         (1 << 23) /* Bit 23: ADC1 DC7 Present */
+#define TIVA_SYSCON_DC9_ADC0DC0         (1 << 0)  /* Bit 0:  ADC0 DC0 Present */
+#define TIVA_SYSCON_DC9_ADC0DC1         (1 << 1)  /* Bit 1:  ADC0 DC1 Present */
+#define TIVA_SYSCON_DC9_ADC0DC2         (1 << 2)  /* Bit 2:  ADC0 DC2 Present */
+#define TIVA_SYSCON_DC9_ADC0DC3         (1 << 3)  /* Bit 3:  ADC0 DC3 Present */
+#define TIVA_SYSCON_DC9_ADC0DC4         (1 << 4)  /* Bit 4:  ADC0 DC4 Present */
+#define TIVA_SYSCON_DC9_ADC0DC5         (1 << 5)  /* Bit 5:  ADC0 DC5 Present */
+#define TIVA_SYSCON_DC9_ADC0DC6         (1 << 6)  /* Bit 6:  ADC0 DC6 Present */
+#define TIVA_SYSCON_DC9_ADC0DC7         (1 << 7)  /* Bit 7:  ADC0 DC7 Present */
+#define TIVA_SYSCON_DC9_ADC1DC0         (1 << 16) /* Bit 16: ADC1 DC0 Present */
+#define TIVA_SYSCON_DC9_ADC1DC1         (1 << 17) /* Bit 17: ADC1 DC1 Present */
+#define TIVA_SYSCON_DC9_ADC1DC2         (1 << 18) /* Bit 18: ADC1 DC2 Present */
+#define TIVA_SYSCON_DC9_ADC1DC3         (1 << 19) /* Bit 19: ADC1 DC3 Present */
+#define TIVA_SYSCON_DC9_ADC1DC4         (1 << 20) /* Bit 20: ADC1 DC4 Present */
+#define TIVA_SYSCON_DC9_ADC1DC5         (1 << 21) /* Bit 21: ADC1 DC5 Present */
+#define TIVA_SYSCON_DC9_ADC1DC6         (1 << 22) /* Bit 22: ADC1 DC6 Present */
+#define TIVA_SYSCON_DC9_ADC1DC7         (1 << 23) /* Bit 23: ADC1 DC7 Present */
 
 /* Non-Volatile Memory Information */
 
-#define LM_SYSCON_NVMSTAT_FWB         (1 << 0)  /* Bit 0: 32 Word Flash Write Buffer Available */
+#define TIVA_SYSCON_NVMSTAT_FWB         (1 << 0)  /* Bit 0: 32 Word Flash Write Buffer Available */
 
 /********************************************************************************************
  * Public Types

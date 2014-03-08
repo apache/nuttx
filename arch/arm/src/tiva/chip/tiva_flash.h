@@ -48,81 +48,81 @@
 
 /* FLASH dimensions ****************************************************************/
 
-#if defined(CONFIG_ARCH_CHIP_LM3S6965) || defined(CONFIG_ARCH_CHIP_LM4F120)
-#  define LM_FLASH_NPAGES        256
-#  define LM_FLASH_PAGESIZE      1024
+#if defined(CONFIG_ARCH_CHIP_LM3S6965) || defined(CONFIG_ARCH_CHIP_LM4F120) || \
+    defined(CONFIG_ARCH_CHIP_LM3S8962) || defined(CONFIG_ARCH_CHIP_LM3S9B96)
+#  define TIVA_FLASH_NPAGES        256
+#  define TIVA_FLASH_PAGESIZE      1024
 #else
-#  error "No flash dimensions defined for selected chip."
+#  warning "No flash dimensions defined for selected chip."
 #endif
 
-#define LM_FLASH_SIZE            (LM_FLASH_NPAGES * LM_FLASH_PAGESIZE)
-
+#define TIVA_FLASH_SIZE            (TIVA_FLASH_NPAGES * TIVA_FLASH_PAGESIZE)
 
 /* FLASH register offsets ***********************************************************/
 
 /* The FMA, FMD, FMC, FCRIS, FCIM, and FCMISC registers are relative to the Flash
- * control base address of LM_FLASHCON_BASE.
+ * control base address of TIVA_FLASHCON_BASE.
  */
 
-#define LM_FLASH_FMA_OFFSET       0x000 /* Flash memory address */
-#define LM_FLASH_FMD_OFFSET       0x004 /* Flash memory data */
-#define LM_FLASH_FMC_OFFSET       0x008 /* Flash memory control */
-#define LM_FLASH_FCRIS_OFFSET     0x00c /* Flash controller raw interrupt status */
-#define LM_FLASH_FCIM_OFFSET      0x010 /* Flash controller interrupt mask */
-#define LM_FLASH_FCMISC_OFFSET    0x014 /* Flash controller masked interrupt status and clear */
+#define TIVA_FLASH_FMA_OFFSET      0x000 /* Flash memory address */
+#define TIVA_FLASH_FMD_OFFSET      0x004 /* Flash memory data */
+#define TIVA_FLASH_FMC_OFFSET      0x008 /* Flash memory control */
+#define TIVA_FLASH_FCRIS_OFFSET    0x00c /* Flash controller raw interrupt status */
+#define TIVA_FLASH_FCIM_OFFSET     0x010 /* Flash controller interrupt mask */
+#define TIVA_FLASH_FCMISC_OFFSET   0x014 /* Flash controller masked interrupt status and clear */
 
 /* The FMPREn, FMPPEn, USECRL, USER_DBG, and USER_REGn registers are relative to the
- * System Control base address of LM_SYSCON_BASE
+ * System Control base address of TIVA_SYSCON_BASE
  */
 
-#define LM_FLASH_FMPRE_OFFSET     0x130 /* Flash memory protection read enable */
-#define LM_FLASH_FMPPE_OFFSET     0x134 /* Flash memory protection program enable */
-#define LM_FLASH_USECRL_OFFSET    0x140 /* USec Reload */
-#define LM_FLASH_USERDBG_OFFSET   0x1d0 /* User Debug */
-#define LM_FLASH_USERREG0_OFFSET  0x1e0 /* User Register 0 */
-#define LM_FLASH_USERREG1_OFFSET  0x1e4 /* User Register 1 */
-#define LM_FLASH_FMPRE0_OFFSET    0x200 /* Flash Memory Protection Read Enable 0 */
-#define LM_FLASH_FMPRE1_OFFSET    0x204 /* Flash Memory Protection Read Enable 1 */
-#define LM_FLASH_FMPRE2_OFFSET    0x208 /* Flash Memory Protection Read Enable 2 */
-#define LM_FLASH_FMPRE3_OFFSET    0x20c /* Flash Memory Protection Read Enable 3 */
-#define LM_FLASH_FMPPE0_OFFSET    0x400 /* Flash Memory Protection Program Enable 0 */
-#define LM_FLASH_FMPPE1_OFFSET    0x404 /* Flash Memory Protection Program Enable 1 */
-#define LM_FLASH_FMPPE2_OFFSET    0x408 /* Flash Memory Protection Program Enable 2 */
-#define LM_FLASH_FMPPE3_OFFSET    0x40c /*  Flash Memory Protection Program Enable 3 */
+#define TIVA_FLASH_FMPRE_OFFSET    0x130 /* Flash memory protection read enable */
+#define TIVA_FLASH_FMPPE_OFFSET    0x134 /* Flash memory protection program enable */
+#define TIVA_FLASH_USECRL_OFFSET   0x140 /* USec Reload */
+#define TIVA_FLASH_USERDBG_OFFSET  0x1d0 /* User Debug */
+#define TIVA_FLASH_USERREG0_OFFSET 0x1e0 /* User Register 0 */
+#define TIVA_FLASH_USERREG1_OFFSET 0x1e4 /* User Register 1 */
+#define TIVA_FLASH_FMPRE0_OFFSET   0x200 /* Flash Memory Protection Read Enable 0 */
+#define TIVA_FLASH_FMPRE1_OFFSET   0x204 /* Flash Memory Protection Read Enable 1 */
+#define TIVA_FLASH_FMPRE2_OFFSET   0x208 /* Flash Memory Protection Read Enable 2 */
+#define TIVA_FLASH_FMPRE3_OFFSET   0x20c /* Flash Memory Protection Read Enable 3 */
+#define TIVA_FLASH_FMPPE0_OFFSET   0x400 /* Flash Memory Protection Program Enable 0 */
+#define TIVA_FLASH_FMPPE1_OFFSET   0x404 /* Flash Memory Protection Program Enable 1 */
+#define TIVA_FLASH_FMPPE2_OFFSET   0x408 /* Flash Memory Protection Program Enable 2 */
+#define TIVA_FLASH_FMPPE3_OFFSET   0x40c /*  Flash Memory Protection Program Enable 3 */
 
 /* FLASH register addresses *********************************************************/
 
 /* The FMA, FMD, FMC, FCRIS, FCIM, and FCMISC registers are relative to the Flash
- * control base address of LM_FLASHCON_BASE.
+ * control base address of TIVA_FLASHCON_BASE.
  */
 
-#define LM_FLASH_FMA              (LM_FLASHCON_BASE + LM_FLASH_FMA_OFFSET)
-#define LM_FLASH_FMD              (LM_FLASHCON_BASE + LM_FLASH_FMD_OFFSET)
-#define LM_FLASH_FMC              (LM_FLASHCON_BASE + LM_FLASH_FMC_OFFSET)
-#define LM_FLASH_FCRIS            (LM_FLASHCON_BASE + LM_FLASH_FCRIS_OFFSET)
-#define LM_FLASH_FCIM             (LM_FLASHCON_BASE + LM_FLASH_FCIM_OFFSET)
-#define LM_FLASH_FCMISC           (LM_FLASHCON_BASE + LM_FLASH_FCMISC_OFFSET)
+#define TIVA_FLASH_FMA             (TIVA_FLASHCON_BASE + TIVA_FLASH_FMA_OFFSET)
+#define TIVA_FLASH_FMD             (TIVA_FLASHCON_BASE + TIVA_FLASH_FMD_OFFSET)
+#define TIVA_FLASH_FMC             (TIVA_FLASHCON_BASE + TIVA_FLASH_FMC_OFFSET)
+#define TIVA_FLASH_FCRIS           (TIVA_FLASHCON_BASE + TIVA_FLASH_FCRIS_OFFSET)
+#define TIVA_FLASH_FCIM            (TIVA_FLASHCON_BASE + TIVA_FLASH_FCIM_OFFSET)
+#define TIVA_FLASH_FCMISC          (TIVA_FLASHCON_BASE + TIVA_FLASH_FCMISC_OFFSET)
 
 /* The FMPREn, FMPPEn, USECRL, USER_DBG, and USER_REGn registers are relative to the
- * System Control base address of LM_SYSCON_BASE
+ * System Control base address of TIVA_SYSCON_BASE
  */
 
-#define LM_FLASH_FMPRE            (LM_SYSCON_BASE + LM_FLASH_FMPRE_OFFSET)
-#define LM_FLASH_FMPPE            (LM_SYSCON_BASE + LM_FLASH_FMPPE_OFFSET)
-#define LM_FLASH_USECRL           (LM_SYSCON_BASE + LM_FLASH_USECRL_OFFSET)
-#define LM_FLASH_USERDBG          (LM_SYSCON_BASE + LM_FLASH_USERDBG_OFFSET)
-#define LM_FLASH_USERREG0         (LM_SYSCON_BASE + LM_FLASH_USERREG0_OFFSET)
-#define LM_FLASH_USERREG1         (LM_SYSCON_BASE + LM_FLASH_USERREG1_OFFSET)
-#define LM_FLASH_FMPRE0           (LM_SYSCON_BASE + LM_FLASH_FMPRE0_OFFSET)
-#define LM_FLASH_FMPRE1           (LM_SYSCON_BASE + LM_FLASH_FMPRE1_OFFSET)
-#define LM_FLASH_FMPRE2           (LM_SYSCON_BASE + LM_FLASH_FMPRE2_OFFSET)
-#define LM_FLASH_FMPRE3           (LM_SYSCON_BASE + LM_FLASH_FMPRE3_OFFSET)
-#define LM_FLASH_FMPPE0           (LM_SYSCON_BASE + LM_FLASH_FMPPE0_OFFSET)
-#define LM_FLASH_FMPPE1           (LM_SYSCON_BASE + LM_FLASH_FMPPE1_OFFSET)
-#define LM_FLASH_FMPPE2           (LM_SYSCON_BASE + LM_FLASH_FMPPE2_OFFSET)
-#define LM_FLASH_FMPPE3           (LM_SYSCON_BASE + LM_FLASH_FMPPE3_OFFSET)
+#define TIVA_FLASH_FMPRE           (TIVA_SYSCON_BASE + TIVA_FLASH_FMPRE_OFFSET)
+#define TIVA_FLASH_FMPPE           (TIVA_SYSCON_BASE + TIVA_FLASH_FMPPE_OFFSET)
+#define TIVA_FLASH_USECRL          (TIVA_SYSCON_BASE + TIVA_FLASH_USECRL_OFFSET)
+#define TIVA_FLASH_USERDBG         (TIVA_SYSCON_BASE + TIVA_FLASH_USERDBG_OFFSET)
+#define TIVA_FLASH_USERREG0        (TIVA_SYSCON_BASE + TIVA_FLASH_USERREG0_OFFSET)
+#define TIVA_FLASH_USERREG1        (TIVA_SYSCON_BASE + TIVA_FLASH_USERREG1_OFFSET)
+#define TIVA_FLASH_FMPRE0          (TIVA_SYSCON_BASE + TIVA_FLASH_FMPRE0_OFFSET)
+#define TIVA_FLASH_FMPRE1          (TIVA_SYSCON_BASE + TIVA_FLASH_FMPRE1_OFFSET)
+#define TIVA_FLASH_FMPRE2          (TIVA_SYSCON_BASE + TIVA_FLASH_FMPRE2_OFFSET)
+#define TIVA_FLASH_FMPRE3          (TIVA_SYSCON_BASE + TIVA_FLASH_FMPRE3_OFFSET)
+#define TIVA_FLASH_FMPPE0          (TIVA_SYSCON_BASE + TIVA_FLASH_FMPPE0_OFFSET)
+#define TIVA_FLASH_FMPPE1          (TIVA_SYSCON_BASE + TIVA_FLASH_FMPPE1_OFFSET)
+#define TIVA_FLASH_FMPPE2          (TIVA_SYSCON_BASE + TIVA_FLASH_FMPPE2_OFFSET)
+#define TIVA_FLASH_FMPPE3          (TIVA_SYSCON_BASE + TIVA_FLASH_FMPPE3_OFFSET)
 
-/* FLASH register bit defitiions ****************************************************/
+/* FLASH register bit definitions ***************************************************/
 
 #define FLASH_FMA_OFFSET_SHIFT     0         /* Bits 17-0: Address Offset */
 #define FLASH_FMA_OFFSET_MASK      (0x0003ffff << FLASH_FMA_OFFSET_SHIFT)
@@ -140,7 +140,6 @@
 #define FLASH_FMC_WRKEY_SHIFT      16         /* Bits 16-31:  Flash Write Key */
 #define FLASH_FMC_WRKEY_MASK       (0xffff << FLASH_FMC_WRKEY_SHIFT)
 #define FLASH_FMC_WRKEY            (0xa442 << FLASH_FMC_WRKEY_SHIFT) /* Magic write key */
-
 
 /************************************************************************************
  * Public Types

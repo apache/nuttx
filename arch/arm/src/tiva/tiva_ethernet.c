@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_LM_ETHERNET)
+#if defined(CONFIG_NET) && defined(CONFIG_TIVA_ETHERNET)
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -66,75 +66,75 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Half duplex can be forced if CONFIG_LM_ETHHDUPLEX is defined. */
+/* Half duplex can be forced if CONFIG_TIVA_ETHHDUPLEX is defined. */
 
-#ifdef CONFIG_LM_ETHHDUPLEX
-#  define LM_DUPLEX_SETBITS 0
-#  define LM_DUPLEX_CLRBITS MAC_TCTL_DUPLEX
+#ifdef CONFIG_TIVA_ETHHDUPLEX
+#  define TIVA_DUPLEX_SETBITS 0
+#  define TIVA_DUPLEX_CLRBITS MAC_TCTL_DUPLEX
 #else 
-#  define LM_DUPLEX_SETBITS MAC_TCTL_DUPLEX
-#  define LM_DUPLEX_CLRBITS 0
+#  define TIVA_DUPLEX_SETBITS MAC_TCTL_DUPLEX
+#  define TIVA_DUPLEX_CLRBITS 0
 #endif
 
-/* Auto CRC generation can be suppressed if CONFIG_LM_ETHNOAUTOCRC is definde */
+/* Auto CRC generation can be suppressed if CONFIG_TIVA_ETHNOAUTOCRC is definde */
 
-#ifdef CONFIG_LM_ETHNOAUTOCRC
-#  define LM_CRC_SETBITS 0
-#  define LM_CRC_CLRBITS MAC_TCTL_CRC
+#ifdef CONFIG_TIVA_ETHNOAUTOCRC
+#  define TIVA_CRC_SETBITS 0
+#  define TIVA_CRC_CLRBITS MAC_TCTL_CRC
 #else 
-#  define LM_CRC_SETBITS MAC_TCTL_CRC
-#  define LM_CRC_CLRBITS 0
+#  define TIVA_CRC_SETBITS MAC_TCTL_CRC
+#  define TIVA_CRC_CLRBITS 0
 #endif
 
-/* Tx padding can be suppressed if CONFIG_LM_ETHNOPAD is defined */
+/* Tx padding can be suppressed if CONFIG_TIVA_ETHNOPAD is defined */
 
-#ifdef CONFIG_LM_ETHNOPAD
-#  define LM_PADEN_SETBITS 0
-#  define LM_PADEN_CLRBITS MAC_TCTL_PADEN
+#ifdef CONFIG_TIVA_ETHNOPAD
+#  define TIVA_PADEN_SETBITS 0
+#  define TIVA_PADEN_CLRBITS MAC_TCTL_PADEN
 #else 
-#  define LM_PADEN_SETBITS MAC_TCTL_PADEN
-#  define LM_PADEN_CLRBITS 0
+#  define TIVA_PADEN_SETBITS MAC_TCTL_PADEN
+#  define TIVA_PADEN_CLRBITS 0
 #endif
 
-#define LM_TCTCL_SETBITS (LM_DUPLEX_SETBITS|LM_CRC_SETBITS|LM_PADEN_SETBITS)
-#define LM_TCTCL_CLRBITS (LM_DUPLEX_CLRBITS|LM_CRC_CLRBITS|LM_PADEN_CLRBITS)
+#define TIVA_TCTCL_SETBITS (TIVA_DUPLEX_SETBITS|TIVA_CRC_SETBITS|TIVA_PADEN_SETBITS)
+#define TIVA_TCTCL_CLRBITS (TIVA_DUPLEX_CLRBITS|TIVA_CRC_CLRBITS|TIVA_PADEN_CLRBITS)
 
-/* Multicast frames can be enabled by defining CONFIG_LM_MULTICAST */
+/* Multicast frames can be enabled by defining CONFIG_TIVA_MULTICAST */
 
-#ifdef CONFIG_LM_MULTICAST
-#  define LM_AMUL_SETBITS MAC_RCTL_AMUL
-#  define LM_AMUL_CLRBITS 0
+#ifdef CONFIG_TIVA_MULTICAST
+#  define TIVA_AMUL_SETBITS MAC_RCTL_AMUL
+#  define TIVA_AMUL_CLRBITS 0
 #else 
-#  define LM_AMUL_SETBITS 0
-#  define LM_AMUL_CLRBITS MAC_RCTL_AMUL
+#  define TIVA_AMUL_SETBITS 0
+#  define TIVA_AMUL_CLRBITS MAC_RCTL_AMUL
 #endif
 
-/* Promiscuous mode can be enabled by defining CONFIG_LM_PROMISCUOUS */
+/* Promiscuous mode can be enabled by defining CONFIG_TIVA_PROMISCUOUS */
 
-#ifdef CONFIG_LM_PROMISCUOUS
-#  define LM_PRMS_SETBITS MAC_RCTL_PRMS
-#  define LM_PRMS_CLRBITS 0
+#ifdef CONFIG_TIVA_PROMISCUOUS
+#  define TIVA_PRMS_SETBITS MAC_RCTL_PRMS
+#  define TIVA_PRMS_CLRBITS 0
 #else 
-#  define LM_PRMS_SETBITS 0
-#  define LM_PRMS_CLRBITS MAC_RCTL_PRMS
+#  define TIVA_PRMS_SETBITS 0
+#  define TIVA_PRMS_CLRBITS MAC_RCTL_PRMS
 #endif
 
-/* Bad CRC rejection can be enabled by define CONFIG_LM_BADCRC */
+/* Bad CRC rejection can be enabled by define CONFIG_TIVA_BADCRC */
 
-#ifdef CONFIG_LM_BADCRC
-#  define LM_BADCRC_SETBITS MAC_RCTL_BADCRC
-#  define LM_BADCRC_CLRBITS 0
+#ifdef CONFIG_TIVA_BADCRC
+#  define TIVA_BADCRC_SETBITS MAC_RCTL_BADCRC
+#  define TIVA_BADCRC_CLRBITS 0
 #else 
-#  define LM_BADCRC_SETBITS 0
-#  define LM_BADCRC_CLRBITS MAC_RCTL_BADCRC
+#  define TIVA_BADCRC_SETBITS 0
+#  define TIVA_BADCRC_CLRBITS MAC_RCTL_BADCRC
 #endif
 
-#define LM_RCTCL_SETBITS (LM_AMUL_SETBITS|LM_PRMS_SETBITS|LM_BADCRC_SETBITS)
-#define LM_RCTCL_CLRBITS (LM_AMUL_CLRBITS|LM_PRMS_CLRBITS|LM_BADCRC_CLRBITS)
+#define TIVA_RCTCL_SETBITS (TIVA_AMUL_SETBITS|TIVA_PRMS_SETBITS|TIVA_BADCRC_SETBITS)
+#define TIVA_RCTCL_CLRBITS (TIVA_AMUL_CLRBITS|TIVA_PRMS_CLRBITS|TIVA_BADCRC_CLRBITS)
 
-/* CONFIG_LM_DUMPPACKET will dump the contents of each packet to the console. */
+/* CONFIG_TIVA_DUMPPACKET will dump the contents of each packet to the console. */
 
-#ifdef CONFIG_LM_DUMPPACKET
+#ifdef CONFIG_TIVA_DUMPPACKET
 #  define tiva_dumppacket(m,a,n) lib_dumpbuffer(m,a,n)
 #else
 #  define tiva_dumppacket(m,a,n)
@@ -142,18 +142,18 @@
 
 /* TX poll deley = 1 seconds. CLK_TCK is the number of clock ticks per second */
 
-#define LM_WDDELAY   (1*CLK_TCK)
-#define LM_POLLHSEC  (1*2)
+#define TIVA_WDDELAY   (1*CLK_TCK)
+#define TIVA_POLLHSEC  (1*2)
 
 /* TX timeout = 1 minute */
 
-#define LM_TXTIMEOUT (60*CLK_TCK)
+#define TIVA_TXTIMEOUT (60*CLK_TCK)
 
 /* This is a helper pointer for accessing the contents of the Ethernet header */
 
 #define ETHBUF ((struct uip_eth_hdr *)priv->ld_dev.d_buf)
 
-#define LM_MAX_MDCCLK 2500000
+#define TIVA_MAX_MDCCLK 2500000
 
 /****************************************************************************
  * Private Types
@@ -192,7 +192,7 @@ struct tiva_driver_s
    * multiple Ethernet controllers.
    */
 
-#if LM_NETHCONTROLLERS > 1
+#if TIVA_NETHCONTROLLERS > 1
   uint32_t ld_base;             /* Ethernet controller base address */
   int      ld_irq;              /* Ethernet controller IRQ */
 #endif
@@ -214,7 +214,7 @@ struct tiva_driver_s
  * Private Data
  ****************************************************************************/
 
-static struct tiva_driver_s g_lm3sdev[LM_NETHCONTROLLERS];
+static struct tiva_driver_s g_lm3sdev[TIVA_NETHCONTROLLERS];
 
 /****************************************************************************
  * Private Function Prototypes
@@ -222,7 +222,7 @@ static struct tiva_driver_s g_lm3sdev[LM_NETHCONTROLLERS];
 
 /* Miscellaneous low level helpers */
 
-#if LM_NETHCONTROLLERS > 1
+#if TIVA_NETHCONTROLLERS > 1
 static uint32_t tiva_ethin(struct tiva_driver_s *priv, int offset);
 static void tiva_ethout(struct tiva_driver_s *priv, int offset, uint32_t value);
 #else
@@ -280,7 +280,7 @@ static int  tiva_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
  *
  ****************************************************************************/
 
-#if LM_NETHCONTROLLERS > 1
+#if TIVA_NETHCONTROLLERS > 1
 static uint32_t tiva_ethin(struct tiva_driver_s *priv, int offset)
 {
   return getreg32(priv->ld_base + offset);
@@ -288,7 +288,7 @@ static uint32_t tiva_ethin(struct tiva_driver_s *priv, int offset)
 #else
 static inline uint32_t tiva_ethin(struct tiva_driver_s *priv, int offset)
 {
-  return getreg32(LM_ETHCON_BASE + offset);
+  return getreg32(TIVA_ETHCON_BASE + offset);
 }
 #endif
 
@@ -308,7 +308,7 @@ static inline uint32_t tiva_ethin(struct tiva_driver_s *priv, int offset)
  *
  ****************************************************************************/
 
-#if LM_NETHCONTROLLERS > 1
+#if TIVA_NETHCONTROLLERS > 1
 static void tiva_ethout(struct tiva_driver_s *priv, int offset, uint32_t value)
 {
   putreg32(value, priv->ld_base + offset);
@@ -316,7 +316,7 @@ static void tiva_ethout(struct tiva_driver_s *priv, int offset, uint32_t value)
 #else
 static inline void tiva_ethout(struct tiva_driver_s *priv, int offset, uint32_t value)
 {
-  putreg32(value, LM_ETHCON_BASE + offset);
+  putreg32(value, TIVA_ETHCON_BASE + offset);
 }
 #endif
 
@@ -341,23 +341,23 @@ static void tiva_ethreset(struct tiva_driver_s *priv)
   irqstate_t flags;
   uint32_t regval;
 
-#if LM_NETHCONTROLLERS > 1
+#if TIVA_NETHCONTROLLERS > 1
 #  error "If multiple interfaces are supported, this function would have to be redesigned"
 #endif
 
   /* Make sure that clocking is enabled for the Ethernet (and PHY) peripherals */
 
   flags   = irqsave();
-  regval  = getreg32(LM_SYSCON_RCGC2);
+  regval  = getreg32(TIVA_SYSCON_RCGC2);
   regval |= (SYSCON_RCGC2_EMAC0|SYSCON_RCGC2_EPHY0);
-  putreg32(regval, LM_SYSCON_RCGC2);
+  putreg32(regval, TIVA_SYSCON_RCGC2);
   nllvdbg("RCGC2: %08x\n", regval);
 
   /* Put the Ethernet controller into the reset state */
 
-  regval = getreg32(LM_SYSCON_SRCR2);
+  regval = getreg32(TIVA_SYSCON_SRCR2);
   regval |= (SYSCON_SRCR2_EMAC0|SYSCON_SRCR2_EPHY0);
-  putreg32(regval, LM_SYSCON_SRCR2);
+  putreg32(regval, TIVA_SYSCON_SRCR2);
 
   /* Wait just a bit.  This is a much longer delay than necessary */
 
@@ -366,7 +366,7 @@ static void tiva_ethreset(struct tiva_driver_s *priv)
   /* Then take the Ethernet controller out of the reset state */
 
   regval &= ~(SYSCON_SRCR2_EMAC0|SYSCON_SRCR2_EPHY0);
-  putreg32(regval, LM_SYSCON_SRCR2);
+  putreg32(regval, TIVA_SYSCON_SRCR2);
   nllvdbg("SRCR2: %08x\n", regval);
 
   /* Wait just a bit, again.  If we touch the ethernet too soon, we may busfault. */
@@ -375,7 +375,7 @@ static void tiva_ethreset(struct tiva_driver_s *priv)
 
   /* Enable Port F for Ethernet LEDs: LED0=Bit 3; LED1=Bit 2 */
 
-#ifdef CONFIG_LM_ETHLEDS
+#ifdef CONFIG_TIVA_ETHLEDS
   /* Configure the pins for the peripheral function */
 
   tiva_configgpio(GPIO_ETHPHY_LED0 | GPIO_STRENGTH_2MA | GPIO_PADTYPE_STD);
@@ -384,14 +384,14 @@ static void tiva_ethreset(struct tiva_driver_s *priv)
 
   /* Disable all Ethernet controller interrupts */
 
-  regval = tiva_ethin(priv, LM_MAC_IM_OFFSET);
+  regval = tiva_ethin(priv, TIVA_MAC_IM_OFFSET);
   regval &= ~MAC_IM_ALLINTS;
-  tiva_ethout(priv, LM_MAC_IM_OFFSET, regval);
+  tiva_ethout(priv, TIVA_MAC_IM_OFFSET, regval);
 
   /* Clear any pending interrupts (shouldn't be any) */
 
-  regval = tiva_ethin(priv, LM_MAC_RIS_OFFSET);
-  tiva_ethout(priv, LM_MAC_IACK_OFFSET, regval);
+  regval = tiva_ethin(priv, TIVA_MAC_RIS_OFFSET);
+  tiva_ethout(priv, TIVA_MAC_IACK_OFFSET, regval);
   irqrestore(flags);
 }
 
@@ -416,22 +416,22 @@ static void tiva_phywrite(struct tiva_driver_s *priv, int regaddr, uint16_t valu
 {
   /* Wait for any MII transactions in progress to complete */
 
-  while ((tiva_ethin(priv, LM_MAC_MCTL_OFFSET) & MAC_MCTL_START) != 0);
+  while ((tiva_ethin(priv, TIVA_MAC_MCTL_OFFSET) & MAC_MCTL_START) != 0);
 
   /* Set up the data to be written */
 
   DEBUGASSERT(value < MAC_MTXD_MASK);
-  tiva_ethout(priv, LM_MAC_MTXD_OFFSET, value);
+  tiva_ethout(priv, TIVA_MAC_MTXD_OFFSET, value);
 
   /* Set up the PHY register address and start the write operation */
 
   regaddr <<= MAC_MCTL_REGADR_SHIFT;
   DEBUGASSERT((regaddr & MAC_MTXD_MASK) == regaddr);
-  tiva_ethout(priv, LM_MAC_MCTL_OFFSET, regaddr | MAC_MCTL_WRITE | MAC_MCTL_START);
+  tiva_ethout(priv, TIVA_MAC_MCTL_OFFSET, regaddr | MAC_MCTL_WRITE | MAC_MCTL_START);
 
   /* Wait for the write transaction to complete */
 
-  while ((tiva_ethin(priv, LM_MAC_MCTL_OFFSET) & MAC_MCTL_START) != 0);
+  while ((tiva_ethin(priv, TIVA_MAC_MCTL_OFFSET) & MAC_MCTL_START) != 0);
 }
 #endif
 
@@ -455,21 +455,21 @@ static uint16_t tiva_phyread(struct tiva_driver_s *priv, int regaddr)
 {
   /* Wait for any MII transactions in progress to complete */
 
-  while ((tiva_ethin(priv, LM_MAC_MCTL_OFFSET) & MAC_MCTL_START) != 0);
+  while ((tiva_ethin(priv, TIVA_MAC_MCTL_OFFSET) & MAC_MCTL_START) != 0);
 
   /* Set up the PHY register address and start the read operation */
 
   regaddr <<= MAC_MCTL_REGADR_SHIFT;
   DEBUGASSERT((regaddr & MAC_MTXD_MASK) == regaddr);
-  tiva_ethout(priv, LM_MAC_MCTL_OFFSET, regaddr | MAC_MCTL_START);
+  tiva_ethout(priv, TIVA_MAC_MCTL_OFFSET, regaddr | MAC_MCTL_START);
 
   /* Wait for the write transaction to complete */
 
-  while ((tiva_ethin(priv, LM_MAC_MCTL_OFFSET) & MAC_MCTL_START) != 0);
+  while ((tiva_ethin(priv, TIVA_MAC_MCTL_OFFSET) & MAC_MCTL_START) != 0);
 
   /* Read and return the PHY data */
 
-  return (uint16_t)(tiva_ethin(priv, LM_MAC_MRXD_OFFSET) & MAC_MTRD_MASK);
+  return (uint16_t)(tiva_ethin(priv, TIVA_MAC_MRXD_OFFSET) & MAC_MTRD_MASK);
 }
 
 /****************************************************************************
@@ -499,7 +499,7 @@ static int tiva_transmit(struct tiva_driver_s *priv)
   /* Verify that the hardware is ready to send another packet */
 
   flags = irqsave();
-  if ((tiva_ethin(priv, LM_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0)
+  if ((tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0)
     {
       /* Increment statistics */
 
@@ -520,7 +520,7 @@ static int tiva_transmit(struct tiva_driver_s *priv)
       regval     = (uint32_t)(pktlen - 14);
       regval    |= ((uint32_t)(*dbuf++) << 16);
       regval    |= ((uint32_t)(*dbuf++) << 24);
-      tiva_ethout(priv, LM_MAC_DATA_OFFSET, regval);
+      tiva_ethout(priv, TIVA_MAC_DATA_OFFSET, regval);
 
       /* Write all of the whole, 32-bit values in the middle of the packet */
 
@@ -530,7 +530,7 @@ static int tiva_transmit(struct tiva_driver_s *priv)
            * buffer may be un-aligned.
            */
 
-          tiva_ethout(priv, LM_MAC_DATA_OFFSET, *(uint32_t*)dbuf);
+          tiva_ethout(priv, TIVA_MAC_DATA_OFFSET, *(uint32_t*)dbuf);
         }
 
       /* Write the last, partial word in the FIFO */
@@ -555,16 +555,16 @@ static int tiva_transmit(struct tiva_driver_s *priv)
                 break;
             }
 
-          tiva_ethout(priv, LM_MAC_DATA_OFFSET, regval);
+          tiva_ethout(priv, TIVA_MAC_DATA_OFFSET, regval);
         }
 
       /* Activate the transmitter */
 
-      tiva_ethout(priv, LM_MAC_TR_OFFSET, MAC_TR_NEWTX);
+      tiva_ethout(priv, TIVA_MAC_TR_OFFSET, MAC_TR_NEWTX);
 
       /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-      (void)wd_start(priv->ld_txtimeout, LM_TXTIMEOUT, tiva_txtimeout, 1, (uint32_t)priv);
+      (void)wd_start(priv->ld_txtimeout, TIVA_TXTIMEOUT, tiva_txtimeout, 1, (uint32_t)priv);
       ret = OK;
     }
 
@@ -609,7 +609,7 @@ static int tiva_uiptxpoll(struct uip_driver_s *dev)
        * packet was successfully handled.
        */
 
-      DEBUGASSERT((tiva_ethin(priv, LM_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0)
+      DEBUGASSERT((tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0)
       uip_arp_out(&priv->ld_dev);
       ret = tiva_transmit(priv);
     }
@@ -646,7 +646,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
 
   /* Loop while there are incoming packets to be processed */
 
-  while ((tiva_ethin(priv, LM_MAC_NP_OFFSET) & MAC_NP_MASK) != 0)
+  while ((tiva_ethin(priv, TIVA_MAC_NP_OFFSET) & MAC_NP_MASK) != 0)
     {
       /* Update statistics */
 
@@ -666,7 +666,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
        * includes the len/type field (size 2) and the FCS (size 4).
        */
 
-      regval = tiva_ethin(priv, LM_MAC_DATA_OFFSET);
+      regval = tiva_ethin(priv, TIVA_MAC_DATA_OFFSET);
       pktlen = (int)(regval & 0x0000ffff);
       nllvdbg("Receiving packet, pktlen: %d\n", pktlen);
 
@@ -695,7 +695,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
 
           while (wordlen--)
             {
-              (void)tiva_ethin(priv, LM_MAC_DATA_OFFSET);
+              (void)tiva_ethin(priv, TIVA_MAC_DATA_OFFSET);
             }
 
           /* Check for another packet */
@@ -719,7 +719,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
            * buffer may be un-aligned.
            */
 
-          *(uint32_t*)dbuf = tiva_ethin(priv, LM_MAC_DATA_OFFSET);
+          *(uint32_t*)dbuf = tiva_ethin(priv, TIVA_MAC_DATA_OFFSET);
         }
 
       /* Handle the last, partial word in the FIFO (0-3 bytes) and discard
@@ -732,7 +732,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
            * bytes of the FCS into the user buffer.
            */
 
-          regval = tiva_ethin(priv, LM_MAC_DATA_OFFSET);
+          regval = tiva_ethin(priv, TIVA_MAC_DATA_OFFSET);
           switch (bytesleft)
             {
               default:
@@ -835,7 +835,7 @@ static void tiva_txdone(struct tiva_driver_s *priv)
    * at this point.
    */
 
-  DEBUGASSERT((tiva_ethin(priv, LM_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0)
+  DEBUGASSERT((tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0)
 
   /* Then poll uIP for new XMIT data */
 
@@ -864,7 +864,7 @@ static int tiva_interrupt(int irq, FAR void *context)
   register struct tiva_driver_s *priv;
   uint32_t ris;
 
-#if LM_NETHCONTROLLERS > 1
+#if TIVA_NETHCONTROLLERS > 1
 # error "A mechanism to associate and interface with an IRQ is needed"
 #else
   priv = &g_lm3sdev[0];
@@ -872,11 +872,11 @@ static int tiva_interrupt(int irq, FAR void *context)
 
   /* Read the raw interrupt status register */
 
-  ris = tiva_ethin(priv, LM_MAC_RIS_OFFSET);
+  ris = tiva_ethin(priv, TIVA_MAC_RIS_OFFSET);
 
   /* Clear all pending interrupts */
 
-  tiva_ethout(priv, LM_MAC_IACK_OFFSET, ris);
+  tiva_ethout(priv, TIVA_MAC_IACK_OFFSET, ris);
 
   /* Check for errors */
 
@@ -899,7 +899,7 @@ static int tiva_interrupt(int irq, FAR void *context)
 
   /* Handle (unmasked) interrupts according to status bit settings */
 
-  ris &= tiva_ethin(priv, LM_MAC_IM_OFFSET);
+  ris &= tiva_ethin(priv, TIVA_MAC_IM_OFFSET);
 
   /* Is this an Rx interrupt (meaning that a packet has been received)? */
 
@@ -995,15 +995,15 @@ static void tiva_polltimer(int argc, uint32_t arg, ...)
    * inaccuracies.
    */
 
-  if ((tiva_ethin(priv, LM_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0)
+  if ((tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0)
     {
       /* If so, update TCP timing states and poll uIP for new XMIT data */
 
-      (void)uip_timer(&priv->ld_dev, tiva_uiptxpoll, LM_POLLHSEC);
+      (void)uip_timer(&priv->ld_dev, tiva_uiptxpoll, TIVA_POLLHSEC);
 
       /* Setup the watchdog poll timer again */
 
-      (void)wd_start(priv->ld_txpoll, LM_WDDELAY, tiva_polltimer, 1, arg);
+      (void)wd_start(priv->ld_txpoll, TIVA_WDDELAY, tiva_polltimer, 1, arg);
     }
 }
 
@@ -1048,11 +1048,11 @@ static int tiva_ifup(struct uip_driver_s *dev)
    *   div = (SYSCLK_FREQUENCY / 2 / MDCCLK_FREQUENCY) - 1
    *
    * Where the maximum value for MDCCLK_FREQUENCY is 2,500,000.  We will
-   * add 1 to assure the max LM_MAX_MDCCLK is not exceeded.
+   * add 1 to assure the max TIVA_MAX_MDCCLK is not exceeded.
    */
 
-  div = SYSCLK_FREQUENCY / 2 / LM_MAX_MDCCLK;
-  tiva_ethout(priv, LM_MAC_MDV_OFFSET, div);
+  div = SYSCLK_FREQUENCY / 2 / TIVA_MAX_MDCCLK;
+  tiva_ethout(priv, TIVA_MAC_MDV_OFFSET, div);
   nllvdbg("MDV:   %08x\n", div);
 
   /* Then configure the Ethernet Controller for normal operation 
@@ -1061,32 +1061,32 @@ static int tiva_ifup(struct uip_driver_s *dev)
    * TX Padding Enabled).
    */
 
-  regval  = tiva_ethin(priv, LM_MAC_TCTL_OFFSET);
-  regval &= ~LM_TCTCL_CLRBITS;
-  regval |= LM_TCTCL_SETBITS;
-  tiva_ethout(priv, LM_MAC_TCTL_OFFSET, regval);
+  regval  = tiva_ethin(priv, TIVA_MAC_TCTL_OFFSET);
+  regval &= ~TIVA_TCTCL_CLRBITS;
+  regval |= TIVA_TCTCL_SETBITS;
+  tiva_ethout(priv, TIVA_MAC_TCTL_OFFSET, regval);
   nllvdbg("TCTL:  %08x\n", regval);
 
   /* Setup the receive control register (Disable multicast frames, disable
    * promiscuous mode, disable bad CRC rejection).
    */
 
-  regval  = tiva_ethin(priv, LM_MAC_RCTL_OFFSET);
-  regval &= ~LM_RCTCL_CLRBITS;
-  regval |= LM_RCTCL_SETBITS;
-  tiva_ethout(priv, LM_MAC_RCTL_OFFSET, regval);
+  regval  = tiva_ethin(priv, TIVA_MAC_RCTL_OFFSET);
+  regval &= ~TIVA_RCTCL_CLRBITS;
+  regval |= TIVA_RCTCL_SETBITS;
+  tiva_ethout(priv, TIVA_MAC_RCTL_OFFSET, regval);
   nllvdbg("RCTL:  %08x\n", regval);
 
   /* Setup the time stamp configuration register */
 
-#ifdef LM_ETHTS
-  regval = tiva_ethin(priv, LM_MAC_TS_OFFSET);
-#ifdef CONFIG_LM_TIMESTAMP
+#ifdef TIVA_ETHTS
+  regval = tiva_ethin(priv, TIVA_MAC_TS_OFFSET);
+#ifdef CONFIG_TIVA_TIMESTAMP
   regval |= MAC_TS_EN;
 #else
   regval &= ~(MAC_TS_EN);
 #endif
-  tiva_ethout(priv, LM_MAC_TS_OFFSET, regval);
+  tiva_ethout(priv, TIVA_MAC_TS_OFFSET, regval);
   nllvdbg("TS:    %08x\n", regval);
 #endif
 
@@ -1106,41 +1106,41 @@ static int tiva_ifup(struct uip_driver_s *dev)
 
   /* Reset the receive FIFO */
 
-  regval  = tiva_ethin(priv, LM_MAC_RCTL_OFFSET);
+  regval  = tiva_ethin(priv, TIVA_MAC_RCTL_OFFSET);
   regval |= MAC_RCTL_RSTFIFO;
-  tiva_ethout(priv, LM_MAC_RCTL_OFFSET, regval);
+  tiva_ethout(priv, TIVA_MAC_RCTL_OFFSET, regval);
 
   /* Enable the Ethernet receiver */
 
-  regval  = tiva_ethin(priv, LM_MAC_RCTL_OFFSET);
+  regval  = tiva_ethin(priv, TIVA_MAC_RCTL_OFFSET);
   regval |= MAC_RCTL_RXEN;
-  tiva_ethout(priv, LM_MAC_RCTL_OFFSET, regval);
+  tiva_ethout(priv, TIVA_MAC_RCTL_OFFSET, regval);
 
   /* Enable the Ethernet transmitter */
 
-  regval  = tiva_ethin(priv, LM_MAC_TCTL_OFFSET);
+  regval  = tiva_ethin(priv, TIVA_MAC_TCTL_OFFSET);
   regval |= MAC_TCTL_TXEN;
-  tiva_ethout(priv, LM_MAC_TCTL_OFFSET, regval);
+  tiva_ethout(priv, TIVA_MAC_TCTL_OFFSET, regval);
 
   /* Reset the receive FIFO (again) */
 
-  regval  = tiva_ethin(priv, LM_MAC_RCTL_OFFSET);
+  regval  = tiva_ethin(priv, TIVA_MAC_RCTL_OFFSET);
   regval |= MAC_RCTL_RSTFIFO;
-  tiva_ethout(priv, LM_MAC_RCTL_OFFSET, regval);
+  tiva_ethout(priv, TIVA_MAC_RCTL_OFFSET, regval);
 
   /* Enable the Ethernet interrupt */
 
-#if LM_NETHCONTROLLERS > 1
+#if TIVA_NETHCONTROLLERS > 1
   up_enable_irq(priv->irq);
 #else
-  up_enable_irq(LM_IRQ_ETHCON);
+  up_enable_irq(TIVA_IRQ_ETHCON);
 #endif
 
   /* Enable the Ethernet RX packet receipt interrupt */
 
-  regval = tiva_ethin(priv, LM_MAC_IM_OFFSET);
+  regval = tiva_ethin(priv, TIVA_MAC_IM_OFFSET);
   regval |= MAC_IM_RXINTM;
-  tiva_ethout(priv, LM_MAC_IM_OFFSET, regval);
+  tiva_ethout(priv, TIVA_MAC_IM_OFFSET, regval);
 
   /* Program the hardware with it's MAC address (for filtering) */
 
@@ -1148,15 +1148,15 @@ static int tiva_ifup(struct uip_driver_s *dev)
            (uint32_t)priv->ld_dev.d_mac.ether_addr_octet[2] << 16 |
            (uint32_t)priv->ld_dev.d_mac.ether_addr_octet[1] << 8 |
            (uint32_t)priv->ld_dev.d_mac.ether_addr_octet[0];
-  tiva_ethout(priv, LM_MAC_IA0_OFFSET, regval);
+  tiva_ethout(priv, TIVA_MAC_IA0_OFFSET, regval);
 
   regval = (uint32_t)priv->ld_dev.d_mac.ether_addr_octet[5] << 8 |
            (uint32_t)priv->ld_dev.d_mac.ether_addr_octet[4];
-  tiva_ethout(priv, LM_MAC_IA1_OFFSET, regval);
+  tiva_ethout(priv, TIVA_MAC_IA1_OFFSET, regval);
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->ld_txpoll, LM_WDDELAY, tiva_polltimer, 1, (uint32_t)priv);
+  (void)wd_start(priv->ld_txpoll, TIVA_WDDELAY, tiva_polltimer, 1, (uint32_t)priv);
 
   priv->ld_bifup = true;
   irqrestore(flags);
@@ -1198,46 +1198,46 @@ static int tiva_ifdown(struct uip_driver_s *dev)
 
   /* Disable the Ethernet interrupt */
 
-#if LM_NETHCONTROLLERS > 1
+#if TIVA_NETHCONTROLLERS > 1
   up_disable_irq(priv->irq);
 #else
-  up_disable_irq(LM_IRQ_ETHCON);
+  up_disable_irq(TIVA_IRQ_ETHCON);
 #endif
 
   /* Disable all Ethernet controller interrupt sources */
 
-  regval = tiva_ethin(priv, LM_MAC_IM_OFFSET);
+  regval = tiva_ethin(priv, TIVA_MAC_IM_OFFSET);
   regval &= ~MAC_IM_ALLINTS;
-  tiva_ethout(priv, LM_MAC_IM_OFFSET, regval);
+  tiva_ethout(priv, TIVA_MAC_IM_OFFSET, regval);
 
   /* Reset the receive FIFO */
 
-  regval  = tiva_ethin(priv, LM_MAC_RCTL_OFFSET);
+  regval  = tiva_ethin(priv, TIVA_MAC_RCTL_OFFSET);
   regval |= MAC_RCTL_RSTFIFO;
-  tiva_ethout(priv, LM_MAC_RCTL_OFFSET, regval);
+  tiva_ethout(priv, TIVA_MAC_RCTL_OFFSET, regval);
 
   /* Disable the Ethernet receiver */
 
-  regval  = tiva_ethin(priv, LM_MAC_RCTL_OFFSET);
+  regval  = tiva_ethin(priv, TIVA_MAC_RCTL_OFFSET);
   regval &= ~MAC_RCTL_RXEN;
-  tiva_ethout(priv, LM_MAC_RCTL_OFFSET, regval);
+  tiva_ethout(priv, TIVA_MAC_RCTL_OFFSET, regval);
 
   /* Disable the Ethernet transmitter */
 
-  regval  = tiva_ethin(priv, LM_MAC_RCTL_OFFSET);
+  regval  = tiva_ethin(priv, TIVA_MAC_RCTL_OFFSET);
   regval &= ~MAC_TCTL_TXEN;
-  tiva_ethout(priv, LM_MAC_TCTL_OFFSET, regval);
+  tiva_ethout(priv, TIVA_MAC_TCTL_OFFSET, regval);
 
   /* Reset the receive FIFO (again) */
 
-  regval  = tiva_ethin(priv, LM_MAC_RCTL_OFFSET);
+  regval  = tiva_ethin(priv, TIVA_MAC_RCTL_OFFSET);
   regval |= MAC_RCTL_RSTFIFO;
-  tiva_ethout(priv, LM_MAC_RCTL_OFFSET, regval);
+  tiva_ethout(priv, TIVA_MAC_RCTL_OFFSET, regval);
 
   /* Clear any pending interrupts */
 
-  regval = tiva_ethin(priv, LM_MAC_RIS_OFFSET);
-  tiva_ethout(priv, LM_MAC_IACK_OFFSET, regval);
+  regval = tiva_ethin(priv, TIVA_MAC_RIS_OFFSET);
+  tiva_ethout(priv, TIVA_MAC_IACK_OFFSET, regval);
 
   /* The interface is now DOWN */
 
@@ -1279,7 +1279,7 @@ static int tiva_txavail(struct uip_driver_s *dev)
    */
 
   flags = irqsave();
-  if (priv->ld_bifup && (tiva_ethin(priv, LM_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0)
+  if (priv->ld_bifup && (tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0)
     {
       /* If the interface is up and we can use the Tx FIFO, then poll uIP
        * for new Tx data
@@ -1372,7 +1372,7 @@ static int tiva_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
  *
  ****************************************************************************/
 
-#if LM_NETHCONTROLLERS > 1
+#if TIVA_NETHCONTROLLERS > 1
 int tiva_ethinitialize(int intf)
 #else
 static inline int tiva_ethinitialize(int intf)
@@ -1385,12 +1385,12 @@ static inline int tiva_ethinitialize(int intf)
 
   ndbg("Setting up eth%d\n", intf);
 
-#if LM_NETHCONTROLLERS > 1
+#if TIVA_NETHCONTROLLERS > 1
 # error "This debug check only works with one interface"
 #else
-  DEBUGASSERT((getreg32(LM_SYSCON_DC4) & (SYSCON_DC4_EMAC0|SYSCON_DC4_EPHY0)) == (SYSCON_DC4_EMAC0|SYSCON_DC4_EPHY0));
+  DEBUGASSERT((getreg32(TIVA_SYSCON_DC4) & (SYSCON_DC4_EMAC0|SYSCON_DC4_EPHY0)) == (SYSCON_DC4_EMAC0|SYSCON_DC4_EPHY0));
 #endif
-  DEBUGASSERT((unsigned)intf < LM_NETHCONTROLLERS);
+  DEBUGASSERT((unsigned)intf < TIVA_NETHCONTROLLERS);
 
   /* Initialize the driver structure */
 
@@ -1406,7 +1406,7 @@ static inline int tiva_ethinitialize(int intf)
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
 
-#if LM_NETHCONTROLLERS > 1
+#if TIVA_NETHCONTROLLERS > 1
 # error "A mechanism to associate base address an IRQ with an interface is needed"
   priv->ld_base          = ??;          /* Ethernet controller base address */
   priv->ld_irq           = ??;          /* Ethernet controller IRQ number */
@@ -1419,7 +1419,7 @@ static inline int tiva_ethinitialize(int intf)
    * is caleld (and the MAC can be overwritten with a netdev ioctl call). 
    */
 
-#ifdef CONFIG_LM_BOARDMAC
+#ifdef CONFIG_TIVA_BOARDMAC
    tiva_ethernetmac(&priv->ld_dev.d_mac);
 #endif
 
@@ -1433,10 +1433,10 @@ static inline int tiva_ethinitialize(int intf)
 
   /* Attach the IRQ to the driver */
 
-#if LM_NETHCONTROLLERS > 1
+#if TIVA_NETHCONTROLLERS > 1
   ret = irq_attach(priv->irq, tiva_interrupt);
 #else
-  ret = irq_attach(LM_IRQ_ETHCON, tiva_interrupt);
+  ret = irq_attach(TIVA_IRQ_ETHCON, tiva_interrupt);
 #endif
   if (ret != 0)
     {
@@ -1462,12 +1462,11 @@ static inline int tiva_ethinitialize(int intf)
  *
  ************************************************************************************/
 
-#if LM_NETHCONTROLLERS == 1
+#if TIVA_NETHCONTROLLERS == 1
 void up_netinitialize(void)
 {
   (void)tiva_ethinitialize(0);
 }
 #endif
 
-#endif /* CONFIG_NET && CONFIG_LM_ETHERNET */
-
+#endif /* CONFIG_NET && CONFIG_TIVA_ETHERNET */

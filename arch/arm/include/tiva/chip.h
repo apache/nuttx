@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/include/tiva/chip.h
  *
- *   Copyright (C) 2009-2010, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2013-2014 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Jose Pablo Carballo <jcarballo@nx-engineering.com>
  *
@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_INCLUDE_LM_CHIP_H
-#define __ARCH_ARM_INCLUDE_LM_CHIP_H
+#ifndef __ARCH_ARM_INCLUDE_TIVA_CHIP_H
+#define __ARCH_ARM_INCLUDE_TIVA_CHIP_H
 
 /************************************************************************************
  * Included Files
@@ -50,94 +50,100 @@
 /* Get customizations for each supported chip (only the LM3S6918 and 65 right now) */
 
 #if defined(CONFIG_ARCH_CHIP_LM3S6918)
-#  define LM3S               1  /* LM3S family */
-#  undef  LM4F                  /* Not LM4F family */
-#  define LM_NTIMERS         4  /* Four general purpose timers */
-#  define LM_NWIDETIMERS     0  /* No general purpose wide timers */
-#  define LM_NETHCONTROLLERS 1  /* One Ethernet controller */
-#  undef  LM_ETHTS              /* No timestamp register */
-#  define LM_NSSI            2  /* Two SSI modules */
-#  define LM_NUARTS          2  /* Two UART modules */
-#  define LM_NI2C            2  /* Two I2C modules */
-#  define LM_NADC            1  /* One ADC module */
-#  define LM_NPWM            0  /* No PWM generator modules */
-#  define LM_NQEI            0  /* No quadrature encoders */
-#  define LM_NPORTS          8  /* 8 Ports (GPIOA-H) 5-38 GPIOs */
-#  define LM_NCANCONTROLLER  0  /* No CAN controllers */
+#  define LM3S                 1  /* LM3S family */
+#  undef  LM4F                    /* Not LM4F family */
+#  undef  TM4C                    /* Not TM4C family */
+#  define TIVA_NTIMERS         4  /* Four general purpose timers */
+#  define TIVA_NWIDETIMERS     0  /* No general purpose wide timers */
+#  define TIVA_NETHCONTROLLERS 1  /* One Ethernet controller */
+#  undef  TIVA_ETHTS              /* No timestamp register */
+#  define TIVA_NSSI            2  /* Two SSI modules */
+#  define TIVA_NUARTS          2  /* Two UART modules */
+#  define TIVA_NI2C            2  /* Two I2C modules */
+#  define TIVA_NADC            1  /* One ADC module */
+#  define TIVA_NPWM            0  /* No PWM generator modules */
+#  define TIVA_NQEI            0  /* No quadrature encoders */
+#  define TIVA_NPORTS          8  /* 8 Ports (GPIOA-H) 5-38 GPIOs */
+#  define TIVA_NCANCONTROLLER  0  /* No CAN controllers */
 #elif defined(CONFIG_ARCH_CHIP_LM3S6432)
-#  define LM3S               1  /* LM3S family */
-#  undef  LM4F                  /* Not LM4F family */
-#  define LM_NTIMERS         3  /* Three general purpose timers */
-#  define LM_NWIDETIMERS     0  /* No general purpose wide timers */
-#  define LM_NETHCONTROLLERS 1  /* One Ethernet controller */
-#  undef  LM_ETHTS              /* No timestamp register */
-#  define LM_NSSI            1  /* One SSI module */
-#  define LM_NUARTS          2  /* Two UART modules */
-#  define LM_NI2C            1  /* Two I2C modules */
-#  define LM_NADC            1  /* One ADC module */
-#  define LM_NPWM            1  /* One PWM generator module */
-#  define LM_NQEI            0  /* No quadrature encoders */
-#  define LM_NPORTS          7  /* 7 Ports (GPIOA-G), 0-42 GPIOs */
-#  define LM_NCANCONTROLLER  0  /* No CAN controllers */
+#  define LM3S                 1  /* LM3S family */
+#  undef  LM4F                    /* Not LM4F family */
+#  undef  TM4C                    /* Not TM4C family */
+#  define TIVA_NTIMERS         3  /* Three general purpose timers */
+#  define TIVA_NWIDETIMERS     0  /* No general purpose wide timers */
+#  define TIVA_NETHCONTROLLERS 1  /* One Ethernet controller */
+#  undef  TIVA_ETHTS              /* No timestamp register */
+#  define TIVA_NSSI            1  /* One SSI module */
+#  define TIVA_NUARTS          2  /* Two UART modules */
+#  define TIVA_NI2C            1  /* Two I2C modules */
+#  define TIVA_NADC            1  /* One ADC module */
+#  define TIVA_NPWM            1  /* One PWM generator module */
+#  define TIVA_NQEI            0  /* No quadrature encoders */
+#  define TIVA_NPORTS          7  /* 7 Ports (GPIOA-G), 0-42 GPIOs */
+#  define TIVA_NCANCONTROLLER  0  /* No CAN controllers */
 #elif defined(CONFIG_ARCH_CHIP_LM3S6965)
-#  define LM3S               1  /* LM3S family */
-#  undef  LM4F                  /* Not LM4F family */
-#  define LM_NTIMERS         4  /* Four general purpose timers */
-#  define LM_NWIDETIMERS     0  /* No general purpose wide timers */
-#  define LM_NETHCONTROLLERS 1  /* One Ethernet controller */
-#  undef  LM_ETHTS              /* No timestamp register */
-#  define LM_NSSI            1  /* One SSI module */
-#  define LM_NUARTS          3  /* Three UART modules */
-#  define LM_NI2C            2  /* Two I2C modules */
-#  define LM_NADC            1  /* One ADC module */
-#  define LM_NPWM            3  /* Three PWM generator modules */
-#  define LM_NQEI            2  /* Two quadrature encoders */
-#  define LM_NPORTS          7  /* 7 Ports (GPIOA-G), 0-42 GPIOs */
-#  define LM_NCANCONTROLLER  0  /* No CAN controllers */
+#  define LM3S                 1  /* LM3S family */
+#  undef  LM4F                    /* Not LM4F family */
+#  undef  TM4C                    /* Not TM4C family */
+#  define TIVA_NTIMERS         4  /* Four general purpose timers */
+#  define TIVA_NWIDETIMERS     0  /* No general purpose wide timers */
+#  define TIVA_NETHCONTROLLERS 1  /* One Ethernet controller */
+#  undef  TIVA_ETHTS              /* No timestamp register */
+#  define TIVA_NSSI            1  /* One SSI module */
+#  define TIVA_NUARTS          3  /* Three UART modules */
+#  define TIVA_NI2C            2  /* Two I2C modules */
+#  define TIVA_NADC            1  /* One ADC module */
+#  define TIVA_NPWM            3  /* Three PWM generator modules */
+#  define TIVA_NQEI            2  /* Two quadrature encoders */
+#  define TIVA_NPORTS          7  /* 7 Ports (GPIOA-G), 0-42 GPIOs */
+#  define TIVA_NCANCONTROLLER  0  /* No CAN controllers */
 #elif defined(CONFIG_ARCH_CHIP_LM3S9B96)
-#  define LM3S               1  /* LM3S family */
-#  undef  LM4F                  /* Not LM4F family */
-#  define LM_NTIMERS         4  /* Four general purpose timers */
-#  define LM_NWIDETIMERS     0  /* No general purpose wide timers */
-#  define LM_NETHCONTROLLERS 1  /* One Ethernet controller */
-#  undef  LM_ETHTS              /* No timestamp register */
-#  define LM_NSSI            2  /* Two SSI modules */
-#  define LM_NUARTS          3  /* Three UART modules */
-#  define LM_NI2C            2  /* Two I2C modules */
-#  define LM_NADC            2  /* Two ADC module */
-#  define LM_CAN             2  /* Two CAN module */
-#  define LM_NPWM            4  /* Four PWM generator modules */
-#  define LM_NQEI            2  /* Two quadrature encoders */
-#  define LM_NPORTS          9  /* 9 Ports (GPIOA-H,J) 0-65 GPIOs */
-#  define LM_NCANCONTROLLER  0  /* No CAN controllers */
+#  define LM3S                 1  /* LM3S family */
+#  undef  LM4F                    /* Not LM4F family */
+#  undef  TM4C                    /* Not TM4C family */
+#  define TIVA_NTIMERS         4  /* Four general purpose timers */
+#  define TIVA_NWIDETIMERS     0  /* No general purpose wide timers */
+#  define TIVA_NETHCONTROLLERS 1  /* One Ethernet controller */
+#  undef  TIVA_ETHTS              /* No timestamp register */
+#  define TIVA_NSSI            2  /* Two SSI modules */
+#  define TIVA_NUARTS          3  /* Three UART modules */
+#  define TIVA_NI2C            2  /* Two I2C modules */
+#  define TIVA_NADC            2  /* Two ADC module */
+#  define TIVA_CAN             2  /* Two CAN module */
+#  define TIVA_NPWM            4  /* Four PWM generator modules */
+#  define TIVA_NQEI            2  /* Two quadrature encoders */
+#  define TIVA_NPORTS          9  /* 9 Ports (GPIOA-H,J) 0-65 GPIOs */
+#  define TIVA_NCANCONTROLLER  0  /* No CAN controllers */
 #elif defined(CONFIG_ARCH_CHIP_LM3S8962)
-#  define LM3S               1  /* LM3S family */
-#  undef  LM4F                  /* Not LM4F family */
-#  define LM_NTIMERS         6  /* Four general purpose timers */
-#  define LM_NWIDETIMERS     0  /* No general purpose wide timers */
-#  define LM_NETHCONTROLLERS 1  /* One Ethernet controller */
-#  define LM_NSSI            1  /* One SSI module */
-#  define LM_NUARTS          3  /* Two UART modules */
-#  define LM_NI2C            2  /* One I2C module */
-#  define LM_NADC            1  /* One ADC module */
-#  define LM_NPWM            3  /* Three PWM generator modules */
-#  define LM_NQEI            2  /* Two quadrature encoders */
-#  define LM_NPORTS          7  /* 7 Ports (GPIOA-G), 5-42 GPIOs */
-#  define LM_NCANCONTROLLER  1  /* One CAN controller */
+#  define LM3S                 1  /* LM3S family */
+#  undef  LM4F                    /* Not LM4F family */
+#  undef  TM4C                    /* Not TM4C family */
+#  define TIVA_NTIMERS         6  /* Four general purpose timers */
+#  define TIVA_NWIDETIMERS     0  /* No general purpose wide timers */
+#  define TIVA_NETHCONTROLLERS 1  /* One Ethernet controller */
+#  define TIVA_NSSI            1  /* One SSI module */
+#  define TIVA_NUARTS          3  /* Two UART modules */
+#  define TIVA_NI2C            2  /* One I2C module */
+#  define TIVA_NADC            1  /* One ADC module */
+#  define TIVA_NPWM            3  /* Three PWM generator modules */
+#  define TIVA_NQEI            2  /* Two quadrature encoders */
+#  define TIVA_NPORTS          7  /* 7 Ports (GPIOA-G), 5-42 GPIOs */
+#  define TIVA_NCANCONTROLLER  1  /* One CAN controller */
 #elif defined(CONFIG_ARCH_CHIP_LM4F120)
-#  undef  LM3S                  /* Not LM3S family */
-#  define LM4F               1  /* LM4F family */
-#  define LM_NTIMERS         6  /* Six general purpose timers */
-#  define LM_NWIDETIMERS     6  /* Six general purpose wide timers */
-#  define LM_NETHCONTROLLERS 0  /* No Ethernet controller */
-#  define LM_NSSI            4  /* Four SSI module */
-#  define LM_NUARTS          8  /* Eight UART modules */
-#  define LM_NI2C            4  /* Four I2C modules */
-#  define LM_NADC            2  /* Two ADC modules */
-#  define LM_NPWM            0  /* No PWM generator modules */
-#  define LM_NQEI            0  /* No quadrature encoders */
-#  define LM_NPORTS          6  /* 6 Ports (GPIOA-F), 0-43 GPIOs */
-#  define LM_NCANCONTROLLER  1  /* One CAN controller */
+#  undef  LM3S                    /* Not LM3S family */
+#  define LM4F                 1  /* LM4F family */
+#  undef  TM4C                    /* Not TM4C family */
+#  define TIVA_NTIMERS         6  /* Six general purpose timers */
+#  define TIVA_NWIDETIMERS     6  /* Six general purpose wide timers */
+#  define TIVA_NETHCONTROLLERS 0  /* No Ethernet controller */
+#  define TIVA_NSSI            4  /* Four SSI module */
+#  define TIVA_NUARTS          8  /* Eight UART modules */
+#  define TIVA_NI2C            4  /* Four I2C modules */
+#  define TIVA_NADC            2  /* Two ADC modules */
+#  define TIVA_NPWM            0  /* No PWM generator modules */
+#  define TIVA_NQEI            0  /* No quadrature encoders */
+#  define TIVA_NPORTS          6  /* 6 Ports (GPIOA-F), 0-43 GPIOs */
+#  define TIVA_NCANCONTROLLER  1  /* One CAN controller */
 #else
 #  error "Capabilities not specified for this Stellaris chip"
 #endif
@@ -214,4 +220,4 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_INCLUDE_LM_CHIP_H */
+#endif /* __ARCH_ARM_INCLUDE_TIVA_CHIP_H */

@@ -70,9 +70,9 @@
 
 /* Is there a UART enabled? */
 
-#if !defined(CONFIG_LM_UART0) && !defined(CONFIG_LM_UART1) && !defined(CONFIG_LM_UART2) && \
-    !defined(CONFIG_LM_UART3) && !defined(CONFIG_LM_UART4) && !defined(CONFIG_LM_UART5) && \
-    !defined(CONFIG_LM_UART6) && !defined(CONFIG_LM_UART7)
+#if !defined(CONFIG_TIVA_UART0) && !defined(CONFIG_TIVA_UART1) && !defined(CONFIG_TIVA_UART2) && \
+    !defined(CONFIG_TIVA_UART3) && !defined(CONFIG_TIVA_UART4) && !defined(CONFIG_TIVA_UART5) && \
+    !defined(CONFIG_TIVA_UART6) && !defined(CONFIG_TIVA_UART7)
 #  error "No UARTs enabled"
 #endif
 
@@ -119,28 +119,28 @@
 #    define TTYS5_DEV           g_uart7port /* UART7 is ttyS0 */
 #else
 #  undef CONSOLE_DEV                        /* No console */
-#  if defined(CONFIG_LM_UART0)
+#  if defined(CONFIG_TIVA_UART0)
 #    define TTYS0_DEV           g_uart0port /* UART0 is ttyS0 */
 #    define UART0_ASSIGNED      1
-#  elif defined(CONFIG_LM_UART1)
+#  elif defined(CONFIG_TIVA_UART1)
 #    define TTYS0_DEV           g_uart1port /* UART1 is ttyS0 */
 #    define UART1_ASSIGNED      1
-#  elif defined(CONFIG_LM_UART2)
+#  elif defined(CONFIG_TIVA_UART2)
 #    define TTYS0_DEV           g_uart2port /* UART2 is ttyS0 */
 #    define UART2_ASSIGNED      1
-#  elif defined(CONFIG_LM_UART3)
+#  elif defined(CONFIG_TIVA_UART3)
 #    define TTYS0_DEV           g_uart3port /* UART3 is ttyS0 */
 #    define UART3_ASSIGNED      1
-#  elif defined(CONFIG_LM_UART4)
+#  elif defined(CONFIG_TIVA_UART4)
 #    define TTYS0_DEV           g_uart4port /* UART4 is ttyS0 */
 #    define UART4_ASSIGNED      1
-#  elif defined(CONFIG_LM_UART5)
+#  elif defined(CONFIG_TIVA_UART5)
 #    define TTYS0_DEV           g_uart5port /* UART5 is ttyS0 */
 #    define UART5_ASSIGNED      1
-#  elif defined(CONFIG_LM_UART6)
+#  elif defined(CONFIG_TIVA_UART6)
 #    define TTYS0_DEV           g_uart6port /* UART5 is ttyS0 */
 #    define UART6_ASSIGNED      1
-#  elif defined(CONFIG_LM_UART7)
+#  elif defined(CONFIG_TIVA_UART7)
 #    define TTYS0_DEV           g_uart7port /* UART5 is ttyS0 */
 #    define UART7_ASSIGNED      1
 #  endif
@@ -148,28 +148,28 @@
 
 /* Pick ttys1.  This could be any of UART0-7 excluding the console UART. */
 
-#if defined(CONFIG_LM_UART0) && !defined(UART0_ASSIGNED)
+#if defined(CONFIG_TIVA_UART0) && !defined(UART0_ASSIGNED)
 #  define TTYS1_DEV           g_uart0port /* UART0 is ttyS1 */
 #  define UART0_ASSIGNED      1
-#elif defined(CONFIG_LM_UART1) && !defined(UART1_ASSIGNED)
+#elif defined(CONFIG_TIVA_UART1) && !defined(UART1_ASSIGNED)
 #  define TTYS1_DEV           g_uart1port /* UART1 is ttyS1 */
 #  define UART1_ASSIGNED      1
-#elif defined(CONFIG_LM_UART2) && !defined(UART2_ASSIGNED)
+#elif defined(CONFIG_TIVA_UART2) && !defined(UART2_ASSIGNED)
 #  define TTYS1_DEV           g_uart2port /* UART2 is ttyS1 */
 #  define UART2_ASSIGNED      1
-#elif defined(CONFIG_LM_UART3) && !defined(UART3_ASSIGNED)
+#elif defined(CONFIG_TIVA_UART3) && !defined(UART3_ASSIGNED)
 #  define TTYS1_DEV           g_uart3port /* UART3 is ttyS1 */
 #  define UART3_ASSIGNED      1
-#elif defined(CONFIG_LM_UART4) && !defined(UART4_ASSIGNED)
+#elif defined(CONFIG_TIVA_UART4) && !defined(UART4_ASSIGNED)
 #  define TTYS1_DEV           g_uart4port /* UART4 is ttyS1 */
 #  define UART4_ASSIGNED      1
-#elif defined(CONFIG_LM_UART5) && !defined(UART5_ASSIGNED)
+#elif defined(CONFIG_TIVA_UART5) && !defined(UART5_ASSIGNED)
 #  define TTYS1_DEV           g_uart5port /* UART5 is ttyS1 */
 #  define UART5_ASSIGNED      1
-#elif defined(CONFIG_LM_UART6) && !defined(UART6_ASSIGNED)
+#elif defined(CONFIG_TIVA_UART6) && !defined(UART6_ASSIGNED)
 #  define TTYS1_DEV           g_uart6port /* UART6 is ttyS1 */
 #  define UART6_ASSIGNED      1
-#elif defined(CONFIG_LM_UART7) && !defined(UART7_ASSIGNED)
+#elif defined(CONFIG_TIVA_UART7) && !defined(UART7_ASSIGNED)
 #  define TTYS1_DEV           g_uart7port /* UART7 is ttyS1 */
 #  define UART7_ASSIGNED      1
 #endif
@@ -179,25 +179,25 @@
  * console.
  */
 
-#if defined(CONFIG_LM_UART1) && !defined(UART1_ASSIGNED)
+#if defined(CONFIG_TIVA_UART1) && !defined(UART1_ASSIGNED)
 #  define TTYS2_DEV           g_uart1port /* UART1 is ttyS2 */
 #  define UART1_ASSIGNED      1
-#elif defined(CONFIG_LM_UART2) && !defined(UART2_ASSIGNED)
+#elif defined(CONFIG_TIVA_UART2) && !defined(UART2_ASSIGNED)
 #  define TTYS2_DEV           g_uart2port /* UART2 is ttyS2 */
 #  define UART2_ASSIGNED      1
-#elif defined(CONFIG_LM_UART3) && !defined(UART3_ASSIGNED)
+#elif defined(CONFIG_TIVA_UART3) && !defined(UART3_ASSIGNED)
 #  define TTYS2_DEV           g_uart3port /* UART3 is ttyS2 */
 #  define UART3_ASSIGNED      1
-#elif defined(CONFIG_LM_UART4) && !defined(UART4_ASSIGNED)
+#elif defined(CONFIG_TIVA_UART4) && !defined(UART4_ASSIGNED)
 #  define TTYS2_DEV           g_uart4port /* UART4 is ttyS2 */
 #  define UART4_ASSIGNED      1
-#elif defined(CONFIG_LM_UART5) && !defined(UART5_ASSIGNED)
+#elif defined(CONFIG_TIVA_UART5) && !defined(UART5_ASSIGNED)
 #  define TTYS2_DEV           g_uart5port /* UART5 is ttyS2 */
 #  define UART5_ASSIGNED      1
-#elif defined(CONFIG_LM_UART6) && !defined(UART6_ASSIGNED)
+#elif defined(CONFIG_TIVA_UART6) && !defined(UART6_ASSIGNED)
 #  define TTYS2_DEV           g_uart6port /* UART6 is ttyS2 */
 #  define UART6_ASSIGNED      1
-#elif defined(CONFIG_LM_UART7) && !defined(UART7_ASSIGNED)
+#elif defined(CONFIG_TIVA_UART7) && !defined(UART7_ASSIGNED)
 #  define TTYS2_DEV           g_uart7port /* UART7 is ttyS2 */
 #  define UART7_ASSIGNED      1
 #endif
@@ -207,22 +207,22 @@
  * UART 2-7 could also be the console.
  */
 
-#if defined(CONFIG_LM_UART2) && !defined(UART2_ASSIGNED)
+#if defined(CONFIG_TIVA_UART2) && !defined(UART2_ASSIGNED)
 #  define TTYS3_DEV           g_uart2port /* UART2 is ttyS3 */
 #  define UART2_ASSIGNED      1
-#elif defined(CONFIG_LM_UART3) && !defined(UART3_ASSIGNED)
+#elif defined(CONFIG_TIVA_UART3) && !defined(UART3_ASSIGNED)
 #  define TTYS3_DEV           g_uart3port /* UART3 is ttyS3 */
 #  define UART3_ASSIGNED      1
-#elif defined(CONFIG_LM_UART4) && !defined(UART4_ASSIGNED)
+#elif defined(CONFIG_TIVA_UART4) && !defined(UART4_ASSIGNED)
 #  define TTYS3_DEV           g_uart4port /* UART4 is ttyS3 */
 #  define UART4_ASSIGNED      1
-#elif defined(CONFIG_LM_UART5) && !defined(UART5_ASSIGNED)
+#elif defined(CONFIG_TIVA_UART5) && !defined(UART5_ASSIGNED)
 #  define TTYS3_DEV           g_uart5port /* UART5 is ttyS3 */
 #  define UART5_ASSIGNED      1
-#elif defined(CONFIG_LM_UART6) && !defined(UART6_ASSIGNED)
+#elif defined(CONFIG_TIVA_UART6) && !defined(UART6_ASSIGNED)
 #  define TTYS3_DEV           g_uart6port /* UART6 is ttyS3 */
 #  define UART6_ASSIGNED      1
-#elif defined(CONFIG_LM_UART7) && !defined(UART7_ASSIGNED)
+#elif defined(CONFIG_TIVA_UART7) && !defined(UART7_ASSIGNED)
 #  define TTYS3_DEV           g_uart7port /* UART7 is ttyS3 */
 #  define UART7_ASSIGNED      1
 #endif
@@ -232,19 +232,19 @@
  * UART 3-7 could also be the console.
  */
 
-#if defined(CONFIG_LM_UART3) && !defined(UART3_ASSIGNED)
+#if defined(CONFIG_TIVA_UART3) && !defined(UART3_ASSIGNED)
 #  define TTYS4_DEV           g_uart3port /* UART3 is ttyS4 */
 #  define UART3_ASSIGNED      1
-#elif defined(CONFIG_LM_UART4) && !defined(UART4_ASSIGNED)
+#elif defined(CONFIG_TIVA_UART4) && !defined(UART4_ASSIGNED)
 #  define TTYS4_DEV           g_uart4port /* UART4 is ttyS4 */
 #  define UART4_ASSIGNED      1
-#elif defined(CONFIG_LM_UART5) && !defined(UART5_ASSIGNED)
+#elif defined(CONFIG_TIVA_UART5) && !defined(UART5_ASSIGNED)
 #  define TTYS4_DEV           g_uart5port /* UART5 is ttyS4 */
 #  define UART5_ASSIGNED      1
-#elif defined(CONFIG_LM_UART6) && !defined(UART6_ASSIGNED)
+#elif defined(CONFIG_TIVA_UART6) && !defined(UART6_ASSIGNED)
 #  define TTYS4_DEV           g_uart6port /* UART6 is ttyS4 */
 #  define UART6_ASSIGNED      1
-#elif defined(CONFIG_LM_UART7) && !defined(UART7_ASSIGNED)
+#elif defined(CONFIG_TIVA_UART7) && !defined(UART7_ASSIGNED)
 #  define TTYS4_DEV           g_uart7port /* UART7 is ttyS4 */
 #  define UART7_ASSIGNED      1
 #endif
@@ -254,16 +254,16 @@
  * UART 4-7 could also be the console.
  */
 
-#if defined(CONFIG_LM_UART4) && !defined(UART4_ASSIGNED)
+#if defined(CONFIG_TIVA_UART4) && !defined(UART4_ASSIGNED)
 #  define TTYS5_DEV           g_uart4port /* UART4 is ttyS5 */
 #  define UART4_ASSIGNED      1
-#elif defined(CONFIG_LM_UART5) && !defined(UART5_ASSIGNED)
+#elif defined(CONFIG_TIVA_UART5) && !defined(UART5_ASSIGNED)
 #  define TTYS5_DEV           g_uart5port /* UART5 is ttyS5 */
 #  define UART5_ASSIGNED      1
-#elif defined(CONFIG_LM_UART6) && !defined(UART6_ASSIGNED)
+#elif defined(CONFIG_TIVA_UART6) && !defined(UART6_ASSIGNED)
 #  define TTYS5_DEV           g_uart6port /* UART6 is ttyS5 */
 #  define UART6_ASSIGNED      1
-#elif defined(CONFIG_LM_UART7) && !defined(UART7_ASSIGNED)
+#elif defined(CONFIG_TIVA_UART7) && !defined(UART7_ASSIGNED)
 #  define TTYS5_DEV           g_uart7port /* UART7 is ttyS5 */
 #  define UART7_ASSIGNED      1
 #endif
@@ -273,13 +273,13 @@
  * UART 5-7 could also be the console.
  */
 
-#if defined(CONFIG_LM_UART5) && !defined(UART5_ASSIGNED)
+#if defined(CONFIG_TIVA_UART5) && !defined(UART5_ASSIGNED)
 #  define TTYS6_DEV           g_uart5port /* UART5 is ttyS6 */
 #  define UART5_ASSIGNED      1
-#elif defined(CONFIG_LM_UART6) && !defined(UART6_ASSIGNED)
+#elif defined(CONFIG_TIVA_UART6) && !defined(UART6_ASSIGNED)
 #  define TTYS6_DEV           g_uart6port /* UART6 is ttyS6 */
 #  define UART6_ASSIGNED      1
-#elif defined(CONFIG_LM_UART7) && !defined(UART7_ASSIGNED)
+#elif defined(CONFIG_TIVA_UART7) && !defined(UART7_ASSIGNED)
 #  define TTYS6_DEV           g_uart7port /* UART7 is ttyS6 */
 #  define UART7_ASSIGNED      1
 #endif
@@ -289,10 +289,10 @@
  * UART 6-7 could also be the console.
  */
 
-#if defined(CONFIG_LM_UART6) && !defined(UART6_ASSIGNED)
+#if defined(CONFIG_TIVA_UART6) && !defined(UART6_ASSIGNED)
 #  define TTYS7_DEV           g_uart6port /* UART6 is ttyS7 */
 #  define UART6_ASSIGNED      1
-#elif defined(CONFIG_LM_UART7) && !defined(UART7_ASSIGNED)
+#elif defined(CONFIG_TIVA_UART7) && !defined(UART7_ASSIGNED)
 #  define TTYS7_DEV           g_uart7port /* UART7 is ttyS7 */
 #  define UART7_ASSIGNED      1
 #endif
@@ -352,47 +352,47 @@ static const struct uart_ops_s g_uart_ops =
 
 /* I/O buffers */
 
-#ifdef CONFIG_LM_UART0
+#ifdef CONFIG_TIVA_UART0
 static char g_uart0rxbuffer[CONFIG_UART0_RXBUFSIZE];
 static char g_uart0txbuffer[CONFIG_UART0_TXBUFSIZE];
 #endif
-#ifdef CONFIG_LM_UART1
+#ifdef CONFIG_TIVA_UART1
 static char g_uart1rxbuffer[CONFIG_UART1_RXBUFSIZE];
 static char g_uart1txbuffer[CONFIG_UART1_TXBUFSIZE];
 #endif
-#ifdef CONFIG_LM_UART2
+#ifdef CONFIG_TIVA_UART2
 static char g_uart2rxbuffer[CONFIG_UART2_RXBUFSIZE];
 static char g_uart2txbuffer[CONFIG_UART2_TXBUFSIZE];
 #endif
-#ifdef CONFIG_LM_UART3
+#ifdef CONFIG_TIVA_UART3
 static char g_uart3rxbuffer[CONFIG_UART3_RXBUFSIZE];
 static char g_uart3txbuffer[CONFIG_UART3_TXBUFSIZE];
 #endif
-#ifdef CONFIG_LM_UART4
+#ifdef CONFIG_TIVA_UART4
 static char g_uart4rxbuffer[CONFIG_UART4_RXBUFSIZE];
 static char g_uart4txbuffer[CONFIG_UART4_TXBUFSIZE];
 #endif
-#ifdef CONFIG_LM_UART5
+#ifdef CONFIG_TIVA_UART5
 static char g_uart5rxbuffer[CONFIG_UART5_RXBUFSIZE];
 static char g_uart5txbuffer[CONFIG_UART5_TXBUFSIZE];
 #endif
-#ifdef CONFIG_LM_UART6
+#ifdef CONFIG_TIVA_UART6
 static char g_uart6rxbuffer[CONFIG_UART6_RXBUFSIZE];
 static char g_uart6txbuffer[CONFIG_UART6_TXBUFSIZE];
 #endif
-#ifdef CONFIG_LM_UART7
+#ifdef CONFIG_TIVA_UART7
 static char g_uart7rxbuffer[CONFIG_UART7_RXBUFSIZE];
 static char g_uart7txbuffer[CONFIG_UART7_TXBUFSIZE];
 #endif
 
 /* This describes the state of the Stellaris uart0 port. */
 
-#ifdef CONFIG_LM_UART0
+#ifdef CONFIG_TIVA_UART0
 static struct up_dev_s g_uart0priv =
 {
-  .uartbase       = LM_UART0_BASE,
+  .uartbase       = TIVA_UART0_BASE,
   .baud           = CONFIG_UART0_BAUD,
-  .irq            = LM_IRQ_UART0,
+  .irq            = TIVA_IRQ_UART0,
   .parity         = CONFIG_UART0_PARITY,
   .bits           = CONFIG_UART0_BITS,
   .stopbits2      = CONFIG_UART0_2STOP,
@@ -417,12 +417,12 @@ static uart_dev_t g_uart0port =
 
 /* This describes the state of the Stellaris uart1 port. */
 
-#ifdef CONFIG_LM_UART1
+#ifdef CONFIG_TIVA_UART1
 static struct up_dev_s g_uart1priv =
 {
-  .uartbase       = LM_UART1_BASE,
+  .uartbase       = TIVA_UART1_BASE,
   .baud           = CONFIG_UART1_BAUD,
-  .irq            = LM_IRQ_UART1,
+  .irq            = TIVA_IRQ_UART1,
   .parity         = CONFIG_UART1_PARITY,
   .bits           = CONFIG_UART1_BITS,
   .stopbits2      = CONFIG_UART1_2STOP,
@@ -447,12 +447,12 @@ static uart_dev_t g_uart1port =
 
 /* This describes the state of the Stellaris uart2 port. */
 
-#ifdef CONFIG_LM_UART2
+#ifdef CONFIG_TIVA_UART2
 static struct up_dev_s g_uart2priv =
 {
-  .uartbase       = LM_UART2_BASE,
+  .uartbase       = TIVA_UART2_BASE,
   .baud           = CONFIG_UART2_BAUD,
-  .irq            = LM_IRQ_UART2,
+  .irq            = TIVA_IRQ_UART2,
   .parity         = CONFIG_UART2_PARITY,
   .bits           = CONFIG_UART2_BITS,
   .stopbits2      = CONFIG_UART2_2STOP,
@@ -477,12 +477,12 @@ static uart_dev_t g_uart2port =
 
 /* This describes the state of the Stellaris uart3 port. */
 
-#ifdef CONFIG_LM_UART3
+#ifdef CONFIG_TIVA_UART3
 static struct up_dev_s g_uart3priv =
 {
-  .uartbase       = LM_UART3_BASE,
+  .uartbase       = TIVA_UART3_BASE,
   .baud           = CONFIG_UART3_BAUD,
-  .irq            = LM_IRQ_UART3,
+  .irq            = TIVA_IRQ_UART3,
   .parity         = CONFIG_UART3_PARITY,
   .bits           = CONFIG_UART3_BITS,
   .stopbits2      = CONFIG_UART3_2STOP,
@@ -507,12 +507,12 @@ static uart_dev_t g_uart3port =
 
 /* This describes the state of the Stellaris uart4 port. */
 
-#ifdef CONFIG_LM_UART4
+#ifdef CONFIG_TIVA_UART4
 static struct up_dev_s g_uart4priv =
 {
-  .uartbase       = LM_UART4_BASE,
+  .uartbase       = TIVA_UART4_BASE,
   .baud           = CONFIG_UART4_BAUD,
-  .irq            = LM_IRQ_UART4,
+  .irq            = TIVA_IRQ_UART4,
   .parity         = CONFIG_UART4_PARITY,
   .bits           = CONFIG_UART4_BITS,
   .stopbits2      = CONFIG_UART4_2STOP,
@@ -537,12 +537,12 @@ static uart_dev_t g_uart4port =
 
 /* This describes the state of the Stellaris uart5 port. */
 
-#ifdef CONFIG_LM_UART5
+#ifdef CONFIG_TIVA_UART5
 static struct up_dev_s g_uart5priv =
 {
-  .uartbase       = LM_UART5_BASE,
+  .uartbase       = TIVA_UART5_BASE,
   .baud           = CONFIG_UART5_BAUD,
-  .irq            = LM_IRQ_UART5,
+  .irq            = TIVA_IRQ_UART5,
   .parity         = CONFIG_UART5_PARITY,
   .bits           = CONFIG_UART5_BITS,
   .stopbits2      = CONFIG_UART5_2STOP,
@@ -567,12 +567,12 @@ static uart_dev_t g_uart5port =
 
 /* This describes the state of the Stellaris uart6 port. */
 
-#ifdef CONFIG_LM_UART6
+#ifdef CONFIG_TIVA_UART6
 static struct up_dev_s g_uart6priv =
 {
-  .uartbase       = LM_UART6_BASE,
+  .uartbase       = TIVA_UART6_BASE,
   .baud           = CONFIG_UART6_BAUD,
-  .irq            = LM_IRQ_UART6,
+  .irq            = TIVA_IRQ_UART6,
   .parity         = CONFIG_UART6_PARITY,
   .bits           = CONFIG_UART6_BITS,
   .stopbits2      = CONFIG_UART6_2STOP,
@@ -597,12 +597,12 @@ static uart_dev_t g_uart6port =
 
 /* This describes the state of the Stellaris uart7 port. */
 
-#ifdef CONFIG_LM_UART7
+#ifdef CONFIG_TIVA_UART7
 static struct up_dev_s g_uart7priv =
 {
-  .uartbase       = LM_UART7_BASE,
+  .uartbase       = TIVA_UART7_BASE,
   .baud           = CONFIG_UART7_BAUD,
-  .irq            = LM_IRQ_UART7,
+  .irq            = TIVA_IRQ_UART7,
   .parity         = CONFIG_UART7_PARITY,
   .bits           = CONFIG_UART7_BITS,
   .stopbits2      = CONFIG_UART7_2STOP,
@@ -663,7 +663,7 @@ static inline void up_disableuartint(struct up_dev_s *priv, uint32_t *im)
   /* Disable all interrupts */
 
   priv->im = 0;
-  up_serialout(priv, LM_UART_IM_OFFSET, 0);
+  up_serialout(priv, TIVA_UART_IM_OFFSET, 0);
 }
 
 /****************************************************************************
@@ -673,7 +673,7 @@ static inline void up_disableuartint(struct up_dev_s *priv, uint32_t *im)
 static inline void up_restoreuartint(struct up_dev_s *priv, uint32_t im)
 {
   priv->im = im;
-  up_serialout(priv, LM_UART_IM_OFFSET, im);
+  up_serialout(priv, TIVA_UART_IM_OFFSET, im);
 }
 
 /****************************************************************************
@@ -691,7 +691,7 @@ static inline void up_waittxnotfull(struct up_dev_s *priv)
     {
       /* Check Tx FIFO is full */
 
-      if ((up_serialin(priv, LM_UART_FR_OFFSET) & UART_FR_TXFF) == 0)
+      if ((up_serialin(priv, TIVA_UART_FR_OFFSET) & UART_FR_TXFF) == 0)
         {
           /* The Tx FIFO is not full... return */
 
@@ -732,9 +732,9 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* Disable the UART by clearing the UARTEN bit in the UART CTL register */
 
-  ctl = up_serialin(priv, LM_UART_CTL_OFFSET);
+  ctl = up_serialin(priv, TIVA_UART_CTL_OFFSET);
   ctl &= ~UART_CTL_UARTEN;
-  up_serialout(priv, LM_UART_CTL_OFFSET, ctl);
+  up_serialout(priv, TIVA_UART_CTL_OFFSET, ctl);
 
   /* Calculate BAUD rate from the SYS clock:
    *
@@ -778,8 +778,8 @@ static int up_setup(struct uart_dev_s *dev)
   remainder = SYSCLK_FREQUENCY - den * brdi;
   divfrac   = ((remainder << 6) + (den >> 1)) / den;
 
-  up_serialout(priv, LM_UART_IBRD_OFFSET, brdi);
-  up_serialout(priv, LM_UART_FBRD_OFFSET, divfrac);
+  up_serialout(priv, TIVA_UART_IBRD_OFFSET, brdi);
+  up_serialout(priv, TIVA_UART_FBRD_OFFSET, divfrac);
 
   /* Set up the LCRH register */
 
@@ -819,14 +819,14 @@ static int up_setup(struct uart_dev_s *dev)
       lcrh |= UART_LCRH_STP2;
     }
 
-  up_serialout(priv, LM_UART_LCRH_OFFSET, lcrh);
+  up_serialout(priv, TIVA_UART_LCRH_OFFSET, lcrh);
 #endif
 
   /* Set the UART to interrupt whenever the TX FIFO is almost empty or when
    * any character is received.
    */
 
-  up_serialout(priv, LM_UART_IFLS_OFFSET, UART_IFLS_TXIFLSEL_18th|UART_IFLS_RXIFLSEL_18th);
+  up_serialout(priv, TIVA_UART_IFLS_OFFSET, UART_IFLS_TXIFLSEL_18th|UART_IFLS_RXIFLSEL_18th);
 
   /* Flush the Rx and Tx FIFOs -- How do you do that?*/
 
@@ -836,27 +836,27 @@ static int up_setup(struct uart_dev_s *dev)
    * yet because the interrupt is still disabled at the interrupt controller.
    */
 
-  up_serialout(priv, LM_UART_IM_OFFSET, UART_IM_RXIM|UART_IM_RTIM);
+  up_serialout(priv, TIVA_UART_IM_OFFSET, UART_IM_RXIM|UART_IM_RTIM);
 
   /* Enable the FIFOs */
 
 #ifdef CONFIG_SUPPRESS_UART_CONFIG
-  lcrh = up_serialin(priv, LM_UART_LCRH_OFFSET);
+  lcrh = up_serialin(priv, TIVA_UART_LCRH_OFFSET);
 #endif
   lcrh |= UART_LCRH_FEN;
-  up_serialout(priv, LM_UART_LCRH_OFFSET, lcrh);
+  up_serialout(priv, TIVA_UART_LCRH_OFFSET, lcrh);
 
   /* Enable Rx, Tx, and the UART */
 
 #ifdef CONFIG_SUPPRESS_UART_CONFIG
-  ctl = up_serialin(priv, LM_UART_CTL_OFFSET);
+  ctl = up_serialin(priv, TIVA_UART_CTL_OFFSET);
 #endif
   ctl |= (UART_CTL_UARTEN|UART_CTL_TXE|UART_CTL_RXE);
-  up_serialout(priv, LM_UART_CTL_OFFSET, ctl);
+  up_serialout(priv, TIVA_UART_CTL_OFFSET, ctl);
 
   /* Set up the cache IM value */
 
-  priv->im = up_serialin(priv, LM_UART_IM_OFFSET);
+  priv->im = up_serialin(priv, TIVA_UART_IM_OFFSET);
   return OK;
 }
 
@@ -947,56 +947,56 @@ static int up_interrupt(int irq, void *context)
   int                passes;
   bool               handled;
 
-#ifdef CONFIG_LM_UART0
+#ifdef CONFIG_TIVA_UART0
   if (g_uart0priv.irq == irq)
     {
       dev = &g_uart0port;
     }
   else
 #endif
-#ifdef CONFIG_LM_UART1
+#ifdef CONFIG_TIVA_UART1
   if (g_uart1priv.irq == irq)
     {
       dev = &g_uart1port;
     }
   else
 #endif
-#ifdef CONFIG_LM_UART2
+#ifdef CONFIG_TIVA_UART2
   if (g_uart2priv.irq == irq)
     {
       dev = &g_uart2port;
     }
   else
 #endif
-#ifdef CONFIG_LM_UART3
+#ifdef CONFIG_TIVA_UART3
   if (g_uart3priv.irq == irq)
     {
       dev = &g_uart3port;
     }
   else
 #endif
-#ifdef CONFIG_LM_UART4
+#ifdef CONFIG_TIVA_UART4
   if (g_uart4priv.irq == irq)
     {
       dev = &g_uart4port;
     }
   else
 #endif
-#ifdef CONFIG_LM_UART5
+#ifdef CONFIG_TIVA_UART5
   if (g_uart5priv.irq == irq)
     {
       dev = &g_uart5port;
     }
   else
 #endif
-#ifdef CONFIG_LM_UART6
+#ifdef CONFIG_TIVA_UART6
   if (g_uart6priv.irq == irq)
     {
       dev = &g_uart6port;
     }
   else
 #endif
-#ifdef CONFIG_LM_UART7
+#ifdef CONFIG_TIVA_UART7
   if (g_uart7priv.irq == irq)
     {
       dev = &g_uart7port;
@@ -1020,8 +1020,8 @@ static int up_interrupt(int irq, void *context)
 
       /* Get the masked UART status and clear the pending interrupts. */
 
-       mis = up_serialin(priv, LM_UART_MIS_OFFSET);
-       up_serialout(priv, LM_UART_ICR_OFFSET, mis);
+       mis = up_serialin(priv, TIVA_UART_MIS_OFFSET);
+       up_serialout(priv, TIVA_UART_ICR_OFFSET, mis);
 
       /* Handle incoming, receive bytes (with or without timeout) */
 
@@ -1105,7 +1105,7 @@ static int up_receive(struct uart_dev_s *dev, uint32_t *status)
 
   /* Get the Rx byte + 4 bits of error information.  Return those in status */
 
-  rxd     = up_serialin(priv, LM_UART_DR_OFFSET);
+  rxd     = up_serialin(priv, TIVA_UART_DR_OFFSET);
   *status = rxd;
 
   /* The lower 8bits of the Rx data is the actual recevied byte */
@@ -1138,7 +1138,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
     {
       priv->im &= ~(UART_IM_RXIM|UART_IM_RTIM);
     }
-  up_serialout(priv, LM_UART_IM_OFFSET, priv->im);
+  up_serialout(priv, TIVA_UART_IM_OFFSET, priv->im);
 }
 
 /****************************************************************************
@@ -1152,7 +1152,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 static bool up_rxavailable(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  return ((up_serialin(priv, LM_UART_FR_OFFSET) & UART_FR_RXFE) == 0);
+  return ((up_serialin(priv, TIVA_UART_FR_OFFSET) & UART_FR_RXFE) == 0);
 }
 
 /****************************************************************************
@@ -1166,7 +1166,7 @@ static bool up_rxavailable(struct uart_dev_s *dev)
 static void up_send(struct uart_dev_s *dev, int ch)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  up_serialout(priv, LM_UART_DR_OFFSET, (uint32_t)ch);
+  up_serialout(priv, TIVA_UART_DR_OFFSET, (uint32_t)ch);
 }
 
 /****************************************************************************
@@ -1189,7 +1189,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
       priv->im |= UART_IM_TXIM;
-      up_serialout(priv, LM_UART_IM_OFFSET, priv->im);
+      up_serialout(priv, TIVA_UART_IM_OFFSET, priv->im);
 
       /* The serial driver wants an interrupt here, but will not get get
        * one unless we "prime the pump."  I believe that this is because
@@ -1209,7 +1209,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
       /* Disable the TX interrupt */
 
       priv->im &= ~UART_IM_TXIM;
-      up_serialout(priv, LM_UART_IM_OFFSET, priv->im);
+      up_serialout(priv, TIVA_UART_IM_OFFSET, priv->im);
     }
   irqrestore(flags);
 }
@@ -1225,7 +1225,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
 static bool up_txready(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  return ((up_serialin(priv, LM_UART_FR_OFFSET) & UART_FR_TXFF) == 0);
+  return ((up_serialin(priv, TIVA_UART_FR_OFFSET) & UART_FR_TXFF) == 0);
 }
 
 /****************************************************************************
@@ -1239,7 +1239,7 @@ static bool up_txready(struct uart_dev_s *dev)
 static bool up_txempty(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  return ((up_serialin(priv, LM_UART_FR_OFFSET) & UART_FR_TXFE) != 0);
+  return ((up_serialin(priv, TIVA_UART_FR_OFFSET) & UART_FR_TXFE) != 0);
 }
 
 /****************************************************************************
@@ -1354,7 +1354,7 @@ int up_putc(int ch)
 
   up_disableuartint(priv, &im);
   up_waittxnotfull(priv);
-  up_serialout(priv, LM_UART_DR_OFFSET, (uint32_t)ch);
+  up_serialout(priv, TIVA_UART_DR_OFFSET, (uint32_t)ch);
 
   /* Check for LF */
 
@@ -1363,7 +1363,7 @@ int up_putc(int ch)
       /* Add CR */
 
       up_waittxnotfull(priv);
-      up_serialout(priv, LM_UART_DR_OFFSET, (uint32_t)'\r');
+      up_serialout(priv, TIVA_UART_DR_OFFSET, (uint32_t)'\r');
     }
 
   up_waittxnotfull(priv);
