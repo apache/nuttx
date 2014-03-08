@@ -458,6 +458,9 @@ static off_t vga_seek(FAR struct file *filp, off_t offset, int whence)
       case SEEK_END:  /* From the end of the file */
         newpos = (VGA_FBSIZE - 1) - offset;
         break;
+
+      default:
+        return g_curpos;
     }
 
   /* Make sure that the new cursor position lies within the frame buffer */
