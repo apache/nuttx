@@ -1,8 +1,7 @@
 /************************************************************************************
- * configs/qemu-i486/src/up_boot.c
- * arch/x86/src/board/up_boot.c
+ * configs/qemu-i486/src/qemu_boot.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,7 +47,7 @@
 #include "up_internal.h"
 
 #include "qemu_internal.h"
-#include "qemui486_internal.h"
+#include "qemu_i486.h"
 
 /************************************************************************************
  * Definitions
