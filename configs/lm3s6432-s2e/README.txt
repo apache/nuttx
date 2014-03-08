@@ -346,15 +346,15 @@ Stellaris MDL-S2E Reference Design Configuration Options
   Additional interrupt support can be disabled if desired to reduce memory
   footprint - GPIOs C-G are not pinned out on the MDL-S2E board.
 
-    CONFIG_LM_DISABLE_GPIOA_IRQS=n
-    CONFIG_LM_DISABLE_GPIOB_IRQS=n
-    CONFIG_LM_DISABLE_GPIOC_IRQS=y
-    CONFIG_LM_DISABLE_GPIOD_IRQS=y
-    CONFIG_LM_DISABLE_GPIOE_IRQS=y
-    CONFIG_LM_DISABLE_GPIOF_IRQS=y
-    CONFIG_LM_DISABLE_GPIOG_IRQS=y
-    CONFIG_LM_DISABLE_GPIOH_IRQS=y
-    CONFIG_LM_DISABLE_GPIOJ_IRQS=y
+    CONFIG_TIVA_DISABLE_GPIOA_IRQS=n
+    CONFIG_TIVA_DISABLE_GPIOB_IRQS=n
+    CONFIG_TIVA_DISABLE_GPIOC_IRQS=y
+    CONFIG_TIVA_DISABLE_GPIOD_IRQS=y
+    CONFIG_TIVA_DISABLE_GPIOE_IRQS=y
+    CONFIG_TIVA_DISABLE_GPIOF_IRQS=y
+    CONFIG_TIVA_DISABLE_GPIOG_IRQS=y
+    CONFIG_TIVA_DISABLE_GPIOH_IRQS=y
+    CONFIG_TIVA_DISABLE_GPIOJ_IRQS=y
  
   LM3S6432 specific device driver settings
 
@@ -388,18 +388,18 @@ Stellaris MDL-S2E Reference Design Configuration Options
       value is large, then larger values of this setting may cause
       Rx FIFO overrun errors.  Default: half of the Tx FIFO size (4).
 
-    CONFIG_LM_ETHERNET - This must be set (along with CONFIG_NET)
+    CONFIG_TIVA_ETHERNET - This must be set (along with CONFIG_NET)
       to build the Stellaris Ethernet driver
-    CONFIG_LM_ETHLEDS - Enable to use Ethernet LEDs on the board.
-    CONFIG_LM_BOARDMAC - This should be set in order to use the
+    CONFIG_TIVA_ETHLEDS - Enable to use Ethernet LEDs on the board.
+    CONFIG_TIVA_BOARDMAC - This should be set in order to use the
       MAC address configured in the flash USER registers.
-    CONFIG_LM_ETHHDUPLEX - Set to force half duplex operation
-    CONFIG_LM_ETHNOAUTOCRC - Set to suppress auto-CRC generation
-    CONFIG_LM_ETHNOPAD - Set to suppress Tx padding
-    CONFIG_LM_MULTICAST - Set to enable multicast frames
-    CONFIG_LM_PROMISCUOUS - Set to enable promiscuous mode
-    CONFIG_LM_BADCRC - Set to enable bad CRC rejection.
-    CONFIG_LM_DUMPPACKET - Dump each packet received/sent to the console.
+    CONFIG_TIVA_ETHHDUPLEX - Set to force half duplex operation
+    CONFIG_TIVA_ETHNOAUTOCRC - Set to suppress auto-CRC generation
+    CONFIG_TIVA_ETHNOPAD - Set to suppress Tx padding
+    CONFIG_TIVA_MULTICAST - Set to enable multicast frames
+    CONFIG_TIVA_PROMISCUOUS - Set to enable promiscuous mode
+    CONFIG_TIVA_BADCRC - Set to enable bad CRC rejection.
+    CONFIG_TIVA_DUMPPACKET - Dump each packet received/sent to the console.
 
 Configurations
 ^^^^^^^^^^^^^^

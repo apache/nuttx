@@ -53,63 +53,63 @@
 
 /* Ethernet MAC Register Offsets */
 
-#define LM_MAC_RIS_OFFSET     0x000 /* Ethernet MAC Raw Interrupt Status */
-#define LM_MAC_IACK_OFFSET    0x000 /* Ethernet MAC Acknowledge */
-#define LM_MAC_IM_OFFSET      0x004 /* Ethernet MAC Interrupt Mask */
-#define LM_MAC_RCTL_OFFSET    0x008 /* Ethernet MAC Receive Control */
-#define LM_MAC_TCTL_OFFSET    0x00c /* Ethernet MAC Transmit Control */
-#define LM_MAC_DATA_OFFSET    0x010 /* Ethernet MAC Data */
-#define LM_MAC_IA0_OFFSET     0x014 /* Ethernet MAC Individual Address 0 */
-#define LM_MAC_IA1_OFFSET     0x018 /* Ethernet MAC Individual Address 1 */
-#define LM_MAC_THR_OFFSET     0x01c /* Ethernet MAC Threshold */
-#define LM_MAC_MCTL_OFFSET    0x020 /* Ethernet MAC Management Control */
-#define LM_MAC_MDV_OFFSET     0x024 /* Ethernet MAC Management Divider */
-#define LM_MAC_MTXD_OFFSET    0x02c /* Ethernet MAC Management Transmit Data */
-#define LM_MAC_MRXD_OFFSET    0x030 /* Ethernet MAC Management Receive Data */
-#define LM_MAC_NP_OFFSET      0x034 /* Ethernet MAC Number of Packets */
-#define LM_MAC_TR_OFFSET      0x038 /* Ethernet MAC Transmission Request */
-#ifdef LM_ETHTS
-#  define LM_MAC_TS_OFFSET    0x03c /* Ethernet MAC Time Stamp Configuration */
+#define TIVA_MAC_RIS_OFFSET   0x000 /* Ethernet MAC Raw Interrupt Status */
+#define TIVA_MAC_IACK_OFFSET  0x000 /* Ethernet MAC Acknowledge */
+#define TIVA_MAC_IM_OFFSET    0x004 /* Ethernet MAC Interrupt Mask */
+#define TIVA_MAC_RCTL_OFFSET  0x008 /* Ethernet MAC Receive Control */
+#define TIVA_MAC_TCTL_OFFSET  0x00c /* Ethernet MAC Transmit Control */
+#define TIVA_MAC_DATA_OFFSET  0x010 /* Ethernet MAC Data */
+#define TIVA_MAC_IA0_OFFSET   0x014 /* Ethernet MAC Individual Address 0 */
+#define TIVA_MAC_IA1_OFFSET   0x018 /* Ethernet MAC Individual Address 1 */
+#define TIVA_MAC_THR_OFFSET   0x01c /* Ethernet MAC Threshold */
+#define TIVA_MAC_MCTL_OFFSET  0x020 /* Ethernet MAC Management Control */
+#define TIVA_MAC_MDV_OFFSET   0x024 /* Ethernet MAC Management Divider */
+#define TIVA_MAC_MTXD_OFFSET  0x02c /* Ethernet MAC Management Transmit Data */
+#define TIVA_MAC_MRXD_OFFSET  0x030 /* Ethernet MAC Management Receive Data */
+#define TIVA_MAC_NP_OFFSET    0x034 /* Ethernet MAC Number of Packets */
+#define TIVA_MAC_TR_OFFSET    0x038 /* Ethernet MAC Transmission Request */
+#ifdef TIVA_ETHTS
+#  define TIVA_MAC_TS_OFFSET  0x03c /* Ethernet MAC Time Stamp Configuration */
 #endif
 
 /* MII Management Register Offsets (see include/nuttx/net/mii.h) */
 
 /* Ethernet Controller Register Addresses *******************************************/
 
-#define LM_MAC_RIS            (LM_ETHCON_BASE + LM_MAC_RIS_OFFSET)
-#define LM_MAC_IACK           (LM_ETHCON_BASE + LM_MAC_IACK_OFFSET)
-#define LM_MAC_IM             (LM_ETHCON_BASE + LM_MAC_IM_OFFSET)
-#define LM_MAC_RCTL           (LM_ETHCON_BASE + LM_MAC_RCTL_OFFSET)
-#define LM_MAC_TCTL           (LM_ETHCON_BASE + LM_MAC_TCTL_OFFSET)
-#define LM_MAC_DATA           (LM_ETHCON_BASE + LM_MAC_DATA_OFFSET)
-#define LM_MAC_IA0            (LM_ETHCON_BASE + LM_MAC_IA0_OFFSET)
-#define LM_MAC_IA1            (LM_ETHCON_BASE + LM_MAC_IA1_OFFSET)
-#define LM_MAC_THR            (LM_ETHCON_BASE + LM_MAC_THR_OFFSET)
-#define LM_MAC_MCTL           (LM_ETHCON_BASE + LM_MAC_MCTL_OFFSET)
-#define LM_MAC_MDV            (LM_ETHCON_BASE + LM_MAC_MDV_OFFSET)
-#define LM_MAC_MTXD           (LM_ETHCON_BASE + LM_MAC_MTXD_OFFSET)
-#define LM_MAC_MRXD           (LM_ETHCON_BASE + LM_MAC_MRXD_OFFSET)
-#define LM_MAC_NP             (LM_ETHCON_BASE + LM_MAC_NP_OFFSET)
-#define LM_MAC_TR             (LM_ETHCON_BASE + LM_MAC_TR_OFFSET)
-#ifdef LM_ETHTS
-#  define LM_MAC_TS           (LM_ETHCON_BASE + LM_MAC_TS_OFFSET)
+#define TIVA_MAC_RIS          (TIVA_ETHCON_BASE + TIVA_MAC_RIS_OFFSET)
+#define TIVA_MAC_IACK         (TIVA_ETHCON_BASE + TIVA_MAC_IACK_OFFSET)
+#define TIVA_MAC_IM           (TIVA_ETHCON_BASE + TIVA_MAC_IM_OFFSET)
+#define TIVA_MAC_RCTL         (TIVA_ETHCON_BASE + TIVA_MAC_RCTL_OFFSET)
+#define TIVA_MAC_TCTL         (TIVA_ETHCON_BASE + TIVA_MAC_TCTL_OFFSET)
+#define TIVA_MAC_DATA         (TIVA_ETHCON_BASE + TIVA_MAC_DATA_OFFSET)
+#define TIVA_MAC_IA0          (TIVA_ETHCON_BASE + TIVA_MAC_IA0_OFFSET)
+#define TIVA_MAC_IA1          (TIVA_ETHCON_BASE + TIVA_MAC_IA1_OFFSET)
+#define TIVA_MAC_THR          (TIVA_ETHCON_BASE + TIVA_MAC_THR_OFFSET)
+#define TIVA_MAC_MCTL         (TIVA_ETHCON_BASE + TIVA_MAC_MCTL_OFFSET)
+#define TIVA_MAC_MDV          (TIVA_ETHCON_BASE + TIVA_MAC_MDV_OFFSET)
+#define TIVA_MAC_MTXD         (TIVA_ETHCON_BASE + TIVA_MAC_MTXD_OFFSET)
+#define TIVA_MAC_MRXD         (TIVA_ETHCON_BASE + TIVA_MAC_MRXD_OFFSET)
+#define TIVA_MAC_NP           (TIVA_ETHCON_BASE + TIVA_MAC_NP_OFFSET)
+#define TIVA_MAC_TR           (TIVA_ETHCON_BASE + TIVA_MAC_TR_OFFSET)
+#ifdef TIVA_ETHTS
+#  define TIVA_MAC_TS         (TIVA_ETHCON_BASE + TIVA_MAC_TS_OFFSET)
 #endif
 
 /* Memory Mapped MII Management Registers */
 
-#define MAC_MII_MCR           (LM_ETHCON_BASE + MII_MCR)
-#define MAC_MII_MSR           (LM_ETHCON_BASE + MII_MSR)
-#define MAC_MII_PHYID1        (LM_ETHCON_BASE + MII_PHYID1)
-#define MAC_MII_PHYID2        (LM_ETHCON_BASE + MII_PHYID2)
-#define MAC_MII_ADVERTISE     (LM_ETHCON_BASE + MII_ADVERTISE)
-#define MAC_MII_LPA           (LM_ETHCON_BASE + MII_LPA)
-#define MAC_MII_EXPANSION     (LM_ETHCON_BASE + MII_EXPANSION)
-#define MAC_MII_VSPECIFIC     (LM_ETHCON_BASE + MII_LM_VSPECIFIC)
-#define MAC_MII_INTCS         (LM_ETHCON_BASE + MII_LM_INTCS)
-#define MAC_MII_DIAGNOSTIC    (LM_ETHCON_BASE + MII_LM_DIAGNOSTIC)
-#define MAC_MII_XCVRCONTROL   (LM_ETHCON_BASE + MII_LM_XCVRCONTROL)
-#define MAC_MII_LEDCONFIG     (LM_ETHCON_BASE + MII_LM_LEDCONFIG)
-#define MAC_MII_MDICONTROL    (LM_ETHCON_BASE + MII_LM_MDICONTROL)
+#define MAC_MII_MCR           (TIVA_ETHCON_BASE + MII_MCR)
+#define MAC_MII_MSR           (TIVA_ETHCON_BASE + MII_MSR)
+#define MAC_MII_PHYID1        (TIVA_ETHCON_BASE + MII_PHYID1)
+#define MAC_MII_PHYID2        (TIVA_ETHCON_BASE + MII_PHYID2)
+#define MAC_MII_ADVERTISE     (TIVA_ETHCON_BASE + MII_ADVERTISE)
+#define MAC_MII_LPA           (TIVA_ETHCON_BASE + MII_LPA)
+#define MAC_MII_EXPANSION     (TIVA_ETHCON_BASE + MII_EXPANSION)
+#define MAC_MII_VSPECIFIC     (TIVA_ETHCON_BASE + MII_TIVA_VSPECIFIC)
+#define MAC_MII_INTCS         (TIVA_ETHCON_BASE + MII_TIVA_INTCS)
+#define MAC_MII_DIAGNOSTIC    (TIVA_ETHCON_BASE + MII_TIVA_DIAGNOSTIC)
+#define MAC_MII_XCVRCONTROL   (TIVA_ETHCON_BASE + MII_TIVA_XCVRCONTROL)
+#define MAC_MII_LEDCONFIG     (TIVA_ETHCON_BASE + MII_TIVA_LEDCONFIG)
+#define MAC_MII_MDICONTROL    (TIVA_ETHCON_BASE + MII_TIVA_MDICONTROL)
 
 /* Ethernet Controller Register Bit Definitions *************************************/
 

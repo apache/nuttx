@@ -48,67 +48,67 @@
 
 /* System Control Register Offsets **************************************************/
 
-#define LM_SYSCON_DID0_OFFSET         0x000 /* Device Identification 0 */
-#define LM_SYSCON_DID1_OFFSET         0x004 /* Device Identification 1 */
-#define LM_SYSCON_DC0_OFFSET          0x008 /* Device Capabilities 0 */
-#define LM_SYSCON_DC1_OFFSET          0x010 /* Device Capabilities 1 */
-#define LM_SYSCON_DC2_OFFSET          0x014 /* Device Capabilities 2 */
-#define LM_SYSCON_DC3_OFFSET          0x018 /* Device Capabilities 3 */
-#define LM_SYSCON_DC4_OFFSET          0x01c /* Device Capabilities 4 */
-#define LM_SYSCON_PBORCTL_OFFSET      0x030 /* Brown-Out Reset Control */
-#define LM_SYSCON_LDOPCTL_OFFSET      0x034 /* LDO Power Control */
-#define LM_SYSCON_SRCR0_OFFSET        0x040 /* Software Reset Control 0 */
-#define LM_SYSCON_SRCR1_OFFSET        0x044 /* Software Reset Control 1 */
-#define LM_SYSCON_SRCR2_OFFSET        0x048 /* Software Reset Control 2*/
-#define LM_SYSCON_RIS_OFFSET          0x050 /* Raw Interrupt Status */
-#define LM_SYSCON_IMC_OFFSET          0x054 /* Interrupt Mask Control */
-#define LM_SYSCON_MISC_OFFSET         0x058 /* Masked Interrupt Status and Clear */
-#define LM_SYSCON_RESC_OFFSET         0x05c /* Reset Cause */
-#define LM_SYSCON_RCC_OFFSET          0x060 /* Run-Mode Clock Configuration */
-#define LM_SYSCON_PLLCFG_OFFSET       0x064 /* XTAL to PLL Translation */
-#define LM_SYSCON_RCC2_OFFSET         0x070 /* Run-Mode Clock Configuration 2 */
-#define LM_SYSCON_RCGC0_OFFSET        0x100 /* Run Mode Clock Gating Control Register 0 */
-#define LM_SYSCON_RCGC1_OFFSET        0x104 /* Run Mode Clock Gating Control Register 1 */
-#define LM_SYSCON_RCGC2_OFFSET        0x108 /* Run Mode Clock Gating Control Register 2 */
-#define LM_SYSCON_SCGC0_OFFSET        0x110 /* Sleep Mode Clock Gating Control Register 0 */
-#define LM_SYSCON_SCGC1_OFFSET        0x114 /* Sleep Mode Clock Gating Control Register 1 */
-#define LM_SYSCON_SCGC2_OFFSET        0x118 /* Sleep Mode Clock Gating Control Register 2 */
-#define LM_SYSCON_DCGC0_OFFSET        0x120 /* Deep Sleep Mode Clock Gating Control Register 0 */
-#define LM_SYSCON_DCGC1_OFFSET        0x124 /* Deep Sleep Mode Clock Gating Control Register 1 */
-#define LM_SYSCON_DCGC2_OFFSET        0x128 /* Deep Sleep Mode Clock Gating Control Register 2 */
-#define LM_SYSCON_DSLPCLKCFG_OFFSET   0x144 /* Deep Sleep Clock Configuration*/
+#define TIVA_SYSCON_DID0_OFFSET       0x000 /* Device Identification 0 */
+#define TIVA_SYSCON_DID1_OFFSET       0x004 /* Device Identification 1 */
+#define TIVA_SYSCON_DC0_OFFSET        0x008 /* Device Capabilities 0 */
+#define TIVA_SYSCON_DC1_OFFSET        0x010 /* Device Capabilities 1 */
+#define TIVA_SYSCON_DC2_OFFSET        0x014 /* Device Capabilities 2 */
+#define TIVA_SYSCON_DC3_OFFSET        0x018 /* Device Capabilities 3 */
+#define TIVA_SYSCON_DC4_OFFSET        0x01c /* Device Capabilities 4 */
+#define TIVA_SYSCON_PBORCTL_OFFSET    0x030 /* Brown-Out Reset Control */
+#define TIVA_SYSCON_LDOPCTL_OFFSET    0x034 /* LDO Power Control */
+#define TIVA_SYSCON_SRCR0_OFFSET      0x040 /* Software Reset Control 0 */
+#define TIVA_SYSCON_SRCR1_OFFSET      0x044 /* Software Reset Control 1 */
+#define TIVA_SYSCON_SRCR2_OFFSET      0x048 /* Software Reset Control 2*/
+#define TIVA_SYSCON_RIS_OFFSET        0x050 /* Raw Interrupt Status */
+#define TIVA_SYSCON_IMC_OFFSET        0x054 /* Interrupt Mask Control */
+#define TIVA_SYSCON_MISC_OFFSET       0x058 /* Masked Interrupt Status and Clear */
+#define TIVA_SYSCON_RESC_OFFSET       0x05c /* Reset Cause */
+#define TIVA_SYSCON_RCC_OFFSET        0x060 /* Run-Mode Clock Configuration */
+#define TIVA_SYSCON_PLLCFG_OFFSET     0x064 /* XTAL to PLL Translation */
+#define TIVA_SYSCON_RCC2_OFFSET       0x070 /* Run-Mode Clock Configuration 2 */
+#define TIVA_SYSCON_RCGC0_OFFSET      0x100 /* Run Mode Clock Gating Control Register 0 */
+#define TIVA_SYSCON_RCGC1_OFFSET      0x104 /* Run Mode Clock Gating Control Register 1 */
+#define TIVA_SYSCON_RCGC2_OFFSET      0x108 /* Run Mode Clock Gating Control Register 2 */
+#define TIVA_SYSCON_SCGC0_OFFSET      0x110 /* Sleep Mode Clock Gating Control Register 0 */
+#define TIVA_SYSCON_SCGC1_OFFSET      0x114 /* Sleep Mode Clock Gating Control Register 1 */
+#define TIVA_SYSCON_SCGC2_OFFSET      0x118 /* Sleep Mode Clock Gating Control Register 2 */
+#define TIVA_SYSCON_DCGC0_OFFSET      0x120 /* Deep Sleep Mode Clock Gating Control Register 0 */
+#define TIVA_SYSCON_DCGC1_OFFSET      0x124 /* Deep Sleep Mode Clock Gating Control Register 1 */
+#define TIVA_SYSCON_DCGC2_OFFSET      0x128 /* Deep Sleep Mode Clock Gating Control Register 2 */
+#define TIVA_SYSCON_DSLPCLKCFG_OFFSET 0x144 /* Deep Sleep Clock Configuration*/
 
 /* System Control Register Addresses ************************************************/
 
-#define LM_SYSCON_DID0                (LM_SYSCON_BASE + LM_SYSCON_DID0_OFFSET)
-#define LM_SYSCON_DID1                (LM_SYSCON_BASE + LM_SYSCON_DID1_OFFSET)
-#define LM_SYSCON_DC0                 (LM_SYSCON_BASE + LM_SYSCON_DC0_OFFSET)
-#define LM_SYSCON_DC1                 (LM_SYSCON_BASE + LM_SYSCON_DC1_OFFSET)
-#define LM_SYSCON_DC2                 (LM_SYSCON_BASE + LM_SYSCON_DC2_OFFSET)
-#define LM_SYSCON_DC3                 (LM_SYSCON_BASE + LM_SYSCON_DC3_OFFSET)
-#define LM_SYSCON_DC4                 (LM_SYSCON_BASE + LM_SYSCON_DC4_OFFSET)
-#define LM_SYSCON_PBORCTL             (LM_SYSCON_BASE + LM_SYSCON_PBORCTL_OFFSET)
-#define LM_SYSCON_LDOPCTL             (LM_SYSCON_BASE + LM_SYSCON_LDOPCTL_OFFSET)
-#define LM_SYSCON_SRCR0               (LM_SYSCON_BASE + LM_SYSCON_SRCR0_OFFSET)
-#define LM_SYSCON_SRCR1               (LM_SYSCON_BASE + LM_SYSCON_SRCR1_OFFSET)
-#define LM_SYSCON_SRCR2               (LM_SYSCON_BASE + LM_SYSCON_SRCR2_OFFSET)
-#define LM_SYSCON_RIS                 (LM_SYSCON_BASE + LM_SYSCON_RIS_OFFSET)
-#define LM_SYSCON_IMC                 (LM_SYSCON_BASE + LM_SYSCON_IMC_OFFSET)
-#define LM_SYSCON_MISC                (LM_SYSCON_BASE + LM_SYSCON_MISC_OFFSET)
-#define LM_SYSCON_RESC                (LM_SYSCON_BASE + LM_SYSCON_RESC_OFFSET)
-#define LM_SYSCON_RCC                 (LM_SYSCON_BASE + LM_SYSCON_RCC_OFFSET)
-#define LM_SYSCON_PLLCFG              (LM_SYSCON_BASE + LM_SYSCON_PLLCFG_OFFSET)
-#define LM_SYSCON_RCC2                (LM_SYSCON_BASE + LM_SYSCON_RCC2_OFFSET)
-#define LM_SYSCON_RCGC0               (LM_SYSCON_BASE + LM_SYSCON_RCGC0_OFFSET)
-#define LM_SYSCON_RCGC1               (LM_SYSCON_BASE + LM_SYSCON_RCGC1_OFFSET)
-#define LM_SYSCON_RCGC2               (LM_SYSCON_BASE + LM_SYSCON_RCGC2_OFFSET)
-#define LM_SYSCON_SCGC0               (LM_SYSCON_BASE + LM_SYSCON_SCGC0_OFFSET)
-#define LM_SYSCON_SCGC1               (LM_SYSCON_BASE + LM_SYSCON_SCGC1_OFFSET)
-#define LM_SYSCON_SCGC2               (LM_SYSCON_BASE + LM_SYSCON_SCGC2_OFFSET)
-#define LM_SYSCON_DCGC0               (LM_SYSCON_BASE + LM_SYSCON_DCGC0_OFFSET)
-#define LM_SYSCON_DCGC1               (LM_SYSCON_BASE + LM_SYSCON_DCGC1_OFFSET)
-#define LM_SYSCON_DCGC2               (LM_SYSCON_BASE + LM_SYSCON_DCGC2_OFFSET)
-#define LM_SYSCON_DSLPCLKCFG          (LM_SYSCON_BASE + LM_SYSCON_DSLPCLKCFG_OFFSET)
+#define TIVA_SYSCON_DID0              (TIVA_SYSCON_BASE + TIVA_SYSCON_DID0_OFFSET)
+#define TIVA_SYSCON_DID1              (TIVA_SYSCON_BASE + TIVA_SYSCON_DID1_OFFSET)
+#define TIVA_SYSCON_DC0               (TIVA_SYSCON_BASE + TIVA_SYSCON_DC0_OFFSET)
+#define TIVA_SYSCON_DC1               (TIVA_SYSCON_BASE + TIVA_SYSCON_DC1_OFFSET)
+#define TIVA_SYSCON_DC2               (TIVA_SYSCON_BASE + TIVA_SYSCON_DC2_OFFSET)
+#define TIVA_SYSCON_DC3               (TIVA_SYSCON_BASE + TIVA_SYSCON_DC3_OFFSET)
+#define TIVA_SYSCON_DC4               (TIVA_SYSCON_BASE + TIVA_SYSCON_DC4_OFFSET)
+#define TIVA_SYSCON_PBORCTL           (TIVA_SYSCON_BASE + TIVA_SYSCON_PBORCTL_OFFSET)
+#define TIVA_SYSCON_LDOPCTL           (TIVA_SYSCON_BASE + TIVA_SYSCON_LDOPCTL_OFFSET)
+#define TIVA_SYSCON_SRCR0             (TIVA_SYSCON_BASE + TIVA_SYSCON_SRCR0_OFFSET)
+#define TIVA_SYSCON_SRCR1             (TIVA_SYSCON_BASE + TIVA_SYSCON_SRCR1_OFFSET)
+#define TIVA_SYSCON_SRCR2             (TIVA_SYSCON_BASE + TIVA_SYSCON_SRCR2_OFFSET)
+#define TIVA_SYSCON_RIS               (TIVA_SYSCON_BASE + TIVA_SYSCON_RIS_OFFSET)
+#define TIVA_SYSCON_IMC               (TIVA_SYSCON_BASE + TIVA_SYSCON_IMC_OFFSET)
+#define TIVA_SYSCON_MISC              (TIVA_SYSCON_BASE + TIVA_SYSCON_MISC_OFFSET)
+#define TIVA_SYSCON_RESC              (TIVA_SYSCON_BASE + TIVA_SYSCON_RESC_OFFSET)
+#define TIVA_SYSCON_RCC               (TIVA_SYSCON_BASE + TIVA_SYSCON_RCC_OFFSET)
+#define TIVA_SYSCON_PLLCFG            (TIVA_SYSCON_BASE + TIVA_SYSCON_PLLCFG_OFFSET)
+#define TIVA_SYSCON_RCC2              (TIVA_SYSCON_BASE + TIVA_SYSCON_RCC2_OFFSET)
+#define TIVA_SYSCON_RCGC0             (TIVA_SYSCON_BASE + TIVA_SYSCON_RCGC0_OFFSET)
+#define TIVA_SYSCON_RCGC1             (TIVA_SYSCON_BASE + TIVA_SYSCON_RCGC1_OFFSET)
+#define TIVA_SYSCON_RCGC2             (TIVA_SYSCON_BASE + TIVA_SYSCON_RCGC2_OFFSET)
+#define TIVA_SYSCON_SCGC0             (TIVA_SYSCON_BASE + TIVA_SYSCON_SCGC0_OFFSET)
+#define TIVA_SYSCON_SCGC1             (TIVA_SYSCON_BASE + TIVA_SYSCON_SCGC1_OFFSET)
+#define TIVA_SYSCON_SCGC2             (TIVA_SYSCON_BASE + TIVA_SYSCON_SCGC2_OFFSET)
+#define TIVA_SYSCON_DCGC0             (TIVA_SYSCON_BASE + TIVA_SYSCON_DCGC0_OFFSET)
+#define TIVA_SYSCON_DCGC1             (TIVA_SYSCON_BASE + TIVA_SYSCON_DCGC1_OFFSET)
+#define TIVA_SYSCON_DCGC2             (TIVA_SYSCON_BASE + TIVA_SYSCON_DCGC2_OFFSET)
+#define TIVA_SYSCON_DSLPCLKCFG        (TIVA_SYSCON_BASE + TIVA_SYSCON_DSLPCLKCFG_OFFSET)
 
 /* System Control Register Bit Definitions ******************************************/
 

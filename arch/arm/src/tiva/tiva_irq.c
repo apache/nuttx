@@ -226,21 +226,21 @@ static inline void tiva_prioritize_syscall(int priority)
 static int tiva_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
                         uintptr_t offset)
 {
-  DEBUGASSERT(irq >= LM_IRQ_NMI && irq < NR_IRQS);
+  DEBUGASSERT(irq >= TIVA_IRQ_NMI && irq < NR_IRQS);
 
   /* Check for external interrupt */
 
-  if (irq >= LM_IRQ_INTERRUPTS)
+  if (irq >= TIVA_IRQ_INTERRUPTS)
     {
-      if (irq < LM_IRQ_INTERRUPTS + 32)
+      if (irq < TIVA_IRQ_INTERRUPTS + 32)
         {
            *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
-           *bit     = 1 << (irq - LM_IRQ_INTERRUPTS);
+           *bit     = 1 << (irq - TIVA_IRQ_INTERRUPTS);
         }
       else if (irq < NR_IRQS)
         {
            *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
-           *bit     = 1 << (irq - LM_IRQ_INTERRUPTS - 32);
+           *bit     = 1 << (irq - TIVA_IRQ_INTERRUPTS - 32);
         }
       else
         {
@@ -253,19 +253,19 @@ static int tiva_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
   else
     {
        *regaddr = NVIC_SYSHCON;
-       if (irq == LM_IRQ_MEMFAULT)
+       if (irq == TIVA_IRQ_MEMFAULT)
         {
           *bit = NVIC_SYSHCON_MEMFAULTENA;
         }
-      else if (irq == LM_IRQ_BUSFAULT)
+      else if (irq == TIVA_IRQ_BUSFAULT)
         {
           *bit = NVIC_SYSHCON_BUSFAULTENA;
         }
-      else if (irq == LM_IRQ_USAGEFAULT)
+      else if (irq == TIVA_IRQ_USAGEFAULT)
         {
           *bit = NVIC_SYSHCON_USGFAULTENA;
         }
-      else if (irq == LM_IRQ_SYSTICK)
+      else if (irq == TIVA_IRQ_SYSTICK)
         {
           *regaddr = NVIC_SYSTICK_CTRL;
           *bit = NVIC_SYSTICK_CTRL_ENABLE;
@@ -327,7 +327,7 @@ void up_irqinitialize(void)
 
   /* Initialize support for GPIO interrupts if included in this build */
 
-#ifndef CONFIG_LM_DISABLE_GPIO_IRQS
+#ifndef CONFIG_TIVA_DISABLE_GPIO_IRQS
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (gpio_irqinitialize != NULL)
 #endif
@@ -342,13 +342,13 @@ void up_irqinitialize(void)
    * under certain conditions.
    */
 
-  irq_attach(LM_IRQ_SVCALL, up_svcall);
-  irq_attach(LM_IRQ_HARDFAULT, up_hardfault);
+  irq_attach(TIVA_IRQ_SVCALL, up_svcall);
+  irq_attach(TIVA_IRQ_HARDFAULT, up_hardfault);
 
   /* Set the priority of the SVCall interrupt */
 
 #ifdef CONFIG_ARCH_IRQPRIO
-/* up_prioritize_irq(LM_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN); */
+/* up_prioritize_irq(TIVA_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN); */
 #endif
 #ifdef CONFIG_ARMV7M_USEBASEPRI
    tiva_prioritize_syscall(NVIC_SYSH_SVCALL_PRIORITY);
@@ -359,22 +359,22 @@ void up_irqinitialize(void)
    */
 
 #ifdef CONFIG_ARMV7M_MPU
-  irq_attach(LM_IRQ_MEMFAULT, up_memfault);
-  up_enable_irq(LM_IRQ_MEMFAULT);
+  irq_attach(TIVA_IRQ_MEMFAULT, up_memfault);
+  up_enable_irq(TIVA_IRQ_MEMFAULT);
 #endif
 
   /* Attach all other processor exceptions (except reset and sys tick) */
 
 #ifdef CONFIG_DEBUG
-  irq_attach(LM_IRQ_NMI, tiva_nmi);
+  irq_attach(TIVA_IRQ_NMI, tiva_nmi);
 #ifndef CONFIG_ARMV7M_MPU
-  irq_attach(LM_IRQ_MEMFAULT, up_memfault);
+  irq_attach(TIVA_IRQ_MEMFAULT, up_memfault);
 #endif
-  irq_attach(LM_IRQ_BUSFAULT, tiva_busfault);
-  irq_attach(LM_IRQ_USAGEFAULT, tiva_usagefault);
-  irq_attach(LM_IRQ_PENDSV, tiva_pendsv);
-  irq_attach(LM_IRQ_DBGMONITOR, tiva_dbgmonitor);
-  irq_attach(LM_IRQ_RESERVED, tiva_reserved);
+  irq_attach(TIVA_IRQ_BUSFAULT, tiva_busfault);
+  irq_attach(TIVA_IRQ_USAGEFAULT, tiva_usagefault);
+  irq_attach(TIVA_IRQ_PENDSV, tiva_pendsv);
+  irq_attach(TIVA_IRQ_DBGMONITOR, tiva_dbgmonitor);
+  irq_attach(TIVA_IRQ_RESERVED, tiva_reserved);
 #endif
 
   tiva_dumpnvic("initial", NR_IRQS);
@@ -409,7 +409,7 @@ void up_disable_irq(int irq)
        * clear the bit in the System Handler Control and State Register.
        */
 
-      if (irq >= LM_IRQ_INTERRUPTS)
+      if (irq >= TIVA_IRQ_INTERRUPTS)
         {
           putreg32(bit, regaddr);
         }
@@ -446,7 +446,7 @@ void up_enable_irq(int irq)
        * set the bit in the System Handler Control and State Register.
        */
 
-      if (irq >= LM_IRQ_INTERRUPTS)
+      if (irq >= TIVA_IRQ_INTERRUPTS)
         {
           putreg32(bit, regaddr);
         }
@@ -491,10 +491,10 @@ int up_prioritize_irq(int irq, int priority)
   uint32_t regval;
   int shift;
 
-  DEBUGASSERT(irq >= LM_IRQ_MEMFAULT && irq < NR_IRQS &&
+  DEBUGASSERT(irq >= TIVA_IRQ_MEMFAULT && irq < NR_IRQS &&
               (unsigned)priority <= NVIC_SYSH_PRIORITY_MIN);
 
-  if (irq < LM_IRQ_INTERRUPTS)
+  if (irq < TIVA_IRQ_INTERRUPTS)
     {
       /* NVIC_SYSH_PRIORITY() maps {0..15} to one of three priority
        * registers (0-3 are invalid)
@@ -507,7 +507,7 @@ int up_prioritize_irq(int irq, int priority)
     {
       /* NVIC_IRQ_PRIORITY() maps {0..} to one of many priority registers */
 
-      irq    -= LM_IRQ_INTERRUPTS;
+      irq    -= TIVA_IRQ_INTERRUPTS;
       regaddr = NVIC_IRQ_PRIORITY(irq);
     }
 

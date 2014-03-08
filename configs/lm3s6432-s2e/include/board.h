@@ -63,7 +63,7 @@
  * of (400 / 2) / 4 = 50MHz
  */
 
-#define LM_SYSDIV          4
+#define TIVA_SYSDIV          4
 #define SYSCLK_FREQUENCY     50000000  /* 50MHz */
 
 /* Other RCC settings:
@@ -74,7 +74,7 @@
  * - No auto-clock gating reset
  */
 
-#define LM_RCC_VALUE (SYSCON_RCC_OSCSRC | SYSCON_RCC_XTAL | SYSCON_RCC_USESYSDIV | SYSCON_RCC_SYSDIV(LM_SYSDIV))
+#define TIVA_RCC_VALUE (SYSCON_RCC_OSCSRC | SYSCON_RCC_XTAL | SYSCON_RCC_USESYSDIV | SYSCON_RCC_SYSDIV(TIVA_SYSDIV))
 
 /* RCC2 settings -- RCC2 not used.  Other RCC2 settings
  *
@@ -83,7 +83,7 @@
  * - Not using RCC2
  */
 
-#define LM_RCC2_VALUE (SYSCON_RCC2_OSCSRC | SYSCON_RCC2_SYSDIV(LM_SYSDIV))
+#define TIVA_RCC2_VALUE (SYSCON_RCC2_OSCSRC | SYSCON_RCC2_SYSDIV(TIVA_SYSDIV))
 
 /* LED definitions ******************************************************************/
 
@@ -123,21 +123,21 @@
  *
  ************************************************************************************/
 
-extern void tiva_boardinitialize(void);
+void tiva_boardinitialize(void);
 
 /************************************************************************************
  * Name: tiva_ethernetmac
  *
  * Description:
  *   For the MDL-S2E Reference Design, the MAC address will be stored in the 
- *   non-volatile USER0 and USER1 registers.  If CONFIG_LM_BOARDMAC is defined, 
+ *   non-volatile USER0 and USER1 registers.  If CONFIG_TIVA_BOARDMAC is defined, 
  *   this function will obtain the MAC address from these registers.
  *
  ************************************************************************************/
 
-#ifdef CONFIG_LM_BOARDMAC
+#ifdef CONFIG_TIVA_BOARDMAC
 struct ether_addr;
-extern void tiva_ethernetmac(struct ether_addr *ethaddr);
+void tiva_ethernetmac(struct ether_addr *ethaddr);
 #endif
 
 #endif /* __ASSEMBLY__ */

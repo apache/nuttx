@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_INCLUDE_LM_IRQ_H
-#define __ARCH_ARM_INCLUDE_LM_IRQ_H
+#ifndef __ARCH_ARM_INCLUDE_TIVA_IRQ_H
+#define __ARCH_ARM_INCLUDE_TIVA_IRQ_H
 
 /************************************************************************************
  * Included Files
@@ -49,41 +49,41 @@
  ************************************************************************************/
  /* Mark GPIO interrupts as disabled for non-existent GPIO ports. */
 
-#if LM_NPORTS < 1 && !defined(CONFIG_LM_DISABLE_GPIOA_IRQS)
-#  define CONFIG_LM_DISABLE_GPIOA_IRQS
-#elif LM_NPORTS < 2 && !defined(CONFIG_LM_DISABLE_GPIOB_IRQS)
-#  define CONFIG_LM_DISABLE_GPIOB_IRQS
-#elif LM_NPORTS < 3 && !defined(CONFIG_LM_DISABLE_GPIOC_IRQS)
-#  define CONFIG_LM_DISABLE_GPIOC_IRQS
-#elif LM_NPORTS < 4 && !defined(CONFIG_LM_DISABLE_GPIOD_IRQS)
-#  define CONFIG_LM_DISABLE_GPIOD_IRQS
-#elif LM_NPORTS < 5 && !defined(CONFIG_LM_DISABLE_GPIOE_IRQS)
-#  define CONFIG_LM_DISABLE_GPIOE_IRQS
-#elif LM_NPORTS < 6 && !defined(CONFIG_LM_DISABLE_GPIOF_IRQS)
-#  define CONFIG_LM_DISABLE_GPIOF_IRQS
-#elif LM_NPORTS < 7 && !defined(CONFIG_LM_DISABLE_GPIOG_IRQS)
-#  define CONFIG_LM_DISABLE_GPIOG_IRQS
-#elif LM_NPORTS < 8 && !defined(CONFIG_LM_DISABLE_GPIOH_IRQS)
-#  define CONFIG_LM_DISABLE_GPIOH_IRQS
-#elif LM_NPORTS < 9 && !defined(CONFIG_LM_DISABLE_GPIOJ_IRQS)
-#  define CONFIG_LM_DISABLE_GPIOJ_IRQS
+#if TIVA_NPORTS < 1 && !defined(CONFIG_TIVA_DISABLE_GPIOA_IRQS)
+#  define CONFIG_TIVA_DISABLE_GPIOA_IRQS
+#elif TIVA_NPORTS < 2 && !defined(CONFIG_TIVA_DISABLE_GPIOB_IRQS)
+#  define CONFIG_TIVA_DISABLE_GPIOB_IRQS
+#elif TIVA_NPORTS < 3 && !defined(CONFIG_TIVA_DISABLE_GPIOC_IRQS)
+#  define CONFIG_TIVA_DISABLE_GPIOC_IRQS
+#elif TIVA_NPORTS < 4 && !defined(CONFIG_TIVA_DISABLE_GPIOD_IRQS)
+#  define CONFIG_TIVA_DISABLE_GPIOD_IRQS
+#elif TIVA_NPORTS < 5 && !defined(CONFIG_TIVA_DISABLE_GPIOE_IRQS)
+#  define CONFIG_TIVA_DISABLE_GPIOE_IRQS
+#elif TIVA_NPORTS < 6 && !defined(CONFIG_TIVA_DISABLE_GPIOF_IRQS)
+#  define CONFIG_TIVA_DISABLE_GPIOF_IRQS
+#elif TIVA_NPORTS < 7 && !defined(CONFIG_TIVA_DISABLE_GPIOG_IRQS)
+#  define CONFIG_TIVA_DISABLE_GPIOG_IRQS
+#elif TIVA_NPORTS < 8 && !defined(CONFIG_TIVA_DISABLE_GPIOH_IRQS)
+#  define CONFIG_TIVA_DISABLE_GPIOH_IRQS
+#elif TIVA_NPORTS < 9 && !defined(CONFIG_TIVA_DISABLE_GPIOJ_IRQS)
+#  define CONFIG_TIVA_DISABLE_GPIOJ_IRQS
 #endif
 
 /* Processor Exceptions (vectors 0-15) */
 
-#define LM_IRQ_RESERVED     (0) /* Reserved vector (only used with CONFIG_DEBUG) */
-                                /* Vector  0: Reset stack pointer value */
-                                /* Vector  1: Reset (not handler as an IRQ) */
-#define LM_IRQ_NMI          (2) /* Vector  2: Non-Maskable Interrupt (NMI) */
-#define LM_IRQ_HARDFAULT    (3) /* Vector  3: Hard fault */
-#define LM_IRQ_MEMFAULT     (4) /* Vector  4: Memory management (MPU) */
-#define LM_IRQ_BUSFAULT     (5) /* Vector  5: Bus fault */
-#define LM_IRQ_USAGEFAULT   (6) /* Vector  6: Usage fault */
-#define LM_IRQ_SVCALL      (11) /* Vector 11: SVC call */
-#define LM_IRQ_DBGMONITOR  (12) /* Vector 12: Debug Monitor */
-                                /* Vector 13: Reserved */
-#define LM_IRQ_PENDSV      (14) /* Vector 14: Pendable system service request */
-#define LM_IRQ_SYSTICK     (15) /* Vector 15: System tick */
+#define TIVA_IRQ_RESERVED     (0) /* Reserved vector (only used with CONFIG_DEBUG) */
+                                  /* Vector  0: Reset stack pointer value */
+                                  /* Vector  1: Reset (not handler as an IRQ) */
+#define TIVA_IRQ_NMI          (2) /* Vector  2: Non-Maskable Interrupt (NMI) */
+#define TIVA_IRQ_HARDFAULT    (3) /* Vector  3: Hard fault */
+#define TIVA_IRQ_MEMFAULT     (4) /* Vector  4: Memory management (MPU) */
+#define TIVA_IRQ_BUSFAULT     (5) /* Vector  5: Bus fault */
+#define TIVA_IRQ_USAGEFAULT   (6) /* Vector  6: Usage fault */
+#define TIVA_IRQ_SVCALL      (11) /* Vector 11: SVC call */
+#define TIVA_IRQ_DBGMONITOR  (12) /* Vector 12: Debug Monitor */
+                                  /* Vector 13: Reserved */
+#define TIVA_IRQ_PENDSV      (14) /* Vector 14: Pendable system service request */
+#define TIVA_IRQ_SYSTICK     (15) /* Vector 15: System tick */
 
 #if defined(CONFIG_ARCH_CHIP_LM3S)
 #  include <arch/tiva/lm3s_irq.h>
@@ -97,133 +97,133 @@
  * be disabled in order to reduce the size of the implemenation.
  */
 
-#ifndef CONFIG_LM_DISABLE_GPIOA_IRQS
-#  define LM_IRQ_GPIOA_0 (NR_IRQS + 0)
-#  define LM_IRQ_GPIOA_1 (NR_IRQS + 1)
-#  define LM_IRQ_GPIOA_2 (NR_IRQS + 2)
-#  define LM_IRQ_GPIOA_3 (NR_IRQS + 3)
-#  define LM_IRQ_GPIOA_4 (NR_IRQS + 4)
-#  define LM_IRQ_GPIOA_5 (NR_IRQS + 5)
-#  define LM_IRQ_GPIOA_6 (NR_IRQS + 6)
-#  define LM_IRQ_GPIOA_7 (NR_IRQS + 7)
-#  define _NGPIOAIRQS    (NR_IRQS + 8)
+#ifndef CONFIG_TIVA_DISABLE_GPIOA_IRQS
+#  define TIVA_IRQ_GPIOA_0 (NR_IRQS + 0)
+#  define TIVA_IRQ_GPIOA_1 (NR_IRQS + 1)
+#  define TIVA_IRQ_GPIOA_2 (NR_IRQS + 2)
+#  define TIVA_IRQ_GPIOA_3 (NR_IRQS + 3)
+#  define TIVA_IRQ_GPIOA_4 (NR_IRQS + 4)
+#  define TIVA_IRQ_GPIOA_5 (NR_IRQS + 5)
+#  define TIVA_IRQ_GPIOA_6 (NR_IRQS + 6)
+#  define TIVA_IRQ_GPIOA_7 (NR_IRQS + 7)
+#  define _NGPIOAIRQS      (NR_IRQS + 8)
 #else
-#  define _NGPIOAIRQS    NR_IRQS
+#  define _NGPIOAIRQS      NR_IRQS
 #endif
 
-#ifndef CONFIG_LM_DISABLE_GPIOB_IRQS
-#  define LM_IRQ_GPIOB_0 (_NGPIOAIRQS + 0)
-#  define LM_IRQ_GPIOB_1 (_NGPIOAIRQS + 1)
-#  define LM_IRQ_GPIOB_2 (_NGPIOAIRQS + 2)
-#  define LM_IRQ_GPIOB_3 (_NGPIOAIRQS + 3)
-#  define LM_IRQ_GPIOB_4 (_NGPIOAIRQS + 4)
-#  define LM_IRQ_GPIOB_5 (_NGPIOAIRQS + 5)
-#  define LM_IRQ_GPIOB_6 (_NGPIOAIRQS + 6)
-#  define LM_IRQ_GPIOB_7 (_NGPIOAIRQS + 7)
-#  define _NGPIOBIRQS    (_NGPIOAIRQS + 8)
+#ifndef CONFIG_TIVA_DISABLE_GPIOB_IRQS
+#  define TIVA_IRQ_GPIOB_0 (_NGPIOAIRQS + 0)
+#  define TIVA_IRQ_GPIOB_1 (_NGPIOAIRQS + 1)
+#  define TIVA_IRQ_GPIOB_2 (_NGPIOAIRQS + 2)
+#  define TIVA_IRQ_GPIOB_3 (_NGPIOAIRQS + 3)
+#  define TIVA_IRQ_GPIOB_4 (_NGPIOAIRQS + 4)
+#  define TIVA_IRQ_GPIOB_5 (_NGPIOAIRQS + 5)
+#  define TIVA_IRQ_GPIOB_6 (_NGPIOAIRQS + 6)
+#  define TIVA_IRQ_GPIOB_7 (_NGPIOAIRQS + 7)
+#  define _NGPIOBIRQS      (_NGPIOAIRQS + 8)
 #else
-#  define _NGPIOBIRQS    _NGPIOAIRQS
+#  define _NGPIOBIRQS      _NGPIOAIRQS
 #endif
 
-#ifndef CONFIG_LM_DISABLE_GPIOC_IRQS
-#  define LM_IRQ_GPIOC_0 (_NGPIOBIRQS + 0)
-#  define LM_IRQ_GPIOC_1 (_NGPIOBIRQS + 1)
-#  define LM_IRQ_GPIOC_2 (_NGPIOBIRQS + 2)
-#  define LM_IRQ_GPIOC_3 (_NGPIOBIRQS + 3)
-#  define LM_IRQ_GPIOC_4 (_NGPIOBIRQS + 4)
-#  define LM_IRQ_GPIOC_5 (_NGPIOBIRQS + 5)
-#  define LM_IRQ_GPIOC_6 (_NGPIOBIRQS + 6)
-#  define LM_IRQ_GPIOC_7 (_NGPIOBIRQS + 7)
-#  define _NGPIOCIRQS    (_NGPIOBIRQS + 8)
+#ifndef CONFIG_TIVA_DISABLE_GPIOC_IRQS
+#  define TIVA_IRQ_GPIOC_0 (_NGPIOBIRQS + 0)
+#  define TIVA_IRQ_GPIOC_1 (_NGPIOBIRQS + 1)
+#  define TIVA_IRQ_GPIOC_2 (_NGPIOBIRQS + 2)
+#  define TIVA_IRQ_GPIOC_3 (_NGPIOBIRQS + 3)
+#  define TIVA_IRQ_GPIOC_4 (_NGPIOBIRQS + 4)
+#  define TIVA_IRQ_GPIOC_5 (_NGPIOBIRQS + 5)
+#  define TIVA_IRQ_GPIOC_6 (_NGPIOBIRQS + 6)
+#  define TIVA_IRQ_GPIOC_7 (_NGPIOBIRQS + 7)
+#  define _NGPIOCIRQS      (_NGPIOBIRQS + 8)
 #else
-#  define _NGPIOCIRQS    _NGPIOBIRQS
+#  define _NGPIOCIRQS      _NGPIOBIRQS
 #endif
 
-#ifndef CONFIG_LM_DISABLE_GPIOD_IRQS
-#  define LM_IRQ_GPIOD_0 (_NGPIOCIRQS + 0)
-#  define LM_IRQ_GPIOD_1 (_NGPIOCIRQS + 1)
-#  define LM_IRQ_GPIOD_2 (_NGPIOCIRQS + 2)
-#  define LM_IRQ_GPIOD_3 (_NGPIOCIRQS + 3)
-#  define LM_IRQ_GPIOD_4 (_NGPIOCIRQS + 4)
-#  define LM_IRQ_GPIOD_5 (_NGPIOCIRQS + 5)
-#  define LM_IRQ_GPIOD_6 (_NGPIOCIRQS + 6)
-#  define LM_IRQ_GPIOD_7 (_NGPIOCIRQS + 7)
-#  define _NGPIODIRQS    (_NGPIOCIRQS + 8)
+#ifndef CONFIG_TIVA_DISABLE_GPIOD_IRQS
+#  define TIVA_IRQ_GPIOD_0 (_NGPIOCIRQS + 0)
+#  define TIVA_IRQ_GPIOD_1 (_NGPIOCIRQS + 1)
+#  define TIVA_IRQ_GPIOD_2 (_NGPIOCIRQS + 2)
+#  define TIVA_IRQ_GPIOD_3 (_NGPIOCIRQS + 3)
+#  define TIVA_IRQ_GPIOD_4 (_NGPIOCIRQS + 4)
+#  define TIVA_IRQ_GPIOD_5 (_NGPIOCIRQS + 5)
+#  define TIVA_IRQ_GPIOD_6 (_NGPIOCIRQS + 6)
+#  define TIVA_IRQ_GPIOD_7 (_NGPIOCIRQS + 7)
+#  define _NGPIODIRQS      (_NGPIOCIRQS + 8)
 #else
-#  define _NGPIODIRQS    _NGPIOCIRQS
+#  define _NGPIODIRQS      _NGPIOCIRQS
 #endif
 
-#ifndef CONFIG_LM_DISABLE_GPIOE_IRQS
-#  define LM_IRQ_GPIOE_0 (_NGPIODIRQS + 0)
-#  define LM_IRQ_GPIOE_1 (_NGPIODIRQS + 1)
-#  define LM_IRQ_GPIOE_2 (_NGPIODIRQS + 2)
-#  define LM_IRQ_GPIOE_3 (_NGPIODIRQS + 3)
-#  define LM_IRQ_GPIOE_4 (_NGPIODIRQS + 4)
-#  define LM_IRQ_GPIOE_5 (_NGPIODIRQS + 5)
-#  define LM_IRQ_GPIOE_6 (_NGPIODIRQS + 6)
-#  define LM_IRQ_GPIOE_7 (_NGPIODIRQS + 7)
-#  define _NGPIOEIRQS    (_NGPIODIRQS + 8)
+#ifndef CONFIG_TIVA_DISABLE_GPIOE_IRQS
+#  define TIVA_IRQ_GPIOE_0 (_NGPIODIRQS + 0)
+#  define TIVA_IRQ_GPIOE_1 (_NGPIODIRQS + 1)
+#  define TIVA_IRQ_GPIOE_2 (_NGPIODIRQS + 2)
+#  define TIVA_IRQ_GPIOE_3 (_NGPIODIRQS + 3)
+#  define TIVA_IRQ_GPIOE_4 (_NGPIODIRQS + 4)
+#  define TIVA_IRQ_GPIOE_5 (_NGPIODIRQS + 5)
+#  define TIVA_IRQ_GPIOE_6 (_NGPIODIRQS + 6)
+#  define TIVA_IRQ_GPIOE_7 (_NGPIODIRQS + 7)
+#  define _NGPIOEIRQS      (_NGPIODIRQS + 8)
 #else
-#  define _NGPIOEIRQS    _NGPIODIRQS
+#  define _NGPIOEIRQS      _NGPIODIRQS
 #endif
 
-#ifndef CONFIG_LM_DISABLE_GPIOF_IRQS
-#  define LM_IRQ_GPIOF_0 (_NGPIOEIRQS + 0)
-#  define LM_IRQ_GPIOF_1 (_NGPIOEIRQS + 1)
-#  define LM_IRQ_GPIOF_2 (_NGPIOEIRQS + 2)
-#  define LM_IRQ_GPIOF_3 (_NGPIOEIRQS + 3)
-#  define LM_IRQ_GPIOF_4 (_NGPIOEIRQS + 4)
-#  define LM_IRQ_GPIOF_5 (_NGPIOEIRQS + 5)
-#  define LM_IRQ_GPIOF_6 (_NGPIOEIRQS + 6)
-#  define LM_IRQ_GPIOF_7 (_NGPIOEIRQS + 7)
-#  define _NGPIOFIRQS    (_NGPIOEIRQS + 8)
+#ifndef CONFIG_TIVA_DISABLE_GPIOF_IRQS
+#  define TIVA_IRQ_GPIOF_0 (_NGPIOEIRQS + 0)
+#  define TIVA_IRQ_GPIOF_1 (_NGPIOEIRQS + 1)
+#  define TIVA_IRQ_GPIOF_2 (_NGPIOEIRQS + 2)
+#  define TIVA_IRQ_GPIOF_3 (_NGPIOEIRQS + 3)
+#  define TIVA_IRQ_GPIOF_4 (_NGPIOEIRQS + 4)
+#  define TIVA_IRQ_GPIOF_5 (_NGPIOEIRQS + 5)
+#  define TIVA_IRQ_GPIOF_6 (_NGPIOEIRQS + 6)
+#  define TIVA_IRQ_GPIOF_7 (_NGPIOEIRQS + 7)
+#  define _NGPIOFIRQS      (_NGPIOEIRQS + 8)
 #else
-#  define _NGPIOFIRQS    _NGPIOEIRQS
+#  define _NGPIOFIRQS      _NGPIOEIRQS
 #endif
 
-#ifndef CONFIG_LM_DISABLE_GPIOG_IRQS
-#  define LM_IRQ_GPIOG_0 (_NGPIOFIRQS + 0)
-#  define LM_IRQ_GPIOG_1 (_NGPIOFIRQS + 1)
-#  define LM_IRQ_GPIOG_2 (_NGPIOFIRQS + 2)
-#  define LM_IRQ_GPIOG_3 (_NGPIOFIRQS + 3)
-#  define LM_IRQ_GPIOG_4 (_NGPIOFIRQS + 4)
-#  define LM_IRQ_GPIOG_5 (_NGPIOFIRQS + 5)
-#  define LM_IRQ_GPIOG_6 (_NGPIOFIRQS + 6)
-#  define LM_IRQ_GPIOG_7 (_NGPIOFIRQS + 7)
-#  define _NGPIOGIRQS    (_NGPIOFIRQS + 8)
+#ifndef CONFIG_TIVA_DISABLE_GPIOG_IRQS
+#  define TIVA_IRQ_GPIOG_0 (_NGPIOFIRQS + 0)
+#  define TIVA_IRQ_GPIOG_1 (_NGPIOFIRQS + 1)
+#  define TIVA_IRQ_GPIOG_2 (_NGPIOFIRQS + 2)
+#  define TIVA_IRQ_GPIOG_3 (_NGPIOFIRQS + 3)
+#  define TIVA_IRQ_GPIOG_4 (_NGPIOFIRQS + 4)
+#  define TIVA_IRQ_GPIOG_5 (_NGPIOFIRQS + 5)
+#  define TIVA_IRQ_GPIOG_6 (_NGPIOFIRQS + 6)
+#  define TIVA_IRQ_GPIOG_7 (_NGPIOFIRQS + 7)
+#  define _NGPIOGIRQS      (_NGPIOFIRQS + 8)
 #else
-#  define _NGPIOGIRQS    _NGPIOFIRQS
+#  define _NGPIOGIRQS      _NGPIOFIRQS
 #endif
 
-#ifndef CONFIG_LM_DISABLE_GPIOH_IRQS
-#  define LM_IRQ_GPIOH_0 (_NGPIOGIRQS + 0)
-#  define LM_IRQ_GPIOH_1 (_NGPIOGIRQS + 1)
-#  define LM_IRQ_GPIOH_2 (_NGPIOGIRQS + 2)
-#  define LM_IRQ_GPIOH_3 (_NGPIOGIRQS + 3)
-#  define LM_IRQ_GPIOH_4 (_NGPIOGIRQS + 4)
-#  define LM_IRQ_GPIOH_5 (_NGPIOGIRQS + 5)
-#  define LM_IRQ_GPIOH_6 (_NGPIOGIRQS + 6)
-#  define LM_IRQ_GPIOH_7 (_NGPIOGIRQS + 7)
-#  define _NGPIOHIRQS    (_NGPIOGIRQS + 8)
+#ifndef CONFIG_TIVA_DISABLE_GPIOH_IRQS
+#  define TIVA_IRQ_GPIOH_0 (_NGPIOGIRQS + 0)
+#  define TIVA_IRQ_GPIOH_1 (_NGPIOGIRQS + 1)
+#  define TIVA_IRQ_GPIOH_2 (_NGPIOGIRQS + 2)
+#  define TIVA_IRQ_GPIOH_3 (_NGPIOGIRQS + 3)
+#  define TIVA_IRQ_GPIOH_4 (_NGPIOGIRQS + 4)
+#  define TIVA_IRQ_GPIOH_5 (_NGPIOGIRQS + 5)
+#  define TIVA_IRQ_GPIOH_6 (_NGPIOGIRQS + 6)
+#  define TIVA_IRQ_GPIOH_7 (_NGPIOGIRQS + 7)
+#  define _NGPIOHIRQS      (_NGPIOGIRQS + 8)
 #else
-#  define _NGPIOHIRQS    _NGPIOGIRQS
+#  define _NGPIOHIRQS      _NGPIOGIRQS
 #endif
 
-#ifndef CONFIG_LM_DISABLE_GPIOJ_IRQS
-#  define LM_IRQ_GPIOJ_0 (_NGPIOHIRQS + 0)
-#  define LM_IRQ_GPIOJ_1 (_NGPIOHIRQS + 1)
-#  define LM_IRQ_GPIOJ_2 (_NGPIOHIRQS + 2)
-#  define LM_IRQ_GPIOJ_3 (_NGPIOHIRQS + 3)
-#  define LM_IRQ_GPIOJ_4 (_NGPIOHIRQS + 4)
-#  define LM_IRQ_GPIOJ_5 (_NGPIOHIRQS + 5)
-#  define LM_IRQ_GPIOJ_6 (_NGPIOHIRQS + 6)
-#  define LM_IRQ_GPIOJ_7 (_NGPIOHIRQS + 7)
-#  define _NGPIOJIRQS    (_NGPIOHIRQS + 8)
+#ifndef CONFIG_TIVA_DISABLE_GPIOJ_IRQS
+#  define TIVA_IRQ_GPIOJ_0 (_NGPIOHIRQS + 0)
+#  define TIVA_IRQ_GPIOJ_1 (_NGPIOHIRQS + 1)
+#  define TIVA_IRQ_GPIOJ_2 (_NGPIOHIRQS + 2)
+#  define TIVA_IRQ_GPIOJ_3 (_NGPIOHIRQS + 3)
+#  define TIVA_IRQ_GPIOJ_4 (_NGPIOHIRQS + 4)
+#  define TIVA_IRQ_GPIOJ_5 (_NGPIOHIRQS + 5)
+#  define TIVA_IRQ_GPIOJ_6 (_NGPIOHIRQS + 6)
+#  define TIVA_IRQ_GPIOJ_7 (_NGPIOHIRQS + 7)
+#  define _NGPIOJIRQS      (_NGPIOHIRQS + 8)
 #else
-#  define _NGPIOJIRQS    _NGPIOHIRQS
+#  define _NGPIOJIRQS      _NGPIOHIRQS
 #endif
 
-#define NR_GPIO_IRQS     (_NGPIOJIRQS - NR_IRQS)
+#define NR_GPIO_IRQS       (_NGPIOJIRQS - NR_IRQS)
 
 /************************************************************************************
  * Public Types
@@ -279,4 +279,4 @@ void gpio_irqdisable(int irq);
 #endif
 #endif
 
-#endif /* __ARCH_ARM_INCLUDE_LM_IRQ_H */
+#endif /* __ARCH_ARM_INCLUDE_TIVA_IRQ_H */

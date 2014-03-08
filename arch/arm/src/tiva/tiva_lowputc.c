@@ -59,82 +59,82 @@
 /* Select UART parameters for the selected console */
 
 #if defined(CONFIG_UART0_SERIAL_CONSOLE)
-#  define LM_CONSOLE_BASE     LM_UART0_BASE
-#  define LM_CONSOLE_BAUD     CONFIG_UART0_BAUD
-#  define LM_CONSOLE_BITS     CONFIG_UART0_BITS
-#  define LM_CONSOLE_PARITY   CONFIG_UART0_PARITY
-#  define LM_CONSOLE_2STOP    CONFIG_UART0_2STOP
+#  define TIVA_CONSOLE_BASE     TIVA_UART0_BASE
+#  define TIVA_CONSOLE_BAUD     CONFIG_UART0_BAUD
+#  define TIVA_CONSOLE_BITS     CONFIG_UART0_BITS
+#  define TIVA_CONSOLE_PARITY   CONFIG_UART0_PARITY
+#  define TIVA_CONSOLE_2STOP    CONFIG_UART0_2STOP
 #elif defined(CONFIG_UART1_SERIAL_CONSOLE)
-#  define LM_CONSOLE_BASE     LM_UART1_BASE
-#  define LM_CONSOLE_BAUD     CONFIG_UART1_BAUD
-#  define LM_CONSOLE_BITS     CONFIG_UART1_BITS
-#  define LM_CONSOLE_PARITY   CONFIG_UART1_PARITY
-#  define LM_CONSOLE_2STOP    CONFIG_UART1_2STOP
+#  define TIVA_CONSOLE_BASE     TIVA_UART1_BASE
+#  define TIVA_CONSOLE_BAUD     CONFIG_UART1_BAUD
+#  define TIVA_CONSOLE_BITS     CONFIG_UART1_BITS
+#  define TIVA_CONSOLE_PARITY   CONFIG_UART1_PARITY
+#  define TIVA_CONSOLE_2STOP    CONFIG_UART1_2STOP
 #elif defined(CONFIG_UART2_SERIAL_CONSOLE)
-#  define LM_CONSOLE_BASE     LM_UART2_BASE
-#  define LM_CONSOLE_BAUD     CONFIG_UART2_BAUD
-#  define LM_CONSOLE_BITS     CONFIG_UART2_BITS
-#  define LM_CONSOLE_PARITY   CONFIG_UART2_PARITY
-#  define LM_CONSOLE_2STOP    CONFIG_UART2_2STOP
+#  define TIVA_CONSOLE_BASE     TIVA_UART2_BASE
+#  define TIVA_CONSOLE_BAUD     CONFIG_UART2_BAUD
+#  define TIVA_CONSOLE_BITS     CONFIG_UART2_BITS
+#  define TIVA_CONSOLE_PARITY   CONFIG_UART2_PARITY
+#  define TIVA_CONSOLE_2STOP    CONFIG_UART2_2STOP
 #elif defined(CONFIG_UART3_SERIAL_CONSOLE)
-#  define LM_CONSOLE_BASE     LM_UART3_BASE
-#  define LM_CONSOLE_BAUD     CONFIG_UART3_BAUD
-#  define LM_CONSOLE_BITS     CONFIG_UART3_BITS
-#  define LM_CONSOLE_PARITY   CONFIG_UART3_PARITY
-#  define LM_CONSOLE_2STOP    CONFIG_UART3_2STOP
+#  define TIVA_CONSOLE_BASE     TIVA_UART3_BASE
+#  define TIVA_CONSOLE_BAUD     CONFIG_UART3_BAUD
+#  define TIVA_CONSOLE_BITS     CONFIG_UART3_BITS
+#  define TIVA_CONSOLE_PARITY   CONFIG_UART3_PARITY
+#  define TIVA_CONSOLE_2STOP    CONFIG_UART3_2STOP
 #elif defined(CONFIG_UART4_SERIAL_CONSOLE)
-#  define LM_CONSOLE_BASE     LM_UART4_BASE
-#  define LM_CONSOLE_BAUD     CONFIG_UART4_BAUD
-#  define LM_CONSOLE_BITS     CONFIG_UART4_BITS
-#  define LM_CONSOLE_PARITY   CONFIG_UART4_PARITY
-#  define LM_CONSOLE_2STOP    CONFIG_UART4_2STOP
+#  define TIVA_CONSOLE_BASE     TIVA_UART4_BASE
+#  define TIVA_CONSOLE_BAUD     CONFIG_UART4_BAUD
+#  define TIVA_CONSOLE_BITS     CONFIG_UART4_BITS
+#  define TIVA_CONSOLE_PARITY   CONFIG_UART4_PARITY
+#  define TIVA_CONSOLE_2STOP    CONFIG_UART4_2STOP
 #elif defined(CONFIG_UART5_SERIAL_CONSOLE)
-#  define LM_CONSOLE_BASE     LM_UART5_BASE
-#  define LM_CONSOLE_BAUD     CONFIG_UART5_BAUD
-#  define LM_CONSOLE_BITS     CONFIG_UART5_BITS
-#  define LM_CONSOLE_PARITY   CONFIG_UART5_PARITY
-#  define LM_CONSOLE_2STOP    CONFIG_UART5_2STOP
+#  define TIVA_CONSOLE_BASE     TIVA_UART5_BASE
+#  define TIVA_CONSOLE_BAUD     CONFIG_UART5_BAUD
+#  define TIVA_CONSOLE_BITS     CONFIG_UART5_BITS
+#  define TIVA_CONSOLE_PARITY   CONFIG_UART5_PARITY
+#  define TIVA_CONSOLE_2STOP    CONFIG_UART5_2STOP
 #elif defined(CONFIG_UART6_SERIAL_CONSOLE)
-#  define LM_CONSOLE_BASE     LM_UART6_BASE
-#  define LM_CONSOLE_BAUD     CONFIG_UART6_BAUD
-#  define LM_CONSOLE_BITS     CONFIG_UART6_BITS
-#  define LM_CONSOLE_PARITY   CONFIG_UART6_PARITY
-#  define LM_CONSOLE_2STOP    CONFIG_UART6_2STOP
+#  define TIVA_CONSOLE_BASE     TIVA_UART6_BASE
+#  define TIVA_CONSOLE_BAUD     CONFIG_UART6_BAUD
+#  define TIVA_CONSOLE_BITS     CONFIG_UART6_BITS
+#  define TIVA_CONSOLE_PARITY   CONFIG_UART6_PARITY
+#  define TIVA_CONSOLE_2STOP    CONFIG_UART6_2STOP
 #elif defined(CONFIG_UART7_SERIAL_CONSOLE)
-#  define LM_CONSOLE_BASE     LM_UART7_BASE
-#  define LM_CONSOLE_BAUD     CONFIG_UART7_BAUD
-#  define LM_CONSOLE_BITS     CONFIG_UART7_BITS
-#  define LM_CONSOLE_PARITY   CONFIG_UART7_PARITY
-#  define LM_CONSOLE_2STOP    CONFIG_UART7_2STOP
+#  define TIVA_CONSOLE_BASE     TIVA_UART7_BASE
+#  define TIVA_CONSOLE_BAUD     CONFIG_UART7_BAUD
+#  define TIVA_CONSOLE_BITS     CONFIG_UART7_BITS
+#  define TIVA_CONSOLE_PARITY   CONFIG_UART7_PARITY
+#  define TIVA_CONSOLE_2STOP    CONFIG_UART7_2STOP
 #else
 #  error "No CONFIG_UARTn_SERIAL_CONSOLE Setting"
 #endif
 
 /* Get LCRH settings */
 
-#if LM_CONSOLE_BITS == 5
+#if TIVA_CONSOLE_BITS == 5
 #  define UART_LCRH_NBITS UART_LCRH_WLEN_5BITS
-#elif LM_CONSOLE_BITS == 6
+#elif TIVA_CONSOLE_BITS == 6
 #  define UART_LCRH_NBITS UART_LCRH_WLEN_6BITS
-#elif LM_CONSOLE_BITS == 7
+#elif TIVA_CONSOLE_BITS == 7
 #  define UART_LCRH_NBITS UART_LCRH_WLEN_7BITS
-#elif LM_CONSOLE_BITS == 8
+#elif TIVA_CONSOLE_BITS == 8
 #  define UART_LCRH_NBITS UART_LCRH_WLEN_8BITS
 #else
 #  error "Number of bits not supported"
 #endif
 
-#if LM_CONSOLE_PARITY == 0
+#if TIVA_CONSOLE_PARITY == 0
 #  define UART_LCRH_PARITY (0)
-#elif LM_CONSOLE_PARITY == 1
+#elif TIVA_CONSOLE_PARITY == 1
 #  define UART_LCRH_PARITY UART_LCRH_PEN
-#elif LM_CONSOLE_PARITY == 2
+#elif TIVA_CONSOLE_PARITY == 2
 #  define UART_LCRH_PARITY (UART_LCRH_PEN|UART_LCRH_EPS)
 #else
 #  error "Invalid parity selection"
 #endif
 
-#if LM_CONSOLE_2STOP != 0
+#if TIVA_CONSOLE_2STOP != 0
 #  define UART_LCRH_NSTOP UART_LCRH_STP2
 #else
 #  define UART_LCRH_NSTOP (0)
@@ -174,17 +174,17 @@
  *  divisor must be followed by a write to the UARTLCRH register for the changes to take effect. ..."
  */
 
-#define LM_BRDDEN     (16 * LM_CONSOLE_BAUD)
-#define LM_BRDI       (SYSCLK_FREQUENCY / LM_BRDDEN)
-#define LM_REMAINDER  (SYSCLK_FREQUENCY - LM_BRDDEN * LM_BRDI)
-#define LM_DIVFRAC    ((LM_REMAINDER * 64 + (LM_BRDDEN/2)) / LM_BRDDEN)
+#define TIVA_BRDDEN     (16 * TIVA_CONSOLE_BAUD)
+#define TIVA_BRDI       (SYSCLK_FREQUENCY / TIVA_BRDDEN)
+#define TIVA_REMAINDER  (SYSCLK_FREQUENCY - TIVA_BRDDEN * TIVA_BRDI)
+#define TIVA_DIVFRAC    ((TIVA_REMAINDER * 64 + (TIVA_BRDDEN/2)) / TIVA_BRDDEN)
 
-/* For example: LM_CONSOLE_BAUD = 115,200, SYSCLK_FREQUENCY = 50,000,000:
+/* For example: TIVA_CONSOLE_BAUD = 115,200, SYSCLK_FREQUENCY = 50,000,000:
  *
- * LM_BRDDEN    = (16 * 115,200)                           = 1,843,200
- * LM_BRDI      = 50,000,000 / 1,843,200                   = 27
- * LM_REMAINDER = 50,000,000 - 1,843,200 * 27              = 233,600
- * LM_DIVFRAC   = (233,600 * 64 + 921,600) / 1,843,200     = 8
+ * TIVA_BRDDEN    = (16 * 115,200)                           = 1,843,200
+ * TIVA_BRDI      = 50,000,000 / 1,843,200                   = 27
+ * TIVA_REMAINDER = 50,000,000 - 1,843,200 * 27              = 233,600
+ * TIVA_DIVFRAC   = (233,600 * 64 + 921,600) / 1,843,200     = 8
  *
  * Which should yied BAUD = 50,000,000 / (16 * (27 + 8/64)) = 115207.37
  */
@@ -226,11 +226,11 @@ void up_lowputc(char ch)
 #ifdef HAVE_SERIAL_CONSOLE
   /* Wait until the TX FIFO is not full */
 
-  while ((getreg32(LM_CONSOLE_BASE+LM_UART_FR_OFFSET) & UART_FR_TXFF) != 0);
+  while ((getreg32(TIVA_CONSOLE_BASE+TIVA_UART_FR_OFFSET) & UART_FR_TXFF) != 0);
 
   /* Then send the character */
 
-  putreg32((uint32_t)ch, LM_CONSOLE_BASE+LM_UART_DR_OFFSET);
+  putreg32((uint32_t)ch, TIVA_CONSOLE_BASE+TIVA_UART_DR_OFFSET);
 #endif
 }
 
@@ -256,73 +256,73 @@ void up_lowsetup(void)
    * this pin configuration -- whether or not a serial console is selected.
    */
 
-#ifdef CONFIG_LM_UART0
-  regval  = getreg32(LM_SYSCON_RCGC1);
+#ifdef CONFIG_TIVA_UART0
+  regval  = getreg32(TIVA_SYSCON_RCGC1);
   regval |= SYSCON_RCGC1_UART0;
-  putreg32(regval, LM_SYSCON_RCGC1);
+  putreg32(regval, TIVA_SYSCON_RCGC1);
 
   tiva_configgpio(GPIO_UART0_RX);
   tiva_configgpio(GPIO_UART0_TX);
 #endif
 
-#ifdef CONFIG_LM_UART1
-  regval  = getreg32(LM_SYSCON_RCGC1);
+#ifdef CONFIG_TIVA_UART1
+  regval  = getreg32(TIVA_SYSCON_RCGC1);
   regval |= SYSCON_RCGC1_UART1;
-  putreg32(regval, LM_SYSCON_RCGC1);
+  putreg32(regval, TIVA_SYSCON_RCGC1);
 
   tiva_configgpio(GPIO_UART1_RX);
   tiva_configgpio(GPIO_UART1_TX);
 #endif
 
-#ifdef CONFIG_LM_UART2
-  regval  = getreg32(LM_SYSCON_RCGC1);
+#ifdef CONFIG_TIVA_UART2
+  regval  = getreg32(TIVA_SYSCON_RCGC1);
   regval |= SYSCON_RCGC1_UART2;
-  putreg32(regval, LM_SYSCON_RCGC1);
+  putreg32(regval, TIVA_SYSCON_RCGC1);
 
   tiva_configgpio(GPIO_UART2_RX);
   tiva_configgpio(GPIO_UART2_TX);
 #endif
 
-#ifdef CONFIG_LM_UART3
-  regval  = getreg32(LM_SYSCON_RCGCUART);
+#ifdef CONFIG_TIVA_UART3
+  regval  = getreg32(TIVA_SYSCON_RCGCUART);
   regval |= SYSCON_RCGCUART_R3;
-  putreg32(regval, LM_SYSCON_RCGCUART);
+  putreg32(regval, TIVA_SYSCON_RCGCUART);
 
   tiva_configgpio(GPIO_UART3_RX);
   tiva_configgpio(GPIO_UART3_TX);
 #endif
 
-#ifdef CONFIG_LM_UART4
-  regval  = getreg32(LM_SYSCON_RCGCUART);
+#ifdef CONFIG_TIVA_UART4
+  regval  = getreg32(TIVA_SYSCON_RCGCUART);
   regval |= SYSCON_RCGCUART_R4;
-  putreg32(regval, LM_SYSCON_RCGCUART);
+  putreg32(regval, TIVA_SYSCON_RCGCUART);
 
   tiva_configgpio(GPIO_UART4_RX);
   tiva_configgpio(GPIO_UART4_TX);
 #endif
 
-#ifdef CONFIG_LM_UART5
-  regval  = getreg32(LM_SYSCON_RCGCUART);
+#ifdef CONFIG_TIVA_UART5
+  regval  = getreg32(TIVA_SYSCON_RCGCUART);
   regval |= SYSCON_RCGCUART_R5;
-  putreg32(regval, LM_SYSCON_RCGCUART);
+  putreg32(regval, TIVA_SYSCON_RCGCUART);
 
   tiva_configgpio(GPIO_UART5_RX);
   tiva_configgpio(GPIO_UART5_TX);
 #endif
 
-#ifdef CONFIG_LM_UART6
-  regval  = getreg32(LM_SYSCON_RCGCUART);
+#ifdef CONFIG_TIVA_UART6
+  regval  = getreg32(TIVA_SYSCON_RCGCUART);
   regval |= SYSCON_RCGCUART_R6;
-  putreg32(regval, LM_SYSCON_RCGCUART);
+  putreg32(regval, TIVA_SYSCON_RCGCUART);
 
   tiva_configgpio(GPIO_UART6_RX);
   tiva_configgpio(GPIO_UART6_TX);
 #endif
 
-#ifdef CONFIG_LM_UART7
-  regval  = getreg32(LM_SYSCON_RCGCUART);
+#ifdef CONFIG_TIVA_UART7
+  regval  = getreg32(TIVA_SYSCON_RCGCUART);
   regval |= SYSCON_RCGCUART_R7;
-  putreg32(regval, LM_SYSCON_RCGCUART);
+  putreg32(regval, TIVA_SYSCON_RCGCUART);
 
   tiva_configgpio(GPIO_UART7_RX);
   tiva_configgpio(GPIO_UART7_TX);
@@ -333,25 +333,25 @@ void up_lowsetup(void)
 #if defined(HAVE_SERIAL_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
   /* Disable the UART by clearing the UARTEN bit in the UART CTL register */
 
-  ctl = getreg32(LM_CONSOLE_BASE+LM_UART_CTL_OFFSET);
+  ctl = getreg32(TIVA_CONSOLE_BASE+TIVA_UART_CTL_OFFSET);
   ctl &= ~UART_CTL_UARTEN;
-  putreg32(ctl, LM_CONSOLE_BASE+LM_UART_CTL_OFFSET);
+  putreg32(ctl, TIVA_CONSOLE_BASE+TIVA_UART_CTL_OFFSET);
 
   /* Write the integer portion of the BRD to the UART IBRD register */
 
-  putreg32(LM_BRDI, LM_CONSOLE_BASE+LM_UART_IBRD_OFFSET);
+  putreg32(TIVA_BRDI, TIVA_CONSOLE_BASE+TIVA_UART_IBRD_OFFSET);
 
   /* Write the fractional portion of the BRD to the UART FBRD register */
 
-  putreg32(LM_DIVFRAC, LM_CONSOLE_BASE+LM_UART_FBRD_OFFSET);
+  putreg32(TIVA_DIVFRAC, TIVA_CONSOLE_BASE+TIVA_UART_FBRD_OFFSET);
 
   /* Write the desired serial parameters to the UART LCRH register */
 
-  putreg32(UART_LCRH_VALUE, LM_CONSOLE_BASE+LM_UART_LCRH_OFFSET);
+  putreg32(UART_LCRH_VALUE, TIVA_CONSOLE_BASE+TIVA_UART_LCRH_OFFSET);
 
   /* Enable the UART by setting the UARTEN bit in the UART CTL register */
 
   ctl |= (UART_CTL_UARTEN|UART_CTL_TXE|UART_CTL_RXE);
-  putreg32(ctl, LM_CONSOLE_BASE+LM_UART_CTL_OFFSET);
+  putreg32(ctl, TIVA_CONSOLE_BASE+TIVA_UART_CTL_OFFSET);
 #endif
 }

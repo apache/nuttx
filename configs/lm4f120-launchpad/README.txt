@@ -626,15 +626,15 @@ LM4F120 LaunchPad Configuration Options
   Additional interrupt support can be disabled if desired to reduce memory
   footprint.
 
-    CONFIG_LM_DISABLE_GPIOA_IRQS=n
-    CONFIG_LM_DISABLE_GPIOB_IRQS=n
-    CONFIG_LM_DISABLE_GPIOC_IRQS=n
-    CONFIG_LM_DISABLE_GPIOD_IRQS=n
-    CONFIG_LM_DISABLE_GPIOE_IRQS=n
-    CONFIG_LM_DISABLE_GPIOF_IRQS=n
-    CONFIG_LM_DISABLE_GPIOG_IRQS=n
-    CONFIG_LM_DISABLE_GPIOH_IRQS=n
-    CONFIG_LM_DISABLE_GPIOJ_IRQS=y
+    CONFIG_TIVA_DISABLE_GPIOA_IRQS=n
+    CONFIG_TIVA_DISABLE_GPIOB_IRQS=n
+    CONFIG_TIVA_DISABLE_GPIOC_IRQS=n
+    CONFIG_TIVA_DISABLE_GPIOD_IRQS=n
+    CONFIG_TIVA_DISABLE_GPIOE_IRQS=n
+    CONFIG_TIVA_DISABLE_GPIOF_IRQS=n
+    CONFIG_TIVA_DISABLE_GPIOG_IRQS=n
+    CONFIG_TIVA_DISABLE_GPIOH_IRQS=n
+    CONFIG_TIVA_DISABLE_GPIOJ_IRQS=y
  
   LM4F120 specific device driver settings
 
@@ -659,18 +659,18 @@ LM4F120 LaunchPad Configuration Options
       value is large, then larger values of this setting may cause
       Rx FIFO overrun errors.  Default: half of the Tx FIFO size (4).
 
-    CONFIG_LM_ETHERNET - This must be set (along with CONFIG_NET)
+    CONFIG_TIVA_ETHERNET - This must be set (along with CONFIG_NET)
       to build the Stellaris Ethernet driver
-    CONFIG_LM_ETHLEDS - Enable to use Ethernet LEDs on the board.
-    CONFIG_LM_BOARDMAC - If the board-specific logic can provide
+    CONFIG_TIVA_ETHLEDS - Enable to use Ethernet LEDs on the board.
+    CONFIG_TIVA_BOARDMAC - If the board-specific logic can provide
       a MAC address (via tiva_ethernetmac()), then this should be selected.
-    CONFIG_LM_ETHHDUPLEX - Set to force half duplex operation
-    CONFIG_LM_ETHNOAUTOCRC - Set to suppress auto-CRC generation
-    CONFIG_LM_ETHNOPAD - Set to suppress Tx padding
-    CONFIG_LM_MULTICAST - Set to enable multicast frames
-    CONFIG_LM_PROMISCUOUS - Set to enable promiscuous mode
-    CONFIG_LM_BADCRC - Set to enable bad CRC rejection.
-    CONFIG_LM_DUMPPACKET - Dump each packet received/sent to the console.
+    CONFIG_TIVA_ETHHDUPLEX - Set to force half duplex operation
+    CONFIG_TIVA_ETHNOAUTOCRC - Set to suppress auto-CRC generation
+    CONFIG_TIVA_ETHNOPAD - Set to suppress Tx padding
+    CONFIG_TIVA_MULTICAST - Set to enable multicast frames
+    CONFIG_TIVA_PROMISCUOUS - Set to enable promiscuous mode
+    CONFIG_TIVA_BADCRC - Set to enable bad CRC rejection.
+    CONFIG_TIVA_DUMPPACKET - Dump each packet received/sent to the console.
 
 Configurations
 ^^^^^^^^^^^^^^

@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_LM_USERSPACE_H
-#define __ARCH_ARM_SRC_TIVA_LM_USERSPACE_H
+#ifndef __ARCH_ARM_SRC_TIVA_TIVA_USERSPACE_H
+#define __ARCH_ARM_SRC_TIVA_TIVA_USERSPACE_H
 
 /************************************************************************************
  * Included Files
@@ -73,4 +73,4 @@
 void tiva_userspace(void);
 #endif
 
-#endif /* __ARCH_ARM_SRC_TIVA_LM_USERSPACE_H */
+#endif /* __ARCH_ARM_SRC_TIVA_TIVA_USERSPACE_H */

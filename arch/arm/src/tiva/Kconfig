@@ -15,7 +15,7 @@ config ARCH_CHIP_LM3S6918
 	depends on ARCH_CHIP_LM
 	select ARCH_CORTEXM3
 	select ARCH_CHIP_LM3S
-	select LM_HAVE_SSI1
+	select TIVA_HAVE_SSI1
 
 config ARCH_CHIP_LM3S9B96
 	bool "LM3S9B96"
@@ -61,58 +61,59 @@ config ARCH_CHIP_LM4F
 config ARCH_CHIP_TM4C
 	bool
 
-config LM_HAVE_SSI1
+config TIVA_HAVE_SSI1
 	bool
 
 config LM_REVA2
 	bool "Rev A2"
 	default n
+	depends on ARCH_CHIP_LM
 	---help---
 		Some early silicon returned an increase LDO voltage or 2.75V to work
 		around a PLL bug
 
 menu "Tiva/Stellaris Peripheral Support"
 
-config LM_UART0
+config TIVA_UART0
 	bool "UART0"
 	select ARCH_HAVE_UART0
 	default n
 
-config LM_UART1
+config TIVA_UART1
 	bool "UART1"
 	select ARCH_HAVE_UART1
 	default n
 
-config LM_UART2
+config TIVA_UART2
 	bool "UART2"
 	select ARCH_HAVE_UART2
 	default n
 
-config LM_UART3
+config TIVA_UART3
 	bool "UART3"
 	default n
 	depends on ARCH_CHIP_LM4F || ARCH_CHIP_TM4C
 	select ARCH_HAVE_UART3
 
-config LM_UART4
+config TIVA_UART4
 	bool "UART4"
 	default n
 	depends on ARCH_CHIP_LM4F || ARCH_CHIP_TM4C
 	select ARCH_HAVE_UART4
 
-config LM_UART5
+config TIVA_UART5
 	bool "UART5"
 	default n
 	depends on ARCH_CHIP_LM4F || ARCH_CHIP_TM4C
 	select ARCH_HAVE_UART5
 
-config LM_UART6
+config TIVA_UART6
 	bool "UART6"
 	default n
 	depends on ARCH_CHIP_LM4F || ARCH_CHIP_TM4C
 	select ARCH_HAVE_UART6
 
-config LM_UART7
+config TIVA_UART7
 	bool "UART7"
 	default n
 	depends on ARCH_CHIP_LM4F || ARCH_CHIP_TM4C
@@ -126,14 +127,14 @@ config SSI1_DISABLE
 	bool "Disable SSI1"
 	default y
 
-config LM_ETHERNET
+config TIVA_ETHERNET
 	bool "Ethernet"
 	default n
 	select NETDEVICES
 	---help---
 		This must be set (along with NET) to build the Stellaris Ethernet driver.
 
-config LM_FLASH
+config TIVA_FLASH
 	bool "Internal FLASH driver"
 	default n
 	---help---
@@ -143,95 +144,95 @@ endmenu
 
 menu "Disable GPIO Interrupts"
 
-config LM_DISABLE_GPIOA_IRQS
+config TIVA_DISABLE_GPIOA_IRQS
 	bool "Disable GPIOA IRQs"
 	default n
 
-config LM_DISABLE_GPIOB_IRQS
+config TIVA_DISABLE_GPIOB_IRQS
 	bool "Disable GPIOB IRQs"
 	default n
 
-config LM_DISABLE_GPIOC_IRQS
+config TIVA_DISABLE_GPIOC_IRQS
 	bool "Disable GPIOC IRQs"
 	default n
 
-config LM_DISABLE_GPIOD_IRQS
+config TIVA_DISABLE_GPIOD_IRQS
 	bool "Disable GPIOD IRQs"
 	default n
 
-config LM_DISABLE_GPIOE_IRQS
+config TIVA_DISABLE_GPIOE_IRQS
 	bool "Disable GPIOE IRQs"
 	default n
 
-config LM_DISABLE_GPIOF_IRQS
+config TIVA_DISABLE_GPIOF_IRQS
 	bool "Disable GPIOF IRQs"
 	default n
 
-config LM_DISABLE_GPIOG_IRQS
+config TIVA_DISABLE_GPIOG_IRQS
 	bool "Disable GPIOG IRQs"
 	default n
 
-config LM_DISABLE_GPIOH_IRQS
+config TIVA_DISABLE_GPIOH_IRQS
 	bool "Disable GPIOH IRQs"
 	default n
 
-config LM_DISABLE_GPIOJ_IRQS
+config TIVA_DISABLE_GPIOJ_IRQS
 	bool "Disable GPIOJ IRQs"
 	default n
 
 endmenu
 
-if LM_ETHERNET
+if TIVA_ETHERNET
 menu "Tiva/Stellaris Ethernet Configuration"
 
-config LM_ETHLEDS
+config TIVA_ETHLEDS
 	bool "Ethernet LEDs"
 	default n
 	---help---
 	Enable to use Ethernet LEDs on the board.
 
-config LM_BOARDMAC
+config TIVA_BOARDMAC
 	bool "Board MAC"
 	default n
 	---help---
 		If the board-specific logic can provide a MAC address (via
 		tiva_ethernetmac()), then this should be selected.
 
-config LM_ETHHDUPLEX
+config TIVA_ETHHDUPLEX
 	bool "Force Half Duplex"
 	default n
 	---help---
 		Set to force half duplex operation
 
-config LM_ETHNOAUTOCRC
+config TIVA_ETHNOAUTOCRC
 	bool "Disable auto-CRC"
 	default n
 	---help---
 		Set to suppress auto-CRC generation
 
-config LM_ETHNOPAD
+config TIVA_ETHNOPAD
 	bool "Disable Tx Padding"
 	default n
 	---help---
 		Set to suppress Tx padding
 
-config LM_MULTICAST
+config TIVA_MULTICAST
 	bool "Enable Multicast"
 	default n
 	---help---
 		Set to enable multicast frames
 
-config LM_PROMISCUOUS
+config TIVA_PROMISCUOUS
 	bool "Enable Promiscuous Mode"
 	default n
 	---help---
 		Set to enable promiscuous mode
 
-config LM_TIMESTAMP
+config TIVA_TIMESTAMP
 	bool "Enable Timestamping"
 	default n
 
-config LM_BADCRC
+config TIVA_BADCRC
 	bool "Enable Bad CRC Rejection"
 	default n
 	---help---
@@ -262,10 +263,10 @@ config SSI_TXLIMIT
 endmenu
 endif
 
-if LM_FLASH
+if TIVA_FLASH
 menu "Tiva/Stellaris Internal Flash Driver Configuration"
 
-config LM_FLASH_STARTPAGE
+config TIVA_FLASH_STARTPAGE
 	int "First page accessible by the MTD driver"
 	default 250
 	---help---

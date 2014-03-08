@@ -62,9 +62,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define LM_VIRTUAL_NPAGES (LM_FLASH_NPAGES - CONFIG_LM_FLASH_STARTPAGE)
-#define LM_VIRTUAL_BASE   (LM_FLASH_BASE \
-                           + CONFIG_LM_FLASH_STARTPAGE * LM_FLASH_PAGESIZE)
+#define TIVA_VIRTUAL_NPAGES (TIVA_FLASH_NPAGES - CONFIG_TIVA_FLASH_STARTPAGE)
+#define TIVA_VIRTUAL_BASE   (TIVA_FLASH_BASE \
+                             + CONFIG_TIVA_FLASH_STARTPAGE * TIVA_FLASH_PAGESIZE)
 
 /****************************************************************************
  * Private Types
@@ -140,26 +140,26 @@ static int tiva_erase(FAR struct mtd_dev_s *dev, off_t startblock,
   int curpage;
   uint32_t pageaddr;
 
-  DEBUGASSERT(nblocks <= LM_VIRTUAL_NPAGES);
+  DEBUGASSERT(nblocks <= TIVA_VIRTUAL_NPAGES);
 
   for (curpage = startblock; curpage < nblocks; curpage++)
     {
-      pageaddr = LM_VIRTUAL_BASE + curpage * LM_FLASH_PAGESIZE;
+      pageaddr = TIVA_VIRTUAL_BASE + curpage * TIVA_FLASH_PAGESIZE;
 
       fvdbg("Erase page at %08x\n", pageaddr);
 
       /* set page address */
 
       putreg32((pageaddr << FLASH_FMA_OFFSET_SHIFT) & FLASH_FMA_OFFSET_MASK,
-               LM_FLASH_FMA);
+               TIVA_FLASH_FMA);
 
       /* set flash write key and erase bit */
 
-      putreg32(FLASH_FMC_WRKEY | FLASH_FMC_ERASE, LM_FLASH_FMC);
+      putreg32(FLASH_FMC_WRKEY | FLASH_FMC_ERASE, TIVA_FLASH_FMC);
 
       /* wait until erase has finished */
 
-      while (getreg32(LM_FLASH_FMC) & FLASH_FMC_ERASE);
+      while (getreg32(TIVA_FLASH_FMC) & FLASH_FMC_ERASE);
     }
 
   return OK;
@@ -176,10 +176,10 @@ static int tiva_erase(FAR struct mtd_dev_s *dev, off_t startblock,
 static ssize_t tiva_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
                           FAR uint8_t *buf)
 {
-  DEBUGASSERT(startblock + nblocks <= LM_VIRTUAL_NPAGES);
+  DEBUGASSERT(startblock + nblocks <= TIVA_VIRTUAL_NPAGES);
 
-  memcpy(buf, (void*)(LM_VIRTUAL_BASE + startblock * LM_FLASH_PAGESIZE),
-         nblocks * LM_FLASH_PAGESIZE);
+  memcpy(buf, (void*)(TIVA_VIRTUAL_BASE + startblock * TIVA_FLASH_PAGESIZE),
+         nblocks * TIVA_FLASH_PAGESIZE);
 
   return nblocks;
 }
@@ -196,28 +196,28 @@ static ssize_t tiva_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t n
                            FAR const uint8_t *buf)
 {
   FAR uint32_t *src = (uint32_t*)buf;
-  FAR uint32_t *dst = (uint32_t*)(LM_VIRTUAL_BASE + startblock * LM_FLASH_PAGESIZE);
+  FAR uint32_t *dst = (uint32_t*)(TIVA_VIRTUAL_BASE + startblock * TIVA_FLASH_PAGESIZE);
   int i;
 
-  DEBUGASSERT(nblocks <= LM_VIRTUAL_NPAGES);
+  DEBUGASSERT(nblocks <= TIVA_VIRTUAL_NPAGES);
 
-  for (i = 0; i < (nblocks * LM_FLASH_PAGESIZE) >> 2; i++)
+  for (i = 0; i < (nblocks * TIVA_FLASH_PAGESIZE) >> 2; i++)
     {
       /* set data to write  */
 
-      putreg32(*src++, LM_FLASH_FMD);
+      putreg32(*src++, TIVA_FLASH_FMD);
 
       /* set destination address */
 
-      putreg32((uint32_t)dst++, LM_FLASH_FMA);
+      putreg32((uint32_t)dst++, TIVA_FLASH_FMA);
 
       /* start write */
 
-      putreg32(FLASH_FMC_WRKEY | FLASH_FMC_WRITE, LM_FLASH_FMC);
+      putreg32(FLASH_FMC_WRKEY | FLASH_FMC_WRITE, TIVA_FLASH_FMC);
 
       /* wait until write has finished */
 
-      while(getreg32(LM_FLASH_FMC) & FLASH_FMC_WRITE);
+      while(getreg32(TIVA_FLASH_FMC) & FLASH_FMC_WRITE);
     }
 
   return nblocks;
@@ -234,9 +234,9 @@ static ssize_t tiva_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t n
 static ssize_t tiva_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
                          FAR uint8_t *buf)
 {
-  DEBUGASSERT(offset + nbytes < LM_VIRTUAL_NPAGES * LM_FLASH_PAGESIZE);
+  DEBUGASSERT(offset + nbytes < TIVA_VIRTUAL_NPAGES * TIVA_FLASH_PAGESIZE);
 
-  memcpy(buf, (void*)(LM_VIRTUAL_BASE + offset), nbytes);
+  memcpy(buf, (void*)(TIVA_VIRTUAL_BASE + offset), nbytes);
 
   return nbytes;
 }
@@ -282,9 +282,9 @@ static int tiva_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
                * appear so.
                */
 
-              geo->blocksize    = LM_FLASH_PAGESIZE;  /* Size of one read/write block */
-              geo->erasesize    = LM_FLASH_PAGESIZE;  /* Size of one erase block */
-              geo->neraseblocks = LM_VIRTUAL_NPAGES;
+              geo->blocksize    = TIVA_FLASH_PAGESIZE;  /* Size of one read/write block */
+              geo->erasesize    = TIVA_FLASH_PAGESIZE;  /* Size of one erase block */
+              geo->neraseblocks = TIVA_VIRTUAL_NPAGES;
               ret               = OK;
           }
         }
@@ -301,7 +301,7 @@ static int tiva_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
                * this case altogether and simply return -ENOTTY.
                */
 
-              *ppv = (void*)LM_VIRTUAL_BASE;
+              *ppv = (void*)TIVA_VIRTUAL_BASE;
               ret  = OK;
             }
         }
@@ -311,7 +311,7 @@ static int tiva_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         {
           /* Erase the entire device */
 
-          tiva_erase(dev, 0, LM_VIRTUAL_NPAGES);
+          tiva_erase(dev, 0, TIVA_VIRTUAL_NPAGES);
 
           ret = OK;
         }

@@ -50,99 +50,99 @@
 
 /* I2C Master */
 
-#define LM_I2CM_SA_OFFSET    0x000 /* I2C Master Slave Address */
-#define LM_I2CM_CS_OFFSET    0x004 /* I2C Master Control/Status */
-#define LM_I2CM_DR_OFFSET    0x008 /* I2C Master Data */
-#define LM_I2CM_TPR_OFFSET   0x00c /* I2C Master Timer Period */
-#define LM_I2CM_IMR_OFFSET   0x010 /* I2C Master Interrupt Mask */
-#define LM_I2CM_RIS_OFFSET   0x014 /* I2C Master Raw Interrupt Status */
-#define LM_I2CM_MIS_OFFSET   0x018 /* I2C Master Masked Interrupt Status */
-#define LM_I2CM_ICR_OFFSET   0x01c /* I2C Master Interrupt Clear */
-#define LM_I2CM_CR_OFFSET    0x020 /* I2C Master Configuration */
+#define TIVA_I2CM_SA_OFFSET  0x000 /* I2C Master Slave Address */
+#define TIVA_I2CM_CS_OFFSET  0x004 /* I2C Master Control/Status */
+#define TIVA_I2CM_DR_OFFSET  0x008 /* I2C Master Data */
+#define TIVA_I2CM_TPR_OFFSET 0x00c /* I2C Master Timer Period */
+#define TIVA_I2CM_IMR_OFFSET 0x010 /* I2C Master Interrupt Mask */
+#define TIVA_I2CM_RIS_OFFSET 0x014 /* I2C Master Raw Interrupt Status */
+#define TIVA_I2CM_MIS_OFFSET 0x018 /* I2C Master Masked Interrupt Status */
+#define TIVA_I2CM_ICR_OFFSET 0x01c /* I2C Master Interrupt Clear */
+#define TIVA_I2CM_CR_OFFSET  0x020 /* I2C Master Configuration */
 
 /* I2C Slave */
 
-#define LM_I2CS_OAR_OFFSET   0x000 /* I2C Slave Own Address */
-#define LM_I2CS_CSR_OFFSET   0x004 /* I2C Slave Control/Status */
-#define LM_I2CS_DR_OFFSET    0x008 /* I2C Slave Data */
-#define LM_I2CS_IMR_OFFSET   0x00c /* I2C Slave Interrupt Mask */
-#define LM_I2CS_RIS_OFFSET   0x010 /* I2C Slave Raw Interrupt Status */
-#define LM_I2CS_MIS_OFFSET   0x014 /* I2C Slave Masked Interrupt Status */
-#define LM_I2CS_ICR_OFFSET   0x018 /* I2C Slave Interrupt Clear */
+#define TIVA_I2CS_OAR_OFFSET 0x000 /* I2C Slave Own Address */
+#define TIVA_I2CS_CSR_OFFSET 0x004 /* I2C Slave Control/Status */
+#define TIVA_I2CS_DR_OFFSET  0x008 /* I2C Slave Data */
+#define TIVA_I2CS_IMR_OFFSET 0x00c /* I2C Slave Interrupt Mask */
+#define TIVA_I2CS_RIS_OFFSET 0x010 /* I2C Slave Raw Interrupt Status */
+#define TIVA_I2CS_MIS_OFFSET 0x014 /* I2C Slave Masked Interrupt Status */
+#define TIVA_I2CS_ICR_OFFSET 0x018 /* I2C Slave Interrupt Clear */
 
 /* I2C Register Addresses ***********************************************************/
 
-#if LM_NI2C > 0
+#if TIVA_NI2C > 0
 
 /* I2C Master */
 
-#define LM_I2CM_BASE(n)      (LM_I2CM0_BASE + (n)*0x1000)
-#define LM_I2CM_SA(n)        (LM_I2CM_BASE(n) + LM_I2CM_SA_OFFSET)
-#define LM_I2CM_CS(n)        (LM_I2CM_BASE(n) + LM_I2CM_CS_OFFSET)
-#define LM_I2CM_DR(n)        (LM_I2CM_BASE(n) + LM_I2CM_DR_OFFSET)
-#define LM_I2CM_TPR(n)       (LM_I2CM_BASE(n) + LM_I2CM_TPR_OFFSET)
-#define LM_I2CM_IMR(n)       (LM_I2CM_BASE(n) + LM_I2CM_IMR_OFFSET)
-#define LM_I2CM_RIS(n)       (LM_I2CM_BASE(n) + LM_I2CM_RIS_OFFSET)
-#define LM_I2CM_MIS(n)       (LM_I2CM_BASE(n) + LM_I2CM_MIS_OFFSET)
-#define LM_I2CM_ICR(n)       (LM_I2CM_BASE(n) + LM_I2CM_ICR_OFFSET)
-#define LM_I2CM_CR(n)        (LM_I2CM_BASE(n) + LM_I2CM_CR_OFFSET)
+#define TIVA_I2CM_BASE(n)    (TIVA_I2CM0_BASE + (n)*0x1000)
+#define TIVA_I2CM_SA(n)      (TIVA_I2CM_BASE(n) + TIVA_I2CM_SA_OFFSET)
+#define TIVA_I2CM_CS(n)      (TIVA_I2CM_BASE(n) + TIVA_I2CM_CS_OFFSET)
+#define TIVA_I2CM_DR(n)      (TIVA_I2CM_BASE(n) + TIVA_I2CM_DR_OFFSET)
+#define TIVA_I2CM_TPR(n)     (TIVA_I2CM_BASE(n) + TIVA_I2CM_TPR_OFFSET)
+#define TIVA_I2CM_IMR(n)     (TIVA_I2CM_BASE(n) + TIVA_I2CM_IMR_OFFSET)
+#define TIVA_I2CM_RIS(n)     (TIVA_I2CM_BASE(n) + TIVA_I2CM_RIS_OFFSET)
+#define TIVA_I2CM_MIS(n)     (TIVA_I2CM_BASE(n) + TIVA_I2CM_MIS_OFFSET)
+#define TIVA_I2CM_ICR(n)     (TIVA_I2CM_BASE(n) + TIVA_I2CM_ICR_OFFSET)
+#define TIVA_I2CM_CR(n)      (TIVA_I2CM_BASE(n) + TIVA_I2CM_CR_OFFSET)
 
 /* I2C Slave */
 
-#define LM_I2CS_BASE(n)      (LM_I2CS0_BASE + (n)*0x1000)
-#define LM_I2CS_OAR(n)       (LM_I2CS_BASE(n) + LM_I2CS_OAR_OFFSET)
-#define LM_I2CS_CSR(n)       (LM_I2CS_BASE(n) + LM_I2CS_CSR_OFFSET)
-#define LM_I2CS_DR(n)        (LM_I2CS_BASE(n) + LM_I2CS_DR_OFFSET)
-#define LM_I2CS_IMR(n)       (LM_I2CS_BASE(n) + LM_I2CS_IMR_OFFSET)
-#define LM_I2CS_RIS(n)       (LM_I2CS_BASE(n) + LM_I2CS_RIS_OFFSET)
-#define LM_I2CS_MIS(n)       (LM_I2CS_BASE(n) + LM_I2CS_MIS_OFFSET)
-#define LM_I2CS_ICR(n)       (LM_I2CS_BASE(n) + LM_I2CS_ICR_OFFSET)
+#define TIVA_I2CS_BASE(n)    (TIVA_I2CS0_BASE + (n)*0x1000)
+#define TIVA_I2CS_OAR(n)     (TIVA_I2CS_BASE(n) + TIVA_I2CS_OAR_OFFSET)
+#define TIVA_I2CS_CSR(n)     (TIVA_I2CS_BASE(n) + TIVA_I2CS_CSR_OFFSET)
+#define TIVA_I2CS_DR(n)      (TIVA_I2CS_BASE(n) + TIVA_I2CS_DR_OFFSET)
+#define TIVA_I2CS_IMR(n)     (TIVA_I2CS_BASE(n) + TIVA_I2CS_IMR_OFFSET)
+#define TIVA_I2CS_RIS(n)     (TIVA_I2CS_BASE(n) + TIVA_I2CS_RIS_OFFSET)
+#define TIVA_I2CS_MIS(n)     (TIVA_I2CS_BASE(n) + TIVA_I2CS_MIS_OFFSET)
+#define TIVA_I2CS_ICR(n)     (TIVA_I2CS_BASE(n) + TIVA_I2CS_ICR_OFFSET)
 
 /* I2C0 Master */
 
-#define LM_I2CM0_SA          (LM_I2CM0_BASE + LM_I2CM_SA_OFFSET)
-#define LM_I2CM0_CS          (LM_I2CM0_BASE + LM_I2CM_CS_OFFSET)
-#define LM_I2CM0_DR          (LM_I2CM0_BASE + LM_I2CM_DR_OFFSET)
-#define LM_I2CM0_TPR         (LM_I2CM0_BASE + LM_I2CM_TPR_OFFSET)
-#define LM_I2CM0_IMR         (LM_I2CM0_BASE + LM_I2CM_IMR_OFFSET)
-#define LM_I2CM0_RIS         (LM_I2CM0_BASE + LM_I2CM_RIS_OFFSET)
-#define LM_I2CM0_MIS         (LM_I2CM0_BASE + LM_I2CM_MIS_OFFSET)
-#define LM_I2CM0_ICR         (LM_I2CM0_BASE + LM_I2CM_ICR_OFFSET)
-#define LM_I2CM0_CR          (LM_I2CM0_BASE + LM_I2CM_CR_OFFSET)
+#define TIVA_I2CM0_SA        (TIVA_I2CM0_BASE + TIVA_I2CM_SA_OFFSET)
+#define TIVA_I2CM0_CS        (TIVA_I2CM0_BASE + TIVA_I2CM_CS_OFFSET)
+#define TIVA_I2CM0_DR        (TIVA_I2CM0_BASE + TIVA_I2CM_DR_OFFSET)
+#define TIVA_I2CM0_TPR       (TIVA_I2CM0_BASE + TIVA_I2CM_TPR_OFFSET)
+#define TIVA_I2CM0_IMR       (TIVA_I2CM0_BASE + TIVA_I2CM_IMR_OFFSET)
+#define TIVA_I2CM0_RIS       (TIVA_I2CM0_BASE + TIVA_I2CM_RIS_OFFSET)
+#define TIVA_I2CM0_MIS       (TIVA_I2CM0_BASE + TIVA_I2CM_MIS_OFFSET)
+#define TIVA_I2CM0_ICR       (TIVA_I2CM0_BASE + TIVA_I2CM_ICR_OFFSET)
+#define TIVA_I2CM0_CR        (TIVA_I2CM0_BASE + TIVA_I2CM_CR_OFFSET)
 
 /* I2C0 Slave */
 
-#define LM_I2CS0_OAR         (LM_I2CS0_BASE + LM_I2CS_OAR_OFFSET)
-#define LM_I2CS0_CSR         (LM_I2CS0_BASE + LM_I2CS_CSR_OFFSET)
-#define LM_I2CS0_DR          (LM_I2CS0_BASE + LM_I2CS_DR_OFFSET)
-#define LM_I2CS0_IMR         (LM_I2CS0_BASE + LM_I2CS_IMR_OFFSET)
-#define LM_I2CS0_RIS         (LM_I2CS0_BASE + LM_I2CS_RIS_OFFSET)
-#define LM_I2CS0_MIS         (LM_I2CS0_BASE + LM_I2CS_MIS_OFFSET)
-#define LM_I2CS0_ICR         (LM_I2CS0_BASE + LM_I2CS_ICR_OFFSET)
+#define TIVA_I2CS0_OAR       (TIVA_I2CS0_BASE + TIVA_I2CS_OAR_OFFSET)
+#define TIVA_I2CS0_CSR       (TIVA_I2CS0_BASE + TIVA_I2CS_CSR_OFFSET)
+#define TIVA_I2CS0_DR        (TIVA_I2CS0_BASE + TIVA_I2CS_DR_OFFSET)
+#define TIVA_I2CS0_IMR       (TIVA_I2CS0_BASE + TIVA_I2CS_IMR_OFFSET)
+#define TIVA_I2CS0_RIS       (TIVA_I2CS0_BASE + TIVA_I2CS_RIS_OFFSET)
+#define TIVA_I2CS0_MIS       (TIVA_I2CS0_BASE + TIVA_I2CS_MIS_OFFSET)
+#define TIVA_I2CS0_ICR       (TIVA_I2CS0_BASE + TIVA_I2CS_ICR_OFFSET)
 
-#if LM_NI2C > 1
+#if TIVA_NI2C > 1
 
 /* I2C1 Master */
 
-#define LM_I2CM1_SA          (LM_I2CM1_BASE + LM_I2CM_SA_OFFSET)
-#define LM_I2CM1_CS          (LM_I2CM1_BASE + LM_I2CM_CS_OFFSET)
-#define LM_I2CM1_DR          (LM_I2CM1_BASE + LM_I2CM_DR_OFFSET)
-#define LM_I2CM1_TPR         (LM_I2CM1_BASE + LM_I2CM_TPR_OFFSET)
-#define LM_I2CM1_IMR         (LM_I2CM1_BASE + LM_I2CM_IMR_OFFSET)
-#define LM_I2CM1_RIS         (LM_I2CM1_BASE + LM_I2CM_RIS_OFFSET)
-#define LM_I2CM1_MIS         (LM_I2CM1_BASE + LM_I2CM_MIS_OFFSET)
-#define LM_I2CM1_ICR         (LM_I2CM1_BASE + LM_I2CM_ICR_OFFSET)
-#define LM_I2CM1_CR          (LM_I2CM1_BASE + LM_I2CM_CR_OFFSET)
+#define TIVA_I2CM1_SA        (TIVA_I2CM1_BASE + TIVA_I2CM_SA_OFFSET)
+#define TIVA_I2CM1_CS        (TIVA_I2CM1_BASE + TIVA_I2CM_CS_OFFSET)
+#define TIVA_I2CM1_DR        (TIVA_I2CM1_BASE + TIVA_I2CM_DR_OFFSET)
+#define TIVA_I2CM1_TPR       (TIVA_I2CM1_BASE + TIVA_I2CM_TPR_OFFSET)
+#define TIVA_I2CM1_IMR       (TIVA_I2CM1_BASE + TIVA_I2CM_IMR_OFFSET)
+#define TIVA_I2CM1_RIS       (TIVA_I2CM1_BASE + TIVA_I2CM_RIS_OFFSET)
+#define TIVA_I2CM1_MIS       (TIVA_I2CM1_BASE + TIVA_I2CM_MIS_OFFSET)
+#define TIVA_I2CM1_ICR       (TIVA_I2CM1_BASE + TIVA_I2CM_ICR_OFFSET)
+#define TIVA_I2CM1_CR        (TIVA_I2CM1_BASE + TIVA_I2CM_CR_OFFSET)
 
 /* I2C1 Slave */
 
-#define LM_I2CS1_OAR         (LM_I2CS1_BASE + LM_I2CS_OAR_OFFSET)
-#define LM_I2CS1_CSR         (LM_I2CS1_BASE + LM_I2CS_CSR_OFFSET)
-#define LM_I2CS1_DR          (LM_I2CS1_BASE + LM_I2CS_DR_OFFSET)
-#define LM_I2CS1_IMR         (LM_I2CS1_BASE + LM_I2CS_IMR_OFFSET)
-#define LM_I2CS1_RIS         (LM_I2CS1_BASE + LM_I2CS_RIS_OFFSET)
-#define LM_I2CS1_MIS         (LM_I2CS1_BASE + LM_I2CS_MIS_OFFSET)
-#define LM_I2CS1_ICR         (LM_I2CS1_BASE + LM_I2CS_ICR_OFFSET)
+#define TIVA_I2CS1_OAR       (TIVA_I2CS1_BASE + TIVA_I2CS_OAR_OFFSET)
+#define TIVA_I2CS1_CSR       (TIVA_I2CS1_BASE + TIVA_I2CS_CSR_OFFSET)
+#define TIVA_I2CS1_DR        (TIVA_I2CS1_BASE + TIVA_I2CS_DR_OFFSET)
+#define TIVA_I2CS1_IMR       (TIVA_I2CS1_BASE + TIVA_I2CS_IMR_OFFSET)
+#define TIVA_I2CS1_RIS       (TIVA_I2CS1_BASE + TIVA_I2CS_RIS_OFFSET)
+#define TIVA_I2CS1_MIS       (TIVA_I2CS1_BASE + TIVA_I2CS_MIS_OFFSET)
+#define TIVA_I2CS1_ICR       (TIVA_I2CS1_BASE + TIVA_I2CS_ICR_OFFSET)
 
 #endif
 #endif
