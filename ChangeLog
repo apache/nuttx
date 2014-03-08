@@ -6957,3 +6957,6 @@
 	  thinking about naming (2014-3-8).
 	* arch/arm/src/lpc2378/lpc23xx_i2c.c and lpc23xx_spi.c:  I2C and SPI
 	  drivers for the LPC23xx from Lizhuoyi (2014-3-8).
+	* arch/arm/include/tiva and src/tiva:  The old lm/ directories were
+	  renamed tiva/ to better support new products coming down the pipe
+	  from TI (2014-3-8).
