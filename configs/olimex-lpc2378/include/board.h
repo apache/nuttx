@@ -6,7 +6,7 @@
  *
  * This is part of the NuttX RTOS and based on the LPC2148 port:
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,35 +38,34 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_BOARD_BOARD_H
-#define __ARCH_BOARD_BOARD_H
+#ifndef __CONFIGS_OLIMEX_LPC2378_INCLUDE_BOARD_H
+#define __CONFIGS_OLIMEX_LPC2378_INCLUDE_BOARD_H
 
-#ifdef __cplusplus
-   extern "C" {
-#endif
+/************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
 
-/* If  USB is enabled, PLL must be configured for 48MHz to provide USB clocking */
-//--  F_pll = (2 * M * F_in)/N
-//--  F_out = ((2 * (PLL_M + 1 ) * FOSC)/(0+1))/(CCLK_DIV+1)  = 288/5 = 57 600 000 Hz
-//~ #ifdef CONFIG_USBDEV
- //~ #	define FOSC		(12000000)	/* Oscillator frequency */
- //~ #	define CCLK		(57600000)	/* CPU running clock */
- //~ #	define FCCO		(288000000)	/* CPU CCO clock */
-//~ #else
- #	define FOSC		(12000000)	/* Oscillator frequency */
- #	define CCLK		(57600000)	/* CPU running clock */
- #	define FCCO		(288000000)	/* CPU CCO clock */
- //~ #	define CCLK		(72000000)	/* CPU running clock */
- //~ #	define FCCO		(360000000)	/* CPU CCO clock */
-//~ #endif 
+/* If  USB is enabled, PLL must be configured for 48MHz to provide USB
+ * clocking.
+ *
+ *   F_pll = (2 * M * F_in) / N
+ *   F_out = ((2 * (PLL_M + 1) * FOSC)/(PLL_N + 1))/(CCLK_DIV + 1)
+ *
+ * With PLL_M=11, PLL_N=0, CCLK_DIV=4:
+ *
+ *   F_out = ((2 * (11 + 1) * 12000000)/(0 + 1))/(4 + 1)
+ *         = 288,000,000 / 5 = 57,600,000 Hz
+ */
 
-//~#define PLL_M	( (FCCO / (2 * FOSC))-1 ) 
-//~ #define PLL_N	( ((2 * PLL_M * FOSC) / FCCO)-1 )
-#define PLL_M	11
-#define PLL_N	0
+#define FOSC             (12000000)   /* Oscillator frequency */
+#define FCCO             (288000000)  /* CPU CCO clock */
+#define CCLK             (57600000)   /* CPU running clock */
 
-#define CCLK_DIV	4
-#define USBCLK_DIV	6
+#define PLL_M             11
+#define PLL_N             0
+
+#define CCLK_DIV          4
+#define USBCLK_DIV        6
 
  /* LED definitions **********************************************************/
 
@@ -79,12 +78,8 @@
 #define LED_ASSERTION     6
 #define LED_PANIC         7
  
-#ifdef __cplusplus
-   }
-#endif
- 
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/
 
-#endif  /* __ARCH_BOARD_BOARD_H */
+#endif  /* __CONFIGS_OLIMEX_LPC2378_INCLUDE_BOARD_H */
