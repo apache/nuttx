@@ -64,7 +64,7 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lm_ethernetmac
+ * Name: tiva_ethernetmac
  *
  * Description:
  *   For the Ethernet Eval Kits, the MAC address will be stored in the non-volatile
@@ -74,7 +74,7 @@
  ************************************************************************************/
 
 #ifdef CONFIG_LM_BOARDMAC
-void lm_ethernetmac(struct ether_addr *ethaddr)
+void tiva_ethernetmac(struct ether_addr *ethaddr)
 {
   uint32_t user0;
   uint32_t user1;

@@ -49,7 +49,7 @@
 
 #include "up_arch.h"
 #include "chip.h"
-#include "lm_gpio.h"
+#include "tiva_gpio.h"
 #include "eagle100_internal.h"
 
 /* The Eagle100 microSD CS is on SSI0 */
@@ -81,7 +81,7 @@
 /* Dump GPIO registers */
 
 #ifdef SSI_VERBOSE
-#  define ssi_dumpgpio(m) lm_dumpgpio(SDCCS_GPIO, m)
+#  define ssi_dumpgpio(m) tiva_dumpgpio(SDCCS_GPIO, m)
 #else
 #  define ssi_dumpgpio(m)
 #endif
@@ -106,19 +106,19 @@ void weak_function lm_ssiinitialize(void)
 {
   /* Configure the SPI-based microSD CS GPIO */
 
-  ssi_dumpgpio("lm_ssiinitialize() before lm_configgpio()");
-  lm_configgpio(SDCCS_GPIO);
-  ssi_dumpgpio("lm_ssiinitialize() after lm_configgpio()");
+  ssi_dumpgpio("lm_ssiinitialize() before tiva_configgpio()");
+  tiva_configgpio(SDCCS_GPIO);
+  ssi_dumpgpio("lm_ssiinitialize() after tiva_configgpio()");
 }
 
 /****************************************************************************
- * The external functions, lm_spiselect and lm_spistatus must be provided
+ * The external functions, tiva_spiselect and tiva_spistatus must be provided
  * by board-specific logic.  The are implementations of the select and status
  * methods SPI interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h).
  * All othermethods (including up_spiinitialize()) are provided by common
  * logic.  To use this common SPI logic on your board:
  *
- *   1. Provide lm_spiselect() and lm_spistatus() functions in your
+ *   1. Provide tiva_spiselect() and tiva_spistatus() functions in your
  *      board-specific logic.  This function will perform chip selection and
  *      status operations using GPIOs in the way your board is configured.
  *   2. Add a call to up_spiinitialize() in your low level initialization
@@ -130,20 +130,20 @@ void weak_function lm_ssiinitialize(void)
  *
  ****************************************************************************/
 
-void lm_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+void tiva_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   ssidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
   if (devid == SPIDEV_MMCSD)
     {
       /* Assert the CS pin to the card */
 
-      ssi_dumpgpio("lm_spiselect() before lm_gpiowrite()");
-      lm_gpiowrite(SDCCS_GPIO, !selected);
-      ssi_dumpgpio("lm_spiselect() after lm_gpiowrite()");
+      ssi_dumpgpio("tiva_spiselect() before tiva_gpiowrite()");
+      tiva_gpiowrite(SDCCS_GPIO, !selected);
+      ssi_dumpgpio("tiva_spiselect() after tiva_gpiowrite()");
     }
 }
 
-uint8_t lm_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t tiva_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
   ssidbg("Returning SPI_STATUS_PRESENT\n");
   return SPI_STATUS_PRESENT;

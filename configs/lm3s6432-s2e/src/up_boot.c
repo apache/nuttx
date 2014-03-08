@@ -47,7 +47,7 @@
 #include "up_arch.h"
 #include "chip.h"
 #include "up_internal.h"
-#include "lm_gpio.h"
+#include "tiva_gpio.h"
 #include "lm3s6432s2e_internal.h"
 
 /************************************************************************************
@@ -67,7 +67,7 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lm_boardinitialize
+ * Name: tiva_boardinitialize
  *
  * Description:
  *   All Stellaris architectures must provide the following entry point.  This entry
@@ -76,7 +76,7 @@
  *
  ************************************************************************************/
 
-void lm_boardinitialize(void)
+void tiva_boardinitialize(void)
 {
   /* Configure SPI chip selects if 1) SSI is not disabled, and 2) the weak function
    * lm_ssiinitialize() has been brought into the link.
@@ -97,8 +97,8 @@ void lm_boardinitialize(void)
 
   /* Configure serial transciever */
   
-  lm_configgpio(XCVR_INV_GPIO);
-  lm_configgpio(XCVR_ENA_GPIO);
-  lm_configgpio(XCVR_ON_GPIO);
-  lm_configgpio(XCVR_OFF_GPIO);
+  tiva_configgpio(XCVR_INV_GPIO);
+  tiva_configgpio(XCVR_ENA_GPIO);
+  tiva_configgpio(XCVR_ON_GPIO);
+  tiva_configgpio(XCVR_OFF_GPIO);
 }

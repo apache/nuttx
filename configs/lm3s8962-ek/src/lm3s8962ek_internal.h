@@ -45,7 +45,7 @@
 #include <nuttx/compiler.h>
 
 #include "chip.h"
-#include "lm_gpio.h"
+#include "tiva_gpio.h"
 
 /************************************************************************************
  * Definitions
@@ -130,7 +130,7 @@
  *
  ************************************************************************************/
 
-extern void weak_function lm_ssiinitialize(void);
+void weak_function lm_ssiinitialize(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_LM3S8962_EK_SRC_LM3S8962EK_INTERNAL_H */

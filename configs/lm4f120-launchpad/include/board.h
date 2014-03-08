@@ -191,7 +191,7 @@
 #ifndef __ASSEMBLY__
 
 /************************************************************************************
- * Name: lm_boardinitialize
+ * Name: tiva_boardinitialize
  *
  * Description:
  *   All Stellaris architectures must provide the following entry point.  This entry
@@ -200,7 +200,7 @@
  *
  ************************************************************************************/
 
-void lm_boardinitialize(void);
+void tiva_boardinitialize(void);
 
 /************************************************************************************
  * Name:  lm4f_ledinit, lm4f_setled, and lm4f_setleds

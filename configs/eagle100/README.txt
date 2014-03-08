@@ -334,7 +334,7 @@ Eagle100-specific Configuration Options
       to build the Stellaris Ethernet driver
     CONFIG_LM_ETHLEDS - Enable to use Ethernet LEDs on the board.
     CONFIG_LM_BOARDMAC - If the board-specific logic can provide
-      a MAC address (via lm_ethernetmac()), then this should be selected.
+      a MAC address (via tiva_ethernetmac()), then this should be selected.
     CONFIG_LM_ETHHDUPLEX - Set to force half duplex operation
     CONFIG_LM_ETHNOAUTOCRC - Set to suppress auto-CRC generation
     CONFIG_LM_ETHNOPAD - Set to suppress Tx padding

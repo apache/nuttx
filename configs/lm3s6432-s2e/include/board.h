@@ -114,7 +114,7 @@
 #ifndef __ASSEMBLY__
 
 /************************************************************************************
- * Name: lm_boardinitialize
+ * Name: tiva_boardinitialize
  *
  * Description:
  *   All Stellaris architectures must provide the following entry point.  This entry
@@ -123,10 +123,10 @@
  *
  ************************************************************************************/
 
-extern void lm_boardinitialize(void);
+extern void tiva_boardinitialize(void);
 
 /************************************************************************************
- * Name: lm_ethernetmac
+ * Name: tiva_ethernetmac
  *
  * Description:
  *   For the MDL-S2E Reference Design, the MAC address will be stored in the 
@@ -137,7 +137,7 @@ extern void lm_boardinitialize(void);
 
 #ifdef CONFIG_LM_BOARDMAC
 struct ether_addr;
-extern void lm_ethernetmac(struct ether_addr *ethaddr);
+extern void tiva_ethernetmac(struct ether_addr *ethaddr);
 #endif
 
 #endif /* __ASSEMBLY__ */

@@ -60,7 +60,7 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lm_boardinitialize
+ * Name: tiva_boardinitialize
  *
  * Description:
  *   All Stellaris architectures must provide the following entry point.  This entry
@@ -69,7 +69,7 @@
  *
  ************************************************************************************/
 
-void lm_boardinitialize(void)
+void tiva_boardinitialize(void)
 {
   /* Configure SPI chip selects if 1) SSI is not disabled, and 2) the weak function
    * lm_ssiinitialize() has been brought into the link.

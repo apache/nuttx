@@ -48,7 +48,7 @@
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/p14201.h>
 
-#include "lm_gpio.h"
+#include "tiva_gpio.h"
 #include "lm3s6965ek_internal.h"
 
 /****************************************************************************
@@ -72,8 +72,8 @@
 
 #ifdef CONFIG_LCD_RITDEBUG
 #  define ritdbg(format, arg...)  vdbg(format, ##arg)
-#  define oleddc_dumpgpio(m) lm_dumpgpio(OLEDDC_GPIO, m)
-#  define oledcs_dumpgpio(m) lm_dumpgpio(OLEDCS_GPIO, m)
+#  define oleddc_dumpgpio(m) tiva_dumpgpio(OLEDDC_GPIO, m)
+#  define oledcs_dumpgpio(m) tiva_dumpgpio(OLEDCS_GPIO, m)
 #else
 #  define ritdbg(x...)
 #  define oleddc_dumpgpio(m)
@@ -102,8 +102,8 @@ FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
   oledcs_dumpgpio("up_nxdrvinit: After OLEDCS setup");
   oleddc_dumpgpio("up_nxdrvinit: On entry");
 
-  lm_configgpio(OLEDDC_GPIO); /* PC7: OLED display data/control select (D/Cn) */
-  lm_configgpio(OLEDEN_GPIO); /* PC6: Enable +15V needed by OLED (EN+15V) */
+  tiva_configgpio(OLEDDC_GPIO); /* PC7: OLED display data/control select (D/Cn) */
+  tiva_configgpio(OLEDEN_GPIO); /* PC6: Enable +15V needed by OLED (EN+15V) */
 
   oleddc_dumpgpio("up_nxdrvinit: After OLEDDC/EN setup");
 
@@ -137,7 +137,7 @@ FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
 }
 
 /******************************************************************************
- * Name:  lm_spicmddata
+ * Name:  tiva_spicmddata
  *
  * Description:
  *   Set or clear the SD1329 D/Cn bit to select data (true) or command
@@ -159,14 +159,15 @@ FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
  *
  ******************************************************************************/
 
-int lm_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+int tiva_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 {
   if (devid == SPIDEV_DISPLAY)
     {
       /* Set GPIO to 1 for data, 0 for command */
 
-      lm_gpiowrite(OLEDDC_GPIO, !cmd);
+      tiva_gpiowrite(OLEDDC_GPIO, !cmd);
       return OK;
     }
+
   return -ENODEV;
 }
