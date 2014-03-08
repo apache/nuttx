@@ -46,7 +46,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* The following lists the input value to lm_configgpio to setup the alternate,
+/* The following lists the input value to tiva_configgpio to setup the alternate,
  * hardware function for each pin.
  */
 

@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/tiva/chip.h
+ * arch/arm/src/tiva/tiva_ethernet.h
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,26 +33,18 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_CHIP_H
-#define __ARCH_ARM_SRC_TIVA_CHIP_H
+#ifndef __ARCH_ARM_SRC_TIVA_TIVA_ETHERNET_H
+#define __ARCH_ARM_SRC_TIVA_TIVA_ETHERNET_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/tiva/chip.h>
 
-/* Then get all of the register definitions */
+#include "chip.h"
 
-#include "chip/tiva_memorymap.h"  /* Memory map */
-#include "chip/tiva_syscontrol.h" /* System control module */
-#include "chip/tiva_gpio.h"       /* GPIO modules */
-#include "chip/tiva_uart.h"       /* UART modules */
-#include "chip/tiva_i2c.h"        /* I2C modules */
-#include "chip/tiva_ssi.h"        /* SSI modules */
-#include "chip/tiva_ethernet.h"   /* Ethernet MAC and PHY */
-#include "chip/tiva_flash.h"      /* FLASH */
+#if LM_NETHCONTROLLERS > 1
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -63,11 +55,49 @@
  ************************************************************************************/
 
 /************************************************************************************
+ * Inline Functions
+ ************************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+/************************************************************************************
  * Public Data
  ************************************************************************************/
+
+#if defined(__cplusplus)
+extern "C"
+{
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_TIVA_CHIP_H */
+/****************************************************************************
+ * Function: tiva_ethinitialize
+ *
+ * Description:
+ *   Initialize the Ethernet driver for one interface.  If the Stellaris chip
+ *   supports multiple Ethernet controllers, then bould specific logic
+ *   must implement up_netinitialize() and call this function to initialize
+ *   the desiresed interfaces.
+ *
+ * Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+int tiva_ethinitialize(int intf);
+
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* LM_NETHCONTROLLERS > 1 */
+#endif /* __ARCH_ARM_SRC_TIVA_TIVA_ETHERNET_H */

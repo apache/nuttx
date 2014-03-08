@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/tiva/chip.h
+ * arch/arm/src/tiva/tiva_ssi.h
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,26 +33,17 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_CHIP_H
-#define __ARCH_ARM_SRC_TIVA_CHIP_H
+#ifndef __ARCH_ARM_SRC_TIVA_TIVA_SSI_H
+#define __ARCH_ARM_SRC_TIVA_TIVA_SSI_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/tiva/chip.h>
 
-/* Then get all of the register definitions */
-
-#include "chip/tiva_memorymap.h"  /* Memory map */
-#include "chip/tiva_syscontrol.h" /* System control module */
-#include "chip/tiva_gpio.h"       /* GPIO modules */
-#include "chip/tiva_uart.h"       /* UART modules */
-#include "chip/tiva_i2c.h"        /* I2C modules */
-#include "chip/tiva_ssi.h"        /* SSI modules */
-#include "chip/tiva_ethernet.h"   /* Ethernet MAC and PHY */
-#include "chip/tiva_flash.h"      /* FLASH */
+#include <stdint.h>
+#include <stdbool.h>
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -63,11 +54,61 @@
  ************************************************************************************/
 
 /************************************************************************************
+ * Inline Functions
+ ************************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+/************************************************************************************
  * Public Data
  ************************************************************************************/
+
+#if defined(__cplusplus)
+extern "C"
+{
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_TIVA_CHIP_H */
+/****************************************************************************
+ * The external functions, tiva_spiselect, tiva_spistatus, and
+ * tiva_spicmddata must be provided by board-specific logic.  These are
+ * implementations of the select, status, and cmddata methods of the SPI
+ * interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h).
+ * All other methods (including up_spiinitialize()) are provided by common
+ * logic.  To use this common SPI logic on your board:
+ *
+ *   1. Provide logic in tiva_boardinitialize() to configure SPI chip select
+ *      pins.
+ *   2. Provide tiva_spiselect() and tiva_spistatus() functions in your
+ *      board-specific logic.  These functions will perform chip selection and
+ *      status operations using GPIOs in the way your board is configured.
+ *   3. If CONFIG_SPI_CMDDATA is defined in your NuttX configuration, provide
+ *      the tiva_spicmddata() function in your board-specific logic.  This
+ *      functions will perform cmd/data selection operations using GPIOs in
+ *      the way your board is configured.
+ *   4. Add a call to up_spiinitialize() in your low level application
+ *      initialization logic
+ *   5. The handle returned by up_spiinitialize() may then be used to bind the
+ *      SPI driver to higher level logic (e.g., calling 
+ *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
+ *      the SPI MMC/SD driver).
+ *
+ ****************************************************************************/
+
+struct spi_dev_s;
+enum spi_dev_e;
+void tiva_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+uint8_t tiva_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+#ifdef CONFIG_SPI_CMDDATA
+int tiva_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+#endif
+
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_TIVA_TIVA_SSI_H */

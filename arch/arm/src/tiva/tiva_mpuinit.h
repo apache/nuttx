@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/tiva/chip.h
+ * arch/arm/src/tiva/tiva_mpuinit.h
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,26 +33,14 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_CHIP_H
-#define __ARCH_ARM_SRC_TIVA_CHIP_H
+#ifndef __ARCH_ARM_SRC_TIVA_TIVA_MPUINIT_H
+#define __ARCH_ARM_SRC_TIVA_TIVA_MPUINIT_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/tiva/chip.h>
-
-/* Then get all of the register definitions */
-
-#include "chip/tiva_memorymap.h"  /* Memory map */
-#include "chip/tiva_syscontrol.h" /* System control module */
-#include "chip/tiva_gpio.h"       /* GPIO modules */
-#include "chip/tiva_uart.h"       /* UART modules */
-#include "chip/tiva_i2c.h"        /* I2C modules */
-#include "chip/tiva_ssi.h"        /* SSI modules */
-#include "chip/tiva_ethernet.h"   /* Ethernet MAC and PHY */
-#include "chip/tiva_flash.h"      /* FLASH */
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -66,8 +54,37 @@
  * Public Data
  ************************************************************************************/
 
+/************************************************************************************
+ * Public Functions
+ ************************************************************************************/
+
 /****************************************************************************
- * Public Function Prototypes
+ * Name: tiva_mpuinitialize
+ *
+ * Description:
+ *   Configure the MPU to permit user-space access to only unrestricted MCU
+ *   resources.
+ *
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_TIVA_CHIP_H */
+#ifdef CONFIG_NUTTX_KERNEL
+void tiva_mpuinitialize(void);
+#else
+#  define tiva_mpuinitialize()
+#endif
+
+/****************************************************************************
+ * Name: tiva_mpu_uheap
+ *
+ * Description:
+ *  Map the user heap region.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NUTTX_KERNEL
+void tiva_mpu_uheap(uintptr_t start, size_t size);
+#else
+#  define tiva_mpu_uheap(start,size)
+#endif
+
+#endif /* __ARCH_ARM_SRC_TIVA_TIVA_MPUINIT_H */

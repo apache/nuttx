@@ -41,10 +41,10 @@
  * Vectors
  ************************************************************************************/
 
-/* This file is included by lm_vectors.S.  It provides the macro VECTOR that
+/* This file is included by tiva_vectors.S.  It provides the macro VECTOR that
  * supplies ach Stellaris vector in terms of a (lower-case) ISR label and an
  * (upper-case) IRQ number as defined in arch/arm/include/lm/lm3s_irq.h.
- * lm_vectors.S will define the VECTOR in different ways in order to generate
+ * tiva_vectors.S will define the VECTOR in different ways in order to generate
  * the interrupt vectors and handlers in their final form.
  */
 

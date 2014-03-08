@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/tiva/chip.h
+ * arch/arm/src/tiva/tiva_syscontrol.h
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,26 +33,14 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_CHIP_H
-#define __ARCH_ARM_SRC_TIVA_CHIP_H
+#ifndef __ARCH_ARM_SRC_TIVA_TIVA_SYSCONTROL_H
+#define __ARCH_ARM_SRC_TIVA_TIVA_SYSCONTROL_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/tiva/chip.h>
-
-/* Then get all of the register definitions */
-
-#include "chip/tiva_memorymap.h"  /* Memory map */
-#include "chip/tiva_syscontrol.h" /* System control module */
-#include "chip/tiva_gpio.h"       /* GPIO modules */
-#include "chip/tiva_uart.h"       /* UART modules */
-#include "chip/tiva_i2c.h"        /* I2C modules */
-#include "chip/tiva_ssi.h"        /* SSI modules */
-#include "chip/tiva_ethernet.h"   /* Ethernet MAC and PHY */
-#include "chip/tiva_flash.h"      /* FLASH */
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -63,11 +51,50 @@
  ************************************************************************************/
 
 /************************************************************************************
+ * Inline Functions
+ ************************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+/************************************************************************************
  * Public Data
  ************************************************************************************/
+
+#if defined(__cplusplus)
+extern "C"
+{
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_TIVA_CHIP_H */
+/****************************************************************************
+ * Name: tiva_clockconfig
+ *
+ * Description:
+ *   Called to change to new clock based on desired rcc and rcc2 settings.
+ *   This is use to set up the initial clocking but can be used later to
+ *   support slow clocked, low power consumption modes.
+ *
+ ****************************************************************************/
+
+void tiva_clockconfig(uint32_t newrcc, uint32_t newrcc2);
+
+/****************************************************************************
+ * Name: up_clockconfig
+ *
+ * Description:
+ *   Called early in the bootsequence (before .data and .bss are available)
+ *   in order to configure initial clocking.
+ *
+ ****************************************************************************/
+
+void up_clockconfig(void);
+
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_TIVA_TIVA_SYSCONTROL_H */

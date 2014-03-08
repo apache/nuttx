@@ -195,7 +195,7 @@ config LM_BOARDMAC
 	default n
 	---help---
 		If the board-specific logic can provide a MAC address (via
-		lm_ethernetmac()), then this should be selected.
+		tiva_ethernetmac()), then this should be selected.
 
 config LM_ETHHDUPLEX
 	bool "Force Half Duplex"

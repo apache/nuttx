@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/tiva/chip.h
+ * arch/arm/src/tiva/chip/tiva_syscontrol.h
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_CHIP_H
-#define __ARCH_ARM_SRC_TIVA_CHIP_H
+#ifndef __ARCH_ARM_SRC_TIVA_CHIP_TIVA_SYSCONTROL_H
+#define __ARCH_ARM_SRC_TIVA_CHIP_TIVA_SYSCONTROL_H
 
 /************************************************************************************
  * Included Files
@@ -43,16 +43,15 @@
 #include <nuttx/config.h>
 #include <arch/tiva/chip.h>
 
-/* Then get all of the register definitions */
+/* Include the system control header file for the specific Stellaris chip */
 
-#include "chip/tiva_memorymap.h"  /* Memory map */
-#include "chip/tiva_syscontrol.h" /* System control module */
-#include "chip/tiva_gpio.h"       /* GPIO modules */
-#include "chip/tiva_uart.h"       /* UART modules */
-#include "chip/tiva_i2c.h"        /* I2C modules */
-#include "chip/tiva_ssi.h"        /* SSI modules */
-#include "chip/tiva_ethernet.h"   /* Ethernet MAC and PHY */
-#include "chip/tiva_flash.h"      /* FLASH */
+#if defined(CONFIG_ARCH_CHIP_LM3S)
+#  include "chip/lm3s_syscontrol.h"
+#elif defined(CONFIG_ARCH_CHIP_LM4F)
+#  include "chip/lm4f_syscontrol.h"
+#else
+#  error "Unsupported Stellaris memory map"
+#endif
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -66,8 +65,8 @@
  * Public Data
  ************************************************************************************/
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
+/************************************************************************************
+ * Public Functions
+ ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_TIVA_CHIP_H */
+#endif /* __ARCH_ARM_SRC_TIVA_CHIP_TIVA_SYSCONTROL_H */

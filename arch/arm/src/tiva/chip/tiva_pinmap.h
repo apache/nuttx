@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/tiva/chip.h
+ * arch/arm/src/tiva/chip/tiva_pinmap.h
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,26 +33,24 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_CHIP_H
-#define __ARCH_ARM_SRC_TIVA_CHIP_H
+#ifndef __ARCH_ARM_SRC_TIVA_CHIP_TIVA_PINMAP_H
+#define __ARCH_ARM_SRC_TIVA_CHIP_TIVA_PINMAP_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/tiva/chip.h>
 
-/* Then get all of the register definitions */
+/* Include the pin mapping file for the specific Tiva/Stellaris chip */
 
-#include "chip/tiva_memorymap.h"  /* Memory map */
-#include "chip/tiva_syscontrol.h" /* System control module */
-#include "chip/tiva_gpio.h"       /* GPIO modules */
-#include "chip/tiva_uart.h"       /* UART modules */
-#include "chip/tiva_i2c.h"        /* I2C modules */
-#include "chip/tiva_ssi.h"        /* SSI modules */
-#include "chip/tiva_ethernet.h"   /* Ethernet MAC and PHY */
-#include "chip/tiva_flash.h"      /* FLASH */
+#if defined(CONFIG_ARCH_CHIP_LM3S)
+#  include "chip/lm3s_pinmap.h"
+#elif defined(CONFIG_ARCH_CHIP_LM4F)
+#  include "chip/lm4f_pinmap.h"
+#else
+#  error "Unsupported Tiva/Stellaris PIN mapping"
+#endif
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -66,8 +64,8 @@
  * Public Data
  ************************************************************************************/
 
-/****************************************************************************
+/************************************************************************************
  * Public Function Prototypes
- ****************************************************************************/
+ ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_TIVA_CHIP_H */
+#endif /* __ARCH_ARM_SRC_TIVA_CHIP_TIVA_PINMAP_H */
