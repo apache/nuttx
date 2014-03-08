@@ -1,8 +1,7 @@
 /************************************************************************************
- * configs/qemu-i486/src/qemui486_internal.h
- * arch/x86/src/board/qemui486_internal.n
+ * configs/qemu-i486/src/qemu_i486.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef _CONFIGS_QEMU_I486_SRC_QEMUI486_INTERNAL_H
-#define _CONFIGS_QEMU_I486_SRC_QEMUI486_INTERNAL_H
+#ifndef _CONFIGS_QEMU_I486_SRC_QEMU_I486_H
+#define _CONFIGS_QEMU_I486_SRC_QEMU_I486_H
 
 /************************************************************************************
  * Included Files
@@ -65,5 +64,4 @@
  ************************************************************************************/
 
 #endif /* __ASSEMBLY__ */
-#endif /* _CONFIGS_QEMU_I486_SRC_QEMUI486_INTERNAL_H */
-
+#endif /* _CONFIGS_QEMU_I486_SRC_QEMU_I486_H */
