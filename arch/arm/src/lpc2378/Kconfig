@@ -117,23 +117,38 @@ menu "LPC2378 Peripheral Support"
 
 config LPC2378_UART0
 	bool "UART0"
-	default y
+	default n
 	select ARCH_HAVE_UART0
 
 config LPC2378_UART1
 	bool "UART1"
-	default y
+	default n
 	select ARCH_HAVE_UART1
 
 config LPC2378_UART2
 	bool "UART2"
-	default y
+	default n
 	select ARCH_HAVE_UART2
 
 config LPC2378_USBDEV
 	bool "USB Device"
-	default y
+	default n
 	depends on USBDEV
+
+config LPC2378_IC0
+	bool "I2C0"
+	default n
+	select I2C
+
+config LPC2378_IC1
+	bool "I2C1"
+	default n
+	select I2C
+
+config LPC2378_IC2
+	bool "I2C2"
+	default n
+	select I2C
 
 endmenu
 
