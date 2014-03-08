@@ -34,6 +34,7 @@ CONFIG_RAW_BINARY=y
 #
 # Customize Header Files
 #
+# CONFIG_ARCH_STDINT_H is not set
 # CONFIG_ARCH_STDBOOL_H is not set
 # CONFIG_ARCH_MATH_H is not set
 # CONFIG_ARCH_FLOAT_H is not set
@@ -78,6 +79,7 @@ CONFIG_ARCH="arm"
 # CONFIG_ARCH_CHIP_KINETIS is not set
 # CONFIG_ARCH_CHIP_KL is not set
 CONFIG_ARCH_CHIP_LM=y
+# CONFIG_ARCH_CHIP_TIVA is not set
 # CONFIG_ARCH_CHIP_LPC17XX is not set
 # CONFIG_ARCH_CHIP_LPC214X is not set
 # CONFIG_ARCH_CHIP_LPC2378 is not set
@@ -103,7 +105,8 @@ CONFIG_ARCH_CHIP="tiva"
 CONFIG_ARCH_HAVE_CMNVECTOR=y
 # CONFIG_ARMV7M_CMNVECTOR is not set
 # CONFIG_ARCH_HAVE_FPU is not set
-# CONFIG_ARCH_HAVE_MPU is not set
+CONFIG_ARCH_HAVE_MPU=y
+# CONFIG_ARMV7M_MPU is not set
 
 #
 # ARMV7M Configuration Options
@@ -118,7 +121,7 @@ CONFIG_ARMV7M_TOOLCHAIN_DEVKITARM=y
 # CONFIG_ARMV7M_TOOLCHAIN_RAISONANCE is not set
 
 #
-# Stellaris Configuration Options
+# Tiva/Stellaris Configuration Options
 #
 CONFIG_ARCH_CHIP_LM3S6918=y
 # CONFIG_ARCH_CHIP_LM3S9B96 is not set
@@ -131,7 +134,7 @@ CONFIG_TIVA_HAVE_SSI1=y
 # CONFIG_LM_REVA2 is not set
 
 #
-# Stellaris Peripheral Support
+# Tiva/Stellaris Peripheral Support
 #
 CONFIG_TIVA_UART0=y
 # CONFIG_TIVA_UART1 is not set
@@ -155,7 +158,7 @@ CONFIG_TIVA_ETHERNET=y
 CONFIG_TIVA_DISABLE_GPIOJ_IRQS=y
 
 #
-# Stellaris Ethernet Configuration
+# Tiva/Stellaris Ethernet Configuration
 #
 # CONFIG_TIVA_ETHLEDS is not set
 CONFIG_TIVA_BOARDMAC=y
@@ -169,7 +172,7 @@ CONFIG_TIVA_BOARDMAC=y
 # CONFIG_M3S_DUMPPACKET is not set
 
 #
-# Stellaris SSI Configuration
+# Tiva/Stellaris SSI Configuration
 #
 CONFIG_SSI_POLLWAIT=y
 CONFIG_SSI_TXLIMIT=4
@@ -190,6 +193,7 @@ CONFIG_ARCH_HAVE_VFORK=y
 CONFIG_ARCH_IRQPRIO=y
 CONFIG_ARCH_STACKDUMP=y
 # CONFIG_ENDIAN_BIG is not set
+# CONFIG_ARCH_IDLE_CUSTOM is not set
 # CONFIG_ARCH_HAVE_RAMFUNCS is not set
 CONFIG_ARCH_HAVE_RAMVECTORS=y
 # CONFIG_ARCH_RAMVECTORS is not set
@@ -371,7 +375,27 @@ CONFIG_NETDEVICES=y
 CONFIG_SERIAL=y
 # CONFIG_DEV_LOWCONSOLE is not set
 # CONFIG_16550_UART is not set
+# CONFIG_ARCH_HAVE_UART is not set
 CONFIG_ARCH_HAVE_UART0=y
+# CONFIG_ARCH_HAVE_UART1 is not set
+# CONFIG_ARCH_HAVE_UART2 is not set
+# CONFIG_ARCH_HAVE_UART3 is not set
+# CONFIG_ARCH_HAVE_UART4 is not set
+# CONFIG_ARCH_HAVE_UART5 is not set
+# CONFIG_ARCH_HAVE_UART6 is not set
+# CONFIG_ARCH_HAVE_UART7 is not set
+# CONFIG_ARCH_HAVE_UART8 is not set
+# CONFIG_ARCH_HAVE_SCI0 is not set
+# CONFIG_ARCH_HAVE_SCI1 is not set
+# CONFIG_ARCH_HAVE_USART0 is not set
+# CONFIG_ARCH_HAVE_USART1 is not set
+# CONFIG_ARCH_HAVE_USART2 is not set
+# CONFIG_ARCH_HAVE_USART3 is not set
+# CONFIG_ARCH_HAVE_USART4 is not set
+# CONFIG_ARCH_HAVE_USART5 is not set
+# CONFIG_ARCH_HAVE_USART6 is not set
+# CONFIG_ARCH_HAVE_USART7 is not set
+# CONFIG_ARCH_HAVE_USART8 is not set
 
 #
 # USART Configuration
