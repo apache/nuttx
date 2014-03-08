@@ -6953,3 +6953,7 @@
 	  thinking about naming (2014-3-8).
 	* arch/x86/src/qemu/qemu_keypad.c and qemu_vga.c:  New QEMU keyboard
 	  and VGA drivers from Lizhuoyi (2014-3-8).
+	* configs/olimex-lpc2378/src:  Files renamed to correspond with current
+	  thinking about naming (2014-3-8).
+	* arch/arm/src/lpc2378/lpc23xx_i2c.c and lpc23xx_spi.c:  I2C and SPI
+	  drivers for the LPC23xx from Lizhuoyi (2014-3-8).
