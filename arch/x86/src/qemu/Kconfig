@@ -6,4 +6,17 @@
 if ARCH_CHIP_QEMU
 comment "QEMU Configuration Options"
 
+config QEMU_KEYPAD
+	bool "QEMU Keypad"
+	default n
+	---help---
+		Enable support for the QEMU keypad.  See qemu_keypad.h for
+		interfaces.
+
+config QEMU_VGA
+	bool "QEMU VGA"
+	default n
+	---help---
+		Enable support for the QEMU VGA.  See qemu_vga.h for interfaces.
+
 endif
