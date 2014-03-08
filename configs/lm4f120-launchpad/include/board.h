@@ -65,7 +65,7 @@
  * of (400 / 1) / 5 = 80MHz (Using RCC2 and DIV400).
  */
 
-#define LM_SYSDIV            5
+#define TIVA_SYSDIV          5
 #define SYSCLK_FREQUENCY     80000000  /* 80MHz */
 
 /* Other RCC settings:
@@ -76,8 +76,8 @@
  * - No auto-clock gating reset
  */
 
-#define LM_RCC_VALUE (SYSCON_RCC_OSCSRC | SYSCON_RCC_XTAL | \
-                      SYSCON_RCC_USESYSDIV | SYSCON_RCC_SYSDIV(LM_SYSDIV))
+#define TIVA_RCC_VALUE (SYSCON_RCC_OSCSRC | SYSCON_RCC_XTAL | \
+                      SYSCON_RCC_USESYSDIV | SYSCON_RCC_SYSDIV(TIVA_SYSDIV))
 
 /* RCC2 settings
  *
@@ -98,13 +98,13 @@
  *   etc.
  */
 
-#if (LM_SYSDIV & 1) == 0
-#  define LM_RCC2_VALUE (SYSCON_RCC2_OSCSRC | SYSCON_RCC2_SYSDIV2LSB | \
-                         SYSCON_RCC2_SYSDIV_DIV400(LM_SYSDIV) | \
-                         SYSCON_RCC2_DIV400 | SYSCON_RCC2_USERCC2)
+#if (TIVA_SYSDIV & 1) == 0
+#  define TIVA_RCC2_VALUE (SYSCON_RCC2_OSCSRC | SYSCON_RCC2_SYSDIV2LSB | \
+                           SYSCON_RCC2_SYSDIV_DIV400(TIVA_SYSDIV) | \
+                           SYSCON_RCC2_DIV400 | SYSCON_RCC2_USERCC2)
 #else
-#  define LM_RCC2_VALUE (SYSCON_RCC2_OSCSRC | SYSCON_RCC2_SYSDIV_DIV400(LM_SYSDIV) | \
-                         SYSCON_RCC2_DIV400 | SYSCON_RCC2_USERCC2)
+#  define TIVA_RCC2_VALUE (SYSCON_RCC2_OSCSRC | SYSCON_RCC2_SYSDIV_DIV400(TIVA_SYSDIV) | \
+                           SYSCON_RCC2_DIV400 | SYSCON_RCC2_USERCC2)
 #endif
 
 /* LED definitions ******************************************************************/

@@ -68,12 +68,12 @@
  *
  * Description:
  *   For the Ethernet Eval Kits, the MAC address will be stored in the non-volatile
- *   USER0 and USER1 registers.  If CONFIG_LM_BOARDMAC is defined, this function
+ *   USER0 and USER1 registers.  If CONFIG_TIVA_BOARDMAC is defined, this function
  *   will obtain the MAC address from these registers.
  *
  ************************************************************************************/
 
-#ifdef CONFIG_LM_BOARDMAC
+#ifdef CONFIG_TIVA_BOARDMAC
 void tiva_ethernetmac(struct ether_addr *ethaddr)
 {
   uint32_t user0;
@@ -81,8 +81,8 @@ void tiva_ethernetmac(struct ether_addr *ethaddr)
 
   /* Get the current value of the user registers */
 
-  user0 = getreg32(LM_FLASH_USERREG0);
-  user1 = getreg32(LM_FLASH_USERREG1);
+  user0 = getreg32(TIVA_FLASH_USERREG0);
+  user1 = getreg32(TIVA_FLASH_USERREG1);
 
   nlldbg("user: %06x:%06x\n", user1 & 0x00ffffff, user0 & 0x00ffffff);
   DEBUGASSERT(user0 != 0xffffffff && user1 != 0xffffffff);
