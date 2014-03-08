@@ -58,7 +58,7 @@
 #include "lpc23xx_vic.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -121,22 +121,24 @@ void up_irqinitialize(void)
  * VIC registers can be accessed in User or privileged mode
  ***********************************************************************/
 
+#if 0 /* Not used */
 static void up_enable_irq_protect(void)
 {
-  // ~ uint32_t reg32 = vic_getreg(VIC_PROTECTION_OFFSET);
-  // ~ reg32 &= ~(0xFFFFFFFF);
   vic_putreg(0x01, VIC_PROTECTION_OFFSET);
 }
+#endif
 
 /***********************************************************************
  * Name: up_disable_irq_protect
  * VIC registers can only be accessed in privileged mode
  ***********************************************************************/
 
+#if 0 /* Not used */
 static void up_disable_irq_protect(void)
 {
   vic_putreg(0, VIC_PROTECTION_OFFSET);
 }
+#endif
 
 /***********************************************************************
  * Name: up_disable_irq
@@ -227,17 +229,21 @@ void up_maskack_irq(int irq)
  * MOD
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_IRQPRIO
 int up_prioritize_irq(int irq, int priority)
 {
   /* The default priority on reset is 16 */
+
   if (irq < NR_IRQS && priority > 0 && priority < 16)
     {
       int offset = irq << 2;
       vic_putreg(priority, VIC_VECTPRIORITY0_OFFSET + offset);
       return OK;
     }
+
   return -EINVAL;
 }
+#endif
 
 /****************************************************************************
  * Name: up_attach_vector
@@ -262,11 +268,13 @@ void up_attach_vector(int irq, int vector, vic_vector_t handler)
 
       /* Save the vector address */
 
-      vic_putreg((uint32_t) handler, VIC_VECTADDR0_OFFSET + offset);
+      vic_putreg((uint32_t)handler, VIC_VECTADDR0_OFFSET + offset);
 
+#ifdef CONFIG_ARCH_IRQPRIO
       /* Set the interrupt priority */
 
-      up_prioritize_irq(irq, vector);
+      up_prioritize_irq(irq, PRIORITY_HIGHEST);
+#endif
 
       /* Enable the vectored interrupt */
 

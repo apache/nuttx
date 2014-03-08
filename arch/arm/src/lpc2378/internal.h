@@ -14,14 +14,14 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *	notice, this list of conditions and the following disclaimer.
+ *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
- *	notice, this list of conditions and the following disclaimer in
- *	the documentation and/or other materials provided with the
- *	distribution.
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
  * 3. Neither the name NuttX nor the names of its contributors may be
- *	used to endorse or promote products derived from this software
- *	without specific prior written permission.
+ *    used to endorse or promote products derived from this software
+ *    without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -61,8 +61,8 @@
 #ifndef __ASSEMBLY__
 
 #ifdef CONFIG_ARCH_LEDS
-extern void up_statledoff(void);
-extern void up_statledon(void);
+extern void lpc2378_statledoff(void);
+extern void lpc2378_statledon(void);
 #endif
 
 #endif
