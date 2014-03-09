@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/tiva/chip/tm2c_vectors.h
+ * arch/arm/src/tiva/chip/tm4c_vectors.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -43,7 +43,7 @@
 
 /* This file is included by tiva_vectors.S.  It provides the macro VECTOR that
  * supplies each Tiva vector in terms of a (lower-case) ISR label and an
- * (upper-case) IRQ number as defined in arch/arm/include/tiva/tm3c_irq.h.
+ * (upper-case) IRQ number as defined in arch/arm/include/tiva/tm4c_irq.h.
  * tiva_vectors.S will define the VECTOR in different ways in order to generate
  * the interrupt vectors and handlers in their final form.
  */
