@@ -187,6 +187,36 @@ config TIVA_DISABLE_GPIOJ_IRQS
 	bool "Disable GPIOJ IRQs"
 	default n
 
+config TIVA_DISABLE_GPIOK_IRQS
+	bool "Disable GPIOK IRQs"
+	default n
+	depends on ARCH_CHIP_TM4C
+
+config TIVA_DISABLE_GPIOL_IRQS
+	bool "Disable GPIOL IRQs"
+	default n
+	depends on ARCH_CHIP_TM4C
+
+config TIVA_DISABLE_GPIOM_IRQS
+	bool "Disable GPIOM IRQs"
+	default n
+	depends on ARCH_CHIP_TM4C
+
+config TIVA_DISABLE_GPION_IRQS
+	bool "Disable GPION IRQs"
+	default n
+	depends on ARCH_CHIP_TM4C
+
+config TIVA_DISABLE_GPIOP_IRQS
+	bool "Disable GPIOP IRQs"
+	default n
+	depends on ARCH_CHIP_TM4C
+
+config TIVA_DISABLE_GPIOQ_IRQS
+	bool "Disable GPIOQ IRQs"
+	default n
+	depends on ARCH_CHIP_TM4C
+
 endmenu
 
 if TIVA_ETHERNET
