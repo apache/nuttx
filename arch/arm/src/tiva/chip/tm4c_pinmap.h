@@ -65,8 +65,7 @@
  * pins in this file.
  */
 
-#if defined(CONFIG_ARCH_CHIP_TM4C120)
-
+#if defined(CONFIG_ARCH_CHIP_TM4C123GH6ZRB)
 
 #  define GPIO_ADC_AIN0        (GPIO_FUNC_ANINPUT | GPIO_PORTE | GPIO_PIN_3)
 #  define GPIO_ADC_AIN1        (GPIO_FUNC_ANINPUT | GPIO_PORTE | GPIO_PIN_2)

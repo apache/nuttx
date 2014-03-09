@@ -6966,4 +6966,6 @@
 	* configs/: Refresh all LM3/4/Tiva configurations (2014-3-9).
 	* arch/arm/src/tiva/chip/tm4c_pinmap.h:  Add pin multiplex definitions
 	  for the TM4C123 (2014-3-9).
+	* arch/arm/src/tiva/chip/tm4c_memorymap.h:  Add memory map for the
+	  TM4C123 (2014-3-9).
 
