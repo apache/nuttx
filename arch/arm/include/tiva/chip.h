@@ -55,6 +55,7 @@
 #  undef  TM4C                    /* Not TM4C family */
 #  define TIVA_NTIMERS         4  /* Four general purpose timers */
 #  define TIVA_NWIDETIMERS     0  /* No general purpose wide timers */
+#  define TIVA_NWDT            1  /* One watchdog timer */
 #  define TIVA_NETHCONTROLLERS 1  /* One Ethernet controller */
 #  undef  TIVA_ETHTS              /* No timestamp register */
 #  define TIVA_NSSI            2  /* Two SSI modules */
@@ -65,12 +66,14 @@
 #  define TIVA_NQEI            0  /* No quadrature encoders */
 #  define TIVA_NPORTS          8  /* 8 Ports (GPIOA-H) 5-38 GPIOs */
 #  define TIVA_NCANCONTROLLER  0  /* No CAN controllers */
+#  define TIVA_NUSBOTGFS       0  /* No USB 2.0 OTG FS */
 #elif defined(CONFIG_ARCH_CHIP_LM3S6432)
 #  define LM3S                 1  /* LM3S family */
 #  undef  LM4F                    /* Not LM4F family */
 #  undef  TM4C                    /* Not TM4C family */
 #  define TIVA_NTIMERS         3  /* Three general purpose timers */
 #  define TIVA_NWIDETIMERS     0  /* No general purpose wide timers */
+#  define TIVA_NWDT            1  /* One watchdog timer */
 #  define TIVA_NETHCONTROLLERS 1  /* One Ethernet controller */
 #  undef  TIVA_ETHTS              /* No timestamp register */
 #  define TIVA_NSSI            1  /* One SSI module */
@@ -81,12 +84,14 @@
 #  define TIVA_NQEI            0  /* No quadrature encoders */
 #  define TIVA_NPORTS          7  /* 7 Ports (GPIOA-G), 0-42 GPIOs */
 #  define TIVA_NCANCONTROLLER  0  /* No CAN controllers */
+#  define TIVA_NUSBOTGFS       0  /* No USB 2.0 OTG FS */
 #elif defined(CONFIG_ARCH_CHIP_LM3S6965)
 #  define LM3S                 1  /* LM3S family */
 #  undef  LM4F                    /* Not LM4F family */
 #  undef  TM4C                    /* Not TM4C family */
 #  define TIVA_NTIMERS         4  /* Four general purpose timers */
 #  define TIVA_NWIDETIMERS     0  /* No general purpose wide timers */
+#  define TIVA_NWDT            1  /* One watchdog timer */
 #  define TIVA_NETHCONTROLLERS 1  /* One Ethernet controller */
 #  undef  TIVA_ETHTS              /* No timestamp register */
 #  define TIVA_NSSI            1  /* One SSI module */
@@ -97,12 +102,14 @@
 #  define TIVA_NQEI            2  /* Two quadrature encoders */
 #  define TIVA_NPORTS          7  /* 7 Ports (GPIOA-G), 0-42 GPIOs */
 #  define TIVA_NCANCONTROLLER  0  /* No CAN controllers */
+#  define TIVA_NUSBOTGFS       0  /* No USB 2.0 OTG FS */
 #elif defined(CONFIG_ARCH_CHIP_LM3S9B96)
 #  define LM3S                 1  /* LM3S family */
 #  undef  LM4F                    /* Not LM4F family */
 #  undef  TM4C                    /* Not TM4C family */
 #  define TIVA_NTIMERS         4  /* Four general purpose timers */
 #  define TIVA_NWIDETIMERS     0  /* No general purpose wide timers */
+#  define TIVA_NWDT            1  /* One watchdog timer */
 #  define TIVA_NETHCONTROLLERS 1  /* One Ethernet controller */
 #  undef  TIVA_ETHTS              /* No timestamp register */
 #  define TIVA_NSSI            2  /* Two SSI modules */
@@ -114,12 +121,14 @@
 #  define TIVA_NQEI            2  /* Two quadrature encoders */
 #  define TIVA_NPORTS          9  /* 9 Ports (GPIOA-H,J) 0-65 GPIOs */
 #  define TIVA_NCANCONTROLLER  0  /* No CAN controllers */
+#  define TIVA_NUSBOTGFS       0  /* No USB 2.0 OTG FS */
 #elif defined(CONFIG_ARCH_CHIP_LM3S8962)
 #  define LM3S                 1  /* LM3S family */
 #  undef  LM4F                    /* Not LM4F family */
 #  undef  TM4C                    /* Not TM4C family */
 #  define TIVA_NTIMERS         6  /* Four general purpose timers */
 #  define TIVA_NWIDETIMERS     0  /* No general purpose wide timers */
+#  define TIVA_NWDT            1  /* One watchdog timer */
 #  define TIVA_NETHCONTROLLERS 1  /* One Ethernet controller */
 #  define TIVA_NSSI            1  /* One SSI module */
 #  define TIVA_NUARTS          3  /* Two UART modules */
@@ -129,12 +138,14 @@
 #  define TIVA_NQEI            2  /* Two quadrature encoders */
 #  define TIVA_NPORTS          7  /* 7 Ports (GPIOA-G), 5-42 GPIOs */
 #  define TIVA_NCANCONTROLLER  1  /* One CAN controller */
+#  define TIVA_NUSBOTGFS       0  /* No USB 2.0 OTG FS */
 #elif defined(CONFIG_ARCH_CHIP_LM4F120)
 #  undef  LM3S                    /* Not LM3S family */
 #  define LM4F                 1  /* LM4F family */
 #  undef  TM4C                    /* Not TM4C family */
 #  define TIVA_NTIMERS         6  /* Six general purpose timers */
 #  define TIVA_NWIDETIMERS     6  /* Six general purpose wide timers */
+#  define TIVA_NWDT            2  /* Two watchdog timer timers */
 #  define TIVA_NETHCONTROLLERS 0  /* No Ethernet controller */
 #  define TIVA_NSSI            4  /* Four SSI module */
 #  define TIVA_NUARTS          8  /* Eight UART modules */
@@ -144,6 +155,25 @@
 #  define TIVA_NQEI            0  /* No quadrature encoders */
 #  define TIVA_NPORTS          6  /* 6 Ports (GPIOA-F), 0-43 GPIOs */
 #  define TIVA_NCANCONTROLLER  1  /* One CAN controller */
+#  define TIVA_NUSBOTGFS       0  /* No USB 2.0 OTG FS */
+#elif defined(CONFIG_ARCH_CHIP_TM4C123GH6PGE) || defined(CONFIG_ARCH_CHIP_TM4C123GH6PZ) || \
+      defined(CONFIG_ARCH_CHIP_TM4C123GH6ZRB)
+#  undef  LM3S                    /* Not LM3S family */
+#  undef  LM4F                    /* Not LM4F family */
+#  define TM4C                 1  /* TM4C family */
+#  define TIVA_NTIMERS         6  /* Six general purpose timers */
+#  define TIVA_NWIDETIMERS     6  /* Six general purpose wide timers */
+#  define TIVA_NWDT            2  /* Two watchdog timers */
+#  define TIVA_NETHCONTROLLERS 0  /* No Ethernet controller */
+#  define TIVA_NSSI            4  /* Four SSI module */
+#  define TIVA_NUARTS          8  /* Eight UART modules */
+#  define TIVA_NI2C            6  /* Six I2C modules */
+#  define TIVA_NADC            2  /* Two ADC modules */
+#  define TIVA_NPWM            2  /* Two PWM generator modules */
+#  define TIVA_NQEI            1  /* One quadrature encoders */
+#  define TIVA_NPORTS          15 /* Fifteen Ports (GPIOA-Q) */
+#  define TIVA_NCANCONTROLLER  2  /* Two CAN controllers */
+#  define TIVA_NUSBOTGFS       1  /* One USB 2.0 OTG FS */
 #else
 #  error "Capabilities not specified for this Stellaris chip"
 #endif

@@ -43,6 +43,8 @@
 #  include "chip/lm3s_vectors.h"
 #elif defined(CONFIG_ARCH_CHIP_LM4F)
 #  include "chip/lm4f_vectors.h"
+#elif defined(CONFIG_ARCH_CHIP_TM3C)
+#  include "chip/tm3c_vectors.h"
 #else
 #  error "Unsupported Tiva/Stellaris vector file"
 #endif
