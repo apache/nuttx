@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/include/tiva/lm4f_irq.h
+ * arch/arm/include/tiva/tm3c_irq.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_INCLUDE_TIVA_LM4F_IRQ_H
-#define __ARCH_ARM_INCLUDE_TIVA_LM4F_IRQ_H
+#ifndef __ARCH_ARM_INCLUDE_TIVA_TM3C_IRQ_H
+#define __ARCH_ARM_INCLUDE_TIVA_TM3C_IRQ_H
 
 /************************************************************************************
  * Included Files
@@ -55,8 +55,7 @@
 
 #define TIVA_IRQ_INTERRUPTS (16) /* Vector number of the first external interrupt */
 
-#if defined(CONFIG_ARCH_CHIP_LM4F120)
-
+#if defined(CONFIG_ARCH_CHIP_TM4C123GH6ZRB)
 #  define TIVA_IRQ_GPIOA      (16)  /* Vector 16: GPIO Port A */
 #  define TIVA_IRQ_GPIOB      (17)  /* Vector 17: GPIO Port B */
 #  define TIVA_IRQ_GPIOC      (18)  /* Vector 18: GPIO Port C */
@@ -67,11 +66,11 @@
 #  define TIVA_IRQ_UART1      (22)  /* Vector 22: UART 1 */
 #  define TIVA_IRQ_SSI0       (23)  /* Vector 23: SSI 0 */
 #  define TIVA_IRQ_I2C0       (24)  /* Vector 24: I2C 0 */
-#  define TIVA_RESERVED_25    (25)  /* Vector 25: Reserved */
-#  define TIVA_RESERVED_26    (26)  /* Vector 26: Reserved */
-#  define TIVA_RESERVED_27    (27)  /* Vector 27: Reserved */
-#  define TIVA_RESERVED_28    (28)  /* Vector 28: Reserved */
-#  define TIVA_RESERVED_29    (29)  /* Vector 29: Reserved */
+#  define TIVA_IRQ_PWM0_FAULT (25)  /* Vector 25: PWM0 Fault */
+#  define TIVA_IRQ_PWM0_GEN0  (26)  /* Vector 26: PWM0 Generator 0 */
+#  define TIVA_IRQ_PWM0_GEN1  (27)  /* Vector 27: PWM0 Generator 1 */
+#  define TIVA_IRQ_PWM0_GEN2  (28)  /* Vector 28: PWM0 Generator 2 */
+#  define TIVA_IRQ_QEI0       (29)  /* Vector 29: QEI0 */
 
 #  define TIVA_IRQ_ADC0       (30)  /* Vector 30: ADC Sequence 0 */
 #  define TIVA_IRQ_ADC1       (31)  /* Vector 31: ADC Sequence 1 */
@@ -87,27 +86,27 @@
 #  define TIVA_IRQ_TIMER2B    (40)  /* Vector 40: 16/32-Bit Timer 2 B */
 #  define TIVA_IRQ_COMPARE0   (41)  /* Vector 41: Analog Comparator 0 */
 #  define TIVA_IRQ_COMPARE1   (42)  /* Vector 42: Analog Comparator 1 */
-#  define TIVA_RESERVED_43    (43)  /* Vector 43: Reserved */
+#  define TIVA_IRQ_COMPARE2   (43)  /* Vector 43: Analog Comparator 2 */
 #  define TIVA_IRQ_SYSCON     (44)  /* Vector 44: System Control */
 #  define TIVA_IRQ_FLASHCON   (45)  /* Vector 45: FLASH and EEPROM Control */
 #  define TIVA_IRQ_GPIOF      (46)  /* Vector 46: GPIO Port F */
-#  define TIVA_RESERVED_47    (47)  /* Vector 47: Reserved */
-#  define TIVA_RESERVED_48    (48)  /* Vector 48: Reserved */
+#  define TIVA_IRQ_GPIOG      (47)  /* Vector 47: GPIO Port G */
+#  define TIVA_IRQ_GPIOH      (48)  /* Vector 48: GPIO Port H */
 #  define TIVA_IRQ_UART2      (49)  /* Vector 49: UART 2 */
 
 #  define TIVA_IRQ_SSI1       (50)  /* Vector 50: SSI 1 */
 #  define TIVA_IRQ_TIMER3A    (51)  /* Vector 51: 16/32-Bit Timer 3 A */
 #  define TIVA_IRQ_TIMER3B    (52)  /* Vector 52: 16/32-Bit Timer 3 B */
 #  define TIVA_IRQ_I2C1       (53)  /* Vector 53: I2C 1 */
-#  define TIVA_RESERVED_54    (54)  /* Vector 54: Reserved */
+#  define TIVA_IRQ_QEI1       (54)  /* Vector 54: QEI1 */
 #  define TIVA_IRQ_CAN0       (55)  /* Vector 55: CAN 0 */
-#  define TIVA_RESERVED_56    (56)  /* Vector 56: Reserved */
+#  define TIVA_IRQ_CAN1       (56)  /* Vector 56: CAN 1 */
 #  define TIVA_RESERVED_57    (57)  /* Vector 57: Reserved */
 #  define TIVA_RESERVED_58    (58)  /* Vector 58: Reserved */
 #  define TIVA_IRQ_HIBERNATE  (59)  /* Vector 59: Hibernation Module */
 
 #  define TIVA_IRQ_USB        (60)  /* Vector 60: USB */
-#  define TIVA_RESERVED_61    (61)  /* Vector 61: Reserved */
+#  define TIVA_IRQ_PWM0_GEN3  (61)  /* Vector 61: PWM0 Generator 3 */
 #  define TIVA_IRQ_UDMASOFT   (62)  /* Vector 62: uDMA Software */
 #  define TIVA_IRQ_UDMAERROR  (63)  /* Vector 63: uDMA Error */
 #  define TIVA_IRQ_ADC1_0     (64)  /* Vector 64: ADC1 Sequence 0 */
@@ -117,9 +116,9 @@
 #  define TIVA_RESERVED_68    (68)  /* Vector 68: Reserved */
 #  define TIVA_RESERVED_69    (69)  /* Vector 69: Reserved */
 
-#  define TIVA_RESERVED_70    (70)  /* Vector 70: Reserved */
-#  define TIVA_RESERVED_71    (71)  /* Vector 71: Reserved */
-#  define TIVA_RESERVED_72    (72)  /* Vector 72: Reserved */
+#  define TIVA_IRQ_GPIOJ      (70)  /* Vector 70: GPIO Port J */
+#  define TIVA_IRQ_GPIOK      (71)  /* Vector 71: GPIO Port K */
+#  define TIVA_IRQ_GPIOL      (72)  /* Vector 72: GPIO Port L */
 #  define TIVA_IRQ_SSI2       (73)  /* Vector 73: SSI 2 */
 #  define TIVA_IRQ_SSI3       (74)  /* Vector 74: SSI 3 */
 #  define TIVA_IRQ_UART3      (75)  /* Vector 75: UART 3 */
@@ -177,45 +176,45 @@
 #  define TIVA_IRQ_SYSTEM     (122) /* Vector 122: System Exception (imprecise) */
 #  define TIVA_RESERVED_123   (123) /* Vector 123: Reserved */
 #  define TIVA_RESERVED_124   (124) /* Vector 124: Reserved */
-#  define TIVA_RESERVED_125   (125) /* Vector 125: Reserved */
-#  define TIVA_RESERVED_126   (126) /* Vector 126: Reserved */
-#  define TIVA_RESERVED_127   (127) /* Vector 127: Reserved */
-#  define TIVA_RESERVED_128   (128) /* Vector 128: Reserved */
+#  define TIVA_IRQ_I2C4       (125) /* Vector 125: I2C4 */
+#  define TIVA_IRQ_I2C5       (126) /* Vector 126: I2C5 */
+#  define TIVA_IRQ_GPIOM      (127) /* Vector 127: GPIO Port M */
+#  define TIVA_IRQ_GPION      (128) /* Vector 128: GPIO Port N */
 #  define TIVA_RESERVED_129   (129) /* Vector 129: Reserved */
 
 #  define TIVA_RESERVED_130   (130) /* Vector 130: Reserved */
 #  define TIVA_RESERVED_131   (131) /* Vector 131: Reserved */
-#  define TIVA_RESERVED_132   (132) /* Vector 132: Reserved */
-#  define TIVA_RESERVED_133   (133) /* Vector 133: Reserved */
-#  define TIVA_RESERVED_134   (134) /* Vector 134: Reserved */
-#  define TIVA_RESERVED_135   (135) /* Vector 135: Reserved */
-#  define TIVA_RESERVED_136   (136) /* Vector 136: Reserved */
-#  define TIVA_RESERVED_137   (137) /* Vector 137: Reserved */
-#  define TIVA_RESERVED_138   (138) /* Vector 138: Reserved */
-#  define TIVA_RESERVED_139   (139) /* Vector 139: Reserved */
+#  define TIVA_IRQ_GPIOP      (132) /* Vector 132: GPIO Port P (Summary or P0) */
+#  define TIVA_IRQ_GPIOP1     (133) /* Vector 133: GPIO Port P1 */
+#  define TIVA_IRQ_GPIOP2     (134) /* Vector 134: GPIO Port P2 */
+#  define TIVA_IRQ_GPIOP3     (135) /* Vector 135: GPIO Port P3 */
+#  define TIVA_IRQ_GPIOP4     (136) /* Vector 136: GPIO Port P4 */
+#  define TIVA_IRQ_GPIOP5     (137) /* Vector 137: GPIO Port P5 */
+#  define TIVA_IRQ_GPIOP6     (138) /* Vector 138: GPIO Port P6 */
+#  define TIVA_IRQ_GPIOP7     (139) /* Vector 139: GPIO Port P7 */
 
-#  define TIVA_RESERVED_140   (140) /* Vector 140: Reserved */
-#  define TIVA_RESERVED_141   (141) /* Vector 141: Reserved */
-#  define TIVA_RESERVED_142   (142) /* Vector 142: Reserved */
-#  define TIVA_RESERVED_143   (143) /* Vector 143: Reserved */
-#  define TIVA_RESERVED_144   (144) /* Vector 144: Reserved */
-#  define TIVA_RESERVED_145   (145) /* Vector 145: Reserved */
-#  define TIVA_RESERVED_146   (146) /* Vector 146: Reserved */
-#  define TIVA_RESERVED_147   (147) /* Vector 147: Reserved */
+#  define TIVA_IRQ_GPIOPQ     (140) /* Vector 140: GPIO Port Q (Summary or Q0) */
+#  define TIVA_IRQ_GPIOPQ1    (141) /* Vector 141: GPIO Port Q1 */
+#  define TIVA_IRQ_GPIOPQ2    (142) /* Vector 142: GPIO Port Q2 */
+#  define TIVA_IRQ_GPIOPQ3    (143) /* Vector 143: GPIO Port Q3 */
+#  define TIVA_IRQ_GPIOPQ4    (144) /* Vector 144: GPIO Port Q4 */
+#  define TIVA_IRQ_GPIOPQ5    (145) /* Vector 145: GPIO Port Q5 */
+#  define TIVA_IRQ_GPIOPQ6    (146) /* Vector 146: GPIO Port Q6 */
+#  define TIVA_IRQ_GPIOPQ7    (147) /* Vector 147: GPIO Port Q7 */
 #  define TIVA_RESERVED_148   (148) /* Vector 148: Reserved */
 #  define TIVA_RESERVED_149   (149) /* Vector 149: Reserved */
 
-#  define TIVA_RESERVED_150   (150) /* Vector 150: Reserved */
-#  define TIVA_RESERVED_151   (151) /* Vector 151: Reserved */
-#  define TIVA_RESERVED_152   (152) /* Vector 152: Reserved */
-#  define TIVA_RESERVED_153   (153) /* Vector 153: Reserved */
-#  define TIVA_RESERVED_154   (154) /* Vector 154: Reserved */
+#  define TIVA_IRQ_PWM1_GEN0  (150)  /* Vector 150: PWM1 Generator 0 */
+#  define TIVA_IRQ_PWM1_GEN1  (151)  /* Vector 151: PWM1 Generator 1 */
+#  define TIVA_IRQ_PWM1_GEN2  (152)  /* Vector 152: PWM1 Generator 2 */
+#  define TIVA_IRQ_PWM1_GEN3  (153)  /* Vector 153: PWM1 Generator 3 */
+#  define TIVA_IRQ_PWM1_FAULT (154)  /* Vector 154: PWM1 Fault */
 
 #  define NR_VECTORS          (155)
 #  define NR_IRQS             (123) /* (Really fewer because of reserved vectors) */
 
 #else
-#  error "IRQ Numbers not known for this Stellaris chip"
+#  error "IRQ Numbers not known for this Tiva chip"
 #endif
 
 /************************************************************************************
@@ -241,5 +240,5 @@ extern "C"
 #endif
 #endif
 
-#endif /* __ARCH_ARM_INCLUDE_TIVA_LM4F_IRQ_H */
+#endif /* __ARCH_ARM_INCLUDE_TIVA_TM3C_IRQ_H */
 

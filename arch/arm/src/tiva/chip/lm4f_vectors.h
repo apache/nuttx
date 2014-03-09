@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/tiva/chip/lm4f_vectors.S
+ * arch/arm/src/tiva/chip/lm4f_vectors.f
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -43,7 +43,7 @@
 
 /* This file is included by tiva_vectors.S.  It provides the macro VECTOR that
  * supplies ach Stellaris vector in terms of a (lower-case) ISR label and an
- * (upper-case) IRQ number as defined in arch/arm/include/lm/lm4f_irq.h.
+ * (upper-case) IRQ number as defined in arch/arm/include/tiva/lm4f_irq.h.
  * tiva_vectors.S will define the VECTOR in different ways in order to generate
  * the interrupt vectors and handlers in their final form.
  */
