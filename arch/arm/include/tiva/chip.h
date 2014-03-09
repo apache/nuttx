@@ -171,7 +171,7 @@
 #  define TIVA_NADC            2  /* Two ADC modules */
 #  define TIVA_NPWM            2  /* Two PWM generator modules */
 #  define TIVA_NQEI            1  /* One quadrature encoders */
-#  define TIVA_NPORTS          15 /* Fifteen Ports (GPIOA-Q) */
+#  define TIVA_NPORTS          15 /* Fifteen Ports (GPIOA-H, J-N, P-Q) */
 #  define TIVA_NCANCONTROLLER  2  /* Two CAN controllers */
 #  define TIVA_NUSBOTGFS       1  /* One USB 2.0 OTG FS */
 #else
