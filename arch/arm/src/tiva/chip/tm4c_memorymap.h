@@ -1,9 +1,8 @@
 /************************************************************************************
- * arch/arm/src/tiva/chip/lm4f_memorymap.h
+ * arch/arm/src/tiva/chip/tm4c_memorymap.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            Jose Pablo Carballo <jcarballo@nx-engineering.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_CHIP_LM4F_MEMORYMAP_H
-#define __ARCH_ARM_SRC_TIVA_CHIP_LM4F_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_TIVA_CHIP_TM4C_MEMORYMAP_H
+#define __ARCH_ARM_SRC_TIVA_CHIP_TM4C_MEMORYMAP_H
 
 /************************************************************************************
  * Included Files
@@ -49,7 +48,7 @@
 
 /* Memory map ***********************************************************************/
 
-#if defined(CONFIG_ARCH_CHIP_LM4F120)
+#if defined(CONFIG_ARCH_CHIP_TM4C123GH6ZRB)
 #  define TIVA_FLASH_BASE     0x00000000 /* -0x0003ffff: On-chip FLASH */
                                          /* -0x00ffffff: Reserved */
 #  define TIVA_ROM_BASE       0x01000000 /* -0x1fffffff: Reserved for ROM */
@@ -71,13 +70,12 @@
 #  define TIVA_ETM_BASE       0xe0041000 /* -0xe0041fff: Embedded Trace Macrocell */
                                          /* -0xffffffff: Reserved */
 #else
-#  error "Memory map not specified for this LM4F chip"
+#  error "Memory map not specified for this TM4C chip"
 #endif
 
 /* Peripheral base addresses ********************************************************/
 
-#if defined(CONFIG_ARCH_CHIP_LM4F120)
-/* FiRM Peripheral Base Addresses */
+#if defined(CONFIG_ARCH_CHIP_TM4C123GH6ZRB)
 
 #  define TIVA_WDOG0_BASE     (TIVA_PERIPH_BASE + 0x00000) /* -0x00fff: Watchdog Timer 0 */
 #  define TIVA_WDOG1_BASE     (TIVA_PERIPH_BASE + 0x01000) /* -0x00fff: Watchdog Timer 1 */
@@ -115,6 +113,10 @@
 #  define TIVA_I2CSC3_BASE    (TIVA_PERIPH_BASE + 0x23fc0)  /* -0x23fff: I2C Status and Control 3 */
 #  define TIVA_GPIOE_BASE     (TIVA_PERIPH_BASE + 0x24000)  /* -0x24fff: GPIO Port E */
 #  define TIVA_GPIOF_BASE     (TIVA_PERIPH_BASE + 0x25000)  /* -0x25fff: GPIO Port F */
+#  define TIVA_GPIOG_BASE     (TIVA_PERIPH_BASE + 0x26000)  /* -0x26fff: GPIO Port G */
+#  define TIVA_GPIOH_BASE     (TIVA_PERIPH_BASE + 0x27000)  /* -0x27fff: GPIO Port H */
+#  define TIVA_PWM0_BASE      (TIVA_PERIPH_BASE + 0x28000)  /* -0x28fff: PWM 0 */
+#  define TIVA_PWM1_BASE      (TIVA_PERIPH_BASE + 0x28000)  /* -0x29fff: PWM 1 */
                                                             /* -0x2ffff: Reserved */
 #  define TIVA_TIMER0_BASE    (TIVA_PERIPH_BASE + 0x30000)  /* -0x30fff: 16/32 Timer 0 */
 #  define TIVA_TIMER1_BASE    (TIVA_PERIPH_BASE + 0x31000)  /* -0x31fff: 16/32 Timer 1 */
@@ -128,8 +130,10 @@
 #  define TIVA_ADC1_BASE      (TIVA_PERIPH_BASE + 0x39000)  /* -0x39fff: ADC 1 */
                                                             /* -0x3bfff: Reserved */
 #  define TIVA_CMP_BASE       (TIVA_PERIPH_BASE + 0x3c000)  /* -0x3cfff: Analog Comparators */
-                                                            /* -0x43fff: Reserved */
-#  define TIVA_CAN0_BASE      (TIVA_PERIPH_BASE + 0x40000)  /* -0x40fff: CAN Controller */
+#  define TIVA_GPIOJ_BASE     (TIVA_PERIPH_BASE + 0x3d000)  /* -0x3dfff: GPIO Port J */
+                                                            /* -0x3ffff: Reserved */
+#  define TIVA_CAN0_BASE      (TIVA_PERIPH_BASE + 0x40000)  /* -0x40fff: CAN Controller 0 */
+#  define TIVA_CAN1_BASE      (TIVA_PERIPH_BASE + 0x41000)  /* -0x41fff: CAN Controller 1 */
                                                             /* -0x4bfff: Reserved */
 #  define TIVA_WTIMER2_BASE   (TIVA_PERIPH_BASE + 0x4c000)  /* -0x4cfff: 32/64 Wide Timer 2 */
 #  define TIVA_WTIMER3_BASE   (TIVA_PERIPH_BASE + 0x4d000)  /* -0x4dfff: 32/64 Wide Timer 3 */
@@ -143,8 +147,24 @@
 #  define TIVA_GPIODAHB_BASE  (TIVA_PERIPH_BASE + 0x5b000)  /* -0x5bfff: GPIO Port D (AHB aperture) */
 #  define TIVA_GPIOEAHB_BASE  (TIVA_PERIPH_BASE + 0x5c000)  /* -0x5cfff: GPIO Port E (AHB aperture) */
 #  define TIVA_GPIOFAHB_BASE  (TIVA_PERIPH_BASE + 0x5d000)  /* -0x5dfff: GPIO Port F (AHB aperture) */
+#  define TIVA_GPIOGAHB_BASE  (TIVA_PERIPH_BASE + 0x5e000)  /* -0x5efff: GPIO Port G (AHB aperture) */
+#  define TIVA_GPIOHAHB_BASE  (TIVA_PERIPH_BASE + 0x5f000)  /* -0x5ffff: GPIO Port H (AHB aperture) */
+#  define TIVA_GPIOJAHB_BASE  (TIVA_PERIPH_BASE + 0x60000)  /* -0x60fff: GPIO Port J (AHB aperture) */
+#  define TIVA_GPIOKAHB_BASE  (TIVA_PERIPH_BASE + 0x61000)  /* -0x61fff: GPIO Port K (AHB aperture) */
+#  define TIVA_GPIOLAHB_BASE  (TIVA_PERIPH_BASE + 0x62000)  /* -0x62fff: GPIO Port L (AHB aperture) */
+#  define TIVA_GPIOMAHB_BASE  (TIVA_PERIPH_BASE + 0x63000)  /* -0x63fff: GPIO Port M (AHB aperture) */
+#  define TIVA_GPIONAHB_BASE  (TIVA_PERIPH_BASE + 0x64000)  /* -0x64fff: GPIO Port N (AHB aperture) */
+#  define TIVA_GPIOPAHB_BASE  (TIVA_PERIPH_BASE + 0x65000)  /* -0x65fff: GPIO Port P (AHB aperture) */
+#  define TIVA_GPIOQAHB_BASE  (TIVA_PERIPH_BASE + 0x66000)  /* -0x66fff: GPIO Port Q (AHB aperture) */
                                                             /* -0xaefff: Reserved */
 #  define TIVA_EEPROM_BASE    (TIVA_PERIPH_BASE + 0xaf000)  /* -0xaffff: EEPROM and Key Locker */
+                                                            /* -0xbffff: Reserved */
+#  define TIVA_I2CM4_BASE     (TIVA_PERIPH_BASE + 0xc0000)  /* -0x207ff: I2C Master 4 */
+#  define TIVA_I2CS4_BASE     (TIVA_PERIPH_BASE + 0xc0800)  /* -0x20fbf: I2C Slave 4 */
+#  define TIVA_I2CSC4_BASE    (TIVA_PERIPH_BASE + 0xc0fc0)  /* -0x20fff: I2C Status and Control 4 */
+#  define TIVA_I2CM5_BASE     (TIVA_PERIPH_BASE + 0xc1000)  /* -0x207ff: I2C Master 5 */
+#  define TIVA_I2CS5_BASE     (TIVA_PERIPH_BASE + 0xc1800)  /* -0x20fbf: I2C Slave 5 */
+#  define TIVA_I2CSC5_BASE    (TIVA_PERIPH_BASE + 0xc1fc0)  /* -0x20fff: I2C Status and Control 5 */
                                                             /* -0xf8fff: Reserved */
 #  define TIVA_SYSEXC_BASE    (TIVA_PERIPH_BASE + 0xf9000)  /* -0xf9fff: System Exception Control */
                                                             /* -0xfbfff: Reserved */
@@ -168,4 +188,4 @@
  * Public Function Prototypes
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_TIVA_CHIP_LM4F_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_TIVA_CHIP_TM4C_MEMORYMAP_H */

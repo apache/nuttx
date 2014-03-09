@@ -48,6 +48,8 @@
 #  include "chip/lm3s_memorymap.h"
 #elif defined(CONFIG_ARCH_CHIP_LM4F)
 #  include "chip/lm4f_memorymap.h"
+#elif defined(CONFIG_ARCH_CHIP_TM4C)
+#  include "chip/tm4c_memorymap.h"
 #else
 #  error "Unsupported Tiva/Stellaris memory map"
 #endif

@@ -133,7 +133,7 @@
                                                             /* -0x37fff: Reserved */
 #  define TIVA_ADC_BASE       (TIVA_PERIPH_BASE + 0x38000)  /* -0x38fff: ADC */
                                                             /* -0x3bfff: Reserved */
-#  define TIVA_COMPARE_BASE   (TIVA_PERIPH_BASE + 0x3c000)  /* -0x3cfff: Analog Comparators */
+#  define TIVA_CMP_BASE       (TIVA_PERIPH_BASE + 0x3c000)  /* -0x3cfff: Analog Comparators */
                                                             /* -0x47fff: Reserved */
 #  define TIVA_ETHCON_BASE    (TIVA_PERIPH_BASE + 0x48000)  /* -0x48fff: Ethernet Controller */
                                                             /* -0xfcfff: Reserved */
@@ -172,7 +172,7 @@
                                                             /* -0x37fff: Reserved */
 #  define TIVA_ADC_BASE       (TIVA_PERIPH_BASE + 0x38000)  /* -0x38fff: ADC */
                                                             /* -0x3bfff: Reserved */
-#  define TIVA_COMPARE_BASE   (TIVA_PERIPH_BASE + 0x3c000)  /* -0x3cfff: Analog Comparators */
+#  define TIVA_CMP_BASE       (TIVA_PERIPH_BASE + 0x3c000)  /* -0x3cfff: Analog Comparators */
                                                             /* -0x47fff: Reserved */
 #  define TIVA_ETHCON_BASE    (TIVA_PERIPH_BASE + 0x48000)  /* -0x48fff: Ethernet Controller */
                                                             /* -0xfcfff: Reserved */
@@ -219,7 +219,7 @@
                                                             /* -0x37fff: Reserved */
 #  define TIVA_ADC_BASE       (TIVA_PERIPH_BASE + 0x38000)  /* -0x38fff: ADC */
                                                             /* -0x3bfff: Reserved */
-#  define TIVA_COMPARE_BASE   (TIVA_PERIPH_BASE + 0x3c000)  /* -0x3cfff: Analog Comparators */
+#  define TIVA_CMP_BASE       (TIVA_PERIPH_BASE + 0x3c000)  /* -0x3cfff: Analog Comparators */
                                                             /* -0x47fff: Reserved */
 #  define TIVA_ETHCON_BASE    (TIVA_PERIPH_BASE + 0x48000)  /* -0x48fff: Ethernet Controller */
                                                             /* -0xfcfff: Reserved */
@@ -262,9 +262,9 @@
                                                             /* -0x37fff: Reserved */
 #  define TIVA_ADC_BASE       (TIVA_PERIPH_BASE + 0x38000)  /* -0x38fff: ADC */
                                                             /* -0x3bfff: Reserved */
-#  define TIVA_COMPARE_BASE   (TIVA_PERIPH_BASE + 0x3c000)  /* -0x3cfff: Analog Comparators */
+#  define TIVA_CMP_BASE       (TIVA_PERIPH_BASE + 0x3c000)  /* -0x3cfff: Analog Comparators */
                                                             /* -0x3fffff: Reserved */
-#  define TIVA_CANCON_BASE    (TIVA_PERIPH_BASE + 0x40000)  /* -0x40fff: CAN Controller */
+#  define TIVA_CAN0_BASE      (TIVA_PERIPH_BASE + 0x40000)  /* -0x40fff: CAN Controller */
                                                             /* -0x47fff: Reserved */
 #  define TIVA_ETHCON_BASE    (TIVA_PERIPH_BASE + 0x48000)  /* -0x48fff: Ethernet Controller */
                                                             /* -0xfcfff: Reserved */
@@ -313,7 +313,7 @@
 #  define TIVA_ADC0_BASE       (TIVA_PERIPH_BASE + 0x38000) /* -0x38fff: ADC 0 */
 #  define TIVA_ADC1_BASE       (TIVA_PERIPH_BASE + 0x39000) /* -0x39fff: ADC 1 */
                                                             /* -0x3bfff: Reserved */
-#  define TIVA_COMPARE_BASE   (TIVA_PERIPH_BASE + 0x3c000)  /* -0x3cfff: Analog Comparators */
+#  define TIVA_CMP_BASE       (TIVA_PERIPH_BASE + 0x3c000)  /* -0x3cfff: Analog Comparators */
 #  define TIVA_GPIOJ_BASE     (TIVA_PERIPH_BASE + 0x3d000)  /* -0x3dfff: GPIO Port J */
                                                             /* -0x3ffff: Reserved */
 #  define TIVA_CAN0_BASE      (TIVA_PERIPH_BASE + 0x40000)  /* -0x40fff: CAN 0 */
