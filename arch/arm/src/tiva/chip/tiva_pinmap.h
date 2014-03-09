@@ -48,6 +48,8 @@
 #  include "chip/lm3s_pinmap.h"
 #elif defined(CONFIG_ARCH_CHIP_LM4F)
 #  include "chip/lm4f_pinmap.h"
+#elif defined(CONFIG_ARCH_CHIP_TM4C)
+#  include "chip/tm4c_pinmap.h"
 #else
 #  error "Unsupported Tiva/Stellaris PIN mapping"
 #endif
