@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/include/tiva/tm3c_irq.h
+ * arch/arm/include/tiva/tm4c_irq.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_INCLUDE_TIVA_TM3C_IRQ_H
-#define __ARCH_ARM_INCLUDE_TIVA_TM3C_IRQ_H
+#ifndef __ARCH_ARM_INCLUDE_TIVA_TM4C_IRQ_H
+#define __ARCH_ARM_INCLUDE_TIVA_TM4C_IRQ_H
 
 /************************************************************************************
  * Included Files
@@ -240,5 +240,5 @@ extern "C"
 #endif
 #endif
 
-#endif /* __ARCH_ARM_INCLUDE_TIVA_TM3C_IRQ_H */
+#endif /* __ARCH_ARM_INCLUDE_TIVA_TM4C_IRQ_H */
 
