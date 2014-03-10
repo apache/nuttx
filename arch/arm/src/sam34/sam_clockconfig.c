@@ -228,7 +228,7 @@ static inline void sam_pmcsetup(void)
    * to PLLA_MMAX.
    */
 
-  putreg32(PMC_PMMR_MASK, SAM_PMC_CKGR_PMMR);
+  putreg32(PMC_PMMR_MASK, SAM_PMC_PMMR);
 #endif
 
   /* Setup PLLA and wait for LOCKA */
