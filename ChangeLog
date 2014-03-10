@@ -6968,4 +6968,6 @@
 	  for the TM4C123 (2014-3-9).
 	* arch/arm/src/tiva/chip/tm4c_memorymap.h:  Add memory map for the
 	  TM4C123 (2014-3-9).
+	* arch/arm/src/tiva/:  Add GPIO and SYCONTROL register bit defintions
+	  for the TM4C123 (2014-3-10).
 
