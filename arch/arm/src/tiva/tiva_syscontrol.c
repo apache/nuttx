@@ -55,7 +55,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef LM4F
+#if defined(LM4F) || defined(TM4C)
 #  define RCC_OSCMASK   (SYSCON_RCC_MOSCDIS)
 #  define RCC_XTALMASK  (SYSCON_RCC_XTAL_MASK | SYSCON_RCC_OSCSRC_MASK | \
                          SYSCON_RCC_PWRDN)
@@ -223,7 +223,7 @@ void tiva_clockconfig(uint32_t newrcc, uint32_t newrcc2)
    * on rest and if that is selected, most likely nothing needs to be done.
    */
 
-#ifdef LM4F
+#if defined(LM4F) || defined(TM4C)
   if ((rcc & SYSCON_RCC_MOSCDIS) && !(newrcc & SYSCON_RCC_MOSCDIS))
 #else
   if (((rcc & SYSCON_RCC_MOSCDIS) && !(newrcc & SYSCON_RCC_MOSCDIS)) ||
@@ -266,7 +266,7 @@ void tiva_clockconfig(uint32_t newrcc, uint32_t newrcc2)
    * before writing the RCC2 register.
    */
 
-#ifndef LM4F
+#if defined(LM4F) || defined(TM4C)
   if ((rcc2 & SYSCON_RCC2_USERCC2) != 0)
     {
       putreg32(rcc2, TIVA_SYSCON_RCC2);
@@ -314,7 +314,7 @@ void tiva_clockconfig(uint32_t newrcc, uint32_t newrcc2)
    */
 
   putreg32(rcc, TIVA_SYSCON_RCC);
-#ifdef LM4F
+#if defined(LM4F) || defined(TM4C)
   rcc = getreg32(TIVA_SYSCON_RCC);
 #endif
   putreg32(rcc2, TIVA_SYSCON_RCC2);
