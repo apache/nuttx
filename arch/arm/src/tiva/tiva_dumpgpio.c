@@ -89,6 +89,24 @@ static const uintptr_t g_gpiobase[TIVA_NPORTS] =
 #if TIVA_NPORTS > 8
   , TIVA_GPIOJ_BASE
 #endif
+#if TIVA_NPORTS > 9
+  , TIVA_GPIOK_BASE
+#endif
+#if TIVA_NPORTS > 10
+  , TIVA_GPIOL_BASE
+#endif
+#if TIVA_NPORTS > 11
+  , TIVA_GPIOM_BASE
+#endif
+#if TIVA_NPORTS > 12
+  , TIVA_GPION_BASE
+#endif
+#if TIVA_NPORTS > 13
+  , TIVA_GPIOP_BASE
+#endif
+#if TIVA_NPORTS > 14
+  , TIVA_GPIOQ_BASE
+#endif
 };
 
 static const char g_portchar[TIVA_NPORTS] =
@@ -119,6 +137,24 @@ static const char g_portchar[TIVA_NPORTS] =
 #endif
 #if TIVA_NPORTS > 8
   , 'J'
+#endif
+#if TIVA_NPORTS > 9
+  , 'K'
+#endif
+#if TIVA_NPORTS > 10
+  , 'L'
+#endif
+#if TIVA_NPORTS > 11
+  , 'M'
+#endif
+#if TIVA_NPORTS > 12
+  , 'N'
+#endif
+#if TIVA_NPORTS > 13
+  , 'P'
+#endif
+#if TIVA_NPORTS > 14
+  , 'Q'
 #endif
 };
 
