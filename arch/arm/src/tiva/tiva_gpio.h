@@ -59,12 +59,14 @@
  *
  * LM3S: FFFS SPPP III. .... .... .... VPPP PBBB
  * LM4F: FFFS SPPP III. AAAA .... .... VPPP PBBB
+ * TM4C: FFFS SPPP III. AAAA .... .... VPPP PBBB
  *
- * TODO: The LM4F also supports configuration of pins to trigger ADC and/or uDMA.
- * That configuratin is not addressed in this this encoding.
+ * TODO: The LM4F/TM4C also support configuration of pins to trigger ADC and/or uDMA.
+ * That configuration is not addressed in this this encoding.
  */
 
 /* These bits set the primary function of the pin:
+ *
  * FFFn .... .... .... .... .... .... ....
  */
 
@@ -84,6 +86,7 @@
 #  define GPIO_FUNC_MAX               GPIO_FUNC_INTERRUPT
 
 /* That primary may be modified by the following options
+ *
  * ...S SPPP .... .... .... .... .... ....
  */
 
@@ -106,6 +109,7 @@
 #  define GPIO_PADTYPE_ANALOG         (6 << GPIO_PADTYPE_SHIFT)  /*   Analog comparator */
 
 /* If the pin is an interrupt, then the following options apply
+ *
  * .... .... III. .... .... .... .... ....
  */
 
@@ -117,11 +121,13 @@
 #  define GPIO_INT_LOWLEVEL           (3 << GPIO_INT_SHIFT)      /*   Interrupt on low level */
 #  define GPIO_INT_HIGHLEVEL          (4 << GPIO_INT_SHIFT)      /*   Interrupt on high level */
 
-/* The LM4F120 supports up to 15 alternate functions per pin:
+/* The LM4F/TM4C supports up to 15 alternate functions per pin:
+ *
  * LM4F: .... .... .... AAAA .... .... .... ....
+ * TM4C: .... .... .... AAAA .... .... .... ....
  */
 
-#ifdef LM4F
+#if defined(LM4F) || defined(TM4C)
 #  define GPIO_ALT_SHIFT              16                         /* Bits 16-19: Alternate function */
 #  define GPIO_ALT_MASK               (15 << GPIO_ALT_SHIFT)
 #    define GPIO_ALT(n)               ((n) << GPIO_ALT_SHIFT)

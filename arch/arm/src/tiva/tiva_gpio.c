@@ -348,7 +348,7 @@ static void tiva_gpiofunc(uint32_t base, uint32_t pinno,
    * isolation circuitry for the corresponding GPIO signal.
    */
 
-#ifdef LM4F
+#if defined(LM4F) || defined(TM4C)
   setbit = (((uint32_t)func->setbits >> AMSEL_SHIFT) & 1) << pinno;
   clrbit = (((uint32_t)func->clrbits >> AMSEL_SHIFT) & 1) << pinno;
 
@@ -754,7 +754,7 @@ static inline void tiva_interrupt(uint32_t base, uint32_t pin, uint32_t cfgset)
  *
  ****************************************************************************/
 
-#ifdef LM4F
+#if defined(LM4F) || defined(TM4C)
 static inline void tiva_portcontrol(uint32_t base, uint32_t pinno,
                                     uint32_t cfgset,
                                     const struct gpio_func_s *func)
