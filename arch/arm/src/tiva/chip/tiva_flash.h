@@ -49,7 +49,8 @@
 /* FLASH dimensions ****************************************************************/
 
 #if defined(CONFIG_ARCH_CHIP_LM3S6965) || defined(CONFIG_ARCH_CHIP_LM4F120) || \
-    defined(CONFIG_ARCH_CHIP_LM3S8962) || defined(CONFIG_ARCH_CHIP_LM3S9B96)
+    defined(CONFIG_ARCH_CHIP_LM3S8962) || defined(CONFIG_ARCH_CHIP_LM3S9B96) || \
+    defined(CONFIG_ARCH_CHIP_TM4C123GH6ZRB)
 #  define TIVA_FLASH_NPAGES        256
 #  define TIVA_FLASH_PAGESIZE      1024
 #else

@@ -47,6 +47,13 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
+#define TIVA_GPIOK_BASE             TIVA_GPIOKAHB_BASE
+#define TIVA_GPIOL_BASE             TIVA_GPIOLAHB_BASE
+#define TIVA_GPIOM_BASE             TIVA_GPIOMAHB_BASE
+#define TIVA_GPION_BASE             TIVA_GPIONAHB_BASE
+#define TIVA_GPIOP_BASE             TIVA_GPIOPAHB_BASE
+#define TIVA_GPIOQ_BASE             TIVA_GPIOQAHB_BASE
+
 /* GPIO Register Offsets ************************************************************/
 
 #define TIVA_GPIO_DATA_OFFSET       0x000 /* GPIO Data */

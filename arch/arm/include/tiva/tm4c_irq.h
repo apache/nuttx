@@ -193,14 +193,14 @@
 #  define TIVA_IRQ_GPIOP6     (138) /* Vector 138: GPIO Port P6 */
 #  define TIVA_IRQ_GPIOP7     (139) /* Vector 139: GPIO Port P7 */
 
-#  define TIVA_IRQ_GPIOPQ     (140) /* Vector 140: GPIO Port Q (Summary or Q0) */
-#  define TIVA_IRQ_GPIOPQ1    (141) /* Vector 141: GPIO Port Q1 */
-#  define TIVA_IRQ_GPIOPQ2    (142) /* Vector 142: GPIO Port Q2 */
-#  define TIVA_IRQ_GPIOPQ3    (143) /* Vector 143: GPIO Port Q3 */
-#  define TIVA_IRQ_GPIOPQ4    (144) /* Vector 144: GPIO Port Q4 */
-#  define TIVA_IRQ_GPIOPQ5    (145) /* Vector 145: GPIO Port Q5 */
-#  define TIVA_IRQ_GPIOPQ6    (146) /* Vector 146: GPIO Port Q6 */
-#  define TIVA_IRQ_GPIOPQ7    (147) /* Vector 147: GPIO Port Q7 */
+#  define TIVA_IRQ_GPIOQ      (140) /* Vector 140: GPIO Port Q (Summary or Q0) */
+#  define TIVA_IRQ_GPIOQ1     (141) /* Vector 141: GPIO Port Q1 */
+#  define TIVA_IRQ_GPIOQ2     (142) /* Vector 142: GPIO Port Q2 */
+#  define TIVA_IRQ_GPIOQ3     (143) /* Vector 143: GPIO Port Q3 */
+#  define TIVA_IRQ_GPIOQ4     (144) /* Vector 144: GPIO Port Q4 */
+#  define TIVA_IRQ_GPIOQ5     (145) /* Vector 145: GPIO Port Q5 */
+#  define TIVA_IRQ_GPIOQ6     (146) /* Vector 146: GPIO Port Q6 */
+#  define TIVA_IRQ_GPIOQ7     (147) /* Vector 147: GPIO Port Q7 */
 #  define TIVA_RESERVED_148   (148) /* Vector 148: Reserved */
 #  define TIVA_RESERVED_149   (149) /* Vector 149: Reserved */
 
