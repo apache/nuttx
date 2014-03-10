@@ -1068,6 +1068,8 @@ nuttx
  |   |   `- README.txt
  |   |- teensy/
  |   |   `- README.txt
+ |   |- tm4c123g-launchpad/
+ |   |   `- README.txt
  |   |- twr-k60n512/
  |   |   `- README.txt
  |   |- ubw32/

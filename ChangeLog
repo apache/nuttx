@@ -6970,4 +6970,6 @@
 	  TM4C123 (2014-3-9).
 	* arch/arm/src/tiva/:  Add GPIO and SYCONTROL register bit defintions
 	  for the TM4C123 (2014-3-10).
+	* configs/tm4c123g-launchpad:  Add basic board support for the
+	  TM4C123G-Launchpad (2014-3-10).
 
