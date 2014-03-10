@@ -59,7 +59,7 @@
   VECTOR(sam_rtt, SAM_IRQ_RTT)        /* Vector 16+3:  Real Time Timer */
   VECTOR(sam_wdt, SAM_IRQ_WDT)        /* Vector 16+4:  Watchdog Timer */
   VECTOR(sam_pmc, SAM_IRQ_PMC)        /* Vector 16+5:  Power Management Controller */
-  VECTOR(sam_eefc, SAM_IRQ_EEFC)      /* Vector 16+6:  Enhanced Embedded Flash Controller */
+  VECTOR(sam_eefc0, SAM_PID_EEFC0)    /* Vector 16+6:  Enhanced Embedded Flash Controller */
   VECTOR(sam_uart0, SAM_IRQ_UART0)    /* Vector 16+7:  Universal Asynchronous Receiver Transmitter 0 */
   UNUSED(SAM_IRQ_RESERVED_8)          /* Vector 16+8:  Static Memory Controller (no vector) */
   VECTOR(sam_pioa, SAM_IRQ_PIOA)      /* Vector 16+9:  Parallel I/O Controller A */
@@ -80,9 +80,9 @@
   VECTOR(sam_tc3, SAM_IRQ_TC3)        /* Vector 16+24: Timer Counter 3 */
   VECTOR(sam_tc4, SAM_IRQ_TC4)        /* Vector 16+25: Timer Counter 4 */
   VECTOR(sam_tc5, SAM_IRQ_TC5)        /* Vector 16+26: Timer Counter 5 */
-  VECTOR(sam_tc5, SAM_IRQ_TC6)        /* Vector 16+27: Timer Counter 6 */
-  VECTOR(sam_tc5, SAM_IRQ_TC7)        /* Vector 16+28: Timer Counter 7 */
-  VECTOR(sam_tc5, SAM_IRQ_TC8)        /* Vector 16+29: Timer Counter 8 */
+  VECTOR(sam_tc6, SAM_IRQ_TC6)        /* Vector 16+27: Timer Counter 6 */
+  VECTOR(sam_tc7, SAM_IRQ_TC7)        /* Vector 16+28: Timer Counter 7 */
+  VECTOR(sam_tc8, SAM_IRQ_TC8)        /* Vector 16+29: Timer Counter 8 */
   VECTOR(sam_afec0, SAM_IRQ_AFEC0)    /* Vector 16+30: Analog Front End 0 */
   VECTOR(sam_afec1, SAM_IRQ_AFEC1)    /* Vector 16+31: Analog Front End 1 */
   VECTOR(sam_dacc, SAM_IRQ_DACC)      /* Vector 16+32: Digital To Analog Converter */

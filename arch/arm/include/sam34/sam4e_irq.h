@@ -90,7 +90,7 @@
 #define SAM_PID_CAN0          (37)  /* CAN0 */
 #define SAM_PID_CAN1          (38)  /* CAN1 */
 #define SAM_PID_AES           (39)  /* AES */
-                                    /* 40-43: Reserved
+                                    /* 40-43: Reserved */
 #define SAM_PID_EMAC          (44)  /* EMAC */
 #define SAM_PID_UART1         (45)  /* UART */
                                     /* 46: Reserved */

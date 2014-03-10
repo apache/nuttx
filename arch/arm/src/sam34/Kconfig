@@ -234,6 +234,10 @@ config ARCH_CHIP_SAM4L
 config ARCH_CHIP_SAM4E
 	bool
 	default n
+	select ARCH_HAVE_EXTNOR
+	select ARCH_HAVE_EXTNAND
+	select ARCH_HAVE_EXTSRAM0
+	select ARCH_HAVE_EXTSRAM1
 
 config ARCH_CHIP_SAM4S
 	bool
@@ -319,7 +323,7 @@ config SAM34_TC6
 	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4E
 
 config SAM34_TC7
-	bool "Timer/Counter 7 (TC6)"
+	bool "Timer/Counter 7 (TC7)"
 	default n
 	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4E
 
@@ -414,7 +418,7 @@ config SAM34_AFEC0
 	default n
 	depends on ARCH_CHIP_SAM4E
 
-config SAM34_AFEC0
+config SAM34_AFEC1
 	bool "Analog Front End 1"
 	default n
 	depends on ARCH_CHIP_SAM4E
@@ -549,12 +553,12 @@ config SAM34_PEVC
 config SAM34_CHIPID
 	bool "Chip ID"
 	default n
-	depends on ARCH_CHIP_SAM4L
+	depends on ARCH_CHIP_SAM4L || ARCH_CHIP_SAM4E
 
 config SAM34_FREQM
 	bool "Frequency Meter (FREQM)"
 	default n
-	depends on ARCH_CHIP_SAM4L || ARCH_CHIP_SAM4E
+	depends on ARCH_CHIP_SAM4L
 
 config SAM34_AST
 	bool "Asynchronous Timer (AST)"

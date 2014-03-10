@@ -564,6 +564,16 @@ config ARCH_BOARD_SAM3UEK
 	---help---
 		The port of NuttX to the Atmel SAM3U-EK development board.
 
+config ARCH_BOARD_SAM4EEK
+	bool "Atmel SAM4E-EK development board"
+	depends on ARCH_CHIP_ATSAM4E16E
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		The port of NuttX to the Atmel SAM4E-EK development board.  This
+		board features the SAM4E16 MCU running at up to 120MHz.
+
 config ARCH_BOARD_SAM4L_XPLAINED
 	bool "Atmel SAM4L-Xplained Pro development board"
 	depends on ARCH_CHIP_ATSAM4LC4C
@@ -949,6 +959,7 @@ config ARCH_BOARD
 	default "sama5d3x-ek"         if ARCH_BOARD_SAMA5D3X_EK
 	default "samd20-xplained"     if ARCH_BOARD_SAMD20_XPLAINED
 	default "sam3u-ek"            if ARCH_BOARD_SAM3UEK
+	default "sam4e-ek"            if ARCH_BOARD_SAM4EEK
 	default "sam4l-xplained"      if ARCH_BOARD_SAM4L_XPLAINED
 	default "sam4s-xplained"      if ARCH_BOARD_SAM4S_XPLAINED
 	default "shenzhou"            if ARCH_BOARD_SHENZHOU
@@ -1201,6 +1212,9 @@ source "configs/samd20-xplained/Kconfig"
 endif
 if ARCH_BOARD_SAM3UEK
 source "configs/sam3u-ek/Kconfig"
+endif
+if ARCH_BOARD_SAM4EEK
+source "configs/sam4e-ek/Kconfig"
 endif
 if ARCH_BOARD_SAM4L_XPLAINED
 source "configs/sam4l-xplained/Kconfig"

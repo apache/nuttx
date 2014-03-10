@@ -6972,4 +6972,6 @@
 	  for the TM4C123 (2014-3-10).
 	* configs/tm4c123g-launchpad:  Add basic board support for the
 	  TM4C123G-Launchpad (2014-3-10).
-
+	* configs/sam4e-ek:  Add basic board support for the SAM4E-EK board.
+	  More work is needed.  The initial commit is little more thatn the
+	  SAM3U-EK with name changes (2014-3-10).
