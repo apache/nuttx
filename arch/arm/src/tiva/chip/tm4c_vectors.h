@@ -74,7 +74,7 @@ VECTOR(tiva_ssi0, TIVA_IRQ_SSI0)             /* Vector 23: SSI 0 */
 VECTOR(tiva_i2c0, TIVA_IRQ_I2C0)             /* Vector 24: I2C 0 */
 
 VECTOR(tiva_pwm0_fault, TIVA_IRQ_PWM0_FAULT) /* Vector 25: PWM0 Fault */
-VECTOR(tiva_pwm0_fault, TIVA_IRQ_PWM0_FAULT) /* Vector 26: PWM0 Generator 0 */
+VECTOR(tiva_pwm0_gen0, TIVA_IRQ_PWM0_GEN0)   /* Vector 26: PWM0 Generator 0 */
 VECTOR(tiva_pwm0_gen1, TIVA_IRQ_PWM0_GEN1)   /* Vector 27: PWM0 Generator 1 */
 VECTOR(tiva_pwm0_gen2, TIVA_IRQ_PWM0_GEN2)   /* Vector 28: PWM0 Generator 2 */
 VECTOR(tiva_qei0, TIVA_IRQ_QEI0)             /* Vector 29: QEI0 */
