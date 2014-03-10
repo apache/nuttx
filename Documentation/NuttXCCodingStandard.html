@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX C Coding Standard</i>
       </font></big></h1>
-      <p>Last Updated: February 6, 2014</p>
+      <p>Last Updated: March 9, 2014</p>
     </td>
   </tr>
 </table>
@@ -1747,7 +1747,7 @@ ptr = (FAR struct somestruct_s *)value;
   </li>
   <li>
     <b>Braces in column 1</b>
-    The opening and close braces of the compound statement mst be placed in column one.
+    The opening and close braces of the compound statement must be placed in column one.
   </li>
   <li>
     <b>First definition or statement in column 3</b>.
@@ -1755,8 +1755,17 @@ ptr = (FAR struct somestruct_s *)value;
     Standards for statements are covered in the <a href="#statements">following paragaraph</a>
   </li>
   <li>
+    <b>Local variables first</b>.
+    Because NuttX conforms to the older C89 standard, all variables that have scope over the entire compound statement must be defined at the beginning of the compound statement.
+    A single blank line must follow the local variable definitions.
+  </li>
+  <li>
     <b>Long functions are discouraged</b>.
     As a rule of thumb, the length of a function should be limited so that it would fit on a single page (if you were to print the source code).
+  </li>
+  <li>
+    <b>Space after the function boady</b>
+    A one (and only one) blank line must follow the closing right brace of the function body.
   </li>
 </ul>
 
