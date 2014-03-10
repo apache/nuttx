@@ -737,6 +737,15 @@ config ARCH_BOARD_TEENSY
 		developed by http://pjrc.com/teensy/.  The Teensy++ 2.0 is based
 		on an Atmel AT90USB1286 MCU.
 
+config ARCH_BOARD_TM4C123G_LAUNCHPAD
+	bool "Tiva TM4C124G LaunchPad"
+	depends on ARCH_CHIP_TM4C123GH6ZRB
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		Tiva TM4C123G LaunchPad.
+
 config ARCH_BOARD_TWR_K60N512
 	bool "FreeScale TWR-K60N512d evelopment board"
 	depends on ARCH_CHIP_MK60N512VMD100
@@ -958,6 +967,7 @@ config ARCH_BOARD
 	default "mikroe-stm32f4"      if ARCH_BOARD_MIKROE_STM32F4
 	default "sure-pic32mx"        if ARCH_BOARD_SUREPIC32MX
 	default "teensy"              if ARCH_BOARD_TEENSY
+	default "tm4c123g-launchpad"  if ARCH_BOARD_TM4C123G_LAUNCHPAD
 	default "twr-k60n512"         if ARCH_BOARD_TWR_K60N512
 	default "ubw32"               if ARCH_BOARD_UBW32
 	default "us7032evb1"          if ARCH_BOARD_US7032EVB1
@@ -1239,6 +1249,9 @@ source "configs/sure-pic32mx/Kconfig"
 endif
 if ARCH_BOARD_TEENSY
 source "configs/teensy/Kconfig"
+endif
+if ARCH_BOARD_TM4C123G_LAUNCHPAD
+source "configs/tm4c123g-launchpad/Kconfig"
 endif
 if ARCH_BOARD_TWR_K60N512
 source "configs/twr-k60n512/Kconfig"

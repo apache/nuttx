@@ -268,7 +268,7 @@ configs/lm3s8962-ek
 configs/lm4f120-launchpad
   This is the port of NuttX to the Stellaris LM4F120 LaunchPad.  The
   Stellaris® LM4F120 LaunchPad Evaluation Board is a low-cost evaluation
-  platform for ARM® Cortex™-M4F-based microcontrollers from Texas\
+  platform for ARM® Cortex™-M4F-based microcontrollers from Texas
   Instruments.
 
 configs/lpcxpresso-lpc1768
@@ -542,6 +542,12 @@ configs/teensy
   This is the port of NuttX to the PJRC Teensy++ 2.0 board.  This board is
   developed by http://pjrc.com/teensy/.  The Teensy++ 2.0 is based
   on an Atmel AT90USB1286 MCU.
+
+configs/tm4c123g-launchpad
+  This is the port of NuttX to the Tiva TM4C123G LaunchPad.  The
+  Tiva® TM4C123G LaunchPad Evaluation Board is a low-cost evaluation
+  platform for ARM® Cortex™-M4F-based microcontrollers from Texas
+  Instruments.
 
 configs/twr-k60n512
   Kinetis K60 Cortex-M4 MCU.  This port uses the FreeScale TWR-K60N512
