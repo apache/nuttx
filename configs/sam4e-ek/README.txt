@@ -1,0 +1,624 @@
+README
+^^^^^^
+
+This README discusses issues unique to NuttX configurations for the Atmel
+SAM4E-EK development.  This board features the SAM4E16 MCU running at 96
+or 120MHz.
+
+Contents
+^^^^^^^^
+
+  - Development Environment
+  - GNU Toolchain Options
+  - IDEs
+  - NuttX EABI "buildroot" Toolchain
+  - NuttX OABI "buildroot" Toolchain
+  - NXFLAT Toolchain
+  - AtmelStudio6.1
+  - LEDs
+  - Serial Console
+  - SAM4E-EK-specific Configuration Options
+  - Configurations
+
+Development Environment
+^^^^^^^^^^^^^^^^^^^^^^^
+
+  Either Linux or Cygwin on Windows can be used for the development environment.
+  The source has been built only using the GNU toolchain (see below).  Other
+  toolchains will likely cause problems. Testing was performed using the Cygwin
+  environment.
+
+GNU Toolchain Options
+^^^^^^^^^^^^^^^^^^^^^
+
+  The NuttX make system can be configured to support the various different
+  toolchain options.  All testing has been conducted using the NuttX buildroot
+  toolchain.  To use alternative toolchain, you simply need to add change of
+  the following configuration options to your .config (or defconfig) file:
+
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y  : CodeSourcery under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL=y  : CodeSourcery under Linux
+    CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC=y        : Atollic toolchain for Windos
+    CONFIG_ARMV7M_TOOLCHAIN_DEVKITARM=y      : devkitARM under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
+    CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL=y      : Generic GCC ARM EABI toolchain for Linux
+    CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y      : Generic GCC ARM EABI toolchain for Windows
+
+  You may also have to modify the PATH in the setenv.h file if your
+  make cannot find the tools.
+
+  NOTE about Windows native toolchains
+  ------------------------------------
+
+  There are basically three kinds of GCC toolchains that can be used:
+
+    1. A Linux native toolchain in a Linux environment,
+    2. The buildroot Cygwin tool chain built in the Cygwin environment,
+    3. A Windows native toolchain.
+ 
+  There are several limitations to using a Windows based toolchain (#3) in a
+  Cygwin environment.  The three biggest are:
+
+  1. The Windows toolchain cannot follow Cygwin paths.  Path conversions are
+     performed automatically in the Cygwin makefiles using the 'cygpath'
+     utility but you might easily find some new path problems.  If so, check
+     out 'cygpath -w'
+
+  2. Windows toolchains cannot follow Cygwin symbolic links.  Many symbolic
+     links are used in Nuttx (e.g., include/arch).  The make system works
+     around these problems for the Windows tools by copying directories
+     instead of linking them. But this can also cause some confusion for
+     you:  For example, you may edit a file in a "linked" directory and find
+     that your changes had no effect.  That is because you are building the
+     copy of the file in the "fake" symbolic directory.  If you use a
+     Windows toolchain, you should get in the habit of making like this:
+
+       make clean_context all
+
+     An alias in your .bashrc file might make that less painful.
+
+  3. Dependencies are not made when using Windows versions of the GCC.  This
+     is because the dependencies are generated using Windows paths which do
+     not work with the Cygwin make.
+
+       MKDEP                = $(TOPDIR)/tools/mknulldeps.sh
+
+IDEs
+^^^^
+
+  NuttX is built using command-line make.  It can be used with an IDE, but some
+  effort will be required to create the project (There is a simple RIDE project
+  in the RIDE subdirectory).
+
+  Makefile Build
+  --------------
+  Under Eclipse, it is pretty easy to set up an "empty makefile project" and
+  simply use the NuttX makefile to build the system.  That is almost for free
+  under Linux.  Under Windows, you will need to set up the "Cygwin GCC" empty
+  makefile project in order to work with Windows (Google for "Eclipse Cygwin" -
+  there is a lot of help on the internet).
+
+  Native Build
+  ------------
+  Here are a few tips before you start that effort:
+
+  1) Select the toolchain that you will be using in your .config file
+  2) Start the NuttX build at least one time from the Cygwin command line
+     before trying to create your project.  This is necessary to create
+     certain auto-generated files and directories that will be needed.
+  3) Set up include pathes:  You will need include/, arch/arm/src/sam34,
+     arch/arm/src/common, arch/arm/src/armv7-m, and sched/.
+  4) All assembly files need to have the definition option -D __ASSEMBLY__
+     on the command line.
+
+  Startup files will probably cause you some headaches.  The NuttX startup file
+  is arch/arm/src/sam34/sam_vectors.S.  You may need to build NuttX
+  one time from the Cygwin command line in order to obtain the pre-built
+  startup object needed by RIDE.
+
+NuttX EABI "buildroot" Toolchain
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
+  be modified to point to the correct path to the Cortex-M3 GCC toolchain (if
+  different from the default in your PATH variable).
+
+  If you have no Cortex-M3 toolchain, one can be downloaded from the NuttX
+  SourceForge download site (https://sourceforge.net/projects/nuttx/files/buildroot/).
+  This GNU toolchain builds and executes in the Linux or Cygwin environment.
+
+  1. You must have already configured Nuttx in <some-dir>/nuttx.
+
+     cd tools
+     ./configure.sh sam4e-ek/<sub-dir>
+
+  2. Download the latest buildroot package into <some-dir>
+
+  3. unpack the buildroot tarball.  The resulting directory may
+     have versioning information on it like buildroot-x.y.z.  If so,
+     rename <some-dir>/buildroot-x.y.z to <some-dir>/buildroot.
+
+  4. cd <some-dir>/buildroot
+
+  5. cp configs/cortexm3-eabi-defconfig-4.6.3 .config
+
+  6. make oldconfig
+
+  7. make
+
+  8. Edit setenv.h, if necessary, so that the PATH variable includes
+     the path to the newly built binaries.
+
+  See the file configs/README.txt in the buildroot source tree.  That has more
+  details PLUS some special instructions that you will need to follow if you are
+  building a Cortex-M3 toolchain for Cygwin under Windows.
+
+  NOTE:  Unfortunately, the 4.6.3 EABI toolchain is not compatible with the
+  the NXFLAT tools.  See the top-level TODO file (under "Binary loaders") for
+  more information about this problem. If you plan to use NXFLAT, please do not
+  use the GCC 4.6.3 EABI toochain; instead use the GCC 4.3.3 OABI toolchain.
+  See instructions below.
+
+NuttX OABI "buildroot" Toolchain
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  The older, OABI buildroot toolchain is also available.  To use the OABI
+  toolchain:
+
+  1. When building the buildroot toolchain, either (1) modify the cortexm3-eabi-defconfig-4.6.3
+     configuration to use EABI (using 'make menuconfig'), or (2) use an exising OABI
+     configuration such as cortexm3-defconfig-4.3.3
+
+  2. Modify the Make.defs file to use the OABI conventions:
+
+    +CROSSDEV = arm-nuttx-elf-
+    +ARCHCPUFLAGS = -mtune=cortex-m3 -march=armv7-m -mfloat-abi=soft
+    +NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-gotoff.ld -no-check-sections
+    -CROSSDEV = arm-nuttx-eabi-
+    -ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
+    -NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-pcrel.ld -no-check-sections
+
+NXFLAT Toolchain
+^^^^^^^^^^^^^^^^
+
+  If you are *not* using the NuttX buildroot toolchain and you want to use
+  the NXFLAT tools, then you will still have to build a portion of the buildroot
+  tools -- just the NXFLAT tools.  The buildroot with the NXFLAT tools can
+  be downloaded from the NuttX SourceForge download site
+  (https://sourceforge.net/projects/nuttx/files/).
+
+  This GNU toolchain builds and executes in the Linux or Cygwin environment.
+
+  1. You must have already configured Nuttx in <some-dir>/nuttx.
+
+     cd tools
+     ./configure.sh sam4e-ek/<sub-dir>
+
+  2. Download the latest buildroot package into <some-dir>
+
+  3. unpack the buildroot tarball.  The resulting directory may
+     have versioning information on it like buildroot-x.y.z.  If so,
+     rename <some-dir>/buildroot-x.y.z to <some-dir>/buildroot.
+
+  4. cd <some-dir>/buildroot
+
+  5. cp configs/cortexm3-defconfig-nxflat .config
+
+  6. make oldconfig
+
+  7. make
+
+  8. Edit setenv.h, if necessary, so that the PATH variable includes
+     the path to the newly builtNXFLAT binaries.
+
+AtmelStudio6.1
+^^^^^^^^^^^^^^
+
+  You can use AtmelStudio6.1 to load and debug code.
+
+  - To load code:
+
+    Tools -> Device Programming
+
+    Configure the debugger and chip and you are in business.
+
+  - To Debug Code:
+
+    File -> Open -> Open Object File for Debugging
+
+    Select the project name, the full path to the NuttX object (called
+    just nuttx with no extension), and chip.  Take the time to resolve
+    all of the source file linkages or else you will not have source
+    level debug!
+
+LEDs
+^^^^
+
+  The SAM4E-EK board has three, user-controllable LEDs labelled D2 (blue),
+  D3 (amber), and D4 (green) on the board.  Usage of these LEDs is defined
+  in include/board.h and src/up_leds.c. They are encoded as follows:
+
+    SYMBOL              Meaning                 D3*     D2      D4
+    ------------------- ----------------------- ------- ------- -------
+    LED_STARTED         NuttX has been started  OFF     OFF     OFF
+    LED_HEAPALLOCATE    Heap has been allocated OFF     OFF     ON
+    LED_IRQSENABLED     Interrupts enabled      OFF     ON      OFF
+    LED_STACKCREATED    Idle stack created      OFF     ON      ON
+    LED_INIRQ           In an interrupt**       N/C     FLASH   N/C
+    LED_SIGNAL          In a signal handler***  N/C     N/C     FLASH
+    LED_ASSERTION       An assertion failed     FLASH   N/C     N/C
+    LED_PANIC           The system has crashed  FLASH   N/C     N/C
+
+  * If D2 and D4 are statically on, then NuttX probably failed to boot
+    and these LEDs will give you some indication of where the failure was
+ ** The normal state is D3=OFF, D4=ON and D2 faintly glowing.  This faint
+    glow is because of timer interrupts that result in the LED being
+    illuminated on a small proportion of the time.
+*** D4 may also flicker normally if signals are processed.
+
+Serial Console
+^^^^^^^^^^^^^^
+
+  By default, all of these configurations use UART0 for the NuttX serial
+  console.  UART0 corresponds to the DB-9 connector labelled "UART".  This
+  is a male connector and will require a female-to-female, NUL modem cable
+  to connect to a PC.
+
+  An alternate is USART1 which connects to the other DB-9 connector labeled
+  "USART".  USART1 is not enabled by default unless specifically noted
+  otherwise in the configuration description.  A NUL modem cable must be
+  used with the port as well.
+
+  NOTE:  One of the USART1 pins is shared with the audio CODEC.  The audio
+  CODEC cannot be used of USART1 is enabled.
+
+  By default serial console is configured for 115000, 8-bit, 1 stop bit, and
+  no parity.
+
+SAM4E-EK-specific Configuration Options
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
+       be set to:
+
+       CONFIG_ARCH=arm
+
+    CONFIG_ARCH_family - For use in C code:
+
+       CONFIG_ARCH_ARM=y
+
+    CONFIG_ARCH_architecture - For use in C code:
+
+       CONFIG_ARCH_CORTEXM3=y
+
+    CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
+
+       CONFIG_ARCH_CHIP="sam34"
+
+    CONFIG_ARCH_CHIP_name - For use in C code to identify the exact
+       chip:
+
+       CONFIG_ARCH_CHIP_SAM34
+       CONFIG_ARCH_CHIP_SAM3U
+       CONFIG_ARCH_CHIP_ATSAM3U4
+
+    CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+       hence, the board that supports the particular chip or SoC.
+
+       CONFIG_ARCH_BOARD=sam4e-ek (for the SAM4E-EK development board)
+
+    CONFIG_ARCH_BOARD_name - For use in C code
+
+       CONFIG_ARCH_BOARD_SAM4EEK=y
+
+    CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
+       of delay loops
+
+    CONFIG_ENDIAN_BIG - define if big endian (default is little
+       endian)
+
+    CONFIG_RAM_SIZE - Describes the installed DRAM (SRAM in this case):
+
+       CONFIG_RAM_SIZE=0x00020000 (128Kb)
+
+    CONFIG_RAM_START - The start address of installed DRAM
+
+       CONFIG_RAM_START=0x20000000
+
+    CONFIG_ARCH_IRQPRIO - The SAM3U supports interrupt prioritization
+
+       CONFIG_ARCH_IRQPRIO=n
+
+    CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to boards that
+       have LEDs
+
+    CONFIG_ARCH_INTERRUPTSTACK - This architecture supports an interrupt
+       stack. If defined, this symbol is the size of the interrupt
+        stack in bytes.  If not defined, the user task stacks will be
+      used during interrupt handling.
+
+    CONFIG_ARCH_STACKDUMP - Do stack dumps after assertions
+
+    CONFIG_ARCH_LEDS -  Use LEDs to show state. Unique to board architecture.
+
+    CONFIG_ARCH_CALIBRATION - Enables some build in instrumentation that
+       cause a 100 second delay during boot-up.  This 100 second delay
+       serves no purpose other than it allows you to calibratre
+       CONFIG_ARCH_LOOPSPERMSEC.  You simply use a stop watch to measure
+       the 100 second delay then adjust CONFIG_ARCH_LOOPSPERMSEC until
+       the delay actually is 100 seconds.
+
+  Individual subsystems can be enabled:
+
+    CONFIG_SAM34_SPI0          - Serial Peripheral Interface 0 (SPI0)
+    CONFIG_SAM34_SPI1          - Serial Peripheral Interface 1 (SPI1)
+    CONFIG_SAM34_SSC           - Synchronous Serial Controller (SSC)
+    CONFIG_SAM34_TC0           - Timer/Counter 0 (TC0)
+    CONFIG_SAM34_TC1           - Timer/Counter 1 (TC1)
+    CONFIG_SAM34_TC2           - Timer/Counter 2 (TC2)
+    CONFIG_SAM34_TC3           - Timer/Counter 3 (TC3)
+    CONFIG_SAM34_TC4           - Timer/Counter 4 (TC4)
+    CONFIG_SAM34_TC5           - Timer/Counter 5 (TC5)
+    CONFIG_SAM34_TC6           - Timer/Counter 6 (TC6)
+    CONFIG_SAM34_TC7           - Timer/Counter 7 (TC6)
+    CONFIG_SAM34_TC8           - Timer/Counter 6 (TC8)
+    CONFIG_SAM34_PWM           - Pulse Width Modulation (PWM) Controller
+    CONFIG_SAM34_TWIM0         - Two-wire Master Interface 0 (TWIM0)
+    CONFIG_SAM34_TWIS0         - Two-wire Slave Interface 0 (TWIS0)
+    CONFIG_SAM34_TWIM1B        - Two-wire Master Interface 1 (TWIM1)
+    CONFIG_SAM34_TWIS1         - Two-wire Slave Interface 1 (TWIS1)
+    CONFIG_SAM34_UART0         - UART 0
+    CONFIG_SAM34_UART1         - UART 1
+    CONFIG_SAM34_USART0        - USART 0
+    CONFIG_SAM34_USART1        - USART 1
+    CONFIG_SAM34_USART2        - USART 2
+    CONFIG_SAM34_USART3        - USART 3
+    CONFIG_SAM34_AFEC0         - Analog Front End 0
+    CONFIG_SAM34_AFEC1         - Analog Front End 1
+    CONFIG_SAM34_DACC          - Digital-to-Analog Converter
+    CONFIG_SAM34_ACC           - Analog Comparator
+    CONFIG_SAM34_EMAC          - Ethernet MAC
+    CONFIG_SAM34_CAN0          - CAN 0
+    CONFIG_SAM34_CAN1          - CAN 1
+    CONFIG_SAM34_SMC           - Static Memory Controller
+    CONFIG_SAM34_NAND          - NAND support
+    CONFIG_SAM34_PDCA          - Peripheral DMA controller
+    CONFIG_SAM34_DMAC          - DMA controller
+    CONFIG_SAM34_UDP           - USB 2.0 Full-Speed device
+    CONFIG_SAM34_CHIPID        - Chip ID
+    CONFIG_SAM34_RTC           - Real Time Clock
+    CONFIG_SAM34_RTT           - Real Time Timer
+    CONFIG_SAM34_WDT           - Watchdog Timer
+    CONFIG_SAM34_EIC           - Interrupt controller
+    CONFIG_SAM34_HSMCI         - High Speed Multimedia Card Interface
+
+  Some subsystems can be configured to operate in different ways. The drivers
+  need to know how to configure the subsystem.
+
+    CONFIG_GPIOA_IRQ
+    CONFIG_GPIOB_IRQ
+    CONFIG_GPIOC_IRQ
+    CONFIG_GPIOD_IRQ
+    CONFIG_GPIOE_IRQ
+    CONFIG_GPIOF_IRQ
+    CONFIG_GPIOG_IRQ
+    CONFIG_GPIOH_IRQ
+    CONFIG_GPIOJ_IRQ
+    CONFIG_GPIOK_IRQ
+    CONFIG_GPIOL_IRQ
+    CONFIG_GPIOM_IRQ
+    CONFIG_GPION_IRQ
+    CONFIG_GPIOP_IRQ
+    CONFIG_GPIOQ_IRQ
+
+    CONFIG_USART0_ISUART
+    CONFIG_USART1_ISUART
+    CONFIG_USART2_ISUART
+    CONFIG_USART3_ISUART
+
+  SAM3U specific device driver settings
+
+    CONFIG_U[S]ARTn_SERIAL_CONSOLE - selects the USARTn (n=0,1,2,3) or UART
+           m (m=4,5) for the console and ttys0 (default is the USART1).
+    CONFIG_U[S]ARTn_RXBUFSIZE - Characters are buffered as received.
+       This specific the size of the receive buffer
+    CONFIG_U[S]ARTn_TXBUFSIZE - Characters are buffered before
+       being sent.  This specific the size of the transmit buffer
+    CONFIG_U[S]ARTn_BAUD - The configure BAUD of the UART.  Must be
+    CONFIG_U[S]ARTn_BITS - The number of bits.  Must be either 7 or 8.
+    CONFIG_U[S]ARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
+    CONFIG_U[S]ARTn_2STOP - Two stop bits
+
+  LCD Options.  Other than the standard LCD configuration options
+  (see configs/README.txt), the SAM4E-EK driver also supports:
+
+    CONFIG_LCD_PORTRAIT - Present the display in the standard 240x320
+       "Portrait" orientation.  Default:  The display is rotated to
+       support a 320x240 "Landscape" orientation.
+
+Configurations
+^^^^^^^^^^^^^^
+
+  Information Common to All Configurations
+  ----------------------------------------
+  Each SAM4E-EK configuration is maintained in a sub-directory and
+  can be selected as follow:
+
+    cd tools
+    ./configure.sh sam4e-ek/<subdir>
+    cd -
+    . ./setenv.sh
+
+  Before sourcing the setenv.sh file above, you should examine it and perform
+  edits as necessary so that BUILDROOT_BIN is the correct path to the directory
+  than holds your toolchain binaries.
+
+  And then build NuttX by simply typing the following.  At the conclusion of
+  the make, the nuttx binary will reside in an ELF file called, simply, nuttx.
+
+    make
+
+  The <subdir> that is provided above as an argument to the tools/configure.sh
+  must be is one of the following.
+
+  NOTES:
+
+  1. These configurations use the mconf-based configuration tool.  To
+    change any of these configurations using that tool, you should:
+
+    a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+       and misc/tools/
+
+    b. Execute 'make menuconfig' in nuttx/ in order to start the
+       reconfiguration process.
+
+  2. Unless stated otherwise, all configurations generate console
+     output on UART0 (J3).
+
+  3. Unless otherwise stated, the configurations are setup for
+     Linux (or any other POSIX environment like Cygwin under Windows):
+
+     Build Setup:
+       CONFIG_HOST_LINUX=y   : Linux or other POSIX environment
+
+  4. All of these configurations use the older, OABI, buildroot toolchain
+     (unless stated otherwise in the description of the configuration).  That
+     toolchain selection can easily be reconfigured using 'make menuconfig'.
+     Here are the relevant current settings:
+
+     Build Setup:
+       CONFIG_HOST_LINUX=y                 : Linux or other pure POSIX invironment
+                                           : (including Cygwin)
+     System Type -> Toolchain:
+       CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
+       CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : Older, OABI toolchain
+
+     If you want to use the Atmel GCC toolchain, for example, here are the
+     steps to do so:
+
+     Build Setup:
+       CONFIG_HOST_WINDOWS=y   : Windows
+       CONFIG_HOST_CYGWIN=y    : Using Cygwin or other POSIX environment
+
+     System Type -> Toolchain:
+       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : General GCC EABI toolchain under windows
+
+     Library Routines ->
+       CONFIG_CXX_NEWLONG=n                : size_t is an unsigned int, not long
+
+     This re-configuration should be done before making NuttX or else the
+     subsequent 'make' will fail.  If you have already attempted building
+     NuttX then you will have to 1) 'make distclean' to remove the old
+     configuration, 2) 'cd tools; ./configure.sh sam4e-ek/ksnh' to start
+     with a fresh configuration, and 3) perform the configuration changes
+     above.
+
+     Also, make sure that your PATH variable has the new path to your
+     Atmel tools.  Try 'which arm-none-eabi-gcc' to make sure that you
+     are selecting the right tool.  setenv.sh is available for you to
+     use to set or PATH variable.  The path in the that file may not,
+     however, be correct for your installation.
+
+     See also the "NOTE about Windows native toolchains" in the section call
+     "GNU Toolchain Options" above.
+
+  Configuration sub-directories
+  -----------------------------
+
+  nsh:
+    Configures the NuttShell (nsh) located at examples/nsh.  The
+    Configuration enables both the serial and telnetd NSH interfaces.
+
+    NOTES:
+
+    1. NSH built-in applications are supported.  However, there are
+       no built-in applications built with the default configuration.
+
+       Binary Formats:
+         CONFIG_BUILTIN=y                    : Enable support for built-in programs
+
+       Applicaton Configuration:
+         CONFIG_NSH_BUILTIN_APPS=y           : Enable starting apps from NSH command line
+
+    2. This configuration has been used for verifying the touchscreen on
+       on the SAM4E-EK LCD.  With these modifications, you can include the
+       touchscreen test program at apps/examples/touchscreen as an NSH built-in
+       application.  You can enable the touchscreen and test by modifying the
+       default configuration in the following ways:
+
+          Device Drivers
+            CONFIG_SPI=y                      : Enable SPI support
+            CONFIG_SPI_EXCHANGE=y             : The exchange() method is supported
+            CONFIG_SPI_OWNBUS=y               : Smaller code if this is the only SPI device
+
+            CONFIG_INPUT=y                    : Enable support for input devices
+            CONFIG_INPUT_ADS7843E=y           : Enable support for the XPT2046
+            CONFIG_ADS7843E_SPIDEV=2          : Use SPI CS 2 for communication
+            CONFIG_ADS7843E_SPIMODE=0         : Use SPI mode 0
+            CONFIG_ADS7843E_FREQUENCY=1000000 : SPI BAUD 1MHz
+            CONFIG_ADS7843E_SWAPXY=y          : If landscpe orientation
+            CONFIG_ADS7843E_THRESHX=51        : These will probably need to be tuned
+            CONFIG_ADS7843E_THRESHY=39
+
+          System Type -> Peripherals:
+            CONFIG_SAM34_SPI0=y                : Enable support for SPI
+
+          System Type:
+            CONFIG_GPIO_IRQ=y                 : GPIO interrupt support
+            CONFIG_GPIOA_IRQ=y                : Enable GPIO interrupts from port A
+
+          RTOS Features:
+            CONFIG_DISABLE_SIGNALS=n          : Signals are required
+
+          Library Support:
+            CONFIG_SCHED_WORKQUEUE=y          : Work queue support required
+
+          Applicaton Configuration:
+            CONFIG_EXAMPLES_TOUCHSCREEN=y     : Enable the touchscreen built-int test
+
+          Defaults should be okay for related touchscreen settings.  Touchscreen
+          debug output on UART0 can be enabled with:
+
+          Build Setup:
+            CONFIG_DEBUG=y                    : Enable debug features
+            CONFIG_DEBUG_VERBOSE=y            : Enable verbose debug output
+            CONFIG_DEBUG_INPUT=y              : Enable debug output from input devices
+
+    3. Enabling HSMCI support. The SAM3U-KE provides a an SD memory card
+       slot.  Support for the SD slot can be enabled with the following
+       settings:
+
+       System Type->ATSAM3/4 Peripheral Support
+         CONFIG_SAM34_HSMCI=y                 : Enable HSMCI support
+         CONFIG_SAM34_DMAC=y                  : DMAC support is needed by HSMCI
+
+       System Type
+         CONFIG_SAM34_GPIO_IRQ=y              : PIO interrupts needed
+         CONFIG_SAM34_GPIOA_IRQ=y             : Card detect pin is on PIOA
+
+       Device Drivers -> MMC/SD Driver Support
+         CONFIG_MMCSD=y                        : Enable MMC/SD support
+         CONFIG_MMSCD_NSLOTS=1                 : One slot per driver instance
+         CONFIG_MMCSD_HAVECARDDETECT=y         : Supports card-detect PIOs
+         CONFIG_MMCSD_SDIO=y                   : SDIO-based MMC/SD support
+         CONFIG_SDIO_DMA=y                     : Use SDIO DMA
+         CONFIG_SDIO_BLOCKSETUP=y              : Needs to know block sizes
+
+       Library Routines
+         CONFIG_SCHED_WORKQUEUE=y              : Driver needs work queue support
+
+       Application Configuration -> NSH Library
+         CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
+
+    STATUS:
+      2013-6-28: The touchscreen is functional.
+      2013-6-29: Hmmm... but there appear to be conditions when the
+        touchscreen driver locks up.  Looks like some issue with
+        managing the interrupts.
+      2013-6-30:  Those lock-ups appear to be due to poorly placed
+        debug output statements.  If you do not enable debug output,
+        the touchscreen is rock-solid.
+      2013-8-10:  Added the comments above above enabling HSMCI memory
+        card support and verified that the configuration builds without
+        error.  However, that configuration has not yet been tested (and
+        is may even be incomplete).

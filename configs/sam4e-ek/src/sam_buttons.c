@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/sam3u-ek/src/up_leds.c
+ * configs/sam4e-ek/src/sam_buttons.c
  *
- *   Copyright (C) 2010, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,7 @@
 #include <arch/board/board.h>
 
 #include "sam_gpio.h"
-#include "sam3u-ek.h"
+#include "sam4e-ek.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
 
@@ -61,8 +61,10 @@
  ****************************************************************************/
 
 #if defined(CONFIG_GPIOA_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
-static xcpt_t g_irqbutton1;
-static xcpt_t g_irqbutton2;
+static xcpt_t g_irq_scrollup;
+static xcpt_t g_irq_scrolldown;
+static xcpt_t g_irq_waku;
+static xcpt_t g_irq_tamp;
 #endif
 
 /****************************************************************************
@@ -124,8 +126,10 @@ static xcpt_t board_button_irqx(int irq, xcpt_t irqhandler, xcpt_t *store)
 
 void board_button_initialize(void)
 {
-  (void)sam_configgpio(GPIO_BUTTON1);
-  (void)sam_configgpio(GPIO_BUTTON2);
+  (void)sam_configgpio(GPIO_SCROLLUP);
+  (void)sam_configgpio(GPIO_SCROLLDWN);
+  (void)sam_configgpio(GPIO_WAKU);
+  (void)sam_configgpio(GPIO_TAMP);
 }
 
 /************************************************************************************
@@ -143,8 +147,10 @@ uint8_t board_buttons(void)
 {
   uint8_t retval;
 
-  retval  = sam_gpioread(GPIO_BUTTON1) ? 0 : BUTTON1;
-  retval |= sam_gpioread(GPIO_BUTTON2) ? 0 : BUTTON2;
+  retval  = sam_gpioread(GPIO_SCROLLUP)  ? 0 : BUTTON_SCROLLUP;
+  retval |= sam_gpioread(GPIO_SCROLLDWN) ? 0 : BUTTON_SCROLLDOWN;
+  retval |= sam_gpioread(GPIO_WAKU)      ? 0 : BUTTON_WAKU;
+  retval |= sam_gpioread(GPIO_TAMP)      ? 0 : BUTTON_TAMP;
 
   return retval;
 }
@@ -170,17 +176,22 @@ uint8_t board_buttons(void)
 #if defined(CONFIG_GPIOA_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
 xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 {
-  if (id == BUTTON1)
+  switch (id)
     {
-      return board_button_irqx(IRQ_BUTTON1, irqhandler, &g_irqbutton1);
-    }
-  else if (id == BUTTON2)
-    {
-      return board_button_irqx(IRQ_BUTTON2, irqhandler, &g_irqbutton2);
-    }
-  else
-    {
-      return NULL;
+      case BUTTON_SCROLLUP:
+        return board_button_irqx(IRQ_SCROLLUP, irqhandler, &g_irq_scrollup);
+
+      case BUTTON_SCROLLDOWN:
+        return board_button_irqx(IRQ_SCROLLDWN, irqhandler, &g_irq_scrolldown);
+
+      case BUTTON_WAKU:
+        return board_button_irqx(IRQ_WAKU, irqhandler, &g_irq_waku);
+
+      case BUTTON_TAMP:
+        return board_button_irqx(IRQ_WAKU, irqhandler, &g_irq_tamp);
+
+      default:
+        return NULL;
     }
 }
 #endif

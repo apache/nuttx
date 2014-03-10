@@ -1,0 +1,19 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+if ARCH_BOARD_SAM4EEK
+
+choice
+	prompt "CPU Frequency"
+	default SAM4EEK_96MHZ
+
+config SAM4EEK_96MHZ
+	bool "96 MHz"
+
+config SAM4EEK_120MHZ
+	bool "120 MHz"
+
+endchoice # CPU Frequency
+endif # ARCH_BOARD_SAM4EEK
