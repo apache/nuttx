@@ -167,6 +167,12 @@
 #  define GPIO_PORTG                  (6 << GPIO_PORT_SHIFT)     /*   GPIOG */
 #  define GPIO_PORTH                  (7 << GPIO_PORT_SHIFT)     /*   GPIOH */
 #  define GPIO_PORTJ                  (8 << GPIO_PORT_SHIFT)     /*   GPIOJ */
+#  define GPIO_PORTK                  (9 << GPIO_PORT_SHIFT)     /*   GPIOK */
+#  define GPIO_PORTL                  (10 << GPIO_PORT_SHIFT)    /*   GPIOL */
+#  define GPIO_PORTM                  (11 << GPIO_PORT_SHIFT)    /*   GPIOM */
+#  define GPIO_PORTN                  (12 << GPIO_PORT_SHIFT)    /*   GPION */
+#  define GPIO_PORTP                  (13 << GPIO_PORT_SHIFT)    /*   GPIOP */
+#  define GPIO_PORTQ                  (14 << GPIO_PORT_SHIFT)    /*   GPIOQ */
 
 /* This identifies the pin number in the port:
  * .... .... .... .... .... .... .... .BBB
