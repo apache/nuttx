@@ -115,28 +115,28 @@
 
 static const uint8_t g_ledon[8] =
 {
-  (D3_OFF     |D2_OFF     |D4_OFF),      /* LED_STARTED  */
-  (D3_ON      |D2_OFF     |D4_ON),       /* LED_HEAPALLOCATE */
-  (D3_OFF     |D2_ON      |D4_OFF),      /* LED_IRQSENABLED  */
-  (D3_ON      |D2_ON      |D4_ON),       /* LED_STACKCREATED  */
+  (D3_OFF      | D2_OFF      | D4_OFF),      /* LED_STARTED  */
+  (D3_ON       | D2_OFF      | D4_ON),       /* LED_HEAPALLOCATE */
+  (D3_OFF      | D2_ON       | D4_OFF),      /* LED_IRQSENABLED  */
+  (D3_ON       | D2_ON       | D4_ON),       /* LED_STACKCREATED  */
 
-  (D3_NOCHANGE|D2_OFF     |D4_NOCHANGE), /* LED_INIRQ  */
-  (D3_NOCHANGE|D2_NOCHANGE|D4_OFF),      /* LED_SIGNAL  */
-  (D3_ON      |D2_NOCHANGE|D4_NOCHANGE), /* LED_ASSERTION  */
-  (D3_ON      |D2_NOCHANGE|D4_NOCHANGE)  /* LED_PANIC */
+  (D3_NOCHANGE | D2_OFF      | D4_NOCHANGE), /* LED_INIRQ  */
+  (D3_NOCHANGE | D2_NOCHANGE | D4_OFF),      /* LED_SIGNAL  */
+  (D3_ON       | D2_NOCHANGE | D4_NOCHANGE), /* LED_ASSERTION  */
+  (D3_ON       | D2_NOCHANGE | D4_NOCHANGE)  /* LED_PANIC */
 };
 
 static const uint8_t g_ledoff[8] =
 {
-  (D3_OFF     |D2_OFF     |D4_OFF),      /* LED_STARTED (does not happen) */
-  (D3_ON      |D2_OFF     |D4_ON),       /* LED_HEAPALLOCATE (does not happen) */
-  (D3_OFF     |D2_ON      |D4_OFF),      /* LED_IRQSENABLED (does not happen) */
-  (D3_ON      |D2_ON      |D4_ON),       /* LED_STACKCREATED (does not happen) */
+  (D3_OFF      | D2_OFF      | D4_OFF),      /* LED_STARTED (does not happen) */
+  (D3_ON       | D2_OFF      | D4_ON),       /* LED_HEAPALLOCATE (does not happen) */
+  (D3_OFF      | D2_ON       | D4_OFF),      /* LED_IRQSENABLED (does not happen) */
+  (D3_ON       | D2_ON       | D4_ON),       /* LED_STACKCREATED (does not happen) */
 
-  (D3_NOCHANGE|D2_ON      |D4_NOCHANGE), /* LED_INIRQ  */
-  (D3_NOCHANGE|D2_NOCHANGE|D4_ON),       /* LED_SIGNAL */
-  (D3_OFF     |D2_NOCHANGE|D4_NOCHANGE), /* LED_ASSERTION */
-  (D3_OFF     |D2_NOCHANGE|D4_NOCHANGE)  /* LED_PANIC */
+  (D3_NOCHANGE | D2_ON       | D4_NOCHANGE), /* LED_INIRQ  */
+  (D3_NOCHANGE | D2_NOCHANGE | D4_ON),       /* LED_SIGNAL */
+  (D3_OFF      | D2_NOCHANGE | D4_NOCHANGE), /* LED_ASSERTION */
+  (D3_OFF      | D2_NOCHANGE | D4_NOCHANGE)  /* LED_PANIC */
 };
 
 /****************************************************************************

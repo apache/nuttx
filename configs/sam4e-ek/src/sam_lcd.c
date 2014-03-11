@@ -34,73 +34,67 @@
  **************************************************************************************/
 
 /**************************************************************************************
+ *
  * The SAM4E-EK carries a TFT transmissive LCD module with touch panel, FTM280C34D.
  * Its integrated driver IC is ILI9325. The LCD display area is 2.8 inches diagonally
  * measured, with a native resolution of 240 x 320 dots.
  *
- *   LCD Module Pin Out:                         SAM3U PIO:
- *  -------------------------------------------- --------------------------------------
- *   Pin Symbol Function                         LCD            PeriphA  PeriphB Extra
- *  ---- ------ -------------------------------- -------------- -------- ------- ------
- *   1   GND    Ground                           N/A            ---      ---     ---
- *   2   CS     Chip Select                      PC16           NCS2     PWML3   AD12BAD5
- *   3   RS     Register select signal           PB8 (see A1)   CTS0     A1      AD3
- *   4   WR     Write operation signal           PB23 (NWE)     NWR0/NEW PCK1    ---
- *   5   RD     Read operation signal            PB19 (NRD)     NRD      PWML2   ---
- *   6   DB0    Data bus                         PB9            D0       DTR0    ---
- *   7   DB1    Data bus                         PB10           D1       DSR0    ---
- *   8   DB2    Data bus                         PB11           D2       DCD0    ---
- *   9   DB3    Data bus                         PB12           D3       RI0     ---
- *   10  DB4    Data bus                         PB13           D4       PWMH0   ---
- *   11  DB5    Data bus                         PB14           D5       PWMH1   ---
- *   12  DB6    Data bus                         PB15           D6       PWMH2   ---
- *   13  DB7    Data bus                         PB16           D7       PMWH3   ---
- *   14  DB8    Data bus                         PB25           D8       PWML0   ---
- *   15  DB9    Data bus                         PB26           D9       PWML1   ---
- *   16  DB10   Data bus                         PB27           D10      PWML2   ---
- *   17  DB11   Data bus                         PB28           D11      PWML3   ---
- *   18  DB12   Data bus                         PB29           D12      ---     ---
- *   19  DB13   Data bus                         PB30           D13      ---     ---
- *   20  DB14   Data bus                         PB31           D14      ---     ---
- *   21  DB15   Data bus                         PB6            TIOA1    D15     AD1
- *   22  NC     No connection                    N/A            ---      ---     ---
- *   23  NC     No connection                    N/A            ---      ---     ---
- *   24  RESET  Reset signal                     N/A            ---      ---     ---
- *   25  GND    Ground                           N/A            ---      ---     ---
- *   26  X+     Touch panel X_RIGHT              PA15           SPCK     PWMH2   ---
- *   27  Y+     Touch panel Y_UP                 PA14           MOSI     ---     ---
- *   28  X-     Touch panel X_LEFT               PA13           MISO     ---     ---
- *   29  Y-     Touch panel Y_DOWN               PC14           A3       NPCS2   ---
- *   30  GND    Ground                           N/A            ---      ---     ---
- *   31  VDD1   Power supply for digital IO Pad  N/A            ---      ---     ---
- *   32  VDD2   Power supply for analog circuit  N/A            ---      ---     ---
- *   33  A1     Power supply for backlight       PB8 (see RS)   CTS0     A1      AD3
- *   34  A2     Power supply for backlight       N/A            ---      ---     ---
- *   35  A3     Power supply for backlight       N/A            ---      ---     ---
- *   36  A4     Power supply for backlight       N/A            ---      ---     ---
- *   37  NC     No connection                    N/A            ---      ---     ---
- *   38  NC     No connection                    N/A            ---      ---     ---
- *   39  K      Backlight ground                 N/A            ---      ---     ---
+ * The SAM4E16 communicates with the LCD through PIOC where an 8-bit parallel "8080-
+ * like" protocol data bus has to be implemented in software.
  *
- * The LCD module gets its reset from NRST. As explained previously, this NRST is
- * shared with the JTAG port and the push button BP1. The LCD chip select signal is
- * connected to NCS2 (a dedicated jumper can disable it, making NCS2 available for
- * other custom usage).
+ *  ---- ----- --------- --------------------------------
+ *  PIN  PIO   SIGNAL    NOTES
+ *  ---- ----- --------- --------------------------------
+ *    1                  VDD
+ *    2  PC7   DB17
+ *    3  PC6   DB16
+ *    4  PC5   DB15
+ *    5  PC4   DB14
+ *    6  PC3   DB13
+ *    7  PC2   DB12
+ *    8  PC1   DB11
+ *    9  PC0   DB10
+ *   10        DB9       Pulled low
+ *   11        DB8       Pulled low
+ *   12        DB7       Pulled low
+ *   13        DB6       Pulled low
+ *   14        DB5       Pulled low
+ *   15        DB4       Pulled low
+ *   16        DB3       Pulled low
+ *   17        DB2       Pulled low
+ *   18        DB1       Pulled low
+ *   19        DB0       Pulled low
+ *  ---- ----- --------- --------------------------------
+ *   20                  VDD
+ *   21  PC11  RD
+ *   22  PC8   WR
+ *   23  PC19  RS
+ *   24  PD18  CS        Via J8, pulled high.  Connects to NRST.
+ *   25        RESET     Connects to NSRST
+ *   26        IM0       Pulled high
+ *   27        IM1       Grounded
+ *   28        GND
+ *  ---- ----- --------- --------------------------------
+ *   29 [PC13] LED-A     Backlight controls:  PC13 enables
+ *   30 [PC13] LEDK1       AAT3155 charge pump that drives
+ *   31 [PC13] LEDK2       the backlight LEDs
+ *   32 [PC13] LEDK3
+ *   33 [PC13] LEDK4
+ *   34 [PC13] LEDK1
+ *  ---- ----- --------- --------------------------------
+ *   35        Y+        These go to the ADS7843
+ *   36        Y-          touchscreen controller.
+ *   37        X+
+ *   38        X-
+ *   39        NC
+ *  ---- ----- --------- --------------------------------
  *
- * The SAM3U4E communicates with the LCD through PIOB where a 16-bit parallel
- * 8080-like protocol data bus has to be implemented by software.
- *
- * LCD backlight is made of 4 white chip LEDs in parallel, driven by an AAT3194
- * charge pump, MN4. The AAT3194 is controlled by the SAM3U4E through a single line
+ * LCD backlight is made of 4 white chip LEDs in parallel, driven by an AAT3155
+ * charge pump, MN4. The AAT3155 is controlled by the SAM3U4E through a single line
  * Simple Serial Control (S2Cwire) interface, which permits to enable, disable, and
  * set the LED drive current (LED brightness control) from a 32-level logarithmic
  * scale. Four resistors R93/R94/R95/R96 are implemented for optional current
  * limitation.
- *
- * The LCD module integrates a 4-wire touch screen panel controlled by
- * MN5, ADS7843, which is a slave device on the SAM3U4E SPI bus. The ADS7843 touch
- * ADC auxiliary inputs IN3/IN4 are connected to test points for optional function
- * extension.
  *
  **************************************************************************************/
 
@@ -200,7 +194,7 @@
 #define HX843X_LCD_RS        (1 << 1)
 
 /* HX8347 ID code */
-
+#error "The SAM4E-EK has an ILI925 LCD cont
 #define HX8347_CHIPID        0x47
 
 /* HX8347 LCD Registers */
