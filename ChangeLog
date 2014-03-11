@@ -6975,3 +6975,5 @@
 	* configs/sam4e-ek:  Add basic board support for the SAM4E-EK board.
 	  More work is needed.  The initial commit is little more thatn the
 	  SAM3U-EK with name changes (2014-3-10).
+	* configs/spark: Refresh all spark configurations (2014-3-11).
+
