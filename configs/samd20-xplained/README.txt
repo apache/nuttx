@@ -240,68 +240,58 @@ Development Environment
 GNU Toolchain Options
 ^^^^^^^^^^^^^^^^^^^^^
 
-  The NuttX make system has been modified to support the following different
-  toolchain options.
 
-  1. The CodeSourcery GNU toolchain,
-  2. The devkitARM GNU toolchain, ok
-  4. The NuttX buildroot Toolchain (see below).
+  The NuttX make system can be configured to support the various different
+  toolchain options.  All testing has been conducted using the NuttX buildroot
+  toolchain.  To use alternative toolchain, you simply need to add change of
+  the following configuration options to your .config (or defconfig) file:
 
-  All testing has been conducted using the NuttX buildroot toolchain.  To use
-  the CodeSourcery, devkitARM or Raisonance GNU toolchain, you simply need to
-  add one of the following configuration options to your .config (or defconfig)
-  file:
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y  : CodeSourcery under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL=y  : CodeSourcery under Linux
+    CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC=y        : Atollic toolchain for Windos
+    CONFIG_ARMV7M_TOOLCHAIN_DEVKITARM=y      : devkitARM under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
+    CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL=y      : Generic GCC ARM EABI toolchain for Linux
+    CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y      : Generic GCC ARM EABI toolchain for Windows
 
-    CONFIG_ARMV6M_TOOLCHAIN_CODESOURCERYW=y  : CodeSourcery under Windows
-    CONFIG_ARMV6M_TOOLCHAIN_CODESOURCERYL=y  : CodeSourcery under Linux
-    CONFIG_ARMV6M_TOOLCHAIN_ATOLLIC=y        : Atollic toolchain for Windos
-    CONFIG_ARMV6M_TOOLCHAIN_DEVKITARM=y      : devkitARM under Windows
-    CONFIG_ARMV6M_TOOLCHAIN_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
-    CONFIG_ARMV6M_TOOLCHAIN_GNU_EABIL=y      : Generic GCC ARM EABI toolchain for Linux
-    CONFIG_ARMV6M_TOOLCHAIN_GNU_EABIW=y      : Generic GCC ARM EABI toolchain for Windows
-
-  If you are not using CONFIG_ARMV6M_TOOLCHAIN_BUILDROOT, then you may also
-  have to modify the PATH in the setenv.h file if your make cannot find the tools.
+  You may also have to modify the PATH in the setenv.h file if your
+  make cannot find the tools.
 
   NOTE about Windows native toolchains
   ------------------------------------
 
-  The CodeSourcery (for Windows), Atollic, and devkitARM toolchains are
-  Windows native toolchains.  The CodeSourcery (for Linux), NuttX buildroot,
-  and, perhaps, the generic GCC toolchains are Cygwin and/or Linux native
-  toolchains. There are several limitations to using a Windows based
-  toolchain in a Cygwin environment.  The three biggest are:
+  There are basically three kinds of GCC toolchains that can be used:
+
+    1. A Linux native toolchain in a Linux environment,
+    2. The buildroot Cygwin tool chain built in the Cygwin environment,
+    3. A Windows native toolchain.
+
+  There are several limitations to using a Windows based toolchain (#3) in a
+  Cygwin environment.  The three biggest are:
 
   1. The Windows toolchain cannot follow Cygwin paths.  Path conversions are
-     performed automatically in the Cygwin makefiles using the 'cygpath' utility
-     but you might easily find some new path problems.  If so, check out 'cygpath -w'
+     performed automatically in the Cygwin makefiles using the 'cygpath'
+     utility but you might easily find some new path problems.  If so, check
+     out 'cygpath -w'
 
-  2. Windows toolchains cannot follow Cygwin symbolic links.  Many symbolic links
-     are used in Nuttx (e.g., include/arch).  The make system works around these
-     problems for the Windows tools by copying directories instead of linking them.
-     But this can also cause some confusion for you:  For example, you may edit
-     a file in a "linked" directory and find that your changes had no effect.
-     That is because you are building the copy of the file in the "fake" symbolic
-     directory.  If you use a Windows toolchain, you should get in the habit of
-     making like this:
+  2. Windows toolchains cannot follow Cygwin symbolic links.  Many symbolic
+     links are used in Nuttx (e.g., include/arch).  The make system works
+     around these problems for the Windows tools by copying directories
+     instead of linking them. But this can also cause some confusion for
+     you:  For example, you may edit a file in a "linked" directory and find
+     that your changes had no effect.  That is because you are building the
+     copy of the file in the "fake" symbolic directory.  If you use a
+     Windows toolchain, you should get in the habit of making like this:
 
        make clean_context all
 
      An alias in your .bashrc file might make that less painful.
 
-  3. Dependencies are not made when using Windows versions of the GCC.  This is
-     because the dependencies are generated using Windows pathes which do not
-     work with the Cygwin make.
+  3. Dependencies are not made when using Windows versions of the GCC.  This
+     is because the dependencies are generated using Windows paths which do
+     not work with the Cygwin make.
 
        MKDEP                = $(TOPDIR)/tools/mknulldeps.sh
-
-  NOTE 1: The CodeSourcery toolchain (2009q1) does not work with default optimization
-  level of -Os (See Make.defs).  It will work with -O0, -O1, or -O2, but not with
-  -Os.
-
-  NOTE 2: The devkitARM toolchain includes a version of MSYS make.  Make sure that
-  the paths to Cygwin's /bin and /usr/bin directories appear BEFORE the devkitARM
-  path or will get the wrong version of make.
 
 IDEs
 ^^^^
@@ -437,7 +427,7 @@ Atmel Studio 6.1
 
   Loading Code into FLASH:
   -----------------------
-  Tools menus:  Tool -> Device Programming.
+  Tools menus:  Tools -> Device Programming.
 
   Debugging the NuttX Object File
   -------------------------------

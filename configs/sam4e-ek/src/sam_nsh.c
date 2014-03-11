@@ -135,6 +135,7 @@ int nsh_archinitialize(void)
 
   message("nsh_archinitialize: Initializing SDIO slot %d\n",
           CONFIG_NSH_MMCSDSLOTNO);
+
   sdio = sdio_initialize(CONFIG_NSH_MMCSDSLOTNO);
   if (!sdio)
     {
@@ -147,12 +148,14 @@ int nsh_archinitialize(void)
 
   message("nsh_archinitialize: Bind SDIO to the MMC/SD driver, minor=%d\n",
           CONFIG_NSH_MMCSDMINOR);
+
   ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, sdio);
   if (ret != OK)
     {
       message("nsh_archinitialize: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
       return ret;
     }
+
   message("nsh_archinitialize: Successfully bound SDIO to the MMC/SD driver\n");
 
   /* Then inform the HSMCI driver if there is or is not a card in the slot. */

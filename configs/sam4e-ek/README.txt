@@ -14,7 +14,7 @@ Contents
   - NuttX EABI "buildroot" Toolchain
   - NuttX OABI "buildroot" Toolchain
   - NXFLAT Toolchain
-  - AtmelStudio6.1
+  - Atmel Studio 6.1
   - LEDs
   - Serial Console
   - SAM4E-EK-specific Configuration Options
@@ -55,7 +55,7 @@ GNU Toolchain Options
     1. A Linux native toolchain in a Linux environment,
     2. The buildroot Cygwin tool chain built in the Cygwin environment,
     3. A Windows native toolchain.
- 
+
   There are several limitations to using a Windows based toolchain (#3) in a
   Cygwin environment.  The three biggest are:
 
@@ -211,25 +211,35 @@ NXFLAT Toolchain
   8. Edit setenv.h, if necessary, so that the PATH variable includes
      the path to the newly builtNXFLAT binaries.
 
-AtmelStudio6.1
-^^^^^^^^^^^^^^
+Atmel Studio 6.1
+^^^^^^^^^^^^^^^^
 
-  You can use AtmelStudio6.1 to load and debug code.
+  You can use Atmel Studio 6.1 to load and debug code.
 
-  - To load code:
+  - To load code into FLASH:
 
-    Tools -> Device Programming
+    Tools menus:  Tools -> Device Programming.
 
     Configure the debugger and chip and you are in business.
 
-  - To Debug Code:
+  - Debugging the NuttX Object File:
 
-    File -> Open -> Open Object File for Debugging
+  1) Rename object file from nutt to nuttx.elf.  That is an extension that
+     will be recognized by the file menu.
 
-    Select the project name, the full path to the NuttX object (called
-    just nuttx with no extension), and chip.  Take the time to resolve
-    all of the source file linkages or else you will not have source
-    level debug!
+  2) Select the project name, the full path to the NuttX object (called
+     just nuttx with no extension), and chip.  Take the time to resolve
+     all of the source file linkages or else you will not have source
+     level debug!
+
+     File menu: File -> Open -> Open object file for debugging
+     - Select nuttx.elf object file
+     - Select AT91SAM4E16
+     - Select files for symbols as desired
+     - Select debugger
+
+  3) Debug menu: Debug -> Start debugging and break
+     - This will reload the nuttx.elf file into FLASH
 
 LEDs
 ^^^^
