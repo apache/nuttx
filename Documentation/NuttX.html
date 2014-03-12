@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: February 28, 2014</p>
+      <p>Last Updated: March 12, 2014</p>
     </td>
   </tr>
 </table>
@@ -3117,8 +3117,17 @@ Mem:         29232       5920      23312      23312
     <p>
       <a name="at91sam4e"><b>Atmel SAM4E</b>.</a>
       General architectural support was provided for the SAM4E family in NuttX 6.32.
-      This is <i>architecture-only</i> support, meaning that support for the boards with these chips is available, but not support for any publicly available boards is included..
-      This support was contributed by Mitko.
+      This is <i>architecture-only</i> support, meaning that support for the boards with these chips is available, but not support for any publicly available boards is included.
+      This support was contributed in part by Mitko.
+    </p>
+    <p>
+      <b>Atmel SAM4E-EK</b>.
+      Board support was added for the SAM4E-EK development board in NuttX 6.33.
+      A fully functional NuttShell (NSH) configuration is avaiable
+      (see the <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH User Guide</a>).
+      This is very much a work in progress.
+      An Ethernet MAC driver is in place and under test now.
+      Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/sam4e-ek/README.txt">README</a> file for further information.
     </p>
   </td>
 </tr>
