@@ -139,6 +139,7 @@ static inline void sam_supcsetup(void)
   if ((getreg32(SAM_SUPC_SR) & SUPC_SR_OSCSEL) == 0)
     {
       uint32_t delay;
+
       putreg32((SUPC_CR_XTALSEL|SUPR_CR_KEY), SAM_SUPC_CR);
       for (delay = 0;
            (getreg32(SAM_SUPC_SR) & SUPC_SR_OSCSEL) == 0 && delay < UINT32_MAX;
@@ -150,7 +151,7 @@ static inline void sam_supcsetup(void)
  * Name: sam_pmcwait
  *
  * Description:
- *   Wait for the specide PMC status bit to become "1"
+ *   Wait for the specified PMC status bit to become "1"
  *
  ****************************************************************************/
 
@@ -215,7 +216,7 @@ static inline void sam_pmcsetup(void)
    *  established.
    */
 
-  regval = getreg32(SAM_PMC_MCKR);
+  regval  = getreg32(SAM_PMC_MCKR);
   regval &= ~PMC_MCKR_CSS_MASK;
   regval |= PMC_MCKR_CSS_MAIN;
   putreg32(regval, SAM_PMC_MCKR);
@@ -228,7 +229,7 @@ static inline void sam_pmcsetup(void)
    * to PLLA_MMAX.
    */
 
-  putreg32(PMC_PMMR_MASK, SAM_PMC_PMMR);
+  //putreg32(PMC_PMMR_MASK, SAM_PMC_PMMR);
 #endif
 
   /* Setup PLLA and wait for LOCKA */
@@ -349,4 +350,3 @@ void sam_clockconfig(void)
 
   sam_enabledefaultmaster();
 }
-

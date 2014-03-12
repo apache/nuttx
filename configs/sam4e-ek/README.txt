@@ -15,6 +15,8 @@ Contents
   - NuttX OABI "buildroot" Toolchain
   - NXFLAT Toolchain
   - Atmel Studio 6.1
+  - Loading Code with J-Link
+  - Writing to FLASH using SAM-BA
   - LEDs
   - Serial Console
   - SAM4E-EK-specific Configuration Options
@@ -224,22 +226,74 @@ Atmel Studio 6.1
 
   - Debugging the NuttX Object File:
 
-  1) Rename object file from nutt to nuttx.elf.  That is an extension that
-     will be recognized by the file menu.
+    1) Rename object file from nutt to nuttx.elf.  That is an extension that
+       will be recognized by the file menu.
 
-  2) Select the project name, the full path to the NuttX object (called
-     just nuttx with no extension), and chip.  Take the time to resolve
-     all of the source file linkages or else you will not have source
-     level debug!
+    2) Select the project name, the full path to the NuttX object (called
+       just nuttx with no extension), and chip.  Take the time to resolve
+       all of the source file linkages or else you will not have source
+       level debug!
 
-     File menu: File -> Open -> Open object file for debugging
-     - Select nuttx.elf object file
-     - Select AT91SAM4E16
-     - Select files for symbols as desired
-     - Select debugger
+       File menu: File -> Open -> Open object file for debugging
+       - Select nuttx.elf object file
+       - Select AT91SAM4E16
+       - Select files for symbols as desired
+       - Select debugger
 
-  3) Debug menu: Debug -> Start debugging and break
-     - This will reload the nuttx.elf file into FLASH
+    3) Debug menu: Debug -> Start debugging and break
+       - This will reload the nuttx.elf file into FLASH
+
+    STATUS: At this point, Atmel Studio 6.1 claims that my object files are
+    not readable.  A little more needs to be done to wring out this procedure.
+
+Loading Code into SRAM with J-Link
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  Loading code with the Segger tools and GDB
+  ------------------------------------------
+
+    1) Change directories into the directory where you built NuttX.
+    2) Start the GDB server and wait until it is ready to accept GDB
+       connections.
+    3) Then run GDB like this:
+
+         $ arm-none-eabi-gdb
+         (gdb) target remote localhost:2331
+         (gdb) mon reset
+         (gdb) load nuttx
+         (gdb) ... start debugging ...
+
+  Loading code using J-Link Commander
+  ----------------------------------
+
+    J-Link> r
+    J-Link> loadbin <file> <address>
+    J-Link> setpc <address of __start>
+    J-Link> ... start debugging ...
+
+  STATUS:  As of this writing, I have no been successful writing to FLASH
+  using the GDB server.  I think that this is because of issues with GPNVM1
+  settings and flash lock bits.  In any event, the GDB server works great for
+  debugging after writing the program to FLASH using SAM-BA.
+
+Writing to FLASH using SAM-BA
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  Assumed starting configuration:
+
+    1. You have installed the J-Link USB driver
+
+  Using SAM-BA to write to FLASH:
+
+    1. Start the SAM-BA application, selecting (1) the SAM-ICE/J-Link
+       port, and (2) board = at91sam4e16-ek.
+    2. The SAM-BA menu should appear.
+    3. Select the FLASH tab and enable FLASH access
+    4. "Send" the file to flash
+    5. Enable "Boot from Flash (GPNVM1)
+    6. Reset the board.
+
+  STATUS: Works great!
 
 LEDs
 ^^^^
@@ -270,17 +324,20 @@ Serial Console
 ^^^^^^^^^^^^^^
 
   By default, all of these configurations use UART0 for the NuttX serial
-  console.  UART0 corresponds to the DB-9 connector labelled "UART".  This
-  is a male connector and will require a female-to-female, NUL modem cable
-  to connect to a PC.
+  console.  UART0 corresponds to the DB-9 connector J17 labelled "DBGU".
+  This is a male connector and will require a female-to-female, NUL modem
+  cable to connect to a PC.
 
-  An alternate is USART1 which connects to the other DB-9 connector labeled
-  "USART".  USART1 is not enabled by default unless specifically noted
+  An alternate is USART1 which connects to the other DB-9 connector labelled
+  "USART1".  USART1 is not enabled by default unless specifically noted
   otherwise in the configuration description.  A NUL modem cable must be
   used with the port as well.
 
-  NOTE:  One of the USART1 pins is shared with the audio CODEC.  The audio
-  CODEC cannot be used of USART1 is enabled.
+  NOTE:  To avoid any electrical conflict, the RS232 and RS485 transceiver
+  are isolated from the receiving line PA21.
+
+  - Chose RS485 channel: Close 1-2 pins on JP11 and set PA23 to high level
+  - Chose RS232 channel: Close 2-3 pins on JP11 and set PA23 to low level
 
   By default serial console is configured for 115000, 8-bit, 1 stop bit, and
   no parity.

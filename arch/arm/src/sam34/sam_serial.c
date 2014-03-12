@@ -739,8 +739,13 @@ static int up_setup(struct uart_dev_s *dev)
 
   up_serialout(priv, SAM_UART_MR_OFFSET, regval);
 
-  /* Configure the console baud.  NOTE: Oversampling by 8 is not supported.
-   * This may limit BAUD rates for lower USART clocks.
+  /* Configure the console baud:
+   *
+   *   Fbaud   = USART_CLOCK / (16 * divisor)
+   *   divisor = USART_CLOCK / (16 * Fbaud)
+   *
+   * NOTE: Oversampling by 8 is not supported. This may limit BAUD rates
+   * for lower USART clocks.
    */
 
   regval  = (SAM_USART_CLOCK + (priv->baud << 3))/(priv->baud << 4);

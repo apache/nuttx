@@ -33,7 +33,7 @@
  *
  ****************************************************************************/
 
-/* The SAM4E16 has 1025KB of FLASH beginning at address 0x0008:0000,
+/* The SAM4E16 has 1024KB of FLASH beginning at address 0x0040:0000,
  * 128KB of SRAM beginning at address 0x2000:0000.  When booting from FLASH,
  * FLASH memory is aliased to address 0x0000:0000 where the code expects to
  * begin execution by jumping to the entry point in the 0x0800:0000 address
@@ -42,7 +42,7 @@
 
 MEMORY
 {
-    flash (rx) : ORIGIN = 0x00080000, LENGTH = 1024K
+    flash (rx) : ORIGIN = 0x00400000, LENGTH = 1024K
     sram (rwx) : ORIGIN = 0x20000000, LENGTH = 128K
 }
 
