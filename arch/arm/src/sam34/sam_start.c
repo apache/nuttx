@@ -171,6 +171,17 @@ void __start(void)
   sam_boardinitialize();
   showprogress('D');
 
+#ifdef CONFIG_SAM34_CMCC
+  /* Enable the Cortex-M Cache
+   *
+   * REVISIT:  This logic is complete but I have not yet tried to enable it.
+   * I have some questions about how the cache will effect memory mapped
+   * register accesses.
+   */
+
+  sam_cmcc_enable();
+#endif
+
   /* Then start NuttX */
 
   showprogress('\r');

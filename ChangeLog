@@ -6978,5 +6978,6 @@
 	* configs/spark: Refresh all spark configurations (2014-3-11).
 	* arch/arm/src/tiva/chip/tm4c_memorymap.h:  Fix typos reported by
 	  Daniel Pereira de Carvalho (2014-2-12).
-
+	* arch/arm/src/sam34/sam_cmcc.c:  Add logic to manage the Cortex-M
+	  Cache Control block.  Untested on initial check-in (2014-3-12).
 
