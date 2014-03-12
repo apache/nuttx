@@ -49,6 +49,15 @@
 /****************************************************************************************
  * Pre-processor Definitions
  ****************************************************************************************/
+/* This information is available in the Cache Type Register.  How every, it is more
+ * efficient if we do not to do the decoding on each cache access.
+ */
+
+#ifdef CONFIG_ARCH_CHIP_SAM4E
+#  define CMCC_CACHE_SIZE            2048
+#  define CMCC_CACHE_LINE_SIZE       16
+#  define CMCC_NWAYS                 4
+#endif
 
 /* CMCC register offsets ****************************************************************/
 
@@ -100,7 +109,7 @@
 #  define CMCC_TYPE_CSIZE_2KB        (1 << CMCC_TYPE_CSIZE_SHIFT) /* Cache Size 2 Kbytes */
 #  define CMCC_TYPE_CSIZE_4KB        (2 << CMCC_TYPE_CSIZE_SHIFT) /* Cache Size 4 Kbytes */
 #  define CMCC_TYPE_CSIZE_8KB        (3 << CMCC_TYPE_CSIZE_SHIFT) /* Cache Size 8 Kbytes */
-#define CMCC_TYPE_CLSIZE_SHIFT       (11)      /* Bits 11-13: Cache Size */
+#define CMCC_TYPE_CLSIZE_SHIFT       (11)      /* Bits 11-13: Cache Line Size */
 #define CMCC_TYPE_CLSIZE_MASK        (7 << CMCC_TYPE_CLSIZE_SHIFT)
 #  define CMCC_TYPE_CLSIZE_4B        (0 << CMCC_TYPE_CLSIZE_SHIFT) /* 4 Bytes */
 #  define CMCC_TYPE_CLSIZE_8B        (1 << CMCC_TYPE_CLSIZE_SHIFT) /* 8 Bytes */
@@ -130,6 +139,7 @@
 #  define CMCC_MAINT1_INDEX(n)       ((uint32_t)(n) << CMCC_MAINT1_INDEX_SHIFT)
 #define CMCC_MAINT1_WAY_SHIFT        (30)      /* Bits 30-31: Invalidate Way */
 #define CMCC_MAINT1_WAY_MASK         (3 << CMCC_MAINT1_WAY_SHIFT)
+#  define CMCC_MAINT1_WAY(n)         ((uint32_t)(n) << CMCC_MAINT1_WAY_SHIFT)
 #  define CMCC_MAINT1_WAY0           (0 << CMCC_MAINT1_WAY_SHIFT) /* Way 0 selected */
 #  define CMCC_MAINT1_WAY1           (1 << CMCC_MAINT1_WAY_SHIFT) /* Way 1 selected */
 #  define CMCC_MAINT1_WAY2           (2 << CMCC_MAINT1_WAY_SHIFT) /* Way 2 selected */
