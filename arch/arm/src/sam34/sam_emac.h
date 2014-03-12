@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/sam34/sam_cmcc.h
+ * arch/arm/src/sam34/sam_ethernet.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAM34_SAM_CMCC_H
-#define __ARCH_ARM_SRC_SAM34_SAM_CMCC_H
+#ifndef __ARCH_ARM_SRC_SAM34_SAM_ETHERNET_H
+#define __ARCH_ARM_SRC_SAM34_SAM_ETHERNET_H
 
 /************************************************************************************
  * Included Files
@@ -42,27 +42,20 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
+#include "chip.h"
+#include "chip/sam_emac.h"
 
-#ifdef CONFIG_SAM34_CMCC
+#ifdef CONFIG_SAM34_EMAC
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
 
 /************************************************************************************
- * Public Types
- ************************************************************************************/
-
-/************************************************************************************
- * Inline Functions
+ * Public Functions
  ************************************************************************************/
 
 #ifndef __ASSEMBLY__
-
-/************************************************************************************
- * Public Data
- ************************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -73,51 +66,48 @@ extern "C"
 #define EXTERN extern
 #endif
 
+/****************************************************************************
+ * Function: up_netinitialize
+ *
+ * Description:
+ *   Initialize the EMAC driver.  Also prototyped in up_internal.h.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *   Called very early in the initialization sequence.
+ *
+ ****************************************************************************/
+
+void up_netinitialize(void);
+
 /************************************************************************************
- * Public Function Prototypes
+ * Function: sam_phy_boardinitialize
+ *
+ * Description:
+ *   Some boards require specialized initialization of the PHY before it can be used.
+ *   This may include such things as configuring GPIOs, resetting the PHY, etc.  If
+ *   CONFIG_SAM34_PHYINIT is defined in the configuration then the board specific
+ *   logic must provide sam_phyinitialize();  The SAM34 Ethernet driver will call
+ *   this function one time before it first uses the PHY.
+ *
+ * Parameters:
+ *   intf - Always zero for now.
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
  ************************************************************************************/
 
-/****************************************************************************
- * Name: sam_cmcc_enable
- *
- * Description:
- *   Enable the Cortex-M Cache Controller
- *
- ****************************************************************************/
-
-void sam_cmcc_enable(void);
-
-/****************************************************************************
- * Name: sam_cmcc_disable
- *
- * Description:
- *   Disable the Cortex-M Cache Controller
- *
- ****************************************************************************/
-
-void sam_cmcc_disable(void);
-
-/****************************************************************************
- * Name: sam_cmcc_invalidate
- *
- * Description:
- *   Invalidate a range of addresses.  Note:  These addresses should be
- *   aligned with the beginning and end of cache lines.  Otherwise, values
- *   at the edges of the region will also be invalidated!
- *
- ****************************************************************************/
-
-void sam_cmcc_invalidate(uintptr_t start, uintptr_t end);
-
-/****************************************************************************
- * Name: sam_cmcc_invalidateall
- *
- * Description:
- *   Invalidate the entire cache
- *
- ****************************************************************************/
-
-void sam_cmcc_invalidateall(void);
+#ifdef CONFIG_SAM34_PHYINIT
+int sam_phy_boardinitialize(int intf);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -125,12 +115,6 @@ void sam_cmcc_invalidateall(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#else /* CONFIG_SAM34_CMCC */
+#endif /* CONFIG_SAM34_EMAC */
+#endif /* __ARCH_ARM_SRC_SAM34_SAM_ETHERNET_H */
 
-/* Stubs so that we don't have to put condition compilation in driver source */
-
-#  define sam_cmcc_invalidate(start, end)
-#  define sam_cmcc_invalidateall()
-
-#endif /* CONFIG_SAM34_CMCC */
-#endif /* __ARCH_ARM_SRC_SAM34_SAM_CMCC_H */

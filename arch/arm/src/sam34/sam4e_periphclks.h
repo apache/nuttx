@@ -52,8 +52,8 @@
 
 #define sam_enableperiph0(s)       putreg32((1 << (s)), SAM_PMC_PCER0)
 #define sam_enableperiph1(s)       putreg32((1 << ((s) - 32)), SAM_PMC_PCER1)
-#define sam_disableperiph0(s)      putreg32((1 << (s)), SAM_PMC_PDER0)
-#define sam_disableperiph1(s)      putreg32((1 << ((s) - 32)), SAM_PMC_PDER1)
+#define sam_disableperiph0(s)      putreg32((1 << (s)), SAM_PMC_PCDR0)
+#define sam_disableperiph1(s)      putreg32((1 << ((s) - 32)), SAM_PMC_PCDR1)
 
 #define sam_supc_enableclk()       sam_enableperiph0(SAM_PID_SUPC)
 #define sam_rstc_enableclk()       sam_enableperiph0(SAM_PID_RSTC)
