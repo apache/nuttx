@@ -1,12 +1,12 @@
 README
-^^^^^^
+======
 
 This README discusses issues unique to NuttX configurations for the Atmel
 SAM4E-EK development.  This board features the SAM4E16 MCU running at 96
 or 120MHz.
 
 Contents
-^^^^^^^^
+========
 
   - Development Environment
   - GNU Toolchain Options
@@ -19,11 +19,12 @@ Contents
   - Writing to FLASH using SAM-BA
   - LEDs
   - Serial Console
+  - Networking Support
   - SAM4E-EK-specific Configuration Options
   - Configurations
 
 Development Environment
-^^^^^^^^^^^^^^^^^^^^^^^
+=======================
 
   Either Linux or Cygwin on Windows can be used for the development environment.
   The source has been built only using the GNU toolchain (see below).  Other
@@ -31,7 +32,7 @@ Development Environment
   environment.
 
 GNU Toolchain Options
-^^^^^^^^^^^^^^^^^^^^^
+=====================
 
   The NuttX make system can be configured to support the various different
   toolchain options.  All testing has been conducted using the NuttX buildroot
@@ -86,7 +87,7 @@ GNU Toolchain Options
        MKDEP                = $(TOPDIR)/tools/mknulldeps.sh
 
 IDEs
-^^^^
+====
 
   NuttX is built using command-line make.  It can be used with an IDE, but some
   effort will be required to create the project (There is a simple RIDE project
@@ -119,7 +120,7 @@ IDEs
   startup object needed by RIDE.
 
 NuttX EABI "buildroot" Toolchain
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+================================
 
   A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
   be modified to point to the correct path to the Cortex-M3 GCC toolchain (if
@@ -162,7 +163,7 @@ NuttX EABI "buildroot" Toolchain
   See instructions below.
 
 NuttX OABI "buildroot" Toolchain
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+================================
 
   The older, OABI buildroot toolchain is also available.  To use the OABI
   toolchain:
@@ -181,7 +182,7 @@ NuttX OABI "buildroot" Toolchain
     -NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-pcrel.ld -no-check-sections
 
 NXFLAT Toolchain
-^^^^^^^^^^^^^^^^
+================
 
   If you are *not* using the NuttX buildroot toolchain and you want to use
   the NXFLAT tools, then you will still have to build a portion of the buildroot
@@ -214,7 +215,7 @@ NXFLAT Toolchain
      the path to the newly builtNXFLAT binaries.
 
 Atmel Studio 6.1
-^^^^^^^^^^^^^^^^
+================
 
   You can use Atmel Studio 6.1 to load and debug code.
 
@@ -247,7 +248,7 @@ Atmel Studio 6.1
     not readable.  A little more needs to be done to wring out this procedure.
 
 Loading Code into SRAM with J-Link
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==================================
 
   Loading code with the Segger tools and GDB
   ------------------------------------------
@@ -277,7 +278,7 @@ Loading Code into SRAM with J-Link
   debugging after writing the program to FLASH using SAM-BA.
 
 Writing to FLASH using SAM-BA
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+=============================
 
   Assumed starting configuration:
 
@@ -296,7 +297,7 @@ Writing to FLASH using SAM-BA
   STATUS: Works great!
 
 LEDs
-^^^^
+====
 
   The SAM4E-EK board has three, user-controllable LEDs labelled D2 (blue),
   D3 (amber), and D4 (green) on the board.  Usage of these LEDs is defined
@@ -321,7 +322,7 @@ LEDs
 *** D4 may also flicker normally if signals are processed.
 
 Serial Console
-^^^^^^^^^^^^^^
+==============
 
   By default, all of these configurations use UART0 for the NuttX serial
   console.  UART0 corresponds to the DB-9 connector J17 labelled "DBGU".
@@ -342,8 +343,153 @@ Serial Console
   By default serial console is configured for 115000, 8-bit, 1 stop bit, and
   no parity.
 
+Networking
+==========
+
+  Networking support via the can be added to NSH by selecting the following
+  configuration options.
+
+  Selecting the EMAC peripheral
+  -----------------------------
+
+  System Type -> SAM34 Peripheral Support
+    CONFIG_SAM34_EMAC=y                 : Enable the EMAC peripheral
+
+  System Type -> EMAC device driver options
+    CONFIG_SAM34_EMAC_NRXBUFFERS=16     : Set aside some RS and TX buffers
+    CONFIG_SAM34_EMAC_NTXBUFFERS=4
+    CONFIG_SAM34_EMAC_PHYADDR=1         : KSZ8051 PHY is at address 1
+    CONFIG_SAM34_EMAC_AUTONEG=y         : Use autonegotiation
+    CONFIG_SAM34_EMAC_MII=y             : Only the MII interface is supported
+    CONFIG_SAM34_EMAC_PHYSR=30          : Address of PHY status register on KSZ8051
+    CONFIG_SAM34_EMAC_PHYSR_ALTCONFIG=y : Needed for KSZ8051
+    CONFIG_SAM34_EMAC_PHYSR_ALTMODE=0x7 : "    " " " "     "
+    CONFIG_SAM34_EMAC_PHYSR_10HD=0x1    : "    " " " "     "
+    CONFIG_SAM34_EMAC_PHYSR_100HD=0x2   : "    " " " "     "
+    CONFIG_SAM34_EMAC_PHYSR_10FD=0x5    : "    " " " "     "
+    CONFIG_SAM34_EMAC_PHYSR_100FD=0x6   : "    " " " "     "
+
+  PHY selection.  Later in the configuration steps, you will need to select
+  the KSZ8051 PHY for EMAC (See below)
+
+  Networking Support
+    CONFIG_NET=y                        : Enable Neworking
+    CONFIG_NET_SOCKOPTS=y               : Enable socket operations
+    CONFIG_NET_BUFSIZE=562              : Maximum packet size (MTD) 1518 is more standard
+    CONFIG_NET_RECEIVE_WINDOW=536       : Should be the same as CONFIG_NET_BUFSIZE
+    CONFIG_NET_TCP=y                    : Enable TCP/IP networking
+    CONFIG_NET_TCPBACKLOG=y             : Support TCP/IP backlog
+    CONFIG_NET_TCP_READAHEAD_BUFSIZE=536  Read-ahead buffer size
+    CONFIG_NET_UDP=y                    : Enable UDP networking
+    CONFIG_NET_BROADCAST=y              : Needed for DNS name resolution
+    CONFIG_NET_ICMP=y                   : Enable ICMP networking
+    CONFIG_NET_ICMP_PING=y              : Needed for NSH ping command
+                                        : Defaults should be okay for other options
+  Device drivers -> Network Device/PHY Support
+    CONFIG_NETDEVICES=y                 : Enabled PHY selection
+    CONFIG_ETH0_PHY_KSZ8051=y           : Select the KSZ8051 PHY (for EMAC)
+
+  Application Configuration -> Network Utilities
+    CONFIG_NETUTILS_RESOLV=y            : Enable host address resolution
+    CONFIG_NETUTILS_TELNETD=y           : Enable the Telnet daemon
+    CONFIG_NETUTILS_TFTPC=y             : Enable TFTP data file transfers for get and put commands
+    CONFIG_NETUTILS_UIPLIB=y            : Network library support is needed
+    CONFIG_NETUTILS_WEBCLIENT=y         : Needed for wget support
+                                        : Defaults should be okay for other options
+  Application Configuration -> NSH Library
+    CONFIG_NSH_TELNET=y                 : Enable NSH session via Telnet
+    CONFIG_NSH_IPADDR=0x0a000002        : Select an IP address
+    CONFIG_NSH_DRIPADDR=0x0a000001      : IP address of gateway/host PC
+    CONFIG_NSH_NETMASK=0xffffff00       : Netmask
+    CONFIG_NSH_NOMAC=y                  : Need to make up a bogus MAC address
+                                        : Defaults should be okay for other options
+
+  Using the network with NSH
+  --------------------------
+
+  So what can you do with this networking support?  First you see that
+  NSH has several new network related commands:
+
+    ifconfig, ifdown, ifup:  Commands to help manage your network
+    get and put:             TFTP file transfers
+    wget:                    HTML file transfers
+    ping:                    Check for access to peers on the network
+    Telnet console:          You can access the NSH remotely via telnet.
+
+  You can also enable other add on features like full FTP or a Web
+  Server or XML RPC and others.  There are also other features that
+  you can enable like DHCP client (or server) or network name
+  resolution.
+
+  By default, the IP address of the SAM4E-EK will be 10.0.0.2 and
+  it will assume that your host is the gateway and has the IP address
+  10.0.0.1.
+
+    nsh> ifconfig
+    eth0    HWaddr 00:e0:de:ad:be:ef at UP
+            IPaddr:10.0.0.2 DRaddr:10.0.0.1 Mask:255.255.255.0
+
+  You can use ping to test for connectivity to the host (Careful,
+  Window firewalls usually block ping-related ICMP traffic).  On the
+  target side, you can:
+
+    nsh> ping 10.0.0.1
+    PING 10.0.0.1 56 bytes of data
+    56 bytes from 10.0.0.1: icmp_seq=1 time=0 ms
+    56 bytes from 10.0.0.1: icmp_seq=2 time=0 ms
+    56 bytes from 10.0.0.1: icmp_seq=3 time=0 ms
+    56 bytes from 10.0.0.1: icmp_seq=4 time=0 ms
+    56 bytes from 10.0.0.1: icmp_seq=5 time=0 ms
+    56 bytes from 10.0.0.1: icmp_seq=6 time=0 ms
+    56 bytes from 10.0.0.1: icmp_seq=7 time=0 ms
+    56 bytes from 10.0.0.1: icmp_seq=8 time=0 ms
+    56 bytes from 10.0.0.1: icmp_seq=9 time=0 ms
+    56 bytes from 10.0.0.1: icmp_seq=10 time=0 ms
+    10 packets transmitted, 10 received, 0% packet loss, time 10100 ms
+
+  NOTE: In this configuration is is normal to have packet loss > 0%
+  the first time you ping due to the default handling of the ARP
+  table.
+
+  On the host side, you should also be able to ping the SAM4E-EK:
+
+    $ ping 10.0.0.2
+
+  You can also log into the NSH from the host PC like this:
+
+    $ telnet 10.0.0.2
+    Trying 10.0.0.2...
+    Connected to 10.0.0.2.
+    Escape character is '^]'.
+    sh_telnetmain: Session [3] Started
+
+    NuttShell (NSH) NuttX-6.31
+    nsh> help
+    help usage:  help [-v] [<cmd>]
+
+      [           echo        ifconfig    mkdir       mw          sleep
+      ?           exec        ifdown      mkfatfs     ping        test
+      cat         exit        ifup        mkfifo      ps          umount
+      cp          free        kill        mkrd        put         usleep
+      cmp         get         losetup     mh          rm          wget
+      dd          help        ls          mount       rmdir       xd
+      df          hexdump     mb          mv          sh
+
+    Builtin Apps:
+    nsh>
+
+  NOTE:  If you enable this feature, you experience a delay on booting.
+  That is because the start-up logic waits for the network connection
+  to be established before starting NuttX.  In a real application, you
+  would probably want to do the network bringup on a separate thread
+  so that access to the NSH prompt is not delayed.
+
+  This delay will be especially long if the board is not connected to
+  a network.
+
+
 SAM4E-EK-specific Configuration Options
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+=======================================
 
     CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
        be set to:
@@ -504,7 +650,7 @@ SAM4E-EK-specific Configuration Options
        support a 320x240 "Landscape" orientation.
 
 Configurations
-^^^^^^^^^^^^^^
+==============
 
   Information Common to All Configurations
   ----------------------------------------

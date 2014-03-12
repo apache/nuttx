@@ -133,7 +133,7 @@ config NET_MAX_LISTENPORTS
 		Maximum number of listening TCP/IP ports (all tasks).  Default: 20
 
 config NET_TCP_READAHEAD
-	bool "Enabled TCP/IP read-ahead buffering"
+	bool "Enable TCP/IP read-ahead buffering"
 	default y
 	---help---
 		Read-ahead buffers allows buffering of TCP/IP packets when there is no
@@ -179,7 +179,7 @@ config NET_NTCP_READAHEAD_BUFFERS
 endif # NET_TCP_READAHEAD
 
 config NET_TCP_WRITE_BUFFERS
-	bool "Enabled TCP/IP write buffering"
+	bool "Enable TCP/IP write buffering"
 	default n
 	---help---
 		Write buffers allows buffering of ongoing TCP/IP packets, providing
