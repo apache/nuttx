@@ -6976,4 +6976,7 @@
 	  More work is needed.  The initial commit is little more thatn the
 	  SAM3U-EK with name changes (2014-3-10).
 	* configs/spark: Refresh all spark configurations (2014-3-11).
+	* arch/arm/src/tiva/chip/tm4c_memorymap.h:  Fix typos reported by
+	  Daniel Pereira de Carvalho (2014-2-12).
+
 

@@ -116,7 +116,7 @@
 #  define TIVA_GPIOG_BASE     (TIVA_PERIPH_BASE + 0x26000)  /* -0x26fff: GPIO Port G */
 #  define TIVA_GPIOH_BASE     (TIVA_PERIPH_BASE + 0x27000)  /* -0x27fff: GPIO Port H */
 #  define TIVA_PWM0_BASE      (TIVA_PERIPH_BASE + 0x28000)  /* -0x28fff: PWM 0 */
-#  define TIVA_PWM1_BASE      (TIVA_PERIPH_BASE + 0x28000)  /* -0x29fff: PWM 1 */
+#  define TIVA_PWM1_BASE      (TIVA_PERIPH_BASE + 0x29000)  /* -0x29fff: PWM 1 */
                                                             /* -0x2ffff: Reserved */
 #  define TIVA_TIMER0_BASE    (TIVA_PERIPH_BASE + 0x30000)  /* -0x30fff: 16/32 Timer 0 */
 #  define TIVA_TIMER1_BASE    (TIVA_PERIPH_BASE + 0x31000)  /* -0x31fff: 16/32 Timer 1 */
