@@ -235,6 +235,18 @@
 #define IRQ_WAKU       SAM_IRQ_PA19
 #define IRQ_TAMP       SAM_IRQ_PA20
 
+/* USART1: To avoid any electrical conflict, the RS232 and RS485 transceiver
+ * are isolated from the receiving line PA21.
+ *
+ * - Chose RS485 channel: Close 1-2 pins on JP11 and set PA23 to high level
+ * - Chose RS232 channel: Close 2-3 pins on JP11 and set PA23 to low level
+ */
+
+#define GPIO_RS232_ENABLE (GPIO_OUTPUT | GPIO_CFG_DEFAULT | \
+                           GPIO_OUTPUT_CLEAR | GPIO_PORT_PIOA | GPIO_PIN21)
+#define GPIO_RS485_ENABLE (GPIO_OUTPUT | GPIO_CFG_DEFAULT | \
+                           GPIO_OUTPUT_SET | GPIO_PORT_PIOA | GPIO_PIN21)
+
 /* SD Card Detect */
 
 #define GPIO_MCI_CD   (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_PORT_PIOA | GPIO_PIN25)

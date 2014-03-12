@@ -47,12 +47,37 @@
 #include "sam4e-ek.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /************************************************************************************
  * Private Functions
  ************************************************************************************/
+
+/************************************************************************************
+ * Name: board_config_usart1
+ *
+ * Description:
+ *   USART1: To avoid any electrical conflict, the RS232 and RS485 transceiver are
+ *   isolated from the receiving line PA21.
+ *
+ *   - Chose RS485 channel: Close 1-2 pins on JP11 and set PA23 to high level
+ *   - Chose RS232 channel: Close 2-3 pins on JP11 and set PA23 to low level
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_SAM34_USART1
+static inline void board_config_usart1(void)
+{
+#if defined(CONFIG_USART1_ISUART)
+  (void)sam_configgpio(GPIO_RS232_ENABLE);
+#else /* if defined(CONFIG_USART1_RS485) */
+  (void)sam_configgpio(GPIO_RS485_ENABLE);
+#endif
+}
+#else
+#  define board_config_usart1()
+#endif
 
 /************************************************************************************
  * Public Functions
@@ -70,6 +95,10 @@
 
 void sam_boardinitialize(void)
 {
+  /* Configure USART1 for RS-232/RS-485 operation */
+
+  board_config_usart1();
+
   /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
    * sam_spiinitialize() has been brought into the link.
    */

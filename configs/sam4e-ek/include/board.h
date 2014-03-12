@@ -54,17 +54,17 @@
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
-/* After power-on reset, the SAM4E16 device is running on a 4MHz internal RC.  These
- * definitions will configure clocking
+/* After power-on reset, the SAM4E16 device is running out of the Master Clock using
+ * the Fast RC Oscillator running at 4 MHz.
  *
- *   MAINOSC:  Frequency = 12MHz (crysta)
+ *   MAINOSC:  Frequency = 12MHz (crystal)
  *
  * CONFIG_SAM4EEK_120MHZ
  *   PLLA: PLL Divider = 1, Multiplier = 20 to generate PLLACK = 240MHz
  *   Master Clock (MCK): Source = PLLACK, Prescalar = 1 to generate MCK = 120MHz
  *   CPU clock: 120MHz
  *
- * CONFIG_SAM4EEK_196MHZ
+ * CONFIG_SAM4EEK_96MHZ
  *   PLLA: PLL Divider = 1, Multiplier = 16 to generate PLLACK = 192MHz
  *   Master Clock (MCK): Source = PLLACK, Prescalar = 1 to generate MCK = 96MHz
  *   CPU clock: 96MHz
@@ -85,9 +85,9 @@
  */
 
 #ifdef CONFIG_SAM4EEK_120MHZ
-#  define BOARD_CKGR_PLLAR_MUL     (20 << PMC_CKGR_PLLAR_MUL_SHIFT)
+#  define BOARD_CKGR_PLLAR_MUL     (19 << PMC_CKGR_PLLAR_MUL_SHIFT)
 #else
-#  define BOARD_CKGR_PLLAR_MUL     (16 << PMC_CKGR_PLLAR_MUL_SHIFT)
+#  define BOARD_CKGR_PLLAR_MUL     (15 << PMC_CKGR_PLLAR_MUL_SHIFT)
 #endif
 
 #define BOARD_CKGR_PLLAR_STMODE    PMC_CKGR_PLLAR_STMODE_FAST
@@ -116,7 +116,6 @@
 #  define BOARD_MCK_FREQUENCY      (120000000) /* MCK:     PLLACK / 2 */
 #  define BOARD_CPU_FREQUENCY      (120000000) /* CPU:     MCK */
 #else
-#  define BOARD_MAINOSC_FREQUENCY  (12000000)  /* MAINOSC: 12MHz crystal on-board */
 #  define BOARD_PLLA_FREQUENCY     (192000000) /* PLLACK:  16 * 12Mhz / 1 */
 #  define BOARD_MCK_FREQUENCY      (96000000)  /* MCK:     PLLACK / 2 */
 #  define BOARD_CPU_FREQUENCY      (96000000)  /* CPU:     MCK */
