@@ -40,7 +40,7 @@ CFLAGS += -I$(TOPDIR)/sched
 ASRCS =
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 
-CSRCS = sam_boot.c sam_leds.c sam_buttons.c sam_spi.c sam_usbdev.c
+CSRCS = sam_boot.c sam_leds.c sam_buttons.c sam_usbdev.c
 
 ifeq ($(CONFIG_HAVE_CXXINITIALIZE),y)
 CSRCS += sam_cxxinitialize.c
@@ -56,6 +56,10 @@ endif
 
 ifeq ($(CONFIG_SAM34_HSMCI),y)
 CSRCS += sam_mmcsd.c
+endif
+
+ifeq ($(CONFIG_SAM34_SPI0),y)
+CSRCS += sam_spi.c
 endif
 
 ifeq ($(CONFIG_USBMSC),y)

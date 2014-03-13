@@ -268,9 +268,9 @@
  * it low throughout the SPI transfer.
  */
 
-#define GPIO_TSC_NPCS2 (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_SET | \
-                        GPIO_PORT_PIOA | GPIO_PIN11)
-#define TSC_CSNUM      0
+#define GPIO_TSC_CS   (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_SET | \
+                       GPIO_PORT_PIOA | GPIO_PIN11)
+#define TSC_CSNUM     0
 
 /************************************************************************************
  * Public Types

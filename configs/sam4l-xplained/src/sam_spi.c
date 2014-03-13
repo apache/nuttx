@@ -115,14 +115,14 @@ void weak_function sam_spiinitialize(void)
 }
 
 /****************************************************************************
- * Name:  sam_spiselect, sam_spistatus, and sam_spicmddata
+ * Name:  sam_spi0select, sam_spi0status, and sam_spic0mddata
  *
  * Description:
  *   These external functions must be provided by board-specific logic.  They
  *   include:
  *
- *   o sam_spiselect is a functions tomanage the board-specific chip selects
- *   o sam_spistatus and sam_spicmddata:  Implementations of the status
+ *   o sam_spi0select is a functions tomanage the board-specific chip selects
+ *   o sam_spi0status and sam_spic0mddata:  Implementations of the status
  *     and cmddata methods of the SPI interface defined by struct spi_ops_
  *     (see include/nuttx/spi/spi.h). All other methods including
  *     up_spiinitialize()) are provided by common SAM3/4 logic.
@@ -131,11 +131,11 @@ void weak_function sam_spiinitialize(void)
  *
  *   1. Provide logic in sam_boardinitialize() to configure SPI chip select
  *      pins.
- *   2. Provide sam_spiselect() and sam_spistatus() functions in your board-
+ *   2. Provide sam_spi0select() and sam_spi0status() functions in your board-
  *      specific logic.  These functions will perform chip selection and
  *      status operations using GPIOs in the way your board is configured.
  *   2. If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, provide
- *      sam_spicmddata() functions in your board-specific logic.  This
+ *      sam_spic0mddata() functions in your board-specific logic.  This
  *      function will perform cmd/data selection operations using GPIOs in
  *      the way your board is configured.
  *   3. Add a call to up_spiinitialize() in your low level application
@@ -148,7 +148,7 @@ void weak_function sam_spiinitialize(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_spiselect
+ * Name: sam_spi0select
  *
  * Description:
  *   PIO chip select pins may be programmed by the board specific logic in
@@ -172,7 +172,7 @@ void weak_function sam_spiinitialize(void)
  *
  ****************************************************************************/
 
-void sam_spiselect(enum spi_dev_e devid, bool selected)
+void sam_spi0select(enum spi_dev_e devid, bool selected)
 {
 #ifdef CONFIG_SAM4L_XPLAINED_IOMODULE
   /* Select/de-select the SD card */
@@ -202,7 +202,7 @@ void sam_spiselect(enum spi_dev_e devid, bool selected)
 }
 
 /****************************************************************************
- * Name: sam_spistatus
+ * Name: sam_spi0status
  *
  * Description:
  *   Return status information associated with the SPI device.
@@ -215,7 +215,7 @@ void sam_spiselect(enum spi_dev_e devid, bool selected)
  *
  ****************************************************************************/
 
-uint8_t sam_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t sam_spi0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
   uint8_t ret = 0;
 
@@ -239,7 +239,7 @@ uint8_t sam_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 #endif /* CONFIG_SAM34_SPI0 */
 
 /****************************************************************************
- * Name: sam_spicmddata
+ * Name: sam_spic0mddata
  *
  * Description:
  *   Some SPI devices require an additional control to determine if the SPI
@@ -263,7 +263,7 @@ uint8_t sam_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_CMDDATA
-int sam_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+int sam_spic0mddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 {
 #ifdef CONFIG_SAM4L_XPLAINED_OLED1MODULE
   if (devid == SPIDEV_DISPLAY)

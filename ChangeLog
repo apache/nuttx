@@ -6988,3 +6988,9 @@
 	  functional (2014-3-13).
 	* configs/sam4e-ek/nsh:  Networking support is now enabled by default
 	  in the NSH configuration (2014-3-13).
+	* arch/arm/src/sam34/sam_spi.c:  Backported the SAMA5 SPI driver to
+	  the SAM3/4 architecture.  The SAMA5 version supports both multiple
+	  SPI peripherals as needed by the SAM3A and SAM3X and also supports
+	  DMAC (but not PDC).  The initial commit is untested and may very
+	  well have (temporarily) broken SPI for the SAM3/4/ family (2014-3-13).
+

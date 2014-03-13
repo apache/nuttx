@@ -114,4 +114,8 @@ endif
 
 ifeq ($(CONFIG_SAM34_SPI0),y)
 CHIP_CSRCS += sam_spi.c
+else
+ifeq ($(CONFIG_SAM34_SPI1),y)
+CHIP_CSRCS += sam_spi.c
+endif
 endif
