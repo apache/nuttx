@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/sam4e-ek/src/sam_nsh.c
+ * config/sam4e-ek/src/sam_at25.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,81 +46,98 @@
 #include <errno.h>
 #include <debug.h>
 
-#ifdef CONFIG_SYSTEM_USBMONITOR
-#  include <apps/usbmonitor.h>
-#endif
+#include <nuttx/spi/spi.h>
+#include <nuttx/mtd/mtd.h>
+#include <nuttx/fs/nxffs.h>
 
+#include "sam_spi.h"
 #include "sam4e-ek.h"
+
+#ifdef HAVE_AT25
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
-
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_DEBUG
-#    define message(...) syslog(__VA_ARGS__)
-#  else
-#    define message(...) printf(__VA_ARGS__)
-#  endif
-#else
-#  ifdef CONFIG_DEBUG
-#    define message syslog
-#  else
-#    define message printf
-#  endif
-#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
+ * Name: sam_at25_automount
  *
  * Description:
- *   Perform architecture specific initialization
+ *   Initialize, configure, and mount the AT25 serial FLASH.  The FLASH will
+ *   be mounted at /dev/at25.
  *
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+int sam_at25_automount(int minor)
 {
-#if defined(HAVE_AT25) || defined(HAVE_HSMCI) || defined(HAVE_USBMONITOR)
+  FAR struct spi_dev_s *spi;
+  FAR struct mtd_dev_s *mtd;
+  static bool initialized = false;
   int ret;
-#endif
 
-#ifdef HAVE_AT25
-  /* Initialize the AT25 driver */
+  /* Have we already initialized? */
 
-  ret = sam_at25_automount(0);
-  if (ret < 0)
+  if (!initialized)
     {
-      message("ERROR: sam_at25_automount() failed: %d\n", ret);
-      return ret;
-    }
+      /* No.. Get the SPI port driver */
+
+      spi = up_spiinitialize(FLASH_CSNUM);
+      if (!spi)
+        {
+          fdbg("ERROR: Failed to initialize SPI port %d\n", FLASH_CSNUM);
+          return -ENODEV;
+        }
+
+      /* Now bind the SPI interface to the AT25 SPI FLASH driver */
+
+      mtd = at25_initialize(spi);
+      if (!mtd)
+        {
+          fdbg("ERROR: Failed to bind SPI port %d to the AT25 FLASH driver\n");
+          return -ENODEV;
+        }
+
+#if defined(CONFIG_SAM4EEK_AT25_FTL)
+      /* And finally, use the FTL layer to wrap the MTD driver as a block
+       * driver at /dev/mtdblockN, where N=minor device number.
+       */
+
+      ret = ftl_initialize(minor, mtd);
+      if (ret < 0)
+        {
+          fdbg("ERROR: Failed to initialize the FTL layer: %d\n", ret);
+          return ret;
+        }
+
+#elif defined(CONFIG_SAM4EEK_AT25_NXFFS)
+      /* Initialize to provide NXFFS on the MTD interface */
+
+      ret = nxffs_initialize(mtd);
+      if (ret < 0)
+        {
+          fdbg("ERROR: NXFFS initialization failed: %d\n", ret);
+          return ret;
+        }
+
+      /* Mount the file system at /mnt/at25 */
+
+      ret = mount(NULL, "/mnt/at25", "nxffs", 0, NULL);
+      if (ret < 0)
+        {
+          fdbg("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
+          return ret;
+        }
 #endif
+      /* Now we are initialized */
 
-#ifdef HAVE_HSMCI
-  /* Initialize the HSMCI driver */
-
-  ret = sam_hsmci_initialize(0);
-  if (ret < 0)
-    {
-      message("ERROR: sam_hsmci_initialize(0) failed: %d\n", ret);
-      return ret;
+      initialized = true;
     }
-#endif
-
-#ifdef HAVE_USBMONITOR
-  /* Start the USB Monitor */
-
-  ret = usbmonitor_start(0, NULL);
-  if (ret != OK)
-    {
-      message("nsh_archinitialize: Start USB monitor: %d\n", ret);
-    }
-#endif
 
   return OK;
 }
+
+#endif /* HAVE_AT25 */

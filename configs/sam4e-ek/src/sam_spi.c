@@ -95,14 +95,16 @@
 
 void weak_function sam_spiinitialize(void)
 {
-  /* The ZigBee module connects used NPCS0.  However, there is not yet any
-   * ZigBee support.
-   */
-
+#if defined(CONFIG_INPUT) && defined(CONFIG_INPUT_ADS7843E)
    /* The touchscreen connects using NPCS0 (PA11). */
 
-#if defined(CONFIG_INPUT) && defined(CONFIG_INPUT_ADS7843E)
    sam_configgpio(GPIO_TSC_CS);
+#endif
+
+#if defined(CONFIG_MTD_AT25)
+   /* The AT25 Serial FLASH connects using NPCS3 (PA5). */
+
+   sam_configgpio(GPIO_FLASH_CS);
 #endif
 }
 
@@ -166,20 +168,33 @@ void weak_function sam_spiinitialize(void)
 
 void sam_spi0select(enum spi_dev_e devid, bool selected)
 {
-  /* The touchscreen chip select is implemented as a GPIO OUTPUT that must
-   * be controlled by this function.  This is because the ADS7843E driver
-   * must be able to sample the device BUSY GPIO input between SPI transfers.
-   * However, the AD7843E will tri-state the BUSY input whenever the chip
-   * select is de-asserted.  So the only option is to control the chip select
-   * manually and hold it low throughout the SPI transfer.
-   */
-
-#if defined(CONFIG_INPUT) && defined(CONFIG_INPUT_ADS7843E)
-  if (devid == SPIDEV_TOUCHSCREEN)
+  switch (devid)
     {
-      sam_gpiowrite(GPIO_TSC_CS, !selected);
-    }
+#if defined(CONFIG_INPUT) && defined(CONFIG_INPUT_ADS7843E)
+      /* The touchscreen chip select is implemented as a GPIO OUTPUT that must
+       * be controlled by this function.  This is because the ADS7843E driver
+       * must be able to sample the device BUSY GPIO input between SPI transfers.
+       * However, the AD7843E will tri-state the BUSY input whenever the chip
+       * select is de-asserted.  So the only option is to control the chip select
+       * manually and hold it low throughout the SPI transfer.
+       */
+
+      case SPIDEV_TOUCHSCREEN:
+        sam_gpiowrite(GPIO_TSC_CS, !selected);
+        break;
 #endif
+
+#if defined(CONFIG_MTD_AT25)
+       /* The AT25 Serial FLASH connects using NPCS3 (PA5). */
+
+      case SPIDEV_FLASH:
+        sam_gpiowrite(GPIO_FLASH_CS, !selected);
+        break;
+#endif
+
+      default:
+        break;
+    }
 }
 
 /****************************************************************************
