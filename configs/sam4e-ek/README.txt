@@ -610,7 +610,7 @@ SAM4E-EK-specific Configuration Options
     CONFIG_SAM34_SMC           - Static Memory Controller
     CONFIG_SAM34_NAND          - NAND support
     CONFIG_SAM34_PDCA          - Peripheral DMA controller
-    CONFIG_SAM34_DMAC          - DMA controller
+    CONFIG_SAM34_DMAC0         - DMA controller
     CONFIG_SAM34_UDP           - USB 2.0 Full-Speed device
     CONFIG_SAM34_CHIPID        - Chip ID
     CONFIG_SAM34_RTC           - Real Time Clock
@@ -843,25 +843,25 @@ Configurations
 
        System Type->ATSAM3/4 Peripheral Support
          CONFIG_SAM34_HSMCI=y                 : Enable HSMCI support
-         CONFIG_SAM34_DMAC=y                  : DMAC support is needed by HSMCI
+         CONFIG_SAM34_DMAC0=y                 : DMAC support is needed by HSMCI
 
        System Type
          CONFIG_SAM34_GPIO_IRQ=y              : PIO interrupts needed
          CONFIG_SAM34_GPIOA_IRQ=y             : Card detect pin is on PIOA
 
        Device Drivers -> MMC/SD Driver Support
-         CONFIG_MMCSD=y                        : Enable MMC/SD support
-         CONFIG_MMSCD_NSLOTS=1                 : One slot per driver instance
-         CONFIG_MMCSD_HAVECARDDETECT=y         : Supports card-detect PIOs
-         CONFIG_MMCSD_SDIO=y                   : SDIO-based MMC/SD support
-         CONFIG_SDIO_DMA=y                     : Use SDIO DMA
-         CONFIG_SDIO_BLOCKSETUP=y              : Needs to know block sizes
+         CONFIG_MMCSD=y                       : Enable MMC/SD support
+         CONFIG_MMSCD_NSLOTS=1                : One slot per driver instance
+         CONFIG_MMCSD_HAVECARDDETECT=y        : Supports card-detect PIOs
+         CONFIG_MMCSD_SDIO=y                  : SDIO-based MMC/SD support
+         CONFIG_SDIO_DMA=y                    : Use SDIO DMA
+         CONFIG_SDIO_BLOCKSETUP=y             : Needs to know block sizes
 
        Library Routines
-         CONFIG_SCHED_WORKQUEUE=y              : Driver needs work queue support
+         CONFIG_SCHED_WORKQUEUE=y             : Driver needs work queue support
 
        Application Configuration -> NSH Library
-         CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
+         CONFIG_NSH_ARCHINIT=y                : NSH board-initialization
 
     STATUS:
       2014-3-13: The basic NSH serial console is working.  Network support

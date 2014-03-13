@@ -6993,4 +6993,6 @@
 	  SPI peripherals as needed by the SAM3A and SAM3X and also supports
 	  DMAC (but not PDC).  The initial commit is untested and may very
 	  well have (temporarily) broken SPI for the SAM3/4/ family (2014-3-13).
-
+	* configs/sam4e-ek/src/sam_at25.c and sam_hsmci.c:  Added support for
+	  the AT25 serial FLASH.  Restructured the logic that registers the
+	  HSMCI block driver (2014-3-13). 

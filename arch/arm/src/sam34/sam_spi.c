@@ -65,13 +65,14 @@
 #include "sam_periphclks.h"
 #include "sam_spi.h"
 #include "chip/sam_pmc.h"
+#include "chip/sam_dmac.h"
 #include "chip/sam_spi.h"
 #include "chip/sam_pinmap.h"
 
 #if defined(CONFIG_SAM34_SPI0) || defined(CONFIG_SAM34_SPI1)
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* When SPI DMA is enabled, small DMA transfers will still be performed by
@@ -217,7 +218,8 @@ struct sam_spidev_s
   select_t select;             /* SPI select callout */
   bool initialized;            /* TRUE: Controller has been initialized */
 #ifdef CONFIG_SAM34_SPI_DMA
-  uint8_t pid;                 /* Peripheral ID */
+  uint8_t rxintf;              /* RX hardware interface number */
+  uint8_t txintf;              /* TX hardware interface number */
 #endif
 
   /* Debug stuff */
@@ -278,7 +280,7 @@ static void     spi_dma_sampledone(struct sam_spics_s *spics);
 
 static void     spi_rxcallback(DMA_HANDLE handle, void *arg, int result);
 static void     spi_txcallback(DMA_HANDLE handle, void *arg, int result);
-static inline uintptr_t spi_physregaddr(struct sam_spics_s *spics,
+static inline uintptr_t spi_regaddr(struct sam_spics_s *spics,
                   unsigned int offset);
 #endif
 
@@ -348,10 +350,11 @@ static const struct spi_ops_s g_spi0ops =
 
 static struct sam_spidev_s g_spi0dev =
 {
-  .base    = SAM_SPI0_BASE,
-  .select  = sam_spi0select,
+  .base              = SAM_SPI0_BASE,
+  .select            = sam_spi0select,
 #ifdef CONFIG_SAM34_SPI_DMA
-  .pid     = SAM_PID_SPI0,
+  .rxintf            = DMACHAN_INTF_SPI0RX,
+  .txintf            = DMACHAN_INTF_SPI0TX,
 #endif
 };
 #endif
@@ -386,10 +389,11 @@ static const struct spi_ops_s g_spi1ops =
 
 static struct sam_spidev_s g_spi1dev =
 {
-  .base    = SAM_SPI1_BASE,
-  .select  = sam_spi1select,
+  .base              = SAM_SPI1_BASE,
+  .select            = sam_spi1select,
 #ifdef CONFIG_SAM34_SPI_DMA
-  .pid     = SAM_PID_SPI1,
+  .rxintf            = DMACHAN_INTF_SPI1RX,
+  .txintf            = DMACHAN_INTF_SPI1TX,
 #endif
 };
 #endif
@@ -849,19 +853,19 @@ static void spi_txcallback(DMA_HANDLE handle, void *arg, int result)
 #endif
 
 /****************************************************************************
- * Name: spi_physregaddr
+ * Name: spi_regaddr
  *
  * Description:
- *   Return the physical address of an HSMCI register
+ *   Return the address of an SPI register
  *
  ****************************************************************************/
 
 #ifdef CONFIG_SAM34_SPI_DMA
-static inline uintptr_t spi_physregaddr(struct sam_spics_s *spics,
-                                        unsigned int offset)
+static inline uintptr_t spi_regaddr(struct sam_spics_s *spics,
+                                    unsigned int offset)
 {
   struct sam_spidev_s *spi = spi_device(spics);
-  return sam_physregaddr(spi->base + offset);
+  return spi->base + offset;
 }
 #endif
 
@@ -1399,8 +1403,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   uint32_t txflags;
   uint32_t txdummy;
   uint32_t rxdummy;
-  uint32_t paddr;
-  uint32_t maddr;
+  uint32_t regaddr;
+  uint32_t memaddr;
   int ret;
 
   /* If we cannot do DMA -OR- if this is a small SPI transfer, then let
@@ -1442,13 +1446,11 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
    */
 
   rxflags = DMACH_FLAG_FIFOCFG_LARGEST |
-            ((uint32_t)spi->pid << DMACH_FLAG_PERIPHPID_SHIFT) |
+            ((uint32_t)spi->rxintf << DMACH_FLAG_PERIPHPID_SHIFT) |
             DMACH_FLAG_PERIPHH2SEL | DMACH_FLAG_PERIPHISPERIPH |
-            DMACH_FLAG_PERIPHAHB_AHB_IF2 | DMACH_FLAG_PERIPHWIDTH_8BITS |
-            DMACH_FLAG_PERIPHCHUNKSIZE_1 |
+            DMACH_FLAG_PERIPHWIDTH_8BITS | DMACH_FLAG_PERIPHCHUNKSIZE_1 |
             ((uint32_t)(0x3f) << DMACH_FLAG_MEMPID_SHIFT) |
-            DMACH_FLAG_MEMAHB_AHB_IF0 | DMACH_FLAG_MEMWIDTH_8BITS |
-            DMACH_FLAG_MEMCHUNKSIZE_1;
+            DMACH_FLAG_MEMWIDTH_8BITS | DMACH_FLAG_MEMCHUNKSIZE_1;
 
   if (!rxbuffer)
     {
@@ -1466,13 +1468,11 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
     }
 
   txflags = DMACH_FLAG_FIFOCFG_LARGEST |
-            ((uint32_t)spi->pid << DMACH_FLAG_PERIPHPID_SHIFT) |
+            ((uint32_t)spi->txintf << DMACH_FLAG_PERIPHPID_SHIFT) |
             DMACH_FLAG_PERIPHH2SEL | DMACH_FLAG_PERIPHISPERIPH |
-            DMACH_FLAG_PERIPHAHB_AHB_IF2 | DMACH_FLAG_PERIPHWIDTH_8BITS |
-            DMACH_FLAG_PERIPHCHUNKSIZE_1 |
+            DMACH_FLAG_PERIPHWIDTH_8BITS | DMACH_FLAG_PERIPHCHUNKSIZE_1 |
             ((uint32_t)(0x3f) << DMACH_FLAG_MEMPID_SHIFT) |
-            DMACH_FLAG_MEMAHB_AHB_IF0 | DMACH_FLAG_MEMWIDTH_8BITS |
-            DMACH_FLAG_MEMCHUNKSIZE_1;
+            DMACH_FLAG_MEMWIDTH_8BITS | DMACH_FLAG_MEMCHUNKSIZE_1;
 
   if (!txbuffer)
     {
@@ -1497,10 +1497,10 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
   /* Configure the exchange transfers */
 
-  paddr = spi_physregaddr(spics, SAM_SPI_RDR_OFFSET);
-  maddr = sam_physramaddr((uintptr_t)rxbuffer);
+  regaddr = spi_regaddr(spics, SAM_SPI_RDR_OFFSET);
+  memaddr = (uintptr_t)rxbuffer;
 
-  ret = sam_dmarxsetup(spics->rxdma, paddr, maddr, nwords);
+  ret = sam_dmarxsetup(spics->rxdma, regaddr, memaddr, nwords);
   if (ret < 0)
     {
       dmadbg("ERROR: sam_dmarxsetup failed: %d\n", ret);
@@ -1509,10 +1509,10 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
   spi_rxdma_sample(spics, DMA_AFTER_SETUP);
 
-  paddr = spi_physregaddr(spics, SAM_SPI_TDR_OFFSET);
-  maddr = sam_physramaddr((uintptr_t)txbuffer);
+  regaddr = spi_regaddr(spics, SAM_SPI_TDR_OFFSET);
+  memaddr = (uintptr_t)txbuffer;
 
-  ret = sam_dmatxsetup(spics->txdma, paddr, maddr, nwords);
+  ret = sam_dmatxsetup(spics->txdma, regaddr, memaddr, nwords);
   if (ret < 0)
     {
       dmadbg("ERROR: sam_dmatxsetup failed: %d\n", ret);
@@ -1741,7 +1741,7 @@ struct spi_dev_s *up_spiinitialize(int port)
 
   if (spics->candma)
     {
-      spics->rxdma = sam_dmachannel(spino, 0);
+      spics->rxdma = sam_dmachannel(0);
       if (!spics->rxdma)
         {
           spidbg("ERROR: Failed to allocate the RX DMA channel\n");
@@ -1751,7 +1751,7 @@ struct spi_dev_s *up_spiinitialize(int port)
 
   if (spics->candma)
     {
-      spics->txdma = sam_dmachannel(spino, 0);
+      spics->txdma = sam_dmachannel(0);
       if (!spics->txdma)
         {
           spidbg("ERROR: Failed to allocate the TX DMA channel\n");

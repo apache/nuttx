@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sam34/sam_dmac.c
  *
- *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,7 +68,7 @@
 
 /* Condition out the whole file unless DMA is selected in the configuration */
 
-#ifdef CONFIG_SAM34_DMAC
+#ifdef CONFIG_SAM34_DMAC0
 
 /* If AT90SAM3U support is enabled, then OS DMA support should also be enabled */
 
@@ -153,7 +153,7 @@ static struct dma_linklist_s g_linklist[CONFIG_SAM34_NLLDESC];
 
 static struct sam_dma_s g_dma[SAM34_NDMACHAN] =
 {
-#ifdef CONFIG_ARCH_CHIP_ATSAM3U4E
+#if defined(CONFIG_ARCH_CHIP_ATSAM3U4E)
   /* the AT91SAM3U4E has four DMA channels.  The FIFOs for channels 0-2 are
    * 8 bytes in size; channel 3 is 32 bytes.
    */
@@ -182,6 +182,40 @@ static struct sam_dma_s g_dma[SAM34_NDMACHAN] =
     .flags    = (DMACH_FLAG_FIFO_32BYTES | DMACH_FLAG_FLOWCONTROL),
     .base     = SAM_DMACHAN3_BASE,
   }
+
+#elif defined(CONFIG_ARCH_CHIP_SAM4E)
+  /* The SAM4E16E, SAM4E8E, SAM4E16C, and SAM4E8C have four DMA channels.
+   *
+   * REVISIT:  I have not yet found any documentation for the per-channel
+   * FIFO depth.  Here I am assuming that the FIFO characteristics are
+   * the same as for the SAM3U.
+   */
+
+#if SAM34_NDMACHAN != 4
+#  error "Logic here assumes SAM34_NDMACHAN is 4"
+#endif
+
+  {
+    .chan     = 0,
+    .flags    = DMACH_FLAG_FIFO_8BYTES,
+    .base     = SAM_DMACHAN0_BASE,
+  },
+  {
+    .chan     = 1,
+    .flags    = DMACH_FLAG_FIFO_8BYTES,
+    .base     = SAM_DMACHAN1_BASE,
+  },
+  {
+    .chan     = 2,
+    .flags    = DMACH_FLAG_FIFO_8BYTES,
+    .base     = SAM_DMACHAN2_BASE,
+  },
+  {
+    .chan     = 3,
+    .flags    = (DMACH_FLAG_FIFO_32BYTES | DMACH_FLAG_FLOWCONTROL),
+    .base     = SAM_DMACHAN3_BASE,
+  }
+
 #else
 #  error "Nothing is known about the DMA channels for this device"
 #endif
@@ -369,6 +403,8 @@ sam_txctrlabits(struct sam_dma_s *dmach)
   DEBUGASSERT(ndx < 3);
   regval = g_srcwidth[ndx];
 
+#if defined(CONFIG_ARCH_CHIP_SAM3U) ||  defined(CONFIG_ARCH_CHIP_SAM3X) || \
+    defined(CONFIG_ARCH_CHIP_SAM3A)
   /* Set the source chunk size (memory chunk size) */
 
   if ((dmach->flags & DMACH_FLAG_MEMCHUNKSIZE) == DMACH_FLAG_MEMCHUNKSIZE_4)
@@ -381,6 +417,7 @@ sam_txctrlabits(struct sam_dma_s *dmach)
       regval |= DMACHAN_CTRLA_SCSIZE_1;
     }
 #endif
+#endif
 
   /* Since this is a transmit, the destination is described by the peripheral selections.
    * Set the destination width (peripheral width).
@@ -390,6 +427,8 @@ sam_txctrlabits(struct sam_dma_s *dmach)
   DEBUGASSERT(ndx < 3);
   regval |= g_destwidth[ndx];
 
+#if defined(CONFIG_ARCH_CHIP_SAM3U) ||  defined(CONFIG_ARCH_CHIP_SAM3X) || \
+    defined(CONFIG_ARCH_CHIP_SAM3A)
   /* Set the destination chunk size (peripheral chunk size) */
 
   if ((dmach->flags & DMACH_FLAG_PERIPHCHUNKSIZE) == DMACH_FLAG_PERIPHCHUNKSIZE_4)
@@ -401,6 +440,7 @@ sam_txctrlabits(struct sam_dma_s *dmach)
     {
       regval |= DMACHAN_CTRLA_DCSIZE_1;
     }
+#endif
 #endif
 
   return regval;
@@ -514,6 +554,8 @@ static inline uint32_t sam_rxctrlabits(struct sam_dma_s *dmach)
   DEBUGASSERT(ndx < 3);
   regval = g_srcwidth[ndx];
 
+#if defined(CONFIG_ARCH_CHIP_SAM3U) ||  defined(CONFIG_ARCH_CHIP_SAM3X) || \
+    defined(CONFIG_ARCH_CHIP_SAM3A)
   /* Set the source chunk size (peripheral chunk size) */
 
   if ((dmach->flags & DMACH_FLAG_PERIPHCHUNKSIZE) == DMACH_FLAG_PERIPHCHUNKSIZE_4)
@@ -526,6 +568,7 @@ static inline uint32_t sam_rxctrlabits(struct sam_dma_s *dmach)
       regval |= DMACHAN_CTRLA_SCSIZE_1;
     }
 #endif
+#endif
 
   /* Since this is a receive, the destination is described by the memory selections.
    * Set the destination width (memory width).
@@ -535,6 +578,8 @@ static inline uint32_t sam_rxctrlabits(struct sam_dma_s *dmach)
   DEBUGASSERT(ndx < 3);
   regval |= g_destwidth[ndx];
 
+#if defined(CONFIG_ARCH_CHIP_SAM3U) ||  defined(CONFIG_ARCH_CHIP_SAM3X) || \
+    defined(CONFIG_ARCH_CHIP_SAM3A)
   /* Set the destination chunk size (memory chunk size) */
 
   if ((dmach->flags & DMACH_FLAG_MEMCHUNKSIZE) == DMACH_FLAG_MEMCHUNKSIZE_4)
@@ -546,6 +591,7 @@ static inline uint32_t sam_rxctrlabits(struct sam_dma_s *dmach)
     {
       regval |= DMACHAN_CTRLA_DCSIZE_1;
     }
+#endif
 #endif
 
   return regval;
@@ -1715,4 +1761,4 @@ void sam_dmadump(DMA_HANDLE handle, const struct sam_dmaregs_s *regs,
   dmadbg("       CFG[%08x]: %08x\n", dmach->base + SAM_DMACHAN_CFG_OFFSET, regs->cfg);
 }
 #endif /* CONFIG_DEBUG_DMA */
-#endif /* CONFIG_SAM34_DMAC */
+#endif /* CONFIG_SAM34_DMAC0 */

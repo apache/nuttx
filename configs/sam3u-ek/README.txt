@@ -381,7 +381,7 @@ SAM3U-EK-specific Configuration Options
     CONFIG_SAM34_PWM           - Pulse Width Modulation Controller
     CONFIG_SAM34_ADC12B        - 12-bit ADC Controller
     CONFIG_SAM34_ADC           - 10-bit ADC Controller
-    CONFIG_SAM34_DMAC          - DMA Controller
+    CONFIG_SAM34_DMAC0         - DMA Controller
     CONFIG_SAM34_UDPHS         - USB Device High Speed
 
   Some subsystems can be configured to operate in different ways. The drivers
@@ -646,25 +646,25 @@ Configurations
 
        System Type->ATSAM3/4 Peripheral Support
          CONFIG_SAM34_HSMCI=y                 : Enable HSMCI support
-         CONFIG_SAM34_DMAC=y                  : DMAC support is needed by HSMCI
+         CONFIG_SAM34_DMAC0=y                 : DMAC support is needed by HSMCI
 
        System Type
          CONFIG_SAM34_GPIO_IRQ=y              : PIO interrupts needed
          CONFIG_SAM34_GPIOA_IRQ=y             : Card detect pin is on PIOA
 
        Device Drivers -> MMC/SD Driver Support
-         CONFIG_MMCSD=y                        : Enable MMC/SD support
-         CONFIG_MMSCD_NSLOTS=1                 : One slot per driver instance
-         CONFIG_MMCSD_HAVECARDDETECT=y         : Supports card-detect PIOs
-         CONFIG_MMCSD_SDIO=y                   : SDIO-based MMC/SD support
-         CONFIG_SDIO_DMA=y                     : Use SDIO DMA
-         CONFIG_SDIO_BLOCKSETUP=y              : Needs to know block sizes
+         CONFIG_MMCSD=y                       : Enable MMC/SD support
+         CONFIG_MMSCD_NSLOTS=1                : One slot per driver instance
+         CONFIG_MMCSD_HAVECARDDETECT=y        : Supports card-detect PIOs
+         CONFIG_MMCSD_SDIO=y                  : SDIO-based MMC/SD support
+         CONFIG_SDIO_DMA=y                    : Use SDIO DMA
+         CONFIG_SDIO_BLOCKSETUP=y             : Needs to know block sizes
 
        Library Routines
-         CONFIG_SCHED_WORKQUEUE=y              : Driver needs work queue support
+         CONFIG_SCHED_WORKQUEUE=y             : Driver needs work queue support
 
        Application Configuration -> NSH Library
-         CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
+         CONFIG_NSH_ARCHINIT=y                : NSH board-initialization
 
     STATUS:
       2013-6-28: The touchscreen is functional.
