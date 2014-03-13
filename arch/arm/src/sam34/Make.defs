@@ -96,7 +96,7 @@ ifeq ($(CONFIG_SAM34_CMCC),y)
 CHIP_CSRCS += sam_cmcc.c
 endif
 
-ifeq ($(CONFIG_SAM34_DMAC),y)
+ifeq ($(CONFIG_SAM34_DMAC0),y)
 CHIP_CSRCS += sam_dmac.c
 endif
 

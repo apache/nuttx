@@ -90,6 +90,7 @@
 /* Peripherals */
 
 #  define SAM34_NDMACHAN              4            /* 4 DMA Channels */
+#  define SAM34_NPDCCHAN              17           /* 17 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
 #  define SAM34_NSLCD                 0            /* No segment LCD interface */
 #  define SAM34_NAESA                 0            /* No advanced encryption standard */
@@ -110,6 +111,7 @@
 /* Peripherals */
 
 #  define SAM34_NDMACHAN              4            /* 4 DMA Channels */
+#  define SAM34_NPDCCHAN              17           /* 17 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
 #  define SAM34_NSLCD                 0            /* No segment LCD interface */
 #  define SAM34_NAESA                 0            /* No advanced encryption standard */
@@ -130,6 +132,7 @@
 /* Peripherals */
 
 #  define SAM34_NDMACHAN              4            /* 4 DMA Channels */
+#  define SAM34_NPDCCHAN              17           /* 17 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
 #  define SAM34_NSLCD                 0            /* No segment LCD interface */
 #  define SAM34_NAESA                 0            /* No advanced encryption standard */
@@ -150,6 +153,7 @@
 /* Peripherals */
 
 #  define SAM34_NDMACHAN              4            /* 4 DMA Channels */
+#  define SAM34_NPDCCHAN              17           /* 17 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
 #  define SAM34_NSLCD                 0            /* No segment LCD interface */
 #  define SAM34_NAESA                 0            /* No advanced encryption standard */
@@ -170,6 +174,7 @@
 /* Peripherals */
 
 #  define SAM34_NDMACHAN              4            /* 4 DMA Channels */
+#  define SAM34_NPDCCHAN              17           /* 17 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
 #  define SAM34_NSLCD                 0            /* No segment LCD interface */
 #  define SAM34_NAESA                 0            /* No advanced encryption standard */
@@ -190,6 +195,7 @@
 /* Peripherals */
 
 #  define SAM34_NDMACHAN              4            /* 4 DMA Channels */
+#  define SAM34_NPDCCHAN              17           /* 17 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
 #  define SAM34_NSLCD                 0            /* No segment LCD interface */
 #  define SAM34_NAESA                 0            /* No advanced encryption standard */
@@ -235,6 +241,7 @@
 /* Peripherals */
 
 #  define SAM34_NDMACHAN              6            /* 6 DMA Channels */
+#  define SAM34_NPDCCHAN              17           /* 17 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
 #  define SAM34_NSLCD                 0            /* No segment LCD interface */
 #  define SAM34_NAESA                 0            /* No advanced encryption standard */
@@ -255,6 +262,7 @@
 /* Peripherals */
 
 #  define SAM34_NDMACHAN              4            /* 4 DMA Channels */
+#  define SAM34_NPDCCHAN              17           /* 17 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
 #  define SAM34_NSLCD                 0            /* No segment LCD interface */
 #  define SAM34_NAESA                 0            /* No advanced encryption standard */
@@ -275,6 +283,7 @@
 /* Peripherals */
 
 #  define SAM34_NDMACHAN              6            /* 4 DMA Channels */
+#  define SAM34_NPDCCHAN              17           /* 17 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
 #  define SAM34_NSLCD                 0            /* No segment LCD interface */
 #  define SAM34_NAESA                 0            /* No advanced encryption standard */
@@ -295,6 +304,7 @@
 /* Peripherals */
 
 #  define SAM34_NDMACHAN              4            /* 4 DMA Channels */
+#  define SAM34_NPDCCHAN              15           /* 15 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
 #  define SAM34_NSLCD                 0            /* No segment LCD interface */
 #  define SAM34_NAESA                 0            /* No advanced encryption standard */
@@ -315,6 +325,7 @@
 /* Peripherals */
 
 #  define SAM34_NDMACHAN              4            /* 4 DMA Channels */
+#  define SAM34_NPDCCHAN              15           /* 15 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
 #  define SAM34_NSLCD                 0            /* No segment LCD interface */
 #  define SAM34_NAESA                 0            /* No advanced encryption standard */
@@ -335,6 +346,7 @@
 /* Peripherals */
 
 #  define SAM34_NDMACHAN              4            /* 4 DMA Channels */
+#  define SAM34_NPDCCHAN              15           /* 15 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
 #  define SAM34_NSLCD                 0            /* No segment LCD interface */
 #  define SAM34_NAESA                 0            /* No advanced encryption standard */
@@ -404,7 +416,8 @@
 
 /* Peripherals */
 
-#  define SAM34_NDMACHAN              16           /* 16 Peripheral DMA Channels */
+#  define SAM34_NDMACHAN              0            /* No DMAC Channels */
+#  define SAM34_NPDCCHAN              16           /* 16 PDC Channels */
 #  define SAM34_NMCI2                 0            /* No memory card interface */
 #  define SAM34_NSLCD                 1            /* 1 segment LCD interface */
 #  define SAM34_NAESA                 1            /* 1 advanced encryption standard */
@@ -425,7 +438,8 @@
 
 /* Peripherals */
 
-#  define SAM34_NDMACHAN              16           /* 16 Peripheral DMA Channels */
+#  define SAM34_NDMACHAN              0            /* No DMAC Channels */
+#  define SAM34_NPDCCHAN              16           /* 16 PDC Channels */
 #  define SAM34_NMCI2                 0            /* No memory card interface */
 #  define SAM34_NSLCD                 1            /* 1 segment LCD interface */
 #  define SAM34_NAESA                 1            /* 1 advanced encryption standard */
@@ -446,7 +460,8 @@
 
 /* Peripherals */
 
-#  define SAM34_NDMACHAN              16           /* 16 Peripheral DMA Channels */
+#  define SAM34_NDMACHAN              0            /* No DMAC Channels */
+#  define SAM34_NPDCCHAN              16           /* 16 PDC Channels */
 #  define SAM34_NMCI2                 0            /* No memory card interface */
 #  define SAM34_NSLCD                 0            /* No segment LCD interface */
 #  define SAM34_NAESA                 0            /* No advanced encryption standard */
@@ -467,7 +482,8 @@
 
 /* Peripherals */
 
-#  define SAM34_NDMACHAN              16           /* 16 Peripheral DMA Channels */
+#  define SAM34_NDMACHAN              0            /* No DMAC Channels */
+#  define SAM34_NPDCCHAN              16           /* 16 PDC Channels */
 #  define SAM34_NMCI2                 0            /* No memory card interface */
 #  define SAM34_NSLCD                 0            /* No segment LCD interface */
 #  define SAM34_NAESA                 0            /* No advanced encryption standard */
@@ -505,7 +521,8 @@
 
 /* Peripherals */
 
-#  define SAM34_NDMACHAN              22           /* 22 PDC Channels */
+#  define SAM34_NDMACHAN              0            /* No DMAC Channels */
+#  define SAM34_NPDCCHAN              22           /* 22 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
 #  define SAM34_NSLCD                 0            /* No segment LCD interface */
 #  define SAM34_NAESA                 0            /* No advanced encryption standard */
@@ -524,7 +541,8 @@
 
 /* Peripherals */
 
-#  define SAM34_NDMACHAN              22           /* 22 PDC Channels */
+#  define SAM34_NDMACHAN              0            /* No DMAC Channels */
+#  define SAM34_NPDCCHAN              22           /* 22 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
 #  define SAM34_NSLCD                 0            /* No segment LCD interface */
 #  define SAM34_NAESA                 0            /* No advanced encryption standard */
@@ -543,7 +561,8 @@
 
 /* Peripherals */
 
-#  define SAM34_NDMACHAN              22           /* 22 PDC Channels */
+#  define SAM34_NDMACHAN              0            /* No DMAC Channels */
+#  define SAM34_NPDCCHAN              22           /* 22 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
 #  define SAM34_NSLCD                 0            /* No segment LCD interface */
 #  define SAM34_NAESA                 0            /* No advanced encryption standard */
@@ -562,7 +581,8 @@
 
 /* Peripherals */
 
-#  define SAM34_NDMACHAN              22           /* 22 PDC Channels */
+#  define SAM34_NDMACHAN              0            /* No DMAC Channels */
+#  define SAM34_NPDCCHAN              22           /* 22 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
 #  define SAM34_NSLCD                 0            /* No segment LCD interface */
 #  define SAM34_NAESA                 0            /* No advanced encryption standard */
@@ -581,7 +601,8 @@
 
 /* Peripherals */
 
-#  define SAM34_NDMACHAN              22           /* 22 PDC Channels */
+#  define SAM34_NDMACHAN              0            /* No DMAC Channels */
+#  define SAM34_NPDCCHAN              22           /* 22 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
 #  define SAM34_NSLCD                 0            /* No segment LCD interface */
 #  define SAM34_NAESA                 0            /* No advanced encryption standard */
@@ -600,7 +621,8 @@
 
 /* Peripherals */
 
-#  define SAM34_NDMACHAN              22           /* 22 PDC Channels */
+#  define SAM34_NDMACHAN              0            /* No DMAC Channels */
+#  define SAM34_NPDCCHAN              22           /* 22 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
 #  define SAM34_NSLCD                 0            /* No segment LCD interface */
 #  define SAM34_NAESA                 0            /* No advanced encryption standard */
@@ -619,7 +641,8 @@
 
 /* Peripherals */
 
-#  define SAM34_NDMACHAN              22           /* 22 PDC Channels */
+#  define SAM34_NDMACHAN              0            /* No DMAC Channels */
+#  define SAM34_NPDCCHAN              22           /* 22 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
 #  define SAM34_NSLCD                 0            /* No segment LCD interface */
 #  define SAM34_NAESA                 0            /* No advanced encryption standard */
@@ -638,7 +661,8 @@
 
 /* Peripherals */
 
-#  define SAM34_NDMACHAN              22           /* 22 PDC Channels */
+#  define SAM34_NDMACHAN              0            /* No DMAC Channels */
+#  define SAM34_NPDCCHAN              22           /* 22 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
 #  define SAM34_NSLCD                 0            /* No segment LCD interface */
 #  define SAM34_NAESA                 0            /* No advanced encryption standard */
@@ -657,7 +681,8 @@
 
 /* Peripherals */
 
-#  define SAM34_NDMACHAN              22           /* 22 PDC Channels */
+#  define SAM34_NDMACHAN              0            /* No DMAC Channels */
+#  define SAM34_NPDCCHAN              22           /* 22 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
 #  define SAM34_NSLCD                 0            /* No segment LCD interface */
 #  define SAM34_NAESA                 0            /* No advanced encryption standard */
@@ -676,7 +701,8 @@
 
 /* Peripherals */
 
-#  define SAM34_NDMACHAN              22           /* 22 PDC Channels */
+#  define SAM34_NDMACHAN              0            /* No DMAC Channels */
+#  define SAM34_NPDCCHAN              22           /* 22 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
 #  define SAM34_NSLCD                 0            /* No segment LCD interface */
 #  define SAM34_NAESA                 0            /* No advanced encryption standard */
@@ -700,7 +726,7 @@
  * CAN          2        2        1        1
  * EBI          Yes      Yes      No       No
  * EBI data     8        8        ---      ---
- * EBI ch		4        4        ---      ---
+ * EBI ch       4        4        ---      ---
  * EBI addr     24       24       ---      ---
  * SDRAM        ---      ---      ---      ---
  * DMA          4        4        4        4
@@ -725,7 +751,8 @@
 
 /* Peripherals */
 
-#  define SAM34_NDMACHAN              24           /* 24 PDC Channels */
+#  define SAM34_NDMACHAN              4            /* 4 DMAC Channels */
+#  define SAM34_NPDCCHAN              24           /* 24 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
 #  define SAM34_NSLCD                 0            /* No segment LCD interface */
 #  define SAM34_NAESA                 0            /* No advanced encryption standard */
@@ -744,7 +771,8 @@
 
 /* Peripherals */
 
-#  define SAM34_NDMACHAN              24           /* 24 PDC Channels */
+#  define SAM34_NDMACHAN              4            /* 4 DMAC Channels */
+#  define SAM34_NPDCCHAN              24           /* 24 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
 #  define SAM34_NSLCD                 0            /* No segment LCD interface */
 #  define SAM34_NAESA                 0            /* No advanced encryption standard */
@@ -763,7 +791,8 @@
 
 /* Peripherals */
 
-#  define SAM34_NDMACHAN              21           /* 21 PDC Channels */
+#  define SAM34_NDMACHAN              4            /* 4 DMAC Channels */
+#  define SAM34_NPDCCHAN              21           /* 21 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
 #  define SAM34_NSLCD                 0            /* No segment LCD interface */
 #  define SAM34_NAESA                 0            /* No advanced encryption standard */
@@ -782,7 +811,8 @@
 
 /* Peripherals */
 
-#  define SAM34_NDMACHAN              21           /* 21 PDC Channels */
+#  define SAM34_NDMACHAN              4            /* 4 DMAC Channels */
+#  define SAM34_NPDCCHAN              21           /* 21 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
 #  define SAM34_NSLCD                 0            /* No segment LCD interface */
 #  define SAM34_NAESA                 0            /* No advanced encryption standard */

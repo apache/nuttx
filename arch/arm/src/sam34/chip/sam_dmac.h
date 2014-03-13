@@ -1,6 +1,6 @@
 /****************************************************************************************
  * arch/arm/src/sam34/chip/sam_dmac.h
- * DMA Controller (DMAC) definitions for the SAM3U, SAM3X, SAM3A, and RCH_CHIP_SAM4E
+ * DMA Controller (DMAC) definitions for the SAM3U, SAM3X, SAM3A, and SAM4E
  *
  *   Copyright (C) 2009-2010, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -456,28 +456,26 @@
 #  define DMAC_WPSR_WPVSRC_MASK    (0xffff << DMAC_WPSR_WPVSRC_SHIFT)
 #endif
 
-/* DMA Peripheral IDs *******************************************************************/
+/* DMA Hardware interface numbers *******************************************************/
 
 #if defined(CONFIG_ARCH_CHIP_SAM3U) ||  defined(CONFIG_ARCH_CHIP_SAM3X) || \
     defined(CONFIG_ARCH_CHIP_SAM3A)
-#  define DMACHAN_PID_MCI0             0
-#  define DMACHAN_PID_SSC              3
-#  define DMACHAN_PID_MCI1             13
+#  define DMACHAN_INTF_MCI0            0
+#  define DMACHAN_INTF_SSC             3
+#  define DMACHAN_INTF_MCI1            13
 #endif
 
-/* Hardware interface numbers */
-
 #if defined(CONFIG_ARCH_CHIP_SAM4E)
-#  define DMAC_INTF_HSMCI              0         /* HSMCI Transmit/Receive */
-#  define DMAC_INTF_SPI0TX             1         /* SPI Transmit */
-#  define DMAC_INTF_SPI0RX             2         /* SPI Receive */
-#  define DMAC_INTF_USART0TX           3         /* USART0 Transmit */
-#  define DMAC_INTF_USART0RX           4         /* USART0 Receive */
-#  define DMAC_INTF_USART1TX           5         /* USART1 Transmit */
-#  define DMAC_INTF_USART1RX           6         /* USART1 Receive */
-#  define DMAC_INTF_AESTX              11        /* AES Transmit */
-#  define DMAC_INTF_AESRX              12        /* AES Receive */
-#  define DMAC_INTF_PWMTX              13        /* PWM Transmit */
+#  define DMACHAN_INTF_HSMCI           0         /* HSMCI Transmit/Receive */
+#  define DMACHAN_INTF_SPI0TX          1         /* SPI Transmit */
+#  define DMACHAN_INTF_SPI0RX          2         /* SPI Receive */
+#  define DMACHAN_INTF_USART0TX        3         /* USART0 Transmit */
+#  define DMACHAN_INTF_USART0RX        4         /* USART0 Receive */
+#  define DMACHAN_INTF_USART1TX        5         /* USART1 Transmit */
+#  define DMACHAN_INTF_USART1RX        6         /* USART1 Receive */
+#  define DMACHAN_INTF_AESTX           11        /* AES Transmit */
+#  define DMACHAN_INTF_AESRX           12        /* AES Receive */
+#  define DMACHAN_INTF_PWMTX           13        /* PWM Transmit */
 #endif
 
 /****************************************************************************************

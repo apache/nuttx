@@ -847,7 +847,7 @@ static void spi_txcallback(DMA_HANDLE handle, void *arg, int result)
  * Name: spi_physregaddr
  *
  * Description:
- *   Return the physical address of an HSMCI register
+ *   Return the physical address of an SPI register
  *
  ****************************************************************************/
 
