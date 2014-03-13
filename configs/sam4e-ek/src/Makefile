@@ -55,11 +55,14 @@ CSRCS += sam_nsh.c
 endif
 
 ifeq ($(CONFIG_SAM34_HSMCI),y)
-CSRCS += sam_mmcsd.c
+CSRCS += sam_hsmci.c
 endif
 
 ifeq ($(CONFIG_SAM34_SPI0),y)
 CSRCS += sam_spi.c
+ifeq ($(CONFIG_MTD_AT25),y)
+CSRCS += sam_at25.c
+endif
 endif
 
 ifeq ($(CONFIG_USBMSC),y)

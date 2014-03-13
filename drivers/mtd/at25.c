@@ -100,10 +100,16 @@
 
 /* Status register bit definitions */
 
-#define AT25_SR_WIP            (1 << 0)    /* Bit 0: Write in progress bit */
-#define AT25_SR_WEL            (1 << 1)    /* Bit 1: Write enable latch bit */
-#define AT25_SR_EPE            (1 << 5)    /* Bit 5: Erase/program error */
-#define AT25_SR_UNPROT         0x00        /* Global unprotect command */
+#define AT25_SR_BUSY       (1 << 0)    /* Bit 0: Ready/Busy Status */
+#define AT25_SR_WEL        (1 << 1)    /* Bit 1: Write enable latch bit */
+#define AT25_SR_SWP_SHIFT  (2)         /* Bits 2-3: Software protection */
+#define AT25_SR_SWP_MASK   (3 << AT25_SR_SWP_SHIFT)
+#define AT25_SR_WPP        (1 << 4)    /* Bit 4: Write Protect (/WP) Pin Status */
+#define AT25_SR_EPE        (1 << 5)    /* Bit 5: Erase/program error */
+                                       /* Bit 6: Reserved */
+#define AT25_SR_SPRL       (1 << 7)    /* Bit 7: Sector Protection Registers Locked */
+
+#define AT25_SR_UNPROT 0x00    /* Global unprotect command */
 
 #define AT25_DUMMY     0xa5
 
@@ -269,7 +275,7 @@ static void at25_waitwritecomplete(struct at25_dev_s *priv)
 
       status = SPI_SEND(priv->dev, AT25_DUMMY);
     }
-  while ((status & AT25_SR_WIP) != 0);
+  while ((status & AT25_SR_BUSY) != 0);
 
   /* Deselect the FLASH */
 
@@ -302,19 +308,19 @@ static void at25_waitwritecomplete(struct at25_dev_s *priv)
        * other peripherals to access the SPI bus.
        */
 
-      if ((status & AT25_SR_WIP) != 0)
+      if ((status & AT25_SR_BUSY) != 0)
         {
           at25_unlock(priv->dev);
           usleep(10000);
           at25_lock(priv->dev);
         }
     }
-  while ((status & AT25_SR_WIP) != 0);
+  while ((status & AT25_SR_BUSY) != 0);
 #endif
 
   if (status & AT25_SR_EPE)
     {
-      fdbg("Write error, status: 0x%02x\n", status);
+      fdbg("ERROR: Write error, status: 0x%02x\n", status);
     }
   
   fvdbg("Complete, status: 0x%02x\n", status);
@@ -693,7 +699,7 @@ FAR struct mtd_dev_s *at25_initialize(FAR struct spi_dev_s *dev)
         {
           /* Unrecognized! Discard all of that work we just did and return NULL */
 
-          fdbg("Unrecognized\n");
+          fdbg("ERROR: Unrecognized\n");
           kfree(priv);
           priv = NULL;
         }

@@ -115,7 +115,7 @@ void sam_boardinitialize(void)
     * into the build.
     */
 
-#if defined(CONFIG_USBDEV) && defined(CONFIG_SAM34_USB)
+#if defined(CONFIG_USBDEV) && defined(CONFIG_SAM34_UDP)
   if (sam_usbinitialize)
     {
       sam_usbinitialize();
@@ -127,15 +127,31 @@ void sam_boardinitialize(void)
 #ifdef CONFIG_ARCH_LEDS
   board_led_initialize();
 #endif
+}
 
-  /* Setup SD card-related PIOs if 1) HSMCI is selected and 2) the weak
-   * function sam_hsmciinit() has been brought into the build.
-    */
+/****************************************************************************
+ * Name: board_initialize
+ *
+ * Description:
+ *   If CONFIG_BOARD_INITIALIZE is selected, then an additional
+ *   initialization call will be performed in the boot-up sequence to a
+ *   function called board_initialize().  board_initialize() will be
+ *   called immediately after up_intiialize() is called and just before the
+ *   initial application is started.  This additional initialization phase
+ *   may be used, for example, to initialize board-specific device drivers.
+ *
+ ****************************************************************************/
 
-#ifdef CONFIG_SAM34_HSMCI
-  if (sam_hsmciinit)
-    {
-      sam_hsmciinit();
-    }
+#ifdef CONFIG_BOARD_INITIALIZE
+void board_initialize(void)
+{
+  /* Perform NSH initialization here instead of from the NSH.  This
+   * alternative NSH initialization is necessary when NSH is ran in user-space
+   * but the initialization function must run in kernel space.
+   */
+
+#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_NSH_ARCHINIT)
+  (void)nsh_archinitialize();
 #endif
 }
+#endif /* CONFIG_BOARD_INITIALIZE */

@@ -51,18 +51,76 @@
 #include "chip/sam_pinmap.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
+/* Configuration ********************************************************************/
 
-/* External Memory Usage ************************************************************/
-/* LCD on CS2 */
+#define HAVE_HSMCI      1
+#define HAVE_AT25       1
 
-#define LCD_BASE              SAM_EXTCS2_BASE
+/* HSMCI */
+/* Can't support MMC/SD if the card interface is not enabled */
+
+#if !defined(CONFIG_SAM34_HSMCI)
+#  undef HAVE_HSMCI
+#endif
+
+/* Can't support MMC/SD features if mountpoints are disabled */
+
+#if defined(HAVE_HSMCI) && defined(CONFIG_DISABLE_MOUNTPOINT)
+#  warning Mountpoints disabled.  No MMC/SD support
+#  undef HAVE_HSMCI
+#endif
+
+/* We need PIO interrupts on PIOA to support card detect interrupts */
+
+#if defined(HAVE_HSMCI) && !defined(CONFIG_SAM34_PIOA_IRQ)
+#  warning PIOA interrupts not enabled.  No MMC/SD support.
+#  undef HAVE_HSMCI
+#endif
+
+/* AT25 Serial FLASH */
+/* Can't support the AT25 device if it SPI0 or AT25 support are not enabled */
+
+#if !defined(CONFIG_SAM34_SPI0) || !defined(CONFIG_MTD_AT25)
+#  undef HAVE_AT25
+#endif
+
+/* Can't support AT25 features if mountpoints are disabled or if we were not
+ * asked to mount the AT25 part
+ */
+
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_SAM4EEK_AT25_AUTOMOUNT)
+#  undef HAVE_AT25
+#endif
+
+/* If we are going to mount the AT25, then they user must also have told
+ * us what to do with it by setting one of these.
+ */
+
+#ifndef CONFIG_FS_NXFFS
+#  undef CONFIG_SAM4EEK_AT25_NXFFS
+#endif
+
+#if !defined(CONFIG_SAM4EEK_AT25_FTL) && !defined(CONFIG_SAM4EEK_AT25_NXFFS)
+#  undef HAVE_AT25
+#endif
+
+#if defined(CONFIG_SAM4EEK_AT25_FTL) && defined(CONFIG_SAM4EEK_AT25_NXFFS)
+#  warning Both CONFIG_SAM4EEK_AT25_FTL and CONFIG_SAM4EEK_AT25_NXFFS are set
+#  warning Ignoring CONFIG_SAM4EEK_AT25_NXFFS
+#  undef CONFIG_SAM4EEK_AT25_NXFFS
+#endif
 
 /* Touchscreen controller (TSC) */
 
 #define CONFIG_TSC_ADS7843    1   /* ADS7843 present on board */
 #define CONFIG_TSC_SPI        0   /* On SPI0 */
+
+/* External Memory Usage ************************************************************/
+/* LCD on CS2 */
+
+#define LCD_BASE              SAM_EXTCS2_BASE
 
 /* SAM4E-EK GPIO Pin Definitions ****************************************************/
 
@@ -167,7 +225,7 @@
  *   ------ -------
  *   GPIO   PIN
  *   ------ -------
- *   PA11   /CS
+ *   PA11   /CS     (pulled high)
  *   PA12   DOUT
  *   PA13   DIN
  *   PA14   DCLK
@@ -201,9 +259,9 @@
 
 /* LEDs
  *
- *  D2 PA0  Blue   Pulled high
- *  D3 PD20 Amber  Pulled high
- *  D4 PD21 Green  Pulled high
+ *   D2 PA0  Blue   Pulled high
+ *   D3 PD20 Amber  Pulled high
+ *   D4 PD21 Green  Pulled high
  */
 
 #define GPIO_D3       (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_PORT_PIOD | \
@@ -253,13 +311,36 @@
 #define GPIO_RS485_ENABLE (GPIO_OUTPUT | GPIO_CFG_DEFAULT | \
                            GPIO_OUTPUT_SET | GPIO_PORT_PIOA | GPIO_PIN21)
 
-/* SD Card Detect */
+/* HSMCI SD Card Detect
+ *
+ *   PA26 DAT2
+ *   PA27 DAT3
+ *   PA28 CMD
+ *   PA29 CLK
+ *   PA30 DAT0
+ *   PA31 DAT1
+ *   PA6  CD        Pulled high
+ */
 
-#define GPIO_MCI_CD   (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_PORT_PIOA | GPIO_PIN25)
+#define GPIO_MCI_CD   (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_PORT_PIOA | GPIO_PIN6)
+#define MCI_CD_IRQ    SAM_IRQ_PA6
 
 /* SPI Chip Selects */
 
-/* Chip select pin connected to the touchscreen controller and to the ZigBee module
+/* Touchscreen Controller:
+ *
+ *   ------ -------
+ *   GPIO   PIN
+ *   ------ -------
+ *   PA11   /CS     (pulled high externally)
+ *   PA12   DOUT
+ *   PA13   DIN
+ *   PA14   DCLK
+ *   PA16   /PENIRQ
+ *   PA17   BUSY
+ *   ------ -------
+ *
+ * Chip select pin connected to the touchscreen controller and to the ZigBee module
  * connector.  Notice that the touchscreen chip select is implemented as a GPIO
  * OUTPUT that must be controlled by board-specific.  This is because the ADS7843E
  * driver must be able to sample the device BUSY GPIO input between SPI transfers.
@@ -268,9 +349,25 @@
  * it low throughout the SPI transfer.
  */
 
-#define GPIO_TSC_CS   (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_SET | \
+#define GPIO_TSC_CS   (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
                        GPIO_PORT_PIOA | GPIO_PIN11)
 #define TSC_CSNUM     0
+
+/* Serial FLASH (AT25DF321A)
+ *
+ *   ------ ------- ---------------
+ *   GPIO   PIN     SAM4E FUNCTION
+ *   ------ ------- ---------------
+ *   PA13   SI      MOSI
+ *   PA12   SO      MIS0
+ *   PA14   SCK     SPCK
+ *   PA5    /CS     NPCS3 (pulled high externally)
+ *   ------ ------- ---------------
+ */
+
+#define GPIO_FLASH_CS (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
+                       GPIO_PORT_PIOA | GPIO_PIN5)
+#define FLASH_CSNUM   3
 
 /************************************************************************************
  * Public Types
@@ -307,25 +404,17 @@ void weak_function sam_spiinitialize(void);
 void weak_function sam_usbinitialize(void);
 
 /************************************************************************************
- * Name: sam_hsmciinit
+ * Name: sam_hsmci_initialize
  *
  * Description:
  *   Initialize HSMCI support
  *
  ************************************************************************************/
 
-#ifdef CONFIG_SAM34_HSMCI
-int weak_function sam_hsmciinit(void);
+#ifdef HAVE_HSMCI
+int weak_function sam_hsmci_initialize(void);
 #else
-# define sam_hsmciinit()
-#endif
-
-/************************************************************************************
- * Name: board_led_initialize
- ************************************************************************************/
-
-#ifdef CONFIG_ARCH_LEDS
-void board_led_initialize(void);
+# define sam_hsmci_initialize()
 #endif
 
 /************************************************************************************
@@ -336,24 +425,49 @@ void board_led_initialize(void);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_SAM34_HSMCI
-bool sam_cardinserted(unsigned char slot);
+#ifdef HAVE_HSMCI
+bool sam_cardinserted(int slotno);
 #else
-#  define sam_cardinserted(slot) (false)
+#  define sam_cardinserted(slotno) (false)
 #endif
 
 /************************************************************************************
  * Name: sam_writeprotected
  *
  * Description:
- *   Check if a card is inserted into the selected HSMCI slot
+ *   Check if the card in the MMCSD slot is write protected
  *
  ************************************************************************************/
 
-#ifdef CONFIG_SAM34_HSMCI
-bool sam_writeprotected(unsigned char slot);
+#ifdef HAVE_HSMCI
+bool sam_writeprotected(int slotno);
 #else
-#  define sam_writeprotected(slot) (false)
+#  define sam_writeprotected(slotno) (false)
+#endif
+
+/****************************************************************************
+ * Name: sam_at25_automount
+ *
+ * Description:
+ *   Initialize, configure, and mount the AT25 serial FLASH.  The FLASH will
+ *   be mounted at /dev/at25.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_AT25
+int sam_at25_automount(int minor);
+#else
+#  define sam_at25_automount(minor) (-ENOSYS)
+#endif
+
+/************************************************************************************
+ * Name: board_led_initialize
+ ************************************************************************************/
+
+#ifdef CONFIG_ARCH_LEDS
+void board_led_initialize(void);
+#else
+#  define board_led_initialize()
 #endif
 
 #endif /* __ASSEMBLY__ */

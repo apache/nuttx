@@ -238,7 +238,7 @@
 #  define AT24_MINOR  _AT24_MINOR
 #endif
 
-/* MMC/SD minor numbers:  The NSH device minor extended is extened to support
+/* MMC/SD minor numbers:  The NSH device minor extended is extended to support
  * two devices.  If CONFIG_NSH_MMCSDMINOR is zero, these will be:  /dev/mmcsd0
  * and /dev/mmcsd1.
  */

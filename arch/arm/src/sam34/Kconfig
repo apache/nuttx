@@ -340,7 +340,7 @@ config SAM34_EIC
 	depends on ARCH_CHIP_SAM4L || ARCH_CHIP_SAM4E
 
 config SAM34_DMAC
-	bool "DMA controller"
+	bool "DMA controller (DMAC)"
 	default n
 	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4E
 	select ARCH_DMA
@@ -875,7 +875,7 @@ endmenu # AT91SAM3/4 GPIO Interrupt Configuration
 
 if SAM34_SPI0 || SAM34_SPI1
 
-menu "SPI device driver options"
+menu "AT91SAM3/4 SPI device driver options"
 
 config SAM34_SPI_DMA
 	bool "SPI DMA"
@@ -911,7 +911,7 @@ config SAM34_SPI_REGDEBUG
 		Output detailed register-level SPI device debug information.
 		Requires also DEBUG.
 
-endmenu # SPI device driver options
+endmenu # AT91SAM3/4 SPI device driver options
 endif # SAM34_SPI0 || SAM34_SPI1
 
 if SAM34_EMAC
