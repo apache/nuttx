@@ -213,7 +213,7 @@ typedef void (*select_t)(enum spi_dev_e devid, bool selected);
 struct sam_spidev_s
 {
   uint32_t base;               /* SPI controller register base address */
-  sem_t spisem;                /* Assures mutually exclusive acess to SPI */
+  sem_t spisem;                /* Assures mutually exclusive access to SPI */
   select_t select;             /* SPI select callout */
   bool initialized;            /* TRUE: Controller has been initialized */
 #ifdef CONFIG_SAM34_SPI_DMA
