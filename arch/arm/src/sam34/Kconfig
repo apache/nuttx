@@ -454,11 +454,13 @@ config SAM34_SMC
 config SAM34_SPI0
 	bool "Serial Peripheral Interface 0 (SPI0)"
 	default n
+	select SPI
 
 config SAM34_SPI1
 	bool "Serial Peripheral Interface 1 (SPI1)"
 	default n
 	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A
+	select SPI
 
 config SAM34_SSC
 	bool "Synchronous Serial Controller (SSC)"
@@ -870,6 +872,47 @@ config GPIOF_IRQ
 
 endif # GPIO_IRQ
 endmenu # AT91SAM3/4 GPIO Interrupt Configuration
+
+if SAM34_SPI0 || SAM34_SPI1
+
+menu "SPI device driver options"
+
+config SAM34_SPI_DMA
+	bool "SPI DMA"
+	default n
+	depends on (SAM34_DMAC0 && SAM34_SPI0) || (SAM34_DMAC1 && SAM34_SPI1)
+	---help---
+		Use DMA to improve SPI transfer performance.
+
+config SAM34_SPI_DMATHRESHOLD
+	int "SPI DMA threshold"
+	default 4
+	depends on SAM34_SPI_DMA
+	---help---
+		When SPI DMA is enabled, small DMA transfers will still be performed
+		by polling logic.  But we need a threshold value to determine what
+		is small.  That value is provided by SAM34_SPI_DMATHRESHOLD.
+
+config SAM34_SPI_DMADEBUG
+	bool "SPI DMA transfer debug"
+	depends on SAM34_SPI_DMA && DEBUG && DEBUG_DMA
+	default n
+	---help---
+		Enable special debug instrumentation analyze SPI DMA data transfers.
+		This logic is as non-invasive as possible:  It samples DMA
+		registers at key points in the data transfer and then dumps all of
+		the registers at the end of the transfer.
+
+config SAM34_SPI_REGDEBUG
+	bool "SPI Register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level SPI device debug information.
+		Requires also DEBUG.
+
+endmenu # SPI device driver options
+endif # SAM34_SPI0 || SAM34_SPI1
 
 if SAM34_EMAC
 

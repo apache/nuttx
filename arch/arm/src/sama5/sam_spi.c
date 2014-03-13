@@ -736,6 +736,7 @@ static void spi_dma_sampledone(struct sam_spics_s *spics)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SAMA5_SPI_DMA
 static void spi_dmatimeout(int argc, uint32_t arg)
 {
   struct sam_spics_s *spics = (struct sam_spics_s *)arg;
@@ -755,6 +756,7 @@ static void spi_dmatimeout(int argc, uint32_t arg)
 
   sem_post(&spics->dmawait);
 }
+#endif
 
 /****************************************************************************
  * Name: spi_rxcallback

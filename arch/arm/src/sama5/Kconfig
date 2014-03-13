@@ -1310,7 +1310,7 @@ config SAMA5_CAN_REGDEBUG
 		Output detailed register-level CAN device debug information.
 		Requires also DEBUG.
 
-endmenu # SPI device driver options
+endmenu # CAN device driver options
 endif # SAMA5_CAN0 || SAMA5_CAN1
 
 if SAMA5_SPI0 || SAMA5_SPI1
