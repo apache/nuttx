@@ -398,11 +398,25 @@ Networking
                                         : Defaults should be okay for other options
   Application Configuration -> NSH Library
     CONFIG_NSH_TELNET=y                 : Enable NSH session via Telnet
-    CONFIG_NSH_IPADDR=0x0a000002        : Select an IP address
+    CONFIG_NSH_IPADDR=0x0a000002        : Select a fixed IP address
     CONFIG_NSH_DRIPADDR=0x0a000001      : IP address of gateway/host PC
     CONFIG_NSH_NETMASK=0xffffff00       : Netmask
     CONFIG_NSH_NOMAC=y                  : Need to make up a bogus MAC address
                                         : Defaults should be okay for other options
+
+  You can also enable enable the DHCPC client for networks that use
+  dynamically assigned address:
+
+  Application Configuration -> Network Utilities
+    CONFIG_NETUTILS_DHCPC=y             : Enables the DHCP client
+
+  Networking Support
+    CONFIG_NET_UDP=y                    : Depends on broadcast UDP
+
+  Application Configuration -> NSH Library
+    CONFIG_NET_BROADCAST=y
+    CONFIG_NSH_DHCPC=y                  : Tells NSH to use DHCPC, not
+                                        : the fixed addresses
 
   Using the network with NSH
   --------------------------
@@ -485,8 +499,8 @@ Networking
   so that access to the NSH prompt is not delayed.
 
   This delay will be especially long if the board is not connected to
-  a network.
-
+  a network because additional time will be required to fail with timeout
+  errors.
 
 SAM4E-EK-specific Configuration Options
 =======================================
@@ -688,23 +702,17 @@ Configurations
   2. Unless stated otherwise, all configurations generate console
      output on UART0 (J3).
 
-  3. Unless otherwise stated, the configurations are setup for
-     Linux (or any other POSIX environment like Cygwin under Windows):
-
-     Build Setup:
-       CONFIG_HOST_LINUX=y   : Linux or other POSIX environment
-
-  4. All of these configurations use the older, OABI, buildroot toolchain
-     (unless stated otherwise in the description of the configuration).  That
-     toolchain selection can easily be reconfigured using 'make menuconfig'.
-     Here are the relevant current settings:
+  3. All of these configurations are set up to build under Linux using the
+     EABI buildroot toolchain (unless stated otherwise in the description of
+     the configuration).  That build selection can easily be reconfigured
+     using 'make menuconfig'.  Here are the relevant current settings:
 
      Build Setup:
        CONFIG_HOST_LINUX=y                 : Linux or other pure POSIX invironment
-                                           : (including Cygwin)
+
      System Type -> Toolchain:
        CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
-       CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : Older, OABI toolchain
+       CONFIG_ARMV7M_OABI_TOOLCHAIN=n      : EABI (Not OABI
 
      If you want to use the Atmel GCC toolchain, for example, here are the
      steps to do so:
@@ -753,7 +761,39 @@ Configurations
        Applicaton Configuration:
          CONFIG_NSH_BUILTIN_APPS=y           : Enable starting apps from NSH command line
 
-    2. This configuration has been used for verifying the touchscreen on
+    2. This configuration has the network enabled by default.  This can be
+       easily disabled or reconfigured (See see the network related
+       configuration settings above in the section entitled "Networking").
+
+       NOTE: In boot-up sequence is very simple in this example; all
+       initialization is done sequential (vs. in parallel) and so you will
+       not see the NSH prompt until all initialization is complete.  The
+       network bring-up in particular will add some delay before the NSH
+       prompt appears.  In a real application, you would probably want to
+       do the network bringup on a separate thread so that access to the
+       NSH prompt is not delayed.
+
+       This delay will be especially long if the board is not connected to
+       a network because additional time will be required to fail with
+       timeout errors.
+
+    3. This configuration supports a network with fixed IP address.  You
+       may have to change these settings for your network:
+
+       CONFIG_NSH_IPADDR=0x0a000002        : IP address: 10.0.0.2
+       CONFIG_NSH_DRIPADDR=0x0a000001      : Gateway:    10.0.0.1
+       CONFIG_NSH_NETMASK=0xffffff00       : Netmask:    255.255.255.0
+
+       You can also enable enable the DHCPC client for networks that use
+       dynamically assigned address:
+
+       CONFIG_NETUTILS_DHCPC=y             : Enables the DHCP client
+       CONFIG_NET_UDP=y                    : Depends on broadcast UDP
+       CONFIG_NET_BROADCAST=y
+       CONFIG_NSH_DHCPC=y                  : Tells NSH to use DHCPC, not
+                                           : the fixed addresses
+
+    4. This configuration has been used for verifying the touchscreen on
        on the SAM4E-EK LCD.  With these modifications, you can include the
        touchscreen test program at apps/examples/touchscreen as an NSH built-in
        application.  You can enable the touchscreen and test by modifying the
@@ -797,7 +837,7 @@ Configurations
             CONFIG_DEBUG_VERBOSE=y            : Enable verbose debug output
             CONFIG_DEBUG_INPUT=y              : Enable debug output from input devices
 
-    3. Enabling HSMCI support. The SAM3U-KE provides a an SD memory card
+    4. Enabling HSMCI support. The SAM3U-KE provides a an SD memory card
        slot.  Support for the SD slot can be enabled with the following
        settings:
 
@@ -824,14 +864,7 @@ Configurations
          CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
 
     STATUS:
-      2013-6-28: The touchscreen is functional.
-      2013-6-29: Hmmm... but there appear to be conditions when the
-        touchscreen driver locks up.  Looks like some issue with
-        managing the interrupts.
-      2013-6-30:  Those lock-ups appear to be due to poorly placed
-        debug output statements.  If you do not enable debug output,
-        the touchscreen is rock-solid.
-      2013-8-10:  Added the comments above above enabling HSMCI memory
-        card support and verified that the configuration builds without
-        error.  However, that configuration has not yet been tested (and
-        is may even be incomplete).
+      2014-3-13: The basic NSH serial console is working.  Network support
+        has been verified.  HSMCI and touchscreen have not been tested (the
+        above notes came from the SAM3U-EK and have not been yet been tested
+        on the SAM4E-EK).

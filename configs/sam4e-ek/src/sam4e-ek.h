@@ -193,6 +193,12 @@
 
 #define SAM_TCS_IRQ   SAM_IRQ_PA16
 
+/* Ethernet MAC.  The PHY interrupt is available on pin PD28 */
+
+#define GPIO_PHY_IRQ  (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_INT_BOTHEDGES | \
+                       GPIO_PORT_PIOD | GPIO_PIN28)
+#define SAM_PHY_IRQ   SAM_IRQ_PD28
+
 /* LEDs
  *
  *  D2 PA0  Blue   Pulled high
