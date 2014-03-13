@@ -2494,7 +2494,7 @@ static int sam_phyinit(struct sam_emac_s *priv)
  * Function: sam_ethgpioconfig
  *
  * Description:
- *  Configure GPIOs for the EMAC interface.
+ *  Configure GPIOs for the EMAC MII interface.
  *
  * Parameters:
  *   priv - A reference to the private driver state structure
@@ -2508,19 +2508,26 @@ static int sam_phyinit(struct sam_emac_s *priv)
 
 static inline void sam_ethgpioconfig(struct sam_emac_s *priv)
 {
-  /* Configure PIO pins to support EMAC */
-  /* Configure EMAC PIO pins common to both MII and RMII */
+  /* Configure PIO pins to support EMAC in MII mode*/
 
-  sam_configgpio(GPIO_EMAC_TX0);
-  sam_configgpio(GPIO_EMAC_TX1);
-  sam_configgpio(GPIO_EMAC_RX0);
-  sam_configgpio(GPIO_EMAC_RX1);
-  sam_configgpio(GPIO_EMAC_TXEN);
-  sam_configgpio(GPIO_EMAC_CRSDV);
-  sam_configgpio(GPIO_EMAC_RXER);
-  sam_configgpio(GPIO_EMAC_REFCK);
-  sam_configgpio(GPIO_EMAC_MDC);
-  sam_configgpio(GPIO_EMAC_MDIO);
+  sam_configgpio(GPIO_EMAC_TXCK);    /* Transmit Clock (or Reference Clock) */
+  sam_configgpio(GPIO_EMAC_TXEN);    /* Transmit Enable */
+  sam_configgpio(GPIO_EMAC_TX0);     /* Transmit data TXD0 */
+  sam_configgpio(GPIO_EMAC_TX1);     /* Transmit data TXD1 */
+  sam_configgpio(GPIO_EMAC_TX2);     /* Transmit data TXD2 */
+  sam_configgpio(GPIO_EMAC_TX3);     /* Transmit data TXD3 */
+//sam_configgpio(GPIO_EMAC_TXER);    /* Transmit Coding Error */
+  sam_configgpio(GPIO_EMAC_RXCK);    /* Receive Clock */
+  sam_configgpio(GPIO_EMAC_RXDV);    /* Receive Data Valid */
+  sam_configgpio(GPIO_EMAC_RX0);     /* Receive data RXD0 */
+  sam_configgpio(GPIO_EMAC_RX1);     /* Receive data RXD0 */
+  sam_configgpio(GPIO_EMAC_RX2);     /* Receive data RXD0 */
+  sam_configgpio(GPIO_EMAC_RX3);     /* Receive data RXD0 */
+  sam_configgpio(GPIO_EMAC_RXER);    /* Receive Error */
+  sam_configgpio(GPIO_EMAC_CRS);     /* Carrier Sense and Data Valid */
+  sam_configgpio(GPIO_EMAC_COL);     /* Collision Detect */
+  sam_configgpio(GPIO_EMAC_MDC);     /* Management Data Clock */
+  sam_configgpio(GPIO_EMAC_MDIO);    /* Management Data Input/Output */
 }
 
 /****************************************************************************
@@ -2847,7 +2854,7 @@ void up_netinitialize(void)
   if (!priv->txpoll)
     {
       nlldbg("ERROR: Failed to create periodic poll timer\n");
-      goto errout;
+      return;
     }
 
   priv->txtimeout = wd_create();     /* Create TX timeout timer */
@@ -2857,7 +2864,7 @@ void up_netinitialize(void)
       goto errout_with_txpoll;
     }
 
-  /* Configure PIO pins to support EMAC */
+  /* Configure PIO pins to support EMAC MII */
 
   sam_ethgpioconfig(priv);
 
@@ -2899,7 +2906,7 @@ void up_netinitialize(void)
   ret = netdev_register(&priv->dev);
   if (ret >= 0)
     {
-      return ret;
+      return;
     }
 
   nlldbg("ERROR: netdev_register() failed: %d\n", ret);
@@ -2910,8 +2917,6 @@ errout_with_txtimeout:
   wd_delete(priv->txtimeout);
 errout_with_txpoll:
   wd_delete(priv->txpoll);
-errout:
-  return ret;
 }
 
 #endif /* CONFIG_NET && CONFIG_SAM34_EMAC */
