@@ -3123,12 +3123,16 @@ Mem:         29232       5920      23312      23312
     <p>
       <b>Atmel SAM4E-EK</b>.
       Board support was added for the SAM4E-EK development board in NuttX 6.33.
-      A fully functional NuttShell (NSH) configuration is avaiable
+      A fully functional NuttShell (NSH) configuration is available
       (see the <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH User Guide</a>).
-      This is very much a work in progress.
-      An Ethernet MAC driver is in place and under test now.
-      Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/sam4e-ek/README.txt">README</a> file for further information.
     </p>
+    <ul>
+      <b>STATUS</b>.
+      This is very much a work in progress.
+      The SAM4E-EK should be compatible with most of the other SAM3/4 drivers (like SPI, HSMCI, DMAC, etc.) but those have not be verified on the SAM4E-EK as of this writing.
+      A new Ethernet MAC driver has been developed and is functional, although it has not yet received a lot of testing.
+      Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/sam4e-ek/README.txt">README</a> file for further information.
+    </ul>
   </td>
 </tr>
 <tr>
