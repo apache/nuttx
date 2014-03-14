@@ -71,10 +71,12 @@
 /* DMA channel registers */
 
 #define SAM_DMACHAN_OFFSET(n)          (0x003c+((n)*0x28))
-#define SAM_DMACHAN0_OFFSET            0x003c /* 0x3c-0x60: Channel 0 */
-#define SAM_DMACHAN1_OFFSET            0x0064 /* 0x64-0x88: Channel 1 */
-#define SAM_DMACHAN2_OFFSET            0x008c /* 0x8c-0xb0: Channel 2 */
-#define SAM_DMACHAN3_OFFSET            0x00b4 /* 0xb4-0xd8: Channel 3 */
+#define SAM_DMACHAN0_OFFSET            0x003c /* 0x003c-0x0060: Channel 0 */
+#define SAM_DMACHAN1_OFFSET            0x0064 /* 0x0064-0x0088: Channel 1 */
+#define SAM_DMACHAN2_OFFSET            0x008c /* 0x008c-0x00b0: Channel 2 */
+#define SAM_DMACHAN3_OFFSET            0x00b4 /* 0x00b4-0x00d8: Channel 3 */
+#define SAM_DMACHAN4_OFFSET            0x00dc /* 0x00dc-0x0103: Channel 4 */
+#define SAM_DMACHAN5_OFFSET            0x0104 /* 0x0104-0x0128: Channel 5 */
 
 #define SAM_DMACHAN_SADDR_OFFSET       0x0000 /* DMAC Channel Source Address Register */
 #define SAM_DMACHAN_DADDR_OFFSET       0x0004 /* DMAC Channel Destination Address Register */
@@ -115,6 +117,8 @@
 #define SAM_DMACHAN1_BASE              (SAM_DMAC_BASE+SAM_DMACHAN1_OFFSET)
 #define SAM_DMACHAN2_BASE              (SAM_DMAC_BASE+SAM_DMACHAN2_OFFSET)
 #define SAM_DMACHAN3_BASE              (SAM_DMAC_BASE+SAM_DMACHAN3_OFFSET)
+#define SAM_DMACHAN4_BASE              (SAM_DMAC_BASE+SAM_DMACHAN4_OFFSET)
+#define SAM_DMACHAN5_BASE              (SAM_DMAC_BASE+SAM_DMACHAN5_OFFSET)
 
 #define SAM_DMACHAN_SADDR(n)           (SAM_DMACHAN_BASE(n)+SAM_DMACHAN_SADDR_OFFSET)
 #define SAM_DMACHAN_DADDR(n)           (SAM_DMACHAN_BASE(n)+SAM_DMACHAN_DADDR_OFFSET)
@@ -361,10 +365,19 @@
 /* DMAC Channel n [n = 0..3] Descriptor Address Register -- 32-bit address*/
 /* DMAC Channel n [n = 0..3] Control A Register */
 
-#define DMACHAN_CTRLA_BTSIZE_MAX       (0xfff)
-#define DMACHAN_CTRLA_BTSIZE_SHIFT     (0)       /* Bits 0-11: Buffer Transfer Size */
-#define DMACHAN_CTRLA_BTSIZE_MASK      (DMACHAN_CTRLA_BTSIZE_MAX << DMACHAN_CTRLA_BTSIZE_SHIFT)
-#  define DMACHAN_CTRLA_BTSIZE(n)      ((uint32_t)(n) << DMACHAN_CTRLA_BTSIZE_SHIFT)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) ||  defined(CONFIG_ARCH_CHIP_SAM3X) || \
+    defined(CONFIG_ARCH_CHIP_SAM3A)
+#  define DMACHAN_CTRLA_BTSIZE_MAX     (0xfff)
+#  define DMACHAN_CTRLA_BTSIZE_SHIFT   (0)       /* Bits 0-11: Buffer Transfer Size */
+#  define DMACHAN_CTRLA_BTSIZE_MASK    (DMACHAN_CTRLA_BTSIZE_MAX << DMACHAN_CTRLA_BTSIZE_SHIFT)
+#    define DMACHAN_CTRLA_BTSIZE(n)    ((uint32_t)(n) << DMACHAN_CTRLA_BTSIZE_SHIFT)
+#elif defined(CONFIG_ARCH_CHIP_SAM3X) ||  defined(CONFIG_ARCH_CHIP_SAM3A) || \
+    defined(CONFIG_ARCH_CHIP_SAM4E)
+#  define DMACHAN_CTRLA_BTSIZE_MAX     (0xffff)
+#  define DMACHAN_CTRLA_BTSIZE_SHIFT   (0)       /* Bits 0-15: Buffer Transfer Size */
+#  define DMACHAN_CTRLA_BTSIZE_MASK    (DMACHAN_CTRLA_BTSIZE_MAX << DMACHAN_CTRLA_BTSIZE_SHIFT)
+#    define DMACHAN_CTRLA_BTSIZE(n)    ((uint32_t)(n) << DMACHAN_CTRLA_BTSIZE_SHIFT)
+#endif
 
 #if defined(CONFIG_ARCH_CHIP_SAM3U) ||  defined(CONFIG_ARCH_CHIP_SAM3X) || \
     defined(CONFIG_ARCH_CHIP_SAM3A)
@@ -458,15 +471,35 @@
 
 /* DMA Hardware interface numbers *******************************************************/
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U) ||  defined(CONFIG_ARCH_CHIP_SAM3X) || \
-    defined(CONFIG_ARCH_CHIP_SAM3A)
-#  define DMACHAN_INTF_MCI0            0
-#  define DMACHAN_INTF_SSC             3
-#  define DMACHAN_INTF_MCI1            13
-#endif
+#if defined(CONFIG_ARCH_CHIP_SAM3U)
 
-#if defined(CONFIG_ARCH_CHIP_SAM4E)
-#  define DMACHAN_INTF_HSMCI           0         /* HSMCI Transmit/Receive */
+#  define DMACHAN_INTF_HSMCI0          0
+#  define DMACHAN_INTF_SPI0TX          1         /* SPI0 Transmit */
+#  define DMACHAN_INTF_SPI0RX          2         /* SPI0 Receive */
+#  define DMACHAN_INTF_SSC0TX          3         /* SSC0 Transmit */
+#  define DMACHAN_INTF_SSC0RX          4         /* SSC0 Receive */
+#  define DMACHAN_INTF_PWM0EV0         5         /* PWM0 Event Line 0 */
+#  define DMACHAN_INTF_PWM0EV1         6         /* PWM0 Event Line 1 */
+#  define DMACHAN_INTF_TIO0            7         /* TIO Output of TC Ch. 0 */
+
+#elif defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
+
+#  define DMACHAN_INTF_HSMCI0          0         /* HSMCI0 Transmit/Receive */
+#  define DMACHAN_INTF_SPI0TX          1         /* SPI0 Transmit */
+#  define DMACHAN_INTF_SPI0RX          2         /* SPI0 Receive */
+#  define DMACHAN_INTF_SSC0TX          3         /* SSC0 Transmit */
+#  define DMACHAN_INTF_SSC0RX          4         /* SSC0 Receive */
+#  define DMACHAN_INTF_SPI0TX          5         /* SPI1 Transmit */
+#  define DMACHAN_INTF_SPI0RX          6         /* SPI1 Receive */
+#  define DMACHAN_INTF_USART0TX        11        /* USART0 Transmit */
+#  define DMACHAN_INTF_USART0RX        12        /* USART0 Receive */
+#  define DMACHAN_INTF_USART1TX        13        /* USART1 Transmit */
+#  define DMACHAN_INTF_USART1RX        14        /* USART1 Receive */
+#  define DMACHAN_INTF_PWM0TX          15        /* PWM0 Transmit */
+
+#elif defined(CONFIG_ARCH_CHIP_SAM4E)
+
+#  define DMACHAN_INTF_HSMCI0          0         /* HSMCI Transmit/Receive */
 #  define DMACHAN_INTF_SPI0TX          1         /* SPI Transmit */
 #  define DMACHAN_INTF_SPI0RX          2         /* SPI Receive */
 #  define DMACHAN_INTF_USART0TX        3         /* USART0 Transmit */
@@ -475,7 +508,8 @@
 #  define DMACHAN_INTF_USART1RX        6         /* USART1 Receive */
 #  define DMACHAN_INTF_AESTX           11        /* AES Transmit */
 #  define DMACHAN_INTF_AESRX           12        /* AES Receive */
-#  define DMACHAN_INTF_PWMTX           13        /* PWM Transmit */
+#  define DMACHAN_INTF_PWM0TX          13        /* PWM0 Transmit */
+
 #endif
 
 /****************************************************************************************

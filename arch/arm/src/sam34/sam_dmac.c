@@ -98,7 +98,7 @@
  * Private Types
  ****************************************************************************/
 
-/* This structure descibes one DMA channel */
+/* This structure describes one DMA channel */
 
 struct sam_dma_s
 {
@@ -153,8 +153,8 @@ static struct dma_linklist_s g_linklist[CONFIG_SAM34_NLLDESC];
 
 static struct sam_dma_s g_dma[SAM34_NDMACHAN] =
 {
-#if defined(CONFIG_ARCH_CHIP_ATSAM3U4E)
-  /* the AT91SAM3U4E has four DMA channels.  The FIFOs for channels 0-2 are
+#if defined(CONFIG_ARCH_CHIP_SAM3U)
+  /* The SAM3U has four DMA channels.  The FIFOs for channels 0-2 are
    * 8 bytes in size; channel 3 is 32 bytes.
    */
 
@@ -179,8 +179,48 @@ static struct sam_dma_s g_dma[SAM34_NDMACHAN] =
   },
   {
     .chan     = 3,
-    .flags    = (DMACH_FLAG_FIFO_32BYTES | DMACH_FLAG_FLOWCONTROL),
+    .flags    = DMACH_FLAG_FIFO_32BYTES,
     .base     = SAM_DMACHAN3_BASE,
+  }
+
+#elif defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
+  /* The SAM3A/X have six DMA channels.  The FIFOs for channels 0-2 are
+   * 8 bytes in size; channel 3 is 32 bytes.
+   */
+
+#if SAM34_NDMACHAN != 6
+#  error "Logic here assumes SAM34_NDMACHAN is 6"
+#endif
+
+  {
+    .chan     = 0,
+    .flags    = DMACH_FLAG_FIFO_8BYTES,
+    .base     = SAM_DMACHAN0_BASE,
+  },
+  {
+    .chan     = 1,
+    .flags    = DMACH_FLAG_FIFO_8BYTES,
+    .base     = SAM_DMACHAN1_BASE,
+  },
+  {
+    .chan     = 2,
+    .flags    = DMACH_FLAG_FIFO_8BYTES,
+    .base     = SAM_DMACHAN2_BASE,
+  },
+  {
+    .chan     = 3,
+    .flags    = DMACH_FLAG_FIFO_32BYTES,
+    .base     = SAM_DMACHAN3_BASE,
+  }
+  {
+    .chan     = 4,
+    .flags    = DMACH_FLAG_FIFO_8BYTES,
+    .base     = SAM_DMACHAN4_BASE,
+  }
+  {
+    .chan     = 5,
+    .flags    = DMACH_FLAG_FIFO_32BYTES,
+    .base     = SAM_DMACHAN5_BASE,
   }
 
 #elif defined(CONFIG_ARCH_CHIP_SAM4E)
@@ -212,7 +252,7 @@ static struct sam_dma_s g_dma[SAM34_NDMACHAN] =
   },
   {
     .chan     = 3,
-    .flags    = (DMACH_FLAG_FIFO_32BYTES | DMACH_FLAG_FLOWCONTROL),
+    .flags    = DMACH_FLAG_FIFO_32BYTES,
     .base     = SAM_DMACHAN3_BASE,
   }
 
@@ -298,19 +338,6 @@ static unsigned int sam_fifosize(uint8_t chflags)
     {
       return 32;
     }
-}
-
-/****************************************************************************
- * Name: sam_flowcontrol
- *
- * Description:
- *  Decode the FIFO flow control from the flags
- *
- ****************************************************************************/
-
-static inline bool sam_flowcontrol(uint8_t chflags)
-{
-  return ((chflags & DMACH_FLAG_FLOWCONTROL) != 0);
 }
 
 /****************************************************************************
@@ -834,6 +861,7 @@ static inline uint32_t sam_rxctrlb(struct sam_dma_s *dmach)
     {
       regval |= DMACHAN_CTRLB_DSTINCR_FIXED;
     }
+
   return regval;
 }
 
@@ -1375,12 +1403,12 @@ void weak_function up_dmainitialize(void)
 DMA_HANDLE sam_dmachannel(uint32_t chflags)
 {
   struct sam_dma_s *dmach;
+  unsigned int fifosize;
   unsigned int chndx;
 
   /* Get the search parameters */
 
-  bool flowcontrol = sam_flowcontrol(chflags);
-  unsigned int fifosize = sam_fifosize(chflags);
+  fifosize = sam_fifosize(chflags);
 
   /* Search for an available DMA channel with at least the requested FIFO
    * size.
@@ -1393,8 +1421,7 @@ DMA_HANDLE sam_dmachannel(uint32_t chflags)
     {
       struct sam_dma_s *candidate = &g_dma[chndx];
       if (!candidate->inuse &&
-          (sam_fifosize(candidate->flags) >= fifosize) &&
-          (!flowcontrol || sam_flowcontrol(chflags)))
+          (sam_fifosize(candidate->flags) >= fifosize))
         {
           dmach         = candidate;
           dmach->inuse  = true;
@@ -1411,13 +1438,13 @@ DMA_HANDLE sam_dmachannel(uint32_t chflags)
 
           putreg32(DMAC_CHDR_DIS(chndx), SAM_DMAC_CHDR);
 
-          /* Set the DMA channel flags, retaining the fifo size and flow
-           * control settings which are inherent properties of the FIFO
-           * and cannot be changed.
+          /* Set the DMA channel flags, retaining the fifo size setting
+           * which is an inherent properties of the FIFO and cannot be
+           * changed.
            */
 
-          dmach->flags &= (DMACH_FLAG_FLOWCONTROL | DMACH_FLAG_FIFOSIZE_MASK);
-          dmach->flags |= (chflags & ~((DMACH_FLAG_FLOWCONTROL | DMACH_FLAG_FIFOSIZE_MASK)));
+          dmach->flags &= DMACH_FLAG_FIFOSIZE_MASK;
+          dmach->flags |= (chflags & ~DMACH_FLAG_FIFOSIZE_MASK);
           break;
         }
     }
@@ -1478,7 +1505,7 @@ void sam_dmafree(DMA_HANDLE handle)
    * operation and so should be safe.
    */
 
-  dmach->flags &= (DMACH_FLAG_FLOWCONTROL | DMACH_FLAG_FIFOSIZE_MASK);
+  dmach->flags &= DMACH_FLAG_FIFOSIZE_MASK;
   dmach->inuse  = false;                   /* No longer in use */
 }
 
@@ -1496,6 +1523,7 @@ void sam_dmafree(DMA_HANDLE handle)
 int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nbytes)
 {
   struct sam_dma_s *dmach = (struct sam_dma_s *)handle;
+  ssize_t remaining = (ssize_t)nbytes;
   size_t maxtransfer;
   int ret = OK;
 
@@ -1512,7 +1540,7 @@ int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nby
 
   /* If this is a large transfer, break it up into smaller buffers */
 
-  while (nbytes > maxtransfer)
+  while (remaining > maxtransfer)
     {
       /* Set up the maximum size transfer */
 
@@ -1521,7 +1549,7 @@ int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nby
         {
           /* Decrement the number of bytes left to transfer */
 
-          nbytes -= maxtransfer;
+          remaining -= maxtransfer;
 
           /* Increment the memory & peripheral address (if it is appropriate to
            * do do).
@@ -1541,9 +1569,9 @@ int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nby
 
   /* Then set up the final buffer transfer */
 
-  if (ret == OK && nbytes > 0)
+  if (ret == OK && remaining > 0)
     {
-      ret = sam_txbuffer(dmach, paddr, maddr, nbytes);
+      ret = sam_txbuffer(dmach, paddr, maddr, remaining);
     }
 
   return ret;
@@ -1563,6 +1591,7 @@ int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nby
 int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nbytes)
 {
   struct sam_dma_s *dmach = (struct sam_dma_s *)handle;
+  ssize_t remaining = (ssize_t)nbytes;
   size_t maxtransfer;
   int ret = OK;
 
@@ -1579,7 +1608,7 @@ int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nby
 
   /* If this is a large transfer, break it up into smaller buffers */
 
-  while (nbytes > maxtransfer)
+  while (remaining > maxtransfer)
     {
       /* Set up the maximum size transfer */
 
@@ -1588,7 +1617,7 @@ int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nby
         {
           /* Decrement the number of bytes left to transfer */
 
-          nbytes -= maxtransfer;
+          remaining -= maxtransfer;
 
           /* Increment the memory & peripheral address (if it is appropriate to
            * do do).
@@ -1608,9 +1637,9 @@ int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nby
 
   /* Then set up the final buffer transfer */
 
-  if (ret == OK && nbytes > 0)
+  if (ret == OK && remaining > 0)
     {
-      ret = sam_rxbuffer(dmach, paddr, maddr, nbytes);
+      ret = sam_rxbuffer(dmach, paddr, maddr, remaining);
     }
 
   return ret;
@@ -1638,12 +1667,12 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
 
   if (dmach->llhead)
     {
-      /* Save the callback info.  This will be invoked whent the DMA commpletes */
+      /* Save the callback info.  This will be invoked when the DMA completes */
 
       dmach->callback = callback;
       dmach->arg      = arg;
 
-      /* Is this a single block transfer?  Or a multiple block tranfer? */
+      /* Is this a single block transfer?  Or a multiple block transfer? */
 
       if (dmach->llhead == dmach->lltail)
         {
@@ -1654,6 +1683,7 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
           ret = sam_multiple(dmach);
         }
     }
+
   return ret;
 }
 
