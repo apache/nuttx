@@ -136,7 +136,6 @@ struct sam_dmaregs_s
   uint32_t creq;    /* DMAC Software Chunk Transfer Request Register */
   uint32_t last;    /* DMAC Software Last Transfer Flag Register */
   uint32_t ebcimr;  /* DMAC Error Mask */
-  uint32_t ebcisr;  /* DMAC Error Status */
   uint32_t chsr;    /* DMAC Channel Handler Status Register */
 
   /* Channel Registers */

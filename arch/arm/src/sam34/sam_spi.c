@@ -822,7 +822,7 @@ static void spi_rxcallback(DMA_HANDLE handle, void *arg, int result)
  *
  * Input Parameters:
  *   handle - The DMA handler
- *   arg - A pointer to the chip select struction
+ *   arg - A pointer to the chip select structure
  *   result - The result of the DMA transfer
  *
  * Returned Value:
