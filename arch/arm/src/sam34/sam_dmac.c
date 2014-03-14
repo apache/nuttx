@@ -1119,6 +1119,9 @@ static inline int sam_single(struct sam_dma_s *dmach)
 
   /* Clear any pending interrupts from any previous DMAC transfer by reading
    * the interrupt status register.
+   *
+   * REVISIT: If DMAC interrupts are disabled at the NVIKC, then reading the
+   * EBCISR register could cause a loss of interrupts!
    */
 
   (void)getreg32(SAM_DMAC_EBCISR);
@@ -1190,6 +1193,9 @@ static inline int sam_multiple(struct sam_dma_s *dmach)
 
   /* Clear any pending interrupts from any previous DMAC transfer by reading the
    * status register
+   *
+   * REVISIT: If DMAC interrupts are disabled at the NVIKC, then reading the
+   * EBCISR register could cause a loss of interrupts!
    */
 
   (void)getreg32(SAM_DMAC_EBCISR);
@@ -1285,7 +1291,7 @@ static int sam_dmainterrupt(int irq, void *context)
 
   /* Check if the any transfer has completed or any errors have occurred */
 
-  if (regval & DMAC_EBC_ALLINTS)
+  if ((regval & DMAC_EBC_ALLINTS) != 0)
     {
       /* Yes.. Check each bit  to see which channel has interrupted */
 
@@ -1315,7 +1321,7 @@ static int sam_dmainterrupt(int irq, void *context)
                   sam_dmaterminate(dmach, OK);
                 }
 
-              /* Otherwise, this must be a Bufffer Transfer Complete (BTC)
+              /* Otherwise, this must be a Buffer Transfer Complete (BTC)
                * interrupt as part of a multiple buffer transfer.
                */
 
@@ -1328,6 +1334,7 @@ static int sam_dmainterrupt(int irq, void *context)
             }
         }
     }
+
   return OK;
 }
 
@@ -1428,6 +1435,9 @@ DMA_HANDLE sam_dmachannel(uint32_t chflags)
 
           /* Read the status register to clear any pending interrupts on the
            * channel
+           *
+           * REVISIT: If DMAC interrupts are disabled at the NVIKC, then
+           * reading the EBCISR register could cause a loss of interrupts!
            */
 
           (void)getreg32(SAM_DMAC_EBCISR);
@@ -1740,7 +1750,6 @@ void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs)
   regs->creq   = getreg32(SAM_DMAC_CREQ);
   regs->last   = getreg32(SAM_DMAC_LAST);
   regs->ebcimr = getreg32(SAM_DMAC_EBCIMR);
-  regs->ebcisr = getreg32(SAM_DMAC_EBCISR);
   regs->chsr   = getreg32(SAM_DMAC_CHSR);
 
   /* Sample channel registers */
@@ -1780,7 +1789,6 @@ void sam_dmadump(DMA_HANDLE handle, const struct sam_dmaregs_s *regs,
   dmadbg("      CREQ[%08x]: %08x\n", SAM_DMAC_CREQ, regs->creq);
   dmadbg("      LAST[%08x]: %08x\n", SAM_DMAC_LAST, regs->last);
   dmadbg("    EBCIMR[%08x]: %08x\n", SAM_DMAC_EBCIMR, regs->ebcimr);
-  dmadbg("    EBCISR[%08x]: %08x\n", SAM_DMAC_EBCISR, regs->ebcisr);
   dmadbg("      CHSR[%08x]: %08x\n", SAM_DMAC_CHSR, regs->chsr);
   dmadbg("  DMA Channel Registers:\n");
   dmadbg("     SADDR[%08x]: %08x\n", dmach->base + SAM_DMACHAN_SADDR_OFFSET, regs->saddr);
