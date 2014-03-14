@@ -6995,4 +6995,7 @@
 	  well have (temporarily) broken SPI for the SAM3/4/ family (2014-3-13).
 	* configs/sam4e-ek/src/sam_at25.c and sam_hsmci.c:  Added support for
 	  the AT25 serial FLASH.  Restructured the logic that registers the
-	  HSMCI block driver (2014-3-13). 
+	  HSMCI block driver (2014-3-13).
+	* arch/arm/src/sam34/sam_dmac.c and sam_spi.c:  Fixes to DMA in general
+	  and to SPI in particular (2014-3-14).
+ 

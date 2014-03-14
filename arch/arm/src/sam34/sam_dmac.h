@@ -65,7 +65,7 @@
 
 /* Unchange-able properties of the channel */
 
-#define DMACH_FLAG_FLOWCONTROL                (1 << 0)  /* Bit 0: Channel supports flow control */
+                                                        /* Bit 0: Not used */
 #define DMACH_FLAG_FIFOSIZE_SHIFT             (1)       /* Bit 1: Size of DMA FIFO */
 #define DMACH_FLAG_FIFOSIZE_MASK              (1 << DMACH_FLAG_FIFOSIZE_SHIFT)
 #  define DMACH_FLAG_FIFO_8BYTES              (0 << DMACH_FLAG_FIFOSIZE_SHIFT) /* 8 bytes */
@@ -102,7 +102,7 @@
 /* Memory endpoint characteristics */
 
 #define DMACH_FLAG_MEMPID_SHIFT               (14)      /* Bits 14-17: Memory PID */
-#define DMACH_FLAG_MEMPID_MASK                (15 << DMACH_FLAG_PERIPHPID_SHIFT)
+#define DMACH_FLAG_MEMPID_MASK                (15 << DMACH_FLAG_MEMPID_SHIFT)
 #define DMACH_FLAG_MEMH2SEL                   (1 << 18) /* Bits 18: HW handshaking */
 #define DMACH_FLAG_MEMISPERIPH                (1 << 19) /* Bits 19: 0=memory; 1=peripheral */
 #define DMACH_FLAG_MEMWIDTH_SHIFT             (20)      /* Bits 20-21: Memory width */
@@ -111,9 +111,10 @@
 #  define DMACH_FLAG_MEMWIDTH_16BITS          (1 << DMACH_FLAG_MEMWIDTH_SHIFT) /* 16 bits */
 #  define DMACH_FLAG_MEMWIDTH_32BITS          (2 << DMACH_FLAG_MEMWIDTH_SHIFT) /* 32 bits */
 #define DMACH_FLAG_MEMINCREMENT               (1 << 22) /* Bit 22: Autoincrement memory address */
-#define DMACH_FLAG_MEMCHUNKSIZE               (1 << 22) /* Bit 23: Memory chunk size */
+#define DMACH_FLAG_MEMCHUNKSIZE               (1 << 23) /* Bit 23: Memory chunk size */
 #  define DMACH_FLAG_MEMCHUNKSIZE_1           (0)                     /* Memory chunksize = 1 */
 #  define DMACH_FLAG_MEMCHUNKSIZE_4           DMACH_FLAG_MEMCHUNKSIZE /* Memory chunksize = 4 */
+                                                        /* Bits 24-31: Not used */
 
 /************************************************************************************
  * Public Types

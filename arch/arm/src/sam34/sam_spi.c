@@ -719,10 +719,10 @@ static void spi_dma_sampledone(struct sam_spics_s *spics)
                   "RX: At DMA callback");
     }
 
-  sam_dmadump(spics->rxdma, &spics->rxdmaregs[DMA_END_TRANSFER],
-              "RX: At End-of-Transfer");
   sam_dmadump(spics->txdma, &spics->txdmaregs[DMA_END_TRANSFER],
               "TX: At End-of-Transfer");
+  sam_dmadump(spics->rxdma, &spics->rxdmaregs[DMA_END_TRANSFER],
+              "RX: At End-of-Transfer");
 }
 #endif
 
@@ -1449,7 +1449,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
             ((uint32_t)spi->rxintf << DMACH_FLAG_PERIPHPID_SHIFT) |
             DMACH_FLAG_PERIPHH2SEL | DMACH_FLAG_PERIPHISPERIPH |
             DMACH_FLAG_PERIPHWIDTH_8BITS | DMACH_FLAG_PERIPHCHUNKSIZE_1 |
-            ((uint32_t)(0x3f) << DMACH_FLAG_MEMPID_SHIFT) |
+            ((uint32_t)(15) << DMACH_FLAG_MEMPID_SHIFT) |
             DMACH_FLAG_MEMWIDTH_8BITS | DMACH_FLAG_MEMCHUNKSIZE_1;
 
   if (!rxbuffer)
@@ -1471,7 +1471,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
             ((uint32_t)spi->txintf << DMACH_FLAG_PERIPHPID_SHIFT) |
             DMACH_FLAG_PERIPHH2SEL | DMACH_FLAG_PERIPHISPERIPH |
             DMACH_FLAG_PERIPHWIDTH_8BITS | DMACH_FLAG_PERIPHCHUNKSIZE_1 |
-            ((uint32_t)(0x3f) << DMACH_FLAG_MEMPID_SHIFT) |
+            ((uint32_t)(15) << DMACH_FLAG_MEMPID_SHIFT) |
             DMACH_FLAG_MEMWIDTH_8BITS | DMACH_FLAG_MEMCHUNKSIZE_1;
 
   if (!txbuffer)
