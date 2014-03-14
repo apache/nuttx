@@ -6998,4 +6998,6 @@
 	  HSMCI block driver (2014-3-13).
 	* arch/arm/src/sam34/sam_dmac.c and sam_spi.c:  Fixes to DMA in general
 	  and to SPI in particular (2014-3-14).
- 
+	* configs/sam4e-ek/nsh:  DMA-based SPI and a FAT file system on the
+	  AT25 Serial FLASH are now supported by default in the NSH configuration
+	  (2014-3-14).

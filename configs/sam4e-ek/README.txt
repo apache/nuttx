@@ -20,6 +20,7 @@ Contents
   - LEDs
   - Serial Console
   - Networking Support
+  - AT25 Serial FLASH
   - SAM4E-EK-specific Configuration Options
   - Configurations
 
@@ -343,8 +344,8 @@ Serial Console
   By default serial console is configured for 115000, 8-bit, 1 stop bit, and
   no parity.
 
-Networking
-==========
+Networking Support
+==================
 
   Networking support via the can be added to NSH by selecting the following
   configuration options.
@@ -501,6 +502,89 @@ Networking
   This delay will be especially long if the board is not connected to
   a network because additional time will be required to fail with timeout
   errors.
+
+AT25 Serial FLASH
+=================
+
+  Connections
+  -----------
+
+  Both the SAM4E-EK include an Atmel AT25DF321A, 32-megabit, 2.7-volt
+  SPI serial flash.  The SPI
+  connection is as follows:
+
+    ------ ------- ---------------
+    SAM4E  AT25    SAM4E
+    GPIO   PIN     FUNCTION
+    ------ ------- ---------------
+    PA13   SI      MOSI
+    PA12   SO      MIS0
+    PA14   SCK     SPCK
+    PA5    /CS     NPCS3 (pulled high externally)
+    ------ ------- ---------------
+
+  Configuration
+  -------------
+
+  Support for the serial FLASH can be enabled in these configurations.  These
+  are the relevant configuration settings.  These settings (1) Enable SPI0,
+  (2) Enable DMAC0 to support DMA transfers on SPI for best performance,
+  (3) Enable the AT25 Serial FLASH, and (3) Set up NuttX to configure the
+  file system on the AT25 FLASH:
+
+    System Type -> ATSAM3/4 Peripheral Support
+      CONFIG_SAM34_SPI0=y                   : Enable SPI0
+      CONFIG_SAM34_DMAC0=y                  : Enable DMA controller 0
+
+    System Type -> SPI device driver options
+      CONFIG_SAM34_SPI_DMA=y                : Use DMA for SPI transfers
+      CONFIG_SAM34_SPI_DMATHRESHOLD=4       : Don't DMA for small transfers
+
+    Device Drivers -> SPI Driver Support
+      CONFIG_SPI=y                          : Enable SPI support
+      CONFIG_SPI_EXCHANGE=y                 : Support the exchange method
+
+    Device Drivers -> Memory Technology Device (MTD) Support
+      CONFIG_MTD=y                          : Enable MTD support
+      CONFIG_MTD_AT25=y                     : Enable the AT25 driver
+      CONFIG_AT25_SPIMODE=0                 : Use SPI mode 0
+      CONFIG_AT25_SPIFREQUENCY=20000000     : Use SPI frequency 12MHz
+
+    The AT25 is capable of operation at 20MHz.  However, if you experience
+    any issues with the AT25, then lower this frequency may give more
+    predictable performance.
+
+    File Systems -> FAT
+      CONFIG_FS_FAT=y                       : Enable and configure FAT
+      CONFIG_FAT_LCNAMES=y                  : Upper/lower case names
+      CONFIG_FAT_LFN=y                      : Long file name support (See NOTE)
+      CONFIG_FAT_MAXFNAME=32                : Limit filename sizes to 32 bytes
+
+    NOTE: Use care if you plan to use FAT long file name feature in a product;
+    There are issues with certain Microsoft patents on the long file name
+    technology.
+
+    Application Configuration -> NSH Library
+      CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
+
+    Board Selection
+      CONFIG_SAM4EEK_AT25_AUTOMOUNT=y       : Mounts AT25 for NSH
+      CONFIG_SAM4EEK_AT25_FTL=y             : Create block driver for FAT
+
+  You can then format the AT25 FLASH for a FAT file system and mount the
+  file system at /mnt/at25 using these NSH commands:
+
+    nsh> mkfatfs /dev/mtdblock0
+    nsh> mount -t vfat /dev/mtdblock0 /mnt/at25
+
+  Then you an use the FLASH as a normal FAT file system:
+
+    nsh> echo "This is a test" >/mnt/at25/atest.txt
+    nsh> ls -l /mnt/at25
+    /mnt/at25:
+     -rw-rw-rw-      16 atest.txt
+    nsh> cat /mnt/at25/atest.txt
+    This is a test
 
 SAM4E-EK-specific Configuration Options
 =======================================
@@ -793,7 +877,12 @@ Configurations
        CONFIG_NSH_DHCPC=y                  : Tells NSH to use DHCPC, not
                                            : the fixed addresses
 
-    4. This configuration has been used for verifying the touchscreen on
+    4. This configuration has the DMA-based SPI0 and AT25 Serial FLASH
+       support enabled by default.  This can be easily disabled or
+       reconfigured (See see the configuration settings and usage notes
+       above in the section entitled "AT25 Serial FLASH").
+
+    5. This configuration has been used for verifying the touchscreen on
        on the SAM4E-EK LCD.  With these modifications, you can include the
        touchscreen test program at apps/examples/touchscreen as an NSH built-in
        application.  You can enable the touchscreen and test by modifying the
@@ -837,7 +926,7 @@ Configurations
             CONFIG_DEBUG_VERBOSE=y            : Enable verbose debug output
             CONFIG_DEBUG_INPUT=y              : Enable debug output from input devices
 
-    4. Enabling HSMCI support. The SAM3U-KE provides a an SD memory card
+    6. Enabling HSMCI support. The SAM3U-KE provides a an SD memory card
        slot.  Support for the SD slot can be enabled with the following
        settings:
 
@@ -868,3 +957,5 @@ Configurations
         has been verified.  HSMCI and touchscreen have not been tested (the
         above notes came from the SAM3U-EK and have not been yet been tested
         on the SAM4E-EK).
+      2014-3-14: The DMA-based SPI appears to be functional and can be used
+        to support a FAT file system on the AT25 Serial FLASH.
