@@ -189,23 +189,23 @@ chmod 755 ${NUTTX}/.version || \
     { echo "'chmod 755 ${NUTTX}/.version' failed"; exit 1; }
 
 # Update the configuration variable documentation
-
-MKCONFIGVARS=${NUTTX}/tools/mkconfigvars.sh
-CONFIGVARHTML=${NUTTX}/Documentation/NuttXConfigVariables.html
-
-if [ ! -x "${MKCONFIGVARS}" ]; then
-    echo "No executable script was found at: ${MKCONFIGVARS}"
-    exit 1
-fi
-
-cd ${NUTTX} || \
-   { echo "Failed to cd to ${NUTTX}" ; exit 1 ; }
-
-${MKCONFIGVARS} ${DEBUG} ${VERSIONOPT} || \
-    { echo "${MKCONFIGVARS} failed"; exit 1; }
-chmod 644 ${CONFIGVARHTML} || \
-    { echo "'chmod 644 ${CONFIGVARHTML}' failed"; exit 1; }
-
+#
+# MKCONFIGVARS=${NUTTX}/tools/mkconfigvars.sh
+# CONFIGVARHTML=${NUTTX}/Documentation/NuttXConfigVariables.html
+#
+# if [ ! -x "${MKCONFIGVARS}" ]; then
+#     echo "No executable script was found at: ${MKCONFIGVARS}"
+#     exit 1
+# fi
+#
+# cd ${NUTTX} || \
+#    { echo "Failed to cd to ${NUTTX}" ; exit 1 ; }
+#
+# ${MKCONFIGVARS} ${DEBUG} ${VERSIONOPT} || \
+#     { echo "${MKCONFIGVARS} failed"; exit 1; }
+# chmod 644 ${CONFIGVARHTML} || \
+#     { echo "'chmod 644 ${CONFIGVARHTML}' failed"; exit 1; }
+#
 # Perform a full clean for the distribution
 
 cd ${TRUNKDIR} || \
