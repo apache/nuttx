@@ -5868,7 +5868,7 @@ Additional new features and extended functionality:
       - As mentioned above, the per-thread CPU load information is now
         reported in the procfs under <pid>/loadavg.
       - Many file system interfaces have been extended to operate on the
-        top-level NuttX pseudo filestem.  These include rmdir, mkdir,
+        top-level NuttX pseudo filesystem.  These include rmdir, mkdir,
         rename, and unlink.  This capability can be disabled with
         CONFIG_DISABLE_PSEUDOFS_OPERATIONS in order to keep the footprint
         small.
@@ -5924,7 +5924,7 @@ Additional new features and extended functionality:
 
       - Added architecture support for the TI Tiva TM4C123G parts.  This was
         merged into the existing support for the LM3S and LM4F families. 
-        All directory, file, and function references changed from m to tiva.
+        All directory, file, and function references changed from lm to tiva.
 
     * TI Tiva TMC4C123G Board Support:
 
@@ -5934,8 +5934,8 @@ Additional new features and extended functionality:
 
     * STMicro STM32 Boards:
 
-      - configs/mikroe-stm32f4/src/up_mio283qt9a.c: The Mikroe STM32F4 can
-        now support the newer MIO283QT9A LCD. From Toby Duckworth.
+      - The Mikroe STM32F4 can now support the newer MIO283QT9A LCD. From
+        Toby Duckworth.
       - Miscellaneous changes to better support FPU on STM32F429 Discovery
         from David Alessio.
 
@@ -5977,7 +5977,7 @@ Additional new features and extended functionality:
       - NSH can now use an EMACS-like command line editor.  This CLE, is
         really more like the traditional readline than is the default, tiny
         the NuttX readline .
-      - The touscreen example can now be configured to work with either a
+      - The touchscreen example can now be configured to work with either a
         touchscreen or a mouse device.
       - Several NSH commands can now be used to operate on objects in the
         top-level pseudo-filesystem: rmdir, mkdir, mv, and rm.  This
@@ -6012,12 +6012,12 @@ Bugfixes (see the ChangeLog for details).  Some of these are very important:
 
       - Fix one place where the connection reference count was not being
         decremented in the socket close() logic.  This is really a cosmetic
-        change BUT when CONFIG_DEBUG_NET is enable, it will cause assertions.
+        change BUT when CONFIG_DEBUG_NET is enabled, it will cause assertions.
       - Backed out a small part of the NuttX 6.33 write buffering changed. 
         David G says that this causes problems in connecting to a server.
-      - In DHCPD, there was a place where the logic called should not call
-        ntohl() inappropriately; the address was already in the correct
-        order.  How could DHCPD have worked with this bug?
+      - In DHCPD, there was a place where the logic was calling ntohl()
+        inappropriately; the address was already in the correct order.  How
+        could DHCPD have worked with this bug?
 
     * TI Tiva/Stellaris Drivers:
 
