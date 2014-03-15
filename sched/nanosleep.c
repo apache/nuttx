@@ -172,7 +172,7 @@ int nanosleep(FAR const struct timespec *rqtp, FAR struct timespec *rmtp)
   if (errval == EAGAIN)
     {
       /* The timeout "error" is the normal, successful result */
-
+      irqrestore(flags);
       return OK;
     }
 
