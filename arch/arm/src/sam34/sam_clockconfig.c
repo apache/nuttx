@@ -237,13 +237,32 @@ static inline void sam_pmcsetup(void)
   putreg32(BOARD_CKGR_PLLAR, SAM_PMC_CKGR_PLLAR);
   sam_pmcwait(PMC_INT_LOCKA);
 
+#ifdef CONFIG_USBDEV
   /* Setup UTMI for USB and wait for LOCKU */
 
-#ifdef CONFIG_USBDEV
+#ifdef SAM_PMC_CKGR_UCKR
+  /* This MCU has a USB PLL.  Configure the UPLL and wait for it to lock. */
+
   regval = getreg32(SAM_PMC_CKGR_UCKR);
   regval |= BOARD_CKGR_UCKR;
   putreg32(regval, SAM_PMC_CKGR_UCKR);
   sam_pmcwait(PMC_INT_LOCKU);
+
+#else
+  /* This board does not have a UPLL.  Use the output of PLLA or PLLA
+   * (depending on USBS) and setup the PLL divisor to generate the 48MHz
+   * USB clock.
+   */
+
+  regval = (BOARD_PMC_USBS | BOARD_PMC_USBDIV);
+  putreg32(regval, SAM_PMC_USB);
+
+  /* Set the UDP bit in the SCER1 register to enable the USB clock output */
+
+  regval  = getreg32(SAM_PMC_SCER);
+  regval |= PMC_UDP;
+  putreg32(regval, SAM_PMC_SCER);
+#endif
 #endif
 
   /* Switch to the fast clock and wait for MCKRDY */

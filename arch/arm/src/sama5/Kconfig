@@ -225,7 +225,6 @@ config SAMA5_UHPHS
 config SAMA5_UDPHS
 	bool "USB Device High Speed (UDPHS)"
 	default n
-	depends on SAMA5_HAVE_GMAC
 
 config SAMA5_GMAC
 	bool "Gigabit Ethernet MAC (GMAC)"
@@ -869,7 +868,7 @@ choice
 	prompt "GMAC Speed"
 	default SAMA5_GMAC_ETH100MBPS
 	---help---
-		If autonegation is not used, then you must select the fixed speed
+		If autonegotiation is not used, then you must select the fixed speed
 		of the PHY
 
 config SAMA5_GMAC_ETH10MBPS
@@ -1512,9 +1511,9 @@ config SAMA5_SSC0_MCKDIV_SAMPLERATE
 	depends on SAMA5_SSC0_RX_MCKDIV || SAMA5_SSC0_TX_MCKDIV
 	---help---
 		If the either the receiver or transmitter clock is provided by MCK/2 divided
-		down, then the samplerate must be provided.  The bitrate will be the product
+		down, then the sample rate must be provided.  The bit rate will be the product
 		of the sample rate and the data width.  The SSC driver will determine the best
-		divider to obtain that bitrate (up to 4095).  If the bitrate can be realized
+		divider to obtain that bit rate (up to 4095).  If the bit rate can be realized
 		by dividing down the MCK/2, a compile time error will occur.
 
 config SAMA5_SSC0_LOOPBACK
@@ -1524,7 +1523,7 @@ config SAMA5_SSC0_LOOPBACK
 	---help---
 		If both the receiver and transmitter are enabled, then the SSC can
 		be configured in loopback mode.  This setting selects SSC loopback
-		and will cause the LOOP bit to be set in the SSC_RFMR regsiter. In
+		and will cause the LOOP bit to be set in the SSC_RFMR register. In
 		this case, RD is connected to TD, RF is connected to TF and RK is
 		connected to TK.
 
@@ -1646,9 +1645,9 @@ config SAMA5_SSC1_MCKDIV_SAMPLERATE
 	depends on SAMA5_SSC1_RX_MCKDIV || SAMA5_SSC1_TX_MCKDIV
 	---help---
 		If the either the receiver or transmitter clock is provided by MCK/2 divided
-		down, then the samplerate must be provided.  The bitrate will be the product
+		down, then the sample rate must be provided.  The bit rate will be the product
 		of the sample rate and the data width.  The SSC driver will determine the best
-		divider to obtain that bitrate (up to 4095).  If the bitrate can be realized
+		divider to obtain that bit rate (up to 4095).  If the bit rate can be realized
 		by dividing down the MCK/2, a compile time error will occur.
 
 config SAMA5_SSC1_LOOPBACK
@@ -1658,7 +1657,7 @@ config SAMA5_SSC1_LOOPBACK
 	---help---
 		If both the receiver and transmitter are enabled, then the SSC can
 		be configured in loopback mode.  This setting selects SSC loopback
-		and will cause the LOOP bit to be set in the SSC_RFMR regsiter. In
+		and will cause the LOOP bit to be set in the SSC_RFMR register. In
 		this case, RD is connected to TD, RF is connected to TF and RK is
 		connected to TK.
 
@@ -1767,7 +1766,7 @@ config SAMA5_UDPHS_NDTDS
 	default 9
 	depends on UDPHS_SCATTERGATHER
 	---help---
-		DMA tranfer descriptors are allocated in a pool at boot time.  This
+		DMA transfer descriptors are allocated in a pool at boot time.  This
 		setting provides the number of DMA transfer descriptors to be
 		allocated.
 
@@ -1776,17 +1775,17 @@ config SAMA5_UDPHS_PREALLOCATE
 	default y
 	depends on UDPHS_SCATTERGATHER
 	---help---
-		If this option is selected then DMA tranfer descriptors will be
+		If this option is selected then DMA transfer descriptors will be
 		pre-allocated in .bss.  Otherwise, the descriptors will be allocated
 		at start-up time with kmalloc().  This might be important if a larger
 		memory pool is available after startup.
 
 config SAMA5_UDPHS_REGDEBUG
-	bool "Enable low-level UPPHS register debug"
+	bool "Enable low-level UDPHS register debug"
 	default n
 	depends on DEBUG
 
-endmenu # USB High Speed Host Device driver (DCD) options
+endmenu # USB High Speed Device Controller driver (DCD) options
 endif # SAMA5_UDPHS
 
 if SAMA5_UHPHS
