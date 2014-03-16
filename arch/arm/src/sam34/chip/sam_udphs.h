@@ -88,7 +88,7 @@
 #define SAM_UDPHSDMA_NXTDSC_OFFSET            0x00 /* UDPHS DMA Next Descriptor Address Register */
 #define SAM_UDPHSDMA_ADDRESS_OFFSET           0x04 /* UDPHS DMA Channel Address Register */
 #define SAM_UDPHSDMA_CONTROL_OFFSET           0x08 /* UDPHS DMA Channel Control Register */
-#define SAM_UDPHSDMA_STATUS_OFFSET)           0x0c /* UDPHS DMA Channel Status Register */
+#define SAM_UDPHSDMA_STATUS_OFFSET            0x0c /* UDPHS DMA Channel Status Register */
 
 /* UDPHS register addresses *************************************************************/
 
@@ -217,12 +217,12 @@
 #define UDPHS_IPFEATURES_ISOEPT7              (1 << 23) /* Bit 23: EP7 High B/W Isoc Capability */
 #define UDPHS_IPFEATURES_ISOEPT8              (1 << 24) /* Bit 24: EP8 High B/W Isoc Capability */
 #define UDPHS_IPFEATURES_ISOEPT9              (1 << 25) /* Bit 25: EP9 High B/W Isoc Capability */
-#define UDPHS_IPFEATURES_ISOEPT0              (1 << 26) /* Bit 26: EP10 High B/W Isoc Capability */
-#define UDPHS_IPFEATURES_ISOEPT1              (1 << 27) /* Bit 27: EP11 High B/W Isoc Capability */
-#define UDPHS_IPFEATURES_ISOEPT2              (1 << 28) /* Bit 28: EP12 High B/W Isoc Capability */
-#define UDPHS_IPFEATURES_ISOEPT3              (1 << 29) /* Bit 29: EP13 High B/W Isoc Capability */
-#define UDPHS_IPFEATURES_ISOEPT4              (1 << 30) /* Bit 30: EP14 High B/W Isoc Capability */
-#define UDPHS_IPFEATURES_ISOEPT5              (1 << 31) /* Bit 31: EP15 High B/W Isoc Capability */
+#define UDPHS_IPFEATURES_ISOEPT10             (1 << 26) /* Bit 26: EP10 High B/W Isoc Capability */
+#define UDPHS_IPFEATURES_ISOEPT11             (1 << 27) /* Bit 27: EP11 High B/W Isoc Capability */
+#define UDPHS_IPFEATURES_ISOEPT12             (1 << 28) /* Bit 28: EP12 High B/W Isoc Capability */
+#define UDPHS_IPFEATURES_ISOEPT13             (1 << 29) /* Bit 29: EP13 High B/W Isoc Capability */
+#define UDPHS_IPFEATURES_ISOEPT14             (1 << 30) /* Bit 30: EP14 High B/W Isoc Capability */
+#define UDPHS_IPFEATURES_ISOEPT15             (1 << 31) /* Bit 31: EP15 High B/W Isoc Capability */
 
 /* UDPHS Endpoint Configuration Register (0-6) */
 
@@ -231,7 +231,7 @@
 #  define UDPHSEP_CFG_SIZE_8b                 (0 << UDPHSEP_CFG_SIZE_SHIFT) /* 8 bytes */
 #  define UDPHSEP_CFG_SIZE_16b                (1 << UDPHSEP_CFG_SIZE_SHIFT) /* 16 bytes */
 #  define UDPHSEP_CFG_SIZE_32b                (2 << UDPHSEP_CFG_SIZE_SHIFT) /* 32 bytes */
-#  define UDPHSEP_CFG_SIZE_16b                (3 << UDPHSEP_CFG_SIZE_SHIFT) /* 64 bytes */
+#  define UDPHSEP_CFG_SIZE_64b                (3 << UDPHSEP_CFG_SIZE_SHIFT) /* 64 bytes */
 #  define UDPHSEP_CFG_SIZE_128b               (4 << UDPHSEP_CFG_SIZE_SHIFT) /* 128 bytes */
 #  define UDPHSEP_CFG_SIZE_256b               (5 << UDPHSEP_CFG_SIZE_SHIFT) /* 256 bytes */
 #  define UDPHSEP_CFG_SIZE_512b               (6 << UDPHSEP_CFG_SIZE_SHIFT) /* 512 bytes */
@@ -330,7 +330,7 @@
 #define UDPHSEP_STA_BUSYBANKSTA_MASK          (3 << UDPHSEP_STA_BUSYBANKSTA_SHIFT)
 #define UDPHSEP_STA_BYTECOUNT_SHIFT           (20)      /* Bits 20-23: UDPHS Byte Count */
 #define UDPHSEP_STA_BYTECOUNT_MASK            (15 << UDPHSEP_STA_BYTECOUNT_SHIFT)
-#define UDPHSEP_STA_SHRTPCKT                  (1 << 31) /* Bit 31: Short Packet
+#define UDPHSEP_STA_SHRTPCKT                  (1 << 31) /* Bit 31: Short Packet */
 
 /* UDPHS DMA Channel Control Register */
 

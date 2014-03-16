@@ -103,9 +103,22 @@
 #define BOARD_PMC_MCKR_CSS         PMC_MCKR_CSS_PLLA
 #define BOARD_PMC_MCKR_PRES        PMC_MCKR_PRES_DIV2
 
-/* USB UTMI PLL start-up time */
+/* The PLL clock (USB_48M or UDPCK) is driven from the output of the PLL,
+ * PLLACK.  The PLL clock must be 48MHz.  PLLACK can be divided down via the
+ * PMC USB register to provide the PLL clock.  So in order to use the USB
+ * feature, the PLL output must be a multiple of 48MHz.
+ *
+ * PLLACK = 240MHz, USBDIV=5, USB_48M = 240 MHz / 5 = 48MHz
+ * PLLACK = 192MHz, USBDIV=4, USB_48M = 192 MHz / 4 = 48MHz
+ */
 
-#define BOARD_CKGR_UCKR_UPLLCOUNT  (3 << PMC_CKGR_UCKR_UPLLCOUNT_SHIFT)
+#define BOARD_PMC_USBS            (0)
+
+#ifdef CONFIG_SAM4EEK_120MHZ
+#  define BOARD_PMC_USBDIV        (4 << PMC_USB_USBDIV_SHIFT)
+#else
+#  define BOARD_PMC_USBDIV        (3 << PMC_USB_USBDIV_SHIFT)
+#endif
 
 /* Resulting frequencies */
 

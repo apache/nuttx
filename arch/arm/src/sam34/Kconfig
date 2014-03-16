@@ -570,7 +570,7 @@ config SAM34_UDPHS
 config SAM34_UOTGHS
 	bool "USB OTG High Speed (UOTGHS)"
 	default n
-	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X
+	depends on ARCH_CHIP_SAM3A || ARCH_CHIP_SAM3X
 
 config SAM34_USBC
 	bool "USB 2.0 Interface (USBC)"
@@ -1128,6 +1128,17 @@ config SAM34_EMAC_ISETH0
 
 endmenu # EMAC device driver options
 endif # SAM34_EMAC
+
+if SAM34_UDP
+menu "USB Full Speed Device Controller driver (DCD) options"
+
+config SAM34_UDP_REGDEBUG
+	bool "Enable low-level UPPHS register debug"
+	default n
+	depends on DEBUG
+
+endmenu # USB Full Speed Device Controller driver (DCD) options
+endif # SAM34_UDP
 
 if SAM34_WDT
 comment "AT91SAM3/4 Watchdog Configuration"|

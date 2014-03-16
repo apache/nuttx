@@ -49,8 +49,32 @@
 /****************************************************************************************
  * Pre-processor Definitions
  ****************************************************************************************/
+/* General Definitions ******************************************************************/
+/* Capabilities and characteristics of endpoints
+ *
+ *   EP  EP BANKS  EP SIZE   EP TYPE
+ *   --- --------- --------- ---------
+ *    0      1        64     Control/Bulk/Interrupt
+ *    1      2        64     Bulk/Iso/Interrupt
+ *    2      2        64     Bulk/Iso/Interrupt
+ *    3      1        64     Control/Bulk/Interrupt
+ *    4      2       512     Bulk/Iso/Interrupt
+ *    5      2       612     Bulk/Iso/Interrupt
+ *    6      2        64     Bulk/Iso/Interrupt
+ *    7      2        64     Bulk/Iso/Interrupt
+ */
 
-/* UDP register offsets ***************************************************************/
+#define SAM_UDP_NENDPOINTS                  8     /* EP0-7 */
+#define SAM_UDP_MAXPACKETSIZE(ep)           ((((unsigned)(ep) & 6) == 4) ? 512 : 64)
+#define SAM_UDP_NBANKS(ep)                  (((unsigned)(ep) == 0 || (unsigned)(ep) == 3) ? 1 : 2)
+#define SAM_UDP_CONTROL(ep)                 (((unsigned)(ep) == 0 || (unsigned)(ep) == 3))
+#define SAM_UDP_BULK(ep)                    (true)
+#define SAM_UDP_ISOCHRONOUS(ep)             (((unsigned)(ep) != 0 && (unsigned)(ep) != 3))
+#define SAM_UDP_INTERRUPT(ep)               (true)
+
+/* UDP register offsets *****************************************************************/
+
+/* Global Registers */
 
 #define SAM_UDP_FRMNUM_OFFSET               0x0000 /* UDP Frame Number Register */
 #define SAM_UDP_GLBSTAT_OFFSET              0x0004 /* UDP Global State Register */
@@ -62,10 +86,9 @@
 #define SAM_UDP_ISR_OFFSET                  0x001c /* UDP Interrupt Status Register */
 #define SAM_UDP_ICR_OFFSET                  0x0020 /* UDP Interrupt Clear Register */
                                                    /* 0x0024: Reserved */
-#define SAM_UDP_RSTEP_OFFSET                0x001c /* UDP Reset Endpoint Regis */
+#define SAM_UDP_RSTEP_OFFSET                0x001c /* UDP Reset Endpoint Register */
                                                    /* 0x002c: Reserved */
-
-/* Endpoint 0-7 registers */
+/* Endpoint registers */
 
 #define SAM_UDPEP_CSR_OFFSET(n)             (0x0030+((n)<<2))
 #  define SAM_UDPEP_CSR0_OFFSET             0x0030 /* Endpoint Control and Status Register 0 */
@@ -89,7 +112,9 @@
 #define SAM_UDP_TXVC_OFFSET                 0x0074 /* Transceiver Control Register */
                                                    /* 0x0078-0x00fc: Reserved */
 
-/* UDP register addresses *************************************************************/
+/* UDP register addresses ***************************************************************/
+
+/* Global Registers */
 
 #define SAM_UDP_FRMNUM                      (SAM_UDP_BASE+SAM_UDP_FRMNUM_OFFSET)
 #define SAM_UDP_GLBSTAT                     (SAM_UDP_BASE+SAM_UDP_GLBSTAT_OFFSET)
@@ -98,10 +123,10 @@
 #define SAM_UDP_IDR                         (SAM_UDP_BASE+SAM_UDP_IDR_OFFSET)
 #define SAM_UDP_IMR                         (SAM_UDP_BASE+SAM_UDP_IMR_OFFSET)
 #define SAM_UDP_ISR                         (SAM_UDP_BASE+SAM_UDP_ISR_OFFSET)
-#define SAM_UDP_ICR                         (SAM_UDP_BASE+ SAM_UDP_ICR_OFFSET)
+#define SAM_UDP_ICR                         (SAM_UDP_BASE+SAM_UDP_ICR_OFFSET)
 #define SAM_UDP_RSTEP                       (SAM_UDP_BASE+SAM_UDP_RSTEP_OFFSET)
 
-/* Endpoint 0-7 registers */
+/* Endpoint registers */
 
 #define SAM_UDPEP_CSR(n)                    (SAM_UDP_BASE+SAM_UDPEP_CSR_OFFSET(n))
 #  define SAM_UDPEP_CSR0                    (SAM_UDP_BASE+SAM_UDPEP_CSR0_OFFSET)
@@ -124,7 +149,9 @@
 
 #define SAM_UDP_TXVC                        (SAM_UDP_BASE+SAM_UDP_TXVC_OFFSET)
 
-/* UDP register bit definitions *******************************************************/
+/* UDP register bit definitions *********************************************************/
+
+/* Global Registers */
 
 /* UDP Frame Number Register */
 
@@ -145,6 +172,7 @@
 
 #define UDP_FADDR_SHIFT                     (0)       /* Bits 0-6:  Function Address Value */
 #define UDP_FADDR_MASK                      (0x0000007f)
+#  define UDP_FADDR(n)                      ((uint32_t)(n))
 #define UDP_FADDR_FEN                       (1 << 8)  /* Bit 8:  Function Enable */
 
 /* UDP Interrupt Enable, UDP Interrupt Disable, UDP Interrupt Mask, UDP Interrupt
@@ -152,22 +180,24 @@
  */
 
 #define UDP_INT_EP(n)                       (1 << (n))
-#  define UDP_INT_EP0                       (1 << 0)  /* Bit 0:  Enable Endpoint 0 Interrupt (Not ICR) */
-#  define UDP_INT_EP1                       (1 << 1)  /* Bit 1:  Enable Endpoint 1 Interrupt (Not ICR) */
-#  define UDP_INT_EP2                       (1 << 2)  /* Bit 2:  Enable Endpoint 2 Interrupt (Not ICR) */
-#  define UDP_INT_EP3                       (1 << 3)  /* Bit 3:  Enable Endpoint 3 Interrupt (Not ICR) */
-#  define UDP_INT_EP4                       (1 << 4)  /* Bit 4:  Enable Endpoint 4 Interrupt (Not ICR) */
-#  define UDP_INT_EP5                       (1 << 5)  /* Bit 5:  Enable Endpoint 5 Interrupt (Not ICR) */
-#  define UDP_INT_EP6                       (1 << 6)  /* Bit 6:  Enable Endpoint 6 Interrupt (Not ICR) */
-#  define UDP_INT_EP7                       (1 << 7)  /* Bit 7:  Enable Endpoint 7 Interrupt (Not ICR) */
-#define UDP_INT_RXSUSP                      (1 << 8)  /* Bit 8:  Enable UDP Suspend Interrupt */
-#define UDP_INT_RXRSM                       (1 << 9)  /* Bit 9:  Enable UDP Resume Interrupt */
+#  define UDP_INT_EP0                       (1 << 0)  /* Bit 0:  Endpoint 0 Interrupt (Not ICR) */
+#  define UDP_INT_EP1                       (1 << 1)  /* Bit 1:  Endpoint 1 Interrupt (Not ICR) */
+#  define UDP_INT_EP2                       (1 << 2)  /* Bit 2:  Endpoint 2 Interrupt (Not ICR) */
+#  define UDP_INT_EP3                       (1 << 3)  /* Bit 3:  Endpoint 3 Interrupt (Not ICR) */
+#  define UDP_INT_EP4                       (1 << 4)  /* Bit 4:  Endpoint 4 Interrupt (Not ICR) */
+#  define UDP_INT_EP5                       (1 << 5)  /* Bit 5:  Endpoint 5 Interrupt (Not ICR) */
+#  define UDP_INT_EP6                       (1 << 6)  /* Bit 6:  Endpoint 6 Interrupt (Not ICR) */
+#  define UDP_INT_EP7                       (1 << 7)  /* Bit 7:  Endpoint 7 Interrupt (Not ICR) */
+#define UDP_INT_RXSUSP                      (1 << 8)  /* Bit 8:  UDP Suspend Interrupt */
+#define UDP_INT_RXRSM                       (1 << 9)  /* Bit 9:  UDP Resume Interrupt */
 #define UDP_INT_EXTRSM                      (1 << 10) /* Bit 10: */
-#define UDP_INT_SOF                         (1 << 11) /* Bit 11: Enable Start Of Frame Interrupt */
+#define UDP_INT_SOF                         (1 << 11) /* Bit 11: Start Of Frame Interrupt */
 #define UDP_ISR_ENDBUSRES                   (1 << 12) /* Bit 12: End of BUS Reset Interrupt Status (ISR and ICR only) */
-#define UDP_INT_WAKEUP                      (1 << 13) /* Bit 13: Enable UDP bus Wake-up Interrupt */
+#define UDP_INT_WAKEUP                      (1 << 13) /* Bit 13: UDP bus Wake-up Interrupt */
 
-/* UDP Reset Endpoint Regis */
+#define UDP_INT_ALL                         (0x00003fff)
+
+/* UDP Reset Endpoint Register */
 
 #define UDP_RSTEP(n)                        (1 << (n))
 #  define UDP_RSTEP0                        (1 << 0)  /* Bit 0:  Reset Endpoint 0 */
@@ -179,7 +209,7 @@
 #  define UDP_RSTEP6                        (1 << 6)  /* Bit 6:  Reset Endpoint 6 */
 #  define UDP_RSTEP7                        (1 << 7)  /* Bit 7:  Reset Endpoint 7 */
 
-/* Endpoint 0-7 registers */
+/* Endpoint registers */
 /* Endpoint Control and Status Registers */
 
 #define UDPEP_CSR_TXCOMP                    (1 << 0)  /* Bit 0:  Generates an IN packet with data */
@@ -227,4 +257,3 @@
  ****************************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAM34_CHIP_SAM_UDP_H */
-
