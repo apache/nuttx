@@ -92,17 +92,25 @@ int sam_usbpullup(FAR struct usbdev_s *dev, bool enable)
 }
 
 /************************************************************************************
- * Name:  sam_usbsuspend
+ * Name:  sam_udp_suspend
  *
  * Description:
- *   Board logic must provide the sam_usbsuspend logic if the USBDEV driver is
+ *   Board logic must provide the sam_udp_suspend logic if the UDP driver is
  *   used.  This function is called whenever the USB enters or leaves suspend mode.
- *   This is an opportunity for the board logic to shutdown clocks, power, etc.
- *   while the USB is suspended.
+ *
+ *   When 'resume' is false, this function call provides an opportunity to perform
+ *   board-specific power-saving actions so that less power is consumed while the
+ *   USB is suspended.
+ *
+ *   Certain power-saving operations are performed by the UDP driver when it enters
+ *   suspend mode:  The USB device peripheral clocks are be switched off.  MCK and
+ *   UDPCK are switched off and the USB transceiver is disabled.
+ *
+ *   When 'resume' is true, normal clocking and operations must all be restored.
  *
  ************************************************************************************/
 
-void sam_usbsuspend(FAR struct usbdev_s *dev, bool resume)
+void sam_udp_suspend(FAR struct usbdev_s *dev, bool resume)
 {
   ulldbg("resume: %d\n", resume);
 }
