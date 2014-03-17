@@ -257,7 +257,7 @@ static inline void sam_pmcsetup(void)
   regval = (BOARD_PMC_USBS | BOARD_PMC_USBDIV);
   putreg32(regval, SAM_PMC_USB);
 
-  /* Set the UDP bit in the SCER1 register to enable the USB clock output */
+  /* Set the UDP bit in the SCER register to enable the USB clock output */
 
   regval  = getreg32(SAM_PMC_SCER);
   regval |= PMC_UDP;
