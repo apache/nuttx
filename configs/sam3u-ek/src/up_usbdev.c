@@ -63,35 +63,6 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: sam_usbinitialize
- *
- * Description:
- *   Called to setup USB-related GPIO pins for the SAM3U-EK board.
- *
- ************************************************************************************/
-
-void sam_usbinitialize(void)
-{
-}
-
-/************************************************************************************
- * Name:  sam_usbpullup
- *
- * Description:
- *   If USB is supported and the board supports a pullup via GPIO (for USB software
- *   connect and disconnect), then the board software must provide sam_pullup.
- *   See include/nuttx/usb/usbdev.h for additional description of this method.
- *   Alternatively, if no pull-up GPIO the following EXTERN can be redefined to be
- *   NULL.
- *
- ************************************************************************************/
-
-int sam_usbpullup(FAR struct usbdev_s *dev, bool enable)
-{
-  return 0;
-}
-
-/************************************************************************************
  * Name:  sam_usbsuspend
  *
  * Description:
@@ -106,4 +77,3 @@ void sam_usbsuspend(FAR struct usbdev_s *dev, bool resume)
 {
   ulldbg("resume: %d\n", resume);
 }
-
