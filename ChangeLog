@@ -7004,3 +7004,7 @@
 	  Jason Jiang (2014-3-15).
 
 7.2 2014-xx-xx Gregory Nutt <gnutt@nuttx.org>
+
+	* arch/arm/src/sam34/sam_udp.c and .h:  Add a USB full speed device
+	  driver (UDP) for the SAM4E (2014-3-17).
+

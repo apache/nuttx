@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/sam4e-ek/src/sam_usbdev.c
+ * arch/arm/src/sam34/sam_udphs.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,63 +33,33 @@
  *
  ************************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_SAM34_SAM_UDP_H
+#define __ARCH_ARM_SRC_SAM34_SAM_UDP_H
+
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <sys/types.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <debug.h>
-
 #include <nuttx/usb/usbdev.h>
-#include <nuttx/usb/usbdev_trace.h>
+#include <stdint.h>
 
-#include "up_arch.h"
-#include "sam4e-ek.h"
-
-/************************************************************************************
- * Definitions
- ************************************************************************************/
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
+#include "chip.h"
+#include "chip/sam_udp.h"
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
-/************************************************************************************
- * Name: sam_usbinitialize
- *
- * Description:
- *   Called to setup USB-related GPIO pins for the SAM4E-EK board.
- *
- ************************************************************************************/
+#ifndef __ASSEMBLY__
 
-void sam_usbinitialize(void)
-{
-}
-
-/************************************************************************************
- * Name:  sam_usbpullup
- *
- * Description:
- *   If USB is supported and the board supports a pullup via GPIO (for USB software
- *   connect and disconnect), then the board software must provide sam_pullup.
- *   See include/nuttx/usb/usbdev.h for additional description of this method.
- *   Alternatively, if no pull-up GPIO the following EXTERN can be redefined to be
- *   NULL.
- *
- ************************************************************************************/
-
-int sam_usbpullup(FAR struct usbdev_s *dev, bool enable)
-{
-  return 0;
-}
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
 
 /************************************************************************************
  * Name:  sam_udp_suspend
@@ -110,7 +80,13 @@ int sam_usbpullup(FAR struct usbdev_s *dev, bool enable)
  *
  ************************************************************************************/
 
-void sam_udp_suspend(FAR struct usbdev_s *dev, bool resume)
-{
-  ulldbg("resume: %d\n", resume);
+void sam_udp_suspend(FAR struct usbdev_s *dev, bool resume);
+
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_SAM34_SAM_UDP_H */
+

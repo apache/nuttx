@@ -179,6 +179,7 @@
  * Status, and UDP Interrupt Clear Registers.
  */
 
+#define UDP_INT_EP_MASK                     (0x000000ff)
 #define UDP_INT_EP(n)                       (1 << (n))
 #  define UDP_INT_EP0                       (1 << 0)  /* Bit 0:  Endpoint 0 Interrupt (Not ICR) */
 #  define UDP_INT_EP1                       (1 << 1)  /* Bit 1:  Endpoint 1 Interrupt (Not ICR) */
@@ -220,6 +221,7 @@
 #define UDPEP_CSR_TXPKTRDY                  (1 << 4)  /* Bit 4:  Transmit Packet Ready */
 #define UDPEP_CSR_FORCESTALL                (1 << 5)  /* Bit 5:  Force Stall */
 #define UDPEP_CSR_RXDATABK1                 (1 << 6)  /* Bit 6:  Receive Data Bank 1 */
+#define UDPEP_CSR_DIR_SHIFT                 (7)       /* Bit 7:  Transfer Direction */
 #define UDPEP_CSR_DIR                       (1 << 7)  /* Bit 7:  Transfer Direction */
 #define UDPEP_CSR_EPTYPE_SHIFT              (8)       /* Bit 8-10: Endpoint type */
 #define UDPEP_CSR_EPTYPE_MASK               (7 << UDPEP_CSR_EPTYPE_SHIFT)

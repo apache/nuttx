@@ -108,8 +108,8 @@
  * PMC USB register to provide the PLL clock.  So in order to use the USB
  * feature, the PLL output must be a multiple of 48MHz.
  *
- * PLLACK = 240MHz, USBDIV=5, USB_48M = 240 MHz / 5 = 48MHz
- * PLLACK = 192MHz, USBDIV=4, USB_48M = 192 MHz / 4 = 48MHz
+ * PLLACK = 240MHz, USBDIV=4, USB_48M = 240 MHz / (4 + 1) = 48MHz
+ * PLLACK = 192MHz, USBDIV=5, USB_48M = 192 MHz / (3 + 1) = 48MHz
  */
 
 #define BOARD_PMC_USBS            (0)
