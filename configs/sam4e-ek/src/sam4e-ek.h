@@ -394,16 +394,6 @@
 void weak_function sam_spiinitialize(void);
 
 /************************************************************************************
- * Name: sam_usbinitialize
- *
- * Description:
- *   Called to setup USB-related GPIO pins for the SAM4E-EK board.
- *
- ************************************************************************************/
-
-void weak_function sam_usbinitialize(void);
-
-/************************************************************************************
  * Name: sam_hsmci_initialize
  *
  * Description:
