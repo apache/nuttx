@@ -55,6 +55,13 @@ config ARCH_CHIP_TM4C123GH6ZRB
 	select ARCH_CHIP_TM4C
 	select ARCH_HAVE_FPU
 
+config ARCH_CHIP_TM4C123GH6PMI
+	bool "TM4C123GH6PMI"
+	depends on ARCH_CHIP_TIVA
+	select ARCH_CORTEXM4
+	select ARCH_CHIP_TM4C
+	select ARCH_HAVE_FPU
+
 endchoice
 
 # Chip families
