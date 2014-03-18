@@ -33,7 +33,7 @@ PIN SIGNAL(S)                                LanchPad Function
  20 PA3/SSIOFSS                              GPIO, J2 pin 9
  21 PA4/SSIORX                               GPIO, J2 pin 8
  22 PA5/SSIOTX                               GPIO, J1 pin 8
- 23 PA6/I2CLSCL                              GPIO, J1 pin 9 
+ 23 PA6/I2CLSCL                              GPIO, J1 pin 9
  24 PA7/I2CLSDA                              GPIO, J1 pin 10
 
  45 PB0/T2CCP0/U1Rx                          GPIO, J1 pin 3
@@ -102,7 +102,7 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
       git fetch http://openocd.zylin.com/openocd refs/changes/22/922/14 && git checkout FETCH_HEAD
       ./bootstrap
       ./configure --enable-maintainer-mode --enable-ti-icdi
-      make 
+      make
       sudo make install
 
     For additional help, see http://processors.wiki.ti.com/index.php/Tiva_Launchpad_with_OpenOCD_and_Linux
@@ -111,7 +111,7 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
 
     I have been using the on-board In-Circuit Debug Interface (ICDI) interface.
     OpenOCD requires a configuration file.  I keep the one I used last here:
-    
+
       configs/tm4c123g-launchpad/tools/tm4c123g-launchpad.cfg
 
     However, the "correct" configuration script to use with OpenOCD may
@@ -127,7 +127,7 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
     There is also a script on the tools/ directory that I use to start
     the OpenOCD daemon on my system called oocd.sh.  That script will
     probably require some modifications to work in another environment:
-  
+
     - Possibly the value of OPENOCD_PATH and TARGET_PATH
     - It assumes that the correct script to use is the one at
       configs/tm4c123g-launchpad/tools/tm4c123g-launchpad.cfg
@@ -142,7 +142,7 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
     The relative path to the oocd.sh script is configs/tm4c123g-launchpad/tools,
     but that should have been added to your PATH variable when you sourced
     the setenv.sh script.
-    
+
     Note that OpenOCD needs to be run with administrator privileges in
     some environments (sudo).
 
@@ -170,11 +170,11 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
        .config file).
     2. The MCU must be halted prior to loading code using 'mon reset'
        as described below.
- 
+
     OpenOCD will support several special 'monitor' commands.  These
     GDB commands will send comments to the OpenOCD monitor.  Here
     are a couple that you will need to use:
-  
+
      (gdb) monitor reset
      (gdb) monitor halt
 
@@ -261,7 +261,7 @@ IDEs
 
   NuttX is built using command-line make.  It can be used with an IDE, but some
   effort will be required to create the project.
-  
+
   Makefile Build
   --------------
   Under Eclipse, it is pretty easy to set up an "empty makefile project" and
@@ -356,7 +356,7 @@ NXFLAT Toolchain
   tools -- just the NXFLAT tools.  The buildroot with the NXFLAT tools can
   be downloaded from the NuttX SourceForge download site
   (https://sourceforge.net/projects/nuttx/files/).
- 
+
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
@@ -473,7 +473,7 @@ USB Device Controller Functions
 
   Debugging with JTAG/SWD
 
-    The FT2232 USB device performs JTAG/SWD serial operations under the control 
+    The FT2232 USB device performs JTAG/SWD serial operations under the control
     of the debugger or the Luminary Flash Programmer.  It also operate as an
     In-Circuit Debugger Interface (ICDI), allowing debugging of any external
     target board.  Debugging modes:
@@ -520,7 +520,7 @@ TM4C123G LaunchPad Configuration Options
     CONFIG_ARCH_CHIP_name - For use in C code to identify the exact
        chip:
 
-       CONFIG_ARCH_CHIP_TM4C123GH6ZRB
+       CONFIG_ARCH_CHIP_TM4C123GH6PMI
 
     CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
        hence, the board that supports the particular chip or SoC.
@@ -588,7 +588,7 @@ TM4C123G LaunchPad Configuration Options
     CONFIG_TIVA_DISABLE_GPION_IRQS=n
     CONFIG_TIVA_DISABLE_GPIOP_IRQS=n
     CONFIG_TIVA_DISABLE_GPIOQ_IRQS=n
- 
+
   TM4C123G specific device driver settings
 
     CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn for the
@@ -646,7 +646,7 @@ Where <subdir> is one of the following:
     builtin applications are selected.
 
     NOTES:
- 
+
     1. This configuration uses the mconf-based configuration tool.  To
        change this configuration using that tool, you should:
 

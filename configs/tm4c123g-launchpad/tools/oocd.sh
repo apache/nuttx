@@ -15,12 +15,12 @@ fi
 # the following to run directly from the build directory
 
 # OPENOCD_PATH="/home/OpenOCD/openocd/src"
-# OPENOCD_PATH="/usr/bin"
-OPENOCD_PATH="/usr/local/bin"
+OPENOCD_PATH="/usr/bin"
+# OPENOCD_PATH="/usr/local/bin"
 
 # TARGET_PATH="/home/OpenOCD/openocd/tcl"
-# TARGET_PATH="/usr/share/openocd/scripts"
-TARGET_PATH="/usr/local/share/openocd/scripts"
+TARGET_PATH="/usr/share/openocd/scripts"
+# TARGET_PATH="/usr/local/share/openocd/scripts"
 
 # Assume a Unix development environment.  Uncomment to use a Windows
 # like environment
