@@ -593,7 +593,7 @@ USB Full-Speed Device
   Basic USB Full-Speed Device Configuration
   -----------------------------------------
 
-  Support the USB high-speed device (UDPHS) driver can be enabled with these
+  Support the USB full-speed device (UDP) driver can be enabled with these
   NuttX configuration settings.
 
     Device Drivers -> USB Device Driver Support
@@ -611,7 +611,7 @@ USB Full-Speed Device
   ------------------
 
   The Mass Storage Class (MSC) class driver can be selected for use with
-  UDPHS.  Note: The following assumes that the internal AT24 Serial FLASH
+  UDP.  Note: The following assumes that the internal AT24 Serial FLASH
   is configured to support a FAT file system through an FTL layer as
   described about under "AT25 Serial FLASH".
 
@@ -689,7 +689,7 @@ USB Full-Speed Device
   There is normal console debug output available that can be enabled with
   CONFIG_DEBUG + CONFIG_DEBUG_USB.  However, USB device operation is very
   time critical and enabling this debug output WILL interfere with the
-  operation of the UDPHS.  USB device tracing is a less invasive way to get
+  operation of the UDP.  USB device tracing is a less invasive way to get
   debug information:  If tracing is enabled, the USB device will save
   encoded trace output in in-memory buffer; if the USB monitor is also
   enabled, that trace buffer will be periodically emptied and dumped to the
