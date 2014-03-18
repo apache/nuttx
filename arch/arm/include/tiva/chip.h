@@ -174,14 +174,32 @@
 #  define TIVA_NPORTS          15 /* Fifteen Ports (GPIOA-H, J-N, P-Q) */
 #  define TIVA_NCANCONTROLLER  2  /* Two CAN controllers */
 #  define TIVA_NUSBOTGFS       1  /* One USB 2.0 OTG FS */
+#elif defined(CONFIG_ARCH_CHIP_TM4C123GH6PMI)
+#  undef  LM3S                    /* Not LM3S family */
+#  undef  LM4F                    /* Not LM4F family */
+#  define TM4C                 1  /* TM4C family */
+#  define TIVA_NTIMERS         6  /* Six general purpose timers */
+#  define TIVA_NWIDETIMERS     6  /* Six general purpose wide timers */
+#  define TIVA_NWDT            2  /* Two watchdog timers */
+#  define TIVA_NETHCONTROLLERS 0  /* No Ethernet controller */
+#  define TIVA_NSSI            4  /* Four SSI module */
+#  define TIVA_NUARTS          8  /* Eight UART modules */
+#  define TIVA_NI2C            4  /* Four I2C modules */
+#  define TIVA_NADC            2  /* Two ADC modules */
+#  define TIVA_NPWM            2  /* Two PWM generator modules */
+#  define TIVA_NQEI            2  /* Two quadrature encoders */
+#  define TIVA_NPORTS          6  /* Six Ports (GPIOA-F) */
+#  define TIVA_NCANCONTROLLER  2  /* Two CAN controllers */
+#  define TIVA_NUSBOTGFS       1  /* One USB 2.0 OTG FS */
 #else
-#  error "Capabilities not specified for this Stellaris chip"
+#  error "Capabilities not specified for this TIVA/Stellaris chip"
 #endif
 
-/* The LM3S69xx only supports 8 priority levels.  The hardware priority mechanism
- * will only look at the upper N bits of the 8-bit priority level (where N is 3 for
- * the Stellaris family), so any prioritization must be performed in those bits.
- * The default priority level is set to the middle value
+/* The TIVA/Stellaris only supports 8 priority levels.  The hardware priority
+ * mechanism will only look at the upper N bits of the 8-bit priority level
+ * (where N is 3 for the Tiva/Stellaris family), so any prioritization must be
+ * performed in those bits.  The default priority level is set to the middle
+ * value
  */
 
 #define NVIC_SYSH_PRIORITY_MIN     0xe0 /* Bits [5:7] set in minimum priority */

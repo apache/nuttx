@@ -53,7 +53,7 @@
 
 /* External interrupts (vectors >= 16) */
 
-#define TIVA_IRQ_INTERRUPTS (16) /* Vector number of the first external interrupt */
+#define TIVA_IRQ_INTERRUPTS   (16) /* Vector number of the first external interrupt */
 #if defined(CONFIG_ARCH_CHIP_LM3S6918)
 
 #  define TIVA_IRQ_GPIOA      (16) /* Vector 16: GPIO Port A */
