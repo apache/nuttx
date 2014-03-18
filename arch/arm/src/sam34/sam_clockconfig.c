@@ -257,13 +257,16 @@ static inline void sam_pmcsetup(void)
   regval = (BOARD_PMC_USBS | BOARD_PMC_USBDIV);
   putreg32(regval, SAM_PMC_USB);
 
+#if 0 /* Done in the UDP driver */
   /* Set the UDP bit in the SCER register to enable the USB clock output */
 
   regval  = getreg32(SAM_PMC_SCER);
   regval |= PMC_UDP;
   putreg32(regval, SAM_PMC_SCER);
-#endif
-#endif
+
+#endif /* 0 */
+#endif /* SAM_PMC_CKGR_UCKR */
+#endif /* CONFIG_USBDEV */
 
   /* Switch to the fast clock and wait for MCKRDY */
 
