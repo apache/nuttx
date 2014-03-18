@@ -119,6 +119,7 @@ int nsh_archinitialize(void)
   if (ret != OK)
     {
       message("nsh_archinitialize: Start USB monitor: %d\n", ret);
+      return ret;
     }
 #endif
 

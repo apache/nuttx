@@ -57,6 +57,8 @@
 
 #define HAVE_HSMCI      1
 #define HAVE_AT25       1
+#define HAVE_USBDEV     1
+#define HAVE_USBMONITOR 1
 
 /* HSMCI */
 /* Can't support MMC/SD if the card interface is not enabled */
@@ -112,10 +114,24 @@
 #  undef CONFIG_SAM4EEK_AT25_NXFFS
 #endif
 
-/* Touchscreen controller (TSC) */
+/* USB Device */
+/* CONFIG_SAM34_UDP and CONFIG_USBDEV must be defined, or there is no USB
+ * device.
+ */
 
-#define CONFIG_TSC_ADS7843    1   /* ADS7843 present on board */
-#define CONFIG_TSC_SPI        0   /* On SPI0 */
+#if !defined(CONFIG_SAM34_UDP) || !defined(CONFIG_USBDEV)
+#  undef HAVE_USBDEV
+#endif
+
+/* Check if we should enable the USB monitor before starting NSH */
+
+#ifndef HAVE_USBDEV
+#  undef CONFIG_USBDEV_TRACE
+#endif
+
+#if !defined(CONFIG_SYSTEM_USBMONITOR) && !defined(CONFIG_USBDEV_TRACE)
+#  undef HAVE_USBMONITOR
+#endif
 
 /* External Memory Usage ************************************************************/
 /* LCD on CS2 */
