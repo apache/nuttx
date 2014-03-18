@@ -2079,7 +2079,7 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
 #ifdef CONFIG_USBDEV_ISOCHRONOUS
       uint32_t eptype;
 #endif
- 
+
       usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_STALLSNT), (uint16_t)csr);
 
       /* Acknowledge the interrupt */
@@ -2129,7 +2129,11 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
 
       sam_ep0_read((uint8_t *)&priv->ctrl, USB_SIZEOF_CTRLREQ);
 
-      /* Acknowledge SETUP packet */
+      /* Clear the RXSETUP indication. RXSETUP cannot be cleared before the
+       * SETUP packet has been read in from the FIFO.  Otherwise, the USB
+       * device would accept the next Data OUT transfer and overwrite the
+       * SETUP packet in the FIFO.
+       */
 
       sam_csr_clrbits(epno, UDPEP_CSR_RXSETUP);
 
@@ -2155,14 +2159,6 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
           privep->epstate = UDP_EPSTATE_IDLE;
           sam_ep0_setup(priv);
         }
-
-      /* Clear the RXSETUP indication. RXSETUP cannot be cleared before the
-       * SETUP packet has been read in the FIFO.  Otherwise, the USB device
-       * would accept the next Data OUT transfer and overwrite the SETUP
-       * packet in the FIFO. 
-       */
-
-      sam_csr_clrbits(epno, UDPEP_CSR_RXSETUP);
     }
 }
 
@@ -2330,7 +2326,7 @@ static int sam_udp_interrupt(int irq, void *context)
  *
  * Description:
  *   Sets the specified bit(s) in the UDPEP_CSR register.
- *   
+ *
  ****************************************************************************/
 
 static void sam_csr_setbits(uint8_t epno, uint32_t setbits)
@@ -2360,7 +2356,7 @@ static void sam_csr_setbits(uint8_t epno, uint32_t setbits)
  *
  * Description:
  *   Clears the specified bit(s) in the UDPEP_CSR register.
- *   
+ *
  ****************************************************************************/
 
 static void sam_csr_clrbits(uint8_t epno, uint32_t clrbits)
@@ -3355,7 +3351,7 @@ static int sam_wakeup(struct usbdev_s *dev)
   regval |= UDP_GLBSTAT_RMWUPE; /* Should already be set */
   regval &= ~UDP_GLBSTAT_ESR;
   sam_putreg(regval, SAM_UDP_GLBSTAT);
-  
+
   /* Wait 5msec in case we just entered the resume state */
 
   usleep(5*1000);
