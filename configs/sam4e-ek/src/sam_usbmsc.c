@@ -45,10 +45,7 @@
 #include <debug.h>
 #include <errno.h>
 
-#include <nuttx/sdio.h>
-#include <nuttx/mmcsd.h>
-
-#include "sam_hsmci.h"
+#include "sam4e-ek.h"
 
 #ifdef CONFIG_SAM34_UDP
 
