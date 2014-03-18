@@ -715,7 +715,7 @@
     </p>
     <p>
       The included <code>tools/Config.mk</code> file contains additional definitions that may
-      be overriden in the architecture-specific Make.defs file as necessary:
+      be overridden in the architecture-specific Make.defs file as necessary:
     </p>
     <ul>
       <li><code>COMPILE</code>, <code>ASSEMBLE</code>, <code>ARCHIVE</code>, <code>CLEAN</code>, and <code>MKDEP</code> macros</li>
@@ -774,7 +774,7 @@
   </li>
 
   <li><code>configs/demo9s12ne64</code>:
-    Feescale DMO9S12NE64 board based on the MC9S12NE64 hcs12 cpu.  This
+    Freescale DMO9S12NE64 board based on the MC9S12NE64 hcs12 cpu.  This
     port uses the m9s12x GCC toolchain.  STATUS:  (Still) under development; it
     is code complete but has not yet been verified.
   </li>
@@ -899,7 +899,7 @@
 
   <li><code>configs/qemu-i486</code>:
     Port of NuttX to QEMU in i486 mode.  This port will also run on real i486
-    hardwared (Google the Bifferboard).
+    hardware (Google the Bifferboard).
   </li>
 
   <li><code>configs/rgmp</code>:
@@ -1073,7 +1073,7 @@ source "configs/myboard/Kconfig"
 endif
 </pre></ul>
 <p>
-  This includes additional, board-specific configuration variabled defintion in <code>configs/myboard/Kconfig</code>.
+  This includes additional, board-specific configuration variable definitions in <code>configs/myboard/Kconfig</code>.
 </p>
 
 <h2>2.5 <a name="DirStructDrivers">nuttx/drivers</a></h2>
@@ -1454,7 +1454,7 @@ netutils/
   This sub-directory name corresponds to one of the supported boards
   identified <a href="#supportedboards">above</a>.
   &lt;config-dir&gt; is the optional, specific configuration directory for the board.
-  And &lt;app-dir&gt; is the location of the optonal application directory.
+  And &lt;app-dir&gt; is the location of the optional application directory.
 </p>
 <p>
   <b>Automated Configuration</b>.
@@ -1467,7 +1467,7 @@ netutils/
 </pre></ul>
 
 <p>
-  There is an alternative Windows batch file, <code>configure.bat</code>,  that can be used insteach of <code>configure.sh</code> in the windows native enironment like:
+  There is an alternative Windows batch file, <code>configure.bat</code>,  that can be used instead of <code>configure.sh</code> in the windows native environment like:
 </p>
 <ul><pre>
   cd tools
@@ -1478,7 +1478,7 @@ netutils/
 </p>
 
 <p>
-  If your application directory is not in the standard loction (<code>../apps</code> or <code>../apps-&lt;version&gt</code>),
+  If your application directory is not in the standard location (<code>../apps</code> or <code>../apps-&lt;version&gt</code>),
   then you should also specify the location of the application directory on the command line like:
 </p>
 <ul><pre>
@@ -2242,12 +2242,12 @@ else
      is down, and (2) A full date / time RTC the provides the date and time information, often in BCD format.
      If <code>CONFIG_RTC_DATETIME</code> is selected, it specifies this second kind of RTC.
      In this case, the RTC is used to &quot;seed&quot;" the normal NuttX timer and the NuttX system timer
-     provides for higher resoution time.
+     provides for higher resolution time.
   <dt><code>CONFIG_RTC_HIRES</code>
   <dd>If <code>CONFIG_RTC_DATETIME</code> not selected, then the simple, battery backed counter is used.
       There are two different implementations of such simple counters based on the time resolution of the counter:
       The typical RTC keeps time to resolution of 1 second, usually supporting a 32-bit <code>time_t</code> value.
-      In this case, the RTC is used to &quot;seed&quot; the normal NuttX timer and the NuttX timer provides for higher resoution time.
+      In this case, the RTC is used to &quot;seed&quot; the normal NuttX timer and the NuttX timer provides for higher resolution time.
       If <code>CONFIG_RTC_HIRES</code> is enabled in the NuttX configuration, then the RTC provides higher resolution time and completely replaces the system timer for purpose of date and time.
   <dt><code>CONFIG_RTC_FREQUENCY</code>
   <dd>If <code>CONFIG_RTC_HIRES</code> is defined, then the frequency of the high resolution RTC must be provided.
@@ -2267,12 +2267,12 @@ else
   <li><code>up_rtc_time()</code>.
     Get the current time in seconds.  This is similar to the standard <code>time()</code> function.
     This interface is only required if the low-resolution RTC/counter hardware implementation selected.
-    It is only used by the RTOS during initializeation to set up the system time when <code>CONFIG_RTC</code> is set
+    It is only used by the RTOS during initialization to set up the system time when <code>CONFIG_RTC</code> is set
     but neither <code>CONFIG_RTC_HIRES</code> nor <code>CONFIG_RTC_DATETIME</code> are set.
   </li>
   <li><code>up_rtc_gettime()</code>.
     Get the current time from the high resolution RTC clock/counter.
-    This interface is only supported by the hight-resolution RTC/counter hardware implementation.
+    This interface is only supported by the high-resolution RTC/counter hardware implementation.
     It is used to replace the system timer (<code>g_system_tick</code>).
   </li>
   <li><code>up_rtc_settime()</code>.
@@ -2297,8 +2297,8 @@ else
 <p>
   If hardware RTC is present (<code>CONFIG_RTC</code>) and and high-resolution timing
   is enabled (<code>CONFIG_RTC_HIRES</code>), then after successful
-  initiliazation variables are overriden by calls to <code>up_rtc_gettime()</code> which is
-  running continously even in power-down modes.
+  initialization variables are overridden by calls to <code>up_rtc_gettime()</code> which is
+  running continuously even in power-down modes.
 </p>
 <p>
   In the case of <code>CONFIG_RTC_HIRES</code> is set the <code>g_system_timer</code>
@@ -2311,7 +2311,7 @@ else
 
 <p>
   CPUs that support memory management units (MMUs) may provide <i>address environments</i> within which tasks and their child threads execute.
-  The configuration indicates the CPUs ability to support address environments by setting the configuration varabile <code>CONFIG_ADDRENV=y</code>.
+  The configuration indicates the CPUs ability to support address environments by setting the configuration variable <code>CONFIG_ADDRENV=y</code>.
   These address environments are created only when tasks are created via <code>exec()</code> or <code>exec_module()</code> (see <code>include/nuttx/binfmt/binfmt.h</code>).
 </p>
 <p>
@@ -2448,7 +2448,7 @@ else
 </ul>
 <p><b>Description</b>:</p>
 <ul>
-  After an address environment has been temporarilty instantiated by <code>up_addrenv_select</code>,
+  After an address environment has been temporarily instantiated by <code>up_addrenv_select</code>,
   this function may be called to to restore the original address environment.
 </ul>
 <p><b>Input Parameters</b>:</p>
@@ -2504,7 +2504,7 @@ else
 </ul>
 <p><b>Description</b>:</p>
 <ul>
-  This function is called from the core scheduler logic when a thread is created that needs to share the address ennvironment of its parent task.
+  This function is called from the core scheduler logic when a thread is created that needs to share the address environment of its parent task.
   In this case, the parent's address environment needs to be &quot;cloned&quot; for the child thread.
 </ul>
 <p><b>Input Parameters</b>:</p>
@@ -2525,7 +2525,7 @@ else
 <p><b>Description</b>:</p>
 <ul>
   This function is called when a task or thread exits in order to release its reference to an address environment.
-  When there are no furtherreferences to an address environment, that address environment should
+  When there are no further references to an address environment, that address environment should
   be destroyed.
 </ul>
 <p><b>Input Parameters</b>:</p>
@@ -2577,9 +2577,9 @@ else
 
 <p>
   The NuttX On-Demand Paging feature permits embedded MCUs with some limited RAM space to execute large programs from some non-random access media.
-  If the platform meets certiain requirements, then NuttX can provide on-demand paging:
+  If the platform meets certain requirements, then NuttX can provide on-demand paging:
   It can copy .text from the large program in non-volatile media into RAM as needed to execute a huge program from the small RAM.
-  Design and porting issues for this feature are discussed in a sepate document.
+  Design and porting issues for this feature are discussed in a separate document.
   Please see the <a href="NuttXDemandPaging.html">NuttX Demand Paging</a> design document for further information.
 </p>
 
@@ -3157,7 +3157,7 @@ void board_led_off(int led);
     <p>
       <b><code>include/nuttx/lcd/lcd.h</code></b>.
       Structures and APIs needed to work with LCD drivers are provided in this header file.
-      This header file also depends on some of the same definitions used for the frame buffer driver as privided in <code>include/nuttx/video/fb.h</code>.
+      This header file also depends on some of the same definitions used for the frame buffer driver as provided in <code>include/nuttx/video/fb.h</code>.
     </p>
   </li>
   <li>
@@ -3305,7 +3305,7 @@ void board_led_off(int led);
       <li><code>MTDIOC_BULKERASE</code>: Erase the entire device</li>
     </ul>
     <p>
-      is provided via a sinble <code>ioctl</code> method (see <code>include/nuttx/fs/ioctl.h</code>):
+      is provided via a single <code>ioctl</code> method (see <code>include/nuttx/fs/ioctl.h</code>):
     </p>
     <ul>
      <p><code>int (*ioctl)(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);</code></p>
@@ -3345,7 +3345,7 @@ void board_led_off(int led);
   <li>
     <p>
       <b><code>struct sdio_dev_s</code></b>.
-      Each SDIOI device driver must implement an instance of <code>struct sdio_dev_s</code>.
+      Each SDIO device driver must implement an instance of <code>struct sdio_dev_s</code>.
       That structure defines a call table with the following methods:
     </p>
     <p>
@@ -3439,7 +3439,7 @@ void board_led_off(int led);
       <b><code>struct usbhost_driver_s</code> and <code>struct usbhost_connection_s</code></b>.
       Each USB host controller driver must implement an instance of <code>struct usbhost_driver_s</code> and <code>struct usbhost_connection_s</code>:
       <code>struct usbhost_driver_s</code> provides the interface between the USB host driver and the USB class driver;
-      <code>struct usbhost_connection_s</code> provides the interface between the USB host driver and platform-specific connection management and device enumeration logoc.
+      <code>struct usbhost_connection_s</code> provides the interface between the USB host driver and platform-specific connection management and device enumeration logic.
       These structures are defined in <code>include/nuttx/usb/usbhost.h</code>.
     </p>
     <p>
@@ -3466,7 +3466,7 @@ void board_led_off(int led);
       <b>USB Host Class Driver Registry</b>.
       The NuttX USB host infrastructure includes a <i>registry</i>.
       During its initialization, each USB host class driver must call the interface, <code>usbhost_registerclass()</code>
-      in order add its interface to the registery.
+      in order add its interface to the registry.
       Later, when a USB device is connected, the USB host controller will look up the USB host class driver that is needed to support the connected device in this registry.
     </p>
     <p>
@@ -3521,7 +3521,7 @@ void board_led_off(int led);
       <ol>
         <li>
           <p>
-            Each USB host class driver includes an initializeation entry point that is called from the
+            Each USB host class driver includes an initialization entry point that is called from the
             application at initialization time.
             This driver calls <code>usbhost_registerclass()</code> during this initialization in order to makes itself available in the event the device that it supports is connected.
           </p>
@@ -3609,7 +3609,7 @@ void board_led_off(int led);
       <ol>
         <li>
           <p>
-            Each USB device class driver includes an initializeation entry point that is called from the
+            Each USB device class driver includes an initialization entry point that is called from the
             application at initialization time.
           </p>
           <p>
@@ -3632,14 +3632,14 @@ void board_led_off(int led);
 
 <h3><a name="analogdrivers">6.3.11 Analog (ADC/DAC) Drivers</a></h3>
 <p>
-  The NuttX PWM driver is split into two parts:
+  The NuttX analog drivers are split into two parts:
 </p>
 <ol>
   <li>
-    An &quot;upper half&quot;, generic driver that provides the comman PWM interface to application level code, and
+    An &quot;upper half&quot;, generic driver that provides the common analog interface to application level code, and
   </li>
   <li>
-    A &quot;lower half&quot;, platform-specific driver that implements the low-level timer controls to implement the PWM functionality.
+    A &quot;lower half&quot;, platform-specific driver that implements the low-level controls to implement the analog functionality.
   </li>
 </ol>
 <ul>
@@ -3716,7 +3716,7 @@ void board_led_off(int led);
 </p>
 <ol>
   <li>
-    An &quot;upper half&quot;, generic driver that provides the comman PWM interface to application level code, and
+    An &quot;upper half&quot;, generic driver that provides the common PWM interface to application level code, and
   </li>
   <li>
     A &quot;lower half&quot;, platform-specific driver that implements the low-level timer controls to implement the PWM functionality.
@@ -3749,7 +3749,7 @@ void board_led_off(int led);
 </p>
 <ol>
   <li>
-    An &quot;upper half&quot;, generic driver that provides the comman CAN interface to application level code, and
+    An &quot;upper half&quot;, generic driver that provides the common CAN interface to application level code, and
   </li>
   <li>
     A &quot;lower half&quot;, platform-specific driver that implements the low-level timer controls to implement the CAN functionality.
@@ -3778,7 +3778,7 @@ void board_led_off(int led);
 </p>
 <ol>
   <li>
-    An &quot;upper half&quot;, generic driver that provides the comman Quadrature Encoder interface to application level code, and
+    An &quot;upper half&quot;, generic driver that provides the common Quadrature Encoder interface to application level code, and
   </li>
   <li>
     A &quot;lower half&quot;, platform-specific driver that implements the low-level timer controls to implement the Quadrature Encoder functionality.
@@ -3807,7 +3807,7 @@ void board_led_off(int led);
 </p>
 <ol>
   <li>
-    An &quot;upper half&quot;, generic driver that provides the comman watchdog timer interface to application level code, and
+    An &quot;upper half&quot;, generic driver that provides the common watchdog timer interface to application level code, and
   </li>
   <li>
     A &quot;lower half&quot;, platform-specific driver that implements the low-level timer controls to implement the watchdog timer functionality.
@@ -3839,7 +3839,7 @@ void board_led_off(int led);
 <p>
   <b>Special Commands</b>.
   In NuttX, a keyboard/keypad driver is simply a character driver that may have an (optional) encoding/decoding layer on the data returned by the character driver.
-  A keyboard may return simple text data (alphabetic, numeric, and punctuaction) or control characters (enter,  control-C, etc.) when a key is pressed.
+  A keyboard may return simple text data (alphabetic, numeric, and punctuation) or control characters (enter,  control-C, etc.) when a key is pressed.
   We can think about this the &quot;normal&quot; keyboard data stream.
   However, in addition, most keyboards support actions that cannot be represented as text or control data.
   Such actions include things like cursor controls (home, up arrow, page down, etc.), editing functions (insert, delete, etc.), volume controls, (mute, volume up, etc.) and other special functions.
@@ -3878,7 +3878,7 @@ void kbd_press(int ch, FAR struct lib_outstream_s *stream);
           Indicates a normal key press event.
           Put one byte of normal keyboard  data into the output stream.
         </ul>
-        <p><b>Input Pameters:</b></p>
+        <p><b>Input Parameters:</b></p>
         <ul>
           <li>
             <code>ch</code>:  The character to be added to the output stream.
@@ -3906,10 +3906,10 @@ void kbd_release(uint8_t ch, FAR struct lib_outstream_s *stream);
         <ul>
           Encode the release of a normal key.
         </ul>
-        <p><b>Input Pameters:</b></p>
+        <p><b>Input Parameters:</b></p>
         <ul>
           <li>
-            <code>ch</code>:  The character associated with the key that was releared.
+            <code>ch</code>:  The character associated with the key that was released.
           </li>
           <li>
             <code>stream</code>:  An instance of <code>lib_outstream_s</code> to perform the actual low-level put operation.
@@ -3935,7 +3935,7 @@ void kbd_specpress(enum kbd_keycode_e keycode, FAR struct lib_outstream_s *strea
            Denotes a special key press event.
            Put one special keyboard command into the output stream.
          </ul>
-        <p><b>Input Pameters:</b></p>
+        <p><b>Input Parameters:</b></p>
         <ul>
           <li>
             <code>keycode</code>:  The command to be added to the output stream.
@@ -3965,7 +3965,7 @@ void kbd_specrel(enum kbd_keycode_e keycode, FAR struct lib_outstream_s *stream)
            Denotes a special key release event.
            Put one special keyboard command into the output stream.
          </ul>
-        <p><b>Input Pameters:</b></p>
+        <p><b>Input Parameters:</b></p>
         <ul>
           <li>
             <code>keycode</code>:  The command to be added to the output stream.
@@ -4002,7 +4002,7 @@ int kbd_decode(FAR struct lib_instream_s *stream, FAR struct kbd_getstate_s *sta
         <ul>
            Get one byte of data or special command from the driver provided input buffer.
         </ul>
-        <p><b>Input Pameters:</b></p>
+        <p><b>Input Parameters:</b></p>
         <ul>
           <li>
             <code>stream</code>:  An instance of <code>lib_instream_s</code> to perform the actual low-level get operation.
@@ -4059,7 +4059,7 @@ int kbd_decode(FAR struct lib_instream_s *stream, FAR struct kbd_getstate_s *sta
 
 <h3><a name="pmoverview">6.4.1 Overview</a></h3>
 <p>
-  NuttX supports a simple power managment (PM) sub-system.  This sub-system:
+  NuttX supports a simple power management (PM) sub-system.  This sub-system:
 </p>
 <ul>
   <li>
@@ -4144,7 +4144,7 @@ void pm_initialize(void);
 </pre></ul>
 <p><b>Description:</b>
 This function is called by MCU-specific one-time at power on reset in order to initialize the power management capabilities.
-This function must be called <i>very</i> early in the initializeation sequence <i>before</i> any other device drivers are initialize (since they may attempt to register with the power management subsystem).
+This function must be called <i>very</i> early in the initialization sequence <i>before</i> any other device drivers are initialize (since they may attempt to register with the power management subsystem).
 </p>
 <p><b>Input Parameters:</b>
 None
@@ -4170,7 +4170,7 @@ int pm_register(FAR struct pm_callback_s *callbacks);
  </dl>
 </p>
 <p><b>Returned Value:</b>
-Zero (<code>OK</code>) on success; otherwise a negater <code>errno</code> value is returned.
+Zero (<code>OK</code>) on success; otherwise a negated <code>errno</code> value is returned.
 </p>
 
 <h4><a name="pmactivity">6.4.2.3 <code>pm_activity()</code></a></h4>
@@ -4181,7 +4181,7 @@ void pm_activity(int priority);
 </pre></ul>
 <p><b>Description:</b>
  This function is called by a device driver to indicate that it is performing meaningful activities (non-idle).
- This increment an activty count and/or will restart a idle timer and prevent entering reduced power states.
+ This increment an activity count and/or will restart a idle timer and prevent entering reduced power states.
 </p>
 <p><b>Input Parameters:</b>
  <dl>
@@ -4277,7 +4277,7 @@ int (*prepare)(FAR struct pm_callback_s *cb, enum pm_state_e pmstate);
  <dl>
    <dt><code>cb</code>
    <dd>Returned to the driver.
-   The driver version of the callback strucure may include additional, driver-specific state data at the end of the structure.
+   The driver version of the callback structure may include additional, driver-specific state data at the end of the structure.
    <dt><code>pmstate</code>
    <dd>Identifies the new PM state
  </dl>
@@ -4304,7 +4304,7 @@ void (*notify)(FAR struct pm_callback_s *cb, enum pm_state_e pmstate);
  <dl>
    <dt><code>cb</code>
    <dd>Returned to the driver.
-   The driver version of the callback strucure may include additional, driver-specific state data at the end of the structure.
+   The driver version of the callback structure may include additional, driver-specific state data at the end of the structure.
    <dt><code>pmstate</code>
    <dd>Identifies the new PM state
  </dl>
