@@ -297,7 +297,6 @@ struct sam_ep_s
   struct sam_usbdev_s *dev;          /* Reference to private driver data */
   struct sam_rqhead_s  reqq;         /* Read/write request queue */
   volatile uint8_t     epstate;      /* State of the endpoint (see enum sam_epstate_e) */
-  volatile uint8_t     bank;         /* Current reception bank (0 or 1) */
   uint8_t              stalled:1;    /* true: Endpoint is stalled */
   uint8_t              halted:1;     /* true: Endpoint feature halted */
   uint8_t              zlpneeded:1;  /* Zero length packet needed at end of transfer */
@@ -1448,7 +1447,7 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
 
   /* Assume NOT stalled; no TX in progress */
 
-  ep0->stalled  = 0;
+  ep0->stalled  = false;
   ep0->epstate  = UDP_EPSTATE_IDLE;
 
   /* And extract the little-endian 16-bit values to host order */
@@ -1590,7 +1589,7 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
                 value.w == USB_FEATURE_ENDPOINTHALT && len.w == 0)
               {
                 privep         = &priv->eplist[epno];
-                privep->halted = 0;
+                privep->halted = false;
 
                 ret = sam_ep_stall(&privep->ep, true);
                 if (ret < 0)
@@ -1639,7 +1638,7 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
                 value.w == USB_FEATURE_ENDPOINTHALT && len.w == 0)
               {
                 privep         = &priv->eplist[epno];
-                privep->halted = 1;
+                privep->halted = true;
 
                 ret = sam_ep_stall(&privep->ep, false);
                 if (ret < 0)
@@ -2484,9 +2483,10 @@ static void sam_ep_reset(struct sam_usbdev_s *priv, uint8_t epno)
 
   sam_req_cancel(privep, -ESHUTDOWN);
 
-  /* Reset endpoint */
+  /* Reset the endpoint FIFO */
 
   sam_putreg(UDP_RSTEP(epno), SAM_UDP_RSTEP);
+  sam_putreg(0, SAM_UDP_RSTEP);
 
   /* Reset endpoint status */
 
@@ -2543,7 +2543,7 @@ sam_ep_reserve(struct sam_usbdev_s *priv, uint8_t epset)
   irqstate_t flags;
   int epndx = 0;
 
-  flags = irqsave();
+  flags  = irqsave();
   epset &= priv->epavail;
   if (epset)
     {
@@ -2654,17 +2654,14 @@ static int sam_ep_configure_internal(struct sam_ep_s *privep,
   csr = SAM_UDPEP_CSR(epno);
   sam_putreg(0, csr);
 
-  /* Reset Endpoint FIFOS */
+  /* Reset the endpoint FIFO */
 
   sam_putreg(UDP_RSTEP(epno), SAM_UDP_RSTEP);
+  sam_putreg(0, SAM_UDP_RSTEP);
 
   /* Disable endpoint interrupts now */
 
   sam_putreg(UDP_INT_EP(epno), SAM_UDP_IDR);
-
-  /* Wait for the endpoint to come out of reset */
-
-  while ((sam_getreg(SAM_UDP_RSTEP) & UDP_RSTEP(epno)) != 0);
 
   /* Configure and enable the endpoint */
 
@@ -3100,9 +3097,10 @@ static int sam_ep_stall(struct usbdev_ep_s *ep, bool resume)
 
           sam_csr_clrbits(epno, UDPEP_CSR_DTGLE | UDPEP_CSR_FORCESTALL);
 
-          /* Reset endpoint FIFOs */
+          /* Reset the endpoint FIFO */
 
           sam_putreg(UDP_RSTEP(epno), SAM_UDP_RSTEP);
+          sam_putreg(0, SAM_UDP_RSTEP);
 
           /* Resuming any blocked data transfers on the endpoint */
 
