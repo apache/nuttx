@@ -86,7 +86,7 @@
 #define SAM_UDP_ISR_OFFSET                  0x001c /* UDP Interrupt Status Register */
 #define SAM_UDP_ICR_OFFSET                  0x0020 /* UDP Interrupt Clear Register */
                                                    /* 0x0024: Reserved */
-#define SAM_UDP_RSTEP_OFFSET                0x001c /* UDP Reset Endpoint Register */
+#define SAM_UDP_RSTEP_OFFSET                0x0028 /* UDP Reset Endpoint Register */
                                                    /* 0x002c: Reserved */
 /* Endpoint registers */
 

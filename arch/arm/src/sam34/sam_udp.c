@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/sam34/sam_udphs.c
+ * arch/arm/src/sam34/sam_udp.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.orgr>
@@ -101,7 +101,7 @@
 /* Endpoint definitions (Assuming 8 endpoints) */
 
 #define EP0                 (0)
-#define SAM_EPSET_ALL       (0xff)   /* All endpoints */
+#define SAM_EPSET_ALL       (0xff)    /* All endpoints */
 #define SAM_EPSET_NOTEP0    (0xfe)    /* All endpoints except EP0 */
 #define SAM_EP_BIT(ep)      (1 << (ep))
 #define SAM_EP0_MAXPACKET   (64)      /* EP0 Max. packet size */
@@ -399,7 +399,7 @@ static void   sam_ep0_setup(struct sam_usbdev_s *priv);
 static void   sam_ep_bankinterrupt(struct sam_usbdev_s *priv,
                 struct sam_ep_s *privep, uint32_t csr, int bank);
 static void   sam_ep_interrupt(struct sam_usbdev_s *priv, int epno);
-static int    sam_udphs_interrupt(int irq, void *context);
+static int    sam_udp_interrupt(int irq, void *context);
 
 /* Endpoint helpers *********************************************************/
 
@@ -739,14 +739,14 @@ static void sam_dumpep(struct sam_usbdev_s *priv, uint8_t epno)
   /* Global Registers */
 
   lldbg("Global Registers:\n");
-  lldbg(" FRMNUM:    %04x\n", sam_getreg(SAM_UDP_FRMNUM));
-  lldbg("GLBSTAT:    %04x\n", sam_getreg(SAM_UDP_GLBSTAT));
-  lldbg("  FADDR:    %04x\n", sam_getreg(SAM_UDP_FADDR));
-  lldbg("    IMR:    %04x\n", sam_getreg(SAM_UDP_IMR));
-  lldbg("    ISR:    %04x\n", sam_getreg(SAM_UDP_ISR));
-  lldbg("  RSTEP:    %04x\n", sam_getreg(SAM_UDP_RSTEP));
-  lldbg("   TXVC:    %04x\n", sam_getreg(SAM_UDP_TXVC));
-  lldbg(" CSR[%d]:    %04x\n", epno, sam_getreg(SAM_UDPEP_CSR(epno)));
+  lldbg(" FRMNUM:    %08x\n", sam_getreg(SAM_UDP_FRMNUM));
+  lldbg("GLBSTAT:    %08x\n", sam_getreg(SAM_UDP_GLBSTAT));
+  lldbg("  FADDR:    %08x\n", sam_getreg(SAM_UDP_FADDR));
+  lldbg("    IMR:    %08x\n", sam_getreg(SAM_UDP_IMR));
+  lldbg("    ISR:    %08x\n", sam_getreg(SAM_UDP_ISR));
+  lldbg("  RSTEP:    %08x\n", sam_getreg(SAM_UDP_RSTEP));
+  lldbg("   TXVC:    %08x\n", sam_getreg(SAM_UDP_TXVC));
+  lldbg(" CSR[%d]:    %08x\n", epno, sam_getreg(SAM_UDPEP_CSR(epno)));
 }
 #endif
 
@@ -2177,14 +2177,14 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
 }
 
 /****************************************************************************
- * Name: sam_udphs_interrupt
+ * Name: sam_udp_interrupt
  *
  * Description:
  *   Handle the UDP interrupt
  *
  ****************************************************************************/
 
-static int sam_udphs_interrupt(int irq, void *context)
+static int sam_udp_interrupt(int irq, void *context)
 {
   /* For now there is only one USB controller, but we will always refer to
    * it using a pointer to make any future ports to multiple UDP controllers
@@ -2217,12 +2217,13 @@ static int sam_udphs_interrupt(int irq, void *context)
 
       if ((pending == UDP_INT_RXSUSP) != 0)
         {
-          usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_DETSUSPD), (uint16_t)pending);
+          usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_DETSUSPD),
+                  (uint16_t)pending);
 
           /* Enable wakeup interrupts */
 
           sam_putreg(UDP_INT_RXSUSP, SAM_UDP_IDR);
-          sam_putreg(UDP_INT_WAKEUP, SAM_UDP_IER);
+          sam_putreg(UDP_INT_WAKEUP | UDP_INT_RXRSM, SAM_UDP_IER);
 
           /* Acknowledge interrupt */
 
@@ -2246,24 +2247,27 @@ static int sam_udphs_interrupt(int irq, void *context)
         {
           /* Acknowledge interrupt */
 
-          usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_INTSOF), (uint16_t)pending);
+          usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_INTSOF),
+                  (uint16_t)pending);
           sam_putreg(UDP_INT_SOF, SAM_UDP_ICR);
         }
 
       /* Resume */
 
-      else if ((pending & UDP_INT_WAKEUP) != 0)
+      else if ((pending & UDP_INT_WAKEUP | UDP_INT_RXRSM) != 0)
         {
-          usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_WAKEUP), (uint16_t)pending);
+          usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_WAKEUP),
+                  (uint16_t)pending);
           sam_resume(priv);
 
           /* Acknowledge interrupt */
 
-          sam_putreg(UDP_INT_WAKEUP | UDP_INT_RXSUSP, SAM_UDP_ICR);
+          sam_putreg(UDP_INT_WAKEUP | UDP_INT_RXRSM | UDP_INT_RXSUSP,
+                     SAM_UDP_ICR);
 
           /* Enable suspend interrupts */
 
-          sam_putreg(UDP_INT_WAKEUP, SAM_UDP_IDR);
+          sam_putreg(UDP_INT_WAKEUP | UDP_INT_RXRSM, SAM_UDP_IDR);
           sam_putreg(UDP_INT_RXSUSP, SAM_UDP_IER);
         }
 
@@ -2294,7 +2298,8 @@ static int sam_udphs_interrupt(int irq, void *context)
 
       if ((pending & UDP_ISR_ENDBUSRES) != 0)
         {
-          usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_ENDRESET), (uint16_t)pending);
+          usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_ENDRESET),
+                  (uint16_t)pending);
 
           /* Handle the reset */
 
@@ -2472,7 +2477,7 @@ static void sam_resume(struct sam_usbdev_s *priv)
  * Name: sam_ep_reset
  *
  * Description
- *   Reset and disable a set of endpoints.
+ *   Reset and disable one endpoints.
  *
  ****************************************************************************/
 
@@ -2504,10 +2509,6 @@ static void sam_ep_reset(struct sam_usbdev_s *priv, uint8_t epno)
   privep->halted    = false;
   privep->zlpneeded = false;
   privep->zlpsent   = false;
-
-  /* Re-enable endpoint interrupt */
-
-  sam_putreg(UDP_INT_EP(epno), SAM_UDP_IER);
 }
 
 /****************************************************************************
@@ -2533,7 +2534,7 @@ static void sam_epset_reset(struct sam_usbdev_s *priv, uint16_t epset)
 
       if ((epset & bit) != 0)
         {
-           /* Yes.. reset it */
+           /* Yes.. reset and disable it */
 
            sam_ep_reset(priv, epno);
            epset &= ~bit;
@@ -2674,6 +2675,10 @@ static int sam_ep_configure_internal(struct sam_ep_s *privep,
   /* Disable endpoint interrupts now */
 
   sam_putreg(UDP_INT_EP(epno), SAM_UDP_IDR);
+
+  /* Wait for the endpoint to come out of reset */
+
+  while ((sam_getreg(SAM_UDP_RSTEP) & UDP_RSTEP(epno)) != 0);
 
   /* Configure and enable the endpoint */
 
@@ -3759,7 +3764,7 @@ void up_usbinitialize(void)
    * them when we need them later.
    */
 
-  if (irq_attach(SAM_IRQ_UDP, sam_udphs_interrupt) != 0)
+  if (irq_attach(SAM_IRQ_UDP, sam_udp_interrupt) != 0)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_IRQREGISTRATION),
                (uint16_t)SAM_IRQ_UDP);
