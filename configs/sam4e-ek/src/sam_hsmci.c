@@ -66,6 +66,7 @@
 struct sam_hsmci_state_s
 {
   struct sdio_dev_s *hsmci;   /* R/W device handle */
+  bool initialized;           /* TRUE: HSMCI block driver is initialized */
   bool inserted;              /* TRUE: card is inserted */
 };
 
@@ -129,42 +130,52 @@ int sam_hsmci_initialize(int minor)
 {
   int ret;
 
-  /* Initialize card-detect GPIO.  There is no write-protection GPIO. */
+  /* Have we already initialized? */
 
-  sam_configpio(GPIO_MCI_CD);
-
-  /* Mount the SDIO-based MMC/SD block driver */
-  /* First, get an instance of the SDIO interface */
-
-  g_hsmci.hsmci = sdio_initialize(0);
-  if (!g_hsmci.hsmci)
+  if (!g_hsmci.initialized)
     {
-      fdbg("Failed to initialize SDIO\n");
-      return -ENODEV;
+      /* Initialize card-detect GPIO.  There is no write-protection GPIO. */
+
+      sam_configpio(GPIO_MCI_CD);
+
+      /* Mount the SDIO-based MMC/SD block driver */
+      /* First, get an instance of the SDIO interface */
+
+      g_hsmci.hsmci = sdio_initialize(0);
+      if (!g_hsmci.hsmci)
+        {
+          fdbg("Failed to initialize SDIO\n");
+          return -ENODEV;
+        }
+
+      /* Now bind the SDIO interface to the MMC/SD driver */
+
+      ret = mmcsd_slotinitialize(minor, g_hsmci.hsmci);
+      if (ret != OK)
+        {
+          fdbg("Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
+          return ret;
+        }
+
+      /* Configure card detect interrupts */
+
+      sam_pioirq(GPIO_MCI_CD);
+      (void)irq_attach(MCI_CD_IRQ, sam_hsmci_cardetect);
+
+      /* Then inform the HSMCI driver if there is or is not a card in the slot. */
+
+      g_hsmci.inserted = sam_cardinserted(0);
+      sdio_mediachange(g_hsmci.hsmci, g_hsmci.inserted);
+
+      /* Now we are initialized */
+
+      g_hsmci.initialized = true;
+
+      /* Enable card detect interrupts */
+
+      sam_pioirqenable(MCI_CD_IRQ);
     }
 
-  /* Now bind the SDIO interface to the MMC/SD driver */
-
-  ret = mmcsd_slotinitialize(minor, g_hsmci.hsmci);
-  if (ret != OK)
-    {
-      fdbg("Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
-      return ret;
-    }
-
-  /* Configure card detect interrupts */
-
-  sam_pioirq(GPIO_MCI_CD);
-  (void)irq_attach(MCI_CD_IRQ, sam_hsmci_cardetect);
-
-  /* Then inform the HSMCI driver if there is or is not a card in the slot. */
-
-  g_hsmci.inserted = sam_cardinserted(0);
-  sdio_mediachange(g_hsmci.hsmci, g_hsmci.inserted);
-
-  /* Enable card detect interrupts */
-
-  sam_pioirqenable(MCI_CD_IRQ);
   return OK;
 }
 

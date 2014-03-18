@@ -1130,10 +1130,10 @@ endmenu # EMAC device driver options
 endif # SAM34_EMAC
 
 if SAM34_UDP
-menu "USB Full Speed Device Controller driver (DCD) options"
+menu "AT91SAM3/4 USB Full Speed Device Controller driver (DCD) options"
 
 config SAM34_UDP_REGDEBUG
-	bool "Enable low-level UPPHS register debug"
+	bool "Enable low-level UDP register debug"
 	default n
 	depends on DEBUG
 

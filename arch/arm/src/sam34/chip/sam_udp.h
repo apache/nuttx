@@ -59,7 +59,7 @@
  *    2      2        64     Bulk/Iso/Interrupt
  *    3      1        64     Control/Bulk/Interrupt
  *    4      2       512     Bulk/Iso/Interrupt
- *    5      2       612     Bulk/Iso/Interrupt
+ *    5      2       512     Bulk/Iso/Interrupt
  *    6      2        64     Bulk/Iso/Interrupt
  *    7      2        64     Bulk/Iso/Interrupt
  */

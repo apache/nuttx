@@ -50,7 +50,7 @@
 
 #include "sam_hsmci.h"
 
-#ifdef CONFIG_SAM34_HSMCI
+#ifdef CONFIG_SAM34_UDP
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -66,6 +66,16 @@
 
 #undef SAM_MMCSDSLOTNO
 #define SAM_MMCSDSLOTNO 0
+
+/* Can't use a block device if it is not available */
+
+#ifndef HAVE_AT25
+#  undef CONFIG_SAM4EEK_AT25_BLOCKDEVICE
+#endif
+
+#ifndef HAVE_HSMCI
+#  undef CONFIG_SAM4EEK_HSMCI_BLOCKDEVICE
+#endif
 
 /* Debug ********************************************************************/
 
@@ -101,48 +111,31 @@
 
 int usbmsc_archinitialize(void)
 {
-  FAR struct sdio_dev_s *sdio;
-  int ret;
+  /* Initialize the AT25 MTD driver */
 
-  /* First, get an instance of the SDIO interface */
-
-  message("usbmsc_archinitialize: "
-          "Initializing SDIO slot %d\n",
-          SAM_MMCSDSLOTNO);
-
-  sdio = sdio_initialize(SAM_MMCSDSLOTNO);
-  if (!sdio)
+#if defined(CONFIG_SAM4EEK_AT25_BLOCKDEVICE)
+  int ret = sam_at25_automount(0);
+  if (ret < 0)
     {
-      message("usbmsc_archinitialize: Failed to initialize SDIO slot %d\n",
-              SAM_MMCSDSLOTNO);
-      return -ENODEV;
+      message("ERROR: sam_at25_automount failed: %d\n", ret);
     }
 
-  /* Now bind the SPI interface to the MMC/SD driver */
+  return ret;
 
-  message("usbmsc_archinitialize: "
-          "Bind SDIO to the MMC/SD driver, minor=%d\n",
-          CONFIG_SYSTEM_USBMSC_DEVMINOR1);
+#elif defined(CONFIG_SAM4EEK_HSMCI_BLOCKDEVICE)
+  /* Initialize the HSMCI driver */
 
-  ret = mmcsd_slotinitialize(CONFIG_SYSTEM_USBMSC_DEVMINOR1, sdio);
-  if (ret != OK)
+  ret = sam_hsmci_initialize(0);
+  if (ret < 0)
     {
-      message("usbmsc_archinitialize: "
-              "Failed to bind SDIO to the MMC/SD driver: %d\n",
-              ret);
-      return ret;
+      message("ERROR: sam_hsmci_initialize(0) failed: %d\n", ret);
     }
 
-  message("usbmsc_archinitialize: "
-          "Successfully bound SDIO to the MMC/SD driver\n");
+  return ret;
 
-  /* Then let's guess and say that there is a card in the slot.  I need to check to
-   * see if the SAM3U10E-EVAL board supports a GPIO to detect if there is a card in
-   * the slot.
-   */
-
-   sdio_mediachange(sdio, true);
-   return OK;
+#else
+  return -ENODEV;
+#endif
 }
 
-#endif /* CONFIG_SAM34_HSMCI */
+#endif /* CONFIG_SAM34_UDP */
