@@ -21,6 +21,7 @@ Contents
   - Serial Console
   - Networking Support
   - AT25 Serial FLASH
+  - USB Full-Speed Device
   - SAM4E-EK-specific Configuration Options
   - Configurations
 
@@ -585,6 +586,138 @@ AT25 Serial FLASH
      -rw-rw-rw-      16 atest.txt
     nsh> cat /mnt/at25/atest.txt
     This is a test
+
+USB Full-Speed Device
+=====================
+
+  Basic USB Full-Speed Device Configuration
+  -----------------------------------------
+
+  Support the USB high-speed device (UDPHS) driver can be enabled with these
+  NuttX configuration settings.
+
+    Device Drivers -> USB Device Driver Support
+      CONFIG_USBDEV=y                       : Enable USB device support
+      CONFIG_USBDEV_DUALSPEED=n             : Device does not support High-Speed
+      CONFIG_USBDEV_DMA=n                   : Device does not use DMA
+
+    System Type -> ATSAM3/4 Peripheral Support
+      CONFIG_SAM34_UDP=y                    : Enable UDP Full Speed USB device
+
+    Application Configuration -> NSH Library
+      CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
+
+  Mass Storage Class
+  ------------------
+
+  The Mass Storage Class (MSC) class driver can be selected for use with
+  UDPHS.  Note: The following assumes that the internal AT24 Serial FLASH
+  is configured to support a FAT file system through an FTL layer as
+  described about under "AT25 Serial FLASH".
+
+    Device Drivers -> USB Device Driver Support
+      CONFIG_USBMSC=y                       : Enable the USB MSC class driver
+      CONFIG_USBMSC_EPBULKOUT=4             : Use EP1 for the BULK OUT endpoint
+      CONFIG_USBMSC_EPBULKIN=5              : Use EP2 for the BULK IN endpoint
+                                            : Defaults for other settings?
+    Board Selection
+      CONFIG_SAM4EEK_AT25_BLOCKDEVICE=y     : Export AT25 serial FLASH device
+      CONFIG_SAM4EEK_HSMCI_BLOCKDEVICE=n    : Don't export HSMCI SD card
+
+  Note: If properly configured, you could export the HSMCI SD card instead
+  of the internal AT25 Serial FLASH.
+
+  The following setting enables an add-on that can can be used to control
+  the USB MSC device.  It will add two new NSH commands:
+
+    a. msconn will connect the USB serial device and export the AT25
+       to the host, and
+    b. msdis which will disconnect the USB serial device.
+
+    Application Configuration -> System Add-Ons:
+      CONFIG_SYSTEM_USBMSC=y                : Enable the USBMSC add-on
+      CONFIG_SYSTEM_USBMSC_NLUNS=1          : One LUN
+      CONFIG_SYSTEM_USBMSC_DEVMINOR1=0      : Minor device zero
+      CONFIG_SYSTEM_USBMSC_DEVPATH1="/dev/mtdblock0"
+                                            : Use a single, LUN:  The AT25
+                                            : block driver.
+    NOTES:
+
+    a. To prevent file system corruption, make sure that the AT25 is un-
+       mounted *before* exporting the mass storage device to the host:
+
+         nsh> umount /mnt/at25
+         nsh> mscon
+
+       The AT25 can be re-mounted after the mass storage class is disconnected:
+
+        nsh> msdis
+        nsh> mount -t vfat /dev/mtdblock0 /mnt/at25
+
+    b. If you change the value CONFIG_SYSTEM_USBMSC_DEVPATH1, then you
+       can export other file systems:
+
+        "/dev/mmcsd0" would export the HSMCI SD slot
+
+        "/dev/ram0" could even be used to export a RAM disk.  But you would
+         first have to use mkrd to create the RAM disk and mkfatfs to put
+         a FAT file system on it.
+
+  CDC/ACM Serial Device Class
+  ---------------------------
+
+  This will select the CDC/ACM serial device.  Defaults for the other
+  options should be okay.
+
+    Device Drivers -> USB Device Driver Support
+      CONFIG_CDCACM=y                       : Enable the CDC/ACM device
+      CONFIG_CDCACM_BULKIN_REQLEN=96        : Default request size
+
+  The following setting enables an example that can can be used to control
+  the CDC/ACM device.  It will add two new NSH commands:
+
+    a. sercon will connect the USB serial device (creating /dev/ttyACM0), and
+    b. serdis which will disconnect the USB serial device (destroying
+        /dev/ttyACM0).
+
+    Application Configuration -> Examples:
+      CONFIG_SYSTEM_CDCACM=y              : Enable an CDC/ACM example
+
+  Debugging USB Device
+  --------------------
+
+  There is normal console debug output available that can be enabled with
+  CONFIG_DEBUG + CONFIG_DEBUG_USB.  However, USB device operation is very
+  time critical and enabling this debug output WILL interfere with the
+  operation of the UDPHS.  USB device tracing is a less invasive way to get
+  debug information:  If tracing is enabled, the USB device will save
+  encoded trace output in in-memory buffer; if the USB monitor is also
+  enabled, that trace buffer will be periodically emptied and dumped to the
+  system logging device (the serial console in this configuration):
+
+    Device Drivers -> "USB Device Driver Support:
+      CONFIG_USBDEV_TRACE=y                   : Enable USB trace feature
+      CONFIG_USBDEV_TRACE_NRECORDS=256        : Buffer 256 records in memory
+      CONFIG_USBDEV_TRACE_STRINGS=y           : (optional)
+
+    Application Configuration -> NSH LIbrary:
+      CONFIG_NSH_USBDEV_TRACE=n               : No builtin tracing from NSH
+      CONFIG_NSH_ARCHINIT=y                   : Automatically start the USB monitor
+
+    Application Configuration -> System NSH Add-Ons:
+      CONFIG_SYSTEM_USBMONITOR=y              : Enable the USB monitor daemon
+      CONFIG_SYSTEM_USBMONITOR_STACKSIZE=2048 : USB monitor daemon stack size
+      CONFIG_SYSTEM_USBMONITOR_PRIORITY=50    : USB monitor daemon priority
+      CONFIG_SYSTEM_USBMONITOR_INTERVAL=1     : Dump trace data every second
+      CONFIG_SYSTEM_USBMONITOR_TRACEINIT=y    : Enable TRACE output
+      CONFIG_SYSTEM_USBMONITOR_TRACECLASS=y
+      CONFIG_SYSTEM_USBMONITOR_TRACETRANSFERS=y
+      CONFIG_SYSTEM_USBMONITOR_TRACECONTROLLER=y
+      CONFIG_SYSTEM_USBMONITOR_TRACEINTERRUPTS=y
+
+  NOTE: If USB debug output is also enabled, both outputs will appear on the
+  serial console.  However, the debug output will be asynchronous with the
+  trace output and, hence, difficult to interpret.
 
 SAM4E-EK-specific Configuration Options
 =======================================

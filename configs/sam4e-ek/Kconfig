@@ -20,7 +20,7 @@ endchoice # CPU Frequency
 config SAM4EEK_AT25_AUTOMOUNT
 	bool "AT25 serial FLASH auto-mount"
 	default n
-	depends on NSH_ARCHINIT && SAM34_SPI0 && MTD_AT25
+	depends on SAM34_SPI0 && MTD_AT25
 	---help---
 		Automatically initialize the AT25 SPI FLASH driver when NSH starts.
 
@@ -44,6 +44,21 @@ config SAM4EEK_AT25_NXFFS
 		Create the MTD driver for the AT25 and mount the AT25 device as
 		a wear-leveling, NuttX FLASH file system (NXFFS).  The downside of
 		NXFFS is that it can be very slow.
+
+endchoice # AT25 serial FLASH configuration
+
+choice
+	prompt "USB MSC block device"
+	default SAM4EEK_AT25_BLOCKDEVICE if SAM4EEK_AT25_FTL
+	default SAM4EEK_HSMCI_BLOCKDEVICE if !SAM4EEK_AT25_FTL
+	depends on SYSTEM_USBMSC && (SAM4EEK_AT25_FTL || SAM34_HSMCI)
+
+config SAM4EEK_AT25_BLOCKDEVICE
+	bool "AT25 Serial FLASH"
+
+config SAM4EEK_HSMCI_BLOCKDEVICE
+	bool "SD card"
+	depends on SAM34_HSMCI
 
 endchoice # AT25 serial FLASH configuration
 
