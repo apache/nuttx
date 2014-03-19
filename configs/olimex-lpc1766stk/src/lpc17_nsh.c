@@ -157,15 +157,13 @@ static struct usbhost_connection_s *g_usbconn;
 static int nsh_waiter(int argc, char *argv[])
 {
   bool connected = false;
-  int ret;
 
   message("nsh_waiter: Running\n");
   for (;;)
     {
       /* Wait for the device to change state */
 
-      ret = CONN_WAIT(g_usbconn, &connected);
-      DEBUGASSERT(ret == OK);
+      DEBUGVERIFY(CONN_WAIT(g_usbconn, &connected));
 
       connected = !connected;
       message("nsh_waiter: %s\n", connected ? "connected" : "disconnected");

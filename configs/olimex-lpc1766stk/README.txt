@@ -837,16 +837,26 @@ USB host operations.  To make these modifications, do the following:
 1. First configure to build the NSH configuration from the top-level
    NuttX directory:
 
-   cd tools
-   ./configure nucleus2g/nsh
-   cd ..
+     cd tools
+     ./configure olimex-lpc1766stk/nsh
+     cd ..
 
-2. Then edit the top-level .config file to enable USB host.  Make the
-   following changes:
+2. Modify the top-level .config file to enable USB host using:
 
-   CONFIG_LPC17_USBHOST=y
-   CONFIG_USBHOST=y
-   CONFIG_SCHED_WORKQUEUE=y
+     make menuconfig
+
+   Make the following changes:
+
+     System Type -> LPC17xx Peripheral Support
+       CONFIG_LPC17_USBHOST=y
+
+     Device Drivers-> USB Host Driver Support
+       CONFIG_USBHOST=y
+       CONFIG_USBHOST_ISOC_DISABLE=y
+       CONFIG_USBHOST_MSC=y
+
+     Library Routines
+       CONFIG_SCHED_WORKQUEUE=y
 
 When this change is made, NSH should be extended to support USB flash
 devices.  When a FLASH device is inserted, you should see a device
