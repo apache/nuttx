@@ -167,10 +167,10 @@
 
 #define SAM_TRACEINTID_ADDRESSED          0x0001
 #define SAM_TRACEINTID_CLEARFEATURE       0x0002
-#define SAM_TRACEINTID_DETSUSPD           0x0003
+#define SAM_TRACEINTID_RXSUSP             0x0003
 #define SAM_TRACEINTID_DEVGETSTATUS       0x0004
 #define SAM_TRACEINTID_DISPATCH           0x0005
-#define SAM_TRACEINTID_ENDRESET           0x0006
+#define SAM_TRACEINTID_ENDBUSRES          0x0006
 #define SAM_TRACEINTID_EP                 0x0007
 #define SAM_TRACEINTID_EP0SETUPIN         0x0008
 #define SAM_TRACEINTID_EP0SETUPOUT        0x0009
@@ -184,7 +184,7 @@
 #define SAM_TRACEINTID_GETSTATUS          0x0011
 #define SAM_TRACEINTID_IFGETSTATUS        0x0012
 #define SAM_TRACEINTID_INTERRUPT          0x0013
-#define SAM_TRACEINTID_INTSOF             0x0014
+#define SAM_TRACEINTID_SOF                0x0014
 #define SAM_TRACEINTID_NOSTDREQ           0x0015
 #define SAM_TRACEINTID_PENDING            0x0016
 #define SAM_TRACEINTID_RXDATABK0          0x0017
@@ -549,10 +549,10 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
 {
   TRACE_STR(SAM_TRACEINTID_ADDRESSED),
   TRACE_STR(SAM_TRACEINTID_CLEARFEATURE),
-  TRACE_STR(SAM_TRACEINTID_DETSUSPD),
+  TRACE_STR(SAM_TRACEINTID_RXSUSP),
   TRACE_STR(SAM_TRACEINTID_DEVGETSTATUS),
   TRACE_STR(SAM_TRACEINTID_DISPATCH),
-  TRACE_STR(SAM_TRACEINTID_ENDRESET),
+  TRACE_STR(SAM_TRACEINTID_ENDBUSRES),
   TRACE_STR(SAM_TRACEINTID_EP),
   TRACE_STR(SAM_TRACEINTID_EP0SETUPIN),
   TRACE_STR(SAM_TRACEINTID_EP0SETUPOUT),
@@ -566,7 +566,7 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
   TRACE_STR(SAM_TRACEINTID_GETSTATUS),
   TRACE_STR(SAM_TRACEINTID_IFGETSTATUS),
   TRACE_STR(SAM_TRACEINTID_INTERRUPT),
-  TRACE_STR(SAM_TRACEINTID_INTSOF),
+  TRACE_STR(SAM_TRACEINTID_SOF),
   TRACE_STR(SAM_TRACEINTID_NOSTDREQ),
   TRACE_STR(SAM_TRACEINTID_PENDING),
   TRACE_STR(SAM_TRACEINTID_RXDATABK0),
@@ -2116,14 +2116,6 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
 
       sam_ep0_read((uint8_t *)&priv->ctrl, USB_SIZEOF_CTRLREQ);
 
-      /* Clear the RXSETUP indication. RXSETUP cannot be cleared before the
-       * SETUP packet has been read in from the FIFO.  Otherwise, the USB
-       * device would accept the next Data OUT transfer and overwrite the
-       * SETUP packet in the FIFO.
-       */
-
-      sam_csr_clrbits(epno, UDPEP_CSR_RXSETUP);
-
       /* Check for a SETUP IN transaction with data. */
 
       len = GETUINT16(priv->ctrl.len);
@@ -2135,15 +2127,42 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
 
           usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_EP0SETUPOUT), priv->ctrl.req);
           privep->epstate = UDP_EPSTATE_EP0DATAOUT;
+
+          /* Clear the CSR:DIR bit to support the host-to-device data OUT
+           * data transfer.  This bit must be cleared before CSR:RXSETUP is
+           * cleared at the end of the SETUP stage.
+           */
+
+          sam_csr_clrbits(epno, UDPEP_CSR_DIR);
+
+          /* Clear the RXSETUP indication. RXSETUP cannot be cleared before the
+           * SETUP packet has been read in from the FIFO.  Otherwise, the USB
+           * device would accept the next Data OUT transfer and overwrite the
+           * SETUP packet in the FIFO.
+           */
+
+          sam_csr_clrbits(epno, UDPEP_CSR_RXSETUP);
         }
       else
         {
-          /* This is an SETUP OUT command (or a SETUP IN with no data).
-           * Handle the EP0 SETUP now.
-           */
+          /* This is an SETUP IN command (or a SETUP IN with no data). */
 
           usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_EP0SETUPIN), len);
           privep->epstate = UDP_EPSTATE_IDLE;
+
+          /* Set the CSR:DIR bit to support the device-to-host data IN
+           * data transfer.  This bit must be set before CSR:RXSETUP is
+           * cleared at the end of the SETUP stage.
+           */
+
+          sam_csr_setbits(epno, UDPEP_CSR_DIR);
+
+          /* Clear the RXSETUP indication. */
+
+          sam_csr_clrbits(epno, UDPEP_CSR_RXSETUP);
+
+          /* Handle the SETUP OUT command now */
+
           sam_ep0_setup(priv);
         }
     }
@@ -2190,7 +2209,7 @@ static int sam_udp_interrupt(int irq, void *context)
 
       if ((pending == UDP_INT_RXSUSP) != 0)
         {
-          usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_DETSUSPD),
+          usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_RXSUSP),
                   (uint16_t)pending);
 
           /* Enable wakeup interrupts */
@@ -2220,7 +2239,7 @@ static int sam_udp_interrupt(int irq, void *context)
         {
           /* Clear the pending SOF interrupt */
 
-          usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_INTSOF),
+          usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_SOF),
                   (uint16_t)pending);
           sam_putreg(UDP_INT_SOF, SAM_UDP_ICR);
         }
@@ -2271,7 +2290,7 @@ static int sam_udp_interrupt(int irq, void *context)
 
       if ((pending & UDP_ISR_ENDBUSRES) != 0)
         {
-          usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_ENDRESET),
+          usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_ENDBUSRES),
                   (uint16_t)pending);
 
           /* Clear the end-of-reset interrupt */
@@ -3861,7 +3880,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
       /* Enable USB controller interrupts at the AIC.
        *
        * NOTE that interrupts and clocking are left disabled in the UDP
-       * peripheral.  The ENDRESET interrupt will automatically be enabled
+       * peripheral.  The ENDBUSRES interrupt will automatically be enabled
        * when the bus reset occurs.  The normal operating configuration will
        * be established at that time.
        */
@@ -3869,7 +3888,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
       up_enable_irq(SAM_IRQ_UDP);
 
       /* Enable pull-up to connect the device.  The host should enumerate us
-       * some time after this.  The next thing we expect the the ENDRESET
+       * some time after this.  The next thing we expect is the ENDBUSRES
        * interrupt.
        */
 
