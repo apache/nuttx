@@ -248,11 +248,13 @@ config ARMV7M_USEBASEPRI
 	default n
 	depends on ARCH_CORTEXM3 || ARCH_CORTEXM4
 	---help---
-		Use the BASEPRI register to enable and disable able interrupts.  By
-		default, the PRIMASK register is used for this purpose.  This
-		usually results in hardfaults that are properly handling by the
-		RTOS.  Using the BASEPRI register will avoid these hardfault.
-		That is needed primarily for integration with some toolchains.
+		Use the BASEPRI register to enable and disable interrupts. By
+		default, the PRIMASK register is used for this purpose. This
+		usually results in hardfaults when supervisor calls are made.
+		Though, these hardfaults are properly handled by the RTOS, the
+		hardfaults can confuse some debuggers. With the BASEPRI
+		register, these hardfaults, will be avoided. For more details see
+		http://www.nuttx.org/doku.php?id=wiki:nxinternal:svcall
 
 config ARCH_HAVE_CMNVECTOR
 	bool
