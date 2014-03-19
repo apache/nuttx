@@ -376,7 +376,6 @@ static inline void
               sam_req_abort(struct sam_ep_s *privep,
                 struct sam_req_s *privreq, int16_t result);
 static void   sam_req_complete(struct sam_ep_s *privep, int16_t result);
-static void   sam_ep_txrdy(uint8_t epno);
 static void   sam_req_wrsetup(struct sam_usbdev_s *priv,
                 struct sam_ep_s *privep, struct sam_req_s *privreq);
 static int    sam_req_write(struct sam_usbdev_s *priv,
@@ -847,34 +846,6 @@ static void sam_req_complete(struct sam_ep_s *privep, int16_t result)
 }
 
 /****************************************************************************
- * Name: sam_ep_txrdy
- *
- * Description:
- *   IN data has been loaded in the endpoint FIFO.  Manage the endpoint to
- *   (1) initiate sending of the data and (2) receive the TXCOMP interrupt
- *   when the transfer completes.
- *
- ****************************************************************************/
-
-static void sam_ep_txrdy(uint8_t epno)
-{
-  /* Set TXPKTRDY to notify the USB hardware that there is TX data in the
-   * endpoint FIFO.  We will be notified that the endpoint’s FIFO has been
-   * released by the USB device when TXCOMP in the endpoint’s UDPEP_CSRx
-   * register has been set.
-   */
-
-  sam_csr_setbits(epno, UDPEP_CSR_TXPKTRDY);
-
-  /* TXCOMP must be cleared after TXPKTRDY has been set.  TXCOMP was set by
-   * the USB device when it has received an ACK PID signal for the Data IN
-   * packet.  An interrupt is pending while TXCOMP is set.
-   */
-
-  sam_csr_clrbits(epno, UDPEP_CSR_TXCOMP);
-}
-
-/****************************************************************************
  * Name: sam_req_wrsetup
  *
  * Description:
@@ -934,8 +905,8 @@ static void sam_req_wrsetup(struct sam_usbdev_s *priv,
       privreq->inflight = nbytes;
       usbtrace(TRACE_WRITE(USB_EPNO(privep->ep.eplog)), nbytes);
 
-      /* The new buffer pointer is the started of the buffer plus the number
-       * of bytes successfully transfered plus the number of bytes previously
+      /* The new buffer pointer is the start of the buffer plus the number of
+       * bytes successfully transferred plus the number of bytes previously
        * "in-flight".
        */
 
@@ -948,19 +919,22 @@ static void sam_req_wrsetup(struct sam_usbdev_s *priv,
         {
           *fifo = (uint32_t)(*buf++);
         }
-
-      /* Indicate that there is data in the TX packet memory.  This will
-       * be cleared when the next data out interrupt is received.
-       */
-
-      privep->epstate = UDP_EPSTATE_SENDING;
     }
 
-  /* Initiate the transfer and configure to receive the transfer complete
-   * interrupt.
+  /* Indicate that there we are in the sending state (even if this is a
+   * zero-length packet) .  This indication will be need in interrupt
+   * processing in order to properly terminate the request.
    */
 
-  sam_ep_txrdy(epno);
+  privep->epstate = UDP_EPSTATE_SENDING;
+
+  /* Set TXPKTRDY to notify the USB hardware that there is TX data in the
+   * endpoint FIFO.  We will be notified that the endpoint’s FIFO has been
+   * released by the USB device when TXCOMP in the endpoint’s UDPEP_CSRx
+   * register has been set.
+   */
+
+  sam_csr_setbits(epno, UDPEP_CSR_TXPKTRDY);
 }
 
 /****************************************************************************
@@ -969,9 +943,9 @@ static void sam_req_wrsetup(struct sam_usbdev_s *priv,
  * Description:
  *   Process the next queued write request.  This function is called in one
  *   of three contexts:  (1) When the endpoint is IDLE and a new write request
- *   is submitted (with interrupts disabled), (2) from interrupt handling
- *   when the current FIFO transfer completes, or (3) when resuming a stalled
- *   IN or control endpoint.
+ *   is submitted (with interrupts disabled), (2) from TXCOMP interrupt
+ *   handling when the current FIFO Tx transfer completes, or (3) when resuming
+ *   a stalled IN or control endpoint.
  *
  *   Calling rules:
  *
@@ -980,10 +954,10 @@ static void sam_req_wrsetup(struct sam_usbdev_s *priv,
  *     When a request is queued, the request 'len' is the number of bytes
  *     to transfer and 'xfrd' and 'inflight' must be zero.
  *
- *     When this function starts a tranfer it will update the request
+ *     When this function starts a transfer it will update the request
  *     'inflight' field to indicate the size of the transfer.
  *
- *     When the transfer completes, the the 'inflight' field must hold the
+ *     When the transfer completes, the 'inflight' field must hold the
  *     number of bytes that have completed the transfer.  This function will
  *     update 'xfrd' with the new size of the transfer.
  *
@@ -1016,7 +990,7 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
 
           usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_EPINQEMPTY), 0);
 
-          /* Acknowledge any pending the TXCOMP interrupt */
+          /* Clear any pending the TXCOMP interrupt */
 
           sam_csr_clrbits(epno, UDPEP_CSR_TXCOMP);
           return -ENOENT;
@@ -1056,7 +1030,7 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
               privep->zlpneeded = false;
             }
 
-          /* Setup the write operation */
+          /* Perform the write operation */
 
           sam_req_wrsetup(priv, privep, privreq);
         }
@@ -1076,7 +1050,7 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
           /* If we get here, then we sent the last of the data on the
            * previous pass and we need to send the zero length packet now.
            *
-           * A Zero Length Packet can be sent by setting just the TXCOMP flag
+           * A Zero Length Packet can be sent by setting just the TXPTKRDY flag
            * in the UDP_EPTSETSTAx register
            */
 
@@ -1085,11 +1059,13 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
           privep->zlpsent   = true;
           privreq->inflight = 0;
 
-          /* Initiate the zero length transfer and configure to receive the
-           * transfer complete interrupt.
+          /* Set TXPKTRDY to notify the USB hardware that there is (null)
+           * TX packet available.  We will be notified that the endpoint’s
+           * FIFO has been released by the USB device when TXCOMP in the
+           * endpoint’s UDPEP_CSRx register has been set.
            */
 
-          sam_ep_txrdy(epno);
+          sam_csr_setbits(epno, UDPEP_CSR_TXPKTRDY);
         }
 
       /* If all of the bytes were sent (including any final zero length
@@ -1103,7 +1079,15 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
       if (privreq->req.len >= privreq->req.xfrd &&
           privep->epstate == UDP_EPSTATE_IDLE)
         {
-          /* Return the write request to the class driver */
+          /* TXCOMP must be cleared after the last packet has been set.
+           * TXCOMP was set by the USB device when it has received an ACK
+           * PID signal for the Data IN packet.  An interrupt is pending
+           * while TXCOMP is set.
+           */
+
+          sam_csr_clrbits(epno, UDPEP_CSR_TXCOMP);
+
+         /* Return the write request to the class driver */
 
           usbtrace(TRACE_COMPLETE(USB_EPNO(privep->ep.eplog)),
                    privreq->req.xfrd);
@@ -1332,11 +1316,13 @@ static void sam_ep0_wrstatus(const uint8_t *buffer, size_t buflen)
       *fifo = (uint32_t)(*buffer++);
     }
 
-  /* Initiate the transfer and configure to receive the transfer complete
-   * interrupt.
+  /* Set TXPKTRDY to notify the USB hardware that there is TX data in the
+   * endpoint FIFO.  We will be notified that the endpoint’s FIFO has been
+   * released by the USB device when TXCOMP in the endpoint’s UDPEP_CSRx
+   * register has been set.
    */
 
-  sam_ep_txrdy(EP0);
+  sam_csr_setbits(EP0, UDPEP_CSR_TXPKTRDY);
 }
 
 /****************************************************************************
@@ -1414,9 +1400,11 @@ static void sam_setdevaddr(struct sam_usbdev_s *priv, uint8_t address)
     }
   else
     {
-      /* Disable address */
+      /* Set address to zero.  The FEN bit still must be set in order to
+       * receive or send data packets from or to the host.
+       */
 
-      sam_putreg(0, SAM_UDP_FADDR);
+      sam_putreg(UDP_FADDR_FEN, SAM_UDP_FADDR);
 
       /* Revert to the un-addressed, default state */
 
@@ -2210,7 +2198,7 @@ static int sam_udp_interrupt(int irq, void *context)
           sam_putreg(UDP_INT_RXSUSP, SAM_UDP_IDR);
           sam_putreg(UDP_INT_WAKEUP | UDP_INT_RXRSM, SAM_UDP_IER);
 
-          /* Acknowledge interrupt */
+          /* Clear the pending suspend (and any wakeup) interrupts */
 
           sam_putreg(UDP_INT_RXSUSP | UDP_INT_WAKEUP, SAM_UDP_ICR);
 
@@ -2230,7 +2218,7 @@ static int sam_udp_interrupt(int irq, void *context)
 
       else if ((pending & UDP_INT_SOF) != 0)
         {
-          /* Acknowledge interrupt */
+          /* Clear the pending SOF interrupt */
 
           usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_INTSOF),
                   (uint16_t)pending);
@@ -2245,7 +2233,7 @@ static int sam_udp_interrupt(int irq, void *context)
                   (uint16_t)pending);
           sam_resume(priv);
 
-          /* Acknowledge interrupt */
+          /* Clear the pending wakeup, resume, (and any suspend) interrupts */
 
           sam_putreg(UDP_INT_WAKEUP | UDP_INT_RXRSM | UDP_INT_RXSUSP,
                      SAM_UDP_ICR);
@@ -2285,6 +2273,10 @@ static int sam_udp_interrupt(int irq, void *context)
         {
           usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_ENDRESET),
                   (uint16_t)pending);
+
+          /* Clear the end-of-reset interrupt */
+
+          sam_putreg(UDP_ISR_ENDBUSRES, SAM_UDP_ICR);
 
           /* Handle the reset */
 
@@ -2342,7 +2334,12 @@ static void sam_csr_setbits(uint8_t epno, uint32_t setbits)
   regval |= setbits;
   sam_putreg(regval, regaddr);
 
-  /* Followed by 15 nops (pluse loop overhead) */
+  /* Followed by 15 nops (plus loop overhead).  After any bit is changed in
+   * the CSR, a wait of 1 UDPCK clock cycle and 1 peripheral clock cycle is
+   * required. However, RX_DATA_BK0, TXPKTRDY, RX_DATA_BK1 require wait
+   * times of 3 UDPCK clock cycles and 5 peripheral clock cycles before
+   * accessing DPR.
+   */
 
   for (count = 0; count < 15; count++ )
     {
@@ -2372,7 +2369,12 @@ static void sam_csr_clrbits(uint8_t epno, uint32_t clrbits)
   regval &= ~clrbits;
   sam_putreg(regval, regaddr);
 
-  /* Followed by 15 nops (pluse loop overhead) */
+  /* Followed by 15 nops (plus loop overhead).  After any bit is changed in
+   * the CSR, a wait of 1 UDPCK clock cycle and 1 peripheral clock cycle is
+   * required. However, RX_DATA_BK0, TXPKTRDY, RX_DATA_BK1 require wait
+   * times of 3 UDPCK clock cycles and 5 peripheral clock cycles before
+   * accessing DPR.
+   */
 
   for (count = 0; count < 15; count++ )
     {
@@ -2411,7 +2413,7 @@ static void sam_suspend(struct sam_usbdev_s *priv)
 
       /* Let the board-specific logic know that we have entered the
        * suspend state.  This may trigger additional reduced power
-       * consumuption measures.
+       * consumption measures.
        */
 
       sam_udp_suspend((struct usbdev_s *)priv, false);
