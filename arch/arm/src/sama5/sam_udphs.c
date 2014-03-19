@@ -2750,7 +2750,7 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
             }
           else
             {
-              /* This is an SETUP OUT command (or a SETUP IN with no data).
+              /* This is an SETUP IN command (or a SETUP IN with no data).
                * Handle the EP0 SETUP now.
                */
 
