@@ -1,7 +1,7 @@
 /*******************************************************************************
  * arch/arm/src/lpc17xx/lpc17_usbhost.c
  *
- *   Copyright (C) 2010-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2012, 2014 Gregory Nutt. All rights reserved.
  *   Authors: Rafael Noronha <rafael@pdsolucoes.com.br>
  *            Gregory Nutt <gnutt@nuttx.org>
  *
@@ -44,6 +44,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <semaphore.h>
 #include <string.h>
 #include <errno.h>
@@ -1619,7 +1620,7 @@ static int lpc17_enumerate(FAR struct usbhost_connection_s *conn, int rphndx)
  
   /* USB 2.0 spec says at least 50ms delay before port reset */
 
-  up_mdelay(100);
+  (void)usleep(100*1000);
 
   /* Put RH port 1 in reset (the LPC176x supports only a single downstream port) */
 
@@ -1632,7 +1633,7 @@ static int lpc17_enumerate(FAR struct usbhost_connection_s *conn, int rphndx)
   /* Release RH port 1 from reset and wait a bit */
 
   lpc17_putreg(OHCI_RHPORTST_PRSC, LPC17_USBHOST_RHPORTST1);
-  up_mdelay(200);
+  (void)usleep(200*1000);
 
   /* Let the common usbhost_enumerate do all of the real work.  Note that the
    * FunctionAddress (USB address) is hardcoded to one.
