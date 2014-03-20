@@ -1,7 +1,7 @@
 /************************************************************************
  * up_assert.c
  *
- *   Copyright (C) 2007, 2009, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2012-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,14 +44,22 @@
 #include <sched.h>
 #include <debug.h>
 
+#include <nuttx/usb/usbdev_trace.h>
+
 #include <8052.h>
+
 #include "os_internal.h"
 #include "up_internal.h"
 #include "up_mem.h"
 
 /************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************/
+/* USB trace dumping */
+
+#ifndef CONFIG_USBDEV_TRACE
+#  undef CONFIG_ARCH_USBDUMP
+#endif
 
 /************************************************************************
  * Private Data
@@ -89,6 +97,18 @@ static void _up_assert(int errorcode)
     }
 }
 
+/****************************************************************************
+ * Name: assert_tracecallback
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_USBDUMP
+static int assert_tracecallback(struct usbtrace_s *trace, void *arg)
+{
+  usbtrace_trprintf((trprintf_t)lowsyslog, trace->event, trace->value);
+  return 0;
+}
+#endif
+
 /************************************************************************
  * Public Functions
  ************************************************************************/
@@ -114,5 +134,12 @@ void up_assert(const uint8_t *filename, int lineno)
 #endif
 
   up_dumpstack();
+
+#ifdef CONFIG_ARCH_USBDUMP
+  /* Dump USB trace data */
+
+  (void)usbtrace_enumerate(assert_tracecallback, NULL);
+#endif
+
   _up_assert(EXIT_FAILURE);
 }
