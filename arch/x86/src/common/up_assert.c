@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/x86/src/common/up_assert.c
  *
- *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,8 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <arch/arch.h>
+#include <nuttx/usb/usbdev_trace.h>
+
 #include <arch/board/board.h>
 
 #include "up_arch.h"
@@ -56,6 +58,11 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* USB trace dumping */
+
+#ifndef CONFIG_USBDEV_TRACE
+#  undef CONFIG_ARCH_USBDUMP
+#endif
 
 /* Output debug info if stack dump is selected -- even if 
  * debug is not selected.
@@ -106,6 +113,18 @@ static void up_stackdump(uint32_t sp, uint32_t stack_base)
 }
 #else
 # define up_stackdump()
+#endif
+
+/****************************************************************************
+ * Name: assert_tracecallback
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_USBDUMP
+static int assert_tracecallback(struct usbtrace_s *trace, void *arg)
+{
+  usbtrace_trprintf((trprintf_t)lowsyslog, trace->event, trace->value);
+  return 0;
+}
 #endif
 
 /****************************************************************************
@@ -199,7 +218,13 @@ static void up_dumpstate(void)
   if (current_regs != NULL)
     {
       up_registerdump((uint32_t*)current_regs);
-	}
+    }
+
+#ifdef CONFIG_ARCH_USBDUMP
+  /* Dump USB trace data */
+
+  (void)usbtrace_enumerate(assert_tracecallback, NULL);
+#endif
 }
 #else
 # define up_dumpstate()
