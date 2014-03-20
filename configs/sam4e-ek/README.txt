@@ -617,8 +617,8 @@ USB Full-Speed Device
 
     Device Drivers -> USB Device Driver Support
       CONFIG_USBMSC=y                       : Enable the USB MSC class driver
-      CONFIG_USBMSC_EPBULKOUT=4             : Use EP1 for the BULK OUT endpoint
-      CONFIG_USBMSC_EPBULKIN=5              : Use EP2 for the BULK IN endpoint
+      CONFIG_USBMSC_EPBULKOUT=1             : Use EP1 for the BULK OUT endpoint
+      CONFIG_USBMSC_EPBULKIN=2              : Use EP2 for the BULK IN endpoint
                                             : Defaults for other settings?
     Board Selection
       CONFIG_SAM4EEK_AT25_BLOCKDEVICE=y     : Export AT25 serial FLASH device
