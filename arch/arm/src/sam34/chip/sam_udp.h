@@ -234,8 +234,8 @@
 #  define UDPEP_CSR_EPTYPE_INTIN            (7 << UDPEP_CSR_EPTYPE_SHIFT) /* Interrupt IN */
 #define UDPEP_CSR_DTGLE                     (1 << 11) /* Bit 11:  Data Toggle */
 #define UDPEP_CSR_EPEDS                     (1 << 15) /* Bit 15:  Endpoint Enable Disable */
-#define UDPEP_CSR_RXBYTECNT_SHIFT           (24)      /* Bits 24-26: Number of Bytes Available in the FIFO */
-#define UDPEP_CSR_RXBYTECNT_MASK            (7 << UDPEP_CSR_RXBYTECNT_SHIFT)
+#define UDPEP_CSR_RXBYTECNT_SHIFT           (16)      /* Bits 16-26: Number of Bytes Available in the FIFO */
+#define UDPEP_CSR_RXBYTECNT_MASK            (0x7ff << UDPEP_CSR_RXBYTECNT_SHIFT)
 
 /* Endpoint FIFO Data Registers */
 
