@@ -593,7 +593,7 @@ static inline int usbmsc_cmdinquiry(FAR struct usbmsc_dev_s *priv,
       else
         {
           memset(response, 0, SCSIRESP_INQUIRY_SIZEOF);
-          priv->nreqbytes = SCSIRESP_INQUIRY_SIZEOF;
+          priv->nreqbytes    = SCSIRESP_INQUIRY_SIZEOF;
 
 #ifdef CONFIG_USBMSC_REMOVABLE
           response->flags1   = SCSIRESP_INQUIRYFLAGS1_RMB;
@@ -1963,9 +1963,10 @@ static int usbmsc_cmdparsestate(FAR struct usbmsc_dev_s *priv)
        */
 
       usbtrace(TRACE_CLASSSTATE(USBMSC_CLASSSTATE_CMDPARSECMDFINISH), priv->cdb[0]);
-      priv->thstate    = USBMSC_STATE_CMDFINISH;
+      priv->thstate = USBMSC_STATE_CMDFINISH;
       ret = OK;
     }
+
   return ret;
 }
 
@@ -2053,6 +2054,7 @@ static int usbmsc_cmdreadstate(FAR struct usbmsc_dev_s *priv)
           priv->nreqbytes = 0;
           return -ENOMEM;
         }
+
       req = privreq->req;
 
       /* Transfer all of the data that will (1) fit into the request buffer, OR (2)
@@ -2305,7 +2307,7 @@ static int usbmsc_cmdfinishstate(FAR struct usbmsc_dev_s *priv)
       if (priv->cbwlen > 0)
         {
           /* On most commands (the exception is outgoing, write commands),
-           * the data has not not yet been sent.
+           * the data has not yet been sent.
            */
 
           if (priv->nreqbytes > 0)
