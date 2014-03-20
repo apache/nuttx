@@ -1205,7 +1205,6 @@ static void sam_req_wrsetup(struct sam_usbdev_s *priv,
   uint8_t *fifo;
   uint8_t epno;
   int nbytes;
-  int bytesleft;
 
   /* Get the unadorned endpoint number */
 
@@ -1217,17 +1216,7 @@ static void sam_req_wrsetup(struct sam_usbdev_s *priv,
 
   /* Get the number of bytes remaining to be sent. */
 
-  bytesleft = privreq->req.len - privreq->req.xfrd;
-
-  /* Clip the requested transfer size to the number of bytes actually
-   * available
-   */
-
-  nbytes = bytesleft;
-  if (nbytes > bytesleft)
-    {
-      nbytes = bytesleft;
-    }
+  nbytes = privreq->req.len - privreq->req.xfrd;
 
   /* If we are not sending a zero length packet, then clip the size to
    * maxpacket and check if we need to send a following zero length packet.

@@ -296,6 +296,7 @@ struct sam_ep_s
 
   struct sam_usbdev_s *dev;          /* Reference to private driver data */
   struct sam_rqhead_s  reqq;         /* Read/write request queue */
+  struct sam_rqhead_s  pendq;        /* Write requests pending stall sent */
   volatile uint8_t     epstate;      /* State of the endpoint (see enum sam_epstate_e) */
   uint8_t              stalled:1;    /* true: Endpoint is stalled */
   uint8_t              pending:1;    /* true: IN Endpoint stall is pending */
@@ -373,9 +374,6 @@ static struct sam_req_s *
               sam_req_dequeue(struct sam_rqhead_s *queue);
 static void   sam_req_enqueue(struct sam_rqhead_s *queue,
                 struct sam_req_s *req);
-static inline void
-              sam_req_abort(struct sam_ep_s *privep,
-                struct sam_req_s *privreq, int16_t result);
 static void   sam_req_complete(struct sam_ep_s *privep, int16_t result);
 static void   sam_req_wrsetup(struct sam_usbdev_s *priv,
                 struct sam_ep_s *privep, struct sam_req_s *privreq);
@@ -793,25 +791,6 @@ static void sam_req_enqueue(struct sam_rqhead_s *queue, struct sam_req_s *req)
 }
 
 /****************************************************************************
- * Name: sam_req_abort
- ****************************************************************************/
-
-static inline void
-sam_req_abort(struct sam_ep_s *privep, struct sam_req_s *privreq, int16_t result)
-{
-  usbtrace(TRACE_DEVERROR(SAM_TRACEERR_REQABORTED),
-           (uint16_t)USB_EPNO(privep->ep.eplog));
-
-  /* Save the result in the request structure */
-
-  privreq->req.result = result;
-
-  /* Callback to the request completion handler */
-
-  privreq->req.callback(&privep->ep, &privreq->req);
-}
-
-/****************************************************************************
  * Name: sam_req_complete
  ****************************************************************************/
 
@@ -861,7 +840,6 @@ static void sam_req_wrsetup(struct sam_usbdev_s *priv,
   volatile uint32_t *fifo;
   uint8_t epno;
   int nbytes;
-  int bytesleft;
 
   /* Get the unadorned endpoint number */
 
@@ -873,17 +851,7 @@ static void sam_req_wrsetup(struct sam_usbdev_s *priv,
 
   /* Get the number of bytes remaining to be sent. */
 
-  bytesleft = privreq->req.len - privreq->req.xfrd;
-
-  /* Clip the requested transfer size to the number of bytes actually
-   * available
-   */
-
-  nbytes = bytesleft;
-  if (nbytes > bytesleft)
-    {
-      nbytes = bytesleft;
-    }
+  nbytes = privreq->req.len - privreq->req.xfrd;
 
   /* If we are not sending a zero length packet, then clip the size to
    * maxpacket and check if we need to send a following zero length packet.
@@ -897,7 +865,7 @@ static void sam_req_wrsetup(struct sam_usbdev_s *priv,
 
       if (nbytes >= privep->ep.maxpacket)
         {
-          nbytes =  privep->ep.maxpacket;
+          nbytes = privep->ep.maxpacket;
         }
 
       /* This is the new number of bytes "in-flight" */
@@ -974,9 +942,10 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
   epno = USB_EPNO(privep->ep.eplog);
 
   /* We get here when an IN endpoint interrupt occurs.  So now we know that
-   * there is no TX transfer in progress.
+   * there is no TX transfer in progress (epstate should be IDLE).
    */
 
+  DEBUGASSERT(privep->epstate == UDP_EPSTATE_IDLE);
   while (privep->epstate == UDP_EPSTATE_IDLE)
     {
       /* Check the request from the head of the endpoint request queue */
@@ -989,10 +958,6 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
            */
 
           usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_EPINQEMPTY), 0);
-
-          /* Clear any pending the TXCOMP interrupt */
-
-          sam_csr_clrbits(epno, UDPEP_CSR_TXCOMP);
 
           /* Was there a pending endpoint stall? */
 
@@ -1040,7 +1005,7 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
               privep->zlpneeded = false;
             }
 
-          /* Perform the write operation */
+          /* Perform the write operation.  epstate will become SENDING. */
 
           sam_req_wrsetup(priv, privep, privreq);
         }
@@ -1080,27 +1045,16 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
 
       /* If all of the bytes were sent (including any final zero length
        * packet) then we are finished with the request buffer), then we can
-       * return the request buffer to the class driver.  The transfer is not
-       * finished yet, however.  There are still bytes in flight.  The
-       * transfer is truly finished when we are called again and the
+       * return the request buffer to the class driver.  The transfer may
+       * not finished yet, however.  There may still be bytes in flight.
+       * The transfer is truly finished when we are called again and the
        * request buffer is empty.
        */
 
       if (privreq->req.len >= privreq->req.xfrd &&
           privep->epstate == UDP_EPSTATE_IDLE)
         {
-          /* TXCOMP must be cleared after the last packet has been set.
-           * TXCOMP was set by the USB device when it has received an ACK
-           * PID signal for the Data IN packet.  An interrupt is pending
-           * while TXCOMP is set.
-           *
-           * REVISIT:  This function might be called before TXCOMP is
-           * actually received.
-           */
-
-          //sam_csr_clrbits(epno, UDPEP_CSR_TXCOMP);
-
-         /* Return the write request to the class driver */
+          /* Return the write request to the class driver */
 
           usbtrace(TRACE_COMPLETE(USB_EPNO(privep->ep.eplog)),
                    privreq->req.xfrd);
@@ -1970,6 +1924,10 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
     {
       usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_TXCOMP), (uint16_t)csr);
 
+      /* Clear the TXCOMP interrupt */
+
+      sam_csr_clrbits(epno, UDPEP_CSR_TXCOMP);
+
       /* Sending state.  This is the completion of a "normal" write request
        * transfer.  In this case, we need to resume request processing in
        * order to send the next outgoing packet.
@@ -1978,9 +1936,7 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
       if (privep->epstate == UDP_EPSTATE_SENDING ||
           privep->epstate == UDP_EPSTATE_EP0STATUSIN)
         {
-          /* Continue/resume processing the write requests.  TXCOMP will
-           * be cleared by sam_req_write().
-           */
+          /* Continue/resume processing the write requests */
 
           privep->epstate = UDP_EPSTATE_IDLE;
           (void)sam_req_write(priv, privep);
@@ -2002,19 +1958,12 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
 
           privep->epstate = UDP_EPSTATE_IDLE;
           sam_setdevaddr(priv, priv->devaddr);
-
-          /* Acknowledge the TXCOMP interrupt */
-
-          sam_csr_clrbits(epno, UDPEP_CSR_TXCOMP);
         }
       else
         {
-          /* Unexpected TXCOMP interrupt.  Complain and acknowledge the
-           * TXCOMP interrupt.
-           */
+          /* Unexpected TXCOMP interrupt */
 
           usbtrace(TRACE_DEVERROR(SAM_TRACEERR_TXCOMPERR), privep->epstate);
-          sam_csr_clrbits(epno, UDPEP_CSR_TXCOMP);
         }
     }
 
@@ -2587,7 +2536,7 @@ static int sam_ep_stall(struct sam_ep_s *privep)
 
       sam_csr_setbits(epno, UDPEP_CSR_FORCESTALL);
     }
- 
+
   irqrestore(flags);
   return OK;
 }
@@ -2599,6 +2548,7 @@ static int sam_ep_stall(struct sam_ep_s *privep)
 static int sam_ep_resume(struct sam_ep_s *privep)
 {
   struct sam_usbdev_s *priv;
+  struct sam_req_s *req;
   irqstate_t flags;
   uint8_t epno;
 
@@ -2623,17 +2573,23 @@ static int sam_ep_resume(struct sam_ep_s *privep)
       privep->pending = false;
       privep->epstate = UDP_EPSTATE_IDLE;
 
-      /* Clear FORCESTALL request
-       * REVISIT:  Data sheet says to reset toggle to DATA0 only on OUT
-       * endpoints.
-       */
+      /* Clear FORCESTALL request */
 
-      sam_csr_clrbits(epno, UDPEP_CSR_DTGLE | UDPEP_CSR_FORCESTALL);
+      sam_csr_clrbits(epno, UDPEP_CSR_FORCESTALL);
 
       /* Reset the endpoint FIFO */
 
       sam_putreg(UDP_RSTEP(epno), SAM_UDP_RSTEP);
       sam_putreg(0, SAM_UDP_RSTEP);
+
+      /* Copy any requests in the pending request queue to the working
+       * request queue.
+       */
+
+      while ((req = sam_req_dequeue(&privep->pendq)) != NULL)
+        {
+          sam_req_enqueue(&privep->reqq, req);
+        }
 
       /* Resuming any blocked data transfers on the endpoint */
 
@@ -3099,16 +3055,20 @@ static int sam_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 
   if (USB_ISEPIN(ep->eplog) || epno == EP0)
     {
-      /* If the endpoint is stalled (or there is a stall pending), then fail
-       * any attempts to write through the endpoint.
-       */
+      /* Check if the endpoint is stalled (or there is a stall pending) */
 
       if (privep->stalled || privep->pending)
         {
-          sam_req_abort(privep, privreq, -EBUSY);
-          ulldbg("ERROR: stalled\n");
-          ret = -EPERM;
+          /* Yes.. in this case, save the new they will get in a special
+           * "pending" they will get queue until the stall is cleared.
+           */
+
+          ulldbg("Pending stall clear\n");
+          sam_req_enqueue(&privep->pendq, privreq);
+          usbtrace(TRACE_INREQQUEUED(epno), req->len);
+          ret = OK;
         }
+
       else
         {
           /* Add the new request to the request queue for the IN endpoint */
@@ -3213,10 +3173,10 @@ static int sam_ep_stallresume(struct usbdev_ep_s *ep, bool resume)
         {
           /* Are there any unfinished write requests in the request queue? */
 
-          if (!sam_rqempty(&privep->reqq)))
+          if (!sam_rqempty(&privep->reqq))
             {
               /* Just set a flag to indicate that the endpoint must be
-               * stalled on the next TXCOMP interrupt when the requeust
+               * stalled on the next TXCOMP interrupt when the request
                * queue becomes empty.
                */
 
