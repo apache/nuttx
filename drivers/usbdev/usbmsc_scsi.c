@@ -81,18 +81,27 @@
 
 /* Configuration ************************************************************/
 
-/* Race condition workaround found by David Hewson.  This race condition
+/* Race condition workaround found by David Hewson.  This race condition:
+ *
  * "seems to relate to stalling the endpoint when a short response is
- * generated which causes a residue to exist when the CSW would be returned.
- * I think there's two issues here.  The first being if the transfer which
- * had just been queued before the stall had not completed then it wouldn't
- * then complete once the endpoint was stalled?  The second is that the
- * subsequent transfer for the CSW would be dropped on the floor (by the
- * epsubmit() function) if the end point was still stalled as the control
- * transfer to resume it hadn't occurred."
+ *  generated which causes a residue to exist when the CSW would be returned.
+ *  I think there's two issues here.  The first being if the transfer which
+ *  had just been queued before the stall had not completed then it wouldn't
+ *  then complete once the endpoint was stalled?  The second is that the
+ *  subsequent transfer for the CSW would be dropped on the floor (by the
+ *  epsubmit() function) if the end point was still stalled as the control
+ *  transfer to resume it hadn't occurred."
+ *
+ * If queuing of stall requests is supported by DCD then this workaround is
+ * not required.  In this case, (1) the stall is not sent until all write
+ * requests preceding the stall request are sent, (2) the stall is sent,
+ * and then after the stall is cleared, (3) all write requests queued after
+ * the stall are sent.
  */
 
-#define CONFIG_USBMSC_RACEWAR 1
+#ifndef CONFIG_ARCH_USBDEV_STALLQUEUE
+#  define USBMSC_STALL_RACEWAR 1
+#endif
 
 /****************************************************************************
  * Private Types
@@ -2343,7 +2352,7 @@ static int usbmsc_cmdfinishstate(FAR struct usbmsc_dev_s *priv)
             {
               usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_CMDFINISHRESIDUE), (uint16_t)priv->residue);
 
-#ifdef CONFIG_USBMSC_RACEWAR
+#ifdef USBMSC_STALL_RACEWAR
               /* (See description of the workaround at the top of the file).
                * First, wait for the transfer to complete, then stall the endpoint
                */
