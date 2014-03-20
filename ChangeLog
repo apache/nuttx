@@ -7014,4 +7014,8 @@
 	* include/nuttx/i2c.h:  More typo fixes from Vijay Kumar (2014-3-19).
 	* arch/Kconfig and *_assert.h:  Add a configuration option to enable
 	  dumping of the USB trace buffer on assertion (2014-3-19).
+	* drivers/usbdev/Kconfig, arch/arm/src/sam34/Kconfig, and
+	  drivers/usbdev/usbmsc_scsi.c:  If DCD can support queuing of stall
+	  requests, then the USB MSC stall work around delays are not necessary
+	  (2014-3-20).
 

@@ -561,6 +561,7 @@ config SAM34_UDP
 	bool "USB Device Full Speed (UDP)"
 	default n
 	depends on ARCH_CHIP_SAM4S || ARCH_CHIP_SAM4E
+	select ARCH_USBDEV_STALLQUEUE
 
 config SAM34_UDPHS
 	bool "USB Device High Speed (UDPHS)"

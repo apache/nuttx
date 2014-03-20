@@ -947,6 +947,15 @@ o USB (drivers/usbdev, drivers/usbhost)
   Description: There is a workaround for a bug in drivers/usbdev/usbdev_storage.c.
                that involves delays.  This needs to be redesigned to eliminate these
                delays.  See logic conditioned on CONFIG_USBMSC_RACEWAR.
+
+               If queuing of stall requests is supported by DCD then this workaround
+               is not required.  In this case, (1) the stall is not sent until all
+               write requests preceding the stall request are sent, (2) the stall is
+               sent, and then after the stall is cleared, (3) all write requests
+               queued after the stall are sent.
+
+               See, for example, the queuing of pending stall requests in the SAM3/4
+               UDP driver at arch/arm/src/sam34/sam_udp.c.
   Status:      Open
   Priority:    Medium
 
