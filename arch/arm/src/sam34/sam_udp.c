@@ -380,9 +380,6 @@ static void   sam_req_wrsetup(struct sam_usbdev_s *priv,
                 struct sam_ep_s *privep, struct sam_req_s *privreq);
 static int    sam_req_write(struct sam_usbdev_s *priv,
                 struct sam_ep_s *privep);
-static void   sam_req_rddone(struct sam_usbdev_s *priv,
-                struct sam_ep_s *privep, struct sam_req_s *privreq,
-                uint16_t recvsize);
 static int    sam_req_read(struct sam_usbdev_s *priv,
                 struct sam_ep_s *privep, uint16_t recvsize);
 static void   sam_req_cancel(struct sam_ep_s *privep, int16_t status);
@@ -1100,53 +1097,6 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
 }
 
 /****************************************************************************
- * Name: sam_req_rddone
- *
- * Description:
- *   The last OUT transfer has completed.  Read 'recvsize' bytes from the
- *   FIFO into the read request buffer.
- *
- ****************************************************************************/
-
-static void sam_req_rddone(struct sam_usbdev_s *priv,
-                           struct sam_ep_s *privep,
-                           struct sam_req_s *privreq, uint16_t recvsize)
-{
-  volatile uint32_t *fifo;
-  uint8_t *dest;
-  int remaining;
-  int readlen;
-  int epno;
-
-  /* Get the number of bytes that can be received.  This is the size of the
-   * user-provided request buffer, minus the number of bytes already
-   * transferred to the user-buffer.
-   */
-
-  remaining = privreq->req.len - privreq->req.xfrd;
-
-  /* Read the smaller of the number of bytes available in FIFO and the
-   * size remaining in the request buffer provided by the caller.
-   */
-
-  readlen = MIN(remaining, recvsize);
-  privreq->req.xfrd += readlen;
-
-  /* Get the source and destination transfer addresses */
-
-  epno = USB_EPNO(privep->ep.eplog);
-  fifo = (volatile uint32_t *)SAM_UDPEP_FDR(epno);
-  dest = privreq->req.buf + privreq->req.xfrd;
-
-  /* Retrieve packet from the FIFO */
-
-  for (; readlen > 0; readlen--)
-    {
-      *dest++ = (uint8_t)(*fifo);
-    }
-}
-
-/****************************************************************************
  * Name: sam_req_read
  *
  * Description:
@@ -1178,7 +1128,11 @@ static int sam_req_read(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
                         uint16_t recvsize)
 {
   struct sam_req_s *privreq;
-  uint8_t epno;
+  volatile const uint32_t *fifo;
+  uint8_t *dest;
+  int remaining;
+  int readlen;
+  int epno;
 
   DEBUGASSERT(priv && privep && privep->epstate == UDP_EPSTATE_IDLE);
 
@@ -1213,18 +1167,36 @@ static int sam_req_read(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
 
       usbtrace(TRACE_READ(USB_EPNO(privep->ep.eplog)), recvsize);
 
-      /* Update the number of bytes transferred with the received size */
+      /* Get the number of bytes that can be received.  This is the size
+       * of the user-provided request buffer, minus the number of bytes
+       * already transferred to the user-buffer.
+       */
 
-      privreq->req.xfrd += recvsize;
+      remaining = privreq->req.len - privreq->req.xfrd;
+
+      /* Read the smaller of the number of bytes available in FIFO and the
+       * size remaining in the request buffer provided by the caller.
+       */
+
+      readlen  = MIN(remaining, recvsize);
+      recvsize = 0;
+
+      /* Get the source and destination transfer addresses */
+
+      fifo = (volatile const uint32_t *)SAM_UDPEP_FDR(epno);
+      dest = privreq->req.buf + privreq->req.xfrd;
+
+      /* Update the total number of bytes transferred */
+
+      privreq->req.xfrd += readlen;
       privreq->inflight  = 0;
 
-      /* Read the incoming data from the FIFO */
+      /* Retrieve packet from the endpoint FIFO */
 
-      sam_req_rddone(priv, privep, privreq, recvsize);
-
-      /* In case we go through the loop again */
-
-      recvsize = 0;
+      for (; readlen > 0; readlen--)
+        {
+          *dest++ = (uint8_t)(*fifo);
+        }
 
       /* If nothing has yet be transferred into the read request, then
        * indicate that we are in the RECEIVING state.
@@ -1285,11 +1257,11 @@ static void sam_req_cancel(struct sam_ep_s *privep, int16_t result)
 
 static void sam_ep0_read(uint8_t *buffer, size_t buflen)
 {
-  volatile uint32_t *fifo;
+  volatile const uint32_t *fifo;
 
   /* Retrieve packet from the FIFO */
 
-  fifo = (volatile uint32_t *)SAM_UDPEP_FDR(EP0);
+  fifo = (volatile const uint32_t *)SAM_UDPEP_FDR(EP0);
   for (; buflen > 0; buflen--)
     {
       *buffer++ = (uint8_t)*fifo;
@@ -2041,7 +2013,7 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
 
       /* Acknowledge the RX Data Bank 0 interrupt */
 
-      sam_csr_setbits(epno, UDPEP_CSR_RXDATABK0);
+      sam_csr_clrbits(epno, UDPEP_CSR_RXDATABK0);
     }
 
   /* OUT packet received in data bank 1 */
@@ -2056,7 +2028,7 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
 
       /* Acknowledge the RX Data Bank 1 interrupt */
 
-      sam_csr_setbits(epno, UDPEP_CSR_RXDATABK1);
+      sam_csr_clrbits(epno, UDPEP_CSR_RXDATABK1);
     }
 
   /* STALL sent */
