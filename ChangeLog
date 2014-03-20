@@ -7018,4 +7018,7 @@
 	  drivers/usbdev/usbmsc_scsi.c:  If DCD can support queuing of stall
 	  requests, then the USB MSC stall work around delays are not necessary
 	  (2014-3-20).
+	* net/netdev_findbyaddr.c:  Skip network devices that are in the
+	  "down" state.  It does not make sense to consider an address match
+	  with a "down" device.  From Brennan Ashton (2014-3-20).
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/netdev_findbyaddr.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,7 +55,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Priviate Types
+ * Private Types
  ****************************************************************************/
 
 /****************************************************************************
@@ -79,7 +79,8 @@
  *
  * Description:
  *   Find a previously registered network device by matching a local address
- *   with the subnet served by the device
+ *   with the subnet served by the device.  Only "up" devices are considered
+ *   (since a "down" device has no meaningful address).
  *
  * Parameters:
  *   addr - Pointer to the remote address of a connection
@@ -95,16 +96,35 @@
 static FAR struct uip_driver_s *netdev_finddevice(const uip_ipaddr_t addr)
 {
   struct uip_driver_s *dev;
+  uint8_t iff;
+
+  /* Examine each registered network device */
 
   netdev_semtake();
   for (dev = g_netdevices; dev; dev = dev->flink)
     {
-      if (uip_ipaddr_maskcmp(dev->d_ipaddr, addr, dev->d_netmask))
+      /* Get the interface flags */
+
+      if (uip_getifstatus(dev->d_ifname, &iff) == OK)
         {
-          netdev_semgive();
-          return dev;
+          /* Is the interface in the "up" state? */
+
+          if ((iff & IFF_UP) != 0)
+            {
+              /* Yes.. check for an address match (under the netmask) */
+
+              if (uip_ipaddr_maskcmp(dev->d_ipaddr, addr, dev->d_netmask))
+                {
+                  /* Its a match */
+
+                  netdev_semgive();
+                  return dev;
+                }
+            }
         }
     }
+
+  /* No device with the matching address found */
 
   netdev_semgive();
   return NULL;

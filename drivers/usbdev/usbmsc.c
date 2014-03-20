@@ -264,7 +264,7 @@ static int usbmsc_bind(FAR struct usbdevclass_driver_s *driver,
   priv->usbdev   = dev;
 
   /* Save the reference to our private data structure in EP0 so that it
-   * can be recovered in ep0 completion events (Unless we are part of 
+   * can be recovered in ep0 completion events (Unless we are part of
    * a composite device and, in that case, the composite device owns
    * EP0).
    */
