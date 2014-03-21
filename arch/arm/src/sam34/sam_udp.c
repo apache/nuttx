@@ -851,28 +851,27 @@ static void sam_req_wrsetup(struct sam_usbdev_s *priv,
 
   /* Get the number of bytes remaining to be sent. */
 
+  DEBUGASSERT(privreq->req.xfrd <= privreq->req.len);
   nbytes = privreq->req.len - privreq->req.xfrd;
 
-  /* If we are not sending a zero length packet, then clip the size to
-   * maxpacket and check if we need to send a following zero length packet.
+  /* Either send the maxpacketsize or all of the remaining data in
+   * the request.
    */
+
+  if (nbytes >= privep->ep.maxpacket)
+    {
+      nbytes = privep->ep.maxpacket;
+    }
+
+  /* This is the new number of bytes "in-flight" */
+
+  privreq->inflight = nbytes;
+  usbtrace(TRACE_WRITE(USB_EPNO(privep->ep.eplog)), nbytes);
+
+  /* Check if we are sending a zero length packet */
 
   if (nbytes > 0)
     {
-      /* Either send the maxpacketsize or all of the remaining data in
-       * the request.
-       */
-
-      if (nbytes >= privep->ep.maxpacket)
-        {
-          nbytes = privep->ep.maxpacket;
-        }
-
-      /* This is the new number of bytes "in-flight" */
-
-      privreq->inflight = nbytes;
-      usbtrace(TRACE_WRITE(USB_EPNO(privep->ep.eplog)), nbytes);
-
       /* The new buffer pointer is the start of the buffer plus the number of
        * bytes successfully transferred plus the number of bytes previously
        * "in-flight".
@@ -1040,6 +1039,7 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
            * endpoint’s UDPEP_CSRx register has been set.
            */
 
+          usbtrace(TRACE_WRITE(epno), 0);
           sam_csr_setbits(epno, UDPEP_CSR_TXPKTRDY);
         }
 
@@ -1056,9 +1056,7 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
         {
           /* Return the write request to the class driver */
 
-          usbtrace(TRACE_COMPLETE(USB_EPNO(privep->ep.eplog)),
-                   privreq->req.xfrd);
-
+          usbtrace(TRACE_COMPLETE(epno), privreq->req.xfrd);
           sam_req_complete(privep, OK);
         }
     }
@@ -1318,7 +1316,12 @@ static void sam_ep0_dispatch(struct sam_usbdev_s *priv)
  *
  * Description:
  *   This function is called after the completion of the STATUS phase to
- *   instantiate the device address that was received during the SETUP phase.
+ *   instantiate the device address that was received during the SETUP
+ *   phase.  This enters the ADDRESSED state from either the DEFAULT or the
+ *   CONFIGURED states.
+ *
+ *   If called with address == 0, then function will revert to the DEFAULT,
+ *   un-configured and un-addressed state.
  *
  ****************************************************************************/
 
@@ -1334,10 +1337,11 @@ static void sam_setdevaddr(struct sam_usbdev_s *priv, uint8_t address)
       regval = UDP_FADDR(address) | UDP_FADDR_FEN;
       sam_putreg(regval, SAM_UDP_FADDR);
 
-      /* Go to the addressed state */
+      /* Go to the addressed but not configured state */
 
       regval  = sam_getreg(SAM_UDP_GLBSTAT);
       regval |= UDP_GLBSTAT_FADDEN;
+      regval &= ~UDP_GLBSTAT_CONFG;
       sam_putreg(regval, SAM_UDP_GLBSTAT);
 
       priv->devstate = UDP_DEVSTATE_ADDRESSED;
@@ -1349,6 +1353,14 @@ static void sam_setdevaddr(struct sam_usbdev_s *priv, uint8_t address)
        */
 
       sam_putreg(UDP_FADDR_FEN, SAM_UDP_FADDR);
+
+      /* Make sure that we are not in either the configured or addressed
+       * states
+       */
+
+      regval  = sam_getreg(SAM_UDP_GLBSTAT);
+      regval &= ~(UDP_GLBSTAT_FADDEN | UDP_GLBSTAT_CONFG);
+      sam_putreg(regval, SAM_UDP_GLBSTAT);
 
       /* Revert to the un-addressed, default state */
 
@@ -2071,6 +2083,9 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
           /* Clear the CSR:DIR bit to support the host-to-device data OUT
            * data transfer.  This bit must be cleared before CSR:RXSETUP is
            * cleared at the end of the SETUP stage.
+           *
+           * NOTE: Clearing this bit seems to be un-necessary.  I think it must
+           * be cleared when RXSETUP is set.
            */
 
           sam_csr_clrbits(epno, UDPEP_CSR_DIR);
@@ -2750,7 +2765,7 @@ static int sam_ep_configure_internal(struct sam_ep_s *privep,
 
   /* Configure and enable the endpoint */
 
-  regval = (((uint32_t)dirin << UDPEP_CSR_DIR_SHIFT) | UDPEP_CSR_EPEDS);
+  regval = UDPEP_CSR_EPEDS;
   switch (eptype)
     {
     case USB_EP_ATTR_XFER_CONTROL:
@@ -2830,12 +2845,6 @@ static int sam_ep_configure_internal(struct sam_ep_s *privep,
   /* Enable endpoint interrupts */
 
   sam_putreg(UDP_INT_EP(epno), SAM_UDP_IER);
-
-  /* If this was the last endpoint, then the class driver is fully
-   * configured.
-   */
-
-  priv->devstate = UDP_DEVSTATE_CONFIGURED;
   sam_dumpep(priv, epno);
   return OK;
 }
@@ -2856,6 +2865,7 @@ static int sam_ep_configure(struct usbdev_ep_s *ep,
                             bool last)
 {
   struct sam_ep_s *privep = (struct sam_ep_s *)ep;
+  int ret;
 
   /* Verify parameters.  Endpoint 0 is not available at this interface */
 
@@ -2869,7 +2879,30 @@ static int sam_ep_configure(struct usbdev_ep_s *ep,
 
   /* This logic is implemented in sam_ep_configure_internal */
 
-  return sam_ep_configure_internal(privep, desc);
+  ret = sam_ep_configure_internal(privep, desc);
+
+  /* If this was the last endpoint, then the class driver is fully
+   * configured.
+   */
+
+  if (ret == OK && last)
+    {
+      struct sam_usbdev_s *priv = privep->dev;
+      uint32_t regval;
+
+      /* Go to the configured state (we should have been in the addressed
+       * state)
+       */
+
+      DEBUGASSERT(priv && priv->devstate == UDP_DEVSTATE_ADDRESSED);
+      priv->devstate = UDP_DEVSTATE_CONFIGURED;
+
+      regval  = sam_getreg(SAM_UDP_GLBSTAT);
+      regval |= UDP_GLBSTAT_CONFG;
+      sam_putreg(regval, SAM_UDP_GLBSTAT);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -2907,7 +2940,7 @@ static int sam_ep_disable(struct usbdev_ep_s *ep)
 
   /* Revert to the addressed-but-not-configured state */
 
-  priv->devstate = UDP_DEVSTATE_ADDRESSED;
+  sam_setdevaddr(priv, priv->devaddr);
   irqrestore(flags);
   return OK;
 }
@@ -3493,7 +3526,7 @@ static void sam_reset(struct sam_usbdev_s *priv)
 
   CLASS_DISCONNECT(priv->driver, &priv->usbdev);
 
-  /* The device enters the Default state */
+  /* The device enters the Default state (un-addressed and un-configured) */
 
   priv->devaddr   = 0;
   sam_setdevaddr(priv, 0);

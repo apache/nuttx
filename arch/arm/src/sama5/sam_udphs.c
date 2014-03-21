@@ -3357,12 +3357,6 @@ static int sam_ep_configure_internal(struct sam_ep_s *privep,
     }
 
   sam_putreg(regval, SAM_UDPHS_EPTCTLENB(epno));
-
-  /* If this was the last endpoint, then the class driver is fully
-   * configured.
-   */
-
-  priv->devstate = UDPHS_DEVSTATE_CONFIGURED;
   sam_dumpep(priv, epno);
   return OK;
 }
@@ -3383,6 +3377,7 @@ static int sam_ep_configure(struct usbdev_ep_s *ep,
                             bool last)
 {
   struct sam_ep_s *privep = (struct sam_ep_s *)ep;
+  int ret;
 
   /* Verify parameters.  Endpoint 0 is not available at this interface */
 
@@ -3396,7 +3391,17 @@ static int sam_ep_configure(struct usbdev_ep_s *ep,
 
   /* This logic is implemented in sam_ep_configure_internal */
 
-  return sam_ep_configure_internal(privep, desc);
+  ret = sam_ep_configure_internal(privep, desc);
+  if (ret == OK && last)
+    {
+      /* If this was the last endpoint, then the class driver is fully
+       * configured.
+       */
+
+      priv->devstate = UDPHS_DEVSTATE_CONFIGURED;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
