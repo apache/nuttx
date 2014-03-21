@@ -172,11 +172,12 @@ int nanosleep(FAR const struct timespec *rqtp, FAR struct timespec *rmtp)
   if (errval == EAGAIN)
     {
       /* The timeout "error" is the normal, successful result */
+
       irqrestore(flags);
       return OK;
     }
 
-  /* If we get there, the wait has fail because we were awakened by a
+  /* If we get there, the wait has failed because we were awakened by a
    * signal.  Return the amount of "unwaited" time if rmtp is non-NULL.
    */
 
