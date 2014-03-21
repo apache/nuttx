@@ -1229,6 +1229,8 @@ static void sam_ep0_read(uint8_t *buffer, size_t buflen)
 {
   volatile const uint32_t *fifo;
 
+  usbtrace(TRACE_READ(EP0), buflen);
+
   /* Retrieve packet from the FIFO */
 
   fifo = (volatile const uint32_t *)SAM_UDPEP_FDR(EP0);

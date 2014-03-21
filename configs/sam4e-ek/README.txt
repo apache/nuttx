@@ -22,6 +22,8 @@ Contents
   - Networking Support
   - AT25 Serial FLASH
   - USB Full-Speed Device
+  - HSMCI
+  - Touchscreen
   - SAM4E-EK-specific Configuration Options
   - Configurations
 
@@ -671,7 +673,9 @@ USB Full-Speed Device
 
     Device Drivers -> USB Device Driver Support
       CONFIG_CDCACM=y                       : Enable the CDC/ACM device
-      CONFIG_CDCACM_BULKIN_REQLEN=96        : Default request size
+      CONFIG_CDCACM_EPINTIN=1               : Select endpoint numbers
+      CONFIG_CDCACM_EPBULKOUT=2
+      CONFIG_CDCACM_EPBULKIN=3
 
   The following setting enables an example that can can be used to control
   the CDC/ACM device.  It will add two new NSH commands:
@@ -681,7 +685,15 @@ USB Full-Speed Device
         /dev/ttyACM0).
 
     Application Configuration -> Examples:
-      CONFIG_SYSTEM_CDCACM=y              : Enable an CDC/ACM example
+      CONFIG_SYSTEM_CDCACM=y                : Enable an CDC/ACM example
+      CONFIG_SYSTEM_CDCACM_DEVMINOR=0       : Use /dev/ttyUSB0
+
+  NOTE: You cannot have both the CDC/ACM and the MSC class drivers enabled
+  simultaneously in the way described here.  If you want to use both, then
+  you will need to consider a USB "composite" devices that support supports
+  both interfaces.  There are no instructures here for setting up the USB
+  composite device, but there are other examples in the NuttX board support
+  directories that can be used for reference.
 
   Debugging USB Device
   --------------------
@@ -718,6 +730,81 @@ USB Full-Speed Device
   NOTE: If USB debug output is also enabled, both outputs will appear on the
   serial console.  However, the debug output will be asynchronous with the
   trace output and, hence, difficult to interpret.
+
+HSMCI
+=====
+
+  Enabling HSMCI support. The SAM3U-KE provides a an SD memory card slot.
+  Support for the SD slot can be enabled with the following settings:
+
+    System Type->ATSAM3/4 Peripheral Support
+      CONFIG_SAM34_HSMCI=y                    : Enable HSMCI support
+      CONFIG_SAM34_DMAC0=y                    : DMAC support is needed by HSMCI
+
+    System Type
+      CONFIG_SAM34_GPIO_IRQ=y                 : PIO interrupts needed
+      CONFIG_SAM34_GPIOA_IRQ=y                : Card detect pin is on PIOA
+
+    Device Drivers -> MMC/SD Driver Support
+      CONFIG_MMCSD=y                          : Enable MMC/SD support
+      CONFIG_MMSCD_NSLOTS=1                   : One slot per driver instance
+      CONFIG_MMCSD_HAVECARDDETECT=y           : Supports card-detect PIOs
+      CONFIG_MMCSD_SDIO=y                     : SDIO-based MMC/SD support
+      CONFIG_SDIO_DMA=y                       : Use SDIO DMA
+      CONFIG_SDIO_BLOCKSETUP=y                : Needs to know block sizes
+
+    Library Routines
+      CONFIG_SCHED_WORKQUEUE=y                : Driver needs work queue support
+
+    Application Configuration -> NSH Library
+      CONFIG_NSH_ARCHINIT=y                   : NSH board-initialization
+
+Touchscreen
+===========
+
+    The NSH configuration can be used to verify the ADS7843E touchscreen on
+    the SAM4E-EK LCD.  With these modifications, you can include the touchscreen
+    test program at apps/examples/touchscreen as an NSH built-in application. 
+    You can enable the touchscreen and test by modifying the default
+    configuration in the following ways:
+
+      Device Drivers
+        CONFIG_SPI=y                          : Enable SPI support
+        CONFIG_SPI_EXCHANGE=y                 : The exchange() method is supported
+        CONFIG_SPI_OWNBUS=y                   : Smaller code if this is the only SPI device
+
+        CONFIG_INPUT=y                        : Enable support for input devices
+        CONFIG_INPUT_ADS7843E=y               : Enable support for the XPT2046
+        CONFIG_ADS7843E_SPIDEV=2              : Use SPI CS 2 for communication
+        CONFIG_ADS7843E_SPIMODE=0             : Use SPI mode 0
+        CONFIG_ADS7843E_FREQUENCY=1000000     : SPI BAUD 1MHz
+        CONFIG_ADS7843E_SWAPXY=y              : If landscape orientation
+        CONFIG_ADS7843E_THRESHX=51            : These will probably need to be tuned
+        CONFIG_ADS7843E_THRESHY=39
+
+      System Type -> Peripherals:
+        CONFIG_SAM34_SPI0=y                   : Enable support for SPI
+
+      System Type:
+        CONFIG_GPIO_IRQ=y                     : GPIO interrupt support
+        CONFIG_GPIOA_IRQ=y                    : Enable GPIO interrupts from port A
+
+      RTOS Features:
+        CONFIG_DISABLE_SIGNALS=n              : Signals are required
+
+      Library Support:
+        CONFIG_SCHED_WORKQUEUE=y              : Work queue support required
+
+      Application Configuration:
+        CONFIG_EXAMPLES_TOUCHSCREEN=y         : Enable the touchscreen built-in test
+
+      Defaults should be okay for related touchscreen settings.  Touchscreen
+      debug output on UART0 can be enabled with:
+
+      Build Setup:
+        CONFIG_DEBUG=y                    : Enable debug features
+        CONFIG_DEBUG_VERBOSE=y            : Enable verbose debug output
+        CONFIG_DEBUG_INPUT=y              : Enable debug output from input devices
 
 SAM4E-EK-specific Configuration Options
 =======================================
@@ -994,6 +1081,10 @@ Configurations
        a network because additional time will be required to fail with
        timeout errors.
 
+       STATUS:
+       2014-3-13: The basic NSH serial console is working.  Network support
+                  has been verified.
+
     3. This configuration supports a network with fixed IP address.  You
        may have to change these settings for your network:
 
@@ -1015,80 +1106,26 @@ Configurations
        reconfigured (See see the configuration settings and usage notes
        above in the section entitled "AT25 Serial FLASH").
 
-    5. This configuration has been used for verifying the touchscreen on
-       on the SAM4E-EK LCD.  With these modifications, you can include the
-       touchscreen test program at apps/examples/touchscreen as an NSH built-in
-       application.  You can enable the touchscreen and test by modifying the
-       default configuration in the following ways:
+       STATUS:
+       2014-3-14: The DMA-based SPI appears to be functional and can be used
+                  to support a FAT file system on the AT25 Serial FLASH.
 
-          Device Drivers
-            CONFIG_SPI=y                      : Enable SPI support
-            CONFIG_SPI_EXCHANGE=y             : The exchange() method is supported
-            CONFIG_SPI_OWNBUS=y               : Smaller code if this is the only SPI device
+    5. To use USB, see the instructions above under "USB Full-Speed Device."
 
-            CONFIG_INPUT=y                    : Enable support for input devices
-            CONFIG_INPUT_ADS7843E=y           : Enable support for the XPT2046
-            CONFIG_ADS7843E_SPIDEV=2          : Use SPI CS 2 for communication
-            CONFIG_ADS7843E_SPIMODE=0         : Use SPI mode 0
-            CONFIG_ADS7843E_FREQUENCY=1000000 : SPI BAUD 1MHz
-            CONFIG_ADS7843E_SWAPXY=y          : If landscpe orientation
-            CONFIG_ADS7843E_THRESHX=51        : These will probably need to be tuned
-            CONFIG_ADS7843E_THRESHY=39
+       STATUS:
+       2014-3-21: USB support is under development and only partially
+                  functional.  Additional test and integration is required.
 
-          System Type -> Peripherals:
-            CONFIG_SAM34_SPI0=y                : Enable support for SPI
+    6. This configuration can be used to verify the touchscreen on on the
+       SAM4E-EK LCD.  See the instructions above in the paragraph entitled
+       "Touchscreen".
 
-          System Type:
-            CONFIG_GPIO_IRQ=y                 : GPIO interrupt support
-            CONFIG_GPIOA_IRQ=y                : Enable GPIO interrupts from port A
+       STATUS:
+         2014-3-21:  The touchscreen has not yet been tested.
 
-          RTOS Features:
-            CONFIG_DISABLE_SIGNALS=n          : Signals are required
+    7. Enabling HSMCI support. The SAM3U-KE provides a an SD memory card
+       slot.  Support for the SD slot can be enabled following the
+       instructions provided above in the paragraph entitled "HSMCI."
 
-          Library Support:
-            CONFIG_SCHED_WORKQUEUE=y          : Work queue support required
-
-          Applicaton Configuration:
-            CONFIG_EXAMPLES_TOUCHSCREEN=y     : Enable the touchscreen built-int test
-
-          Defaults should be okay for related touchscreen settings.  Touchscreen
-          debug output on UART0 can be enabled with:
-
-          Build Setup:
-            CONFIG_DEBUG=y                    : Enable debug features
-            CONFIG_DEBUG_VERBOSE=y            : Enable verbose debug output
-            CONFIG_DEBUG_INPUT=y              : Enable debug output from input devices
-
-    6. Enabling HSMCI support. The SAM3U-KE provides a an SD memory card
-       slot.  Support for the SD slot can be enabled with the following
-       settings:
-
-       System Type->ATSAM3/4 Peripheral Support
-         CONFIG_SAM34_HSMCI=y                 : Enable HSMCI support
-         CONFIG_SAM34_DMAC0=y                 : DMAC support is needed by HSMCI
-
-       System Type
-         CONFIG_SAM34_GPIO_IRQ=y              : PIO interrupts needed
-         CONFIG_SAM34_GPIOA_IRQ=y             : Card detect pin is on PIOA
-
-       Device Drivers -> MMC/SD Driver Support
-         CONFIG_MMCSD=y                       : Enable MMC/SD support
-         CONFIG_MMSCD_NSLOTS=1                : One slot per driver instance
-         CONFIG_MMCSD_HAVECARDDETECT=y        : Supports card-detect PIOs
-         CONFIG_MMCSD_SDIO=y                  : SDIO-based MMC/SD support
-         CONFIG_SDIO_DMA=y                    : Use SDIO DMA
-         CONFIG_SDIO_BLOCKSETUP=y             : Needs to know block sizes
-
-       Library Routines
-         CONFIG_SCHED_WORKQUEUE=y             : Driver needs work queue support
-
-       Application Configuration -> NSH Library
-         CONFIG_NSH_ARCHINIT=y                : NSH board-initialization
-
-    STATUS:
-      2014-3-13: The basic NSH serial console is working.  Network support
-        has been verified.  HSMCI and touchscreen have not been tested (the
-        above notes came from the SAM3U-EK and have not been yet been tested
-        on the SAM4E-EK).
-      2014-3-14: The DMA-based SPI appears to be functional and can be used
-        to support a FAT file system on the AT25 Serial FLASH.
+       STATUS:
+         2014-3-21:  The HSMCI SD card slot has not yet been tested.
