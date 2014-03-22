@@ -955,7 +955,22 @@ o USB (drivers/usbdev, drivers/usbhost)
                queued after the stall are sent.
 
                See, for example, the queuing of pending stall requests in the SAM3/4
-               UDP driver at arch/arm/src/sam34/sam_udp.c.
+               UDP driver at arch/arm/src/sam34/sam_udp.c.  There the logic is do this
+               is implemented with a normal request queue, a pending request queue, a
+               stall flag and a stall pending flag:
+
+               1) If the normal request queue is not empty when the STALL request is
+                  received, the stall pending flag is set.
+               2) If addition write requests are received while the stall pending flag
+                  is set (or while waiting for the stall to be sent), those write requests
+                  go into the pending queue.
+               3) When the normal request queue empties successful and all of the write
+                  transfers complete, the STALL is sent.  The stall pending flag is
+                  cleared and the stall flag is set.  Now the endpoint is really stalled.
+               4) After the STALL is cleared (via the Clear Feature SETUP), the pending
+                  request queue is copied to the normal request queue, the stall flag is
+                  cleared, and normal write request processing resumes.
+
   Status:      Open
   Priority:    Medium
 

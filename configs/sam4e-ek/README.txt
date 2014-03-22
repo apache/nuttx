@@ -688,12 +688,18 @@ USB Full-Speed Device
       CONFIG_SYSTEM_CDCACM=y                : Enable an CDC/ACM example
       CONFIG_SYSTEM_CDCACM_DEVMINOR=0       : Use /dev/ttyUSB0
 
-  NOTE: You cannot have both the CDC/ACM and the MSC class drivers enabled
-  simultaneously in the way described here.  If you want to use both, then
-  you will need to consider a USB "composite" devices that support supports
-  both interfaces.  There are no instructures here for setting up the USB
-  composite device, but there are other examples in the NuttX board support
-  directories that can be used for reference.
+  NOTES:
+
+  1. You cannot have both the CDC/ACM and the MSC class drivers enabled
+     simultaneously in the way described here.  If you want to use both, then
+     you will need to consider a USB "composite" devices that support supports
+     both interfaces.  There are no instructures here for setting up the USB
+     composite device, but there are other examples in the NuttX board support
+     directories that can be used for reference.
+
+  2. Linux supports the CDC/ACM driver out of the box.  Windows, on the other
+     than requires that you first install a serial driver (a .inf file).  There
+     are example .inf files for NuttX in the nuttx/configs/spark directories.
 
   Debugging USB Device
   --------------------
@@ -764,7 +770,7 @@ Touchscreen
 
     The NSH configuration can be used to verify the ADS7843E touchscreen on
     the SAM4E-EK LCD.  With these modifications, you can include the touchscreen
-    test program at apps/examples/touchscreen as an NSH built-in application. 
+    test program at apps/examples/touchscreen as an NSH built-in application.
     You can enable the touchscreen and test by modifying the default
     configuration in the following ways:
 
@@ -1056,8 +1062,7 @@ Configurations
 
     NOTES:
 
-    1. NSH built-in applications are supported.  However, there are
-       no built-in applications built with the default configuration.
+    1. NSH built-in applications are supported.
 
        Binary Formats:
          CONFIG_BUILTIN=y                    : Enable support for built-in programs
@@ -1106,15 +1111,28 @@ Configurations
        reconfigured (See see the configuration settings and usage notes
        above in the section entitled "AT25 Serial FLASH").
 
+       To mount the AT25 Serial FLASH as a FAT file system:
+
+         nsh>mount -t vfat /dev/mtdblock0 /mnt/at25
+
        STATUS:
        2014-3-14: The DMA-based SPI appears to be functional and can be used
                   to support a FAT file system on the AT25 Serial FLASH.
 
-    5. To use USB, see the instructions above under "USB Full-Speed Device."
+    5. USB device support is not enabled in this configuration by default.
+       To add USB device support to this configuration, see the instructions
+       above under "USB Full-Speed Device."
 
        STATUS:
-       2014-3-21: USB support is under development and only partially
-                  functional.  Additional test and integration is required.
+       2014-3-21: USB support is under development and USB MSC support is
+                  only partially functional.  Additional test and integration
+                  is required.
+       2014-3-22: USB seems to work properly (there are not obvious errors
+                  in a USB bus capture.  However, the AT25 does not mount
+                  on either the Linux or Windows host.  Since there are no
+                  USB errors, this could only be an issue with the USB MSC
+                  protocol (not likely) or with the FAT format on the AT25
+                  serial FLASH (likely).
 
     6. This configuration can be used to verify the touchscreen on on the
        SAM4E-EK LCD.  See the instructions above in the paragraph entitled
@@ -1129,3 +1147,75 @@ Configurations
 
        STATUS:
          2014-3-21:  The HSMCI SD card slot has not yet been tested.
+
+  usbnsh:
+
+    This is another NSH example.  If differs from the 'nsh' configuration
+    in that this configurations uses a USB serial device for console I/O.
+
+    NOTES:
+
+    1. See the NOTES in the description of the nsh configuration.  Those
+       notes all apply here as well.
+
+    2. The configuration differences between this configuration and the
+       nsh configuration is:
+
+       a. USB device support is enabled as described in the paragraph
+          entitled "USB Full-Speed Device",
+
+       b. The CDC/ACM serial class is enabled as described in the paragraph
+          "CDC/ACM Serial Device Class"
+
+       c. The serial console is disabled:
+
+          RTOS Features:
+            CONFIG_DEV_CONSOLE=n           : No console at boot time
+
+          Driver Support -> USB Device Driver Support
+            CONFIG_UART0_SERIAL_CONSOLE=n  : UART0 is not the console
+            CONFIG_NO_SERIAL_CONSOLE=y     : There is no serial console
+
+          Driver Support -> USB Device Driver Support
+            CONFIG_CDCACM_CONSOLE=y        : USB CDC/ACM console
+
+       d. Support for debug output on UART0 is provided as described in the
+          next note.
+
+    3. This configuration does have UART0 output enabled and set up as
+       the system logging device:
+
+           File Systems -> Advanced SYSLOG Features
+             CONFIG_SYSLOG=y               : Enable output to syslog, not console
+             CONFIG_SYSLOG_CHAR=y          : Use a character device for system logging
+             CONFIG_SYSLOG_DEVPATH="/dev/ttyS0" : UART0 will be /dev/ttyS0
+
+       However, there is nothing to generate SYLOG output in the default
+       configuration so nothing should appear on UART0 unless you enable
+       some debug output or enable the USB monitor.
+
+       NOTE:  Using the SYSLOG to get debug output has limitations.  Among
+       those are that you cannot get debug output from interrupt handlers.
+       So, in particularly, debug output is not a useful way to debug the
+       USB device controller driver.  Instead, use the USB monitor with
+       USB debug off and USB trace on (see below).
+
+    4. Enabling USB monitor SYSLOG output.  See the paragraph entitle
+       " Debugging USB Device" for a summary of the configuration settings
+       needed to enable the USB monitor and get USB debug data out UART0.
+
+    5. By default, this configuration uses the CDC/ACM serial device to
+       provide the USB console.  This works out-of-the-box for Linux.
+       Windows, on the other hand, will require a CDC/ACM device driver
+       (.inf file).  There is a sample .inf file in the nuttx/configs/spark
+       directories.
+
+    5. Using the Prolifics PL2303 Emulation
+
+       You could also use the non-standard PL2303 serial device instead of
+       the standard CDC/ACM serial device by changing:
+
+        CONFIG_CDCACM=n                    : Disable the CDC/ACM serial device class
+        CONFIG_CDCACM_CONSOLE=n            : The CDC/ACM serial device is NOT the console
+        CONFIG_PL2303=y                    : The Prolifics PL2303 emulation is enabled
+        CONFIG_PL2303_CONSOLE=y            : The PL2303 serial device is the console

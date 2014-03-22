@@ -7021,4 +7021,6 @@
 	* net/netdev_findbyaddr.c:  Skip network devices that are in the
 	  "down" state.  It does not make sense to consider an address match
 	  with a "down" device.  From Brennan Ashton (2014-3-20).
+	* configs/sam4e-ek/usbnsh:  Add a NSH configuration that uses the
+	  NSH console (2014-3-22).
 
