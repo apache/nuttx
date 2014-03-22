@@ -96,30 +96,24 @@
 static FAR struct uip_driver_s *netdev_finddevice(const uip_ipaddr_t addr)
 {
   struct uip_driver_s *dev;
-  uint8_t iff;
 
   /* Examine each registered network device */
 
   netdev_semtake();
   for (dev = g_netdevices; dev; dev = dev->flink)
     {
-      /* Get the interface flags */
+      /* Is the interface in the "up" state? */
 
-      if (uip_getifstatus(dev->d_ifname, &iff) == OK)
+      if ((dev->d_flags & IFF_UP) != 0)
         {
-          /* Is the interface in the "up" state? */
+          /* Yes.. check for an address match (under the netmask) */
 
-          if ((iff & IFF_UP) != 0)
+          if (uip_ipaddr_maskcmp(dev->d_ipaddr, addr, dev->d_netmask))
             {
-              /* Yes.. check for an address match (under the netmask) */
+              /* Its a match */
 
-              if (uip_ipaddr_maskcmp(dev->d_ipaddr, addr, dev->d_netmask))
-                {
-                  /* Its a match */
-
-                  netdev_semgive();
-                  return dev;
-                }
+              netdev_semgive();
+              return dev;
             }
         }
     }
