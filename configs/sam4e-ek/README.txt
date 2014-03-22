@@ -276,10 +276,11 @@ Loading Code into SRAM with J-Link
     J-Link> setpc <address of __start>
     J-Link> ... start debugging ...
 
-  STATUS:  As of this writing, I have no been successful writing to FLASH
-  using the GDB server.  I think that this is because of issues with GPNVM1
-  settings and flash lock bits.  In any event, the GDB server works great for
-  debugging after writing the program to FLASH using SAM-BA.
+  STATUS:  As of this writing, I have not been successful writing to FLASH
+  using the GDB server; the write succeeds with no complaints, but the contents
+  of the FLASH memory remain unchanged.  This may be because of issues with
+  GPNVM1 settings and flash lock bits?  In any event, the GDB server works
+  great for debugging after writing the program to FLASH using SAM-BA.
 
 Writing to FLASH using SAM-BA
 =============================
@@ -1153,6 +1154,9 @@ Configurations
     This is another NSH example.  If differs from the 'nsh' configuration
     in that this configurations uses a USB serial device for console I/O.
 
+    STATUS:
+     2014-3-22: Partially functional, but not yet reliable.
+      
     NOTES:
 
     1. See the NOTES in the description of the nsh configuration.  Those
