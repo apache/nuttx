@@ -131,7 +131,9 @@
 #  undef CONFIG_USART2_SERIAL_CONSOLE
 #  define HAVE_CONSOLE 1
 #else
-#  warning "No valid CONFIG_USARTn_SERIAL_CONSOLE Setting"
+#  if !defined(CONFIG_NO_SERIAL_CONSOLE)
+#    warning "No valid CONFIG_USARTn_SERIAL_CONSOLE Setting"
+#  endif
 #  undef CONFIG_UART0_SERIAL_CONSOLE
 #  undef CONFIG_UART1_SERIAL_CONSOLE
 #  undef CONFIG_USART0_SERIAL_CONSOLE
@@ -141,102 +143,106 @@
 #  undef HAVE_CONSOLE
 #endif
 
-/* Select MCU-specific settings
- *
- * For the SAM3U, SAM3A, SAM3X, SAM4E and SAM4S the USARTs are driven by the
- *   main clock.  (This could also be the MCK/8 or an external clock but
- *   those options have not yet been necessary).
- * For the SAM4L, the USARTs are driven by CLK_USART (undivided) which is
- *   selected by the PBADIVMASK register.
- */
+#if defined(HAVE_CONSOLE)
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
-    defined(CONFIG_ARCH_CHIP_SAM3A) || defined(CONFIG_ARCH_CHIP_SAM4S) || \
-    defined(CONFIG_ARCH_CHIP_SAM4E)
-#  define SAM_MR_USCLKS    UART_MR_USCLKS_MCK   /* Source = Main clock */
-#  define SAM_USART_CLOCK  BOARD_MCK_FREQUENCY  /* Frequency of the main clock */
-#elif defined(CONFIG_ARCH_CHIP_SAM4L)
-#  define SAM_MR_USCLKS    UART_MR_USCLKS_USART /* Source = USART_CLK (undefined) */
-#  define SAM_USART_CLOCK  BOARD_PBA_FREQUENCY  /* PBA frequency is undivided */
-#else
-#  error Unrecognized SAM architecture
-#endif
+  /* Select MCU-specific settings
+   *
+   * For the SAM3U, SAM3A, SAM3X, SAM4E and SAM4S the USARTs are driven by the
+   *   main clock.  (This could also be the MCK/8 or an external clock but
+   *   those options have not yet been necessary).
+   * For the SAM4L, the USARTs are driven by CLK_USART (undivided) which is
+   *   selected by the PBADIVMASK register.
+   */
+
+#  if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
+      defined(CONFIG_ARCH_CHIP_SAM3A) || defined(CONFIG_ARCH_CHIP_SAM4S) || \
+      defined(CONFIG_ARCH_CHIP_SAM4E)
+#    define SAM_MR_USCLKS    UART_MR_USCLKS_MCK   /* Source = Main clock */
+#    define SAM_USART_CLOCK  BOARD_MCK_FREQUENCY  /* Frequency of the main clock */
+#  elif defined(CONFIG_ARCH_CHIP_SAM4L)
+#    define SAM_MR_USCLKS    UART_MR_USCLKS_USART /* Source = USART_CLK (undefined) */
+#    define SAM_USART_CLOCK  BOARD_PBA_FREQUENCY  /* PBA frequency is undivided */
+#  else
+#    error Unrecognized SAM architecture
+#  endif
 
 /* Select USART parameters for the selected console */
 
-#if defined(CONFIG_UART0_SERIAL_CONSOLE)
-#  define SAM_CONSOLE_BASE     SAM_UART0_BASE
-#  define SAM_CONSOLE_BAUD     CONFIG_UART0_BAUD
-#  define SAM_CONSOLE_BITS     CONFIG_UART0_BITS
-#  define SAM_CONSOLE_PARITY   CONFIG_UART0_PARITY
-#  define SAM_CONSOLE_2STOP    CONFIG_UART0_2STOP
-#elif defined(CONFIG_UART1_SERIAL_CONSOLE)
-#  define SAM_CONSOLE_BASE     SAM_UART1_BASE
-#  define SAM_CONSOLE_BAUD     CONFIG_UART1_BAUD
-#  define SAM_CONSOLE_BITS     CONFIG_UART1_BITS
-#  define SAM_CONSOLE_PARITY   CONFIG_UART1_PARITY
-#  define SAM_CONSOLE_2STOP    CONFIG_UART1_2STOP
-#elif defined(CONFIG_USART0_SERIAL_CONSOLE)
-#  define SAM_CONSOLE_BASE     SAM_USART0_BASE
-#  define SAM_CONSOLE_BAUD     CONFIG_USART0_BAUD
-#  define SAM_CONSOLE_BITS     CONFIG_USART0_BITS
-#  define SAM_CONSOLE_PARITY   CONFIG_USART0_PARITY
-#  define SAM_CONSOLE_2STOP    CONFIG_USART0_2STOP
-#elif defined(CONFIG_USART1_SERIAL_CONSOLE)
-#  define SAM_CONSOLE_BASE     SAM_USART1_BASE
-#  define SAM_CONSOLE_BAUD     CONFIG_USART1_BAUD
-#  define SAM_CONSOLE_BITS     CONFIG_USART1_BITS
-#  define SAM_CONSOLE_PARITY   CONFIG_USART1_PARITY
-#  define SAM_CONSOLE_2STOP    CONFIG_USART1_2STOP
-#elif defined(CONFIG_USART2_SERIAL_CONSOLE)
-#  define SAM_CONSOLE_BASE     SAM_USART2_BASE
-#  define SAM_CONSOLE_BAUD     CONFIG_USART2_BAUD
-#  define SAM_CONSOLE_BITS     CONFIG_USART2_BITS
-#  define SAM_CONSOLE_PARITY   CONFIG_USART2_PARITY
-#  define SAM_CONSOLE_2STOP    CONFIG_USART2_2STOP
-#elif defined(CONFIG_USART3_SERIAL_CONSOLE)
-#  define SAM_CONSOLE_BASE     SAM_USART3_BASE
-#  define SAM_CONSOLE_BAUD     CONFIG_USART3_BAUD
-#  define SAM_CONSOLE_BITS     CONFIG_USART3_BITS
-#  define SAM_CONSOLE_PARITY   CONFIG_USART3_PARITY
-#  define SAM_CONSOLE_2STOP    CONFIG_USART3_2STOP
-#else
-#  error "No CONFIG_U[S]ARTn_SERIAL_CONSOLE Setting"
-#endif
+#  if defined(CONFIG_UART0_SERIAL_CONSOLE)
+#    define SAM_CONSOLE_BASE     SAM_UART0_BASE
+#    define SAM_CONSOLE_BAUD     CONFIG_UART0_BAUD
+#    define SAM_CONSOLE_BITS     CONFIG_UART0_BITS
+#    define SAM_CONSOLE_PARITY   CONFIG_UART0_PARITY
+#    define SAM_CONSOLE_2STOP    CONFIG_UART0_2STOP
+#  elif defined(CONFIG_UART1_SERIAL_CONSOLE)
+#    define SAM_CONSOLE_BASE     SAM_UART1_BASE
+#    define SAM_CONSOLE_BAUD     CONFIG_UART1_BAUD
+#    define SAM_CONSOLE_BITS     CONFIG_UART1_BITS
+#    define SAM_CONSOLE_PARITY   CONFIG_UART1_PARITY
+#    define SAM_CONSOLE_2STOP    CONFIG_UART1_2STOP
+#  elif defined(CONFIG_USART0_SERIAL_CONSOLE)
+#    define SAM_CONSOLE_BASE     SAM_USART0_BASE
+#    define SAM_CONSOLE_BAUD     CONFIG_USART0_BAUD
+#    define SAM_CONSOLE_BITS     CONFIG_USART0_BITS
+#    define SAM_CONSOLE_PARITY   CONFIG_USART0_PARITY
+#    define SAM_CONSOLE_2STOP    CONFIG_USART0_2STOP
+#  elif defined(CONFIG_USART1_SERIAL_CONSOLE)
+#    define SAM_CONSOLE_BASE     SAM_USART1_BASE
+#    define SAM_CONSOLE_BAUD     CONFIG_USART1_BAUD
+#    define SAM_CONSOLE_BITS     CONFIG_USART1_BITS
+#    define SAM_CONSOLE_PARITY   CONFIG_USART1_PARITY
+#    define SAM_CONSOLE_2STOP    CONFIG_USART1_2STOP
+#  elif defined(CONFIG_USART2_SERIAL_CONSOLE)
+#    define SAM_CONSOLE_BASE     SAM_USART2_BASE
+#    define SAM_CONSOLE_BAUD     CONFIG_USART2_BAUD
+#    define SAM_CONSOLE_BITS     CONFIG_USART2_BITS
+#    define SAM_CONSOLE_PARITY   CONFIG_USART2_PARITY
+#    define SAM_CONSOLE_2STOP    CONFIG_USART2_2STOP
+#  elif defined(CONFIG_USART3_SERIAL_CONSOLE)
+#    define SAM_CONSOLE_BASE     SAM_USART3_BASE
+#    define SAM_CONSOLE_BAUD     CONFIG_USART3_BAUD
+#    define SAM_CONSOLE_BITS     CONFIG_USART3_BITS
+#    define SAM_CONSOLE_PARITY   CONFIG_USART3_PARITY
+#    define SAM_CONSOLE_2STOP    CONFIG_USART3_2STOP
+#  else
+#    error "No CONFIG_U[S]ARTn_SERIAL_CONSOLE Setting"
+#  endif
 
 /* Select the settings for the mode register */
 
-#if SAM_CONSOLE_BITS == 5
-#  define MR_CHRL_VALUE UART_MR_CHRL_5BITS /* 5 bits */
-#elif SAM_CONSOLE_BITS == 6
-#  define MR_CHRL_VALUE UART_MR_CHRL_6BITS  /* 6 bits */
-#elif SAM_CONSOLE_BITS == 7
-#  define MR_CHRL_VALUE UART_MR_CHRL_7BITS /* 7 bits */
-#elif SAM_CONSOLE_BITS == 8
-#  define MR_CHRL_VALUE UART_MR_CHRL_8BITS /* 8 bits */
-#elif SAM_CONSOLE_BITS == 9 && !defined(CONFIG_UART0_SERIAL_CONSOLE) && \
-     !defined(CONFIG_UART1_SERIAL_CONSOLE)
-#  define MR_CHRL_VALUE UART_MR_MODE9
-#else
-#  error "Invalid number of bits"
-#endif
+#  if SAM_CONSOLE_BITS == 5
+#    define MR_CHRL_VALUE UART_MR_CHRL_5BITS /* 5 bits */
+#  elif SAM_CONSOLE_BITS == 6
+#    define MR_CHRL_VALUE UART_MR_CHRL_6BITS  /* 6 bits */
+#  elif SAM_CONSOLE_BITS == 7
+#    define MR_CHRL_VALUE UART_MR_CHRL_7BITS /* 7 bits */
+#  elif SAM_CONSOLE_BITS == 8
+#    define MR_CHRL_VALUE UART_MR_CHRL_8BITS /* 8 bits */
+#  elif SAM_CONSOLE_BITS == 9 && !defined(CONFIG_UART0_SERIAL_CONSOLE) && \
+       !defined(CONFIG_UART1_SERIAL_CONSOLE)
+#    define MR_CHRL_VALUE UART_MR_MODE9
+#  else
+#    error "Invalid number of bits"
+#  endif
 
-#if SAM_CONSOLE_PARITY == 1
-#  define MR_PAR_VALUE UART_MR_PAR_ODD
-#elif SAM_CONSOLE_PARITY == 2
-#  define MR_PAR_VALUE UART_MR_PAR_EVEN
-#else
-#  define MR_PAR_VALUE UART_MR_PAR_NONE
-#endif
+#  if SAM_CONSOLE_PARITY == 1
+#    define MR_PAR_VALUE UART_MR_PAR_ODD
+#  elif SAM_CONSOLE_PARITY == 2
+#    define MR_PAR_VALUE UART_MR_PAR_EVEN
+#  else
+#    define MR_PAR_VALUE UART_MR_PAR_NONE
+#  endif
 
-#if SAM_CONSOLE_2STOP != 0
-#  define MR_NBSTOP_VALUE UART_MR_NBSTOP_2
-#else
-#  define MR_NBSTOP_VALUE UART_MR_NBSTOP_1
-#endif
+#  if SAM_CONSOLE_2STOP != 0
+#    define MR_NBSTOP_VALUE UART_MR_NBSTOP_2
+#  else
+#    define MR_NBSTOP_VALUE UART_MR_NBSTOP_1
+#  endif
 
-#define MR_VALUE (UART_MR_MODE_NORMAL | SAM_MR_USCLKS | \
-                  MR_CHRL_VALUE | MR_PAR_VALUE | MR_NBSTOP_VALUE)
+#  define MR_VALUE (UART_MR_MODE_NORMAL | SAM_MR_USCLKS | \
+                    MR_CHRL_VALUE | MR_PAR_VALUE | MR_NBSTOP_VALUE)
+
+#endif /* HAVE_CONSOLE */
 
 /**************************************************************************
  * Private Types
@@ -272,6 +278,7 @@
 
 void up_lowputc(char ch)
 {
+#ifdef HAVE_CONSOLE
   /* Wait for the transmitter to be available */
 
   while ((getreg32(SAM_CONSOLE_BASE + SAM_UART_SR_OFFSET) & UART_INT_TXEMPTY) == 0);
@@ -279,6 +286,7 @@ void up_lowputc(char ch)
   /* Send the character */
 
   putreg32((uint32_t)ch, SAM_CONSOLE_BASE + SAM_UART_THR_OFFSET);
+#endif
 }
 
 /**************************************************************************
@@ -398,5 +406,3 @@ void sam_lowsetup(void)
            SAM_CONSOLE_BASE + SAM_UART_CR_OFFSET);
 #endif
 }
-
-
