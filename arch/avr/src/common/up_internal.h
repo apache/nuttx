@@ -73,6 +73,14 @@
 # define CONFIG_ARCH_INTERRUPTSTACK 0
 #endif
 
+/* This is the value used to mark the stack for subsequent stack monitoring
+ * logic.
+ */
+
+#define STACK_COLOR    's'
+#define INTSTACK_COLOR 's'
+#define HEAP_COLOR     'h'
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

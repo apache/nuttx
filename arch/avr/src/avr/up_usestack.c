@@ -112,7 +112,7 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
    */
 
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_STACK)
-   memset(tcb->stack_alloc_ptr, 0xaa, stack_size);
+   memset(tcb->stack_alloc_ptr, STACK_COLOR, stack_size);
 #endif
 
   /* The AVR uses a push-down stack:  the stack grows toward loweraddresses in

@@ -170,7 +170,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        */
 
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_STACK)
-      memset(tcb->stack_alloc_ptr, 0xaa, stack_size);
+      memset(tcb->stack_alloc_ptr, STACK_COLOR, stack_size);
 #endif
 
       /* The AVR uses a push-down stack:  the stack grows toward lower
