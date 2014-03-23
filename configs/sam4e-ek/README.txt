@@ -719,6 +719,10 @@ USB Full-Speed Device
       CONFIG_USBDEV_TRACE_NRECORDS=256        : Buffer 256 records in memory
       CONFIG_USBDEV_TRACE_STRINGS=y           : (optional)
 
+    If you get data loss in the trace buffer, then you may want to increase the
+    CONFIG_USBDEV_TRACE_NRECORDS.  I have used buffers up to 4096 records to
+    avoid data loss.
+
     Application Configuration -> NSH LIbrary:
       CONFIG_NSH_USBDEV_TRACE=n               : No builtin tracing from NSH
       CONFIG_NSH_ARCHINIT=y                   : Automatically start the USB monitor
