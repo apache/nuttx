@@ -74,9 +74,9 @@
 #  undef HAVE_HSMCI
 #endif
 
-/* We need PIO interrupts on PIOA to support card detect interrupts */
+/* We need PIO interrupts on GPIOA to support card detect interrupts */
 
-#if defined(HAVE_HSMCI) && !defined(CONFIG_SAM34_PIOA_IRQ)
+#if defined(HAVE_HSMCI) && !defined(CONFIG_SAM34_GPIOA_IRQ)
 #  warning PIOA interrupts not enabled.  No MMC/SD support.
 #  undef HAVE_HSMCI
 #endif
@@ -418,9 +418,9 @@ void weak_function sam_spiinitialize(void);
  ************************************************************************************/
 
 #ifdef HAVE_HSMCI
-int weak_function sam_hsmci_initialize(void);
+int sam_hsmci_initialize(int minor);
 #else
-# define sam_hsmci_initialize()
+# define sam_hsmci_initialize(minor) (-ENOSYS)
 #endif
 
 /************************************************************************************
