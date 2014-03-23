@@ -44,15 +44,23 @@
 #include <sched.h>
 #include <debug.h>
 
-#include <nuttx/arch.h> 
+#include <nuttx/arch.h>
 
 #include "os_internal.h"
 #include "up_internal.h"
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_STACK)
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#if !defined(CONFIG_DEBUG)
+#  undef CONFIG_DEBUG_STACK
+#endif
+
+#if defined(CONFIG_DEBUG_STACK)
 
 /****************************************************************************
- * Private Types
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -60,11 +68,94 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: do_stackcheck
+ *
+ * Description:
+ *   Determine (approximately) how much stack has been used be searching the
+ *   stack memory for a high water mark.  That is, the deepest level of the
+ *   stack that clobbered some recognizable marker in the stack memory.
+ *
+ * Input Parameters:
+ *   alloc - Allocation base address of the stack
+ *   size - The size of the stack in bytes
+ *
+ * Returned value:
+ *   The estimated amount of stack space used.
+ *
+ ****************************************************************************/
+
+size_t do_stackcheck(uintptr_t alloc, size_t size)
+{
+  FAR uintptr_t start;
+  FAR uintptr_t end;
+  FAR uint32_t *ptr;
+  size_t mark;
+
+  /* Get aligned addresses and adjusted sizes */
+
+  start  = alloc & ~3;
+  end    = (alloc + size + 3) & ~3;
+  size   = end - start;
+
+  /* The ARM uses a push-down stack:  the stack grows toward lower addresses
+   * in memory.  We need to start at the lowest address in the stack memory
+   * allocation and search to higher addresses.  The first word we encounter
+   * that does not have the magic value is the high water mark.
+   */
+
+  for (ptr = (FAR uint32_t *)start, mark = (size >> 2);
+       *ptr == STACK_COLOR && mark > 0;
+       ptr++, mark--);
+
+  /* If the stack is completely used, then this might mean that the stack
+   * overflowed from above (meaning that the stack is too small), or may
+   * have been overwritten from below meaning that some other stack or data
+   * structure overflowed.
+   *
+   * If you see returned values saying that the entire stack is being used
+   * then enable the following logic to see it there are unused areas in the
+   * middle of the stack.
+   */
+
+#if 0
+  if (mark + 16 > nwords)
+    {
+      int i, j;
+
+      ptr = (FAR uint32_t *)start;
+      for (i = 0; i < size; i += 4*64)
+        {
+          for (j = 0; j < 64; j++)
+            {
+              int ch;
+              if (*ptr++ == STACK_COLOR)
+                {
+                  ch = '.';
+                }
+              else
+                {
+                  ch = 'X';
+                }
+
+              up_putc(ch);
+             }
+
+          up_putc('\n');
+        }
+     }
+#endif
+
+  /* Return our guess about how much stack space was used */
+
+  return mark << 2;
+}
+
+/****************************************************************************
  * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_check_stack
+ * Name: up_check_stack and friends
  *
  * Description:
  *   Determine (approximately) how much stack has been used be searching the
@@ -81,58 +172,7 @@
 
 size_t up_check_tcbstack(FAR struct tcb_s *tcb)
 {
-  FAR uint32_t *ptr;
-  size_t mark;
-
-  /* The ARM uses a push-down stack:  the stack grows toward lower addresses
-   * in memory.  We need to start at the lowest address in the stack memory
-   * allocation and search to higher addresses.  The first word we encounter
-   * that does not have the magic value is the high water mark.
-   */
-
-  for (ptr = (FAR uint32_t *)tcb->stack_alloc_ptr, mark = tcb->adj_stack_size/4;
-       *ptr == STACK_COLOR && mark > 0;
-       ptr++, mark--);
-
-  /* If the stack is completely used, then this might mean that the stack
-   * overflowed from above (meaning that the stack is too small), or may
-   * have been overwritten from below meaning that some other stack or data
-   * structure overflowed.
-   *
-   * If you see returned values saying that the entire stack is being used
-   * then enable the following logic to see it there are unused areas in the
-   * middle of the stack.
-   */
-
-#if 0
-  if (mark + 16 > tcb->adj_stack_size/4)
-    {
-      int i, j;
-
-      ptr = (FAR uint32_t *)tcb->stack_alloc_ptr;
-      for (i = 0; i < tcb->adj_stack_size; i += 4*64)
-        {
-          for (j = 0; j < 64; j++)
-            {
-              int ch;
-              if (*ptr++ == STACK_COLOR)
-                {
-                  ch = '.';
-                }
-              else
-                {
-                  ch = 'X';
-                }
-              up_putc(ch);
-             }
-          up_putc('\n');
-        }
-     }
-#endif
-
-  /* Return our guess about how much stack space was used */
-
-  return mark*4;
+  return do_stackcheck((uintptr_t)tcb->stack_alloc_ptr, tcb->adj_stack_size);
 }
 
 ssize_t up_check_tcbstack_remain(FAR struct tcb_s *tcb)
@@ -150,4 +190,16 @@ ssize_t up_check_stack_remain(void)
   return up_check_tcbstack_remain((FAR struct tcb_s*)g_readytorun.head);
 }
 
-#endif /* CONFIG_DEBUG && CONFIG_DEBUG_STACK */
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
+size_t up_check_intstack(void)
+{
+  return do_stackcheck((uintptr_t)&g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~3));
+}
+
+size_t up_check_intstack_remain(void)
+{
+  return (CONFIG_ARCH_INTERRUPTSTACK & ~3) - up_check_intstack();
+}
+#endif
+
+#endif /* CONFIG_DEBUG_STACK */
