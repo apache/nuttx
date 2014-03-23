@@ -52,7 +52,7 @@
 #include "os_internal.h"
 #include "up_internal.h"
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_SAM34_GPIO_IRQ
 #  include "sam_gpio.h"
 #endif
 
@@ -438,7 +438,7 @@ void up_irqinitialize(void)
    * GPIO pins.
    */
 
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_SAM34_GPIO_IRQ
   sam_gpioirqinitialize();
 #endif
 
@@ -481,7 +481,7 @@ void up_disable_irq(int irq)
           putreg32(regval, regaddr);
         }
     }
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_SAM34_GPIO_IRQ
   else
     {
       /* Maybe it is a (derived) GPIO IRQ */
@@ -525,7 +525,7 @@ void up_enable_irq(int irq)
           putreg32(regval, regaddr);
         }
     }
-#ifdef CONFIG_GPIO_IRQ
+#ifdef CONFIG_SAM34_GPIO_IRQ
   else
     {
       /* Maybe it is a (derived) GPIO IRQ */

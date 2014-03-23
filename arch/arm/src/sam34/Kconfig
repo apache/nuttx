@@ -381,6 +381,7 @@ config SAM34_HSMCI
 	default n
 	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S || ARCH_CHIP_SAM4E
 	select ARCH_HAVE_SDIO
+	select MMCSD
 
 config SAM34_IISC
 	bool "Inter-IC Sound (I2S) Controller"
@@ -841,41 +842,41 @@ endmenu # External Memory Configuration
 
 menu "AT91SAM3/4 GPIO Interrupt Configuration"
 
-config GPIO_IRQ
+config SAM34_GPIO_IRQ
 	bool "GPIO pin interrupts"
 	---help---
 		Enable support for interrupting GPIO pins
 
-if GPIO_IRQ
+if SAM34_GPIO_IRQ
 
-config GPIOA_IRQ
+config SAM34_GPIOA_IRQ
 	bool "GPIOA interrupts"
 	default n
 
-config GPIOB_IRQ
+config SAM34_GPIOB_IRQ
 	bool "GPIOB interrupts"
 	default n
 
-config GPIOC_IRQ
+config SAM34_GPIOC_IRQ
 	bool "GPIOC interrupts"
 	default n
 
-config GPIOD_IRQ
+config SAM34_GPIOD_IRQ
 	bool "GPIOD interrupts"
 	default n
 	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A
 
-config GPIOE_IRQ
+config SAM34_GPIOE_IRQ
 	bool "GPIOE interrupts"
 	default n
 	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A
 
-config GPIOF_IRQ
+config SAM34_GPIOF_IRQ
 	bool "GPIOF interrupts"
 	default n
 	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A
 
-endif # GPIO_IRQ
+endif # SAM34_GPIO_IRQ
 endmenu # AT91SAM3/4 GPIO Interrupt Configuration
 
 if SAM34_SPI0 || SAM34_SPI1
