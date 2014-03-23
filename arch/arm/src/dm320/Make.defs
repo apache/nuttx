@@ -1,7 +1,7 @@
 ############################################################################
 # dm320/Make.defs
 #
-#   Copyright (C) 2007, 2010, 2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007, 2010, 2013-2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,10 @@ CMN_CSRCS	= up_assert.c up_blocktask.c up_copyfullstate.c up_createstack.c \
 
 ifeq ($(CONFIG_ELF),y)
 CMN_CSRCS += up_elf.c
+endif
+
+ifeq ($(CONFIG_DEBUG_STACK),y)
+CMN_CSRCS += up_checkstack.c
 endif
 
 CHIP_ASRCS	= dm320_lowputc.S dm320_restart.S
