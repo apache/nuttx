@@ -1063,7 +1063,16 @@ Configurations
 
     NOTES:
 
-    1. NSH built-in applications are supported.
+    1. Default stack sizes are large and should really be tuned to reduce
+       the RAM footprint:
+
+         CONFIG_ARCH_INTERRUPTSTACK=2048
+         CONFIG_IDLETHREAD_STACKSIZE=1024
+         CONFIG_USERMAIN_STACKSIZE=2048
+         CONFIG_PTHREAD_STACK_DEFAULT=2048
+         ... and others ...
+
+    2. NSH built-in applications are supported.
 
        Binary Formats:
          CONFIG_BUILTIN=y                    : Enable support for built-in programs
@@ -1071,7 +1080,7 @@ Configurations
        Applicaton Configuration:
          CONFIG_NSH_BUILTIN_APPS=y           : Enable starting apps from NSH command line
 
-    2. This configuration has the network enabled by default.  This can be
+    3. This configuration has the network enabled by default.  This can be
        easily disabled or reconfigured (See see the network related
        configuration settings above in the section entitled "Networking").
 
@@ -1091,7 +1100,7 @@ Configurations
        2014-3-13: The basic NSH serial console is working.  Network support
                   has been verified.
 
-    3. This configuration supports a network with fixed IP address.  You
+    4. This configuration supports a network with fixed IP address.  You
        may have to change these settings for your network:
 
        CONFIG_NSH_IPADDR=0x0a000002        : IP address: 10.0.0.2
@@ -1107,7 +1116,7 @@ Configurations
        CONFIG_NSH_DHCPC=y                  : Tells NSH to use DHCPC, not
                                            : the fixed addresses
 
-    4. This configuration has the DMA-based SPI0 and AT25 Serial FLASH
+    5. This configuration has the DMA-based SPI0 and AT25 Serial FLASH
        support enabled by default.  This can be easily disabled or
        reconfigured (See see the configuration settings and usage notes
        above in the section entitled "AT25 Serial FLASH").
@@ -1120,7 +1129,7 @@ Configurations
        2014-3-14: The DMA-based SPI appears to be functional and can be used
                   to support a FAT file system on the AT25 Serial FLASH.
 
-    5. USB device support is not enabled in this configuration by default.
+    6. USB device support is not enabled in this configuration by default.
        To add USB device support to this configuration, see the instructions
        above under "USB Full-Speed Device."
 
@@ -1135,14 +1144,14 @@ Configurations
                   protocol (not likely) or with the FAT format on the AT25
                   serial FLASH (likely).
 
-    6. This configuration can be used to verify the touchscreen on on the
+    7. This configuration can be used to verify the touchscreen on on the
        SAM4E-EK LCD.  See the instructions above in the paragraph entitled
        "Touchscreen".
 
        STATUS:
          2014-3-21:  The touchscreen has not yet been tested.
 
-    7. Enabling HSMCI support. The SAM3U-KE provides a an SD memory card
+    8. Enabling HSMCI support. The SAM3U-KE provides a an SD memory card
        slot.  Support for the SD slot can be enabled following the
        instructions provided above in the paragraph entitled "HSMCI."
 
@@ -1160,7 +1169,8 @@ Configurations
     NOTES:
 
     1. See the NOTES in the description of the nsh configuration.  Those
-       notes all apply here as well.
+       notes all apply here as well.  Some additional notes unique to
+       the USB console version follow:
 
     2. The configuration differences between this configuration and the
        nsh configuration is:
