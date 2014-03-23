@@ -63,8 +63,14 @@
 #  undef CONFIG_ARCH_USBDUMP
 #endif
 
-/* Output debug info if stack dump is selected -- even if 
- * debug is not selected.
+/* Check if we can dump stack usage information */
+
+#ifndef CONFIG_DEBUG
+#  undef CONFIG_DEBUG_STACK
+#endif
+
+/* Output debug info if stack dump is selected -- even if debug is not
+ * selected.
  */
 
 #ifdef CONFIG_ARCH_STACKDUMP
@@ -193,7 +199,7 @@ static int assert_tracecallback(struct usbtrace_s *trace, void *arg)
 #ifdef CONFIG_ARCH_STACKDUMP
 static void up_dumpstate(void)
 {
-  struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
+  struct tcb_s *rtcb = (struct tcb_s *)g_readytorun.head;
   uint32_t sp = up_getsp();
   uint32_t ustackbase;
   uint32_t ustacksize;
@@ -219,7 +225,7 @@ static void up_dumpstate(void)
   /* Get the limits on the interrupt stack memory */
 
   istackbase = (uint32_t)&g_intstackbase;
-  istacksize = (CONFIG_ARCH_INTERRUPTSTACK & ~3) - 4;
+  istacksize = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
 
   /* Show interrupt stack info */
 
@@ -227,6 +233,9 @@ static void up_dumpstate(void)
   lldbg("IRQ stack:\n");
   lldbg("  base: %08x\n", istackbase);
   lldbg("  size: %08x\n", istacksize);
+#ifdef CONFIG_DEBUG_STACK
+  lldbg("  used: %08x\n", up_check_intstack());
+#endif
 
   /* Does the current stack pointer lie within the interrupt
    * stack?
@@ -253,6 +262,9 @@ static void up_dumpstate(void)
   lldbg("User stack:\n");
   lldbg("  base: %08x\n", ustackbase);
   lldbg("  size: %08x\n", ustacksize);
+#ifdef CONFIG_DEBUG_STACK
+  lldbg("  used: %08x\n", up_check_tcbstack(rtcb));
+#endif
 
   /* Dump the user stack if the stack pointer lies within the allocated user
    * stack memory.
@@ -270,6 +282,9 @@ static void up_dumpstate(void)
   lldbg("sp:         %08x\n", sp);
   lldbg("stack base: %08x\n", ustackbase);
   lldbg("stack size: %08x\n", ustacksize);
+#ifdef CONFIG_DEBUG_STACK
+  lldbg("stack used: %08x\n", up_check_tcbstack(rtcb));
+#endif
 
   /* Dump the user stack if the stack pointer lies within the allocated user
    * stack memory.
