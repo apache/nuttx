@@ -69,8 +69,8 @@
  ****************************************************************************/
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_GPIOC_IRQ
-#  error "Touchscreen support requires CONFIG_GPIOC_IRQ"
+#ifndef CONFIG_SAM34_GPIOC_IRQ
+#  error "Touchscreen support requires CONFIG_SAM34_GPIOC_IRQ"
 #endif
 
 #ifndef CONFIG_ADS7843E_FREQUENCY

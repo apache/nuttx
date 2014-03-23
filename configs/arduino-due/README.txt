@@ -827,12 +827,12 @@ Arduino DUE-specific Configuration Options
   Some subsystems can be configured to operate in different ways. The drivers
   need to know how to configure the subsystem.
 
-    CONFIG_GPIOA_IRQ
-    CONFIG_GPIOB_IRQ
-    CONFIG_GPIOC_IRQ
-    CONFIG_GPIOD_IRQ
-    CONFIG_GPIOE_IRQ
-    CONFIG_GPIOF_IRQ
+    CONFIG_SAM34_GPIOA_IRQ
+    CONFIG_SAM34_GPIOB_IRQ
+    CONFIG_SAM34_GPIOC_IRQ
+    CONFIG_SAM34_GPIOD_IRQ
+    CONFIG_SAM34_GPIOE_IRQ
+    CONFIG_SAM34_GPIOF_IRQ
     CONFIG_USART0_ISUART
     CONFIG_USART1_ISUART
     CONFIG_USART2_ISUART
@@ -1069,8 +1069,8 @@ Configuration sub-directories
          CONFIG_ADS7843E_THRESHY=39
 
        System Type:
-         CONFIG_GPIO_IRQ=y                 : GPIO interrupt support
-         CONFIG_GPIOACIRQ=y                : Enable GPIO interrupts from port C
+         CONFIG_SAM34_GPIO_IRQ=y           : GPIO interrupt support
+         CONFIG_SAM34_GPIOC_IRQ=y          : Enable GPIO interrupts from port C
 
        RTOS Features:
          CONFIG_DISABLE_SIGNALS=n          : Signals are required

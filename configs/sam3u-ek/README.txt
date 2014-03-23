@@ -387,9 +387,9 @@ SAM3U-EK-specific Configuration Options
   Some subsystems can be configured to operate in different ways. The drivers
   need to know how to configure the subsystem.
 
-    CONFIG_GPIOA_IRQ
-    CONFIG_GPIOB_IRQ
-    CONFIG_GPIOC_IRQ
+    CONFIG_SAM34_GPIOA_IRQ
+    CONFIG_SAM34_GPIOB_IRQ
+    CONFIG_SAM34_GPIOC_IRQ
     CONFIG_USART0_ISUART
     CONFIG_USART1_ISUART
     CONFIG_USART2_ISUART
@@ -617,11 +617,11 @@ Configurations
             CONFIG_ADS7843E_THRESHY=39
 
           System Type -> Peripherals:
-            CONFIG_SAM34_SPI0=y                : Enable support for SPI
+            CONFIG_SAM34_SPI0=y               : Enable support for SPI
 
           System Type:
-            CONFIG_GPIO_IRQ=y                 : GPIO interrupt support
-            CONFIG_GPIOA_IRQ=y                : Enable GPIO interrupts from port A
+            CONFIG_SAM34_GPIO_IRQ=y           : GPIO interrupt support
+            CONFIG_SAM34_GPIOA_IRQ=y          : Enable GPIO interrupts from port A
 
           RTOS Features:
             CONFIG_DISABLE_SIGNALS=n          : Signals are required

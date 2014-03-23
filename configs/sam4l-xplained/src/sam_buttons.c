@@ -60,7 +60,7 @@
  * Private Data
  ****************************************************************************/
 
-#if defined(CONFIG_GPIOA_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
+#if defined(CONFIG_SAM34_GPIOA_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
 static xcpt_t g_irqsw0;
 #endif
 
@@ -122,7 +122,7 @@ uint8_t board_buttons(void)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_GPIOA_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
+#if defined(CONFIG_SAM34_GPIOA_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
 xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 {
   xcpt_t oldhandler = NULL;

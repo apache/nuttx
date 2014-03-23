@@ -614,7 +614,7 @@ USB Full-Speed Device
   ------------------
 
   The Mass Storage Class (MSC) class driver can be selected for use with
-  UDP.  Note: The following assumes that the internal AT24 Serial FLASH
+  UDP.  Note: The following assumes that the internal AT25 Serial FLASH
   is configured to support a FAT file system through an FTL layer as
   described about under "AT25 Serial FLASH".
 
@@ -797,8 +797,8 @@ Touchscreen
         CONFIG_SAM34_SPI0=y                   : Enable support for SPI
 
       System Type:
-        CONFIG_GPIO_IRQ=y                     : GPIO interrupt support
-        CONFIG_GPIOA_IRQ=y                    : Enable GPIO interrupts from port A
+        CONFIG_SAM34_GPIO_IRQ=y               : GPIO interrupt support
+        CONFIG_SAM34_GPIOA_IRQ=y              : Enable GPIO interrupts from port A
 
       RTOS Features:
         CONFIG_DISABLE_SIGNALS=n              : Signals are required
@@ -937,21 +937,21 @@ SAM4E-EK-specific Configuration Options
   Some subsystems can be configured to operate in different ways. The drivers
   need to know how to configure the subsystem.
 
-    CONFIG_GPIOA_IRQ
-    CONFIG_GPIOB_IRQ
-    CONFIG_GPIOC_IRQ
-    CONFIG_GPIOD_IRQ
-    CONFIG_GPIOE_IRQ
-    CONFIG_GPIOF_IRQ
-    CONFIG_GPIOG_IRQ
-    CONFIG_GPIOH_IRQ
-    CONFIG_GPIOJ_IRQ
-    CONFIG_GPIOK_IRQ
-    CONFIG_GPIOL_IRQ
-    CONFIG_GPIOM_IRQ
-    CONFIG_GPION_IRQ
-    CONFIG_GPIOP_IRQ
-    CONFIG_GPIOQ_IRQ
+    CONFIG_SAM34_GPIOA_IRQ
+    CONFIG_SAM34_GPIOB_IRQ
+    CONFIG_SAM34_GPIOC_IRQ
+    CONFIG_SAM34_GPIOD_IRQ
+    CONFIG_SAM34_GPIOE_IRQ
+    CONFIG_SAM34_GPIOF_IRQ
+    CONFIG_SAM34_GPIOG_IRQ
+    CONFIG_SAM34_GPIOH_IRQ
+    CONFIG_SAM34_GPIOJ_IRQ
+    CONFIG_SAM34_GPIOK_IRQ
+    CONFIG_SAM34_GPIOL_IRQ
+    CONFIG_SAM34_GPIOM_IRQ
+    CONFIG_SAM34_GPION_IRQ
+    CONFIG_SAM34_GPIOP_IRQ
+    CONFIG_SAM34_GPIOQ_IRQ
 
     CONFIG_USART0_ISUART
     CONFIG_USART1_ISUART
@@ -1168,7 +1168,7 @@ Configurations
     in that this configurations uses a USB serial device for console I/O.
 
     STATUS:
-     2014-3-22: Partially functional, but not yet reliable.
+      2014-3-23: This configuration appears to be fully functional.
       
     NOTES:
 
@@ -1219,7 +1219,7 @@ Configurations
        USB debug off and USB trace on (see below).
 
     4. Enabling USB monitor SYSLOG output.  See the paragraph entitle
-       " Debugging USB Device" for a summary of the configuration settings
+       "Debugging USB Device" for a summary of the configuration settings
        needed to enable the USB monitor and get USB debug data out UART0.
 
     5. By default, this configuration uses the CDC/ACM serial device to
