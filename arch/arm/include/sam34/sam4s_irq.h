@@ -130,7 +130,7 @@
 
 /* GPIO interrupts (derived from SAM_IRQ_PIOA/B/C) */
 
-#ifdef CONFIG_GPIOA_IRQ
+#ifdef CONFIG_SAM34_GPIOA_IRQ
 #  define SAM_IRQ_GPIOA_PINS (SAM_IRQ_EXTINT + SAM_IRQ_NEXTINT)
 #  define SAM_IRQ_PA0        (SAM_IRQ_GPIOA_PINS+0)               /* GPIOA, PIN 0 */
 #  define SAM_IRQ_PA1        (SAM_IRQ_GPIOA_PINS+1)               /* GPIOA, PIN 1 */
@@ -169,7 +169,7 @@
 #  define SAM_NGPIOAIRQS     0
 #endif
 
-#ifdef CONFIG_GPIOB_IRQ
+#ifdef CONFIG_SAM34_GPIOB_IRQ
 #  define SAM_IRQ_GPIOB_PINS (SAM_IRQ_EXTINT + SAM_IRQ_NEXTINT + SAM_NGPIOAIRQS)
 #  define SAM_IRQ_PB0        (SAM_IRQ_GPIOB_PINS+0)               /* GPIOB, PIN 0 */
 #  define SAM_IRQ_PB1        (SAM_IRQ_GPIOB_PINS+1)               /* GPIOB, PIN 1 */
@@ -208,7 +208,7 @@
 #  define SAM_NGPIOBIRQS     0
 #endif
 
-#ifdef CONFIG_GPIOC_IRQ
+#ifdef CONFIG_SAM34_GPIOC_IRQ
 #  define SAM_IRQ_GPIOC_PINS (SAM_IRQ_EXTINT + SAM_IRQ_NEXTINT + SAM_NGPIOAIRQS + SAM_NGPIOBIRQS)
 #  define SAM_IRQ_PC0        (SAM_IRQ_GPIOC_PINS+0)               /* GPIOC, PIN 0 */
 #  define SAM_IRQ_PC1        (SAM_IRQ_GPIOC_PINS+1)               /* GPIOC, PIN 1 */
