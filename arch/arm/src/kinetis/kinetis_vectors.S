@@ -2,7 +2,7 @@
  * arch/arm/src/kinetis/kinetis_vectors.S
  * arch/arm/src/chip/kinetis_vectors.S
  *
- *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -848,6 +848,7 @@ exception_common:
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 	.bss
+	.global	g_intstackalloc
 	.global	g_intstackbase
 	.align	4
 g_intstackalloc:
