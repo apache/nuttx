@@ -107,6 +107,14 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
 
   tcb->stack_alloc_ptr = stack;
 
+  /* If stack debug is enabled, then fill the stack with a recognizable value
+   * that we can use later to test for high water marks.
+   */
+
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_STACK)
+   memset(tcb->stack_alloc_ptr, STACK_COLOR, stack_size);
+#endif
+
   /* The AVR32 uses a push-down stack:  the stack grows
    * toward loweraddresses in memory.  The stack pointer
    * register, points to the lowest, valid work address
