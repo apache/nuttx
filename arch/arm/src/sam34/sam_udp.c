@@ -2165,7 +2165,7 @@ static int sam_udp_interrupt(int irq, void *context)
 
       /* Suspend, treated last */
 
-      if ((pending == UDP_INT_RXSUSP) != 0)
+      if (pending == UDP_INT_RXSUSP)
         {
           usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_RXSUSP),
                   (uint16_t)pending);
