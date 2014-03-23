@@ -136,7 +136,7 @@ int sam_hsmci_initialize(int minor)
     {
       /* Initialize card-detect GPIO.  There is no write-protection GPIO. */
 
-      sam_configpio(GPIO_MCI_CD);
+      sam_configgpio(GPIO_MCI_CD);
 
       /* Mount the SDIO-based MMC/SD block driver */
       /* First, get an instance of the SDIO interface */
@@ -159,7 +159,7 @@ int sam_hsmci_initialize(int minor)
 
       /* Configure card detect interrupts */
 
-      sam_pioirq(GPIO_MCI_CD);
+      sam_gpioirq(GPIO_MCI_CD);
       (void)irq_attach(MCI_CD_IRQ, sam_hsmci_cardetect);
 
       /* Then inform the HSMCI driver if there is or is not a card in the slot. */
@@ -173,7 +173,7 @@ int sam_hsmci_initialize(int minor)
 
       /* Enable card detect interrupts */
 
-      sam_pioirqenable(MCI_CD_IRQ);
+      sam_gpioirqenable(MCI_CD_IRQ);
     }
 
   return OK;
@@ -193,7 +193,7 @@ bool sam_cardinserted(int slotno)
 
   /* Get the state of the GPIO pin */
 
-  removed = sam_pioread(GPIO_MCI_CD);
+  removed = sam_gpioread(GPIO_MCI_CD);
   fllvdbg("Slot %d inserted: %s\n", slotno, removed ? "NO" : "YES");
 
   return !removed;
