@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/c5471/c5471_vectors.S
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -472,7 +472,9 @@ up_vectoraddrexcptn:
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 	.bss
 	.align	4
-	.globl	g_intstackbase
+	.global	g_intstackalloc
+	.global	g_intstackbase
+	.type	g_intstackalloc, object
 	.type	g_intstackbase, object
 g_intstackalloc:
 	.skip	((CONFIG_ARCH_INTERRUPTSTACK & ~3) - 4)
