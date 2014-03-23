@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sam34/sam_hsmci.c
  *
- *   Copyright (C) 2010, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2012-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -128,7 +128,8 @@
   (DMACHAN_INTF_HSMCI0 << DMACH_FLAG_PERIPHPID_SHIFT) | \
    DMACH_FLAG_PERIPHH2SEL | DMACH_FLAG_PERIPHISPERIPH |  \
    DMACH_FLAG_PERIPHWIDTH_32BITS | DMACH_FLAG_PERIPHCHUNKSIZE_1 | \
-   DMACH_FLAG_MEMWIDTH_32BITS | DMACH_FLAG_MEMINCREMENT | DMACH_FLAG_MEMCHUNKSIZE_4)
+   DMACH_FLAG_MEMWIDTH_32BITS | DMACH_FLAG_MEMINCREMENT | \
+   DMACH_FLAG_MEMCHUNKSIZE_4)
 
 /* Status errors:
  *
@@ -146,9 +147,9 @@
  */
 
 #define HSMCI_STATUS_ERRORS \
-  ( HSMCI_INT_UNRE  | HSMCI_INT_OVRE  | HSMCI_INT_BLKOVRE | HSMCI_INT_CSTOE | \
-    HSMCI_INT_DTOE  | HSMCI_INT_DCRCE | HSMCI_INT_RTOE    | HSMCI_INT_RENDE | \
-    HSMCI_INT_RCRCE | HSMCI_INT_RDIRE | HSMCI_INT_RINDE )
+  (HSMCI_INT_UNRE  | HSMCI_INT_OVRE  | HSMCI_INT_BLKOVRE | HSMCI_INT_CSTOE | \
+   HSMCI_INT_DTOE  | HSMCI_INT_DCRCE | HSMCI_INT_RTOE    | HSMCI_INT_RENDE | \
+   HSMCI_INT_RCRCE | HSMCI_INT_RDIRE | HSMCI_INT_RINDE)
 
 /* Response errors:
  *
@@ -161,13 +162,15 @@
  */
 
 #define HSMCI_RESPONSE_ERRORS \
-  ( HSMCI_INT_CSTOE | HSMCI_INT_RTOE  | HSMCI_INT_RENDE   | HSMCI_INT_RCRCE | \
-    HSMCI_INT_RDIRE | HSMCI_INT_RINDE )
+  (HSMCI_INT_CSTOE | HSMCI_INT_RTOE  | HSMCI_INT_RENDE   | HSMCI_INT_RCRCE | \
+   HSMCI_INT_RDIRE | HSMCI_INT_RINDE)
+
 #define HSMCI_RESPONSE_NOCRC_ERRORS \
-  ( HSMCI_INT_CSTOE | HSMCI_INT_RTOE  | HSMCI_INT_RENDE   | HSMCI_INT_RDIRE | \
-    HSMCI_INT_RINDE )
+  (HSMCI_INT_CSTOE | HSMCI_INT_RTOE  | HSMCI_INT_RENDE   | HSMCI_INT_RDIRE | \
+   HSMCI_INT_RINDE)
+
 #define HSMCI_RESPONSE_TIMEOUT_ERRORS \
-  ( HSMCI_INT_CSTOE | HSMCI_INT_RTOE  )
+  (HSMCI_INT_CSTOE | HSMCI_INT_RTOE)
 
 /* Data transfer errors:
  *
@@ -179,19 +182,30 @@
  *   HSMCI_INT_DCRCE         Data CRC Error
  */
 
-#define HSMCI_DATA_ERRORS \
-  ( HSMCI_INT_UNRE  | HSMCI_INT_OVRE  | HSMCI_INT_BLKOVRE | HSMCI_INT_CSTOE | \
-    HSMCI_INT_DTOE  | HSMCI_INT_DCRCE )
+#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#  define HSMCI_DATA_ERRORS \
+     (HSMCI_INT_UNRE  | HSMCI_INT_OVRE  | HSMCI_INT_BLKOVRE | HSMCI_INT_CSTOE | \
+      HSMCI_INT_DTOE  | HSMCI_INT_DCRCE)
+#else
+#  define HSMCI_DATA_ERRORS \
+     (HSMCI_INT_UNRE  | HSMCI_INT_OVRE  | HSMCI_INT_CSTOE | HSMCI_INT_DTOE  | \
+      HSMCI_INT_DCRCE)
+#endif
 
 #define HSMCI_DATA_TIMEOUT_ERRORS \
-  ( HSMCI_INT_CSTOE | HSMCI_INT_DTOE )
+  (HSMCI_INT_CSTOE | HSMCI_INT_DTOE)
 
-#define HSMCI_DATA_DMARECV_ERRORS \
-  ( HSMCI_INT_OVRE  | HSMCI_INT_BLKOVRE | HSMCI_INT_CSTOE | HSMCI_INT_DTOE | \
-    HSMCI_INT_DCRCE )
+#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#  define HSMCI_DATA_DMARECV_ERRORS \
+    (HSMCI_INT_OVRE  | HSMCI_INT_BLKOVRE | HSMCI_INT_CSTOE | HSMCI_INT_DTOE | \
+     HSMCI_INT_DCRCE)
+#else
+#  define HSMCI_DATA_DMARECV_ERRORS \
+    (HSMCI_INT_OVRE  | HSMCI_INT_CSTOE | HSMCI_INT_DTOE | HSMCI_INT_DCRCE)
+#endif
 
 #define HSMCI_DATA_DMASEND_ERRORS \
-  ( HSMCI_INT_UNRE  | HSMCI_INT_CSTOE | HSMCI_INT_DTOE    | HSMCI_INT_DCRCE )
+  (HSMCI_INT_UNRE  | HSMCI_INT_CSTOE | HSMCI_INT_DTOE    | HSMCI_INT_DCRCE)
 
 /* Data transfer status and interrupt mask bits.
  *
@@ -208,9 +222,9 @@
  */
 
 #define HSMCI_DMARECV_INTS \
-  ( HSMCI_DATA_DMARECV_ERRORS | HSMCI_INT_XFRDONE /* | HSMCI_INT_DMADONE */ )
+  (HSMCI_DATA_DMARECV_ERRORS | HSMCI_INT_XFRDONE /* | HSMCI_INT_DMADONE */)
 #define HSMCI_DMASEND_INTS \
-  ( HSMCI_DATA_DMASEND_ERRORS | HSMCI_INT_XFRDONE /* | HSMCI_INT_DMADONE */ )
+  (HSMCI_DATA_DMASEND_ERRORS | HSMCI_INT_XFRDONE /* | HSMCI_INT_DMADONE */)
 
 /* Event waiting interrupt mask bits.
  *
@@ -222,9 +236,9 @@
  */
 
 #define HSMCI_CMDRESP_INTS \
-  ( HSMCI_RESPONSE_ERRORS | HSMCI_INT_CMDRDY )
+  (HSMCI_RESPONSE_ERRORS | HSMCI_INT_CMDRDY)
 #define HSMCI_CMDRESP_NOCRC_INTS \
-  ( HSMCI_RESPONSE_NOCRC_ERRORS | HSMCI_INT_CMDRDY )
+  (HSMCI_RESPONSE_NOCRC_ERRORS | HSMCI_INT_CMDRDY)
 
 /* Register logging support */
 
@@ -306,7 +320,9 @@ struct sam_hsmciregs_s
   uint32_t rsp3;  /* Response Register 3 */
   uint32_t sr;    /* Status Register */
   uint32_t imr;   /* Interrupt Mask Register */
+#if defined(CONFIG_ARCH_CHIP_SAM3U)
   uint32_t dma;   /* DMA Configuration Register */
+#endif
   uint32_t cfg;   /* Configuration Register */
   uint32_t wpmr;  /* Write Protection Mode Register */
   uint32_t wpsr;  /* Write Protection Status Register */
@@ -728,7 +744,9 @@ static void sam_hsmcisample(struct sam_hsmciregs_s *regs)
   regs->rsp3  = getreg32(SAM_HSMCI_RSPR3);
   regs->sr    = getreg32(SAM_HSMCI_SR);
   regs->imr   = getreg32(SAM_HSMCI_IMR);
+#if defined(CONFIG_ARCH_CHIP_SAM3U)
   regs->dma   = getreg32(SAM_HSMCI_DMA);
+#endif
   regs->cfg   = getreg32(SAM_HSMCI_CFG);
   regs->wpmr  = getreg32(SAM_HSMCI_WPMR);
   regs->wpsr  = getreg32(SAM_HSMCI_WPSR);
@@ -759,7 +777,9 @@ static void sam_hsmcidump(struct sam_hsmciregs_s *regs, const char *msg)
   fdbg("  RSPR3[%08x]: %08x\n", SAM_HSMCI_RSPR3, regs->rsp3);
   fdbg("     SR[%08x]: %08x\n", SAM_HSMCI_SR,    regs->sr);
   fdbg("    IMR[%08x]: %08x\n", SAM_HSMCI_IMR,   regs->imr);
+#if defined(CONFIG_ARCH_CHIP_SAM3U)
   fdbg("    DMA[%08x]: %08x\n", SAM_HSMCI_DMA,   regs->dma);
+#endif
   fdbg("    CFG[%08x]: %08x\n", SAM_HSMCI_CFG,   regs->cfg);
   fdbg("   WPMR[%08x]: %08x\n", SAM_HSMCI_WPMR,  regs->wpmr);
   fdbg("   WPSR[%08x]: %08x\n", SAM_HSMCI_WPSR,  regs->wpsr);
@@ -1060,9 +1080,11 @@ static void sam_endtransfer(struct sam_dev_s *priv,
   sam_dmastop(priv->dma);
   priv->dmabusy = false;
 
+#if defined(CONFIG_ARCH_CHIP_SAM3U)
   /* Disable the DMA handshaking */
 
   putreg32(0, SAM_HSMCI_DMA);
+#endif
 
   /* Is a thread wait for these data transfer complete events? */
 
@@ -1091,8 +1113,14 @@ static void sam_endtransfer(struct sam_dev_s *priv,
 
 static void sam_notransfer(struct sam_dev_s *priv)
 {
-  uint32_t regval = getreg32(SAM_HSMCI_MR);
+  uint32_t regval;
+
+  regval = getreg32(SAM_HSMCI_MR);
+#if defined(CONFIG_ARCH_CHIP_SAM3U)
   regval &= ~(HSMCI_MR_RDPROOF | HSMCI_MR_WRPROOF | HSMCI_MR_BLKLEN_MASK);
+#else
+  regval &= ~(HSMCI_MR_RDPROOF | HSMCI_MR_WRPROOF);
+#endif
   putreg32(regval, SAM_HSMCI_MR);
 }
 
@@ -1288,9 +1316,11 @@ static void sam_reset(FAR struct sdio_dev_s *dev)
 
   putreg32(HSMCI_CR_MCIEN, SAM_HSMCI_CR);
 
+#if defined(CONFIG_ARCH_CHIP_SAM3U)
   /* Disable the DMA interface */
 
   putreg32(0, SAM_HSMCI_DMA);
+#endif
 
   /* Configure MCI */
 
@@ -1479,9 +1509,11 @@ static int sam_attach(FAR struct sdio_dev_s *dev)
 
       up_enable_irq(SAM_IRQ_HSMCI);
 
-      /* Set the interrrupt priority */
+#ifdef CONFIG_ARCH_IRQPRIO
+      /* Set the interrupt priority */
 
       up_prioritize_irq(SAM_IRQ_HSMCI, CONFIG_HSMCI_PRI);
+#endif
     }
 
   return ret;
@@ -1639,9 +1671,14 @@ static void sam_blocksetup(FAR struct sdio_dev_s *dev, unsigned int blocklen,
   /* Set the block size */
 
   regval = getreg32(SAM_HSMCI_MR);
+#if defined(CONFIG_ARCH_CHIP_SAM3U)
   regval &= ~(HSMCI_MR_RDPROOF | HSMCI_MR_WRPROOF | HSMCI_MR_BLKLEN_MASK);
   regval |= HSMCU_PROOF_BITS;
   regval |= (blocklen << HSMCI_MR_BLKLEN_SHIFT);
+#else
+  regval &= ~(HSMCI_MR_RDPROOF | HSMCI_MR_WRPROOF);
+  regval |= HSMCU_PROOF_BITS;
+#endif
   putreg32(regval, SAM_HSMCI_MR);
 
   /* Set the block count */
@@ -1698,9 +1735,11 @@ static int sam_cancel(FAR struct sdio_dev_s *dev)
   sam_dmastop(priv->dma);
   priv->dmabusy = false;
 
+#if defined(CONFIG_ARCH_CHIP_SAM3U)
   /* Disable the DMA handshaking */
 
   putreg32(0, SAM_HSMCI_DMA);
+#endif
 
   return OK;
 }
@@ -2110,16 +2149,19 @@ static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev,
            return SDIOWAIT_TIMEOUT;
         }
 
-      /* Start the watchdog timer.  I am not sure why this is, but I am
-       * currently seeing some additional delays when DMA is used (On the
-       * SAMA5, might not be necessary for SAM3/4).
+#if 0
+      /* I am not sure why this is, but I am currently seeing some
+       * additional delays when DMA is used (On the SAMA5, might
+       * not be necessary for SAM3/4).
        */
 
-#warning REVISIT: This should not be necessary
       if (priv->dmabusy)
         {
           timeout += 500;
         }
+#endif
+
+      /* Start the watchdog timer */
 
       delay = (timeout + (MSEC_PER_TICK-1)) / MSEC_PER_TICK;
       ret   = wd_start(priv->waitwdog, delay, (wdentry_t)sam_eventtimeout,
@@ -2294,9 +2336,11 @@ static int sam_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   sam_dmarxsetup(priv->dma, SAM_HSMCI_RDR, (uint32_t)buffer, buflen);
 
+#if defined(CONFIG_ARCH_CHIP_SAM3U)
   /* Enable DMA handshaking */
 
   putreg32(HSMCI_DMA_DMAEN, SAM_HSMCI_DMA);
+#endif
   sam_xfrsample(priv, SAMPLENDX_BEFORE_ENABLE);
 
   /* Start the DMA */
@@ -2350,9 +2394,11 @@ static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   sam_dmatxsetup(priv->dma, SAM_HSMCI_TDR, (uint32_t)buffer, buflen);
 
+#if defined(CONFIG_ARCH_CHIP_SAM3U)
   /* Enable DMA handshaking */
 
   putreg32(HSMCI_DMA_DMAEN, SAM_HSMCI_DMA);
+#endif
   sam_xfrsample(priv, SAMPLENDX_BEFORE_ENABLE);
 
   /* Start the DMA */
@@ -2493,12 +2539,12 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
    * GPIOs must be set up in board-specific logic.
    */
 
-  sam_configgpio(GPIO_MCI_DAT0);   /* Data 0 of Slot A */
-  sam_configgpio(GPIO_MCI_DAT1);   /* Data 1 of Slot A */
-  sam_configgpio(GPIO_MCI_DAT2);   /* Data 2 of Slot A */
-  sam_configgpio(GPIO_MCI_DAT3);   /* Data 3 of Slot A */
-  sam_configgpio(GPIO_MCI_CK);     /* SD clock */
-  sam_configgpio(GPIO_MCI_DA);     /* Command/Response */
+  sam_configgpio(GPIO_HSMCI_DAT0);   /* Data 0 of Slot A */
+  sam_configgpio(GPIO_HSMCI_DAT1);   /* Data 1 of Slot A */
+  sam_configgpio(GPIO_HSMCI_DAT2);   /* Data 2 of Slot A */
+  sam_configgpio(GPIO_HSMCI_DAT3);   /* Data 3 of Slot A */
+  sam_configgpio(GPIO_HSMCI_CK);     /* SD clock */
+  sam_configgpio(GPIO_HSMCI_DA);     /* Command/Response */
 
 #ifdef CONFIG_DEBUG_FS
   sam_dumpgpio(GPIO_PORT_PIOA, "Pins: 3-8");
