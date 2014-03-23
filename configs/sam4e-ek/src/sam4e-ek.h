@@ -129,7 +129,7 @@
 #  undef CONFIG_USBDEV_TRACE
 #endif
 
-#if !defined(CONFIG_SYSTEM_USBMONITOR) && !defined(CONFIG_USBDEV_TRACE)
+#if !defined(CONFIG_SYSTEM_USBMONITOR) || !defined(CONFIG_USBDEV_TRACE)
 #  undef HAVE_USBMONITOR
 #endif
 
