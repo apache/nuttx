@@ -1,12 +1,12 @@
 ##############################################################################
 # lpc23xx/Make.defs
 #
-#   Copyright (C) 2010, 2013 Rommel Marcelo. All rights reserved.
+#   Copyright (C) 2010 Rommel Marcelo. All rights reserved.
 #   Author: Rommel Marcelo
 #
 # This file is part of the NuttX RTOS and based on the lpc2148 port:
 #
-#   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2010, 2013-2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -55,6 +55,10 @@ endif
 
 ifeq ($(CONFIG_ELF),y)
 CMN_CSRCS += up_elf.c
+endif
+
+ifeq ($(CONFIG_DEBUG_STACK),y)
+CMN_CSRCS += up_checkstack.c
 endif
 
 CHIP_ASRCS = lpc23xx_lowputc.S

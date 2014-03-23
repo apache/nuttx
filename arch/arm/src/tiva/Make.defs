@@ -54,6 +54,10 @@ ifeq ($(CONFIG_ARCH_MEMCPY),y)
 CMN_ASRCS += up_memcpy.S
 endif
 
+ifeq ($(CONFIG_DEBUG_STACK),y)
+CMN_CSRCS += up_checkstack.c
+endif
+
 ifeq ($(CONFIG_NUTTX_KERNEL),y)
 CMN_CSRCS += up_mpu.c up_task_start.c up_pthread_start.c up_stackframe.c
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)

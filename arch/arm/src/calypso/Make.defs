@@ -1,7 +1,7 @@
 ############################################################################
 # calypso/Make.defs
 #
-#   Copyright (C) 2007, 2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007, 2013-2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 #   Copyright (C) 2011 Stefan Richter. All rights reserved.
@@ -50,6 +50,10 @@ CMN_CSRCS = up_allocateheap.c up_assert.c up_blocktask.c up_copyfullstate.c \
 
 ifeq ($(CONFIG_ELF),y)
 CMN_CSRCS += up_elf.c
+endif
+
+ifeq ($(CONFIG_DEBUG_STACK),y)
+CMN_CSRCS += up_checkstack.c
 endif
 
 CHIP_ASRCS = calypso_lowputc.S
