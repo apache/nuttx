@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/avr/src/avr/up_dumpstate.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,6 +57,12 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Check if we can dump stack usage information */
+
+#ifndef CONFIG_DEBUG
+#  undef CONFIG_DEBUG_STACK
+#endif
 
 /* Output debug info if stack dump is selected -- even if debug is not
  * selected.
@@ -202,6 +208,9 @@ void up_dumpstate(void)
   lldbg("IRQ stack:\n");
   lldbg("  base: %04x\n", istackbase);
   lldbg("  size: %04x\n", istacksize);
+#ifdef CONFIG_DEBUG_STACK
+  lldbg("  used: %08x\n", up_check_intstack());
+#endif
 
   /* Does the current stack pointer lie within the interrupt
    * stack?
@@ -228,6 +237,9 @@ void up_dumpstate(void)
   lldbg("User stack:\n");
   lldbg("  base: %04x\n", ustackbase);
   lldbg("  size: %04x\n", ustacksize);
+#ifdef CONFIG_DEBUG_STACK
+  lldbg("  used: %08x\n", up_check_tcbstack(rtcb));
+#endif
 
   /* Dump the user stack if the stack pointer lies within the allocated user
    * stack memory.
@@ -241,6 +253,9 @@ void up_dumpstate(void)
   lldbg("sp:         %04x\n", sp);
   lldbg("stack base: %04x\n", ustackbase);
   lldbg("stack size: %04x\n", ustacksize);
+#ifdef CONFIG_DEBUG_STACK
+  lldbg("stack used: %08x\n", up_check_tcbstack(rtcb));
+#endif
 
   /* Dump the user stack if the stack pointer lies within the allocated user
    * stack memory.
