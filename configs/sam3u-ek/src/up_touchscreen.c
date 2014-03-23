@@ -66,8 +66,8 @@
 #  error "Touchscreen support requires CONFIG_SAM34_SPI0"
 #endif
 
-#ifndef CONFIG_GPIOA_IRQ
-#  error "Touchscreen support requires CONFIG_GPIOA_IRQ"
+#ifndef CONFIG_SAM34_GPIOA_IRQ
+#  error "Touchscreen support requires CONFIG_SAM34_GPIOA_IRQ"
 #endif
 
 #ifndef CONFIG_ADS7843E_FREQUENCY
