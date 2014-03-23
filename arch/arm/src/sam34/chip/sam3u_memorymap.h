@@ -62,7 +62,7 @@
 #  define SAM_BBSRAM_BASE      0x22000000 /* 0x22000000-0x23ffffff:   32Mb bit-band alias */
                                           /* 0x24000000-0x3fffffff:   Undefined */
 #define SAM_PERIPHERALS_BASE   0x40000000 /* 0x40000000-0x5fffffff: Peripherals */
-#  define SAM_MCI_BASE         0x40000000 /* 0x40000000-0x400003ff:   High Speed Multimedia Card Interface */
+#  define SAM_HSMCI_BASE       0x40000000 /* 0x40000000-0x400003ff:   High Speed Multimedia Card Interface */
 #  define SAM_SSC_BASE         0x40004000 /* 0x40004000-0x40007fff:   Synchronous Serial Controller */
 #  define SAM_SPI0_BASE        0x40008000 /* 0x40008000-0x4000bfff:   Serial Peripheral Interface */
                                           /* 0x4000c000-0x4007ffff:   Reserved */
