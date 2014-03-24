@@ -1425,7 +1425,14 @@ static void sam_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
   /* Fetch the current mode register and mask out the clkdiv (and pwsdiv) */
 
   regval = getreg32(SAM_HSMCI_MR);
+
+  /* Does this HSMCI support the CLOCKODD bit? */
+
+#ifdef HSMCI_MR_CLKODD
+  regval &= ~(HSMCI_MR_CLKDIV_MASK | HSMCI_MR_PWSDIV_MASK | HSMCI_MR_CLKODD);
+#else
   regval &= ~(HSMCI_MR_CLKDIV_MASK | HSMCI_MR_PWSDIV_MASK);
+#endif
 
  /* These clock devisor values that must be defined in the board-specific
   * board.h header file: HSMCI_INIT_CLKDIV, HSMCI_MMCXFR_CLKDIV,
