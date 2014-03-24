@@ -444,7 +444,7 @@
  * Name: SDIO_BLOCKLEN
  *
  * Description:
- *   Some hardward needs to be informed of the selected blocksize and the
+ *   Some hardware needs to be informed of the selected blocksize and the
  *   number of blocks.  Others just work on the byte stream.
  *
  * Input Parameters:

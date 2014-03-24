@@ -758,17 +758,28 @@ HSMCI
 
     Device Drivers -> MMC/SD Driver Support
       CONFIG_MMCSD=y                          : Enable MMC/SD support
-      CONFIG_MMSCD_NSLOTS=1                   : One slot per driver instance
+      CONFIG_MMCSD_NSLOTS=1                   : One slot per driver instance
       CONFIG_MMCSD_HAVECARDDETECT=y           : Supports card-detect PIOs
       CONFIG_MMCSD_SDIO=y                     : SDIO-based MMC/SD support
+      CONFIG_MMCSD_MULTIBLOCK_DISABLE=y       : Probably works but is untested
+
       CONFIG_SDIO_DMA=y                       : Use SDIO DMA
       CONFIG_SDIO_BLOCKSETUP=y                : Needs to know block sizes
 
     Library Routines
       CONFIG_SCHED_WORKQUEUE=y                : Driver needs work queue support
+                                              : Defaults for other settings okay
 
     Application Configuration -> NSH Library
       CONFIG_NSH_ARCHINIT=y                   : NSH board-initialization
+      CONFIG_NSH_MMCSDSLOTNO=0                : Only one slot, slot 0
+
+  After an SD card is successfully initialized, the block device /dev/mmcsd0
+  will be available.  To mount the SD card, use the following NSH command:
+
+    nsh> mount -t vfat /dev/mmcsd0 /mnt/sdcard
+
+  The SD card contents will then be available under /mnt/sdcard.
 
 Touchscreen
 ===========
