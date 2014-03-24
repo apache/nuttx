@@ -266,6 +266,24 @@ int smart_initialize(int minor, FAR struct mtd_dev_s *mtd,
  * functions (such as a block or character driver front end).
  */
 
+/************************************************************************************
+ * Name: s512_initialize
+ *
+ * Description:
+ *   Create an initialized MTD device instance.  This MTD driver contains another
+ *   MTD driver and converts a larger sector size to a standard 512 byte sector
+ *   size.
+ *
+ *   MTD devices are not registered in the file system, but are created as instances
+ *   that can be bound to other functions (such as a block or character driver front
+ *   end).
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_MTD_SECT512
+FAR struct mtd_dev_s *s512_initialize(FAR struct mtd_dev_s *mtd);
+#endif
+
 /****************************************************************************
  * Name: at45db_initialize
  *

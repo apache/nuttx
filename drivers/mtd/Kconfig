@@ -26,6 +26,27 @@ config MTD_PARTITION
 		managing the sub-region of flash beginning at 'offset' (in blocks)
 		and of size 'nblocks' on the device specified by 'mtd'.
 
+config MTD_SECT512
+	bool "512B sector conversion"
+	default n
+	---help---
+		If enabled, a MTD driver will be created that will convert the
+		sector size of any other MTD driver to a 512 byte "apparent" sector
+		size.  The managed MTD driver in this case must have an erase block
+		size that is greater than 512B and an event multiple of 512B.
+
+if MTD_SECT512
+
+config MTD_SECT512_ERASED_STATE
+	hex "Erased state of the FLASH"
+	default 0xff
+
+config MTD_SECT512_READONLY
+	bool "512B read-only"
+	default n
+
+endif # MTD_SECT512
+
 config MTD_PARTITION_NAMES
 	bool "Support MTD partition naming"
 	depends on FS_PROCFS
