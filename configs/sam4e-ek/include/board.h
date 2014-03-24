@@ -146,28 +146,28 @@
  */
 
 #ifdef CONFIG_SAM4EEK_120MHZ
-  /* MCK = 120MHz, CLKDIV = 149, MCI_SPEED = 120MHz / 2 * (149+1) = 400 KHz */
+  /* MCK = 120MHz, CLKDIV = 149 w/o CLKODD, MCI_SPEED = 120MHz / (2*149 + 0 + 2) = 400 KHz */
 
 #  define HSMCI_INIT_CLKDIV        (149 << HSMCI_MR_CLKDIV_SHIFT)
 
-  /* MCK = 120MHz, CLKDIV = 2, MCI_SPEED = 120MHz / 2 * (2+1) = 20 MHz */
+  /* MCK = 120MHz, CLKDIV = 2 w/o CLKODD, MCI_SPEED = 120MHz / (2*2 + 0 + 2) = 20 MHz */
 
 #  define HSMCI_MMCXFR_CLKDIV      (3 << HSMCI_MR_CLKDIV_SHIFT)
 
-  /* MCK = 120MHz, CLKDIV = 2, MCI_SPEED = 120MHz / 2 * (2+1) = 20 MHz */
+  /* MCK = 120MHz, CLKDIV = 1 w/ CLKODD, MCI_SPEED = 120MHz / (2*1 + 1 + 2) = 24 MHz */
 
-#  define HSMCI_SDXFR_CLKDIV       (1 << HSMCI_MR_CLKDIV_SHIFT)
+#  define HSMCI_SDXFR_CLKDIV       ((1 << HSMCI_MR_CLKDIV_SHIFT) | HSMCI_MR_CLKODD)
 
 #else
-/* MCK = 96MHz, CLKDIV = 119, MCI_SPEED = 96MHz / 2 * (119+1) = 400 KHz */
+/* MCK = 96MHz, CLKDIV = 119, w/o CLKODD, MCI_SPEED = 96MHz / (2 * 119 + 0 + 2) = 400 KHz */
 
 #  define HSMCI_INIT_CLKDIV        (119 << HSMCI_MR_CLKDIV_SHIFT)
 
-/* MCK = 96MHz, CLKDIV = 3, MCI_SPEED = 96MHz / 2 * (3+1) = 12 MHz */
+/* MCK = 96MHz, CLKDIV = 1 w/ CLKODD, MCI_SPEED = 96MHz / (2*1 + 1 + 2) = 19.2 MHz */
 
-#  define HSMCI_MMCXFR_CLKDIV      (3 << HSMCI_MR_CLKDIV_SHIFT)
+#  define HSMCI_MMCXFR_CLKDIV      ((3 << HSMCI_MR_CLKDIV_SHIFT) | HSMCI_MR_CLKODD)
 
-/* MCK = 96MHz, CLKDIV = 1, MCI_SPEED = 96MHz / 2 * (1+1) = 24 MHz */
+/* MCK = 96MHz, CLKDIV = 1 w/o CLKODD, MCI_SPEED = 96MHz / (2*1 + 0 + 2) = 24 MHz */
 
 #  define HSMCI_SDXFR_CLKDIV       (1 << HSMCI_MR_CLKDIV_SHIFT)
 #endif

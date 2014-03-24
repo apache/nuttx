@@ -7027,3 +7027,7 @@
 	  Manuel Stühn (2014-3-24).
 	* net/netdev_ioctl.c and uip/uip_input.c:  IGMP-related bug fixes
 	  from Manuel Stühn (2014-3-24).
+	* arch/arm/src/sam34:  Add missing HSCMI configuration settings to
+	  Kconfig; update naming to include SAM34_ (2014-3-24).
+	* configs/sam4e-ek/include/board.h:  Update HSMCI timing to use the
+	  CLKODD bit (2014-3-24).

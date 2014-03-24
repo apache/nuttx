@@ -1131,6 +1131,52 @@ config SAM34_EMAC_ISETH0
 endmenu # EMAC device driver options
 endif # SAM34_EMAC
 
+if SAM34_HSMCI
+menu "AT91SAM3/4 HSMCI device driver options"
+
+config SAM34_HSMCI_RDPROOF
+	bool "Read Proof Enable"
+	default n
+	---help---
+		Enabling Read Proof allows to stop the HSMCI Clock during read
+		access if the internal FIFO is full. This will guarantee data
+		integrity, not bandwidth.
+
+config SAM34_HSMCI_WRPROOF
+	bool "Write Proof Enable"
+	default n
+	---help---
+		Enabling Write Proof allows to stop the HSMCI Clock during write
+		access if the internal FIFO is full. This will guarantee data
+		integrity, not bandwidth.
+
+config SAM34_HSMCI_XFRDEBUG
+	bool "HSMCI transfer debug"
+	depends on DEBUG_FS && DEBUG_VERBOSE
+	default n
+	---help---
+		Enable special debug instrumentation analyze HSMCI data transfers.
+		This logic is as non-invasive as possible:  It samples HSMCI
+		registers at key points in the data transfer and then dumps all of
+		the registers at the end of the transfer.  If DEBUG_DMA is also
+		enabled, then DMA register will be collected as well.  Requires also
+		DEBUG_FS and DEBUG_VERBOSE.
+
+config SAM34_HSMCI_CMDDEBUG
+	bool "HSMCI command debug"
+	depends on DEBUG_FS && DEBUG_VERBOSE
+	default n
+	---help---
+		Enable special debug instrumentation analyze HSMCI commands. This
+		logic is as non-invasive as possible:  It samples HSMCI registers at
+		key points in the data transfer and then dumps all of the registers
+		at the end of the transfer.  If DEBUG_DMA is also enabled, then DMA
+		register will be collected as well.  Requires also DEBUG_FS and
+		DEBUG_VERBOSE.
+
+endmenu # HSMCI device driver options
+endif # SAM34_HSMCI
+
 if SAM34_UDP
 menu "AT91SAM3/4 USB Full Speed Device Controller driver (DCD) options"
 
