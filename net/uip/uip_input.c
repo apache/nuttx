@@ -2,7 +2,7 @@
  * netuip/uip_input.c
  * The uIP TCP/IP stack code.
  *
- *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -453,11 +453,18 @@ int uip_input(struct uip_driver_s *dev)
 #ifndef CONFIG_NET_IPv6
       if (!uip_ipaddr_cmp(uip_ip4addr_conv(pbuf->destipaddr), dev->d_ipaddr))
         {
-#ifdef CONFIG_NET_STATISTICS
-          uip_stat.ip.drop++;
+#ifdef CONFIG_NET_IGMP
+          uip_ipaddr_t destip = uip_ip4addr_conv(pbuf->destipaddr);
+          if (uip_grpfind(dev, &destip) == NULL)
 #endif
-          goto drop;
+            {
+#ifdef CONFIG_NET_STATISTICS
+              uip_stat.ip.drop++;
+#endif
+              goto drop;
+            }
         }
+
 #else /* CONFIG_NET_IPv6 */
       /* For IPv6, packet reception is a little trickier as we need to
        * make sure that we listen to certain multicast addresses (all

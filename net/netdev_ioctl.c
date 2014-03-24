@@ -472,7 +472,7 @@ static FAR struct uip_driver_s *netdev_imsfdev(FAR struct ip_msfilter *imsf)
  *   psock    Socket structure
  *   dev      Ethernet driver device structure
  *   cmd      The ioctl command
- *   imsf      The argument of the ioctl cmd
+ *   imsf     The argument of the ioctl cmd
  *
  * Return:
  *   >=0 on success (positive non-zero values are cmd-specific)
@@ -495,7 +495,7 @@ static int netdev_imsfioctl(FAR struct socket *psock, int cmd,
     {
       case SIOCSIPMSFILTER:  /* Set source filter content */
         {
-          dev = netdev_imsfdev(req);
+          dev = netdev_imsfdev(imsf);
           if (dev)
             {
               if (imsf->imsf_fmode == MCAST_INCLUDE)

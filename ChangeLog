@@ -7025,3 +7025,5 @@
 	  NSH console (2014-3-22).
 	* arch/arm/src/stm32/stm32_eth.c:  Add IGMP hashing support.  From
 	  Manuel Stühn (2014-3-24).
+	* net/netdev_ioctl.c and uip/uip_input.c:  IGMP-related bug fixes
+	  from Manuel Stühn (2014-3-24).
