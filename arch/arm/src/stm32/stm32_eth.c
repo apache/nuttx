@@ -257,7 +257,7 @@
 
 #define STM32_TXTIMEOUT   (60*CLK_TCK)
 
-/* PHY reset/configuration delays in milliseconds */ 
+/* PHY reset/configuration delays in milliseconds */
 
 #define PHY_RESET_DELAY   (65)
 #define PHY_CONFIG_DELAY  (1000)
@@ -358,7 +358,7 @@
   (ETH_MACFFR_PM | ETH_MACFFR_HU | ETH_MACFFR_HM | ETH_MACFFR_DAIF | \
    ETH_MACFFR_PAM | ETH_MACFFR_BFD | ETH_MACFFR_PCF_MASK | ETH_MACFFR_SAIF | \
    ETH_MACFFR_SAF | ETH_MACFFR_HPF | ETH_MACFFR_RA)
-  
+
 /* The following bits are set or left zero unconditionally in all modes.
  *
  * ETH_MACFFR_PM    Promiscuous mode                       0 (disabled)
@@ -450,7 +450,7 @@
  * stored in the FIFO, so the MAC can insert/verify the checksum, if the
  * checksum is OK the DMA can handle the frame otherwise the frame is dropped
  */
- 
+
 #if CONFIG_STM32_ETH_HWCHECKSUM
 #  define DMAOMR_SET_MASK \
     (ETH_DMAOMR_OSF | ETH_DMAOMR_RTC_64 | ETH_DMAOMR_TTC_64 | \
@@ -1335,7 +1335,7 @@ static void stm32_disableint(FAR struct stm32_ethmac_s *priv, uint32_t ierbit)
   if ((regval & ETH_DMAINT_NORMAL) == 0)
     {
       /* Yes.. disable normal interrupts */
- 
+
       regval &= ~ETH_DMAINT_NIS;
     }
 
@@ -1384,12 +1384,12 @@ static void stm32_freesegment(FAR struct stm32_ethmac_s *priv,
 
   /* Check if the RX Buffer unavailable flag is set */
 
-  if ((stm32_getreg(STM32_ETH_DMASR) & ETH_DMAINT_RBUI) != 0)  
+  if ((stm32_getreg(STM32_ETH_DMASR) & ETH_DMAINT_RBUI) != 0)
     {
       /* Clear RBUS Ethernet DMA flag */
 
       stm32_putreg(ETH_DMAINT_RBUI, STM32_ETH_DMASR);
-      
+
       /* Resume DMA reception */
 
       stm32_putreg(0, STM32_ETH_DMARPDR);
@@ -1462,9 +1462,9 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
           (rxdesc->rdes0 & ETH_RDES0_LS) == 0)
         {
           priv->rxcurr   = rxdesc;
-          priv->segments = 1;   
+          priv->segments = 1;
         }
-    
+
       /* Check if this is an intermediate segment in the frame */
 
       else if (((rxdesc->rdes0 & ETH_RDES0_LS) == 0)&&
@@ -1476,7 +1476,7 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
       /* Otherwise, it is the last segment in the frame */
 
       else
-        { 
+        {
           priv->segments++;
 
           /* Check if the there is only one segment in the frame */
@@ -1559,7 +1559,7 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
   nllvdbg("rxhead: %p rxcurr: %p segments: %d\n",
           priv->rxhead, priv->rxcurr, priv->segments);
 
-  return -EAGAIN; 
+  return -EAGAIN;
 }
 
 /****************************************************************************
@@ -1979,7 +1979,7 @@ static void stm32_polltimer(int argc, uint32_t arg, ...)
 
       if (dev->d_buf)
         {
-          /* Update TCP timing states and poll uIP for new XMIT data. 
+          /* Update TCP timing states and poll uIP for new XMIT data.
            */
 
           (void)uip_timer(dev, stm32_uiptxpoll, STM32_POLLHSEC);
@@ -2007,7 +2007,7 @@ static void stm32_polltimer(int argc, uint32_t arg, ...)
  *
  * Description:
  *   NuttX Callback: Bring up the Ethernet interface when an IP address is
- *   provided 
+ *   provided
  *
  * Parameters:
  *   dev  - Reference to the NuttX driver state structure
@@ -2100,7 +2100,7 @@ static int stm32_ifdown(struct uip_driver_s *dev)
  * Function: stm32_txavail
  *
  * Description:
- *   Driver callback invoked when new TX data is available.  This is a 
+ *   Driver callback invoked when new TX data is available.  This is a
  *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
  *   latency.
  *
@@ -2142,6 +2142,50 @@ static int stm32_txavail(struct uip_driver_s *dev)
 }
 
 /****************************************************************************
+ * Function: stm32_calcethcrc
+ *
+ * Description:
+ *   Function to calculate the CRC used by STM32 to check an ethernet frame
+ *
+ * Parameters:
+ *   data   - the data to be checked
+ *   length - length of the data
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IGMP
+static uint32_t stm32_calcethcrc(const uint8_t *data, size_t length)
+{
+  uint32_t crc = 0xffffffff;
+  size_t i;
+  int j;
+
+  for (i = 0; i < length; i++)
+    {
+      for (j = 0; j < 8; j++)
+        {
+          if (((crc >> 31) ^ (data[i] >> j)) & 0x01)
+            {
+              /* x^26+x^23+x^22+x^16+x^12+x^11+x^10+x^8+x^7+x^5+x^4+x^2+x+1 */
+              crc = (crc << 1) ^ 0x04c11db7;
+            }
+          else
+            {
+              crc = crc << 1;
+            }
+        }
+    }
+
+  return ~crc;
+}
+#endif
+
+/****************************************************************************
  * Function: stm32_addmac
  *
  * Description:
@@ -2150,7 +2194,7 @@ static int stm32_txavail(struct uip_driver_s *dev)
  *
  * Parameters:
  *   dev  - Reference to the NuttX driver state structure
- *   mac  - The MAC address to be added 
+ *   mac  - The MAC address to be added
  *
  * Returned Value:
  *   None
@@ -2162,14 +2206,37 @@ static int stm32_txavail(struct uip_driver_s *dev)
 #ifdef CONFIG_NET_IGMP
 static int stm32_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
 {
-  FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)dev->d_private;
+  uint32_t crc;
+  uint32_t hashindex;
+  uint32_t temp;
+  uint32_t registeraddress;
 
   nllvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
-  /* Add the MAC address to the hardware multicast routing table */
-  /* Add the MAC address to the hardware multicast routing table */
-#error "Missing logic"
+  /* Add the MAC address to the hardware multicast hash table */
+
+  crc = stm32_calcethcrc( mac, 6 );
+
+  hashindex = (crc >> 26) & 0x3F;
+
+  if (hashindex > 31)
+    {
+      registeraddress = STM32_ETH_MACHTHR;
+      hashindex -= 32;
+    }
+  else
+    {
+      registeraddress = STM32_ETH_MACHTLR;
+    }
+
+  temp = stm32_getreg(registeraddress);
+  temp |= 1 << hashindex;
+  stm32_putreg(temp, registeraddress);
+
+  temp = stm32_getreg(STM32_ETH_MACFFR);
+  temp |= (ETH_MACFFR_HM | ETH_MACFFR_HPF);
+  stm32_putreg(temp, STM32_ETH_MACFFR);
 
   return OK;
 }
@@ -2184,7 +2251,7 @@ static int stm32_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
  *
  * Parameters:
  *   dev  - Reference to the NuttX driver state structure
- *   mac  - The MAC address to be removed 
+ *   mac  - The MAC address to be removed
  *
  * Returned Value:
  *   None
@@ -2196,13 +2263,43 @@ static int stm32_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
 #ifdef CONFIG_NET_IGMP
 static int stm32_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
 {
-  FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)dev->d_private;
+  uint32_t crc;
+  uint32_t hashindex;
+  uint32_t temp;
+  uint32_t registeraddress;
 
   nllvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
-  /* Add the MAC address to the hardware multicast routing table */
-#error "Missing logic"
+  /* Remove the MAC address to the hardware multicast hash table */
+
+  crc = stm32_calcethcrc( mac, 6 );
+
+  hashindex = (crc >> 26) & 0x3F;
+
+  if (hashindex > 31)
+    {
+      registeraddress = STM32_ETH_MACHTHR;
+      hashindex -= 32;
+    }
+  else
+    {
+      registeraddress = STM32_ETH_MACHTLR;
+    }
+
+  temp = stm32_getreg(registeraddress);
+  temp &= ~(1 << hashindex);
+  stm32_putreg(temp, registeraddress);
+
+  /* If there is no address registered any more, delete multicast filtering */
+
+  if (stm32_getreg(STM32_ETH_MACHTHR ) == 0 &&
+      stm32_getreg(STM32_ETH_MACHTLR) == 0)
+    {
+      temp = stm32_getreg(STM32_ETH_MACFFR);
+      temp &= ~(ETH_MACFFR_HM | ETH_MACFFR_HPF);
+      stm32_putreg(temp, STM32_ETH_MACFFR);
+    }
 
   return OK;
 }
@@ -2228,7 +2325,7 @@ static void stm32_txdescinit(FAR struct stm32_ethmac_s *priv)
 {
   struct eth_txdesc_s *txdesc;
   int i;
-  
+
   /* priv->txhead will point to the first, available TX descriptor in the chain.
    * Set the priv->txhead pointer to the first descriptor in the table.
    */
@@ -2243,7 +2340,7 @@ static void stm32_txdescinit(FAR struct stm32_ethmac_s *priv)
    priv->txtail   = NULL;
    priv->inflight = 0;
 
-  /* Initialize each TX descriptor */   
+  /* Initialize each TX descriptor */
 
   for (i = 0; i < CONFIG_STM32_ETH_NTXDESC; i++)
     {
@@ -2251,8 +2348,8 @@ static void stm32_txdescinit(FAR struct stm32_ethmac_s *priv)
 
       /* Set Second Address Chained bit */
 
-      txdesc->tdes0 = ETH_TDES0_TCH;  
-       
+      txdesc->tdes0 = ETH_TDES0_TCH;
+
 #ifdef CHECKSUM_BY_HARDWARE
       /* Enable the checksum insertion for the TX frames */
 
@@ -2264,7 +2361,7 @@ static void stm32_txdescinit(FAR struct stm32_ethmac_s *priv)
        */
 
       txdesc->tdes2 = 0;
-    
+
       /* Initialize the next descriptor with the Next Descriptor Polling Enable */
 
       if (i < (CONFIG_STM32_ETH_NTXDESC-1))
@@ -2281,7 +2378,7 @@ static void stm32_txdescinit(FAR struct stm32_ethmac_s *priv)
            * to the first descriptor base address
            */
 
-          txdesc->tdes3 = (uint32_t)priv->txtable;  
+          txdesc->tdes3 = (uint32_t)priv->txtable;
         }
     }
 
@@ -2310,7 +2407,7 @@ static void stm32_rxdescinit(FAR struct stm32_ethmac_s *priv)
 {
   struct eth_rxdesc_s *rxdesc;
   int i;
-  
+
   /* priv->rxhead will point to the first,  RX descriptor in the chain.
    * This will be where we receive the first incomplete frame.
    */
@@ -2324,7 +2421,7 @@ static void stm32_rxdescinit(FAR struct stm32_ethmac_s *priv)
   priv->rxcurr   = NULL;
   priv->segments = 0;
 
-  /* Initialize each TX descriptor */   
+  /* Initialize each TX descriptor */
 
   for (i = 0; i < CONFIG_STM32_ETH_NRXDESC; i++)
     {
@@ -2338,12 +2435,12 @@ static void stm32_rxdescinit(FAR struct stm32_ethmac_s *priv)
        * RX desc receive interrupt
        */
 
-      rxdesc->rdes1 = ETH_RDES1_RCH | (uint32_t)CONFIG_STM32_ETH_BUFSIZE;  
+      rxdesc->rdes1 = ETH_RDES1_RCH | (uint32_t)CONFIG_STM32_ETH_BUFSIZE;
 
       /* Set Buffer1 address pointer */
 
       rxdesc->rdes2 = (uint32_t)&priv->rxbuffer[i*CONFIG_STM32_ETH_BUFSIZE];
-    
+
       /* Initialize the next descriptor with the Next Descriptor Polling Enable */
 
       if (i < (CONFIG_STM32_ETH_NRXDESC-1))
@@ -2360,7 +2457,7 @@ static void stm32_rxdescinit(FAR struct stm32_ethmac_s *priv)
            * to the first descriptor base address
            */
 
-          rxdesc->rdes3 = (uint32_t)priv->rxtable;  
+          rxdesc->rdes3 = (uint32_t)priv->rxtable;
         }
     }
 
@@ -2539,7 +2636,7 @@ static inline int stm32_dm9161(FAR struct stm32_ethmac_s *priv)
   /* Bit 8 of the DSCR register is zero, then the DM9161 has not selected RMII.
    * If RMII is not selected, then reset the MCU to recover.
    */
- 
+
   else if ((phyval & (1 << 8)) == 0)
     {
       up_systemreset();
@@ -2670,7 +2767,7 @@ static int stm32_phyinit(FAR struct stm32_ethmac_s *priv)
       ndbg("Timed out waiting for auto-negotiation\n");
       return -ETIMEDOUT;
     }
- 
+
   /* Read the result of the auto-negotiation from the PHY-specific register */
 
   ret = stm32_phyread(CONFIG_STM32_PHYADDR, CONFIG_STM32_PHYSR, &phyval);
@@ -2895,7 +2992,7 @@ static inline void stm32_ethgpioconfig(FAR struct stm32_ethmac_s *priv)
   stm32_mcoconfig(BOARD_CFGR_MCO_SOURCE);
 # endif
 
-  /* MII interface pins (17):  
+  /* MII interface pins (17):
    *
    * MII_TX_CLK, MII_TXD[3:0], MII_TX_EN, MII_RX_CLK, MII_RXD[3:0], MII_RX_ER,
    * MII_RX_DV, MII_CRS, MII_COL, MDC, MDIO
@@ -3147,16 +3244,16 @@ static void stm32_macaddress(FAR struct stm32_ethmac_s *priv)
           dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5]);
 
   /* Set the MAC address high register */
-  
+
   regval = ((uint32_t)dev->d_mac.ether_addr_octet[5] << 8) |
             (uint32_t)dev->d_mac.ether_addr_octet[4];
   stm32_putreg(regval, STM32_ETH_MACA0HR);
 
   /* Set the MAC address low register */
-  
+
   regval = ((uint32_t)dev->d_mac.ether_addr_octet[3] << 24) |
            ((uint32_t)dev->d_mac.ether_addr_octet[2] << 16) |
-           ((uint32_t)dev->d_mac.ether_addr_octet[1] <<  8) | 
+           ((uint32_t)dev->d_mac.ether_addr_octet[1] <<  8) |
             (uint32_t)dev->d_mac.ether_addr_octet[0];
   stm32_putreg(regval, STM32_ETH_MACA0LR);
 }
@@ -3185,7 +3282,7 @@ static int stm32_macenable(FAR struct stm32_ethmac_s *priv)
 
   stm32_macaddress(priv);
 
-  /* Enable transmit state machine of the MAC for transmission on the MII */  
+  /* Enable transmit state machine of the MAC for transmission on the MII */
 
   regval  = stm32_getreg(STM32_ETH_MACCR);
   regval |= ETH_MACCR_TE;
@@ -3197,20 +3294,20 @@ static int stm32_macenable(FAR struct stm32_ethmac_s *priv)
   regval |= ETH_DMAOMR_FTF;
   stm32_putreg(regval, STM32_ETH_DMAOMR);
 
-  /* Enable receive state machine of the MAC for reception from the MII */  
+  /* Enable receive state machine of the MAC for reception from the MII */
 
   /* Enables or disables the MAC reception. */
 
   regval  = stm32_getreg(STM32_ETH_MACCR);
   regval |= ETH_MACCR_RE;
   stm32_putreg(regval, STM32_ETH_MACCR);
- 
+
   /* Start DMA transmission */
 
   regval  = stm32_getreg(STM32_ETH_DMAOMR);
   regval |= ETH_DMAOMR_ST;
   stm32_putreg(regval, STM32_ETH_DMAOMR);
- 
+
   /* Start DMA reception */
 
   regval  = stm32_getreg(STM32_ETH_DMAOMR);
@@ -3229,7 +3326,7 @@ static int stm32_macenable(FAR struct stm32_ethmac_s *priv)
    */
 
   stm32_putreg(ETH_MACIMR_ALLINTS, STM32_ETH_MACIMR);
-  
+
   /* Ethernet DMA supports two classes of interrupts: Normal interrupt
    * summary (NIS) and Abnormal interrupt summary (AIS) with a variety
    * individual normal and abnormal interrupting events.  Here only
