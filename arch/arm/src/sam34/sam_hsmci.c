@@ -89,13 +89,13 @@
 #  error "This driver requires CONFIG_SDIO_BLOCKSETUP"
 #endif
 
-#ifndef CONFIG_HSMCI_PRI
-#  define CONFIG_HSMCI_PRI        NVIC_SYSH_PRIORITY_DEFAULT
-#endif
+/* Nested interrupts not supported */
+
+#define SAM34_HSMCI_PRIO NVIC_SYSH_PRIORITY_DEFAULT
 
 #if !defined(CONFIG_DEBUG_FS) || !defined(CONFIG_DEBUG_VERBOSE)
-#  undef CONFIG_HSMCI_CMDDEBUG
-#  undef CONFIG_HSMCI_XFRDEBUG
+#  undef CONFIG_SAM34_HSMCI_CMDDEBUG
+#  undef CONFIG_SAM34_HSMCI_XFRDEBUG
 #endif
 
 #ifdef CONFIG_SAM34_HSMCI_RDPROOF
@@ -242,7 +242,7 @@
 
 /* Register logging support */
 
-#ifdef CONFIG_HSMCI_XFRDEBUG
+#ifdef CONFIG_SAM34_HSMCI_XFRDEBUG
 #  ifdef CONFIG_DEBUG_DMA
 #    define SAMPLENDX_BEFORE_SETUP  0
 #    define SAMPLENDX_BEFORE_ENABLE 1
@@ -258,7 +258,7 @@
 #  endif
 #endif
 
-#ifdef CONFIG_HSMCI_CMDDEBUG
+#ifdef CONFIG_SAM34_HSMCI_CMDDEBUG
 #  define SAMPLENDX_AFTER_CMDR      0
 #  define SAMPLENDX_AT_WAKEUP       1
 #  define DEBUG_NCMDSAMPLES         2
@@ -305,7 +305,7 @@ struct sam_dev_s
 
 /* Register logging support */
 
-#if defined(CONFIG_HSMCI_XFRDEBUG) || defined(CONFIG_HSMCI_CMDDEBUG)
+#if defined(CONFIG_SAM34_HSMCI_XFRDEBUG) || defined(CONFIG_SAM34_HSMCI_CMDDEBUG)
 struct sam_hsmciregs_s
 {
   uint32_t mr;    /* Mode Register */
@@ -329,7 +329,7 @@ struct sam_hsmciregs_s
 };
 #endif
 
-#ifdef CONFIG_HSMCI_XFRDEBUG
+#ifdef CONFIG_SAM34_HSMCI_XFRDEBUG
 struct sam_xfrregs_s
 {
   struct sam_hsmciregs_s hsmci;
@@ -360,12 +360,12 @@ static inline void sam_enable(void);
 
 /* Register Sampling ********************************************************/
 
-#if defined(CONFIG_HSMCI_XFRDEBUG) || defined(CONFIG_HSMCI_CMDDEBUG)
+#if defined(CONFIG_SAM34_HSMCI_XFRDEBUG) || defined(CONFIG_SAM34_HSMCI_CMDDEBUG)
 static void sam_hsmcisample(struct sam_hsmciregs_s *regs);
 static void sam_hsmcidump(struct sam_hsmciregs_s *regs, const char *msg);
 #endif
 
-#ifdef CONFIG_HSMCI_XFRDEBUG
+#ifdef CONFIG_SAM34_HSMCI_XFRDEBUG
 static void sam_xfrsampleinit(void);
 static void sam_xfrsample(struct sam_dev_s *priv, int index);
 static void sam_xfrdumpone(struct sam_dev_s *priv,
@@ -377,7 +377,7 @@ static void sam_xfrdump(struct sam_dev_s *priv);
 #  define   sam_xfrdump(priv)
 #endif
 
-#ifdef CONFIG_HSMCI_CMDDEBUG
+#ifdef CONFIG_SAM34_HSMCI_CMDDEBUG
 static void sam_cmdsampleinit(void);
 static inline void sam_cmdsample1(int index3);
 static inline void sam_cmdsample2(int index, uint32_t sr);
@@ -495,13 +495,13 @@ struct sam_dev_s g_sdiodev =
 
 /* Register logging support */
 
-#ifdef CONFIG_HSMCI_XFRDEBUG
+#ifdef CONFIG_SAM34_HSMCI_XFRDEBUG
 static struct sam_xfrregs_s   g_xfrsamples[DEBUG_NDMASAMPLES];
 #endif
-#ifdef CONFIG_HSMCI_CMDDEBUG
+#ifdef CONFIG_SAM34_HSMCI_CMDDEBUG
 static struct sam_hsmciregs_s g_cmdsamples[DEBUG_NCMDSAMPLES];
 #endif
-#if defined(CONFIG_HSMCI_XFRDEBUG) && defined(CONFIG_HSMCI_CMDDEBUG)
+#if defined(CONFIG_SAM34_HSMCI_XFRDEBUG) && defined(CONFIG_SAM34_HSMCI_CMDDEBUG)
 static bool                     g_xfrinitialized;
 static bool                     g_cmdinitialized;
 #endif
@@ -729,7 +729,7 @@ static inline void sam_enable(void)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_HSMCI_XFRDEBUG) || defined(CONFIG_HSMCI_CMDDEBUG)
+#if defined(CONFIG_SAM34_HSMCI_XFRDEBUG) || defined(CONFIG_SAM34_HSMCI_CMDDEBUG)
 static void sam_hsmcisample(struct sam_hsmciregs_s *regs)
 {
   regs->mr    = getreg32(SAM_HSMCI_MR);
@@ -761,7 +761,7 @@ static void sam_hsmcisample(struct sam_hsmciregs_s *regs)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_HSMCI_XFRDEBUG) || defined(CONFIG_HSMCI_CMDDEBUG)
+#if defined(CONFIG_SAM34_HSMCI_XFRDEBUG) || defined(CONFIG_SAM34_HSMCI_CMDDEBUG)
 static void sam_hsmcidump(struct sam_hsmciregs_s *regs, const char *msg)
 {
   fdbg("HSMCI Registers: %s\n", msg);
@@ -794,7 +794,7 @@ static void sam_hsmcidump(struct sam_hsmciregs_s *regs, const char *msg)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_HSMCI_XFRDEBUG
+#ifdef CONFIG_SAM34_HSMCI_XFRDEBUG
 static void sam_xfrsample(struct sam_dev_s *priv, int index)
 {
   struct sam_xfrregs_s *regs = &g_xfrsamples[index];
@@ -813,11 +813,11 @@ static void sam_xfrsample(struct sam_dev_s *priv, int index)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_HSMCI_XFRDEBUG
+#ifdef CONFIG_SAM34_HSMCI_XFRDEBUG
 static void sam_xfrsampleinit(void)
 {
   memset(g_xfrsamples, 0xff, DEBUG_NDMASAMPLES * sizeof(struct sam_xfrregs_s));
-#ifdef CONFIG_HSMCI_CMDDEBUG
+#ifdef CONFIG_SAM34_HSMCI_CMDDEBUG
   g_xfrinitialized = true;
 #endif
 }
@@ -831,7 +831,7 @@ static void sam_xfrsampleinit(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_HSMCI_XFRDEBUG
+#ifdef CONFIG_SAM34_HSMCI_XFRDEBUG
 static void sam_xfrdumpone(struct sam_dev_s *priv,
                            struct sam_xfrregs_s *regs, const char *msg)
 {
@@ -850,10 +850,10 @@ static void sam_xfrdumpone(struct sam_dev_s *priv,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_HSMCI_XFRDEBUG
+#ifdef CONFIG_SAM34_HSMCI_XFRDEBUG
 static void  sam_xfrdump(struct sam_dev_s *priv)
 {
-#ifdef CONFIG_HSMCI_CMDDEBUG
+#ifdef CONFIG_SAM34_HSMCI_CMDDEBUG
   if (g_xfrinitialized)
 #endif
     {
@@ -866,7 +866,7 @@ static void  sam_xfrdump(struct sam_dev_s *priv)
 #ifdef CONFIG_DEBUG_DMA
       sam_xfrdumpone(priv, &g_xfrsamples[SAMPLENDX_DMA_CALLBACK], "DMA Callback");
 #endif
-#ifdef CONFIG_HSMCI_CMDDEBUG
+#ifdef CONFIG_SAM34_HSMCI_CMDDEBUG
       g_xfrinitialized = false;
 #endif
     }
@@ -881,11 +881,11 @@ static void  sam_xfrdump(struct sam_dev_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_HSMCI_CMDDEBUG
+#ifdef CONFIG_SAM34_HSMCI_CMDDEBUG
 static void sam_cmdsampleinit(void)
 {
   memset(g_cmdsamples, 0xff, DEBUG_NCMDSAMPLES * sizeof(struct sam_hsmciregs_s));
-#ifdef CONFIG_HSMCI_XFRDEBUG
+#ifdef CONFIG_SAM34_HSMCI_XFRDEBUG
   g_cmdinitialized = true;
 #endif
 }
@@ -899,7 +899,7 @@ static void sam_cmdsampleinit(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_HSMCI_CMDDEBUG
+#ifdef CONFIG_SAM34_HSMCI_CMDDEBUG
 static inline void sam_cmdsample1(int index)
 {
   sam_hsmcisample(&g_cmdsamples[index]);
@@ -920,16 +920,16 @@ static inline void sam_cmdsample2(int index, uint32_t sr)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_HSMCI_CMDDEBUG
+#ifdef CONFIG_SAM34_HSMCI_CMDDEBUG
 static void sam_cmddump(void)
 {
-#ifdef CONFIG_HSMCI_XFRDEBUG
+#ifdef CONFIG_SAM34_HSMCI_XFRDEBUG
   if (g_cmdinitialized)
 #endif
     {
       sam_hsmcidump(&g_cmdsamples[SAMPLENDX_AFTER_CMDR], "After command setup");
       sam_hsmcidump(&g_cmdsamples[SAMPLENDX_AT_WAKEUP],  "After wakeup");
-#ifdef CONFIG_HSMCI_XFRDEBUG
+#ifdef CONFIG_SAM34_HSMCI_XFRDEBUG
       g_cmdinitialized = false;
 #endif
     }
@@ -1519,7 +1519,7 @@ static int sam_attach(FAR struct sdio_dev_s *dev)
 #ifdef CONFIG_ARCH_IRQPRIO
       /* Set the interrupt priority */
 
-      up_prioritize_irq(SAM_IRQ_HSMCI, CONFIG_HSMCI_PRI);
+      up_prioritize_irq(SAM_IRQ_HSMCI, SAM34_HSMCI_PRIO);
 #endif
     }
 
