@@ -146,7 +146,26 @@ void sam_cmcc_invalidate(uintptr_t start, uintptr_t end)
   uint32_t regval;
   uint32_t way
   uint32_t index;
+  size_t size;
   int nlines;
+
+  /* Get the aligned addresses and size for the memory region to be
+   * invalidated.
+   */
+
+  start  = ALIGN_DOWN(start);
+  end    = ALIGN_up(end);
+  size   = end - start;
+
+  /* If this is a large region (as big as the cache), then just invalidate
+   * the entire cache the easy way.
+   */
+
+  if (size >= (CMCC_CACHE_SIZE / CMCC_CACHE_LINE_SIZE / CMCC_NWAYS)
+    {
+      sam_cmcc_invalidateall();
+      return;
+    }
 
   /* "When an invalidate by line command is issued the cache controller resets
    *  the valid bit information of the decoded cache line. As the line is no
@@ -169,9 +188,6 @@ void sam_cmcc_invalidate(uintptr_t start, uintptr_t end)
   sam_cmcc_disable();
 
   /* Invalidate the address region */
-
-  start  = ALIGN_DOWN(start);
-  end    = ALIGN_up(end);
 
   index  = (start >> CMCC_SHIFT)
   nlines = ((end - start) >> CMCC_SHIFT);
