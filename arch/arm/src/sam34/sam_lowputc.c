@@ -285,14 +285,16 @@ void up_lowputc(char ch)
     {
       /* Wait for the transmitter to be available */
 
-      while ((getreg32(SAM_CONSOLE_BASE + SAM_UART_SR_OFFSET) & UART_INT_TXEMPTY) == 0);
+      while ((getreg32(SAM_CONSOLE_BASE + SAM_UART_SR_OFFSET) &
+        UART_INT_TXEMPTY) == 0);
 
       /* Disable interrupts so that the test and the transmission are
        * atomic.
        */
 
       flags = irqsave();
-      if ((getreg32(SAM_CONSOLE_BASE + SAM_UART_SR_OFFSET) & UART_INT_TXEMPTY) != 0)
+      if ((getreg32(SAM_CONSOLE_BASE + SAM_UART_SR_OFFSET) &
+        UART_INT_TXEMPTY) != 0)
         {
           /* Send the character */
 
