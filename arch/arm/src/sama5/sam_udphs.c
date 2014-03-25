@@ -3373,6 +3373,7 @@ static int sam_ep_configure(struct usbdev_ep_s *ep,
                             bool last)
 {
   struct sam_ep_s *privep = (struct sam_ep_s *)ep;
+  struct sam_usbdev_s *priv;
   int ret;
 
   /* Verify parameters.  Endpoint 0 is not available at this interface */
@@ -3394,6 +3395,7 @@ static int sam_ep_configure(struct usbdev_ep_s *ep,
        * configured.
        */
 
+      priv           = privep->dev;
       priv->devstate = UDPHS_DEVSTATE_CONFIGURED;
     }
 

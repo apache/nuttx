@@ -254,7 +254,7 @@ void up_lowputc(char ch)
     {
       /* Wait for the transmitter to be available */
 
-      while (((getreg32(SAM_CONSOLE_VBASE + SAM_UART_SR_OFFSET) &
+      while ((getreg32(SAM_CONSOLE_VBASE + SAM_UART_SR_OFFSET) &
         UART_INT_TXEMPTY) == 0);
 
       /* Disable interrupts so that the test and the transmission are
