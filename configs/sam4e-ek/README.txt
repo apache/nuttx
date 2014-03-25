@@ -622,7 +622,9 @@ USB Full-Speed Device
       CONFIG_USBMSC=y                       : Enable the USB MSC class driver
       CONFIG_USBMSC_EPBULKOUT=1             : Use EP1 for the BULK OUT endpoint
       CONFIG_USBMSC_EPBULKIN=2              : Use EP2 for the BULK IN endpoint
-                                            : Defaults for other settings?
+      CONFIG_USBMSC_BULKINREQLEN=64         : (Defaults for full speed)
+      CONFIG_USBMSC_BULKOUTREQLEN=64        :
+                                            : Defaults for other settings as well?
     Board Selection
       CONFIG_SAM4EEK_AT25_BLOCKDEVICE=y     : Export AT25 serial FLASH device
       CONFIG_SAM4EEK_HSMCI_BLOCKDEVICE=n    : Don't export HSMCI SD card
@@ -667,6 +669,15 @@ USB Full-Speed Device
          first have to use mkrd to create the RAM disk and mkfatfs to put
          a FAT file system on it.
 
+  STATUS:
+
+  2014-3-25:  Marginally functional. Very slow to come up.  USB analyzer
+              shows several resets before the host decides that it is
+              happy with the device.  There are no obvious errors in the
+              USB data capture.
+  2014-3-25:  There also seem to be issues about writing files.  This
+              needs more investigation.
+
   CDC/ACM Serial Device Class
   ---------------------------
 
@@ -702,6 +713,11 @@ USB Full-Speed Device
   2. Linux supports the CDC/ACM driver out of the box.  Windows, on the other
      than requires that you first install a serial driver (a .inf file).  There
      are example .inf files for NuttX in the nuttx/configs/spark directories.
+
+  STATUS:
+
+  2013-2-23:  Checks out OK.  See discussion of the usbnsh configuration
+              below.
 
   Debugging USB Device
   --------------------
