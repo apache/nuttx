@@ -660,7 +660,8 @@ USB Full-Speed Device
     b. If you change the value CONFIG_SYSTEM_USBMSC_DEVPATH1, then you
        can export other file systems:
 
-        "/dev/mmcsd0" would export the HSMCI SD slot
+        "/dev/mmcsd0" would export the HSMCI SD slot (not currently available,
+        see the "HSMCI" section).
 
         "/dev/ram0" could even be used to export a RAM disk.  But you would
          first have to use mkrd to create the RAM disk and mkfatfs to put
@@ -780,6 +781,14 @@ HSMCI
     nsh> mount -t vfat /dev/mmcsd0 /mnt/sdcard
 
   The SD card contents will then be available under /mnt/sdcard.
+
+  NOTES:
+
+  1. DMA is not currently functional and without DMA, there may not be
+     reliable data transfers at high speeds due to data overrun problems.
+     The current HSMCI driver supports DMA via the DMAC.  However, the data
+     sheet only discusses PDC-based HSMCI DMA (although there is a DMA
+     channel interface definition for HSMCI).
 
 Touchscreen
 ===========
@@ -1171,7 +1180,12 @@ Configurations
        instructions provided above in the paragraph entitled "HSMCI."
 
        STATUS:
-         2014-3-21:  The HSMCI SD card slot has not yet been tested.
+         2014-3-24:  DMA is not currently functional and without DMA, there
+                     may not be reliable data transfers at high speeds due
+                     to data overrun problems.  The current HSMCI driver
+                     supports DMA via the DMAC.  However, the data sheet
+                     only discusses PDC-based HSMCI DMA (although there is
+                     a DMA channel interface definition for HSMCI).
 
   usbnsh:
 
