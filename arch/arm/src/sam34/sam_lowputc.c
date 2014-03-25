@@ -279,14 +279,57 @@
 void up_lowputc(char ch)
 {
 #ifdef HAVE_CONSOLE
-  /* Wait for the transmitter to be available */
+  irqstate_t flags;
 
-  while ((getreg32(SAM_CONSOLE_BASE + SAM_UART_SR_OFFSET) & UART_INT_TXEMPTY) == 0);
+  for (;;)
+    {
+      /* Wait for the transmitter to be available */
 
-  /* Send the character */
+      while ((getreg32(SAM_CONSOLE_BASE + SAM_UART_SR_OFFSET) & UART_INT_TXEMPTY) == 0);
 
-  putreg32((uint32_t)ch, SAM_CONSOLE_BASE + SAM_UART_THR_OFFSET);
+      /* Disable interrupts so that the test and the transmission are
+       * atomic.
+       */
+
+      flags = irqsave();
+      if ((getreg32(SAM_CONSOLE_BASE + SAM_UART_SR_OFFSET) & UART_INT_TXEMPTY) != 0)
+        {
+          /* Send the character */
+
+          putreg32((uint32_t)ch, SAM_CONSOLE_BASE + SAM_UART_THR_OFFSET);
+          irqrestore(flags);
+          return;
+        }
+
+      irqrestore(flags);
+    }
 #endif
+}
+
+
+/****************************************************************************
+ * Name: up_putc
+ *
+ * Description:
+ *   Provide priority, low-level access to support OS debug writes
+ *
+ ****************************************************************************/
+
+int up_putc(int ch)
+{
+#ifdef HAVE_CONSOLE
+  /* Check for LF */
+
+  if (ch == '\n')
+    {
+      /* Add CR */
+
+      up_lowputc('\r');
+    }
+
+  up_lowputc(ch);
+#endif
+  return ch;
 }
 
 /**************************************************************************
