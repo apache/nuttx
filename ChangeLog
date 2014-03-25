@@ -7031,3 +7031,17 @@
 	  Kconfig; update naming to include SAM34_ (2014-3-24).
 	* configs/sam4e-ek/include/board.h:  Update HSMCI timing to use the
 	  CLKODD bit (2014-3-24).
+	* drivers/include/mtd/Kconfig, sector512.c, and include/nuttx/mtd/mtd.h:
+	  Add a new MTD driver that can be used to contain another driver and
+	  force its apparent sector size to be 512 bytes (2014-3-24).
+	* arch/arm/src/sam34/sam_lowputc.c sam_serial.c:  Fix a mysterious
+	  multithreading bug that can log up the serial port (2014-3-14).
+	* drivers/usbdev/Kconfig, usbmsc.c, usbmsc.h, and usbmsc_scsi.c:
+	  Redesign threading module used with the USB MSC driver.  It was using
+	  pthreads before and these were changed to a kernel thread.  The reason
+	  for this has to do with task grouping:  A pthread is a memory of the
+	  group of the task that started it.  A kernel thread is independent of
+	  the task that started in (other than knowing it as the parent).  This
+	  allows me to remove so kludge logic to "deparent" the pthread on
+	  startup (2014-3-25).
+

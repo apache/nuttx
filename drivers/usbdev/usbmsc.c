@@ -66,13 +66,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <pthread.h>
 #include <string.h>
 #include <errno.h>
 #include <queue.h>
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/kthread.h>
 #include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/usb/usb.h>
@@ -159,6 +159,10 @@ static struct usbdevclass_driverops_s g_driverops =
   NULL,              /* suspend */
   NULL               /* resume */
 };
+
+/* Used to hand-off the state structure when the SCSI worker thread is started */
+
+FAR struct usbmsc_dev_s *g_usbmsc_handoff;
 
 /****************************************************************************
  * Public Data
@@ -642,7 +646,7 @@ static int usbmsc_setup(FAR struct usbdevclass_driver_s *driver,
 
                 priv->theventset |= USBMSC_EVENT_CFGCHANGE;
                 priv->thvalue     = value;
-                pthread_cond_signal(&priv->cond);
+                usbmsc_scsi_signal(priv);
 
                 /* Return here... the response will be provided later by the
                  * worker thread.
@@ -681,7 +685,7 @@ static int usbmsc_setup(FAR struct usbdevclass_driver_s *driver,
                     /* Signal to instantiate the interface change */
 
                     priv->theventset |= USBMSC_EVENT_IFCHANGE;
-                    pthread_cond_signal(&priv->cond);
+                    usbmsc_scsi_signal(priv);
 
                     /* Return here... the response will be provided later by the
                      * worker thread.
@@ -748,7 +752,7 @@ static int usbmsc_setup(FAR struct usbdevclass_driver_s *driver,
                     /* Signal to stop the current operation and reinitialize state */
 
                      priv->theventset |= USBMSC_EVENT_RESET;
-                     pthread_cond_signal(&priv->cond);
+                     usbmsc_scsi_signal(priv);
 
                     /* Return here... the response will be provided later by the
                      * worker thread.
@@ -870,7 +874,7 @@ static void usbmsc_disconnect(FAR struct usbdevclass_driver_s *driver,
   /* Signal the worker thread */
 
   priv->theventset |= USBMSC_EVENT_DISCONNECT;
-  pthread_cond_signal(&priv->cond);
+  usbmsc_scsi_signal(priv);
   irqrestore(flags);
 
   /* Perform the soft connect function so that we will we can be
@@ -1109,7 +1113,7 @@ void usbmsc_wrcomplete(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req)
   /* Inform the worker thread that a write request has been returned */
 
   priv->theventset |= USBMSC_EVENT_WRCOMPLETE;
-  pthread_cond_signal(&priv->cond);
+  usbmsc_scsi_signal(priv);
 }
 
 /****************************************************************************
@@ -1160,7 +1164,7 @@ void usbmsc_rdcomplete(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req)
         /* Signal the worker thread that there is received data to be processed */
 
         priv->theventset |= USBMSC_EVENT_RDCOMPLETE;
-        pthread_cond_signal(&priv->cond);
+        usbmsc_scsi_signal(priv);
       }
       break;
 
@@ -1262,6 +1266,26 @@ void usbmsc_deferredresponse(FAR struct usbmsc_dev_s *priv, bool failed)
 }
 
 /****************************************************************************
+ * Name: usbmsc_sync_wait
+ *
+ * Description:
+ *   Wait for the worker thread to obtain the USB MSC state data
+ *
+ ****************************************************************************/
+
+static inline void usbmsc_sync_wait(FAR struct usbmsc_dev_s *priv)
+{
+  int ret;
+
+  do
+    {
+      ret = sem_wait(&priv->thsynch);
+      DEBUGASSERT(ret == OK || errno == EINTR);
+    }
+  while (ret < 0);
+}
+
+/****************************************************************************
  * User Interfaces
  ****************************************************************************/
 /****************************************************************************
@@ -1314,8 +1338,9 @@ int usbmsc_configure(unsigned int nluns, void **handle)
   priv = &alloc->dev;
   memset(priv, 0, sizeof(struct usbmsc_dev_s));
 
-  pthread_mutex_init(&priv->mutex, NULL);
-  pthread_cond_init(&priv->cond, NULL);
+  sem_init(&priv->thsynch, 0, 0);
+  sem_init(&priv->thlock, 0, 1);
+  sem_init(&priv->thwaitsem, 0, 0);
   sq_init(&priv->wrreqlist);
 
   priv->nluns = nluns;
@@ -1549,7 +1574,7 @@ int usbmsc_unbindlun(FAR void *handle, unsigned int lunno)
 #endif
 
   lun = &priv->luntab[lunno];
-  pthread_mutex_lock(&priv->mutex);
+  usbmsc_scsi_lock(priv);
 
 #ifdef CONFIG_DEBUG
   if (lun->inode == NULL)
@@ -1566,7 +1591,7 @@ int usbmsc_unbindlun(FAR void *handle, unsigned int lunno)
      ret = OK;
    }
 
-  pthread_mutex_unlock(&priv->mutex);
+  usbmsc_scsi_unlock(priv);
   return ret;
 }
 
@@ -1594,10 +1619,7 @@ int usbmsc_exportluns(FAR void *handle)
   FAR struct usbmsc_dev_s *priv;
   FAR struct usbmsc_driver_s *drvr;
   irqstate_t flags;
-#ifdef SDCC
-  pthread_attr_t attr;
-#endif
-  int ret;
+  int ret = OK;
 
 #ifdef CONFIG_DEBUG
   if (!alloc)
@@ -1610,34 +1632,34 @@ int usbmsc_exportluns(FAR void *handle)
   priv = &alloc->dev;
   drvr = &alloc->drvr;
 
-  /* Start the worker thread */
-
-  pthread_mutex_lock(&priv->mutex);
-  priv->thstate    = USBMSC_STATE_NOTSTARTED;
-  priv->theventset = USBMSC_EVENT_NOEVENTS;
-
-#ifdef SDCC
-  (void)pthread_attr_init(&attr);
-  ret = pthread_create(&priv->thread, &attr, usbmsc_workerthread, (pthread_addr_t)priv);
-#else
-  ret = pthread_create(&priv->thread, NULL, usbmsc_workerthread, (pthread_addr_t)priv);
-#endif
-  if (ret != OK)
-    {
-      usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_THREADCREATE), (uint16_t)-ret);
-      goto errout_with_mutex;
-    }
-
-  /* Detach the pthread so that we do not create a memory leak.
+  /* Start the worker thread
    *
-   * REVISIT:  See related comments in usbmsc_uninitialize()
+   * REVISIT:  g_usbmsc_handoff is a global and, hence, really requires
+   * some protection against re-entrant usage.
    */
 
-  ret = pthread_detach(priv->thread);
-  if (ret != OK)
+  usbmsc_scsi_lock(priv);
+
+  priv->thstate = USBMSC_STATE_NOTSTARTED;
+  priv->theventset = USBMSC_EVENT_NOEVENTS;
+
+  g_usbmsc_handoff = priv;
+
+  uvdbg("Starting SCSI worker thread\n");
+  priv->thpid = KERNEL_THREAD("scsid", CONFIG_USBMSC_SCSI_PRIO,
+                              CONFIG_USBMSC_SCSI_STACKSIZE,
+                              usbmsc_scsi_main, NULL);
+  if (priv->thpid <= 0)
     {
-      usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_DETACH), (uint16_t)-ret);
+      usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_THREADCREATE), (uint16_t)errno);
+      goto errout_with_lock;
     }
+
+  /* Wait for the worker thread to run and initialize */
+
+  uvdbg("Waiting for the SCSI worker thread\n");
+  usbmsc_sync_wait(priv);
+  DEBUGASSERT(g_usbmsc_handoff == NULL);
 
   /* Register the USB storage class driver (unless we are part of a composite device) */
 
@@ -1646,19 +1668,20 @@ int usbmsc_exportluns(FAR void *handle)
   if (ret != OK)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_DEVREGISTER), (uint16_t)-ret);
-      goto errout_with_mutex;
+      goto errout_with_lock;
     }
 #endif
 
   /* Signal to start the thread */
 
+  uvdbg("Signalling for the SCSI worker thread\n");
   flags = irqsave();
   priv->theventset |= USBMSC_EVENT_READY;
-  pthread_cond_signal(&priv->cond);
+  usbmsc_scsi_signal(priv);
   irqrestore(flags);
 
-errout_with_mutex:
-  pthread_mutex_unlock(&priv->mutex);
+errout_with_lock:
+  usbmsc_scsi_unlock(priv);
   return ret;
 }
 
@@ -1742,7 +1765,7 @@ void usbmsc_uninitialize(FAR void *handle)
    * first pass uninitialization.
    */
 
-  if (priv->thread == 0)
+  if (priv->thpid == 0)
     {
       /* In this second and final pass, all that remains to be done is to
        * free the memory resources.
@@ -1759,54 +1782,28 @@ void usbmsc_uninitialize(FAR void *handle)
     {
        /* The thread was started.. Is it still running? */
 
-      pthread_mutex_lock(&priv->mutex);
+      usbmsc_scsi_lock(priv);
       if (priv->thstate != USBMSC_STATE_TERMINATED)
         {
           /* Yes.. Ask the thread to stop */
 
           flags = irqsave();
           priv->theventset |= USBMSC_EVENT_TERMINATEREQUEST;
-          pthread_cond_signal(&priv->cond);
+          usbmsc_scsi_signal(priv);
           irqrestore(flags);
         }
 
-      pthread_mutex_unlock(&priv->mutex);
+      usbmsc_scsi_unlock(priv);
 
-      /* Wait for the thread to exit.  This is necessary even if the
-       * thread has already exitted in order to collect the join
-       * garbage
-       */
+      /* Wait for the thread to exit */
 
-#if 0
-      /* REVISIT:  pthread_join does not work in all contexts.  In
-       * particular, if usbmsc_uninitialize() executes in a different
-       * task group than the group that includes the SCSI thread, then
-       * pthread_join will fail.
-       *
-       * NOTE: If, for some reason, you wanted to restore this code,
-       * there is now a matching pthread_detach() elsewhere to prevent
-       * memory leaks.
-       */
-
-      (void)pthread_join(priv->thread, &value);
-
-#else
-      /* REVISIT:  Calling pthread_mutex_lock and pthread_cond_wait
-       * from outside of the task group is equally non-standard.
-       * However, this actually works.
-       */
-
-      pthread_mutex_lock(&priv->mutex);
       while ((priv->theventset & USBMSC_EVENT_TERMINATEREQUEST) != 0)
         {
-          pthread_cond_wait(&priv->cond, &priv->mutex);
+          usbmsc_sync_wait(priv);
         }
-
-      pthread_mutex_unlock(&priv->mutex);
-#endif
     }
 
-  priv->thread = 0;
+  priv->thpid = 0;
 
   /* Unregister the driver (unless we are a part of a composite device) */
 
@@ -1832,14 +1829,15 @@ void usbmsc_uninitialize(FAR void *handle)
 
   /* Uninitialize and release the driver structure */
 
-  pthread_mutex_destroy(&priv->mutex);
-  pthread_cond_destroy(&priv->cond);
+  sem_destroy(&priv->thsynch);
+  sem_destroy(&priv->thlock);
+  sem_destroy(&priv->thwaitsem);
 
 #ifndef CONFIG_USBMSC_COMPOSITE
   /* For the case of the composite driver, there is a two pass
    * uninitialization sequence.  We cannot yet free the driver structure.
    * We will do that on the second pass (and we will know that it is the
-   * second pass because of priv->thread == 0)
+   * second pass because of priv->thpid == 0)
    */
 
   kfree(priv);

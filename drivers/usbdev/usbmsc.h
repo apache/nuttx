@@ -47,8 +47,8 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <pthread.h>
 #include <queue.h>
+#include <semaphore.h>
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/usb/storage.h>
@@ -193,6 +193,16 @@
 
 #undef CONFIG_USBMSC_CONFIGSTR
 #define CONFIG_USBMSC_CONFIGSTR "Bulk"
+
+/* SCSI daemon */
+
+#ifndef CONFIG_USBMSC_SCSI_PRIO
+#  define CONFIG_USBMSC_SCSI_PRIO 128
+#endif
+
+#ifndef CONFIG_USBMSC_SCSI_STACKSIZE
+#  define CONFIG_USBMSC_SCSI_STACKSIZE 2048
+#endif
 
 /* Debug -- must be consistent with include/debug.h */
 
@@ -443,17 +453,19 @@ struct usbmsc_lun_s
   size_t           nsectors;          /* Number of sectors in the partition */
 };
 
-/* Describes the overall state of the driver */
+/* Describes the overall state of one instance of the driver */
 
 struct usbmsc_dev_s
 {
   FAR struct usbdev_s *usbdev;        /* usbdev driver pointer (Non-null if registered) */
 
-  /* Worker thread interface */
+  /* SCSI worker kernel thread interface */
 
-  pthread_t         thread;           /* The worker thread */
-  pthread_mutex_t   mutex;            /* Mutually exclusive access to resources*/
-  pthread_cond_t    cond;             /* Used to signal worker thread */
+  pid_t             thpid;            /* The worker thread task ID */
+  sem_t             thsynch;          /* Used to synchronizer terminal events */
+  sem_t             thlock;           /* Used to get exclusive access to the state data */
+  sem_t             thwaitsem;        /* Used to signal worker thread */
+  volatile bool     thwaiting;        /* True: worker thread is waiting for an event */
   volatile uint8_t  thstate;          /* State of the worker thread */
   volatile uint16_t theventset;       /* Set of pending events signaled to worker thread */
   volatile uint8_t  thvalue;          /* Value passed with the event (must persist) */
@@ -542,9 +554,54 @@ EXTERN const char g_compserialstr[];
 #define g_mscproductstr g_compproductstr
 #define g_mscserialstr  g_compserialstr
 #endif
+
+/* Used to hand-off the state structure when the SCSI worker thread is started */
+
+EXTERN FAR struct usbmsc_dev_s *g_usbmsc_handoff;
+
 /************************************************************************************
  * Public Function Prototypes
  ************************************************************************************/
+
+/************************************************************************************
+ * Name: usbmsc_scsi_lock
+ *
+ * Description:
+ *   Get exclusive access to SCSI state data.
+ *
+ ****************************************************************************/
+
+void usbmsc_scsi_lock(FAR struct usbmsc_dev_s *priv);
+
+/************************************************************************************
+ * Name: usbmsc_scsi_unlock
+ *
+ * Description:
+ *   Relinquish exclusive access to SCSI state data.
+ *
+ ************************************************************************************/
+
+#define usbmsc_scsi_unlock(priv) sem_post(&priv->thlock)
+
+/************************************************************************************
+ * Name: usbmsc_scsi_signal
+ *
+ * Description:
+ *   Signal the SCSI worker thread that SCSI events need service.
+ *
+ ************************************************************************************/
+
+void usbmsc_scsi_signal(FAR struct usbmsc_dev_s *priv);
+
+/************************************************************************************
+ * Name: usbmsc_synch_signal
+ *
+ * Description:
+ *   ACK controlling tasks request for synchronization.
+ *
+ ************************************************************************************/
+
+#define usbmsc_synch_signal(priv) sem_post(&priv->thsynch)
 
 /************************************************************************************
  * Name: usbmsc_mkstrdesc
@@ -607,7 +664,7 @@ FAR const struct usb_qualdesc_s *usbmsc_getqualdesc(void);
 #endif
 
 /****************************************************************************
- * Name: usbmsc_workerthread
+ * Name: usbmsc_scsi_main
  *
  * Description:
  *   This is the main function of the USB storage worker thread.  It loops
@@ -615,7 +672,7 @@ FAR const struct usb_qualdesc_s *usbmsc_getqualdesc(void);
  *
  ****************************************************************************/
 
-EXTERN void *usbmsc_workerthread(void *arg);
+int usbmsc_scsi_main(int argc, char *argv[]);
 
 /****************************************************************************
  * Name: usbmsc_setconfig
@@ -626,7 +683,7 @@ EXTERN void *usbmsc_workerthread(void *arg);
  *
  ****************************************************************************/
 
-EXTERN int usbmsc_setconfig(FAR struct usbmsc_dev_s *priv, uint8_t config);
+int usbmsc_setconfig(FAR struct usbmsc_dev_s *priv, uint8_t config);
 
 /****************************************************************************
  * Name: usbmsc_resetconfig
@@ -636,7 +693,7 @@ EXTERN int usbmsc_setconfig(FAR struct usbmsc_dev_s *priv, uint8_t config);
  *
  ****************************************************************************/
 
-EXTERN void usbmsc_resetconfig(FAR struct usbmsc_dev_s *priv);
+void usbmsc_resetconfig(FAR struct usbmsc_dev_s *priv);
 
 /****************************************************************************
  * Name: usbmsc_wrcomplete
@@ -647,8 +704,8 @@ EXTERN void usbmsc_resetconfig(FAR struct usbmsc_dev_s *priv);
  *
  ****************************************************************************/
 
-EXTERN void usbmsc_wrcomplete(FAR struct usbdev_ep_s *ep,
-                              FAR struct usbdev_req_s *req);
+void usbmsc_wrcomplete(FAR struct usbdev_ep_s *ep,
+                       FAR struct usbdev_req_s *req);
 
 /****************************************************************************
  * Name: usbmsc_rdcomplete
@@ -659,8 +716,8 @@ EXTERN void usbmsc_wrcomplete(FAR struct usbdev_ep_s *ep,
  *
  ****************************************************************************/
 
-EXTERN void usbmsc_rdcomplete(FAR struct usbdev_ep_s *ep,
-                              FAR struct usbdev_req_s *req);
+void usbmsc_rdcomplete(FAR struct usbdev_ep_s *ep,
+                       FAR struct usbdev_req_s *req);
 
 /****************************************************************************
  * Name: usbmsc_deferredresponse
@@ -684,7 +741,7 @@ EXTERN void usbmsc_rdcomplete(FAR struct usbdev_ep_s *ep,
  *
  ****************************************************************************/
 
-EXTERN void usbmsc_deferredresponse(FAR struct usbmsc_dev_s *priv, bool failed);
+void usbmsc_deferredresponse(FAR struct usbmsc_dev_s *priv, bool failed);
 
 #undef EXTERN
 #if defined(__cplusplus)

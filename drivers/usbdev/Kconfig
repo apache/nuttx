@@ -584,10 +584,25 @@ config USBMSC_VERSIONNO
 	default "0x399"
 
 config USBMSC_REMOVABLE
-	bool "Mass storage remove able"
+	bool "Mass storage removable"
 	default n
 	---help---
 		Select if the media is removable
 		USB Composite Device Configuration
+
+config USBMSC_SCSI_PRIO
+	int "USBMSC SCSI daemon priority"
+	default 128
+	---help---
+		Priority of the SCSI kernel thread.  This must be a relatively high
+		priority so that the SCSI daemon can be response to USB block driver
+		accesses.
+
+config USBMSC_SCSI_STACKSIZE
+	int "USBMSC SCSI daemon stack size"
+	default 2048
+	---help---
+		Stack size used with the SCSI kernel thread.  The default value
+		is not tuned.
 
 endif
