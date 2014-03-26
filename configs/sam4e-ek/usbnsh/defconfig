@@ -110,7 +110,6 @@ CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y
 # CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL is not set
 # CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL is not set
 # CONFIG_ARMV7M_OABI_TOOLCHAIN is not set
-# CONFIG_SAM34_GPIO_IRQ is not set
 CONFIG_ARCH_HAVE_EXTNAND=y
 CONFIG_ARCH_HAVE_EXTNOR=y
 CONFIG_ARCH_HAVE_EXTSRAM0=y
@@ -220,6 +219,7 @@ CONFIG_SAM34_USART1=y
 #
 # AT91SAM3/4 GPIO Interrupt Configuration
 #
+# CONFIG_SAM34_GPIO_IRQ is not set
 
 #
 # AT91SAM3/4 SPI device driver options
@@ -324,8 +324,8 @@ CONFIG_NSH_MMCSDMINOR=0
 #
 # Board-Specific Options
 #
-CONFIG_SAM4EEK_96MHZ=y
-# CONFIG_SAM4EEK_120MHZ is not set
+# CONFIG_SAM4EEK_96MHZ is not set
+CONFIG_SAM4EEK_120MHZ=y
 CONFIG_SAM4EEK_AT25_AUTOMOUNT=y
 CONFIG_SAM4EEK_AT25_FTL=y
 
@@ -428,6 +428,7 @@ CONFIG_MTD=y
 # MTD Configuration
 #
 # CONFIG_MTD_PARTITION is not set
+# CONFIG_MTD_SECT512 is not set
 # CONFIG_MTD_BYTE_WRITE is not set
 # CONFIG_MTD_CONFIG is not set
 # CONFIG_MTD_CONFIG_RAM_CONSOLIDATE is not set
@@ -967,27 +968,14 @@ CONFIG_NSH_MAX_ROUNDTRIP=20
 #
 
 #
-# USB CDC/ACM Device Commands
-#
-# CONFIG_SYSTEM_CDCACM is not set
-
-#
-# USB Composite Device Commands
-#
-
-#
 # Custom Free Memory Command
 #
 # CONFIG_SYSTEM_FREE is not set
 
 #
-# I2C tool
+# EMACS-like Command Line Editor
 #
-
-#
-# INI File Parser
-#
-# CONFIG_SYSTEM_INIFILE is not set
+# CONFIG_SYSTEM_CLE is not set
 
 #
 # FLASH Program Installation
@@ -998,6 +986,15 @@ CONFIG_NSH_MAX_ROUNDTRIP=20
 # FLASH Erase-all Command
 #
 # CONFIG_SYSTEM_FLASH_ERASEALL is not set
+
+#
+# I2C tool
+#
+
+#
+# INI File Parser
+#
+# CONFIG_SYSTEM_INIFILE is not set
 
 #
 # NxPlayer media player library / command Line
@@ -1036,15 +1033,6 @@ CONFIG_READLINE_ECHO=y
 # CONFIG_SYSTEM_SYSINFO is not set
 
 #
-# USB Monitor
-#
-
-#
-# EMACS-like Command Line Editor
-#
-# CONFIG_SYSTEM_CLE is not set
-
-#
 # VI Work-Alike Editor
 #
 # CONFIG_SYSTEM_VI is not set
@@ -1054,7 +1042,20 @@ CONFIG_READLINE_ECHO=y
 #
 
 #
+# USB CDC/ACM Device Commands
+#
+# CONFIG_SYSTEM_CDCACM is not set
+
+#
+# USB Composite Device Commands
+#
+
+#
 # USB Mass Storage Device Commands
+#
+
+#
+# USB Monitor
 #
 
 #

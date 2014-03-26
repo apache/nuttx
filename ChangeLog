@@ -7045,8 +7045,11 @@
 	  allows me to remove so kludge logic to "deparent" the pthread on
 	  startup (2014-3-25).
 	* tools/astyle.sh:  A code formatting tool from Lorenz Meier.  This
-	  tool should do a better job than the old tools/indent.sh tool.
+	  tool should do a better job than the old tools/indent.sh tool
+	(2014-3-26).
 	* arch/arm/src/sam_hsmci.c and sam_spi.c:  Add support to invalidate
 	  cached memory if the CMCC is enabled (not yet tested, 2014-3-26).
 	* arch/arm/src/sam_spi.c:  Add logic to handle SPI word widths > 8
 	  (also untested on initial checkin, 2014-3-26).
+	* configs/sam4e-ek:  All configurations updated to run with 120MHz
+	  CPU speed (2014-3-26).

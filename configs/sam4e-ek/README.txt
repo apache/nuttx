@@ -677,6 +677,8 @@ USB Full-Speed Device
               USB data capture.  Testing is insufficient.  This needs to
               be revisited.
 
+              Last tested at 96MHz with the CMCC disabled.
+
   CDC/ACM Serial Device Class
   ---------------------------
 
@@ -836,6 +838,9 @@ HSMCI
      The current HSMCI driver supports DMA via the DMAC.  However, the data
      sheet only discusses PDC-based HSMCI DMA (although there is a DMA
      channel interface definition for HSMCI).
+
+     Bottom line:  Untested and probably not usable on the SAM4E-EK in its
+     current form.
 
 Touchscreen
 ===========
@@ -1134,7 +1139,9 @@ Configurations
 
     NOTES:
 
-    1. Default stack sizes are large and should really be tuned to reduce
+    1. This configuration runs with a CPU clock of 120MHz
+
+    2. Default stack sizes are large and should really be tuned to reduce
        the RAM footprint:
 
          CONFIG_ARCH_INTERRUPTSTACK=2048
@@ -1143,7 +1150,7 @@ Configurations
          CONFIG_PTHREAD_STACK_DEFAULT=2048
          ... and others ...
 
-    2. NSH built-in applications are supported.
+    3. NSH built-in applications are supported.
 
        Binary Formats:
          CONFIG_BUILTIN=y                    : Enable support for built-in programs
@@ -1151,7 +1158,7 @@ Configurations
        Applicaton Configuration:
          CONFIG_NSH_BUILTIN_APPS=y           : Enable starting apps from NSH command line
 
-    3. This configuration has the network enabled by default.  This can be
+    4. This configuration has the network enabled by default.  This can be
        easily disabled or reconfigured (See see the network related
        configuration settings above in the section entitled "Networking").
 
@@ -1171,7 +1178,7 @@ Configurations
        2014-3-13: The basic NSH serial console is working.  Network support
                   has been verified.
 
-    4. This configuration supports a network with fixed IP address.  You
+    5. This configuration supports a network with fixed IP address.  You
        may have to change these settings for your network:
 
        CONFIG_NSH_IPADDR=0x0a000002        : IP address: 10.0.0.2
@@ -1187,7 +1194,7 @@ Configurations
        CONFIG_NSH_DHCPC=y                  : Tells NSH to use DHCPC, not
                                            : the fixed addresses
 
-    5. This configuration has the DMA-based SPI0 and AT25 Serial FLASH
+    6. This configuration has the DMA-based SPI0 and AT25 Serial FLASH
        support enabled by default.  This can be easily disabled or
        reconfigured (See see the configuration settings and usage notes
        above in the section entitled "AT25 Serial FLASH").
@@ -1200,7 +1207,7 @@ Configurations
        2014-3-14: The DMA-based SPI appears to be functional and can be used
                   to support a FAT file system on the AT25 Serial FLASH.
 
-    6. USB device support is not enabled in this configuration by default.
+    7. USB device support is not enabled in this configuration by default.
        To add USB device support to this configuration, see the instructions
        above under "USB Full-Speed Device."
 
@@ -1213,14 +1220,14 @@ Configurations
                   does not mount on either the Linux or Windows host.  This
                   needs to be retested.
 
-    7. This configuration can be used to verify the touchscreen on on the
+    8. This configuration can be used to verify the touchscreen on on the
        SAM4E-EK LCD.  See the instructions above in the paragraph entitled
        "Touchscreen".
 
        STATUS:
          2014-3-21:  The touchscreen has not yet been tested.
 
-    8. Enabling HSMCI support. The SAM3U-KE provides a an SD memory card
+    9. Enabling HSMCI support. The SAM3U-KE provides a an SD memory card
        slot.  Support for the SD slot can be enabled following the
        instructions provided above in the paragraph entitled "HSMCI."
 
@@ -1272,8 +1279,9 @@ Configurations
           next note.
 
     3. If you send large amounts of data to the target, you may see data
-       loss due to RX overrun errors.  See the NOTES in the section entitle
-       "CDC/ACM Serial Device Class" for some possible work-arounds.
+       loss due to RX overrun errors.  See the NOTES in the section entitled
+       "CDC/ACM Serial Device Class" for an explanation and some possible
+       work-arounds.
 
     3. This configuration does have UART0 output enabled and set up as
        the system logging device:
