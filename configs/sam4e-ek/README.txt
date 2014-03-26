@@ -674,9 +674,8 @@ USB Full-Speed Device
   2014-3-25:  Marginally functional. Very slow to come up.  USB analyzer
               shows several resets before the host decides that it is
               happy with the device.  There are no obvious errors in the
-              USB data capture.
-  2014-3-25:  There also seem to be issues about writing files.  This
-              needs more investigation.
+              USB data capture.  Testing is insufficient.  This needs to
+              be revisited.
 
   CDC/ACM Serial Device Class
   ---------------------------
@@ -713,6 +712,38 @@ USB Full-Speed Device
   2. Linux supports the CDC/ACM driver out of the box.  Windows, on the other
      than requires that you first install a serial driver (a .inf file).  There
      are example .inf files for NuttX in the nuttx/configs/spark directories.
+
+  3. There is hand-shaking to pace incoming serial data.  As a result, you may
+     experience data loss due to RX overrun errors.  The overrun errors occur
+     when more data is received than can be buffered in memory on the target.
+
+     At present, the only workaround is to increase the amount of buffering
+     in the target.  That allow the target to accept short bursts of larger
+     volumes of data (but would still fail on sustained, high speed incoming
+     data.  The following configuration options can be changed to increase
+     the buffering.
+
+     1. RX buffer size.  All incoming data is buffered by the serial driver
+        until it can be read by the application.  The default size of this
+        RX buffer is only 256 but can be increased as you see fit:
+
+         CONFIG_CDCACM_RXBUFSIZE=256        : Default RX buffer size is only 256 bytes
+
+     2. Upstream from the RX buffers are USB read request buffers.  Each
+        buffer is the maximum size of one USB packet (64 byte) and that cannot
+        really be changed.  But if you want to increase this upstream buffering
+        capability, you can increase the number of available read requests.
+        The default is four, providing an additional buffering capability of
+        of 4*64=256 bytes.
+
+        Each read request receives data from USB, copies the data into the
+        serial RX buffer, and then is available to receive more data.  This
+        recycling of read requests stalls as soon as the serial RX buffer is
+        full.  Data loss occurs when there are no available read requests to
+        accept the next packet from the host.  So increasing the number of
+        read requests can also help to minimize RX overrun:
+
+          CONFIG_CDCACM_NRDREQS=4           : Default is only 4 read requests
 
   STATUS:
 
@@ -1174,15 +1205,13 @@ Configurations
        above under "USB Full-Speed Device."
 
        STATUS:
-       2014-3-21: USB support is under development and USB MSC support is
-                  only partially functional.  Additional test and integration
-                  is required.
+       2014-3-21: USB support is partially functional.  Additional test and
+                  integration is required. See STATUS in the "USB Full-Speed
+                  Device" for further information
        2014-3-22: USB seems to work properly (there are not obvious errors
-                  in a USB bus capture.  However, the AT25 does not mount
-                  on either the Linux or Windows host.  Since there are no
-                  USB errors, this could only be an issue with the USB MSC
-                  protocol (not likely) or with the FAT format on the AT25
-                  serial FLASH (likely).
+                  in a USB bus capture.  However, as of this data the AT25
+                  does not mount on either the Linux or Windows host.  This
+                  needs to be retested.
 
     7. This configuration can be used to verify the touchscreen on on the
        SAM4E-EK LCD.  See the instructions above in the paragraph entitled
@@ -1201,7 +1230,8 @@ Configurations
                      to data overrun problems.  The current HSMCI driver
                      supports DMA via the DMAC.  However, the data sheet
                      only discusses PDC-based HSMCI DMA (although there is
-                     a DMA channel interface definition for HSMCI).
+                     a DMA channel interface definition for HSMCI).  So
+                     this is effort is dead-in-the-water for now.
 
   usbnsh:
 
@@ -1224,7 +1254,7 @@ Configurations
           entitled "USB Full-Speed Device",
 
        b. The CDC/ACM serial class is enabled as described in the paragraph
-          "CDC/ACM Serial Device Class"
+          "CDC/ACM Serial Device Class".
 
        c. The serial console is disabled:
 
@@ -1240,6 +1270,10 @@ Configurations
 
        d. Support for debug output on UART0 is provided as described in the
           next note.
+
+    3. If you send large amounts of data to the target, you may see data
+       loss due to RX overrun errors.  See the NOTES in the section entitle
+       "CDC/ACM Serial Device Class" for some possible work-arounds.
 
     3. This configuration does have UART0 output enabled and set up as
        the system logging device:

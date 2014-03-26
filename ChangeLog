@@ -7046,4 +7046,3 @@
 	  startup (2014-3-25).
 	* tools/astyle.sh:  A code formatting tool from Lorenz Meier.  This
 	  tool should do a better job than the old tools/indent.sh tool.
-
