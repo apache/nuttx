@@ -7044,4 +7044,6 @@
 	  the task that started in (other than knowing it as the parent).  This
 	  allows me to remove so kludge logic to "deparent" the pthread on
 	  startup (2014-3-25).
+	* tools/astyle.sh:  A code formatting tool from Lorenz Meier.  This
+	  tool should do a better job than the old tools/indent.sh tool.
 

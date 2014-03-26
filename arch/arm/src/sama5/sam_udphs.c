@@ -3575,6 +3575,7 @@ static int sam_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   epno              = USB_EPNO(ep->eplog);
   req->result       = -EINPROGRESS;
   req->xfrd         = 0;
+  privreq->inflight = 0;
   flags             = irqsave();
 
   /* Handle IN (device-to-host) requests.  NOTE:  If the class device is

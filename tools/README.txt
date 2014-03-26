@@ -12,6 +12,12 @@ README.txt
 
   This file!
 
+astyle.sh
+---------
+
+  A C formatting tool from Lorenz Meier.  This is based on astyle and gets
+  very close to the NuttX coding style.
+
 Config.mk
 ---------
 
@@ -527,6 +533,8 @@ indent.sh
   This script can be used to indent .c and .h files in a manner similar
   to my coding NuttX coding style.  It doesn't do a really good job,
   however (see the comments at the top of the indent.sh file).
+
+  See astyle.sh above.  I suspect that it will do a better job.
 
 zipme.sh
 --------

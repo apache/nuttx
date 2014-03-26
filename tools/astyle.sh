@@ -1,9 +1,9 @@
 #!/bin/sh
 ############################################################################
-# tools/indent.sh
+# tools/astyle.sh
 #
-#   Copyright (C) 2008, 2010 Gregory Nutt. All rights reserved.
-#   Author: Gregory Nutt <gnutt@nuttx.org>
+#   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+#   Author: Lorenz Meier
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -33,54 +33,11 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 ############################################################################
-#
-# This script uses the Linux 'indent' utility to re-format C source files
-# to match the coding style that I use.  It differs from my coding style in that
-#
-# - I normally put the trailing */ of a multi-line comment on a separate line,
-# - I usually align things vertically (like '=' in assignments),
-# - indent puts a bogus blank line at the top of the file,
-# - I don't like the way it handles nested conditional compilation intermixed with code.
-# - I also indent brackets differently on structures than does this script.
-#
 
-# Constants
-
-options="-nbad -bap -bbb -nbbo -nbc -bl -bl2 -bls -nbs -cbi2 -ncdw -nce -ci2 -cli0 -cp40 -ncs -nbfda -nbfde -di1 -nfc1 -fca -i2 -l80 -lp -ppi2 -lps -npcs -pmt -nprs -npsl -saf -sai -sbi2 -saw -sc -sob -nss -nut"
-
-usage="USAGE: $0 <in-file> <out-file>"
-
-# Inputs
-
-infile=$1
-outfile=$2
-
-# Verify inputs
-
-if [ -z "$infile" ]; then
-    echo "Missing <in-file>"
-    echo $usage
-    exit 1
-fi
-
-if [ ! -r $infile ]; then
-    echo "Readable $infile does not exist"
-    exit 1
-fi
-
-if [ -z "$outfile" ]; then
-    echo "Missing <out-file>"
-    echo $usage
-    exit 1
-fi
-
-if [ -f $outfile ]; then
-    echo "Removing old $outfile"
-    rm $outfile || { echo "Failed to remove $outfile" ; exit 1 ; }
-fi
-
-# Perform the indentation
-
-indent $options $infile -o $outfile
-
+astyle \
+  --style=gnu \
+  --indent=spaces=2 \
+  --indent-cases \
+  --indent-switches \
+  $*
 
