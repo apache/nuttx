@@ -51,6 +51,7 @@
 
 #include "sam_clockconfig.h"
 #include "sam_lowputc.h"
+#include "sam_cmcc.h"
 #include "sam_userspace.h"
 
 /****************************************************************************
