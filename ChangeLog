@@ -7052,4 +7052,6 @@
 	* arch/arm/src/sam_spi.c:  Add logic to handle SPI word widths > 8
 	  (also untested on initial checkin, 2014-3-26).
 	* configs/sam4e-ek:  All configurations updated to run with 120MHz
-	  CPU speed (2014-3-26).
+	  CPU speed and with the CMCC enabled.  Calibrated delay loop
+	  (2014-3-26).
+

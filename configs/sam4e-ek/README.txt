@@ -1139,7 +1139,9 @@ Configurations
 
     NOTES:
 
-    1. This configuration runs with a CPU clock of 120MHz
+    1. This configuration runs with a CPU clock of 120MHz and with the
+       the CMCC enabled.  If you disable these, then you must also
+       re-calibrate the delay loop.
 
     2. Default stack sizes are large and should really be tuned to reduce
        the RAM footprint:
@@ -1247,7 +1249,7 @@ Configurations
 
     STATUS:
       2014-3-23: This configuration appears to be fully functional.
-      
+
     NOTES:
 
     1. See the NOTES in the description of the nsh configuration.  Those
