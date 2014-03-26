@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <stdint.h>
 #include <assert.h>
 
@@ -144,24 +145,31 @@ void sam_cmcc_invalidate(uintptr_t start, uintptr_t end)
 {
   uintptr_t addr;
   uint32_t regval;
-  uint32_t way
-  uint32_t index;
-  size_t size;
-  int nlines;
+  ssize_t size;
+  int index;
+  int way;
 
-  /* Get the aligned addresses and size for the memory region to be
-   * invalidated.
+  /* Get the aligned addresses and size (in bytes) for the memory region
+   * to be invalidated.
    */
 
   start  = ALIGN_DOWN(start);
-  end    = ALIGN_up(end);
-  size   = end - start;
+  end    = ALIGN_UP(end);
+  size   = end - start + 1;
 
   /* If this is a large region (as big as the cache), then just invalidate
    * the entire cache the easy way.
+   *
+   *   CacheSize = CacheLineSize * NCacheLines * NWays
+   *   CacheAddressRange = CacheLineSize * NCacheLines = CacheSize / NWays
+   *
+   * Example: CacheSize = 2048, CacheLineSize=16, NWays=4:
+   *
+   *   CacheAddressRange = 2048 / 4 = 512
+   *   NCacheLines       = 32
    */
 
-  if (size >= (CMCC_CACHE_SIZE / CMCC_CACHE_LINE_SIZE / CMCC_NWAYS)
+  if (size >= (CMCC_CACHE_SIZE / CMCC_NWAYS))
     {
       sam_cmcc_invalidateall();
       return;
@@ -189,10 +197,9 @@ void sam_cmcc_invalidate(uintptr_t start, uintptr_t end)
 
   /* Invalidate the address region */
 
-  index  = (start >> CMCC_SHIFT)
-  nlines = ((end - start) >> CMCC_SHIFT);
-
-  for (addr = start; addr < end; addr += CMCC_CACHE_LINE_SIZE, index++)
+  for (addr = start, index  = (int)(start >> CMCC_SHIFT);
+       addr <= end;
+       addr += CMCC_CACHE_LINE_SIZE, index++)
     {
       regval = CMCC_MAINT1_INDEX(index);
       for (way = 0; way < CMCC_NWAYS; way++)
