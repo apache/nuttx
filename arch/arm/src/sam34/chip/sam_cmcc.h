@@ -51,6 +51,9 @@
  ****************************************************************************************/
 /* This information is available in the Cache Type Register.  How every, it is more
  * efficient if we do not to do the decoding on each cache access.
+ *
+ *  CacheSize = CacheLineSize * NCacheLines * NWays
+ *  CacheAddressRange = CacheLineSize * NCacheLines = CacheSize / NWays
  */
 
 #ifdef CONFIG_ARCH_CHIP_SAM4E
