@@ -62,6 +62,7 @@
 #include "chip.h"
 #include "sam_gpio.h"
 #include "sam_dmac.h"
+#include "sam_cmcc.h"
 #include "sam_periphclks.h"
 #include "sam_spi.h"
 #include "chip/sam_pmc.h"
@@ -177,9 +178,9 @@ struct sam_spics_s
 #ifndef CONFIG_SPI_OWNBUS
   uint32_t frequency;          /* Requested clock frequency */
   uint32_t actual;             /* Actual clock frequency */
-  uint8_t nbits;               /* Width of word in bits (8 to 16) */
   uint8_t mode;                /* Mode 0,1,2,3 */
 #endif
+  uint8_t nbits;               /* Width of word in bits (8 to 16) */
 
 #if defined(CONFIG_SAM34_SPI0) || defined(CONFIG_SAM34_SPI1)
   uint8_t spino;               /* SPI controller number (0 or 1) */
@@ -1190,19 +1191,12 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
   spivdbg("cs=%d nbits=%d\n", spics->cs, nbits);
   DEBUGASSERT(spics && nbits > 7 && nbits < 17);
 
-  /* NOTE:  The logic in spi_send and in spi_exchange only handles 8-bit
-   * data at the present time.  So the following extra assertion is a
-   * reminder that we have to fix that someday.
-   */
-
-  DEBUGASSERT(nbits == 8); /* Temporary -- FIX ME */
-
   /* Has the number of bits changed? */
 
 #ifndef CONFIG_SPI_OWNBUS
   if (nbits != spics->nbits)
-    {
 #endif
+    {
       /* Yes... Set number of bits appropriately */
 
       offset  = (unsigned int)g_csroffset[spics->cs];
@@ -1215,10 +1209,8 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
 
       /* Save the selection so the subsequence re-configurations will be faster */
 
-#ifndef CONFIG_SPI_OWNBUS
       spics->nbits = nbits;
     }
-#endif
 }
 
 /****************************************************************************
@@ -1284,24 +1276,43 @@ static uint16_t spi_send(struct spi_dev_s *dev, uint16_t wd)
 
 #ifdef CONFIG_SAM34_SPI_DMA
 static void spi_exchange_nodma(struct spi_dev_s *dev, const void *txbuffer,
-              void *rxbuffer, size_t nwords)
+                               void *rxbuffer, size_t nwords)
 #else
 static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
-              void *rxbuffer, size_t nwords)
+                         void *rxbuffer, size_t nwords)
 #endif
 {
   struct sam_spics_s *spics = (struct sam_spics_s *)dev;
   struct sam_spidev_s *spi = spi_device(spics);
-  uint8_t *rxptr = (uint8_t*)rxbuffer;
-  uint8_t *txptr = (uint8_t*)txbuffer;
   uint32_t pcs;
   uint32_t data;
+  uint16_t *rxptr16;
+  uint16_t *txptr16;
+  uint8_t *rxptr8;
+  uint8_t *txptr8;
 
   spivdbg("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
 
   /* Set up PCS bits */
 
   pcs = spi_cs2pcs(spics) << SPI_TDR_PCS_SHIFT;
+
+  /* Set up working pointers */
+
+  if (spics->nbits > 8)
+    {
+      rxptr16 = (uint16_t*)rxbuffer;
+      txptr16 = (uint16_t*)txbuffer;
+      rxptr8  = NULL;
+      txptr8  = NULL;
+    }
+  else
+    {
+      rxptr16 = NULL;
+      txptr16 = NULL;
+      rxptr8  = (uint8_t*)rxbuffer;
+      txptr8  = (uint8_t*)txbuffer;
+    }
 
   /* Make sure that any previous transfer is flushed from the hardware */
 
@@ -1340,11 +1351,15 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
   for ( ; nwords > 0; nwords--)
     {
-      /* Get the data to send (0xff if there is no data source) */
+      /* Get the data to send (0xff if there is no data source). */
 
-      if (txptr)
+      if (txptr8)
         {
-          data = (uint32_t)*txptr++;
+          data = (uint32_t)*txptr8++;
+        }
+      else if (txptr16)
+        {
+          data = (uint32_t)*txptr16++;
         }
       else
         {
@@ -1381,14 +1396,16 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
       while ((spi_getreg(spi, SAM_SPI_SR_OFFSET) & SPI_INT_RDRF) == 0);
 
-      /* Read the received data from the SPI Data Register..
-       * TODO: The following only works if nbits <= 8.
-       */
+      /* Read the received data from the SPI Data Register. */
 
       data = spi_getreg(spi, SAM_SPI_RDR_OFFSET);
-      if (rxptr)
+      if (rxptr8)
         {
-          *rxptr++ = (uint8_t)data;
+          *rxptr8++ = (uint8_t)data;
+        }
+      else if (rxptr16)
+        {
+          *rxptr16++ = (uint16_t)data;
         }
     }
 }
@@ -1405,13 +1422,19 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   uint32_t rxdummy;
   uint32_t regaddr;
   uint32_t memaddr;
+  uint32_t width;
+  size_t nbytes;
   int ret;
+
+  /* Convert the number of word to a number of bytes */
+
+  nbytes = (spics->nbits > 8) ? nwords << 1 : nwords;
 
   /* If we cannot do DMA -OR- if this is a small SPI transfer, then let
    * spi_exchange_nodma() do the work.
    */
 
-  if (!spics->candma || nwords <= CONFIG_SAM34_SPI_DMATHRESHOLD)
+  if (!spics->candma || nbytes <= CONFIG_SAM34_SPI_DMATHRESHOLD)
     {
       spi_exchange_nodma(dev, txbuffer, rxbuffer, nwords);
       return;
@@ -1431,6 +1454,17 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
   spi_dma_sampleinit(spics);
 
+  /* Select the source and destination width bits */
+
+  if (spics->nbits > 8)
+    {
+      width = (DMACH_FLAG_PERIPHWIDTH_16BITS | DMACH_FLAG_MEMWIDTH_16BITS);
+    }
+  else
+    {
+      width = (DMACH_FLAG_PERIPHWIDTH_8BITS | DMACH_FLAG_MEMWIDTH_8BITS);
+    }
+
   /* Configure the DMA channels.  There are four different cases:
    *
    * 1) A true exchange with the memory address incrementing on both
@@ -1445,12 +1479,20 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
    *    provided on the SPI bus.
    */
 
+  /* Configure the RX DMA channel */
+
   rxflags = DMACH_FLAG_FIFOCFG_LARGEST |
             ((uint32_t)spi->rxintf << DMACH_FLAG_PERIPHPID_SHIFT) |
             DMACH_FLAG_PERIPHH2SEL | DMACH_FLAG_PERIPHISPERIPH |
-            DMACH_FLAG_PERIPHWIDTH_8BITS | DMACH_FLAG_PERIPHCHUNKSIZE_1 |
+            DMACH_FLAG_PERIPHCHUNKSIZE_1 |
             ((uint32_t)(15) << DMACH_FLAG_MEMPID_SHIFT) |
-            DMACH_FLAG_MEMWIDTH_8BITS | DMACH_FLAG_MEMCHUNKSIZE_1;
+            DMACH_FLAG_MEMCHUNKSIZE_1;
+
+  /* Set the source and destination width bits */
+
+  rxflags |= width;
+
+  /* Handle the case where there is no sink buffer */
 
   if (!rxbuffer)
     {
@@ -1462,21 +1504,37 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
     }
   else
     {
-      /* A receive buffer is available.  Use normal TX memory incrementing. */
+      /* A receive buffer is available.
+       *
+       * Invalidate the RX buffer memory to force re-fetching from RAM when
+       * the DMA completes
+       */
+
+      sam_cmcc_invalidate((uintptr_t)rxbuffer, (uintptr_t)rxbuffer + nbytes);
+
+      /* Use normal RX memory incrementing. */
 
       rxflags |= DMACH_FLAG_MEMINCREMENT;
     }
 
+  /* Configure the TX DMA channel */
+
   txflags = DMACH_FLAG_FIFOCFG_LARGEST |
             ((uint32_t)spi->txintf << DMACH_FLAG_PERIPHPID_SHIFT) |
             DMACH_FLAG_PERIPHH2SEL | DMACH_FLAG_PERIPHISPERIPH |
-            DMACH_FLAG_PERIPHWIDTH_8BITS | DMACH_FLAG_PERIPHCHUNKSIZE_1 |
+            DMACH_FLAG_PERIPHCHUNKSIZE_1 |
             ((uint32_t)(15) << DMACH_FLAG_MEMPID_SHIFT) |
-            DMACH_FLAG_MEMWIDTH_8BITS | DMACH_FLAG_MEMCHUNKSIZE_1;
+            DMACH_FLAG_MEMCHUNKSIZE_1;
+
+  /* Set the source and destination width bits */
+
+  txflags |= width;
+
+  /* Handle the case where there is no source buffer */
 
   if (!txbuffer)
     {
-      /* No source data buffer.  Point to our dummy buffer and configure
+      /* No source data buffer.  Point to our dummy buffer and leave
        * the txflags so that no address increment is performed.
        */
 
@@ -1495,7 +1553,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   sam_dmaconfig(spics->rxdma, rxflags);
   sam_dmaconfig(spics->txdma, txflags);
 
-  /* Configure the exchange transfers */
+  /* Configure the RX side of the exchange transfer */
 
   regaddr = spi_regaddr(spics, SAM_SPI_RDR_OFFSET);
   memaddr = (uintptr_t)rxbuffer;
@@ -1508,6 +1566,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
     }
 
   spi_rxdma_sample(spics, DMA_AFTER_SETUP);
+
+  /* Configure the TX side of the exchange transfer */
 
   regaddr = spi_regaddr(spics, SAM_SPI_TDR_OFFSET);
   memaddr = (uintptr_t)txbuffer;
@@ -1626,7 +1686,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
  *   nwords - the length of data to send from the buffer in number of words.
  *            The wordsize is determined by the number of bits-per-word
  *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *            packed into uint8_t's; if nbits >8, the data is packed into
+ *            uint16_t's
  *
  * Returned Value:
  *   None
@@ -1634,7 +1695,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
  ****************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void spi_sndblock(struct spi_dev_s *dev, const void *buffer, size_t nwords)
+static void spi_sndblock(struct spi_dev_s *dev, const void *buffer,
+                         size_t nwords)
 {
   /* spi_exchange can do this. */
 
@@ -1654,7 +1716,8 @@ static void spi_sndblock(struct spi_dev_s *dev, const void *buffer, size_t nword
  *   nwords - the length of data that can be received in the buffer in number
  *            of words.  The wordsize is determined by the number of bits-per-word
  *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *            packed into uint8_t's; if nbits >8, the data is packed into
+ *            uint16_t's
  *
  * Returned Value:
  *   None

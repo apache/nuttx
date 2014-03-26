@@ -62,6 +62,7 @@
 
 #include "sam_gpio.h"
 #include "sam_dmac.h"
+#include "sam_cmcc.h"
 #include "sam_hsmci.h"
 #include "sam_periphclks.h"
 #include "chip/sam_dmac.h"
@@ -2343,6 +2344,12 @@ static int sam_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   sam_dmarxsetup(priv->dma, SAM_HSMCI_RDR, (uint32_t)buffer, buflen);
 
+  /* Invalidate the buffer memory to force re-fetching from RAM when the DMA
+   * completes
+   */
+
+  sam_cmcc_invalidate((uintptr_t)buffer, (uintptr_t)buffer + buflen);
+
 #if defined(CONFIG_ARCH_CHIP_SAM3U)
   /* Enable DMA handshaking */
 
@@ -2385,7 +2392,7 @@ static int sam_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
  ****************************************************************************/
 
 static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
-                          FAR const uint8_t *buffer, size_t buflen)
+                            FAR const uint8_t *buffer, size_t buflen)
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)dev;
 
