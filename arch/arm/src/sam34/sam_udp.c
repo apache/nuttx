@@ -2739,7 +2739,6 @@ sam_ep_reserved(struct sam_usbdev_s *priv, int epno)
 static int sam_ep_configure_internal(struct sam_ep_s *privep,
                                      const struct usb_epdesc_s *desc)
 {
-  struct sam_usbdev_s *priv = privep->dev;
   uintptr_t csr;
   uint32_t regval;
   uint16_t maxpacket;
@@ -2747,7 +2746,7 @@ static int sam_ep_configure_internal(struct sam_ep_s *privep,
   uint8_t eptype;
   bool dirin;
 
-  DEBUGASSERT(priv && privep && desc);
+  DEBUGASSERT(privep && privep->dev && desc);
 
   uvdbg("len: %02x type: %02x addr: %02x attr: %02x "
         "maxpacketsize: %02x %02x interval: %02x\n",
@@ -2867,7 +2866,7 @@ static int sam_ep_configure_internal(struct sam_ep_s *privep,
   /* Enable endpoint interrupts */
 
   sam_putreg(UDP_INT_EP(epno), SAM_UDP_IER);
-  sam_dumpep(priv, epno);
+  sam_dumpep(privep->dev, epno);
   return OK;
 }
 
