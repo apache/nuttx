@@ -314,7 +314,10 @@ static inline void ramtron_unlock(FAR struct spi_dev_s *dev)
 
 static inline int ramtron_readid(struct ramtron_dev_s *priv)
 {
-  uint16_t manufacturer, memory, capacity, part;
+  uint16_t manufacturer;
+  uint16_t memory;
+  uint16_t capacity;
+  uint16_t part;
   int i;
 
   fvdbg("priv: %p\n", priv);
@@ -349,6 +352,9 @@ static inline int ramtron_readid(struct ramtron_dev_s *priv)
      
   if (priv->part->name)
     {
+      (void)manufacturer; /* Eliminate warnings when debug is off */
+      (void)memory;       /* Eliminate warnings when debug is off */
+
       fvdbg("RAMTRON %s of size %d bytes (mf:%02x mem:%02x cap:%02x part:%02x)\n",
             priv->part->name, priv->part->size, manufacturer, memory, capacity, part);
 
