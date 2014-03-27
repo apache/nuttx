@@ -62,4 +62,17 @@ config SAM4EEK_HSMCI_BLOCKDEVICE
 
 endchoice # AT25 serial FLASH configuration
 
+config SAM4EEK_ILI9325
+	bool "ILI9325-based LCD"
+	default n
+	depends on EXPERIMENTAL
+	select NX
+	select NX_LCDDRIVER
+	---help---
+		This option enables support for the SAM4E-EK on-board LCD. The
+		SAM4E-EK carries a TFT transmissive LCD module with touch panel,
+		FTM280C34D. Its integrated driver IC is ILI9325. The LCD display
+		area is 2.8 inches diagonally measured, with a native resolution
+		of 240 x 320 dots.
+
 endif # ARCH_BOARD_SAM4EEK
