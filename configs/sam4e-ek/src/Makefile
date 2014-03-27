@@ -46,8 +46,8 @@ ifeq ($(CONFIG_HAVE_CXXINITIALIZE),y)
 CSRCS += sam_cxxinitialize.c
 endif
 
-ifeq ($(CONFIG_LCD),y)
-CSRCS += sam_lcd.c
+ifeq ($(CONFIG_SAM4EEK_ILI9325),y)
+CSRCS += sam_ili9325.c
 endif
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)

@@ -24,6 +24,7 @@ Contents
   - USB Full-Speed Device
   - HSMCI
   - Touchscreen
+  - ILI9325-Based LCD
   - SAM4E-EK-specific Configuration Options
   - Configurations
 
@@ -845,49 +846,160 @@ HSMCI
 Touchscreen
 ===========
 
-    The NSH configuration can be used to verify the ADS7843E touchscreen on
-    the SAM4E-EK LCD.  With these modifications, you can include the touchscreen
-    test program at apps/examples/touchscreen as an NSH built-in application.
-    You can enable the touchscreen and test by modifying the default
-    configuration in the following ways:
+  The NSH configuration can be used to verify the ADS7843E touchscreen on
+  the SAM4E-EK LCD.  With these modifications, you can include the touchscreen
+  test program at apps/examples/touchscreen as an NSH built-in application.
+  You can enable the touchscreen and test by modifying the default
+  configuration in the following ways:
 
-      Device Drivers
-        CONFIG_SPI=y                          : Enable SPI support
-        CONFIG_SPI_EXCHANGE=y                 : The exchange() method is supported
-        CONFIG_SPI_OWNBUS=y                   : Smaller code if this is the only SPI device
+    Device Drivers
+      CONFIG_SPI=y                          : Enable SPI support
+      CONFIG_SPI_EXCHANGE=y                 : The exchange() method is supported
+      CONFIG_SPI_OWNBUS=y                   : Smaller code if this is the only SPI device
 
-        CONFIG_INPUT=y                        : Enable support for input devices
-        CONFIG_INPUT_ADS7843E=y               : Enable support for the XPT2046
-        CONFIG_ADS7843E_SPIDEV=2              : Use SPI CS 2 for communication
-        CONFIG_ADS7843E_SPIMODE=0             : Use SPI mode 0
-        CONFIG_ADS7843E_FREQUENCY=1000000     : SPI BAUD 1MHz
-        CONFIG_ADS7843E_SWAPXY=y              : If landscape orientation
-        CONFIG_ADS7843E_THRESHX=51            : These will probably need to be tuned
-        CONFIG_ADS7843E_THRESHY=39
+      CONFIG_INPUT=y                        : Enable support for input devices
+      CONFIG_INPUT_ADS7843E=y               : Enable support for the XPT2046
+      CONFIG_ADS7843E_SPIDEV=2              : Use SPI CS 2 for communication
+      CONFIG_ADS7843E_SPIMODE=0             : Use SPI mode 0
+      CONFIG_ADS7843E_FREQUENCY=1000000     : SPI BAUD 1MHz
+      CONFIG_ADS7843E_SWAPXY=y              : If landscape orientation
+      CONFIG_ADS7843E_THRESHX=51            : These will probably need to be tuned
+      CONFIG_ADS7843E_THRESHY=39
 
-      System Type -> Peripherals:
-        CONFIG_SAM34_SPI0=y                   : Enable support for SPI
+    System Type -> Peripherals:
+      CONFIG_SAM34_SPI0=y                   : Enable support for SPI
 
-      System Type:
-        CONFIG_SAM34_GPIO_IRQ=y               : GPIO interrupt support
-        CONFIG_SAM34_GPIOA_IRQ=y              : Enable GPIO interrupts from port A
+    System Type:
+      CONFIG_SAM34_GPIO_IRQ=y               : GPIO interrupt support
+      CONFIG_SAM34_GPIOA_IRQ=y              : Enable GPIO interrupts from port A
 
-      RTOS Features:
-        CONFIG_DISABLE_SIGNALS=n              : Signals are required
+    RTOS Features:
+      CONFIG_DISABLE_SIGNALS=n              : Signals are required
 
-      Library Support:
-        CONFIG_SCHED_WORKQUEUE=y              : Work queue support required
+    Library Support:
+      CONFIG_SCHED_WORKQUEUE=y              : Work queue support required
 
-      Application Configuration:
-        CONFIG_EXAMPLES_TOUCHSCREEN=y         : Enable the touchscreen built-in test
+    Application Configuration:
+      CONFIG_EXAMPLES_TOUCHSCREEN=y         : Enable the touchscreen built-in test
 
-      Defaults should be okay for related touchscreen settings.  Touchscreen
-      debug output on UART0 can be enabled with:
+    Defaults should be okay for related touchscreen settings.  Touchscreen
+    debug output on UART0 can be enabled with:
 
-      Build Setup:
-        CONFIG_DEBUG=y                    : Enable debug features
-        CONFIG_DEBUG_VERBOSE=y            : Enable verbose debug output
-        CONFIG_DEBUG_INPUT=y              : Enable debug output from input devices
+    Build Setup:
+      CONFIG_DEBUG=y                    : Enable debug features
+      CONFIG_DEBUG_VERBOSE=y            : Enable verbose debug output
+      CONFIG_DEBUG_INPUT=y              : Enable debug output from input devices
+
+  STATUS
+    2014-3-27: As of this writing, the touchscreen is untested.
+
+ILI9325-Based LCD
+=================
+
+  The SAM4E-EK carries a TFT transmissive LCD module with touch panel,
+  FTM280C34D. Its integrated driver IC is ILI9325. The LCD display area is
+  2.8 inches diagonally measured, with a native resolution of 240 x 320
+  dots.
+
+  No driver has been developed for the SAM4E-EK LCD as of this writing.
+  Some technical information follows might be useful to anyone who is
+  inspired to develop that driver:
+
+  Connectivity
+  ------------
+
+    The SAM4E16 communicates with the LCD through PIOC where an 8-bit
+    parallel "8080-like" protocol data bus has to be implemented in
+    software.
+
+    ---- ----- --------- --------------------------------
+    PIN  PIO   SIGNAL    NOTES
+    ---- ----- --------- --------------------------------
+      1                  VDD
+      2  PC7   DB17
+      3  PC6   DB16
+      4  PC5   DB15
+      5  PC4   DB14
+      6  PC3   DB13
+      7  PC2   DB12
+      8  PC1   DB11
+      9  PC0   DB10
+     10        DB9       Pulled low
+     11        DB8       Pulled low
+     12        DB7       Pulled low
+     13        DB6       Pulled low
+     14        DB5       Pulled low
+     15        DB4       Pulled low
+     16        DB3       Pulled low
+     17        DB2       Pulled low
+     18        DB1       Pulled low
+     19        DB0       Pulled low
+    ---- ----- --------- --------------------------------
+     20                  VDD
+     21  PC11  RD
+     22  PC8   WR
+     23  PC19  RS
+     24  PD18  CS        Via J8, pulled high.  Connects to NRST.
+     25        RESET     Connects to NSRST
+     26        IM0       Pulled high
+     27        IM1       Grounded
+     28        GND
+    ---- ----- --------- --------------------------------
+     29 [PC13] LED-A     Backlight controls:  PC13 enables
+     30 [PC13] LEDK1       AAT3155 charge pump that drives
+     31 [PC13] LEDK2       the backlight LEDs
+     32 [PC13] LEDK3
+     33 [PC13] LEDK4
+     34 [PC13] LEDK1
+    ---- ----- --------- --------------------------------
+     35        Y+        These go to the ADS7843
+     36        Y-          touchscreen controller.
+     37        X+
+     38        X-
+     39        NC
+    ---- ----- --------- --------------------------------
+
+    The ILI9325 IM0 and IM1 lines are pulled up and down, respectively.
+    This puts the ILI9325 in the mode "i80-system 16-bit interface DB[17:10],
+    DB[8:1]".  As you can see above, the LCD DB[17:10] connect to PC[0:7];
+    I don't understand why DB[8:1] are grounded???
+
+  Backlight
+  ---------
+
+    LCD backlight is made of 4 white chip LEDs in parallel, driven by an
+    AAT3155 charge pump, MN4. The AAT3155 is controlled by the SAM3U4E
+    through a single line Simple Serial Control (S2Cwire) interface, which
+    permits to enable, disable, and set the LED drive current (LED
+    brightness control) from a 32-level logarithmic scale. Four resistors
+    R93/R94/R95/R96 are implemented for optional current limitation.
+
+  Resources
+  ---------
+
+    If you want to implement LCD support, here are some references that may
+    help you:
+
+    1. Atmel Sample Code (ASF).  There is no example for the SAM4E-EK, but
+       there is for the SAM4S-EK.  The LCD and its processor connectivity
+       appear to be equivalent to the SAM4E-EK so this sample code should be
+       a good place to begin.  NOTE that the clock frequencies may be
+       different and pin usage may be different.  So it may be necessary to
+       adjust the SAM configuration to use this example.
+
+    2. There is an example of an LCD driver for the SAM3U at
+       configs/sam4u-ek/src/up_lcd.c.  That LCD driver is for an LCD with a
+       different LCD controller but should provide the NuttX SAM framework
+       for an LCD driver.
+
+    3. There are other LCD drivers for different MCUs that do support the
+       ILI9325 LCD.  Look at configs/shenzhou/src/up_ili93xx.c,
+       configs/stm3220g-eval/src/up_lcd.c, and
+       configs/stm3240g-eval/src/up_lcd.c.  I believe that the Shenzhou
+       driver is the most recent.
+
+  STATUS:
+    2014-3-27:  Not implemented.
 
 SAM4E-EK-specific Configuration Options
 =======================================
