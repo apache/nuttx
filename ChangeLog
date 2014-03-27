@@ -7054,4 +7054,6 @@
 	* configs/sam4e-ek:  All configurations updated to run with 120MHz
 	  CPU speed and with the CMCC enabled.  Calibrated delay loop
 	  (2014-3-26).
+	* drivers/lcd/Kconfig:  Add missing configuration for the MIO283QT-9A
+	  LCD.  Reported by Toby Duckworth (2014-3-27).
 

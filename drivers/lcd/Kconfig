@@ -212,6 +212,14 @@ config LCD_MIO283QT2
 		OLED Display Module, MIO283QT-2, Multi-Inno Technology, Co.
 		based on the Himax HX8347-D LCD controller.
 
+config LCD_MIO283QT9A
+	bool "MIO283QT-9A TFT LCD Display Module"
+	default n
+	---help---
+		Selects the driver for the MI0283QT-9A LCD from Multi-Inno
+		Technology Co., Ltd.  This LCD is based on the Ilitek ILI9341
+		LCD controller.
+
 config LCD_UG9664HSWAG01
 	bool "UG-9664HSWAG01 OLED Display Module"
 	default n
