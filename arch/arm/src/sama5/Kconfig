@@ -89,6 +89,20 @@ config ARCH_CHIP_ATSAMA5D35
 	select SAMA5_HAVE_TC1
 	select ARCH_NAND_HWECC
 
+config ARCH_CHIP_ATSAMA5D36
+	bool "Atmel ATSAMA5D356"
+	select ARCH_CHIP_SAMA5D3
+	select SAMA5_HAVE_EMAC
+	select SAMA5_HAVE_GMAC
+	select SAMA5_HAVE_HSMCI2
+	select SAMA5_HAVE_LCDC
+	select SAMA5_HAVE_UART0
+	select SAMA5_HAVE_UART1
+	select SAMA5_HAVE_CAN0
+	select SAMA5_HAVE_CAN1
+	select SAMA5_HAVE_TC1
+	select ARCH_NAND_HWECC
+
 endchoice # Atmel AT91SAMA5 Chip Selection
 
 menu "SAMA5 Peripheral Support"
