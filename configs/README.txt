@@ -466,8 +466,10 @@ configs/sama5d3x-ek
   are supported by NuttX with a simple reconfiguration of the processor
   type.
 
-  There is also the SAMA5D3FAE-EK bundle includes everything:  The base
-  board, all four CPU modules, and the LCD.
+configs/sama5d3-xplained
+  This is the  port of NuttX to the Atmel SAMA5D3x-Xplained development board.
+  This board features the Atmel SAMA5D36.  See
+  http://www.atmel.com/devices/sama5d36.aspx.
 
 configs/samd20-xplained
   The port of NuttX to the Atmel SAMD20-Xplained Pro development board.  This

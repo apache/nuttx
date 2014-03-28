@@ -7058,4 +7058,11 @@
 	  LCD.  Reported by Toby Duckworth (2014-3-27).
 	* arch/arm/include/sama5/chip.h and arch/arm/src/sama5/Kconfig:  Add
 	  support for the SAMA5D36 (2014-3-28).
-
+	* libc/strings/lib_strncpy.c:  Change ordering of test and copy.  Logic
+	  would have failed if n=0; one byte was always copying before testing
+	  for the end of the copy.
+	* nuttx/configs/sama5d3-xplained/:  Add a board support configuration
+	  for the Atmel SAMA5D3 Xplaiend board.  The initial check in is not
+	  finished. For example, it still builds to run out of NOR FLASH but
+	  the SAMA5D Xlpained has no NOR FLASH (2013-4-28).
+ 
