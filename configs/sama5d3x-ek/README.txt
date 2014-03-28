@@ -66,7 +66,6 @@ Contents
   - GNU Toolchain Options
   - IDEs
   - NuttX EABI "buildroot" Toolchain
-  - NuttX OABI "buildroot" Toolchain
   - NXFLAT Toolchain
   - Loading Code into SRAM with J-Link
   - Writing to FLASH using SAM-BA
@@ -129,11 +128,8 @@ GNU Toolchain Options
     CONFIG_ARMV7A_TOOLCHAIN_GNU_EABIW=y      : Generic GCC ARM EABI toolchain for Windows
 
   The CodeSourcery GCC toolchain is selected with
-  CONFIG_ARMV7A_TOOLCHAIN_GNU_EABIW=y and setting the PATH variable
+  CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYW=y and setting the PATH variable
   appropriately.
-
-  If you are not using AtmelStudio GCC toolchain, then you may also have to
-  modify the PATH in the setenv.h file if your make cannot find the tools.
 
   NOTE about Windows native toolchains
   ------------------------------------
@@ -165,20 +161,11 @@ GNU Toolchain Options
 
        MKDEP                = $(TOPDIR)/tools/mknulldeps.sh
 
-  NOTE 1: Older CodeSourcery toolchains (2009q1) do not work with default
-  optimization level of -Os (See Make.defs).  It will work with -O0, -O1, or
-  -O2, but not with -Os.
-
-  NOTE 2: The devkitARM toolchain includes a version of MSYS make.  Make sure that
-  the paths to Cygwin's /bin and /usr/bin directories appear BEFORE the devkitARM
-  path or will get the wrong version of make.
-
 IDEs
 ====
 
   NuttX is built using command-line make.  It can be used with an IDE, but some
-  effort will be required to create the project (There is a simple RIDE project
-  in the RIDE subdirectory).
+  effort will be required to create the project.
 
   Makefile Build
   --------------
@@ -204,7 +191,7 @@ IDEs
   Startup files will probably cause you some headaches.  The NuttX startup file
   is arch/arm/src/sam34/sam_vectors.S.  You may need to build NuttX
   one time from the Cygwin command line in order to obtain the pre-built
-  startup object needed by RIDE.
+  startup object needed by an IDE.
 
 NuttX EABI "buildroot" Toolchain
 ================================
@@ -230,9 +217,23 @@ NuttX EABI "buildroot" Toolchain
 
   4. cd <some-dir>/buildroot
 
-  5. cp configs/cortexm3-eabi-defconfig-4.6.3 .config
+  5.  Copy the configuration file from the configs/ sub-directory to the
+      top-level build directory:
 
-  6. make oldconfig
+      cp configs/cortexa8-eabi-defconfig-4.8.2 .config
+
+  6a. You may wish to modify the configuration before you build it.  For
+      example, it is recommended that you build the kconfig-frontends tools,
+      generomfs, and the NXFLAT tools as well.  You may also want to change
+      the selected toolchain.  These reconfigurations can all be done with
+
+      make menuconfig
+
+  6b. If you chose to make the configuration with no changes, then you
+      should still do the following to make certain that the build
+      configuration is up-to-date:
+
+      make oldconfig
 
   7. make
 
@@ -242,21 +243,6 @@ NuttX EABI "buildroot" Toolchain
   See the file configs/README.txt in the buildroot source tree.  That has more
   details PLUS some special instructions that you will need to follow if you are
   building a Cortex-M3 toolchain for Cygwin under Windows.
-
-  NOTE:  Unfortunately, the 4.6.3 EABI toolchain is not compatible with the
-  the NXFLAT tools.  See the top-level TODO file (under "Binary loaders") for
-  more information about this problem. If you plan to use NXFLAT, please do not
-  use the GCC 4.6.3 EABI toochain; instead use the GCC 4.3.3 OABI toolchain.
-  See instructions below.
-
-NuttX OABI "buildroot" Toolchain
-================================
-
-  The older, OABI buildroot toolchain is also available.  To use the OABI
-  toolchain, use the build instructions above, but (1) modify the
-  cortexm3-eabi-defconfig-4.6.3 configuration to use OABI (using 'make
-  menuconfig'), or (2) use an existing OABI configuration such as
-  cortexm3-defconfig-4.3.3
 
 NXFLAT Toolchain
 ================
@@ -290,6 +276,11 @@ NXFLAT Toolchain
 
   8. Edit setenv.h, if necessary, so that the PATH variable includes
      the path to the newly built NXFLAT binaries.
+
+  NOTE:  There are some known incompatibilities with 4.6.3 EABI toolchain
+  and the NXFLAT tools.  See the top-level TODO file (under "Binary
+  loaders") for more information about this problem. If you plan to use
+  NXFLAT, please do not use the GCC 4.6.3 EABI toochain.
 
 Loading Code into SRAM with J-Link
 ==================================

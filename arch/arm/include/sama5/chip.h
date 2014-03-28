@@ -47,7 +47,7 @@
  ****************************************************************************************************/
 /* SAMA5D3 Family
  * 
- *                           ATSAMA5D31    ATSAMA5D33    ATSAMA5D34    ATSAMA5D35    ATSAMA5D35
+ *                           ATSAMA5D31    ATSAMA5D33    ATSAMA5D34    ATSAMA5D35    ATSAMA5D36
  * ------------------------- ------------- ------------- ------------- ------------- -------------
  * Pin Count                 324           324           324           324           324
  * Max. Operating Frequency  536 MHz       536 MHz       536 MHz       536 MHz       536 MHz
@@ -64,7 +64,7 @@
  * LIN                       4             4             4             4             4
  * SSC                       2             2             2             2             2
  * Ethernet                  1             1             1             2             2
- * SD / eMMC                 3             2             3             2             2
+ * SD / eMMC                 3             2             3             2             3
  * Graphic LCD               Yes           Yes           Yes           -             Yes
  * Camera Interface          Yes           Yes           Yes           Yes           Yes
  * ADC channels              12            12            12            12            12
