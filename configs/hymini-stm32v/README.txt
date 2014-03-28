@@ -25,8 +25,7 @@ Development Environment
   Either Linux or Cygwin on Windows can be used for the development environment.
   The source has been built only using the GNU toolchain (see below).  Other
   toolchains will likely cause problems. Testing was performed using the Cygwin
-  environment because the Raisonance R-Link emulatator and some RIDE7 development tools
-  were used and those tools works only under Windows.
+  environment.
 
 GNU Toolchain Options
 =====================
@@ -94,8 +93,7 @@ IDEs
 ====
 
   NuttX is built using command-line make.  It can be used with an IDE, but some
-  effort will be required to create the project (There is a simple RIDE project
-  in the RIDE subdirectory).
+  effort will be required to create the project.
 
   Makefile Build
   --------------
@@ -119,9 +117,9 @@ IDEs
      on the command line.
 
   Startup files will probably cause you some headaches.  The NuttX startup file
-  is arch/arm/src/stm32/stm32_vectors.S.  With RIDE, I have to build NuttX
+  is arch/arm/src/stm32/stm32_vectors.S.  You many have to build NuttX
   one time from the Cygwin command line in order to obtain the pre-built
-  startup object needed by RIDE.
+  startup object needed by an IDE.
 
 NuttX EABI "buildroot" Toolchain
 ================================
