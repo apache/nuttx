@@ -1,7 +1,7 @@
 /************************************************************
  * libc/string/lib_strncpy.c
  *
- *   Copyright (C) 2007, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,16 +42,20 @@
 #include <string.h>
 
 /************************************************************
- * Global Functions
+ * Public Functions
+ ************************************************************/
+
+/************************************************************
+ * Name: strncpy
  ************************************************************/
 
 #ifndef CONFIG_ARCH_STRNCPY
-char *strncpy(char *dest, const char *src, size_t n)
+char *strncpy(FAR char *dest, FAR const char *src, size_t n)
 {
   char *ret = dest;     /* Value to be returned */
   char *end = dest + n; /* End of dest buffer + 1 byte */
 
-  while ((*dest++ = *src++) != '\0' && dest != end);
+  while (dest != end && (*dest++ = *src++) != '\0');
   return ret;
 }
 #endif

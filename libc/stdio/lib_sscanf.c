@@ -72,23 +72,23 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
  * Global Function Prototypes
  ****************************************************************************/
- 
+
 int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap);
- 
-/**************************************************************************
+
+/****************************************************************************
  * Global Constant Data
- **************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Global Variables
  ****************************************************************************/
 
-/**************************************************************************
+/****************************************************************************
  * Private Constant Data
- **************************************************************************/
+ ****************************************************************************/
 
 static const char spaces[] = " \t\n\r\f\v";
 
@@ -136,14 +136,14 @@ static int findwidth(FAR const char *buf, FAR const char *fmt)
         }
     }
 
-  /* No... the format has not delimiter and is back-to-back with the next
-   * formats (or no is following by a delimiter that does not exist in the
+  /* No... the format has no delimiter and is back-to-back with the next
+   * format (or is followed by a delimiter that does not exist in the
    * input string).  At this point we just bail and Use the input up until
    * the first white space is encountered.
    *
    * NOTE:  This means that values from the following format may be
    * concatenated with the first. This is a bug.  We have no generic way of
-   * determining the width of the data if there is no fieldwith, no space
+   * determining the width of the data if there is no fieldwidth, no space
    * separating the input, and no usable delimiter character.
    */
 
@@ -284,6 +284,8 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 
               if (*buf)
                 {
+                  /* Skip over white space */
+
                   while (isspace(*buf))
                     {
                       buf++;
@@ -303,11 +305,7 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 
                   if (!noassign)
                     {
-                      if (width > 0)
-                        {
-                          strncpy(tv, buf, width);
-                        }
-
+                      strncpy(tv, buf, width);
                       tv[width] = '\0';
                     }
 
@@ -456,9 +454,9 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                   buf += width;
                   if (!noassign)
                     {
-                      char *endptr;
-                      int   errsave;
-                      long  tmplong;
+                      FAR char *endptr;
+                      int       errsave;
+                      long      tmplong;
 
                       errsave = errno;
                       set_errno(0);
