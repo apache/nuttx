@@ -1,5 +1,5 @@
 #!/bin/bash
-# configs/samard3x-ek/nx/setenv.sh
+# configs/sama5d3x-ek/nx/setenv.sh
 #
 #   Copyright (C) 2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

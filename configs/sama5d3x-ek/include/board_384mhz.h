@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/sama5df3x-ek/include/board_384mhz.h
+ * configs/sama5d3x-ek/include/board_384mhz.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
