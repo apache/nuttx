@@ -695,7 +695,7 @@ Networking
   the first time you ping due to the default handling of the ARP
   table.
 
-  On the host side, you should also be able to ping the SAMA5D3-EK:
+  On the host side, you should also be able to ping the SAMA5D3x-EK:
 
     $ ping 10.0.0.2
 
@@ -1930,7 +1930,7 @@ CAN Usage
   CAN connectors
   --------------
 
-  CAN1 and CAN2 are available via RJ-11 connectors on the SAMA5Dx-EK.  Each
+  CAN1 and CAN2 are available via RJ-11 connectors on the SAMA5D3x-EK.  Each
   is wired as follows.  Also shown below is the matching pins if you want connect
   the CAN to a device that uses an DB-9 connector (Such as the IXXAT USB-to-CAN
   Compact).  Both connector types (as well as RJ-45) are common.
@@ -2577,7 +2577,7 @@ Configurations
 
   Information Common to All Configurations
   ----------------------------------------
-  Each SAM3U-EK configuration is maintained in a sub-directory and
+  Each SAMA5D3x-EK configuration is maintained in a sub-directory and
   can be selected as follow:
 
     cd tools
@@ -3105,7 +3105,7 @@ To-Do List
 
 7) The NxWM example does not work well.  This example was designed to work
    with much smaller displays and does not look good or work well with the
-   SAMA5Dx-EKs 800x480 display.  See above for details.
+   SAMA5D3x-EK's 800x480 display.  See above for details.
 
 8) There are lots of LCDC hardware features that are not tested with NuttX.
    The simple NuttX graphics system does not have support for all of the
