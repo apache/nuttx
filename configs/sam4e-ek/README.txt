@@ -959,11 +959,6 @@ ILI9325-Based LCD
      39        NC
     ---- ----- --------- --------------------------------
 
-    The ILI9325 IM0 and IM1 lines are pulled up and down, respectively.
-    This puts the ILI9325 in the mode "i80-system 16-bit interface DB[17:10],
-    DB[8:1]".  As you can see above, the LCD DB[17:10] connect to PC[0:7];
-    I don't understand why DB[8:1] are grounded???
-
   Backlight
   ---------
 

@@ -89,11 +89,6 @@
  *   39        NC
  *  ---- ----- --------- --------------------------------
  *
- * The ILI9325 IM0 and IM1 lines are pulled up and down, respectively.  This puts
- * the ILI9325 in the mode "i80-system 16-bit interface DB[17:10], DB[8:1]".  As
- * you can see above, the LCD DB[17:10] connect to PC[0:7]; I don't understand why
- * DB[8:1] are grounded???
- *
  * LCD backlight is made of 4 white chip LEDs in parallel, driven by an AAT3155
  * charge pump, MN4. The AAT3155 is controlled by the SAM3U4E through a single line
  * Simple Serial Control (S2Cwire) interface, which permits to enable, disable, and
