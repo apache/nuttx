@@ -7046,7 +7046,7 @@
 	  startup (2014-3-25).
 	* tools/astyle.sh:  A code formatting tool from Lorenz Meier.  This
 	  tool should do a better job than the old tools/indent.sh tool
-	(2014-3-26).
+	  (2014-3-26).
 	* arch/arm/src/sam_hsmci.c and sam_spi.c:  Add support to invalidate
 	  cached memory if the CMCC is enabled (not yet tested, 2014-3-26).
 	* arch/arm/src/sam_spi.c:  Add logic to handle SPI word widths > 8
@@ -7056,4 +7056,6 @@
 	  (2014-3-26).
 	* drivers/lcd/Kconfig:  Add missing configuration for the MIO283QT-9A
 	  LCD.  Reported by Toby Duckworth (2014-3-27).
+	* arch/arm/include/sama5/chip.h and arch/arm/src/sama5/Kconfig:  Add
+	  support for the SAMA5D36 (2014-3-28).
 
