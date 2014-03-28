@@ -460,7 +460,7 @@ Buttons and LEDs
   Only the momentary push button is controllable by software (labeled
   "PB_USER1" on the board):
 
-    - PE27.  Pressing the switch connect PE27 to grounded.  Therefore, PE27
+    - PE27.  Pressing the switch connects PE27 to grounded.  Therefore, PE27
       must be pulled high internally.  When the button is pressed the SAMA5
       will sense "0" is on PE27.
 
@@ -566,11 +566,11 @@ Networking
   System Type -> EMAC device driver options
     CONFIG_SAMA5_EMAC_NRXBUFFERS=16     : Set aside some RS and TX buffers
     CONFIG_SAMA5_EMAC_NTXBUFFERS=4
-    CONFIG_SAMA5_EMAC_PHYADDR=1         : KSZ8051 PHY is at address 1
+    CONFIG_SAMA5_EMAC_PHYADDR=1         : KSZ8021/31 PHY is at address 1
     CONFIG_SAMA5_EMAC_AUTONEG=y         : Use autonegotiation
     CONFIG_SAMA5_EMAC_RMII=y            : Either MII or RMII interface should work
-    CONFIG_SAMA5_EMAC_PHYSR=30          : Address of PHY status register on KSZ8051
-    CONFIG_SAMA5_EMAC_PHYSR_ALTCONFIG=y : Needed for KSZ8051
+    CONFIG_SAMA5_EMAC_PHYSR=30          : Address of PHY status register on KSZ8021/31
+    CONFIG_SAMA5_EMAC_PHYSR_ALTCONFIG=y : Needed for KSZ8021/31
     CONFIG_SAMA5_EMAC_PHYSR_ALTMODE=0x7 : "    " " " "     "
     CONFIG_SAMA5_EMAC_PHYSR_10HD=0x1    : "    " " " "     "
     CONFIG_SAMA5_EMAC_PHYSR_100HD=0x2   : "    " " " "     "
@@ -578,7 +578,7 @@ Networking
     CONFIG_SAMA5_EMAC_PHYSR_100FD=0x6   : "    " " " "     "
 
   PHY selection.  Later in the configuration steps, you will need to select
-  the KSZ8051 PHY for EMAC (See below)
+  the KSZ8021/31 PHY for EMAC (See below)
 
   Selecting the GMAC peripheral
   -----------------------------
@@ -622,7 +622,7 @@ Networking
   Device drivers -> Network Device/PHY Support
     CONFIG_NETDEVICES=y                 : Enabled PHY selection
     CONFIG_ETH0_PHY_KSZ8051=y           : Select the KSZ8051 PHY (for EMAC), OR
-    CONFIG_ETH0_PHY_KSZ90x1=y           : Select teh KSZ9021/31 PHY (for GMAC)
+    CONFIG_ETH0_PHY_KSZ90x1=y           : Select the KSZ9021/31 PHY (for GMAC)
 
   Application Configuration -> Network Utilities
     CONFIG_NETUTILS_RESOLV=y            : Enable host address resolution
@@ -812,7 +812,7 @@ HSMCI Card Slots
   labelled MCI1).
 
   The full size SD card slot connects via HSMCI0.  The card detect discrete
-  is available on PB17 (pulled high).  The write protect discrete is tied to
+  is available on PD17 (pulled high).  The write protect discrete is tied to
   ground (via PP6) and not available to software.  The slot supports 8-bit
   wide transfer mode, but the NuttX driver currently uses only the 4-bit
   wide transfer mode
@@ -830,7 +830,7 @@ HSMCI Card Slots
     PD0  MCI0_CDA
 
   The microSD connects vi HSMCI1.  The card detect discrete is available on
-  PB18 (pulled high):
+  PD18 (pulled high):
 
     PD18  MCI1_CD
     PB20  MCI1_DA0
