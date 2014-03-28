@@ -151,7 +151,7 @@
  *   3. One User momentary Push Button
  *   4. One Disable CS Push Button
  *
- * Only the momentary push button is controllable by software (labeled
+ * Only the momentary push button is controllable by software (labelled
  * "PB_USER1" on the board):
  *
  *   - PE27.  Pressing the switch connect PE27 to grounded.  Therefore, PE27
@@ -327,7 +327,7 @@ extern "C" {
  *
  * Description:
  *   All SAMA5 architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
+ *   is called early in the initialization -- after all memory has been configured
  *   and mapped but before any devices have been initialized.
  *
  ************************************************************************************/

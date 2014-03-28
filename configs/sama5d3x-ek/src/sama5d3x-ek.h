@@ -368,7 +368,7 @@
  * Only the momentary push button is controllable by software (labeled
  * "PB_USER1" on the board):
  *
- *   - PE27.  Pressing the switch connect PE27 to grounded.  Therefore, PE27
+ *   - PE27.  Pressing the switch connects PE27 to ground.  Therefore, PE27
  *     must be pulled high internally.  When the button is pressed the SAMA5
  *     will sense "0" is on PE27.
  */
