@@ -64,7 +64,7 @@
  *   LED_IDLE          N/A MCU is is sleep mode         Not used
  *
  * Thus if the blue LED is statically on, NuttX has successfully booted and
- * is, apparently, running normmally.  If the red is flashing at
+ * is, apparently, running normally.  If the red is flashing at
  * approximately 2Hz, then a fatal error has been detected and the system
  * has halted.
  */
