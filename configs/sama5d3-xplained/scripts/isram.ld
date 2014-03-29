@@ -33,7 +33,7 @@
  *
  ****************************************************************************/
 
-/* The SAMA5D3 has 128 KB of ISRAM beginning at virtual address 0x0030:0000.
+/* The SAMA5D36 has 128 KB of ISRAM beginning at virtual address 0x0030:0000.
  *
  * Vectors in low memory are assumed and 16KB of ISRAM is reserved at the
  * high end of ISRAM for the page table.

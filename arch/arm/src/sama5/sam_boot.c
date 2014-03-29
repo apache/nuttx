@@ -140,13 +140,14 @@ static const struct section_mapping_s section_mapping[] =
    * I have found that in the test environments that I use, I cannot always
    * be assured of that physical address mapping.
    *
-   * So we do both here.  If we are exectuing from FLASH, then we provide
+   * So we do both here.  If we are executing from FLASH, then we provide
    * the MMU to map the physical address of FLASH to address 0x0000:0000;
    * if we are executing from the internal SRAM, then we trust the bootload
    * to setup the AXI MATRIX mapping.
    */
 
-#if defined(CONFIG_ARCH_LOWVECTORS) && !defined(CONFIG_SAMA5_BOOT_ISRAM)
+#if defined(CONFIG_ARCH_LOWVECTORS) && !defined(CONFIG_SAMA5_BOOT_ISRAM) && \
+   !defined(CONFIG_SAMA5_BOOT_SDRAM)
   { CONFIG_FLASH_VSTART,   0x00000000,
     MMU_ROMFLAGS,          1
   },

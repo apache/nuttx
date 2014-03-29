@@ -58,7 +58,6 @@ Contents
   - NXFLAT Toolchain
   - Loading Code into SRAM with J-Link
   - Writing to FLASH using SAM-BA
-  - Creating and Using NORBOOT
   - Buttons and LEDs
   - Serial Console
   - Networking
@@ -323,105 +322,6 @@ Writing to FLASH using SAM-BA
        and re-connect the serial link on USB CDC / DBGU connector (J23) and
        re-open the terminal emulator program.
     10. Power cycle the board.
-
-Creating and Using NORBOOT
-==========================
-
-  In order to have more control of debugging code that runs out of NOR FLASH,
-  I created the sama5d3-xplained/norboot configuration.  That configuration is
-  described below under "Configurations."
-
-  Here are some general instructions on how to build an use norboot:
-
-  Building:
-  1. Remove any old configurations (if applicable).
-
-       cd <nuttx>
-       make distclean
-
-  2. Install and build the norboot configuration.  This steps will establish
-     the norboot configuration and setup the PATH variable in order to do
-     the build:
-
-       cd tools
-       ./configure.sh sama5d3-xplained/<subdir>
-       cd -
-       . ./setenv.sh
-
-     Before sourcing the setenv.sh file above, you should examine it and
-     perform edits as necessary so that TOOLCHAIN_BIN is the correct path
-     to the directory than holds your toolchain binaries.
-
-     NOTE:  Be aware that the default norboot also disables the watchdog.
-     Since you will not be able to re-enable the watchdog later, you may
-     need to set CONFIG_SAMA5_WDT=y in the NuttX configuration file.
-
-     Then make norboot:
-
-       make
-
-     This will result in an ELF binary called 'nuttx' and also HEX and
-     binary versions called 'nuttx.hex' and 'nuttx.bin'.
-
-  3. Rename the binaries.  Since you will need two versions of NuttX:  this
-     norboot version that runs in internal SRAM and another under test in
-     NOR FLASH, I rename the resulting binary files so that they can be
-     distinguished:
-
-       mv nuttx norboot
-       mv nuttx.hex norboot.hex
-       mv nuttx.bin norboot.bin
-
-  4. Build your NOR configuration and write this into NOR FLASH.  Here, for
-     example, is how you would create the NSH NOR configuration:
-
-       cd <nuttx>
-       make distclean                 # Remove the norboot configuration
-       cd tools
-       ./configure.sh sama5d3-xplained/nsh # Establish the NSH configuration
-       cd -
-       make                           # Build the NSH configuration
-
-     Then use SAM-BA to write the nuttx.bin binary into NOR FLASH.  This
-     will involve holding the CS_BOOT button and power cycling to start
-     the ROM loader.  The SAM-BA serial connection will be on the device
-     USB port, not the debug USB port.  Follow the SAM-BA instruction to
-     write the nuttx.bin binary to NOR FLASH.
-
-   5. Restart the system without holding CS_BOOT to get back to the normal
-      debug setup.
-
-   6. Then start the J-Link GDB server and GDB.  In GDB, I do the following:
-
-       (gdb) mon reset                # Reset and halt the CPU
-       (gdb) load norboot             # Load norboot into internal SRAM
-       (gdb) mon go                   # Start norboot
-       (gdb) mon halt                 # Break in
-       (gdb) mon reg pc = 0x10000040  # Set the PC to NOR flash entry point
-       (gdb) mon go                   # And jump into NOR flash
-
-      The norboot program can also be configured to jump directly into
-      NOR FLASH without requiring the final halt and go by setting
-      CONFIG_SAMA5D3XPLAINED_NOR_START=y in the NuttX configuration.  However,
-      since I have been debugging the early boot sequence, the above
-      sequence has been most convenient for me since it allows me to
-      step into the program in NOR.
-
-   7. An option is to use the SAM-BA tool to write the NORBOOT image into
-      Serial FLASH.  Then, the system will boot from Serial FLASH by
-      copying the NORBOOT image in SRAM which will run and then start the
-      image in NOR FLASH automatically.  This is a very convenient usage!
-
-      NOTES: (1) There is jumper on the CM module that must be closed to
-      enable use of the AT25 Serial Flash.  (2) If using SAM-BA, make sure
-      that you load the NOR boot program into the boot area via the pull-
-      down menu.
-
-    STATUS:
-      2014-7-30:  I have been unable to execute these configurations from NOR
-        FLASH by closing the BMS jumper (J9).  As far as I can tell, this
-        jumper does nothing on my board???  So I have been using the norboot
-        configuration exclusively to start the program-under-test in NOR FLASH.
 
 Buttons and LEDs
 ================
@@ -1203,37 +1103,6 @@ USB High-Speed Host
   serial console.  However, the debug output will be asynchronous with the
   trace output and, hence, difficult to interpret.
 
-NOR FLASH Support
-=================
-
-  Most of these configurations execute out of CS0 NOR flash and can only be
-  loaded via SAM-BA.  These are the relevant configuration options the
-  define the NOR FLASH configuration:
-
-    CONFIG_SAMA5_BOOT_CS0FLASH=y            : Boot from FLASH on CS0
-    CONFIG_BOOT_RUNFROMFLASH=y              : Run in place on FLASH (vs copying to RAM)
-
-    CONFIG_SAMA5_EBICS0=y                   : Enable CS0 external memory
-    CONFIG_SAMA5_EBICS0_SIZE=134217728      : Memory size is 128KB
-    CONFIG_SAMA5_EBICS0_NOR=y               : Memory type is NOR FLASH
-
-    CONFIG_FLASH_START=0x10000000           : Physical FLASH start address
-    CONFIG_FLASH_VSTART=0x10000000          : Virtual FLASH start address
-    CONFIG_FLASH_SIZE=134217728             : FLASH size (again)
-
-    CONFIG_RAM_START=0x00300400             : Data stored after page table
-    CONFIG_RAM_VSTART=0x00300400
-    CONFIG_RAM_SIZE=114688                  : Available size of 128KB - 16KB for page table
-
-  NOTE:  In order to boot in this configuration, you need to close the BMS
-  jumper.
-
-  STATUS:  I have been unable to execute these configurations from NOR FLASH
-  by closing the BMS jumper (J9).  As far as I can tell, this jumper does
-  nothing on my board???  So I have been using the norboot configuration
-  exclusively to start the program-under-test in NOR FLASH (see the section
-  entitled "Creating and Using NORBOOT" above.)
-
 SDRAM Support
 =============
 
@@ -1392,18 +1261,7 @@ NAND Support
        entering any data on the DBG serial port.  I have not tried this.
        Instead, I just changed to boot from Serial Flash:
 
-    2. Booting from Serial Flash. The work around for this case is to put
-       the NORBOOT image into Serial FLASH.  Then, the system will boot from
-       Serial FLASH by copying the NORBOOT image in SRAM which will run and
-       then start the image in NOR FLASH.  See the discussion of the NORBOOT
-       configuration in the "Creating and Using NORBOOT" section above.
-
-       NOTE that there is jumper on the CM module that must be closed to enable
-       use of the AT25 Serial Flash.  Also, if you are using using SAM-BA,
-       make sure that you load the NOR boot program into the boot area via
-       the pull-down menu.
-
-    3. Unfortunately, there are no appropriate NAND file system in NuttX as
+    2. Unfortunately, there are no appropriate NAND file system in NuttX as
        of this writing.  The following sections discussion issues/problems
        with using NXFFS and FAT.
 
@@ -2085,10 +1943,6 @@ Watchdog Timer
   the WDT, we cannot disable the watchdog time if CONFIG_SAMA5_WDT=y.  So,
   be forewarned:  You have only 16 seconds to run your watchdog timer test!
 
-  NOTE:  If you are using the norboot program to run from FLASH as I did,
-  beware that the default version also disables the watchdog.  You will
-  need a special version of norboot with CONFIG_SAMA5_WDT=y.
-
 TRNG and /dev/random
 ====================
 
@@ -2457,11 +2311,6 @@ Configurations
   Summary:  Some of the descriptions below are long and wordy. Here is the
   concise summary of the available SAMA5D3-Xplained configurations:
 
-    norboot:
-      This is a little program to help debug of code in NOR flash.  I wrote
-      it because I don't yet understand how to get the SAMA5 to boot from
-      NOR FLASH.  See the description below and the section above entitled
-      "Creating and Using NORBOOT" for more information
     nsh:  This is another NSH configuration, not too different from the
       demo configuration.  The nsh configuration is, however, bare bones.
       It is the simplest possible NSH configuration and is useful as a
@@ -2471,39 +2320,6 @@ Configurations
   before of the status of individual configurations.
 
   Now for the gory details:
-
-  norboot:
-    This is a little program to help debug of code in NOR flash.  It
-    does the following:
-
-    - It enables and configures NOR FLASH, then
-    - Waits for you to break in with GDB.
-
-    At that point, you can set the PC and begin executing from NOR FLASH
-    under debug control.  See the section entitled "Creating and Using
-    NORBOOT" above.
-
-    NOTES:
-
-    1. This program derives from the hello configuration.  All of the
-       notes there apply to this configuration as well.
-
-    2. The default norboot program initializes the NOR memory,
-       displays a message and halts.  The norboot program can also be
-       configured to jump directly into NOR FLASH without requiring the
-       final halt and go by setting CONFIG_SAMA5D3XPLAINED_NOR_START=y in the
-       NuttX configuration.
-
-    3. Be aware that the default norboot also disables the watchdog.
-       Since you will not be able to re-enable the watchdog later, you may
-       need to set CONFIG_SAMA5_WDT=y in the NuttX configuration file.
-
-    4. If you put norboot on the Serial FLASH, you can automatically
-       boot to NOR on reset.  See the section "Creating and Using NORBOOT"
-       above.
-
-    STATUS:
-       See the To-Do list below
 
   nsh:
 
@@ -2536,9 +2352,8 @@ Configurations
        the warning in the section "Information Common to All Configurations"
        for further information.
 
-    3. This configuration executes out of CS0 NOR flash and can only
-       be loaded via SAM-BA.  The are the relevant configuration options
-       are provided above in the section entitled "NOR FLASH Support".
+    3. This configuration executes out of NAND flash and can only
+       be loaded via BareBox.
 
     4. This configuration has support for NSH built-in applications enabled.
        However, no built-in applications are selected in the base configuration.
@@ -2610,22 +2425,16 @@ To-Do List
 1) Currently the SAMA5Dx is running at 396MHz in these configurations.  This
    is because the timing for the PLLs, NOR FLASH, and SDRAM came from the
    Atmel NoOS sample code which runs at that rate.  The SAMA5Dx is capable
-   of running at 528MHz, however.  The setup for that configuration exists
-   in the Bareboard assembly language setup and should be incorporated.
+   of running at 536MHz, however.  The setup for that configuration exists
+   in the BareBox assembly language setup and should be incorporated.
 
-2) Most of these configurations execute from NOR FLASH. I have been unable
-   to execute these configurations from NOR FLASH by closing the BMS jumper
-   (J9).  As far as I can tell, this jumper does nothing on my board???  I
-   have been using the norboot configuration to start the program in NOR
-   FLASH (see just above).  See "Creating and Using NORBOOT" above.
-
-3) Neither USB OHCI nor EHCI support Isochronous endpoints.  Interrupt
+2) Neither USB OHCI nor EHCI support Isochronous endpoints.  Interrupt
    endpoint support in the EHCI driver is untested (but works in similar
    EHCI drivers).
 
-4) HSCMI TX DMA support is currently commented out.
+3) HSCMI TX DMA support is currently commented out.
 
-5) I believe that there is an issue when the internal AT25 FLASH is
+4) I believe that there is an issue when the internal AT25 FLASH is
    formatted by NuttX.  That format works fine with Linux, but does not
    appear to work with Windows.  Reformatting on Windows can resolve this.
    NOTE:  This is not a SAMA5Dx issue.
@@ -2634,20 +2443,20 @@ To-Do List
    formatting function (mkfatfs).  It is likely that these fixes will
    eliminate this issue, but that has not yet been verified.
 
-6) CAN testing has not yet been performed due to issues with cabling.  I
+5) CAN testing has not yet been performed due to issues with cabling.  I
    just do not have a good test bed (or sufficient CAN knowledge) for
    good CAN testing.
 
-7) The NxWM example does not work well.  This example was designed to work
+6) The NxWM example does not work well.  This example was designed to work
    with much smaller displays and does not look good or work well with the
    SAMA5D3-Xplained's 800x480 display.  See above for details.
 
-8) I have a Camera, but there is still no ISI driver.  I am not sure what to
+7) I have a Camera, but there is still no ISI driver.  I am not sure what to
    do with the camera.  NuttX needs something like V4L to provide the
    definition for what a camera driver is supposed to do.
 
    I will probably develop a test harness for ISI, but it is of only
    minimal value with no OS infrastructure to deal with images and video.
 
-9) GMAC has only been tested on a 10/100Base-T network.  I don't have a
+8) GMAC has only been tested on a 10/100Base-T network.  I don't have a
    1000Base-T network to support additional testing.

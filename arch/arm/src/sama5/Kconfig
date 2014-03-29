@@ -3513,7 +3513,6 @@ config SAMA5_BOOT_ISRAM
 
 config SAMA5_BOOT_SDRAM
 	bool "Running from external SDRAM"
-	depends on SAMA5_DDRCS
 
 config SAMA5_BOOT_CS0FLASH
 	bool "Running in external FLASH CS0"

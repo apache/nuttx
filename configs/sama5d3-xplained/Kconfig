@@ -22,26 +22,6 @@ config SAMA5D3XPLAINED_MT47H64M16HR
 
 endchoice # SAMA5D3-Xplained DRAM Type
 
-config SAMA5D3XPLAINED_NOR_MAIN
-	bool "Build nor_main"
-	default n
-	depends on SAMA5_BOOT_ISRAM
-	---help---
-		nor_main is a tiny program that runs in ISRAM.  nor_main will enable
-		NOR flash then either (1) jump to the program in NOR flash or (2)
-		wait for you to break in with GDB to debug the NOR program.
-
-config SAMA5D3XPLAINED_NOR_START
-	bool "Start NOR program"
-	default n
-	depends on SAMA5D3XPLAINED_NOR_MAIN
-	---help---
-		The default behavior of the NOR boot program is to initialize the
-		NOR FLASH at CS0, then patiently wait for you to break into the
-		program with GDB.  An alternative behvior is enabled with this
-		option:  If SAMA5D3XPLAINED_NOR_START is defined, then it will not wait but
-		will, instead, immediately start the program in NOR FLASH.
-
 config SAMA5D3XPLAINED_NAND_AUTOMOUNT
 	bool "NAND FLASH auto-mount"
 	default n
