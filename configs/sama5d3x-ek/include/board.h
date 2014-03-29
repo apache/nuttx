@@ -51,7 +51,19 @@
  * definitions will configure operational clocking.
  */
 
-#if 1 /* #if !defined(CONFIG_SAMA5_OHCI) || defined(CONFIG_SAMA5_EHCI) */
+#if defined(CONFIG_SAMA5_BOOT_SDRAM)
+/* When booting from SDRAM, NuttX is loaded in SDRAM by an intermediate bootloader.
+ * That bootloader had to have already configured the PLL and SDRAM for proper
+ * operation.
+ *
+ * In this case, we don not reconfigure the clocking.  Rather, we need to query
+ * the register settings to determine the clock frequencies.  We can only assume that
+ * the Main clock source in the on-board 12MHz crystal.
+ */
+
+#  include <arch/board/board_sdram.h>
+
+#elif 1 /* #elif !defined(CONFIG_SAMA5_OHCI) || defined(CONFIG_SAMA5_EHCI) */
 /* This is the configuration provided in the Atmel example code.  This setup results
  * in a CPU clock of 396MHz.
  *

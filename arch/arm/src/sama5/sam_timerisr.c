@@ -70,14 +70,6 @@
 
 #define PIT_PIV ((PIT_CLOCK + (CLK_TCK >> 1)) / CLK_TCK)
 
-/* The size of the reload field is 20 bits.  Verify that the reload value
- * will fit in the reload register.
- */
-
-#if PIT_PIV > PIT_MR_PIV_MASK
-#  error PIT_PIV exceeds the maximum value
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -149,7 +141,10 @@ void up_timerinit(void)
    * interrupts from the PIT.
    */
 
-  regval = PIT_PIV | PIT_MR_PITEN | PIT_MR_PITIEN;
+  regval  = PIT_PIV;
+  DEBUGASSERT(regval <= PIT_MR_PIV_MASK);
+
+  regval |= (PIT_MR_PITEN | PIT_MR_PITIEN);
   putreg32(regval, SAM_PIT_MR);
 
   /* And enable the timer interrupt */
