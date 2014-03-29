@@ -56,6 +56,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#undef NEED_PLLSETUP
+#if defined(CONFIG_SAMA5_BOOT_ISRAM) || defined(CONFIG_SAMA5_BOOT_CS0FLASH)
+#  define NEED_PLLSETUP 1
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -80,6 +85,7 @@
  *
  ****************************************************************************/
 
+#if defined(NEED_PLLSETUP)
 static void sam_pmcwait(uint32_t bit)
 {
   /* There is no timeout on this wait.  Why not?  Because the symptoms there
@@ -90,15 +96,17 @@ static void sam_pmcwait(uint32_t bit)
 
   while ((getreg32(SAM_PMC_SR) & bit) == 0);
 }
+#endif
 
 /****************************************************************************
  * Name: sam_enablemosc
  *
  * Description:
- *   Enable the main osciallator
+ *   Enable the main oscillator
  *
  ****************************************************************************/
 
+#if defined(NEED_PLLSETUP)
 static inline void sam_enablemosc(void)
 {
   uint32_t regval;
@@ -141,6 +149,7 @@ static inline void sam_enablemosc(void)
       sam_pmcwait(PMC_INT_MCKRDY);
     }
 }
+#endif
 
 /****************************************************************************
  * Name: sam_selectmosc
@@ -152,6 +161,7 @@ static inline void sam_enablemosc(void)
  *
  ****************************************************************************/
 
+#if defined(NEED_PLLSETUP)
 static inline void sam_selectmosc(void)
 {
   uint32_t regval;
@@ -167,6 +177,7 @@ static inline void sam_selectmosc(void)
 
   sam_pmcwait(PMC_INT_MCKRDY);
 }
+#endif
 
 /****************************************************************************
  * Name: sam_pllasetup
@@ -178,6 +189,7 @@ static inline void sam_selectmosc(void)
  *
  ****************************************************************************/
 
+#if defined(NEED_PLLSETUP)
 static inline void sam_pllasetup(void)
 {
   uint32_t regval;
@@ -197,6 +209,7 @@ static inline void sam_pllasetup(void)
 
   sam_pmcwait(PMC_INT_LOCKA);
 }
+#endif
 
 /****************************************************************************
  * Name: sam_plladivider
@@ -206,6 +219,7 @@ static inline void sam_pllasetup(void)
  *
  ****************************************************************************/
 
+#if defined(NEED_PLLSETUP)
 static inline void sam_plladivider(void)
 {
   uint32_t regval;
@@ -246,6 +260,7 @@ static inline void sam_plladivider(void)
 
   sam_pmcwait(PMC_INT_MCKRDY);
 }
+#endif
 
 /****************************************************************************
  * Name: sam_mckprescaler
@@ -255,6 +270,7 @@ static inline void sam_plladivider(void)
  *
  ****************************************************************************/
 
+#if defined(NEED_PLLSETUP)
 static inline void sam_mckprescaler(void)
 {
   uint32_t regval;
@@ -270,6 +286,7 @@ static inline void sam_mckprescaler(void)
 
   sam_pmcwait(PMC_INT_MCKRDY);
 }
+#endif
 
 /****************************************************************************
  * Name: sam_mckdivider
@@ -280,6 +297,7 @@ static inline void sam_mckprescaler(void)
  *
  ****************************************************************************/
 
+#if defined(NEED_PLLSETUP)
 static inline void sam_mckdivider(void)
 {
   uint32_t regval;
@@ -295,6 +313,7 @@ static inline void sam_mckdivider(void)
 
   sam_pmcwait(PMC_INT_MCKRDY);
 }
+#endif
 
 /****************************************************************************
  * Name: sam_selectplla
@@ -304,6 +323,7 @@ static inline void sam_mckdivider(void)
  *
  ****************************************************************************/
 
+#if defined(NEED_PLLSETUP)
 static inline void sam_selectplla(void)
 {
   uint32_t regval;
@@ -319,6 +339,7 @@ static inline void sam_selectplla(void)
 
   sam_pmcwait(PMC_INT_MCKRDY);
 }
+#endif
 
 /****************************************************************************
  * Name: sam_usbclockconfig
@@ -569,8 +590,8 @@ void sam_clockconfig(void)
 #ifdef CONFIG_SAMA5_BOOT_CS0FLASH
   if (config)
 #endif /* CONFIG_SAMA5_BOOT_CS0FLASH */
-#if defined(CONFIG_SAMA5_BOOT_ISRAM) || defined(CONFIG_SAMA5_BOOT_CS0FLASH)
     {
+#if defined(NEED_PLLSETUP)
       /* Enable main oscillator (if it has not already been selected) */
 
       sam_enablemosc();
@@ -601,10 +622,10 @@ void sam_clockconfig(void)
       /* Finally, elect the PLLA output as the input clock for PCK and MCK. */
 
       sam_selectplla();
+#endif /* NEED_PLLSETUP */
 
       /* Setup USB clocking */
 
       sam_usbclockconfig();
     }
-#endif /* CONFIG_SAMA5_BOOT_ISRAM || CONFIG_SAMA5_BOOT_CS0FLASH */
 }

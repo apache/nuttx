@@ -50,6 +50,11 @@
 #include "up_arch.h"
 
 #include "chip.h"
+
+#ifdef CONFIG_ARCH_HAVE_SDIO
+#  include "chip/sam_hsmci.h"
+#endif
+
 #include "chip/sam_pmc.h"
 #include "sam_pmc.h"
 
@@ -77,7 +82,7 @@
  * Name: sam_pllack_frequency
  *
  * Description:
- *   Given the Main Clock frequency that provides the input to PLLA, return 
+ *   Given the Main Clock frequency that provides the input to PLLA, return
  *   the frequency of the PPA output clock, PLLACK
  *
  * Assumptions:
@@ -113,20 +118,57 @@ uint32_t sam_pllack_frequency(uint32_t mainclk)
     {
       return 0;
     }
- 
+
  /* MULA = 0: PLLA is deactivated
   * MULA > 0: The PLLA Clock frequency is the PLLA input frequency
   *           multiplied by MULA + 1.
   */
 
   mula = (regval & PMC_CKGR_PLLAR_MUL_MASK) >> PMC_CKGR_PLLAR_MUL_SHIFT;
-  if (mula > 1)
+  if (mula > 0)
     {
-     pllack *= (mula + 1);
+      pllack *= (mula + 1);
     }
-  else if (diva < 1)
+  else
     {
       return 0;
+    }
+
+  return pllack;
+}
+
+/****************************************************************************
+ * Name: sam_plladiv2_frequency
+ *
+ * Description:
+ *   The PLLACK input to most clocking may or may not be divided by two.
+ *   This function will return the possibly divided PLLACK clock input
+ *   frequency.
+ *
+ * Assumptions:
+ *   See sam_pllack_frequency.
+ *
+ ****************************************************************************/
+
+uint32_t sam_plladiv2_frequency(uint32_t mainclk)
+{
+  uint32_t regval;
+  uint32_t pllack;
+
+  /* Get the PLLA output clock */
+
+  pllack = sam_pllack_frequency(mainclk);
+  if (pllack == 0)
+    {
+      return 0;
+    }
+
+  /* Check if the PLLACK output is divided by 2 */
+
+  regval = getreg32(SAM_PMC_MCKR);
+  if ((regval & PMC_MCKR_PLLADIV2) != 0)
+    {
+      pllack >>= 1;
     }
 
   return pllack;
@@ -136,7 +178,7 @@ uint32_t sam_pllack_frequency(uint32_t mainclk)
  * Name: sam_pck_frequency
  *
  * Description:
- *   Given the Main Clock frequency that provides the input to PLLA, return 
+ *   Given the Main Clock frequency that provides the input to PLLA, return
  *   the frequency of the processor clock (PCK).
  *
  * Assumptions:
@@ -165,17 +207,10 @@ uint32_t sam_pck_frequency(uint32_t mainclk)
     case PMC_MCKR_CSS_PLLA: /* PLLA Clock */
       /* Use the PLLA output clock */
 
-      pck = sam_pllack_frequency(mainclk);
+      pck = sam_plladiv2_frequency(mainclk);
       if (pck == 0)
         {
           return 0;
-        }
-
-      /* Check if the PLLACK output is divided by 2 */
-
-      if ((regval & PMC_MCKR_PLLADIV2) != 0)
-        {
-          pck >>= 1;
         }
       break;
 
@@ -200,7 +235,7 @@ uint32_t sam_pck_frequency(uint32_t mainclk)
  * Name: sam_mck_frequency
  *
  * Description:
- *   Given the Main Clock frequency that provides the input to PLLA, return 
+ *   Given the Main Clock frequency that provides the input to PLLA, return
  *   the frequency of the PPA output clock, PLLACK
  *
  * Assumptions:
@@ -225,14 +260,80 @@ uint32_t sam_mck_frequency(uint32_t mainclk)
       return 0;
     }
 
-  /* MDIV = n: Master Clock is Prescaler Output Clock divided by (n + 1) */
+  /* MDIV = n: Master Clock is Prescaler Output Clock divided by encoded value */
 
   regval = getreg32(SAM_PMC_MCKR);
-  mdiv = (regval & PMC_MCKR_MDIV_MASK) >> PMC_MCKR_MDIV_SHIFT;
-  if (mdiv > 0)
+  switch (regval & PMC_MCKR_MDIV_MASK)
     {
-      mck /= (mdiv + 1);
+    case PMC_MCKR_MDIV_PCKDIV1:
+      return mck;
+
+    case PMC_MCKR_MDIV_PCKDIV2:
+      mdiv = 2;
+      break;
+
+    case PMC_MCKR_MDIV_PCKDIV3:
+      mdiv = 3;
+      break;
+
+    case PMC_MCKR_MDIV_PCKDIV4:
+      mdiv = 4;
+      break;
+
+    default:
+      return 0;
     }
 
-  return mck;
+  return mck / mdiv;
 }
+
+/************************************************************************************
+ * Name: sam_hsmci_clkdiv
+ *
+ * Description:
+ *   Multimedia Card Interface clock (MCCK or MCI_CK) is Master Clock (MCK)
+ *   divided by (2*(CLKDIV) + CLOCKODD + 2).
+ *
+ *     CLKFULLDIV = 2*CLKDIV + CLOCKODD;
+ *     MCI_SPEED  = MCK / (CLKFULLDIV + 2)
+ *     CLKFULLDIV = MCK / MCI_SPEED - 2
+ *
+ *     CLKDIV     = CLKFULLDIV >> 1
+ *     CLOCKODD   = CLKFULLDIV & 1
+ *
+ *   Where CLKDIV has a range of 0-255.
+ *
+ * TODO: This belongs elsewhere
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ARCH_HAVE_SDIO
+uint32_t sam_hsmci_clkdiv(uint32_t target)
+{
+  uint32_t clkfulldiv;
+  uint32_t ret;
+
+  clkfulldiv = BOARD_MCK_FREQUENCY / target;
+  if (clkfulldiv > 2)
+    {
+     clkfulldiv -= 2;
+    }
+  else
+    {
+     clkfulldiv = 0;
+    }
+
+  if (clkfulldiv > 511)
+    {
+      clkfulldiv = 511;
+    }
+
+  ret = (clkfulldiv >> 1) << HSMCI_MR_CLKDIV_SHIFT;
+  if ((clkfulldiv & 1) != 0)
+    {
+      ret |= HSMCI_MR_CLKODD;
+    }
+
+  return ret;
+}
+#endif

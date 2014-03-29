@@ -65,7 +65,7 @@ extern "C"
  * Name: sam_pllack_frequency
  *
  * Description:
- *   Given the Main Clock frequency that provides the input to PLLA, return 
+ *   Given the Main Clock frequency that provides the input to PLLA, return
  *   the frequency of the PPA output clock, PLLACK
  *
  * Assumptions:
@@ -77,10 +77,25 @@ extern "C"
 uint32_t sam_pllack_frequency(uint32_t mainclk);
 
 /****************************************************************************
+ * Name: sam_plladiv2_frequency
+ *
+ * Description:
+ *   The PLLACK input to most clocking may or may not be divided by two.
+ *   This function will return the possibly divided PLLACK clock input
+ *   frequency.
+ *
+ * Assumptions:
+ *   See sam_pllack_frequency.
+ *
+ ****************************************************************************/
+
+uint32_t sam_plladiv2_frequency(uint32_t mainclk);
+
+/****************************************************************************
  * Name: sam_pck_frequency
  *
  * Description:
- *   Given the Main Clock frequency that provides the input to PLLA, return 
+ *   Given the Main Clock frequency that provides the input to PLLA, return
  *   the frequency of the processor clock (PCK).
  *
  * Assumptions:
@@ -95,7 +110,7 @@ uint32_t sam_pck_frequency(uint32_t mainclk);
  * Name: sam_mck_frequency
  *
  * Description:
- *   Given the Main Clock frequency that provides the input to PLLA, return 
+ *   Given the Main Clock frequency that provides the input to PLLA, return
  *   the frequency of the PPA output clock, PLLACK
  *
  * Assumptions:
@@ -105,6 +120,30 @@ uint32_t sam_pck_frequency(uint32_t mainclk);
  ****************************************************************************/
 
 uint32_t sam_mck_frequency(uint32_t mainclk);
+
+/************************************************************************************
+ * Name: sam_hsmci_clkdiv
+ *
+ * Description:
+ *   Multimedia Card Interface clock (MCCK or MCI_CK) is Master Clock (MCK)
+ *   divided by (2*(CLKDIV) + CLOCKODD + 2).
+ *
+ *     CLKFULLDIV = 2*CLKDIV + CLOCKODD;
+ *     MCI_SPEED  = MCK / (CLKFULLDIV + 2)
+ *     CLKFULLDIV = MCK / MCI_SPEED - 2
+ *
+ *     CLKDIV     = CLKFULLDIV >> 1
+ *     CLOCKODD   = CLKFULLDIV & 1
+ *
+ *   Where CLKDIV has a range of 0-255.
+ *
+ * TODO: This belongs elsewhere
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ARCH_HAVE_SDIO
+uint32_t sam_hsmci_clkdiv(uint32_t target);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)
