@@ -327,6 +327,12 @@ Writing to FLASH using SAM-BA
 Running NuttX from NAND FLASH
 =============================
 
+  - Boot sequence
+  - NAND FLASH Memory Map
+  - Programming the AT91Boostrap Binary
+  - Programming U-Boot
+  - Load NuttX with U-Boot on AT91 boards
+
 Boot sequence
 -------------
 
