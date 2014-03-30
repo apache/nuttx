@@ -458,13 +458,15 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                       int       errsave;
                       long      tmplong;
 
-                      errsave = errno;
+                      /* Preserve the errno value */
+
+                      errsave = get_errno();
                       set_errno(0);
                       tmplong = strtol(tmp, &endptr, base);
 
                       /* Number can't be converted */
 
-                      if (tmp == endptr || errno == ERANGE)
+                      if (tmp == endptr || get_errno() == ERANGE)
                         {
                           return count;
                         }
@@ -568,13 +570,15 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                       int       errsave;
                       double_t  dvalue;
 
-                      errsave = errno;
+                      /* Preserve the errno value */
+
+                      errsave = get_errno();
                       set_errno(0);
                       dvalue  = strtod(tmp, &endptr);
 
                       /* Number can't be converted */
 
-                      if (tmp == endptr || errno == ERANGE)
+                      if (tmp == endptr || get_errno() == ERANGE)
                         {
                           return count;
                         }
