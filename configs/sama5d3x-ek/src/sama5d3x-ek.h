@@ -108,27 +108,27 @@
 #endif
 
 /* If we are going to mount the NAND, then they user must also have told
- * us what to do with it by setting one of CONFIG_SAMA5_NAND_FTL or
- * CONFIG_SAMA5_NAND_NXFFS.
+ * us what to do with it by setting one of CONFIG_SAMA5D3xEK_NAND_FTL or
+ * CONFIG_SAMA5D3xEK_NAND_NXFFS.
  */
 
 #ifndef CONFIG_MTD
-#  undef CONFIG_SAMA5_NAND_NXFFS
-#  undef CONFIG_SAMA5_NAND_FTL
+#  undef CONFIG_SAMA5D3xEK_NAND_NXFFS
+#  undef CONFIG_SAMA5D3xEK_NAND_FTL
 #endif
 
 #if !defined(CONFIG_FS_NXFFS) || !defined(CONFIG_NXFFS_NAND)
-#  undef CONFIG_SAMA5_NAND_NXFFS
+#  undef CONFIG_SAMA5D3xEK_NAND_NXFFS
 #endif
 
-#if !defined(CONFIG_SAMA5_NAND_FTL) && !defined(CONFIG_SAMA5_NAND_NXFFS)
+#if !defined(CONFIG_SAMA5D3xEK_NAND_FTL) && !defined(CONFIG_SAMA5D3xEK_NAND_NXFFS)
 #  undef HAVE_NAND
 #endif
 
-#if defined(CONFIG_SAMA5_NAND_FTL) && defined(CONFIG_SAMA5_NAND_NXFFS)
-#  warning Both CONFIG_SAMA5_NAND_FTL and CONFIG_SAMA5_NAND_NXFFS are set
-#  warning Ignoring CONFIG_SAMA5_NAND_NXFFS
-#  undef CONFIG_SAMA5_NAND_NXFFS
+#if defined(CONFIG_SAMA5D3xEK_NAND_FTL) && defined(CONFIG_SAMA5D3xEK_NAND_NXFFS)
+#  warning Both CONFIG_SAMA5D3xEK_NAND_FTL and CONFIG_SAMA5D3xEK_NAND_NXFFS are set
+#  warning Ignoring CONFIG_SAMA5D3xEK_NAND_NXFFS
+#  undef CONFIG_SAMA5D3xEK_NAND_NXFFS
 #endif
 
 /* AT25 Serial FLASH */
@@ -142,7 +142,7 @@
  * asked to mount the AT25 part
  */
 
-#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_SAMA5_AT25_AUTOMOUNT)
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_SAMA5D3xEK_AT25_AUTOMOUNT)
 #  undef HAVE_AT25
 #endif
 
@@ -151,17 +151,17 @@
  */
 
 #ifndef CONFIG_FS_NXFFS
-#  undef CONFIG_SAMA5_AT25_NXFFS
+#  undef CONFIG_SAMA5D3xEK_AT25_NXFFS
 #endif
 
-#if !defined(CONFIG_SAMA5_AT25_FTL) && !defined(CONFIG_SAMA5_AT25_NXFFS)
+#if !defined(CONFIG_SAMA5D3xEK_AT25_FTL) && !defined(CONFIG_SAMA5D3xEK_AT25_NXFFS)
 #  undef HAVE_AT25
 #endif
 
-#if defined(CONFIG_SAMA5_AT25_FTL) && defined(CONFIG_SAMA5_AT25_NXFFS)
-#  warning Both CONFIG_SAMA5_AT25_FTL and CONFIG_SAMA5_AT25_NXFFS are set
-#  warning Ignoring CONFIG_SAMA5_AT25_NXFFS
-#  undef CONFIG_SAMA5_AT25_NXFFS
+#if defined(CONFIG_SAMA5D3xEK_AT25_FTL) && defined(CONFIG_SAMA5D3xEK_AT25_NXFFS)
+#  warning Both CONFIG_SAMA5D3xEK_AT25_FTL and CONFIG_SAMA5D3xEK_AT25_NXFFS are set
+#  warning Ignoring CONFIG_SAMA5D3xEK_AT25_NXFFS
+#  undef CONFIG_SAMA5D3xEK_AT25_NXFFS
 #endif
 
 /* AT24 Serial EEPROM
@@ -192,7 +192,7 @@
  * asked to mount the AT25 part
  */
 
-#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_SAMA5_AT24_AUTOMOUNT)
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_SAMA5D3xEK_AT24_AUTOMOUNT)
 #  undef HAVE_AT24
 #endif
 
@@ -201,17 +201,17 @@
  */
 
 #ifndef CONFIG_FS_NXFFS
-#  undef CONFIG_SAMA5_AT24_NXFFS
+#  undef CONFIG_SAMA5D3xEK_AT24_NXFFS
 #endif
 
-#if !defined(CONFIG_SAMA5_AT24_FTL) && !defined(CONFIG_SAMA5_AT24_NXFFS)
+#if !defined(CONFIG_SAMA5D3xEK_AT24_FTL) && !defined(CONFIG_SAMA5D3xEK_AT24_NXFFS)
 #  undef HAVE_AT24
 #endif
 
-#if defined(CONFIG_SAMA5_AT24_FTL) && defined(CONFIG_SAMA5_AT24_NXFFS)
-#  warning Both CONFIG_SAMA5_AT24_FTL and CONFIG_SAMA5_AT24_NXFFS are set
-#  warning Ignoring CONFIG_SAMA5_AT24_NXFFS
-#  undef CONFIG_SAMA5_AT24_NXFFS
+#if defined(CONFIG_SAMA5D3xEK_AT24_FTL) && defined(CONFIG_SAMA5D3xEK_AT24_NXFFS)
+#  warning Both CONFIG_SAMA5D3xEK_AT24_FTL and CONFIG_SAMA5D3xEK_AT24_NXFFS are set
+#  warning Ignoring CONFIG_SAMA5D3xEK_AT24_NXFFS
+#  undef CONFIG_SAMA5D3xEK_AT24_NXFFS
 #endif
 
 /* Assign minor device numbers.  For example, if we also use MINOR number 0
@@ -322,7 +322,7 @@
 
 #define OV2640_BUS 1
 
-#ifndef CONFIG_SAMA5_OV2640_DEMO
+#ifndef CONFIG_SAMA5D3xEK_OV2640_DEMO
 #  undef HAVE_CAMERA
 #endif
 

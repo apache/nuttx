@@ -423,7 +423,7 @@ Creating and Using NORBOOT
 
       The norboot program can also be configured to jump directly into
       NOR FLASH without requiring the final halt and go by setting
-      CONFIG_SAMA5_NOR_START=y in the NuttX configuration.  However,
+      CONFIG_SAMA5D3xEK_NOR_START=y in the NuttX configuration.  However,
       since I have been debugging the early boot sequence, the above
       sequence has been most convenient for me since it allows me to
       step into the program in NOR.
@@ -777,8 +777,8 @@ AT25 Serial FLASH
       CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
 
     Board Selection
-      CONFIG_SAMA5_AT25_AUTOMOUNT=y         : Mounts AT25 for NSH
-      CONFIG_SAMA5_AT25_FTL=y               : Create block driver for FAT
+      CONFIG_SAMA5D3xEK_AT25_AUTOMOUNT=y    : Mounts AT25 for NSH
+      CONFIG_SAMA5D3xEK_AT25_FTL=y          : Create block driver for FAT
 
   NOTE that you must close JP1 on the Embest/Ronetix board in order to
   enable the AT25 FLASH chip select.
@@ -1288,7 +1288,7 @@ SDRAM Support
       CONFIG_SAMA5_DDRCS=y                  : Tell the system that DRAM is at the DDR CS
       CONFIG_SAMA5_DDRCS_SIZE=268435456     : 2Gb DRAM -> 256GB
       CONFIG_SAMA5_DDRCS_LPDDR2=y           : Its DDR2
-      CONFIG_SAMA5_MT47H128M16RT=y          : This is the type of DDR2
+      CONFIG_SAMA5D3xEK_MT47H128M16RT=y     : This is the type of DDR2
 
     System Type->Heap Configuration
       CONFIG_SAMA5_DDRCS_HEAP=y             : Add the SDRAM to the heap
@@ -1356,10 +1356,10 @@ SDRAM Support
       CONFIG_SAMA5_DDRCS=y                  : Tell the system that DRAM is at the DDR CS
       CONFIG_SAMA5_DDRCS_SIZE=268435456     : 2Gb DRAM -> 256GB
       CONFIG_SAMA5_DDRCS_LPDDR2=y           : Its DDR2
-      CONFIG_SAMA5_MT47H128M16RT=y          : This is the type of DDR2
+      CONFIG_SAMA5D3xEK_MT47H128M16RT=y     : This is the type of DDR2
 
     System Type->Heap Configuration
-      CONFIG_SAMA5_ISRAM_HEAP=n              : These do not apply in this case
+      CONFIG_SAMA5_ISRAM_HEAP=n             : These do not apply in this case
       CONFIG_SAMA5_DCRS_HEAP=n
 
     System Type->Boot Memory Configuration
@@ -1499,7 +1499,7 @@ NAND Support
 
     Board Selection
       CONFIG_SAMA5_NAND_AUTOMOUNT=y     : Enable FS support on NAND
-      CONFIG_SAMA5_NAND_NXFFS=y         : Use the NXFFS file system
+      CONFIG_SAMA5D3xEK_NAND_NXFFS=y    : Use the NXFFS file system
 
       Other file systems are not recommended because only NXFFS can handle
       bad blocks and only NXFFS performs wear-levelling.
@@ -1523,7 +1523,7 @@ NAND Support
 
     Board Selection
       CONFIG_SAMA5_NAND_AUTOMOUNT=y     : Enable FS support on NAND
-      CONFIG_SAMA5_NAND_FTL=y           : Use an flash translation layer
+      CONFIG_SAMA5D3xEK_NAND_FTL=y      : Use an flash translation layer
 
       NOTE:  FTL will require some significant buffering because of
       the large size of the NAND flash blocks.  You will also need
@@ -1541,7 +1541,7 @@ NAND Support
     ---------------------
 
     With the options CONFIG_SAMA5_NAND_AUTOMOUNT=y and
-    CONFIG_SAMA5_NAND_NXFFS=y, the NAND FLASH will be mounted in the NSH
+    CONFIG_SAMA5D3xEK_NAND_NXFFS=y, the NAND FLASH will be mounted in the NSH
     start-up logic before the NSH prompt appears.  There is no feedback as
     to whether or not the mount was successful.  You can, however, see the
     mounted file systems using the nsh 'mount' command:
@@ -1763,8 +1763,8 @@ AT24 Serial EEPROM
                                             : Other defaults are probably OK
 
     Board Selection
-      CONFIG_SAMA5_AT24_AUTOMOUNT=y         : Mounts AT24 for NSH
-      CONFIG_SAMA5_AT24_NXFFS=y             : Mount the AT24 using NXFFS
+      CONFIG_SAMA5D3xEK_AT24_AUTOMOUNT=y    : Mounts AT24 for NSH
+      CONFIG_SAMA5D3xEK_AT24_NXFFS=y        : Mount the AT24 using NXFFS
 
   You can then format the AT24 EEPROM for a FAT file system and mount the
   file system at /mnt/at24 using these NSH commands:
@@ -2233,7 +2233,7 @@ Touchscreen Testing
       CONFIG_INPUT=y                      : (automatically selected)
 
     Board Selection:
-       CONFIG_SAMA5_TSD_DEVMINOR=0        : Register as /dev/input0
+       CONFIG_SAMA5D3xEK_TSD_DEVMINOR=0   : Register as /dev/input0
 
     Library Support:
       CONFIG_SCHED_WORKQUEUE=y            : Work queue support required
@@ -2375,8 +2375,8 @@ I2S Audio Support
       CONFIG_EXAMPLES_I2SCHAR_DEVINIT=y
 
     Board Selection
-      CONFIG_SAMA5D3X_EK_I2SCHAR_MINOR=0
-      CONFIG_SAMA5D3X_EK_SSC_PORT=0     : 0 or SSC0, 1 for SSC1
+      CONFIG_SAMA5D3xEK_I2SCHAR_MINOR=0
+      CONFIG_SAMA5D3xEK_SSC_PORT=0      : 0 or SSC0, 1 for SSC1
 
     Library Routines
       CONFIG_SCHED_WORKQUEUE=y          : Driver needs work queue support
@@ -2810,7 +2810,7 @@ Configurations
     2. The default norboot program initializes the NOR memory,
        displays a message and halts.  The norboot program can also be
        configured to jump directly into NOR FLASH without requiring the
-       final halt and go by setting CONFIG_SAMA5_NOR_START=y in the
+       final halt and go by setting CONFIG_SAMA5D3xEK_NOR_START=y in the
        NuttX configuration.
 
     3. Be aware that the default norboot also disables the watchdog.

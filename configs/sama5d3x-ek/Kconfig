@@ -7,22 +7,22 @@ if ARCH_BOARD_SAMA5D3X_EK
 
 choice
 	prompt "SAMA5D3x-EK DRAM Type"
-	default SAMA5_MT47H128M16RT
+	default SAMA5D3xEK_MT47H128M16RT
 	depends on SAMA5_DDRCS
 
-config SAMA5_MT47H128M16RT
+config SAMA5D3xEK_MT47H128M16RT
 	bool "MT47H128M16RT"
 	---help---
 		Micron 2Gbit x16 DDR2-1066 128Mb
 
-config SAMA5_MT47H64M16HR
+config SAMA5D3xEK_MT47H64M16HR
 	bool "MT47H64M16HR"
 	---help---
 		Micron 1Gbit x16 DDR2-800 64Mb
 
 endchoice # SAMA5D3x-EK DRAM Type
 
-config SAMA5_NOR_MAIN
+config SAMA5D3xEK_NOR_MAIN
 	bool "Build nor_main"
 	default n
 	depends on SAMA5_BOOT_ISRAM
@@ -31,15 +31,15 @@ config SAMA5_NOR_MAIN
 		NOR flash then either (1) jump to the program in NOR flash or (2)
 		wait for you to break in with GDB to debug the NOR program.
 
-config SAMA5_NOR_START
+config SAMA5D3xEK_NOR_START
 	bool "Start NOR program"
 	default n
-	depends on SAMA5_NOR_MAIN
+	depends on SAMA5D3xEK_NOR_MAIN
 	---help---
 		The default behavior of the NOR boot program is to initialize the
 		NOR FLASH at CS0, then patiently wait for you to break into the
 		program with GDB.  An alternative behvior is enabled with this
-		option:  If SAMA5_NOR_START is defined, then it will not wait but
+		option:  If SAMA5D3xEK_NOR_START is defined, then it will not wait but
 		will, instead, immediately start the program in NOR FLASH.
 
 config SAMA5_NAND_AUTOMOUNT
@@ -51,10 +51,10 @@ config SAMA5_NAND_AUTOMOUNT
 
 choice
 	prompt "NAND FLASH configuration"
-	default SAMA5_NAND_NXFFS
+	default SAMA5D3xEK_NAND_NXFFS
 	depends on SAMA5_NAND_AUTOMOUNT
 
-config SAMA5_NAND_FTL
+config SAMA5D3xEK_NAND_FTL
 	bool "Create NAND FLASH block driver"
 	depends on MTD && MTD_NAND
 	---help---
@@ -68,7 +68,7 @@ config SAMA5_NAND_FTL
 		wear-leveling other than NXFFS and NXFFS does not use a block driver
 		but, rather, operates directly upon the NAND MTD device.
 
-config SAMA5_NAND_NXFFS
+config SAMA5D3xEK_NAND_NXFFS
 	bool "Create NAND FLASH NXFFS file system"
 	depends on MTD && MTD_NAND && FS_NXFFS && NXFFS_NAND
 	---help---
@@ -81,7 +81,7 @@ config SAMA5_NAND_NXFFS
 
 endchoice # NAND FLASH configuration
 
-config SAMA5_AT25_AUTOMOUNT
+config SAMA5D3xEK_AT25_AUTOMOUNT
 	bool "AT25 serial FLASH auto-mount"
 	default n
 	depends on NSH_ARCHINIT && SAMA5_SPI0 && MTD_AT25
@@ -90,10 +90,10 @@ config SAMA5_AT25_AUTOMOUNT
 
 choice
 	prompt "AT25 serial FLASH configuration"
-	default SAMA5_AT25_FTL
-	depends on SAMA5_AT25_AUTOMOUNT
+	default SAMA5D3xEK_AT25_FTL
+	depends on SAMA5D3xEK_AT25_AUTOMOUNT
 
-config SAMA5_AT25_FTL
+config SAMA5D3xEK_AT25_FTL
 	bool "Create AT25 Serial FLASH block driver"
 	---help---
 		Create the MTD driver for the AT25 and "wrap" the AT25 as a standard
@@ -101,7 +101,7 @@ config SAMA5_AT25_FTL
 		any other file system.  Any file system may be used, but there will
 		be no wear-leveling.
 
-config SAMA5_AT25_NXFFS
+config SAMA5D3xEK_AT25_NXFFS
 	bool "Create AT25 serial FLASH NXFFS file system"
 	depends on FS_NXFFS
 	---help---
@@ -111,7 +111,7 @@ config SAMA5_AT25_NXFFS
 
 endchoice # AT25 serial FLASH configuration
 
-config SAMA5_AT24_AUTOMOUNT
+config SAMA5D3xEK_AT24_AUTOMOUNT
 	bool "AT24 Serial EEPROM auto-mount"
 	default n
 	depends on NSH_ARCHINIT && SAMA5_TWI0 && MTD_AT24XX
@@ -131,10 +131,10 @@ config SAMA5_AT24_AUTOMOUNT
 
 choice
 	prompt "AT24 serial EPPROM configuration"
-	default SAMA5_AT24_FTL
-	depends on SAMA5_AT24_AUTOMOUNT
+	default SAMA5D3xEK_AT24_FTL
+	depends on SAMA5D3xEK_AT24_AUTOMOUNT
 
-config SAMA5_AT24_FTL
+config SAMA5D3xEK_AT24_FTL
 	bool "Create AT24 block driver"
 	---help---
 		Create the MTD driver for the AT24 and "wrap" the AT24 as a standard
@@ -142,7 +142,7 @@ config SAMA5_AT24_FTL
 		any other file system.  Any file system may be used, but there will
 		be no wear-leveling.
 
-config SAMA5_AT24_NXFFS
+config SAMA5D3xEK_AT24_NXFFS
 	bool "Create AT24 NXFFS file system"
 	depends on FS_NXFFS
 	---help---
@@ -152,7 +152,7 @@ config SAMA5_AT24_NXFFS
 
 endchoice # AT24 serial EPPROM configuration
 
-config SAMA5_TSD_DEVMINOR
+config SAMA5D3xEK_TSD_DEVMINOR
 	int "Touchscreen device minor"
 	default 0
 	depends on SAMA5_TSD
@@ -160,7 +160,7 @@ config SAMA5_TSD_DEVMINOR
 		This touchscreen will be register as /dev/inputN where the value of
 		N is provided by this configuration setting.
 
-config SAMA5D3X_EK_CHANNEL
+config SAMA5D3xEK_CHANNEL
 	int "PWM channel number"
 	default 0 if SAMA5_PWM_CHAN0
 	default 1 if SAMA5_PWM_CHAN1
@@ -176,7 +176,7 @@ if AUDIO_I2SCHAR && (SAMA5_SSC0 || SAMA5_SSC1)
 
 if SAMA5_SSC0 && SAMA5_SSC1
 
-config SAMA5D3X_EK_SSC_PORT
+config SAMA5D3xEK_SSC_PORT
 	int "SSC port number"
 	default 0
 	range 0 1
@@ -187,7 +187,7 @@ endif # SAMA5_SSC0 && SAMA5_SSC1
 
 if SAMA5_SSC0 && !SAMA5_SSC1
 
-config SAMA5D3X_EK_SSC_PORT
+config SAMA5D3xEK_SSC_PORT
 	int
 	default 0
 
@@ -195,13 +195,13 @@ endif # SAMA5_SSC0 && !SAMA5_SSC1
 
 if !SAMA5_SSC0 && SAMA5_SSC1
 
-config SAMA5D3X_EK_SSC_PORT
+config SAMA5D3xEK_SSC_PORT
 	int
 	default 1
 
 endif # SAMA5_SSC0 && !SAMA5_SSC1
 
-config SAMA5D3X_EK_I2SCHAR_MINOR
+config SAMA5D3xEK_I2SCHAR_MINOR
 	int "I2S character driver minor number"
 	default 0
 	---help---
@@ -213,7 +213,7 @@ endif # AUDIO_I2SCHAR && (SAMA5_SSC0 || SAMA5_SSC1)
 
 if VIDEO_OV2640
 
-config SAMA5_OV2640_DEMO
+config SAMA5D3xEK_OV2640_DEMO
 	bool "SAMA5 OV2640 camera demo"
 	default n
 	---help---

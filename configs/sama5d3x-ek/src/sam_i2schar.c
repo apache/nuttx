@@ -55,16 +55,16 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-#ifndef CONFIG_SAMA5D3X_EK_SSC_PORT
+#ifndef CONFIG_SAMA5D3xEK_SSC_PORT
 #  if defined(CONFIG_SAMA5_SSC0)
-#    define CONFIG_SAMA5D3X_EK_SSC_PORT 0
+#    define CONFIG_SAMA5D3xEK_SSC_PORT 0
 #  elif defined(CONFIG_SAMA5_SSC1)
-#    define CONFIG_SAMA5D3X_EK_SSC_PORT 1
+#    define CONFIG_SAMA5D3xEK_SSC_PORT 1
 #  endif
 #endif
 
-#ifndef CONFIG_SAMA5D3X_EK_I2SCHAR_MINOR
-#  define CONFIG_SAMA5D3X_EK_I2SCHAR_MINOR 0
+#ifndef CONFIG_SAMA5D3xEK_I2SCHAR_MINOR
+#  define CONFIG_SAMA5D3xEK_I2SCHAR_MINOR 0
 #endif
 
 /************************************************************************************
@@ -96,17 +96,17 @@ int i2schar_devinit(void)
     {
       /* Call sam_ssc_initialize() to get an instance of the SSC/I2S interface */
 
-      i2s = sam_ssc_initialize(CONFIG_SAMA5D3X_EK_SSC_PORT);
+      i2s = sam_ssc_initialize(CONFIG_SAMA5D3xEK_SSC_PORT);
       if (!i2s)
         {
           dbg("ERROR: Failed to get the SAMA5 SSC/I2S driver for SSC%d\n",
-              CONFIG_SAMA5D3X_EK_SSC_PORT);
+              CONFIG_SAMA5D3xEK_SSC_PORT);
           return -ENODEV;
         }
 
       /* Register the I2S character driver at "/dev/i2schar0" */
 
-      ret = i2schar_register(i2s, CONFIG_SAMA5D3X_EK_I2SCHAR_MINOR);
+      ret = i2schar_register(i2s, CONFIG_SAMA5D3xEK_I2SCHAR_MINOR);
       if (ret < 0)
         {
           adbg("ERROR: i2schar_register failed: %d\n", ret);
