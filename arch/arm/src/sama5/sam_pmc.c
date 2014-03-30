@@ -313,7 +313,10 @@ uint32_t sam_hsmci_clkdiv(uint32_t target)
   uint32_t clkfulldiv;
   uint32_t ret;
 
-  clkfulldiv = BOARD_MCK_FREQUENCY / target;
+  /* Get the largest divisor does not exceed the target value */
+
+  clkfulldiv = (BOARD_MCK_FREQUENCY + target - 1) / target;
+
   if (clkfulldiv > 2)
     {
      clkfulldiv -= 2;
