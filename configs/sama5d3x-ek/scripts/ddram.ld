@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/sama5d3x-ek/scripts/ddram.ld
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,8 +34,9 @@
  ****************************************************************************/
 
 /* The SAMA5D3 has 128 KB of ISRAM beginning at virtual address 0x0030:0000.
- * This memory configuration, however, loads into the 64 MB SDRAM on board
- * the SAMA5D3x-EK which lies at 0x2000:0000
+ * This memory configuration, however, loads into the 2Gb SDRAM on board
+ * the SAMA5D3x-EK which lies at 0x2000:0000.  An offset 0x00008000 is
+ * reserved by the bootloader.
  *
  * Vectors in low memory are assumed and 16KB of ISRAM is reserved at the
  * high end of ISRAM for the page table.
@@ -44,7 +45,7 @@
 MEMORY
 {
 	isram (W!RX) : ORIGIN = 0x300000, LENGTH = 128K - 16K
-	sdram (W!RX) : ORIGIN = 0x20000000, LENGTH = 64M
+	sdram (W!RX) : ORIGIN = 0x20008000, LENGTH = 2G - 32K
 }
 
 OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
