@@ -52,7 +52,7 @@
  * booting from SDRAM, NuttX is loaded in SDRAM by an intermediate bootloader.  That
  * bootloader had to have already configured the PLL and SDRAM for proper operation.
  *
- * In this case, we don not reconfigure the clocking.  Rather, we need to query
+ * In this case, we do not reconfigure the clocking.  Rather, we need to query
  * the register settings to determine the clock frequencies.  We can only assume that
  * the Main clock source in the on-board 12MHz crystal.
  */
