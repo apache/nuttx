@@ -1,8 +1,12 @@
 /****************************************************************************
- * arch/arm/src/sama5/sam_pmc.h
+ * arch/arm/src/sama5/sam_pmc.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *
+ * References:
+ *
+ *   SAMA5D3 Series Data Sheet
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -14,8 +18,8 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
+ * 3. Neither the name NuttX nor the names of its contributors may
+ *    be used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -33,98 +37,105 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMA5_SAM_PMC_H
-#define __ARCH_ARM_SRC_SAMA5_SAM_PMC_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+
+#include <arch/board/board.h>
+
+#include "chip.h"
+#include "chip/sam_hsmci.h"
+#include "sam_hsmci.h"
+
+#if defined(CONFIG_SAMA5_HSMCI0) || defined(CONFIG_SAMA5_HSMCI1) || \
+    defined(CONFIG_SAMA5_HSMCI2)
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_pllack_frequency
+ * Name: sam_hsmci_clkdiv
  *
  * Description:
- *   Given the Main Clock frequency that provides the input to PLLA, return
- *   the frequency of the PPA output clock, PLLACK
+ *   Multimedia Card Interface clock (MCCK or MCI_CK) is Master Clock (MCK)
+ *   divided by (2*(CLKDIV) + CLOCKODD + 2).
  *
- * Assumptions:
- *   PLLA is enabled.  If the PLL is is disabled, either at the input divider
- *   or the output multiplier, the value zero is returned.
+ *     CLKFULLDIV = 2*CLKDIV + CLOCKODD;
+ *     MCI_SPEED  = MCK / (CLKFULLDIV + 2)
+ *     CLKFULLDIV = MCK / MCI_SPEED - 2
+ *
+ *     CLKDIV     = CLKFULLDIV >> 1
+ *     CLOCKODD   = CLKFULLDIV & 1
+ *
+ *   Where CLKDIV has a range of 0-255.
+ *
+ *   NOTE: The primary use of this function is for cases where the clock
+ *   frequencies are not known a priori and so HSMCI clock dividers must
+ *   be determined dynamically.  This is the case, for example, when we
+ *   execute out of SDRAM.  In that case, the clocking was set up by the
+ *   bootloader that brought us into SDRAM and it is that bootloader that
+ *   has configured the clocking.
+ *
+ * Input parameters:
+ *   target - The target SD frequency
+ *
+ * Returned Value:
+ *   A bitset containing the CLKDIV and CLKODD bits as needed to configure
+ *   the HSMCI clock output.
  *
  ****************************************************************************/
 
-uint32_t sam_pllack_frequency(uint32_t mainclk);
+uint32_t sam_hsmci_clkdiv(uint32_t target)
+{
+  uint32_t clkfulldiv;
+  uint32_t ret;
 
-/****************************************************************************
- * Name: sam_plladiv2_frequency
- *
- * Description:
- *   The PLLACK input to most clocking may or may not be divided by two.
- *   This function will return the possibly divided PLLACK clock input
- *   frequency.
- *
- * Assumptions:
- *   See sam_pllack_frequency.
- *
- ****************************************************************************/
+  /* Get the largest divisor does not exceed the target value */
 
-uint32_t sam_plladiv2_frequency(uint32_t mainclk);
+  clkfulldiv = (BOARD_MCK_FREQUENCY + target - 1) / target;
 
-/****************************************************************************
- * Name: sam_pck_frequency
- *
- * Description:
- *   Given the Main Clock frequency that provides the input to PLLA, return
- *   the frequency of the processor clock (PCK).
- *
- * Assumptions:
- *   PLLA is enabled and the either the main clock or the PLLA output clock
- *   (PLLACK) provides the input to the MCK prescaler.
- *
- ****************************************************************************/
+  if (clkfulldiv > 2)
+    {
+     clkfulldiv -= 2;
+    }
+  else
+    {
+     clkfulldiv = 0;
+    }
 
-uint32_t sam_pck_frequency(uint32_t mainclk);
+  if (clkfulldiv > 511)
+    {
+      clkfulldiv = 511;
+    }
 
-/****************************************************************************
- * Name: sam_mck_frequency
- *
- * Description:
- *   Given the Main Clock frequency that provides the input to PLLA, return
- *   the frequency of the PPA output clock, PLLACK
- *
- * Assumptions:
- *   PLLA is enabled and the either the main clock or the PLLA output clock
- *   (PLLACK) provides the input to the MCK prescaler.
- *
- ****************************************************************************/
+  ret = (clkfulldiv >> 1) << HSMCI_MR_CLKDIV_SHIFT;
+  if ((clkfulldiv & 1) != 0)
+    {
+      ret |= HSMCI_MR_CLKODD;
+    }
 
-uint32_t sam_mck_frequency(uint32_t mainclk);
-
-#undef EXTERN
-#if defined(__cplusplus)
+  return ret;
 }
-#endif
 
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_SAMA5_SAM_PMC_H */
+#endif /* CONFIG_SAMA5_HSMCI0 || CONFIG_SAMA5_HSMCI1 || CONFIG_SAMA5_HSMCI2 */
