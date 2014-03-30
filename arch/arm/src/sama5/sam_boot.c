@@ -209,12 +209,16 @@ static const struct section_mapping_s section_mapping[] =
 
 #ifdef CONFIG_SAMA5_DDRCS
 #ifdef CONFIG_SAMA5_BOOT_SDRAM
-  { SAM_DDRCS_PSECTION,    SAM_DDRCS_VSECTION,
-    MMU_STRONGLY_ORDERED,  SAM_DDRCS_NSECTIONS
-  },
-#else
+  /* Running out of SDRAM */
+
   { SAM_DDRCS_PSECTION,    SAM_DDRCS_VSECTION,
     SAM_DDRCS_MMUFLAGS,    SAM_DDRCS_NSECTIONS
+  },
+#else
+  /* Running out of ISRAM or NOR FLASH */
+
+  { SAM_DDRCS_PSECTION,    SAM_DDRCS_VSECTION,
+    MMU_STRONGLY_ORDERED,  SAM_DDRCS_NSECTIONS
   },
 #endif
 #endif
