@@ -2752,6 +2752,9 @@ Configurations
     STATUS:
        See the To-Do list below
 
+       2014-3-30: I some casual retesting, I am seeing some slow boot-
+                  up times and possible microSD card issues.  I will
+                  need to revisit this.
   hello:
 
     This configuration directory, performs the (almost) simplest of all

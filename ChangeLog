@@ -7082,4 +7082,6 @@
 	* arch/arm/src/sama5/sam_hsmci_clkciv.c:  Remove HSCMI-related
 	  functions that did not belong in sam_pmc.c and give them their
 	  own file (2014-3-30).
+	* arch/arm/src/sama5/sam_boot.c:  Fix some backward conditional
+	  compilation (2014-3-30).
 
