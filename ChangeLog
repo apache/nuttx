@@ -7084,4 +7084,7 @@
 	  own file (2014-3-30).
 	* arch/arm/src/sama5/sam_boot.c:  Fix some backward conditional
 	  compilation (2014-3-30).
+	* libc/stdio/lib_sccanf.c:  Fix a counting error in the return
+	  value from sscanf().  Noted by kfrolov.  Also, sscanf() should
+	  return EOF if no values were converted (2014-3-30).
 

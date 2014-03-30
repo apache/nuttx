@@ -271,7 +271,7 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                * update the 'ap' variable.
                */
 
-              tv = NULL;      /* To avoid warnings about beign uninitialized */
+              tv = NULL;      /* To avoid warnings about begin uninitialized */
               if (!noassign)
                 {
                   tv    = va_arg(ap, char*);
@@ -307,6 +307,7 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                     {
                       strncpy(tv, buf, width);
                       tv[width] = '\0';
+                      count++;
                     }
 
                   /* Update the buffer pointer past the string in the input */
@@ -339,7 +340,7 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 
               if (*buf)
                 {
-                  /* Was a fieldwidth specified? */
+                  /* Was a field width specified? */
 
                   if (!width)
                     {
@@ -354,6 +355,7 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                     {
                       strncpy(tv, buf, width);
                       tv[width] = '\0';
+                      count++;
                     }
 
                   /* Update the buffer pointer past the character(s) in the
@@ -396,7 +398,7 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                     }
                 }
 
-              /* But we only perform the data conversion is we still have
+              /* But we only perform the data conversion if we still have
                * bytes remaining in the input data stream.
                */
 
@@ -489,6 +491,8 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                                 tmplong, pint);
                           *pint = (int)tmplong;
                         }
+
+                      count++;
                     }
                 }
             }
@@ -601,6 +605,8 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                           lvdbg("vsscanf: Return %f to %p\n", dvalue, pf);
                           *pf = (float)dvalue;
                         }
+
+                      count++;
                     }
                 }
 #endif
@@ -616,6 +622,8 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                 {
                   size_t nchars = (size_t)(buf - bufstart);
 
+                  /* Note %n does not count as a conversion */
+
                   if (lflag)
                     {
                       FAR long *plong = va_arg(ap, long*);
@@ -627,13 +635,6 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                       *pint = (int)nchars;
                     }
                 }
-            }
-
-          /* Note %n does not count as a conversion */
-
-          if (!noassign && *fmt != 'n')
-            {
-              count++;
             }
 
           width    = 0;
@@ -674,5 +675,9 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
         }
     }
 
-  return count;
+  /* sscanf is required to return EOF if the input ends before the first
+   * matching failure or conversion.
+   */
+
+  return count ? count : EOF;
 }
