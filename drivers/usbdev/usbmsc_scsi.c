@@ -391,6 +391,7 @@ static void usbmsc_scsi_wait(FAR struct usbmsc_dev_s *priv)
     {
       ret = sem_wait(&priv->thwaitsem);
       DEBUGASSERT(ret == OK || errno == EINTR);
+      UNUSED(ret); /* Eliminate warnings when debug is off */
     }
   while (priv->thwaiting);
 

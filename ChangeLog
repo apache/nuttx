@@ -7076,4 +7076,6 @@
 	* configs/sama5d3x-ek:  Change all configuration names to board-
 	  specific names so that this are no name collisions with other
 	  boards that have similar configuration variables (2013-3-30).
-
+	* configs/nuttx/compiler.h:  Add macro UNUSED() that can be used
+	  to eliminate warnings about variables that are set to values
+	  that are not used (2014-3-30).
