@@ -70,6 +70,7 @@ Contents
   - Loading Code into SRAM with J-Link
   - Writing to FLASH using SAM-BA
   - Creating and Using NORBOOT
+  - Running NuttX from NAND FLASH
   - Buttons and LEDs
   - Serial Consoles
   - Networking
@@ -443,6 +444,232 @@ Creating and Using NORBOOT
         FLASH by closing the BMS jumper (J9).  As far as I can tell, this
         jumper does nothing on my board???  So I have been using the norboot
         configuration exclusively to start the program-under-test in NOR FLASH.
+
+Running NuttX from NAND FLASH
+=============================
+
+Boot sequence
+-------------
+
+  Reference: http://www.at91.com/linux4sam/bin/view/Linux4SAM/GettingStarted
+
+  Several pieces of software are involved to boot a Nutt5X from NAND.  First
+  is the primary bootloader in ROM which is in charge to check if a valid
+  application is present on supported media (NOR FLASH, Serial DataFlash,
+  NAND FLASH, SD card).
+
+  The boot sequence of linux4SAM is done in several steps :
+
+  1. The ROM bootloader checks if a valid application is present in FLASH
+     and if it is the case downloads it into internal SRAM.  This program
+     is usually a second level bootloader called AT91BootStrap.
+
+  2. AT91Bootstrap is the second level bootloader. It is in charge of the
+     hardware configuration.  It downloads U-Boot / Barebox binary from
+     FLASH to SDRAM / DDRAM and starts the third level bootloader
+     (U-Boot / Barebox)
+
+    (see http://www.at91.com/linux4sam/bin/view/Linux4SAM/AT91Bootstrap).
+
+  3. The third level bootloader is either U-Boot or Barebox.  The third
+     level bootloader is in charge of downloading NuttX binary from FLASH,
+     network, SD card, etc.  It then starts NuttX.
+
+   4. Then NuttX runs from SDRAM
+
+NAND FLASH Memory Map
+---------------------
+
+  Reference: http://www.at91.com/linux4sam/bin/view/Linux4SAM/GettingStarted
+
+  0x0000:0000 - 0x0003:ffff: AT91BootStrap
+  0x0004:0000 - 0x000b:ffff: U-Boot
+  0x000c:0000 - 0x000f:ffff: U-Boot environment
+  0x0010:0000 - 0x0017:ffff: U-Boot environement redundant
+  0x0018:0000 - 0x001f:ffff: Device tree (DTB)
+  0x0020:0000 - 0x007f:ffff: NuttX
+  0x0080:0000 - end:         Available for use as a NAND file system
+
+Programming the AT91Boostrap Binary
+-----------------------------------
+
+  Reference: http://www.at91.com/linux4sam/bin/view/Linux4SAM/AT91Bootstrap
+
+  This section describes how to program AT91Bootstrap binary into the boot
+  media with SAM-BA tool using NandFlash as boot media.
+
+  1. Get AT91BootStrap binaries.  Build instructions are available here:
+
+       http://www.at91.com/linux4sam/bin/view/Linux4SAM/AT91Bootstrap#Build_AT91Bootstrap_from_sources
+
+     A pre-built AT91BootStrap binary is available here:
+
+      ftp://www.at91.com/pub/at91bootstrap/AT91Bootstrap3.6.0/sama5d3xek-nandflashboot-uboot-3.6.0.bin
+
+  2. Start the SAM-BA GUI Application:
+
+     - Connect the USB Device interface to your host machine using the USB
+       Device Cable.
+     - Make sure that the chip can execute the SAM-BA Monitor.
+     - Start SAM-BA GUI application.
+     - Select the board in the drop-down menu and choose the USB connection.
+
+  3. In the SAM-BA GUI Application:
+
+     - Choose the "NandFlash" tab in the SAM-BA GUI interface.
+     - Initialize the NandFlash by choosing the "Enable NandFlash" action in
+       the Scripts rolling menu, then press "Execute" button.
+     - Erase the NandFlash device by choosing the "Erase All" action, then
+       press "Execute" button.
+     - Enable the PMECC by choosing the "Enable OS PMECC parameters" action,
+       then press "Execute" button.
+
+         PMECC
+         Number of sectors per page: 4
+         Spare Size: 64
+         Number of ECC bits required: 4
+         Size of the ECC sector: 512
+         ECC offset: 36
+
+   - Choose "Send Boot File" action, then press Execute button to select the
+     at91bootstrap binary file and to program the binary to the NandFlash.
+   - Close SAM-BA, remove the USB Device cable.
+
+Programming U-Boot
+-------------------
+
+  Reference http://www.at91.com/linux4sam/bin/view/Linux4SAM/U-Boot
+
+  1. Get U-Boot Binaries.  Build instructions are available here:
+
+     http://www.at91.com/linux4sam/bin/view/Linux4SAM/U-Boot#Build_U_Boot_from_sources
+
+     A pre-built binary is available here:
+
+     ftp://www.at91.com/pub/uboot/u-boot-v2012.10/u-boot-sama5d3xek_nandflash_linux4sam_4.2.bin
+
+  2. Start the SAM-BA GUI Application:
+
+     - Connect the USB Device interface to your host machine using the USB
+       Device Cable.
+     - Make sure that the chip can execute the SAM-BA Monitor.
+     - Start SAM-BA GUI application.
+     - Select the board in the drop-down menu and choose the USB connection.
+
+  3. In the SAM-BA GUI Application:
+
+     - Choose the NandFlash tab in the SAM-BA GUI interface.
+     - Initialize the NandFlash by choosing the "Enable NandFlash" action in
+       the Scripts rolling menu, then press Execute button.
+     - Enable the PMECC by choosing the "Enable OS PMECC parameters" action,
+       then press Execute button.
+
+         PMECC
+         Number of sectors per page: 4
+         Spare Size: 64
+         Number of ECC bits required: 4
+         Size of the ECC sector: 512
+         ECC offset: 36
+
+     - Press the "Send File Name" Browse button
+     - Choose u-boot.bin binary file and press Open
+     - Enter the proper address on media in the Address text field:
+       0x00200000
+     - Press the "Send File" button
+     - Close SAM-BA, remove the USB Device cable.
+
+  You should now be able to interrupt with U-Boot vie the DBGU interface.
+
+Load NuttX with U-Boot on AT91 boards
+-------------------------------------
+
+  Reference http://www.at91.com/linux4sam/bin/view/Linux4SAM/U-Boot
+
+  Preparing NuttX image
+
+    U-Boot does not support normal binary images.  Instead you have to
+    create an uImage file with the mkimage tool which encapsulates kernel
+    image with header information, CRC32 checksum, etc.
+
+    mkimage comes in source code with U-Boot distribution and it is built
+    during U-Boot compilation (u-boot-source-dir/tools/mkimage).
+
+    See the U-Boot README file for more information.  More information is
+    also available in the mkimage man page (for example,
+    http://linux.die.net/man/1/mkimage).
+
+    Command to generate an uncompressed uImage file (4) :
+
+      mkimage -A arm -O linux -C none -T kernel -a 20008000 -e 20008000 \
+        -n nuttx -d nuttx.bin uImage
+
+    Where:
+
+      -A arm: Set architecture to ARM
+      -O linux: Select operating system. bootm command of u-boot changes
+         boot method by os type.
+      -T kernel: Set image type.
+      -C none: Set compression type.
+      -a 20008000:  Set load address.
+      -e 20008000: Set entry point.
+      -n nuttx: Set image name.
+      -d nuttx.bin: Use image data from nuttx.bin.
+
+  Loading through network
+
+    On a development system, it is useful to get the kernel and root file
+    system through the network. U-Boot provides support for loading
+    binaries from a remote host on the network using the TFTP protocol.
+
+    To manage to use TFTP with U-Boot, you will have to configure a TFTP
+    server on your host machine. Check your distribution manual or Internet
+    resources to configure a Linux or Windows TFTP server on your host:
+
+      - U-Boot documentation on a Linux host:
+        http://www.denx.de/wiki/view/DULG/SystemSetup#Section_4.6.
+
+      - Another TFTP configuration reference:
+        http://www.linuxhomenetworking.com/wiki/index.php/Quick_HOWTO_:_Ch16_:_Telnet%2C_TFTP%2C_and_xinetd#TFTP
+
+    On the U-Boot side, you will have to setup the networking parameters:
+
+     1. Setup an Ethernet address (MAC address)
+        Check this U-Boot network BuildRootFAQ entry to choose a proper MAC
+        address: http://www.denx.de/wiki/DULG/EthernetDoesNotWork
+
+          setenv ethaddr 3e:36:65:ba:6f:be
+
+     2. Setup IP parameters:
+        The board ip address
+
+          setenv ipaddr 10.0.0.2
+
+        The server ip address where the TFTP server is running
+
+          setenv serverip 10.0.0.1
+
+     3. saving Environment to flash
+
+          saveenv
+
+     4. If Ethernet Phy has not been detected during former bootup, reset
+        the board to reload U-Boot : the Ethernet address and Phy
+        initialization shall be ok, now
+
+     5. Download the NuttX uImage and the root file system to a ram location
+       using the U-Boot tftp command (Cf. U-Boot script capability chapter).
+
+     6. Launch NuttX issuing a bootm or boot command.
+
+    If the board has both emac and gmac, you can use following to choose
+    which one to use:
+
+       setenv ethact macb0,gmacb0
+       setenv ethprime gmacb0
+
+  STATUS:
+    2014-3-30:  These instructions were adapted from the Linux4SAM website
+                but have not yet been used.
 
 Buttons and LEDs
 ================
@@ -1785,7 +2012,7 @@ I2C Tool
 ========
 
   I2C Tool. NuttX supports an I2C tool at apps/system/i2c that can be used
-  to peek and poke I2C devices.  That tool cal be enabled by setting the
+  to peek and poke I2C devices.  That tool can be enabled by setting the
   following:
 
     System Type -> SAMA5 Peripheral Support
