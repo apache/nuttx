@@ -66,7 +66,7 @@ ifeq ($(CONFIG_SAMA5_EBICS3_NAND),y)
 CSRCS += sam_nandflash.c
 endif
 
-ifeq ($(CONFIG_SAMA5_NOR_MAIN),y)
+ifeq ($(CONFIG_SAMA5D3xEK_NOR_MAIN),y)
 CSRCS += nor_main.c
 endif
 

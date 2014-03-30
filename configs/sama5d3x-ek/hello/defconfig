@@ -255,7 +255,7 @@ CONFIG_ARCH_HAVE_IRQBUTTONS=y
 #
 # Board-Specific Options
 #
-# CONFIG_SAMA5_NOR_MAIN is not set
+# CONFIG_SAMA5D3xEK_NOR_MAIN is not set
 
 #
 # RTOS Features

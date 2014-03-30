@@ -87,19 +87,19 @@
  *    -----+---+---+----+--------------------
  */
 
-#ifndef CONFIG_SAMA5D3X_EK_CHANNEL
+#ifndef CONFIG_SAMA5D3xEK_CHANNEL
 #  if defined(CONFIG_SAMA5_PWM_CHAN0)
 #    warning Assuming PWM channel 0
-#    define CONFIG_SAMA5D3X_EK_CHANNEL 0
+#    define CONFIG_SAMA5D3xEK_CHANNEL 0
 #  elif defined(CONFIG_SAMA5_PWM_CHAN1)
 #    warning Assuming PWM channel 1
-#    define CONFIG_SAMA5D3X_EK_CHANNEL 1
+#    define CONFIG_SAMA5D3xEK_CHANNEL 1
 #  elif defined(CONFIG_SAMA5_PWM_CHAN2)
 #    warning Assuming PWM channel 2
-#    define CONFIG_SAMA5D3X_EK_CHANNEL 2
+#    define CONFIG_SAMA5D3xEK_CHANNEL 2
 #  elif defined(CONFIG_SAMA5_PWM_CHAN3)
 #    warning Assuming PWM channel 3
-#    define CONFIG_SAMA5D3X_EK_CHANNEL 3
+#    define CONFIG_SAMA5D3xEK_CHANNEL 3
 #  endif
 #endif
 
@@ -134,7 +134,7 @@ int pwm_devinit(void)
     {
       /* Call sam_pwminitialize() to get an instance of the PWM interface */
 
-      pwm = sam_pwminitialize(CONFIG_SAMA5D3X_EK_CHANNEL);
+      pwm = sam_pwminitialize(CONFIG_SAMA5D3xEK_CHANNEL);
       if (!pwm)
         {
           dbg("Failed to get the SAMA5 PWM lower half\n");

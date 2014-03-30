@@ -59,8 +59,8 @@
 #  error AT25 Serial FLASH not supported
 #endif
 
-#ifndef CONFIG_SAMA5_AT25_FTL
-#  error AT25 FTL support required (CONFIG_SAMA5_AT25_FTL)
+#ifndef CONFIG_SAMA5D3xEK_AT25_FTL
+#  error AT25 FTL support required (CONFIG_SAMA5D3xEK_AT25_FTL)
 #  undef HAVE_AT25
 #endif
 

@@ -88,7 +88,7 @@ int nor_main(int argc, char *argv)
 {
   uint32_t regval;
 
-#ifdef CONFIG_SAMA5_NOR_START
+#ifdef CONFIG_SAMA5D3xEK_NOR_START
   printf("Configuring and booting from NOR FLASH on CS0\n");
 #else
   printf("Configuring NOR FLASH on CS0 and halting\n");
@@ -180,7 +180,7 @@ int nor_main(int argc, char *argv)
   cp15_invalidate_dcache_all();
   cp15_invalidate_tlbs();
 
-#ifdef CONFIG_SAMA5_NOR_START
+#ifdef CONFIG_SAMA5D3xEK_NOR_START
   /* Then jump into NOR flash */
 
   NOR_ENTRY();

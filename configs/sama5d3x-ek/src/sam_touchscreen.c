@@ -58,8 +58,8 @@
 #  error "Touchscreen support requires CONFIG_INPUT"
 #endif
 
-#ifndef CONFIG_SAMA5_TSD_DEVMINOR
-#  define CONFIG_SAMA5_TSD_DEVMINOR 0
+#ifndef CONFIG_SAMA5D3xEK_TSD_DEVMINOR
+#  define CONFIG_SAMA5D3xEK_TSD_DEVMINOR 0
 #endif
 
 /****************************************************************************
@@ -126,11 +126,11 @@ int arch_tcinitialize(int minor)
 
       /* Initialize and register the SPI touchscreen device */
 
-      ret = sam_tsd_register(adc, CONFIG_SAMA5_TSD_DEVMINOR);
+      ret = sam_tsd_register(adc, CONFIG_SAMA5D3xEK_TSD_DEVMINOR);
       if (ret < 0)
         {
           idbg("ERROR: Failed to register touchscreen device /dev/input%d: %d\n",
-               CONFIG_SAMA5_TSD_DEVMINOR, ret);
+               CONFIG_SAMA5D3xEK_TSD_DEVMINOR, ret);
           return -ENODEV;
         }
 

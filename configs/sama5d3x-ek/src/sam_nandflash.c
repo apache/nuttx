@@ -190,7 +190,7 @@ int sam_nand_automount(int minor)
           return -ENODEV;
         }
 
-#if defined(CONFIG_SAMA5_NAND_FTL)
+#if defined(CONFIG_SAMA5D3xEK_NAND_FTL)
       /* Use the FTL layer to wrap the MTD driver as a block driver */
 
       ret = ftl_initialize(NAND_MINOR, mtd);
@@ -200,7 +200,7 @@ int sam_nand_automount(int minor)
           return ret;
         }
 
-#elif defined(CONFIG_SAMA5_NAND_NXFFS)
+#elif defined(CONFIG_SAMA5D3xEK_NAND_NXFFS)
       /* Initialize to provide NXFFS on the MTD interface */
 
       ret = nxffs_initialize(mtd);
