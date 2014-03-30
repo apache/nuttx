@@ -167,13 +167,13 @@ endif
 endif
 
 ifeq ($(CONFIG_SAMA5_HSMCI0),y)
-CHIP_CSRCS += sam_hsmci.c
+CHIP_CSRCS += sam_hsmci.c sam_hsmci_clkdiv.c
 else
 ifeq ($(CONFIG_SAMA5_HSMCI1),y)
-CHIP_CSRCS += sam_hsmci.c
+CHIP_CSRCS += sam_hsmci.c sam_hsmci_clkdiv.c
 else
 ifeq ($(CONFIG_SAMA5_HSMCI2),y)
-CHIP_CSRCS += sam_hsmci.c
+CHIP_CSRCS += sam_hsmci.c sam_hsmci_clkdiv.c
 endif
 endif
 endif
