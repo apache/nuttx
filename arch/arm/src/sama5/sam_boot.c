@@ -135,15 +135,19 @@ static const struct section_mapping_s section_mapping[] =
    *      mapping to map the boot region at 0x0000:0000 to virtual address
    *      0x0000:00000
    *
-   * The first level bootloader is supposed to provide the AXI MATRIX
-   * mapping for us at boot time base on the state of the BMS pin.  However,
-   * I have found that in the test environments that I use, I cannot always
-   * be assured of that physical address mapping.
+   * When executing from NOR FLASH, the first level bootloader is supposed
+   * to provide the AXI MATRIX mapping for us at boot time base on the state
+   * of the BMS pin.  However, I have found that in the test environments
+   * that I use, I cannot always be assured of that physical address mapping.
    *
    * So we do both here.  If we are executing from FLASH, then we provide
    * the MMU to map the physical address of FLASH to address 0x0000:0000;
-   * if we are executing from the internal SRAM, then we trust the bootload
-   * to setup the AXI MATRIX mapping.
+   *
+   * If we are executing out of ISRAM, then the SAMA5 primary bootloader
+   * probably copied us into ISRAM.  If we are executing from external
+   * SDRAM, then a secondary bootloader must have loaded us into SDRAM. In
+   * either case we trust the bootloader to setup the AXI MATRIX mapping on
+   * our behalf.
    */
 
 #if defined(CONFIG_ARCH_LOWVECTORS) && !defined(CONFIG_SAMA5_BOOT_ISRAM) && \
