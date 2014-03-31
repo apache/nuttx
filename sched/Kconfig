@@ -3,33 +3,55 @@
 # see misc/tools/kconfig-language.txt.
 #
 
-config BOARD_INITIALIZE
-	bool "Custom board/driver initialization"
-	default n
+menuconfig DISABLE_OS_API
+	bool "Disable NuttX interfaces"
+	default y
 	---help---
-		By default, there are three points in time where you can insert
-		custom initialization logic:
+		The following can be used to disable categories of
+		APIs supported by the OS.  If the compiler supports
+		weak functions, then it should not be necessary to
+		disable functions unless you want to restrict usage
+		of those APIs.
 
-		1) <arch>_boardinitialize():  This function is used only for
-		initialization of very low-level things like configuration of
-		GPIO pins, power setting.  The OS has not been initialized
-		at this point, so you cannot allocate memory or initialize
-		device drivers at this phase.
+		There are certain dependency relationships in these
+		features.
 
-		2) The next level of initialization is performed by a call to
-		up_initialize() (in arch/<arch>/src/common/up_initialize.c).
-		The OS has been initialized at this point and it is okay to
-		initialize drivers in this phase.
+		1) mq_notify logic depends on signals to awaken tasks
+		waiting for queues to become full or empty.
+		2) pthread_condtimedwait() depends on signals to wake
+		up waiting tasks.
 
-		3) And, finally, when the user application code starts.
+if DISABLE_OS_API
 
-		If BOARD_INITIALIZE is selected, then an additional initialization
-		call will be performed in the boot-up sequence to a function
-		called board_initialize().  board_initialize() will be
-		call between phases 2) and 3) above, immediately after
-		up_initialize() is called.  This additional initialization
-		phase may be used, for example, to initialize board-specific
-		device drivers.
+config DISABLE_CLOCK
+	bool "Disable clock interfaces"
+	default n
+
+config DISABLE_POSIX_TIMERS
+	bool "Disable POSIX timers"
+	default y if DEFAULT_SMALL
+	default n if !DEFAULT_SMALL
+
+config DISABLE_PTHREAD
+	bool "Disable pthread support"
+	default n
+
+config DISABLE_SIGNALS
+	bool "Disable signal support"
+	default n
+
+config DISABLE_MQUEUE
+	bool "Disable POSIX message queue support"
+	default n
+
+config DISABLE_ENVIRON
+	bool "Disable environment variable support"
+	default y if DEFAULT_SMALL
+	default n if !DEFAULT_SMALL
+
+endif # DISABLE_OS_API
+
+menu "Clocks and Timers"
 
 config MSEC_PER_TICK
 	int "Milliseconds per system timer tick"
@@ -67,12 +89,215 @@ config CLOCK_MONOTONIC
 
 		The value of the CLOCK_MONOTONIC clock cannot be set via clock_settime().
 
+config JULIAN_TIME
+	bool "Enables Julian time conversions"
+	default n
+	---help---
+		Enables Julian time conversions
+
+config START_YEAR
+	int "Start year"
+	default 2014
+
+config START_MONTH
+	int "Start month"
+	default 1
+
+config START_DAY
+	int "Start day"
+	default 1
+
+config MAX_WDOGPARMS
+	int "Maximum number of watchdog parameters"
+	default 4
+	---help---
+		Maximum number of parameters that can be passed to a watchdog handler
+
+config PREALLOC_WDOGS
+	int "Number of pre-allocated watchdog timers"
+	default 32
+	---help---
+		The number of pre-allocated watchdog structures.  The system manages a
+		pool of preallocated watchdog structures to minimize dynamic allocations
+
+config PREALLOC_TIMERS
+	int "Number of pre-allocated POSIX timers"
+	default 8
+	---help---
+		The number of pre-allocated POSIX timer structures.  The system manages a
+		pool of preallocated timer structures to minimize dynamic allocations.  Set to
+		zero for all dynamic allocations.
+
+endmenu # Clocks and Timers
+
+menu "Tasks and Scheduling"
+
+config USER_ENTRYPOINT
+	string "Application entry point"
+	default "user_start"
+	---help---
+		The name of the entry point for user applications.  For the example
+		applications this is of the form 'app_main' where 'app' is the application
+		name. If not defined, USER_ENTRYPOINT defaults to "user_start."
+
 config RR_INTERVAL
 	int "Round robin timeslice (MSEC)"
 	default 0
 	---help---
 		The round robin timeslice will be set this number of milliseconds;
 		Round robin scheduling can be disabled by setting this value to zero.
+
+config TASK_NAME_SIZE
+	int "Maximum task name size"
+	default 32
+	---help---
+		Spcifies that maximum size of a task name to save in the TCB.
+		Useful if scheduler instrumentation is selected.  Set to zero to
+		disable.
+
+config MAX_TASK_ARGS
+	int "Maximum number of task arguments"
+	default 4
+	---help---
+		This controls the maximum number of of parameters that a task may
+		receive (i.e., maxmum value of 'argc')
+
+config MAX_TASKS
+	int "Max number of tasks"
+	default 32
+	---help---
+		The maximum number of simultaneously active tasks. This value must be
+		a power of two.
+
+config SCHED_HAVE_PARENT
+	bool "Support parent/child task relationships"
+	default n
+	---help---
+		Remember the ID of the parent task when a new child task is
+		created.  This support enables some additional features (such as
+		SIGCHLD) and modifies the behavior of other interfaces.  For
+		example, it makes waitpid() more standards complete by restricting
+		the waited-for tasks to the children of the caller. Default:
+		disabled.
+
+config SCHED_CHILD_STATUS
+	bool "Retain child exit status"
+	default n
+	depends on SCHED_HAVE_PARENT
+	---help---
+		If this option is selected, then the exit status of the child task
+		will be retained after the child task exits.  This option should be
+		selected if you require knowledge of a child process' exit status.
+		Without this setting, wait(), waitpid() or waitid() may fail.  For
+		example, if you do:
+
+		1) Start child task
+		2) Wait for exit status (using wait(), waitpid(), or waitid()).
+
+		This can fail because the child task may run to completion before
+		the wait begins.  There is a non-standard work-around in this case:
+		The above sequence will work if you disable pre-emption using
+		sched_lock() prior to starting the child task, then re-enable pre-
+		emption with sched_unlock() after the wait completes.  This works
+		because the child task is not permitted to run until the wait is in
+		place.
+
+		The standard solution would be to enable SCHED_CHILD_STATUS.  In
+		this case the exit status of the child task is retained after the
+		child exits and the wait will successful obtain the child task's
+		exit status whether it is called before the child task exits or not.
+
+		Warning:  If you enable this feature, then your application must
+		either (1) take responsibility for reaping the child status with wait(),
+		waitpid(), or waitid(), or (2) suppress retention of child status.
+		If you do not reap the child status, then you have a memory leak and
+		your system will eventually fail.
+
+		Retention of child status can be suppressed on the parent using logic like:
+
+			struct sigaction sa;
+
+			sa.sa_handler = SIG_IGN;
+			sa.sa_flags = SA_NOCLDWAIT;
+			int ret = sigaction(SIGCHLD, &sa, NULL);
+
+if SCHED_CHILD_STATUS
+
+config PREALLOC_CHILDSTATUS
+	int "Number of pre-allocated child status"
+	default 0
+	---help---
+		To prevent runaway child status allocations and to improve
+		allocation performance, child task exit status structures are pre-
+		allocated when the system boots.  This setting determines the number
+		of child status structures that will be pre-allocated.  If this
+		setting is not defined or if it is defined to be zero then a value
+		of 2*MAX_TASKS is used.
+
+		Note that there cannot be more that MAX_TASKS tasks in total.
+		However, the number of child status structures may need to be
+		significantly larger because this number includes the maximum number
+		of tasks that are running PLUS the number of tasks that have exit'ed
+		without having their exit status reaped (via wait(), waitid(), or
+		waitpid()).
+
+		Obviously, if tasks spawn children indefinitely and never have the
+		exit status reaped, then you may have a memory leak!  If you enable
+		the SCHED_CHILD_STATUS feature, then your application must take
+		responsibility for either (1) reaping the child status with wait(),
+		waitpid(), or waitid() or it must (2) suppress retention of child
+		status.  Otherwise, your system will eventually fail.
+
+		Retention of child status can be suppressed on the parent using logic like:
+
+			struct sigaction sa;
+
+			sa.sa_handler = SIG_IGN;
+			sa.sa_flags = SA_NOCLDWAIT;
+			int ret = sigaction(SIGCHLD, &sa, NULL);
+
+config DEBUG_CHILDSTATUS
+	bool "Enable Child Status Debug Output"
+	default n
+	depends on SCHED_CHILD_STATUS && DEBUG
+	---help---
+		Very detailed... I am sure that you do not want this.
+
+endif # SCHED_CHILD_STATUS
+
+config SCHED_WAITPID
+	bool "Enable waitpid() API"
+	default n
+	---help---
+		Enables the waitpid() interface in a default, non-standard mode
+		(non-standard in the sense that the waited for PID need not be child
+		of the caller).  If SCHED_HAVE_PARENT is also defined, then this
+		setting will modify the behavior or waitpid() (making more spec
+		compliant) and will enable the waitid() and wait() interfaces as
+		well.
+
+endmenu # Tasks and Scheduling
+
+menu "Pthread Options"
+	depends on !DISABLE_PTHREAD
+
+config MUTEX_TYPES:
+	bool "Enable mutex types"
+	default n
+	---help---
+		Set to enable support for recursive and errorcheck mutexes. Enables
+		pthread_mutexattr_settype().
+
+config NPTHREAD_KEYS
+	int "Maximum number of pthread keys"
+	default 4
+	---help---
+		The number of items of thread-
+		specific data that can be retained
+
+endmenu # Pthread Options
+
+menu "Performance Monitoring"
 
 config SCHED_CPULOAD
 	bool "Enable CPU load monitoring"
@@ -138,7 +363,7 @@ config SCHED_CPULOAD_TIMECONSTANT
 endif # SCHED_CPULOAD
 
 config SCHED_INSTRUMENTATION
-	bool "Monitor system performance"
+	bool "System performance monitor hooks"
 	default n
 	---help---
 		Enables instrumentation in scheduler to monitor system performance.
@@ -149,124 +374,9 @@ config SCHED_INSTRUMENTATION
 		void sched_note_stop(FAR struct tcb_s *tcb);
 		void sched_note_switch(FAR struct tcb_s *pFromTcb, FAR struct tcb_s *pToTcb);
 
-config TASK_NAME_SIZE
-	int "Maximum task name size"
-	default 32
-	---help---
-		Spcifies that maximum size of a task name to save in the TCB.
-		Useful if scheduler instrumentation is selected.  Set to zero to
-		disable.
+endmenu # Performance Monitoring
 
-config SCHED_HAVE_PARENT
-	bool "Support parent/child task relationships"
-	default n
-	---help---
-		Remember the ID of the parent task when a new child task is
-		created.  This support enables some additional features (such as
-		SIGCHLD) and modifies the behavior of other interfaces.  For
-		example, it makes waitpid() more standards complete by restricting
-		the waited-for tasks to the children of the caller. Default:
-		disabled.
-
-config SCHED_CHILD_STATUS
-	bool "Retain child exit status"
-	default n
-	depends on SCHED_HAVE_PARENT
-	---help---
-		If this option is selected, then the exit status of the child task
-		will be retained after the child task exits.  This option should be
-		selected if you require knowledge of a child process' exit status.
-		Without this setting, wait(), waitpid() or waitid() may fail.  For
-		example, if you do:
-
-		1) Start child task
-		2) Wait for exit status (using wait(), waitpid(), or waitid()).
-
-		This can fail because the child task may run to completion before
-		the wait begins.  There is a non-standard work-around in this case:
-		The above sequence will work if you disable pre-emption using
-		sched_lock() prior to starting the child task, then re-enable pre-
-		emption with sched_unlock() after the wait completes.  This works
-		because the child task is not permitted to run until the wait is in
-		place.
-
-		The standard solution would be to enable SCHED_CHILD_STATUS.  In
-		this case the exit status of the child task is retained after the
-		child exits and the wait will successful obtain the child task's
-		exit status whether it is called before the child task exits or not.
-
-		Warning:  If you enable this feature, then your application must
-		either (1) take responsibility for reaping the child status with wait(),
-		waitpid(), or waitid(), or (2) suppress retention of child status.
-		If you do not reap the child status, then you have a memory leak and
-		your system will eventually fail.
-
-		Retention of child status can be suppressed on the parent using logic like:
-
-			struct sigaction sa;
-
-			sa.sa_handler = SIG_IGN;
-			sa.sa_flags = SA_NOCLDWAIT;
-			int ret = sigaction(SIGCHLD, &sa, NULL);
-
-config PREALLOC_CHILDSTATUS
-	int "Number of pre-allocated child status"
-	default 0
-	depends on SCHED_CHILD_STATUS
-	---help---
-		To prevent runaway child status allocations and to improve
-		allocation performance, child task exit status structures are pre-
-		allocated when the system boots.  This setting determines the number
-		of child status structures that will be pre-allocated.  If this
-		setting is not defined or if it is defined to be zero then a value
-		of 2*MAX_TASKS is used.
-
-		Note that there cannot be more that MAX_TASKS tasks in total.
-		However, the number of child status structures may need to be
-		significantly larger because this number includes the maximum number
-		of tasks that are running PLUS the number of tasks that have exit'ed
-		without having their exit status reaped (via wait(), waitid(), or
-		waitpid()).
-
-		Obviously, if tasks spawn children indefinitely and never have the
-		exit status reaped, then you may have a memory leak!  If you enable
-		the SCHED_CHILD_STATUS feature, then your application must take
-		responsibility for either (1) reaping the child status with wait(),
-		waitpid(), or waitid() or it must (2) suppress retention of child
-		status.  Otherwise, your system will eventually fail.
-
-		Retention of child status can be suppressed on the parent using logic like:
-
-			struct sigaction sa;
-
-			sa.sa_handler = SIG_IGN;
-			sa.sa_flags = SA_NOCLDWAIT;
-			int ret = sigaction(SIGCHLD, &sa, NULL);
-
-config DEBUG_CHILDSTATUS
-	bool "Enable Child Status Debug Output"
-	default n
-	depends on SCHED_CHILD_STATUS && DEBUG
-	---help---
-		Very detailed... I am sure that you do not want this.
-
-config JULIAN_TIME
-	bool "Enables Julian time conversions"
-	default n
-	---help---
-		Enables Julian time conversions
-
-config START_YEAR
-	int "Start year"
-	default 2014
-
-config START_MONTH
-	int "Start month"
-	default 1
-	
-config START_DAY
-	int "Start day"
-	default 1
+menu "Files and I/O"
 
 config DEV_CONSOLE
 	bool "Enable /dev/console"
@@ -274,42 +384,6 @@ config DEV_CONSOLE
 	---help---
 		Set if architecture-specific logic provides /dev/console.  Enables
 		stdout, stderr, stdin.
-
-config MUTEX_TYPES:
-	bool "Enable mutex types"
-	default n
-	---help---
-		Set to enable support for recursive and errorcheck mutexes. Enables
-		pthread_mutexattr_settype().
-
-config PRIORITY_INHERITANCE 
-	bool "Enable priority inheritance "
-	default n
-	---help---
-		Set to enable support for priority inheritance on mutexes and semaphores. 
-
-config SEM_PREALLOCHOLDERS 
-	int "Number of pre-allocated holders"
-	default 16
-	depends on PRIORITY_INHERITANCE
-	---help---
-		This setting is only used if priority inheritance is enabled.
-		It defines the maximum number of different threads (minus one) that
-		can take counts on a semaphore with priority inheritance support.
-		This may be set to zero if priority inheritance is disabled OR if you
-		are only using semaphores as mutexes (only one holder) OR if no more
-		than two threads participate using a counting semaphore.
-
-config SEM_NNESTPRIO
-	int "Maximum number of higher priority threads"
-	default 16
-	depends on PRIORITY_INHERITANCE
-	---help---
-		If priority inheritance is enabled, then this setting is the 
-		maximum number of higher priority threads (minus 1) than can be
-		waiting for another thread to release a count on a semaphore.
-		This value may be set to zero if no more than one thread is
-		expected to wait for a semaphore.
 
 config FDCLONE_DISABLE
 	bool "Disable cloning of file descriptors"
@@ -336,16 +410,86 @@ config SDCLONE_DISABLE
 	desciptors by task_create() when a new task is started. If
 	set, all sockets will appear to be closed in the new task.
 
-config SCHED_WAITPID
-	bool "Enable waitpid() API"
+config NFILE_DESCRIPTORS
+	int "Maximum number of file descriptors per task"
+	default 16
+	---help---
+		The maximum number of file descriptors per task (one for each open)
+
+config NFILE_STREAMS
+	int "Maximum number of FILE streams"
+	default 16
+	---help---
+		The maximum number of streams that can be fopen'ed
+
+config NAME_MAX
+	int "Maximum size of a file name"
+	default 32
+	---help---
+	The maximum size of a file name.
+
+endmenu # Files and I/O
+
+menuconfig PRIORITY_INHERITANCE
+	bool "Enable priority inheritance "
 	default n
 	---help---
-		Enables the waitpid() interface in a default, non-standard mode
-		(non-standard in the sense that the waited for PID need not be child
-		of the caller).  If SCHED_HAVE_PARENT is also defined, then this
-		setting will modify the behavior or waitpid() (making more spec
-		compliant) and will enable the waitid() and wait() interfaces as
-		well.
+		Set to enable support for priority inheritance on mutexes and semaphores.
+
+if PRIORITY_INHERITANCE
+
+config SEM_PREALLOCHOLDERS
+	int "Number of pre-allocated holders"
+	default 16
+	---help---
+		This setting is only used if priority inheritance is enabled.
+		It defines the maximum number of different threads (minus one) that
+		can take counts on a semaphore with priority inheritance support.
+		This may be set to zero if priority inheritance is disabled OR if you
+		are only using semaphores as mutexes (only one holder) OR if no more
+		than two threads participate using a counting semaphore.
+
+config SEM_NNESTPRIO
+	int "Maximum number of higher priority threads"
+	default 16
+	---help---
+		If priority inheritance is enabled, then this setting is the
+		maximum number of higher priority threads (minus 1) than can be
+		waiting for another thread to release a count on a semaphore.
+		This value may be set to zero if no more than one thread is
+		expected to wait for a semaphore.
+
+endif # PRIORITY_INHERITANCE
+
+menu "RTOS hooks"
+
+config BOARD_INITIALIZE
+	bool "Custom board/driver initialization"
+	default n
+	---help---
+		By default, there are three points in time where you can insert
+		custom initialization logic:
+
+		1) <arch>_boardinitialize():  This function is used only for
+		initialization of very low-level things like configuration of
+		GPIO pins, power setting.  The OS has not been initialized
+		at this point, so you cannot allocate memory or initialize
+		device drivers at this phase.
+
+		2) The next level of initialization is performed by a call to
+		up_initialize() (in arch/<arch>/src/common/up_initialize.c).
+		The OS has been initialized at this point and it is okay to
+		initialize drivers in this phase.
+
+		3) And, finally, when the user application code starts.
+
+		If BOARD_INITIALIZE is selected, then an additional initialization
+		call will be performed in the boot-up sequence to a function
+		called board_initialize().  board_initialize() will be
+		call between phases 2) and 3) above, immediately after
+		up_initialize() is called.  This additional initialization
+		phase may be used, for example, to initialize board-specific
+		device drivers.
 
 config SCHED_STARTHOOK
 	bool "Enable startup hook"
@@ -396,66 +540,10 @@ config SCHED_ONEXIT_MAX
 		on top of the on_exit() implementation.  In that case, SCHED_ONEXIT_MAX
 		determines the size of the combined number of atexit(0) and on_exit calls.
 
-config USER_ENTRYPOINT
-	string "Application entry point"
-	default "user_start"
-	---help---
-		The name of the entry point for user applications.  For the example
-		applications this is of the form 'app_main' where 'app' is the application
-		name. If not defined, USER_ENTRYPOINT defaults to "user_start."
+endmenu # RTOS hooks
 
-config DISABLE_OS_API
-	bool "Disable NuttX interfaces"
-	default y
-	---help---
-		The following can be used to disable categories of
-		APIs supported by the OS.  If the compiler supports
-		weak functions, then it should not be necessary to
-		disable functions unless you want to restrict usage
-		of those APIs.
-
-		There are certain dependency relationships in these
-		features.
-
-		1) mq_notify logic depends on signals to awaken tasks
-		waiting for queues to become full or empty.
-		2) pthread_condtimedwait() depends on signals to wake
-		up waiting tasks.
-
-config DISABLE_CLOCK
-	bool "Disable clock interfaces"
-	depends on DISABLE_OS_API
-	default n
-
-config DISABLE_POSIX_TIMERS
-	bool "Disable POSIX timers"
-	depends on DISABLE_OS_API
-	default y if DEFAULT_SMALL
-	default n if !DEFAULT_SMALL
-
-config DISABLE_PTHREAD
-	bool "Disable pthread support"
-	depends on DISABLE_OS_API
-	default n
-
-config DISABLE_SIGNALS
-	bool "Disable signal support"
-	depends on DISABLE_OS_API
-	default n
-
-config DISABLE_MQUEUE
-	bool "Disable POSIX message queue support"
-	depends on DISABLE_OS_API
-	default n
-
-config DISABLE_ENVIRON
-	bool "Disable environment variable support"
-	depends on DISABLE_OS_API
-	default y if DEFAULT_SMALL
-	default n if !DEFAULT_SMALL
-
-if !DISABLE_SIGNALS
-comment "Signal Numbers"
+menu "Signal Numbers"
+	depends on !DISABLE_SIGNALS
 
 config SIG_SIGUSR1
 	int "SIGUSR1"
@@ -502,48 +590,10 @@ config SIG_SIGWORK
 		worker thread.  This setting specifies the signal number that will be
 		used for SIGWORK.  Default: 17
 
-endif
+endmenu # Signal Numbers
 
-comment "Sizes of configurable things (0 disables)"
-
-config MAX_TASKS
-	int "Max number of tasks"
-	default 32
-	---help---
-		The maximum number of simultaneously active tasks. This value must be
-		a power of two.
-
-config MAX_TASK_ARGS
-	int "Maximum number of task arguments"
-	default 4
-	---help---
-		This controls the maximum number of of parameters that a task may
-		receive (i.e., maxmum value of 'argc')
-
-config NPTHREAD_KEYS
-	int "Maximum number of pthread keys"
-	default 4
-	---help---
-		The number of items of thread-
-		specific data that can be retained
-
-config NFILE_DESCRIPTORS
-	int "Maximum number of file descriptors per task"
-	default 16
-	---help---
-		The maximum number of file descriptors per task (one for each open)
-
-config NFILE_STREAMS
-	int "Maximum number of FILE streams"
-	default 16
-	---help---
-		The maximum number of streams that can be fopen'ed
-
-config NAME_MAX
-	int "Maximum size of a file name"
-	default 32
-	---help---
-	The maximum size of a file name.
+menu "POSIX Message Queue Options"
+	depends on !DISABLE_MQUEUE
 
 config PREALLOC_MQ_MSGS
 	int "Number of pre-allocated messages"
@@ -559,28 +609,9 @@ config MQ_MAXMSGSIZE
 		Message structures are allocated with a fixed payload size given by this
 		setting (does not include other message structure overhead.
 
-config MAX_WDOGPARMS
-	int "Maximum number of watchdog parameters"
-	default 4
-	---help---
-		Maximum number of parameters that can be passed to a watchdog handler
+endmenu # POSIX Message Queue Options
 
-config PREALLOC_WDOGS
-	int "Number of pre-allocated watchdog timers"
-	default 32
-	---help---
-		The number of pre-allocated watchdog structures.  The system manages a
-		pool of preallocated watchdog structures to minimize dynamic allocations
-
-config PREALLOC_TIMERS
-	int "Number of pre-allocated POSIX timers"
-	default 8
-	---help---
-		The number of pre-allocated POSIX timer structures.  The system manages a
-		pool of preallocated timer structures to minimize dynamic allocations.  Set to
-		zero for all dynamic allocations.
-
-comment "Stack and heap information"
+menu "Stack and heap information"
 
 config IDLETHREAD_STACKSIZE
 	int "Idle thread stack size"
@@ -609,3 +640,5 @@ config PTHREAD_STACK_DEFAULT
 	default 2048
 	---help---
 		Default pthread stack size
+
+endmenu # Stack and heap information

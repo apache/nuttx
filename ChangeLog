@@ -7097,4 +7097,6 @@
 	  buffered in memory.  From Macs N (2013-3-31).
 	* Add CONFIG_CLOCK_MONOTONIC that case used to disable CLOCK_MONOTONIC
 	  for a smaller footprint (2013-3-31).
+	* sched/Kconfig:  Menu has gotten too long.  And another layer of
+	  menuing in order to simplify this layer (2014-3-31).
 
