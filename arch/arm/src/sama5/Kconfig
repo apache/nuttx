@@ -108,15 +108,15 @@ endchoice # Atmel AT91SAMA5 Chip Selection
 menu "SAMA5 Peripheral Support"
 
 config SAMA5_DBGU
-	bool "Debug Unit Interrupt (DBGU)"
+	bool "Debug Unit (DBGU)"
 	default n
 
 config SAMA5_PIT
-	bool "Periodic Interval Timer Interrupt (PIT)"
+	bool "Periodic Interval Timer (PIT)"
 	default n
 
 config SAMA5_WDT
-	bool "Watchdog timer Interrupt (WDT)"
+	bool "Watchdog timer (WDT)"
 	default n
 	select WATCHDOG
 
