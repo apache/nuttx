@@ -7102,3 +7102,6 @@
 	* arch/arm/src/sama5_boot.c:  Fix double mapping of SDRAM when executing
 	  out of SDRAM.  In this case, the SDRAM was already mapping in
 	  arm_head.S (2014-3-31).
+	* arch/arm/src/sama5/chip/sam_dbgu.h:  Add SAMA5D3 DBGU definition
+	  header file (2014-3031).
+
