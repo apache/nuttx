@@ -86,15 +86,21 @@
 #  error High vector remap cannot be performed if we are using a ROM page table
 #endif
 
-/* if SDRAM is used, then it will be configured twice:  It will first be
- * configured to a temporary state to support low-level ininitialization.
- * After the SDRAM has been fully initialized, SRAM be used to
- * set the SDRM in its final, fully cache-able state.
+/* If SDRAM needs to be configured, then it will be configured twice:  It
+ * will first be configured to a temporary state to support low-level
+ * initialization.  After the SDRAM has been fully initialized, SRAM be used
+ * to set the SDRM in its final, fully cache-able state.
  */
 
+#undef NEED_SDRAM_CONFIGURATION
+#if defined(CONFIG_SAMA5_DDRCS) && !defined(CONFIG_SAMA5_BOOT_SDRAM)
+#  define NEED_SDRAM_CONFIGURATION 1
+#endif
+
+#undef NEED_SDRAM_MAPPING
 #undef NEED_SDRAM_REMAPPING
-#if defined(CONFIG_SAMA5_DDRCS) && !defined(CONFIG_SAMA5_BOOT_SDRAM) && \
-   !defined(CONFIG_ARCH_ROMPGTABLE)
+#if defined(NEED_SDRAM_CONFIGURATION) && !defined(CONFIG_ARCH_ROMPGTABLE)
+#  define NEED_SDRAM_MAPPING 1
 #  define NEED_SDRAM_REMAPPING 1
 #endif
 
@@ -204,6 +210,9 @@ static const struct section_mapping_s section_mapping[] =
  * second level boot loader has properly configured SRAM for us.  In that
  * case, we set the MMU flags for the final, fully cache-able state.
  *
+ * Also, in this case, the mapping for the SDRAM was done in arm_head.S and
+ * need not be repeated here.
+ *
  * If we are running from ISRAM or NOR flash, then we will need to configure
  * the SDRAM ourselves.  In this case, we set the MMU flags to the strongly
  * ordered, non-cacheable state.  We need this direct access to SDRAM in
@@ -211,20 +220,10 @@ static const struct section_mapping_s section_mapping[] =
  * configured in its final state.
  */
 
-#ifdef CONFIG_SAMA5_DDRCS
-#ifdef CONFIG_SAMA5_BOOT_SDRAM
-  /* Running out of SDRAM */
-
-  { SAM_DDRCS_PSECTION,    SAM_DDRCS_VSECTION,
-    SAM_DDRCS_MMUFLAGS,    SAM_DDRCS_NSECTIONS
-  },
-#else
-  /* Running out of ISRAM or NOR FLASH */
-
+#ifdef NEED_SDRAM_MAPPING
   { SAM_DDRCS_PSECTION,    SAM_DDRCS_VSECTION,
     MMU_STRONGLY_ORDERED,  SAM_DDRCS_NSECTIONS
   },
-#endif
 #endif
 
 /* SAMA5 CS1-3 External Memories */
