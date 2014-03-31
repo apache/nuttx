@@ -1,9 +1,9 @@
 /************************************************************************************************
- * arch/arm/src/sam34/chip/sam3u_uart.h
+ * arch/arm/src/sama5/chip/sam3u_uart.h
  * Universal Asynchronous Receiver Transmitter (UART) and Universal Synchronous Asynchronous
- * Receiver Transmitter (USART) definitions for the SAM3U, SAM3X, SAM3A and SAM4S
+ * Receiver Transmitter (USART) definitions for the SAMA5D3
  *
- *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,8 +35,8 @@
  *
  ************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_UART_H
-#define __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_UART_H
+#ifndef __ARCH_ARM_SRC_SAMA5_CHIP_SAM_UART_H
+#define __ARCH_ARM_SRC_SAMA5_CHIP_SAM_UART_H
 
 /************************************************************************************************
  * Included Files
@@ -200,7 +200,7 @@
 #define UART_CR_RSTSTA               (1 << 8)  /* Bit 8:  Reset Status Bits (Common) */
 #define UART_CR_STTBRK               (1 << 9)  /* Bit 9:  Start Break (USART UART mode only) */
 #define UART_CR_STPBRK               (1 << 10) /* Bit 10: Stop Break (USART UART mode only) */
-#define UART_CR_STTTO                (1 << 11) /* Bit 11: Start Time-out (USART oUART mode nly) */
+#define UART_CR_STTTO                (1 << 11) /* Bit 11: Start Time-out (USART UART mode only) */
 #define UART_CR_SENDA                (1 << 12) /* Bit 12: Send Address (USART UART mode only) */
 #define UART_CR_RSTIT                (1 << 13) /* Bit 13: Reset Iterations (USART UART mode only) */
 #define UART_CR_RSTNACK              (1 << 14) /* Bit 14: Reset Non Acknowledge (USART UART mode only) */
@@ -407,4 +407,4 @@
  * Public Functions
  ************************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_UART_H */
+#endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAM_UART_H */
