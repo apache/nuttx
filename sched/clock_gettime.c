@@ -107,6 +107,7 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
   sdbg("clock_id=%d\n", clock_id);
   DEBUGASSERT(tp != NULL);
 
+#ifdef CLOCK_MONOTONIC
   /* CLOCK_MONOTONIC is an optional under POSIX: "If the Monotonic Clock
    * option is supported, all implementations shall support a clock_id
    * of CLOCK_MONOTONIC defined in <time.h>. This clock represents the
@@ -139,6 +140,8 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
       tp->tv_sec  = (time_t)secs;
       tp->tv_nsec = (long)nsecs;
     }
+  else
+#endif
 
   /* CLOCK_REALTIME - POSIX demands this to be present.  CLOCK_REALTIME
    * represents the machine's best-guess as to the current wall-clock,
@@ -152,9 +155,9 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
    */
 
 #ifdef CONFIG_RTC
-  else if (clock_id == CLOCK_REALTIME || clock_id == CLOCK_ACTIVETIME)
+  if (clock_id == CLOCK_REALTIME || clock_id == CLOCK_ACTIVETIME)
 #else
-  else if (clock_id == CLOCK_REALTIME)
+  if (clock_id == CLOCK_REALTIME)
 #endif
     {
       /* Do we have a high-resolution RTC that can provide us with the time? */

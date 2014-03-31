@@ -99,7 +99,9 @@
  * system time-of-day clock.
  */
 
-#define CLOCK_MONOTONIC    2
+#ifdef CLOCK_MONOTONIC
+#  define CLOCK_MONOTONIC  2
+#endif
 
 /* This is a flag that may be passed to the timer_settime() function */
 

@@ -53,6 +53,20 @@ config SYSTEM_TIME64
 		and/or if a very long "uptime" is required, then this option can be
 		selected to support a 64-bit wide timer.
 
+config CLOCK_MONOTONIC
+	bool "Support CLOCK_MONOTONIC"
+	default n
+	---help---
+		CLOCK_MONOTONIC is an optional standard POSIX clock.  Unlike
+		CLOCK_REALTIME which can move forward and backward when the
+		time-of-day changes, CLOCK_MONOTONIC is the elapsed time since some
+		arbitrary point in the post (the system start-up time for NuttX)
+		and, hence, is always monotonically increasing.  CLOCK_MONOTONIC
+		is, hence, the more appropriate clock for determining time
+		differences.
+
+		The value of the CLOCK_MONOTONIC clock cannot be set via clock_settime().
+
 config RR_INTERVAL
 	int "Round robin timeslice (MSEC)"
 	default 0

@@ -7095,3 +7095,6 @@
 	* libc/stdio/lib_ftell.c:  Fix a logic error in ftell().  It was
 	  simply using the file offset and did not take into account data
 	  buffered in memory.  From Macs N (2013-3-31).
+	* Add CONFIG_CLOCK_MONOTONIC that case used to disable CLOCK_MONOTONIC
+	  for a smaller footprint (2013-3-31).
+
