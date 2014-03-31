@@ -52,7 +52,7 @@
 #include "lib_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -84,6 +84,41 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: lib_getrdoffset
+ *
+ * Description:
+ *   It is insufficient to simply use the file offset; we must also account
+ *   for the data offset in the any buffered data.  This function calculates
+ *   that offset.
+ *
+ * Returned Value:
+ *   The file position offset due to buffered data.
+ *
+ ****************************************************************************/
+
+#if CONFIG_STDIO_BUFFER_SIZE > 0
+static off_t lib_getrdoffset(FAR FILE *stream)
+{
+  off_t rdoffset = 0;
+  lib_take_semaphore(stream);
+
+  if (stream->fs_bufread != stream->fs_bufstart)
+    {
+#if CONFIG_NUNGET_CHARS > 0
+      rdoffset = stream->fs_bufread - stream->fs_bufpos + stream->fs_nungotten;
+#else
+      rdoffset = stream->fs_bufread - stream->fs_bufpos;
+#endif
+    }
+
+  lib_give_semaphore(stream);
+  return rdoffset;
+}
+#else
+#  define lib_getrdoffset(stream) (0)
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -95,7 +130,7 @@
  *   stream pointed to by stream.
  *
  * Returned Value:
- *   Zero on succes; -1 on failure with errno set appropriately.
+ *   Zero on success; -1 on failure with errno set appropriately.
  *
  ****************************************************************************/
 
@@ -118,7 +153,7 @@ long ftell(FAR FILE *stream)
   position = lseek(stream->fs_fd, 0, SEEK_CUR);
   if (position != (off_t)-1)
     {
-      return (long)position;
+      return (long)(position - lib_getrdoffset(stream));
     }
   else
     {

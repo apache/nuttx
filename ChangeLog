@@ -7092,3 +7092,6 @@
 	* libc/stdio/lib_ferror.c, lib_fread.c, lib_libfflush.c,
 	  lib_libfread.c, and lib_libfwrite.c:  Finish incomplete support
 	  for ferror().  From Macs N (2014-3-14).
+	* libc/stdio/lib_ftell.c:  Fix a logic error in ftell().  It was
+	  simply using the file offset and did not take into account data
+	  buffered in memory.  From Macs N (2013-3-31).
