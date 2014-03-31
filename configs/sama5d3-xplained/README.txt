@@ -662,9 +662,7 @@ Serial Console
 
   By default USART1 is used as the NuttX serial console in all
   configurations (unless otherwise noted).  USART1 is provided at TTL
-  levels at pins TXD0 and TXD1 or J20.
-
-    USART1 Connector J8
+  levels at pins TXD0 and TXD1 of J20.
 
   DBGU Interface
   --------------
@@ -2528,7 +2526,7 @@ Configurations
        reconfiguration process.
 
   2. Unless stated otherwise, all configurations generate console
-     output on UART0 (J3).
+     output on USART1 (J20).
 
   3. All of these configurations use the Code Sourcery for Windows toolchain
      (unless stated otherwise in the description of the configuration).  That
@@ -2609,61 +2607,56 @@ Configurations
        the warning in the section "Information Common to All Configurations"
        for further information.
 
-    3. This configuration executes out of NAND flash and can only
-       be loaded via BareBox.
+    3. This configuration executes out of SDRAM flash and is loaded into
+       SDRAM from NAND, Serial DataFlash, or from a TFTPC sever via
+       U-Boot or BareBox.  Data also is positioned in SDRAM.
 
     4. This configuration has support for NSH built-in applications enabled.
        However, no built-in applications are selected in the base configuration.
 
-    5. Data resides in ISRAM, but can be moved to SDRAM as described above
-       under "SDRAM Data Configuration."
-
-    6. This configuration has support for the FAT file system built in.  However,
+    5. This configuration has support for the FAT file system built in.  However,
        by default, there are no block drivers initialized.  The FAT file system can
        still be used to create RAM disks.
 
-    7. SDRAM support can be enabled by modifying your NuttX configuration as
-       described above in the paragraph entitle "SDRAM Support"
-
-    8. The SAMA5D3 Xplained board includes an option serial DataFlash.  Support
+    6. The SAMA5D3 Xplained board includes an option serial DataFlash.  Support
        for that serial FLASH can be enabled by modifying the NuttX configuration
        as described above in the paragraph entitled "AT25 Serial FLASH".
 
-    9. Enabling HSMCI support. The SAMA5D3-Xplained provides a two SD memory
+    7. Enabling HSMCI support. The SAMA5D3-Xplained provides a two SD memory
        card slots:  (1) a full size SD card slot (J10), and (2) a microSD
        memory card slot (J11).  The full size SD card slot connects via HSMCI0;
        the microSD connects vi HSMCI1.  Support for both SD slots can be enabled
        with the settings provided in the paragraph entitled "HSMCI Card Slots"
        above.
 
-    10. Support the USB low-, high- and full-speed OHCI host driver can be enabled
-        by changing the NuttX configuration file as described in the section
-        entitled "USB High-Speed Host" above.
+    8. Support the USB low-, high- and full-speed OHCI host driver can be enabled
+       by changing the NuttX configuration file as described in the section
+       entitled "USB High-Speed Host" above.
 
-    11. Support the USB high-speed USB device driver (UDPHS) can be enabled
-        by changing the NuttX configuration file as described above in the
-        section entitled "USB High-Speed Device."
+    9. Support the USB high-speed USB device driver (UDPHS) can be enabled
+       by changing the NuttX configuration file as described above in the
+       section entitled "USB High-Speed Device."
 
-    12. I2C Tool. NuttX supports an I2C tool at apps/system/i2c that can be
+    10. I2C Tool. NuttX supports an I2C tool at apps/system/i2c that can be
         used to peek and poke I2C devices.  See the discussion above under
         "I2C Tool" for detailed configuration settings.
 
-    13. Networking support via the can be added to NSH by modifying the
+    11. Networking support via the can be added to NSH by modifying the
         configuration.  See the "Networking" section above for detailed
         configuration settings.
 
-    16. The Real Time Clock/Calendar RTC) may be enabled by reconfiguring NuttX.
+    12. The Real Time Clock/Calendar (RTC) may be enabled by reconfiguring NuttX.
         See the section entitled "RTC" above for detailed configuration settings.
 
-    17. This example can be configured to exercise the watchdog timer test
+    13. This example can be configured to exercise the watchdog timer test
         (apps/examples/watchdog).  See the detailed configuration settings in
         the section entitled "Watchdog Timer" above.
 
-    18. This example can be configured to enable the SAMA5 TRNG peripheral so
+    14. This example can be configured to enable the SAMA5 TRNG peripheral so
         that it provides /dev/random.  See the section entitled "TRNG and
         /dev/random" above for detailed configuration information.
 
-    19. See also the sections above for additional configuration options:
+    16. See also the sections above for additional configuration options:
         "CAN Usage", "SAMA5 ADC Support", "SAMA5 PWM Support", "I2S Audio
         Support"
 
@@ -2691,29 +2684,5 @@ To-Do List
 
 3) HSCMI TX DMA support is currently commented out.
 
-4) I believe that there is an issue when the internal AT25 FLASH is
-   formatted by NuttX.  That format works fine with Linux, but does not
-   appear to work with Windows.  Reformatting on Windows can resolve this.
-   NOTE:  This is not a SAMA5Dx issue.
-
-   UPDATE: Two important bugs were recently fixed in the NuttX FAT
-   formatting function (mkfatfs).  It is likely that these fixes will
-   eliminate this issue, but that has not yet been verified.
-
-5) CAN testing has not yet been performed due to issues with cabling.  I
-   just do not have a good test bed (or sufficient CAN knowledge) for
-   good CAN testing.
-
-6) The NxWM example does not work well.  This example was designed to work
-   with much smaller displays and does not look good or work well with the
-   SAMA5D3-Xplained's 800x480 display.  See above for details.
-
-7) I have a Camera, but there is still no ISI driver.  I am not sure what to
-   do with the camera.  NuttX needs something like V4L to provide the
-   definition for what a camera driver is supposed to do.
-
-   I will probably develop a test harness for ISI, but it is of only
-   minimal value with no OS infrastructure to deal with images and video.
-
-8) GMAC has only been tested on a 10/100Base-T network.  I don't have a
+7) GMAC has only been tested on a 10/100Base-T network.  I don't have a
    1000Base-T network to support additional testing.

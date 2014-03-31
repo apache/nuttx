@@ -2857,7 +2857,7 @@ Configurations
        reconfiguration process.
 
   2. Unless stated otherwise, all configurations generate console
-     output on UART0 (J3).
+     output on USART1 (J8).
 
   3. All of these configurations use the Code Sourcery for Windows toolchain
      (unless stated otherwise in the description of the configuration).  That
@@ -2979,7 +2979,7 @@ Configurations
        Relevant configuration settings are provided in the paragraph entitled
        "SDRAM Support" above.
 
-    6. The Real Time Clock/Calendar RTC) is enabled.  See the section entitled
+    6. The Real Time Clock/Calendar (RTC) is enabled.  See the section entitled
        "RTC" above.
 
     7. The Embest or Ronetix CPU module includes an Atmel AT25DF321A,
@@ -3170,7 +3170,7 @@ Configurations
         configuration instrcutions in the section entitled "Touchscreen
         Testing" above.
 
-    16. The Real Time Clock/Calendar RTC) may be enabled by reconfiguring NuttX.
+    16. The Real Time Clock/Calendar (RTC) may be enabled by reconfiguring NuttX.
         See the section entitled "RTC" above for detailed configuration settings.
 
     17. This example can be configured to exercise the watchdog timer test
