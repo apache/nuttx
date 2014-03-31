@@ -7087,4 +7087,6 @@
 	* libc/stdio/lib_sccanf.c:  Fix a counting error in the return
 	  value from sscanf().  Noted by kfrolov.  Also, sscanf() should
 	  return EOF if no values were converted (2014-3-30).
+	* include/time.h and sched/clock_settime(): Add support for
+	  CLOCK_REALTIME.  From Macs N (2014-3-31).
 

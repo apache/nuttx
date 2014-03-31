@@ -1,7 +1,7 @@
 /********************************************************************************
  * include/time.h
  *
- *   Copyright (C) 2007-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,19 +67,23 @@
 # define CLOCKS_PER_SEC    (100)
 #endif
 
-/* CLOCK_REALTIME refers to the standard time source.  For most implementations,
- * the standard time source is the system timer interrupt.  However, if the
- * platform supports an RTC, then the standard time source will be the RTC
- * for the clock_gettime() and clock_settime() interfaces (the system timer
- * is still the time source for all of the interfaces).
+/* CLOCK_REALTIME refers to the standard time source.  For most
+ * implementations, the standard time source is the system timer interrupt.
+ * However, if the platform supports an RTC, then the standard time source
+ * will be the RTC for the clock_gettime() and clock_settime() interfaces
+ * (the system timer is still the time source for all of the interfaces).
+ *
+ * CLOCK_REALTIME represents the machine's best-guess as to the current
+ * wall-clock, time-of-day time. This means that CLOCK_REALTIME can jump
+ * forward and backward as the system time-of-day clock is changed.
  */
 
 #define CLOCK_REALTIME     0
 
 /* If an RTC is supported, then the non-standard CLOCK_ACTIVETIME is also
- * supported to manage time based on the system timer interrupt separately from
- * the RTC.  This may be necessary, for example, in certain cases where the
- * system timer interrupt has been stopped in low power modes.
+ * supported to manage time based on the system timer interrupt separately
+ * from the RTC.  This may be necessary, for example, in certain cases where
+ * the system timer interrupt has been stopped in low power modes.
  *
  * CLOCK_ACTIVETIME is only recognized by clock_gettime() and clock_settime().
  */
@@ -89,6 +93,13 @@
 #else
 #  define CLOCK_ACTIVETIME CLOCK_REALTIME
 #endif
+
+/* Clock that cannot be set and represents monotonic time since some
+ * unspecified starting point. It is not affected by changes in the
+ * system time-of-day clock.
+ */
+
+#define CLOCK_MONOTONIC    2
 
 /* This is a flag that may be passed to the timer_settime() function */
 
