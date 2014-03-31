@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/stdio/lib_libfwrite.c
  *
- *   Copyright (C) 2007-2009, 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>  /* for CONFIG_STDIO_BUFFER_SIZE */
+#include <nuttx/config.h>
 
 #include <sys/types.h>
 #include <stdbool.h>
@@ -145,6 +145,7 @@ ssize_t lib_fwrite(FAR const void *ptr, size_t count, FAR FILE *stream)
         {
           *dest++ = *src++;
         }
+
       stream->fs_bufpos = dest;
 
       /* Is the buffer full? */
@@ -169,10 +170,21 @@ errout_with_semaphore:
   lib_give_semaphore(stream);
 
 errout:
+  if (ret < 0)
+    {
+      stream->fs_flags |= __FS_FLAG_ERROR;
+    }
+
   return ret;
 }
 #else
 {
-  return write(stream->fs_fd, ptr, count);
+  ssize_t ret = write(stream->fs_fd, ptr, count);
+  if (ret < 0)
+    {
+      stream->fs_flags |= __FS_FLAG_ERROR;
+    }
+
+  return ret;
 }
 #endif /* CONFIG_STDIO_BUFFER_SIZE */

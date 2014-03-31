@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/stdio/lib_ferror.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,26 +64,12 @@
 
 int ferror(FILE *stream)
 {
-#if 0
   /* If an error is encountered by any of the C-buffered I/O functions, they
    * should set the __FS_FLAG_ERROR in the fs_flags field of struct
    * file_struct.
    */
 
   return (stream->fs_flags & __FS_FLAG_ERROR) != 0;
-#else
-  /* However, nothing currenlty sets the __FS_FLAG_ERROR flag (that is a job
-   * for another day).  The __FS_FLAG_EOF is set by operations that perform
-   * read operations.  Since ferror()  is probably only called to disambiguate
-   * the meaning of other functions that return EOF, to indicate either EOF or
-   * an error, just testing for not EOF is probably sufficient for now.
-   *
-   * This approach would not work if ferror() is called in other contexts. In
-   * those cases, ferror() will always report an error.
-   */
-
-  return (stream->fs_flags & __FS_FLAG_EOF) == 0;
-#endif
 }
 
 #endif /* CONFIG_NFILE_STREAMS */

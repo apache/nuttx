@@ -7089,4 +7089,6 @@
 	  return EOF if no values were converted (2014-3-30).
 	* include/time.h and sched/clock_settime(): Add support for
 	  CLOCK_REALTIME.  From Macs N (2014-3-31).
-
+	* libc/stdio/lib_ferror.c, lib_fread.c, lib_libfflush.c,
+	  lib_libfread.c, and lib_libfwrite.c:  Finish incomplete support
+	  for ferror().  From Macs N (2014-3-14).

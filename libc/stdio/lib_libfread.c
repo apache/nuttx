@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/stdio/lib_libfread.c
  *
- *   Copyright (C) 2007-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>  /* for CONFIG_STDIO_BUFFER_SIZE */
+#include <nuttx/config.h>
 
 #include <sys/types.h>
 #include <stdio.h>
@@ -312,6 +312,7 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
 /* Error exits */
 
 errout_with_errno:
+  stream->fs_flags |= __FS_FLAG_ERROR;
   lib_give_semaphore(stream);
   return -get_errno();
 }
