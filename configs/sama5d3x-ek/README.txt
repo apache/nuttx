@@ -70,7 +70,7 @@ Contents
   - Loading Code into SRAM with J-Link
   - Writing to FLASH using SAM-BA
   - Creating and Using NORBOOT
-  - Running NuttX from NAND FLASH
+  - Running NuttX from SDRAM
   - Buttons and LEDs
   - Serial Consoles
   - Networking
@@ -445,21 +445,45 @@ Creating and Using NORBOOT
         jumper does nothing on my board???  So I have been using the norboot
         configuration exclusively to start the program-under-test in NOR FLASH.
 
-Running NuttX from NAND FLASH
-=============================
+Running NuttX from SDRAM
+========================
 
-  - Boot sequence
-  - NAND FLASH Memory Map
-  - Programming the AT91Boostrap Binary
-  - Programming U-Boot
-  - Load NuttX with U-Boot on AT91 boards
+  NuttX may be executed from SDRAM.  But this case means that the NuttX
+  binary must reside on some other media (typically NAND FLASH, Serial
+  FLASH, or, perhaps even a TFTP server).  In these cases, an intermediate
+  bootloader such as U-Boot or Barebox must be used to configure the
+  SAMA5D3 clocks and SDRAM and then to copy the NuttX binary into SDRAM.
+
+    - NuttX Configuration
+    - Boot sequence
+    - NAND FLASH Memory Map
+    - Programming the AT91Boostrap Binary
+    - Programming U-Boot
+    - Load NuttX with U-Boot on AT91 boards
+
+NuttX Configuration
+-------------------
+
+  In order to run from SDRAM, NuttX must be built at origin 0x20008000 in
+  SDRAM (skipping over SDRAM memory used by the bootloader).  The following
+  configuration option is required:
+
+    CONFIG_SAMA5_BOOT_SDRAM=y
+    CONFIG_BOOT_RUNFROMSDRAM=y
+
+  These options tell the NuttX code that it will be booting and running from
+  SDRAM.  In this case, the start-logic will do to things:  (1) it will not
+  configure the SAMA5D3 clocking.  Rather, it will use the clock configuration
+  as set up by the bootloader.  And (2) it will not attempt to configure the
+  SDRAM.  Since NuttX is already running from SDRAM, it must accept the SDRAM
+  configuration as set up by the bootloader.
 
 Boot sequence
 -------------
 
   Reference: http://www.at91.com/linux4sam/bin/view/Linux4SAM/GettingStarted
 
-  Several pieces of software are involved to boot a Nutt5X from NAND.  First
+  Several pieces of software are involved to boot a Nutt5X into SDRAM.  First
   is the primary bootloader in ROM which is in charge to check if a valid
   application is present on supported media (NOR FLASH, Serial DataFlash,
   NAND FLASH, SD card).
@@ -1519,7 +1543,7 @@ SDRAM Support
 
     System Type->External Memory Configuration
       CONFIG_SAMA5_DDRCS=y                  : Tell the system that DRAM is at the DDR CS
-      CONFIG_SAMA5_DDRCS_SIZE=268435456     : 2Gb DRAM -> 256GB
+      CONFIG_SAMA5_DDRCS_SIZE=268435456     : 2Gb DRAM -> 256MB
       CONFIG_SAMA5_DDRCS_LPDDR2=y           : Its DDR2
       CONFIG_SAMA5D3xEK_MT47H128M16RT=y     : This is the type of DDR2
 
