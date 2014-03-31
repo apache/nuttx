@@ -376,7 +376,7 @@ o Kernel Build
 
                COMMAND  KERNEL INTERFACE(s)
                -------- ----------------------------------------------
-               loset    losetup(), loteardown()
+               losetup  losetup(), loteardown()
                mkfatfs  mkfatfs
                mkrd     ramdisk_register()
                dd       bchlib_setup(), bchlib_read(), bchlib_write(),

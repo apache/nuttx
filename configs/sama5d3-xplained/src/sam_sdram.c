@@ -4,7 +4,7 @@
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * Most of this file derives from Atmel sample code for the SAMA5D3x-E
+ * Most of this file derives from Atmel sample code for the SAMA5D3 Xplained
  * board.  That sample code has licensing that is compatible with the NuttX
  * modified BSD license:
  *
@@ -122,14 +122,13 @@ static inline void sam_sdram_delay(unsigned int loops)
  * Name: sam_sdram_config
  *
  * Description:
- *   Configures DDR2 (MT47H128M16RT 128MB/ MT47H64M16HR)
- *
  *   Configures DDR2 (MT47H128M16RT 128MB or, optionally,  MT47H64M16HR)
  *
- *   Per the SAMA5D3-Xplained User guide: "Two SDRAM/DDR2 used as main system memory.
- *   MT47H128M16 - 2 Gb - 16 Meg x 16 x 8 banks, the board provides up to 2 Gb on-
- *   board, soldered DDR2 SDRAM. The memory bus is 32 bits wide and operates with
- *   up to 166 MHz."
+ *   Per the SAMA5D3-Xplained User guide: "Two DDR2/SDRAM (MT47H64M16HR) used as
+ *   main system memory (256 MByte). The board includes 2 Gbits of on-board soldered
+ *   DDR2 (double data rate) SDRAM. The footprints can also host two DDR2
+ *   (MT47H128M16RT) from Micron® for a total of 512 MBytes of DDR2 memory. The
+ *   memory bus is 32 bits wide and operates with a frequency of up to 166 MHz."
  *
  *   From the Atmel Code Example:
  *     MT47H64M16HR : 8 Meg x 16 x 8 banks

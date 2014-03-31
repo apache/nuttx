@@ -80,7 +80,7 @@ void sam_boardinitialize(void)
 
 #if defined(CONFIG_SAMA5_DDRCS) && !defined(CONFIG_SAMA5_BOOT_SDRAM)
 
-  /* Configure SDRAM if (1) SDRAM has been enalbled in the NuttX configuration and
+  /* Configure SDRAM if (1) SDRAM has been enabled in the NuttX configuration and
    * (2) if we are not currently running out of SDRAM.  If we are now running out
    * of SDRAM then we have to assume that some second level bootloader has properly
    * configured SDRAM for our use.
@@ -103,7 +103,7 @@ void sam_boardinitialize(void)
     }
 #endif
 
-  /* Configure board resources to support networkingif the 1) networking is enabled,
+  /* Configure board resources to support networking if the 1) networking is enabled,
    * 2) the EMAC or GMAC module is enabled, and 2) the weak function
    * sam_netinitialize() has been brought into the build.
    */

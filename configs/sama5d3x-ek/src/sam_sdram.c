@@ -122,8 +122,6 @@ static inline void sam_sdram_delay(unsigned int loops)
  * Name: sam_sdram_config
  *
  * Description:
- *   Configures DDR2 (MT47H128M16RT 128MB/ MT47H64M16HR)
- *
  *   Configures DDR2 (MT47H128M16RT 128MB or, optionally,  MT47H64M16HR)
  *
  *   Per the SAMA5D3x-EK User guide: "Two SDRAM/DDR2 used as main system memory.
