@@ -235,6 +235,24 @@ config RAW_BINARY
 		different loaders using the GNU objcopy program.  This option
 		should not be selected if you are not using the GNU toolchain.
 
+menuconfig UBOOT_UIMAGE
+	bool "U-Boot uImage"
+	select RAW_BINARY
+	depends on !WINDOWS_NATIVE
+	---help---
+		Create the uImage binary used with U-Boot.
+
+if UBOOT_UIMAGE
+
+config UIMAGE_LOAD_ADDRESS
+	hex "uImage load address"
+	default 0x0
+
+config UIMAGE_ENTRY_POINT
+	hex "uImage entry point"
+	default 0x0
+
+endif
 endmenu # Binary Output Formats
 
 menu "Customize Header Files"

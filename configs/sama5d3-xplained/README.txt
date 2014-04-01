@@ -501,7 +501,9 @@ Load NuttX with U-Boot on AT91 boards
     image with header information, CRC32 checksum, etc.
 
     mkimage comes in source code with U-Boot distribution and it is built
-    during U-Boot compilation (u-boot-source-dir/tools/mkimage).
+    during U-Boot compilation (u-boot-source-dir/tools/mkimage).  There
+    are also sites where you can download pre-built mkimage binaries.  For
+    example: http://www.trimslice.com/wiki/index.php/U-Boot_images
 
     See the U-Boot README file for more information.  More information is
     also available in the mkimage man page (for example,
@@ -523,6 +525,8 @@ Load NuttX with U-Boot on AT91 boards
       -e 20008000: Set entry point.
       -n nuttx: Set image name.
       -d nuttx.bin: Use image data from nuttx.bin.
+
+    This will generate a binary called uImage.
 
   Loading through network
 
