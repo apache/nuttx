@@ -345,6 +345,43 @@ config SAMA5_PIOE_IRQ
 
 endif # PIO_IRQ
 
+menu "DBGU Configuration"
+	depends on SAMA5_DBGU
+
+config SAMA5_DBGU_CONSOLE
+	bool "DBGU serial console"
+	---help---
+		Select to use the DBGU as the serial console.
+
+config SAMA5_DBGU_RXBUFSIZE
+	int "Receive buffer size"
+	default 256
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
+
+config SAMA5_DBGU_TXBUFSIZE
+	int "Transmit buffer size"
+	default 256
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
+
+config SAMA5_DBGU_BAUD
+	int "BAUD rate"
+	default 115200
+	---help---
+		The configured BAUD of the UART.
+
+config SAMA5_DBGU_PARITY
+	int "Parity setting"
+	default 0
+	range 0 2
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
+
+endmenu #DBGU Configuration
+
 if SAMA5_LCDC
 menu "LCDC Configuration"
 

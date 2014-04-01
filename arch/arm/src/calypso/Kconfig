@@ -96,6 +96,7 @@ endmenu
 choice
 	prompt "Serial Console Selection"
 	default SERIAL_CONSOLE_NONE
+	depends on DEV_CONSOLE
 
 # See drivers/Kconfig
 config USE_SERCOMM_CONSOLE
