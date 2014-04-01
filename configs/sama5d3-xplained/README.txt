@@ -483,7 +483,7 @@ Programming U-Boot
      - Press the "Send File Name" Browse button
      - Choose u-boot.bin binary file and press Open
      - Enter the proper address on media in the Address text field:
-       0x00200000
+       0x00040000
      - Press the "Send File" button
      - Close SAM-BA, remove the USB Device cable.
 
@@ -660,10 +660,6 @@ Serial Console
     J20   SDA  20 PE19  USART3      TXD3
     J20   SCL  21 PE18  USART3      RXD3
 
-  By default USART1 is used as the NuttX serial console in all
-  configurations (unless otherwise noted).  USART1 is provided at TTL
-  levels at pins TXD0 and TXD1 of J20.
-
   DBGU Interface
   --------------
 
@@ -679,7 +675,10 @@ Serial Console
    5  PE14 (available)
    6  GND
 
-  The DBGU is not used by NuttX.
+  By default the DBUG is used as the NuttX serial console in all
+  configurations (unless otherwise noted).  The DBGU is available at
+  logic levels at pins RXD and TXD of the DEBUG connector (J23).  GND
+  is available at J23 and +3.3V is available from J14
 
 Networking
 ==========
@@ -855,15 +854,21 @@ AT25 Serial FLASH
   Connections
   -----------
 
-  Both the SAMA5D3-Xplained board supports an options Serial DataFlash.  The
-  SPI connection is as follows:
+  The SAMA5D3-Xplained board supports an options Serial DataFlash connected
+  at MN8.  The SPI connection is as follows:
 
-    AT25DF321A      SAMA5
-    --------------- -----------------------------------------------
-    SI              PD11 SPI0_MOSI
-    SO              PD10 SPI0_MIS0
-    SCK             PD12 SPI0_SPCK
-    /CS             PD13 if jumper JP6 is closed.
+         MN8       SAMA5
+    ------------- -----------------------------------------------
+    PIN  FUNCTION  PIO   FUNCTION
+    --- --------- ----- -----------------------------------------
+     5    SI       PD11  SPI0_MOSI
+     2    SO       PD10  SPI0_MIS0
+     6    SCK      PD12  SPI0_SPCK
+     1    /CS      PD13  if jumper JP6 is closed.
+
+  NOTE:  The MN8 is not populated on my SAMAD3 Xplained board.  So, as a 
+  result, these instructions would only apply if you were to have an AT25
+  Serial DataFlash installed in MN8.
 
   Configuration
   -------------
@@ -897,7 +902,7 @@ AT25 Serial FLASH
       CONFIG_SAMA5D3XPLAINED_AT25_AUTOMOUNT=y         : Mounts AT25 for NSH
       CONFIG_SAMA5D3XPLAINED_AT25_FTL=y               : Create block driver for FAT
 
-  NOTE that you must close JP6 in order to enable the AT25 FLASH chip select.
+  NOTE: that you must close JP6 in order to enable the AT25 FLASH chip select.
 
   You can then format the AT25 FLASH for a FAT file system and mount the
   file system at /mnt/at25 using these NSH commands:
@@ -913,9 +918,6 @@ AT25 Serial FLASH
      -rw-rw-rw-      16 atest.txt
     nsh> cat /mnt/at25/atest.txt
     This is a test
-
-  NOTE:  It appears that if Linux runs out of NAND, it will destroy the
-  contents of the AT25.
 
 HSMCI Card Slots
 ================
@@ -2391,10 +2393,10 @@ SAMA5D3-Xplained Configuration Options
 
   Individual subsystems can be enabled:
 
-    CONFIG_SAMA5_DBGU        - Debug Unit Interrupt
-    CONFIG_SAMA5_PIT         - Periodic Interval Timer Interrupt
-    CONFIG_SAMA5_WDT         - Watchdog timer Interrupt
-    CONFIG_SAMA5_HSMC        - Multi-bit ECC Interrupt
+    CONFIG_SAMA5_DBGU        - Debug Unit
+    CONFIG_SAMA5_PIT         - Periodic Interval Timer
+    CONFIG_SAMA5_WDT         - Watchdog timer
+    CONFIG_SAMA5_HSMC        - Multi-bit ECC
     CONFIG_SAMA5_SMD         - SMD Soft Modem
     CONFIG_SAMA5_USART0      - USART 0
     CONFIG_SAMA5_USART1      - USART 1
@@ -2448,17 +2450,26 @@ SAMA5D3-Xplained Configuration Options
     CONFIG_USART2_ISUART     - USART2 is configured as a UART
     CONFIG_USART3_ISUART     - USART3 is configured as a UART
 
-  ST91SAMA5 specific device driver settings
+  AT91SAMA5 specific device driver settings
+
+    CONFIG_SAMA5_DBGU_SERIAL_CONSOLE - selects the DBGU
+      for the console and ttyDBGU
+    CONFIG_SAMA5_DBGU_RXBUFSIZE - Characters are buffered as received.
+       This specific the size of the receive buffer
+    CONFIG_SAMA5_DBGU_TXBUFSIZE - Characters are buffered before
+       being sent.  This specific the size of the transmit buffer
+    CONFIG_SAMA5_DBGU_BAUD - The configure BAUD of the DBGU.
+    CONFIG_SAMA5_DBGU_PARITY - 0=no parity, 1=odd parity, 2=even parity
 
     CONFIG_U[S]ARTn_SERIAL_CONSOLE - selects the USARTn (n=0,1,2,3) or UART
-           m (m=4,5) for the console and ttys0 (default is the USART1).
+           m (m=4,5) for the console and ttys0 (default is the DBGU).
     CONFIG_U[S]ARTn_RXBUFSIZE - Characters are buffered as received.
        This specific the size of the receive buffer
     CONFIG_U[S]ARTn_TXBUFSIZE - Characters are buffered before
        being sent.  This specific the size of the transmit buffer
     CONFIG_U[S]ARTn_BAUD - The configure BAUD of the UART.  Must be
     CONFIG_U[S]ARTn_BITS - The number of bits.  Must be either 7 or 8.
-    CONFIG_U[S]ARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
+    CONFIG_U[S]ARTn_PARITY - 0=no parity, 1=odd parity, 2=even parity
     CONFIG_U[S]ARTn_2STOP - Two stop bits
 
   AT91SAMA5 USB Host Configuration
@@ -2526,7 +2537,7 @@ Configurations
        reconfiguration process.
 
   2. Unless stated otherwise, all configurations generate console
-     output on USART1 (J20).
+     output on the DBGU (J23).
 
   3. All of these configurations use the Code Sourcery for Windows toolchain
      (unless stated otherwise in the description of the configuration).  That
@@ -2586,7 +2597,7 @@ Configurations
     together.
 
     NOTES:
-    1. This configuration uses the default USART1 serial console.  That
+    1. This configuration uses the default DBGU serial console.  That
        is easily changed by reconfiguring to (1) enable a different
        serial peripheral, and (2) selecting that serial peripheral as
        the console device.

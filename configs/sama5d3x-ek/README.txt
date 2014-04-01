@@ -604,7 +604,7 @@ Programming U-Boot
      - Press the "Send File Name" Browse button
      - Choose u-boot.bin binary file and press Open
      - Enter the proper address on media in the Address text field:
-       0x00200000
+       0x00040000
      - Press the "Send File" button
      - Close SAM-BA, remove the USB Device cable.
 
@@ -2722,10 +2722,10 @@ SAMA5D3x-EK Configuration Options
 
   Individual subsystems can be enabled:
 
-    CONFIG_SAMA5_DBGU        - Debug Unit Interrupt
-    CONFIG_SAMA5_PIT         - Periodic Interval Timer Interrupt
-    CONFIG_SAMA5_WDT         - Watchdog timer Interrupt
-    CONFIG_SAMA5_HSMC        - Multi-bit ECC Interrupt
+    CONFIG_SAMA5_DBGU        - Debug Unit
+    CONFIG_SAMA5_PIT         - Periodic Interval Timer
+    CONFIG_SAMA5_WDT         - Watchdog timer
+    CONFIG_SAMA5_HSMC        - Multi-bit ECC
     CONFIG_SAMA5_SMD         - SMD Soft Modem
     CONFIG_SAMA5_USART0      - USART 0
     CONFIG_SAMA5_USART1      - USART 1
@@ -2779,7 +2779,16 @@ SAMA5D3x-EK Configuration Options
     CONFIG_USART2_ISUART     - USART2 is configured as a UART
     CONFIG_USART3_ISUART     - USART3 is configured as a UART
 
-  ST91SAMA5 specific device driver settings
+  AT91SAMA5 specific device driver settings
+
+    CONFIG_SAMA5_DBGU_SERIAL_CONSOLE - selects the DBGU
+      for the console and ttyDBGU
+    CONFIG_SAMA5_DBGU_RXBUFSIZE - Characters are buffered as received.
+       This specific the size of the receive buffer
+    CONFIG_SAMA5_DBGU_TXBUFSIZE - Characters are buffered before
+       being sent.  This specific the size of the transmit buffer
+    CONFIG_SAMA5_DBGU_BAUD - The configure BAUD of the DBGU.
+    CONFIG_SAMA5_DBGU_PARITY - 0=no parity, 1=odd parity, 2=even parity
 
     CONFIG_U[S]ARTn_SERIAL_CONSOLE - selects the USARTn (n=0,1,2,3) or UART
            m (m=4,5) for the console and ttys0 (default is the USART1).
@@ -2787,9 +2796,9 @@ SAMA5D3x-EK Configuration Options
        This specific the size of the receive buffer
     CONFIG_U[S]ARTn_TXBUFSIZE - Characters are buffered before
        being sent.  This specific the size of the transmit buffer
-    CONFIG_U[S]ARTn_BAUD - The configure BAUD of the UART.  Must be
+    CONFIG_U[S]ARTn_BAUD - The configure BAUD of the UART.
     CONFIG_U[S]ARTn_BITS - The number of bits.  Must be either 7 or 8.
-    CONFIG_U[S]ARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
+    CONFIG_U[S]ARTn_PARITY - 0=no parity, 1=odd parity, 2=even parity
     CONFIG_U[S]ARTn_2STOP - Two stop bits
 
   AT91SAMA5 USB Host Configuration
