@@ -130,12 +130,6 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
       /* Return the elapsed time in seconds and nanoseconds */
 
       nsecs = (msecs - (secs * MSEC_PER_SEC)) * NSEC_PER_MSEC;
-      if (nsecs > NSEC_PER_SEC)
-        {
-          carry  = nsecs / NSEC_PER_SEC;
-          secs  += carry;
-          nsecs -= (carry * NSEC_PER_SEC);
-        }
 
       tp->tv_sec  = (time_t)secs;
       tp->tv_nsec = (long)nsecs;

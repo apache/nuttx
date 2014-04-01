@@ -7104,4 +7104,7 @@
 	  arm_head.S (2014-3-31).
 	* arch/arm/src/sama5/chip/sam_dbgu.h:  Add SAMA5D3 DBGU definition
 	  header file (2014-3031).
-
+	* arch/arm/src/sama5/sam_dbgu.c and .h:  Add support for the SAMA5D3
+	  DBGU (2014-4-1).
+	* configs/sama5d3-xplained/nsh:  Configurations now use the DBGU for
+	  the serial console (instead of USART1) (2014-4-1).

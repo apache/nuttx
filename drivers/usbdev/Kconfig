@@ -191,6 +191,7 @@ if PL2303
 
 config PL2303_CONSOLE
 	bool "PL2303 console device"
+	depends on DEV_CONSOLE
 	default n
 	---help---
 		Register the USB device as /dev/console so that is will be used
@@ -275,6 +276,7 @@ if CDCACM
 
 config CDCACM_CONSOLE
 	bool "CDC/ACM console device"
+	depends on DEV_CONSOLE
 	default n
 	---help---
 		Register the USB device as /dev/console so that is will be used

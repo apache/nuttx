@@ -49,9 +49,11 @@
 
 #include "sam_pio.h"
 #include "sam_periphclks.h"
+#include "sam_dbgu.h"
 #include "sam_lowputc.h"
 
 #include "chip/sam_uart.h"
+#include "chip/sam_dbgu.h"
 #include "chip/sam_pinmap.h"
 
 /**************************************************************************
@@ -79,57 +81,72 @@
 
 /* Is there a serial console?  It could be on UART0-1 or USART0-3 */
 
-#if defined(CONFIG_UART0_SERIAL_CONSOLE) && defined(CONFIG_SAMA5_UART0)
+#if defined(CONFIG_SAMA5_DBGU_CONSOLE) && defined(CONFIG_SAMA5_DBGU)
+#  undef CONFIG_UART0_SERIAL_CONSOLE
 #  undef CONFIG_UART1_SERIAL_CONSOLE
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
-#  define HAVE_CONSOLE 1
+#  undef HAVE_UART_CONSOLE
+#elif defined(CONFIG_UART0_SERIAL_CONSOLE) && defined(CONFIG_SAMA5_UART0)
+#  undef CONFIG_SAMA5_DBGU_CONSOLE
+#  undef CONFIG_UART1_SERIAL_CONSOLE
+#  undef CONFIG_USART0_SERIAL_CONSOLE
+#  undef CONFIG_USART1_SERIAL_CONSOLE
+#  undef CONFIG_USART2_SERIAL_CONSOLE
+#  undef CONFIG_USART3_SERIAL_CONSOLE
+#  define HAVE_UART_CONSOLE 1
 #elif defined(CONFIG_UART1_SERIAL_CONSOLE) && defined(CONFIG_SAMA5_UART1)
+#  undef CONFIG_SAMA5_DBGU_CONSOLE
 #  undef CONFIG_UART0_SERIAL_CONSOLE
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
-#  define HAVE_CONSOLE 1
+#  define HAVE_UART_CONSOLE 1
 #elif defined(CONFIG_USART0_SERIAL_CONSOLE) && defined(CONFIG_SAMA5_USART0)
+#  undef CONFIG_SAMA5_DBGU_CONSOLE
 #  undef CONFIG_UART0_SERIAL_CONSOLE
 #  undef CONFIG_UART1_SERIAL_CONSOLE
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
-#  define HAVE_CONSOLE 1
+#  define HAVE_UART_CONSOLE 1
 #elif defined(CONFIG_USART1_SERIAL_CONSOLE) && defined(CONFIG_SAMA5_USART1)
+#  undef CONFIG_SAMA5_DBGU_CONSOLE
 #  undef CONFIG_UART0_SERIAL_CONSOLE
 #  undef CONFIG_UART1_SERIAL_CONSOLE
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
-#  define HAVE_CONSOLE 1
+#  define HAVE_UART_CONSOLE 1
 #elif defined(CONFIG_USART2_SERIAL_CONSOLE) && defined(CONFIG_SAMA5_USART2)
+#  undef CONFIG_SAMA5_DBGU_CONSOLE
 #  undef CONFIG_UART0_SERIAL_CONSOLE
 #  undef CONFIG_UART1_SERIAL_CONSOLE
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
-#  define HAVE_CONSOLE 1
+#  define HAVE_UART_CONSOLE 1
 #elif defined(CONFIG_USART3_SERIAL_CONSOLE) && defined(CONFIG_SAMA5_USART3)
+#  undef CONFIG_SAMA5_DBGU_CONSOLE
 #  undef CONFIG_UART0_SERIAL_CONSOLE
 #  undef CONFIG_UART1_SERIAL_CONSOLE
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
-#  define HAVE_CONSOLE 1
+#  define HAVE_UART_CONSOLE 1
 #else
 #  warning "No valid CONFIG_USARTn_SERIAL_CONSOLE Setting"
+#  undef CONFIG_SAMA5_DBGU_CONSOLE
 #  undef CONFIG_UART0_SERIAL_CONSOLE
 #  undef CONFIG_UART1_SERIAL_CONSOLE
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
-#  undef HAVE_CONSOLE
+#  undef HAVE_UART_CONSOLE
 #endif
 
 /* The UART/USART modules are driven by the main clock (MCK). */
@@ -139,7 +156,13 @@
 
 /* Select USART parameters for the selected console */
 
-#if defined(CONFIG_UART0_SERIAL_CONSOLE)
+#if defined(CONFIG_SAMA5_DBGU_CONSOLE)
+#  define SAM_CONSOLE_VBASE    SAM_DBGU_VBASE
+#  define SAM_CONSOLE_BAUD     CONFIG_SAMA5_DBGU_BAUD
+#  define SAM_CONSOLE_BITS     8
+#  define SAM_CONSOLE_PARITY   CONFIG_SAMA5_DBGU_PARITY
+#  define SAM_CONSOLE_2STOP    0
+#elif defined(CONFIG_UART0_SERIAL_CONSOLE)
 #  define SAM_CONSOLE_VBASE    SAM_UART0_VBASE
 #  define SAM_CONSOLE_BAUD     CONFIG_UART0_BAUD
 #  define SAM_CONSOLE_BITS     CONFIG_UART0_BITS
@@ -247,7 +270,7 @@
 
 void up_lowputc(char ch)
 {
-#ifdef HAVE_CONSOLE
+#if defined(HAVE_UART_CONSOLE)
   irqstate_t flags;
 
   for (;;)
@@ -274,6 +297,31 @@ void up_lowputc(char ch)
 
       irqrestore(flags);
     }
+#elif defined(CONFIG_SAMA5_DBGU_CONSOLE)
+  irqstate_t flags;
+
+  for (;;)
+    {
+      /* Wait for the transmitter to be available */
+
+      while ((getreg32(SAM_DBGU_SR) & DBGU_INT_TXEMPTY) == 0);
+
+      /* Disable interrupts so that the test and the transmission are
+       * atomic.
+       */
+
+      flags = irqsave();
+      if ((getreg32(SAM_DBGU_SR) & DBGU_INT_TXEMPTY) != 0)
+        {
+          /* Send the character */
+
+          putreg32((uint32_t)ch, SAM_DBGU_THR);
+          irqrestore(flags);
+          return;
+        }
+
+      irqrestore(flags);
+    }
 #endif
 }
 
@@ -287,7 +335,7 @@ void up_lowputc(char ch)
 
 int up_putc(int ch)
 {
-#ifdef HAVE_CONSOLE
+#if defined(HAVE_UART_CONSOLE) || defined(CONFIG_SAMA5_DBGU_CONSOLE)
   /* Check for LF */
 
   if (ch == '\n')
@@ -298,9 +346,9 @@ int up_putc(int ch)
     }
 
   up_lowputc(ch);
-#endif
   return ch;
 }
+#endif
 
 /**************************************************************************
  * Name: sam_lowsetup
@@ -392,7 +440,8 @@ void sam_lowsetup(void)
 #endif
 
   /* Configure the console (only) */
-#if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
+
+#if defined(HAVE_UART_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
   /* Reset and disable receiver and transmitter */
 
   putreg32((UART_CR_RSTRX | UART_CR_RSTTX | UART_CR_RXDIS | UART_CR_TXDIS),
@@ -417,5 +466,11 @@ void sam_lowsetup(void)
 
   putreg32((UART_CR_RXEN | UART_CR_TXEN),
            SAM_CONSOLE_VBASE + SAM_UART_CR_OFFSET);
+#endif
+
+#ifdef CONFIG_SAMA5_DBGU
+  /* Initialize the DBGU (might be the serial console) */
+
+  sam_dbgu_initialize();
 #endif
 }

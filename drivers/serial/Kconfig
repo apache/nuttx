@@ -7,6 +7,7 @@ config DEV_LOWCONSOLE
 	bool "Low-level console support"
 	default n
 	depends on ARCH_LOWPUTC
+	depends on DEV_CONSOLE
 	---help---
 		Use the simple, low-level, write-only serial console driver (minimal support)
 
@@ -39,6 +40,7 @@ config 16550_UART0_BAUD
 config 16550_UART0_PARITY
 	int "16550 UART0 parity"
 	default 0
+	range 0 2
 	---help---
 		16550 UART0 parity.  0=None, 1=Odd, 2=Even.  Default: None
 
@@ -103,6 +105,7 @@ config 16550_UART1_BAUD
 config 16550_UART1_PARITY
 	int "16550 UART1 parity"
 	default 0
+	range 0 2
 	---help---
 		16550 UART1 parity.  0=None, 1=Odd, 2=Even.  Default: None
 
@@ -167,6 +170,7 @@ config 16550_UART2_BAUD
 config 16550_UART2_PARITY
 	int "16550 UART2 parity"
 	default 0
+	range 0 2
 	---help---
 		16550 UART2 parity.  0=None, 1=Odd, 2=Even.  Default: None
 
@@ -231,6 +235,7 @@ config 16550_UART3_BAUD
 config 16550_UART3_PARITY
 	int "16550 UART3 parity"
 	default 0
+	range 0 2
 	---help---
 		16550 UART3 parity.  0=None, 1=Odd, 2=Even.  Default: None
 
@@ -277,6 +282,7 @@ endif
 choice
 	prompt "16550 Serial Console"
 	default 16550_NO_SERIAL_CONSOLE
+	depends on DEV_CONSOLE
 
 config 16550_UART0_SERIAL_CONSOLE
 	bool "16550 UART0 serial console"
@@ -531,6 +537,7 @@ choice
 	prompt "Serial console"
 	depends on MCU_SERIAL
 	default NO_SERIAL_CONSOLE
+	depends on DEV_CONSOLE
 
 config UART_SERIAL_CONSOLE
 	bool "UART"
@@ -657,6 +664,7 @@ config UART_BITS
 config UART_PARITY
 	int "Parity setting"
 	default 0
+	range 0 2
 	---help---
 		0=no parity, 1=odd parity, 2=even parity
 
@@ -713,6 +721,7 @@ config UART0_BITS
 
 config UART0_PARITY
 	int "Parity setting"
+	range 0 2
 	default 0
 	---help---
 		0=no parity, 1=odd parity, 2=even parity
@@ -771,6 +780,7 @@ config USART0_BITS
 config USART0_PARITY
 	int "Parity setting"
 	default 0
+	range 0 2
 	---help---
 		0=no parity, 1=odd parity, 2=even parity
 
@@ -828,6 +838,7 @@ config UART1_BITS
 config UART1_PARITY
 	int "Parity setting"
 	default 0
+	range 0 2
 	---help---
 		0=no parity, 1=odd parity, 2=even parity
 
@@ -885,6 +896,7 @@ config USART1_BITS
 config USART1_PARITY
 	int "Parity setting"
 	default 0
+	range 0 2
 	---help---
 		0=no parity, 1=odd parity, 2=even parity
 
@@ -942,6 +954,7 @@ config UART2_BITS
 config UART2_PARITY
 	int "Parity setting"
 	default 0
+	range 0 2
 	---help---
 		0=no parity, 1=odd parity, 2=even parity
 
@@ -999,6 +1012,7 @@ config USART2_BITS
 config USART2_PARITY
 	int "Parity setting"
 	default 0
+	range 0 2
 	---help---
 		0=no parity, 1=odd parity, 2=even parity
 
@@ -1056,6 +1070,7 @@ config UART3_BITS
 config UART3_PARITY
 	int "Parity setting"
 	default 0
+	range 0 2
 	---help---
 		0=no parity, 1=odd parity, 2=even parity
 
@@ -1113,6 +1128,7 @@ config USART3_BITS
 config USART3_PARITY
 	int "Parity setting"
 	default 0
+	range 0 2
 	---help---
 		0=no parity, 1=odd parity, 2=even parity
 
@@ -1170,6 +1186,7 @@ config UART4_BITS
 config UART4_PARITY
 	int "Parity setting"
 	default 0
+	range 0 2
 	---help---
 		0=no parity, 1=odd parity, 2=even parity
 
@@ -1227,6 +1244,7 @@ config USART4_BITS
 config USART4_PARITY
 	int "Parity setting"
 	default 0
+	range 0 2
 	---help---
 		0=no parity, 1=odd parity, 2=even parity
 
@@ -1284,6 +1302,7 @@ config UART5_BITS
 config UART5_PARITY
 	int "Parity setting"
 	default 0
+	range 0 2
 	---help---
 		0=no parity, 1=odd parity, 2=even parity
 
@@ -1341,6 +1360,7 @@ config USART5_BITS
 config USART5_PARITY
 	int "Parity setting"
 	default 0
+	range 0 2
 	---help---
 		0=no parity, 1=odd parity, 2=even parity
 
@@ -1398,6 +1418,7 @@ config USART6_BITS
 config USART6_PARITY
 	int "Parity setting"
 	default 0
+	range 0 2
 	---help---
 		0=no parity, 1=odd parity, 2=even parity
 
@@ -1455,6 +1476,7 @@ config UART6_BITS
 config UART6_PARITY
 	int "Parity setting"
 	default 0
+	range 0 2
 	---help---
 		0=no parity, 1=odd parity, 2=even parity
 
@@ -1512,6 +1534,7 @@ config USART7_BITS
 config USART7_PARITY
 	int "Parity setting"
 	default 0
+	range 0 2
 	---help---
 		0=no parity, 1=odd parity, 2=even parity
 
@@ -1569,6 +1592,7 @@ config UART7_BITS
 config UART7_PARITY
 	int "Parity setting"
 	default 0
+	range 0 2
 	---help---
 		0=no parity, 1=odd parity, 2=even parity
 
@@ -1626,6 +1650,7 @@ config USART8_BITS
 config USART8_PARITY
 	int "Parity setting"
 	default 0
+	range 0 2
 	---help---
 		0=no parity, 1=odd parity, 2=even parity
 
@@ -1683,6 +1708,7 @@ config UART8_BITS
 config UART8_PARITY
 	int "Parity setting"
 	default 0
+	range 0 2
 	---help---
 		0=no parity, 1=odd parity, 2=even parity
 
@@ -1740,6 +1766,7 @@ config SCI0_BITS
 config SCI0_PARITY
 	int "Parity setting"
 	default 0
+	range 0 2
 	---help---
 		0=no parity, 1=odd parity, 2=even parity
 
@@ -1783,6 +1810,7 @@ config SCI1_BITS
 config SCI1_PARITY
 	int "Parity setting"
 	default 0
+	range 0 2
 	---help---
 		0=no parity, 1=odd parity, 2=even parity
 
