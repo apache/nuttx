@@ -671,7 +671,7 @@ Load NuttX with U-Boot on AT91 boards
         Check this U-Boot network BuildRootFAQ entry to choose a proper MAC
         address: http://www.denx.de/wiki/DULG/EthernetDoesNotWork
 
-          setenv ethaddr 3e:36:65:ba:6f:be
+          setenv ethaddr 00:e0:de:ad:be:ef
 
      2. Setup IP parameters:
         The board ip address
