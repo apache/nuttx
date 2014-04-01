@@ -367,6 +367,19 @@ config SAMA5_DBGU_TXBUFSIZE
 		Characters are buffered before being sent.  This specifies
 		the size of the transmit buffer.
 
+config SAMA5_DBGU_NOCONFIG
+	bool "Suppress DBGU configuration"
+	default n
+	depends on SAMA5_BOOT_SDRAM && SAMA5_DBGU_CONSOLE
+	---help---
+		The DBGU is often used by bootloaders to provide the bootloader
+		interface.  If the DBGU is also used as the NuttX console, then it
+		would be best to avoid reconfiguring the DBGU so that the user
+		experience is seamless going from the bootloader to the NuttX
+		console.
+
+if !SAMA5_DBGU_NOCONFIG
+
 config SAMA5_DBGU_BAUD
 	int "BAUD rate"
 	default 115200
@@ -380,6 +393,7 @@ config SAMA5_DBGU_PARITY
 	---help---
 		0=no parity, 1=odd parity, 2=even parity
 
+endif # !SAMA5_DBGU_NOCONFIG
 endmenu #DBGU Configuration
 
 if SAMA5_LCDC

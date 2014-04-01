@@ -164,9 +164,9 @@ static uart_dev_t g_dbgu_port =
  *
  ****************************************************************************/
 
+#if !defined(CONFIG_SUPPRESS_UART_CONFIG) && !defined(CONFIG_SAMA5_DBGU_NOCONFIG)
 static void dbgu_configure(void)
 {
-#ifndef CONFIG_SUPPRESS_UART_CONFIG
   uint32_t regval;
 
   /* Set up the mode register.  Start with normal DBGU mode and the MCK
@@ -200,8 +200,11 @@ static void dbgu_configure(void)
   /* Enable receiver & transmitter */
 
   putreg32((DBGU_CR_RXEN|DBGU_CR_TXEN), SAM_DBGU_CR);
-#endif
 }
+
+#else
+#  define dbgu_configure()
+#endif /* !CONFIG_SUPPRESS_UART_CONFIG && !CONFIG_SAMA5_DBGU_NOCONFIG */
 
 /****************************************************************************
  * Name: dbgu_setup
@@ -237,6 +240,12 @@ static int dbgu_setup(struct uart_dev_s *dev)
 
 static void dbgu_shutdown(struct uart_dev_s *dev)
 {
+#if !defined(CONFIG_SUPPRESS_UART_CONFIG) && !defined(CONFIG_SAMA5_DBGU_NOCONFIG)
+  /* Disable all interrupts */
+
+  putreg32(DBGU_INT_ALLINTS, SAM_DBGU_IDR);
+
+#else
   irqstate_t flags;
 
   /* The following must be atomic */
@@ -251,6 +260,7 @@ static void dbgu_shutdown(struct uart_dev_s *dev)
 
   putreg32(DBGU_INT_ALLINTS, SAM_DBGU_IDR);
   irqrestore(flags);
+#endif
 }
 
 /****************************************************************************
