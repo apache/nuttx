@@ -51,6 +51,7 @@
 #include "chip.h"
 #include "arm.h"
 #include "mmu.h"
+#include "cache.h"
 #include "fpu.h"
 #include "up_internal.h"
 #include "up_arch.h"
@@ -125,6 +126,8 @@
 /****************************************************************************
  * Public Variables
  ****************************************************************************/
+
+/* Symbols defined via the linker script */
 
 extern uint32_t _vector_start; /* Beginning of vector block */
 extern uint32_t _vector_end;   /* End+1 of vector block */
@@ -429,6 +432,25 @@ static void sam_vectorpermissions(uint32_t mmuflags)
 #endif
 
 /****************************************************************************
+ * Name: sam_vectorsize
+ *
+ * Description:
+ *   Return the size of the vector data
+ *
+ ****************************************************************************/
+
+static inline size_t sam_vectorsize(void)
+{
+  uintptr_t src;
+  uintptr_t end;
+
+  src  = (uintptr_t)&_vector_start;
+  end  = (uintptr_t)&_vector_end;
+
+  return (size_t)(end - src);
+}
+
+/****************************************************************************
  * Name: sam_vectormapping
  *
  * Description:
@@ -497,11 +519,11 @@ static void sam_copyvectorblock(void)
   uint32_t *end;
   uint32_t *dest;
 
+#ifdef CONFIG_PAGING
   /* If we are using re-mapped vectors in an area that has been marked
    * read only, then temporarily mark the mapping write-able (non-buffered).
    */
 
-#ifdef CONFIG_PAGING
   sam_vectorpermissions(MMU_L2_VECTRWFLAGS);
 #endif
 
@@ -523,10 +545,16 @@ static void sam_copyvectorblock(void)
       *dest++ = *src++;
     }
 
+#if !defined(CONFIG_ARCH_LOWVECTORS) && defined(CONFIG_PAGING)
   /* Make the vectors read-only, cacheable again */
 
-#if !defined(CONFIG_ARCH_LOWVECTORS) && defined(CONFIG_PAGING)
   sam_vectorpermissions(MMU_L2_VECTORFLAGS);
+
+#else
+  /* Flush the DCache to assure that the vector data is in physical in ISRAM */
+
+  cp15_clean_dcache((uintptr_t)SAM_VECTOR_VSRAM,
+                    (uintptr_t)SAM_VECTOR_VSRAM + sam_vectorsize());
 #endif
 }
 
