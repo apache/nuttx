@@ -7108,3 +7108,7 @@
 	  DBGU (2014-4-1).
 	* configs/sama5d3-xplained/nsh:  Configurations now use the DBGU for
 	  the serial console (instead of USART1) (2014-4-1).
+	* libc/stdio/lib_sccanf.c:  Use stroul() vs strol() with %u format
+	  otherwise, range of values is restricted because of sign bit
+	  from kfrolov (2014-4-2).
+

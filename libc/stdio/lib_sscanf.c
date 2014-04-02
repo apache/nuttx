@@ -372,6 +372,7 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
             {
               FAR long *plong = NULL;
               FAR int  *pint  = NULL;
+              bool sign;
 
               lvdbg("vsscanf: Performing integer conversion\n");
 
@@ -415,24 +416,30 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                    * specific conversion specification.
                    */
 
-                  if (*fmt == 'd' || *fmt == 'u')
+                  sign = false;
+                  switch (*fmt)
                     {
+                    default:
+                    case 'd':
+                      sign = true;
+                    case 'u':
                       base = 10;
-                    }
-                  else if (*fmt == 'x')
-                    {
+                      break;
+
+                    case 'x':
                       base = 16;
-                    }
-                  else if (*fmt == 'o')
-                    {
+                      break;
+
+                    case 'o':
                       base = 8;
-                    }
-                  else if (*fmt == 'b')
-                    {
+                      break;
+
+                    case 'b':
                       base = 2;
+                      break;
                     }
 
-                  /* Was a fieldwidth specified? */
+                  /* Was a field width specified? */
 
                   if (!width)
                     {
@@ -464,9 +471,16 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 
                       errsave = get_errno();
                       set_errno(0);
-                      tmplong = strtol(tmp, &endptr, base);
+                      if (sign)
+                        {
+                          tmplong = strtol(tmp, &endptr, base);
+                        }
+                      else
+                        {
+                          tmplong = strtoul(tmp, &endptr, base);
+                        }
 
-                      /* Number can't be converted */
+                      /* Check if the number was successfully converted */
 
                       if (tmp == endptr || get_errno() == ERANGE)
                         {
@@ -580,7 +594,7 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                       set_errno(0);
                       dvalue  = strtod(tmp, &endptr);
 
-                      /* Number can't be converted */
+                      /* Check if the number was successfully converted */
 
                       if (tmp == endptr || get_errno() == ERANGE)
                         {
