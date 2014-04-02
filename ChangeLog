@@ -7111,4 +7111,5 @@
 	* libc/stdio/lib_sccanf.c:  Use stroul() vs strol() with %u format
 	  otherwise, range of values is restricted because of sign bit
 	  from kfrolov (2014-4-2).
-
+	* arch/arm/src/sama5/sam_boot.c, sam_irq.c, chip/sama5d3x_memorymap.h:
+	  When running from SDRAM, vectors must lie in SRAM (2014-4-2).
