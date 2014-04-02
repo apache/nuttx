@@ -56,6 +56,7 @@
 #include "up_arch.h"
 
 #include "chip/sam_wdt.h"
+#include "chip/sam_aximx.h"
 #include "sam_clockconfig.h"
 #include "sam_lowputc.h"
 #include "sam_serial.h"
@@ -104,6 +105,19 @@
 #  define NEED_SDRAM_REMAPPING 1
 #endif
 
+/* We need to copy vectors under two conditions:
+ *
+ * 1. If vectors lie in high memory because CONFIG_ARCH_LOWVECTORS=n, or
+ * 2. If vectors lie in low memory and we are executing from SDRAM.
+ */
+
+#undef NEED_VECTOR_COPY
+#if !defined(CONFIG_ARCH_LOWVECTORS)
+#  define NEED_VECTOR_COPY 1
+#elif defined(CONFIG_SAMA5_BOOT_SDRAM)
+#  define NEED_VECTOR_COPY 1
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -130,37 +144,55 @@ static const struct section_mapping_s section_mapping[] =
 
   /* If CONFIG_ARCH_LOWVECTORS is defined, then the vectors located at the
    * beginning of the .text region must appear at address zero.  There are
-   * two ways to accomplish this:
+   * three ways to accomplish this:
    *
    *   1. By explicitly mapping the beginning of .text region with a page
    *      table entry so that the virtual address zero maps to the beginning
    *      of the .text region.
+   *
    *   2. A second way is to map the use the AXI MATRIX remap register to
    *      map physical address zero to the beginning of the text region,
    *      either internal SRAM or EBI CS 0.  Then we can set an identity
    *      mapping to map the boot region at 0x0000:0000 to virtual address
    *      0x0000:00000
    *
-   * When executing from NOR FLASH, the first level bootloader is supposed
-   * to provide the AXI MATRIX mapping for us at boot time base on the state
-   * of the BMS pin.  However, I have found that in the test environments
-   * that I use, I cannot always be assured of that physical address mapping.
+   *      This method is used when booting from NORFLASH.  In that case,
+   *      vectors must lie at the beginning of NOFR FLASH.
    *
-   * So we do both here.  If we are executing from FLASH, then we provide
-   * the MMU to map the physical address of FLASH to address 0x0000:0000;
+   *   3. Set the AXI MATRIX remap register so that SRAM appears at address
+   *      zero, mapping the boot region to address 0, then copying the
+   *      vectors to address zero.
    *
-   * If we are executing out of ISRAM, then the SAMA5 primary bootloader
-   * probably copied us into ISRAM.  If we are executing from external
-   * SDRAM, then a secondary bootloader must have loaded us into SDRAM. In
-   * either case we trust the bootloader to setup the AXI MATRIX mapping on
-   * our behalf.
+   *      This is the method used when booting from either SDRAM or
+   *      SRAM.
+   *
+   * - When executing from NOR FLASH, the first level bootloader is supposed
+   *   to provide the AXI MATRIX mapping for us at boot time base on the state
+   *   of the BMS pin.  However, I have found that in the test environments
+   *   that I use, I cannot always be assured of that physical address mapping.
+   *
+   *   So we do both here.  If we are executing from NOR FLASH, then we provide
+   *   the MMU to map the physical address of FLASH to address 0x0000:0000;
+   *
+   * - If we are executing out of ISRAM, then the SAMA5 primary bootloader
+   *   probably copied us into ISRAM and set the AXI REMAP bit for us.
+   *
+   * - If we are executing from external SDRAM, then a secondary bootloader must
+   *   have loaded us into SDRAM.  In this case, we will may the BOOT memory,
+   *   set the AXI matrix to locate the ISRAM in boot memory, and copy the vector
+   *   table ISRAM.
    */
 
-#if defined(CONFIG_ARCH_LOWVECTORS) && !defined(CONFIG_SAMA5_BOOT_ISRAM) && \
-   !defined(CONFIG_SAMA5_BOOT_SDRAM)
-  { CONFIG_FLASH_VSTART,   0x00000000,
+#if defined(CONFIG_ARCH_LOWVECTORS) && !defined(CONFIG_SAMA5_BOOT_ISRAM)
+#  if defined(CONFIG_SAMA5_BOOT_SDRAM)
+  { SAM_ISRAM_PSECTION,    0x00000000,
     MMU_ROMFLAGS,          1
   },
+#  else
+  { CONFIG_FLASH_START,    0x00000000,
+    MMU_ROMFLAGS,          1
+  },
+#  endif
 #else
   { SAM_BOOTMEM_PSECTION,  SAM_BOOTMEM_VSECTION,
     SAM_BOOTMEM_MMUFLAGS,  SAM_BOOTMEM_NSECTIONS
@@ -453,11 +485,12 @@ static void sam_vectormapping(void)
  * Description:
  *   Copy the interrupt block to its final destination.  Vectors are already
  *   positioned at the beginning of the text region and only need to be
- *   copied in the case where we are using high vectors.
+ *   copied in the case where we are using high vectors or where the beginning
+ *   of the text region cannot be remapped to address zero.
  *
  ****************************************************************************/
 
-#ifndef CONFIG_ARCH_LOWVECTORS
+#ifdef NEED_VECTOR_COPY
 static void sam_copyvectorblock(void)
 {
   uint32_t *src;
@@ -465,7 +498,7 @@ static void sam_copyvectorblock(void)
   uint32_t *dest;
 
   /* If we are using re-mapped vectors in an area that has been marked
-   * read only, then temparily mark the mapping write-able (non-buffered).
+   * read only, then temporarily mark the mapping write-able (non-buffered).
    */
 
 #ifdef CONFIG_PAGING
@@ -496,6 +529,7 @@ static void sam_copyvectorblock(void)
   sam_vectorpermissions(MMU_L2_VECTORFLAGS);
 #endif
 }
+
 #else
 /* Don't copy the vectors */
 
@@ -542,7 +576,7 @@ static inline void sam_wdtdisable(void)
  *
  * Boot Sequence
  *
- *   This logic may be executing in ISRAM or in external mmemory: CS0, DDR,
+ *   This logic may be executing in ISRAM or in external memory: CS0, DDR,
  *   CS1, CS2, or CS3.  It may be executing in CS0 or ISRAM through the
  *   action of the SAMA5 "first level bootloader;"  it might be executing in
  *   CS1-3 through the action of some second level bootloader that provides

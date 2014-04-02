@@ -280,16 +280,16 @@ void up_irqinitialize(void)
 
   putreg32(AIC_WPMR_WPKEY | AIC_WPMR_WPEN, SAM_AIC_WPMR);
 
-#if defined(CONFIG_ARCH_LOWVECTORS) && defined(CONFIG_SAMA5_BOOT_ISRAM)
+#if defined(CONFIG_ARCH_LOWVECTORS)
   /* Disable MATRIX write protection */
 
 #if 0 /* Disabled on reset */
   putreg32(MATRIX_WPMR_WPKEY, SAM_MATRIX_WPMR);
 #endif
 
-  /* Set remap state 0 if we are running from internal SRAM.  If we booted
-   * into NOR FLASH, then the first level bootloader should have already
-   * provided this mapping for us.
+  /* Set remap state 0 if we are running from internal SRAM or from SDRAM.
+   * If we booted into NOR FLASH, then the first level bootloader should
+   * have already provided this mapping for us.
    *
    * This is done late in the boot sequence.  Any exceptions taken before
    * this point in time will be handled by the ROM code, not by the NuttX
@@ -306,8 +306,13 @@ void up_irqinitialize(void)
    * address 0x0000:0000 in that case anyway.
    */
 
-  putreg32(MATRIX_MRCR_RCB0, SAM_MATRIX_MRCR);   /* Enable remap */
+#if defined(CONFIG_SAMA5_BOOT_ISRAM) || defined(CONFIG_SAMA5_BOOT_SDRAM)
+  putreg32(MATRIX_MRCR_RCB0, SAM_MATRIX_MRCR);   /* Enable Cortex-A5 remap */
   putreg32(AXIMX_REMAP_REMAP0, SAM_AXIMX_REMAP); /* Remap SRAM */
+#elif defined(CONFIG_SAMA5_BOOT_CS0FLASH)
+  putreg32(MATRIX_MRCR_RCB0, SAM_MATRIX_MRCR);   /* Enable Cortex-A5 remap */
+  putreg32(AXIMX_REMAP_REMAP1, SAM_AXIMX_REMAP); /* Remap NOR FLASH */
+#endif
 
   /* Restore MATRIX write protection */
 

@@ -594,10 +594,10 @@
    * in the way at that position.
    */
 
-#  if defined(CONFIG_BOOT_RUNFROMISRAM) && defined(CONFIG_ARCH_LOWVECTORS)
+#  if defined(CONFIG_SAMA5_BOOT_ISRAM) && defined(CONFIG_ARCH_LOWVECTORS)
 
-  /* In this case, table must lie at the top 16Kb of ISRAM1 (or ISRAM0 if ISRAM1
-   * is not available in this architecture)
+  /* In this case, page table must lie at the top 16Kb of ISRAM1 (or ISRAM0
+   * if ISRAM1 is not available in this architecture)
    *
    * If CONFIG_PAGING is defined, then mmu.h assign the virtual address
    * of the page table.
@@ -620,7 +620,21 @@
 #      error CONFIG_BOOT_SDRAM_DATA not suupported in this configuration
 #    endif
 
-#  else /* CONFIG_BOOT_RUNFROMISRAM && CONFIG_ARCH_LOWVECTORS */
+#  elif defined(CONFIG_SAMA5_BOOT_SDRAM) && defined(CONFIG_ARCH_LOWVECTORS)
+
+  /* In this case, vectors must lie in ISRAM, followed by the page table,*/
+
+#    define PGTABLE_BASE_PADDR    (SAM_ISRAM0_PADDR + 0x00004000)
+#    ifndef CONFIG_PAGING
+#      define PGTABLE_BASE_VADDR  (SAM_ISRAM0_VADDR + 0x00004000)
+#    endif
+#    define PGTABLE_IN_LOWSRAM    1
+
+#    ifdef CONFIG_BOOT_SDRAM_DATA
+#      error CONFIG_BOOT_SDRAM_DATA not suupported in this configuration
+#    endif
+
+#  else /* CONFIG_SAMA5_BOOT_SDRAM && CONFIG_ARCH_LOWVECTORS */
 
   /* Otherwise, the vectors lie at another location (perhaps in NOR FLASH, perhaps
    * elsewhere in internal SRAM).  The page table will then be positioned at
@@ -638,7 +652,7 @@
 #      define IDLE_STACK_VBASE    (PGTABLE_BASE_VADDR + PGTABLE_SIZE)
 #    endif
 
-#  endif /* CONFIG_BOOT_RUNFROMISRAM && CONFIG_ARCH_LOWVECTORS */
+#  endif /* CONFIG_SAMA5_BOOT_ISRAM && CONFIG_ARCH_LOWVECTORS */
 
   /* In either case, the page table lies in ISRAM.  If ISRAM is not the
    * primary RAM region, then we will need to set-up a special mapping for
