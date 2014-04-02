@@ -5,7 +5,7 @@ README
   development board. This board features the Atmel SAMA5D36 microprocessor.
   See http://www.atmel.com/devices/sama5d36.aspx for further information.
 
-    PARAMTER                  SAMA5D36
+    PARAMETER                 SAMA5D36
     ------------------------- -------------
     Pin Count                 324
     Max. Operating Frequency  536 MHz
@@ -526,7 +526,52 @@ Load NuttX with U-Boot on AT91 boards
       -n nuttx: Set image name.
       -d nuttx.bin: Use image data from nuttx.bin.
 
-    This will generate a binary called uImage.
+    This will generate a binary called uImage.  If you have the path to
+    mkimage in your PATH variable, then you can automatically build the
+    uImage file by adding the following to your .config file:
+
+      CONFIG_RAW_BINARY=y
+      CONFIG_UBOOT_UIMAGE=y
+      CONFIG_UIMAGE_LOAD_ADDRESS=0x20008000
+      CONFIG_UIMAGE_ENTRY_POINT=0x20008040
+
+    The uImage file can them be loaded into memory from a variety of sources
+    (serial, SD card, JFFS2 on NAND, TFTP).
+
+    STATUS:
+      2014-4-1:  So far, I am unable to get U-Boot to execute the uImage
+                 file.  I get the following error messages (in this case
+                 trying to load from an SD card):
+
+        U-Boot> fatload mmc 0 0x22000000 uimage
+        reading uimage
+        97744 bytes read in 21 ms (4.4 MiB/s)
+        U-Boot> bootm 0x22000000
+        ## Booting kernel from Legacy Image at 0x22000000 ...
+           Image Name:   nuttx
+           Image Type:   ARM Linux Kernel Image (uncompressed)
+           Data Size:    97680 Bytes = 95.4 KiB
+           Load Address: 20008000
+           Entry Point:  20008040
+           Verifying Checksum ... OK
+           XIP Kernel Image ... OK
+        FDT and ATAGS support not compiled in - hanging
+        ### ERROR ### Please RESET the board ###
+
+      This, however, appears to be a usable workaround:
+
+      U-Boot> fatload mmc 0 0x20008000 nuttx.bin
+      mci: setting clock 257812 Hz, block size 512
+      mci: setting clock 257812 Hz, block size 512
+      mci: setting clock 257812 Hz, block size 512
+      gen_atmel_mci: CMDR 00001048 ( 8) ARGR 000001aa (SR: 0c100025) Command Time Out
+      mci: setting clock 257812 Hz, block size 512
+      mci: setting clock 22000000 Hz, block size 512
+      reading nuttx.bin
+      108076 bytes read in 23 ms (4.5 MiB/s)
+      U-Boot> go 0x20008040
+      ## Starting application at 0x20008040 ...
+      os_start: Entry
 
   Loading through network
 
@@ -2623,8 +2668,14 @@ Configurations
        for further information.
 
     3. This configuration executes out of SDRAM flash and is loaded into
-       SDRAM from NAND, Serial DataFlash, or from a TFTPC sever via
+       SDRAM from NAND, Serial DataFlash, SD card or from a TFTPC sever via
        U-Boot or BareBox.  Data also is positioned in SDRAM.
+
+       I did most testing with nuttx.bin on an SD card.  These are the
+       commands that I used to boot NuttX from the SD card:
+
+         U-Boot> fatload mmc 0 0x20008000 nuttx.bin
+         U-Boot> go 0x20008040
 
     4. This configuration has support for NSH built-in applications enabled.
        However, no built-in applications are selected in the base configuration.
