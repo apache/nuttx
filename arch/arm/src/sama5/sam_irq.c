@@ -54,6 +54,8 @@
 #  include "sam_pio.h"
 #endif
 
+#include "mmu.h"
+#include "cache.h"
 #include "chip/sam_aic.h"
 #include "chip/sam_matrix.h"
 #include "chip/sam_aximx.h"
@@ -75,6 +77,11 @@ typedef uint32_t *(*doirq_t)(int irq, uint32_t *regs);
  ****************************************************************************/
 
 volatile uint32_t *current_regs;
+
+/* Symbols defined via the linker script */
+
+extern uint32_t _vector_start; /* Beginning of vector block */
+extern uint32_t _vector_end;   /* End+1 of vector block */
 
 /****************************************************************************
  * Private Data
@@ -130,6 +137,25 @@ static void sam_dumpaic(const char *msg, int irq)
 #else
 #  define sam_dumpaic(msg, irq)
 #endif
+
+/****************************************************************************
+ * Name: sam_vectorsize
+ *
+ * Description:
+ *   Return the size of the vector data
+ *
+ ****************************************************************************/
+
+static inline size_t sam_vectorsize(void)
+{
+  uintptr_t src;
+  uintptr_t end;
+
+  src  = (uintptr_t)&_vector_start;
+  end  = (uintptr_t)&_vector_end;
+
+  return (size_t)(end - src);
+}
 
 /****************************************************************************
  * Name: sam_spurious
@@ -210,6 +236,7 @@ static uint32_t *sam_fiqhandler(int irq, uint32_t *regs)
 
 void up_irqinitialize(void)
 {
+  size_t vectorsize;
   int i;
 
   /* The following operations need to be atomic, but since this function is
@@ -313,6 +340,13 @@ void up_irqinitialize(void)
   putreg32(MATRIX_MRCR_RCB0, SAM_MATRIX_MRCR);   /* Enable Cortex-A5 remap */
   putreg32(AXIMX_REMAP_REMAP1, SAM_AXIMX_REMAP); /* Remap NOR FLASH */
 #endif
+
+  /* Make sure that there is no trace of any previous mapping */
+
+  vectorsize = sam_vectorsize();
+  cp15_invalidate_icache();
+  cp15_invalidate_dcache(0, vectorsize);
+  mmu_invalidate_region(0, vectorsize);
 
   /* Restore MATRIX write protection */
 

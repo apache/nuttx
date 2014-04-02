@@ -7113,3 +7113,12 @@
 	  from kfrolov (2014-4-2).
 	* arch/arm/src/sama5/sam_boot.c, sam_irq.c, chip/sama5d3x_memorymap.h:
 	  When running from SDRAM, vectors must lie in SRAM (2014-4-2).
+	* arch/arm/src/armv7-a/arm_head.S and cache.h:  On start-up, make
+	  certain the the MMU and caches are disabled (probably un-necessary)
+	  (2014-4-2).
+	* arch/arm/src/sama5/sam_boot.c:  If we have to copy vectors, then
+	  make sure to clean the DCache to be sure that the copied vectors are
+	  in the physical RAM (2014-4-2).
+	* arch/arm/src/sama5/sam_irq.c:  After we modify the AXI MATRIX, make
+	  sure to invalidate all caches and TLBs (probably un-necessary)
+	  (2014-4-2).

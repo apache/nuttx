@@ -210,7 +210,7 @@
 	.macro	cp15_disable_dcache, tmp
 	mrc		p15, 0, \tmp, c1, c0, 0		/* Read SCTLR */
 	bic		\tmp, \tmp, #(0x1 << 2)		/* Disable D cache */
-	mcr		p15, 0, \tmp, c1, c0, 0		/* Updagte the SCTLR */
+	mcr		p15, 0, \tmp, c1, c0, 0		/* Update the SCTLR */
 	.endm
 
 /************************************************************************************
@@ -231,7 +231,7 @@
 	mrc		p15, 0, \tmp, c1, c0, 0		/* Read SCTLR */
 	bic		\tmp, \tmp, #(0x1 << 12)	/* Disable I cache */
 	bic		\tmp, \tmp, #(0x1 << 2)		/* Disable D cache */
-	mcr		p15, 0, \tmp, c1, c0, 0		/* Updagte the SCTLR */
+	mcr		p15, 0, \tmp, c1, c0, 0		/* Update the SCTLR */
 	.endm
 
 /************************************************************************************
@@ -501,7 +501,7 @@ static inline void cp15_disable_dcache(void)
     (
       "\tmrc  p15, 0, r0, c1, c0, 0\n"  /* Read SCTLR */
       "\tbic  r0, r0, #(1 << 2)\n"      /* Disable D cache */
-      "\tmcr  p15, 0, r0, c1, c0, 0\n"  /* Updagte the SCTLR */
+      "\tmcr  p15, 0, r0, c1, c0, 0\n"  /* Update the SCTLR */
       :
       :
       : "r0", "memory"
@@ -529,7 +529,7 @@ static inline void cp15_disable_caches(void)
       "\tmrc  p15, 0, r0, c1, c0, 0\n"  /* Read SCTLR */
       "\tbic  r0, r0, #(1 << 12)\n"     /* Disable I cache */
       "\tbic  r0, r0, #(1 << 2)\n"      /* Disable D cache */
-      "\tmcr  p15, 0, r0, c1, c0, 0\n"  /* Updagte the SCTLR */
+      "\tmcr  p15, 0, r0, c1, c0, 0\n"  /* Update the SCTLR */
       :
       :
       : "r0", "memory"
