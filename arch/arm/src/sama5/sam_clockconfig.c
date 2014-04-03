@@ -482,10 +482,10 @@ static inline void sam_usbclockconfig(void)
  *   configured to work in different ways using the BMS pin and the contents
  *   of the Boot Sequence Configuration Register (BSC_CR).
  *
- *   If the BMS_BIT is read "1", then the first level bootloader will
+ *   If the BMS_BIT is read "0", then the first level bootloader will
  *   support execution of code in the memory connected to CS0 on the EBI
  *   interface (presumably NOR flash).  The following sequence is performed
- *   by the first level bootloader if BMS_BIT is "1":
+ *   by the first level bootloader if BMS_BIT is "0":
  *
  *     - The main clock is the on-chip 12 MHz RC oscillator,
  *     - The Static Memory Controller is configured with timing allowing
@@ -504,7 +504,7 @@ static inline void sam_usbclockconfig(void)
  *     - Program and Start the PLL
  *     - Switch the system clock to the new value
  *
- *  If the BMS_BIT is read "0", then the first level bootloader will
+ *  If the BMS_BIT is read "1", then the first level bootloader will
  *  perform:
  *
  *     - Basic chip initialization: XTal or external clock frequency
@@ -545,9 +545,9 @@ void sam_clockconfig(void)
    */
 
 #ifdef CONFIG_SAMA5_BOOT_CS0FLASH
-  /* Yes... did we get here via the first level bootloader? */
+  /* Yes... did we get here via the first level bootloader?  */
 
-  if ((getreg32(SAM_SFR_EBICFG) & SFR_EBICFG_BMS) != 0)
+  if ((getreg32(SAM_SFR_EBICFG) & SFR_EBICFG_BMS) == 0)
     {
       /* Yes.. Perform the following operations in order to complete the
        * clocks and SMC timings configuration to run at a higher clock

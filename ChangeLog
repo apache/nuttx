@@ -7128,4 +7128,6 @@
 	* arch/arm/src/sama5/sam_boot.c, sam_irq.c, and chip/sama5d3x_memorymap.h:
 	  When booting from SDRAM, don't relocated vectors to ISRAM.  Instead,
 	  just set the VBAR register to address of the vectors in SDRAM.
+	* arch/arm/src/sama5/sam_clockconfig.c: BMS Fixed to match what the HW
+	  does.  From David Sidrane (2014-4-3).
 
