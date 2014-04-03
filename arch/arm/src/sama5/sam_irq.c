@@ -237,7 +237,9 @@ static uint32_t *sam_fiqhandler(int irq, uint32_t *regs)
 
 void up_irqinitialize(void)
 {
+#if defined(CONFIG_SAMA5_BOOT_ISRAM) || defined(CONFIG_SAMA5_BOOT_CS0FLASH)
   size_t vectorsize;
+#endif
   int i;
 
   /* The following operations need to be atomic, but since this function is
@@ -309,7 +311,44 @@ void up_irqinitialize(void)
   putreg32(AIC_WPMR_WPKEY | AIC_WPMR_WPEN, SAM_AIC_WPMR);
 
 #if defined(CONFIG_ARCH_LOWVECTORS)
-  /* Set the vector base address register to zero */
+  /* If CONFIG_ARCH_LOWVECTORS is defined, then the vectors located at the
+   * beginning of the .text region must appear at address at the address
+   * specified in the VBAR.  There are three ways to accomplish this:
+   *
+   *   1. By explicitly mapping the beginning of .text region with a page
+   *      table entry so that the virtual address zero maps to the beginning
+   *      of the .text region.  VBAR == 0x0000:0000.
+   *
+   *   2. A second way is to map the use the AXI MATRIX remap register to
+   *      map physical address zero to the beginning of the text region,
+   *      either internal SRAM or EBI CS 0.  Then we can set an identity
+   *      mapping to map the boot region at 0x0000:0000 to virtual address
+   *      0x0000:00000.   VBAR == 0x0000:0000.
+   *
+   *      This method is used when booting from ISRAM or NOR FLASH.  In
+   &      that case, vectors must lie at the beginning of NOFR FLASH.
+   *
+   *   3. Set the Cortex-A5 VBAR register so that the vector table address
+   *      is moved to a location other than 0x0000:0000.
+   *
+   *      This is the method used when booting from SDRAM.
+   *
+   * - When executing from NOR FLASH, the first level bootloader is supposed
+   *   to provide the AXI MATRIX mapping for us at boot time base on the state
+   *   of the BMS pin.  However, I have found that in the test environments
+   *   that I use, I cannot always be assured of that physical address mapping.
+   *
+   * - If we are executing out of ISRAM, then the SAMA5 primary bootloader
+   *   probably copied us into ISRAM and set the AXI REMAP bit for us.
+   *
+   * - If we are executing from external SDRAM, then a secondary bootloader
+   *   must have loaded us into SDRAM.  In this case, simply set the VBAR
+   *   register to the address of the vector table (not necessary at the
+   *   beginning or SDRAM).
+   */
+
+#if defined(CONFIG_SAMA5_BOOT_ISRAM) || defined(CONFIG_SAMA5_BOOT_CS0FLASH)
+  /* Set the vector base address register to 0x0000:0000 */
 
   cp15_wrvbar(0);
 
@@ -338,12 +377,12 @@ void up_irqinitialize(void)
    * address 0x0000:0000 in that case anyway.
    */
 
-#if defined(CONFIG_SAMA5_BOOT_ISRAM) || defined(CONFIG_SAMA5_BOOT_SDRAM)
   putreg32(MATRIX_MRCR_RCB0, SAM_MATRIX_MRCR);   /* Enable Cortex-A5 remap */
+
+#if defined(CONFIG_SAMA5_BOOT_ISRAM)
   putreg32(AXIMX_REMAP_REMAP0, SAM_AXIMX_REMAP); /* Remap SRAM */
-#elif defined(CONFIG_SAMA5_BOOT_CS0FLASH)
-  putreg32(MATRIX_MRCR_RCB0, SAM_MATRIX_MRCR);   /* Enable Cortex-A5 remap */
-  putreg32(AXIMX_REMAP_REMAP1, SAM_AXIMX_REMAP); /* Remap NOR FLASH */
+#else /* elif defined(CONFIG_SAMA5_BOOT_CS0FLASH) */
+  putreg32(AXIMX_REMAP_REMAP1, SAM_AXIMX_REMAP); /* Remap NOR FLASH on CS0 */
 #endif
 
   /* Make sure that there is no trace of any previous mapping */
@@ -359,8 +398,14 @@ void up_irqinitialize(void)
   putreg32(MATRIX_WPMR_WPKEY | MATRIX_WPMR_WPEN, SAM_MATRIX_WPMR);
 #endif
 
-  /* It might be wise to flush the instruction cache here */
-#endif
+#elif defined(CONFIG_SAMA5_BOOT_SDRAM)
+  /* Set the VBAR register to the address of the vector table in SDRAM */
+
+  DEBUGASSERT((((uintptr_t)&_vector_start) & ~VBAR_MASK) == 0);
+  cp15_wrvbar((uint32_t)&_vector_start);
+
+#endif /* CONFIG_SAMA5_BOOT_ISRAM || CONFIG_SAMA5_BOOT_CS0FLASH */
+#endif /* CONFIG_ARCH_LOWVECTORS */
 
   /* currents_regs is non-NULL only while processing an interrupt */
 
