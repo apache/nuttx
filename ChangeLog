@@ -7130,4 +7130,8 @@
 	  just set the VBAR register to address of the vectors in SDRAM.
 	* arch/arm/src/sama5/sam_clockconfig.c: BMS Fixed to match what the HW
 	  does.  From David Sidrane (2014-4-3).
-
+	* arch/arm/src/sama5/Kconfig, sam_boot.c, andsam_clockconfig.c:  On some
+	  hardware, reconfiguring the PLL while executing out of NOR FLASH causes
+	  crashes.  This was fixed by David Sidrane by implementing RAM functions.
+	  The killer code is copied and executed from ISRAM and the crash is
+	  avoided (2014-4-3).
