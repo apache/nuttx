@@ -6,6 +6,21 @@
 if ARCH_BOARD_SAMA5D3X_EK
 
 choice
+	prompt "CPU Frequency"
+	default SAMA5D3xEK_396MHZ
+
+config SAMA5D3xEK_384MHZ
+	bool "384 MHz"
+
+config SAMA5D3xEK_396MHZ
+	bool "396 MHz"
+
+config SAMA5D3xEK_528MHZ
+	bool "528 MHz"
+
+endchoice # CPU Frequency
+
+choice
 	prompt "SAMA5D3x-EK DRAM Type"
 	default SAMA5D3xEK_MT47H128M16RT
 	depends on SAMA5_DDRCS

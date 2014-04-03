@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
@@ -63,7 +63,26 @@
 
 #  include <arch/board/board_sdram.h>
 
-#elif 1 /* #elif !defined(CONFIG_SAMA5_OHCI) || defined(CONFIG_SAMA5_EHCI) */
+#elif defined(CONFIG_SAMA5D3XPLAINED_384MHZ)
+/* OHCI Only.  This is an alternative slower configuration that will produce a 48MHz
+ * USB clock with the required accuracy using only PLLA.  When PPLA is used to clock
+ * OHCI, an additional requirement is the PLLACK be a multiple of 48MHz.  This setup
+ * results in a CPU clock of 384MHz.
+ *
+ * This case is only interesting for experimentation.
+ */
+
+#  include <arch/board/board_384mhz.h>
+
+#elif defined(CONFIG_SAMA5D3XPLAINED_528MHZ)
+/* This is the configuration results in a CPU clock of 528MHz.
+ *
+ * In this configuration, UPLL is the source of the UHPHS clock (if enabled).
+ */
+
+#  include <arch/board/board_529mhz.h>
+
+#else /* #elif defined(CONFIG_SAMA5D3XPLAINED_396MHZ) */
 /* This is the configuration provided in the Atmel example code.  This setup results
  * in a CPU clock of 396MHz.
  *
@@ -71,15 +90,6 @@
  */
 
 #  include <arch/board/board_396mhz.h>
-
-#else
-/* OHCI Only.  This is an alternative slower configuration that will produce a 48MHz
- * USB clock with the required accuracy using only PLLA.  When PPLA is used to clock
- * OHCI, an additional requirement is the PLLACK be a multiple of 48MHz.  This setup
- * results in a CPU clock of 384MHz.
- */
-
-#  include <arch/board/board_384mhz.h>
 
 #endif
 
