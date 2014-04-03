@@ -2733,6 +2733,8 @@ Configurations
     STATUS:
        See the To-Do list below
 
+       2014-4-3:  Delay loop calibrated: CONFIG_BOARD_LOOPSPERMSEC=65775
+
 To-Do List
 ==========
 
