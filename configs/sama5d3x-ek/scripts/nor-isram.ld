@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/sama5d3x-ek/scripts/nor-isram.ld
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,7 @@
 MEMORY
 {
 	norflash (W!RX) : ORIGIN = 0x10000000, LENGTH = 128M
-	isram    (WR)   : ORIGIN = 0x00304000, LENGTH = 128K - 16K
+	isram    (WRX)  : ORIGIN = 0x00304000, LENGTH = 128K - 16K
 }
 
 OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
@@ -110,6 +110,14 @@ SECTIONS
 		*(COMMON)
 		_ebss = ABSOLUTE(.);
 	} > isram
+
+	.ramfunc ALIGN(4): {
+		_sramfuncs = ABSOLUTE(.);
+		*(.ramfunc  .ramfunc.*)
+		_eramfuncs = ABSOLUTE(.);
+	} > isram AT > norflash
+
+	 _framfuncs = LOADADDR(.ramfunc);
 
 	/* Stabs debugging sections. */
 	.stab 0 : { *(.stab) }
