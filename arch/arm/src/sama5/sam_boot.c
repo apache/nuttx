@@ -648,6 +648,11 @@ static inline void sam_wdtdisable(void)
 
 void up_boot(void)
 {
+#ifdef CONFIG_ARCH_RAMFUNCS
+  const uint32_t *src;
+  uint32_t *dest;
+#endif
+
 #ifndef CONFIG_ARCH_ROMPGTABLE
   /* __start provided the basic MMU mappings for SRAM.  Now provide mappings
    * for all IO regions (Including the vector region).
@@ -662,6 +667,25 @@ void up_boot(void)
   sam_vectormapping();
 
 #endif /* CONFIG_ARCH_ROMPGTABLE */
+
+#ifdef CONFIG_ARCH_RAMFUNCS
+  /* Copy any necessary code sections from FLASH to RAM.  The correct
+   * destination in SRAM is given by _sramfuncs and _eramfuncs.  The
+   * temporary location is in flash after the data initialization code
+   * at _framfuncs
+   */
+
+  for (src = &_framfuncs, dest = &_sramfuncs; dest < &_eramfuncs; )
+    {
+      *dest++ = *src++;
+    }
+
+  /* Flush the copied RAM functions into physical RAM so that will
+   * be available when fetched into the I-Cache.
+   */
+
+  cp15_clean_dcache(&_sramfuncs, &_eramfuncs)
+#endif
 
   /* Setup up vector block.  _vector_start and _vector_end are exported from
    * arm_vector.S

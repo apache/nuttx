@@ -3568,6 +3568,7 @@ config SAMA5_BOOT_SDRAM
 config SAMA5_BOOT_CS0FLASH
 	bool "Running in external FLASH CS0"
 	depends on SAMA5_EBICS0_NOR
+	select ARCH_RAMFUNCS
 
 config SAMA5_BOOT_CS0SRAM
 	bool "Running in external FLASH CS0"

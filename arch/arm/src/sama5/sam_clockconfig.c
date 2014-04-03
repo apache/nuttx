@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_clockconfig.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,10 +56,33 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Do we need to setup the POLL?  Yes if we are booting from ISRAM or NOR
+ * FLASH on CS0.
+ */
+
 #undef NEED_PLLSETUP
 #if defined(CONFIG_SAMA5_BOOT_ISRAM) || defined(CONFIG_SAMA5_BOOT_CS0FLASH)
 #  define NEED_PLLSETUP 1
 #endif
+
+/* Problems have been seen when reconfiguring the PLL while executing out
+ * of NOR FLASH on CS0.  In that case, we required RAM function support.  The
+ * critical functions will be copied from NOR into ISRAM for execution.  This
+ * prevents any strange behavior from the NOR while we reconfigure the PLL.
+ */
+
+#if defined(CONFIG_SAMA5_BOOT_CS0FLASH) && !defined(CONFIG_ARCH_RAMFUNCS)
+# error "CONFIG_ARCH_RAMFUNCS must be defined for this logic"
+#endif
+
+#ifndef CONFIG_ARCH_RAMFUNCS
+#  undef  __ramfunc__
+#  define __ramfunc__
+#endif
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
 
 /****************************************************************************
  * Private Types
@@ -533,7 +556,7 @@ static inline void sam_usbclockconfig(void)
  *
  ****************************************************************************/
 
-void sam_clockconfig(void)
+void __ramfunc__ sam_clockconfig(void)
 {
 #ifdef CONFIG_SAMA5_BOOT_CS0FLASH
   bool config = false;

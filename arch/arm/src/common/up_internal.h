@@ -263,7 +263,7 @@ extern uint32_t _ebss;            /* End+1 of .bss */
 
 extern const uint32_t _framfuncs; /* Copy source address in FLASH */
 extern uint32_t _sramfuncs;       /* Copy destination start address in RAM */
-extern uint32_t _eramfuncs;       /* Copy destination start address in RAM */
+extern uint32_t _eramfuncs;       /* Copy destination end address in RAM */
 
 #endif /* CONFIG_ARCH_RAMFUNCS */
 #endif /* __ASSEMBLY__ */
