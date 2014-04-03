@@ -192,10 +192,10 @@ __start:
 
 	/* The MMU and caches should be disabled */
 
-	mrc		p15, 0, r0, c1, c0, 0
+	mrc		CP15_SCTLR(r0)
 	bic		r0, r0, #(SCTLR_M | SCTLR_C)
 	bic		r0, r0, #(SCTLR_I)
-	mcr		p15, 0, r0, c1, c0, 0
+	mcr		CP15_SCTLR(r0)
 
 	/* Clear the 16K level 1 page table */
 
