@@ -106,19 +106,6 @@
 #  define NEED_SDRAM_REMAPPING 1
 #endif
 
-/* We need to copy vectors under two conditions:
- *
- * 1. If vectors lie in high memory because CONFIG_ARCH_LOWVECTORS=n, or
- * 2. If vectors lie in low memory and we are executing from SDRAM.
- */
-
-#undef NEED_VECTOR_COPY
-#if !defined(CONFIG_ARCH_LOWVECTORS)
-#  define NEED_VECTOR_COPY 1
-#elif defined(CONFIG_SAMA5_BOOT_SDRAM)
-#  define NEED_VECTOR_COPY 1
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -146,28 +133,26 @@ static const struct section_mapping_s section_mapping[] =
   /* SAMA5 Internal Memories */
 
   /* If CONFIG_ARCH_LOWVECTORS is defined, then the vectors located at the
-   * beginning of the .text region must appear at address zero.  There are
-   * three ways to accomplish this:
+   * beginning of the .text region must appear at address at the address
+   * specified in the VBAR.  There are three ways to accomplish this:
    *
    *   1. By explicitly mapping the beginning of .text region with a page
    *      table entry so that the virtual address zero maps to the beginning
-   *      of the .text region.
+   *      of the .text region.  VBAR == 0x0000:0000.
    *
    *   2. A second way is to map the use the AXI MATRIX remap register to
    *      map physical address zero to the beginning of the text region,
    *      either internal SRAM or EBI CS 0.  Then we can set an identity
    *      mapping to map the boot region at 0x0000:0000 to virtual address
-   *      0x0000:00000
+   *      0x0000:00000.   VBAR == 0x0000:0000.
    *
-   *      This method is used when booting from NORFLASH.  In that case,
-   *      vectors must lie at the beginning of NOFR FLASH.
+   *      This method is used when booting from ISRAM or NOR FLASH.  In
+   &      that case, vectors must lie at the beginning of NOFR FLASH.
    *
-   *   3. Set the AXI MATRIX remap register so that SRAM appears at address
-   *      zero, mapping the boot region to address 0, then copying the
-   *      vectors to address zero.
+   *   3. Set the Cortex-A5 VBAR register so that the vector table address
+   *      is moved to a location other than 0x0000:0000.
    *
-   *      This is the method used when booting from either SDRAM or
-   *      SRAM.
+   *      This is the method used when booting from SDRAM.
    *
    * - When executing from NOR FLASH, the first level bootloader is supposed
    *   to provide the AXI MATRIX mapping for us at boot time base on the state
@@ -181,21 +166,16 @@ static const struct section_mapping_s section_mapping[] =
    *   probably copied us into ISRAM and set the AXI REMAP bit for us.
    *
    * - If we are executing from external SDRAM, then a secondary bootloader must
-   *   have loaded us into SDRAM.  In this case, we will may the BOOT memory,
-   *   set the AXI matrix to locate the ISRAM in boot memory, and copy the vector
-   *   table ISRAM.
+   *   have loaded us into SDRAM.  In this case, simply set the VBAR register
+   *   to the address of the vector table (not necessary at the beginning
+   *   or SDRAM).
    */
 
-#if defined(CONFIG_ARCH_LOWVECTORS) && !defined(CONFIG_SAMA5_BOOT_ISRAM)
-#  if defined(CONFIG_SAMA5_BOOT_SDRAM)
-  { SAM_ISRAM_PSECTION,    0x00000000,
-    MMU_ROMFLAGS,          1
-  },
-#  else
+#if defined(CONFIG_ARCH_LOWVECTORS) && !defined(CONFIG_SAMA5_BOOT_ISRAM) && \
+    !defined(CONFIG_SAMA5_BOOT_SDRAM)
   { CONFIG_FLASH_START,    0x00000000,
     MMU_ROMFLAGS,          1
   },
-#  endif
 #else
   { SAM_BOOTMEM_PSECTION,  SAM_BOOTMEM_VSECTION,
     SAM_BOOTMEM_MMUFLAGS,  SAM_BOOTMEM_NSECTIONS
@@ -512,7 +492,7 @@ static void sam_vectormapping(void)
  *
  ****************************************************************************/
 
-#ifdef NEED_VECTOR_COPY
+#if !defined(CONFIG_ARCH_LOWVECTORS)
 static void sam_copyvectorblock(void)
 {
   uint32_t *src;

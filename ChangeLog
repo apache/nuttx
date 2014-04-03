@@ -7122,3 +7122,10 @@
 	* arch/arm/src/sama5/sam_irq.c:  After we modify the AXI MATRIX, make
 	  sure to invalidate all caches and TLBs (probably un-necessary)
 	  (2014-4-2).
+	* arch/arm/src/sama5/sam_irq.c: Set the VBAR register to zero.  If
+	  were started by a bootloader (vs. a RESET), then the VBAR register
+	  may not be in its reset state (zero, 2014-4-3).
+	* arch/arm/src/sama5/sam_boot.c, sam_irq.c, and chip/sama5d3x_memorymap.h:
+	  When booting from SDRAM, don't relocated vectors to ISRAM.  Instead,
+	  just set the VBAR register to address of the vectors in SDRAM.
+
