@@ -204,7 +204,8 @@
  */
 
 /* Vector Base Address Register (VBAR) */
-/* TODO: To be provided */
+
+#define VBAR_MASK               (0xffffffe0)
 
 /* Monitor Vector Base Address Register (MVBAR) */
 /* TODO: To be provided */
@@ -307,6 +308,33 @@ static inline void cp15_wrsctlr(unsigned int sctlr)
       "\tnop\n"
       "\tnop\n"
       "\tnop\n"
+      :
+      : "r" (sctlr)
+      : "memory"
+    );
+}
+
+/* Read/write the vector base address register (VBAR) */
+
+static inline unsigned int cp15_rdvbar(void)
+{
+  unsigned int sctlr;
+  __asm__ __volatile__
+    (
+      "\tmrc p15, 0, %0, c12, c0, 0\n"
+      : "=r" (sctlr)
+      :
+      : "memory"
+    );
+
+  return sctlr;
+}
+
+static inline void cp15_wrvbar(unsigned int sctlr)
+{
+  __asm__ __volatile__
+    (
+      "\tmcr p15, 0, %0, c12, c0, 0\n"
       :
       : "r" (sctlr)
       : "memory"

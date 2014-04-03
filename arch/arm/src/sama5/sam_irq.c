@@ -56,6 +56,7 @@
 
 #include "mmu.h"
 #include "cache.h"
+#include "sctlr.h"
 #include "chip/sam_aic.h"
 #include "chip/sam_matrix.h"
 #include "chip/sam_aximx.h"
@@ -121,7 +122,7 @@ static void sam_dumpaic(const char *msg, int irq)
   lldbg("  SSR: %08x  SMR: %08x  SVR: %08x  IVR: %08x\n",
         getreg32(SAM_AIC_SSR),  getreg32(SAM_AIC_SMR),
         getreg32(SAM_AIC_SVR),  getreg32(SAM_AIC_IVR));
-  lldbg("  FVR: %08x ISR: %08x\n",
+  lldbg("  FVR: %08x  ISR: %08x\n",
         getreg32(SAM_AIC_FVR),  getreg32(SAM_AIC_ISR));
   lldbg("  IPR: %08x       %08x       %08x       %08x\n",
         getreg32(SAM_AIC_IPR0), getreg32(SAM_AIC_IPR1),
@@ -129,9 +130,9 @@ static void sam_dumpaic(const char *msg, int irq)
   lldbg("  IMR: %08x CISR: %08x  SPU: %08x FFSR: %08x\n",
         getreg32(SAM_AIC_IMR),  getreg32(SAM_AIC_CISR),
         getreg32(SAM_AIC_SPU),  getreg32(SAM_AIC_FFSR));
-  lldbg("  DCR: %08x WPMR: %08x WPMR: %08x\n",
+  lldbg("  DCR: %08x WPMR: %08x WPSR: %08x\n",
         getreg32(SAM_AIC_DCR),  getreg32(SAM_AIC_WPMR),
-        getreg32(SAM_AIC_WPMR));
+        getreg32(SAM_AIC_WPSR));
   irqrestore(flags);
 }
 #else
@@ -308,9 +309,13 @@ void up_irqinitialize(void)
   putreg32(AIC_WPMR_WPKEY | AIC_WPMR_WPEN, SAM_AIC_WPMR);
 
 #if defined(CONFIG_ARCH_LOWVECTORS)
-  /* Disable MATRIX write protection */
+  /* Set the vector base address register to zero */
+
+  cp15_wrvbar(0);
 
 #if 0 /* Disabled on reset */
+  /* Disable MATRIX write protection */
+
   putreg32(MATRIX_WPMR_WPKEY, SAM_MATRIX_WPMR);
 #endif
 
@@ -348,9 +353,9 @@ void up_irqinitialize(void)
   cp15_invalidate_dcache(0, vectorsize);
   mmu_invalidate_region(0, vectorsize);
 
+#if 0 /* Disabled on reset */
   /* Restore MATRIX write protection */
 
-#if 0 /* Disabled on reset */
   putreg32(MATRIX_WPMR_WPKEY | MATRIX_WPMR_WPEN, SAM_MATRIX_WPMR);
 #endif
 

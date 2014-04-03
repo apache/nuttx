@@ -546,6 +546,7 @@ Load NuttX with U-Boot on AT91 boards
         U-Boot> fatload mmc 0 0x22000000 uimage
         reading uimage
         97744 bytes read in 21 ms (4.4 MiB/s)
+
         U-Boot> bootm 0x22000000
         ## Booting kernel from Legacy Image at 0x22000000 ...
            Image Name:   nuttx
@@ -560,18 +561,21 @@ Load NuttX with U-Boot on AT91 boards
 
       This, however, appears to be a usable workaround:
 
-      U-Boot> fatload mmc 0 0x20008000 nuttx.bin
-      mci: setting clock 257812 Hz, block size 512
-      mci: setting clock 257812 Hz, block size 512
-      mci: setting clock 257812 Hz, block size 512
-      gen_atmel_mci: CMDR 00001048 ( 8) ARGR 000001aa (SR: 0c100025) Command Time Out
-      mci: setting clock 257812 Hz, block size 512
-      mci: setting clock 22000000 Hz, block size 512
-      reading nuttx.bin
-      108076 bytes read in 23 ms (4.5 MiB/s)
-      U-Boot> go 0x20008040
-      ## Starting application at 0x20008040 ...
-      os_start: Entry
+        U-Boot> fatload mmc 0 0x20008000 nuttx.bin
+        mci: setting clock 257812 Hz, block size 512
+        mci: setting clock 257812 Hz, block size 512
+        mci: setting clock 257812 Hz, block size 512
+        gen_atmel_mci: CMDR 00001048 ( 8) ARGR 000001aa (SR: 0c100025) Command Time Out
+        mci: setting clock 257812 Hz, block size 512
+        mci: setting clock 22000000 Hz, block size 512
+        reading nuttx.bin
+        108076 bytes read in 23 ms (4.5 MiB/s)
+
+        U-Boot> go 0x20008040
+        ## Starting application at 0x20008040 ...
+
+        NuttShell (NSH) NuttX-7.2
+        nsh>
 
   Loading through network
 
@@ -2729,26 +2733,14 @@ Configurations
     STATUS:
        See the To-Do list below
 
-      I2C
-      2014-9-12:  The I2C tool, however, seems to work well.  It succesfully
-        enumerates the devices on the bus and successfully exchanges a few
-        commands.  The real test of the come later when a real I2C device is
-        integrated.
-
 To-Do List
 ==========
 
-1) Currently the SAMA5Dx is running at 396MHz in these configurations.  This
-   is because the timing for the PLLs, NOR FLASH, and SDRAM came from the
-   Atmel NoOS sample code which runs at that rate.  The SAMA5Dx is capable
-   of running at 536MHz, however.  The setup for that configuration exists
-   in the BareBox assembly language setup and should be incorporated.
-
-2) Neither USB OHCI nor EHCI support Isochronous endpoints.  Interrupt
+1) Neither USB OHCI nor EHCI support Isochronous endpoints.  Interrupt
    endpoint support in the EHCI driver is untested (but works in similar
    EHCI drivers).
 
-3) HSCMI TX DMA support is currently commented out.
+2) HSCMI TX DMA support is currently commented out.
 
-7) GMAC has only been tested on a 10/100Base-T network.  I don't have a
+3) GMAC has only been tested on a 10/100Base-T network.  I don't have a
    1000Base-T network to support additional testing.
