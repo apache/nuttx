@@ -88,10 +88,19 @@ int nor_main(int argc, char *argv)
 {
   uint32_t regval;
 
+  /* Here we have a in memory value we can change in the debugger
+   * to begin booting in NOR Flash
+   */
+
+  static volatile uint32_t wait = 1;
+
 #ifdef CONFIG_SAMA5D3xEK_NOR_START
   printf("Configuring and booting from NOR FLASH on CS0\n");
+  wait = 0;
+
 #else
-  printf("Configuring NOR FLASH on CS0 and halting\n");
+  printf("Configuring NOR FLASH on CS0 and waiting\n");
+  wait = 1;
 #endif
 
   /* Make sure that the SMC peripheral is enabled (But of course it is... we
@@ -180,16 +189,14 @@ int nor_main(int argc, char *argv)
   cp15_invalidate_dcache_all();
   cp15_invalidate_tlbs();
 
-#ifdef CONFIG_SAMA5D3xEK_NOR_START
   /* Then jump into NOR flash */
+
+  while (!wait)
+    {
+    }
 
   NOR_ENTRY();
 
-#else
-  /* Or just wait patiently for the user to break in with GDB. */
-
-  for (;;);
-#endif
 
   return 0; /* We should not get here in either case */
 }
