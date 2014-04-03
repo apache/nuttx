@@ -274,7 +274,7 @@ __start:
 
 	add		r2, r5, r2, lsr #18		/* R2=Offset page table address */
 
-	/* No loop until each page table entry has been written for the .text
+	/* Now loop until each page table entry has been written for the .text
 	 * region.
 	 */
 
