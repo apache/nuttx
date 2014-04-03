@@ -667,6 +667,7 @@ Load NuttX with U-Boot on AT91 boards
         U-Boot> fatload mmc 0 0x22000000 uimage
         reading uimage
         97744 bytes read in 21 ms (4.4 MiB/s)
+
         U-Boot> bootm 0x22000000
         ## Booting kernel from Legacy Image at 0x22000000 ...
            Image Name:   nuttx
@@ -681,18 +682,21 @@ Load NuttX with U-Boot on AT91 boards
 
       This, however, appears to be a usable workaround:
 
-      U-Boot> fatload mmc 0 0x20008000 nuttx.bin
-      mci: setting clock 257812 Hz, block size 512
-      mci: setting clock 257812 Hz, block size 512
-      mci: setting clock 257812 Hz, block size 512
-      gen_atmel_mci: CMDR 00001048 ( 8) ARGR 000001aa (SR: 0c100025) Command Time Out
-      mci: setting clock 257812 Hz, block size 512
-      mci: setting clock 22000000 Hz, block size 512
-      reading nuttx.bin
-      108076 bytes read in 23 ms (4.5 MiB/s)
-      U-Boot> go 0x20008040
-      ## Starting application at 0x20008040 ...
-      os_start: Entry
+        U-Boot> fatload mmc 0 0x20008000 nuttx.bin
+        mci: setting clock 257812 Hz, block size 512
+        mci: setting clock 257812 Hz, block size 512
+        mci: setting clock 257812 Hz, block size 512
+        gen_atmel_mci: CMDR 00001048 ( 8) ARGR 000001aa (SR: 0c100025) Command Time Out
+        mci: setting clock 257812 Hz, block size 512
+        mci: setting clock 22000000 Hz, block size 512
+        reading nuttx.bin
+        108076 bytes read in 23 ms (4.5 MiB/s)
+
+        U-Boot> go 0x20008040
+        ## Starting application at 0x20008040 ...
+
+        NuttShell (NSH) NuttX-7.2
+        nsh>
 
   Loading through network
 
@@ -828,8 +832,10 @@ Serial Consoles
     PB28 RXD1       PIO_USART1_RXD
     PB26 CTS1       PIO_USART1_CTS
 
-    NOTE: Debug TX and RX pins also go to the ADM3312EARU, but I am
-    uncertain of the functionality.
+    NOTE: Debug TX (DTXD) and RX (DRXD) pins also are routed to the 
+    ADM3312EARU via non populated 0 Ohm resistors. Thus allowing one
+    skilled with a soldering iron to choose which UART is level
+    translated by the ADM3312EARU
 
     -------------------------------
     SAMA5 FUNCTION  NUTTX PIO
