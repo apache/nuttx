@@ -112,13 +112,13 @@
 
 #if defined(CONFIG_SAMA5D3xEK_384MHZ)
 #  define NSEC_TO_COUNT(nsec)     ((((nsec) * 1000) / 15625) + LOOP_GUARD)
-#  define USEC_TO_COUNT(usec)     (((usec) * 1000000) / 15625) + LOOP_GUARD)
+#  define USEC_TO_COUNT(usec)     ((((usec) * 1000000) / 15625) + LOOP_GUARD)
 #elif defined(CONFIG_SAMA5D3xEK_528MHZ)
 #  define NSEC_TO_COUNT(nsec)     ((((nsec) * 1000) / 11364) + LOOP_GUARD)
-#  define USEC_TO_COUNT(usec)     (((usec) * 1000000) / 11364) + LOOP_GUARD)
+#  define USEC_TO_COUNT(usec)     ((((usec) * 1000000) / 11364) + LOOP_GUARD)
 #else /* #elif defined(CONFIG_SAMA5D3xEK_396MHZ) */
 #  define NSEC_TO_COUNT(nsec)     ((((nsec) * 1000) / 15152) + LOOP_GUARD)
-#  define USEC_TO_COUNT(usec)     (((usec) * 1000000) / 15152) + LOOP_GUARD)
+#  define USEC_TO_COUNT(usec)     ((((usec) * 1000000) / 15152) + LOOP_GUARD)
 #endif
 
 /****************************************************************************
