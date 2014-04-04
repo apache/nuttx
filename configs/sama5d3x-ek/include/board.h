@@ -80,7 +80,7 @@
  * In this configuration, UPLL is the source of the UHPHS clock (if enabled).
  */
 
-#  include <arch/board/board_529mhz.h>
+#  include <arch/board/board_528mhz.h>
 
 #else /* #elif defined(CONFIG_SAMA5D3xEK_396MHZ) */
 /* This is the configuration provided in the Atmel example code.  This setup results

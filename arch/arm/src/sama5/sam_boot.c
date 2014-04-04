@@ -684,7 +684,7 @@ void up_boot(void)
    * be available when fetched into the I-Cache.
    */
 
-  cp15_clean_dcache(&_sramfuncs, &_eramfuncs)
+  cp15_clean_dcache((uintptr_t)&_sramfuncs, (uintptr_t)&_eramfuncs)
 #endif
 
   /* Setup up vector block.  _vector_start and _vector_end are exported from

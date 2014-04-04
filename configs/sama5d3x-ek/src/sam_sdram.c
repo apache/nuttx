@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/sama5d3x-ek/src/sam_sdram.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Most of this file derives from Atmel sample code for the SAMA5D3x-E
@@ -89,6 +89,38 @@
 #  error Unknown SDRAM type
 #endif
 
+/* The delay loop in sam_sdram_delay requires 6 core cycles per iteration.
+ *
+ *   At 384MHz:
+ *
+ *     (6 cycles/iteration) / (0.384 cycles/nanosecond) =
+ *       15.6250 nanoseconds per iteration
+ *
+ *   At 396MHz:
+ *
+ *     (6 cycles/iteration) / (0.396 cycles/nanosecond) =
+ *       15.1515 nanoseconds per iteration
+ *
+ *   At 528MHz:
+ *
+ *     (6 cycles/iteration) / (0.528 cycles/nanosecond) =
+ *       11.3636 nanoseconds per iteration
+ */
+
+#define LOOP_GUARD 100
+#  define CYCLES_TO_COUNT(cycles) (((cycles) / 6) + LOOP_GUARD)
+
+#if defined(CONFIG_SAMA5D3xEK_384MHZ)
+#  define NSEC_TO_COUNT(nsec)     ((((nsec) * 1000) / 15625) + LOOP_GUARD)
+#  define USEC_TO_COUNT(usec)     (((usec) * 1000000) / 15625) + LOOP_GUARD)
+#elif defined(CONFIG_SAMA5D3xEK_528MHZ)
+#  define NSEC_TO_COUNT(nsec)     ((((nsec) * 1000) / 11364) + LOOP_GUARD)
+#  define USEC_TO_COUNT(usec)     (((usec) * 1000000) / 11364) + LOOP_GUARD)
+#else /* #elif defined(CONFIG_SAMA5D3xEK_396MHZ) */
+#  define NSEC_TO_COUNT(nsec)     ((((nsec) * 1000) / 15152) + LOOP_GUARD)
+#  define USEC_TO_COUNT(usec)     (((usec) * 1000000) / 15152) + LOOP_GUARD)
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -99,8 +131,8 @@
  * Description:
  *   Precision delay function for SDRAM configuration.
  *
- *   This delay loop requires 6 core cycles per iteration.  At 396MHz, that
- *   is equivalent to 15.1515 nanoseconds per iteration.
+ *   This delay loop requires 6 core cycles per iteration.  The actual
+ *   amount of time delayed will then vary with PCK.
  *
  ****************************************************************************/
 
@@ -323,7 +355,7 @@ void sam_sdram_config(void)
 
   /* DDRSDRC Low-power Register */
 
-  sam_sdram_delay(13300);
+  sam_sdram_delay(USEC_TO_COUNT(200));
 
   regval = MPDDRC_LPR_LPCB_DISABLED |  /* Low-power Feature is inhibited */
            MPDDRC_LPR_TIMEOUT_0CLKS |  /* Activates low-power mode after the end of transfer */
@@ -349,7 +381,7 @@ void sam_sdram_config(void)
    * (6 core cycles per iteration, core is at 396MHz: min 13200 loops)
    */
 
-  sam_sdram_delay(13300);
+  sam_sdram_delay(USEC_TO_COUNT(200));
 
   /* Step 4:  An NOP command is issued to the DDR2-SDRAM */
 
@@ -362,7 +394,7 @@ void sam_sdram_config(void)
   /* Now CKE is driven high.*/
   /* Wait 400 ns min */
 
-  sam_sdram_delay(100);
+  sam_sdram_delay(NSEC_TO_COUNT(400));
 
   /* Step 5: An all banks precharge command is issued to the DDR2-SDRAM. */
 
@@ -374,7 +406,7 @@ void sam_sdram_config(void)
 
   /* Wait 400 ns min */
 
-  sam_sdram_delay(100);
+  sam_sdram_delay(NSEC_TO_COUNT(400));
 
   /* Step 6: An Extended Mode Register set (EMRS2) cycle is  issued to chose
    * between commercialor high  temperature operations.
@@ -388,7 +420,7 @@ void sam_sdram_config(void)
 
   /* Wait 2 cycles min */
 
-  sam_sdram_delay(100);
+  sam_sdram_delay(100 /* CYCLES_TO_COUNT(2) */);
 
   /* Step 7: An Extended Mode Register set (EMRS3) cycle is issued to set
    * all registers to 0.
@@ -402,7 +434,7 @@ void sam_sdram_config(void)
 
   /* Wait 2 cycles min */
 
-  sam_sdram_delay(100);
+  sam_sdram_delay(100 /* CYCLES_TO_COUNT(2) */);
 
   /* Step 8:  An Extended Mode Register set (EMRS1) cycle is issued to enable DLL.
    *
@@ -414,7 +446,7 @@ void sam_sdram_config(void)
 
   /* An additional 200 cycles of clock are required for locking DLL */
 
-  sam_sdram_delay(10000);
+  sam_sdram_delay(10000 /* CYCLES_TO_COUNT(200) */);
 
   /* Step 9:  Program DLL field into the Configuration Register.*/
 
@@ -432,7 +464,7 @@ void sam_sdram_config(void)
 
   /* Wait 2 cycles min */
 
-  sam_sdram_delay(100);
+  sam_sdram_delay(100 /* CYCLES_TO_COUNT(2) */);
 
   /* Step 11: An all banks precharge command is issued to the DDR2-SDRAM.
    *
@@ -445,7 +477,7 @@ void sam_sdram_config(void)
 
   /* Wait 2 cycles min */
 
-  sam_sdram_delay(100);
+  sam_sdram_delay(100 /* CYCLES_TO_COUNT(2) */);
 
   /* Step 12: Two auto-refresh (CBR) cycles are provided. Program the auto
    * refresh command (CBR) into the Mode Register.
@@ -459,7 +491,7 @@ void sam_sdram_config(void)
 
   /* Wait 2 cycles min */
 
-  sam_sdram_delay(100);
+  sam_sdram_delay(100 /* CYCLES_TO_COUNT(2) */);
 
   /* Configure 2nd CBR.
    *
@@ -471,7 +503,7 @@ void sam_sdram_config(void)
 
   /* Wait 2 cycles min */
 
-  sam_sdram_delay(100);
+  sam_sdram_delay(100 /* CYCLES_TO_COUNT(2) */);
 
   /* Step 13: Program DLL field into the Configuration Register to low
    * (Disable DLL reset).
@@ -492,7 +524,7 @@ void sam_sdram_config(void)
 
   /* Wait 2 cycles min */
 
-  sam_sdram_delay(100);
+  sam_sdram_delay(100 /* CYCLES_TO_COUNT(2) */);
 
   /* Step 15: Program OCD field into the Configuration Register to high (OCD
    * calibration default).
@@ -514,7 +546,7 @@ void sam_sdram_config(void)
 
   /* Wait 2 cycles min */
 
-  sam_sdram_delay(100);
+  sam_sdram_delay(100 /* CYCLES_TO_COUNT(2) */);
 
   /* Step 17: Program OCD field into the Configuration Register to low (OCD
    * calibration mode exit).
@@ -538,7 +570,7 @@ void sam_sdram_config(void)
 
   /* Wait 2 cycles min */
 
-  sam_sdram_delay(100);
+  sam_sdram_delay(100 /* CYCLES_TO_COUNT(2) */);
 
   /* Step 19,20: A mode Normal command is provided. Program the Normal mode
    * into Mode Register.
