@@ -3394,18 +3394,8 @@ To-Do List
        CONFIG_SAMA5D3xEK_528MHZ=y
 
    Basic operation at 528MHz has been verified but is not the default in
-   these configurations because most testing was done at 396MHz.
-
-     - The apps/system/ramtest runs without errors, but runs very slowly.
-       It looks like it takes about 90 seconds to test 1MiB of RAM. That
-       means that a full 256MiB RAM test should take about 6 hours.  That
-       is too long.  This implies that there is something wrong with the
-       SDRAM configuration.
-     - Similarly, while attempting to calibrate the delay loop, I find that
-       the 100s calibration delay runs for a very long time.  This is not
-       correct, of course, with a higher CPU clock, the calibration delay
-       should be shorter if anything!
-     - NAND time has not been tested.
+   these configurations because most testing was done at 396MHz.  NAND
+   has not been verified at these rates.
 
 2) Most of these configurations execute from NOR FLASH. I have been unable
    to execute these configurations from NOR FLASH by closing the BMS jumper
