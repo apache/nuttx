@@ -1,7 +1,7 @@
 ############################################################################
 # arch/arm/sama5/Make.defs
 #
-#   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -162,11 +162,13 @@ ifeq ($(CONFIG_SAMA5_UDPHS),y)
 CHIP_CSRCS += sam_udphs.c
 endif
 
+ifeq ($(CONFIG_USBHOST),y)
 ifeq ($(CONFIG_USBHOST_TRACE),y)
 CHIP_CSRCS += sam_usbhost.c
 else
 ifeq ($(CONFIG_DEBUG_USB),y)
 CHIP_CSRCS += sam_usbhost.c
+endif
 endif
 endif
 
