@@ -343,7 +343,7 @@ config ARCH_HAVE_RAMFUNCS
 
 config ARCH_RAMFUNCS
 	bool "Copy functions to RAM on startup"
-	default n
+	default y
 	depends on ARCH_HAVE_RAMFUNCS
 	---help---
 		Copy some functions to RAM at boot time.  This is done in some
