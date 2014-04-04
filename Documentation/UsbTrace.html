@@ -328,5 +328,125 @@ static int pl2303_setup(FAR struct uart_dev_s *dev)
     And the interrupt returns
   </li>
 </ul>
+<p><b>USB Monitor</b>.
+  The <i>USB monitor</i> is an application in the <code>apps/system/usbmonitor</code> that provides a convenient way to get debug trace output.
+  If tracing is enabled, the USB device will save encoded trace output in in-memory buffer;
+  if the USB monitor is also enabled, that trace buffer will be periodically emptied and dumped to the
+  system logging device (the serial console in most configurations).
+  The following are some of the relevant configuration options:
+</p>
+<ul>
+<table width="100%">
+  <tr>
+    <td colspan="2" align="left" valign="top" bgcolor="#e4e4e4">
+      <i>Device Drivers -&gt; USB Device Driver Support</i>
+    </td>
+  </tr>
+  <tr>
+    <td width="30%" align="left" valign="top">
+      <code>CONFIG_USBDEV_TRACE=y</code>
+    </td>
+    <td align="left" valign="top">
+      Enable USB trace feature
+    </td>
+  </tr>
+  <tr>
+    <td width="30%" align="left" valign="top">
+      <code>CONFIG_USBDEV_TRACE_NRECORDS=<i>nnnn</i></code>
+    </td>
+    <td align="left" valign="top">
+      Buffer <i>nnnn</i> records in memory.
+      If you lose trace data, then you will need to increase the size of this buffer
+      (or increase the rate at which the trace buffer is emptied).
+     </td>
+  </tr>
+    <td width="30%" align="left" valign="top">
+      <code>CONFIG_USBDEV_TRACE_STRINGS=y</code>
+    </td>
+    <td align="left" valign="top">
+      Optionally, convert trace ID numbers to strings.
+      This feature may not be supported by all drivers.
+    </td>
+  <tr>
+    <td colspan="2" align="left" valign="top" bgcolor="#e4e4e4">
+      <i>Application Configuration -&gt; NSH LIbrary</i>
+    </td>
+  </tr>
+  <tr>
+    <td width="30%" align="left" valign="top">
+      <code>CONFIG_NSH_USBDEV_TRACE=n</code>
+    </td>
+    <td align="left" valign="top">
+      Make sure that any built-in tracing from NSH is disabled.
+    </td>
+  </tr>
+  <tr>
+    <td width="30%" align="left" valign="top">
+      <code>CONFIG_NSH_ARCHINIT=y</code>
+    </td>
+    <td align="left" valign="top">
+      Enable this option <i>only</i> if your board-specific logic has logic to automatically start the USB monitor.
+      Otherwise the USB monitor can be started or stopped with the <code>usbmon_start</code> and <code>usbmon_stop</code> commands from the NSH console.
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" align="left" valign="top" bgcolor="#e4e4e4">
+      <i>Application Configuration -&gt; System NSH Add-Ons</i>
+    </td>
+  </tr>
+  <tr>
+    <td width="30%" align="left" valign="top">
+      <code>CONFIG_SYSTEM_USBMONITOR=y</code>
+    </td>
+    <td align="left" valign="top">
+      Enable the USB monitor daemon
+    </td>
+  </tr>
+  <tr>
+    <td width="30%" align="left" valign="top">
+      <code>CONFIG_SYSTEM_USBMONITOR_STACKSIZE=<i>nnnn</i></code>
+    </td>
+    <td align="left" valign="top">
+      Sets the USB monitor daemon stack size to <i>nnnn</i>.
+      The default is 2KiB.
+    </td>
+  </tr>
+  <tr>
+    <td width="30%" align="left" valign="top">
+      <code>CONFIG_SYSTEM_USBMONITOR_PRIORITY=50</code>
+    </td>
+    <td align="left" valign="top">
+      Sets the USB monitor daemon priority to <i>nnnn</i>.
+      This priority should be low so that it does not interfere with other operations, but not so low that you cannot dump the buffered USB data sufficiently rapidly.
+      The default is 50.
+    </td>
+  </tr>
+  <tr>
+    <td width="30%" align="left" valign="top">
+      <code>CONFIG_SYSTEM_USBMONITOR_INTERVAL=<i>nnnn</i></code>
+    </td>
+    <td align="left" valign="top">
+      Dump the buffered USB data every <i>nnnn</i> seconds.
+      If you lose buffered USB trace data, then dropping this value will help by increasing the rate at which the USB trace buffer is emptied.
+    </td>
+  </tr>
+  <tr>
+    <td width="30%" align="left" valign="top">
+      <code>CONFIG_SYSTEM_USBMONITOR_TRACEINIT=y</code><br>
+      <code>CONFIG_SYSTEM_USBMONITOR_TRACECLASS=y</code><br>
+      <code>CONFIG_SYSTEM_USBMONITOR_TRACETRANSFERS=y</code><br>
+      <code>CONFIG_SYSTEM_USBMONITOR_TRACECONTROLLER=y</code><br>
+      <code>CONFIG_SYSTEM_USBMONITOR_TRACEINTERRUPTS=y</code><br>
+    </td>
+    <td align="left" valign="top">
+      Selects which USB event(s) that you want to be traced.
+    </td>
+  </tr>
+</table>
+</ul>
+<p>
+  NOTE: If USB debug output is also enabled, both outputs will appear on the serial console.
+  However, the debug output will be asynchronous with the trace output and, hence, difficult to interpret.
+</p>
 </body>
 </html>
