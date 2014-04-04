@@ -7135,3 +7135,11 @@
 	  crashes.  This was fixed by David Sidrane by implementing RAM functions.
 	  The killer code is copied and executed from ISRAM and the crash is
 	  avoided (2014-4-3).
+	* configs/sama5d3-xplained/Kconfig and include/board*.h;
+	  configs/sama5d3x-ek/Kconfig and include/board*.h:  Add support for
+	  528MHz CPU clock (2014-4-3).
+	* arch/arm/src/sama5/Make.defs:  Fix a build error that occurs when
+	  only USB device tracing is enabled (2014-4-4).
+	* Documentation/UsbTrace.html:  Add some discussion of the USB monitor
+	  (2014-4-4).
+
