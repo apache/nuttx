@@ -1436,11 +1436,6 @@ USB High-Speed Host
     Application Configuration -> NSH Library
       CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
 
-  NOTE:  When OHCI is selected, the SAMA5 will operate at 384MHz instead of
-  396MHz.  This is so that the PLL generates a frequency which is a multiple
-  of the 48MHz needed for OHCI.  The delay loop calibration values that are
-  used will be off slightly because of this.
-
   EHCI
   ----
 
@@ -1630,7 +1625,7 @@ SDRAM Support
       CONFIG_SYSTEM_RAMTEST=y
 
   In this configuration, the SDRAM is not added to heap and so is not
-  accessable to the applications.  So the RAM test can be freely executed
+  accessible to the applications.  So the RAM test can be freely executed
   against the SRAM memory beginning at address 0x2000:0000 (DDR CS):
 
     nsh> ramtest -h
@@ -3389,9 +3384,28 @@ To-Do List
 
 1) Currently the SAMA5Dx is running at 396MHz in these configurations.  This
    is because the timing for the PLLs, NOR FLASH, and SDRAM came from the
-   Atmel NoOS sample code which runs at that rate.  The SAMA5Dx is capable
-   of running at 528MHz, however.  The setup for that configuration exists
-   in the Bareboard assembly language setup and should be incorporated.
+   Atmel NoOS sample code which runs at that rate.
+
+   The SAMA5Dx is capable of running at 528MHz, however, and is easily
+   configured:
+
+     Board Selection -> CPU Frequency
+       CONFIG_SAMA5D3xEK_396MHZ=n
+       CONFIG_SAMA5D3xEK_528MHZ=y
+
+   Basic operation at 528MHz has been verified but is not the default in
+   these configurations because most testing was done at 396MHz.
+
+     - The apps/system/ramtest runs without errors, but runs very slowly.
+       It looks like it takes about 90 seconds to test 1MiB of RAM. That
+       means that a full 256MiB RAM test should take about 6 hours.  That
+       is too long.  This implies that there is something wrong with the
+       SDRAM configuration.
+     - Similarly, while attempting to calibrate the delay loop, I find that
+       the 100s calibration delay runs for a very long time.  This is not
+       correct, of course, with a higher CPU clock, the calibration delay
+       should be shorter if anything!
+     - NAND time has not been tested.
 
 2) Most of these configurations execute from NOR FLASH. I have been unable
    to execute these configurations from NOR FLASH by closing the BMS jumper
