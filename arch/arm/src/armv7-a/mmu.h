@@ -2,7 +2,7 @@
  * arch/arm/src/armv7-a/mmu.h
  * CP15 MMU register definitions
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -296,7 +296,7 @@
 #define PMD_SECT_PXN         (1 << 0)     /* Bit 0:  Privileged execute-never bit */
                                           /* Bits 0-1: Type of mapping */
 #define PMD_SECT_B           (1 << 2)     /* Bit 2:  Bufferable bit */
-#define PMD_SECT_C           (1 << 3)     /* Bit 3:  Cacheable bit*/
+#define PMD_SECT_C           (1 << 3)     /* Bit 3:  Cacheable bit */
 #define PMD_SECT_XN          (1 << 4)     /* Bit 4:  Execute-never bit */
 #define PMD_SECT_DOM_SHIFT   (5)          /* Bits 5-8: Domain */
 #define PMD_SECT_DOM_MASK    (15 << PMD_SECT_DOM_SHIFT)
@@ -502,8 +502,7 @@
 
 #define PMD_STRONGLY_ORDERED (0)
 #define PMD_DEVICE           (PMD_SECT_B)
-#define PMD_WRITE_THROUGH    (PMD_SECT_C)
-#define PMD_WRITE_BACK       (PMD_SECT_B | PMD_SECT_C)
+#define PM_CACHEABLE         (PMD_SECT_B | PMD_SECT_C)
 
 #define PTE_STRONGLY_ORDER   (0)
 #define PTE_DEVICE           (PTE_B)
@@ -515,9 +514,9 @@
  * REVISIT:  Here we expect all threads to be running at PL1
  */
 
-#define MMU_ROMFLAGS         (PMD_TYPE_SECT | PMD_SECT_AP_R1 | PMD_WRITE_THROUGH | \
+#define MMU_ROMFLAGS         (PMD_TYPE_SECT | PMD_SECT_AP_R1 | PM_CACHEABLE | \
                               PMD_SECT_DOM(0))
-#define MMU_MEMFLAGS         (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | PMD_WRITE_BACK | \
+#define MMU_MEMFLAGS         (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | PM_CACHEABLE | \
                               PMD_SECT_DOM(0))
 #define MMU_IOFLAGS          (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | PMD_DEVICE | \
                               PMD_SECT_DOM(0) | PMD_SECT_XN)
