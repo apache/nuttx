@@ -109,7 +109,7 @@
  ****************************************************************************/
 
 #if defined(NEED_PLLSETUP)
-static void sam_pmcwait(uint32_t bit)
+static void __ramfunc__ sam_pmcwait(uint32_t bit)
 {
   /* There is no timeout on this wait.  Why not?  Because the symptoms there
    * is no fallback if the wait times out and if the wait does time out, it
@@ -130,7 +130,7 @@ static void sam_pmcwait(uint32_t bit)
  ****************************************************************************/
 
 #if defined(NEED_PLLSETUP)
-static inline void sam_enablemosc(void)
+static inline void __ramfunc__ sam_enablemosc(void)
 {
   uint32_t regval;
 
@@ -185,7 +185,7 @@ static inline void sam_enablemosc(void)
  ****************************************************************************/
 
 #if defined(NEED_PLLSETUP)
-static inline void sam_selectmosc(void)
+static inline void __ramfunc__ sam_selectmosc(void)
 {
   uint32_t regval;
 
@@ -213,7 +213,7 @@ static inline void sam_selectmosc(void)
  ****************************************************************************/
 
 #if defined(NEED_PLLSETUP)
-static inline void sam_pllasetup(void)
+static inline void __ramfunc__ sam_pllasetup(void)
 {
   uint32_t regval;
 
@@ -243,7 +243,7 @@ static inline void sam_pllasetup(void)
  ****************************************************************************/
 
 #if defined(NEED_PLLSETUP)
-static inline void sam_plladivider(void)
+static inline void __ramfunc__ sam_plladivider(void)
 {
   uint32_t regval;
 
@@ -294,7 +294,7 @@ static inline void sam_plladivider(void)
  ****************************************************************************/
 
 #if defined(NEED_PLLSETUP)
-static inline void sam_mckprescaler(void)
+static inline void __ramfunc__ sam_mckprescaler(void)
 {
   uint32_t regval;
 
@@ -321,7 +321,7 @@ static inline void sam_mckprescaler(void)
  ****************************************************************************/
 
 #if defined(NEED_PLLSETUP)
-static inline void sam_mckdivider(void)
+static inline void __ramfunc__ sam_mckdivider(void)
 {
   uint32_t regval;
 
@@ -347,7 +347,7 @@ static inline void sam_mckdivider(void)
  ****************************************************************************/
 
 #if defined(NEED_PLLSETUP)
-static inline void sam_selectplla(void)
+static inline void __ramfunc__ sam_selectplla(void)
 {
   uint32_t regval;
 
