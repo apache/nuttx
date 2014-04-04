@@ -7142,4 +7142,7 @@
 	  only USB device tracing is enabled (2014-4-4).
 	* Documentation/UsbTrace.html:  Add some discussion of the USB monitor
 	  (2014-4-4).
+	* nuttx/arch/arm/src/armv7-a/mmu.h:  Bufferable bit did not do what
+	  I thought it was going to do.  Result was the NOR FLASH accesses
+	  were very slow (2014-4-3).
 
