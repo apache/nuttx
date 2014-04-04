@@ -229,7 +229,7 @@ config ARCH_CHIP_SAM3A
 config ARCH_CHIP_SAM4L
 	bool
 	default n
-	select ARCH_RAMFUNCS
+	select ARCH_HAVE_RAMFUNCS
 
 config ARCH_CHIP_SAM4E
 	bool
