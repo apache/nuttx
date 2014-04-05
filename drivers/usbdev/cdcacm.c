@@ -105,7 +105,7 @@ struct cdcacm_dev_s
   FAR struct usbdev_ep_s  *epintin;    /* Interrupt IN endpoint structure */
   FAR struct usbdev_ep_s  *epbulkin;   /* Bulk IN endpoint structure */
   FAR struct usbdev_ep_s  *epbulkout;  /* Bulk OUT endpoint structure */
-  FAR struct usbdev_req_s *ctrlreq;    /* Allocoated control request */
+  FAR struct usbdev_req_s *ctrlreq;    /* Allocated control request */
   struct sq_queue_s        reqlist;    /* List of write request containers */
 
   /* Pre-allocated write request containers.  The write requests will
@@ -319,7 +319,7 @@ static uint16_t cdcacm_fillrequest(FAR struct cdcacm_dev_s *priv, uint8_t *reqbu
  * Description:
  *   This function obtains write requests, transfers the TX data into the
  *   request, and submits the requests to the USB controller.  This continues
- *   untils either (1) there are no further packets available, or (2) thre is
+ *   until either (1) there are no further packets available, or (2) there is
  *   no further data to send.
  *
  ****************************************************************************/
@@ -429,7 +429,7 @@ static inline int cdcacm_recvpacket(FAR struct cdcacm_dev_s *priv,
    * the serial driver will be extracting data from the circular buffer and modifying
    * recv.tail.  During this time, we should avoid modifying recv.head; Instead we will
    * use a shadow copy of the index.  When interrupts are restored, the real recv.head
-   * will be updated with this indes.
+   * will be updated with this index.
    */
 
   if (priv->rxenabled)
@@ -2072,7 +2072,7 @@ static void cdcuart_rxint(FAR struct uart_dev_s *dev, bool enable)
             * buffer and modifying recv.tail.  During this time, we
             * should avoid modifying recv.head; When interrupts are restored,
             * we can update the head pointer for all of the data that we
-            * put into cicular buffer while "interrupts" were disabled.
+            * put into circular buffer while "interrupts" were disabled.
             */
 
           if (priv->rxhead != serdev->recv.head)
@@ -2163,9 +2163,9 @@ static void cdcuart_txint(FAR struct uart_dev_s *dev, bool enable)
  * Description:
  *   Return true when all data has been sent.  This is called from the
  *   serial driver when the driver is closed.  It will call this API
- *   periodically until it reports true.  NOTE that the serial driver takes all
- *   responsibility for flushing TX data through the hardware so we can be
- *   a bit sloppy about that.
+ *   periodically until it reports true.  NOTE that the serial driver takes
+ *   all responsibility for flushing TX data through the hardware so we can
+ *   be a bit sloppy about that.
  *
  ****************************************************************************/
 
@@ -2322,7 +2322,7 @@ errout_with_class:
  *
  * Returned Value:
  *   Zero (OK) means that the driver was successfully registered.  On any
- *   failure, a negated errno value is retured.
+ *   failure, a negated errno value is returned.
  *
  ****************************************************************************/
 
@@ -2364,7 +2364,7 @@ int cdcacm_initialize(int minor, FAR void **handle)
  *
  * Description:
  *   Un-initialize the USB storage class driver.  This function is used
- *   internally by the USB composite driver to unitialize the CDC/ACM
+ *   internally by the USB composite driver to uninitialize the CDC/ACM
  *   driver.  This same interface is available (with an untyped input
  *   parameter) when the CDC/ACM driver is used standalone.
  *
@@ -2375,7 +2375,7 @@ int cdcacm_initialize(int minor, FAR void **handle)
  *
  *     classdev - The class object returned by board_cdcclassobject() or
  *       cdcacm_classobject()
- *     handle - The opaque handle represetning the class object returned by
+ *     handle - The opaque handle representing the class object returned by
  *       a previous call to cdcacm_initialize().
  *
  * Returned Value:
@@ -2445,7 +2445,7 @@ void cdcacm_uninitialize(FAR void *handle)
   /* For the case of the composite driver, there is a two pass
    * uninitialization sequence.  We cannot yet free the driver structure.
    * We will do that on the second pass.  We mark the fact that we have
-   * already unitialized by setting the minor number to -1.  If/when we
+   * already uninitialized by setting the minor number to -1.  If/when we
    * are called again, then we will free the memory resources.
    */
 

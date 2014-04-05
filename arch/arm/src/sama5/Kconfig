@@ -3612,9 +3612,19 @@ config SAMA5_ISRAM_HEAP
 		NOTE:  MM_REGIONS must also be set to indicate the total number of
 		memory regions to be added to the heap.
 
-		*** DO NOT SELECT THIS OPTION IF YOU ARE EXECUTING FROM INTERNAL SRAM!!**
+		*** DO NOT SELECT THIS OPTION IF YOU ARE EXECUTING FROM INTERNAL SRAM!! **
 		In this case, the remaining ISRAM will automatically be added to the
 		heap (using RAM_END).
+
+		*** RAMFUNCS WARNING **
+		If you execute from NOR FLASH, RAM functions will be enabled.  The
+		RAM functions will be positioned in SRAM in the same location as the
+		ISRAM heap and, as a result, those RAM functions will be destroyed
+		after the heap is initialized.  That is not a problem now since
+		these RAM functions are only used in the early boot phase.  If,
+		however, you should wish to preserve the RAM functions, then you
+		should also disable SAMA5_ISRAM_HEAP so that the RAM functions are
+		preserved beyond the boot phase.
 
 config SAMA5_DDRCS_HEAP
 	bool "Include DDR-SDRAM in heap"
