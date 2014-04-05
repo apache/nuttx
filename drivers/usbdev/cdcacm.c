@@ -2256,7 +2256,7 @@ int cdcacm_classobject(int minor, FAR struct usbdevclass_driver_s **classdev)
 
   /* Initialize the serial driver sub-structure */
 
-      /* The initial state is disconnected */
+  /* The initial state is disconnected */
 
 #ifdef CONFIG_SERIAL_REMOVABLE
   priv->serdev.disconnected = true;

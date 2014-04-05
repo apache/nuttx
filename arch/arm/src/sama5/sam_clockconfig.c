@@ -610,11 +610,11 @@ void __ramfunc__ sam_clockconfig(void)
    * clock.
    */
 
+#if defined(NEED_PLLSETUP)
 #ifdef CONFIG_SAMA5_BOOT_CS0FLASH
   if (config)
 #endif /* CONFIG_SAMA5_BOOT_CS0FLASH */
     {
-#if defined(NEED_PLLSETUP)
       /* Enable main oscillator (if it has not already been selected) */
 
       sam_enablemosc();
@@ -645,10 +645,10 @@ void __ramfunc__ sam_clockconfig(void)
       /* Finally, elect the PLLA output as the input clock for PCK and MCK. */
 
       sam_selectplla();
+    }
 #endif /* NEED_PLLSETUP */
 
-      /* Setup USB clocking */
+  /* Setup USB clocking */
 
-      sam_usbclockconfig();
-    }
+  sam_usbclockconfig();
 }
