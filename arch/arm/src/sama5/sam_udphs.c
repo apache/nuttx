@@ -2587,7 +2587,9 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
             ((eptsta & UDPHS_EPTSTA_BYTECNT_MASK) >>
             UDPHS_EPTSTA_BYTECNT_SHIFT);
 
-          /* And continue processing the read request */
+          /* And continue processing the read request, clearing RXRDYTXKL in
+           * order to receive more data.
+           */
 
           privep->epstate = UDPHS_EPSTATE_IDLE;
           sam_req_read(priv, privep, pktsize);
@@ -2615,9 +2617,12 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
           len = GETUINT16(priv->ctrl.len);
           if (len == pktsize)
             {
-              /* Copy the OUT data from the EP0 FIFO into special EP0 buffer. */
+              /* Copy the OUT data from the EP0 FIFO into special EP0 buffer
+               * and clear RXRDYTXKL in order to receive more data.
+               */
 
               sam_ep0_read(priv->ep0out, len);
+              sam_putreg(UDPHS_EPTSTA_RXRDYTXKL, SAM_UDPHS_EPTCLRSTA(epno));
 
               /* And handle the EP0 SETUP now. */
 
@@ -2626,7 +2631,11 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
           else
             {
               usbtrace(TRACE_DEVERROR(SAM_TRACEERR_EP0SETUPOUTSIZE), pktsize);
+
+              /* STALL and discard received data. */
+
               (void)sam_ep_stall(&privep->ep, false);
+              sam_putreg(UDPHS_EPTSTA_RXRDYTXKL, SAM_UDPHS_EPTCLRSTA(epno));
             }
         }
       else
@@ -2636,14 +2645,12 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
           if (eptype == UDPHS_EPTCFG_TYPE_CTRL8 &&
               (eptsta & UDPHS_EPTSTA_BYTECNT_MASK) == 0)
             {
-              sam_putreg(UDPHS_EPTSTA_RXRDYTXKL, SAM_UDPHS_EPTCLRSTA(epno));
             }
 
           /* Data has been STALLed */
 
           else if ((eptsta & UDPHS_EPTSTA_FRCESTALL) != 0)
             {
-              sam_putreg(UDPHS_EPTSTA_RXRDYTXKL, SAM_UDPHS_EPTCLRSTA(epno));
             }
 
           /* NAK the data */
@@ -2654,6 +2661,12 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
               regval &= ~UDPHS_INT_EPT(epno);
               sam_putreg(regval, SAM_UDPHS_IEN);
             }
+
+          /* Discard any received data and clear UDPHS_EPTSTA_RXRDYTXKL so that we
+           * may receive more data.
+           */
+
+          sam_putreg(UDPHS_EPTSTA_RXRDYTXKL, SAM_UDPHS_EPTCLRSTA(epno));
         }
     }
 

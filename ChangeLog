@@ -7145,4 +7145,6 @@
 	* nuttx/arch/arm/src/armv7-a/mmu.h:  Bufferable bit did not do what
 	  I thought it was going to do.  Result was the NOR FLASH accesses
 	  were very slow (2014-4-3).
+	* arch/arm/src/sama5/sam_udphs.c:  Fix a case where received status
+	  was not clear, causing OUT SETUP commands to fail (2014-4-6).
 
