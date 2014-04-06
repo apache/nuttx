@@ -194,7 +194,7 @@ static void rwb_wrtimeout(FAR void *arg)
   FAR struct rwbuffer_s *rwb = (struct rwbuffer_s *)arg;
   DEBUGASSERT(rwb != NULL);
 
-  /* If a timeout elpases with with write buffer activity, this watchdog
+  /* If a timeout elapses with with write buffer activity, this watchdog
    * handler function will be evoked on the thread of execution of the
    * worker thread.
    */

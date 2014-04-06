@@ -139,7 +139,7 @@ static int rd_close(FAR struct inode *inode)
 /****************************************************************************
  * Name: rd_read
  *
- * Description:  Read the specified numer of sectors
+ * Description:  Read the specified number of sectors
  *
  ****************************************************************************/
 
@@ -329,7 +329,7 @@ int romdisk_register(int minor, uint8_t *buffer, uint32_t nsectors,
 
       snprintf(devname, 16, "/dev/ram%d", minor);
 
-      /* Inode private data is a reference to the ramdisk device stgructure */
+      /* Inode private data is a reference to the ramdisk device structure */
 
       ret = register_blockdriver(devname, &g_bops, 0, dev);
       if (ret < 0)

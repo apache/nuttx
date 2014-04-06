@@ -2,7 +2,7 @@
  * drivers/lcd/ssd1289.c
  *
  * Generic LCD driver for LCDs based on the Solomon Systech SSD1289 LCD controller.
- * Think of this as a template for an LCD driver that you will proably ahve to
+ * Think of this as a template for an LCD driver that you will probably have to
  * customize for any particular LCD hardware.
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.

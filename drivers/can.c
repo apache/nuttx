@@ -143,7 +143,7 @@ static int can_open(FAR struct file *filep)
     }
   else
     {
-      /* Increment the count of references to the device.  If this the first
+      /* Increment the count of references to the device.  If this is the first
        * time that the driver has been opened for this device, then initialize
        * the device.
        */
@@ -453,9 +453,9 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer, size_t 
 
   flags = irqsave();
 
-  /* Check if the TX is inactive when we started. In certain race conditionas, there
-   * may be a pending interrupt to kick things back off, but we will here that there
-   * is not.  That the hardware is IDLE and will need to be kick-started.
+  /* Check if the TX is inactive when we started. In certain race conditions, there
+   * may be a pending interrupt to kick things back off, but we will be sure here that
+   * there is not.  That the hardware is IDLE and will need to be kick-started.
    */
 
   inactive = dev_txempty(dev);

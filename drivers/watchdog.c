@@ -222,7 +222,7 @@ errout:
  * Name: wdog_read
  *
  * Description:
- *   A dummy read method.  This is provided only to satsify the VFS layer.
+ *   A dummy read method.  This is provided only to satisfy the VFS layer.
  *
  ************************************************************************************/
 
@@ -237,7 +237,7 @@ static ssize_t wdog_read(FAR struct file *filep, FAR char *buffer, size_t buflen
  * Name: wdog_write
  *
  * Description:
- *   A dummy write method.  This is provided only to satsify the VFS layer.
+ *   A dummy write method.  This is provided only to satisfy the VFS layer.
  *
  ************************************************************************************/
 
@@ -306,7 +306,7 @@ static int wdog_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       break;
 
     /* cmd:         WDIOC_GETSTATUS
-     * Description: et the status of the watchdog timer.
+     * Description: Get the status of the watchdog timer.
      * Argument:    A writeable pointer to struct watchdog_status_s.
      */
 

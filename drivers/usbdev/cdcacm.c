@@ -1467,6 +1467,7 @@ static int cdcacm_setup(FAR struct usbdevclass_driver_s *driver,
                   {
                     memcpy(&priv->linecoding, dataout, SIZEOF_CDC_LINECODING);
                   }
+
                 ret = 0;
 
                 /* If there is a registered callback to receive line status info, then
@@ -1579,6 +1580,7 @@ static int cdcacm_setup(FAR struct usbdevclass_driver_s *driver,
           cdcacm_ep0incomplete(dev->ep0, ctrlreq);
         }
     }
+
   return ret;
 }
 

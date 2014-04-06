@@ -86,7 +86,7 @@
  * Private Type Definitions
  ****************************************************************************/
 
-/* This structure describes the state of the upper half drivere */
+/* This structure describes the state of the upper half driver */
 
 struct qe_upperhalf_s
 {

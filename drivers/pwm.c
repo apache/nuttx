@@ -266,7 +266,7 @@ errout:
  * Name: pwm_read
  *
  * Description:
- *   A dummy read method.  This is provided only to satsify the VFS layer.
+ *   A dummy read method.  This is provided only to satisfy the VFS layer.
  *
  ************************************************************************************/
 
@@ -281,7 +281,7 @@ static ssize_t pwm_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
  * Name: pwm_write
  *
  * Description:
- *   A dummy write method.  This is provided only to satsify the VFS layer.
+ *   A dummy write method.  This is provided only to satisfy the VFS layer.
  *
  ************************************************************************************/
 
@@ -469,7 +469,7 @@ static int pwm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       /* PWMIOC_GETCHARACTERISTICS - Get the currently selected characteristics of
        *   the pulsed output (independent of whether the output is start or stopped).
        *
-       *   ioctl argument:  A reference to struct pwm_info_s to recevie the
+       *   ioctl argument:  A reference to struct pwm_info_s to receive the
        *   characteristics of the pulsed output.
        */
 
@@ -569,7 +569,7 @@ static int pwm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *   reset state (as if the shutdown() method had already been called).
  *
  * Input parameters:
- *   path - The full path to the driver to be registers in the NuttX pseudo-
+ *   path - The full path to the driver to be registered in the NuttX pseudo-
  *     filesystem.  The recommended convention is to name all PWM drivers
  *     as "/dev/pwm0", "/dev/pwm1", etc.  where the driver path differs only
  *     in the "minor" number at the end of the device name.
@@ -622,7 +622,7 @@ int pwm_register(FAR const char *path, FAR struct pwm_lowerhalf_s *dev)
  *      number of pulses is required, the 'count' value will be nonzero.
  *   2. The lower half driver's start() methoc must verify that it can
  *      support the request pulse train (frequency, duty, AND pulse count).
- *      It it cannot, it should return an error.  If the pulse count is
+ *      If it cannot, it should return an error.  If the pulse count is
  *      non-zero, it should set up the hardware for that number of pulses
  *      and return success.  NOTE:  That is CONFIG_PWM_PULSECOUNT is
  *      defined, the start() method receives an additional parameter
