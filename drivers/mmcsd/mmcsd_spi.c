@@ -146,20 +146,20 @@
 struct mmcsd_slot_s
 {
   FAR struct spi_dev_s *spi; /* SPI port bound to this slot */
-  sem_t  sem;            /* Assures mutually exclusive accesss to card and SPI */
-  uint8_t  state;        /* State of the slot (see MMCSD_SLOTSTATUS_* definitions) */
-  uint8_t  type;         /* Disk type */
-  uint8_t  csd[16];      /* Copy of card CSD */
+  sem_t  sem;                /* Assures mutually exclusive accesss to card and SPI */
+  uint8_t  state;            /* State of the slot (see MMCSD_SLOTSTATUS_* definitions) */
+  uint8_t  type;             /* Disk type */
+  uint8_t  csd[16];          /* Copy of card CSD */
 #ifndef CONFIG_MMCSD_SECTOR512
-  uint16_t sectorsize;   /* Media block size (in bytes) */
+  uint16_t sectorsize;       /* Media block size (in bytes) */
 #endif
-  uint32_t nsectors;     /* Number of blocks on the media */
-  uint32_t taccess;      /* Card access time */
-  uint32_t twrite;       /* Card write time */
-  uint32_t ocr;          /* Last 4 bytes of OCR (R3) */
-  uint32_t r7;           /* Last 4 bytes of R7 */
+  uint32_t nsectors;         /* Number of blocks on the media */
+  uint32_t taccess;          /* Card access time */
+  uint32_t twrite;           /* Card write time */
+  uint32_t ocr;              /* Last 4 bytes of OCR (R3) */
+  uint32_t r7;               /* Last 4 bytes of R7 */
 #ifndef CONFIG_SPI_OWNBUS
-  uint32_t spispeed;     /* Speed to use for SPI in data mode */
+  uint32_t spispeed;         /* Speed to use for SPI in data mode */
 #endif
 };
 
@@ -1035,6 +1035,7 @@ static int mmcsd_xmitblock(FAR struct mmcsd_slot_s *slot, const uint8_t *buffer,
       fdbg("Bad data response: %02x\n", response);
       return -EIO;
     }
+
   return OK;
 }
 #endif /* CONFIG_FS_WRITABLE && !CONFIG_MMCSD_READONLY */
@@ -1089,7 +1090,7 @@ static int mmcsd_open(FAR struct inode *inode)
 
       if (slot->type == MMCSD_CARDTYPE_UNKNOWN)
         {
-          /* Ininitialize for the media in the slot */
+          /* Initialize for the media in the slot */
 
           ret = mmcsd_mediainitialize(slot);
           if (ret < 0)
@@ -1188,6 +1189,8 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
   /* Convert sector and nsectors to nbytes and byte offset */
 
   nbytes = nsectors * SECTORSIZE(slot);
+  UNUSED(nbytes);
+
   if (IS_BLOCK(slot->type))
     {
       offset = start_sector;
@@ -1402,7 +1405,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
        }
 
       /* Send CMD25:  Continuously write blocks of data until the
-       * tranmission is stopped.
+       * transmission is stopped.
        */
 
       response = mmcsd_sendcmd(slot, &g_cmd25, offset);
@@ -1850,6 +1853,7 @@ static void mmcsd_mediachanged(void *arg)
       return;
     }
 #endif
+
   spi  = slot->spi;
 
   /* Save the current slot state and reassess the new state */
@@ -1957,7 +1961,7 @@ int mmcsd_spislotinitialize(int minor, int slotno, FAR struct spi_dev_s *spi)
   mmcsd_semtake(slot);
   mmcsd_spiinit(slot);
 
-  /* Ininitialize for the media in the slot (if any) */
+  /* Initialize for the media in the slot (if any) */
 
   ret = mmcsd_mediainitialize(slot);
   mmcsd_semgive(slot);

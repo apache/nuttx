@@ -834,6 +834,7 @@ static int ssi_transfer(struct tiva_ssidev_s *priv, const void *txbuffer,
           ssi_getreg(priv, TIVA_SSI_SR_OFFSET));
 
   ntxd  = ssi_performtx(priv);
+  UNUSED(ntxd);
 
   /* For the case where nwords < Tx FIFO size, ssi_performrx will
    * configure interrupts correctly for the final phase of the
@@ -873,6 +874,7 @@ static int ssi_transfer(struct tiva_ssidev_s *priv, const void *txbuffer,
       /* Handle outgoing Tx FIFO transfers */
 
       ntxd = ssi_performtx(priv);
+      UNUSED(ntxd);
 
       /* Handle incoming Rx FIFO transfers */
 
@@ -886,6 +888,7 @@ static int ssi_transfer(struct tiva_ssidev_s *priv, const void *txbuffer,
     }
   while (priv->nrxwords < priv->nwords);
 #endif
+
   return OK;
 }
 
@@ -996,6 +999,7 @@ static int ssi_interrupt(int irq, void *context)
       ssidbg("Transfer complete\n");
       ssi_semgive(&priv->xfrsem);
     }
+
   return OK;
 }
 #endif
@@ -1043,6 +1047,7 @@ static int ssi_lock(FAR struct spi_dev_s *dev, bool lock)
     {
       (void)sem_post(&priv->exclsem);
     }
+
   return OK;
 }
 #endif
@@ -1160,8 +1165,10 @@ static uint32_t ssi_setfrequencyinternal(struct tiva_ssidev_s *priv,
       priv->frequency = frequency;
       priv->actual    = actual;
     }
+
   return priv->actual;
 #else
+
   return actual;
 #endif
 }

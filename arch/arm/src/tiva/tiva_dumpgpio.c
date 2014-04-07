@@ -204,6 +204,7 @@ static inline uint8_t tiva_gpioport(int port)
 
 int tiva_dumpgpio(uint32_t pinset, const char *msg)
 {
+#ifdef CONFIG_DEBUG
   irqstate_t   flags;
   unsigned int port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   uintptr_t    base;
@@ -242,6 +243,9 @@ int tiva_dumpgpio(uint32_t pinset, const char *msg)
             getreg32(base + TIVA_GPIO_PUR_OFFSET), getreg32(base + TIVA_GPIO_PDR_OFFSET),
             getreg32(base + TIVA_GPIO_SLR_OFFSET));
     }
+
   irqrestore(flags);
+#endif /* CONFIG_DEBUG */
+
   return OK;
 }
