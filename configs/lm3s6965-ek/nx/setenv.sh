@@ -1,7 +1,7 @@
 #!/bin/bash
 # configs/lm3s6965-ek/nx/setenv.sh
 #
-#   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2010, 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -47,10 +47,17 @@ if [ -z "${PATH_ORIG}" ]; then
   export PATH_ORIG="${PATH}"
 fi
 
+# This is the Cygwin path to the location where I installed the CodeSourcery
+# toolchain under windows.  You will also have to edit this if you install
+# the CodeSourcery toolchain in any other location
+
+#export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/CodeSourcery/Sourcery G++ Lite/bin"
+#export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/CodeSourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin"
+
 # This is the Cygwin path to the location where I build the buildroot
 # toolchain.
 
-export BUILDROOT_BIN="${WD}/../misc/buildroot/build_arm_nofpu/staging_dir/bin"
+export TOOLCHAIN_BIN="${WD}/../misc/buildroot/build_arm_nofpu/staging_dir/bin"
 
 # This is the path to the LM3S6995-EK tools directory
 
@@ -58,6 +65,6 @@ export TOOL_BIN="${WD}/configs/lm3s6965-ek/tools"
 
 # Update the PATH variable
 
-export PATH="${BUILDROOT_BIN}:${TOOL_BIN}:/sbin:/usr/sbin:${PATH_ORIG}"
+export PATH="${TOOLCHAIN_BIN}:${TOOL_BIN}:/sbin:/usr/sbin:${PATH_ORIG}"
 
 echo "PATH : ${PATH}"
