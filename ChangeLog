@@ -7147,4 +7147,8 @@
 	  were very slow (2014-4-3).
 	* arch/arm/src/sama5/sam_udphs.c:  Fix a case where received status
 	  was not clear, causing OUT SETUP commands to fail (2014-4-6).
+	* arch/arm/src/tiva/tiva_syscontrol.c:  Add logic for TM4C125GXL based
+	  on logic from Daniel Carvalho with modifications.  I think the
+	  LM4F120 may have broken before as well(?).  In any event, the LM4F120
+	  also works well with this chanage (2014-4-7).
 

@@ -56,11 +56,9 @@
  ****************************************************************************/
 
 #if defined(LM4F) || defined(TM4C)
-#  define RCC_OSCMASK   (SYSCON_RCC_MOSCDIS)
 #  define RCC_XTALMASK  (SYSCON_RCC_XTAL_MASK | SYSCON_RCC_OSCSRC_MASK | \
                          SYSCON_RCC_PWRDN)
 #  define RCC2_XTALMASK (SYSCON_RCC2_OSCSRC2_MASK | SYSCON_RCC2_PWRDN2 | \
-                         SYSCON_RCC2_SYSDIV2LSB | SYSCON_RCC2_SYSDIV2_MASK | \
                          SYSCON_RCC2_DIV400 | SYSCON_RCC2_USERCC2)
 #  define RCC_DIVMASK   (SYSCON_RCC_SYSDIV_MASK | SYSCON_RCC_USESYSDIV | \
                          SYSCON_RCC_MOSCDIS)
@@ -140,7 +138,7 @@ static inline void tiva_oscdelay(uint32_t rcc, uint32_t rcc2)
         }
     }
 
-  /* No.. using srce in RCC */
+  /* No.. using OSCSRC in RCC */
 
   else
     {
@@ -157,14 +155,14 @@ static inline void tiva_oscdelay(uint32_t rcc, uint32_t rcc2)
 }
 
 /****************************************************************************
- * Name: tiva_plllock
+ * Name: tiva_pll_lock
  *
  * Description:
  *   The new RCC values have been selected... wait for the PLL to lock on
  *
  ****************************************************************************/
 
-static inline void tiva_plllock(void)
+static inline void tiva_pll_lock(void)
 {
   volatile uint32_t delay;
 
@@ -209,28 +207,131 @@ void tiva_clockconfig(uint32_t newrcc, uint32_t newrcc2)
   rcc  = getreg32(TIVA_SYSCON_RCC);
   rcc2 = getreg32(TIVA_SYSCON_RCC2);
 
-  /* Temporarily bypass the PLL and system clock dividers */
-
-  rcc |= SYSCON_RCC_BYPASS;
-  rcc &= ~(SYSCON_RCC_USESYSDIV);
-  putreg32(rcc, TIVA_SYSCON_RCC);
-
-  rcc2 |= SYSCON_RCC2_BYPASS2;
-  putreg32(rcc2, TIVA_SYSCON_RCC2);
-
-  /* We are probably using the main oscillator.  The main oscillator is disabled on
-   * reset and so probably must be enabled here.  The internal oscillator is enabled
-   * on rest and if that is selected, most likely nothing needs to be done.
+  /* We are probably using the main oscillator.  The main oscillator is
+   * disabled on reset and so probably must be enabled here.  The internal
+   * oscillator is enabled on reset and if that is selected, most likely
+   * nothing needs to be done.
    */
 
 #if defined(LM4F) || defined(TM4C)
-  if ((rcc & SYSCON_RCC_MOSCDIS) && !(newrcc & SYSCON_RCC_MOSCDIS))
-#else
-  if (((rcc & SYSCON_RCC_MOSCDIS) && !(newrcc & SYSCON_RCC_MOSCDIS)) ||
-      ((rcc & SYSCON_RCC_IOSCDIS) && !(newrcc & SYSCON_RCC_IOSCDIS)))
-#endif
+  if ((rcc & SYSCON_RCC_MOSCDIS) != 0 && (newrcc & SYSCON_RCC_MOSCDIS) == 0)
     {
-      /* Enable any selected osciallators (but don't disable any yet) */
+      uint32_t dummy;
+
+      /* According to TM4C123GH6PM datasheet page 231 item 5.3 we must perform
+       * the following steps to initialize and configure TM4C123G chip to use
+       * a PLL based system clock.
+       *
+       * 1. Bypass the PLL and system clock divider by setting the BYPASS bit
+       *    and clearing the USESYS bit in the RCC register.
+       *
+       * 2. Select the crystal value (XTAL) and oscillator source (OSCSRC),
+       *    and clear the PWRDN bit in RCC/RCC2. Setting the XTAL field
+       *    automatically pulls valid PLL configuration data for the appropriate
+       *    crystal, and clearing the PWRDN bit powers and enables the PLL and
+       *    its output.
+       *
+       * 3. Select the desired system divider (SYSDIV) in RCC/RCC2 and set the
+       *    USESYS bit in RCC. The SYSDIV field determines the system
+       *    frequency for the microcontroller.
+       *
+       * 4. Wait for the PLL to lock by polling the PLLLRIS bit in the Raw
+       *    Interrupt Status (RIS) register.
+       *
+       * 5. Enable use of the PLL by clearing the BYPASS bit in RCC/RCC2.
+       */
+
+      /* Step 1 - Temporarily bypass the PLL and system clock dividers */
+
+      rcc  |= SYSCON_RCC_BYPASS;
+      rcc  &= ~(SYSCON_RCC_USESYSDIV);
+
+      rcc2 |= SYSCON_RCC2_BYPASS2;
+
+      /* According to TM4C123GH6PM datasheet we must write RCC register prior
+       * to writing the RCC2 register.
+       */
+
+      putreg32(rcc, TIVA_SYSCON_RCC);
+      dummy = getreg32(TIVA_SYSCON_RCC);
+      UNUSED(dummy);
+      putreg32(rcc2, TIVA_SYSCON_RCC2);
+
+      /* Step 2 - Set the new crystal value, oscillator source and PLL
+       * configuration.
+       */
+
+      rcc  &= ~RCC_XTALMASK;
+      rcc  |= (newrcc & RCC_XTALMASK);
+
+      rcc2 &= ~RCC2_XTALMASK;
+      rcc2 |= (newrcc2 & RCC2_XTALMASK);
+
+      /* Write the new RCC/RCC2 values.
+       *
+       * LM4F120 Data Sheet:  "Write the RCC register prior to writing the
+       * RCC2 register. If a subsequent write to the RCC register is required,
+       * include another register access after writing the RCC register and
+       * before writing the RCC2 register."
+       */
+
+      putreg32(rcc, TIVA_SYSCON_RCC);
+      dummy = getreg32(TIVA_SYSCON_RCC);
+      UNUSED(dummy);
+      putreg32(rcc2, TIVA_SYSCON_RCC2);
+
+      /* Wait for the new crystal value and oscillator source to take effect */
+
+      tiva_delay(16);
+
+      /* Step 3 - Set the requested system divider and disable the non-
+       * selected oscillators.
+       */
+
+      rcc  &= ~RCC_DIVMASK;
+      rcc  |= (newrcc & RCC_DIVMASK);
+
+      rcc2 &= ~RCC2_DIVMASK;
+      rcc2 |= (newrcc2 & RCC2_DIVMASK);
+
+      putreg32(rcc, TIVA_SYSCON_RCC);
+      dummy = getreg32(TIVA_SYSCON_RCC);
+      UNUSED(dummy);
+      putreg32(rcc2, TIVA_SYSCON_RCC2);
+
+      /* Step 4 - Will the PLL output be used to clock the system? */
+
+      if ((newrcc & SYSCON_RCC_BYPASS) == 0)
+        {
+          /* Yes, wait until l the PLL is locked */
+
+          tiva_pll_lock();
+
+          /* Step 5 - Then enable the PLL */
+
+          rcc  &= ~SYSCON_RCC_BYPASS;
+          rcc2 &= ~SYSCON_RCC2_BYPASS2;
+
+          putreg32(rcc, TIVA_SYSCON_RCC);
+          dummy = getreg32(TIVA_SYSCON_RCC);
+          UNUSED(dummy);
+          putreg32(rcc2, TIVA_SYSCON_RCC2);
+        }
+    }
+#else
+  if (((rcc & SYSCON_RCC_MOSCDIS) != 0 && (newrcc & SYSCON_RCC_MOSCDIS) == 0) ||
+      ((rcc & SYSCON_RCC_IOSCDIS) != 0 && (newrcc & SYSCON_RCC_IOSCDIS) == 0))
+    {
+      /* Temporarily bypass the PLL and system clock dividers */
+
+      rcc |= SYSCON_RCC_BYPASS;
+      rcc &= ~(SYSCON_RCC_USESYSDIV);
+      putreg32(rcc, TIVA_SYSCON_RCC);
+
+      rcc2 |= SYSCON_RCC2_BYPASS2;
+      putreg32(rcc2, TIVA_SYSCON_RCC2);
+
+      /* Enable any selected oscillators (but don't disable any yet) */
 
       rcc &= (~RCC_OSCMASK | (newrcc & RCC_OSCMASK));
       putreg32(rcc, TIVA_SYSCON_RCC);
@@ -241,94 +342,71 @@ void tiva_clockconfig(uint32_t newrcc, uint32_t newrcc2)
        */
 
       tiva_oscdelay(rcc, rcc2);
-    }
 
-  /* Set the new crystal value, oscillator source and PLL configuration */
+      /* Set the new crystal value, oscillator source and PLL configuration */
 
-  rcc  &= ~RCC_XTALMASK;
-  rcc  |= newrcc & RCC_XTALMASK;
+      rcc  &= ~RCC_XTALMASK;
+      rcc  |= (newrcc & RCC_XTALMASK);
 
-  rcc2 &= ~RCC2_XTALMASK;
-  rcc2 |= newrcc2 & RCC2_XTALMASK;
+      rcc2 &= ~RCC2_XTALMASK;
+      rcc2 |= (newrcc2 & RCC2_XTALMASK);
 
-  /* Clear the PLL lock interrupt */
+      /* Clear the PLL lock interrupt */
 
-  putreg32(SYSCON_MISC_PLLLMIS, TIVA_SYSCON_MISC);
+      putreg32(SYSCON_MISC_PLLLMIS, TIVA_SYSCON_MISC);
 
-  /* Write the new RCC/RCC2 values.
-   *
-   * Original LM3S Logic: Order depends upon whether RCC2 or RCC is
-   * currently enabled.
-   *
-   * LM4F120 Data Sheet:  "Write the RCC register prior to writing the
-   * RCC2 register. If a subsequent write to the RCC register is required,
-   * include another register access after writing the RCC register and
-   * before writing the RCC2 register.
-   */
+      /* Write the new RCC/RCC2 values.
+       *
+       * Original LM3S Logic: Order depends upon whether RCC2 or RCC is
+       * currently enabled.
+       */
 
-#if defined(LM4F) || defined(TM4C)
-  if ((rcc2 & SYSCON_RCC2_USERCC2) != 0)
-    {
-      putreg32(rcc2, TIVA_SYSCON_RCC2);
-      putreg32(rcc, TIVA_SYSCON_RCC);
-    }
-  else
-#endif
-    {
       putreg32(rcc, TIVA_SYSCON_RCC);
       putreg32(rcc2, TIVA_SYSCON_RCC2);
+
+      /* Wait for the new crystal value and oscillator source to take effect */
+
+      tiva_delay(16);
+
+      /* Set the requested system divider and disable the non-selected osciallators */
+
+      rcc  &= ~RCC_DIVMASK;
+      rcc  |= (newrcc & RCC_DIVMASK);
+
+      rcc2 &= ~RCC2_DIVMASK;
+      rcc2 |= (newrcc2 & RCC2_DIVMASK);
+
+      /* Will the PLL output be used to clock the system? */
+
+      if ((newrcc & SYSCON_RCC_BYPASS) == 0)
+        {
+          /* Yes, wait until the PLL is locked */
+
+          tiva_pll_lock();
+
+          /* Then enable the PLL */
+
+          rcc  &= ~SYSCON_RCC_BYPASS;
+          rcc2 &= ~SYSCON_RCC2_BYPASS2;
+        }
+
+      /* Now we can set the final RCC/RCC2 values */
+
+      putreg32(rcc, TIVA_SYSCON_RCC);
+      putreg32(rcc2, TIVA_SYSCON_RCC2);
+
+      /* Wait for the system divider to be effective */
+
+      tiva_delay(6);
     }
-
-  /* Wait for the new crystal value and oscillator source to take effect */
-
-  tiva_delay(16);
-
-  /* Set the requested system divider and disable the non-selected osciallators */
-
-  rcc &= ~RCC_DIVMASK;
-  rcc |= newrcc & RCC_DIVMASK;
-
-  rcc2 &= ~RCC2_DIVMASK;
-  rcc2 |= newrcc2 & RCC2_DIVMASK;
-
-  /* Will the PLL output be used to clock the system? */
-
-  if ((newrcc & SYSCON_RCC_BYPASS) == 0)
-    {
-      /* Yes, wail untill the PLL is locked */
-
-      tiva_plllock();
-
-      /* Then enable the PLL */
-
-      rcc  &= ~SYSCON_RCC_BYPASS;
-      rcc2 &= ~SYSCON_RCC2_BYPASS2;
-    }
-
-  /* Now we can set the final RCC/RCC2 values:
-   *
-   * LM4F120 Data Sheet:  "Write the RCC register prior to writing the
-   * RCC2 register. If a subsequent write to the RCC register is required,
-   * include another register access after writing the RCC register and
-   * before writing the RCC2 register.
-   */
-
-  putreg32(rcc, TIVA_SYSCON_RCC);
-#if defined(LM4F) || defined(TM4C)
-  rcc = getreg32(TIVA_SYSCON_RCC);
 #endif
-  putreg32(rcc2, TIVA_SYSCON_RCC2);
-
-  /* Wait for the system divider to be effective */
-
-  tiva_delay(6);
 }
 
 /****************************************************************************
  * Name: up_clockconfig
  *
  * Description:
- *   Called early in the bootsequence (before .data and .bss are available)
+ *   Called early in the boot sequence (before .data and .bss are available)
  *   in order to configure initial clocking.
  *
  ****************************************************************************/
