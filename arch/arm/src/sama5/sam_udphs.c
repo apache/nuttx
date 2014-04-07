@@ -2617,7 +2617,7 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
           len = GETUINT16(priv->ctrl.len);
           if (len == pktsize)
             {
-              /* Copy the OUT data from the EP0 FIFO into special EP0 buffer
+              /* Copy the OUT data from the EP0 FIFO into a special EP0 buffer
                * and clear RXRDYTXKL in order to receive more data.
                */
 

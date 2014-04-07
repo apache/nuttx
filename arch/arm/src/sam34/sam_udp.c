@@ -1898,7 +1898,7 @@ static void sam_ep_bankinterrupt(struct sam_usbdev_s *priv,
       len = GETUINT16(priv->ctrl.len);
       if (len == pktsize)
         {
-          /* Copy the OUT data from the EP0 FIFO into special EP0 buffer. */
+          /* Copy the OUT data from the EP0 FIFO into a special EP0 buffer. */
 
           sam_ep0_read(priv->ep0out, len);
 
