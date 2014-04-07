@@ -2951,6 +2951,35 @@ Configurations
      create a very corrupt configuration that may not be easy to recover
      from.
 
+  4. The SAMA5Dx is running at 396MHz by default in these configurations.
+     This is because the original timing for the PLLs, NOR FLASH, and SDRAM
+     came from the Atmel NoOS sample code which runs at that rate.
+
+     The SAMA5Dx is capable of running at 528MHz, however, and is easily
+     re-configured:
+
+       Board Selection -> CPU Frequency
+         CONFIG_SAMA5D3xEK_396MHZ=n     # Disable 396MHz operation
+         CONFIG_SAMA5D3xEK_528MHZ=y     # Enable 528MHz operation
+
+     If you switch to 528MHz, you should also check the loop calibration
+     value in your .config file.  Of course, it would be best to re-calibrate
+     the timing loop, but these values should get you in the ballpark:
+
+       CONFIG_BOARD_LOOPSPERMSEC=49341  # Calibrated on SAMA5D3-EK at 396MHz
+                                        # running from ISRAM
+       CONFIG_BOARD_LOOPSPERMSEC=65775  # Calibrated on SAMA4D3-Xplained at
+                                        # 528MHz running from SDRAM
+
+     Operation at 528MHz has been verified but is not the default in these
+     configurations because most testing was done at 396MHz.  NAND has not
+     been verified at these rates.
+
+   5. By default, all of these configurations run from ISRAM or NOR FLASH
+     (as indicated below in each description of the configuration).
+     Operation from SDRAM is also an option as described in the paragraph
+     entitled, "Running NuttX from SDRAM."
+
   Configuration Sub-directories
   -----------------------------
   Summary:  Some of the descriptions below are long and wordy. Here is the
@@ -3382,26 +3411,16 @@ Configurations
 To-Do List
 ==========
 
-1) Currently the SAMA5Dx is running at 396MHz in these configurations.  This
-   is because the timing for the PLLs, NOR FLASH, and SDRAM came from the
-   Atmel NoOS sample code which runs at that rate.
-
-   The SAMA5Dx is capable of running at 528MHz, however, and is easily
-   configured:
-
-     Board Selection -> CPU Frequency
-       CONFIG_SAMA5D3xEK_396MHZ=n
-       CONFIG_SAMA5D3xEK_528MHZ=y
-
-   Basic operation at 528MHz has been verified but is not the default in
-   these configurations because most testing was done at 396MHz.  NAND
-   has not been verified at these rates.
-
-2) Most of these configurations execute from NOR FLASH. I have been unable
+1) Most of these configurations execute from NOR FLASH. I have been unable
    to execute these configurations from NOR FLASH by closing the BMS jumper
    (J9).  As far as I can tell, this jumper does nothing on my board???  I
    have been using the norboot configuration to start the program in NOR
    FLASH (see just above).  See "Creating and Using NORBOOT" above.
+
+   UPDATE: It has been confirmed at that there is an issue with the BMS
+   jumper on my board. However, other NuttX users have confirmed operation
+   booting directly into NOR FLASH.  So although I cannot confirm this
+   behavior, this appears to be no longer an issue.
 
 3) Neither USB OHCI nor EHCI support Isochronous endpoints.  Interrupt
    endpoint support in the EHCI driver is untested (but works in similar
