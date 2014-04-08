@@ -7151,4 +7151,6 @@
 	  on logic from Daniel Carvalho with modifications.  I think the
 	  LM4F120 may have broken before as well(?).  In any event, the LM4F120
 	  also works well with this chanage (2014-4-7).
-
+	* Back out part of 610e2aa0c224e2936fe8009ef4a2351ce607067a: Need to
+	  be able to select USB console devices when there is no /dev/console
+	  enabled. Noted by Librae (2014-4-8).
