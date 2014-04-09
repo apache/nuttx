@@ -382,16 +382,27 @@ config DEV_CONSOLE
 	bool "Enable /dev/console"
 	default y
 	---help---
-		Set if architecture-specific logic provides /dev/console.  Enables
-		stdout, stderr, stdin.
+		Set if architecture-specific logic provides /dev/console at boot-up
+		time.  Enables stdout, stderr, stdin in the start-up application.
+
+		You need this setting if your console device is ready at boot time.
+		For example, if you are using a serial console, then /dev/console
+		(aka, /dev/ttyS0) will be available when the application first starts.
+
+		You must not select DEV_CONSOLE if you console device comes up later
+		and is not ready until after the application starts.  At this time,
+		the only console device that behaves this way is a USB serial console.
+		When the application first starts, the USB is (probably) not yet
+		connected and /dev/console will not be created until later when the
+		host connects to the USB console.
 
 config FDCLONE_DISABLE
 	bool "Disable cloning of file descriptors"
 	default n
 	---help---
-	Disable cloning of all file descriptors
-	by task_create() when a new task is started.  If set, all
-	files/drivers will appear to be closed in the new task.
+		Disable cloning of all file descriptors by task_create() when a new
+		ask is started.  If set, all files/drivers will appear to be closed
+		in the new task.
 
 config FDCLONE_STDIO
 	bool "Disable clone file descriptors without stdio"
