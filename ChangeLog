@@ -7156,4 +7156,6 @@
 	  enabled. Noted by Librae (2014-4-8).
 	* configs/*/defconfig:  Increase the number of preallocated watchdogs
 	  in all configurations that use networking or USB (2014-3-9).
+	* include/nuttx/syslog/syslog.h and ramlog.h:  Move syslog.h and
+	  ramlog.h to include/nutt/syslog (2014-4-10).
 

@@ -51,7 +51,7 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/arch.h>
-#include <nuttx/syslog.h>
+#include <nuttx/syslog/syslog.h>
 
 #include "fs_internal.h"
 

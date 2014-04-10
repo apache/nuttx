@@ -1,8 +1,8 @@
 /****************************************************************************
- * include/nuttx/ramlog.h
+ * include/nuttx/syslog/ramlog.h
  * The RAM logging driver
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,15 +46,15 @@
  * configuration.
  */
 
-#ifndef __INCLUDE_NUTTX_RAMLOG_H
-#define __INCLUDE_NUTTX_RAMLOG_H
+#ifndef __INCLUDE_NUTTX_SYSLOG_RAMLOG_H
+#define __INCLUDE_NUTTX_SYSLOG_RAMLOG_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/syslog.h>
+#include <nuttx/syslog/syslog.h>
 
 #ifdef CONFIG_RAMLOG
 
@@ -205,4 +205,4 @@ EXTERN int ramlog_sysloginit(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_RAMLOG */
-#endif /* __INCLUDE_NUTTX_RAMLOG_H */
+#endif /* __INCLUDE_NUTTX_SYSLOG_RAMLOG_H */

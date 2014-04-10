@@ -56,7 +56,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/arch.h>
-#include <nuttx/ramlog.h>
+#include <nuttx/syslog/ramlog.h>
 
 #include <arch/irq.h>
 
@@ -638,7 +638,6 @@ errout:
  *
  * Description:
  *   Create the RAM logging device and register it at the specified path.
- *   Mostly likely this path will be /dev/console
  *
  ****************************************************************************/
 
@@ -683,8 +682,7 @@ int ramlog_register(FAR const char *devpath, FAR char *buffer, size_t buflen)
  * Name: ramlog_consoleinit
  *
  * Description:
- *   Create the RAM logging device and register it at the specified path.
- *   Mostly likely this path will be /dev/console
+ *   Use a pre-allocated RAM logging device and register it at /dev/console
  *
  ****************************************************************************/
 
@@ -703,8 +701,8 @@ int ramlog_consoleinit(void)
  * Name: ramlog_sysloginit
  *
  * Description:
- *   Create the RAM logging device and register it at the specified path.
- *   Mostly likely this path will be CONFIG_RAMLOG_SYSLOG
+ *   Use a pre-allocated RAM logging device and register it at the path
+ *   specified by CONFIG_RAMLOG_SYSLOG
  *
  *   If CONFIG_RAMLOG_CONSOLE is also defined, then this functionality is
  *   performed when ramlog_consoleinit() is called.

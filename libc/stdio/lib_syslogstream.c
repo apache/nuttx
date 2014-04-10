@@ -43,7 +43,7 @@
 #include <assert.h>
 #include <errno.h>
 
-#include <nuttx/syslog.h>
+#include <nuttx/syslog/syslog.h>
 
 #include "lib_internal.h"
 

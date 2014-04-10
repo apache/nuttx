@@ -1,8 +1,8 @@
 /****************************************************************************
- * include/nuttx/syslog.h
+ * include/nuttx/syslog/syslog.h
  * The NuttX SYSLOGing interface
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_SYSLOG_H
-#define __INCLUDE_NUTTX_SYSLOG_H
+#ifndef __INCLUDE_NUTTX_SYSLOG_SYSLOG_H
+#define __INCLUDE_NUTTX_SYSLOG_SYSLOG_H
 
 /****************************************************************************
  * Included Files
@@ -56,7 +56,7 @@
  *
  *   1. A RAM SYSLOGing device that will log data into a circular buffer
  *      that can be dumped using the NSH dmesg command.  This device is
- *      described in the include/nuttx/ramlog.h header file.
+ *      described in the include/nuttx/syslog/ramlog.h header file.
  *
  *   2. And a generic character device that may be used as the SYSLOG.  The
  *      generic device interfaces are described in this file.  A disadvantage
@@ -133,4 +133,4 @@ EXTERN int syslog_putc(int ch);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __INCLUDE_NUTTX_SYSLOG_H */
+#endif /* __INCLUDE_NUTTX_SYSLOG_SYSLOG_H */
