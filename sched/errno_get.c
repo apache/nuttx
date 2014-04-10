@@ -80,5 +80,3 @@ int get_errno(void)
 {
   return *get_errno_ptr();
 }
-
-

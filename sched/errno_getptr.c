@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/errno_getptr.c
  *
- *   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,6 +54,12 @@
  * Private Data
  ****************************************************************************/
 
+/* This is a 'dummy' errno value to use in context where there is no valid
+ * errno location to use.  For example, when running from an interrupt handler
+ * or early in initialization when task structures have not yet been
+ * initialized.
+ */
+
 static int g_irqerrno;
 
 /****************************************************************************
@@ -89,10 +95,14 @@ FAR int *get_errno_ptr(void)
        * task at the head of the ready-to-run list is actually running.  It
        * may not be running during very brief times during context switching
        * logic (see, for example, task_exit.c).
+       *
+       * There is also a corner case early in the initialization sequence:
+       * The ready to run list may not yet be initialized and g_readytorun.head
+       * may be NULL.
        */
 
       FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
-      if (rtcb->task_state == TSTATE_TASK_RUNNING)
+      if (rtcb && rtcb->task_state == TSTATE_TASK_RUNNING)
         {
           /* Yes.. the task is running normally.  Return a reference to the
            * thread-private errno in the TCB of the running task.
@@ -113,5 +123,3 @@ FAR int *get_errno_ptr(void)
 
   return &g_irqerrno;
 }
-
-

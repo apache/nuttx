@@ -7158,4 +7158,8 @@
 	  in all configurations that use networking or USB (2014-3-9).
 	* include/nuttx/syslog/syslog.h and ramlog.h:  Move syslog.h and
 	  ramlog.h to include/nutt/syslog (2014-4-10).
+	* sched/errno_getptr.c and getpid.c:  Add some checks.  If these
+	  functions are called early in initialization before the tasking
+	  structures are initialized, they will not behavr properly
+	  (2014-4-10).
 
