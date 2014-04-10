@@ -43,7 +43,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/ramlog.h>
+#include <nuttx/syslog/ramlog.h>
 
 #include <arch/board/board.h>
 
