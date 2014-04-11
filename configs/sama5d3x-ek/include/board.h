@@ -132,18 +132,24 @@
 /* LED index values for use with sam_setled() */
 
 #define BOARD_BLUE        0
-#define BOARD_RED         1
-#define BOARD_NLEDS       2
+#ifdef CONFIG_SAMA5D3xEK_NOREDLED
+#  define BOARD_NLEDS     1
+#else
+#  define BOARD_RED       1
+#  define BOARD_NLEDS     2
+#endif
 
 /* LED bits for use with sam_setleds() */
 
 #define BOARD_BLUE_BIT    (1 << BOARD_BLUE)
-#define BOARD_RED_BIT     (1 << BOARD_RED)
+#ifndef CONFIG_SAMA5D3xEK_NOREDLED
+#  define BOARD_RED_BIT   (1 << BOARD_RED)
+#endif
 
 /* These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
  * defined.  In that case, the usage by the board port is defined in
  * include/board.h and src/sam_leds.c. The LEDs are used to encode OS-related
- * events as follows:
+ * events as follows when the red LED (PE24) is available:
  *
  *      SYMBOL            Val    Meaning                     LED state
  *                                                         Blue     Red
@@ -158,9 +164,13 @@
 #define LED_PANIC         3  /* The system has crashed     OFF      Blinking */
 #undef  LED_IDLE             /* MCU is is sleep mode         Not used        */
 
-/* Thus if the blue LED is statically on, NuttX has successfully booted and
- * is, apparently, running normmally.  If the red is flashing at
- * approximately 2Hz, then a fatal error has been detected and the system
+/* If CONFIG_SAMA5D3xEK_NOREDLED=y, then the red LED is not used by the
+ * system.  The only difference from the above is that it is the blue, not
+ * the red LED that blinks in the event of an PANIC.
+ *
+ * Thus if the blue LED is statically on, NuttX has successfully booted and
+ * is, apparently, running normally.  If the red (or blue) LED is flashing
+ * at approximately 2Hz, then a fatal error has been detected and the system
  * has halted.
  */
 

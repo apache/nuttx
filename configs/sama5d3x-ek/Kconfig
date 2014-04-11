@@ -37,6 +37,17 @@ config SAMA5D3xEK_MT47H64M16HR
 
 endchoice # SAMA5D3x-EK DRAM Type
 
+config SAMA5D3xEK_NOREDLED
+	bool "Red LED not available"
+	default n
+	---help---
+		By default, both the blue LED and the red LED are used by the
+		SAMA5D3x-EK board logic.  However, the PIO associated with the red
+		LED (PE24) has other board functions.  For example, PE24 is also the
+		ISI_RST reset signal to the camera interface.  So when PE24 is not
+		available to control the red LED, this configuration variable should
+		be set so that the LED logic will only used the blue LED.
+
 config SAMA5D3xEK_NOR_MAIN
 	bool "Build nor_main"
 	default n
@@ -231,6 +242,7 @@ if VIDEO_OV2640
 config SAMA5D3xEK_OV2640_DEMO
 	bool "SAMA5 OV2640 camera demo"
 	default n
+	select SAMA5D3xEK_NOREDLED
 	---help---
 		Enable the SAMA5 OV2640 camera demo
 

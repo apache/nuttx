@@ -7165,4 +7165,8 @@
 	* arch/arm/src/sama5/sam_twi.c: TWI data sending is fails to increment
 	  the number of byes transferred on first byte sent.  from David Sidrane
 	  (2014-4-10).
-
+	* configs/sama5d3x-ek/src: The red LED is controlled by PE24 which is
+	  also the camera/ISI interface reset line.  So if the a camera is
+	  installed, then we must avoid controlling the red LED or we inadvertently
+	  also reset the camera module.  Noted by David Sidrane (2014-4-11).
+ 

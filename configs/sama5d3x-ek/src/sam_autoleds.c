@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/sama5d3x-ek/src/sam_autoleds.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -123,7 +123,9 @@ void board_led_initialize(void)
   /* Configure LED PIOs for output */
 
   sam_configpio(PIO_BLUE);
+#ifndef CONFIG_SAMA5D3xEK_NOREDLED
   sam_configpio(PIO_RED);
+#endif
 }
 
 /****************************************************************************
@@ -133,7 +135,9 @@ void board_led_initialize(void)
 void board_led_on(int led)
 {
   bool blueoff = true;  /* Low illuminates */
+#ifndef CONFIG_SAMA5D3xEK_NOREDLED
   bool redon   = false; /* High illuminates */
+#endif
 
   switch (led)
     {
@@ -149,12 +153,18 @@ void board_led_on(int led)
         return;
 
       case 3:  /* LED_PANIC */
+#ifdef CONFIG_SAMA5D3xEK_NOREDLED
+        blueoff = false;
+#else
         redon = true;
+#endif
         break;
     }
 
   sam_piowrite(PIO_BLUE, blueoff);
+#ifndef CONFIG_SAMA5D3xEK_NOREDLED
   sam_piowrite(PIO_RED, redon);
+#endif
 }
 
 /****************************************************************************
@@ -166,7 +176,9 @@ void board_led_off(int led)
   if (led != 2)
     {
       sam_piowrite(PIO_BLUE, true);  /* Low illuminates */
+#ifndef CONFIG_SAMA5D3xEK_NOREDLED
       sam_piowrite(PIO_RED, false);  /* High illuminates */
+#endif
     }
 }
 
