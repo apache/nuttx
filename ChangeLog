@@ -7162,4 +7162,7 @@
 	  functions are called early in initialization before the tasking
 	  structures are initialized, they will not behavr properly
 	  (2014-4-10).
+	* arch/arm/src/sama5/sam_twi.c: TWI data sending is fails to increment
+	  the number of byes transferred on first byte sent.  from David Sidrane
+	  (2014-4-10).
 
