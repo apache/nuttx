@@ -130,7 +130,7 @@ extern "C" {
  * Public Function Prototypes
  ****************************************************************************/
 
-EXTERN int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout);
+int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout);
 
 #undef EXTERN
 #if defined(__cplusplus)

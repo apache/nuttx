@@ -409,7 +409,8 @@ extern void uip_send(struct uip_driver_s *dev, const void *buf, int len);
 
 #define uip_ipaddr(addr, addr0, addr1, addr2, addr3) \
   do { \
-    addr = HTONL((addr0) << 24 | (addr1) << 16 | (addr2) << 8 | (addr3)); \
+    addr = HTONL((uint32_t)(addr0) << 24 | (uint32_t)(addr1) << 16 | \
+                 (uint32_t)(addr2) << 8  | (uint32_t)(addr3)); \
   } while(0)
 
 /* Convert an IPv4 address of the form uint16_t[2] to an in_addr_t */
