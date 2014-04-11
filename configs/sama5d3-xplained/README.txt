@@ -667,7 +667,8 @@ Buttons and LEDs
 
     PE24.  The red LED is also pulled high but is driven by a transistor so
     that it is illuminated when power is applied even if PE24 is not
-    configured as an output.
+    configured as an output.  If PE24 is configured as an output, then the
+    LED is illuminated by a high output.
 
   These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
   defined.  In that case, the usage by the board port is defined in
@@ -688,7 +689,7 @@ Buttons and LEDs
     LED_IDLE             MCU is is sleep mode         Not used
 
   Thus if the blue LED is statically on, NuttX has successfully booted and
-  is, apparently, running normally.  If the red is flashing at
+  is, apparently, running normally.  If the red LED is flashing at
   approximately 2Hz, then a fatal error has been detected and the system
   has halted.
 
@@ -919,7 +920,7 @@ AT25 Serial FLASH
      6    SCK      PD12  SPI0_SPCK
      1    /CS      PD13  if jumper JP6 is closed.
 
-  NOTE:  The MN8 is not populated on my SAMAD3 Xplained board.  So, as a 
+  NOTE:  The MN8 is not populated on my SAMAD3 Xplained board.  So, as a
   result, these instructions would only apply if you were to have an AT25
   Serial DataFlash installed in MN8.
 
@@ -1484,7 +1485,7 @@ SDRAM Support
 
   SDRAM Data Configuration
   ------------------------
- 
+
   In these configurations, .data and .bss are retained in ISRAM by default.
   .data and .bss can also be retained in SDRAM using these slightly
   different configuration settings.  In this configuration, ISRAM is

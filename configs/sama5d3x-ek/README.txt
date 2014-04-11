@@ -787,12 +787,16 @@ Buttons and LEDs
     PE24.  The red LED is also pulled high but is driven by a transistor so
     that it is illuminated when power is applied even if PE24 is not
     configured as an output.  If PE24 is configured as an output, then the
-    LCD is illuminated by a high output.
+    LED is illuminated by a high output.
+
+      N.B. PE24 Drives the RED Led on the CM (SODIMM200), but unfortunately
+      it is also connected to ISI_RST on the MB (Main Board) and controlling
+      it will reset a Camera connected to the ISI
 
   These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
   defined.  In that case, the usage by the board port is defined in
   include/board.h and src/sam_leds.c. The LEDs are used to encode OS-related
-  events as follows:
+  events as follows when the red LED (PE24) is available:
 
     SYMBOL                Meaning                     LED state
                                                     Blue     Red
@@ -807,9 +811,25 @@ Buttons and LEDs
     LED_PANIC            The system has crashed     OFF      Blinking
     LED_IDLE             MCU is is sleep mode         Not used
 
+  If CONFIG_SAMA5D3xEK_NOREDLED=y, then the red LED is not used by the
+  system and the controls are as follows:
+
+    SYMBOL                Meaning                     LED state
+                                                    Blue     Red
+    -------------------  -----------------------  -------- ----------
+    LED_STARTED          NuttX has been started     OFF      Not used
+    LED_HEAPALLOCATE     Heap has been allocated    OFF      " " "  "
+    LED_IRQSENABLED      Interrupts enabled         OFF      " " "  "
+    LED_STACKCREATED     Idle stack created         ON       " " "  "
+    LED_INIRQ            In an interrupt              No change
+    LED_SIGNAL           In a signal handler          No change
+    LED_ASSERTION        An assertion failed          No change
+    LED_PANIC            The system has crashed     Blinking " " "  "
+    LED_IDLE             MCU is is sleep mode         Not used
+
   Thus if the blue LED is statically on, NuttX has successfully booted and
-  is, apparently, running normally.  If the red is flashing at
-  approximately 2Hz, then a fatal error has been detected and the system
+  is, apparently, running normally.  If the red (or blue) LED is flashing
+  at approximately 2Hz, then a fatal error has been detected and the system
   has halted.
 
 Serial Consoles
@@ -832,7 +852,7 @@ Serial Consoles
     PB28 RXD1       PIO_USART1_RXD
     PB26 CTS1       PIO_USART1_CTS
 
-    NOTE: Debug TX (DTXD) and RX (DRXD) pins also are routed to the 
+    NOTE: Debug TX (DTXD) and RX (DRXD) pins also are routed to the
     ADM3312EARU via non populated 0 Ohm resistors. Thus allowing one
     skilled with a soldering iron to choose which UART is level
     translated by the ADM3312EARU
@@ -1650,7 +1670,7 @@ SDRAM Support
 
   SDRAM Data Configuration
   ------------------------
- 
+
   In these configurations, .data and .bss are retained in ISRAM by default.
   .data and .bss can also be retained in SDRAM using these slightly
   different configuration settings.  In this configuration, ISRAM is

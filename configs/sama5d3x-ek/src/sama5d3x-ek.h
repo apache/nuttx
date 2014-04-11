@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/sama5d3x-ek/src/sama5d3x-ek.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -349,12 +349,19 @@
  *   that it is illuminated when power is applied even if PE24 is not
  *   configured as an output.  If PE24 is configured as an output, then the
  *   LCD is illuminated by a high output.
+ *
+ *     N.B. PE24 Drives the RED Led on the CM (SODIMM200), but unfortunately
+ *     it is also connected to ISI_RST on the MB (Main Board) and controlling
+ *     it will reset a Camera connected to the ISI
  */
 
 #define PIO_BLUE     (PIO_OUTPUT | PIO_CFG_PULLUP | PIO_OUTPUT_SET | \
                       PIO_PORT_PIOE | PIO_PIN25)
-#define PIO_RED      (PIO_OUTPUT | PIO_CFG_PULLUP | PIO_OUTPUT_CLEAR | \
+
+#ifndef CONFIG_SAMA5D3xEK_NOREDLED
+#  define PIO_RED    (PIO_OUTPUT | PIO_CFG_PULLUP | PIO_OUTPUT_CLEAR | \
                       PIO_PORT_PIOE | PIO_PIN24)
+#endif
 
 /* Buttons **************************************************************************/
 /* There are five push button switches on the SAMA5D3X-EK base board:

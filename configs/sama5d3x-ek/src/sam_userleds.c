@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/sama5d3x-ek/src/sam_userleds.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -108,7 +108,9 @@ void sam_ledinit(void)
   /* Configure LED PIOs for output */
 
   sam_configpio(PIO_BLUE);
+#ifndef CONFIG_SAMA5D3xEK_NOREDLED
   sam_configpio(PIO_RED);
+#endif
 }
 
 /****************************************************************************
@@ -126,12 +128,14 @@ void sam_setled(int led, bool ledon)
       ledcfg = PIO_BLUE;
       ledon  = !ledon;
     }
+#ifndef CONFIG_SAMA5D3xEK_NOREDLED
   else if (led == BOARD_RED)
     {
       /* High illuminates */
 
       ledcfg = PIO_RED;
     }
+#endif
   else
     {
       return;
@@ -153,10 +157,12 @@ void sam_setleds(uint8_t ledset)
   ledon = ((ledset & BOARD_BLUE_BIT) == 0);
   sam_piowrite(PIO_BLUE, ledon);
 
+#ifndef CONFIG_SAMA5D3xEK_NOREDLED
   /* High illuminates */
 
   ledon = ((ledset & BOARD_RED_BIT) != 0);
   sam_piowrite(PIO_RED, ledon);
+#endif
 }
 
 #endif /* !CONFIG_ARCH_LEDS */
