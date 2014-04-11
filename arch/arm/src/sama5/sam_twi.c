@@ -719,7 +719,7 @@ static void twi_startwrite(struct twi_dev_s *priv, struct i2c_msg_s *msg)
 
   /* Write first byte to send.*/
 
-  twi_putrel(priv, SAM_TWI_THR_OFFSET, msg->buffer[0]);
+  twi_putrel(priv, SAM_TWI_THR_OFFSET, msg->buffer[priv->xfrd++]);
 
   /* Enable write interrupt */
 
