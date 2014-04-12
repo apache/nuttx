@@ -1738,7 +1738,7 @@ static int nand_read_pmecc(struct sam_nandcs_s *priv, off_t block,
 
   /* Wait until the kernel of the PMECC is not busy */
 
-  while((nand_getreg(SAM_HSMC_PMECCSR) & HSMC_PMECCSR_BUSY) != 0);
+  while ((nand_getreg(SAM_HSMC_PMECCSR) & HSMC_PMECCSR_BUSY) != 0);
   return OK;
 }
 #endif

@@ -548,7 +548,7 @@ static void stm32_stdclockconfig(void)
 
   /* Wait for PLL2 ready */
 
-  while((getreg32(STM32_RCC_CR) & RCC_CR_PLL2RDY) == 0);
+  while ((getreg32(STM32_RCC_CR) & RCC_CR_PLL2RDY) == 0);
 
   /* Setup PLL3 for MII/RMII clock on MCO */
 

@@ -148,7 +148,7 @@ int up_progmem_erasepage(uint16_t page)
   putreg32(page * STM32_FLASH_PAGESIZE, STM32_FLASH_AR);
   modifyreg32(STM32_FLASH_CR, 0, FLASH_CR_STRT);
 
-  while(getreg32(STM32_FLASH_SR) & FLASH_SR_BSY) up_waste();
+  while (getreg32(STM32_FLASH_SR) & FLASH_SR_BSY) up_waste();
 
   modifyreg32(STM32_FLASH_CR, FLASH_CR_PER, 0);
 
@@ -232,7 +232,7 @@ int up_progmem_write(uint32_t addr, const void *buf, size_t count)
 
       putreg16(*hword, addr);
 
-      while(getreg32(STM32_FLASH_SR) & FLASH_SR_BSY) up_waste();
+      while (getreg32(STM32_FLASH_SR) & FLASH_SR_BSY) up_waste();
 
       /* Verify */
 

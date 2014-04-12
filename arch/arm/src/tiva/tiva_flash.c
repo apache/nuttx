@@ -217,7 +217,7 @@ static ssize_t tiva_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t n
 
       /* wait until write has finished */
 
-      while(getreg32(TIVA_FLASH_FMC) & FLASH_FMC_WRITE);
+      while (getreg32(TIVA_FLASH_FMC) & FLASH_FMC_WRITE);
     }
 
   return nblocks;
