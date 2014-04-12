@@ -280,7 +280,7 @@ static void _up_assert(int errorcode)
   if (current_regs || ((struct tcb_s*)g_readytorun.head)->pid == 0)
     {
        (void)irqsave();
-        for(;;)
+        for (;;)
           {
 #ifdef CONFIG_ARCH_LEDS
             board_led_on(LED_PANIC);

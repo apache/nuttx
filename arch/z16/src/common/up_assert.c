@@ -91,7 +91,7 @@ static void _up_assert(int errorcode) /* noreturn_function */
   if (up_interrupt_context() || ((FAR struct tcb_s*)g_readytorun.head)->pid == 0)
     {
        (void)irqsave();
-        for(;;)
+        for (;;)
           {
 #ifdef CONFIG_ARCH_LEDS
             board_led_on(LED_PANIC);
