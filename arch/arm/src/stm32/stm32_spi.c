@@ -1221,7 +1221,9 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
   /* Check and clear any error flags (Reading from the SR clears the error flags) */
 
   regval = spi_getreg(priv, STM32_SPI_SR_OFFSET);
+
   spivdbg("Sent: %04x Return: %04x Status: %02x\n", wd, ret, regval);
+  UNUSED(regval);
 
   return ret;
 }
