@@ -34,7 +34,7 @@
 ############################################################################
 
 ifeq ($(CONFIG_ARMV7M_CMNVECTOR),y)
-HEAD_ASRC = 
+HEAD_ASRC =
 else
 HEAD_ASRC = stm32_vectors.S
 endif
@@ -90,7 +90,7 @@ CMN_CSRCS += up_copyarmstate.c
 endif
 endif
 
-CHIP_ASRCS  = 
+CHIP_ASRCS  =
 
 CHIP_CSRCS  = stm32_allocateheap.c stm32_start.c stm32_rcc.c stm32_lse.c
 CHIP_CSRCS += stm32_lsi.c stm32_gpio.c stm32_exti_gpio.c stm32_flash.c stm32_irq.c

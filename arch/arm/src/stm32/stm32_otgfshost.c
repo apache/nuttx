@@ -98,7 +98,7 @@
  *    packets. Depends on CONFIG_DEBUG.
  */
 
-/* Pre-requistites (partial) */
+/* Pre-requisites (partial) */
 
 #ifndef CONFIG_STM32_SYSCFG
 #  error "CONFIG_STM32_SYSCFG is required"
@@ -133,6 +133,11 @@
 #ifndef CONFIG_DEBUG
 #  undef CONFIG_STM32_USBHOST_REGDEBUG
 #  undef CONFIG_STM32_USBHOST_PKTDUMP
+#endif
+
+#undef HAVE_USB_TRACE 1
+#if defined(CONFIG_USBHOST_TRACE) || (defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_USB))
+#  define HAVE_USB_TRACE 1
 #endif
 
 /* HCD Setup *******************************************************************/
@@ -719,22 +724,26 @@ static void stm32_chan_configure(FAR struct stm32_usbhost_s *priv, int chidx)
   switch (priv->chan[chidx].eptype)
     {
     case OTGFS_EPTYPE_CTRL:
+    case OTGFS_EPTYPE_BULK:
       {
-        if (priv->chan[chidx].in)
+#ifdef HAVE_USB_TRACE
+        uint16_t intrace;
+        uint16_t outtrace;
+
+        /* Determine the definitive trace ID to use below */
+
+        if (priv->chan[chidx].eptype == OTGFS_EPTYPE_CTRL)
           {
-            usbhost_vtrace2(OTGFS_VTRACE2_CHANCONF_CTRL_IN, chidx,
-                            priv->chan[chidx].epno);
+            intrace  = OTGFS_VTRACE2_CHANCONF_CTRL_IN;
+            outtrace = OTGFS_VTRACE2_CHANCONF_CTRL_OUT;
           }
         else
           {
-            usbhost_vtrace2(OTGFS_VTRACE2_CHANCONF_CTRL_OUT, chidx,
-                            priv->chan[chidx].epno);
+            intrace  = OTGFS_VTRACE2_CHANCONF_BULK_IN;
+            outtrace = OTGFS_VTRACE2_CHANCONF_BULK_OUT;
           }
-      }
-      break;
+#endif
 
-    case OTGFS_EPTYPE_BULK:
-      {
         /* Interrupts required for CTRL and BULK endpoints */
 
         regval |= (OTGFS_HCINT_XFRC  | OTGFS_HCINT_STALL | OTGFS_HCINT_NAK |
@@ -744,14 +753,12 @@ static void stm32_chan_configure(FAR struct stm32_usbhost_s *priv, int chidx)
 
         if (priv->chan[chidx].in)
           {
-            usbhost_vtrace2(OTGFS_VTRACE2_CHANCONF_BULK_IN, chidx,
-                            priv->chan[chidx].epno);
+            usbhost_vtrace2(intrace, chidx, priv->chan[chidx].epno);
             regval |= OTGFS_HCINT_BBERR;
           }
         else
           {
-            usbhost_vtrace2(OTGFS_VTRACE2_CHANCONF_BULK_OUT, chidx,
-                            priv->chan[chidx].epno);
+            usbhost_vtrace2(outtrace, chidx, priv->chan[chidx].epno);
             regval |= OTGFS_HCINT_NYET;
           }
       }
@@ -772,11 +779,13 @@ static void stm32_chan_configure(FAR struct stm32_usbhost_s *priv, int chidx)
                             priv->chan[chidx].epno);
             regval |= OTGFS_HCINT_BBERR;
           }
+#ifdef HAVE_USB_TRACE
         else
           {
             usbhost_vtrace2(OTGFS_VTRACE2_CHANCONF_INTR_OUT, chidx,
                             priv->chan[chidx].epno);
           }
+#endif
       }
       break;
 
@@ -794,11 +803,13 @@ static void stm32_chan_configure(FAR struct stm32_usbhost_s *priv, int chidx)
                             priv->chan[chidx].epno);
             regval |= (OTGFS_HCINT_TXERR | OTGFS_HCINT_BBERR);
           }
+#ifdef HAVE_USB_TRACE
         else
           {
             usbhost_vtrace2(OTGFS_VTRACE2_CHANCONF_ISOC_OUT, chidx,
                             priv->chan[chidx].epno);
           }
+#endif
       }
       break;
     }
@@ -1044,16 +1055,9 @@ static void stm32_chan_wakeup(FAR struct stm32_usbhost_s *priv,
 
   if (chan->result != EBUSY && chan->waiter)
     {
-      if (chan->in)
-        {
-          usbhost_vtrace2(OTGFS_VTRACE2_CHANWAKEUP_IN, chan->epno,
-                          chan->result);
-        }
-      else
-        {
-          usbhost_vtrace2(OTGFS_VTRACE2_CHANWAKEUP_OUT, chan->epno,
-                          chan->result);
-        }
+      usbhost_vtrace2(chan->in ? OTGFS_VTRACE2_CHANWAKEUP_IN :
+                                 OTGFS_VTRACE2_CHANWAKEUP_OUT,
+                      chan->epno, chan->result);
 
       stm32_givesem(&chan->waitsem);
       chan->waiter = false;
@@ -1112,7 +1116,6 @@ static void stm32_transfer_start(FAR struct stm32_usbhost_s *priv, int chidx)
         {
           npackets = STM32_MAX_PKTCOUNT;
           chan->buflen = STM32_MAX_PKTCOUNT * maxpacket;
-
           usbhost_trace2(OTGFS_TRACE2_CLIP, chidx, chan->buflen);
         }
     }
