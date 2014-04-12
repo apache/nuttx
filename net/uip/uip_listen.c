@@ -112,7 +112,7 @@ struct uip_conn *uip_findlistener(uint16_t portno)
  *   Setup the listening data structures
  *
  * Assumptions:
- *   Called early in the inialization phase while the system is still
+ *   Called early in the initialization phase while the system is still
  *   single-threaded.
  *
  ****************************************************************************/
@@ -282,7 +282,8 @@ int uip_accept(struct uip_driver_s *dev, struct uip_conn *conn,
         }
 #endif
     }
-   return ret;
+
+  return ret;
 }
 
 #endif /* CONFIG_NET */

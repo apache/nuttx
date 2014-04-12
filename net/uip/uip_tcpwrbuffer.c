@@ -122,7 +122,8 @@ void uip_tcpwrbuffer_init(void)
  *
  ****************************************************************************/
 
-FAR struct uip_wrbuffer_s *uip_tcpwrbuffer_alloc(FAR const struct timespec *abstime)
+FAR struct uip_wrbuffer_s *
+uip_tcpwrbuffer_alloc(FAR const struct timespec *abstime)
 {
   int ret;
 
@@ -148,8 +149,8 @@ FAR struct uip_wrbuffer_s *uip_tcpwrbuffer_alloc(FAR const struct timespec *abst
  *
  * Description:
  *   Release a TCP write buffer by returning the buffer to the free list.
- *   This function is called from user logic after it is consumed the buffered
- *   data.
+ *   This function is called from user logic after it is consumed the
+ *   buffered data.
  *
  * Assumptions:
  *   Called from interrupt level with interrupts disabled.

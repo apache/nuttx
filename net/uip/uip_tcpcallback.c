@@ -63,7 +63,7 @@
  * Function: uip_readahead
  *
  * Description:
- *   Copy as much received data as possible into the readahead buffer
+ *   Copy as much received data as possible into the read-ahead buffer
  *
  * Assumptions:
  *   This function is called at the interrupt level with interrupts disabled.
@@ -71,8 +71,8 @@
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP_READAHEAD
-static int uip_readahead(struct uip_readahead_s *readahead, uint8_t *buf,
-                         int len)
+static int uip_readahead(FAR struct uip_readahead_s *readahead,
+                         FAR uint8_t *buf, int len)
 {
   int available = CONFIG_NET_TCP_READAHEAD_BUFSIZE - readahead->rh_nbytes;
   int recvlen   = 0;
@@ -95,6 +95,7 @@ static int uip_readahead(struct uip_readahead_s *readahead, uint8_t *buf,
       memcpy(&readahead->rh_buffer[readahead->rh_nbytes], buf, recvlen);
       readahead->rh_nbytes += recvlen;
     }
+
   return recvlen;
 }
 #endif
@@ -216,7 +217,7 @@ uint16_t uip_tcpcallback(struct uip_driver_s *dev, struct uip_conn *conn,
    *                 attempted.
    *   UIP_SNDACK  - If UIP_NEWDATA is cleared, then UIP_SNDACK may be set
    *                 to indicate that an ACK should be included in the response.
-   *                 (In UIP_NEWDATA is cleared bu UIP_SNDACK is not set, then
+   *                 (In UIP_NEWDATA is cleared but UIP_SNDACK is not set, then
    *                 dev->d_len should also be cleared).
    */
 
@@ -259,7 +260,7 @@ uint16_t uip_tcpcallback(struct uip_driver_s *dev, struct uip_conn *conn,
  *   (2) from the TCP event logic is there is no listener in place ready to
  *   receive the data.
  *
- * Input Parmeters:
+ * Input Parameters:
  *   conn - A pointer to the TCP connection structure
  *   buffer - A pointer to the buffer to be copied to the read-ahead
  *     buffers
@@ -287,11 +288,11 @@ uint16_t uip_datahandler(FAR struct uip_conn *conn, FAR uint8_t *buffer,
 
   /* First, we need to determine if we have space to buffer the data.  This
    * needs to be verified before we actually begin buffering the data. We
-   * will use any remaining space in the last allocated readahead buffer
+   * will use any remaining space in the last allocated read-ahead buffer
    * plus as much one additional buffer.  It is expected that the size of
-   * readahead buffers are tuned so that one full packet will always fit
-   * into one readahead buffer (for example if the buffer size is 420, then
-   * a readahead buffer of 366 will hold a full packet of TCP data).
+   * read-ahead buffers are tuned so that one full packet will always fit
+   * into one read-ahead buffer (for example if the buffer size is 420, then
+   * a read-ahead buffer of 366 will hold a full packet of TCP data).
    */
 
   readahead1 = (FAR struct uip_readahead_s*)conn->readahead.tail;
@@ -300,7 +301,7 @@ uint16_t uip_datahandler(FAR struct uip_conn *conn, FAR uint8_t *buffer,
       (readahead2 = uip_tcpreadahead_alloc()) != NULL)
     {
       /* We have buffer space.  Now try to append add as much data as possible
-       * to the last readahead buffer attached to this connection.
+       * to the last read-ahead buffer attached to this connection.
        */
 
       remaining = buflen;
@@ -321,7 +322,7 @@ uint16_t uip_datahandler(FAR struct uip_conn *conn, FAR uint8_t *buffer,
           readahead2->rh_nbytes = 0;
           recvlen += uip_readahead(readahead2, buffer, remaining);
 
-          /* Save the readahead buffer in the connection structure where
+          /* Save the read-ahead buffer in the connection structure where
            * it can be found with recv() is called.
            */
 

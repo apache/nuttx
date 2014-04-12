@@ -123,7 +123,7 @@ static void uip_igmptimeout(int argc, uint32_t arg, ...)
   /* If the group exists and is no an IDLE MEMBER, then it must be a DELAYING
    * member.  Race conditions are avoided because (1) the timer is not started
    * until after the first IGMPv2_MEMBERSHIP_REPORT during the join, and (2)
-   * the timer is canceled before sending the IGMP_LEAVE_GROUP during a leave.
+   * the timer is cancelled before sending the IGMP_LEAVE_GROUP during a leave.
    */
 
   if (!IS_IDLEMEMBER(group->flags))
@@ -141,7 +141,7 @@ static void uip_igmptimeout(int argc, uint32_t arg, ...)
        * is stranded if both reports were lost?  This is consistent with the
        * RFC that states: "To cover the possibility of the initial Membership
        * Report being lost or damaged, it is recommended that it be repeated
-       * once or twice after shortdelays [Unsolicited Report Interval]..."
+       * once or twice after short delays [Unsolicited Report Interval]..."
        */
     }
 }
@@ -190,8 +190,11 @@ void uip_igmpstartticks(FAR struct igmp_group_s *group, int ticks)
   /* Start the timer */
 
   gtmrlldbg("ticks: %d\n", ticks);
+
   ret = wd_start(group->wdog, ticks, uip_igmptimeout, 1, (uint32_t)group);
+
   DEBUGASSERT(ret == OK);
+  UNUSED(ret);
 }
 
 void uip_igmpstarttimer(FAR struct igmp_group_s *group, uint8_t decisecs)
@@ -213,7 +216,7 @@ void uip_igmpstarttimer(FAR struct igmp_group_s *group, uint8_t decisecs)
  *   avoid race conditions) and return true.
  *
  * Assumptions:
- *   This function may be called from most any context.  If true is retuend
+ *   This function may be called from most any context.  If true is returned
  *   then the caller must call uip_igmpstartticks() to restart the timer
  *
  ****************************************************************************/

@@ -84,6 +84,7 @@ static uint16_t chksum(uint16_t sum, const uint8_t *data, uint16_t len)
         {
           sum++; /* carry */
         }
+
       dataptr += 2;
     }
 
@@ -114,7 +115,7 @@ static uint16_t upper_layer_chksum(struct uip_driver_s *dev, uint8_t proto)
   upper_layer_len = (((uint16_t)(pbuf->len[0]) << 8) + pbuf->len[1]) - UIP_IPH_LEN;
 #endif /* CONFIG_NET_IPv6 */
 
-  /* First sum pseudoheader. */
+  /* First sum pseudo-header. */
 
   /* IP protocol and length fields. This addition cannot carry. */
 
@@ -226,5 +227,4 @@ uint16_t uip_icmpchksum(struct uip_driver_s *dev, int len)
 #endif
 
 #endif /* UIP_ARCH_CHKSUM */
-
 #endif /* CONFIG_NET */

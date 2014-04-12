@@ -87,14 +87,14 @@
  * Return:
  *   OK  The packet has been processed  and can be deleted
  *   ERROR Hold the packet and try again later. There is a listening socket
- *         but no recv in place to catch the packet yet.
+ *         but no receive in place to catch the packet yet.
  *
  * Assumptions:
  *   Called from the interrupt level or with interrupts disabled.
  *
  ****************************************************************************/
 
-int uip_udpinput(struct uip_driver_s *dev)
+int uip_udpinput(FAR struct uip_driver_s *dev)
 {
   struct uip_udp_conn  *conn;
   struct uip_udpip_hdr *pbuf = UDPBUF;
@@ -131,7 +131,7 @@ int uip_udpinput(struct uip_driver_s *dev)
         {
           uint16_t flags;
 
-          /* Setup for the application callback */
+          /* Set-up for the application callback */
 
           dev->d_appdata = &dev->d_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];
           dev->d_snddata = &dev->d_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];

@@ -354,7 +354,7 @@ found:
       uint32_t ackseq;
 
       /* The next sequence number is equal to the current sequence
-       * number (sndseq) plus the size of the oustanding, unacknowledged
+       * number (sndseq) plus the size of the outstanding, unacknowledged
        * data (unacked).
        */
 
@@ -379,7 +379,7 @@ found:
 
       if (ackseq <= unackseq)
         {
-          /* Calculate the new number of oustanding, unacknowledged bytes */
+          /* Calculate the new number of outstanding, unacknowledged bytes */
 
           conn->unacked = unackseq - ackseq;
         }
@@ -487,6 +487,7 @@ found:
             uip_tcpack(dev, conn, TCP_ACK | TCP_SYN);
             return;
           }
+
         goto drop;
 
       case UIP_SYN_SENT:
@@ -584,6 +585,7 @@ found:
           {
             goto drop;
           }
+
         uip_tcpreset(dev);
         return;
 
@@ -668,7 +670,7 @@ found:
 
         /* If d_len > 0 we have TCP data in the packet, and we flag this
          * by setting the UIP_NEWDATA flag. If the application has stopped
-         * the dataflow using uip_stop(), we must not accept any data
+         * the data flow using uip_stop(), we must not accept any data
          * packets from the remote host.
          */
 
@@ -727,6 +729,7 @@ found:
             uip_tcpappsend(dev, conn, result);
             return;
           }
+
         goto drop;
 
       case UIP_LAST_ACK:

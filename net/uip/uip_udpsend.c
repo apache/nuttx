@@ -78,10 +78,10 @@
  * Name: uip_udpsend
  *
  * Description:
- *   Setup to send a UDP packet
+ *   Set-up to send a UDP packet
  *
  * Parameters:
- *   dev - The device driver structure to use in the send operation
+ *   dev  - The device driver structure to use in the send operation
  *   conn - The UDP "connection" structure holding port information
  *
  * Return:
@@ -98,8 +98,8 @@ void uip_udpsend(struct uip_driver_s *dev, struct uip_udp_conn *conn)
 
   if (dev->d_sndlen > 0)
     {
-      /* The total lenth to send is the size of the application data plus
-       * the IP and UDP headers (and, eventually, the ethernet header)
+      /* The total length to send is the size of the application data plus
+       * the IP and UDP headers (and, eventually, the Ethernet header)
        */
 
       dev->d_len = dev->d_sndlen + UIP_IPUDPH_LEN;

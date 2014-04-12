@@ -221,7 +221,7 @@ typeerr:
             }
 
           /* We should now send a neighbor advertisement back to where the
-           * neighbor solicication came from.
+           * neighbor solicitation came from.
            */
 
           picmp->type = ICMP6_NEIGHBOR_ADVERTISEMENT;

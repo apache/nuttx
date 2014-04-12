@@ -69,7 +69,7 @@ static FAR struct uip_callback_s *g_cbfreelist = NULL;
  * Function: uip_callbackinit
  *
  * Description:
- *   Configure the pre-allocated callaback structures into a free list.
+ *   Configure the pre-allocated callback structures into a free list.
  *   This is called internally as part of uIP initialization and should not
  *   be accessed from the application or socket layer.
  *
@@ -153,7 +153,8 @@ FAR struct uip_callback_s *uip_callbackalloc(FAR struct uip_callback_s **list)
  *
  ****************************************************************************/
 
-void uip_callbackfree(FAR struct uip_callback_s *cb, FAR struct uip_callback_s **list)
+void uip_callbackfree(FAR struct uip_callback_s *cb,
+                      FAR struct uip_callback_s **list)
 {
   FAR struct uip_callback_s *prev;
   FAR struct uip_callback_s *curr;

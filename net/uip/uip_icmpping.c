@@ -192,7 +192,7 @@ static uint16_t ping_interrupt(struct uip_driver_s *dev, void *conn,
        *   If the output buffer currently contains unprocessed incoming
        *   data.
        * -OR-
-       *   If we have alread sent the ECHO request
+       *   If we have already sent the ECHO request
        *
        * In the first two cases, we will just have to wait for the next
        * polling cycle.
@@ -350,7 +350,7 @@ int uip_ping(uip_ipaddr_t addr, uint16_t id, uint16_t seqno,
       state.png_cb->event   = ping_interrupt;
       state.png_result      = -EINTR; /* Assume sem-wait interrupted by signal */
 
-      /* Notify the device driver of the availaibilty of TX data */
+      /* Notify the device driver of the availability of TX data */
 
       netdev_txnotify(state.png_addr);
 

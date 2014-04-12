@@ -240,6 +240,7 @@ void uip_arp_arpin(struct uip_driver_s *dev)
       dev->d_len = 0;
       return;
     }
+
   dev->d_len = 0;
 
   ipaddr = uip_ip4addr_conv(parp->ah_dipaddr);
@@ -327,7 +328,7 @@ void uip_arp_out(struct uip_driver_s *dev)
   in_addr_t               destipaddr;
 
   /* Find the destination IP address in the ARP table and construct
-   * the Ethernet header. If the destination IP addres isn't on the
+   * the Ethernet header. If the destination IP address isn't on the
    * local network, we use the default router's IP address instead.
    *
    * If not ARP table entry is found, we overwrite the original IP
@@ -340,6 +341,7 @@ void uip_arp_out(struct uip_driver_s *dev)
     {
       memcpy(peth->dest, g_broadcast_ethaddr.ether_addr_octet, ETHER_ADDR_LEN);
     }
+
 #if defined(CONFIG_NET_IGMP) && !defined(CONFIG_NET_IPv6)
   /* Check if the destination address is a multicast address
    *
@@ -353,7 +355,7 @@ void uip_arp_out(struct uip_driver_s *dev)
  else if (NTOHS(pip->eh_destipaddr[0]) >= 0xe000 &&
           NTOHS(pip->eh_destipaddr[0]) <= 0xefff)
     {
-      /* Build the well-known IPv4 IGMP ethernet address.  The first
+      /* Build the well-known IPv4 IGMP Ethernet address.  The first
        * three bytes are fixed; the final three variable come from the
        * last three bytes of the IP address.
        */
@@ -374,7 +376,7 @@ void uip_arp_out(struct uip_driver_s *dev)
 
 #ifdef CONFIG_NET_ROUTE
           /* We have a routing table.. find the correct router to use in
-           * this case (or, as a fallback, use the device's default router
+           * this case (or, as a fall-back, use the device's default router
            * address).  We will use the router IP address instead of the
            * destination address when determining the MAC address.
            */
@@ -426,12 +428,12 @@ void uip_arp_out(struct uip_driver_s *dev)
           return;
         }
 
-      /* Build an ethernet header. */
+      /* Build an Ethernet header. */
 
       memcpy(peth->dest, tabptr->at_ethaddr.ether_addr_octet, ETHER_ADDR_LEN);
     }
 
-  /* Finish populating the ethernet header */
+  /* Finish populating the Ethernet header */
 
   memcpy(peth->src, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
   peth->type  = HTONS(UIP_ETHTYPE_IP);

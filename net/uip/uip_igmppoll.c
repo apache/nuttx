@@ -81,7 +81,7 @@ static inline void uip_schedsend(FAR struct uip_driver_s *dev, FAR struct igmp_g
 {
   uip_ipaddr_t *dest;
 
-  /* Check what kind of messsage we need to send.  There are only two
+  /* Check what kind of message we need to send.  There are only two
    * possibilities:
    */
 
@@ -156,7 +156,9 @@ void uip_igmppoll(FAR struct uip_driver_s *dev)
 
   /* Check each member of the group */
 
-  for (group = (FAR struct igmp_group_s *)dev->grplist.head; group; group = group->next)
+  for (group = (FAR struct igmp_group_s *)dev->grplist.head;
+       group;
+       group = group->next)
     {
       /* Does this member have a pending outgoing message? */
 

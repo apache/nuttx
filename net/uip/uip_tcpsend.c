@@ -80,7 +80,7 @@
  *   up IP header and computes the TCP checksum
  *
  * Parameters:
- *   dev    - The device driver structure to use in the send operation
+ *   dev - The device driver structure to use in the send operation
  *
  * Return:
  *   None
@@ -90,9 +90,9 @@
  *
  ****************************************************************************/
 
-static void uip_tcpsendcomplete(struct uip_driver_s *dev)
+static void uip_tcpsendcomplete(FAR struct uip_driver_s *dev)
 {
-  struct uip_tcpip_hdr *pbuf = BUF;
+  FAR struct uip_tcpip_hdr *pbuf = BUF;
 
   pbuf->ttl         = UIP_TTL;
 
@@ -160,8 +160,8 @@ static void uip_tcpsendcomplete(struct uip_driver_s *dev)
  *   calculating the checksum and finally send the packet.
  *
  * Parameters:
- *   dev    - The device driver structure to use in the send operation
- *   conn   - The TCP connection structure holding connection information
+ *   dev  - The device driver structure to use in the send operation
+ *   conn - The TCP connection structure holding connection information
  *
  * Return:
  *   None
@@ -171,9 +171,10 @@ static void uip_tcpsendcomplete(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static void uip_tcpsendcommon(struct uip_driver_s *dev, struct uip_conn *conn)
+static void uip_tcpsendcommon(FAR struct uip_driver_s *dev,
+                              FAR struct uip_conn *conn)
 {
-  struct uip_tcpip_hdr *pbuf = BUF;
+  FAR struct uip_tcpip_hdr *pbuf = BUF;
 
   memcpy(pbuf->ackno, conn->rcvseq, 4);
   memcpy(pbuf->seqno, conn->sndseq, 4);
@@ -205,7 +206,6 @@ static void uip_tcpsendcommon(struct uip_driver_s *dev, struct uip_conn *conn)
    */
 
   uip_tcpsendcomplete(dev);
-
 }
 
 /****************************************************************************
@@ -232,10 +232,10 @@ static void uip_tcpsendcommon(struct uip_driver_s *dev, struct uip_conn *conn)
  *
  ****************************************************************************/
 
-void uip_tcpsend(struct uip_driver_s *dev, struct uip_conn *conn,
+void uip_tcpsend(FAR struct uip_driver_s *dev, FAR struct uip_conn *conn,
                  uint16_t flags, uint16_t len)
 {
-  struct uip_tcpip_hdr *pbuf = BUF;
+  FAR struct uip_tcpip_hdr *pbuf = BUF;
 
   pbuf->flags     = flags;
   dev->d_len     = len;
@@ -260,12 +260,11 @@ void uip_tcpsend(struct uip_driver_s *dev, struct uip_conn *conn,
  *
  ****************************************************************************/
 
-void uip_tcpreset(struct uip_driver_s *dev)
+void uip_tcpreset(FAR struct uip_driver_s *dev)
 {
-  struct uip_tcpip_hdr *pbuf = BUF;
-
+  FAR struct uip_tcpip_hdr *pbuf = BUF;
   uint16_t tmp16;
-  uint8_t  seqbyte;
+  uint8_t seqbyte;
 
 #ifdef CONFIG_NET_STATISTICS
   uip_stat.tcp.rst++;
@@ -332,9 +331,9 @@ void uip_tcpreset(struct uip_driver_s *dev)
  *   Send the SYN or SYNACK response.
  *
  * Parameters:
- *   dev    - The device driver structure to use in the send operation
- *   conn   - The TCP connection structure holding connection information
- *   ack    - The ACK response to send
+ *   dev  - The device driver structure to use in the send operation
+ *   conn - The TCP connection structure holding connection information
+ *   ack  - The ACK response to send
  *
  * Return:
  *   None
@@ -344,7 +343,8 @@ void uip_tcpreset(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-void uip_tcpack(struct uip_driver_s *dev, struct uip_conn *conn, uint8_t ack)
+void uip_tcpack(FAR struct uip_driver_s *dev, FAR struct uip_conn *conn,
+                uint8_t ack)
 {
   struct uip_tcpip_hdr *pbuf = BUF;
 

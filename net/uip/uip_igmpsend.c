@@ -105,9 +105,9 @@ static uint16_t uip_igmpchksum(FAR uint8_t *buffer, int buflen)
  *   the IP header and calculates the IP header checksum.
  *
  * Parameters:
- *   dev       - The device driver structure to use in the send operation.
- *   group     - Describes the multicast group member and identifies the message
- *                to be sent.
+ *   dev        - The device driver structure to use in the send operation.
+ *   group      - Describes the multicast group member and identifies the
+ *                message to be sent.
  *   destipaddr - The IP address of the recipient of the message
  *
  * Return:
@@ -124,7 +124,7 @@ void uip_igmpsend(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group,
   nllvdbg("msgid: %02x destipaddr: %08x\n", group->msgid, (int)*destipaddr);
 
   /* The total length to send is the size of the IP and IGMP headers and 4
-   * bytes for the ROUTER ALERT (and, eventually, the ethernet header)
+   * bytes for the ROUTER ALERT (and, eventually, the Ethernet header)
    */
 
   dev->d_len           = UIP_IPIGMPH_LEN;

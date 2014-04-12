@@ -163,7 +163,9 @@ static inline FAR struct igmp_group_s *uip_grpheapalloc(void)
 #if CONFIG_PREALLOC_IGMPGROUPS > 0
 static inline FAR struct igmp_group_s *uip_grpprealloc(void)
 {
-  FAR struct igmp_group_s *group = (FAR struct igmp_group_s *)sq_remfirst(&g_freelist);
+  FAR struct igmp_group_s *group =
+    (FAR struct igmp_group_s *)sq_remfirst(&g_freelist);
+
   if (group)
     {
       memset(group, 0, sizeof(struct igmp_group_s));
@@ -361,7 +363,7 @@ void uip_grpfree(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group)
 
   sq_rem((FAR sq_entry_t*)group, &dev->grplist);
   
-  /* Destroy the wait semapore */
+  /* Destroy the wait semaphore */
 
   (void)sem_destroy(&group->sem);
 

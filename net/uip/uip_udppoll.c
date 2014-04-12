@@ -80,7 +80,7 @@
  *   Poll a UDP "connection" structure for availability of TX data
  *
  * Parameters:
- *   dev - The device driver structure to use in the send operation
+ *   dev  - The device driver structure to use in the send operation
  *   conn - The UDP "connection" to poll for TX data
  *
  * Return:
@@ -91,13 +91,13 @@
  *
  ****************************************************************************/
 
-void uip_udppoll(struct uip_driver_s *dev, struct uip_udp_conn *conn)
+void uip_udppoll(FAR struct uip_driver_s *dev, FAR struct uip_udp_conn *conn)
 {
   /* Verify that the UDP connection is valid */
 
   if (conn->lport != 0)
     {
-      /* Setup for the application callback */
+      /* Set-up for the application callback */
 
       dev->d_appdata = &dev->d_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];
       dev->d_snddata = &dev->d_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];

@@ -95,7 +95,7 @@ static uint16_t g_last_udp_port;
  *
  ****************************************************************************/
 
-static inline void _uip_semtake(sem_t *sem)
+static inline void _uip_semtake(FAR sem_t *sem)
 {
   /* Take the semaphore (perhaps waiting) */
 
@@ -120,7 +120,7 @@ static inline void _uip_semtake(sem_t *sem)
  *
  ****************************************************************************/
 
-static struct uip_udp_conn *uip_find_conn(uint16_t portno)
+static FAR struct uip_udp_conn *uip_find_conn(uint16_t portno)
 {
   int i;
 
@@ -143,7 +143,7 @@ static struct uip_udp_conn *uip_find_conn(uint16_t portno)
  * Description:
  *   Select an unused port number.
  *
- *   NOTE that in prinicple this function could fail if there is no available
+ *   NOTE that in principle this function could fail if there is no available
  *   port number.  There is no check for that case and it would actually
  *   in an infinite loop if that were the case.  In this simple, small UDP
  *   implementation, it is reasonable to assume that that error cannot happen
@@ -231,7 +231,7 @@ void uip_udpinit(void)
  * Name: uip_udpalloc()
  *
  * Description:
- *   Alloc a new, uninitialized UDP connection structure.
+ *   Allocate a new, uninitialized UDP connection structure.
  *
  ****************************************************************************/
 
@@ -255,6 +255,7 @@ struct uip_udp_conn *uip_udpalloc(void)
 
       dq_addlast(&conn->node, &g_active_udp_connections);
     }
+
   _uip_semgive(&g_free_sem);
   return conn;
 }
@@ -295,16 +296,17 @@ void uip_udpfree(struct uip_udp_conn *conn)
  *
  * Description:
  *   Find a connection structure that is the appropriate
- *   connection to be used withi the provided TCP/IP header
+ *   connection to be used within the provided TCP/IP header
  *
  * Assumptions:
  *   This function is called from UIP logic at interrupt level
  *
  ****************************************************************************/
 
-struct uip_udp_conn *uip_udpactive(struct uip_udpip_hdr *buf)
+struct uip_udp_conn *uip_udpactive(FAR struct uip_udpip_hdr *buf)
 {
-  struct uip_udp_conn *conn = (struct uip_udp_conn *)g_active_udp_connections.head;
+  FAR struct uip_udp_conn *conn =
+    (FAR struct uip_udp_conn *)g_active_udp_connections.head;
 
   while (conn)
     {
@@ -348,7 +350,7 @@ struct uip_udp_conn *uip_udpactive(struct uip_udpip_hdr *buf)
  *
  ****************************************************************************/
 
-struct uip_udp_conn *uip_nextudpconn(struct uip_udp_conn *conn)
+FAR struct uip_udp_conn *uip_nextudpconn(FAR struct uip_udp_conn *conn)
 {
   if (!conn)
     {
@@ -373,9 +375,11 @@ struct uip_udp_conn *uip_nextudpconn(struct uip_udp_conn *conn)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-int uip_udpbind(struct uip_udp_conn *conn, const struct sockaddr_in6 *addr)
+int uip_udpbind(FAR struct uip_udp_conn *conn,
+                FAR const struct sockaddr_in6 *addr)
 #else
-int uip_udpbind(struct uip_udp_conn *conn, const struct sockaddr_in *addr)
+int uip_udpbind(FAR struct uip_udp_conn *conn,
+                FAR const struct sockaddr_in *addr)
 #endif
 {
   int ret = -EADDRINUSE;
@@ -408,6 +412,7 @@ int uip_udpbind(struct uip_udp_conn *conn, const struct sockaddr_in *addr)
 
       uip_unlock(flags);
     }
+
   return ret;
 }
 
@@ -432,9 +437,11 @@ int uip_udpbind(struct uip_udp_conn *conn, const struct sockaddr_in *addr)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-int uip_udpconnect(struct uip_udp_conn *conn, const struct sockaddr_in6 *addr)
+int uip_udpconnect(FAR struct uip_udp_conn *conn,
+                   FAR const struct sockaddr_in6 *addr)
 #else
-int uip_udpconnect(struct uip_udp_conn *conn, const struct sockaddr_in *addr)
+int uip_udpconnect(FAR struct uip_udp_conn *conn,
+                   FAR const struct sockaddr_in *addr)
 #endif
 {
   /* Has this address already been bound to a local port (lport)? */
@@ -461,7 +468,7 @@ int uip_udpconnect(struct uip_udp_conn *conn, const struct sockaddr_in *addr)
       uip_ipaddr_copy(conn->ripaddr, g_allzeroaddr);
     }
 
-  conn->ttl   = UIP_TTL;
+  conn->ttl = UIP_TTL;
   return OK;
 }
 

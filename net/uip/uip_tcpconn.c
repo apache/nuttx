@@ -89,8 +89,8 @@ static uint16_t g_last_tcp_port;
  * Name: uip_selectport()
  *
  * Description:
- *   If the portnumber is zero; select an unused port for the connection.
- *   If the portnumber is non-zero, verify that no other connection has
+ *   If the port number is zero; select an unused port for the connection.
+ *   If the port number is non-zero, verify that no other connection has
  *   been created with this port number.
  *
  * Input Parameters:
@@ -164,7 +164,7 @@ static int uip_selectport(uint16_t portno)
  *
  * Description:
  *   Initialize the TCP/IP connection structures.  Called only once and only
- *   from the UIP layer at startup in normal user mode.
+ *   from the UIP layer at start-up in normal user mode.
  *
  ****************************************************************************/
 
@@ -221,7 +221,7 @@ struct uip_conn *uip_tcpalloc(void)
 
   if (!conn)
     {
-      /* As a fallback, check for connection structures which can be stalled.
+      /* As a fall-back, check for connection structures which can be stalled.
        *
        * Search the active connection list for the oldest connection
        * that is in the UIP_TIME_WAIT or UIP_FIN_WAIT_1 state.
@@ -462,7 +462,7 @@ struct uip_conn *uip_nexttcpconn(struct uip_conn *conn)
  *   connection that listens on this this port.
  *
  *   Primary uses: (1) to determine if a port number is available, (2) to
- *   To idenfity the socket that will accept new connections on a local port.
+ *   To identify the socket that will accept new connections on a local port.
  *
  ****************************************************************************/
 
@@ -478,7 +478,7 @@ struct uip_conn *uip_tcplistener(uint16_t portno)
       conn = &g_tcp_connections[i];
       if (conn->tcpstateflags != UIP_CLOSED && conn->lport == portno)
         {
-          /* The portnumber is in use, return the connection */
+          /* The port number is in use, return the connection */
 
           return conn;
         }
@@ -614,7 +614,7 @@ int uip_tcpbind(struct uip_conn *conn, const struct sockaddr_in *addr)
  *   TCP connect() operation:  It connects to a remote host using TCP.
  *
  *   This function is used to start a new connection to the specified
- *   port on the specied host. It uses the connection structure that was
+ *   port on the specified host. It uses the connection structure that was
  *   allocated by a preceding socket() call.  It sets the connection to
  *   the SYN_SENT state and sets the retransmission timer to 0. This will
  *   cause a TCP SYN segment to be sent out the next time this connection
@@ -645,7 +645,7 @@ int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in *addr)
       return -EISCONN;
     }
 
-  /* If the TCP port has not alread been bound to a local port, then select
+  /* If the TCP port has not already been bound to a local port, then select
    * one now.
    */
 

@@ -81,9 +81,9 @@
  *   Handle a TCP timer expiration for the provided TCP connection
  *
  * Parameters:
- *   dev     - The device driver structure to use in the send operation
- *   conn    - The TCP "connection" to poll for TX data
- *   hsed    - The polling interval in halves of a second
+ *   dev  - The device driver structure to use in the send operation
+ *   conn - The TCP "connection" to poll for TX data
+ *   hsed - The polling interval in halves of a second
  *
  * Return:
  *   None
@@ -93,7 +93,8 @@
  *
  ****************************************************************************/
 
-void uip_tcptimer(struct uip_driver_s *dev, struct uip_conn *conn, int hsec)
+void uip_tcptimer(FAR struct uip_driver_s *dev, FAR struct uip_conn *conn,
+                  int hsec)
 {
   uint8_t result;
 

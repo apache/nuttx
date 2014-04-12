@@ -269,7 +269,7 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
        * NOTE 1: This could be an expensive check if there are a lot of
        * entries in the ARP table.
        *
-       * NOTE 2: If we are actually harvesting IP addresses on incomming IP
+       * NOTE 2: If we are actually harvesting IP addresses on incoming IP
        * packets, then this check should not be necessary; the MAC mapping
        * should already be in the ARP table.
        */

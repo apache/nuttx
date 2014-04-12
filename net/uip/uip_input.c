@@ -65,7 +65,7 @@
  * a byte stream if needed. The application will not be fed with data
  * that is out of sequence.
  *
- * If the application whishes to send data to the peer, it should put
+ * If the application wishes to send data to the peer, it should put
  * its data into the d_buf. The d_appdata pointer points to the
  * first available byte. The TCP/IP stack will calculate the
  * checksums, and fill in the necessary header fields and finally send
@@ -166,7 +166,7 @@ static uint8_t uip_reass(void)
     }
 
   /* Check if the incoming fragment matches the one currently present
-   * in the reasembly buffer. If so, we proceed with copying the
+   * in the reassembly buffer. If so, we proceed with copying the
    * fragment into the buffer.
    */
 
@@ -297,7 +297,6 @@ nullreturn:
  *         yet.  Currently useful for UDP when a packet arrives before a recv
  *         call is in place.
  *
- *
  * Assumptions:
  *
  ****************************************************************************/
@@ -329,6 +328,7 @@ int uip_input(struct uip_driver_s *dev)
       nlldbg("Invalid IPv6 version: %d\n", pbuf->vtc >> 4);
       goto drop;
     }
+
 #else /* CONFIG_NET_IPv6 */
   /* Check validity of the IP header. */
 

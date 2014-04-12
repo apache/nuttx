@@ -108,7 +108,7 @@ void uip_tcppoll(struct uip_driver_s *dev, struct uip_conn *conn)
       dev->d_len     = 0;
       dev->d_sndlen  = 0;
 
-      /* Perfom the callback */
+      /* Perform the callback */
 
       result = uip_tcpcallback(dev, conn, UIP_POLL);
 

@@ -315,7 +315,7 @@ static uint16_t sendfile_interrupt(FAR struct uip_driver_s *dev, FAR void *pvcon
            * in the ARP table.  Hence, we only check on the first packet -- when
            * snd_sent is zero.
            *
-           * NOTE 2: If we are actually harvesting IP addresses on incomming IP
+           * NOTE 2: If we are actually harvesting IP addresses on incoming IP
            * packets, then this check should not be necessary; the MAC mapping
            * should already be in the ARP table.
            */

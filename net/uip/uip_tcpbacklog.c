@@ -107,7 +107,7 @@ int uip_backlogcreate(FAR struct uip_conn *conn, int nblg)
 
       /* Then determine the full size of the allocation include the
        * uip_backlog_s, a pre-allocated array of struct uip_blcontainer_s
-       * and alignement padding
+       * and alignment padding
        */
 
       size = offset + nblg * sizeof(struct uip_blcontainer_s);
@@ -399,6 +399,7 @@ int uip_backlogdelete(FAR struct uip_conn *conn, FAR struct uip_conn *blconn)
         nlldbg("Failed to find pending connection\n");
         return -EINVAL;
     }
+
   return OK;
 }
 

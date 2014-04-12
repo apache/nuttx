@@ -69,7 +69,8 @@
  ****************************************************************************/
 
 #if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING)
-static inline int uip_pollicmp(struct uip_driver_s *dev, uip_poll_callback_t callback)
+static inline int uip_pollicmp(FAR struct uip_driver_s *dev,
+                               uip_poll_callback_t callback)
 {
   /* Perform the UDP TX poll */
 
@@ -94,7 +95,8 @@ static inline int uip_pollicmp(struct uip_driver_s *dev, uip_poll_callback_t cal
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static inline int uip_polligmp(struct uip_driver_s *dev, uip_poll_callback_t callback)
+static inline int uip_polligmp(FAR struct uip_driver_s *dev,
+                               uip_poll_callback_t callback)
 {
   /* Perform the UDP TX poll */
 
@@ -113,17 +115,17 @@ static inline int uip_polligmp(struct uip_driver_s *dev, uip_poll_callback_t cal
  *   Poll all UDP connections for available packets to send.
  *
  * Assumptions:
- *   This function is called from the MAC device driver and may be called from
- *   the timer interrupt/watchdog handle level.
+ *   This function is called from the MAC device driver and may be called
+ *   from the timer interrupt/watchdog handle level.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_NET_UDP
-static int uip_polludpconnections(struct uip_driver_s *dev,
+static int uip_polludpconnections(FAR struct uip_driver_s *dev,
                                   uip_poll_callback_t callback)
 {
-  struct uip_udp_conn *udp_conn = NULL;
-  int                  bstop    = 0;
+  FAR struct uip_udp_conn *udp_conn = NULL;
+  int bstop = 0;
 
   /* Traverse all of the allocated UDP connections and perform the poll action */
 
@@ -149,17 +151,17 @@ static int uip_polludpconnections(struct uip_driver_s *dev,
  *   Poll all UDP connections for available packets to send.
  *
  * Assumptions:
- *   This function is called from the MAC device driver and may be called from
- *   the timer interrupt/watchdog handle level.
+ *   This function is called from the MAC device driver and may be called
+ *   from the timer interrupt/watchdog handle level.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
-static inline int uip_polltcpconnections(struct uip_driver_s *dev,
+static inline int uip_polltcpconnections(FAR struct uip_driver_s *dev,
                                          uip_poll_callback_t callback)
 {
-  struct uip_conn *conn  = NULL;
-  int              bstop = 0;
+  FAR struct uip_conn *conn  = NULL;
+  int bstop = 0;
 
   /* Traverse all of the active TCP connections and perform the poll action */
 
@@ -194,11 +196,11 @@ static inline int uip_polltcpconnections(struct uip_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
-static inline int uip_polltcptimer(struct uip_driver_s *dev,
+static inline int uip_polltcptimer(FAR struct uip_driver_s *dev,
                                    uip_poll_callback_t callback, int hsec)
 {
-  struct uip_conn *conn  = NULL;
-  int              bstop = 0;
+  FAR struct uip_conn *conn  = NULL;
+  int bstop = 0;
 
   /* Traverse all of the active TCP connections and perform the poll action */
 
@@ -229,11 +231,12 @@ static inline int uip_polltcptimer(struct uip_driver_s *dev,
  * Description:
  *   This function will traverse each active uIP connection structure and
  *   will perform TCP and UDP polling operations. uip_poll() may be called
- *   asychronously with the network drvier can accept another outgoing packet.
+ *   asynchronously with the network driver can accept another outgoing
+ *   packet.
  *
  *   This function will call the provided callback function for every active
  *   connection. Polling will continue until all connections have been polled
- *   or until the user-suplied function returns a non-zero value (which it
+ *   or until the user-supplied function returns a non-zero value (which it
  *   should do only if it cannot accept further write data).
  *
  *   When the callback function is called, there may be an outbound packet
@@ -242,16 +245,16 @@ static inline int uip_polltcptimer(struct uip_driver_s *dev,
  *   out the packet.
  *
  * Assumptions:
- *   This function is called from the MAC device driver and may be called from
- *   the timer interrupt/watchdog handle level.
+ *   This function is called from the MAC device driver and may be called
+ *   from the timer interrupt/watchdog handle level.
  *
  ****************************************************************************/
 
-int uip_poll(struct uip_driver_s *dev, uip_poll_callback_t callback)
+int uip_poll(FAR struct uip_driver_s *dev, uip_poll_callback_t callback)
 {
   int bstop;
 
-  /* Check for pendig IGMP messages */
+  /* Check for pending IGMP messages */
 
 #ifdef CONFIG_NET_IGMP
   bstop = uip_polligmp(dev, callback);
@@ -264,14 +267,18 @@ int uip_poll(struct uip_driver_s *dev, uip_poll_callback_t callback)
       if (!bstop)
         {
 #ifdef CONFIG_NET_UDP
-          /* Traverse all of the allocated UDP connections and perform the poll action */
+          /* Traverse all of the allocated UDP connections and perform the
+           * poll action.
+           */
 
           bstop = uip_polludpconnections(dev, callback);
           if (!bstop)
 #endif
             {
 #if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING)
-              /* Traverse all of the tasks waiting to send an ICMP ECHO request */
+              /* Traverse all of the tasks waiting to send an ICMP ECHO
+               * request
+               */
 
               bstop = uip_pollicmp(dev, callback);
 #endif
@@ -292,7 +299,7 @@ int uip_poll(struct uip_driver_s *dev, uip_poll_callback_t callback)
  *
  *   This function will call the provided callback function for every active
  *   connection. Polling will continue until all connections have been polled
- *   or until the user-suplied function returns a non-zero value (which it
+ *   or until the user-supplied function returns a non-zero value (which it
  *   should do only if it cannot accept further write data).
  *
  *   When the callback function is called, there may be an outbound packet
@@ -306,7 +313,8 @@ int uip_poll(struct uip_driver_s *dev, uip_poll_callback_t callback)
  *
  ****************************************************************************/
 
-int uip_timer(struct uip_driver_s *dev, uip_poll_callback_t callback, int hsec)
+int uip_timer(FAR struct uip_driver_s *dev, uip_poll_callback_t callback,
+              int hsec)
 {
   int bstop;
 

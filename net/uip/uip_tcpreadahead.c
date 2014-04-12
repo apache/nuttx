@@ -108,7 +108,7 @@ void uip_tcpreadahead_init(void)
  * Description:
  *   Allocate a TCP read-ahead buffer by taking a pre-allocated buffer from
  *   the free list.  This function is called from TCP logic when new,
- *   incoming TCP data is received but there is no user logic recving the
+ *   incoming TCP data is received but there is no user logic receiving the
  *   the data.  Note: kmalloc() cannot be used because this function is
  *   called from interrupt level.
  *

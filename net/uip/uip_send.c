@@ -48,7 +48,7 @@
 #include <nuttx/net/uip/uip-arch.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -87,7 +87,7 @@
  *   the network interface driver.
  *
  * Assumptions:
- *   Called from the interrupt level or, at a mimimum, with interrupts
+ *   Called from the interrupt level or, at a minimum, with interrupts
  *   disabled.
  *
  ****************************************************************************/

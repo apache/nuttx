@@ -59,7 +59,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define IGMPBUF     ((struct uip_igmphdr_s *)&dev->d_buf[UIP_LLH_LEN])
+#define IGMPBUF ((struct uip_igmphdr_s *)&dev->d_buf[UIP_LLH_LEN])
 
 /****************************************************************************
  * Private Functions
@@ -156,8 +156,8 @@ void uip_igmpinput(struct uip_driver_s *dev)
         /* RFC 2236, 2.2.  ax Response Time
          *  "The Max Response Time field is meaningful only in Membership Query
          *   messages, and specifies the maximum allowed time before sending a
-         *   responding report in units of 1/10 second.  In all other messages, it
-         *   is set to zero by the sender and ignored by receivers.
+         *   responding report in units of 1/10 second.  In all other messages,
+         *   it is set to zero by the sender and ignored by receivers.
          */
 
         /* Check if the query was sent to all systems */
@@ -239,7 +239,7 @@ void uip_igmpinput(struct uip_driver_s *dev)
 
         else if (group->grpaddr != 0)
           {
-            nllvdbg("Unitcast queury\n");
+            nllvdbg("Unicast query\n");
             IGMP_STATINCR(uip_stat.igmp.ucast_query);
 
             nlldbg("Query to a specific group with the group address as destination\n");

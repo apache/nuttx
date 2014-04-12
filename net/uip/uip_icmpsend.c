@@ -49,7 +49,7 @@
 #include "uip_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define ICMPBUF ((struct uip_icmpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
@@ -94,7 +94,7 @@ void uip_icmpsend(struct uip_driver_s *dev, uip_ipaddr_t *destaddr)
   if (dev->d_sndlen > 0)
     {
       /* The total length to send is the size of the application data plus
-       * the IP and ICMP headers (and, eventually, the ethernet header)
+       * the IP and ICMP headers (and, eventually, the Ethernet header)
        */
 
       dev->d_len = dev->d_sndlen + UIP_IPICMPH_LEN;
