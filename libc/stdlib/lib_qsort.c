@@ -99,7 +99,7 @@ static inline char *med3(char *a, char *b, char *c,
 
 static inline void swapfunc(char *a, char *b, int n, int swaptype)
 {
-  if(swaptype <= 1)
+  if (swaptype <= 1)
     {
       swapcode(long, a, b, n)
     }

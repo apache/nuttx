@@ -141,13 +141,14 @@ static inline bool nxbe_poprectangle(struct nxbe_clipstack_s *stack,
                                      FAR struct nxbe_window_s **wnd,
                                      struct nxgl_rect_s *rect)
 {
-  if(stack->npushed > 0)
+  if (stack->npushed > 0)
     {
       stack->npushed--;
       *wnd = stack->stack[stack->npushed].wnd;
       nxgl_rectcopy(rect, &stack->stack[stack->npushed].rect);
       return true;
     }
+
   return false;
 }
 

@@ -1626,7 +1626,7 @@ FAR struct can_dev_s *stm32_caninitialize(int port)
    */
 
 #ifdef CONFIG_STM32_CAN1
-  if( port == 1 )
+  if (port == 1)
     {
       /* Select the CAN1 device structure */
 
@@ -1642,7 +1642,7 @@ FAR struct can_dev_s *stm32_caninitialize(int port)
   else
 #endif
 #ifdef CONFIG_STM32_CAN2
-  if ( port ==2 )
+  if (port == 2)
     {
       /* Select the CAN2 device structure */
 

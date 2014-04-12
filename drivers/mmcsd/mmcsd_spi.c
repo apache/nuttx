@@ -1351,6 +1351,8 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
   /* Convert sector and nsectors to nbytes and byte offset */
 
   nbytes = nsectors * SECTORSIZE(slot);
+  UNUSED(nbytes);
+
   if (IS_BLOCK(slot->type))
     {
       offset = start_sector;

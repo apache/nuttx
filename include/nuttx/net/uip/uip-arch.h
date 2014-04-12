@@ -222,12 +222,14 @@ struct uip_driver_s
  * code below.
  *
  *     dev->d_len = devicedriver_poll();
- *     if(dev->d_len > 0) {
- *       uip_input(dev);
- *       if(dev->d_len > 0) {
- *         devicedriver_send();
+ *     if (dev->d_len > 0)
+ *       {
+ *         uip_input(dev);
+ *         if (dev->d_len > 0)
+ *           {
+ *             devicedriver_send();
+ *           }
  *       }
- *     }
  *
  * Note: If you are writing a uIP device driver that needs ARP
  * (Address Resolution Protocol), e.g., when running uIP over
@@ -236,20 +238,26 @@ struct uip_driver_s
  *
  *     #define BUF ((struct uip_eth_hdr *)&dev->d_buf[0])
  *     dev->d_len = ethernet_devicedrver_poll();
- *     if(dev->d_len > 0) {
- *       if(BUF->type == HTONS(UIP_ETHTYPE_IP)) {
- *         uip_arp_ipin();
- *         uip_input(dev);
- *         if(dev->d_len > 0) {
- *           uip_arp_out();
- *           devicedriver_send();
- *         }
- *       } else if(BUF->type == HTONS(UIP_ETHTYPE_ARP)) {
- *         uip_arp_arpin();
- *         if(dev->d_len > 0) {
- *           devicedriver_send();
- *         }
- *       }
+ *     if (dev->d_len > 0)
+ *       {
+ *         if (BUF->type == HTONS(UIP_ETHTYPE_IP))
+ *           {
+ *             uip_arp_ipin();
+ *             uip_input(dev);
+ *             if (dev->d_len > 0)
+ *               {
+ *                 uip_arp_out();
+ *                 devicedriver_send();
+ *               }
+ *           }
+ *         else if (BUF->type == HTONS(UIP_ETHTYPE_ARP))
+ *           {
+ *             uip_arp_arpin();
+ *             if (dev->d_len > 0)
+ *               {
+ *                 devicedriver_send();
+ *               }
+ *           }
  */
 
 int uip_input(struct uip_driver_s *dev);

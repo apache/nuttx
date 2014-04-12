@@ -399,7 +399,7 @@ void uart_init(uint8_t uart, uint8_t interrupts)
   if (uart == CONS_UART_NR)
     {
       cons_init();
-      if(interrupts)
+      if (interrupts)
         {
           irq_register_handler(irq, &uart_irq_handler_cons);
           irq_config(irq, 0, 0, 0xff);
@@ -409,7 +409,7 @@ void uart_init(uint8_t uart, uint8_t interrupts)
   else
     {
       sercomm_init();
-      if(interrupts)
+      if (interrupts)
         {
           irq_register_handler(irq, &uart_irq_handler_sercomm);
           irq_config(irq, 0, 0, 0xff);

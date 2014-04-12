@@ -619,7 +619,7 @@ static void kinetis_txdone(FAR struct kinetis_driver_s *priv)
  *   Three interrupt sources will vector this this function:
  *   1. Ethernet MAC transmit interrupt handler
  *   2. Ethernet MAC receive interrupt handler
- *   3. 
+ *   3.
  *
  * Parameters:
  *   irq     - Number of the IRQ that generated the interrupt
@@ -677,7 +677,7 @@ static int kinetis_interrupt(int irq, FAR void *context)
       /* Reinitialize all buffers. */
 
       kinetis_initbuffers(priv);
- 
+
       /* Indicate that there have been empty receive buffers produced */
 
       putreg32(ENET_RDAR, KINETIS_ENET_RDAR);
@@ -771,7 +771,7 @@ static void kinetis_polltimer(int argc, uint32_t arg, ...)
  *
  * Description:
  *   NuttX Callback: Bring up the Ethernet interface when an IP address is
- *   provided 
+ *   provided
  *
  * Parameters:
  *   dev  - Reference to the NuttX driver state structure
@@ -933,7 +933,7 @@ static int kinetis_ifdown(struct uip_driver_s *dev)
  * Function: kinetis_txavail
  *
  * Description:
- *   Driver callback invoked when new TX data is available.  This is a 
+ *   Driver callback invoked when new TX data is available.  This is a
  *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
  *   latency.
  *
@@ -990,7 +990,7 @@ static int kinetis_txavail(struct uip_driver_s *dev)
  *
  * Parameters:
  *   dev  - Reference to the NuttX driver state structure
- *   mac  - The MAC address to be added 
+ *   mac  - The MAC address to be added
  *
  * Returned Value:
  *   None
@@ -1019,7 +1019,7 @@ static int kinetis_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
  *
  * Parameters:
  *   dev  - Reference to the NuttX driver state structure
- *   mac  - The MAC address to be removed 
+ *   mac  - The MAC address to be removed
  *
  * Returned Value:
  *   None
@@ -1070,7 +1070,7 @@ static void kinetis_initmii(struct kinetis_driver_s *priv)
  * Function: kinetis_writemii
  *
  * Description:
- *   Write a 16-bit value to a PHY register. 
+ *   Write a 16-bit value to a PHY register.
  *
  * Parameters:
  *   priv - Reference to the private ENET driver state structure
@@ -1114,7 +1114,7 @@ static int kinetis_writemii(struct kinetis_driver_s *priv, uint8_t phyaddr,
 
   /* Check for a timeout */
 
-  if(timeout == MII_MAXPOLLS) 
+  if (timeout == MII_MAXPOLLS)
     {
       return -ETIMEDOUT;
     }
@@ -1129,7 +1129,7 @@ static int kinetis_writemii(struct kinetis_driver_s *priv, uint8_t phyaddr,
  * Function: kinetis_writemii
  *
  * Description:
- *   Read a 16-bit value from a PHY register. 
+ *   Read a 16-bit value from a PHY register.
  *
  * Parameters:
  *   priv    - Reference to the private ENET driver state structure
@@ -1152,7 +1152,7 @@ static int kinetis_readmii(struct kinetis_driver_s *priv, uint8_t phyaddr,
   putreg32(ENET_INT_MII, KINETIS_ENET_EIR);
 
   /* Initiatate the MII Management read */
- 
+
   putreg32(2 << ENET_MMFR_TA_SHIFT |
            (uint32_t)regaddr << ENET_MMFR_PA_SHIFT |
            (uint32_t)phyaddr << ENET_MMFR_PA_SHIFT |
@@ -1172,7 +1172,7 @@ static int kinetis_readmii(struct kinetis_driver_s *priv, uint8_t phyaddr,
 
   /* Check for a timeout */
 
-  if (timeout >= MII_MAXPOLLS) 
+  if (timeout >= MII_MAXPOLLS)
     {
       return -ETIMEDOUT;
     }
@@ -1241,7 +1241,7 @@ static inline void kinetis_initphy(struct kinetis_driver_s *priv)
   phydata = 0;
   kinetis_readmii(priv, CONFIG_ENET_PHYADDR, PHY_STATUS, &phydata);
 
-  /* Set up the transmit and receive contrel registers based on the 
+  /* Set up the transmit and receive contrel registers based on the
    * configuration and the auto negotiation results.
    */
 
@@ -1256,7 +1256,7 @@ static inline void kinetis_initphy(struct kinetis_driver_s *priv)
 
   putreg32(rcr, KINETIS_ENET_RCR);
   putreg32(tcr, KINETIS_ENET_TCR);
-  
+
   /* Setup half or full duplex */
 
   if ((phydata & PHY_DUPLEX_STATUS) != 0)
@@ -1271,7 +1271,7 @@ static inline void kinetis_initphy(struct kinetis_driver_s *priv)
 
       rcr |= ENET_RCR_DRT;
     }
- 
+
   if ((phydata & PHY_SPEED_STATUS) != 0)
     {
       /* 10Mbps */
@@ -1463,7 +1463,7 @@ int kinetis_netinitialize(int intf)
   kinetis_pinconfig(PIN_RMII0_TXD0);
   kinetis_pinconfig(PIN_RMII0_TXD1);
   kinetis_pinconfig(PIN_RMII0_TXEN);
-#endif   
+#endif
 
   /* Set interrupt priority levels */
 

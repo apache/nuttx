@@ -203,7 +203,7 @@ int elf_loadshdrs(FAR struct elf_loadinfo_s *loadinfo)
   /* Get the total size of the section header table */
 
   shdrsize = (size_t)loadinfo->ehdr.e_shentsize * (size_t)loadinfo->ehdr.e_shnum;
-  if(loadinfo->ehdr.e_shoff + shdrsize > loadinfo->filelen)
+  if (loadinfo->ehdr.e_shoff + shdrsize > loadinfo->filelen)
     {
       bdbg("Insufficent space in file for section header table\n");
       return -ESPIPE;

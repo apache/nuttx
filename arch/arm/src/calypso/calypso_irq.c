@@ -252,7 +252,7 @@ void up_disable_irq(int irq)
 
 void up_enable_irq(int irq)
 {
-  if((unsigned)irq < NR_IRQS)
+  if ((unsigned)irq < NR_IRQS)
     {
       _irq_enable(irq, 1);
     }

@@ -287,7 +287,7 @@ static int init_graph_vga(int width, int height,int chain4)
 
   /* chain4 not available if mode takes over 64k */
 
-  /* if(chain4 && (long)width*(long)height>65536L) return -3; */
+  /* if (chain4 && (long)width*(long)height>65536L) return -3; */
 
   /* here goes the actual modeswitch */
 
@@ -306,7 +306,7 @@ static int init_graph_vga(int width, int height,int chain4)
 
   outw(0x0008, 0x3d4); /* vert.panning = 0 */
 
-  if(chain4)
+  if (chain4)
     {
       outw(0x4014, 0x3d4);
       outw(0xa317, 0x3d4);

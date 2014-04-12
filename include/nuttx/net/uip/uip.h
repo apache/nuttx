@@ -493,9 +493,10 @@ extern void uip_send(struct uip_driver_s *dev, const void *buf, int len);
  *   uip_ipaddr_t ipaddr1, ipaddr2;
  *
  *   uip_ipaddr(&ipaddr1, 192,16,1,2);
- *   if(uip_ipaddr_cmp(ipaddr2, ipaddr1)) {
- *      printf("They are the same");
- *   }
+ *   if (uip_ipaddr_cmp(ipaddr2, ipaddr1))
+ *     {
+ *       printf("They are the same");
+ *     }
  *
  * addr1 The first IP address.
  * addr2 The second IP address.
@@ -521,7 +522,7 @@ extern void uip_send(struct uip_driver_s *dev, const void *buf, int len);
  *   uip_ipaddr(&mask, 255,255,255,0);
  *   uip_ipaddr(&ipaddr1, 192,16,1,2);
  *   uip_ipaddr(&ipaddr2, 192,16,1,3);
- *   if(uip_ipaddr_maskcmp(ipaddr1, ipaddr2, &mask))
+ *   if (uip_ipaddr_maskcmp(ipaddr1, ipaddr2, &mask))
  *     {
  *       printf("They are the same");
  *     }
