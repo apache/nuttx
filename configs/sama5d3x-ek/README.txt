@@ -805,27 +805,27 @@ Buttons and LEDs
     LED_HEAPALLOCATE     Heap has been allocated    OFF      OFF
     LED_IRQSENABLED      Interrupts enabled         OFF      OFF
     LED_STACKCREATED     Idle stack created         ON       OFF
-    LED_INIRQ            In an interrupt              No change
-    LED_SIGNAL           In a signal handler          No change
-    LED_ASSERTION        An assertion failed          No change
+    LED_INIRQ            In an interrupt            -- No change --
+    LED_SIGNAL           In a signal handler        -- No change --
+    LED_ASSERTION        An assertion failed        -- No change --
     LED_PANIC            The system has crashed     OFF      Blinking
-    LED_IDLE             MCU is is sleep mode         Not used
+    LED_IDLE             MCU is is sleep mode       -- Not used  --
 
   If CONFIG_SAMA5D3xEK_NOREDLED=y, then the red LED is not used by the
   system and the controls are as follows:
 
     SYMBOL                Meaning                     LED state
-                                                    Blue     Red
-    -------------------  -----------------------  -------- ----------
-    LED_STARTED          NuttX has been started     OFF      Not used
-    LED_HEAPALLOCATE     Heap has been allocated    OFF      " " "  "
-    LED_IRQSENABLED      Interrupts enabled         OFF      " " "  "
-    LED_STACKCREATED     Idle stack created         ON       " " "  "
-    LED_INIRQ            In an interrupt              No change
-    LED_SIGNAL           In a signal handler          No change
-    LED_ASSERTION        An assertion failed          No change
-    LED_PANIC            The system has crashed     Blinking " " "  "
-    LED_IDLE             MCU is is sleep mode         Not used
+                                                    Blue        Red
+    -------------------  -----------------------  ----------- -----------
+    LED_STARTED          NuttX has been started     OFF       Not used
+    LED_HEAPALLOCATE     Heap has been allocated    OFF       " " "  "
+    LED_IRQSENABLED      Interrupts enabled         OFF       " " "  "
+    LED_STACKCREATED     Idle stack created         ON        " " "  "
+    LED_INIRQ            In an interrupt            No change " " "  "
+    LED_SIGNAL           In a signal handler        No change " " "  "
+    LED_ASSERTION        An assertion failed        No change " " "  "
+    LED_PANIC            The system has crashed     Blinking  " " "  "
+    LED_IDLE             MCU is is sleep mode       Not used  " " "  "
 
   Thus if the blue LED is statically on, NuttX has successfully booted and
   is, apparently, running normally.  If the red (or blue) LED is flashing
