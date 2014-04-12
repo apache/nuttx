@@ -157,9 +157,11 @@ void stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sele
         stm32_gpiowrite(GPIO_CC1101_CS, !selected);
 
         /* Wait for MISO to go low, indicates that Quart has stabilized */
-        if (selected) {
-            while( stm32_gpioread(GPIO_SPI2_MISO) ) up_waste();
-        }
+
+        if (selected)
+          {
+            while (stm32_gpioread(GPIO_SPI2_MISO) ) up_waste();
+          }
         
     }
 }

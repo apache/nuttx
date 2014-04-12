@@ -357,11 +357,11 @@ static void getfilename(int fd, char *name)
     {
       ret = readbyte(fd, &ch);
     }
-  while(ch == ' ' && ret == 1);
+  while (ch == ' ' && ret == 1);
 
   /* Concatenate the filename */
 
-  while(ret == 1 && ch > ' ')
+  while (ret == 1 && ch > ' ')
     {
       *name++ = ch;
        ret = readbyte(fd, &ch);
@@ -484,7 +484,7 @@ int main(int argc, char **argv, char **envp)
   int  oflags;
   int  ret;
 
-  while((opt = getopt(argc, argv, ":dt:b:hl:")) != -1)
+  while ((opt = getopt(argc, argv, ":dt:b:hl:")) != -1)
     {
       switch(opt)
         {

@@ -203,7 +203,7 @@ static void fb_ssd1783_send_cmdlist(const struct ssd1783_cmdlist *p)
 {
   int i=0;
 
-  while(p->is_cmd != END)
+  while (p->is_cmd != END)
     {
       uint16_t sendcmd = p->data;
       if (p->is_cmd == DATA)

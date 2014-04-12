@@ -204,9 +204,10 @@ struct vsn_sif_s vsn_sif;
 
 void sif_sem_wait(void)
 {
-    while( sem_wait( &vsn_sif.exclusive_access ) != 0 ) {
+    while (sem_wait( &vsn_sif.exclusive_access ) != 0)
+      {
         ASSERT(errno == EINTR);
-    }
+      }
 }
 
 
@@ -688,7 +689,7 @@ int sif_main(int argc, char *argv[])
                 
                 cc1101_setchannel(cc, 0);   /* AV Test Hex, receive on that channel */
                 cc1101_receive(cc);          /* Enter RX mode */
-                while(1) 
+                while (1) 
                 {
                     fflush(stdout);
                     sta = cc1101_read(cc, buf, 64);
