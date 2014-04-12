@@ -878,7 +878,7 @@ static void stm32_chan_halt(FAR struct stm32_usbhost_s *priv, int chidx,
    * handling logic to know what to do next.
    */
 
-  usbhost_trace2(OTGFS_VTRACE2_CHANHALT, chidx, chreason);
+  usbhost_vtrace2(OTGFS_VTRACE2_CHANHALT, chidx, chreason);
 
   priv->chan[chidx].chreason = (uint8_t)chreason;
 
@@ -1484,7 +1484,7 @@ static int stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
           {
             /* Set up the IN data PID */
 
-            usbhost_trace2(OTGFS_VTRACE2_ISOCIN, chidx, buflen);
+            usbhost_vtrace2(OTGFS_VTRACE2_ISOCIN, chidx, buflen);
             chan->pid = OTGFS_PID_DATA0;
           }
           break;
@@ -1493,7 +1493,7 @@ static int stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
           {
             /* Setup the IN data PID */
 
-            usbhost_trace2(OTGFS_VTRACE2_BULKIN, chidx, buflen);
+            usbhost_vtrace2(OTGFS_VTRACE2_BULKIN, chidx, buflen);
             chan->pid = chan->indata1 ? OTGFS_PID_DATA1 : OTGFS_PID_DATA0;
           }
           break;
@@ -1502,7 +1502,7 @@ static int stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
           {
             /* Setup the IN data PID */
 
-            usbhost_trace2(OTGFS_VTRACE2_INTRIN, chidx, buflen);
+            usbhost_vtrace2(OTGFS_VTRACE2_INTRIN, chidx, buflen);
             chan->pid = chan->indata1 ? OTGFS_PID_DATA1 : OTGFS_PID_DATA0;
           }
           break;
@@ -1609,7 +1609,7 @@ static int stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
           {
             /* Set up the OUT data PID */
 
-            usbhost_trace2(OTGFS_VTRACE2_ISOCOUT, chidx, buflen);
+            usbhost_vtrace2(OTGFS_VTRACE2_ISOCOUT, chidx, buflen);
             chan->pid = OTGFS_PID_DATA0;
           }
           break;
@@ -1618,7 +1618,7 @@ static int stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
           {
             /* Setup the OUT data PID */
 
-            usbhost_trace2(OTGFS_VTRACE2_BULKOUT, chidx, buflen);
+            usbhost_vtrace2(OTGFS_VTRACE2_BULKOUT, chidx, buflen);
             chan->pid = chan->outdata1 ? OTGFS_PID_DATA1 : OTGFS_PID_DATA0;
           }
           break;
@@ -1627,7 +1627,7 @@ static int stm32_out_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
           {
             /* Setup the OUT data PID */
 
-            usbhost_trace2(OTGFS_VTRACE2_INTROUT, chidx, buflen);
+            usbhost_vtrace2(OTGFS_VTRACE2_INTROUT, chidx, buflen);
             chan->pid = chan->outdata1 ? OTGFS_PID_DATA1 : OTGFS_PID_DATA0;
 
             /* Toggle the OUT data PID for the next transfer */
