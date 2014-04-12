@@ -135,7 +135,7 @@
 #  undef CONFIG_STM32_USBHOST_PKTDUMP
 #endif
 
-#undef HAVE_USB_TRACE 1
+#undef HAVE_USB_TRACE
 #if defined(CONFIG_USBHOST_TRACE) || (defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_USB))
 #  define HAVE_USB_TRACE 1
 #endif
@@ -2427,7 +2427,6 @@ static inline void stm32_gint_nptxfeisr(FAR struct stm32_usbhost_s *priv)
   FAR struct stm32_chan_s *chan;
   uint32_t     regval;
   unsigned int wrsize;
-  unsigned int minsize;
   unsigned int avail;
   unsigned int chidx;
 
@@ -2467,12 +2466,12 @@ static inline void stm32_gint_nptxfeisr(FAR struct stm32_usbhost_s *priv)
 
   avail = ((regval & OTGFS_HNPTXSTS_NPTXFSAV_MASK) >> OTGFS_HNPTXSTS_NPTXFSAV_SHIFT) << 2;
 
-  /* Get minimal size packet that can be sent.  Something is serioulsy
+  /* Get minimal size packet that can be sent.  Something is seriously
    * configured wrong if one packet will not fit into the empty Tx FIFO.
    */
 
-  minsize = MIN(chan->buflen, chan->maxpacket);
-  DEBUGASSERT(chan->buflen > 0 && avail >= minsize);
+  DEBUGASSERT(chan->buflen > 0 &&
+              avail >= MIN(chan->buflen, chan->maxpacket));
 
   /* Get the size to put in the Tx FIFO now */
 
@@ -2517,7 +2516,6 @@ static inline void stm32_gint_ptxfeisr(FAR struct stm32_usbhost_s *priv)
   FAR struct stm32_chan_s *chan;
   uint32_t     regval;
   unsigned int wrsize;
-  unsigned int minsize;
   unsigned int avail;
   unsigned int chidx;
 
@@ -2557,12 +2555,12 @@ static inline void stm32_gint_ptxfeisr(FAR struct stm32_usbhost_s *priv)
 
   avail = ((regval & OTGFS_HPTXSTS_PTXFSAVL_MASK) >> OTGFS_HPTXSTS_PTXFSAVL_SHIFT) << 2;
 
-  /* Get minimal size packet that can be sent.  Something is serioulsy
+  /* Get minimal size packet that can be sent.  Something is seriously
    * configured wrong if one packet will not fit into the empty Tx FIFO.
    */
 
-  minsize = MIN(chan->buflen, chan->maxpacket);
-  DEBUGASSERT(chan->buflen > 0 && avail >= minsize);
+  DEBUGASSERT(chan->buflen > 0 &&
+              avail >= MIN(chan->buflen, chan->maxpacket));
 
   /* Get the size to put in the Tx FIFO now */
 
