@@ -125,11 +125,12 @@ static inline void pic32mx_waitstates(void)
   residual = BOARD_CPU_CLOCK;
   nwaits   = 0;
 
-  while(residual > MAX_FLASH_HZ)
+  while (residual > MAX_FLASH_HZ)
     {
       nwaits++;
       residual -= MAX_FLASH_HZ;
     }
+
   DEBUGASSERT(nwaits < 8);
 
   /* Set the FLASH wait states -- clearing all other bits! */

@@ -93,7 +93,7 @@ static uint8_t g_line[LCD_NCHARS];    /* The content of lines 2 */
 static void up_lcddelay(uint16_t count)
 {
   uint32_t counter = (uint16_t)count << 8;
-  while(counter--)
+  while (counter--)
     {
       asm("\tnop\n\tnop\n\tnop\n" : :); /* 3 NOPs */
     }

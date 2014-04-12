@@ -626,7 +626,7 @@ static void * cc3000_worker(FAR void *arg)
   /* We have started  release our creator*/
 
   sem_post(&priv->readysem);
-  while(1)
+  while (1)
     {
       PROBE(0,1);
       CHECK_GUARD(priv);
@@ -741,7 +741,7 @@ static void * cc3000_worker(FAR void *arg)
         } /* end if */
 
       cc3000_devgive(priv);
-    } /* while(1) */
+    } /* while (1) */
 
   return OK;
 }

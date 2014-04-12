@@ -2909,7 +2909,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
 
       elapsed = clock_systimer() - start;
     }
-  while( elapsed < TICK_PER_SEC ); /* On successful reception while 'breaks', see above. */
+  while (elapsed < TICK_PER_SEC); /* On successful reception while 'breaks', see above. */
 
   /* We get here when the above loop completes, either (1) we could not
    * communicate properly with the card due to errors (and the loop times

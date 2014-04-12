@@ -686,14 +686,14 @@ static void stm32_stdclockconfig(void)
       regval  = getreg32(STM32_PWR_CR);
       regval |= PWR_CR_ODEN;
       putreg32(regval, STM32_PWR_CR);
-      while((getreg32(STM32_PWR_CSR) & PWR_CSR_ODRDY) == 0)
+      while ((getreg32(STM32_PWR_CSR) & PWR_CSR_ODRDY) == 0)
         {
         }
 
       regval = getreg32(STM32_PWR_CR);
       regval |= PWR_CR_ODSWEN;
       putreg32(regval, STM32_PWR_CR);
-      while((getreg32(STM32_PWR_CSR) & PWR_CSR_ODSWRDY) == 0)
+      while ((getreg32(STM32_PWR_CSR) & PWR_CSR_ODSWRDY) == 0)
         {
         }
 

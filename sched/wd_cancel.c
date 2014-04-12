@@ -113,7 +113,7 @@ int wd_cancel (WDOG_ID wdid)
       prev = NULL;
       curr = (wdog_t*)g_wdactivelist.head;
 
-      while((curr) && (curr != wdid))
+      while ((curr) && (curr != wdid))
         {
           prev = curr;
           curr = curr->next;

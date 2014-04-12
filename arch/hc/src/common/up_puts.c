@@ -69,7 +69,7 @@
 
 void up_puts(const char *str)
 {
-  while(*str)
+  while (*str)
     {
       up_putc(*str++);
     }

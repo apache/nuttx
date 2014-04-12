@@ -938,7 +938,7 @@ void SimpleLinkWaitEvent(uint16_t usOpcode, void *pRetParams)
           hci_event_handler(pRetParams, 0, 0);
         }
     }
-  while(tSLInformation.usRxEventOpcode != 0);
+  while (tSLInformation.usRxEventOpcode != 0);
 
   nllvdbg("Done for usOpcode 0x%x\n",usOpcode);
 }
@@ -996,7 +996,7 @@ void SimpleLinkWaitData(uint8_t *pBuf, uint8_t *from, uint8_t *fromlen)
             }
         }
     }
-  while(*tSLInformation.pucReceivedData == HCI_TYPE_EVNT);
+  while (*tSLInformation.pucReceivedData == HCI_TYPE_EVNT);
 
   nllvdbg("Done for Data 0x%x\n",usOpcode);
 }

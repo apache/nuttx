@@ -82,7 +82,7 @@
 #endif
 
 #ifdef CONFIG_WL_NRF24L01_CHECK_PARAMS
-#  define CHECK_ARGS(cond) do { if (!(cond)) return -EINVAL; } while(0)
+#  define CHECK_ARGS(cond) do { if (!(cond)) return -EINVAL; } while (0)
 #else
 #  define CHECK_ARGS(cond)
 #endif
@@ -1719,7 +1719,7 @@ ssize_t nrf24l01_recv(struct nrf24l01_dev_s *dev, uint8_t *buffer,
 static void binarycvt(char *deststr, const uint8_t *srcbin, size_t srclen)
 {
   int i = 0;
-  while(i < srclen)
+  while (i < srclen)
     {
       sprintf(deststr + i*2, "%02x", srcbin[i]);
       ++i;

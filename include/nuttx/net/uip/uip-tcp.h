@@ -495,7 +495,7 @@ int uip_backlogdelete(FAR struct uip_conn *conn, FAR struct uip_conn *blconn);
   do { \
     (f) |= UIP_NEWDATA; \
     (conn)->tcpstateflags &= ~UIP_STOPPED; \
-  } while(0)
+  } while (0)
 
 /* Get the current maximum segment size that can be sent on the current
  * connection.

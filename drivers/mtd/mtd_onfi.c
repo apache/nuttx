@@ -111,7 +111,7 @@
 #define WRITE_NAND(d,a) \
   do { \
     *(volatile uint8_t *)((uintptr_t)a) = (uint8_t)d; \
-  } while(0)
+  } while (0)
 
 /****************************************************************************
  * Private Types

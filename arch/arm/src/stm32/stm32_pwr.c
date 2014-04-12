@@ -129,14 +129,14 @@ void stm32_pwr_setvos(uint16_t vos)
    * 4. Poll VOSF bit of in PWR_CSR register. Wait until it is reset to 0.
    */
 
-  while((stm32_pwr_getreg(STM32_PWR_CSR_OFFSET) & PWR_CSR_VOSF) != 0);
+  while ((stm32_pwr_getreg(STM32_PWR_CSR_OFFSET) & PWR_CSR_VOSF) != 0);
 
   regval  = stm32_pwr_getreg(STM32_PWR_CR_OFFSET);
   regval &= ~PWR_CR_VOS_MASK;
   regval |= (vos & PWR_CR_VOS_MASK);
   stm32_pwr_putreg(STM32_PWR_CR_OFFSET, regval);
 
-  while((stm32_pwr_getreg(STM32_PWR_CSR_OFFSET) & PWR_CSR_VOSF) != 0);
+  while ((stm32_pwr_getreg(STM32_PWR_CSR_OFFSET) & PWR_CSR_VOSF) != 0);
 }
 #endif
 

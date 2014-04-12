@@ -151,9 +151,10 @@ void rtos_stop_running(void)
 
     nuttx_arch_exit();
 
-    while(1) {
-		arch_hlt();
-    }
+    while (1)
+      {
+	arch_hlt();
+      }
 }
 
 int rtos_vnet_init(struct rgmp_vnet *vnet)

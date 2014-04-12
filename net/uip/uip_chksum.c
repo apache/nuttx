@@ -74,7 +74,7 @@ static uint16_t chksum(uint16_t sum, const uint8_t *data, uint16_t len)
   dataptr = data;
   last_byte = data + len - 1;
 
-  while(dataptr < last_byte)
+  while (dataptr < last_byte)
     {
       /* At least two more bytes */
 

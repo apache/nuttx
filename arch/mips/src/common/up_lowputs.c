@@ -67,7 +67,7 @@
 
 void up_lowputs(const char *str)
 {
-  while(*str)
+  while (*str)
     {
       up_lowputc(*str++);
     }

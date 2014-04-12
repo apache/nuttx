@@ -411,7 +411,7 @@ extern void uip_send(struct uip_driver_s *dev, const void *buf, int len);
   do { \
     addr = HTONL((uint32_t)(addr0) << 24 | (uint32_t)(addr1) << 16 | \
                  (uint32_t)(addr2) << 8  | (uint32_t)(addr3)); \
-  } while(0)
+  } while (0)
 
 /* Convert an IPv4 address of the form uint16_t[2] to an in_addr_t */
 
@@ -454,7 +454,7 @@ extern void uip_send(struct uip_driver_s *dev, const void *buf, int len);
     ((uint16_t*)(addr))[5] = HTONS((addr5)); \
     ((uint16_t*)(addr))[6] = HTONS((addr6)); \
     ((uint16_t*)(addr))[7] = HTONS((addr7)); \
-  } while(0)
+  } while (0)
 
 /* Copy an IP address to another IP address.
  *
@@ -475,12 +475,12 @@ extern void uip_send(struct uip_driver_s *dev, const void *buf, int len);
 #  define uip_ipaddr_copy(dest, src) \
    do { \
      (dest) = (in_addr_t)(src); \
-   } while(0)
+   } while (0)
 #  define uiphdr_ipaddr_copy(dest, src) \
    do { \
      ((uint16_t*)(dest))[0] = ((uint16_t*)(src))[0]; \
      ((uint16_t*)(dest))[1] = ((uint16_t*)(src))[1]; \
-   } while(0)
+   } while (0)
 #else /* !CONFIG_NET_IPv6 */
 #  define uip_ipaddr_copy(dest, src)    memcpy(&dest, &src, sizeof(uip_ip6addr_t))
 #  define uiphdr_ipaddr_copy(dest, src) uip_ipaddr_copy(dest, src)
@@ -565,6 +565,6 @@ extern bool uip_ipaddr_maskcmp(uip_ipaddr_t addr1, uip_ipaddr_t addr2,
 #define uip_ipaddr_mask(dest, src, mask) \
   do { \
     (in_addr_t)(dest) = (in_addr_t)(src) & (in_addr_t)(mask); \
-  } while(0)
+  } while (0)
 
 #endif /* __INCLUDE_NUTTX_NET_UIP_UIP_H */
