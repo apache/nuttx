@@ -380,9 +380,9 @@ static int readbyte(int fd, char *ch)
   /* Read characters from the console, and echo them to the target tty */
 
   ret = read(fd, ch, 1);
-  if(ret < 0)
+  if (ret < 0)
     {
-      if(errno != EAGAIN)
+      if (errno != EAGAIN)
         {
           printconsole("ERROR: Failed to read from fd=%d: %s\n", fd, strerror(errno));
           close_tty();
@@ -390,7 +390,7 @@ static int readbyte(int fd, char *ch)
         }
       return -EAGAIN;
     }
-  else if(ret > 1)
+  else if (ret > 1)
     {
       printconsole("ERROR: Unexpected number of bytes read(%d) from fd=%d\n", ret, fd);
       close_tty();
@@ -406,7 +406,7 @@ static int readbyte(int fd, char *ch)
 static void writebyte(int fd, char byte)
 {
   int ret = write(fd, &byte, 1);
-  if(ret < 0)
+  if (ret < 0)
     {
       printconsole("ERROR: Failed to write to fd=%d: %s\n", fd, strerror(errno));
       close_tty();
@@ -520,13 +520,13 @@ int main(int argc, char **argv, char **envp)
         }
     }
 
-  if(optind < argc)
+  if (optind < argc)
     {
       fprintf(stderr, "ERROR: Unexpected arguments at end of line\n");
       show_usage(argv[0], 3);
     }
 
-  switch(g_baud)
+  switch (g_baud)
     {
     case 0:      speed = B0;      break;
     case 50:     speed = B50;     break;
@@ -568,14 +568,14 @@ int main(int argc, char **argv, char **envp)
   /* Set the host stdin to O_NONBLOCK */
 
   oflags = fcntl(0, F_GETFL, 0);
-  if(oflags == -1)
+  if (oflags == -1)
     {
       fprintf(stderr, "ERROR: fnctl(F_GETFL) failed: %s\n", strerror(errno));
       return 6;
     }
 
   ret = fcntl(0, F_SETFL, oflags | O_NONBLOCK);
-  if(ret < 0)
+  if (ret < 0)
     {
       fprintf(stderr, "ERROR: fnctl(F_SETFL) failed: %s\n", strerror(errno));
       return 7;
@@ -584,7 +584,7 @@ int main(int argc, char **argv, char **envp)
   /* Open the selected serial port (blocking)*/
 
   g_fd = open(g_ttydev, O_RDWR);
-  if(g_fd < 0)
+  if (g_fd < 0)
     {
       printconsole("ERROR: Failed to open %s: %s\n", g_ttydev, strerror(errno));
       return 8;
@@ -595,7 +595,7 @@ int main(int argc, char **argv, char **envp)
    */
 
   ret = tcgetattr(g_fd, &g_termios);
-  if(ret < 0)
+  if (ret < 0)
     {
       printconsole("ERROR: Failed to get termios for %s: %s\n", g_ttydev, strerror(errno));
       close(g_fd);
@@ -613,7 +613,7 @@ int main(int argc, char **argv, char **envp)
  (void)cfsetospeed(&tty, speed);
 
   ret = tcsetattr(g_fd, TCSANOW, &tty);
-  if(ret < 0)
+  if (ret < 0)
     {
       printconsole("ERROR: Failed to set termios for %s: %s\n", g_ttydev, strerror(errno));
       close(g_fd);
@@ -624,7 +624,7 @@ int main(int argc, char **argv, char **envp)
   /* Open the selected serial port (non-blocking)*/
 
   g_fdnb = open(g_ttydev, O_RDONLY | O_NONBLOCK);
-  if(g_fdnb < 0)
+  if (g_fdnb < 0)
     {
       printconsole("ERROR: Failed to open %s: %s\n", g_ttydev, strerror(errno));
       return 11;
@@ -641,7 +641,7 @@ int main(int argc, char **argv, char **envp)
     }
 
   oflags = fcntl(g_fdnb, F_GETFL, 0);
-  if(oflags == -1)
+  if (oflags == -1)
     {
       fprintf(stderr, "ERROR: fnctl(F_GETFL) failed: %s\n", strerror(errno));
       close_tty();
@@ -649,7 +649,7 @@ int main(int argc, char **argv, char **envp)
     }
 
   ret = fcntl(g_fdnb, F_SETFL, oflags | O_NONBLOCK);
-  if(ret < 0)
+  if (ret < 0)
     {
       fprintf(stderr, "ERROR: fnctl(F_SETFL) failed: %s\n", strerror(errno));
       close_tty();
