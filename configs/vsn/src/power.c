@@ -104,5 +104,5 @@ void board_power_off(void)
 
     // trigger shutdown with pull-up resistor (not push-pull!) and wait.
     stm32_gpiowrite(GPIO_PCLR, true);
-    for(;;);
+    for (;;);
 }

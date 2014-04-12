@@ -665,7 +665,7 @@ int main(int argc, char **argv, char **envp)
 
   /* Loopo until control-C */
 
-  for(;;)
+  for (;;)
     {
       /* Read characters from the console, and echo them to the target tty */
 
