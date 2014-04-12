@@ -145,7 +145,7 @@ static inline int usbhost_devdesc(FAR const struct usb_devdesc_s *devdesc,
         id->base, id->subclass, id->proto, id->vid, id->pid);
   return OK;
 }
-                                
+
 /*******************************************************************************
  * Name: usbhost_configdesc
  *
@@ -193,7 +193,7 @@ static inline int usbhost_configdesc(const uint8_t *configdesc, int cfglen,
            * Typically these values are zero meaning that the "real" ID
            * information resides in the device descriptor.
            */
- 
+
           DEBUGASSERT(remaining >= sizeof(struct usb_ifdesc_s));
           id->base     = ifdesc->classid;
           id->subclass = ifdesc->subclass;
@@ -204,7 +204,7 @@ static inline int usbhost_configdesc(const uint8_t *configdesc, int cfglen,
         }
 
      /* Increment the address of the next descriptor */
- 
+
       configdesc += ifdesc->len;
       remaining  -= ifdesc->len;
     }
@@ -510,7 +510,7 @@ int usbhost_enumerate(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
    * It is not needed further here but it may be needed by the class driver
    * during its connection operations.
    */
- 
+
   DRVR_FREE(drvr, (uint8_t*)ctrlreq);
   ctrlreq = NULL;
 
