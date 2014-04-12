@@ -227,7 +227,7 @@ unsigned int tapdev_read(unsigned char *buf, unsigned int buflen)
   FD_SET(gtapdevfd, &fdset);
 
   ret = select(gtapdevfd + 1, &fdset, NULL, NULL, &tv);
-  if(ret == 0)
+  if (ret == 0)
     {
       return 0;
     }
@@ -250,7 +250,7 @@ void tapdev_send(unsigned char *buf, unsigned int buflen)
   syslog("tapdev_send: sending %d bytes\n", buflen);
 
   gdrop++;
-  if(gdrop % 8 == 7)
+  if (gdrop % 8 == 7)
     {
       syslog("Dropped a packet!\n");
       return;

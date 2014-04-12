@@ -165,21 +165,21 @@ static void adc_reset(FAR struct adc_dev_s *dev)
   clkdiv&=0xff00;
   putreg32(ADC_CR_PDN|ADC_CR_BURST|clkdiv|priv->mask,LPC43_ADC_CR);
 
-  if(priv->mask&0x01)
+  if (priv->mask&0x01)
     lpc43_configgpio(GPIO_AD0p0);
-  else if(priv->mask&0x02)
+  else if (priv->mask&0x02)
     lpc43_configgpio(GPIO_AD0p1);
-  else if(priv->mask&0x04)
+  else if (priv->mask&0x04)
     lpc43_configgpio(GPIO_AD0p2);
-  else if(priv->mask&0x08)
+  else if (priv->mask&0x08)
     lpc43_configgpio(GPIO_AD0p3);
-  else if(priv->mask&0x10)
+  else if (priv->mask&0x10)
     lpc43_configgpio(GPIO_AD0p4);
-  else if(priv->mask&0x20)
+  else if (priv->mask&0x20)
     lpc43_configgpio(GPIO_AD0p5);
-  else if(priv->mask&0x40)
+  else if (priv->mask&0x40)
     lpc43_configgpio(GPIO_AD0p6);
-  else if(priv->mask&0x80)
+  else if (priv->mask&0x80)
     lpc43_configgpio(GPIO_AD0p7);
     
   irqrestore(flags);
