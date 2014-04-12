@@ -58,7 +58,7 @@ void uip_neighbor_init(void)
 {
   int i;
 
-  for(i = 0; i < ENTRIES; ++i)
+  for (i = 0; i < ENTRIES; ++i)
     {
       entries[i].time = MAX_TIME;
     }
@@ -68,7 +68,7 @@ void uip_neighbor_periodic(void)
 {
   int i;
 
-  for(i = 0; i < ENTRIES; ++i)
+  for (i = 0; i < ENTRIES; ++i)
     {
       if (entries[i].time < MAX_TIME)
         {
@@ -125,7 +125,7 @@ static struct neighbor_entry *find_entry(uip_ipaddr_t ipaddr)
 {
   int i;
 
-  for(i = 0; i < ENTRIES; ++i)
+  for (i = 0; i < ENTRIES; ++i)
     {
       if (uip_ipaddr_cmp(entries[i].ipaddr, ipaddr))
         {

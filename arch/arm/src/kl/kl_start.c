@@ -181,6 +181,6 @@ void __start(void)
 
   /* Shoulnd't get here */
 
-  for(;;);
+  for (;;);
 }
 

@@ -89,7 +89,7 @@ FAR sigactq_t *sig_findaction(FAR struct tcb_s *stcb, int signo)
 
       /* Seach the list for a sigaction on this signal */
 
-      for(sigact = (FAR sigactq_t*)stcb->sigactionq.head;
+      for (sigact = (FAR sigactq_t*)stcb->sigactionq.head;
           ((sigact) && (sigact->signo != signo));
           sigact = sigact->flink);
 

@@ -832,7 +832,7 @@ static int up_interrupt(int irq, void *context)
    * until we have been looping for a long time.
    */
 
-  for(;;)
+  for (;;)
     {
       /* Get the current UART status and check for loop
        * termination conditions

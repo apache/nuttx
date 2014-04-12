@@ -300,7 +300,7 @@ static uint8_t spi_transfer(uint8_t ch)
 
   /* Send the byte, repeating if some error occurs */
 
-  for(;;)
+  for (;;)
     {
       outp(EZ80_SPI_TSR, ch);
 

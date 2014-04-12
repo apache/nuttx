@@ -653,7 +653,7 @@ static inline void rit_clear(FAR struct rit_dev_s *priv)
 
   /* Display each row */
 
-  for(row = 0; row < RIT_YRES; row++)
+  for (row = 0; row < RIT_YRES; row++)
     {
       /* Display a horizontal run */
 
@@ -680,7 +680,7 @@ static inline void rit_clear(FAR struct rit_dev_s *priv)
 
   /* Display each row */
 
-  for(row = 0; row < RIT_YRES; row++)
+  for (row = 0; row < RIT_YRES; row++)
     {
       /* Display a horizontal run */
 

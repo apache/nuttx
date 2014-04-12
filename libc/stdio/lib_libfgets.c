@@ -177,7 +177,7 @@ FAR char *lib_fgets(FAR char *buf, size_t buflen, FILE *stream,
    * the next character and one for the null terminator.
    */
 
-  for(;;)
+  for (;;)
     {
       /* Get the next character */
 

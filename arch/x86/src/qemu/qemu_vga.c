@@ -294,12 +294,12 @@ static int init_graph_vga(int width, int height,int chain4)
   outb(val, 0x3c2);
   outw(0x0e11, 0x3d4); /* enable regs 0-7 */
 
-  for(a = 0; a < SZ(g_hor_regs); ++a)
+  for (a = 0; a < SZ(g_hor_regs); ++a)
     {
       outw((uint16_t)((w[a] << 8) + g_hor_regs[a]), 0x3d4);
     }
 
-  for(a = 0; a < SZ(g_ver_regs); ++a)
+  for (a = 0; a < SZ(g_ver_regs); ++a)
     {
       outw((uint16_t)((h[a] << 8) + g_ver_regs[a]), 0x3d4);
     }
@@ -330,7 +330,7 @@ static int init_graph_vga(int width, int height,int chain4)
   outb(0x33, 0x3c0);
   outb(0x00, 0x3c0);
 
-  for(a = 0; a < 16; a++)    /* ega pal */
+  for (a = 0; a < 16; a++)    /* ega pal */
     {
       outb((uint8_t)a, 0x3c0);
       outb((uint8_t)a, 0x3c0);

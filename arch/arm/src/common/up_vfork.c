@@ -185,7 +185,7 @@ pid_t up_vfork(const struct vfork_s *context)
   /* Make some feeble effort to perserve the stack contents.  This is
    * feeble because the stack surely contains invalid pointers and other
    * content that will not work in the child context.  However, if the
-   * user follows all of the caveats of vfor() usage, even this feeble
+   * user follows all of the caveats of vfork() usage, even this feeble
    * effort is overkill.
    */
 

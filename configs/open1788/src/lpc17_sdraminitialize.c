@@ -195,7 +195,7 @@ void open1788_sdram_initialize(void)
 
   /* Wait 128 AHB clock cycles */
 
-  for(i = 0; i < 128; i++);
+  for (i = 0; i < 128; i++);
  
   /* 64ms/8192 = 7.8125us, nx16x8.33ns < 7.8125us, n < 58.6*/
 

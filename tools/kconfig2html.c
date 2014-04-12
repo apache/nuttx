@@ -690,7 +690,7 @@ static char *read_line(FILE *stream)
 
   /* Loop to handle continuation lines */
 
-  for(;;)
+  for (;;)
     {
       /* How long is the line so far? */
 

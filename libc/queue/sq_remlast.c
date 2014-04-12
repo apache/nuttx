@@ -65,7 +65,7 @@ FAR sq_entry_t *sq_remlast(sq_queue_t *queue)
       else
         {
           FAR sq_entry_t *prev;
-          for(prev = queue->head;
+          for (prev = queue->head;
               prev && prev->flink != ret;
               prev = prev->flink);
 

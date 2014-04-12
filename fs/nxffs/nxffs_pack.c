@@ -286,7 +286,7 @@ static inline int nxffs_startpos(FAR struct nxffs_volume_s *volume,
    * compacting.
    */
 
-  for(;;)
+  for (;;)
     {
       /* Is there wasted space between the offset where the we could have
        * valid data and the offset to the beginning of the first valid

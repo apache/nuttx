@@ -220,9 +220,9 @@ static FAR sigpendq_t *sig_findpendingsignal(FAR struct task_group_s *group,
 
   /* Seach the list for a sigpendion on this signal */
 
-  for(sigpend = (FAR sigpendq_t*)group->sigpendingq.head;
-      (sigpend && sigpend->info.si_signo != signo);
-      sigpend = sigpend->flink);
+  for (sigpend = (FAR sigpendq_t*)group->sigpendingq.head;
+       (sigpend && sigpend->info.si_signo != signo);
+       sigpend = sigpend->flink);
 
   irqrestore(saved_state);
   return sigpend;
