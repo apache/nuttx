@@ -1,7 +1,7 @@
 ############################################################################
 # arch/arm/src/stm32/Make.defs
 #
-#   Copyright (C) 2009, 2011-2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2009, 2011-2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -129,6 +129,16 @@ CHIP_CSRCS += stm32_otgfshost.c
 endif
 ifeq ($(CONFIG_STM32_OTGFS2),y)
 CHIP_CSRCS += stm32_otgfshost.c
+endif
+endif
+
+ifeq ($(CONFIG_USBHOST),y)
+ifeq ($(CONFIG_USBHOST_TRACE),y)
+CHIP_CSRCS += stm32_usbhost.c
+else
+ifeq ($(CONFIG_DEBUG_USB),y)
+CHIP_CSRCS += stm32_usbhost.c
+endif
 endif
 endif
 

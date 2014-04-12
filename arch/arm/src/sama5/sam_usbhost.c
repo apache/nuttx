@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/arm/src/sama5/sam_host.c
+ * arch/arm/src/sama5/sam_usbhost.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
