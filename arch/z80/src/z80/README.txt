@@ -24,7 +24,7 @@ z80_rom.asm
 
     A board specific version in the configs/<board-name>/src directory can be
     used by:
-    
+
     1. Define CONFIG_ARCH_HAVEHEAD
     2. Add the board-specific head file, say <filename>.asm, to
        configs/<board-name>/src
