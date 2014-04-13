@@ -7,7 +7,7 @@ README
   I have not compared these boards in detail, but I believe that the
   differences are cosmetic.  This port was developed on the v1 board, but
   the others may be compatible:
-  
+
   pcDuino Lite (See http://www.pcduino.com/?page_id=1707)
 
     ITEMS                DETAILS

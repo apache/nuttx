@@ -68,7 +68,7 @@
  *
  * If CONFIG_ARCH_LEDS is defined, the LEDs will be controlled as follows
  * for NuttX debug functionality (where NC means "No Change").
- * 
+ *
  *                                      ON            OFF
  *                                  LED1   LED2   LED1   LED2
  *   LED_STARTED                0   OFF    OFF     -      -

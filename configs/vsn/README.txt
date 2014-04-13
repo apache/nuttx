@@ -94,7 +94,7 @@ IDEs
 
   NuttX is built using command-line make.  It can be used with an IDE, but some
   effort will be required to create the project.
-  
+
   Makefile Build
   --------------
   Under Eclipse, it is pretty easy to set up an "empty makefile project" and
@@ -191,7 +191,7 @@ NXFLAT Toolchain
   tools -- just the NXFLAT tools.  The buildroot with the NXFLAT tools can
   be downloaded from the NuttX SourceForge download site
   (https://sourceforge.net/projects/nuttx/files/).
- 
+
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
@@ -247,7 +247,7 @@ VSN-specific Configuration Options
        CONFIG_ARCH_BOARD=vsn (for the VSN development board)
 
     CONFIG_ARCH_BOARD_name - For use in C code
-    
+
        CONFIG_ARCH_BOARD_VSN=y
 
     CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
@@ -302,8 +302,8 @@ Where <subdir> is one of the following:
     Configures the NuttShell (nsh) located at examples/nsh.  The
     Configuration enables both the serial and telnetd NSH interfaces.
 
-    The default configuration sets up a console on front-panel RS-232 
-    interface, sets up device driver of all supported equipment and 
+    The default configuration sets up a console on front-panel RS-232
+    interface, sets up device driver of all supported equipment and
     links in VSN default applications.
 
     NOTES:

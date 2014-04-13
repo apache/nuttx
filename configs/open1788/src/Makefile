@@ -37,7 +37,7 @@
 
 CFLAGS += -I$(TOPDIR)/sched
 
-ASRCS = 
+ASRCS =
 CSRCS = lpc17_boardinitialize.c lpc17_ssp.c
 
 ifeq ($(CONFIG_LPC17_EMC),y)

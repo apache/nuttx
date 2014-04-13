@@ -53,8 +53,8 @@
  * -------------------------------- --------- -------------- ---------------------
  * P0[0]/RD1/TXD3/SDA1               J6-9     I2C E2PROM SDA TXD3/SDA1
  * P0[1]/TD1/RXD3/SCL                J6-10                   RXD2/SCL1
- * P0[2]/TXD0/AD0[7]                 J6-21    
- * P0[3]/RXD0/AD0[6]                 J6-22    
+ * P0[2]/TXD0/AD0[7]                 J6-21
+ * P0[3]/RXD0/AD0[6]                 J6-22
  * P0[4]/I2SRX-CLK/RD2/CAP2.0        J6-38                   CAN_RX2
  * P0[5]/I2SRX-WS/TD2/CAP2.1         J6-39                   CAN_TX2
  * P0[6]/I2SRX_SDA/SSEL1/MAT2[0]     J6-8                    SSEL1
@@ -69,14 +69,14 @@
  * P0[18]/DCD1/MOSI0/MOSI            J6-11                   MOSI0
  * P0[19]/DSR1/SDA1                  PAD17                   N/A
  * P0[20]/DTR1/SCL1                  PAD18    I2C E2PROM SCL N/A
- * P0[21]/RI1/MCIPWR/RD1             J6-23                  
- * P0[22]/RTS1/TD1                   J6-24    LED            
+ * P0[21]/RI1/MCIPWR/RD1             J6-23
+ * P0[22]/RTS1/TD1                   J6-24    LED
  * P0[23]/AD0[0]/I2SRX_CLK/CAP3[0]   J6-15                   AD0.0
  * P0[24]/AD0[1]/I2SRX_WS/CAP3[1]    J6-16                   AD0.1
  * P0[25]/AD0[2]/I2SRX_SDA/TXD3      J6-17                   AD0.2
  * P0[26]/AD0[3]/AOUT/RXD3           J6-18                   AD0.3/AOUT
- * P0[27]/SDA0/USB_SDA               J6-25                   
- * P0[28]/SCL0                       J6-26                   
+ * P0[27]/SDA0/USB_SDA               J6-25
+ * P0[28]/SCL0                       J6-26
  * P0[29]/USB_D+                     J6-37                   USB_D+
  * P0[30]/USB_D-                     J6-36                   USB_D-
  */
@@ -116,14 +116,14 @@
  * P2[3]/PWM1.4/DCD1/TRACEDATA[2]    J6-45                   PWM1.4
  * P2[4]/PWM1.5/DSR1/TRACEDATA[1]    J6-46                   PWM1.5
  * P2[5]/PWM1[6]/DTR1/TRACEDATA[0]   J6-47                   PWM1.6
- * P2[6]/PCAP1[0]/RI1/TRACECLK       J6-48    
- * P2[7]/RD2/RTS1                    J6-49    
- * P2[8]/TD2/TXD2                    J6-50    
+ * P2[6]/PCAP1[0]/RI1/TRACECLK       J6-48
+ * P2[7]/RD2/RTS1                    J6-49
+ * P2[8]/TD2/TXD2                    J6-50
  * P2[9]/USB_CONNECT/RXD2            PAD19   USB Pullup      N/A
- * P2[10]/EINT0/NMI                  J6-51    
- * P2[11]/EINT1/I2STX_CLK            J6-52    
- * P2[12]/EINT2/I2STX_WS             J6-53    
- * P2[13]/EINT3/I2STX_SDA            J6-27                 
+ * P2[10]/EINT0/NMI                  J6-51
+ * P2[11]/EINT1/I2STX_CLK            J6-52
+ * P2[12]/EINT2/I2STX_WS             J6-53
+ * P2[13]/EINT3/I2STX_SDA            J6-27
  */
 
 #define LPCXPRESSO_USB_PULLUP (GPIO_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORT2 | GPIO_PIN9)
@@ -134,7 +134,7 @@
  * P4[28]/RX-MCLK/MAT2.0/TXD3        PAD15                   N/A
  * P4[29]/TX-MCLK/MAT2.1/RXD3        PAD16                   N/A
  */
- 
+
 /* SD Slot
  *
  *      Base-board  J4/J6 LPC1768

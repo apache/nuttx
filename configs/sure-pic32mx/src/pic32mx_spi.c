@@ -83,7 +83,7 @@
 /* The Sure DB_DP11215 PIC32 Storage Demo Board has pads an SOIC (Flash or
  * EEPROM) connected on SPI2, however, U4 is not populated on my board.
  *
- * 
+ *
  *  TMS/AN10/CVREFOUT/PMA13/RB10  UTIL_WP        FLASH (U1) WP
  *  SS2/PMA2/CN11/RG9             UTIL_CS        FLASH (U1) CS
  */
@@ -92,7 +92,7 @@
 
 #  define GPIO_SOIC_WP (GPIO_INPUT|GPIO_PORTB|GPIO_PIN10)
 #  define GPIO_SOIC_CS (GPIO_OUTPUT|GPIO_VALUE_ONE|GPIO_PORTG|GPIO_PIN0)
- 
+
 /* Change notification numbers -- Not available for SD_CD. */
 
 #endif
@@ -108,7 +108,7 @@
  /* The Sure DB-DP11212 PIC32 General Purpose Demo Board has an SOIC (Flash or
  * EEPROM) connected on SPI2:
  *
- * 
+ *
  *  TMS/AN10/PMA13/RB10   UTIL_WP FLASH (U4) WP
  *  TDO/AN11/PMA12/RB11   UTIL_CS FLASH (U4) CS
  */
@@ -120,7 +120,7 @@
 #endif
 
 /* The following enable debug output from this file.
- * 
+ *
  * CONFIG_DEBUG_SPI && CONFIG_DEBUG - Define to enable basic SPI debug
  * CONFIG_DEBUG_VERBOSE - Define to enable verbose SPI debug
  */
@@ -180,7 +180,7 @@ void weak_function pic32mx_spiinitialize(void)
  * Name:  pic32mx_spi2select and pic32mx_spi2status
  *
  * Description:
- *   The external functions, pic32mx_spi2select and pic32mx_spi2status 
+ *   The external functions, pic32mx_spi2select and pic32mx_spi2status
  *   must be provided by board-specific logic.  They are implementations of the select
  *   and status methods of the SPI interface defined by struct spi_ops_s (see
  *   include/nuttx/spi/spi.h). All other methods (including up_spiinitialize())
@@ -195,7 +195,7 @@ void weak_function pic32mx_spiinitialize(void)
  *   3. Add a calls to up_spiinitialize() in your low level application
  *      initialization logic
  *   4. The handle returned by up_spiinitialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling 
+ *      SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *

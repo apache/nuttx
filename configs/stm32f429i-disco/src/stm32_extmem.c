@@ -187,7 +187,7 @@ void stm32_enablefsmc(void)
 
   /* Configure and enable the SDRAM bank1
    *
-   *   FMC clock = 180MHz/2 = 90MHz 
+   *   FMC clock = 180MHz/2 = 90MHz
    *   90MHz = 11,11 ns
    *   All timings from the datasheet for Speedgrade -7 (=7ns)
    */

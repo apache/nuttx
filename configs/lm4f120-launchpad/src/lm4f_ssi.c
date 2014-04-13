@@ -111,7 +111,7 @@ void weak_function lm4f_ssiinitialize(void)
  *   2. Add a call to tiva_spiinitialize() in your low level initialization
  *      logic
  *   3. The handle returned by tiva_spiinitialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling 
+ *      SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *

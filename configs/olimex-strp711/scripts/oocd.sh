@@ -68,7 +68,7 @@ done
 
 export options="-d 1"
 
-# Run OpenOCD -- here it is assumed (1) that you must have root priveleges to 
+# Run OpenOCD -- here it is assumed (1) that you must have root priveleges to
 # execute OpenOCD and (2) that your user is listed in the /etc/sudoers file.
 
 $SUDO $openocd $options -f $oocdcfg

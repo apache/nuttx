@@ -65,7 +65,7 @@ ifeq ($(WINTOOL),y)
   PASS1_LIBPATHS += -L"${shell cygpath -w "$(TOPDIR)$(DELIM)lib"}"
   PASS1_LDSCRIPT = -T "${shell cygpath -w $(TOPDIR)$(DELIM)configs$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)locked$(DELIM)ld-locked.inc}"
 else
-  # Linux/Cygwin-native toolchain 
+  # Linux/Cygwin-native toolchain
   PASS1_LIBPATHS += -L"(TOPDIR)$(DELIM)lib"
   PASS1_LDSCRIPT = -T$(TOPDIR)$(DELIM)configs$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)locked$(DELIM)ld-locked.inc
 endif
@@ -99,7 +99,7 @@ $(PASS1_LIBBOARD):
 
 locked.r: ld-locked.inc $(PASS1_LIBBOARD)
 	@echo "LD:  locked.r"
-	@$(LD) -o $@ $(PASS1_LDFLAGS) $(PASS1_LIBPATHS) --start-group $(PASS1_LDLIBS) --end-group $(PASS1_LIBGCC) 
+	@$(LD) -o $@ $(PASS1_LDFLAGS) $(PASS1_LIBPATHS) --start-group $(PASS1_LDLIBS) --end-group $(PASS1_LIBGCC)
 	@$(NM) $@ > locked.map
 	@fgrep " U " locked.map | grep -v os_start
 	@$(CROSSDEV)size $@

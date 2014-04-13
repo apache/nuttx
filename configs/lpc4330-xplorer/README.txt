@@ -74,9 +74,9 @@ Status
     - Remove LPC17xx power, clocking, and pin configuration logic.
     - Adding of clock source and frequency to the board.h file.
     - Adding of LPC43 clock connection and pin configuration logic.
- 
+
     Within any luck, these drivers should come up very quickly:
- 
+
     - lpc43_adc.c,
     - lpc43_dac.c,
     - lpc43_gpdma.c,
@@ -238,7 +238,7 @@ IDEs
 
   NuttX is built using command-line make.  It can be used with an IDE, but some
   effort will be required to create the project .
-  
+
   Makefile Build
   --------------
   Under Eclipse, it is pretty easy to set up an "empty makefile project" and
@@ -279,7 +279,7 @@ Code Red IDE/Tools
 
     $ /cygdrive/c/code_red/RedSuite_4.2.3_379/redsuite/bin/Scripts/bootLPCXpresso.cmd winusb
     Booting LPC-Link with LPCXpressoWIN.enc
-    Press any key to continue . . . 
+    Press any key to continue . . .
 
   The same file logic can be found the less restrictive LPCXpresso package at:
 
@@ -298,7 +298,7 @@ Code Red IDE/Tools
 
     $ lpc43xx
     Booting LPC-Link with LPCXpressoWIN.enc
-    Press any key to continue . . . 
+    Press any key to continue . . .
 
   Using GDB
   ---------
@@ -331,7 +331,7 @@ Code Red IDE/Tools
   And <options> are:
 
     -n set information level for the debug driver. n should be 2, 3 or 4.
-        2 should be sufficient in most circumstances 
+        2 should be sufficient in most circumstances
 
     -p<part> is the target device to connect to and you should use
         <part>=LPC4330.
@@ -355,7 +355,7 @@ Code Red IDE/Tools
 
     $ lpc43xx
     Booting LPC-Link with LPCXpressoWIN.enc
-    Press any key to continue . . . 
+    Press any key to continue . . .
 
     $ arm-none-eabi-gdb nuttx
     (gdb) target extended-remote | crt_emu_lpc18_43_nxp -2 -pLPC4330 -wire=winusb
@@ -380,7 +380,7 @@ Code Red IDE/Tools
 
   NOTE 4: Every time that you control-C out of the command line GDB, you
   leave a copy of the Code Red debugger (crt_emu_lpc18_43_nxp) running.  I
-  have found that if you have these old copies of the debugger running, 
+  have found that if you have these old copies of the debugger running,
   hen strange things can happen when start yet another copy of the
   debugger (I suspect that GDB may be talking with the wrong debugger).
 
@@ -448,7 +448,7 @@ Code Red IDE/Tools
   #   -wire=hid     LPC-Link on Windows Vista/ Windows 7
   # Add -g -4 for verbose output
 
-  crt_emu_lpc18_43_nxp -wire=hid -pLPC4330 -load-base=0x14000000 
+  crt_emu_lpc18_43_nxp -wire=hid -pLPC4330 -load-base=0x14000000
     -flash-load-exec=nuttx.bin -flash-driver=LPC1850A_4350A_SPIFI.cfx
 
   USB DFU Booting
@@ -526,7 +526,7 @@ NXFLAT Toolchain
   tools -- just the NXFLAT tools.  The buildroot with the NXFLAT tools can
   be downloaded from the NuttX SourceForge download site
   (https://sourceforge.net/projects/nuttx/files/).
- 
+
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
@@ -706,10 +706,10 @@ LPC4330-Xplorer Configuration Options
     CONFIG_ARCH_FPU - The LPC43xxx supports a floating point unit (FPU)
 
        CONFIG_ARCH_FPU=y
- 
+
     CONFIG_LPC43_BOOT_xxx - The startup code needs to know if the code is running
        from internal FLASH, external FLASH, SPIFI, or SRAM in order to
-       initialize properly.  Note that a boot device is not specified for 
+       initialize properly.  Note that a boot device is not specified for
        cases where the code is copied into SRAM; those cases are all covered
        by CONFIG_LPC43_BOOT_SRAM.
 
@@ -797,7 +797,7 @@ LPC4330-Xplorer Configuration Options
     CONFIG_USARTn_RS485MODE - Support LPC43xx USART0,2,3 RS485 mode
       ioctls (TIOCSRS485 and TIOCGRS485) to enable and disable
       RS-485 mode.
-  
+
   LPC43xx specific CAN device driver settings.  These settings all
   require CONFIG_CAN:
 
@@ -839,7 +839,7 @@ LPC4330-Xplorer Configuration Options
   LPC43xx USB Device Configuration
 
     CONFIG_LPC43_USBDEV_FRAME_INTERRUPT
-      Handle USB Start-Of-Frame events. 
+      Handle USB Start-Of-Frame events.
       Enable reading SOF from interrupt handler vs. simply reading on demand.
       Probably a bad idea... Unless there is some issue with sampling the SOF
       from hardware asynchronously.

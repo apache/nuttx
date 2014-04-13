@@ -83,7 +83,7 @@
  * 56 PD9  MII_RXD0       Ethernet PHY.  Requires CONFIG_STM32_ETH_REMAP
  * 57 PD10 MII_RXD1       Ethernet PHY.  Requires CONFIG_STM32_ETH_REMAP
  *
- * The board desdign can support a 50MHz external clock to drive the PHY 
+ * The board desdign can support a 50MHz external clock to drive the PHY
  * (U9).  However, on my board, U9 is not present.
  *
  * 67 PA8  MCO            DM9161AEP

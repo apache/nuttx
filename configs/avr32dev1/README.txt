@@ -155,7 +155,7 @@ IDEs
 
   NuttX is built using command-line make.  It can be used with an IDE, but some
   effort will be required to create the project.
-  
+
   Makefile Build
   --------------
   Under Eclipse, it is pretty easy to set up an "empty makefile project" and
@@ -185,7 +185,7 @@ AVR32 Bootloader
 
   Boot Sequence
   -------------
-  
+
     "An AVR UC3 part having the bootloader programmed resets as any other
      part at 80000000h. Bootloader execution begins here. The bootloader
      first performs the boot process to know whether it should start the
@@ -193,7 +193,7 @@ AVR32 Bootloader
      that the USB DFU ISP should be started, then execution continues in
      the bootloader area, i.e. between 80000000h and 80002000h, else
      the bootloader launches the application at 80002000h."
-  
+
   Link Address
   ------------
 
@@ -234,7 +234,7 @@ AVR32 Bootloader
   will need to modify the setenv.sh files.
 
   Notes from "AVR32 UC3 USB DFU Bootloader" (doc7745.pdf)
-  
+
   "To launch BatchISP, open a command prompt. Windows or Cygwin command
    prompt can be used provided that the bin folder of the FLIP installation
    directory is in the PATH (Windows’ or Cygwin’s) environment variable.
@@ -247,7 +247,7 @@ AVR32 Bootloader
   "BatchISP works with an internal ISP buffer per target memory. These ISP
    buffers can be filled from several sources. All target operations (program,
    verify, read) are performed using these buffers."
- 
+
   The following BatchISP command line will erase FLASH, write the nuttx binary
   into FLASH, and reset the AVR32.  This command line is available in the
   script config/avr32dev1/tools/doisp.sh:
@@ -256,7 +256,7 @@ AVR32 Bootloader
      blankcheck loadbuffer nuttx.elf program verify start reset 0
 
   "BatchISP main commands available on AT32UC3xxxxx are:
-  
+
    - ASSERT { PASS | FAIL } changes the displayed results of the following
      operations according to the expected behavior.
    - ONFAIL { ASK | ABORT | RETRY | IGNORE } changes the interactive behavior
@@ -325,7 +325,7 @@ Make Tip
    changes when you run the program.  That is because build is still using the
    version of the file in the copied directory, not your modified file! To work
    around this annoying behavior, do the following when you re-build:
-   
+
    make clean_context all <-- Remove and re-copy all of the directories, then make all
    doisp.sh               <-- Load the code onto the board.
 
@@ -401,7 +401,7 @@ AVR32DEV1 Configuration Options
        the delay actually is 100 seconds.
 
   Individual subsystems can be enabled:
-  
+
     CONFIG_AVR32_GPIOIRQ - GPIO interrupt support
     CONFIG_AVR32_GPIOIRQSETA - Set of GPIOs on PORTA that support interrupts
     CONFIG_AVR32_GPIOIRQSETB - Set of GPIOs on PORTB that support interrupts

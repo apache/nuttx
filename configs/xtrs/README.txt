@@ -24,10 +24,10 @@ This port uses a vintage computer based on the Z80, the TRS80.
 There's a main page describing the different models of TRS80.
 See: http://www.trs-80.com
 
-An emulator for this computer is available to run TRS80 programs on a 
+An emulator for this computer is available to run TRS80 programs on a
 linux platform (http://www.tim-mann.org/xtrs.html).
 
-Other emulators are available for other platforms. 
+Other emulators are available for other platforms.
 See http://www.trs-80.com, click on the link Emulators.
 
 TRSDOS, LDOS and other softwares are available at:
@@ -185,7 +185,7 @@ by modifying the configuration file as follows:
   -CONFIG_HOST_WINDOWS=y
   -CONFIG_WINDOWS_NATIVE=y
   +CONFIG_HOST_LINUX=y
- 
+
   -CONFIG_Z80_TOOLCHAIN_SDCCW=y
   +CONFIG_Z80_TOOLCHAIN_SDCCL=y
 

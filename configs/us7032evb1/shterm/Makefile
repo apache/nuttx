@@ -45,7 +45,7 @@ $(BIN)$(EXEEXT): $(SRC)
 
 ..$(DELIM)bin$(DELIM)$(BIN)$(EXEEXT): $(BIN)$(EXEEXT)
 	install -m 0755 $^ $@
- 
+
 clean:
 	$(call DELFILE, $(BIN)$(EXEEXT))
 	$(call DELFILE..$(DELIM)bin$(DELIM)$(BIN)$(EXEEXT))

@@ -3,7 +3,7 @@
  * include/arch/board/power.h
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved
- * 
+ *
  *   Authors: Uros Platise <uros.platise@isotel.eu>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,7 +56,7 @@ extern "C" {
 void board_power_reboot(void);
 
 /** Power off the board
- * 
+ *
  * If it returns, then it was not possible to power-off the board due to some
  * other constraints. In the case of VSN due to external power supply, press
  * of a push-button or RTC alarm.

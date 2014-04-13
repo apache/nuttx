@@ -37,7 +37,7 @@
 
 CFLAGS		+= -I$(TOPDIR)/sched
 
-ASRCS		= 
+ASRCS		=
 CSRCS		= up_boot.c up_leds.c
 
 ifeq ($(CONFIG_PIC32MX_SPI2),y)

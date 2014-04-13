@@ -2,7 +2,7 @@ README
 ======
 
 This README discusses issues unique to NuttX configurations for the CloudController
-development board featuring the STMicro STM32F107VCT MCU.  
+development board featuring the STMicro STM32F107VCT MCU.
 
 Features of the CloudController board include:
 
@@ -392,7 +392,7 @@ NXFLAT Toolchain
   tools -- just the NXFLAT tools.  The buildroot with the NXFLAT tools can
   be downloaded from the NuttX SourceForge download site
   (https://sourceforge.net/projects/nuttx/files/).
- 
+
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
@@ -700,14 +700,14 @@ Cloudctrl-specific Configuration Options
   STM32 USB OTG FS Host Driver Support
 
   Pre-requisites
- 
+
    CONFIG_USBHOST         - Enable USB host support
    CONFIG_STM32_OTGFS     - Enable the STM32 USB OTG FS block
    CONFIG_STM32_SYSCFG    - Needed
    CONFIG_SCHED_WORKQUEUE - Worker thread support is required
- 
+
   Options:
- 
+
    CONFIG_STM32_OTGFS_RXFIFO_SIZE - Size of the RX FIFO in 32-bit words.
      Default 128 (512 bytes)
    CONFIG_STM32_OTGFS_NPTXFIFO_SIZE - Size of the non-periodic Tx FIFO
@@ -760,7 +760,7 @@ Where <subdir> is one of the following:
          ADC1_IN10(PC0) Potentiometer
 
        External signals are also available on CON5 CN14:
-    
+
          ADC_IN8 (PB0) CON5 CN14 Pin2
          ADC_IN9 (PB1) CON5 CN14 Pin1
 
@@ -855,7 +855,7 @@ Where <subdir> is one of the following:
 
       -CONFIG_NX_WRITEONLY=y
       +# CONFIG_NX_WRITEONLY is not set
- 
+
   thttpd
   ------
 

@@ -91,7 +91,7 @@
  *   FSMC_CD
  *   FSMC_CLK
  *   FSMC_NCE2
- *   FSMC_NCE3   
+ *   FSMC_NCE3
  *   FSMC_NCE4_1
  *   FSMC_NCE4_2
  *   FSMC_NIORD
@@ -139,7 +139,7 @@ void stm32_selectlcd(void)
   stm32_enablefsmc();
 
   /* Color LCD configuration (LCD configured as follow):
-   * 
+   *
    *   - Data/Address MUX  = Disable   "FSMC_BCR_MUXEN" just not enable it.
    *   - Extended Mode     = Disable   "FSMC_BCR_EXTMOD"
    *   - Memory Type       = SRAM      "FSMC_BCR_SRAM"

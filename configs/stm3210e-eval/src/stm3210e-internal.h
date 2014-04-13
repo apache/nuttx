@@ -112,7 +112,7 @@
  * configured as CH1OUT for variable backlight control.  Otherwise, the
  * following definition will be used to support a discrete backlight control.
  */
- 
+
 #define GPIO_LCD_BACKLIGHT (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
                              GPIO_OUTPUT_CLEAR|GPIO_PORTA|GPIO_PIN8)
 

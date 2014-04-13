@@ -90,8 +90,8 @@ void open1788_nand_initialize(void)
   putreg32(31, LPC17_EMC_STATICWAITPAGE1);
   putreg32(31, LPC17_EMC_STATICWAITWR1);
   putreg32(31, LPC17_EMC_STATICWAITTURN1);
-  
-  /* GPIO P2[21] connects to the Ready/Busy pin of the NAND part.  We need to 
+
+  /* GPIO P2[21] connects to the Ready/Busy pin of the NAND part.  We need to
    * reconfigure this pin as normal GPIO input.
    */
 

@@ -124,7 +124,7 @@ void board_button_initialize(void)
 #if 0 /* Interrupts are not used */
 
   /* Attach GIO interrupts */
-  
+
   irq_attach(EZ80_PB_IRQ, up_PBinterrupt);
   irq_attach(EZ80_PB1_IRQ, up_pb1interrupt);
   irq_attach(EZ80_PB2_IRQ, up_pb2interrupt);

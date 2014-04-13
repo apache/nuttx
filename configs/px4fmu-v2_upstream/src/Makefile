@@ -37,7 +37,7 @@
 
 CFLAGS += -I$(TOPDIR)/sched
 
-ASRCS = 
+ASRCS =
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 
 CSRCS = px4fmu_can.c px4fmu_spi.c px4fmu_usb.c px4fmu2_init.c px4fmu2_led.c

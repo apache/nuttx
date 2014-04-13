@@ -95,7 +95,7 @@
 /* Board definitions ********************************************************/
 /* The STM3240G-EVAL has two STMPE811QTR I/O expanders on board both connected
  * to the STM32 via I2C1.  They share a common interrupt line: PI2.
- * 
+ *
  * STMPE811 U24, I2C address 0x41 (7-bit)
  * ------ ---- ---------------- --------------------------------------------
  * STPE11 PIN  BOARD SIGNAL     BOARD CONNECTION
@@ -108,7 +108,7 @@
  *   IN2       EXP_IO10
  *   IN1       EXP_IO11
  *   IN0       EXP_IO12
- * 
+ *
  * STMPE811 U29, I2C address 0x44 (7-bit)
  * ------ ---- ---------------- --------------------------------------------
  * STPE11 PIN  BOARD SIGNAL     BOARD CONNECTION
@@ -213,7 +213,7 @@ static int stmpe811_attach(FAR struct stmpe811_config_s *state, xcpt_t isr)
 
   ivdbg("Saving handler %p\n", isr);
   DEBUGASSERT(priv);
-  
+
   /* Just save the handler.  We will use it when EXTI interruptsare enabled */
 
   priv->handler = isr;

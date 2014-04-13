@@ -386,7 +386,7 @@
  * VD14   --- Connected to P1[24]
  * VD15   --- Connected to P1[25]
  */
-   
+
 #define GPIO_LCD_VD8                GPIO_LCD_VD8_1
 #define GPIO_LCD_VD9                GPIO_LCD_VD9_1
 #define GPIO_LCD_VD10               GPIO_LCD_VD10_1

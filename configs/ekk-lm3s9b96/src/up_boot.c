@@ -77,7 +77,7 @@ void tiva_boardinitialize(void)
    * lm_ssiinitialize() has been brought into the link.
    */
 
-#if !defined(CONFIG_SSI0_DISABLE)  || !defined(CONFIG_SSI1_DISABLE) 
+#if !defined(CONFIG_SSI0_DISABLE)  || !defined(CONFIG_SSI1_DISABLE)
   if (lm_ssiinitialize)
     {
       lm_ssiinitialize();

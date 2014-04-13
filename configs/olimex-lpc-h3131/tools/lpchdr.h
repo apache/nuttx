@@ -69,7 +69,7 @@ struct lpc31_header_s
                                *      0xB – Do CRC32 check on both header and
                                *            execution part of the image. */
   uint32_t imageLength;       /* 0x20    Total image length including header rounded
-                               *    up to the nearest 512 byte boundary. In C 
+                               *    up to the nearest 512 byte boundary. In C
                                *    language the field can be computed as:
                                *    imageLength = (Actual length + 511) & ~0x1FF; */
   uint32_t releaseID;         /* 0x24    Release or version number of the image. Note,

@@ -92,14 +92,14 @@
 
 /** Called to configure SPI chip select GPIO pins for the VSN board.
  */
- 
+
 void weak_function stm32_spiinitialize(void)
 {
   /* NOTE: Clocking for SPI1 and/or SPI2 and SPI3 was already provided in stm32_rcc.c.
    *       Configurations of SPI pins is performed in stm32_spi.c.
    *       Here, we only initialize chip select pins unique to the board architecture.
    */
-   
+
 #ifdef CONFIG_STM32_SPI2
     stm32_configgpio(GPIO_CC1101_CS);
 #endif
@@ -151,9 +151,9 @@ uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 void stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
     spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-    
+
     if (devid == SPIDEV_WIRELESS) {
-    
+
         stm32_gpiowrite(GPIO_CC1101_CS, !selected);
 
         /* Wait for MISO to go low, indicates that Quart has stabilized */
@@ -162,7 +162,7 @@ void stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sele
           {
             while (stm32_gpioread(GPIO_SPI2_MISO) ) up_waste();
           }
-        
+
     }
 }
 

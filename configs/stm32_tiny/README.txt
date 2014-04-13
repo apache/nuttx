@@ -6,7 +6,7 @@ STM32 Tiny development board.
 
 This board is available from several vendors on the net, and may
 be sold under different names. It is based on a STM32 F103C8T6 MCU, and
-is (always ?) bundled with a nRF24L01 wireless communication module. 
+is (always ?) bundled with a nRF24L01 wireless communication module.
 
 Contents
 ========
@@ -40,7 +40,7 @@ GNU Toolchain Options
   toolchain options.
 
   1. The CodeSourcery GNU toolchain,
-  2. The Atollic Toolchain, 
+  2. The Atollic Toolchain,
   3. The devkitARM GNU toolchain,
   4. Raisonance GNU toolchain, or
   5. The NuttX buildroot Toolchain (see below).
@@ -118,7 +118,7 @@ GNU Toolchain Options
   In order to compile successfully.  Otherwise, you will get errors like:
 
     "C++ Compiler only available in TrueSTUDIO Professional"
-  
+
   The make may then fail in some of the post link processing because of some of
   the other missing tools.  The Make.defs file replaces the ar and nm with
   the default system x86 tool versions and these seem to work okay.  Disable all
@@ -140,7 +140,7 @@ IDEs
 
   NuttX is built using command-line make.  It can be used with an IDE, but some
   effort will be required to create the project.
-  
+
   Makefile Build
   --------------
   Under Eclipse, it is pretty easy to set up an "empty makefile project" and
@@ -237,7 +237,7 @@ NXFLAT Toolchain
   tools -- just the NXFLAT tools.  The buildroot with the NXFLAT tools can
   be downloaded from the NuttX SourceForge download site
   (https://sourceforge.net/projects/nuttx/files/).
- 
+
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
@@ -267,10 +267,10 @@ LEDs
 
 The STM32Tiny board has only one software controllable LED.
 This LED can be used by the board port when CONFIG_ARCH_LEDS option is
-enabled. 
+enabled.
 
 If enabled the LED is simply turned on when the board boots
-succesfully, and is blinking on panic / assertion failed. 
+succesfully, and is blinking on panic / assertion failed.
 
 PWM
 ===
@@ -305,12 +305,12 @@ USART3
 
 * theses IO lines are intended to be used by the wireless module on the board.
 
- 
+
 Default USART/UART Configuration
 --------------------------------
- 
+
 USART1 (RX & TX only) is available through the RS-232 port on the board. A MAX232 chip converts
-voltage to RS-232 level. This serial port can be used to flash a firmware using the boot loader 
+voltage to RS-232 level. This serial port can be used to flash a firmware using the boot loader
 integrated in the MCU.
 
 
@@ -371,7 +371,7 @@ STM32 Tiny - specific Configuration Options
        configuration features.
 
        CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG=n
- 
+
     CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
        hence, the board that supports the particular chip or SoC.
 
@@ -462,7 +462,7 @@ STM32 Tiny - specific Configuration Options
   configuration settings:
 
     CONFIG_STM32_TIMx_CHANNEL - Specifies the timer output channel {1,..,4}
- 
+
   NOTE: The STM32 timers are each capable of generating different signals on
   each of the four channels with different duty cycles.  That capability is
   not supported by this driver:  Only one output channel per timer.
@@ -540,7 +540,7 @@ Where <subdir> is one of the following:
     builtin applications are selected (see NOTES below).
 
     NOTES:
- 
+
     1. This configuration uses the mconf-based configuration tool.  To
        change this configuration using that tool, you should:
 
@@ -566,9 +566,9 @@ Where <subdir> is one of the following:
        CONFIG_STM32_TIM3_PWM=y   : Use TIM3 to generate PWM output
        CONFIG_STM32_TIM3_PARTIAL_REMAP=y  : Required to have the port B5 as timer PWM output  (channel 2)
        CONFIG_STM32_TIM3_CHANNEL=2
-       
+
        See also apps/examples/README.txt
-       
+
        Note that the only supported board configuration uses the board LED as PWM output.
 
        Special PWM-only debug options:
@@ -629,7 +629,7 @@ Where <subdir> is one of the following:
           you can still use certain kinds of debug output (see include/debug.h, all
           of the interfaces based on lowsyslog will work in this configuration).
 
-        - But don't enable USB debug output!  Since USB is console is used for 
+        - But don't enable USB debug output!  Since USB is console is used for
           USB debug output and you are using a USB console, there will be
           infinite loops and deadlocks:  Debug output generates USB debug
           output which generatates USB debug output, etc.  If you want USB
@@ -644,9 +644,9 @@ Where <subdir> is one of the following:
 
     This is another NSH example.  If differs from other 'nsh' configurations
     in that this configurations uses a USB serial device for console I/O.
-    
+
     NOTES:
- 
+
     1. This configuration uses the mconf-based configuration tool.  To
        change this configuration using that tool, you should:
 

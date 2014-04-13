@@ -215,7 +215,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
       if (irqbuttron)
         {
           pic32mx_gpioirqenable(g_buttoncn[id]);
-        }      
+        }
     }
   return oldhandler;
 }

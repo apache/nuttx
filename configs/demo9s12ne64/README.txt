@@ -314,12 +314,12 @@ HCS12/DEMO9S12NEC64-specific Configuration Options
 	   the delay actually is 100 seconds.
 
   GPIO Interrupts
-  
+
     CONFIG_GPIO_IRQ - Enable general support for GPIO IRQs
     CONFIG_HCS12_PORTG_INTS - Enable PortG IRQs
     CONFIG_HCS12_PORTH_INTS - Enable PortH IRQs
     CONFIG_HCS12_PORTJ_INTS - Enable PortJ IRQs
-   
+
   HCS12 build options:
 
 	CONFIG_HCS12_SERIALMON - Indicates that the target systems uses

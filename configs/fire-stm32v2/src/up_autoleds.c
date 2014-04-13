@@ -70,7 +70,7 @@
 #endif
 
 /* The following definitions map the encoded LED setting to GPIO settings.
- * 
+ *
  * OFFBITS    ONBITS
  * CLR  SET  CLR  SET
  * 210  210  210  210

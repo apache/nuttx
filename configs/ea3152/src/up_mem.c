@@ -110,7 +110,7 @@
  *
  * Micron Initialization Sequence from their data sheet for the Micron
  * MT48LC32M16A2 32M x 16 SDRAM chip:
- *   
+ *
  *   "SDRAMs must be powered up and initialized in a predefined manner.
  *    Operational procedures other than those specified may result in
  *    undefined operation. Once power is applied to VDD and VDDQ
@@ -118,33 +118,33 @@
  *    a signal cycling within timing constraints specified for the clock
  *    pin), the SDRAM requires a 100µs delay prior to issuing any command
  *    other than a COMMAND INHIBIT or NOP.
- *   
+ *
  *   "Starting at some point during this 100µs period and continuing at least
  *    through the end of this period, COMMAND INHIBIT or NOP commands should
  *    be applied.  Once the 100µs delay has been satisfied with at least one
  *    COMMAND INHIBIT or NOP command having been applied, a PRECHARGE command
  *    should be applied. All banks must then be precharged, thereby placing
  *    the device in the all banks idle state.
- *   
+ *
  *   "Once in the idle state, two AUTO REFRESH cycles must be performed. After
  *    the AUTO REFRESH cycles are complete, the SDRAM is ready for mode
  *    register programming.
- *   
+ *
  *   "Because the mode register will power up in an unknown state, it should
  *    be loaded prior to applying any operational command."
  *
  *  The JEDEC recommendation for initializing SDRAM is:
- *    
+ *
  *    APPLY POWER (Vdd/Vddq equally, and CLK is stable)
  *    Wait 200uS
  *    PRECHARGE all
  *    8 AUTO REFRESH COMMANDS
  *    LOAD MODE REGISTER
  *    SDRAM is ready for operation
- *    
+ *
  *  The Micron SDRAM parts will work fine with the JEDEC sequence, but also
  *  allow for a quicker init sequence of:
- *    
+ *
  *    APPLY POWER (Vdd/Vddq equally, and CLK is stable)
  *    Wait at least 100uS (during which time start applying and
  *       continue applying NOP or COMMAND INHIBIT)
@@ -221,7 +221,7 @@ static void lpc31_sdraminitialize(void)
   putreg32(NS2HCLKS(EA3152_SDRAM_TMRD, HCLK2, MPMC_DYNTMRD_MASK),
            LPC31_MPMC_DYNTMRD);
   up_udelay(100);
-  
+
   /* Issue continuous NOP commands  */
 
   putreg32((MPMC_DYNCONTROL_CE|MPMC_DYNCONTROL_CS|MPMC_DYNCONTROL_INOP),
@@ -230,7 +230,7 @@ static void lpc31_sdraminitialize(void)
   /* Load ~200us delay value to timer1 */
 
   up_udelay(200);
-  
+
   /* Issue a "pre-charge all" command */
 
   putreg32((MPMC_DYNCONTROL_CE|MPMC_DYNCONTROL_CS|MPMC_DYNCONTROL_IPALL),
@@ -246,7 +246,7 @@ static void lpc31_sdraminitialize(void)
   /* Load ~250us delay value to timer1 */
 
   up_udelay(250);
-  
+
   /* Recommended refresh interval for normal operation of the Micron
    * MT48LC16LFFG = 7.8125usec (128KHz rate). ((HCLK / 128000) - 1) =
     * refresh counter interval rate, (subtract one for safety margin).
@@ -267,7 +267,7 @@ static void lpc31_sdraminitialize(void)
    */
 
   tmp = getreg32(LPC31_EXTSDRAM0_VSECTION | (0x23 << 13));
-  
+
   putreg32((MPMC_DYNCONFIG0_MDSDRAM|MPMC_DYNCONFIG_HP16_32MX16),
            LPC31_MPMC_DYNCONFIG0);
   putreg32((MPMC_DYNRASCAS0_RAS2CLK|MPMC_DYNRASCAS0_CAS2CLK),
@@ -303,7 +303,7 @@ static void lpc31_sdraminitialize(void)
 void lpc31_meminitialize(void)
 {
   /* Configure the LCD pins in external bus interface (EBI/MPMC) memory mode.
-   * 
+   *
    * LCD_CSB   -> MPMC_NSTCS_0
    * LCD_DB_1  -> MPMC_NSTCS_1
    * LCD_DB_0  -> MPMC_CLKOUT
@@ -331,7 +331,7 @@ void lpc31_meminitialize(void)
   /* Enable EBI clock */
 
   lpc31_enableclock(CLKID_EBICLK);
-  
+
   /* Enable MPMC controller clocks */
 
   lpc31_enableclock(CLKID_MPMCCFGCLK);
@@ -351,7 +351,7 @@ void lpc31_meminitialize(void)
    */
 
   putreg32(EA3152_MPMC_DELAY, LPC31_SYSCREG_MPMC_DELAYMODES);
-  
+
   /* Configure Micron MT48LC32M16A2 SDRAM on the EA3152 board */
 
   lpc31_sdraminitialize();

@@ -77,7 +77,7 @@
 
 void board_button_initialize(void)
 {
-  /* Configure the GPIO pins as inputs.  NOTE that EXTI interrupts are 
+  /* Configure the GPIO pins as inputs.  NOTE that EXTI interrupts are
    * configured for all pins.
    */
 

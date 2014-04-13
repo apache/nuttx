@@ -170,7 +170,7 @@ MAX3232 Connection
   RX  -- J4 pin 30: U1RX/RF2
   GND -- J4 pin 40: GND
   Vcc -- J4 pin 39: 5V
- 
+
 Toolchains
 ==========
 
@@ -262,7 +262,7 @@ Toolchains
 
   Windows Native Toolchains
   -------------------------
-  
+
   NOTE:  There are several limitations to using a Windows based toolchain in a
   Cygwin environment.  The three biggest are:
 
@@ -342,7 +342,7 @@ LEDs
   ----- ----- -------------------------------------------------------------
   LABEL COLOR CONTROL
   ----- ----- -------------------------------------------------------------
-  USB   Green   RF3. This could be used by software if USB is not used. 
+  USB   Green   RF3. This could be used by software if USB is not used.
                      Otherwise, RF3 is used as the USBID signal.
   LED1  While   RE2, Pulled up.  Low value illuminates
   LED2  Red     RE1, Pulled up.  Low value illuminates
@@ -369,7 +369,7 @@ Buttons
 
     RE6 User switch
     RE7 Program switch
- 
+
 PIC32MX Configuration Options
 =============================
 
@@ -493,7 +493,7 @@ PIC32MX Configuration Options
       CONFIG_PIC32MX_CODEWP - Default 1 (disabled)
     DEVCFG1: (All settings determined by selections in board.h)
     DEVCFG2: (All settings determined by selections in board.h)
-    DEVCFG3: 
+    DEVCFG3:
       CONFIG_PIC32MX_USBIDO - USB USBID Selection.  Default 1 if USB enabled
         (USBID pin is controlled by the USB module), but 0 (GPIO) otherwise.
       CONFIG_PIC32MX_VBUSIO - USB VBUSON Selection (Default 1 if USB enabled
@@ -604,7 +604,7 @@ Where <subdir> is one of the following:
        RX  -- J4 pin 30: U1RX/RF2
        GND -- J4 pin 40: GND
        Vcc -- J4 pin 39: 5V
- 
+
     3. USB Configuations
 
        Several USB device configurations can be enabled and included

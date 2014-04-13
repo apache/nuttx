@@ -57,7 +57,7 @@
  *   PGTABLE_BASE_VADDR - The mapped address of the page table in ROM, and
  *   Mappings for each of the PSECTIONS in lpc31_memorymap.h
  */
- 
+
 #ifdef CONFIG_ARCH_ROMPGTABLE
    /* The LPC31xx ROM page table uses a 1-1 physical to virtual memory mapping */
 

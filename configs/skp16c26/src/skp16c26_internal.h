@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/skp16c26/src/scp16c26_internal.h 
+ * configs/skp16c26/src/scp16c26_internal.h
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

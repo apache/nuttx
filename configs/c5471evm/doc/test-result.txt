@@ -103,7 +103,7 @@ cond_test: signaler terminated, now cancel the waiter
 cond_test: 	Waiter	Signaler
 cond_test: Loops	32	32
 cond_test: Errors	0	0
-cond_test: 
+cond_test:
 0 times, waiter did not have to wait for data
 cond_test: 0 times, data was already available when the signaler run
 cond_test: 0 times, the waiter was in an unexpected state when the signaler ran

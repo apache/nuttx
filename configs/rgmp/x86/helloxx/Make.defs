@@ -51,7 +51,7 @@ else
 endif
 
 ARCHCXXFLAGS    = -fno-builtin -fno-exceptions -fno-rtti
-ARCHCPUFLAGS    = -fno-builtin -nostdinc -fno-stack-protector 
+ARCHCPUFLAGS    = -fno-builtin -nostdinc -fno-stack-protector
 ARCHPICFLAGS    = -fpic
 ARCHWARNINGS    = -Wall -Wstrict-prototypes -Wshadow
 ARCHWARNINGSXX  = -Wall -Wshadow

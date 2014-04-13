@@ -19,7 +19,7 @@ Contents
   ENC28J60 Module
   Configurations
   STR71x-Specific Configuration Settings
-  
+
 Olimex STR-P711
 ^^^^^^^^^^^^^^^
  Features:
@@ -276,7 +276,7 @@ Windows OpenOCD will Olimex JTAG
   I used to start the OpenOCD daemon on my system called oocd.sh.  That
   script would probably require some modifications to work in another
   environment:
-  
+
     - possibly the value of OPENOCD_PATH
     - If you are working under Linux you will need to change any
       occurances of `cygpath -w blablabla` to just blablabla
@@ -319,12 +319,12 @@ MMC/SD Slot
   P0.4/S1.MISO 7     DAT0/D0    MISO1
   ---          8     DAT1/RES   (Pulled up)
   ---          9     DAT2/RES   (Pulled up)
-             
+
   P1.10/USBCLK 10/14 WP         P1.10 input
   P1.15/HTXD   13/15 CP         P1.15 input
 
   Use of SPI1 doesn't conflict with anything.  WP conflicts USB; CP conflicts
-  with NTXD. 
+  with NTXD.
 
 ENC28J60 Module
 ^^^^^^^^^^^^^^^
@@ -419,8 +419,8 @@ STR71x-Specific Configuration Settings
 
   CONFIG_STR71X_I2C0, CONFIG_STR71X_I2C1, CONFIG_STR71X_UART0, CONFIG_STR71X_UART1,
   CONFIG_STR71X_UART2, CONFIG_STR71X_UART3, CONFIG_STR71X_USB, CONFIG_STR71X_CAN,
-  CONFIG_STR71X_BSPI0, CONFIG_STR71X_BSPI1, CONFIG_STR71X_HDLC, CONFIG_STR71X_XTI, 
-  CONFIG_STR71X_GPIO0, CONFIG_STR71X_GPIO1, CONFIG_STR71X_GPIO2, CONFIG_STR71X_ADC12, 
+  CONFIG_STR71X_BSPI0, CONFIG_STR71X_BSPI1, CONFIG_STR71X_HDLC, CONFIG_STR71X_XTI,
+  CONFIG_STR71X_GPIO0, CONFIG_STR71X_GPIO1, CONFIG_STR71X_GPIO2, CONFIG_STR71X_ADC12,
   CONFIG_STR71X_CKOUT, CONFIG_STR71X_TIM1, CONFIG_STR71X_TIM2, CONFIG_STR71X_TIM3, and
   CONFIG_STR71X_RTC
     Select peripherals to initialize (Timer0 and EIC are always initialized)

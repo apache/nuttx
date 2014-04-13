@@ -114,7 +114,7 @@ FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
   /* Configure the OLED GPIOs. For the SPI interface, insert jumpers in J42,
    * J43, J45 pin1-2 and J46 pin 1-2.
    */
- 
+
   oledcs_dumpgpio("up_nxdrvinit: After OLED CS setup");
   oleddc_dumpgpio("up_nxdrvinit: On entry");
 

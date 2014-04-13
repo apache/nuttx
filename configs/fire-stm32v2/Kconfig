@@ -11,7 +11,7 @@ choice
 	prompt "Select Wildfire STM32 version"
 	default ARCH_BOARD_FIRE_STM32V2
 	---help---
-		This port has logic differences to support either the Version 2 or 
+		This port has logic differences to support either the Version 2 or
 		Version 3 of the Wildfire board.
 
 config ARCH_BOARD_FIRE_STM32V2

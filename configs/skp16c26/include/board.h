@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/skp16c26/include/board.h 
+ * configs/skp16c26/include/board.h
  * arch/board/board.h
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.

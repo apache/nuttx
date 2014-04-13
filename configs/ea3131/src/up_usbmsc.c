@@ -98,7 +98,7 @@ int usbmsc_archinitialize(void)
     }
 
   /* Register a RAMDISK device to manage this RAM image */
-  
+
   ret = ramdisk_register(CONFIG_SYSTEM_USBMSC_DEVMINOR1,
                          pbuffer,
                          USBMSC_NSECTORS,

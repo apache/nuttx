@@ -291,7 +291,7 @@ Where <subdir> is one of the following:
     builtin applications is disabled.
 
     NOTES:
- 
+
     1. This configuration uses the mconf-based configuration tool.  To
        change this configuration using that tool, you should:
 

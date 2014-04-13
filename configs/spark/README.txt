@@ -61,7 +61,7 @@ GNU Toolchain Options
   4. Raisonance GNU toolchain, or
   5. The NuttX buildroot Toolchain (see below).
 
-  All testing has been conducted using the CodeSourcery toolchain for Linux. 
+  All testing has been conducted using the CodeSourcery toolchain for Linux.
   To use the Atollic, devkitARM, Raisonance GNU, or NuttX buildroot toolchain,
   you simply need to add one of the following configuration options to your
   .config (or defconfig) file:

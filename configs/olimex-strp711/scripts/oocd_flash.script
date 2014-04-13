@@ -1,11 +1,11 @@
-# 
+#
 # The following command will be executed on reset
 # - wait for target halt
 # - erase memory
 # - flash content of file nuttx.bin into target-memory
 # - shutdown openocd
 #
-# Based on file originally created by Martin Thomas 
+# Based on file originally created by Martin Thomas
 #
 
 arm7_9 dcc_downloads enable

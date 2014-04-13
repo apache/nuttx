@@ -116,7 +116,7 @@ static void up_setleds(uint8_t gybits, uint8_t rbit)
   regval &= ~GREENYELLOW_LED_MASK;
   regval |= gybits;
   putreg8(regval, GREENYELLOW_LED_PORT);
-  
+
   regval  = getreg8(RED_LED_PORT);
   regval &= ~RED_LED_MASK;
   regval |= rbit;
@@ -140,17 +140,17 @@ void board_led_initialize(void)
   regval  = getreg8(GREENYELLOW_LED_PORT);
   regval |= (GREEN_LED_OFF |YELLOW_LED_OFF);
   putreg8(regval, GREENYELLOW_LED_PORT);
-  
+
   regval  = getreg8(RED_LED_PORT);
   regval |=  RED_LED_OFF;
   putreg8(regval, RED_LED_PORT);
 
   /* Set the direction to output */
-  
+
   regval  = getreg8(GREENYELLOW_DIR_PORT);
   regval |= (GREEN_LED |YELLOW_LED);
   putreg8(regval, GREENYELLOW_DIR_PORT);
-  
+
   regval  = getreg8(RED_DIR_PORT);
   regval |=  RED_LED;
   putreg8(regval, RED_DIR_PORT);

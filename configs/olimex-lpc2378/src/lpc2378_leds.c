@@ -114,7 +114,7 @@ void board_led_off(int led)
 }
 
 /****************************************************************************
- * olimex board STATUS LED 
+ * olimex board STATUS LED
  ****************************************************************************/
 
 void lpc2378_statledoff(void)

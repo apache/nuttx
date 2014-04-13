@@ -140,13 +140,13 @@
  * (XTI) pin.  The only easily accessible XTI pins are on SPI0/1 so you can't have
  * both SPI0 and 1 together with this configuration.
  *
- * STR-P711 PIN            PIN CONFIGURATION ENC28J60 CONNECTION  
+ * STR-P711 PIN            PIN CONFIGURATION ENC28J60 CONNECTION
  * ----------------------- ----------------- -----------------------
- * P0.3/S0.SS/I1.SDA       P0.3 output      CON5 1 J8-1 NET CS 
+ * P0.3/S0.SS/I1.SDA       P0.3 output      CON5 1 J8-1 NET CS
  * P0.2/S0.SCLK/I1.SCL     SCLK0                 2    2 SCK
  * P0.0/S0.MOSI/U3.RX      MOSI0                 3    3 MOSI
  * P0.1/S0.MISO/U3.TX      MISO0                 4    4 MISO
- * GND                     GND                   5    5 GND 
+ * GND                     GND                   5    5 GND
  * 3.3V                    3.3V                 10 J9-1 3V3
  * NC                      NC                    9    2 WOL
  * P0.6/S1.SCLK            P0.6 input            8    3 NET INT
@@ -218,12 +218,12 @@
  * P0.4/S1.MISO 7     DAT0/D0    MISO1
  * ---          8     DAT1/RES   (Pulled up)
  * ---          9     DAT2/RES   (Pulled up)
- *            
+ *
  * P1.10/USBCLK 10/14 WP         P1.10 input
  * P1.15/HTXD   13/15 CP         P1.15 input
  *
  * Use of SPI1 doesn't conflict with anything.  WP conflicts USB; CP conflicts
- * with HTXD. 
+ * with HTXD.
  */
 
 /* MMC/SD additional pins */
@@ -958,7 +958,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
            * PC0=1 PC1=1 PC2=1: Alternate function, push-pull
            * PC0=1 PC1=0 PC2=0: In, TTL
            * PC0=0 PC1=1 PC2=0: In, CMOS
-           * PC0=1 PC1=0 PC2=1: Output, push pull 
+           * PC0=1 PC1=0 PC2=1: Output, push pull
            */
 
           reg16  = getreg16(STR71X_GPIO0_PC0);
@@ -1001,7 +1001,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
            *
            * PC0=1 PC1=0 PC2=0: In, TTL
            * PC0=0 PC1=1 PC2=0: In, CMOS
-           * PC0=1 PC1=0 PC2=1: Output, push pull 
+           * PC0=1 PC1=0 PC2=1: Output, push pull
            */
 
 #ifdef BSPI0_GPIO1_ALL
@@ -1043,7 +1043,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
            * PC0=1 PC1=1 PC2=1: Alternate function, push-pull
            * PC0=1 PC1=0 PC2=0: In, TTL
            * PC0=0 PC1=1 PC2=0: In, CMOS
-           * PC0=1 PC1=0 PC2=1: Output, push pull 
+           * PC0=1 PC1=0 PC2=1: Output, push pull
            */
 
           reg16  = getreg16(STR71X_GPIO0_PC0);
@@ -1082,7 +1082,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
            *
            * PC0=1 PC1=0 PC2=0: In, TTL
            * PC0=0 PC1=1 PC2=0: In, CMOS
-           * PC0=1 PC1=0 PC2=1: Output, push pull 
+           * PC0=1 PC1=0 PC2=1: Output, push pull
            */
 
 #ifdef BSPI1_GPIO1_ALL

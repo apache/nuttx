@@ -70,8 +70,8 @@
 
 /* You can't use CAN1 with FSMC:
  *
- *   PD0   = FSMC_D2 & CAN1_RX   
- *   PD1   = FSMC_D3 & CAN1_TX  
+ *   PD0   = FSMC_D2 & CAN1_RX
+ *   PD1   = FSMC_D3 & CAN1_TX
  */
 
 #if defined(CONFIG_STM32_CAN1) && defined(CONFIG_STM32_FSMC)
@@ -127,7 +127,7 @@
 #  endif
 #endif
 
-/* USB OTG FS 
+/* USB OTG FS
  *
  * PA9  VBUS_FS
  * PH5  OTG_FS_PowerSwitchOn
@@ -145,7 +145,7 @@
 
 /* The STM3220G-EVAL has two STMPE811QTR I/O expanders on board both connected
  * to the STM32 via I2C1.  They share a common interrupt line: PI2.
- * 
+ *
  * STMPE811 U24, I2C address 0x41 (7-bit)
  * ------ ---- ---------------- --------------------------------------------
  * STPE11 PIN  BOARD SIGNAL     BOARD CONNECTION
@@ -158,7 +158,7 @@
  *   IN2       EXP_IO10
  *   IN1       EXP_IO11
  *   IN0       EXP_IO12
- * 
+ *
  * STMPE811 U29, I2C address 0x44 (7-bit)
  * ------ ---- ---------------- --------------------------------------------
  * STPE11 PIN  BOARD SIGNAL     BOARD CONNECTION
@@ -307,7 +307,7 @@ void stm32_disablefsmc(void);
  * Name: stm32_selectsram
  *
  * Description:
- *   Initialize to access external SRAM.  SRAM will be visible at the FSMC Bank 
+ *   Initialize to access external SRAM.  SRAM will be visible at the FSMC Bank
  *   NOR/SRAM2 base address (0x64000000)
  *
  *   General transaction rules.  The requested AHB transaction data size can be 8-,

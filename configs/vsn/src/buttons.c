@@ -62,11 +62,11 @@
  ****************************************************************************/
 
 /** Called from an interrupt
- * 
+ *
  * \todo Measure the time button is being pressed, and then:
  *  - if short signal all processes (tasks and threads) with 'button user request': SIGUSR1
  *  - if long (>0.5 s) signal all with 'power-off request': SIGTERM
- **/ 
+ **/
 void buttons_callback(void)
 {
 }

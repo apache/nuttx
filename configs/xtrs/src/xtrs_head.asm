@@ -109,7 +109,7 @@ _up_rstvectors:
 ; Other reset handlers
 ;
 ; Interrupt mode 1 behavior:
-; 
+;
 ; 1. M1 cycle: 7 ticks
 ;    Acknowledge interrupt and decrements SP
 ; 2. M2 cycle: 3 ticks

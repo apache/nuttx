@@ -147,7 +147,7 @@ int composite_archinitialize(void)
       return ret;
     }
   message("composite_archinitialize: Successfully bound SDIO to the MMC/SD driver\n");
-  
+
   /* Then let's guess and say that there is a card in the slot.  I need to check to
    * see if the STM3210E-EVAL board supports a GPIO to detect if there is a card in
    * the slot.

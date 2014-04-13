@@ -132,7 +132,7 @@ static const struct led_setting_s g_ledoffvalues[LED_NVALUES] =
   {LED_NC,  LED_NC,  LED_NC,  LED_NC},
   {LED_NC,  LED_NC,  LED_NC,  LED_NC},
   {LED_NC,  LED_NC,  LED_NC,  LED_NC},
-  {LED_NC,  LED_NC,  LED_NC,  LED_NC}, 
+  {LED_NC,  LED_NC,  LED_NC,  LED_NC},
   {LED_NC,  LED_NC,  LED_OFF, LED_NC},
   {LED_NC,  LED_NC,  LED_NC,  LED_OFF}
 };

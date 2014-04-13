@@ -220,7 +220,7 @@
 /* Display/Color Properties ***********************************************************/
 /* Display Resolution */
 
-#if defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_RLANDSCAPE) 
+#if defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_RLANDSCAPE)
 #  define STM32_XRES          320
 #  define STM32_YRES          240
 #else
@@ -509,9 +509,9 @@ static const uint32_t g_lcdout[16] =
 
 static const uint32_t g_lcdin[16] =
 {
-  GPIO_LCD_D0IN,   GPIO_LCD_D1IN,   GPIO_LCD_D2IN,   GPIO_LCD_D3IN, 
-  GPIO_LCD_D4IN,   GPIO_LCD_D5IN,   GPIO_LCD_D6IN,   GPIO_LCD_D7IN, 
-  GPIO_LCD_D8IN,   GPIO_LCD_D9IN,   GPIO_LCD_D10IN,  GPIO_LCD_D11IN, 
+  GPIO_LCD_D0IN,   GPIO_LCD_D1IN,   GPIO_LCD_D2IN,   GPIO_LCD_D3IN,
+  GPIO_LCD_D4IN,   GPIO_LCD_D5IN,   GPIO_LCD_D6IN,   GPIO_LCD_D7IN,
+  GPIO_LCD_D8IN,   GPIO_LCD_D9IN,   GPIO_LCD_D10IN,  GPIO_LCD_D11IN,
   GPIO_LCD_D12IN,  GPIO_LCD_D13IN,  GPIO_LCD_D14IN,  GPIO_LCD_D15IN
 };
 #endif
@@ -548,7 +548,7 @@ static const struct fb_videoinfo_s g_videoinfo =
 
 /* This is the standard, NuttX Plane information object */
 
-static const struct lcd_planeinfo_s g_planeinfo = 
+static const struct lcd_planeinfo_s g_planeinfo =
 {
   .putrun = stm32_putrun,       /* Put a run into LCD memory */
   .getrun = stm32_getrun,       /* Get a run from LCD memory */
@@ -558,12 +558,12 @@ static const struct lcd_planeinfo_s g_planeinfo =
 
 /* This is the standard, NuttX LCD driver object */
 
-static struct stm32_dev_s g_lcddev = 
+static struct stm32_dev_s g_lcddev =
 {
   .dev =
   {
     /* LCD Configuration */
- 
+
     .getvideoinfo = stm32_getvideoinfo,
     .getplaneinfo = stm32_getplaneinfo,
 
@@ -674,9 +674,9 @@ static uint16_t stm32_readreg(FAR struct stm32_dev_s *priv, uint8_t regaddr)
   putreg32(1, LCD_RS_SET);
   putreg32(1, LCD_RD_CLEAR);
   putreg32(1, LCD_RD_SET);
-  regval = (uint16_t)getreg32(LCD_IDR); 
+  regval = (uint16_t)getreg32(LCD_IDR);
   putreg32(1, LCD_CS_SET);
-    
+
   return regval;
 }
 
@@ -750,9 +750,9 @@ static inline uint16_t stm32_readgram(FAR struct stm32_dev_s *priv)
   putreg32(1, LCD_RS_SET);
   putreg32(1, LCD_RD_CLEAR);
   putreg32(1, LCD_RD_SET);
-  regval = (uint16_t)getreg32(LCD_IDR); 
+  regval = (uint16_t)getreg32(LCD_IDR);
   putreg32(1, LCD_CS_SET);
-    
+
   return regval;
 }
 
@@ -767,7 +767,7 @@ static inline uint16_t stm32_readgram(FAR struct stm32_dev_s *priv)
  *   - ILI932x: Discard first dummy read; no shift in the return data
  *
  ************************************************************************************/
- 
+
 static void stm32_readnosetup(FAR struct stm32_dev_s *priv, FAR uint16_t *accum)
 {
   /* Read-ahead one pixel */
@@ -782,7 +782,7 @@ static void stm32_readnosetup(FAR struct stm32_dev_s *priv, FAR uint16_t *accum)
  *   Read one correctly aligned pixel from the GRAM memory.  Possibly shifting the
  *   data and possibly swapping red and green components.
  *
- *   - ILI932x: Unknown -- assuming colors are in the color order 
+ *   - ILI932x: Unknown -- assuming colors are in the color order
  *
  ************************************************************************************/
 
@@ -866,7 +866,7 @@ static int stm32_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffe
   FAR struct stm32_dev_s *priv = &g_lcddev;
   FAR const uint16_t *src = (FAR const uint16_t*)buffer;
   int i;
- 
+
   /* Buffer must be provided and aligned to a 16-bit address boundary */
 
   lcdvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
@@ -933,7 +933,7 @@ static int stm32_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffe
   /* Convert coordinates */
 
   row = (STM32_YRES-1) - row;
-  
+
   /* Then write the GRAM data, manually incrementing Y (which is col) */
 
   for (i = 0; i < npixels; i++)
@@ -975,7 +975,7 @@ static int stm32_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   uint16_t (*readgram)(FAR struct stm32_dev_s *priv, FAR uint16_t *accum);
   uint16_t accum;
   int i;
- 
+
   /* Buffer must be provided and aligned to a 16-bit address boundary */
 
   lcdvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
@@ -1001,7 +1001,7 @@ static int stm32_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
      default:  /* Shouldn't happen */
        return -ENOSYS;
    }
- 
+
   /* Read the run from GRAM */
 
 #ifdef CONFIG_LCD_LANDSCAPE
@@ -1071,7 +1071,7 @@ static int stm32_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   /* Convert coordinates */
 
   row = (STM32_YRES-1) - row;
-  
+
   /* Then write the GRAM data, manually incrementing Y (which is col) */
 
   for (i = 0; i < npixels; i++)
@@ -1158,7 +1158,7 @@ static int stm32_poweroff(FAR struct stm32_dev_s *priv)
 {
   /* Turn the display off */
 
-  stm32_writereg(priv, LCD_REG_7, 0); 
+  stm32_writereg(priv, LCD_REG_7, 0);
 
   /* Remember the power off state */
 
@@ -1963,7 +1963,7 @@ void stm32_lcdclear(uint16_t color)
   FAR struct stm32_dev_s *priv = &g_lcddev;
   uint32_t i = 0;
 
-  stm32_setcursor(priv, 0, 0); 
+  stm32_setcursor(priv, 0, 0);
   stm32_gramselect(priv);
 
   /* Make sure that we are configured for output */

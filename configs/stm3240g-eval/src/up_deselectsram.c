@@ -85,7 +85,7 @@ void stm32_deselectsram(void)
   /* Bank1 NOR/SRAM timing register configuration */
 
   putreg32(FSMC_BTR_RSTVALUE, STM32_FSMC_BTR2);
- 
+
   /* Disable AHB clocking to the FSMC */
 
   stm32_disablefsmc();

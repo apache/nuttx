@@ -118,7 +118,7 @@ static const uint32_t g_sramconfig[] =
  * Name: stm32_selectsram
  *
  * Description:
- *   Initialize to access external SRAM.  SRAM will be visible at the FSMC Bank 
+ *   Initialize to access external SRAM.  SRAM will be visible at the FSMC Bank
  *   NOR/SRAM2 base address (0x64000000)
  *
  *   General transaction rules.  The requested AHB transaction data size can be 8-,

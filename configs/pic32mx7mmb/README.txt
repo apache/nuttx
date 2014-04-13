@@ -75,7 +75,7 @@ PIN CONFIGURATIONS                     SIGNAL NAME                ON-BOARD CONNE
  41 PMA11/AECRS/AN12/ERXD0/RB12        LCD-YU                     TFT display
  42 PMA10/AECOL/AN13/ERXD1/RB13        LCD-XL                     TFT display
  43 PMA1/AETXD3/AN14/ERXD2/PMALH/RB14  LCD-CS#                    TFT display, HDR2 pin 3
- 44 PMA0/AETXD2/AN15/CN12/ERXD3/OCFB/  LCD-RS                     TFT display       
+ 44 PMA0/AETXD2/AN15/CN12/ERXD3/OCFB/  LCD-RS                     TFT display
     PMALL/RB15
  45 VSS                                (grounded)                 ---
  46 VDD                                P32_VDD                    ---
@@ -138,8 +138,8 @@ PIN CONFIGURATIONS                     SIGNAL NAME                ON-BOARD CONNE
  85 VCAP/VCORE                         (capacitor to ground)      ---
  84 PMD15/CN16/ETXCLK/RD7              PMPD15                     TFT display, HDR1 pin 3
  83 PMD14/CN15/ETXEN/RD6               PMPD14                     TFT display, HDR1 pin 4
- 82 CN14/PMRD/RD5                      PMPRD                      
- 81 CN13/OC5/PMWR/RD4                  PMPWR                      
+ 82 CN14/PMRD/RD5                      PMPRD
+ 81 CN13/OC5/PMWR/RD4                  PMPWR
  80 PMD13/CN19/ETXD3/RD13              PMPD13                     TFT display, HDR1 pin 5
  79 PMD12/ETXD2/IC5/RD12               PMPD12                     TFT display, HDR1 pin 6
  78 OC4/RD3                            RD3                        HDR2 pin 5
@@ -236,7 +236,7 @@ Toolchains
 
   Windows Native Toolchains
   -------------------------
-  
+
   NOTE:  There are several limitations to using a Windows based toolchain in a
   Cygwin environment.  The three biggest are:
 
@@ -485,7 +485,7 @@ PIC32MX Configuration Options
       CONFIG_PIC32MX_CODEWP - Default 1 (disabled)
     DEVCFG1: (All settings determined by selections in board.h)
     DEVCFG2: (All settings determined by selections in board.h)
-    DEVCFG3: 
+    DEVCFG3:
       CONFIG_PIC32MX_USBIDO - USB USBID Selection.  Default 1 if USB enabled
         (USBID pin is controlled by the USB module), but 0 (GPIO) otherwise.
       CONFIG_PIC32MX_VBUSIO - USB VBUSON Selection (Default 1 if USB enabled
@@ -633,7 +633,7 @@ Where <subdir> is one of the following:
     3. SD Card Support
 
        SD card support is built into this example by default:
-  
+
          CONFIG_PIC32MX_SPI1=y
          CONFIG_NSH_ARCHINIT=y
 
@@ -653,7 +653,7 @@ Where <subdir> is one of the following:
        USB device support is enabled by default in this configuration.
        The following settings are defined by default (and can be set
        to 'n' to disabled USB device support).
- 
+
          CONFIG_USBDEV=y         : Enable basic USB device support
          CONFIG_PIC32MX_USBDEV=y : Enable PIC32 USB device support
          CONFIG_USBMSC=y         : USB supports a mass storage device.
@@ -663,7 +663,7 @@ Where <subdir> is one of the following:
          msconn  : Connect the mass storage device, exportint the SD
                    card as the USB mass storage logical unit.
          msdis   : Disconnect the USB mass storage device
- 
+
        NOTE: The SD card should *not* be mounted under NSH *and* exported
        by the mass storage device!!! That can result in corruption of the
        SD card format.  This is the sequence of commands that you should
@@ -677,7 +677,7 @@ Where <subdir> is one of the following:
          msdis                : Disconnect the USB MSC
          mount -t vfat /dev/mmcsd0 /mnt/sdcard : Re-mount the SD card
          ...
-      
+
        Other USB other device configurations can be enabled and
        included as NSH built-in built in functions.
 
@@ -692,9 +692,9 @@ Where <subdir> is one of the following:
          CONFIG_PL2303=y         : Enable the Prolifics PL2303 emulation
          CONFIG_CDCACM=y         : or the CDC/ACM serial driver (not both)
 
-       system/cdcacm -  The system/cdcacm program can be included as an 
+       system/cdcacm -  The system/cdcacm program can be included as an
        function by adding the following to the NuttX configuration file:
-    
+
          CONFIG_SYSTEM_CDCACM=y
 
        and defining the following in your .config file:
@@ -717,7 +717,7 @@ Where <subdir> is one of the following:
          CONFIG_NSH_DRIPADDR=(10<<24|0<<16|0<<8|1) : Host IP address 10.0.0.1
 
        This will probably need to be customized for your network.
- 
+
        NOTES:
 
        a. This logic will assume that a network is connected.  During its
@@ -752,7 +752,7 @@ Where <subdir> is one of the following:
 
          a) Enable support for the PIC32 USB device
 
-           -CONFIG_PIC32MX_USBDEV=n 
+           -CONFIG_PIC32MX_USBDEV=n
            +CONFIG_PIC32MX_USBDEV=y
 
          b) Enable NuttX USB device support
@@ -784,7 +784,7 @@ Where <subdir> is one of the following:
            nsh> mkrd -s 512 128
 
          b) Put a FAT file system on the RAM disk:
-  
+
            nsh> mkfatfs /dev/ram0
 
          b) Now the 'msconn' command will connect to the host and
@@ -808,7 +808,7 @@ Where <subdir> is one of the following:
 
        But you will have to enable a specific graphics example application
        in the NuttX configuration file in order to see anything.
- 
+
     8. Enabling touch screen support in the nsh configuaration
 
        In defconfig (or nuttx/.config), set:

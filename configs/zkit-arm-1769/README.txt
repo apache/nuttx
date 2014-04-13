@@ -549,7 +549,7 @@ Where <subdir> is one of the following:
     apps/examples/README.txt for information about the examples.
 
     NOTES:
- 
+
     1. This configuration uses the mconf-based configuration tool.  To
        change this configuration using that tool, you should:
 
@@ -569,7 +569,7 @@ Where <subdir> is one of the following:
     the apps/examples/thttpd application.
 
     NOTES:
- 
+
     1. This configuration uses the mconf-based configuration tool.  To
        change this configuration using that tool, you should:
 

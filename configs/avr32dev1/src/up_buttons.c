@@ -79,7 +79,7 @@
 static xcpt_t board_button_irqx(int irq, xcpt_t irqhandler)
 {
   xcpt_t oldhandler;
-  
+
   /* Attach the handler */
 
   gpio_irqattach(irq, irqhandler, &oldhandler);

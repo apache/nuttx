@@ -50,7 +50,7 @@ else
   ARCHOPTIMIZATION	= -O2
 endif
 
-ARCHCPUFLAGS		= -fno-builtin -nostdinc -fno-stack-protector 
+ARCHCPUFLAGS		= -fno-builtin -nostdinc -fno-stack-protector
 ARCHPICFLAGS		= -fpic
 ARCHWARNINGS		= -Wall -Wstrict-prototypes -Wshadow
 ARCHDEFINES		= -D__RGMP_KERNEL__ -D__RTOS_KERNEL__ -D__SHARE_KERNEL__
@@ -82,7 +82,7 @@ else
 endif
 
 LDFLAGS                 += -nostdlib
-EXTRA_LIBS		= 
+EXTRA_LIBS		=
 
 
 MKDEP			= $(TOPDIR)/tools/mkdeps.sh

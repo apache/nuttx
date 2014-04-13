@@ -52,7 +52,7 @@ endif
 
 #ARCHCXXFLAGS   = -fno-builtin -fno-exceptions -fno-rtti
 ARCHCXXFLAGS    = -fno-builtin
-ARCHCPUFLAGS    = -fno-builtin -nostdinc -fno-stack-protector 
+ARCHCPUFLAGS    = -fno-builtin -nostdinc -fno-stack-protector
 ARCHPICFLAGS    = -fpic
 ARCHWARNINGS    = -Wall -Wstrict-prototypes -Wshadow
 ARCHWARNINGSXX  = -Wall -Wshadow
@@ -60,7 +60,7 @@ ARCHDEFINES	    = -D__RGMP_KERNEL__ -D__RTOS_KERNEL__ -D__SHARE_KERNEL__
 ARCHINCLUDES    = -I. -isystem $(TOPDIR)/include -I$(RGMPINCDIR) \
                   -I$(TOPDIR)/configs/rgmp/include -I$(TOPDIR)/arch/rgmp/include/x86
 
-ARCHXXDEFINES   = 
+ARCHXXDEFINES   =
 ARCHXXINCLUDES  = -I$(TOPDIR)/include/cxx -isystem $(TOPDIR)/include -I$(RGMPINCDIR) \
                   -I$(TOPDIR)/configs/rgmp/include -I$(TOPDIR)/arch/rgmp/include/x86 \
                   -I$(TOPDIR)/include/uClibc++

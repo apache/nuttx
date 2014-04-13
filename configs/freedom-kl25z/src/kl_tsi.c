@@ -167,7 +167,7 @@ static ssize_t tsi_read(FAR struct file *filep, FAR char *buf, size_t buflen)
 
   regval = TSI_DATA_TSICH(g_chsensor[g_channel]);
   putreg32(regval, KL_TSI_DATA);
-  
+
   regval |= TSI_DATA_SWTS;
   putreg32(regval, KL_TSI_DATA);
 

@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 /* The MKL25Z128 has 128Kb of FLASH beginning at address 0x00000000 and
- * 16Kb of SRAM at address 0x1ffff000. 
+ * 16Kb of SRAM at address 0x1ffff000.
  */
 
 MEMORY

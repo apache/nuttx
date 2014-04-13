@@ -59,7 +59,7 @@ Pin Usage
   (left)
   1  (INT.6/AIN.0) PE6         J3-25 E6, CY7C1019D ^CE (Unpopulated)
   2  (INT.7/AIN.1/UVcon) PE7   J3-26 E7, CY7C1019D A16 (Unpopulated)
-  3  UVcc                      
+  3  UVcc
   4  D-                        USB DP
   5  D+                        USB DM
   6  UGnd                      GND
@@ -138,7 +138,7 @@ Atmel AVRISP mkII Connection
 
   Micropendous 3 JTAG (JTAG10PIN Connector)
   ------------------- ---------------------
-  
+
       1  2                 1  2
   TCK o  o GND         TCK o  o GND
   TDO o  o VCC         TDO o  o VTref
@@ -254,7 +254,7 @@ Windows Native Toolchains
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
   The WinAVR toolchain is a Windows native toolchain. There are several
-  limitations to using a Windows native toolchain in a Cygwin environment. 
+  limitations to using a Windows native toolchain in a Cygwin environment.
   The three biggest are:
 
   1. The Windows toolchain cannot follow Cygwin paths.  Path conversions are
@@ -354,14 +354,14 @@ Build Notes:
   the flowing point library, then you may have to build avr-lib from sources.
   Below are instructions for building avr-lib from fresh sources:
 
-  1. Download the avr-libc package from: 
+  1. Download the avr-libc package from:
 
      http://savannah.nongnu.org/projects/avr-libc/
 
      I am using avr-lib-1.7.1.tar.bz2
 
-  2. Upack the tarball and cd into the 
- 
+  2. Upack the tarball and cd into the
+
      tar jxf avr-lib-1.7.1.tar.bz2
      cd avr-lib-1.7.1
 
@@ -479,7 +479,7 @@ Micropendous3 Configuration Options
       CONFIG_AVR_ANACOMP=n
       CONFIG_AVR_ADC=n
       CONFIG_AVR_TWI=n
- 
+
   If the watchdog is enabled, this specifies the initial timeout.  Default
   is maximum supported value.
 

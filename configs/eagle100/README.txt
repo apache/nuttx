@@ -139,7 +139,7 @@ NXFLAT Toolchain
   tools -- just the NXFLAT tools.  The buildroot with the NXFLAT tools can
   be downloaded from the NuttX SourceForge download site
   (https://sourceforge.net/projects/nuttx/files/).
- 
+
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
@@ -174,7 +174,7 @@ Ethernet-Bootloader
 
   - The board has no fixed IP address but uses DHCP to get an address.
     I used a D-link router; I can use a web browser to surf to the D-link
-    web page to get the address assigned by 
+    web page to get the address assigned by
 
   - Then you can use this IP address in your browser to surf to the Eagle-100
     board.  It presents several interesting pages -- the most important is
@@ -195,7 +195,7 @@ Ethernet-Bootloader
     it is not very informative.  The Eagle100 User's Manual has the best
     information.
 
-  - Are there any special things I have to do in my code, other than setting 
+  - Are there any special things I have to do in my code, other than setting
     the origin to 0x0000:2000 (APP_START_ADDRESS)?  No.  The bootloader assumes
     that you have a vector table at that address .  The bootloader does the
     following each time it boots (after you have downloaded the first valid
@@ -306,7 +306,7 @@ Eagle100-specific Configuration Options
     CONFIG_TIVA_DISABLE_GPIOG_IRQS=n
     CONFIG_TIVA_DISABLE_GPIOH_IRQS=y
     CONFIG_TIVA_DISABLE_GPIOJ_IRQS=y
- 
+
   LM3S6918 specific device driver settings
 
     CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn for the
@@ -368,7 +368,7 @@ Common Configuration Notes
 
      b. Execute 'make menuconfig' in nuttx/ in order to start the
         reconfiguration process.
-   
+
 Configuration Sub-Directories
 -----------------------------
 

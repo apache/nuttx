@@ -141,7 +141,7 @@ FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
   /* Configure the OLED GPIOs. This initial configuration is RESET low,
    * putting the OLED into reset state.
    */
- 
+
   (void)sam_configgpio(GPIO_OLED_RST);
 
   /* Wait a bit then release the OLED from the reset state */

@@ -37,7 +37,7 @@
 
 CFLAGS		+= -I$(TOPDIR)/sched
 
-ASRCS		= 
+ASRCS		=
 CSRCS		= qemu_boot.c
 
 AOBJS		= $(ASRCS:.S=$(OBJEXT))

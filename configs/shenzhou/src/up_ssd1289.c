@@ -36,7 +36,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ************************************************************************************/
- 
+
 /************************************************************************************
  * Included Files
  ************************************************************************************/
@@ -230,9 +230,9 @@ static const uint32_t g_lcdout[16] =
 
 static const uint32_t g_lcdin[16] =
 {
-  GPIO_LCD_D0IN,   GPIO_LCD_D1IN,   GPIO_LCD_D2IN,   GPIO_LCD_D3IN, 
-  GPIO_LCD_D4IN,   GPIO_LCD_D5IN,   GPIO_LCD_D6IN,   GPIO_LCD_D7IN, 
-  GPIO_LCD_D8IN,   GPIO_LCD_D9IN,   GPIO_LCD_D10IN,  GPIO_LCD_D11IN, 
+  GPIO_LCD_D0IN,   GPIO_LCD_D1IN,   GPIO_LCD_D2IN,   GPIO_LCD_D3IN,
+  GPIO_LCD_D4IN,   GPIO_LCD_D5IN,   GPIO_LCD_D6IN,   GPIO_LCD_D7IN,
+  GPIO_LCD_D8IN,   GPIO_LCD_D9IN,   GPIO_LCD_D10IN,  GPIO_LCD_D11IN,
   GPIO_LCD_D12IN,  GPIO_LCD_D13IN,  GPIO_LCD_D14IN,  GPIO_LCD_D15IN
 };
 #endif

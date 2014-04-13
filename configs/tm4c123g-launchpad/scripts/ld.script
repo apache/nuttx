@@ -97,7 +97,7 @@ SECTIONS
 		*(COMMON)
 		_ebss = ABSOLUTE(.);
 	} > sram
- 
+
 	/* Stabs debugging sections. */
 
 	.stab 0 : { *(.stab) }

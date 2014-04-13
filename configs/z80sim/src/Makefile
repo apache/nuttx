@@ -39,7 +39,7 @@ CFLAGS		+= -I$(TOPDIR)$(DELIM)sched
 CFLAGS		+= -I$(TOPDIR)$(DELIM)arch$(DELIM)z80$(DELIM)src$(DELIM)common
 CFLAGS		+= -I$(TOPDIR)$(DELIM)arch$(DELIM)z80$(DELIM)src$(DELIM)z80
 
-ASRCS		= 
+ASRCS		=
 AOBJS		= $(ASRCS:$(ASMEXT)=$(OBJEXT))
 CSRCS		= z80_irq.c z80_serial.c z80_timerisr.c z80_lowputc.c
 COBJS		= $(CSRCS:.c=$(OBJEXT))
