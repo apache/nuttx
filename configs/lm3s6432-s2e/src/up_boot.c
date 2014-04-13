@@ -96,7 +96,7 @@ void tiva_boardinitialize(void)
 #endif
 
   /* Configure serial transciever */
-  
+
   tiva_configgpio(XCVR_INV_GPIO);
   tiva_configgpio(XCVR_ENA_GPIO);
   tiva_configgpio(XCVR_ON_GPIO);

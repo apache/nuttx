@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash
 # mkctags.sh
 #
 #   Copyright (C) 2013 Ken pettit All rights reserved.
@@ -33,7 +33,7 @@
 #
 
 WD=`pwd`
-if [[ "$WD" =~ "nuttx/tools" ]]  
+if [[ "$WD" =~ "nuttx/tools" ]]
 then
 	cd ..
 fi

@@ -84,7 +84,7 @@
 /* PLL0.  PLL0 is used to generate the CPU clock divider input (PLLCLK).
  *
  *  Source clock:               Main oscillator
- *  PLL0 Multiplier value (M):  20 
+ *  PLL0 Multiplier value (M):  20
  *  PLL0 Pre-divider value (N): 1
  *
  *  PLL0CLK = (2 * 20 * SYSCLK) / 1 = 480MHz
@@ -137,7 +137,7 @@
 #define LED_STACKCREATED           3  /* OFF    OFF     */
 
 /* After the system is booted, this logic will no longer use LEDs 1 & 2.  They
- * are available together with LED3 for use the application software using 
+ * are available together with LED3 for use the application software using
  * lpc17_led (prototyped below)
  */
                                       /* LED1   LED2   LED3 LED4 */

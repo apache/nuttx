@@ -39,7 +39,7 @@
 /************************************************************************************
  * Included Files
  ************************************************************************************/
- 
+
 /************************************************************************************
  * Definitions
  ************************************************************************************/
@@ -170,13 +170,13 @@
 
 /* SDRAMC Register Offsets **********************************************************/
 
-#define SDRAMC_SDCTL0_OFFSET    0x0000                
-#define SDRAMC_SDCTL1_OFFSET    0x0004              
+#define SDRAMC_SDCTL0_OFFSET    0x0000
+#define SDRAMC_SDCTL1_OFFSET    0x0004
 
 /* SDRAMC Register Addresses ********************************************************/
 
-#define IMX_SDRAMC_SDCTL0       (IMX_SDRAMC_VBASE + SDRAMC_SDCTL0_OFFSET)                
-#define IMX_SDRAMC_SDCTL1       (IMX_SDRAMC_VBASE + SDRAMC_SDCTL1_OFFSET))             
+#define IMX_SDRAMC_SDCTL0       (IMX_SDRAMC_VBASE + SDRAMC_SDCTL0_OFFSET)
+#define IMX_SDRAMC_SDCTL1       (IMX_SDRAMC_VBASE + SDRAMC_SDCTL1_OFFSET))
 
 /* SDRAMC Register Bit Definitions **************************************************/
 

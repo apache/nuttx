@@ -75,7 +75,7 @@
  ****************************************************************************/
 /* This array maps an LED number to GPIO pin configuration */
 
-static uint32_t g_ledcfg[BOARD_NLEDS] = 
+static uint32_t g_ledcfg[BOARD_NLEDS] =
 {
   GPIO_LED1, GPIO_LED2, GPIO_LED3
 };

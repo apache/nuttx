@@ -67,8 +67,8 @@
 #define _TRS80_M3_PRCHAR	0x003B
 
 /* Call Input a line from the keyboard. B = max length of line. HL points at buffer.
- * Buffer should be the length of B plus 1. To terminate, hit BREAK or ENTER. 
- * On exit, HL points at buffer and B = number of characters entered. 
+ * Buffer should be the length of B plus 1. To terminate, hit BREAK or ENTER.
+ * On exit, HL points at buffer and B = number of characters entered.
  * Carry will be set if BREAK was pressed.
  */
 
@@ -86,13 +86,13 @@
 
 #define _TRS80_M3_RSRCV		0x0050
 
-/* "Transmit character to RS-232. On entry, Accumulator or memory location 16880 
+/* "Transmit character to RS-232. On entry, Accumulator or memory location 16880
  * contains character. On exit, 16880 = 0 if no character sent. Wait status honored."
  */
 
 #define _TRS80_M3_RSTX		0x0055
 
-/* Initialize RS-232 interface. On entry, memory location 16888 = send/receive baud 
+/* Initialize RS-232 interface. On entry, memory location 16888 = send/receive baud
  * rate code, location 16890 = wait/don't wait switch, location 16889 = RS-232
  * characteristics switch. On exit, DE is altered. For more detail, consult Model 3
  * reference manual.
@@ -100,9 +100,9 @@
 
 #define _TRS80_M3_RSINIT	0x005A
 
-/* This is the routine that is Basic's SET, RESET, and POINT functions. Here's how 
- * to use it. Load HL with return address and push. Load register A with one of the 
- * following: 00H = POINT, 01H = RESET, and 80H = SET. Push AF onto stack. Load A with 
+/* This is the routine that is Basic's SET, RESET, and POINT functions. Here's how
+ * to use it. Load HL with return address and push. Load register A with one of the
+ * following: 00H = POINT, 01H = RESET, and 80H = SET. Push AF onto stack. Load A with
  * X coordinate and push onto stack. Load A with Y coordinate and JP GRAPH.
  */
 
@@ -122,7 +122,7 @@
 
 #ifdef TRS80_MODEL1
 
-/* A register contains a 0 or 1 which is the cassette number. This routine defines 
+/* A register contains a 0 or 1 which is the cassette number. This routine defines
  * cassette number and turns on cassette. Model I only.
  */
 
@@ -136,7 +136,7 @@
 
 #define _TRS80_M3_CSIN		0x0235
 
-/* Outputs data one byte at a time to cassette after you use CSHWR. A = the 
+/* Outputs data one byte at a time to cassette after you use CSHWR. A = the
  * output byte.
  */
 
@@ -178,7 +178,7 @@
 
 #define _TRS80_M3_GETDAT 	0x3033
 
-/* "Get time in ASCII format. Mod III TRSDOS, LDOS, & MULTIDOS." */ 
+/* "Get time in ASCII format. Mod III TRSDOS, LDOS, & MULTIDOS." */
 
 #define _TRS80_M3_GETTIM	0x3036
 

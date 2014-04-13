@@ -128,24 +128,24 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
 ==================================================
 
   Downloading OpenOCD
-  
+
     You can get information about OpenOCD here: http://openocd.berlios.de/web/
     and you can download it from here. http://sourceforge.net/projects/openocd/files/.
     To get the latest OpenOCD with more mature lpc214x, you have to download
     from the GIT archive.
-    
+
       git clone git://openocd.git.sourceforge.net/gitroot/openocd/openocd
 
     At present, there is only the older, frozen 0.4.0 version.  These, of course,
     may have changed since I wrote this.
- 
+
   Building OpenOCD under Cygwin:
 
     You can build OpenOCD for Windows using the Cygwin tools.  Below are a
     few notes that worked as of November 7, 2010.  Things may have changed
     by the time you read this, but perhaps the following will be helpful to
     you:
-    
+
     1. Install Cygwin (http://www.cygwin.com/).  My recommendation is to install
        everything.  There are many tools you will need and it is best just to
        waste a little disk space and have everthing you need.  Everything will
@@ -162,23 +162,23 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
        CDM20802 WHQL Certified.zip
        $ mkdir ftd2xx
        $ cd ftd2xx
-       $ unzip ..CDM20802\ WHQL\ Certified.zip 
+       $ unzip ..CDM20802\ WHQL\ Certified.zip
        Archive:  CDM20802 WHQL Certified.zip
        ...
 
     3. Get the latest OpenOCD source
-    
+
        $ pwd
        /home/OpenOCD
        $ git clone git://openocd.git.sourceforge.net/gitroot/openocd/openocd
- 
+
        You will then have the source code in /home/OpenOCD/openocd
 
     4. Build OpenOCD for the FT22322 interface
 
        $ pwd
        /home/OpenOCD/openocd
-       $ ./bootstrap 
+       $ ./bootstrap
 
        Jim is a tiny version of the Tcl scripting language.  It is needed
        by more recent versions of OpenOCD.  Build libjim.a using the following
@@ -214,18 +214,18 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
     I have been using the Olimex ARM-USB-OCD JTAG debugger with the
     ZP213X/4XPA.  OpenOCD requires a configuration file.  I keep the
     one I used last here:
-    
+
       configs/zpa214xpa/tools/olimex.cfg
 
     However, the "correct" configuration script to use with OpenOCD may
     change as the features of OpenOCD evolve.  So you should at least
     compare that olimex.cfg file with configuration files in
     /usr/local/share/openocd/scripts/target (or /home/OpenOCD/openocd/tcl/target).
-    
+
     There is also a script on the tools/ directory that I use to start
     the OpenOCD daemon on my system called oocd.sh.  That script will
     probably require some modifications to work in another environment:
-  
+
     - Possibly the value of OPENOCD_PATH and TARGET_PATH
     - It assumes that the correct script to use is the one at
       configs/zp214xpa/tools/olimex.cfg
@@ -266,11 +266,11 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
     1. Loading the symbol-file is only useful if you have built NuttX to
        include debug symbols (by setting CONFIG_DEBUG_SYMBOLS=y in the
        .config file).
- 
+
     OpenOCD will support several special 'monitor' commands.  These
     GDB commands will send comments to the OpenOCD monitor.  Here
     are a couple that you will need to use:
-  
+
      (gdb) monitor reset
      (gdb) monitor halt
 
@@ -299,7 +299,7 @@ Configurations:
     Configuration enables only the serial NSH interfaces.
 
     NOTES:
- 
+
     1. This configuration uses the mconf-based configuration tool.  To
        change this configuration using that tool, you should:
 

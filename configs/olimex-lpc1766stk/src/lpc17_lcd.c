@@ -159,7 +159,7 @@ void nokia_blinitialize(void)
   putreg32(0, LPC17_PWM1_MR3);
 
   /* Enable PWM1 */
-  
+
   regval |= PWM_LER_M3EN;
   putreg32(regval, LPC17_PWM1_LER);
 
@@ -254,7 +254,7 @@ int nokia_backlight(unsigned int power)
   uint32_t regval;
 
   putreg32(NOKIA_BACKLIGHT_OFF + power, LPC17_PWM1_MR3);
-  
+
   regval  = getreg32(LPC17_PWM1_LER);
   regval |= PWM_LER_M3EN;
   putreg32(regval, LPC17_PWM1_LER);

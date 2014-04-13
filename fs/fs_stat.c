@@ -109,7 +109,7 @@ static inline int statpseudo(FAR struct inode *inode, FAR struct stat *buf)
 static inline int statroot(FAR struct stat *buf)
 {
   /* There is no inode associated with the fake root directory */
-  
+
   memset(buf, 0, sizeof(struct stat) );
   buf->st_mode = S_IFDIR|S_IROTH|S_IRGRP|S_IRUSR;
   return OK;

@@ -117,7 +117,7 @@ ifeq ($(WINTOOL),y)
   DIRUNLINK = $(TOPDIR)$(DELIM)tools$(DELIM)unlink.sh
   MKDEP = $(TOPDIR)$(DELIM)tools$(DELIM)mknulldeps.sh
 else
-  # Linux/Cygwin-native host tools 
+  # Linux/Cygwin-native host tools
   MKDEP = $(TOPDIR)$(DELIM)tools$(DELIM)mkdeps$(HOSTEXEEXT)
 endif
 

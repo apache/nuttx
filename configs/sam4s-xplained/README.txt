@@ -588,7 +588,7 @@ Configuration sub-directories
     1. The configuration configuration can be modified to include support
        for the on-board SRAM (1MB).
 
-       System Type -> External Memory Configuration       
+       System Type -> External Memory Configuration
          CONFIG_SAM34_EXTSRAM0=y              : Select SRAM on CS0
          CONFIG_SAM34_EXTSRAM0SIZE=1048576    : Size=1MB
 
@@ -597,7 +597,7 @@ Configuration sub-directories
        a)  To enable the NuttX RAM test that may be used to verify the
            external SRAM:
 
-           System Type -> External Memory Configuration       
+           System Type -> External Memory Configuration
              CONFIG_SAM34_EXTSRAM0HEAP=n      : Don't add to heap
 
            Application Configuration -> System NSH Add-Ons
@@ -631,7 +631,7 @@ Configuration sub-directories
         b) To add this RAM to the NuttX heap, you would need to change the
            configuration as follows:
 
-           System Type -> External Memory Configuration       
+           System Type -> External Memory Configuration
              CONFIG_SAM34_EXTSRAM0HEAP=y     : Add external RAM to heap
 
            Memory Management

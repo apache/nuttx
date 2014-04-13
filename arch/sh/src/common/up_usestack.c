@@ -104,7 +104,7 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
     }
 
   /* Save the new stack allocation */
- 
+
   tcb->stack_alloc_ptr = stack;
 
   /* The SH family uses a push-down stack:  the stack grows toward lower

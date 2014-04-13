@@ -58,9 +58,9 @@
 enum lpc43_aescmd_e
 {
   AES_API_CMD_ENCODE_ECB = 0,
-  AES_API_CMD_DECODE_ECB = 1, 
-  AES_API_CMD_ENCODE_CBC = 2, 
-  AES_API_CMD_DECODE_CBC = 3 
+  AES_API_CMD_DECODE_ECB = 1,
+  AES_API_CMD_ENCODE_CBC = 2,
+  AES_API_CMD_DECODE_CBC = 3
 };
 
 struct lpc43_aes_s
@@ -89,7 +89,7 @@ struct lpc43_aes_s
   void (*aes_LoadKeySW)(unsigned char *key);
 
   /* Loads 128-bit AES initialization vector (16 bytes) */
- 
+
   void (*aes_LoadIV_SW)(unsigned char *iv);
 
   /* Loads 128-bit AES IC specific initialization vector, which is used to decrypt

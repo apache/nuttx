@@ -120,21 +120,21 @@ Switches and Jumpers
 ^^^^^^^^^^^^^^^^^^^^
 ISP/UART0
   JP1 - DTE/DCE selection
-  JP2 - 
-  JP5 - 
+  JP2 -
+  JP5 -
   J11 - STK500 Enable
 
 ADC
-  JP8 - 
-  JP9 - 
+  JP8 -
+  JP9 -
 
 Networking
-  JP10 - 
+  JP10 -
 
 RS-485
-  J8 - 
-  J9 - 
-  J10 - 
+  J8 -
+  J9 -
+  J10 -
 
 Atmel AVRISP mkII Connection
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -149,7 +149,7 @@ Atmel AVRISP mkII Connection
 
   (ISP10PIN Connector)
   ------------------- -------------------------
-  
+
          1  2
     MOSI o  o Vcc   - ISP-PDI: PE0/PDI/RX0 via 74HC5053
      LED o  o GND   - ISP-PROG: J11/GND, to 74HC5053 and LED
@@ -241,7 +241,7 @@ Windows Native Toolchains
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
   The WinAVR toolchain is a Windows native toolchain. There are several
-  limitations to using a Windows native toolchain in a Cygwin environment. 
+  limitations to using a Windows native toolchain in a Cygwin environment.
   The three biggest are:
 
   1. The Windows toolchain cannot follow Cygwin paths.  Path conversions are
@@ -341,14 +341,14 @@ Build Notes:
   the flowing point library, then you may have to build avr-lib from sources.
   Below are instructions for building avr-lib from fresh sources:
 
-  1. Download the avr-libc package from: 
+  1. Download the avr-libc package from:
 
      http://savannah.nongnu.org/projects/avr-libc/
 
      I am using avr-lib-1.7.1.tar.bz2
 
-  2. Upack the tarball and cd into the 
- 
+  2. Upack the tarball and cd into the
+
      tar jxf avr-lib-1.7.1.tar.bz2
      cd avr-lib-1.7.1
 

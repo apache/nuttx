@@ -1847,7 +1847,7 @@ bad:
         {
           kfree(nmp->nm_rpcclnt);
         }
-        
+
       kfree(nmp);
     }
 

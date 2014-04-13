@@ -49,7 +49,7 @@ STACKSIZE	= 4096
 
 CFLAGS		+= -I$(TOPDIR)/sched
 
-ASRCS		= 
+ASRCS		=
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
 CSRCS		= sysclock.c boot.c leds.c buttons.c spi.c \

@@ -51,12 +51,12 @@
 /************************************************************************************
  * PIN Definitions
  ************************************************************************************/
- 
+
  /* Board Peripheral Assignment
- * 
+ *
  * RS232/Power connector:
  *  - USART1, is the default bootloader and console
- * 
+ *
  * Sensor Connector:
  *  Digital:
  *  - GPIOs: PB10, PB11 (or even TIM2 CH3 and CH4)
@@ -70,14 +70,14 @@
  *  - Filtered Out (TIM3_CH4)
  *    (TIM8 could run at lower frequency, while TIM3 must run at highest possible)
  *  - Gain selection muxed with SDcard I/Os.
- * 
+ *
  * Radio connector:
  *  - UART3 / UART4
  *  - SPI2
  *  - I2C1 (remapped pins vs. Expansion connector)
  *  - CAN
  *  - TIM4 CH[3:4]
- * 
+ *
  * Expansion connector:
  *  - WakeUp Pin
  *  - System Wide Reset
@@ -88,7 +88,7 @@
  *  - ADC2 on pins [0:7]
  *  - TIM2 Channels [1:4]
  *  - TIM5 Channels [1:4]
- * 
+ *
  * Onboard Components:
  *  - SPI3 has direct connection with FRAM
  *  - SDCard, conencts the microSD and shares the control lines with Sensor Interface
@@ -100,7 +100,7 @@
 /* LED */
 
 #define GPIO_LED		(GPIO_OUTPUT|GPIO_CNF_OUTPP    |GPIO_MODE_2MHz |GPIO_PORTB|GPIO_PIN2 |GPIO_OUTPUT_CLEAR)
-                         
+
 /* BUTTON - Note that after a good second button causes hardware reset */
 
 #define GPIO_PUSHBUTTON	(GPIO_INPUT |GPIO_CNF_INFLOAT  |GPIO_MODE_INPUT|GPIO_PORTC|GPIO_PIN5 )
@@ -148,7 +148,7 @@
 #define GPIO_OUT_HIGH	(GPIO_OUTPUT|GPIO_CNF_OUTPP    |GPIO_MODE_2MHz |GPIO_PORTB|GPIO_PIN1 |GPIO_OUTPUT_SET)
 #define GPIO_OUT_AIN	(GPIO_INPUT |GPIO_CNF_ANALOGIN |GPIO_MODE_INPUT|GPIO_PORTB|GPIO_PIN1 )
 #define GPIO_OUT_PWM	(GPIO_ALT   |GPIO_CNF_AFPP     |GPIO_MODE_10MHz|GPIO_PORTB|GPIO_PIN1 )
-#define GPIO_OUT_PWM_TIM3_CH        4   /* TIM3.CH4 */ 
+#define GPIO_OUT_PWM_TIM3_CH        4   /* TIM3.CH4 */
 
 #define GPIO_PGIA_A0_H  (GPIO_OUTPUT|GPIO_CNF_OUTPP    |GPIO_MODE_2MHz |GPIO_PORTC|GPIO_PIN8 |GPIO_OUTPUT_SET)
 #define GPIO_PGIA_A0_L  (GPIO_OUTPUT|GPIO_CNF_OUTPP    |GPIO_MODE_2MHz |GPIO_PORTC|GPIO_PIN8 |GPIO_OUTPUT_CLEAR)

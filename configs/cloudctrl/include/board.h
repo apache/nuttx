@@ -112,7 +112,7 @@
 
 /* MCO output driven by PLL3. From above, we already have PLL3 input frequency as:
  *
- *  STM32_PLL_PREDIV2 = 5, 25MHz / 5 => 5MHz 
+ *  STM32_PLL_PREDIV2 = 5, 25MHz / 5 => 5MHz
  */
 
 #if defined(CONFIG_STM32_MII_MCO) || defined(CONFIG_STM32_RMII_MCO)
@@ -160,7 +160,7 @@
 #define BUTTON_KEY2         1
 #define BUTTON_KEY3         2
 #define NUM_BUTTONS         3
- 
+
 #define BUTTON_USERKEY      BUTTON_KEY1 /* Names in schematic */
 #define BUTTON_TAMPER       BUTTON_KEY2
 #define BUTTON_WAKEUP       BUTTON_KEY3
@@ -196,7 +196,7 @@
  * 56 PD9  MII_RXD0       Ethernet PHY.  Requires CONFIG_STM32_ETH_REMAP
  * 57 PD10 MII_RXD1       Ethernet PHY.  Requires CONFIG_STM32_ETH_REMAP
  *
- * The board desdign can support a 50MHz external clock to drive the PHY 
+ * The board desdign can support a 50MHz external clock to drive the PHY
  * (U9).  However, on my board, U9 is not present.
  *
  * 67 PA8  MCO            DM9161AEP

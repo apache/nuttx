@@ -11,14 +11,14 @@ NuttX
 
 License for NuttX in general (authorship of individual files may vary):
 /*************************************************************************
- * 
+ *
  *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions 
+ * modification, are permitted provided that the following conditions
  * are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
@@ -32,13 +32,13 @@ License for NuttX in general (authorship of individual files may vary):
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE 
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
  * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
  * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
  * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
  * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
  * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
@@ -66,7 +66,7 @@ FAT Long File Names
      o "U.S. Patent 6,286,013 (http://www.google.com/patents?vid=6286013) -
         Method and system for providing a common name space for long and
         short file names in an operating system. ...
- 
+
     "Many technical commentators have concluded that these patents only cover
      FAT implementations that include support for long filenames, and that
      removable solid state media and consumer devices only using short names
@@ -74,7 +74,7 @@ FAT Long File Names
 
   This Wikipedia entry has been updated with recent legal decisions in favor
   of Microsoft. Refer to:
-  
+
     http://en.wikipedia.org/wiki/File_Allocation_Table#Legal_issues
 
   So you have been forewarned:  Use the long filename at your own risk!
@@ -129,7 +129,7 @@ fs/nfs:
 ^^^^^^^
 
    NFS:
- 
+
      Copyright (c) 1989, 1991, 1993, 1995 The Regents of the University of
        California.  All rights reserved.
 
@@ -178,20 +178,20 @@ libc/string/lib_vikmemcpy.c
   Permission is granted to anyone to use this software for any
   purpose, including commercial applications, and to alter it and
   redistribute it freely, subject to the following restrictions:
- 
+
   1. The origin of this software must not be misrepresented; you
      must not claim that you wrote the original software. If you
      use this software in a product, an acknowledgment in the
      use this software in a product, an acknowledgment in the
      product documentation would be appreciated but is not
      required.
- 
+
   2. Altered source versions must be plainly marked as such, and
      must not be misrepresented as being the original software.
- 
+
   3. This notice may not be removed or altered from any source
      distribution.
- 
+
 libc/math
 ^^^^^^^^^
 
@@ -202,11 +202,11 @@ libc/math
   compatible MIT license:
 
     Copyright (C) 2009-2011 Nick Johnson <nickbjohnson4224 at gmail.com>
-  
+
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
   copyright notice and this permission notice appear in all copies.
- 
+
   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
   WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
   MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR

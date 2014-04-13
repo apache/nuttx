@@ -134,7 +134,7 @@
 #define ACC_WPMR_WPKEY_SHIFT       (8)       /* Bits 8-31: Write Protect KEY */
 #define ACC_WPMR_WPKEY_MASK        (0x00ffffff << ACC_WPMR_WPKEY_SHIFT)
 #  define ACC_WPMR_WPKEY           (0x00414343 << ACC_WPMR_WPKEY_SHIFT)
- 
+
 /* Write Protect Status Register */
 
 #define ACC_WPSR_WPROTERR          (1 << 0)  /* Bit 0:  Write protection error */

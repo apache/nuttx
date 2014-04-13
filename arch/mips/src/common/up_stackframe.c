@@ -51,7 +51,7 @@
 /****************************************************************************
  * Pre-processor Macros
  ****************************************************************************/
-/* MIPS requires at least a 4-byte stack alignment.  For floating point use, 
+/* MIPS requires at least a 4-byte stack alignment.  For floating point use,
  * however, the stack must be aligned to 8-byte addresses.
  */
 
@@ -118,7 +118,7 @@ FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size)
   /* Align the frame_size */
 
   frame_size = STACK_ALIGN_UP(frame_size);
-  
+
   /* Is there already a stack allocated? Is it big enough? */
 
   if (!tcb->stack_alloc_ptr || tcb->adj_stack_size <= frame_size)

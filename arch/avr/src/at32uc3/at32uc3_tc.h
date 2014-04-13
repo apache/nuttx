@@ -355,7 +355,7 @@
 #  define TC_BMR_TC2XC2S_NONE     (1 << TC_BMR_TC2XC2S_SHIFT) /* None */
 #  define TC_BMR_TC2XC2S_TIOA0    (2 << TC_BMR_TC2XC2S_SHIFT) /* TIOA0 */
 #  define TC_BMR_TC2XC2S_TIOA1    (3 << TC_BMR_TC2XC2S_SHIFT) /* TIOA1 */
-				 
+				
 /************************************************************************************
  * Public Types
  ************************************************************************************/

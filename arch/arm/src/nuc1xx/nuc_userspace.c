@@ -97,7 +97,7 @@ void nuc_userspace(void)
   /* Initialize all of user-space .data */
 
   DEBUGASSERT(USERSPACE->us_datasource != 0 &&
-              USERSPACE->us_datastart != 0 && USERSPACE->us_dataend != 0 && 
+              USERSPACE->us_datastart != 0 && USERSPACE->us_dataend != 0 &&
               USERSPACE->us_datastart <= USERSPACE->us_dataend);
 
   src  = (uint8_t*)USERSPACE->us_datasource;

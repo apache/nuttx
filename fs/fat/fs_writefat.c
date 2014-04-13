@@ -115,12 +115,12 @@ static inline void mkfatfs_initmbr(FAR struct fat_format_s *fmt,
       MBR_PUTTOTSEC16(var->fv_sect, (uint16_t)fmt->ff_nsectors);
     }
 
-  /* 1@21: Media code: f0, f8, f9-fa, fc-ff */ 
+  /* 1@21: Media code: f0, f8, f9-fa, fc-ff */
 
   MBR_PUTMEDIA(var->fv_sect, FAT_DEFAULT_MEDIA_TYPE); /* Only "hard drive" supported */
-  
+
   /* 2@22: FAT12/16: Must be 0, see BS32_FATSZ32  -- handled in FAT specific logic */
- 
+
   /* 2@24: Sectors per track geometry value and 2@26: Number of heads geometry value */
 
   MBR_PUTSECPERTRK(var->fv_sect, FAT_DEFAULT_SECPERTRK);
@@ -177,7 +177,7 @@ static inline void mkfatfs_initmbr(FAR struct fat_format_s *fmt,
 
       MBR_PUTFATSZ32(var->fv_sect, var->fv_nfatsects);
 
-      /* 2@40: 0-3:Active FAT, 7=0 both FATS, 7=1 one FAT -- left zero*/ 
+      /* 2@40: 0-3:Active FAT, 7=0 both FATS, 7=1 one FAT -- left zero*/
       /* 2@42: MSB:Major LSB:Minor revision number (0.0) -- left zero */
       /* 4@44: Cluster no. of 1st cluster of root dir */
 
@@ -195,7 +195,7 @@ static inline void mkfatfs_initmbr(FAR struct fat_format_s *fmt,
       /*  1@64: Drive number for MSDOS bootstrap -- left zero */
       /*  1@65: Reserved (zero) */
       /*  1@66: Extended boot signature: 0x29 if following valid */
- 
+
       MBR_PUTBOOTSIG32(var->fv_sect, EXTBOOT_SIGNATURE);
 
       /* 4@67: Volume serial number */
@@ -286,7 +286,7 @@ static inline void mkfatfs_initrootdir(FAR struct fat_format_s *fmt,
   if (sectno == 0)
     {
       /* It is only necessary to set data in the first sector of the directory */
-      
+
       if (memcmp(fmt->ff_volumelabel, "           ", 11))
         {
           memcpy(&var->fv_sect[DIR_NAME], fmt->ff_volumelabel, 11);
@@ -337,7 +337,7 @@ static inline int mkfatfs_writembr(FAR struct fat_format_s *fmt,
     {
       ret = DEV_WRITE(var->fv_sect, sectno, 1);
     }
- 
+
   /* Write FAT32-specific sectors */
 
   if (ret >= 0 && fmt->ff_fattype == 32)

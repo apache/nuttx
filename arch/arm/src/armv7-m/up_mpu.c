@@ -67,7 +67,7 @@
  * all subregions are available (0x00).
  */
 
-static const uint8_t g_ms_regionmask[9] = 
+static const uint8_t g_ms_regionmask[9] =
 {
   0xff, 0xfe, 0xfc, 0xf8, 0xf0, 0xe0, 0xc0, 0x80, 0x00
 };
@@ -77,7 +77,7 @@ static const uint8_t g_ms_regionmask[9] =
  * and 8 means all subregions must be disabled (0xff).
  */
 
-static const uint8_t g_ls_regionmask[9] = 
+static const uint8_t g_ls_regionmask[9] =
 {
   0x00, 0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f, 0xff
 };

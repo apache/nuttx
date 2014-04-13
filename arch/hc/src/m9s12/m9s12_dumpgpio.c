@@ -143,7 +143,7 @@ static const struct gpio_mebiinfo_s mebiinfo[HCS12_MEBI_NPORTS] =
  {HCS12_MEBI_PORTE, HCS12_MEBI_DDRE, 'E', MEBIPORT_E},  /* Port E */
  {HCS12_MEBI_PORTK, HCS12_MEBI_DDRK, 'K', MEBIPORT_K}   /* Port K */
 };
- 
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -223,7 +223,7 @@ static inline void hcs12_mebidump(uint8_t portndx)
       lldbg("  Illegal MEBI port index: %d\n", portndx);
       return;
     }
-    
+
   ptr = &mebiinfo[portndx];
   lldbg(" MEBI Port%c:\n", ptr->name);
 

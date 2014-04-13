@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_Z16_INCLUDE_LIMITS_H 
-#define __ARCH_Z16_INCLUDE_LIMITS_H 
+#ifndef __ARCH_Z16_INCLUDE_LIMITS_H
+#define __ARCH_Z16_INCLUDE_LIMITS_H
 
 /****************************************************************************
  * Included Files

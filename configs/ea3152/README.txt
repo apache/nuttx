@@ -92,7 +92,7 @@ GNU Toolchain Options
   NOTE 2: The devkitARM toolchain includes a version of MSYS make.  Make sure that
   the paths to Cygwin's /bin and /usr/bin directories appear BEFORE the devkitARM
   path or will get the wrong version of make.
- 
+
   Generic arm-none-eabi GNU Toolchain
   -----------------------------------
   There are a number of toolchain projects providing support for ARMv4/v5
@@ -219,7 +219,7 @@ Image Format
   - mklpc.sh                      # Make the bootloader binary (nuttx.lpc)
 
   NOTES:
-  
+
     1. setenv.sh just sets up pathes to the toolchain and also to
        configs/ea3152/tools where mklpc.sh resides. Use of setenv.sh is optional.
        If you don't use setenv.sh, then just set your PATH variable appropriately or
@@ -265,7 +265,7 @@ Using OpenOCD and GDB
   I used to start the OpenOCD daemon on my system called oocd.sh.  That
   script would probably require some modifications to work in another
   environment:
-  
+
     - possibly the value of OPENOCD_PATH
     - If you are working under Linux you will need to change any
       occurances of `cygpath -w blablabla` to just blablabla

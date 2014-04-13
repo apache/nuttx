@@ -113,7 +113,7 @@ int nxflat_init(const char *filename, struct nxflat_loadinfo_s *loadinfo)
     {
       int errval = errno;
       bdbg("Failed to open NXFLAT binary %s: %d\n", filename, errval);
-      return -errval;      
+      return -errval;
     }
 
   /* Read the NXFLAT header from offset 0 */
@@ -143,7 +143,7 @@ int nxflat_init(const char *filename, struct nxflat_loadinfo_s *loadinfo)
       return -ENOEXEC;
     }
 
-  /* Save all of the input values in the loadinfo structure 
+  /* Save all of the input values in the loadinfo structure
    * and extract some additional information from the xflat
    * header.  Note that the information in the xflat header is in
    * network order.

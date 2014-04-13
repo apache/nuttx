@@ -126,7 +126,7 @@ Other Versions
 
   If you use any version of ZDS-II other than 5.0.1 or if you install ZDS-II
   at any location other than the default location, you will have to modify
-  two files:  (1) configs/16z/*/setenv.sh and (2) configs/16z/*/Make.defs. 
+  two files:  (1) configs/16z/*/setenv.sh and (2) configs/16z/*/Make.defs.
   Simply edit these two files, changing 5.0.1 to whatever.
 
 Patches

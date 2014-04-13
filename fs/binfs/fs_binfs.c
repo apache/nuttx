@@ -210,7 +210,7 @@ static int binfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   if (cmd == FIOC_FILENAME)
     {
-      /* IN:  FAR char const ** pointer 
+      /* IN:  FAR char const ** pointer
        * OUT: Pointer to a persistent file name (Guaranteed to persist while
        *      the file is open).
        */

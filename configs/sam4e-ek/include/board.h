@@ -190,7 +190,7 @@
  *  4   86 MHz   96 MHz   88 MHz  107 MHz
  *  5  100 MHz  104 MHz  106 MHz  129 MHz
  *  6                    124 MHz
- 
+
  * (1) VDDCORE set at 1.08V and VDDIO 1.62V to 3.6V @105C
  * (2) VDDCORE set at 1.08V and VDDIO 2.7V to 3.6V @105C
  * (3) VDDCORE set at 1.20V and VDDIO 1.62V to 3.6V @ 105C

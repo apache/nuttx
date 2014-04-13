@@ -157,7 +157,7 @@ int main(int argc, char **argv, char **envp)
   if (optind >= argc)
     {
        fprintf(stderr, "Missing <cvs-file> and <symtab-file>\n");
-       show_usage(argv[0]);          
+       show_usage(argv[0]);
     }
 
   csvpath = argv[optind];
@@ -166,7 +166,7 @@ int main(int argc, char **argv, char **envp)
   if (optind >= argc)
     {
        fprintf(stderr, "Missing <symtab-file>\n");
-       show_usage(argv[0]);      
+       show_usage(argv[0]);
     }
 
   symtab = argv[optind];
@@ -175,8 +175,8 @@ int main(int argc, char **argv, char **envp)
   if (optind < argc)
     {
        fprintf(stderr, "Unexpected garbage at the end of the line\n");
-       show_usage(argv[0]);      
-    }    
+       show_usage(argv[0]);
+    }
 
   /* Open the CSV file for reading */
 

@@ -96,15 +96,15 @@
 
 #if defined(CONFIG_PAGING_M25PX) && defined(CONFIG_PAGING_AT45DB)
 #  error "Both CONFIG_PAGING_M25PX and CONFIG_PAGING_AT45DB are defined"
-#  undef CONFIG_PAGING_M25PX 
+#  undef CONFIG_PAGING_M25PX
 #endif
 #if defined(CONFIG_PAGING_BINPATH) && defined(CONFIG_PAGING_M25PX)
 #  error "Both CONFIG_PAGING_BINPATH and CONFIG_PAGING_M25PX are defined"
-#  undef CONFIG_PAGING_BINPATH 
+#  undef CONFIG_PAGING_BINPATH
 #endif
 #if defined(CONFIG_PAGING_BINPATH) && defined(CONFIG_PAGING_AT45DB)
 #  error "Both CONFIG_PAGING_BINPATH and CONFIG_PAGING_AT45DB are defined"
-#  undef CONFIG_PAGING_BINPATH 
+#  undef CONFIG_PAGING_BINPATH
 #endif
 
 /* Are we accessing the page source data through a file path? */
@@ -260,7 +260,7 @@ static inline void lpc31_initsrc(void)
 
       ret = mmcsd_slotinitialize(CONFIG_EA3152_PAGING_MINOR, sdio);
       DEBUGASSERT(ret == OK);
-  
+
       /* Then let's guess and say that there is a card in the slot.
        * (We are basically jodido anyway if there is no card in the slot).
        */
@@ -427,7 +427,7 @@ int up_fillpage(FAR struct tcb_s *tcb, FAR void *vpage)
 
   lpc31_initsrc();
 
-  /* Create an offset into the binary image that corresponds to the 
+  /* Create an offset into the binary image that corresponds to the
    * virtual address.   File offset 0 corresponds to PG_LOCKED_VBASE.
    */
 
@@ -437,7 +437,7 @@ int up_fillpage(FAR struct tcb_s *tcb, FAR void *vpage)
 
   pos = lseek(g_pgsrc.fd, offset, SEEK_SET);
   DEBUGASSERT(pos != (off_t)-1);
-  
+
   /* And read the page data from that offset */
 
   nbytes = read(g_pgsrc.fd, vpage, PAGESIZE);
@@ -450,7 +450,7 @@ int up_fillpage(FAR struct tcb_s *tcb, FAR void *vpage)
 
   lpc31_initsrc();
 
-  /* Create an offset into the binary image that corresponds to the 
+  /* Create an offset into the binary image that corresponds to the
    * virtual address.   File offset 0 corresponds to PG_LOCKED_VBASE.
    */
 

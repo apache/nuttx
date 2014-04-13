@@ -88,7 +88,7 @@ static void up_idlepm(void)
   enum pm_state_e newstate;
   irqstate_t flags;
   int ret;
-  
+
   /* Decide, which power saving level can be obtained */
 
   newstate = pm_checkstate();
@@ -192,7 +192,7 @@ void up_idle(void)
    *    perform any AHB master accesses during sleep mode."
    *
    *  Workaround
-   *    Enable DMA1 or DMA2 clocks in the RCC_AHBENR register before 
+   *    Enable DMA1 or DMA2 clocks in the RCC_AHBENR register before
    *    executing the WFI/WFE instruction."
    *
    * Here the workaround is just to avoid SLEEP mode for the connectivity

@@ -45,12 +45,12 @@
 
 static inline void up_mdelay(uint32_t msec)
 {
-    
+
 }
 
 static inline void up_udelay(uint32_t usec)
 {
-    
+
 }
 
 #endif /* !__ASSEMBLY__ */

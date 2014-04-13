@@ -177,8 +177,8 @@ static inline void sam_configinput(uintptr_t base, port_pinset_t pinset)
         break;
     }
 
-  /* Configure the pin as an input */ 
- 
+  /* Configure the pin as an input */
+
   putreg32(regval, base + SAM_PORT_WRCONFIG_OFFSET);
 }
 
@@ -281,8 +281,8 @@ static inline void sam_configoutput(uintptr_t base, port_pinset_t pinset)
       regval |= PORT_WRCONFIG_DRVSTR;
     }
 
-  /* Configure the pin as an output */ 
- 
+  /* Configure the pin as an output */
+
   putreg32(regval, base + SAM_PORT_WRCONFIG_OFFSET);
 }
 
@@ -356,8 +356,8 @@ static inline void sam_configperiph(uintptr_t base, port_pinset_t pinset)
         break;
     }
 
-  /* Configure the pin for the peripheral function */ 
- 
+  /* Configure the pin for the peripheral function */
+
   putreg32(regval, base + SAM_PORT_WRCONFIG_OFFSET);
 }
 
@@ -410,7 +410,7 @@ static inline void sam_configreset(uintptr_t base, port_pinset_t pinset)
   /* Disable the peripheral multiplexor, disable the input, disable
    * pull-up/down, reset driver strength, etc.
    */
- 
+
   putreg32(regval, base + SAM_PORT_WRCONFIG_OFFSET);
 }
 

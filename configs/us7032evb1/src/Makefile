@@ -38,7 +38,7 @@
 ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
 CFLAGS		+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(TOPDIR)/sched
 
-ASRCS		= 
+ASRCS		=
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 CSRCS		= up_leds.c
 COBJS		= $(CSRCS:.c=$(OBJEXT))

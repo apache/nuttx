@@ -228,7 +228,7 @@
  *  - Save FLG register
  *  - Clear I, D, and U flags in FLG register
  *  - Builds stack frame like (on the push-down, interrupt stack):
- * 
+ *
  *    sp   -> PC bits 0-7
  *    sp+1 -> PC bits 8-15
  *    sp+2 -> FLG bits 0-7
@@ -245,7 +245,7 @@
  	m16c_vector	_m16c_unexpected_isr, NR_IRQS
 
  /* Variable vectors */
- 
+
 	m16c_vector	_m16c_brk_isr, M16C_BRK_IRQ
 	m16c_vector	_m16c_int3_isr, M16C_INT3_IRQ
 	m16c_vector	_m16c_int5_isr, M16C_INT5_IRQ
@@ -372,11 +372,11 @@ _m16c_commonvector:
  *
  * Of the ISP to the end of the context array:
  */
- 
+
  	ldc	r0, isp				/* ISP = address of base of new context info */
- 
+
  /* Restore the user stack pointer */
- 
+
  	pop.w	r0				/* R0 = saved user stack pointer */
 	fset	u				/* Switch to User stack */
 	ldc	r0, sp				/* Restore the user stack pointer */
@@ -416,7 +416,7 @@ _up_saveusercontext:
  *  - Save FLG register
  *  - Clear I, D, and U flags in FLG register
  *  - Builds stack frame like (on the push-down, interrupt stack):
- * 
+ *
  *    sp   -> PC bits 0-7
  *    sp+1 -> PC bits 8-15
  *    sp+2 -> FLG bits 0-7
@@ -482,7 +482,7 @@ _up_fullcontextrestore:
  *  - Save FLG register
  *  - Clear I and D flags in FLG register (U is preserved)
  *  - Builds stack frame like (on the push-down, interrupt stack):
- * 
+ *
  *    sp   -> PC bits 0-7
  *    sp+1 -> PC bits 8-15
  *    sp+2 -> FLG bits 0-7
@@ -497,9 +497,9 @@ _m16c_contextrestore:
 /* Set the USP to the beginning of the context save area */
 
  	ldc	r1, sp				/* USP = address of base of new context info */
- 
+
  /* Restore the user stack pointer */
- 
+
  	fset	b				/* Switch to bank 1 */
  	pop.w	r0				/* R0 = saved user stack pointer */
 	fclr	b				/* Back to bank 0 */

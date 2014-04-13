@@ -192,7 +192,7 @@ if [ "X${winpaths}" = "Xy" ]; then
     	show_usage
     	exit 1
     fi
- 
+
     # Get the top dir expressed like the Windows GCC would use it, except
     # with forward slashs
 

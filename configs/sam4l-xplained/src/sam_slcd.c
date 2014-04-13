@@ -1239,7 +1239,7 @@ int sam_slcd_initialize(void)
        * Number of segments (NSU): Controlled by board setting
        */
 
-      regval = 
+      regval =
 #ifdef BOARD_XBIAS
                LCDCA_CFG_XBIAS |
 #endif

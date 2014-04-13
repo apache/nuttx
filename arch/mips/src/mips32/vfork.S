@@ -64,7 +64,7 @@
  *   undefined if the process created by vfork() either modifies any data other than
  *   a variable of type pid_t used to store the return value from vfork(), or returns
  *   from the function in which vfork() was called, or calls any other function before
- *   successfully calling _exit() or one of the exec family of functions. 
+ *   successfully calling _exit() or one of the exec family of functions.
  *
  *   This thin layer implements vfork by simply calling up_vfork() with the vfork()
  *   context as an argument.  The overall sequence is:
@@ -93,7 +93,7 @@
  *   Upon successful completion, vfork() returns 0 to the child process and returns
  *   the process ID of the child process to the parent process. Otherwise, -1 is
  *   returned to the parent, no child process is created, and errno is set to
- *   indicate the error. 
+ *   indicate the error.
  *
  ************************************************************************************/
 

@@ -176,7 +176,7 @@ FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size)
   /* Align the frame_size */
 
   frame_size = (frame_size + 3) & ~3;
-  
+
   /* Is there already a stack allocated? Is it big enough? */
 
   if (!tcb->stack_alloc_ptr || tcb->adj_stack_size <= frame_size) {
@@ -280,7 +280,7 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
             }
             // If there are any pending tasks, then add them to the g_readytorun
             // task list now. It should be the up_realease_pending() called from
-            // sched_unlock() to do this for disable preemption. But it block 
+            // sched_unlock() to do this for disable preemption. But it block
             // itself, so it's OK.
             if (g_pendingtasks.head) {
                 warn("Disable preemption failed for task block itself\n");
@@ -328,7 +328,7 @@ void up_unblock_task(struct tcb_s *tcb)
 #if CONFIG_RR_INTERVAL > 0
         tcb->timeslice = CONFIG_RR_INTERVAL / MSEC_PER_TICK;
 #endif
-    
+
         // Add the task in the correct location in the prioritized
         // g_readytorun task list.
         if (sched_addreadytorun(tcb) && !up_interrupt_context()) {
@@ -402,7 +402,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
             struct tcb_s *nexttcb;
             // If there are any pending tasks, then add them to the g_readytorun
             // task list now. It should be the up_realease_pending() called from
-            // sched_unlock() to do this for disable preemption. But it block 
+            // sched_unlock() to do this for disable preemption. But it block
             // itself, so it's OK.
             if (g_pendingtasks.head) {
                 warn("Disable preemption failed for reprioritize task\n");
@@ -439,7 +439,7 @@ void up_assert(const uint8_t *filename, int line)
 {
     fprintf(stderr, "Assertion failed at file:%s line: %d\n", filename, line);
 
-    // in interrupt context or idle task means kernel error 
+    // in interrupt context or idle task means kernel error
     // which will stop the OS
     // if in user space just terminate the task
     if (up_interrupt_context() || current_task->pid == 0) {
@@ -523,7 +523,7 @@ int up_prioritize_irq(int irq, int priority)
 void up_sigdeliver(struct Trapframe *tf)
 {
     sig_deliver_t sigdeliver;
-    
+
     pop_xcptcontext(&current_task->xcp);
     sigdeliver = current_task->xcp.sigdeliver;
     current_task->xcp.sigdeliver = NULL;

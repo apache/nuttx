@@ -77,7 +77,7 @@
  *
  * Description:
  *   Used by a thread or interrupt handler that manages some kind of keypad
- *   hardware to report text information to the NX server. 
+ *   hardware to report text information to the NX server.
  *
  ****************************************************************************/
 

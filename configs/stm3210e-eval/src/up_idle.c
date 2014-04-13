@@ -260,7 +260,7 @@ static void up_idlepm(void)
    * Logically, this code belongs at the end of the PM_STANDBY case below,
    * does not work in the position for some unkown reason.
    */
- 
+
   if (oldstate == PM_STANDBY)
     {
       /* Were we awakened by the alarm? */

@@ -94,7 +94,7 @@ void weak_function pic32mx_usbdevinitialize(void)
 
 #ifdef CONFIG_USBHOST
 #endif
-    
+
   /* "If the host PC sends a GetStatus (device) request, the firmware must respond
    *  and let the host know if the USB peripheral device is currently bus powered
    *  or self powered.  See chapter 9 in the official USB specifications for details

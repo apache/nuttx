@@ -86,7 +86,7 @@ int elf_unload(struct elf_loadinfo_s *loadinfo)
   /* Release memory holding the relocated ELF image */
 
   elf_addrenv_free(loadinfo);
- 
+
    /* Release memory used to hold static constructors and destructors */
 
 #ifdef CONFIG_BINFMT_CONSTRUCTORS

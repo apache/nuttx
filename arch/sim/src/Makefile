@@ -111,7 +111,7 @@ STDLIBS += -lc
 
 # Determine which objects are required in the link.  The
 # up_head object normally draws in all that is needed, but
-# there are a fews that must be included because they 
+# there are a fews that must be included because they
 # are called only from the host OS-specific logic (HOSTOBJS)
 
 LINKOBJS = up_head$(OBJEXT)
@@ -132,7 +132,7 @@ RELPATHS += -L"$(TOPDIR)/lib"
 
 # Add the board-specific library and directory
 
-LIBPATHS += -L board 
+LIBPATHS += -L board
 RELPATHS += -L board
 RELLIBS += -lboard
 
@@ -207,7 +207,7 @@ export_head: board/libboard$(LIBEXT) up_head.o $(HOSTOBJS)
 
 depend: .depend
 
-cleanrel: 
+cleanrel:
 	$(Q) rm -f nuttx.rel GNU/Linux-names.dat Cygwin-names.dat
 
 clean: cleanrel

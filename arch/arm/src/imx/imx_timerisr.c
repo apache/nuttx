@@ -135,7 +135,7 @@ void up_timerinit(void)
   /* The timer is driven by PERCLK1.  Set prescaler for division by one
    * so that the clock is driven at PERCLK1.
    *
-   * putreg(0, IMX_TIMER1_TPRER); -- already the case 
+   * putreg(0, IMX_TIMER1_TPRER); -- already the case
    *
    * Set the compare register so that the COMP interrupt is generated
    * with a period of MSEC_PER_TICK.  The value IMX_PERCLK1_FREQ/1000

@@ -160,7 +160,7 @@ static void i2c_semtake(void)
 
 static void i2c_waittxempty(void)
 {
-  int i;  
+  int i;
   for (i = 0; i < 10000 && (I2CSTAT & I2C_STAT_TDRE) == 0;  i++);
 }
 
@@ -178,7 +178,7 @@ static void i2c_waittxempty(void)
  *
  ****************************************************************************/
 
-static void i2c_waitrxavail(void)  
+static void i2c_waitrxavail(void)
 {
   int i;
   for (i = 0; i <= 10000 && (I2CSTAT & (I2C_STAT_RDRF | I2C_STAT_NCKI)) == 0; i++);
@@ -365,7 +365,7 @@ static int i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int bufle
 
       I2CD    = I2C_WRITEADDR8(priv->addr);
       I2CCTL |= I2C_CTL_START;
- 
+
       /* Wait for the xmt buffer to become empty */
 
       i2c_waittxempty();
@@ -385,7 +385,7 @@ static int i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int bufle
            * the last bit.. Hmmm.  If this true then we will never be
            * able to send more than one data byte???
            */
- 
+
           if (count == 1)
             {
               I2CCTL |= I2C_CTL_STOP;
@@ -470,7 +470,7 @@ static int i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
 
   /* Retry as necessary to receive the whole message */
 
-  for (retry = 0; retry < 100; retry++)    
+  for (retry = 0; retry < 100; retry++)
     {
       /* Load the address into the transmit register.  It is not sent
        * until the START bit is set.
@@ -481,7 +481,7 @@ static int i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
       /* If we want only a single byte of data, then set the NACK
        * bit now.
        */
- 
+
       I2CCTL |= I2C_CTL_NAK;
 
       /* The START bit begins the transaction */
@@ -553,7 +553,7 @@ static int i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
  * Description:
  *   Initialize the selected I2C port. And return a unique instance of struct
  *   struct i2c_dev_s.  This function may be called to obtain multiple
- *   instances of the interface, each of which may be set up with a 
+ *   instances of the interface, each of which may be set up with a
  *   different frequency and slave address.
  *
  * Input Parameter:
@@ -567,7 +567,7 @@ static int i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
 FAR struct i2c_dev_s *up_i2cinitialize(int port)
 {
   FAR struct z8_i2cdev_s *i2c;
- 
+
   if (!g_initialized)
     {
       /* Set up some initial BRG value */
@@ -578,7 +578,7 @@ FAR struct i2c_dev_s *up_i2cinitialize(int port)
       /* Make sure that GPIOs are configured for the alternate function (this
        * varies with silicon revisions).
        */
-  
+
       PAADDR = 0x02;
       PACTL |= 0xc0;
 
@@ -603,4 +603,4 @@ FAR struct i2c_dev_s *up_i2cinitialize(int port)
     }
 
   return (FAR struct i2c_dev_s *)i2c;
-} 
+}

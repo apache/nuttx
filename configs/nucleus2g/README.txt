@@ -149,7 +149,7 @@ IDEs
 
   NuttX is built using command-line make.  It can be used with an IDE, but some
   effort will be required to create the project.
-  
+
   Makefile Build
   --------------
   Under Eclipse, it is pretty easy to set up an "empty makefile project" and
@@ -244,7 +244,7 @@ NXFLAT Toolchain
   tools -- just the NXFLAT tools.  The buildroot with the NXFLAT tools can
   be downloaded from the NuttX SourceForge download site
   (https://sourceforge.net/projects/nuttx/files/).
- 
+
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
@@ -483,7 +483,7 @@ Nucleus 2G Configuration Options
   LPC17xx USB Device Configuration
 
     CONFIG_LPC17_USBDEV_FRAME_INTERRUPT
-      Handle USB Start-Of-Frame events. 
+      Handle USB Start-Of-Frame events.
       Enable reading SOF from interrupt handler vs. simply reading on demand.
       Probably a bad idea... Unless there is some issue with sampling the SOF
       from hardware asynchronously.

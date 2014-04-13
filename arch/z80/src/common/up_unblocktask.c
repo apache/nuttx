@@ -114,7 +114,7 @@ void up_unblock_task(FAR struct tcb_s *tcb)
       /* The currently active task has changed! We need to do
        * a context switch to the new task.
        *
-       * Are we in an interrupt handler? 
+       * Are we in an interrupt handler?
        */
 
       if (IN_INTERRUPT())
@@ -125,7 +125,7 @@ void up_unblock_task(FAR struct tcb_s *tcb)
 
           SAVE_IRQCONTEXT(rtcb);
 
-          /* Restore the exception context of the rtcb at the (new) head 
+          /* Restore the exception context of the rtcb at the (new) head
            * of the g_readytorun task list.
            */
 
@@ -140,7 +140,7 @@ void up_unblock_task(FAR struct tcb_s *tcb)
         }
 
       /* We are not in an interrupt handler.  Copy the user C context
-       * into the TCB of the task that was previously active.  if 
+       * into the TCB of the task that was previously active.  if
        * SAVE_USERCONTEXT returns a non-zero value, then this is really the
        * previously running task restarting!
        */

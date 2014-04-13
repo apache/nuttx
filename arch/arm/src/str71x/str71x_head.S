@@ -265,7 +265,7 @@
  *
  *     IRQs and FIQs are disabled
  *     IVR set to zero
- *     All channels are disabled 
+ *     All channels are disabled
  *     Channels set to priority 0
  *     All SIR[n] registers contain the NuttX IRQ number in the MS 16-bits
  *

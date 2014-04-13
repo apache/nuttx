@@ -81,7 +81,7 @@
 #  define UARTx2STOP   CONFIG_UART1_2STOP
 #elif defined(CONFIG_UART2_SERIAL_CONSOLE)
 #  define UARTxBASE    UART2_BASE_ADDR
-#  define PINSELECT	   LPC23XX_PINSEL0 
+#  define PINSELECT	   LPC23XX_PINSEL0
 #  define UARTxPCLKSEL 0xE01FC1AC
 #  define PCLKSEL_MASK U2_PCLKSEL_MASK
 #  define UARTxPINSEL  UART2_PINSEL
@@ -249,7 +249,7 @@ up_lowsetup:
 	
 /* Configure the FIFOs */
 
-	mov	r1, #FCR_VALUE 
+	mov	r1, #FCR_VALUE
 	strb	r1, [r0, #UART_FCR_OFFSET]
 	
 	mov	r1, #LCR_VALUE

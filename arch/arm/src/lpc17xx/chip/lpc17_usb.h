@@ -49,7 +49,7 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
- 
+
 /* Register offsets *****************************************************************/
 /* USB Host Controller (OHCI) *******************************************************/
 /* See include/nuttx/usb/ohci.h */
@@ -326,7 +326,7 @@
 /* USB Device Interrupt Status, USB Device Interrupt Enable, USB Device Interrupt
  * Clear, USB Device Interrupt Set, and USB Device Interrupt Priority
  */
- 
+
 #define USBDEV_INT_FRAME                 (1 << 0)  /* Bit 0:  frame interrupt (every 1 ms) */
 #define USBDEV_INT_EPFAST                (1 << 1)  /* Bit 1:  Fast endpoint interrupt */
 #define USBDEV_INT_EPSLOW                (1 << 2)  /* Bit 2:  Slow endpoints interrupt */

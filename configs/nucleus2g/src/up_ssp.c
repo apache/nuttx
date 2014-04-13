@@ -119,7 +119,7 @@ void weak_function nucleus2g_sspinitialize(void)
 #ifdef CONFIG_LPC17_SSP0
   lpc17_configgpio(NUCLEUS2G_MMCSD_CS);
 #endif
-  
+
   /* SSP1 goes off the Nucleus 2G board to the Babel CAN board along with 3 chip
    * select pins.  However, it is currently not used on that board.
    */
@@ -134,7 +134,7 @@ void weak_function nucleus2g_sspinitialize(void)
  * Name:  lpc17_ssp0/ssp1select and lpc17_ssp0/ssp1status
  *
  * Description:
- *   The external functions, lpc17_ssp0/ssp1select and lpc17_ssp0/ssp1status 
+ *   The external functions, lpc17_ssp0/ssp1select and lpc17_ssp0/ssp1status
  *   must be provided by board-specific logic.  They are implementations of the select
  *   and status methods of the SPI interface defined by struct spi_ops_s (see
  *   include/nuttx/spi/spi.h). All other methods (including lpc17_sspinitialize())
@@ -149,7 +149,7 @@ void weak_function nucleus2g_sspinitialize(void)
  *   3. Add a calls to lpc17_sspinitialize() in your low level application
  *      initialization logic
  *   4. The handle returned by lpc17_sspinitialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling 
+ *      SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *

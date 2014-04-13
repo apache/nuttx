@@ -821,7 +821,7 @@ static inline void sam_gclk_config(FAR const struct sam_gclkconfig_s *config)
   /* Wait for synchronization */
 
   sam_gclck_waitsyncbusy();
-    
+
   /* Select the generator */
 
   putreg32(((uint32_t)config->gclk << GCLK_GENDIV_ID_SHIFT),
@@ -897,7 +897,7 @@ static inline void sam_config_gclks(void)
   /* Wait for the reset to complete */
 
   while ((getreg8(SAM_GCLK_CTRL) & GCLK_CTRL_SWRST) != 0);
-  
+
   /* Configure all GCLK generators, skipping GLCK_MAIN which is configured
    * below.
    */

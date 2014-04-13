@@ -38,14 +38,14 @@
 /** \file
  *  \author Uros Platise
  *  \brief Real Time Alarm Clock
- * 
+ *
  * Implementation of the Real-Time Alarm Clock as per SNP Specifications.
- * It provides real-time and phase controlled timer module while it 
+ * It provides real-time and phase controlled timer module while it
  * cooperates with hardware RTC for low-power operation.
- * 
+ *
  * It provides a replacement for a system 32-bit UTC time/date counter.
- * 
- * It runs at maximum STM32 allowed precision of 16384 Hz, providing 
+ *
+ * It runs at maximum STM32 allowed precision of 16384 Hz, providing
  * resolution of 61 us, required by the Sensor Network Protocol.
  */
 
@@ -83,22 +83,22 @@ int rtac_waitg(int group, int time)
 
 
 /** Power optimization of base systick timer
- * 
+ *
  * 1. Simple method to skip wake-ups:
  *  - ask timers about the min. period, which is Ns * systick
  *  - set the preload register with floor(Ns) * DEFAULT_PRELOAD
  *  - on wake-up call routines Ns times.
- * 
+ *
  * 2. If intermediate ISR occuried then:
  *  - check how many periods have passed by reading the counter: Np
  *  - set the new counter value as (counter % DEFAULT_PRELOAD)
  *  - call timer routines Np times; the next call is as usual, starting
  *    at 1. point above
- * 
+ *
  * This is okay if ISR's do not read timers, if they read timers then:
  *  - on ISR wake-up the code described under 2. must be called first
  *    (on wake-up from IDLE)
- * 
+ *
  * BUT: the problem is that SYSTICK does not run in Stop mode but RTC
  *   only, so it might be better to replace SYSTICK with RTAC (this
  *   module) and do the job above, permitting ultra low power modes of

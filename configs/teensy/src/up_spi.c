@@ -82,7 +82,7 @@
 #define TEENSY_WP (1 << 5)
 
 /* The following enable debug output from this file (needs CONFIG_DEBUG too).
- * 
+ *
  * CONFIG_SPI_DEBUG - Define to enable basic SSP debug
  * CONFIG_SPI_VERBOSE - Define to enable verbose SSP debug
  */
@@ -189,7 +189,7 @@ uint8_t avr_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
     {
       ret |= SPI_STATUS_PRESENT;
     }
-  
+
   if ((regval & TEENSY_WP) == 0)
     {
       ret |= SPI_STATUS_WRPROTECTED;

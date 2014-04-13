@@ -199,7 +199,7 @@ int nfs_checkmount(struct nfsmount *nmp)
  * Name: nfs_request
  *
  * Desciption:
- *   Perform the NFS request. On successful receipt, it verifies the NFS level of the 
+ *   Perform the NFS request. On successful receipt, it verifies the NFS level of the
  *   returned values.
  *
  * Return Value:
@@ -305,7 +305,7 @@ int nfs_lookup(struct nfsmount *nmp, FAR const char *filename,
 
   *ptr++  = txdr_unsigned(fhandle->length);
   reqlen += sizeof(uint32_t);
-  
+
   memcpy(ptr, &fhandle->handle, fhandle->length);
   reqlen += fhandle->length;
   ptr    += uint32_increment(fhandle->length);

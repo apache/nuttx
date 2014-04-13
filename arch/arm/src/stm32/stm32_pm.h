@@ -75,7 +75,7 @@ extern "C" {
  * Name: stm32_pmstop
  *
  * Description:
- *   Enter STOP mode. 
+ *   Enter STOP mode.
  *
  * Input Parameters:
  *   lpds - true: To further reduce power consumption in Stop mode, put the
@@ -115,11 +115,11 @@ EXTERN int stm32_pmstandby(void);
  * Name: stm32_pmsleep
  *
  * Description:
- *   Enter SLEEP mode. 
+ *   Enter SLEEP mode.
  *
  * Input Parameters:
  *   sleeponexit - true:  SLEEPONEXIT bit is set when the WFI instruction is
- *                        executed, the MCU enters Sleep mode as soon as it 
+ *                        executed, the MCU enters Sleep mode as soon as it
  *                        exits the lowest priority ISR.
  *               - false: SLEEPONEXIT bit is cleared, the MCU enters Sleep mode
  *                        as soon as WFI or WFE instruction is executed.

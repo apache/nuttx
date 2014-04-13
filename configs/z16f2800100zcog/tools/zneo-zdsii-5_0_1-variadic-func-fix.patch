@@ -22,12 +22,12 @@ index ba7dbe7..b9f9991 100644
 +  FAR const char *fmt, va_list ap);
 +#endif
  static FAR char *nsh_consolelinebuffer(FAR struct nsh_vtbl_s *vtbl);
- 
+
  #if CONFIG_NFILE_DESCRIPTORS > 0
 @@ -213,6 +219,7 @@ static ssize_t nsh_consolewrite(FAR struct nsh_vtbl_s *vtbl, FAR const void *buf
   *
   ****************************************************************************/
- 
+
 +#if 0
  static int nsh_consoleoutput(FAR struct nsh_vtbl_s *vtbl,
                               FAR const char *fmt, ...)
@@ -35,7 +35,7 @@ index ba7dbe7..b9f9991 100644
 @@ -263,6 +270,51 @@ static int nsh_consoleoutput(FAR struct nsh_vtbl_s *vtbl,
  #endif
  }
- 
+
 +#else
 +static int nsh_consolevoutput(FAR struct nsh_vtbl_s *vtbl, FAR const char *fmt, va_list ap)
 +{
@@ -95,7 +95,7 @@ index ba7dbe7..b9f9991 100644
 +#endif
        pstate->cn_vtbl.linebuffer = nsh_consolelinebuffer;
        pstate->cn_vtbl.exit       = nsh_consoleexit;
- 
+
 @@ -489,3 +545,15 @@ FAR struct console_stdio_s *nsh_newconsole(void)
      }
    return pstate;
@@ -122,12 +122,12 @@ index c78362f..59bd8d7 100644
  #include <stdbool.h>
 +#include <stdarg.h>
  #include <errno.h>
- 
+
  /****************************************************************************
 @@ -62,11 +63,13 @@
  #define nsh_undirect(v,s)      (v)->undirect(v,s)
  #define nsh_exit(v,s)          (v)->exit(v,s)
- 
+
 +#if 0
  #ifdef CONFIG_CPP_HAVE_VARARGS
  # define nsh_output(v, fmt...) (v)->output(v, ##fmt)
@@ -135,9 +135,9 @@ index c78362f..59bd8d7 100644
  # define nsh_output            vtbl->output
  #endif
 +#endif
- 
+
  /* Size of info to be saved in call to nsh_redirect */
- 
+
 @@ -107,7 +110,11 @@ struct nsh_vtbl_s
    void (*release)(FAR struct nsh_vtbl_s *vtbl);
  #endif
@@ -152,8 +152,8 @@ index c78362f..59bd8d7 100644
    void (*redirect)(FAR struct nsh_vtbl_s *vtbl, int fd, FAR uint8_t *save);
 @@ -159,5 +166,6 @@ struct console_stdio_s
  /* Defined in nsh_console.c *************************************************/
- 
+
  FAR struct console_stdio_s *nsh_newconsole(void);
 +int nsh_output(FAR struct nsh_vtbl_s *vtbl, FAR const char *fmt, ...);
- 
+
  #endif /* __APPS_NSHLIB_NSH_CONSOLE_H */

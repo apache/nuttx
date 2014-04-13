@@ -76,6 +76,6 @@ int up_putc(int ch)
     {
       _up_putc('\r');
     }
-  return ch;  
+  return ch;
 }
 

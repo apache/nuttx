@@ -140,7 +140,7 @@ struct imx_spidev_s
  ****************************************************************************/
 
  /* SPI register access */
- 
+
 static inline uint32_t spi_getreg(struct imx_spidev_s *priv, unsigned int offset);
 static inline void spi_putreg(struct imx_spidev_s *priv, unsigned int offset, uint32_t value);
 
@@ -1083,7 +1083,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
       imxgpio_configinput(GPIOD, 31);
       imxgpio_ocrbin(GPIOD, 31);
       imxgpio_dirout(GPIOD, 31);
-#else 
+#else
       imxgpio_configoutput(GPIOD, 10);
 #endif
       break;
@@ -1101,7 +1101,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
   /* Initialize control register: min frequency, ignore ready, master mode, mode=0, 8-bit */
 
-  spi_putreg(priv, CSPI_CTRL_OFFSET, 
+  spi_putreg(priv, CSPI_CTRL_OFFSET,
              CSPI_CTRL_DIV512 |                /* Lowest frequency */
              CSPI_CTRL_DRCTL_IGNRDY |          /* Ignore ready */
              CSPI_CTRL_MODE |                  /* Master mode */

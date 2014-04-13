@@ -77,7 +77,7 @@
 #ifndef CONFIG_SCI0_DISABLE
 #  ifndef CONFIG_SCI0_PARITY
 #    warning "CONFIG_SCI0_PARITY not defined -- Assuming none"
-#    define CONFIG_SCI0_PARITY 0 
+#    define CONFIG_SCI0_PARITY 0
 #  elif CONFIG_SCI0_PARITY != 0 && CONFIG_SCI0_PARITY != 2 && CONFIG_SCI0_PARITY != 2
 #    error "CONFIG_SCI0_PARITY value not recognized"
 #  endif
@@ -95,7 +95,7 @@
 #ifndef CONFIG_SCI1_DISABLE
 #  ifndef CONFIG_SCI1_PARITY
 #    warning "CONFIG_SCI1_PARITY not defined -- Assuming none"
-#    define CONFIG_SCI1_PARITY 0 
+#    define CONFIG_SCI1_PARITY 0
 #  elif CONFIG_SCI1_PARITY != 0 && CONFIG_SCI1_PARITY != 2 && CONFIG_SCI1_PARITY != 2
 #    error "CONFIG_SCI1_PARITY value not recognized"
 #  endif

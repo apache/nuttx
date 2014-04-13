@@ -160,7 +160,7 @@
 #define STM32_OTGFS_DVBUSPULSE_OFFSET   0x082c /* Device VBUS pulsing time register */
 #define STM32_OTGFS_DIEPEMPMSK_OFFSET   0x0834 /* Device IN endpoint FIFO empty interrupt mask register */
 
-#define STM32_OTGFS_DIEP_OFFSET(n)      (0x0900 + ((n) << 5)) 
+#define STM32_OTGFS_DIEP_OFFSET(n)      (0x0900 + ((n) << 5))
 #define STM32_OTGFS_DIEPCTL_EPOFFSET    0x0000 /* Device endpoint control register */
 #define STM32_OTGFS_DIEPINT_EPOFFSET    0x0008 /* Device endpoint interrupt register */
 #define STM32_OTGFS_DIEPTSIZ_EPOFFSET   0x0010 /* Device IN endpoint transfer size register */

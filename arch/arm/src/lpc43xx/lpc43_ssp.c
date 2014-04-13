@@ -66,7 +66,7 @@
  ****************************************************************************/
 
 /* The following enable debug output from this file (needs CONFIG_DEBUG too).
- * 
+ *
  * CONFIG_SSP_DEBUG - Define to enable basic SSP debug
  * CONFIG_SSP_VERBOSE - Define to enable verbose SSP debug
  */
@@ -192,7 +192,7 @@ static struct lpc43_sspdev_s g_ssp0dev =
 #ifdef CONFIG_LPC43_SSP_INTERRUPTS
   .sspirq            = LPC43_IRQ_SSP0,
 #endif
-}; 
+};
 #endif /* CONFIG_LPC43_SSP0 */
 
 #ifdef CONFIG_LPC43_SSP1
@@ -226,7 +226,7 @@ static struct lpc43_sspdev_s g_ssp1dev =
 #ifdef CONFIG_LPC43_SSP_INTERRUPTS
   .sspirq            = LPC43_IRQ_SSP1,
 #endif
-}; 
+};
 #endif /* CONFIG_LPC43_SSP1 */
 
 /****************************************************************************
@@ -376,7 +376,7 @@ static uint32_t ssp_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   divisor = (divisor + 1) & ~1;
 
   /* Save the new divisor value */
-  
+
   ssp_putreg(priv, LPC43_SSP_CPSR_OFFSET, divisor);
 
   /* Calculate the new actual */
@@ -429,19 +429,19 @@ static void ssp_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
         {
         case SPIDEV_MODE0: /* CPOL=0; CPHA=0 */
           break;
- 
+
         case SPIDEV_MODE1: /* CPOL=0; CPHA=1 */
           regval |= SSP_CR0_CPHA;
           break;
- 
+
         case SPIDEV_MODE2: /* CPOL=1; CPHA=0 */
           regval |= SSP_CR0_CPOL;
           break;
- 
+
         case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
           regval |= (SSP_CR0_CPOL|SSP_CR0_CPHA);
           break;
- 
+
         default:
           sspdbg("Bad mode: %d\n", mode);
           DEBUGASSERT(FALSE);

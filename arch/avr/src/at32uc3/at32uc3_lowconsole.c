@@ -164,7 +164,7 @@ static void usart_setbaudrate(uintptr_t usart_base, uint32_t baudrate)
 
       mr &= ~USART_MR_SYNC;
       mr |= USART_MR_OVER;
- 
+
       /* Calculate the clock divider assuming 16x oversampling */
 
       cd = (AVR32_PBA_CLOCK + (baudrate << 2)) / (baudrate << 3);
@@ -177,7 +177,7 @@ static void usart_setbaudrate(uintptr_t usart_base, uint32_t baudrate)
 
       /* Use the undivided PBA clock */
 
-      cd = AVR32_PBA_CLOCK / baudrate;    
+      cd = AVR32_PBA_CLOCK / baudrate;
     }
 
   DEBUGASSERT(cd > 0 && cd < 65536);
@@ -202,7 +202,7 @@ static void usart_setbaudrate(uintptr_t usart_base, uint32_t baudrate)
 void usart_reset(uintptr_t usart_base)
 {
   irqstate_t flags;
-  
+
   /* Disable all USART interrupts */
 
   flags = irqsave();
@@ -275,7 +275,7 @@ void usart_configure(uintptr_t usart_base, uint32_t baud, unsigned int parity,
     {
       regval |= USART_MR_CHRL_BITS(nbits);
     }
-  
+
   usart_putreg(usart_base, AVR32_USART_MR_OFFSET, regval);
 
   /* Set the baud rate generation register */

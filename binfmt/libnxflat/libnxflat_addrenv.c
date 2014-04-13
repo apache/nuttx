@@ -150,7 +150,7 @@ int nxflat_addrenv_alloc(FAR struct nxflat_loadinfo_s *loadinfo, size_t envsize)
   /* Success... save the fruits of our labor */
 
   loadinfo->dspace = dspace;
-  dspace->crefs    = 1;  
+  dspace->crefs    = 1;
   dspace->region   = (FAR uint8_t *)vaddr;
   return OK;
 
@@ -172,7 +172,7 @@ errout_with_dspace:
     }
 
   loadinfo->dspace = dspace;
-  dspace->crefs    = 1;  
+  dspace->crefs    = 1;
   return OK;
 #endif
 }

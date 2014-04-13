@@ -83,7 +83,7 @@
 #define t9                 $25
 
 /* Static registers:  Registers that must be saved and restored if used */
- 
+
 #define s0                 $16
 #define s1                 $17
 #define s2                 $18

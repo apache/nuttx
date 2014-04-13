@@ -560,7 +560,7 @@ static void ez80_rxint(struct uart_dev_s *dev, bool enable)
 {
   struct ez80_dev_s *priv = (struct ez80_dev_s*)dev->priv;
   uint8_t ier = ez80_serialin(priv, EZ80_UART_IER);
-  
+
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -766,7 +766,7 @@ int up_putc(int ch)
   ez80_serialout(priv, EZ80_UART_THR, (uint8_t)ch);
 
   /* Wait for the character to be sent before re-enabling interrupts */
- 
+
   ez80_waittxready(priv);
   ez80_restoreuartint(priv, ier);
   return ch;

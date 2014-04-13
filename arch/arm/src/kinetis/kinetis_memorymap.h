@@ -185,7 +185,7 @@
 # define KINETIS_MCM_BASE       0xe0080000 /* Miscellaneous Control Module (including ETB Almost Full) */
 # define KINETIS_ROMTAB_BASE    0xe00ff000 /* ROM Table - allows auto-detection of debug components */
 
-/* K60 Family 
+/* K60 Family
  *
  * The memory map for the following parts is defined in Freescale document
  * K60P144M100SF2RM

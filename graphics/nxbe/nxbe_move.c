@@ -234,7 +234,7 @@ void nxbe_move(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s *rect
   /* The clip order depends up the direction that the rectangle is being
    * moved.
    */
- 
+
   if (offset->y < 0)
     {
       /* Moving rectangle up */

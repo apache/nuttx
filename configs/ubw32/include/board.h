@@ -94,7 +94,7 @@
 /* ----- ----- -------------------------------------------------------------
  * LABEL COLOR CONTROL
  * ----- ----- -------------------------------------------------------------
- * USB   Green   RF3. This could be used by software if USB is not used. 
+ * USB   Green   RF3. This could be used by software if USB is not used.
  *                    Otherwise, RF3 is used as the USBID signal.
  * LED1  While   RE2, Pulled up.  Low value illuminates
  * LED2  Red     RE1, Pulled up.  Low value illuminates

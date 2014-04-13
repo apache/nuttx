@@ -41,16 +41,16 @@
 /* The STM32 RTC Driver offers standard precision of 1 Hz or High Resolution
  * operating at rate up to 16384 Hz. It provides UTC time and alarm interface
  * with external output pin (for wake-up).
- * 
- * RTC is based on hardware RTC module which is located in a separate power 
- * domain. The 32-bit counter is extended by 16-bit registers in BKP domain 
+ *
+ * RTC is based on hardware RTC module which is located in a separate power
+ * domain. The 32-bit counter is extended by 16-bit registers in BKP domain
  * STM32_BKP_DR1 to provide system equiv. function to the: time_t time(time_t *).
- * 
- * Notation: 
+ *
+ * Notation:
  *  - clock refers to 32-bit hardware counter
  *  - time is a combination of clock and upper bits stored in backuped domain
  *    with unit of 1 [s]
- * 
+ *
  * TODO: Error Handling in case LSE fails during start-up or during operation.
  */
 
@@ -164,7 +164,7 @@ static alarmcb_t g_alarmcb;
  * Public Data
  ************************************************************************************/
 
-/* Variable determines the state of the LSE oscilator. 
+/* Variable determines the state of the LSE oscilator.
  * Possible errors:
  *   - on start-up
  *   - during operation, reported by LSE interrupt
@@ -267,7 +267,7 @@ static void up_rtc_breakout(FAR const struct timespec *tp,
   uint64_t frac;
   uint32_t cnt;
   uint16_t ovf;
-  
+
   /* Break up the time in seconds + milleconds into the correct values for our use */
 
   frac = ((uint64_t)tp->tv_nsec * CONFIG_RTC_FREQUENCY) / 1000000000;
@@ -331,8 +331,8 @@ static int stm32_rtc_interrupt(int irq, void *context)
 #endif
 
   /* Clear pending flags, leave RSF high */
-    
-  putreg16(RTC_CRL_RSF, STM32_RTC_CRL);    
+
+  putreg16(RTC_CRL_RSF, STM32_RTC_CRL);
   return 0;
 }
 #endif
@@ -365,8 +365,8 @@ int up_rtcinitialize(void)
 
   stm32_pwr_enablebkp();
   stm32_rcc_enablelse();
-    
-  /* TODO: Get state from this function, if everything is 
+
+  /* TODO: Get state from this function, if everything is
    *   okay and whether it is already enabled (if it was disabled
    *   reset upper time register)
    */
@@ -541,7 +541,7 @@ int up_rtc_gettime(FAR struct timespec *tp)
 
   ls = (uint32_t)cnth << 16 | (uint32_t)cntl;
   ms = (uint32_t)ovf  << 16 | (uint32_t)cnth;
-  
+
   /* Then we can save the time in seconds and fractional seconds. */
 
   tp->tv_sec  = (ms << (32-RTC_CLOCKS_SHIFT-16)) | (ls >> (RTC_CLOCKS_SHIFT+16));
@@ -623,11 +623,11 @@ int up_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
       g_alarmcb = callback;
 
       /* Break out the time values */
-  
+
       up_rtc_breakout(tp, &regvals);
 
       /* Enable RTC alarm */
-      
+
       cr  = getreg16(STM32_RTC_CRH);
       cr |= RTC_CRH_ALRIE;
       putreg16(cr, STM32_RTC_CRH);
@@ -651,7 +651,7 @@ int up_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
  * Name: up_rtc_cancelalarm
  *
  * Description:
- *   Cancel a pending alarm alarm 
+ *   Cancel a pending alarm alarm
  *
  * Input Parameters:
  *   none
@@ -682,7 +682,7 @@ int up_rtc_cancelalarm(void)
       stm32_rtc_endwr();
       irqrestore(flags);
 
-      ret = OK; 
+      ret = OK;
     }
   return ret;
 }

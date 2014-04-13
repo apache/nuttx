@@ -152,7 +152,7 @@ EXEPATH_HANDLE exepath_init(void)
  *
  * Input Parameters:
  *   handle - The handle value returned by exepath_init
- *   relpath - The relative path to the file to be found. 
+ *   relpath - The relative path to the file to be found.
  *
  * Returned Value:
  *   On success, a non-NULL pointer to a null-terminated string is provided.

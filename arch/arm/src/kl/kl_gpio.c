@@ -145,7 +145,7 @@ int kl_configgpio(uint32_t cfgset)
                 {
                   regval |= PORT_PCR_ODE;
                 }
-              
+
               /* Check for high drive output */
 
               if ((cfgset & _PIN_OUTPUT_DRIVE_MASK) == _PIN_OUTPUT_HIGHDRIVE)

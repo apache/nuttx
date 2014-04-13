@@ -193,7 +193,7 @@ ssize_t nxcon_read(FAR struct file *filep, FAR char *buffer, size_t len)
            * mutual exclusion semaphore?
            */
 
-          if (ret < 0) 
+          if (ret < 0)
             {
               /* No.. One of the two sem_wait's failed. */
 

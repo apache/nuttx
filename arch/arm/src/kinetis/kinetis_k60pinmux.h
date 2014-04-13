@@ -47,7 +47,7 @@
 /********************************************************************************************
  * Pre-processor Definitions
  ********************************************************************************************/
-/* Reference: Paragraph 10.3.1, p 258, of FreeScale document K60P144M100SF2RM 
+/* Reference: Paragraph 10.3.1, p 258, of FreeScale document K60P144M100SF2RM
  *
  * In most cases, there are alternative configurations for various pins. Those alternative
  * pins are labeled with a suffix like _1, _2, etc. in order to distinguish them.  Logic in

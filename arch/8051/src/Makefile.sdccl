@@ -200,7 +200,7 @@ up_mem.h: pass1.mem
 libarch$(LIBEXT): up_mem.h $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
 
-# This builds the libboard library in the board/ subdirectory 
+# This builds the libboard library in the board/ subdirectory
 
 board/libboard$(LIBEXT):
 	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT) EXTRADEFINES=$(EXTRADEFINES)

@@ -375,7 +375,7 @@
 
 #define SYSCREG_EBI_TIMEOUT_SHIFT                (0)       /* Bits 0-9:  Time MPMC, NAND or unused channel */
 #define SYSCREG_EBI_TIMEOUT_MASK                 (0x3ff << SYSCREG_EBI_TIMEOUT_SHIFT)
- 
+
 /* RINGOSCCFG address 0x13002814 */
 
 #define SYSCREG_RINGOSCCFG_OSC1EN                (1 << 1)  /* Bit 1:  Enable ring oscillator 1 */

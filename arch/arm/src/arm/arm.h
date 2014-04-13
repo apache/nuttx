@@ -332,7 +332,7 @@ static inline unsigned int get_cp15c3(void)
  * ARM926EJ-S operation:  Invalidate set-associative
  * Data:                  Should be zero
  */
- 
+
 static inline void tlb_invalidate(void)
 {
   unsigned int sbz = 0;

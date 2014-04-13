@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 /* The STM32F303VCT has 256Kb of FLASH beginning at address 0x0800:0000 and
- * 40Kb of SRAM. 
+ * 40Kb of SRAM.
  *
  * When booting from FLASH, FLASH memory is aliased to address 0x0000:0000
  * where the code expects to begin execution by jumping to the entry point in

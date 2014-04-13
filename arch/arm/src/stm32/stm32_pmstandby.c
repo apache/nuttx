@@ -101,7 +101,7 @@ int stm32_pmstandby(void)
   regval  = getreg32(NVIC_SYSCON);
   regval |= NVIC_SYSCON_SLEEPDEEP;
   putreg32(regval, NVIC_SYSCON);
-  
+
   /* Sleep until the wakeup reset occurs */
 
   asm("wfi");

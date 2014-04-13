@@ -273,7 +273,7 @@ int main(int argc, char **argv, char **envp)
   padlen                = g_hdr.imageLength - buf.st_size;
 
   /* Calculate CRCs */
- 
+
   g_hdr.execution_crc32 = infilecrc32(infd, buf.st_size, padlen);
   g_hdr.header_crc32    = crc32((const uint8_t*)&g_hdr, HDR_CRC_SIZE);
 
@@ -294,4 +294,4 @@ int main(int argc, char **argv, char **envp)
   return 0;
 }
 
-  
+

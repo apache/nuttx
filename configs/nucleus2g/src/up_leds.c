@@ -93,7 +93,7 @@
  * In normal usage, the two LEDs on the Babel CAN board would show CAN status, but if
  * CONFIG_ARCH_LEDS is defined, these LEDs will be controlled as follows for NuttX
  * debug functionality (where NC means "No Change").
- * 
+ *
  *                      LED1   LED2   HEARTBEAT
  *                    +------- ------ -----------------------
  *   LED_STARTED      | OFF    OFF    OFF

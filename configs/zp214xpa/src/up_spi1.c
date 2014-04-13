@@ -52,7 +52,7 @@
  *    3  SI   P0.6/MOSI0/CAP0.2/AD1.0          - Alternate function 1
  *    4  SO   P0.5/MISO0/MAT0.1/AD0.7          - Alternate function 1
  *    7  INT  P1.25/EXTIN0                     - Alternal function 1
- *    9  RST  P1.24/TRACECLK  
+ *    9  RST  P1.24/TRACECLK
  *
  * This file provides support only for the LCD interface on SPI1.
  *

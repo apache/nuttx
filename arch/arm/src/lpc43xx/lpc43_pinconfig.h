@@ -183,7 +183,7 @@
  * ---- ---- ---- ---- ----
  * .... .... .... ...P PPPP
  */
- 
+
 #define PINCONF_PIN_SHIFT             (0)        /* Bits 0-4: Pin number */
 #define PINCONF_PIN_MASK              (31 << PINCONF_PIN_SHIFT)
 #  define PINCONF_PIN_0               (0 << PINCONF_PIN_SHIFT)

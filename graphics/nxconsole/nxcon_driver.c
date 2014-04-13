@@ -209,7 +209,7 @@ static ssize_t nxcon_write(FAR struct file *filep, FAR const char *buffer,
              * (but the escape sequence is still incomplete.
              */
 
-            case VT100_CONSUMED: 
+            case VT100_CONSUMED:
               {
                 /* Do nothing... the VT100 logic owns the character */
               }

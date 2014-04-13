@@ -470,7 +470,7 @@ static void ez80emac_miiwrite(FAR struct ez80emac_driver_s *priv, uint8_t offset
 static uint16_t ez80emac_miiread(FAR struct ez80emac_driver_s *priv, uint32_t offset)
 {
   uint8_t regval;
-  
+
   /* Wait for any preceding MII management operation to complete */
 
   ez80emac_waitmiibusy();
@@ -613,7 +613,7 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
    ndbg("Configure autonegotiation\n");
    if (bauto)
     {
-      ez80emac_miiwrite(priv, MII_ADVERTISE, 
+      ez80emac_miiwrite(priv, MII_ADVERTISE,
                         MII_ADVERTISE_100BASETXFULL|MII_ADVERTISE_100BASETXHALF|
                         MII_ADVERTISE_10BASETXFULL|MII_ADVERTISE_10BASETXHALF|
                         MII_ADVERTISE_CSMA);
@@ -1177,7 +1177,7 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
    * RxDMA reads the next two bytes from the RxFIFO and writes them into
    * the Rx descriptor status LSB and MSB. The packet length counter is
    * stored into the descriptor table packet length field, the descriptor
-   * table next pointer is written into the Rx descriptor table and finally 
+   * table next pointer is written into the Rx descriptor table and finally
    * the Rx_DONE_STAT bit in the EMAC Interrupt Status Register register is
    * set to 1.
    */
@@ -1223,7 +1223,7 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
         {
           int nbytes = (int)((FAR uint8_t*)priv->rxendp1 - (FAR uint8_t*)psrc);
           nvdbg("RX wraps after %d bytes\n", nbytes + SIZEOF_EMACSDESC);
- 
+
           memcpy(pdest, psrc, nbytes);
           memcpy(&pdest[nbytes], priv->rxstart, pktlen - nbytes);
         }
@@ -1383,7 +1383,7 @@ static int ez80emac_txinterrupt(int irq, FAR void *context)
         }
     }
 
-  /* Save the new head.  If it is NULL, then we have read all the way to 
+  /* Save the new head.  If it is NULL, then we have read all the way to
    * the terminating description with np==NULL.
    */
 
@@ -1616,7 +1616,7 @@ static void ez80emac_polltimer(int argc, uint32_t arg, ...)
  *
  * Description:
  *   NuttX Callback: Bring up the Ethernet interface when an IP address is
- *   provided 
+ *   provided
  *
  * Parameters:
  *   dev  - Reference to the NuttX driver state structure
@@ -1760,7 +1760,7 @@ static int ez80emac_ifdown(struct uip_driver_s *dev)
  * Function: ez80emac_txavail
  *
  * Description:
- *   Driver callback invoked when new TX data is available.  This is a 
+ *   Driver callback invoked when new TX data is available.  This is a
  *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
  *   latency.
  *
@@ -1807,7 +1807,7 @@ static int ez80emac_txavail(struct uip_driver_s *dev)
  *
  * Parameters:
  *   dev  - Reference to the NuttX driver state structure
- *   mac  - The MAC address to be added 
+ *   mac  - The MAC address to be added
  *
  * Returned Value:
  *   None
@@ -1837,7 +1837,7 @@ static int ez80emac_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
  *
  * Parameters:
  *   dev  - Reference to the NuttX driver state structure
- *   mac  - The MAC address to be removed 
+ *   mac  - The MAC address to be removed
  *
  * Returned Value:
  *   None
@@ -1885,12 +1885,12 @@ static int ez80_emacinitialize(void)
   outp(EZ80_EMAC_RST, 0);        /* Reset everything */
   outp(EZ80_EMAC_RST, 0xff);
   outp(EZ80_EMAC_RST, 0);
-  
+
   /* The ez80 has a fixed 8kb of EMAC SRAM memory (+ 8kb of
    * general purpose SRAM) located in the high address space.
    * Configure the GP and EMAC SRAM
    */
- 
+
   outp(EZ80_RAM_CTL, (RAMCTL_ERAMEN|RAMCTL_GPRAMEN));
   outp(EZ80_RAM_ADDR_U, (CONFIG_EZ80_RAMADDR >> 16));
   outp(EZ80_EMAC_BP_U, (CONFIG_EZ80_RAMADDR >> 16));
@@ -2014,7 +2014,7 @@ static int ez80_emacinitialize(void)
   outp(EZ80_EMAC_CFG3, EMAC_RETRY);
 
   /* EMAC_CFG4_TXFC - Pause control frames are allowed to be transmitted
-   * EMAC_CFG4_RXFC - Act on received pause control frames 
+   * EMAC_CFG4_RXFC - Act on received pause control frames
    */
 
   outp(EZ80_EMAC_CFG4, EMAC_CFG4_TXFC|EMAC_CFG4_RXFC);

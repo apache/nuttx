@@ -129,8 +129,8 @@ void tiva_boardinitialize(void);
  * Name: tiva_ethernetmac
  *
  * Description:
- *   For the MDL-S2E Reference Design, the MAC address will be stored in the 
- *   non-volatile USER0 and USER1 registers.  If CONFIG_TIVA_BOARDMAC is defined, 
+ *   For the MDL-S2E Reference Design, the MAC address will be stored in the
+ *   non-volatile USER0 and USER1 registers.  If CONFIG_TIVA_BOARDMAC is defined,
  *   this function will obtain the MAC address from these registers.
  *
  ************************************************************************************/

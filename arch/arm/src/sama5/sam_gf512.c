@@ -56,7 +56,7 @@
 
 /* Gallois Field tables for 512 bytes sectors. First raw is "index_of" and second one is "alpha_to" */
 
-const uint16_t pmecc_gf512[2][PMECC_GF_SIZEOF_512] = 
+const uint16_t pmecc_gf512[2][PMECC_GF_SIZEOF_512] =
 {
   /* "index_of" table */
   {

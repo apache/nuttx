@@ -87,7 +87,7 @@ static void up_idlepm(void)
   enum pm_state_e newstate;
   irqstate_t flags;
   int ret;
-  
+
   /* Decide, which power saving level can be obtained */
 
   newstate = pm_checkstate();

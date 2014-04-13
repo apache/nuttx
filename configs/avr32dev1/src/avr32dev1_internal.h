@@ -53,15 +53,15 @@
 
 #if (CONFIG_AVR32_GPIOIRQSETB & 4) == 1
 #  define CONFIG_AVR32DEV_BUTTON1_IRQ 1
-#endif 
+#endif
 
 #if (CONFIG_AVR32_GPIOIRQSETB & 8) == 1
 #  define CONFIG_AVR32DEV_BUTTON2_IRQ 1
-#endif 
+#endif
 
 /* AVRDEV1 GPIO Pin Definitions *****************************************************/
 /* LEDs
- * 
+ *
  * The AVR32DEV1 board has 3 LEDs, two of which can be controlled through GPIO pins.
  *
  * PIN 13  PA7  LED1

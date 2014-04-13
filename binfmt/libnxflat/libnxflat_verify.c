@@ -84,11 +84,11 @@ int nxflat_verifyheader(const struct nxflat_hdr_s *header)
     }
 
   /* Check the FLT header -- magic number and revision.
-   * 
+   *
    * If the magic number does not match.  Just return
    * silently.  This is not our binary.
    */
-  
+
   if (strncmp(header->h_magic, NXFLAT_MAGIC, 4) != 0)
     {
       bdbg("Unrecognized magic=\"%c%c%c%c\"\n",

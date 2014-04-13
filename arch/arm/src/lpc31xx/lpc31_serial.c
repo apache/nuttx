@@ -238,7 +238,7 @@ static inline void up_configbaud(void)
    */
 
   /* Get UART block clock divided by 16 */
-  
+
   qtrclk = lpc31_clkfreq(CLKID_UARTUCLK, DOMAINID_UART) >> 4;
 
   /* Try every valid multiplier, tmulval (or until a perfect

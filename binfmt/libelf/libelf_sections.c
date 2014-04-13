@@ -265,7 +265,7 @@ int elf_findsection(FAR struct elf_loadinfo_s *loadinfo,
           bdbg("elf_sectname failed: %d\n", ret);
           return ret;
         }
- 
+
       /* Check if the name of this section is 'sectname' */
 
       bvdbg("%d. Comparing \"%s\" and .\"%s\"\n",

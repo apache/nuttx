@@ -173,7 +173,7 @@ cond_test: signaler terminated, now cancel the waiter
 cond_test: 	Waiter	Signaler
 cond_test: Loops	32	32
 cond_test: Errors	0	0
-cond_test: 
+cond_test:
 0 times, waiter did not have to wait for data
 cond_test: 0 times, data was already available when the signaler run
 cond_test: 0 times, the waiter was in an unexpected state when the signaler ran
@@ -375,10 +375,10 @@ uordblks     53f0     53f0
 fordblks   fdbb20   fdbb20
 
 user_main: round-robin scheduler test
-rr_test: Starting sieve1 thread 
+rr_test: Starting sieve1 thread
 rr_test: Set thread priority to 1
 rr_test: Set thread policty to SCHED_RR
-rr_test: Starting sieve1 thread 
+rr_test: Starting sieve1 thread
 sieve1 started
 sieve1 finished
 rr_test: Waiting for sieves to complete -- this should take awhile

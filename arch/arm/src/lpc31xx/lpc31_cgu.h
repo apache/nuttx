@@ -1121,7 +1121,7 @@
 #define CGU_FREQIN_I2SRXWS1              4 /* I2SRX_WS1 */
 #define CGU_FREQIN_HPPLL0                5 /* HPPLL0 (Audio/I2S PLL) */
 #define CGU_FREQIN_HPPLL1                6 /* HPPLL1 (System PLL) */
-#define CGU_NFREQIN                      7 
+#define CGU_NFREQIN                      7
 
 /* CGU clock switchbox register bit definitions *************************************************/
 
@@ -1569,7 +1569,7 @@ Nandflash Controller */
 /* HP0 Bandwith Selection register HP0_INSELR, address 0x13004d10,
  * HP1 bandwith Selection register HP1_INSELR, address 0x13004d48
  */
- 
+
 #define CGU_HPINSELR_SHIFT               (0)      /* Bits 0-3: Pins to select the bandwidth */
 #define CGU_HPINSELR_MASK                (15 << CGU_HPINSELR_SHIFT)
 

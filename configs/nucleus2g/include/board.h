@@ -84,7 +84,7 @@
 /* PLL0.  PLL0 is used to generate the CPU clock divider input (PLLCLK).
  *
  *  Source clock:               Main oscillator
- *  PLL0 Multiplier value (M):  20 
+ *  PLL0 Multiplier value (M):  20
  *  PLL0 Pre-divider value (N): 1
  *
  *  PLL0CLK = (2 * 20 * SYSCLK) / 1 = 480MHz

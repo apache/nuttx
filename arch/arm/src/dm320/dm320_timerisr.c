@@ -56,24 +56,24 @@
 /* DM320 Timers
  *
  * Each of the general-purpose timers can run in one of two modes:  one-
- * shot mode and free-run mode.  In one-shot mode, an interrupt only 
- * occurs once and then the timer must be explicitly reset to begin the 
- * timing operation again.  In free-run mode, when the timer generates an 
- * interrupt, the timer counter is automatically reloaded to start the count 
- * operation again.  Use the bit field MODE in TMMDx to configure the 
+ * shot mode and free-run mode.  In one-shot mode, an interrupt only
+ * occurs once and then the timer must be explicitly reset to begin the
+ * timing operation again.  In free-run mode, when the timer generates an
+ * interrupt, the timer counter is automatically reloaded to start the count
+ * operation again.  Use the bit field MODE in TMMDx to configure the
  * timer for one-shot more or free-run mode. The bit field MODE in TMMDx
  * also allows you to stop the timer.
- * 
- * Either the ARM clock divided by 2 (CLK_ARM/2) or an external clock 
- * connected to the M27XI pin can be selected as the clock source of the 
+ *
+ * Either the ARM clock divided by 2 (CLK_ARM/2) or an external clock
+ * connected to the M27XI pin can be selected as the clock source of the
  * timer.
  *
- * The actual clock frequency used in the timer count operation is the input 
- * clock divided by: 1 plus the value set in the bit field PRSCL of the 
- * register TMPRSCLx (10 bits).  The timer expires when it reaches the 
- * value set in the bit field DIV of the register TMDIVx (16 bits) plus 1. 
- * PRSCL+1 is the source clock frequency divide factor and DIV+1 is the 
- * timer count value.  The frequency of a timer interrupt is given by the 
+ * The actual clock frequency used in the timer count operation is the input
+ * clock divided by: 1 plus the value set in the bit field PRSCL of the
+ * register TMPRSCLx (10 bits).  The timer expires when it reaches the
+ * value set in the bit field DIV of the register TMDIVx (16 bits) plus 1.
+ * PRSCL+1 is the source clock frequency divide factor and DIV+1 is the
+ * timer count value.  The frequency of a timer interrupt is given by the
  * following equation:
  *
  * Interrupt Frequency = (Source Clock Frequency) / (PRSCL+1) / (DIV+1)

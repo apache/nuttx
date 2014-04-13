@@ -252,7 +252,6 @@
 
 #define GPDMA_SOFTLBREQ(n)                (1 << (n)) /* Bits 0-15: Software last burst request flags for source n */
                                                      /* Bits 16-31: Reserved */
-                                                     
 /* DMA Software Last Single Request Register */
 
 #define GPDMA_SOFTLSREQ(n)                (1 << (n)) /* Bits 0-15: Software last single burst request flags for source n */

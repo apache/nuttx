@@ -94,7 +94,7 @@ static int load_default_priority(FAR struct binary_s *bin)
       bdbg("ERROR: sched_getparam failed: %d\n", errno);
       return ERROR;
     }
-  
+
   /* Save that as the priority of child thread */
 
   bin->priority = param.sched_priority;

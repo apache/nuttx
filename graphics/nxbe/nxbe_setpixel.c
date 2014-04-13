@@ -141,7 +141,7 @@ void nxbe_setpixel(FAR struct nxbe_window_s *wnd,
 
   rect.pt2.x = rect.pt1.x;
   rect.pt2.y = rect.pt1.y;
- 
+
 #if CONFIG_NX_NPLANES > 1
   for (i = 0; i < wnd->be->vinfo.nplanes; i++)
 #else

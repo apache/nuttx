@@ -5,7 +5,7 @@ configs/skp16c26/README.txt
    buildroot can be downloaded from misc/buildroot in the NuttX GIT.  Insructions
    for building the toolchain are provided below.
 
-   However, the target cannot be built because the GNU m16c-nuttx-elf-ld link fails with 
+   However, the target cannot be built because the GNU m16c-nuttx-elf-ld link fails with
    the following message:
 
      m32c-nuttx-elf-ld: BFD (GNU Binutils) 2.19 assertion fail /home/Owner/projects/nuttx/buildroot/toolchain_build_m32c/binutils-2.19/bfd/elf32-m32c.c:482
@@ -18,7 +18,7 @@ configs/skp16c26/README.txt
 
    No workaround is known at this time.  This is a show stopper for M16C.
 
-2. A supported version of the M16C toolchain is available here: 
+2. A supported version of the M16C toolchain is available here:
 
      http://www.kpitgnutools.com/index.php
 
@@ -51,13 +51,13 @@ NOTE:  See the toolchain issues above -- you may not want to waste your time.
      rename the directory to buildroot
 
    b. Using GIT
-   
+
      Check out the misc/buildroot module. GIT checkout instructions:
 
         http://sourceforge.net/p/nuttx/git/ci/master/tree/misc/buildroot/
 
    Make the archive directory:
-  
+
      mkdir archive
 
    The <nuttx-dir>/../buildroot is where the toolchain is built;
@@ -67,7 +67,7 @@ NOTE:  See the toolchain issues above -- you may not want to waste your time.
 
      cd <nuttx-dir>/tools
      ./configure.sh <nuttx-configuration>
-     
+
 4. Configure and Make the buildroot
 
      cd buildroot
@@ -109,4 +109,4 @@ Cygwin GCC BUILD NOTES
    build, the workaround is the same except that the directory will be
    toolchain_build_m32c/gcc-4.2.4-final/gcc.
 
-   
+

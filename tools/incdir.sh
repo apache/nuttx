@@ -40,7 +40,7 @@ pathtype=user
 usage="USAGE: $progname [-w] [-d] [-h] <compiler-path> <dir1> [<dir2> [<dir3> ...]]"
 advice="Try '$progname -h' for more information"
 
-while [ ! -z "$1" ]; do 
+while [ ! -z "$1" ]; do
 	case $1 in
 	-d )
 		set -x

@@ -68,11 +68,11 @@
  * Name: stm32_pmsleep
  *
  * Description:
- *   Enter SLEEP mode. 
+ *   Enter SLEEP mode.
  *
  * Input Parameters:
  *   sleeponexit - true:  SLEEPONEXIT bit is set when the WFI instruction is
- *                        executed, the MCU enters Sleep mode as soon as it 
+ *                        executed, the MCU enters Sleep mode as soon as it
  *                        exits the lowest priority ISR.
  *               - false: SLEEPONEXIT bit is cleared, the MCU enters Sleep mode
  *                        as soon as WFI or WFE instruction is executed.

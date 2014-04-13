@@ -37,7 +37,7 @@ ADVICE="Try '$0 -h' for more information"
 
 unset VERSION
 
-while [ ! -z "$1" ]; do 
+while [ ! -z "$1" ]; do
     case $1 in
     -v )
         shift

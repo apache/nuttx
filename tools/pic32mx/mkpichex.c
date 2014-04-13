@@ -301,7 +301,7 @@ int main(int argc, char **argv, char **envp)
   if (remove(srcfile) != 0)
     {
       fprintf(stderr, "Failed to remove the old '%s'\n", srcfile);
-    
+
     }
 
   /* Rename the new nuttx.tmp file to nuttx.hex */

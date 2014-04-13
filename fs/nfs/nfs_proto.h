@@ -230,7 +230,7 @@ typedef enum
   NFFIFO = 7                   /* Named FIFO */
 } nfstype;
 
-/* File Handle variable is up to 64 bytes for version 3. This structures a 
+/* File Handle variable is up to 64 bytes for version 3. This structures a
  * ariable sized and are provided only for setting aside maximum memory
  * allocations for a file handle.
  */
@@ -324,7 +324,7 @@ struct nfs_statfs
   nfsuint64          sf_afiles;
   uint32_t           sf_invarsec;
 };
- 
+
 struct post_attr
 {
   uint32_t           obj_attributesfalse;
@@ -519,12 +519,12 @@ struct MKDIR3resok
   struct wcc_data    dir_wcc;
 };
 
-struct RMDIR3args 
+struct RMDIR3args
 {
   struct diropargs3  object;
 };
 
-struct RMDIR3resok 
+struct RMDIR3resok
 {
   struct wcc_data    dir_wcc;
 };
@@ -533,7 +533,7 @@ struct RMDIR3resok
  * only useful in setting aside maximum memory usage for the LOOKUP arguments.
  */
 
-struct READDIR3args 
+struct READDIR3args
 {
   struct file_handle dir;                      /* Variable length */
   nfsuint64          cookie;
@@ -552,8 +552,8 @@ struct READDIR3args
  *  Cookie (8 bytes)
  *  next entry (4 bytes)
  */
- 
-struct READDIR3resok 
+
+struct READDIR3resok
 {
   uint32_t           attributes_follow;
   struct nfs_fattr   dir_attributes;

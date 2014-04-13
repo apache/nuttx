@@ -290,7 +290,7 @@ int elf_bind(FAR struct elf_loadinfo_s *loadinfo,
   for (i = 1; i < loadinfo->ehdr.e_shnum; i++)
     {
       /* Get the index to the relocation section */
-      
+
       int infosec = loadinfo->shdr[i].sh_info;
       if (infosec >= loadinfo->ehdr.e_shnum)
         {

@@ -35,7 +35,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  **************************************************************************************/
- 
+
 /**************************************************************************************
  * Included Files
  **************************************************************************************/
@@ -87,14 +87,14 @@
 
 /* STM32F4Discovery LCD Hardware Definitions ******************************************/
 /* LCD /CS is CE1 ==  NOR/SRAM Bank 1
- * 
+ *
  * Bank 1 = 0x60000000 | 0x00000000
  * Bank 2 = 0x60000000 | 0x04000000
  * Bank 3 = 0x60000000 | 0x08000000
  * Bank 4 = 0x60000000 | 0x0c000000
  *
  * FSMC address bit 16 is used to distinguish command and data.  FSMC address bits
- * 0-24 correspond to ARM address bits 1-25. 
+ * 0-24 correspond to ARM address bits 1-25.
  */
 
 #define STM32_LCDBASE ((uintptr_t)(0x60000000 | 0x00000000))
@@ -309,7 +309,7 @@ void stm32_selectlcd(void)
   stm32_enablefsmc();
 
   /* Color LCD configuration (LCD configured as follow):
-   * 
+   *
    *   - Data/Address MUX  = Disable   "FSMC_BCR_MUXEN" just not enable it.
    *   - Extended Mode     = Disable   "FSMC_BCR_EXTMOD"
    *   - Memory Type       = SRAM      "FSMC_BCR_SRAM"

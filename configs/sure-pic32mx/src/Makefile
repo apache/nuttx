@@ -37,7 +37,7 @@
 
 CFLAGS += -I$(TOPDIR)/sched
 
-ASRCS = 
+ASRCS =
 CSRCS = pic32mx_boot.c pic32mx_spi.c
 
 # Only the  DB_DP11215 PIC32 Storage Demo Board board has user controllable

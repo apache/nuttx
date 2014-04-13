@@ -449,7 +449,7 @@ static int skel_stat(const char *relpath, struct stat *buf)
   buf->st_size    = 0;
   buf->st_blksize = 0;
   buf->st_blocks  = 0;
-  
+
   return ret;
 }
 

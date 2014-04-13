@@ -263,7 +263,7 @@
 #define MCPWM_CAPCLR_MCCLR0          (1 << 0)  /* Bit 0:  Clear MCCAP0 register */
 #define MCPWM_CAPCLR_MCCLR1          (1 << 1)  /* Bit 1:  Clear MCCAP1 register */
 #define MCPWM_CAPCLR_MCCLR2          (1 << 2)  /* Bit 2:  Clear MCCAP2 register */
-                                               /* Bits 2-31: Reserved */ 
+                                               /* Bits 2-31: Reserved */
 
 /************************************************************************************
  * Public Types

@@ -568,7 +568,7 @@ static int up_interrupt(int irq, void *context)
   struct up_dev_s   *priv;
 
 #ifdef CONFIG_SH1_SCI0
-  if ((irq >= g_sci0priv.irq) && 
+  if ((irq >= g_sci0priv.irq) &&
       (irq <= g_sci0priv.irq +  SH1_SCI_NIRQS))
     {
       dev = &g_sci0port;
@@ -576,7 +576,7 @@ static int up_interrupt(int irq, void *context)
   else
 #endif
 #ifdef CONFIG_SH1_SCI1
-  if ((irq >= g_sci1priv.irq) && 
+  if ((irq >= g_sci1priv.irq) &&
       (irq <= g_sci1priv.irq +  SH1_SCI_NIRQS))
     {
       dev = &g_sci1port;
@@ -616,7 +616,7 @@ static int up_interrupt(int irq, void *context)
 
   /* Handle outgoing, transmit bytes (TDRE: Transmit Data Register Empty)
    * when TIE is enabled.  TIE is only enabled when the driver is waiting with
-   * buffered data.  Since TDRE is usually true, 
+   * buffered data.  Since TDRE is usually true,
    */
 
   if ((priv->ssr & SH1_SCISSR_TDRE) != 0 && (priv->scr & SH1_SCISCR_TIE) != 0)
@@ -836,7 +836,7 @@ static bool up_txready(struct uart_dev_s *dev)
  * Name: up_earlyconsoleinit
  *
  * Description:
- *   Performs the low level SCI initialization early in 
+ *   Performs the low level SCI initialization early in
  *   debug so that the serial console will be available
  *   during bootup.  This must be called before up_consoleinit.
  *

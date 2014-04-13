@@ -59,7 +59,7 @@ conditions where mmap() can be supported:
 
    c. All mapped files are read-only.  You can write to the in-memory image,
       but the file contents will not change.
- 
+
    d. There are no access privileges.
 
    e. Since there are no processes in NuttX, all mmap() and munmap()

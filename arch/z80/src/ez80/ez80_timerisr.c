@@ -79,7 +79,7 @@ int up_timerisr(int irq, chipreg_t *regs)
   volatile uint8_t reg;
 
   /* Read the appropropriate timer0 registr to clear the interrupt */
-  
+
 #ifdef _EZ80F91
   reg = inp(EZ80_TMR0_IIR);
 #else
@@ -91,7 +91,7 @@ int up_timerisr(int irq, chipreg_t *regs)
   /* Process timer interrupt */
 
   sched_process_timer();
-   
+
  /* Architecture specific hook into the timer interrupt handler */
 
 #ifdef CONFIG_ARCH_TIMERHOOK
@@ -147,7 +147,7 @@ void up_timerinit(void)
   outp(EZ80_TMR0_RRL, (uint8_t)(reload));
 
   /* Clear any pending timer interrupts */
-  
+
 #if defined(_EZ80F91)
   reg = inp(EZ80_TMR0_IIR);
 #elif defined(_EZ80L92) || defined(_EZ80F92) ||defined(_EZ80F93)

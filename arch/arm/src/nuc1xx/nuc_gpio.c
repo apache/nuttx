@@ -140,7 +140,7 @@ int nuc_configgpio(gpio_cfgset_t cfgset)
     {
       regval |= GPIO_OFFD(pin);
     }
- 
+
   putreg32(regval, regaddr);
 
   /* Check if we need to enable debouncing */
@@ -153,7 +153,7 @@ int nuc_configgpio(gpio_cfgset_t cfgset)
     {
       regval |= GPIO_DBEN(pin);
     }
- 
+
   putreg32(regval, regaddr);
 
   /* Configure interrupting pins */

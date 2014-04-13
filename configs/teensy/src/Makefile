@@ -35,7 +35,7 @@
 
 -include $(TOPDIR)/Make.defs
 
-ASRCS		= 
+ASRCS		=
 CSRCS		= up_boot.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
@@ -64,13 +64,13 @@ endif
 
 ifeq ($(WINTOOL),y)
   CFLAGS	+= -I "${shell cygpath -w $(TOPDIR)/sched}"
-  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" 
-  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/common}" 
+  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}"
+  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/common}"
   CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/$(ARCH_SUBDIR)}"
 else
   CFLAGS	+= -I "$(TOPDIR)/sched"
   CFLAGS	+= -I "$(ARCH_SRCDIR)/chip"
-  CFLAGS	+= -I "$(ARCH_SRCDIR)/common" 
+  CFLAGS	+= -I "$(ARCH_SRCDIR)/common"
   CFLAGS	+= -I "$(ARCH_SRCDIR)/$(ARCH_SUBDIR)"
 endif
 

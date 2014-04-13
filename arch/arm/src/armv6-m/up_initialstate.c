@@ -96,7 +96,7 @@ void up_initial_state(struct tcb_s *tcb)
   /* Save the task entry point (stripping off the thumb bit) */
 
   xcp->regs[REG_PC]      = (uint32_t)tcb->start & ~1;
-  
+
   /* Specify thumb mode */
 
   xcp->regs[REG_XPSR]    = ARMV6M_XPSR_T;

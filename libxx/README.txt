@@ -8,7 +8,7 @@ have a need for more extensive C++ support, the following libraries
 are recommended:
 
  - libstdc++  (part of GCC)
- - STLport    http://www.stlport.org/ 
+ - STLport    http://www.stlport.org/
  - uClibc++   http://cxx.uclibc.org/
  - uSTL       http://ustl.sourceforge.net/
 
@@ -24,7 +24,7 @@ At present, only the following are supported here:
  - void __cxa_pure_virtual(void);
  - int __aeabi_atexit(void* object, void (*destroyer)(void*), void *dso_handle);
  - int __cxa_atexit(__cxa_exitfunc_t func, FAR void *arg, FAR void *dso_handle);
- 
+
 operator new
 ------------
 

@@ -109,7 +109,7 @@ int elf_loaddtors(FAR struct elf_loadinfo_s *loadinfo)
 
   /* Find the index to the section named ".dtors."  NOTE:  On old ABI system,
    * .dtors is the name of the section containing the list of destructors;
-   * On newer systems, the similar section is called .fini_array.  It is 
+   * On newer systems, the similar section is called .fini_array.  It is
    * expected that the linker script will force the section name to be ".dtors"
    * in either case.
    */
@@ -204,7 +204,7 @@ int elf_loaddtors(FAR struct elf_loadinfo_s *loadinfo)
            * loaded into memory.  Since the .dtors lie in allocated memory, they
            * will be relocated via the normal mechanism.
            */
- 
+
           loadinfo->dtors = (binfmt_dtor_t*)shdr->sh_addr;
         }
     }

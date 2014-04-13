@@ -29,7 +29,7 @@ Dev vs. Production Neuros OSD v1.0 boards
   available commercial v1.0 Boards, most notably in the amount of memory:
   8Mb FLASH and 32Mb RAM vs. 16Mb and 64Mb as in the production board.
   See the following for more information:
-    
+
      http://wiki.neurostechnology.com/index.php/OSD_Developer_Board_v1
 
   NuttX operates on the ARM9EJS of this dual core processor.  The DSP
@@ -112,7 +112,7 @@ GNU Toolchain Options
   NOTE 2: The devkitARM toolchain includes a version of MSYS make.  Make sure that
   the paths to Cygwin's /bin and /usr/bin directories appear BEFORE the devkitARM
   path or will get the wrong version of make.
- 
+
   Generic arm-none-eabi GNU Toolchain
   -----------------------------------
   There are a number of toolchain projects providing support for ARMv4/v5
@@ -135,7 +135,7 @@ IDEs
 
   NuttX is built using command-line make.  It can be used with an IDE, but some
   effort will be required to create the project.
-  
+
   Makefile Build
   --------------
   Under Eclipse, it is pretty easy to set up an "empty makefile project" and
@@ -273,7 +273,7 @@ ARM/DM320-specific Configuration Options
 	CONFIG_DM320_GIO_USBATTACH
 	   GIO that detects USB attach/detach events
 	CONFIG_DM320_GIO_USBDPPULLUP
-	   GIO 
+	   GIO
 	CONFIG_DMA320_USBDEV_DMA
 	   Enable DM320-specific DMA support
 	CONFIG_DM320_GIO_USBATTACH=6
@@ -393,5 +393,5 @@ DM320 USB Configuration
 Neuros OSD Configuration Options
 
  CONFIG_ARCH_NTOSD_DEVBOARD - Selects the old NTOSD development board.
-   The default is the production OSD board which differs in 
+   The default is the production OSD board which differs in
    several ways.

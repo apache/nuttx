@@ -60,12 +60,12 @@
 
 /* Clocking and power control - Phase locked loops */
 
-#define LPC17_SYSCON_PLL0CON_OFFSET   0x0080 /* PLL0 Control Register */     
+#define LPC17_SYSCON_PLL0CON_OFFSET   0x0080 /* PLL0 Control Register */
 #define LPC17_SYSCON_PLL0CFG_OFFSET   0x0084 /* PLL0 Configuration Register */
 #define LPC17_SYSCON_PLL0STAT_OFFSET  0x0088 /* PLL0 Status Register */
 #define LPC17_SYSCON_PLL0FEED_OFFSET  0x008c /* PLL0 Feed Register */
 
-#define LPC17_SYSCON_PLL1CON_OFFSET   0x00a0 /* PLL1 Control Register */     
+#define LPC17_SYSCON_PLL1CON_OFFSET   0x00a0 /* PLL1 Control Register */
 #define LPC17_SYSCON_PLL1CFG_OFFSET   0x00a4 /* PLL1 Configuration Register */
 #define LPC17_SYSCON_PLL1STAT_OFFSET  0x00a8 /* PLL1 Status Register */
 #define LPC17_SYSCON_PLL1FEED_OFFSET  0x00ac /* PLL1 Feed Register */

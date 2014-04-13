@@ -171,7 +171,7 @@ arch/arm - ARM-based micro-controllers
         is complete on the basic port (timer, serial console, SPI).
 
     arch/arm/include/lm and arch/arm/src/lm
-        These directories contain support for the Luminary LM3S/4F family. The 
+        These directories contain support for the Luminary LM3S/4F family. The
         initial, release of this port was included in NuttX version 0.4.6.  The
         current port includes timer, serial console, Ethernet, SSI, and microSD
         support. There are working configurations the NuttX OS test, to run the
@@ -211,7 +211,7 @@ arch/arm - ARM-based micro-controllers
         STATUS: The basic AT91SAM3U port was released in NuttX version 5.1.
         The basic port includes boot-up logic, interrupt driven serial
         console, and system timer interrupts. That release passes the
-        NuttX OS test and is proven to have a valid OS implementation. A 
+        NuttX OS test and is proven to have a valid OS implementation. A
         onfiguration to support the NuttShell is also included.
 
     arch/arm/include/stm32 and arch/arm/src/stm32

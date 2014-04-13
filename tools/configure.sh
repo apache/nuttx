@@ -162,7 +162,7 @@ if [ -z "${appdir}" ]; then
   fi
 
   # Check for an unversioned apps/ directory
- 
+
   if [ -d "${TOPDIR}/../apps" ]; then
     appdir="../apps"
 
@@ -171,7 +171,7 @@ if [ -z "${appdir}" ]; then
 
     if [ -d "${TOPDIR}/../apps-${CONFIG_VERSION_STRING}" ]; then
       appdir="../apps-${CONFIG_VERSION_STRING}"
-    fi 
+    fi
   fi
 fi
 
@@ -214,4 +214,4 @@ if [ "X${defappdir}" = "Xy" ]; then
   else
     echo "CONFIG_APPS_DIR=\"$posappdir\"" >> "${dest_config}"
   fi
-fi 
+fi

@@ -5923,7 +5923,7 @@ Additional new features and extended functionality:
     * TI Tiva TMC4C123G:
 
       - Added architecture support for the TI Tiva TM4C123G parts.  This was
-        merged into the existing support for the LM3S and LM4F families. 
+        merged into the existing support for the LM3S and LM4F families.
         All directory, file, and function references changed from lm to tiva.
 
     * TI Tiva TMC4C123G Board Support:
@@ -5949,7 +5949,7 @@ Additional new features and extended functionality:
 
     * Documentation:
 
-      - Added a coding standards document.  See 
+      - Added a coding standards document.  See
         http://www.nuttx.org/doku.php?id=documentation:codingstandard
 
     * Configuration/Build System:
@@ -6013,7 +6013,7 @@ Bugfixes (see the ChangeLog for details).  Some of these are very important:
       - Fix one place where the connection reference count was not being
         decremented in the socket close() logic.  This is really a cosmetic
         change BUT when CONFIG_DEBUG_NET is enabled, it will cause assertions.
-      - Backed out a small part of the NuttX 6.33 write buffering changed. 
+      - Backed out a small part of the NuttX 6.33 write buffering changed.
         David G says that this causes problems in connecting to a server.
       - In DHCPD, there was a place where the logic was calling ntohl()
         inappropriately; the address was already in the correct order.  How
@@ -6054,7 +6054,7 @@ Bugfixes (see the ChangeLog for details).  Some of these are very important:
 
     * Configuration/Build System:
 
-      - Several changes to restore the broken native Windows build 
+      - Several changes to restore the broken native Windows build
 
     * NuttShell (NSH):
 

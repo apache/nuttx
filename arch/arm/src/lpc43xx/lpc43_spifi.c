@@ -241,7 +241,7 @@
  * Compute this from the SPIFI clock period and the minimum high time of CS
  * from the serial flash data sheet:
  *
- *   csHigh = ceiling( min CS high / SPIFI clock period ) - 1 
+ *   csHigh = ceiling( min CS high / SPIFI clock period ) - 1
  *
  * where ceiling means round up to the next higher integer if the argument
  * isn’t an integer.
@@ -381,7 +381,7 @@ static void lpc43_blockerase(struct lpc43_dev_s *priv, off_t sector)
   priv->operands.dest   = SPIFI_BASE + (sector << SPIFI_BLKSHIFT);
   priv->operands.length = SPIFI_BLKSIZE;
 
-  fvdbg("SPIFI_ERASE: dest=%p length=%d\n", 
+  fvdbg("SPIFI_ERASE: dest=%p length=%d\n",
         priv->operands.dest, priv->operands.length);
 
   result = SPIFI_ERASE(priv, &priv->rom, &priv->operands);
@@ -456,7 +456,7 @@ static int lpc43_pagewrite(FAR struct lpc43_dev_s *priv, FAR uint8_t *dest,
   priv->operands.dest   = dest;
   priv->operands.length = nbytes;
 
-  fvdbg("SPIFI_PROGRAM: src=%p dest=%p length=%d\n", 
+  fvdbg("SPIFI_PROGRAM: src=%p dest=%p length=%d\n",
         src, priv->operands.dest, priv->operands.length);
 
   result = SPIFI_PROGRAM(priv, &priv->rom, src, &priv->operands);
@@ -543,7 +543,7 @@ static FAR uint8_t *lpc43_cacheread(struct lpc43_dev_s *priv, off_t sector)
   FAR const uint8_t *src;
   off_t blkno;
   int   index;
- 
+
   /* Convert from the 512 byte sector to the erase sector size of the device.  For
    * exmample, if the actual erase sector size if 4Kb (1 << 12), then we first
    * shift to the right by 3 to get the sector number in 4096 increments.
@@ -881,7 +881,7 @@ static int lpc43_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
             ret = lpc43_chiperase(priv);
         }
         break;
- 
+
       case MTDIOC_XIPBASE:
       default:
         ret = -ENOTTY; /* Bad command */
@@ -1156,7 +1156,7 @@ FAR struct mtd_dev_s *lpc43_spifi_initialize(void)
 
   priv->operands.protect = -1;              /* Save and restore protection */
   priv->operands.options = S_CALLER_ERASE;  /* This driver will do erasure */
-  
+
   /* Initialize the SPIFI.  Interrupts must be disabled here because shared
    * CGU registers will be modified.
    */
@@ -1230,7 +1230,7 @@ void pullMISO(int high)
 
   /* Control MISO pull-up/down state  Assume pull down by clearing:
    *
-   *  EPD = Enable pull-down connect (bit 
+   *  EPD = Enable pull-down connect (bit
    */
 
   pinconfig = PINCONF_SPIFI_MISO & ~(PINCONF_PULLUP | PINCONF_PULLDOWN);

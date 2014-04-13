@@ -9,7 +9,7 @@
  *   Copyright (C) 2011 Li Zhuoyi. All rights reserved.
  *   Author: Li Zhuoyi <lzyy.cn@gmail.com>
  *   History: 0.1 2011-08-05 initial version
- * 
+ *
  * This file is a part of NuttX:
  *
  *   Copyright (C) 2010-2012 Gregory Nutt. All rights reserved.
@@ -121,7 +121,7 @@ static void dac_reset(FAR struct dac_dev_s *dev)
 {
   irqstate_t flags;
   uint32_t regval;
-    
+
   flags = irqsave();
 
   regval  = getreg32(LPC43_SYSCON_PCLKSEL0);

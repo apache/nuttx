@@ -251,7 +251,7 @@ static inline int nxflat_gotrelocs(FAR struct nxflat_loadinfo_s *loadinfo)
 
   relocs = (FAR struct nxflat_reloc_s *)
         (offset - loadinfo->isize + loadinfo->dspace->region);
-  bvdbg("isize: %08lx dpsace: %p relocs: %p\n", 
+  bvdbg("isize: %08lx dpsace: %p relocs: %p\n",
         (long)loadinfo->isize, loadinfo->dspace->region, relocs);
 
   /* All relocations are performed within the D-Space allocation.  If

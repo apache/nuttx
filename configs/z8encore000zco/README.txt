@@ -15,12 +15,12 @@ Version 4.10.1
     @@ -94,8 +94,11 @@
     {
        int i;
- 
+
     +#if 0 /* DO NOT CHECK IN */
        CHECK_ALLOCNODE_SIZE;
        CHECK_FREENODE_SIZE;
     +#endif
- 
+
    /* Set up global variables */
 
 Version 4.9.5
@@ -37,7 +37,7 @@ Version 5.0.0
   to modify the versioning in Make.defs and setenv.sh; if you want to build
   on a different platform, you will need to change the path in the ZDS binaries
   in those same files.
-  
+
 Other Versions
   If you use any version of ZDS-II other than 5.0.0 or if you install ZDS-II
   at any location other than the default location, you will have to modify
@@ -93,7 +93,7 @@ available:
         CONFIG_APPS_DIR="..\apps"
 
       NOTES:
-      
+
       a. If you need to change the toolchain path used in Make.defs, you
          will need to use the short 8.3 filenames to avoid spaces.  On my
          PC, C:\PROGRA~1\ is is C:\Program Files\ and C:\PROGRA~2\ is

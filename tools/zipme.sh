@@ -49,7 +49,7 @@ unset VERSIONOPT
 unset BUILD
 unset DEBUG
 
-while [ ! -z "$1" ]; do 
+while [ ! -z "$1" ]; do
     case $1 in
     -b )
         shift

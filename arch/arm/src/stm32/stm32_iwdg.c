@@ -418,7 +418,7 @@ static int stm32_keepalive(FAR struct watchdog_lowerhalf_s *lower)
   irqstate_t flags;
 
   wdvdbg("Entry\n");
- 
+
   /* Reload the IWDG timer */
 
   flags = irqsave();
@@ -600,7 +600,7 @@ static int stm32_settimeout(FAR struct watchdog_lowerhalf_s *lower,
    * So we want:
    *  timeout = 1000 * reload / Fiwdg
    */
- 
+
   priv->timeout = (1000 * (uint32_t)reload) / fiwdg;
 
   /* Save setup values for later use */
@@ -619,7 +619,7 @@ static int stm32_settimeout(FAR struct watchdog_lowerhalf_s *lower,
   /* If CONFIG_STM32_IWDG_DEFERREDSETUP is selected, then perform the register
    * configuration only if the timer has been started.
    */
- 
+
 #ifdef CONFIG_STM32_IWDG_DEFERREDSETUP
   if (priv->started)
 #endif

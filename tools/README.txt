@@ -240,7 +240,7 @@ bdf-convert.c
   Create a new NuttX configuration variable.  For example, suppose
   you define the following variable:  CONFIG_NXFONT_MYFONT.  Then
   you would need to:
-  
+
     3. Define CONFIG_NXFONT_MYFONT=y in your NuttX configuration file.
 
   A font ID number has to be assigned for each new font.  The font ID
@@ -251,7 +251,7 @@ bdf-convert.c
 
     4. include/nuttx/nx/nxfonts.h. Add you new font as a possible system
        default font:
- 
+
        #if defined(CONFIG_NXFONT_SANS23X27)
        # define NXFONT_DEFAULT FONTID_SANS23X27
        #elif defined(CONFIG_NXFONT_MYFONT)
@@ -260,7 +260,7 @@ bdf-convert.c
 
        Then define the actual font ID.  Make sure that the font ID value
        is unique:
- 
+
        enum nx_fontid_e
        {
          FONTID_DEFAULT     = 0      /* The default font */
@@ -271,7 +271,7 @@ bdf-convert.c
          , FONTID_MYFONT    = 2      /* My shiny, new font */
        #endif
        ...
- 
+
   New Add the font to the NX build system.  There are several files that
   you have to modify to to this.  Look how the build system uses the
   font CONFIG_NXFONT_SANS23X27 for examaples:
@@ -338,7 +338,7 @@ bdf-convert.c
        font.  The lookup function is NXHANDLE nxf_getfonthandle(enum nx_fontid_e fontid).
        The new font information needs to be added to data structures used by
        that function:
- 
+
        #ifdef CONFIG_NXFONT_SANS23X27
        extern const struct nx_fontpackage_s g_sans23x27_package;
        #endif
@@ -516,7 +516,7 @@ kconfig.bat
   variables from the Cygwin kconfig-mconf running in the CMD.exe shell.
   The following change to the top-level Kconfig file seems to work around
   these problems:
-  
+
      config APPSDIR
           string
      -   option env="APPSDIR"

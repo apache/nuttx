@@ -112,7 +112,7 @@
 #  define CONFIG_STM32_CCMEXCLUDE 1
 
    /* Only one memory region can be support (internal SRAM) */
- 
+
 #  if CONFIG_MM_REGIONS > 1
 #    error "CONFIG_MM_REGIONS > 1.  The STM32L15X has only one memory region."
 #  endif
@@ -239,7 +239,7 @@
  * regions are contiguous and treated as one in this logic that extends to
  * 0x2002:0000 (or 0x2003:0000 for the F427/F437/F429/F439).
  *
- * As a complication, CCM SRAM cannot be used for DMA.  So, if STM32 DMA is enabled, 
+ * As a complication, CCM SRAM cannot be used for DMA.  So, if STM32 DMA is enabled,
  * CCM SRAM should probably be excluded from the heap or the application must take
  * extra care to ensure that DMA buffers are not allocated in CCM SRAM.
  *
@@ -347,7 +347,7 @@
 #      undef CONFIG_STM32_CCMEXCLUDE
 #      define CONFIG_STM32_CCMEXCLUDE 1
 #    endif
-   
+
 #  elif !defined(CONFIG_STM32_CCMEXCLUDE)
 
    /* Configuration 2: FSMC SRAM is not used, but CCM SRAM is requested.  DMA

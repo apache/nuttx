@@ -53,7 +53,7 @@
  * the ADC0_MASK within the board-specific library.
  */
 
-#ifdef CONFIG_ADC_CHANLIST 
+#ifdef CONFIG_ADC_CHANLIST
 #  if !defined(CONFIG_ADC_NCHANNELS)
 #    error "CONFIG_ADC_CHANLIST must defined in this configuration"
 #  elif CONFIG_ADC_NCHANNELS < 1
@@ -92,7 +92,7 @@ extern "C"
  * the ADC0_MASK within the board-specific library.
  */
 
-#ifdef CONFIG_ADC_CHANLIST 
+#ifdef CONFIG_ADC_CHANLIST
 EXTERN uint8_t g_adc_chanlist[CONFIG_ADC_NCHANNELS];
 #endif
 

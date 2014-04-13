@@ -90,7 +90,7 @@
 #define   LPC214X_PLL_BASE              0xe01fc080  /* Phase Locked Loop (PLL) base address */
 #define   LPC214X_PCON_BASE             0xe01fc0c0  /* Power Control (PCON) base address */
 #define   LPC214X_APBDIV                0xe01fc100  /* APBDIV Address */
-#define   LPC214X_EXT_BASE              0xe01fc140  /* External Interrupt base address */       
+#define   LPC214X_EXT_BASE              0xe01fc140  /* External Interrupt base address */
 
 /* AHB Register block base addresses */
 

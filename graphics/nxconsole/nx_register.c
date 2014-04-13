@@ -182,7 +182,7 @@ static int nxcon_bitmap(FAR struct nxcon_state_s *priv,
  *   minor - The device minor number
  *
  * Return:
- *   A non-NULL handle is returned on success. 
+ *   A non-NULL handle is returned on success.
  *
  ****************************************************************************/
 

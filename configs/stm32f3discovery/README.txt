@@ -36,7 +36,7 @@ GNU Toolchain Options
   toolchain options.
 
   1. The CodeSourcery GNU toolchain,
-  2. The Atollic Toolchain, 
+  2. The Atollic Toolchain,
   3. The devkitARM GNU toolchain,
   4. Raisonance GNU toolchain, or
   5. The NuttX buildroot Toolchain (see below).
@@ -114,7 +114,7 @@ GNU Toolchain Options
   In order to compile successfully.  Otherwise, you will get errors like:
 
     "C++ Compiler only available in TrueSTUDIO Professional"
-  
+
   The make may then fail in some of the post link processing because of some of
   the other missing tools.  The Make.defs file replaces the ar and nm with
   the default system x86 tool versions and these seem to work okay.  Disable all
@@ -136,7 +136,7 @@ IDEs
 
   NuttX is built using command-line make.  It can be used with an IDE, but some
   effort will be required to create the project.
-  
+
   Makefile Build
   --------------
   Under Eclipse, it is pretty easy to set up an "empty makefile project" and
@@ -233,7 +233,7 @@ NXFLAT Toolchain
   tools -- just the NXFLAT tools.  The buildroot with the NXFLAT tools can
   be downloaded from the NuttX SourceForge download site
   (https://sourceforge.net/projects/nuttx/files/).
- 
+
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
@@ -458,7 +458,7 @@ STM32F3Discovery-specific Configuration Options
        configuration features.
 
        CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG=n
- 
+
     CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
        hence, the board that supports the particular chip or SoC.
 
@@ -582,7 +582,7 @@ STM32F3Discovery-specific Configuration Options
   configuration settings:
 
     CONFIG_STM32_TIMx_CHANNEL - Specifies the timer output channel {1,..,4}
- 
+
   NOTE: The STM32 timers are each capable of generating different signals on
   each of the four channels with different duty cycles.  That capability is
   not supported by this driver:  Only one output channel per timer.
@@ -660,7 +660,7 @@ Where <subdir> is one of the following:
     builtin applications are selected (see NOTES below).
 
     NOTES:
- 
+
     1. This configuration uses the mconf-based configuration tool.  To
        change this configuration using that tool, you should:
 
@@ -687,13 +687,13 @@ Where <subdir> is one of the following:
        CONFIG_NSH_ARCHINIT=y         : To perform USB initialization
 
        The CDC/ACM example is included as two NSH "built-in" commands.\
- 
+
        CONFIG_SYSTEM_CDCACM=y      : Enable apps/system/cdcacm
-  
+
        The two commands are:
- 
+
        sercon : Connect the serial device a create /dev/ttyACM0
-       serdis : Disconnect the serial device.        
+       serdis : Disconnect the serial device.
 
        NOTE:  The serial connections/disconnections do not work as advertised.
        This is because the STM32F3Discovery board does not provide circuitry for
@@ -704,7 +704,7 @@ Where <subdir> is one of the following:
        1) Start NSH with USB disconnected
        2) enter to 'sercon' command to start the CDC/ACM device, then
        3) Connect the USB device to the host.
- 
+
        and to close the connection:
 
        4) Disconnect the USB device from the host
@@ -739,7 +739,7 @@ Where <subdir> is one of the following:
     There appears to be some kind of driver-related issue.
 
     NOTES:
- 
+
     1. This configuration uses the mconf-based configuration tool.  To
        change this configuration using that tool, you should:
 
@@ -814,7 +814,7 @@ Where <subdir> is one of the following:
 
        1) Start NSH with USB disconnected, then
        2) Connect the USB device to the host.
- 
+
     6. Using the Prolifics PL2303 Emulation
 
        You could also use the non-standard PL2303 serial device instead of

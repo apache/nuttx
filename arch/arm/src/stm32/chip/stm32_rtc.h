@@ -44,7 +44,7 @@
 
 #define STM32_RTC_CRH_OFFSET    0x0000    /* RTC control register High (16-bit) */
 #define STM32_RTC_CRL_OFFSET    0x0004    /* RTC control register low (16-bit) */
-#define STM32_RTC_PRLH_OFFSET   0x0008    /* RTC prescaler load register high (16-bit) */ 
+#define STM32_RTC_PRLH_OFFSET   0x0008    /* RTC prescaler load register high (16-bit) */
 #define STM32_RTC_PRLL_OFFSET   0x000c    /* RTC prescaler load register low (16-bit) */
 #define STM32_RTC_DIVH_OFFSET   0x0010    /* RTC prescaler divider register high (16-bit) */
 #define STM32_RTC_DIVL_OFFSET   0x0014    /* RTC prescaler divider register low (16-bit) */

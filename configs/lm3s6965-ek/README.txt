@@ -119,7 +119,7 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
 
     I have been using the on-board FT2232 JTAG/SWD/SWO interface.  OpenOCD
     requires a configuration file.  I keep the one I used last here:
-    
+
       configs/lm3s6965-ek/tools/lm3s6965-ek.cfg
 
     However, the "correct" configuration script to use with OpenOCD may
@@ -135,7 +135,7 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
     There is also a script on the tools/ directory that I use to start
     the OpenOCD daemon on my system called oocd.sh.  That script will
     probably require some modifications to work in another environment:
-  
+
     - Possibly the value of OPENOCD_PATH and TARGET_PATH
     - It assumes that the correct script to use is the one at
       configs/lm3s6965-ek/tools/lm3s6965-ek.cfg
@@ -170,11 +170,11 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
        .config file).
     2. The MCU must be halted prior to loading code using 'mon reset'
        as described below.
- 
+
     OpenOCD will support several special 'monitor' commands.  These
     GDB commands will send comments to the OpenOCD monitor.  Here
     are a couple that you will need to use:
-  
+
      (gdb) monitor reset
      (gdb) monitor halt
 
@@ -260,7 +260,7 @@ IDEs
 
   NuttX is built using command-line make.  It can be used with an IDE, but some
   effort will be required to create the project.
-  
+
   Makefile Build
   --------------
   Under Eclipse, it is pretty easy to set up an "empty makefile project" and
@@ -355,7 +355,7 @@ NXFLAT Toolchain
   tools -- just the NXFLAT tools.  The buildroot with the NXFLAT tools can
   be downloaded from the NuttX SourceForge download site
   (https://sourceforge.net/projects/nuttx/files/).
- 
+
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
@@ -395,7 +395,7 @@ USB Device Controller Functions
 
   Debugging with JTAG/SWD
 
-    The FT2232 USB device performs JTAG/SWD serial operations under the control 
+    The FT2232 USB device performs JTAG/SWD serial operations under the control
     of the debugger or the Luminary Flash Programmer.  It also operate as an
     In-Circuit Debugger Interface (ICDI), allowing debugging of any external
     target board.  Debugging modes:
@@ -504,7 +504,7 @@ Stellaris LM3S6965 Evaluation Kit Configuration Options
     CONFIG_TIVA_DISABLE_GPIOG_IRQS=n
     CONFIG_TIVA_DISABLE_GPIOH_IRQS=n
     CONFIG_TIVA_DISABLE_GPIOJ_IRQS=y
- 
+
   LM3S6965 specific device driver settings
 
     CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn for the

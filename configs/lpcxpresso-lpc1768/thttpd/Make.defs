@@ -47,7 +47,7 @@ ifeq ($(WINTOOL),y)
   ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/ld.script}"
   NXFLATLDSCRIPT = -T "${shell cygpath -w $(TOPDIR)/binfmt/libnxflat/gnu-nxflat-gotoff.ld}"
 else
-  # Linux/Cygwin-native toolchain 
+  # Linux/Cygwin-native toolchain
   MKDEP = $(TOPDIR)/tools/mkdeps.sh
   ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
   ARCHXXINCLUDES = -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx

@@ -89,7 +89,7 @@
 /* PLL0.  PLL0 is used to generate the CPU clock divider input (PLLCLK).
  *
  *  Source clock:               Main oscillator
- *  PLL0 Multiplier value (M):  20 
+ *  PLL0 Multiplier value (M):  20
  *  PLL0 Pre-divider value (N): 1
  *
  *  PLL0CLK = (2 * 20 * SYSCLK) / 1 = 480MHz
@@ -166,7 +166,7 @@
 #define LED_ASSERTION              2  /*  N/C  ON  = In an assertion */
 #define LED_PANIC                  2  /*  N/C  ON  = Oops! We crashed. (flashing) */
 #define LED_IDLE                   3  /*  OFF  N/C = LPC17 in sleep mode (LED1 glowing) */
- 
+
 /* Button definitions ***************************************************************/
 /* The LPC1766-STK supports several buttons.  All will read "1" when open and "0"
  * when closed

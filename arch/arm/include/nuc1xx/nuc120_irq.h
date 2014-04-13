@@ -82,7 +82,7 @@
 #define NUC_IRQ_ADC    (45) /* ADC */
                             /* 46: Reserved */
 #define NUC_IRQ_RTC    (47) /* Real time clock */
- 
+
 #define NR_IRQS        (48)
 
 /************************************************************************************

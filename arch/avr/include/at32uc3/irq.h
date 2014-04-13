@@ -63,7 +63,7 @@
 #  undef CONFIG_AVR32_GPIOIRQSETA
 #  undef CONFIG_AVR32_GPIOIRQSETB
 #endif
- 
+
 /* IRQ numbers **************************************************************/
 /* Events.  These exclude:
  *
@@ -287,7 +287,7 @@
 #if (CONFIG_AVR32_GPIOIRQSETA & 0x00000001) != 0
 #  define AVR32_IRQ_GPIO_PA0  __IRQ_GPPIO_PA0
 #  define __IRQ_GPIO_PA1      (__IRQ_GPPIO_PA0+1)
-#else 
+#else
 #  define __IRQ_GPIO_PA1      __IRQ_GPPIO_PA0
 #endif
 

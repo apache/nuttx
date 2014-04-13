@@ -103,7 +103,7 @@
 
 #  define BOARD_FCLKOUT_FREQUENCY   (72000000)  /* 6 * 12,000,000 / 1 */
 #  define BOARD_FCCO_FREQUENCY      (244000000) /* 2 * 2 * Fclkout */
- 
+
 #else
 
 /* NOTE:  At 72MHz, the calibrated value of CONFIG_BOARD_LOOPSPERMSEC was
@@ -115,7 +115,7 @@
  */
 
 /* Intermediate ramp-up clocking (Integer mode). If BOARD_PLL_RAMP_MSEL
- * is not defined, there will be no ramp-up.  
+ * is not defined, there will be no ramp-up.
  *
  *    Fclkout = 9 * 12MHz / 1  = 108MHz
  *    Fcco    = 2 * 1 * 108MHz = 216MHz
@@ -128,7 +128,7 @@
 #  define BOARD_RAMP_FCLKOUT        (108000000) /* 9 * 12,000,000 / 1 */
 #  define BOARD_RAMP_FCCO           (216000000) /* 2 * 1 * Fclkout */
 
-/* Final clocking (Direct mode). 
+/* Final clocking (Direct mode).
  *
  *    Fclkout = 17 * 12MHz / 1 = 204MHz
  *    Fcco    = Fclockout      = 204MHz
@@ -206,7 +206,7 @@
  *  LED2   D3  GPIO1[11]
  *
  * LEDs are pulled high to a low output illuminates the LED.
- * 
+ *
  * LED index values for use with lpc43_setled()
  */
 

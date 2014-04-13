@@ -116,7 +116,7 @@ FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size)
   /* Align the frame_size */
 
   frame_size = STACK_ALIGN_UP(frame_size);
-  
+
   /* Is there already a stack allocated? Is it big enough? */
 
   if (!tcb->stack_alloc_ptr || tcb->adj_stack_size <= frame_size)

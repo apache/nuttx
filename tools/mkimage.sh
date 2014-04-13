@@ -56,15 +56,15 @@
 #   Scenario #2
 #   -----------
 #   If the supplied image is not a standard binary
-#   executagle image then that is ok too, a header is 
+#   executagle image then that is ok too, a header is
 #   constructed and tacked onto the front of the supplied
 #   binary data forming the new binary image (in rr format).
-#   In this case the EntryAddr is set to 0xFFFFFFFF by 
+#   In this case the EntryAddr is set to 0xFFFFFFFF by
 #   default and the LoadAddr is set to   0x00000000 by
-#   default unless otherwise indicated by command line 
+#   default unless otherwise indicated by command line
 #   arguments -LEntry and -LAddr which if used are assumed
 #   to be in hexidecimal units.
-#   
+#
 #   -----------
 #   Scenario #3
 #   -----------
@@ -75,10 +75,10 @@
 #
 #   mkimage [--NoHeader ] <input-bin> <out-RR>
 #
-# Usage: 
-#   mkimage [--LAddr h] [--EAddr h] [--NoHeader] <input-bin> <out-RR> 
-#  
-# Examples: 
+# Usage:
+#   mkimage [--LAddr h] [--EAddr h] [--NoHeader] <input-bin> <out-RR>
+#
+# Examples:
 #   $ mkimage linux linux.rr
 #     ..or..
 #   $ mkimage -LAddr 10008000 -EAddr 10008000 vmlinux vmlinux.rr
@@ -90,8 +90,8 @@
 #   $ mkimage --LAddr A00 fileSys.gz fileSys.gz.rr
 #                     ^
 #                     |
-#                 Assumed hex units. 
-#                 Please omit the 
+#                 Assumed hex units.
+#                 Please omit the
 #                 leading "0x".
 ########################################################
 
@@ -185,7 +185,7 @@ if [ ! -z "$FileTypeExec" ] ; then
 	image_file=${binary}.binary.gz
     fi
   # ---------------------------------
-  # Next  | Create the header information (ascii) needed 
+  # Next  | Create the header information (ascii) needed
   #       | by the TI925 bootloader. This includes the
   #       | load address, entry address and byte count of
   #       | the binary executable data which will follow it.
@@ -211,8 +211,8 @@ if [ ! -z "$FileTypeExec" ] ; then
     numBytes=$(echo $numBytes | sed -e "s/^.*\(........\)$/\1/g")
   # ---------------------------------
   # Next  | Combine the ascii header information
-  #       | with the binary image to make the 
-  #       | final downloadable *mostly* binary 
+  #       | with the binary image to make the
+  #       | final downloadable *mostly* binary
   #       | image.
   # ---------------------------------
     rm -f ${outbin}
@@ -235,12 +235,12 @@ else
   # -----------
   # Scenario #2
   # -----------
-  # Just a binary image but not a standard executable 
+  # Just a binary image but not a standard executable
   # style binary (like ELF, etc). Might be a compressed
   # filesystem image, etc.
   # So...
   # ---------------------------------
-  # Next  | Create the header information (ascii) needed 
+  # Next  | Create the header information (ascii) needed
   #       | by the TI925 bootloader. This includes the
   #       | load address, entry address and byte count of
   #       | the binary file which will follow it.
@@ -255,7 +255,7 @@ else
     fi
   #
   # Note: The LoadAddr and EntryAddr are already established
-  # for us at this point, but we will need to compute the 
+  # for us at this point, but we will need to compute the
   # byte length of binary portion next.
   #
     numBytes=$(wc --bytes ${image_file})
@@ -267,8 +267,8 @@ else
   #
   # ---------------------------------
   # Next  | Combine the ascii header information
-  #       | with the binary image to make the 
-  #       | final downloadable *mostly* binary 
+  #       | with the binary image to make the
+  #       | final downloadable *mostly* binary
   #       | image.
   # ---------------------------------
   #

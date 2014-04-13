@@ -37,8 +37,8 @@
 
 # Sources
 
-ASRCS = 
-CSRCS = 
+ASRCS =
+CSRCS =
 
 CXXSRCS  = libxx_cxapurevirtual.cxx libxx_eabi_atexit.cxx  libxx_cxa_atexit.cxx
 

@@ -107,7 +107,7 @@ extern "C"
  *   On success, a non-NULL handle value is returned.  This handle may be
  *   used with subsequent timer/counter interfaces to manage the timer.  A
  *   NULL handle value is returned on a failure.
- *   
+ *
  ****************************************************************************/
 
 TC_HANDLE sam_tc_allocate(int channel, int mode);
@@ -123,7 +123,7 @@ TC_HANDLE sam_tc_allocate(int channel, int mode);
  *
  * Returned Value:
  *   None
- *   
+ *
  ****************************************************************************/
 
 void sam_tc_free(TC_HANDLE handle);
@@ -139,7 +139,7 @@ void sam_tc_free(TC_HANDLE handle);
  *   handle Channel handle previously allocated by sam_tc_allocate()
  *
  * Returned Value:
- *   
+ *
  ****************************************************************************/
 
 void sam_tc_start(TC_HANDLE handle);
@@ -154,7 +154,7 @@ void sam_tc_start(TC_HANDLE handle);
  *   handle Channel handle previously allocated by sam_tc_allocate()
  *
  * Returned Value:
- *   
+ *
  ****************************************************************************/
 
 void sam_tc_stop(TC_HANDLE handle);
@@ -167,7 +167,7 @@ void sam_tc_stop(TC_HANDLE handle);
  *    setting in the register will be the TC input frequency divided by
  *    the provided divider (which should derive from the divider returned
  *    by sam_tc_divider).
- *    
+ *
  *
  * Input Parameters:
  *   handle Channel handle previously allocated by sam_tc_allocate()

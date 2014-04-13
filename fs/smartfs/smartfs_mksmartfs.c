@@ -97,7 +97,7 @@ int mksmartfs(FAR const char *pathname)
   struct smart_format_s fmt;
   int ret;
   int x;
-  uint8_t type; 
+  uint8_t type;
   struct smart_read_write_s request;
 
   /* Find the inode of the block driver indentified by 'source' */
@@ -184,7 +184,7 @@ errout:
   if (ret < 0)
     {
       errno = -ret;
-      return ERROR; 
+      return ERROR;
     }
 
   return OK;

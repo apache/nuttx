@@ -64,7 +64,7 @@
 #define EF_ARM_EABI_VER4         0x04000000
 #define EF_ARM_EABI_VER5         0x05000000
 
-#define EF_ARM_BE8               0x00800000 
+#define EF_ARM_BE8               0x00800000
 
 /* Table 4-4, Processor specific section types */
 

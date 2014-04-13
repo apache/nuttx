@@ -62,7 +62,7 @@ def send_discover(socket):
     for c in cmd[:3]:
         chksum -= c;
     cmd[3] = chksum & 0xff
-    
+
     socket.sendto(cmd, ('<broadcast>', PORT))
 
 def read_responses(socket):
@@ -75,7 +75,7 @@ def read_responses(socket):
                 and response[0] == DISCOVER_PROTO_ID
                 and response[1] == DISCOVER_RESPONSE
                 and check_sum(response)):
-                
+
                 dev = {}
                 dev['addr'] = src[0]
                 dev['descr'] = response[2:-1].tostring().rstrip('\0')

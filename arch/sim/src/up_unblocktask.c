@@ -109,7 +109,7 @@ void up_unblock_task(struct tcb_s *tcb)
   if (sched_addreadytorun(tcb))
     {
       /* The currently active task has changed! Copy the exception context
-       * into the TCB of the task that was previously active.  if 
+       * into the TCB of the task that was previously active.  if
        * up_setjmp returns a non-zero value, then this is really the
        * previously running task restarting!
        */

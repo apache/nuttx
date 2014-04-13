@@ -114,7 +114,7 @@ void up_leds(int r, int g ,int b, int freqs)
 
 void up_ioinit(void)
 {
-  /* Configure the GPIO pins as inputs.  NOTE that EXTI interrupts are 
+  /* Configure the GPIO pins as inputs.  NOTE that EXTI interrupts are
    * configured for all pins.
    */
 

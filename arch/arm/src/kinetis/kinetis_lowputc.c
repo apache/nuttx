@@ -56,7 +56,7 @@
 /**************************************************************************
  * Private Definitions
  **************************************************************************/
-     
+
 /* Select UART parameters for the selected console */
 
 #if defined(CONFIG_UART0_SERIAL_CONSOLE)
@@ -126,7 +126,7 @@ static uint8_t g_sizemap[8] = {1, 4, 8, 16, 32, 64, 128, 0};
 /**************************************************************************
  * Private Functions
  **************************************************************************/
- 
+
 /**************************************************************************
  * Public Functions
  **************************************************************************/
@@ -347,7 +347,7 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
     {
       regval |= UART_C1_M;
     }
-  
+
   /* The only other option is 8-bit operation */
 
   else
@@ -361,7 +361,7 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
 
   sbr = clock / (baud << 4);
   DEBUGASSERT(sbr < 0x2000);
-        
+
   /* Save the new baud divisor, retaining other bits in the UARTx_BDH
    * register.
    */
@@ -373,7 +373,7 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
 
   regval  = sbr & 0xff;
   putreg8(regval, uart_base+KINETIS_UART_BDL_OFFSET);
-    
+
   /* Calculate a fractional divider to get closer to the requested baud.
    * The fractional divider, BRFA, is a 5 bit fractional value that is
    * logically added to the SBR:
@@ -386,7 +386,7 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
 
   tmp  = clock - (sbr * (baud << 4));
   brfa = (tmp << 5) / (baud << 4);
-    
+
   /* Set the BRFA field (retaining other bits in the UARTx_C4 register) */
 
   regval  = getreg8(uart_base+KINETIS_UART_C4_OFFSET) & UART_C4_BRFA_MASK;
@@ -412,14 +412,14 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
       depth = (3 * depth) >> 2;
     }
   putreg8(depth , uart_base+KINETIS_UART_RWFIFO_OFFSET);
-  
+
   depth = g_sizemap[(regval & UART_PFIFO_TXFIFOSIZE_MASK) >> UART_PFIFO_TXFIFOSIZE_SHIFT];
   if (depth > 3)
     {
       depth = (depth >> 2);
     }
   putreg8(depth, uart_base+KINETIS_UART_TWFIFO_OFFSET);
-  
+
   /* Enable RX and TX FIFOs */
 
   putreg8(UART_PFIFO_RXFE | UART_PFIFO_TXFE, uart_base+KINETIS_UART_PFIFO_OFFSET);
@@ -431,8 +431,8 @@ void kinetis_uartconfigure(uintptr_t uart_base, uint32_t baud,
    *  (1 in this case) is less than or equal to 0.
    * RWFIFO[RXWATER] = 1:  RDRF will be set when the number of queued bytes
    *  (1 in this case) is greater than or equal to 1.
-   * 
-   * Set the watermarks to one/zero and disable the FIFOs 
+   *
+   * Set the watermarks to one/zero and disable the FIFOs
    */
 
   putreg8(1, uart_base+KINETIS_UART_RWFIFO_OFFSET);

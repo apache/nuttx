@@ -174,7 +174,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
    *
    *   BRG >= System Clock Frequency / (2 * SPIR)
    */
- 
+
   uint32_t brg = ((EZ80_SYS_CLK_FREQ+1)/2 + frequency - 1) / frequency;
 
   /* "When configured as a Master, the 16-bit divisor value must be between

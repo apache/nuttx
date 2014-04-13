@@ -17,7 +17,7 @@ config HAVE_CXX
 	bool "Have C++ compiler"
 	default n
 	---help---
-		Toolchain supports C++ and CXX, CXXFLAGS, and COMPILEXX have been 
+		Toolchain supports C++ and CXX, CXXFLAGS, and COMPILEXX have been
 		defined in the configurations Make.defs file.
 
 if HAVE_CXX
@@ -27,7 +27,7 @@ config HAVE_CXXINITIALIZE
 	default n
 	---help---
 		The platform-specific logic includes support for initialization
-		of static C++ instances for this architecture and for the selected 
+		of static C++ instances for this architecture and for the selected
 		toolchain (via up_cxxinitialize()).
 
 config CXX_NEWLONG

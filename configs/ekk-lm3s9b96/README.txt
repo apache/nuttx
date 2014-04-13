@@ -156,7 +156,7 @@ IDEs
 
   NuttX is built using command-line make.  It can be used with an IDE, but some
   effort will be required to create the project.
-  
+
   Makefile Build
   --------------
   Under Eclipse, it is pretty easy to set up an "empty makefile project" and
@@ -251,7 +251,7 @@ NXFLAT Toolchain
   tools -- just the NXFLAT tools.  The buildroot with the NXFLAT tools can
   be downloaded from the NuttX SourceForge download site
   (https://sourceforge.net/projects/nuttx/files/).
- 
+
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
@@ -361,7 +361,7 @@ Stellaris EKK-LM3S9B96 Evaluation Kit Configuration Options
     CONFIG_TIVA_DISABLE_GPIOG_IRQS=n
     CONFIG_TIVA_DISABLE_GPIOH_IRQS=n
     CONFIG_TIVA_DISABLE_GPIOJ_IRQS=y
- 
+
   LM3S9B96 specific device driver settings
 
     CONFIG_UARTn_SERIAL_CONSOLE - selects the UARTn for the

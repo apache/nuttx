@@ -70,7 +70,7 @@
  ************************************************************************************/
 
 /* The near RAM memory map is as follows:
- * 
+ *
  * 0x00400 - DATA		Size: Determined by linker
  *           BSS		Size: Determined by linker
  *           Interrupt stack	Size: CONFIG_ARCH_INTERRUPTSTACK

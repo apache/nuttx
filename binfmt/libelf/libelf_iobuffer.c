@@ -83,7 +83,7 @@ int elf_allocbuffer(FAR struct elf_loadinfo_s *loadinfo)
   if (!loadinfo->iobuffer)
     {
       /* No.. allocate one now */
- 
+
       loadinfo->iobuffer = (FAR uint8_t *)kmalloc(CONFIG_ELF_BUFFERSIZE);
       if (!loadinfo->iobuffer)
         {

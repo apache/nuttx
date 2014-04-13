@@ -45,9 +45,9 @@ else
   CFLAGS	+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/arm -I$(TOPDIR)/sched
 endif
 
-ASRCS		= 
+ASRCS		=
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
-CSRCS		= 
+CSRCS		=
 
 ifeq ($(CONFIG_LCD_UG2864AMBAG01),y)
 CSRCS += up_ug2864ambag01.c up_spi1.c

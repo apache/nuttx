@@ -171,7 +171,7 @@ int up_allocpage(FAR struct tcb_s *tcb, FAR void **vpage)
   uintptr_t paddr;
   uint32_t *pte;
   unsigned int pgndx;
-  
+
   /* Since interrupts are disabled, we don't need to anything special. */
 
   DEBUGASSERT(tcb && vpage);
@@ -199,7 +199,7 @@ int up_allocpage(FAR struct tcb_s *tcb, FAR void **vpage)
   if (g_pgwrap)
     {
       /* Yes.. Get a pointer to the L2 entry corresponding to the previous
-       * mapping -- then zero it!  
+       * mapping -- then zero it!
        */
 
        uintptr_t oldvaddr = PG_POOL_NDX2VA(g_ptemap[pgndx]);
@@ -214,7 +214,7 @@ int up_allocpage(FAR struct tcb_s *tcb, FAR void **vpage)
        * case:  The I-Cache uses a virtual address index and, hence, since the
        * NuttX address space is flat, the cached instruction value should be
        * correct even if the page mapping is no longer in place.
-       */ 
+       */
     }
 
   /* Then convert the index to a (physical) page address. */
@@ -231,7 +231,7 @@ int up_allocpage(FAR struct tcb_s *tcb, FAR void **vpage)
   *pte = (paddr | MMU_L2_ALLOCFLAGS);
 
   /* And save the new L1 index */
- 
+
   g_ptemap[pgndx] = PG_POOL_VA2L2NDX(vaddr);
 
   /* Finally, return the virtual address of allocated page */

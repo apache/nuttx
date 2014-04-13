@@ -37,10 +37,10 @@
 
 CFLAGS += -I$(TOPDIR)/sched
 
-ASRCS = 
+ASRCS =
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 
-CSRCS = nuc_boardinitialize.c 
+CSRCS = nuc_boardinitialize.c
 
 ifeq ($(CONFIG_HAVE_CXX),y)
 CSRCS += nuc_cxxinitialize.c

@@ -35,7 +35,7 @@
 
 HEAD_ASRC	= sh1_head.S
 
-CMN_ASRCS	= 
+CMN_ASRCS	=
 CMN_CSRCS	= up_allocateheap.c up_assert.c up_blocktask.c \
 		  up_createstack.c up_doirq.c up_exit.c up_idle.c up_initialize.c \
 		  up_initialstate.c up_interruptcontext.c up_lowputs.c \
@@ -51,6 +51,6 @@ CMN_CSRCS	+= sh1_schedulesigaction.c sh1_sigdeliver.c
 endif
 
 ifeq ($(CONFIG_USBDEV),y)
-CHIP_CSRCS	+= 
+CHIP_CSRCS	+=
 endif
 

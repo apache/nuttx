@@ -4,7 +4,7 @@
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2011 Uros Platise. All rights reserved
- * 
+ *
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Uros Platise <uros.platise@isotel.eu>
  *
@@ -62,8 +62,8 @@
 /* Clocking *************************************************************************/
 
 /* On-board external frequency source is 9MHz (HSE) provided by the CC1101, so it is
- * not available on power-up. Instead we are about to run on HSI*9 = 36 MHz, see 
- * up_sysclock.c for details. 
+ * not available on power-up. Instead we are about to run on HSI*9 = 36 MHz, see
+ * up_sysclock.c for details.
  */
 
 #define STM32_BOARD_XTAL        9000000UL
@@ -71,9 +71,9 @@
 
 /* PLL source is either HSI or HSE
  * When HSI: PLL multiplier is 9, out frequency 36 MHz
- * When HSE: PLL multiplier is 8: out frequency is 9 MHz x 8 = 72MHz 
+ * When HSE: PLL multiplier is 8: out frequency is 9 MHz x 8 = 72MHz
  */
- 
+
 #define STM32_CFGR_PLLSRC_HSI  0
 #define STM32_CFGR_PLLMUL_HSI  RCC_CFGR_PLLMUL_CLKx9
 
@@ -125,17 +125,17 @@
 
 #define STM32_CFGR_USBPRE      0
 
-/* SDIO dividers.  Note that slower clocking is required when DMA is disabled 
+/* SDIO dividers.  Note that slower clocking is required when DMA is disabled
  * in order to avoid RX overrun/TX underrun errors due to delayed responses
- * to service FIFOs in interrupt driven mode. 
- * 
+ * to service FIFOs in interrupt driven mode.
+ *
  * SDcard default speed has max SDIO_CK freq of 25 MHz (12.5 Mbps)
  * After selection of high speed freq may be 50 MHz (25 Mbps)
  * Recommended default voltage: 3.3 V
  *
- * HCLK=36MHz, SDIOCLK=36 MHz, SDIO_CK=HCLK/(88+2)=400 KHz 
+ * HCLK=36MHz, SDIOCLK=36 MHz, SDIO_CK=HCLK/(88+2)=400 KHz
  */
-  
+
 #define SDIO_INIT_CLKDIV       (88 << SDIO_CLKCR_CLKDIV_SHIFT)
 
 /* DMA ON:  HCLK=36 MHz, SDIOCLK=36MHz, SDIO_CK=HCLK/(0+2)=18 MHz
@@ -143,7 +143,7 @@
  */
 
 #ifdef CONFIG_SDIO_DMA
-#  define SDIO_MMCXFR_CLKDIV   (0 << SDIO_CLKCR_CLKDIV_SHIFT) 
+#  define SDIO_MMCXFR_CLKDIV   (0 << SDIO_CLKCR_CLKDIV_SHIFT)
 #else
 #  ifndef CONFIG_DEBUG
 #    define SDIO_MMCXFR_CLKDIV    (1 << SDIO_CLKCR_CLKDIV_SHIFT)
@@ -199,7 +199,7 @@ extern "C" {
 /************************************************************************************
  * Board Clock Configuration, called immediatelly after boot
  ************************************************************************************/
- 
+
 /************************************************************************************
  * Name: stm32_boardinitialize
  *

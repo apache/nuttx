@@ -270,7 +270,7 @@ void board_led_on(int led)
       break;
 
     default:
-      return;    
+      return;
     }
 
   g_prevglyph = tmp;

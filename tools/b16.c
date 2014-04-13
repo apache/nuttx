@@ -116,6 +116,6 @@ int main(int argc, char **argv, char **envp)
       lvalue = 65536.0 * fvalue;
       printf("%10.5f -> 0x%08lx\n", fvalue, lvalue);
     }
-   
+
   return 0;
 }

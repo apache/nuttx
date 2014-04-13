@@ -115,7 +115,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
     }
 
   /* Do we need to allocate a new stack? */
- 
+
   if (!tcb->stack_alloc_ptr)
     {
       /* Allocate the stack.  If DEBUG is enabled (but not stack debug),

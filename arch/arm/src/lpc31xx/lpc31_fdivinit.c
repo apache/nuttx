@@ -110,7 +110,7 @@ lpc31_bitwidth(unsigned int value, unsigned int fdwid)
       /* Is this bit set?  If so, then the width of the value is 0 to bit,
        * or bit+1.
        */
-    
+
       if ((value & (1 << bit)) != 0)
         {
           width = bit + 1;
@@ -148,7 +148,7 @@ uint32_t lpc31_fdivinit(int fdcndx,
    * consumption, the lpc313x user manual recommends that madd and msub
    * be shifted right to have as many trailing zero's as possible.
    */
- 
+
   madd = fdiv->m - fdiv->n;
   msub = -fdiv->n;
 
@@ -170,7 +170,7 @@ uint32_t lpc31_fdivinit(int fdcndx,
     }
 
   /* Find maximum bit width of madd & msub.  Here we calculate the width of the OR
-   * of the two values.  The width of the OR will be the width of the wider value 
+   * of the two values.  The width of the OR will be the width of the wider value
    */
 
   fdshift = fdwid - lpc31_bitwidth((unsigned int)madd | (unsigned int)fdiv->n, fdwid);
@@ -181,7 +181,7 @@ uint32_t lpc31_fdivinit(int fdcndx,
   madd   = (madd << fdshift) & fdmask;
   msub   = (msub << fdshift) & fdmask;
   regval = (madd << maddshift) | (msub << msubshift);
-  
+
   /* Check if 50% duty cycle is needed for this divider */
 
   if (fdiv->stretch)

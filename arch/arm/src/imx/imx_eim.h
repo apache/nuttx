@@ -39,7 +39,7 @@
 /************************************************************************************
  * Included Files
  ************************************************************************************/
- 
+
 /************************************************************************************
  * Definitions
  ************************************************************************************/
@@ -62,18 +62,18 @@
 
 /* EIM Register Addresses ***********************************************************/
 
-#define IMX_EIM_CS0H                (EIM_BASE_ADDR + EIM_CS0H_OFFSET)                
-#define IMX_EIM_CS0L                (EIM_BASE_ADDR + EIM_CS0L_OFFSET)                
-#define IMX_EIM_CS1H                (EIM_BASE_ADDR + EIM_CS1H_OFFSET)                
-#define IMX_EIM_CS1L                (EIM_BASE_ADDR + EIM_CS1L_OFFSET)                
-#define IMX_EIM_CS2H                (EIM_BASE_ADDR + EIM_CS2H_OFFSET)                
-#define IMX_EIM_CS2L                (EIM_BASE_ADDR + EIM_CS2L_OFFSET)                
-#define IMX_EIM_CS3H                (EIM_BASE_ADDR + EIM_CS3H_OFFSET)                
-#define IMX_EIM_CS3L                (EIM_BASE_ADDR + EIM_CS3L_OFFSET)                
-#define IMX_EIM_CS4H                (EIM_BASE_ADDR + EIM_CS4H_OFFSET)                
-#define IMX_EIM_CS4L                (EIM_BASE_ADDR + EIM_CS4L_OFFSET)                
-#define IMX_EIM_CS5H                (EIM_BASE_ADDR + EIM_CS5H_OFFSET)                
-#define IMX_EIM_CS5L                (EIM_BASE_ADDR + EIM_CS5L_OFFSET)                
+#define IMX_EIM_CS0H                (EIM_BASE_ADDR + EIM_CS0H_OFFSET)
+#define IMX_EIM_CS0L                (EIM_BASE_ADDR + EIM_CS0L_OFFSET)
+#define IMX_EIM_CS1H                (EIM_BASE_ADDR + EIM_CS1H_OFFSET)
+#define IMX_EIM_CS1L                (EIM_BASE_ADDR + EIM_CS1L_OFFSET)
+#define IMX_EIM_CS2H                (EIM_BASE_ADDR + EIM_CS2H_OFFSET)
+#define IMX_EIM_CS2L                (EIM_BASE_ADDR + EIM_CS2L_OFFSET)
+#define IMX_EIM_CS3H                (EIM_BASE_ADDR + EIM_CS3H_OFFSET)
+#define IMX_EIM_CS3L                (EIM_BASE_ADDR + EIM_CS3L_OFFSET)
+#define IMX_EIM_CS4H                (EIM_BASE_ADDR + EIM_CS4H_OFFSET)
+#define IMX_EIM_CS4L                (EIM_BASE_ADDR + EIM_CS4L_OFFSET)
+#define IMX_EIM_CS5H                (EIM_BASE_ADDR + EIM_CS5H_OFFSET)
+#define IMX_EIM_CS5L                (EIM_BASE_ADDR + EIM_CS5L_OFFSET)
 #define IMX_EIM_WEIM                (EIM_BASE_ADDR + EIM_WEIM_OFFSET)
 
 /* EIM Register Bit Definitions *****************************************************/

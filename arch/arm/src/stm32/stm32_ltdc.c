@@ -219,7 +219,7 @@
 #define STM32_LTDC_BUFFER_L1     STM32_LTDC_BUFFER_START
 #define STM32_LTDC_ENDBUF_L1     (STM32_LTDC_BUFFER_L1 + STM32_L1_FBSIZE)
 
-#ifdef CONFIG_STM32_LTDC_L2  
+#ifdef CONFIG_STM32_LTDC_L2
 #  define STM32_LTDC_BUFFER_L2   STM32_LTDC_ENDBUF_L1
 #  define STM32_LTDC_ENDBUF_L2   (STM32_LTDC_BUFFER_L2 + STM32_L2_FBSIZE)
 #else
@@ -728,7 +728,7 @@ static void stm32_config_lcd_clock(void)
  * Name: stm32_show_layer
  *
  * Description:
- *   Show the given layer with the specified window 
+ *   Show the given layer with the specified window
  *
  ****************************************************************************/
 

@@ -83,7 +83,7 @@ else
 endif
 
 LDFLAGS                 += -nostdlib
-EXTRA_LIBS		= 
+EXTRA_LIBS		=
 
 
 MKDEP			= $(TOPDIR)/tools/mkdeps.sh

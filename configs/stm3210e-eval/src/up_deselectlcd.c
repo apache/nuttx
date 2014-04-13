@@ -85,7 +85,7 @@ void stm32_deselectlcd(void)
   /* Bank1 NOR/SRAM timing register configuration */
 
   putreg32(0x0fffffff, STM32_FSMC_BTR4);
- 
+
   /* Disable AHB clocking to the FSMC */
 
   stm32_disablefsmc();

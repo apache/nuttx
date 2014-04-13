@@ -134,7 +134,7 @@ void weak_function open1788_sspinitialize(void)
  * Name:  lpc17_ssp0/1/2select and lpc17_ssp0/1/2status
  *
  * Description:
- *   The external functions, lpc17_ssp0/1/2select and lpc17_ssp0/1/2status 
+ *   The external functions, lpc17_ssp0/1/2select and lpc17_ssp0/1/2status
  *   must be provided by board-specific logic.  They are implementations of the select
  *   and status methods of the SPI interface defined by struct spi_ops_s (see
  *   include/nuttx/spi/spi.h). All other methods (including lpc17_sspinitialize())
@@ -149,7 +149,7 @@ void weak_function open1788_sspinitialize(void)
  *   3. Add a calls to lpc17_sspinitialize() in your low level application
  *      initialization logic
  *   4. The handle returned by lpc17_sspinitialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling 
+ *      SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *

@@ -145,7 +145,7 @@ void nxbe_bitmap(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s *de
       return;
     }
 
-  /* Verify that the width of the destination rectangle does not exceed the 
+  /* Verify that the width of the destination rectangle does not exceed the
    * width of the source bitmap data (taking into account the bitmap origin)
    */
 

@@ -112,7 +112,7 @@ nxgl_copyrun_1bpp(FAR const uint8_t *src, FAR uint8_t *dest,
    *
    * indata: AAAA AAxx maps to nextdata: xxAA AAAA
    */
- 
+
   nextdata = (indata >> remainder);
 
 #endif
@@ -194,7 +194,7 @@ nxgl_copyrun_2bpp(FAR const uint8_t *src, FAR uint8_t *dest,
    */
 
   nextdata = (indata << shift);
-  
+
 #else
   /* If CONFIG_NX_PACKEDMSFIRST is NOT defined, then bits (7-2*remainder)-7
    * are carried over to the first pass through the loop.  For example
@@ -202,7 +202,7 @@ nxgl_copyrun_2bpp(FAR const uint8_t *src, FAR uint8_t *dest,
    *
    * indata: AAAA AAxx maps to nextdata: xxAA AAAA
    */
- 
+
   nextdata = (indata >> shift);
 
 #endif
@@ -282,14 +282,14 @@ nxgl_copyrun_4bpp(FAR const uint8_t *src, FAR uint8_t *dest,
    */
 
   nextdata = (indata << 4);
-  
+
 #else
   /* If CONFIG_NX_PACKEDMSFIRST is NOT defined, then bits 4-7
    * are carried over to the first pass through the loop.  For example:
    *
    * indata: AAAA xxxx maps to nextdata: xxxx AAAA
    */
- 
+
   nextdata = (indata >> 4);
 
 #endif

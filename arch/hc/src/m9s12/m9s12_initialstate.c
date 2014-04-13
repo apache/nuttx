@@ -115,7 +115,7 @@ void up_initial_state(struct tcb_s *tcb)
 # ifdef CONFIG_SUPPRESS_INTERRUPTS
   /* Disable STOP, Mask I- and Z- interrupts */
 
-  xcp->regs[REG_CCR]      = HCS12_CCR_S|HCS12_CCR_X|HCS12_CCR_I;  
+  xcp->regs[REG_CCR]      = HCS12_CCR_S|HCS12_CCR_X|HCS12_CCR_I;
 # else
   /* Disable STOP, Enable I- and Z-interrupts */
 

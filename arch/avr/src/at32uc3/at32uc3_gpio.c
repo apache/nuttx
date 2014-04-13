@@ -151,13 +151,13 @@ int at32uc3_configgpio(uint16_t cfgset)
   if ((cfgset & GPIO_ENABLE) != 0)
     {
       /* Its a GPIO.  Input or output? */
- 
+
       if ((cfgset & GPIO_OUTPUT) != 0)
         {
           /* Its a GPIO output. Set up the initial output value and enable
            * the output driver.
            */
- 
+
           if ((cfgset & GPIO_VALUE) != 0)
             {
               putreg32(pinmask, base + AVR32_GPIO_OVRS_OFFSET);
@@ -222,7 +222,7 @@ int at32uc3_configgpio(uint16_t cfgset)
 
       putreg32(pinmask, base + AVR32_GPIO_IERS_OFFSET);
     }
-  
+
   return OK;
 }
 

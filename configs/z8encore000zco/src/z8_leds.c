@@ -148,7 +148,7 @@ static const struct z8_ledbits_s g_ledarray[10][4] =
 static void z8_putled134(FAR const struct z8_ledbits_s *bits, uint8_t addr)
 {
   uint8_t porte;
-  
+
   porte = bits->cathode;
   putreg8(porte, PEOD);          /* Load porte data */
   putreg8(bits->anode, PGOD);    /* Load portg data */
@@ -203,7 +203,7 @@ void board_led_initialize(void)
 {
   putreg8(0x00, PEAF);          /* PE Alt func = Port */
   putreg8(0x00, PGAF);          /* PG Alt func = Port */
-                      
+
   putreg8(0x00, PEOC);          /* PE Out Ctrl = push-pull */
   putreg8(0x00, PGOC);          /* PG Out Ctrl = push-pull */
 
@@ -213,7 +213,7 @@ void board_led_initialize(void)
 /*putreg8(0x00, PGDD);           * PA Data Dir = output */
   putreg8(0x01, PGADDR);        /* PA Data Dir = output */
   putreg8(0x00, PGCTL);         /* OUTPUT */
-  
+
   z8_putarray(&g_ledarray[0][0]);
 }
 

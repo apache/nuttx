@@ -75,7 +75,7 @@ static void up_gdtentry(struct gdt_entry_s *entry, uint32_t base,
 
   entry->lowlimit     = (limit & 0xffff);
   entry->granularity  = (limit >> 16) & 0x0f;
-    
+
   entry->granularity |= gran & 0xf0;
   entry->access       = access;
 }

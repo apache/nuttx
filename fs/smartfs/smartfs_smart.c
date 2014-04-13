@@ -104,7 +104,7 @@ static int     smartfs_rename(struct inode *mountpt, const char *oldrelpath,
                         const char *newrelpath);
 static int     smartfs_stat(struct inode *mountpt, const char *relpath, struct stat *buf);
 
-static off_t smartfs_seek_internal(struct smartfs_mountpt_s *fs, 
+static off_t smartfs_seek_internal(struct smartfs_mountpt_s *fs,
                         struct smartfs_ofile_s *sf,
                         off_t offset, int whence);
 
@@ -261,12 +261,12 @@ static int smartfs_open(FAR struct file *filep, const char *relpath,
         }
 
       /* Yes... test if the parent directory is valid */
-      
+
       if (parentdirsector != 0xFFFF)
         {
           /* We can create in the given parent directory */
 
-          ret = smartfs_createentry(fs, parentdirsector, filename, 
+          ret = smartfs_createentry(fs, parentdirsector, filename,
                                     SMARTFS_DIRENT_TYPE_FILE, mode,
                                     &sf->entry, 0xFFFF);
           if (ret != OK)
@@ -381,7 +381,7 @@ static int smartfs_close(FAR struct file *filep)
     {
       /* The file is opened more than once.  Just decrement the
        * reference count and return. */
-    
+
       sf->crefs--;
       goto okout;
     }
@@ -508,7 +508,7 @@ static ssize_t smartfs_read(FAR struct file *filep, char *buffer, size_t buflen)
 
       /* Calculate the number of bytes to read into the buffer */
 
-      bytestoread = bytesinsector - (sf->curroffset - 
+      bytestoread = bytesinsector - (sf->curroffset -
           sizeof(struct smartfs_chain_header_s));
       if (bytestoread + bytesread > buflen)
         {
@@ -566,7 +566,7 @@ errout_with_semaphore:
  *
  ****************************************************************************/
 
-static int smartfs_sync_internal(struct smartfs_mountpt_s *fs, 
+static int smartfs_sync_internal(struct smartfs_mountpt_s *fs,
                                  struct smartfs_ofile_s *sf)
 {
   struct smart_read_write_s readwrite;
@@ -675,7 +675,7 @@ static ssize_t smartfs_write(FAR struct file *filep, const char *buffer,
       goto errout_with_semaphore;
     }
 
-  /* First test if we are overwriting an existing location or writing to 
+  /* First test if we are overwriting an existing location or writing to
    * a new one. */
 
   header = (struct smartfs_chain_header_s *) fs->fs_rwbuffer;
@@ -754,7 +754,7 @@ static ssize_t smartfs_write(FAR struct file *filep, const char *buffer,
 
   while (buflen > 0)
     {
-      /* We will fill up the current sector. Write data to 
+      /* We will fill up the current sector. Write data to
        * the current sector first.
        */
 
@@ -845,12 +845,12 @@ errout_with_semaphore:
  *
  * Description: Performs the logic of the seek function.  This is an internal
  *              function because it does not provide semaphore protection and
- *              therefore must be called from one of the other public 
+ *              therefore must be called from one of the other public
  *              interface routines (open, seek, etc.).
  *
  ****************************************************************************/
 
-static off_t smartfs_seek_internal(struct smartfs_mountpt_s *fs, 
+static off_t smartfs_seek_internal(struct smartfs_mountpt_s *fs,
                                    struct smartfs_ofile_s *sf,
                                    off_t offset, int whence)
 {
@@ -910,7 +910,7 @@ static off_t smartfs_seek_internal(struct smartfs_mountpt_s *fs,
    * sector and can skip the search to save time.
    */
 
-  sectorstartpos = sf->filepos - (sf->curroffset - sizeof(struct 
+  sectorstartpos = sf->filepos - (sf->curroffset - sizeof(struct
         smartfs_chain_header_s));
   if (newpos >= sectorstartpos && newpos < sectorstartpos +
       fs->fs_llformat.availbytes - sizeof(struct smartfs_chain_header_s))
@@ -919,7 +919,7 @@ static off_t smartfs_seek_internal(struct smartfs_mountpt_s *fs,
 
       sf->curroffset = sizeof(struct smartfs_chain_header_s) + newpos-sectorstartpos;
       sf->filepos = newpos;
-      
+
       return newpos;
     }
 
@@ -939,7 +939,7 @@ static off_t smartfs_seek_internal(struct smartfs_mountpt_s *fs,
     }
 
   header = (struct smartfs_chain_header_s *) fs->fs_rwbuffer;
-  while ((sf->currsector != SMARTFS_ERASEDSTATE_16BIT) && 
+  while ((sf->currsector != SMARTFS_ERASEDSTATE_16BIT) &&
       (sf->filepos + fs->fs_llformat.availbytes -
       sizeof(struct smartfs_chain_header_s) < newpos))
     {
@@ -1182,7 +1182,7 @@ static int smartfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 
   /* Read sectors and search entries until one found or no more */
 
-  entrysize = sizeof(struct smartfs_entry_header_s) + 
+  entrysize = sizeof(struct smartfs_entry_header_s) +
     fs->fs_llformat.namesize;
   while (dir->u.smartfs.fs_currsector != SMARTFS_ERASEDSTATE_16BIT)
     {
@@ -1217,7 +1217,7 @@ static int smartfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
               /* This entry isn't valid, skip it */
 
               dir->u.smartfs.fs_curroffset += entrysize;
-              entry = (struct smartfs_entry_header_s *) 
+              entry = (struct smartfs_entry_header_s *)
                 &fs->fs_rwbuffer[dir->u.smartfs.fs_curroffset];
 
               continue;
@@ -1256,7 +1256,7 @@ static int smartfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
               header = (struct smartfs_chain_header_s *) fs->fs_rwbuffer;
               dir->u.smartfs.fs_currsector = SMARTFS_NEXTSECTOR(header);
             }
-          
+
           /* Now exit */
 
           ret = OK;
@@ -1343,7 +1343,7 @@ static int smartfs_bind(FAR struct inode *blkdriver, const void *data,
       return -ENOMEM;
     }
 
-  /* If the global semaphore hasn't been initialized, then 
+  /* If the global semaphore hasn't been initialized, then
    * initialized it now. */
 
   fs->fs_sem = &g_sem;
@@ -1589,7 +1589,7 @@ static int smartfs_mkdir(struct inode *mountpt, const char *relpath, mode_t mode
 
       /* Create the directory */
 
-      ret = smartfs_createentry(fs, parentdirsector, filename, 
+      ret = smartfs_createentry(fs, parentdirsector, filename,
           SMARTFS_DIRENT_TYPE_DIR, mode, &entry, 0xFFFF);
       if (ret != OK)
         {
@@ -1826,14 +1826,14 @@ int smartfs_rename(struct inode *mountpt, const char *oldrelpath,
     }
 
   /* Test if the new parent directory is valid */
-  
+
   if (newparentdirsector != 0xFFFF)
     {
       /* We can move to the given parent directory */
 
       mode = oldentry.flags & SMARTFS_DIRENT_MODE;
       type = oldentry.flags & SMARTFS_DIRENT_TYPE;
-      ret = smartfs_createentry(fs, newparentdirsector, newfilename, 
+      ret = smartfs_createentry(fs, newparentdirsector, newfilename,
                                 type, mode, &newentry, oldentry.firstsector);
       if (ret != OK)
         {
@@ -1859,7 +1859,7 @@ int smartfs_rename(struct inode *mountpt, const char *oldrelpath,
 #else
       direntry->flags |= SMARTFS_DIRENT_ACTIVE;
 #endif
-      
+
       /* Now write the updated flags back to the device */
 
       readwrite.offset = oldentry.doffset;
@@ -1935,7 +1935,7 @@ static int smartfs_stat(struct inode *mountpt, const char *relpath, struct stat 
     }
 
   /* Initialize the stat structure */
-  
+
   memset(buf, 0, sizeof(struct stat));
   if (entry.firstsector == fs->fs_rootsector)
     {

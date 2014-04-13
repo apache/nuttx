@@ -62,7 +62,7 @@
 #endif
 
 /* Z16F Chip Variants ***************************************************************/
- 
+
 #if defined(CONFIG_ARCH_CHIP_Z16F2810)
 # define Z16F_INVMEM_SIZE     (128*1024)
 # define Z16F_IRAM_SIZE       (4*1024)
@@ -122,7 +122,7 @@
  * Internal non-volatile memory starts at address zero.  The size
  * of the internal non-volatile memory is chip-dependent.
  */
- 
+
 #define Z16F_INVMEM_BASE        _HX32(00000000)
 
 /* Most chip variants support external memory */
@@ -141,7 +141,7 @@
 /* Internal RAM always ends at 0xffbfff.  The IRAM base address depends
  * on the size of the IRAM supported by the chip.
  */
- 
+
 #define Z16F_IRAM_BASE          (_HX32(ffffc000) - Z16F_IRAM_SIZE)
 
 /* External memory mapped peripherals, internal I/O memory and SFRS */

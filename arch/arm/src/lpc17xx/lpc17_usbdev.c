@@ -1490,7 +1490,7 @@ static void lpc17_usbreset(struct lpc17_usbdev_s *priv)
   lpc17_putreg(USB_SLOW_INT|USB_DEVSTATUS_INT|USB_FAST_INT|USB_FRAME_INT|USB_ERROR_INT,
                LPC17_USBDEV_INTEN);
 
-  /* Tell the class driver that we are disconnected. The class 
+  /* Tell the class driver that we are disconnected. The class
    * driver should then accept any new configurations.
    */
 
@@ -3130,7 +3130,7 @@ static int lpc17_wakeup(struct usbdev_s *dev)
  * Name: lpc17_selfpowered
  *
  * Description:
- *   Sets/clears the device selfpowered feature 
+ *   Sets/clears the device selfpowered feature
  *
  *******************************************************************************/
 

@@ -92,7 +92,7 @@
 #define SAM_PWM_CMPV_OFFSET(n)     (0x0130 + ((int)(n) << 4)) /* n=0..7 */
 #define SAM_PWM_CMPVUPD_OFFSET(n)  (0x0134 + ((int)(n) << 4)) /* n=0-7 */
 #define SAM_PWM_CMPM_OFFSET(n)     (0x0138 + ((int)(n) << 4)) /* n=0-7 */
-#define SAM_PWM_CMPMUPD_OFFSET(n)  (0x013c + ((int)(n) << 4)) /* n=0-7 */ 
+#define SAM_PWM_CMPMUPD_OFFSET(n)  (0x013c + ((int)(n) << 4)) /* n=0-7 */
 
 #define SAM_PWM_CMPV0_OFFSET       0x0130 /* PWM Comparison 0 Value Register */
 #define SAM_PWM_CMPVUPD0_OFFSET    0x0134 /* PWM Comparison 0 Value Update Register */

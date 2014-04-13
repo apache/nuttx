@@ -195,7 +195,7 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
       bdbg("Failed to read .data section: %d\n", ret);
       goto errout;
     }
-       
+
   bvdbg("TEXT: %08x Entry point offset: %08x Data offset: %08x\n",
       loadinfo->ispace, loadinfo->entryoffs, doffset);
 

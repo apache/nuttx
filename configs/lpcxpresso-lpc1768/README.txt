@@ -27,8 +27,8 @@ LCPXpresso LPC1768 Board
 
   P0[0]/RD1/TXD3/SDA1               J6-9     I2C E2PROM SDA TXD3/SDA1
   P0[1]/TD1/RXD3/SCL                J6-10                   RXD3/SCL1
-  P0[2]/TXD0/AD0[7]                 J6-21    
-  P0[3]/RXD0/AD0[6]                 J6-22    
+  P0[2]/TXD0/AD0[7]                 J6-21
+  P0[3]/RXD0/AD0[6]                 J6-22
   P0[4]/I2SRX-CLK/RD2/CAP2.0        J6-38                   CAN_RX2
   P0[5]/I2SRX-WS/TD2/CAP2.1         J6-39                   CAN_TX2
   P0[6]/I2SRX_SDA/SSEL1/MAT2[0]     J6-8                    SSEL1, OLED CS
@@ -43,14 +43,14 @@ LCPXpresso LPC1768 Board
   P0[18]/DCD1/MOSI0/MOSI            J6-11                   MOSI0
   P0[19]/DSR1/SDA1                  PAD17                   N/A
   P0[20]/DTR1/SCL1                  PAD18    I2C E2PROM SCL N/A
-  P0[21]/RI1/MCIPWR/RD1             J6-23                  
-  P0[22]/RTS1/TD1                   J6-24    LED            
+  P0[21]/RI1/MCIPWR/RD1             J6-23
+  P0[22]/RTS1/TD1                   J6-24    LED
   P0[23]/AD0[0]/I2SRX_CLK/CAP3[0]   J6-15                   AD0.0
   P0[24]/AD0[1]/I2SRX_WS/CAP3[1]    J6-16                   AD0.1
   P0[25]/AD0[2]/I2SRX_SDA/TXD3      J6-17                   AD0.2
   P0[26]/AD0[3]/AOUT/RXD3           J6-18                   AD0.3/AOUT / RGB LED
-  P0[27]/SDA0/USB_SDA               J6-25                   
-  P0[28]/SCL0                       J6-26                   
+  P0[27]/SDA0/USB_SDA               J6-25
+  P0[28]/SCL0                       J6-26
   P0[29]/USB_D+                     J6-37                   USB_D+
   P0[30]/USB_D-                     J6-36                   USB_D-
 
@@ -85,14 +85,14 @@ LCPXpresso LPC1768 Board
   P2[3]/PWM1.4/DCD1/TRACEDATA[2]    J6-45                   PWM1.4
   P2[4]/PWM1.5/DSR1/TRACEDATA[1]    J6-46                   PWM1.5
   P2[5]/PWM1[6]/DTR1/TRACEDATA[0]   J6-47                   PWM1.6
-  P2[6]/PCAP1[0]/RI1/TRACECLK       J6-48    
+  P2[6]/PCAP1[0]/RI1/TRACECLK       J6-48
   P2[7]/RD2/RTS1                    J6-49                   OLED command/data
-  P2[8]/TD2/TXD2                    J6-50    
+  P2[8]/TD2/TXD2                    J6-50
   P2[9]/USB_CONNECT/RXD2            PAD19   USB Pullup      N/A
-  P2[10]/EINT0/NMI                  J6-51    
-  P2[11]/EINT1/I2STX_CLK            J6-52    
-  P2[12]/EINT2/I2STX_WS             j6-53    
-  P2[13]/EINT3/I2STX_SDA            J6-27                 
+  P2[10]/EINT0/NMI                  J6-51
+  P2[11]/EINT1/I2STX_CLK            J6-52
+  P2[12]/EINT2/I2STX_WS             j6-53
+  P2[13]/EINT3/I2STX_SDA            J6-27
 
   P3[25]/MAT0.0/PWM1.2              PAD13                   N/A
   P3[26]/STCLK/MAT0.1/PWM1.3        PAD14                   N/A
@@ -129,10 +129,10 @@ SD Slot
 
   *J55 must be set to provide chip select PIO1_11 signal as the SD slot
    chip select.
- 
+
 USB Device
 ----------
- 
+
   Base-board          J4/J6 LPC1768
   Signal              Pin   Pin
   ------------------- ----- --------
@@ -303,7 +303,7 @@ Code Red IDE
 
   NuttX is built using command-line make.  It can be used with an IDE, but some
   effort will be required to create the project.
-  
+
   Makefile Build
   --------------
   Under Linux Eclipse, it is pretty easy to set up an "empty makefile project" and
@@ -334,7 +334,7 @@ Code Red IDE
   Under Cygwin, the Code Red command line tools (e.g., arm-non-eabi-gcc) cannot
   be executed because the they only have execut privileges for Administrators.  I
   worked around this by:
-  
+
   Opening a native Cygwin RXVT as Administrator (Right click, "Run as administrator"),
   then executing 'chmod 755 *.exe' in the following directories:
 
@@ -471,7 +471,7 @@ NXFLAT Toolchain
   tools -- just the NXFLAT tools.  The buildroot with the NXFLAT tools can
   be downloaded from the NuttX SourceForge download site
   (https://sourceforge.net/projects/nuttx/files/).
- 
+
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
@@ -514,8 +514,8 @@ LEDs
   is as follows:
 
   - The LED is not illuminated until the LPCXpresso completes initialization.
-  
-    If the LED is stuck in the OFF state, this means that the LPCXpresso did not 
+
+    If the LED is stuck in the OFF state, this means that the LPCXpresso did not
     complete initializeation.
 
   - Each time the OS enters an interrupt (or a signal) it will turn the LED OFF and
@@ -698,7 +698,7 @@ LPCXpresso Configuration Options
   LPC17xx USB Device Configuration
 
     CONFIG_LPC17_USBDEV_FRAME_INTERRUPT
-      Handle USB Start-Of-Frame events. 
+      Handle USB Start-Of-Frame events.
       Enable reading SOF from interrupt handler vs. simply reading on demand.
       Probably a bad idea... Unless there is some issue with sampling the SOF
       from hardware asynchronously.
@@ -713,7 +713,7 @@ LPCXpresso Configuration Options
       Define if the hardware implementation does not support the VBUS signal
     CONFIG_LPC17_USBDEV_NOLED
       Define if the hardware  implementation does not support the LED output
- 
+
   LPC17xx USB Host Configuration (the LPCXpresso does not support USB Host)
 
     CONFIG_USBHOST_OHCIRAM_SIZE
@@ -806,7 +806,7 @@ Where <subdir> is one of the following:
 
     2. Jumpers:  There are several jumper settings needed by the OLED.
        All are the default settings:
-    
+
          J42: Close to select the SPI interface (Default: closed)
          J43: Close to support OLED command/data select (Default: closed)
          J44: Close to allow control of OLED voltage (Default: closed)
@@ -858,7 +858,7 @@ Where <subdir> is one of the following:
     2. At present, the value for the SD SPI frequency is too high and the
        SD will fail.  Setting that frequency to 400000 removes the problem.
        TODO:  Tune this frequency to some optimal value.
- 
+
     3. Jumpers: J55 must be set to provide chip select PIO1_11 signal as
        the SD slot chip select.
 

@@ -43,7 +43,7 @@ unset VERSION
 unset BUILD
 unset OUTFILE
 
-while [ ! -z "$1" ]; do 
+while [ ! -z "$1" ]; do
 	case $1 in
 	-b )
 		shift

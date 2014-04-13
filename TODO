@@ -1254,9 +1254,9 @@ o File system / Generic drivers (fs/, drivers/)
                   AtEsT.tXt
                   aTeSt.TxT
                  nsh> cat /tmp/aTeSt.TxT
-                 Test2 
+                 Test2
                  nsh> cat /tmp/AtEsT.tXt
-                 Test1 
+                 Test1
 
   Status:      Open
   Priority:    Low

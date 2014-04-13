@@ -343,7 +343,7 @@ static void generate_proxy(int nparms)
            */
 
           get_fieldname(g_parm[PARM1_INDEX+i], fieldname);
-          fprintf(stream, ", (uintptr_t)parm%d.%s", i+1, fieldname);          
+          fprintf(stream, ", (uintptr_t)parm%d.%s", i+1, fieldname);
         }
       else
         {
@@ -433,7 +433,7 @@ static void generate_stub(int nparms)
     {
       fprintf(stream, "static inline ");
     }
- 
+
   fprintf(stream, "uintptr_t STUB_%s(int nbr", g_parm[NAME_INDEX]);
 
   /* Generate the formal parameter list */
@@ -615,15 +615,15 @@ int main(int argc, char **argv, char **envp)
   if (optind >= argc)
     {
        fprintf(stderr, "Missing <CSV file>\n");
-       show_usage(argv[0]);      
+       show_usage(argv[0]);
     }
 
   csvpath = argv[optind];
   if (++optind < argc)
     {
        fprintf(stderr, "Unexpected garbage at the end of the line\n");
-       show_usage(argv[0]);      
-    }    
+       show_usage(argv[0]);
+    }
 
   /* Open the CSV file */
 

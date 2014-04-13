@@ -33,8 +33,8 @@
  *
  ************************************************************/
 
-#ifndef __ARCH_SIM_INCLUDE_LIMITS_H 
-#define __ARCH_SIM_INCLUDE_LIMITS_H 
+#ifndef __ARCH_SIM_INCLUDE_LIMITS_H
+#define __ARCH_SIM_INCLUDE_LIMITS_H
 
 /************************************************************
  * Included Files

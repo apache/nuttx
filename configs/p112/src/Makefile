@@ -39,9 +39,9 @@ CFLAGS		+= -I$(TOPDIR)$(DELIM)sched
 CFLAGS		+= -I$(TOPDIR)$(DELIM)arch$(DELIM)z80$(DELIM)src$(DELIM)common
 CFLAGS		+= -I$(TOPDIR)$(DELIM)arch$(DELIM)z80$(DELIM)src$(DELIM)z180
 
-ASRCS		= 
+ASRCS		=
 AOBJS		= $(ASRCS:$(ASMEXT)=$(OBJEXT))
-CSRCS		= 
+CSRCS		=
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)

@@ -73,7 +73,7 @@
 
 /* Debug ********************************************************************/
 /* The following enable debug output from this file:
- * 
+ *
  * CONFIG_DEBUG         - Define to enable general debug features
  * CONFIG_DEBUG_SPI     - Define to enable basic SSP debug (needs CONFIG_DEBUG)
  * CONFIG_DEBUG_VERBOSE - Define to enable verbose SSP debug
@@ -212,7 +212,7 @@ static struct lpc17_sspdev_s g_ssp0dev =
 #ifdef CONFIG_LPC17_SSP_INTERRUPTS
   .sspirq            = LPC17_IRQ_SSP0,
 #endif
-}; 
+};
 #endif /* CONFIG_LPC17_SSP0 */
 
 #ifdef CONFIG_LPC17_SSP1
@@ -246,7 +246,7 @@ static struct lpc17_sspdev_s g_ssp1dev =
 #ifdef CONFIG_LPC17_SSP_INTERRUPTS
   .sspirq            = LPC17_IRQ_SSP1,
 #endif
-}; 
+};
 #endif /* CONFIG_LPC17_SSP1 */
 
 #ifdef CONFIG_LPC17_SSP2
@@ -280,7 +280,7 @@ static struct lpc17_sspdev_s g_ssp2dev =
 #ifdef CONFIG_LPC17_SSP_INTERRUPTS
   .sspirq            = LPC17_IRQ_SSP2,
 #endif
-}; 
+};
 #endif /* CONFIG_LPC17_SSP2 */
 
 /****************************************************************************
@@ -462,7 +462,7 @@ static uint32_t ssp_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   cpsdvsr = (cpsdvsr + 1) & ~1;
 
   /* Save the new CPSDVSR and SCR values */
-  
+
   ssp_putreg(priv, LPC17_SSP_CPSR_OFFSET, cpsdvsr);
 
   regval  = ssp_getreg(priv, LPC17_SSP_CR0_OFFSET);
@@ -520,19 +520,19 @@ static void ssp_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
         {
         case SPIDEV_MODE0: /* CPOL=0; CPHA=0 */
           break;
- 
+
         case SPIDEV_MODE1: /* CPOL=0; CPHA=1 */
           regval |= SSP_CR0_CPHA;
           break;
- 
+
         case SPIDEV_MODE2: /* CPOL=1; CPHA=0 */
           regval |= SSP_CR0_CPOL;
           break;
- 
+
         case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
           regval |= (SSP_CR0_CPOL|SSP_CR0_CPHA);
           break;
- 
+
         default:
           sspdbg("Bad mode: %d\n", mode);
           DEBUGASSERT(FALSE);

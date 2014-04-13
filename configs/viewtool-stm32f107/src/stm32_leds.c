@@ -272,15 +272,15 @@ void stm32_setled(int led, bool ledon)
       case BOARD_LED1:
         pinset = GPIO_LED1;
         break;
-        
+
       case BOARD_LED2:
         pinset = GPIO_LED2;
         break;
-        
+
       case BOARD_LED3:
         pinset = GPIO_LED3;
         break;
-        
+
       case BOARD_LED4:
 #ifndef CONFIG_ARCH_LEDS
         pinset = GPIO_LED4;

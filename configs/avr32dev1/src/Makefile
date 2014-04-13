@@ -37,7 +37,7 @@
 
 CFLAGS		+= -I$(TOPDIR)/sched
 
-ASRCS		= 
+ASRCS		=
 CSRCS		= up_boot.c
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS		+= up_leds.c

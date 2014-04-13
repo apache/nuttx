@@ -75,7 +75,7 @@
 
 #define MIN_PRER    1024 /* 2**10, B=1 */
 #define MAX_PRER   65536 /* 2**16, B=7 */
- 
+
 #define MIN_MODCNT     1 /* A=0 */
 #define MAX_MODCNT    16 /* A=15 */
 

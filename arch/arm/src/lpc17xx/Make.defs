@@ -36,7 +36,7 @@
 # The start-up, "head", file
 
 ifeq ($(CONFIG_ARMV7M_CMNVECTOR),y)
-HEAD_ASRC = 
+HEAD_ASRC =
 else
 HEAD_ASRC = lpc17_vectors.S
 endif

@@ -903,7 +903,7 @@ void tiva_gpiowrite(uint32_t pinset, bool value)
    *
    * "In order to write to GPIO DATA, the corresponding bits in the mask,
    *  resulting from the address bus bits [9:2], must be High. Otherwise, the
-   *  bit values remain unchanged by the write. 
+   *  bit values remain unchanged by the write.
    *
    * "... All bits are cleared by a reset."
    */

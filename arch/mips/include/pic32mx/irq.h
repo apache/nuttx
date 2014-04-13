@@ -123,7 +123,7 @@ static inline void cp0_putintctl(uint32_t intctl)
       "\t.set    noreorder\n"
       "\tmtc0   %0, $12, 1\n"             /* Set the IntCtl to the provided value */
       "\t.set    pop\n"
-      : 
+      :
       : "r" (intctl)
       : "memory"
     );
@@ -183,7 +183,7 @@ static inline void cp0_putebase(uint32_t ebase)
       "\t.set    noreorder\n"
       "\tmtc0   %0, $15, 1\n"             /* Set the EBASE to the provided value */
       "\t.set    pop\n"
-      : 
+      :
       : "r" (ebase)
       : "memory"
     );

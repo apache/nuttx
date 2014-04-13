@@ -162,7 +162,7 @@ static inline int file_vfcntl(int fd, int cmd, va_list ap)
       case F_SETOWN:
         /* If fd refers to a socket, set the process or process group ID specified
          * to receive SIGURG signals when out-of-band data is available, using the value
-         * of the third argument, arg, taken as type int. Positive values indicate a 
+         * of the third argument, arg, taken as type int. Positive values indicate a
          * process ID; negative values, other than -1, indicate a process group ID. If
          * fd does not refer to a socket, the results are unspecified.
          */

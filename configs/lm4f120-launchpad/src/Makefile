@@ -37,7 +37,7 @@
 
 CFLAGS		+= -I$(TOPDIR)/sched
 
-ASRCS		= 
+ASRCS		=
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 CSRCS		= lm4f_boot.c lm4f_ssi.c
 

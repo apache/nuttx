@@ -3,7 +3,7 @@
  * include/arch/board/muxbus.h
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved
- * 
+ *
  *   Authors: Uros Platise <uros.platise@isotel.eu>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,20 +56,20 @@ extern "C" {
  */
 void vsn_muxbus_init(void);
 
-/** 
+/**
  * Simple Lock / Unlock Mechanism for the SDIO Interface
- * 
+ *
  * NOTE: This function is provided for the stm32_sdio driver.
  */
 extern void stm32_muxbus_sdio_lock(bool lock);
 
 /**
- * Set PGA Gain of the Analog Devices AD8231 on bus shared with the 
+ * Set PGA Gain of the Analog Devices AD8231 on bus shared with the
  * SDIO interface
- * 
+ *
  * \param gain sets the front-end gain as 2^{gain}, where gain = 0..7.
  *   Setting gain outside that range shutdowns the front-end.
- * 
+ *
  * \return gain set or -1 if front end is put into shutdown.
  */
 extern int vsn_muxbus_setpgagain(int gain);

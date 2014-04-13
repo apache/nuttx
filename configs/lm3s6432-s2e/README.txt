@@ -78,7 +78,7 @@ C12 PB3               Transciever #ENABLE
 Development Environment
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-  Either Linux, Mac OS X or Cygwin on Windows can be used for the development 
+  Either Linux, Mac OS X or Cygwin on Windows can be used for the development
   environment.
   The source has been built only using the GNU toolchain (see below).  Other
   toolchains will likely cause problems. Testing was performed using GCC on
@@ -146,7 +146,7 @@ IDEs
 
   NuttX is built using command-line make.  It can be used with an IDE, but some
   effort will be required to create the project.
-  
+
   Makefile Build
   --------------
   Under Eclipse, it is pretty easy to set up an "empty makefile project" and
@@ -245,7 +245,7 @@ NXFLAT Toolchain
   tools -- just the NXFLAT tools.  The buildroot with the NXFLAT tools can
   be downloaded from the NuttX SourceForge download site
   (https://sourceforge.net/projects/nuttx/files/).
- 
+
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
@@ -355,7 +355,7 @@ Stellaris MDL-S2E Reference Design Configuration Options
     CONFIG_TIVA_DISABLE_GPIOG_IRQS=y
     CONFIG_TIVA_DISABLE_GPIOH_IRQS=y
     CONFIG_TIVA_DISABLE_GPIOJ_IRQS=y
- 
+
   LM3S6432 specific device driver settings
 
     CONFIG_UARTn_DISABLE

@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 /* The NUC120LE3AN has 128Kb of FLASH beginning at address 0x0000:0000 and
- * 16Kb of SRAM at address 0x20000000. 
+ * 16Kb of SRAM at address 0x20000000.
  */
 
 MEMORY

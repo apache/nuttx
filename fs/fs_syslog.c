@@ -178,7 +178,7 @@ static inline void syslog_givesem(void)
   g_sysdev.sl_holder = NO_HOLDER;
   sem_post(&g_sysdev.sl_sem);
 }
-  
+
 /****************************************************************************
  * Name: syslog_write
  *
@@ -215,7 +215,7 @@ static inline void syslog_flush(void)
   if (INODE_IS_MOUNTPT(inode) && inode->u.i_mops->sync)
     {
       /* Yes... synchronize to the stream */
- 
+
       (void)inode->u.i_mops->sync(&g_sysdev.sl_file);
     }
 }
@@ -413,7 +413,7 @@ int syslog_putc(int ch)
   if (g_sysdev.sl_state != SYSLOG_OPENED)
     {
       /* Case (1) and (2) */
- 
+
       if (g_sysdev.sl_state == SYSLOG_UNINITIALIZED ||
           g_sysdev.sl_state == SYSLOG_INITIALIZING)
        {

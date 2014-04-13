@@ -396,7 +396,7 @@ static void lpc17_gpiodemux(uint32_t intbase, uint32_t intmask,
  *
  * Description:
  *   Handle the GPIO interrupt.  For the LPC176x family, that interrupt could
- *   also that also indicates that an EINT3 interrupt has occurred.  NOTE: 
+ *   also that also indicates that an EINT3 interrupt has occurred.  NOTE:
  *   This logic would  have to be extended if EINT3 is actually used for
  *   External Interrupt 3 on an LPC176x platform.
  *

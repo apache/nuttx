@@ -199,7 +199,7 @@ static void up_notify(FAR struct up_dev_s *priv)
        * is no longer avaialable.
        */
 
-      sem_post(&priv->waitsem); 
+      sem_post(&priv->waitsem);
     }
 
   /* If there are threads waiting on poll() for touchscreen data to become availabe,

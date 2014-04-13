@@ -88,7 +88,7 @@ extern uint32_t _ebss;            /* End+1 of .bss */
 
 int CONFIG_USER_ENTRYPOINT(int argc, char *argv[]);
 
-const struct userspace_s userspace __attribute__ ((section (".userspace"))) = 
+const struct userspace_s userspace __attribute__ ((section (".userspace"))) =
 {
   /* General memory map */
 

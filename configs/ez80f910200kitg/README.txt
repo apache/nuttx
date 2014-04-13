@@ -17,7 +17,7 @@ Version 4.11.0
   The 5.1.1 version of the ZDS-II tools are currently configured for
   all ez80 boards.  However, it is the older version 4.11.0 that this code
   has been verified against.
-  
+
   Although it compiles without error, the 4.11.0 compiler generates
   bad code on one of the files, mm/mm_initialize.c.  Below is a simple work-
   around.
@@ -27,12 +27,12 @@ Version 4.11.0
     @@ -94,8 +94,11 @@
     {
        int i;
- 
+
     +#if 0 /* DO NOT CHECK IN */
        CHECK_ALLOCNODE_SIZE;
        CHECK_FREENODE_SIZE;
     +#endif
- 
+
    /* Set up global variables */
 
    UPDATE:  I don't know if 4.11.1 has this same problem (I bet not since
@@ -52,7 +52,7 @@ Version 5.1.1
   to modify the versioning in Make.defs and setenv.sh; if you want to build
   on a different platform, you will need to change the path in the ZDS binaries
   in those same files.
-  
+
 Other Versions
   If you use any version of ZDS-II other than 5.1.1 or if you install ZDS-II
   at any location other than the default location, you will have to modify
@@ -108,7 +108,7 @@ available:
         CONFIG_APPS_DIR="..\apps"
 
       NOTES:
-      
+
       a. If you need to change the toolchain path used in Make.defs, you
          will need to use the short 8.3 filenames to avoid spaces.  On my
          PC, C:\PROGRA~1\ is is C:\Program Files\ and C:\PROGRA~2\ is

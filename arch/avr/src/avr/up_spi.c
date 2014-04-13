@@ -140,7 +140,7 @@ static const struct spi_ops_s g_spiops =
 static struct avr_spidev_s g_spidev =
 {
   .spidev            = { &g_spiops },
-}; 
+};
 
 /****************************************************************************
  * Public Data
@@ -319,19 +319,19 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
         {
         case SPIDEV_MODE0: /* CPOL=0; CPHA=0 */
           break;
- 
+
         case SPIDEV_MODE1: /* CPOL=0; CPHA=1 */
           regval |= (1 << CPHA);
           break;
- 
+
         case SPIDEV_MODE2: /* CPOL=1; CPHA=0 */
           regval |= (1 << CPOL);
           break;
- 
+
         case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
           regval |= ((1 << CPOL) | (1 << CPHA));
           break;
- 
+
         default:
           DEBUGASSERT(FALSE);
           return;

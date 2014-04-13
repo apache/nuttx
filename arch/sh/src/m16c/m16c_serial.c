@@ -613,7 +613,7 @@ static int up_setup(struct uart_dev_s *dev)
     {
       dbg("Invalid bits=%d\n", priv->bits);
     }
- 
+
   if (priv->parity != 0)
     {
       regval |= UART_MR_PRYE;
@@ -1075,7 +1075,7 @@ static bool up_txready(struct uart_dev_s *dev)
  * Name: up_earlyconsoleinit
  *
  * Description:
- *   Performs the low level UART initialization early in 
+ *   Performs the low level UART initialization early in
  *   debug so that the serial console will be available
  *   during bootup.  This must be called before up_consoleinit.
  *

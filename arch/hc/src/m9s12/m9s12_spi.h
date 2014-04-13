@@ -52,7 +52,7 @@
 #define HCS12_SPI_CR1_OFFSET      0x00 /* SPI Control Register 1 */
 #define HCS12_SPI_CR2_OFFSET      0x01 /* SPI Control Register 2 */
 #define HCS12_SPI_BR_OFFSET       0x02 /* SPI Baud Rate Register */
-#define HCS12_SPI_SR_OFFSET       0x03 /* SPI Status Register */       
+#define HCS12_SPI_SR_OFFSET       0x03 /* SPI Status Register */
 #define HCS12_SPI_DR_OFFSET       0x05 /* SPI Data Register */
 
 /* Register Addresses ***************************************************************/
@@ -90,7 +90,7 @@
 #define SPI_BR_SPPR_SHIFT         (4)      /* Bits 4-6: SPI Baud Rate Preselection */
 #define SPI_BR_SPPR_MASK          (7 << SPI_BR_SPPR_SHIFT)
 
-/* SPI Status Register Bit-Field Definitions */  
+/* SPI Status Register Bit-Field Definitions */
 
 #define SPI_SR_MODF               (1 << 4)  /* Bit 4:  Mode Fault */
 #define SPI_SR_SPTEF              (1 << 5)  /* Bit 5:  SPI Transmit Empty Interrupt */

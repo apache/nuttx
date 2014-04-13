@@ -91,7 +91,7 @@ struct lpc31_spidev_s
   uint32_t         actual;     /* Actual clock frequency */
   uint8_t          nbits;      /* Width of work in bits (8 or 16) */
   uint8_t          mode;       /* Mode 0,1,2,3 */
-    
+
   uint32_t         slv1;
   uint32_t         slv2;
 };
@@ -156,7 +156,7 @@ static const struct spi_ops_s g_spiops =
   .registercallback  = 0,
 };
 
-static struct lpc31_spidev_s g_spidev = 
+static struct lpc31_spidev_s g_spidev =
 {
   .spidev            = { &g_spiops },
 };
@@ -299,7 +299,7 @@ static inline void spi_drive_cs(FAR struct lpc31_spidev_s *priv, uint8_t slave, 
         }
       spi_putreg(IOCONFIG_SPI_CSOUT0, LPC31_IOCONFIG_SPI_MODE1SET);
       break;
-      
+
     case 1:
       if (val == 0)
         {
@@ -350,7 +350,7 @@ static inline void spi_select_slave(FAR struct lpc31_spidev_s *priv, uint8_t sla
       spi_putreg(priv->slv2, LPC31_SPI_SLV0_2);
       spi_putreg(SPI_SLVENABLE1_ENABLED, LPC31_SPI_SLVENABLE);
       break;
-      
+
     case 1:
       spi_putreg(priv->slv1, LPC31_SPI_SLV1_1);
       spi_putreg(priv->slv2, LPC31_SPI_SLV1_2);
@@ -483,7 +483,7 @@ static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sel
 {
   struct lpc31_spidev_s *priv = (struct lpc31_spidev_s *) dev;
   uint8_t slave = 0;
-  
+
   /* FIXME: map the devid to the SPI slave - this should really
    * be in board specific code..... */
   switch (devid)
@@ -503,19 +503,19 @@ static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sel
     default:
       return;
     }
-      
+
   /*
-   * Since we don't use sequential multi-slave mode, but rather 
-   * perform the transfer piecemeal by consecutive calls to 
-   * SPI_SEND, then we must manually assert the chip select 
-   * across the whole transfer 
+   * Since we don't use sequential multi-slave mode, but rather
+   * perform the transfer piecemeal by consecutive calls to
+   * SPI_SEND, then we must manually assert the chip select
+   * across the whole transfer
    */
 
   if (selected)
   {
       spi_drive_cs(priv, slave, 0);
       spi_select_slave(priv, slave);
-      
+
       /* Enable SPI as master and notify of slave enables change */
 
       spi_putreg((1 << SPI_CONFIG_INTERSLVDELAY_SHIFT) | SPI_CONFIG_UPDENABLE | SPI_CONFIG_SPIENABLE, LPC31_SPI_CONFIG);
@@ -523,11 +523,11 @@ static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sel
   else
   {
       spi_drive_cs(priv, slave, 1);
-      
+
       /* Disable all slaves */
 
       spi_putreg(0, LPC31_SPI_SLVENABLE);
-      
+
       /* Disable SPI as master */
 
       spi_putreg(SPI_CONFIG_UPDENABLE, LPC31_SPI_CONFIG);
@@ -553,18 +553,18 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
 {
   FAR struct lpc31_spidev_s *priv = (FAR struct lpc31_spidev_s *)dev;
   uint32_t spi_clk, div, div1, div2;
-  
+
   if (priv->frequency != frequency)
   {
       /* The SPI clock is derived from the (main system oscillator / 2),
        * so compute the best divider from that clock */
-      
+
       spi_clk = lpc31_clkfreq(CLKID_SPICLK, DOMAINID_SPI);
-      
+
       /* Find closest divider to get at or under the target frequency */
-      
+
       div = (spi_clk + frequency / 2) / frequency;
-      
+
       if (div > SPI_MAX_DIVIDER)
         {
           div = SPI_MAX_DIVIDER;
@@ -573,7 +573,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
         {
           div = SPI_MIN_DIVIDER;
         }
-      
+
       div2 = (((div-1) / 512) + 2) * 2;
       div1 = ((((div + div2 / 2) / div2) - 1));
 
@@ -619,22 +619,22 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
           setbits = 0;
           clrbits = SPI_SLV_2_SPO|SPI_SLV_2_SPH;
           break;
- 
+
         case SPIDEV_MODE1: /* SPO=0; SPH=1 */
           setbits = SPI_SLV_2_SPH;
           clrbits = SPI_SLV_2_SPO;
           break;
- 
+
         case SPIDEV_MODE2: /* SPO=1; SPH=0 */
           setbits = SPI_SLV_2_SPO;
           clrbits = SPI_SLV_2_SPH;
           break;
- 
+
         case SPIDEV_MODE3: /* SPO=1; SPH=1 */
           setbits = SPI_SLV_2_SPO|SPI_SLV_2_SPH;
           clrbits = 0;
           break;
- 
+
         default:
           return;
         }
@@ -689,7 +689,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 
 static uint8_t spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-    /* FIXME: is there anyway to determine this 
+    /* FIXME: is there anyway to determine this
     *         it should probably be board dependant anyway */
 
     return SPI_STATUS_PRESENT;
@@ -789,7 +789,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                   *dest++ = word;
                 }
             }
-        } 
+        }
     }
   else
     {

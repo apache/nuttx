@@ -561,7 +561,7 @@ off_t nxffs_iotell(FAR struct nxffs_volume_s *volume);
  * Returned Value:
  *   Zero is returned on success.  Otherwise, a negated errno indicating the
  *   nature of the failure.
- *   
+ *
  * Defined in nxffs_cache.c
  *
  ****************************************************************************/
@@ -603,7 +603,7 @@ void nxffs_freeentry(FAR struct nxffs_entry_s *entry);
  *   offset - The FLASH memory offset to begin searching.
  *   entry  - A pointer to memory provided by the caller in which to return
  *     the inode description.
- *  
+ *
  * Returned Value:
  *   Zero is returned on success. Otherwise, a negated errno is returned
  *   that indicates the nature of the failure.
@@ -987,7 +987,7 @@ int nxffs_wrblkhdr(FAR struct nxffs_volume_s *volume,
  * Input Parameters:
  *   volume - Describes the NXFFS volume.
  *   datlen  - A memory location to return the data block length.
- *  
+ *
  * Returned Value:
  *   Zero is returned on success. Otherwise, a negated errno is returned
  *   that indicates the nature of the failure.

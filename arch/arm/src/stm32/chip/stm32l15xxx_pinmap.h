@@ -45,7 +45,7 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-/* Alternate Pin Functions. 
+/* Alternate Pin Functions.
  *
  * Alternative pin selections are provided with a numeric suffix like _1, _2, etc.
  * Drivers, however, will use the pin selection without the numeric suffix.

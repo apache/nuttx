@@ -66,7 +66,7 @@
  * this makes it easier to following the ordering of pushing on a push-down
  * stack.
  */
- 
+
 #define REG_R8           16
 #define REG_R9           15
 #define REG_R10          14

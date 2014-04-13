@@ -52,7 +52,7 @@
  ****************************************************************************/
 
 /* Macros to handle saving and restore interrupt state.  The state is copied
- * from the stack to the TCB, but only a referenced is passed to get the 
+ * from the stack to the TCB, but only a referenced is passed to get the
  * state from the TCB.
  */
 

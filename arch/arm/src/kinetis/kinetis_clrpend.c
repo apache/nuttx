@@ -71,7 +71,7 @@
  *
  * Description:
  *   Clear a pending interrupt at the NVIC.  This does not seem to be required
- *   for most interrupts.  Don't know why... 
+ *   for most interrupts.  Don't know why...
  *
  *   I keep it in a separate file so that it will not increase the footprint
  *   on Kinetis platforms that do not need this function.

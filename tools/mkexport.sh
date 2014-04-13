@@ -206,7 +206,7 @@ cp -f "${ARCHDIR}"/*.h "${EXPORTDIR}"/arch/. 2>/dev/null
 
 # Then look a list of possible places where other architecture-specific
 # header files might be found.  If those places exist (as directories or
-# as symbolic links to directories, then copy the header files from 
+# as symbolic links to directories, then copy the header files from
 # those directories into the EXPORTDIR
 
 ARCH_HDRDIRS="arm armv7-m avr avr32 board common chip mips32"
@@ -323,4 +323,4 @@ fi
 
 # Clean up after ourselves
 
-rm -rf "${EXPORTSUBDIR}" 
+rm -rf "${EXPORTSUBDIR}"

@@ -224,7 +224,7 @@ void nxcon_scroll(FAR struct nxcon_state_s *priv, int scrollheight)
           bm->pos.y -= scrollheight;
 
           /* We are keeping this one so increment to the next character */
- 
+
           i++;
         }
     }

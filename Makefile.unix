@@ -707,12 +707,12 @@ download: $(BIN)
 # pass1dep: Create pass1 build dependencies
 # pass2dep: Create pass2 build dependencies
 
-pass1dep: context tools/mkdeps$(HOSTEXEEXT) 
+pass1dep: context tools/mkdeps$(HOSTEXEEXT)
 	$(Q) for dir in $(USERDEPDIRS) ; do \
 		$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" depend ; \
 	done
 
-pass2dep: context tools/mkdeps$(HOSTEXEEXT) 
+pass2dep: context tools/mkdeps$(HOSTEXEEXT)
 	$(Q) for dir in $(KERNDEPDIRS) ; do \
 		$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" EXTRADEFINES=$(KDEFINE) depend; \
 	done

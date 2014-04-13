@@ -230,13 +230,13 @@
  * Interrupt clear status register INTCLRSTATUS, address 0x15002fe8,
  * Interrupt set status register   INTSETSTATUS, address 0x15002fec
  */
- 
+
 #define SPI_INT_SMS                      (1 << 4)  /* Bit 4:  Sequential multi-slave mode ready interrupt bit */
 #define SPI_INT_TX                       (1 << 3)  /* Bit 3:  Transmit threshold level interrupt bit */
 #define SPI_INT_RX                       (1 << 2)  /* Bit 3:  Receive threshold level interrupt bit */
 #define SPI_INT_TO                       (1 << 1)  /* Bit 1:  Receive timeout interrupt bit */
 #define SPI_INT_OV                       (1 << 0)  /* Bit 0:  Receive overrtun interrrupt bit */
-                          
+
 /************************************************************************************************
  * Public Types
  ************************************************************************************************/

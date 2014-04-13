@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_X86_INCLUDE_I486_LIMITS_H 
-#define __ARCH_X86_INCLUDE_I486_LIMITS_H 
+#ifndef __ARCH_X86_INCLUDE_I486_LIMITS_H
+#define __ARCH_X86_INCLUDE_I486_LIMITS_H
 
 /****************************************************************************
  * Included Files

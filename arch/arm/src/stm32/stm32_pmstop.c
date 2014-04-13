@@ -66,7 +66,7 @@
  * Name: stm32_pmstop
  *
  * Description:
- *   Enter STOP mode. 
+ *   Enter STOP mode.
  *
  * Input Parameters:
  *   lpds - true: To further reduce power consumption in Stop mode, put the
@@ -98,7 +98,7 @@ int stm32_pmstop(bool lpds)
     {
       regval |= PWR_CR_LPDS;
     }
- 
+
   putreg32(regval, STM32_PWR_CR);
 
   /* Set SLEEPDEEP bit of Cortex System Control Register */
@@ -106,7 +106,7 @@ int stm32_pmstop(bool lpds)
   regval  = getreg32(NVIC_SYSCON);
   regval |= NVIC_SYSCON_SLEEPDEEP;
   putreg32(regval, NVIC_SYSCON);
-  
+
   /* Sleep until the wakeup interrupt or event occurs */
 
 #ifdef CONFIG_PM_WFE
@@ -116,7 +116,7 @@ int stm32_pmstop(bool lpds)
 #else
   /* Mode: SLEEP + Entry with WFI */
 
-  asm("wfi"); 
+  asm("wfi");
 #endif
   return OK;
 }

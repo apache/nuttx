@@ -302,7 +302,7 @@ errout:
  * Name: files_allocate
  *
  * Description:
- *   Allocate a struct files instance and associate it with an inode instance. 
+ *   Allocate a struct files instance and associate it with an inode instance.
  *   Returns the file descriptor == index into the files array.
  *
  ****************************************************************************/

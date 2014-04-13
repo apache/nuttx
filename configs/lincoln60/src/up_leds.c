@@ -96,11 +96,11 @@ debug functionality (where NC means "No Change").
 
 During the boot phases.  LED1 and LED2 will show boot status.
 
-               LED1   LED2   
-STARTED         OFF    OFF   
-HEAPALLOCATE   BLUE    OFF    
+               LED1   LED2
+STARTED         OFF    OFF
+HEAPALLOCATE   BLUE    OFF
 IRQSENABLED     OFF   BLUE
-STACKCREATED    OFF    OFF 
+STACKCREATED    OFF    OFF
 
 After the system is booted, this logic will no longer use LEDs 1 & 2.  They
 are available for use by applications using lpc17_led (prototyped below)

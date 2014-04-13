@@ -93,7 +93,7 @@ up_lowputc:
 	ldr	r2, =IMX_UART2_VBASE	/* r2=UART0 base */
 #endif
 
-	/* Poll the TX fifo trigger level bit of the UART status register #2 . 
+	/* Poll the TX fifo trigger level bit of the UART status register #2 .
 	 * When the bit is non-zero, the TX Buffer FIFO is empty.
 	 */
 

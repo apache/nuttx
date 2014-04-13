@@ -81,7 +81,7 @@ _up_saveusercontext:
 	 * to populate.
 	 *
 	 * Re-position to the end of the structure (+4_ so that we can use
-	 * auto decrement 
+	 * auto decrement
 	 */
 
 	add	#(XCPTCONTEXT_SIZE), r4	/* R4: Address of last entry + 4 */

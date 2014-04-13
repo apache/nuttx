@@ -92,7 +92,7 @@ static inline void lpc43_configinput(uint16_t gpiocfg,
   regval  = getreg32(regaddr);
   regval &= ~GPIO_DIR(pin);
   putreg32(regval, regaddr);
-  
+
   /* To be able to read the signal on the GPIO input, the input
    * buffer must be enabled in the syscon block for the corresponding pin.
    * This should have been done when the pin was configured as a GPIO.
@@ -147,7 +147,7 @@ static inline void lpc43_configoutput(uint16_t gpiocfg,
  *
  * Description:
  *   Configure a GPIO based on bit-encoded description of the pin.  NOTE:
- *   The pin *must* have first been configured for GPIO usage with a 
+ *   The pin *must* have first been configured for GPIO usage with a
  *   corresponding call to lpc43_pin_config().
  *
  * Returned Value:

@@ -132,7 +132,7 @@ by modifying the configuration file as follows:
   -CONFIG_HOST_WINDOWS=y
   -CONFIG_WINDOWS_NATIVE=y
   +CONFIG_HOST_LINUX=y
- 
+
   -CONFIG_Z80_TOOLCHAIN_SDCCW=y
   +CONFIG_Z80_TOOLCHAIN_SDCCL=y
 

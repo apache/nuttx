@@ -156,7 +156,7 @@ goto :EOF
 :CheckPaths
 for %%H in (%altpath%) do (
   set tmppath=%%H\%file%
-  if "%debug%"=="y" echo Checkfile: Checking %tmppath% 
+  if "%debug%"=="y" echo Checkfile: Checking %tmppath%
   if exist %tmppath% (
     set fullpath=%tmppath%
     goto :EOF

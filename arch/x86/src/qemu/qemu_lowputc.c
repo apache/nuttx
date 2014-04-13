@@ -46,7 +46,7 @@
  ****************************************************************************/
 
  /* COM1 port addresses */
- 
+
 #define COM1_PORT 0x3f8   /* COM1: I/O port 0x3f8, IRQ 4 */
 #define COM2_PORT 0x2f8   /* COM2: I/O port 0x2f8, IRQ 3 */
 #define COM3_PORT 0x3e8   /* COM3: I/O port 0x3e8, IRQ 4 */

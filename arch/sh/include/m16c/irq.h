@@ -208,7 +208,7 @@
  *  - Save FLG register
  *  - Clear I, D, and U flags in FLG register
  *  - Builds stack frame like:
- * 
+ *
  *    sp   -> PC bits 0-7
  *    sp+1 -> PC bits 8-15
  *    sp+2 -> FLG bits 0-7

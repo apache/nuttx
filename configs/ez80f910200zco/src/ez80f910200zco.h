@@ -117,7 +117,7 @@
  * TX:
  *   The TX signal at D4 indicates that data is tranmitted to the modem.
  */
- 
+
  /* Push buttons:
   *
   * PB0   SW1 Bit 0 of GPIO Port B
@@ -130,7 +130,7 @@
 #define EZ80_PB1_IRQ EZ80_PORTB1_IRQ  /* Vector Oxa4 */
 #define EZ80_PB2_IRQ EZ80_PORTB2_IRQ  /* Vector Oxa8 */
 
-  
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/

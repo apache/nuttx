@@ -56,7 +56,7 @@ ifeq ($(CONFIG_DEBUG_STACK),y)
 CMN_CSRCS += up_checkstack.c
 endif
 
-CHIP_ASRCS	= 
+CHIP_ASRCS	=
 CHIP_CSRCS	= str71x_prccu.c str71x_lowputc.c str71x_decodeirq.c str71x_irq.c \
 		  str71x_timerisr.c str71x_serial.c
 

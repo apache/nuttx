@@ -318,7 +318,7 @@ int schedule_unload(pid_t pid, FAR struct binary_s *bin)
         {
           blldbg("ERROR: Failed to remove structure\n");
         }
-      
+
       goto errout;
     }
 

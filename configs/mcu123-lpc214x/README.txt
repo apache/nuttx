@@ -34,7 +34,7 @@ GNU Toolchain Options
   1. The NuttX buildroot Toolchain (see below).
   2. The CodeSourcery GNU toolchain,
   3. The devkitARM GNU toolchain, or
- 
+
   All testing has been conducted using the NuttX buildroot toolchain.  To use
   the CodeSourcery or devkitARM GNU toolchain, you simply need to build the
   system as follows:
@@ -163,7 +163,7 @@ Here are the detailed steps I use:
 
 3. Start lpc21isp.sh
 
-4. Reset the board to 
+4. Reset the board to
 
 FlashMagic (Windows/MAC)
 ------------------------
@@ -190,7 +190,7 @@ You download FlashMagic for Windows or MAC here: http://www.flashmagictool.com
 5. Start and reset the board to entry ISP mode.  Or hold the INT1
    button down after reset after you press start.
 
-NOTE:  FlashMagic will complain if the data section overlaps 
+NOTE:  FlashMagic will complain if the data section overlaps
        0x4000000-0x400001ff.
 
 OpenOCD
@@ -201,14 +201,14 @@ Cygwin, I can do the following:
 
 1. Create a .cfg file:
 
-   $ cat /cygdrive/c/gccfd/openocd/lib/openocd/interface/arm-usb-ocd.cfg /cygdrive/c/gccfd/openocd/lib/openocd/target/lpc2148.cfg > lpc2148.cfg 
+   $ cat /cygdrive/c/gccfd/openocd/lib/openocd/interface/arm-usb-ocd.cfg /cygdrive/c/gccfd/openocd/lib/openocd/target/lpc2148.cfg > lpc2148.cfg
 
 2. Start OpenOCD:
 
    /cygdrive/c/gccfd/openocd/bin/openocd-ftd2xx.exe -f lpc2148.cfg -s . &
 
 3. Start arm-*-gdb (whichever GDB your toolchain uses).
-   
+
 ARM/LPC214X-specific Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -300,7 +300,7 @@ ARM/LPC214X-specific Configuration Options
   LPC214X USB Configuration
 
 	CONFIG_LPC214X_USBDEV_FRAME_INTERRUPT
-	   Handle USB Start-Of-Frame events. 
+	   Handle USB Start-Of-Frame events.
 	   Enable reading SOF from interrupt handler vs. simply reading on demand.
 	   Probably a bad idea... Unless there is some issue with sampling the SOF
 	   from hardware asynchronously.

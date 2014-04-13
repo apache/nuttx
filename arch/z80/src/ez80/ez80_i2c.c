@@ -261,7 +261,7 @@ static uint16_t i2c_getccr(uint32_t fscl)
        fscl  = ftmp;
        n     = 7;
      }
-  
+
   /* Finally, get M:
    *
    *   M = (fsamp / 10) / fscl - 1 = ftmp / fscl - 1
@@ -340,7 +340,7 @@ static void i2c_clriflg(void)
  *   None
  *
  ****************************************************************************/
- 
+
 static void i2c_start(void)
 {
   uint8_t regval  = inp(EZ80_I2C_CTL);
@@ -362,7 +362,7 @@ static void i2c_start(void)
  *   None
  *
  ****************************************************************************/
- 
+
 static void i2c_stop(void)
 {
   uint8_t regval  = inp(EZ80_I2C_CTL);
@@ -382,11 +382,11 @@ static void i2c_stop(void)
  *
  * Returned Value:
  *   0: Success, IFLG is set and DATA can be sent or received.
- 
+
  *   Or <0: Negated error value.  IFLG is cleared.
  *
  *   -EIO: Irrecoverable (or unexpected) error occured
- *   -EAGAIN: And 
+ *   -EAGAIN: And
  *
  ****************************************************************************/
 
@@ -420,7 +420,7 @@ static int i2c_sendaddr(struct ez80_i2cdev_s *priv, uint8_t readbit)
 
       outp(EZ80_I2C_DR, (uint8_t)I2C_ADDR8(priv->addr) | readbit);
       i2c_clriflg();
- 
+
       /* And wait for the address transfer to complete */
 
       sr = i2c_waitiflg();
@@ -659,7 +659,7 @@ static int i2c_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int bufle
               if (sr == I2C_SR_ARBLOST1)
                 {
                    /* Arbitration lost, break out of the inner loop and
-                    * try sending the message again 
+                    * try sending the message again
                     */
 
                    break;
@@ -745,7 +745,7 @@ static int i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
 
   /* Retry as necessary to receive the whole message */
 
-  for (retry = 0; retry < 100; retry++)    
+  for (retry = 0; retry < 100; retry++)
     {
       /* Enter MASTER TRANSMIT mode by setting the STA bit in the I2C_CTL
        * register to 1. The I2C then tests the I2C bus and transmits a START
@@ -784,7 +784,7 @@ static int i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
               /* If the AAK bit is cleared to 0 during a transfer, the I2C
                * transmits a NACK bit after the next byte is received.
                */
-             
+
               regval &= ~I2C_CTL_AAK;
             }
           else
@@ -798,7 +798,7 @@ static int i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
             }
           outp(EZ80_I2C_CTL, regval);
 
-          /* Wait for IFLG to be set meaning that incoming data is 
+          /* Wait for IFLG to be set meaning that incoming data is
            * available in the I2C_DR registers.
            */
 
@@ -851,7 +851,7 @@ static int i2c_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
             i2c_clriflg();
             break;
           }
-          
+
         /* Unexpected status response */
 
         else
@@ -881,7 +881,7 @@ failure:
  * Description:
  *   Initialize the selected I2C port. And return a unique instance of struct
  *   struct i2c_dev_s.  This function may be called to obtain multiple
- *   instances of the interface, each of which may be set up with a 
+ *   instances of the interface, each of which may be set up with a
  *   different frequency and slave address.
  *
  * Input Parameter:
@@ -897,7 +897,7 @@ FAR struct i2c_dev_s *up_i2cinitialize(int port)
   FAR struct ez80_i2cdev_s *i2c;
   uint16_t ccr;
   uint8_t  regval;
- 
+
   if (!g_initialized)
     {
       /* Set up some initial BRG value */
@@ -906,7 +906,7 @@ FAR struct i2c_dev_s *up_i2cinitialize(int port)
       i2c_setccr(ccr);
 
       /* No GPIO setup is required -- I2C pints, SCL/SDA are not multiplexed */
-  
+
       /* This semaphore enforces serialized access for I2C transfers */
 
       sem_init(&g_i2csem, 0, 1);
@@ -929,4 +929,4 @@ FAR struct i2c_dev_s *up_i2cinitialize(int port)
       i2c->ccr = g_currccr;
     }
   return (FAR struct i2c_dev_s *)i2c;
-} 
+}

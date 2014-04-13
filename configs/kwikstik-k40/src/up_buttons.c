@@ -110,7 +110,7 @@ uint8_t board_buttons(void)
  *   be called when a button is depressed or released.  The ID value is a
  *   button enumeration value that uniquely identifies a button resource.
  *   See the BUTTON_* and JOYSTICK_* definitions in board.h for the meaning
- *   of enumeration value.  The previous interrupt handler address is 
+ *   of enumeration value.  The previous interrupt handler address is
  *   returned (so that it may be restored, if so desired).
  *
  ****************************************************************************/

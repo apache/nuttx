@@ -128,7 +128,7 @@ static int builtin_loadbinary(struct binary_s *binp)
       int errval = errno;
       bdbg("ERROR: %s is not a builtin application\n", filename);
       return -errval;
-      
+
     }
 
   /* Return the load information.  NOTE: that there is no way to configure

@@ -153,7 +153,7 @@ int unload_module(FAR const struct binary_s *binp)
   int ret;
 #endif
   int i;
- 
+
   if (binp)
     {
       /* Execute C++ desctructors */

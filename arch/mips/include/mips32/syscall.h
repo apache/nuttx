@@ -62,7 +62,7 @@
  * a SYS call in kernel mode.  The first four syscall values must, therefore, be
  * reserved (0 is not used).
  */
- 
+
 #ifdef CONFIG_NUTTX_KERNEL
 #  ifndef CONFIG_SYS_RESERVED
 #    error "CONFIG_SYS_RESERVED must be defined to the value 4"

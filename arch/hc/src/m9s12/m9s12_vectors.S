@@ -80,7 +80,7 @@
  *              PCH
  * High Address PCL  <-- SP before interrupt
  */
- 
+
 	.macro	HANDLER, label, irqno
 \label:
 	ldab	#\irqno							/* Load B=IRQ number */
@@ -293,7 +293,7 @@ vcommon:
 #endif
 
 	/* Save the PPAGE register */
- 
+
 #ifndef CONFIG_HCS12_NONBANKED
 	movb	HCS12_MMC_PPAGE, 1, -sp
 #endif
@@ -318,7 +318,7 @@ vcommon:
 	bne		up_fullcontextrestore
 
 	/* Restore registers and return */
- 
+
 	/* Restore the PPAGE register */
 
 #ifndef CONFIG_HCS12_NONBANKED

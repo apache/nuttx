@@ -45,7 +45,7 @@ CSVFILE = "$(TOPDIR)$(DELIM)syscall$(DELIM)syscall.csv"
 STUB_SRCS += syscall_funclookup.c syscall_stublookup.c syscall_nparms.c
 STUB_SRCS += syscall_clock_systimer.c
 
-ASRCS = 
+ASRCS =
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 
 PROXY_OBJS = $(PROXY_SRCS:.c=$(OBJEXT))

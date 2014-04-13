@@ -146,7 +146,7 @@ FAR struct lcd_dev_s *up_lcdgetdev(int lcddev)
       (void)dev->setpower(dev, CONFIG_LCD_MAXPOWER);
       return dev;
     }
- 
+
   return NULL;
 }
 

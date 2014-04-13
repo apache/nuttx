@@ -37,7 +37,7 @@
 
 CFLAGS += -I$(TOPDIR)/sched
 
-ASRCS = 
+ASRCS =
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 
 CSRCS = stm32_boot.c stm32_spi.c

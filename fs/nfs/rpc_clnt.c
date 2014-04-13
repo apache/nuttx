@@ -233,7 +233,7 @@ static int rpcclnt_reply(FAR struct rpcclnt *rpc, int procid, int prog,
     {
       fdbg("ERROR: rpcclnt_receive returned: %d\n", error);
 
-      /* If we failed because of a timeout, then try sending the CALL 
+      /* If we failed because of a timeout, then try sending the CALL
        * message again.
        */
 
@@ -299,7 +299,7 @@ static uint32_t rpcclnt_newxid(void)
  * Name: rpcclnt_fmtheader
  *
  * Description:
- *   Format the common part of the call header 
+ *   Format the common part of the call header
  *
  ****************************************************************************/
 
@@ -728,7 +728,7 @@ int rpcclnt_request(FAR struct rpcclnt *rpc, int procnum, int prog,
 
       rpc_statistics(rpcrequests);
       rpc->rc_timeout = false;
-  
+
       /* Send the RPC CALL message */
 
       error = rpcclnt_send(rpc, procnum, prog, request, reqlen);

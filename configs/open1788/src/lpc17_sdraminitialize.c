@@ -80,7 +80,7 @@
 
 #define CONFIG_LPC17_SDRAM_32BIT
 
-#ifdef CONFIG_LPC17_SDRAM_16BIT 
+#ifdef CONFIG_LPC17_SDRAM_16BIT
 #  define SDRAM_SIZE        0x02000000 /* 256Mbit */
 #else /* if defined(CONFIG_LPC17_SDRAM_32BIT) */
 #  undef CONFIG_LPC17_SDRAM_32BIT
@@ -196,7 +196,7 @@ void open1788_sdram_initialize(void)
   /* Wait 128 AHB clock cycles */
 
   for (i = 0; i < 128; i++);
- 
+
   /* 64ms/8192 = 7.8125us, nx16x8.33ns < 7.8125us, n < 58.6*/
 
   regval = 64000000 / (1 << 13);

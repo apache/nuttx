@@ -33,7 +33,7 @@ some links (which will probably be mostly outdated by the time your read this):
 Building QEMU
 -------------
 
-  tar zxf qemu-0.14.0.tar.gz 
+  tar zxf qemu-0.14.0.tar.gz
   cd qemu-0.14.0
   ./configure --target-list=i386-softmmu
   make
@@ -43,21 +43,21 @@ Cygwin Build Problems
 ---------------------
 
   Error:
- 
+
     "gcc: The -mno-cygwin flag has been removed; use a mingw-targeted cross-compiler."
 
   Workaround:
-  
+
     None known.  It does not seem possible to build QEMU using the Cygwin gcc.
     I tried editing configure.  Removing the following line will allow QEMU to
     configure:
-  
+
       QEMU_CFLAGS="-mno-cygwin $QEMU_CFLAGS"
 
     However, it then fails later during the compilation phase.
 
   Recommendation:
- 
+
     1. Google for "qemu windows download" and download some pre-built QEMU
        binaries.  I found 0.14.0 here: http://dietpc.org/windows/qemu/, or
     2. Try building QEMU with MingGW (I understand that this is difficult).
@@ -75,11 +75,11 @@ Running QEMU
 
   The -nographic option redirects COM1 to your console.  However, the -nographic
   option does not work under Cygwin.  For simple testing under Cygwin, I use
-  
+
     qemu -cpu 486 -m 2 -kernel nuttx.elf -serial file:test.txt
 
   which will send COM1 output to the file test.txt.
- 
+
 Toolchains
 ==========
 

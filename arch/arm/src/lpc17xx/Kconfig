@@ -493,7 +493,7 @@ config ADC_CHANLIST
 config ADC_NCHANNELS
 	int "ADC0 number of channels"
 	depends on ADC_CHANLIST
-	default 0  
+	default 0
 	---help---
 		If ADC_CHANLIST is enabled, then the platform specific code
 		must do two things:  (1) define ADC_NCHANNELS in the configuration
@@ -606,7 +606,7 @@ config SDIO_DMA
 	default y if LPC17_GPDMA
 	depends on LPC17_GPDMA
 	---help---
-		Support DMA data transfers.  
+		Support DMA data transfers.
 		Enable SD card DMA data transfers.  This is a marginally optional.
 		For most usages, SD accesses will cause data overruns if used without
 		DMA.  Requires LPC17_SDCARD and config LPC17_GPDMA.

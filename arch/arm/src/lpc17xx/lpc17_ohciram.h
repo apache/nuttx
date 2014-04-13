@@ -141,11 +141,11 @@
 #define LPC17_TD_SIZE   32
 
 /* Configurable number of user transfer descriptors (TDs).  */
- 
+
 #ifndef CONFIG_USBHOST_NTDS
 #  define CONFIG_USBHOST_NTDS 3
 #endif
- 
+
 #if CONFIG_USBHOST_NTDS < 2
 #  error "Insufficent TDs"
 #endif

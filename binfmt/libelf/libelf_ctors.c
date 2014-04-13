@@ -109,7 +109,7 @@ int elf_loadctors(FAR struct elf_loadinfo_s *loadinfo)
 
   /* Find the index to the section named ".ctors."  NOTE:  On old ABI system,
    * .ctors is the name of the section containing the list of constructors;
-   * On newer systems, the similar section is called .init_array.  It is 
+   * On newer systems, the similar section is called .init_array.  It is
    * expected that the linker script will force the section name to be ".ctors"
    * in either case.
    */
@@ -204,7 +204,7 @@ int elf_loadctors(FAR struct elf_loadinfo_s *loadinfo)
            * loaded into memory.  Since the .ctors lie in allocated memory, they
            * will be relocated via the normal mechanism.
            */
- 
+
           loadinfo->ctors = (binfmt_ctor_t*)shdr->sh_addr;
         }
     }

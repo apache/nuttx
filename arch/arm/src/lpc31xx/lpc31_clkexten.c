@@ -64,7 +64,7 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
- 
+
 /****************************************************************************
  * Name: lpc31_enableexten
  *
@@ -77,7 +77,7 @@ void lpc31_enableexten(enum lpc31_clockid_e clkid)
 {
   uint32_t regaddr;
   uint32_t regval;
- 
+
   switch (clkid)
     {
       case CLKID_DMACLKGATED:      /*  9 DMA_CLK_GATED */
@@ -120,7 +120,7 @@ void lpc31_disableexten(enum lpc31_clockid_e clkid)
 {
   uint32_t regaddr;
   uint32_t regval;
- 
+
   switch (clkid)
     {
       case CLKID_DMACLKGATED:      /*  9 DMA_CLK_GATED */

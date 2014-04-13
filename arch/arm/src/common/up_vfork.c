@@ -90,7 +90,7 @@
  *   any data other than a variable of type pid_t used to store the return
  *   value from vfork(), or returns from the function in which vfork() was
  *   called, or calls any other function before successfully calling _exit()
- *   or one of the exec family of functions. 
+ *   or one of the exec family of functions.
  *
  *   The overall sequence is:
  *
@@ -120,7 +120,7 @@
  *   Upon successful completion, vfork() returns 0 to the child process and
  *   returns the process ID of the child process to the parent process.
  *   Otherwise, -1 is returned to the parent, no child process is created,
- *   and errno is set to indicate the error. 
+ *   and errno is set to indicate the error.
  *
  ****************************************************************************/
 
@@ -180,7 +180,7 @@ pid_t up_vfork(const struct vfork_s *context)
   DEBUGASSERT((uint32_t)parent->adj_stack_ptr > context->sp);
   stackutil = (uint32_t)parent->adj_stack_ptr - context->sp;
 
-  svdbg("stacksize:%d stackutil:%d\n", stacksize, stackutil); 
+  svdbg("stacksize:%d stackutil:%d\n", stacksize, stackutil);
 
   /* Make some feeble effort to perserve the stack contents.  This is
    * feeble because the stack surely contains invalid pointers and other

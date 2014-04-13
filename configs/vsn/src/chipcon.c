@@ -2,7 +2,7 @@
  * configs/vsn/src/chipcon.c
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
- * 
+ *
  *   Author: Uros Platise <uros.platise@isotel.eu>
  *
  * Redistribution and use in source and binary forms, with or without

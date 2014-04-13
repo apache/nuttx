@@ -36,10 +36,10 @@
  **************************************************************************************/
 /* This driver supports the following LCDs on the STM324xG_EVAL board:
  *
- *   AM-240320L8TNQW00H (LCD_ILI9320 or LCD_ILI9321) OR 
+ *   AM-240320L8TNQW00H (LCD_ILI9320 or LCD_ILI9321) OR
  *   AM-240320D5TOQW01H (LCD_ILI9325)
  */
- 
+
 /**************************************************************************************
  * Included Files
  **************************************************************************************/
@@ -126,7 +126,7 @@
 /* Display/Color Properties ***********************************************************/
 /* Display Resolution */
 
-#if defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_RLANDSCAPE) 
+#if defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_RLANDSCAPE)
 #  define STM3220G_XRES       320
 #  define STM3220G_YRES       240
 #else
@@ -386,7 +386,7 @@ static const struct fb_videoinfo_s g_videoinfo =
 
 /* This is the standard, NuttX Plane information object */
 
-static const struct lcd_planeinfo_s g_planeinfo = 
+static const struct lcd_planeinfo_s g_planeinfo =
 {
   .putrun = stm3220g_putrun,       /* Put a run into LCD memory */
   .getrun = stm3220g_getrun,       /* Get a run from LCD memory */
@@ -396,12 +396,12 @@ static const struct lcd_planeinfo_s g_planeinfo =
 
 /* This is the standard, NuttX LCD driver object */
 
-static struct stm3220g_dev_s g_lcddev = 
+static struct stm3220g_dev_s g_lcddev =
 {
   .dev =
   {
     /* LCD Configuration */
- 
+
     .getvideoinfo = stm3220g_getvideoinfo,
     .getplaneinfo = stm3220g_getplaneinfo,
 
@@ -492,7 +492,7 @@ static inline void stm3220g_writegram(uint16_t rgbval)
  *   - ILI932x: Discard first dummy read; no shift in the return data
  *
  **************************************************************************************/
- 
+
 static void stm3220g_readnosetup(FAR uint16_t *accum)
 {
   /* Read-ahead one pixel */
@@ -507,7 +507,7 @@ static void stm3220g_readnosetup(FAR uint16_t *accum)
  *   Read one correctly aligned pixel from the GRAM memory.  Possibly shifting the
  *   data and possibly swapping red and green components.
  *
- *   - ILI932x: Unknown -- assuming colors are in the color order 
+ *   - ILI932x: Unknown -- assuming colors are in the color order
  *
  **************************************************************************************/
 
@@ -582,7 +582,7 @@ static int stm3220g_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *bu
 {
   FAR const uint16_t *src = (FAR const uint16_t*)buffer;
   int i;
- 
+
   /* Buffer must be provided and aligned to a 16-bit address boundary */
 
   lcdvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
@@ -659,7 +659,7 @@ static int stm3220g_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *bu
    */
 
   row = (STM3220G_YRES-1) - row;
-  
+
   /* Then write the GRAM data, manually incrementing Y (which is col) */
 
   for (i = 0; i < npixels; i++)
@@ -700,7 +700,7 @@ static int stm3220g_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   uint16_t (*readgram)(FAR uint16_t *accum);
   uint16_t accum;
   int i;
- 
+
   /* Buffer must be provided and aligned to a 16-bit address boundary */
 
   lcdvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
@@ -719,7 +719,7 @@ static int stm3220g_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
      default:  /* Shouldn't happen */
        return -ENOSYS;
    }
- 
+
   /* Read the run from GRAM. */
 
 #ifdef CONFIG_LCD_LANDSCAPE
@@ -796,7 +796,7 @@ static int stm3220g_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
    */
 
   row = (STM3220G_YRES-1) - row;
-  
+
   /* Then write the GRAM data, manually incrementing Y (which is col) */
 
   for (i = 0; i < npixels; i++)
@@ -880,7 +880,7 @@ static int stm3220g_poweroff(void)
 {
   /* Turn the display off */
 
-  stm3220g_writereg(LCD_REG_7, 0); 
+  stm3220g_writereg(LCD_REG_7, 0);
 
   /* Remember the power off state */
 
@@ -1197,8 +1197,8 @@ void up_lcduninitialize(void)
 void stm3220g_lcdclear(uint16_t color)
 {
   uint32_t i = 0;
-  
-  stm3220g_setcursor(0, STM3220G_XRES-1); 
+
+  stm3220g_setcursor(0, STM3220G_XRES-1);
   stm3220g_gramselect();
   for (i = 0; i < STM3220G_XRES * STM3220G_YRES; i++)
     {

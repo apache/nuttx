@@ -85,7 +85,7 @@
  *    - All vector addresses are FLASH absolute addresses,
  *    - DRAM cannot reside at address zero,
  *    - Vectors at address zero (CR_V is not set),
- *    - The boot logic must configure SDRAM and, 
+ *    - The boot logic must configure SDRAM and,
  *    - The .data section in RAM must be initialized.
  *
  * 2. We boot in FLASH but copy ourselves to DRAM from better performance.
@@ -140,7 +140,7 @@
 /* Peripheral Register Offsets ******************************************************/
 
 #define IMX_AIPI1_OFFSET          0x00000000 /* -0x00000fff AIPI1               4Kb */
-#define IMX_WDOG_OFFSET           0x00001000 /* -0x00001fff WatchDog            4Kb */          
+#define IMX_WDOG_OFFSET           0x00001000 /* -0x00001fff WatchDog            4Kb */
 #define IMX_TIMER1_OFFSET         0x00002000 /* -0x00002fff Timer1              4Kb */
 #define IMX_TIMER2_OFFSET         0x00003000 /* -0x00003fff Timer2              4Kb */
 #define IMX_RTC_OFFSET            0x00004000 /* -0x00004fff RTC                 4Kb */

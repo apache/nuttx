@@ -62,7 +62,7 @@ endif
 
 all: b16$(HOSTEXEEXT) bdf-converter$(HOSTEXEEXT) cmpconfig$(HOSTEXEEXT) \
     configure$(HOSTEXEEXT) mkconfig$(HOSTEXEEXT) mkdeps$(HOSTEXEEXT) mksymtab$(HOSTEXEEXT) \
-    mksyscall$(HOSTEXEEXT) mkversion$(HOSTEXEEXT) 
+    mksyscall$(HOSTEXEEXT) mkversion$(HOSTEXEEXT)
 default: mkconfig$(HOSTEXEEXT) mksyscall$(HOSTEXEEXT) mkdeps$(HOSTEXEEXT)
 
 ifdef HOSTEXEEXT
@@ -73,8 +73,8 @@ endif
 
 # b16 - Fixed precision math conversion tool
 
-b16$(HOSTEXEEXT): b16.c 
-	$(Q) $(HOSTCC) $(HOSTCFLAGS) -o b16$(HOSTEXEEXT) b16.c 
+b16$(HOSTEXEEXT): b16.c
+	$(Q) $(HOSTCC) $(HOSTCFLAGS) -o b16$(HOSTEXEEXT) b16.c
 
 ifdef HOSTEXEEXT
 b16: b16$(HOSTEXEEXT)

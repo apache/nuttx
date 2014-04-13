@@ -3094,7 +3094,7 @@ static int lpc214x_wakeup(struct usbdev_s *dev)
  * Name: lpc214x_selfpowered
  *
  * Description:
- *   Sets/clears the device selfpowered feature 
+ *   Sets/clears the device selfpowered feature
  *
  *******************************************************************************/
 
