@@ -291,7 +291,7 @@ struct lpc17_driver_s
   uint32_t lp_inten;            /* Shadow copy of INTEN register */
   WDOG_ID  lp_txpoll;           /* TX poll timer */
   WDOG_ID  lp_txtimeout;        /* TX timeout timer */
-  
+
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_NET)
   struct lpc17_statistics_s lp_stat;
 #endif
@@ -638,7 +638,7 @@ static int lpc17_transmit(struct lpc17_driver_s *priv)
   memcpy(txbuffer, priv->lp_dev.d_buf, priv->lp_dev.d_len);
 
   /* Bump the producer index, making the packet available for transmission. */
-  
+
   if (++prodidx >= CONFIG_NET_NTXDESC)
     {
      /* Wrap back to index zero */
@@ -723,10 +723,10 @@ static int lpc17_uiptxpoll(struct uip_driver_s *dev)
  *   possibly a response to the incoming packet (but probably not, in reality).
  *   However, since the Rx and Tx operations are decoupled, there is no
  *   guarantee that there will be a Tx descriptor available at that time.
- *   This function will perform that check and, if no Tx descriptor is 
+ *   This function will perform that check and, if no Tx descriptor is
  *   available, this function will (1) stop incoming Rx processing (bad), and
  *   (2) hold the outgoing packet in a pending state until the next Tx
- *   interrupt occurs. 
+ *   interrupt occurs.
  *
  * Parameters:
  *   priv  - Reference to the driver state structure
@@ -757,7 +757,7 @@ static void lpc17_response(struct lpc17_driver_s *priv)
        /* No.. mark the Tx as pending and halt further Tx interrupts */
 
        DEBUGASSERT((priv->lp_inten & ETH_INT_TXDONE) != 0);
-       
+
        priv->lp_txpending = true;
        priv->lp_inten    &= ~ETH_RXINTS;
        lpc17_putreg(priv->lp_inten, LPC17_ETH_INTEN);
@@ -807,7 +807,7 @@ static void lpc17_rxdone(struct lpc17_driver_s *priv)
       EMAC_STAT(priv, rx_packets);
 
       /* Get the Rx status and packet length (-4+1) */
-    
+
       rxstat   = (uint32_t*)(LPC17_RXSTAT_BASE + (considx << 3));
       pktlen   = (*rxstat & RXSTAT_INFO_RXSIZE_MASK) - 3;
 
@@ -827,7 +827,7 @@ static void lpc17_rxdone(struct lpc17_driver_s *priv)
        * be the same size as our max packet size, any fragments also
        * imply that the packet is too big.
        */
- 
+
       /* else */ if (pktlen > CONFIG_NET_BUFSIZE + CONFIG_NET_GUARDSIZE)
         {
           nlldbg("Too big. considx: %08x prodidx: %08x pktlen: %d rxstat: %08x\n",
@@ -854,11 +854,11 @@ static void lpc17_rxdone(struct lpc17_driver_s *priv)
           void     *rxbuffer;
 
           /* Get the Rx buffer address from the Rx descriptor */
- 
+
           rxdesc   = (uint32_t*)(LPC17_RXDESC_BASE + (considx << 3));
           rxbuffer = (void*)*rxdesc;
 
-          /* Copy the data data from the EMAC DMA RAM to priv->lp_dev.d_buf. 
+          /* Copy the data data from the EMAC DMA RAM to priv->lp_dev.d_buf.
            * Set amount of data in priv->lp_dev.d_len
            *
            * Here would be a great performance improvement:  Remove the
@@ -1034,7 +1034,7 @@ static int lpc17_interrupt(int irq, void *context)
       /* Clear all pending interrupts */
 
       lpc17_putreg(status, LPC17_ETH_INTCLR);
-      
+
       /* Handle each pending interrupt **************************************/
       /* Check for Wake-Up on Lan *******************************************/
 
@@ -1076,7 +1076,7 @@ static int lpc17_interrupt(int irq, void *context)
            (void)lpc17_ifup(&priv->lp_dev);
         }
       else
-        {      
+        {
           /* Check for receive events ***************************************/
           /* RX ERROR -- Triggered on receive errors: AlignmentError,
            * RangeError, LengthError, SymbolError, CRCError or NoDescriptor
@@ -1116,7 +1116,7 @@ static int lpc17_interrupt(int irq, void *context)
 
               lpc17_rxdone(priv);
             }
- 
+
           /* Check for Tx events ********************************************/
           /* TX ERROR -- Triggered on transmit errors: LateCollision,
            * ExcessiveCollision and ExcessiveDefer, NoDescriptor or Underrun.
@@ -1255,7 +1255,7 @@ static void lpc17_polltimer(int argc, uint32_t arg, ...)
  *
  * Description:
  *   NuttX Callback: Bring up the Ethernet interface when an IP address is
- *   provided 
+ *   provided
  *
  * Parameters:
  *   dev  - Reference to the NuttX driver state structure
@@ -1463,7 +1463,7 @@ static int lpc17_ifdown(struct uip_driver_s *dev)
  * Function: lpc17_txavail
  *
  * Description:
- *   Driver callback invoked when new TX data is available.  This is a 
+ *   Driver callback invoked when new TX data is available.  This is a
  *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
  *   latency.
  *
@@ -1516,7 +1516,7 @@ static int lpc17_txavail(struct uip_driver_s *dev)
  *
  * Parameters:
  *   dev  - Reference to the NuttX driver state structure
- *   mac  - The MAC address to be added 
+ *   mac  - The MAC address to be added
  *
  * Returned Value:
  *   None
@@ -1546,7 +1546,7 @@ static int lpc17_addmac(struct uip_driver_s *dev, const uint8_t *mac)
  *
  * Parameters:
  *   dev  - Reference to the NuttX driver state structure
- *   mac  - The MAC address to be removed 
+ *   mac  - The MAC address to be removed
  *
  * Returned Value:
  *   None
@@ -1574,7 +1574,7 @@ static int lpc17_rmmac(struct uip_driver_s *dev, const uint8_t *mac)
  *   Dump GPIO registers
  *
  * Parameters:
- *   None 
+ *   None
  *
  * Returned Value:
  *   None
@@ -1631,7 +1631,7 @@ static void lpc17_showmii(uint8_t phyaddr, const char *msg)
  * Parameters:
  *   phyaddr - The device address where the PHY was discovered
  *   regaddr - The address of the PHY register to be written
- *   phydata - The data to write to the PHY register 
+ *   phydata - The data to write to the PHY register
  *
  * Returned Value:
  *   None
@@ -1891,7 +1891,7 @@ static int lpc17_phymode(uint8_t phyaddr, uint8_t mode)
  *   Initialize the PHY
  *
  * Parameters:
- *   priv - Pointer to EMAC device driver structure 
+ *   priv - Pointer to EMAC device driver structure
  *
  * Returned Value:
  *   None directly.  As a side-effect, it will initialize priv->lp_phyaddr
@@ -1988,7 +1988,7 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
 #ifdef CONFIG_PHY_AUTONEG
   /* Setup the Auto-negotiation advertisement: 100 or 10, and HD or FD */
 
-  lpc17_phywrite(phyaddr, MII_ADVERTISE, 
+  lpc17_phywrite(phyaddr, MII_ADVERTISE,
                  (MII_ADVERTISE_100BASETXFULL | MII_ADVERTISE_100BASETXHALF |
                   MII_ADVERTISE_10BASETXFULL  | MII_ADVERTISE_10BASETXHALF  |
                   MII_ADVERTISE_CSMA));
@@ -2146,7 +2146,7 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
  *   Initialize the EMAC Tx descriptor table
  *
  * Parameters:
- *   priv - Pointer to EMAC device driver structure 
+ *   priv - Pointer to EMAC device driver structure
  *
  * Returned Value:
  *   None directory.
@@ -2202,7 +2202,7 @@ static inline void lpc17_txdescinit(struct lpc17_driver_s *priv)
  *   Initialize the EMAC Rx descriptor table
  *
  * Parameters:
- *   priv - Pointer to EMAC device driver structure 
+ *   priv - Pointer to EMAC device driver structure
  *
  * Returned Value:
  *   None directory.
@@ -2278,7 +2278,7 @@ static void lpc17_macmode(uint8_t mode)
   if ((mode & LPC17_DUPLEX_MASK) == LPC17_DUPLEX_FULL)
     {
       /* Set the back-to-back inter-packet gap */
- 
+
       lpc17_putreg(21, LPC17_ETH_IPGT);
 
       /* Set MAC to operate in full duplex mode with CRC and Pad enabled */
@@ -2296,7 +2296,7 @@ static void lpc17_macmode(uint8_t mode)
   else
     {
       /* Set the back-to-back inter-packet gap */
- 
+
       lpc17_putreg(18, LPC17_ETH_IPGT);
 
       /* Set MAC to operate in half duplex mode with CRC and Pad enabled */

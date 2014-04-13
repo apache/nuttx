@@ -164,7 +164,7 @@
 struct kinetis_dev_s
 {
   struct sdio_dev_s  dev;        /* Standard, base SDIO interface */
-  
+
   /* Kinetis-specific extensions */
   /* Event support */
 
@@ -733,7 +733,8 @@ static void kinetis_dataconfig(struct kinetis_dev_s *priv, bool bwrite,
         {
           watermark = (SDHC_MAX_WATERMARK / 2);
         }
-      putreg32(watermark << SDHC_WML_RD_SHIFT, KINETIS_SDHC_WML);        
+
+      putreg32(watermark << SDHC_WML_RD_SHIFT, KINETIS_SDHC_WML);
     }
 #endif
 }
@@ -825,7 +826,7 @@ static void kinetis_transmit(struct kinetis_dev_s *priv)
             {
                data.b[i] = *ptr++;
             }
- 
+
           /* Now the transfer is finished */
 
           priv->remaining = 0;
@@ -870,7 +871,7 @@ static void kinetis_receive(struct kinetis_dev_s *priv)
    * queued words is greater than or equal to 1.
    */
 
-  putreg32(1 << SDHC_WML_RD_SHIFT, KINETIS_SDHC_WML);        
+  putreg32(1 << SDHC_WML_RD_SHIFT, KINETIS_SDHC_WML);
 
   /* Loop while there is space to store the data, waiting for buffer read
    * ready (BRR)
@@ -925,7 +926,8 @@ static void kinetis_receive(struct kinetis_dev_s *priv)
     {
       watermark = (SDHC_MAX_WATERMARK / 2);
     }
-  putreg32(watermark << SDHC_WML_RD_SHIFT, KINETIS_SDHC_WML);        
+
+  putreg32(watermark << SDHC_WML_RD_SHIFT, KINETIS_SDHC_WML);
 
   fllvdbg("Exit: remaining: %d IRQSTAT: %08x WML: %08x\n",
           priv->remaining, getreg32(KINETIS_SDHC_IRQSTAT),
@@ -1039,7 +1041,7 @@ static void kinetis_endtransfer(struct kinetis_dev_s *priv, sdio_eventset_t wkup
   kinetis_configxfrints(priv, 0);
 
   /* Clearing pending interrupt status on all transfer related interrupts */
- 
+
   putreg32(SDHC_XFRDONE_INTS, KINETIS_SDHC_IRQSTAT);
 
   /* If this was a DMA transfer, make sure that DMA is stopped */
@@ -1071,7 +1073,7 @@ static void kinetis_endtransfer(struct kinetis_dev_s *priv, sdio_eventset_t wkup
 }
 
 /****************************************************************************
- * Interrrupt Handling
+ * Interrupt Handling
  ****************************************************************************/
 
 /****************************************************************************
@@ -1103,9 +1105,9 @@ static int kinetis_interrupt(int irq, void *context)
 
   regval  = getreg32(KINETIS_SDHC_IRQSIGEN);
   enabled = getreg32(KINETIS_SDHC_IRQSTAT) & regval;
-  fllvdbg("IRQSTAT: %08x IRQSIGEN %08x enabled: %08x\n", 
+  fllvdbg("IRQSTAT: %08x IRQSIGEN %08x enabled: %08x\n",
           getreg32(KINETIS_SDHC_IRQSTAT), regval, enabled);
-  
+
   /* Disable card interrupts to clear the card interrupt to the host system. */
 
   regval &= ~SDHC_INT_CINT;
@@ -1217,7 +1219,7 @@ static int kinetis_interrupt(int irq, void *context)
  *
  * Description:
  *   Locks the bus. Function calls low-level multiplexed bus routines to
- *   resolve bus requests and acknowledgment issues.
+ *   resolve bus requests and acknowledgement issues.
  *
  * Input Parameters:
  *   dev    - An instance of the SDIO device interface
@@ -1230,7 +1232,7 @@ static int kinetis_interrupt(int irq, void *context)
 
 #ifdef CONFIG_SDIO_MUXBUS
 static int kinetis_lock(FAR struct sdio_dev_s *dev, bool lock)
-{  
+{
   /* Single SDIO instance so there is only one possibility.  The multiplex
    * bus is part of board support package.
    */
@@ -1247,7 +1249,7 @@ static int kinetis_lock(FAR struct sdio_dev_s *dev, bool lock)
  *   Reset the SDIO controller.  Undo all setup and initialization.
  *
  * Input Parameters:
- *   dev    - An instance of the SDIO device interface
+ *   dev - An instance of the SDIO device interface
  *
  * Returned Value:
  *   None
@@ -1406,12 +1408,12 @@ static void kinetis_frequency(FAR struct sdio_dev_s *dev, uint32_t frequency)
    *
    * For example, if the base clock frequency is 96 MHz, and the target
    * frequency is 25 MHz, the following logic will select prescaler.
-   * 
+   *
    *   96MHz / 2  <= 25MHz <= 96MHz / 2 /16       -- YES, prescaler == 2
    *
    * If the target frequency is 400 kHz, the following logic will select
    * prescaler:
-   * 
+   *
    *   96MHz / 2  <= 400KHz <= 96MHz / 2 / 16     -- NO
    *   96MHz / 4  <= 400KHz <= 96MHz / 4 / 16     -- NO
    *   96MHz / 8  <= 400KHz <= 96MHz / 8 / 16     -- NO
@@ -1479,7 +1481,7 @@ static void kinetis_frequency(FAR struct sdio_dev_s *dev, uint32_t frequency)
    *
    * Or, for example, if the target frequency is 400 kHz and the selected
    * prescaler is 16, the following* logic will select prescaler:
-   * 
+   *
    *   prescaled = 96MHz / 16 = 6MHz
    *   divisor   = (6MHz + 200KHz) / 400KHz = 15
    *
@@ -1686,7 +1688,7 @@ static int kinetis_attach(FAR struct sdio_dev_s *dev)
       putreg32(0,            KINETIS_SDHC_IRQSIGEN);
       putreg32(SDHC_INT_ALL, KINETIS_SDHC_IRQSTAT);
 
-      /* Set the interrrupt priority */
+      /* Set the interrupt priority */
 
       up_prioritize_irq(KINETIS_IRQ_SDHC, CONFIG_KINETIS_SDHC_PRIO);
 
@@ -1778,7 +1780,7 @@ static int kinetis_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t ar
             }
         }
     }
-    
+
   /* Configure response type bits */
 
   switch (cmd & MMCSD_RESPONSE_MASK)
@@ -1790,7 +1792,7 @@ static int kinetis_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t ar
     case MMCSD_R1B_RESPONSE:              /* Response length 48, check busy & cmdindex*/
       regval |= (SDHC_XFERTYP_RSPTYP_LEN48BSY|SDHC_XFERTYP_CICEN|SDHC_XFERTYP_CCCEN);
       break;
-    
+
     case MMCSD_R1_RESPONSE:              /* Response length 48, check cmdindex */
     case MMCSD_R5_RESPONSE:
     case MMCSD_R6_RESPONSE:
@@ -1988,7 +1990,7 @@ static int kinetis_cancel(FAR struct sdio_dev_s *dev)
   /* Clearing pending interrupt status on all transfer- and event- related
    * interrupts
    */
- 
+
   putreg32(SDHC_WAITALL_INTS, KINETIS_SDHC_IRQSTAT);
 
   /* Cancel any watchdog timeout */
@@ -2066,7 +2068,7 @@ static int kinetis_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
 
   /* Then wait for the Command Complete (CC) indication (or timeout).  The
    * CC bit is set when the end bit of the command response is received
-   * (except Auto CMD12). 
+   * (except Auto CMD12).
    */
 
   while ((getreg32(KINETIS_SDHC_IRQSTAT) & SDHC_INT_CC) == 0)
@@ -2117,7 +2119,8 @@ static int kinetis_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
  *
  ****************************************************************************/
 
-static int kinetis_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *rshort)
+static int kinetis_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd,
+                                uint32_t *rshort)
 {
   uint32_t regval;
   int ret = OK;
@@ -2130,7 +2133,7 @@ static int kinetis_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32
    *     7:1       bit6   - bit0   CRC7
    *     0         1               End bit
    *
-   * R1b Identical to R1 with the additional busy signaling via the data
+   * R1b Identical to R1 with the additional busy signalling via the data
    *     line.
    *
    * R6  Published RCA Response (48-bit, SD card only)
@@ -2227,7 +2230,7 @@ static int kinetis_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t r
           ret = -EIO;
         }
     }
-    
+
   /* Return the long response in CMDRSP3..0*/
 
   if (rlong)
@@ -2326,7 +2329,7 @@ static void kinetis_waitenable(FAR struct sdio_dev_s *dev,
 {
   struct kinetis_dev_s *priv = (struct kinetis_dev_s*)dev;
   uint32_t waitints;
- 
+
   DEBUGASSERT(priv != NULL);
 
   /* Disable event-related interrupts */
@@ -2395,7 +2398,7 @@ static sdio_eventset_t kinetis_eventwait(FAR struct sdio_dev_s *dev,
     {
       int delay;
 
-      /* Yes.. Handle a cornercase */
+      /* Yes.. Handle a corner case */
 
       if (!timeout)
         {
@@ -2428,9 +2431,9 @@ static sdio_eventset_t kinetis_eventwait(FAR struct sdio_dev_s *dev,
 
       kinetis_takesem(priv);
       wkupevent = priv->wkupevent;
- 
+
       /* Check if the event has occurred.  When the event has occurred, then
-       * evenset will be set to 0 and wkupevent will be set to a nonzero value.
+       * evenset will be set to 0 and wkupevent will be set to a non-zero value.
        */
 
       if (wkupevent != 0)
@@ -2462,7 +2465,7 @@ static sdio_eventset_t kinetis_eventwait(FAR struct sdio_dev_s *dev,
  *
  *   Events are automatically disabled once the callback is performed and no
  *   further callback events will occur until they are again enabled by
- *   calling this methos.
+ *   calling this method.
  *
  * Input Parameters:
  *   dev      - An instance of the SDIO device interface
@@ -2500,7 +2503,7 @@ static void kinetis_callbackenable(FAR struct sdio_dev_s *dev,
  *
  * Input Parameters:
  *   dev -      Device-specific state data
- *   callback - The funtion to call on the media change
+ *   callback - The function to call on the media change
  *   arg -      A caller provided value to return with the callback
  *
  * Returned Value:
@@ -2595,7 +2598,7 @@ static int kinetis_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   kinetis_configxfrints(priv, SDHC_DMADONE_INTS);
   putreg32((uint32_t)buffer, KINETIS_SDHC_DSADDR);
- 
+
   /* Sample the register state */
 
   kinetis_sample(priv, SAMPLENDX_AFTER_SETUP);
@@ -2805,7 +2808,7 @@ FAR struct sdio_dev_s *sdhc_initialize(int slotno)
 
   /* Configure pins for 1 or 4-bit, wide-bus operation (the chip is capable
    * of 8-bit wide bus operation but D4-D7 are not configured).
-   * 
+   *
    * If bus is multiplexed then there is a custom bus configuration utility
    * in the scope of the board support package.
    */
@@ -2851,13 +2854,13 @@ FAR struct sdio_dev_s *sdhc_initialize(int slotno)
  * Name: sdhc_mediachange
  *
  * Description:
- *   Called by board-specific logic -- posssible from an interrupt handler --
+ *   Called by board-specific logic -- possible from an interrupt handler --
  *   in order to signal to the driver that a card has been inserted or
  *   removed from the slot
  *
  * Input Parameters:
  *   dev        - An instance of the SDIO driver device state structure.
- *   cardinslot - true is a card has been detected in the slot; false if a 
+ *   cardinslot - true is a card has been detected in the slot; false if a
  *                card has been removed from the slot.  Only transitions
  *                (inserted->removed or removed->inserted should be reported)
  *
@@ -2884,6 +2887,7 @@ void sdhc_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
     {
       priv->cdstatus &= ~SDIO_STATUS_PRESENT;
     }
+
   fvdbg("cdstatus OLD: %02x NEW: %02x\n", cdstatus, priv->cdstatus);
 
   /* Perform any requested callback if the status has changed */
@@ -2892,6 +2896,7 @@ void sdhc_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
     {
       kinetis_callback(priv);
     }
+
   irqrestore(flags);
 }
 
