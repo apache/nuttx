@@ -93,7 +93,7 @@
 int nxtk_drawlinewindow(NXTKWINDOW hfwnd, FAR struct nxgl_vector_s *vector,
                         nxgl_coord_t width, nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
 
-{  
+{
   struct nxgl_trapezoid_s trap[3];
   struct nxgl_rect_s rect;
   int ret;

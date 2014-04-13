@@ -44,8 +44,8 @@ closedir(DIR);
 print(OUTPUT "#include <apps/netutils/httpd.h>\n\n");
 print(OUTPUT "#ifndef NULL\n#define NULL 0\n#endif\n\n");
 
-foreach $file (@files) {  
-   
+foreach $file (@files) {
+
     if(-d $file && $file !~ /^\./) {
         print "Processing directory $file\n";
         opendir(DIR, $file);
@@ -75,8 +75,8 @@ foreach $file (@files) {
             printf(OUTPUT "%#02x, ", unpack("C", substr($file, $j, 1)));
         }
         printf(OUTPUT "0x00,\n  ");
-        
-        $i = 0;        
+
+        $i = 0;
         while(read(FILE, $data, 1)) {
             printf(OUTPUT "%#02x, ", unpack("C", $data));
             $i++;

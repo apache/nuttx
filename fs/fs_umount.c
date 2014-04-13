@@ -114,10 +114,10 @@ int umount(const char *target)
   /* Verify that the inode is a mountpoint */
 
   if (!INODE_IS_MOUNTPT(mountpt_inode))
-    { 
+    {
       errcode = EINVAL;
       goto errout_with_mountpt;
-   }
+    }
 
   /* Unbind the block driver from the file system (destroying any fs
    * private data.

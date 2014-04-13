@@ -105,7 +105,7 @@ int find_blockdriver(FAR const char *pathname, int mountflags, FAR struct inode 
   /* Verify that the inode is a block driver. */
 
   if (!INODE_IS_BLOCK(inode))
-    { 
+    {
       fdbg("%s is not a block driver\n", pathname);
       ret = -ENOTBLK;
       goto errout_with_inode;

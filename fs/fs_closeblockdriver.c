@@ -87,7 +87,7 @@ int close_blockdriver(FAR struct inode *inode)
   /* Verify that the inode is a block driver. */
 
   if (!INODE_IS_BLOCK(inode))
-    { 
+    {
       fdbg("inode is not a block driver\n");
       ret = -ENOTBLK;
       goto errout;
