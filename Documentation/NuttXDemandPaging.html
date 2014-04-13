@@ -243,7 +243,7 @@
      </li>
      <li>
        <b>Boost the page fill worker thread priority</b>.
-       Check the priority of the task at the head of the <code>g_waitingforfill</code> list. 
+       Check the priority of the task at the head of the <code>g_waitingforfill</code> list.
        If the priority of that task is higher than the current priority of the page fill worker thread, then boost the priority of the page fill worker thread to that priority.
        Thus, the page fill worker thread will always run at the priority of the highest priority task that is waiting for a fill.
      </li>
@@ -370,7 +370,7 @@
   The architecture-specific functions, <code>up_checkmapping()</code>, <code>up_allocpage(tcb, &vpage)</code> and <code>up_fillpage(page, pg_callback)</code>
   will be prototyped in <code>include/nuttx/arch.h</code>
 </p>
- 
+
 <a name="FillComplete"><h2>Fill Complete</h2></a>
 
 <p>
@@ -379,7 +379,7 @@
 <p>
   For the non-blocking <code>up_fillpage()</code>, the architecture-specific driver call the <code>pg_callback()</code> that was provided to <code>up_fillpage()</code> when the fill completes.
   In this case, the <code>pg_callback()</code> will probably be called from driver interrupt-level logic.
-  The driver will provide the result of the fill as an argument to the callback function. 
+  The driver will provide the result of the fill as an argument to the callback function.
   NOTE: <code>pg_callback()</code> must also be <a href="#MemoryOrg">locked</a> in memory.
 </p>
 <p>
@@ -404,7 +404,7 @@
     </li>
   </ul>
 </p>
- 
+
 <a name="TaskResumption"><h2>Task Resumption</h2></a>
 
 <p>
@@ -600,7 +600,7 @@
     <li>
       In the first phase, create a partially linked objected containing all interrupt/exception handling logic, the page fill worker thread plus all parts of the IDLE thread (which must always be available for execution).
     </li>
-    <li>    
+    <li>
        All of the <code>.text</code> and <code>.rodata</code> sections of this partial link should be collected into a single section.
     </li>
     <li>
@@ -625,7 +625,7 @@
     The currently executing task at the head of the ready to run list must be stopped.
     Save its context and move it to the inactive list specified by task_state.
     This function is called by the on-demand paging logic in order to block the task that requires the
-    page fill, and to 
+    page fill, and to
   </dd>
   <dt>
     <code>void up_unblock_task(FAR struct tcb_s *tcb);</code>
@@ -671,4 +671,4 @@
 </dl></ul>
 </body>
 </html>
-        
+
