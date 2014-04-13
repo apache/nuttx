@@ -707,7 +707,7 @@ static int up_attach(struct uart_dev_s *dev)
 static void up_detach(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  
+
   /* Disable interrupts */
 
   up_restoreuartint(priv, 0);

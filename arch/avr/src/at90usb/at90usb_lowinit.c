@@ -50,7 +50,7 @@
  **************************************************************************/
 
 #if defined(CONFIG_WDTO_15MS)
-#  define WDTO_VALUE WDTO_15MS   
+#  define WDTO_VALUE WDTO_15MS
 #elif defined(CONFIG_WDTO_30MS)
 #  define WDTO_VALUE WDTO_30MS
 #elif defined(CONFIG_WDTO_60MS)

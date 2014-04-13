@@ -428,56 +428,56 @@
 #define GPIO_PMD_OPENDRAIN         2 /* Open drain output */
 #define GPIO_PMD_BIDI              3 /* Quasi bi-directional */
 
-#define GPIO_PMD_SHIFT(n)          ((n) << 1) /* Bits 2n-2n+1: GPIOx Pin[n] mode control */ 
+#define GPIO_PMD_SHIFT(n)          ((n) << 1) /* Bits 2n-2n+1: GPIOx Pin[n] mode control */
 #define GPIO_PMD_MASK(n)           (3 << GPIO_PMD_SHIFT(n))
 #  define GPIO_PMD(n,v)            ((v) << GPIO_PMD_SHIFT(n))
 
-#define GPIO_PMD0_SHIFT            (0)      /* Bits 0-1: GPIOx Pin0 mode control */ 
+#define GPIO_PMD0_SHIFT            (0)      /* Bits 0-1: GPIOx Pin0 mode control */
 #define GPIO_PMD0_MASK             (3 << GPIO_PMD0_SHIFT)
 #  define GPIO_PMD0(v)             ((v) << GPIO_PMD0_SHIFT)
-#define GPIO_PMD1_SHIFT            (2)      /* Bits 2-3: GPIOx Pin1 mode control */ 
+#define GPIO_PMD1_SHIFT            (2)      /* Bits 2-3: GPIOx Pin1 mode control */
 #define GPIO_PMD1_MASK             (3 << GPIO_PMD1_SHIFT)
 #  define GPIO_PMD1(v)             ((v) << GPIO_PMD1_SHIFT)
-#define GPIO_PMD2_SHIFT            (4)      /* Bits 4-5: GPIOx Pin2 mode control */ 
+#define GPIO_PMD2_SHIFT            (4)      /* Bits 4-5: GPIOx Pin2 mode control */
 #define GPIO_PMD2_MASK             (3 << GPIO_PMD2_SHIFT)
 #  define GPIO_PMD2(v)             ((v) << GPIO_PMD2_SHIFT)
-#define GPIO_PMD3_SHIFT            (6)      /* Bits 6-7: GPIOx Pin3 mode control */ 
+#define GPIO_PMD3_SHIFT            (6)      /* Bits 6-7: GPIOx Pin3 mode control */
 #define GPIO_PMD3_MASK             (3 << GPIO_PMD3_SHIFT)
 #  define GPIO_PMD3(v)             ((v) << GPIO_PMD3_SHIFT)
-#define GPIO_PMD4_SHIFT            (8)      /* Bits 8-9: GPIOx Pin4 mode control */ 
+#define GPIO_PMD4_SHIFT            (8)      /* Bits 8-9: GPIOx Pin4 mode control */
 #define GPIO_PMD4_MASK             (3 << GPIO_PMD4_SHIFT)
 #  define GPIO_PMD4(v)             ((v) << GPIO_PMD4_SHIFT)
-#define GPIO_PMD5_SHIFT            (10)     /* Bits 10-11: GPIOx Pin5 mode control */ 
+#define GPIO_PMD5_SHIFT            (10)     /* Bits 10-11: GPIOx Pin5 mode control */
 #define GPIO_PMD5_MASK             (3 << GPIO_PMD5_SHIFT)
 #  define GPIO_PMD5(v)             ((v) << GPIO_PMD5_SHIFT)
-#define GPIO_PMD6_SHIFT            (12)     /* Bits 12-13: GPIOx Pin6 mode control */ 
+#define GPIO_PMD6_SHIFT            (12)     /* Bits 12-13: GPIOx Pin6 mode control */
 #define GPIO_PMD6_MASK             (3 << GPIO_PMD6_SHIFT)
 #  define GPIO_PMD6(v)             ((v) << GPIO_PMD6_SHIFT)
-#define GPIO_PMD7_SHIFT            (14)     /* Bits 14-15: GPIOx Pin7 mode control */ 
+#define GPIO_PMD7_SHIFT            (14)     /* Bits 14-15: GPIOx Pin7 mode control */
 #define GPIO_PMD7_MASK             (3 << GPIO_PMD7_SHIFT)
 #  define GPIO_PMD7(v)             ((v) << GPIO_PMD7_SHIFT)
-#define GPIO_PMD8_SHIFT            (16)     /* Bits 16-17: GPIOx Pin8 mode control */ 
+#define GPIO_PMD8_SHIFT            (16)     /* Bits 16-17: GPIOx Pin8 mode control */
 #define GPIO_PMD8_MASK             (3 << GPIO_PMD8_SHIFT)
 #  define GPIO_PMD8(v)             ((v) << GPIO_PMD8_SHIFT)
-#define GPIO_PMD9_SHIFT            (18)     /* Bits 18-19: GPIOx Pin9 mode control */ 
+#define GPIO_PMD9_SHIFT            (18)     /* Bits 18-19: GPIOx Pin9 mode control */
 #define GPIO_PMD9_MASK             (3 << GPIO_PMD9_SHIFT)
 #  define GPIO_PMD9(v)             ((v) << GPIO_PMD9_SHIFT)
-#define GPIO_PMD10_SHIFT           (20)     /* Bits 20-21: GPIOx Pin0 mode control */ 
+#define GPIO_PMD10_SHIFT           (20)     /* Bits 20-21: GPIOx Pin0 mode control */
 #define GPIO_PMD10_MASK            (3 << GPIO_PMD10_SHIFT)
 #  define GPIO_PMD10(v)            ((v) << GPIO_PMD10_SHIFT)
-#define GPIO_PMD11_SHIFT           (22)     /* Bits 22-23: GPIOx Pin1 mode control */ 
+#define GPIO_PMD11_SHIFT           (22)     /* Bits 22-23: GPIOx Pin1 mode control */
 #define GPIO_PMD11_MASK            (3 << GPIO_PMD11_SHIFT)
 #  define GPIO_PMD11(v)            ((v) << GPIO_PMD11_SHIFT)
-#define GPIO_PMD12_SHIFT           (24)     /* Bits 24-25: GPIOx Pin2 mode control */ 
+#define GPIO_PMD12_SHIFT           (24)     /* Bits 24-25: GPIOx Pin2 mode control */
 #define GPIO_PMD12_MASK            (3 << GPIO_PMD12_SHIFT)
 #  define GPIO_PMD12(v)            ((v) << GPIO_PMD12_SHIFT)
-#define GPIO_PMD13_SHIFT           (26)     /* Bits 26-27: GPIOx Pin3 mode control */ 
+#define GPIO_PMD13_SHIFT           (26)     /* Bits 26-27: GPIOx Pin3 mode control */
 #define GPIO_PMD13_MASK            (3 << GPIO_PMD13_SHIFT)
 #  define GPIO_PMD13(v)            ((v) << GPIO_PMD13_SHIFT)
-#define GPIO_PMD14_SHIFT           (28)     /* Bits 28-29: GPIOx Pin4 mode control */ 
+#define GPIO_PMD14_SHIFT           (28)     /* Bits 28-29: GPIOx Pin4 mode control */
 #define GPIO_PMD14_MASK            (3 << GPIO_PMD14_SHIFT)
 #  define GPIO_PMD14(v)            ((v) << GPIO_PMD14_SHIFT)
-#define GPIO_PMD15_SHIFT           (30)     /* Bits 30-31: GPIOx Pin5 mode control */ 
+#define GPIO_PMD15_SHIFT           (30)     /* Bits 30-31: GPIOx Pin5 mode control */
 #define GPIO_PMD15_MASK            (3 << GPIO_PMD15_SHIFT)
 #  define GPIO_PMD15(v)            ((v) << GPIO_PMD15_SHIFT)
 

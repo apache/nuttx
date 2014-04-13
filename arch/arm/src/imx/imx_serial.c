@@ -514,7 +514,7 @@ static int up_setup(struct uart_dev_s *dev)
   if (priv->hwfc)
     {
       ucr2 |= UART_UCR2_IRTS;
- 
+
       /* CTS controled by Rx FIFO */
 
       ucr2 |= UART_UCR2_CTSC;
@@ -533,7 +533,7 @@ static int up_setup(struct uart_dev_s *dev)
 
   up_serialout(priv, UART_UCR2, ucr2);
 
-  /* Set the baud.  
+  /* Set the baud.
    *
    *   baud * 16 / REFFREQ = NUM/DEN
    *   UBIR    = NUM-1;
@@ -628,7 +628,7 @@ static int up_setup(struct uart_dev_s *dev)
   /* Set the TX trigger level to interrupt when the TxFIFO has 2 or fewer characters.
    * Set the RX trigger level to interrupt when the RxFIFO has 1 character.
    */
- 
+
   regval |= ((2 << UART_UFCR_TXTL_SHIFT) | (1 << UART_UFCR_RXTL_SHIFT));
   up_serialout(priv, UART_UFCR, regval);
 
@@ -803,7 +803,7 @@ static inline struct uart_dev_s *up_mapirq(int irq)
         break;
     }
   return dev;
-} 
+}
 
 /****************************************************************************
  * Name: up_interrupt (and front-ends)
@@ -841,7 +841,7 @@ static int up_interrupt(int irq, void *context)
       usr1 = up_serialin(priv, UART_USR1);
       usr1 &= (UART_USR1_RRDY | UART_USR1_TRDY);
 
-      if (usr1 == 0 || passes > 256) 
+      if (usr1 == 0 || passes > 256)
         {
           return OK;
         }
@@ -971,7 +971,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 static bool up_rxavailable(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  
+
   /* Return true is data is ready in the Rx FIFO */
 
   return ((up_serialin(priv, UART_USR2) & UART_USR2_RDR) != 0);
@@ -1062,7 +1062,7 @@ static bool up_txempty(struct uart_dev_s *dev)
  * Name: up_serialinit
  *
  * Description:
- *   Performs the low level UART initialization early in 
+ *   Performs the low level UART initialization early in
  *   debug so that the serial console will be available
  *   during bootup.  This must be called before up_serialinit.
  *

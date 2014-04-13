@@ -271,13 +271,13 @@ static void lpc17_setinttab(uint32_t value, unsigned int interval, unsigned int 
 #endif
 
 static inline int lpc17_addinted(struct lpc17_usbhost_s *priv,
-                                 FAR const struct usbhost_epdesc_s *epdesc, 
+                                 FAR const struct usbhost_epdesc_s *epdesc,
                                  struct lpc17_ed_s *ed);
 static inline int lpc17_reminted(struct lpc17_usbhost_s *priv,
                                  struct lpc17_ed_s *ed);
 
 static inline int lpc17_addisoced(struct lpc17_usbhost_s *priv,
-                                  FAR const struct usbhost_epdesc_s *epdesc, 
+                                  FAR const struct usbhost_epdesc_s *epdesc,
                                   struct lpc17_ed_s *ed);
 static inline int lpc17_remisoced(struct lpc17_usbhost_s *priv,
                                   struct lpc17_ed_s *ed);
@@ -724,7 +724,7 @@ static void lpc17_freeio(uint8_t *buffer)
  *   Helper function to add an ED to the bulk list.
  *
  *******************************************************************************/
- 
+
 static inline int lpc17_addbulked(struct lpc17_usbhost_s *priv,
                                   struct lpc17_ed_s *ed)
 {
@@ -757,7 +757,7 @@ static inline int lpc17_addbulked(struct lpc17_usbhost_s *priv,
  *   Helper function remove an ED from the bulk list.
  *
  *******************************************************************************/
- 
+
 static inline int lpc17_rembulked(struct lpc17_usbhost_s *priv,
                                   struct lpc17_ed_s *ed)
 {
@@ -891,9 +891,9 @@ static void lpc17_setinttab(uint32_t value, unsigned int interval, unsigned int 
  *     2. Some devices may get polled at a much higher rate than they request.
  *
  *******************************************************************************/
- 
+
 static inline int lpc17_addinted(struct lpc17_usbhost_s *priv,
-                                 FAR const struct usbhost_epdesc_s *epdesc, 
+                                 FAR const struct usbhost_epdesc_s *epdesc,
                                  struct lpc17_ed_s *ed)
 {
 #ifndef CONFIG_USBHOST_INT_DISABLE
@@ -1000,7 +1000,7 @@ static inline int lpc17_addinted(struct lpc17_usbhost_s *priv,
  *     2. Some devices may get polled at a much higher rate than they request.
  *
  *******************************************************************************/
- 
+
 static inline int lpc17_reminted(struct lpc17_usbhost_s *priv,
                                  struct lpc17_ed_s *ed)
 {
@@ -1088,7 +1088,7 @@ static inline int lpc17_reminted(struct lpc17_usbhost_s *priv,
       uvdbg("min interval: %d offset: %d\n", interval, offset);
 
       /* Save the new minimum interval */
- 
+
       if ((ed->hw.ctrl && ED_CONTROL_D_MASK) == ED_CONTROL_D_IN)
         {
           priv->ininterval  = interval;
@@ -1127,9 +1127,9 @@ static inline int lpc17_reminted(struct lpc17_usbhost_s *priv,
  *   Helper functions to add an ED to the periodic table.
  *
  *******************************************************************************/
- 
+
 static inline int lpc17_addisoced(struct lpc17_usbhost_s *priv,
-                                  FAR const struct usbhost_epdesc_s *epdesc, 
+                                  FAR const struct usbhost_epdesc_s *epdesc,
                                   struct lpc17_ed_s *ed)
 {
 #ifndef CONFIG_USBHOST_ISOC_DISABLE
@@ -1146,7 +1146,7 @@ static inline int lpc17_addisoced(struct lpc17_usbhost_s *priv,
  *   Helper functions to remove an ED from the periodic table.
  *
  *******************************************************************************/
- 
+
 static inline int lpc17_remisoced(struct lpc17_usbhost_s *priv,
                                   struct lpc17_ed_s *ed)
 {
@@ -1302,7 +1302,7 @@ static int lpc17_ctrltd(struct lpc17_usbhost_s *priv, uint32_t dirpid,
         {
           ret = OK;
         }
-      else 
+      else
         {
           uvdbg("Bad TD completion status: %d\n", EDCTRL->tdstatus);
           ret = EDCTRL->tdstatus == TD_CC_STALL ? -EPERM : -EIO;
@@ -1397,7 +1397,7 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
                     }
 
                   /* Check if we are now disconnected */
- 
+
                   else if (priv->connected)
                     {
                       /* Yes.. disconnect the device */
@@ -1446,7 +1446,7 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
         }
 
       /* Writeback Done Head interrupt */
- 
+
       if ((pending & OHCI_INT_WDH) != 0)
         {
           struct lpc17_gtd_s *td;
@@ -1617,7 +1617,7 @@ static int lpc17_enumerate(FAR struct usbhost_connection_s *conn, int rphndx)
       udbg("Not connected\n");
       return -ENODEV;
     }
- 
+
   /* USB 2.0 spec says at least 50ms delay before port reset */
 
   (void)usleep(100*1000);
@@ -1681,7 +1681,7 @@ static int lpc17_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcadd
 
   /* Set the EP0 ED control word */
 
-  EDCTRL->hw.ctrl = (uint32_t)funcaddr << ED_CONTROL_FA_SHIFT | 
+  EDCTRL->hw.ctrl = (uint32_t)funcaddr << ED_CONTROL_FA_SHIFT |
                     (uint32_t)maxpacketsize << ED_CONTROL_MPS_SHIFT;
 
   if (priv->lowspeed)
@@ -1780,9 +1780,9 @@ static int lpc17_epalloc(FAR struct usbhost_driver_s *drvr,
       g_edfree = ((struct lpc17_list_s*)ed)->flink;
 
       /* Configure the endpoint descriptor. */
- 
+
       memset((void*)ed, 0, sizeof(struct lpc17_ed_s));
-      ed->hw.ctrl = (uint32_t)(epdesc->funcaddr)     << ED_CONTROL_FA_SHIFT | 
+      ed->hw.ctrl = (uint32_t)(epdesc->funcaddr)     << ED_CONTROL_FA_SHIFT |
                     (uint32_t)(epdesc->addr)         << ED_CONTROL_EN_SHIFT |
                     (uint32_t)(epdesc->mxpacketsize) << ED_CONTROL_MPS_SHIFT;
 
@@ -2259,7 +2259,7 @@ static int lpc17_ctrlout(FAR struct usbhost_driver_s *drvr,
  *   - Never called from an interrupt handler.
  *
  *******************************************************************************/
- 
+
 static int lpc17_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                           FAR uint8_t *buffer, size_t buflen)
 {
@@ -2277,10 +2277,10 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 
   in = (ed->hw.ctrl  & ED_CONTROL_D_MASK) == ED_CONTROL_D_IN;
   uvdbg("EP%d %s toggle:%d maxpacket:%d buflen:%d\n",
-        (ed->hw.ctrl  & ED_CONTROL_EN_MASK) >> ED_CONTROL_EN_SHIFT, 
+        (ed->hw.ctrl  & ED_CONTROL_EN_MASK) >> ED_CONTROL_EN_SHIFT,
         in ? "IN" : "OUT",
         (ed->hw.headp & ED_HEADP_C) != 0 ? 1 : 0,
-        (ed->hw.ctrl  & ED_CONTROL_MPS_MASK) >> ED_CONTROL_MPS_SHIFT, 
+        (ed->hw.ctrl  & ED_CONTROL_MPS_MASK) >> ED_CONTROL_MPS_SHIFT,
         buflen);
 
   /* We must have exclusive access to the endpoint, the TD pool, the I/O buffer
@@ -2360,7 +2360,7 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
       /* BulkListFilled. This bit is used to indicate whether there are any
        * TDs on the Bulk list.
        */
- 
+
       regval  = lpc17_getreg(LPC17_USBHOST_CMDST);
       regval |= OHCI_CMDST_BLF;
       lpc17_putreg(regval, LPC17_USBHOST_CMDST);
@@ -2375,7 +2375,7 @@ static int lpc17_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
         {
           ret = OK;
         }
-      else 
+      else
         {
           uvdbg("Bad TD completion status: %d\n", ed->tdstatus);
           ret = -EIO;
@@ -2443,7 +2443,7 @@ static void lpc17_disconnect(FAR struct usbhost_driver_s *drvr)
 
   priv->class = NULL;
 }
-  
+
 /*******************************************************************************
  * Initialization
  *******************************************************************************/
@@ -2687,11 +2687,11 @@ FAR struct usbhost_connection_s *lpc17_usbhost_initialize(int controller)
   /* Software reset */
 
   lpc17_putreg(OHCI_CMDST_HCR, LPC17_USBHOST_CMDST);
-  
+
   /* Write Fm interval (FI), largest data packet counter (FSMPS), and
    * periodic start.
    */
-  
+
   lpc17_putreg(DEFAULT_FMINTERVAL, LPC17_USBHOST_FMINT);
   lpc17_putreg(DEFAULT_PERSTART, LPC17_USBHOST_PERSTART);
 

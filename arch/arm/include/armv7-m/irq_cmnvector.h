@@ -70,7 +70,7 @@
 #ifdef CONFIG_ARCH_FPU
 
 /* If the MCU supports a floating point unit, then it will be necessary
- * to save the state of the non-volatile registers before calling code 
+ * to save the state of the non-volatile registers before calling code
  * that may save and overwrite them.
  */
 

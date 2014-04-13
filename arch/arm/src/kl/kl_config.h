@@ -64,7 +64,7 @@
 /* Are any UARTs enabled? */
 
 #undef HAVE_UART_DEVICE
-#if defined(CONFIG_KL_UART0) || defined(CONFIG_KL_UART1) || defined(CONFIG_KL_UART2) 
+#if defined(CONFIG_KL_UART0) || defined(CONFIG_KL_UART1) || defined(CONFIG_KL_UART2)
 #  define HAVE_UART_DEVICE 1
 #endif
 

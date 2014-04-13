@@ -89,7 +89,7 @@ int lpc31_esrndx(enum lpc31_clockid_e clkid)
 
   /* There ar 89 Enable Select Registers (ESR).  Indexing for these
    * registers is identical to indexing to other registers (like PCR),
-   * except that there are no ESR registers for 
+   * except that there are no ESR registers for
    *
    *
    *  CLKID_I2SRXBCK0         Clock ID 87: I2SRX_BCK0

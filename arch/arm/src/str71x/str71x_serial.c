@@ -925,7 +925,7 @@ static bool up_txempty(struct uart_dev_s *dev)
  * Name: up_serialinit
  *
  * Description:
- *   Performs the low level UART initialization early in 
+ *   Performs the low level UART initialization early in
  *   debug so that the serial console will be available
  *   during bootup.  This must be called before up_serialinit.
  *

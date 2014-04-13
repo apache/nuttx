@@ -164,7 +164,7 @@ static int hcs12_interrupt(uint16_t base, int irq0, uint8_t valid, void *context
                */
 
               putreg8(bit, base+HCS12_PIM_IF_OFFSET);
-          
+
               /* Re-deliver the IRQ (recurses! We got here from irq_dispatch!) */
 
               irq_dispatch(irq, context);

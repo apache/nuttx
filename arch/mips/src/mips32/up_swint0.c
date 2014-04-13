@@ -310,7 +310,7 @@ int up_swint0(int irq, FAR void *context)
 #endif
 
   /* Clear the pending software interrupt 0 in the PIC32 interrupt block */
- 
+
   up_clrpend_irq(PIC32MX_IRQSRC_CS0);
 
   /* And reset the software interrupt bit in the MIPS CAUSE register */

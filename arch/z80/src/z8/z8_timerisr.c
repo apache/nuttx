@@ -98,7 +98,7 @@ int up_timerisr(int irq, uint32_t *regs)
 void up_timerinit(void)
 {
   uint32_t reload;
- 
+
   up_disable_irq(Z8_IRQ_SYSTIMER);
 
   /* Write to the timer control register to disable the timer, configure

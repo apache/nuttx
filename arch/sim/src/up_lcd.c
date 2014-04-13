@@ -32,7 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
- 
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -203,7 +203,7 @@ static const struct fb_videoinfo_s g_videoinfo =
 
 /* This is the standard, NuttX Plane information object */
 
-static const struct lcd_planeinfo_s g_planeinfo = 
+static const struct lcd_planeinfo_s g_planeinfo =
 {
   .putrun = sim_putrun,            /* Put a run into LCD memory */
   .getrun = sim_getrun,            /* Get a run from LCD memory */
@@ -213,12 +213,12 @@ static const struct lcd_planeinfo_s g_planeinfo =
 
 /* This is the standard, NuttX LCD driver object */
 
-static struct sim_dev_s g_lcddev = 
+static struct sim_dev_s g_lcddev =
 {
   .dev =
   {
     /* LCD Configuration */
- 
+
     .getvideoinfo = sim_getvideoinfo,
     .getplaneinfo = sim_getplaneinfo,
 

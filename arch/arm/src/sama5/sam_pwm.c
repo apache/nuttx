@@ -1132,7 +1132,7 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
 
   pwm_chan_putreg(chan, SAM_PWM_CMR_OFFSET, PWM_CMR_CPRE_CLKA);
 
-  /* Set the PWM period.  
+  /* Set the PWM period.
    *
    * If the waveform is left-aligned, then the output waveform period
    * depends on the channel counter source clock and can be calculated
@@ -1368,7 +1368,7 @@ FAR struct pwm_lowerhalf_s *sam_pwminitialize(int channel)
         {
           pwmdbg("ERROR: Failed to attach IRQ%d\n", channel);
           return NULL;
-          
+
         }
 #endif
 

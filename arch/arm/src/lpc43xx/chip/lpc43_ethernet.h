@@ -606,7 +606,7 @@
 
 /* Ethernet TX DMA Descriptor.  Descriptor size can be 4 DWORDS (16 bytes) or 8 DWORDS (32 bytes)
  * depending on the setting of the ATDS bit in the DMA Bus Mode register.
- */ 
+ */
 
 struct eth_txdesc_s
 {
@@ -629,7 +629,7 @@ struct eth_txdesc_s
 
 /* Ethernet RX DMA Descriptor.  Descriptor size can be 4 DWORDS (16 bytes) or 8 DWORDS (32 bytes)
  * depending on the setting of the ATDS bit in the DMA Bus Mode register.
- */ 
+ */
 
 struct eth_rxdesc_s
 {

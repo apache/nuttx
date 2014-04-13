@@ -78,7 +78,7 @@ volatile chipreg_t *current_regs;
 void up_irqinitialize(void)
 {
   current_regs = NULL;
-  
+
   /* And finally, enable interrupts */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS

@@ -89,7 +89,7 @@
 #define STM32_DMA_S4CR_OFFSET     0x0070 /* DMA stream 4 configuration register */
 #define STM32_DMA_S5CR_OFFSET     0x0088 /* DMA stream 5 configuration register */
 #define STM32_DMA_S6CR_OFFSET     0x00a0 /* DMA stream 6 configuration register */
-#define STM32_DMA_S7CR_OFFSET     0x00b8 /* DMA stream 7 configuration register */ 
+#define STM32_DMA_S7CR_OFFSET     0x00b8 /* DMA stream 7 configuration register */
 
 #define STM32_DMA_S0NDTR_OFFSET   0x0014 /* DMA stream 0 number of data register */
 #define STM32_DMA_S1NDTR_OFFSET   0x002c /* DMA stream 1 number of data register */

@@ -107,7 +107,7 @@ static void lpc31_domaininit(struct lpc31_domainconfig_s* dmn)
     }
 
   /* Configure the fractional dividers in this domain */
- 
+
   for (fdndx = 0; fdndx < dmn->nfdiv; fdndx++, sub++)
     {
       /* Set fractional divider confiruation but don't enable it yet */
@@ -125,7 +125,7 @@ static void lpc31_domaininit(struct lpc31_domainconfig_s* dmn)
           for (clkndx = 0; clkndx <= dmn->nclks; clkndx++)
             {
               /* Does this clock have an ESR register? */
- 
+
               esrndx = lpc31_esrndx((enum lpc31_clockid_e)(clkndx + dmn->clk1));
               if (esrndx != ESRNDX_INVALID)
                 {

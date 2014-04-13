@@ -229,7 +229,7 @@ enum lpc31_clockid_e
   CLKID_DMACLKGATED,      /*  9 DMA_CLK_GATED */
   CLKID_NANDFLASHS0CLK,   /* 10 NANDFLASH_S0_CLK */
   CLKID_NANDFLASHECCCLK,  /* 11 NANDFLASH_ECC_CLK */
-  CLKID_NANDFLASHAESCLK,  /* 12 NANDFLASH_AES_CLK (Reserved on LPC313x) */ 
+  CLKID_NANDFLASHAESCLK,  /* 12 NANDFLASH_AES_CLK (Reserved on LPC313x) */
   CLKID_NANDFLASHNANDCLK, /* 13 NANDFLASH_NAND_CLK */
   CLKID_NANDFLASHPCLK,    /* 14 NANDFLASH_PCLK */
   CLKID_CLOCKOUT,         /* 15 CLOCK_OUT */
@@ -307,7 +307,7 @@ enum lpc31_clockid_e
   /* Domain 6: UART_BASE */
 
   CLKID_UARTUCLK,         /* 72 UART_U_CLK */
-  
+
   /* Domain 7: CLK1024FS_BASE */
 
   CLKID_I2SEDGEDETECTCLK, /* 73 I2S_EDGE_DETECT_CLK */
@@ -383,11 +383,11 @@ enum lpc31_resetid_e
   RESETID_I2SRXIF0RST,    /* 33 I2SRX_IF_0 */
   RESETID_I2SRXFF1RST,    /* 34 I2SRX_FIFO_1 */
   RESETID_I2SRXIF1RST,    /* 35 I2SRX_IF_1 */
-  RESETID_RESERVED40,     /* 36 Reserved */    
-  RESETID_RESERVED41,     /* 37 Reserved */    
-  RESETID_RESERVED42,     /* 38 Reserved */    
-  RESETID_RESERVED43,     /* 39 Reserved */    
-  RESETID_RESERVED44,     /* 40 Reserved */ 
+  RESETID_RESERVED40,     /* 36 Reserved */
+  RESETID_RESERVED41,     /* 37 Reserved */
+  RESETID_RESERVED42,     /* 38 Reserved */
+  RESETID_RESERVED43,     /* 39 Reserved */
+  RESETID_RESERVED44,     /* 40 Reserved */
   RESETID_LCDRST,         /* 41 LCD Interface */
   RESETID_SPIRSTAPB,      /* 42 apb_clk domain of SPI */
   RESETID_SPIRSTIP,       /* 43 ip_clk domain of SPI */

@@ -241,7 +241,7 @@ int up_addrenv_create(size_t envsize, FAR task_addrenv_t *addrenv)
       sdbg("ERROR: npages is zero\n");
       return OK;
     }
-  
+
   /* Allocate a structure in the common .bss to hold information about the
    * task's address environment.  NOTE that this is not a part of the TCB,
    * but rather a break-away structure that can be shared by the task as
@@ -287,7 +287,7 @@ int up_addrenv_create(size_t envsize, FAR task_addrenv_t *addrenv)
 
 errout_with_cbr:
   z180_mmu_freecbr(cbr);
-  
+
 errout_with_irq:
   irqrestore(flags);
   return ret;

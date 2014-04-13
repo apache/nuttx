@@ -98,7 +98,7 @@ void up_release_pending(void)
 
            up_saveirqcontext(&rtcb->xcp);
 
-          /* Restore the exception context of the rtcb at the (new) head 
+          /* Restore the exception context of the rtcb at the (new) head
            * of the g_readytorun task list.
            */
 
@@ -114,13 +114,13 @@ void up_release_pending(void)
 
       /* Copy the exception context into the TCB of the task that
        * was currently active. if up_savecontext returns a non-zero
-       * value, then this is really the previously running task 
+       * value, then this is really the previously running task
        * restarting!
        */
 
       else if (!up_savecontext(&rtcb->xcp))
         {
-          /* Restore the exception context of the rtcb at the (new) head 
+          /* Restore the exception context of the rtcb at the (new) head
            * of the g_readytorun task list.
            */
 

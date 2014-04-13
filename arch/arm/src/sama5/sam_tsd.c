@@ -434,7 +434,7 @@ errout:
  * Input Parameters
  *   priv - The touchscreen private data structure
  *   tsav - The new (shifted) value of the TSAV field of the ADC TSMR regsiter.
- * 
+ *
  * Returned Value:
  *   None
  *
@@ -495,7 +495,7 @@ static void sam_tsd_setaverage(struct sam_tsd_s *priv, uint32_t tsav)
  *
  * Input Parameters
  *   arg - The touchscreen private data structure cast to (void *)
- * 
+ *
  * Returned Value:
  *   None
  *

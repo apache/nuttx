@@ -377,7 +377,7 @@
 
 /* Error Warning Limit */
 
-#define CAN_EWL_SHIFT               (0)       /* Bits 0-7: Error warning limit */ 
+#define CAN_EWL_SHIFT               (0)       /* Bits 0-7: Error warning limit */
 #define CAN_EWL_MASK                (0xff << CAN_EWL_SHIFT)
                                               /* Bits 8-31: Reserved */
 /* Status Register */
@@ -482,7 +482,7 @@
 #define CAN_TDA_DATA4_SHIFT         (24)      /* Bits 24-31: RTR=0 && DLC >= 4 */
 #define CAN_TDA_DATA4_MASK          (0x0ff << CAN_TDA_DATA4_SHIFT)
 
-/* Transmit data bytes 5-8 (Tx Buffer 1), Transmit data bytes 5-8 (Tx Buffer 2), and 
+/* Transmit data bytes 5-8 (Tx Buffer 1), Transmit data bytes 5-8 (Tx Buffer 2), and
  * Transmit data bytes 5-8 (Tx Buffer 3) common bit field definitions.
  */
 

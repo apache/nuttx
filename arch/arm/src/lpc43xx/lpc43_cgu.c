@@ -350,7 +350,7 @@ static inline void lpc43_pll1config(uint32_t ctrlvalue)
   regval &= ~(PLL1_CTRL_BYPASS    | PLL1_CTRL_FBSEL     | PLL1_CTRL_DIRECT |
               PLL1_CTRL_PSEL_MASK | PLL1_CTRL_NSEL_MASK |
               PLL1_CTRL_MSEL_MASK);
-  
+
   /* Set selected PLL1 controls:
    *
    *   - PLL1_CTRL_FBSEL:     Set in both integer and direct modes
@@ -380,7 +380,7 @@ static inline void lpc43_pll1enable(void)
   /* Take PLL1 out of power down mode.  The reset state of the PD bit
    * is one, i.e., powered down.
    */
-  
+
   regval  = getreg32(LPC43_PLL1_CTRL);
   regval &= ~PLL1_CTRL_PD;
   putreg32(regval, LPC43_PLL1_CTRL);
@@ -441,7 +441,7 @@ void lpc43_clockconfig(void)
   /* Enable PLL1 */
 
   lpc43_pll1enable();
- 
+
   /* Set up PLL1 output as the M4 clock */
 
   lpc43_m4clkselect(BASE_M4_CLKSEL_PLL1);
@@ -477,6 +477,6 @@ void lpc43_clockconfig(void)
 
   /* Go to the final, full-speed PLL1 configuration */
 
-  lpc43_pll1config(PLL_CONTROLS);  
+  lpc43_pll1config(PLL_CONTROLS);
 #endif
 }

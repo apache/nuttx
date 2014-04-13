@@ -276,7 +276,7 @@ static inline int up_x11mapsharedmem(int depth, unsigned int fblen)
       printf("Using shared memory.\n");
 
       up_x11traperrors();
-      g_image = XShmCreateImage(g_display, DefaultVisual(g_display, g_screen), 
+      g_image = XShmCreateImage(g_display, DefaultVisual(g_display, g_screen),
                                 depth, ZPixmap, NULL, &g_xshminfo,
                                 g_fbpixelwidth, g_fbpixelheight);
       if (up_x11untraperrors())

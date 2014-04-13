@@ -9,7 +9,7 @@
  *   Copyright (C) 2011 Li Zhuoyi. All rights reserved.
  *   Author: Li Zhuoyi <lzyy.cn@gmail.com>
  *   History: 0.1 2011-08-05 initial version
- * 
+ *
  * This file is a part of NuttX:
  *
  *   Copyright (C) 2010-2012 Gregory Nutt. All rights reserved.
@@ -181,7 +181,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
     lpc43_configgpio(GPIO_AD0p6);
   else if (priv->mask&0x80)
     lpc43_configgpio(GPIO_AD0p7);
-    
+
   irqrestore(flags);
 }
 
@@ -244,7 +244,7 @@ static int adc_interrupt(int irq, void *context)
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)g_adcdev.ad_priv;
   unsigned char ch;
   int32_t value;
-    
+
   regval = getreg32(LPC43_ADC_GDR);
   ch = (regval >> 24) & 0x07;
   priv->buf[ch] += regval & 0xfff0;

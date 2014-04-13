@@ -228,7 +228,7 @@ endif
 	xdef _z8_p4ap0a_handler
 	xdef _z8_potrap_handler
 	xdef _z8_wotrap_handler
-#endif 
+#endif
 
 /**************************************************************************
  * Macros
@@ -430,7 +430,7 @@ endif
 	vector P4A	= _z8_p4ap0a_handler
 	vector POTRAP	= _z8_potrap_handler
 	vector WOTRAP	= _z8_wotrap_handler
-#endif 
+#endif
 
 /**************************************************************************
  * Name: _z16f_*_handler
@@ -724,7 +724,7 @@ _z8_potrap_handler:
 	ENTER(Z8_POTRAP_IRQ)
 _z8_wotrap_handler:
 	ENTER(Z8_WOTRAP_IRQ)
-#endif 
+#endif
 
 /**************************************************************************
  * Name: _z16f_common_handler

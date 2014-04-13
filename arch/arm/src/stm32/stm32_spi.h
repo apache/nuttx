@@ -88,13 +88,13 @@ enum    spi_dev_e;
  *      board-specific logic.  These functions will perform chip selection and
  *      status operations using GPIOs in the way your board is configured.
  *   3. If CONFIG_SPI_CMDDATA is defined in your NuttX configuration file, then
- *      provide stm32_spi1/2/...cmddata() functions in your board-specific logic. 
+ *      provide stm32_spi1/2/...cmddata() functions in your board-specific logic.
  *      These functions will perform cmd/data selection operations using GPIOs in the
  *      way your board is configured.
  *   4. Add a calls to up_spiinitialize() in your low level application
  *      initialization logic
  *   5. The handle returned by up_spiinitialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling 
+ *      SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *

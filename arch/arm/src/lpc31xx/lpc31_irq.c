@@ -102,7 +102,7 @@ void up_irqinitialize(void)
 
   putreg32(0, LPC31_INTC_PRIORITYMASK0); /* Proc interrupt request 0: IRQ */
   putreg32(0, LPC31_INTC_PRIORITYMASK1); /* Proc interrupt request 1: FIQ */
- 
+
   /* Disable all interrupts. Start from index 1 since 0 is unused.*/
 
   for (irq = 0; irq < NR_IRQS; irq++)

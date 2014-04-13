@@ -68,7 +68,7 @@ void up_systemreset(void)
   regval = ((0x5fa << SYSCON_AIRCR_VECTKEY_SHIFT) | SYSCON_AIRCR_SYSRESETREQ);
   putreg32(regval, ARMV6M_SYSCON_AIRCR);
 
-  /* Ensure completion of memory accesses */              
+  /* Ensure completion of memory accesses */
 
   __asm volatile ("dsb");
 

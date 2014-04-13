@@ -33,7 +33,7 @@
 #
 ############################################################################
 
-HEAD_ASRC = 
+HEAD_ASRC =
 
 CMN_ASRCS  = up_exception.S up_saveusercontext.S up_fullcontextrestore.S
 CMN_ASRCS += up_switchcontext.S vfork.S
@@ -67,7 +67,7 @@ ifeq ($(CONFIG_DEBUG),y)
 CMN_CSRCS += up_dumpnvic.c
 endif
 
-CHIP_ASRCS  = 
+CHIP_ASRCS  =
 CHIP_CSRCS  = sam_clockconfig.c sam_idle.c sam_irq.c sam_lowputc.c
 CHIP_CSRCS += sam_port.c sam_sercom.c sam_serial.c sam_start.c
 CHIP_CSRCS += sam_timerisr.c sam_usart.c

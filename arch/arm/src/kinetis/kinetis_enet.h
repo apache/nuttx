@@ -295,7 +295,7 @@
 /* Receive Descriptor Ring Start Register */
                                                /* Bits 0-2: Reserved */
 #define ENET_RDSR_SHIFT              (3)       /* Bits 3-31: Start of the receive buffer descriptor queue */
-#define ENET_RDSR_MASK               (0xfffffff8) 
+#define ENET_RDSR_MASK               (0xfffffff8)
 
 /* Transmit Buffer Descriptor Ring Start Register */
                                                /* Bits 0-2: Reserved */
@@ -476,9 +476,9 @@
 
 #ifdef CONFIG_ENDIAN_BIG
 #  define TXDESC_TSE                 (1 << 8)
-#  define TXDESC_OE                  (1 << 9) 
-#  define TXDESC_LCE                 (1 << 10) 
-#  define TXDESC_FE                  (1 << 11) 
+#  define TXDESC_OE                  (1 << 9)
+#  define TXDESC_LCE                 (1 << 10)
+#  define TXDESC_FE                  (1 << 11)
 #  define TXDESC_EE                  (1 << 12)
 #  define TXDESC_UE                  (1 << 13)
 #  define TXDESC_TXE                 (1 << 15)
@@ -495,15 +495,15 @@
 #  define TXDESC_TS                  (1 << 5)
 #  define TXDESC_INT                 (1 << 6)
 
-#  define TXDESC_TSE                 (1 << 16) 
-#  define TXDESC_OE                  (1 << 17) 
-#  define TXDESC_LCE                 (1 << 18) 
-#  define TXDESC_FE                  (1 << 19) 
+#  define TXDESC_TSE                 (1 << 16)
+#  define TXDESC_OE                  (1 << 17)
+#  define TXDESC_LCE                 (1 << 18)
+#  define TXDESC_FE                  (1 << 19)
 #  define TXDESC_EE                  (1 << 20)
 #  define TXDESC_UE                  (1 << 21)
 #  define TXDESC_TXE                 (1 << 23)
 
-#  define TXDESC_BDU                 (1 << 7)    
+#  define TXDESC_BDU                 (1 << 7)
 #endif
 
 /* Legacy (and Common) RX Buffer Descriptor Bit Definitions */
@@ -552,7 +552,7 @@
 #  define RXDESC_PE                  (1 << 26)
 #  define RXDESC_ME                  (1 << 31)
 
-#  define RXDESC_BDU                 (1 << 31)    
+#  define RXDESC_BDU                 (1 << 31)
 #else
 #  define RXDESC_UC                  (1 << 0)
 #  define RXDESC_CE                  (1 << 1)

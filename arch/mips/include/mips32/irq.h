@@ -430,7 +430,7 @@ static inline void cp0_putstatus(irqstate_t status)
       "\tnop\n"
       "\tnop\n"                          /* Plus one for good measure */
       "\t.set    pop\n"
-      : 
+      :
       : "r" (status)
       : "memory"
     );
@@ -490,7 +490,7 @@ static inline void cp0_putcause(uint32_t cause)
       "\t.set    noreorder\n"
       "\tmtc0   %0, $13, 0\n"            /* Set the cause to the provided value */
       "\t.set    pop\n"
-      : 
+      :
       : "r" (cause)
       : "memory"
     );

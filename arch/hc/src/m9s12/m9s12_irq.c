@@ -87,7 +87,7 @@ void up_irqinitialize(void)
   /* Initialize logic to support a second level of interrupt decoding for
    * GPIO pins.
    */
- 
+
 #ifdef CONFIG_GPIO_IRQ
   hcs12_gpioirqinitialize();
 #endif

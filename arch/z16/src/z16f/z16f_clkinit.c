@@ -77,7 +77,7 @@ extern _Erom unsigned long SYS_CLK_FREQ;
  * and the clock source is _DEFSRC.
  *
  * NOTE: The UART output is designed to work with 5.56 MHz internal and 20 MHz
- * External clock frequencies at the Default Baud rate of 57.6K Baud. 
+ * External clock frequencies at the Default Baud rate of 57.6K Baud.
  * Entering different clock frequencies may cause the UART to stop transmitting
  * unless the user makes changes to the UART routines.
  *

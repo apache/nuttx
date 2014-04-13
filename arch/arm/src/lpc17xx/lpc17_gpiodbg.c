@@ -163,7 +163,7 @@ int lpc17_dumpgpio(lpc17_pinset_t pinset, const char *msg)
 #if defined(LPC176x)
   lldbg("  PINSEL[%08x]: %08x PINMODE[%08x]: %08x ODMODE[%08x]: %08x\n",
         pinsel,  pinsel  ? getreg32(pinsel) : 0,
-        pinmode, pinmode ? getreg32(pinmode) : 0, 
+        pinmode, pinmode ? getreg32(pinmode) : 0,
         g_odmode[port],    getreg32(g_odmode[port]));
 #elif defined(LPC178x)
   lldbg("  IOCON[%08x]: %08x\n", iocon, getreg32(iocon));

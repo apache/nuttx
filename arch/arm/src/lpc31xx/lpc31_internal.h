@@ -193,7 +193,7 @@ void lpc31_clockconfig(void);
  *   4. Add a calls to up_spiinitialize() in your low level application
  *      initialization logic
  *   5. The handle returned by up_spiinitialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling 
+ *      SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
@@ -318,7 +318,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno);
  *
  * Input Parameters:
  *   dev        - An instance of the SDIO driver device state structure.
- *   cardinslot - true is a card has been detected in the slot; false if a 
+ *   cardinslot - true is a card has been detected in the slot; false if a
  *                card has been removed from the slot.  Only transitions
  *                (inserted->removed or removed->inserted should be reported)
  *

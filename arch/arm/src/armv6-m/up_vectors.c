@@ -84,7 +84,7 @@ extern char _ebss;
  * Note that the [ ... ] desginated initialiser is a GCC extension.
  */
 
-unsigned _vectors[] __attribute__((section(".vectors"))) = 
+unsigned _vectors[] __attribute__((section(".vectors"))) =
   {
     /* Initial stack */
 

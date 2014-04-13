@@ -71,7 +71,7 @@
 #ifdef CONFIG_TIVA_ETHHDUPLEX
 #  define TIVA_DUPLEX_SETBITS 0
 #  define TIVA_DUPLEX_CLRBITS MAC_TCTL_DUPLEX
-#else 
+#else
 #  define TIVA_DUPLEX_SETBITS MAC_TCTL_DUPLEX
 #  define TIVA_DUPLEX_CLRBITS 0
 #endif
@@ -81,7 +81,7 @@
 #ifdef CONFIG_TIVA_ETHNOAUTOCRC
 #  define TIVA_CRC_SETBITS 0
 #  define TIVA_CRC_CLRBITS MAC_TCTL_CRC
-#else 
+#else
 #  define TIVA_CRC_SETBITS MAC_TCTL_CRC
 #  define TIVA_CRC_CLRBITS 0
 #endif
@@ -91,7 +91,7 @@
 #ifdef CONFIG_TIVA_ETHNOPAD
 #  define TIVA_PADEN_SETBITS 0
 #  define TIVA_PADEN_CLRBITS MAC_TCTL_PADEN
-#else 
+#else
 #  define TIVA_PADEN_SETBITS MAC_TCTL_PADEN
 #  define TIVA_PADEN_CLRBITS 0
 #endif
@@ -104,7 +104,7 @@
 #ifdef CONFIG_TIVA_MULTICAST
 #  define TIVA_AMUL_SETBITS MAC_RCTL_AMUL
 #  define TIVA_AMUL_CLRBITS 0
-#else 
+#else
 #  define TIVA_AMUL_SETBITS 0
 #  define TIVA_AMUL_CLRBITS MAC_RCTL_AMUL
 #endif
@@ -114,7 +114,7 @@
 #ifdef CONFIG_TIVA_PROMISCUOUS
 #  define TIVA_PRMS_SETBITS MAC_RCTL_PRMS
 #  define TIVA_PRMS_CLRBITS 0
-#else 
+#else
 #  define TIVA_PRMS_SETBITS 0
 #  define TIVA_PRMS_CLRBITS MAC_RCTL_PRMS
 #endif
@@ -124,7 +124,7 @@
 #ifdef CONFIG_TIVA_BADCRC
 #  define TIVA_BADCRC_SETBITS MAC_RCTL_BADCRC
 #  define TIVA_BADCRC_CLRBITS 0
-#else 
+#else
 #  define TIVA_BADCRC_SETBITS 0
 #  define TIVA_BADCRC_CLRBITS MAC_RCTL_BADCRC
 #endif
@@ -921,7 +921,7 @@ static int tiva_interrupt(int irq, FAR void *context)
       tiva_txdone(priv);
     }
 
-  /* Enable Ethernet interrupts (perhaps excluding the TX done interrupt if 
+  /* Enable Ethernet interrupts (perhaps excluding the TX done interrupt if
    * there are no pending transmissions).
    */
 
@@ -1012,7 +1012,7 @@ static void tiva_polltimer(int argc, uint32_t arg, ...)
  *
  * Description:
  *   NuttX Callback: Bring up the Ethernet interface when an IP address is
- *   provided 
+ *   provided
  *
  * Parameters:
  *   dev  - Reference to the NuttX driver state structure
@@ -1055,7 +1055,7 @@ static int tiva_ifup(struct uip_driver_s *dev)
   tiva_ethout(priv, TIVA_MAC_MDV_OFFSET, div);
   nllvdbg("MDV:   %08x\n", div);
 
-  /* Then configure the Ethernet Controller for normal operation 
+  /* Then configure the Ethernet Controller for normal operation
    *
    * Setup the transmit control register (Full duplex, TX CRC Auto Generation,
    * TX Padding Enabled).
@@ -1250,7 +1250,7 @@ static int tiva_ifdown(struct uip_driver_s *dev)
  * Function: tiva_txavail
  *
  * Description:
- *   Driver callback invoked when new TX data is available.  This is a 
+ *   Driver callback invoked when new TX data is available.  This is a
  *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
  *   latency.
  *
@@ -1301,7 +1301,7 @@ static int tiva_txavail(struct uip_driver_s *dev)
  *
  * Parameters:
  *   dev  - Reference to the NuttX driver state structure
- *   mac  - The MAC address to be added 
+ *   mac  - The MAC address to be added
  *
  * Returned Value:
  *   None
@@ -1331,7 +1331,7 @@ static int tiva_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
  *
  * Parameters:
  *   dev  - Reference to the NuttX driver state structure
- *   mac  - The MAC address to be removed 
+ *   mac  - The MAC address to be removed
  *
  * Returned Value:
  *   None
@@ -1416,7 +1416,7 @@ static inline int tiva_ethinitialize(int intf)
 
   /* If the board can provide us with a MAC address, get the address
    * from the board now.  The MAC will not be applied until tiva_ifup()
-   * is caleld (and the MAC can be overwritten with a netdev ioctl call). 
+   * is caleld (and the MAC can be overwritten with a netdev ioctl call).
    */
 
 #ifdef CONFIG_TIVA_BOARDMAC

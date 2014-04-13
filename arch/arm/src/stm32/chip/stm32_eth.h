@@ -754,7 +754,7 @@
 #define ETH_RDES4_IPPT_SHIFT         (0)       /* Bits 0-2: IP payload type */
 #define ETH_RDES4_IPPT_MASK          (7 << ETH_RDES4_IPPT_SHIFT)
 # define ETH_RDES4_IPPT_UDP          (1 << ETH_RDES4_IPPT_SHIFT) /* UDP payload in IP datagram */
-# define ETH_RDES4_IPPT_TCP          (2 << ETH_RDES4_IPPT_SHIFT) /* TCP payload in IP datagram */ 
+# define ETH_RDES4_IPPT_TCP          (2 << ETH_RDES4_IPPT_SHIFT) /* TCP payload in IP datagram */
 # define ETH_RDES4_IPPT_ICMP         (3 << ETH_RDES4_IPPT_SHIFT) /* ICMP payload in IP datagram */
 #define ETH_RDES4_IPHE               (1 << 3)  /* Bit 3:  IP header error */
 #define ETH_RDES4_IPPE               (1 << 4)  /* Bit 4:  IP payload error */
@@ -791,7 +791,7 @@
 
 #ifndef __ASSEMBLY__
 
-/* Ethernet TX DMA Descriptor */ 
+/* Ethernet TX DMA Descriptor */
 
 struct eth_txdesc_s
 {
@@ -812,7 +812,7 @@ struct eth_txdesc_s
 #endif
 };
 
-/* Ethernet RX DMA Descriptor */ 
+/* Ethernet RX DMA Descriptor */
 
 struct eth_rxdesc_s
 {

@@ -91,7 +91,7 @@ endif
 # Each toolchain definition should set:
 #
 #  CROSSDEV         The GNU toolchain triple (command prefix)
-#  ARCROSSDEV       If required, an alternative prefix used when 
+#  ARCROSSDEV       If required, an alternative prefix used when
 #                   invoking ar and nm.
 #  ARCHCPUFLAGS     CPU-specific flags selecting the instruction set
 #                   FPU options, etc.

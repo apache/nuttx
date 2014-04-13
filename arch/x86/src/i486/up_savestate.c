@@ -77,7 +77,7 @@ void up_savestate(uint32_t *regs)
 {
   uint8_t cpl;
   uint8_t rpl;
-  
+
   /* First, just copy all of the registers */
 
   up_copystate(regs, (uint32_t*)current_regs);

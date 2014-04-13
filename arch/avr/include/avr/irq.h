@@ -168,7 +168,7 @@ static inline irqstate_t irqsave(void)
     (
       "\tin %0, __SREG__\n"
 	  "\tcli\n"
-	  : "=&r" (sreg) :: 
+	  : "=&r" (sreg) ::
 	);
   return sreg;
 }

@@ -176,7 +176,7 @@
 #define TPM_CONF_CSOT             (1 << 16) /* Bit 16: Counter Start On Trigger */
 #define TPM_CONF_CSOO             (1 << 17) /* Bit 17: Counter Stop On Overflow */
 #define TPM_CONF_CROT             (1 << 18) /* Bit 18: Counter Reload On Trigger */
-                                            /* Bits 19-23: Reserved */              
+                                            /* Bits 19-23: Reserved */
 #define TPM_CONF_TRGSEL_SHIFT     24
 #define TPM_CONF_TRGSEL_MASK      (15 << TPM_CONF_TRGSEL_SHIFT)
 # define TPM_CONF_TRGSEL_EXTRG_IN (0 << TPM_CONF_TRGSEL_SHIFT) /* External trigger pin input */

@@ -35,7 +35,7 @@
 
 HEAD_SSRC	= z8_head.S
 
-CMN_SSRCS	= 
+CMN_SSRCS	=
 CMN_CSRCS	= up_initialize.c up_allocateheap.c up_createstack.c \
 		  up_releasestack.c up_interruptcontext.c up_blocktask.c \
 		  up_unblocktask.c up_exit.c up_releasepending.c \

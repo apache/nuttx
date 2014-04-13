@@ -84,7 +84,7 @@ void lpc31_setfdiv(enum lpc31_domainid_e dmnid,
   unsigned int basefreq;
   int fdcndx;
   int bcrndx;
-  
+
   /* Get the frequency divider associated with this clock */
 
   fdcndx = lpc31_fdcndx(clkid, dmnid);
@@ -97,7 +97,7 @@ void lpc31_setfdiv(enum lpc31_domainid_e dmnid,
 
       regaddr  = LPC31_CGU_SSR((int)dmnid);
       basefreq = (getreg32(regaddr) & CGU_SSR_FS_MASK) >> CGU_SSR_FS_SHIFT;
-      
+
       /* Switch domain to FFAST input */
 
       lpc31_selectfreqin(dmnid, CGU_FS_FFAST);

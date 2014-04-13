@@ -160,7 +160,7 @@
  * For example if we wanted to read the In-Service Register (ISR), then we
  * would set both bits 1 and 0 to 1. The next read to the base register,
  * (0x20 for PIC1 or 0xa0 for PIC2) will return the status of the In-Service
- * Register. 
+ * Register.
  */
 
 #define PIC1_OCW3                0x20
@@ -179,7 +179,7 @@
 
 /* If the PIC has been reset, it must be initialized with 2 to 4 Initialization
  * Command Words (ICW) before it will accept and process Interrupt Requests. The
- * following outlines the four possible Initialization Command Words. 
+ * following outlines the four possible Initialization Command Words.
  */
 
 #define PIC1_ICW1                0x20
@@ -197,7 +197,7 @@
  * released onto the bus, during the 2nd INTA Pulse. Using the 8086 mode,
  * only bits 7:3 need to be used. This will be 00001000 (0x08) for PIC1 and
  * 01110000 (0x70) for PIC2. If you wish to relocate the IRQ Vector Table,
- * then you can use this register. 
+ * then you can use this register.
  */
 
 #define PIC1_ICW2                0x21
@@ -309,7 +309,7 @@
  *
  * The Global Descriptor Table or GDT is a data structure used by Intel x86-
  * family processors starting with the 80286 in order to define the
- * characteristics of the various memory areas used during program execution, 
+ * characteristics of the various memory areas used during program execution,
  * for example the base address, the size and access privileges like
  * executability and writability. These memory areas are called segments in
  * Intel terminology.

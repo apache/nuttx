@@ -651,7 +651,7 @@ static void pic32mx_dumprxdesc(struct pic32mx_rxdesc_s *rxdesc, const char *msg)
  *   Initialize the buffers by placing them all in a free list
  *
  * Parameters:
- *   priv - Pointer to EMAC device driver structure 
+ *   priv - Pointer to EMAC device driver structure
  *
  * Returned Value:
  *   None
@@ -670,7 +670,7 @@ static inline void pic32mx_bufferinit(struct pic32mx_driver_s *priv)
      sq_addlast((sq_entry_t*)buffer, &priv->pd_freebuffers);
 
      /* Get the address of the next buffer */
- 
+
      buffer += PIC32MX_ALIGNED_BUFSIZE;
    }
 }
@@ -682,7 +682,7 @@ static inline void pic32mx_bufferinit(struct pic32mx_driver_s *priv)
  *   Allocate one buffer by removing it from the free list
  *
  * Parameters:
- *   priv - Pointer to EMAC device driver structure 
+ *   priv - Pointer to EMAC device driver structure
  *
  * Returned Value:
  *   Pointer to the allocated buffer (or NULL on failure)
@@ -703,7 +703,7 @@ static uint8_t *pic32mx_allocbuffer(struct pic32mx_driver_s *priv)
  *   Free one buffer by returning it to the free list
  *
  * Parameters:
- *   priv - Pointer to EMAC device driver structure 
+ *   priv - Pointer to EMAC device driver structure
  *
  * Returned Value:
  *   Pointer to the allocated buffer (or NULL on failure)
@@ -724,7 +724,7 @@ static void pic32mx_freebuffer(struct pic32mx_driver_s *priv, uint8_t *buffer)
  *   Initialize the EMAC Tx descriptor table
  *
  * Parameters:
- *   priv - Pointer to EMAC device driver structure 
+ *   priv - Pointer to EMAC device driver structure
  *
  * Returned Value:
  *   None
@@ -792,7 +792,7 @@ static inline void pic32mx_txdescinit(struct pic32mx_driver_s *priv)
  *   Initialize the EMAC Rx descriptor table
  *
  * Parameters:
- *   priv - Pointer to EMAC device driver structure 
+ *   priv - Pointer to EMAC device driver structure
  *
  * Returned Value:
  *   None
@@ -885,7 +885,7 @@ static inline struct pic32mx_txdesc_s *pic32mx_txdesc(struct pic32mx_driver_s *p
    * done condition has been processed when the buffer has been freed and
    * reset to zero.
    */
- 
+
   if ((txdesc->status & TXDESC_STATUS_EOWN) == 0 && txdesc->address == 0)
     {
       /* Yes.. return a pointer to the descriptor */
@@ -1280,10 +1280,10 @@ static void pic32mx_timerpoll(struct pic32mx_driver_s *priv)
  *   possibly a response to the incoming packet (but probably not, in reality).
  *   However, since the Rx and Tx operations are decoupled, there is no
  *   guarantee that there will be a Tx descriptor available at that time.
- *   This function will perform that check and, if no Tx descriptor is 
+ *   This function will perform that check and, if no Tx descriptor is
  *   available, this function will (1) stop incoming Rx processing (bad), and
  *   (2) hold the outgoing packet in a pending state until the next Tx
- *   interrupt occurs. 
+ *   interrupt occurs.
  *
  * Parameters:
  *   priv  - Reference to the driver state structure
@@ -1314,7 +1314,7 @@ static void pic32mx_response(struct pic32mx_driver_s *priv)
        /* No.. mark the Tx as pending and halt further Rx interrupts */
 
        DEBUGASSERT((priv->pd_inten & ETH_INT_TXDONE) != 0);
-       
+
        priv->pd_txpending = true;
        priv->pd_inten    &= ~ETH_RXINTS;
        pic32mx_putreg(priv->pd_inten, PIC32MX_ETH_IEN);
@@ -1351,7 +1351,7 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
     {
       /* Check if any RX descriptor has the EOWN bit cleared meaning that the
        * this descriptor is now under software control and a message was
-       * received. 
+       * received.
        */
 
       rxdesc = pic32mx_rxdesc(priv);
@@ -1387,7 +1387,7 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
        * be the same size as our max packet size, any fragments also
        * imply that the packet is too big.
        */
- 
+
       else if (priv->pd_dev.d_len > CONFIG_NET_BUFSIZE)
         {
           nlldbg("Too big. packet length: %d rxdesc: %08x\n", priv->pd_dev.d_len, rxdesc->status);
@@ -1408,7 +1408,7 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
           uint8_t *rxbuffer;
 
           /* Get the Rx buffer address from the Rx descriptor */
- 
+
           priv->pd_dev.d_buf = (uint8_t*)VIRT_ADDR(rxdesc->address);
           DEBUGASSERT(priv->pd_dev.d_buf != NULL);
 
@@ -1744,7 +1744,7 @@ static int pic32mx_interrupt(int irq, void *context)
        * has no effect.
        */
 
-      /* FWMARK: Full Watermark Interrupt.  This bit is set when the RX 
+      /* FWMARK: Full Watermark Interrupt.  This bit is set when the RX
        * escriptor Buffer Count is greater than or equal to the value in the
        * RXFWM bit (ETHRXWM:16-23) field. It is cleared by writing the BUFCDEC
        * (ETHCON1:0) bit to decrement the BUFCNT counter. Writing a ‘0’ or a
@@ -1852,7 +1852,7 @@ static void pic32mx_polltimer(int argc, uint32_t arg, ...)
  *
  * Description:
  *   NuttX Callback: Bring up the Ethernet interface when an IP address is
- *   provided 
+ *   provided
  *
  * Parameters:
  *   dev  - Reference to the NuttX driver state structure
@@ -2197,7 +2197,7 @@ static int pic32mx_ifdown(struct uip_driver_s *dev)
  * Function: pic32mx_txavail
  *
  * Description:
- *   Driver callback invoked when new TX data is available.  This is a 
+ *   Driver callback invoked when new TX data is available.  This is a
  *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
  *   latency.
  *
@@ -2252,7 +2252,7 @@ static int pic32mx_txavail(struct uip_driver_s *dev)
  *
  * Parameters:
  *   dev  - Reference to the NuttX driver state structure
- *   mac  - The MAC address to be added 
+ *   mac  - The MAC address to be added
  *
  * Returned Value:
  *   None
@@ -2282,7 +2282,7 @@ static int pic32mx_addmac(struct uip_driver_s *dev, const uint8_t *mac)
  *
  * Parameters:
  *   dev  - Reference to the NuttX driver state structure
- *   mac  - The MAC address to be removed 
+ *   mac  - The MAC address to be removed
  *
  * Returned Value:
  *   None
@@ -2364,7 +2364,7 @@ static void pic32mx_phybusywait(void)
  * Parameters:
  *   phyaddr - The device address where the PHY was discovered
  *   regaddr - The address of the PHY register to be written
- *   phydata - The data to write to the PHY register 
+ *   phydata - The data to write to the PHY register
  *
  * Returned Value:
  *   None
@@ -2630,7 +2630,7 @@ static int pic32mx_phymode(uint8_t phyaddr, uint8_t mode)
  *   Initialize the PHY
  *
  * Parameters:
- *   priv - Pointer to EMAC device driver structure 
+ *   priv - Pointer to EMAC device driver structure
  *
  * Returned Value:
  *   None directly.  As a side-effect, it will initialize priv->pd_phyaddr
@@ -2761,7 +2761,7 @@ static inline int pic32mx_phyinit(struct pic32mx_driver_s *priv)
     }
 
   /* Are we configured to do auto-negotiation?
-   * 
+   *
    * Preferably the auto-negotiation should be selected if the PHY supports
    * it. Expose the supported capabilities: Half/Full Duplex, 10BaseT/100Base
    * TX, etc. (Extended Register 4). Start the negotiation (Control Register
@@ -2773,7 +2773,7 @@ static inline int pic32mx_phyinit(struct pic32mx_driver_s *priv)
 #ifdef CONFIG_PHY_AUTONEG
   /* Setup the Auto-negotiation advertisement: 100 or 10, and HD or FD */
 
-  pic32mx_phywrite(phyaddr, MII_ADVERTISE, 
+  pic32mx_phywrite(phyaddr, MII_ADVERTISE,
                  (MII_ADVERTISE_100BASETXFULL | MII_ADVERTISE_100BASETXHALF |
                   MII_ADVERTISE_10BASETXFULL  | MII_ADVERTISE_10BASETXHALF  |
                   MII_ADVERTISE_CSMA));
@@ -2944,7 +2944,7 @@ static void pic32mx_macmode(uint8_t mode)
   if ((mode & PIC32MX_DUPLEX_MASK) == PIC32MX_DUPLEX_FULL)
     {
       /* Set the back-to-back inter-packet gap */
- 
+
       pic32mx_putreg(21, PIC32MX_EMAC1_IPGT);
 
       /* Set MAC to operate in full duplex mode with CRC and Pad enabled */
@@ -2955,7 +2955,7 @@ static void pic32mx_macmode(uint8_t mode)
   else
     {
       /* Set the back-to-back inter-packet gap */
- 
+
       pic32mx_putreg(18, PIC32MX_EMAC1_IPGT);
 
       /* Set MAC to operate in half duplex mode with CRC and Pad enabled */

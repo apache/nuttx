@@ -56,7 +56,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Output debug info if stack dump is selected -- even if 
+/* Output debug info if stack dump is selected -- even if
  * debug is not selected.
  */
 
@@ -136,7 +136,7 @@ uint32_t *arm_dataabort(uint32_t *regs, uint32_t dfar, uint32_t dfsr)
    * the exception occurred, this address was provided in the DFAR register.
    * (It has not yet been saved in the register context save area).
    */
- 
+
   pgllvdbg("VBASE: %08x VEND: %08x\n", PG_PAGED_VBASE, PG_PAGED_VEND);
   if (dfar < PG_PAGED_VBASE || dfar >= PG_PAGED_VEND)
     {

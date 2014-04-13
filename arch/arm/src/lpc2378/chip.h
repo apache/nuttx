@@ -44,7 +44,7 @@
 /****************************************************************************************************
  * Included Files
  ****************************************************************************************************/
- 
+
 #include <sys/types.h>
 
 /****************************************************************************************************
@@ -57,7 +57,7 @@
 #define LPC23XX_FIO_BASE			0x3fffc000
 #define LPC23XX_ONCHIP_RAM_BASE		0x40000000
 #define LPC23XX_USBDMA_RAM_BASE		0x7fd00000
-#define LPC23XX_ETHERNET_RAM_BASE	0x7fe00000 
+#define LPC23XX_ETHERNET_RAM_BASE	0x7fe00000
 #define LPC23XX_BOOT_BLOCK			0x7fffd000
 #define LPC23XX_EXTMEM_BASE			0x80000000
 #define LPC23XX_APB_BASE			0xe0000000
@@ -101,7 +101,7 @@
 #define LPC23XX_EMAC_BASE			0xFFE00000  /* Ethernet MAC base address */
 #define LPC23XX_USB_BASE			0xFFE0C200  /* USB base address */
 #define LPC23XX_SCB_BASE			0xE01FC000  /* System Control Block (SBC) base address */
-#define LPC23XX_EXT_BASE			0xe01fc140  /* External Interrupt base address */	   
+#define LPC23XX_EXT_BASE			0xe01fc140  /* External Interrupt base address */	
 
 /* AHB Register block base addresses */
 
@@ -513,7 +513,7 @@
 #define USB_SYS_ERR_INT_SET_OFFSET	0xC0
 
 /* System Control Block(SCB) modules include Memory Accelerator Module,
-Phase Locked Loop, VPB divider, Power Control, External Interrupt, 
+Phase Locked Loop, VPB divider, Power Control, External Interrupt,
 Reset, and Code Security/Debugging */
 
 #define SCB_BASE_ADDR	0xE01FC000
@@ -556,7 +556,7 @@ Reset, and Code Security/Debugging */
 //~ /* External Memory Controller (EMC) definitions */
 
 
-/* MPMC(EMC) registers, note: all the external memory controller(EMC) registers 
+/* MPMC(EMC) registers, note: all the external memory controller(EMC) registers
 are for LPC24xx only. */
 #define STATIC_MEM0_BASE	0x80000000
 #define STATIC_MEM1_BASE	0x81000000

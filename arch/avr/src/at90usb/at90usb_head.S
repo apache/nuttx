@@ -227,7 +227,7 @@ __do_copy_data:
 .Lcopyloop:
 	lpm     r0, Z+
 	st      X+, r0
- 
+
 .Lcopystart:
 	cpi     r26, lo8(_edata)
 	cpc     r27, r17
@@ -246,7 +246,7 @@ __do_clear_bss:
 
 .Lclearloop:
 	st		X+, r1
- 
+
 .Lclearstart:
 	cpi		r26, lo8(_ebss)
 	cpc		r27, r17

@@ -735,7 +735,7 @@ static inline void ssi_performrx(struct tiva_ssidev_s *priv)
     {
        /* There are no more outgoing words to send, but there are
         * additional incoming words expected (I would think that this
-        * a real corner case, be we will handle it with an extra 
+        * a real corner case, be we will handle it with an extra
         * interrupt, probably an Rx timeout).
         */
 
@@ -1092,7 +1092,7 @@ static uint32_t ssi_setfrequencyinternal(struct tiva_ssidev_s *priv,
        *  (FSysClk). The clock is first divided by an even prescale value
        *  CPSDVSR from 2 to 254, which is programmed in the SSI Clock Prescale
        *  (SSI_CPSR) register ... The clock is further divided by a value
-       *  from 1 to 256, which is 1 + SCR, where SCR is the value programmed 
+       *  from 1 to 256, which is 1 + SCR, where SCR is the value programmed
        *  i n the SSI Control0 (SSICR0) register ...
        *
        * "The frequency of the output clock SSIClk is defined by:
@@ -1462,7 +1462,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
   uint8_t regval;
 
   ssidbg("port: %d\n", port);
- 
+
   /* Set up for the selected port */
 
   flags = irqsave();

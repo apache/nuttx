@@ -174,7 +174,7 @@ void nuc_lowsetup(void)
 
 #ifdef CONFIG_NUC_UART1
 #ifdef CONFIG_UART1_FLOW_CONTROL
-  regval |= (GCR_GPB_MFP4 | GCR_GPB_MFP5 | GCR_GPB_MFP6| GCR_GPB_MFP7) 
+  regval |= (GCR_GPB_MFP4 | GCR_GPB_MFP5 | GCR_GPB_MFP6| GCR_GPB_MFP7)
 #else
   regval |= (GCR_GPB_MFP4 | GCR_GPB_MFP5);
 #endif
@@ -364,11 +364,11 @@ void nuc_setbaud(uintptr_t base, uint32_t baud)
   uint32_t divx;
 
   regval = getreg32(base + NUC_UART_BAUD_OFFSET);
-  
+
    /* Mode 0: Source Clock mod 16 < 3 => Using Divider X = 16 */
 
   clksperbit = (NUC_UART_CLK + (baud >> 1)) / baud;
-  if ((clksperbit & 15) < 3)          
+  if ((clksperbit & 15) < 3)
     {
       regval &= ~(UART_BAUD_DIV_X_ONE | UART_BAUD_DIV_X_EN);
       brd = (clksperbit >> 4) - 2;
@@ -390,7 +390,7 @@ void nuc_setbaud(uintptr_t base, uint32_t baud)
           /* Mode 1: Try to Set Divider X up 10 */
 
           regval &= ~UART_BAUD_DIV_X_ONE;
-   
+
           for (divx = 8; divx < 16; divx++)
             {
               brd = clksperbit % (divx + 1);

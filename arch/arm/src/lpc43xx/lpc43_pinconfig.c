@@ -120,7 +120,7 @@ int lpc43_pin_config(uint32_t pinconf)
    {
      regval |= SCU_NDPIN_EHS; /* 0=slow; 1=fast */
    }
- 
+
   /* Only high drive pins suppose drive strength */
 
   switch (pinconf & PINCONF_DRIVE_MASK)

@@ -112,7 +112,7 @@ void up_lowserialinit(void)
   putreg8(brg & 0xff, U1BRL);
 
   /* Configure GPIO Port D pins 4 & 5 for alternate function */
-  
+
   putreg8(0x02, PAADDR);
   val = getreg8(PDCTL) | 0x30;    /* Set bits in alternate function register */
   putreg8(val, PDCTL);

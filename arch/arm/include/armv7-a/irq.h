@@ -60,7 +60,7 @@
  *   (1) stmia rx, {r0-r14}
  *   (2) then the PC and CPSR
  *
- * This results in the following set of indices that can be used to access 
+ * This results in the following set of indices that can be used to access
  * individual registers in the xcp.regs array:
  */
 

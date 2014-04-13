@@ -113,7 +113,7 @@ static int a1x_pio_interrupt(int irq, void *context)
   int irq;
 
   /* Read the set of pending GPIO interrupts */
-  
+
   status  = getreg32(A1X_PIO_INT_STA);
   mask    = getreg32(A1X_PIO_INT_CTL);
   pending = status & mask;

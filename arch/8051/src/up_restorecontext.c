@@ -276,7 +276,7 @@ void up_restorecontext(FAR struct xcptcontext *context) __naked
 	/* Restore registers from the new stack */
 
 	pop	dph
-	pop	dpl 
+	pop	dpl
 
 	/* Restore the interrupt state per the stored IE value */
 

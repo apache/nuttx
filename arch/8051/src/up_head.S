@@ -178,7 +178,7 @@ _up_timer0:
 	push	ie
 	clr	ea
 
-	/* Save the remaining registers with interrupts disabled 
+	/* Save the remaining registers with interrupts disabled
 	 *
 	 * a, ie, and dptr go on the stack.
 	 */
@@ -232,7 +232,7 @@ _up_interrupt:
 	push	ie
 	clr	ea
 
-	/* Save the remaining registers with interrupts disabled 
+	/* Save the remaining registers with interrupts disabled
 	 *
 	 * a, ie, and dptr go on the stack.
 	 */

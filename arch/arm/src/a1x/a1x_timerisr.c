@@ -120,7 +120,7 @@ void up_timerinit(void)
   uint32_t regval;
 
   /* Set the timer reload interval value */
- 
+
   putreg32(TMR_INTERVAL, A1X_TMR0_INTV_VALUE);
 
   /* Configure timer 0:

@@ -37,8 +37,8 @@
  * only indirectly through sys/types.h
  */
 
-#ifndef __ARCH_8051_INCLUDE_TYPES_H 
-#define __ARCH_8051_INCLUDE_TYPES_H 
+#ifndef __ARCH_8051_INCLUDE_TYPES_H
+#define __ARCH_8051_INCLUDE_TYPES_H
 
 /************************************************************************
  * Included Files

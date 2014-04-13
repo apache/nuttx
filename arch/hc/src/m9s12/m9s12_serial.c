@@ -250,7 +250,7 @@ static inline void up_serialout(struct up_dev_s *priv, int offset, uint8_t value
 static inline void up_setsciint(struct up_dev_s *priv)
 {
   uint8_t regval;
- 
+
   regval   = up_serialin(priv, HCS12_SCI_CR2_OFFSET);
   regval  &= ~SCI_CR2_ALLINTS;
   regval  |= priv->im;
@@ -264,7 +264,7 @@ static inline void up_setsciint(struct up_dev_s *priv)
 static inline void up_disablesciint(struct up_dev_s *priv, uint8_t *im)
 {
   uint8_t regval;
- 
+
   /* Return the current interrupt mask value */
 
   if (im)
@@ -348,7 +348,7 @@ static int up_setup(struct uart_dev_s *dev)
 
   up_serialout(priv, HCS12_SCI_BDH_OFFSET, (uint8_t)(tmp >> 8));
   up_serialout(priv, HCS12_SCI_BDL_OFFSET, (uint8_t)(tmp & 0xff));
-  
+
   /* Set up the SCICR1 register */
 
   cr1 = 0;
@@ -422,7 +422,7 @@ static int up_attach(struct uart_dev_s *dev)
   if (ret == OK)
     {
        /* Enable the Rx interrupt (the TX interrupt is still disabled
-        * until we have something to send). 
+        * until we have something to send).
         */
 
        priv->im = SCI_CR2_RIE;
@@ -567,7 +567,7 @@ static int up_receive(struct uart_dev_s *dev, uint32_t *status)
   /* Return the error indications */
 
   *status = (uint32_t)(priv->sr1 & ~SCI_CR2_ALLINTS);
-  
+
   /* Get the Rx data */
 
   rxd = (int)up_serialin(priv, HCS12_SCI_DRL_OFFSET);

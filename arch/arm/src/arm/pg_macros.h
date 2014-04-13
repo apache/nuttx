@@ -183,7 +183,7 @@
  * larger than the size of the physical paged region.  That is the
  * core of what the On-Demanding Paging feature provides.
  */
- 
+
 #define PG_L1_PAGED_PADDR       (PGTABLE_BASE_PADDR + ((PG_PAGED_VBASE >> 20) << 2))
 #define PG_L1_PAGED_VADDR       (PGTABLE_BASE_VADDR + ((PG_PAGED_VBASE >> 20) << 2))
 
@@ -261,10 +261,10 @@
 /* Case 2: Vectors are in low memory and the locked text region starts at
  * the beginning of SRAM (which will be aliased to address 0x00000000).
  * However, the beginning of SRAM may not be aligned to the beginning
- * of the L2 page table (because the beginning of RAM is offset into 
+ * of the L2 page table (because the beginning of RAM is offset into
  * the table.
  */
- 
+
 #elif defined(CONFIG_ARCH_LOWVECTORS) && !defined(CONFIG_PAGING_LOCKED_PBASE)
 #  define PG_VECT_PBASE         PG_LOCKED_PBASE
 #  define PG_L2_VECT_OFFSET     (((PG_LOCKED_VBASE & 0x000fffff) >> PAGESHIFT) << 2)
@@ -327,7 +327,7 @@
  *                            text region (the address at the beginning of
  *                            the page).
  * PG_POOL_MAXL2NDX         - This is the maximum value+1 of such an index.
- * 
+ *
  * PG_POOL_PGPADDR(ndx)     - Converts an page index into the corresponding
  *                            (physical) address of the backing page memory.
  * PG_POOL_PGVADDR(ndx)     - Converts an page index into the corresponding
@@ -340,7 +340,7 @@
  * written.
  */
 
-#define PG_POOL_VA2L1OFFSET(va) (((va) >> 20) << 2) 
+#define PG_POOL_VA2L1OFFSET(va) (((va) >> 20) << 2)
 #define PG_POOL_VA2L1VADDR(va)  (PGTABLE_BASE_VADDR + PG_POOL_VA2L1OFFSET(va))
 #define PG_POOL_L12PPTABLE(L1)  ((L1) & PG_L1_PADDRMASK)
 #define PG_POOL_L12VPTABLE(L1)  (PG_POOL_L12PPTABLE(L1) - PGTABLE_BASE_PADDR + PGTABLE_BASE_VADDR)
@@ -442,7 +442,7 @@
  *   follows:
  *
  *	ldr	r0, =PG_L1_PGTABLE_PADDR	<-- Address in the L1 table
- *	ldr	r1, =PG_L2_PGTABLE_PADDR	<-- Physical address of L2 page table 
+ *	ldr	r1, =PG_L2_PGTABLE_PADDR	<-- Physical address of L2 page table
  *	ldr	r2, =PG_PGTABLE_NPAGES		<-- Total number of pages
  *	ldr	r3, =PG_PGTABLE_NPAGE1		<-- Number of pages in the first PTE
  *      ldr	r4, =MMU_L1_PGTABFLAGS		<-- L1 MMU flags

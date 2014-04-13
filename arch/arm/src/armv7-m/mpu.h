@@ -79,19 +79,19 @@
 
 /* MPU Region Number Register Bit Definitions */
 
-#define MPU_RNR_MASK            (0xff)     
+#define MPU_RNR_MASK            (0xff)
 
 /* MPU Region Base Address Register Bit Definitions */
 
 #define MPU_RBAR_REGION_SHIFT   (0)       /* Bits 0-3: MPU region */
 #define MPU_RBAR_REGION_MASK    (15 << MPU_RBAR_REGION_SHIFT)
-#define MPU_RBAR_VALID          (1 << 4)  /* Bit 4: MPU Region Number valid */ 
+#define MPU_RBAR_VALID          (1 << 4)  /* Bit 4: MPU Region Number valid */
 #define MPU_RBAR_ADDR_MASK      0xffffffe0 /* Bits N-31:  Region base addrese */
 
 /* MPU Region Attributes and Size Register Bit Definitions */
 
 #define MPU_RASR_ENABLE         (1 << 0)  /* Bit 0: Region enable */
-#define MPU_RASR_SIZE_SHIFT     (1)       /* Bits 1-5: Size of the MPU protection region */  
+#define MPU_RASR_SIZE_SHIFT     (1)       /* Bits 1-5: Size of the MPU protection region */
 #define MPU_RASR_SIZE_MASK      (31 << MPU_RASR_SIZE_SHIFT)
 #  define MPU_RASR_SIZE_LOG2(n) ((n-1) << MPU_RASR_SIZE_SHIFT)
 #define MPU_RASR_SRD_SHIFT      (8)       /* Bits 8-15: Subregion disable */

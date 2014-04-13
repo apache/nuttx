@@ -39,7 +39,7 @@
 /************************************************************************************
  * Included Files
  ************************************************************************************/
- 
+
 /************************************************************************************
  * Definitions
  ************************************************************************************/
@@ -54,11 +54,11 @@
 
 /* I2C Register Addresses ***********************************************************/
 
-#define IMX_I2C_IADR                (IMX_I2C_VBASE + I2C_IADR_OFFSET) 
+#define IMX_I2C_IADR                (IMX_I2C_VBASE + I2C_IADR_OFFSET)
 #define IMX_I2C_IFDR                (IMX_I2C_VBASE + I2C_IFDR_OFFSET)
 #define IMX_I2C_I2CR                (IMX_I2C_VBASE + I2C_I2CR_OFFSET)
-#define IMX_I2C_I2SR                (IMX_I2C_VBASE + I2C_I2SR_OFFSET) 
-#define IMX_I2C_I2DR                (IMX_I2C_VBASE + I2C_I2DR_OFFSET) 
+#define IMX_I2C_I2SR                (IMX_I2C_VBASE + I2C_I2SR_OFFSET)
+#define IMX_I2C_I2DR                (IMX_I2C_VBASE + I2C_I2DR_OFFSET)
 
 /* I2C Register Bit Definitions *****************************************************/
 

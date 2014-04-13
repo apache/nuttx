@@ -57,7 +57,7 @@ extern "C" {
  ****************************************************************************/
 
 /** Waste CPU Time
- * 
+ *
  *   up_waste() is the logic that will be executed when portions of kernel
  *   or user-app is polling some register or similar, waiting for desired
  *   status. This time is wasted away. This function offers a measure of

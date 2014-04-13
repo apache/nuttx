@@ -109,7 +109,7 @@ void up_unblock_task(struct tcb_s *tcb)
       /* The currently active task has changed! We need to do
        * a context switch to the new task.
        *
-       * Are we in an interrupt handler? 
+       * Are we in an interrupt handler?
        */
 
       if (current_regs)
@@ -120,7 +120,7 @@ void up_unblock_task(struct tcb_s *tcb)
 
           up_savestate(rtcb->xcp.regs);
 
-          /* Restore the exception context of the rtcb at the (new) head 
+          /* Restore the exception context of the rtcb at the (new) head
            * of the g_readytorun task list.
            */
 

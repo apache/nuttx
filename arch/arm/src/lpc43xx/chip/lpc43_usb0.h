@@ -147,25 +147,25 @@
 
 /* Device side naming of common register offsets */
 
-#define LPC43_USBDEV_USBCMD                  LPC43_USBOTG_USBCMD       
-#define LPC43_USBDEV_USBSTS                  LPC43_USBOTG_USBSTS       
-#define LPC43_USBDEV_USBINTR                 LPC43_USBOTG_USBINTR       
-#define LPC43_USBDEV_FRINDEX                 LPC43_USBOTG_FRINDEX       
-#define LPC43_USBDEV_BURSTSIZE               LPC43_USBOTG_BURSTSIZE       
-#define LPC43_USBDEV_BINTERVAL               LPC43_USBOTG_BINTERVAL       
-#define LPC43_USBDEV_PORTSC1                 LPC43_USBOTG_USBMODE       
-#define LPC43_USBDEV_USBMODE                 LPC43_USBOTG_USBMODE       
+#define LPC43_USBDEV_USBCMD                  LPC43_USBOTG_USBCMD
+#define LPC43_USBDEV_USBSTS                  LPC43_USBOTG_USBSTS
+#define LPC43_USBDEV_USBINTR                 LPC43_USBOTG_USBINTR
+#define LPC43_USBDEV_FRINDEX                 LPC43_USBOTG_FRINDEX
+#define LPC43_USBDEV_BURSTSIZE               LPC43_USBOTG_BURSTSIZE
+#define LPC43_USBDEV_BINTERVAL               LPC43_USBOTG_BINTERVAL
+#define LPC43_USBDEV_PORTSC1                 LPC43_USBOTG_USBMODE
+#define LPC43_USBDEV_USBMODE                 LPC43_USBOTG_USBMODE
 
 /* Host side naming of common registers */
 
-#define LPC43_USBHOST_USBCMD                 LPC43_USBOTG_USBCMD       
-#define LPC43_USBHOST_USBSTS                 LPC43_USBOTG_USBSTS       
-#define LPC43_USBHOST_USBINTR                LPC43_USBOTG_USBINTR       
-#define LPC43_USBHOST_FRINDEX                LPC43_USBOTG_FRINDEX       
-#define LPC43_USBHOST_BURSTSIZE              LPC43_USBOTG_BURSTSIZE       
-#define LPC43_USBHOST_BINTERVAL              LPC43_USBOTG_BINTERVAL       
-#define LPC43_USBHOST_PORTSC1                LPC43_USBOTG_USBMODE       
-#define LPC43_USBHOST_USBMODE                LPC43_USBOTG_USBMODE       
+#define LPC43_USBHOST_USBCMD                 LPC43_USBOTG_USBCMD
+#define LPC43_USBHOST_USBSTS                 LPC43_USBOTG_USBSTS
+#define LPC43_USBHOST_USBINTR                LPC43_USBOTG_USBINTR
+#define LPC43_USBHOST_FRINDEX                LPC43_USBOTG_FRINDEX
+#define LPC43_USBHOST_BURSTSIZE              LPC43_USBOTG_BURSTSIZE
+#define LPC43_USBHOST_BINTERVAL              LPC43_USBOTG_BINTERVAL
+#define LPC43_USBHOST_PORTSC1                LPC43_USBOTG_USBMODE
+#define LPC43_USBHOST_USBMODE                LPC43_USBOTG_USBMODE
 
 /* Device endpoint registers */
 
@@ -381,13 +381,13 @@
 /* USB burst size register BURSTSIZE -- Device/Host Mode */
 
 #define USBHOST_BURSTSIZE_RXPBURST_SHIFT     (0)       /* Bits 0-7: RXPBURST Programmable RX burst length */
-#define USBHOST_BURSTSIZE_RXPBURST_MASK      (255 << USBHOST_BURSTSIZE_RXPBURST_SHIFT) 
+#define USBHOST_BURSTSIZE_RXPBURST_MASK      (255 << USBHOST_BURSTSIZE_RXPBURST_SHIFT)
 #define USBHOST_BURSTSIZE_TXPBURST_SHIFT     (8)       /* Bits 8-15: Programmable TX burst length */
 #define USBHOST_BURSTSIZE_TXPBURST_MASK      (255 << USBHOST_BURSTSIZE_TXPBURST_SHIFT)
                                                        /* Bits 16-31: Reserved */
 
 #define USBDEV_BURSTSIZE_RXPBURST_SHIFT      (0)       /* Bits 0-7: RXPBURST Programmable RX burst length */
-#define USBDEV_BURSTSIZE_RXPBURST_MASK       (255 << USBDEV_BURSTSIZE_RXPBURST_SHIFT) 
+#define USBDEV_BURSTSIZE_RXPBURST_MASK       (255 << USBDEV_BURSTSIZE_RXPBURST_SHIFT)
 #define USBDEV_BURSTSIZE_TXPBURST_SHIFT      (8)       /* Bits 8-15: Programmable TX burst length */
 #define USBDEV_BURSTSIZE_TXPBURST_MASK       (255 << USBDEV_BURSTSIZE_TXPBURST_SHIFT)
                                                        /* Bits 16-31: Reserved */

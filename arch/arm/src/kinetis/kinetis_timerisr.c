@@ -126,7 +126,7 @@ void up_timerinit(void)
   regval |= (NVIC_SYSH_PRIORITY_DEFAULT << NVIC_SYSH_PRIORITY_PR15_SHIFT);
   putreg32(regval, NVIC_SYSH12_15_PRIORITY);
 
-  /* Note that is should not be neccesary to set the SYSTICK clock source: 
+  /* Note that is should not be neccesary to set the SYSTICK clock source:
    * "The CLKSOURCE bit in SysTick Control and Status register is always set
    *  to select the core clock."
    */

@@ -72,7 +72,7 @@
  *
  * Description:
  *   Called when the priority of a running or
- *   ready-to-run task changes and the reprioritization will 
+ *   ready-to-run task changes and the reprioritization will
  *   cause a context switch.  Two cases:
  *
  *   1) The priority of the currently running task drops and the next
@@ -155,7 +155,7 @@ void up_reprioritize_rtr(FAR struct tcb_s *tcb, uint8_t priority)
 
                SAVE_IRQCONTEXT(rtcb);
 
-              /* Restore the exception context of the rtcb at the (new) head 
+              /* Restore the exception context of the rtcb at the (new) head
                * of the g_readytorun task list.
                */
 
@@ -176,7 +176,7 @@ void up_reprioritize_rtr(FAR struct tcb_s *tcb, uint8_t priority)
 
           else if (!SAVE_USERCONTEXT(rtcb))
             {
-              /* Restore the exception context of the rtcb at the (new) head 
+              /* Restore the exception context of the rtcb at the (new) head
                * of the g_readytorun task list.
                */
 

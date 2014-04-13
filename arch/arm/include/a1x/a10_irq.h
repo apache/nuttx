@@ -48,7 +48,7 @@
  * Pre-Processor Definitions
  ****************************************************************************************/
 
-/* External interrupts numbers */ 
+/* External interrupts numbers */
 
 #define A1X_IRQ_NMI         0 /* External Non-Mask Interrupt */
 #  define A1X_IRQ_POWER     0 /* Power module */

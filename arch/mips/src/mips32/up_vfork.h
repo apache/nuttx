@@ -72,7 +72,7 @@
  *                then this is the frame pointer.
  * r31     ra     Return address.
  */
- 
+
 #define VFORK_S0_OFFSET   (0*4)   /* Saved register s0 */
 #define VFORK_S1_OFFSET   (1*4)   /* Saved register s1 */
 #define VFORK_S2_OFFSET   (2*4)   /* Saved register s2 */

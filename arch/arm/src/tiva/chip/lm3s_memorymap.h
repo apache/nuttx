@@ -47,7 +47,7 @@
  ************************************************************************************/
 
 /* Memory map ***********************************************************************/
- 
+
 #if defined(CONFIG_ARCH_CHIP_LM3S6918) || defined(CONFIG_ARCH_CHIP_LM3S6432) || \
     defined(CONFIG_ARCH_CHIP_LM3S6965) || defined(CONFIG_ARCH_CHIP_LM3S8962)
 #  define TIVA_FLASH_BASE     0x00000000 /* -0x0003ffff: On-chip FLASH */
@@ -272,7 +272,7 @@
 #  define TIVA_FLASHCON_BASE  (TIVA_PERIPH_BASE + 0xfd000)  /* -0xfdfff: FLASH Control */
 #  define TIVA_SYSCON_BASE    (TIVA_PERIPH_BASE + 0xfe000)  /* -0xfefff: System Control */
                                                             /* -0x1ffffff: Reserved */
-#elif defined(CONFIG_ARCH_CHIP_LM3S9B96) 
+#elif defined(CONFIG_ARCH_CHIP_LM3S9B96)
 /* FiRM Peripheral Base Addresses */
 
 #  define TIVA_WDOG_BASE      (TIVA_PERIPH_BASE + 0x00000) /* -0x00fff: Watchdog Timer */

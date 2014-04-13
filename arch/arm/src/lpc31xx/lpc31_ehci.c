@@ -4320,7 +4320,7 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
   /* Enable USB OTG PLL and wait for lock */
 
   putreg32(0, LPC31_SYSCREG_USB_ATXPLLPDREG);
-  
+
   uint32_t bank = EVNTRTR_BANK(EVENTRTR_USBATXPLLLOCK);
   uint32_t bit  = EVNTRTR_BIT(EVENTRTR_USBATXPLLLOCK);
 

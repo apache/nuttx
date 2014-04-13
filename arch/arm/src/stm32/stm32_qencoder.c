@@ -589,7 +589,7 @@ static void stm32_dumpregs(struct stm32_lowerhalf_s *priv, FAR const char *msg)
  * Name: stm32_tim2lower
  *
  * Description:
- *   Map a timer number to a device structure  
+ *   Map a timer number to a device structure
  *
  ************************************************************************************/
 
@@ -671,7 +671,7 @@ static int stm32_interrupt(FAR struct stm32_lowerhalf_s *priv)
  * Name: stm32_intNinterrupt
  *
  * Description:
- *   TIMN interrupt handler   
+ *   TIMN interrupt handler
  *
  ************************************************************************************/
 
@@ -723,7 +723,7 @@ static int stm32_tim8interrupt(int irq, FAR void *context)
  * Description:
  *   This method is called when the driver is opened.  The lower half driver
  *   should configure and initialize the device so that it is ready for use.
- *   The initial position value should be zero. *   
+ *   The initial position value should be zero. *
  *
  ************************************************************************************/
 
@@ -779,7 +779,7 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
   stm32_putreg16(priv, STM32_GTIM_PSC_OFFSET, (uint16_t)priv->config->psc);
 
 #if defined(CONFIG_STM32_TIM1_QE) || defined(CONFIG_STM32_TIM8_QE)
-  if (priv->config->timid == 1 || priv->config->timid == 8) 
+  if (priv->config->timid == 1 || priv->config->timid == 8)
   {
     /* Clear the Repetition Counter value */
 
@@ -797,7 +797,7 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
 
   stm32_configgpio(priv->config->ti1cfg);
   stm32_configgpio(priv->config->ti2cfg);
-  
+
   /* Set the encoder Mode 3 */
 
   smcr = stm32_getreg16(priv, STM32_GTIM_SMCR_OFFSET);
@@ -830,7 +830,7 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
 
   stm32_putreg16(priv, STM32_GTIM_CCMR1_OFFSET, ccmr1);
   stm32_putreg16(priv, STM32_GTIM_CCER_OFFSET, ccer);
- 
+
   /* Set the Input Capture Prescaler value: Capture performed each time an
    * edge is detected on the capture input.
    */
@@ -896,7 +896,7 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
           stm32_shutdown(lower);
           return ret;
         }
-  
+
       /* Enable the update/global interrupt at the NVIC */
 
       up_enable_irq(priv->config->irq);
@@ -908,7 +908,7 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
   cr1 = stm32_getreg16(priv, STM32_GTIM_CR1_OFFSET);
   cr1 &= ~GTIM_CR1_UDIS;
   stm32_putreg16(priv, STM32_GTIM_CR1_OFFSET, cr1);
-  
+
   /* Reset the URS Bit */
 
   cr1 &= ~GTIM_CR1_URS;
@@ -949,7 +949,7 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
  * Description:
  *   This method is called when the driver is closed.  The lower half driver
  *   should stop data collection, free any resources, disable timer hardware, and
- *   put the system into the lowest possible power usage state *   
+ *   put the system into the lowest possible power usage state *
  *
  ************************************************************************************/
 
@@ -964,9 +964,9 @@ static int stm32_shutdown(FAR struct qe_lowerhalf_s *lower)
 
   /* Disable the update/global interrupt at the NVIC */
 
-  flags = irqsave();  
+  flags = irqsave();
   up_disable_irq(priv->config->irq);
-  
+
   /* Detach the interrupt handler */
 
   (void)irq_detach(priv->config->irq);

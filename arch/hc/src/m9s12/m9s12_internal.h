@@ -163,7 +163,7 @@
  * Ports A, B, E, and K reside in the MEBI block
  * Ports T,S,G,H,J, and L reside in the PIM block.
  */
- 
+
 #define GPIO_PORT_SHIFT 3
 #define GPIO_PORT_MASK  (15 << GPIO_PORT_SHIFT)
 #  define GPIO_PORT_A   (0 << GPIO_PORT_SHIFT)
@@ -341,7 +341,7 @@ EXTERN int hcs12_ethinitialize(int intf);
  *   3. Add a calls to up_spiinitialize() in your low level application
  *      initialization logic
  *   4. The handle returned by up_spiinitialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling 
+ *      SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *

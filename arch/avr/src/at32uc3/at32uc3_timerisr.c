@@ -121,7 +121,7 @@
  * Therefore, the TOP interrupt should occur after 143+1=144 counts
  * at a rate of 69.57us x 144 = 10.02 ms
  */
- 
+
 #ifdef AVR32_CLOCK_OSC32
 #  define AV32_PSEL 1
 #  define AV32_TOP (82-1)
@@ -168,7 +168,7 @@ static void rtc_waitnotbusy(void)
 int up_timerisr(int irq, uint32_t *regs)
 {
    /* Clear the pending timer interrupt */
- 
+
    putreg32(RTC_INT_TOPI, AVR32_RTC_ICR);
 
    /* Process timer interrupt */
@@ -228,7 +228,7 @@ void up_timerinit(void)
   /* Enable RTC interrupts */
 
   putreg32(RTC_INT_TOPI, AVR32_RTC_IER);
-  
+
   /* Enable the RTC */
 
   rtc_waitnotbusy();

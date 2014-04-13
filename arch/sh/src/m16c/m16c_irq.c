@@ -78,7 +78,7 @@ volatile uint32_t *current_regs; /* Actually a pointer to the beginning of a uin
 void up_irqinitialize(void)
 {
   current_regs = NULL;
-  
+
   /* And finally, enable interrupts */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS

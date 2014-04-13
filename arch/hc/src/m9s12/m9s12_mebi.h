@@ -99,7 +99,7 @@
 /* Port K Data Register Bit-Field Definitions */
 /* Data Direction Register K Bit-Field Definitions */
 
-#define MEBI_PIN(n)                (1 << (n))         
+#define MEBI_PIN(n)                (1 << (n))
 #define MEBI_PIN0                  (1 << 0)
 #define MEBI_PIN1                  (1 << 1)
 #define MEBI_PIN2                  (1 << 2)

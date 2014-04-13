@@ -92,7 +92,7 @@
  *
  * Description:
  *	This macro provides the exception entry logic.  It is called with the PC already on the
- *	stack.  It simply saves one register on the  stack (r24) and passes the IRQ number to 
+ *	stack.  It simply saves one register on the  stack (r24) and passes the IRQ number to
  *	common logic (see EXCPT_PROLOGUE).
  *
  * On Entry:
@@ -437,7 +437,7 @@
 	out		_SFR_IO_ADDR(SPH), r25		/* (SPH then SPL) */
 	ld		r24, x+
 	out		_SFR_IO_ADDR(SPL), r24
- 
+
 	/* Fetch the return address and save it at the bottom of the new stack so
 	 * that we can iret to switch contexts.  The new stack is now:
 	 *

@@ -172,7 +172,7 @@ static int sam_interrupt(int irq, void *context)
       /* This is not the first sample.  Check if the new sample differs from
        * the preceding sample.
        */
- 
+
       else if (odata == g_trngdev.samples[g_trngdev.nsamples - 1])
         {
           /* Two samples with the same value.  Discard this one and try again. */

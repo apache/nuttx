@@ -413,7 +413,7 @@ static inline void c5471_dumpbuffer(const char *msg, const uint8_t *buffer, unsi
   /* CONFIG_DEBUG, CONFIG_DEBUG_VERBOSE, and CONFIG_DEBUG_NET have to be
    * defined or the following does nothing.
    */
-    
+
   nvdbgdumpbuffer(msg, buffer, nbytes);
 }
 #else
@@ -723,7 +723,7 @@ static int c5471_phyinit (void)
 
   /* Next, request a chip reset */
 
-  c5471_mdwrite(0, MD_PHY_CONTROL_REG, 0x8000); 
+  c5471_mdwrite(0, MD_PHY_CONTROL_REG, 0x8000);
   while (c5471_mdread(0, MD_PHY_CONTROL_REG) & 0x8000)
     {
       /* wait for chip reset to complete */
@@ -743,15 +743,15 @@ static int c5471_phyinit (void)
 #ifdef CONFIG_C5471_AUTONEGOTIATION
   ndbg("Setting PHY Transceiver for Autonegotiation\n");
   c5471_mdwrite(0, MD_PHY_CONTROL_REG, MODE_AUTONEG);
-#endif 
+#endif
 #ifdef CONFIG_C5471_BASET100
   ndbg("Setting PHY Transceiver for 100BaseT FullDuplex\n");
   c5471_mdwrite(0, MD_PHY_CONTROL_REG, MODE_100MBIT_FULLDUP);
-#endif 
+#endif
 #ifdef CONFIG_C5471_BASET10
   ndbg("Setting PHY Transceiver for 10BaseT FullDuplex\n");
   c5471_mdwrite(0, MD_PHY_CONTROL_REG, MODE_10MBIT_FULLDUP);
-#endif 
+#endif
 
   status = c5471_mdread(0, MD_PHY_CTRL_STAT_REG);
   return status;
@@ -1479,7 +1479,7 @@ static int c5471_interrupt(int irq, FAR void *context)
       c5471_txdone(c5471);
     }
 
-  /* Enable Ethernet interrupts (perhaps excluding the TX done interrupt if 
+  /* Enable Ethernet interrupts (perhaps excluding the TX done interrupt if
    * there are no pending transmissions.
    */
 
@@ -1567,7 +1567,7 @@ static void c5471_polltimer(int argc, uint32_t arg, ...)
  *
  * Description:
  *   NuttX Callback: Bring up the Ethernet interface when an IP address is
- *   provided 
+ *   provided
  *
  * Parameters:
  *   dev  - Reference to the NuttX driver state structure
@@ -1680,7 +1680,7 @@ static int c5471_ifdown(struct uip_driver_s *dev)
  * Function: c5471_txavail
  *
  * Description:
- *   Driver callback invoked when new TX data is available.  This is a 
+ *   Driver callback invoked when new TX data is available.  This is a
  *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
  *   latency.
  *
@@ -1732,7 +1732,7 @@ static int c5471_txavail(struct uip_driver_s *dev)
  *
  * Parameters:
  *   dev  - Reference to the NuttX driver state structure
- *   mac  - The MAC address to be added 
+ *   mac  - The MAC address to be added
  *
  * Returned Value:
  *   None
@@ -1762,7 +1762,7 @@ static int c5471_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
  *
  * Parameters:
  *   dev  - Reference to the NuttX driver state structure
- *   mac  - The MAC address to be removed 
+ *   mac  - The MAC address to be removed
  *
  * Returned Value:
  *   None
@@ -1973,7 +1973,7 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
 //  putreg32(EIM_FILTER_LOGICAL|EIM_FILTER_UNICAST|EIM_FILTER_MULTICAST|
 //           EIM_FILTER_BROADCAST, EIM_CPU_FILTER);
   putreg32(EIM_FILTER_UNICAST|EIM_FILTER_MULTICAST|EIM_FILTER_BROADCAST, EIM_CPU_FILTER);
-#endif 
+#endif
 
   /* Disable all Ethernet interrupts */
 
@@ -1984,16 +1984,16 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
 #if 1
   putreg32(EIM_CTRL_ENET0_EN|EIM_CTRL_RXENET0_EN|EIM_CTRL_TXENET0_EN|
            EIM_CTRL_RXCPU_EN|EIM_CTRL_TXCPU_EN, EIM_CTRL);
-#else 
+#else
   putreg32(EIM_CTRL_ENET0_EN|EIM_CTRL_ENET0_FLW|EIM_CTRL_RXENET0_EN|
            EIM_CTRL_TXENET0_EN|EIM_CTRL_RXCPU_EN|EIM_CTRL_TXCPU_EN, EIM_CTRL);
 #endif
 
-#if 1 
+#if 1
   putreg32(0x00000000, EIM_MFVHI);
 #else
   putreg32(0x0000ff00, EIM_MFVHI);
-#endif 
+#endif
 
   putreg32(0x00000000, EIM_MFVLO);
   putreg32(0x00000000, EIM_MFMHI);
@@ -2007,16 +2007,16 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
   putreg32(ENET_MODE_RJCT_SFE|ENET_MODE_MWIDTH|ENET_MODE_FULLDUPLEX, ENET0_MODE);
 #else
   putreg32(ENET_MODE_RJCT_SFE|ENET_MODE_MWIDTH|ENET_MODE_HALFDUPLEX, ENET0_MODE);
-#endif 
+#endif
 
   putreg32(0x00000000, ENET0_BOFFSEED);
   putreg32(0x00000000, ENET0_FLWPAUSE);
   putreg32(0x00000000, ENET0_FLWCONTROL);
   putreg32(0x00000000, ENET0_VTYPE);
 
-#if 0 
+#if 0
   putreg32(ENET_ADR_BROADCAST|ENET_ADR_PROMISCUOUS, ENET0_ADRMODE_EN);
-#else 
+#else
   /* The CPU port is not PROMISCUOUS, it wants a no-promiscuous address
    * match yet the SWITCH receives packets from the PROMISCUOUS ENET0
    * which routes all packets for filter matching at the CPU port which
@@ -2026,7 +2026,7 @@ static void c5471_eimconfig(struct c5471_driver_s *c5471)
    */
 
   putreg32(ENET_ADR_PROMISCUOUS, ENET0_ADRMODE_EN);
-#endif 
+#endif
 
   putreg32(0x00000000, ENET0_DRP);
   up_mdelay(500);
@@ -2093,7 +2093,7 @@ static void c5471_macassign(struct c5471_driver_s *c5471)
   putreg32(getreg32(EIM_CPU_DALO), ENET0_LARLO);
 
 #else
-  /* ENET MAC assignment not needed for its PROMISCUOUS mode */ 
+  /* ENET MAC assignment not needed for its PROMISCUOUS mode */
 
   putreg32(0x00000000, ENET0_PARHI);
   putreg32(0x00000000, ENET0_PARLO);

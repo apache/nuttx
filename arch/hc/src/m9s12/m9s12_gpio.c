@@ -286,7 +286,7 @@ static inline void pim_interrupt(uint8_t portndx, unsigned pin, uint8_t type)
     {
       gpio_writebit(HCS12_PIM_PORT_IE(portndx), pin, false);
     }
-} 
+}
 
 /****************************************************************************
  * Name: pim_configgpio
@@ -308,7 +308,7 @@ static inline void pim_configgpio(uint16_t cfgset, uint8_t portndx, uint8_t pin)
   if ((cfgset & GPIO_INT_ENABLE) != 0)
     {
       /* Yes.. then it must not be tagged as an output */
- 
+
       ASSERT((cfgset & GPIO_DIRECTION) != GPIO_OUTPUT);
 
       /* If the pull-driver is also enabled, it must be enabled with a

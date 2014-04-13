@@ -92,7 +92,7 @@ void up_release_pending(void)
 
       if (!up_setjmp(rtcb->xcp.regs))
         {
-          /* Restore the exception context of the rtcb at the (new) head 
+          /* Restore the exception context of the rtcb at the (new) head
            * of the g_readytorun task list.
            */
 

@@ -278,7 +278,7 @@ static uart_dev_t g_escca_port =
  */
 
 #undef CONSOLE_DEV
-#undef TTYS0_DEV 
+#undef TTYS0_DEV
 #undef TTYS1_DEV
 
 #if defined(CONFIG_Z180_SCC_SERIAL_CONSOLE)

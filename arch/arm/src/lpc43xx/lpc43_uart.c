@@ -58,7 +58,7 @@
 /**************************************************************************
  * Private Definitions
  **************************************************************************/
-     
+
 /* Select UART parameters for the selected console */
 
 #if defined(CONFIG_USART0_SERIAL_CONSOLE)
@@ -199,7 +199,7 @@ void up_lowputc(char ch)
  *      PCLK_UART1; in the PCLKSEL1 register, select PCLK_USART2 and PCLK_USART3.
  *   3. Baud rate: In the LCR register, set bit DLAB = 1. This enables access
  *      to registers DLL and DLM for setting the baud rate. Also, if needed,
- *      set the fractional baud rate in the fractional divider 
+ *      set the fractional baud rate in the fractional divider
  *   4. UART FIFO: Use bit FIFO enable (bit 0) in FCR register to
  *      enable FIFO.
  *   5. Pins: Select UART pins through the PINSEL registers and pin modes
@@ -496,7 +496,7 @@ void lpc43_setbaud(uintptr_t uartbase, uint32_t basefreq, uint32_t baud)
   uint32_t errval;   /* Error value associated with the candidate */
 
  /* The U[S]ART buad is given by:
-  * 
+  *
   * Fbaud =  Fbase * mul / (mul + divadd) / (16 * dl)
   * dl    =  Fbase * mul / (mul + divadd) / Fbaud / 16
   *       =  Fbase * mul / ((mul + divadd) * Fbaud * 16)
@@ -507,7 +507,7 @@ void lpc43_setbaud(uintptr_t uartbase, uint32_t basefreq, uint32_t baud)
   *  0 < mul < 16
   *  0 <= divadd < mul
   */
- 
+
   best   = UINT32_MAX;
   divadd = 0;
   mul    = 0;

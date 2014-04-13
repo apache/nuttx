@@ -241,7 +241,7 @@
 
 #define PIN_PASV_FILTER        (1 << 18)  /* Bit 18: Enable passive filter */
 #define PIN_DIG_FILTER         (1 << 17)  /* Bit 17: Enable digital filter */
- 
+
 /* Three bits are used to define the port number:
  *
  * ---- ---- ---- ---- ---- -ppp ---- ----

@@ -96,7 +96,7 @@
  *
  * The MC9S12NE64 has 64K bytes of FLASH EEPROM and 8K bytes of RAM.
  */
- 
+
 	.macro	MMCINIT
 	/* Registers are always positioned at address 0x0000 */
 
@@ -126,7 +126,7 @@
  * already been configured at 24 MHz
  */
 
-	.macro	PLLINIT 
+	.macro	PLLINIT
 #ifndef CONFIG_HCS12_SERIALMON
 	/* Select the clock source from crystal */
 
@@ -137,7 +137,7 @@
 	bclr	*HCS12_CRG_PLLCTL #CRG_PLLCTL_PLLON
 	ldab	#HCS12_SYNR_VALUE
 	stab	HCS12_CRG_SYNR
-	ldab	#HCS12_REFDV_VALUE   
+	ldab	#HCS12_REFDV_VALUE
 	stab	HCS12_CRG_REFDV
 	bset	*HCS12_CRG_PLLCTL #CRG_PLLCTL_PLLON
 

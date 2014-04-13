@@ -55,7 +55,7 @@
  * Pre-processor Macros
  ****************************************************************************/
 
-/* MIPS requires at least a 4-byte stack alignment.  For floating point use, 
+/* MIPS requires at least a 4-byte stack alignment.  For floating point use,
  * however, the stack must be aligned to 8-byte addresses.
  */
 
@@ -135,7 +135,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
     }
 
   /* Do we need to allocate a new stack? */
- 
+
   if (!tcb->stack_alloc_ptr)
     {
       /* Allocate the stack.  If DEBUG is enabled (but not stack debug),
@@ -202,7 +202,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       /* The MIPS stack must be aligned at word (4 byte) boundaries; for
        * floating point use, the stack must be aligned to 8-byte addresses.
        * If necessary top_of_stack must be rounded down to the next
-       * boundary to meet these alignment requirements. 
+       * boundary to meet these alignment requirements.
        */
 
       top_of_stack = STACK_ALIGN_DOWN(top_of_stack);

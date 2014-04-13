@@ -477,7 +477,7 @@ __start0:
 .Ledata:
 	.long   _edata
 #endif
-.Lsbss:  
+.Lsbss:
 	.long   _sbss
 .Lebss:
 	.long   _ebss

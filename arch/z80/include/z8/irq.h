@@ -198,7 +198,7 @@
 
 #  define NR_IRQS          (29)
 
-#endif 
+#endif
 
 #define Z8_IRQ_SYSTIMER Z8_TIMER0_IRQ
 

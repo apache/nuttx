@@ -105,7 +105,7 @@ extern "C" {
  * include/nuttx/spi/spi.h).  All other methods (including up_spiinitialize()) are
  * provided by common logic.  To use this common SPI logic on your board:
  *
- *   1. Provide ez80_spiselect() and ez80_spistatus() functions in your board-specific 
+ *   1. Provide ez80_spiselect() and ez80_spistatus() functions in your board-specific
  *      logic.  This function will perform chip selection and status operations using
  *      GPIOs in the way your board is configured.
  *   2. If CONFIG_SPI_CMDDATA is defined in your NuttX configuration, provide the

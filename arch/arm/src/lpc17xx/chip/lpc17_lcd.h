@@ -71,7 +71,7 @@
 
 /* Cursor Image registers, n=0-255 */
 
-#define LPC17_LCD_CRSR_IMG_OFFSET(n)    (0x0800 + ((n) << 2)) 
+#define LPC17_LCD_CRSR_IMG_OFFSET(n)    (0x0800 + ((n) << 2))
 
 #define LPC17_LCD_CRSR_CRTL_OFFSET      (0x0c00) /* Cursor Control register */
 #define LPC17_LCD_CRSR_CFG_OFFSET       (0x0c04) /* Cursor Configuration register */

@@ -270,7 +270,7 @@
  *   32 K ROM (185)
  *   1 Ch ESCC
  *   IEEE 1284 Bi-Directional Centronics Parallel Port
- *   7 or 24 Bits of I/O 
+ *   7 or 24 Bits of I/O
  */
 
 #elif defined(CONFIG_ARCH_CHIP_Z8019520FSG) ||    /* 100-pin QFP 20MHz 5V */ \

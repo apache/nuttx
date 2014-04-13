@@ -52,7 +52,7 @@
  * Definitions
  ****************************************************************************/
 
-/* Output debug info if stack dump is selected -- even if 
+/* Output debug info if stack dump is selected -- even if
  * debug is not selected.
  */
 

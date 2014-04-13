@@ -122,7 +122,7 @@ static inline void lpc17_fpuconfig(void)
    * with the volatile FP registers stacked above the basic context.
    */
 
-  regval = getcontrol(); 
+  regval = getcontrol();
   regval |= (1 << 2);
   setcontrol(regval);
 
@@ -152,7 +152,7 @@ static inline void lpc17_fpuconfig(void)
    * with the volatile FP registers stacked in the saved context.
    */
 
-  regval = getcontrol(); 
+  regval = getcontrol();
   regval &= ~(1 << 2);
   setcontrol(regval);
 

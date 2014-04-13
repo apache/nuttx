@@ -88,7 +88,7 @@
 #define SPIFI_PROG_INST         2
 #define SPIFI_CHIP_ERASE        3
 
-/* Bit definitions in options operands (MODE3, RCVCLK, and FULLCLK 
+/* Bit definitions in options operands (MODE3, RCVCLK, and FULLCLK
  * have the same relationship as in the Control register)
  */
 
@@ -117,7 +117,7 @@
 
 /* SPI ROM driver table pointer */
 
-#define SPIFI_ROM_PTR LPC43_ROM_DRIVER_TABLE6 
+#define SPIFI_ROM_PTR LPC43_ROM_DRIVER_TABLE6
 #define pSPIFI *((struct spifi_driver_s **)SPIFI_ROM_PTR)
 
 /****************************************************************************

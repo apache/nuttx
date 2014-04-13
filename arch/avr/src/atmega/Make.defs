@@ -74,7 +74,7 @@ CHIP_CSRCS	= atmega_lowconsole.c atmega_lowinit.c atmega_serial.c atmega_timeris
 # Configuration-dependent ATMEGA files
 
 ifeq ($(CONFIG_AVR_GPIOIRQ),y)
-CHIP_CSRCS	+= 
+CHIP_CSRCS	+=
 endif
 
 

@@ -156,7 +156,7 @@ up_vectorirq:
 
 /************************************************************************************
  * Function: up_vectorswi
- * 
+ *
  * Description:
  *   SWI interrupt. We enter the SWI in SVC mode.
  *

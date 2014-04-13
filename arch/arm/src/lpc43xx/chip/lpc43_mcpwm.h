@@ -257,7 +257,7 @@
 #define MCPWM_CAPCLR_CLR0            (1 << 0)  /* Bit 0:  Clear CAP0 register */
 #define MCPWM_CAPCLR_CLR1            (1 << 1)  /* Bit 1:  Clear CAP1 register */
 #define MCPWM_CAPCLR_CLR2            (1 << 2)  /* Bit 2:  Clear CAP2 register */
-                                               /* Bits 2-31: Reserved */ 
+                                               /* Bits 2-31: Reserved */
 
 /************************************************************************************
  * Public Types

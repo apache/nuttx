@@ -160,7 +160,7 @@ struct xcptcontext
 
    uint8_t nbytes;
 
-   /* This is the saved stack.  Space is allocated for the 
+   /* This is the saved stack.  Space is allocated for the
     * entire 256 byte IRAM (minus register and bit usage at
     * the beginning).
     */

@@ -85,7 +85,7 @@ bool lpc31_defclk(enum lpc31_clockid_e clkid)
   /* Check if this clock should be enabled.  This is determined by
    * 3 bitsets provided by board-specific logic in board/board.h.
    */
- 
+
   if ((int)clkid < 32)
     {
       enable = ((BOARD_CLKS_0_31 & (1 << (int)clkid)) != 0);

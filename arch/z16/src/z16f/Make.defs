@@ -35,7 +35,7 @@
 
 HEAD_SSRC	= z16f_head.S
 
-CMN_SSRCS	= 
+CMN_SSRCS	=
 CMN_CSRCS	= up_allocateheap.c up_initialize.c up_schedulesigaction.c \
 		  up_assert.c up_initialstate.c up_sigdeliver.c up_blocktask.c \
 		  up_interruptcontext.c up_stackdump.c up_copystate.c \

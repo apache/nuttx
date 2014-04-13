@@ -86,7 +86,7 @@ FAR struct xcptcontext *g_irqcontext;
  * to comput them.
  */
 
-const uint8_t g_ntobit[8] = 
+const uint8_t g_ntobit[8] =
   { 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80 };
 
 /************************************************************************

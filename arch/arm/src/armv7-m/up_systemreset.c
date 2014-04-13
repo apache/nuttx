@@ -69,7 +69,7 @@ void up_systemreset(void)
   regval |= ((0x5fa << NVIC_AIRCR_VECTKEY_SHIFT) | NVIC_AIRCR_SYSRESETREQ);
   putreg32(regval, NVIC_AIRCR);
 
-  /* Ensure completion of memory accesses */              
+  /* Ensure completion of memory accesses */
 
   __asm volatile ("dsb");
 

@@ -161,7 +161,7 @@ static const struct spi_ops_s g_spiops =
 static struct lpc43_spidev_s g_spidev =
 {
   .spidev            = { &g_spiops },
-}; 
+};
 
 /****************************************************************************
  * Public Data
@@ -269,7 +269,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   divisor = (divisor + 1) & ~1;
 
   /* Save the new divisor value */
-  
+
   putreg32(divisor, LPC43_SPI_CCR);
 
   /* Calculate the new actual */
@@ -322,19 +322,19 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
         {
         case SPIDEV_MODE0: /* CPOL=0; CPHA=0 */
           break;
- 
+
         case SPIDEV_MODE1: /* CPOL=0; CPHA=1 */
           regval |= SPI_CR_CPHA;
           break;
- 
+
         case SPIDEV_MODE2: /* CPOL=1; CPHA=0 */
           regval |= SPI_CR_CPOL;
           break;
- 
+
         case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
           regval |= (SPI_CR_CPOL|SPI_CR_CPHA);
           break;
- 
+
         default:
           DEBUGASSERT(FALSE);
           return;
@@ -517,7 +517,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
 
      (void)getreg32(LPC43_SPI_SR);
 
-     /* Read the received data from the SPI Data Register */   
+     /* Read the received data from the SPI Data Register */
 
      *ptr++ = (uint8_t)getreg32(LPC43_SPI_DR);
      nwords--;
@@ -575,7 +575,7 @@ FAR struct spi_dev_s *lpc43_spiinitialize(int port)
   regval |= SYSCON_PCONP_PCSPI;
   putreg32(regval, LPC43_SYSCON_PCONP);
   irqrestore(flags);
-  
+
   /* Configure 8-bit SPI mode and master mode */
 
   putreg32(SPI_CR_BITS_8BITS|SPI_CR_BITENABLE|SPI_CR_MSTR, LPC43_SPI_CR);

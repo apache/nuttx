@@ -59,7 +59,7 @@
 
 #define LPC43_OTP_MEM20_OFFSET   0x0034  /* General purpose OTP memory 2, word 0 */
 #define LPC43_OTP_MEM21_OFFSET   0x0038  /* General purpose OTP memory 2, word 1 */
-#define LPC43_OTP_MEM22_OFFSET   0x003c  /* General purpose OTP memory 2, word 2 */ 
+#define LPC43_OTP_MEM22_OFFSET   0x003c  /* General purpose OTP memory 2, word 2 */
 
 #define LPC43_OTP_AES00_OFFSET   0x0010  /* AES key 0, word 0 */
 #define LPC43_OTP_AES01_OFFSET   0x0014  /* AES key 0, word 1 */

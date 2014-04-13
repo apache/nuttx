@@ -122,7 +122,7 @@ uint32_t sam_pck_configure(enum pckid_e pckid, uint32_t frequency)
       regval = PMC_PCK_CSS_PLLA;
       clkin  = BOARD_PLLA_FREQUENCY;
     }
-    
+
   /* The the larger smallest divisor that does not exceed the requested
    * frequency.
    */

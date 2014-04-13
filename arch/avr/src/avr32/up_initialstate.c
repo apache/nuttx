@@ -91,7 +91,7 @@ void up_initial_state(struct tcb_s *tcb)
   /* No pending signal delivery */
 
   xcp->sigdeliver   = NULL;
-  
+
   /* Clear the frame pointer and link register since this is the outermost
    * frame.
    */

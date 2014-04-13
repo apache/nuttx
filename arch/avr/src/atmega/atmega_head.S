@@ -240,7 +240,7 @@ __do_clear_bss:
 
 .Lclearloop:
 	st		X+, r1
- 
+
 .Lclearstart:
 	cpi		r26, lo8(_ebss)
 	cpc		r27, r17

@@ -63,7 +63,7 @@
 
 /* CAN register offsets *****************************************************************/
 
-#define SAM_CAN_MR_OFFSET            0x0000 /* Mode Register */ 
+#define SAM_CAN_MR_OFFSET            0x0000 /* Mode Register */
 #define SAM_CAN_IER_OFFSET           0x0004 /* Interrupt Enable Register */
 #define SAM_CAN_IDR_OFFSET           0x0008 /* Interrupt Disable Register */
 #define SAM_CAN_IMR_OFFSET           0x000c /* Interrupt Mask Register */
@@ -146,7 +146,7 @@
 
 /* CAN register bit definitions *********************************************************/
 
-/* Mode Register */ 
+/* Mode Register */
 
 #define CAN_MR_CANEN                 (1 << 0)  /* Bit 0:  CAN controller enable */
 #define CAN_MR_LPM                   (1 << 1)  /* Bit 1:  Disable/enable low power mode */

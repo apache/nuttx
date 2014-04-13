@@ -44,7 +44,7 @@
 # that we are operating on a Windows platform.  But in the case where we
 # have an AVR32 toolchain built under Cygwin, the correct setting would be
 # GNU, not AVRTOOLSW.
-# 
+#
 
 CROSSDEV = avr32-
 ARCHCPUFLAGS = -mpart=uc3b0256

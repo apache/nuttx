@@ -295,7 +295,7 @@ void up_lowsetup(void)
 #endif
 
   /* Configure GPIO0 pins to enable all UARTs in the configuration
-   * (the serial driver later depends on this configuration) 
+   * (the serial driver later depends on this configuration)
    */
 
 #if HAVE_UART

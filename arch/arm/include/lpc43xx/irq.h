@@ -51,7 +51,7 @@
 /********************************************************************************************
  * Pre-processor Definitions
  ********************************************************************************************/
- 
+
 /* IRQ numbers.  The IRQ number corresponds vector number and hence map directly to bits in
  * the NVIC.  This does, however, waste several words of memory in the IRQ to handle mapping
  * tables.

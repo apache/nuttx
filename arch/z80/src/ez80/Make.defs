@@ -36,7 +36,7 @@
 HEAD_ASRC	= ez80_vectors.asm
 HEAD_SSRC	=
 
-CMN_SSRCS	= 
+CMN_SSRCS	=
 CMN_CSRCS	= up_initialize.c up_allocateheap.c up_createstack.c \
 		  up_releasestack.c up_interruptcontext.c up_blocktask.c \
 		  up_unblocktask.c up_exit.c up_releasepending.c \
@@ -49,7 +49,7 @@ ifeq ($(CONFIG_ARCH_CHIP_EZ80F91),y)
 CHIP_ASRCS	+= ez80f91_init.asm
 endif
 
-CHIP_SSRCS	= 
+CHIP_SSRCS	=
 CHIP_CSRCS	= ez80_clock.c ez80_initialstate.c ez80_irq.c ez80_copystate.c \
 		  ez80_schedulesigaction.c ez80_sigdeliver.c ez80_timerisr.c \
 		  ez80_lowuart.c ez80_serial.c ez80_spi.c ez80_i2c.c \

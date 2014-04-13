@@ -705,7 +705,7 @@ static int up_interrupt(int irq, void *context)
            * generated after several bytes have been recevied and enable
            * the RX timout.
            */
- 
+
           up_rxto_enable(priv);
         }
 
@@ -727,7 +727,7 @@ static int up_interrupt(int irq, void *context)
          regval = up_serialin(priv, NUC_UART_MCR_OFFSET);
          up_serialout(priv, NUC_UART_MCR_OFFSET, regval | UART_MSR_DCTSF);
         }
-      
+
       /* Check for line status or buffer errors*/
 
       if ((isr & UART_ISR_RLS_INT) != 0 ||

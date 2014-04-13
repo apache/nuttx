@@ -77,7 +77,7 @@
  *     AVR_NORMAL_UBRR1 = 52 (rounded), actual baud = 9615
  *     AVR_DBLSPEED_UBRR1 = 104 (rounded), actual baud = 9615
  */
- 
+
 #undef UART1_DOUBLE_SPEED
 #if BOARD_CPU_CLOCK <= 4000000
 #  if CONFIG_USART1_BAUD <= 9600
@@ -194,7 +194,7 @@ void usart1_configure(void)
 
   ucsr1b = ((1 << TXEN1)  | (1 << RXEN1));
   ucsr1c = 0;
- 
+
   /* Select parity */
 
 #if CONFIG_USART1_PARITY == 1

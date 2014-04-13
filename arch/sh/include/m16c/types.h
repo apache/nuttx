@@ -62,7 +62,7 @@
  * the user prefers to use the definitions provided by their toolchain header
  * files
  *
- * int is 16-bits and long is 32-bits 
+ * int is 16-bits and long is 32-bits
  */
 
 typedef signed char        _int8_t;

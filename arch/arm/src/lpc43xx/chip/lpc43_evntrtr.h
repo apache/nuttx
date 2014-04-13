@@ -90,7 +90,7 @@
 #define EVNTRTR_SOURCE_TIM6          14 /* Combined timer output 6 (SCT output 6 | TIMER1 Ch2) */
 #define EVNTRTR_SOURCE_QEI           15 /* QEI interrupt */
 #define EVNTRTR_SOURCE_TIM14         16 /* Combined timer output 14 (SCT output 14 | TIMER3 Ch2) */
-                                        /* 17-18: Reserved */              
+                                        /* 17-18: Reserved */
 #define EVNTRTR_SOURCE_RESET         19 /* Reset event */
 
 #define EVNTRTR_WAKEUP0              (1 << EVNTRTR_SOURCE_WAKEUP0)

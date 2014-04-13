@@ -296,7 +296,7 @@ int arch_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
         S  = (offset >> 24) & 1;
         J1 = S ^ (~(offset >> 23) & 1);
         J2 = S ^ (~(offset >> 22) & 1);
- 
+
         upper_insn = ((upper_insn & 0xf800) | (S << 10) | ((offset >> 12) & 0x03ff));
         *(uint16_t*)addr = (uint16_t)upper_insn;
 

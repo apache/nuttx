@@ -179,7 +179,7 @@ avr32_intcommon:
 /* On entry to each, the context save area looks like this:                 */
 /*     xx xx xx xx xx xx xx xx xx xx xx xx xx xx xx SR PC                   */
 /*                                                  ^     ^+2*4             */
- 
+
 	HANDLER	avr32_unrec, AVR32_IRQ_UNREC			/* Unrecoverable xcptn  */
 	HANDLER	avr32_tlbmult, AVR32_IRQ_TLBMULT		/* TLB multiple hit     */
 	HANDLER	avr32_busdata, AVR32_IRQ_BUSDATA		/* Bus error data fetch */
@@ -240,7 +240,7 @@ avr32_xcptcommon:
 /* Save r8 and r8:                                                          */
 /*     xx xx xx xx xx xx xx xx xx SR PC LI 12 11 10 SR PC                   */
 /*                                ^                 ^+6*4 ^+8*4             */
- 
+
 	st.w	sp[6*4], r9
 	st.w	sp[7*4], r8
 

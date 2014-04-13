@@ -90,7 +90,7 @@
  *
  * Bit 0:4 MSEL: PLL Multiplier "M" Value
  *               CCLK = M * Fosc
- * Bit 5:6 PSEL: PLL Divider "P" Value 
+ * Bit 5:6 PSEL: PLL Divider "P" Value
  *               Fcco = CCLK * 2 * P
  *               156MHz <= Fcco <= 320MHz
  */
@@ -403,9 +403,9 @@
 #ifdef CONFIG_MAM_SETUP
 	ldr	\base, =LPC214X_MAM_BASE
 	mov	\val, #CONFIG_MAMTIM_VALUE
-	str	\val, [\base, #LPC214x_MAM_TIM_OFFSET] 
+	str	\val, [\base, #LPC214x_MAM_TIM_OFFSET]
 	mov	\val, #CONFIG_MAMCR_VALUE
-	str	\val, [\base, #LPC214X_MAM_CR_OFFSET] 
+	str	\val, [\base, #LPC214X_MAM_CR_OFFSET]
 #endif
 	.endm
 

@@ -50,10 +50,10 @@
  * exception mechanism relies on this value to detect when the processor has
  * completed an exception handler.
  *
- * Bits [31:28] of an EXC_RETURN value are always 1.  When the processor loads a 
- * value matching this pattern to the PC it detects that the operation is a not 
- * a normal branch operation and instead, that the exception is complete. 
- * Therefore, it starts the exception return sequence. 
+ * Bits [31:28] of an EXC_RETURN value are always 1.  When the processor loads a
+ * value matching this pattern to the PC it detects that the operation is a not
+ * a normal branch operation and instead, that the exception is complete.
+ * Therefore, it starts the exception return sequence.
  *
  * Bits[4:0] of the EXC_RETURN value indicate the required return stack and eventual
  * processor mode.  The remaining bits of the EXC_RETURN value should be set to 1.
@@ -64,23 +64,23 @@
 #define EXC_RETURN_BASE          0xffffffe1
 
 /* EXC_RETURN_PROCESS_STACK: The exception saved (and will restore) the hardware
- * context using the process stack pointer (if not set, the context was saved 
+ * context using the process stack pointer (if not set, the context was saved
  * using the main stack pointer)
  */
- 
+
 #define EXC_RETURN_PROCESS_STACK (1 << 2)
 
 /* EXC_RETURN_THREAD_MODE: The exception will return to thread mode (if not set,
  * return stays in handler mode)
  */
- 
+
 #define EXC_RETURN_THREAD_MODE   (1 << 3)
 
-/* EXC_RETURN_STD_CONTEXT: The state saved on the stack does not include the 
+/* EXC_RETURN_STD_CONTEXT: The state saved on the stack does not include the
  * volatile FP registers and FPSCR.  If this bit is clear, the state does include
  * these registers.
  */
- 
+
 #define EXC_RETURN_STD_CONTEXT   (1 << 4)
 
 /* EXC_RETURN_HANDLER: Return to handler mode. Exception return gets state from

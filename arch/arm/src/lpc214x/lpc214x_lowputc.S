@@ -199,7 +199,7 @@ up_lowsetup:
 
 	/* Configure the FIFOs */
 
-	mov	r1, #LPC214X_FCR_VALUE 
+	mov	r1, #LPC214X_FCR_VALUE
 	strb	r1, [r0, #LPC214X_UART_FCR_OFFSET]
 
 	/* And return */

@@ -62,7 +62,7 @@
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
- 
+
 void __ramfunc__
 kinesis_setdividers(uint32_t div1, uint32_t div2, uint32_t div3, uint32_t div4);
 
@@ -205,8 +205,8 @@ void kinetis_pllconfig(void)
    * Flash clock = MCG / BOARD_OUTDIV4
    */
 
-  kinesis_setdividers(BOARD_OUTDIV1, BOARD_OUTDIV2, BOARD_OUTDIV3, BOARD_OUTDIV4); 
- 
+  kinesis_setdividers(BOARD_OUTDIV1, BOARD_OUTDIV2, BOARD_OUTDIV3, BOARD_OUTDIV4);
+
   /* Set the VCO divider, VDIV, is defined in the board.h file.  VDIV
    * selects the amount to divide the VCO output of the PLL. The VDIV bits
    * establish the multiplication factor applied to the reference clock
@@ -352,7 +352,7 @@ kinesis_setdividers(uint32_t div1, uint32_t div2, uint32_t div3, uint32_t div4)
   /* Save the current value of the Flash Access Protection Register */
 
   regval = getreg32(KINETIS_FMC_PFAPR);
-  
+
   /* Set M0PFD through M7PFD to 1 to disable prefetch */
 
   putreg32(FMC_PFAPR_M7PFD | FMC_PFAPR_M6PFD | FMC_PFAPR_M5PFD |
@@ -369,7 +369,7 @@ kinesis_setdividers(uint32_t div1, uint32_t div2, uint32_t div3, uint32_t div4)
   /* Wait for dividers to change */
 
   for (i = 0 ; i < div4 ; i++);
-  
+
   /* Re-store the saved value of FMC_PFAPR */
 
   putreg32(regval, KINETIS_FMC_PFAPR);
