@@ -95,7 +95,7 @@ void mq_recover(FAR struct tcb_s *tcb)
    * timer was canceled and deleted in task_recover() before this
    * function was called.
    */
- 
+
   /* Was the task waiting for a message queue to become non-empty? */
 
   if (tcb->task_state == TSTATE_WAIT_MQNOTEMPTY)

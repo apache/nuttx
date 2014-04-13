@@ -135,7 +135,7 @@ FAR struct lcd_dev_s *mio283qt2_lcdinitialize(FAR struct mio283qt9a_lcd_s *lcd);
  * Description:
  *   This is a non-standard LCD interface.  Because of the various rotations, clearing
  *   the display in the normal way by writing a sequences of runs that covers the
- *   entire display can be very slow.  Here the display is cleared by simply setting 
+ *   entire display can be very slow.  Here the display is cleared by simply setting
  *   all GRAM memory to the specified color.
  *
  **************************************************************************************/

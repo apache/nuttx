@@ -225,7 +225,7 @@ static inline FAR void *gran_common_alloc(FAR struct gran_s *priv, size_t size)
                 {
                   break;
                 }
-              
+
               /* Check for the first zero bit in the lower or upper 16-bits.
                * From the test above, we know that at least one of the 32-
                * bits in 'curr' is zero.

@@ -125,7 +125,7 @@ int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
           sdbg("Holder=%d returning EPERM\n", mutex->pid);
           ret = EPERM;
         }
-        
+
 
       /* Yes, the caller owns the semaphore.. Is this a recursive mutex? */
 

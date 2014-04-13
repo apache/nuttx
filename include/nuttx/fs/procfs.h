@@ -103,7 +103,7 @@ struct procfs_entry_s
   FAR const struct procfs_operations *ops;
 };
 
-/* Specifies the common elements for an open file in the procfs 
+/* Specifies the common elements for an open file in the procfs
  * file system.  This structure should be sub-classed by handlers
  * to add their own specific data elements to the context.
  */

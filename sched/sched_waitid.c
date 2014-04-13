@@ -117,21 +117,21 @@ static void exited_child(FAR struct tcb_s *rtcb, FAR struct child_status_s *chil
  *   will will wait for. It is formed by OR-ing together one or more of the
  *   following flags:
  *
- *     WEXITED - Wait for processes that have exited. 
+ *     WEXITED - Wait for processes that have exited.
  *     WSTOPPED - Status will be returned for any child that has stopped
- *       upon receipt of a signal. 
+ *       upon receipt of a signal.
  *     WCONTINUED - Status will be returned for any child that was stopped
- *       and has been continued. 
- *     WNOHANG - Return immediately if there are no children to wait for. 
+ *       and has been continued.
+ *     WNOHANG - Return immediately if there are no children to wait for.
  *     WNOWAIT - Keep the process whose status is returned in 'info' in a
  *       waitable state. This will not affect the state of the process; the
- *       process may be waited for again after this call completes. 
+ *       process may be waited for again after this call completes.
  *
  *   The 'info' argument must point to a siginfo_t structure. If waitid()
  *   returns because a child process was found that satisfied the conditions
  *   indicated by the arguments idtype and options, then the structure pointed
  *   to by 'info' will be filled in by the system with the status of the
- *   process. The si_signo member will always be equal to SIGCHLD. 
+ *   process. The si_signo member will always be equal to SIGCHLD.
  *
  * Input Parameters:
  *   See description.
@@ -139,15 +139,15 @@ static void exited_child(FAR struct tcb_s *rtcb, FAR struct child_status_s *chil
  * Returned Value:
  *   If waitid() returns due to the change of state of one of its children,
  *   0 is returned. Otherwise, -1 is returned and errno is set to indicate
- *   the error. 
+ *   the error.
  *
  *   The waitid() function will fail if:
  *
  *     ECHILD - The calling process has no existing unwaited-for child
- *       processes. 
- *     EINTR - The waitid() function was interrupted by a signal. 
+ *       processes.
+ *     EINTR - The waitid() function was interrupted by a signal.
  *     EINVAL - An invalid value was specified for options, or idtype and id
- *       specify an invalid set of processes. 
+ *       specify an invalid set of processes.
  *
  *****************************************************************************/
 
@@ -297,7 +297,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
 
           child = group_findchild(rtcb->group, (pid_t)id);
           DEBUGASSERT(child);
-      
+
           /* Did the child exit? */
 
           if ((child->ch_flags & CHILD_FLAG_EXITED) != 0)

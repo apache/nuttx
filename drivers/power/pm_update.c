@@ -92,7 +92,7 @@ static const int16_t g_pmcoeffs[CONFIG_PM_MEMORY-1] =
 /* Threshold activity values to enter into the next lower power consumption
  * state. Indexing is next state 0:IDLE, 1:STANDBY, 2:SLEEP.
  */
- 
+
 static const int16_t g_pmenterthresh[3] =
 {
   CONFIG_PM_IDLEENTER_THRESH,

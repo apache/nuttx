@@ -65,7 +65,7 @@
  * always be created in a montonically increasing fashion.
  */
 
-struct join_s 
+struct join_s
 {
   FAR struct join_s *next;       /* Implements link list */
   uint8_t        crefs;          /* Reference count */

@@ -99,7 +99,7 @@ static void kbd_encode(uint8_t keycode, FAR struct lib_outstream_s *stream,
 
 void kbd_release(uint8_t ch, FAR struct lib_outstream_s *stream)
 {
-  kbd_encode(ch, stream, ('a' + KBD_RELEASE)); 
+  kbd_encode(ch, stream, ('a' + KBD_RELEASE));
 }
 
 /****************************************************************************
@@ -123,7 +123,7 @@ void kbd_specpress(enum kbd_keycode_e keycode,
                    FAR struct lib_outstream_s *stream)
 {
   DEBUGASSERT(stream && keycode >= KEYCODE_FWDDEL && keycode <= LAST_KEYCODE);
-  kbd_encode((uint8_t)keycode, stream, ('a' + KBD_SPECPRESS)); 
+  kbd_encode((uint8_t)keycode, stream, ('a' + KBD_SPECPRESS));
 }
 
 /****************************************************************************
@@ -147,5 +147,5 @@ void kbd_specrel(enum kbd_keycode_e keycode,
                  FAR struct lib_outstream_s *stream)
 {
   DEBUGASSERT(stream && keycode >= KEYCODE_FWDDEL && keycode <= LAST_KEYCODE);
-  kbd_encode((uint8_t)keycode, stream, ('a' + KBD_SPECREL)); 
+  kbd_encode((uint8_t)keycode, stream, ('a' + KBD_SPECREL));
 }

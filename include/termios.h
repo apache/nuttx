@@ -249,7 +249,7 @@ extern "C" {
 
 /* The cfgetspeed() function is a non-POSIX function will extract the baud
  * from the termios structure to which the termiosp argument points. NuttX
- * does not control input/output baud independently.  Both must be the same. 
+ * does not control input/output baud independently.  Both must be the same.
  * The POSIX standard interfaces, cfigetispeed() and cfigetospeed() are
  * supported by simply defining them to be cfgetspeed().
  */
@@ -260,7 +260,7 @@ EXTERN speed_t cfgetspeed(FAR const struct termios *termiosp);
 
 /* The cfsetspeed() function is a non-POSIX function that sets the baud
  * stored in the structure pointed to by termiosp to speed. NuttX does
- * not control input/output baud independently.  Both must be the same. 
+ * not control input/output baud independently.  Both must be the same.
  * The POSIX standard interfaces, cfigetispeed() and cfigetospeed() are
  * supported by simply defining them to be cfsetspeed().
  */

@@ -86,7 +86,7 @@
 #define SSD1329_SET_ROWADDR     0x75
 
 /* Set Contract Current
- * 
+ *
  * This double byte command is to set Contrast Setting of the display. The
  * chip has 256 contrast steps from 0x00 to 0xff. The segment output current
  * increases linearly with the increase of contrast step.
@@ -142,9 +142,9 @@
  *         ...
  *         ff = 127.5 uA
  */
- 
+
 #define SSD1329_ICON_CURRRNG  0x91
- 
+
 /* Set Individual Icon Current
  *
  * This multiple byte command is used to fine tune the current for each of the

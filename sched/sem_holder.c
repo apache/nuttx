@@ -324,7 +324,7 @@ static int sem_boostholderprio(FAR struct semholder_s *pholder,
               else
                 {
                   sdbg("CONFIG_SEM_NNESTPRIO exceeded\n");
-                }  
+                }
             }
 
           /* Raise the priority of the thread holding of the semaphore.
@@ -503,13 +503,13 @@ static int sem_restoreholderprio(FAR struct semholder_s *pholder, FAR sem_t *sem
           /* And apply that priority to the thread (while retaining the base_priority) */
 
           sched_setpriority(htcb, rpriority);
-        }                    
+        }
       else
         {
           /* The holder thread has been boosted to a higher priority than the
            * waiter task.  The pending priority should be in the list (unless it
            * was lost because of of list overflow or because the holder was
-           * reporioritize again unbeknownst to the priority inheritance logic).
+           * reprioritize again unbeknownst to the priority inheritance logic).
            *
            * Search the list for the matching priority.
            */
@@ -517,7 +517,7 @@ static int sem_restoreholderprio(FAR struct semholder_s *pholder, FAR sem_t *sem
           for (i = 0; i < htcb->npend_reprio; i++)
             {
               /* Does this pending priority match the priority of the thread
-               * that just received the count? 
+               * that just received the count?
                */
 
               if (htcb->pend_reprios[i] == stcb->sched_priority)
@@ -723,7 +723,7 @@ static inline void sem_restorebaseprio_task(FAR struct tcb_s *stcb, FAR sem_t *s
     }
 #endif
 
-  /* In any case, the currently executing task should have an entry in the 
+  /* In any case, the currently executing task should have an entry in the
    * list.  Its counts were previously decremented; if it now holds no
    * counts, then we need to remove it from the list of holders.
    */
@@ -862,7 +862,7 @@ void sem_addholder(FAR sem_t *sem)
  * Name: void sem_boostpriority(sem_t *sem)
  *
  * Description:
- *   
+ *
  *
  * Parameters:
  *   None
@@ -1057,7 +1057,7 @@ int sem_nfreeholders(void)
 #if CONFIG_SEM_PREALLOCHOLDERS > 0
   FAR struct semholder_s *pholder;
   int n;
-  
+
   for (pholder = g_freeholders, n = 0; pholder; pholder = pholder->flink) n++;
   return n;
 #else

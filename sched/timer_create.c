@@ -90,7 +90,7 @@ static struct posix_timer_s *timer_allocate(void)
   irqrestore(flags);
 
   /* Did we get one? */
-  
+
   if (ret)
     {
       pt_flags = PT_FLAGS_PREALLOCATED;

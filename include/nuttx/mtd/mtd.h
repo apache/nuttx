@@ -404,7 +404,7 @@ FAR struct mtd_dev_s *up_flashinitialize(void);
  *
  * Description:
  *   Registers MTD device with the procfs file system.  This assigns a unique
- *   MTD number and associates the given device name, then  add adds it to 
+ *   MTD number and associates the given device name, then  add adds it to
  *   the list of registered devices.
  *
  * In an embedded system, this all is really unnecessary, but is provided

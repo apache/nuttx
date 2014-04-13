@@ -242,7 +242,7 @@
    *
    * User Work Queue:
    *   USRWORK:  In the kernel phase a a kernel build, there should be no
-   *     references to user-space work queues.  That would be an error. 
+   *     references to user-space work queues.  That would be an error.
    *     Otherwise, in a flat build, user applications will use the lower
    *     priority work queue (if there is one).
    */

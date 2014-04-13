@@ -76,7 +76,7 @@
  *   CONFIG_DEBUG_VERBOSE), this will generate output that can be use dto
  *   debug the PWM driver.
  */
- 
+
 /* IOCTL Commands ***********************************************************/
 /* The PWM module uses a standard character driver framework.  However, since
  * the PWM driver is a device control interface and not a data transfer

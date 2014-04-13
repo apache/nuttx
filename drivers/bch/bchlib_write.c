@@ -122,7 +122,7 @@ ssize_t bchlib_write(FAR void *handle, FAR const char *buffer, size_t offset, si
         {
           nbytes = bch->sectsize - sectoffset;
         }
-      else 
+      else
         {
           nbytes = len;
         }

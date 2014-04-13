@@ -98,7 +98,7 @@ int net_dup(int sockfd, int minsd)
   /* Get the socket structure underlying sockfd */
 
   psock1 = sockfd_socket(sockfd);
- 
+
  /* Verify that the sockfd corresponds to valid, allocated socket */
 
   if (!psock1 || psock1->s_crefs <= 0)
@@ -132,7 +132,7 @@ int net_dup(int sockfd, int minsd)
     {
       err = -ret;
       goto errout;
- 
+
     }
 
   sched_unlock();

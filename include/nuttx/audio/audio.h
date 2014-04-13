@@ -143,7 +143,7 @@
 /* The following defines the audio data format types in NuttX.  During a
  * format query, these will be converted to bit positions withing the
  * ac_format field, meaning we currently only support up to 16 formats. To
- * support more than that, we will use the FMT_OTHER entry, and the 
+ * support more than that, we will use the FMT_OTHER entry, and the
  * interfacing software can perform a second query to get the other formats.
  */
 

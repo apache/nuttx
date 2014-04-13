@@ -200,7 +200,7 @@ static int pwm_open(FAR struct file *filep)
 
 errout_with_sem:
   sem_post(&upper->exclsem);
-  
+
 errout:
   return ret;
 }
@@ -257,7 +257,7 @@ static int pwm_close(FAR struct file *filep)
 
 //errout_with_sem:
   sem_post(&upper->exclsem);
-  
+
 errout:
   return ret;
 }
@@ -295,7 +295,7 @@ static ssize_t pwm_write(FAR struct file *filep, FAR const char *buffer, size_t 
  *
  * Description:
  *   Handle the PWMIOC_START ioctl command
- *   
+ *
  ************************************************************************************/
 
 #ifdef CONFIG_PWM_PULSECOUNT
@@ -402,7 +402,7 @@ static int pwm_start(FAR struct pwm_upperhalf_s *upper, unsigned int oflags)
  *
  * Description:
  *   The standard ioctl method.  This is where ALL of the PWM work is done.
- *   
+ *
  ************************************************************************************/
 
 static int pwm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
@@ -666,7 +666,7 @@ void pwm_expired(FAR void *handle)
           upper->waiting = false;
           sem_post(&upper->waitsem);
         }
-    
+
       /* The PWM is now stopped */
 
       upper->started = false;

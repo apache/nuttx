@@ -163,7 +163,7 @@ int sigprocmask(int how, FAR const sigset_t *set, FAR sigset_t *oset)
             rtcb->sigprocmask = *set;
             break;
 
-          default: 
+          default:
             ret = ERROR;
             break;
         }

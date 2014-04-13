@@ -106,7 +106,7 @@ void net_initroute(void)
     {
       sq_addlast((FAR sq_entry_t *)&g_preallocroutes[i],
                  (FAR sq_queue_t *)&g_freeroutes);
-    }    
+    }
 }
 
 /****************************************************************************

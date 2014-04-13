@@ -115,7 +115,7 @@ int nxtk_drawframe(FAR struct nxtk_framedwindow_s *fwnd,
   struct nxgl_size_s tbsize;
   nxgl_coord_t thickness;
 
-  /* Shiny edge: 
+  /* Shiny edge:
    *   Thickness: 1
    *   Color:     CONFIG_NXTK_BORDERCOLOR3;
    *   Condition: CONFIG_NXTK_BORDERWIDTH > 2

@@ -74,7 +74,7 @@
 /****************************************************************************
  * Name: wd_create
  *
- * Description:  
+ * Description:
  *   The wd_create function will create a watchdog by allocating it from the
  *   list of free watchdogs.
  *

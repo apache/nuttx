@@ -63,7 +63,7 @@ static void sched_releasepid(pid_t pid)
 {
   int hash_ndx = PIDHASH(pid);
 
-  /* Make any pid associated with this hash available.  Note: 
+  /* Make any pid associated with this hash available.  Note:
    * no special precautions need be taken here because the
    * following action is atomic
    */

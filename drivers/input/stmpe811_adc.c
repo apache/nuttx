@@ -258,7 +258,7 @@ uint16_t stmpe811_adcread(STMPE811_HANDLE handle, int pin)
   /* At the completion of the conversion, return whatever we read from
    * from the channel register associated with the pin.
    */
- 
+
   return stmpe811_getreg16(priv, STMPE811_ADC_DATACH(pin));
 }
 

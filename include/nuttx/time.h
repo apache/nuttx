@@ -106,7 +106,7 @@ EXTERN int clock_daysbeforemonth(int month, bool leapyear);
  *    Calendar/UTC conversion based on algorithms from p. 604
  *    of Seidelman, P. K. 1992.  Explanatory Supplement to
  *    the Astronomical Almanac.  University Science Books,
- *    Mill Valley. 
+ *    Mill Valley.
  *
  ****************************************************************************/
 

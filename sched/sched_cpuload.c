@@ -197,7 +197,7 @@ int clock_cpuload(int pid, FAR struct cpuload_s *cpuload)
    * on all threads during timer interrupt handling. sched_foreach() could
    * do this too, but this would require a little more overhead.
    */
-  
+
   if (g_pidhash[hash_index].tcb && g_pidhash[hash_index].pid == pid)
     {
       cpuload->total  = g_cpuload_total;

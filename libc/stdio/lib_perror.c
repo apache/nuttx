@@ -51,7 +51,7 @@
  * be defined, however, to provide perror output that is serialized with
  * other stdout messages.
  */
- 
+
 #ifdef CONFIG_LIBC_PERROR_STDOUT
 #  define PERROR_STREAM stdout
 #else

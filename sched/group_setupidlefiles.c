@@ -122,7 +122,7 @@ int group_setupidlefiles(FAR struct task_tcb_s *tcb)
       /* We failed to open /dev/console OR for some reason, we opened
        * it and got some file descriptor other than 0.
        */
-  
+
       if (fd > 0)
         {
           slldbg("Open /dev/console fd: %d\n", fd);

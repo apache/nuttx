@@ -72,7 +72,7 @@
  ****************************************************************************/
 
 /* Make the buffer index as small as possible for the configured pipe size */
- 
+
 #if CONFIG_DEV_PIPE_SIZE > 65535
 typedef uint32_t pipe_ndx_t;  /* 32-bit index */
 #elif CONFIG_DEV_PIPE_SIZE > 255

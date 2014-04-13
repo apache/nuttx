@@ -150,7 +150,7 @@ static FAR const struct nx_fontpackage_s *g_fontpackages[] =
 #ifdef CONFIG_NXFONT_MONO5X8
   &g_mono5x8_package,
 #endif
-  
+
 /* SANS */
 
 #ifdef CONFIG_NXFONT_SANS17X22
@@ -336,7 +336,7 @@ NXHANDLE nxf_getfonthandle(enum nx_fontid_e fontid)
 
           return (NXHANDLE)package;
         }
- 
+
       /* No.. is it the default font? */
 
       else if (package->id == NXFONT_DEFAULT)

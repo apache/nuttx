@@ -65,7 +65,7 @@
 /* Default PMAP port number to provide */
 
 #define NFS_PMAPPORT             111
- 
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -104,5 +104,5 @@ extern "C" {
 #if defined(__cplusplus)
 }
 #endif
- 
+
 #endif /* _NFS_NFS_H */

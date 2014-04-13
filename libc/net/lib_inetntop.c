@@ -116,7 +116,7 @@ FAR const char *inet_ntop(int af, FAR const void *src, FAR char *dst, socklen_t 
   int count;
   int maxentry;
   int maxcount;
- 
+
   DEBUGASSERT(src && dst);
 
   if (af != AF_INET6)

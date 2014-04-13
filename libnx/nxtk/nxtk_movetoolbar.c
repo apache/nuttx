@@ -108,7 +108,7 @@ int nxtk_movetoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
 #endif
 
   /* Make sure that both the source and dest rectangle lie within the
-   * toolbar sub-window 
+   * toolbar sub-window
    */
 
   nxtk_subwindowmove(fwnd, &srcrect, &clipoffset, rect, offset, &fwnd->tbrect);

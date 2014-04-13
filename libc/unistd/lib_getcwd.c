@@ -89,7 +89,7 @@
  *   EACCES
  *     Read or search permission was denied for a component of the pathname.
  *   ENOMEM
- *  Insufficient storage space is available. 
+ *  Insufficient storage space is available.
  *
  ****************************************************************************/
 

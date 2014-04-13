@@ -215,7 +215,7 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
   size_t nxfrd;
   int    nbytes;
   int    ret;
- 
+
   /* Get the aligned block.  Here is is assumed: (1) The number of R/W blocks
    * per erase block is a power of 2, and (2) the erase begins with that same
    * alignment.
@@ -232,7 +232,7 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
       /* Check if the write is shorter than to the end of the erase block */
 
       bool short_write = (remaining < (alignedblock - startblock));
-      
+
       /* Read the full erase block into the buffer */
 
       rwblock = startblock & ~mask;
@@ -256,7 +256,7 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
       /* Copy the user data at the end of the buffered erase block */
 
       offset = (startblock & mask) * dev->geo.blocksize;
-      
+
       if (short_write)
         {
           nbytes = remaining * dev->geo.blocksize;
@@ -265,7 +265,7 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
         {
           nbytes = dev->geo.erasesize - offset;
         }
-      
+
       fvdbg("Copy %d bytes into erase block=%d at offset=%d\n",
              nbytes, eraseblock, offset);
 
@@ -290,7 +290,7 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
         {
           remaining -= dev->blkper - (startblock & mask);
         }
-      
+
       buffer += nbytes;
     }
 
@@ -427,7 +427,7 @@ static int ftl_geometry(FAR struct inode *inode, struct geometry *geometry)
             geometry->geo_writeenabled ? "true" : "false");
       fvdbg("nsectors: %d sectorsize: %d\n",
             geometry->geo_nsectors, geometry->geo_sectorsize);
- 
+
       return OK;
     }
   return -EINVAL;

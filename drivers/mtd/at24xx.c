@@ -413,7 +413,7 @@ FAR struct mtd_dev_s *at24c_initialize(FAR struct i2c_dev_s *dev)
   if (priv)
     {
       /* Initialize the allocated structure */
- 
+
       priv->addr       = CONFIG_AT24XX_ADDR;
       priv->pagesize   = AT24XX_PAGESIZE;
       priv->npages     = AT24XX_NPAGES;

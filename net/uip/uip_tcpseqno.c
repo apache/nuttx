@@ -111,7 +111,7 @@ void uip_tcpsetsequence(FAR uint8_t *seqno, uint32_t value)
 uint32_t uip_tcpgetsequence(FAR uint8_t *seqno)
 {
   uint32_t value;
- 
+
   /* Combine the sequence number from network (big-endian) order */
 
    value = (uint32_t)seqno[0] << 24 |

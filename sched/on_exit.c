@@ -91,7 +91,7 @@
  *
  *    NOTE 1: This function comes from SunOS 4, but is also present in
  *    libc4, libc5 and glibc. It no longer occurs in Solaris (SunOS 5).
- *    Avoid this function, and use the standard atexit() instead. 
+ *    Avoid this function, and use the standard atexit() instead.
  *
  *    NOTE 2: CONFIG_SCHED_ONEXIT must be defined to enable this function
  *

@@ -95,7 +95,7 @@
 /* contrast setting, related to VCOM toggle frequency
  * higher frequency gives better contrast, instead, saves power
  */
- 
+
 #define MEMLCD_CONTRAST      24
 #define MEMLCD_MAXCONTRAST   60
 #define MEMLCD_MINCONTRAST   1
@@ -333,14 +333,14 @@ static inline void memlcd_select(FAR struct spi_dev_s *spi)
 #else
 static void memlcd_select(FAR struct spi_dev_s *spi)
 {
-  /* 
+  /*
    * Select memlcd (locking the SPI bus in case there are multiple
    * devices competing for the SPI bus
    */
   SPI_LOCK(spi, true);
   SPI_SELECT(spi, SPIDEV_DISPLAY, true);
 
-  /* 
+  /*
    * Now make sure that the SPI bus is configured for the memlcd (it
    * might have gotten configured for a different device while unlocked)
    */
@@ -435,7 +435,7 @@ static int memlcd_extcominisr(int irq, FAR void *context)
   struct memlcd_dev_s *mlcd = &g_memlcddev;
 #ifdef CONFIG_MEMLCD_EXTCOMIN_MODE_HW
 #  error "CONFIG_MEMLCD_EXTCOMIN_MODE_HW unsupported yet!"
-  /* 
+  /*
    * start a worker thread, do it in bottom half?
    */
 #else

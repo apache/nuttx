@@ -69,7 +69,7 @@
  *     enough for a dirent with an array of char d_name
  *     members containing at least {NAME_MAX}+1 elements.
  *   result -- Upon successful return, the pointer returned
- *     at *result shall have the  same  value  as  the 
+ *     at *result shall have the  same  value  as  the
  *     argument entry. Upon reaching the end of the directory
  *     stream, this pointer shall have the value NULL.
  *

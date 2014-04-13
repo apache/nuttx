@@ -145,7 +145,7 @@ int task_restart(pid_t pid)
         }
 
       /* Try to recover from any bad states */
- 
+
       task_recover((FAR struct tcb_s *)tcb);
 
       /* Kill any children of this thread */
@@ -155,7 +155,7 @@ int task_restart(pid_t pid)
 #endif
 
       /* Remove the TCB from whatever list it is in.  At this point, the
-       * TCB should no longer be accessible to the system 
+       * TCB should no longer be accessible to the system
        */
 
       state = irqsave();

@@ -151,7 +151,7 @@ static FAR uint8_t *s512_cacheread(struct s512_dev_s *priv, off_t sector512)
   off_t sector;
   ssize_t result;
   int index;
- 
+
   /* Get the erase block containing this sector */
 
   eblockno = sector512 / priv->stdperblock;
@@ -487,7 +487,7 @@ static ssize_t s512_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
       memcpy(buffer, src + sectoffset, xfrsize);
       buffer += xfrsize;
     }
- 
+
   fvdbg("return nbytes: %d\n", (int)nbytes);
   return nbytes;
 }
@@ -543,7 +543,7 @@ static int s512_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
             }
         }
         break;
- 
+
       case MTDIOC_XIPBASE:
       default:
         ret = -ENOTTY; /* Bad command */

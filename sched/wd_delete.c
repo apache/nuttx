@@ -74,7 +74,7 @@
 /****************************************************************************
  * Name: wd_delete
  *
- * Description:  
+ * Description:
  *   The wd_delete function will deallocate a watchdog by returning it to
  *   the free pool of watchdogs.  The watchdog will be removed from the timer
  *   queue if has been started.

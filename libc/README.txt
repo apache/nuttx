@@ -70,7 +70,7 @@ Each type field has a format as follows:
 
   type name:
         For all simpler types
-  formal type | actual type: 
+  formal type | actual type:
         For array types where the form of the formal (eg. int parm[2])
         differs from the type of actual passed parameter (eg. int*).  This
         is necessary because you cannot do simple casts to array types.

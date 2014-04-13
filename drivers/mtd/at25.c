@@ -224,7 +224,7 @@ static inline int at25_readid(struct at25_dev_s *priv)
   (void)SPI_SEND(priv->dev, AT25_RDID);
   manufacturer = SPI_SEND(priv->dev, AT25_DUMMY);
   memory       = SPI_SEND(priv->dev, AT25_DUMMY);
-  
+
   /* Deselect the FLASH and unlock the bus */
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
@@ -266,7 +266,7 @@ static void at25_waitwritecomplete(struct at25_dev_s *priv)
   /* Send "Read Status Register (RDSR)" command */
 
   (void)SPI_SEND(priv->dev, AT25_RDSR);
-  
+
   /* Loop as long as the memory is busy with a write cycle */
 
   do
@@ -322,7 +322,7 @@ static void at25_waitwritecomplete(struct at25_dev_s *priv)
     {
       fdbg("ERROR: Write error, status: 0x%02x\n", status);
     }
-  
+
   fvdbg("Complete, status: 0x%02x\n", status);
 }
 
@@ -440,7 +440,7 @@ static inline void at25_pagewrite(struct at25_dev_s *priv, FAR const uint8_t *bu
   /* Enable the write access to the FLASH */
 
   at25_writeenable(priv);
-  
+
   /* Select this FLASH part */
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
@@ -458,7 +458,7 @@ static inline void at25_pagewrite(struct at25_dev_s *priv, FAR const uint8_t *bu
   /* Then write the specified number of bytes */
 
   SPI_SNDBLOCK(priv->dev, buffer, 256);
-  
+
   /* Deselect the FLASH: Chip Select high */
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
@@ -635,7 +635,7 @@ static int at25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
             at25_unlock(priv->dev);
         }
         break;
- 
+
       case MTDIOC_XIPBASE:
       default:
         ret = -ENOTTY; /* Bad command */

@@ -239,15 +239,15 @@
 #define VT100_ALT_3          {ASCII_ESC, 'O', 's'}
 #define VT100_NUMERIC_4      {'4'}
 #define VT100_ALT_4          {ASCII_ESC, 'O', 't'}
-#define VT100_NUMERIC_5      {'5'} 
+#define VT100_NUMERIC_5      {'5'}
 #define VT100_ALT_5          {ASCII_ESC, 'O', 'u'}
-#define VT100_NUMERIC_6      {'6'} 
+#define VT100_NUMERIC_6      {'6'}
 #define VT100_ALT_6          {ASCII_ESC, 'O', 'v'}
 #define VT100_NUMERIC_7      {'7'}
 #define VT100_ALT_7          {ASCII_ESC, 'O', 'w'}
-#define VT100_NUMERIC_8      {'8'} 
+#define VT100_NUMERIC_8      {'8'}
 #define VT100_ALT_8          {ASCII_ESC, 'O', 'x'}
-#define VT100_NUMERIC_9      {'9', 
+#define VT100_NUMERIC_9      {'9',
 #define VT100_ALT_9          {ASCII_ESC, 'O', 'y'}
 #define VT100_NUMERIC_MINUS  {'-'}
 #define VT100_ALT_MINUS      {ASCII_ESC, 'O', 'm'}

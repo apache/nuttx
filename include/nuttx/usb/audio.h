@@ -9,7 +9,7 @@
  * documents for the Audio v2.0 package:
  *
  * 1. Universal Serial Bus Device Class Definition for Audio Devices, Release
- *    2.0, May 31, 2006, 
+ *    2.0, May 31, 2006,
  * 2. Universal Serial Bus Device Class Definition for Audio Data Formats,
  *    Release 2.0, May 31, 2006
  * 3. Universal Serial Bus Device Class Definition for Terminal Types,\
@@ -1178,7 +1178,7 @@ struct adc_mpeg_decoder_desc_s
                                  *      01 = Supported at Fs
                                  *      10 = Reserved
                                  *      11 = Supported at Fs and ½Fs.
-                                 *    Bit 10: 
+                                 *    Bit 10:
                                  *    Bit 11-15: Reserved */
   uint8_t md_features;          /* 7: MPEG features
                                  *    Bits 0-3: Reserved
@@ -1395,7 +1395,7 @@ struct adc_clustctrl_curparm_s
   uint8_t cc_nchan;             /* 0: Number of logical channels */
   uint8_t cc_config[4];         /* 1: Spatial location of channels */
   uint8_t cc_names;             /* 5: String index of first channel name */
-}; 
+};
 
 #define USB_SIZEOF_ADC_CLUSTCTRL_CURPARM 6
 
@@ -1406,7 +1406,7 @@ struct adc_connctrl_curparm_s
   uint8_t cc_nchan;             /* 0: Number of logical channels */
   uint8_t cc_config[4];         /* 1: Spatial location of channels */
   uint8_t cc_names;             /* 5: String index of first channel name */
-}; 
+};
 
 #define USB_SIZEOF_ADC_CONNCTRL_CURPARM 6
 
@@ -1416,7 +1416,7 @@ struct adc_equalizer_curparm_s
 {
   uint8_t eq_bands[4];          /* 0: A set bit indicates that the band is present */
   uint8_t eq_cur[1];            /* 4: Setting for the band in bands bitset */
-}; 
+};
 
 #define USB_SIZEOF_ADC_CONNCTRL_CURPARM(nbands) (4+(nbands))
 
@@ -1477,7 +1477,7 @@ struct adc_hilo_rangeparm_s
 struct adc_int_message_s
 {
   uint8_t im_info;              /* 0: Bitmap
-                                 *    Bit 0: Vender specific, 
+                                 *    Bit 0: Vender specific,
                                  *    Bit 1: Interface or endpoint
                                  *    Bits 2-7: Reserved */
   uint8_t im_attr;              /* 1: The attribute that cause the interrupt */

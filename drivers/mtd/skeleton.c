@@ -150,7 +150,7 @@ static ssize_t skel_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nb
    */
 
   /* Read the specified blocks into the provided user buffer and return status
-   * (The positive, number of blocks actually read or a negated errno). 
+   * (The positive, number of blocks actually read or a negated errno).
    */
 
   return 0;
@@ -288,7 +288,7 @@ static int skel_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
           ret = OK;
         }
         break;
- 
+
       default:
         ret = -ENOTTY; /* Bad command */
         break;

@@ -116,7 +116,7 @@ const struct nand_scheme_s g_nand_sparescheme2048 =
 
   /* 24 ecc bytes */
 
-  24, 
+  24,
 
   /* 38 extra bytes */
 
@@ -268,7 +268,7 @@ void nandscheme_writeecc(FAR const struct nand_scheme_s *scheme,
   for (i = 0; i < scheme->eccsize; i++)
     {
       spare[scheme->eccbytepos[i]] = ecc[i];
-    } 
+    }
 }
 
 /****************************************************************************

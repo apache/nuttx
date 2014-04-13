@@ -1131,7 +1131,7 @@ static int usbhost_mouse_poll(int argc, char *argv[])
             {
               /* We get here when either there is a meaning button change
                * and/or a significant movement of the mouse.  We are going
-               * to report the mouse event. 
+               * to report the mouse event.
                *
                * Snap to the new x/y position for subsequent thresholding
                */

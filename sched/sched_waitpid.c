@@ -93,19 +93,19 @@
  *
  *   WCONTINUED - The waitpid() function will report the status of any
  *     continued child process specified by pid whose status has not been
- *     reported since it continued from a job control stop.  
+ *     reported since it continued from a job control stop.
  *   WNOHANG - The waitpid() function will not suspend execution of the
  *    calling thread if status is not immediately available for one of the
- *    child processes specified by pid. 
+ *    child processes specified by pid.
  *   WUNTRACED - The status of any child processes specified by pid that are
  *    stopped, and whose status has not yet been reported since they stopped,
- *    will also be reported to the requesting process. 
+ *    will also be reported to the requesting process.
  *
  *   If the calling process has SA_NOCLDWAIT set or has SIGCHLD set to
  *   SIG_IGN, and the process has no unwaited-for children that were
  *   transformed into zombie processes, the calling thread will block until all
  *   of the children of the process containing the calling thread terminate, and
- *   waitpid() will fail and set errno to ECHILD. 
+ *   waitpid() will fail and set errno to ECHILD.
  *
  *   If waitpid() returns because the status of a child process is available,
  *   these functions will return a value equal to the process ID of the child
@@ -125,22 +125,22 @@
  *   to by stat_loc.
  *
  *   WIFEXITED(stat_val) - Evaluates to a non-zero value if status was
- *     returned for a child process that terminated normally. 
+ *     returned for a child process that terminated normally.
  *   WEXITSTATUS(stat_val) - If the value of WIFEXITED(stat_val) is non-zero,
  *     this macro evaluates to the low-order 8 bits of the status argument
  *     that the child process passed to _exit() or exit(), or the value the
- *     child process returned from main(). 
+ *     child process returned from main().
  *   WIFSIGNALED(stat_val) - Evaluates to a non-zero value if status was
  *     returned for a child process that terminated due to the receipt of a
- *     signal that was not caught (see <signal.h>). 
+ *     signal that was not caught (see <signal.h>).
  *   WTERMSIG(stat_val)  - If the value of WIFSIGNALED(stat_val) is non-zero,
  *     this macro evaluates to the number of the signal that caused the
- *     termination of the child process. 
+ *     termination of the child process.
  *   WIFSTOPPED(stat_val) - Evaluates to a non-zero value if status was
- *     returned for a child process that is currently stopped. 
+ *     returned for a child process that is currently stopped.
  *   WSTOPSIG(stat_val) - If the value of WIFSTOPPED(stat_val) is non-zero,
  *     this macro evaluates to the number of the signal that caused the child
- *     process to stop. 
+ *     process to stop.
  *   WIFCONTINUED(stat_val) - Evaluates to a non-zero value if status was
  *    returned for a child process that has continued from a job control stop.
  *
@@ -165,10 +165,10 @@
  *
  *   ECHILD - The process specified by pid does not exist or is not a child of
  *     the calling process, or the process group specified by pid does not exist
- *     or does not have any member process that is a child of the calling process. 
+ *     or does not have any member process that is a child of the calling process.
  *   EINTR - The function was interrupted by a signal. The value of the location
- *     pointed to by stat_loc is undefined. 
- *   EINVAL - The options argument is not valid. 
+ *     pointed to by stat_loc is undefined.
+ *   EINVAL - The options argument is not valid.
  *
  * Assumptions:
  *
@@ -231,7 +231,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
     }
 
   /* Then wait for the task to exit */
- 
+
   ret = sem_wait(&group->tg_exitsem);
   if (ret < 0)
     {

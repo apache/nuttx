@@ -58,7 +58,7 @@
 #define SSD1289_OUTCTRL                 0x01  /* Driver output control */
 #define SSD1289_ACCTRL                  0x02  /* LCD drive AC control */
 #define SSD1289_PWRCTRL1                0x03  /* Power control 1 */
-#define SSD1289_CMP1                    0x05  /* Compare register 1 */ 
+#define SSD1289_CMP1                    0x05  /* Compare register 1 */
 #define SSD1289_CMP2                    0x06  /* Compare register 2 */
 #define SSD1289_DSPCTRL                 0x07  /* Display control */
 #define SSD1289_FCYCCTRL                0x0b  /* Frame cycle control */
@@ -198,7 +198,7 @@
 #  define SSD1289_PWRCTRL1_DCT_FOSd12   (14 << SSD1289_PWRCTRL1_DCT_SHIFT)
 #  define SSD1289_PWRCTRL1_DCT_FOSd16   (15 << SSD1289_PWRCTRL1_DCT_SHIFT)
 
-/* Compare register 1 and 2 */ 
+/* Compare register 1 and 2 */
 
 #define SSD1289_CMP1_CPG_SHIFT          (2)
 #define SSD1289_CMP1_CPG_MASK           (0x3f << SSD1289_CMP1_CPG_SHIFT)

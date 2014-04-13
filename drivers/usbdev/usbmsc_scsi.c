@@ -664,7 +664,7 @@ static inline int usbmsc_cmdinquiry(FAR struct usbmsc_dev_s *priv,
 #endif
           response->version  = 2; /* SCSI-2 */
           response->flags2   = 2; /* SCSI-2 INQUIRY response data format */
-          response->len      = SCSIRESP_INQUIRY_SIZEOF - 5; 
+          response->len      = SCSIRESP_INQUIRY_SIZEOF - 5;
 
           /* Strings */
 
@@ -1997,12 +1997,12 @@ static int usbmsc_cmdparsestate(FAR struct usbmsc_dev_s *priv)
     }
 
   usbmsc_scsi_unlock(priv);
- 
+
   /* Is a response required?  (Not for read6/10/12 and write6/10/12). */
 
   if (priv->thstate == USBMSC_STATE_CMDPARSE)
     {
-      /* All commands come through this path (EXCEPT read6/10/12 and write6/10/12). 
+      /* All commands come through this path (EXCEPT read6/10/12 and write6/10/12).
        * For all other commands, the following setup is expected for the response
        * based on data direction:
        *
@@ -2470,7 +2470,7 @@ static int usbmsc_cmdfinishstate(FAR struct usbmsc_dev_s *priv)
 
           /* Unprocessed incoming data: STALL and cancel requests. */
 
-          else 
+          else
             {
               usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_CMDFINSHSUBMIT), (uint16_t)priv->residue);
               EP_STALL(priv->epbulkout);
@@ -2548,7 +2548,7 @@ static int usbmsc_cmdstatusstate(FAR struct usbmsc_dev_s *priv)
     {
       sd = lun->sd;
     }
-  else 
+  else
     {
       sd = SCSI_KCQIR_INVALIDLUN;
     }

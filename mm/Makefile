@@ -50,7 +50,7 @@ endif
 
 # Core allocator logic
 
-ASRCS  = 
+ASRCS  =
 CSRCS  = mm_initialize.c mm_sem.c  mm_addfreechunk.c mm_size2ndx.c
 CSRCS += mm_shrinkchunk.c mm_malloc.c mm_zalloc.c mm_calloc.c mm_realloc.c
 CSRCS += mm_memalign.c mm_free.c mm_mallinfo.c
@@ -83,7 +83,7 @@ KBIN = libkmm$(LIBEXT)
 BIN ?= libmm$(LIBEXT)
 
 all: $(BIN)
-.PHONY: clean distclean 
+.PHONY: clean distclean
 
 $(AOBJS): $(BINDIR)$(DELIM)%$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)

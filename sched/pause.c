@@ -77,7 +77,7 @@
  *   None
  *
  * Returned Value:
- *   Since pause() suspends thread execution indefinitely unless interrupted 
+ *   Since pause() suspends thread execution indefinitely unless interrupted
  *   a signal, there is no successful completion return value. A value of -1
  *   will always be returned and errno set to indicate the error (EINTR).
  *
@@ -94,7 +94,7 @@ int pause(void)
 {
   sigset_t set;
   struct siginfo value;
- 
+
   /* Set up for the sleep.  Using the empty set means that we are not
    * waiting for any particular signal.  However, any unmasked signal
    * can still awaken sigtimedwait().

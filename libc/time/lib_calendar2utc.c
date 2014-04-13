@@ -80,7 +80,7 @@
  *    UTC conversion routines.  These conversions are based
  *    on algorithms from p. 604 of Seidelman, P. K. 1992.
  *    Explanatory Supplement to the Astronomical Almanac.
- *    University Science Books, Mill Valley. 
+ *    University Science Books, Mill Valley.
  *
  ****************************************************************************/
 
@@ -120,7 +120,7 @@ static time_t clock_julian2utc(int year, int month, int day)
  *    Calendar/UTC conversion based on algorithms from p. 604
  *    of Seidelman, P. K. 1992.  Explanatory Supplement to
  *    the Astronomical Almanac.  University Science Books,
- *    Mill Valley. 
+ *    Mill Valley.
  *
  ****************************************************************************/
 

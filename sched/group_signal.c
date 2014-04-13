@@ -280,7 +280,7 @@ errout:
 #else
 
   return -ENOSYS;
-  
+
 #endif
 }
 

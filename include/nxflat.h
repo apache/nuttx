@@ -93,7 +93,7 @@ struct nxflat_hdr_s
    * and bss regions (bss_end - data_start) as well as the size of the
    * stack.  At run time, this region will also include program arguments
    * and environement variables.
-   * 
+   *
    * The bss segment is data_end through bss_end.
    */
 
@@ -189,7 +189,7 @@ struct nxflat_reloc_s
 #define NXFLAT_RELOC_TYPE_NUM     2 /* Number of relocation types */
 
 /****************************************************************************
- * NXFLAT Imported symbol type 
+ * NXFLAT Imported symbol type
  *
  * The imported symbols are an array of the following type.  The fields
  * in each element are stored in native machine order.

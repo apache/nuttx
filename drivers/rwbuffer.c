@@ -158,7 +158,7 @@ static void rwb_wrflush(struct rwbuffer_s *rwb)
   int ret;
 
   fvdbg("Timeout!\n");
-  
+
   rwb_semtake(&rwb->wrsem);
   if (rwb->wrnblocks)
     {
@@ -175,7 +175,7 @@ static void rwb_wrflush(struct rwbuffer_s *rwb)
         {
           fdbg("ERROR: Error flushing write buffer: %d\n", ret);
         }
-      
+
       rwb_resetwrbuffer(rwb);
     }
 
@@ -239,7 +239,7 @@ static ssize_t rwb_writebuffer(FAR struct rwbuffer_s *rwb,
   /* Write writebuffer Logic */
 
   rwb_wrcanceltimeout(rwb);
-  
+
   /* First: Should we flush out our cache? We would do that if (1) we already
    * buffering blocks and the next block writing is not in the same sequence,
    * or (2) the number of blocks would exceed our allocated buffer capacity
@@ -250,7 +250,7 @@ static ssize_t rwb_writebuffer(FAR struct rwbuffer_s *rwb,
     {
       fvdbg("writebuffer miss, expected: %08x, given: %08x\n",
             rwb->wrexpectedblock, startblock);
-    
+
       /* Flush the write buffer */
 
       ret = rwb->wrflush(rwb, rwb->wrbuffer, rwb->wrblockstart, rwb->wrnblocks);
@@ -262,7 +262,7 @@ static ssize_t rwb_writebuffer(FAR struct rwbuffer_s *rwb,
 
       rwb_resetwrbuffer(rwb);
     }
-  
+
   /* writebuffer is empty? Then initialize it */
 
   if (!rwb->wrnblocks)
@@ -270,7 +270,7 @@ static ssize_t rwb_writebuffer(FAR struct rwbuffer_s *rwb,
       fvdbg("Fresh cache starting at block: 0x%08x\n", startblock);
       rwb->wrblockstart = startblock;
     }
-  
+
   /* Add data to cache */
 
   fvdbg("writebuffer: copying %d bytes from %p to %p\n",
@@ -434,7 +434,7 @@ int rwb_initialize(FAR struct rwbuffer_s *rwb)
           return -ENOMEM;
         }
     }
-  
+
   fvdbg("Write buffer size: %d bytes\n", allocsize);
 #endif /* CONFIG_FS_WRITEBUFFER */
 
@@ -462,7 +462,7 @@ int rwb_initialize(FAR struct rwbuffer_s *rwb)
           return -ENOMEM;
         }
     }
-  
+
   fvdbg("Read-ahead buffer size: %d bytes\n", allocsize);
 #endif /* CONFIG_FS_READAHEAD */
   return 0;
@@ -500,7 +500,7 @@ int rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock, uint32_t nblocks,
              FAR uint8_t *rdbuffer)
 {
   uint32_t remaining;
- 
+
   fvdbg("startblock=%ld nblocks=%ld rdbuffer=%p\n",
         (long)startblock, (long)nblocks, rdbuffer);
 
@@ -619,8 +619,8 @@ int rwb_write(FAR struct rwbuffer_s *rwb, off_t startblock,
 #ifdef CONFIG_FS_WRITEBUFFER
   fvdbg("startblock=%d wrbuffer=%p\n", startblock, wrbuffer);
 
-  /* Use the block cache unless the buffer size is bigger than block cache */   
-     
+  /* Use the block cache unless the buffer size is bigger than block cache */
+
   if (nblocks > rwb->wrmaxblocks)
     {
       /* First flush the cache */

@@ -155,7 +155,7 @@ static void mq_sndtimeout(int argc, uint32_t pid)
  *
  *   If the message queue is full, and the timeout has already expired by
  *   the time of the call, mq_timedsend() returns immediately.
- * 
+ *
  * Parameters:
  *   mqdes - Message queue descriptor
  *   msg - Message to send

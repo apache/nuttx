@@ -4,7 +4,7 @@
  *   Copyright (C) 2011 Li Zhuoyi. All rights reserved.
  *   Author: Li Zhuoyi <lzyy.cn@gmail.com>
  *   History: 0.1 2011-08-04 initial version
- * 
+ *
  * Derived from drivers/can.c
  *
  *   Copyright (C) 2008-2009Gregory Nutt. All rights reserved.

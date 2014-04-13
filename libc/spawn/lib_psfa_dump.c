@@ -56,7 +56,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: posix_spawn_file_actions_dump 
+ * Name: posix_spawn_file_actions_dump
  *
  * Description:
  *   Show the entryent file actions.
@@ -81,7 +81,7 @@ void posix_spawn_file_actions_dump(FAR posix_spawn_file_actions_t *file_actions)
       dbg("  NONE\n");
       return;
     }
-  
+
   /* Destroy each file action, one at a time */
 
   for (entry = (FAR struct spawn_general_file_action_s *)*file_actions;

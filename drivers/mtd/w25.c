@@ -464,7 +464,7 @@ static uint8_t w25_waitwritecomplete(struct w25_dev_s *priv)
   /* Send "Read Status Register (RDSR)" command */
 
   (void)SPI_SEND(priv->spi, W25_RDSR);
-  
+
   /* Loop as long as the memory is busy with a write cycle */
 
   do
@@ -534,7 +534,7 @@ static inline void w25_wren(struct w25_dev_s *priv)
   /* Send "Write Enable (WREN)" command */
 
   (void)SPI_SEND(priv->spi, W25_WREN);
-  
+
   /* Deselect the FLASH */
 
   SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
@@ -553,7 +553,7 @@ static inline void w25_wrdi(struct w25_dev_s *priv)
   /* Send "Write Disable (WRDI)" command */
 
   (void)SPI_SEND(priv->spi, W25_WRDI);
-  
+
   /* Deselect the FLASH */
 
   SPI_SELECT(priv->spi, SPIDEV_FLASH, false);
@@ -778,7 +778,7 @@ static FAR uint8_t *w25_cacheread(struct w25_dev_s *priv, off_t sector)
   off_t esectno;
   int   shift;
   int   index;
- 
+
   /* Convert from the 512 byte sector to the erase sector size of the device.  For
    * exmample, if the actual erase sector size if 4Kb (1 << 12), then we first
    * shift to the right by 3 to get the sector number in 4096 increments.
@@ -1082,7 +1082,7 @@ static int w25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
             w25_unlock(priv->spi);
         }
         break;
- 
+
       case MTDIOC_XIPBASE:
       default:
         ret = -ENOTTY; /* Bad command */

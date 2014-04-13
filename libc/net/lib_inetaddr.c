@@ -55,7 +55,7 @@
  *   The inet_addr() function converts the string pointed to by cp, in the
  *   standard IPv4 dotted decimal notation, to an integer value suitable for
  *   use as an Internet address.
- 
+
  ****************************************************************************/
 
 in_addr_t inet_addr(FAR const char *cp)

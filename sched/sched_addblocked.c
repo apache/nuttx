@@ -72,7 +72,7 @@
  * Name: sched_addblocked
  *
  * Description:
- *   This function adds a TCB to one of the blocked state task lists as 
+ *   This function adds a TCB to one of the blocked state task lists as
  *   inferred from task_state.
  *
  * Inputs:

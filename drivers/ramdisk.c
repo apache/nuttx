@@ -241,7 +241,7 @@ static int rd_geometry(FAR struct inode *inode, struct geometry *geometry)
             geometry->geo_writeenabled ? "true" : "false");
       fvdbg("nsectors: %d sectorsize: %d\n",
             geometry->geo_nsectors, geometry->geo_sectorsize);
- 
+
       return OK;
     }
 

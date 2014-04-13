@@ -45,7 +45,7 @@
  ****************************************************************************/
 
 #include <stdint.h>
- 
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -411,14 +411,14 @@ struct ohci_itd_s
 };
 
 /* Host Controller Communications Area Format (4.4.1) */
- 
+
 struct ohci_hcca_s
 {
   /* HccaInterrruptTable: 32x32-bit pointers to interrupt EDs */
 
   volatile uint32_t inttbl[HCCA_INTTBL_WSIZE];
 
-  /* HccaFrameNumber: Current frame number and 
+  /* HccaFrameNumber: Current frame number and
    * HccaPad1: Zero when frame no. updated
    */
 

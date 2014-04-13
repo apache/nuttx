@@ -78,7 +78,7 @@ extern "C" {
  *   to perform a copy.  It serves a purpose in systems where there is
  *   a penalty for copies to between user and kernal space, but really
  *   nothing in NuttX but provide some Linux compatible (and adding
- *   another 'almost standard' interface). 
+ *   another 'almost standard' interface).
  *
  *   NOTE: This interface is *not* specified in POSIX.1-2001, or other
  *   standards.  The implementation here is very similar to the Linux

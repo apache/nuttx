@@ -109,7 +109,7 @@ int sched_setpriority(FAR struct tcb_s *tcb, int sched_priority)
 
   /* Verify that the requested priority is in the valid range */
 
-  if (sched_priority < SCHED_PRIORITY_MIN || 
+  if (sched_priority < SCHED_PRIORITY_MIN ||
       sched_priority > SCHED_PRIORITY_MAX)
     {
       errno = EINVAL;
@@ -128,7 +128,7 @@ int sched_setpriority(FAR struct tcb_s *tcb, int sched_priority)
   switch (task_state)
     {
       /* CASE 1. The task is running or ready-to-run and a context switch
-       * may be caused by the re-prioritization 
+       * may be caused by the re-prioritization
        */
 
       case TSTATE_TASK_RUNNING:
@@ -162,7 +162,7 @@ int sched_setpriority(FAR struct tcb_s *tcb, int sched_priority)
       case TSTATE_TASK_READYTORUN:
 
         /* A context switch will occur if the new priority of the ready-to
-         * run task is (strictly) greater than the current running task 
+         * run task is (strictly) greater than the current running task
          */
 
         if (sched_priority > rtcb->sched_priority)

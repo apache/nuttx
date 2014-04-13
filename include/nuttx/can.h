@@ -134,7 +134,7 @@
  *               Bits 0-3:  Data Length Code (DLC)
  *               Bit  4:    Remote Tranmission Request (RTR)
  *               Bits 5-15: The 11-bit CAN identifier
- *            
+ *
  *   Bytes 2-9:  CAN data
  *
  * CAN-message Format (with Extended ID suppport)
@@ -224,7 +224,7 @@ struct can_ops_s
   CODE void (*co_reset)(FAR struct can_dev_s *dev);
 
   /* Configure the CAN. This method is called the first time that the CAN
-   * device is opened.  This will occur when the port is first opened. 
+   * device is opened.  This will occur when the port is first opened.
    * This setup includes configuring and attaching CAN interrupts.  All CAN
    * interrupts are disabled upon return.
    */

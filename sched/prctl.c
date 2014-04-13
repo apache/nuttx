@@ -73,8 +73,8 @@
  *     EINVAL The value of 'option' is not recognized.
  *     EFAULT optional arg1 is not a valid address.
  *     ESRCH  No task/thread can be found corresponding to that specified
- *       by optional arg1. 
- *   
+ *       by optional arg1.
+ *
  ****************************************************************************/
 
 int prctl(int option, ...)

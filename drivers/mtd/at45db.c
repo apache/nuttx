@@ -355,7 +355,7 @@ static inline int at45db_rdid(struct at45db_dev_s *priv)
 
   fvdbg("manufacturer: %02x devid1: %02x devid2: %02x\n",
         devid[0], devid[1], devid[2]);
- 
+
   /* Check for a valid manufacturer and memory family */
 
   if (devid[0] == AT45DB_MANUFACTURER &&
@@ -609,7 +609,7 @@ static int at45db_erase(FAR struct mtd_dev_s *mtd, off_t startblock, size_t nblo
   /* Take the lock so that we have exclusive access to the bus, then power up the
    * FLASH device.
    */
- 
+
   at45db_lock(priv);
   at45db_resume(priv);
 
@@ -663,7 +663,7 @@ static ssize_t at45db_bwrite(FAR struct mtd_dev_s *mtd, off_t startblock, size_t
   /* Take the lock so that we have exclusive access to the bus, then power up the
    * FLASH device.
    */
- 
+
   at45db_lock(priv);
   at45db_resume(priv);
 
@@ -704,10 +704,10 @@ static ssize_t at45db_read(FAR struct mtd_dev_s *mtd, off_t offset, size_t nbyte
   /* Take the lock so that we have exclusive access to the bus, then power up the
    * FLASH device.
    */
- 
+
   at45db_lock(priv);
   at45db_resume(priv);
- 
+
   /* Higher performance write logic:  We leave the chip busy after write and erase
    * operations.  This improves write and erase performance because we do not have
    * to wait as long between transactions (other processing can occur while the chip
@@ -776,7 +776,7 @@ static int at45db_ioctl(FAR struct mtd_dev_s *mtd, int cmd, unsigned long arg)
              /* Take the lock so that we have exclusive access to the bus, then
               * power up the FLASH device.
               */
- 
+
              at45db_lock(priv);
              at45db_resume(priv);
 
@@ -787,7 +787,7 @@ static int at45db_ioctl(FAR struct mtd_dev_s *mtd, int cmd, unsigned long arg)
             at45db_unlock(priv);
         }
         break;
- 
+
       case MTDIOC_XIPBASE:
       default:
         ret = -ENOTTY; /* Bad command */
@@ -884,7 +884,7 @@ FAR struct mtd_dev_s *at45db_initialize(FAR struct spi_dev_s *spi)
 
       at45db_pwrdown(priv);
       at45db_unlock(priv);
-    }  
+    }
 
   /* Register the MTD with the procfs system if enabled */
 
@@ -896,7 +896,7 @@ FAR struct mtd_dev_s *at45db_initialize(FAR struct spi_dev_s *spi)
   return (FAR struct mtd_dev_s *)priv;
 
 /* On any failure, we need free memory allocations and release the lock that
- * we hold on the SPI bus.  On failures, assume that we cannot talk to the 
+ * we hold on the SPI bus.  On failures, assume that we cannot talk to the
  * device to do any more.
  */
 

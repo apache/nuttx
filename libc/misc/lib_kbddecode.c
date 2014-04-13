@@ -74,7 +74,7 @@
  * Name: kbd_reget
  *
  * Description:
- *   We have unused characters from the last, unsuccessful decode attempt. 
+ *   We have unused characters from the last, unsuccessful decode attempt.
  *   Return one of these instead of the new character from the stream.
  *
  * Input Parameters:

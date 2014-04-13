@@ -87,7 +87,7 @@ struct watchdog_upperhalf_s
   FAR char *path;     /* Registration path */
 
   /* The contained lower-half driver */
- 
+
   FAR struct watchdog_lowerhalf_s *lower;
 };
 
@@ -172,7 +172,7 @@ static int wdog_open(FAR struct file *filep)
 
 errout_with_sem:
   sem_post(&upper->exclsem);
-  
+
 errout:
   return ret;
 }
@@ -213,7 +213,7 @@ static int wdog_close(FAR struct file *filep)
 
   sem_post(&upper->exclsem);
   ret = OK;
-  
+
 errout:
   return ret;
 }
@@ -252,7 +252,7 @@ static ssize_t wdog_write(FAR struct file *filep, FAR const char *buffer, size_t
  * Description:
  *   The standard ioctl method.  This is where ALL of the watchdog timer work is
  *   done.
- *   
+ *
  ************************************************************************************/
 
 static int wdog_ioctl(FAR struct file *filep, int cmd, unsigned long arg)

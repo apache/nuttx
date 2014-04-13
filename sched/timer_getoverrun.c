@@ -78,7 +78,7 @@
  *   timer_getoverrun() function will return the timer expiration overrun count for
  *   the specified timer. The overrun count returned contains the number of extra
  *   timer expirations that occurred between the time the signal was generated
- *   (queued) and when it was delivered or accepted, up to but not including an 
+ *   (queued) and when it was delivered or accepted, up to but not including an
  *   implementation-defined  maximum of DELAYTIMER_MAX. If the number of such
  *   extra expirations is greater than or equal to DELAYTIMER_MAX, then the
  *   overrun count will be set to DELAYTIMER_MAX. The value returned by

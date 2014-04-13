@@ -80,7 +80,7 @@
  *
  * Description:
  *   Given a group ID, find the group task structure with that ID.  IDs are
- *   used instead of pointers to group structures.  This is done because a 
+ *   used instead of pointers to group structures.  This is done because a
  *   group can disappear at any time leaving a stale pointer; an ID is cleaner
  *   because if the group disappears, this function will fail gracefully.
  *

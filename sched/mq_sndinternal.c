@@ -86,7 +86,7 @@
  *
  * Description:
  *   This is internal, common logic shared by both mq_send and mq_timesend.
- *   This function verifies the input parameters that are common to both 
+ *   This function verifies the input parameters that are common to both
  *   functions.
  *
  * Parameters:
@@ -147,7 +147,7 @@ int mq_verifysend(mqd_t mqdes, const void *msg, size_t msglen, int prio)
  *   continue.
  *
  *   If the list is empty AND the message IS being allocated from the
- *   interrupt level.  This function will attempt to get a message from 
+ *   interrupt level.  This function will attempt to get a message from
  *   the g_msgfreeirq list.  If this is unsuccessful, the calling interrupt
  *   handler will be notified.
  *
@@ -268,7 +268,7 @@ int mq_waitsend(mqd_t mqdes)
 
       else
         {
-          /* Loop until there are fewer than max allowable messages in the 
+          /* Loop until there are fewer than max allowable messages in the
            * receiving message queue
            */
 
@@ -310,7 +310,7 @@ int mq_waitsend(mqd_t mqdes)
  *   (mqdes).  Then it notifies any tasks that were waiting for message
  *   queue notifications setup by mq_notify.  And, finally, it awakens any
  *   tasks that were waiting for the message not empty event.
- * 
+ *
  * Parameters:
  *   mqdes - Message queue descriptor
  *   msg - Message to send

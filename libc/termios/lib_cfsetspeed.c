@@ -69,7 +69,7 @@
  *   stored in the structure pointed to by termiosp to speed.
  *
  *   There is no effect on the baud set in the hardware until a subsequent
- *   successful call to tcsetattr() on the same termios structure. 
+ *   successful call to tcsetattr() on the same termios structure.
  *
  *   NOTE 1: NuttX does not control input/output baud independently.  Both
  *   must be the same.  The POSIX standard interfaces, cfisetispeed() and
@@ -104,7 +104,7 @@
  *
  * Returned Value:
  *   Baud is not checked... OK is always returned (this is non-standard
- *   behavior). 
+ *   behavior).
  *
  ****************************************************************************/
 

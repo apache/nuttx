@@ -71,7 +71,7 @@ extern "C" {
  * Name: mksmartfs
  *
  * Description:
- *   Make a SMART (Sector Mapped Allocation for Really Tiny) Flash file 
+ *   Make a SMART (Sector Mapped Allocation for Really Tiny) Flash file
  *   system image on the specified block device (must be a SMART device).
  *
  * Inputs:

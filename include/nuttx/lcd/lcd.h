@@ -107,7 +107,7 @@ struct lcd_planeinfo_s
    * if there are multiple LCD devices, they must each have unique run buffers.
    */
 
-  uint8_t *buffer; 
+  uint8_t *buffer;
 
   /* This is the number of bits in one pixel.  This may be one of {1, 2, 4,
    * 8, 16, 24, or 32} unless support for one or more of those resolutions

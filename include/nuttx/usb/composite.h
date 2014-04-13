@@ -97,7 +97,7 @@ extern "C" {
  *   Register USB composite device as configured.  This function will call
  *   board-specific implementations in order to obtain the class objects for
  *   each of the members of the composite (see board_mscclassobject(),
- *   board_cdcclassobjec(), ...) 
+ *   board_cdcclassobjec(), ...)
  *
  * Input Parameter:
  *   None
@@ -122,7 +122,7 @@ EXTERN FAR void *composite_initialize(void);
  *   class' device object as was returned by composite_initialize().  This
  *   function will call  board-specific implementations in order to free the
  *   class objects for each of the members of the composite (see
- *   board_mscuninitialize(), board_cdcuninitialize(), ...) 
+ *   board_mscuninitialize(), board_cdcuninitialize(), ...)
  *
  * Input Parameters:
  *   handle - The handle returned by a previous call to composite_initialize().
@@ -141,7 +141,7 @@ EXTERN void composite_uninitialize(FAR void *handle);
  *   Register USB composite device as configured.  This function will call
  *   board-specific implementations in order to obtain the class objects for
  *   each of the members of the composite (see board_mscclassobject(),
- *   board_cdcclassobjec(), ...) 
+ *   board_cdcclassobjec(), ...)
  *
  * Input Parameter:
  *   None

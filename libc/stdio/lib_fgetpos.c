@@ -96,7 +96,7 @@
  *   stream.
  *
  * Returned Value:
- *   Zero on succes; -1 on failure with errno set appropriately. 
+ *   Zero on succes; -1 on failure with errno set appropriately.
  *
  ****************************************************************************/
 

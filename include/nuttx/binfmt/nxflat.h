@@ -98,7 +98,7 @@ struct nxflat_loadinfo_s
    *
    * addrenv - This is the handle created by up_addrenv_create() that can be
    *   used to manage the tasks address space.
-   * oldenv  - This is a value returned by up_addrenv_select() that must be 
+   * oldenv  - This is a value returned by up_addrenv_select() that must be
    *   used to restore the current hardware address environment.
    */
 

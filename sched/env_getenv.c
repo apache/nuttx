@@ -65,7 +65,7 @@
  *   matches the string pointed to by name.
  *
  * Parameters:
- *   name - The name of the variable to find. 
+ *   name - The name of the variable to find.
  *
  * Return Value:
  *   The value of the valiable (read-only) or NULL on failure

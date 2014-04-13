@@ -515,7 +515,7 @@ EXTERN void nxgl_rectadd(FAR struct nxgl_rect_s *dest,
  * Name: nxgl_rectunion
  *
  * Description:
- *   Given two rectanges, src1 and src2, return the larger rectangle that 
+ *   Given two rectanges, src1 and src2, return the larger rectangle that
  *   contains both, dest.
  *
  ****************************************************************************/

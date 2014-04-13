@@ -36,7 +36,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  **************************************************************************************/
- 
+
 /**************************************************************************************
  * Included Files
  **************************************************************************************/
@@ -113,7 +113,7 @@
 /* Display/Color Properties ***********************************************************/
 /* Display Resolution */
 
-#if defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_RLANDSCAPE) 
+#if defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_RLANDSCAPE)
 #  define MIO283QT9A_XRES       320
 #  define MIO283QT9A_YRES       240
 #else
@@ -280,7 +280,7 @@ static uint16_t mio283qt9a_readreg(FAR struct mio283qt9a_lcd_s *lcd, uint8_t reg
 {
   /* Set the index register to the register address and read the register contents. */
 
-  lcd->index(lcd, regaddr);  
+  lcd->index(lcd, regaddr);
   return lcd->read(lcd);
 }
 #endif
@@ -342,7 +342,7 @@ static inline void mio283qt9a_readsetup(FAR struct mio283qt9a_lcd_s *lcd,
  *   Read one correctly aligned pixel from the GRAM memory.  Possibly shifting the
  *   data and possibly swapping red and green components.
  *
- *   - ILI932x: Unknown -- assuming colors are in the color order 
+ *   - ILI932x: Unknown -- assuming colors are in the color order
  *
  **************************************************************************************/
 
@@ -433,7 +433,7 @@ static int mio283qt9a_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *
   FAR struct mio283qt9a_lcd_s *lcd = priv->lcd;
   FAR const uint16_t *src = (FAR const uint16_t*)buffer;
   int i;
- 
+
   /* Buffer must be provided and aligned to a 16-bit address boundary */
 
   //lcdvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
@@ -483,7 +483,7 @@ static int mio283qt9a_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer
   FAR uint16_t *dest = (FAR uint16_t*)buffer;
   uint16_t accum;
   int i;
- 
+
   /* Buffer must be provided and aligned to a 16-bit address boundary */
 
   lcdvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
@@ -814,7 +814,7 @@ static inline int mio283qt9a_hwinitialize(FAR struct mio283qt9a_dev_s *priv)
  /*************************************************************************************
  * Public Functions
  **************************************************************************************/
- 
+
 /**************************************************************************************
  * Name:  mio283qt9a_lcdinitialize
  *

@@ -3,7 +3,7 @@
  *
  *   Copyright (C) 2011-2012 NX Engineering, S.A., All rights reserved.
  *   Author: Petteri Aimonen <jpa@nx.mail.kapsi.fi>
- * 
+ *
  * Based on 5x8.pcf.gz from xfonts-base. The file is marked as
  * COPYRIGHT "Public domain font.  Share and enjoy."
  *

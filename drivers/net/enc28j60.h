@@ -402,7 +402,7 @@
                                     /* Bit 0:  Reserved */
 #define PHLCON_STRCH      (1 << 1)  /* Bit 1:  LED Pulse Stretching Enable */
 #define PHLCON_LFRQ0      (1 << 2)  /* Bit 2:  LED Pulse Stretch Time Configuration */
-#define PHLCON_LFRQ1      (1 << 3)  /* Bit 3:  " " "   " "     " "  " " */      
+#define PHLCON_LFRQ1      (1 << 3)  /* Bit 3:  " " "   " "     " "  " " */
 #define PHLCON_LBCFG0     (1 << 4)  /* Bit 4:  LEDB Configuration */
 #define PHLCON_LBCFG1     (1 << 5)  /* Bit 5:  "  " "           " */
 #define PHLCON_LBCFG2     (1 << 6)  /* Bit 6:  "  " "           " */

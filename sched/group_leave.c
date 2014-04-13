@@ -100,9 +100,9 @@ void group_remove(FAR struct task_group_s *group)
   /* Let's be especially careful while access the global task group list.
    * This is probably un-necessary.
    */
- 
+
   flags = irqsave();
- 
+
   /* Find the task group structure */
 
   for (prev = NULL, curr = g_grouphead;

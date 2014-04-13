@@ -59,7 +59,7 @@
  * Public Types
  ****************************************************************************/
 
-/* The following defines the format information for the device.  This 
+/* The following defines the format information for the device.  This
  * information is retrieved via the BIOC_GETFORMAT ioctl.
  */
 
@@ -69,7 +69,7 @@ struct smart_format_s
   uint16_t availbytes;      /* Number of bytes available in each sector */
   uint16_t nsectors;        /* Total number of sectors on device */
   uint16_t nfreesectors;    /* Number of free sectors on device */
-  uint8_t  flags;           /* Format flags (see above) */  
+  uint8_t  flags;           /* Format flags (see above) */
   uint8_t  namesize;        /* Size of filenames on this volume */
 #ifdef CONFIG_SMARTFS_MULTI_ROOT_DIRS
   uint8_t  nrootdirentries; /* Number of root directories on this device */

@@ -75,7 +75,7 @@
  *
  * WDIOC_MINTIME    - Set the minimum ping time.  If two keepalive ioctls
  *                    are received within this time, a reset event will
- *                    be generated.  This feature should assume to be 
+ *                    be generated.  This feature should assume to be
  *                    disabled after WDIOC_SETTIMEOUT.
  *                    Argument: A 32-bit time value in milliseconds.
  */
@@ -112,7 +112,7 @@ struct watchdog_capture_s
  * and returned by the "lower half" getstatus() method.
  */
 
-struct watchdog_status_s 
+struct watchdog_status_s
 {
   uint32_t  flags;          /* See WDFLAGS_* definitions above */
   uint32_t  timeout;        /* The current timeout setting (in milliseconds) */
@@ -125,7 +125,7 @@ struct watchdog_status_s
  */
 
 struct watchdog_lowerhalf_s;
-struct watchdog_ops_s 
+struct watchdog_ops_s
 {
   /* Required methods ********************************************************/
   /* Start the watchdog timer, resetting the time to the current timeout */
@@ -270,7 +270,7 @@ EXTERN void watchdog_unregister(FAR void *handle);
  *   Perform architecture-specific initialization of the Watchdog hardware.
  *   This interface should be provided by all configurations using
  *   to avoid exposed platform-dependent logic.
- * 
+ *
  *   At a minimum, this function should all watchdog_register() which is
  *   described above.
  *

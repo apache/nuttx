@@ -73,7 +73,7 @@ int pthread_condattr_init(FAR pthread_condattr_t *attr)
     {
       ret = EINVAL;
     }
-  else 
+  else
     {
       *attr = 0;
     }

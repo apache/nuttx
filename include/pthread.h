@@ -81,7 +81,7 @@
  * PTHREAD_MUTEX_NORMAL: This type of mutex does not detect deadlock. A thread
  *   attempting to relock this mutex without first unlocking it will deadlock.
  *   Attempting to unlock a mutex locked by a different thread results in undefined
- *   behavior. Attempting to unlock an unlocked mutex results in undefined behavior. 
+ *   behavior. Attempting to unlock an unlocked mutex results in undefined behavior.
  * PTHREAD_MUTEX_ERRORCHECK
  *   This type of mutex provides error checking. A thread attempting to relock this
  *   mutex without first unlocking it will return with an error. A thread attempting
@@ -94,7 +94,7 @@
  *   mutex require the same number of unlocks to release the mutex before another thread
  *   can acquire the mutex. A thread attempting to unlock a mutex which another thread
  *   has locked will return with an error. A thread attempting to unlock an unlocked
- *   mutex will return with an error. 
+ *   mutex will return with an error.
  * PTHREAD_MUTEX_DEFAULT
  *  An implementation is allowed to map this mutex to one of the other mutex types.
  */
@@ -147,7 +147,7 @@
 
 #define pthread_setname_np(thread, name) \
   prctl((int)PR_SET_NAME, (char*)name, (int)thread)
-  
+
 #define pthread_getname_np(thread, name) \
   prctl((int)PR_GET_NAME, (char*)name, (int)thread)
 

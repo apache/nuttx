@@ -125,7 +125,7 @@
 #  define FMT_NEXT     src++                        /* Advance to the next character */
 #  define FMT_PREV     src--                        /* Backup to the previous character */
 #endif
- 
+
 /****************************************************************************
  * Private Type Declarations
  ****************************************************************************/
@@ -225,7 +225,7 @@ static const char g_nullstring[] = "(null)";
  ****************************************************************************/
 
 /* Include floating point functions */
- 
+
 #ifdef CONFIG_LIBC_FLOATINGPOINT
 #  include "stdio/lib_libdtoa.c"
 #endif

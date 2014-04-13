@@ -487,7 +487,7 @@ static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer,
               /* No data was transferred. Return the negated errno value.
                * The VFS layer will set the errno value appropriately).
                */
- 
+
               nwritten = ret;
             }
 

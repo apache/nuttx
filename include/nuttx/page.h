@@ -172,7 +172,7 @@
  * from the end of RAM for page tables or other system usage.  The
  * configuration settings and linker directives must be cognizant of that:
  * CONFIG_PAGING_NDATA should be defined to prevent the data region from
- * extending all the way to the end of memory. 
+ * extending all the way to the end of memory.
  */
 
 #define PG_RAM_PAGES               (CONFIG_RAM_SIZE >> PAGESHIFT)
@@ -213,7 +213,7 @@
  *   transfer is completed. Default:  Undefined (non-blocking).
  * CONFIG_PAGING_WORKPERIOD - The page fill worker thread will wake periodically
  *   even if there is no mapping to do.  This selection controls that wake-up
- *   period (in microseconds).  This wake-up a failsafe that will handle any 
+ *   period (in microseconds).  This wake-up a failsafe that will handle any
  *   cases where a single is lost (that would really be a bug and shouldn't
  *   happen!) and also supports timeouts for case of non-blocking, asynchronous
  *   fills (see CONFIG_PAGING_TIMEOUT_TICKS).
@@ -315,7 +315,7 @@ void pg_miss(void);
  * Public Functions -- Provided by architecture-specific logic to common
  *                     paging logic.
  ****************************************************************************/
- 
+
 /****************************************************************************
  * Name: up_checkmapping()
  *

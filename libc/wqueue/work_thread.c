@@ -182,7 +182,7 @@ static void work_process(FAR struct wqueue_s *wqueue)
 
               next = remaining;
             }
-              
+
           /* Then try the next in the list. */
 
           work = (FAR struct work_s *)work->dq.flink;

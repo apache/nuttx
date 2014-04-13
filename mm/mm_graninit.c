@@ -115,7 +115,7 @@ gran_common_initialize(FAR void *heapstart, size_t heapsize, uint8_t log2gran,
 
   mask         = (1 << log2align) - 1;
   alignedstart = ((uintptr_t)heapstart + mask) & ~mask;
-  
+
   /* Determine the number of granules */
 
   mask         = (1 << log2gran) - 1;

@@ -399,7 +399,7 @@ FAR struct child_status_s *group_removechild(FAR struct task_group_s *group,
       curr->flink = NULL;
       group_dumpchildren(group, "group_removechild");
     }
- 
+
   return curr;
 }
 

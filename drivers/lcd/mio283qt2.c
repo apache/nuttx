@@ -12,7 +12,7 @@
  *    Ltd., Revision 1.0
  * 2) Data Sheet: HX8347-D(T), 240RGB x 320 dot, 262K color, with internal GRAM, TFT
  *    Mobile Single Chip Driver Version 02 March, Doc No. HX8347-D(T)-DS, Himax
- *    Technologies, Inc., 2009, 
+ *    Technologies, Inc., 2009,
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -42,7 +42,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  **************************************************************************************/
- 
+
 /**************************************************************************************
  * Included Files
  **************************************************************************************/
@@ -119,7 +119,7 @@
 /* Display/Color Properties ***********************************************************/
 /* Display Resolution */
 
-#if defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_RLANDSCAPE) 
+#if defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_RLANDSCAPE)
 #  define MIO283QT2_XRES       320
 #  define MIO283QT2_YRES       240
 #else
@@ -143,7 +143,7 @@
 
 /* LCD Profiles ***********************************************************************/
 /* Many details of the controller initialization must, unfortunately, vary from LCD to
- * LCD.  I have looked at the spec and at three different drivers for LCDs that have 
+ * LCD.  I have looked at the spec and at three different drivers for LCDs that have
  * MIO283QT2 controllers.  I have tried to summarize these differences as "LCD profiles"
  *
  * Most of the differences between LCDs are nothing more than a few minor bit
@@ -352,7 +352,7 @@ static struct mio283qt2_dev_s g_lcddev;
  **************************************************************************************/
 
 /**************************************************************************************
- * Name:  mio283qt2_putreg(lcd, 
+ * Name:  mio283qt2_putreg(lcd,
  *
  * Description:
  *   Write to an LCD register
@@ -443,7 +443,7 @@ static inline void mio283qt2_readsetup(FAR struct mio283qt2_lcd_s *lcd,
  *   Read one correctly aligned pixel from the GRAM memory.  Possibly shifting the
  *   data and possibly swapping red and green components.
  *
- *   - ILI932x: Unknown -- assuming colors are in the color order 
+ *   - ILI932x: Unknown -- assuming colors are in the color order
  *
  **************************************************************************************/
 
@@ -530,7 +530,7 @@ static int mio283qt2_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *b
   FAR struct mio283qt2_lcd_s *lcd = priv->lcd;
   FAR const uint16_t *src = (FAR const uint16_t*)buffer;
   int i;
- 
+
   /* Buffer must be provided and aligned to a 16-bit address boundary */
 
   lcdvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
@@ -580,7 +580,7 @@ static int mio283qt2_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   FAR uint16_t *dest = (FAR uint16_t*)buffer;
   uint16_t accum;
   int i;
- 
+
   /* Buffer must be provided and aligned to a 16-bit address boundary */
 
   lcdvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);

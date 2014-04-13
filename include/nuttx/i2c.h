@@ -133,9 +133,9 @@
  *   Set our own I2C address. Calling this function enables Slave mode and
  *   disables Master mode on given instance (note that I2C is a bus, where
  *   multiple masters and slave may be handled by one device driver).
- * 
+ *
  *   One may register a callback to be notified about reception. During the
- *   slave mode reception, the function READ and WRITE must be used to 
+ *   slave mode reception, the function READ and WRITE must be used to
  *   to handle reads and writes from a master.
  *
  * Input Parameters:
@@ -199,7 +199,7 @@
  *
  * Description:
  *   Send a block of data on I2C using the previously selected I2C
- *   frequency and slave address, followed by restarted read access. 
+ *   frequency and slave address, followed by restarted read access.
  *   It provides a convenient wrapper to the transfer function.
  *
  * Input Parameters:
@@ -220,9 +220,9 @@
  * Name: I2C_TRANSFER
  *
  * Description:
- *   Perform a sequence of I2C transfers, each transfer is started with a 
- *   START and the final transfer is completed with a STOP. Each sequence 
- *   will be an 'atomic'  operation in the sense that any other I2C actions 
+ *   Perform a sequence of I2C transfers, each transfer is started with a
+ *   START and the final transfer is completed with a STOP. Each sequence
+ *   will be an 'atomic'  operation in the sense that any other I2C actions
  *   will be serialized and pend until this read completes. Optional.
  *
  * Input Parameters:
@@ -278,7 +278,7 @@ struct i2c_msg_s
 };
 
 /* I2C private data.  This structure only defines the initial fields of the
- * structure visible to the I2C client.  The specific implementation may 
+ * structure visible to the I2C client.  The specific implementation may
  * add additional, device specific fields after the vtable.
  */
 
@@ -305,7 +305,7 @@ extern "C" {
  * Description:
  *   Initialize the selected I2C port. And return a unique instance of struct
  *   struct i2c_dev_s.  This function may be called to obtain multiple
- *   instances of the interface, each of which may be set up with a 
+ *   instances of the interface, each of which may be set up with a
  *   different frequency and slave address.
  *
  * Input Parameter:
@@ -329,7 +329,7 @@ EXTERN FAR struct i2c_dev_s *up_i2cinitialize(int port);
  *
  * Returned Value:
  *   OK on success, ERROR when internal reference count mismatch or dev
- *   points to invalid hardware device. 
+ *   points to invalid hardware device.
  *
  ****************************************************************************/
 

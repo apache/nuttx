@@ -117,7 +117,7 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
   /* Create two "allocated" guard nodes at the beginning and end of
    * the heap.  These only serve to keep us from allocating outside
    * of the heap.
-   * 
+   *
    * And create one free node between the guard nodes that contains
    * all available memory.
    */

@@ -125,7 +125,7 @@
  *   symbols:
  *
  *   - USER_ENTRYPOINT: This is the default user application entry point.
- *                 
+ *
  ****************************************************************************/
 
 int os_bringup(void)

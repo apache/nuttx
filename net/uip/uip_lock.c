@@ -190,7 +190,7 @@ int uip_lockedwait(sem_t *sem)
   if (g_holder == me)
     {
       /* Release the uIP semaphore, remembering the count */
- 
+
       count    = g_count;
       g_holder = NO_HOLDER;
       g_count  = 0;

@@ -110,7 +110,7 @@ static ssize_t lowconsole_read(struct file *filep, char *buffer, size_t buflen)
 static ssize_t lowconsole_write(struct file *filep, const char *buffer, size_t buflen)
 {
   ssize_t ret = buflen;
- 
+
   for (; buflen; buflen--)
     {
       up_putc(*buffer++);

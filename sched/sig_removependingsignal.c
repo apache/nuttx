@@ -100,7 +100,7 @@ FAR sigpendq_t *sig_removependingsignal(FAR struct tcb_s *stcb, int signo)
        (currsig && currsig->info.si_signo != signo);
        prevsig = currsig, currsig = currsig->flink);
 
-  if (currsig) 
+  if (currsig)
     {
       if (prevsig)
         {

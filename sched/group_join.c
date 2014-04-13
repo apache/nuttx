@@ -74,7 +74,7 @@
  * Name: group_addmember
  *
  * Description:
- *   Add a new member to a group.  
+ *   Add a new member to a group.
  *
  * Parameters:
  *   group - The task group to add the new member
@@ -131,7 +131,7 @@ static inline int group_addmember(FAR struct task_group_s *group, pid_t pid)
       irqrestore(flags);
     }
 
-  /* Assign this new pid to the group; group->tg_nmembers will be incremented 
+  /* Assign this new pid to the group; group->tg_nmembers will be incremented
    * by the caller.
    */
 
@@ -153,7 +153,7 @@ static inline int group_addmember(FAR struct task_group_s *group, pid_t pid)
  *   this (at the return from group_join, things are a little unstable:  The
  *   group has been bound, but tg_nmembers hs not yet been incremented).
  *   Then, after the new thread is initialized and has a PID assigned to it,
- *   group_join() is called, incrementing the tg_nmembers count on the group.  
+ *   group_join() is called, incrementing the tg_nmembers count on the group.
  *
  * Parameters:
  *   tcb - The TCB of the new "child" task that need to join the group.
@@ -190,7 +190,7 @@ int group_bind(FAR struct pthread_tcb_s *tcb)
  *   this (at the return from group_join, things are a little unstable:  The
  *   group has been bound, but tg_nmembers hs not yet been incremented).
  *   Then, after the new thread is initialized and has a PID assigned to it,
- *   group_join() is called, incrementing the tg_nmembers count on the group.  
+ *   group_join() is called, incrementing the tg_nmembers count on the group.
  *
  * Parameters:
  *   tcb - The TCB of the new "child" task that need to join the group.

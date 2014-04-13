@@ -28,7 +28,7 @@ float roundf(float x)
     {
       x -= 1.0f;
     }
-  
+
   if (x >= 0.0f && f >= 0.5f)
     {
       x += 1.0f;

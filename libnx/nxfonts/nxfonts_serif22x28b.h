@@ -55,7 +55,7 @@
 
 #define NXFONT_MIN8BIT    161
 #define NXFONT_MAX8BIT    255
- 
+
 /* Maximum height and width of any glyph in the set */
 
 #define NXFONT_MAXHEIGHT  28

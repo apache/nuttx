@@ -100,7 +100,7 @@ int nx_getrectangle(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
   struct nxsvrmsg_getrectangle_s  outmsg;
   int ret;
   sem_t sem_done;
-  
+
 #ifdef CONFIG_DEBUG
   if (!hwnd || !rect || !dest)
     {
@@ -124,27 +124,27 @@ int nx_getrectangle(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
 
   outmsg.sem_done = &sem_done;
   ret = sem_init(&sem_done, 0, 0);
-  
+
   if (ret != OK)
     {
       gdbg("sem_init failed: %d\n", errno);
       return ret;
     }
-  
+
   /* Forward the fill command to the server */
 
   ret = nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_getrectangle_s));
-  
+
   /* Wait that the command is completed, so that caller can release the buffer. */
-  
+
   if (ret == OK)
     {
       ret = sem_wait(&sem_done);
     }
-  
+
   /* Destroy the semaphore and return. */
-  
+
   sem_destroy(&sem_done);
-  
+
   return ret;
 }

@@ -101,7 +101,7 @@ struct usbhost_state_s
   struct usbhost_driver_s *drvr;
 
   /* The remainder of the fields are provide to the class driver */
-  
+
   char                    devchar;      /* Character identifying the /dev/skel[n] device */
   volatile bool           disconnected; /* TRUE: Device has been disconnected */
   uint8_t                 ifno;         /* Interface number */
@@ -158,7 +158,7 @@ static inline int usbhost_talloc(FAR struct usbhost_state_s *priv);
 static inline int usbhost_tfree(FAR struct usbhost_state_s *priv);
 
 /* struct usbhost_registry_s methods */
- 
+
 static struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *drvr,
                                               FAR const struct usbhost_id_s *id);
 
@@ -175,7 +175,7 @@ static int usbhost_disconnected(FAR struct usbhost_class_s *class);
  * Private Data
  ****************************************************************************/
 
-/* This structure provides the registry entry ID informatino that will  be 
+/* This structure provides the registry entry ID informatino that will  be
  * used to associate the USB class driver to a connected USB device.
  */
 
@@ -353,7 +353,7 @@ static void usbhost_destroy(FAR void *arg)
 
   DEBUGASSERT(priv != NULL);
   uvdbg("crefs: %d\n", priv->crefs);
- 
+
   /* Unregister the driver */
 
   /* Release the device name used by this connection */
@@ -416,10 +416,10 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
   uint8_t found = 0;
   int ret;
 
-  DEBUGASSERT(priv != NULL && 
+  DEBUGASSERT(priv != NULL &&
               configdesc != NULL &&
               desclen >= sizeof(struct usb_cfgdesc_s));
-  
+
   /* Verify that we were passed a configuration descriptor */
 
   cfgdesc = (FAR struct usb_cfgdesc_s *)configdesc;
@@ -455,7 +455,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
         case USB_DESC_TYPE_INTERFACE:
           {
             FAR struct usb_ifdesc_s *ifdesc = (FAR struct usb_ifdesc_s *)configdesc;
- 
+
             uvdbg("Interface descriptor\n");
             DEBUGASSERT(remaining >= USB_SIZEOF_IFDESC);
 
@@ -527,7 +527,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
                     found |= USBHOST_BINFOUND;
 
                     /* Save the bulk IN endpoint information */
-                    
+
                     bindesc.addr         = epdesc->addr & USB_EP_ADDR_NUMBER_MASK;
                     bindesc.in           = 1;
                     bindesc.funcaddr     = funcaddr;
@@ -557,13 +557,13 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
         }
 
       /* Increment the address of the next descriptor */
- 
+
       configdesc += desc->len;
       remaining  -= desc->len;
     }
 
   /* Sanity checking... did we find all of things that we need? */
-    
+
   if (found != USBHOST_ALLFOUND)
     {
       ulldbg("ERROR: Found IF:%s BIN:%s BOUT:%s\n",
@@ -660,7 +660,7 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
           /* We don't have to give the semaphore because it will be
            * destroyed when usb_destroy is called.
            */
-  
+
           ret = -ENODEV;
         }
       else
@@ -820,7 +820,7 @@ static inline int usbhost_tfree(FAR struct usbhost_state_s *priv)
  * Name: usbhost_create
  *
  * Description:
- *   This function implements the create() method of struct usbhost_registry_s. 
+ *   This function implements the create() method of struct usbhost_registry_s.
  *   The create() method is a callback into the class implementation.  It is
  *   used to (1) create a new instance of the USB host class state and to (2)
  *   bind a USB host driver "session" to the class instance.  Use of this
@@ -879,7 +879,7 @@ static FAR struct usbhost_class_s *usbhost_create(FAR struct usbhost_driver_s *d
           priv->drvr               = drvr;
 
           /* Return the instance of the USB class driver */
- 
+
           return &priv->class;
         }
     }
@@ -934,7 +934,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *class,
   FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)class;
   int ret;
 
-  DEBUGASSERT(priv != NULL && 
+  DEBUGASSERT(priv != NULL &&
               configdesc != NULL &&
               desclen >= sizeof(struct usb_cfgdesc_s));
 
@@ -955,7 +955,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *class,
           udbg("usbhost_devinit() failed: %d\n", ret);
         }
     }
- 
+
   return ret;
 }
 
@@ -1025,7 +1025,7 @@ static int usbhost_disconnected(struct usbhost_class_s *class)
         }
     }
 
-  irqrestore(flags);  
+  irqrestore(flags);
   return OK;
 }
 

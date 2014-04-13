@@ -149,7 +149,7 @@ int atexit(void (*func)(void))
               break;
             }
         }
-  
+
       sched_unlock();
     }
 

@@ -261,7 +261,7 @@ EXTERN int up_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback);
  * Name: up_rtc_cancelalarm
  *
  * Description:
- *   Cancel a pending alarm alarm 
+ *   Cancel a pending alarm alarm
  *
  * Input Parameters:
  *   none

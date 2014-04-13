@@ -103,12 +103,12 @@
  *   and errno is set to indicate the error.  The following errors may be
  *   reported:
  *
- *   - EBADF: The 'fd' argument is not a valid file descriptor. 
- *   - EINTR:  A signal interrupted tcsetattr(). 
+ *   - EBADF: The 'fd' argument is not a valid file descriptor.
+ *   - EINTR:  A signal interrupted tcsetattr().
  *   - EINVAL: The 'options' argument is not a supported value, or
  *     an attempt was made to change an attribute represented in the
- *     termios structure to an unsupported value. 
- *   - ENOTTY: The file associated with 'fd' is not a terminal. 
+ *     termios structure to an unsupported value.
+ *   - ENOTTY: The file associated with 'fd' is not a terminal.
  *
  ****************************************************************************/
 

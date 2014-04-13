@@ -65,7 +65,7 @@ char *itoa(int val, char *str, int base)
           *buf++ = digits[digit];
         }
       while (intval > 0);
-      
+
       if (val < 0)
         {
           *buf++ = '-';

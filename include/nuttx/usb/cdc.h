@@ -125,7 +125,7 @@
 #define DLC_SET_PULSE_TIME      0x14 /* Setup value for time of make and break periods when
                                       * pulse dialing. (Optional)
                                       */
-#define DLC_RING_AUX_JACK       0x15 /* Request for a ring signal to be generated on secondary 
+#define DLC_RING_AUX_JACK       0x15 /* Request for a ring signal to be generated on secondary
                                       * phone jack. (Optional)
                                       */
 /* Table 3: Notifications, Direct Line Control Model */
@@ -169,7 +169,7 @@
 #define ACM_NETWORK_CONNECTION  0x00 /* Notification to host of network connection status.
                                       * (Optional)
                                       */
-#define ACM_RESPONSE_AVAILABLE  0x01 /* Notification to host to issue a GET_ENCAPSULATED_RESPONSE 
+#define ACM_RESPONSE_AVAILABLE  0x01 /* Notification to host to issue a GET_ENCAPSULATED_RESPONSE
                                       * request. (Required)
                                       */
 #define ACM_SERIAL_STATE        0x20 /* Returns the current state of the carrier detect, DSR,

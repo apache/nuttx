@@ -86,7 +86,7 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
- 
+
 static uint16_t uip_igmpchksum(FAR uint8_t *buffer, int buflen)
 {
   uint16_t sum = uip_chksum((FAR uint16_t*)buffer, buflen);

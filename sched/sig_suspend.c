@@ -148,7 +148,7 @@ int sigsuspend(FAR const sigset_t *set)
   else
     {
       /* Its time to wait. Save a copy of the old sigprocmask and install
-       * the new (temporary) sigprocmask 
+       * the new (temporary) sigprocmask
        */
 
       saved_sigprocmask = rtcb->sigprocmask;

@@ -142,7 +142,7 @@ FAR sem_t *sem_open (FAR const char *name, int oflag, ...)
           psem = sem_findnamed(name);
           if (psem)
             {
-              /* It does.  Check if the caller wanted to created 
+              /* It does.  Check if the caller wanted to created
                * a new semahore with this name.
                */
 

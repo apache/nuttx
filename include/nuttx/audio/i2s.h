@@ -226,7 +226,7 @@ struct i2s_ops_s
 };
 
 /* I2S private data.  This structure only defines the initial fields of the
- * structure visible to the I2S client.  The specific implementation may 
+ * structure visible to the I2S client.  The specific implementation may
  * add additional, device specific fields
  */
 

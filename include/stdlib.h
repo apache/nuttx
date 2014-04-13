@@ -66,7 +66,7 @@
 #define MAX_RAND 32767
 
 /* Integer expression whose value is the maximum number of bytes in a
- * character specified by the current locale. 
+ * character specified by the current locale.
  */
 
 #define MB_CUR_MAX 1

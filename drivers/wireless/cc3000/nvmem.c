@@ -323,7 +323,7 @@ uint8_t nvmem_read_sp_version(uint8_t *patchVer)
  *   Create new file entry and allocate space on the NVMEM. Applies only to
  *   user files. Modify the size of file. If the entry is unallocated -
  *   allocate it to size ulNewLen (marked invalid). If it is allocated then
- *   deallocate it first. To just mark the file as invalid without resizing - 
+ *   deallocate it first. To just mark the file as invalid without resizing -
  *   Set ulNewLen=0.
  *
  * Input Parameters:

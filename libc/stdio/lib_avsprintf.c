@@ -106,7 +106,7 @@ int avsprintf(FAR char **ptr, const char *fmt, va_list ap)
   /* First, use a nullstream to get the size of the buffer.  The number
    * of bytes returned may or may not include the null terminator.
    */
-  
+
   lib_nulloutstream(&nulloutstream);
   nbytes = lib_vsprintf((FAR struct lib_outstream_s *)&nulloutstream, fmt, ap);
 

@@ -97,7 +97,7 @@ static void   clock_utc2julian(time_t jdn, int *year, int *month, int *day);
  *    Calendar to UTC conversion routines.  These conversions
  *    are based on algorithms from p. 604 of Seidelman, P. K.
  *    1992.  Explanatory Supplement to the Astronomical
- *    Almanac.  University Science Books, Mill Valley. 
+ *    Almanac.  University Science Books, Mill Valley.
  *
  ****************************************************************************/
 

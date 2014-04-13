@@ -44,7 +44,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
- 
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -296,7 +296,7 @@ int hid_parsereport(FAR const uint8_t *report, int rptlen,
 
           collectionpath = collectionpath->parent;
           break;
- 
+
         case USBHID_MAIN_INPUT_PREFIX:
         case USBHID_MAIN_OUTPUT_PREFIX:
         case USBHID_MAIN_FEATURE_PREFIX:
@@ -511,7 +511,7 @@ void hid_putitem(FAR uint8_t *report, struct hid_rptitem_s *item)
  *  Size of the report in bytes, or 0 if the report does not exist.
  *
  ****************************************************************************/
- 
+
 size_t hid_reportsize(FAR struct hid_rptinfo_s *rptinfo, uint8_t id, uint8_t rpttype)
 {
   int i;

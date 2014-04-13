@@ -63,7 +63,7 @@ static int stdinstream_getc(FAR struct lib_instream_s *this)
     {
       this->nget++;
     }
- 
+
  return ret;
 }
 

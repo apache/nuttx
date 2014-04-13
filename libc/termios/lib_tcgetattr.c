@@ -82,8 +82,8 @@
  *   Upon successful completion, 0 is returned. Otherwise, -1 is returned and
  *   errno is set to indicate the error.  The following errors may be reported:
  *
- *   - EBADF: The 'fd' argument is not a valid file descriptor. 
- *   - ENOTTY: The file associated with 'fd' is not a terminal. 
+ *   - EBADF: The 'fd' argument is not a valid file descriptor.
+ *   - ENOTTY: The file associated with 'fd' is not a terminal.
  *
  ****************************************************************************/
 

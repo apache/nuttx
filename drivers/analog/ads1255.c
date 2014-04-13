@@ -4,7 +4,7 @@
  *   Copyright (C) 2011 Li Zhuoyi. All rights reserved.
  *   Author: Li Zhuoyi <lzyy.cn@gmail.com>
  *   History: 0.1 2011-08-05 initial version
- *            0.2 2011-08-25 fix bug in g_adcdev (cd_ops -> ad_ops,cd_priv -> ad_priv) 
+ *            0.2 2011-08-25 fix bug in g_adcdev (cd_ops -> ad_ops,cd_priv -> ad_priv)
  *
  * This file is a part of NuttX:
  *

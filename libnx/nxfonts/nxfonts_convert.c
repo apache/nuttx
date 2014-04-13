@@ -234,7 +234,7 @@ int NXF_FUNCNAME(nxf_convert,NXFONTS_SUFFIX)
         }
 
       /* The entire glyph row has been rendered.  Handle any fractional bytes at
-       * the end of the row 
+       * the end of the row
        */
 
       if (nbits > 0)

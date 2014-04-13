@@ -106,7 +106,7 @@ struct adc_ops_s
   CODE void (*ao_reset)(FAR struct adc_dev_s *dev);
 
   /* Configure the ADC. This method is called the first time that the ADC
-   * device is opened.  This will occur when the port is first opened. 
+   * device is opened.  This will occur when the port is first opened.
    * This setup includes configuring and attaching ADC interrupts.  Interrupts
    * are all disabled upon return.
    */
@@ -122,7 +122,7 @@ struct adc_ops_s
   /* Call to enable or disable RX interrupts */
 
   CODE void (*ao_rxint)(FAR struct adc_dev_s *dev, bool enable);
- 
+
   /* All ioctl calls will be routed through this method */
 
   CODE int (*ao_ioctl)(FAR struct adc_dev_s *dev, int cmd, unsigned long arg);

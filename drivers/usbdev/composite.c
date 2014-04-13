@@ -674,7 +674,7 @@ static void composite_disconnect(FAR struct usbdevclass_driver_s *driver,
    * re-enumerated.
    */
 
-  DEV_CONNECT(dev); 
+  DEV_CONNECT(dev);
 }
 
 /****************************************************************************
@@ -773,7 +773,7 @@ static void composite_resume(FAR struct usbdevclass_driver_s *driver,
  *   Register USB composite device as configured.  This function will call
  *   board-specific implementations in order to obtain the class objects for
  *   each of the members of the composite (see board_mscclassobject(),
- *   board_cdcclassobjec(), ...) 
+ *   board_cdcclassobjec(), ...)
  *
  * Input Parameter:
  *   None
@@ -863,7 +863,7 @@ errout_with_alloc:
  *   class' device object as was returned by composite_initialize().  This
  *   function will call  board-specific implementations in order to free the
  *   class objects for each of the members of the composite (see
- *   board_mscuninitialize(), board_cdcuninitialize(), ...) 
+ *   board_mscuninitialize(), board_cdcuninitialize(), ...)
  *
  * Input Parameters:
  *   handle - The handle returned by a previous call to composite_initialize().

@@ -64,7 +64,7 @@
  *   that parse the same string.
  *
  *   On the first call to strtok_r(), 'str' should point to the
- *   string to be parsed, and the value of 'saveptr' is 
+ *   string to be parsed, and the value of 'saveptr' is
  *   ignored.  In subsequent calls, 'str' should be NULL, and
  *   saveptr should be unchanged since the previous call.
  *

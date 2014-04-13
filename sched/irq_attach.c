@@ -94,7 +94,7 @@ int irq_attach(int irq, xcpt_t isr)
       if (isr == NULL)
         {
           /* Disable the interrupt if we can before detaching it.  We might
-           * not be able to do this if:  (1) the device does not have a 
+           * not be able to do this if:  (1) the device does not have a
            * centralized interrupt controller (so up_disable_irq() is not
            * supported).  Or (2) if the device has different number for vector
            * numbers and IRQ numbers (in that case, we don't know the correct

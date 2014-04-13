@@ -4,7 +4,7 @@
  *   Copyright (C) 2011 Li Zhuoyi. All rights reserved.
  *   Author: Li Zhuoyi <lzyy.cn@gmail.com>
  *   History: 0.1 2011-08-05 initial version
- * 
+ *
  * This file is a part of NuttX:
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
@@ -63,7 +63,7 @@
 
 #define AD5410_CMD_REXT       (1<<13)
 #define AD5410_CMD_OUTEN      (1<<12)
-#define AD5410_CMD_SRCLK(x)   (x<<8)  
+#define AD5410_CMD_SRCLK(x)   (x<<8)
 #define AD5410_CMD_SRSTEP(x)  (x<<5)
 #define AD5410_CMD_SREN       (1<<4)
 #define AD5410_CMD_DCEN       (1<<3)

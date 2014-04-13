@@ -99,12 +99,12 @@
  *   On success mq_notify() returns 0; on error, -1 is returned, with
  *   errno set to indicate the error.
  *
- *   EBADF The descriptor specified in mqdes is invalid. 
+ *   EBADF The descriptor specified in mqdes is invalid.
  *   EBUSY Another process has already registered to receive notification
- *     for this message queue. 
+ *     for this message queue.
  *   EINVAL sevp->sigev_notify is not one of the permitted values; or
  *     sevp->sigev_notify is SIGEV_SIGNAL and sevp->sigev_signo is not a
- *     valid signal number. 
+ *     valid signal number.
  *   ENOMEM
  *     Insufficient memory.
  *

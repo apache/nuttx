@@ -204,7 +204,7 @@ int sigaction(int signo, FAR const struct sigaction *act, FAR struct sigaction *
 
   /* If the argument act is a null pointer, signal handling is unchanged;
    * thus, the call can be used to enquire about the current handling of
-   * a given signal. 
+   * a given signal.
    */
 
   if (!act)

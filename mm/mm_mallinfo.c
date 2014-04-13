@@ -71,7 +71,7 @@ static inline
 int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
 {
   struct mm_allocnode_s *node;
-  size_t mxordblk = 0; 
+  size_t mxordblk = 0;
   int    ordblks  = 0;  /* Number of non-inuse chunks */
   size_t uordblks = 0;  /* Total allocated space */
   size_t fordblks = 0;  /* Total non-inuse space */
@@ -92,7 +92,7 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
       /* Visit each node in the region
        * Retake the semaphore for each region to reduce latencies
        */
-      
+
       mm_takesemaphore(heap);
 
       for (node = heap->mm_heapstart[region];
@@ -116,7 +116,7 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
         }
 
       mm_givesemaphore(heap);
-        
+
       mvdbg("region=%d node=%p heapend=%p\n", region, node, heap->mm_heapend[region]);
       DEBUGASSERT(node == heap->mm_heapend[region]);
       uordblks += SIZEOF_MM_ALLOCNODE; /* account for the tail node */

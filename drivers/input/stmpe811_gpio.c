@@ -215,7 +215,7 @@ int stmpe811_gpioconfig(STMPE811_HANDLE handle, uint8_t pinconfig)
           regval &= pinmask;
         }
       stmpe811_putreg8(priv, STMPE811_GPIO_RE, regval);
- 
+
       /* Disable interrupts for now */
 
       regval = stmpe811_getreg8(priv, STMPE811_GPIO_EN);

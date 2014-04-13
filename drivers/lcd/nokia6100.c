@@ -433,7 +433,7 @@ static const struct fb_videoinfo_s g_videoinfo =
 
 /* This is the standard, NuttX Plane information object */
 
-static const struct lcd_planeinfo_s g_planeinfo = 
+static const struct lcd_planeinfo_s g_planeinfo =
 {
   .putrun = nokia_putrun,           /* Put a run into LCD memory */
   .getrun = nokia_getrun,           /* Get a run from LCD memory */
@@ -443,12 +443,12 @@ static const struct lcd_planeinfo_s g_planeinfo =
 
 /* This is the standard, NuttX LCD driver object */
 
-static struct nokia_dev_s g_lcddev = 
+static struct nokia_dev_s g_lcddev =
 {
   .dev =
   {
     /* LCD Configuration */
- 
+
     .getvideoinfo = nokia_getvideoinfo,
     .getplaneinfo = nokia_getplaneinfo,
 
@@ -523,7 +523,7 @@ static const uint8_t g_pwrctr[] =
  * P3: Grayscale setup
  */
 
-static const uint8_t g_datctl[] = 
+static const uint8_t g_datctl[] =
 {
   S1D15G10_DATCTL,                  /* Data control */
   0
@@ -586,11 +586,11 @@ static const uint8_t g_paset[] =
 };
 
 /* Column address set (CASET) */
-  
+
 static const uint8_t g_caset[] =
 {
   S1D15G10_CASET,                   /* Column start address set */
-  NOKIA_COLBIAS,          
+  NOKIA_COLBIAS,
   131
 };
 #endif /* CONFIG_NOKIA6100_S1D15G10 */
@@ -665,7 +665,7 @@ static const uint8_t g_setcon[] =
  * Assumptions:
  *
  **************************************************************************************/
- 
+
 static inline void nokia_configspi(FAR struct spi_dev_s *spi)
 {
   lcddbg("Mode: %d Bits: %d Frequency: %d\n",
@@ -884,7 +884,7 @@ static void nokia_clrram(FAR struct spi_dev_s *spi)
 
       *rowbuf++ = NOKIA_LCD_DATA;
     }
-  
+
   /* Select the LCD and send the RAMWR command */
 
   nokia_select(spi);
@@ -948,7 +948,7 @@ static int nokia_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffe
   cmd[0] = LCD_CASET;
   cmd[1] = row | NOKIA_LCD_DATA;
   cmd[2] = NOKIA_ENDCOL  | NOKIA_LCD_DATA;
-  (void)SPI_SNDBLOCK(spi, cmd, 3); 
+  (void)SPI_SNDBLOCK(spi, cmd, 3);
   nokia_deselect(spi);
 
   /* Then send the run */
@@ -1212,7 +1212,7 @@ FAR struct lcd_dev_s *nokia_lcdinitialize(FAR struct spi_dev_s *spi, unsigned in
   DEBUGASSERT(devno == 0);
 
   /* Initialize the driver data structure */
-  
+
   priv->spi      = spi;                     /* Save the SPI instance */
   priv->contrast = NOKIA_DEFAULT_CONTRAST;  /* Initial contrast setting */
 

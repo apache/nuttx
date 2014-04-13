@@ -116,7 +116,7 @@ int pthread_cond_signal(FAR pthread_cond_t *cond)
            * usable from interrupt handlers.  However, from interrupt handlers,
            * you cannot take the associated mutex before signaling the condition.
            * As a result, I think that there could be a race condition with
-           * the following logic which assumes that the if sval < 0 then the 
+           * the following logic which assumes that the if sval < 0 then the
            * thread is waiting.  Without the mutex, there is no atomic, protected
            * operation that will guarantee this to be so.
            */

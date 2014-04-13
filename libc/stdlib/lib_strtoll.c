@@ -65,7 +65,7 @@
  * Warning: does not check for integer overflow!
  *
  ****************************************************************************/
- 
+
 long long strtoll(const char *nptr, char **endptr, int base)
 {
   unsigned long long accum = 0;

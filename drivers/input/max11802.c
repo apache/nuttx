@@ -269,7 +269,7 @@ static uint16_t max11802_sendcmd(FAR struct max11802_dev_s *priv, uint8_t cmd, i
   /* Send the command */
 
   (void)SPI_SEND(priv->spi, cmd);
-  
+
   /* Read the data */
 
   SPI_RECVBLOCK(priv->spi, buffer, 2);
@@ -278,7 +278,7 @@ static uint16_t max11802_sendcmd(FAR struct max11802_dev_s *priv, uint8_t cmd, i
   result = ((uint16_t)buffer[0] << 8) | (uint16_t)buffer[1];
   *tags = result & 0xF;
   result >>= 4; // Get rid of tags
-  
+
   ivdbg("cmd:%02x response:%04x\n", cmd, result);
   return result;
 }
@@ -303,7 +303,7 @@ static void max11802_notify(FAR struct max11802_dev_s *priv)
        * is no longer available.
        */
 
-      sem_post(&priv->waitsem); 
+      sem_post(&priv->waitsem);
     }
 
   /* If there are threads waiting on poll() for MAX11802 data to become available,
@@ -415,7 +415,7 @@ static int max11802_waitsample(FAR struct max11802_dev_s *priv,
   while (max11802_sample(priv, sample) < 0)
     {
       /* Wait for a change in the MAX11802 state */
- 
+
       ivdbg("Waiting..\n");
       priv->nwaiters++;
       ret = sem_wait(&priv->waitsem);
@@ -548,10 +548,10 @@ static void max11802_worker(FAR void *arg)
   /* Lock the SPI bus so that we have exclusive access */
 
   max11802_lock(priv->spi);
-  
+
   /* Start coordinate measurement */
   (void)max11802_sendcmd(priv, MAX11802_CMD_MEASUREXY, &tags);
-  
+
   /* Get exclusive access to the driver data structure */
 
   do
@@ -576,7 +576,7 @@ static void max11802_worker(FAR void *arg)
     ivdbg("\nPD\n");
   else
     ivdbg("\nPU\n");
-  
+
   if (!pendown)
     {
       /* The pen is up.. reset thresholding variables. */
@@ -589,7 +589,7 @@ static void max11802_worker(FAR void *arg)
        */
 
       ivdbg("\nPC%d\n", priv->sample.contact);
-      
+
       if (priv->sample.contact == CONTACT_NONE ||
           priv->sample.contact == CONTACT_UP)
 
@@ -632,11 +632,11 @@ static void max11802_worker(FAR void *arg)
        * the hardware value can change in the middle of the readout,
        * causing the upper bits to be still invalid even though lower
        * bits indicate valid result.
-       * 
+       *
        * We work around this by reading the registers once more after
        * the tags indicate they are ready.
        */
-      
+
       int readycount = 0;
       do {
 #ifdef CONFIG_MAX11802_SWAPXY
@@ -651,17 +651,17 @@ static void max11802_worker(FAR void *arg)
           readycount++;
         }
       } while (readycount < 2);
-      
+
       /* Continue to sample the position while the pen is down */
       wd_start(priv->wdog, MAX11802_WDOG_DELAY, max11802_wdog, 1, (uint32_t)priv);
-      
+
       /* Check if data is valid */
       if ((tags & 0x03) != 0)
       {
         ivdbg("Touch ended before measurement\n");
         goto ignored;
       }
-      
+
       /* Perform a thresholding operation so that the results will be more stable.
        * If the difference from the last sample is small, then ignore the event.
        * REVISIT:  Should a large change in pressure also generate a event?
@@ -1253,27 +1253,27 @@ int max11802_register(FAR struct spi_dev_s *spi,
   (void)SPI_SEND(priv->spi, MAX11802_CMD_TIMING_WR);
   (void)SPI_SEND(priv->spi, MAX11802_TIMING);
   SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, false);
-  
+
   SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, true);
   (void)SPI_SEND(priv->spi, MAX11802_CMD_DELAY_WR);
   (void)SPI_SEND(priv->spi, MAX11802_DELAY);
   SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, false);
-  
+
   /* Test that the device access was successful. */
   SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, true);
   (void)SPI_SEND(priv->spi, MAX11802_CMD_MODE_RD);
   ret = SPI_SEND(priv->spi, 0);
   SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, false);
-  
+
   /* Unlock the bus */
   max11802_unlock(spi);
-  
+
   if (ret != MAX11802_MODE)
   {
     idbg("max11802 mode readback failed: %02x\n", ret);
     goto errout_with_priv;
   }
-  
+
   /* Register the device as an input device */
 
   (void)snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);

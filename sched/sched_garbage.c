@@ -84,7 +84,7 @@ static inline void sched_kucleanup(void)
    /* Test if the delayed deallocation queue is empty.  No special protection
     * is needed because this is an atomic test.
     */
- 
+
    while (g_delayed_kufree.head)
     {
       /* Remove the first delayed deallocation.  This is not atomic and so
@@ -131,7 +131,7 @@ static inline void sched_kcleanup(void)
    /* Test if the delayed deallocation queue is empty.  No special protection
     * is needed because this is an atomic test.
     */
- 
+
    while (g_delayed_kfree.head)
     {
       /* Remove the first delayed deallocation.  This is not atomic and so

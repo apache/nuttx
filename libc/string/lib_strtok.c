@@ -56,7 +56,7 @@ static char *g_saveptr = NULL;
  *    The  strtok()  function  parses  a string into a
  *    sequence of tokens.  On the first call to strtok() the
  *    string to be parsed should be specified in 'str'.  In
- *    each subsequent call that should parse the same string, 
+ *    each subsequent call that should parse the same string,
  *    'str' should be NULL.
  *
  *    The 'delim' argument specifies a set of characters that

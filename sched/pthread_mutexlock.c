@@ -145,7 +145,7 @@ int pthread_mutex_lock(FAR pthread_mutex_t *mutex)
           if (mutex->type == PTHREAD_MUTEX_RECURSIVE)
             {
               /* Yes... just increment the number of locks held and return success */
-          
+
               mutex->nlocks++;
             }
           else

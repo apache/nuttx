@@ -110,7 +110,7 @@ bool sched_mergepending(void)
     {
       pndnext = pndtcb->flink;
 
-      /* Search the g_readytorun list to find the location to insert the 
+      /* Search the g_readytorun list to find the location to insert the
        * new pndtcb. Each is list is maintained in ascending sched_priority
        * order.
        */

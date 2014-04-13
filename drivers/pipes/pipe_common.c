@@ -187,7 +187,7 @@ int pipecommon_open(FAR struct file *filep)
   struct pipe_dev_s *dev   = inode->i_private;
   int                sval;
   int                ret;
- 
+
   /* Some sanity checking */
 #if CONFIG_DEBUG
   if (!dev)
@@ -337,7 +337,7 @@ int pipecommon_close(FAR struct file *filep)
       dev->d_buffer = NULL;
 
       /* And reset all counts and indices */
- 
+
       dev->d_wrndx    = 0;
       dev->d_rdndx    = 0;
       dev->d_refs     = 0;
@@ -405,7 +405,7 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
       ret = sem_wait(&dev->d_rdsem);
       sched_unlock();
 
-      if (ret < 0  || sem_wait(&dev->d_bfsem) < 0) 
+      if (ret < 0  || sem_wait(&dev->d_bfsem) < 0)
         {
           return ERROR;
         }
@@ -419,7 +419,7 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
       *buffer++ = dev->d_buffer[dev->d_rdndx];
       if (++dev->d_rdndx >= CONFIG_DEV_PIPE_SIZE)
         {
-          dev->d_rdndx = 0; 
+          dev->d_rdndx = 0;
         }
       nread++;
     }

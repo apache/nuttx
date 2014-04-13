@@ -181,8 +181,8 @@ static int vnet_transmit(FAR struct vnet_driver_s *vnet)
 		/* Setup the TX timeout watchdog (perhaps restarting the timer) */
 		//(void)wd_start(vnet->sk_txtimeout, VNET_TXTIMEOUT, vnet_txtimeout, 1, (uint32_t)vnet);
 
-		// When vnet_xmit fail, it means TX buffer is full. Watchdog 
-		// is of no use here because no TX done INT will happen. So 
+		// When vnet_xmit fail, it means TX buffer is full. Watchdog
+		// is of no use here because no TX done INT will happen. So
 		// we reset the TX buffer directly.
 #ifdef CONFIG_DEBUG
 		cprintf("VNET: TX buffer is full\n");
@@ -429,7 +429,7 @@ static void vnet_polltimer(int argc, uint32_t arg, ...)
  *
  * Description:
  *   NuttX Callback: Bring up the Ethernet interface when an IP address is
- *   provided 
+ *   provided
  *
  * Parameters:
  *   dev  - Reference to the NuttX driver state structure
@@ -505,7 +505,7 @@ static int vnet_ifdown(struct uip_driver_s *dev)
  * Function: vnet_txavail
  *
  * Description:
- *   Driver callback invoked when new TX data is available.  This is a 
+ *   Driver callback invoked when new TX data is available.  This is a
  *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
  *   latency.
  *
@@ -562,7 +562,7 @@ out:
  *
  * Parameters:
  *   dev  - Reference to the NuttX driver state structure
- *   mac  - The MAC address to be added 
+ *   mac  - The MAC address to be added
  *
  * Returned Value:
  *   None
@@ -591,7 +591,7 @@ static int vnet_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
  *
  * Parameters:
  *   dev  - Reference to the NuttX driver state structure
- *   mac  - The MAC address to be removed 
+ *   mac  - The MAC address to be removed
  *
  * Returned Value:
  *   None

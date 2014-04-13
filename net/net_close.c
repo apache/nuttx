@@ -221,8 +221,8 @@ static uint16_t netclose_interrupt(FAR struct uip_driver_s *dev,
        * do not yet report UIP_CLOSE in the response.
        */
 
-      dev->d_len = 0;     
-      flags = (flags & ~UIP_NEWDATA);     
+      dev->d_len = 0;
+      flags = (flags & ~UIP_NEWDATA);
     }
 
 #endif /* CONFIG_NET_TCP_WRITE_BUFFERS */

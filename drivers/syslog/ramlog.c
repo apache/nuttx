@@ -143,7 +143,7 @@ static char g_sysbuffer[CONFIG_RAMLOG_CONSOLE_BUFSIZE];
  * could be called before the driver initialization logic executes.
  */
 
-static struct ramlog_dev_s g_sysdev = 
+static struct ramlog_dev_s g_sysdev =
 {
 #ifndef CONFIG_RAMLOG_NONBLOCKING
   0,                             /* rl_nwaiters */
@@ -338,7 +338,7 @@ static ssize_t ramlog_read(FAR struct file *filep, FAR char *buffer, size_t len)
            * mutual exclusion semaphore?
            */
 
-          if (ret < 0) 
+          if (ret < 0)
             {
               /* No.. One of the two sem_wait's failed. */
 
@@ -584,7 +584,7 @@ int ramlog_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
         {
           ndx = 0;
         }
-  
+
       if (ndx != priv->rl_tail)
        {
          eventset |= POLLOUT;

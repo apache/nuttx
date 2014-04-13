@@ -242,7 +242,7 @@
 /* OTG Definitions */
 
 /* OTG SET FEATURE Constants */
-  
+
 #define USBOTG_FEATURE_B_HNP_ENABLE             3  /* Enable B device to perform HNP */
 #define USBOTG_FEATURE_A_HNP_SUPPORT            4  /* A device supports HNP */
 #define USBOTG_FEATURE_A_ALT_HNP_SUPPORT        5  /* Another port on the A device supports HNP */
@@ -389,7 +389,7 @@ struct usb_qualdesc_s
  * the USB Device Working Group (DWG) created USB device classes that allow for
  * functions with multiple interfaces, and the USB Implementor's Forum issued an
  * Engineering Change Notification (ECN) that defines a mechanism for grouping
- * interfaces. 
+ * interfaces.
  */
 
 struct usb_iaddesc_s

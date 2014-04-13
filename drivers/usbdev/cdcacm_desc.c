@@ -188,7 +188,7 @@ static const struct cdc_hdr_funcdesc_s g_funchdr =
     MSBYTE(CDC_VERSIONNO)                       /* MS cdc */
   }
 };
- 
+
 /* ACM functional descriptor */
 
 static const struct cdc_acm_funcdesc_s g_acmfunc =

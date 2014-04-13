@@ -93,7 +93,7 @@
  *
  *   If the message queue is full and O_NONBLOCK is set, the message is not
  *   queued and ERROR is returned.
- * 
+ *
  * Parameters:
  *   mqdes - Message queue descriptor
  *   msg - Message to send

@@ -55,7 +55,7 @@ char *strpbrk(const char *str, const char *charset)
       return NULL;
     }
 #endif
-    
+
   /* Check each character in the string */
 
   while (*str)

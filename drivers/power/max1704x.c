@@ -107,7 +107,7 @@
 #  define MAX1407X_VCELL(v)     MAX14071_VCELL(v)
 #endif
 
-/* "SOC Register. The SOC register is a read-only register that displays the 
+/* "SOC Register. The SOC register is a read-only register that displays the
  *  state of charge of the cell as calculated by the ModelGauge algorithm. The
  *  result is displayed as a percentage of the cell’s full capacity...
  *

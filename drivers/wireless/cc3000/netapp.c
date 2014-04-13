@@ -307,14 +307,14 @@ long netapp_ping_send(unsigned long *ip, unsigned long ulPingAttempts,
  *   events: HCI_EVNT_WLAN_ASYNC_PING_REPORT. This event will carry the report
  *   structure: netapp_pingreport_args_t. This structure is filled in with ping
  *   results up till point of triggering API.
- *   
+ *
  *   netapp_pingreport_args_t:
  *     packets_sent - echo sent,
  *     packets_received - echo reply
  *     min_round_time - minimum round time,
  *     max_round_time - max round time,
  *     avg_round_time - average round time
- *   
+ *
  *   NOTE: When a ping operation is not active, the returned structure fields
  *   are 0.
  *

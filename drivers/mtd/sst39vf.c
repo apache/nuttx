@@ -159,7 +159,7 @@ static const struct sst39vf_chip_s g_sst39vf1601 =
   /* 32,                       nblocks */
   512,                      /* nsectors */
   /* 64*1024,                  blocksize */
-  4*1024,                   /* sectorsize */  
+  4*1024,                   /* sectorsize */
 };
 
 static const struct sst39vf_chip_s g_sst39vf1602 =
@@ -169,7 +169,7 @@ static const struct sst39vf_chip_s g_sst39vf1602 =
   /* 32,                       nblocks */
   512,                      /* nsectors */
   /* 64*1024,                  blocksize */
-  4*1024,                   /* sectorsize */  
+  4*1024,                   /* sectorsize */
 };
 
 static const struct sst39vf_chip_s g_sst39vf3201 =
@@ -179,7 +179,7 @@ static const struct sst39vf_chip_s g_sst39vf3201 =
   /* 64,                       nblocks */
   1024,                     /* nsectors */
   /* 64*1024,                  blocksize */
-  4*1024,                   /* sectorsize */  
+  4*1024,                   /* sectorsize */
 };
 
 static const struct sst39vf_chip_s g_sst39vf3202 =
@@ -189,7 +189,7 @@ static const struct sst39vf_chip_s g_sst39vf3202 =
   /* 64,                       nblocks */
   1024,                     /* nsectors */
   /* 64*1024,                  blocksize */
-  4*1024,                   /* sectorsize */  
+  4*1024,                   /* sectorsize */
 };
 
 /* This structure holds the state of the MTD driver */
@@ -216,74 +216,74 @@ static const struct sst39vf_wrinfo_s g_wordprogram[3] =
   {0x5555, 0x00aa}, {0x2aaa, 0x0055}, {0x5555, 0x00a0} /* , {address, data} */
 };
 
-static const struct sst39vf_wrinfo_s g_sectorerase[5] = 
+static const struct sst39vf_wrinfo_s g_sectorerase[5] =
 {
   {0x5555, 0x00aa}, {0x2aaa, 0x0055}, {0x5555, 0x0080},
   {0x5555, 0x00aa}, {0x2aaa, 0x0055} /* , {sector, 0x0030} */
 };
 
 #if 0 /* Not used */
-static const struct sst39vf_wrinfo_s g_blockerase[5] = 
+static const struct sst39vf_wrinfo_s g_blockerase[5] =
 {
   {0x5555, 0x00aa}, {0x2aaa, 0x0055}, {0x5555, 0x80},
   {0x5555, 0x00aa}, {0x2aaa, 0x0055} /* , {block, 0x0050} */
 };
 #endif
 
-static const struct sst39vf_wrinfo_s g_chiperase[6] = 
+static const struct sst39vf_wrinfo_s g_chiperase[6] =
 {
   {0x5555, 0x00aa}, {0x2aaa, 0x0055}, {0x5555, 0x0080},
   {0x5555, 0x00aa}, {0x2aaa, 0x0055}, {0x5555, 0x0010}
 };
 
 #if 0 /* Not used */
-static const struct sst39vf_wrinfo_s g_erasesuspend[1] = 
+static const struct sst39vf_wrinfo_s g_erasesuspend[1] =
 {
   {0x5555, 0x00aa}
 };
 
-static const struct sst39vf_wrinfo_s g_eraseresume[1] = 
+static const struct sst39vf_wrinfo_s g_eraseresume[1] =
 {
   {0x5555, 0x00aa}
 };
 
-static const struct sst39vf_wrinfo_s g_querysecid[3] = 
+static const struct sst39vf_wrinfo_s g_querysecid[3] =
 {
   {0x5555, 0x00aa}, {0x2aaa, 0x0055},  {0x5555, 0x0088}
 };
 
-static const struct sst39vf_wrinfo_s g_securityid_wordprogram[3] = 
+static const struct sst39vf_wrinfo_s g_securityid_wordprogram[3] =
 {
   {0x5555, 0x00aa}, {0x2aaa, 0x0055},  {0x5555, 0x00a5}, /* {address, data} */
 };
 
-static const struct sst39vf_wrinfo_s g_securityid_lockout[3] = 
+static const struct sst39vf_wrinfo_s g_securityid_lockout[3] =
 {
   {0x5555, 0x00aa}, {0x2aaa, 0x0055},  {0x5555, 0x0085} /* {0xXX, 0x0000} */
 };
 #endif
 
-static const struct sst39vf_wrinfo_s g_swid_entry[3] = 
+static const struct sst39vf_wrinfo_s g_swid_entry[3] =
 {
   {0x5555, 0x00aa}, {0x2aaa, 0x0055},  {0x5555, 0x0090}
 };
 
 #if 0 /* Not used */
-static const struct sst39vf_wrinfo_s g_cfiquery[3] = 
+static const struct sst39vf_wrinfo_s g_cfiquery[3] =
 {
   {0x5555, 0x00aa}, {0x2aaa, 0x0055},  {0x5555, 0x0080},
 };
 #endif
 
-static const struct sst39vf_wrinfo_s g_swid_exit[3] = 
+static const struct sst39vf_wrinfo_s g_swid_exit[3] =
 {
   {0x5555, 0x00aa}, {0x2aaa, 0x0055},  {0x5555, 0x00f0}
 };
 
 #if 0 /* Not used */
-static const struct sst39vf_wrinfo_s g_swid_exit2[1] = 
+static const struct sst39vf_wrinfo_s g_swid_exit2[1] =
 {
-  {0x0000, 0x00f0}, 
+  {0x0000, 0x00f0},
 };
 #endif
 
@@ -548,7 +548,7 @@ static int sst39vf_sectorerase(FAR struct sst39vf_dev_s *priv,
  *   Write one 16-bit word to FLASH
  *
  *  "The SST39VF160x/320x are programmed on a word-by-word basis. Before
- *   programming, the sector where the word exists must be fully erased. The 
+ *   programming, the sector where the word exists must be fully erased. The
  *   rogram operation is accomplished in three steps. The first step is the
  *   three-byte load sequence for Software Data Protection. The second step
  *   is to load word address and word data. During the Word-Program operation,
@@ -765,7 +765,7 @@ static int sst39vf_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
             return sst39vf_chiperase(priv);
           }
         break;
- 
+
       default:
         ret = -ENOTTY; /* Bad command */
         break;

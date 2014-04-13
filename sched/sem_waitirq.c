@@ -121,7 +121,7 @@ void sem_waitirq(FAR struct tcb_s *wtcb, int errcode)
        * that was taken by sem_post().  This count decremented the semaphore
        * count to negative and caused the thread to be blocked in the first
        * place.
-       */ 
+       */
 
       sem->semcount++;
 

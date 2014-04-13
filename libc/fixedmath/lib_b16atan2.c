@@ -91,7 +91,7 @@ b16_t b16atan2(b16_t y, b16_t x)
   t2 = ub16inv(t0);
   t2 = b16mulb16(t1, t2);
 
-  t3 = b16mulb16(t2, t2); 
+  t3 = b16mulb16(t2, t2);
   t0 =                   - B16_C1;
   t0 = b16mulb16(t0, t3) + B16_C2;
   t0 = b16mulb16(t0, t3) - B16_C3;

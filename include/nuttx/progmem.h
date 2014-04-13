@@ -96,7 +96,7 @@ uint16_t up_progmem_pagesize(uint16_t page);
  * Name: up_progmem_getpage
  *
  * Description:
- *   Address to page conversion 
+ *   Address to page conversion
  *
  * Input Parameters:
  *   addr - Address with of without flash offset (absolute or aligned to page0)
@@ -118,7 +118,7 @@ int up_progmem_getpage(uint32_t addr);
  *   Erase selected page.
  *
  * Input Parameters:
- *   page - 
+ *   page -
  *
  * Returned Value:
  *   Page size or negative value on error.  The following errors are reported
@@ -142,7 +142,7 @@ int up_progmem_erasepage(uint16_t page);
  *   Checks whether page is erased
  *
  * Input Parameters:
- *    page - 
+ *    page -
  *
  * Returned Value:
  *   Returns number of bytes written or negative value on error. If it
@@ -187,7 +187,7 @@ int up_progmem_ispageerased(uint16_t page);
 int up_progmem_write(uint32_t addr, const void *buf, size_t count);
 
 /* TODO: Define the following functions and their options:
- *  - up_progmem_protect() 
+ *  - up_progmem_protect()
  *  - up_progmem_unprotect()
  */
 

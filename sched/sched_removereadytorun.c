@@ -79,7 +79,7 @@
  *   rtcb - Points to the TCB that is ready-to-run
  *
  * Return Value:
- *   true if the currently active task (the head of the 
+ *   true if the currently active task (the head of the
  *     g_readytorun list) has changed.
  *
  * Assumptions:

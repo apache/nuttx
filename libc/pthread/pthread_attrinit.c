@@ -61,7 +61,7 @@
 /* Default pthread attributes (see included/nuttx/pthread.h).  When configured
  * to build separate kernel- and user-address spaces, this global is
  * duplicated in each address spaced.  This copy can only be shared within
- * the user address space. 
+ * the user address space.
  */
 
 #if defined(CONFIG_NUTTX_KERNEL) && !defined(__KERNEL__)

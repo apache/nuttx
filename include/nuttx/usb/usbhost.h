@@ -561,7 +561,7 @@ struct usbhost_registry_s
    * environments where there may be multiple USB ports and multiple USB devices
    * simultaneously connected (see the CLASS_CREATE() macro above).
    */
- 
+
   FAR struct usbhost_class_s     *(*create)(FAR struct usbhost_driver_s *drvr,
                                            FAR const struct usbhost_id_s *id);
 

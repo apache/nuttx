@@ -138,7 +138,7 @@ int nandmodel_find(FAR const struct nand_model_s *modeltab, size_t size,
                   switch (id4 & 0x30)
                     {
                       case 0x00:
-                        model->blocksize = 64; 
+                        model->blocksize = 64;
                         break;
 
                       case 0x10:

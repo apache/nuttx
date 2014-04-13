@@ -104,7 +104,7 @@
 
 /* Class-specific requests (HID 7.2)
  *
- *   bmRequestType (                 USB_REQ_TYPE_CLASS | USB_REQ_RECIPIENT_INTERFACE) -or- 
+ *   bmRequestType (                 USB_REQ_TYPE_CLASS | USB_REQ_RECIPIENT_INTERFACE) -or-
  *                 (USB_REQ_DIR_IN | USB_REQ_TYPE_CLASS | USB_REQ_RECIPIENT_INTERFACE)
  *   bRequest      Class-specific request
  *   wValue        Varies according to request
@@ -112,7 +112,7 @@
  *   wLength       Number of bytes to transfer in the data phase
  *   Data          Data
  */
- 
+
 #define USBHID_REQUEST_GETREPORT          0x01
 #define USBHID_REQUEST_GETIDLE            0x02
 #define USBHID_REQUEST_GETPROTOCOL        0x03
@@ -122,9 +122,9 @@
 
 /* Report Type (MS byte of wValue for GET_REPORT) (HID 7.2.1) */
 
-#define USBHID_REPORTTYPE_INPUT           0x01 
-#define USBHID_REPORTTYPE_OUTPUT          0x02 
-#define USBHID_REPORTTYPE_FEATURE         0x03 
+#define USBHID_REPORTTYPE_INPUT           0x01
+#define USBHID_REPORTTYPE_OUTPUT          0x02
+#define USBHID_REPORTTYPE_FEATURE         0x03
 
 /* HID Descriptor ***********************************************************/
 

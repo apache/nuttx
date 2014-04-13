@@ -98,11 +98,11 @@ int stmpe811_tempinitialize(STMPE811_HANDLE handle)
   /* Enable the temperature sensor */
 
   stmpe811_putreg8(priv, STMPE811_TEMP_CTRL, TEMP_CTRL_ENABLE);
-  
+
   /* Aquire data enable */
 
   stmpe811_putreg8(priv, STMPE811_TEMP_CTRL, (TEMP_CTRL_ACQ|TEMP_CTRL_ENABLE));
-  
+
   return OK;
 }
 
@@ -124,14 +124,14 @@ int stmpe811_tempinitialize(STMPE811_HANDLE handle)
 uint16_t stmpe811_tempread(STMPE811_HANDLE handle)
 {
   FAR struct stmpe811_dev_s *priv = (FAR struct stmpe811_dev_s *)handle;
-  uint32_t temp = 0;  
+  uint32_t temp = 0;
   uint8_t  temp1;
   uint8_t  temp2;
-    
+
   /* Acquire data enable */
 
   stmpe811_putreg8(priv, STMPE811_TEMP_CTRL, (TEMP_CTRL_ACQ|TEMP_CTRL_ENABLE));
-  
+
   /* Read the temperature */
 
   temp1 = stmpe811_getreg8(priv, STMPE811_SYS_CTRL2);

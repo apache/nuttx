@@ -199,10 +199,10 @@ int task_reparent(pid_t ppid, pid_t chpid)
   ret = OK;
 
 #endif /* CONFIG_SCHED_CHILD_STATUS */
-  
+
 errout_with_ints:
   irqrestore(flags);
-  return ret;  
+  return ret;
 }
 #else
 int task_reparent(pid_t ppid, pid_t chpid)
@@ -254,7 +254,7 @@ int task_reparent(pid_t ppid, pid_t chpid)
     {
       ppid = otcb->ppid;
     }
-  
+
   /* Get the new parent task's TCB (ptcb) */
 
   ptcb = sched_gettcb(ppid);
@@ -311,10 +311,10 @@ int task_reparent(pid_t ppid, pid_t chpid)
   ret = OK;
 
 #endif /* CONFIG_SCHED_CHILD_STATUS */
-  
+
 errout_with_ints:
   irqrestore(flags);
-  return ret;  
+  return ret;
 }
 #endif
 #endif /* CONFIG_SCHED_HAVE_PARENT */

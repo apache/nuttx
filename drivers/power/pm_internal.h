@@ -67,7 +67,7 @@
  * slice ticks = (CONFIG_PM_SLICEMS msec / 1000 msec/sec) /
  *               (CLOCKS_PER_SEC ticks/sec)
  */
- 
+
 #define TIME_SLICE_TICKS ((CONFIG_PM_SLICEMS * CLOCKS_PER_SEC) /  1000)
 
 /* Function-like macros *****************************************************/

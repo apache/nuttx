@@ -165,7 +165,7 @@ void nxgl_circletraps(FAR const struct nxgl_point_s *center, nxgl_coord_t radius
   circle[2].top.x1      = circle[1].bot.x1;
   circle[2].top.x2      = circle[1].bot.x2;
   circle[2].top.y       = circle[1].bot.y;
-  
+
   circle[5].bot.x1      = circle[1].bot.x1;
   circle[5].bot.x2      = circle[1].bot.x2;
   circle[5].bot.y       = center->y + xoffs;

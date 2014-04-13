@@ -79,6 +79,6 @@ FAR struct streamlist *sched_getstreams(void)
 #else
   return &group->tg_streamlist;
 #endif
-} 
+}
 
 #endif /* CONFIG_NFILE_DESCRIPTORS && CONFIG_NFILE_STREAMS */

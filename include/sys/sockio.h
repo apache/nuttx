@@ -91,7 +91,7 @@ struct ip_msfilter
 
 #else
 
-struct ip_msfilter  
+struct ip_msfilter
 {
    char imsf_name[IMSFNAMSIZ];     /* Network device name, e.g., "eth0" */
    struct in_addr imsf_multiaddr;  /* IP multicast address of group */

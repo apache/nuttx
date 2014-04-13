@@ -82,7 +82,7 @@
  *   termiosp - The termiosp argument is a pointer to a termios structure.
  *
  * Returned Value:
- *   Encoded baud value from the termios structure. 
+ *   Encoded baud value from the termios structure.
  *
  ****************************************************************************/
 

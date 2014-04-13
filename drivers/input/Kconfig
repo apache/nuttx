@@ -57,7 +57,7 @@ config INPUT_ADS7843E
 	---help---
 		Enable support for the TI/Burr-Brown ADS7842 touchscreen controller.  I believe
 		that driver should be compatibile with the TI/Burr-Brown TSC2046 and XPT2046
-		touchscreen controllers as well. 
+		touchscreen controllers as well.
 
 if INPUT_ADS7843E
 
@@ -116,7 +116,7 @@ config ADS7843E_THRESHX
 		thresholds. This trades reduces data rate for some loss in dragging accuracy.  For
 		12-bit values so the raw ranges are 0-4095. So for example, if your display is
 		320x240, then THRESHX=13 and THRESHY=17 would correspond to one pixel.  Default: 12
- 
+
 config ADS7843E_THRESHY
 	int "Y threshold"
 	default 12
@@ -132,7 +132,7 @@ config INPUT_STMPE811
 	bool "STMicro STMPE811 Driver"
 	default n
 	---help---
-		Enables support for the STMPE811 driver 
+		Enables support for the STMPE811 driver
 
 if INPUT_STMPE811
 
@@ -210,7 +210,7 @@ config STMPE811_THRESHX
 		STMPE811 is configure for 12-bit values so the raw ranges are 0-4095. So
 		for example, if your display is 320x240, then THRESHX=13 and THRESHY=17
 		would correspond to one pixel.  Default: 12
- 
+
 config STMPE811_THRESHY
 	int "Y threshold"
 	default 12

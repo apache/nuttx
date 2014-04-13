@@ -75,7 +75,7 @@
  *   any data other than a variable of type pid_t used to store the return
  *   value from vfork(), or returns from the function in which vfork() was
  *   called, or calls any other function before successfully calling _exit()
- *   or one of the exec family of functions. 
+ *   or one of the exec family of functions.
  *
  *   This functin provides one step in the overall vfork() sequence:  It
  *   Allocates and initializes the child task's TCB.  The overall sequence is:
@@ -198,7 +198,7 @@ errout_with_tcb:
  *   any data other than a variable of type pid_t used to store the return
  *   value from vfork(), or returns from the function in which vfork() was
  *   called, or calls any other function before successfully calling _exit()
- *   or one of the exec family of functions. 
+ *   or one of the exec family of functions.
  *
  *   This functin provides one step in the overall vfork() sequence:  It
  *   starts execution of the previously initialized TCB.  The overall
@@ -228,7 +228,7 @@ errout_with_tcb:
  *   Upon successful completion, vfork() returns 0 to the child process and
  *   returns the process ID of the child process to the parent process.
  *   Otherwise, -1 is returned to the parent, no child process is created,
- *   and errno is set to indicate the error. 
+ *   and errno is set to indicate the error.
  *
  ****************************************************************************/
 

@@ -37,7 +37,7 @@
 /** \file
  *  \author Uros Platise
  *  \brief ST LIS331DL I2C Device Driver
- **/ 
+ **/
 
 #ifndef __INCLUDE_NUTTX_SENSORS_LIS331DL_H
 #define __INCLUDE_NUTTX_SENSORS_LIS331DL_H
@@ -76,11 +76,11 @@ struct lis331dl_vector_s {
  ************************************************************************************/
 
 /** Initialize ST LIS331DL Chip
- * 
+ *
  * \param i2c I2C Device Structure
  * \param address I2C Address of the proposed device
  * \return Pointer to newly allocated ST LIS331DL structure or NULL on error with errno set.
- * 
+ *
  * Possible errno as set by this function on error:
  *  - ENODEV: When device addressed on given address is not compatible or it is not a LIS331DL
  *  - EFAULT: When there is no device at given address.
@@ -89,10 +89,10 @@ struct lis331dl_vector_s {
 EXTERN struct lis331dl_dev_s * lis331dl_init(struct i2c_dev_s * i2c, uint16_t address);
 
 /** Deinitialize ST LIS331DL Chip
- * 
+ *
  * \param dev Device to LIS331DL device structure, as returned by the lis331dl_init()
  * \return OK On success
- * 
+ *
  **/
 EXTERN int lis331dl_deinit(struct lis331dl_dev_s * dev);
 
@@ -102,8 +102,8 @@ EXTERN int lis331dl_powerup(struct lis331dl_dev_s * dev);
 /** Power down device, stop conversion */
 EXTERN int lis331dl_powerdown(struct lis331dl_dev_s * dev);
 
-/** Configure conversion 
- * 
+/** Configure conversion
+ *
  * \param dev Device to LIS331DL device structure
  * \param full When set, range of [-9g, 9g] is selected, otherwise [-2g, +2g]
  * \param fast When set, conversion operates at 400 Hz, otherwise at 100 Hz
@@ -112,19 +112,19 @@ EXTERN int lis331dl_powerdown(struct lis331dl_dev_s * dev);
 EXTERN int lis331dl_setconversion(struct lis331dl_dev_s * dev, bool full, bool fast);
 
 /** Get precision
- * 
+ *
  * \return Precision of 1 LSB in terms of unit [mg]
  **/
 EXTERN int lis331dl_getprecision(struct lis331dl_dev_s * dev);
 
-/** Get sample rate 
- * 
+/** Get sample rate
+ *
  * \return Sample rate in unit of [Hz]
  **/
 EXTERN int lis331dl_getsamplerate(struct lis331dl_dev_s * dev);
 
 /** Get readings, updates internal data structure
- * 
+ *
  * \param dev Device to LIS331DL device structure
  * \return Ptr to vector acceleration [x,y,z] on success, or NULL on error with errno set.
  *   If data is not yet ready to be read from the LIS331 then errno is set to EAGAIN otherwise

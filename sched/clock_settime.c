@@ -130,7 +130,7 @@ int clock_settime(clockid_t clock_id, FAR const struct timespec *tp)
       if (g_rtc_enabled && clock_id != CLOCK_ACTIVETIME)
         {
           up_rtc_settime(tp);
-        } 
+        }
 #endif
       irqrestore(flags);
 
@@ -138,7 +138,7 @@ int clock_settime(clockid_t clock_id, FAR const struct timespec *tp)
           (int)g_basetime.tv_sec, (int)g_basetime.tv_nsec,
           (int)g_tickbias);
     }
-  else 
+  else
     {
       sdbg("Returning ERROR\n");
       set_errno(EINVAL);

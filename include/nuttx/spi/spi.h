@@ -405,7 +405,7 @@ struct spi_ops_s
 };
 
 /* SPI private data.  This structure only defines the initial fields of the
- * structure visible to the SPI client.  The specific implementation may 
+ * structure visible to the SPI client.  The specific implementation may
  * add additional, device specific fields
  */
 

@@ -107,7 +107,7 @@ int nxtk_movewindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
 #endif
 
   /* Make sure that both the source and dest rectangle lie within the
-   * client sub-window 
+   * client sub-window
    */
 
   nxtk_subwindowmove(fwnd, &srcrect, &clipoffset, rect, offset, &fwnd->fwrect);

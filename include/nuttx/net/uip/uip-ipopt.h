@@ -67,7 +67,7 @@
  *
  * The IP Option Type byte consists of the following subfields:
  */
- 
+
 #define IPOPT_TYPE_OPTION_SHIFT       (0)      /* Bits 0-5: Option number*/
 #define IPOPT_TYPE_OPTION_MASK        (0x1f << IPOPT_TYPE_OPTION_SHIFT)
 #  define IPOPT_TYPE_OPTION_END       (0  << IPOPT_TYPE_OPTION_SHIFT) /* End of options list (RFC 791) */
@@ -116,7 +116,7 @@
 /* Option Copy Class Length    Description References
  * ------ ---- ----- --------- ------------------------------------------------
  *   0     0    0     1        End of options list (RFC 791)
- *   1     0    0     1        NOP (RFC 791 
+ *   1     0    0     1        NOP (RFC 791
  *   2     1    0     11       Security (RFC 791, RFC 1108)
  *   3     1    0     variable Loose Source Route (RFC 791)
  *   4     0    2     variable Time stamp (RFC 781, RFC 791)
@@ -137,18 +137,18 @@
  *  19     1    0     10       Address Extension (RFC 1475)
  *  20     1    0     4        Router Alert (RFC 2113)
  *  21     1    0     6-38     Selective Directed Broadcast Mode (RFC 1770)
- *  22     1    0        
+ *  22     1    0
  *  23     1    0              Dynamic Packet State
  *  24     1    0              Upstream Multicast Packet
  *  25     0    0              QS, Quick-Start (RFC 4782)
  *  26
  *  -
- *  29             
+ *  29
  *  30     0    0             EXP - RFC3692-style Experiment (RFC 4727)
  *  30     0    2             EXP - RFC3692-style Experiment (RFC 4727)
  *  30     1    0             EXP - RFC3692-style Experiment RFC 4727)
  *  30     1    2             EXP - RFC3692-style Experiment (RFC 4727)
- *  31             
+ *  31
  */
 
 #define IPOTR_END_LEN 1
@@ -226,13 +226,13 @@
 
 #define IPOPT_SDBM_TYPE \
   IPOPT_MKTYPE(IPOPT_TYPE_COPIED, IPOPT_TYPE_CLASS_CTRL, IPOPT_TYPE_OPTION_SDBM)
-  
+
 #define IPOPT_DPS_TYPE \
   IPOPT_MKTYPE(IPOPT_TYPE_COPIED, IPOPT_TYPE_CLASS_CTRL, IPOPT_TYPE_OPTION_DPS)
-  
+
 #define IPOPT_UMP_TYPE \
   IPOPT_MKTYPE(IPOPT_TYPE_COPIED, IPOPT_TYPE_CLASS_CTRL, IPOPT_TYPE_OPTION_UMP)
-  
+
 #define IPOPT_QS_TYPE \
   IPOPT_MKTYPE(IPOPT_TYPE_NOTCOPIED, IPOPT_TYPE_CLASS_CTRL, IPOPT_TYPE_OPTION_QS)
 

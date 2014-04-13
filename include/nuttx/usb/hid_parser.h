@@ -109,7 +109,7 @@
 #define HID_REPORT_ITEM_IN           0
 #define HID_REPORT_ITEM_OUT          1
 #define HID_REPORT_ITEM_FEATURE      2
- 
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -209,7 +209,7 @@ struct hid_rptinfo_s
   /* All collection items, referenced by the report items. */
 
   struct hid_collectionpath_s collectionpaths[CONFIG_HID_MAXCOLLECTIONS];
- 
+
   uint8_t nreports;                   /* Number of reports within the HID interface */
   struct hid_rptsizeinfo_s rptsize[CONFIG_HID_MAXIDS]; /* Report sizes for each report in the interface */
   uint16_t maxrptsize;                /* Largest report that the attached device will generate, in bits */
@@ -337,7 +337,7 @@ EXTERN void hid_putitem(FAR uint8_t *report, FAR struct hid_rptitem_s *item);
  *  Size of the report in bytes, or 0 if the report does not exist.
  *
  ****************************************************************************/
- 
+
 EXTERN size_t hid_reportsize(FAR struct hid_rptinfo_s *rptinfo,
                              uint8_t id, uint8_t rpttype);
 

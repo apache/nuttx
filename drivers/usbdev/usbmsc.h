@@ -71,7 +71,7 @@
 #  define CONFIG_USBMSC_STRBASE (4)
 #endif
 
-/* Interface IDs.  If the mass storage driver is built as a component of a 
+/* Interface IDs.  If the mass storage driver is built as a component of a
  * composite device, then the interface IDs may need to be offset.
  */
 
@@ -424,7 +424,7 @@ enum usbmsc_epdesc_e
   USBMSC_EPFSBULKOUT = 0, /* Full speed bulk OUT endpoint descriptor */
   USBMSC_EPFSBULKIN       /* Full speed bulk IN endpoint descriptor */
 #ifdef CONFIG_USBDEV_DUALSPEED
-  , 
+  ,
   USBMSC_EPHSBULKOUT,     /* High speed bulk OUT endpoint descriptor */
   USBMSC_EPHSBULKIN       /* High speed bulk IN endpoint descriptor */
 #endif

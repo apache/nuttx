@@ -60,7 +60,7 @@ void dq_rem(FAR dq_entry_t *node, dq_queue_t *queue)
     {
       queue->head = next;
     }
-  else 
+  else
     {
       prev->flink = next;
     }
@@ -69,7 +69,7 @@ void dq_rem(FAR dq_entry_t *node, dq_queue_t *queue)
     {
       queue->tail = prev;
     }
-  else 
+  else
     {
       next->blink = prev;
     }

@@ -310,7 +310,7 @@ config 16550_SUPRESS_CONFIG
 	default n
 	---help---
 		This option is useful, for example, if you are using a bootloader
-		that configures the 16550_UART.  In that case, you may want to 
+		that configures the 16550_UART.  In that case, you may want to
 		just leave the existing console configuration in place.  Default: n
 
 config 16550_REGINCR

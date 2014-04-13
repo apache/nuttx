@@ -64,7 +64,7 @@
  *   *ptr points to the first, non-whitespace character in the string.
  *
  ****************************************************************************/
- 
+
 int lib_checkbase(int base, FAR const char **pptr)
 {
    const char *ptr = *pptr;
@@ -88,7 +88,7 @@ int lib_checkbase(int base, FAR const char **pptr)
 
           /* Check for hexadecimal */
 
-          if ((*ptr == 'X' || *ptr == 'x') && 
+          if ((*ptr == 'X' || *ptr == 'x') &&
               lib_isbasedigit(ptr[1], 16, NULL))
             {
               base = 16;

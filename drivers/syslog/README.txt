@@ -40,7 +40,7 @@ ramlog.c
   configuration.
 
   Configuration options:
-  
+
     CONFIG_RAMLOG - Enables the RAM logging feature
     CONFIG_RAMLOG_CONSOLE - Use the RAM logging device as a system console.
       If this feature is enabled (along with CONFIG_DEV_CONSOLE), then all

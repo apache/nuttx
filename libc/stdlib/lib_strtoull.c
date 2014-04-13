@@ -63,7 +63,7 @@
  *   must be between 2 and 36 inclusive, or be the special value 0.
  *
  ****************************************************************************/
- 
+
 unsigned long long strtoull(const char *nptr, char **endptr, int base)
 {
   unsigned long long accum = 0;

@@ -67,7 +67,7 @@
 
 #define PR_SET_NAME 1
 #define PR_GET_NAME 2
- 
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -75,7 +75,7 @@
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
- 
+
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
@@ -101,8 +101,8 @@ extern "C"
  *     EINVAL The value of 'option' is not recognized.
  *     EFAULT optional arg1 is not a valid address.
  *     ESRCH  No task/thread can be found corresponding to that specified
- *       by optional arg1. 
- *   
+ *       by optional arg1.
+ *
  ****************************************************************************/
 
 int prctl(int option, ...);

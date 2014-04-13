@@ -233,7 +233,7 @@ extern "C" {
  *   minor - The device minor number
  *
  * Return:
- *   A non-NULL handle is returned on success. 
+ *   A non-NULL handle is returned on success.
  *
  ****************************************************************************/
 
@@ -256,7 +256,7 @@ EXTERN NXCONSOLE nx_register(NXWINDOW hwnd, FAR struct nxcon_window_s *wndo,
  *   minor - The device minor number
  *
  * Return:
- *   A non-NULL handle is returned on success. 
+ *   A non-NULL handle is returned on success.
  *
  ****************************************************************************/
 
@@ -281,7 +281,7 @@ EXTERN NXCONSOLE nxtk_register(NXTKWINDOW hfwnd,
  *   minor - The device minor number
  *
  * Return:
- *   A non-NULL handle is returned on success. 
+ *   A non-NULL handle is returned on success.
  *
  ****************************************************************************/
 

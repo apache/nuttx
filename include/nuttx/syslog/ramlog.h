@@ -37,7 +37,7 @@
  * output (syslogging) when the normal serial output is not available.  For
  * example, if you are using a telnet or USB serial console, the debug
  * output will get lost.
- * 
+ *
  * The RAM logging  driver is similar to a pipe in that it saves the
  * debugging output in a FIFO in RAM.  It differs from a pipe in numerous
  * details as needed to support logging.

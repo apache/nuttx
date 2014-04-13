@@ -288,7 +288,7 @@ static int task_spawn_proxy(int argc, FAR char *argv[])
  *
  *   entry - The child task's entry point (an address in memory)
  *
- *   file_actions - If 'file_actions' is a null pointer, then file 
+ *   file_actions - If 'file_actions' is a null pointer, then file
  *     descriptors open in the calling process will remain open in the
  *     child process (unless CONFIG_FDCLONE_STDIO is defined). If
  *     'file_actions' is not NULL, then the file descriptors open in the

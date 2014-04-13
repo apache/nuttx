@@ -32,7 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
- 
+
 #ifndef __GRAPHICS_NXFONTS_NXFONTS_SERIF29X37_H
 #define __GRAPHICS_NXFONTS_NXFONTS_SERIF29X37_H
 
@@ -55,7 +55,7 @@
 
 #define NXFONT_MIN8BIT    161
 #define NXFONT_MAX8BIT    255
- 
+
 /* Maximum height and width of any glyph in the set */
 
 #define NXFONT_MAXHEIGHT  37

@@ -68,7 +68,7 @@
  * Description:
  *   memalign requests more than enough space from malloc, finds a region
  *   within that chunk that meets the alignment request and then frees any
- *   leading or trailing space. 
+ *   leading or trailing space.
  *
  *   The alignment argument must be a power of two (not checked).  8-byte
  *   alignment is guaranteed by normal malloc calls.
@@ -233,7 +233,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
  * Description:
  *   memalign requests more than enough space from malloc, finds a region
  *   within that chunk that meets the alignment request and then frees any
- *   leading or trailing space. 
+ *   leading or trailing space.
  *
  *   The alignment argument must be a power of two (not checked).  8-byte
  *   alignment is guaranteed by normal malloc calls.

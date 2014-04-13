@@ -78,7 +78,7 @@
  *   or more tasks have the message queue open when mq_unlink() is called,
  *   removal of the message queue is postponed until all references to the
  *   message queue have been closed.
- * 
+ *
  * Parameters:
  *   mq_name - Name of the message queue
  *

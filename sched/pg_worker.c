@@ -130,7 +130,7 @@ status uint32_t g_starttime;
  *   NOTE: pg_callback() must also be locked in memory.
  *
  * When pg_callback() is called, it will perform the following operations:
- * 
+ *
  * - Verify that g_pftcb is non-NULL.
  * - Find the higher priority between the task waiting for the fill to
  *   complete in g_pftcb and the task waiting at the head of the
@@ -176,7 +176,7 @@ static void pg_callback(FAR struct tcb_s *tcb, int result)
         {
           priority = htcb->sched_priority;
         }
- 
+
       /* If this higher priority is higher than current page fill worker
        * thread, then boost worker thread's priority to that level. Thus,
        * the page fill worker thread will always run at the priority of
@@ -201,7 +201,7 @@ static void pg_callback(FAR struct tcb_s *tcb, int result)
     }
 
   /* Signal the page fill worker thread (in any event) */
- 
+
   pglldbg("Signaling worker. PID: %d\n", g_pgworker);
   kill(g_pgworker, SIGWORK);
 }
@@ -223,7 +223,7 @@ static void pg_callback(FAR struct tcb_s *tcb, int result)
  *
  *   The result (NULL or a TCB pointer) will be returned in the global
  *   variable, g_pftcb.
- * 
+ *
  * Input parameters:
  *   None
  *
@@ -234,7 +234,7 @@ static void pg_callback(FAR struct tcb_s *tcb, int result)
  *   assertions and this function will not return).
  *
  * Assumptions:
- *   Executing in the context of the page fill worker thread with all 
+ *   Executing in the context of the page fill worker thread with all
  *   interrupts disabled.
  *
  ****************************************************************************/
@@ -278,7 +278,7 @@ static inline bool pg_dequeue(void)
                * fill (this priority can get re-boosted by pg_miss()
                * if a new higher priority fill is required).
                */
-               
+
               FAR struct tcb_s *wtcb = (FAR struct tcb_s *)g_readytorun.head;
               if (wtcb->sched_priority > CONFIG_PAGING_DEFPRIO &&
                   wtcb->sched_priority > g_pftcb->sched_priority)
@@ -334,7 +334,7 @@ static inline bool pg_dequeue(void)
  *   is notified that there is a new page fill TCB in the g_waitingforfill
  *   prioritized list, or (2) when a page fill completes and there are more
  *   pages to be filled in g_waitingforfill list.
- * 
+ *
  * Input parameters:
  *   None
  *
@@ -345,7 +345,7 @@ static inline bool pg_dequeue(void)
  *   assertions and this function will not return).
  *
  * Assumptions:
- *   Executing in the context of the page fill worker thread with all 
+ *   Executing in the context of the page fill worker thread with all
  *   interrupts disabled.
  *
  ****************************************************************************/
@@ -402,7 +402,7 @@ static inline bool pg_startfill(void)
       pgllvdbg("Call up_fillpage(%p)\n", g_pftcb);
       result = up_fillpage(g_pftcb, vpage, pg_callback);
       DEBUGASSERT(result == OK);
-      
+
       /* Save the time that the fill was started.  These will be used to check for
        * timeouts.
        */
