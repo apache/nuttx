@@ -52,7 +52,7 @@
  ****************************************************************************/
 
 FAR sq_entry_t *sq_remlast(sq_queue_t *queue)
-{ 
+{
   FAR sq_entry_t *ret = queue->tail;
 
   if (ret)
@@ -80,4 +80,4 @@ FAR sq_entry_t *sq_remlast(sq_queue_t *queue)
     }
 
   return ret;
-} 
+}
