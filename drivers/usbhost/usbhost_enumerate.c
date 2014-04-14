@@ -179,7 +179,7 @@ static inline int usbhost_configdesc(const uint8_t *configdesc, int cfglen,
   configdesc += cfgdesc->len;
   remaining   = cfglen - cfgdesc->len;
 
-  /* Loop where there are more dscriptors to examine */
+  /* Loop while there are more descriptors to examine */
 
   memset(id, 0, sizeof(FAR struct usb_desc_s));
   while (remaining >= sizeof(struct usb_desc_s))

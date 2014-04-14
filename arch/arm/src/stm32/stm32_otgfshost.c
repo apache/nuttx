@@ -640,7 +640,7 @@ static int stm32_chan_alloc(FAR struct stm32_usbhost_s *priv)
 
   /* Search the table of channels */
 
-  for (chidx = 0 ; chidx < STM32_NHOST_CHANNELS ; chidx++)
+  for (chidx = 0; chidx < STM32_NHOST_CHANNELS; chidx++)
     {
       /* Is this channel available? */
 
@@ -693,7 +693,7 @@ static inline void stm32_chan_freeall(FAR struct stm32_usbhost_s *priv)
 
    /* Free all host channels */
 
-   for (chidx = 2; chidx < STM32_NHOST_CHANNELS ; chidx ++)
+   for (chidx = 2; chidx < STM32_NHOST_CHANNELS; chidx ++)
      {
        stm32_chan_free(priv, chidx);
      }
@@ -3232,8 +3232,8 @@ static int stm32_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
 
   /* Configure control channels */
 
-  stm32_chan_configure(priv, priv->ep0out) ;
-  stm32_chan_configure(priv, priv->ep0in) ;
+  stm32_chan_configure(priv, priv->ep0out);
+  stm32_chan_configure(priv, priv->ep0in);
 
   /* Let the common usbhost_enumerate do all of the real work.  Note that the
    * FunctionAddress (USB address) is hardcoded to one.
@@ -3412,7 +3412,7 @@ static int stm32_epalloc(FAR struct usbhost_driver_s *drvr,
 
   /* Then configure the endpoint */
 
-  stm32_chan_configure(priv, chidx) ;
+  stm32_chan_configure(priv, chidx);
 
   /* Return the index to the allocated channel as the endpoint "handle" */
 
