@@ -102,7 +102,7 @@ static const struct stm32_usbhost_trace_s g_trace1[TRACE1_NSTRINGS] =
   TRENTRY(OTGFS_VTRACE1_GINT_HC,           TR_FMT1, "OTGFS Handle the host channels interrupt.\n"),
   TRENTRY(OTGFS_VTRACE1_GINT_HPRT,         TR_FMT1, "OTGFS Handle the host port interrupt.\n"),
   TRENTRY(OTGFS_VTRACE1_GINT_DISC,         TR_FMT1, "OTGFS Handle the disconnect detected interrupt.\n"),
-  TRENTRY(OTGFS_VTRACE1_GINT_IISOOXFR,     TR_FMT1, "OTGFS Handle the incomplete isochronous OUT transfer.\n"),
+  TRENTRY(OTGFS_VTRACE1_GINT_IPXFR,        TR_FMT1, "OTGFS Handle the incomplete periodic transfer.\n"),
 
 #  endif
 #endif
