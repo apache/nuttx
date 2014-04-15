@@ -1,7 +1,7 @@
 /****************************************************************************************************
  * arch/arm/src/stm32/chip/stm32_otgfs.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -485,7 +485,8 @@
 #define OTGFS_GINT_IEP                  (1 << 18) /* Bit 18: IN endpoint interrupt */
 #define OTGFS_GINT_OEP                  (1 << 19) /* Bit 19: OUT endpoint interrupt */
 #define OTGFS_GINT_IISOIXFR             (1 << 20) /* Bit 20: Incomplete isochronous IN transfer */
-#define OTGFS_GINT_IISOOXFR             (1 << 21) /* Bit 21: Incomplete isochronous OUT transfer */
+#define OTGFS_GINT_IISOOXFR             (1 << 21) /* Bit 21: Incomplete isochronous OUT transfer (device) */
+#define OTGFS_GINT_IPXFR                (1 << 21) /* Bit 21: Incomplete periodic transfer (host) */
                                                   /* Bits 22-23: Reserved, must be kept at reset value */
 #define OTGFS_GINT_HPRT                 (1 << 24) /* Bit 24: Host port interrupt */
 #define OTGFS_GINT_HC                   (1 << 25) /* Bit 25: Host channels interrupt */

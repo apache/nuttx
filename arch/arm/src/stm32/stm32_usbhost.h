@@ -75,7 +75,7 @@ enum usbhost_trace1codes_e
   OTGFS_VTRACE1_GINT_HC,             /* OTGFS Handle the host channels interrupt */
   OTGFS_VTRACE1_GINT_HPRT,           /* OTGFS Handle the host port interrupt */
   OTGFS_VTRACE1_GINT_DISC,           /* OTGFS Handle the disconnect detected interrupt */
-  OTGFS_VTRACE1_GINT_IISOOXFR,       /* OTGFS Handle the incomplete isochronous OUT transfer */
+  OTGFS_VTRACE1_GINT_IPXFR,          /* OTGFS Handle the incomplete periodic transfer */
 
 #  endif
 #endif
