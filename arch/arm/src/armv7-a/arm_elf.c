@@ -115,7 +115,7 @@ bool arch_checkarch(FAR const Elf32_Ehdr *ehdr)
   if ((ehdr->e_entry & 3) != 0)
     {
       bdbg("Entry point is not properly aligned: %08x\n", ehdr->e_entry);
-      return -ENOEXEC
+      return -ENOEXEC;
     }
 
   /* TODO:  Check ABI here. */
