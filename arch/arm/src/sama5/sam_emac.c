@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_emac.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -2470,6 +2470,7 @@ errout:
 static int sam_phyinit(struct sam_emac_s *priv)
 {
   uint32_t regval;
+  uint32_t mck;
   int ret;
 
   /* Configure PHY clocking */
@@ -2477,17 +2478,28 @@ static int sam_phyinit(struct sam_emac_s *priv)
   regval = sam_getreg(priv, SAM_EMAC_NCFGR);
   regval &= ~EMAC_NCFGR_CLK_MASK;
 
-#if BOARD_MCK_FREQUENCY > (160*1000*1000)
-#  error Supported MCK frequency
-#elif BOARD_MCK_FREQUENCY > (80*1000*1000)
-  regval |= EMAC_NCFGR_CLK_DIV64; /* MCK divided by 64 (MCK up to 160 MHz) */
-#elif BOARD_MCK_FREQUENCY > (40*1000*1000)
-  regval |= EMAC_NCFGR_CLK_DIV32; /* MCK divided by 32 (MCK up to 80 MHz) */
-#elif BOARD_MCK_FREQUENCY > (20*1000*1000)
-  regval |= EMAC_NCFGR_CLK_DIV16; /* MCK divided by 16 (MCK up to 40 MHz) */
-#else
-  regval |= EMAC_NCFGR_CLK_DIV8;  /* MCK divided by 8 (MCK up to 20 MHz) */
-#endif
+  mck = BOARD_MCK_FREQUENCY;
+  if (mck > (160*1000*1000))
+    {
+      ndbg("ERROR: Cannot realize PHY clock\n");
+      return -EINVAL;
+    }
+  else if (mck > (80*1000*1000)
+    {
+      regval |= EMAC_NCFGR_CLK_DIV64; /* MCK divided by 64 (MCK up to 160 MHz) */
+    }
+  else if (mck > (40*1000*1000)
+    {
+      regval |= EMAC_NCFGR_CLK_DIV32; /* MCK divided by 32 (MCK up to 80 MHz) */
+    }
+  else if (mck > (20*1000*1000)
+    {
+      regval |= EMAC_NCFGR_CLK_DIV16; /* MCK divided by 16 (MCK up to 40 MHz) */
+    }
+  else
+    {
+      regval |= EMAC_NCFGR_CLK_DIV8;  /* MCK divided by 8 (MCK up to 20 MHz) */
+    }
 
   sam_putreg(priv, SAM_EMAC_NCFGR, regval);
 
