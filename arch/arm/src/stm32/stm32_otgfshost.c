@@ -2649,6 +2649,7 @@ static inline void stm32_gint_hprtisr(FAR struct stm32_usbhost_s *priv)
   uint32_t newhprt;
   uint32_t hcfg;
 
+  usbhost_vtrace1(OTGFS_VTRACE1_GINT_HPRT, 0);
   /* Read the port status and control register (HPRT) */
 
   hprt = stm32_getreg(STM32_OTGFS_HPRT);
@@ -2667,6 +2668,7 @@ static inline void stm32_gint_hprtisr(FAR struct stm32_usbhost_s *priv)
     {
       /* Set up to clear the POCCHNG status in the new HPRT contents. */
 
+      usbhost_vtrace1(OTGFS_VTRACE1_GINT_HPRT_POCCHNG, 0);
       newhprt |= OTGFS_HPRT_POCCHNG;
     }
 
@@ -2680,6 +2682,7 @@ static inline void stm32_gint_hprtisr(FAR struct stm32_usbhost_s *priv)
        * process the new connection event.
        */
 
+      usbhost_vtrace1(OTGFS_VTRACE1_GINT_HPRT_PCDET, 0);
       newhprt |= OTGFS_HPRT_PCDET;
       stm32_gint_connected(priv);
     }
@@ -2690,6 +2693,7 @@ static inline void stm32_gint_hprtisr(FAR struct stm32_usbhost_s *priv)
     {
       /* Set up to clear the PENCHNG status in the new HPRT contents. */
 
+      usbhost_vtrace1(OTGFS_VTRACE1_GINT_HPRT_PENCHNG, 0);
       newhprt |= OTGFS_HPRT_PENCHNG;
 
       /* Was the port enabled? */
@@ -2712,12 +2716,15 @@ static inline void stm32_gint_hprtisr(FAR struct stm32_usbhost_s *priv)
             {
               /* Set the Host Frame Interval Register for the 6KHz speed */
 
+              usbhost_vtrace1(OTGFS_VTRACE1_GINT_HPRT_LSDEV, 0);
               stm32_putreg(STM32_OTGFS_HFIR, 6000);
 
               /* Are we switching from FS to LS? */
 
               if ((hcfg & OTGFS_HCFG_FSLSPCS_MASK) != OTGFS_HCFG_FSLSPCS_LS6MHz)
                 {
+
+                  usbhost_vtrace1(OTGFS_VTRACE1_GINT_HPRT_FSLSSW, 0);
                   /* Yes... configure for LS */
 
                   hcfg &= ~OTGFS_HCFG_FSLSPCS_MASK;
@@ -2731,12 +2738,16 @@ static inline void stm32_gint_hprtisr(FAR struct stm32_usbhost_s *priv)
             }
           else /* if ((hprt & OTGFS_HPRT_PSPD_MASK) == OTGFS_HPRT_PSPD_FS) */
             {
+
+              usbhost_vtrace1(OTGFS_VTRACE1_GINT_HPRT_FSDEV, 0);
               stm32_putreg(STM32_OTGFS_HFIR, 48000);
 
               /* Are we switching from LS to FS? */
 
               if ((hcfg & OTGFS_HCFG_FSLSPCS_MASK) != OTGFS_HCFG_FSLSPCS_FS48MHz)
                 {
+
+                  usbhost_vtrace1(OTGFS_VTRACE1_GINT_HPRT_LSFSSW, 0);
                   /* Yes... configure for FS */
 
                   hcfg &= ~OTGFS_HCFG_FSLSPCS_MASK;
@@ -2846,7 +2857,6 @@ static int stm32_gint_isr(int irq, FAR void *context)
 
       /* Otherwise, process each pending, unmasked GINT interrupts */
 
-      usbhost_vtrace1(OTGFS_VTRACE1_GINT, 0);
 
       /* Handle the start of frame interrupt */
 
@@ -2894,7 +2904,6 @@ static int stm32_gint_isr(int irq, FAR void *context)
 
       if ((pending & OTGFS_GINT_HPRT) != 0)
         {
-          usbhost_vtrace1(OTGFS_VTRACE1_GINT_HPRT, 0);
           stm32_gint_hprtisr(priv);
         }
 
@@ -2910,7 +2919,7 @@ static int stm32_gint_isr(int irq, FAR void *context)
 
       if ((pending & OTGFS_GINT_IPXFR) != 0)
         {
-          usbhost_vtrace1(OTGFS_VTRACE1_GINT_IISOOXFR, 0);
+          usbhost_vtrace1(OTGFS_VTRACE1_GINT_IPXFR, 0);
           stm32_gint_ipxfrisr(priv);
         }
     }
