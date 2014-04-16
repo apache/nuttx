@@ -370,24 +370,6 @@
 
 #define SAMA5_ADC_SAMPLES (CONFIG_SAMA5_ADC_DMASAMPLES * SAMA5_NCHANNELS)
 
-/* Clocking */
-
-#if BOARD_MCK_FREQUENCY <= SAM_ADC_MAXPERCLK
-#  define ADC_FREQUENCY BOARD_MCK_FREQUENCY
-#  define ADC_PCR_DIV PMC_PCR_DIV1
-#elif (BOARD_MCK_FREQUENCY >> 1) <= SAM_ADC_MAXPERCLK
-#  define ADC_FREQUENCY (BOARD_MCK_FREQUENCY >> 1)
-#  define ADC_PCR_DIV PMC_PCR_DIV2
-#elif (BOARD_MCK_FREQUENCY >> 2) <= SAM_ADC_MAXPERCLK
-#  define ADC_FREQUENCY (BOARD_MCK_FREQUENCY >> 2)
-#  define ADC_PCR_DIV PMC_PCR_DIV4
-#elif (BOARD_MCK_FREQUENCY >> 3) <= SAM_ADC_MAXPERCLK
-#  define ADC_FREQUENCY (BOARD_MCK_FREQUENCY >> 3)
-#  define ADC_PCR_DIV PMC_PCR_DIV8
-#else
-#  error Cannot realize ADC input frequency
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -398,6 +380,7 @@ struct sam_adc_s
 {
   sem_t exclsem;         /* Supports exclusive access to the ADC interface */
   bool initialized;      /* The ADC driver is already initialized */
+  uint32_t frequency;    /* ADC clock frequency */
 
 #ifdef SAMA5_ADC_HAVE_CHANNELS
 #ifdef CONFIG_SAMA5_ADC_DMA
@@ -701,6 +684,7 @@ static void sam_adc_dmadone(void *arg)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SAMA5_ADC_DMA
 static void sam_adc_dmastart(struct sam_adc_s *priv)
 {
   /* Make sure that the worker is available and that DMA is not disabled */
@@ -712,6 +696,7 @@ static void sam_adc_dmastart(struct sam_adc_s *priv)
                        SAMA5_ADC_SAMPLES * sizeof(uint16_t));
     }
 }
+#endif
 
 /****************************************************************************
  * Name: sam_adc_dmacallback
@@ -980,7 +965,9 @@ static int sam_adc_interrupt(int irq, void *context)
 
 static void sam_adc_reset(struct adc_dev_s *dev)
 {
+#ifdef CONFIG_SAMA5_ADC_DMA
   struct sam_adc_s *priv = (struct sam_adc_s *)dev->ad_priv;
+#endif
   uint32_t regval;
 
   avdbg("Resetting..\n");
@@ -1120,7 +1107,9 @@ static int sam_adc_setup(struct adc_dev_s *dev)
 
 static void sam_adc_shutdown(struct adc_dev_s *dev)
 {
+#ifdef CONFIG_SAMA5_ADC_DMA
   struct sam_adc_s *priv = (struct sam_adc_s *)dev->ad_priv;
+#endif
 
   avdbg("Shutdown\n");
 
@@ -1147,7 +1136,9 @@ static void sam_adc_shutdown(struct adc_dev_s *dev)
 
 static void sam_adc_rxint(struct adc_dev_s *dev, bool enable)
 {
+#ifdef CONFIG_SAMA5_ADC_DMA
   struct sam_adc_s *priv = (struct sam_adc_s *)dev->ad_priv;
+#endif
 
   avdbg("enable=%d\n", enable);
 
@@ -1916,6 +1907,7 @@ struct adc_dev_s *sam_adc_initialize(void)
 {
   struct sam_adc_s *priv = &g_adcpriv;
   uint32_t regval;
+  uint32_t mck;
   int ret;
 
   /* Have we already been initialzed?  If yes, than just hand out the
@@ -1990,9 +1982,38 @@ struct adc_dev_s *sam_adc_initialize(void)
       DEBUGASSERT(priv->dma);
 #endif
 
+      /* Determine the maximum ADC peripheral clock frequency */
+
+      mck = BOARD_MCK_FREQUENCY;
+      if (mck <= SAM_ADC_MAXPERCLK)
+        {
+          priv->frequency = mck;
+          regval          = PMC_PCR_DIV1;
+        }
+      else if ((mck >> 1) <= SAM_ADC_MAXPERCLK)
+        {
+          priv->frequency = (mck >> 1);
+          regval          = PMC_PCR_DIV2;
+        }
+      else if ((mck >> 2) <= SAM_ADC_MAXPERCLK)
+        {
+          priv->frequency = (mck >> 2);
+          regval          = PMC_PCR_DIV4;
+        }
+      else if ((mck >> 3) <= SAM_ADC_MAXPERCLK)
+        {
+          priv->frequency = (mck >> 3);
+          regval          = PMC_PCR_DIV8;
+        }
+      else
+        {
+          adbg("ERROR: Cannot realize ADC input frequency\n");
+          return NULL;
+        }
+
       /* Set the maximum ADC peripheral clock frequency */
 
-      regval = PMC_PCR_PID(SAM_PID_ADC) | PMC_PCR_CMD | ADC_PCR_DIV | PMC_PCR_EN;
+      regval |= PMC_PCR_PID(SAM_PID_ADC) | PMC_PCR_CMD | PMC_PCR_EN;
       sam_adc_putreg(priv, SAM_PMC_PCR, regval);
 
       /* Enable the ADC peripheral clock*/

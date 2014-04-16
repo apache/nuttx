@@ -7171,3 +7171,7 @@
 	  also reset the camera module.  Noted by David Sidrane (2014-4-11).
 	* arch/arm/src/stm32/stm32_usbhost.c/.h and stm32_otgfshost.c:  USB host
 	  tracing added by Leo (2014-4-12).
+	* arch/arm/src/sama5/sam_adc.c:  If running from SDRAM, then BOARD_MCK_FREQUENCY
+	  is not a constand and cannot be used in condititional comilation
+	  (2014-4-16).
+
