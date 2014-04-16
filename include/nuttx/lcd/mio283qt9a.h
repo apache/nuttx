@@ -52,7 +52,7 @@
  * Pre-processor Definitions
  **************************************************************************************/
 /* Configuration **********************************************************************/
-/* CONFIG_LCD_MIO283QT9A - Enables support for the MIO283QT2-based LCD.
+/* CONFIG_LCD_MIO283QT9A - Enables support for the MIO283QT9A-based LCD.
  * CONFIG_LCD_NOGETRUN
  *   NX components need to know if it can read from the LCD or not. If reading from the
  *   LCD is supported then some graphic operations can be improved. Default: Supported
@@ -76,7 +76,7 @@
 
 struct mio283qt9a_lcd_s
 {
-  /* Interface to write to a MIO283QT2 register.
+  /* Interface to write to a MIO283QT9A register.
    *
    *  - select      Select the device (as necessary).  The meaning of selecting (and
    *                and deselecting) is not defined.  select() will be called before
@@ -94,6 +94,7 @@ struct mio283qt9a_lcd_s
   void (*index)(FAR struct mio283qt9a_lcd_s *dev, uint8_t index);
 #ifndef CONFIG_LCD_NOGETRUN
   uint16_t (*read)(FAR struct mio283qt9a_lcd_s *dev);
+  uint16_t (*readgram)(FAR struct mio283qt9a_lcd_s *dev);
 #endif
   void (*write)(FAR struct mio283qt9a_lcd_s *dev, uint16_t value);
   void (*backlight)(FAR struct mio283qt9a_lcd_s *dev, int power);
