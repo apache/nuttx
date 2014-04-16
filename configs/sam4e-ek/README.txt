@@ -1045,10 +1045,6 @@ SAM4E-EK-specific Configuration Options
 
        CONFIG_RAM_START=0x20000000
 
-    CONFIG_ARCH_IRQPRIO - The SAM3U supports interrupt prioritization
-
-       CONFIG_ARCH_IRQPRIO=n
-
     CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to boards that
        have LEDs
 

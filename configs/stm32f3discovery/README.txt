@@ -484,10 +484,6 @@ STM32F3Discovery-specific Configuration Options
 
     CONFIG_STM32_CCMEXCLUDE - Exclude CCM SRAM from the HEAP
 
-    CONFIG_ARCH_IRQPRIO - The STM32F3Discovery supports interrupt prioritization
-
-       CONFIG_ARCH_IRQPRIO=y
-
     CONFIG_ARCH_FPU - The STM32F3Discovery supports a floating point unit (FPU)
 
        CONFIG_ARCH_FPU=y

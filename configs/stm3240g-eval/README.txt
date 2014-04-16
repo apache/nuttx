@@ -630,10 +630,6 @@ STM3240G-EVAL-specific Configuration Options
 
     CONFIG_HEAP2_END - The size of the SRAM in the FSMC address space (decimal)
 
-    CONFIG_ARCH_IRQPRIO - The STM3240xxx supports interrupt prioritization
-
-       CONFIG_ARCH_IRQPRIO=y
-
     CONFIG_ARCH_FPU - The STM3240xxx supports a floating point unit (FPU)
 
        CONFIG_ARCH_FPU=y

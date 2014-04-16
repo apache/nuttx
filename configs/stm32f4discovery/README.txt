@@ -792,10 +792,6 @@ STM32F4Discovery-specific Configuration Options
 
     CONFIG_HEAP2_SIZE - The size of the SRAM in the FSMC address space (decimal)
 
-    CONFIG_ARCH_IRQPRIO - The STM32F4Discovery supports interrupt prioritization
-
-       CONFIG_ARCH_IRQPRIO=y
-
     CONFIG_ARCH_FPU - The STM32F4Discovery supports a floating point unit (FPU)
 
        CONFIG_ARCH_FPU=y

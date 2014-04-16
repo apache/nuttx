@@ -125,9 +125,6 @@ Architecture selection
     support an interrupt controller or otherwise cannot support
     APIs like up_enable_irq() and up_disable_irq().  Should be
     defined.
-  CONFIG_ARCH_IRQPRIO
-    Define if the architecture suports prioritizaton of interrupts
-    and the up_prioritize_irq() API.  Should be defined.
   CONFIG_BOARD_LOOPSPERMSEC - for delay loops
   CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to SH1_LCEVB1
   CONFIG_RAM_SIZE - Describes the internal DRAM.

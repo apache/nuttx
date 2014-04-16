@@ -545,10 +545,6 @@ TM4C123G LaunchPad Configuration Options
 
        CONFIG_RAM_START=0x20000000
 
-    CONFIG_ARCH_IRQPRIO - The TM4C123G supports interrupt prioritization
-
-       CONFIG_ARCH_IRQPRIO=n
-
     CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to boards that
        have LEDs
 

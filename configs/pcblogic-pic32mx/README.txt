@@ -407,10 +407,6 @@ PIC32MX Configuration Options
 
        CONFIG_RAM_START=0xa0000000
 
-    CONFIG_ARCH_IRQPRIO - The PIC32MXx supports interrupt prioritization
-
-       CONFIG_ARCH_IRQPRIO=y
-
     CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to boards that
        have LEDs
 

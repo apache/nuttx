@@ -371,10 +371,6 @@ Nucleus 2G Configuration Options
 
        CONFIG_RAM_START=0x10000000
 
-    CONFIG_ARCH_IRQPRIO - The LPC17xx supports interrupt prioritization
-
-       CONFIG_ARCH_IRQPRIO=y
-
     CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to boards that
        have LEDs
 

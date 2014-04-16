@@ -340,8 +340,6 @@ ARM/EA3152-specific Configuration Options
     CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to boards that
        have LEDs
 
-    CONFIG_ARCH_IRQPRIO - The LPC315x supports interrupt prioritization
-
     CONFIG_ARCH_INTERRUPTSTACK - This architecture supports an interrupt
        stack. If defined, this symbol is the size of the interrupt
        stack in bytes.  If not defined, the user task stacks will be
