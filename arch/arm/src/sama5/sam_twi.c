@@ -99,22 +99,6 @@
 
 #define TWI_MAX_FREQUENCY 66000000   /* Maximum TWI frequency */
 
-#if BOARD_MCK_FREQUENCY <= TWI_MAX_FREQUENCY
-#  define TWI_FREQUENCY BOARD_MCK_FREQUENCY
-#  define TWI_PCR_DIV PMC_PCR_DIV1
-#elif (BOARD_MCK_FREQUENCY >> 1) <= TWI_MAX_FREQUENCY
-#  define TWI_FREQUENCY (BOARD_MCK_FREQUENCY >> 1)
-#  define TWI_PCR_DIV PMC_PCR_DIV2
-#elif (BOARD_MCK_FREQUENCY >> 2) <= TWI_MAX_FREQUENCY
-#  define TWI_FREQUENCY (BOARD_MCK_FREQUENCY >> 2)
-#  define TWI_PCR_DIV PMC_PCR_DIV4
-#elif (BOARD_MCK_FREQUENCY >> 3) <= TWI_MAX_FREQUENCY
-#  define TWI_FREQUENCY (BOARD_MCK_FREQUENCY >> 3)
-#  define TWI_PCR_DIV PMC_PCR_DIV8
-#else
-#  error Cannot realize TWI frequency
-#endif
-
 /* Debug ***********************************************************************/
 /* CONFIG_DEBUG_I2C + CONFIG_DEBUG enables general I2C debug output. */
 
@@ -139,6 +123,7 @@ struct twi_dev_s
   struct i2c_dev_s    dev;        /* Generic I2C device */
   struct i2c_msg_s    *msg;       /* Message list */
   uintptr_t           base;       /* Base address of registers */
+  uint32_t            frequency;  /* TWO clock frequency */
   uint16_t            irq;        /* IRQ number for this device */
   uint16_t            address;    /* Slave address */
   uint16_t            flags;      /* Transfer flags */
@@ -277,7 +262,7 @@ struct i2c_ops_s g_twiops =
  * Name: twi_takesem
  *
  * Description:
- *   Take the wait semaphore (handling false alarm wakeups due to the receipt
+ *   Take the wait semaphore (handling false alarm wake-ups due to the receipt
  *   of signals).
  *
  * Input Parameters:
@@ -314,7 +299,7 @@ static void twi_takesem(sem_t *sem)
  *
  * Returned Value:
  *   true:  This is the first register access of this type.
- *   flase: This is the same as the preceding register access.
+ *   false: This is the same as the preceding register access.
  *
  ****************************************************************************/
 
@@ -322,9 +307,9 @@ static void twi_takesem(sem_t *sem)
 static bool twi_checkreg(struct twi_dev_s *priv, bool wr, uint32_t value,
                          uint32_t address)
 {
-  if (wr      == priv->wrlast &&     /* Same kind of access? */
+  if (wr      == priv->wrlast &&   /* Same kind of access? */
       value   == priv->vallast &&  /* Same value? */
-      address == priv->addrlast)  /* Same address? */
+      address == priv->addrlast)   /* Same address? */
     {
       /* Yes, then just keep a count of the number of times we did this. */
 
@@ -504,7 +489,6 @@ static int twi_interrupt(struct twi_dev_s *priv)
   uint32_t imr;
   uint32_t pending;
   uint32_t regval;
-  int ret;
 
   /* Retrieve masked interrupt status */
 
@@ -580,9 +564,8 @@ static int twi_interrupt(struct twi_dev_s *priv)
   else if ((pending & TWI_INT_TXCOMP) != 0)
     {
       twi_putrel(priv, SAM_TWI_IDR_OFFSET, TWI_INT_TXCOMP);
-      ret = OK;
 
-      /* Is there another messasge to send? */
+      /* Is there another message to send? */
 
       if (priv->msgc > 1)
         {
@@ -1096,7 +1079,7 @@ static uint32_t twi_hw_setfrequency(struct twi_dev_s *priv, uint32_t frequency)
     {
       /* Calulate the CLDIV value using the current CKDIV guess */
 
-      cldiv = ((TWI_FREQUENCY / (frequency << 1)) - 4) / (1 << ckdiv);
+      cldiv = ((priv->frequency / (frequency << 1)) - 4) / (1 << ckdiv);
 
       /* Is CLDIV in range? */
 
@@ -1121,7 +1104,7 @@ static uint32_t twi_hw_setfrequency(struct twi_dev_s *priv, uint32_t frequency)
 
   /* Return the actual frequency */
 
-  actual = (TWI_FREQUENCY / 2) / (((1 << ckdiv) * cldiv) + 2);
+  actual = (priv->frequency / 2) / (((1 << ckdiv) * cldiv) + 2);
   i2cvdbg("TWI%d frequency: %d ckdiv: %d cldiv: %d actual: %d\n",
           priv->twi, frequency, ckdiv, cldiv, actual);
 
@@ -1140,6 +1123,7 @@ static void twi_hw_initialize(struct twi_dev_s *priv, unsigned int pid,
                               uint32_t frequency)
 {
   uint32_t regval;
+  uint32_t mck;
 
   i2cvdbg("TWI%d Initializing\n", priv->twi);
 
@@ -1161,9 +1145,35 @@ static void twi_hw_initialize(struct twi_dev_s *priv, unsigned int pid,
 
   twi_putrel(priv, SAM_TWI_CR_OFFSET, TWI_CR_MSEN);
 
+  /* Determine the maximum valid frequency setting */
+
+  mck = BOARD_MCK_FREQUENCY;
+  DEBUGASSERT((mck >> 3) <= TWI_MAX_FREQUENCY);
+
+  if (mck <= TWI_MAX_FREQUENCY)
+    {
+      priv->frequency = mck;
+      regval          = PMC_PCR_DIV1;
+    }
+  else if ((mck >> 1) <= TWI_MAX_FREQUENCY)
+    {
+      priv->frequency = (mck >> 1);
+      regval          = PMC_PCR_DIV2;
+    }
+  else if ((mck >> 2) <= TWI_MAX_FREQUENCY)
+    {
+      priv->frequency = (mck >> 2);
+      regval          = PMC_PCR_DIV4;
+    }
+  else /* if ((mck >> 3) <= TWI_MAX_FREQUENCY) */
+    {
+      priv->frequency = (mck >> 3);
+      regval          = PMC_PCR_DIV8;
+    }
+
   /* Set the TWI peripheral input clock to the maximum, valid frequency */
 
-  regval = PMC_PCR_PID(pid) | PMC_PCR_CMD | TWI_PCR_DIV | PMC_PCR_EN;
+  regval |= PMC_PCR_PID(pid) | PMC_PCR_CMD | PMC_PCR_EN;
   twi_putabs(priv, SAM_PMC_PCR, regval);
 
   /* Set the initial TWI data transfer frequency */
