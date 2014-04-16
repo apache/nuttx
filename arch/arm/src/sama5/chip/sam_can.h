@@ -292,7 +292,7 @@
 #  define CAN_MAM_EXTID(n)       (((uint32_t)(n) << CAN_MAM_EXTID_SHIFT) | CAN_MAM_MIDE)
 #define CAN_MAM_STDID_SHIFT      (18)      /* Bits 18-28: 11-bit standard address */
 #define CAN_MAM_STDID_MASK       (0x7ff << CAN_MAM_STDID_SHIFT)
-#  define CAN_MAM_STDIE(n)       ((uint32_t)(n) << CAN_MAM_STDID_SHIFT)
+#  define CAN_MAM_STDID(n)       ((uint32_t)(n) << CAN_MAM_STDID_SHIFT)
 
 /* Mailbox ID Register */
 
@@ -308,8 +308,8 @@
 #define CAN_MID_EXTID_MASK       (0x1fffffff << CAN_MID_EXTID_SHIFT)
 #  define CAN_MID_EXTID(n)       (((uint32_t)(n) << CAN_MID_EXTID_SHIFT) | CAN_MID_MIDE)
 #define CAN_MID_STDID_SHIFT      (18)      /* Bits 18-28: 11-bit standard address */
-#define CAN_MID_STDID_MASK       (0x7ff << CAN_MID_STDIF_SHIFT)
-#  define CAN_MID_STDID(n)       ((uint32_t)(n) << CAN_MID_STDIF_SHIFT)
+#define CAN_MID_STDID_MASK       (0x7ff << CAN_MID_STDID_SHIFT)
+#  define CAN_MID_STDID(n)       ((uint32_t)(n) << CAN_MID_STDID_SHIFT)
 
 /* Mailbox Family ID Register */
 

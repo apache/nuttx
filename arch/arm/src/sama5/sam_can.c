@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_can.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -99,26 +99,6 @@
 #  error Unsupport/undefined number of mailboxes
 #endif
 
-/* Bit timing ***************************************************************/
-
-/* Clocking */
-
-#if BOARD_MCK_FREQUENCY <= SAM_CAN_MAXPERCLK
-#  define CAN_FREQUENCY BOARD_MCK_FREQUENCY
-#  define CAN_PCR_DIV PMC_PCR_DIV1
-#elif (BOARD_MCK_FREQUENCY >> 1) <= SAM_CAN_MAXPERCLK
-#  define CAN_FREQUENCY (BOARD_MCK_FREQUENCY >> 1)
-#  define CAN_PCR_DIV PMC_PCR_DIV2
-#elif (BOARD_MCK_FREQUENCY >> 2) <= SAM_CAN_MAXPERCLK
-#  define CAN_FREQUENCY (BOARD_MCK_FREQUENCY >> 2)
-#  define CAN_PCR_DIV PMC_PCR_DIV4
-#elif (BOARD_MCK_FREQUENCY >> 3) <= SAM_CAN_MAXPERCLK
-#  define CAN_FREQUENCY (BOARD_MCK_FREQUENCY >> 3)
-#  define CAN_PCR_DIV PMC_PCR_DIV8
-#else
-#  error Cannot realize CAN input frequency
-#endif
-
 /* Interrupts ***************************************************************/
 /* If debug is enabled, then print some diagnostic info if any of these
  * events occur:
@@ -208,6 +188,7 @@ struct sam_can_s
   volatile uint8_t txmbset; /* The set of mailboxes actively transmitting */
   bool  txdisabled;         /* TRUE:  Keep TX interrupts disabled */
   sem_t exclsem;            /* Enforces mutually exclusive access */
+  uint32_t frequency;       /* CAN clock frequency */
 
 #ifdef CONFIG_SAMA5_CAN_REGDEBUG
   uintptr_t regaddr;        /* Last register address read */
@@ -816,6 +797,7 @@ static void can_reset(FAR struct can_dev_s *dev)
   DEBUGASSERT(config);
 
   canllvdbg("CAN%d\n", config->port);
+  UNUSED(config);
 
   /* Get exclusive access to the CAN peripheral */
 
@@ -1707,12 +1689,12 @@ static int can_bittiming(struct sam_can_s *priv)
    * frequency.
    *
    *   Tq   = (BRP + 1) / CAN_FRQUENCY
-   *   Tbit = Nquanta * (BRP + 1) / CAN_FREQUENCY
-   *   baud = CAN_FREQUENCY / (Nquanta * (brp + 1))
-   *   brp  = CAN_FREQUENCY / (baud * nquanta) - 1
+   *   Tbit = Nquanta * (BRP + 1) / Fcan
+   *   baud = Fcan / (Nquanta * (brp + 1))
+   *   brp  = Fcan / (baud * nquanta) - 1
    */
 
-  brp = (CAN_FREQUENCY / (config->baud * 1000 * tq)) - 1;
+  brp = (priv->frequency / (config->baud * 1000 * tq)) - 1;
   if (brp == 0)
     {
       /* The BRP field must be within the range 1 - 0x7f */
@@ -1864,6 +1846,7 @@ static int can_hwinitialize(struct sam_can_s *priv)
 {
   FAR const struct sam_config_s *config = priv->config;
   uint32_t regval;
+  uint32_t mck;
   int ret;
 
   canllvdbg("CAN%d\n", config->port);
@@ -1873,9 +1856,38 @@ static int can_hwinitialize(struct sam_can_s *priv)
   sam_configpio(config->rxpinset);
   sam_configpio(config->txpinset);
 
+  /* Determine the maximum CAN peripheral clock frequency */
+
+  mck = BOARD_MCK_FREQUENCY;
+  if (mck <= SAM_CAN_MAXPERCLK)
+    {
+      priv->frequency = mck;
+      regval          = PMC_PCR_DIV1;
+    }
+  else if ((mck >> 1) <= SAM_CAN_MAXPERCLK)
+    {
+      priv->frequency = (mck >> 1);
+      regval          = PMC_PCR_DIV2;
+    }
+  else if ((mck >> 2) <= SAM_CAN_MAXPERCLK)
+    {
+      priv->frequency = (mck >> 2);
+      regval          = PMC_PCR_DIV4;
+    }
+  else if ((mck >> 3) <= SAM_CAN_MAXPERCLK)
+    {
+      priv->frequency = (mck >> 3);
+      regval          = PMC_PCR_DIV8;
+    }
+  else
+    {
+      candbg("ERROR: Cannot realize CAN input frequency\n");
+      return -EINVAL;
+    }
+
   /* Set the maximum CAN peripheral clock frequency */
 
-  regval = PMC_PCR_PID(config->pid) | PMC_PCR_CMD | CAN_PCR_DIV | PMC_PCR_EN;
+  regval |= PMC_PCR_PID(config->pid) | PMC_PCR_CMD | PMC_PCR_EN;
   can_putreg(priv, SAM_PMC_PCR, regval);
 
   /* Enable peripheral clocking */
@@ -1891,7 +1903,7 @@ static int can_hwinitialize(struct sam_can_s *priv)
   ret = can_bittiming(priv);
   if (ret < 0)
     {
-      canlldbg("ERROR: Failed to set bit timing: %d\n", ret);
+      candbg("ERROR: Failed to set bit timing: %d\n", ret);
       return ret;
     }
 
