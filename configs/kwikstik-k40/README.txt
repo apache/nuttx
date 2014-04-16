@@ -389,10 +389,6 @@ KwikStik-K40-specific Configuration Options
 
        CONFIG_RAM_START=0x20000000
 
-    CONFIG_ARCH_IRQPRIO - The Kinetis K40 supports interrupt prioritization
-
-       CONFIG_ARCH_IRQPRIO=y
-
     CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to boards that
        have LEDs
 

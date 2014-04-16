@@ -502,10 +502,6 @@ Cloudctrl-specific Configuration Options
 
     CONFIG_STM32_CCMEXCLUDE - Exclude CCM SRAM from the HEAP
 
-    CONFIG_ARCH_IRQPRIO - The STM32107xxx supports interrupt prioritization
-
-       CONFIG_ARCH_IRQPRIO=y
-
     CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to boards that
        have LEDs
 

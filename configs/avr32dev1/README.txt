@@ -377,10 +377,6 @@ AVR32DEV1 Configuration Options
 
        CONFIG_RAM_START=0x20000000
 
-    CONFIG_ARCH_IRQPRIO - The AT32UC3B0256 supports interrupt prioritization
-
-       CONFIG_ARCH_IRQPRIO=y
-
     CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to boards that
        have LEDs
 

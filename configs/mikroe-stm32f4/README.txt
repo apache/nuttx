@@ -519,10 +519,6 @@ Mikroe-STM32F4-specific Configuration Options
 
     CONFIG_HEAP2_SIZE - The size of the SRAM in the FSMC address space (decimal)
 
-    CONFIG_ARCH_IRQPRIO - The Mikroe-STM32F4 supports interrupt prioritization
-
-       CONFIG_ARCH_IRQPRIO=y
-
     CONFIG_ARCH_FPU - The Mikroe-STM32F4 supports a floating point unit (FPU)
 
        CONFIG_ARCH_FPU=y

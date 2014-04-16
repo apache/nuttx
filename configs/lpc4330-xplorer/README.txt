@@ -699,10 +699,6 @@ LPC4330-Xplorer Configuration Options
 
        CONFIG_RAM_START=0x10000000
 
-    CONFIG_ARCH_IRQPRIO - The LPC43xx supports interrupt prioritization
-
-       CONFIG_ARCH_IRQPRIO=y
-
     CONFIG_ARCH_FPU - The LPC43xxx supports a floating point unit (FPU)
 
        CONFIG_ARCH_FPU=y

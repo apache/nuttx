@@ -558,10 +558,6 @@ STM3220G-EVAL-specific Configuration Options
 
     CONFIG_HEAP2_SIZE - The size of the SRAM in the FSMC address space (decimal)
 
-    CONFIG_ARCH_IRQPRIO - The STM3220xxx supports interrupt prioritization
-
-       CONFIG_ARCH_IRQPRIO=y
-
     CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to boards that
        have LEDs
 

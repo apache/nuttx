@@ -339,10 +339,6 @@ RX pin (PA10) of your board besides, of course, the GND pin.
 
        CONFIG_RAM_START=0x20000000
 
-    CONFIG_ARCH_IRQPRIO - STM32F100RC chip supports interrupt prioritization
-
-       CONFIG_ARCH_IRQPRIO=y
-
     CONFIG_ARCH_LEDS - Use LED to show state. Unique to boards that have LED(s)
 
     CONFIG_ARCH_INTERRUPTSTACK - This architecture supports an interrupt
