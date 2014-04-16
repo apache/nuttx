@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_gmac.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -2489,6 +2489,7 @@ static void sam_mdcclock(struct sam_gmac_s *priv)
 {
   uint32_t ncfgr;
   uint32_t ncr;
+  uint32_t mck;
 
   /* Disable RX and TX momentarily */
 
@@ -2500,21 +2501,33 @@ static void sam_mdcclock(struct sam_gmac_s *priv)
   ncfgr  = sam_getreg(priv, SAM_GMAC_NCFGR);
   ncfgr &= ~GMAC_NCFGR_CLK_MASK;
 
-#if BOARD_MCK_FREQUENCY <= 20000000
-  ncfgr |= GMAC_NCFGR_CLK_DIV8;          /* MCK divided by 8 (MCK up to 20 MHz) */
-#elif BOARD_MCK_FREQUENCY <= 40000000
-  ncfgr |= GMAC_NCFGR_CLK_DIV16;         /* MCK divided by 16 (MCK up to 40 MHz) */
-#elif BOARD_MCK_FREQUENCY <= 80000000
-  ncfgr |= GMAC_NCFGR_CLK_DIV32;         /* MCK divided by 32 (MCK up to 80 MHz) */
-#elif BOARD_MCK_FREQUENCY <= 120000000
-  ncfgr |= GMAC_NCFGR_CLK_DIV48;         /* MCK divided by 48 (MCK up to 120 MHz) */
-#elif BOARD_MCK_FREQUENCY <= 160000000
-  ncfgr |= GMAC_NCFGR_CLK_DIV64;         /* MCK divided by 64 (MCK up to 160 MHz) */
-#elif BOARD_MCK_FREQUENCY <= 240000000
-  ncfgr |= GMAC_NCFGR_CLK_DIV96;         /* MCK divided by 64 (MCK up to 240 MHz) */
-#else
-#  error Invalid BOARD_MCK_FREQUENCY
-#endif
+  mck = BOARD_MCK_FREQUENCY;
+  DEBUGASSERT(mck <= 240000000);
+
+  if (mck <= 20000000)
+    {
+      ncfgr |= GMAC_NCFGR_CLK_DIV8;   /* MCK divided by 8 (MCK up to 20 MHz) */
+    }
+  else if (mck <= 40000000)
+    {
+      ncfgr |= GMAC_NCFGR_CLK_DIV16;  /* MCK divided by 16 (MCK up to 40 MHz) */
+    }
+  else if (mck <= 80000000)
+    {
+      ncfgr |= GMAC_NCFGR_CLK_DIV32;  /* MCK divided by 32 (MCK up to 80 MHz) */
+    }
+  else if (mck <= 120000000)
+    {
+      ncfgr |= GMAC_NCFGR_CLK_DIV48;  /* MCK divided by 48 (MCK up to 120 MHz) */
+    }
+  else if (mck <= 160000000)
+    {
+      ncfgr |= GMAC_NCFGR_CLK_DIV64;  /* MCK divided by 64 (MCK up to 160 MHz) */
+    }
+  else /* if (mck <= 240000000) */
+    {
+      ncfgr |= GMAC_NCFGR_CLK_DIV96;  /* MCK divided by 64 (MCK up to 240 MHz) */
+    }
 
   sam_putreg(priv, SAM_GMAC_NCFGR, ncfgr);
 
