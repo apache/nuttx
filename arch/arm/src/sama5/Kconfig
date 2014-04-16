@@ -217,7 +217,7 @@ config SAMA5_PWM
 	select PWM
 
 config SAMA5_ADC
-	bool "Touch Screen ADC Controller (ADC)"
+	bool "Touch Screen / ADC Controller (ADC)"
 	default n
 	select ANALOG
 	select ADC
