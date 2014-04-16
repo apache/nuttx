@@ -461,6 +461,12 @@ Running NuttX from SDRAM
     - Programming U-Boot
     - Load NuttX with U-Boot on AT91 boards
 
+  TODO:  Some drivers may require some adjustments to run from SDRAM.  That
+  is because in this case macros like BOARD_MCK_FREQUENCY are not constants
+  but are instead function calls:  The MCK clock frequency is not known in
+  advance but instead has to be calculated from the bootloader PLL configuration.
+  See the TODO list at the end of this file for further information.
+
 NuttX Configuration
 -------------------
 
@@ -3474,3 +3480,13 @@ To-Do List
 
 10) GMAC has only been tested on a 10/100Base-T network.  I don't have a
     1000Base-T network to support additional testing.
+
+11) Some drivers may require some adjustments if you intend to run from SDRAM.
+    That is because in this case macros like BOARD_MCK_FREQUENCY are not constants
+    but are instead function calls:  The MCK clock frequency is not known in
+    advance but instead has to be calculated from the bootloader PLL configuration.
+
+    As of this writing, all drivers have been converted to run from SDRAM except
+    for the PWM and the Timer/Counter drivers.  These drivers use the
+    BOARD_MCK_FREQUENCY definition in more complex ways and will require some
+    minor redesign and re-testing before they can be available.
