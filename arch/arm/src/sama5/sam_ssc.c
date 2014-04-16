@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_ssc.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,6 +55,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/audio/audio.h>
 #include <nuttx/audio/i2s.h>
 
 #include "up_internal.h"
@@ -102,6 +103,10 @@
 #  error Invalid value for CONFIG_SAMA5_SSC0_DATALEN
 #endif
 
+#ifndef CONFIG_AUDIO
+#  error CONFIG_AUDIO required by this driver
+#endif
+
 /* Check if we need to build RX and/or TX support */
 
 #undef SSC_HAVE_RX
@@ -116,6 +121,8 @@
     (defined(CONFIG_SAMA5_SSC1) && defined(CONFIG_SAMA5_SSC1_TX))
 #  define SSC_HAVE_TX
 #endif
+
+#if defined(SSC_HAVE_RX) || defined(SSC_HAVE_TX)
 
 /* Check if we need the sample rate to set MCK/2 divider */
 
@@ -161,27 +168,6 @@
 #define SCC_PERIOD (SSC_FSLEN + CONFIG_SAMA5_SSC0_DATALEN * SSC_DATNB)
 
 /* Clocking *****************************************************************/
-/* Select MCU-specific settings
- *
- * SSC is driven by the main clock, divided down so that the maximum
- * peripheral clocking is not exceeded.
- */
-
-#if BOARD_MCK_FREQUENCY <= SAM_SSC_MAXPERCLK
-#  define SSC_FREQUENCY BOARD_MCK_FREQUENCY
-#  define SSC_PCR_DIV PMC_PCR_DIV1
-#elif (BOARD_MCK_FREQUENCY >> 1) <= SAM_SSC_MAXPERCLK
-#  define SSC_FREQUENCY (BOARD_MCK_FREQUENCY >> 1)
-#  define SSC_PCR_DIV PMC_PCR_DIV2
-#elif (BOARD_MCK_FREQUENCY >> 2) <= SAM_SSC_MAXPERCLK
-#  define SSC_FREQUENCY (BOARD_MCK_FREQUENCY >> 2)
-#  define SSC_PCR_DIV PMC_PCR_DIV4
-#elif (BOARD_MCK_FREQUENCY >> 3) <= SAM_SSC_MAXPERCLK
-#  define SSC_FREQUENCY (BOARD_MCK_FREQUENCY >> 3)
-#  define SSC_PCR_DIV PMC_PCR_DIV8
-#else
-#  error Cannot realize SSC input frequency
-#endif
 
 /* Clock source definitions */
 
@@ -316,6 +302,8 @@ struct sam_ssc_s
   struct i2s_dev_s dev;        /* Externally visible I2S interface */
   uintptr_t base;              /* SSC controller register base address */
   sem_t exclsem;               /* Assures mutually exclusive acess to SSC */
+  uint8_t datalen;             /* Data width (2-32) */
+  uint8_t pid;                 /* Peripheral ID */
   uint16_t rxenab:1;           /* True: RX transfers enabled */
   uint16_t txenab:1;           /* True: TX transfers enabled */
   uint16_t loopback:1;         /* True: Loopback mode */
@@ -324,8 +312,7 @@ struct sam_ssc_s
   uint16_t txclk:2;            /* Transmitter clock source. See SSC_CLKSRC_* definitions */
   uint16_t rxout:2;            /* Receiver clock output. See SSC_CLKOUT_* definitions */
   uint16_t txout:2;            /* Transmitter clock output. See SSC_CLKOUT_* definitions */
-  uint8_t datalen;             /* Data width (2-32) */
-  uint8_t pid;                 /* Peripheral ID */
+  uint32_t frequency;          /* SSC clock frequency */
 #ifdef SSC_HAVE_MCK2
   uint32_t samplerate;         /* Data sample rate (determines only MCK/2 divider) */
 #endif
@@ -757,7 +744,7 @@ static void ssc_exclsem_take(struct sam_ssc_s *priv)
 }
 
 /****************************************************************************
- * Name: ssc_exclsem_take
+ * Name: ssc_bufsem_take
  *
  * Description:
  *   Take the buffer semaphore handling any exceptional conditions
@@ -1994,9 +1981,11 @@ static int ssc_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
                        i2s_callback_t callback, void *arg, uint32_t timeout)
 {
   struct sam_ssc_s *priv = (struct sam_ssc_s *)dev;
+#ifdef SSC_HAVE_RX
   struct sam_buffer_s *bfcontainer;
   irqstate_t flags;
   int ret;
+#endif
 
   DEBUGASSERT(priv && apb && ((uintptr_t)apb->samp & 3) == 0);
   i2svdbg("apb=%p nmaxbytes=%d arg=%p timeout=%d\n",
@@ -2058,6 +2047,7 @@ errout_with_exclsem:
 
 #else
   i2sdbg("ERROR: SSC%d has no receiver\n", priv->sscno);
+  UNUSED(priv);
   return -ENOSYS;
 #endif
 }
@@ -2197,9 +2187,11 @@ static int ssc_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
                     i2s_callback_t callback, void *arg, uint32_t timeout)
 {
   struct sam_ssc_s *priv = (struct sam_ssc_s *)dev;
+#ifdef SSC_HAVE_TX
   struct sam_buffer_s *bfcontainer;
   irqstate_t flags;
   int ret;
+#endif
 
   DEBUGASSERT(priv && apb && ((uintptr_t)apb->samp & 3) == 0);
   i2svdbg("apb=%p nbytes=%d arg=%p timeout=%d\n",
@@ -2261,6 +2253,7 @@ errout_with_exclsem:
 
 #else
   i2sdbg("ERROR: SSC%d has no transmitter\n", priv->sscno);
+  UNUSED(priv);
   return -ENOSYS;
 #endif
 }
@@ -2598,10 +2591,37 @@ static uint32_t ssc_mck2divider(struct sam_ssc_s *priv)
 static void ssc_clocking(struct sam_ssc_s *priv)
 {
   uint32_t regval;
+  uint32_t mck;
+
+  /* Determine the maximum SSC peripheral clock frequency */
+
+  mck = BOARD_MCK_FREQUENCY;
+  DEBUGASSERT((mck >> 3) <= SAM_SSC_MAXPERCLK);
+
+  if (mck <= SAM_SSC_MAXPERCLK)
+    {
+      priv->frequency = mck;
+      regval          = PMC_PCR_DIV1;
+    }
+  else if ((mck >> 1) <= SAM_SSC_MAXPERCLK)
+    {
+      priv->frequency = (mck >> 1);
+      regval          = PMC_PCR_DIV2;
+    }
+  else if ((mck >> 2) <= SAM_SSC_MAXPERCLK)
+    {
+      priv->frequency = (mck >> 2);
+      regval          = PMC_PCR_DIV4;
+    }
+  else /* if ((mck >> 3) <= SAM_SSC_MAXPERCLK) */
+    {
+      priv->frequency = (mck >> 3);
+      regval          = PMC_PCR_DIV8;
+    }
 
   /* Set the maximum SSC peripheral clock frequency */
 
-  regval = PMC_PCR_PID(priv->pid) | PMC_PCR_CMD | SSC_PCR_DIV | PMC_PCR_EN;
+  regval |= PMC_PCR_PID(priv->pid) | PMC_PCR_CMD | PMC_PCR_EN;
   putreg32(regval, SAM_PMC_PCR);
 
   /* Reset, disable receiver & transmitter */
@@ -3189,4 +3209,5 @@ errout_with_alloc:
   return NULL;
 }
 
+#endif /* SSC_HAVE_RX || SSC_HAVE_TX */
 #endif /* CONFIG_SAMA5_SSC0 || CONFIG_SAMA5_SSC1 */

@@ -268,12 +268,14 @@ config SAMA5_SSC0
 	default n
 	select I2S
 	depends on SAMA5_DMAC0
+	select AUDIO
 
 config SAMA5_SSC1
 	bool "Synchronous Serial Controller 1 (SSC1)"
 	default n
 	select I2S
 	depends on SAMA5_DMAC1
+	select AUDIO
 
 config SAMA5_CAN0
 	bool "CAN controller 0 (CAN0)"
@@ -300,7 +302,7 @@ config SAMA5_TDES
 config SAMA5_TRNG
 	bool "True Random Number Generator (TRNG)"
 	default n
-	select DEV_RANDOM
+	select ARCH_HAVE_RNG
 
 config SAMA5_ARM
 	bool "Performance Monitor Unit (ARM)"
