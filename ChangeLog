@@ -7177,3 +7177,7 @@
 	* drivers/lcd/mio283qt9a.c and include/nuttx/lcd/mio283qt9a.h:  Update the
 	  MIO183QT-9A LCD driver to support reading from the LCD.  From Toby
 	  Duckworth (2014-4-16).
+	* arch/arm/src/stm32/chip/stm32f20xxx_pinmap.h:  Correct a mapping for
+	  SPI MOSI pin.  From dlsitzer (2014-4-26).
+
+
