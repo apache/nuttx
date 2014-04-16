@@ -43,7 +43,6 @@
 #include <stdbool.h>
 #include <assert.h>
 
-#include <nuttx/usb/usbhost_trace.h>
 
 #include "stm32_usbhost.h"
 
@@ -101,6 +100,13 @@ static const struct stm32_usbhost_trace_s g_trace1[TRACE1_NSTRINGS] =
   TRENTRY(OTGFS_VTRACE1_GINT_PTXFE,        TR_FMT1, "OTGFS Handle the periodic TxFIFO empty interrupt.\n"),
   TRENTRY(OTGFS_VTRACE1_GINT_HC,           TR_FMT1, "OTGFS Handle the host channels interrupt.\n"),
   TRENTRY(OTGFS_VTRACE1_GINT_HPRT,         TR_FMT1, "OTGFS Handle the host port interrupt.\n"),
+  TRENTRY(OTGFS_VTRACE1_GINT_HPRT_POCCHNG, TR_FMT1, "OTGFS  HPRT: Port Over-Current Change.\n"),
+  TRENTRY(OTGFS_VTRACE1_GINT_HPRT_PCDET,   TR_FMT1, "OTGFS  HPRT: Port Connect Detect.\n"),
+  TRENTRY(OTGFS_VTRACE1_GINT_HPRT_PENCHNG, TR_FMT1, "OTGFS  HPRT: Port Enable Changed.\n"),
+  TRENTRY(OTGFS_VTRACE1_GINT_HPRT_LSDEV,   TR_FMT1, "OTGFS  HPRT: Low Speed Device Connected.\n"),
+  TRENTRY(OTGFS_VTRACE1_GINT_HPRT_FSDEV,   TR_FMT1, "OTGFS  HPRT: Full Speed Device Connected.\n"),
+  TRENTRY(OTGFS_VTRACE1_GINT_HPRT_LSFSSW,  TR_FMT1, "OTGFS  HPRT: Host Switch: LS -> FS.\n"),
+  TRENTRY(OTGFS_VTRACE1_GINT_HPRT_FSLSSW,  TR_FMT1, "OTGFS  HPRT: Host Switch: FS -> LS.\n"),
   TRENTRY(OTGFS_VTRACE1_GINT_DISC,         TR_FMT1, "OTGFS Handle the disconnect detected interrupt.\n"),
   TRENTRY(OTGFS_VTRACE1_GINT_IPXFR,        TR_FMT1, "OTGFS Handle the incomplete periodic transfer.\n"),
 

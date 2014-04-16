@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/usb/usbhost.h>
+#include <nuttx/usb/usbhost_trace.h>
 #include <stdint.h>
 
 #include "chip.h"
@@ -74,6 +75,13 @@ enum usbhost_trace1codes_e
   OTGFS_VTRACE1_GINT_PTXFE,          /* OTGFS Handle the periodic TxFIFO empty interrupt */
   OTGFS_VTRACE1_GINT_HC,             /* OTGFS Handle the host channels interrupt */
   OTGFS_VTRACE1_GINT_HPRT,           /* OTGFS Handle the host port interrupt */
+  OTGFS_VTRACE1_GINT_HPRT_POCCHNG,   /* OTGFS  HPRT: Port Over-Current Change*/
+  OTGFS_VTRACE1_GINT_HPRT_PCDET,     /* OTGFS  HPRT: Port Connect Detect */
+  OTGFS_VTRACE1_GINT_HPRT_PENCHNG,   /* OTGFS  HPRT: Port Enable Changed */
+  OTGFS_VTRACE1_GINT_HPRT_LSDEV,     /* OTGFS  HPRT: Low Speed Device Connected */
+  OTGFS_VTRACE1_GINT_HPRT_FSDEV,     /* OTGFS  HPRT: Full Speed Device Connected */
+  OTGFS_VTRACE1_GINT_HPRT_LSFSSW,    /* OTGFS  HPRT: Host Switch: LS -> FS */
+  OTGFS_VTRACE1_GINT_HPRT_FSLSSW,    /* OTGFS  HPRT: Host Switch: FS -> LS */
   OTGFS_VTRACE1_GINT_DISC,           /* OTGFS Handle the disconnect detected interrupt */
   OTGFS_VTRACE1_GINT_IPXFR,          /* OTGFS Handle the incomplete periodic transfer */
 
