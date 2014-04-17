@@ -75,11 +75,6 @@
 # error "CONFIG_ARCH_RAMFUNCS must be defined for this logic"
 #endif
 
-#ifndef CONFIG_ARCH_RAMFUNCS
-#  undef  __ramfunc__
-#  define __ramfunc__
-#endif
-
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
