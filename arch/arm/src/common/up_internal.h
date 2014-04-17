@@ -253,7 +253,7 @@ extern uint32_t _ebss;            /* End+1 of .bss */
 
 #  define __ramfunc__ __attribute__ ((section(".ramfunc"),long_call))
 
-/* Functions decleared in the .ramfunc section will be packaged together
+/* Functions declared in the .ramfunc section will be packaged together
  * by the linker script and stored in FLASH.  During boot-up, the start
  * logic must include logic to copy the RAM functions from their storage
  * location in FLASH to their correct destination in SRAM.  The following
@@ -264,6 +264,14 @@ extern uint32_t _ebss;            /* End+1 of .bss */
 extern const uint32_t _framfuncs; /* Copy source address in FLASH */
 extern uint32_t _sramfuncs;       /* Copy destination start address in RAM */
 extern uint32_t _eramfuncs;       /* Copy destination end address in RAM */
+
+#else /* CONFIG_ARCH_RAMFUNCS */
+
+/* Otherwise, a null definition is provided so that condition compilation is
+ * not necessary in code that may operate with or without RAM functions.
+ */
+
+#  define __ramfunc__
 
 #endif /* CONFIG_ARCH_RAMFUNCS */
 #endif /* __ASSEMBLY__ */

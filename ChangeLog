@@ -7179,5 +7179,7 @@
 	  Duckworth (2014-4-16).
 	* arch/arm/src/stm32/chip/stm32f20xxx_pinmap.h:  Correct a mapping for
 	  SPI MOSI pin.  From dlsitzer (2014-4-26).
-
-
+	* arm/src/sama5/sam_clockconfig.c/.h: Move the un-definitions of
+	  __ramfuncs__ from the .c file to the .h file or, otherwise, the
+	  attribute will be applied differently for the prototype and the
+	  function definition.  Sourceforge patch 38 from Luciano Neri (2014-4-17).
