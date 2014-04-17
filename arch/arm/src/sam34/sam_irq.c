@@ -372,7 +372,7 @@ void up_irqinitialize(void)
        i > 0;
        i--, regaddr += 4)
     {
-      putreg32(0, regaddr);
+      putreg32(DEFPRIORITY32, regaddr);
     }
 
   /* currents_regs is non-NULL only while processing an interrupt */
