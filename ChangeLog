@@ -7200,4 +7200,10 @@
 	  in the error count.  From Leo (2014-4-17).
 	* arch/arm/src/sam34/sam_irq.c:  Fix initialization of the default
 	  priorities (2014-4-17).
-
+	* arch/arm/src/kinetis/kinetis_irq.c, lpc17xx/lpc17_irq.c, and
+	  tiva/tiva_irq.c:  Modify the logic to disables the interrupts and sets
+	  the default interrupt priority so that it uses the ICTR to get the
+	  number of interrupt lines/registers.  This is instead of using some
+	  fixed number of initializations based a priori knowledge of the number
+	  of interrupt lines in the MCU.  This logic is untested on some MCUs
+	  on initial check-in0 (2014-4-17).
