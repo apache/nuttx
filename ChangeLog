@@ -7187,3 +7187,7 @@
 	* arch/arm/src/sama5/sam_emac.c:  Add missing right parentheses.  This
 	  introduced in the above change and is Sourceforge patch 39 from Luciano
 	  Neri (2014-4-17).
+	* configs/sama5dx-ek/include/board.h and sama5d3-xplained.h:  These files
+	  referenct type xcpt_t and so must include nuttx/irq.h.  This is
+	  Sourceforge bug 25 submitted by Luciano Neri (2014-4-17).
+
