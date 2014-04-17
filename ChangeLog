@@ -7192,4 +7192,7 @@
 	  Sourceforge bug 25 submitted by Luciano Neri (2014-4-17).
 	* arch/arm/src/stm32/stm32_otgfshost.c:  Some fixes related to low-speed
 	  devices and interrupt endpoints from Leo (2014-4-17).
-
+	* configs/stm32f4discovery/src/stm32_usb.c:  Add support to register
+	  keyboard and mouse classes if so configured.  From Leo (2014-4-17).
+	* include/nuttx/usb/usbhost:  Fix some USB HID-related conditional
+	  compilation.  From Leo (2014-4-17).
