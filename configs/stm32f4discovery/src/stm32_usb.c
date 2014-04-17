@@ -177,11 +177,30 @@ int stm32_usbhost_initialize(void)
    */
 
   uvdbg("Register class drivers\n");
+
+#ifdef CONFIG_USBHOST_MSC
   ret = usbhost_storageinit();
   if (ret != OK)
     {
       udbg("Failed to register the mass storage class\n");
     }
+#endif
+
+#ifdef CONFIG_USBHOST_HIDKBD
+  ret = usbhost_kbdinit();
+  if (ret != OK)
+    {
+      udbg("Failed to register the HID keyboard class\n");
+    }
+#endif
+
+#ifdef CONFIG_USBHOST_HIDMOUSE
+  ret = usbhost_mouse_init();
+  if (ret != OK)
+    {
+      udbg("Failed to register the HID mouse class\n");
+    }
+#endif
 
   /* Then get an instance of the USB host interface */
 
