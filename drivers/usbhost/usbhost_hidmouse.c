@@ -1083,14 +1083,22 @@ static int usbhost_mouse_poll(int argc, char *argv[])
 
       if (ret != OK)
         {
-          nerrors++;
-          udbg("ERROR: DRVR_TRANSFER returned: %d/%d\n",
-               ret, nerrors);
+          /* If DRVR_TRANSFER() returns EAGAIN, that simply means that
+           * the devices was not ready and has NAK'ed the transfer.  That
+           * no be treated as an error (unless it persists for a long
+           * time).
+           */
 
-          if (nerrors > 200)
+          udbg("ERROR: DRVR_TRANSFER returned: %d/%d\n", ret, nerrors);
+          if (ret != -EAGAIN)
             {
-              udbg("Too many errors... aborting: %d\n", nerrors);
-              break;
+              nerrors++;
+
+              if (nerrors > 200)
+                {
+                  udbg("Too many errors... aborting: %d\n", nerrors);
+                  break;
+                }
             }
         }
 

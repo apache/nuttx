@@ -7196,3 +7196,5 @@
 	  keyboard and mouse classes if so configured.  From Leo (2014-4-17).
 	* include/nuttx/usb/usbhost:  Fix some USB HID-related conditional
 	  compilation.  From Leo (2014-4-17).
+	* drivers/usbhost/usbhost_hidmouse.c: Don't include NAKs from the device
+	  in the error count.  From Leo (2014-4-17).
