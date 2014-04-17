@@ -7198,3 +7198,6 @@
 	  compilation.  From Leo (2014-4-17).
 	* drivers/usbhost/usbhost_hidmouse.c: Don't include NAKs from the device
 	  in the error count.  From Leo (2014-4-17).
+	* arch/arm/src/sam34/sam_irq.c:  Fix initialization of the default
+	  priorities (2014-4-17).
+
