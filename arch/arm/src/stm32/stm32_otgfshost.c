@@ -69,7 +69,7 @@
 #if defined(CONFIG_USBHOST) && (defined(CONFIG_STM32_OTGFS) || defined(CONFIG_STM32_OTGFS2))
 
 /*******************************************************************************
- * Definitions
+ * Pre-processor Definitions
  *******************************************************************************/
 /* Configuration ***************************************************************/
 /*
@@ -1161,6 +1161,10 @@ static void stm32_transfer_start(FAR struct stm32_usbhost_s *priv, int chidx)
   if ((stm32_getreg(STM32_OTGFS_HFNUM) & 1) == 0)
     {
       regval |= OTGFS_HCCHAR_ODDFRM;
+    }
+  else
+    {
+      regval &= ~OTGFS_HCCHAR_ODDFRM;
     }
 
   regval &= ~OTGFS_HCCHAR_CHDIS;
