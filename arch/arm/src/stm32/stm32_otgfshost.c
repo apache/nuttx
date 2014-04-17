@@ -1940,18 +1940,18 @@ static inline void stm32_gint_hcinisr(FAR struct stm32_usbhost_s *priv,
 
   else if ((pending & OTGFS_HCINT_NAK) != 0)
     {
-      /* For a BULK tranfer, the hardware is capable of retrying
+      /* For a BULK transfer, the hardware is capable of retrying
        * automatically on a NAK.  However, this is not always
        * what we need to do.  So we always halt the transfer and
        * return control to high level logic in the even of a NAK.
        */
 
-#if 0
+#if 1
       /* Halt the interrupt channel */
 
-      if (chan->eptype == OTGFS_EPTYPE_CTRL)
+      if (chan->eptype == OTGFS_EPTYPE_INTR)
         {
-          /* Halt the channel -- the CHH interrrupt is expected next */
+          /* Halt the channel -- the CHH interrupt is expected next */
 
           stm32_chan_halt(priv, chidx, CHREASON_NAK);
         }
@@ -1971,10 +1971,11 @@ static inline void stm32_gint_hcinisr(FAR struct stm32_usbhost_s *priv,
           stm32_putreg(STM32_OTGFS_HCCHAR(chidx), regval);
         }
 #else
-      /* Halt all transfers on the NAK -- the CHH interrrupt is expected next */
+      /* Halt all transfers on the NAK -- the CHH interrupt is expected next */
 
       stm32_chan_halt(priv, chidx, CHREASON_NAK);
 #endif
+
       /* Clear the NAK condition */
 
       stm32_putreg(STM32_OTGFS_HCINT(chidx), OTGFS_HCINT_NAK);
@@ -2684,6 +2685,7 @@ static inline void stm32_gint_hprtisr(FAR struct stm32_usbhost_s *priv)
 
       usbhost_vtrace1(OTGFS_VTRACE1_GINT_HPRT_PCDET, 0);
       newhprt |= OTGFS_HPRT_PCDET;
+      stm32_portreset(priv);
       stm32_gint_connected(priv);
     }
 
@@ -3360,7 +3362,7 @@ static int stm32_getdevinfo(FAR struct usbhost_driver_s *drvr,
  *      the class create() method.
  *   epdesc - Describes the endpoint to be allocated.
  *   ep - A memory location provided by the caller in which to receive the
- *      allocated endpoint desciptor.
+ *      allocated endpoint descriptor.
  *
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
@@ -3437,7 +3439,7 @@ errout:
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
- *   ep - The endpint to be freed.
+ *   ep - The endpoint to be freed.
  *
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
@@ -3971,7 +3973,7 @@ static void stm32_portreset(FAR struct stm32_usbhost_s *priv)
   regval |= OTGFS_HPRT_PRST;
   stm32_putreg(STM32_OTGFS_HPRT, regval);
 
-  up_mdelay(10);
+  up_mdelay(20);
 
   regval &= ~OTGFS_HPRT_PRST;
   stm32_putreg(STM32_OTGFS_HPRT, regval);

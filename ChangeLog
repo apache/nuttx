@@ -7190,4 +7190,6 @@
 	* configs/sama5dx-ek/include/board.h and sama5d3-xplained.h:  These files
 	  referenct type xcpt_t and so must include nuttx/irq.h.  This is
 	  Sourceforge bug 25 submitted by Luciano Neri (2014-4-17).
+	* arch/arm/src/stm32/stm32_otgfshost.c:  Some fixes related to low-speed
+	  devices and interrupt endpoints from Leo (2014-4-17).
 
