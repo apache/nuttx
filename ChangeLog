@@ -7209,3 +7209,5 @@
 	  on initial check-in0 (2014-4-17).
 	* arm/src/lpc17xx/Kconfig and lpc17_ethernet.c:  The default interrupt
 	  priority should be default, not the highest priority (2014-4-19).
+	* configs/lpcxpresso-lpc1768: Refreshed all defconfig fiels (2014-4-19).
+
