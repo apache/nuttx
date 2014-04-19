@@ -668,9 +668,10 @@ config NET_NRXDESC
 
 config NET_PRIORITY
 	int "Ethernet interrupt priority"
-	default 0
+	default 128
+	depends on ARCH_IRQPRIO && EXPERIMENTAL
 	---help---
-		Ethernet interrupt priority.  The is default is the higest priority (0).
+		Ethernet interrupt priority.  The default is the default priority (128).
 
 config NET_WOL
 	bool "Wake-up on LAN"
