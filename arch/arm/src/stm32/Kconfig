@@ -2722,8 +2722,9 @@ config SDIO_DMA
 config SDIO_PRI
 	hex "SDIO interrupt priority"
 	default 128
+	depends on ARCH_IRQPRIO && EXPERIMENTAL
 	---help---
-		Select SDIO interrupt prority.  Default: 128.
+		Select SDIO interrupt priority.  Default: 128.
 
 config SDIO_DMAPRIO
 	hex "SDIO DMA priority"
