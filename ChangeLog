@@ -7207,3 +7207,5 @@
 	  fixed number of initializations based a priori knowledge of the number
 	  of interrupt lines in the MCU.  This logic is untested on some MCUs
 	  on initial check-in0 (2014-4-17).
+	* arm/src/lpc17xx/Kconfig and lpc17_ethernet.c:  The default interrupt
+	  priority should be default, not the highest priority (2014-4-19).

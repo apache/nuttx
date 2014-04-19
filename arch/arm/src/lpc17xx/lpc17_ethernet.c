@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc17xx/lpc17_ethernet.c
  *
- *   Copyright (C) 2010-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -72,7 +72,7 @@
 #if LPC17_NETHCONTROLLERS > 0
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Configuration ************************************************************/
@@ -104,28 +104,11 @@
 #endif
 
 /* If the user did not specify a priority for Ethernet interrupts, set the
- * interrupt priority to the maximum (unless CONFIG_ARMV7M_USEBASEPRI is
- * defined, then set it to the maximum allowable priority).
+ * interrupt priority to the default.
  */
 
 #ifndef CONFIG_NET_PRIORITY
-#  ifdef CONFIG_ARMV7M_USEBASEPRI
-#    define CONFIG_NET_PRIORITY NVIC_SYSH_DISABLE_PRIORITY
-#  else
-#    define CONFIG_NET_PRIORITY NVIC_SYSH_PRIORITY_MAX
-#  endif
-#endif
-
-/* If the priority is set at the max (0) and CONFIG_ARMV7M_USEBASEPRI is
- * defined, then silently drop the priority to NVIC_SYSH_DISABLE_PRIORITY.
- * In this configuratin, nothing is permitted to run at priority zero
- * except for the SVCALL handler.  NVIC_SYSH_DISABLE_PRIORITY is the
- * maximum allowable priority in that case.
- */
-
-#if CONFIG_NET_PRIORITY == 0 && defined(CONFIG_ARMV7M_USEBASEPRI)
-#  undef CONFIG_NET_PRIORITY
-#  define CONFIG_NET_PRIORITY NVIC_SYSH_DISABLE_PRIORITY
+#  define CONFIG_NET_PRIORITY NVIC_SYSH_PRIORITY_DEFAULT
 #endif
 
 /* Debug Configuration *****************************************************/
