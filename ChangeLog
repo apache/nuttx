@@ -7211,4 +7211,4 @@
 	  priority should be default, not the highest priority (2014-4-19).
 	* configs/lpcxpresso-lpc1768: Refreshed all defconfig files (2014-4-19).
 	* configs/olimex-lpc1766stk: Refreshed all defconfig files (2014-4-19).
-
+	* configs/zkit-arm-1769: Refreshed all defconfig files (2014-4-19).
