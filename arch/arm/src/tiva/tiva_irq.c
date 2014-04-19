@@ -289,6 +289,7 @@ static int tiva_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
 
 void up_irqinitialize(void)
 {
+  uintptr_t regaddr;
   int nintlines;
   int i;
 

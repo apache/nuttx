@@ -56,7 +56,7 @@
 #include "lpc17_clrpend.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Get a 32-bit version of the default priority */
 
@@ -287,6 +287,7 @@ static int lpc17_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
 
 void up_irqinitialize(void)
 {
+  uintptr_t regaddr;
   int nintlines;
   int i;
 
