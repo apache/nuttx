@@ -7214,4 +7214,8 @@
 	* configs/zkit-arm-1769: Refreshed all defconfig files (2014-4-19).
 	* include/nuttx/binfmt/ieee695.h:  Beginning of header file for IEEE
 	  695 OMF header file (2014-4-19).
-
+	* arch/arm/include/stm32/chip.h and src/stm32/Kconfig:  Add support
+	  for the STM401RE.  From Frank Bennett (2014-4-20).
+	* README.txt, Documentation/README.html, configs/Kconfig and README.txt,
+	  configs/nucleo-f401re:  Add support for the Nucleo-F401RE board.  From
+	  Frank Bennett (2014-4-20).
