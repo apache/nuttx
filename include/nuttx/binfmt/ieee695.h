@@ -271,6 +271,20 @@
 #define IEEE695_EXTCMD_INBLOCK       {0x04, 0xb9}
 #define IEEE695_EXTCMD_CALLOPT       {0x05, 0xb9}
 
+/* Attribute Definitions */
+
+#define IEEE695_ATTR_VERSION         37 /* Object format version number, 2 bytes follow */
+#define IEEE695_ATTR_OBJFORMT        38 /* Object format type, 1 byte follows */
+#define IEEE695_ATTR_CASESENSITIVE   39 /* Case sensitivity, 1 byte follows */
+
+#define IEEE695_OBJFORMT_ABSOLUTE    1 /* Absolute (not relinkable) */
+#define IEEE695_OBJFORMT_RELOCATABLE 2 /* Relocatable */
+#define IEEE695_OBJFORMT_LOADABLE    3 /* Loadable */
+#define IEEE695_OBJFORMT_LIBRARY     4 /* Library */
+
+#define IEEE695_CASE_SENSITIVE       1 /* Treat all symbols as if they were upper case */
+#define IEEE695_CASE_INSENSITIVE     2 /* Do not change the case of symbols */
+
 /* Helper Macros ********************************************************************/
 /* These macros extract un-aligned, little-endian values from the object file */
 
