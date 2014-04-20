@@ -7212,3 +7212,6 @@
 	* configs/lpcxpresso-lpc1768: Refreshed all defconfig files (2014-4-19).
 	* configs/olimex-lpc1766stk: Refreshed all defconfig files (2014-4-19).
 	* configs/zkit-arm-1769: Refreshed all defconfig files (2014-4-19).
+	* include/nuttx/binfmt/ieee695.h:  Beginning of header file for IEEE
+	  695 OMF header file (2014-4-19).
+
