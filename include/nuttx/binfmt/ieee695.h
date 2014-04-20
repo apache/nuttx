@@ -276,6 +276,13 @@
 #define IEEE695_ATTR_VERSION         37 /* Object format version number, 2 bytes follow */
 #define IEEE695_ATTR_OBJFORMT        38 /* Object format type, 1 byte follows */
 #define IEEE695_ATTR_CASESENSITIVE   39 /* Case sensitivity, 1 byte follows */
+#define IEEE695_ATTR_MEMORYMODEL     40 /* Memory model, 1 byte follows */
+#define IEEE695_ATTR_CREATIONTIME    50 /* Creation date/time, 6 bytes follows */
+#define IEEE695_ATTR_CMDLINE         51 /* Command line text, string follows */
+#define IEEE695_ATTR_EXECSTATUS      52 /* Execution status, 1 byte follows */
+#define IEEE695_ATTR_HOSTENVIRON     53 /* Host environment, 1 byte follows */
+#define IEEE695_ATTR_TOOLVERSION     54 /* Tool and version number used to create the module, 3 bytes follows */
+#define IEEE695_ATTR_COMMENTS        55 /* Comments, string follows */
 
 #define IEEE695_OBJFORMT_ABSOLUTE    1 /* Absolute (not relinkable) */
 #define IEEE695_OBJFORMT_RELOCATABLE 2 /* Relocatable */
@@ -284,6 +291,25 @@
 
 #define IEEE695_CASE_SENSITIVE       1 /* Treat all symbols as if they were upper case */
 #define IEEE695_CASE_INSENSITIVE     2 /* Do not change the case of symbols */
+
+#define IEEE695_MEMORYMODEL_TINY     0 /* Code and data: Same single 64K segment */
+#define IEEE695_MEMORYMODEL_SMALL    1 /* Code and data: Each have a single 64K segment */
+#define IEEE695_MEMORYMODEL_MEDIUM   2 /* Data: Single 64K segment; Code: Multiple 64K segments */
+#define IEEE695_MEMORYMODEL_COMPACT  3 /* Data: Multiple 64K segments; Code: Single 64K segment */
+#define IEEE695_MEMORYMODEL_LARGE    4 /* Data and code: Both have multiple 64K segments */
+#define IEEE695_MEMORYMODEL_BIG      5 /* Code has multiple 64K segments with common "near" data area */
+#define IEEE695_MEMORYMODEL_HUGE     6 /* All large arrays and structures are in their own section */
+
+#define IEEE695_EXECSTATUS_SUCCESS   0 /* Success */
+#define IEEE695_EXECSTATUS_WARNINGS  1 /* Warning(s) */
+#define IEEE695_EXECSTATUS_ERRORS    2 /* Error(s) */
+#define IEEE695_EXECSTATUS_FATAL     3 /* Fatal error(s) */
+
+#define IEEE695_HOSTENVIRON_UNKNOWN  0
+#define IEEE695_HOSTENVIRON_VMS      1
+#define IEEE695_HOSTENVIRON_MSDOS    2
+#define IEEE695_HOSTENVIRON_UNIX     3
+#define IEEE695_HOSTENVIRON_HPUX     4
 
 /* Helper Macros ********************************************************************/
 /* These macros extract un-aligned, little-endian values from the object file */
