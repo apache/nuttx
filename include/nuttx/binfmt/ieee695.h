@@ -48,7 +48,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* IEEE695 Record Types */
+/* IEEE695 Record Types *************************************************************/
 
 #define IEEE695_RECTYPE_THEADR       0x80  /* Translator Header Record */
 #define IEEE695_RECTYPE_LHEADR       0x82  /* Library Module Header Record */
@@ -90,6 +90,27 @@
 #define IEEE695_RECTYPE_VENDEXT      0xce  /* Vendor-specific OMF Extension Record */
 #define IEEE695_RECTYPE_LIBHDR       0xf0  /* Library Header Record */
 #define IEEE695_RECTYPE_LIBEND       0xf1  /* Library End Record */
+
+/* Obsolete records */
+
+#define IEEE695_RECTYPE_RHEADR       0x6e  /* R-Module Header Record */
+#define IEEE695_RECTYPE_REGINT       0x70  /* Register Initialization Record */
+#define IEEE695_RECTYPE_REDATA       0x72  /* Relocatable Enumerated Data Record */
+#define IEEE695_RECTYPE_RIDATA       0x74  /* Relocatable Iterated Data Record */
+#define IEEE695_RECTYPE_OVLDEF       0x76  /* Overlay Definition Record */
+#define IEEE695_RECTYPE_ENDREC       0x78  /* End Record */
+#define IEEE695_RECTYPE_BLKDEF       0x7a  /* Block Definition Record */
+#define IEEE695_RECTYPE_BLKEND       0x7c  /* Block End Record */
+#define IEEE695_RECTYPE_DEBSYM       0x7e  /* Debug Symbols Record */
+#define IEEE695_RECTYPE_PEDATA       0x84  /* Physical Enumerated Data Record */
+#define IEEE695_RECTYPE_PIDATA       0x86  /* Physical Iterated Data Record */
+#define IEEE695_RECTYPE_TYPDEF       0x8e  /* Type of data represented by a name */
+#define IEEE695_RECTYPE_LOCSYM       0x92  /* Local Symbols Record */
+#define IEEE695_RECTYPE_NONAME       0x9e  /* Unnamed record */
+#define IEEE695_RECTYPE_LIBHED       0xa4  /* Library Header Record */
+#define IEEE695_RECTYPE_LIBNAM       0xa6  /* Library Module Names Record */
+#define IEEE695_RECTYPE_LIBLOC       0xa8  /* Library Module Locations Record */
+#define IEEE695_RECTYPE_LIBDIC       0xaa  /* Library Dictionary Record */
 
 /* Comment type */
 
@@ -146,7 +167,112 @@
 
 #define IEEE695_COMENT_PASS2         0x01  /* Records generated from Pass 2 of the linker */
 
-/* These macros extract un-aligned, little endian values from the object file */
+/* Standard Functions, Identifiers and Commands *************************************/
+/* Standard functions */
+
+#define IEEE695_FUNC_F               0xa0
+#define IEEE695_FUNC_T               0xa1
+#define IEEE695_FUNC_ABS             0xa2
+#define IEEE695_FUNC_NEG             0xa3
+#define IEEE695_FUNC_NOT             0xa4
+#define IEEE695_FUNC_PLUS            0xa5
+#define IEEE695_FUNC_MINUS           0xa6
+#define IEEE695_FUNC_DIV             0xa7
+#define IEEE695_FUNC_MUL             0xa8
+#define IEEE695_FUNC_MAX             0xa9
+#define IEEE695_FUNC_MIN             0xaa
+#define IEEE695_FUNC_MOD             0xab
+#define IEEE695_FUNC_LT              0xac
+#define IEEE695_FUNC_GT              0xad
+#define IEEE695_FUNC_EQU             0xae
+#define IEEE695_FUNC_NEQ             0xaf
+#define IEEE695_FUNC_AND             0xb0
+#define IEEE695_FUNC_OR              0xb1
+#define IEEE695_FUNC_XOR             0xb2
+#define IEEE695_FUNC_EXT             0xb3
+#define IEEE695_FUNC_INS             0xb4
+#define IEEE695_FUNC_ERR             0xb5
+#define IEEE695_FUNC_IF              0xb6
+#define IEEE695_FUNC_ELSE            0xb7
+#define IEEE695_FUNC_END             0xb8
+#define IEEE695_FUNC_ESCAPE          0xb9
+#define IEEE695_FUNC_LPSIGNED        0xba
+#define IEEE695_FUNC_RPSIGNED        0xbb
+#define IEEE695_FUNC_LPUNSIGNED      0xbc
+#define IEEE695_FUNC_RPUNSIGNED      0xbd
+#define IEEE695_FUNC_LPEITHER        0xbe
+#define IEEE695_FUNC_RPEITHER        0xbf
+
+/* Standard Identifiers */
+
+#define IEEE695_IDENT_A              0xc1
+#define IEEE695_IDENT_B              0xc2
+#define IEEE695_IDENT_C              0xc3
+#define IEEE695_IDENT_D              0xc4
+#define IEEE695_IDENT_E              0xc5
+#define IEEE695_IDENT_F              0xc6
+#define IEEE695_IDENT_G              0xc7
+#define IEEE695_IDENT_H              0xc8
+#define IEEE695_IDENT_I              0xc9
+#define IEEE695_IDENT_J              0xca
+#define IEEE695_IDENT_K              0xcb
+#define IEEE695_IDENT_L              0xcc
+#define IEEE695_IDENT_M              0xcd
+#define IEEE695_IDENT_N              0xce
+#define IEEE695_IDENT_O              0xcf
+#define IEEE695_IDENT_P              0xd0
+#define IEEE695_IDENT_Q              0xd1
+#define IEEE695_IDENT_R              0xd2
+#define IEEE695_IDENT_S              0xd3
+#define IEEE695_IDENT_T              0xd4
+#define IEEE695_IDENT_U              0xd5
+#define IEEE695_IDENT_V              0xd6
+#define IEEE695_IDENT_W              0xd7
+#define IEEE695_IDENT_X              0xd8
+#define IEEE695_IDENT_Y              0xd9
+#define IEEE695_IDENT_Z              0xda
+
+/* Standard Commands */
+
+#define IEEE695_CMD_MB               0xe0 /* Module Begin (MB) */
+#define IEEE695_CMD_ME               0xe1
+#define IEEE695_CMD_AS               0xe2 /* Assign Value to variable (ASvn) */
+#define IEEE695_CMD_IR               0xe3
+#define IEEE695_CMD_LR               0xe4
+#define IEEE695_CMD_SB               0xe5
+#define IEEE695_CMD_ST               0xe6
+#define IEEE695_CMD_SA               0xe7
+#define IEEE695_CMD_NI               0xe8
+#define IEEE695_CMD_NX               0xe9
+#define IEEE695_CMD_CO               0xea
+#define IEEE695_CMD_DT               0xeb
+#define IEEE695_CMD_AD               0xec /* Address Descriptor (AD) */
+#define IEEE695_CMD_LD               0xed
+#define IEEE695_CMD_CSSUM            0xee
+#define IEEE695_CMD_CS               0xef
+#define IEEE695_CMD_NN               0xf0
+#define IEEE695_CMD_AT               0xf1
+#define IEEE695_CMD_TY               0xf2
+#define IEEE695_CMD_RI               0xf3
+#define IEEE695_CMD_WX               0xf4
+#define IEEE695_CMD_LI               0xf5
+#define IEEE695_CMD_LX               0xf6
+#define IEEE695_CMD_RE               0xf7
+#define IEEE695_CMD_BB               0xf8 /* Block Begin (BB) */
+#define IEEE695_CMD_BE               0xf9 /* Block End (BE) */
+#define IEEE695_CMD_LT               0xfa
+#define IEEE695_CMD_NC               0xfb
+
+/* Extended commands */
+
+#define IEEE695_EXTCMD_ISDEF         {0x01, 0xb9}
+#define IEEE695_EXTCMD_TRANS         {0x02, 0xb9}
+#define IEEE695_EXTCMD_SPLIT         {0x03, 0xb9}
+#define IEEE695_EXTCMD_INBLOCK       {0x04, 0xb9}
+#define IEEE695_EXTCMD_CALLOPT       {0x05, 0xb9}
+
+/* Helper Macros ********************************************************************/
+/* These macros extract un-aligned, little-endian values from the object file */
 
 #define IEEE695_GETUINT16(p) \
   (((uint16_t)(*(FAR uint8_t *)(p)) << 8) | \
