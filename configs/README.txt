@@ -335,6 +335,9 @@ configs/ntosd-dm320
   STATUS: This port is code complete, verified, and included in the
   NuttX 0.2.1 release.
 
+configs/nucleo-f401re
+  STMicro ST Nucleo F401RE http://mbed.org/platforms/ST-Nucleo-F401RE
+
 configs/nucleus2g
   This port uses the Nucleus 2G board (with Babel CAN board).  This board
   features an NXP LPC1768 processor.  See the 2G website (http://www.2g-eng.com/)
