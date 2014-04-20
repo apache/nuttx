@@ -131,6 +131,7 @@ __BEGIN_DECLS
 #define PX4_SPIDEV_MPU          4
 
 /* I2C busses */
+
 #define PX4_I2C_BUS_EXPANSION   1
 #define PX4_I2C_BUS_LED         2
 
