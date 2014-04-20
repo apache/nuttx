@@ -47,7 +47,7 @@ CSRCS += stm32_wireless.c
 endif
 
 ifeq ($(CONFIG_CC3000_PROBES),)
-CSRCS += up_io.c
+CSRCS += stm32_io.c
 endif
 
 COBJS = $(CSRCS:.c=$(OBJEXT))

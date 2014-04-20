@@ -48,7 +48,9 @@
 #include <up_arch.h>
 #include <chip.h>
 #include <stm32.h>
+
 #include "board_config.h"
+#include "nucleo-f401re.h"
 
 #if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
 

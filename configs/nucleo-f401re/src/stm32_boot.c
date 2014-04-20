@@ -39,8 +39,11 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/spi/spi.h>
+
 #include <debug.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/spi/spi.h>
 
 #include <arch/board/board.h>
 
