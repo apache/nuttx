@@ -1,0 +1,9 @@
+
+
+ - implement flash driver
+   - see arch/arm/src/stm32/stm32_flash.c and related
+     - both banks could be mapped with care taken not to erase the active code. 
+       - perhaps the MPU could block code corruption?
+       
+   - once implemented, the free() cmd replacement can show flash information. 
+
