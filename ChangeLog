@@ -7230,4 +7230,6 @@
 	  (2014-4-21).
 	* configs/sam4s-xplained-pro:  Support for the SAM4S Xplained Pro
 	  board from Bob Doison (2014-4-21).
-
+	* configs/sam4s-xplained-pro: Added card detect (kind of broken
+	  still); added proc/vfat mounting during init to save some typing.
+	  From Bob Doison (2014-4-21).
