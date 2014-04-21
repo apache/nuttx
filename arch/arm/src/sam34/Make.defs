@@ -104,8 +104,10 @@ ifeq ($(CONFIG_SAM34_DMAC0),y)
 CHIP_CSRCS += sam_dmac.c
 endif
 
+ifeq ($(CONFIG_ARCH_CHIP_SAM4L),y)
 ifeq ($(CONFIG_SAM34_PDCA),y)
 CHIP_CSRCS += sam4l_pdca.c
+endif
 endif
 
 ifeq ($(CONFIG_SAM34_EMAC),y)
@@ -126,4 +128,8 @@ else
 ifeq ($(CONFIG_SAM34_SPI1),y)
 CHIP_CSRCS += sam_spi.c
 endif
+endif
+
+ifeq ($(CONFIG_SAM34_RTC),y)
+CHIP_CSRCS += sam_rtc.c
 endif
