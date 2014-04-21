@@ -7221,4 +7221,6 @@
 	  Frank Bennett (2014-4-20).
 	* arch/arm/src/sam34/sam_rtc.c/.h:  Port RTC driver from SAMA5 to
 	  SAM3/4.  From Bob Doiron (2014-4-21)
+	* arch/arm/src/sam34/sam4s_periphclks.h: Fix error in macros that
+	  disable peripheral clocking.  From Bob Doiron (2014-4-21)
 
