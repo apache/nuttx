@@ -1041,6 +1041,8 @@ nuttx
  |   |   `- README.txt
  |   |- sam4s-xplained/
  |   |   `- README.txt
+ |   |- sam4s-xplained-pro/
+ |   |   `- README.txt
  |   |- sim/
  |   |   `- README.txt
  |   |- shenzhou/

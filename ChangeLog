@@ -7228,4 +7228,6 @@
 	* arch/arm/src/sam34/sam_hsmci.c and chip/sam_hsmci.h:  Extensions
 	  from Bob Doiron needed to support PDC-based HSMCI DMA transfers
 	  (2014-4-21).
+	* configs/sam4s-xplained-pro:  Support for the SAM4S Xplained Pro
+	  board from Bob Doison (2014-4-21).
 
