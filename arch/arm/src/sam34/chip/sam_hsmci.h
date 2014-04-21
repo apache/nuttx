@@ -43,6 +43,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
+#include "chip/sam_pdc.h"
 #include "chip/sam_memorymap.h"
 
 /****************************************************************************************
@@ -112,6 +113,19 @@
 #define SAM_HSMCI_WPMR                (SAM_HSMCI_BASE+SAM_HSMCI_WPMR_OFFSET)
 #define SAM_HSMCI_WPSR                (SAM_HSMCI_BASE+SAM_HSMCI_WPSR_OFFSET)
 #define SAM_HSMCI_FIFO                (SAM_HSMCI_BASE+SAM_HSMCI_FIFO_OFFSET)
+
+#if (defined(CONFIG_ARCH_CHIP_SAM4S) && defined(CONFIG_SAM34_PDCA))
+#  define SAM_HSMCI_PDC_RPR           (SAM_HSMCI_BASE+SAM_PDC_RPR_OFFSET)
+#  define SAM_HSMCI_PDC_RCR           (SAM_HSMCI_BASE+SAM_PDC_RCR_OFFSET)
+#  define SAM_HSMCI_PDC_TPR           (SAM_HSMCI_BASE+SAM_PDC_TPR_OFFSET)
+#  define SAM_HSMCI_PDC_TCR           (SAM_HSMCI_BASE+SAM_PDC_TCR_OFFSET)
+#  define SAM_HSMCI_PDC_RNPR          (SAM_HSMCI_BASE+SAM_PDC_RNPR_OFFSET)
+#  define SAM_HSMCI_PDC_RNCR          (SAM_HSMCI_BASE+SAM_PDC_RNCR_OFFSET)
+#  define SAM_HSMCI_PDC_TNPR          (SAM_HSMCI_BASE+SAM_PDC_TNPR_OFFSET)
+#  define SAM_HSMCI_PDC_TNCR          (SAM_HSMCI_BASE+SAM_PDC_TNCR_OFFSET)
+#  define SAM_HSMCI_PDC_PTCR          (SAM_HSMCI_BASE+SAM_PDC_PTCR_OFFSET)
+#  define SAM_HSMCI_PDC_PTSR          (SAM_HSMCI_BASE+SAM_PDC_PTSR_OFFSET)
+#endif
 
 /* HSMCI register bit definitions *******************************************************/
 

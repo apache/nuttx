@@ -7225,3 +7225,7 @@
 	  disable peripheral clocking.  From Bob Doiron (2014-4-21)
 	* drivers/mmcsd/mmcsd_sdio.c/.h:  Misc improvements from Bob Doiron
 	  (2014-4-21)
+	* arch/arm/src/sam34/sam_hsmci.c and chip/sam_hsmci.h:  Extensions
+	  from Bob Doiron needed to support PDC-based HSMCI DMA transfers
+	  (2014-4-21).
+
