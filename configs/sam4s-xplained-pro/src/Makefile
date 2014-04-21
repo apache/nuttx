@@ -42,8 +42,16 @@ AOBJS = $(ASRCS:.S=$(OBJEXT))
 
 CSRCS = sam_boot.c
 
-ifeq ($(CONFIG_HAVE_CXX),y)
+ifeq ($(CONFIG_HAVE_CXXINITIALIZE),y)
 CSRCS += sam_cxxinitialize.c
+endif
+
+ifeq ($(CONFIG_NSH_ARCHINIT),y)
+CSRCS += sam_nsh.c
+endif
+
+ifeq ($(CONFIG_SAM34_HSMCI),y)
+CSRCS += sam_hsmci.c
 endif
 
 ifeq ($(CONFIG_ARCH_LEDS),y)

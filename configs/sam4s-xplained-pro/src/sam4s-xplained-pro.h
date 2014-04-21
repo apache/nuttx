@@ -53,6 +53,41 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+/* Configuration ********************************************************************/
+
+#define HAVE_HSMCI      1
+#define HAVE_PROC       1
+
+/* HSMCI */
+/* Can't support MMC/SD if the card interface is not enabled */
+
+#if !defined(CONFIG_SAM34_HSMCI)
+#  undef HAVE_HSMCI
+#endif
+
+#if !defined(CONFIG_FS_PROCFS)
+#  undef HAVE_PROC
+#endif
+
+/* Can't support MMC/SD features if mountpoints are disabled */
+
+if defined(HAVE_HSMCI) && defined(CONFIG_DISABLE_MOUNTPOINT)
+#  warning Mountpoints disabled.  No MMC/SD support
+#  undef HAVE_HSMCI
+#endif
+
+#if defined(HAVE_PROC) && defined(CONFIG_DISABLE_MOUNTPOINT)
+#  warning Mountpoints disabled.  No procfs support
+#  undef HAVE_PROC
+#endif
+
+/* We need PIO interrupts on PIOC to support card detect interrupts */
+
+#if defined(HAVE_HSMCI) && !defined(CONFIG_GPIOC_IRQ)
+#  warning PIOC interrupts not enabled.  No MMC/SD support.
+#  undef HAVE_HSMCI
+#endif
+
 /* There are four LEDs on board the SAM4S Xplained board, two of these can be
  * controlled by software in the SAM4S:
  *
@@ -102,6 +137,11 @@
                       GPIO_INT_BOTHEDGES | GPIO_PORT_PIOA | GPIO_PIN2)
 #define IRQ_SW0      SAM_IRQ_PA2
 
+/* HSMCI SD Card Detect PC12 */
+
+#define GPIO_MCI_CD   (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_PORT_PIOC | GPIO_PIN12)
+#define MCI_CD_IRQ    SAM_IRQ_PC12
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
@@ -122,6 +162,48 @@
 
 #ifdef CONFIG_ARCH_LEDS
 void board_led_initialize(void);
+#endif
+
+/************************************************************************************
+ * Name: sam_hsmci_initialize
+ *
+ * Description:
+ *   Initialize HSMCI support
+ *
+ ************************************************************************************/
+
+#ifdef HAVE_HSMCI
+int sam_hsmci_initialize(void);
+#else
+# define sam_hsmci_initialize()
+#endif
+
+/************************************************************************************
+ * Name: sam_cardinserted
+ *
+ * Description:
+ *   Check if a card is inserted into the selected HSMCI slot
+ *
+ ************************************************************************************/
+
+#ifdef HAVE_HSMCI
+bool sam_cardinserted(int slotno);
+#else
+#  define sam_cardinserted(slotno) (false)
+#endif
+
+/************************************************************************************
+ * Name: sam_writeprotected
+ *
+ * Description:
+ *   Check if the card in the MMCSD slot is write protected
+ *
+ ************************************************************************************/
+
+#ifdef HAVE_HSMCI
+bool sam_writeprotected(int slotno);
+#else
+#  define sam_writeprotected(slotno) (false)
 #endif
 
 #endif /* __ASSEMBLY__ */
