@@ -95,7 +95,8 @@
  */
 
 #define MMCSD_SCR_DATADELAY     (100)      /* Wait up to 100MS to get SCR */
-#define MMCSD_BLOCK_DATADELAY   (100)      /* Wait up to 100MS to get one data block */
+#define MMCSD_BLOCK_RDATADELAY  (100)      /* Wait up to 100MS to get one data block */
+#define MMCSD_BLOCK_WDATADELAY  (200)      /* Wait up to 200MS to write one data block */
 
 #define IS_EMPTY(priv) (priv->type == MMCSD_CARDTYPE_UNKNOWN)
 
@@ -494,6 +495,13 @@ static int mmcsd_getSCR(FAR struct mmcsd_state_s *priv, uint32_t scr[2])
       return ret;
     }
 
+  /* Setup up to receive data with interrupt mode */
+
+  SDIO_BLOCKSETUP(priv->dev, 8, 1);
+  SDIO_RECVSETUP(priv->dev, (FAR uint8_t*)scr, 8);
+
+  (void)SDIO_WAITENABLE(priv->dev, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT|SDIOWAIT_ERROR);
+
   /* Send CMD55 APP_CMD with argument as card's RCA */
 
   mmcsd_sendcmdpoll(priv, SD_CMD55, (uint32_t)priv->rca << 16);
@@ -504,14 +512,8 @@ static int mmcsd_getSCR(FAR struct mmcsd_state_s *priv, uint32_t scr[2])
       return ret;
     }
 
-  /* Setup up to receive data with interrupt mode */
-
-  SDIO_BLOCKSETUP(priv->dev, 8, 1);
-  SDIO_RECVSETUP(priv->dev, (FAR uint8_t*)scr, 8);
-
   /* Send ACMD51 SD_APP_SEND_SCR with argument as 0 to start data receipt */
 
-  (void)SDIO_WAITENABLE(priv->dev, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT|SDIOWAIT_ERROR);
   mmcsd_sendcmdpoll(priv, SD_ACMD51, 0);
   ret = mmcsd_recvR1(priv, SD_ACMD51);
   if (ret != OK)
@@ -1377,7 +1379,7 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_state_s *priv,
 
   /* Then wait for the data transfer to complete */
 
-  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT|SDIOWAIT_ERROR, MMCSD_BLOCK_DATADELAY);
+  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT|SDIOWAIT_ERROR, MMCSD_BLOCK_RDATADELAY);
   if (ret != OK)
     {
       fdbg("ERROR: CMD17 transfer failed: %d\n", ret);
@@ -1506,7 +1508,7 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
 
   /* Wait for the transfer to complete */
 
-  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT|SDIOWAIT_ERROR, nblocks * MMCSD_BLOCK_DATADELAY);
+  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT|SDIOWAIT_ERROR, nblocks * MMCSD_BLOCK_RDATADELAY);
   if (ret != OK)
     {
       fdbg("ERROR: CMD18 transfer failed: %d\n", ret);
@@ -1711,7 +1713,7 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
 
   /* Wait for the transfer to complete */
 
-  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT|SDIOWAIT_ERROR, MMCSD_BLOCK_DATADELAY);
+  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT|SDIOWAIT_ERROR, MMCSD_BLOCK_WDATADELAY);
   if (ret != OK)
     {
       fdbg("ERROR: CMD24 transfer failed: %d\n", ret);
@@ -1817,9 +1819,9 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
 
   if (IS_SD(priv->type))
     {
-      /* Send CMD55, APP_CMD, a verify that good R1 status is retured */
+      /* Send CMD55, APP_CMD, a verify that good R1 status is returned */
 
-      mmcsd_sendcmdpoll(priv, SD_CMD55, 0);
+      mmcsd_sendcmdpoll(priv, SD_CMD55, (uint32_t)priv->rca << 16);
       ret = mmcsd_recvR1(priv, SD_CMD55);
       if (ret != OK)
         {
@@ -1836,18 +1838,6 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
           fdbg("ERROR: mmcsd_recvR1 for ACMD23 failed: %d\n", ret);
           return ret;
         }
-    }
-
-  /* Send CMD25, WRITE_MULTIPLE_BLOCK, and verify that good R1 status
-   * is returned
-   */
-
-  mmcsd_sendcmdpoll(priv, MMCSD_CMD25, offset);
-  ret = mmcsd_recvR1(priv, MMCSD_CMD25);
-  if (ret != OK)
-    {
-      fdbg("ERROR: mmcsd_recvR1 for CMD24 failed: %d\n", ret);
-      return ret;
     }
 
   /* Configure SDIO controller hardware for the write transfer */
@@ -1876,9 +1866,22 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
 
   priv->wrbusy = true;
 
+  /* Send CMD25, WRITE_MULTIPLE_BLOCK, and verify that good R1 status
+   * is returned
+   */
+
+  mmcsd_sendcmdpoll(priv, MMCSD_CMD25, offset);
+  ret = mmcsd_recvR1(priv, MMCSD_CMD25);
+  if (ret != OK)
+    {
+      fdbg("ERROR: mmcsd_recvR1 for CMD25 failed: %d\n", ret);
+      return ret;
+    }
+
+
   /* Wait for the transfer to complete */
 
-  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT|SDIOWAIT_ERROR, nblocks * MMCSD_BLOCK_DATADELAY);
+  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT|SDIOWAIT_ERROR, nblocks * MMCSD_BLOCK_WDATADELAY);
   if (ret != OK)
     {
       fdbg("ERROR: CMD18 transfer failed: %d\n", ret);
@@ -1894,7 +1897,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
       return ret;
     }
 
-  /* On success, return the number of blocks read */
+  /* On success, return the number of blocks written */
 
   return nblocks;
 }
@@ -2203,7 +2206,7 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
           fvdbg("available: true mediachanged: %s writeenabled: %s\n",
                  geometry->geo_mediachanged ? "true" : "false",
                  geometry->geo_writeenabled ? "true" : "false");
-          fvdbg("nsectors: %ld sectorsize: %d\n",
+          fvdbg("nsectors: %lu sectorsize: %d\n",
                  (long)geometry->geo_nsectors, geometry->geo_sectorsize);
 
           priv->mediachanged = false;
@@ -2372,6 +2375,9 @@ static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
 
       /* Then send ACMD42 with the argument to disconnect the CD/DAT3
        * pullup
+       *
+       * TODO: May want to disable, then re-enable around data transfers
+       * to support card detection"
        */
 
       mmcsd_sendcmdpoll(priv, SD_ACMD42, MMCSD_ACMD42_CD_DISCONNECT);
@@ -2495,7 +2501,7 @@ static int mmcsd_mmcinitialize(FAR struct mmcsd_state_s *priv)
 
   /* Send CMD9, SEND_CSD in standby state/data-transfer mode to obtain the
    * Card Specific Data (CSD) register, e.g., block length, card storage
-   * capacity, etc. (Stays in standy state/data-transfer mode)
+   * capacity, etc. (Stays in standby state/data-transfer mode)
    */
 
   mmcsd_sendcmdpoll(priv, MMCSD_CMD9, priv->rca << 16);
@@ -2661,7 +2667,7 @@ static int mmcsd_sdinitialize(FAR struct mmcsd_state_s *priv)
       fdbg("WARN: Failed to set wide bus operation: %d\n", ret);
     }
 
-  /* TODO: If widebus selected, then send CMD6 to see if the card supports
+  /* TODO: If wide-bus selected, then send CMD6 to see if the card supports
    * high speed mode.  A new SDIO method will be needed to set high speed
    * mode.
    */
@@ -2792,7 +2798,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
             {
               /* Send ACMD41 */
 
-              mmcsd_sendcmdpoll(priv, SD_ACMD41, MMCSD_ACMD41_VOLTAGEWINDOW|sdcapacity);
+              mmcsd_sendcmdpoll(priv, SD_ACMD41, MMCSD_ACMD41_VOLTAGEWINDOW_33_32|sdcapacity);
               ret = SDIO_RECVR3(priv->dev, SD_ACMD41, &response);
               if (ret != OK)
                 {

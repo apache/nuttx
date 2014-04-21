@@ -7223,4 +7223,5 @@
 	  SAM3/4.  From Bob Doiron (2014-4-21)
 	* arch/arm/src/sam34/sam4s_periphclks.h: Fix error in macros that
 	  disable peripheral clocking.  From Bob Doiron (2014-4-21)
-
+	* drivers/mmcsd/mmcsd_sdio.c/.h:  Misc improvements from Bob Doiron
+	  (2014-4-21)

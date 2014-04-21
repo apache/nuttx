@@ -68,7 +68,9 @@
 
 /* ACMD41 argument */
 
-#define MMCSD_ACMD41_VOLTAGEWINDOW  ((uint32_t)0x80100000)
+#define MMCSD_ACMD41_VOLTAGEWINDOW_34_33 ((uint32_t)1 << 21)
+#define MMCSD_ACMD41_VOLTAGEWINDOW_33_32 ((uint32_t)1 << 20)
+#define MMCSD_ACMD41_VOLTAGEWINDOW_32_31 ((uint32_t)1 << 19)
 #define MMCSD_ACMD41_HIGHCAPACITY   ((uint32_t)1 << 30)
 #define MMCSD_ACMD41_STDCAPACITY    ((uint32_t)0)
 
