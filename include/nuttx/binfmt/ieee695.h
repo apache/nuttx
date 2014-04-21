@@ -240,10 +240,10 @@
 #define IEEE695_CMD_IR               0xe3
 #define IEEE695_CMD_LR               0xe4
 #define IEEE695_CMD_SB               0xe5
-#define IEEE695_CMD_ST               0xe6
-#define IEEE695_CMD_SA               0xe7
-#define IEEE695_CMD_NI               0xe8
-#define IEEE695_CMD_NX               0xe9
+#define IEEE695_CMD_ST               0xe6 /* Section Type (ST) */
+#define IEEE695_CMD_SA               0xe7 /* Section Alignment (SA) */
+#define IEEE695_CMD_NI               0xe8 /* Public (External) Symbol (NI) */
+#define IEEE695_CMD_NX               0xe9 /* External Reference Name (NX) */
 #define IEEE695_CMD_CO               0xea
 #define IEEE695_CMD_DT               0xeb
 #define IEEE695_CMD_AD               0xec /* Address Descriptor (AD) */
@@ -251,17 +251,17 @@
 #define IEEE695_CMD_CSSUM            0xee
 #define IEEE695_CMD_CS               0xef
 #define IEEE695_CMD_NN               0xf0
-#define IEEE695_CMD_AT               0xf1
+#define IEEE695_CMD_AT               0xf1 /* Assign Attribute (ATN) */
 #define IEEE695_CMD_TY               0xf2
 #define IEEE695_CMD_RI               0xf3
-#define IEEE695_CMD_WX               0xf4
+#define IEEE695_CMD_WX               0xf4 /* Weak External Reference (WX) */
 #define IEEE695_CMD_LI               0xf5
 #define IEEE695_CMD_LX               0xf6
 #define IEEE695_CMD_RE               0xf7
 #define IEEE695_CMD_BB               0xf8 /* Block Begin (BB) */
 #define IEEE695_CMD_BE               0xf9 /* Block End (BE) */
 #define IEEE695_CMD_LT               0xfa
-#define IEEE695_CMD_NC               0xfb
+#define IEEE695_CMD_NC               0xfb /* Define Context (NC) */
 
 /* Extended commands */
 
@@ -277,12 +277,14 @@
 #define IEEE695_ATTR_OBJFORMT        38 /* Object format type, 1 byte follows */
 #define IEEE695_ATTR_CASESENSITIVE   39 /* Case sensitivity, 1 byte follows */
 #define IEEE695_ATTR_MEMORYMODEL     40 /* Memory model, 1 byte follows */
+
 #define IEEE695_ATTR_CREATIONTIME    50 /* Creation date/time, 6 bytes follows */
 #define IEEE695_ATTR_CMDLINE         51 /* Command line text, string follows */
 #define IEEE695_ATTR_EXECSTATUS      52 /* Execution status, 1 byte follows */
 #define IEEE695_ATTR_HOSTENVIRON     53 /* Host environment, 1 byte follows */
 #define IEEE695_ATTR_TOOLVERSION     54 /* Tool and version number used to create the module, 3 bytes follows */
 #define IEEE695_ATTR_COMMENTS        55 /* Comments, string follows */
+#define IEEE695_ATTR_UNKNOWN         56 /* What is this? 1 byte follows */
 
 #define IEEE695_OBJFORMT_ABSOLUTE    1 /* Absolute (not relinkable) */
 #define IEEE695_OBJFORMT_RELOCATABLE 2 /* Relocatable */
