@@ -260,6 +260,8 @@ int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
           /* Create a watchdog */
 
           rtcb->waitdog = wd_create();
+          DEBUGASSERT(rtcb->waitdog);
+
           if (rtcb->waitdog)
             {
               /* This little bit of nonsense is necessary for some
