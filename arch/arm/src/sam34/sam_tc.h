@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sam34/sam_tc.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,7 +56,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -82,8 +83,10 @@ extern "C" {
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SAM34_TC0) || defined(CONFIG_SAM34_TC1) || defined(CONFIG_SAM34_TC2) || defined(CONFIG_SAM34_TC3) || defined(CONFIG_SAM34_TC4) || defined(CONFIG_SAM34_TC5)
-EXTERN void sam_tcinitialize(FAR const char *devpath, int irq);
+#if defined(CONFIG_SAM34_TC0) || defined(CONFIG_SAM34_TC1) || \
+    defined(CONFIG_SAM34_TC2) || defined(CONFIG_SAM34_TC3) || \
+    defined(CONFIG_SAM34_TC4) || defined(CONFIG_SAM34_TC5)
+void sam_tcinitialize(FAR const char *devpath, int irq);
 #endif
 
 #undef EXTERN
