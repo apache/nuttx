@@ -159,6 +159,11 @@
  *   HSMCI_INT_RINDE         Response Index Error
  */
 
+#define HSMCI_STATUS_ERRORS \
+  (HSMCI_INT_UNRE  | HSMCI_INT_OVRE  | HSMCI_INT_BLKOVRE | HSMCI_INT_CSTOE | \
+   HSMCI_INT_DTOE  | HSMCI_INT_DCRCE | HSMCI_INT_RTOE    | HSMCI_INT_RENDE | \
+   HSMCI_INT_RCRCE | HSMCI_INT_RDIRE | HSMCI_INT_RINDE)
+
 /* Response errors:
  *
  *   HSMCI_INT_CSTOE         Completion signal time-out error (see HSMCI_CSTOR)

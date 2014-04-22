@@ -413,7 +413,6 @@ static int sam34_getstatus(FAR struct watchdog_lowerhalf_s *lower,
 {
   FAR struct sam34_lowerhalf_s *priv = (FAR struct sam34_lowerhalf_s *)lower;
   uint32_t elapsed;
-  uint16_t reload;
 
   wdvdbg("Entry\n");
   DEBUGASSERT(priv);
@@ -470,7 +469,6 @@ static int sam34_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 {
   FAR struct sam34_lowerhalf_s *priv = (FAR struct sam34_lowerhalf_s *)lower;
   uint32_t reload;
-  uint16_t regval;
 
   DEBUGASSERT(priv);
   wdvdbg("Entry: timeout=%d\n", timeout);
@@ -538,6 +536,7 @@ static int sam34_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 static xcpt_t sam34_capture(FAR struct watchdog_lowerhalf_s *lower,
                             xcpt_t handler)
 {
+#if 0 // TODO
   FAR struct sam34_lowerhalf_s *priv = (FAR struct sam34_lowerhalf_s *)lower;
   irqstate_t flags;
   xcpt_t oldhandler;
@@ -548,7 +547,6 @@ static xcpt_t sam34_capture(FAR struct watchdog_lowerhalf_s *lower,
 
   /* Get the old handler return value */
   flags = irqsave();
-#if 0 // TODO
   oldhandler = priv->handler;
 
   /* Save the new handler */
@@ -577,9 +575,11 @@ static xcpt_t sam34_capture(FAR struct watchdog_lowerhalf_s *lower,
       up_disable_irq(STM32_IRQ_WWDG);
     }
 
-#endif
   irqrestore(flags);
   return oldhandler;
+#endif
+  ASSERT(0);
+  return NULL;
 }
 
 /****************************************************************************
