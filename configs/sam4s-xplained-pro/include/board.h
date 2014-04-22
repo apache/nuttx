@@ -41,6 +41,7 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdbool.h>
 
 #ifndef __ASSEMBLY__
 #  include <stdint.h>

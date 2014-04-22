@@ -45,10 +45,9 @@
 #include <stdio.h>
 #include <errno.h>
 #include <debug.h>
+#include <unistd.h>
 
-#ifdef CONFIG_SYSTEM_USBMONITOR
-#  include <apps/usbmonitor.h>
-#endif
+#include <nuttx/arch.h>
 
 #ifdef CONFIG_CDCACM
 #  include <nuttx/usb/cdcacm.h>
@@ -56,6 +55,14 @@
 
 #ifdef CONFIG_PL2303
 #  include <nuttx/usb/pl2303.h>
+#endif
+
+#ifdef CONFIG_TIMER
+#  include <nuttx/timer.h>
+#endif
+
+#ifdef CONFIG_SYSTEM_USBMONITOR
+#  include <apps/usbmonitor.h>
 #endif
 
 #include "sam4s-xplained-pro.h"
@@ -134,7 +141,6 @@ int nsh_archinitialize(void)
     }
 #endif
 
-#warning "add automount config...."
   message("Mounting /dev/mmcsd0 to /fat\n");
   ret = mount("/dev/mmcsd0", "/fat", "vfat", 0, NULL);
   if (ret < 0)
@@ -142,6 +148,12 @@ int nsh_archinitialize(void)
     message("ERROR: Failed to mount the FAT filesystem: %d\n", errno);
     return ret;
   }
+
+#ifdef CONFIG_TIMER
+  /* Registers the timer driver and starts an async interrupt. */
+
+  up_timerinitialize();
+#endif
 
   return OK;
 }
