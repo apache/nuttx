@@ -610,18 +610,10 @@ static void * select_thread_func(FAR void *arg)
 
 static void * cc3000_worker(FAR void *arg)
 {
-  FAR struct cc3000_dev_s    *priv = (FAR struct cc3000_dev_s *)arg;
-  FAR struct cc3000_config_s *config;
-  int                         ret;
+  FAR struct cc3000_dev_s *priv = (FAR struct cc3000_dev_s *)arg;
+  int ret;
 
-  ASSERT(priv != NULL);
-
-  /* Get a pointer the callbacks for convenience (and so the code is not so
-   * ugly).
-   */
-
-  config = priv->config;
-  DEBUGASSERT(config != NULL);
+  ASSERT(priv != NULL && priv->config != NULL);
 
   /* We have started  release our creator*/
 
@@ -705,7 +697,8 @@ static void * cc3000_worker(FAR void *arg)
                     priv->rx_buffer.len = data_to_recv;
 
                     ret = mq_send(priv->queue, &priv->rx_buffer, sizeof(priv->rx_buffer), 1);
-                    DEBUGASSERT(ret>=0);
+                    DEBUGASSERT(ret >= 0);
+                    UNUSED(ret);
 
                     /* Notify any waiters that new CC3000 data is available */
 
@@ -714,9 +707,11 @@ static void * cc3000_worker(FAR void *arg)
                     /* Give up driver */
 
                     cc3000_devgive(priv);
+
                     nllvdbg("Wait On Completion\n");
                     sem_wait(priv->wrkwaitsem);
-                    nllvdbg("Completed S:%d irq :%d\n",priv->state,priv->config->irq_read(priv->config));
+                    nllvdbg("Completed S:%d irq :%d\n",
+                            priv->state, priv->config->irq_read(priv->config));
 
                     sem_getvalue(&priv->irqsem, &count);
                     if (priv->config->irq_read(priv->config) && count==0)
@@ -731,17 +726,17 @@ static void * cc3000_worker(FAR void *arg)
 
                     continue;
                   }
-              } /* eSPI_STATE_WRITE_DONE or eSPI_STATE_IDLE */
+              }
               break;
 
             default:
               nllvdbg("default: State%d\n",priv->state);
               break;
-            } /* end switch */
-        } /* end if */
+            }
+        }
 
       cc3000_devgive(priv);
-    } /* while (1) */
+    }
 
   return OK;
 }

@@ -92,7 +92,6 @@ void stm32_boardinitialize(void)
   stm32_spiinitialize();
 #endif
 
-
   /* Initialize USB is 1) USBDEV is selected, 2) the USB controller is not
    * disabled, and 3) the weak function stm32_usbinitialize() has been brought
    * into the build.
@@ -125,8 +124,8 @@ void board_initialize(void)
    */
 
 #if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_NSH_ARCHINIT)
-      nsh_archinitialize();
-      wireless_archinitialize(0);
+  nsh_archinitialize();
+  wireless_archinitialize(0);
 #endif
 }
 #endif

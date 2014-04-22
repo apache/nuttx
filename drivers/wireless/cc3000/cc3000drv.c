@@ -264,6 +264,7 @@ void cc3000_open(gcSpiHandleRx pfRxHandler)
       status = pthread_create(&spiconf.unsoliced_thread, &attr,
                               unsoliced_thread_func, NULL);
       DEBUGASSERT(status == 0)
+      UNUSED(status);
    }
 
   DEBUGASSERT(spiconf.cc3000fd);

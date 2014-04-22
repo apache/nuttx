@@ -1,7 +1,8 @@
 /****************************************************************************
  * configs/nucleo-f401re/src/stm32_led.c
  *
- *   Copyright (c) 2013 PX4 Development Team. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -13,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name PX4 nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -40,20 +41,20 @@
 
 #include <stdbool.h>
 
-#include "stm32.h"
-#include "board_config.h"
-
 #include <arch/board/board.h>
+
+#include "stm32.h"
+#include "nucleo-f401re.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-void led_init()
+void led_init(void)
 {
   /* Configure LED1 GPIO for output */
 
-  stm32_configgpio(GPIO_LED1);
+  stm32_configgpio(GPIO_LD2);
 }
 
 void led_on(int led)
@@ -62,7 +63,7 @@ void led_on(int led)
     {
       /* Pull down to switch on */
 
-      stm32_gpiowrite(GPIO_LED1, false);
+      stm32_gpiowrite(GPIO_LD2, true);
     }
 }
 
@@ -72,7 +73,7 @@ void led_off(int led)
     {
       /* Pull up to switch off */
 
-      stm32_gpiowrite(GPIO_LED1, true);
+      stm32_gpiowrite(GPIO_LD2, false);
     }
 }
 
@@ -80,13 +81,13 @@ void led_toggle(int led)
 {
   if (led == 1)
     {
-      if (stm32_gpioread(GPIO_LED1))
+      if (stm32_gpioread(GPIO_LD2))
         {
-          stm32_gpiowrite(GPIO_LED1, false);
+          stm32_gpiowrite(GPIO_LD2, false);
         }
       else
         {
-          stm32_gpiowrite(GPIO_LED1, true);
+          stm32_gpiowrite(GPIO_LD2, true);
         }
     }
 }

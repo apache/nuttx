@@ -236,12 +236,16 @@ void wlan_init(size_t max_tx_len,
 
 void SpiReceiveHandler(void *pvBuffer)
 {
+  uint16_t event_type;
+
   tSLInformation.pucReceivedData = (uint8_t *)pvBuffer;
   tSLInformation.usEventOrDataReceived = 1;
 
-  uint16_t event_type;
-  STREAM_TO_UINT16((char *)tSLInformation.pucReceivedData, HCI_EVENT_OPCODE_OFFSET,event_type);
-  nllvdbg("Evtn:0x%x\n", event_type);
+  STREAM_TO_UINT16((char *)tSLInformation.pucReceivedData,
+                   HCI_EVENT_OPCODE_OFFSET, event_type);
+
+  nllvdbg("Evnt:0x%x\n", event_type);
+  UNUSED(event_type);
 
   hci_unsolicited_event_handler();
 }

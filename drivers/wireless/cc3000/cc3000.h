@@ -92,7 +92,9 @@
 
 #ifdef CONFIG_CC3000_MT
 /* lock to serialze access to driver (spi protocol is window size 1) */
+
 extern pthread_mutex_t g_cc3000_mut;
+
 /* This structure describes the state of one CC3000 driver instance */
 
 typedef struct cc3000_socket_ent
@@ -185,6 +187,7 @@ static inline void cc3000_lib_lock(void)
 #ifdef CONFIG_CC3000_MT
   int status = pthread_mutex_lock(&g_cc3000_mut);
   DEBUGASSERT(status == 0);
+  UNUSED(status);
 #endif
 }
 
@@ -193,6 +196,7 @@ static inline void cc3000_lib_unlock(void)
 #ifdef CONFIG_CC3000_MT
   int status = pthread_mutex_unlock(&g_cc3000_mut);
   DEBUGASSERT(status == 0);
+  UNUSED(status);
 #endif
 }
 
