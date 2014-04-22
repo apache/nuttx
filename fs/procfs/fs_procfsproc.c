@@ -556,14 +556,13 @@ static ssize_t proc_loadavg(FAR struct proc_file_s *procfile,
   uint32_t fracpart;
   size_t linesize;
   size_t copysize;
-  ssize_t ret;
 
   /* Sample the counts for the thread.  clock_cpuload should only fail if
    * the PID is not valid.  This could happen if the thread exited sometime
    * after the procfs entry was opened.
    */
 
-  ret = (ssize_t)clock_cpuload(procfile->pid, &cpuload);
+  (void)clock_cpuload(procfile->pid, &cpuload);
 
   /* On the simulator, you may hit cpuload.total == 0, but probably never on
    * real hardware.
