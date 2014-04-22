@@ -271,7 +271,7 @@ EXTERN void watchdog_unregister(FAR void *handle);
  *   This interface should be provided by all configurations using
  *   to avoid exposed platform-dependent logic.
  *
- *   At a minimum, this function should all watchdog_register() which is
+ *   At a minimum, this function should call watchdog_register() which is
  *   described above.
  *
  * Input parameters:
