@@ -931,7 +931,7 @@ static int up_interrupt(int irq, void *context)
            handled = true;
         }
 
-      /* Handle outgoing, transmit bytes. XRDY: There is no character in the
+      /* Handle outgoing, transmit bytes. TXRDY: There is no character in the
        * US_THR.
        */
 

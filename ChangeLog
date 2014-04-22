@@ -7233,3 +7233,7 @@
 	* configs/sam4s-xplained-pro: Added card detect (kind of broken
 	  still); added proc/vfat mounting during init to save some typing.
 	  From Bob Doison (2014-4-21).
+	* configs/sam4s-xplained-pro: Boost PLLA to 240MHz to allow USB. From
+	  Bob Doison (2014-4-21).
+	* arch/arm/src/sam34/sam_wdt.c/.h:  Add watchdog driver.  From Bob
+	  Doison (2014-4-21).

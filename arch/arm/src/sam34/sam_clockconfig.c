@@ -121,7 +121,9 @@ static inline void sam_efcsetup(void)
 
 static inline void sam_wdtsetup(void)
 {
+#if !defined(CONFIG_SAM34_WDT) || (defined(CONFIG_WDT_ENABLED_ON_RESET) && defined(CONFIG_WDT_DISABLE_ON_RESET))
   putreg32(WDT_MR_WDDIS, SAM_WDT_MR);
+#endif
 }
 
 /****************************************************************************

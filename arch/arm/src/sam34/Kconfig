@@ -1189,10 +1189,10 @@ endmenu # USB Full Speed Device Controller driver (DCD) options
 endif # SAM34_UDP
 
 if SAM34_WDT
-comment "AT91SAM3/4 Watchdog Configuration"|
+menu "AT91SAM3/4 Watchdog Configuration"
 
 config WDT_ENABLED_ON_RESET
-	bool "Enabled on reset"
+	bool "Watchdog Enabled on reset"
 	default n
 	---help---
 		The WDT can be enabled at reset. This is controlled by the WDTAUTO
@@ -1204,7 +1204,7 @@ config WDT_ENABLED_ON_RESET
 		enabled.
 
 config WDT_DISABLE_ON_RESET
-	bool "Disable on reset"
+	bool "Disable watchdog on reset"
 	default n
 	depends on WDT_ENABLED_ON_RESET
 	---help---
@@ -1212,4 +1212,42 @@ config WDT_DISABLE_ON_RESET
 		configure and disable the watchdog timer very early in the boot
 		sequence.
 
+config WDT_TIMEOUT
+	int "Watchdog Timeout (ms)"
+	default 4000
+	depends on !WDT_DISABLE_ON_RESET
+	---help---
+		Watchdog timeout value in milliseconds.
+
+config WDT_MINTIME
+	int "Watchdog Minimum Time (ms)"
+	default 2000
+	depends on !WDT_DISABLE_ON_RESET
+	---help---
+		Minimum watchdog kick interval
+
+menuconfig WDT_THREAD
+	bool "Watchdog Kicker Thread"
+	depends on !WDT_DISABLE_ON_RESET
+	default y
+
+if WDT_THREAD
+
+config WDT_THREAD_NAME
+	string "Watchdog Thread Name"
+	default "wdog"
+
+config WDT_THREAD_INTERVAL
+	int "Watchdog Thread Interval (ms)"
+	default 2000
+
+config WDT_THREAD_PRIORITY
+	int "Watchdog Thread Priority"
+	default 99
+
+config WDT_THREAD_STACKSIZE
+	int "Watchdog Thread Stacksize"
+	default 1024
+endif # WDT_THREAD
+endmenu #"AT91SAM3/4 Watchdog device driver options"
 endif # SAM34_WDT

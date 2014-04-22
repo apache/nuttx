@@ -133,3 +133,7 @@ endif
 ifeq ($(CONFIG_SAM34_RTC),y)
 CHIP_CSRCS += sam_rtc.c
 endif
+
+ifeq ($(CONFIG_SAM34_WDT),y)
+CHIP_CSRCS += sam_wdt.c
+endif

@@ -73,14 +73,16 @@
 /* Watchdog Timer Mode Register */
 
 #define WDT_MR_WDV_SHIFT          (0)       /* Bits 0-11:  Watchdog Counter Value */
-#define WDT_MR_WDV_MASK           (0xfff << WDT_MR_WDV_SHIFT)
+#define WDT_MR_WDV_MAX            0xfff
+#define WDT_MR_WDV_MASK           (WDT_MR_WDV_MAX << WDT_MR_WDV_SHIFT)
 #  define WDT_MR_WDV(n)           ((uint32_t)(n) << WDT_MR_WDV_SHIFT)
 #define WDT_MR_WDFIEN             (1 << 12) /* Bit 12: Watchdog Fault Interrupt Enable */
 #define WDT_MR_WDRSTEN            (1 << 13) /* Bit 13: Watchdog Reset Enable */
 #define WDT_MR_WDRPROC            (1 << 14) /* Bit 14: Watchdog Reset Processor */
 #define WDT_MR_WDDIS              (1 << 15) /* Bit 15: Watchdog Disable */
 #define WDT_MR_WDD_SHIFT          (16)      /* Bits 16-27:  Watchdog Delta Value */
-#define WDT_MR_WDD_MASK           (0xfff << WDT_MR_WDD_SHIFT)
+#define WDT_MR_WDD_MAX            0xfff
+#define WDT_MR_WDD_MASK           (WDT_MR_WDD_MAX << WDT_MR_WDD_SHIFT)
 #  define WDT_MR_WDD(n)           ((uint32_t)(n) << WDT_MR_WDD_SHIFT)
 #define WDT_MR_WDDBGHLT           (1 << 28) /* Bit 28: Watchdog Debug Halt */
 #define WDT_MR_WDIDLEHLT          (1 << 29) /* Bit 29: Watchdog Idle Halt */
