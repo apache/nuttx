@@ -558,7 +558,7 @@ static int procfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
   FAR struct procfs_dir_priv_s *priv;
   FAR struct procfs_level0_s *level0;
   FAR struct tcb_s *tcb;
-  FAR const char *name;
+  FAR const char *name = NULL;
   unsigned int index;
   irqstate_t flags;
   pid_t pid;

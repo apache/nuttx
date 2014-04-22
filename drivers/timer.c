@@ -210,7 +210,6 @@ static int timer_close(FAR struct file *filep)
     {
       upper->crefs--;
     }
-#warning "anythin uninit to do on last close?"
 
   //sem_post(&upper->exclsem);
   ret = OK;
@@ -466,7 +465,7 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  ****************************************************************************/
 
 FAR void *timer_register(FAR const char *path,
-                            FAR struct timer_lowerhalf_s *lower)
+                         FAR struct timer_lowerhalf_s *lower)
 {
   FAR struct timer_upperhalf_s *upper;
   int ret;

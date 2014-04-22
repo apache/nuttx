@@ -1287,7 +1287,7 @@ static int proc_closedir(FAR struct fs_dirent_s *dir)
 static int proc_readdir(struct fs_dirent_s *dir)
 {
   FAR struct proc_dir_s *procdir;
-  FAR const struct proc_node_s *node;
+  FAR const struct proc_node_s *node = NULL;
   FAR struct tcb_s *tcb;
   unsigned int index;
   irqstate_t flags;
