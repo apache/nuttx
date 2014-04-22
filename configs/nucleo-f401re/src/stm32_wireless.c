@@ -268,7 +268,6 @@ static bool probe(FAR struct cc3000_config_s *state,int n, bool s)
  *   configure the wireless device.  This function will register the driver
  *   as /dev/wirelessN where N is the minor device number.
  *
- *
  * Returned Value:
  *   Zero is returned on success.  Otherwise, a negated errno value is
  *   returned to indicate the nature of the failure.

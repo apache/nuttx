@@ -1,7 +1,8 @@
 /****************************************************************************
  * configs/nucleo-f401re/src/stm32_spi.c
  *
- *   Copyright (C) 2012 PX4 Development Team. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -13,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name PX4 nor the names of its contributors may be
+ * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -49,7 +50,6 @@
 #include <chip.h>
 #include <stm32.h>
 
-#include "board_config.h"
 #include "nucleo-f401re.h"
 
 #if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
@@ -85,45 +85,22 @@
  * Name: stm32_spiinitialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the PX4FMU board.
+ *   Called to configure SPI chip select GPIO pins for the Nucleo-F401RE  board.
  *
  ************************************************************************************/
 
 void weak_function stm32_spiinitialize(void)
 {
 #ifdef CONFIG_STM32_SPI1
-  stm32_configgpio(GPIO_SPI_CS_GYRO);
-  stm32_configgpio(GPIO_SPI_CS_ACCEL_MAG);
-  stm32_configgpio(GPIO_SPI_CS_BARO);
-  stm32_configgpio(GPIO_SPI_CS_MPU);
-
-  /* De-activate all peripherals, required for some peripheral state machines */
-
-  stm32_gpiowrite(GPIO_SPI_CS_GYRO, 1);
-  stm32_gpiowrite(GPIO_SPI_CS_ACCEL_MAG, 1);
-  stm32_gpiowrite(GPIO_SPI_CS_BARO, 1);
-  stm32_gpiowrite(GPIO_SPI_CS_MPU, 1);
-
-  stm32_configgpio(GPIO_EXTI_GYRO_DRDY);
-  stm32_configgpio(GPIO_EXTI_MAG_DRDY);
-  stm32_configgpio(GPIO_EXTI_ACCEL_DRDY);
-  stm32_configgpio(GPIO_EXTI_MPU_DRDY);
 #endif
 
 #ifdef CONFIG_STM32_SPI2
-  stm32_configgpio(GPIO_SPI_CS_FRAM);
-  stm32_gpiowrite(GPIO_SPI_CS_FRAM, 1);
-
   /* Setup CS, EN & IRQ line IOs */
 
 #ifdef CONFIG_WL_CC3000
   stm32_configgpio(GPIO_WIFI_CS);
   stm32_configgpio(GPIO_WIFI_EN);
   stm32_configgpio(GPIO_WIFI_INT);
-#endif
-
-#ifdef CONFIG_MTD_SST25
-  stm32_configgpio(GPIO_MEM_CS);    /* FLASH chip select */
 #endif
 #endif
 }
@@ -157,50 +134,6 @@ void weak_function stm32_spiinitialize(void)
 void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-
-  /* SPI select is active low, so write !selected to select the device */
-
-  switch (devid)
-    {
-    case PX4_SPIDEV_GYRO:
-      /* Making sure the other peripherals are not selected */
-
-      stm32_gpiowrite(GPIO_SPI_CS_GYRO, !selected);
-      stm32_gpiowrite(GPIO_SPI_CS_ACCEL_MAG, 1);
-      stm32_gpiowrite(GPIO_SPI_CS_BARO, 1);
-      stm32_gpiowrite(GPIO_SPI_CS_MPU, 1);
-      break;
-
-    case PX4_SPIDEV_ACCEL_MAG:
-      /* Making sure the other peripherals are not selected */
-
-      stm32_gpiowrite(GPIO_SPI_CS_GYRO, 1);
-      stm32_gpiowrite(GPIO_SPI_CS_ACCEL_MAG, !selected);
-      stm32_gpiowrite(GPIO_SPI_CS_BARO, 1);
-      stm32_gpiowrite(GPIO_SPI_CS_MPU, 1);
-      break;
-
-    case PX4_SPIDEV_BARO:
-      /* Making sure the other peripherals are not selected */
-
-      stm32_gpiowrite(GPIO_SPI_CS_GYRO, 1);
-      stm32_gpiowrite(GPIO_SPI_CS_ACCEL_MAG, 1);
-      stm32_gpiowrite(GPIO_SPI_CS_BARO, !selected);
-      stm32_gpiowrite(GPIO_SPI_CS_MPU, 1);
-      break;
-
-    case PX4_SPIDEV_MPU:
-      /* Making sure the other peripherals are not selected */
-
-      stm32_gpiowrite(GPIO_SPI_CS_GYRO, 1);
-      stm32_gpiowrite(GPIO_SPI_CS_ACCEL_MAG, 1);
-      stm32_gpiowrite(GPIO_SPI_CS_BARO, 1);
-      stm32_gpiowrite(GPIO_SPI_CS_MPU, !selected);
-      break;
-
-    default:
-      break;
-    }
 }
 
 uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
@@ -214,27 +147,12 @@ void stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sele
 {
   spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
-#if defined(CONFIG_MTD_SST25)
-
-  if (devid == SPIDEV_FLASH)
-    {
-      stm32_gpiowrite(GPIO_MEM_CS, !selected);
-    }
-  else
-#endif
-
 #if defined(CONFIG_WL_CC3000)
   if (devid == SPIDEV_WIRELESS)
     {
       stm32_gpiowrite(GPIO_WIFI_CS, !selected);
     }
-  else
 #endif
-    {
-      /* There can only be one device on this bus, so always select it */
-
-      stm32_gpiowrite(GPIO_SPI_CS_FRAM, !selected);
-    }
 }
 
 uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
@@ -282,7 +200,7 @@ uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 #ifdef CONFIG_STM32_SPI1
 int stm32_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 {
-  return -ENODEV;
+  return OK;
 }
 #endif
 
