@@ -1214,14 +1214,14 @@ config WDT_DISABLE_ON_RESET
 
 config WDT_TIMEOUT
 	int "Watchdog Timeout (ms)"
-	default 4000
+	default 5000
 	depends on !WDT_DISABLE_ON_RESET
 	---help---
 		Watchdog timeout value in milliseconds.
 
 config WDT_MINTIME
 	int "Watchdog Minimum Time (ms)"
-	default 2000
+	default 2500
 	depends on !WDT_DISABLE_ON_RESET
 	---help---
 		Minimum watchdog kick interval
@@ -1239,11 +1239,11 @@ config WDT_THREAD_NAME
 
 config WDT_THREAD_INTERVAL
 	int "Watchdog Thread Interval (ms)"
-	default 2000
+	default 2500
 
 config WDT_THREAD_PRIORITY
 	int "Watchdog Thread Priority"
-	default 99
+	default 200
 
 config WDT_THREAD_STACKSIZE
 	int "Watchdog Thread Stacksize"

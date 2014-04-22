@@ -387,7 +387,7 @@
 #if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
 #  define UART_INT_ALLINTS           0x3f08ffff
 #elif defined(CONFIG_ARCH_CHIP_SAM4S)
-#  define UART_INT_ALLINTS           0x010f3fff
+#  define UART_INT_ALLINTS           0x010f3fff /* USART - UART only has 0x001AFB? does it matter? */
 #else
 #  define UART_INT_ALLINTS           0x01083fff
 #endif

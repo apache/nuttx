@@ -163,6 +163,7 @@ void up_timerinit(void)
   /* Configure SysTick to interrupt at the requested rate */
 
   putreg32(SYSTICK_RELOAD, NVIC_SYSTICK_RELOAD);
+  putreg32(0, NVIC_SYSTICK_CURRENT);
 
   /* Attach the timer interrupt vector */
 
