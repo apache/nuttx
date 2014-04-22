@@ -284,10 +284,10 @@ int wireless_archinitialize(size_t max_rx_size)
   DEBUGASSERT(CONFIG_CC3000_DEVMINOR == 0);
 
 #ifdef CONFIG_CC3000_PROBES
-  stm32_configgpio(GPIO_D0);
-  stm32_configgpio(GPIO_D1);
-  stm32_gpiowrite(GPIO_D0, 1);
-  stm32_gpiowrite(GPIO_D1, 1);
+  stm32_configgpio(GPIO_D7);
+  stm32_configgpio(GPIO_D15);
+  stm32_gpiowrite(GPIO_D7, 1);
+  stm32_gpiowrite(GPIO_D15, 1);
 #endif
 
   /* Get an instance of the SPI interface */
