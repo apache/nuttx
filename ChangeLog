@@ -7237,3 +7237,6 @@
 	  Bob Doison (2014-4-21).
 	* arch/arm/src/sam34/sam_wdt.c/.h:  Add watchdog driver.  From Bob
 	  Doison (2014-4-21).
+	* nuttx/configs/sam4s-xplained-pro:  Add board-specific watchdog
+	  timer support.  From Bob Doison (2014-4-21).
+

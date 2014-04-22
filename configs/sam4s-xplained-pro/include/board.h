@@ -54,8 +54,8 @@
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
-/* After power-on reset, the sam3u device is running on a 4MHz internal RC.  These
- * definitions will configure clocking with MCK = 48MHz, PLLA = 96, and CPU=120MHz.
+/* After power-on reset, the sam4s device is running on a 4MHz internal RC.  These
+ * definitions will configure clocking with MCK = 120MHz, PLLA = 240, and CPU=120MHz.
  */
 
 /* Main oscillator register settings */
@@ -69,6 +69,8 @@
  * PLLdiv: 1 (bypassed)
  * Fpll:   (12MHz * 20) / 1 = 240MHz
  */
+#define BOARD_32KOSC_FREQUENCY     (32768)
+#define BOARD_SLCK_FREQUENCY       (BOARD_32KOSC_FREQUENCY)
 
 #define BOARD_MAINOSC_FREQUENCY    (12000000)
 #define BOARD_CKGR_PLLAR_MUL       (19 << PMC_CKGR_PLLAR_MUL_SHIFT)

@@ -1,5 +1,3 @@
-
-
  - implement flash driver
    - see arch/arm/src/stm32/stm32_flash.c and related
      - both banks could be mapped with care taken not to erase the active code. 
@@ -7,3 +5,8 @@
        
    - once implemented, the free() cmd replacement can show flash information. 
 
+ - Seen crashes when running serial ports below 921600
+ - USB serial not quite stable when pushing lots of data
+ 
+ - UARTs don't use DMA. We may need this for high baudrates.
+   - Inbound hardware flow control requires dma. 

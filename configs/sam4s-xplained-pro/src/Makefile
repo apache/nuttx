@@ -68,6 +68,11 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += sam_buttons.c
 endif
 
+ifeq ($(CONFIG_SAM34_WDT),y)
+CSRCS += sam_wdt.c
+endif
+
+
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
 SRCS = $(ASRCS) $(CSRCS)
