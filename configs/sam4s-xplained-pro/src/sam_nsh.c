@@ -112,7 +112,7 @@ int nsh_archinitialize(void)
   ret = cdcacm_initialize(CONFIG_SAM4S_XPLAINED_PRO_CDCACM_DEVMINOR, NULL);
   if (ret < 0)
     {
-      message("ERROR: Failed to create the CDC/ACM serial device: %d\n", errno);
+      message("ERROR: Failed to create the CDC/ACM serial device: %d (%d)\n", ret, errno);
       return ret;
     }
 #endif
@@ -124,7 +124,7 @@ int nsh_archinitialize(void)
   ret = sam_hsmci_initialize();
   if (ret < 0)
     {
-      message("ERROR: sam_hsmci_initialize() failed: %d\n", ret);
+      message("ERROR: sam_hsmci_initialize() failed: %d (%d)\n", ret, errno);
       return ret;
     }
 #endif
@@ -136,7 +136,7 @@ int nsh_archinitialize(void)
   ret = mount(NULL, "/proc", "procfs", 0, NULL);
   if (ret < 0)
     {
-      message("ERROR: Failed to mount the PROC filesystem: %d\n", errno);
+      message("ERROR: Failed to mount the PROC filesystem: %d (%d)\n", ret, errno);
       return ret;
     }
 #endif
@@ -146,7 +146,7 @@ int nsh_archinitialize(void)
   ret = mount("/dev/mmcsd0", "/fat", "vfat", 0, NULL);
   if (ret < 0)
     {
-      message("ERROR: Failed to mount the FAT filesystem: %d\n", errno);
+      message("ERROR: Failed to mount the FAT filesystem: %d (%d)\n", ret, errno);
       return ret;
     }
 #endif
@@ -164,7 +164,7 @@ int nsh_archinitialize(void)
   ret = usbmonitor_start(0, NULL);
   if (ret != OK)
     {
-      message("nsh_archinitialize: Start USB monitor: %d\n", ret);
+      message("nsh_archinitialize: Start USB monitor: %d (%d)\n", ret, errno);
       return ret;
     }
 #endif

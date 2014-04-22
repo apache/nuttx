@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <debug.h>
+#include <nuttx/watchdog.h>
 
 #include "sam4s-xplained-pro.h"
 
@@ -73,3 +74,27 @@ void sam_boardinitialize(void)
   board_led_initialize();
 #endif
 }
+
+
+/****************************************************************************
+ * Name: board_initialize
+ *
+ * Description:
+ *   If CONFIG_BOARD_INITIALIZE is selected, then an additional
+ *   initialization call will be performed in the boot-up sequence to a
+ *   function called board_initialize().  board_initialize() will be
+ *   called immediately after up_initialize() is called and just before the
+ *   initial application is started.  This additional initialization phase
+ *   may be used, for example, to initialize board-specific device drivers.
+ *
+ ****************************************************************************/
+#ifdef CONFIG_BOARD_INITIALIZE
+void board_initialize(void)
+{
+#if (defined(CONFIG_SAM34_WDT) && !defined(CONFIG_WDT_DISABLE_ON_RESET))
+  /* Enable watchdog timer kicker kernel thread. */
+
+  DEBUGASSERT(up_wdginitialize() >= 0);
+#endif
+}
+#endif /* CONFIG_BOARD_INITIALIZE */
