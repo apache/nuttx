@@ -1,21 +1,24 @@
 README
 ======
 
-This README discusses issues unique to NuttX configurations for the ST NucleoF401RE board 
-from ST Micro (http://www.st.com/web/catalog/mmc/FM141/SC1169/SS1577/LN1810/PF258797) 
+This README discusses issues unique to NuttX configurations for the ST NucleoF401RE board
+from ST Micro (http://www.st.com/web/catalog/mmc/FM141/SC1169/SS1577/LN1810/PF258797)
 
 
-  Microprocessor: 32-bit ARM Cortex M4 at 84MHz STM32F104RE  
+  Microprocessor: 32-bit ARM Cortex M4 at 84MHz STM32F104RE
   Memory:         512 KB Flash and 96 KB SRAM
   I/O Pins Out:   37, 17 On the Connector
   Network:        TI CC3000 Wifi Module
   ADCs:           1 (at 12-bit resolution)
   Peripherals:    10 timers, 2 I2Cs, 2 SPI ports, 3 USARTs, 1 led
   Other:          Sleep, stop, and standby modes; serial wire debug and JTAG interfaces
+  Expansion I/F   Ardino and Morpho Headers
 
-  It breaks out the Tx, Rx to connect to a FTDI TTL-232RG-VREG3V3-WE for the console and
-  wires in the spark LEDs and serial flash to the same I/O as the sparkcore. It has a Jlink
-  compatible Jtag connector on it.
+  Uses a STM32F103 to provide a ST-Link for programming, debug similar to the OpenOcd
+  FTDI function - USB to JTAG front-end.
+
+  Wireless WIFI + SD Card SDIO via a "CC3000 WiFi Arduino Shield" added card
+  RS232 console support via a "RS232 Arduino Shield" added card
 
 Contents
 ========
@@ -27,9 +30,8 @@ Contents
   - NuttX OABI "buildroot" Toolchain
   - NXFLAT Toolchain
   - Hardware
-    - Core Pin out
-    - LED
     - Button
+    - LED
     - USARTS and Serial Consoles
   - LQFP64
   - DFU and JTAG
@@ -56,7 +58,7 @@ GNU Toolchain Options
   4. Raisonance GNU toolchain, or
   5. The NuttX buildroot Toolchain (see below).
 
-  All testing has been conducted using the CodeSourcery toolchain for Linux. 
+  All testing has been conducted using the CodeSourcery toolchain for Linux.
   To use the Atollic, devkitARM, Raisonance GNU, or NuttX buildroot toolchain,
   you simply need to add one of the following configuration options to your
   .config (or defconfig) file:
@@ -89,7 +91,7 @@ GNU Toolchain Options
      directory.  If you use a Windows toolchain, you should get in the habit of
      making like this:
 
-       V=1 make clean_context all 2>&1 |tee mout 
+       V=1 make clean_context all 2>&1 |tee mout
 
      An alias in your .bashrc file might make that less painful.
 
@@ -202,8 +204,9 @@ NuttX EABI "buildroot" Toolchain
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
-     cd tools
-     ./configure.sh stm32_tiny/<sub-dir>
+     $ (cd tools; ./configure.sh nucleo-f401re/nsh)
+     $ make qconfig
+     $ V=1 make context all 2>&1 | tee mout
 
   2. Download the latest buildroot package into <some-dir>
 
@@ -287,7 +290,7 @@ NXFLAT Toolchain
 DFU and JTAG
 ============
 
-  Enbling Support for the DFU Bootloader
+  Enabling Support for the DFU Bootloader
   --------------------------------------
   The linker files in these projects can be configured to indicate that you
   will be loading code using STMicro built-in USB Device Firmware Upgrade (DFU)
@@ -309,7 +312,7 @@ DFU and JTAG
   For Linux or Mac:
   ----------------
 
-  While on Linux or Mac, 
+  While on Linux or Mac,
 
   $ lsusb
   Bus 003 Device 061: ID 0483:374b STMicroelectronics
@@ -341,6 +344,20 @@ DFU and JTAG
 
 Hardware
 ========
+
+  GPIO
+  ----
+  SERIAL_TX=PA_2    USER_BUTTON=PC_13
+  SERIAL_RX=PA_3    LED1       =PA_5
+
+  A0=PA_0           D0=PA_3            D8 =PA_9
+  A1=PA_1           D1=PA_2            D9 =PC_7
+  A2=PA_4           D2=PA_10   WIFI_CS=D10=PB_6 SPI_CS
+  A3=PB_0  WIFI_INT=D3=PB_3            D11=PA_7 SPI_MOSI
+  A4=PC_1      SDCS=D4=PB_5            D12=PA_6 SPI_MISO
+  A5=PC_0   WIFI_EN=D5=PB_4       LED1=D13=PA_5 SPI_SCK
+               LED2=D6=PB_10  I2C1_SDA=D14=PB_9 Probe
+                    D7=PA_8   I2C1_SCL=D15=PB_8 Probe
 
   Buttons
   -------
@@ -405,12 +422,12 @@ Configurations
 
   Build it with
 
-    make distclean;(cd tools;./configure.sh nucleo-f401re/nsh)    
+    make distclean;(cd tools;./configure.sh nucleo-f401re/nsh)
 
   then run make menuconfig if you wish to customize things.
 
   or
- 
+
   $ make qconfig
 
   N.B. Memory is tight, both Flash and RAM are taxed. If you enable

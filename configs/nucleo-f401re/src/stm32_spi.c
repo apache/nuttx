@@ -92,6 +92,14 @@
 void weak_function stm32_spiinitialize(void)
 {
 #ifdef CONFIG_STM32_SPI1
+  stm32_configgpio(GPIO_SPI_CS_WIFI);
+  stm32_configgpio(GPIO_SPI_CS_SD_CARD);
+  stm32_configgpio(GPIO_SPI_CS_MPU);
+
+  /* De-activate all peripherals, required for some peripheral state machines */
+
+  stm32_gpiowrite(GPIO_SPI_CS_MPU, 1);
+  stm32_configgpio(GPIO_EXTI_MPU_DRDY);
 #endif
 
 #ifdef CONFIG_STM32_SPI2
@@ -134,6 +142,33 @@ void weak_function stm32_spiinitialize(void)
 void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+
+  switch (devid)
+    {
+    case SPIDEV_WIRELESS:
+      /* Making sure the other peripherals are not selected */
+
+      stm32_gpiowrite(GPIO_SPI_CS_WIFI, !selected);
+      stm32_gpiowrite(GPIO_SPI_CS_SD_CARD, true);
+      stm32_gpiowrite(GPIO_SPI_CS_MPU, true);
+      break;
+
+    case SPIDEV_MMCSD:
+      /* Making sure the other peripherals are not selected */
+
+      stm32_gpiowrite(GPIO_SPI_CS_WIFI, true);
+      stm32_gpiowrite(GPIO_SPI_CS_SD_CARD, !selected);
+      stm32_gpiowrite(GPIO_SPI_CS_MPU, true);
+      break;
+
+    case SPIDEV_EXTDEV:
+      /* Making sure the other peripherals are not selected */
+
+      stm32_gpiowrite(GPIO_SPI_CS_WIFI, true);
+      stm32_gpiowrite(GPIO_SPI_CS_SD_CARD, true);
+      stm32_gpiowrite(GPIO_SPI_CS_MPU, !selected);
+      break;
+    }
 }
 
 uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
