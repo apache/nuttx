@@ -98,11 +98,10 @@ int nsh_archinitialize(void)
   int ret;
 #endif
 
-  message("initializing...\n");
-
 #ifdef HAVE_HSMCI
   /* Initialize the HSMCI driver */
 
+  message("initializing HSMCI\n");
   ret = sam_hsmci_initialize();
   if (ret < 0)
     {
@@ -114,6 +113,7 @@ int nsh_archinitialize(void)
 #ifdef HAVE_PROC
   /* mount the proc filesystem */
 
+  message("Mounting procfs to /proc\n");
   ret = mount(NULL, "/proc", "procfs", 0, NULL);
   if (ret < 0)
   {
@@ -125,6 +125,7 @@ int nsh_archinitialize(void)
 #ifdef HAVE_USBMONITOR
   /* Start the USB Monitor */
 
+  message("Starting USB Monitor\n");
   ret = usbmonitor_start(0, NULL);
   if (ret != OK)
     {
@@ -134,6 +135,7 @@ int nsh_archinitialize(void)
 #endif
 
 #warning "add automount config...."
+  message("Mounting /dev/mmcsd0 to /fat\n");
   ret = mount("/dev/mmcsd0", "/fat", "vfat", 0, NULL);
   if (ret < 0)
   {
