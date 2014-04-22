@@ -83,14 +83,18 @@ static struct sam_hsmci_state_s g_hsmci;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_hsmci_cardetect
+ * Name: sam_hsmci_cardetect_int
  *
  * Description:
  *   Card detect interrupt handler
  *
+ * TODO: Any way to automatically moun/unmount filesystem based on card
+ * detect status?  Yes... send a message or signal to an application.
+ *
  ****************************************************************************/
 
-static int sam_hsmci_cardetect(int irq, void *regs)
+#ifdef CONFIG_MMCSD_HAVECARDDETECT
+static int sam_hsmci_cardetect_int(int irq, void *regs)
 {
   bool inserted;
 
@@ -100,7 +104,7 @@ static int sam_hsmci_cardetect(int irq, void *regs)
 
   /* Has the card detect state changed? */
 
-  if (inserted == g_hsmci.inserted)
+  if (inserted != g_hsmci.inserted)
     {
       /* Yes... remember that new state and inform the HSMCI driver */
 
@@ -113,6 +117,7 @@ static int sam_hsmci_cardetect(int irq, void *regs)
 
    return OK;
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -135,10 +140,6 @@ int sam_hsmci_initialize(void)
 
   if (!g_hsmci.initialized)
     {
-      /* Initialize card-detect GPIO.  There is no write-protection GPIO. */
-
-      sam_configgpio(GPIO_MCI_CD);
-
       /* Mount the SDIO-based MMC/SD block driver */
       /* First, get an instance of the SDIO interface */
 
@@ -158,14 +159,21 @@ int sam_hsmci_initialize(void)
           return ret;
         }
 
+#ifdef CONFIG_MMCSD_HAVECARDDETECT
+      /* Initialize card-detect GPIO.  There is no write-protection GPIO. */
+
+      sam_configgpio(GPIO_MCI_CD);
+
       /* Configure card detect interrupts */
 
       sam_gpioirq(GPIO_MCI_CD);
-      (void)irq_attach(MCI_CD_IRQ, sam_hsmci_cardetect);
-
+      (void)irq_attach(MCI_CD_IRQ, sam_hsmci_cardetect_int);
+      g_hsmci.inserted = sam_cardinserted(0);
+#else
+      g_hsmci.inserted = true; /* An assumption? */
+#endif
       /* Then inform the HSMCI driver if there is or is not a card in the slot. */
 
-      g_hsmci.inserted = sam_cardinserted(0);
       sdio_mediachange(g_hsmci.hsmci, g_hsmci.inserted);
 
       /* Now we are initialized */
@@ -174,7 +182,9 @@ int sam_hsmci_initialize(void)
 
       /* Enable card detect interrupts */
 
+#ifdef CONFIG_MMCSD_HAVECARDDETECT
       sam_gpioirqenable(MCI_CD_IRQ);
+#endif
     }
 
   return OK;
@@ -188,6 +198,7 @@ int sam_hsmci_initialize(void)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_MMCSD_HAVECARDDETECT
 bool sam_cardinserted(int slotno)
 {
   bool removed;
@@ -199,6 +210,7 @@ bool sam_cardinserted(int slotno)
 
   return !removed;
 }
+#endif
 
 /****************************************************************************
  * Name: sam_writeprotected

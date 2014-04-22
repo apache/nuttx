@@ -61,7 +61,7 @@
  * Definitions
  ************************************************************************************/
 /* Configuration *******************************************************************/
-/* Wathdog hardware should be enabled */
+/* Watchdog hardware should be enabled */
 
 #if !defined(CONFIG_SAM34_WDT)
 #  warning "CONFIG_SAM34_WDT must be defined"
@@ -75,6 +75,10 @@
 #  else
 #    define CONFIG_WATCHDOG_DEVPATH "/dev/watchdog0"
 #  endif
+#endif
+
+#if (CONFIG_WDT_THREAD_INTERVAL < CONFIG_WDT_MINTIME)
+#  error "WDT_THREAD_INTERVAL must be greater than or equal to WDT_MINTIME"
 #endif
 
 /* Debug ***************************************************************************/
@@ -109,10 +113,8 @@
  * Public Functions
  ************************************************************************************/
 
+/* Watchdog kicker task */
 
-/*
-Watchdog kicker task
-*/
 #if defined(CONFIG_WDT_THREAD)
 static int wdog_daemon(int argc, char *argv[])
 {
@@ -172,7 +174,6 @@ errout:
 
 int up_wdginitialize(void)
 {
-
 #if (defined(CONFIG_SAM34_WDT) && !defined(CONFIG_WDT_DISABLE_ON_RESET))
   int fd;
   int ret;
