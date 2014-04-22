@@ -240,6 +240,11 @@ menuconfig WATCHDOG
 		information.
 
 if WATCHDOG
+
+config WATCHDOG_DEVPATH
+	string "Watchdog Device Path"
+	default "/dev/watchdog0"
+
 endif # WATCHDOG
 
 menuconfig ANALOG
