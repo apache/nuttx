@@ -54,6 +54,10 @@ ifeq ($(CONFIG_SAM34_HSMCI),y)
 CSRCS += sam_hsmci.c
 endif
 
+ifeq ($(CONFIG_SAM34_UDP),y)
+CSRCS += sam_udp.c
+endif
+
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += sam_autoleds.c
 else
