@@ -108,7 +108,7 @@ int nsh_archinitialize(void)
 
 #ifdef HAVE_USBDEV
   message("Registering CDC/ACM serial driver\n");
-  ret = cdcacm_initialize(CONFIG_CDCACM_DEVMINOR, NULL);
+  ret = cdcacm_initialize(CONFIG_SAM4S_XPLAINED_PRO_CDCACM_DEVMINOR, NULL);
   if (ret < 0)
     {
       message("ERROR: Failed to create the CDC/ACM serial device: %d\n", errno);
