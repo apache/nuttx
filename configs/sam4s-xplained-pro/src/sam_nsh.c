@@ -1,6 +1,6 @@
 /****************************************************************************
  * config/sam4s-xplained-pro/src/sam_nsh.c
- * 
+ *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -50,6 +50,14 @@
 #  include <apps/usbmonitor.h>
 #endif
 
+#ifdef CONFIG_CDCACM
+#  include <nuttx/usb/cdcacm.h>
+#endif
+
+#ifdef CONFIG_PL2303
+#  include <nuttx/usb/pl2303.h>
+#endif
+
 #include "sam4s-xplained-pro.h"
 
 /****************************************************************************
@@ -86,7 +94,7 @@
 
 int nsh_archinitialize(void)
 {
-#if (defined(HAVE_HSMCI) || defined (HAVE_PROC))
+#if defined(HAVE_HSMCI) || defined (HAVE_PROC) || defined(HAVE_USBMONITOR)
   int ret;
 #endif
 
@@ -94,7 +102,7 @@ int nsh_archinitialize(void)
 
 #ifdef HAVE_HSMCI
   /* Initialize the HSMCI driver */
-  
+
   ret = sam_hsmci_initialize();
   if (ret < 0)
     {
@@ -105,20 +113,31 @@ int nsh_archinitialize(void)
 
 #ifdef HAVE_PROC
   /* mount the proc filesystem */
- 
+
   ret = mount(NULL, "/proc", "procfs", 0, NULL);
   if (ret < 0)
   {
-    fdbg("ERROR: Failed to mount the PROC filesystem: %d\n", errno);
+    message("ERROR: Failed to mount the PROC filesystem: %d\n", errno);
     return ret;
   }
+#endif
+
+#ifdef HAVE_USBMONITOR
+  /* Start the USB Monitor */
+
+  ret = usbmonitor_start(0, NULL);
+  if (ret != OK)
+    {
+      message("nsh_archinitialize: Start USB monitor: %d\n", ret);
+      return ret;
+    }
 #endif
 
 #warning "add automount config...."
   ret = mount("/dev/mmcsd0", "/fat", "vfat", 0, NULL);
   if (ret < 0)
   {
-    fdbg("ERROR: Failed to mount the FAT filesystem: %d\n", errno);
+    message("ERROR: Failed to mount the FAT filesystem: %d\n", errno);
     return ret;
   }
 

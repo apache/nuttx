@@ -57,6 +57,8 @@
 
 #define HAVE_HSMCI      1
 #define HAVE_PROC       1
+#define HAVE_USBDEV     1
+#undef  HAVE_USBMONITOR
 
 /* HSMCI */
 /* Can't support MMC/SD if the card interface is not enabled */
@@ -71,7 +73,7 @@
 
 /* Can't support MMC/SD features if mountpoints are disabled */
 
-if defined(HAVE_HSMCI) && defined(CONFIG_DISABLE_MOUNTPOINT)
+#if defined(HAVE_HSMCI) && defined(CONFIG_DISABLE_MOUNTPOINT)
 #  warning Mountpoints disabled.  No MMC/SD support
 #  undef HAVE_HSMCI
 #endif
@@ -86,6 +88,25 @@ if defined(HAVE_HSMCI) && defined(CONFIG_DISABLE_MOUNTPOINT)
 #if defined(HAVE_HSMCI) && !defined(CONFIG_GPIOC_IRQ)
 #  warning PIOC interrupts not enabled.  No MMC/SD support.
 #  undef HAVE_HSMCI
+#endif
+
+/* USB Device */
+/* CONFIG_SAM34_UDP and CONFIG_USBDEV must be defined, or there is no USB
+ * device.
+ */
+
+#if !defined(CONFIG_SAM34_UDP) || !defined(CONFIG_USBDEV)
+#  undef HAVE_USBDEV
+#endif
+
+/* Check if we should enable the USB monitor before starting NSH */
+
+#ifndef HAVE_USBDEV
+#  undef CONFIG_USBDEV_TRACE
+#endif
+
+#if !defined(CONFIG_SYSTEM_USBMONITOR) && !defined(CONFIG_USBDEV_TRACE)
+#  undef HAVE_USBMONITOR
 #endif
 
 /* There are four LEDs on board the SAM4S Xplained board, two of these can be
