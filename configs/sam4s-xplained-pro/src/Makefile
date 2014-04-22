@@ -73,7 +73,7 @@ CSRCS += sam_wdt.c
 endif
 
 ifeq ($(CONFIG_TIMER),y)
-# CSRCS += sam_tc.c
+CSRCS += sam_tc.c
 endif
 
 COBJS = $(CSRCS:.c=$(OBJEXT))
