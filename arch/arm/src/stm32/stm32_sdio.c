@@ -454,7 +454,7 @@ static int  stm32_registercallback(FAR struct sdio_dev_s *dev,
 #ifdef CONFIG_SDIO_DMA
 static bool stm32_dmasupported(FAR struct sdio_dev_s *dev);
 static int  stm32_dmapreflight(FAR struct sdio_dev_s *dev,
-              FAR uint8_t *buffer, size_t buflen);
+              FAR const uint8_t *buffer, size_t buflen);
 static int  stm32_dmarecvsetup(FAR struct sdio_dev_s *dev,
               FAR uint8_t *buffer, size_t buflen);
 static int  stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
@@ -2469,8 +2469,8 @@ static bool stm32_dmasupported(FAR struct sdio_dev_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_SDIO_DMA
-static int stm32_dmapreflight(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
-                              size_t buflen)
+static int stm32_dmapreflight(FAR struct sdio_dev_s *dev,
+                              FAR const uint8_t *buffer, size_t buflen)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
 
