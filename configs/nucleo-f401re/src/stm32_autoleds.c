@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/nucleo-f401re/src/stm32_led.c
+ * configs/nucleo-f401re/src/stm32_autoleds.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,55 +39,81 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
 #include <stdbool.h>
+#include <debug.h>
 
 #include <arch/board/board.h>
 
+#include "chip.h"
+#include "up_arch.h"
+#include "up_internal.h"
 #include "stm32.h"
 #include "nucleo-f401re.h"
+
+#ifdef CONFIG_ARCH_LEDS
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
+ * with CONFIG_DEBUG_VERBOSE too)
+ */
+
+#ifdef CONFIG_DEBUG_LEDS
+#  define leddbg  lldbg
+#  define ledvdbg llvdbg
+#else
+#  define leddbg(x...)
+#  define ledvdbg(x...)
+#endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-void led_init(void)
+/****************************************************************************
+ * Name: board_led_initialize
+ ****************************************************************************/
+
+void board_led_initialize(void)
 {
-  /* Configure LED1 GPIO for output */
+  /* Configure LD2 GPIO for output */
 
   stm32_configgpio(GPIO_LD2);
 }
 
-void led_on(int led)
+/****************************************************************************
+ * Name: board_led_on
+ ****************************************************************************/
+
+void board_led_on(int led)
 {
   if (led == 1)
     {
-      /* Pull down to switch on */
-
       stm32_gpiowrite(GPIO_LD2, true);
     }
 }
 
-void led_off(int led)
+/****************************************************************************
+ * Name: board_led_off
+ ****************************************************************************/
+
+void board_led_off(int led)
 {
   if (led == 1)
     {
-      /* Pull up to switch off */
-
       stm32_gpiowrite(GPIO_LD2, false);
     }
 }
 
-void led_toggle(int led)
-{
-  if (led == 1)
-    {
-      if (stm32_gpioread(GPIO_LD2))
-        {
-          stm32_gpiowrite(GPIO_LD2, false);
-        }
-      else
-        {
-          stm32_gpiowrite(GPIO_LD2, true);
-        }
-    }
-}
+#endif /* CONFIG_ARCH_LEDS */

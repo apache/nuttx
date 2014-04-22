@@ -31,6 +31,7 @@ Contents
     - LED
     - Button
     - USARTS and Serial Consoles
+  - Buttons and LEDs
   - LQFP64
   - DFU and JTAG
   - Configurations
@@ -342,14 +343,38 @@ DFU and JTAG
 Hardware
 ========
 
-Buttons and LEDs
-================
-
   Buttons
   -------
 
   LEDs
   ----
+  The Nucleo F401RE and a single user LED, LD2.  LD2 is the green LED
+  connected to Arduino signal D13 corresponding to MCU I/O PA5 (pin 21) or
+  PB13 (pin 34) depending on the STM32target.
+
+    - When the I/O is HIGH value, the LED is on.
+    - When the I/O is LOW, the LED is off.
+
+  These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
+  defined.  In that case, the usage by the board port is defined in
+  include/board.h and src/sam_leds.c. The LEDs are used to encode OS-related
+  events as follows when the red LED (PE24) is available:
+
+    SYMBOL                Meaning                   LD2
+    -------------------  -----------------------  -----------
+    LED_STARTED          NuttX has been started     OFF
+    LED_HEAPALLOCATE     Heap has been allocated    OFF
+    LED_IRQSENABLED      Interrupts enabled         OFF
+    LED_STACKCREATED     Idle stack created         ON
+    LED_INIRQ            In an interrupt            No change
+    LED_SIGNAL           In a signal handler        No change
+    LED_ASSERTION        An assertion failed        No change
+    LED_PANIC            The system has crashed     Blinking
+    LED_IDLE             MCU is is sleep mode       Not used
+
+  Thus if LD2, NuttX has successfully booted and is, apparently, running
+  normally.  If LD2 is flashing at approximately 2Hz, then a fatal error
+  has been detected and the system has halted.
 
 Serial Consoles
 ===============

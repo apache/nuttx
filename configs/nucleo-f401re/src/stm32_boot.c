@@ -80,10 +80,6 @@ void stm32_boardinitialize(void)
   board_led_initialize();
 #endif
 
-#ifdef CONFIG_ARCH_HAVE_BUTTONS
-  board_button_initialize();
-#endif
-
   /* Configure SPI chip selects if 1) SP2 is not disabled, and 2) the weak function
    * stm32_spiinitialize() has been brought into the link.
    */
