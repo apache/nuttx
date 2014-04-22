@@ -2,7 +2,8 @@
  * drivers/timer.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Bob Doiron
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

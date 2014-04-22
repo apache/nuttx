@@ -7229,17 +7229,17 @@
 	  from Bob Doiron needed to support PDC-based HSMCI DMA transfers
 	  (2014-4-21).
 	* configs/sam4s-xplained-pro:  Support for the SAM4S Xplained Pro
-	  board from Bob Doison (2014-4-21).
+	  board from Bob Doiron (2014-4-21).
 	* configs/sam4s-xplained-pro: Added card detect (kind of broken
 	  still); added proc/vfat mounting during init to save some typing.
-	  From Bob Doison (2014-4-21).
+	  From Bob Doiron (2014-4-21).
 	* configs/sam4s-xplained-pro: Boost PLLA to 240MHz to allow USB. From
-	  Bob Doison (2014-4-21).
+	  Bob Doiron (2014-4-21).
 	* arch/arm/src/sam34/sam_wdt.c/.h:  Add watchdog driver.  From Bob
-	  Doison (2014-4-21).
+	  Doiron (2014-4-21).
 	* nuttx/configs/sam4s-xplained-pro:  Add board-specific watchdog
-	  timer support.  From Bob Doison (2014-4-21).
+	  timer support.  From Bob Doiron (2014-4-21).
 	* drivers/timer.c and include/nuttx/timer.h:  Timer "upper half"
-	  driver and lower half interface definition from Bob Doison
+	  driver and lower half interface definition from Bob Doiron
 	  (2014-40-22).
 

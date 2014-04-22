@@ -2,7 +2,8 @@
  * arch/arm/src/sam34/sam_tc.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Bob Dioron
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -261,7 +262,7 @@ static int sam34_interrupt(int irq, FAR void *context)
   FAR struct sam34_lowerhalf_s *priv = &g_tcdev;
   uint16_t regval;
 
-  tcvdbg("Entry\n");  
+  tcvdbg("Entry\n");
 
   /* Check if the interrupt is really pending */
 
@@ -391,7 +392,7 @@ static int sam34_getstatus(FAR struct timer_lowerhalf_s *lower,
     {
       status->flags |= TCFLAGS_ACTIVE;
     }
- 
+
   if (priv->handler)
     {
       status->flags |= TCFLAGS_CAPTURE;
@@ -446,7 +447,7 @@ static int sam34_settimeout(FAR struct timer_lowerhalf_s *lower,
       return -ERANGE;
     }
 
-   
+
   /* TODOR: -1 or no? */
 
   reload = (((uint64_t)timeout * TC_FCLK) / 1000000) - 1;
@@ -472,7 +473,7 @@ static int sam34_settimeout(FAR struct timer_lowerhalf_s *lower,
 
   tcvdbg("fwdt=%d reload=%d timout=%d\n",
          TC_FCLK, reload, priv->timeout);
-  
+
   /* Don't commit to MR register until started! */
 
   return OK;
@@ -529,7 +530,7 @@ static xcpt_t sam34_capture(FAR struct timer_lowerhalf_s *lower,
 
       regval |= WWDG_CFR_EWI;
       sam34_putreg(regval, SAM_TC_CFR);
- 
+
       up_enable_irq(STM32_IRQ_WWDG);
     }
   else
@@ -590,7 +591,7 @@ static int sam34_ioctl(FAR struct timer_lowerhalf_s *lower, int cmd,
  *
  * Description:
  *   Initialize the timer.  The timer is initialized and
- *   registers as 'devpath'.  
+ *   registers as 'devpath'.
  *
  * Input Parameters:
  *   devpath - The full path to the timer.  This should be of the form
