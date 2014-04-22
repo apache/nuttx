@@ -86,7 +86,7 @@
 
 /* We need PIO interrupts on PIOC to support card detect interrupts */
 
-#if defined(HAVE_HSMCI) && !defined(CONFIG_GPIOC_IRQ)
+#if defined(HAVE_HSMCI) && !defined(CONFIG_SAM34_GPIOC_IRQ)
 #  warning PIOC interrupts not enabled.  No MMC/SD support.
 #  undef HAVE_HSMCI
 #endif
