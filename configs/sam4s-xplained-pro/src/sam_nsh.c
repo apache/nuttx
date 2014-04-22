@@ -101,8 +101,19 @@
 
 int nsh_archinitialize(void)
 {
-#if defined(HAVE_HSMCI) || defined (HAVE_PROC) || defined(HAVE_USBMONITOR)
+#if defined (HAVE_USBDEV) || defined(HAVE_HSMCI) || defined (HAVE_PROC) || \
+    defined(HAVE_USBMONITOR)
   int ret;
+#endif
+
+#ifdef HAVE_USBDEV
+  message("Registering CDC/ACM serial driver\n");
+  ret = cdcacm_initialize(CONFIG_CDCACM_DEVMINOR, NULL);
+  if (ret < 0)
+    {
+      message("ERROR: Failed to create the CDC/ACM serial device: %d\n", errno);
+      return ret;
+    }
 #endif
 
 #ifdef HAVE_HSMCI
@@ -123,10 +134,26 @@ int nsh_archinitialize(void)
   message("Mounting procfs to /proc\n");
   ret = mount(NULL, "/proc", "procfs", 0, NULL);
   if (ret < 0)
-  {
-    message("ERROR: Failed to mount the PROC filesystem: %d\n", errno);
-    return ret;
-  }
+    {
+      message("ERROR: Failed to mount the PROC filesystem: %d\n", errno);
+      return ret;
+    }
+#endif
+
+#if HAVE_HSMCI
+  message("Mounting /dev/mmcsd0 to /fat\n");
+  ret = mount("/dev/mmcsd0", "/fat", "vfat", 0, NULL);
+  if (ret < 0)
+    {
+      message("ERROR: Failed to mount the FAT filesystem: %d\n", errno);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_TIMER
+  /* Registers the timer driver and starts an async interrupt. */
+
+  up_timerinitialize();
 #endif
 
 #ifdef HAVE_USBMONITOR
@@ -139,20 +166,6 @@ int nsh_archinitialize(void)
       message("nsh_archinitialize: Start USB monitor: %d\n", ret);
       return ret;
     }
-#endif
-
-  message("Mounting /dev/mmcsd0 to /fat\n");
-  ret = mount("/dev/mmcsd0", "/fat", "vfat", 0, NULL);
-  if (ret < 0)
-  {
-    message("ERROR: Failed to mount the FAT filesystem: %d\n", errno);
-    return ret;
-  }
-
-#ifdef CONFIG_TIMER
-  /* Registers the timer driver and starts an async interrupt. */
-
-  up_timerinitialize();
 #endif
 
   return OK;

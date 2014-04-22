@@ -57,7 +57,7 @@
 
 #define HAVE_HSMCI      1
 #define HAVE_PROC       1
-#define HAVE_USBDEV     0
+#define HAVE_USBDEV     1
 #undef  HAVE_USBMONITOR
 
 /* HSMCI */
@@ -95,7 +95,7 @@
  * device.
  */
 
-#if !defined(CONFIG_SAM34_UDP) || !defined(CONFIG_USBDEV)
+#if !defined(CONFIG_SAM34_UDP) || !defined(CONFIG_USBDEV) ||!defined(CONFIG_CDCACM)
 #  undef HAVE_USBDEV
 #endif
 
@@ -207,10 +207,8 @@ int sam_hsmci_initialize(void);
  *
  ************************************************************************************/
 
-#ifdef HAVE_HSMCI
+#if defined(HAVE_HSMCI) && defined(CONFIG_MMCSD_HAVECARDDETECT)
 bool sam_cardinserted(int slotno);
-#else
-#  define sam_cardinserted(slotno) (false)
 #endif
 
 /************************************************************************************
