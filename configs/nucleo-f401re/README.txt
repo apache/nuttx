@@ -31,7 +31,6 @@ Contents
     - LED
     - Button
     - USARTS and Serial Consoles
-  - Buttons and LEDs
   - LQFP64
   - DFU and JTAG
   - Configurations
@@ -345,6 +344,8 @@ Hardware
 
   Buttons
   -------
+  B1 USER: the user button is connected to the I/O PC13 (pin 2) of the STM32
+  microcontroller.
 
   LEDs
   ----

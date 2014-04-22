@@ -14,6 +14,28 @@
 #include <nuttx/compiler.h>
 #include <stdint.h>
 
+/* LED.  User LD2: the green LED is a user LED connected to Arduino signal D13
+ * corresponding to MCU I/O PA5 (pin 21) or PB13 (pin 34) depending on the STM32
+ * target.
+ *
+ * - When the I/O is HIGH value, the LED is on.
+ * - When the I/O is LOW, the LED is off.
+ */
+
+#define GPIO_LD2      (GPIO_PORTA | GPIO_PIN13 | GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | GPIO_PULLUP | GPIO_SPEED_50MHz)
+
+/* Buttons
+ *
+ * B1 USER: the user button is connected to the I/O PC13 (pin 2) of the STM32
+ * microcontroller.
+ */
+
+#define MIN_IRQBUTTON   BUTTON_USER
+#define MAX_IRQBUTTON   BUTTON_USER
+#define NUM_IRQBUTTONS  1
+
+#define GPIO_BTN_USER   (GPIO_INPUT |GPIO_FLOAT |GPIO_EXTI | GPIO_PORTC | GPIO_PIN13)
+
 /* The shield uses the following pins:
  *
  *   +5V
@@ -27,20 +49,11 @@
  *   Digital pin 12:
  *   Digital pin 13:
  *   Even if optional 6-pin SPI header is used, these pins are unavailable for other use.
- *
- * LED.  User LD2: the green LED is a user LED connected to Arduino signal D13
- * corresponding to MCU I/O PA5 (pin 21) or PB13 (pin 34) depending on the STM32
- * target.
- *
- * - When the I/O is HIGH value, the LED is on.
- * - When the I/O is LOW, the LED is off.
  */
 
 #define GPIO_WIFI_INT (GPIO_PORTB | GPIO_PIN3  | GPIO_INPUT        | GPIO_PULLUP | GPIO_EXTI)
 #define GPIO_WIFI_EN  (GPIO_PORTB | GPIO_PIN4  | GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | GPIO_PULLUP | GPIO_SPEED_50MHz)
 #define GPIO_WIFI_CS  (GPIO_PORTB | GPIO_PIN6  | GPIO_OUTPUT_SET   | GPIO_OUTPUT | GPIO_PULLUP | GPIO_SPEED_50MHz)
-
-#define GPIO_LD2      (GPIO_PORTA | GPIO_PIN13 | GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | GPIO_PULLUP | GPIO_SPEED_50MHz)
 
 #if defined(CONFIG_CC3000_PROBES)
 #  define GPIO_D0     (GPIO_PORTB | GPIO_PIN7  | GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | GPIO_PULLUP | GPIO_SPEED_50MHz)
