@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/nucleo-f401re/src/stm32_init.c
+ * configs/nucleo-f401re/src/stm32_nsh.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -47,10 +47,8 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/spi/spi.h>
-#include <nuttx/i2c.h>
 #include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
-#include <nuttx/analog/adc.h>
 #include <nuttx/gran.h>
 
 #include <stm32.h>
@@ -135,6 +133,14 @@ static void dma_alloc_init(void)
  * Public Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: up_netinitialize
+ *
+ * Description:
+ *   Dummy function expected to start-up logic.
+ *
+ ****************************************************************************/
+
 void up_netinitialize(void)
 {
 }
@@ -165,7 +171,6 @@ int nsh_archinitialize(void)
   if (!spi1)
     {
       message("[boot] FAILED to initialize SPI port 1\n");
-      board_led_on(LED_AMBER);
       return -ENODEV;
     }
 

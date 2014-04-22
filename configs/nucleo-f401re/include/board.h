@@ -278,15 +278,54 @@
 #define GPIO_SPI2_MOSI   GPIO_SPI2_MOSI_1
 #define GPIO_SPI2_SCK    GPIO_SPI2_SCK_2
 
-/* LED Definitions.  Needed if CONFIG_ARCH_LEDs is defined */
+/* LEDs
+ *
+ * The Nucleo F401RE and a single user LED, LD2.  LD2 is the green LED
+ * connected to Arduino signal D13 corresponding to MCU I/O PA5 (pin 21) or
+ * PB13 (pin 34) depending on the STM32target.
+ *
+ *   - When the I/O is HIGH value, the LED is on.
+ *   - When the I/O is LOW, the LED is off.
+ */
+
+/* LED index values for use with stm32_setled() */
+
+#define BOARD_LD2         0
+#define BOARD_NLEDS       1
+
+/* LED bits for use with stm32_setleds() */
+
+#define BOARD_LD2_BIT     (1 << BOARD_LD2)
+
+/* These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
+ * defined.  In that case, the usage by the board port is defined in
+ * include/board.h and src/sam_leds.c. The LEDs are used to encode OS-related
+ * events as follows when the red LED (PE24) is available:
+ *
+ *   SYMBOL                Meaning                   LD2
+ *   -------------------  -----------------------  -----------
+ *   LED_STARTED          NuttX has been started     OFF
+ *   LED_HEAPALLOCATE     Heap has been allocated    OFF
+ *   LED_IRQSENABLED      Interrupts enabled         OFF
+ *   LED_STACKCREATED     Idle stack created         ON
+ *   LED_INIRQ            In an interrupt            No change
+ *   LED_SIGNAL           In a signal handler        No change
+ *   LED_ASSERTION        An assertion failed        No change
+ *   LED_PANIC            The system has crashed     Blinking
+ *   LED_IDLE             MCU is is sleep mode       Not used
+ *
+ * Thus if LD2, NuttX has successfully booted and is, apparently, running
+ * normally.  If LD2 is flashing at approximately 2Hz, then a fatal error
+ * has been detected and the system has halted.
+ */
 
 #define LED_STARTED      0
 #define LED_HEAPALLOCATE 0
 #define LED_IRQSENABLED  0
 #define LED_STACKCREATED 1
-#define LED_INIRQ        1
-#define LED_SIGNAL       1
-#define LED_ASSERTION    1
+#define LED_INIRQ        2
+#define LED_SIGNAL       2
+#define LED_ASSERTION    2
 #define LED_PANIC        1
 
 /************************************************************************************
@@ -312,12 +351,28 @@ extern "C"
  *
  * Description:
  *   All STM32 architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
+ *   is called early in the initialization -- after all memory has been configured
  *   and mapped but before any devices have been initialized.
  *
  ************************************************************************************/
 
 void stm32_boardinitialize(void);
+
+/************************************************************************************
+ * Name:  stm32_ledinit, stm32_setled, and stm32_setleds
+ *
+ * Description:
+ *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board LEDs.  If
+ *   CONFIG_ARCH_LEDS is not defined, then the following interfaces are available to
+ *   control the LEDs from user applications.
+ *
+ ************************************************************************************/
+
+#ifndef CONFIG_ARCH_LEDS
+void stm32_ledinit(void);
+void stm32_setled(int led, bool ledon);
+void stm32_setleds(uint8_t ledset);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)
