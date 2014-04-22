@@ -328,6 +328,17 @@
 #define LED_ASSERTION    2
 #define LED_PANIC        1
 
+/* Buttons
+ *
+ * B1 USER: the user button is connected to the I/O PC13 (pin 2) of the STM32
+ * microcontroller.
+ */
+
+#define BUTTON_USER        0
+#define NUM_BUTTONS        1
+
+#define BUTTON_USER_BIT    (1 << BUTTON_USER)
+
 /************************************************************************************
  * Public Data
  ************************************************************************************/

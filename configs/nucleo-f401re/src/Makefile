@@ -48,6 +48,10 @@ else
 CSRCS += stm32_userleds.c
 endif
 
+ifeq ($(CONFIG_ARCH_BUTTONS),y)
+CSRCS +=  stm32_buttons.c
+endif
+
 ifeq ($(CONFIG_WL_CC3000),y)
 CSRCS += stm32_wireless.c
 endif
