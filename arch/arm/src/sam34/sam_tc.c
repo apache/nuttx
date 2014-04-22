@@ -55,14 +55,18 @@
 
 //#define CONFIG_SAM34_TC_REGDEBUG
 
-#if defined(CONFIG_TIMER) && (defined(CONFIG_SAM34_TC0) || defined(CONFIG_SAM34_TC1) || defined(CONFIG_SAM34_TC2) || defined(CONFIG_SAM34_TC3) || defined(CONFIG_SAM34_TC4) || defined(CONFIG_SAM34_TC5))
+#if defined(CONFIG_TIMER) && (defined(CONFIG_SAM34_TC0) || \
+    defined(CONFIG_SAM34_TC1) || defined(CONFIG_SAM34_TC2) || \
+    defined(CONFIG_SAM34_TC3) || defined(CONFIG_SAM34_TC4) || \
+    defined(CONFIG_SAM34_TC5))
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
 /* Clocking *****************************************************************/
 
-#warning "TODO: allow selection of any of the input clocks"
+/* TODO: Allow selection of any of the input clocks */
+
 #define TC_FCLK        (BOARD_SLCK_FREQUENCY)
 #define TC_MAXTIMEOUT  ((1000000ULL * (1ULL + TC_RVALUE_MASK)) / TC_FCLK)
 
@@ -184,6 +188,7 @@ static uint32_t sam34_getreg(uint32_t addr)
              {
                lldbg("...\n");
              }
+
           return val;
         }
     }
@@ -250,6 +255,7 @@ static void sam34_putreg(uint32_t val, uint32_t addr)
  *   Always returns OK.
  *
  ****************************************************************************/
+
 static int sam34_interrupt(int irq, FAR void *context)
 {
   FAR struct sam34_lowerhalf_s *priv = &g_tcdev;
@@ -258,16 +264,20 @@ static int sam34_interrupt(int irq, FAR void *context)
   tcvdbg("Entry\n");  
 
   /* Check if the interrupt is really pending */
+
   regval = sam34_getreg(SAM_TC0_SR);
   if ((regval & TC_INT_CPCS) != 0)
-  {
-    /* Is there a registered handler? */
-    if (priv->handler)
     {
-      priv->handler(irq, context);
+      /* Is there a registered handler? */
+
+      if (priv->handler)
+      {
+        priv->handler(irq, context);
+      }
+
+      /* TC_INT_CPCS is cleared by reading SAM_TC0_SR */
     }
-    /* TC_INT_CPCS is cleared by reading SAM_TC0_SR */
-  }
+
   return OK;
 }
 
@@ -298,22 +308,25 @@ static int sam34_start(FAR struct timer_lowerhalf_s *lower)
 
   sam34_putreg(TC_CCR_CLKDIS, SAM_TC0_CCR); // disable counter
 
-  // TC_CMR_WAVE - waveform mode
-  // TC_CMR_WAVSEL_UPAUTO - reset on RC compare (interval timer)
-  // TC_CMR_TCCLKS_TIMERCLOCK5 = SCLK
+  /* TC_CMR_WAVE - waveform mode
+   * TC_CMR_WAVSEL_UPAUTO - reset on RC compare (interval timer)
+   * TC_CMR_TCCLKS_TIMERCLOCK5 = SCLK
+   */
+
   mr_val |= (TC_CMR_WAVE + TC_CMR_WAVSEL_UPAUTO + TC_CMR_TCCLKS_TIMERCLOCK5);
   sam34_putreg(mr_val, SAM_TC0_CMR);
 
   sam34_putreg(priv->reload, SAM_TC0_RC); // set interval
 
-#warning "isr active without user handle for now..."
-//  if(priv->handler)
-//  {
-    // clear status
-    sam34_getreg(SAM_TC0_SR);
-    sam34_putreg(TC_INT_CPCS, SAM_TC0_IMR);
-    sam34_putreg(TC_INT_CPCS, SAM_TC0_IER);
-//  }
+  /* TODO: isr active without user handle for now... */
+//  if (priv->handler)
+    {
+      /* Clear status */
+
+      sam34_getreg(SAM_TC0_SR);
+      sam34_putreg(TC_INT_CPCS, SAM_TC0_IMR);
+      sam34_putreg(TC_INT_CPCS, SAM_TC0_IER);
+    }
 
   sam34_putreg(TC_CCR_SWTRG + TC_CCR_CLKEN, SAM_TC0_CCR); // start counter
 
@@ -434,11 +447,13 @@ static int sam34_settimeout(FAR struct timer_lowerhalf_s *lower,
     }
 
    
-#warning "-1 or no?"
-    reload = (((uint64_t)timeout * TC_FCLK) / 1000000) - 1;
+  /* TODOR: -1 or no? */
+
+  reload = (((uint64_t)timeout * TC_FCLK) / 1000000) - 1;
 
   /* Make sure that the final reload value is within range */
-#warning "+1 or no?"
+  /* TODOR: +1 or no? */
+
   if (reload > TC_CV_MASK)
     {
       reload = TC_CV_MASK;
@@ -458,7 +473,7 @@ static int sam34_settimeout(FAR struct timer_lowerhalf_s *lower,
   tcvdbg("fwdt=%d reload=%d timout=%d\n",
          TC_FCLK, reload, priv->timeout);
   
-  // Don't commit to MR register until started!
+  /* Don't commit to MR register until started! */
 
   return OK;
 }
@@ -585,6 +600,7 @@ static int sam34_ioctl(FAR struct timer_lowerhalf_s *lower, int cmd,
  *   None
  *
  ****************************************************************************/
+
 void sam_tcinitialize(FAR const char *devpath, int irq)
 {
   FAR struct sam34_lowerhalf_s *priv = &g_tcdev;
@@ -601,16 +617,23 @@ void sam_tcinitialize(FAR const char *devpath, int irq)
    */
 
   priv->ops = &g_tcops;
-#warning "add irq + switch in sam34_interrupt or something (also need register base address..."
+
+  /* TODO: Add irq + switch in sam34_interrupt or something (also need register
+   * base address...
+   */
+
   (void)irq_attach(irq, sam34_interrupt);
-  // enable interrupt.
-#warning "may want to enable/disable in start/stop..."
+
+  /* enable interrupt.
+   *
+   * TODO: May want to enable/disable in start/stop...
+   */
+
   up_enable_irq(irq);
-  
 
   /* Register the timer driver as /dev/timerX */
-  (void)timer_register(devpath, (FAR struct timer_lowerhalf_s *)priv);
 
+  (void)timer_register(devpath, (FAR struct timer_lowerhalf_s *)priv);
 }
 
 #endif /* CONFIG_TIMER && CONFIG_SAM34_TCx */
