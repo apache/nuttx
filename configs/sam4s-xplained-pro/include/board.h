@@ -135,6 +135,7 @@
 #define HSMCI_SDXFR_CLKDIV           (2 << HSMCI_MR_CLKDIV_SHIFT)
 #define HSMCI_SDWIDEXFR_CLKDIV       HSMCI_SDXFR_CLKDIV
 
+#ifdef CONFIG_SAM34_UDP
 /* The PLL clock (USB_48M or UDPCK) is driven from the output of the PLL,
  * PLLACK.  The PLL clock must be 48MHz.  PLLACK can be divided down via the
  * PMC USB register to provide the PLL clock.  So in order to use the USB
@@ -144,8 +145,9 @@
  * PLLACK = 192MHz, USBDIV=5, USB_48M = 192 MHz / (3 + 1) = 48MHz
  */
 
-#define BOARD_PMC_USBS               (0)
-#define BOARD_PMC_USBDIV             (4 << PMC_USB_USBDIV_SHIFT)
+#  define BOARD_PMC_USBS             (0)
+#  define BOARD_PMC_USBDIV           (4 << PMC_USB_USBDIV_SHIFT)
+#endif
 
 /* FLASH wait states:
  *
