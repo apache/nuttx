@@ -7239,4 +7239,7 @@
 	  Doison (2014-4-21).
 	* nuttx/configs/sam4s-xplained-pro:  Add board-specific watchdog
 	  timer support.  From Bob Doison (2014-4-21).
+	* drivers/timer.c and include/nuttx/timer.h:  Timer "upper half"
+	  driver and lower half interface definition from Bob Doison
+	  (2014-40-22).
 

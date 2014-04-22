@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/timer.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -83,7 +83,7 @@
 struct timer_upperhalf_s
 {
   uint8_t   crefs;    /* The number of times the device has been opened */
-//  sem_t     exclsem;  /* Supports mutual exclusion */
+//sem_t     exclsem;  /* Supports mutual exclusion */
   FAR char *path;     /* Registration path */
 
   /* The contained lower-half driver */
@@ -114,10 +114,10 @@ static const struct file_operations g_timerops =
   timer_close, /* close */
   timer_read,  /* read */
   timer_write, /* write */
-  0,          /* seek */
+  0,           /* seek */
   timer_ioctl  /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
-  , 0         /* poll */
+  , 0          /* poll */
 #endif
 };
 
@@ -155,7 +155,7 @@ static int timer_open(FAR struct file *filep)
    * time that the driver has been opened for this device, then initialize
    * the device.
    */
-#warning "anythin init to do on first open?"
+
   tmp = upper->crefs + 1;
   if (tmp == 0)
     {
@@ -230,7 +230,7 @@ errout:
 static ssize_t timer_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
 {
   /* Return zero -- usually meaning end-of-file */
-#warning "return counter value?"
+
   return 0;
 }
 
@@ -242,7 +242,8 @@ static ssize_t timer_read(FAR struct file *filep, FAR char *buffer, size_t bufle
  *
  ************************************************************************************/
 
-static ssize_t timer_write(FAR struct file *filep, FAR const char *buffer, size_t buflen)
+static ssize_t timer_write(FAR struct file *filep, FAR const char *buffer,
+                           size_t buflen)
 {
   return 0;
 }
@@ -287,15 +288,14 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       {
         /* Start the timer, resetting the time to the current timeout */
 
-        //DEBUGASSERT(lower->ops->start); /* Required */
-		if(lower->ops->start)
-		{
-			ret = lower->ops->start(lower);
-		}
-		else
-		{
+        if(lower->ops->start)
+          {
+            ret = lower->ops->start(lower);
+          }
+        else
+          {
             ret = -ENOSYS;
-		}
+          }
       }
       break;
 
@@ -308,15 +308,14 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       {
         /* Stop the timer */
 
-        //DEBUGASSERT(lower->ops->stop); /* Required */
-		if(lower->ops->start)
-		{
-	        ret = lower->ops->stop(lower);
-		}
-		else
-		{
+        if(lower->ops->start)
+          {
+            ret = lower->ops->stop(lower);
+          }
+        else
+          {
             ret = -ENOSYS;
-		}
+          }
       }
       break;
 
@@ -353,8 +352,11 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     /* cmd:         TCIOC_SETTIMEOUT
      * Description: Reset the timeout to this value
      * Argument:    A 32-bit timeout value in microseconds.
+     *
+     * TODO: pass pointer to uint64 ns? Need to determine if these timers
+     * are 16 or 32 bit...
      */
-#warning "TODO - pass pointer to uint64 ns? Need to determine if these timers are 16 or 32 bit..."
+
     case TCIOC_SETTIMEOUT:
       {
         /* Set a new timeout value (and reset the timer) */

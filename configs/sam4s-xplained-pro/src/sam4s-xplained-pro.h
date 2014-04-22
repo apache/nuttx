@@ -57,7 +57,7 @@
 
 #define HAVE_HSMCI      1
 #define HAVE_PROC       1
-#define HAVE_USBDEV     1
+#define HAVE_USBDEV     0
 #undef  HAVE_USBMONITOR
 
 /* HSMCI */

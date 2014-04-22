@@ -662,6 +662,7 @@ static int sam34_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
  *
  ****************************************************************************/
 
+#ifndef CONFIG_WDT_DISABLE_ON_RESET
 void sam_wdtinitialize(FAR const char *devpath)
 {
   FAR struct sam34_lowerhalf_s *priv = &g_wdgdev;
@@ -696,5 +697,6 @@ void sam_wdtinitialize(FAR const char *devpath)
   (void)watchdog_register(devpath, (FAR struct watchdog_lowerhalf_s *)priv);
 
 }
+#endif /* CONFIG_WDT_DISABLE_ON_RESET */
 
 #endif /* CONFIG_WATCHDOG && CONFIG_SAM34_WDT */

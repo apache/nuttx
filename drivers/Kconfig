@@ -247,6 +247,14 @@ config WATCHDOG_DEVPATH
 
 endif # WATCHDOG
 
+menuconfig TIMER
+	bool "Timer Support"
+	default n
+	---help---
+		This selection enables building of the "upper-half" timer
+		driver. See include/nuttx/timer.h for further timer driver
+		information.
+
 menuconfig ANALOG
 	bool "Analog Device(ADC/DAC) Support"
 	default n

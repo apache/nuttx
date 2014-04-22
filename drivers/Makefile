@@ -87,6 +87,10 @@ endif
 ifeq ($(CONFIG_WATCHDOG),y)
   CSRCS += watchdog.c
 endif
+
+ifeq ($(CONFIG_TIMER),y)
+  CSRCS += timer.c
+endif
 endif
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))

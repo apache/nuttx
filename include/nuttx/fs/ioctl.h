@@ -70,6 +70,7 @@
 #define _SLCDIOCBASE    (0x1100) /* Segment LCD ioctl commands */
 #define _WLIOCBASE      (0x1200) /* Wireless modules ioctl commands */
 #define _CFGDIOCBASE    (0x1300) /* Config Data device (app config) ioctl commands */
+#define _TCIOCBASE      (0x1400) /* Timer ioctl commands */
 
 /* Macros used to manage ioctl commands */
 
@@ -92,6 +93,11 @@
 
 #define _WDIOCVALID(c)  (_IOC_TYPE(c)==_WDIOCBASE)
 #define _WDIOC(nr)      _IOC(_WDIOCBASE,nr)
+
+/* Timer driver ioctl commands *******************************************/
+
+#define _TCIOCVALID(c)  (_IOC_TYPE(c)==_TCIOCBASE)
+#define _TCIOC(nr)      _IOC(_TCIOCBASE,nr)
 
 /* NuttX file system ioctl definitions **************************************/
 

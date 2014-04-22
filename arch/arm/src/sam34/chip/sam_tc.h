@@ -296,16 +296,31 @@
 
 /* Timer common registers */
 
-#define SAM_TC_BCR                   (SAM_TC_BASE+SAM_TC_BCR_OFFSET)
-#define SAM_TC_BMR                   (SAM_TC_BASE+SAM_TC_BMR_OFFSET)
-#define SAM_TC_QIER                  (SAM_TC_BASE+SAM_TC_QIER_OFFSET)
-#define SAM_TC_QIDR                  (SAM_TC_BASE+SAM_TC_QIDR_OFFSET)
-#define SAM_TC_QIMR                  (SAM_TC_BASE+SAM_TC_QIMR_OFFSET)
-#define SAM_TC_QISR                  (SAM_TC_BASE+SAM_TC_QISR_OFFSET)
-
 #if defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
-#  define SAM_TC_FMR                 (SAM_TC_BASE+SAM_TC_FMR_OFFSET)
-#  define SAM_TC_WPMR                (SAM_TC_BASE+SAM_TC_WPMR_OFFSET)
+#  define SAM_TC0_BCR                (SAM_TC0_BASE+SAM_TC_BCR_OFFSET)
+#  define SAM_TC0_BMR                (SAM_TC0_BASE+SAM_TC_BMR_OFFSET)
+#  define SAM_TC0_QIER               (SAM_TC0_BASE+SAM_TC_QIER_OFFSET)
+#  define SAM_TC0_QIDR               (SAM_TC0_BASE+SAM_TC_QIDR_OFFSET)
+#  define SAM_TC0_QIMR               (SAM_TC0_BASE+SAM_TC_QIMR_OFFSET)
+#  define SAM_TC0_QISR               (SAM_TC0_BASE+SAM_TC_QISR_OFFSET)
+#  define SAM_TC0_FMR                (SAM_TC0_BASE+SAM_TC_FMR_OFFSET)
+#  define SAM_TC0_WPMR               (SAM_TC0_BASE+SAM_TC_WPMR_OFFSET)
+
+#  define SAM_TC1_BCR                (SAM_TC3_BASE+SAM_TC_BCR_OFFSET)
+#  define SAM_TC1_BMR                (SAM_TC3_BASE+SAM_TC_BMR_OFFSET)
+#  define SAM_TC1_QIER               (SAM_TC3_BASE+SAM_TC_QIER_OFFSET)
+#  define SAM_TC1_QIDR               (SAM_TC3_BASE+SAM_TC_QIDR_OFFSET)
+#  define SAM_TC1_QIMR               (SAM_TC3_BASE+SAM_TC_QIMR_OFFSET)
+#  define SAM_TC1_QISR               (SAM_TC3_BASE+SAM_TC_QISR_OFFSET)
+#  define SAM_TC1_FMR                (SAM_TC3_BASE+SAM_TC_FMR_OFFSET)
+#  define SAM_TC1_WPMR               (SAM_TC3_BASE+SAM_TC_WPMR_OFFSET)
+#else
+#  define SAM_TC_BCR                 (SAM_TC_BASE+SAM_TC_BCR_OFFSET)
+#  define SAM_TC_BMR                 (SAM_TC_BASE+SAM_TC_BMR_OFFSET)
+#  define SAM_TC_QIER                (SAM_TC_BASE+SAM_TC_QIER_OFFSET)
+#  define SAM_TC_QIDR                (SAM_TC_BASE+SAM_TC_QIDR_OFFSET)
+#  define SAM_TC_QIMR                (SAM_TC_BASE+SAM_TC_QIMR_OFFSET)
+#  define SAM_TC_QISR                (SAM_TC_BASE+SAM_TC_QISR_OFFSET)
 #endif
 
 /* TC register bit definitions ******************************************************************/
@@ -393,8 +408,8 @@
 #define TC_CMR_WAVSEL_SHIFT          (13)      /* Bits 13-14: Waveform Selection (Waveform mode) */
 #define TC_CMR_WAVSEL_MASK           (3 << TC_CMR_WAVSEL_SHIFT)
 #  define TC_CMR_WAVSEL_UP           (0 << TC_CMR_WAVSEL_SHIFT) /* UP mode w/o auto trigger (Waveform mode) */
-#  define TC_CMR_WAVSEL_UPAUTO       (1 << TC_CMR_WAVSEL_SHIFT) /* UP mode with auto trigger (Waveform mode) */
-#  define TC_CMR_WAVSEL_UPDWN        (2 << TC_CMR_WAVSEL_SHIFT) /* UPDOWN mode w/o  auto trigger (Waveform mode) */
+#  define TC_CMR_WAVSEL_UPDWN        (1 << TC_CMR_WAVSEL_SHIFT) /* UPDOWN mode w/o  auto trigger (Waveform mode) */
+#  define TC_CMR_WAVSEL_UPAUTO       (2 << TC_CMR_WAVSEL_SHIFT) /* UP mode with auto trigger (Waveform mode) */
 #  define TC_CMR_WAVSEL_UPDWNAUTO    (3 << TC_CMR_WAVSEL_SHIFT) /* UPDOWN mode with auto trigger (Waveform mode) */
 #define TC_CMR_ACPA_SHIFT            (16)      /* Bits 16-17: RA Compare Effect on TIOA (Waveform mode) */
 #define TC_CMR_ACPA_MASK             (3 << TC_CMR_ACPA_SHIFT)
@@ -488,6 +503,9 @@
 #if defined(CONFIG_ARCH_CHIP_SAM4E)
 #  define TC_INT_ENDRX               (1 << 8)  /* Bit 8: End of Receiver Transfer */
 #  define TC_INT_RXBUFF              (1 << 9)  /* Bit 9: Reception Buffer Full */
+#  define TC_INT_ALL                 (TC_INT_COVFS + TC_INT_LOVRS + TC_INT_CPAS + TC_INT_CPBS + TC_INT_CPCS + TC_INT_LDRAS + TC_INT_LDRBS + TC_INT_ETRGS + TC_INT_ENDRX + TC_INT_RXBUFF)
+#else
+#  define TC_INT_ALL                 (TC_INT_COVFS + TC_INT_LOVRS + TC_INT_CPAS + TC_INT_CPBS + TC_INT_CPCS + TC_INT_LDRAS + TC_INT_LDRBS + TC_INT_ETRGS)
 #endif
 
 #define TC_INT_CLKSTA                (1 << 16) /* Bit 16: Clock Enabling (SR only) */
@@ -511,7 +529,7 @@
 /* Timer common registers ***********************************************************************/
 /* TC Block Control Register */
 
-#define TC_BCR_SYNC                  (1 << 0)  /* Bit 0: Synchro Command
+#define TC_BCR_SYNC                  (1 << 0)  /* Bit 0: Synchro Command */
 
 /* TC Block Mode Register */
 

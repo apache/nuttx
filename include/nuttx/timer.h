@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/timer.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,8 +68,11 @@
  *                    Argument: A 32-bit timeout value in microseconds.
  * TCIOC_CAPTURE    - Do not reset.  Instead, called this handler.
  *                    Argument: A pointer to struct timer_capture_s.
+ *
+ * WARNING: May change TCIOC_SETTIMEOUT to pass pointer to 64bit nanoseconds
+ * or timespec structure.
  */
-#warning "may change TCIOC_SETTIMEOUT to pass pointer to 64bit nanoseconds or timespec structure"
+
 #define TCIOC_START      _TCIOC(0x001)
 #define TCIOC_STOP       _TCIOC(0x002)
 #define TCIOC_GETSTATUS  _TCIOC(0x003)
@@ -174,7 +177,8 @@ struct timer_lowerhalf_s
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -212,8 +216,8 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN FAR void *timer_register(FAR const char *path,
-                                   FAR struct timer_lowerhalf_s *lower);
+FAR void *timer_register(FAR const char *path,
+                         FAR struct timer_lowerhalf_s *lower);
 
 /****************************************************************************
  * Name: timer_unregister
@@ -230,7 +234,7 @@ EXTERN FAR void *timer_register(FAR const char *path,
  *
  ****************************************************************************/
 
-EXTERN void timer_unregister(FAR void *handle);
+void timer_unregister(FAR void *handle);
 
 /****************************************************************************
  * Platform-Independent "Lower-Half" Timer Driver Interfaces
@@ -259,7 +263,7 @@ EXTERN void timer_unregister(FAR void *handle);
  *
  ****************************************************************************/
 
-EXTERN int up_timerinitialize(void);
+int up_timerinitialize(void);
 
 #undef EXTERN
 #ifdef __cplusplus
