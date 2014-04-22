@@ -67,21 +67,21 @@
  * Source: 12MHz crystall at 12MHz
  * PLLmul: 10
  * PLLdiv: 1 (bypassed)
- * Fpll:   (12MHz * 10) / 1 = 120MHz
+ * Fpll:   (12MHz * 20) / 1 = 240MHz
  */
 
 #define BOARD_MAINOSC_FREQUENCY    (12000000)
-#define BOARD_CKGR_PLLAR_MUL       (9 << PMC_CKGR_PLLAR_MUL_SHIFT)
+#define BOARD_CKGR_PLLAR_MUL       (19 << PMC_CKGR_PLLAR_MUL_SHIFT)
 #define BOARD_CKGR_PLLAR_DIV       PMC_CKGR_PLLAR_DIV_BYPASS
 #define BOARD_CKGR_PLLAR_COUNT     (63 << PMC_CKGR_PLLAR_COUNT_SHIFT)
-#define BOARD_PLLA_FREQUENCY       (10*BOARD_MAINOSC_FREQUENCY)   /* PLLA = 120Mhz */
+#define BOARD_PLLA_FREQUENCY       (20*BOARD_MAINOSC_FREQUENCY)   /* PLLA = 240Mhz */
 
 /* PMC master clock register settings */
 
 #define BOARD_PMC_MCKR_CSS         PMC_MCKR_CSS_PLLA
-#define BOARD_PMC_MCKR_PRES        PMC_MCKR_PRES_DIV1
-#define BOARD_MCK_FREQUENCY        (BOARD_PLLA_FREQUENCY/1)       /* MCK = 120Mhz */
-#define BOARD_CPU_FREQUENCY        (BOARD_PLLA_FREQUENCY/1)       /* CPU = 120Mhz */
+#define BOARD_PMC_MCKR_PRES        PMC_MCKR_PRES_DIV2
+#define BOARD_MCK_FREQUENCY        (BOARD_PLLA_FREQUENCY/2)       /* MCK = 120Mhz */
+#define BOARD_CPU_FREQUENCY        (BOARD_PLLA_FREQUENCY/2)       /* CPU = 120Mhz */
 
 /* USB UTMI PLL start-up time */
 
@@ -98,16 +98,28 @@
 
 /* MCK = 120MHz, CLKDIV = 149, MCI_SPEED = 120MHz / 2 * (149+1) = 400 KHz */
 
-#define HSMCI_INIT_CLKDIV          (149 << HSMCI_MR_CLKDIV_SHIFT) /* 120M MCK */
+#define HSMCI_INIT_CLKDIV          (149 << HSMCI_MR_CLKDIV_SHIFT)
 
-/* MCK = 120MHz, CLKDIV = 4, MCI_SPEED = 120MHz / 2 * (4+1) = 12 MHz */
+/* MCK = 120MHz, CLKDIV = 3, MCI_SPEED = 120MHz / 2 * (3+1) = 15 MHz */
 
-#define HSMCI_MMCXFR_CLKDIV        (4 << HSMCI_MR_CLKDIV_SHIFT)
+#define HSMCI_MMCXFR_CLKDIV        (3 << HSMCI_MR_CLKDIV_SHIFT)
 
 /* MCK = 120MHz, CLKDIV = 0, MCI_SPEED = 120MHz / 2 * (2+1) = 20 MHz */
 
-#define HSMCI_SDXFR_CLKDIV         (2 << HSMCI_MR_CLKDIV_SHIFT) /* 120M MCK, 20M SDCLK */
-#define HSMCI_SDWIDEXFR_CLKDIV     HSMCI_SDXFR_CLKDIV           /* 120M MCK, 20M SDCLK */
+#define HSMCI_SDXFR_CLKDIV         (2 << HSMCI_MR_CLKDIV_SHIFT)
+#define HSMCI_SDWIDEXFR_CLKDIV     HSMCI_SDXFR_CLKDIV
+
+/* The PLL clock (USB_48M or UDPCK) is driven from the output of the PLL,
+ * PLLACK.  The PLL clock must be 48MHz.  PLLACK can be divided down via the
+ * PMC USB register to provide the PLL clock.  So in order to use the USB
+ * feature, the PLL output must be a multiple of 48MHz.
+ *
+ * PLLACK = 240MHz, USBDIV=4, USB_48M = 240 MHz / (4 + 1) = 48MHz
+ * PLLACK = 192MHz, USBDIV=5, USB_48M = 192 MHz / (3 + 1) = 48MHz
+ */
+
+#define BOARD_PMC_USBS             (0)
+#define BOARD_PMC_USBDIV           (4 << PMC_USB_USBDIV_SHIFT)
 
 /* FLASH wait states:
  *
@@ -188,7 +200,7 @@
 #define LED_IDLE             0 /* MCU is is sleep mode      Not used        */
 
 /* Thus if D301 is statically on, NuttX has successfully booted and is,
- * apparently, running normmally.  
+ * apparently, running normmally.
  */
 
 /* Button definitions ***************************************************************/
