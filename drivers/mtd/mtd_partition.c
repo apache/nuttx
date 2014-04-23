@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/mtd/mtd_partition.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -757,7 +757,7 @@ static int part_procfs_stat(const char *relpath, struct stat *buf)
  * Description:
  *   Give an instance of an MTD driver, create a flash partition, ie.,
  *   another MTD driver instance that only operates with a sub-region of
- *   FLASH media.  That sub-region is defined by a sector offsetset and a
+ *   FLASH media.  That sub-region is defined by a sector offset and a
  *   sector count (where the size of a sector is provided the by parent MTD
  *   driver).
  *
@@ -766,6 +766,15 @@ static int part_procfs_stat(const char *relpath, struct stat *buf)
  *   of enforcing mutually exclusive access to the FLASH device.  Without
  *   partitions, that mutual exclusion would be provided by the file system
  *   above the FLASH driver.
+ *
+ * Input parameters:
+ *   mtd        - The MTD device to be partitioned
+ *   firstblock - The offset in bytes to the first block
+ *   nblocks    - The number of blocks in the partition
+ *
+ * Returned Value:
+ *   On success, another MTD device representing the partition is returned.
+ *   A NULL value is returned on a failure.
  *
  ****************************************************************************/
 
@@ -800,7 +809,7 @@ FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd, off_t firstblock,
 
   /* Adjust the offset and size if necessary so that they are multiples of
    * the erase block size (making sure that we do not go outside of the
-   * requested sub-region).  NOTE that eraseend is the first erase block
+   * requested sub-region).  NOTE that 'eraseend' is the first erase block
    * beyond the sub-region.
    */
 
@@ -855,7 +864,7 @@ FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd, off_t firstblock,
 #endif
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_PROCFS_EXCLUDE_PARTITIONS)
-  /* Add this parition to the list of known partitions */
+  /* Add this partition to the list of known partitions */
 
   if (g_pfirstpartition == NULL)
     {

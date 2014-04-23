@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated January 10, 2014)
+NuttX TODO List (Last updated April 23, 2014)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -15,7 +15,7 @@ nuttx/
  (11)  Kernel Build
   (4)  C++ Support
   (6)  Binary loaders (binfmt/)
- (17)  Network (net/, drivers/net)
+ (16)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
  (10)  Libraries (libc/, )
  (12)  File system/Generic drivers (fs/, drivers/)
@@ -48,8 +48,8 @@ nuttx/
 
 apps/
 
-  (5)  Network Utilities (apps/netutils/)
-  (4)  NuttShell (NSH) (apps/nshlib)
+  (4)  Network Utilities (apps/netutils/)
+  (3)  NuttShell (NSH) (apps/nshlib)
   (1)  System libraries apps/system (apps/system)
   (5)  Other Applications & Tests (apps/examples/)
 
@@ -900,17 +900,6 @@ o Network (net/, drivers/net)
   Status:      Open
   Priority:    Low unless you need it.
 
-  Title:       UNTESTED IGMPv2
-  Description: Support for client-side IGMPv2 multicast has been added but not yet
-               tested (because I don't have a proper environment for multicast testing).
-               There are most likely errors that need to be fixed at least in the
-               receipt of multicast packets.
-
-               In addition, an Ethernet driver that needs to work with the IGMP logic
-               will have to include additional support for multicast MAC address tables.
-  Status:      Open
-  Priority:    Low unless you need it.
-
   Title:       INTERFACES TO LEAVE/JOIN IGMP MULTICAST GROUP
   Description: The interfaces used to leave/join IGMP multicast groups is non-standard.
                RFC3678 (IGMPv3) suggests ioctl() commands to do this (SIOCSIPMSFILTER) but
@@ -927,18 +916,14 @@ o Network (net/, drivers/net)
                the mechanism for leaving and joining groups is hidden behind a wrapper
                function so that little of this incompatibilities need be exposed.
 
-  Title:       CONFIGURATIONS WITH TINY MTUS
-  Description: Many configurations have the MTU (CONFIG_NET_BUFSIZE) set to very small
-               numbers, less then the minimum MTU size that must be supported -- 576.
-               This can cause problems in some networks:  CONFIG_NET_BUFSIZE should
-               be set to at least 576 in all defconfig files.
-
-               The symptoms of using very small MTU sizes can be very strange.  With
-               Ubuntu 9.x and vsFtpd was that the total packet size did *not match* the
-               packet size in the IP header.  This then caused a TCP checksum failure
-               and the packet was rejected.
+  Title:       CLOSED CONNECTIONS IN THE BACKLOG
+               If a connection is backlogged but accept() is not called quickly, then
+               that connection may time out.  How should this be handled?  Should the
+               connection be removed from the backlog if it is times out or is closed?
+               Or should it remain in the backlog with a status indication so that accept()
+               can fail when it encounteres the invalid connection?
   Status:      Open
-  Priority:    Low... fix defconfig files as necessary.
+  Priority:    Medium.  Important on slow applications that will not accept connections promptly.
 
 o USB (drivers/usbdev, drivers/usbhost)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2309,14 +2294,6 @@ o mc68hc1x (arch/hc)
 
 o Network Utilities (apps/netutils/)
 
-  Title:       UIP RESOLVER
-  Description: One critical part of netutils/ apps is untested: The uIP
-               resolver in netutils/resolv.  The webclient code has been
-               tested on host using gethosbyname(), but still depends on the
-               untested resolve logic.
-  Status:      Open
-  Priority:    Medium, Important but not core NuttX functionality
-
   Title:       PPP PORT
   Description: Port PPP support from http://contiki.cvs.sourceforge.net/contiki/contiki-2.x/backyard/core/net/ppp/
   Status:      Open
@@ -2363,11 +2340,6 @@ o NuttShell (NSH) (apps/nshlib)
                still show status for all interfaces.
   Status:      Open
   Priority:    Low (multiple network interfaces not fully supported yet anyway).
-
-  Title:       RUN NXFLAT PROGRAMS
-  Description: Add support to NSH to run NXFLAT programs from a ROMFS file system
-  Status:      Open
-  Priority:    Low (enhancement)
 
   Title:       ARP COMMAND
   Description: Add an ARP command so that we can see the contents of the ARP table.

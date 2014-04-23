@@ -188,7 +188,7 @@ extern "C"
  * Description:
  *   Given an instance of an MTD driver, create a flash partition, ie.,
  *   another MTD driver instance that only operates with a sub-region of
- *   FLASH media.  That sub-region is defined by a sector offsetset and a
+ *   FLASH media.  That sub-region is defined by a sector offset and a
  *   sector count (where the size of a sector is provided the by parent MTD
  *   driver).
  *
@@ -197,6 +197,15 @@ extern "C"
  *   of enforcing mutually exclusive access to the FLASH device.  Without
  *   partitions, that mutual exclusion would be provided by the file system
  *   above the FLASH driver.
+ *
+ * Input parameters:
+ *   mtd        - The MTD device to be partitioned
+ *   firstblock - The offset in bytes to the first block
+ *   nblocks    - The number of blocks in the partition
+ *
+ * Returned Value:
+ *   On success, another MTD device representing the partition is returned.
+ *   A NULL value is returned on a failure.
  *
  ****************************************************************************/
 
