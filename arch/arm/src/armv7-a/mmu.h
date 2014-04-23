@@ -498,11 +498,25 @@
  *   NMRR[19:18] = 0b00, Region is Non-cacheable
  *   NMRR[21:20] = 0b10, Region is Write-Through, no Write-Allocate
  *   NMRR[23:22] = 0b11, Region is Write-Back, no Write-Allocate
+ *
+ * Interpretation of Cacheable (C) and Bufferable (B) Bits:
+ *
+ *         Write-Through  Write-Back   Write-Through/Write-Back
+ *  C   B  Cache          Only Cache    Cache
+ * --- --- -------------- ------------- -------------------------
+ *  0   0  Uncached/      Uncached/     Uncached/
+ *         Unbuffered     Unbuffered    Unbuffered
+ *  0   1  Uncached/      Uncached/     Uncached/
+ *         Buffered       Buffered      Buffered
+ *  1   0  Cached/        UNPREDICTABLE Write-Through cached
+ *         Unbuffered                   Buffered
+ *  1   1  Cached/        Cached/       Write-Back cached
+ *         Buffered       Buffered      Buffered
  */
 
 #define PMD_STRONGLY_ORDERED (0)
 #define PMD_DEVICE           (PMD_SECT_B)
-#define PM_CACHEABLE         (PMD_SECT_B | PMD_SECT_C)
+#define PMD_CACHEABLE        (PMD_SECT_B | PMD_SECT_C)
 
 #define PTE_STRONGLY_ORDER   (0)
 #define PTE_DEVICE           (PTE_B)
@@ -514,9 +528,9 @@
  * REVISIT:  Here we expect all threads to be running at PL1
  */
 
-#define MMU_ROMFLAGS         (PMD_TYPE_SECT | PMD_SECT_AP_R1 | PM_CACHEABLE | \
+#define MMU_ROMFLAGS         (PMD_TYPE_SECT | PMD_SECT_AP_R1 | PMD_CACHEABLE | \
                               PMD_SECT_DOM(0))
-#define MMU_MEMFLAGS         (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | PM_CACHEABLE | \
+#define MMU_MEMFLAGS         (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | PMD_CACHEABLE | \
                               PMD_SECT_DOM(0))
 #define MMU_IOFLAGS          (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | PMD_DEVICE | \
                               PMD_SECT_DOM(0) | PMD_SECT_XN)
