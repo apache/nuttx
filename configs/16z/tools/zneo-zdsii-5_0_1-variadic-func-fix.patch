@@ -1,5 +1,5 @@
 diff --git a/apps/nshlib/nsh_console.c b/apps/nshlib/nsh_console.c
-index ba7dbe7..b9f9991 100644
+index ba7dbe7..45e4ab1 100644
 --- a/apps/nshlib/nsh_console.c
 +++ b/apps/nshlib/nsh_console.c
 @@ -46,6 +46,7 @@
@@ -113,7 +113,7 @@ index ba7dbe7..b9f9991 100644
 +  return ret;
 +}
 diff --git a/apps/nshlib/nsh_console.h b/apps/nshlib/nsh_console.h
-index c78362f..59bd8d7 100644
+index c78362f..207f9b9 100644
 --- a/apps/nshlib/nsh_console.h
 +++ b/apps/nshlib/nsh_console.h
 @@ -47,6 +47,7 @@

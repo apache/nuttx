@@ -34,11 +34,12 @@
 #
 ############################################################################
 
-USAGE="${0} \$PWD"
+USAGE="${0} [-R] \$PWD"
 WD=`pwd`
 TOOLDIR=${WD}/configs/16z/tools
 ME=${TOOLDIR}/dopatch.sh
 PATCH=${TOOLDIR}/zneo-zdsii-5_0_1-variadic-func-fix.patch
+ARGS=${1}
 
 if [ ! -x ${ME} ]; then
   echo "ERROR:  This script must be executed from the top-level NuttX directory"
@@ -55,5 +56,5 @@ fi
 cd .. || \
   { echo "ERROR: failed to CD to the parent directory"; exit 1; }
 
-cat ${PATCH} | patch -p1 || \
+cat ${PATCH} | patch ${ARGS} -p1 || \
   { echo "ERROR: patch failed" ; exit 1; }
