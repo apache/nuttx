@@ -41,10 +41,16 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #endif
+
 #include <arch/irq.h>
+#if !defined(__ASSEMBLY__) && defined(CONFIG_Z16F_ESPI)
+#  include <nuttx/spi/spi.h>
+#endif
+
 #include "common/up_internal.h"
 
 /************************************************************************************
@@ -454,6 +460,87 @@
 #define Z16F_UARTMDSEL_HWREV    _HX8(e0)        /* Bits 5-7=7: LIN-UART Hardware Revision */
                                                 /* Bits 0-4:   Mode dependent status */
 
+/* ESPI registers *******************************************************************/
+
+#define Z16F_ESPI_DATA          _HX32(ffffe260) /*  8-bit: ESPI Data */
+#define Z16F_ESPI_DCR           _HX32(ffffe261) /*  8-bit: ESPI Transmit Data Command */
+#define Z16F_ESPI_CTL           _HX32(ffffe262) /*  8-bit: ESPI Control */
+#define Z16F_ESPI_MODE          _HX32(ffffe263) /*  8-bit: ESPI Mode */
+#define Z16F_ESPI_STAT          _HX32(ffffe264) /*  8-bit: ESPI Status */
+#define Z16F_ESPI_STATE         _HX32(ffffe265) /*  8-bit: ESPI State */
+#define Z16F_ESPI_BR            _HX32(ffffe266) /*  16-bit: ESPI Baud Rate High Byte */
+#  define Z16F_ESPI_BRH         _HX32(ffffe266) /*  8-bit: ESPI Baud Rate High Byte */
+#  define Z16F_ESPI_BRL         _HX32(ffffe267) /*  8-bit: ESPI Baud Rate Low Byte */
+
+/* ESPI register bit definitions ****************************************************/
+
+#define Z16F_ESPI_DCR_SSV       _HX8(01) /* Bit 0: Slave Select Value */
+#define Z16F_ESPI_DCR_TEOF      _HX8(02) /* Bit 1: Transmit End of Frame */
+
+#define Z16F_ESPI_CTL_ESPIEN0   _HX8(01) /* Bit 0: ESPI Enable and Direction Control */
+#define Z16F_ESPI_CTL_MMEN      _HX8(02) /* Bit 1: ESPI Master Mode Enable */
+#define Z16F_ESPI_CTL_WOR       _HX8(04) /* Bit 2: Wire-OR (Open-Drain) Mode Enabled */
+#define Z16F_ESPI_CTL_CLKPOL    _HX8(08) /* Bit 3: Clock Polarity */
+#define Z16F_ESPI_CTL_PHASE     _HX8(10) /* Bit 4: Phase Select */
+#define Z16F_ESPI_CTL_BRGCTL    _HX8(20) /* Bit 5: Baud Rate Generator Control */
+#define Z16F_ESPI_CTL_ESPIEN1   _HX8(40) /* Bit 6: ESPI Enable and Direction Control */
+#define Z16F_ESPI_CTL_DIRQE     _HX8(80) /* Bit 7: Data Interrupt Request Enable */
+
+#define Z16F_ESPI_MODE_SSPO     _HX8(01) /* Bit 0: Slave Select Polarity */
+#define Z16F_ESPI_MODE_SSIO     _HX8(02) /* Bit 1: Slave Select I/O */
+#define Z16F_ESPI_MODE_NUMBITS_SHIFT   (2) /* Bits 2-4: Number of Data Bits Per Character */
+#define Z16F_ESPI_MODE_NUMBITS_MASK    (7 << Z16F_ESPI_MODE_NUMBITS_SHIFT)
+#  define Z16F_ESPI_MODE_NUMBITS_8BITS (0 << Z16F_ESPI_MODE_NUMBITS_SHIFT) /* 8 bits */
+#  define Z16F_ESPI_MODE_NUMBITS_1BIT  (1 << Z16F_ESPI_MODE_NUMBITS_SHIFT) /* 1 bit */
+#  define Z16F_ESPI_MODE_NUMBITS_2BITS (2 << Z16F_ESPI_MODE_NUMBITS_SHIFT) /* 2 bits */
+#  define Z16F_ESPI_MODE_NUMBITS_3BITS (3 << Z16F_ESPI_MODE_NUMBITS_SHIFT) /* 3 bits */
+#  define Z16F_ESPI_MODE_NUMBITS_4BITS (4 << Z16F_ESPI_MODE_NUMBITS_SHIFT) /* 4 bits */
+#  define Z16F_ESPI_MODE_NUMBITS_5BITS (5 << Z16F_ESPI_MODE_NUMBITS_SHIFT) /* 5 bits */
+#  define Z16F_ESPI_MODE_NUMBITS_6BITS (6 << Z16F_ESPI_MODE_NUMBITS_SHIFT) /* 6 bits */
+#  define Z16F_ESPI_MODE_NUMBITS_7BITS (7 << Z16F_ESPI_MODE_NUMBITS_SHIFT) /* 7 bits */
+#define Z16F_ESPI_MODE_SSMD_SHIFT      (5) /* Bits 5-7: SLAVE SELECT Mode */
+#define Z16F_ESPI_MODE_SSMD_MASK       (7 << Z16F_ESPI_MODE_SSMD_SHIFT)
+#  define Z16F_ESPI_MODE_SSMD_SPI      (0 << Z16F_ESPI_MODE_SSMD_SHIFT) /* SPI mode */
+#  define Z16F_ESPI_MODE_SSMD_LPBK     (1 << Z16F_ESPI_MODE_SSMD_SHIFT) /* LOOPBACK Mode */
+#  define Z16F_ESPI_MODE_SSMD_I2S      (2 << Z16F_ESPI_MODE_SSMD_SHIFT) /* I2S Mode */
+
+#define Z16F_ESPI_STAT_SLAS     _HX8(01) /* Bit 0: Slave Select */
+#define Z16F_ESPI_STAT_TFST     _HX8(02) /* Bit 1: Transfer Status */
+#define Z16F_ESPI_STAT_RDRF     _HX8(04) /* Bit 2: Receive Data Register Full */
+#define Z16F_ESPI_STAT_ROVR     _HX8(08) /* Bit 3: Receive Overrun */
+#define Z16F_ESPI_STAT_ABT      _HX8(10) /* Bit 4: Slave mode transaction abort */
+#define Z16F_ESPI_STAT_COL      _HX8(20) /* Bit 5: Collision */
+#define Z16F_ESPI_STAT_TUND     _HX8(40) /* Bit 6: Transmit Underrun */
+#define Z16F_ESPI_STAT_TDRE     _HX8(80) /* Bit 7: Transmit Data Register Empty */
+
+#define Z16F_ESPI_STATE_SHIFT    (0)      /* Bits 0-5: ESPI State Machine */
+#define Z16F_ESPI_STATE_MASK     (0x3f << Z16F_ESPI_STATE_SHIFT)
+#  define Z16F_ESPI_STATE_IDLE   (0x00 << Z16F_ESPI_STATE_SHIFT) /* Idle */
+#  define Z16F_ESPI_STATE_SWAIT  (0x01 << Z16F_ESPI_STATE_SHIFT) /* Slave Wait For SCK */
+#  define Z16F_ESPI_STATE_I2SSD0 (0x02 << Z16F_ESPI_STATE_SHIFT) /* I2S slave mode start delay */
+#  define Z16F_ESPI_STATE_I2SSD1 (0x03 << Z16F_ESPI_STATE_SHIFT) /* I2S slave mode start delay */
+#  define Z16F_ESPI_STATE_SPIMD  (0x10 << Z16F_ESPI_STATE_SHIFT) /* SPI master mode start delay */
+#  define Z16F_ESPI_STATE_I2SMD0 (0x31 << Z16F_ESPI_STATE_SHIFT) /* I2S master mode start delay */
+#  define Z16F_ESPI_STATE_I2SMD1 (0x32 << Z16F_ESPI_STATE_SHIFT) /* I2S master mode start delay */
+#  define Z16F_ESPI_STATE_B7RCV  (0x2e << Z16F_ESPI_STATE_SHIFT) /* Bit 7 Receive */
+#  define Z16F_ESPI_STATE_B7XMT  (0x2f << Z16F_ESPI_STATE_SHIFT) /* Bit 7 Transmit */
+#  define Z16F_ESPI_STATE_B6RCV  (0x2c << Z16F_ESPI_STATE_SHIFT) /* Bit 6 Receive */
+#  define Z16F_ESPI_STATE_B6XMT  (0x2d << Z16F_ESPI_STATE_SHIFT) /* Bit 6 Transmit */
+#  define Z16F_ESPI_STATE_B5RCV  (0x2a << Z16F_ESPI_STATE_SHIFT) /* Bit 5 Receive */
+#  define Z16F_ESPI_STATE_B5XMT  (0x2b << Z16F_ESPI_STATE_SHIFT) /* Bit 5 Transmit */
+#  define Z16F_ESPI_STATE_B4RCV  (0x28 << Z16F_ESPI_STATE_SHIFT) /* Bit 4 Receive */
+#  define Z16F_ESPI_STATE_B4XMT  (0x29 << Z16F_ESPI_STATE_SHIFT) /* Bit 4 Transmit */
+#  define Z16F_ESPI_STATE_B3RCV  (0x26 << Z16F_ESPI_STATE_SHIFT) /* Bit 3 Receive */
+#  define Z16F_ESPI_STATE_B3XMT  (0x27 << Z16F_ESPI_STATE_SHIFT) /* Bit 3 Transmit */
+#  define Z16F_ESPI_STATE_B2RCV  (0x24 << Z16F_ESPI_STATE_SHIFT) /* Bit 2 Receive */
+#  define Z16F_ESPI_STATE_B2XMT  (0x25 << Z16F_ESPI_STATE_SHIFT) /* Bit 2 Transmit */
+#  define Z16F_ESPI_STATE_B1RCV  (0x22 << Z16F_ESPI_STATE_SHIFT) /* Bit 1 Receive */
+#  define Z16F_ESPI_STATE_B1XMT  (0x23 << Z16F_ESPI_STATE_SHIFT) /* Bit 1 Transmit */
+#  define Z16F_ESPI_STATE_B0RCV  (0x20 << Z16F_ESPI_STATE_SHIFT) /* Bit 0 Receive */
+#  define Z16F_ESPI_STATE_B0XMT  (0x21 << Z16F_ESPI_STATE_SHIFT) /* Bit 0 Transmit */
+#define Z16F_ESPI_STATE_SDI      _HX8(40) /* Bit 6: Serial Data Input */
+#define Z16F_ESPI_STATE_SCKI     _HX8(80) /* Bit 7: Serial Clock Input */
+
 /* Timer0/1/2 registers *************************************************************/
 
 #define Z16F_TIMER0_HL          _HX32(ffffe300) /* 16-bit: Timer 0 */
@@ -575,13 +662,33 @@ void z16f_lowinit(void);
 void z16f_lowuartinit(void);
 #endif
 
-/* This function handles Z16F system execeptions */
+/* This function handles Z16F system exceptions */
 
 void z16f_sysexec(FAR chipreg_t *regs);
 
 /* Entry point to reset the processor */
 
 void z16f_reset(void);
+
+/* The following must be provided by board-specific logic that uses the ZNeo
+ * ESPI
+ */
+
+#ifdef CONFIG_Z16F_ESPI
+/* Select an SPI device (see include/nuttx/spi/spi.h) */
+
+void z16f_espi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+
+/* Provide SPI device status (see include/nuttx/spi/spi.h) */
+
+uint8_t z16f_espi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+
+/* Select CMD/DATA options (often used with LCD devices) */
+
+#ifdef CONFIG_SPI_CMDDATA
+int z16f_espi_cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+#endif
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus
