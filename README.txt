@@ -192,7 +192,7 @@ Notes about Header Files
     top-level Makefile will copy the stub math.h header file from
     include/nuttx/math.h to include/math.h where it will become the system
     math.h header file.  The stub math.h header file does nothing other
-    than to include that archicture-specific math.h header file as the
+    than to include that architecture-specific math.h header file as the
     system math.h header file.
 
   float.h
@@ -201,7 +201,7 @@ Notes about Header Files
     will expect your toolchain to provide the standard float.h header file.
     The float.h header file defines the properties of your floating point
     implementation.  It would always be best to use your toolchain's float.h
-    header file but if none is avaiable, a default float.h header file will
+    header file but if none is available, a default float.h header file will
     provided if this option is selected.  However, there is no assurance that
     the settings in this float.h are actually correct for your platform!
 
@@ -265,7 +265,7 @@ easier.  It is used as follows:
   ./configure.sh <board-name>/<config-dir>
 
 There is an alternative Windows batch file that can be used in the
-windows native enironment like:
+windows native environment like:
 
   cd ${TOPDIR}\tools
   configure.bat <board-name>\<config-dir>
@@ -338,7 +338,7 @@ NuttX Configuration Tool
   This is pretty straight forward for creating new configurations
   but may be less intuitive for modifying existing configurations.
 
-  If you have an environment that suppots the Qt or GTK graphical systems
+  If you have an environment that supports the Qt or GTK graphical systems
   (probably KDE or gnome, respectively), then you can also build the
   graphical kconfig-frontends, kconfig-qconf and kconfig-gconf.  In
   these case, you can start the graphical configurator with either:
@@ -373,7 +373,8 @@ Incompatibilities with Older Configurations
   The current NuttX build system supports *only* the new configuration
   files generated using the kconfig-frontends tools.  The older, legacy,
   manual configurations and the new kconfig-frontends configurations are
-  not compatible.  Old legacy configurations can *not* be used with the kconfig-frontends tool and, hence, cannot be used with recent releases
+  not compatible.  Old legacy configurations can *not* be used with the
+  kconfig-frontends tool and, hence, cannot be used with recent releases
   of NuttX:
 
   If you run 'make menuconfig' with a legacy configuration the resulting
@@ -472,8 +473,9 @@ NuttX Buildroot Toolchain
   environments.
 
   Advantages:  (1) NuttX header files are built into the tool chain,
-  and (2) related support tools like NXFLAT tools and the ROMFS
-  genromfs tools can be built into your toolchain.
+  and (2) related support tools like NXFLAT tools, the ROMFS
+  genromfs tools, and the kconfig-frontends tools can be built into your
+  toolchain.
 
   Disadvantages:  This tool chain is not was well supported as some other
   toolchains.  GNU tools are not my priority and so the buildroot tools
@@ -497,7 +499,7 @@ SHELLS
 ^^^^^^
 
   The NuttX build relies on some shell scripts.  Some are inline in the
-  Makefiles and many are exectuble scripts in the tools/. directory.  The
+  Makefiles and many are executable scripts in the tools/. directory.  The
   scripts were all developed using bash and many contain bash shell
   dependencies.
 
@@ -509,7 +511,7 @@ SHELLS
 
   1. Linux where /bin/sh refers to an incompatible shell (like ksh or csh).
 
-     In this case, bash is probably avaiable and the #!/bin/bash at the
+     In this case, bash is probably available and the #!/bin/bash at the
      beginning of the file should do the job.  If any scripts with #!/bin/sh
      fail, try changing that ti #!/bin/bash and let me know about the change.
 
@@ -644,7 +646,7 @@ Build Targets and Options
     and symbolic links created by the context target.
 
   Build Options:
-  Of course, the value any make variable an be overriden from the make command
+  Of course, the value any make variable an be overridden from the make command
   line.  However, there is one particular variable assignment option that may
   be useful to you:
 
@@ -658,8 +660,8 @@ Build Targets and Options
 Native Windows Build
 --------------------
 
-  The beginnings of a Windows native build are in place but still not full
-  usable as of this writing.  The windows native build logic initiatiated
+  The beginnings of a Windows native build are in place but still not often
+  used as of this writing.  The windows native build logic initiated
   if CONFIG_WINDOWS_NATIVE=y is defined in the NuttX configuration file:
 
   This build:
@@ -682,7 +684,7 @@ Native Windows Build
 
   This capability should still be considered a work in progress because:
 
-  (1) It has not been verfied on all targets and tools, and
+  (1) It has not been verified on all targets and tools, and
   (2) it still lacks some of the creature-comforts of the more mature environments.
 
    There is an alternative to the setenv.sh script available for the Windows

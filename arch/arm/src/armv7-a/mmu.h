@@ -333,12 +333,12 @@
  *
  * Key:
  *
- *   WR    - Read/write addess allowed
+ *   WR    - Read/write address allowed
  *   R     - Read-only access allowed
  *   0,1,2 - At PL0, PL1, and/or PL2
  *
  *   PL0   - User privilege level
- *   PL1   - Privilieged mode
+ *   PL1   - Privileged mode
  *   PL2   - Software executing in Hyp mode
  */
 
@@ -501,7 +501,7 @@
  *
  * Interpretation of Cacheable (C) and Bufferable (B) Bits:
  *
- *         Write-Through  Write-Back   Write-Through/Write-Back
+ *         Write-Through  Write-Back    Write-Through/Write-Back
  *  C   B  Cache          Only Cache    Cache
  * --- --- -------------- ------------- -------------------------
  *  0   0  Uncached/      Uncached/     Uncached/
@@ -668,7 +668,7 @@
 /* Page Table Info ******************************************************************/
 
 /* The number of pages in the in the page table (PG_PGTABLE_NPAGES).  We
- * position the pagetable PTEs just after the data section PTEs.
+ * position the page table PTEs just after the data section PTEs.
  */
 
 #define PG_PGTABLE_NPAGES       (PGTABLE_SIZE >> PAGESHIFT)
@@ -750,7 +750,7 @@
 
 /* Page Management ******************************************************************/
 
-/* For page managment purposes, the following summarize the "heap" of
+/* For page management purposes, the following summarize the "heap" of
  * free pages, operations on free pages and the L2 page table.
  *
  * PG_POOL_VA2L1OFFSET(va)  - Given a virtual address, return the L1 table
@@ -778,7 +778,7 @@
  *                            Index 0 corresponds to the first L2 page table
  *                            entry for the first page in the virtual paged
  *                            text address space.
- * PG_POOL_NDX2VA(ndx)      - Performs the opposite conversion.. convests
+ * PG_POOL_NDX2VA(ndx)      - Performs the opposite conversion.. converts
  *                            an index into a virtual address in the paged
  *                            text region (the address at the beginning of
  *                            the page).
@@ -952,7 +952,7 @@ struct section_mapping_s
  * Description:
  *   Write several, contiguous L2 page table entries.  npages entries will be
  *   written. This macro is used when CONFIG_PAGING is enable.  This case,
- *   it is used asfollows:
+ *   it is used as follows:
  *
  *	ldr	r0, =PGTABLE_L2_BASE_PADDR	<-- Address in L2 table
  *	ldr	r1, =PG_LOCKED_PBASE		<-- Physical page memory address
@@ -1247,9 +1247,9 @@ static inline void cp14_wrttb(unsigned int ttb)
  * Name: mmu_l1_getentry
  *
  * Description:
- *   Given a virtual address, return the valule of the corresponding L1 table entry.
+ *   Given a virtual address, return the value of the corresponding L1 table entry.
  *
- * Input Paramters:
+ * Input Parameters:
  *   vaddr - The virtual address to be mapped.
  *
  ************************************************************************************/
@@ -1271,9 +1271,9 @@ static inline uint32_t mmu_l1_getentry(uint32_t vaddr)
  *
  * Description:
  *   Given a address of the beginning of an L2 page table and a virtual address,
- *   return the varlue of the corresponding L2 page table entry.
+ *   return the value of the corresponding L2 page table entry.
  *
- * Input Paramters:
+ * Input Parameters:
  *   l2vaddr - The virtual address of the beginning of the L2 page table
  *   vaddr - The virtual address to be mapped.
  *
@@ -1323,7 +1323,7 @@ extern "C" {
  *   Set a one level 1 translation table entry.  Only a single L1 page table is
  *   supported.
  *
- * Input Paramters:
+ * Input Parameters:
  *   paddr - The physical address to be mapped.  Must be aligned to a 1MB address
  *     boundary
  *   vaddr - The virtual address to be mapped.  Must be aligned to a 1MB address

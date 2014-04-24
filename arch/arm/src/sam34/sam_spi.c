@@ -204,7 +204,7 @@ struct sam_spics_s
 #endif
 };
 
-/* Type of board-specific SPI status fuction */
+/* Type of board-specific SPI status function */
 
 typedef void (*select_t)(enum spi_dev_e devid, bool selected);
 
@@ -216,7 +216,7 @@ struct sam_spidev_s
 {
   uint32_t base;               /* SPI controller register base address */
   sem_t spisem;                /* Assures mutually exclusive access to SPI */
-  select_t select;             /* SPI select callout */
+  select_t select;             /* SPI select call-out */
   bool initialized;            /* TRUE: Controller has been initialized */
 #ifdef CONFIG_SAM34_SPI_DMA
   uint8_t rxintf;              /* RX hardware interface number */
@@ -599,7 +599,7 @@ static inline void spi_flush(struct sam_spidev_s *spi)
  *   Map the chip select number to the bit-set PCS field used in the SPI
  *   registers.  A chip select number is used for indexing and identifying
  *   chip selects.  However, the chip select information is represented by
- *   a bit set in the SPI regsisters.  This function maps those chip select
+ *   a bit set in the SPI registers.  This function maps those chip select
  *   numbers to the correct bit set:
  *
  *    CS  Returned   Spec    Effective
@@ -699,7 +699,7 @@ static void spi_dma_sampledone(struct sam_spics_s *spics)
   /* Register values at the time of the TX and RX DMA callbacks
    * -OR- DMA timeout.
    *
-   * If the DMA timedout, then there will not be any RX DMA
+   * If the DMA timed out, then there will not be any RX DMA
    * callback samples.  There is probably no TX DMA callback
    * samples either, but we don't know for sure.
    */
@@ -776,7 +776,7 @@ static void spi_dmatimeout(int argc, uint32_t arg)
  *
  * Input Parameters:
  *   handle - The DMA handler
- *   arg - A pointer to the chip select struction
+ *   arg - A pointer to the chip select structure
  *   result - The result of the DMA transfer
  *
  * Returned Value:
@@ -804,7 +804,7 @@ static void spi_rxcallback(DMA_HANDLE handle, void *arg, int result)
 
   if (spics->result == -EBUSY)
     {
-      /* Save the result of the transfer if no error was previuosly reported */
+      /* Save the result of the transfer if no error was previously reported */
 
       spics->result = result;
     }
@@ -874,12 +874,12 @@ static inline uintptr_t spi_regaddr(struct sam_spics_s *spics,
  * Name: spi_lock
  *
  * Description:
- *   On SPI busses where there are multiple devices, it will be necessary to
- *   lock SPI to have exclusive access to the busses for a sequence of
+ *   On SPI buses where there are multiple devices, it will be necessary to
+ *   lock SPI to have exclusive access to the buses for a sequence of
  *   transfers.  The bus should be locked before the chip is selected. After
  *   locking the SPI bus, the caller should then also call the setfrequency,
  *   setbits, and setmode methods to make sure that the SPI is properly
- *   configured for the device.  If the SPI buss is being shared, then it
+ *   configured for the device.  If the SPI bus is being shared, then it
  *   may have been left in an incompatible state.
  *
  * Input Parameters:
@@ -1262,7 +1262,7 @@ static uint16_t spi_send(struct spi_dev_s *dev, uint16_t wd)
  * Input Parameters:
  *   dev      - Device-specific state data
  *   txbuffer - A pointer to the buffer of data to be sent
- *   rxbuffer - A pointer to the buffer in which to recieve data
+ *   rxbuffer - A pointer to the buffer in which to receive data
  *   nwords   - the length of data that to be exchanged in units of words.
  *              The wordsize is determined by the number of bits-per-word
  *              selected for the SPI interface.  If nbits <= 8, the data is
@@ -1318,14 +1318,11 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
   spi_flush(spi);
 
-  /* Loop, sending each word in the user-provied data buffer.
+  /* Loop, sending each word in the user-provided data buffer.
    *
-   * Note 1: Right now, this only deals with 8-bit words.  If the SPI
-   *         interface were configured for words of other sizes, this
-   *         would fail.
-   * Note 2: Good SPI performance would require that we implement DMA
+   * Note 1: Good SPI performance would require that we implement DMA
    *         transfers!
-   * Note 3: This loop might be made more efficient.  Would logic
+   * Note 2: This loop might be made more efficient.  Would logic
    *         like the following improve the throughput?  Or would it
    *         just add the risk of overruns?
    *
@@ -1603,7 +1600,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
   spi_txdma_sample(spics, DMA_AFTER_START);
 
-  /* Wait for DMA completion.  This is done in a loop becaue there my be
+  /* Wait for DMA completion.  This is done in a loop because there may be
    * false alarm semaphore counts that cause sam_wait() not fail to wait
    * or to wake-up prematurely (for example due to the receipt of a signal).
    * We know that the DMA has completed when the result is anything other
@@ -1634,7 +1631,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
       if (ret < 0)
         {
           /* EINTR is not a failure.  That simply means that the wait
-           * was awakened by a signel.
+           * was awakened by a signal.
            */
 
           int errorcode = errno;
@@ -1645,9 +1642,9 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
             }
         }
 
-      /* Not that we might be awkened before the wait is over due to
+      /* Not that we might be awakened before the wait is over due to
        * residual counts on the semaphore.  So, to handle, that case,
-       * we loop until somthing changes the DMA result to any value other
+       * we loop until something changes the DMA result to any value other
        * than -EBUSY.
        */
     }
@@ -1712,7 +1709,7 @@ static void spi_sndblock(struct spi_dev_s *dev, const void *buffer,
  *
  * Input Parameters:
  *   dev -    Device-specific state data
- *   buffer - A pointer to the buffer in which to recieve data
+ *   buffer - A pointer to the buffer in which to receive data
  *   nwords - the length of data that can be received in the buffer in number
  *            of words.  The wordsize is determined by the number of bits-per-word
  *            selected for the SPI interface.  If nbits <= 8, the data is
@@ -1747,7 +1744,7 @@ static void spi_recvblock(struct spi_dev_s *dev, void *buffer, size_t nwords)
  *   cs - Chip select number (identifying the "logical" SPI port)
  *
  * Returned Value:
- *   Valid SPI device structure reference on succcess; a NULL on failure
+ *   Valid SPI device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 
