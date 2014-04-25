@@ -7243,4 +7243,7 @@
 	  driver and lower half interface definition from Bob Doiron
 	  (2014-40-22).
 	* arch/z16/src/z16f/z16f_espi.c:  Add ZNEO ESPI driver (2014-4-24).
+	* arch/arm/src/stm32/stm32_sdio.c:  The dmaflight method must
+	  be conditioned on CONFIG_SDIO_PREFLIGHT.  Noted by Pelle
+	  Windestam (2014-4-25)
 
