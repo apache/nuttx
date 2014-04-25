@@ -60,7 +60,7 @@
 #ifdef USE_SERIALDRIVER
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* System clock frequency value from ZDS target settings */
@@ -626,7 +626,7 @@ static void z16f_rxint(struct uart_dev_s *dev, bool enable)
  * Name: z16f_rxavailable
  *
  * Description:
- *   Return true if the receive fifo is not empty
+ *   Return true if the receive FIFO is not empty
  *
  ****************************************************************************/
 
@@ -688,7 +688,7 @@ static void z16f_txint(struct uart_dev_s *dev, bool enable)
  * Name: z16f_txready
  *
  * Description:
- *   Return true if the tranmsit fifo is not full
+ *   Return true if the transmit FIFO is not full
  *
  ****************************************************************************/
 
@@ -702,7 +702,7 @@ static bool z16f_txready(struct uart_dev_s *dev)
  * Name: z16f_txempty
  *
  * Description:
- *   Return true if the transmit fifo is empty
+ *   Return true if the transmit FIFO is empty
  *
  ****************************************************************************/
 
@@ -713,7 +713,7 @@ static bool z16f_txempty(struct uart_dev_s *dev)
 }
 
 /****************************************************************************
- * Public Funtions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -810,7 +810,7 @@ int up_putc(int ch)
 #else /* USE_SERIALDRIVER */
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #ifdef CONFIG_UART1_SERIAL_CONSOLE
