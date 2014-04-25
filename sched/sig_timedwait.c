@@ -270,7 +270,7 @@ int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
                */
 
               wdparm_t wdparm;
-              wdparm.pvarg = (FAR void*)rtcb;
+              wdparm.pvarg = (FAR void *)rtcb;
 
               /* Start the watchdog */
 

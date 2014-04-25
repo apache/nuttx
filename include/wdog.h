@@ -90,7 +90,8 @@ typedef FAR struct wdog_s *WDOG_ID;
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
