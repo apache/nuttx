@@ -82,8 +82,12 @@ The patch would be applied when NuttX is configured as follows:
   ./configure.sh z16f2800100zcog/nsh
   cd ..
   . ./setenv.sh
-  dopath.sh $PWD
+  dopatch.sh
   make
+
+The patch can also be removed with:
+
+  dopatch.sh -R
 
 See the section "Selecting Configurations" below.
 
