@@ -157,3 +157,31 @@ index c78362f..207f9b9 100644
 +int nsh_output(FAR struct nsh_vtbl_s *vtbl, FAR const char *fmt, ...);
  
  #endif /* __APPS_NSHLIB_NSH_CONSOLE_H */
+diff --git a/nuttx/include/wdog.h b/nuttx/include/wdog.h
+index 0aa3584..ac4a36a 100644
+--- a/nuttx/include/wdog.h
++++ b/nuttx/include/wdog.h
+@@ -74,7 +74,23 @@ typedef union wdparm_u wdparm_t;
+  * watchdog function expires.  Up to four parameters may be passed.
+  */
+ 
++#if 0
+ typedef CODE void (*wdentry_t)(int argc, uint32_t arg1, ...);
++#elif CONFIG_MAX_WDOGPARMS < 1
++typedef CODE void (*wdentry_t)(int argc);
++#elif CONFIG_MAX_WDOGPARMS < 2
++typedef CODE void (*wdentry_t)(int argc, uint32_t arg1);
++#elif CONFIG_MAX_WDOGPARMS < 3
++typedef CODE void (*wdentry_t)(int argc, uint32_t arg1, uint32_t arg2);
++#elif CONFIG_MAX_WDOGPARMS < 4
++typedef CODE void (*wdentry_t)(int argc, uint32_t arg1, uint32_t arg2,
++                               uint32_t arg3);
++#elif CONFIG_MAX_WDOGPARMS < 5
++typedef CODE void (*wdentry_t)(int argc, uint32_t arg1, uint32_t arg2,
++                               uint32_t arg3, uint32_t arg4);
++#else
++#  error Ooops.  CONFIG_MAX_WDOGPARMS > 4
++#endif
+ 
+ /* Watchdog 'handle' */
+ 
