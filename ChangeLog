@@ -7248,4 +7248,7 @@
 	  Windestam (2014-4-25)
 	* configs/nucleo-f401re:  Removed bogus references to the MPU
 	  (2014-4-25).
+	* arch/z16/src/z16f_timerisr.c:  Fix calculation of timer
+	  reload and prescaler.  The timer frequency was way too fast
+	  (2014-4-25).
 
