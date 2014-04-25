@@ -103,13 +103,14 @@ extern sq_queue_t g_wdactivelist;
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
-EXTERN void weak_function wd_initialize(void);
-EXTERN void weak_function wd_timer(void);
+void weak_function wd_initialize(void);
+void weak_function wd_timer(void);
 
 #undef EXTERN
 #ifdef __cplusplus
