@@ -508,6 +508,7 @@ static int z16f_rxinterrupt(int irq, void *context)
 
       uart_recvchars(dev);
     }
+
   return OK;
 }
 
@@ -563,7 +564,8 @@ static int z16f_txinterrupt(int irq, void *context)
  * Name: z16f_ioctl
  *
  * Description:
- *   All ioctl calls will be routed through this method
+ *   All ioctl that are not handled by the upper half serial driver will be
+ *   routed through this method
  *
  ****************************************************************************/
 
