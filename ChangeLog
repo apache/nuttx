@@ -7246,4 +7246,6 @@
 	* arch/arm/src/stm32/stm32_sdio.c:  The dmaflight method must
 	  be conditioned on CONFIG_SDIO_PREFLIGHT.  Noted by Pelle
 	  Windestam (2014-4-25)
+	* configs/nucleo-f401re:  Removed bogus references to the MPU
+	  (2014-4-25).
 
