@@ -148,8 +148,8 @@
 _z16f_reset:
 	/* Initialize the init/idle task stack */
 
-	ld	sp, #(_near_stack+1)	/* Set Stack Pointer to the top of internal RAM */
-	clr	fp
+	ld		sp, #(_near_stack+1)	/* Set Stack Pointer to the top of internal RAM */
+	clr		fp
 
 	/* Initialize clocking */
 
@@ -163,27 +163,27 @@ _z16f_reset:
 	/* Perform VERY early UART initialization so that we can use it here */
 
 #ifdef USE_LOWUARTINIT
-	call	_z16f_lowuartinit	/* Initialize the UART for debugging */
+	call	_z16f_lowuartinit		/* Initialize the UART for debugging */
 #endif
 	/* Initialize the hardware stack overflow register */
 
 #ifdef CONFIG_Z16F_INITSPOV
-	ld	r0, #(_near_stack_bot+1)
-	ld	spov, r0
+	ld		r0, #(_near_stack_bot+1)
+	ld		spov, r0
 #endif
 	/* Clear BSS */
 
-	lea	r0, _low_nearbss
-	ld	r1, #_len_nearbss+1
-	jp	_z16f_reset2
+	lea		r0, _low_nearbss
+	ld		r1, #_len_nearbss+1
+	jp		_z16f_reset2
 _z16f_reset1:
 	ld.b	(r0++), #0
 _z16f_reset2:
 	djnz	r1, _z16f_reset1
 
-	lea	r0, _low_farbss
-	ld	r1, #_len_farbss+1
-	jp	_z16f_reset4
+	lea		r0, _low_farbss
+	ld		r1, #_len_farbss+1
+	jp		_z16f_reset4
 _z16f_reset3:
 	ld.b	(r0++), #0
 _z16f_reset4:
@@ -191,20 +191,20 @@ _z16f_reset4:
 
 	/* Copy ROM data into RAM */
 
-	lea	r0, _low_near_romdata
-	lea	r1, _low_neardata
-	ld	r2, #_len_neardata+1
-        jp      _z16f_reset6
+	lea		r0, _low_near_romdata
+	lea		r1, _low_neardata
+	ld		r2, #_len_neardata+1
+	jp		_z16f_reset6
 _z16f_reset5:
-        ld.b    r3, (r0++)
+	ld.b	r3, (r0++)
 	ld.b	(r1++), r3
 _z16f_reset6:
-        djnz    r2, _z16f_reset5
+	djnz	r2, _z16f_reset5
 
-       	lea	r0, _low_far_romdata
-	lea	r1, _low_fardata
-	ld	r2, #_len_fardata+1
-	jp	_z16f_reset8
+	lea		r0, _low_far_romdata
+	lea		r1, _low_fardata
+	ld		r2, #_len_fardata+1
+	jp		_z16f_reset8
 _z16f_reset7:
 	ld.b	r3, (r0++)
 	ld.b	(r1++), r3
@@ -213,7 +213,7 @@ _z16f_reset8:
 
 	/* Perform low-level hardware initialization */
 
-	call	_z16f_lowinit		/* Perform low-level hardware initialization */
+	call	_z16f_lowinit			/* Perform low-level hardware initialization */
 
 #ifdef USE_EARLYSERIALINIT
 	/* Perform early serial initialization */
@@ -222,8 +222,8 @@ _z16f_reset8:
 #endif
 	/* Start NuttX */
 
-	call	_os_start		/* Start the operating system */
-_halt1:					/* _os_start() should not return */
+	call	_os_start				/* Start the operating system */
+_halt1:								/* _os_start() should not return */
 	halt
 	jp	_halt1
 
@@ -244,15 +244,15 @@ _halt1:					/* _os_start() should not return */
  **************************************************************************/
 
 _sysexc_isr:
-	pushmlo	<r0-r7>		/* Save r0-r7 on the stack */
+	pushmlo	<r0-r7>					/* Save r0-r7 on the stack */
 	
 	/* Calculate the value of the SP BEFORE the interrupt occurred and
 	 * push that as the saved value of r15=sp
 	 */
 
-	ld	r1, #-6		/* return(4) + flags(1) + padding(1) */
-	add	r1, sp		/* r1 = Value of the SP before the interrupt */
-	push	r1		/* Push r1 in the spot for the saved SP */
+	ld		r1, #-6					/* return(4) + flags(1) + padding(1) */
+	add		r1, sp					/* r1 = Value of the SP before the interrupt */
+	push	r1						/* Push r1 in the spot for the saved SP */
 
 	/* Save all of the remaining registers */
 
@@ -263,10 +263,10 @@ _sysexc_isr:
 	 * of the register save structure.
 	 */
 
-	ld	r1, sp
-	call	_z16f_sysexec	/* Handle in C logic */
+	ld		r1, sp
+	call	_z16f_sysexec			/* Handle in C logic */
 
-_halt2:				/* _z16f_sysexec() should not return */
+_halt2:								/* _z16f_sysexec() should not return */
 	halt
 	jp	_halt2
 
@@ -287,125 +287,124 @@ _halt2:				/* _z16f_sysexec() should not return */
  **************************************************************************/
 
 _timer2_isr:
-	pushmlo	<r0-r7>			/* Save r0-r7 on the stack */
-	ld	r1, #Z16F_IRQ_TIMER2	/* r1 = Timer 2 IRQ number */
-	jp	_common_isr		/* Join common interrupt handling logic */
+	pushmlo	<r0-r7>					/* Save r0-r7 on the stack */
+	ld		r1, #Z16F_IRQ_TIMER2	/* r1 = Timer 2 IRQ number */
+	jp		_common_isr				/* Join common interrupt handling logic */
 
 _timer1_isr:
-	pushmlo	<r0-r7>			/* Save r0-r7 on the stack */
-	ld	r1, #Z16F_IRQ_TIMER1	/* r1 = Timer 1 IRQ number */
-	jp	_common_isr		/* Join common interrupt handling logic */
+	pushmlo	<r0-r7>					/* Save r0-r7 on the stack */
+	ld		r1, #Z16F_IRQ_TIMER1	/* r1 = Timer 1 IRQ number */
+	jp		_common_isr				/* Join common interrupt handling logic */
 
 _timer0_isr:
-	pushmlo	<r0-r7>			/* Save r0-r7 on the stack */
-	ld	r1, #Z16F_IRQ_TIMER0	/* r1 = Timer 0 IRQ number */
-	jp	_common_isr		/* Join common interrupt handling logic */
+	pushmlo	<r0-r7>					/* Save r0-r7 on the stack */
+	ld		r1, #Z16F_IRQ_TIMER0	/* r1 = Timer 0 IRQ number */
+	jp		_common_isr				/* Join common interrupt handling logic */
 
 _uart0rx_isr:
-	pushmlo	<r0-r7>			/* Save r0-r7 on the stack */
-	ld	r1, #Z16F_IRQ_UART0RX	/* r1 = UART0 RX IRQ number */
-	jp	_common_isr		/* Join common interrupt handling logic */
+	pushmlo	<r0-r7>					/* Save r0-r7 on the stack */
+	ld		r1, #Z16F_IRQ_UART0RX	/* r1 = UART0 RX IRQ number */
+	jp		_common_isr				/* Join common interrupt handling logic */
 
 _uart0tx_isr:
-	pushmlo	<r0-r7>			/* Save r0-r7 on the stack */
-	ld	r1, #Z16F_IRQ_UART0TX	/* r1 = UART0 TX IRQ number */
-	jp	_common_isr		/* Join common interrupt handling logic */
+	pushmlo	<r0-r7>					/* Save r0-r7 on the stack */
+	ld		r1, #Z16F_IRQ_UART0TX	/* r1 = UART0 TX IRQ number */
+	jp		_common_isr				/* Join common interrupt handling logic */
 
 _i2c_isr:
-	pushmlo	<r0-r7>			/* Save r0-r7 on the stack */
-	ld	r1, #Z16F_IRQ_I2C	/* r1 = I2C IRQ number */
-	jp	_common_isr		/* Join common interrupt handling logic */
+	pushmlo	<r0-r7>					/* Save r0-r7 on the stack */
+	ld		r1, #Z16F_IRQ_I2C		/* r1 = I2C IRQ number */
+	jp		_common_isr				/* Join common interrupt handling logic */
 
 _spi_isr:
-	pushmlo	<r0-r7>			/* Save r0-r7 on the stack */
-	ld	r1, #Z16F_IRQ_SPI	/* r1 = SPI IRQ number */
-	jp	_common_isr		/* Join common interrupt handling logic */
+	pushmlo	<r0-r7>					/* Save r0-r7 on the stack */
+	ld		r1, #Z16F_IRQ_SPI		/* r1 = SPI IRQ number */
+	jp		_common_isr				/* Join common interrupt handling logic */
 
 _adc_isr:
-	pushmlo	<r0-r7>			/* Save r0-r7 on the stack */
-	ld	r1, #Z16F_IRQ_ADC	/* r1 = ADC IRQ number */
-	jp	_common_isr		/* Join common interrupt handling logic */
+	pushmlo	<r0-r7>					/* Save r0-r7 on the stack */
+	ld		r1, #Z16F_IRQ_ADC		/* r1 = ADC IRQ number */
+	jp		_common_isr				/* Join common interrupt handling logic */
 
 _p7ad_isr:
-	pushmlo	<r0-r7>			/* Save r0-r7 on the stack */
-	ld	r1, #Z16F_IRQ_P7AD	/* r1 = Port A/D7, rising/falling edge IRQ number */
-	jp	_common_isr		/* Join common interrupt handling logic */
+	pushmlo	<r0-r7>					/* Save r0-r7 on the stack */
+	ld		r1, #Z16F_IRQ_P7AD		/* r1 = Port A/D7, rising/falling edge IRQ number */
+	jp		_common_isr				/* Join common interrupt handling logic */
 
 _p6ad_isr:
-	pushmlo	<r0-r7>			/* Save r0-r7 on the stack */
-	ld	r1, #Z16F_IRQ_P6AD	/* r1 = Port A/D6, rising/falling edge IRQ number */
-	jp	_common_isr		/* Join common interrupt handling logic */
+	pushmlo	<r0-r7>					/* Save r0-r7 on the stack */
+	ld		r1, #Z16F_IRQ_P6AD		/* r1 = Port A/D6, rising/falling edge IRQ number */
+	jp		_common_isr				/* Join common interrupt handling logic */
 
 _p5ad_isr:
-	pushmlo	<r0-r7>			/* Save r0-r7 on the stack */
-	ld	r1, #Z16F_IRQ_P5AD	/* r1 = Port A/D5, rising/falling edge IRQ number */
-	jp	_common_isr		/* Join common interrupt handling logic */
+	pushmlo	<r0-r7>					/* Save r0-r7 on the stack */
+	ld		r1, #Z16F_IRQ_P5AD		/* r1 = Port A/D5, rising/falling edge IRQ number */
+	jp		_common_isr				/* Join common interrupt handling logic */
 
 _p4ad_isr:
-	pushmlo	<r0-r7>			/* Save r0-r7 on the stack */
-	ld	r1, #Z16F_IRQ_P4AD	/* r1 = Port A/D4, rising/falling edge IRQ number */
-	jp	_common_isr		/* Join common interrupt handling logic */
+	pushmlo	<r0-r7>					/* Save r0-r7 on the stack */
+	ld		r1, #Z16F_IRQ_P4AD		/* r1 = Port A/D4, rising/falling edge IRQ number */
+	jp		_common_isr				/* Join common interrupt handling logic */
 
 _p3ad_isr:
-	pushmlo	<r0-r7>			/* Save r0-r7 on the stack */
-	ld	r1, #Z16F_IRQ_P3AD	/* r1 = Port A/D3, rising/falling edgeEXEC IRQ number */
-	jp	_common_isr		/* Join common interrupt handling logic */
+	pushmlo	<r0-r7>					/* Save r0-r7 on the stack */
+	ld		r1, #Z16F_IRQ_P3AD		/* r1 = Port A/D3, rising/falling edgeEXEC IRQ number */
+	jp		_common_isr				/* Join common interrupt handling logic */
 
 _p2ad_isr:
-	pushmlo	<r0-r7>			/* Save r0-r7 on the stack */
-	ld	r1, #Z16F_IRQ_P2AD	/* r1 = Port A/D2, rising/falling edge IRQ number */
-	jp	_common_isr		/* Join common interrupt handling logic */
+	pushmlo	<r0-r7>					/* Save r0-r7 on the stack */
+	ld		r1, #Z16F_IRQ_P2AD		/* r1 = Port A/D2, rising/falling edge IRQ number */
+	jp		_common_isr				/* Join common interrupt handling logic */
 
 _p1ad_isr:
-	pushmlo	<r0-r7>			/* Save r0-r7 on the stack */
-	ld	r1, #Z16F_IRQ_P1AD	/* r1 = Port A/D1, rising/falling edge IRQ number */
-	jp	_common_isr		/* Join common interrupt handling logic */
+	pushmlo	<r0-r7>					/* Save r0-r7 on the stack */
+	ld		r1, #Z16F_IRQ_P1AD		/* r1 = Port A/D1, rising/falling edge IRQ number */
+	jp		_common_isr				/* Join common interrupt handling logic */
 
 _p0ad_isr:
-	pushmlo	<r0-r7>			/* Save r0-r7 on the stack */
-	ld	r1, #Z16F_IRQ_P0AD	/* r1 = Port A/D0, rising/falling edge IRQ number */
-	jp	_common_isr		/* Join common interrupt handling logic */
+	pushmlo	<r0-r7>					/* Save r0-r7 on the stack */
+	ld		r1, #Z16F_IRQ_P0AD		/* r1 = Port A/D0, rising/falling edge IRQ number */
+	jp		_common_isr				/* Join common interrupt handling logic */
 
 _pwmtimer_isr:
-	pushmlo	<r0-r7>			/* Save r0-r7 on the stack */
-	ld	r1, #Z16F_IRQ_PWMTIMER	/* r1 = PWM Timer IRQ number */
-	jp	_common_isr		/* Join common interrupt handling logic */
+	pushmlo	<r0-r7>					/* Save r0-r7 on the stack */
+	ld		r1, #Z16F_IRQ_PWMTIMER	/* r1 = PWM Timer IRQ number */
+	jp		_common_isr				/* Join common interrupt handling logic */
 
 _uart1rx_isr:
-	pushmlo	<r0-r7>			/* Save r0-r7 on the stack */
-	ld	r1, #Z16F_IRQ_UART1RX	/* r1 = UART1 RX IRQ number */
-	jp	_common_isr		/* Join common interrupt handling logic */
+	pushmlo	<r0-r7>					/* Save r0-r7 on the stack */
+	ld		r1, #Z16F_IRQ_UART1RX	/* r1 = UART1 RX IRQ number */
+	jp		_common_isr				/* Join common interrupt handling logic */
 
 _uart1tx_isr:
-	pushmlo	<r0-r7>			/* Save r0-r7 on the stack */
-	ld	r1, #Z16F_IRQ_UART1TX	/* r1 = UART1 TX IRQ number */
-	jp	_common_isr		/* Join common interrupt handling logic */
+	pushmlo	<r0-r7>					/* Save r0-r7 on the stack */
+	ld		r1, #Z16F_IRQ_UART1TX	/* r1 = UART1 TX IRQ number */
+	jp		_common_isr				/* Join common interrupt handling logic */
 
 _pwmfault_isr:
-	pushmlo	<r0-r7>			/* Save r0-r7 on the stack */
-	ld	r1, #Z16F_IRQ_PWMFAULT	/* r1 = PWM Fault IRQ number */
-	jp	_common_isr		/* Join common interrupt handling logic */
+	pushmlo	<r0-r7>					/* Save r0-r7 on the stack */
+	ld		r1, #Z16F_IRQ_PWMFAULT	/* r1 = PWM Fault IRQ number */
+	jp		_common_isr				/* Join common interrupt handling logic */
 
 _c3_isr:
-	pushmlo	<r0-r7>			/* Save r0-r7 on the stack */
-	ld	r1, #Z16F_IRQ_C3	/* r1 = Port C3, both edges DMA3 IRQ number */
-	jp	_common_isr		/* Join common interrupt handling logic */
+	pushmlo	<r0-r7>					/* Save r0-r7 on the stack */
+	ld		r1, #Z16F_IRQ_C3		/* r1 = Port C3, both edges DMA3 IRQ number */
+	jp		_common_isr				/* Join common interrupt handling logic */
 
 _c2_isr:
-	pushmlo	<r0-r7>			/* Save r0-r7 on the stack */
-	ld	r1, #Z16F_IRQ_C2	/* r1 = Port C2, both edges DMA2 IRQ number */
-	jp	_common_isr		/* Join common interrupt handling logic */
+	pushmlo	<r0-r7>					/* Save r0-r7 on the stack */
+	ld		r1, #Z16F_IRQ_C2		/* r1 = Port C2, both edges DMA2 IRQ number */
+	jp		_common_isr				/* Join common interrupt handling logic */
 
 _c1_isr:
-	pushmlo	<r0-r7>			/* Save r0-r7 on the stack */
-	ld	r1, #Z16F_IRQ_C1	/* r1 = Port C1, both edges DMA1 IRQ number */
-	jp	_common_isr		/* Join common interrupt handling logic */
+	pushmlo	<r0-r7>					/* Save r0-r7 on the stack */
+	ld		r1, #Z16F_IRQ_C1		/* r1 = Port C1, both edges DMA1 IRQ number */
+	jp		_common_isr				/* Join common interrupt handling logic */
 
 _c0_isr:
-	pushmlo	<r0-r7>			/* Save r0-r7 on the stack */
-	ld	r1, #Z16F_IRQ_C0	/* r1 = Port C0, both edges DMA0 IRQ number */
-					/* Join common interrupt handling logic */
-
+	pushmlo	<r0-r7>					/* Save r0-r7 on the stack */
+	ld		r1, #Z16F_IRQ_C0		/* r1 = Port C0, both edges DMA0 IRQ number */
+									/* Join common interrupt handling logic */
 
 /**************************************************************************
  * Name: _common_isr
@@ -437,9 +436,9 @@ _common_isr:
 	 * push that as the saved value of r15=sp
 	 */
 
-	ld	r2, #(9*4+2)	/* See stack accounting above */
-	add	r2, sp		/* r1 = Value of the SP before the interrupt */
-	push	r2		/* Push r1 in the spot for the saved SP */
+	ld		r2, #(9*4+2)			/* See stack accounting above */
+	add		r2, sp					/* r1 = Value of the SP before the interrupt */
+	push	r2						/* Push r1 in the spot for the saved SP */
 
 	/* Save all of the remaining registers */
 
@@ -450,7 +449,7 @@ _common_isr:
 	 * arg2(r2)=address of the register save structure.
 	 */
 
-	ld	r2, sp
+	ld		r2, sp
 	call	_up_doirq
 
 	/* Upon return, _up_doirq will provide that address of the save structure
@@ -458,11 +457,11 @@ _common_isr:
 	 * same value as sp.
 	 */
 
-	cp	r0, sp			/* Check if we are performing a context switch */
-	jp	nz, _common_switch	/* Jump if yes, else use faster return */
-	popmhi	<r8-r14>		/* Restore r8-r14 */
-	add	sp, #4			/* Skip over restore of r15=sp */
-	popmlo	<r0-r7>			/* Restore r0-r7 */
+	cp		r0, sp					/* Check if we are performing a context switch */
+	jp		nz, _common_switch		/* Jump if yes, else use faster return */
+	popmhi	<r8-r14>				/* Restore r8-r14 */
+	add		sp, #4					/* Skip over restore of r15=sp */
+	popmlo	<r0-r7>					/* Restore r0-r7 */
 	iret
 
 	/* We are not returning to the same thread that was interrupted.  In this case,
@@ -470,21 +469,21 @@ _common_isr:
 	 */
 
 _common_switch:
-	ld	sp, 2*REG_SP(r0)	/* sp=Value of SP on return from interrupt */
-	ld.w	r1, 2*REG_FLAGS(r0)	/* r1=padded flags value */
-	push.w	r1			/* Push padded flags value onto the stack */
-	ld	r1, 2*REG_PC(r0)	/* r1=return address */
-	push	r1			/* Push the return address onto the stack */
-	ld	r7, 2*REG_R7(r0)	/* Recover saved r7 */
-	push	r7			/* And save on the stack so that we can use r7 */
-	ld	r7, sp			/* r7=saved sp */
+	ld		sp, 2*REG_SP(r0)		/* sp=Value of SP on return from interrupt */
+	ld.w	r1, 2*REG_FLAGS(r0)		/* r1=padded flags value */
+	push.w	r1						/* Push padded flags value onto the stack */
+	ld		r1, 2*REG_PC(r0)		/* r1=return address */
+	push	r1						/* Push the return address onto the stack */
+	ld		r7, 2*REG_R7(r0)		/* Recover saved r7 */
+	push	r7						/* And save on the stack so that we can use r7 */
+	ld		r7, sp					/* r7=saved sp */
 
-	ld	sp, r0			/* sp=Pointer to register save structure */
-	popmhi	<r8-r14>		/* Restore r8-r14 */
-	add	sp, #4			/* Skip over restore of r15=sp */
-	popmlo	<r0-r6>			/* Restore r0-r6 */
-	ld	sp, r7			/* Switch back to the correct stack */
-	pop	r7			/* Recover r7 from the stack */
-	iret				/* Return from interrupt */
+	ld		sp, r0					/* sp=Pointer to register save structure */
+	popmhi	<r8-r14>				/* Restore r8-r14 */
+	add		sp, #4					/* Skip over restore of r15=sp */
+	popmlo	<r0-r6>					/* Restore r0-r6 */
+	ld		sp, r7					/* Switch back to the correct stack */
+	pop		r7						/* Recover r7 from the stack */
+	iret							/* Return from interrupt */
 
 	end

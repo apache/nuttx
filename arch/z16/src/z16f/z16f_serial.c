@@ -435,6 +435,7 @@ static int z16f_attach(struct uart_dev_s *dev)
           irq_detach(priv->rxirq);
         }
     }
+
   return ret;
 }
 
@@ -451,8 +452,10 @@ static int z16f_attach(struct uart_dev_s *dev)
 static void z16f_detach(struct uart_dev_s *dev)
 {
   struct z16f_uart_s *priv = (struct z16f_uart_s*)dev->priv;
+
   up_disable_irq(priv->rxirq);
   up_disable_irq(priv->txirq);
+
   irq_detach(priv->rxirq);
   irq_detach(priv->txirq);
 }
@@ -484,8 +487,8 @@ static int z16f_rxinterrupt(int irq, void *context)
     {
       dev = &g_uart0port;
     }
-#endif
   else
+#endif
     {
       PANIC();
     }
@@ -504,7 +507,7 @@ static int z16f_rxinterrupt(int irq, void *context)
 
   if (status & Z16F_UARTSTAT0_RDA)
     {
-      /* Handline an incoming, receive byte */
+      /* Handle an incoming, received byte */
 
       uart_recvchars(dev);
     }
@@ -539,8 +542,8 @@ static int z16f_txinterrupt(int irq, void *context)
     {
       dev = &g_uart0port;
     }
-#endif
   else
+#endif
     {
       PANIC();
     }
@@ -593,6 +596,7 @@ static int z16f_receive(struct uart_dev_s *dev, uint32_t *status)
   rxd     = getreg8(priv->uartbase + Z16F_UART_RXD);
   stat0   = getreg8(priv->uartbase + Z16F_UART_STAT0);
   *status = (uint32_t)rxd | (((uint32_t)stat0) << 8);
+
   return rxd;
 }
 
@@ -730,14 +734,45 @@ static bool z16f_txempty(struct uart_dev_s *dev)
 
 void up_earlyserialinit(void)
 {
-  /* REVISIT:  UART GPIO AFL register is not initialized */
+  uint8_t regval;
+
+  /* Configure UART alternate pin functions */
+
+#ifdef CONFIG_Z16F_UART0
+  /* UART0 is PA4 and PA5, alternate function 1 */
+
+  regval  = getreg8(Z16F_GPIOA_AFL);
+  regval |= 0x30;
+  putreg8(regval, Z16F_GPIOA_AFL);
+
+  regval  = getreg8(Z16F_GPIOA_AFH);
+  regval &= ~0x30;
+  putreg8(regval, Z16F_GPIOA_AFH);
+#endif
+
+#ifdef CONFIG_Z16F_UART1
+  /* UART1 is PD4 and PD5, alternate function 1 */
+
+  regval  = getreg8(Z16F_GPIOD_AFL);
+  regval |= 0x30;
+  putreg8(regval, Z16F_GPIOD_AFL);
+
+  regval  = getreg8(Z16F_GPIOD_AFH);
+  regval &= ~0x30;
+  putreg8(regval, Z16F_GPIOD_AFH);
+#endif
+
+  /* Disable UART interrupts */
 
 #ifdef TTYS0_DEV
   (void)z16f_disableuartirq(&TTYS0_DEV);
 #endif
+
 #ifdef TTYS1_DEV
   (void)z16f_disableuartirq(&TTYS1_DEV);
 #endif
+
+  /* Configuration any serial console */
 
 #ifdef CONSOLE_DEV
   CONSOLE_DEV.isconsole = true;
