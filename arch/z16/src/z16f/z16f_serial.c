@@ -225,8 +225,8 @@ static uart_dev_t g_uart1port =
     { 0 },                  /* recv.sem */
     0,                      /* recv.head */
     0,                      /* recv.tail */
-    CONFIG_UART0_RXBUFSIZE, /* recv.size */
-    g_uart0rxbuffer,        /* recv.buffer */
+    CONFIG_UART1_RXBUFSIZE, /* recv.size */
+    g_uart1rxbuffer,        /* recv.buffer */
   },
   &g_uart_ops,              /* ops */
   &g_uart1priv,             /* priv */
@@ -353,7 +353,7 @@ static int z16f_setup(struct uart_dev_s *dev)
    * BRG = (freq + baud * 8)/(baud * 16)
    */
 
-  brg = (_DEFCLK + (priv->baud << 3))/(priv->baud << 4);
+  brg = (_DEFCLK + (priv->baud << 3)) / (priv->baud << 4);
   putreg16((uint16_t)brg, priv->uartbase + Z16F_UART_BR);
 
   /* Configure STOP bits */
@@ -736,7 +736,9 @@ void up_earlyserialinit(void)
 {
   uint8_t regval;
 
-  /* Configure UART alternate pin functions */
+  /* Configure UART alternate pin functions.  This may duplicate logic in
+   * z16f_lowuartinit().
+   */
 
 #ifdef CONFIG_Z16F_UART0
   /* UART0 is PA4 and PA5, alternate function 1 */
