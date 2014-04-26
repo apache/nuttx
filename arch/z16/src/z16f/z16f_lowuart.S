@@ -90,7 +90,7 @@
  * Description:
  *   Initialize UART0 or UART1
  *
- * Parameters:
+ * Input Parameters:
  *   None
  *
  *************************************************************************/
@@ -103,7 +103,7 @@ _z16f_lowuartinit:
 #ifdef CONFIG_UART1_SERIAL_CONSOLE
 	ld		r3, #CONFIG_UART1_BAUD	/* r3 = Selected UART1 baud */
 #else
-	ld	r3, #CONFIG_UART0_BAUD		/* r3 = Selected UART0 (default) baud */
+	ld		r3, #CONFIG_UART0_BAUD	/* r3 = Selected UART0 (default) baud */
 #endif
 	ld		r0, r3					/* r0 = baud */
 	sll		r0, #3					/* r0 = baud * 8 */
@@ -111,8 +111,10 @@ _z16f_lowuartinit:
 	sll		r3, #4					/* r3 = baud * 16 */
 	udiv	r0, r3					/* BRG = (freq + baud * 8)/(baud * 16) */
 
+	/* Hacks to get a serial console available ASAP */
+
 #ifdef CONFIG_UART1_SERIAL_CONSOLE
-	ld.w	Z16F_UART1_BR, r0	/* Z16F_UART1_BR = BRG */
+	ld.w	Z16F_UART1_BR, r0		/* Z16F_UART1_BR = BRG */
 
 	/* Set the GPIO Alternate Function Register Lo (AFL) register */
 
@@ -152,10 +154,10 @@ _z16f_lowuartinit:
  * Description:
  *   Send one character to the selected serial console
  *
- * Parmeters:
+ * Input Parameters:
  *   r1 = character
  *
- * Return:
+ * Returned Value:
  *   None
  *
  * Modifies r0 (and maybe r1)

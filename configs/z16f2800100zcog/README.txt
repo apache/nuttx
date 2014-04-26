@@ -115,8 +115,8 @@ connector labelled CONSOLE.
 UART1 is also available on JP2:
 
   MCU PIN     GPIO  JP2
-  Pin 86 TXD1 PD5   JP2 Pin 25
-  Pin 87 RXD1 PD4   JP2 Pin 25
+  Pin 86 TXD1 PD5   JP2 Pin 26
+  Pin 87 RXD1 PD4   JP2 Pin 27
   Vcc               JP2 Pin 59
   GND               JP2 Pins 19, 39, 46, 48, 56
 
