@@ -737,7 +737,7 @@ void up_earlyserialinit(void)
   uint8_t regval;
 
   /* Configure UART alternate pin functions.  This may duplicate logic in
-   * z16f_lowuartinit().
+   * z16f_lowuartinit() or z16f_lowinit().
    */
 
 #ifdef CONFIG_Z16F_UART0

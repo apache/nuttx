@@ -1,7 +1,7 @@
 /***************************************************************************
  * configs/z16f2800100zcog/src/z16f_lowinit.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Based upon sample code included with the Zilog ZDS-II toolchain.
@@ -44,11 +44,21 @@
 #include "chip/chip.h"
 
 /***************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ***************************************************************************/
 
 /***************************************************************************
  * Private Functions
+ ***************************************************************************/
+
+/***************************************************************************
+ * Name: z16f_gpioinit
+ *
+ * Description:
+ *   Configure board-specific GPIO usage here.  Driver pin configurations
+ *   are set in the associated device drivers (such as UART, SPI, I2C,
+ *   etc.) and must be preserved.
+ *
  ***************************************************************************/
 
 static void z16f_gpioinit(void)
@@ -72,11 +82,6 @@ static void z16f_gpioinit(void)
   /* Configure Direction switch port */
 
   putreg8(getreg8(Z16F_GPIOC_DD) | 0x01, Z16F_GPIOC_DD);
-
-  /* Configure to use both UART0 and 1 */
-
-  putreg8(getreg8(Z16F_GPIOA_AFL) | 0x30, Z16F_GPIOA_AFL);
-  putreg8(getreg8(Z16F_GPIOD_AFL) | 0x30, Z16F_GPIOD_AFL);
 }
 
 /***************************************************************************
@@ -87,4 +92,3 @@ void z16f_lowinit(void)
 {
   z16f_gpioinit();
 }
-

@@ -44,7 +44,7 @@
 #include "chip/chip.h"
 
 /***************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ***************************************************************************/
 
 /***************************************************************************
@@ -100,6 +100,12 @@ static void z16f_extcsinit(void)
 
 /***************************************************************************
  * Name: z16f_gpioinit
+ *
+ * Description:
+ *   Configure board-specific GPIO usage here.  Driver pin configurations
+ *   are set in the associated device drivers (such as UART, SPI, I2C,
+ *   etc.) and must be preserved.
+ *
  ***************************************************************************/
 
 static void z16f_gpioinit(void)
