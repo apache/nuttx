@@ -838,9 +838,9 @@ struct spi_dev_s *up_spiinitialize(int port)
   FAR struct z16f_spi_s *priv;
   irqstate_t flags;
 #ifndef CONFIG_SPI_OWNBUS
-  uint8_t regval;
   unsigned int offset;
 #endif
+  uint8_t regval;
 
   spivdbg("port: %d\n", port);
   DEBUGASSERT(port == 0);
@@ -857,6 +857,22 @@ struct spi_dev_s *up_spiinitialize(int port)
 #ifndef CONFIG_SPI_OWNBUS
       sem_init(&priv->exclsem, 0, 1);
 #endif
+
+      /* Set up the SPI pin configuration (board-specific logic is required to
+       * configure and manage all chip selects).
+       *
+       *   SCK  - PC3, Alternate function 1
+       *   MOSI - PC4, Alternate function 1
+       *   MISO - PC5, Alternate function 1
+       */
+
+      regval  = getreg8(Z16F_GPIOC_AFL);
+      regval |= 0x38;
+      putreg8(regval, Z16F_GPIOC_AFL);
+
+      regval  = getreg8(Z16F_GPIOC_AFH);
+      regval &= ~0x38;
+      putreg8(regval, Z16F_GPIOC_AFH);
 
       /* Initialize the hardware.  Mode 0, 8-bits, 400KHz */
 
