@@ -255,10 +255,10 @@ static uart_dev_t g_uart1port =
 #    define UART1_ASSIGNED      1
 #else
 #  undef CONSOLE_DEV                        /* No console */
-#  if defined(CONFIG_KINETIS_UART0)
+#  if defined(CONFIG_Z16F_UART0)
 #    define TTYS0_DEV           g_uart0port /* UART0 is ttyS0 */
 #    define UART0_ASSIGNED      1
-#  elif defined(CONFIG_KINETIS_UART1)
+#  elif defined(CONFIG_Z16F_UART1)
 #    define TTYS0_DEV           g_uart1port /* UART1 is ttyS0 */
 #    define UART1_ASSIGNED      1
 #  endif
@@ -266,10 +266,10 @@ static uart_dev_t g_uart1port =
 
 /* Pick ttys1.  This could be either of UART0-1 excluding the console UART. */
 
-#if defined(CONFIG_KINETIS_UART0) && !defined(UART0_ASSIGNED)
+#if defined(CONFIG_Z16F_UART0) && !defined(UART0_ASSIGNED)
 #  define TTYS1_DEV           g_uart0port /* UART0 is ttyS1 */
 #  define UART0_ASSIGNED      1
-#elif defined(CONFIG_KINETIS_UART1) && !defined(UART1_ASSIGNED)
+#elif defined(CONFIG_Z16F_UART1) && !defined(UART1_ASSIGNED)
 #  define TTYS1_DEV           g_uart1port /* UART1 is ttyS1 */
 #  define UART1_ASSIGNED      1
 #endif
@@ -781,7 +781,10 @@ int up_putc(int ch)
   uint8_t  state;
 
   /* Keep interrupts disabled so that we do not interfere with normal
-   * driver operation
+   * driver operation.
+   *
+   * REVISIT:  I can imagine scenarios where the follow logic gets pre-empted
+   * and the the UART interrupts get left in a bad state.
    */
 
   state = z16f_disableuartirq(&CONSOLE_DEV);
