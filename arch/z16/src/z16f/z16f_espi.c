@@ -866,15 +866,15 @@ struct spi_dev_s *up_spiinitialize(int port)
        *   MISO - PC5, Alternate function 1
        */
 
-      regval  = getreg8(Z16F_GPIOC_AFL);
+      regval  = spi_getreg8(priv, Z16F_GPIOC_AFL);
       regval |= 0x38;
-      putreg8(regval, Z16F_GPIOC_AFL);
+      spi_putreg8(priv, regval, Z16F_GPIOC_AFL);
 
-      regval  = getreg8(Z16F_GPIOC_AFH);
+      regval  = spi_getreg8(priv, Z16F_GPIOC_AFH);
       regval &= ~0x38;
-      putreg8(regval, Z16F_GPIOC_AFH);
+      spi_putreg8(priv, regval, Z16F_GPIOC_AFH);
 
-      /* Initialize the hardware.  Mode 0, 8-bits, 400KHz */
+      /* Initialize the ESPI peripheral.  Master, Mode 0, 8-bits, 400KHz */
 
       spi_putreg8(priv, 0x00, Z16F_ESPI_CTL);    /* Disabled the ESPI */
       spi_putreg8(priv, 0x00, Z16F_ESPI_DCR);    /* Disabled slave select; clear TEOF */
