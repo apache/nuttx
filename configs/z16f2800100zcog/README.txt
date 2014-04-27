@@ -49,6 +49,14 @@ Version 4.11.1
   81400 and 81459 or not.  It is unknown if the code will run without -reduceopt
   either. (Basically, it compiles with 4.11.1, but is untested with that version).
 
+Version 4.12.0
+
+  Never tested
+
+Version 5.0.0
+
+  Never tested
+
 Version 5.0.1
 
   On November 29, 2012, all of the z16f configurations were converted to use 5.0.1,

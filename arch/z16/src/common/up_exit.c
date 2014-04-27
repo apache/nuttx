@@ -146,7 +146,7 @@ void _exit(int status)
 
   (void)irqsave();
 
-  slldbg("TCB=%p exitting\n", tcb);
+  slldbg("TCB=%p exiting\n", tcb);
 
 #if defined(CONFIG_DUMP_ON_EXIT) && defined(CONFIG_DEBUG)
   lldbg("Other tasks:\n");

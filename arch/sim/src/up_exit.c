@@ -78,7 +78,7 @@ void _exit(int status)
 {
   struct tcb_s* tcb;
 
-  sdbg("TCB=%p exitting\n", tcb);
+  sdbg("TCB=%p exiting\n", tcb);
 
   /* Destroy the task at the head of the ready to run list. */
 
