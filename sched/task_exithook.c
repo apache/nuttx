@@ -53,7 +53,7 @@
 #include "sig_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -80,7 +80,7 @@
  * Name: task_atexit
  *
  * Description:
- *   Call any registerd atexit function(s)
+ *   Call any registered atexit function(s)
  *
  ****************************************************************************/
 
@@ -90,7 +90,7 @@ static inline void task_atexit(FAR struct tcb_s *tcb)
   FAR struct task_group_s *group = tcb->group;
 
   /* Make sure that we have not already left the group.  Only the final
-   * exitting thread in the task group should trigger the atexit()
+   * exiting thread in the task group should trigger the atexit()
    * callbacks.
    */
 
@@ -100,7 +100,7 @@ static inline void task_atexit(FAR struct tcb_s *tcb)
       int index;
 
       /* Call each atexit function in reverse order of registration atexit()
-       * functions are registered from lower to higher arry indices; they
+       * functions are registered from lower to higher array indices; they
        * must be called in the reverse order of registration when the task
        * group exits, i.e., from higher to lower indices.
        */
@@ -140,7 +140,7 @@ static inline void task_atexit(FAR struct tcb_s *tcb)
  * Name: task_onexit
  *
  * Description:
- *   Call any registerd on_exit function(s)
+ *   Call any registered on_exit function(s)
  *
  ****************************************************************************/
 
@@ -150,7 +150,7 @@ static inline void task_onexit(FAR struct tcb_s *tcb, int status)
   FAR struct task_group_s *group = tcb->group;
 
   /* Make sure that we have not already left the group.  Only the final
-   * exitting thread in the task group should trigger the atexit()
+   * exiting thread in the task group should trigger the atexit()
    * callbacks.
    */
 
@@ -160,9 +160,9 @@ static inline void task_onexit(FAR struct tcb_s *tcb, int status)
       int index;
 
       /* Call each on_exit function in reverse order of registration.
-       * on_exit() functions are registered from lower to higher arry
+       * on_exit() functions are registered from lower to higher array
        * indices; they must be called in the reverse order of registration
-       * when the task grroup exits, i.e., from higher to lower indices.
+       * when the task group exits, i.e., from higher to lower indices.
        */
 
       for (index = CONFIG_SCHED_ONEXIT_MAX-1; index >= 0; index--)
@@ -266,7 +266,7 @@ static inline void task_groupexit(FAR struct task_group_s *group)
       DEBUGASSERT(child);
       if (child)
         {
-          /* Mark that all members of the child task group has exit'ed */
+          /* Mark that all members of the child task group has exited */
 
           child->ch_flags |= CHILD_FLAG_EXITED;
         }
@@ -336,7 +336,7 @@ static inline void task_sigchild(gid_t pgid, FAR struct tcb_s *ctcb, int status)
       task_groupexit(pgrp);
 
       /* Create the siginfo structure.  We don't actually know the cause.
-       * That is a bug. Let's just say that the child task just exit-ted
+       * That is a bug. Let's just say that the child task just exited
        * for now.
        */
 
@@ -387,7 +387,7 @@ static inline void task_sigchild(FAR struct tcb_s *ptcb,
 #endif /* CONFIG_SCHED_CHILD_STATUS */
 
       /* Create the siginfo structure.  We don't actually know the cause.
-       * That is a bug. Let's just say that the child task just exit-ted
+       * That is a bug. Let's just say that the child task just exited
        * for now.
        */
 
@@ -501,7 +501,7 @@ static inline void task_exitwakeup(FAR struct tcb_s *tcb, int status)
 #endif
         {
           /* Report the exit status.  We do not nullify tg_statloc here
-           * because we want to prent other tasks from registering for
+           * because we want to prevent other tasks from registering for
            * the return status.  There is only one task per task group,
            * there for, this logic should execute exactly once in the
            * lifetime of the task group.
@@ -577,7 +577,7 @@ static inline void task_flushstreams(FAR struct tcb_s *tcb)
  *
  * Description:
  *   This function implements some of the internal logic of exit() and
- *   task_delete().  This function performs some cleanup and other actions
+ *   task_delete().  This function performs some clean-up and other actions
  *   required when a task exits:
  *
  *   - All open streams are flushed and closed.

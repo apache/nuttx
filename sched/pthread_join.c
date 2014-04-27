@@ -48,7 +48,7 @@
 #include "pthread_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -89,9 +89,9 @@
  * Return Value:
  *   0 if successful.  Otherwise, one of the following error codes:
  *
- *   EINVAL  The value specified by thread does not refer to ajoinable
+ *   EINVAL  The value specified by thread does not refer to joinable
  *           thread.
- *   ESRCH   No thread could be found corresponding to thatspecified by the
+ *   ESRCH   No thread could be found corresponding to that specified by the
  *           given thread ID.
  *   EDEADLK A deadlock was detected or the value of thread specifies the
  *           calling thread.
@@ -218,7 +218,7 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
               sdbg("exit_value=0x%p\n", pjoin->exit_value);
             }
 
-          /* Post the thread's data semaphore so that the exitting thread
+          /* Post the thread's data semaphore so that the exiting thread
            * will know that we have received the data.
            */
 
@@ -253,4 +253,3 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
   sdbg("Returning %d\n", ret);
   return ret;
 }
-
