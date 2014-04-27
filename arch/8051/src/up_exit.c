@@ -79,7 +79,7 @@ void _exit(int status)
 {
   FAR struct tcb_s* tcb;
 
-  dbg("TCB=%p exitting\n", tcb);
+  dbg("TCB=%p exiting\n", tcb);
 
   /* Disable interrupts.  Interrupts will remain disabled until
    * the new task is resumed below when the save IE is restored.
