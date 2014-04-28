@@ -7003,7 +7003,7 @@
 	* sched/nanosleep.c:  Fix a missing call to re-enable interrupts.  From
 	  Jason Jiang (2014-3-15).
 
-7.2 2014-xx-xx Gregory Nutt <gnutt@nuttx.org>
+7.2 2014-04-29 Gregory Nutt <gnutt@nuttx.org>
 
 	* arch/arm/src/sam34/sam_udp.c and .h:  Add a USB full speed device
 	  driver (UDP) for the SAM4E (2014-3-17).
@@ -7035,7 +7035,7 @@
 	  Add a new MTD driver that can be used to contain another driver and
 	  force its apparent sector size to be 512 bytes (2014-3-24).
 	* arch/arm/src/sam34/sam_lowputc.c sam_serial.c:  Fix a mysterious
-	  multithreading bug that can log up the serial port (2014-3-14).
+	  multithreading bug that can lock up the serial port (2014-3-14).
 	* drivers/usbdev/Kconfig, usbmsc.c, usbmsc.h, and usbmsc_scsi.c:
 	  Redesign threading module used with the USB MSC driver.  It was using
 	  pthreads before and these were changed to a kernel thread.  The reason
@@ -7062,7 +7062,7 @@
 	  would have failed if n=0; one byte was always copying before testing
 	  for the end of the copy.
 	* nuttx/configs/sama5d3-xplained/:  Add a board support configuration
-	  for the Atmel SAMA5D3 Xplaiend board.  The initial check in is not
+	  for the Atmel SAMA5D3 Xplained board.  The initial check in is not
 	  finished. For example, it still builds to run out of NOR FLASH but
 	  the SAMA5D Xlpained has no NOR FLASH (2013-4-28).
 	* arch/arm/src/sama5/sam_pmc.c and .h:  Add functions to calculate
@@ -7146,11 +7146,11 @@
 	  I thought it was going to do.  Result was the NOR FLASH accesses
 	  were very slow (2014-4-3).
 	* arch/arm/src/sama5/sam_udphs.c:  Fix a case where received status
-	  was not clear, causing OUT SETUP commands to fail (2014-4-6).
+	  was not being cleared, causing OUT SETUP commands to fail (2014-4-6).
 	* arch/arm/src/tiva/tiva_syscontrol.c:  Add logic for TM4C125GXL based
 	  on logic from Daniel Carvalho with modifications.  I think the
 	  LM4F120 may have broken before as well(?).  In any event, the LM4F120
-	  also works well with this chanage (2014-4-7).
+	  also works well with this change (2014-4-7).
 	* Back out part of 610e2aa0c224e2936fe8009ef4a2351ce607067a: Need to
 	  be able to select USB console devices when there is no /dev/console
 	  enabled. Noted by Librae (2014-4-8).
@@ -7160,7 +7160,7 @@
 	  ramlog.h to include/nutt/syslog (2014-4-10).
 	* sched/errno_getptr.c and getpid.c:  Add some checks.  If these
 	  functions are called early in initialization before the tasking
-	  structures are initialized, they will not behavr properly
+	  structures are initialized, they will not behave properly
 	  (2014-4-10).
 	* arch/arm/src/sama5/sam_twi.c: TWI data sending is fails to increment
 	  the number of byes transferred on first byte sent.  from David Sidrane
@@ -7188,7 +7188,7 @@
 	  introduced in the above change and is Sourceforge patch 39 from Luciano
 	  Neri (2014-4-17).
 	* configs/sama5dx-ek/include/board.h and sama5d3-xplained.h:  These files
-	  referenct type xcpt_t and so must include nuttx/irq.h.  This is
+	  reference type xcpt_t and so must include nuttx/irq.h.  This is
 	  Sourceforge bug 25 submitted by Luciano Neri (2014-4-17).
 	* arch/arm/src/stm32/stm32_otgfshost.c:  Some fixes related to low-speed
 	  devices and interrupt endpoints from Leo (2014-4-17).
@@ -7255,3 +7255,4 @@
 	  Ticket #26.  up_prioritize_irq should not be called if
 	  CONFIG_ARCH_IRQPRIO is not defined (2014-4-25).
 
+7.3 2014-xx-xx Gregory Nutt <gnutt@nuttx.org>
