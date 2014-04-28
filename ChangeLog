@@ -7251,7 +7251,7 @@
 	* arch/z16/src/z16f_timerisr.c:  Fix calculation of timer
 	  reload and prescaler.  The timer frequency was way too fast
 	  (2014-4-25).
-	* arch/arm/src/stm32/stm32_otgfsdev.c: Sourceforge Ticket #26.
-	  up_prioritize_irq should not be called if CONFIG_ARCH_IRQPRIO
-	  is not defined (2014-4-25).
+	* arch/arm/src/stm32/stm32_otgfsdev.c and others: Sourceforge
+	  Ticket #26.  up_prioritize_irq should not be called if
+	  CONFIG_ARCH_IRQPRIO is not defined (2014-4-25).
 

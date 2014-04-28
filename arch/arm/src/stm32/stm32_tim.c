@@ -392,7 +392,12 @@ static int stm32_tim_setisr(FAR struct stm32_tim_dev_s *dev,
 
   irq_attach(vectorno, handler);
   up_enable_irq(vectorno);
-//up_prioritize_irq(vectorno, NVIC_SYSH_PRIORITY_DEFAULT);
+
+#ifdef CONFIG_ARCH_IRQPRIO
+  /* Set the interrupt priority */
+
+  up_prioritize_irq(vectorno, NVIC_SYSH_PRIORITY_DEFAULT);
+#endif
   return OK;
 }
 

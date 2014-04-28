@@ -122,6 +122,9 @@ Version 5.0.1
 
   All testing has been performed with ZSD II verion 5.0.1 for the ZNEO.
 
+  There are some problems with this compiler version.  See the section
+  entitled "Patches" below.
+
 Other Versions
 
   If you use any version of ZDS-II other than 5.0.1 or if you install ZDS-II

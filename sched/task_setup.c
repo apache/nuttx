@@ -495,7 +495,7 @@ static int task_tcbargsetup(FAR struct task_tcb_s *tcb,
  * Description:
  *   This functions is called only from task_argsetup() for the case of the
  *   kernel build where the argv[] array and all strings are copied to the
- *   task's stack.  This is done because the TCB (and kernal allocated
+ *   task's stack.  This is done because the TCB (and kernel allocated
  *   strings) are only accessible in kernel-mode.  Data on the stack, on the
  *   other hand, is guaranteed to be accessible no matter what mode the
  *   task runs in.

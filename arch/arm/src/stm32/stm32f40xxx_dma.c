@@ -492,9 +492,11 @@ void weak_function up_dmainitialize(void)
 
       up_enable_irq(dmast->irq);
 
-      /* Set the interrrupt priority */
+#ifdef CONFIG_ARCH_IRQPRIO
+      /* Set the interrupt priority */
 
       up_prioritize_irq(dmast->irq, CONFIG_DMA_PRI);
+#endif
     }
 }
 
