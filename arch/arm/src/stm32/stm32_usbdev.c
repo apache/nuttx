@@ -3867,10 +3867,12 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
       up_enable_irq(STM32_IRQ_USBHP);
       up_enable_irq(STM32_IRQ_USBLP);
 
-      /* Set the interrrupt priority */
+#ifdef CONFIG_ARCH_IRQPRIO
+      /* Set the interrupt priority */
 
       up_prioritize_irq(STM32_IRQ_USBHP, CONFIG_USB_PRI);
       up_prioritize_irq(STM32_IRQ_USBLP, CONFIG_USB_PRI);
+#endif
 
       /* Enable pull-up to connect the device.  The host should enumerate us
        * some time after this
