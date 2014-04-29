@@ -209,8 +209,16 @@ endif
 ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),CODESOURCERYL)
   CROSSDEV ?= arm-none-eabi-
   ARCROSSDEV ?= arm-none-eabi-
-  ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
   MAXOPTIMIZATION ?= -O2
+  ifeq ($(CONFIG_ARCH_CORTEXM4),y)
+    ifeq ($(CONFIG_ARCH_FPU),y)
+      ARCHCPUFLAGS = -mcpu=cortex-m4 -mthumb -march=armv7e-m -mfpu=fpv4-sp-d16 -mfloat-abi=hard
+    else
+      ARCHCPUFLAGS = -mcpu=cortex-m4 -mthumb -march=armv7e-m -mfloat-abi=soft
+    endif
+  else ifeq ($(CONFIG_ARCH_CORTEXM3),y)
+    ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
+  endif
 endif
 
 # CodeSourcery under Windows
