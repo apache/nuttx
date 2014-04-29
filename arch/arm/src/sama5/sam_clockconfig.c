@@ -65,6 +65,16 @@
 #  define NEED_PLLSETUP 1
 #endif
 
+/* Do we need to configure the UPLL */
+
+#if !defined(CONFIG_SAMA5_EHCI) && !defined(CONFIG_SAMA5_OHCI) && \
+    !defined(CONFIG_SAMA5_UDPHS)
+
+   /* No... ignore the board setup */
+
+#  undef BOARD_USE_UPLL
+#endif
+
 /* Problems have been seen when reconfiguring the PLL while executing out
  * of NOR FLASH on CS0.  In that case, we required RAM function support.  The
  * critical functions will be copied from NOR into ISRAM for execution.  This
@@ -103,7 +113,7 @@
  *
  ****************************************************************************/
 
-#if defined(NEED_PLLSETUP)
+#if defined(NEED_PLLSETUP) || defined(BOARD_USE_UPLL)
 static void __ramfunc__ sam_pmcwait(uint32_t bit)
 {
   /* There is no timeout on this wait.  Why not?  Because the symptoms there

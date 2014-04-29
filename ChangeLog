@@ -7256,3 +7256,9 @@
 	  CONFIG_ARCH_IRQPRIO is not defined (2014-4-25).
 
 7.3 2014-xx-xx Gregory Nutt <gnutt@nuttx.org>
+
+	* arch/arm/src/sama5/sam_clockconfig.c:  Needed function sam_pmcwait()
+	  is needed when UDPHS, EHCI, or OHCI is configured but may not be
+	  compiled in due to insufficient conditional logic.  From Luciano Neri
+	  (SourceForge patch #40).
+
