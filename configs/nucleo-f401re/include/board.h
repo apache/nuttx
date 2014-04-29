@@ -204,11 +204,11 @@
 
 /* UARTs */
 
-#define GPIO_USART1_RX   GPIO_USART1_RX_1    /* Console in from IO */
-#define GPIO_USART1_TX   0                   /* USART1 is RX-only */
+#define GPIO_USART1_RX   GPIO_USART1_RX_1    /* PA_10 */
+#define GPIO_USART1_TX   GPIO_USART1_TX_2    /* PB_6  */
 
-#define GPIO_USART2_RX   GPIO_USART2_RX_2
-#define GPIO_USART2_TX   GPIO_USART2_TX_2
+#define GPIO_USART2_RX   GPIO_USART2_RX_1    /* PA_3 */
+#define GPIO_USART2_TX   GPIO_USART2_TX_1    /* PA_2 */
 #define GPIO_USART2_RTS  GPIO_USART2_RTS_2
 #define GPIO_USART2_CTS  GPIO_USART2_CTS_2
 

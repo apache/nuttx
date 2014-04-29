@@ -243,12 +243,12 @@ static bool probe(FAR struct cc3000_config_s *state,int n, bool s)
 {
   if (n == 0)
     {
-      stm32_gpiowrite(GPIO_D0, s);
+      stm32_gpiowrite(GPIO_D14, s);
     }
 
   if (n == 1)
     {
-      stm32_gpiowrite(GPIO_D1, s);
+      stm32_gpiowrite(GPIO_D15, s);
     }
 
   return true;
@@ -284,9 +284,9 @@ int wireless_archinitialize(size_t max_rx_size)
   DEBUGASSERT(CONFIG_CC3000_DEVMINOR == 0);
 
 #ifdef CONFIG_CC3000_PROBES
-  stm32_configgpio(GPIO_D7);
+  stm32_configgpio(GPIO_D14);
   stm32_configgpio(GPIO_D15);
-  stm32_gpiowrite(GPIO_D7, 1);
+  stm32_gpiowrite(GPIO_D14, 1);
   stm32_gpiowrite(GPIO_D15, 1);
 #endif
 
