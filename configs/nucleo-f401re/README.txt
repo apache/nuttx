@@ -350,14 +350,16 @@ Hardware
   SERIAL_TX=PA_2    USER_BUTTON=PC_13
   SERIAL_RX=PA_3    LED1       =PA_5
 
-  A0=PA_0           D0=PA_3            D8 =PA_9
-  A1=PA_1           D1=PA_2            D9 =PC_7
+  A0=PA_0  USART2RX D0=PA_3            D8 =PA_9
+  A1=PA_1  USART2TX D1=PA_2            D9 =PC_7
   A2=PA_4           D2=PA_10   WIFI_CS=D10=PB_6 SPI_CS
   A3=PB_0  WIFI_INT=D3=PB_3            D11=PA_7 SPI_MOSI
   A4=PC_1      SDCS=D4=PB_5            D12=PA_6 SPI_MISO
   A5=PC_0   WIFI_EN=D5=PB_4       LED1=D13=PA_5 SPI_SCK
                LED2=D6=PB_10  I2C1_SDA=D14=PB_9 Probe
                     D7=PA_8   I2C1_SCL=D15=PB_8 Probe
+
+  From: https://mbed.org/platforms/ST-Nucleo-F401RE/
 
   Buttons
   -------

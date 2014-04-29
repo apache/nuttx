@@ -119,13 +119,14 @@ void up_ioinit(void)
    */
 
   up_leds(0,0,0,0);
-  stm32_configgpio(GPIO_A0); /* Probes */
-  stm32_configgpio(GPIO_A1); /* Probes */
-  stm32_configgpio(GPIO_A2); /* Smart Config */
-  stm32_configgpio(GPIO_A3); /* not used */
-  stm32_configgpio(GPIO_D0); /* Sw 1 */
-  stm32_configgpio(GPIO_D1); /* Sw 2 */
-  stm32_configgpio(GPIO_D2); /* Activate */
+  stm32_configgpio(GPIO_A0);       /* Probes */
+  stm32_configgpio(GPIO_A1);       /* Probes */
+  stm32_configgpio(GPIO_A2);       /* Smart Config */
+  stm32_configgpio(GPIO_A3);       /* not used */
+  stm32_configgpio(GPIO_BTN_USER); /* Sw 1 */
+  stm32_configgpio(GPIO_D0);       /* USART2 RX*/
+  stm32_configgpio(GPIO_D1);       /* uSART2 TX*/
+  stm32_configgpio(GPIO_D2);       /* Activate */
 }
 
 /****************************************************************************
@@ -138,10 +139,10 @@ void up_ioinit(void)
 uint8_t up_read_inputs(void)
 {
   uint8_t bits = 0;
-  bits |= stm32_gpioread(GPIO_D0) == 0 ? 1 : 0;
-  bits |= stm32_gpioread(GPIO_D1) == 0 ? 2 : 0;
-  bits |= stm32_gpioread(GPIO_A2) == 0 ? 4 : 0;
-  bits |= stm32_gpioread(GPIO_A3) == 0 ? 8 : 0;
+  bits |= stm32_gpioread(GPIO_D14) == 0 ? 1 : 0;
+  bits |= stm32_gpioread(GPIO_D15) == 0 ? 2 : 0;
+  bits |= stm32_gpioread(GPIO_A2)  == 0 ? 4 : 0;
+  bits |= stm32_gpioread(GPIO_A3)  == 0 ? 8 : 0;
   return bits;
 }
 
@@ -183,11 +184,11 @@ xcpt_t up_irqio(int id, xcpt_t irqhandler)
 
   if (id == 0)
     {
-      oldhandler = stm32_gpiosetevent(GPIO_D0, true, true, true, irqhandler);
+      oldhandler = stm32_gpiosetevent(GPIO_D14, true, true, true, irqhandler);
     }
   else if (id == 1)
     {
-      oldhandler = stm32_gpiosetevent(GPIO_D1, true, true, true, irqhandler);
+      oldhandler = stm32_gpiosetevent(GPIO_D15, true, true, true, irqhandler);
     }
 
   return oldhandler;

@@ -22,7 +22,7 @@
  * - When the I/O is LOW, the LED is off.
  */
 
-#define GPIO_LD2      (GPIO_PORTA | GPIO_PIN13 | GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | GPIO_PULLUP | GPIO_SPEED_50MHz)
+#define GPIO_LD2      (GPIO_PORTA | GPIO_PIN5 | GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | GPIO_PULLUP | GPIO_SPEED_50MHz)
 
 /* Buttons
  *
@@ -40,34 +40,37 @@
  *
  *   +5V
  *   GND
- *   Digital pin  3: IRQ for WiFi
- *   Digital pin  4: Card Select for SD card
- *   Digital pin  5: WiFi enable
- *   Digital pin 10: Chip Select for WiFi
- *   Digital pins 11, 12, 13 for SPI communication (both WiFi and SD).
- *   Digital pin 11:
- *   Digital pin 12:
- *   Digital pin 13:
- *   Even if optional 6-pin SPI header is used, these pins are unavailable for other use.
+ *  SERIAL_TX=PA_2    USER_BUTTON=PC_13
+ *  SERIAL_RX=PA_3            LD2=PA_5
+ *
+ * Analog                         Digital
+ *  A0=PA_0    USART2RX D0=PA_3              D8 =PA_9
+ *  A1=PA_1    USART2TX D1=PA_2              D9 =PC_7
+ *  A2=PA_4             D2=PA_10     WIFI_CS=D10=PB_6 SPI_CS
+ *  A3=PB_0    WIFI_INT=D3=PB_3              D11=PA_7 SPI_MOSI
+ *  A4=PC_1       SD_CS=D4=PB_5              D12=PA_6 SPI_MISO
+ *  A5=PC_0     WIFI_EN=D5=PB_4          LD2=D13=PA_5 SPI_SCK
+ *                 LED2=D6=PB_10    I2C1_SDA=D14=PB_9 WIFI Probe
+ *                      D7=PA_8     I2C1_SCL=D15=PB_8 WIFI Probe
+ *
+ *  mostly from: https://mbed.org/platforms/ST-Nucleo-F401RE/
+ *
  */
 
 #define GPIO_WIFI_INT (GPIO_PORTB | GPIO_PIN3  | GPIO_INPUT        | GPIO_PULLUP | GPIO_EXTI)
 #define GPIO_WIFI_EN  (GPIO_PORTB | GPIO_PIN4  | GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | GPIO_PULLUP | GPIO_SPEED_50MHz)
 #define GPIO_WIFI_CS  (GPIO_PORTB | GPIO_PIN6  | GPIO_OUTPUT_SET   | GPIO_OUTPUT | GPIO_PULLUP | GPIO_SPEED_50MHz)
 
-#if defined(CONFIG_CC3000_PROBES)
 #  define GPIO_D14    (GPIO_PORTB | GPIO_PIN9  | GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | GPIO_PULLUP | GPIO_SPEED_50MHz)
 #  define GPIO_D15    (GPIO_PORTB | GPIO_PIN8  | GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | GPIO_PULLUP | GPIO_SPEED_50MHz)
-#else
-#  define GPIO_D0     (GPIO_PORTA | GPIO_PIN3  | GPIO_INPUT        | GPIO_PULLUP | GPIO_EXTI)
-#  define GPIO_D1     (GPIO_PORTA | GPIO_PIN2  | GPIO_INPUT        | GPIO_PULLUP | GPIO_EXTI)
+#  define GPIO_D0     (GPIO_PORTA | GPIO_PIN3  | GPIO_INPUT        | GPIO_PULLUP )
+#  define GPIO_D1     (GPIO_PORTA | GPIO_PIN2  | GPIO_OUTPUT_CLEAR | GPIO_PULLUP )
 #  define GPIO_D2     (GPIO_PORTA | GPIO_PIN10 | GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | GPIO_PULLUP | GPIO_SPEED_50MHz)
 
 #  define GPIO_A0     (GPIO_PORTA | GPIO_PIN0  | GPIO_OUTPUT_SET   | GPIO_OUTPUT | GPIO_PULLUP | GPIO_SPEED_50MHz)
 #  define GPIO_A1     (GPIO_PORTA | GPIO_PIN1  | GPIO_OUTPUT_SET   | GPIO_OUTPUT | GPIO_PULLUP | GPIO_SPEED_50MHz)
 #  define GPIO_A2     (GPIO_PORTA | GPIO_PIN4  | GPIO_INPUT        | GPIO_PULLUP )
 #  define GPIO_A3     (GPIO_PORTB | GPIO_PIN0  | GPIO_INPUT        | GPIO_PULLUP )
-#endif
 
 /* SPI1 off */
 
@@ -85,9 +88,9 @@
 /* SPI chip selects */
 
 #define GPIO_SPI_CS_WIFI \
-  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_2MHz|GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN13)
+  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_2MHz|GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN6)
 #define GPIO_SPI_CS_SD_CARD \
-  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_2MHz|GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN15)
+  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_2MHz|GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN5)
 
 /* Devices on the onboard bus.
  *
