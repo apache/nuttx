@@ -64,6 +64,7 @@ config MSEC_PER_TICK
 config SYSTEMTICK_EXTCLK
 	bool "Use external clock"
 	default n
+	depends on ARCH_HAVE_EXTCLK
 	---help---
 		Use external clock for system tick. When enabled, the platform-specific
 		logic must start it's own timer interrupt to make periodic calls to the

@@ -1199,6 +1199,7 @@ endmenu # USB Full Speed Device Controller driver (DCD) options
 config SAM34_TC
 	bool
 	default n
+	select ARCH_HAVE_EXTCLK
 
 menu "AT91SAM3/4 Timer/Counter options"
 	depends on SAM34_TC

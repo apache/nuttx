@@ -145,6 +145,10 @@ config ARCH_NAND_HWECC
 	bool
 	default n
 
+config ARCH_HAVE_EXTCLK
+	bool
+	default n
+
 menuconfig PAGING
 	bool "On-demand paging"
 	default n
