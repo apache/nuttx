@@ -105,6 +105,7 @@ struct sam34_lowerhalf_s
   uint32_t adjustment;      /* time lost due to clock resolution truncation (us) */
   uint32_t clkticks;        /* actual clock ticks for current interval */
   bool     started;         /* The timer has been started */
+  uint16_t periphid;        /* peripheral id */
   uint16_t debug;
 };
 
@@ -155,7 +156,11 @@ static const struct timer_ops_s g_tcops =
 
 /* "Lower half" driver state */
 
-static struct sam34_lowerhalf_s g_tcdev;
+/* TODO - allocating all 6 now, even though we might not need them.
+ *        May want to allocate the right number to not be wasteful.
+ */
+
+static struct sam34_lowerhalf_s g_tcdevs[6];
 
 /****************************************************************************
  * Private Functions
@@ -245,7 +250,6 @@ static void sam34_putreg(uint32_t val, uint32_t addr)
 }
 #endif
 
-
 /****************************************************************************
  * Name: sam34_interrupt
  *
@@ -262,14 +266,15 @@ static void sam34_putreg(uint32_t val, uint32_t addr)
 
 static int sam34_interrupt(int irq, FAR void *context)
 {
-  FAR struct sam34_lowerhalf_s *priv = &g_tcdev;
+  FAR struct sam34_lowerhalf_s *priv = &g_tcdevs[irq-SAM_IRQ_TC0];
   uint16_t regval;
 
   tcvdbg("Entry\n");
+  DEBUGASSERT((irq >= SAM_IRQ_TC0) && (irq <= SAM_IRQ_TC5));
 
   /* Check if the interrupt is really pending */
 
-  regval = sam34_getreg(SAM_TC0_SR);
+  regval = sam34_getreg(priv->base + SAM_TC_SR_OFFSET);
   if ((regval & TC_INT_CPCS) != 0)
     {
       uint32_t timeout;
@@ -284,17 +289,17 @@ static int sam34_interrupt(int irq, FAR void *context)
 
           /* Set next interval interval. TODO: make sure the interval is not so soon it will be missed! */
 
-          sam34_putreg(priv->clkticks, SAM_TC0_RC);
+          sam34_putreg(priv->clkticks, priv->base + SAM_TC_RC_OFFSET);
 
           timeout = (1000000ULL * priv->clkticks) / TC_FCLK;    /* trucated timeout */
           priv->adjustment = (priv->adjustment + priv->timeout) - timeout;  /* truncated time to be added to next interval (dither) */
         }
       else /* stop */
         {
-          sam34_stop((FAR struct timer_lowerhalf_s *)&g_tcdev);
+          sam34_stop((FAR struct timer_lowerhalf_s *)priv);
         }
 
-      /* TC_INT_CPCS is cleared by reading SAM_TC0_SR */
+      /* TC_INT_CPCS is cleared by reading SAM_TCx_SR */
     }
 
   return OK;
@@ -323,14 +328,13 @@ static int sam34_start(FAR struct timer_lowerhalf_s *lower)
   tcvdbg("Entry\n");
   DEBUGASSERT(priv);
 
-  if(priv->started)
+  if (priv->started)
     {
       return -EINVAL;
     }
 
-  sam_tc0_enableclk();
-
-  sam34_putreg(TC_CCR_CLKDIS, SAM_TC0_CCR); /* Disable counter */
+  sam_enableperiph0(priv->periphid);                            /* Enable peripheral clock */
+  sam34_putreg(TC_CCR_CLKDIS, priv->base + SAM_TC_CCR_OFFSET);  /* Disable counter */
 
   /* TC_CMR_WAVE - waveform mode
    * TC_CMR_WAVSEL_UPAUTO - reset on RC compare (interval timer)
@@ -338,19 +342,19 @@ static int sam34_start(FAR struct timer_lowerhalf_s *lower)
    */
 
   mr_val |= (TC_CMR_WAVE + TC_CMR_WAVSEL_UPAUTO + TC_CMR_TCCLKS_TIMERCLOCK5);
-  sam34_putreg(mr_val, SAM_TC0_CMR);
+  sam34_putreg(mr_val, priv->base + SAM_TC_CMR_OFFSET);
 
-  sam34_putreg(priv->clkticks, SAM_TC0_RC); /* Set interval */
+  sam34_putreg(priv->clkticks, priv->base + SAM_TC_RC_OFFSET);   /* Set interval */
 
   if (priv->handler)
     {
       /* Clear status and enable interrupt */
 
-      sam34_getreg(SAM_TC0_SR);
-      sam34_putreg(TC_INT_CPCS, SAM_TC0_IER);
+      sam34_getreg(priv->base + SAM_TC_SR_OFFSET);               /* Clear status */
+      sam34_putreg(TC_INT_CPCS, priv->base + SAM_TC_IER_OFFSET); /* Enable interrupt */
     }
 
-  sam34_putreg(TC_CCR_SWTRG + TC_CCR_CLKEN, SAM_TC0_CCR); /* Start counter */
+  sam34_putreg(TC_CCR_SWTRG + TC_CCR_CLKEN, priv->base + SAM_TC_CCR_OFFSET); /* Start counter */
 
   priv->started = true;
   return OK;
@@ -382,9 +386,10 @@ static int sam34_stop(FAR struct timer_lowerhalf_s *lower)
       return -EINVAL;
     }
 
-  sam34_putreg(TC_CCR_CLKDIS, SAM_TC0_CCR); /* Disable counter */
-  sam34_putreg(TC_INT_ALL, SAM_TC0_IDR); /* Disable all ints */
-  sam_tc0_disableclk();
+  sam34_putreg(TC_CCR_CLKDIS, priv->base + SAM_TC_CCR_OFFSET); /* Disable counter */
+  sam34_putreg(TC_INT_ALL, priv->base + SAM_TC_IDR_OFFSET);    /* Disable all ints */
+  sam_disableperiph0(priv->periphid);                          /* Disable peripheral clock */
+
   priv->started = false;
 
   return OK;
@@ -434,7 +439,7 @@ static int sam34_getstatus(FAR struct timer_lowerhalf_s *lower,
 
   /* Get the time remaining until the timer expires (in microseconds) */
 
-  elapsed = sam34_getreg(SAM_TC0_CV);
+  elapsed = sam34_getreg(priv->base + SAM_TC_CV_OFFSET);
   status->timeleft = (priv->timeout * elapsed) / (priv->clkticks + 1); /* TODO - check on this +1 */
 
   tcvdbg("  flags    : %08x\n", status->flags);
@@ -589,31 +594,69 @@ static int sam34_ioctl(FAR struct timer_lowerhalf_s *lower, int cmd,
 
 void sam_tcinitialize(FAR const char *devpath, int irq)
 {
-  FAR struct sam34_lowerhalf_s *priv = &g_tcdev;
+  FAR struct sam34_lowerhalf_s *priv = &g_tcdevs[irq-SAM_IRQ_TC0];
 
   tcvdbg("Entry: devpath=%s\n", devpath);
-
-  /* NOTE we assume that clocking to the IWDG has already been provided by
-   * the RCC initialization logic.
-   */
+  DEBUGASSERT((irq >= SAM_IRQ_TC0) && (irq <= SAM_IRQ_TC5));
 
   /* Initialize the driver state structure.  Here we assume: (1) the state
    * structure lies in .bss and was zeroed at reset time.  (2) This function
    * is only called once so it is never necessary to re-zero the structure.
    */
 
-  priv->ops = &g_tcops;
+  switch(irq)
+    {
+#if defined(CONFIG_SAM34_TC0)
+    case SAM_IRQ_TC0:
+      priv->base = SAM_TC0_BASE;
+      priv->periphid = SAM_PID_TC0;
+      break;
+#endif
 
-  /* TODO: Add irq + switch in sam34_interrupt or something (also need register
-   * base address...
-   */
+#if defined(CONFIG_SAM34_TC1)
+    case SAM_IRQ_TC1:
+      priv->base = SAM_TC1_BASE;
+      priv->periphid = SAM_PID_TC1;
+      break;
+#endif
+
+#if defined(CONFIG_SAM34_TC2)
+    case SAM_IRQ_TC2:
+      priv->base = SAM_TC2_BASE;
+      priv->periphid = SAM_PID_TC2;
+      break;
+#endif
+
+#if defined(CONFIG_SAM34_TC3)
+    case SAM_IRQ_TC3:
+      priv->base = SAM_TC3_BASE;
+      priv->periphid = SAM_PID_TC3;
+      break;
+#endif
+
+#if defined(CONFIG_SAM34_TC4)
+    case SAM_IRQ_TC4:
+      priv->base = SAM_TC4_BASE;
+      priv->periphid = SAM_PID_TC4;
+      break;
+#endif
+
+#if defined(CONFIG_SAM34_TC5)
+    case SAM_IRQ_TC5:
+      priv->base = SAM_TC5_BASE;
+      priv->periphid = SAM_PID_TC5;
+      break;
+#endif
+
+    default:
+      ASSERT(0);
+    }
+
+  priv->ops = &g_tcops;
 
   (void)irq_attach(irq, sam34_interrupt);
 
-  /* enable interrupt.
-   *
-   * TODO: May want to enable/disable in start/stop...
-   */
+  /* Enable NVIC interrupt. */
 
   up_enable_irq(irq);
 
