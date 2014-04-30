@@ -444,54 +444,63 @@ config ARCH_CHIP_STM32F405RG
 	bool "STM32F405RG"
 	select ARCH_CORTEXM4
 	select STM32_STM32F40XX
+	select STM32_STM32F405
 	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F405VG
 	bool "STM32F405VG"
 	select ARCH_CORTEXM4
 	select STM32_STM32F40XX
+	select STM32_STM32F405
 	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F405ZG
 	bool "STM32F405ZG"
 	select ARCH_CORTEXM4
 	select STM32_STM32F40XX
+	select STM32_STM32F405
 	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F407VE
 	bool "STM32F407VE"
 	select ARCH_CORTEXM4
 	select STM32_STM32F40XX
+	select STM32_STM32F407
 	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F407VG
 	bool "STM32F407VG"
 	select ARCH_CORTEXM4
 	select STM32_STM32F40XX
+	select STM32_STM32F407
 	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F407ZE
 	bool "STM32F407ZE"
 	select ARCH_CORTEXM4
 	select STM32_STM32F40XX
+	select STM32_STM32F407
 	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F407ZG
 	bool "STM32F407ZG"
 	select ARCH_CORTEXM4
 	select STM32_STM32F40XX
+	select STM32_STM32F407
 	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F407IE
 	bool "STM32F407IE"
 	select ARCH_CORTEXM4
 	select STM32_STM32F40XX
+	select STM32_STM32F407
 	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F407IG
 	bool "STM32F407IG"
 	select ARCH_CORTEXM4
 	select STM32_STM32F40XX
+	select STM32_STM32F407
 	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F427V
@@ -582,6 +591,7 @@ config STM32_PERFORMANCELINE
 config STM32_HIGHDENSITY
 	bool
 	default n
+	select STM32_HAVE_FSMC
 
 config STM32_MEDIUMDENSITY
 	bool
@@ -595,6 +605,7 @@ config STM32_STM32F20XX
 	bool
 	default n
 	select STM32_HAVE_OTGFS
+	select STM32_HAVE_FSMC
 
 config STM32_STM32F30XX
 	bool
@@ -608,14 +619,29 @@ config STM32_STM32F40XX
 
 config STM32_STM32F401
 	bool
+	default n
+
+config STM32_STM32F405
+	bool
+	default n
+	select STM32_HAVE_FSMC
+
+config STM32_STM32F407
+	bool
+	default n
+	select STM32_HAVE_FSMC
 
 # This is really 427/437, but we treat the two the same.
 config STM32_STM32F427
 	bool
+	default n
+	select STM32_HAVE_FSMC
 
 # This is really 429/439, but we treat the two the same.
 config STM32_STM32F429
 	bool
+	default n
+	select STM32_HAVE_FSMC
 
 config STM32_DFU
 	bool "DFU bootloader"
@@ -632,6 +658,10 @@ config STM32_HAVE_USBDEV
 	default n
 
 config STM32_HAVE_OTGFS
+	bool
+	default n
+
+config STM32_HAVE_FSMC
 	bool
 	default n
 
@@ -742,7 +772,7 @@ config STM32_ETHMAC
 config STM32_FSMC
 	bool "FSMC"
 	default n
-	depends on !STM32_CONNECTIVITYLINE && (STM32_HIGHDENSITY || STM32_STM32F20XX || STM32_STM32F40XX)
+	depends on STM32_HAVE_FSMC
 
 config STM32_HASH
 	bool "HASH"
