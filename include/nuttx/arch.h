@@ -1029,6 +1029,28 @@ void up_cxxinitialize(void);
 
 void sched_process_timer(void);
 
+/************************************************************************
+ * Name: sched_process_cpuload
+ *
+ * Description:
+ *   Collect data that can be used for CPU load measurements.
+ *
+ * Inputs:
+ *   None
+ *
+ * Return Value:
+ *   None
+ *
+ * Assumptions/Limitations:
+ *   This function is called from a timer interrupt handler with all
+ *   interrupts disabled.
+ *
+ ************************************************************************/
+
+#if defined(CONFIG_SCHED_CPULOAD) && defined(CONFIG_SCHED_CPULOAD_EXTCLK)
+void weak_function sched_process_cpuload(void);
+#endif
+
 /****************************************************************************
  * Name: irq_dispatch
  *

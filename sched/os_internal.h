@@ -255,7 +255,7 @@ int  sched_reprioritize(FAR struct tcb_s *tcb, int sched_priority);
 #else
 #  define sched_reprioritize(tcb,sched_priority) sched_setpriority(tcb,sched_priority)
 #endif
-#ifdef CONFIG_SCHED_CPULOAD
+#if defined(CONFIG_SCHED_CPULOAD) && !defined(CONFIG_SCHED_CPULOAD_EXTCLK)
 void weak_function sched_process_cpuload(void);
 #endif
 bool sched_verifytcb(FAR struct tcb_s *tcb);

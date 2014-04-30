@@ -7275,3 +7275,7 @@
 	* configs/sam4s-xplained-pro/Kconfig, nsh/defconfig, and src/sam_tc.c:
 	  The SAM4S Xplained Pro now uses the extended timer/counter features.
 	  From Bob Doiron (2014-4-30).
+	* include/nuttx/arch.h and sched/os_internal.h:  If the CPU load
+	  measurements are being driven by an external clock, then the prototype
+	  for sched_process_cpuload() must be available in include/nuttx/arch.h
+	  (2014-4-30).
