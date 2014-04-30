@@ -110,12 +110,15 @@
 #define W25X_JEDEC_MEMORY_TYPE     0x30  /* W25X memory type */
 #define W25Q_JEDEC_MEMORY_TYPE_A   0x40  /* W25Q memory type */
 #define W25Q_JEDEC_MEMORY_TYPE_B   0x60  /* W25Q memory type */
+#define W25Q_JEDEC_MEMORY_TYPE_C   0x50  /* W25Q memory type */
 
+#define W25_JEDEC_CAPACITY_8MBIT   0x14  /* 256x4096  = 8Mbit memory capacity */
 #define W25_JEDEC_CAPACITY_16MBIT  0x15  /* 512x4096  = 16Mbit memory capacity */
 #define W25_JEDEC_CAPACITY_32MBIT  0x16  /* 1024x4096 = 32Mbit memory capacity */
 #define W25_JEDEC_CAPACITY_64MBIT  0x17  /* 2048x4096 = 64Mbit memory capacity */
 #define W25_JEDEC_CAPACITY_128MBIT 0x18  /* 4096x4096 = 128Mbit memory capacity */
 
+#define NSECTORS_8MBIT             256   /* 256 sectors x 4096 bytes/sector = 1Mb */
 #define NSECTORS_16MBIT            512   /* 512 sectors x 4096 bytes/sector = 2Mb */
 #define NSECTORS_32MBIT            1024  /* 1024 sectors x 4096 bytes/sector = 4Mb */
 #define NSECTORS_64MBIT            2048  /* 2048 sectors x 4096 bytes/sector = 8Mb */
@@ -350,20 +353,31 @@ static inline int w25_readid(struct w25_dev_s *priv)
   /* Check for a valid manufacturer and memory type */
 
   if (manufacturer == W25_JEDEC_MANUFACTURER &&
-      (memory == W25X_JEDEC_MEMORY_TYPE ||
+      (memory == W25X_JEDEC_MEMORY_TYPE   ||
        memory == W25Q_JEDEC_MEMORY_TYPE_A ||
-       memory == W25Q_JEDEC_MEMORY_TYPE_B))
+       memory == W25Q_JEDEC_MEMORY_TYPE_B ||
+       memory == W25Q_JEDEC_MEMORY_TYPE_C))
     {
       /* Okay.. is it a FLASH capacity that we understand? If so, save
        * the FLASH capacity.
        */
+
+      /* 8M-bit / 1M-byte
+       *
+       * W25Q80BV
+       */
+
+      if (capacity == W25_JEDEC_CAPACITY_8MBIT)
+        {
+           priv->nsectors = NSECTORS_8MBIT;
+        }
 
       /* 16M-bit / 2M-byte (2,097,152)
        *
        * W24X16, W25Q16BV, W25Q16CL, W25Q16CV, W25Q16DW
        */
 
-      if (capacity == W25_JEDEC_CAPACITY_16MBIT)
+      else if (capacity == W25_JEDEC_CAPACITY_16MBIT)
         {
            priv->nsectors = NSECTORS_16MBIT;
         }

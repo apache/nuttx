@@ -7264,3 +7264,5 @@
 	* arch/arm/include/stm32/chip.h, src/stm32/Kconfig, stm32_allocateheap.c,
 	  configs/nucleo-f401re/nsh/defconfig, and scripts/ld.script:  Numerous
 	  changes, most correcting memory usage on the Nucleo-F401RE (2014-4-30).
+	* /drivers/mtd/w25.c: Extended by Mark Whitehorn to support the 8Mbit
+	  W25Q80BV part (2014-4-30).
