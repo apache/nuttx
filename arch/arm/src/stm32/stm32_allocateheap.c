@@ -218,23 +218,27 @@
 #      endif
 #    endif
 
-/* All members of both the STM32F20xxx and STM32F40xxx families have 128Kib
+/* Most members of both the STM32F20xxx and STM32F40xxx families have 128Kib
  * in two banks:
  *
- * 1) 112KiB of System SRAM beginning at address 0x2000:0000
- * 2)  16KiB of System SRAM beginning at address 0x2001:c000
+ *   1) 112KiB of System SRAM beginning at address 0x2000:0000
+ *   2)  16KiB of System SRAM beginning at address 0x2001:c000
+ *
+ * The STM32F401 family is an exception and has only 96Kib total on one bank:
+ *
+ *   3)  96KiB of System SRAM beginning at address 0x2000:0000
  *
  * Members of the STM32F40xxx family have an additional 64Kib of CCM RAM
  * for a total of 192KB.
  *
- * 3)  64Kib of CCM SRAM beginning at address 0x1000:0000
+ *   4)  64Kib of CCM SRAM beginning at address 0x1000:0000
  *
  * The STM32F427/437/429/439 parts have another 64KiB of System SRAM for a total
  * of 256KiB.
  *
- * 3)  64Kib of System SRAM beginning at address 0x2002:0000
+ *   5)  64Kib of System SRAM beginning at address 0x2002:0000
  *
- * As determined by ld.script, g_heapbase lies in the 112KiB memory
+ * As determined by the linker script, g_heapbase lies in the 112KiB memory
  * region and that extends to 0x2001:0000.  But the  first and second memory
  * regions are contiguous and treated as one in this logic that extends to
  * 0x2002:0000 (or 0x2003:0000 for the F427/F437/F429/F439).
@@ -257,7 +261,9 @@
 
    /* Set the end of system SRAM */
 
-#  if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
+#  if defined(CONFIG_STM32_STM32F401)
+#    define SRAM1_END 0x20018000
+#  elif defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
 #    define SRAM1_END 0x20030000
 #  else
 #    define SRAM1_END 0x20020000
@@ -287,7 +293,7 @@
     *                  CONFIG_STM32_FSMC_SRAM defined
     *                  CONFIG_STM32_CCMEXCLUDE NOT defined
     *
-    * Let's make sure that all definitions are consitent before doing
+    * Let's make sure that all definitions are consistent before doing
     * anything else
     */
 

@@ -73,7 +73,7 @@
 #if defined(CONFIG_ARCH_CHIP_STM32L151C6) || defined(CONFIG_ARCH_CHIP_STM32L151C8) || \
     defined(CONFIG_ARCH_CHIP_STM32L151CB)
 #  define CONFIG_STM32_STM32L15XX        1   /* STM32L151xx and STM32L152xx family */
-#  define CONFIG_STM32_ENERGYLITE        1   /* STM32L EnergyLite vamily */
+#  define CONFIG_STM32_ENERGYLITE        1   /* STM32L EnergyLite family */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  define CONFIG_STM32_LOWDENSITY        1   /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes
                                               * and all STM32L15xxx */
@@ -111,7 +111,7 @@
 #elif defined(CONFIG_ARCH_CHIP_STM32L151R6) || defined(CONFIG_ARCH_CHIP_STM32L151R8) || \
       defined(CONFIG_ARCH_CHIP_STM32L151RB)
 #  define CONFIG_STM32_STM32L15XX        1   /* STM32L151xx and STM32L152xx family */
-#  define CONFIG_STM32_ENERGYLITE        1   /* STM32L EnergyLite vamily */
+#  define CONFIG_STM32_ENERGYLITE        1   /* STM32L EnergyLite family */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  define CONFIG_STM32_LOWDENSITY        1   /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes
                                               * and all STM32L15xxx */
@@ -149,7 +149,7 @@
 #elif defined(CONFIG_ARCH_CHIP_STM32L151V6) || defined(CONFIG_ARCH_CHIP_STM32L151V8) || \
       defined(CONFIG_ARCH_CHIP_STM32L151VB)
 #  define CONFIG_STM32_STM32L15XX        1   /* STM32L151xx and STM32L152xx family */
-#  define CONFIG_STM32_ENERGYLITE        1   /* STM32L EnergyLite vamily */
+#  define CONFIG_STM32_ENERGYLITE        1   /* STM32L EnergyLite family */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  define CONFIG_STM32_LOWDENSITY        1   /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes
                                               * and all STM32L15xxx */
@@ -187,7 +187,7 @@
 #elif defined(CONFIG_ARCH_CHIP_STM32L152C6) || defined(CONFIG_ARCH_CHIP_STM32L152C8) || \
       defined(CONFIG_ARCH_CHIP_STM32L152CB)
 #  define CONFIG_STM32_STM32L15XX        1   /* STM32L151xx and STM32L152xx family */
-#  define CONFIG_STM32_ENERGYLITE        1   /* STM32L EnergyLite vamily */
+#  define CONFIG_STM32_ENERGYLITE        1   /* STM32L EnergyLite family */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  define CONFIG_STM32_LOWDENSITY        1   /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes
                                               * and all STM32L15xxx */
@@ -225,7 +225,7 @@
 #elif defined(CONFIG_ARCH_CHIP_STM32L152R6) || defined(CONFIG_ARCH_CHIP_STM32L152R8) || \
       defined(CONFIG_ARCH_CHIP_STM32L152RB)
 #  define CONFIG_STM32_STM32L15XX        1   /* STM32L151xx and STM32L152xx family */
-#  define CONFIG_STM32_ENERGYLITE        1   /* STM32L EnergyLite vamily */
+#  define CONFIG_STM32_ENERGYLITE        1   /* STM32L EnergyLite family */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  define CONFIG_STM32_LOWDENSITY        1   /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes
                                               * and all STM32L15xxx */
@@ -263,7 +263,7 @@
 #elif defined(CONFIG_ARCH_CHIP_STM32L152V6) || defined(CONFIG_ARCH_CHIP_STM32L152V8) || \
       defined(CONFIG_ARCH_CHIP_STM32L152VB)
 #  define CONFIG_STM32_STM32L15XX        1   /* STM32L151xx and STM32L152xx family */
-#  define CONFIG_STM32_ENERGYLITE        1   /* STM32L EnergyLite vamily */
+#  define CONFIG_STM32_ENERGYLITE        1   /* STM32L EnergyLite family */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  define CONFIG_STM32_LOWDENSITY        1   /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes
                                               * and all STM32L15xxx */
@@ -303,7 +303,7 @@
 #elif defined(CONFIG_ARCH_CHIP_STM32F100C8) || defined(CONFIG_ARCH_CHIP_STM32F100CB) \
  || defined(CONFIG_ARCH_CHIP_STM32F100R8) || defined(CONFIG_ARCH_CHIP_STM32F100RB)
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  define CONFIG_STM32_STM32F10XX        1   /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  define CONFIG_STM32_MEDIUMDENSITY     1   /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
@@ -338,7 +338,7 @@
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F100V8) || defined(CONFIG_ARCH_CHIP_STM32F100VB)
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  define CONFIG_STM32_STM32F10XX        1   /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  define CONFIG_STM32_MEDIUMDENSITY     1   /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
@@ -376,7 +376,7 @@
 #elif defined(CONFIG_ARCH_CHIP_STM32F100RC) || defined(CONFIG_ARCH_CHIP_STM32F100RD) \
  || defined(CONFIG_ARCH_CHIP_STM32F100RE)
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  define CONFIG_STM32_STM32F10XX        1   /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
@@ -412,7 +412,7 @@
 #elif defined(CONFIG_ARCH_CHIP_STM32F100VC) || defined(CONFIG_ARCH_CHIP_STM32F100VD) \
  || defined(CONFIG_ARCH_CHIP_STM32F100VE)
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  define CONFIG_STM32_STM32F10XX        1   /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
@@ -482,7 +482,7 @@
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F103T8) || defined(CONFIG_ARCH_CHIP_STM32F103TB)
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  define CONFIG_STM32_STM32F10XX        1   /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  define CONFIG_STM32_MEDIUMDENSITY     1   /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
@@ -517,7 +517,7 @@
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F103C8) || defined(CONFIG_ARCH_CHIP_STM32F103CB)
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  define CONFIG_STM32_STM32F10XX        1   /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  define CONFIG_STM32_MEDIUMDENSITY     1   /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
@@ -552,7 +552,7 @@
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F103R8) || defined(CONFIG_ARCH_CHIP_STM32F103RB)
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  define CONFIG_STM32_STM32F10XX        1   /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  define CONFIG_STM32_MEDIUMDENSITY     1   /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
@@ -592,7 +592,7 @@
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F103RET6)
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  define CONFIG_STM32_STM32F10XX        1   /* STM32F10xxx family */
 #  undef CONFIG_STM32_LOWDENSITY             /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
@@ -630,7 +630,7 @@
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F103VCT6) || defined(CONFIG_ARCH_CHIP_STM32F103VET6)
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  define CONFIG_STM32_STM32F10XX        1   /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
@@ -668,7 +668,7 @@
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F103ZET6)
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  define CONFIG_STM32_STM32F10XX        1   /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
@@ -704,7 +704,7 @@
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F105VBT7)
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  define CONFIG_STM32_STM32F10XX        1   /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
@@ -738,7 +738,7 @@
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F107VC)
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  define CONFIG_STM32_STM32F10XX        1   /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
@@ -774,7 +774,7 @@
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F207IG)  /* UFBGA-176 1024Kb FLASH 128Kb SRAM */
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
@@ -810,7 +810,7 @@
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F207ZE)  /* LQFP-144 512Kb FLASH 128Kb SRAM */
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
@@ -856,7 +856,7 @@
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F302CB) || defined(CONFIG_ARCH_CHIP_STM32F302CC)
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
@@ -894,7 +894,7 @@
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F302RB) || defined(CONFIG_ARCH_CHIP_STM32F302RC)
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
@@ -932,7 +932,7 @@
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F302VB) || defined(CONFIG_ARCH_CHIP_STM32F302VC)
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
@@ -970,7 +970,7 @@
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F303CB) || defined(CONFIG_ARCH_CHIP_STM32F303CC)
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
@@ -1008,7 +1008,7 @@
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F303RB) || defined(CONFIG_ARCH_CHIP_STM32F303RC)
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
@@ -1046,7 +1046,7 @@
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F303VB) || defined(CONFIG_ARCH_CHIP_STM32F303VC)
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
@@ -1084,9 +1084,45 @@
 
 /* STM23 F4 Family ******************************************************************/
 
+#elif defined(CONFIG_ARCH_CHIP_STM32F401RE)  /* LQFP64 package, 512Kb FLASH, 96KiB SRAM */
+#  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
+#  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
+#  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
+#  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
+#  undef  CONFIG_STM32_HIGHDENSITY           /* STM32F100x, STM32F101x, and STM32F103x w/ 256/512 Kbytes */
+#  undef  CONFIG_STM32_VALUELINE             /* STM32F100x */
+#  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
+#  undef  CONFIG_STM32_STM32F20XX            /* STM32F205x and STM32F207x */
+#  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
+#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
+#  define STM32_NFSMC                    0   /* No FSMC */
+#  define STM32_NATIM                    1   /* One advanced timers TIM1 */
+#  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
+                                              * 32-bit general timers TIM2 and 5 with DMA */
+#  define STM32_NGTIMNDMA                3   /* 16-bit general timers TIM9-11 without DMA */
+#  define STM32_NBTIM                    0   /* No basic timers */
+#  define STM32_NDMA                     2   /* DMA1-2 with 8 streams each*/
+#  define STM32_NSPI                     4   /* SPI1-4 */
+#  define STM32_NI2S                     2   /* I2S1-2 (multiplexed with SPI2-3) */
+#  define STM32_NUSART                   3   /* USART1, 2 and 6 */
+#  define STM32_NI2C                     3   /* I2C1-3 */
+#  define STM32_NCAN                     0   /* No CAN */
+#  define STM32_NSDIO                    1   /* One SDIO interface */
+#  define STM32_NLCD                     0   /* No LCD */
+#  define STM32_NUSBOTG                  1   /* USB OTG FS (only) */
+#  define STM32_NGPIO                    50  /* GPIOA-H */
+#  define STM32_NADC                     1   /* One 12-bit ADC1, 16 channels */
+#  define STM32_NDAC                     0   /* No DAC */
+#  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
+#  define STM32_NCRC                     1   /* No CRC */
+#  define STM32_NETHERNET                0   /* No Ethernet MAC */
+#  define STM32_NRNG                     0   /* No Random number generator (RNG) */
+#  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
+
 #elif defined(CONFIG_ARCH_CHIP_STM32F405RG)  /* LQFP 64 10x10x1.4 1024Kb FLASH 192Kb SRAM */
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
@@ -1122,7 +1158,7 @@
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F405VG)  /* LQFP 100 14x14x1.4  1024Kb FLASH 192Kb SRAM */
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
@@ -1158,7 +1194,7 @@
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F405ZG)  /* LQFP 144 20x20x1.4 1024Kb FLASH 192Kb SRAM */
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
@@ -1192,45 +1228,9 @@
 #  define STM32_NRNG                     1   /* Random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
-#elif defined(CONFIG_ARCH_CHIP_STM32F401RE)  /* LQFP-100 512Kb FLASH 192Kb SRAM */
-#  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
-#  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
-#  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
-#  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
-#  undef  CONFIG_STM32_HIGHDENSITY           /* STM32F100x, STM32F101x, and STM32F103x w/ 256/512 Kbytes */
-#  undef  CONFIG_STM32_VALUELINE             /* STM32F100x */
-#  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
-#  undef  CONFIG_STM32_STM32F20XX            /* STM32F205x and STM32F207x */
-#  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
-#  define CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
-#  define STM32_NFSMC                    1   /* FSMC */
-#  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
-#  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
-                                              * 32-bit general timers TIM2 and 5 with DMA */
-#  define STM32_NGTIMNDMA                6   /* 16-bit general timers TIM9-14 without DMA */
-#  define STM32_NBTIM                    2   /* Two basic timers, TIM6-7 */
-#  define STM32_NDMA                     2   /* DMA1-2 */
-#  define STM32_NSPI                     3   /* SPI1-3 */
-#  define STM32_NI2S                     2   /* I2S1-2 (multiplexed with SPI2-3) */
-#  define STM32_NUSART                   6   /* USART1-3 and 6, UART 4-5 */
-#  define STM32_NI2C                     3   /* I2C1-3 */
-#  define STM32_NCAN                     2   /* CAN1-2 */
-#  define STM32_NSDIO                    1   /* SDIO */
-#  define STM32_NLCD                     0   /* No LCD */
-#  define STM32_NUSBOTG                  1   /* USB OTG FS/HS */
-#  define STM32_NGPIO                    139 /* GPIOA-I */
-#  define STM32_NADC                     3   /* 12-bit ADC1-3, 16 channels */
-#  define STM32_NDAC                     0   /* 12-bit DAC1-2 */
-#  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
-#  define STM32_NCRC                     1   /* CRC */
-#  define STM32_NETHERNET                0   /* 100/100 Ethernet MAC */
-#  define STM32_NRNG                     1   /* Random number generator (RNG) */
-#  define STM32_NDCMI                    1   /* Digital camera interface (DCMI) */
-
 #elif defined(CONFIG_ARCH_CHIP_STM32F407VE)  /* LQFP-100 512Kb FLASH 192Kb SRAM */
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
@@ -1266,7 +1266,7 @@
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F407VG)  /* LQFP-100 14x14x1.4 1024Kb FLASH 192Kb SRAM */
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
@@ -1302,7 +1302,7 @@
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F407ZE)  /* LQFP-144 512Kb FLASH 192Kb SRAM */
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
@@ -1338,7 +1338,7 @@
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F407ZG)  /* LQFP 144 20x20x1.4 1024Kb FLASH 192Kb SRAM */
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
@@ -1374,7 +1374,7 @@
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F407IE)  /* LQFP 176 24x24x1.4 512Kb FLASH 192Kb SRAM */
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
@@ -1410,7 +1410,7 @@
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F407IG)  /* BGA 176; LQFP 176 24x24x1.4 1024Kb FLASH 192Kb SRAM */
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
@@ -1446,7 +1446,7 @@
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F427I)   /* BGA176; LQFP176 1024/2048KiB flash 256KiB SRAM */
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
@@ -1482,7 +1482,7 @@
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F427Z)   /* LQFP144 1024/2048KiB flash 256KiB SRAM */
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
@@ -1518,7 +1518,7 @@
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F427V)   /* LQFP100 1024/2048KiB flash 256KiB SRAM */
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
@@ -1554,7 +1554,7 @@
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F429I)   /* BGA176; LQFP176 1024/2048KiB flash 256KiB SRAM */
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
@@ -1590,7 +1590,7 @@
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F429Z)   /* LQFP144 1024/2048KiB flash 256KiB SRAM */
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
@@ -1626,7 +1626,7 @@
 
 #elif defined(CONFIG_ARCH_CHIP_STM32F429V)   /* LQFP100 1024/2048KiB flash 256KiB SRAM */
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
-#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite vamily */
+#  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  undef  CONFIG_STM32_STM32F10XX            /* STM32F10xxx family */
 #  undef  CONFIG_STM32_LOWDENSITY            /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
 #  undef  CONFIG_STM32_MEDIUMDENSITY         /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 64/128 Kbytes */
