@@ -437,6 +437,7 @@ config ARCH_CHIP_STM32F401RE
 	bool "STM32F401RE"
 	select ARCH_CORTEXM4
 	select STM32_STM32F40XX
+	select STM32_STM32F401
 	select ARCH_HAVE_FPU
 
 config ARCH_CHIP_STM32F405RG
@@ -604,6 +605,9 @@ config STM32_STM32F40XX
 	bool
 	default n
 	select STM32_HAVE_OTGFS
+
+config STM32_STM32F401
+	bool
 
 # This is really 427/437, but we treat the two the same.
 config STM32_STM32F427
