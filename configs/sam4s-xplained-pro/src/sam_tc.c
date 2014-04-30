@@ -48,6 +48,7 @@
 #include <stdio.h>
 #include <fcntl.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/timer.h>
 #include <nuttx/clock.h>
 #include <nuttx/kthread.h>
