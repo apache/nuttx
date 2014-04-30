@@ -606,11 +606,13 @@ config STM32_STM32F20XX
 	default n
 	select STM32_HAVE_OTGFS
 	select STM32_HAVE_FSMC
+	select STM32_HAVE_CCM
 
 config STM32_STM32F30XX
 	bool
 	default n
 	select STM32_HAVE_USBDEV
+	select STM32_HAVE_CCM
 
 config STM32_STM32F40XX
 	bool
@@ -625,23 +627,27 @@ config STM32_STM32F405
 	bool
 	default n
 	select STM32_HAVE_FSMC
+	select STM32_HAVE_CCM
 
 config STM32_STM32F407
 	bool
 	default n
 	select STM32_HAVE_FSMC
+	select STM32_HAVE_CCM
 
 # This is really 427/437, but we treat the two the same.
 config STM32_STM32F427
 	bool
 	default n
 	select STM32_HAVE_FSMC
+	select STM32_HAVE_CCM
 
 # This is really 429/439, but we treat the two the same.
 config STM32_STM32F429
 	bool
 	default n
 	select STM32_HAVE_FSMC
+	select STM32_HAVE_CCM
 
 config STM32_DFU
 	bool "DFU bootloader"
@@ -1304,8 +1310,8 @@ config ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG
 
 config STM32_CCMEXCLUDE
 	bool "Exclude CCM SRAM from the heap"
-	depends on STM32_STM32F20XX || STM32_STM32F40XX || STM32_STM32F30XX
 	default y if  ARCH_DMA || ELF
+	depends on STM32_HAVE_CCM
 	---help---
 		Exclude CCM SRAM from the HEAP because (1) it cannot be used for DMA
 		and (2) it appears to be impossible to execute ELF modules from CCM

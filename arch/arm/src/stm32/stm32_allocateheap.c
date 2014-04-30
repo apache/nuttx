@@ -63,7 +63,7 @@
  * following definitions must be provided to specify the size and
  * location of internal(system) SRAM:
  *
- * CONFIG_RAM_END            : End address (+1) of SRAM (F1 family only, the
+ * CONFIG_RAM_END             : End address (+1) of SRAM (F1 family only, the
  *                            : F4 family uses the a priori end of SRAM)
  *
  * The F4 family also contains internal CCM SRAM.  This SRAM is different
@@ -148,12 +148,12 @@
 #  undef CONFIG_STM32_CCMEXCLUDE
 #  define CONFIG_STM32_CCMEXCLUDE 1
 
-/* Members of teh STM32F30xxx family has a variable amount of SRAM from 24
- * to 40Kb plus 8KB if CCM SRAM.  No external RAM is supported (the F3 family has no
- * FSMC).
+/* Members of the STM32F30xxx family has a variable amount of SRAM from 24
+ * to 40Kb plus 8KB if CCM SRAM.  No external RAM is supported (the F3 family
+ * has no FSMC).
  *
- * As a complication, CCM SRAM cannot be used for DMA.  So, if STM32 DMA is enabled, CCM SRAM
- * should probably be excluded from the heap.
+ * As a complication, CCM SRAM cannot be used for DMA.  So, if STM32 DMA is
+ * enabled, CCM SRAM should probably be excluded from the heap.
  */
 
 #elif defined(CONFIG_STM32_STM32F30XX)
@@ -252,9 +252,9 @@
 
 #elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
 
-   /* The STM32 F2 has no CCM SRAM */
+   /* The STM32 F2 and the STM32 F401 have no CCM SRAM */
 
-#  ifdef CONFIG_STM32_STM32F20XX
+#  if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F401)
 #    undef CONFIG_STM32_CCMEXCLUDE
 #    define CONFIG_STM32_CCMEXCLUDE 1
 #  endif
