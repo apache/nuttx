@@ -57,6 +57,10 @@
 #include "sam_lowputc.h"
 #include "sam_tc.h"
 
+#if defined(CONFIG_SCHED_CPULOAD) && defined(CONFIG_SCHED_CPULOAD_EXTCLK)
+#  include <os_internal.h>
+#endif
+
 #ifdef CONFIG_TIMER
 
 /****************************************************************************
@@ -81,8 +85,6 @@
 #endif
 
 /* Timer Definitions ********************************************************/
-
-#define TINTERVAL (3042)
 
 /* Debug ********************************************************************/
 /* Non-standard debug that may be enabled just for testing the watchdog
@@ -113,6 +115,12 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+static bool calc_cpuload(FAR uint32_t *next_interval_us)
+{
+  sched_process_cpuload();
+  return TRUE; /* Reload, no change to interval */
+}
 
 /****************************************************************************
  * Public Functions
@@ -165,23 +173,40 @@ int sam_timerinitialize(void)
 
   /* Open the timer device */
 
+#if defined(CONFIG_SCHED_CPULOAD) && defined(CONFIG_SCHED_CPULOAD_EXTCLK)
   tcvdbg("Opening.\n");
-  fd = open(CONFIG_TIMER0_DEVPATH, O_RDONLY);
+
+  fd = open(CONFIG_SAM4S_XPLAINED_PRO_CPULOAD_TIMER_DEVPATH, O_RDONLY);
   if (fd < 0)
     {
-      tcdbg("open %s failed: %d\n", CONFIG_TIMER0_DEVPATH, errno);
+      tcdbg("open %s failed: %d\n", CONFIG_SAM4S_XPLAINED_PRO_CPULOAD_TIMER_DEVPATH, errno);
       goto errout;
     }
 
   /* Set the timeout */
 
   tcvdbg("Timeout = %d.\n", TINTERVAL);
-  ret = ioctl(fd, TCIOC_SETTIMEOUT, (unsigned long)TINTERVAL);
+  ret = ioctl(fd, TCIOC_SETTIMEOUT, (unsigned long)1000000 / CONFIG_SCHED_CPULOAD_TICKSPERSEC);
   if (ret < 0)
     {
       tcdbg("ioctl(TCIOC_SETTIMEOUT) failed: %d\n", errno);
       goto errout_with_dev;
     }
+
+  /* Install user callback */
+
+  {
+    struct timer_capture_s tccb;
+    tccb.newhandler = calc_cpuload;
+    tccb.oldhandler = NULL;
+
+    ret = ioctl(fd, TCIOC_SETHANDLER, (unsigned long)&tccb);
+    if (ret < 0)
+      {
+        tcdbg("ioctl(TCIOC_SETHANDLER) failed: %d\n", errno);
+        goto errout_with_dev;
+      }
+  }
 
   /* Start the timer */
 
@@ -192,13 +217,17 @@ int sam_timerinitialize(void)
       tcdbg("ioctl(TCIOC_START) failed: %d\n", errno);
       goto errout_with_dev;
     }
-  
-  return OK;
 
+  goto success;
 errout_with_dev:
   close(fd);
 errout:
   return ERROR;
+#endif
+
+success:
+  return OK;
+
 }
 
 #endif /* CONFIG_TIMER */
