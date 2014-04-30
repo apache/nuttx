@@ -116,11 +116,26 @@
  * Private Functions
  ****************************************************************************/
 
+#if defined(CONFIG_SYSTEMTICK_EXTCLK) && !defined(CONFIG_SUPPRESS_INTERRUPTS) && \
+    !defined(CONFIG_SUPPRESS_TIMER_INTS)
+
+static bool systemtick(FAR uint32_t *next_interval_us)
+{
+  sched_process_timer();
+  return true; // reload, no change to interval
+}
+
+#endif /* CONFIG_SYSTEMTICK_EXTCLK && !CONFIG_SUPPRESS_INTERRUPTS && !CONFIG_SUPPRESS_TIMER_INTS */
+
+#if defined(CONFIG_SCHED_CPULOAD) && defined(CONFIG_SCHED_CPULOAD_EXTCLK)
+
 static bool calc_cpuload(FAR uint32_t *next_interval_us)
 {
   sched_process_cpuload();
   return TRUE; /* Reload, no change to interval */
 }
+
+#endif /* CONFIG_SCHED_CPULOAD && CONFIG_SCHED_CPULOAD_EXTCLK */
 
 /****************************************************************************
  * Public Functions
@@ -141,52 +156,104 @@ int sam_timerinitialize(void)
 
   /* Initialize and register the timer devices */
 
-#if defined(CONFIG_SAM34_TC0) 
+#if defined(CONFIG_SAM34_TC0)
   tcvdbg("Initializing %s...\n", CONFIG_TIMER0_DEVPATH);
   sam_tcinitialize(CONFIG_TIMER0_DEVPATH, SAM_IRQ_TC0);
 #endif
 
-#if defined(CONFIG_SAM34_TC1) 
+#if defined(CONFIG_SAM34_TC1)
   tcvdbg("Initializing %s...\n", CONFIG_TIMER1_DEVPATH);
   sam_tcinitialize(CONFIG_TIMER1_DEVPATH, SAM_IRQ_TC1);
 #endif
 
-#if defined(CONFIG_SAM34_TC2) 
+#if defined(CONFIG_SAM34_TC2)
   tcvdbg("Initializing %s...\n", CONFIG_TIMER2_DEVPATH);
   sam_tcinitialize(CONFIG_TIMER2_DEVPATH, SAM_IRQ_TC2);
 #endif
 
-#if defined(CONFIG_SAM34_TC3) 
+#if defined(CONFIG_SAM34_TC3)
   tcvdbg("Initializing %s...\n", CONFIG_TIMER3_DEVPATH);
   sam_tcinitialize(CONFIG_TIMER3_DEVPATH, SAM_IRQ_TC3);
 #endif
 
-#if defined(CONFIG_SAM34_TC4) 
+#if defined(CONFIG_SAM34_TC4)
   tcvdbg("Initializing %s...\n", CONFIG_TIMER4_DEVPATH);
   sam_tcinitialize(CONFIG_TIMER4_DEVPATH, SAM_IRQ_TC4);
 #endif
 
-#if defined(CONFIG_SAM34_TC5) 
+#if defined(CONFIG_SAM34_TC5)
   tcvdbg("Initializing %s...\n", CONFIG_TIMER5_DEVPATH);
   sam_tcinitialize(CONFIG_TIMER5_DEVPATH, SAM_IRQ_TC5);
 #endif
 
-  /* Open the timer device */
+#if defined(CONFIG_SYSTEMTICK_EXTCLK) && !defined(CONFIG_SUPPRESS_INTERRUPTS) && \
+    !defined(CONFIG_SUPPRESS_TIMER_INTS)
+  /* System Timer Initialization */
 
-#if defined(CONFIG_SCHED_CPULOAD) && defined(CONFIG_SCHED_CPULOAD_EXTCLK)
-  tcvdbg("Opening.\n");
+  tcvdbg("Opening %s\n", CONFIG_SAM4S_XPLAINED_PRO_SCHED_TIMER_DEVPATH);
 
-  fd = open(CONFIG_SAM4S_XPLAINED_PRO_CPULOAD_TIMER_DEVPATH, O_RDONLY);
+  fd = open(CONFIG_SAM4S_XPLAINED_PRO_SCHED_TIMER_DEVPATH, O_RDONLY);
   if (fd < 0)
     {
-      tcdbg("open %s failed: %d\n", CONFIG_SAM4S_XPLAINED_PRO_CPULOAD_TIMER_DEVPATH, errno);
+      tcdbg("open %s failed: %d\n",
+            CONFIG_SAM4S_XPLAINED_PRO_SCHED_TIMER_DEVPATH, errno);
       goto errout;
     }
 
   /* Set the timeout */
 
-  tcvdbg("Timeout = %d.\n", TINTERVAL);
-  ret = ioctl(fd, TCIOC_SETTIMEOUT, (unsigned long)1000000 / CONFIG_SCHED_CPULOAD_TICKSPERSEC);
+  tcvdbg("Interval = %d us.\n",  (unsigned long)MSEC_PER_TICK * 1000);
+  ret = ioctl(fd, TCIOC_SETTIMEOUT, (unsigned long)MSEC_PER_TICK * 1000);
+  if (ret < 0)
+    {
+      tcdbg("ioctl(TCIOC_SETTIMEOUT) failed: %d\n", errno);
+      goto errout_with_dev;
+    }
+
+  /* install user callback */
+  {
+    struct timer_capture_s tccb;
+    tccb.newhandler = systemtick;
+    tccb.oldhandler = NULL;
+
+    ret = ioctl(fd, TCIOC_SETHANDLER, (unsigned long)&tccb);
+    if (ret < 0)
+      {
+        tcdbg("ioctl(TCIOC_SETHANDLER) failed: %d\n", errno);
+        goto errout_with_dev;
+      }
+  }
+
+  /* Start the timer */
+
+  tcvdbg("Starting.\n");
+  ret = ioctl(fd, TCIOC_START, 0);
+  if (ret < 0)
+    {
+      tcdbg("ioctl(TCIOC_START) failed: %d\n", errno);
+      goto errout_with_dev;
+    }
+#endif
+
+#if defined(CONFIG_SCHED_CPULOAD) && defined(CONFIG_SCHED_CPULOAD_EXTCLK)
+  /* CPU Load initialization */
+
+  tcvdbg("Opening %s\n", CONFIG_SAM4S_XPLAINED_PRO_CPULOAD_TIMER_DEVPATH);
+
+  fd = open(CONFIG_SAM4S_XPLAINED_PRO_CPULOAD_TIMER_DEVPATH, O_RDONLY);
+  if (fd < 0)
+    {
+      tcdbg("open %s failed: %d\n",
+            CONFIG_SAM4S_XPLAINED_PRO_CPULOAD_TIMER_DEVPATH, errno);
+      goto errout;
+    }
+
+  /* Set the timeout */
+
+  tcvdbg("Interval = %d us.\n",  (unsigned long)1000000 / CONFIG_SCHED_CPULOAD_TICKSPERSEC);
+
+  ret = ioctl(fd, TCIOC_SETTIMEOUT,
+             (unsigned long)1000000 / CONFIG_SCHED_CPULOAD_TICKSPERSEC);
   if (ret < 0)
     {
       tcdbg("ioctl(TCIOC_SETTIMEOUT) failed: %d\n", errno);

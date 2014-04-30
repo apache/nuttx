@@ -61,6 +61,16 @@ config MSEC_PER_TICK
 		may be defined to inform NuttX that the processor hardware is providing
 		system timer interrupts at some interrupt interval other than 10 msec.
 
+config SYSTEMTICK_EXTCLK
+	bool "Use external clock"
+	default n
+	---help---
+		Use external clock for system tick. When enabled, the platform-specific
+		logic must start it's own timer interrupt to make periodic calls to the
+		sched_process_timer() or the functions called within. The purpose is
+		to move the scheduling off the processor to enter low power states that
+		would disable that clock. Platform-specific logic must also provide
+
 config SYSTEM_TIME64
 	bool "64-bit system clock"
 	default n
