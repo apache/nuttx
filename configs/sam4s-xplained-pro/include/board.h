@@ -222,12 +222,12 @@
 #define LED_STARTED          0 /* NuttX has been started    OFF             */
 #define LED_HEAPALLOCATE     0 /* Heap has been allocated   OFF             */
 #define LED_IRQSENABLED      0 /* Interrupts enabled        OFF             */
-#define LED_STACKCREATED     0 /* Idle stack created        ON              */
-#define LED_INIRQ            0 /* In an interrupt           No change       */
-#define LED_SIGNAL           0 /* In a signal handler       No change       */
-#define LED_ASSERTION        0 /* An assertion failed       No change       */
-#define LED_PANIC            0 /* The system has crashed    OFF             */
-#define LED_IDLE             0 /* MCU is is sleep mode      Not used        */
+#define LED_STACKCREATED     1 /* Idle stack created        ON              */
+#define LED_INIRQ            2 /* In an interrupt           OFF             */
+#define LED_SIGNAL           2 /* In a signal handler       OFF             */
+#define LED_ASSERTION        4 /* An assertion failed       No change       */
+#define LED_PANIC            3 /* The system has crashed    Flash @ 250ms   */
+#define LED_IDLE             4 /* MCU is is sleep mode      Not used        */
 
 /* Thus if D301 is statically on, NuttX has successfully booted and is,
  * apparently, running normmally.
