@@ -151,12 +151,6 @@ int nsh_archinitialize(void)
     }
 #endif
 
-#ifdef CONFIG_TIMER
-  /* Registers the timer driver and starts an async interrupt. */
-
-  sam_timerinitialize();
-#endif
-
 #ifdef HAVE_USBMONITOR
   /* Start the USB Monitor */
 

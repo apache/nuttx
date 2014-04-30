@@ -92,9 +92,16 @@ void sam_boardinitialize(void)
 void board_initialize(void)
 {
 #if (defined(CONFIG_SAM34_WDT) && !defined(CONFIG_WDT_DISABLE_ON_RESET))
-  /* Enable watchdog timer kicker kernel thread. */
+  /* Configure watchdog timer and enable kicker kernel thread. */
 
   DEBUGASSERT(up_wdginitialize() >= 0);
 #endif
+
+#ifdef CONFIG_TIMER
+  /* Registers the timers and starts any async processes (which may include the scheduler) */
+
+  sam_timerinitialize();
+#endif
+
 }
 #endif /* CONFIG_BOARD_INITIALIZE */
