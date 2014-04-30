@@ -475,45 +475,54 @@ config SAM34_SSC
 config SAM34_TC0
 	bool "Timer/Counter 0 (TC0)"
 	default n
+	select SAM34_TC
 
 config SAM34_TC1
 	bool "Timer/Counter 1 (TC1)"
 	default n
+	select SAM34_TC
 
 config SAM34_TC2
 	bool "Timer/Counter 2 (TC2)"
 	default n
 	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S || ARCH_CHIP_SAM4E
+	select SAM34_TC
 
 config SAM34_TC3
 	bool "Timer/Counter 3 (TC3)"
 	default n
 	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S || ARCH_CHIP_SAM4E
+	select SAM34_TC
 
 config SAM34_TC4
 	bool "Timer/Counter 4 (TC4)"
 	default n
 	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S || ARCH_CHIP_SAM4E
+	select SAM34_TC
 
 config SAM34_TC5
 	bool "Timer/Counter 5 (TC5)"
 	default n
 	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S || ARCH_CHIP_SAM4E
+	select SAM34_TC
 
 config SAM34_TC6
 	bool "Timer/Counter 6 (TC6)"
 	default n
 	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4E
+	select SAM34_TC
 
 config SAM34_TC7
 	bool "Timer/Counter 7 (TC7)"
 	default n
 	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4E
+	select SAM34_TC
 
 config SAM34_TC8
 	bool "Timer/Counter 6 (TC8)"
 	default n
 	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4E
+	select SAM34_TC
 
 config SAM34_TRNG
 	bool "True Random Number Generator (TRNG)"
@@ -1177,8 +1186,8 @@ config SAM34_HSMCI_CMDDEBUG
 endmenu # HSMCI device driver options
 endif # SAM34_HSMCI
 
-if SAM34_UDP
 menu "AT91SAM3/4 USB Full Speed Device Controller driver (DCD) options"
+	depends on SAM34_UDP
 
 config SAM34_UDP_REGDEBUG
 	bool "Enable low-level UDP register debug"
@@ -1186,10 +1195,23 @@ config SAM34_UDP_REGDEBUG
 	depends on DEBUG
 
 endmenu # USB Full Speed Device Controller driver (DCD) options
-endif # SAM34_UDP
 
-if SAM34_WDT
+config SAM34_TC
+	bool
+	default n
+
+menu "AT91SAM3/4 Timer/Counter options"
+	depends on SAM34_TC
+
+config SAM34_TC_REGDEBUG
+	bool "Enable low-level timer/counter register debug"
+	default n
+	depends on DEBUG
+
+endmenu # USB Full Speed Device Controller driver (DCD) options
+
 menu "AT91SAM3/4 Watchdog Configuration"
+	depends on SAM34_WDT
 
 config WDT_ENABLED_ON_RESET
 	bool "Watchdog Enabled on reset"
@@ -1248,6 +1270,6 @@ config WDT_THREAD_PRIORITY
 config WDT_THREAD_STACKSIZE
 	int "Watchdog Thread Stacksize"
 	default 1024
+
 endif # WDT_THREAD
 endmenu #"AT91SAM3/4 Watchdog device driver options"
-endif # SAM34_WDT
