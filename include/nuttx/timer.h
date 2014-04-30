@@ -55,7 +55,7 @@
 /* The timer driver uses a standard character driver framework.  However,
  * since the timer driver is a device control interface and not a data
  * transfer interface, the majority of the functionality is implemented in
- * driver ioctl calls.  The timer ioctl commands are lised below:
+ * driver ioctl calls.  The timer ioctl commands are listed below:
  *
  * These are detected and handled by the "upper half" timer driver.
  *
@@ -67,18 +67,21 @@
  *                    Argument:  A writeable pointer to struct timer_status_s.
  * TCIOC_SETTIMEOUT - Reset the timer timeout to this value
  *                    Argument: A 32-bit timeout value in microseconds.
- * TCIOC_CAPTURE    - Do not reset.  Instead, called this handler.
+ * TCIOC_SETHANDLER - Call this handler on timer expiration
  *                    Argument: A pointer to struct timer_capture_s.
  *
  * WARNING: May change TCIOC_SETTIMEOUT to pass pointer to 64bit nanoseconds
  * or timespec structure.
+ *
+ * NOTE: This ioctl cannot be support in the kernel build mode. In that
+ * case direct callbacks from kernel space into user space is forbidden.
  */
 
 #define TCIOC_START      _TCIOC(0x001)
 #define TCIOC_STOP       _TCIOC(0x002)
 #define TCIOC_GETSTATUS  _TCIOC(0x003)
 #define TCIOC_SETTIMEOUT _TCIOC(0x004)
-#define TCIOC_CAPTURE    _TCIOC(0x005)
+#define TCIOC_SETHANDLER _TCIOC(0x005)
 
 /* Bit Settings *************************************************************/
 /* Bit settings for the struct timer_status_s flags field */
@@ -90,12 +93,19 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
-/* This is the type of the argument passed to the TCIOC_CAPTURE ioctl */
+
+/* User function prototype. Returns true to reload the timer, and the
+ * function can modify the next interval if desired.
+ */
+
+typedef bool (*tccb_t)(FAR uint32_t *next_interval_us);
+
+/* This is the type of the argument passed to the TCIOC_SETHANDLER ioctl */
 
 struct timer_capture_s
 {
-  CODE xcpt_t newhandler;   /* The new timer capture handler */
-  CODE xcpt_t oldhandler;   /* The previous timer capture handler (if any) */
+  CODE tccb_t newhandler;   /* The new timer capture handler */
+  CODE tccb_t oldhandler;   /* The previous timer capture handler (if any) */
 };
 
 /* This is the type of the argument passed to the TCIOC_GETSTATUS ioctl and
@@ -140,8 +150,8 @@ struct timer_ops_s
    * NOTE:  Providing handler==NULL disable.
    */
 
-  CODE xcpt_t (*capture)(FAR struct timer_lowerhalf_s *lower,
-                         CODE xcpt_t handler);
+  CODE tccb_t (*capture)(FAR struct timer_lowerhalf_s *lower,
+                         CODE tccb_t handler);
 
   /* Any ioctl commands that are not recognized by the "upper-half" driver
    * are forwarded to the lower half driver through this method.

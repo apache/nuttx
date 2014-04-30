@@ -372,12 +372,16 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       }
       break;
 
-    /* cmd:         TCIOC_CAPTURE
-     * Description: Called this handler on timeout
+    /* cmd:         TCIOC_SETHANDLER
+     * Description: Call this handler on timeout
      * Argument:    A pointer to struct timer_capture_s.
+     *
+     * NOTE: This ioctl cannot be support in the kernel build mode. In that
+     * case direct callbacks from kernel space into user space is forbidden.
      */
 
-    case TCIOC_CAPTURE:
+#ifndef CONFIG_NUTTX_KERNEL
+    case TCIOC_SETHANDLER:
       {
         FAR struct timer_capture_s *capture;
 
@@ -406,7 +410,7 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           }
       }
       break;
-
+#endif
 
     /* Any unrecognized IOCTL commands might be platform-specific ioctl commands */
 
