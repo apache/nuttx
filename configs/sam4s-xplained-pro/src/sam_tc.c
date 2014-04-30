@@ -57,10 +57,6 @@
 #include "sam_lowputc.h"
 #include "sam_tc.h"
 
-#if defined(CONFIG_SCHED_CPULOAD) && defined(CONFIG_SCHED_CPULOAD_EXTCLK)
-#  include <os_internal.h>
-#endif
-
 #ifdef CONFIG_TIMER
 
 /****************************************************************************
