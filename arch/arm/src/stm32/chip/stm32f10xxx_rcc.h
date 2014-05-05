@@ -209,8 +209,8 @@
 #define RCC_APB2RSTR_IOPCRST        (1 << 4)  /* Bit 4: IO port C reset */
 #define RCC_APB2RSTR_IOPDRST        (1 << 5)  /* Bit 5: IO port D reset */
 #define RCC_APB2RSTR_IOPERST        (1 << 6)  /* Bit 6: IO port E reset */
-#define TCC_APB2RSTR_IOPFRST        (1 << 7)  /* Bit 7: IO port F reset */
-#define TCC_APB2RSTR_IOPGRST        (1 << 8)  /* Bit 8: IO port G reset */
+#define RCC_APB2RSTR_IOPFRST        (1 << 7)  /* Bit 7: IO port F reset */
+#define RCC_APB2RSTR_IOPGRST        (1 << 8)  /* Bit 8: IO port G reset */
 #define RCC_APB2RSTR_ADC1RST        (1 << 9)  /* Bit 9: ADC 1 interface reset */
 #ifndef CONFIG_STM32_VALUELINE
 #  define RCC_APB2RSTR_ADC2RST      (1 << 10) /* Bit 10: ADC 2 interface reset */
