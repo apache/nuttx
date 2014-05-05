@@ -7279,3 +7279,9 @@
 	  measurements are being driven by an external clock, then the prototype
 	  for sched_process_cpuload() must be available in include/nuttx/arch.h
 	  (2014-4-30).
+	* Documentation/NuttShell.html and many defconfig files:  The alternate
+	  console device CONFIG_NSH_CONDEV must not be defined unconditionally.
+	  This causes errors when using Telnet sessions.  This was solved by
+	  adding CONFIG_NSH_ALTCONDEV: CONFIG_NSH_ALTCONDEV enables or disables
+	  the feature then, if enabled, CONFIG_NSH_CONDEV provides the alternative
+	  console device name (2014-5-5).

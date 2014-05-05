@@ -3007,8 +3007,8 @@ set FOOBAR ABC_${FOO}_${BAR}
         <li>
           <code>CONFIG_NSH_USBCONSOLE</code>.
           If defined, then the an arbitrary USB device may be used to as the NSH console.
-          In this case, <code>CONFIG_NSH_CONDEV</code> must be defined to indicate which USB device to use as the console.
-          The advantage of using a device other that /dev/console is that normal debug output can not use /dev/console while NSH uses <code>CONFIG_NSH_USBCONDEV</code>.
+          In this case, <code>CONFIG_NSH_USBCONDEV</code> must be defined to indicate which USB device to use as the console.
+          The advantage of using a device other that <code>/dev/console</code> is that normal debug output can then use <code>/dev/console</code> while NSH uses <code>CONFIG_NSH_USBCONDEV</code>.
           <p>
           <code>CONFIG_NSH_USBCONDEV</code>.
           If <code>CONFIG_NSH_USBCONSOLE</code> is set to 'y', then <code>CONFIG_NSH_USBCONDEV</code> must also be set to select the USB device used to support the NSH console.
@@ -3053,20 +3053,29 @@ set FOOBAR ABC_${FOO}_${BAR}
     </td>
   </tr>
   <tr>
-    <td valign="top"><b><code>CONFIG_NSH_CONDEV</code></b></td>
+    <td valign="top"><b><code>CONFIG_NSH_ALTCONDEV</code></b> and <b><code>CONFIG_NSH_CONDEV</code></b></td>
     <td>
-      If <code>CONFIG_NSH_CONSOLE</code> is set to <i>y</i>, then <code>CONFIG_NSH_CONDEV</code>
-      may also be set to select the serial device used to support the NSH console.
-      This should be set to the quoted name of a readable/write-able character driver such as:
+      If <code>CONFIG_NSH_CONSOLE</code> is set to <i>y</i>, then <code>CONFIG_NSH_ALTCONDEV</code>
+      may also be selected to enable use of an alternate character device to support the NSH console.
+      If <code>CONFIG_NSH_ALTCONDEV</code> is selected, then <code>CONFIG_NSH_CONDEV</code> holds the quoted name of a readable/write-able character driver such as:
       <code>CONFIG_NSH_CONDEV=&quot;/dev/ttyS1&quot;</code>.
       This is useful, for example, to separate the NSH command line from the system console
       when the system console is used to provide debug output.
       Default:  <code>stdin</code> and <code>stdout</code> (probably &quot;<code>/dev/console</code>&quot;)
       <ul><small>
-        NOTE: When any other device other than <code>/dev/console</code> is used for a user interface,
-        (1) linefeeds (<code>\n</code>) will not be expanded to carriage return / linefeeds (<code>\r\n</code>).
-        You will need to configure your terminal program to account for this.
-        And (2) input is not automatically echoed so you will have to turn local echo on.
+        <li>
+          <b>NOTE 1:</b>
+          When any other device other than <code>/dev/console</code> is used for a user interface,
+          (1) linefeeds (<code>\n</code>) will not be expanded to carriage return / linefeeds (<code>\r\n</code>).
+          You will need to configure your terminal program to account for this.
+          And (2) input is not automatically echoed so you will have to turn local echo on.
+        </li>
+        <li>
+          <b>NOTE 2:</b>
+          This option forces the console of all sessions to use NSH_CONDEV.
+          Hence, this option only makes sense for a system that supports only a single session.
+          This option is, in particular, incompatible with Telnet sessions because each Telnet session must use a different console device.
+        </li>
       </small></ul>
     </td>
   <tr>
