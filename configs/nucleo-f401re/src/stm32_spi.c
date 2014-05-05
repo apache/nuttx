@@ -78,6 +78,18 @@
 #endif
 
 /************************************************************************************
+ * Public Data
+ ************************************************************************************/
+/* Global driver instances */
+
+#ifdef CONFIG_STM32_SPI1
+struct spi_dev_s *g_spi1;
+#endif
+#ifdef CONFIG_STM32_SPI2
+struct spi_dev_s *g_spi2;
+#endif
+
+/************************************************************************************
  * Public Functions
  ************************************************************************************/
 
@@ -92,11 +104,29 @@
 void weak_function stm32_spiinitialize(void)
 {
 #ifdef CONFIG_STM32_SPI1
+  /* Configure SPI-based devices */
+
+  g_spi1 = up_spiinitialize(1);
+  if (!g_spi1)
+    {
+      message("[boot] FAILED to initialize SPI port 1\n");
+      return -ENODEV;
+    }
+
+#ifdef CONFIG_WL_CC3000
   stm32_configgpio(GPIO_SPI_CS_WIFI);
+#endif
+
+#ifdef HAVE_MMCSD
   stm32_configgpio(GPIO_SPI_CS_SD_CARD);
+#endif
 #endif
 
 #ifdef CONFIG_STM32_SPI2
+  /* Configure SPI-based devices */
+
+  g_spi2 = up_spiinitialize(2);
+
   /* Setup CS, EN & IRQ line IOs */
 
 #ifdef CONFIG_WL_CC3000
@@ -137,22 +167,19 @@ void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sele
 {
   spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
-  switch (devid)
+#ifdef CONFIG_WL_CC3000
+  if (devid == SPIDEV_WIRELESS)
     {
-    case SPIDEV_WIRELESS:
-      /* Making sure the other peripherals are not selected */
-
       stm32_gpiowrite(GPIO_SPI_CS_WIFI, !selected);
-      stm32_gpiowrite(GPIO_SPI_CS_SD_CARD, true);
-      break;
-
-    case SPIDEV_MMCSD:
-      /* Making sure the other peripherals are not selected */
-
-      stm32_gpiowrite(GPIO_SPI_CS_WIFI, true);
-      stm32_gpiowrite(GPIO_SPI_CS_SD_CARD, !selected);
-      break;
     }
+  else
+#endif
+#ifdef HAVE_MMCSD
+  if (devid == SPIDEV_MMCSD)
+    {
+      stm32_gpiowrite(GPIO_SPI_CS_SD_CARD, !selected);
+    }
+#endif
 }
 
 uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
@@ -166,7 +193,7 @@ void stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sele
 {
   spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
-#if defined(CONFIG_WL_CC3000)
+#ifdef CONFIG_WL_CC3000
   if (devid == SPIDEV_WIRELESS)
     {
       stm32_gpiowrite(GPIO_WIFI_CS, !selected);

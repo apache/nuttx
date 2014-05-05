@@ -194,7 +194,8 @@
 
 #define DMAMAP_SDIO DMAMAP_SDIO_1
 
-// need to VERIFY fwb
+/* Need to VERIFY fwb */
+
 #define DMACHAN_SPI1_RX DMAMAP_SPI1_RX_1
 #define DMACHAN_SPI1_TX DMAMAP_SPI1_TX_1
 #define DMACHAN_SPI2_RX DMAMAP_SPI2_RX
@@ -202,29 +203,37 @@
 
 /* Alternate function pin selections ************************************************/
 
-/* UARTs */
+/* USART1:
+ *   RXD: PA11  CN10 pin 14
+ *        PB7   CN7 pin 21
+ *   TXD: PA10  CN9 pin 3, CN10 pin 33
+ *        PB6   CN5 pin 3, CN10 pin 17
+ */
 
-#define GPIO_USART1_RX   GPIO_USART1_RX_1    /* PA_10 */
-#define GPIO_USART1_TX   GPIO_USART1_TX_2    /* PB_6  */
+#define GPIO_USART1_RX   GPIO_USART1_RX_1    /* PA10 */
+#define GPIO_USART1_TX   GPIO_USART1_TX_2    /* PA9  */
 
-#define GPIO_USART2_RX   GPIO_USART2_RX_1    /* PA_3 */
-#define GPIO_USART2_TX   GPIO_USART2_TX_1    /* PA_2 */
+/* USART2:
+ *   RXD: PA3   CN9 pin 1 (See SB13, 14, 62, 63). CN10 pin 37
+ *        PD6
+ *   TXD: PA2   CN9 pin 2(See SB13, 14, 62, 63). CN10 pin 35
+ *        PD5
+ */
+
+#define GPIO_USART2_RX   GPIO_USART2_RX_1    /* PA3 */
+#define GPIO_USART2_TX   GPIO_USART2_TX_1    /* PA2 */
 #define GPIO_USART2_RTS  GPIO_USART2_RTS_2
 #define GPIO_USART2_CTS  GPIO_USART2_CTS_2
 
-#define GPIO_USART3_RX   GPIO_USART3_RX_3
-#define GPIO_USART3_TX   GPIO_USART3_TX_3
-#define GPIO_USART2_RTS  GPIO_USART2_RTS_2
-#define GPIO_USART2_CTS  GPIO_USART2_CTS_2
+/* USART6:
+ *  RXD: PC7    CN5 pin2, CN10 pin 19
+ *       PA12   CN10, pin 12
+ *  TXD: PC6    CN10, pin 4
+ *       PA11   CN10, pin 14
+ */
 
-#define GPIO_UART4_RX    GPIO_UART4_RX_1
-#define GPIO_UART4_TX    GPIO_UART4_TX_1
-
-#define GPIO_USART6_RX   GPIO_USART6_RX_1
-#define GPIO_USART6_TX   GPIO_USART6_TX_1
-
-#define GPIO_UART7_RX    GPIO_UART7_RX_1
-#define GPIO_UART7_TX    GPIO_UART7_TX_1
+#define GPIO_USART6_RX   GPIO_USART6_RX_1    /* PC7 */
+#define GPIO_USART6_TX   GPIO_USART6_TX_1    /* PC6 */
 
 /* UART8 has no alternate pin config */
 

@@ -27,14 +27,14 @@ Contents
   - GNU Toolchain Options
   - IDEs
   - NuttX EABI "buildroot" Toolchain
-  - NuttX OABI "buildroot" Toolchain
   - NXFLAT Toolchain
   - Hardware
     - Button
     - LED
-    - USARTS and Serial Consoles
+    - USARTs and Serial Consoles
   - LQFP64
-  - DFU and JTAG
+  - mbed
+  - Shields
   - Configurations
 
 Development Environment
@@ -232,27 +232,7 @@ NuttX EABI "buildroot" Toolchain
   NOTE:  Unfortunately, the 4.6.3 EABI toolchain is not compatible with the
   the NXFLAT tools.  See the top-level TODO file (under "Binary loaders") for
   more information about this problem. If you plan to use NXFLAT, please do not
-  use the GCC 4.6.3 EABI toochain; instead use the GCC 4.3.3 OABI toolchain.
-  See instructions below.
-
-NuttX OABI "buildroot" Toolchain
-================================
-
-  The older, OABI buildroot toolchain is also available.  To use the OABI
-  toolchain:
-
-  1. When building the buildroot toolchain, either (1) modify the cortexm3-eabi-defconfig-4.6.3
-     configuration to use EABI (using 'make menuconfig'), or (2) use an exising OABI
-     configuration such as cortexm3-defconfig-4.3.3
-
-  2. Modify the Make.defs file to use the OABI conventions:
-
-    +CROSSDEV = arm-nuttx-elf-
-    +ARCHCPUFLAGS = -mtune=cortex-m3 -march=armv7-m -mfloat-abi=soft
-    +NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-gotoff.ld -no-check-sections
-    -CROSSDEV = arm-nuttx-eabi-
-    -ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
-    -NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-pcrel.ld -no-check-sections
+  use the GCC 4.6.3 EABI toolchain; instead use the GCC 4.3.3 EABI toolchain.
 
 NXFLAT Toolchain
 ================
@@ -287,60 +267,22 @@ NXFLAT Toolchain
   8. Edit setenv.h, if necessary, so that the PATH variable includes
      the path to the newly builtNXFLAT binaries.
 
-DFU and JTAG
-============
+mbed
+====
 
-  Enabling Support for the DFU Bootloader
-  --------------------------------------
-  The linker files in these projects can be configured to indicate that you
-  will be loading code using STMicro built-in USB Device Firmware Upgrade (DFU)
-  loader or via some JTAG emulator.  You can specify the DFU bootloader by
-  adding the following line:
+  The Nucleo-F401RE includes boot loader from mbed:
 
-    CONFIG_STM32_DFU=y
+    https://mbed.org/platforms/ST-Nucleo-F401RE/
+    https://mbed.org/handbook/Homepage
 
-  to your .config file. Most of the configurations in this directory are set
-  up to use the DFU loader.
+  Using the mbed loader:
 
-  If CONFIG_STM32_DFU is defined, the code will not be positioned at the beginning
-  of FLASH (0x08000000) but will be offset to 0x08005000.  This offset is needed
-  to make space for the DFU loader and 0x08005000 is where the DFU loader expects
-  to find new applications at boot time.  If you need to change that origin for some
-  other bootloader, you will need to edit the file(s) ld.script.dfu for the
-  configuration.
-
-  For Linux or Mac:
-  ----------------
-
-  While on Linux or Mac,
-
-  $ lsusb
-  Bus 003 Device 061: ID 0483:374b STMicroelectronics
-
-  $ st-flash write nuttx.bin 0x08000000
-
-  Enabling JTAG
-  -------------
-  If you are not using the DFU, then you will probably also need to enable
-  JTAG support.  By default, all JTAG support is disabled but there NuttX
-  configuration options to enable JTAG in various different ways.
-
-  These configurations effect the setting of the SWJ_CFG[2:0] bits in the AFIO
-  MAPR register.  These bits are used to configure the SWJ and trace alternate function I/Os.
-  The SWJ (SerialWire JTAG) supports JTAG or SWD access to the Cortex debug port.
-  The default state in this port is for all JTAG support to be disable.
-
-  CONFIG_STM32_JTAG_FULL_ENABLE - sets SWJ_CFG[2:0] to 000 which enables full
-    SWJ (JTAG-DP + SW-DP)
-
-  CONFIG_STM32_JTAG_NOJNTRST_ENABLE - sets SWJ_CFG[2:0] to 001 which enable
-    full SWJ (JTAG-DP + SW-DP) but without JNTRST.
-
-  CONFIG_STM32_JTAG_SW_ENABLE - sets SWJ_CFG[2:0] to 010 which would set JTAG-DP
-    disabled and SW-DP enabled
-
-  The default setting (none of the above defined) is SWJ_CFG[2:0] set to 100
-  which disable JTAG-DP and SW-DP.
+  1. Connect the Nucleo-F401RE to the host PC using the USB connector.
+  2. A new file system will appear called NUCLEO; open it with Windows
+     Explorer (assuming that you are using Windows).
+  3. Drag and drop nuttx.bin into the MBED window.  This will load the
+     nuttx.bin binary into the Nucleo-F401RE.  The NUCLEO window will
+     close then re-open and the Nucleo-F401RE will be running the new code.
 
 Hardware
 ========
@@ -399,22 +341,93 @@ Hardware
 Serial Consoles
 ===============
 
+  USART1
+  ------
+    RXD: PA11  CN10 pin 14
+         PB7   CN7 pin 21
+    TXD: PA10  CN9 pin 3, CN10 pin 33
+         PB6   CN5 pin 3, CN10 pin 17
+
   USART2
   -----
-  If you have a 3.3 V TTL to RS-232 convertor then this is the most convenient
+    RXD: PA3   CN9 pin 1 (See SB13, 14, 62, 63). CN10 pin 37
+         PD6
+    TXD: PA2   CN9 pin 2(See SB13, 14, 62, 63). CN10 pin 35
+         PD5
+
+  If you have a 3.3 V TTL to RS-232 converter then this is the most convenient
   serial console to use.  UART2 is the default in all of these
   configurations.
 
-    USART2 RX  PA3   JP1 pin 4
-    USART2 TX  PA2   JP1 pin 3
-    GND              JP1 pin 2
-    V3.3             JP2 pin 1
+       Nucleo CN9  STM32F401RE
+       ----------- ------------
+       Pin 1  PA3  USART2_RX
+       Pin 2  PA2  USART2_TX
+
+  Solder Bridges.  This configuration requires:
+
+  - SB62 and SB63 Closed: PA2 and PA3 on STM32 MCU are connected to D1 and D0
+    (pin 7 and pin 8) on Arduino connector CN9 and ST Morpho connector CN10
+    as USART signals.  Thus SB13 and SB14 should be OFF.
+
+  - SB13 and SB14 Open:  PA2 and PA3 on STM32F103C8T6 (ST-LINK MCU) are
+    disconnected to PA3 and PA2 on STM32 MCU.
+
+  USART6
+  ------
+   RXD: PC7    CN5 pin2, CN10 pin 19
+        PA12   CN10, pin 12
+   TXD: PC6    CN10, pin 4
+        PA11   CN10, pin 14
 
   Virtual COM Port
   ----------------
   Yet another option is to use UART0 and the USB virtual COM port.  This
   option may be more convenient for long term development, but was
   painful to use during board bring-up.
+
+  Solder Bridges.  This configuration requires:
+
+  - SB62 and SB63 Open: PA2 and PA3 on STM32 MCU are disconnected to D1
+    and D0 (pin 7 and pin 8) on Arduino connector CN9 and ST Morpho
+    connector CN10.
+
+  - SB13 and SB14 Closed:  PA2 and PA3 on STM32F103C8T6 (ST-LINK MCU) are
+    connected to PA3 and PA2 on STM32 MCU to have USART communication
+    between them. Thus SB61,SB62 and SB63 should be OFF.
+
+  Default
+  -------
+  As shipped, SB62 and SB63 are open and SB13 and SB14 closed, so the
+  virtual COM port is enabled.
+
+Shields
+=======
+
+  1. RS-232 from Cutedigi.com.  Supports a single RS-232 connected via
+
+       Nucleo CN9  STM32F401RE  Cutedigi
+       ----------- ------------ --------
+       Pin 1  PA3  USART2_RX    RXD
+       Pin 2  PA2  USART2_TX    TXD
+
+     Support for this shield is enabled by selecting:
+
+       CONFIG_STM32_USART2=y
+       CONFIG_USART2_ISUART=y
+       CONFIG_USART2_SERIAL_CONSOLE=y
+       CONFIG_USART2_RXBUFSIZE=256
+       CONFIG_USART2_TXBUFSIZE=256
+       CONFIG_USART2_BAUD=115200
+       CONFIG_USART2_BITS=8
+       CONFIG_USART2_PARITY=0
+       CONFIG_USART2_2STOP=0
+
+  2. CC3000 Wireless shield
+
+     Support this shield is enabled by configuring the CC3000 networking:
+
+       CONFIG_WL_CC3000
 
 Configurations
 ==============
