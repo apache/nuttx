@@ -68,13 +68,14 @@
  * TCIOC_SETTIMEOUT - Reset the timer timeout to this value
  *                    Argument: A 32-bit timeout value in microseconds.
  * TCIOC_SETHANDLER - Call this handler on timer expiration
- *                    Argument: A pointer to struct timer_capture_s.
+ *                    Argument: A pointer to struct timer_sethandler_s.
  *
  * WARNING: May change TCIOC_SETTIMEOUT to pass pointer to 64bit nanoseconds
  * or timespec structure.
  *
- * NOTE: This ioctl cannot be support in the kernel build mode. In that
- * case direct callbacks from kernel space into user space is forbidden.
+ * NOTE: The TCIOC_SETHANDLER ioctl cannot be supported in the kernel build
+ * mode. In that case direct callbacks from kernel space into user space is
+ * forbidden.
  */
 
 #define TCIOC_START      _TCIOC(0x001)
@@ -87,7 +88,7 @@
 /* Bit settings for the struct timer_status_s flags field */
 
 #define TCFLAGS_ACTIVE   (1 << 0) /* 1=The timer is running */
-#define TCFLAGS_CAPTURE  (1 << 1) /* 1=Call the user function when the
+#define TCFLAGS_HANDLER  (1 << 1) /* 1=Call the user function when the
                                    *   timer expires */
 
 /****************************************************************************
@@ -102,22 +103,22 @@ typedef bool (*tccb_t)(FAR uint32_t *next_interval_us);
 
 /* This is the type of the argument passed to the TCIOC_SETHANDLER ioctl */
 
-struct timer_capture_s
+struct timer_sethandler_s
 {
-  CODE tccb_t newhandler;   /* The new timer capture handler */
-  CODE tccb_t oldhandler;   /* The previous timer capture handler (if any) */
+  CODE tccb_t newhandler;   /* The new timer interrupt handler */
+  CODE tccb_t oldhandler;   /* The previous timer interrupt handler (if any) */
 };
 
 /* This is the type of the argument passed to the TCIOC_GETSTATUS ioctl and
  * and returned by the "lower half" getstatus() method.
  */
 
-struct timer_status_s 
+struct timer_status_s
 {
   uint32_t  flags;          /* See TCFLAGS_* definitions above */
-  uint32_t  timeout;        /* The current timeout setting (in milliseconds) */
+  uint32_t  timeout;        /* The current timeout setting (in microseconds) */
   uint32_t  timeleft;       /* Time left until the timer expiration
-                             * (in milliseconds) */
+                             * (in microseconds) */
 };
 
 /* This structure provides the "lower-half" driver operations available to
@@ -125,7 +126,7 @@ struct timer_status_s
  */
 
 struct timer_lowerhalf_s;
-struct timer_ops_s 
+struct timer_ops_s
 {
   /* Required methods ********************************************************/
   /* Start the timer, resetting the time to the current timeout */
@@ -146,12 +147,12 @@ struct timer_ops_s
   CODE int (*settimeout)(FAR struct timer_lowerhalf_s *lower,
                          uint32_t timeout);
 
-  /* Call this user provider timeout handler on timeout.  
+  /* Call this user provider timeout handler on timeout.
    * NOTE:  Providing handler==NULL disable.
    */
 
-  CODE tccb_t (*capture)(FAR struct timer_lowerhalf_s *lower,
-                         CODE tccb_t handler);
+  CODE tccb_t (*sethandler)(FAR struct timer_lowerhalf_s *lower,
+                            CODE tccb_t handler);
 
   /* Any ioctl commands that are not recognized by the "upper-half" driver
    * are forwarded to the lower half driver through this method.
@@ -210,7 +211,7 @@ extern "C"
  *
  *   NOTE:  Normally, this function would not be called by application code.
  *   Rather it is called indirectly through the architecture-specific
- *   interface up_timerinitialize() described below.
+ *   initialization.
  *
  * Input parameters:
  *   dev path - The full path to the driver to be registers in the NuttX
@@ -254,27 +255,6 @@ void timer_unregister(FAR void *handle);
 /****************************************************************************
  * Architecture-specific Application Interfaces
  ****************************************************************************/
-
-/****************************************************************************
- * Name: up_timerinitialize()
- *
- * Description:
- *   Perform architecture-specific initialization of the timer hardware.
- *   This interface should be provided by all configurations using
- *   to avoid exposed platform-dependent logic.
- * 
- *   At a minimum, this function should call timer_register() which is
- *   described above.
- *
- * Input parameters:
- *   None
- *
- * Returned Value:
- *   Zero on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-int up_timerinitialize(void);
 
 #undef EXTERN
 #ifdef __cplusplus

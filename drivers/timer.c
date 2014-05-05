@@ -374,7 +374,7 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
     /* cmd:         TCIOC_SETHANDLER
      * Description: Call this handler on timeout
-     * Argument:    A pointer to struct timer_capture_s.
+     * Argument:    A pointer to struct timer_sethandler_s.
      *
      * NOTE: This ioctl cannot be support in the kernel build mode. In that
      * case direct callbacks from kernel space into user space is forbidden.
@@ -383,20 +383,20 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #ifndef CONFIG_NUTTX_KERNEL
     case TCIOC_SETHANDLER:
       {
-        FAR struct timer_capture_s *capture;
+        FAR struct timer_sethandler_s *sethandler;
 
         /* Don't reset on timer timeout; instead, call this user
          * provider timeout handler.  NOTE:  Providing handler==NULL will
          * restore the reset behavior.
          */
 
-        if (lower->ops->capture) /* Optional */
+        if (lower->ops->sethandler) /* Optional */
           {
-            capture = (FAR struct timer_capture_s *)((uintptr_t)arg);
-            if (capture)
+            sethandler = (FAR struct timer_sethandler_s *)((uintptr_t)arg);
+            if (sethandler)
               {
-                capture->oldhandler =
-                  lower->ops->capture(lower, capture->newhandler);
+                sethandler->oldhandler =
+                  lower->ops->sethandler(lower, sethandler->newhandler);
                 ret = OK;
               }
             else
