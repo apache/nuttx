@@ -54,20 +54,25 @@
 #include "up_arch.h"
 #include "sam_rtc.h"
 
+#if defined(CONFIG_RTC_HIRES) && defined (CONFIG_SAM34_RTT)
+#  include "sam_rtt.h"
+#  include "sam_periphclks.h"
+#endif
+
 #ifdef CONFIG_RTC
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
 /* Configuration ********************************************************************/
-/* This RTC implementation supports only date/time RTC hardware */
-
-#ifndef CONFIG_RTC_DATETIME
-#  error "CONFIG_RTC_DATETIME must be set to use this driver"
-#endif
 
 #ifdef CONFIG_RTC_HIRES
-#  error "CONFIG_RTC_HIRES must NOT be set with this driver"
+# if !defined(CONFIG_SAM34_RTT)
+#  error RTT is required to emulate high resolution RTC
+# endif
+# if (CONFIG_RTC_FREQUENCY > 32768) || ((32768 % CONFIG_RTC_FREQUENCY) != 0)
+#  error CONFIG_RTC_FREQUENCY must be an integer division of 32768
+# endif
 #endif
 
 #if defined(CONFIG_RTC_ALARM) && !defined(CONFIG_SCHED_WORKQUEUE)
@@ -118,6 +123,12 @@ struct work_s g_alarmwork;
 /* g_rtc_enabled is set true after the RTC has successfully initialized */
 
 volatile bool g_rtc_enabled = false;
+
+/* g_rtt_offset holds the rtt->rtc count offset */
+
+#if defined(CONFIG_RTC_HIRES) && defined (CONFIG_SAM34_RTT)
+uint32_t g_rtt_offset = 0;
+#endif
 
 /************************************************************************************
  * Private Functions
@@ -303,6 +314,40 @@ static int rtc_interrupt(int irq, void *context)
 #endif
 
 /************************************************************************************
+ * Name: rtc_sync
+ *
+ * Description:
+ *   Waits and returns immediately after 1 sec tick. For best accuracy,
+ *   call with interrupts disabled.
+ *
+ * Returns value of the TIMR register
+ *
+ ************************************************************************************/
+
+static uint32_t rtc_sync(void)
+{
+  uint32_t r0, r1;
+
+  /* Get start second (stable) */
+
+  do
+    {
+      r0 = getreg32(SAM_RTC_TIMR);
+    }
+  while (r0 != getreg32(SAM_RTC_TIMR));
+
+  /* Now read until it changes */
+
+  do
+    {
+      r1 = getreg32(SAM_RTC_TIMR);
+    }
+  while (r1 == r0);
+
+  return r1;
+}
+
+/************************************************************************************
  * Public Functions
  ************************************************************************************/
 
@@ -368,6 +413,32 @@ int up_rtcinitialize(void)
 
   up_enable_irq(SAM_IRQ_RTC);
 
+#endif
+
+#if defined(CONFIG_RTC_HIRES) && defined (CONFIG_SAM34_RTT)
+   /* Using the RTT for subsecond ticks. */
+
+  sam_rtt_enableclk();
+
+  /* Disable ints, set prescaler, start counter */
+
+  putreg32(RTT_MR_RTPRES(32768/CONFIG_RTC_FREQUENCY) | RTT_MR_RTTRST, SAM_RTT_MR);
+
+  /* wait for a second tick to get the RTT offset.
+   * Interrupts are assumed to still be off at this point.
+   */
+
+  rtc_sync();
+
+  /* Probably safe to read the RTT_VR register now since the clock just ticked,
+   * but we'll be careful anyway.
+   */
+
+  do
+    {
+      g_rtt_offset = getreg32(SAM_RTT_VR);
+    }
+  while(getreg32(SAM_RTT_VR) != g_rtt_offset);
 #endif
 
   rtc_dumpregs("After Initialization");
@@ -678,6 +749,57 @@ int up_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
 
   irqrestore(flags);
   return ret;
+}
+#endif
+
+
+/************************************************************************************
+ * Name: up_rtc_gettime
+ *
+ * Description:
+ *   Get the current time from the high resolution RTC clock/counter.  This interface
+ *   is only supported by the high-resolution RTC/counter hardware implementation.
+ *   It is used to replace the system timer.
+ *
+ * Input Parameters:
+ *   tp - The location to return the high resolution time value.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_RTC_HIRES) && defined (CONFIG_SAM34_RTT)
+
+int up_rtc_gettime(FAR struct timespec *tp)
+{
+  /* This is a hack to emulate a high resolution rtc using the rtt */
+  uint32_t rtc_cal, rtc_tim, rtt_val;
+  struct tm t;
+
+  do
+  {
+    rtc_cal = getreg32(SAM_RTC_CALR);
+    rtc_tim = getreg32(SAM_RTC_TIMR);
+    rtt_val = getreg32(SAM_RTT_VR);
+  } while((rtc_cal != getreg32(SAM_RTC_CALR)) ||
+          (rtc_tim != getreg32(SAM_RTC_TIMR)) ||
+          (rtt_val != getreg32(SAM_RTT_VR)));
+
+  t.tm_sec  = rtc_bcd2bin((rtc_tim & RTC_TIMR_SEC_MASK)   >> RTC_TIMR_SEC_SHIFT);
+  t.tm_min  = rtc_bcd2bin((rtc_tim & RTC_TIMR_MIN_MASK)   >> RTC_TIMR_MIN_SHIFT);
+  t.tm_hour = rtc_bcd2bin((rtc_tim & RTC_TIMR_HOUR_MASK)  >> RTC_TIMR_HOUR_SHIFT);
+  t.tm_mday = rtc_bcd2bin((rtc_cal & RTC_CALR_DATE_MASK)  >> RTC_CALR_DATE_SHIFT);
+  t.tm_mon  = rtc_bcd2bin((rtc_cal & RTC_CALR_MONTH_MASK) >> RTC_CALR_MONTH_SHIFT);
+  t.tm_year = (rtc_bcd2bin((rtc_cal & RTC_CALR_CENT_MASK) >> RTC_CALR_CENT_SHIFT) * 100)
+             + rtc_bcd2bin((rtc_cal & RTC_CALR_YEAR_MASK) >> RTC_CALR_YEAR_SHIFT)
+             - 1900;
+
+  tp->tv_sec = mktime(&t);
+  tp->tv_nsec = (((rtt_val-g_rtt_offset) & (CONFIG_RTC_FREQUENCY-1)) * 1000000000ULL) /
+                CONFIG_RTC_FREQUENCY;
+
+  return OK;
 }
 #endif
 
