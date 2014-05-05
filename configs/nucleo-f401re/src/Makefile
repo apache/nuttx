@@ -42,6 +42,10 @@ AOBJS = $(ASRCS:.S=$(OBJEXT))
 
 CSRCS = stm32_boot.c stm32_spi.c
 
+ifeq ($(CONFIG_HAVE_CXX),y)
+CSRCS += stm32_cxxinitialize.c
+endif
+
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += stm32_autoleds.c
 else
@@ -54,14 +58,13 @@ endif
 
 ifeq ($(CONFIG_WL_CC3000),y)
 CSRCS += stm32_wireless.c
+ifeq ($(CONFIG_CC3000_PROBES),)
+CSRCS += stm32_io.c
+endif
 endif
 
 ifeq ($(CONFIG_NSH_LIBRARY),y)
 CSRCS += stm32_nsh.c
-endif
-
-ifeq ($(CONFIG_CC3000_PROBES),)
-CSRCS += stm32_io.c
 endif
 
 COBJS = $(CSRCS:.c=$(OBJEXT))

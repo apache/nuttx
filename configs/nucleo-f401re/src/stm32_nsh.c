@@ -39,34 +39,25 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
 #include <stdio.h>
-#include <math.h>
 #include <debug.h>
 #include <errno.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/spi/spi.h>
 #include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
-#include <nuttx/gran.h>
 
 #include <stm32.h>
 #include <stm32_uart.h>
 
 #include <arch/board/board.h>
 
+#include "nucleo-f401re.h"
+
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
-
 /* Configuration ************************************************************/
-
-#ifdef CONFIG_FAT_DMAMEMORY
-#  if !defined(CONFIG_GRAN) || !defined(CONFIG_FAT_DMAMEMORY)
-#    error microSD DMA support requires CONFIG_GRAN
-#  endif
-#endif
 
 /* Debug ********************************************************************/
 
@@ -88,46 +79,9 @@
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_FAT_DMAMEMORY
-static GRAN_HANDLE dma_allocator;
-
-/* The DMA heap size constrains the total number of things that can be
- * ready to do DMA at a time.
- *
- * For example, FAT DMA depends on one sector-sized buffer per file system plus
- * one sector-sized buffer per file.
- *
- * We use a fundamental alignment / granule size of 64B; this is sufficient
- * to guarantee alignment for the largest STM32 DMA burst (16 beats x 32bits).
- */
-
-static uint8_t g_dma_heap[8192] __attribute__((aligned(64)));
-#endif
-
-static struct spi_dev_s *spi1;
-static struct sdio_dev_s *sdio;
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-#ifdef CONFIG_FAT_DMAMEMORY
-static void dma_alloc_init(void)
-{
-  dma_allocator =
-    gran_initialize(g_dma_heap,
-                    sizeof(g_dma_heap),
-                    7,  /* 128B granule - must be > alignment (XXX bug?) */
-                    6); /* 64B alignment */
-
-  if (dma_allocator == NULL)
-    {
-      message("[boot] DMA allocator setup FAILED");
-    }
-}
-#else
-# define dma_alloc_init()
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -141,9 +95,11 @@ static void dma_alloc_init(void)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_WL_CC3000
 void up_netinitialize(void)
 {
 }
+#endif
 
 /****************************************************************************
  * Name: nsh_archinitialize
@@ -155,7 +111,7 @@ void up_netinitialize(void)
 
 int nsh_archinitialize(void)
 {
-#ifdef CONFIG_MMCSD
+#ifdef HAVE_MMCSD
   int ret;
 #endif
 
@@ -165,20 +121,11 @@ int nsh_archinitialize(void)
   cpuload_initialize_once();
 #endif
 
-  /* Configure SPI-based devices */
-
-  spi1 = up_spiinitialize(1);
-  if (!spi1)
-    {
-      message("[boot] FAILED to initialize SPI port 1\n");
-      return -ENODEV;
-    }
-
-#ifdef CONFIG_MMCSD
+#ifdef HAVE_MMCSD
   /* First, get an instance of the SDIO interface */
 
-  sdio = sdio_initialize(CONFIG_NSH_MMCSDSLOTNO);
-  if (!sdio)
+  g_sdio = sdio_initialize(CONFIG_NSH_MMCSDSLOTNO);
+  if (!g_sdio)
     {
       message("[boot] Failed to initialize SDIO slot %d\n",
               CONFIG_NSH_MMCSDSLOTNO);
@@ -187,7 +134,7 @@ int nsh_archinitialize(void)
 
   /* Now bind the SDIO interface to the MMC/SD driver */
 
-  ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, sdio);
+  ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, g_sdio);
   if (ret != OK)
     {
       message("ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
@@ -198,7 +145,7 @@ int nsh_archinitialize(void)
    * card detect GPIO.
    */
 
-  sdio_mediachange(sdio, true);
+  sdio_mediachange(g_sdio, true);
 
   message("[boot] Initialized SDIO\n");
 #endif
