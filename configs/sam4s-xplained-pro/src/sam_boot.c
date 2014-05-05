@@ -42,6 +42,7 @@
 #include <debug.h>
 #include <nuttx/watchdog.h>
 
+#include <arch/board/board.h>
 #include "sam4s-xplained-pro.h"
 
 /************************************************************************************
@@ -95,6 +96,12 @@ void board_initialize(void)
   /* Configure watchdog timer and enable kicker kernel thread. */
 
   DEBUGASSERT(up_wdginitialize() >= 0);
+#endif
+
+#ifndef CONFIG_ARCH_LEDS
+  /* Initialize user led */
+
+  sam_ledinit();
 #endif
 
 #ifdef CONFIG_TIMER
