@@ -343,13 +343,29 @@ Serial Consoles
 
   USART1
   ------
+  Pins and Connectors:
+
     RXD: PA11  CN10 pin 14
          PB7   CN7 pin 21
     TXD: PA10  CN9 pin 3, CN10 pin 33
          PB6   CN5 pin 3, CN10 pin 17
 
+  To configure USART1 as the console:
+
+    CONFIG_STM32_USART1=y
+    CONFIG_USART1_ISUART=y
+    CONFIG_USART1_SERIAL_CONSOLE=y
+    CONFIG_USART1_RXBUFSIZE=256
+    CONFIG_USART1_TXBUFSIZE=256
+    CONFIG_USART1_BAUD=115200
+    CONFIG_USART1_BITS=8
+    CONFIG_USART1_PARITY=0
+    CONFIG_USART1_2STOP=0
+
   USART2
   -----
+  Pins and Connectors:
+
     RXD: PA3   CN9 pin 1 (See SB13, 14, 62, 63). CN10 pin 37
          PD6
     TXD: PA2   CN9 pin 2(See SB13, 14, 62, 63). CN10 pin 35
@@ -359,10 +375,10 @@ Serial Consoles
   serial console to use.  UART2 is the default in all of these
   configurations.
 
-       Nucleo CN9  STM32F401RE
-       ----------- ------------
-       Pin 1  PA3  USART2_RX
-       Pin 2  PA2  USART2_TX
+    Nucleo CN9  STM32F401RE
+    ----------- ------------
+    Pin 1  PA3  USART2_RX
+    Pin 2  PA2  USART2_TX
 
   Solder Bridges.  This configuration requires:
 
@@ -373,18 +389,44 @@ Serial Consoles
   - SB13 and SB14 Open:  PA2 and PA3 on STM32F103C8T6 (ST-LINK MCU) are
     disconnected to PA3 and PA2 on STM32 MCU.
 
+  To configure USART2 as the console:
+
+    CONFIG_STM32_USART2=y
+    CONFIG_USART2_ISUART=y
+    CONFIG_USART2_SERIAL_CONSOLE=y
+    CONFIG_USART2_RXBUFSIZE=256
+    CONFIG_USART2_TXBUFSIZE=256
+    CONFIG_USART2_BAUD=115200
+    CONFIG_USART2_BITS=8
+    CONFIG_USART2_PARITY=0
+    CONFIG_USART2_2STOP=0
+
   USART6
   ------
-   RXD: PC7    CN5 pin2, CN10 pin 19
-        PA12   CN10, pin 12
-   TXD: PC6    CN10, pin 4
-        PA11   CN10, pin 14
+  Pins and Connectors:
+
+    RXD: PC7    CN5 pin2, CN10 pin 19
+         PA12   CN10, pin 12
+    TXD: PC6    CN10, pin 4
+         PA11   CN10, pin 14
+
+  To configure USART6 as the console:
+
+    CONFIG_STM32_USART6=y
+    CONFIG_USART6_ISUART=y
+    CONFIG_USART6_SERIAL_CONSOLE=y
+    CONFIG_USART6_RXBUFSIZE=256
+    CONFIG_USART6_TXBUFSIZE=256
+    CONFIG_USART6_BAUD=115200
+    CONFIG_USART6_BITS=8
+    CONFIG_USART6_PARITY=0
+    CONFIG_USART6_2STOP=0
 
   Virtual COM Port
   ----------------
-  Yet another option is to use UART0 and the USB virtual COM port.  This
-  option may be more convenient for long term development, but was
-  painful to use during board bring-up.
+  Yet another option is to use UART2 and the USB virtual COM port.  This
+  option may be more convenient for long term development, but is painful
+  to use during board bring-up.
 
   Solder Bridges.  This configuration requires:
 
@@ -394,7 +436,12 @@ Serial Consoles
 
   - SB13 and SB14 Closed:  PA2 and PA3 on STM32F103C8T6 (ST-LINK MCU) are
     connected to PA3 and PA2 on STM32 MCU to have USART communication
-    between them. Thus SB61,SB62 and SB63 should be OFF.
+    between them. Thus SB61, SB62 and SB63 should be OFF.
+
+  Configuring USART2 is the same as given above.
+
+  Question:  What BAUD should be configure to interface with the Virtual
+  COM port?  115200 8N1?
 
   Default
   -------
@@ -411,17 +458,8 @@ Shields
        Pin 1  PA3  USART2_RX    RXD
        Pin 2  PA2  USART2_TX    TXD
 
-     Support for this shield is enabled by selecting:
-
-       CONFIG_STM32_USART2=y
-       CONFIG_USART2_ISUART=y
-       CONFIG_USART2_SERIAL_CONSOLE=y
-       CONFIG_USART2_RXBUFSIZE=256
-       CONFIG_USART2_TXBUFSIZE=256
-       CONFIG_USART2_BAUD=115200
-       CONFIG_USART2_BITS=8
-       CONFIG_USART2_PARITY=0
-       CONFIG_USART2_2STOP=0
+     Support for this shield is enabled by selecting USART2 and configuring
+     SB13, 14, 62, and 63 as described above under "Serial Consoles"
 
   2. CC3000 Wireless shield
 
