@@ -229,6 +229,9 @@
 #define LED_PANIC            3 /* The system has crashed    Flash @ 250ms   */
 #define LED_IDLE             4 /* MCU is is sleep mode      Not used        */
 
+#define LED_D301_OFF true /* GPIO high for OFF */
+#define LED_D301_ON false /* GPIO low for ON */
+
 /* Thus if D301 is statically on, NuttX has successfully booted and is,
  * apparently, running normmally.
  */

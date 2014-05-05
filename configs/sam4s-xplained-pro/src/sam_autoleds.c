@@ -73,9 +73,6 @@
  *   LED_IDLE             MCU is is sleep mode       Not used
  */
 
-#define LED_OFF true /* GPIO high for OFF */
-#define LED_ON false /* GPIO low for ON */
-
 /* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
  * with CONFIG_DEBUG_VERBOSE too)
  */
@@ -120,19 +117,19 @@ void board_led_on(int led)
   switch (led)
     {
       case 0:  /* LED_STARTED, LED_HEAPALLOCATE, LED_IRQSENABLED - off while initializing */
-        sam_gpiowrite(GPIO_D301, LED_OFF);
+        sam_gpiowrite(GPIO_D301, LED_D301_OFF);
         break;
 
       case 1:  /* LED_STACKCREATED - turn on when ready */
-        sam_gpiowrite(GPIO_D301, LED_ON);
+        sam_gpiowrite(GPIO_D301, LED_D301_ON);
         break;
 
       case 2:  /* LED_INIRQ, LED_SIGNAL - turn off inside irqs/signal processing */
-        sam_gpiowrite(GPIO_D301, LED_OFF);
+        sam_gpiowrite(GPIO_D301, LED_D301_OFF);
         return;
 
       case 3:  /* LED_PANIC - flash */
-        sam_gpiowrite(GPIO_D301, LED_ON);
+        sam_gpiowrite(GPIO_D301, LED_D301_ON);
         break;
 
       default:
@@ -153,11 +150,11 @@ void board_led_off(int led)
         break;
 
       case 2:  /* LED_INIRQ, LED_SIGNAL - return to on after irq/signal processing */
-        sam_gpiowrite(GPIO_D301, LED_ON);
+        sam_gpiowrite(GPIO_D301, LED_D301_ON);
         return;
 
       case 3:  /* LED_PANIC - flashes */
-        sam_gpiowrite(GPIO_D301, LED_OFF);
+        sam_gpiowrite(GPIO_D301, LED_D301_OFF);
         break;
   }
 }

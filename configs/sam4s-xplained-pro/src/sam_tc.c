@@ -57,6 +57,7 @@
 
 #include "sam_lowputc.h"
 #include "sam_tc.h"
+#include "sam_rtt.h"
 
 #ifdef CONFIG_TIMER
 
@@ -64,21 +65,34 @@
  * Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
-/* Watchdog hardware should be enabled */
 
-#if !defined(CONFIG_SAM34_TC0)
-#  warning "CONFIG_SAM34_TC0 must be defined"
+#if !(defined(CONFIG_SAM34_TC0) || defined(CONFIG_SAM34_TC1) || defined(CONFIG_SAM34_TC2) \
+     || defined(CONFIG_SAM34_TC3) || defined(CONFIG_SAM34_TC4) || defined(CONFIG_SAM34_RTT) )
+#  warning "CONFIG_SAM34_TCx or CONFIG_SAM34_RTT must be defined"
 #endif
 
 /* Select the path to the registered watchdog timer device */
 
 #ifndef CONFIG_TIMER0_DEVPATH
 #  define CONFIG_TIMER0_DEVPATH "/dev/tc0"
+#endif
+#ifndef CONFIG_TIMER1_DEVPATH
 #  define CONFIG_TIMER1_DEVPATH "/dev/tc1"
+#endif
+#ifndef CONFIG_TIMER2_DEVPATH
 #  define CONFIG_TIMER2_DEVPATH "/dev/tc2"
+#endif
+#ifndef CONFIG_TIMER3_DEVPATH
 #  define CONFIG_TIMER3_DEVPATH "/dev/tc3"
+#endif
+#ifndef CONFIG_TIMER4_DEVPATH
 #  define CONFIG_TIMER4_DEVPATH "/dev/tc4"
+#endif
+#ifndef CONFIG_TIMER5_DEVPATH
 #  define CONFIG_TIMER5_DEVPATH "/dev/tc5"
+#endif
+#ifndef CONFIG_RTT_DEVPATH
+#  define CONFIG_RTT_DEVPATH "/dev/rtt0"
 #endif
 
 /* Timer Definitions ********************************************************/
@@ -183,6 +197,11 @@ int sam_timerinitialize(void)
   sam_tcinitialize(CONFIG_TIMER5_DEVPATH, SAM_IRQ_TC5);
 #endif
 
+#if defined(CONFIG_SAM34_RTT)
+  tcvdbg("Initializing %s...\n", CONFIG_RTT_DEVPATH);
+  sam_rttinitialize(CONFIG_RTT_DEVPATH);
+#endif
+
 #if defined(CONFIG_SYSTEMTICK_EXTCLK) && !defined(CONFIG_SUPPRESS_INTERRUPTS) && \
     !defined(CONFIG_SUPPRESS_TIMER_INTS)
   /* System Timer Initialization */
@@ -209,7 +228,7 @@ int sam_timerinitialize(void)
 
   /* install user callback */
   {
-    struct timer_capture_s tccb;
+    struct timer_sethandler_s tccb;
     tccb.newhandler = systemtick;
     tccb.oldhandler = NULL;
 
@@ -260,7 +279,7 @@ int sam_timerinitialize(void)
   /* Install user callback */
 
   {
-    struct timer_capture_s tccb;
+    struct timer_sethandler_s tccb;
     tccb.newhandler = calc_cpuload;
     tccb.oldhandler = NULL;
 
@@ -281,13 +300,13 @@ int sam_timerinitialize(void)
       tcdbg("ioctl(TCIOC_START) failed: %d\n", errno);
       goto errout_with_dev;
     }
+#endif
 
   goto success;
 errout_with_dev:
   close(fd);
 errout:
   return ERROR;
-#endif
 
 success:
   return OK;

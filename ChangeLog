@@ -7285,3 +7285,8 @@
 	  adding CONFIG_NSH_ALTCONDEV: CONFIG_NSH_ALTCONDEV enables or disables
 	  the feature then, if enabled, CONFIG_NSH_CONDEV provides the alternative
 	  console device name (2014-5-5).
+	* arch/arm/src/sam34/sam_rtt.c/.h:  RTT driver from Bob Doiron.  Also
+	  added high resolution RTC emulation using the RTT for the sub-second
+	  counter (2014-5-5).
+	* configs/sam4s-xplained-pro:  Clean-up of LED usage and also some
+	  integration of new timer features.  From Bob Doiron  (2014-5-5).

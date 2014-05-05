@@ -105,18 +105,10 @@ void sam_ledinit(void)
 
 void sam_setled(int led, bool ledon)
 {
-  uint32_t ledcfg;
-
   if (led == BOARD_D301)
     {
-      ledcfg = GPIO_D301;
+      sam_gpiowrite(GPIO_D301, ledon ? LED_D301_ON : LED_D301_OFF);
     }
-  else
-    {
-      return;
-    }
-
-  sam_gpiowrite(ledcfg, !ledon); /* 0 = on, 1 = off */
 }
 
 /****************************************************************************
@@ -125,10 +117,7 @@ void sam_setled(int led, bool ledon)
 
 void sam_setleds(uint8_t ledset)
 {
-  bool ledon;
-
-  ledon = ((ledset & BOARD_D301_BIT) != 0);
-  sam_gpiowrite(GPIO_D301, !ledon); /* 0 = on, 1 = off */
+  sam_gpiowrite(GPIO_D301, (ledset & BOARD_D301_BIT) ? LED_D301_ON : LED_D301_OFF);
 }
 
 #endif /* !CONFIG_ARCH_LEDS */

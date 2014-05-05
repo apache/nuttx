@@ -67,10 +67,10 @@ config SYSTEMTICK_EXTCLK
 	depends on ARCH_HAVE_EXTCLK
 	---help---
 		Use external clock for system tick. When enabled, the platform-specific
-		logic must start it's own timer interrupt to make periodic calls to the
+		logic must start its own timer interrupt to make periodic calls to the
 		sched_process_timer() or the functions called within. The purpose is
-		to move the scheduling off the processor to enter low power states that
-		would disable that clock. Platform-specific logic must also provide
+		to move the scheduling off the processor clock to allow entering low
+		power states that would disable that clock.
 
 config SYSTEM_TIME64
 	bool "64-bit system clock"
