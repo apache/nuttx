@@ -184,7 +184,7 @@
 #  define RCC_CFGR_MCO1_LSE         (1 << RCC_CFGR_MCO1_SHIFT) /* 01: LSE oscillator selected */
 #  define RCC_CFGR_MCO1_HSE         (2 << RCC_CFGR_MCO1_SHIFT) /* 10: HSE oscillator clock selected */
 #  define RCC_CFGR_MCO1_PLL         (3 << RCC_CFGR_MCO1_SHIFT) /* 11: PLL clock selected */
-#define TCC_CFGR_I2SSRC             (1 << 23) /* Bit 23: I2S clock selection */
+#define RCC_CFGR_I2SSRC             (1 << 23) /* Bit 23: I2S clock selection */
 #define RCC_CFGR_MCO1PRE_SHIFT      (24)      /* Bits 24-26: MCO1 prescaler */
 #define RCC_CFGR_MCO1PRE_MASK       (7 << RCC_CFGR_MCO1PRE_SHIFT)
 #  define RCC_CFGR_MCO1PRE_NONE     (0 << RCC_CFGR_MCO1PRE_SHIFT) /* 0xx: no division */
