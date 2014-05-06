@@ -7294,3 +7294,6 @@
 	  Bob Doiron (2014-5-5).
 	* binfmt/symtab_findorderedbyname.c:  Fix an error in the symbol search
 	  function.  Noted by Pelle Windestam (2014-5-6).
+	* arch/arm/src/stm32/stm32f40xxx_rcc.c and configs/nucleo-f401re/include/board.h:
+	  The Nucleo-F401RE has no on-board crystals and, hence, needs to run
+	  with the PLL input from the on-chip HSI clock (2014-5-6).

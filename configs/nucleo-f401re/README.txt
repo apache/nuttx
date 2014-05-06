@@ -52,11 +52,11 @@ GNU Toolchain Options
   The NuttX make system has been modified to support the following different
   toolchain options.
 
-  1. The CodeSourcery GNU toolchain,
-  2. The Atollic Toolchain,
-  3. The devkitARM GNU toolchain,
-  4. Raisonance GNU toolchain, or
-  5. The NuttX buildroot Toolchain (see below).
+    1. The CodeSourcery GNU toolchain,
+    2. The Atollic Toolchain,
+    3. The devkitARM GNU toolchain,
+    4. Raisonance GNU toolchain, or
+    5. The NuttX buildroot Toolchain (see below).
 
   All testing has been conducted using the CodeSourcery toolchain for Linux.
   To use the Atollic, devkitARM, Raisonance GNU, or NuttX buildroot toolchain,
@@ -73,10 +73,8 @@ GNU Toolchain Options
   If you change the default toolchain, then you may also have to modify the PATH in
   the setenv.h file if your make cannot find the tools.
 
-  NOTE: the CodeSourcery (for Windows), Atollic, devkitARM, and Raisonance toolchains are
-  Windows native toolchains.  The CodeSourcey (for Linux) and NuttX buildroot
-  toolchains are Cygwin and/or Linux native toolchains. There are several limitations
-  to using a Windows based toolchain in a Cygwin environment.  The three biggest are:
+  NOTE: There are several limitations to using a Windows based toolchain in a
+  Cygwin environment.  The three biggest are:
 
   1. The Windows toolchain cannot follow Cygwin paths.  Path conversions are
      performed automatically in the Cygwin makefiles using the 'cygpath' utility
@@ -100,12 +98,6 @@ GNU Toolchain Options
      work with the Cygwin make.
 
        MKDEP = $(TOPDIR)/tools/mknulldeps.sh
-
-  The CodeSourcery Toolchain (2009q1)
-  -----------------------------------
-  The CodeSourcery toolchain (2009q1) does not work with default optimization
-  level of -Os (See Make.defs).  It will work with -O0, -O1, or -O2, but not with
-  -Os.
 
   The Atollic "Pro" and "Lite" Toolchain
   --------------------------------------
