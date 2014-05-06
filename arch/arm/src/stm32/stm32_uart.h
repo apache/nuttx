@@ -63,6 +63,10 @@
  ************************************************************************************/
 /* Make sure that we have not enabled more U[S]ARTs than are support by
  * the device.
+ *
+ * REVISIT:  These should be replaced with the CONFIG_STM32_HAVE_USARTn now generated
+ * by the Kconfig file.  The following logic is not valid for the STM32F401 which
+ * supports 3 USARTS:  USART1, USART2, and USART6.
  */
 
 #if STM32_NUSART < 8

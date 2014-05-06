@@ -342,6 +342,18 @@ Serial Consoles
     TXD: PA10  CN9 pin 3, CN10 pin 33
          PB6   CN5 pin 3, CN10 pin 17
 
+  NOTE:  You may need to edit the include/board.h to select different USART1
+  pin selections.
+
+  TTL to RS-232 converter connection:
+
+    Nucleo CN10 STM32F401RE
+    ----------- ------------
+    Pin 21 PA9  USART2_RX
+    Pin 33 PA10 USART2_TX
+    Pin 20 GND
+    Pin 8  U5V
+
   To configure USART1 as the console:
 
     CONFIG_STM32_USART1=y
@@ -363,9 +375,9 @@ Serial Consoles
     TXD: PA2   CN9 pin 2(See SB13, 14, 62, 63). CN10 pin 35
          PD5
 
-  If you have a 3.3 V TTL to RS-232 converter then this is the most convenient
-  serial console to use.  UART2 is the default in all of these
-  configurations.
+  UART2 is the default in all of these configurations.
+
+  TTL to RS-232 converter connection:
 
     Nucleo CN9  STM32F401RE
     ----------- ------------
@@ -462,78 +474,94 @@ Shields
 Configurations
 ==============
 
-  Composite: The composite is a super set of all the functions in nsh,
-  usbserial, usbmsc. (usbnsh has not been rung out).
+  nsh:
+  ---
+    Configures the NuttShell (nsh) located at apps/examples/nsh.  The
+    Configuration enables the serial interfaces on UART2.  Support for
+    builtin applications is enabled, but in the base configuration no
+    builtin applications are selected (see NOTES below).
 
-  Build it with
+    NOTES:
 
-    make distclean;(cd tools;./configure.sh nucleo-f401re/nsh)
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configuration using that tool, you should:
 
-  then run make menuconfig if you wish to customize things.
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
 
-  or
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
 
-  $ make qconfig
+    2. By default, this configuration uses the CodeSourcery toolchain
+       for Linux.  That can easily be reconfigured, of course.
 
-  N.B. Memory is tight, both Flash and RAM are taxed. If you enable
-  debugging you will need to add -Os following the line -g in the line:
+       CONFIG_HOST_LINUX=y                     : Builds under Linux
+       CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL=y : CodeSourcery for Linux
 
-    ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-      ARCHOPTIMIZATION = -g
+    3. Although the default console is USART2 (which would correspond to
+       the Virtual COM port) I have done all testing with the console 
+       device configured for USART1 (see instruction above under "Serial
+       Consoles).  I have been using a TTL-to-RS-232 converted connected
+       as shown below:
 
-  in the top level Make.degs or the code will not fit.
+       Nucleo CN10 STM32F401RE
+       ----------- ------------
+       Pin 21 PA9  USART2_RX
+       Pin 33 PA10 USART2_TX
+       Pin 20 GND
+       Pin 8  U5V
 
-  Stack space has been hand optimized using the stack coloring by enabling
-  "Stack usage debug hooks" (CONFIG_DEBUG_STACK) in Build Setup-> Debug
-  Options. I have selected values that have 8-16 bytes of headroom with
-  network debugging on. If you enable more debugging and get a hard fault
-  or any weirdness like commands hanging. Then the Idle, main or Interrupt
-  stack my be too small. Stop the target and have a look a memory for a
-  blown stack: No DEADBEEF at the lowest address of a given stack.
+  cc3000:
+  ------
+    This configuration adds support for the CC3000 Shield.
 
-  Given the RAM memory constraints it is not possible to be running the
-  network and USB CDC/ACM and MSC at the same time. But on the bright
-  side, you can export the FLASH memory to the PC. Write files on the
-  Flash. Reboot and mount the FAT FS and run network code that will have
-  access the files.
+    Build it with
 
-  You can use the scripts/cdc-acm.inf file to install the windows
-  composite device.
+      make distclean;(cd tools;./configure.sh nucleo-f401re/nsh)
 
-  Network control is facilitated by running the c3b (cc3000basic) application.
+    then run make menuconfig if you wish to customize things.
 
-  Run c3b from the nsh prompt.
+    or
 
-    +-------------------------------------------+
-    |      Nuttx CC3000 Demo Program            |
-    +-------------------------------------------+
+    $ make qconfig
 
-      01 - Initialize the CC3000
-      02 - Show RX & TX buffer sizes, & free RAM
-      03 - Start Smart Config
-      04 - Manually connect to AP
-      05 - Manually add connection profile
-      06 - List access points
-      07 - Show CC3000 information
-      08 - Telnet
+    You can use the scripts/cdc-acm.inf file to install the windows
+    composite device.
 
-     Type 01-07 to select above option:
+    Network control is facilitated by running the c3b (cc3000basic) application.
 
-  Select 01. Then use 03 and the TI Smart config application running on an
-  IOS or Android device to configure join your network.
+    Run c3b from the nsh prompt.
 
-  Use 07 to see the IP address of the device.
+      +-------------------------------------------+
+      |      Nuttx CC3000 Demo Program            |
+      +-------------------------------------------+
 
-  (On the next reboot running c3b 01 the CC3000 will automaticaly rejoin the
-  network after the 01 give it a few seconds and enter 07 or 08)
+        01 - Initialize the CC3000
+        02 - Show RX & TX buffer sizes, & free RAM
+        03 - Start Smart Config
+        04 - Manually connect to AP
+        05 - Manually add connection profile
+        06 - List access points
+        07 - Show CC3000 information
+        08 - Telnet
 
-  Use 08 to start Telnet. Then you can connect to the device using the
-  address listed in command 07.
+       Type 01-07 to select above option:
 
-  qq will exit the c3b with the telnet deamon running (if started)
+    Select 01. Then use 03 and the TI Smart config application running on an
+    IOS or Android device to configure join your network.
 
-  Slow.... You will be thinking 300 bps. This is because of packet sizes and
-  how the select thread runs in the telnet session. Telnet is not the best
-  showcase for the CC3000, but simply a proof of network connectivity.
+    Use 07 to see the IP address of the device.
 
-  http POST and GET should be more efficient.
+    (On the next reboot running c3b 01 the CC3000 will automaticaly rejoin the
+    network after the 01 give it a few seconds and enter 07 or 08)
+
+    Use 08 to start Telnet. Then you can connect to the device using the
+    address listed in command 07.
+
+    qq will exit the c3b with the telnet deamon running (if started)
+
+    Slow.... You will be thinking 300 bps. This is because of packet sizes and
+    how the select thread runs in the telnet session. Telnet is not the best
+    showcase for the CC3000, but simply a proof of network connectivity.
+
+    http POST and GET should be more efficient.

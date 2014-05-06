@@ -228,14 +228,19 @@
 /* Alternate function pin selections ************************************************/
 
 /* USART1:
- *   RXD: PA11  CN10 pin 14
+ *   RXD: PA10  CN9 pin 3, CN10 pin 33
  *        PB7   CN7 pin 21
- *   TXD: PA10  CN9 pin 3, CN10 pin 33
+ *   TXD: PA9   CN5 pin 1, CN10 pin 21
  *        PB6   CN5 pin 3, CN10 pin 17
  */
 
-#define GPIO_USART1_RX   GPIO_USART1_RX_1    /* PA10 */
-#define GPIO_USART1_TX   GPIO_USART1_TX_2    /* PA9  */
+#if 1
+#  define GPIO_USART1_RX GPIO_USART1_RX_1    /* PA10 */
+#  define GPIO_USART1_TX GPIO_USART1_TX_1    /* PA9  */
+#else
+#  define GPIO_USART1_RX GPIO_USART1_RX_2    /* PB7 */
+#  define GPIO_USART1_TX GPIO_USART1_TX_2    /* PB6  */
+#endif
 
 /* USART2:
  *   RXD: PA3   CN9 pin 1 (See SB13, 14, 62, 63). CN10 pin 37
@@ -259,23 +264,10 @@
 #define GPIO_USART6_RX   GPIO_USART6_RX_1    /* PC7 */
 #define GPIO_USART6_TX   GPIO_USART6_TX_1    /* PC6 */
 
-/* UART8 has no alternate pin config */
-
 /* UART RX DMA configurations */
 
 #define DMAMAP_USART1_RX DMAMAP_USART1_RX_2
 #define DMAMAP_USART6_RX DMAMAP_USART6_RX_2
-
-/* CAN
- *
- * CAN1 is routed to the onboard transceiver. 
- * CAN2 is routed to the expansion connector.
- */
-
-#define GPIO_CAN1_RX     GPIO_CAN1_RX_3
-#define GPIO_CAN1_TX     GPIO_CAN1_TX_3
-#define GPIO_CAN2_RX     GPIO_CAN2_RX_1
-#define GPIO_CAN2_TX     GPIO_CAN2_TX_2
 
 /* I2C
  *
