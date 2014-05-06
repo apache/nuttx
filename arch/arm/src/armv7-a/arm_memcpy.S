@@ -1,8 +1,9 @@
 /************************************************************************************
- * nuttx/arch/arm/src/armv7-m/up_memcpy.S
+ * nuttx/arch/arm/src/armv7-a/arm_memcpy.S
  *
- * armv7m-optimised memcpy, contributed by Mike Smith.  Apparently in the public
- * domain and is re-released here under the modified BSD license:
+ * ARMv7-A optimised memcpy, based on the ARMv7-M version contributed by Mike Smith.
+ * Apparently in the public domain and is re-released here under the modified BSD
+ * license:
  *
  * Obtained via a posting on the Stellaris forum:
  *  http://e2e.ti.com/support/microcontrollers/\
