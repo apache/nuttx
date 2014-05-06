@@ -7292,3 +7292,5 @@
 	  integration of new timer features.  From Bob Doiron  (2014-5-5).
 	* drivers/timer.c and include/nuttx/timer.h:  Timer driver updates from
 	  Bob Doiron (2014-5-5).
+	* binfmt/symtab_findorderedbyname.c:  Fix an error in the symbol search
+	  function.  Noted by Pelle Windestam (2014-5-6).

@@ -1,7 +1,7 @@
 /****************************************************************************
  * binfmt/symtab_findorderedbyname.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,10 +73,9 @@
  *   Find the symbol in the symbol table with the matching name.
  *   This version assumes that table ordered with respect to symbol name.
  *
- *   This function uses qsort() to implement the search and, hence, is a lot
- *   larger than symbtab_findbyname().  This function not be used, unless
- *   the symbol table is large and the performance benefit is worth the
- *   increased size.
+ *   This function is a lot larger than symbtab_findbyname().  This function
+ *   not be used, unless the symbol table is large and the performance
+ *   benefit is worth the increased size.
  *
  * Returned Value:
  *   A reference to the symbol table entry if an entry with the matching
@@ -89,7 +88,7 @@ symtab_findorderedbyname(FAR const struct symtab_s *symtab,
                          FAR const char *name, int nsyms)
 {
   int low  = 0;
-  int high = nsyms -1;
+  int high = nsyms - 1;
   int mid;
   int cmp;
 
@@ -108,9 +107,13 @@ symtab_findorderedbyname(FAR const struct symtab_s *symtab,
       cmp = strcmp(name, symtab[mid].sym_name);
       if (cmp < 0)
         {
-          /* name < symtab[mid].sym_name */
+          /* name < symtab[mid].sym_name
+           *
+           * NOTE: Because of truncation in the calculation of 'mid'.
+           * 'mid' could be equal to 'low'
+           */
 
-          high = mid - 1;
+          high = mid > low ? mid - 1 : low;
         }
       else if (cmp > 0)
         {
