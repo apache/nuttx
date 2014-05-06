@@ -104,7 +104,7 @@
                                              /* (2) Comparators */
 #  define STM32_NCAPSENSE                13  /* Capacitive sensing channels */
 #  define STM32_NCRC                     0   /* No CRC */
-#  define STM32_NETHERNET                0   /* No ethernet */
+#  define STM32_NETHERNET                0   /* No Ethernet */
 #  define STM32_NRNG                     0   /* No random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
@@ -142,7 +142,7 @@
                                              /* (2) Comparators */
 #  define STM32_NCAPSENSE                20  /* Capacitive sensing channels */
 #  define STM32_NCRC                     0   /* No CRC */
-#  define STM32_NETHERNET                0   /* No ethernet */
+#  define STM32_NETHERNET                0   /* No Ethernet */
 #  define STM32_NRNG                     0   /* No random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
@@ -180,7 +180,7 @@
                                              /* (2) Comparators */
 #  define STM32_NCAPSENSE                20  /* Capacitive sensing channels */
 #  define STM32_NCRC                     0   /* No CRC */
-#  define STM32_NETHERNET                0   /* No ethernet */
+#  define STM32_NETHERNET                0   /* No Ethernet */
 #  define STM32_NRNG                     0   /* No random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
@@ -218,7 +218,7 @@
                                              /* (2) Comparators */
 #  define STM32_NCAPSENSE                13  /* Capacitive sensing channels */
 #  define STM32_NCRC                     0   /* No CRC */
-#  define STM32_NETHERNET                0   /* No ethernet */
+#  define STM32_NETHERNET                0   /* No Ethernet */
 #  define STM32_NRNG                     0   /* No random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
@@ -256,7 +256,7 @@
                                              /* (2) Comparators */
 #  define STM32_NCAPSENSE                20  /* Capacitive sensing channels */
 #  define STM32_NCRC                     0   /* No CRC */
-#  define STM32_NETHERNET                0   /* No ethernet */
+#  define STM32_NETHERNET                0   /* No Ethernet */
 #  define STM32_NRNG                     0   /* No random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
@@ -294,7 +294,7 @@
                                              /* (2) Comparators */
 #  define STM32_NCAPSENSE                20  /* Capacitive sensing channels */
 #  define STM32_NCRC                     0   /* No CRC */
-#  define STM32_NETHERNET                0   /* No ethernet */
+#  define STM32_NETHERNET                0   /* No Ethernet */
 #  define STM32_NRNG                     0   /* No random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
@@ -332,7 +332,7 @@
 #  define STM32_NDAC                     2   /* DAC 1-2 */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC1 */
-#  define STM32_NETHERNET                0   /* No ethernet */
+#  define STM32_NETHERNET                0   /* No Ethernet */
 #  define STM32_NRNG                     0   /* No random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
@@ -367,7 +367,7 @@
 #  define STM32_NDAC                     2   /* DAC 1-2 */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC1 */
-#  define STM32_NETHERNET                0   /* No ethernet */
+#  define STM32_NETHERNET                0   /* No Ethernet */
 #  define STM32_NRNG                     0   /* No random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
@@ -405,7 +405,7 @@
 #  define STM32_NDAC                     2   /* DAC 1-2 */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC1 */
-#  define STM32_NETHERNET                0   /* No ethernet */
+#  define STM32_NETHERNET                0   /* No Ethernet */
 #  define STM32_NRNG                     0   /* No random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
@@ -441,13 +441,14 @@
 #  define STM32_NDAC                     2   /* DAC 1-2 */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC1 */
-#  define STM32_NETHERNET                0   /* No ethernet */
+#  define STM32_NETHERNET                0   /* No Ethernet */
 #  define STM32_NRNG                     0   /* No random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
 /* STM32 F103 Low Density Family *************************************************/
 
 /* STM32F103C4 & STM32F103C6 */
+
 #elif defined(CONFIG_ARCH_CHIP_STM32F103C4)
 #  define CONFIG_STM32_STM32F10XX        1   /* STM32F10xxx family */
 #  define CONFIG_STM32_LOWDENSITY        1   /* STM32F100x, STM32F101x, STM32F102x and STM32F103x w/ 16/32 Kbytes */
@@ -456,7 +457,7 @@
 #  undef  CONFIG_STM32_VALUELINE             /* STM32F100x */
 #  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
 #  undef  CONFIG_STM32_STM32F20XX            /* STM32F205x and STM32F207x */
-#  undef  CONFIG_STM32_STM32F30XX           /* STM32F30xxx family */
+#  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
 #  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx families */
 #  define STM32_NFSMC                    0   /* FSMC */
 #  define STM32_NATIM                    1   /* One advanced timer TIM1 */
@@ -474,7 +475,7 @@
 #  define STM32_NADC                     2   /* ADC1-2 */
 #  define STM32_NDAC                     0   /* No DAC */
 #  define STM32_NCRC                     1   /* CRC */
-#  define STM32_NTHERNET                 0   /* No ethernet */
+#  define STM32_NTHERNET                 0   /* No Ethernet */
 #  define STM32_NRNG                     0   /* No random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
@@ -511,7 +512,7 @@
 #  define STM32_NDAC                     0   /* No DAC */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
-#  define STM32_NTHERNET                 0   /* No ethernet */
+#  define STM32_NTHERNET                 0   /* No Ethernet */
 #  define STM32_NRNG                     0   /* No random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
@@ -546,7 +547,7 @@
 #  define STM32_NDAC                     0   /* No DAC */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
-#  define STM32_NTHERNET                 0   /* No ethernet */
+#  define STM32_NTHERNET                 0   /* No Ethernet */
 #  define STM32_NRNG                     0   /* No random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
@@ -581,7 +582,7 @@
 #  define STM32_NDAC                     0   /* No DAC */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
-#  define STM32_NTHERNET                 0   /* No ethernet */
+#  define STM32_NTHERNET                 0   /* No Ethernet */
 #  define STM32_NRNG                     0   /* No random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
@@ -604,7 +605,7 @@
 #  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and TIM8 */
-#  define STM32_NGTIM                    4   /* 16-bit generall timers TIM2,3,4,5 with DMA */
+#  define STM32_NGTIM                    4   /* 16-bit general timers TIM2,3,4,5 with DMA */
 #  define STM32_NBTIM                    2   /* Two basic timers TIM6 and TIM7 */
 #  define STM32_NDMA                     2   /* DMA1-2 */
 #  define STM32_NSPI                     3   /* SPI1-3 */
@@ -620,7 +621,7 @@
 #  define STM32_NDAC                     2   /* DAC1-2 */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
-#  define STM32_NETHERNET                0   /* No ethernet */
+#  define STM32_NETHERNET                0   /* No Ethernet */
 #  define STM32_NRNG                     0   /* No random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
@@ -658,7 +659,7 @@
 #  define STM32_NDAC                     2   /* DAC1-2 */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     1   /* CRC */
-#  define STM32_NTHERNET                 0   /* No ethernet */
+#  define STM32_NTHERNET                 0   /* No Ethernet */
 #  define STM32_NRNG                     0   /* No random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
@@ -680,7 +681,7 @@
 #  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx families */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    1   /* One advanced timer TIM1 */
-#  define STM32_NGTIM                    4   /* 16-bit generall timers TIM2,3,4,5 with DMA */
+#  define STM32_NGTIM                    4   /* 16-bit general timers TIM2,3,4,5 with DMA */
 #  define STM32_NBTIM                    0   /* No basic timers */
 #  define STM32_NDMA                     2   /* DMA1-2 */
 #  define STM32_NSPI                     3   /* SPI1-3 */
@@ -696,7 +697,7 @@
 #  define STM32_NDAC                     0   /* No DAC */
 #  define STM32_NCAPSENSE                0   /* No capacitive sensing channels */
 #  define STM32_NCRC                     0   /* No CRC */
-#  define STM32_NETHERNET                0   /* No ethernet */
+#  define STM32_NETHERNET                0   /* No Ethernet */
 #  define STM32_NRNG                     0   /* No random number generator (RNG) */
 #  define STM32_NDCMI                    0   /* No digital camera interface (DCMI) */
 
@@ -716,7 +717,7 @@
 #  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    1   /* One advanced timers TIM1 */
-#  define STM32_NGTIM                    4   /* 16-bit generall timers TIM2,3,4,5 with DMA */
+#  define STM32_NGTIM                    4   /* 16-bit general timers TIM2,3,4,5 with DMA */
 #  define STM32_NBTIM                    2   /* Two basic timers, TIM6-7 */
 #  define STM32_NDMA                     2   /* DMA1-2 */
 #  define STM32_NSPI                     3   /* SPI1-3 */
@@ -750,7 +751,7 @@
 #  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    1   /* One advanced timers TIM1 */
-#  define STM32_NGTIM                    4   /* 16-bit generall timers TIM2,3,4,5 with DMA */
+#  define STM32_NGTIM                    4   /* 16-bit general timers TIM2,3,4,5 with DMA */
 #  define STM32_NBTIM                    2   /* Two basic timers, TIM6-7 */
 #  define STM32_NDMA                     2   /* DMA1-2 */
 #  define STM32_NSPI                     3   /* SPI1-3 */
@@ -817,9 +818,9 @@
 #  undef  CONFIG_STM32_HIGHDENSITY           /* STM32F100x, STM32F101x, and STM32F103x w/ 256/512 Kbytes */
 #  undef  CONFIG_STM32_VALUELINE             /* STM32F100x */
 #  undef  CONFIG_STM32_CONNECTIVITYLINE      /* STM32F105x and STM32F107x */
-#  define CONFIG_STM32_STM32F20XX            /* STM32F205x and STM32F207x */
+#  define CONFIG_STM32_STM32F20XX        1   /* STM32F205x and STM32F207x */
 #  undef  CONFIG_STM32_STM32F30XX            /* STM32F30xxx family */
-#  undef  CONFIG_STM32_STM32F40XX        1   /* STM32F405xx and STM32407xx */
+#  undef  CONFIG_STM32_STM32F40XX            /* STM32F405xx and STM32407xx */
 #  define STM32_NFSMC                    1   /* FSMC */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM3 and 4 with DMA
@@ -1659,7 +1660,6 @@
 #  define STM32_NETHERNET                1   /* 100/100 Ethernet MAC */
 #  define STM32_NRNG                     1   /* Random number generator (RNG) */
 #  define STM32_NDCMI                    1   /* Digital camera interface (DCMI) */
-
 
 #else
 #  error "Unsupported STM32 chip"

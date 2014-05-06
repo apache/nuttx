@@ -139,4 +139,3 @@ symtab_findorderedbyname(FAR const struct symtab_s *symtab,
 
   return strcmp(name, symtab[low].sym_name) == 0 ? &symtab[low] : NULL;
 }
-
