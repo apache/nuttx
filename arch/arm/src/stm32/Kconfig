@@ -355,11 +355,13 @@ config ARCH_CHIP_STM32F207IG
 	bool "STM32F207IG"
 	select ARCH_CORTEXM3
 	select STM32_STM32F20XX
+	select STM32_STM32F207
 
 config ARCH_CHIP_STM32F207ZE
 	bool "STM32F207ZE"
 	select ARCH_CORTEXM3
 	select STM32_STM32F20XX
+	select STM32_STM32F207
 
 config ARCH_CHIP_STM32F302CB
 	bool "STM32F302CB"
@@ -614,6 +616,7 @@ config STM32_CONNECTIVITYLINE
 	select STM32_HAVE_ADC2
 	select STM32_HAVE_CAN1
 	select STM32_HAVE_CAN2
+	select STM32_HAVE_ETHMAC
 
 config STM32_PERFORMANCELINE
 	bool
@@ -678,6 +681,10 @@ config STM32_LOWDENSITY
 config STM32_STM32F20XX
 	bool
 	default n
+
+config STM32_STM32F207
+	bool
+	default n
 	select STM32_HAVE_OTGFS
 	select STM32_HAVE_FSMC
 	select STM32_HAVE_CCM
@@ -700,6 +707,8 @@ config STM32_STM32F20XX
 	select STM32_HAVE_ADC3
 	select STM32_HAVE_CAN1
 	select STM32_HAVE_CAN2
+	select STM32_HAVE_RNG
+	select STM32_HAVE_ETHMAC
 
 config STM32_STM32F30XX
 	bool
@@ -757,6 +766,7 @@ config STM32_STM32F405
 	select STM32_HAVE_ADC3
 	select STM32_HAVE_CAN1
 	select STM32_HAVE_CAN2
+	select STM32_HAVE_RNG
 
 config STM32_STM32F407
 	bool
@@ -782,6 +792,8 @@ config STM32_STM32F407
 	select STM32_HAVE_ADC3
 	select STM32_HAVE_CAN1
 	select STM32_HAVE_CAN2
+	select STM32_HAVE_RNG
+	select STM32_HAVE_ETHMAC
 
 # This is really 427/437, but we treat the two the same.
 config STM32_STM32F427
@@ -810,6 +822,8 @@ config STM32_STM32F427
 	select STM32_HAVE_ADC3
 	select STM32_HAVE_CAN1
 	select STM32_HAVE_CAN2
+	select STM32_HAVE_RNG
+	select STM32_HAVE_ETHMAC
 
 # This is really 429/439, but we treat the two the same.
 config STM32_STM32F429
@@ -837,6 +851,8 @@ config STM32_STM32F429
 	select STM32_HAVE_ADC3
 	select STM32_HAVE_CAN1
 	select STM32_HAVE_CAN2
+	select STM32_HAVE_RNG
+	select STM32_HAVE_ETHMAC
 
 config STM32_DFU
 	bool "DFU bootloader"
@@ -967,6 +983,14 @@ config STM32_HAVE_CAN2
 	bool
 	default n
 
+config STM32_HAVE_RNG
+	bool
+	default n
+
+config STM32_HAVE_ETHMAC
+	bool
+	default n
+
 # These are the peripheral selections proper
 
 config STM32_ADC1
@@ -1005,7 +1029,7 @@ config STM32_BKP
 config STM32_BKPSRAM
 	bool "BKP RAM"
 	default n
-	depends on STM32_STM32F20XX || STM32_STM32F40XX
+	depends on STM32_STM32F207 || STM32_STM32F40XX
 
 config STM32_CAN1
 	bool "CAN1"
@@ -1038,7 +1062,7 @@ config STM32_CRC
 config STM32_CRYP
 	bool "CRYP"
 	default n
-	depends on STM32_STM32F20XX || STM32_STM32F40XX
+	depends on STM32_STM32F207 || STM32_STM32F40XX
 
 config STM32_DMA1
 	bool "DMA1"
@@ -1064,12 +1088,12 @@ config STM32_DAC2
 config STM32_DCMI
 	bool "DCMI"
 	default n
-	depends on STM32_STM32F20XX || STM32_STM32F40XX
+	depends on STM32_STM32F207 || STM32_STM32F40XX
 
 config STM32_ETHMAC
 	bool "Ethernet MAC"
 	default n
-	depends on STM32_CONNECTIVITYLINE || STM32_STM32F20XX || STM32_STM32F40XX
+	depends on STM32_HAVE_ETHMAC
 	select NETDEVICES
 	select ARCH_HAVE_PHY
 
@@ -1081,7 +1105,7 @@ config STM32_FSMC
 config STM32_HASH
 	bool "HASH"
 	default n
-	depends on STM32_STM32F20XX || STM32_STM32F40XX
+	depends on STM32_STM32F207 || STM32_STM32F40XX
 
 config STM32_I2C1
 	bool "I2C1"
@@ -1097,7 +1121,7 @@ config STM32_I2C2
 config STM32_I2C3
 	bool "I2C3"
 	default n
-	depends on STM32_STM32F20XX || STM32_STM32F40XX
+	depends on STM32_STM32F207 || STM32_STM32F40XX
 	select STM32_I2C
 
 config STM32_LTDC
@@ -1118,7 +1142,7 @@ config STM32_OTGFS
 config STM32_OTGHS
 	bool "OTG HS"
 	default n
-	depends on STM32_STM32F20XX || STM32_STM32F40XX || STM32_STM32F429
+	depends on STM32_STM32F207 || STM32_STM32F40XX || STM32_STM32F429
 
 config STM32_OTGHS_FS_MODE
 	bool "Use OTG HS in FS mode"
@@ -1140,7 +1164,7 @@ config STM32_PWR
 config STM32_RNG
 	bool "RNG"
 	default n
-	depends on STM32_STM32F20XX || STM32_STM32F40XX
+	depends on STM32_HAVE_RNG
 	select ARCH_HAVE_RNG
 
 config STM32_SDIO
@@ -1159,14 +1183,14 @@ config STM32_SPI1
 config STM32_SPI2
 	bool "SPI2"
 	default n
-	depends on STM32_CONNECTIVITYLINE || STM32_STM32F20XX || STM32_STM32F40XX || (STM32_VALUELINE && STM32_HIGHDENSITY) || (STM32_STM32F10XX && (STM32_HIGHDENSITY || STM32_MEDIUMDENSITY)) || STM32_STM32F30XX
+	depends on STM32_CONNECTIVITYLINE || STM32_STM32F207 || STM32_STM32F40XX || (STM32_VALUELINE && STM32_HIGHDENSITY) || (STM32_STM32F10XX && (STM32_HIGHDENSITY || STM32_MEDIUMDENSITY)) || STM32_STM32F30XX
 	select SPI
 	select STM32_SPI
 
 config STM32_SPI3
 	bool "SPI3"
 	default n
-	depends on STM32_CONNECTIVITYLINE || STM32_STM32L15XX || STM32_STM32F20XX || STM32_STM32F40XX || (STM32_VALUELINE && STM32_HIGHDENSITY) || (STM32_STM32F10XX && STM32_HIGHDENSITY)
+	depends on STM32_CONNECTIVITYLINE || STM32_STM32L15XX || STM32_STM32F207 || STM32_STM32F40XX || (STM32_VALUELINE && STM32_HIGHDENSITY) || (STM32_STM32F10XX && STM32_HIGHDENSITY)
 	select SPI
 	select STM32_SPI
 
@@ -1194,7 +1218,7 @@ config STM32_SPI6
 config STM32_SYSCFG
 	bool "SYSCFG"
 	default y
-	depends on STM32_STM32L15XX || STM32_STM32F30XX || STM32_STM32F20XX || STM32_STM32F40XX
+	depends on STM32_STM32L15XX || STM32_STM32F30XX || STM32_STM32F207 || STM32_STM32F40XX
 
 config STM32_TIM1
 	bool "TIM1"
@@ -1557,7 +1581,7 @@ endmenu
 
 config STM32_FLASH_PREFETCH
 	bool "Enable FLASH Pre-fetch"
-	depends on STM32_STM32F20XX || STM32_STM32F40XX
+	depends on STM32_STM32F207 || STM32_STM32F40XX
 	default y if STM32_STM32F427 || STM32_STM32F429
 	default n
 	---help---
@@ -3121,7 +3145,7 @@ config STM32_MII
 choice
 	prompt "MII clock configuration"
 	default STM32_MII_MCO if STM32_STM32F10XX
-	default STM32_MII_MCO1 if STM32_STM32F20XX || STM32_STM32F40XX
+	default STM32_MII_MCO1 if STM32_STM32F207 || STM32_STM32F40XX
 	depends on STM32_MII
 
 config STM32_MII_MCO
@@ -3132,13 +3156,13 @@ config STM32_MII_MCO
 
 config STM32_MII_MCO1
 	bool "Use MC01 as MII clock"
-	depends on (STM32_STM32F20XX || STM32_STM32F40XX)
+	depends on (STM32_STM32F207 || STM32_STM32F40XX)
 	---help---
 		Use MCO1 to clock the MII interface.  Default:  Use MC01
 
 config STM32_MII_MCO2
 	bool "Use MC02 as MII clock"
-	depends on (STM32_STM32F20XX || STM32_STM32F40XX)
+	depends on (STM32_STM32F207 || STM32_STM32F40XX)
 	---help---
 		Use MCO2 to clock the MII interface.  Default:  Use MC01
 
@@ -3269,7 +3293,7 @@ config STM32_RMII
 choice
 	prompt "RMII clock configuration"
 	default STM32_RMII_MCO if STM32_STM32F10XX
-	default STM32_RMII_MCO1 if STM32_STM32F20XX || STM32_STM32F40XX
+	default STM32_RMII_MCO1 if STM32_STM32F207 || STM32_STM32F40XX
 	depends on STM32_RMII
 
 config STM32_RMII_MCO
@@ -3280,13 +3304,13 @@ config STM32_RMII_MCO
 
 config STM32_RMII_MCO1
 	bool "Use MC01 as RMII clock"
-	depends on (STM32_STM32F20XX || STM32_STM32F40XX)
+	depends on (STM32_STM32F207 || STM32_STM32F40XX)
 	---help---
 		Use MCO1 to clock the RMII interface.  Default:  Use MC01
 
 config STM32_RMII_MCO2
 	bool "Use MC02 as RMII clock"
-	depends on (STM32_STM32F20XX || STM32_STM32F40XX)
+	depends on (STM32_STM32F207 || STM32_STM32F40XX)
 	---help---
 		Use MCO2 to clock the RMII interface.  Default:  Use MC01
 
