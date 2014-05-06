@@ -7297,3 +7297,6 @@
 	* arch/arm/src/stm32/stm32f40xxx_rcc.c and configs/nucleo-f401re/include/board.h:
 	  The Nucleo-F401RE has no on-board crystals and, hence, needs to run
 	  with the PLL input from the on-chip HSI clock (2014-5-6).
+	* arch/arm/src/armv7-a/arm_memcpy.S:  This is the same optimized memcpy()
+	  function that Mike Smith brought in for the ARMv7-M with minor tweaks
+	  by David Sidrane to work with the ARMv7-A (2014-5-6).

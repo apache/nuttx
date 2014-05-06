@@ -54,6 +54,10 @@ CMN_ASRCS += arm_saveusercontext.S arm_vectoraddrexcptn.S arm_vfork.S
 CMN_ASRCS += cp15_coherent_dcache.S cp15_invalidate_dcache.S
 CMN_ASRCS += cp15_clean_dcache.S cp15_flush_dcache.S cp15_invalidate_dcache_all.S
 
+ifeq ($(CONFIG_ARCH_MEMCPY),y)
+CMN_ASRCS += arm_memcpy.S
+endif
+
 # Common C source files
 
 CMN_CSRCS  = up_initialize.c up_idle.c up_interruptcontext.c up_exit.c
