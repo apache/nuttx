@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/stm32/chip/stm32f103vc_pinmap.h
+ * arch/arm/src/stm32/chip/stm32f103v_pinmap.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Laurent Latil <laurent@latil.nom.fr>
  *
@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32F103VC_PINMAP_H
-#define __ARCH_ARM_SRC_STM32_CHIP_STM32F103VC_PINMAP_H
+#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32F103V_PINMAP_H
+#define __ARCH_ARM_SRC_STM32_CHIP_STM32F103V_PINMAP_H
 
 /************************************************************************************
  * Included Files
@@ -413,4 +413,4 @@
 #define GPIO_PB4                (GPIO_ALT|GPIO_CNF_AFPP|GPIO_MODE_50MHz|GPIO_PORTB|GPIO_PIN4)
 #endif
 
-#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32F103VC_PINMAP_H */
+#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32F103V_PINMAP_H */
