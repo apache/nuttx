@@ -51,7 +51,7 @@
 
 /* Only the STM32F103 supports the SDIO interface */
 
-#ifdef CONFIG_ARCH_CHIP_STM32F103VCT6
+#ifdef CONFIG_ARCH_CHIP_STM32F103VC
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -129,5 +129,5 @@ int stm32_sdinitialize(int minor)
   return OK;
 }
 
-#endif /* CONFIG_ARCH_CHIP_STM32F103VCT6 */
+#endif /* CONFIG_ARCH_CHIP_STM32F103VC */
 

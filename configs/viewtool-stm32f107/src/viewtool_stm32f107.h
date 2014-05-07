@@ -55,7 +55,7 @@
 
 /* Handle chip differences */
 
-#if defined(CONFIG_ARCH_CHIP_STM32F103VCT6)
+#if defined(CONFIG_ARCH_CHIP_STM32F103VC)
 #  undef CONFIG_STM32_OTGFS
 #elif defined(CONFIG_ARCH_CHIP_STM32F107VC)
 #  undef CONFIG_STM32_USB
@@ -159,7 +159,7 @@
  *      with an SPI-based card interface???)
  */
 
-#ifdef CONFIG_ARCH_CHIP_STM32F103VCT6
+#ifdef CONFIG_ARCH_CHIP_STM32F103VC
 #  define GPIO_SD_CD      (GPIO_INPUT | GPIO_CNF_INFLOAT | GPIO_EXTI| \
                            GPIO_PORTA | GPIO_PIN8)
 #endif
@@ -193,7 +193,7 @@
  *     be open so that PE11 activity does effect USB.
  */
 
-#ifdef CONFIG_ARCH_CHIP_STM32F103VCT6
+#ifdef CONFIG_ARCH_CHIP_STM32F103VC
 #  define GPIO_USB_PULLUP (GPIO_OUTPUT | GPIO_CNF_OUTOD | GPIO_MODE_50MHz | \
                            GPIO_OUTPUT_SET | GPIO_PORTE | GPIO_PIN11)
 #endif

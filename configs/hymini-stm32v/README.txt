@@ -320,7 +320,7 @@ HY-Mini specific Configuration Options
     CONFIG_ARCH_CHIP_name - For use in C code to identify the exact
        chip:
 
-       CONFIG_ARCH_CHIP_STM32F103VCT6
+       CONFIG_ARCH_CHIP_STM32F103VC
 
     CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG - Enables special STM32 clock
        configuration features.

@@ -591,7 +591,7 @@
  * differ only in the available FLASH and SRAM.
  */
 
-#elif defined(CONFIG_ARCH_CHIP_STM32F103RET6)
+#elif defined(CONFIG_ARCH_CHIP_STM32F103RE)
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
 #  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  define CONFIG_STM32_STM32F10XX        1   /* STM32F10xxx family */
@@ -629,7 +629,7 @@
  * only in the available FLASH and SRAM.
  */
 
-#elif defined(CONFIG_ARCH_CHIP_STM32F103VCT6) || defined(CONFIG_ARCH_CHIP_STM32F103VET6)
+#elif defined(CONFIG_ARCH_CHIP_STM32F103VC) || defined(CONFIG_ARCH_CHIP_STM32F103VE)
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
 #  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  define CONFIG_STM32_STM32F10XX        1   /* STM32F10xxx family */
@@ -667,7 +667,7 @@
  * only in the available FLASH and SRAM.
  */
 
-#elif defined(CONFIG_ARCH_CHIP_STM32F103ZET6)
+#elif defined(CONFIG_ARCH_CHIP_STM32F103ZE)
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
 #  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  define CONFIG_STM32_STM32F10XX        1   /* STM32F10xxx family */
@@ -703,7 +703,7 @@
 
 /* STM32 F105/F107 Connectivity Line *******************************************************/
 
-#elif defined(CONFIG_ARCH_CHIP_STM32F105VBT7)
+#elif defined(CONFIG_ARCH_CHIP_STM32F105VB)
 #  undef  CONFIG_STM32_STM32L15XX            /* STM32L151xx and STM32L152xx family */
 #  undef  CONFIG_STM32_ENERGYLITE            /* STM32L EnergyLite family */
 #  define CONFIG_STM32_STM32F10XX        1   /* STM32F10xxx family */
@@ -1722,4 +1722,3 @@
 #endif
 
 #endif /* __ARCH_ARM_INCLUDE_STM32_CHIP_H */
-
