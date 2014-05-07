@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/stm32/chip/stm32f105vb_pinmap.h
+ * arch/arm/src/stm32/chip/stm32f105v_pinmap.h
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32F105VB_PINMAP_H
-#define __ARCH_ARM_SRC_STM32_CHIP_STM32F105VB_PINMAP_H
+#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32F105V_PINMAP_H
+#define __ARCH_ARM_SRC_STM32_CHIP_STM32F105V_PINMAP_H
 
 /************************************************************************************
  * Included Files
@@ -409,4 +409,4 @@
 #define GPIO_PB4                (GPIO_ALT|GPIO_CNF_AFPP|GPIO_MODE_50MHz|GPIO_PORTB|GPIO_PIN4)
 #endif
 
-#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32F105VB_PINMAP_H */
+#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32F105V_PINMAP_H */
