@@ -62,8 +62,8 @@
  ****************************************************************************/
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_ARCH_CHIP_STM32F103VCT6
-#  warning This only only been verified with CONFIG_ARCH_CHIP_STM32F103VCT6
+#ifndef CONFIG_ARCH_CHIP_STM32F103VC
+#  warning This only only been verified with CONFIG_ARCH_CHIP_STM32F103VC
 #endif
 
 #ifndef CONFIG_ARCH_HIPRI_INTERRUPT

@@ -8,12 +8,12 @@ if ARCH_BOARD_VIEWTOOL_STM32F107
 config VIEWTOOL_HIGHPRI
 	bool "High priority interrupt test"
 	default n
-	depends on ARCH_CHIP_STM32F103VCT6 && ARCH_HIPRI_INTERRUPT
+	depends on ARCH_CHIP_STM32F103VC && ARCH_HIPRI_INTERRUPT
 	---help---
 		This selection enables building of the custom test for the Cortex-M
 		high priority, nested interrupts.  ARCH_HIPRI_INTERRUPT must first
 		be enabled.  This test is only implemented on the STM32F103VCT6
-		(ARCH_CHIP_STM32F103VCT6) but should be easily ported to other STM32
+		(ARCH_CHIP_STM32F103VC) but should be easily ported to other STM32
 		architectures.
 
 if VIEWTOOL_HIGHPRI

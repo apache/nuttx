@@ -567,7 +567,7 @@ M3 Wildfire-specific Configuration Options
        chip:
 
        CONFIG_ARCH_CHIP_STM32
-       CONFIG_ARCH_CHIP_STM32F103VET6
+       CONFIG_ARCH_CHIP_STM32F103VE
 
     CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG - Enables special STM32 clock
        configuration features.

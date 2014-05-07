@@ -630,7 +630,7 @@ Configurations
        with a STM32F103VCT6, it would have to be modified as follows:
 
       System Type -> STM32 Configuration Options
-         CONFIG_ARCH_CHIP_STM32F103VCT6=y
+         CONFIG_ARCH_CHIP_STM32F103VC=y
          CONFIG_ARCH_CHIP_STM32F107VC=n
 
     2. This configuration uses the default USART1 serial console.  That
@@ -656,7 +656,7 @@ Configurations
        of the board.  The LCD requires FSMC support.
 
           System Type -> STM32 Chip Selection:
-            CONFIG_ARCH_CHIP_STM32F103VCT6=y      : Select STM32F103VCT6
+            CONFIG_ARCH_CHIP_STM32F103VC=y      : Select STM32F103VCT6
 
           System Type -> Peripherals:
             CONFIG_STM32_FSMC=y                   : Enable FSMC LCD interface
@@ -706,7 +706,7 @@ Configurations
        is not very meaningful with no LCD).
 
           System Type -> STM32 Chip Selection:
-           CONFIG_ARCH_CHIP_STM32F103VCT6=y    : Select STM32F103VCT6
+           CONFIG_ARCH_CHIP_STM32F103VC=y    : Select STM32F103VCT6
 
        With the following modifications, you can include the touchscreen
        test program at apps/examples/touchscreen as an NSH built-in
