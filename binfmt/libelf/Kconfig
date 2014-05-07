@@ -13,7 +13,7 @@ config ELF_STACKSIZE
 	int "ELF Stack Size"
 	default 2048
 	---help---
-		This is the default stack size that will will be used when starting ELF binaries.
+		This is the default stack size that will be used when starting ELF binaries.
 
 config ELF_BUFFERSIZE
 	int "ELF I/O Buffer Size"

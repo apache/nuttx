@@ -1,0 +1,23 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+config PCODE_STACKSIZE
+	int "P-code interpreter stack size"
+	default 2048
+	---help---
+		This is the stack size that will be used when starting P-code interpreter.
+
+config PCODE_PRIORITY
+	int "P-code interpreter priority"
+	default 100
+	---help---
+		This is the task_priority that will be used when starting P-code interpreter.
+
+config PCODE_DUMPBUFFER
+	bool "Dump P-code buffers"
+	default n
+	depends on DEBUG && DEBUG_VERBOSE
+	---help---
+		Dump various P-code buffers for debug purposes

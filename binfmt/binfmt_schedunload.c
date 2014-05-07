@@ -208,7 +208,7 @@ static void unload_callback(int signo, siginfo_t *info, void *ucontext)
 
   if (!info || signo != SIGCHLD)
     {
-      blldbg("ERROR:Bad signal callback: signo=%d info=%p\n", signo, callback);
+      blldbg("ERROR:Bad signal callback: signo=%d info=%p\n", signo, info);
       return;
     }
 

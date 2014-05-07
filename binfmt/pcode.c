@@ -1,7 +1,7 @@
 /****************************************************************************
- * binfmt/builtin.c
+ * binfmt/pcode.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,20 +39,16 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <sys/ioctl.h>
-
-#include <stdint.h>
-#include <string.h>
 #include <fcntl.h>
-#include <debug.h>
+#include <stdint.h>
 #include <errno.h>
+#include <debug.h>
 
-#include <nuttx/fs/ioctl.h>
+#include <nuttx/poff.h>
 #include <nuttx/binfmt/binfmt.h>
-#include <nuttx/binfmt/builtin.h>
+#include <nuttx/binfmt/pcode.h>
 
-#ifdef CONFIG_BUILTIN
+#ifdef CONFIG_PCODE
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -62,16 +58,16 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int builtin_loadbinary(FAR struct binary_s *binp);
+static int pcode_loadbinary(FAR struct binary_s *binp);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static struct binfmt_s g_builtin_binfmt =
+static struct binfmt_s g_pcode_binfmt =
 {
-  NULL,               /* next */
-  builtin_loadbinary, /* load */
+  NULL,              /* next */
+  pcode_loadbinary,  /* load */
 };
 
 /****************************************************************************
@@ -79,19 +75,41 @@ static struct binfmt_s g_builtin_binfmt =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: builtin_loadbinary
+ * Name: pcode_proxy
  *
  * Description:
- *   Verify that the file is an builtin binary.
+ *   This is the proxy program that runs and starts the P-Code interpreter.
  *
  ****************************************************************************/
 
-static int builtin_loadbinary(struct binary_s *binp)
+#ifndef CONFIG_NUTTX_KERNEL
+static int pcode_proxy(int argc, char **argv)
 {
-  FAR const char *filename;
-  FAR const struct builtin_s *b;
+  /* REVISIT:  There are issues here when CONFIG_NUTTX_KERNEL is selected. */
+
+  bdbg("ERROR: Not implemented");
+  return EXIT_FAILURE;
+}
+#else
+#  error Missing logic for the case of CONFIG_NUTTX_KERNEL
+#endif
+
+/****************************************************************************
+ * Name: pcode_loadbinary
+ *
+ * Description:
+ *   Verify that the file is an pcode binary.
+ *
+ ****************************************************************************/
+
+static int pcode_loadbinary(struct binary_s *binp)
+{
+  FAR struct poff_fileheader_s hdr;
+  FAR const struct pcode_s *b;
+  FAR uint8_t *ptr;
+  size_t remaining;
+  ssize_t nread;
   int fd;
-  int index;
   int ret;
 
   bvdbg("Loading file: %s\n", binp->filename);
@@ -106,40 +124,70 @@ static int builtin_loadbinary(struct binary_s *binp)
       return -errval;
     }
 
-  /* If this file is a BINFS file system, then we can recover the name of
-   * the file using the FIOC_FILENAME ioctl() call.
-   */
+  /* Read the POFF file header */
 
-  ret = ioctl(fd, FIOC_FILENAME, (unsigned long)((uintptr_t)&filename));
-  if (ret < 0)
+  for (remaining = sizeof(struct poff_fileheader_s), ptr = (FAR uint8_t *)&hdr;
+       remaining > 0; )
     {
-      int errval = errno;
-      bdbg("ERROR: FIOC_FILENAME ioctl failed: %d\n", errval);
-      return -errval;
+      /* Read the next GULP */
+
+      nread = read(fd, ptr, remaining);
+      if (nread < 0)
+        {
+          /* If errno is EINTR, then this is not an error; the read() was
+           * simply interrupted by a signal.
+           */
+
+          int errval = errno;
+          DEBUGASSERT(errval > 0);
+
+          if (errval != EINTR)
+            {
+              bdbg("ERROR: read failed: %d\n", errval);
+              ret = -errval;
+              goto errout_with_fd;
+            }
+
+          bdbg("Interrupted by a signal\n");
+        }
+      else
+        {
+          /* Set up for the next gulp */
+
+          DEBUASSERT(nread > 0 && nread <=remaining);
+          remaining -= nread;
+          ptr += nread;
+        } 
     }
 
-  /* Other file systems may also support FIOC_FILENAME, so the real proof
-   * is that we can look up the index to this name in g_builtins[].
-   */
+#ifdef CONFIG_PCODE_DUMPBUFFER
+  lib_dumpbuffer("POFF File Header", &hdr, sizeof(poff_fileheader_s));
+#endif
 
-  index = builtin_isavail(filename);
-  if (index < 0)
+  /* Verify that the file is a P-Code executable */
+
+  if (memcmp(&hdr.fh_ident, FHI_POFF_MAG, 4) != 0 || hdr.fh_type != FHT_EXEC)
     {
-      int errval = errno;
-      bdbg("ERROR: %s is not a builtin application\n", filename);
-      return -errval;
-
+      dbg("ERROR: File is not a P-code executable: %d\n");
+      ret = -ENOEXEC;
+      goto errout_with_fd;
     }
 
-  /* Return the load information.  NOTE: that there is no way to configure
-   * the priority.  That is a bug and needs to be fixed.
+  /* Return the load information.
+   * REVISIT:  There are issues here when CONFIG_NUTTX_KERNEL is selected.
    */
 
-  b = builtin_for_index(index);
-  binp->entrypt   = b->main;
-  binp->stacksize = b->stacksize;
-  binp->priority  = b->priority;
-  return OK;
+  binp->entrypt   = pcode_proxy;
+  binp->stacksize = CONFIG_PCODE_STACKSIZE;
+  binp->priority  = CONFIG_PCODE_PRIORITY;
+
+  /* Successfully identified a p-code binary */
+
+  ret = OK;
+
+errout_with_fd:
+  close(fd);
+  return ret;
 }
 
 /****************************************************************************
@@ -147,12 +195,12 @@ static int builtin_loadbinary(struct binary_s *binp)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: builtin_initialize
+ * Name: pcode_initialize
  *
  * Description:
- *   Builtin support is built unconditionally.  However, in order to
- *   use this binary format, this function must be called during system
- *   initialzie in order to register the builtin binary format.
+ *   P-code support is built based on the configuration.  However, in order
+ *   to use this binary format, this function must be called during system
+ *   initialization in order to register the P-Code binary format.
  *
  * Returned Value:
  *   This is a NuttX internal function so it follows the convention that
@@ -161,15 +209,15 @@ static int builtin_loadbinary(struct binary_s *binp)
  *
  ****************************************************************************/
 
-int builtin_initialize(void)
+int pcode_initialize(void)
 {
   int ret;
 
   /* Register ourselves as a binfmt loader */
 
-  bvdbg("Registering Builtin Loader\n");
+  bvdbg("Registering P-Code Loader\n");
 
-  ret = register_binfmt(&g_builtin_binfmt);
+  ret = register_binfmt(&g_pcode_binfmt);
   if (ret != 0)
     {
       bdbg("Failed to register binfmt: %d\n", ret);
@@ -179,20 +227,20 @@ int builtin_initialize(void)
 }
 
 /****************************************************************************
- * Name: builtin_uninitialize
+ * Name: pcode_uninitialize
  *
  * Description:
- *   Unregister the builtin binary loader
+ *   Unregister the pcode binary loader
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void builtin_uninitialize(void)
+void pcode_uninitialize(void)
 {
-  unregister_binfmt(&g_builtin_binfmt);
+  unregister_binfmt(&g_pcode_binfmt);
 }
 
-#endif /* CONFIG_BUILTIN */
+#endif /* CONFIG_PCODE */
 

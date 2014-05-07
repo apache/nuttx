@@ -83,7 +83,7 @@ extern "C" {
  * Description:
  *   Builtin support is built unconditionally.  However, in order to
  *   use this binary format, this function must be called during system
- *   initialzie in order to register the builtin binary format.
+ *   format in order to register the builtin binary format.
  *
  * Returned Value:
  *   This is a NuttX internal function so it follows the convention that
@@ -167,7 +167,7 @@ FAR const char *builtin_getname(int index);
  *
  ****************************************************************************/
 
-FAR const struct builtin_s *builtin_for_index(int index);
+EXTERN FAR const struct builtin_s *builtin_for_index(int index);
 
 #undef EXTERN
 #if defined(__cplusplus)

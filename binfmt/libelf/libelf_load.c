@@ -222,7 +222,7 @@ static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
  *
  * Description:
  *   Loads the binary into memory, allocating memory, performing relocations
- *   and inializing the data and bss segments.
+ *   and initializing the data and bss segments.
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on

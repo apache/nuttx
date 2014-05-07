@@ -7300,3 +7300,7 @@
 	* arch/arm/src/armv7-a/arm_memcpy.S:  This is the same optimized memcpy()
 	  function that Mike Smith brought in for the ARMv7-M with minor tweaks
 	  by David Sidrane to work with the ARMv7-A (2014-5-6).
+	* binfmt/libpcode, pcode.c, include/nuttx/poff.h, and binfmt/pcode.h:
+	  Framework to support Pascal P-Code as a binary format.  At present this
+	  logic is incomplete and really nothing more than a thought experiment
+	  to determine the feasibility of the P-code binary format (2014-5-7).

@@ -80,7 +80,7 @@
  * Description:
  *   Loads the binary specified by nxflat_init into memory, mapping
  *   the I-space executable regions, allocating the D-Space region,
- *   and inializing the data segment (relocation information is
+ *   and initializing the data segment (relocation information is
  *   temporarily loaded into the BSS region.  BSS will be cleared
  *   by nxflat_bind() after the relocation data has been processed).
  *

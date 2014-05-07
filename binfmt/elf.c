@@ -218,7 +218,7 @@ static int elf_loadbinary(struct binary_s *binp)
   binp->stacksize = CONFIG_ELF_STACKSIZE;
 
   /* Add the ELF allocation to the alloc[] only if there is no address
-   * enironment.  If there is an address environment, it will automatically
+   * environment.  If there is an address environment, it will automatically
    * be freed when the function exits
    *
    * REVISIT:  If the module is loaded then unloaded, wouldn't this cause
@@ -275,9 +275,9 @@ errout:
  * Name: elf_initialize
  *
  * Description:
- *   ELF support is built unconditionally.  However, it order to
+ *   ELF support is built unconditionally.  However, in order to
  *   use this binary format, this function must be called during system
- *   format in order to register the ELF binary format.
+ *   initialization in order to register the ELF binary format.
  *
  * Returned Value:
  *   This is a NuttX internal function so it follows the convention that

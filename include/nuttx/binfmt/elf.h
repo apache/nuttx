@@ -170,8 +170,7 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN int elf_init(FAR const char *filename,
-                    FAR struct elf_loadinfo_s *loadinfo);
+int elf_init(FAR const char *filename, FAR struct elf_loadinfo_s *loadinfo);
 
 /****************************************************************************
  * Name: elf_uninit
@@ -186,14 +185,14 @@ EXTERN int elf_init(FAR const char *filename,
  *
  ****************************************************************************/
 
-EXTERN int elf_uninit(FAR struct elf_loadinfo_s *loadinfo);
+int elf_uninit(FAR struct elf_loadinfo_s *loadinfo);
 
 /****************************************************************************
  * Name: elf_load
  *
  * Description:
  *   Loads the binary into memory, allocating memory, performing relocations
- *   and inializing the data and bss segments.
+ *   and initializing the data and bss segments.
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
@@ -201,7 +200,7 @@ EXTERN int elf_uninit(FAR struct elf_loadinfo_s *loadinfo);
  *
  ****************************************************************************/
 
-EXTERN int elf_load(FAR struct elf_loadinfo_s *loadinfo);
+int elf_load(FAR struct elf_loadinfo_s *loadinfo);
 
 /****************************************************************************
  * Name: elf_bind
@@ -217,8 +216,8 @@ EXTERN int elf_load(FAR struct elf_loadinfo_s *loadinfo);
  ****************************************************************************/
 
 struct symtab_s;
-EXTERN int elf_bind(FAR struct elf_loadinfo_s *loadinfo,
-                    FAR const struct symtab_s *exports, int nexports);
+int elf_bind(FAR struct elf_loadinfo_s *loadinfo,
+             FAR const struct symtab_s *exports, int nexports);
 
 /****************************************************************************
  * Name: elf_unload
@@ -234,7 +233,7 @@ EXTERN int elf_bind(FAR struct elf_loadinfo_s *loadinfo,
  *
  ****************************************************************************/
 
-EXTERN int elf_unload(struct elf_loadinfo_s *loadinfo);
+int elf_unload(struct elf_loadinfo_s *loadinfo);
 
 /****************************************************************************
  * These are APIs used outside of binfmt by NuttX:
@@ -243,9 +242,9 @@ EXTERN int elf_unload(struct elf_loadinfo_s *loadinfo);
  * Name: elf_initialize
  *
  * Description:
- *   ELF support is built unconditionally.  However, it order to
+ *   ELF support is built unconditionally.  However, in order to
  *   use this binary format, this function must be called during system
- *   format in order to register the ELF binary format.
+ *   initialization in order to register the ELF binary format.
  *
  * Returned Value:
  *   This is a NuttX internal function so it follows the convention that
@@ -254,7 +253,7 @@ EXTERN int elf_unload(struct elf_loadinfo_s *loadinfo);
  *
  ****************************************************************************/
 
-EXTERN int elf_initialize(void);
+int elf_initialize(void);
 
 /****************************************************************************
  * Name: elf_uninitialize
@@ -267,7 +266,7 @@ EXTERN int elf_initialize(void);
  *
  ****************************************************************************/
 
-EXTERN void elf_uninitialize(void);
+void elf_uninitialize(void);
 
 /****************************************************************************
  * These are APIs must be provided by architecture-specific logic:
@@ -288,7 +287,7 @@ EXTERN void elf_uninitialize(void);
  *
  ****************************************************************************/
 
-EXTERN bool arch_checkarch(FAR const Elf32_Ehdr *hdr);
+bool arch_checkarch(FAR const Elf32_Ehdr *hdr);
 
 /****************************************************************************
  * Name: arch_relocate and arch_relocateadd
@@ -308,10 +307,10 @@ EXTERN bool arch_checkarch(FAR const Elf32_Ehdr *hdr);
  *
  ****************************************************************************/
 
-EXTERN int arch_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
-                         uintptr_t addr);
-EXTERN int arch_relocateadd(FAR const Elf32_Rela *rel,
-                            FAR const Elf32_Sym *sym, uintptr_t addr);
+int arch_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
+                  uintptr_t addr);
+int arch_relocateadd(FAR const Elf32_Rela *rel,
+                     FAR const Elf32_Sym *sym, uintptr_t addr);
 
 /****************************************************************************
  * Name: arch_flushicache
@@ -329,7 +328,7 @@ EXTERN int arch_relocateadd(FAR const Elf32_Rela *rel,
  ****************************************************************************/
 
 #ifdef CONFIG_ELF_ICACHE
-EXTERN bool arch_flushicache(FAR void *addr, size_t len);
+bool arch_flushicache(FAR void *addr, size_t len);
 #endif
 
 #undef EXTERN
