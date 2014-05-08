@@ -7,7 +7,7 @@
  *
  * With extensions, modifications by:
  *
- *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregroy Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -95,17 +95,19 @@
 
 /* At least one I2C peripheral must be enabled */
 
-#if defined(CONFIG_STM32_I2C1) || defined(CONFIG_STM32_I2C2) || defined(CONFIG_STM32_I2C3)
+#if defined(CONFIG_STM32_I2C1) || defined(CONFIG_STM32_I2C2) || \
+    defined(CONFIG_STM32_I2C3)
 /* This implementation is for the STM32 F1, F2, and F4 only */
+/* Experimentally enabled for STM32L15XX */
 
-#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F20XX) || \
-    defined(CONFIG_STM32_STM32F40XX)
+#if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
+    defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
 /* Configuration ********************************************************************/
-/* CONFIG_I2C_POLLED may be set so that I2C interrrupts will not be used.  Instead,
+/* CONFIG_I2C_POLLED may be set so that I2C interrupts will not be used.  Instead,
  * CPU-intensive polling will be used.
  */
 
@@ -143,7 +145,10 @@
 
 /* Macros to convert a I2C pin to a GPIO output */
 
-#if defined(CONFIG_STM32_STM32F10XX)
+#if defined(CONFIG_STM32_STM32L15XX)
+#  define I2C_OUTPUT (GPIO_OUTPUT | GPIO_OUTPUT_SET | GPIO_OPENDRAIN | \
+                      GPIO_SPEED_40MHz)
+#elif defined(CONFIG_STM32_STM32F10XX)
 #  define I2C_OUTPUT (GPIO_OUTPUT | GPIO_OUTPUT_SET | GPIO_CNF_OUTOD | \
                       GPIO_MODE_50MHz)
 #elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
@@ -1284,7 +1289,8 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
    * the F1 in that BTF is not set after data is received (only RXNE).
    */
 
-#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX) || \
+    defined(CONFIG_STM32_STM32L15XX)
   if (priv->dcnt <= 0 && (status & (I2C_SR1_BTF|I2C_SR1_RXNE)) != 0)
 #else
   if (priv->dcnt <= 0 && (status & I2C_SR1_BTF) != 0)

@@ -80,7 +80,12 @@
 #define TIMTYPE_ADVANCED   4  /* Advanced timers:  TIM1-8 */
 
 #define TIMTYPE_TIM1       TIMTYPE_ADVANCED
-#ifdef CONFIG_STM32_STM32F10XX
+#ifdef CONFIG_STM32_STM32L15XX
+#  define TIMTYPE_TIM2     TIMTYPE_GENERAL16
+#  define TIMTYPE_TIM3     TIMTYPE_GENERAL16
+#  define TIMTYPE_TIM4     TIMTYPE_GENERAL16
+#  define TIMTYPE_TIM5     TIMTYPE_GENERAL32
+#elif defined(CONFIG_STM32_STM32F10XX)
 #  define TIMTYPE_TIM2     TIMTYPE_GENERAL16
 #  define TIMTYPE_TIM3     TIMTYPE_GENERAL16
 #  define TIMTYPE_TIM4     TIMTYPE_GENERAL16
@@ -131,7 +136,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-/* This structure representst the state of one PWM timer */
+/* This structure represents the state of one PWM timer */
 
 struct stm32_pwmtimer_s
 {
@@ -1107,6 +1112,113 @@ static uint8_t pwm_pulsecount(uint32_t count)
 #endif
 
 /****************************************************************************
+ * Name: pwm_set_apb_clock
+ *
+ * Description:
+ *   Enable or disable APB clock for the timer peripheral
+ *
+ * Input parameters:
+ *   dev - A reference to the lower half PWM driver state structure
+ *   on  - Enable clock if 'on' is 'true' and disable if 'false'
+ *
+ ****************************************************************************/
+
+static void pwm_set_apb_clock(FAR struct stm32_pwmtimer_s *priv, bool on)
+{
+  uint32_t en_bit;
+  uint32_t regaddr;
+
+  /* Determine which timer to configure */
+
+  switch (priv->timid)
+    {
+#ifdef CONFIG_STM32_TIM1_PWM
+      case 1:
+        regaddr  = STM32_RCC_APB2ENR;
+        en_bit   = RCC_APB2ENR_TIM1EN;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM2_PWM
+      case 2:
+        regaddr  = STM32_RCC_APB1ENR;
+        en_bit   = RCC_APB1ENR_TIM2EN;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM3_PWM
+      case 3:
+        regaddr  = STM32_RCC_APB1ENR;
+        en_bit   = RCC_APB1ENR_TIM3EN;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM4_PWM
+      case 4:
+        regaddr  = STM32_RCC_APB1ENR;
+        en_bit   = RCC_APB1ENR_TIM4EN;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM5_PWM
+      case 5:
+        regaddr  = STM32_RCC_APB1ENR;
+        en_bit   = RCC_APB1ENR_TIM5EN;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM8_PWM
+      case 8:
+        regaddr  = STM32_RCC_APB2ENR;
+        en_bit   = RCC_APB2ENR_TIM8EN;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM9_PWM
+      case 9:
+        regaddr  = STM32_RCC_APB2ENR;
+        en_bit   = RCC_APB2ENR_TIM9EN;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM10_PWM
+      case 10:
+        regaddr  = STM32_RCC_APB2ENR;
+        en_bit   = RCC_APB2ENR_TIM10EN;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM11_PWM
+      case 11:
+        regaddr  = STM32_RCC_APB2ENR;
+        en_bit   = RCC_APB2ENR_TIM11EN;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM12_PWM
+      case 12:
+        regaddr  = STM32_RCC_APB1ENR;
+        en_bit   = RCC_APB1ENR_TIM12EN;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM13_PWM
+      case 13:
+        regaddr  = STM32_RCC_APB1ENR;
+        en_bit   = RCC_APB1ENR_TIM13EN;
+        break;
+#endif
+#ifdef CONFIG_STM32_TIM14_PWM
+      case 14:
+        regaddr  = STM32_RCC_APB1ENR;
+        en_bit   = RCC_APB1ENR_TIM14EN;
+        break;
+#endif
+    }
+
+  /* Enable/disable APB 1/2 clock for timer */
+
+  if (on)
+    {
+      modifyreg32(regaddr, 0, en_bit);
+    }
+  else
+    {
+      modifyreg32(regaddr, en_bit, 0);
+    }
+}
+
+/****************************************************************************
  * Name: pwm_setup
  *
  * Description:
@@ -1121,8 +1233,8 @@ static uint8_t pwm_pulsecount(uint32_t count)
  *   Zero on success; a negated errno value on failure
  *
  * Assumptions:
- *   AHB1 or 2 clocking for the GPIOs and timer has already been configured
- *   by the RCC logic at power up.
+ *   APB1 or 2 clocking for the GPIOs has already been configured by the RCC
+ *   logic at power up.
  *
  ****************************************************************************/
 
@@ -1132,6 +1244,10 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
 
   pwmvdbg("TIM%d pincfg: %08x\n", priv->timid, priv->pincfg);
   pwm_dumpregs(priv, "Initially");
+
+  /* Enable APB1/2 clocking for timer. */
+
+  pwm_set_apb_clock(priv, true);
 
   /* Configure the PWM output pin, but do not start the timer yet */
 
@@ -1167,13 +1283,18 @@ static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
 
   pwm_stop(dev);
 
+  /* Disable APB1/2 clocking for timer. */
+
+  pwm_set_apb_clock(priv, false);
+
   /* Then put the GPIO pin back to the default state */
 
   pincfg = priv->pincfg & (GPIO_PORT_MASK|GPIO_PIN_MASK);
 
 #if defined(CONFIG_STM32_STM32F10XX)
   pincfg |= (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_MODE_INPUT);
-#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX) || \
+      defined(CONFIG_STM32_STM32L15XX)
   pincfg |= (GPIO_INPUT|GPIO_FLOAT);
 #else
 #  error "Unrecognized STM32 chip"

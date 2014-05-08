@@ -7305,4 +7305,12 @@
 	  logic is incomplete and really nothing more than a thought experiment
 	  to determine the feasibility of the P-code binary format (2014-5-7).
 	* drivers/sensors/Make.defs:  Correct build dependency.  Sourceforge
-	  ticket #41 from Kosma Moczek (2014-8-14).
+	  ticket #41 from Kosma Moczek (2014-5-8).
+	* drivers/serial.c, include/nuttx/serial.h, arch/arm/src/stm32/stm32_serial.c
+	  and minor updates to all other drivers using the serial interface:  Add an
+	  rxflowcontrol method to the serial interface to better support RX flow control.
+	  From Jussi Kivilinna (2014-5-8).
+	* arch/arm/include/stm32 and src/stm32:  Add support for the STM32152 and
+	  STM32162 Medium+ density parts (plus miscellaneous other improvements to
+	  the original STM32151 logi).  From Jussi Kivilinna and Sami Pelkonen
+	  (2014-5-8).

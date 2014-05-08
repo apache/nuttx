@@ -303,25 +303,33 @@ static inline void rcc_enableapb1(void)
 #ifdef CONFIG_STM32_USART2
   /* USART 2 clock enable */
 
+#ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_USART2EN;
+#endif
 #endif
 
 #ifdef CONFIG_STM32_USART3
   /* USART 3 clock enable */
 
+#ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB1ENR_USART3EN;
 #endif
-
-#ifdef CONFIG_STM32_USART4
-  /* USART 4 clock enable */
-
-  regval |= RCC_APB1ENR_USART4EN;
 #endif
 
-#ifdef CONFIG_STM32_USART5
+#ifdef CONFIG_STM32_UART4
+  /* USART 4 clock enable */
+
+#ifdef CONFIG_STM32_FORCEPOWER
+  regval |= RCC_APB1ENR_UART4EN;
+#endif
+#endif
+
+#ifdef CONFIG_STM32_UART5
   /* USART 5 clock enable */
 
-  regval |= RCC_APB1ENR_USART5EN;
+#ifdef CONFIG_STM32_FORCEPOWER
+  regval |= RCC_APB1ENR_UART5EN;
+#endif
 #endif
 
 #ifdef CONFIG_STM32_I2C1
@@ -431,7 +439,9 @@ static inline void rcc_enableapb2(void)
 #ifdef CONFIG_STM32_USART1
   /* USART1 clock enable */
 
+#ifdef CONFIG_STM32_FORCEPOWER
   regval |= RCC_APB2ENR_USART1EN;
+#endif
 #endif
 
   putreg32(regval, STM32_RCC_APB2ENR);

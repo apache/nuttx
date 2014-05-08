@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 #include <chip.h>
 
-#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
+#if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
 
 /************************************************************************************
  * Definitions
