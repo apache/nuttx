@@ -7304,3 +7304,5 @@
 	  Framework to support Pascal P-Code as a binary format.  At present this
 	  logic is incomplete and really nothing more than a thought experiment
 	  to determine the feasibility of the P-code binary format (2014-5-7).
+	* drivers/sensors/Make.defs:  Correct build dependency.  Sourceforge
+	  ticket #41 from Kosma Moczek (2014-8-14).

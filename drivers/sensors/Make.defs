@@ -38,7 +38,7 @@
 
 ifeq ($(CONFIG_I2C),y)
 
-ifeq ($(CONFIG_I2C_TRANSFER),y)
+ifeq ($(CONFIG_LIS331DL),y)
   CSRCS += lis331dl.c
 endif
 
