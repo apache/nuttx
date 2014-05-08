@@ -163,6 +163,16 @@ config ARCH_CHIP_STM32L152VB
 		STM32L 100-pin EnergyLite, 128KB FLASH, 16KB SRAM, 4KB EEPRROM with
 		4x44/8x40 LCD interface
 
+config ARCH_CHIP_STM32L162ZD
+	bool "STM32L162ZD"
+	select ARCH_CORTEXM3
+	select STM32_STM32L15XX
+	select STM32_ENERGYLITE
+	select STM32_HIGHDENSITY
+	---help---
+		STM32L 144-pin EnergyLite, 384KB FLASH, 48KB SRAM, 12KB EEPRROM with
+		8x40 LCD interface
+
 config ARCH_CHIP_STM32F100C8
 	bool "STM32F100C8"
 	select ARCH_CORTEXM3
@@ -563,6 +573,7 @@ config ARCH_CHIP_STM32F429N
 
 endchoice
 
+# This is really 15XX/16XX, but we treat the two the same.
 config STM32_STM32L15XX
 	bool
 	default n
@@ -2808,7 +2819,7 @@ config USART1_RS485_DIR_POLARITY
 config USART1_RXDMA
 	bool "USART1 Rx DMA"
 	default n
-	depends on STM32_USART1 && ((STM32STM32F10XX && STM32_DMA1) || (!STM32_STM32F10XX && STM32_DMA2))
+	depends on STM32_USART1 && (((STM32_STM32F10XX || STM32_STM32L15XX) && STM32_DMA1) || (!STM32_STM32F10XX && STM32_DMA2))
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 

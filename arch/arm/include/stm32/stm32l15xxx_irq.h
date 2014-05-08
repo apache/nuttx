@@ -227,8 +227,8 @@
 #  define STM32_IRQ_SDIO        (STM32_IRQ_INTERRUPTS+45) /* 45: SDIO Global interrupt */
 #  define STM32_IRQ_TIM5        (STM32_IRQ_INTERRUPTS+46) /* 46: TIM5 global interrupt */
 #  define STM32_IRQ_SPI3        (STM32_IRQ_INTERRUPTS+47) /* 47: SPI3 global interrupt */
-#  define STM32_IRQ_USART4      (STM32_IRQ_INTERRUPTS+48) /* 48: USART4 global interrupt */
-#  define STM32_IRQ_USART5      (STM32_IRQ_INTERRUPTS+49) /* 49: USART5 global interrupt */
+#  define STM32_IRQ_UART4       (STM32_IRQ_INTERRUPTS+48) /* 48: UART4 global interrupt */
+#  define STM32_IRQ_UART5       (STM32_IRQ_INTERRUPTS+49) /* 49: UART5 global interrupt */
 #  define STM32_IRQ_DMA2CH1     (STM32_IRQ_INTERRUPTS+50) /* 50: DMA2 channel 1 global interrupt */
 #  define STM32_IRQ_DMA2CH2     (STM32_IRQ_INTERRUPTS+51) /* 51: DMA2 channel 2 global interrupt */
 #  define STM32_IRQ_DMA2CH3     (STM32_IRQ_INTERRUPTS+52) /* 52: DMA2 channel 3 global interrupt */

@@ -242,8 +242,8 @@
   VECTOR(stm32_sdio, STM32_IRQ_SDIO)          /* 45: SDIO Global interrupt */
   VECTOR(stm32_tim5, STM32_IRQ_TIM5)          /* 46: TIM5 global interrupt */
   VECTOR(stm32_spi3, STM32_IRQ_SPI3)          /* 47: SPI3 global interrupt */
-  VECTOR(stm32_usart4, STM32_IRQ_USART4)      /* 48: USART4 global interrupt */
-  VECTOR(stm32_usart5, STM32_IRQ_USART5)      /* 49: USART5 global interrupt */
+  VECTOR(stm32_usart4, STM32_IRQ_UART4)       /* 48: UART4 global interrupt */
+  VECTOR(stm32_usart5, STM32_IRQ_UART5)       /* 49: UART5 global interrupt */
   VECTOR(stm32_dma2ch1, STM32_IRQ_DMA2CH1)    /* 50: DMA2 channel 1 global interrupt */
   VECTOR(stm32_dma2ch2, STM32_IRQ_DMA2CH2)    /* 51: DMA2 channel 2 global interrupt */
   VECTOR(stm32_dma2ch3, STM32_IRQ_DMA2CH3)    /* 52: DMA2 channel 3 global interrupt */

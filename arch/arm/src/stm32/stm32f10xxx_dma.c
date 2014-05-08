@@ -56,9 +56,9 @@
 #include "stm32_dma.h"
 #include "stm32.h"
 
-/* Only for the STM32F10xx family for now */
 
-#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
+#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX) || \
+    defined(CONFIG_STM32_STM32L15XX)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -157,7 +157,8 @@ static struct stm32_dma_s g_dma[DMA_NCHANNELS] =
   },
   {
     .chan     = 3,
-#if defined(CONFIG_STM32_CONNECTIVITYLINE) || defined(CONFIG_STM32_STM32F30XX)
+#if defined(CONFIG_STM32_CONNECTIVITYLINE) || defined(CONFIG_STM32_STM32F30XX) || \
+    defined(CONFIG_STM32_STM32L15XX)
     .irq      = STM32_IRQ_DMA2CH4,
 #else
     .irq      = STM32_IRQ_DMA2CH45,
@@ -166,7 +167,8 @@ static struct stm32_dma_s g_dma[DMA_NCHANNELS] =
   },
   {
     .chan     = 4,
-#if defined(CONFIG_STM32_CONNECTIVITYLINE) || defined(CONFIG_STM32_STM32F30XX)
+#if defined(CONFIG_STM32_CONNECTIVITYLINE) || defined(CONFIG_STM32_STM32F30XX) || \
+    defined(CONFIG_STM32_STM32L15XX)
     .irq      = STM32_IRQ_DMA2CH5,
 #else
     .irq      = STM32_IRQ_DMA2CH45,
@@ -288,7 +290,8 @@ static int stm32_dmainterrupt(int irq, void *context)
     }
   else
 #if STM32_NDMA > 1
-#if defined(CONFIG_STM32_CONNECTIVITYLINE) || defined(CONFIG_STM32_STM32F30XX)
+#if defined(CONFIG_STM32_CONNECTIVITYLINE) || defined(CONFIG_STM32_STM32F30XX) || \
+    defined(CONFIG_STM32_STM32L15XX)
   if (irq >= STM32_IRQ_DMA2CH1 && irq <= STM32_IRQ_DMA2CH5)
 #else
   if (irq >= STM32_IRQ_DMA2CH1 && irq <= STM32_IRQ_DMA2CH45)
@@ -637,24 +640,24 @@ bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
    * multiply.
    */
 
-  switch (ccr & STM32_DMA_SCR_MSIZE_MASK)
+  switch (ccr & DMA_CCR_MSIZE_MASK)
     {
-      case DMA_SCR_MSIZE_8BITS:
+      case DMA_CCR_MSIZE_8BITS:
         transfer_size = 1;
         mend = maddr + count - 1;
         break;
 
-      case DMA_SCR_MSIZE_16BITS:
+      case DMA_CCR_MSIZE_16BITS:
         transfer_size = 2;
         mend = maddr + (count << 1) - 1;
         break;
 
-      case DMA_SCR_MSIZE_32BITS:
+      case DMA_CCR_MSIZE_32BITS:
         transfer_size = 4;
         mend = maddr + (count << 2) - 1;
         break;
 
-      default
+      default:
         return false;
     }
 
