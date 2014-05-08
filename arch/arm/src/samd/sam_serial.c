@@ -300,6 +300,9 @@ static const struct uart_ops_s g_uart_ops =
   .receive        = sam_receive,
   .rxint          = sam_rxint,
   .rxavailable    = sam_rxavailable,
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  .rxflowcontrol  = NULL,
+#endif
   .send           = sam_send,
   .txint          = sam_txint,
   .txready        = sam_txempty,

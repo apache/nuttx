@@ -401,6 +401,9 @@ static const struct uart_ops_s g_uartops =
   NULL,                 /* receive */
   usbser_rxint,         /* rxinit */
   NULL,                 /* rxavailable */
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  NULL,                 /* rxflowcontrol */
+#endif
   NULL,                 /* send */
   usbser_txint,         /* txinit */
   NULL,                 /* txready */

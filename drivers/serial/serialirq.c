@@ -153,7 +153,26 @@ void uart_recvchars(FAR uart_dev_t *dev)
 
   while (uart_rxavailable(dev))
     {
-      char ch = uart_receive(dev, &status);
+      bool is_full = (nexthead == dev->recv.tail);
+      char ch;
+
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+      /* Check if RX buffer is full and allow serial low-level driver to pause
+       * processing. This allows proper utilization of hardware flow control.
+       */
+
+      if (is_full)
+        {
+          if (uart_rxflowcontrol(dev))
+            {
+              /* Low-level driver activated RX flow control, exit loop now. */
+
+              break;
+            }
+        }
+#endif
+
+      ch = uart_receive(dev, &status);
 
       /* If the RX buffer becomes full, then the serial data is discarded.  This is
        * necessary because on most serial hardware, you must read the data in order
@@ -163,7 +182,7 @@ void uart_recvchars(FAR uart_dev_t *dev)
        * some large internal buffering).
        */
 
-      if (nexthead != dev->recv.tail)
+      if (!is_full)
         {
           /* Add the character to the buffer */
 

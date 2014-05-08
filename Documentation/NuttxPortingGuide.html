@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: January 25, 2014</p>
+      <p>Last Updated: May 8, 2014</p>
     </td>
   </tr>
 </table>
@@ -3059,6 +3059,9 @@ void board_led_off(int led);
      <code>int receive(FAR struct uart_dev_s *dev, unsigned int *status);</code><br>
      <code>void rxint(FAR struct uart_dev_s *dev, bool enable);</code><br>
      <code>bool rxavailable(FAR struct uart_dev_s *dev);</code><br>
+     <code>#ifdef CONFIG_SERIAL_IFLOWCONTROL</code><br>
+     <code>bool rxflowcontrol(FAR struct uart_dev_s *dev);</code><br>
+     <code>#endif</code><br>
      <code>void send(FAR struct uart_dev_s *dev, int ch);</code><br>
      <code>void txint(FAR struct uart_dev_s *dev, bool enable);</code><br>
      <code>bool txready(FAR struct uart_dev_s *dev);</code><br>

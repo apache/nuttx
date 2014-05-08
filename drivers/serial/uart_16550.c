@@ -119,6 +119,9 @@ static const struct uart_ops_s g_uart_ops =
   .receive        = u16550_receive,
   .rxint          = u16550_rxint,
   .rxavailable    = u16550_rxavailable,
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  .rxflowcontrol  = NULL,
+#endif
   .send           = u16550_send,
   .txint          = u16550_txint,
   .txready        = u16550_txready,
