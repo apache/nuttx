@@ -95,6 +95,7 @@ static struct binfmt_s g_elfbinfmt =
 {
   NULL,             /* next */
   elf_loadbinary,   /* load */
+  NULL,             /* unload */
 };
 
 /****************************************************************************

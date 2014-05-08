@@ -136,14 +136,27 @@ struct binary_s
 
   uint8_t priority;                    /* Task execution priority */
   size_t stacksize;                    /* Size of the stack in bytes (unallocated) */
+
+  /* Unload module callback */
+
+  CODE int (*unload)(FAR struct binary_s *bin);
 };
 
 /* This describes one binary format handler */
 
 struct binfmt_s
 {
-  FAR struct binfmt_s *next;             /* Supports a singly-linked list */
-  int (*load)(FAR struct binary_s *bin); /* Verify and load binary into memory */
+  /* Supports a singly-linked list */
+
+  FAR struct binfmt_s *next;
+
+  /* Verify and load binary into memory */
+
+  CODE int (*load)(FAR struct binary_s *bin);
+
+  /* Unload module callback */
+
+  CODE int (*unload)(FAR struct binary_s *bin);
 };
 
 /****************************************************************************
@@ -224,7 +237,7 @@ int load_module(FAR struct binary_s *bin);
  *
  ****************************************************************************/
 
-int unload_module(FAR const struct binary_s *bin);
+int unload_module(FAR struct binary_s *bin);
 
 /****************************************************************************
  * Name: exec_module

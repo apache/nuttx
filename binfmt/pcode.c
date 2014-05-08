@@ -47,6 +47,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/poff.h>
 #include <nuttx/fs/ramdisk.h>
 #include <nuttx/binfmt/binfmt.h>
@@ -62,24 +63,28 @@
  */
 
 #if CONFIG_NFILE_DESCRIPTORS < 1
-#  error "You must provide file descriptors via CONFIG_NFILE_DESCRIPTORS in your configuration file"
+#  error You must provide file descriptors via CONFIG_NFILE_DESCRIPTORS in your configuration file
 #endif
 
 #ifdef CONFIG_BINFMT_DISABLE
-#  error "The binary loader is disabled (CONFIG_BINFMT_DISABLE)!"
+#  error The binary loader is disabled (CONFIG_BINFMT_DISABLE)!
 #endif
 
 #ifndef CONFIG_PCODE
-#  error "You must select CONFIG_PCODE in your configuration file"
+#  error You must select CONFIG_PCODE in your configuration file
+#endif
+
+#ifndef CONFIG_SCHED_ONEXIT
+#  error CONFIG_SCHED_ONEXIT is required
 #endif
 
 #ifdef CONFIG_PCODE_TEST_FS
 #  ifndef CONFIG_FS_ROMFS
-#    error "You must select CONFIG_FS_ROMFS in your configuration file"
+#    error You must select CONFIG_FS_ROMFS in your configuration file
 #  endif
 
 #  ifdef CONFIG_DISABLE_MOUNTPOINT
-#    error "You must not disable mountpoints via CONFIG_DISABLE_MOUNTPOINT in your configuration file"
+#    error You must not disable mountpoints via CONFIG_DISABLE_MOUNTPOINT in your configuration file
 #  endif
 
 #  ifndef CONFIG_PCODE_TEST_DEVMINOR
@@ -104,7 +109,19 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int pcode_loadbinary(FAR struct binary_s *binp);
+struct binfmt_handoff_s
+{
+  sem_t exclsem;              /* Supports mutually exclusive access */
+  FAR struct binary_s *binp;  /* Binary format being handed off */
+  FAR char *fullpath;         /* Full path to the P-Code file */
+};
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static int pcode_load(FAR struct binary_s *binp);
+static int pcode_unload(FAR struct binary_s *binp);
 
 /****************************************************************************
  * Private Data
@@ -112,9 +129,12 @@ static int pcode_loadbinary(FAR struct binary_s *binp);
 
 static struct binfmt_s g_pcode_binfmt =
 {
-  NULL,              /* next */
-  pcode_loadbinary,  /* load */
+  NULL,          /* next */
+  pcode_load,    /* load */
+  pcode_unload,  /* unload */
 };
+
+struct binfmt_handoff_s g_pcode_handoff;
 
 #ifdef CONFIG_PCODE_TEST_FS
 #  include "romfs.h"
@@ -181,7 +201,7 @@ static int pcode_mount_testfs(void)
 #endif
 
 /****************************************************************************
- * Name: pcode_proxy
+ * Name: pcode_onexit
  *
  * Description:
  *   This is the proxy program that runs and starts the P-Code interpreter.
@@ -189,9 +209,62 @@ static int pcode_mount_testfs(void)
  ****************************************************************************/
 
 #ifndef CONFIG_NUTTX_KERNEL
+static void pcode_onexit(int exitcode, FAR void *arg)
+{
+  FAR struct binary_s *binp = (FAR struct binary_s *)arg;
+  DEBUGASSERT(binp);
+
+  /* And unload the module */
+
+  unload_module(binp);
+}
+#endif
+
+/****************************************************************************
+ * Name: pcode_proxy
+ *
+ * Description:
+ *   This is the proxy program that runs and starts the P-Code interpreter.
+ *
+ * REVISIT:  There are issues here when CONFIG_NUTTX_KERNEL is selected.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_NUTTX_KERNEL
 static int pcode_proxy(int argc, char **argv)
 {
-  /* REVISIT:  There are issues here when CONFIG_NUTTX_KERNEL is selected. */
+  FAR struct binary_s *binp;
+  FAR char *fullpath;
+  int ret;
+
+  /* Get the struct binary_s instance from the handoff structure */
+
+  binp                     = g_pcode_handoff.binp;
+  g_pcode_handoff.binp     = NULL;
+  fullpath                 = g_pcode_handoff.fullpath;
+  g_pcode_handoff.fullpath = NULL;
+
+  sem_post(&g_pcode_handoff.exclsem);
+  DEBUGASSERT(binp && fullpath);
+
+  bvdbg("Executing %s\n", fullpath);
+
+  /* Set-up the on-exit handler that will unload the module on exit */
+
+  ret = on_exit(pcode_onexit, binp);
+  if (ret < 0)
+    {
+      bdbg("ERROR: on_exit failed: %d\n", errno);
+      return EXIT_FAILURE;
+    }
+
+  /* Load the P-code file and execute it */
+
+  /* We don't need the fullpath now */
+
+  kfree(fullpath);
+
+  /* Execute the P-code file and execute it */
 
   bdbg("ERROR: Not implemented\n");
   return EXIT_FAILURE;
@@ -201,14 +274,14 @@ static int pcode_proxy(int argc, char **argv)
 #endif
 
 /****************************************************************************
- * Name: pcode_loadbinary
+ * Name: pcode_load
  *
  * Description:
- *   Verify that the file is an pcode binary.
+ *   Verify that the file is a pcode binary.
  *
  ****************************************************************************/
 
-static int pcode_loadbinary(struct binary_s *binp)
+static int pcode_load(struct binary_s *binp)
 {
   FAR struct poff_fileheader_s hdr;
   FAR uint8_t *ptr;
@@ -262,7 +335,7 @@ static int pcode_loadbinary(struct binary_s *binp)
           DEBUGASSERT(nread > 0 && nread <=remaining);
           remaining -= nread;
           ptr += nread;
-        } 
+        }
     }
 
 #ifdef CONFIG_PCODE_DUMPBUFFER
@@ -286,13 +359,65 @@ static int pcode_loadbinary(struct binary_s *binp)
   binp->stacksize = CONFIG_PCODE_STACKSIZE;
   binp->priority  = CONFIG_PCODE_PRIORITY;
 
-  /* Successfully identified a p-code binary */
+  /* Get exclusive access to the p-code handoff structure */
+
+  do
+    {
+      ret = sem_wait(&g_pcode_handoff.exclsem);
+      DEBUGASSERT(ret == OK || errno == EINTR);
+    }
+  while (ret < 0);
+
+  /* Save the data that we need to handoff to the child thread */
+
+  DEBUGASSERT(g_pcode_handoff.binp == NULL &&
+              g_pcode_handoff.fullpath == NULL);
+
+  /* Duplicate the full path to the binary */
+
+  g_pcode_handoff.fullpath = strdup(binp->filename);
+  if (!g_pcode_handoff.fullpath)
+    {
+      bdbg("ERROR: Failed to duplicate the full path: %d\n",
+           binp->filename);
+
+      sem_post(&g_pcode_handoff.exclsem);
+      ret = -ENOMEM;
+      goto errout_with_fd;
+    }
+
+  g_pcode_handoff.binp = binp;
+
+  /* Successfully identified (but not really loaded) a p-code binary */
 
   ret = OK;
 
 errout_with_fd:
   close(fd);
   return ret;
+}
+
+/****************************************************************************
+ * Name: pcode_unload
+ *
+ * Description:
+ *   Called when the pcode binary is unloaded.  This is necessary primarily
+ *   to handler error conditions where unload_module is called after
+ *   pcode_load without having executed the P-Code module.
+ *
+ ****************************************************************************/
+
+static int pcode_unload(struct binary_s *binp)
+{
+  /* Increment the semaphore count back to one if appropriate */
+
+  if (g_pcode_handoff.binp)
+    {
+      g_pcode_handoff.binp = NULL;
+      sem_post(&g_pcode_handoff.exclsem);
+    }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -317,6 +442,10 @@ errout_with_fd:
 int pcode_initialize(void)
 {
   int ret;
+
+  /* Initialize globals */
+
+  sem_init(&g_pcode_handoff.exclsem, 0, 1);
 
   /* Mount the test file system */
 
@@ -378,6 +507,10 @@ void pcode_uninitialize(void)
       UNUSED(errval);
     }
 #endif
+
+  /* Uninitialize globals */
+
+  sem_destroy(&g_pcode_handoff.exclsem);
 }
 
 #endif /* CONFIG_PCODE */

@@ -84,7 +84,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_BINFMT_CONSTRUCTORS
-static inline int exec_dtors(FAR const struct binary_s *binp)
+static inline int exec_dtors(FAR struct binary_s *binp)
 {
   binfmt_dtor_t *dtor = binp->dtors;
 #ifdef CONFIG_ADDRENV
@@ -136,7 +136,7 @@ static inline int exec_dtors(FAR const struct binary_s *binp)
  *   been started (via exec_module) and has not exited, calling this will
  *   be fatal.
  *
- *   However, this function must be called after the module exist.  How
+ *   However, this function must be called after the module exits.  How
  *   this is done is up to your logic.  Perhaps you register it to be
  *   called by on_exit()?
  *
@@ -147,18 +147,29 @@ static inline int exec_dtors(FAR const struct binary_s *binp)
  *
  ****************************************************************************/
 
-int unload_module(FAR const struct binary_s *binp)
+int unload_module(FAR struct binary_s *binp)
 {
-#ifdef CONFIG_BINFMT_CONSTRUCTORS
   int ret;
-#endif
   int i;
 
   if (binp)
     {
-      /* Execute C++ desctructors */
+      /* Perform any format-specific unload operations */
+
+      if (binp->unload)
+        {
+          ret = binp->unload(binp);
+          if (ret < 0)
+            {
+              bdbg("binp->unload() failed: %d\n", ret);
+              set_errno(-ret);
+              return ERROR;
+            }
+        }
 
 #ifdef CONFIG_BINFMT_CONSTRUCTORS
+      /* Execute C++ destructors */
+
       ret = exec_dtors(binp);
       if (ret < 0)
         {

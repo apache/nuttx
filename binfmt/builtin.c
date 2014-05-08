@@ -72,6 +72,7 @@ static struct binfmt_s g_builtin_binfmt =
 {
   NULL,               /* next */
   builtin_loadbinary, /* load */
+  NULL,               /* unload */
 };
 
 /****************************************************************************

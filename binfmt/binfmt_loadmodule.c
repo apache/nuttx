@@ -72,7 +72,7 @@
  * Description:
  *   Set the default priority of the module to be loaded.  This may be
  *   changed (1) by the actions of the binary format's load() method if
- *   the binary format contains priority informaition, or (2) by the user
+ *   the binary format contains priority information, or (2) by the user
  *   between calls to load_module() and exec_module().
  *
  * Returned Value:
@@ -143,6 +143,10 @@ static int load_absmodule(FAR struct binary_s *bin)
           /* Successfully loaded -- break out with ret == 0 */
 
           bvdbg("Successfully loaded module %s\n", bin->filename);
+
+          /* Save the unload method for use by unload_module */
+
+          bin->unload = binfmt->unload;
           dump_module(bin);
           break;
         }

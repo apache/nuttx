@@ -655,7 +655,7 @@ cat ../syscall/syscall.csv ../libc/lib.csv | sort >tmp.csv
 </p>
 </ul>
 
-<p><b><code>int unload_module(FAR const struct binary_s *bin)</code></b>
+<p><b><code>int unload_module(FAR struct binary_s *bin)</code></b>
 <ul>
 <p><b>Description:</b>
   Unload a (non-executing) module from memory.  If the module has

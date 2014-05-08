@@ -100,7 +100,9 @@ int dump_module(FAR const struct binary_s *bin)
       bdbg("  addrenv:   %p\n", bin->addrenv);
 #endif
       bdbg("  stacksize: %d\n", bin->stacksize);
+      bdbg("  unload:    %p\n", bin->unload);
     }
+
   return OK;
 }
 #endif
