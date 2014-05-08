@@ -121,6 +121,9 @@ static const struct uart_ops_s g_uart_ops =
   z16f_receive,        /* receive */
   z16f_rxint,          /* rxint */
   z16f_rxavailable,    /* rxavailable */
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  NULL,                /* rxflowcontrol */
+#endif
   z16f_send,           /* send */
   z16f_txint,          /* txint */
   z16f_txready,        /* txready */

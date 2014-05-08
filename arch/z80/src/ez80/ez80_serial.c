@@ -110,6 +110,9 @@ static const struct uart_ops_s g_uart_ops =
   ez80_receive,        /* receive */
   ez80_rxint,          /* rxint */
   ez80_rxavailable,    /* rxavailable */
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  NULL,                /* rxflowcontrol */
+#endif
   ez80_send,           /* send */
   ez80_txint,          /* txint */
   ez80_txready,        /* txready */

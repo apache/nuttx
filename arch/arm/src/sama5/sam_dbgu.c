@@ -116,6 +116,9 @@ static const struct uart_ops_s g_uart_ops =
   .receive        = dbgu_receive,
   .rxint          = dbgu_rxint,
   .rxavailable    = dbgu_rxavailable,
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  .rxflowcontrol  = NULL,
+#endif
   .send           = dbgu_send,
   .txint          = dbgu_txint,
   .txready        = dbgu_txready,
