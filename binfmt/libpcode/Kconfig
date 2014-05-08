@@ -15,6 +15,38 @@ config PCODE_PRIORITY
 	---help---
 		This is the task_priority that will be used when starting P-code interpreter.
 
+config PCODE_TEST_FS
+	bool "Mount a test file system"
+	depends on FS_ROMFS && !DISABLE_MOUNTPOINT
+	---help---
+		Mount a test file system.  This test file system was used to verify the P-Code binary format.
+
+if PCODE_TEST_FS
+
+config PCODE_TEST_DEVMINOR
+	int "Test file system minor device number"
+	default 0
+	---help---
+		The minor device number of the ROMFS block. For example, the N in /dev/ramN.
+		Used for registering the RAM block driver that will hold the ROMFS file system
+		containing the P-code files to be tested.  Default: 0
+
+config PCODE_TEST_DEVPATH
+	string "Test file system device Path"
+	default "/dev/ram0"
+	---help---
+		The path to the ROMFS block driver device.  This must match PCODE_TEST_DEVMINOR.
+		Used for registering the RAM block driver that will hold the ROMFS file system
+		containing the P-code files to be tested.  Default: "/dev/ram0"
+
+config PCODE_TEST_MOUNTPOINT
+	string "Test file system mount point"
+	default "/bin"
+	---help---
+		Location where the test file system will be mounted
+
+endif # PCODE_TEST_FS
+
 config PCODE_DUMPBUFFER
 	bool "Dump P-code buffers"
 	default n

@@ -37,16 +37,21 @@ ifeq ($(CONFIG_PCODE),y)
 
 # P-code application interfaces
 
-# BINFMT_CSRCS +=
+BINFMT_CSRCS += pcode.c
 
 # P-code library interfaces
 
 # BINFMT_CSRCS +=
 
-# Hook the libbuiltin subdirectory into the build
+# Add an include path so that P-Code related header files may reside in
+# the libpcode sub-directory
 
-#VPATH += libbuiltin
-#SUBDIRS += libbuiltin
-#DEPPATH += --dep-path libbuiltin
+CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" "$(TOPDIR)$(DELIM)binfmt$(DELIM)libpcode"}
+
+# Hook the libpcode subdirectory into the build
+
+#VPATH += libpcode
+#SUBDIRS += libpcode
+#DEPPATH += --dep-path libpcode
 
 endif

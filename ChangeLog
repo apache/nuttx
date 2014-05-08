@@ -7312,5 +7312,5 @@
 	  From Jussi Kivilinna (2014-5-8).
 	* arch/arm/include/stm32 and src/stm32:  Add support for the STM32152 and
 	  STM32162 Medium+ density parts (plus miscellaneous other improvements to
-	  the original STM32151 logi).  From Jussi Kivilinna and Sami Pelkonen
+	  the original STM32151 logic).  From Jussi Kivilinna and Sami Pelkonen
 	  (2014-5-8).
