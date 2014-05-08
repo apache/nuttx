@@ -132,6 +132,9 @@ static const struct uart_ops_s g_uart_ops =
   up_receive,               /* receive */
   up_rxint,                 /* rxint */
   up_rxavailable,           /* rxavailable */
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  NULL,                     /* rxflowcontrol */
+#endif
   up_send,                  /* send */
   up_txint,                 /* txint */
   up_txready,               /* txready */
