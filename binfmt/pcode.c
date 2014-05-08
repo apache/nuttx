@@ -193,7 +193,7 @@ static int pcode_proxy(int argc, char **argv)
 {
   /* REVISIT:  There are issues here when CONFIG_NUTTX_KERNEL is selected. */
 
-  bdbg("ERROR: Not implemented");
+  bdbg("ERROR: Not implemented\n");
   return EXIT_FAILURE;
 }
 #else
