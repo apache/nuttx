@@ -47,6 +47,8 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <apps/interpreters/prun.h>
+
 #include <nuttx/kmalloc.h>
 #include <nuttx/poff.h>
 #include <nuttx/fs/ramdisk.h>
@@ -76,6 +78,14 @@
 
 #ifndef CONFIG_SCHED_ONEXIT
 #  error CONFIG_SCHED_ONEXIT is required
+#endif
+
+#ifndef CONFIG_PCODE_VARSTACKSIZE
+# define CONFIG_PCODE_VARSTACKSIZE 1024
+#endif
+
+#ifndef CONFIG_PCODE_STRSTACKSIZE
+# define CONFIG_PCODE_STRSTACKSIZE 128
 #endif
 
 #ifdef CONFIG_PCODE_TEST_FS
@@ -255,19 +265,27 @@ static int pcode_proxy(int argc, char **argv)
   if (ret < 0)
     {
       bdbg("ERROR: on_exit failed: %d\n", errno);
+      kfree(fullpath);
       return EXIT_FAILURE;
     }
 
   /* Load the P-code file and execute it */
 
-  /* We don't need the fullpath now */
+  ret = prun(fullpath, CONFIG_PCODE_VARSTACKSIZE, CONFIG_PCODE_STRSTACKSIZE);
+
+  /* We no longer need the fullpath */
 
   kfree(fullpath);
 
-  /* Execute the P-code file and execute it */
+  /* Check the result of the interpretation */
 
-  bdbg("ERROR: Not implemented\n");
-  return EXIT_FAILURE;
+  if (ret < 0)
+    {
+      bdbg("ERROR: Execution failed\n");
+      return EXIT_FAILURE;
+    }
+
+  return EXIT_SUCCESS;
 }
 #else
 #  error Missing logic for the case of CONFIG_NUTTX_KERNEL

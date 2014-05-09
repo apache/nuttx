@@ -7314,3 +7314,12 @@
 	  STM32162 Medium+ density parts (plus miscellaneous other improvements to
 	  the original STM32151 logic).  From Jussi Kivilinna and Sami Pelkonen
 	  (2014-5-8).
+	* binfmt/binfmt_dumpmodule.c, binfmt_loadmodule.c, binfmt_unloadmdoule.c,
+	  builtin.c, elf.c, nxflat.c, pcode.c, and include/nuttx/binfmt/binfmt.h:
+	  Extend the binfmt interface to handle error conditions where format-specific
+	  binfmt clean-up is needed in the event of error conditions.  This is needed
+	  by the P-Code binfmt (2014-5-8).
+	* binfmt/libpcode, pcode.c, include/nuttx/poff.h, and binfmt/pcode.h:
+	  Now uses apps/interpreters/prun and is basically functional.  More work
+	  is needed because (1) it is too coupled with apps/ and (2) will not work
+	  with CONFIG_NUTTX_KERNEL (2014-5-9).

@@ -15,6 +15,20 @@ config PCODE_PRIORITY
 	---help---
 		This is the task_priority that will be used when starting P-code interpreter.
 
+config PCODE_VARSTACKSIZE
+	int "P-code variable stack size"
+	default 1024
+	---help---
+		This size of the P-Code variable storage area to be allocated by the
+		P-Code runtime.
+
+config PCODE_STRSTACKSIZE
+	int "P-code string stack size"
+	default 128
+	---help---
+		This size of the P-Code string stack area to be allocated by the
+		P-Code runtime.
+
 config PCODE_TEST_FS
 	bool "Mount a test file system"
 	depends on FS_ROMFS && !DISABLE_MOUNTPOINT

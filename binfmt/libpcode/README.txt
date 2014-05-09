@@ -49,3 +49,70 @@ Files include in this directory include:
      xxd -g 1 -i romfs.img >romfs.h
 
      then cleaned up with an editor to conform with NuttX coding standards.
+
+Test Configuration
+------------------
+Here is a simple test configuration using the NuttX simulator:
+
+1. Install the sim/nsh configuration:
+
+   cd tools
+   ./configure.sh sim/nsh
+   cd ..
+
+2. Install p-code virtual machine as described above.
+
+3. Modify the configuration using 'make menuconfig'.  Change the following
+   selections:
+
+   This enables general BINFMT support:
+
+     CONFIG_DEBUG_BINFMT=y
+     CONFIG_BINFMT_EXEPATH=y
+
+   This enables building of the P-Code virtual machine:
+
+     CONFIG_INTERPRETERS_PCODE=y
+
+   This enables building the PCODE binary format
+
+     CONFIG_PCODE=y
+     CONFIG_PCODE_PRIORITY=100
+     CONFIG_PCODE_STACKSIZE=2048
+
+   This enables building and mount a test filesystem:
+
+     CONFIG_PCODE_TEST_FS=y
+     CONFIG_PCODE_TEST_DEVMINOR=3
+     CONFIG_PCODE_TEST_DEVPATH="/dev/ram3"
+     CONFIG_PCODE_TEST_MOUNTPOINT="/bin"
+
+   Debug options can also be enabled with:
+
+    CONFIG_DEBUG=y
+    CONFIG_DEBUG_BINFMT=y
+    CONFIG_DEBUG_VERBOSE=y
+
+4. In lieu of a a real test application, this Quick'n'Dirty patch can be used
+   to initialize the P-Code binary format:
+
+   @@ -115,6 +115,7 @@ const struct symtab_s CONFIG_EXECFUNCS_SYMTAB[1];
+    /****************************************************************************
+     * Name: nsh_main
+     ****************************************************************************/
+   +int pcode_initialize(void);
+
+    int nsh_main(int argc, char *argv[])
+    {
+   @@ -143,6 +144,7 @@ int nsh_main(int argc, char *argv[])
+         exitval = 1;
+       }
+    #endif
+   +(void)pcode_initialize();
+
+    /* Initialize the NSH library */
+
+5. Then after building nuttx.exe you should be able to run the P-Code hello
+   world example like:
+
+   nsh> hello.pex
