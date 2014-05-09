@@ -390,8 +390,6 @@ static const struct uart_ops_s g_uart_ops =
   .rxavailable    = up_rxavailable,
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   .rxflowcontrol  = up_rxflowcontrol,
-#else
-  .rxflowcontrol  = NULL,
 #endif
   .send           = up_send,
   .txint          = up_txint,
