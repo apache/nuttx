@@ -47,7 +47,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <apps/interpreters/prun.h>
+#include <apps/prun.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/poff.h>

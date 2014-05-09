@@ -74,6 +74,10 @@ Here is a simple test configuration using the NuttX simulator:
 
      CONFIG_INTERPRETERS_PCODE=y
 
+   And the P-Code runtime support:
+
+     CONFIG_SYSTEM_PRUN=y
+
    This enables building the PCODE binary format
 
      CONFIG_PCODE=y
