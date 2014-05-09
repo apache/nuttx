@@ -52,12 +52,18 @@ endif
 config BUILTIN
 	bool "Support Builtin Applications"
 	default n
+	depends on !NUTTX_KERNEL || EXPERIMENTAL
 	---help---
 		Enable support for builtin applications.  This features assigns a string
 		name to an application and in addition if FS_BINFS is defined, retaining
 		those names in a file system from which they can be executed.  This feature
 		is also the underlying requirement to support built-in applications in the
 		NuttShell (NSH).
+
+		ISSUES:  This feature is highly coupled with logic in the apps/subdirectory
+		and, as a consequence, cannot be used in environments that do not
+		include the standard NuttX apps/ nor in build configurations using
+		NUTTX_KERNEL.
 
 if BUILTIN
 source binfmt/libbuiltin/Kconfig
@@ -77,6 +83,11 @@ config PCODE
 		misc/pascal directory of the repository.  Read the README.txt file
 		in the misc/pascal directory for more details.  The correct
 		installation director is: apps/interpreters.
+
+		ISSUES:  This feature is highly coupled with logic in the apps/subdirectory
+		and, as a consequence, cannot be used in environments that do not
+		include the standard NuttX apps/ nor in build configurations using
+		NUTTX_KERNEL.
 
 if PCODE
 source binfmt/libpcode/Kconfig

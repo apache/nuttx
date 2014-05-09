@@ -236,7 +236,8 @@ static void pcode_onexit(int exitcode, FAR void *arg)
  * Description:
  *   This is the proxy program that runs and starts the P-Code interpreter.
  *
- * REVISIT:  There are issues here when CONFIG_NUTTX_KERNEL is selected.
+ * REVISIT:  There are issues here when CONFIG_NUTTX_KERNEL is selected.  Also
+ * This implementation is too highly couple to logic in the apps/ directory.
  *
  ****************************************************************************/
 
