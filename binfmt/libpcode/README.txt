@@ -120,3 +120,37 @@ Here is a simple test configuration using the NuttX simulator:
    world example like:
 
    nsh> hello.pex
+
+Issues
+------
+
+1. As implemented now, there is a tight coupling between the nuttx/directory
+   and the apps/ directory.  That should not be the case; the nuttx/ logic
+   should be completely independent of apps/ logic (but not vice versa).
+
+2. The current implementation will not work in the CONFIG_KERNEL_BUILD.
+   This is because of the little proxy logic (function pcode_proxy() in the
+   file pcode.c).  (a) That logic would attempt to link with P-code logic
+   that resides in user space.  That will not work.  And (2) that proxy
+   would be started in user mode but in the kernel address space which will
+   certainly crash immediately.
+
+The general idea to fix both of these problems is as follows:
+
+1. Eliminate the pcode_proxy.  Instead start a P-Code execution program that
+   resides in the file system.  That P-Code execution program already
+   exists.  It is in apps/system/prun.  This program should be built as,
+   say, an ELF binary and installed in a file system.
+
+2. Add a configuration setting that gives the full path to where the pexec
+   program is stored in the filesystem.
+
+3. Modify the logic so that the P-Code execution program runs (instead of
+   the requested program) an it received the full path the the P-Code file
+   on the command line.  This might be accomplished by simply modifying the
+   argv[] structure in the struct binary_s instance.
+
+4. Add a task start hook to the program.  Here is where we can setup up the
+   on_exit() function that will clean up after the P-Code program terminates.
+
+There are many other smaller issues to be resolved, but those are the main ones.
