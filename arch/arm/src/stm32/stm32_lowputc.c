@@ -572,9 +572,11 @@ void stm32_lowsetup(void)
   uint32_t cr;
 #endif
 
+#if defined(CONFIG_HAVE_CONSOLE)
   /* Enable USART APB1/2 clock */
 
   modifyreg32(STM32_CONSOLE_APBREG, 0, STM32_CONSOLE_APBEN);
+#endif
 
   /* Enable the console USART and configure GPIO pins needed for rx/tx.
    *
