@@ -1617,7 +1617,14 @@ static int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *ms
 
   stm32_i2c_clrstart(priv);
 
-  /* Old transfers are done */
+  /* Old transfers are done
+   *
+   * Reset ptr and dcnt to ensure an unexpected data interrupt doesn't
+   * overwrite stale data.
+   */
+
+  priv->dcnt = 0;
+  priv->ptr  = NULL;
 
   priv->msgv = msgs;
   priv->msgc = count;
@@ -1753,6 +1760,11 @@ static int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *ms
 
   stm32_i2c_enablefsmc(ahbenr);
   stm32_i2c_sem_post(dev);
+
+  /* Ensure that any ISR happening after we finish can't overwrite any user data */
+
+  priv->dcnt = 0;
+  priv->ptr  = NULL;
 
   return -errval;
 }

@@ -7323,3 +7323,7 @@
 	  Now uses apps/interpreters/prun and is basically functional.  More work
 	  is needed because (1) it is too coupled with apps/ and (2) will not work
 	  with CONFIG_NUTTX_KERNEL (2014-5-9).
+	* arch/arm/src/stm32/stm32_i2c.c:  Bring in PX4 fix for I2C in very high
+	  noise environments or with rogue perpipherals.  Taken from the PX4 commit
+	  099b2017ccfa0fc7696f168db2a0c2e13fe5edbc by Tridge here:
+	  https://github.com/PX4/NuttX (2014-5-10).
