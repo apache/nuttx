@@ -1125,6 +1125,7 @@ static inline uint32_t stm32_i2c_disablefsmc(FAR struct stm32_i2c_priv_s *priv)
       regval = ret & ~RCC_AHBENR_FSMCEN;
       putreg32(regval, STM32_RCC_AHBENR);
     }
+
   return ret;
 }
 
@@ -1581,7 +1582,8 @@ static int stm32_i2c_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
  *
  ************************************************************************************/
 
-static int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs, int count)
+static int stm32_i2c_process(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs,
+                             int count)
 {
   struct stm32_i2c_inst_s     *inst = (struct stm32_i2c_inst_s *)dev;
   FAR struct stm32_i2c_priv_s *priv = inst->priv;
@@ -1828,14 +1830,14 @@ static int stm32_i2c_writeread(FAR struct i2c_dev_s *dev,
                                const uint8_t *wbuffer, int wbuflen,
                                uint8_t *buffer, int buflen)
 {
-  stm32_i2c_sem_wait(dev);   /* ensure that address or flags don't change meanwhile */
+  stm32_i2c_sem_wait(dev);   /* Ensure that address or flags don't change meanwhile */
 
   struct i2c_msg_s msgv[2] =
   {
     {
       .addr   = ((struct stm32_i2c_inst_s *)dev)->address,
       .flags  = ((struct stm32_i2c_inst_s *)dev)->flags,
-      .buffer = (uint8_t *)wbuffer,          /* this is really ugly, sorry const ... */
+      .buffer = (uint8_t *)wbuffer,          /* This is really ugly, sorry const ... */
       .length = wbuflen
     },
     {
@@ -1862,7 +1864,7 @@ static int stm32_i2c_writeread(FAR struct i2c_dev_s *dev,
 static int stm32_i2c_transfer(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *msgs,
                               int count)
 {
-  stm32_i2c_sem_wait(dev);   /* ensure that address or flags don't change meanwhile */
+  stm32_i2c_sem_wait(dev);   /* Ensure that address or flags don't change meanwhile */
   return stm32_i2c_process(dev, msgs, count);
 }
 #endif
@@ -1881,8 +1883,8 @@ static int stm32_i2c_transfer(FAR struct i2c_dev_s *dev, FAR struct i2c_msg_s *m
 
 FAR struct i2c_dev_s *up_i2cinitialize(int port)
 {
-  struct stm32_i2c_priv_s * priv = NULL;  /* private data of device with multiple instances */
-  struct stm32_i2c_inst_s * inst = NULL;  /* device, single instance */
+  struct stm32_i2c_priv_s * priv = NULL;  /* Private data of device with multiple instances */
+  struct stm32_i2c_inst_s * inst = NULL;  /* Eevice, single instance */
   int irqs;
 
 #if STM32_PCLK1_FREQUENCY < 4000000
@@ -1932,7 +1934,7 @@ FAR struct i2c_dev_s *up_i2cinitialize(int port)
   inst->address   = 0;
   inst->flags     = 0;
 
-  /* Init private data for the first time, increment refs count,
+  /* Initialize private data for the first time, increment reference count,
    * power-up hardware and configure GPIOs.
    */
 
@@ -1962,7 +1964,7 @@ int up_i2cuninitialize(FAR struct i2c_dev_s * dev)
 
   ASSERT(dev);
 
-  /* Decrement refs and check for underflow */
+  /* Decrement reference count and check for underflow */
 
   if (((struct stm32_i2c_inst_s *)dev)->priv->refs == 0)
     {

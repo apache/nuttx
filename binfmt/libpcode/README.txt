@@ -150,7 +150,16 @@ The general idea to fix both of these problems is as follows:
    on the command line.  This might be accomplished by simply modifying the
    argv[] structure in the struct binary_s instance.
 
+   The current start-up logic in binfmt_execmodule.c would have modified to
+   handle this special start-up.  Perhaps the struct binfmt_s could be
+   extended to include an exec() method that provides custom start up logic?
+
 4. Add a task start hook to the program.  Here is where we can setup up the
    on_exit() function that will clean up after the P-Code program terminates.
 
-There are many other smaller issues to be resolved, but those are the main ones.
+There are many other smaller issues to be resolved, but those are the main
+ones.
+
+A more complex solution might include a user-space p-code daemon that
+receives the P-Code path in a POSIX message and starts a P-Code interpreter
+thread wholly in user space.
