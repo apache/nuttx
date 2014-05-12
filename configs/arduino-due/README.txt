@@ -136,7 +136,7 @@ ITEAD 2.4" TFT with Touch
 
   NOTE:  When used with the ITEAD shield, the power from the USB connector
   seems to be inefficient (for example, I lose the USB connection when I
-  insert an SD card).  I recommends using a 7-12V power supply with the
+  insert an SD card).  I recommend using a 7-12V power supply with the
   Arduino in this case.
 
   Connector:
