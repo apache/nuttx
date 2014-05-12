@@ -7327,3 +7327,6 @@
 	  noise environments or with rogue perpipherals.  Taken from the PX4 commit
 	  099b2017ccfa0fc7696f168db2a0c2e13fe5edbc by Tridge here:
 	  https://github.com/PX4/NuttX (2014-5-10).
+	* include/nuttx/video/rgbcolors.h:  Fix typo in several macros: RBG -> RGB.
+	  (2014-5-12).
+

@@ -51,7 +51,6 @@
 
 /* ILI9325 LCD Register Addresses *****************************************************/
 
-
 #define ILI9325_DEVICE_CODE_REG                0x00 /* Driver Code Register */
 #define ILI9325_START_OSC_CTRL                 0x00 /* Start Oscillator Control */
 #define ILI9325_DRIVER_OUTPUT_CTRL1            0x01 /* Start Oscillator Control */
