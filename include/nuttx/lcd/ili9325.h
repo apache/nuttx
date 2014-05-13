@@ -147,7 +147,7 @@
 
 #define ILI9325_DISP_CTRL1_D_SHIFT             0
 #define ILI9325_DISP_CTRL1_D_MASK              (3 << ILI9325_DISP_CTRL1_D_SHIFT)
-#  define ILI9325_DISP_CTRL1_D(n)              ((uint16_t)(n) << ILI9325_DISP_CTRL1_D_SHIFT)))
+#  define ILI9325_DISP_CTRL1_D(n)              ((uint16_t)(n) << ILI9325_DISP_CTRL1_D_SHIFT)
 #define ILI9325_DISP_CTRL1_CL                  (1 << 3)
 #define ILI9325_DISP_CTRL1_DTE                 (1 << 4)
 #define ILI9325_DISP_CTRL1_GON                 (1 << 5)
@@ -160,7 +160,7 @@
 
 #define ILI9325_DISP_CTRL2_BP_SHIFT            0
 #define ILI9325_DISP_CTRL2_BP_MASK             (0xf << ILI9325_DISP_CTRL2_BP_SHIFT)
-#  define ILI9325_DISP_CTRL2_BP(n)             ((uint16_t)(n) << ILI9325_DISP_CTRL2_BP_SHIFT)))
+#  define ILI9325_DISP_CTRL2_BP(n)             ((uint16_t)(n) << ILI9325_DISP_CTRL2_BP_SHIFT)
 #define ILI9325_DISP_CTRL2_FP_SHIFT             8
 #define ILI9325_DISP_CTRL2_FP_MASK             (0xf << ILI9325_DISP_CTRL2_FP_SHIFT)
 #  define ILI9325_DISP_CTRL2_FP(n)             ((uint16_t)(n) << ILI9325_DISP_CTRL2_FP_SHIFT)
@@ -203,7 +203,7 @@
 
 #define ILI9325_FRAME_MAKER_SHIFT_FMP_SHIFT    0
 #define ILI9325_FRAME_MAKER_SHIFT_FMP_MASK     (0x1ff << ILI9325_FRAME_MAKER_SHIFT_FMP_SHIFT)
-#  define ILI9325_FRAME_MAKER_SHIFT_FMP(n)     ((uint16_t)(n) << ILI9325_FRAME_MAKER_SHIFT_FMP_SHIFT)))
+#  define ILI9325_FRAME_MAKER_SHIFT_FMP(n)     ((uint16_t)(n) << ILI9325_FRAME_MAKER_SHIFT_FMP_SHIFT)
 
 /* ILI9325_RGB_DISP_INTERFACE_CTRL2, RGB Display Interface Control 2, Offset: 0x0f */
 
@@ -217,11 +217,11 @@
 #define ILI9325_POWER_CTRL1_STB                (1 << 0)
 #define ILI9325_POWER_CTRL1_SLP                (1 << 1)
 #define ILI9325_POWER_CTRL1_DSTB               (1 << 2)
-#define ILI9325_POWER_CTRL1_AP_SHIFT            4
+#define ILI9325_POWER_CTRL1_AP_SHIFT           4
 #define ILI9325_POWER_CTRL1_AP_MASK            (7 << ILI9325_POWER_CTRL1_AP_SHIFT)
 #  define ILI9325_POWER_CTRL1_AP(n)            ((uint16_t)(n) << ILI9325_POWER_CTRL1_AP_SHIFT)
 #define ILI9325_POWER_CTRL1_APE                (1 << 7)
-#define ILI9325_POWER_CTRL1_BT_SHIFT            8
+#define ILI9325_POWER_CTRL1_BT_SHIFT           8
 #define ILI9325_POWER_CTRL1_BT_MASK            (7 << ILI9325_POWER_CTRL1_BT_SHIFT)
 #  define ILI9325_POWER_CTRL1_BT(n)            ((uint16_t)(n) << ILI9325_POWER_CTRL1_BT_SHIFT)
 #define ILI9325_POWER_CTRL1_SAP                (1 << 12)

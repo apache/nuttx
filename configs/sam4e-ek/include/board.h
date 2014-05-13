@@ -314,5 +314,22 @@ void sam_setled(int led, bool ledon);
 void sam_setleds(uint8_t ledset);
 #endif
 
+/************************************************************************************
+ * Name:  stm32_lcdclear
+ *
+ * Description:
+ *   This is a non-standard LCD interface just for the Shenzhou board.  Because
+ *   of the various rotations, clearing the display in the normal way by writing a
+ *   sequences of runs that covers the entire display can be very slow.  Here the
+ *   display is cleared by simply setting all GRAM memory to the specified color.
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_SAM4EEK_LCD_RGB565)
+void sam_lcdclear(uint16_t color);
+#else /* if defined(CONFIG_SAM4EEK_LCD_RGB24) defined(CONFIG_SAM4EEK_LCD_RGB32) */
+void sam_lcdclear(uint32_t color);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif  /* __ARCH_SAM4E_EK_INCLUDE_BOARD_H */

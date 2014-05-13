@@ -58,6 +58,10 @@ ifeq ($(CONFIG_SAM34_HSMCI),y)
 CSRCS += sam_hsmci.c
 endif
 
+ifeq ($(CONFIG_LCD),y)
+CSRCS += sam_ili9325.c
+endif
+
 ifeq ($(CONFIG_SAM34_SPI0),y)
 CSRCS += sam_spi.c
 ifeq ($(CONFIG_MTD_AT25),y)

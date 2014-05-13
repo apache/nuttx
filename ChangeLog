@@ -7331,3 +7331,5 @@
 	  (2014-5-12).
 	* drivers/mtd/ramtron.c: Add support for Fujitsu MB85RS1MT part.  From
 	  Charles Ash (2014-5-12).
+	* configs/sam4e-ek/src/sam_ili9325.c:  Add an LCD driver for the SAM4E-EK
+	  board.  Untested on initial check-in (2014-5-13).
