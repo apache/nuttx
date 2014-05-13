@@ -333,18 +333,23 @@ static inline int ramtron_readid(struct ramtron_dev_s *priv)
   ramtron_lock(priv->dev);
   SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
 
-  /* Send the "Read ID (RDID)" command and read the first three ID bytes */
+  /* Send the "Read ID (RDID)" command */
 
   (void)SPI_SEND(priv->dev, RAMTRON_RDID);
+
+  /* Read the first six manufacturer ID bytes. */
+
   for (i = 0; i < 6; i++)
     {
+      /* Read the next manufacturer byte */
+
       manufacturer = SPI_SEND(priv->dev, RAMTRON_DUMMY);
 
       /* Fujitsu parts such as MB85RS1MT only have 1-byte for the manufacturer
        * ID.  The manufacturer code is "0x4".
        */
 
-      if (manufacturer == 0x04)
+      if (i == 0 && manufacturer == 0x04)
         {
           break;
         }
