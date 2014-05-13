@@ -7329,4 +7329,5 @@
 	  https://github.com/PX4/NuttX (2014-5-10).
 	* include/nuttx/video/rgbcolors.h:  Fix typo in several macros: RBG -> RGB.
 	  (2014-5-12).
-
+	* drivers/mtd/ramtron.c: Add support for Fujitsu MB85RS1MT part.  From
+	  Charles Ash (2014-5-12).
