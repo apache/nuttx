@@ -857,8 +857,8 @@ Touchscreen
       CONFIG_SPI_OWNBUS=y                   : Smaller code if this is the only SPI device
 
       CONFIG_INPUT=y                        : Enable support for input devices
-      CONFIG_INPUT_ADS7843E=y               : Enable support for the XPT2046
-      CONFIG_ADS7843E_SPIDEV=2              : Use SPI CS 2 for communication
+      CONFIG_INPUT_ADS7843E=y               : Enable support for the ADS7843E
+      CONFIG_ADS7843E_SPIDEV=0              : Use SPI CS 0 for communication
       CONFIG_ADS7843E_SPIMODE=0             : Use SPI mode 0
       CONFIG_ADS7843E_FREQUENCY=1000000     : SPI BAUD 1MHz
       CONFIG_ADS7843E_SWAPXY=y              : If landscape orientation
@@ -888,9 +888,6 @@ Touchscreen
       CONFIG_DEBUG=y                    : Enable debug features
       CONFIG_DEBUG_VERBOSE=y            : Enable verbose debug output
       CONFIG_DEBUG_INPUT=y              : Enable debug output from input devices
-
-  STATUS
-    2014-3-27: As of this writing, the touchscreen is untested.
 
 ILI9325-Based LCD
 =================
@@ -1334,6 +1331,96 @@ Configurations
     9. Enabling HSMCI support. The SAM3U-KE provides a an SD memory card
        slot.  Support for the SD slot can be enabled following the
        instructions provided above in the paragraph entitled "HSMCI."
+
+   11. This configuration has been used for verifying the touchscreen on
+       on the SAM4E-EK LCD module.
+
+       The NSH configuration can be used to verify the ADS7843E touchscreen on
+       the SAM4E-EK LCD.  With these modifications, you can include the touchscreen
+       test program at apps/examples/touchscreen as an NSH built-in application.
+       You can enable the touchscreen and test by modifying the default
+       configuration in the following ways:
+
+       Device Drivers
+         CONFIG_SPI=y                      : Enable SPI support
+         CONFIG_SPI_EXCHANGE=y             : The exchange() method is supported
+         CONFIG_SPI_OWNBUS=y               : Smaller code if this is the only SPI device
+
+         CONFIG_INPUT=y                    : Enable support for input devices
+         CONFIG_INPUT_ADS7843E=y           : Enable support for the ADS7843E
+         CONFIG_ADS7843E_SPIDEV=0          : Use SPI CS 0 for communication
+         CONFIG_ADS7843E_SPIMODE=0         : Use SPI mode 0
+         CONFIG_ADS7843E_FREQUENCY=1000000 : SPI BAUD 1MHz
+         CONFIG_ADS7843E_SWAPXY=y          : If landscape orientation
+         CONFIG_ADS7843E_THRESHX=51        : These will probably need to be tuned
+         CONFIG_ADS7843E_THRESHY=39
+
+       System Type -> Peripherals:
+         CONFIG_SAM34_SPI0=y               : Enable support for SPI
+
+       System Type:
+         CONFIG_SAM34_GPIO_IRQ=y           : GPIO interrupt support
+         CONFIG_SAM34_GPIOA_IRQ=y          : Enable GPIO interrupts from port A
+
+       RTOS Features:
+         CONFIG_DISABLE_SIGNALS=n          : Signals are required
+
+       Library Support:
+         CONFIG_SCHED_WORKQUEUE=y          : Work queue support required
+
+       Application Configuration:
+         CONFIG_EXAMPLES_TOUCHSCREEN=y     : Enable the touchscreen built-in test
+
+       Defaults should be okay for related touchscreen settings.  Touchscreen
+       debug output on UART0 can be enabled with:
+
+       Build Setup:
+         CONFIG_DEBUG=y                    : Enable debug features
+         CONFIG_DEBUG_VERBOSE=y            : Enable verbose debug output
+         CONFIG_DEBUG_INPUT=y              : Enable debug output from input devices
+
+   11. This configuration can be re-configured to test the on-board LCD
+       module.
+
+       System Type -> AT91SAM3/4 Configuration Options
+         CONFIG_SAM34_SMC=y                : SMC support
+
+       Device Drivers -> LCD Driver Support
+         CONFIG_LCD=y                      : Enable LCD support
+         CONFIG_NX_LCDDRIVER=y             : LCD graphics device
+         CONFIG_LCD_MAXCONTRAST=1          : Value should not matter
+         CONFIG_LCD_MAXPOWER=64            : Must be > 16
+         CONFIG_LCD_LANDSCAPE=y            : Landscape orientation
+
+       Board Selection
+         CONFIG_SAM4EEK_LCD_RGB565=y       : Color resolution
+         CONFIG_SAM4EEK_LCD_BGCOLOR=0x00   : Initial background color
+
+       Graphics Support
+         CONFIG_NX=y
+
+       Graphics Support -> Supported Pixel Depths
+         CONFIG_NX_DISABLE_1BPP=y          : Only 16BPP supported
+         CONFIG_NX_DISABLE_2BPP=y
+         CONFIG_NX_DISABLE_4BPP=y
+         CONFIG_NX_DISABLE_8BPP=y
+         CONFIG_NX_DISABLE_24BPP=y
+         CONFIG_NX_DISABLE_32BPP=y
+
+       Graphics Support -> Font Selections
+         CONFIG_NXFONTS_CHARBITS=7
+         CONFIG_NXFONT_SANS22X29B=y
+         CONFIG_NXFONT_SANS23X27=y
+
+       Application Configuration -> Examples
+         CONFIG_EXAMPLES_NXLINES=y
+         CONFIG_EXAMPLES_NXLINES_BGCOLOR=0x0320
+         CONFIG_EXAMPLES_NXLINES_LINEWIDTH=16
+         CONFIG_EXAMPLES_NXLINES_LINECOLOR=0xffe0
+         CONFIG_EXAMPLES_NXLINES_BORDERWIDTH=4
+         CONFIG_EXAMPLES_NXLINES_BORDERCOLOR=0xffe0
+         CONFIG_EXAMPLES_NXLINES_CIRCLECOLOR=0xf7bb
+         CONFIG_EXAMPLES_NXLINES_BPP=16
 
        STATUS:
          2014-3-24:  DMA is not currently functional and without DMA, there
