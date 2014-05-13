@@ -70,15 +70,12 @@ choice
 
 config SAM4EEK_LCD_RGB565
 	bool "RGB565"
-	default n
 
 config SAM4EEK_LCD_RGB24
 	bool "RGB24 / RGB888"
-	default n
 
 config SAM4EEK_LCD_RGB32
 	bool "RGB32"
-	default n
 
 endchoice # ILI9325-based LCD Color Configuration
 

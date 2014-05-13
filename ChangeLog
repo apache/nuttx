@@ -7333,3 +7333,5 @@
 	  Charles Ash (2014-5-12).
 	* configs/sam4e-ek/src/sam_ili9325.c:  Add an LCD driver for the SAM4E-EK
 	  board.  Untested on initial check-in (2014-5-13).
+	* configs/sam4e-ek/src/sam_ads7843e.c:  Add a touchscreen driver for the
+	  SAM4E-EK board.  Untested on initial check-in (2014-5-13).
