@@ -133,11 +133,6 @@
 #  undef HAVE_USBMONITOR
 #endif
 
-/* External Memory Usage ************************************************************/
-/* LCD on CS2 */
-
-#define LCD_BASE              SAM_EXTCS2_BASE
-
 /* SAM4E-EK GPIO Pin Definitions ****************************************************/
 
 /* LCD:

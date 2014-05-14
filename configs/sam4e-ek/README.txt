@@ -957,6 +957,11 @@ ILI9325-Based LCD
      39        NC
     ---- ----- --------- --------------------------------
 
+  Jumpers
+  -------
+
+  Make sure the JP8 is closed.  This connects PD18 as the LCD CS.
+
   Backlight
   ---------
 
@@ -992,7 +997,10 @@ ILI9325-Based LCD
        driver is the most recent.
 
   STATUS:
-    2014-3-27:  Not implemented.
+    2014-05-14:  Fully implemented.  There is still a bug in in the LCD
+    communications.  The LCD ID is read as 0x0000 instead of 0x9325.
+
+    The LCD backlight appears to be functional.
 
 SAM4E-EK-specific Configuration Options
 =======================================
@@ -1381,8 +1389,6 @@ Configurations
          CONFIG_DEBUG_VERBOSE=y            : Enable verbose debug output
          CONFIG_DEBUG_INPUT=y              : Enable debug output from input devices
 
-       STATUS: Verified 2014-05-14
-
    11. This configuration can be re-configured to test the on-board LCD
        module.
 
@@ -1427,13 +1433,19 @@ Configurations
          CONFIG_EXAMPLES_NXLINES_BPP=16
 
        STATUS:
-         2014-3-24:  DMA is not currently functional and without DMA, there
+         2014-30-24: DMA is not currently functional and without DMA, there
                      may not be reliable data transfers at high speeds due
                      to data overrun problems.  The current HSMCI driver
                      supports DMA via the DMAC.  However, the data sheet
                      only discusses PDC-based HSMCI DMA (although there is
                      a DMA channel interface definition for HSMCI).  So
                      this is effort is dead-in-the-water for now.
+         2014-05-14: The touchscreen interface was successfully verified.
+         2014-05-14: The LCD interface is fully implemented.  However,
+                     there is still a bug in in the LCD communications.  The
+                     LCD ID is read as 0x0000 instead of 0x9325.
+
+                     The LCD backlight appears to be functional.
 
   usbnsh:
 
