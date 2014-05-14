@@ -831,10 +831,10 @@
  * bits[7:4] of each field, bits[3:0] read as zero and ignore writes.
  */
 
-#define NVIC_SYSH_PRIORITY_MIN       0xf0 /* All bits[7:4] set is minimum priority */
-#define NVIC_SYSH_PRIORITY_DEFAULT   0x80 /* Midpoint is the default */
-#define NVIC_SYSH_PRIORITY_MAX       0x00 /* Zero is maximum priority */
-#define NVIC_SYSH_PRIORITY_STEP      0x10 /* Four bits of interrupt priority used */
+#define NVIC_SYSH_PRIORITY_MIN        0xf0 /* All bits[7:4] set is minimum priority */
+#define NVIC_SYSH_PRIORITY_DEFAULT    0x80 /* Midpoint is the default */
+#define NVIC_SYSH_PRIORITY_MAX        0x00 /* Zero is maximum priority */
+#define NVIC_SYSH_PRIORITY_STEP       0x10 /* Four bits of interrupt priority used */
 
 /* If CONFIG_ARMV7M_USEBASEPRI is selected, then interrupts will be disabled
  * by setting the BASEPRI register to NVIC_SYSH_DISABLE_PRIORITY so that most

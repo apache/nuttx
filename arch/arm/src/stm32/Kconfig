@@ -3052,6 +3052,17 @@ endmenu
 menu "I2C Configuration"
 	depends on STM32_I2C
 
+config STM32_I2C_ALT
+	bool "Alternate I2C implementation"
+	default n if !STM32_PERFORMANCELINE
+	default y if STM32_PERFORMANCELINE
+	---help---
+		This selection enables an alternative I2C driver.  This alternate
+		driver implements some rather complex workarounds for errata against
+		the STM32 F103 "Performance Line".  This selection is an option
+		because: (1) It has not yet been fully verified and (2) It is not
+		certain that he scope of this workaround is needed only for the F103.
+
 config STM32_I2C_DYNTIMEO
 	bool "Use dynamic timeouts"
 	default n
