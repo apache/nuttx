@@ -3056,6 +3056,7 @@ config STM32_I2C_ALT
 	bool "Alternate I2C implementation"
 	default n if !STM32_PERFORMANCELINE
 	default y if STM32_PERFORMANCELINE
+	depends on !STM32_STM32F30XX
 	---help---
 		This selection enables an alternative I2C driver.  This alternate
 		driver implements some rather complex workarounds for errata against

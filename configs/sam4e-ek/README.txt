@@ -889,6 +889,8 @@ Touchscreen
       CONFIG_DEBUG_VERBOSE=y            : Enable verbose debug output
       CONFIG_DEBUG_INPUT=y              : Enable debug output from input devices
 
+    STATUS: Verified 2014-05-14
+
 ILI9325-Based LCD
 =================
 
@@ -1379,6 +1381,8 @@ Configurations
          CONFIG_DEBUG_VERBOSE=y            : Enable verbose debug output
          CONFIG_DEBUG_INPUT=y              : Enable debug output from input devices
 
+       STATUS: Verified 2014-05-14
+
    11. This configuration can be re-configured to test the on-board LCD
        module.
 
@@ -1387,7 +1391,6 @@ Configurations
 
        Device Drivers -> LCD Driver Support
          CONFIG_LCD=y                      : Enable LCD support
-         CONFIG_NX_LCDDRIVER=y             : LCD graphics device
          CONFIG_LCD_MAXCONTRAST=1          : Value should not matter
          CONFIG_LCD_MAXPOWER=64            : Must be > 16
          CONFIG_LCD_LANDSCAPE=y            : Landscape orientation
@@ -1397,7 +1400,8 @@ Configurations
          CONFIG_SAM4EEK_LCD_BGCOLOR=0x00   : Initial background color
 
        Graphics Support
-         CONFIG_NX=y
+         CONFIG_NX=y                       : Enable Graphics support
+         CONFIG_NX_LCDDRIVER=y             : LCD graphics device
 
        Graphics Support -> Supported Pixel Depths
          CONFIG_NX_DISABLE_1BPP=y          : Only 16BPP supported
