@@ -250,11 +250,11 @@
 /* SAM4E-EK LCD Hardware Definitions **************************************************/
 /* LCD /CS is CE4,  Bank 3 of NOR/SRAM Bank 1~4 */
 
-#define SAM_LCD_BASE          ((uintptr_t)(0x60000000 | 0x01000000))
+#define SAM_LCD_BASE          ((uintptr_t)SAM_EXTCS1_BASE)
 #define LCD_INDEX             (*(volatile uint8_t *)(SAM_LCD_BASE))
 #define LCD_DATA              (*(volatile uint8_t *)(SAM_LCD_BASE + 2))
 
-/* LCD SMC hip select number to be set */
+/* LCD SMC chip select number to be set */
 
 #define SAM_LCD_CS            1
 
@@ -380,7 +380,7 @@ static const uint32_t g_lcdpin[] =
   GPIO_LCD_BKL                                                /* Backlight control */
 };
 
-#define LCP_NPINS (sizeof(g_lcdpin) / sizeof(uint32_t))
+#define LCD_NPINS (sizeof(g_lcdpin) / sizeof(uint32_t))
 
 /* This is working memory allocated by the LCD driver for each LCD device
  * and for each color plane.  This memory will hold one raster line of data.
@@ -941,7 +941,7 @@ static inline void sam_gpio_initialize(void)
 
   /* Configure all LCD pins pins (backlight is initially off) */
 
-  for (i = 0; i < LCP_NPINS; i++)
+  for (i = 0; i < LCD_NPINS; i++)
     {
       sam_configgpio(g_lcdpin[i]);
     }
@@ -1282,7 +1282,7 @@ static inline int sam_lcd_initialize(void)
 {
   uint16_t id;
 
-  /* Check LCD ID */
+  /* Check the LCD ID */
 
   id = sam_read_reg(ILI9325_DEVICE_CODE_REG);
   lcdvdbg("LCD ID: %04x\n", id);
@@ -1291,7 +1291,7 @@ static inline int sam_lcd_initialize(void)
 
   if (id != ILI9325_DEVICE_CODE)
     {
-      lcddbg("ERROR: Unsupported LCD type: %04x\n", id);
+      lcddbg("ERROR: Unsupported LCD: %04x\n", id);
       return -ENODEV;
     }
 
