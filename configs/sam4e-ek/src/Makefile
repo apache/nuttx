@@ -73,10 +73,6 @@ ifeq ($(CONFIG_USBMSC),y)
 CSRCS += sam_usbmsc.c
 endif
 
-ifeq ($(CONFIG_INPUT_ADS7843E),y)
-CSRCS += sam_touchscreen.c
-endif
-
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
 SRCS = $(ASRCS) $(CSRCS)
