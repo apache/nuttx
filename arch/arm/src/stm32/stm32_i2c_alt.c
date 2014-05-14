@@ -206,37 +206,37 @@ enum stm32_intstate_e
 /* Trace events */
 
 #ifdef CONFIG_I2C_TRACE
-static const uint32_t I2CEVENT_NONE = 0,                   /* No events have occurred with this status */
-static const uint32_t I2CEVENT_STATE_ERROR = 1000,         /* No correct state detected, diver cannot handle state */
-static const uint32_t I2CEVENT_ISR_SHUTDOWN = 1001,        /* ISR gets shutdown */
-static const uint32_t I2CEVENT_ISR_EMPTY_CALL = 1002,      /* ISR gets called but no I2C logic comes into play */
-static const uint32_t I2CEVENT_MSG_HANDLING = 1003,        /* Message Handling 1/1: advances the msg processing param = msgc*/
-static const uint32_t I2CEVENT_POLL_DEV_NOT_RDY = 1004,    /* During polled operation if device is not ready yet */
-static const uint32_t I2CEVENT_ISR_CALL = 1111,            /* ISR called*/
+static const uint32_t I2CEVENT_NONE = 0;                   /* No events have occurred with this status */
+static const uint32_t I2CEVENT_STATE_ERROR = 1000;         /* No correct state detected, diver cannot handle state */
+static const uint32_t I2CEVENT_ISR_SHUTDOWN = 1001;        /* ISR gets shutdown */
+static const uint32_t I2CEVENT_ISR_EMPTY_CALL = 1002;      /* ISR gets called but no I2C logic comes into play */
+static const uint32_t I2CEVENT_MSG_HANDLING = 1003;        /* Message Handling 1/1: advances the msg processing param = msgc*/
+static const uint32_t I2CEVENT_POLL_DEV_NOT_RDY = 1004;    /* During polled operation if device is not ready yet */
+static const uint32_t I2CEVENT_ISR_CALL = 1111;            /* ISR called*/
 
-static const uint32_t I2CEVENT_SENDADDR = 5,               /* Start/Master bit set and address sent, param = priv->msgv->addr(EV5 in reference manual) */
-static const uint32_t I2CEVENT_ADDR_HDL_READ_1 = 51,       /* Read of length 1 address handling, param = 0 */
-static const uint32_t I2CEVENT_ADDR_HDL_READ_2 = 52,       /* Read of length 2 address handling, param = 0 */
-static const uint32_t I2CEVENT_EMPTY_MSG = 5000,           /* Empty message detected, param=0 */
+static const uint32_t I2CEVENT_SENDADDR = 5;               /* Start/Master bit set and address sent, param = priv->msgv->addr(EV5 in reference manual) */
+static const uint32_t I2CEVENT_ADDR_HDL_READ_1 = 51;       /* Read of length 1 address handling, param = 0 */
+static const uint32_t I2CEVENT_ADDR_HDL_READ_2 = 52;       /* Read of length 2 address handling, param = 0 */
+static const uint32_t I2CEVENT_EMPTY_MSG = 5000;           /* Empty message detected, param=0 */
 
-static const uint32_t I2CEVENT_ADDRESS_ACKED = 6,          /* Address has been ACKed(i.e. it's a valid address) param = address */
-static const uint32_t I2CEVENT_ADDRESS_ACKED_READ_1 = 63,  /* Event when reading single byte just after address is beeing ACKed, param = 0 */
-static const uint32_t I2CEVENT_ADDRESS_ACKED_READ_2 = 61,  /* Event when reading two bytes just after address is beeing ACKed, param = 0 */
-static const uint32_t I2CEVENT_ADDRESS_ACKED_WRITE = 681,  /* Address has been ACKed(i.e. it's a valid address) in write mode and byte has been written */
-static const uint32_t I2CEVENT_ADDRESS_NACKED = 6000,      /* Address has been NACKed(i.e. it's an invalid address) param = address */
+static const uint32_t I2CEVENT_ADDRESS_ACKED = 6;          /* Address has been ACKed(i.e. it's a valid address) param = address */
+static const uint32_t I2CEVENT_ADDRESS_ACKED_READ_1 = 63;  /* Event when reading single byte just after address is beeing ACKed, param = 0 */
+static const uint32_t I2CEVENT_ADDRESS_ACKED_READ_2 = 61;  /* Event when reading two bytes just after address is beeing ACKed, param = 0 */
+static const uint32_t I2CEVENT_ADDRESS_ACKED_WRITE = 681;  /* Address has been ACKed(i.e. it's a valid address) in write mode and byte has been written */
+static const uint32_t I2CEVENT_ADDRESS_NACKED = 6000;      /* Address has been NACKed(i.e. it's an invalid address) param = address */
 
-static const uint32_t I2CEVENT_READ = 7,                   /* RxNE = 1 therefore can be read, param = dcnt */
-static const uint32_t I2CEVENT_READ_3 = 72,                /* EV7_2 reference manual, reading byte N-2 and N-1 when N >=3 */
-static const uint32_t I2CEVENT_READ_2 = 73,                /* EV7_3 reference manual, reading byte 1 and 2 when N == 2 */
-static const uint32_t I2CEVENT_READ_SR_EMPTY = 79,         /* DR is full but SR is empty, does not read DR and waits for SR to fill in next ISR */
-static const uint32_t I2CEVENT_READ_LAST_BYTE = 72,        /* EV7_2 reference manual last two bytes are in SR and DR */
-static const uint32_t I2CEVENT_READ_ERROR = 7000,          /* read mode error */
+static const uint32_t I2CEVENT_READ = 7;                   /* RxNE = 1 therefore can be read, param = dcnt */
+static const uint32_t I2CEVENT_READ_3 = 72;                /* EV7_2 reference manual, reading byte N-2 and N-1 when N >=3 */
+static const uint32_t I2CEVENT_READ_2 = 73;                /* EV7_3 reference manual, reading byte 1 and 2 when N == 2 */
+static const uint32_t I2CEVENT_READ_SR_EMPTY = 79;         /* DR is full but SR is empty, does not read DR and waits for SR to fill in next ISR */
+static const uint32_t I2CEVENT_READ_LAST_BYTE = 72;        /* EV7_2 reference manual last two bytes are in SR and DR */
+static const uint32_t I2CEVENT_READ_ERROR = 7000;          /* read mode error */
 
-static const uint32_t I2CEVENT_WRITE_TO_DR = 8,            /* EV8   reference manual, writing into the data register param = byte to send */
-static const uint32_t I2CEVENT_WRITE_STOP = 82,            /* EV8_2 reference manual, set stop bit after write is finished */
-static const uint32_t I2CEVENT_WRITE_RESTART = 83,         /* Re-send start bit as next packet is a read */
-static const uint32_t I2CEVENT_WRITE_NO_RESTART = 84,      /* don't restart as packet flag says so */
-static const uint32_t I2CEVENT_WRITE_ERROR = 8000,         /* Error in write mode, param = 0 */
+static const uint32_t I2CEVENT_WRITE_TO_DR = 8;            /* EV8   reference manual, writing into the data register param = byte to send */
+static const uint32_t I2CEVENT_WRITE_STOP = 82;            /* EV8_2 reference manual, set stop bit after write is finished */
+static const uint32_t I2CEVENT_WRITE_RESTART = 83;         /* Re-send start bit as next packet is a read */
+static const uint32_t I2CEVENT_WRITE_NO_RESTART = 84;      /* don't restart as packet flag says so */
+static const uint32_t I2CEVENT_WRITE_ERROR = 8000;         /* Error in write mode, param = 0 */
 static const uint32_t I2CEVENT_WRITE_FLAG_ERROR = 8001;    /* Next message has unrecognized flag, param = priv->msgv->flags */
 #endif /* CONFIG_I2C_TRACE */
 
