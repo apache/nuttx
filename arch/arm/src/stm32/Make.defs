@@ -105,10 +105,14 @@ ifeq ($(CONFIG_NUTTX_KERNEL),y)
 CHIP_CSRCS += stm32_userspace.c stm32_mpuinit.c
 endif
 
+ifeq ($(CONFIG_STM32_I2C_ALT),y)
+CHIP_CSRCS += stm32_i2c_alt.c
+else
 ifeq ($(CONFIG_STM32_STM32F30XX),y)
 CHIP_CSRCS += stm32f30xxx_i2c.c
 else
 CHIP_CSRCS += stm32_i2c.c
+endif
 endif
 
 ifeq ($(CONFIG_USBDEV),y)
