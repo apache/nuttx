@@ -1440,7 +1440,12 @@ Configurations
                      only discusses PDC-based HSMCI DMA (although there is
                      a DMA channel interface definition for HSMCI).  So
                      this is effort is dead-in-the-water for now.
+         2014-05-15: The HSCMCI driver has been recently updated to support
+                     PCD DMA.  That modified driver, however, has not yet
+                     been tested with the SAM4E-EK
+
          2014-05-14: The touchscreen interface was successfully verified.
+
          2014-05-14: The LCD interface is fully implemented.  However,
                      there is still a bug in in the LCD communications.  The
                      LCD ID is read as 0x0000 instead of 0x9325.

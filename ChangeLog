@@ -7338,3 +7338,6 @@
 	* arch/arm/src/stm32/stm32_i2c_alt.c: Add an alternative I2C implementation
 	  for the STM32 F03 that works around errata in that part.  From Patrizio
 	  Simona (2014-5-14).
+	* arch/arm/src/sam34/sam_gpio.c:  Fix some SAM4E compiler errors when
+	  CONFIG_DEBUG_GPIO is enabled (2014-5-15).
+
