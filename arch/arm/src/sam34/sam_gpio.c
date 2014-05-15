@@ -376,9 +376,9 @@ static inline int sam_configperiph(uintptr_t base, uint32_t pin,
 int sam_configgpio(gpio_pinset_t cfgset)
 {
   uintptr_t base = sam_gpiobase(cfgset);
-  uint32_t  pin  = sam_gpiopin(cfgset);
+  uint32_t pin   = sam_gpiopin(cfgset);
   irqstate_t flags;
-  int       ret;
+  int ret;
 
   /* Disable interrupts to prohibit re-entrance. */
 
@@ -484,12 +484,10 @@ int sam_dumpgpio(uint32_t pinset, const char *msg)
 {
   irqstate_t    flags;
   uintptr_t     base;
-  unsigned int  pin;
   unsigned int  port;
 
   /* Get the base address associated with the PIO port */
 
-  pin  = sam_gpiopin(pinset);
   port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   base = SAM_PION_BASE(port);
 
@@ -511,7 +509,7 @@ int sam_dumpgpio(uint32_t pinset, const char *msg)
 #elif defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
   lldbg(" ABCDSR: %08x %08x         IFSCSR: %08x  PPDSR: %08x\n",
         getreg32(base + SAM_PIO_ABCDSR1_OFFSET), getreg32(base + SAM_PIO_ABCDSR2_OFFSET),
-        getreg32(base + SAM_PIO_IFSCSR_OFFSET), getreg32(base + SAM_PIOC_PPDSR));
+        getreg32(base + SAM_PIO_IFSCSR_OFFSET), getreg32(base + SAM_PIO_PPDSR_OFFSET));
 #endif
   lldbg("   PUSR: %08x   SCDR: %08x   OWSR: %08x  AIMMR: %08x\n",
         getreg32(base + SAM_PIO_PUSR_OFFSET), getreg32(base + SAM_PIO_SCDR_OFFSET),
@@ -528,7 +526,7 @@ int sam_dumpgpio(uint32_t pinset, const char *msg)
         getreg32(base + SAM_PIO_PCISR_OFFSET), getreg32(base + SAM_PIO_PCRHR_OFFSET));
 #ifdef CONFIG_ARCH_CHIP_SAM4E
   lldbg("SCHMITT: %08x DELAYR:%08x\n",
-        getreg32(base + SAM_PIO_SCHMITT_OFFSET), getreg32(base + SAM_PIO_DELAY_OFFSET));
+        getreg32(base + SAM_PIO_SCHMITT_OFFSET), getreg32(base + SAM_PIO_DELAYR_OFFSET));
 #else
   lldbg("SCHMITT: %08x\n",
         getreg32(base + SAM_PIO_SCHMITT_OFFSET));
