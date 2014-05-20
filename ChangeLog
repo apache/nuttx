@@ -7340,4 +7340,7 @@
 	  Simona (2014-5-14).
 	* arch/arm/src/sam34/sam_gpio.c:  Fix some SAM4E compiler errors when
 	  CONFIG_DEBUG_GPIO is enabled (2014-5-15).
+	* sched/sig_mqnotempty.c:  Test for a valid signal number is inverted; this
+	  function could not have been working correctly???  From eero.nurkkala
+	  (2014-5-20).
 

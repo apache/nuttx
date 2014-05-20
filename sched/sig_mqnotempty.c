@@ -103,7 +103,7 @@ int sig_mqnotempty(int pid, int signo, void *sival_ptr)
 
   /* Verify that we can perform the signalling operation */
 
-  if (GOOD_SIGNO(signo))
+  if (!GOOD_SIGNO(signo))
     {
       return -EINVAL;
     }
