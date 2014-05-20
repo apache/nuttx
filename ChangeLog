@@ -7343,4 +7343,6 @@
 	* sched/sig_mqnotempty.c:  Test for a valid signal number is inverted; this
 	  function could not have been working correctly???  From eero.nurkkala
 	  (2014-5-20).
+	* arch/arm/src/stm32/stm32_lowputc.c:  Fix error in conditional compilation.
+	  From Sami PelKonen (2014-5-20).
 

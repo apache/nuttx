@@ -572,7 +572,7 @@ void stm32_lowsetup(void)
   uint32_t cr;
 #endif
 
-#if defined(CONFIG_HAVE_CONSOLE)
+#if defined(HAVE_CONSOLE)
   /* Enable USART APB1/2 clock */
 
   modifyreg32(STM32_CONSOLE_APBREG, 0, STM32_CONSOLE_APBEN);
