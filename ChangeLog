@@ -7345,4 +7345,7 @@
 	  (2014-5-20).
 	* arch/arm/src/stm32/stm32_lowputc.c:  Fix error in conditional compilation.
 	  From Sami PelKonen (2014-5-20).
+	* arch/*/src/* (several files):  Make sure that all references to
+	  up_prioritize_irq() are conditioned on CONFIG_ARCH_IRQPRIO.  Problem
+	  noted by Mike Smit (2014-05-20).
 
