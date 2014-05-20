@@ -80,6 +80,10 @@ volatile uint32_t *current_regs;
  * Private Functions
  ****************************************************************************/
 
+#ifndef CONFIG_ARCH_IRQPRIO
+static int up_prioritize_irq(int irq, int priority);
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -436,7 +440,9 @@ void up_clrpend_irq(int irq)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_IRQPRIO
+#ifndef CONFIG_ARCH_IRQPRIO
+static
+#endif
 int up_prioritize_irq(int irq, int priority)
 {
   int regndx;
@@ -467,4 +473,3 @@ int up_prioritize_irq(int irq, int priority)
 
   return -EINVAL;
 }
-#endif

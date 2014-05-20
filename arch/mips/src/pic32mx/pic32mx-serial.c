@@ -362,9 +362,12 @@ static int up_setup(struct uart_dev_s *dev)
                         priv->bits, priv->stopbits2);
 #endif
 
+#ifdef CONFIG_ARCH_IRQPRIO
   /* Set up the interrupt priority */
 
   up_prioritize_irq(priv->irq, priv->irqprio);
+#endif
+
   return OK;
 }
 

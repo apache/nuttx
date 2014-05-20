@@ -1007,6 +1007,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
   up_enable_irq(priv->txirq);
   up_enable_irq(priv->rxirq);
 
+#ifdef CONFIG_ARCH_IRQPRIO
   /* Set the SPI interrupt priority */
 
   ret = up_prioritize_irq(priv->vector, CONFIG_PIC32MX_SPI_PRIORITY)
@@ -1015,6 +1016,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
       spidbg("up_prioritize_irq failed: %d\n", ret);
       goto errout;
     }
+#endif
 #endif
 
   /* Enable interrupts at the interrupt controller */
