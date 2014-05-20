@@ -76,10 +76,10 @@ ifeq ($(CONFIG_NUTTX_KERNEL),y)
 CHIP_CSRCS += sam_userspace.c
 endif
 
-ifeq ($(CONFIG_SAMD_HAVE_SPI),y)
-CHIP_CSRCS += sam_spi.c
-endif
-
 ifeq ($(CONFIG_ARCH_IRQPRIO),y)
 CHIP_CSRCS += sam_irqprio.c
+endif
+
+ifeq ($(CONFIG_SAMD_HAVE_SPI),y)
+CHIP_CSRCS += sam_spi.c
 endif

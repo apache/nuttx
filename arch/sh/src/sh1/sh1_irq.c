@@ -96,6 +96,7 @@ void up_irqinitialize(void)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_IRQPRIO
 void up_prioritize_irq(int irq, int priority)
 {
   uint16_t mask;
@@ -282,4 +283,4 @@ void up_prioritize_irq(int irq, int priority)
   reg16 |= (priority << shift);
   putreg16(reg16, reg);
 }
-
+#endif /* CONFIG_ARCH_IRQPRIO */

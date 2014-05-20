@@ -208,6 +208,7 @@ void up_maskack_irq(int irq)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_IRQPRIO
 int up_prioritize_irq(int irq, int priority)
 {
   uint32_t addr;
@@ -229,4 +230,5 @@ int up_prioritize_irq(int irq, int priority)
 
   return -EINVAL;
 }
+#endif
 

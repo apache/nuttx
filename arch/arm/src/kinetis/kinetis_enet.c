@@ -1465,12 +1465,14 @@ int kinetis_netinitialize(int intf)
   kinetis_pinconfig(PIN_RMII0_TXEN);
 #endif
 
+#ifdef CONFIG_ARCH_IRQPRIO
   /* Set interrupt priority levels */
 
   up_prioritize_irq(KINETIS_IRQ_EMACTMR, CONFIG_KINETIS_EMACTMR_PRIO);
   up_prioritize_irq(KINETIS_IRQ_EMACTX, CONFIG_KINETIS_EMACTX_PRIO);
   up_prioritize_irq(KINETIS_IRQ_EMACRX, CONFIG_KINETIS_EMACRX_PRIO);
   up_prioritize_irq(KINETIS_IRQ_EMACMISC, CONFIG_KINETIS_EMACMISC_PRIO);
+#endif
 
   /* Attach the Ethernet MAC IEEE 1588 timer interrupt handler */
 

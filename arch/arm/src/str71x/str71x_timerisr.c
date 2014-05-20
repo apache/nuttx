@@ -198,9 +198,11 @@ void up_timerinit(void)
   putreg16(OCAR_VALUE, STR71X_TIMER0_OCAR);
   putreg16(0xfffc, STR71X_TIMER0_CNTR);
 
+#ifdef CONFIG_ARCH_IRQPRIO
   /* Set the timer interrupt priority */
 
   up_prioritize_irq(STR71X_IRQ_SYSTIMER, CONFIG_TIM_PRI);
+#endif
 
   /* Attach the timer interrupt vector */
 

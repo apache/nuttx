@@ -193,9 +193,11 @@ void up_timerinit(void)
 
   putreg8(SH1_ITUTIER_IMIEA, SH1_ITU0_TIER);
 
+#ifdef CONFIG_ARCH_IRQPRIO
   /* Set the interrupt priority */
 
   up_prioritize_irq(SH1_SYSTIMER_IRQ, 7);  /* Set ITU priority midway */
+#endif
 
   /* Start the timer */
 
