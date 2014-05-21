@@ -75,12 +75,12 @@
 #  define CONFIG_CC3000_NPOLLWAITERS 2
 #endif
 
-#ifndef CONFIG_CC3000_SPIMODE
+#ifndef CONFIG_CC3000_SPI_MODE
 /* CPOL = 0, CPHA = 1 Sample Data Falling Edge of Clock
  * See http://processors.wiki.ti.com/index.php/CC3000_Serial_Port_Interface_(SPI)
  */
 
-#  define CONFIG_CC3000_SPIMODE SPIDEV_MODE1
+#  define CONFIG_CC3000_SPI_MODE SPIDEV_MODE1
 #endif
 
 /* Check for some required settings.  This can save the user a lot of time

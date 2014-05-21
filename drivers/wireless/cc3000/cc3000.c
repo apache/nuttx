@@ -271,9 +271,9 @@ static void usdelay(long ustimeout)
 static inline void cc3000_configspi(FAR struct spi_dev_s *spi)
 {
   ndbg("Mode: %d Bits: 8 Frequency: %d\n",
-       CONFIG_CC3000_SPIMODE, CONFIG_CC3000_SPI_FREQUENCY);
+       CONFIG_CC3000_SPI_MODE, CONFIG_CC3000_SPI_FREQUENCY);
 
-  SPI_SETMODE(spi, CONFIG_CC3000_SPIMODE);
+  SPI_SETMODE(spi, CONFIG_CC3000_SPI_MODE);
   SPI_SETBITS(spi, 8);
   SPI_SETFREQUENCY(spi, CONFIG_CC3000_SPI_FREQUENCY);
 }
