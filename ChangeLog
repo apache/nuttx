@@ -7343,9 +7343,21 @@
 	* sched/sig_mqnotempty.c:  Test for a valid signal number is inverted; this
 	  function could not have been working correctly???  From eero.nurkkala
 	  (2014-5-20).
-	* arch/arm/src/stm32/stm32_lowputc.c:  Fix error in conditional compilation.
-	  From Sami PelKonen (2014-5-20).
+	* arch/arm/src/stm32/stm32_lowputc.c:  Fix error in conditional
+	  compilation. From Sami PelKonen (2014-5-20).
 	* arch/*/src/* (several files):  Make sure that all references to
 	  up_prioritize_irq() are conditioned on CONFIG_ARCH_IRQPRIO.  Problem
-	  noted by Mike Smit (2014-05-20).
-
+	  noted by Mike Smith (2014-05-20).
+	* drivers/wireless/cc3000/Kconfig: Correct SPI mode for CC3000 is CPOL=0
+	  CHPA=1. See http://processors.wiki.ti.com/index.php/CC3000_Serial_Port_Interface_(SPI)
+	  From Jussi Kivilinna (2014-5-21).
+	* drivers/wireless/cc3000/cc3000.c and include/nuttx/wireless/cc3000/include/cc3000_upif.h:
+	  Configuration has CC3000_SPI_MODE settings but source uses
+	  CONFIG_CC3000_SPIMODE. From Jussi Kivilinna (2014-5-21).
+	* drivers/wireless/cc3000/cc3000drv.c: unsoliced_thread does
+	  initialization of message queue, but main thread might block that
+	  thread from running and use the uninitialized message queue. The main
+	  thread must wait until unsolice_thread initializes the required
+	  structures before proceeding. From Jussi Kivilinna (2014-5-21).
+	* drivers/wireless/cc3000/cc3000.c: Fix build when POLL is enabled.
+	  From Jussi Kivilinna (2014-5-21).
