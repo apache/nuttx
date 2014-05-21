@@ -446,15 +446,33 @@ static inline int cc3000_wait_ready(FAR struct cc3000_dev_s *priv)
 }
 
 /****************************************************************************
+ * Name: cc3000_pollnotify
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_POLL
+static void cc3000_pollnotify(FAR struct cc3000_dev_s *priv, uint32_t type)
+{
+  int i;
+
+  for (i = 0; i < CONFIG_CC3000_NPOLLWAITERS; i++)
+    {
+      struct pollfd *fds = priv->fds[i];
+      if (fds)
+        {
+          fds->revents |= type;
+          nllvdbg("Report events: %02x\n", fds->revents);
+          sem_post(fds->sem);
+        }
+    }
+}
+#endif
+
+/****************************************************************************
  * Name: cc3000_notify
  ****************************************************************************/
 
 static void cc3000_notify(FAR struct cc3000_dev_s *priv)
 {
-#ifndef CONFIG_DISABLE_POLL
-  int i;
-#endif
-
   /* If there are threads waiting for read data, then signal one of them
    * that the read data is available.
    */
@@ -475,16 +493,7 @@ static void cc3000_notify(FAR struct cc3000_dev_s *priv)
    */
 
 #ifndef CONFIG_DISABLE_POLL
-  for (i = 0; i < CONFIG_CC3000_NPOLLWAITERS; i++)
-    {
-      struct pollfd *fds = priv->fds[i];
-      if (fds)
-        {
-          fds->revents |= POLLIN;
-          nllvdbg("Report events: %02x\n", fds->revents);
-          sem_post(fds->sem);
-        }
-    }
+  cc3000_pollnotify(priv, POLLIN);
 #endif
 }
 
@@ -1419,7 +1428,7 @@ static int cc3000_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       /* Should we immediately notify on any of the requested events? */
 
-      if (priv->rx_buffer_len)
+      if (priv->rx_buffer.len)
         {
           cc3000_notify(priv);
         }
