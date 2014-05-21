@@ -90,6 +90,7 @@ static struct
   cc3000_buffer_desc rx_buffer;
   mqd_t  queue;
   sem_t *done;
+  sem_t unsoliced_thread_wakesem;
 } spiconf;
 
 /*****************************************************************************
@@ -209,6 +210,8 @@ static void *unsoliced_thread_func(void *parameter)
   spiconf.done = sem_open(buff,O_RDONLY);
   DEBUGASSERT(spiconf.done != (sem_t *)-1);
 
+  sem_post(&spiconf.unsoliced_thread_wakesem);
+
   while (spiconf.run)
     {
       memset(&spiconf.rx_buffer,0,sizeof(spiconf.rx_buffer));
@@ -255,6 +258,8 @@ void cc3000_open(gcSpiHandleRx pfRxHandler)
       spiconf.cc3000fd = fd;
       spiconf.run = true;
 
+      sem_init(&spiconf.unsoliced_thread_wakesem, 0, 0);
+
       pthread_attr_t attr;
       struct sched_param param;
       pthread_attr_init(&attr);
@@ -265,6 +270,13 @@ void cc3000_open(gcSpiHandleRx pfRxHandler)
                               unsoliced_thread_func, NULL);
       DEBUGASSERT(status == 0)
       UNUSED(status);
+
+      /* Wait unsoliced_thread to wake-up. */
+
+      while (sem_wait(&spiconf.unsoliced_thread_wakesem) != 0)
+        {
+          ASSERT(errno == EINTR);
+        }
    }
 
   DEBUGASSERT(spiconf.cc3000fd);
