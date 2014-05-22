@@ -61,7 +61,7 @@
  */
 
 #ifdef CONFIG_DEBUG_HARDFAULT
-# define hfdbg(format, arg...) lldbg(format, ##arg)
+# define hfdbg(format, ...) lldbg(format, ##__VA_ARGS__)
 #else
 # define hfdbg(x...)
 #endif
