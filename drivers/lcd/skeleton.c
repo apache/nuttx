@@ -90,7 +90,7 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_LCD_SKELDEBUG
-# define skeldbg(format, arg...)  vdbg(format, ##arg)
+# define skeldbg(format, ...)  vdbg(format, ##__VA_ARGS__)
 #else
 # define skeldbg(x...)
 #endif

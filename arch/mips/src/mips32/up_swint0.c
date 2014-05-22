@@ -65,7 +65,7 @@
  */
 
 #ifdef CONFIG_DEBUG_SYSCALL
-# define swidbg(format, arg...) lldbg(format, ##arg)
+# define swidbg(format, ...) lldbg(format, ##__VA_ARGS__)
 #else
 # define swidbg(x...)
 #endif

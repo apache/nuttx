@@ -70,10 +70,10 @@
 
 #ifdef CONFIG_CPP_HAVE_VARARGS
 #  ifdef IGMP_GTMRDEBUG
-#    define gtmrdbg(format, arg...)    ndbg(format, ##arg)
-#    define gtmrlldbg(format, arg...)  nlldbg(format, ##arg)
-#    define gtmrvdbg(format, arg...)   nvdbg(format, ##arg)
-#    define gtmrllvdbg(format, arg...) nllvdbg(format, ##arg)
+#    define gtmrdbg(format, ...)    ndbg(format, ##__VA_ARGS__)
+#    define gtmrlldbg(format, ...)  nlldbg(format, ##__VA_ARGS__)
+#    define gtmrvdbg(format, ...)   nvdbg(format, ##__VA_ARGS__)
+#    define gtmrllvdbg(format, ...) nllvdbg(format, ##__VA_ARGS__)
 #  else
 #    define gtmrdbg(x...)
 #    define gtmrlldbg(x...)

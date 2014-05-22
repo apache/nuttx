@@ -20,7 +20,7 @@
 #define dputchar(x) putchar(x)
 #define dputs(x) puts(x)
 #define dphex(x,y) phex(x,y)
-#define printd(x, args ...) printf(x, ## args)
+#define printd(x, ...) printf(x, ##__VA_ARGS__)
 #else
 #define dputchar(x)
 #define dputs(x)

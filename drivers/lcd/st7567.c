@@ -209,7 +209,7 @@
 /* Debst7567 ******************************************************************************/
 
 #ifdef CONFIG_LCD_ST7567DEBUG
-# define st7567dbg(format, arg...)  vdbg(format, ##arg)
+# define st7567dbg(format, ...)  vdbg(format, ##__VA_ARGS__)
 #else
 # define st7567dbg(x...)
 #endif

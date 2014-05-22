@@ -56,7 +56,7 @@
 /* This needs to match the logic in include/debug.h */
 
 #ifdef CONFIG_CPP_HAVE_VARARGS
-#  define message(format, arg...) syslog(format, ##arg)
+#  define message(format, ...) syslog(format, ##__VA_ARGS__)
 #else
 #  define message syslog
 #endif

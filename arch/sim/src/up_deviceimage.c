@@ -58,9 +58,9 @@
  ****************************************************************************/
 
 #ifdef VFAT_STANDALONE
-# define sdbg(format, arg...) printf(format, ##arg)
-# define kmalloc(size)        malloc(size)
-# define kfree(mem)           free(mem)
+# define sdbg(format, ...) printf(format, ##__VA_ARGS__)
+# define kmalloc(size)     malloc(size)
+# define kfree(mem)        free(mem)
 #endif
 
 /****************************************************************************

@@ -56,7 +56,7 @@
 #undef DEBUG_MEMFAULTS         /* Define to debug memory management faults */
 
 #ifdef DEBUG_MEMFAULTS
-# define mfdbg(format, arg...) lldbg(format, ##arg)
+# define mfdbg(format, ...) lldbg(format, ##__VA_ARGS__)
 #else
 # define mfdbg(x...)
 #endif

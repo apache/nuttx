@@ -100,26 +100,26 @@
 
 #ifdef CONFIG_CPP_HAVE_VARARGS
 
-/* Variable argument macros supported */
+/* C-99 style variadic macros are supported */
 
 #ifdef CONFIG_DEBUG
-# define dbg(format, arg...) \
-  syslog(EXTRA_FMT format EXTRA_ARG, ##arg)
+# define dbg(format, ...) \
+  syslog(EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
 
 # ifdef CONFIG_ARCH_LOWPUTC
-#  define lldbg(format, arg...) \
-   lowsyslog(EXTRA_FMT format EXTRA_ARG, ##arg)
+#  define lldbg(format, ...) \
+   lowsyslog(EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
 # else
 #  define lldbg(x...)
 # endif
 
 # ifdef CONFIG_DEBUG_VERBOSE
-#  define vdbg(format, arg...) \
-   syslog(EXTRA_FMT format EXTRA_ARG, ##arg)
+#  define vdbg(format, ...) \
+   syslog(EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
 
 #  ifdef CONFIG_ARCH_LOWPUTC
-#    define llvdbg(format, arg...) \
-     lowsyslog(EXTRA_FMT format EXTRA_ARG, ##arg)
+#    define llvdbg(format, ...) \
+     lowsyslog(EXTRA_FMT format EXTRA_ARG, ##__VA_ARGS__)
 #  else
 #    define llvdbg(x...)
 #  endif
@@ -141,10 +141,10 @@
 /* Subsystem specific debug */
 
 #ifdef CONFIG_DEBUG_MM
-# define mdbg(format, arg...)    dbg(format, ##arg)
-# define mlldbg(format, arg...)  lldbg(format, ##arg)
-# define mvdbg(format, arg...)   vdbg(format, ##arg)
-# define mllvdbg(format, arg...) llvdbg(format, ##arg)
+# define mdbg(format, ...)    dbg(format, ##__VA_ARGS__)
+# define mlldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
+# define mvdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
+# define mllvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
 #else
 # define mdbg(x...)
 # define mlldbg(x...)
@@ -153,10 +153,10 @@
 #endif
 
 #ifdef CONFIG_DEBUG_SCHED
-# define sdbg(format, arg...)    dbg(format, ##arg)
-# define slldbg(format, arg...)  lldbg(format, ##arg)
-# define svdbg(format, arg...)   vdbg(format, ##arg)
-# define sllvdbg(format, arg...) llvdbg(format, ##arg)
+# define sdbg(format, ...)    dbg(format, ##__VA_ARGS__)
+# define slldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
+# define svdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
+# define sllvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
 #else
 # define sdbg(x...)
 # define slldbg(x...)
@@ -165,10 +165,10 @@
 #endif
 
 #ifdef CONFIG_DEBUG_PAGING
-# define pgdbg(format, arg...)    dbg(format, ##arg)
-# define pglldbg(format, arg...)  lldbg(format, ##arg)
-# define pgvdbg(format, arg...)   vdbg(format, ##arg)
-# define pgllvdbg(format, arg...) llvdbg(format, ##arg)
+# define pgdbg(format, ...)    dbg(format, ##__VA_ARGS__)
+# define pglldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
+# define pgvdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
+# define pgllvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
 #else
 # define pgdbg(x...)
 # define pglldbg(x...)
@@ -177,10 +177,10 @@
 #endif
 
 #ifdef CONFIG_DEBUG_DMA
-# define dmadbg(format, arg...)    dbg(format, ##arg)
-# define dmalldbg(format, arg...)  lldbg(format, ##arg)
-# define dmavdbg(format, arg...)   vdbg(format, ##arg)
-# define dmallvdbg(format, arg...) llvdbg(format, ##arg)
+# define dmadbg(format, ...)    dbg(format, ##__VA_ARGS__)
+# define dmalldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
+# define dmavdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
+# define dmallvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
 #else
 # define dmadbg(x...)
 # define dmalldbg(x...)
@@ -189,10 +189,10 @@
 #endif
 
 #ifdef CONFIG_DEBUG_NET
-# define ndbg(format, arg...)    dbg(format, ##arg)
-# define nlldbg(format, arg...)  lldbg(format, ##arg)
-# define nvdbg(format, arg...)   vdbg(format, ##arg)
-# define nllvdbg(format, arg...) llvdbg(format, ##arg)
+# define ndbg(format, ...)    dbg(format, ##__VA_ARGS__)
+# define nlldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
+# define nvdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
+# define nllvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
 #else
 # define ndbg(x...)
 # define nlldbg(x...)
@@ -201,10 +201,10 @@
 #endif
 
 #ifdef CONFIG_DEBUG_USB
-# define udbg(format, arg...)    dbg(format, ##arg)
-# define ulldbg(format, arg...)  lldbg(format, ##arg)
-# define uvdbg(format, arg...)   vdbg(format, ##arg)
-# define ullvdbg(format, arg...) llvdbg(format, ##arg)
+# define udbg(format, ...)    dbg(format, ##__VA_ARGS__)
+# define ulldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
+# define uvdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
+# define ullvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
 #else
 # define udbg(x...)
 # define ulldbg(x...)
@@ -213,10 +213,10 @@
 #endif
 
 #ifdef CONFIG_DEBUG_FS
-# define fdbg(format, arg...)    dbg(format, ##arg)
-# define flldbg(format, arg...)  lldbg(format, ##arg)
-# define fvdbg(format, arg...)   vdbg(format, ##arg)
-# define fllvdbg(format, arg...) llvdbg(format, ##arg)
+# define fdbg(format, ...)    dbg(format, ##__VA_ARGS__)
+# define flldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
+# define fvdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
+# define fllvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
 #else
 # define fdbg(x...)
 # define flldbg(x...)
@@ -225,10 +225,10 @@
 #endif
 
 #ifdef CONFIG_DEBUG_INPUT
-# define idbg(format, arg...)    dbg(format, ##arg)
-# define illdbg(format, arg...)  lldbg(format, ##arg)
-# define ivdbg(format, arg...)   vdbg(format, ##arg)
-# define illvdbg(format, arg...) llvdbg(format, ##arg)
+# define idbg(format, ...)    dbg(format, ##__VA_ARGS__)
+# define illdbg(format, ...)  lldbg(format, ##__VA_ARGS__)
+# define ivdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
+# define illvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
 #else
 # define idbg(x...)
 # define illdbg(x...)
@@ -237,10 +237,10 @@
 #endif
 
 #ifdef CONFIG_DEBUG_ANALOG
-# define adbg(format, arg...)    dbg(format, ##arg)
-# define alldbg(format, arg...)  lldbg(format, ##arg)
-# define avdbg(format, arg...)   vdbg(format, ##arg)
-# define allvdbg(format, arg...) llvdbg(format, ##arg)
+# define adbg(format, ...)    dbg(format, ##__VA_ARGS__)
+# define alldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
+# define avdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
+# define allvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
 #else
 # define adbg(x...)
 # define alldbg(x...)
@@ -249,10 +249,10 @@
 #endif
 
 #ifdef CONFIG_DEBUG_GRAPHICS
-# define gdbg(format, arg...)    dbg(format, ##arg)
-# define glldbg(format, arg...)  lldbg(format, ##arg)
-# define gvdbg(format, arg...)   vdbg(format, ##arg)
-# define gllvdbg(format, arg...) llvdbg(format, ##arg)
+# define gdbg(format, ...)    dbg(format, ##__VA_ARGS__)
+# define glldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
+# define gvdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
+# define gllvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
 #else
 # define gdbg(x...)
 # define glldbg(x...)
@@ -261,10 +261,10 @@
 #endif
 
 #ifdef CONFIG_DEBUG_BINFMT
-# define bdbg(format, arg...)    dbg(format, ##arg)
-# define blldbg(format, arg...)  lldbg(format, ##arg)
-# define bvdbg(format, arg...)   vdbg(format, ##arg)
-# define bllvdbg(format, arg...) llvdbg(format, ##arg)
+# define bdbg(format, ...)    dbg(format, ##__VA_ARGS__)
+# define blldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
+# define bvdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
+# define bllvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
 #else
 # define bdbg(x...)
 # define blldbg(x...)
@@ -273,10 +273,10 @@
 #endif
 
 #ifdef CONFIG_DEBUG_LIB
-# define ldbg(format, arg...)    dbg(format, ##arg)
-# define llldbg(format, arg...)  lldbg(format, ##arg)
-# define lvdbg(format, arg...)   vdbg(format, ##arg)
-# define lllvdbg(format, arg...) llvdbg(format, ##arg)
+# define ldbg(format, ...)    dbg(format, ##__VA_ARGS__)
+# define llldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
+# define lvdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
+# define lllvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
 #else
 # define ldbg(x...)
 # define llldbg(x...)
@@ -285,10 +285,10 @@
 #endif
 
 #ifdef CONFIG_DEBUG_AUDIO
-# define auddbg(format, arg...)    dbg(format, ##arg)
-# define audlldbg(format, arg...)  lldbg(format, ##arg)
-# define audvdbg(format, arg...)   vdbg(format, ##arg)
-# define audllvdbg(format, arg...) llvdbg(format, ##arg)
+# define auddbg(format, ...)    dbg(format, ##__VA_ARGS__)
+# define audlldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
+# define audvdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
+# define audllvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
 #else
 # define auddbg(x...)
 # define audlldbg(x...)
@@ -298,7 +298,7 @@
 
 #else /* CONFIG_CPP_HAVE_VARARGS */
 
-/* Variable argument macros NOT supported */
+/* Variadic macros NOT supported */
 
 #ifdef CONFIG_DEBUG
 # ifndef CONFIG_ARCH_LOWPUTC

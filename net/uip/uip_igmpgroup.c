@@ -86,10 +86,10 @@
 
 #ifdef CONFIG_CPP_HAVE_VARARGS
 #  ifdef IGMP_GRPDEBUG
-#    define grpdbg(format, arg...)    ndbg(format, ##arg)
-#    define grplldbg(format, arg...)  nlldbg(format, ##arg)
-#    define grpvdbg(format, arg...)   nvdbg(format, ##arg)
-#    define grpllvdbg(format, arg...) nllvdbg(format, ##arg)
+#    define grpdbg(format, ...)    ndbg(format, ##__VA_ARGS__)
+#    define grplldbg(format, ...)  nlldbg(format, ##__VA_ARGS__)
+#    define grpvdbg(format, ...)   nvdbg(format, ##__VA_ARGS__)
+#    define grpllvdbg(format, ...) nllvdbg(format, ##__VA_ARGS__)
 #  else
 #    define grpdbg(x...)
 #    define grplldbg(x...)

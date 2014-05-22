@@ -180,7 +180,7 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_LCD_RITDEBUG
-#  define ritdbg(format, arg...)  vdbg(format, ##arg)
+#  define ritdbg(format, ...)  vdbg(format, ##__VA_ARGS__)
 #else
 #  define ritdbg(x...)
 #endif

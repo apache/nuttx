@@ -308,7 +308,7 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_LCD_REGDEBUG
-# define lcddbg(format, arg...)  llvdbg(format, ##arg)
+# define lcddbg(format, ...) llvdbg(format, ##__VA_ARGS__)
 #else
 # define lcddbg(x...)
 #endif

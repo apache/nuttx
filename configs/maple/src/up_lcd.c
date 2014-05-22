@@ -83,7 +83,7 @@
 #endif
 
 #ifdef CONFIG_DEBUG_LCD
-#  define lcddbg(format, arg...)  vdbg(format, ##arg)
+#  define lcddbg(format, ...)  vdbg(format, ##__VA_ARGS__)
 #else
 #  define lcddbg(x...)
 #endif
