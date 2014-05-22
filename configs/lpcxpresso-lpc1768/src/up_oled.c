@@ -85,9 +85,9 @@
 #endif
 
 #ifdef CONFIG_DEBUG_LCD
-#  define ugdbg(format, arg...)  vdbg(format, ##arg)
-#  define oleddc_dumpgpio(m)     lpc17_dumpgpio(LPCXPRESSO_OLED_POWER, m)
-#  define oledcs_dumpgpio(m)     lpc17_dumpgpio(LPCXPRESSO_OLED_CS, m)
+#  define ugdbg(format, ...)  vdbg(format, ##__VA_ARGS__)
+#  define oleddc_dumpgpio(m)  lpc17_dumpgpio(LPCXPRESSO_OLED_POWER, m)
+#  define oledcs_dumpgpio(m)  lpc17_dumpgpio(LPCXPRESSO_OLED_CS, m)
 #else
 #  define ugdbg(x...)
 #  define oleddc_dumpgpio(m)

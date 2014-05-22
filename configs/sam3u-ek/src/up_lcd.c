@@ -159,14 +159,14 @@
 /* Debug ******************************************************************************/
 
 #ifdef CONFIG_LCD_REGDEBUG
-#  define regdbg(format, arg...)  vdbg(format, ##arg)
+#  define regdbg(format, ...)  vdbg(format, ##__VA_ARGS__)
 #else
 #  define regdbg(x...)
 #endif
 
 #ifdef CONFIG_DEBUG_LCD
-#  define lcddbg(format, arg...)  dbg(format, ##arg)
-#  define lcdvdbg(format, arg...) vdbg(format, ##arg)
+#  define lcddbg(format, ...)  dbg(format, ##__VA_ARGS__)
+#  define lcdvdbg(format, ...) vdbg(format, ##__VA_ARGS__)
 #else
 #  define lcddbg(x...)
 #  define lcdvdbg(x...)

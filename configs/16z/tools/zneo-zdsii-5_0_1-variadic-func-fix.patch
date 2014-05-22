@@ -130,7 +130,7 @@ index c78362f..207f9b9 100644
  
 +#if 0
  #ifdef CONFIG_CPP_HAVE_VARARGS
- # define nsh_output(v, fmt...) (v)->output(v, ##fmt)
+ # define nsh_output(v, ...)    (v)->output(v, ##__VA_ARGS__)
  #else
  # define nsh_output            vtbl->output
  #endif

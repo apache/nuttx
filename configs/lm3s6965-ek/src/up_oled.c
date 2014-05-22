@@ -71,9 +71,9 @@
 #endif
 
 #ifdef CONFIG_LCD_RITDEBUG
-#  define ritdbg(format, arg...)  vdbg(format, ##arg)
-#  define oleddc_dumpgpio(m) tiva_dumpgpio(OLEDDC_GPIO, m)
-#  define oledcs_dumpgpio(m) tiva_dumpgpio(OLEDCS_GPIO, m)
+#  define ritdbg(format, ...) vdbg(format, ##__VA_ARGS__)
+#  define oleddc_dumpgpio(m)  tiva_dumpgpio(OLEDDC_GPIO, m)
+#  define oledcs_dumpgpio(m)  tiva_dumpgpio(OLEDCS_GPIO, m)
 #else
 #  define ritdbg(x...)
 #  define oleddc_dumpgpio(m)
