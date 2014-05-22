@@ -302,7 +302,7 @@ static inline void irqrestore(irqstate_t flags)
   __asm__ __volatile__
     (
       "\ttst    %0, #1\n"
-      "\tbne    1f\n"
+      "\tbne.n  1f\n"
       "\tcpsie  i\n"
       "1:\n"
       :
