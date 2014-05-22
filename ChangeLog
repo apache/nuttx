@@ -7361,3 +7361,10 @@
 	  structures before proceeding. From Jussi Kivilinna (2014-5-21).
 	* drivers/wireless/cc3000/cc3000.c: Fix build when POLL is enabled.
 	  From Jussi Kivilinna (2014-5-21).
+	* arch/arm/include/armv7-m/irq.h:  Change bne to bne.n in irqrestore()
+	  (2014-5-22).
+	* Many files: Convert all old-style variadic macros to the C99 form.
+	  Recent GCC changes tightens up that behavior and can cause some problems
+	  (at least for the IAR compiler for some reason).  See
+	  https://gcc.gnu.org/onlinedocs/cpp/Variadic-Macros.html#Variadic-Macros.
+	  Noted by Bob Grimes (2014-5-22).
