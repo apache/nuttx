@@ -7369,3 +7369,6 @@
 	  https://gcc.gnu.org/onlinedocs/cpp/Variadic-Macros.html#Variadic-Macros.
 	  Noted by Bob Grimes (2014-5-22).
 	* configs/viewtool-stm32f107/nsh: Configuration refreshed (2014-5-23).
+	* arch/arm/src/stm32/stm32_i2c_alt.c: Final driver from Max Kriegleder et al.
+	  Reduces footprint and fixes a bug.  (2014-5-23).
+
