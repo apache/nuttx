@@ -7368,3 +7368,4 @@
 	  (at least for the IAR compiler for some reason).  See
 	  https://gcc.gnu.org/onlinedocs/cpp/Variadic-Macros.html#Variadic-Macros.
 	  Noted by Bob Grimes (2014-5-22).
+	* configs/viewtool-stm32f107/nsh: Configuration refreshed (2014-5-23).
