@@ -112,7 +112,7 @@ struct mtd_dev_s
   /* Erase the specified erase blocks (units are erase blocks).  Semantic
    * Clarification:  Here, we are not referring to the erase block according
    * to the FLASH data sheet.  Rather, we are referring to the *smallest*
-   * eraseable part of the FLASH which may have a name like a page or sector
+   * erasable part of the FLASH which may have a name like a page or sector
    * or subsector.
    */
 
@@ -219,6 +219,7 @@ FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd,
  *   Sets the name of the specified partition.
  *
  ****************************************************************************/
+
 #ifdef CONFIG_MTD_PARTITION_NAMES
 int mtd_setpartitionname(FAR struct mtd_dev_s *mtd, FAR const char *name);
 #endif
@@ -301,6 +302,7 @@ FAR struct mtd_dev_s *s512_initialize(FAR struct mtd_dev_s *mtd);
  *
  ****************************************************************************/
 
+struct spi_dev_s; /* Forward reference */
 FAR struct mtd_dev_s *at45db_initialize(FAR struct spi_dev_s *dev);
 
 /****************************************************************************
