@@ -7375,3 +7375,5 @@
 	  From Hannes Delago (2014-5-25).
 	* include/nuttx/mtd/mtd.h:  Needs forward reference to struct spi_dev_s.
 	  (2014-5-25).
+	* arch/arm/src/stm32/stm32_i2c.c and stm32_i2c_alt.c:  Back out PX4 fixes
+	  that were reverted in the PX4 repositories (2014-5-25).
