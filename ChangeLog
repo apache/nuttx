@@ -7371,4 +7371,7 @@
 	* configs/viewtool-stm32f107/nsh: Configuration refreshed (2014-5-23).
 	* arch/arm/src/stm32/stm32_i2c_alt.c: Final driver from Max Kriegleder et al.
 	  Reduces footprint and fixes a bug.  (2014-5-23).
-
+	* tools/configure.sh:  In-place SED edit an mess up permissions on windows.
+	  From Hannes Delago (2014-5-25).
+	* include/nuttx/mtd/mtd.h:  Needs forward reference to struct spi_dev_s.
+	  (2014-5-25).
