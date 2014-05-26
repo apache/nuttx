@@ -7377,3 +7377,6 @@
 	  (2014-5-25).
 	* arch/arm/src/stm32/stm32_i2c.c and stm32_i2c_alt.c:  Back out PX4 fixes
 	  that were reverted in the PX4 repositories (2014-5-25).
+	* sched/Kconfig:  CONFIG_START_YEAR/MONTH/DAY are not required is the
+	  RTC is enabled (2014-5-26).
+
