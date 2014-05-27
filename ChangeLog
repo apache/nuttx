@@ -7379,4 +7379,6 @@
 	  that were reverted in the PX4 repositories (2014-5-25).
 	* sched/Kconfig:  CONFIG_START_YEAR/MONTH/DAY are not required is the
 	  RTC is enabled (2014-5-26).
-
+	* arch/arm/src/stm32/stm32_rtcc.c:  Add retry logic to RTC initialization.
+	  It sometimes takes longer for the RTC to initialize, at least as noted
+	  on an F2 part.  From dlsitzer (2014-5-27).
