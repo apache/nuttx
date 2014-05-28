@@ -563,7 +563,7 @@ struct usbhost_registry_s
    */
 
   FAR struct usbhost_class_s     *(*create)(FAR struct usbhost_driver_s *drvr,
-                                           FAR const struct usbhost_id_s *id);
+                                            FAR const struct usbhost_id_s *id);
 
   /* This information uniquely identifies the USB host class implementation that
    * goes with a specific USB device.

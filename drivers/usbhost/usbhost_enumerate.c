@@ -424,7 +424,7 @@ int usbhost_enumerate(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
 
   /* Get class identification information from the device descriptor.  Most
    * devices set this to USB_CLASS_PER_INTERFACE (zero) and provide the
-   * identification informatino in the interface descriptor(s).  That allows
+   * identification information in the interface descriptor(s).  That allows
    * a device to support multiple, different classes.
    */
 

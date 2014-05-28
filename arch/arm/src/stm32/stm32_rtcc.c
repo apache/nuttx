@@ -484,6 +484,7 @@ static int rtc_setup(void)
 
       rtc_wprlock();
     }
+
   return ret;
 }
 
@@ -526,6 +527,7 @@ static int rtc_resume(void)
 
   putreg32((1 << 17), STM32_EXTI_PR);
 #endif
+
   return ret;
 }
 

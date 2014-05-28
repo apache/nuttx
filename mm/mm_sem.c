@@ -211,7 +211,10 @@ void mm_givesemaphore(FAR struct mm_heap_s *heap)
     {
       /* Nope, this is the last reference I have */
 
+#ifdef CONFIG_DEBUG
       msemdbg("PID=%d giving\n", my_pid);
+#endif
+
       heap->mm_holder      = -1;
       heap->mm_counts_held = 0;
       ASSERT(sem_post(&heap->mm_semaphore) == 0);
