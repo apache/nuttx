@@ -1,7 +1,7 @@
 ############################################################################
-# net/uip/Make.defs
+# net/icmp/Make.defs
 #
-#   Copyright (C) 2007, 2009-2010, 2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,56 +35,25 @@
 
 ifeq ($(CONFIG_NET),y)
 
-# Common IP source files
+# ICMP source files
 
-NET_CSRCS += uip_initialize.c uip_setipid.c uip_input.c uip_send.c
-NET_CSRCS += uip_poll.c uip_chksum.c uip_callback.c
+ifeq ($(CONFIG_NET_ICMP),y)
 
-# Non-interrupt level support required?
+NET_CSRCS += icmp_input.c
 
-ifeq ($(CONFIG_NET_NOINTS),y)
-NET_CSRCS += uip_lock.c
-endif
+ifeq ($(CONFIG_NET_ICMP_PING),y)
+ifneq ($(CONFIG_DISABLE_CLOCK),y)
 
-# IPv6-specific logic
-
-ifeq ($(CONFIG_NET_IPv6),y)
-NET_CSRCS += uip_neighbor.c
-endif
-
-# TCP/IP source files
-
-ifeq ($(CONFIG_NET_TCP),y)
-
-NET_CSRCS += uip_tcpconn.c uip_tcpseqno.c uip_tcppoll.c uip_tcptimer.c
-NET_CSRCS += uip_tcpsend.c uip_tcpinput.c uip_tcpappsend.c uip_listen.c
-NET_CSRCS += uip_tcpcallback.c uip_tcpbacklog.c
-
-# TCP Buffering
-
-ifeq ($(CONFIG_NET_TCP_READAHEAD),y)
-NET_CSRCS += uip_tcpreadahead.c
-endif
-
-ifeq ($(CONFIG_NET_TCP_WRITE_BUFFERS),y)
-NET_CSRCS += uip_tcpwrbuffer.c
-endif
+NET_CSRCS += icmp_ping.c icmp_poll.c icmp_send.c
 
 endif
-
-# UDP source files
-
-ifeq ($(CONFIG_NET_UDP),y)
-
-NET_CSRCS += uip_udpconn.c uip_udppoll.c uip_udpsend.c uip_udpinput.c
-NET_CSRCS += uip_udpcallback.c
-
+endif
 endif
 
 # Include uip build support
 
-DEPPATH += --dep-path uip
-VPATH += :uip
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)net$(DELIM)uip}
+DEPPATH += --dep-path icmp
+VPATH += :icmp
+CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)net$(DELIM)icmp}
 
 endif

@@ -100,6 +100,7 @@ NETDEV_CSRCS += netdev_rxnotify.c
 endif
 
 include arp/Make.defs
+include icmp/Make.defs
 include igmp/Make.defs
 include uip/Make.defs
 endif
