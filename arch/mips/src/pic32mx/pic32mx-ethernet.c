@@ -57,7 +57,7 @@
 
 #include <nuttx/net/uip/uip.h>
 #include <nuttx/net/uip/uipopt.h>
-#include <nuttx/net/uip/uip-arp.h>
+#include <nuttx/net/arp.h>
 #include <nuttx/net/uip/uip-arch.h>
 
 #include <arch/irq.h>
@@ -1147,7 +1147,7 @@ static int pic32mx_uiptxpoll(struct uip_driver_s *dev)
        * at least one more packet in the descriptor list.
        */
 
-      uip_arp_out(&priv->pd_dev);
+      arp_out(&priv->pd_dev);
       pic32mx_transmit(priv);
 
       /* Check if the next TX descriptor is available. If not, return a
@@ -1435,7 +1435,7 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
               /* Handle the incoming IP packet */
 
               EMAC_STAT(priv, rx_ip);
-              uip_arp_ipin(&priv->pd_dev);
+              arp_ipin(&priv->pd_dev);
               uip_input(&priv->pd_dev);
 
               /* If the above function invocation resulted in data that
@@ -1445,7 +1445,7 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
 
               if (priv->pd_dev.d_len > 0)
                 {
-                  uip_arp_out(&priv->pd_dev);
+                  arp_out(&priv->pd_dev);
                   pic32mx_response(priv);
                 }
             }
@@ -1454,7 +1454,7 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
               /* Handle the incoming ARP packet */
 
               EMAC_STAT(priv, rx_arp);
-              uip_arp_arpin(&priv->pd_dev);
+              arp_arpin(&priv->pd_dev);
 
               /* If the above function invocation resulted in data that
                * should be sent out on the network, the field  d_len will

@@ -52,7 +52,7 @@
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 #include <nuttx/net/uip/uip.h>
-#include <nuttx/net/uip/uip-arp.h>
+#include <nuttx/net/arp.h>
 #include <nuttx/net/uip/uip-arch.h>
 
 #include "chip.h"
@@ -610,7 +610,7 @@ static int tiva_uiptxpoll(struct uip_driver_s *dev)
        */
 
       DEBUGASSERT((tiva_ethin(priv, TIVA_MAC_TR_OFFSET) & MAC_TR_NEWTX) == 0)
-      uip_arp_out(&priv->ld_dev);
+      arp_out(&priv->ld_dev);
       ret = tiva_transmit(priv);
     }
 
@@ -766,7 +766,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
           nllvdbg("IP packet received (%02x)\n", ETHBUF->type);
           EMAC_STAT(priv, rx_ip);
 
-          uip_arp_ipin(&priv->ld_dev);
+          arp_ipin(&priv->ld_dev);
           uip_input(&priv->ld_dev);
 
           /* If the above function invocation resulted in data that should be
@@ -775,7 +775,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
 
           if (priv->ld_dev.d_len > 0)
             {
-              uip_arp_out(&priv->ld_dev);
+              arp_out(&priv->ld_dev);
               tiva_transmit(priv);
             }
         }
@@ -784,7 +784,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
           nllvdbg("ARP packet received (%02x)\n", ETHBUF->type);
           EMAC_STAT(priv, rx_arp);
 
-          uip_arp_arpin(&priv->ld_dev);
+          arp_arpin(&priv->ld_dev);
 
           /* If the above function invocation resulted in data that should be
            * sent out on the network, the field  d_len will set to a value > 0.

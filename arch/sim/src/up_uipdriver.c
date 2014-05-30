@@ -55,7 +55,7 @@
 #include <net/ethernet.h>
 #include <nuttx/net/uip/uip.h>
 #include <nuttx/net/uip/uip-arch.h>
-#include <nuttx/net/uip/uip-arp.h>
+#include <nuttx/net/arp.h>
 
 #include "up_internal.h"
 
@@ -123,7 +123,7 @@ static int sim_uiptxpoll(struct uip_driver_s *dev)
 
   if (g_sim_dev.d_len > 0)
     {
-      uip_arp_out(&g_sim_dev);
+      arp_out(&g_sim_dev);
       netdev_send(g_sim_dev.d_buf, g_sim_dev.d_len);
     }
 
@@ -166,7 +166,7 @@ void uipdriver_loop(void)
           if (BUF->ether_type == htons(UIP_ETHTYPE_IP))
 #endif
             {
-              uip_arp_ipin(&g_sim_dev);
+              arp_ipin(&g_sim_dev);
               uip_input(&g_sim_dev);
 
              /* If the above function invocation resulted in data that
@@ -176,13 +176,13 @@ void uipdriver_loop(void)
 
               if (g_sim_dev.d_len > 0)
                 {
-                  uip_arp_out(&g_sim_dev);
+                  arp_out(&g_sim_dev);
                   netdev_send(g_sim_dev.d_buf, g_sim_dev.d_len);
                 }
             }
           else if (BUF->ether_type == htons(UIP_ETHTYPE_ARP))
             {
-              uip_arp_arpin(&g_sim_dev);
+              arp_arpin(&g_sim_dev);
 
               /* If the above function invocation resulted in data that
                * should be sent out on the network, the global variable

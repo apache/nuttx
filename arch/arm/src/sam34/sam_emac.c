@@ -64,7 +64,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/net/mii.h>
 #include <nuttx/net/uip/uip.h>
-#include <nuttx/net/uip/uip-arp.h>
+#include <nuttx/net/arp.h>
 #include <nuttx/net/uip/uip-arch.h>
 
 #include "up_arch.h"
@@ -820,7 +820,7 @@ static int sam_uiptxpoll(struct uip_driver_s *dev)
     {
       /* Send the packet */
 
-      uip_arp_out(&priv->dev);
+      arp_out(&priv->dev);
       sam_transmit(priv);
 
       /* Check if the there are any free TX descriptors.  We cannot perform
@@ -1139,7 +1139,7 @@ static void sam_receive(struct sam_emac_s *priv)
 
           /* Handle ARP on input then give the IP packet to uIP */
 
-          uip_arp_ipin(&priv->dev);
+          arp_ipin(&priv->dev);
           uip_input(&priv->dev);
 
           /* If the above function invocation resulted in data that should be
@@ -1148,7 +1148,7 @@ static void sam_receive(struct sam_emac_s *priv)
 
           if (priv->dev.d_len > 0)
            {
-             uip_arp_out(&priv->dev);
+             arp_out(&priv->dev);
              sam_transmit(priv);
            }
         }
@@ -1158,7 +1158,7 @@ static void sam_receive(struct sam_emac_s *priv)
 
           /* Handle ARP packet */
 
-          uip_arp_arpin(&priv->dev);
+          arp_arpin(&priv->dev);
 
           /* If the above function invocation resulted in data that should be
            * sent out on the network, the field  d_len will set to a value > 0.
