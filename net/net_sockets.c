@@ -47,6 +47,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/net/arp.h>
 #include <nuttx/net/uip/uip.h>
 #include <nuttx/net/net.h>
 #include <nuttx/kmalloc.h>
@@ -55,7 +56,7 @@
 #include "net_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************

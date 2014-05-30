@@ -51,7 +51,7 @@
 #include <nuttx/net/uip/uip.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Definitions of 8-bit socket flags */
