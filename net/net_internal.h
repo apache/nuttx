@@ -225,14 +225,6 @@ void netdev_rxnotify(const uip_ipaddr_t addr);
 int netdev_count(void);
 #endif
 
-/* net_arptimer.c ************************************************************/
-
-#ifdef CONFIG_NET_ARP
-void arptimer_init(void);
-#else
-# define arptimer_init()
-#endif
-
 /* send.c ********************************************************************/
 
 ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,

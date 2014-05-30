@@ -55,7 +55,7 @@
 #include <nuttx/kmalloc.h>
 
 #include <nuttx/net/uip/uip.h>
-#include <nuttx/net/uip/uip-arp.h>
+#include <nuttx/net/arp.h>
 #include <nuttx/net/uip/uip-arch.h>
 
 #include <rgmp/pmap.h>
@@ -487,7 +487,7 @@ static int e1000_uiptxpoll(struct uip_driver_s *dev)
 
   if (e1000->uip_dev.d_len > 0)
     {
-      uip_arp_out(&e1000->uip_dev);
+      arp_out(&e1000->uip_dev);
       e1000_transmit(e1000);
 
       /* Check if there is room in the device to hold another packet. If not,
@@ -573,7 +573,7 @@ static void e1000_receive(struct e1000_dev *e1000)
           if (BUF->type == HTONS(UIP_ETHTYPE_IP))
 #endif
             {
-              uip_arp_ipin(&e1000->uip_dev);
+              arp_ipin(&e1000->uip_dev);
               uip_input(&e1000->uip_dev);
 
               /* If the above function invocation resulted in data that should be
@@ -582,13 +582,13 @@ static void e1000_receive(struct e1000_dev *e1000)
 
               if (e1000->uip_dev.d_len > 0)
                 {
-                  uip_arp_out(&e1000->uip_dev);
+                  arp_out(&e1000->uip_dev);
                   e1000_transmit(e1000);
                 }
             }
           else if (BUF->type == htons(UIP_ETHTYPE_ARP))
             {
-              uip_arp_arpin(&e1000->uip_dev);
+              arp_arpin(&e1000->uip_dev);
 
               /* If the above function invocation resulted in data that should be
                * sent out on the network, the field  d_len will set to a value > 0.

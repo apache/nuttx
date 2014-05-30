@@ -65,7 +65,7 @@
 
 #include <net/ethernet.h>
 #include <nuttx/net/uip/uip.h>
-#include <nuttx/net/uip/uip-arp.h>
+#include <nuttx/net/arp.h>
 #include <nuttx/net/uip/uip-arch.h>
 
 /****************************************************************************
@@ -849,7 +849,7 @@ static int dm9x_uiptxpoll(struct uip_driver_s *dev)
 
   if (dm9x->dm_dev.d_len > 0)
     {
-      uip_arp_out(&dm9x->dm_dev);
+      arp_out(&dm9x->dm_dev);
       dm9x_transmit(dm9x);
 
       /* Check if there is room in the DM90x0 to hold another packet.  In 100M mode,
@@ -988,7 +988,7 @@ static void dm9x_receive(struct dm9x_driver_s *dm9x)
           if (BUF->type == HTONS(UIP_ETHTYPE_IP))
 #endif
             {
-              uip_arp_ipin(&dm9x->dm_dev);
+              arp_ipin(&dm9x->dm_dev);
               uip_input(&dm9x->dm_dev);
 
              /* If the above function invocation resulted in data that should be
@@ -997,13 +997,13 @@ static void dm9x_receive(struct dm9x_driver_s *dm9x)
 
               if (dm9x->dm_dev.d_len > 0)
                 {
-                  uip_arp_out(&dm9x->dm_dev);
+                  arp_out(&dm9x->dm_dev);
                   dm9x_transmit(dm9x);
                 }
             }
           else if (BUF->type == htons(UIP_ETHTYPE_ARP))
             {
-              uip_arp_arpin(&dm9x->dm_dev);
+              arp_arpin(&dm9x->dm_dev);
 
              /* If the above function invocation resulted in data that should be
               * sent out on the network, the field  d_len will set to a value > 0.

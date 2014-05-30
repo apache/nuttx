@@ -59,7 +59,7 @@
 
 #include <net/ethernet.h>
 #include <nuttx/net/uip/uip.h>
-#include <nuttx/net/uip/uip-arp.h>
+#include <nuttx/net/arp.h>
 #include <nuttx/net/uip/uip-arch.h>
 
 #include "chip.h"
@@ -984,7 +984,7 @@ static int c5471_uiptxpoll(struct uip_driver_s *dev)
 
   if (c5471->c_dev.d_len > 0)
     {
-      uip_arp_out(&c5471->c_dev);
+      arp_out(&c5471->c_dev);
       c5471_transmit(c5471);
 
       /* Check if the ESM has let go of the RX descriptor giving us access
@@ -1238,7 +1238,7 @@ static void c5471_receive(struct c5471_driver_s *c5471)
       if (BUF->type == HTONS(UIP_ETHTYPE_IP))
 #endif
         {
-          uip_arp_ipin(dev);
+          arp_ipin(dev);
           uip_input(dev);
 
           /* If the above function invocation resulted in data that should be
@@ -1250,13 +1250,13 @@ static void c5471_receive(struct c5471_driver_s *c5471)
           if (dev->d_len > 0 &&
              (EIM_TXDESC_OWN_HOST & getreg32(c5471->c_rxcpudesc)) == 0)
             {
-              uip_arp_out(dev);
+              arp_out(dev);
               c5471_transmit(c5471);
             }
         }
       else if (BUF->type == HTONS(UIP_ETHTYPE_ARP))
         {
-          uip_arp_arpin(dev);
+          arp_arpin(dev);
 
           /* If the above function invocation resulted in data that should be
            * sent out on the network, the field  d_len will set to a value > 0.

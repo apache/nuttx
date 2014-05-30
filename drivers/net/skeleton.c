@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/skeleton.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,7 +52,7 @@
 #include <nuttx/arch.h>
 
 #include <nuttx/net/uip/uip.h>
-#include <nuttx/net/uip/uip-arp.h>
+#include <nuttx/net/arp.h>
 #include <nuttx/net/uip/uip-arch.h>
 
 /****************************************************************************
@@ -212,7 +212,7 @@ static int skel_uiptxpoll(struct uip_driver_s *dev)
 
   if (skel->sk_dev.d_len > 0)
     {
-      uip_arp_out(&skel->sk_dev);
+      arp_out(&skel->sk_dev);
       skel_transmit(skel);
 
       /* Check if there is room in the device to hold another packet. If not,
@@ -264,7 +264,7 @@ static void skel_receive(FAR struct skel_driver_s *skel)
       if (BUF->type == HTONS(UIP_ETHTYPE_IP))
 #endif
         {
-          uip_arp_ipin(&skel->sk_dev);
+          arp_ipin(&skel->sk_dev);
           uip_input(&skel->sk_dev);
 
           /* If the above function invocation resulted in data that should be
@@ -273,13 +273,13 @@ static void skel_receive(FAR struct skel_driver_s *skel)
 
           if (skel->sk_dev.d_len > 0)
            {
-             uip_arp_out(&skel->sk_dev);
+             arp_out(&skel->sk_dev);
              skel_transmit(skel);
            }
         }
       else if (BUF->type == htons(UIP_ETHTYPE_ARP))
         {
-          uip_arp_arpin(&skel->sk_dev);
+          arp_arpin(&skel->sk_dev);
 
           /* If the above function invocation resulted in data that should be
            * sent out on the network, the field  d_len will set to a value > 0.

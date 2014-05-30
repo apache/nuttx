@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/net/uip/uip-arch.h
+ * include/nuttx/net/arp.h
  * Macros and definitions for the ARP module.
  *
  *   Copyright (C) 2007, 2009-2012 Gregory Nutt. All rights reserved.
@@ -38,8 +38,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_NET_UIP_UIP_ARP_H
-#define __INCLUDE_NUTTX_NET_UIP_UIP_ARP_H
+#ifndef __INCLUDE_NUTTX_NET_ARP_H
+#define __INCLUDE_NUTTX_NET_ARP_H
 
 /****************************************************************************
  * Included Files
@@ -106,7 +106,7 @@ extern "C" {
 
 #ifdef CONFIG_NET_ARP
 /****************************************************************************
- * Name: uip_arp_init
+ * Name: arp_init
  *
  * Description:
  *   Initialize the ARP module. This function must be called before any of
@@ -114,13 +114,13 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN void uip_arp_init(void);
+void arp_init(void);
 
 /****************************************************************************
- * Name: uip_arp_ipin
+ * Name: arp_ipin
  *
  * Description:
- *   The uip_arp_ipin() function should be called whenever an IP packet
+ *   The arp_ipin() function should be called whenever an IP packet
  *   arrives from the Ethernet. This function refreshes the ARP table or
  *   inserts a new mapping if none exists. The function assumes that an
  *   IP packet with an Ethernet header is present in the d_buf buffer
@@ -129,31 +129,31 @@ EXTERN void uip_arp_init(void);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ARP_IPIN
-EXTERN void uip_arp_ipin(struct uip_driver_s *dev);
+void arp_ipin(struct uip_driver_s *dev);
 #else
-# define uip_arp_ipin(dev)
+# define arp_ipin(dev)
 #endif
 
 /****************************************************************************
- * Name: uip_arp_arpin
+ * Name: arp_arpin
  *
  * Description:
- *   The uip_arp_arpin() should be called when an ARP packet is received
+ *   The arp_arpin() should be called when an ARP packet is received
  *   by the Ethernet driver. This function also assumes that the
  *   Ethernet frame is present in the d_buf buffer. When the
- *   uip_arp_arpin() function returns, the contents of the d_buf
+ *   arp_arpin() function returns, the contents of the d_buf
  *   buffer should be sent out on the Ethernet if the d_len field
  *   is > 0.
  *
  ****************************************************************************/
 
-EXTERN void uip_arp_arpin(struct uip_driver_s *dev);
+void arp_arpin(struct uip_driver_s *dev);
 
 /****************************************************************************
- * Name: uip_arp_arpin
+ * Name: arp_arpin
  *
  * Description:
- *   The uip_arp_out() function should be called when an IP packet
+ *   The arp_out() function should be called when an IP packet
  *   should be sent out on the Ethernet. This function creates an
  *   Ethernet header before the IP header in the d_buf buffer. The
  *   Ethernet header will have the correct Ethernet MAC destination
@@ -166,10 +166,30 @@ EXTERN void uip_arp_arpin(struct uip_driver_s *dev);
  *
  ****************************************************************************/
 
-EXTERN void uip_arp_out(struct uip_driver_s *dev);
+void arp_out(struct uip_driver_s *dev);
 
 /****************************************************************************
- * Name: uip_arp_timer
+ * Function: arp_timer_init
+ *
+ * Description:
+ *   Initialized the 10 second timer that is need by uIP to age ARP
+ *   associations
+ *
+ * Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called once at system initialization time
+ *
+ ****************************************************************************/
+
+void arp_timer_init(void);
+
+/****************************************************************************
+ * Name: arp_timer
  *
  * Description:
  *   This function performs periodic timer processing in the ARP module
@@ -179,10 +199,10 @@ EXTERN void uip_arp_out(struct uip_driver_s *dev);
  *
  ****************************************************************************/
 
-EXTERN void uip_arp_timer(void);
+void arp_timer(void);
 
 /****************************************************************************
- * Name: uip_arp_update
+ * Name: arp_update
  *
  * Description:
  *   Add the IP/HW address mapping to the ARP table -OR- change the IP
@@ -197,10 +217,10 @@ EXTERN void uip_arp_timer(void);
  *
  ****************************************************************************/
 
-EXTERN void uip_arp_update(uint16_t *pipaddr, uint8_t *ethaddr);
+void arp_update(FAR uint16_t *pipaddr, FAR uint8_t *ethaddr);
 
 /****************************************************************************
- * Name: uip_arp_find
+ * Name: arp_find
  *
  * Description:
  *   Find the ARP entry corresponding to this IP address.
@@ -214,10 +234,10 @@ EXTERN void uip_arp_update(uint16_t *pipaddr, uint8_t *ethaddr);
  *
  ****************************************************************************/
 
-EXTERN struct arp_entry *uip_arp_find(in_addr_t ipaddr);
+struct arp_entry *arp_find(in_addr_t ipaddr);
 
 /****************************************************************************
- * Name: uip_arp_delete
+ * Name: arp_delete
  *
  * Description:
  *   Remove an IP association from the ARP table
@@ -230,9 +250,9 @@ EXTERN struct arp_entry *uip_arp_find(in_addr_t ipaddr);
  *
  ****************************************************************************/
 
-#define uip_arp_delete(ipaddr) \
+#define arp_delete(ipaddr) \
 { \
-  struct arp_entry *tabptr = uip_arp_find(ipaddr); \
+  struct arp_entry *tabptr = arp_find(ipaddr); \
   if (tabptr) \
     { \
       tabptr->at_ipaddr = 0; \
@@ -243,14 +263,15 @@ EXTERN struct arp_entry *uip_arp_find(in_addr_t ipaddr);
 
 /* If ARP is disabled, stub out all ARP interfaces */
 
-# define uip_arp_init()
-# define uip_arp_ipin(dev)
-# define uip_arp_arpin(dev)
-# define uip_arp_out(dev)
-# define uip_arp_timer()
-# define uip_arp_update(pipaddr,ethaddr)
-# define uip_arp_find(ipaddr) NULL
-# define uip_arp_delete(ipaddr)
+# define arp_init()
+# define arp_ipin(dev)
+# define arp_arpin(dev)
+# define arp_out(dev)
+# define arp_timer()
+# define arp_update(pipaddr,ethaddr)
+# define arp_find(ipaddr) NULL
+# define arp_delete(ipaddr)
+# define arp_timer_init(void);
 
 #endif /* CONFIG_NET_ARP */
 
@@ -259,4 +280,4 @@ EXTERN struct arp_entry *uip_arp_find(in_addr_t ipaddr);
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_NET_UIP_UIP_ARP_H */
+#endif /* __INCLUDE_NUTTX_NET_ARP_H */

@@ -52,7 +52,7 @@
 #include <nuttx/arch.h>
 
 #include <nuttx/net/uip/uip.h>
-#include <nuttx/net/uip/uip-arp.h>
+#include <nuttx/net/arp.h>
 #include <nuttx/net/uip/uip-arch.h>
 
 /****************************************************************************
@@ -337,7 +337,7 @@ static int cs89x0_uiptxpoll(struct uip_driver_s *dev)
 
   if (cs89x0->cs_dev.d_len > 0)
     {
-      uip_arp_out(&cs89x0->cs_dev);
+      arp_out(&cs89x0->cs_dev);
       cs89x0_transmit(cs89x0);
 
       /* Check if there is room in the CS89x0 to hold another packet. If not,
@@ -438,7 +438,7 @@ static void cs89x0_receive(struct cs89x0_driver_s *cs89x0, uint16_t isq)
   if (BUF->type == HTONS(UIP_ETHTYPE_IP))
 #endif
     {
-      uip_arp_ipin(&cs89x0->cs_dev);
+      arp_ipin(&cs89x0->cs_dev);
       uip_input(&cs89x0->cs_dev);
 
       /* If the above function invocation resulted in data that should be
@@ -447,13 +447,13 @@ static void cs89x0_receive(struct cs89x0_driver_s *cs89x0, uint16_t isq)
 
       if (cs89x0->cs_dev.d_len > 0)
         {
-          uip_arp_out(&cs89x0->cs_dev);
+          arp_out(&cs89x0->cs_dev);
           cs89x0_transmit(cs89x0);
         }
     }
   else if (BUF->type == htons(UIP_ETHTYPE_ARP))
     {
-       uip_arp_arpin(&cs89x0->cs_dev);
+       arp_arpin(&cs89x0->cs_dev);
 
        /* If the above function invocation resulted in data that should be
         * sent out on the network, the field  d_len will set to a value > 0.

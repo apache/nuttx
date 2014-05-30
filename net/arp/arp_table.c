@@ -1,8 +1,8 @@
 /****************************************************************************
- * net/arp/uip_arptab.c
+ * net/arp/arp_table.c
  * Implementation of the ARP Address Resolution Protocol.
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Based originally on uIP which also has a BSD style license:
@@ -55,7 +55,7 @@
 #include <net/ethernet.h>
 #include <nuttx/net/uip/uipopt.h>
 #include <nuttx/net/uip/uip-arch.h>
-#include <nuttx/net/uip/uip-arp.h>
+#include <nuttx/net/arp.h>
 
 #ifdef CONFIG_NET_ARP
 
@@ -85,7 +85,7 @@ static uint8_t g_arptime;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_arp_init
+ * Name: arp_init
  *
  * Description:
  *   Initialize the ARP module. This function must be called before any of
@@ -93,7 +93,7 @@ static uint8_t g_arptime;
  *
  ****************************************************************************/
 
-void uip_arp_init(void)
+void arp_init(void)
 {
   int i;
   for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
@@ -103,7 +103,7 @@ void uip_arp_init(void)
 }
 
 /****************************************************************************
- * Name: uip_arp_timer
+ * Name: arp_timer
  *
  * Description:
  *   This function performs periodic timer processing in the ARP module
@@ -113,7 +113,7 @@ void uip_arp_init(void)
  *
  ****************************************************************************/
 
-void uip_arp_timer(void)
+void arp_timer(void)
 {
   struct arp_entry *tabptr;
   int i;
@@ -130,7 +130,7 @@ void uip_arp_timer(void)
 }
 
 /****************************************************************************
- * Name: uip_arp_update
+ * Name: arp_update
  *
  * Description:
  *   Add the IP/HW address mapping to the ARP table -OR- change the IP
@@ -145,7 +145,7 @@ void uip_arp_timer(void)
  *
  ****************************************************************************/
 
-void uip_arp_update(uint16_t *pipaddr, uint8_t *ethaddr)
+void arp_update(uint16_t *pipaddr, uint8_t *ethaddr)
 {
   struct arp_entry *tabptr = NULL;
   in_addr_t         ipaddr = uip_ip4addr_conv(pipaddr);
@@ -225,7 +225,7 @@ void uip_arp_update(uint16_t *pipaddr, uint8_t *ethaddr)
 }
 
 /****************************************************************************
- * Name: uip_arp_find
+ * Name: arp_find
  *
  * Description:
  *   Find the ARP entry corresponding to this IP address.
@@ -239,7 +239,7 @@ void uip_arp_update(uint16_t *pipaddr, uint8_t *ethaddr)
  *
  ****************************************************************************/
 
-struct arp_entry *uip_arp_find(in_addr_t ipaddr)
+struct arp_entry *arp_find(in_addr_t ipaddr)
 {
   struct arp_entry *tabptr;
   int i;

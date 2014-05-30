@@ -59,7 +59,7 @@
 #include <arch/io.h>
 
 #include <nuttx/net/uip/uip.h>
-#include <nuttx/net/uip/uip-arp.h>
+#include <nuttx/net/arp.h>
 #include <nuttx/net/uip/uip-arch.h>
 
 #include "chip.h"
@@ -1080,7 +1080,7 @@ static int ez80emac_uiptxpoll(struct uip_driver_s *dev)
        * packet was successfully handled.
        */
 
-      uip_arp_out(&priv->dev);
+      arp_out(&priv->dev);
       ret = ez80emac_transmit(priv);
     }
 
@@ -1274,7 +1274,7 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
           nvdbg("IP packet received (%02x)\n", ETHBUF->type);
           EMAC_STAT(priv, rx_ip);
 
-          uip_arp_ipin(&priv->dev);
+          arp_ipin(&priv->dev);
           uip_input(&priv->dev);
 
           /* If the above function invocation resulted in data that should be
@@ -1283,7 +1283,7 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
 
           if (priv->dev.d_len > 0)
             {
-              uip_arp_out(&priv->dev);
+              arp_out(&priv->dev);
               ez80emac_transmit(priv);
             }
         }
@@ -1292,7 +1292,7 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
           nvdbg("ARP packet received (%02x)\n", ETHBUF->type);
           EMAC_STAT(priv, rx_arp);
 
-          uip_arp_arpin(&priv->dev);
+          arp_arpin(&priv->dev);
 
           /* If the above function invocation resulted in data that should be
            * sent out on the network, the field  d_len will set to a value > 0.

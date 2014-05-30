@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/net_arptimer.c
+ * net/arp/arp_timer.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,7 @@
 #include <debug.h>
 
 #include <nuttx/net/uip/uipopt.h>
-#include <nuttx/net/uip/uip-arp.h>
+#include <nuttx/net/arp.h>
 
 #include "net_internal.h"
 
@@ -93,7 +93,7 @@ static void arptimer_poll(int argc, uint32_t arg, ...)
 {
   /* Call the ARP timer function every 10 seconds. */
 
-  uip_arp_timer();
+  arp_timer();
 
   /* Setup the watchdog timer again */
 
@@ -105,7 +105,7 @@ static void arptimer_poll(int argc, uint32_t arg, ...)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: arptimer_init
+ * Function: arp_timer_init
  *
  * Description:
  *   Initialized the 10 second timer that is need by uIP to age ARP
@@ -122,7 +122,7 @@ static void arptimer_poll(int argc, uint32_t arg, ...)
  *
  ****************************************************************************/
 
-void arptimer_init(void)
+void arp_timer_init(void)
 {
   /* Create and start the ARP timer */
 

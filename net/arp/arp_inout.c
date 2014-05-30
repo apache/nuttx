@@ -1,8 +1,8 @@
 /****************************************************************************
- * net/arp/uip_arp.c
+ * net/arp/arm_inout.c
  * Implementation of the ARP Address Resolution Protocol.
  *
- *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Based on uIP which also has a BSD style license:
@@ -65,7 +65,7 @@
 #include <net/ethernet.h>
 #include <nuttx/net/uip/uipopt.h>
 #include <nuttx/net/uip/uip-arch.h>
-#include <nuttx/net/uip/uip-arp.h>
+#include <nuttx/net/arp.h>
 
 #ifdef CONFIG_NET_ARP
 
@@ -155,7 +155,7 @@ static const uint8_t g_multicast_ethaddr[3] = {0x01, 0x00, 0x5e};
  ****************************************************************************/
 
 #if defined(CONFIG_NET_DUMPARP) && defined(CONFIG_DEBUG)
-static void uip_arp_dump(struct arp_hdr_s *arp)
+static void arp_dump(struct arp_hdr_s *arp)
 {
   nlldbg("  HW type: %04x Protocol: %04x\n",
          arp->ah_hwtype, arp->ah_protocol);\
@@ -173,7 +173,7 @@ static void uip_arp_dump(struct arp_hdr_s *arp)
          arp->ah_dipaddr[1] & 0xff, arp->ah_dipaddr[1] >> 8);
 }
 #else
-# define uip_arp_dump(arp)
+# define arp_dump(arp)
 #endif
 
 /****************************************************************************
@@ -192,7 +192,7 @@ static void uip_arp_dump(struct arp_hdr_s *arp)
  */
 
 #ifdef CONFIG_NET_ARP_IPIN
-void uip_arp_ipin(struct uip_driver_s *dev)
+void arp_ipin(struct uip_driver_s *dev)
 {
   in_addr_t srcipaddr;
 
@@ -203,7 +203,7 @@ void uip_arp_ipin(struct uip_driver_s *dev)
   srcipaddr = uip_ip4addr_conv(IPBUF->eh_srcipaddr);
   if (uip_ipaddr_maskcmp(srcipaddr, dev->d_ipaddr, dev->d_netmask))
     {
-      uip_arp_update(IPBUF->eh_srcipaddr, ETHBUF->src);
+      arp_update(IPBUF->eh_srcipaddr, ETHBUF->src);
     }
 }
 #endif /* CONFIG_NET_ARP_IPIN */
@@ -229,7 +229,7 @@ void uip_arp_ipin(struct uip_driver_s *dev)
  * variable d_len.
  */
 
-void uip_arp_arpin(struct uip_driver_s *dev)
+void arp_arpin(struct uip_driver_s *dev)
 {
   struct arp_hdr_s *parp = ARPBUF;
   in_addr_t ipaddr;
@@ -260,7 +260,7 @@ void uip_arp_arpin(struct uip_driver_s *dev)
              * with this host in the future.
              */
 
-            uip_arp_update(parp->ah_sipaddr, parp->ah_shwaddr);
+            arp_update(parp->ah_sipaddr, parp->ah_shwaddr);
 
             parp->ah_opcode = HTONS(ARP_REPLY);
             memcpy(parp->ah_dhwaddr, parp->ah_shwaddr, ETHER_ADDR_LEN);
@@ -271,7 +271,7 @@ void uip_arp_arpin(struct uip_driver_s *dev)
             parp->ah_dipaddr[0] = parp->ah_sipaddr[0];
             parp->ah_dipaddr[1] = parp->ah_sipaddr[1];
             uiphdr_ipaddr_copy(parp->ah_sipaddr, &dev->d_ipaddr);
-            uip_arp_dump(parp);
+            arp_dump(parp);
 
             peth->type          = HTONS(UIP_ETHTYPE_ARP);
             dev->d_len          = sizeof(struct arp_hdr_s) + UIP_LLH_LEN;
@@ -287,7 +287,7 @@ void uip_arp_arpin(struct uip_driver_s *dev)
 
         if (uip_ipaddr_cmp(ipaddr, dev->d_ipaddr))
           {
-            uip_arp_update(parp->ah_sipaddr, parp->ah_shwaddr);
+            arp_update(parp->ah_sipaddr, parp->ah_shwaddr);
           }
         break;
     }
@@ -318,7 +318,7 @@ void uip_arp_arpin(struct uip_driver_s *dev)
  * buffer, and the length of the packet is in the field d_len.
  */
 
-void uip_arp_out(struct uip_driver_s *dev)
+void arp_out(struct uip_driver_s *dev)
 {
   const struct arp_entry *tabptr = NULL;
   struct arp_hdr_s       *parp   = ARPBUF;
@@ -399,7 +399,7 @@ void uip_arp_out(struct uip_driver_s *dev)
 
       /* Check if we already have this destination address in the ARP table */
 
-      tabptr = uip_arp_find(ipaddr);
+      tabptr = arp_find(ipaddr);
       if (!tabptr)
         {
            nllvdbg("ARP request for IP %04lx\n", (long)ipaddr);
@@ -421,7 +421,7 @@ void uip_arp_out(struct uip_driver_s *dev)
           parp->ah_protocol = HTONS(UIP_ETHTYPE_IP);
           parp->ah_hwlen    = ETHER_ADDR_LEN;
           parp->ah_protolen = 4;
-          uip_arp_dump(parp);
+          arp_dump(parp);
 
           peth->type        = HTONS(UIP_ETHTYPE_ARP);
           dev->d_len        = sizeof(struct arp_hdr_s) + UIP_LLH_LEN;

@@ -54,7 +54,7 @@
 
 #include <nuttx/net/uip/uip.h>
 #include <nuttx/net/uip/uipopt.h>
-#include <nuttx/net/uip/uip-arp.h>
+#include <nuttx/net/arp.h>
 #include <nuttx/net/uip/uip-arch.h>
 
 #include "up_arch.h"
@@ -681,7 +681,7 @@ static int lpc17_uiptxpoll(struct uip_driver_s *dev)
        * at least one more packet in the descriptor list.
        */
 
-      uip_arp_out(&priv->lp_dev);
+      arp_out(&priv->lp_dev);
       lpc17_transmit(priv);
 
       /* Check if there is room in the device to hold another packet. If not,
@@ -867,7 +867,7 @@ static void lpc17_rxdone(struct lpc17_driver_s *priv)
               /* Handle the incoming Rx packet */
 
               EMAC_STAT(priv, rx_ip);
-              uip_arp_ipin(&priv->lp_dev);
+              arp_ipin(&priv->lp_dev);
               uip_input(&priv->lp_dev);
 
               /* If the above function invocation resulted in data that
@@ -877,14 +877,14 @@ static void lpc17_rxdone(struct lpc17_driver_s *priv)
 
               if (priv->lp_dev.d_len > 0)
                 {
-                  uip_arp_out(&priv->lp_dev);
+                  arp_out(&priv->lp_dev);
                   lpc17_response(priv);
                 }
             }
           else if (BUF->type == htons(UIP_ETHTYPE_ARP))
             {
               EMAC_STAT(priv, rx_arp);
-              uip_arp_arpin(&priv->lp_dev);
+              arp_arpin(&priv->lp_dev);
 
               /* If the above function invocation resulted in data that
                * should be sent out on the network, the field  d_len will

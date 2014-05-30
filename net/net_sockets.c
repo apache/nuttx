@@ -118,7 +118,7 @@ void net_initialize(void)
 
   /* Initialize the periodic ARP timer */
 
-  arptimer_init();
+  arp_timer_init();
 }
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0

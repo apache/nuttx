@@ -68,7 +68,7 @@
 #include <nuttx/net/encx24j600.h>
 
 #include <nuttx/net/uip/uip.h>
-#include <nuttx/net/uip/uip-arp.h>
+#include <nuttx/net/arp.h>
 #include <nuttx/net/uip/uip-arch.h>
 
 #include "encx24j600.h"
@@ -1209,7 +1209,7 @@ static int enc_uiptxpoll(struct uip_driver_s *dev)
 
   if (priv->dev.d_len > 0)
     {
-      uip_arp_out(&priv->dev);
+      arp_out(&priv->dev);
 
       ret = enc_txenqueue(priv);
     }
@@ -1496,7 +1496,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
         {
           nllvdbg("Try to process IP packet (%02x)\n", BUF->type);
 
-          uip_arp_ipin(&priv->dev);
+          arp_ipin(&priv->dev);
           ret = uip_input(&priv->dev);
 
           if (ret == OK || (clock_systimer() - descr->ts) > ENC_RXTIMEOUT)
@@ -1514,14 +1514,14 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 
           if (priv->dev.d_len > 0)
             {
-              uip_arp_out(&priv->dev);
+              arp_out(&priv->dev);
               enc_txenqueue(priv);
             }
         }
       else if (BUF->type == htons(UIP_ETHTYPE_ARP))
         {
           nllvdbg("ARP packet received (%02x)\n", BUF->type);
-          uip_arp_arpin(&priv->dev);
+          arp_arpin(&priv->dev);
 
           /* ARP packets are freed immediately */
 

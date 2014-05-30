@@ -52,7 +52,7 @@
 #include <nuttx/arch.h>
 
 #include <nuttx/net/uip/uip.h>
-#include <nuttx/net/uip/uip-arp.h>
+#include <nuttx/net/arp.h>
 #include <nuttx/net/uip/uip-arch.h>
 
 /****************************************************************************
@@ -212,7 +212,7 @@ static int emac_uiptxpoll(struct uip_driver_s *dev)
 
   if (priv->d_dev.d_len > 0)
     {
-      uip_arp_out(&priv->d_dev);
+      arp_out(&priv->d_dev);
       emac_transmit(priv);
 
       /* Check if there is room in the device to hold another packet. If not,
@@ -264,7 +264,7 @@ static void emac_receive(FAR struct emac_driver_s *priv)
       if (BUF->type == HTONS(UIP_ETHTYPE_IP))
 #endif
         {
-          uip_arp_ipin(&priv->d_dev);
+          arp_ipin(&priv->d_dev);
           uip_input(&priv->d_dev);
 
           /* If the above function invocation resulted in data that should be
@@ -273,13 +273,13 @@ static void emac_receive(FAR struct emac_driver_s *priv)
 
           if (priv->d_dev.d_len > 0)
            {
-             uip_arp_out(&priv->d_dev);
+             arp_out(&priv->d_dev);
              emac_transmit(priv);
            }
         }
       else if (BUF->type == htons(UIP_ETHTYPE_ARP))
         {
-          uip_arp_arpin(&priv->d_dev);
+          arp_arpin(&priv->d_dev);
 
           /* If the above function invocation resulted in data that should be
            * sent out on the network, the field  d_len will set to a value > 0.

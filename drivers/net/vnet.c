@@ -56,7 +56,7 @@
 #include <nuttx/arch.h>
 
 #include <nuttx/net/uip/uip.h>
-#include <nuttx/net/uip/uip-arp.h>
+#include <nuttx/net/arp.h>
 #include <nuttx/net/uip/uip-arch.h>
 
 #include <rgmp/vnet.h>
@@ -231,7 +231,7 @@ static int vnet_uiptxpoll(struct uip_driver_s *dev)
 
 	if (vnet->sk_dev.d_len > 0)
     {
-		uip_arp_out(&vnet->sk_dev);
+		arp_out(&vnet->sk_dev);
 		vnet_transmit(vnet);
 
 		/* Check if there is room in the device to hold another packet. If not,
@@ -293,18 +293,18 @@ void rtos_vnet_recv(struct rgmp_vnet *rgmp_vnet, char *data, int len)
 			if (BUF->type == HTONS(UIP_ETHTYPE_IP))
 #endif
 			{
-				uip_arp_ipin(&vnet->sk_dev);
+				arp_ipin(&vnet->sk_dev);
 				uip_input(&vnet->sk_dev);
 
 				// If the above function invocation resulted in data that should be
 				// sent out on the network, the field  d_len will set to a value > 0.
 				if (vnet->sk_dev.d_len > 0) {
-					uip_arp_out(&vnet->sk_dev);
+					arp_out(&vnet->sk_dev);
 					vnet_transmit(vnet);
 				}
 			}
 			else if (BUF->type == htons(UIP_ETHTYPE_ARP)) {
-				uip_arp_arpin(&vnet->sk_dev);
+				arp_arpin(&vnet->sk_dev);
 
 				// If the above function invocation resulted in data that should be
 				// sent out on the network, the field  d_len will set to a value > 0.

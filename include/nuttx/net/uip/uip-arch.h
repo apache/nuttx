@@ -242,17 +242,17 @@ struct uip_driver_s
  *       {
  *         if (BUF->type == HTONS(UIP_ETHTYPE_IP))
  *           {
- *             uip_arp_ipin();
+ *             arp_ipin();
  *             uip_input(dev);
  *             if (dev->d_len > 0)
  *               {
- *                 uip_arp_out();
+ *                 arp_out();
  *                 devicedriver_send();
  *               }
  *           }
  *         else if (BUF->type == HTONS(UIP_ETHTYPE_ARP))
  *           {
- *             uip_arp_arpin();
+ *             arp_arpin();
  *             if (dev->d_len > 0)
  *               {
  *                 devicedriver_send();
@@ -297,14 +297,14 @@ int uip_input(struct uip_driver_s *dev);
  *
  * Note: If you are writing a uIP device driver that needs ARP (Address
  * Resolution Protocol), e.g., when running uIP over Ethernet, you will
- * need to call the uip_arp_out() function in the callback function
+ * need to call the arp_out() function in the callback function
  * before sending the packet:
  *
  *   int driver_callback(struct uip_driver_dev *dev)
  *   {
  *     if (dev->d_len > 0)
  *       {
- *         uip_arp_out();
+ *         arp_out();
  *         devicedriver_send();
  *         return 1; <-- Terminates polling if necessary
  *       }

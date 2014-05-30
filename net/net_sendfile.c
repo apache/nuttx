@@ -58,7 +58,7 @@
 #include <arch/irq.h>
 #include <nuttx/clock.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/net/uip/uip-arp.h>
+#include <nuttx/net/arp.h>
 #include <nuttx/net/uip/uip-arch.h>
 
 #include "net_internal.h"
@@ -321,7 +321,7 @@ static uint16_t sendfile_interrupt(FAR struct uip_driver_s *dev, FAR void *pvcon
            */
 
 #if defined(CONFIG_NET_ETHERNET) && !defined (CONFIG_NET_ARP_IPIN)
-          if (pstate->snd_sent != 0 || uip_arp_find(conn->ripaddr) != NULL)
+          if (pstate->snd_sent != 0 || arp_find(conn->ripaddr) != NULL)
 #endif
             {
               /* Update the amount of data sent (but not necessarily ACKed) */

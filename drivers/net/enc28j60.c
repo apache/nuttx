@@ -62,7 +62,7 @@
 #include <nuttx/net/enc28j60.h>
 
 #include <nuttx/net/uip/uip.h>
-#include <nuttx/net/uip/uip-arp.h>
+#include <nuttx/net/arp.h>
 #include <nuttx/net/uip/uip-arch.h>
 
 #include "enc28j60.h"
@@ -1195,7 +1195,7 @@ static int enc_uiptxpoll(struct uip_driver_s *dev)
   nllvdbg("Poll result: d_len=%d\n", priv->dev.d_len);
   if (priv->dev.d_len > 0)
     {
-      uip_arp_out(&priv->dev);
+      arp_out(&priv->dev);
       enc_transmit(priv);
 
       /* Stop the poll now because we can queue only one packet */
@@ -1378,7 +1378,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 #endif
     {
       nllvdbg("IP packet received (%02x)\n", BUF->type);
-      uip_arp_ipin(&priv->dev);
+      arp_ipin(&priv->dev);
       uip_input(&priv->dev);
 
       /* If the above function invocation resulted in data that should be
@@ -1387,14 +1387,14 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 
       if (priv->dev.d_len > 0)
         {
-          uip_arp_out(&priv->dev);
+          arp_out(&priv->dev);
           enc_transmit(priv);
         }
     }
   else if (BUF->type == htons(UIP_ETHTYPE_ARP))
     {
       nllvdbg("ARP packet received (%02x)\n", BUF->type);
-      uip_arp_arpin(&priv->dev);
+      arp_arpin(&priv->dev);
 
       /* If the above function invocation resulted in data that should be
        * sent out on the network, the field  d_len will set to a value > 0.
