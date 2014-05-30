@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/uip/uip_igminput.c
+ * net/igmp/igmp_input.c
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,7 +51,7 @@
 #include <nuttx/net/uip/uip.h>
 #include <nuttx/net/uip/uip-igmp.h>
 
-#include "uip_internal.h"
+#include "uip/uip_internal.h"
 
 #ifdef CONFIG_NET_IGMP
 

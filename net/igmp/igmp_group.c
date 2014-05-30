@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/uip/uip_igmpgroup.c
+ * net/igmp/igmp_group.c
  * IGMP group data structure management logic
  *
  *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
@@ -58,7 +58,7 @@
 #include <nuttx/net/uip/uip.h>
 #include <nuttx/net/uip/uip-igmp.h>
 
-#include "uip_internal.h"
+#include "uip/uip_internal.h"
 
 #ifdef CONFIG_NET_IGMP
 

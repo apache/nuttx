@@ -1,5 +1,6 @@
 /****************************************************************************
- * net/uip/uip_mcastmac.c
+ * net/igmp/igmp_init.c
+ * IGMP initialization logic
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,10 +47,10 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/net/uip/uipopt.h>
 #include <nuttx/net/uip/uip.h>
+#include <nuttx/net/uip/uip-igmp.h>
 
-#include "uip_internal.h"
+#include "uip/uip_internal.h"
 
 #ifdef CONFIG_NET_IGMP
 
@@ -57,76 +58,63 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#ifdef CONFIG_NET_IPv6
+#  error "IGMP for IPv6 not supported"
+#endif
 
 /****************************************************************************
- * Name:  uip_mcastmac
- *
- * Description:
- *   Given an IP address (in network order), create a IGMP multicast MAC
- *   address.
- *
+ * Public Data
  ****************************************************************************/
 
-static void uip_mcastmac(uip_ipaddr_t *ip, FAR uint8_t *mac)
-{
-  /* This mapping is from the IETF IN RFC 1700 */
-
-  mac[0] = 0x01;
-  mac[1] = 0x00;
-  mac[2] = 0x5e;
-  mac[3] = ip4_addr2(*ip) & 0x7f;
-  mac[4] = ip4_addr3(*ip);
-  mac[5] = ip4_addr4(*ip);
-
-  nvdbg("IP: %08x -> MAC: %02x%02x%02x%02x%02x%02x\n",
-        *ip, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-}
+uip_ipaddr_t g_allsystems;
+uip_ipaddr_t g_allrouters;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  uip_addmcastmac
+ * Name:  uip_igmpinit
  *
  * Description:
- *   Add an IGMP MAC address to the device's MAC filter table.
+ *   Perform one-time IGMP initialization.
  *
  ****************************************************************************/
 
-void uip_addmcastmac(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *ip)
+void uip_igmpinit(void)
 {
-  uint8_t mcastmac[6];
+  nvdbg("IGMP initializing\n");
 
-  nvdbg("Adding: IP %08x\n", *ip);
-  if (dev->d_addmac)
-    {
-      uip_mcastmac(ip, mcastmac);
-      dev->d_addmac(dev, mcastmac);
-    }
+  uip_ipaddr(g_allrouters, 224, 0, 0, 2);
+  uip_ipaddr(g_allsystems, 224, 0, 0, 1);
+
+  /* Initialize the group allocation logic */
+
+  uip_grpinit();
 }
 
 /****************************************************************************
- * Name:  uip_removemcastmac
+ * Name:  uip_igmpdevinit
  *
  * Description:
- *   Remove an IGMP MAC address from the device's MAC filter table.
+ *   Called when a new network device is registered to configure that device
+ *   for IGMP support.
  *
  ****************************************************************************/
 
-void uip_removemcastmac(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *ip)
+void uip_igmpdevinit(struct uip_driver_s *dev)
 {
-  uint8_t mcastmac[6];
+  nvdbg("IGMP initializing dev %p\n", dev);
+  DEBUGASSERT(dev->grplist.head == NULL);
 
-  nvdbg("Removing: IP %08x\n", *ip);
-  if (dev->d_rmmac)
-    {
-      uip_mcastmac(ip, mcastmac);
-      dev->d_rmmac(dev, mcastmac);
-    }
+  /* Add the all systems address to the group */
+
+  (void)uip_grpalloc(dev, &g_allsystems);
+
+  /* Allow the IGMP messages at the MAC level */
+
+  uip_addmcastmac(dev, &g_allrouters);
+  uip_addmcastmac(dev, &g_allsystems);
 }
 
 #endif /* CONFIG_NET_IGMP */

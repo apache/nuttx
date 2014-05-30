@@ -33,44 +33,41 @@
 #
 ############################################################################
 
-UIP_ASRCS =
-UIP_CSRCS =
-
 ifeq ($(CONFIG_NET),y)
 
 # Common IP source files
 
-UIP_CSRCS += uip_initialize.c uip_setipid.c uip_input.c uip_send.c
-UIP_CSRCS += uip_poll.c uip_chksum.c uip_callback.c
+NET_CSRCS += uip_initialize.c uip_setipid.c uip_input.c uip_send.c
+NET_CSRCS += uip_poll.c uip_chksum.c uip_callback.c
 
 # Non-interrupt level support required?
 
 ifeq ($(CONFIG_NET_NOINTS),y)
-UIP_CSRCS += uip_lock.c
+NET_CSRCS += uip_lock.c
 endif
 
 # IPv6-specific logic
 
 ifeq ($(CONFIG_NET_IPv6),y)
-UIP_CSRCS += uip_neighbor.c
+NET_CSRCS += uip_neighbor.c
 endif
 
 # TCP/IP source files
 
 ifeq ($(CONFIG_NET_TCP),y)
 
-UIP_CSRCS += uip_tcpconn.c uip_tcpseqno.c uip_tcppoll.c uip_tcptimer.c
-UIP_CSRCS += uip_tcpsend.c uip_tcpinput.c uip_tcpappsend.c uip_listen.c
-UIP_CSRCS += uip_tcpcallback.c uip_tcpbacklog.c
+NET_CSRCS += uip_tcpconn.c uip_tcpseqno.c uip_tcppoll.c uip_tcptimer.c
+NET_CSRCS += uip_tcpsend.c uip_tcpinput.c uip_tcpappsend.c uip_listen.c
+NET_CSRCS += uip_tcpcallback.c uip_tcpbacklog.c
 
 # TCP Buffering
 
 ifeq ($(CONFIG_NET_TCP_READAHEAD),y)
-UIP_CSRCS += uip_tcpreadahead.c
+NET_CSRCS += uip_tcpreadahead.c
 endif
 
 ifeq ($(CONFIG_NET_TCP_WRITE_BUFFERS),y)
-UIP_CSRCS += uip_tcpwrbuffer.c
+NET_CSRCS += uip_tcpwrbuffer.c
 endif
 
 endif
@@ -79,8 +76,8 @@ endif
 
 ifeq ($(CONFIG_NET_UDP),y)
 
-UIP_CSRCS += uip_udpconn.c uip_udppoll.c uip_udpsend.c uip_udpinput.c
-UIP_CSRCS += uip_udpcallback.c
+NET_CSRCS += uip_udpconn.c uip_udppoll.c uip_udpsend.c uip_udpinput.c
+NET_CSRCS += uip_udpcallback.c
 
 endif
 
@@ -88,22 +85,13 @@ endif
 
 ifeq ($(CONFIG_NET_ICMP),y)
 
-UIP_CSRCS += uip_icmpinput.c uip_igmppoll.c
+NET_CSRCS += uip_icmpinput.c
 
 ifeq ($(CONFIG_NET_ICMP_PING),y)
 ifneq ($(CONFIG_DISABLE_CLOCK),y)
-UIP_CSRCS += uip_icmpping.c uip_icmppoll.c uip_icmpsend.c
+NET_CSRCS += uip_icmpping.c uip_icmppoll.c uip_icmpsend.c
 endif
 endif
-
-# IGMP source files
-
-ifeq ($(CONFIG_NET_IGMP),y)
-UIP_CSRCS += uip_igmpgroup.c uip_igmpinit.c uip_igmpinput.c uip_igmpjoin.c
-UIP_CSRCS += uip_igmpleave.c uip_igmpmsg.c uip_igmpsend.c uip_igmptimer.c
-UIP_CSRCS += uip_mcastmac.c
-endif
-
 endif
 
 # Include uip build support

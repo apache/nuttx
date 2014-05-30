@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/uip/uip_igmpmgs.c
+ * net/igmp/igmp_mcastmac.c
  *
- *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * The NuttX implementation of IGMP was inspired by the IGMP add-on for the
@@ -48,9 +48,8 @@
 
 #include <nuttx/net/uip/uipopt.h>
 #include <nuttx/net/uip/uip.h>
-#include <nuttx/net/uip/uip-igmp.h>
 
-#include "uip_internal.h"
+#include "uip/uip_internal.h"
 
 #ifdef CONFIG_NET_IGMP
 
@@ -63,77 +62,71 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name:  uip_mcastmac
+ *
+ * Description:
+ *   Given an IP address (in network order), create a IGMP multicast MAC
+ *   address.
+ *
+ ****************************************************************************/
+
+static void uip_mcastmac(uip_ipaddr_t *ip, FAR uint8_t *mac)
+{
+  /* This mapping is from the IETF IN RFC 1700 */
+
+  mac[0] = 0x01;
+  mac[1] = 0x00;
+  mac[2] = 0x5e;
+  mac[3] = ip4_addr2(*ip) & 0x7f;
+  mac[4] = ip4_addr3(*ip);
+  mac[5] = ip4_addr4(*ip);
+
+  nvdbg("IP: %08x -> MAC: %02x%02x%02x%02x%02x%02x\n",
+        *ip, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_igmpschedmsg
+ * Name:  uip_addmcastmac
  *
  * Description:
- *   Schedule a message to be send at the next driver polling interval.
- *
- * Assumptions:
- *   This function may be called in most any context.
+ *   Add an IGMP MAC address to the device's MAC filter table.
  *
  ****************************************************************************/
 
-void uip_igmpschedmsg(FAR struct igmp_group_s *group, uint8_t msgid)
+void uip_addmcastmac(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *ip)
 {
-  uip_lock_t flags;
+  uint8_t mcastmac[6];
 
-  /* The following should be atomic */
-
-  flags = uip_lock();
-  DEBUGASSERT(!IS_SCHEDMSG(group->flags));
-  group->msgid = msgid;
-  SET_SCHEDMSG(group->flags);
-  uip_unlock(flags);
+  nvdbg("Adding: IP %08x\n", *ip);
+  if (dev->d_addmac)
+    {
+      uip_mcastmac(ip, mcastmac);
+      dev->d_addmac(dev, mcastmac);
+    }
 }
 
 /****************************************************************************
- * Name: uip_igmpwaitmsg
+ * Name:  uip_removemcastmac
  *
  * Description:
- *   Schedule a message to be send at the next driver polling interval and
- *   block, waiting for the message to be sent.
- *
- * Assumptions:
- *   This function cannot be called from an interrupt handler (if you try it,
- *   uip_lockedwait will assert).
+ *   Remove an IGMP MAC address from the device's MAC filter table.
  *
  ****************************************************************************/
 
-void uip_igmpwaitmsg(FAR struct igmp_group_s *group, uint8_t msgid)
+void uip_removemcastmac(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *ip)
 {
-  uip_lock_t flags;
+  uint8_t mcastmac[6];
 
-  /* Schedule to send the message */
-
-  flags = uip_lock();
-  DEBUGASSERT(!IS_WAITMSG(group->flags));
-  SET_WAITMSG(group->flags);
-  uip_igmpschedmsg(group, msgid);
-
-  /* Then wait for the message to be sent */
-
-  while (IS_SCHEDMSG(group->flags))
+  nvdbg("Removing: IP %08x\n", *ip);
+  if (dev->d_rmmac)
     {
-      /* Wait for the semaphore to be posted */
-
-      while (uip_lockedwait(&group->sem) != 0)
-        {
-          /* The only error that should occur from uip_lockedwait() is if
-           * the wait is awakened by a signal.
-           */
-
-          ASSERT(errno == EINTR);
-        }
+      uip_mcastmac(ip, mcastmac);
+      dev->d_rmmac(dev, mcastmac);
     }
-
-  /* The message has been sent and we are no longer waiting */
-
-  CLR_WAITMSG(group->flags);
-  uip_unlock(flags);
 }
 
 #endif /* CONFIG_NET_IGMP */

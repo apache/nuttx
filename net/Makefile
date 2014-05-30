@@ -100,13 +100,14 @@ NETDEV_CSRCS += netdev_rxnotify.c
 endif
 
 include arp/Make.defs
+include igmp/Make.defs
 include uip/Make.defs
 endif
 
-ASRCS		= $(SOCK_ASRCS) $(NETDEV_ASRCS) $(ARP_ASRCS) $(UIP_ASRCS)
+ASRCS		= $(SOCK_ASRCS) $(NETDEV_ASRCS) $(NET_ASRCS)
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
-CSRCS		= $(SOCK_CSRCS) $(NETDEV_CSRCS) $(ARP_CSRCS) $(UIP_CSRCS)
+CSRCS		= $(SOCK_CSRCS) $(NETDEV_CSRCS) $(NET_CSRCS)
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)
