@@ -7385,3 +7385,8 @@
 	* libc/stdio/lib_snprintf.c:  If the size passed to snprintf() is zero,
 	  then snprintf() must write nothing, but instead return the size of the
 	  buffer needed to hold the entire string.  From Sami Pelkonen (2014-5-30).
+	* net/arp:  Move arp related files from net/uip to net/arp.  Files renamed
+	  with arp_ prefix (2014-5-30).
+	* include/nuttx/net/arp.h and net/arp/arp_timer.c:  Moved
+	  include/nuttx/net/uip/uip-arp.h to include/nuttx/net/arp.h; moved
+	  net/net_arptimer to arp/arp_timer.c. (2014-5-30).
