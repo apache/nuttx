@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/uip/uip_arp.c
+ * net/arp/uip_arp.c
  * Implementation of the ARP Address Resolution Protocol.
  *
  *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.

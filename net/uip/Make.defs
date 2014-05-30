@@ -49,12 +49,6 @@ ifeq ($(CONFIG_NET_NOINTS),y)
 UIP_CSRCS += uip_lock.c
 endif
 
-# ARP supported is not provided for SLIP (Ethernet only)
-
-ifneq ($(CONFIG_NET_SLIP),y)
-UIP_CSRCS += uip_arp.c uip_arptab.c
-endif
-
 # IPv6-specific logic
 
 ifeq ($(CONFIG_NET_IPv6),y)
@@ -111,4 +105,11 @@ UIP_CSRCS += uip_mcastmac.c
 endif
 
 endif
+
+# Include uip build support
+
+DEPPATH += --dep-path uip
+VPATH += :uip
+CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)net$(DELIM)uip}
+
 endif

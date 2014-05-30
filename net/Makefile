@@ -44,6 +44,9 @@ SOCK_CSRCS  = bind.c connect.c getsockname.c recv.c recvfrom.c socket.c
 SOCK_CSRCS += sendto.c net_sockets.c net_close.c net_dup.c net_dup2.c
 SOCK_CSRCS += net_clone.c net_vfcntl.c
 
+VPATH =
+DEPPATH = --dep-path .
+
 # TCP/IP support
 
 ifeq ($(CONFIG_NET_TCP),y)
@@ -99,21 +102,20 @@ ifeq ($(CONFIG_NET_RXAVAIL),y)
 NETDEV_CSRCS += netdev_rxnotify.c
 endif
 
+include arp/Make.defs
 include uip/Make.defs
 endif
 
-ASRCS		= $(SOCK_ASRCS) $(NETDEV_ASRCS) $(UIP_ASRCS)
+ASRCS		= $(SOCK_ASRCS) $(NETDEV_ASRCS) $(ARP_ASRCS) $(UIP_ASRCS)
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
-CSRCS		= $(SOCK_CSRCS) $(NETDEV_CSRCS) $(UIP_CSRCS)
+CSRCS		= $(SOCK_CSRCS) $(NETDEV_CSRCS) $(ARP_CSRCS) $(UIP_CSRCS)
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
 SRCS		= $(ASRCS) $(CSRCS)
 OBJS		= $(AOBJS) $(COBJS)
 
 BIN		= libnet$(LIBEXT)
-
-VPATH		= uip
 
 all:	$(BIN)
 
@@ -128,7 +130,7 @@ $(BIN): $(OBJS)
 
 .depend: Makefile $(SRCS)
 ifeq ($(CONFIG_NET),y)
-	$(Q) $(MKDEP) --dep-path . --dep-path uip "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
+	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
 endif
 	$(Q) touch $@
 
