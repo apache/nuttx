@@ -69,7 +69,7 @@
 #if defined(KINETIS_NENET) && KINETIS_NENET > 0
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* CONFIG_ENET_NETHIFS determines the number of physical interfaces
