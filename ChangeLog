@@ -7390,3 +7390,5 @@
 	* include/nuttx/net/arp.h and net/arp/arp_timer.c:  Moved
 	  include/nuttx/net/uip/uip-arp.h to include/nuttx/net/arp.h; moved
 	  net/net_arptimer to arp/arp_timer.c. (2014-5-30).
+	* net/igmp:  Moved IGMP files from net/uip to net/igmp (2014-5-30).
+	* net/icmp:  Moved ICMP files from net/uip to net/icmp (2014-5-30).
