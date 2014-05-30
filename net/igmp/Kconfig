@@ -1,0 +1,22 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+config NET_IGMP
+	bool "IGMPv2 clientsupport"
+	default n
+	depends on NET
+	---help---
+		Enable IGMPv2 client support.
+
+if NET_IGMP
+
+config PREALLOC_IGMPGROUPS
+	int "Number of pre-allocated IGMP groups"
+	default 4
+	---help---
+		Pre-allocated IGMP groups are used only if needed from interrupt
+		level group created (by the IGMP server). Default: 4.
+
+endif # NET_IGMP

@@ -1,0 +1,29 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+config NET_ICMP
+	bool "ICMP networking support"
+	default n
+	depends on NET
+	---help---
+		Enable minimal ICMP support. Includes built-in support
+		for sending replies to received ECHO (ping) requests.
+
+if NET_ICMP
+
+config NET_ICMP_PING
+	bool "ICMP ping interfaces"
+	default n
+	---help---
+		Provide interfaces to support application level support for
+		for sending ECHO (ping) requests and associating ECHO replies.
+
+config NET_PINGADDRCONF
+	bool "Ping address configuration"
+	default n
+	---help---
+		Use "ping" packet for setting IP address
+
+endif # NET_ICMP

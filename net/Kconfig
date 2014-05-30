@@ -328,48 +328,8 @@ config NET_RXAVAIL
 endif # NET_UDP
 endmenu
 
-config NET_ICMP
-	bool "ICMP networking support"
-	default n
-	depends on NET
-	---help---
-		Enable minimal ICMP support. Includes built-in support
-		for sending replies to received ECHO (ping) requests.
-
-if NET_ICMP
-
-config NET_ICMP_PING
-	bool "ICMP ping interfaces"
-	default n
-	---help---
-		Provide interfaces to support application level support for
-		for sending ECHO (ping) requests and associating ECHO replies.
-
-config NET_PINGADDRCONF
-	bool "Ping address configuration"
-	default n
-	---help---
-		Use "ping" packet for setting IP address
-
-endif # NET_ICMP
-
-config NET_IGMP
-	bool "IGMPv2 clientsupport"
-	default n
-	depends on NET
-	---help---
-		Enable IGMPv2 client support.
-
-if NET_IGMP
-
-config PREALLOC_IGMPGROUPS
-	int "Number of pre-allocated IGMP groups"
-	default 4
-	---help---
-		Pre-allocated IGMP groups are used only if needed from interrupt
-		level group created (by the IGMP server). Default: 4.
-
-endif # NET_IGMP
+source "net/icmp/Kconfig"
+source "net/igmp/Kconfig"
 
 config NET_STATISTICS
 	bool "Collect network statistics"
@@ -388,18 +348,7 @@ config NET_RECEIVE_WINDOW
 		incoming data, or high (32768 bytes) if the application processes
 		data quickly.
 
-config NET_ARPTAB_SIZE
-	int "ARP table size"
-	default 16
-	---help---
-		The size of the ARP table (in entries).
-
-config NET_ARP_IPIN
-	bool "ARP address harvesting"
-	default n
-	---help---
-		Harvest IP/MAC address mappings from the ARP table
-		from incoming IP packets.
+source "net/arp/Kconfig"
 
 config NET_ROUTE
 	bool "Routing table suport"

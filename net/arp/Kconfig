@@ -1,0 +1,28 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+config NET_ARP
+	bool
+	default y if !NET_SLIP
+	default n if NET_SLIP
+	---help---
+		This setting is currently overridden by logic in include/nuttx/net
+
+if NET_ARP
+
+config NET_ARPTAB_SIZE
+	int "ARP table size"
+	default 16
+	---help---
+		The size of the ARP table (in entries).
+
+config NET_ARP_IPIN
+	bool "ARP address harvesting"
+	default n
+	---help---
+		Harvest IP/MAC address mappings from the ARP table
+		from incoming IP packets.
+
+endif # NET_ARP
