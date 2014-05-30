@@ -7382,3 +7382,6 @@
 	* arch/arm/src/stm32/stm32_rtcc.c:  Add retry logic to RTC initialization.
 	  It sometimes takes longer for the RTC to initialize, at least as noted
 	  on an F2 part.  From dlsitzer (2014-5-27).
+	* libc/stdio/lib_snprintf.c:  If the size passed to snprintf() is zero,
+	  then snprintf() must write nothing, but instead return the size of the
+	  buffer needed to hold the entire string.  From Sami Pelkonen (2014-5-30).
