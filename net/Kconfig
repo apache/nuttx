@@ -369,6 +369,17 @@ config NET_MULTICAST
 	---help---
 		Outgoing multi-cast address support
 
+# Select Transport (should be a choice)
+
+config NET_ETHERNET
+	bool
+	default y if !NET_SLIP
+	default n if NET_SLIP
+	---help---
+		If NET_SLIP is not selected, then Ethernet will be used (there is
+		no need to define anything special in the configuration file to use
+		Ethernet -- it is the default).
+
 config NET_SLIP
 	bool "SLIP support"
 	default n
