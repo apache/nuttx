@@ -217,6 +217,7 @@ struct uip_conn *uip_tcpalloc(void)
 
   conn = (struct uip_conn *)dq_remfirst(&g_free_tcp_connections);
 
+#ifndef CONFIG_NET_SOLINGER
   /* Is the free list empty? */
 
   if (!conn)
@@ -224,7 +225,7 @@ struct uip_conn *uip_tcpalloc(void)
       /* As a fall-back, check for connection structures which can be stalled.
        *
        * Search the active connection list for the oldest connection
-       * that is in the UIP_TIME_WAIT or UIP_FIN_WAIT_1 state.
+       * that is about to be closed anyway.
        */
 
       FAR struct uip_conn *tmp =
@@ -234,13 +235,17 @@ struct uip_conn *uip_tcpalloc(void)
         {
           nllvdbg("conn: %p state: %02x\n", tmp, tmp->tcpstateflags);
 
-          /* Is this connection in a state we can sacrifice.
-           * REVISIT: maybe UIP_FIN_WAIT_1 is too harsh? There should be a
-           *          higher priority for UIP_TIME_WAIT
+          /* Is this connection in a state we can sacrifice. */
+
+          /* REVISIT: maybe we could check for SO_LINGER but it's buried
+           * in the socket layer.
            */
 
-          if (tmp->tcpstateflags == UIP_TIME_WAIT ||
-              tmp->tcpstateflags == UIP_FIN_WAIT_1)
+          if (tmp->tcpstateflags == UIP_CLOSING    ||
+              tmp->tcpstateflags == UIP_FIN_WAIT_1 ||
+              tmp->tcpstateflags == UIP_FIN_WAIT_2 ||
+              tmp->tcpstateflags == UIP_TIME_WAIT  ||
+              tmp->tcpstateflags == UIP_LAST_ACK)
             {
               /* Yes.. Is it the oldest one we have seen so far? */
 
@@ -269,6 +274,11 @@ struct uip_conn *uip_tcpalloc(void)
            *
            * REVISIT:  Could there be any higher level, socket interface
            * that needs to be informed that we did this to them?
+           *
+           * Actually yes. When CONFIG_NET_SOLINGER is enabled there is a
+           * pending callback in netclose_disconnect waiting for getting
+           * woken up.  Otherwise there's the callback too, but no one is
+           * waiting for it.
            */
 
           uip_tcpfree(conn);
@@ -278,6 +288,7 @@ struct uip_conn *uip_tcpalloc(void)
           conn = (struct uip_conn *)dq_remfirst(&g_free_tcp_connections);
         }
     }
+#endif
 
   uip_unlock(flags);
 
