@@ -125,6 +125,11 @@ void uip_tcptimer(FAR struct uip_driver_s *dev, FAR struct uip_conn *conn,
       if (conn->timer >= UIP_TIME_WAIT_TIMEOUT)
         {
           conn->tcpstateflags = UIP_CLOSED;
+
+          /* Notify upper layers about the timeout */
+
+          result = uip_tcpcallback(dev, conn, UIP_TIMEDOUT);
+
           nllvdbg("TCP state: UIP_CLOSED\n");
         }
     }
