@@ -534,8 +534,10 @@ while (0)
 
 #define RB_GENERATE(name, type, field, cmp) \
   RB_GENERATE_INTERNAL(name, type, field, cmp,)
+
 #define RB_GENERATE_STATIC(name, type, field, cmp) \
   RB_GENERATE_INTERNAL(name, type, field, cmp, __attribute__((__unused__)) static)
+
 #define RB_GENERATE_INTERNAL(name, type, field, cmp, attr) \
   attr void name##_RB_INSERT_COLOR(struct name *head, struct type *elm) \
   { \
@@ -977,23 +979,23 @@ while (0)
           { \
             elm = RB_RIGHT(elm, field); \
           } \
-        else \
+      } \
+    else \
+      { \
+        if (RB_PARENT(elm, field) && \
+            (elm == RB_RIGHT(RB_PARENT(elm, field), field))) \
           { \
-            if (RB_PARENT(elm, field) && \
-                (elm == RB_RIGHT(RB_PARENT(elm, field), field))) \
+            elm = RB_PARENT(elm, field); \
+          } \
+       else \
+          { \
+            while (RB_PARENT(elm, field) && \
+                  (elm == RB_LEFT(RB_PARENT(elm, field), field))) \
               { \
                 elm = RB_PARENT(elm, field); \
               } \
-           else \
-              { \
-                while (RB_PARENT(elm, field) && \
-                      (elm == RB_LEFT(RB_PARENT(elm, field), field))) \
-                  { \
-                    elm = RB_PARENT(elm, field); \
-                  } \
-                \
-                elm = RB_PARENT(elm, field); \
-              } \
+            \
+            elm = RB_PARENT(elm, field); \
           } \
       } \
     \
