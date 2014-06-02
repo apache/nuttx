@@ -7392,3 +7392,11 @@
 	  net/net_arptimer to arp/arp_timer.c. (2014-5-30).
 	* net/igmp:  Moved IGMP files from net/uip to net/igmp (2014-5-30).
 	* net/icmp:  Moved ICMP files from net/uip to net/icmp (2014-5-30).
+	* net/uip/uip_tcptimer.c:  NET: Notify upper layer when TIME_WAIT or
+	  FIN_WAIT_2 timeout occurs. Otherwise connections possibly won't get
+	  freed. From Max Holtzberg (2014-6-2).
+	* TCP fallback allocation: Added all states in which the connections are
+	  about to be closed.  Fallback mechanism is disabled when SO_LINGER is
+	  enabled to prevent deadlocks in netclos_disconnect().  From Max Holtzberg
+	  (2014-6-2).
+

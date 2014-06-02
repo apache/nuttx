@@ -61,7 +61,7 @@ static void z16f_extcsinit(void)
    * Post Read: No wait states; Chip select: 1 wait state
    */
 
-  putreg16(0x9001, Z16F_EXTCS0H);
+  putreg16(0x9001, Z16F_EXTCS0);
 
   /* CS1 enabled, Data [0:7]
    * Post Read: No wait states; Chip select: 1 wait state
