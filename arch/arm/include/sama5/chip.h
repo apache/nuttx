@@ -93,34 +93,58 @@
 
 #if defined(CONFIG_ARCH_CHIP_ATSAMA5D31)
 #  define ATSAMA5D3        1         /* SAMA5D3 family */
+#  undef  ATSAMA5D4                  /* Not SAMA5D4 family */
 #  define SAM_ISRAM0_SIZE (64*1024)  /* 128KB of SRAM in two banks */
 #  define SAM_ISRAM1_SIZE (64*1024)
 #  define SAM_NDMAC        2         /* (2) DMA controllers */
 #  define SAM_NDMACHAN     8         /* (8) DMA channels per DMA controller */
 #elif defined(CONFIG_ARCH_CHIP_ATSAMA5D33)
 #  define ATSAMA5D3        1         /* SAMA5D3 family */
+#  undef  ATSAMA5D4                  /* Not SAMA5D4 family */
 #  define SAM_ISRAM0_SIZE (64*1024)  /* 128KB of SRAM in two banks */
 #  define SAM_ISRAM1_SIZE (64*1024)
 #  define SAM_NDMAC        2         /* (2) DMA controllers */
 #  define SAM_NDMACHAN     8         /* (8) DMA channels per DMA controller */
 #elif defined(CONFIG_ARCH_CHIP_ATSAMA5D34)
 #  define ATSAMA5D3        1         /* SAMA5D3 family */
+#  undef  ATSAMA5D4                  /* Not SAMA5D4 family */
 #  define SAM_ISRAM0_SIZE (64*1024)  /* 128KB of SRAM in two banks */
 #  define SAM_ISRAM1_SIZE (64*1024)
 #  define SAM_NDMAC        2         /* (2) DMA controllers */
 #  define SAM_NDMACHAN     8         /* (8) DMA channels per DMA controller */
 #elif defined(CONFIG_ARCH_CHIP_ATSAMA5D35)
 #  define ATSAMA5D3        1         /* SAMA5D3 family */
+#  undef  ATSAMA5D4                  /* Not SAMA5D4 family */
 #  define SAM_ISRAM0_SIZE (64*1024)  /* 128KB of SRAM in two banks */
 #  define SAM_ISRAM1_SIZE (64*1024)
 #  define SAM_NDMAC        2         /* (2) DMA controllers */
 #  define SAM_NDMACHAN     8         /* (8) DMA channels per DMA controller */
 #elif defined(CONFIG_ARCH_CHIP_ATSAMA5D36)
 #  define ATSAMA5D3        1         /* SAMA5D3 family */
+#  undef  ATSAMA5D4                  /* Not SAMA5D4 family */
 #  define SAM_ISRAM0_SIZE (64*1024)  /* 128KB of SRAM in two banks */
 #  define SAM_ISRAM1_SIZE (64*1024)
 #  define SAM_NDMAC        2         /* (2) DMA controllers */
 #  define SAM_NDMACHAN     8         /* (8) DMA channels per DMA controller */
+
+/* The SAMA5D4 series devices are similar to the SAMA5D3 family except that:
+ *
+ * - Some parts support a 32-bit DDR data path (SAMA5D42 and SAMA5D44)
+ * - Some parts support a Video Decoder (SAMA5D43 and SAMA5D44)
+ * - Includes an L2 data cache, NEON FPU, and TrustZone
+ * - New XDMAC DMA controller
+ * - There are few differences in the support peripherals (Gigbit Ethernet is not supported,
+ *   for example)
+ */
+
+#elif defined(CONFIG_ARCH_CHIP_ATSAMA5D41) || defined(CONFIG_ARCH_CHIP_ATSAMA5D42) \
+      defined(CONFIG_ARCH_CHIP_ATSAMA5D43) || defined(CONFIG_ARCH_CHIP_ATSAMA5D44)
+#  undef  ATSAMA5D3                  /* Not SAMA5D3 family */
+#  define ATSAMA5D4        1         /* SAMA5D4 family */
+#  define SAM_ISRAM0_SIZE (64*1024)  /* 128KB of SRAM in two banks */
+#  define SAM_ISRAM1_SIZE (64*1024)
+#  define SAM_NDMAC        1         /* (1) XDMA controllers */
+#  define SAM_NDMACHAN     16        /* (16) DMA channels per XDMA controller */
 #else
 #  error Unrecognized SAMAD5 chip
 #endif
