@@ -42,6 +42,8 @@
 
 /* Get NuttX configuration and NuttX-specific network IOCTL definitions */
 
+#include <netinet/in.h>
+
 #include <nuttx/config.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/net/ioctl.h>
