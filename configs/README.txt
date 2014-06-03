@@ -356,6 +356,12 @@ configs/olimex-lpc2378
   Linux or Cygwin.  STATUS: ostest and NSH configurations available.
   This port for the NXP LPC2378 was contributed by Rommel Marcelo.
 
+configs/olimex-stm32-h405
+  This port uses the Olimex STM32 H405 board and a GNU arm-nuttx-elf
+  toolchain* under Linux or Cygwin. See the http://www.olimex.com for
+  further information. This board features the STMicro STM32F405RGT6 MCU.
+  Contributed by Martin Lederhilger.
+
 configs/olimex-stm32-p107
   This port uses the Olimex STM32-P107 board (STM32F107VC) and a GNU arm-nuttx-elf
   toolchain* under Linux or Cygwin. See the https://www.olimex.com/dev/stm32-p107.html
