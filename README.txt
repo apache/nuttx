@@ -1008,6 +1008,10 @@ nuttx
  |   |   `- README.txt
  |   |- olimex-lpc-h3131/
  |   |   `- README.txt
+ |   |- olimex-stm32-h405/
+ |   |   `- README.txt
+ |   |- olimex-stm32-p107/
+ |   |   `- README.txt
  |   |- olimex-stm32-p207/
  |   |   `- README.txt
  |   |- olimex-strp711/
