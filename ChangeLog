@@ -7399,4 +7399,6 @@
 	  about to be closed.  Fallback mechanism is disabled when SO_LINGER is
 	  enabled to prevent deadlocks in netclos_disconnect().  From Max Holtzberg
 	  (2014-6-2).
+	* configs/olimex-stm32_h405:  Support for the Olimex STM32 H405 board
+	  contributed by Martin Lederhilger (2014-6-3).
 
