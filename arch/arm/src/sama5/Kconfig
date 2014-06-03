@@ -9,6 +9,14 @@ comment "SAMA5 Configuration Options"
 
 # Chip Capabilities
 
+config SAMA5_HAVE_AESB
+	bool
+	default n
+
+config SAMA5_HAVE_ICM
+	bool
+	default n
+
 config SAMA5_HAVE_UART0
 	bool
 	default n
@@ -17,11 +25,31 @@ config SAMA5_HAVE_UART1
 	bool
 	default n
 
+config SAMA5_HAVE_USART4
+	bool
+	default n
+
 config SAMA5_HAVE_CAN0
 	bool
 	default n
 
 config SAMA5_HAVE_CAN1
+	bool
+	default n
+
+config SAMA5_HAVE_DMA
+	bool
+	default n
+
+config SAMA5_HAVE_DDR32
+	bool
+	default n
+
+config SAMA5_HAVE_XDMA
+	bool
+	default n
+
+config SAMA5_HAVE_L2CC
 	bool
 	default n
 
@@ -41,9 +69,65 @@ config SAMA5_HAVE_HSMCI2
 	bool
 	default n
 
+config SAMA5_HAVE_SAIC
+	bool
+	default n
+
+config SAMA5_HAVE_SBM
+	bool
+	default n
+
+config SAMA5_HAVE_SFC
+	bool
+	default n
+
+config SAMA5_HAVE_SPI2
+	bool
+	default n
+
 config SAMA5_HAVE_TC1
 	bool
 	default n
+
+config SAMA5_HAVE_TC2
+	bool
+	default n
+
+config SAMA5_HAVE_TWI3
+	bool
+	default n
+
+config SAMA5_HAVE_VDEC
+	bool
+	default n
+
+# Chip Selection
+
+config ARCH_CHIP_SAMA5D3
+	bool
+	default n
+	select SAMA5_HAVE_DMA
+
+config ARCH_CHIP_SAMA5D4
+	bool
+	default n
+	select SAMA5_HAVE_AESB
+	select SAMA5_HAVE_EMAC
+	select SAMA5_HAVE_ICM
+	select SAMA5_HAVE_LCDC
+	select SAMA5_HAVE_UART0
+	select SAMA5_HAVE_UART1
+	select SAMA5_HAVE_USART4
+	select SAMA5_HAVE_XDMA
+	select SAMA5_HAVE_L2CC
+	select SAMA5_HAVE_SAIC
+	select SAMA5_HAVE_SBM
+	select SAMA5_HAVE_SFC
+	select SAMA5_HAVE_SPI2
+	select SAMA5_HAVE_TC1
+	select SAMA5_HAVE_TC2
+	select SAMA5_HAVE_TWI3
+	select ARCH_NAND_HWECC
 
 choice
 	prompt "Atmel AT91SAMA5 Chip Selection"
@@ -103,13 +187,51 @@ config ARCH_CHIP_ATSAMA5D36
 	select SAMA5_HAVE_TC1
 	select ARCH_NAND_HWECC
 
+config ARCH_CHIP_ATSAMA5D41
+	bool "Atmel ATSAMA5D41"
+	select ARCH_CHIP_SAMA5D4
+
+config ARCH_CHIP_ATSAMA5D42
+	bool "Atmel ATSAMA5D42"
+	select ARCH_CHIP_SAMA5D4
+	select SAMA5_HAVE_DDR32
+
+config ARCH_CHIP_ATSAMA5D43
+	bool "Atmel ATSAMA5D43"
+	select ARCH_CHIP_SAMA5D4
+	select SAMA5_HAVE_VDEC
+
+config ARCH_CHIP_ATSAMA5D44
+	bool "Atmel ATSAMA5D44"
+	select ARCH_CHIP_SAMA5D4
+	select SAMA5_HAVE_DDR32
+	select SAMA5_HAVE_VDEC
+
 endchoice # Atmel AT91SAMA5 Chip Selection
 
 menu "SAMA5 Peripheral Support"
 
+config SAMA5_AES
+	bool "Advanced Encryption Standard (AES)"
+	default n
+
+config SAMA5_TDES
+	bool "Triple Data Encryption Standard (TDES)"
+	default n
+
+config SAMA5_AESB
+	bool "Advanced Encryption Bridge (AESB)"
+	default n
+	depends on SAMA5_HAVE_AESB
+
 config SAMA5_DBGU
 	bool "Debug Unit (DBGU)"
 	default n
+
+config SAMA5_L2CC
+	bool "L2 Cache Controller (L2CC)"
+	default n
+	depends on SAMA5_HAVE_L2CC
 
 config SAMA5_PIT
 	bool "Periodic Interval Timer (PIT)"
@@ -125,6 +247,11 @@ config SAMA5_RTC
 	default n
 	select RTC
 	select RTC_DATETIME
+
+config SAMA5_ICM
+	bool "Integrity Check Monitor (ICM)"
+	default n
+	depends on SAMA5_HAVE_ICM
 
 config SAMA5_HSMC
 	bool "Static Memory Controller (HSMC)"
@@ -166,6 +293,12 @@ config SAMA5_USART3
 	default n
 	select ARCH_HAVE_USART3
 
+config SAMA5_USART4
+	bool "USART 4"
+	default n
+	depends on SAMA5_HAVE_USART4
+	select ARCH_HAVE_USART4
+
 config SAMA5_TWI0
 	bool "Two-Wire Interface 0 (TWI0)"
 	default n
@@ -177,6 +310,11 @@ config SAMA5_TWI1
 config SAMA5_TWI2
 	bool "Two-Wire Interface 2 (TWI2)"
 	default n
+
+config SAMA5_TWI3
+	bool "Two-Wire Interface 3 (TWI3)"
+	default n
+	depends on SAMA5_HAVE_TWI3
 
 config SAMA5_HSMCI0
 	bool "High Speed Multimedia Card Interface 0 (HSMCI0)"
@@ -194,6 +332,21 @@ config SAMA5_HSMCI2
 	depends on SAMA5_HAVE_HSMCI2
 	select ARCH_HAVE_SDIO
 
+config SAMA5_SAIC
+	bool "Secure Advanced Interrupt Controller (SAIC)"
+	default n
+	depends on SAMA5_HAVE_SAIC
+
+config SAMA5_SBM
+	bool "Secure Box Module (SBM)"
+	default n
+	depends on SAMA5_HAVE_SBM
+
+config SAMA5_SFC
+	bool "Secure Fuse Controller (SFC)"
+	default n
+	depends on SAMA5_HAVE_SFC
+
 config SAMA5_SPI0
 	bool "Serial Peripheral Interface 0 (SPI0)"
 	default n
@@ -202,6 +355,11 @@ config SAMA5_SPI1
 	bool "Serial Peripheral Interface 1 (SPI1)"
 	default n
 
+config SAMA5_SPI2
+	bool "Serial Peripheral Interface 2 (SPI2)"
+	default n
+	depends on SAMA5_HAVE_SPI2
+
 config SAMA5_TC0
 	bool "Timer Counter 0 (ch. 0, 1, 2) (TC0)"
 	default n
@@ -209,6 +367,11 @@ config SAMA5_TC0
 config SAMA5_TC1
 	bool "Timer Counter 1 (ch. 3, 4, 5) (TC1)"
 	depends on SAMA5_HAVE_TC1
+	default n
+
+config SAMA5_TC2
+	bool "Timer Counter 2 (ch. 6, 7, 8) (TC2)"
+	depends on SAMA5_HAVE_TC2
 	default n
 
 config SAMA5_PWM
@@ -226,11 +389,19 @@ config SAMA5_DMAC0
 	bool "DMA Controller 0 (DMAC0)"
 	default n
 	select ARCH_DMA
+	depends on SAMA5_HAVE_DMA
 
 config SAMA5_DMAC1
 	bool "DMA Controller 1 (DMAC1)"
 	default n
 	select ARCH_DMA
+	depends on SAMA5_HAVE_DMA
+
+config SAMA5_XDMAC
+	bool "XDMA Controller (XDMAC)"
+	default n
+	select ARCH_DMA
+	depends on SAMA5_HAVE_XDMA
 
 config SAMA5_UHPHS
 	bool "USB Host High Speed (UHPHS)"
@@ -291,14 +462,6 @@ config SAMA5_SHA
 	bool "Secure Hash Algorithm (SHA)"
 	default n
 
-config SAMA5_AES
-	bool "Advanced Encryption Standard (AES)"
-	default n
-
-config SAMA5_TDES
-	bool "Triple Data Encryption Standard (TDES)"
-	default n
-
 config SAMA5_TRNG
 	bool "True Random Number Generator (TRNG)"
 	default n
@@ -315,6 +478,11 @@ config SAMA5_FUSE
 config SAMA5_MPDDRC
 	bool "MPDDR controller (MPDDRC)"
 	default n
+
+config SAMA5_VDEC
+	bool "Video decoder (VDEC)"
+	default n
+	depends on SAMA5_HAVE_VDEC
 
 endmenu # SAMA5 Peripheral Support
 
