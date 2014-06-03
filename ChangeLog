@@ -7401,4 +7401,8 @@
 	  (2014-6-2).
 	* configs/olimex-stm32_h405:  Support for the Olimex STM32 H405 board
 	  contributed by Martin Lederhilger (2014-6-3).
+	* net/arp/Make.defs:  Fix an error introduced recently in the net/ build
+	  (2014-6-3).
+	* net/iob:  Add generic I/O buffering.  Not currently used by anything.
+	  (2014-6-4).
 
