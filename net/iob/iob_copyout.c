@@ -109,7 +109,7 @@ void iob_copyout(FAR uint8_t *dest, FAR const struct iob_s *iob,
       src   = &iob->io_data[offset];
       avail = iob->io_len - offset;
 
-      /* Copy the whole I/O buffer in to the user buffer */
+      /* Copy the from the I/O buffer in to the user buffer */
 
       ncopy = MIN(avail, len);
       memcpy(dest, src, ncopy);

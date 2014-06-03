@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/iob/iob_alloc.c
+ * net/iob/iob_copyin.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,7 +39,11 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+#include <string.h>
 #include <queue.h>
+#include <errno.h>
+#include <debug.h>
 
 #include <nuttx/net/iob.h>
 
@@ -48,6 +52,10 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#ifndef MIN
+#  define MIN(a,b) ((a) < (b) ? (a) : (b))
+#endif
 
 /****************************************************************************
  * Private Types
@@ -66,27 +74,83 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_alloc
+ * Name: iob_copyin
  *
  * Description:
- *   Allocate an I/O buffer by take the buffer at the head of the free list.
+ *  Copy data 'len' bytes from a user buffer into the I/O buffer chain,
+ *  starting at 'offset'.
  *
  ****************************************************************************/
 
-FAR struct iob_s *iob_alloc(void)
+int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
+               unsigned int len, unsigned int offset)
 {
-  FAR struct iob_s *iob;
+  FAR uint8_t *dest;
+  unsigned int ncopy;
+  unsigned int avail;
 
-  iob = (FAR struct iob_s *)sq_remfirst(&g_iob_freelist);
-  if (iob)
+  /* Skip to the I/O buffer containing the offset */
+
+  while (offset >= iob->io_len)
     {
-      iob->io_link.flink = NULL; /* Not in a list */
-      iob->io_flags      = 0;    /* Flags associated with the I/O buffer */
-      iob->io_len        = 0;    /* Length of the data in the entry */
-      iob->io_pktlen     = 0;    /* Total length of the packet */
-      iob->io_vtag       = 0;    /* VLAN tag */
-      iob->io_priv       = NULL; /* User private data attached to the I/O buffer */
+      offset -= iob->io_len;
+      iob     = (FAR struct iob_s *)iob->io_link.flink;
     }
 
-  return iob;
+  /* Then loop until all of the I/O data is copied from the user buffer */
+
+  while (len > 0)
+    {
+      /* Get the source I/O buffer offset address and the amount of data
+       * available from that address.
+       */
+
+      dest  = &iob->io_data[offset];
+      avail = CONFIG_IOB_BUFSIZE - offset;
+
+      /* Copy from the user buffer to the I/O buffer */
+
+      ncopy = MIN(avail, len);
+      memcpy(dest, src, ncopy);
+
+      /* Adjust the total length of the copy and the destination address in
+       * the user buffer.
+       */
+
+      len -= ncopy;
+      src += ncopy;
+
+      /* Skip to the next I/O buffer in the chain.  First, check if we
+       * are at the end of the buffer chain.
+       */
+
+      if (iob->io_link.flink == NULL)
+        {
+          struct iob_s *newiob;
+
+          /* Yes.. allocate a new buffer */
+
+          newiob = iob_alloc();
+          if (newiob == NULL)
+            {
+              ndbg("ERROR: Failed to allocate I/O buffer\n");
+              return -ENOMEM;
+            }
+
+          /* Add the new I/O buffer to the end of the buffer chain. */
+
+          iob->io_link.flink = &newiob->io_link;
+          iob = newiob;
+        }
+      else
+        {
+          /* Otherwise, just move to the next buffer in the list */
+
+          iob = (FAR struct iob_s *)iob->io_link.flink;
+        }
+
+      offset = 0;
+    }
+
+  return 0;
 }

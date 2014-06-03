@@ -40,8 +40,8 @@ ifeq ($(CONFIG_NET_IOB),y)
 
 # Include IOB src files
 
-NET_CSRCS += iob_alloc.c iob_concat.c iob_copyout.c iob_free.c iob_freeq.c
-NET_CSRCS += iob_initialize.c iob_trimhead.c iob_trimtail.c
+NET_CSRCS += iob_alloc.c iob_concat.c iob_copyin.c iob_copyout.c iob_free.c
+NET_CSRCS += iob_freeq.c iob_initialize.c iob_trimhead.c iob_trimtail.c
 
 # Include iob build support
 
