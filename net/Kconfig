@@ -349,6 +349,7 @@ config NET_RECEIVE_WINDOW
 		data quickly.
 
 source "net/arp/Kconfig"
+source "net/iob/Kconfig"
 
 config NET_ROUTE
 	bool "Routing table suport"

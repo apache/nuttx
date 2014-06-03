@@ -99,6 +99,7 @@ ifeq ($(CONFIG_NET_RXAVAIL),y)
 NETDEV_CSRCS += netdev_rxnotify.c
 endif
 
+include iob/Make.defs
 include arp/Make.defs
 include icmp/Make.defs
 include igmp/Make.defs

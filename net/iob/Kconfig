@@ -1,0 +1,31 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+config NET_IOB
+	bool "Network I/O buffer support"
+	default n
+	---help---
+		This setting will build the networking I/O buffer (IOB) support
+		library.
+
+if NET_IOB
+
+config IOB_NBUFFERS
+	int "Number of pre-allocated network I/O buffers"
+	default 16
+	---help---
+		Each packet is represented by a series of small I/O buffers in a
+		chain.  This setting determines the number of preallocated I/O
+		buffers available for packet data.
+
+config IOB_BUFSIZE
+	int "Payload size of one network I/O buffer"
+	default 256
+	---help---
+		Each packet is represented by a series of small I/O buffers in a
+		chain.  This setting determines the data payload each preallocated
+		I/O buffer.
+
+endif # NET_IOB
