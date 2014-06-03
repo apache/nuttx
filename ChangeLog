@@ -7405,4 +7405,6 @@
 	  (2014-6-3).
 	* net/iob:  Add generic I/O buffering.  Not currently used by anything.
 	  (2014-6-4).
+	* arch/arm/include/sama5 and arch/arm/src/sama5:  Basic framework to
+	  support the SAMA5D4 family.  Incomplete on initial check-in (201406-3).
 
