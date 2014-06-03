@@ -33,9 +33,6 @@
 #
 ############################################################################
 
-NET_ASRCS =
-NET_CSRCS =
-
 ifeq ($(CONFIG_NET),y)
 
 # ARP supported is not provided for SLIP (Ethernet only)
