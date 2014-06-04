@@ -314,7 +314,7 @@
 
 /* Networking */
 
-#if !defined(CONFIG_NET) || (!defined(CONFIG_SAMA5_EMAC) && !defined(CONFIG_SAMA5_GMAC))
+#if !defined(CONFIG_NET) || (!defined(CONFIG_SAMA5_EMAC0) && !defined(CONFIG_SAMA5_GMAC))
 #  undef HAVE_NETWORK
 #endif
 
