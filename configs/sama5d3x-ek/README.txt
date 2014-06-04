@@ -891,8 +891,8 @@ Networking
   the EMAC peripheral; Only the SAMA5D33, SAMA5D34, and SAMA5D35 support
   the GMAC perpheral!  NOTE that the SAMA5D35 supports both!
 
-  Selecting the EMAC peripheral
-  -----------------------------
+  Selecting the EMAC0 peripheral
+  ------------------------------
 
   System Type
     CONFIG_ARCH_CHIP_ATSAMA5D31=y        : SAMA5D31 or SAMAD35 support EMAC
@@ -901,7 +901,7 @@ Networking
   System Type -> SAMA5 Peripheral Support
     CONFIG_SAMA5_EMAC0=y                 : Enable the EMAC peripheral
 
-  System Type -> EMAC device driver options
+  System Type -> EMAC0 device driver options
     CONFIG_SAMA5_EMAC0_NRXBUFFERS=16     : Set aside some RS and TX buffers
     CONFIG_SAMA5_EMAC0_NTXBUFFERS=4
     CONFIG_SAMA5_EMAC0_PHYADDR=1         : KSZ8021/31 PHY is at address 1
@@ -922,22 +922,22 @@ Networking
   -----------------------------
 
   System Type
-    CONFIG_ARCH_CHIP_ATSAMA5D33=y       : SAMA5D31, SAMA5D33 and SAMAD35
-    CONFIG_ARCH_CHIP_ATSAMA5D34=y       : support GMAC (others do not)
-    CONFIG_ARCH_CHIP_ATSAMA5D35=y       :
+    CONFIG_ARCH_CHIP_ATSAMA5D33=y        : SAMA5D31, SAMA5D33 and SAMAD35
+    CONFIG_ARCH_CHIP_ATSAMA5D34=y        : support GMAC (others do not)
+    CONFIG_ARCH_CHIP_ATSAMA5D35=y        :
 
   System Type -> SAMA5 Peripheral Support
-    CONFIG_SAMA5_GMAC=y                 : Enable the GMAC peripheral
+    CONFIG_SAMA5_GMAC=y                  : Enable the GMAC peripheral
 
   System Type -> GMAC device driver options
-    CONFIG_SAMA5_GMAC_NRXBUFFERS=16     : Set aside some RS and TX buffers
+    CONFIG_SAMA5_GMAC_NRXBUFFERS=16      : Set aside some RS and TX buffers
     CONFIG_SAMA5_GMAC_NTXBUFFERS=4
-    CONFIG_SAMA5_GMAC_PHYADDR=1         : KSZ8051 PHY is at address 1
-    CONFIG_SAMA5_GMAC_AUTONEG=y         : Use autonegotiation
+    CONFIG_SAMA5_GMAC_PHYADDR=1          : KSZ8051 PHY is at address 1
+    CONFIG_SAMA5_GMAC_AUTONEG=y          : Use autonegotiation
 
   If both EMAC and GMAC are selected, you will also need:
 
-    CONFIG_SAMA5_GMAC_ISETH0=y          : GMAC is "eth0"; EMAC is "eth1"
+    CONFIG_SAMA5_GMAC_ISETH0=y           : GMAC is "eth0"; EMAC is "eth1"
 
   PHY selection.  Later in the configuration steps, you will need to select
   the  KSZ9021/31 PHY for GMAC (See below)
@@ -946,36 +946,36 @@ Networking
   -----------------------------
 
   Networking Support
-    CONFIG_NET=y                        : Enable Neworking
-    CONFIG_NET_SOCKOPTS=y               : Enable socket operations
-    CONFIG_NET_BUFSIZE=562              : Maximum packet size (MTD) 1518 is more standard
-    CONFIG_NET_RECEIVE_WINDOW=562       : Should be the same as CONFIG_NET_BUFSIZE
-    CONFIG_NET_TCP=y                    : Enable TCP/IP networking
-    CONFIG_NET_TCPBACKLOG=y             : Support TCP/IP backlog
-    CONFIG_NET_TCP_READAHEAD_BUFSIZE=562  Read-ahead buffer size
-    CONFIG_NET_UDP=y                    : Enable UDP networking
-    CONFIG_NET_ICMP=y                   : Enable ICMP networking
-    CONFIG_NET_ICMP_PING=y              : Needed for NSH ping command
-                                        : Defaults should be okay for other options
+    CONFIG_NET=y                         : Enable Neworking
+    CONFIG_NET_SOCKOPTS=y                : Enable socket operations
+    CONFIG_NET_BUFSIZE=562               : Maximum packet size (MTD) 1518 is more standard
+    CONFIG_NET_RECEIVE_WINDOW=562        : Should be the same as CONFIG_NET_BUFSIZE
+    CONFIG_NET_TCP=y                     : Enable TCP/IP networking
+    CONFIG_NET_TCPBACKLOG=y              : Support TCP/IP backlog
+    CONFIG_NET_TCP_READAHEAD_BUFSIZE=562 : Read-ahead buffer size
+    CONFIG_NET_UDP=y                     : Enable UDP networking
+    CONFIG_NET_ICMP=y                    : Enable ICMP networking
+    CONFIG_NET_ICMP_PING=y               : Needed for NSH ping command
+                                         : Defaults should be okay for other options
   Device drivers -> Network Device/PHY Support
-    CONFIG_NETDEVICES=y                 : Enabled PHY selection
-    CONFIG_ETH0_PHY_KSZ8051=y           : Select the KSZ8051 PHY (for EMAC), OR
-    CONFIG_ETH0_PHY_KSZ90x1=y           : Select the KSZ9021/31 PHY (for GMAC)
+    CONFIG_NETDEVICES=y                  : Enabled PHY selection
+    CONFIG_ETH0_PHY_KSZ8051=y            : Select the KSZ8051 PHY (for EMAC), OR
+    CONFIG_ETH0_PHY_KSZ90x1=y            : Select the KSZ9021/31 PHY (for GMAC)
 
   Application Configuration -> Network Utilities
-    CONFIG_NETUTILS_DNSCLIENT=y            : Enable host address resolution
-    CONFIG_NETUTILS_TELNETD=y           : Enable the Telnet daemon
-    CONFIG_NETUTILS_TFTPC=y             : Enable TFTP data file transfers for get and put commands
-    CONFIG_NETUTILS_UIPLIB=y            : Network library support is needed
-    CONFIG_NETUTILS_WEBCLIENT=y         : Needed for wget support
-                                        : Defaults should be okay for other options
+    CONFIG_NETUTILS_DNSCLIENT=y          : Enable host address resolution
+    CONFIG_NETUTILS_TELNETD=y            : Enable the Telnet daemon
+    CONFIG_NETUTILS_TFTPC=y              : Enable TFTP data file transfers for get and put commands
+    CONFIG_NETUTILS_UIPLIB=y             : Network library support is needed
+    CONFIG_NETUTILS_WEBCLIENT=y          : Needed for wget support
+                                         : Defaults should be okay for other options
   Application Configuration -> NSH Library
-    CONFIG_NSH_TELNET=y                 : Enable NSH session via Telnet
-    CONFIG_NSH_IPADDR=0x0a000002        : Select an IP address
-    CONFIG_NSH_DRIPADDR=0x0a000001      : IP address of gateway/host PC
-    CONFIG_NSH_NETMASK=0xffffff00       : Netmask
-    CONFIG_NSH_NOMAC=y                  : Need to make up a bogus MAC address
-                                        : Defaults should be okay for other options
+    CONFIG_NSH_TELNET=y                  : Enable NSH session via Telnet
+    CONFIG_NSH_IPADDR=0x0a000002         : Select an IP address
+    CONFIG_NSH_DRIPADDR=0x0a000001       : IP address of gateway/host PC
+    CONFIG_NSH_NETMASK=0xffffff00        : Netmask
+    CONFIG_NSH_NOMAC=y                   : Need to make up a bogus MAC address
+                                         : Defaults should be okay for other options
 
   Using the network with NSH
   --------------------------
