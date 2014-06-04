@@ -7407,4 +7407,6 @@
 	  (2014-6-4).
 	* arch/arm/include/sama5 and arch/arm/src/sama5:  Basic framework to
 	  support the SAMA5D4 family.  Incomplete on initial check-in (201406-3).
+	* arch/arm/src/sama5/chip/sam_xdmac.h: Beginning of XDMAC register
+	  definition header file (incomplete) (2014-6-4).
 
