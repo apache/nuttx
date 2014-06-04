@@ -41,6 +41,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <stdint.h>
+#include <queue.h>
+
 #include <nuttx/net/iob.h>
 
 /****************************************************************************
@@ -57,7 +61,8 @@
  ****************************************************************************/
 
 /* Represents one I/O buffer.  A packet is contained by one or more I/O
- * buffers in a chain.
+ * buffers in a chain.  The io_flags, io_pktlen, io_vtag and io_priv
+ * fields are only valid for the I/O buffer at the head of the chain.
  */
 
 struct iob_s
@@ -65,6 +70,7 @@ struct iob_s
   sq_entry_t io_link;    /* Link to the next I/O buffer in the chain */
   uint8_t    io_flags;   /* Flags associated with the I/O buffer */
   uint16_t   io_len;     /* Length of the data in the entry */
+  uint16_t   io_offset;  /* Data begins at this offset */
   uint16_t   io_pktlen;  /* Total length of the packet */
   uint16_t   io_vtag;    /* VLAN tag */
   void      *io_priv;    /* User private data attached to the I/O buffer */
@@ -146,20 +152,35 @@ void iob_concat(FAR struct iob_s *iob1, FAR struct iob_s *iob2);
  * Name: iob_trimhead
  *
  * Description:
- *   Remove bytes from the beginning of an I/O chain
+ *   Remove bytes from the beginning of an I/O chain.  Emptied I/O buffers
+ *   are freed and, hence, the beginning of the chain may change.
  *
  ****************************************************************************/
 
-void iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen);
+FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen);
 
 /****************************************************************************
  * Name: iob_trimtail
  *
  * Description:
- *   Remove bytes from the end of an I/O chain
+ *   Remove bytes from the end of an I/O chain.  Emptied I/O buffers are
+ *   freed NULL will be returned in the special case where the entry I/O
+ *   buffer chain is freed.
  *
  ****************************************************************************/
 
-void iob_trimtail(FAR struct iob_s *iob, unsigned int trimlen);
+FAR struct iob_s *iob_trimtail(FAR struct iob_s *iob, unsigned int trimlen);
+
+/****************************************************************************
+ * Name: iob_pack
+ *
+ * Description:
+ *   Pack all data in the I/O buffer chain so that the data offset is zero
+ *   and all but the final buffer in the chain are filled.  Any emptied
+ *   buffers at the end of the chain are freed.
+ *
+ ****************************************************************************/
+
+FAR struct iob_s *iob_pack(FAR struct iob_s *iob);
 
 #endif /* _INCLUDE_NUTTX_NET_IOB_H */

@@ -80,9 +80,10 @@ FAR struct iob_s *iob_alloc(void)
   iob = (FAR struct iob_s *)sq_remfirst(&g_iob_freelist);
   if (iob)
     {
-      iob->io_link.flink = NULL; /* Not in a list */
+      iob->io_link.flink = NULL; /* Not in a chain */
       iob->io_flags      = 0;    /* Flags associated with the I/O buffer */
       iob->io_len        = 0;    /* Length of the data in the entry */
+      iob->io_offset     = 0;    /* Offset to the beginning of data */
       iob->io_pktlen     = 0;    /* Total length of the packet */
       iob->io_vtag       = 0;    /* VLAN tag */
       iob->io_priv       = NULL; /* User private data attached to the I/O buffer */

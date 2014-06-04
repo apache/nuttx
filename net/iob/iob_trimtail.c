@@ -74,8 +74,9 @@
  *
  ****************************************************************************/
 
-void iob_trimtail(FAR struct iob_s *iob, unsigned int trimlen)
+FAR struct iob_s *iob_trimtail(FAR struct iob_s *iob, unsigned int trimlen)
 {
+  FAR struct iob_s *head = iob;
   FAR struct iob_s *entry;
   FAR struct iob_s *penultimate;
   FAR struct iob_s *last;
@@ -118,21 +119,27 @@ void iob_trimtail(FAR struct iob_s *iob, unsigned int trimlen)
 
           if (last->io_len <= len)
             {
-              /* Yes.. just set is length to zero and skip to the next */
+              /* Yes.. Consume the entire buffer */
 
-              len -= last->io_len;
-              last->io_len = 0;
+              head->io_pktlen -= last->io_len;
+              len             -= last->io_len;
+              last->io_len     = 0;
+
+              /* Free the last, empty buffer in the list */
+
+              iob_free(last);
 
               /* There should be a buffer before this one */
 
               if (!penultimate)
                 {
-                  return;
+                  /* No.. we just freed the head of the chain */
+
+                  return NULL;
                 }
 
-              /* Free the last, empty buffer in the list */
+              /* Unlink the penultimate from the freed buffer */
 
-              iob_free(last);
               penultimate->io_link.flink = NULL;
             }
                
@@ -142,10 +149,12 @@ void iob_trimtail(FAR struct iob_s *iob, unsigned int trimlen)
                * stop the trim.
                */
 
-              last->io_len -= len;
-              memcpy(last->io_data, &last->io_data[len], last->io_len);
-              len = 0;
+              head->io_pktlen -= last->io_len;
+              last->io_len    -= len;
+              len              = 0;
             }
         }
     }
+
+  return iob;
 }

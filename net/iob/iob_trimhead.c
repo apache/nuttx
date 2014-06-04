@@ -39,9 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <string.h>
-#include <queue.h>
-
 #include <nuttx/net/iob.h>
 
 #include "iob.h"
@@ -70,33 +67,55 @@
  * Name: iob_trimhead
  *
  * Description:
- *   Remove bytes from the beginning of an I/O chain
+ *   Remove bytes from the beginning of an I/O chain.  Emptied I/O buffers
+ *   are freed and, hence, the beginning of the chain may change.
  *
  ****************************************************************************/
 
-void iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
+FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
 {
   FAR struct iob_s *entry;
+  uint8_t flags;
+  uint16_t pktlen;
+  uint16_t vtag;
+  void *priv;
   unsigned int len;
 
   if (iob && trimlen > 0)
     {
-      entry = iob;
-      len   = trimlen;
+      /* Save information from the head of the chain (in case the
+       * head is removed).
+       */
+
+      flags  = iob->io_flags;
+      pktlen = iob->io_pktlen;
+      vtag   = iob->io_vtag;
+      priv   = iob->io_priv;
 
       /* Trim from the head of the I/IO buffer chain */
 
-      while (entry != NULL && len > 0)
+      entry  = iob;
+      len    = trimlen;
+
+      while (entry != NULL)
         {
           /* Do we trim this entire I/O buffer away? */
 
           if (entry->io_len <= len)
             {
-              /* Yes.. just set is length to zero and skip to the next */
+              /* Decrement the trim length by the full data size */
 
-              len -= entry->io_len;
-              entry->io_len = 0;
-              entry = (FAR struct iob_s *)entry->io_link.flink;
+              pktlen -= entry->io_len;
+              len    -= entry->io_len;
+
+              /* Free this one and set the next I/O buffer as the head */
+
+              iob =  (FAR struct iob_s *)entry->io_link.flink;
+              iob_free(entry);
+
+              /* Continue with the new buffer head */
+
+              entry = iob;
             }
           else
             {
@@ -104,10 +123,26 @@ void iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
                * stop the trim.
                */
 
-              entry->io_len -= len;
-              memcpy(entry->io_data, &entry->io_data[len], entry->io_len);
+              pktlen           -= len;
+              entry->io_len    -= len;
+              entry->io_offset += len;
               len = 0;
             }
         }
+
+      /* Restore the state to the head of the chain (which may not be
+       * the same I/O buffer chain head that we started with).
+       *
+       * Adjust the pktlen by the number of bytes removed from the head
+       * of the I/O buffer chain.  A special case is where we delete the
+       * entire chain:  len > 0 and iob == NULL.
+       */
+
+      iob->io_flags  = flags;
+      iob->io_pktlen = pktlen;
+      iob->io_vtag   = vtag;
+      iob->io_priv   = priv;
     }
+
+  return iob;
 }

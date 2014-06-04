@@ -85,11 +85,12 @@
 int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
                unsigned int len, unsigned int offset)
 {
+  FAR struct iob_s *head = iob;
   FAR uint8_t *dest;
   unsigned int ncopy;
   unsigned int avail;
 
-  /* Skip to the I/O buffer containing the offset */
+  /* Skip to the I/O buffer containing the data offset */
 
   while (offset >= iob->io_len)
     {
@@ -101,16 +102,18 @@ int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
 
   while (len > 0)
     {
-      /* Get the source I/O buffer offset address and the amount of data
-       * available from that address.
+      /* Get the destination I/O buffer address and the amount of data
+       * available from that address.  We don't want to extend the length
+       * an I/O buffer here.
        */
 
-      dest  = &iob->io_data[offset];
-      avail = CONFIG_IOB_BUFSIZE - offset;
+      dest  = &iob->io_data[iob->io_offset + offset];
+      avail = iob->io_len - offset;
 
-      /* Copy from the user buffer to the I/O buffer */
+      /* Copy from the user buffer to the I/O buffer
+       */
 
-      ncopy = MIN(avail, len);
+      ncopy = MIN(len, avail);
       memcpy(dest, src, ncopy);
 
       /* Adjust the total length of the copy and the destination address in
@@ -127,6 +130,7 @@ int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
       if (iob->io_link.flink == NULL)
         {
           struct iob_s *newiob;
+          unsigned int newlen;
 
           /* Yes.. allocate a new buffer */
 
@@ -140,7 +144,13 @@ int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
           /* Add the new I/O buffer to the end of the buffer chain. */
 
           iob->io_link.flink = &newiob->io_link;
-          iob = newiob;
+          iob                = newiob;
+
+          /* The additional bytes extend the length of the packet */
+
+          newlen             = MIN(len, CONFIG_IOB_BUFSIZE);
+          iob->io_len        = newlen;
+          head->io_pktlen   += newlen;
         }
       else
         {

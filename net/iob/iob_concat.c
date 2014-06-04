@@ -76,10 +76,6 @@
 
 void iob_concat(FAR struct iob_s *iob1, FAR struct iob_s *iob2)
 {
-  unsigned int offset2;
-  unsigned int ncopy;
-  unsigned int navail;
-
   /* Find the last buffer in the iob1 buffer chain */
  
   while (iob1->io_link.flink)
@@ -87,72 +83,16 @@ void iob_concat(FAR struct iob_s *iob1, FAR struct iob_s *iob2)
       iob1 = (FAR struct iob_s *)iob1->io_link.flink;
     }
 
-  /* Then add data to the end of iob1 */
+  /* Then connect iob2 buffer chain to the end of the iob1 chain */
 
-  offset2 = 0;
-  while (iob2)
-    {
-      /* Is the iob1 tail buffer full? */
+  iob1->io_link.flink = iob2->io_link.flink;
 
-      if (iob1->io_len >= CONFIG_IOB_BUFSIZE)
-        {
-          /* Yes.. Just connect the chains */
+  /* Combine the total packet size.  flags, VLAN, tags, and private
+  * data from iob2 are lost.
+  */
 
-          iob1->io_link.flink = iob2->io_link.flink;
-
-          /* Has the data offset in iob2? */
-
-          if (offset2 > 0)
-            {
-              /* Yes, move the data down and adjust the size */
-
-              iob2->io_len -= offset2;
-              memcpy(iob2->io_data, &iob2->io_data[offset2], iob2->io_len);
-
-              /* Set up to continue packing, but now into iob2 */
-
-              iob1 = iob2;
-              iob2 = (FAR struct iob_s *)iob2->io_link.flink;
-
-              iob1->io_link.flink = NULL;
-              offset2 = 0;
-            }
-          else
-            {
-              /* Otherwise, we are done */
-
-              return;
-            }
-        }
-
-      /* How many bytes can we copy from the source (iob2) */
-
-      ncopy = iob2->io_len - offset2;
-
-      /* Limit the size of the copy to the amount of free space in iob1 */
-
-      navail = CONFIG_IOB_BUFSIZE - iob1->io_len;
-      if (ncopy > navail)
-        {
-          ncopy = navail;
-        }
-
-      /* Copy the data from iob2 into iob1 */
-
-      memcpy(iob1->io_data + iob1->io_len, iob2->io_data, ncopy);
-      iob1->io_len += ncopy;
-      offset2 += ncopy;
-
-      /* Have we consumed all of the data in the iob2 entry? */
-
-      if (offset2 >= iob2->io_len)
-        {
-          /* Yes.. free the iob2 entry and start processing the next I/O
-           * buffer in the iob2 chain.
-           */
-
-          iob2 = iob_free(iob2);
-          offset2 = 0;
-        }
-    }
+  iob1->io_pktlen += iob2->io_pktlen;
+  iob2->io_flags   = 0;
+  iob2->io_vtag    = 0;
+  iob2->io_priv    = NULL;
 }

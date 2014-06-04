@@ -106,7 +106,7 @@ void iob_copyout(FAR uint8_t *dest, FAR const struct iob_s *iob,
        * available from that address.
        */
 
-      src   = &iob->io_data[offset];
+      src   = &iob->io_data[iob->io_offset + offset];
       avail = iob->io_len - offset;
 
       /* Copy the from the I/O buffer in to the user buffer */
