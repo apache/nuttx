@@ -143,7 +143,7 @@
 #  define ATSAMA5D4        1         /* SAMA5D4 family */
 #  define SAM_ISRAM0_SIZE (64*1024)  /* 128KB of SRAM in two banks */
 #  define SAM_ISRAM1_SIZE (64*1024)
-#  define SAM_NDMAC        1         /* (1) XDMA controllers */
+#  define SAM_NDMAC        2         /* (2) XDMA controllers */
 #  define SAM_NDMACHAN     16        /* (16) DMA channels per XDMA controller */
 #else
 #  error Unrecognized SAMAD5 chip
