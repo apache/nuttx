@@ -55,7 +55,7 @@
  ************************************************************************************/
 
 #ifdef CONFIG_SAMA5_PIOE_IRQ
-#ifdef CONFIG_SAMA5_EMAC
+#ifdef CONFIG_SAMA5_EMAC0
 static xcpt g_emac_handler;
 #endif
 #ifdef CONFIG_SAMA5_GMAC
@@ -138,7 +138,7 @@ xcpt_t sam_phyirq(int intf, xcpt_t irqhandler)
   xcpt_t oldhandler;
   int irq;
 
-#ifdef CONFIG_SAMA5_EMAC
+#ifdef CONFIG_SAMA5_EMAC0
   if (intf == EMAC_INTF)
     {
       handler = &g_emac_handler;

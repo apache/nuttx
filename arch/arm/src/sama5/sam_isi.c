@@ -180,4 +180,4 @@ int sam_isi_initialize(void)
 #warning Missing logic
 }
 
-#endif /* CONFIG_SAMA5_ISI && CONFIG_SAMA5_EMAC */
+#endif /* CONFIG_SAMA5_ISI && CONFIG_SAMA5_EMAC0 */

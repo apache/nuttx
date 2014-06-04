@@ -376,7 +376,7 @@ void sam_boardinitialize(void);
  *
  ************************************************************************************/
 
-#if defined(CONFIG_NET) && (defined(CONFIG_SAMA5_EMAC) || defined(CONFIG_SAMA5_GMAC)) && \
+#if defined(CONFIG_NET) && (defined(CONFIG_SAMA5_EMAC0) || defined(CONFIG_SAMA5_GMAC)) && \
     defined(CONFIG_SAMA5_PIOE_IRQ)
 xcpt_t sam_phyirq(int intf, xcpt_t irqhandler);
 #endif
