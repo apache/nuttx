@@ -109,7 +109,7 @@ static inline void up_gmac_initialize(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAMA5_EMAC
+#ifdef CONFIG_SAMA5_EMAC0
 static inline void up_emac_initialize(void)
 {
   int ret;
@@ -162,4 +162,4 @@ void up_netinitialize(void)
 #endif
 }
 
-#endif /* CONFIG_NET && CONFIG_SAMA5_EMAC */
+#endif /* CONFIG_NET && CONFIG_SAMA5_EMAC0 */

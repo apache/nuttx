@@ -61,7 +61,11 @@ config SAMA5_HAVE_GMAC
 	bool
 	default n
 
-config SAMA5_HAVE_EMAC
+config SAMA5_HAVE_EMAC0
+	bool
+	default n
+
+config SAMA5_HAVE_EMAC1
 	bool
 	default n
 
@@ -112,7 +116,8 @@ config ARCH_CHIP_SAMA5D4
 	bool
 	default n
 	select SAMA5_HAVE_AESB
-	select SAMA5_HAVE_EMAC
+	select SAMA5_HAVE_EMAC0
+	select SAMA5_HAVE_EMAC1
 	select SAMA5_HAVE_ICM
 	select SAMA5_HAVE_LCDC
 	select SAMA5_HAVE_UART0
@@ -136,7 +141,7 @@ choice
 config ARCH_CHIP_ATSAMA5D31
 	bool "Atmel ATSAMA5D31"
 	select ARCH_CHIP_SAMA5D3
-	select SAMA5_HAVE_EMAC
+	select SAMA5_HAVE_EMAC0
 	select SAMA5_HAVE_HSMCI2
 	select SAMA5_HAVE_LCDC
 	select SAMA5_HAVE_UART0
@@ -163,7 +168,7 @@ config ARCH_CHIP_ATSAMA5D34
 config ARCH_CHIP_ATSAMA5D35
 	bool "Atmel ATSAMA5D35"
 	select ARCH_CHIP_SAMA5D3
-	select SAMA5_HAVE_EMAC
+	select SAMA5_HAVE_EMAC0
 	select SAMA5_HAVE_GMAC
 	select SAMA5_HAVE_HSMCI2
 	select SAMA5_HAVE_UART0
@@ -176,7 +181,7 @@ config ARCH_CHIP_ATSAMA5D35
 config ARCH_CHIP_ATSAMA5D36
 	bool "Atmel ATSAMA5D356"
 	select ARCH_CHIP_SAMA5D3
-	select SAMA5_HAVE_EMAC
+	select SAMA5_HAVE_EMAC0
 	select SAMA5_HAVE_GMAC
 	select SAMA5_HAVE_HSMCI2
 	select SAMA5_HAVE_LCDC
@@ -418,10 +423,17 @@ config SAMA5_GMAC
 	select NETDEVICES
 	select ARCH_HAVE_PHY
 
-config SAMA5_EMAC
-	bool "10/100MBps Ethernet MAC (EMAC)"
+config SAMA5_EMAC0
+	bool "10/100MBps Ethernet MAC (EMAC0)"
 	default n
-	depends on SAMA5_HAVE_EMAC
+	depends on SAMA5_HAVE_EMAC0
+	select NETDEVICES
+	select ARCH_HAVE_PHY
+
+config SAMA5_EMAC1
+	bool "10/100MBps Ethernet MAC (EMAC1)"
+	default n
+	depends on SAMA5_HAVE_EMAC1
 	select NETDEVICES
 	select ARCH_HAVE_PHY
 
@@ -452,11 +464,13 @@ config SAMA5_CAN0
 	bool "CAN controller 0 (CAN0)"
 	default n
 	select CAN
+	depends on SAMA5_HAVE_CAN0
 
 config SAMA5_CAN1
 	bool "CAN controller 1 (CAN1)"
 	default n
 	select CAN
+	depends on SAMA5_HAVE_CAN1
 
 config SAMA5_SHA
 	bool "Secure Hash Algorithm (SHA)"
@@ -1134,29 +1148,14 @@ config SAMA5_GMAC_REGDEBUG
 	---help---
 		Enable very low-level register access debug.  Depends on DEBUG.
 
-if SAMA5_EMAC
-
-config SAMA5_GMAC_ISETH0
-    bool "GMAC is ETH0"
-    default y
-
-endif # SAMA5_EMAC
-
-if !SAMA5_EMAC
-
-config SAMA5_GMAC_ISETH0
-    bool
-    default y
-
-endif # !SAMA5_EMAC
 endmenu # GMAC device driver options
 endif # SAMA5_GMAC
 
-if SAMA5_EMAC
+if SAMA5_EMAC0
 
-menu "EMAC device driver options"
+menu "EMAC0 device driver options"
 
-config SAMA5_EMAC_NRXBUFFERS
+config SAMA5_EMAC0_NRXBUFFERS
 	int "Number of RX buffers"
 	default 16
 	---help---
@@ -1166,7 +1165,7 @@ config SAMA5_EMAC_NRXBUFFERS
 		descriptors that will be allocated  The selected value must be an
 		even power of 2.
 
-config SAMA5_EMAC_NTXBUFFERS
+config SAMA5_EMAC0_NTXBUFFERS
 	int "Number of TX buffers"
 	default 8
 	---help---
@@ -1175,7 +1174,7 @@ config SAMA5_EMAC_NTXBUFFERS
 		that can be in flight.  This is also equal to the number of TX
 		descriptors that will be allocated.
 
-config SAMA5_EMAC_PREALLOCATE
+config SAMA5_EMAC0_PREALLOCATE
 	bool "Preallocate buffers"
 	default n
 	---help---
@@ -1183,73 +1182,73 @@ config SAMA5_EMAC_PREALLOCATE
 		pool or pre-allocated to lie in .bss.  This options selected pre-
 		allocated buffer memory.
 
-config SAMA5_EMAC_NBC
+config SAMA5_EMAC0_NBC
 	bool "Disable Broadcast"
 	default n
 	---help---
 		Select to disable receipt of broadcast packets.
 
-config SAMA5_EMAC_PHYADDR
+config SAMA5_EMAC0_PHYADDR
 	int "PHY address"
 	default 1
 	---help---
 		The 5-bit address of the PHY on the board.  Default: 1
 
-config SAMA5_EMAC_PHYINIT
+config SAMA5_EMAC0_PHYINIT
 	bool "Board-specific PHY Initialization"
 	default n
 	---help---
 		Some boards require specialized initialization of the PHY before it can be used.
 		This may include such things as configuring GPIOs, resetting the PHY, etc.  If
-		SAMA5_EMAC_PHYINIT is defined in the configuration then the board specific logic must
+		SAMA5_EMAC0_PHYINIT is defined in the configuration then the board specific logic must
 		provide sam_phyinitialize();  The SAMA5 EMAC driver will call this function
 		one time before it first uses the PHY.
 
-config SAMA5_EMAC_MII
+config SAMA5_EMAC0_MII
 	bool "Use MII interface"
 	default n
 	---help---
 		Support Ethernet MII interface (vs RMII).
 
-config SAMA5_EMAC_RMII
+config SAMA5_EMAC0_RMII
 	bool
-	default y if !SAMA5_EMAC_MII
-	default n if SAMA5_EMAC_MII
+	default y if !SAMA5_EMAC0_MII
+	default n if SAMA5_EMAC0_MII
 
-config SAMA5_EMAC_AUTONEG
+config SAMA5_EMAC0_AUTONEG
 	bool "Use autonegotiation"
 	default y
 	---help---
 		Use PHY autonegotiation to determine speed and mode
 
-config SAMA5_EMAC_ETHFD
+config SAMA5_EMAC0_ETHFD
 	bool "Full duplex"
 	default n
-	depends on !SAMA5_EMAC_AUTONEG
+	depends on !SAMA5_EMAC0_AUTONEG
 	---help---
-		If SAMA5_EMAC_AUTONEG is not defined, then this may be defined to select full duplex
+		If SAMA5_EMAC0_AUTONEG is not defined, then this may be defined to select full duplex
 		mode. Default: half-duplex
 
-config SAMA5_EMAC_ETH100MBPS
+config SAMA5_EMAC0_ETH100MBPS
 	bool "100 Mbps"
 	default n
-	depends on !SAMA5_EMAC_AUTONEG
+	depends on !SAMA5_EMAC0_AUTONEG
 	---help---
-		If SAMA5_EMAC_AUTONEG is not defined, then this may be defined to select 100 MBps
+		If SAMA5_EMAC0_AUTONEG is not defined, then this may be defined to select 100 MBps
 		speed.  Default: 10 Mbps
 
-config SAMA5_EMAC_PHYSR
+config SAMA5_EMAC0_PHYSR
 	int "PHY Status Register Address (decimal)"
-	depends on SAMA5_EMAC_AUTONEG
+	depends on SAMA5_EMAC0_AUTONEG
 	---help---
-		This must be provided if SAMA5_EMAC_AUTONEG is defined.  The PHY status register
+		This must be provided if SAMA5_EMAC0_AUTONEG is defined.  The PHY status register
 		address may diff from PHY to PHY.  This configuration sets the address of
 		the PHY status register.
 
-config SAMA5_EMAC_PHYSR_ALTCONFIG
+config SAMA5_EMAC0_PHYSR_ALTCONFIG
 	bool "PHY Status Alternate Bit Layout"
 	default n
-	depends on SAMA5_EMAC_AUTONEG
+	depends on SAMA5_EMAC0_AUTONEG
 	---help---
 		Different PHYs present speed and mode information in different ways.  Some
 		will present separate information for speed and mode (this is the default).
@@ -1258,83 +1257,279 @@ config SAMA5_EMAC_PHYSR_ALTCONFIG
 		where speed and mode information are combined.  This might mean, for example,
 		separate bits for 10HD, 100HD, 10FD and 100FD.
 
-config SAMA5_EMAC_PHYSR_SPEED
+config SAMA5_EMAC0_PHYSR_SPEED
 	hex "PHY Speed Mask"
-	depends on SAMA5_EMAC_AUTONEG && !SAMA5_EMAC_PHYSR_ALTCONFIG
+	depends on SAMA5_EMAC0_AUTONEG && !SAMA5_EMAC0_PHYSR_ALTCONFIG
 	---help---
-		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This provides bit mask
+		This must be provided if SAMA5_EMAC0_AUTONEG is defined.  This provides bit mask
 		for isolating the 10 or 100MBps speed indication.
 
-config SAMA5_EMAC_PHYSR_100MBPS
+config SAMA5_EMAC0_PHYSR_100MBPS
 	hex "PHY 100Mbps Speed Value"
-	depends on SAMA5_EMAC_AUTONEG && !SAMA5_EMAC_PHYSR_ALTCONFIG
+	depends on SAMA5_EMAC0_AUTONEG && !SAMA5_EMAC0_PHYSR_ALTCONFIG
 	---help---
-		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This provides the value
+		This must be provided if SAMA5_EMAC0_AUTONEG is defined.  This provides the value
 		of the speed bit(s) indicating 100MBps speed.
 
-config SAMA5_EMAC_PHYSR_MODE
+config SAMA5_EMAC0_PHYSR_MODE
 	hex "PHY Mode Mask"
-	depends on SAMA5_EMAC_AUTONEG && !SAMA5_EMAC_PHYSR_ALTCONFIG
+	depends on SAMA5_EMAC0_AUTONEG && !SAMA5_EMAC0_PHYSR_ALTCONFIG
 	---help---
-		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This provide bit mask
+		This must be provided if SAMA5_EMAC0_AUTONEG is defined.  This provide bit mask
 		for isolating the full or half duplex mode bits.
 
-config SAMA5_EMAC_PHYSR_FULLDUPLEX
+config SAMA5_EMAC0_PHYSR_FULLDUPLEX
 	hex "PHY Full Duplex Mode Value"
-	depends on SAMA5_EMAC_AUTONEG && !SAMA5_EMAC_PHYSR_ALTCONFIG
+	depends on SAMA5_EMAC0_AUTONEG && !SAMA5_EMAC0_PHYSR_ALTCONFIG
 	---help---
-		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This provides the
+		This must be provided if SAMA5_EMAC0_AUTONEG is defined.  This provides the
 		value of the mode bits indicating full duplex mode.
 
-config SAMA5_EMAC_PHYSR_ALTMODE
+config SAMA5_EMAC0_PHYSR_ALTMODE
 	hex "PHY Mode Mask"
-	depends on SAMA5_EMAC_AUTONEG && SAMA5_EMAC_PHYSR_ALTCONFIG
+	depends on SAMA5_EMAC0_AUTONEG && SAMA5_EMAC0_PHYSR_ALTCONFIG
 	---help---
-		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This provide bit mask
+		This must be provided if SAMA5_EMAC0_AUTONEG is defined.  This provide bit mask
 		for isolating the speed and full/half duplex mode bits.
 
-config SAMA5_EMAC_PHYSR_10HD
+config SAMA5_EMAC0_PHYSR_10HD
 	hex "10MBase-T Half Duplex Value"
-	depends on SAMA5_EMAC_AUTONEG && SAMA5_EMAC_PHYSR_ALTCONFIG
+	depends on SAMA5_EMAC0_AUTONEG && SAMA5_EMAC0_PHYSR_ALTCONFIG
 	---help---
-		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This is the value
+		This must be provided if SAMA5_EMAC0_AUTONEG is defined.  This is the value
 		under the bit mask that represents the 10Mbps, half duplex setting.
 
-config SAMA5_EMAC_PHYSR_100HD
+config SAMA5_EMAC0_PHYSR_100HD
 	hex "100Base-T Half Duplex Value"
-	depends on SAMA5_EMAC_AUTONEG && SAMA5_EMAC_PHYSR_ALTCONFIG
+	depends on SAMA5_EMAC0_AUTONEG && SAMA5_EMAC0_PHYSR_ALTCONFIG
 	---help---
-		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This is the value
+		This must be provided if SAMA5_EMAC0_AUTONEG is defined.  This is the value
 		under the bit mask that represents the 100Mbps, half duplex setting.
 
-config SAMA5_EMAC_PHYSR_10FD
+config SAMA5_EMAC0_PHYSR_10FD
 	hex "10Base-T Full Duplex Value"
-	depends on SAMA5_EMAC_AUTONEG && SAMA5_EMAC_PHYSR_ALTCONFIG
+	depends on SAMA5_EMAC0_AUTONEG && SAMA5_EMAC0_PHYSR_ALTCONFIG
 	---help---
-		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This is the value
+		This must be provided if SAMA5_EMAC0_AUTONEG is defined.  This is the value
 		under the bit mask that represents the 10Mbps, full duplex setting.
 
-config SAMA5_EMAC_PHYSR_100FD
+config SAMA5_EMAC0_PHYSR_100FD
 	hex "100Base-T Full Duplex Value"
-	depends on SAMA5_EMAC_AUTONEG && SAMA5_EMAC_PHYSR_ALTCONFIG
+	depends on SAMA5_EMAC0_AUTONEG && SAMA5_EMAC0_PHYSR_ALTCONFIG
 	---help---
-		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This is the value
+		This must be provided if SAMA5_EMAC0_AUTONEG is defined.  This is the value
 		under the bit mask that represents the 100Mbps, full duplex setting.
 
-config SAMA5_EMAC_REGDEBUG
+config SAMA5_EMAC0_REGDEBUG
 	bool "Register-Level Debug"
 	default n
 	depends on DEBUG
 	---help---
 		Enable very low-level register access debug.  Depends on DEBUG.
 
-config SAMA5_EMAC_ISETH0
-	bool
-	default y if !SAMA5_EMAC || !SAMA5_GMAC_ISETH0
-	default n if SAMA5_EMAC && SAMA5_GMAC_ISETH0
+endmenu # EMAC0 device driver options
+endif # SAMA5_EMAC0
 
-endmenu # EMAC device driver options
-endif # SAMA5_EMAC
+if SAMA5_EMAC1
+
+menu "EMAC1 device driver options"
+
+config SAMA5_EMAC1_NRXBUFFERS
+	int "Number of RX buffers"
+	default 16
+	---help---
+		EMAC buffer memory is segmented into 128 byte units (not
+		configurable).  This setting provides the number of such 128 byte
+		units used for reception.  This is also equal to the number of RX
+		descriptors that will be allocated  The selected value must be an
+		even power of 2.
+
+config SAMA5_EMAC1_NTXBUFFERS
+	int "Number of TX buffers"
+	default 8
+	---help---
+		EMAC buffer memory is segmented into full Ethernet packets (size
+		NET_BUFSIZE bytes).  This setting provides the number of such packets
+		that can be in flight.  This is also equal to the number of TX
+		descriptors that will be allocated.
+
+config SAMA5_EMAC1_PREALLOCATE
+	bool "Preallocate buffers"
+	default n
+	---help---
+		Buffer an descriptor many may either be allocated from the memory
+		pool or pre-allocated to lie in .bss.  This options selected pre-
+		allocated buffer memory.
+
+config SAMA5_EMAC1_NBC
+	bool "Disable Broadcast"
+	default n
+	---help---
+		Select to disable receipt of broadcast packets.
+
+config SAMA5_EMAC1_PHYADDR
+	int "PHY address"
+	default 1
+	---help---
+		The 5-bit address of the PHY on the board.  Default: 1
+
+config SAMA5_EMAC1_PHYINIT
+	bool "Board-specific PHY Initialization"
+	default n
+	---help---
+		Some boards require specialized initialization of the PHY before it can be used.
+		This may include such things as configuring GPIOs, resetting the PHY, etc.  If
+		SAMA5_EMAC1_PHYINIT is defined in the configuration then the board specific logic must
+		provide sam_phyinitialize();  The SAMA5 EMAC driver will call this function
+		one time before it first uses the PHY.
+
+config SAMA5_EMAC1_MII
+	bool "Use MII interface"
+	default n
+	---help---
+		Support Ethernet MII interface (vs RMII).
+
+config SAMA5_EMAC1_RMII
+	bool
+	default y if !SAMA5_EMAC1_MII
+	default n if SAMA5_EMAC1_MII
+
+config SAMA5_EMAC1_AUTONEG
+	bool "Use autonegotiation"
+	default y
+	---help---
+		Use PHY autonegotiation to determine speed and mode
+
+config SAMA5_EMAC1_ETHFD
+	bool "Full duplex"
+	default n
+	depends on !SAMA5_EMAC1_AUTONEG
+	---help---
+		If SAMA5_EMAC1_AUTONEG is not defined, then this may be defined to select full duplex
+		mode. Default: half-duplex
+
+config SAMA5_EMAC1_ETH100MBPS
+	bool "100 Mbps"
+	default n
+	depends on !SAMA5_EMAC1_AUTONEG
+	---help---
+		If SAMA5_EMAC1_AUTONEG is not defined, then this may be defined to select 100 MBps
+		speed.  Default: 10 Mbps
+
+config SAMA5_EMAC1_PHYSR
+	int "PHY Status Register Address (decimal)"
+	depends on SAMA5_EMAC1_AUTONEG
+	---help---
+		This must be provided if SAMA5_EMAC1_AUTONEG is defined.  The PHY status register
+		address may diff from PHY to PHY.  This configuration sets the address of
+		the PHY status register.
+
+config SAMA5_EMAC1_PHYSR_ALTCONFIG
+	bool "PHY Status Alternate Bit Layout"
+	default n
+	depends on SAMA5_EMAC1_AUTONEG
+	---help---
+		Different PHYs present speed and mode information in different ways.  Some
+		will present separate information for speed and mode (this is the default).
+		Those PHYs, for example, may provide a 10/100 Mbps indication and a separate
+		full/half duplex indication. This options selects an alternative representation
+		where speed and mode information are combined.  This might mean, for example,
+		separate bits for 10HD, 100HD, 10FD and 100FD.
+
+config SAMA5_EMAC1_PHYSR_SPEED
+	hex "PHY Speed Mask"
+	depends on SAMA5_EMAC1_AUTONEG && !SAMA5_EMAC1_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if SAMA5_EMAC1_AUTONEG is defined.  This provides bit mask
+		for isolating the 10 or 100MBps speed indication.
+
+config SAMA5_EMAC1_PHYSR_100MBPS
+	hex "PHY 100Mbps Speed Value"
+	depends on SAMA5_EMAC1_AUTONEG && !SAMA5_EMAC1_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if SAMA5_EMAC1_AUTONEG is defined.  This provides the value
+		of the speed bit(s) indicating 100MBps speed.
+
+config SAMA5_EMAC1_PHYSR_MODE
+	hex "PHY Mode Mask"
+	depends on SAMA5_EMAC1_AUTONEG && !SAMA5_EMAC1_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if SAMA5_EMAC1_AUTONEG is defined.  This provide bit mask
+		for isolating the full or half duplex mode bits.
+
+config SAMA5_EMAC1_PHYSR_FULLDUPLEX
+	hex "PHY Full Duplex Mode Value"
+	depends on SAMA5_EMAC1_AUTONEG && !SAMA5_EMAC1_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if SAMA5_EMAC1_AUTONEG is defined.  This provides the
+		value of the mode bits indicating full duplex mode.
+
+config SAMA5_EMAC1_PHYSR_ALTMODE
+	hex "PHY Mode Mask"
+	depends on SAMA5_EMAC1_AUTONEG && SAMA5_EMAC1_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if SAMA5_EMAC1_AUTONEG is defined.  This provide bit mask
+		for isolating the speed and full/half duplex mode bits.
+
+config SAMA5_EMAC1_PHYSR_10HD
+	hex "10MBase-T Half Duplex Value"
+	depends on SAMA5_EMAC1_AUTONEG && SAMA5_EMAC1_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if SAMA5_EMAC1_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 10Mbps, half duplex setting.
+
+config SAMA5_EMAC1_PHYSR_100HD
+	hex "100Base-T Half Duplex Value"
+	depends on SAMA5_EMAC1_AUTONEG && SAMA5_EMAC1_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if SAMA5_EMAC1_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 100Mbps, half duplex setting.
+
+config SAMA5_EMAC1_PHYSR_10FD
+	hex "10Base-T Full Duplex Value"
+	depends on SAMA5_EMAC1_AUTONEG && SAMA5_EMAC1_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if SAMA5_EMAC1_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 10Mbps, full duplex setting.
+
+config SAMA5_EMAC1_PHYSR_100FD
+	hex "100Base-T Full Duplex Value"
+	depends on SAMA5_EMAC1_AUTONEG && SAMA5_EMAC1_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if SAMA5_EMAC1_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 100Mbps, full duplex setting.
+
+config SAMA5_EMAC1_REGDEBUG
+	bool "Register-Level Debug"
+	default n
+	depends on DEBUG
+	---help---
+		Enable very low-level register access debug.  Depends on DEBUG.
+
+endmenu # EMAC1 device driver options
+endif # SAMA5_EMAC1
+
+if SAMA5_EMAC0 || SAMA5_EMAC1 || SAMA5_GMAC
+choice
+	prompt "Which device is eth0"
+	default SAMA5_GMAC_ISETH0 if SAMA5_GMAC
+	default SAMA5_EMAC0_ISETH0 if SAMA5_EMAC0 && !SAMA5_GMAC
+	default SAMA5_EMAC1_ISETH0 if SAMA5_EMAC1 && !SAMA5_EMAC0 && !SAMA5_GMAC
+
+config SAMA5_EMAC0_ISETH0
+	bool "EMAC0 is eth0"
+	depends on SAMA5_EMAC0
+
+config SAMA5_EMAC0_ISETH1
+	bool "EMAC1 is eth0"
+	depends on SAMA5_EMAC1
+
+config SAMA5_GMAC_ISETH0
+    bool "GMAC is ETH0"
+	depends on SAMA5_GMAC
+
+endchoice # Which device is eth0
+endif # SAMA5_EMAC0 || SAMA5_EMAC1 || SAMA5_GMAC
 
 if SAMA5_CAN0 || SAMA5_CAN1
 

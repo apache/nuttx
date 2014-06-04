@@ -78,7 +78,7 @@
 
 #include <arch/board/board.h>
 
-#if defined(CONFIG_NET) && defined(CONFIG_SAMA5_EMAC)
+#if defined(CONFIG_NET) && defined(CONFIG_SAMA5_EMAC0)
 
 /****************************************************************************
  * Definitions
@@ -87,62 +87,62 @@
 
 /* Number of buffer for RX */
 
-#ifndef CONFIG_SAMA5_EMAC_NRXBUFFERS
-#  define CONFIG_SAMA5_EMAC_NRXBUFFERS  16
+#ifndef CONFIG_SAMA5_EMAC0_NRXBUFFERS
+#  define CONFIG_SAMA5_EMAC0_NRXBUFFERS  16
 #endif
 
 /* Number of buffer for TX */
 
-#ifndef CONFIG_SAMA5_EMAC_NTXBUFFERS
-#  define CONFIG_SAMA5_EMAC_NTXBUFFERS  8
+#ifndef CONFIG_SAMA5_EMAC0_NTXBUFFERS
+#  define CONFIG_SAMA5_EMAC0_NTXBUFFERS  8
 #endif
 
-#undef CONFIG_SAMA5_EMAC_NBC
+#undef CONFIG_SAMA5_EMAC0_NBC
 
-#ifndef CONFIG_SAMA5_EMAC_PHYADDR
-#  error "CONFIG_SAMA5_EMAC_PHYADDR must be defined in the NuttX configuration"
+#ifndef CONFIG_SAMA5_EMAC0_PHYADDR
+#  error "CONFIG_SAMA5_EMAC0_PHYADDR must be defined in the NuttX configuration"
 #endif
 
-#if !defined(CONFIG_SAMA5_EMAC_MII) && !defined(CONFIG_SAMA5_EMAC_RMII)
-#  warning "Neither CONFIG_SAMA5_EMAC_MII nor CONFIG_SAMA5_EMAC_RMII defined"
+#if !defined(CONFIG_SAMA5_EMAC0_MII) && !defined(CONFIG_SAMA5_EMAC0_RMII)
+#  warning "Neither CONFIG_SAMA5_EMAC0_MII nor CONFIG_SAMA5_EMAC0_RMII defined"
 #endif
 
-#if defined(CONFIG_SAMA5_EMAC_MII) && defined(CONFIG_SAMA5_EMAC_RMII)
-#  error "Both CONFIG_SAMA5_EMAC_MII and CONFIG_SAMA5_EMAC_RMII defined"
+#if defined(CONFIG_SAMA5_EMAC0_MII) && defined(CONFIG_SAMA5_EMAC0_RMII)
+#  error "Both CONFIG_SAMA5_EMAC0_MII and CONFIG_SAMA5_EMAC0_RMII defined"
 #endif
 
-#ifdef CONFIG_SAMA5_EMAC_AUTONEG
-#  ifndef CONFIG_SAMA5_EMAC_PHYSR
-#    error "CONFIG_SAMA5_EMAC_PHYSR must be defined in the NuttX configuration"
+#ifdef CONFIG_SAMA5_EMAC0_AUTONEG
+#  ifndef CONFIG_SAMA5_EMAC0_PHYSR
+#    error "CONFIG_SAMA5_EMAC0_PHYSR must be defined in the NuttX configuration"
 #  endif
-#  ifdef CONFIG_SAMA5_EMAC_PHYSR_ALTCONFIG
-#    ifndef CONFIG_SAMA5_EMAC_PHYSR_ALTMODE
-#      error "CONFIG_SAMA5_EMAC_PHYSR_ALTMODE must be defined in the NuttX configuration"
+#  ifdef CONFIG_SAMA5_EMAC0_PHYSR_ALTCONFIG
+#    ifndef CONFIG_SAMA5_EMAC0_PHYSR_ALTMODE
+#      error "CONFIG_SAMA5_EMAC0_PHYSR_ALTMODE must be defined in the NuttX configuration"
 #    endif
-#    ifndef CONFIG_SAMA5_EMAC_PHYSR_10HD
-#      error "CONFIG_SAMA5_EMAC_PHYSR_10HD must be defined in the NuttX configuration"
+#    ifndef CONFIG_SAMA5_EMAC0_PHYSR_10HD
+#      error "CONFIG_SAMA5_EMAC0_PHYSR_10HD must be defined in the NuttX configuration"
 #    endif
-#    ifndef CONFIG_SAMA5_EMAC_PHYSR_100HD
-#      error "CONFIG_SAMA5_EMAC_PHYSR_100HD must be defined in the NuttX configuration"
+#    ifndef CONFIG_SAMA5_EMAC0_PHYSR_100HD
+#      error "CONFIG_SAMA5_EMAC0_PHYSR_100HD must be defined in the NuttX configuration"
 #    endif
-#    ifndef CONFIG_SAMA5_EMAC_PHYSR_10FD
-#      error "CONFIG_SAMA5_EMAC_PHYSR_10FD must be defined in the NuttX configuration"
+#    ifndef CONFIG_SAMA5_EMAC0_PHYSR_10FD
+#      error "CONFIG_SAMA5_EMAC0_PHYSR_10FD must be defined in the NuttX configuration"
 #    endif
-#    ifndef CONFIG_SAMA5_EMAC_PHYSR_100FD
-#      error "CONFIG_SAMA5_EMAC_PHYSR_100FD must be defined in the NuttX configuration"
+#    ifndef CONFIG_SAMA5_EMAC0_PHYSR_100FD
+#      error "CONFIG_SAMA5_EMAC0_PHYSR_100FD must be defined in the NuttX configuration"
 #    endif
 #  else
-#    ifndef CONFIG_SAMA5_EMAC_PHYSR_SPEED
-#      error "CONFIG_SAMA5_EMAC_PHYSR_SPEED must be defined in the NuttX configuration"
+#    ifndef CONFIG_SAMA5_EMAC0_PHYSR_SPEED
+#      error "CONFIG_SAMA5_EMAC0_PHYSR_SPEED must be defined in the NuttX configuration"
 #    endif
-#    ifndef CONFIG_SAMA5_EMAC_PHYSR_100MBPS
-#      error "CONFIG_SAMA5_EMAC_PHYSR_100MBPS must be defined in the NuttX configuration"
+#    ifndef CONFIG_SAMA5_EMAC0_PHYSR_100MBPS
+#      error "CONFIG_SAMA5_EMAC0_PHYSR_100MBPS must be defined in the NuttX configuration"
 #    endif
-#    ifndef CONFIG_SAMA5_EMAC_PHYSR_MODE
-#      error "CONFIG_SAMA5_EMAC_PHYSR_MODE must be defined in the NuttX configuration"
+#    ifndef CONFIG_SAMA5_EMAC0_PHYSR_MODE
+#      error "CONFIG_SAMA5_EMAC0_PHYSR_MODE must be defined in the NuttX configuration"
 #    endif
-#    ifndef CONFIG_SAMA5_EMAC_PHYSR_FULLDUPLEX
-#      error "CONFIG_SAMA5_EMAC_PHYSR_FULLDUPLEX must be defined in the NuttX configuration"
+#    ifndef CONFIG_SAMA5_EMAC0_PHYSR_FULLDUPLEX
+#      error "CONFIG_SAMA5_EMAC0_PHYSR_FULLDUPLEX must be defined in the NuttX configuration"
 #    endif
 #  endif
 #endif
@@ -162,15 +162,15 @@
 #  error EMAC PHY unrecognized
 #endif
 
-#ifdef CONFIG_SAMA5_EMAC_PHYSR_ALTCONFIG
+#ifdef CONFIG_SAMA5_EMAC0_PHYSR_ALTCONFIG
 
-#  define PHYSR_MODE(sr)     ((sr) & CONFIG_SAMA5_EMAC_PHYSR_ALTMODE)
+#  define PHYSR_MODE(sr)     ((sr) & CONFIG_SAMA5_EMAC0_PHYSR_ALTMODE)
 #  define PHYSR_ISMODE(sr,m) (PHYSR_MODE(sr) == (m))
 
-#  define PHYSR_IS10HDX(sr)  PHYSR_ISMODE(sr,CONFIG_SAMA5_EMAC_PHYSR_10HD)
-#  define PHYSR_IS100HDX(sr) PHYSR_ISMODE(sr,CONFIG_SAMA5_EMAC_PHYSR_100HD)
-#  define PHYSR_IS10FDX(sr)  PHYSR_ISMODE(sr,CONFIG_SAMA5_EMAC_PHYSR_10FD)
-#  define PHYSR_IS100FDX(sr) PHYSR_ISMODE(sr,CONFIG_SAMA5_EMAC_PHYSR_100FD)
+#  define PHYSR_IS10HDX(sr)  PHYSR_ISMODE(sr,CONFIG_SAMA5_EMAC0_PHYSR_10HD)
+#  define PHYSR_IS100HDX(sr) PHYSR_ISMODE(sr,CONFIG_SAMA5_EMAC0_PHYSR_100HD)
+#  define PHYSR_IS10FDX(sr)  PHYSR_ISMODE(sr,CONFIG_SAMA5_EMAC0_PHYSR_10FD)
+#  define PHYSR_IS100FDX(sr) PHYSR_ISMODE(sr,CONFIG_SAMA5_EMAC0_PHYSR_100FD)
 
 #else
 
@@ -205,14 +205,14 @@
 
 /* We need at least one more free buffer than transmit buffers */
 
-#define SAM_EMAC_NFREEBUFFERS (CONFIG_SAMA5_EMAC_NTXBUFFERS+1)
+#define SAM_EMAC_NFREEBUFFERS (CONFIG_SAMA5_EMAC0_NTXBUFFERS+1)
 
 /* Extremely detailed register debug that you would normally never want
  * enabled.
  */
 
 #ifndef CONFIG_DEBUG
-#  undef CONFIG_SAMA5_EMAC_REGDEBUG
+#  undef CONFIG_SAMA5_EMAC0_REGDEBUG
 #endif
 
 #ifdef CONFIG_NET_DUMPPACKET
@@ -274,7 +274,7 @@ struct sam_emac_s
 
   /* Debug stuff */
 
-#ifdef CONFIG_SAMA5_EMAC_REGDEBUG
+#ifdef CONFIG_SAMA5_EMAC0_REGDEBUG
    bool               wrlast;     /* Last was a write */
    uintptr_t          addrlast;   /* Last address */
    uint32_t           vallast;    /* Last value */
@@ -290,16 +290,16 @@ struct sam_emac_s
 
 static struct sam_emac_s g_emac;
 
-#ifdef CONFIG_SAMA5_EMAC_PREALLOCATE
+#ifdef CONFIG_SAMA5_EMAC0_PREALLOCATE
 /* Preallocated data */
 /* TX descriptors list */
 
-static struct emac_txdesc_s g_txdesc[CONFIG_SAMA5_EMAC_NTXBUFFERS]
+static struct emac_txdesc_s g_txdesc[CONFIG_SAMA5_EMAC0_NTXBUFFERS]
               __attribute__((aligned(8)));
 
 /* RX descriptors list */
 
-static struct emac_rxdesc_s g_rxdesc[CONFIG_SAMA5_EMAC_NRXBUFFERS]
+static struct emac_rxdesc_s g_rxdesc[CONFIG_SAMA5_EMAC0_NRXBUFFERS]
               __attribute__((aligned(8)));
 
 /* Transmit Buffers
@@ -309,12 +309,12 @@ static struct emac_rxdesc_s g_rxdesc[CONFIG_SAMA5_EMAC_NRXBUFFERS]
  * shall be set to 0
  */
 
-static uint8_t g_txbuffer[CONFIG_SAMA5_EMAC_NTXBUFFERS * EMAC_TX_UNITSIZE];
+static uint8_t g_txbuffer[CONFIG_SAMA5_EMAC0_NTXBUFFERS * EMAC_TX_UNITSIZE];
                __attribute__((aligned(8)))
 
 /* Receive Buffers */
 
-static uint8_t g_rxbuffer[CONFIG_SAMA5_EMAC_NRXBUFFERS * EMAC_RX_UNITSIZE]
+static uint8_t g_rxbuffer[CONFIG_SAMA5_EMAC0_NRXBUFFERS * EMAC_RX_UNITSIZE]
                __attribute__((aligned(8)));
 
 #endif
@@ -324,7 +324,7 @@ static uint8_t g_rxbuffer[CONFIG_SAMA5_EMAC_NRXBUFFERS * EMAC_RX_UNITSIZE]
  ****************************************************************************/
 /* Register operations ******************************************************/
 
-#if defined(CONFIG_SAMA5_EMAC_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_SAMA5_EMAC0_REGDEBUG) && defined(CONFIG_DEBUG)
 static bool sam_checkreg(struct sam_emac_s *priv, bool wr,
                          uint32_t regval, uintptr_t address);
 static uint32_t sam_getreg(struct sam_emac_s *priv, uintptr_t addr);
@@ -415,7 +415,7 @@ static int  sam_emac_configure(struct sam_emac_s *priv);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAMA5_EMAC_REGDEBUG
+#ifdef CONFIG_SAMA5_EMAC0_REGDEBUG
 static bool sam_checkreg(struct sam_emac_s *priv, bool wr, uint32_t regval,
                          uintptr_t address)
 {
@@ -461,7 +461,7 @@ static bool sam_checkreg(struct sam_emac_s *priv, bool wr, uint32_t regval,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAMA5_EMAC_REGDEBUG
+#ifdef CONFIG_SAMA5_EMAC0_REGDEBUG
 static uint32_t sam_getreg(struct sam_emac_s *priv, uintptr_t address)
 {
   uint32_t regval = getreg32(address);
@@ -483,7 +483,7 @@ static uint32_t sam_getreg(struct sam_emac_s *priv, uintptr_t address)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAMA5_EMAC_REGDEBUG
+#ifdef CONFIG_SAMA5_EMAC0_REGDEBUG
 static void sam_putreg(struct sam_emac_s *priv, uintptr_t address,
                        uint32_t regval)
 {
@@ -515,7 +515,7 @@ static uint16_t sam_txinuse(struct sam_emac_s *priv)
   uint32_t txhead32 = (uint32_t)priv->txhead;
   if ((uint32_t)priv->txtail > txhead32)
     {
-      return txhead32 += CONFIG_SAMA5_EMAC_NTXBUFFERS;
+      return txhead32 += CONFIG_SAMA5_EMAC0_NTXBUFFERS;
     }
 
   return (uint16_t)(txhead32 - (uint32_t)priv->txtail);
@@ -542,7 +542,7 @@ static uint16_t sam_txfree(struct sam_emac_s *priv)
    * the configured size minus 1.
    */
 
-  return (CONFIG_SAMA5_EMAC_NTXBUFFERS-1) - sam_txinuse(priv);
+  return (CONFIG_SAMA5_EMAC0_NTXBUFFERS-1) - sam_txinuse(priv);
 }
 
 /****************************************************************************
@@ -565,7 +565,7 @@ static uint16_t sam_txfree(struct sam_emac_s *priv)
 
 static int sam_buffer_initialize(struct sam_emac_s *priv)
 {
-#ifdef CONFIG_SAMA5_EMAC_PREALLOCATE
+#ifdef CONFIG_SAMA5_EMAC0_PREALLOCATE
   /* Use pre-allocated buffers */
 
   priv->txdesc   = g_txdesc;
@@ -578,7 +578,7 @@ static int sam_buffer_initialize(struct sam_emac_s *priv)
 
   /* Allocate buffers */
 
-  allocsize = CONFIG_SAMA5_EMAC_NTXBUFFERS * sizeof(struct emac_txdesc_s);
+  allocsize = CONFIG_SAMA5_EMAC0_NTXBUFFERS * sizeof(struct emac_txdesc_s);
   priv->txdesc = (struct emac_txdesc_s *)kmemalign(8, allocsize);
   if (!priv->txdesc)
     {
@@ -588,7 +588,7 @@ static int sam_buffer_initialize(struct sam_emac_s *priv)
 
   memset(priv->txdesc, 0, allocsize);
 
-  allocsize = CONFIG_SAMA5_EMAC_NRXBUFFERS * sizeof(struct emac_rxdesc_s);
+  allocsize = CONFIG_SAMA5_EMAC0_NRXBUFFERS * sizeof(struct emac_rxdesc_s);
   priv->rxdesc = (struct emac_rxdesc_s *)kmemalign(8, allocsize);
   if (!priv->rxdesc)
     {
@@ -599,7 +599,7 @@ static int sam_buffer_initialize(struct sam_emac_s *priv)
 
   memset(priv->rxdesc, 0, allocsize);
 
-  allocsize = CONFIG_SAMA5_EMAC_NTXBUFFERS * EMAC_TX_UNITSIZE;
+  allocsize = CONFIG_SAMA5_EMAC0_NTXBUFFERS * EMAC_TX_UNITSIZE;
   priv->txbuffer = (uint8_t *)kmemalign(8, allocsize);
   if (!priv->txbuffer)
     {
@@ -608,7 +608,7 @@ static int sam_buffer_initialize(struct sam_emac_s *priv)
       return -ENOMEM;
     }
 
-  allocsize = CONFIG_SAMA5_EMAC_NRXBUFFERS * EMAC_RX_UNITSIZE;
+  allocsize = CONFIG_SAMA5_EMAC0_NRXBUFFERS * EMAC_RX_UNITSIZE;
   priv->rxbuffer = (uint8_t *)kmemalign(8, allocsize);
   if (!priv->rxbuffer)
     {
@@ -643,7 +643,7 @@ static int sam_buffer_initialize(struct sam_emac_s *priv)
 
 static void sam_buffer_free(struct sam_emac_s *priv)
 {
-#ifndef CONFIG_SAMA5_EMAC_PREALLOCATE
+#ifndef CONFIG_SAMA5_EMAC0_PREALLOCATE
   /* Free allocated buffers */
 
   if (priv->txdesc)
@@ -737,7 +737,7 @@ static int sam_transmit(struct sam_emac_s *priv)
   /* Update TX descriptor status. */
 
   status = dev->d_len | EMACTXD_STA_LAST;
-  if (priv->txhead == CONFIG_SAMA5_EMAC_NTXBUFFERS-1)
+  if (priv->txhead == CONFIG_SAMA5_EMAC0_NTXBUFFERS-1)
     {
       status |= EMACTXD_STA_WRAP;
     }
@@ -750,16 +750,16 @@ static int sam_transmit(struct sam_emac_s *priv)
 
   /* Increment the head index */
 
-  if (++priv->txhead >= CONFIG_SAMA5_EMAC_NTXBUFFERS)
+  if (++priv->txhead >= CONFIG_SAMA5_EMAC0_NTXBUFFERS)
     {
       priv->txhead = 0;
     }
 
   /* Now start transmission (if it is not already done) */
 
-  regval  = sam_getreg(priv, SAM_EMAC_NCR);
+  regval  = sam_getreg(priv, SAM_EMAC0_NCR);
   regval |= EMAC_NCR_TSTART;
-  sam_putreg(priv, SAM_EMAC_NCR, regval);
+  sam_putreg(priv, SAM_EMAC0_NCR, regval);
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
@@ -782,7 +782,7 @@ static int sam_transmit(struct sam_emac_s *priv)
   if (sam_txfree(priv) < 1)
     {
       nllvdbg("Disabling RX interrupts\n");
-      sam_putreg(priv, SAM_EMAC_IDR, EMAC_INT_RCOMP);
+      sam_putreg(priv, SAM_EMAC0_IDR, EMAC_INT_RCOMP);
     }
 
   return OK;
@@ -959,7 +959,7 @@ static int sam_recvframe(struct sam_emac_s *priv)
 
               /* Increment the RX index */
 
-              if (++priv->rxndx >= CONFIG_SAMA5_EMAC_NRXBUFFERS)
+              if (++priv->rxndx >= CONFIG_SAMA5_EMAC0_NRXBUFFERS)
                 {
                   priv->rxndx = 0;
                 }
@@ -977,7 +977,7 @@ static int sam_recvframe(struct sam_emac_s *priv)
 
       /* Increment the working index */
 
-      if (++rxndx >= CONFIG_SAMA5_EMAC_NRXBUFFERS)
+      if (++rxndx >= CONFIG_SAMA5_EMAC0_NRXBUFFERS)
         {
           rxndx = 0;
         }
@@ -1004,7 +1004,7 @@ static int sam_recvframe(struct sam_emac_s *priv)
 
                   /* Increment the RX index */
 
-                  if (++priv->rxndx >= CONFIG_SAMA5_EMAC_NRXBUFFERS)
+                  if (++priv->rxndx >= CONFIG_SAMA5_EMAC0_NRXBUFFERS)
                     {
                       priv->rxndx = 0;
                     }
@@ -1064,7 +1064,7 @@ static int sam_recvframe(struct sam_emac_s *priv)
 
                   /* Increment the RX index */
 
-                  if (++priv->rxndx >= CONFIG_SAMA5_EMAC_NRXBUFFERS)
+                  if (++priv->rxndx >= CONFIG_SAMA5_EMAC0_NRXBUFFERS)
                     {
                       priv->rxndx = 0;
                     }
@@ -1257,7 +1257,7 @@ static void sam_txdone(struct sam_emac_s *priv)
 #if 0 /* The issue does not exist in the current configuration, but may return */
 #warning REVISIT
           if (priv->txtail == 0 &&
-              sam_physramaddr((uintptr_t)txdesc) != sam_getreg(priv, SAM_EMAC_TBQP))
+              sam_physramaddr((uintptr_t)txdesc) != sam_getreg(priv, SAM_EMAC0_TBQP))
             {
               txdesc->status = (uint32_t)EMACTXD_STA_USED;
               cp15_clean_dcache((uintptr_t)txdesc,
@@ -1276,7 +1276,7 @@ static void sam_txdone(struct sam_emac_s *priv)
 
       /* Increment the tail index */
 
-      if (++priv->txtail >= CONFIG_SAMA5_EMAC_NTXBUFFERS)
+      if (++priv->txtail >= CONFIG_SAMA5_EMAC0_NTXBUFFERS)
         {
           /* Wrap to the beginning of the TX descriptor list */
 
@@ -1288,7 +1288,7 @@ static void sam_txdone(struct sam_emac_s *priv)
        * TX desciptors (see commits in sam_transmit()).
        */
 
-      sam_putreg(priv, SAM_EMAC_IER, EMAC_INT_RCOMP);
+      sam_putreg(priv, SAM_EMAC0_IER, EMAC_INT_RCOMP);
     }
 
   /* Then poll uIP for new XMIT data */
@@ -1324,10 +1324,10 @@ static int sam_emac_interrupt(int irq, void *context)
   uint32_t pending;
   uint32_t clrbits;
 
-  isr = sam_getreg(priv, SAM_EMAC_ISR);
-  rsr = sam_getreg(priv, SAM_EMAC_RSR);
-  tsr = sam_getreg(priv, SAM_EMAC_TSR);
-  imr = sam_getreg(priv, SAM_EMAC_IMR);
+  isr = sam_getreg(priv, SAM_EMAC0_ISR);
+  rsr = sam_getreg(priv, SAM_EMAC0_RSR);
+  tsr = sam_getreg(priv, SAM_EMAC0_TSR);
+  imr = sam_getreg(priv, SAM_EMAC0_IMR);
 
   pending = isr & ~(imr | EMAC_INT_UNUSED);
   nllvdbg("isr: %08x pending: %08x\n", isr, pending);
@@ -1358,9 +1358,9 @@ static int sam_emac_interrupt(int irq, void *context)
 
           nlldbg("ERROR: Retry Limit Exceeded TSR: %08x\n", tsr);
 
-          regval = sam_getreg(priv, SAM_EMAC_NCR);
+          regval = sam_getreg(priv, SAM_EMAC0_NCR);
           regval |= EMAC_NCR_TE;
-          sam_putreg(priv, SAM_EMAC_NCR, regval);
+          sam_putreg(priv, SAM_EMAC0_NCR, regval);
         }
 
       /* Check Collision Occurred (COL) */
@@ -1396,7 +1396,7 @@ static int sam_emac_interrupt(int irq, void *context)
 
       /* Clear status */
 
-      sam_putreg(priv, SAM_EMAC_TSR, clrbits);
+      sam_putreg(priv, SAM_EMAC0_TSR, clrbits);
 
       /* And handle the TX done event */
 
@@ -1450,7 +1450,7 @@ static int sam_emac_interrupt(int irq, void *context)
 
       /* Clear status */
 
-      sam_putreg(priv, SAM_EMAC_RSR, clrbits);
+      sam_putreg(priv, SAM_EMAC0_RSR, clrbits);
 
       /* Handle the received packet */
 
@@ -1810,13 +1810,13 @@ static void sam_phydump(struct sam_emac_s *priv)
 
   /* Enable management port */
 
-  regval  = sam_getreg(priv, SAM_EMAC_NCR);
+  regval  = sam_getreg(priv, SAM_EMAC0_NCR);
   regval |= EMAC_NCR_MPE;
-  sam_putreg(priv, SAM_EMAC_NCR, regval);
+  sam_putreg(priv, SAM_EMAC0_NCR, regval);
 
-#ifdef CONFIG_SAMA5_EMAC_RMII
+#ifdef CONFIG_SAMA5_EMAC0_RMII
   nllvdbg("RMII Registers (Address %02x)\n", priv->phyaddr);
-#else /* defined(CONFIG_SAMA5_EMAC_MII) */
+#else /* defined(CONFIG_SAMA5_EMAC0_MII) */
   nllvdbg("MII Registers (Address %02x)\n", priv->phyaddr);
 #endif
 
@@ -1828,14 +1828,14 @@ static void sam_phydump(struct sam_emac_s *priv)
   nllvdbg("  ADVERTISE: %04x\n", phyval);
   sam_phyread(priv, priv->phyaddr, MII_LPA, &phyval);
   nllvdbg("  LPR:       %04x\n", phyval);
-  sam_phyread(priv, priv->phyaddr, CONFIG_SAMA5_EMAC_PHYSR, &phyval);
+  sam_phyread(priv, priv->phyaddr, CONFIG_SAMA5_EMAC0_PHYSR, &phyval);
   nllvdbg("  PHYSR:     %04x\n", phyval);
 
   /* Disable management port */
 
-  regval  = sam_getreg(priv, SAM_EMAC_NCR);
+  regval  = sam_getreg(priv, SAM_EMAC0_NCR);
   regval &= ~EMAC_NCR_MPE;
-  sam_putreg(priv, SAM_EMAC_NCR, regval);
+  sam_putreg(priv, SAM_EMAC0_NCR, regval);
 }
 #endif
 
@@ -1863,7 +1863,7 @@ static int sam_phywait(struct sam_emac_s *priv)
     {
       /* Is the PHY IDLE */
 
-      if ((sam_getreg(priv, SAM_EMAC_NSR) & EMAC_NSR_IDLE) != 0)
+      if ((sam_getreg(priv, SAM_EMAC0_NSR) & EMAC_NSR_IDLE) != 0)
         {
           return OK;
         }
@@ -1899,9 +1899,9 @@ static int sam_phyreset(struct sam_emac_s *priv)
 
   /* Enable management port */
 
-  regval  = sam_getreg(priv, SAM_EMAC_NCR);
+  regval  = sam_getreg(priv, SAM_EMAC0_NCR);
   regval |= EMAC_NCR_MPE;
-  sam_putreg(priv, SAM_EMAC_NCR, regval);
+  sam_putreg(priv, SAM_EMAC0_NCR, regval);
 
   /* Reset the PHY */
 
@@ -1932,9 +1932,9 @@ static int sam_phyreset(struct sam_emac_s *priv)
 
   /* Disable management port */
 
-  regval  = sam_getreg(priv, SAM_EMAC_NCR);
+  regval  = sam_getreg(priv, SAM_EMAC0_NCR);
   regval &= ~EMAC_NCR_MPE;
-  sam_putreg(priv, SAM_EMAC_NCR, regval);
+  sam_putreg(priv, SAM_EMAC0_NCR, regval);
   return ret;
 }
 
@@ -1966,9 +1966,9 @@ static int sam_phyfind(struct sam_emac_s *priv, uint8_t *phyaddr)
 
   /* Enable management port */
 
-  regval  = sam_getreg(priv, SAM_EMAC_NCR);
+  regval  = sam_getreg(priv, SAM_EMAC0_NCR);
   regval |= EMAC_NCR_MPE;
-  sam_putreg(priv, SAM_EMAC_NCR, regval);
+  sam_putreg(priv, SAM_EMAC0_NCR, regval);
 
   candidate = *phyaddr;
 
@@ -2009,15 +2009,15 @@ static int sam_phyfind(struct sam_emac_s *priv, uint8_t *phyaddr)
     {
       nllvdbg("  PHYID1: %04x PHY addr: %d\n", phyval, candidate);
       *phyaddr = candidate;
-      sam_phyread(priv, candidate, CONFIG_SAMA5_EMAC_PHYSR, &phyval);
+      sam_phyread(priv, candidate, CONFIG_SAMA5_EMAC0_PHYSR, &phyval);
       nllvdbg("  PHYSR:  %04x PHY addr: %d\n", phyval, candidate);
     }
 
   /* Disable management port */
 
-  regval  = sam_getreg(priv, SAM_EMAC_NCR);
+  regval  = sam_getreg(priv, SAM_EMAC0_NCR);
   regval &= ~EMAC_NCR_MPE;
-  sam_putreg(priv, SAM_EMAC_NCR, regval);
+  sam_putreg(priv, SAM_EMAC0_NCR, regval);
   return ret;
 }
 
@@ -2059,7 +2059,7 @@ static int sam_phyread(struct sam_emac_s *priv, uint8_t phyaddr,
 
   regval = EMAC_MAN_DATA(0) | EMAC_MAN_CODE | EMAC_MAN_REGA(regaddr) |
            EMAC_MAN_PHYA(phyaddr) | EMAC_MAN_READ | EMAC_MAN_SOF;
-  sam_putreg(priv, SAM_EMAC_MAN, regval);
+  sam_putreg(priv, SAM_EMAC0_MAN, regval);
 
   /* Wait until the PHY is again idle */
 
@@ -2072,7 +2072,7 @@ static int sam_phyread(struct sam_emac_s *priv, uint8_t phyaddr,
 
   /* Return data */
 
-  *phyval = (uint16_t)(sam_getreg(priv, SAM_EMAC_MAN) & EMAC_MAN_DATA_MASK);
+  *phyval = (uint16_t)(sam_getreg(priv, SAM_EMAC0_MAN) & EMAC_MAN_DATA_MASK);
   return OK;
 }
 
@@ -2114,7 +2114,7 @@ static int sam_phywrite(struct sam_emac_s *priv, uint8_t phyaddr,
 
   regval = EMAC_MAN_DATA(phyval) | EMAC_MAN_CODE | EMAC_MAN_REGA(regaddr) |
            EMAC_MAN_PHYA(phyaddr) | EMAC_MAN_WRITE| EMAC_MAN_SOF;
-  sam_putreg(priv, SAM_EMAC_MAN, regval);
+  sam_putreg(priv, SAM_EMAC0_MAN, regval);
 
   /* Wait until the PHY is again IDLE */
 
@@ -2156,9 +2156,9 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
 
   /* Enable management port */
 
-  regval  = sam_getreg(priv, SAM_EMAC_NCR);
+  regval  = sam_getreg(priv, SAM_EMAC0_NCR);
   regval |= EMAC_NCR_MPE;
-  sam_putreg(priv, SAM_EMAC_NCR, regval);
+  sam_putreg(priv, SAM_EMAC0_NCR, regval);
 
   /* Verify tht we can read the PHYID register */
 
@@ -2303,7 +2303,7 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
 
   /* Setup the EMAC link speed */
 
-  regval  = sam_getreg(priv, SAM_EMAC_NCFGR);
+  regval  = sam_getreg(priv, SAM_EMAC0_NCFGR);
   regval &= (EMAC_NCFGR_SPD | EMAC_NCFGR_FD);
 
   if (((advertise & lpa) & MII_ADVERTISE_100BASETXFULL) != 0)
@@ -2331,28 +2331,28 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
     }
 #endif
 
-  sam_putreg(priv, SAM_EMAC_NCFGR, regval);
+  sam_putreg(priv, SAM_EMAC0_NCFGR, regval);
 
   /* Select RMII/MII */
 
-  regval = sam_getreg(priv, SAM_EMAC_USRIO);
-#ifdef CONFIG_SAMA5_EMAC_RMII
+  regval = sam_getreg(priv, SAM_EMAC0_USRIO);
+#ifdef CONFIG_SAMA5_EMAC0_RMII
   regval |= EMAC_USRIO_RMII;
-#else /* defined(CONFIG_SAMA5_EMAC_MII) */
+#else /* defined(CONFIG_SAMA5_EMAC0_MII) */
   regval &= ~EMAC_USRIO_RMII;
 #endif
 
   /* Enable the transceiver clock */
 
   regval |=  EMAC_USRIO_CLKEN;
-  sam_putreg(priv, SAM_EMAC_USRIO, regval);
+  sam_putreg(priv, SAM_EMAC0_USRIO, regval);
 
 errout:
   /* Disable management port */
 
-  regval  = sam_getreg(priv, SAM_EMAC_NCR);
+  regval  = sam_getreg(priv, SAM_EMAC0_NCR);
   regval &= ~EMAC_NCR_MPE;
-  sam_putreg(priv, SAM_EMAC_NCR, regval);
+  sam_putreg(priv, SAM_EMAC0_NCR, regval);
   return ret;
 }
 
@@ -2380,9 +2380,9 @@ static bool sam_linkup(struct sam_emac_s *priv)
 
   /* Enable management port */
 
-  regval  = sam_getreg(priv, SAM_EMAC_NCR);
+  regval  = sam_getreg(priv, SAM_EMAC0_NCR);
   regval |= EMAC_NCR_MPE;
-  sam_putreg(priv, SAM_EMAC_NCR, regval);
+  sam_putreg(priv, SAM_EMAC0_NCR, regval);
 
   ret = sam_phyread(priv, priv->phyaddr, MII_MSR, &msr);
   if (ret < 0)
@@ -2399,14 +2399,14 @@ static bool sam_linkup(struct sam_emac_s *priv)
 
   /* Re-configure Link speed */
 
-  ret = sam_phyread(priv, priv->phyaddr, CONFIG_SAMA5_EMAC_PHYSR, &physr);
+  ret = sam_phyread(priv, priv->phyaddr, CONFIG_SAMA5_EMAC0_PHYSR, &physr);
   if (ret < 0)
     {
       nlldbg("ERROR: Failed to read PHYSR: %d\n", ret);
       goto errout;
     }
 
-  regval = sam_getreg(priv, SAM_EMAC_NCFGR);
+  regval = sam_getreg(priv, SAM_EMAC0_NCFGR);
   regval &= ~(EMAC_NCFGR_SPD | EMAC_NCFGR_FD);
 
   if ((msr & MII_MSR_100BASETXFULL) != 0 && PHYSR_IS100FDX(physr))
@@ -2436,7 +2436,7 @@ static bool sam_linkup(struct sam_emac_s *priv)
     }
 #endif
 
-  sam_putreg(priv, SAM_EMAC_NCFGR, regval);
+  sam_putreg(priv, SAM_EMAC0_NCFGR, regval);
 
   /* Start the EMAC transfers */
 
@@ -2446,9 +2446,9 @@ static bool sam_linkup(struct sam_emac_s *priv)
 errout:
   /* Disable management port */
 
-  regval  = sam_getreg(priv, SAM_EMAC_NCR);
+  regval  = sam_getreg(priv, SAM_EMAC0_NCR);
   regval &= ~EMAC_NCR_MPE;
-  sam_putreg(priv, SAM_EMAC_NCR, regval);
+  sam_putreg(priv, SAM_EMAC0_NCR, regval);
 
   return linkup;
 }
@@ -2475,7 +2475,7 @@ static int sam_phyinit(struct sam_emac_s *priv)
 
   /* Configure PHY clocking */
 
-  regval = sam_getreg(priv, SAM_EMAC_NCFGR);
+  regval = sam_getreg(priv, SAM_EMAC0_NCFGR);
   regval &= ~EMAC_NCFGR_CLK_MASK;
 
   mck = BOARD_MCK_FREQUENCY;
@@ -2501,11 +2501,11 @@ static int sam_phyinit(struct sam_emac_s *priv)
       regval |= EMAC_NCFGR_CLK_DIV8;  /* MCK divided by 8 (MCK up to 20 MHz) */
     }
 
-  sam_putreg(priv, SAM_EMAC_NCFGR, regval);
+  sam_putreg(priv, SAM_EMAC0_NCFGR, regval);
 
   /* Check the PHY Address */
 
-  priv->phyaddr = CONFIG_SAMA5_EMAC_PHYADDR;
+  priv->phyaddr = CONFIG_SAMA5_EMAC0_PHYADDR;
   ret = sam_phyfind(priv, &priv->phyaddr);
   if (ret < 0)
     {
@@ -2513,7 +2513,7 @@ static int sam_phyinit(struct sam_emac_s *priv)
       return ret;
     }
 
-  if (priv->phyaddr != CONFIG_SAMA5_EMAC_PHYADDR)
+  if (priv->phyaddr != CONFIG_SAMA5_EMAC0_PHYADDR)
     {
       sam_phyreset(priv);
     }
@@ -2542,16 +2542,16 @@ static inline void sam_ethgpioconfig(struct sam_emac_s *priv)
   /* Configure PIO pins to support EMAC */
   /* Configure EMAC PIO pins common to both MII and RMII */
 
-  sam_configpio(PIO_EMAC_TX0);
-  sam_configpio(PIO_EMAC_TX1);
-  sam_configpio(PIO_EMAC_RX0);
-  sam_configpio(PIO_EMAC_RX1);
-  sam_configpio(PIO_EMAC_TXEN);
-  sam_configpio(PIO_EMAC_CRSDV);
-  sam_configpio(PIO_EMAC_RXER);
-  sam_configpio(PIO_EMAC_REFCK);
-  sam_configpio(PIO_EMAC_MDC);
-  sam_configpio(PIO_EMAC_MDIO);
+  sam_configpio(PIO_EMAC0_TX0);
+  sam_configpio(PIO_EMAC0_TX1);
+  sam_configpio(PIO_EMAC0_RX0);
+  sam_configpio(PIO_EMAC0_RX1);
+  sam_configpio(PIO_EMAC0_TXEN);
+  sam_configpio(PIO_EMAC0_CRSDV);
+  sam_configpio(PIO_EMAC0_RXER);
+  sam_configpio(PIO_EMAC0_REFCK);
+  sam_configpio(PIO_EMAC0_MDC);
+  sam_configpio(PIO_EMAC0_MDIO);
 }
 
 /****************************************************************************
@@ -2581,16 +2581,16 @@ static void sam_txreset(struct sam_emac_s *priv)
 
   /* Disable TX */
 
-  regval = sam_getreg(priv, SAM_EMAC_NCR);
+  regval = sam_getreg(priv, SAM_EMAC0_NCR);
   regval &= ~EMAC_NCR_TE;
-  sam_putreg(priv, SAM_EMAC_NCR, regval);
+  sam_putreg(priv, SAM_EMAC0_NCR, regval);
 
   /* Configure the TX descriptors. */
 
   priv->txhead = 0;
   priv->txtail = 0;
 
-  for (ndx = 0; ndx < CONFIG_SAMA5_EMAC_NTXBUFFERS; ndx++)
+  for (ndx = 0; ndx < CONFIG_SAMA5_EMAC0_NTXBUFFERS; ndx++)
   {
     bufaddr = (uint32_t)(&(txbuffer[ndx * EMAC_TX_UNITSIZE]));
 
@@ -2603,19 +2603,19 @@ static void sam_txreset(struct sam_emac_s *priv)
 
   /* Mark the final descriptor in the list */
 
-  txdesc[CONFIG_SAMA5_EMAC_NTXBUFFERS - 1].status =
+  txdesc[CONFIG_SAMA5_EMAC0_NTXBUFFERS - 1].status =
     EMACTXD_STA_USED | EMACTXD_STA_WRAP;
 
   /* Flush the entire TX descriptor table to RAM */
 
   cp15_clean_dcache((uintptr_t)txdesc,
                     (uintptr_t)txdesc +
-                    CONFIG_SAMA5_EMAC_NTXBUFFERS * sizeof(struct emac_txdesc_s));
+                    CONFIG_SAMA5_EMAC0_NTXBUFFERS * sizeof(struct emac_txdesc_s));
 
   /* Set the Transmit Buffer Queue Pointer Register */
 
   physaddr = sam_physramaddr((uintptr_t)txdesc);
-  sam_putreg(priv, SAM_EMAC_TBQP, physaddr);
+  sam_putreg(priv, SAM_EMAC0_TBQP, physaddr);
 }
 
 /****************************************************************************
@@ -2645,14 +2645,14 @@ static void sam_rxreset(struct sam_emac_s *priv)
 
   /* Disable RX */
 
-  regval  = sam_getreg(priv, SAM_EMAC_NCR);
+  regval  = sam_getreg(priv, SAM_EMAC0_NCR);
   regval &= ~EMAC_NCR_RE;
-  sam_putreg(priv, SAM_EMAC_NCR, regval);
+  sam_putreg(priv, SAM_EMAC0_NCR, regval);
 
   /* Configure the RX descriptors. */
 
   priv->rxndx = 0;
-  for (ndx = 0; ndx < CONFIG_SAMA5_EMAC_NRXBUFFERS; ndx++)
+  for (ndx = 0; ndx < CONFIG_SAMA5_EMAC0_NRXBUFFERS; ndx++)
   {
     bufaddr = (uintptr_t)(&(rxbuffer[ndx * EMAC_RX_UNITSIZE]));
     DEBUGASSERT((bufaddr & ~EMACRXD_ADDR_MASK) == 0);
@@ -2668,18 +2668,18 @@ static void sam_rxreset(struct sam_emac_s *priv)
 
   /* Mark the final descriptor in the list */
 
-  rxdesc[CONFIG_SAMA5_EMAC_NRXBUFFERS - 1].addr |= EMACRXD_ADDR_WRAP;
+  rxdesc[CONFIG_SAMA5_EMAC0_NRXBUFFERS - 1].addr |= EMACRXD_ADDR_WRAP;
 
   /* Flush the entire RX descriptor table to RAM */
 
   cp15_clean_dcache((uintptr_t)rxdesc,
                     (uintptr_t)rxdesc +
-                    CONFIG_SAMA5_EMAC_NRXBUFFERS * sizeof(struct emac_rxdesc_s));
+                    CONFIG_SAMA5_EMAC0_NRXBUFFERS * sizeof(struct emac_rxdesc_s));
 
   /* Set the Receive Buffer Queue Pointer Register */
 
   physaddr = sam_physramaddr((uintptr_t)rxdesc);
-  sam_putreg(priv, SAM_EMAC_RBQP, physaddr);
+  sam_putreg(priv, SAM_EMAC0_RBQP, physaddr);
 }
 
 /****************************************************************************
@@ -2704,7 +2704,7 @@ static void sam_emac_reset(struct sam_emac_s *priv)
 
   /* Disable all EMAC interrupts */
 
-  sam_putreg(priv, SAM_EMAC_IDR, EMAC_INT_ALL);
+  sam_putreg(priv, SAM_EMAC0_IDR, EMAC_INT_ALL);
 
   /* Reset RX and TX logic */
 
@@ -2714,7 +2714,7 @@ static void sam_emac_reset(struct sam_emac_s *priv)
   /* Disable RX, TX, and statistics */
 
   regval = EMAC_NCR_TE | EMAC_NCR_RE | EMAC_NCR_WESTAT | EMAC_NCR_CLRSTAT;
-  sam_putreg(priv, SAM_EMAC_NCR, regval);
+  sam_putreg(priv, SAM_EMAC0_NCR, regval);
 
   /* Disable clocking to the EMAC peripheral */
 
@@ -2754,11 +2754,11 @@ static void sam_macaddress(struct sam_emac_s *priv)
            (uint32_t)dev->d_mac.ether_addr_octet[1] << 8 |
            (uint32_t)dev->d_mac.ether_addr_octet[2] << 16 |
            (uint32_t)dev->d_mac.ether_addr_octet[3] << 24;
-  sam_putreg(priv, SAM_EMAC_SA1B, regval);
+  sam_putreg(priv, SAM_EMAC0_SA1B, regval);
 
   regval = (uint32_t)dev->d_mac.ether_addr_octet[4] |
            (uint32_t)dev->d_mac.ether_addr_octet[5] << 8;
-  sam_putreg(priv, SAM_EMAC_SA1T, regval);
+  sam_putreg(priv, SAM_EMAC0_SA1T, regval);
 }
 
 /****************************************************************************
@@ -2789,33 +2789,33 @@ static int sam_emac_configure(struct sam_emac_s *priv)
 
   /* Disable TX, RX, interrupts, etc. */
 
-  sam_putreg(priv, SAM_EMAC_NCR, 0);
-  sam_putreg(priv, SAM_EMAC_IDR, EMAC_INT_ALL);
+  sam_putreg(priv, SAM_EMAC0_NCR, 0);
+  sam_putreg(priv, SAM_EMAC0_IDR, EMAC_INT_ALL);
 
-  regval = sam_getreg(priv, SAM_EMAC_NCR);
+  regval = sam_getreg(priv, SAM_EMAC0_NCR);
   regval |= EMAC_NCR_CLRSTAT;
-  sam_putreg(priv, SAM_EMAC_NCR, regval);
+  sam_putreg(priv, SAM_EMAC0_NCR, regval);
 
   /* Clear all status bits in the receive status register. */
 
   regval = (EMAC_RSR_OVR | EMAC_RSR_REC | EMAC_RSR_BNA);
-  sam_putreg(priv, SAM_EMAC_RSR, regval);
+  sam_putreg(priv, SAM_EMAC0_RSR, regval);
 
   /* Clear all status bits in the transmit status register */
 
   regval = (EMAC_TSR_UBR | EMAC_TSR_COL | EMAC_TSR_RLES | EMAC_TSR_BEX |
             EMAC_TSR_COMP | EMAC_TSR_UND);
-  sam_putreg(priv, SAM_EMAC_TSR, regval);
+  sam_putreg(priv, SAM_EMAC0_TSR, regval);
 
   /* Clear any pending interrupts */
 
-  (void)sam_getreg(priv, SAM_EMAC_ISR);
+  (void)sam_getreg(priv, SAM_EMAC0_ISR);
 
   /* Enable/disable the copy of data into the buffers, ignore broadcasts.
    * Don't copy FCS.
    */
 
-  regval  = sam_getreg(priv, SAM_EMAC_NCFGR);
+  regval  = sam_getreg(priv, SAM_EMAC0_NCFGR);
   regval |= (EMAC_NCFGR_DRFCS | EMAC_NCFGR_PAE);
 
 #ifdef CONFIG_NET_PROMISCUOUS
@@ -2824,13 +2824,13 @@ static int sam_emac_configure(struct sam_emac_s *priv)
   regval &= ~EMAC_NCFGR_CAF;
 #endif
 
-#ifdef CONFIG_SAMA5_EMAC_NBC
+#ifdef CONFIG_SAMA5_EMAC0_NBC
   regval |=  EMAC_NCFGR_NBC;
 #else
   regval &= ~EMAC_NCFGR_NBC;
 #endif
 
-  sam_putreg(priv, SAM_EMAC_NCFGR, regval);
+  sam_putreg(priv, SAM_EMAC0_NCFGR, regval);
 
   /* Reset TX and RX */
 
@@ -2839,16 +2839,16 @@ static int sam_emac_configure(struct sam_emac_s *priv)
 
   /* Enable Rx and Tx, plus the stats register. */
 
-  regval  = sam_getreg(priv, SAM_EMAC_NCR);
+  regval  = sam_getreg(priv, SAM_EMAC0_NCR);
   regval |= (EMAC_NCR_RE | EMAC_NCR_TE | EMAC_NCR_WESTAT);
-  sam_putreg(priv, SAM_EMAC_NCR, regval);
+  sam_putreg(priv, SAM_EMAC0_NCR, regval);
 
   /* Setup the interrupts for TX events, RX events, and error events */
 
   regval = (EMAC_INT_RCOMP | EMAC_INT_RXUBR | EMAC_INT_TUND | EMAC_INT_RLE |
             EMAC_INT_TXERR | EMAC_INT_TCOMP | EMAC_INT_ROVR | EMAC_INT_HRESP |
             EMAC_INT_PFR | EMAC_INT_PTZ);
-  sam_putreg(priv, SAM_EMAC_IER, regval);
+  sam_putreg(priv, SAM_EMAC0_IER, regval);
   return OK;
 }
 
@@ -2965,4 +2965,4 @@ errout:
   return ret;
 }
 
-#endif /* CONFIG_NET && CONFIG_SAMA5_EMAC */
+#endif /* CONFIG_NET && CONFIG_SAMA5_EMAC0 */
