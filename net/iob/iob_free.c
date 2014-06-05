@@ -85,7 +85,7 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
 
   if (next)
     {
-      /* Just copy the flags and private information */
+      /* Just copy the flags and private information to the next entry. */
 
       next->io_flags = iob->io_flags;
       next->io_priv  = iob->io_priv;
@@ -96,13 +96,19 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
 
       if (iob->io_pktlen > iob->io_len)
         {
+          /* Adjust packet length and move it to the next entry */
+
           next->io_pktlen = iob->io_pktlen - iob->io_len;
           DEBUGASSERT(next->io_pktlen >= next->io_len);
         }
       else
         {
+          /* This can only happen if the next entry is last entry in the
+           * chain... and if it is empty
+           */
+
           next->io_pktlen = 0;
-          DEBUGASSERT(next->io_pktlen == 0 && next->io_link.flink == NULL);
+          DEBUGASSERT(next->io_len == 0 && next->io_link.flink == NULL);
         }
     }
 
