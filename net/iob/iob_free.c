@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <queue.h>
+#include <assert.h>
 
 #include <nuttx/net/iob.h>
 
@@ -76,8 +77,40 @@
 
 FAR struct iob_s *iob_free(FAR struct iob_s *iob)
 {
-  sq_entry_t *next = iob->io_link.flink;
+  FAR struct iob_s *next = (FAR struct iob_s *)iob->io_link.flink;
+
+  /* Copy the data that only exists in the head of a I/O buffer chain into
+   * the next entry.
+   */
+
+  if (next)
+    {
+      /* Just copy the flags and private information */
+
+      next->io_flags = iob->io_flags;
+      next->io_priv  = iob->io_priv;
+
+      /* Copy and decrement the total packet length, being careful to
+       * do nothing too crazy.
+       */
+
+      if (iob->io_pktlen > iob->io_len)
+        {
+          next->io_pktlen = iob->io_pktlen - iob->io_len;
+          DEBUGASSERT(next->io_pktlen >= next->io_len);
+        }
+      else
+        {
+          next->io_pktlen = 0;
+          DEBUGASSERT(next->io_pktlen == 0 && next->io_link.flink == NULL);
+        }
+    }
+
+  /* Free the I/O buffer by adding to the end of the free list */
 
   sq_addlast(&iob->io_link, &g_iob_freelist);
-  return (FAR struct iob_s *)next;
+
+  /* And return the I/O buffer after the one that was freed */
+
+  return next;
 }

@@ -75,8 +75,8 @@
 
 void iob_freeq(FAR sq_queue_t *q)
 {
-  /* If the free list is empty, then just move the entry queue to the the
-   * free list.  Otherwise, append the list to the end of the free list.
+  /* If the free list is empty, then just move the entry queue to the free
+   * list.  Otherwise, append the list to the end of the free list.
    */
 
   if (g_iob_freelist.tail)
@@ -93,4 +93,8 @@ void iob_freeq(FAR sq_queue_t *q)
    */
 
   g_iob_freelist.tail = q->tail;
+
+  /* Reset the queue to empty */
+
+  sq_init(q);
 }
