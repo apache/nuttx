@@ -39,6 +39,8 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
+
 #include <nuttx/net/iob.h>
 
 #include "iob.h"
@@ -75,23 +77,14 @@
 FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
 {
   FAR struct iob_s *entry;
-  uint8_t flags;
   uint16_t pktlen;
-  void *priv;
   unsigned int len;
 
   if (iob && trimlen > 0)
     {
-      /* Save information from the head of the chain (in case the
-       * head is removed).
-       */
-
-      flags  = iob->io_flags;
-      pktlen = iob->io_pktlen;
-      priv   = iob->io_priv;
-
       /* Trim from the head of the I/IO buffer chain */
 
+      pktlen = iob->io_pktlen;
       entry  = iob;
       len    = trimlen;
 
@@ -101,19 +94,34 @@ FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
 
           if (entry->io_len <= len)
             {
-              /* Decrement the trim length by the full data size */
+              FAR struct iob_s *next;
 
-              pktlen -= entry->io_len;
-              len    -= entry->io_len;
+              /* Decrement the trim length and packet length by the full
+               * data size.
+               */
 
-              /* Free this one and set the next I/O buffer as the head */
+              pktlen          -= entry->io_len;
+              len             -= entry->io_len;
+              entry->io_len    = 0;
+              entry->io_offset = 0;
 
-              iob =  (FAR struct iob_s *)entry->io_link.flink;
+              /* Check if this was the last entry in the chain */
+
+              next = (FAR struct iob_s *)entry->io_link.flink;
+              if (!next)
+                {
+                  /* Yes.. break out of the loop returning the empty
+                   * I/O buffer chain containing only one empty entry.
+                   */
+
+                  DEBUGASSERT(pktlen == 0);
+                  break;
+                }
+
+              /* Free this entry and set the next I/O buffer as the head */
+
               iob_free(entry);
-
-              /* Continue with the new buffer head */
-
-              entry = iob;
+              entry = next;
             }
           else
             {
@@ -124,21 +132,15 @@ FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
               pktlen           -= len;
               entry->io_len    -= len;
               entry->io_offset += len;
-              len = 0;
+              len               = 0;
             }
         }
 
-      /* Restore the state to the head of the chain (which may not be
-       * the same I/O buffer chain head that we started with).
-       *
-       * Adjust the pktlen by the number of bytes removed from the head
-       * of the I/O buffer chain.  A special case is where we delete the
-       * entire chain:  len > 0 and iob == NULL.
+      /* Adjust the pktlen by the number of bytes removed from the head
+       * of the I/O buffer chain.
        */
 
-      iob->io_flags  = flags;
       iob->io_pktlen = pktlen;
-      iob->io_priv   = priv;
     }
 
   return iob;

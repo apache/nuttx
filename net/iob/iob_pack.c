@@ -91,19 +91,7 @@ FAR struct iob_s *iob_pack(FAR struct iob_s *iob)
 
   while (iob->io_len <= 0)
     {
-      /* Save elements that are only valid on the first entry */
-
-      uint8_t  flags  = iob->io_flags;
-      uint16_t pktlen = iob->io_pktlen;
-      void    *priv   = iob->io_priv;
-
       iob = iob_free(iob);
-
-      /* Restore saved settings */
-
-      iob->io_flags   = flags;
-      iob->io_pktlen  = pktlen;
-      iob->io_priv    = priv;
     }
 
   /* Now remember the head of the chain (for the return value) */
