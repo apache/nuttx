@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/iob/iob_freeq.c
+ * net/iob/iob_freechain.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -66,35 +66,36 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_freeq
+ * Name: iob_freechain
  *
  * Description:
- *   Free an entire buffer chain, starting at a queue head
+ *   Free an entire buffer chain, starting at the beginning of the I/O
+ *   buffer chain
  *
  ****************************************************************************/
 
-void iob_freeq(FAR sq_queue_t *q)
+void iob_freechain(FAR struct iob_s *iob)
 {
-  /* If the free list is empty, then just move the entry queue to the free
-   * list.  Otherwise, append the list to the end of the free list.
+  FAR sq_entry_t *first = (sq_entry_t *)&iob->io_link;
+  FAR sq_entry_t *last;
+
+  /* Find the last entry in the I/O buffer list */
+
+  for (last = first; last->flink; last = last->flink);
+
+  /* If the free list is empty, then just move the I/O buffer chain to the
+   * free list.  Otherwise, append the I/O buffer chain to the end of the
+   * free list.
    */
 
   if (g_iob_freelist.tail)
     {
-      g_iob_freelist.tail->flink = q->head;
+      g_iob_freelist.tail->flink = first;
     }
   else
     {
-      g_iob_freelist.head = q->head;
+      g_iob_freelist.head = first;
     }
 
-  /* In either case, the tail of the queue is the tail of queue becomes the
-   * tail of the free list.
-   */
-
-  g_iob_freelist.tail = q->tail;
-
-  /* Reset the queue to empty */
-
-  sq_init(q);
+  g_iob_freelist.tail = last;
 }

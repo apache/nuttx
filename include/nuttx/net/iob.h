@@ -124,10 +124,21 @@ FAR struct iob_s *iob_alloc(void);
 FAR struct iob_s *iob_free(FAR struct iob_s *iob);
 
 /****************************************************************************
+ * Name: iob_freechain
+ *
+ * Description:
+ *   Free an entire buffer chain, starting at the beginning of the I/O
+ *   buffer chain
+ *
+ ****************************************************************************/
+
+void iob_freechain(FAR struct iob_s *iob);
+
+/****************************************************************************
  * Name: iob_freeq
  *
  * Description:
- *   Free an entire buffer chain
+ *   Free an entire buffer chain, starting at a queue head
  *
  ****************************************************************************/
 
