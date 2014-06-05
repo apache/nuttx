@@ -77,16 +77,17 @@
  *
  * Description:
  *  Copy data 'len' bytes of data into the user buffer starting at 'offset'
- *  in the I/O buffer.
+ *  in the I/O buffer, returning that actual number of bytes copied out.
  *
  ****************************************************************************/
 
-void iob_copyout(FAR uint8_t *dest, FAR const struct iob_s *iob,
-                 unsigned int len, unsigned int offset)
+int iob_copyout(FAR uint8_t *dest, FAR const struct iob_s *iob,
+                unsigned int len, unsigned int offset)
 {
   FAR const uint8_t *src;
   unsigned int ncopy;
   unsigned int avail;
+  unsigned int remaining;
 
   /* Skip to the I/O buffer containing the offset */
 
@@ -98,10 +99,9 @@ void iob_copyout(FAR uint8_t *dest, FAR const struct iob_s *iob,
 
   /* Then loop until all of the I/O data is copied to the user buffer */
 
-  while (len > 0)
+  remaining = len;
+  while (iob && remaining > 0)
     {
-      ASSERT(iob);
-
       /* Get the source I/O buffer offset address and the amount of data
        * available from that address.
        */
@@ -111,14 +111,14 @@ void iob_copyout(FAR uint8_t *dest, FAR const struct iob_s *iob,
 
       /* Copy the from the I/O buffer in to the user buffer */
 
-      ncopy = MIN(avail, len);
+      ncopy = MIN(avail, remaining);
       memcpy(dest, src, ncopy);
 
       /* Adjust the total length of the copy and the destination address in
        * the user buffer.
        */
 
-      len  -= ncopy;
+      remaining -= ncopy;
       dest += ncopy;
 
       /* Skip to the next I/O buffer in the chain */
@@ -126,4 +126,6 @@ void iob_copyout(FAR uint8_t *dest, FAR const struct iob_s *iob,
       iob = (FAR struct iob_s *)iob->io_link.flink;
       offset = 0;
     }
+
+  return len - remaining;
 }

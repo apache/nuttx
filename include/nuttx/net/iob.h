@@ -54,7 +54,7 @@
 /* IOB flags */
 
 #define IOBFLAGS_MCAST   (1 << 0) /* Multicast packet */
-#define IOBFLAGS_VLANTAG (1 << 0) /* VLAN tag is value */
+#define IOBFLAGS_VLANTAG (1 << 1) /* VLAN tag is value (not supported) */
 
 /****************************************************************************
  * Public Types
@@ -69,10 +69,17 @@ struct iob_s
 {
   sq_entry_t io_link;    /* Link to the next I/O buffer in the chain */
   uint8_t    io_flags;   /* Flags associated with the I/O buffer */
+#if CONFIG_IOB_BUFSIZE < 256
+  uint8_t    io_len;     /* Length of the data in the entry */
+  uint8_t    io_offset;  /* Data begins at this offset */
+#else
   uint16_t   io_len;     /* Length of the data in the entry */
   uint16_t   io_offset;  /* Data begins at this offset */
+#endif
   uint16_t   io_pktlen;  /* Total length of the packet */
-  uint16_t   io_vtag;    /* VLAN tag */
+#ifdef __NO_VLAN__
+  uint16_t   io_vtag;    /* VLAN tag (not supported) */
+#endif
   void      *io_priv;    /* User private data attached to the I/O buffer */
   uint8_t    io_data[CONFIG_IOB_BUFSIZE];
 };
@@ -127,16 +134,28 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob);
 void iob_freeq(FAR sq_queue_t *q);
 
 /****************************************************************************
+ * Name: iob_copyin
+ *
+ * Description:
+ *  Copy data 'len' bytes from a user buffer into the I/O buffer chain,
+ *  starting at 'offset', extending the chain as necessary.
+ *
+ ****************************************************************************/
+
+int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
+               unsigned int len, unsigned int offset);
+
+/****************************************************************************
  * Name: iob_copyout
  *
  * Description:
  *  Copy data 'len' bytes of data into the user buffer starting at 'offset'
- *  in the I/O buffer.
+ *  in the I/O buffer, returning that actual number of bytes copied out.
  *
  ****************************************************************************/
 
-void iob_copyout(FAR uint8_t *dest, FAR const struct iob_s *iob,
-                 unsigned int len, unsigned int offset);
+int iob_copyout(FAR uint8_t *dest, FAR const struct iob_s *iob,
+                unsigned int len, unsigned int offset);
 
 /****************************************************************************
  * Name: iob_concat

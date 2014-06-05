@@ -77,7 +77,6 @@ FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
   FAR struct iob_s *entry;
   uint8_t flags;
   uint16_t pktlen;
-  uint16_t vtag;
   void *priv;
   unsigned int len;
 
@@ -89,7 +88,6 @@ FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
 
       flags  = iob->io_flags;
       pktlen = iob->io_pktlen;
-      vtag   = iob->io_vtag;
       priv   = iob->io_priv;
 
       /* Trim from the head of the I/IO buffer chain */
@@ -97,7 +95,7 @@ FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
       entry  = iob;
       len    = trimlen;
 
-      while (entry != NULL)
+      while (len > 0 && entry != NULL)
         {
           /* Do we trim this entire I/O buffer away? */
 
@@ -140,7 +138,6 @@ FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
 
       iob->io_flags  = flags;
       iob->io_pktlen = pktlen;
-      iob->io_vtag   = vtag;
       iob->io_priv   = priv;
     }
 

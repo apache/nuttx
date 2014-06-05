@@ -43,6 +43,7 @@
 #include <string.h>
 #include <queue.h>
 #include <errno.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <nuttx/net/iob.h>
@@ -78,7 +79,7 @@
  *
  * Description:
  *  Copy data 'len' bytes from a user buffer into the I/O buffer chain,
- *  starting at 'offset'.
+ *  starting at 'offset', extending the chain as necessary.
  *
  ****************************************************************************/
 
@@ -86,13 +87,25 @@ int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
                unsigned int len, unsigned int offset)
 {
   FAR struct iob_s *head = iob;
+  FAR struct iob_s *next;
   FAR uint8_t *dest;
   unsigned int ncopy;
   unsigned int avail;
 
+  DEBUGASSERT(iob && src);
+
+  /* The offset must applied to data that is already in the I/O buffer chain */
+
+  if (offset > iob->io_pktlen)
+    {
+      ndbg("ERROR: offset is past the end of data: %d > %d\n",
+           offset, iob->io_pktlen);
+      return -ESPIPE;
+    }
+
   /* Skip to the I/O buffer containing the data offset */
 
-  while (offset >= iob->io_len)
+  while (offset > iob->io_len)
     {
       offset -= iob->io_len;
       iob     = (FAR struct iob_s *)iob->io_link.flink;
@@ -102,18 +115,69 @@ int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
 
   while (len > 0)
     {
+      next = (FAR struct iob_s *)iob->io_link.flink;
+
       /* Get the destination I/O buffer address and the amount of data
-       * available from that address.  We don't want to extend the length
-       * an I/O buffer here.
+       * available from that address.
        */
 
       dest  = &iob->io_data[iob->io_offset + offset];
       avail = iob->io_len - offset;
 
-      /* Copy from the user buffer to the I/O buffer
+      /* Will the rest of the copy fit into this buffer, overwriting
+       * existing data.
        */
 
-      ncopy = MIN(len, avail);
+      if (len > avail)
+        {
+          /* No.. Is this the last buffer in the chain? */
+
+          if (next)
+            {
+              /* No.. clip to size that will overwrite.  We cannot
+               * extend the length of an I/O block in mid-chain.
+               */
+
+              ncopy = avail;
+            }
+          else
+            {
+              unsigned int maxlen;
+              unsigned int newlen;
+
+              /* Yes.. We can extend this buffer to the up to the very end. */
+
+              maxlen  = CONFIG_IOB_BUFSIZE - iob->io_offset;
+
+              /* This is the new buffer length that we need.  Of course,
+               * clipped to the maximum possible size in this buffer.
+               */
+
+              newlen = len + offset;
+              if (newlen > maxlen)
+                {
+                  newlen = maxlen;
+                }
+
+              /* Set the new length and increment the packet length */
+
+              head->io_pktlen += (newlen - iob->io_len);
+              iob->io_len      = newlen;
+
+              /* Set the new number of bytes to copy */
+
+              ncopy = newlen - offset;
+            }
+        }
+      else
+        {
+          /* Yes.. Copy all of the remaining bytes */
+
+          ncopy = len;
+        }
+
+      /* Copy from the user buffer to the I/O buffer.  */
+
       memcpy(dest, src, ncopy);
 
       /* Adjust the total length of the copy and the destination address in
@@ -127,38 +191,23 @@ int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
        * are at the end of the buffer chain.
        */
 
-      if (iob->io_link.flink == NULL)
+      if (len > 0 && !next)
         {
-          struct iob_s *newiob;
-          unsigned int newlen;
-
           /* Yes.. allocate a new buffer */
 
-          newiob = iob_alloc();
-          if (newiob == NULL)
+          next = iob_alloc();
+          if (next == NULL)
             {
               ndbg("ERROR: Failed to allocate I/O buffer\n");
               return -ENOMEM;
             }
 
-          /* Add the new I/O buffer to the end of the buffer chain. */
+          /* Add the new, empty I/O buffer to the end of the buffer chain. */
 
-          iob->io_link.flink = &newiob->io_link;
-          iob                = newiob;
-
-          /* The additional bytes extend the length of the packet */
-
-          newlen             = MIN(len, CONFIG_IOB_BUFSIZE);
-          iob->io_len        = newlen;
-          head->io_pktlen   += newlen;
-        }
-      else
-        {
-          /* Otherwise, just move to the next buffer in the list */
-
-          iob = (FAR struct iob_s *)iob->io_link.flink;
+          iob->io_link.flink = &next->io_link;
         }
 
+      iob = next;
       offset = 0;
     }
 

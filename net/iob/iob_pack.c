@@ -95,7 +95,6 @@ FAR struct iob_s *iob_pack(FAR struct iob_s *iob)
 
       uint8_t  flags  = iob->io_flags;
       uint16_t pktlen = iob->io_pktlen;
-      uint16_t vtag   = iob->io_vtag;
       void    *priv   = iob->io_priv;
 
       iob = iob_free(iob);
@@ -104,7 +103,6 @@ FAR struct iob_s *iob_pack(FAR struct iob_s *iob)
 
       iob->io_flags   = flags;
       iob->io_pktlen  = pktlen;
-      iob->io_vtag    = vtag;
       iob->io_priv    = priv;
     }
 
