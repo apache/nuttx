@@ -158,6 +158,16 @@ int iob_copyout(FAR uint8_t *dest, FAR const struct iob_s *iob,
                 unsigned int len, unsigned int offset);
 
 /****************************************************************************
+ * Name: iob_clone
+ *
+ * Description:
+ *   Duplicate (and pack) the data in iob1 in iob2.  iob2 must be empty.
+ *
+ ****************************************************************************/
+
+int iob_clone(FAR struct iob_s *iob1, FAR struct iob_s *iob2);
+
+/****************************************************************************
  * Name: iob_concat
  *
  * Description:
