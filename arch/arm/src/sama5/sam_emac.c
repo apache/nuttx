@@ -1625,7 +1625,7 @@ static int sam_ifup(struct uip_driver_s *dev)
   /* Enable the EMAC interrupt */
 
   priv->ifup = true;
-  up_enable_irq(SAM_IRQ_EMAC);
+  up_enable_irq(SAM_IRQ_EMAC0);
   return OK;
 }
 
@@ -1655,7 +1655,7 @@ static int sam_ifdown(struct uip_driver_s *dev)
   /* Disable the EMAC interrupt */
 
   flags = irqsave();
-  up_disable_irq(SAM_IRQ_EMAC);
+  up_disable_irq(SAM_IRQ_EMAC0);
 
   /* Cancel the TX poll timer and TX timeout timers */
 
@@ -2718,7 +2718,7 @@ static void sam_emac_reset(struct sam_emac_s *priv)
 
   /* Disable clocking to the EMAC peripheral */
 
-  sam_emac_disableclk();
+  sam_emac0_disableclk();
 }
 
 /****************************************************************************
@@ -2785,7 +2785,7 @@ static int sam_emac_configure(struct sam_emac_s *priv)
 
   /* Enable clocking to the EMAC peripheral */
 
-  sam_emac_enableclk();
+  sam_emac0_enableclk();
 
   /* Disable TX, RX, interrupts, etc. */
 
@@ -2925,16 +2925,16 @@ int sam_emac_initialize(void)
    * the interface is in the 'up' state.
    */
 
-  ret = irq_attach(SAM_IRQ_EMAC, sam_emac_interrupt);
+  ret = irq_attach(SAM_IRQ_EMAC0, sam_emac_interrupt);
   if (ret < 0)
     {
-      nlldbg("ERROR: Failed to attach the handler to the IRQ%d\n", SAM_IRQ_EMAC);
+      nlldbg("ERROR: Failed to attach the handler to the IRQ%d\n", SAM_IRQ_EMAC0);
       goto errout_with_buffers;
     }
 
   /* Enable clocking to the EMAC peripheral (just for sam_ifdown()) */
 
-  sam_emac_enableclk();
+  sam_emac0_enableclk();
 
   /* Put the interface in the down state (disabling clocking again). */
 

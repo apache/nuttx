@@ -157,7 +157,7 @@
 #  define SAM_RSTC_OFFSET        0x00068600 /* 0x00068600-0x0006860f: RSTC */
 #  define SAM_SHDC_OFFSET        0x00068610 /* 0x00068610-0x0006862f: SHDC */
 #  define SAM_PITC_OFFSET        0x00068630 /* 0x00068630-0x0006863f: PITC */
-#  define SAM_WDTC_OFFSET        0x00068640 /* 0x00068640-0x0006864f: WDTC */
+#  define SAM_WDT_OFFSET         0x00068640 /* 0x00068640-0x0006864f: WDTC */
 #  define SAM_SCKCR_OFFSET       0x00068650 /* 0x00068650-0x000686af: SCKCR */
 #  define SAM_RTCC_OFFSET        0x000686b0 /* 0x000686b0-0x000688cf: RTCC */
 #  define SAM_DBGU_OFFSET        0x00069000 /* 0x00069000-0x0006bfff: DBGU */
@@ -246,8 +246,8 @@
 #define SAM_NFCCR_NSECTIONS      _NSECTIONS(SAM_NFCCR_SIZE)
 
 #define SAM_PERIPHA_NSECTIONS    _NSECTIONS(SAM_PERIPHA_SIZE)
-#define SAM_PERIPHB_NSECTIONS    _NSECTIONS(SAM_PERIPHB_NSECTIONS)
-#define SAM_PERIPHC_NSECTIONS    _NSECTIONS(SAM_PERIPHC_NSECTIONS)
+#define SAM_PERIPHB_NSECTIONS    _NSECTIONS(SAM_PERIPHB_SIZE)
+#define SAM_PERIPHC_NSECTIONS    _NSECTIONS(SAM_PERIPHC_SIZE)
 
 /* Section MMU Flags */
 
@@ -344,31 +344,31 @@
  * the high vectors must reside.
  */
 
-#define SAM_INTMEM_VSECTION      0x00000000 /* 0x00000000-0x0fffffff: Internal Memories */
-#  define SAM_BOOTMEM_VSECTION   0x00000000 /* 0x00000000-0x000fffff: Boot memory */
-#  define SAM_ROM_VSECTION       0x00000000 /* 0x00000000-0x000fffff: ROM */
-#  define SAM_NFCSRAM_VSECTION   0x00100000 /* 0x00100000-0x001fffff: NFC SRAM */
-#  define SAM_ISRAM_VSECTION     0x00200000 /* 0x00200000-0x0020ffff: SRAM */
-#    define SAM_ISRAM0_PADDR     0x00200000 /* 0x00200000-0x0020ffff: SRAM0 */
-#    define SAM_ISRAM1_PADDR     0x00210000 /* 0x00210000-0x002fffff: SRAM1 */
-#  define SAM_VDEC_VSECTION      0x00300000 /* 0x00300000-0x0030ffff: VDEC */
-#  define SAM_UDPHSRAM_VSECTION  0x00400000 /* 0x00400000-0x004fffff: UDPH SRAM */
-#  define SAM_UHPOHCI_VSECTION   0x00500000 /* 0x00500000-0x005fffff: UHP OHCI */
-#  define SAM_UHPEHCI_VSECTION   0x00600000 /* 0x00600000-0x006fffff: UHP EHCI */
-#  define SAM_AXIMX_VSECTION     0x00700000 /* 0x00700000-0x007fffff: AXI Matr */
-#  define SAM_DAP_VSECTION       0x00800000 /* 0x00800000-0x008fffff: DAP */
-#  define SAM_SMD_VSECTION       0x00900000 /* 0x00900000-0x009fffff: SMD */
-#  define SAM_L2CC_VSECTION      0x00a00000 /* 0x00a00000-0x00afffff: L2CC */
-
-#define SAM_EBICS0_VSECTION      0x10000000 /* 0x10000000-0x1fffffff: EBI Chip select 0 */
-#define SAM_DDRCS_VSECTION       0x20000000 /* 0x20000000-0x3fffffff: EBI DDRCS */
-#define SAM_EBICS1_VSECTION      0x60000000 /* 0x60000000-0x6fffffff: EBI Chip select 1 */
-#define SAM_EBICS2_VSECTION      0x70000000 /* 0x70000000-0x7fffffff: EBI Chip select 2 */
-#define SAM_EBICS3_VSECTION      0x80000000 /* 0x80000000-0x8fffffff: EBI Chip select 2 */
-#define SAM_NFCCR_VSECTION       0x90000000 /* 0x90000000-0x9fffffff: NFC Command Registers */
-#define SAM_PERIPHA_VSECTION     0xf0000000 /* 0xf0000000-0xf0023fff: Internal Peripherals A */
-#define SAM_PERIPHB_VSECTION     0xf8000000 /* 0xf8000000-0xf803c3ff: Internal Peripherals B */
-#define SAM_PERIPHC_VSECTION     0xfc000000 /* 0xfc000000-0xfc06efff: Internal Peripherals C */
+#  define SAM_INTMEM_VSECTION     0x00000000 /* 0x00000000-0x0fffffff: Internal Memories */
+#    define SAM_BOOTMEM_VSECTION  0x00000000 /* 0x00000000-0x000fffff: Boot memory */
+#    define SAM_ROM_VSECTION      0x00000000 /* 0x00000000-0x000fffff: ROM */
+#    define SAM_NFCSRAM_VSECTION  0x00100000 /* 0x00100000-0x001fffff: NFC SRAM */
+#    define SAM_ISRAM_VSECTION    0x00200000 /* 0x00200000-0x0020ffff: SRAM */
+#      define SAM_ISRAM0_VADDR    0x00200000 /* 0x00200000-0x0020ffff: SRAM0 */
+#      define SAM_ISRAM1_VADDR    0x00210000 /* 0x00210000-0x002fffff: SRAM1 */
+#    define SAM_VDEC_VSECTION     0x00300000 /* 0x00300000-0x0030ffff: VDEC */
+#    define SAM_UDPHSRAM_VSECTION 0x00400000 /* 0x00400000-0x004fffff: UDPH SRAM */
+#    define SAM_UHPOHCI_VSECTION  0x00500000 /* 0x00500000-0x005fffff: UHP OHCI */
+#    define SAM_UHPEHCI_VSECTION  0x00600000 /* 0x00600000-0x006fffff: UHP EHCI */
+#    define SAM_AXIMX_VSECTION    0x00700000 /* 0x00700000-0x007fffff: AXI Matr */
+#    define SAM_DAP_VSECTION      0x00800000 /* 0x00800000-0x008fffff: DAP */
+#    define SAM_SMD_VSECTION      0x00900000 /* 0x00900000-0x009fffff: SMD */
+#    define SAM_L2CC_VSECTION     0x00a00000 /* 0x00a00000-0x00afffff: L2CC */
+#  define SAM_EBICS0_VSECTION     0x10000000 /* 0x10000000-0x1fffffff: EBI Chip select 0 */
+#  define SAM_DDRCS_VSECTION      0x20000000 /* 0x20000000-0x3fffffff: EBI DDRCS */
+#  define SAM_EBICS1_VSECTION     0x60000000 /* 0x60000000-0x6fffffff: EBI Chip select 1 */
+#  define SAM_EBICS2_VSECTION     0x70000000 /* 0x70000000-0x7fffffff: EBI Chip select 2 */
+#  define SAM_EBICS3_VSECTION     0x80000000 /* 0x80000000-0x8fffffff: EBI Chip select 2 */
+#  define SAM_NFCCR_VSECTION      0x90000000 /* 0x90000000-0x9fffffff: NFC Command Registers */
+#  define SAM_PERIPHA_VSECTION    0xf0000000 /* 0xf0000000-0xf0023fff: Internal Peripherals A */
+#  define SAM_PERIPHB_VSECTION    0xf8000000 /* 0xf8000000-0xf803c3ff: Internal Peripherals B */
+#  define SAM_PERIPHC_VSECTION    0xfc000000 /* 0xfc000000-0xfc06efff: Internal Peripherals C */
+#endif /* !CONFIG_ARCH_ROMPGTABLE */
 
 /* Peripheral virtual base addresses */
 
@@ -425,7 +425,7 @@
 #define SAM_RSTC_VBASE           (SAM_PERIPHC_VSECTION+SAM_RSTC_OFFSET)
 #define SAM_SHDC_VBASE           (SAM_PERIPHC_VSECTION+SAM_SHDC_OFFSET)
 #define SAM_PITC_VBASE           (SAM_PERIPHC_VSECTION+SAM_PITC_OFFSET)
-#define SAM_WDTC_VBASE           (SAM_PERIPHC_VSECTION+SAM_WDTC_OFFSET)
+#define SAM_WDT_VBASE            (SAM_PERIPHC_VSECTION+SAM_WDT_OFFSET)
 #define SAM_SCKCR_VBASE          (SAM_PERIPHC_VSECTION+SAM_SCKCR_OFFSET)
 #define SAM_RTCC_VBASE           (SAM_PERIPHC_VSECTION+SAM_RTCC_OFFSET)
 #define SAM_DBGU_VBASE           (SAM_PERIPHC_VSECTION+SAM_DBGU_OFFSET)
@@ -712,7 +712,7 @@
 
 #  define PGTABLE_L2_OFFSET       0x000002000
 #  define PGTABLE_L2_SIZE         0x000001c00
-#endif
+#endif /* CONFIG_ARCH_LOWVECTORS */
 
 /* Paging L2 page table base addresses
  *
@@ -754,7 +754,7 @@
 #  endif
 #  define SAM_VECTOR_VADDR        0xffff0000
 
-#endif
+#endif /* CONFIG_ARCH_LOWVECTORS */
 
 /************************************************************************************
  * Public Types

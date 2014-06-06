@@ -55,6 +55,8 @@
 
 #if defined(ATSAMA5D3)
 #  include <arch/sama5/sama5d3_irq.h>
+#elif defined(ATSAMA5D4)
+#  include <arch/sama5/sama5d4_irq.h>
 #else
 #  error Unrecognized SAMA5 family
 #endif
