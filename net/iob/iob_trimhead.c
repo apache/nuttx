@@ -76,7 +76,6 @@
 
 FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
 {
-  FAR struct iob_s *entry;
   uint16_t pktlen;
   unsigned int len;
 
@@ -85,14 +84,13 @@ FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
       /* Trim from the head of the I/IO buffer chain */
 
       pktlen = iob->io_pktlen;
-      entry  = iob;
       len    = trimlen;
 
-      while (len > 0 && entry != NULL)
+      while (len > 0 && iob != NULL)
         {
           /* Do we trim this entire I/O buffer away? */
 
-          if (entry->io_len <= len)
+          if (iob->io_len <= len)
             {
               FAR struct iob_s *next;
 
@@ -100,14 +98,14 @@ FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
                * data size.
                */
 
-              pktlen          -= entry->io_len;
-              len             -= entry->io_len;
-              entry->io_len    = 0;
-              entry->io_offset = 0;
+              pktlen        -= iob->io_len;
+              len           -= iob->io_len;
+              iob->io_len    = 0;
+              iob->io_offset = 0;
 
               /* Check if this was the last entry in the chain */
 
-              next = (FAR struct iob_s *)entry->io_link.flink;
+              next = (FAR struct iob_s *)iob->io_link.flink;
               if (!next)
                 {
                   /* Yes.. break out of the loop returning the empty
@@ -120,8 +118,7 @@ FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
 
               /* Free this entry and set the next I/O buffer as the head */
 
-              (void)iob_free(entry);
-              entry = next;
+              (void)iob_free(iob);
               iob   = next;
             }
           else
@@ -130,10 +127,10 @@ FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
                * stop the trim.
                */
 
-              pktlen           -= len;
-              entry->io_len    -= len;
-              entry->io_offset += len;
-              len               = 0;
+              pktlen         -= len;
+              iob->io_len    -= len;
+              iob->io_offset += len;
+              len             = 0;
             }
         }
 
