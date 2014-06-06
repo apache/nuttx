@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc17xx/lpc17_gpdma.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,6 +73,7 @@ struct lpc17_dmach_s
   uint8_t chn;             /* The DMA channel number */
   bool inuse;              /* True: The channel is in use */
   bool inprogress;         /* True: DMA is in progress on this channel */
+  uint16_t nxfrs;          /* Number of transfers */
   dma_callback_t callback; /* DMA completion callback function */
   void *arg;               /* Argument to pass to the callback function */
 };
@@ -464,7 +465,7 @@ int lpc17_dmasetup(DMA_HANDLE handle, uint32_t control, uint32_t config,
   uint32_t regval;
   uint32_t base;
 
-  DEBUGASSERT(dmach && dmach->inuse);
+  DEBUGASSERT(dmach && dmach->inuse && nxfrs < 4096);
 
   chbit = DMACH((uint32_t)dmach->chn);
   base  = LPC17_DMACH_BASE((uint32_t)dmach->chn);
@@ -522,6 +523,10 @@ int lpc17_dmasetup(DMA_HANDLE handle, uint32_t control, uint32_t config,
   regval |= ((uint32_t)nxfrs << DMACH_CONTROL_XFRSIZE_SHIFT);
   putreg32(regval, base + LPC17_DMACH_CONTROL_OFFSET);
 
+  /* Save the number of transfer to perform for lpc17_dmastart */
+
+  dmach->nxfrs = (uint16_t)nxfrs;
+
   /* 7. "Write the channel configuration information into the DMACCxConfig
    *     register. If the enable bit is set then the DMA channel is
    *     automatically enabled."
@@ -573,11 +578,15 @@ int lpc17_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
   putreg32(chbit, LPC17_DMA_INTTCCLR);
   putreg32(chbit, LPC17_DMA_INTERRCLR);
 
-  /* Enable terminal count interrupt */
+  /* Enable terminal count interrupt.  Note that we need to restore the
+   * number transfers.  That is because the value has a different meaning
+   * when it is read.
+   */
 
   base    = LPC17_DMACH_BASE((uint32_t)dmach->chn);
   regval  = getreg32(base + LPC17_DMACH_CONTROL_OFFSET);
-  regval |= DMACH_CONTROL_I;
+  regval &= ~DMACH_CONTROL_XFRSIZE_MASK;
+  regval |= (DMACH_CONTROL_I | ((uint32_t)dmach->nxfrs << DMACH_CONTROL_XFRSIZE_SHIFT));
   putreg32(regval, base + LPC17_DMACH_CONTROL_OFFSET);
 
   /* Enable the channel and unmask terminal count and error interrupts.
