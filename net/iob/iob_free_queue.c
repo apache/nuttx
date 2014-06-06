@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/iob/iob.h
+ * net/iob/iob_free_queue.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,16 +33,17 @@
  *
  ****************************************************************************/
 
-#ifndef __NET_IOB_IOB_H
-#define __NET_IOB_IOB_H 1
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <assert.h>
+
 #include <nuttx/net/iob.h>
+
+#include "iob.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -52,47 +53,62 @@
  * Private Types
  ****************************************************************************/
 
+#ifndef NULL
+#  define NULL ((FAR void *)0)
+#endif
+
 /****************************************************************************
- * Public Data
+ * Private Data
  ****************************************************************************/
-
-/* A list of all free, unallocated I/O buffers */
-
-extern FAR struct iob_s *g_iob_freelist;
-
-/* A list of all free, unallocated I/O buffer queue containers */
-
-extern FAR struct iob_qentry_s *g_iob_freeqlist;
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_alloc_qentry
+ * Name: iob_free_queue
  *
  * Description:
- *   Allocate an I/O buffer chain container by taking the buffer at the head
- *   of the free list. This function is intended only for internal use by
- *   the IOB module.
+ *   Free an entire queue of I/O buffer chains.
  *
  ****************************************************************************/
 
-FAR struct iob_qentry_s *iob_alloc_qentry(void);
+void iob_free_queue(FAR struct iob_queue_s *qhead)
+{
+  FAR struct iob_qentry_s *iobq;
+  FAR struct iob_qentry_s *nextq;
+  FAR struct iob_s *iob;
 
-/****************************************************************************
- * Name: iob_free_qentry
- *
- * Description:
- *   Free the I/O buffer chain container by returning it to the  free list.
- *   The link to  the next I/O buffer in the chain is return.
- *
- ****************************************************************************/
+  /* Detach the list from the queue head so first for safety (should be safe
+   * anyway).
+   */
 
-FAR struct iob_qentry_s *iob_free_qentry(FAR struct iob_qentry_s *iobq);
+  iobq           = qhead->qh_head;
+  qhead->qh_head = NULL;
 
-#endif /* __NET_IOB_IOB_H */
+  /* Remove each I/O buffer chain from the queue */
+
+  while (iobq)
+    {
+      /* Remove the I/O buffer chain from the head of the queue and
+       * discard the queue container.
+       */
+
+      iob = iobq->qe_head;
+      DEBUGASSERT(iob);
+
+      /* Remove the queue container from the list and discard it */
+
+      nextq = iobq->qe_flink;
+      iob_free_qentry(iobq);
+      iobq = nextq;
+
+      /* Free the I/O chain */
+
+      iob_free_chain(iob);
+    }
+}

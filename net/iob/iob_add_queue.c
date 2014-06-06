@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/iob/iob_freeq.c
+ * net/iob/iob_add_queue.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,7 +39,9 @@
 
 #include <nuttx/config.h>
 
-#include <queue.h>
+#include <assert.h>
+#include <errno.h>
+#include <debug.h>
 
 #include <nuttx/net/iob.h>
 
@@ -49,52 +51,54 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
+#ifndef NULL
+#  define NULL ((FAR void *)0)
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_freeq
+ * Name: iob_add_queue
  *
  * Description:
- *   Free an entire buffer chain, starting at a queue head
+ *   Add one I/O buffer chain to the end of a queue.  May fail due to lack
+ *   of resources.
  *
  ****************************************************************************/
 
-void iob_freeq(FAR sq_queue_t *q)
+int iob_add_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq)
 {
-  /* If the free list is empty, then just move the entry queue to the free
-   * list.  Otherwise, append the list to the end of the free list.
-   */
+  FAR struct iob_qentry_s *qentry;
 
-  if (g_iob_freelist.tail)
+  /* Allocate a container to hold the I/O buffer chain */
+
+  qentry = iob_alloc_qentry();
+  if (!qentry)
     {
-      g_iob_freelist.tail->flink = q->head;
+      ndbg("ERROR: Failed to allocate a container\n");
+      return -ENOMEM;
+    }
+
+  /* Add the I/O buffer chain to the container */
+
+  qentry->qe_head = iob;
+
+  /* Add the container to the end of the queue */
+
+  qentry->qe_flink = NULL;
+  if (!iobq->qh_head)
+    {
+      iobq->qh_head = qentry;
+      iobq->qh_tail = qentry;
     }
   else
     {
-      g_iob_freelist.head = q->head;
+      DEBUGASSERT(iobq->qh_tail);
+      iobq->qh_tail->qe_flink = qentry;
+      iobq->qh_tail = qentry;
     }
 
-  /* In either case, the tail of the queue is the tail of queue becomes the
-   * tail of the free list.
-   */
-
-  g_iob_freelist.tail = q->tail;
-
-  /* Reset the queue to empty */
-
-  sq_init(q);
+  return 0;
 }

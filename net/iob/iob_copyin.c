@@ -41,7 +41,6 @@
 
 #include <stdint.h>
 #include <string.h>
-#include <queue.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
@@ -108,14 +107,14 @@ int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
   while (offset > iob->io_len)
     {
       offset -= iob->io_len;
-      iob     = (FAR struct iob_s *)iob->io_link.flink;
+      iob     = iob->io_flink;
     }
 
   /* Then loop until all of the I/O data is copied from the user buffer */
 
   while (len > 0)
     {
-      next = (FAR struct iob_s *)iob->io_link.flink;
+      next = iob->io_flink;
 
       /* Get the destination I/O buffer address and the amount of data
        * available from that address.
@@ -204,7 +203,7 @@ int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
 
           /* Add the new, empty I/O buffer to the end of the buffer chain. */
 
-          iob->io_link.flink = &next->io_link;
+          iob->io_flink = next;
         }
 
       iob = next;

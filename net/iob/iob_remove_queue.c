@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/iob/iob.h
+ * net/iob/iob_remove_queue.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,66 +33,62 @@
  *
  ****************************************************************************/
 
-#ifndef __NET_IOB_IOB_H
-#define __NET_IOB_IOB_H 1
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <debug.h>
+
 #include <nuttx/net/iob.h>
+
+#include "iob.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifndef NULL
+#  define NULL ((FAR void *)0)
+#endif
+
 /****************************************************************************
- * Private Types
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* A list of all free, unallocated I/O buffers */
-
-extern FAR struct iob_s *g_iob_freelist;
-
-/* A list of all free, unallocated I/O buffer queue containers */
-
-extern FAR struct iob_qentry_s *g_iob_freeqlist;
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: iob_alloc_qentry
+ * Name: iob_add_queue
  *
  * Description:
- *   Allocate an I/O buffer chain container by taking the buffer at the head
- *   of the free list. This function is intended only for internal use by
- *   the IOB module.
+ *   Remove one I/O buffer chain from the heaqd of a queue.
  *
  ****************************************************************************/
 
-FAR struct iob_qentry_s *iob_alloc_qentry(void);
+FAR struct iob_s *iob_remove_queue(FAR struct iob_queue_s *iobq)
+{
+  FAR struct iob_qentry_s *qentry;
+  FAR struct iob_s *iob = NULL;
 
-/****************************************************************************
- * Name: iob_free_qentry
- *
- * Description:
- *   Free the I/O buffer chain container by returning it to the  free list.
- *   The link to  the next I/O buffer in the chain is return.
- *
- ****************************************************************************/
+  /* Remove the I/O buffer chain from the head of the queue */
 
-FAR struct iob_qentry_s *iob_free_qentry(FAR struct iob_qentry_s *iobq);
+  qentry = iobq->qh_head;
+  if (qentry)
+    {
+      iobq->qh_head = qentry->qe_flink;
+      if (!iobq->qh_head)
+        {
+          iobq->qh_tail = NULL;
+        }
 
-#endif /* __NET_IOB_IOB_H */
+      /* Extract the I/O buffer chain from the container and free the
+       * container.
+       */
+
+      iob = qentry->qe_head;
+      iob_free_qentry(qentry);
+    }
+
+  return iob;
+}
+

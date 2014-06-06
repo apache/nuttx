@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 
 #include <string.h>
-#include <queue.h>
 
 #include <nuttx/net/iob.h>
 
@@ -98,9 +97,7 @@ FAR struct iob_s *iob_trimtail(FAR struct iob_s *iob, unsigned int trimlen)
           last = NULL;
           iosize = 0;
 
-          for (entry = iob;
-               entry;
-               entry = (FAR struct iob_s *)entry->io_link.flink)
+          for (entry = iob; entry; entry = entry->io_flink)
             {
               /* Accumulate the total size of all buffers in the list */
 
@@ -139,7 +136,7 @@ FAR struct iob_s *iob_trimtail(FAR struct iob_s *iob, unsigned int trimlen)
 
               /* Unlink the penultimate from the freed buffer */
 
-              penultimate->io_link.flink = NULL;
+              penultimate->io_flink = NULL;
             }
                
           else

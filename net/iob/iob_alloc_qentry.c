@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/iob/iob_freechain.c
+ * net/iob/iob_alloc_qentry.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,8 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <queue.h>
-
+#include <nuttx/arch.h>
 #include <nuttx/net/iob.h>
 
 #include "iob.h"
@@ -66,36 +65,37 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_freechain
+ * Name: iob_alloc_qentry
  *
  * Description:
- *   Free an entire buffer chain, starting at the beginning of the I/O
- *   buffer chain
+ *   Allocate an I/O buffer chain container by taking the buffer at the head
+ *   of the free list. This function is intended only for internal use by
+ *   the IOB module.
  *
  ****************************************************************************/
 
-void iob_freechain(FAR struct iob_s *iob)
+FAR struct iob_qentry_s *iob_alloc_qentry(void)
 {
-  FAR sq_entry_t *first = (sq_entry_t *)&iob->io_link;
-  FAR sq_entry_t *last;
+  FAR struct iob_qentry_s *iobq;
+  irqstate_t flags;
 
-  /* Find the last entry in the I/O buffer list */
-
-  for (last = first; last->flink; last = last->flink);
-
-  /* If the free list is empty, then just move the I/O buffer chain to the
-   * free list.  Otherwise, append the I/O buffer chain to the end of the
-   * free list.
+  /* We don't know what context we are called from so we use extreme measures
+   * to protect the free list:  We disable interrupts very briefly.
    */
 
-  if (g_iob_freelist.tail)
+  flags = irqsave();
+  iobq  = g_iob_freeqlist;
+  if (iobq)
     {
-      g_iob_freelist.tail->flink = first;
-    }
-  else
-    {
-      g_iob_freelist.head = first;
+      /* Remove the I/O buffer chain container from the free list */
+
+      g_iob_freeqlist = iobq->qe_flink;
+
+      /* Put the I/O buffer in a known state */
+
+      iobq->qe_head = NULL; /* Nothing is contained */
     }
 
-  g_iob_freelist.tail = last;
+  irqrestore(flags);
+  return iobq;
 }

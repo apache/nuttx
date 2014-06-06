@@ -49,6 +49,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifndef NULL
+#  define NULL ((FAR void *)0)
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -105,7 +109,7 @@ FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
 
               /* Check if this was the last entry in the chain */
 
-              next = (FAR struct iob_s *)iob->io_link.flink;
+              next = iob->io_flink;
               if (!next)
                 {
                   /* Yes.. break out of the loop returning the empty

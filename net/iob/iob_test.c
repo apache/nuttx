@@ -90,7 +90,7 @@ static void dump_chain(struct iob_s *iob)
              n, iob->io_len, iob->io_offset, iob->io_priv);
 
       pktlen += iob->io_len;
-      iob = (struct iob_s *)iob->io_link.flink;
+      iob = iob->io_flink;
       n++;
     }
 
@@ -206,41 +206,4 @@ void my_assert(bool value)
 
     abort();
   }
-}
-
-/****************************************************************************
- * Non-standard queue functions cloned from libc/queue
- ****************************************************************************/
-
-sq_entry_t *sq_remfirst(sq_queue_t *queue)
-{
-  sq_entry_t *ret = queue->head;
-
-  if (ret)
-    {
-      queue->head = ret->flink;
-      if (!queue->head)
-        {
-          queue->tail = NULL;
-        }
-
-      ret->flink = NULL;
-    }
-
-  return ret;
-}
-
-void sq_addlast(sq_entry_t *node, sq_queue_t *queue)
-{
-  node->flink = NULL;
-  if (!queue->head)
-    {
-      queue->head = node;
-      queue->tail = node;
-    }
-  else
-    {
-      queue->tail->flink = node;
-      queue->tail        = node;
-    }
 }

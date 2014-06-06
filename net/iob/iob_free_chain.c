@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/iob/iob.h
+ * net/iob/iob_free_chain.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,16 +33,16 @@
  *
  ****************************************************************************/
 
-#ifndef __NET_IOB_IOB_H
-#define __NET_IOB_IOB_H 1
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/net/iob.h>
+
+#include "iob.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -53,46 +53,42 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Private Data
  ****************************************************************************/
-
-/* A list of all free, unallocated I/O buffers */
-
-extern FAR struct iob_s *g_iob_freelist;
-
-/* A list of all free, unallocated I/O buffer queue containers */
-
-extern FAR struct iob_qentry_s *g_iob_freeqlist;
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_alloc_qentry
+ * Name: iob_free_chain
  *
  * Description:
- *   Allocate an I/O buffer chain container by taking the buffer at the head
- *   of the free list. This function is intended only for internal use by
- *   the IOB module.
+ *   Free an entire buffer chain, starting at the beginning of the I/O
+ *   buffer chain
  *
  ****************************************************************************/
 
-FAR struct iob_qentry_s *iob_alloc_qentry(void);
+void iob_free_chain(FAR struct iob_s *iob)
+{
+  FAR struct iob_s *last;
+  irqstate_t flags;
 
-/****************************************************************************
- * Name: iob_free_qentry
- *
- * Description:
- *   Free the I/O buffer chain container by returning it to the  free list.
- *   The link to  the next I/O buffer in the chain is return.
- *
- ****************************************************************************/
+  /* Find the last entry in the I/O buffer list */
 
-FAR struct iob_qentry_s *iob_free_qentry(FAR struct iob_qentry_s *iobq);
+  for (last = iob; last->io_flink; last = last->io_flink);
 
-#endif /* __NET_IOB_IOB_H */
+  /* Free the I/O buffer chain by adding it to the head of the free list. We
+   * don't know what context we are called from so we use extreme measures to
+   * protect the free list:  We disable interrupts very briefly.
+   */
+
+  flags = irqsave();
+  last->io_flink = g_iob_freelist;
+  g_iob_freelist = iob;
+  irqrestore(flags);
+}

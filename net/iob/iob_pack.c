@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 
 #include <string.h>
-#include <queue.h>
 
 #include <nuttx/net/iob.h>
 
@@ -102,7 +101,7 @@ FAR struct iob_s *iob_pack(FAR struct iob_s *iob)
 
   while (iob)
     {
-      next = (FAR struct iob_s *)iob->io_link.flink;
+      next = iob->io_flink;
 
       /* Eliminate the data offset in this entry */
 
@@ -149,8 +148,8 @@ FAR struct iob_s *iob_pack(FAR struct iob_s *iob)
            {
              /* Yes.. free the next entry in I/O buffer chain */
 
-             next = iob_free(next);
-             iob->io_link.flink = (sq_entry_t *)next;
+             next          = iob_free(next);
+             iob->io_flink = next;
            }
         }
 

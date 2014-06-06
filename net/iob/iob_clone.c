@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 
 #include <string.h>
-#include <queue.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -92,7 +91,7 @@ int iob_clone(FAR struct iob_s *iob1, FAR struct iob_s *iob2)
   unsigned int offset2;
 
   DEBUGASSERT(iob2->io_len == 0 && iob2->io_offset == 0 &&
-              iob2->io_pktlen == 0 && iob2->io_link.flink == NULL);
+              iob2->io_pktlen == 0 && iob2->io_flink == NULL);
 
   /* Copy the header information */
 
@@ -106,7 +105,7 @@ int iob_clone(FAR struct iob_s *iob1, FAR struct iob_s *iob2)
 
   while (iob1->io_len <= 0)
     {
-      iob1 = (FAR struct iob_s *)iob1->io_link.flink;
+      iob1 = iob1->io_flink;
     }
 
   /* Pack each entry from iob1 to iob2 */
@@ -152,7 +151,7 @@ int iob_clone(FAR struct iob_s *iob1, FAR struct iob_s *iob2)
             {
               /* Yes.. move to the next source I/O buffer */
 
-              iob1 = (FAR struct iob_s *)iob1->io_link.flink;
+              iob1 = iob1->io_flink;
             }
           while (iob1->io_len <= 0);
 
@@ -180,7 +179,7 @@ int iob_clone(FAR struct iob_s *iob1, FAR struct iob_s *iob2)
               return -ENOMEM;
             }
 
-          iob2->io_link.flink = &next->io_link;
+          iob2->io_flink = next;
           iob2 = next;
           offset2 = 0;
         }

@@ -39,9 +39,9 @@
 
 #include <nuttx/config.h>
 
-#include <queue.h>
 #include <assert.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/net/iob.h>
 
 #include "iob.h"
@@ -77,7 +77,8 @@
 
 FAR struct iob_s *iob_free(FAR struct iob_s *iob)
 {
-  FAR struct iob_s *next = (FAR struct iob_s *)iob->io_link.flink;
+  FAR struct iob_s *next = iob->io_flink;
+  irqstate_t flags;
 
   /* Copy the data that only exists in the head of a I/O buffer chain into
    * the next entry.
@@ -108,13 +109,19 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
            */
 
           next->io_pktlen = 0;
-          DEBUGASSERT(next->io_len == 0 && next->io_link.flink == NULL);
+          DEBUGASSERT(next->io_len == 0 && next->io_flink == NULL);
         }
     }
 
-  /* Free the I/O buffer by adding to the end of the free list */
+  /* Free the I/O buffer by adding it to the head of the free list. We don't
+   * know what context we are called from so we use extreme measures to
+   * protect the free list:  We disable interrupts very briefly.
+   */
 
-  sq_addlast(&iob->io_link, &g_iob_freelist);
+  flags = irqsave();
+  iob->io_flink  = g_iob_freelist;
+  g_iob_freelist = iob;
+  irqrestore(flags);
 
   /* And return the I/O buffer after the one that was freed */
 

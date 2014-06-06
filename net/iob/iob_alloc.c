@@ -39,8 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <queue.h>
-
+#include <nuttx/arch.h>
 #include <nuttx/net/iob.h>
 
 #include "iob.h"
@@ -69,24 +68,39 @@
  * Name: iob_alloc
  *
  * Description:
- *   Allocate an I/O buffer by take the buffer at the head of the free list.
+ *   Allocate an I/O buffer by taking the buffer at the head of the free list.
  *
  ****************************************************************************/
 
 FAR struct iob_s *iob_alloc(void)
 {
   FAR struct iob_s *iob;
+  irqstate_t flags;
 
-  iob = (FAR struct iob_s *)sq_remfirst(&g_iob_freelist);
+  /* We don't know what context we are called from so we use extreme measures
+   * to protect the free list:  We disable interrupts very briefly.
+   */
+
+  flags = irqsave();
+  iob   = g_iob_freelist;
   if (iob)
     {
-      iob->io_link.flink = NULL; /* Not in a chain */
-      iob->io_flags      = 0;    /* Flags associated with the I/O buffer */
-      iob->io_len        = 0;    /* Length of the data in the entry */
-      iob->io_offset     = 0;    /* Offset to the beginning of data */
-      iob->io_pktlen     = 0;    /* Total length of the packet */
-      iob->io_priv       = NULL; /* User private data attached to the I/O buffer */
+      /* Remove the I/O buffer from the free list */
+
+      g_iob_freelist = iob->io_flink;
+      irqrestore(flags);
+
+      /* Put the I/O buffer in a known state */
+
+      iob->io_flink  = NULL; /* Not in a chain */
+      iob->io_flags  = 0;    /* Flags associated with the I/O buffer */
+      iob->io_len    = 0;    /* Length of the data in the entry */
+      iob->io_offset = 0;    /* Offset to the beginning of data */
+      iob->io_pktlen = 0;    /* Total length of the packet */
+      iob->io_priv   = NULL; /* User private data attached to the I/O buffer */
+      return iob;
     }
 
-  return iob;
+  irqrestore(flags);
+  return NULL;
 }

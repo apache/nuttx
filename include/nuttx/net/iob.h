@@ -43,7 +43,6 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <queue.h>
 
 #include <nuttx/net/iob.h>
 
@@ -54,7 +53,10 @@
 /* IOB flags */
 
 #define IOBFLAGS_MCAST   (1 << 0) /* Multicast packet */
-#define IOBFLAGS_VLANTAG (1 << 1) /* VLAN tag is value (not supported) */
+
+/* Queue helpers */
+
+#define IOB_QINIT(q)     do { (q)->qh_head = 0; (q)->qh_tail = 0; } while (0)
 
 /****************************************************************************
  * Public Types
@@ -67,21 +69,49 @@
 
 struct iob_s
 {
-  sq_entry_t io_link;    /* Link to the next I/O buffer in the chain */
-  uint8_t    io_flags;   /* Flags associated with the I/O buffer */
+  /* Singly-link list support */
+
+  FAR struct iob_s *io_flink;
+
+  /* Payload */
+
+  uint8_t  io_flags;    /* Flags associated with the I/O buffer */
 #if CONFIG_IOB_BUFSIZE < 256
-  uint8_t    io_len;     /* Length of the data in the entry */
-  uint8_t    io_offset;  /* Data begins at this offset */
+  uint8_t  io_len;      /* Length of the data in the entry */
+  uint8_t  io_offset;   /* Data begins at this offset */
 #else
-  uint16_t   io_len;     /* Length of the data in the entry */
-  uint16_t   io_offset;  /* Data begins at this offset */
+  uint16_t io_len;      /* Length of the data in the entry */
+  uint16_t io_offset;   /* Data begins at this offset */
 #endif
-  uint16_t   io_pktlen;  /* Total length of the packet */
-#ifdef __NO_VLAN__
-  uint16_t   io_vtag;    /* VLAN tag (not supported) */
-#endif
-  void      *io_priv;    /* User private data attached to the I/O buffer */
-  uint8_t    io_data[CONFIG_IOB_BUFSIZE];
+  uint16_t io_pktlen;   /* Total length of the packet */
+  void    *io_priv;     /* User private data attached to the I/O buffer */
+
+  uint8_t  io_data[CONFIG_IOB_BUFSIZE];
+};
+
+/* This container structure supports queuing of I/O buffer chains.  This
+ * structure is intended only for internal use by the IOB module.
+ */
+
+struct iob_qentry_s
+{
+  /* Singly-link list support */
+
+  FAR struct iob_qentry_s *qe_flink;
+
+  /* Payload -- Head of the I/O buffer chain */
+
+  FAR struct iob_s *qe_head;
+};
+
+/* The I/O buffer queue head structure */
+
+struct iob_queue_s
+{
+  /* Head of the I/O buffer chain list */
+
+  FAR struct iob_qentry_s *qh_head;
+  FAR struct iob_qentry_s *qh_tail;
 };
 
 /****************************************************************************
@@ -106,7 +136,7 @@ void iob_initialize(void);
  * Name: iob_alloc
  *
  * Description:
- *   Allocate an I/O buffer by take the buffer at the head of the free list.
+ *   Allocate an I/O buffer by taking the buffer at the head of the free list.
  *
  ****************************************************************************/
 
@@ -124,7 +154,7 @@ FAR struct iob_s *iob_alloc(void);
 FAR struct iob_s *iob_free(FAR struct iob_s *iob);
 
 /****************************************************************************
- * Name: iob_freechain
+ * Name: iob_free_chain
  *
  * Description:
  *   Free an entire buffer chain, starting at the beginning of the I/O
@@ -132,17 +162,38 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob);
  *
  ****************************************************************************/
 
-void iob_freechain(FAR struct iob_s *iob);
+void iob_free_chain(FAR struct iob_s *iob);
 
 /****************************************************************************
- * Name: iob_freeq
+ * Name: iob_add_queue
  *
  * Description:
- *   Free an entire buffer chain, starting at a queue head
+ *   Add one I/O buffer chain to the end of a queue.  May fail due to lack
+ *   of resources.
  *
  ****************************************************************************/
 
-void iob_freeq(FAR sq_queue_t *q);
+int iob_add_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq);
+
+/****************************************************************************
+ * Name: iob_add_queue
+ *
+ * Description:
+ *   Remove one I/O buffer chain from the heaqd of a queue.
+ *
+ ****************************************************************************/
+
+FAR struct iob_s *iob_remove_queue(FAR struct iob_queue_s *iobq);
+
+/****************************************************************************
+ * Name: iob_free_queue
+ *
+ * Description:
+ *   Free an entire queue of I/O buffer chains.
+ *
+ ****************************************************************************/
+
+void iob_free_queue(FAR struct iob_queue_s *qhead);
 
 /****************************************************************************
  * Name: iob_copyin

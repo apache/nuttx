@@ -28,4 +28,12 @@ config IOB_BUFSIZE
 		chain.  This setting determines the data payload each preallocated
 		I/O buffer.
 
+config IOB_NCHAINS
+	int "Number of pre-allocated I/O buffer chain heads"
+	default 8
+	---help---
+		These tiny nodes are used as "containers" to suppor queueing of
+		I/O buffer chains.  This will limit the number of I/O transactions
+		that can be "in-flight" at any give time.
+
 endif # NET_IOB

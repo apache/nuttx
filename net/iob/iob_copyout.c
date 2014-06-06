@@ -42,7 +42,6 @@
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
-#include <queue.h>
 
 #include <nuttx/net/iob.h>
 
@@ -94,7 +93,7 @@ int iob_copyout(FAR uint8_t *dest, FAR const struct iob_s *iob,
   while (offset >= iob->io_len)
     {
       offset -= iob->io_len;
-      iob     = (FAR struct iob_s *)iob->io_link.flink;
+      iob     = iob->io_flink;
     }
 
   /* Then loop until all of the I/O data is copied to the user buffer */
@@ -123,7 +122,7 @@ int iob_copyout(FAR uint8_t *dest, FAR const struct iob_s *iob,
 
       /* Skip to the next I/O buffer in the chain */
 
-      iob = (FAR struct iob_s *)iob->io_link.flink;
+      iob = iob->io_flink;
       offset = 0;
     }
 

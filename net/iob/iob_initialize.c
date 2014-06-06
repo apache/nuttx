@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 
 #include <stdbool.h>
-#include <queue.h>
 
 #include <nuttx/net/iob.h>
 
@@ -60,15 +59,20 @@
 
 /* This is a pool of pre-allocated I/O buffers */
 
-struct iob_s g_iob_pool[CONFIG_IOB_NBUFFERS];
-
-/* A list of all free, unallocated I/O buffers */
-
-sq_queue_t g_iob_freelist;
+static struct iob_s        g_iob_pool[CONFIG_IOB_NBUFFERS];
+static struct iob_qentry_s g_iob_qpool[CONFIG_IOB_NCHAINS];
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+
+/* A list of all free, unallocated I/O buffers */
+
+FAR struct iob_s *g_iob_freelist;
+
+/* A list of all free, unallocated I/O buffer queue containers */
+
+FAR struct iob_qentry_s *g_iob_freeqlist;
 
 /****************************************************************************
  * Public Functions
@@ -95,7 +99,24 @@ void iob_initialize(void)
 
       for (i = 0; i < CONFIG_IOB_NBUFFERS; i++)
         {
-          sq_addlast(&g_iob_pool[i].io_link, &g_iob_freelist);
+          FAR struct iob_s *iob = &g_iob_pool[i];
+
+          /* Add the pre-allocate I/O buffer to the head of the free list */
+
+          iob->io_flink  = g_iob_freelist;
+          g_iob_freelist = iob;
+        }
+
+      /* Add each I/O buffer chain queue container to the free list */
+
+      for (i = 0; i < CONFIG_IOB_NCHAINS; i++)
+        {
+          FAR struct iob_qentry_s *iobq = &g_iob_qpool[i];
+
+          /* Add the pre-allocate buffer container to the head of the free list */
+
+          iobq->qe_flink  = g_iob_freeqlist;
+          g_iob_freeqlist = iobq;
         }
 
       initialized = true;
