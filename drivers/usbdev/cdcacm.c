@@ -1642,6 +1642,7 @@ static void cdcacm_disconnect(FAR struct usbdevclass_driver_s *driver,
 
   priv->serdev.xmit.head = 0;
   priv->serdev.xmit.tail = 0;
+  priv->rxhead = 0;
   irqrestore(flags);
 
   /* Perform the soft connect function so that we will we can be
