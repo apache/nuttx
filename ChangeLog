@@ -7411,4 +7411,12 @@
 	  definition header file (incomplete) (2014-6-4).
 	* arch/arm/src/sama5/chip/sam_l2cc.h:  Add SAMA5D4 L2CC register definition
 	  header file (incomplete on initial check-in) (2014-6-5).
-
+	* drivers/usbdev/cdcacm.c:  Reset RX head to avoid resending last serial
+	  data when USB cable disconnected/re-connected.  From Lizhuoyi (2014-6-6).
+	* drivers/usbdev/pl2303.c:  Same change cloned for PL2303 (2014-6-6).
+	* arch/arm/src/lpc2378:  Fix several typos. From Lizhuoyi (2014-6-6).
+	* arch/arm/src/lpc17xx/lpb17_gpdma.c:  Fix an error when DMA is
+	  started:  The read-modify-write fails when the DMA is started.  This
+	  is because the value read is not the same as the value set (on write
+	  it is the number of transfers to do; on read it is the number of
+	  transfers completed).  From Lizhuoyi (2014-6-6).
