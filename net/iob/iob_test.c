@@ -74,19 +74,30 @@ uint8_t buffer2[16384];
 
 static void dump_chain(struct iob_s *iob)
 {
+  struct iob_s *head = iob;
+  unsigned int pktlen;
   int n;
  
   printf("=========================================================\n");
   printf("pktlen: %d flags: %02x\n", iob->io_pktlen, iob->io_flags);
 
   n = 0;
+  pktlen = 0;
+
   while (iob)
     {
       printf("%d. len=%d, offset=%d, priv=%p\n",
              n, iob->io_len, iob->io_offset, iob->io_priv);
 
+      pktlen += iob->io_len;
       iob = (struct iob_s *)iob->io_link.flink;
       n++;
+    }
+
+  if (pktlen != head->io_pktlen)
+    {
+      printf("ERROR: Bad packet length=%u, actual=%u\n",
+             head->io_pktlen, pktlen);
     }
 
   printf("=========================================================\n");
@@ -164,7 +175,7 @@ int main(int argc, char **argv)
     }
 
   iob = iob_pack(iob);
-  printf("Packed\n", nbytes);
+  printf("Packed\n");
   dump_chain(iob);
 
   nbytes = iob_copyout(buffer2, iob, 4096, 0);

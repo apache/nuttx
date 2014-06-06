@@ -120,8 +120,9 @@ FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
 
               /* Free this entry and set the next I/O buffer as the head */
 
-              iob_free(entry);
+              (void)iob_free(entry);
               entry = next;
+              iob   = next;
             }
           else
             {
