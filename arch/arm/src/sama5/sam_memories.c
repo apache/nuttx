@@ -115,6 +115,38 @@ static inline uintptr_t periphb_physregaddr(uintptr_t virtregaddr)
 }
 
 /****************************************************************************
+ * Name: periphc_physregaddr
+ *
+ * Description:
+ *   Given the virtual address of a peripheral C register, return the
+ *   physical address of the register
+ *
+ ****************************************************************************/
+
+#ifdef SAM_PERIPHC_VSECTION
+static inline uintptr_t periphc_physregaddr(uintptr_t virtregaddr)
+{
+#if SAM_PERIPHB_PSECTION != SAM_PERIPHB_VSECTION
+  /* Get the offset into the virtual memory region section containing the
+   * register
+   */
+
+  uintptr_t sectoffset = virtregaddr - SAM_PERIPHC_VSECTION;
+
+  /* Add that offset to the physical base address of the memory region */
+
+  return SAM_PERIPHC_PSECTION + sectoffset;
+
+#else
+  /* 1-to-1 mapping */
+
+  return virtregaddr;
+
+#endif
+}
+#endif
+
+/****************************************************************************
  * Name: sysc_physregaddr
  *
  * Description:
@@ -123,6 +155,7 @@ static inline uintptr_t periphb_physregaddr(uintptr_t virtregaddr)
  *
  ****************************************************************************/
 
+#ifdef SAM_SYSC_VSECTION
 static inline uintptr_t sysc_physregaddr(uintptr_t virtregaddr)
 {
 #if SAM_SYSC_PSECTION != SAM_SYSC_VSECTION
@@ -143,6 +176,7 @@ static inline uintptr_t sysc_physregaddr(uintptr_t virtregaddr)
 
 #endif
 }
+#endif
 
 /****************************************************************************
  * Name: isram_physramaddr
@@ -687,13 +721,29 @@ uintptr_t sam_physregaddr(uintptr_t virtregaddr)
       return periphb_physregaddr(virtregaddr);
     }
 
-  /* Check for a system controller register */
+  /* Check for a system controller/peripheral C register
+   *
+   * Naming of peripheral sections differs between the SAMA5D3 and SAMA5D4.
+   * There is nothing called SYSC in the SAMA5D4 memory map.  The third
+   * peripheral section is un-named in the SAMA5D4 memory map, but I have
+   * chosen the name PERIPHC for this usage.
+   */
 
+#ifdef SAM_PERIPHC_VSECTION
+  else if (virtregaddr >= SAM_PERIPHC_VSECTION &&
+           virtregaddr < (SAM_PERIPHC_VSECTION + SAM_PERIPHC_SIZE))
+    {
+      return periphc_physregaddr(virtregaddr);
+    }
+#endif
+
+#ifdef SAM_SYSC_VSECTION
   else if (virtregaddr >= SAM_SYSC_VSECTION &&
            virtregaddr < (SAM_SYSC_VSECTION + SAM_SYSC_SIZE))
     {
       return sysc_physregaddr(virtregaddr);
     }
+#endif
 
   /* Check for NFCS SRAM.  If NFC SRAM is being used by the NAND logic,
    * then it will be treated as peripheral space.

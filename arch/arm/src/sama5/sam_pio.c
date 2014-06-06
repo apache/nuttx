@@ -56,7 +56,7 @@
 #include "chip/sam_pio.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -68,7 +68,24 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_GPIO
-static const char g_portchar[4]   = { 'A', 'B', 'C', 'D' };
+  static const char g_portchar[SAM_NPIO] =
+  {
+    'A', 'B', 'C', 'D', 'E'
+  };
+#endif
+
+/* SAM_PION_VBASE will only be defined if the PIO register blocks are
+ * contiguous.  If not defined, then we need to do a table lookup.
+ */
+
+#ifndef SAM_PION_VBASE
+  static const uintptr_t g_piobase[SAM_NPIO] =
+  {
+    SAM_PIOA_VBASE, SAM_PIOB_VBASE, SAM_PIOC_VBASE, SAM_PIOD_VBASE,
+    SAM_PIOE_VBASE
+  };
+
+# define SAM_PION_VBASE(n) (g_piobase[(n)])
 #endif
 
 /****************************************************************************
@@ -85,7 +102,15 @@ static const char g_portchar[4]   = { 'A', 'B', 'C', 'D' };
 static inline uintptr_t sam_piobase(pio_pinset_t cfgset)
 {
   int port = (cfgset & PIO_PORT_MASK) >> PIO_PORT_SHIFT;
-  return SAM_PION_VBASE(port);
+
+  if (port < SAM_NPIO)
+    {
+      return SAM_PION_VBASE(port);
+    }
+  else
+    {
+      return 0;
+    }
 }
 
 /****************************************************************************
@@ -394,10 +419,20 @@ static inline int sam_configperiph(uintptr_t base, uint32_t pin,
 
 int sam_configpio(pio_pinset_t cfgset)
 {
-  uintptr_t base = sam_piobase(cfgset);
-  uint32_t  pin  = sam_piopin(cfgset);
+  uintptr_t base;
+  uint32_t pin;
   irqstate_t flags;
-  int       ret;
+  int ret;
+
+  /* Sanity check */
+
+  base = sam_piobase(cfgset);
+  if (base == 0)
+    {
+      return -EINVAL;
+    }
+
+  pin = sam_piopin(cfgset);
 
   /* Disable interrupts to prohibit re-entrance. */
 
@@ -454,13 +489,16 @@ void sam_piowrite(pio_pinset_t pinset, bool value)
   uintptr_t base = sam_piobase(pinset);
   uint32_t  pin  = sam_piopin(pinset);
 
-  if (value)
+  if (base != 0)
     {
-      putreg32(pin, base + SAM_PIO_SODR_OFFSET);
-    }
-  else
-    {
-      putreg32(pin, base + SAM_PIO_CODR_OFFSET);
+      if (value)
+        {
+          putreg32(pin, base + SAM_PIO_SODR_OFFSET);
+        }
+      else
+        {
+          putreg32(pin, base + SAM_PIO_CODR_OFFSET);
+        }
     }
 }
 
@@ -475,19 +513,26 @@ void sam_piowrite(pio_pinset_t pinset, bool value)
 bool sam_pioread(pio_pinset_t pinset)
 {
   uintptr_t base = sam_piobase(pinset);
-  uint32_t  pin  = sam_piopin(pinset);
+  uint32_t  pin;
   uint32_t  regval;
 
-  if ((pinset & PIO_MODE_MASK) == PIO_OUTPUT)
+  if (base != 0)
     {
-      regval = getreg32(base + SAM_PIO_ODSR_OFFSET);
-    }
-  else
-    {
-      regval = getreg32(base + SAM_PIO_PDSR_OFFSET);
+      pin  = sam_piopin(pinset);
+
+      if ((pinset & PIO_MODE_MASK) == PIO_OUTPUT)
+        {
+          regval = getreg32(base + SAM_PIO_ODSR_OFFSET);
+        }
+      else
+        {
+          regval = getreg32(base + SAM_PIO_PDSR_OFFSET);
+        }
+
+      return (regval & pin) != 0;
     }
 
-  return (regval & pin) != 0;
+  return 0;
 }
 
 /************************************************************************************

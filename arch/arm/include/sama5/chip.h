@@ -137,7 +137,7 @@
  *   for example)
  */
 
-#elif defined(CONFIG_ARCH_CHIP_ATSAMA5D41) || defined(CONFIG_ARCH_CHIP_ATSAMA5D42) \
+#elif defined(CONFIG_ARCH_CHIP_ATSAMA5D41) || defined(CONFIG_ARCH_CHIP_ATSAMA5D42) || \
       defined(CONFIG_ARCH_CHIP_ATSAMA5D43) || defined(CONFIG_ARCH_CHIP_ATSAMA5D44)
 #  undef  ATSAMA5D3                  /* Not SAMA5D3 family */
 #  define ATSAMA5D4        1         /* SAMA5D4 family */

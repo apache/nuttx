@@ -264,17 +264,33 @@ static const struct section_mapping_s section_mapping[] =
   },
 #endif
 
-/* SAMA5 Internal Peripherals */
+/* SAMA5 Internal Peripherals
+ *
+ * Naming of peripheral sections differs between the SAMA5D3 and SAMA5D4.
+ * There is nothing called SYSC in the SAMA5D4 memory map.  The third
+ * peripheral section is un-named in the SAMA5D4 memory map, but I have
+ * chosen the name PERIPHC for this usage.
+ */
 
   { SAM_PERIPHA_PSECTION, SAM_PERIPHA_VSECTION,
     SAM_PERIPHA_MMUFLAGS, SAM_PERIPHA_NSECTIONS
   },
+
   { SAM_PERIPHB_PSECTION, SAM_PERIPHB_VSECTION,
     SAM_PERIPHB_MMUFLAGS, SAM_PERIPHB_NSECTIONS
   },
+
+#ifdef SAM_PERIPHC_PSECTION
+  { SAM_PERIPHC_PSECTION, SAM_PERIPHC_VSECTION,
+    SAM_PERIPHC_MMUFLAGS, SAM_PERIPHC_NSECTIONS
+  },
+#endif
+
+#ifdef SAM_SYSC_PSECTION
   { SAM_SYSC_PSECTION,    SAM_SYSC_VSECTION,
     SAM_SYSC_MMUFLAGS,    SAM_SYSC_NSECTIONS
   },
+#endif
 
 /* LCDC Framebuffer.  This entry reprograms a part of one of the above
  * regions, making it non-cacheable and non-buffereable.

@@ -47,7 +47,7 @@
 #include <stdbool.h>
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 /* Configuration ********************************************************************/
 
@@ -66,6 +66,8 @@
 #define PIO_HAVE_PERIPHCD         1
 #define PIO_HAVE_SCHMITT          1
 #define PIO_HAVE_DRIVE            1
+
+#define SAM_NPIO                  5 /* (5) PIOA-E */
 
 /* Bit-encoded input to sam_configpio() ********************************************/
 
