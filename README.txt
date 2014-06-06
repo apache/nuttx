@@ -1040,6 +1040,8 @@ nuttx
  |   |   `- README.txt
  |   |- sama5d3-xplained/
  |   |   `- README.txt
+ |   |- sama5d4-ek/
+ |   |   `- README.txt
  |   |- samd20-xplained/
  |   |   `- README.txt
  |   |- sam3u-ek/

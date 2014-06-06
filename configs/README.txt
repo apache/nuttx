@@ -480,6 +480,10 @@ configs/sama5d3-xplained
   This board features the Atmel SAMA5D36.  See
   http://www.atmel.com/devices/sama5d36.aspx.
 
+configs/sama5d4-ek
+  This is the  port of NuttX to the Atmel SAMA5D4-EK development board.
+  This board features the Atmel SAMA5D44.  See http://www.atmel.com.
+
 configs/samd20-xplained
   The port of NuttX to the Atmel SAMD20-Xplained Pro development board.  This
   board features the ATSAMD20J18A MCU (Cortex-M0+ with 256KB of FLASH and
