@@ -7420,3 +7420,7 @@
 	  is because the value read is not the same as the value set (on write
 	  it is the number of transfers to do; on read it is the number of
 	  transfers completed).  From Lizhuoyi (2014-6-6).
+	* configs/sama5d4-ek:  Initial board support for the SAMA5D4-EK board.
+	  This initial check-in is basically the SAMA5D3-Xplained board support
+	  with appropriate name changes (2014-6-6).
+
