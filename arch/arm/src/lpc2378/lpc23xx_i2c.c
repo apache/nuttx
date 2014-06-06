@@ -377,7 +377,7 @@ static int i2c_interrupt (int irq, FAR void *context)
   /* Reference UM10360 19.10.5 */
 
   uint32_t state = getreg32(priv->base + I2C_STAT_OFFSET);
-  putreg32(I2C_CONCLR_SIC, priv->base + 2C_CONCLR_OFFSET);
+  putreg32(I2C_CONCLR_SIC, priv->base + I2C_CONCLR_OFFSET);
 
   priv->state = state;
   state &= 0xf8;
