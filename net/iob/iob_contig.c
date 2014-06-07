@@ -153,7 +153,7 @@ int iob_contig(FAR struct iob_s *iob, unsigned int len)
 
       /* This should always succeed because we know that:
        *
-       *   pktlen >= CONFIG_IOB_BUFSIZE >= len 
+       *   pktlen >= CONFIG_IOB_BUFSIZE >= len
        */
 
       return 0;
