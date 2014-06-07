@@ -56,7 +56,8 @@
 
 /* IOB helpers */
 
-#define IOB_FREESPACE(n) (CONFIG_IOB_BUFSIZE - (n)->io_len - (n)->io_offset)
+#define IOB_DATA(p)      (&(p)-io_data[(p)->io_offset])
+#define IOB_FREESPACE(p) (CONFIG_IOB_BUFSIZE - (p)->io_len - (p)->io_offset)
 
 /* Queue helpers */
 
