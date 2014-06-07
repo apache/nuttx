@@ -66,9 +66,13 @@
 #define SAM_AIC_IDCR_OFFSET    0x0044 /* Interrupt Disable Command Register */
 #define SAM_AIC_ICCR_OFFSET    0x0048 /* Interrupt Clear Command Register */
 #define SAM_AIC_ISCR_OFFSET    0x004c /* Interrupt Set Command Register */
-#define SAM_AIC_FFER_OFFSET    0x0050 /* Fast Forcing Enable Register */
-#define SAM_AIC_FFDR_OFFSET    0x0054 /* Fast Forcing Disable Register */
-#define SAM_AIC_FFSR_OFFSET    0x0058 /* Fast Forcing Status Register */
+
+#ifdef ATSAMA5D3
+#  define SAM_AIC_FFER_OFFSET  0x0050 /* Fast Forcing Enable Register */
+#  define SAM_AIC_FFDR_OFFSET  0x0054 /* Fast Forcing Disable Register */
+#  define SAM_AIC_FFSR_OFFSET  0x0058 /* Fast Forcing Status Register */
+#endif
+
 #define SAM_AIC_DCR_OFFSET     0x006c /* Debug Control Register */
 #define SAM_AIC_WPMR_OFFSET    0x00e4 /* Write Protect Mode Register */
 #define SAM_AIC_WPSR_OFFSET    0x00e8 /* Write Protect Status Register */
@@ -93,12 +97,40 @@
 #define SAM_AIC_IDCR           (SAM_AIC_VBASE+SAM_AIC_IDCR_OFFSET)
 #define SAM_AIC_ICCR           (SAM_AIC_VBASE+SAM_AIC_ICCR_OFFSET)
 #define SAM_AIC_ISCR           (SAM_AIC_VBASE+SAM_AIC_ISCR_OFFSET)
-#define SAM_AIC_FFER           (SAM_AIC_VBASE+SAM_AIC_FFER_OFFSET)
-#define SAM_AIC_FFDR           (SAM_AIC_VBASE+SAM_AIC_FFDR_OFFSET)
-#define SAM_AIC_FFSR           (SAM_AIC_VBASE+SAM_AIC_FFSR_OFFSET)
+
+#ifdef ATSAMA5D3
+#  define SAM_AIC_FFER         (SAM_AIC_VBASE+SAM_AIC_FFER_OFFSET)
+#  define SAM_AIC_FFDR         (SAM_AIC_VBASE+SAM_AIC_FFDR_OFFSET)
+#  define SAM_AIC_FFSR         (SAM_AIC_VBASE+SAM_AIC_FFSR_OFFSET)
+#endif
+
 #define SAM_AIC_DCR            (SAM_AIC_VBASE+SAM_AIC_DCR_OFFSET)
 #define SAM_AIC_WPMR           (SAM_AIC_VBASE+SAM_AIC_WPMR_OFFSET)
 #define SAM_AIC_WPSR           (SAM_AIC_VBASE+SAM_AIC_WPSR_OFFSET)
+
+#ifdef SAMA5_HAVE_SAIC
+#  define SAM_SAIC_SSR         (SAM_SAIC_VBASE+SAM_AIC_SSR_OFFSET)
+#  define SAM_SAIC_SMR         (SAM_SAIC_VBASE+SAM_AIC_SMR_OFFSET)
+#  define SAM_SAIC_SVR         (SAM_SAIC_VBASE+SAM_AIC_SVR_OFFSET)
+#  define SAM_SAIC_IVR         (SAM_SAIC_VBASE+SAM_AIC_IVR_OFFSET)
+#  define SAM_SAIC_FVR         (SAM_SAIC_VBASE+SAM_AIC_FVR_OFFSET)
+#  define SAM_SAIC_ISR         (SAM_SAIC_VBASE+SAM_AIC_ISR_OFFSET)
+#  define SAM_SAIC_IPR0        (SAM_SAIC_VBASE+SAM_AIC_IPR0_OFFSET)
+#  define SAM_SAIC_IPR1        (SAM_SAIC_VBASE+SAM_AIC_IPR1_OFFSET)
+#  define SAM_SAIC_IPR2        (SAM_SAIC_VBASE+SAM_AIC_IPR2_OFFSET)
+#  define SAM_SAIC_IPR3        (SAM_SAIC_VBASE+SAM_AIC_IPR3_OFFSET)
+#  define SAM_SAIC_IMR         (SAM_SAIC_VBASE+SAM_AIC_IMR_OFFSET)
+#  define SAM_SAIC_CISR        (SAM_SAIC_VBASE+SAM_AIC_CISR_OFFSET)
+#  define SAM_SAIC_EOICR       (SAM_SAIC_VBASE+SAM_AIC_EOICR_OFFSET)
+#  define SAM_SAIC_SPU         (SAM_SAIC_VBASE+SAM_AIC_SPU_OFFSET)
+#  define SAM_SAIC_IECR        (SAM_SAIC_VBASE+SAM_AIC_IECR_OFFSET)
+#  define SAM_SAIC_IDCR        (SAM_SAIC_VBASE+SAM_AIC_IDCR_OFFSET)
+#  define SAM_SAIC_ICCR        (SAM_SAIC_VBASE+SAM_AIC_ICCR_OFFSET)
+#  define SAM_SAIC_ISCR        (SAM_SAIC_VBASE+SAM_AIC_ISCR_OFFSET)
+#  define SAM_SAIC_DCR         (SAM_SAIC_VBASE+SAM_AIC_DCR_OFFSET)
+#  define SAM_SAIC_WPMR        (SAM_SAIC_VBASE+SAM_AIC_WPMR_OFFSET)
+#  define SAM_SAIC_WPSR        (SAM_SAIC_VBASE+SAM_AIC_WPSR_OFFSET)
+#endif
 
 /* AIC Register Bit Definitions *****************************************************/
 
@@ -131,7 +163,10 @@
 
 /* Interrupt Pending Register 0-3 */
 
-#define AIC_IPR(pid)           (1 << (pid))
+#define AIC_IPR0(pid)           (1 << (pid))
+#define AIC_IPR1(pid)           (1 << ((pid) - 32)
+#define AIC_IPR2(pid)           (1 << ((pid) - 64)
+#define AIC_IPR3(pid)           (1 << ((pid) - 96)
 
 /* Interrupt Mask Register */
 
@@ -164,17 +199,19 @@
 
 #define AIC_ISCR_INTSET        (1 << 0)  /* Bit 0:  Interrupt Set */
 
+#ifdef ATSAMA5D3
 /* Fast Forcing Enable Register */
 
-#define AIC_FFER_FFEN          (1 << 0)  /* Bit 0:  Fast Forcing Enable */
+#  define AIC_FFER_FFEN        (1 << 0)  /* Bit 0:  Fast Forcing Enable */
 
 /* Fast Forcing Disable Register */
 
-#define AIC_FFDR_FFDIS         (1 << 0)  /* Bit 0:  Fast Forcing Disable */
+#  define AIC_FFDR_FFDIS       (1 << 0)  /* Bit 0:  Fast Forcing Disable */
 
 /* Fast Forcing Status Register */
 
-#define AIC_FFSR_FFS           (1 << 0)  /* Bit 0:  Fast Forcing Status */
+#  define AIC_FFSR_FFS         (1 << 0)  /* Bit 0:  Fast Forcing Status */
+#endif
 
 /* Debug Control Register */
 
