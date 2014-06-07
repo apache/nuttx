@@ -32,20 +32,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
-/* There are five push button switches on the SAMA4D4-EK base board:
+/* A single button, PB_USER1 (PB2), is available on the SAMA5D4-EK:
  *
- *   1. One Reset, board reset (BP1)
- *   2. One Wake up, push button to bring the processor out of low power mode
- *     (BP2)
- *   3. One User momentary Push Button
- *   4. One Disable CS Push Button
+ * ------------------------------ ------------------- ----------------------
+ * SAMA5D4 PIO                    SIGNAL              USAGE
+ * ------------------------------ ------------------- ----------------------
+ * PE13/A13/TIOB1/PWML2           PB_USER1_PE13       PB_USER1
+ * ------------------------------ ------------------- ----------------------
  *
- * Only the momentary push button is controllable by software (labeled
- * "PB_USER1" on the board):
- *
- *   - PE27.  Pressing the switch connect PE27 to grounded.  Therefore, PE27
- *     must be pulled high internally.  When the button is pressed the SAMA5
- *     will sense "0" is on PE27.
+ * Closing JP2 will bring PE13 to ground so 1) PE13 should have a weak
+ * pull-up, and 2) when PB2 is pressed, a low value will be senses.
  */
 
 /****************************************************************************
@@ -91,32 +87,32 @@ static xcpt_t g_irquser1;
  * Name: board_button_initialize
  *
  * Description:
- *   board_button_initialize() must be called to initialize button resources.  After
- *   that, board_buttons() may be called to collect the current state of all
- *   buttons or board_button_irq() may be called to register button interrupt
- *   handlers.
+ *   board_button_initialize() must be called to initialize button resources.
+ *   After that, board_buttons() may be called to collect the current state
+ *   of all buttons or board_button_irq() may be called to register button
+ *   interrupt handlers.
  *
  ****************************************************************************/
 
 void board_button_initialize(void)
 {
-  (void)sam_configpio(PIO_USER1);
+  (void)sam_configpio(PIO_BTN_USER);
 }
 
 /****************************************************************************
  * Name: board_buttons
  *
  * Description:
- *   After board_button_initialize() has been called, board_buttons() may be called to
- *   collect the state of all buttons.  board_buttons() returns an 8-bit bit set
- *   with each bit associated with a button.  See the BUTTON* definitions
- *   above for the meaning of each bit in the returned value.
+ *   After board_button_initialize() has been called, board_buttons() may be
+ *   called to collect the state of all buttons.  board_buttons() returns an
+ *   8-bit bit set with each bit associated with a button.  See the BUTTON*
+ *   definitions above for the meaning of each bit in the returned value.
  *
  ****************************************************************************/
 
 uint8_t board_buttons(void)
 {
-  return sam_pioread(PIO_USER1) ? 0 : BUTTON_USER1_BIT;
+  return sam_pioread(PIO_BTN_USER) ? 0 : BUTTON_USER_BIT;
 }
 
 /****************************************************************************
@@ -126,7 +122,7 @@ uint8_t board_buttons(void)
  *   This function may be called to register an interrupt handler that will
  *   be called when a button is depressed or released.  The ID value is one
  *   of the BUTTON* definitions provided above. The previous interrupt
- *   handler address isreturned (so that it may restored, if so desired).
+ *   handler address is returned (so that it may restored, if so desired).
  *
  * Configuration Notes:
  *   Configuration CONFIG_SAMA5_PIO_IRQ must be selected to enable the
@@ -140,7 +136,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 {
   xcpt_t oldhandler = NULL;
 
-  if (id == BUTTON_USER1)
+  if (id == BUTTON_USER)
     {
       irqstate_t flags;
 

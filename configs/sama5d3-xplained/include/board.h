@@ -160,6 +160,7 @@
  *    - PE29.  Pressing the switch connect PE29 to ground.  Therefore, PE29
  *      must be pulled high internally.  When the button is pressed the SAMA5
  *      will sense "0" is on PE29.
+ */
 
 #define BUTTON_USER       0
 #define NUM_BUTTONS       1
