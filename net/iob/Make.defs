@@ -33,15 +33,12 @@
 #
 ############################################################################
 
-NET_ASRCS =
-NET_CSRCS =
-
 ifeq ($(CONFIG_NET_IOB),y)
 
 # Include IOB src files
 
 NET_CSRCS += iob_add_queue.c iob_alloc.c iob_alloc_qentry.c iob_clone.c
-NET_CSRCS += iob_concat.c iob_copyin.c iob_copyout.c iob_free.c
+NET_CSRCS += iob_concat.c iob_copyin.c iob_copyout.c iob_contig.c iob_free.c
 NET_CSRCS += iob_free_chain.c iob_free_qentry.c iob_free_queue.c
 NET_CSRCS += iob_initialize.c iob_pack.c iob_remove_queue.c iob_trimhead.c
 NET_CSRCS += iob_trimtail.c

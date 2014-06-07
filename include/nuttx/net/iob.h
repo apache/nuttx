@@ -279,4 +279,15 @@ FAR struct iob_s *iob_trimtail(FAR struct iob_s *iob, unsigned int trimlen);
 
 FAR struct iob_s *iob_pack(FAR struct iob_s *iob);
 
+/****************************************************************************
+ * Name: iob_contig
+ *
+ * Description:
+ *   Ensure that there is'len' bytes of contiguous space at the beginning
+ *   of the I/O buffer chain starting at 'iob'.
+ *
+ ****************************************************************************/
+
+int iob_contig(FAR struct iob_s *iob, unsigned int len);
+
 #endif /* _INCLUDE_NUTTX_NET_IOB_H */
