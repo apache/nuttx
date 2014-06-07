@@ -91,32 +91,32 @@ static xcpt_t g_irquser1;
  * Name: board_button_initialize
  *
  * Description:
- *   board_button_initialize() must be called to initialize button resources.  After
- *   that, board_buttons() may be called to collect the current state of all
- *   buttons or board_button_irq() may be called to register button interrupt
- *   handlers.
+ *   board_button_initialize() must be called to initialize button resources.
+ *   After that, board_buttons() may be called to collect the current state
+ *   of all buttons or board_button_irq() may be called to register button
+ *   interrupt handlers.
  *
  ****************************************************************************/
 
 void board_button_initialize(void)
 {
-  (void)sam_configpio(PIO_USER1);
+  (void)sam_configpio(PIO_USER);
 }
 
 /****************************************************************************
  * Name: board_buttons
  *
  * Description:
- *   After board_button_initialize() has been called, board_buttons() may be called to
- *   collect the state of all buttons.  board_buttons() returns an 8-bit bit set
- *   with each bit associated with a button.  See the BUTTON* definitions
- *   above for the meaning of each bit in the returned value.
+ *   After board_button_initialize() has been called, board_buttons() may be
+ *   called to collect the state of all buttons.  board_buttons() returns an
+ *   8-bit bit set with each bit associated with a button.  See the BUTTON*
+ *   definitions above for the meaning of each bit in the returned value.
  *
  ****************************************************************************/
 
 uint8_t board_buttons(void)
 {
-  return sam_pioread(PIO_USER1) ? 0 : BUTTON_USER1_BIT;
+  return sam_pioread(PIO_USER) ? 0 : BUTTON_USER_BIT;
 }
 
 /****************************************************************************
@@ -140,7 +140,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 {
   xcpt_t oldhandler = NULL;
 
-  if (id == BUTTON_USER1)
+  if (id == BUTTON_USER)
     {
       irqstate_t flags;
 

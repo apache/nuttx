@@ -32,18 +32,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
-/* There are two LEDs on the SAMA5D4 series-CM board that can be controlled
- * by software.  A  blue LED is controlled via PIO pins.  A red LED normally
- * provides an indication that power is supplied to the board but can also
- * be controlled via software.
+/* There are 3 LEDs on the SAMA5D4-EK:
  *
- *   PE25.  This blue LED is pulled high and is illuminated by pulling PE25
- *   low.
+ * ------------------------------ ------------------- -------------------------
+ * SAMA5D4 PIO                    SIGNAL              USAGE
+ * ------------------------------ ------------------- -------------------------
+ * PE28/NWAIT/RTS4/A19            1Wire_PE28          1-WIRE ROM, LCD, D8 (green)
+ * PE8/A8/TCLK3/PWML3             LED_USER_PE8        LED_USER (D10)
+ * PE9/A9/TIOA2                   LED_POWER_PE9       LED_POWER (D9, Red)
+ * ------------------------------ ------------------- -------------------------
  *
- *   PE24.  The red LED is also pulled high but is driven by a transistor so
- *   that it is illuminated when power is applied even if PE24 is not
- *   configured as an output.  If PE24 is configured as an output, then the
- *   LCD is illuminated by a low output.
+ * - D8: D8 is shared with other functions and cannot be used if the 1-Wire ROM
+ *   is used.  I am not sure of the LCD function, but the LED may not be available
+ *   if the LCD is used either.  We will avoid using D8 just for simplicity.
+ * - D10:  Nothing special here.  A low output illuminates.
+ * - D9: The Power ON LED.  Connects to the via an IRLML2502 MOSFET.  This LED will
+ *   be on when power is applied but otherwise, I think it works like D10.
  */
 
 /****************************************************************************
@@ -84,7 +88,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Protototypes
+ * Private Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -107,8 +111,8 @@ void sam_ledinit(void)
 {
   /* Configure LED PIOs for output */
 
-  sam_configpio(PIO_BLUE);
-  sam_configpio(PIO_RED);
+  sam_configpio(PIO_LED_USER);
+  sam_configpio(PIO_LED_POWER);
 }
 
 /****************************************************************************
@@ -123,14 +127,14 @@ void sam_setled(int led, bool ledon)
     {
       /* Low illuminates */
 
-      ledcfg = PIO_BLUE;
+      ledcfg = PIO_LED_USER;
       ledon  = !ledon;
     }
   else if (led == BOARD_RED)
     {
       /* High illuminates */
 
-      ledcfg = PIO_RED;
+      ledcfg = PIO_LED_POWER;
     }
   else
     {
@@ -151,12 +155,12 @@ void sam_setleds(uint8_t ledset)
   /* Low illuminates */
 
   ledon = ((ledset & BOARD_BLUE_BIT) == 0);
-  sam_piowrite(PIO_BLUE, ledon);
+  sam_piowrite(PIO_LED_USER, ledon);
 
   /* High illuminates */
 
   ledon = ((ledset & BOARD_RED_BIT) != 0);
-  sam_piowrite(PIO_RED, ledon);
+  sam_piowrite(PIO_LED_POWER, ledon);
 }
 
 #endif /* !CONFIG_ARCH_LEDS */

@@ -5,6 +5,7 @@ README
   development board. This board features the Atmel SAMA5D44 microprocessor.
   See http://www.atmel.com for further information.
 
+    ---------------------------- -------------
     PARAMETER                    SAMA5D44
     ---------------------------- -------------
     CPU                          Cortex-A5
@@ -49,6 +50,7 @@ README
     PWM Channels                 4
     32kHz RTC                    Yes
     Package                      BGA361
+    ---------------------------- -------------
 
 Contents
 ========
@@ -61,6 +63,7 @@ Contents
   - Loading Code into SRAM with J-Link
   - Writing to FLASH using SAM-BA
   - Running NuttX from SDRAM
+  - PIO Usage
   - Buttons and LEDs
   - Serial Console
   - Networking
@@ -640,43 +643,208 @@ Load NuttX with U-Boot on AT91 boards
   STATUS:
     2014-3-30:  These instructions were adapted from the Linux4SAM website
                 but have not yet been used.
+PIO Usage
+=========
+
+  Rev. B. 0111A
+  ------------------------------ ------------------- -------------------------
+  SAMA5D4 PIO                    SIGNAL              USAGE
+  ------------------------------ ------------------- -------------------------
+  PA0/LCDDAT0/TMS                PA0                 LCDDAT0, TMS
+  PA1/LCDDAT1                    PA1                 LCDDAT1
+  PA2/LCDDAT2/G1_TXCK            PA                  LCDDAT2, G1_TXCK
+  PA3/LCDDAT3/G1_RXCK            PA3                 LCDDAT3
+  PA4/LCDDAT4/G1_TXEN            PA4                 LCDDAT4, G1_TXEN
+  PA5/LCDDAT5/G1_TXER            PA5                 LCDDAT5
+  PA6/LCDDAT6/G1_CRS             PA6                 LCDDAT6
+  PA7/LCDDAT7                    PA7                 LCDDAT7
+  PA8/LCDDAT8/TCK                PA8                 LCDDAT8, TCK
+  PA9/LCDDAT9/G1_COL             PA9                 LCDDAT9
+  PA10/LCDDAT10/G1_RXDV          PA10                LCDDAT10, G1_RXDV
+  PA11/LCDDAT11/G1_RXER          PA11                LCDDAT11, G1_RXER
+  PA12/LCDDAT12/G1_RX0           PA12                LCDDAT12, G1_RX0
+  PA13/LCDDAT13/G1_RX1           PA13                LCDDAT13, G1_RX1
+  PA14/LCDDAT14/G1_TX0           PA14                LCDDAT14, G1_TX0
+  PA15/LCDDAT15/G1_TX1           PA15                LCDDAT15, G1_TX1
+  PA16/LCDDAT16/NTRST            PA16                LCDDAT16, NTRST
+  PA17/LCDDAT17                  PA17                LCDDAT17
+  PA18/LCDDAT18/G1_RX2           PA18                LCDDAT18
+  PA19/LCDDAT19/G1_RX3           PA19                LCDDAT19
+  PA20/LCDDAT20/G1_TX2           PA20                LCDDAT20
+  PA21/LCDDAT21/G1_TX3           PA21                LCDDAT21
+  PA22/LCDDAT22/G1_MDC           PA22                LCDDAT22, G1_MDC
+  PA23/LCDDAT23/G1_MDIO          PA23                LCDDAT23, G1_MDIO
+  PA24/LCDPWM/PCK0               PA24                LCDPWM, EXP
+  PA25/LCDDISP/TD0               PA25                LCDDISP, EXP
+  PA26/LCDVSYNC/PWMH0/SPI1_NPCS1 PA26                LCDVSYNC
+  PA27/LCDHSYNC/PWML0/SPI1_NPCS2 PA27                LCDHSYNC
+  PA28/LCDPCK/PWMH1/SPI1_NPCS3   PA28                LCDPCK
+  PA29/LCDDEN/PWML1              PA29                LCDDEN
+  PA30/TWD0                      PA30                TWD0
+  PA31/TWCK0                     PA31                TWCK0
+  ------------------------------ ------------------- -------------------------
+  PB0/G0_TXCK                    PB0                 G0_TXCK, EXP
+  PB1/G0_RXCK/SCK2/ISI_PCK       ISI_PCK_PB1         ISI_PCK
+  PB2/G0_TXEN                    PB2                 G0_TXEN,EXP
+  PB3/G0_TXER/CTS2/ISI_VSYNC     ISI_VSYNC_PB3       ISI_VSYNC
+  PB4/G0_CRS/RXD2/ISI_HSYNC      ISI_HSYNC_PB4       ISI_HSYNC
+  PB5/G0_COL/TXD2/PCK2           ISI_PWD_PB5         ISI_PWD
+  PB6/G0_RXDV                    PB6                 G0_RXDV, EXP
+  PB7/G0_RXER                    PB7                 G0_RXER, EXP
+  PB8/G0_RX0                     PB8                 G0_RX0, EXP
+  PB9/G0_RX1                     PB9                 G0_RX1, EXP
+  PB10/G0_RX2/PCK2/PWML1         PB10                AUDIO_PCK2, EXP
+  PB11/G0_RX3/RTS2/PWMH1         ISI_RST_PB11        ISI_RST
+  PB12/G0_TX0                    PB12                G0_TX0, EXP
+  PB13/G0_TX1                    PB13                G0_TX1, EXP
+  PB14/G0_TX2/SPI2_NPCS1/PWMH0   ZIG_SPI2_NPCS1      ZIG_SPI2_NPCS1
+  PB15/G0_TX3/SPI2_NPCS2/PWML0   HDMI_RST_PB15       HDMI_RST
+  PB16/G0_MDC                    PB16                G0_MDC, EXP
+  PB17/G0_MDIO                   PB17                G0_MDIO, EXP
+  PB18/SPI1_MISO/D8              LCD_SPI1_SO         LCD_SPI1_SO
+  PB19/SPI1_MOSI/D9              LCD_SPI1_SI         LCD_SPI1_SI
+  PB20/SPI1_SPCK/D10             LCD_SPI1_CLK        LCD_SPI1_CLK
+  PB21/SPI1_NPCS0/D11            EXP_PB21            EXP
+  PB22/SPI1_NPCS1/D12            EXP_PB22            EXP
+  PB23/SPI1_NPCS2/D13            LCD_SPI1_CS2        LCD_SPI1_NPCS2
+  PB24/DRXD/D14/TDI              PB24                TDI, EXP
+  PB25/DTXD/D15/TDO              PB25                TDO, EXP
+  PB26/PCK0/RK0/PWMH0            PB26                AUDIO_RK0
+  PB27/SPI1_NPCS3/TK0/PWML0      PB27                AUDIO, HDMI_TK0, EXP
+  PB28/SPI2_NPCS3/TD0/PWMH1      PB28                AUDIO, HDMI_TD0, EXP
+  PB29/TWD2/RD0/PWML1            PB29                AUDIO_RD0, ZIG_TWD2
+  PB30/TWCK2/RF0                 PB30                AUDIO_RF, ZIG_TWCK2
+  PB31/TF0                       PB31                AUDIO, HDMI_TF0, EXP
+  ------------------------------ ------------------- -------------------------
+  PC0/SPI0_MISO/PWMH2/ISI_D8     PC0                 AT25_SPI0_SO, ISI_D8
+  PC1/SPI0_MOSI/PWML2/ISI_D9     PC1                 AT25_SPI0_SI, ISI_D9
+  PC2/SPI0_SPCK/PWMH3/ISI_D10    PC2                 AT25_SPI0_SPCK, ISI_D10,
+                                                     ZIG_PWMH3_PC2
+  PC3/SPI0_NPCS0/PWML3/ISI_D11   PC3                 AT25_SPI0_NCPS0, ISI_D11,
+                                                     ZIG_PWML3_PC3 (See JP6)
+  PC4/SPI0_NPCS1/MCI0_CK/PCK1    PC4                 MCI0_CK, ISI_MCK, EXP
+  PC5/D0/MCI0_CDA                PC5                 MCI0_CDA, NAND_IO0
+  PC6/D1/MCI0_DA0                PC6                 MCI0_DA0, NAND_IO1
+  PC7/D2/MCI0_DA1                PC7                 MCI0_DA1, NAND_IO2
+  PC8/D3/MCI0_DA2                PC8                 MCI0_DA2, NAND_IO3
+  PC9/D4/MCI0_DA3                PC9                 MCI0_DA3, NAND_IO4
+  PC10/D5/MCI0_DA4               PC10                MCI0_DA4, NAND_IO5
+  PC11/D6/MCI0_DA5               PC11                MCI0_DA5, NAND_IO6
+  PC12/D7/MCI0_DA6               PC12                MCI0_DA6, NAND_IO7
+  PC13/NRD/NANDOE/MCI0_DA7       PC13                MCI0_DA7, NAND_RE
+  PC14/NWE/NANDWE                NAND_WEn            NWE, NANDWE
+  PC15/NCS3                      NAND_NCS3           NAND_NCS3
+  PC16/NANDRDY                   NAND_RDY            NANDRDY
+  PC17/A21/NANDALE               NAND_ALE            NAND_ALE
+  PC18/A22/NANDCLE               NAND_CLE            NAND_CLE
+  PC19/ISI_D0/TK1                PC19                ISI_D0
+  PC20/ISI_D1/TF1                PC20                ISI_D1
+  PC21/ISI_D2/TD1                PC21                ISI_D2
+  PC22/ISI_D3/RF1                PC22                ISI_D3
+  PC23/ISI_D4/RD1                PC23                ISI_D4
+  PC24/ISI_D5/RK1/PCK1           PC24                ISI_D5
+  PC25/ISI_D6/TWD3/URXD1         PC25                AUDIO_TWD3, ISI_D6
+  PC26/ISI_D7/TWCK3/UTXD1        PC26                AUDIO_TWCK3, ISI_D7
+  PC27/AD0/SPI0_NPCS1/PWML0      AD0_XP              AD0_XP
+  PC28/AD1/SPI0_NPCS2/PWML1      AD1_XM              AD1_XM
+  PC29/AD2/SPI0_NPCS3/PWMFI0     AD2_YP              AD2_YP
+  PC30/AD3/PWMH0                 AD3_YM              AD3_YM
+  PC31/AD4/PWMH1                 AD4_LR              AD4_LR, ADC_INPUT
+  ------------------------------ ------------------- -------------------------
+  PD8/PCK0                       PD8                 EXP_PCK0
+  PD9/FIQ                        USB_OVCUR_PD9       USB_OVCUR_PD9
+  PD10/CTS0/CDETA                ZIG_CTS0_PD10       ZIG_CTS0
+  PD11/RTS0/SPI2_MISO            ZIG_SPI2_MISO_RTS0  ZIG_SPI2_MISO_RTS0
+  PD12/RXD0/DCENA                ZIG_RXD0_PD12       ZIG_RXD0
+  PD13/TXD0/SPI2_MOSI            ZIG_SPI2_MOSI_TXD0  ZIG_SPI2_MOSI_TXD0
+  PD14/CTS1/CDETB                ZIG_CTS1_PD14       ZIG_CTS1
+  PD15/RTS1/SPI2_SPCK            ZIG_SPI2_SPCK_RTS1  ZIG_SPI2_SPCK_RTS
+  PD16/RXD1/DCENB                ZIG_RXD1_PD16       ZIG_RXD1_PD16
+  PD17/TXD1/SPI2_NPCS0           ZIG_SPI2_NPCS0_TXD1 ZIG_SPI2_NPCS0_TXD
+  PD18/SENSE0                    SENSE0_PD18         SENSE0
+  PD19/SENSE1                    SENSE1_PD19         SENSE1
+  PD20/SENSE2                    SENSE2_PD20         SENSE2
+  PD21/SENSE3                    SENSE3_PD21         SENSE3
+  PD22/SENSE4                    SENSE4_PD22         SENSE4
+  PD23/SENSE5                    N/C                 N/C
+  PD24/SENSE6                    N/C                 N/C
+  PD25/SENSE7                    N/C                 N/C
+  PD26/SENSE8                    N/C                 N/C
+  PD27/SENSE9                    N/C                 N/C
+  PD28/SCK0                      N/C                 PD28
+  PD29/SCK1                      SENSE_DISCH_PD29    SENSE_DISCH
+  PD30                           EXP_PD30            EXP
+  PD31/SPI0_NPCS2/PCK1           EXP_PD31            EXP
+  ------------------------------ ------------------- -------------------------
+  PE0/A0/NBS0/MCI0_CDB/CTS4      PMIC_IRQ_PE0        PMIC_IRQ
+  PE1/A1/MCI0_DB0                G0_IRQ_PE1          G0_IRQ
+  PE2/A2/MCI0_DB1                G1_IRQ_PE2          G1_IRQ
+  PE3/A3/MCI0_DB2                HDMI_IRQ_PE3        HDMI_IRQ
+  PE4/A4/MCI0_DB3                AUDIO_IRQ_PE4       AUDIO_IRQ
+  PE5/A5/CTS3                    MCI0_CD_PE5         MCI0_CD
+  PE6/A6/TIOA3                   MCI1_CD_PE6         MCI1_CD
+  PE7/A7/TIOB3/PWMFI1            MCI1_CD_PE6         EXP
+  PE8/A8/TCLK3/PWML3             LED_USER_PE8        LED_USER (D10)
+  PE9/A9/TIOA2                   LED_POWER_PE9       LED_POWER (D9, Red)
+  PE10/A10/TIOB2                 USBA_EN5V_PE10      EN5V_USBA
+  PE11/A11/TCLK2                 USBB_EN5V_PE11      EN5V_USBB
+  PE12/A12/TIOA1/PWMH2           USBC_EN5V_PE12      EN5V_USBC
+  PE13/A13/TIOB1/PWML2           PB_USER1_PE13       PB_USER1
+  PE14/A14/TCLK1/PWMH3           MCI1_CD_PE14        MCI1_CD
+  PE15/A15/SCK3/TIOA0            MCI1_PWR_PE15       MCI1_PWR
+  PE16/A16/RXD3/TIOB0            DBGU_RXD3_PE16      DBGU_RXD3 (See JP19)
+  PE17/A17/TXD3/TCLK0            DBGU_TXD3_PE17      DBGU_TXD3 (See JP20)
+  PE18/A18/TIOA5/MCI1_CK         PE18                MCI1_CK, EXP
+  PE19/A19/TIOB5/MCI1_CDA        PE19                MCI1_CDA, EXP
+  PE20/A20/TCLK5/MCI1_DA0        PE20                MCI1_DA0, EXP
+  PE21/A23/TIOA4/MCI1_DA1        PE21                MCI1_DA1, EXP
+  PE22/A24/TIOB4/MCI1_DA2        PE22                MCI1_DA2, EXP
+  PE23/A25/TCLK4/MCI1_DA3        PE23                MCI1_DA3, EXP
+  PE24/NCS0/RTS3                 LCD_PE24            LCD_PE24
+  PE25/NCS1/SCK4/IRQ             LCD_PE25            LCD_PE25
+  PE26/NCS2/RXD4/A18             RXD4_PE26           RXD4
+  PE27/NWR1/NBS1/TXD4            TXD4_PE27           TXD4
+  PE28/NWAIT/RTS4/A19            1Wire_PE28          1-WIRE ROM, LCD, D8 (green)
+  PE29/DIBP/URXD0/TWD1           SMD_DIBP_PE29       DIBP
+  PE30/DIBN/UTXD0/TWCK1          SMD_DIBN_PE30       DIBP
+  PE31/ADTRG                     USBA_VBUS_PE31      USBA_VBUS_PE31
+  ------------------------------ ------------------- -------------------------
 
 Buttons and LEDs
 ================
 
   Buttons
   -------
+  A single button, PB_USER1 (PB2), is available on the SAMA5D4-EK:
 
-  The following push buttons switches are available:
+  ------------------------------ ------------------- -------------------------
+  SAMA5D4 PIO                    SIGNAL              USAGE
+  ------------------------------ ------------------- -------------------------
+  PE13/A13/TIOB1/PWML2           PB_USER1_PE13       PB_USER1
+  ------------------------------ ------------------- -------------------------
 
-    1. One board reset button (BP2). When pressed and released, this push
-       button causes a power-on reset of the whole board.
-
-    2. One wakeup pushbutton that brings the processor out of Low-power mode
-       (BP1)
-
-    3. One user pushbutton (BP3)
-
-  Only the user push button (BP3) is controllable by software:
-
-    - PE29.  Pressing the switch connect PE29 to ground.  Therefore, PE29
-      must be pulled high internally.  When the button is pressed the SAMA5
-      will sense "0" is on PE29.
+  Closing JP2 will bring PE13 to ground so 1) PE13 should have a weak pull-up,
+  and 2) when PB2 is pressed, a low value will be senses.
 
   LEDs
   ----
-  There are two LEDs on the SAMA5D4-EK that can be controlled by software.
-  A blue LED is controlled via PIO pins.  A red LED normally provides an
-  indication that power is supplied to the board but can also be controlled
-  via software.
+  There are 3 LEDs on the SAMA5D4-EK:
 
-    PE23.  This blue LED is pulled high and is illuminated by pulling PE23
-    low.
+  ------------------------------ ------------------- -------------------------
+  SAMA5D4 PIO                    SIGNAL              USAGE
+  ------------------------------ ------------------- -------------------------
+  PE28/NWAIT/RTS4/A19            1Wire_PE28          1-WIRE ROM, LCD, D8 (green)
+  PE8/A8/TCLK3/PWML3             LED_USER_PE8        LED_USER (D10)
+  PE9/A9/TIOA2                   LED_POWER_PE9       LED_POWER (D9, Red)
+  ------------------------------ ------------------- -------------------------
 
-    PE24.  The red LED is also pulled high but is driven by a transistor so
-    that it is illuminated when power is applied even if PE24 is not
-    configured as an output.  If PE24 is configured as an output, then the
-    LED is illuminated by a high output.
+  - D8: D8 is shared with other functions and cannot be used if the 1-Wire ROM
+    is used.  I am not sure of the LCD function, but the LED may not be available
+    if the LCD is used either.  We will avoid using D8 just for simplicity.
+  - D10:  Nothing special here.  A low output illuminates.
+  - D9: The Power ON LED.  Connects to the via an IRLML2502 MOSFET.  This LED will
+    be on when power is applied but otherwise a low output value will turn it
+    off.
 
   These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
   defined.  In that case, the usage by the board port is defined in
@@ -684,71 +852,120 @@ Buttons and LEDs
   events as follows:
 
     SYMBOL                Meaning                     LED state
-                                                    Blue     Red
+                                                  USER D10 POWER D9
     -------------------  -----------------------  -------- --------
-    LED_STARTED          NuttX has been started     OFF      OFF
-    LED_HEAPALLOCATE     Heap has been allocated    OFF      OFF
-    LED_IRQSENABLED      Interrupts enabled         OFF      OFF
-    LED_STACKCREATED     Idle stack created         ON       OFF
+    LED_STARTED          NuttX has been started     OFF      ON
+    LED_HEAPALLOCATE     Heap has been allocated    OFF      ON
+    LED_IRQSENABLED      Interrupts enabled         OFF      ON
+    LED_STACKCREATED     Idle stack created         ON       ON
     LED_INIRQ            In an interrupt              No change
     LED_SIGNAL           In a signal handler          No change
     LED_ASSERTION        An assertion failed          No change
     LED_PANIC            The system has crashed     OFF      Blinking
     LED_IDLE             MCU is is sleep mode         Not used
 
-  Thus if the blue LED is statically on, NuttX has successfully booted and
-  is, apparently, running normally.  If the red LED is flashing at
+  Thus if the D0 and D9 are statically on, NuttX has successfully booted and
+  is, apparently, running normally.  If the red D9 LED is flashing at
   approximately 2Hz, then a fatal error has been detected and the system
   has halted.
 
 Serial Console
 ==============
 
-  UARTS/USARTS
-  ------------
+  Two UARTs are available:
 
-    CONN  LABEL   PIO   UART/USART  FUNCTION
-    ----- ------- ----- ----------- ---------------
-    J18   SCL0    PC30  UART0       UTXD0
-    J18   SDA0    PC29  UART0       URXD0
-    J15   1       PA31  UART1       UTXD1
-    J15   0       PA30  UART1       URXD1
-    J20   TXD3 14 PC26  UART1       URXD1
-    J20   RXD3 15 PC27  UART1       UTXD1
-    J20   TXD1 16 PD18  USART0      TXD0
-    J20   RXD1 17 PD17  USART0      RXD0
-    J20   TXD0 18 PB29  USART1      TXD1
-    J20   RXD0 19 PB28  USART1      RXD1
-    J20   SDA  20 PE19  USART3      TXD3
-    J20   SCL  21 PE18  USART3      RXD3
+  USART3 Virtual Com
+  ------------------------------ ------------------- -------------------------
+  SAMA5D4 PIO                    SIGNAL              USAGE
+  ------------------------------ ------------------- -------------------------
+  PE16/A16/RXD3/TIOB0            DBGU_RXD3_PE16      DBGU_RXD3 (See JP19)
+  PE17/A17/TXD3/TCLK0            DBGU_TXD3_PE17      DBGU_TXD3 (See JP20)
+  ------------------------------ ------------------- -------------------------
 
-  DBGU Interface
-  --------------
+  Connects to the SAM3U which will, in turn, provide the serial output on a
+  virual COM port.  JP19 and JP20 can disconnect USART3 from the SAM3U.
 
-  The SAMA5D4-EK board has a dedicated serial port for debugging which is
-  accessible through the 6-pin male header J23.
+  USART4 TTL-Level
+  ------------------------------ ------------------- -------------------------
+  SAMA5D4 PIO                    SIGNAL              USAGE
+  ------------------------------ ------------------- -------------------------
+  PE26/NCS2/RXD4/A18             RXD4_PE26           RXD4
+  PE27/NWR1/NBS1/TXD4            TXD4_PE27           TXD4
+  ------------------------------ ------------------- -------------------------
 
-  PIN PIO  Usage
-  --- ---- -----------------------------------------
-   1  PE13 (available)
-   2  PB31 DBGU DTXD
-   3  PB30 DBGU DRXD
-   4  N/C  (may be used by debug interface tool)
-   5  PE14 (available)
-   6  GND
+  A TTL-to-RS232 converter is required to use this USART for a serial console.
 
-  By default the DBUG is used as the NuttX serial console in all
-  configurations (unless otherwise noted).  The DBGU is available at
-  logic levels at pins RXD and TXD of the DEBUG connector (J23).  GND
-  is available at J23 and +3.3V is available from J14
+  - RXD4/PE26 is available at Expansion Interface, J19C pin 59
+  - TXD4/PE27 is available at Expansion Interface, J19C pin 60
+  - VCC_3V3 is also available at Expansion Interface, J19B pins 21 and 22
+  - GND is available J19A pin 11, J19B pin 31, and J19C pin 51
+
+  By default the DBGU/USART3 is used as the NuttX serial console in all
+  configurations (unless otherwise noted).  USART4, however, is the more
+  convenient USART to use during board bring-up.
 
 Networking
 ==========
 
   Networking support via the can be added to NSH by selecting the following
-  configuration options.  The SAMA5D44 supports two different Ethernet MAC
-  peripherals:  (1) The 10/100Base-T EMAC peripheral and (2) the
-  10/100/1000Base-T GMAC peripheral.
+  configuration options.  The SAMA5D44 supports two different 10/100Base-T
+  Ethernet MAC peripherals.
+
+  ------------------------------ ------------------- -------------------------
+  SAMA5D4 PIO                    SIGNAL              USAGE
+  ------------------------------ ------------------- -------------------------
+  PB0/G0_TXCK                    PB0                 G0_TXCK, EXP
+  PB1/G0_RXCK/SCK2/ISI_PCK       ISI_PCK_PB1         ISI_PCK
+  PB2/G0_TXEN                    PB2                 G0_TXEN,EXP
+  PB3/G0_TXER/CTS2/ISI_VSYNC     ISI_VSYNC_PB3       ISI_VSYNC
+  PB4/G0_CRS/RXD2/ISI_HSYNC      ISI_HSYNC_PB4       ISI_HSYNC
+  PB5/G0_COL/TXD2/PCK2           ISI_PWD_PB5         ISI_PWD
+  PB6/G0_RXDV                    PB6                 G0_RXDV, EXP
+  PB7/G0_RXER                    PB7                 G0_RXER, EXP
+  PB8/G0_RX0                     PB8                 G0_RX0, EXP
+  PB9/G0_RX1                     PB9                 G0_RX1, EXP
+  PB10/G0_RX2/PCK2/PWML1         PB10                AUDIO_PCK2, EXP
+  PB11/G0_RX3/RTS2/PWMH1         ISI_RST_PB11        ISI_RST
+  PB12/G0_TX0                    PB12                G0_TX0, EXP
+  PB13/G0_TX1                    PB13                G0_TX1, EXP
+  PB14/G0_TX2/SPI2_NPCS1/PWMH0   ZIG_SPI2_NPCS1      ZIG_SPI2_NPCS1
+  PB15/G0_TX3/SPI2_NPCS2/PWML0   HDMI_RST_PB15       HDMI_RST
+  PB16/G0_MDC                    PB16                G0_MDC, EXP
+  PB17/G0_MDIO                   PB17                G0_MDIO, EXP
+  PE1/A1/MCI0_DB0                G0_IRQ_PE1          G0_IRQ
+  ------------------------------ ------------------- -------------------------
+  PA2/LCDDAT2/G1_TXCK            PA                  LCDDAT2, G1_TXCK
+  PA3/LCDDAT3/G1_RXCK            PA3                 LCDDAT3
+  PA4/LCDDAT4/G1_TXEN            PA4                 LCDDAT4, G1_TXEN
+  PA5/LCDDAT5/G1_TXER            PA5                 LCDDAT5
+  PA6/LCDDAT6/G1_CRS             PA6                 LCDDAT6
+  PA9/LCDDAT9/G1_COL             PA9                 LCDDAT9
+  PA10/LCDDAT10/G1_RXDV          PA10                LCDDAT10, G1_RXDV
+  PA11/LCDDAT11/G1_RXER          PA11                LCDDAT11, G1_RXER
+  PA12/LCDDAT12/G1_RX0           PA12                LCDDAT12, G1_RX0
+  PA13/LCDDAT13/G1_RX1           PA13                LCDDAT13, G1_RX1
+  PA14/LCDDAT14/G1_TX0           PA14                LCDDAT14, G1_TX0
+  PA15/LCDDAT15/G1_TX1           PA15                LCDDAT15, G1_TX1
+  PA18/LCDDAT18/G1_RX2           PA18                LCDDAT18
+  PA19/LCDDAT19/G1_RX3           PA19                LCDDAT19
+  PA20/LCDDAT20/G1_TX2           PA20                LCDDAT20
+  PA21/LCDDAT21/G1_TX3           PA21                LCDDAT21
+  PA22/LCDDAT22/G1_MDC           PA22                LCDDAT22, G1_MDC
+  PA23/LCDDAT23/G1_MDIO          PA23                LCDDAT23, G1_MDIO
+  PE2/A2/MCI0_DB1                G1_IRQ_PE2          G1_IRQ
+  ------------------------------ ------------------- -------------------------
+
+  EMAC2 connects (directly) to a KSZ8081RNB PHY (U10) and is available at
+  the ETH0 connector.
+
+  EMAC1 connects (indirectly) to another KSZ8081RNB PHY (U7) and is available
+  at the ETH1 connector.  The ETH1 signals go through a line driver that is
+  enabled via LCD_ETH1_CONFIG when an LCD is detected:
+
+  - LCD_ETH1_CONFIG = 0: LCD 5v disable
+  - LCD_ETH1_CONFIG = 1 & LCD_DETECT# =0: LCD 5v enable
+
+  But where does LCD_ETH1_CONFIG come from?
 
   Selecting the EMAC0 peripheral
   -----------------------------
@@ -759,11 +976,11 @@ Networking
   System Type -> EMAC device driver options
     CONFIG_SAMA5_EMAC0_NRXBUFFERS=16     : Set aside some RS and TX buffers
     CONFIG_SAMA5_EMAC0_NTXBUFFERS=4
-    CONFIG_SAMA5_EMAC0_PHYADDR=1         : KSZ9031 PHY is at address 1
+    CONFIG_SAMA5_EMAC0_PHYADDR=1         : KSZ8081 PHY is at address 1
     CONFIG_SAMA5_EMAC0_AUTONEG=y         : Use autonegotiation
     CONFIG_SAMA5_EMAC0_RMII=y            : Either MII or RMII interface should work
-    CONFIG_SAMA5_EMAC0_PHYSR=30          : Address of PHY status register on KSZ9031
-    CONFIG_SAMA5_EMAC0_PHYSR_ALTCONFIG=y : Needed for KSZ9031
+    CONFIG_SAMA5_EMAC0_PHYSR=30          : Address of PHY status register on KSZ8081
+    CONFIG_SAMA5_EMAC0_PHYSR_ALTCONFIG=y : Needed for KSZ8081
     CONFIG_SAMA5_EMAC0_PHYSR_ALTMODE=0x7 : "    " " " "     "
     CONFIG_SAMA5_EMAC0_PHYSR_10HD=0x1    : "    " " " "     "
     CONFIG_SAMA5_EMAC0_PHYSR_100HD=0x2   : "    " " " "     "
@@ -771,23 +988,34 @@ Networking
     CONFIG_SAMA5_EMAC0_PHYSR_100FD=0x6   : "    " " " "     "
 
   PHY selection.  Later in the configuration steps, you will need to select
-  the KSZ9031 PHY for EMAC (See below)
+  the KSZ8081 PHY for EMAC (See below)
 
-  Selecting the GMAC peripheral
+  Selecting the EMAC1 peripheral
   -----------------------------
 
   System Type -> SAMA5 Peripheral Support
-    CONFIG_SAMA5_GMAC=y                  : Enable the GMAC peripheral
+    CONFIG_SAMA5_EMAC0=y                 : Enable the EMAC peripheral
 
-  System Type -> GMAC device driver options
-    CONFIG_SAMA5_GMAC_NRXBUFFERS=16      : Set aside some RS and TX buffers
-    CONFIG_SAMA5_GMAC_NTXBUFFERS=4
-    CONFIG_SAMA5_GMAC_PHYADDR=1          : KSZ8081 PHY is at address 1
-    CONFIG_SAMA5_GMAC_AUTONEG=y          : Use autonegotiation
+  System Type -> EMAC device driver options
+    CONFIG_SAMA5_EMAC0_NRXBUFFERS=16     : Set aside some RS and TX buffers
+    CONFIG_SAMA5_EMAC0_NTXBUFFERS=4
+    CONFIG_SAMA5_EMAC0_PHYADDR=1         : KSZ8081 PHY is at address 1
+    CONFIG_SAMA5_EMAC0_AUTONEG=y         : Use autonegotiation
+    CONFIG_SAMA5_EMAC0_RMII=y            : Either MII or RMII interface should work
+    CONFIG_SAMA5_EMAC0_PHYSR=30          : Address of PHY status register on KSZ8081
+    CONFIG_SAMA5_EMAC0_PHYSR_ALTCONFIG=y : Needed for KSZ8081
+    CONFIG_SAMA5_EMAC0_PHYSR_ALTMODE=0x7 : "    " " " "     "
+    CONFIG_SAMA5_EMAC0_PHYSR_10HD=0x1    : "    " " " "     "
+    CONFIG_SAMA5_EMAC0_PHYSR_100HD=0x2   : "    " " " "     "
+    CONFIG_SAMA5_EMAC0_PHYSR_10FD=0x5    : "    " " " "     "
+    CONFIG_SAMA5_EMAC0_PHYSR_100FD=0x6   : "    " " " "     "
 
-  If both EMAC and GMAC are selected, you will also need:
+  PHY selection.  Later in the configuration steps, you will need to select
+  the KSZ8081 PHY for EMAC (See below)
 
-    CONFIG_SAMA5_GMAC_ISETH0=y           : GMAC is "eth0"; EMAC is "eth1"
+  If both EMAC0 and EMAC1 are selected, you will also need:
+
+    CONFIG_SAMA5_EMAC0_ISETH0=y          : EMAC0 is "eth0"; EMAC1 is "eth1"
 
   PHY selection.  Later in the configuration steps, you will need to select
   the  KSZ9081 PHY for GMAC (See below)
@@ -919,18 +1147,16 @@ AT25 Serial FLASH
   The SAMA4D4-EK board supports an options Serial DataFlash connected
   at MN8.  The SPI connection is as follows:
 
-         MN8       SAMA5
-    ------------- -----------------------------------------------
-    PIN  FUNCTION  PIO   FUNCTION
-    --- --------- ----- -----------------------------------------
-     5    SI       PD11  SPI0_MOSI
-     2    SO       PD10  SPI0_MIS0
-     6    SCK      PD12  SPI0_SPCK
-     1    /CS      PD13  if jumper JP6 is closed.
-
-  NOTE:  The MN8 is not populated on my SAMAD3 Xplained board.  So, as a
-  result, these instructions would only apply if you were to have an AT25
-  Serial DataFlash installed in MN8.
+  ------------------------------ ------------------- -------------------------
+  SAMA5D4 PIO                    SIGNAL              USAGE
+  ------------------------------ ------------------- -------------------------
+  PC0/SPI0_MISO/PWMH2/ISI_D8     PC0                 AT25_SPI0_SO, ISI_D8
+  PC1/SPI0_MOSI/PWML2/ISI_D9     PC1                 AT25_SPI0_SI, ISI_D9
+  PC2/SPI0_SPCK/PWMH3/ISI_D10    PC2                 AT25_SPI0_SPCK, ISI_D10,
+                                                     ZIG_PWMH3_PC2
+  PC3/SPI0_NPCS0/PWML3/ISI_D11   PC3                 AT25_SPI0_NCPS0, ISI_D11,
+                                                     ZIG_PWML3_PC3 (See JP6)
+  ------------------------------ ------------------- -------------------------
 
   Configuration
   -------------
@@ -1105,45 +1331,43 @@ USB Ports
   The SAMA4D4-EK features three USB communication ports:
 
     * Port A Host High Speed (EHCI) and Full Speed (OHCI) multiplexed with
-      USB Device High Speed Micro AB connector, J6
+      USB Device High Speed Micro AB connector, J1
 
     * Port B Host High Speed (EHCI) and Full Speed (OHCI) standard type A
-      connector, J7 upper port
+      connector, J5 upper port
 
-    * Port C Host Full Speed (OHCI) only standard type A connector, J7
-      lower port
+    * Port C Host Full Speed (OHCI)  and Full Speed (OHCI) standard type A
+      connector, J5 lower port
 
-  The two USB host ports (only) are equipped with 500-mA high-side power
+  The three  USB host ports are equipped with 500-mA high-side power
   switch for self-powered and bus-powered applications.
 
-  The USB device port A (J6) features a VBUS insert detection function.
+  The USB device port A (J5) features a VBUS insert detection function.
 
   Port A
   ------
 
-    PIO  Signal Name Function
-    ---- ----------- -------------------------------------------------------
-    PE9  VBUS_SENSE VBus detection
-
-    Note: No VBus power switch enable on port A.  I think that this limits
-    this port to a device port or as a host port for self-powered devices
-    only.
+    PIO  Signal Name    Function
+    ---- -------------- -------------------------------------------------------
+    PE10 EN5V_USBA      VBus power enable (via MN2 power switch) to VBus pin of
+                        the OTG connector (host)
+    PE31 USBA_VBUS_PE31 VBus sensing from the VBus pin of the OTG connector (device)
 
   Port B
   ------
 
-    PIO  Signal Name Function
-    ---- ----------- -------------------------------------------------------
-    PE4  EN5V_USBB   VBus power enable (via MN3 power switch).  To the A1
-                     pin of J7 Dual USB A connector
+    PIO  Signal Name    Function
+    ---- -------------- -------------------------------------------------------
+    PE11 EN5V_USBB      VBus power enable (via MN4 power switch).  To the A1
+                        pin of J5 Dual USB A connector
 
   Port C
   ------
 
-    PIO  Signal Name Function
-    ---- ----------- -------------------------------------------------------
-    PE3  EN5V_USBC   VBus power enable (via MN3 power switch).  To the B1
-                     pin of J7 Dual USB A connector
+    PIO  Signal Name    Function
+    ---- -------------- -------------------------------------------------------
+    PE12 EN5V_USBC      VBus power enable (via MN4 power switch).  To the B1
+                        pin of J5 Dual USB A connector
 
   Both Ports B and C
   ------------------

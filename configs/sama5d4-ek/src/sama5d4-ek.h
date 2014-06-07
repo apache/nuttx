@@ -260,45 +260,46 @@
 #endif
 
 /* LEDs *****************************************************************************/
-/* There are two LEDs on the SAMA5D4 series-CM board that can be controlled
- * by software.  A  blue LED is controlled via PIO pins.  A red LED normally
- * provides an indication that power is supplied to the board but can also
- * be controlled via software.
+/* There are 3 LEDs on the SAMA5D4-EK:
  *
- *   PE23.  This blue LED is pulled high and is illuminated by pulling PE23
- *   low.
+ * ------------------------------ ------------------- -------------------------
+ * SAMA5D4 PIO                    SIGNAL              USAGE
+ * ------------------------------ ------------------- -------------------------
+ * PE28/NWAIT/RTS4/A19            1Wire_PE28          1-WIRE ROM, LCD, D8 (green)
+ * PE8/A8/TCLK3/PWML3             LED_USER_PE8        LED_USER (D10)
+ * PE9/A9/TIOA2                   LED_POWER_PE9       LED_POWER (D9, Red)
+ * ------------------------------ ------------------- -------------------------
  *
- *   PE24.  The red LED is also pulled high but is driven by a transistor so
- *   that it is illuminated when power is applied even if PE24 is not
- *   configured as an output.  If PE24 is configured as an output, then the
- *   LCD is illuminated by a high output.
+ * - D8: D8 is shared with other functions and cannot be used if the 1-Wire ROM
+ *   is used.  I am not sure of the LCD function, but the LED may not be available
+ *   if the LCD is used either.  We will avoid using D8 just for simplicity.
+ * - D10:  Nothing special here.  A low output illuminates.
+ * - D9: The Power ON LED.  Connects to the via an IRLML2502 MOSFET.  This LED will
+ *   be on when power is applied but otherwise; a low output value will turn it
+ *   off.
  */
 
-#define PIO_BLUE     (PIO_OUTPUT | PIO_CFG_PULLUP | PIO_OUTPUT_SET | \
-                      PIO_PORT_PIOE | PIO_PIN23)
-#define PIO_RED      (PIO_OUTPUT | PIO_CFG_PULLUP | PIO_OUTPUT_CLEAR | \
-                      PIO_PORT_PIOE | PIO_PIN24)
+#define PIO_LED_USER  (PIO_OUTPUT | PIO_CFG_PULLUP | PIO_OUTPUT_SET | \
+                       PIO_PORT_PIOE | PIO_PIN8)
+#define PIO_LED_POWER (PIO_OUTPUT | PIO_CFG_PULLUP | PIO_OUTPUT_SET | \
+                       PIO_PORT_PIOE | PIO_PIN9)
 
 /* Buttons **************************************************************************/
-/* There are five push button switches on the SAMA4D4-EK base board:
+/* A single button, PB_USER1 (PB2), is available on the SAMA5D4-EK:
  *
- *   1. One Reset, board reset (BP1)
- *   2. One Wake up, push button to bring the processor out of low power mode
- *     (BP2)
- *   3. One User momentary Push Button
- *   4. One Disable CS Push Button
+ * ------------------------------ ------------------- -------------------------
+ * SAMA5D4 PIO                    SIGNAL              USAGE
+ * ------------------------------ ------------------- -------------------------
+ * PE13/A13/TIOB1/PWML2           PB_USER1_PE13       PB_USER1
+ * ------------------------------ ------------------- -------------------------
  *
- * Only the user push button is controllable by software (labeled
- * "PB_USER1" on the board):
- *
- *   - PE29.  Pressing the switch connects PE29 to ground.  Therefore, PE29
- *     must be pulled high internally.  When the button is pressed the SAMA5
- *     will sense "0" is on PE29.
+ * Closing JP2 will bring PE13 to ground so 1) PE13 should have a weak pull-up,
+ * and 2) when PB2 is pressed, a low value will be senses.
  */
 
-#define PIO_USER     (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
-                      PIO_INT_BOTHEDGES | PIO_PORT_PIOE | PIO_PIN29)
-#define IRQ_USER      SAM_IRQ_PE29
+#define PIO_BTN_USER (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
+                      PIO_INT_BOTHEDGES | PIO_PORT_PIOE | PIO_PIN13)
+#define IRQ_BTN_USER  SAM_IRQ_PE13
 
 /* HSMCI Card Slots *****************************************************************/
 /* The SAMA4D4-EK provides a two SD memory card slots:  (1) a full size SD card
