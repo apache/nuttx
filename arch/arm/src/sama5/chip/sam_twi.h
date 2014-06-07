@@ -2,7 +2,7 @@
  * arch/arm/src/sama5/chip/sam_twi.h
  * Two-wire Interface (TWI) definitions for the SAMA5
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,8 +65,8 @@
 #define SAM_TWI_RHR_OFFSET          0x0030 /* Receive Holding Register */
 #define SAM_TWI_THR_OFFSET          0x0034 /* Transmit Holding Register */
                                            /* 0x0038-0x00e0: Reserved */
-#define SAM_TWI_WPROT_MODE_OFFSET   0x00e4 /* Protection Mode Register */
-#define SAM_TWI_WPROT_STATUS_OFFSET 0x00e8 /* Protection Status Register */
+#define SAM_TWI_WPMR_OFFSET         0x00e4 /* Protection Mode Register */
+#define SAM_TWI_WPSR_OFFSET         0x00e8 /* Protection Status Register */
                                            /* 0x00ec-0x00fc: Reserved */
 
 /* TWI register adresses ****************************************************************/
@@ -82,8 +82,8 @@
 #define SAM_TWI0_IMR                (SAM_TWI0_VBASE+SAM_TWI_IMR_OFFSET)
 #define SAM_TWI0_RHR                (SAM_TWI0_VBASE+SAM_TWI_RHR_OFFSET)
 #define SAM_TWI0_THR                (SAM_TWI0_VBASE+SAM_TWI_THR_OFFSET)
-#define SAM_TWI0_WPROT_MODE         (SAM_TWI0_VBASE+SAM_TWI_WPROT_MODE_OFFSET)
-#define SAM_TWI0_WPROT_STATUS       (SAM_TWI0_VBASE+SAM_TWI_WPROT_STATUS_OFFSET)
+#define SAM_TWI0_WPMR               (SAM_TWI0_VBASE+SAM_TWI_WPMR_OFFSET)
+#define SAM_TWI0_WPSR               (SAM_TWI0_VBASE+SAM_TWI_WPSR_OFFSET)
 
 #define SAM_TWI1_CR                 (SAM_TWI1_VBASE+SAM_TWI_CR_OFFSET)
 #define SAM_TWI1_MMR                (SAM_TWI1_VBASE+SAM_TWI_MMR_OFFSET)
@@ -96,8 +96,8 @@
 #define SAM_TWI1_IMR                (SAM_TWI1_VBASE+SAM_TWI_IMR_OFFSET)
 #define SAM_TWI1_RHR                (SAM_TWI1_VBASE+SAM_TWI_RHR_OFFSET)
 #define SAM_TWI1_THR                (SAM_TWI1_VBASE+SAM_TWI_THR_OFFSET)
-#define SAM_TWI1_WPROT_MODE         (SAM_TWI1_VBASE+SAM_TWI_WPROT_MODE_OFFSET)
-#define SAM_TWI1_WPROT_STATUS       (SAM_TWI1_VBASE+SAM_TWI_WPROT_STATUS_OFFSET)
+#define SAM_TWI1_WPMR               (SAM_TWI1_VBASE+SAM_TWI_WPMR_OFFSET)
+#define SAM_TWI1_WPSR               (SAM_TWI1_VBASE+SAM_TWI_WPSR_OFFSET)
 
 #define SAM_TWI2_CR                 (SAM_TWI2_VBASE+SAM_TWI_CR_OFFSET)
 #define SAM_TWI2_MMR                (SAM_TWI2_VBASE+SAM_TWI_MMR_OFFSET)
@@ -110,8 +110,24 @@
 #define SAM_TWI2_IMR                (SAM_TWI2_VBASE+SAM_TWI_IMR_OFFSET)
 #define SAM_TWI2_RHR                (SAM_TWI2_VBASE+SAM_TWI_RHR_OFFSET)
 #define SAM_TWI2_THR                (SAM_TWI2_VBASE+SAM_TWI_THR_OFFSET)
-#define SAM_TWI2_WPROT_MODE         (SAM_TWI2_VBASE+SAM_TWI_WPROT_MODE_OFFSET)
-#define SAM_TWI2_WPROT_STATUS       (SAM_TWI2_VBASE+SAM_TWI_WPROT_STATUS_OFFSET)
+#define SAM_TWI2_WPMR               (SAM_TWI2_VBASE+SAM_TWI_WPMR_OFFSET)
+#define SAM_TWI2_WPSR               (SAM_TWI2_VBASE+SAM_TWI_WPSR_OFFSET)
+
+#ifdef CONFIG_SAMA5_HAVE_TWI3
+#  define SAM_TWI3_CR               (SAM_TWI3_VBASE+SAM_TWI_CR_OFFSET)
+#  define SAM_TWI3_MMR              (SAM_TWI3_VBASE+SAM_TWI_MMR_OFFSET)
+#  define SAM_TWI3_SMR              (SAM_TWI3_VBASE+SAM_TWI_SMR_OFFSET)
+#  define SAM_TWI3_IADR             (SAM_TWI3_VBASE+SAM_TWI_IADR_OFFSET)
+#  define SAM_TWI3_CWGR             (SAM_TWI3_VBASE+SAM_TWI_CWGR_OFFSET)
+#  define SAM_TWI3_SR               (SAM_TWI3_VBASE+SAM_TWI_SR_OFFSET)
+#  define SAM_TWI3_IER              (SAM_TWI3_VBASE+SAM_TWI_IER_OFFSET)
+#  define SAM_TWI3_IDR              (SAM_TWI3_VBASE+SAM_TWI_IDR_OFFSET)
+#  define SAM_TWI3_IMR              (SAM_TWI3_VBASE+SAM_TWI_IMR_OFFSET)
+#  define SAM_TWI3_RHR              (SAM_TWI3_VBASE+SAM_TWI_RHR_OFFSET)
+#  define SAM_TWI3_THR              (SAM_TWI3_VBASE+SAM_TWI_THR_OFFSET)
+#  define SAM_TWI3_WPMR             (SAM_TWI3_VBASE+SAM_TWI_WPMR_OFFSET)
+#  define SAM_TWI3_WPSR             (SAM_TWI3_VBASE+SAM_TWI_WPSR_OFFSET)
+#endif
 
 /* TWI register bit definitions *********************************************************/
 
@@ -143,20 +159,31 @@
 
 #define TWI_SMR_SADR_SHIFT          (16)      /* Bits 16-22:  Slave Address */
 #define TWI_SMR_SADR_MASK           (0x7f << TWI_SMR_SADR_SHIFT)
+#  define TWI_SMR_SADR(n)           ((uint32_t)(n) << TWI_SMR_SADR_SHIFT)
 
 /* TWI Internal Address Register */
 
 #define TWI_IADR_SHIFT              (0)      /* Bits 0-23:  Internal Address */
 #define TWI_IADR_MASK               (0x00ffffff << TWI_IADR_SHIFT)
+#  define TWI_IADR(n)               ((uint32_t)(n) << TWI_IADR_SHIFT)
 
 /* TWI Clock Waveform Generator Register */
 
 #define TWI_CWGR_CLDIV_SHIFT        (0)       /* Bits 0-7:  Clock Low Divider */
 #define TWI_CWGR_CLDIV_MASK         (0xff << TWI_CWGR_CLDIV_SHIFT)
+#  define TWI_CWGR_CLDIV(n)         ((uint32_t)(n) << TWI_CWGR_CLDIV_SHIFT)
 #define TWI_CWGR_CHDIV_SHIFT        (8)       /* Bits 8-15:  Clock High Divider */
 #define TWI_CWGR_CHDIV_MASK         (0xff << TWI_CWGR_CLDIV_SHIFT)
+#  define TWI_CWGR_CHDIV(n)         ((uint32_t)(n) << TWI_CWGR_CLDIV_SHIFT)
 #define TWI_CWGR_CKDIV_SHIFT        (16)      /* Bits 16-18:  Clock Divider */
 #define TWI_CWGR_CKDIV_MASK         (7 << TWI_CWGR_CLDIV_SHIFT)
+#  define TWI_CWGR_CKDIV(n)         ((uint32_t)(n) << TWI_CWGR_CLDIV_SHIFT)
+
+#ifdef ATSAMA5D4
+#  define TWI_CWGR_HOLD_SHIFT       (24)      /* Bits 24-28: TWD Hold Time versus TWCK falling */
+#  define TWI_CWGR_HOLD_MASK        (31 << TWI_CWGR_HOLD_SHIFT)
+#    define TWI_CWGR_HOLD(n)        ((uint32_t)(n) << TWI_CWGR_HOLD_SHIFT)
+#endif
 
 /* TWI Status Register, TWI Interrupt Enable Register, TWI Interrupt Disable
  * Register, and TWI Interrupt Mask Register common bit fields.
@@ -189,16 +216,16 @@
 
 /* Protection Mode Register */
 
-#define TWI_WPROT_MODE_WPROT        (1 << 0)  /* Bit 0:  Write protection bit */
-#define TWI_WPROT_MODE_KEY_SHIFT    (8)       /* Bits 8-31: Write protection mode security code */
-#define TWI_WPROT_MODE_KEY_MASK     (0x00ffffff << TWI_WPROT_MODE_KEY_SHIFT)
-#  define TWI_WPROT_MODE_KEY        (0x00545749 << TWI_WPROT_MODE_KEY_SHIFT)
+#define TWI_WPMR_WPEN               (1 << 0)  /* Bit 0:  Write Protection Enable */
+#define TWI_WPMR_WPKEY_SHIFT        (8)       /* Bits 8-31: Write Protection Key */
+#define TWI_WPMR_WPKEY_MASK         (0x00ffffff << TWI_WPMR_WPKEY_SHIFT)
+#  define TWI_WPMR_WPKEY            (0x00545749 << TWI_WPMR_WPKEY_SHIFT)
 
 /* Protection Status Register */
 
-#define TWI_WPROT_STATUS_ERR        (1 << 0)  /* Bit 0:  Write Protection Error */
-#define TWI_WPROT_STATUS_ADDR_SHIFT (8) /* Bits 8-31: Write Protection Error Address */
-#define TWI_WPROT_STATUS_ADDR_MASK  (0x00ffffff << TWI_WPROT_STATUS_WPROTADDR_SHIFT)
+#define TWI_WPSR_WPVS              (1 << 0)  /* Bit 0:  Write Protection Violation Status */
+#define TWI_WPSR_WPVSRC_SHIFT      (8)       /* Bits 8-31: Write Protection Violation Source */
+#define TWI_WPSR_WPVSRC_MASK       (0x00ffffff << TWI_WPSR_WPVSRC_SHIFT)
 
 /****************************************************************************************
  * Public Types
