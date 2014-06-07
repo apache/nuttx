@@ -41,6 +41,8 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <arch/sama5/chip.h>
 #include "chip/sam_memorymap.h"
 
 /************************************************************************************
@@ -66,6 +68,9 @@
  */
 
 #define AXIMX_REMAP_REMAP0     (1 << 0) /* Remap State 0 */
-#define AXIMX_REMAP_REMAP1     (1 << 1) /* Remap State 1 */
+
+#ifdef ATSAMA5D3
+#  define AXIMX_REMAP_REMAP1   (1 << 1) /* Remap State 1 */
+#endif
 
 #endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAM_AXIMX_H */

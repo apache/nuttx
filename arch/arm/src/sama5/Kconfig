@@ -337,11 +337,6 @@ config SAMA5_HSMCI2
 	depends on SAMA5_HAVE_HSMCI2
 	select ARCH_HAVE_SDIO
 
-config SAMA5_SAIC
-	bool "Secure Advanced Interrupt Controller (SAIC)"
-	default n
-	depends on SAMA5_HAVE_SAIC
-
 config SAMA5_SBM
 	bool "Secure Box Module (SBM)"
 	default n

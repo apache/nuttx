@@ -77,7 +77,11 @@
 #  define WDT_MR_WDV(n)           ((uint32_t)(n) << WDT_MR_WDV_SHIFT)
 #define WDT_MR_WDFIEN             (1 << 12) /* Bit 12: Watchdog Fault Interrupt Enable */
 #define WDT_MR_WDRSTEN            (1 << 13) /* Bit 13: Watchdog Reset Enable */
-#define WDT_MR_WDRPROC            (1 << 14) /* Bit 14: Watchdog Reset Processor */
+
+#ifdef ATSAMA5D3
+#  define WDT_MR_WDRPROC          (1 << 14) /* Bit 14: Watchdog Reset Processor */
+#endif
+
 #define WDT_MR_WDDIS              (1 << 15) /* Bit 15: Watchdog Disable */
 #define WDT_MR_WDD_SHIFT          (16)      /* Bits 16-27:  Watchdog Delta Value */
 #define WDT_MR_WDD_MASK           (0xfff << WDT_MR_WDD_SHIFT)
