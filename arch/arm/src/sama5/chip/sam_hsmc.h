@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/sama5/chip/sam_hsmc.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -176,7 +176,7 @@
 #define SAM_HSMC_KEY1_OFFSET          0x06a4 /* HSMC OCMS KEY1 Register */
 #define SAM_HSMC_KEY2_OFFSET          0x06a8 /* HSMC OCMS KEY2 Register */
                                              /* 0x06ac-0x06e0 Reserved */
-#define SAM_HSMC_WPCR_OFFSET          0x06e4 /* HSMC Write Protection Control Register */
+#define SAM_HSMC_WPMR_OFFSET          0x06e4 /* HSMC Write Protection Mode Register */
 #define SAM_HSMC_WPSR_OFFSET          0x06e8 /* HSMC Write Protection Status Register */
                                              /* 0x06fc Reserved */
 
@@ -293,7 +293,7 @@
 #define SAM_HSMC_OCMS                 (SAM_HSMC_VBASE+SAM_HSMC_OCMS_OFFSET)
 #define SAM_HSMC_KEY1                 (SAM_HSMC_VBASE+SAM_HSMC_KEY1_OFFSET)
 #define SAM_HSMC_KEY2                 (SAM_HSMC_VBASE+SAM_HSMC_KEY2_OFFSET)
-#define SAM_HSMC_WPCR                 (SAM_HSMC_VBASE+SAM_HSMC_WPCR_OFFSET)
+#define SAM_HSMC_WPMR                 (SAM_HSMC_VBASE+SAM_HSMC_WPMR_OFFSET)
 #define SAM_HSMC_WPSR                 (SAM_HSMC_VBASE+SAM_HSMC_WPSR_OFFSET)
 
 /* SMC Register Bit Definitions *****************************************************/
@@ -428,7 +428,9 @@
 
 /* PMECC Interrupt Status Register */
 
-#define HSMC_PMECCISR_ERRIS(n)        (1 << (n))  /* Bits 0-7: Error Interrupt Status */
+#define HSMC_PMECCISR_ERRIS_SHIFT     (0)      /* Bits 0-7: Error Interrupt Status */
+#define HSMC_PMECCISR_ERRIS_MASK      (0xff << HSMC_PMECCISR_ERRIS_SHIFT)
+#  define HSMC_PMECCISR_ERRIS(n)      (1 << (n))  /* Bits n: Error on sector n */
 
 /* PMECC Redundancy x Register (32-bit ECC value) */
 
@@ -569,12 +571,12 @@
 /* HSMC OCMS KEY1 Register (32-bits of 64-bit key value) */
 /* HSMC OCMS KEY2 Register (32-bits of 64-bit key value) */
 
-/* HSMC Write Protection Control Register */
+/* HSMC Write Protection Mode Register */
 
-#define HSMC_WPCR_WP_EN               (1 << 0)  /* Bit 0:  Write Protection Enable */
-#define HSMC_WPCR_WPKEY_SHIFT         (8)       /* Bit 8-31: Write Protection KEY password */
-#define HSMC_WPCR_WPKEY_MASK          (0xffffff << HSMC_WPCR_WPKEY_SHIFT)
-#  define HSMC_WPCR_WPKEY             (0x534d43 << HSMC_WPCR_WPKEY_SHIFT)
+#define HSMC_WPMR_WPEN                (1 << 0)  /* Bit 0:  Write Protection Enable */
+#define HSMC_WPMR_WPKEY_SHIFT         (8)       /* Bit 8-31: Write Protection KEY password */
+#define HSMC_WPMR_WPKEY_MASK          (0x00ffffff << HSMC_WPMR_WPKEY_SHIFT)
+#  define HSMC_WPMR_WPKEY             (0x00534d43 << HSMC_WPMR_WPKEY_SHIFT)
 
 /* HSMC Write Protection Status Register */
 
@@ -584,6 +586,8 @@
 #define HSMC_WPSR_WPVSRC_MASK         (0xffff << HSMC_WPSR_WPVSRC_SHIFT)
 
 /* NFC Command/Data Registers *******************************************************/
+
+/* NFC Command and Status Registers */
 
 #define NFCADDR_CMD_CMD1_SHIFT        (2)        /* Bits 2-9: Command Register Value for Cycle 1 */
 #define NFCADDR_CMD_CMD1_MASK         (0xff <<  NFCADDR_CMD_CMD1_SHIFT)
@@ -616,7 +620,9 @@
 #define NFCADDR_CMD_DATADIS           (0 << 25) /* Bit 25: 0=NFC Data disable */
 #define NFCADDR_CMD_NFCRD             (0 << 26) /* Bit 26: 0=NFC Read Enable */
 #define NFCADDR_CMD_NFCWR             (1 << 26) /* Bit 26: 1=NFC Write Enable */
-#define NFCADDR_CMD_NFCCMD            (1 << 27) /* Bit 27: 1=NFC Command Enable */
+#define NFCADDR_CMD_NFCCMD            (1 << 27) /* Bit 27: 1=NFC Command Enable (status only) */
+
+/* NFC Data Address */
 
 #define NFCDATA_ADDT_CYCLE1_SHIFT     (0)      /* Bits 0-7: NAND Flash Array Address Cycle 1 */
 #define NFCDATA_ADDT_CYCLE1_MASK      (0xff << NFCDATA_ADDT_CYCLE1_SHIFT)
@@ -624,8 +630,8 @@
 #define NFCDATA_ADDT_CYCLE2_SHIFT     (8)      /* Bits 8-15: NAND Flash Array Address Cycle 2 */
 #define NFCDATA_ADDT_CYCLE2_MASK      (0xff << NFCDATA_ADDT_CYCLE2_SHIFT)
 #  define NFCDATA_ADDT_CYCLE2(n)      ((uint32_t)(n) << NFCDATA_ADDT_CYCLE2_SHIFT)
-#define NFCDATA_ADDT_CYCLE3_SHIFT     (nn)      /* Bits 16-23: NAND Flash Array Address Cycle 3 */
-#define NFCDATA_ADDT_CYCLE3_MASK      (16 << NFCDATA_ADDT_CYCLE3_SHIFT)
+#define NFCDATA_ADDT_CYCLE3_SHIFT     (16)      /* Bits 16-23: NAND Flash Array Address Cycle 3 */
+#define NFCDATA_ADDT_CYCLE3_MASK      (0xff << NFCDATA_ADDT_CYCLE3_SHIFT)
 #  define NFCDATA_ADDT_CYCLE3(n)      ((uint32_t)(n) << NFCDATA_ADDT_CYCLE3_SHIFT)
 #define NFCDATA_ADDT_CYCLE4_SHIFT     (24)      /* Bits 24-31: NAND Flash Array Address Cycle 4 */
 #define NFCDATA_ADDT_CYCLE4_MASK      (0xff << NFCDATA_ADDT_CYCLE4_SHIFT)

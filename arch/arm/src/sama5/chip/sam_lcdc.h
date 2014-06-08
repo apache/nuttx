@@ -1288,7 +1288,7 @@
 #define LCDC_HEOCFG17_XPHI0COEFF2_SHIFT (16)   /* Bits 16-23: Horizontal Coefficient for phase 0 tap 2 */
 #define LCDC_HEOCFG17_XPHI0COEFF2_MASK  (0xff << LCDC_HEOCFG17_XPHI0COEFF2_SHIFT)
 #  define LCDC_HEOCFG17_XPHI0COEFF2(n)  ((uint32_t)(n) << LCDC_HEOCFG17_XPHI0COEFF2_SHIFT)
-#define LCDC_HEOCFG17_XPHI0COEFF3_SHIFT (24)   /* Bits 2431nn: Horizontal Coefficient for phase 0 tap 3 */
+#define LCDC_HEOCFG17_XPHI0COEFF3_SHIFT (24)   /* Bits 24-31: Horizontal Coefficient for phase 0 tap 3 */
 #define LCDC_HEOCFG17_XPHI0COEFF3_MASK  (0xff << LCDC_HEOCFG17_XPHI0COEFF3_SHIFT)
 #  define LCDC_HEOCFG17_XPHI0COEFF3(n)  ((uint32_t)(n) << LCDC_HEOCFG17_XPHI0COEFF3_SHIFT)
 
@@ -1309,7 +1309,7 @@
 #define LCDC_HEOCFG19_XPHI1COEFF2_SHIFT (16)   /* Bits 16-23: Horizontal Coefficient for phase 1 tap 2 */
 #define LCDC_HEOCFG19_XPHI1COEFF2_MASK  (0xff << LCDC_HEOCFG19_XPHI1COEFF2_SHIFT)
 #  define LCDC_HEOCFG19_XPHI1COEFF2(n)  ((uint32_t)(n) << LCDC_HEOCFG19_XPHI1COEFF2_SHIFT)
-#define LCDC_HEOCFG19_XPHI1COEFF3_SHIFT (24)   /* Bits 2431nn: Horizontal Coefficient for phase 1 tap 3 */
+#define LCDC_HEOCFG19_XPHI1COEFF3_SHIFT (24)   /* Bits 24-31: Horizontal Coefficient for phase 1 tap 3 */
 #define LCDC_HEOCFG19_XPHI1COEFF3_MASK  (0xff << LCDC_HEOCFG19_XPHI1COEFF3_SHIFT)
 #  define LCDC_HEOCFG19_XPHI1COEFF3(n)  ((uint32_t)(n) << LCDC_HEOCFG19_XPHI1COEFF3_SHIFT)
 
@@ -1330,7 +1330,7 @@
 #define LCDC_HEOCFG21_XPHI2COEFF2_SHIFT (16)   /* Bits 16-23: Horizontal Coefficient for phase 2 tap 2 */
 #define LCDC_HEOCFG21_XPHI2COEFF2_MASK  (0xff << LCDC_HEOCFG21_XPHI2COEFF2_SHIFT)
 #  define LCDC_HEOCFG21_XPHI2COEFF2(n)  ((uint32_t)(n) << LCDC_HEOCFG21_XPHI2COEFF2_SHIFT)
-#define LCDC_HEOCFG21_XPHI2COEFF3_SHIFT (24)   /* Bits 2431nn: Horizontal Coefficient for phase 2 tap 3 */
+#define LCDC_HEOCFG21_XPHI2COEFF3_SHIFT (24)   /* Bits 24-31: Horizontal Coefficient for phase 2 tap 3 */
 #define LCDC_HEOCFG21_XPHI2COEFF3_MASK  (0xff << LCDC_HEOCFG21_XPHI2COEFF3_SHIFT)
 #  define LCDC_HEOCFG21_XPHI2COEFF3(n)  ((uint32_t)(n) << LCDC_HEOCFG21_XPHI2COEFF3_SHIFT)
 
@@ -1351,7 +1351,7 @@
 #define LCDC_HEOCFG23_XPHI3COEFF2_SHIFT (16)   /* Bits 16-23: Horizontal Coefficient for phase 3 tap 2 */
 #define LCDC_HEOCFG23_XPHI3COEFF2_MASK  (0xff << LCDC_HEOCFG23_XPHI3COEFF2_SHIFT)
 #  define LCDC_HEOCFG23_XPHI3COEFF2(n)  ((uint32_t)(n) << LCDC_HEOCFG23_XPHI3COEFF2_SHIFT)
-#define LCDC_HEOCFG23_XPHI3COEFF3_SHIFT (24)   /* Bits 2431nn: Horizontal Coefficient for phase 3 tap 3 */
+#define LCDC_HEOCFG23_XPHI3COEFF3_SHIFT (24)   /* Bits 24-31: Horizontal Coefficient for phase 3 tap 3 */
 #define LCDC_HEOCFG23_XPHI3COEFF3_MASK  (0xff << LCDC_HEOCFG23_XPHI3COEFF3_SHIFT)
 #  define LCDC_HEOCFG23_XPHI3COEFF3(n)  ((uint32_t)(n) << LCDC_HEOCFG23_XPHI3COEFF3_SHIFT)
 
@@ -1372,7 +1372,7 @@
 #define LCDC_HEOCFG25_XPHI4COEFF2_SHIFT (16)   /* Bits 16-25: Horizontal Coefficient for phase 4 tap 2 */
 #define LCDC_HEOCFG25_XPHI4COEFF2_MASK  (0xff << LCDC_HEOCFG25_XPHI4COEFF2_SHIFT)
 #  define LCDC_HEOCFG25_XPHI4COEFF2(n)  ((uint32_t)(n) << LCDC_HEOCFG25_XPHI4COEFF2_SHIFT)
-#define LCDC_HEOCFG25_XPHI4COEFF3_SHIFT (24)   /* Bits 2431nn: Horizontal Coefficient for phase 4 tap 3 */
+#define LCDC_HEOCFG25_XPHI4COEFF3_SHIFT (24)   /* Bits 24-31: Horizontal Coefficient for phase 4 tap 3 */
 #define LCDC_HEOCFG25_XPHI4COEFF3_MASK  (0xff << LCDC_HEOCFG25_XPHI4COEFF3_SHIFT)
 #  define LCDC_HEOCFG25_XPHI4COEFF3(n)  ((uint32_t)(n) << LCDC_HEOCFG25_XPHI4COEFF3_SHIFT)
 
@@ -1393,7 +1393,7 @@
 #define LCDC_HEOCFG27_XPHI5COEFF2_SHIFT (16)   /* Bits 16-25: Horizontal Coefficient for phase 5 tap 2 */
 #define LCDC_HEOCFG27_XPHI5COEFF2_MASK  (0xff << LCDC_HEOCFG27_XPHI5COEFF2_SHIFT)
 #  define LCDC_HEOCFG27_XPHI5COEFF2(n)  ((uint32_t)(n) << LCDC_HEOCFG27_XPHI5COEFF2_SHIFT)
-#define LCDC_HEOCFG27_XPHI5COEFF3_SHIFT (24)   /* Bits 2431nn: Horizontal Coefficient for phase 5 tap 3 */
+#define LCDC_HEOCFG27_XPHI5COEFF3_SHIFT (24)   /* Bits 24-31: Horizontal Coefficient for phase 5 tap 3 */
 #define LCDC_HEOCFG27_XPHI5COEFF3_MASK  (0xff << LCDC_HEOCFG27_XPHI5COEFF3_SHIFT)
 #  define LCDC_HEOCFG27_XPHI5COEFF3(n)  ((uint32_t)(n) << LCDC_HEOCFG27_XPHI5COEFF3_SHIFT)
 
@@ -1414,7 +1414,7 @@
 #define LCDC_HEOCFG29_XPHI6COEFF2_SHIFT (16)   /* Bits 16-25: Horizontal Coefficient for phase 6 tap 2 */
 #define LCDC_HEOCFG29_XPHI6COEFF2_MASK  (0xff << LCDC_HEOCFG29_XPHI6COEFF2_SHIFT)
 #  define LCDC_HEOCFG29_XPHI6COEFF2(n)  ((uint32_t)(n) << LCDC_HEOCFG29_XPHI6COEFF2_SHIFT)
-#define LCDC_HEOCFG29_XPHI6COEFF3_SHIFT (24)   /* Bits 2431nn: Horizontal Coefficient for phase 6 tap 3 */
+#define LCDC_HEOCFG29_XPHI6COEFF3_SHIFT (24)   /* Bits 24-31: Horizontal Coefficient for phase 6 tap 3 */
 #define LCDC_HEOCFG29_XPHI6COEFF3_MASK  (0xff << LCDC_HEOCFG29_XPHI6COEFF3_SHIFT)
 #  define LCDC_HEOCFG29_XPHI6COEFF3(n)  ((uint32_t)(n) << LCDC_HEOCFG29_XPHI6COEFF3_SHIFT)
 
@@ -1435,7 +1435,7 @@
 #define LCDC_HEOCFG31_XPHI7COEFF2_SHIFT (16)   /* Bits 16-25: Horizontal Coefficient for phase 7 tap 2 */
 #define LCDC_HEOCFG31_XPHI7COEFF2_MASK  (0xff << LCDC_HEOCFG31_XPHI7COEFF2_SHIFT)
 #  define LCDC_HEOCFG31_XPHI7COEFF2(n)  ((uint32_t)(n) << LCDC_HEOCFG31_XPHI7COEFF2_SHIFT)
-#define LCDC_HEOCFG31_XPHI7COEFF3_SHIFT (24)   /* Bits 2431nn: Horizontal Coefficient for phase 7 tap 3 */
+#define LCDC_HEOCFG31_XPHI7COEFF3_SHIFT (24)   /* Bits 24-31: Horizontal Coefficient for phase 7 tap 3 */
 #define LCDC_HEOCFG31_XPHI7COEFF3_MASK  (0xff << LCDC_HEOCFG31_XPHI7COEFF3_SHIFT)
 #  define LCDC_HEOCFG31_XPHI7COEFF3(n)  ((uint32_t)(n) << LCDC_HEOCFG31_XPHI7COEFF3_SHIFT)
 
