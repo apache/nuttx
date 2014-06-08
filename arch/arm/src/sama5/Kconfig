@@ -2956,7 +2956,7 @@ config SAMA5_ADC_REGDEBUG
 
 endmenu # ADC Configuration
 
-if SAMA5_TC0 || SAMA5_TC1
+if SAMA5_TC0 || SAMA5_TC1 || SAMA5_TC2
 menu "Timer/counter Configuration"
 
 if SAMA5_TC0
@@ -3039,6 +3039,46 @@ config SAMA5_TC1_TIOB5
 
 endif # SAMA5_TC1
 
+if SAMA5_TC2
+
+config SAMA5_TC2_CLK6
+	bool "Enable TC2 channel 6 clock input pin"
+	default n
+
+config SAMA5_TC2_TIOA6
+	bool "Enable TC2 channel 6 ouput A"
+	default n
+
+config SAMA5_TC2_TIOB6
+	bool "Enable TC2 channel 6 ouput B"
+	default n
+
+config SAMA5_TC2_CLK7
+	bool "Enable TC2 channel 7 clock input pin"
+	default n
+
+config SAMA5_TC2_TIOA7
+	bool "Enable TC2 channel 7 ouput A"
+	default n
+
+config SAMA5_TC2_TIOB7
+	bool "Enable TC2 channel 7 ouput B"
+	default n
+
+config SAMA5_TC2_CLK8
+	bool "Enable TC2 channel 8 clock input pin"
+	default n
+
+config SAMA5_TC2_TIOA8
+	bool "Enable TC2 channel 8 ouput A"
+	default n
+
+config SAMA5_TC2_TIOB8
+	bool "Enable TC2 channel 8 ouput B"
+	default n
+
+endif # SAMA5_TC2
+
 config SAMA5_TC_REGDEBUG
 	bool "TC Register level debug"
 	depends on DEBUG
@@ -3048,7 +3088,7 @@ config SAMA5_TC_REGDEBUG
 		Very invasive! Requires also DEBUG.
 
 endmenu # Timer/counter Configuration
-endif # SAMA5_TC0 || SAMA5_TC1
+endif # SAMA5_TC0 || SAMA5_TC1 || SAM_TC2
 
 menu "Touchscreen configuration"
 

@@ -67,7 +67,8 @@
 #include "sam_pio.h"
 #include "sam_tc.h"
 
-#if defined(CONFIG_SAMA5_TC0) || defined(CONFIG_SAMA5_TC1)
+#if defined(CONFIG_SAMA5_TC0) || defined(CONFIG_SAMA5_TC1) || \
+    defined(CONFIG_SAMA5_TC2)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -350,6 +351,76 @@ static const struct sam_tcconfig_s g_tc345config =
 };
 #endif
 
+#ifdef CONFIG_SAMA5_TC2
+static const struct sam_tcconfig_s g_tc678config =
+{
+  .base    = SAM_TC678_VBASE,
+  .pid     = SAM_PID_TC2,
+  .chfirst = 6,
+  .tc      = 2,
+  .channel =
+  {
+    [0] =
+    {
+      .base    = SAM_TC678_CHAN_BASE(6),
+#ifdef CONFIG_SAMA5_TC2_CLK6
+      .clkset  = PIO_TC6_CLK,
+#else
+      .clkset  = 0,
+#endif
+#ifdef CONFIG_SAMA5_TC2_TIOA6
+      .tioaset = PIO_TC6_IOA,
+#else
+      .tioaset = 0,
+#endif
+#ifdef CONFIG_SAMA5_TC2_TIOB6
+      .tiobset = PIO_TC6_IOB,
+#else
+      .tiobset = 0,
+#endif
+    },
+    [1] =
+    {
+      .base    = SAM_TC678_CHAN_BASE(7),
+#ifdef CONFIG_SAMA5_TC2_CLK7
+      .clkset  = PIO_TC7_CLK,
+#else
+      .clkset  = 0,
+#endif
+#ifdef CONFIG_SAMA5_TC2_TIOA7
+      .tioaset = PIO_TC7_IOA,
+#else
+      .tioaset = 0,
+#endif
+#ifdef CONFIG_SAMA5_TC2_TIOB7
+      .tiobset = PIO_TC7_IOB,
+#else
+      .tiobset = 0,
+#endif
+    },
+    [2] =
+    {
+      .base    = SAM_TC345_CHAN_BASE(5),
+#ifdef CONFIG_SAMA5_TC2_CLK8
+      .clkset  = PIO_TC8_CLK,
+#else
+      .clkset  = 0,
+#endif
+#ifdef CONFIG_SAMA5_TC2_TIOA8
+      .tioaset = PIO_TC8_IOA,
+#else
+      .tioaset = 0,
+#endif
+#ifdef CONFIG_SAMA5_TC2_TIOB8
+      .tiobset = PIO_TC8_IOB,
+#else
+      .tiobset = 0,
+#endif
+    },
+  },
+};
+#endif
+
 /* Timer/counter state */
 
 #ifdef CONFIG_SAMA5_TC0
@@ -358,6 +429,10 @@ static struct sam_tc_s g_tc012;
 
 #ifdef CONFIG_SAMA5_TC1
 static struct sam_tc_s g_tc345;
+#endif
+
+#ifdef CONFIG_SAMA5_TC2
+static struct sam_tc_s g_tc678;
 #endif
 
 /* TC frequency data.  This table provides the frequency for each selection of TCCLK */
@@ -671,10 +746,18 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
   else
 #endif
 #ifdef CONFIG_SAMA5_TC1
-  if (channel >= 3 && channel < 5)
+  if (channel >= 3 && channel < 6)
     {
       tc       = &g_tc345;
       tcconfig = &g_tc345config;
+    }
+  else
+#endif
+#ifdef CONFIG_SAMA5_TC2
+  if (channel >= 6 && channel < 9)
+    {
+      tc       = &g_tc678;
+      tcconfig = &g_tc678config;
     }
   else
 #endif
@@ -1046,4 +1129,4 @@ int sam_tc_divisor(uint32_t frequency, uint32_t *div, uint32_t *tcclks)
   return OK;
 }
 
-#endif /* CONFIG_SAMA5_TC0 || CONFIG_SAMA5_TC1 */
+#endif /* CONFIG_SAMA5_TC0 || CONFIG_SAMA5_TC1 || CONFIG_SAMA5_TC2 */
