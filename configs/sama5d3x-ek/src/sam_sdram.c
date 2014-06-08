@@ -205,10 +205,10 @@ void sam_sdram_config(void)
   regval |= MPDDRC_HS_AUTOREFRESH_CAL;
   putreg32(regval, SAM_MPDDRC_HS);
 
-  /* Force DDR_DQ and DDR_DQS input buffer always on (undocumented) */
+  /* Force DDR_DQ and DDR_DQS input buffer always on */
 
   regval  = getreg32(SAM_SFR_DDRCFG);
-  regval |= SFR_DDRCFG_DRQON;
+  regval |= SFR_FDQIEN | SFR_FDQSIEN;
   putreg32(regval, SAM_SFR_DDRCFG);
 
   /* Configure the slave offset register */
@@ -234,11 +234,9 @@ void sam_sdram_config(void)
   regval |= (MPDDRC_IO_CALIBR_RZQ48_40 |  MPDDRC_IO_CALIBR_TZQIO(3));
   putreg32(regval, SAM_MPDDRC_IO_CALIBR);
 
-  /* Force DDR_DQ and DDR_DQS input buffer always on, clearing other bits
-   * (undocumented)
-   */
+  /* Force DDR_DQ and DDR_DQS input buffer always on */
 
-  putreg32(SFR_DDRCFG_DRQON, SAM_SFR_DDRCFG);
+  putreg32(SFR_FDQIEN | SFR_FDQSIEN, SAM_SFR_DDRCFG);
 
   /* Step 1: Program the memory device type
    *
