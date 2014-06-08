@@ -96,14 +96,18 @@
 
 /* DBGU Mode Register */
 
-#define DBGU_MR_PAR_SHIFT            (9)       /* Bits 9-11: Parity Type (2) */
+#ifdef ATSAMA5D4
+#  define DBGU_MR_FILTER_SHIFT       (1 << 4)  /* Bit 4: FILTER: Receiver Digital Filter */
+#endif
+
+#define DBGU_MR_PAR_SHIFT            (9)       /* Bits 9-11: Parity Type */
 #define DBGU_MR_PAR_MASK             (7 << DBGU_MR_PAR_SHIFT)
-#  define DBGU_MR_PAR_EVEN           (0 << DBGU_MR_PAR_SHIFT) /* Even parity (1) */
-#  define DBGU_MR_PAR_ODD            (1 << DBGU_MR_PAR_SHIFT) /* Odd parity (1) */
-#  define DBGU_MR_PAR_SPACE          (2 << DBGU_MR_PAR_SHIFT) /* Space: parity forced to 0 (1) */
-#  define DBGU_MR_PAR_MARK           (3 << DBGU_MR_PAR_SHIFT) /* Mark: parity forced to 1 (1) */
-#  define DBGU_MR_PAR_NONE           (4 << DBGU_MR_PAR_SHIFT) /* No parity (1) */
-#define DBGU_MR_CHMODE_SHIFT         (14)      /* Bits 14-15: Channel Mode (2) */
+#  define DBGU_MR_PAR_EVEN           (0 << DBGU_MR_PAR_SHIFT) /* Even parity */
+#  define DBGU_MR_PAR_ODD            (1 << DBGU_MR_PAR_SHIFT) /* Odd parity */
+#  define DBGU_MR_PAR_SPACE          (2 << DBGU_MR_PAR_SHIFT) /* Space: parity forced to 0 */
+#  define DBGU_MR_PAR_MARK           (3 << DBGU_MR_PAR_SHIFT) /* Mark: parity forced to 1 */
+#  define DBGU_MR_PAR_NONE           (4 << DBGU_MR_PAR_SHIFT) /* No parity */
+#define DBGU_MR_CHMODE_SHIFT         (14)      /* Bits 14-15: Channel Mode */
 #define DBGU_MR_CHMODE_MASK          (3 << DBGU_MR_CHMODE_SHIFT)
 #  define DBGU_MR_CHMODE_NORMAL      (0 << DBGU_MR_CHMODE_SHIFT) /* Normal Mode */
 #  define DBGU_MR_CHMODE_ECHO        (1 << DBGU_MR_CHMODE_SHIFT) /* Automatic Echo */
@@ -139,14 +143,20 @@
 
 #define DBGU_BRGR_CD_SHIFT           (0)      /* Bits 0-15: Clock Divisor */
 #define DBGU_BRGR_CD_MASK            (0xffff << DBGU_BRGR_CD_SHIFT)
+#  define DBGU_BRGR_CD_DISABLE       (0 << DBGU_BRGR_CD_SHIFT)
 #  define DBGU_BRGR_CD(n)            ((uint32_t)(n) << DBGU_BRGR_CD_SHIFT)
 
 /* Chip ID Register */
 
 #define DBGU_CIDR_VERSION_SHIFT      (0)      /* Bits 0-4: Version of the Device */
 #define DBGU_CIDR_VERSION_MASK       (31 << DBGU_CIDR_VERSION_SHIFT)
-#define DBGU_CIDR_EPROC_SHIFT        (5)      /* Bits 5-xx7 Embedded Processor */
+#define DBGU_CIDR_EPROC_SHIFT        (5)      /* Bits 5-7: Embedded Processor */
 #define DBGU_CIDR_EPROC_MASK         (7 << DBGU_CIDR_EPROC_SHIFT)
+#  define DBGU_CIDR_EPROC_ARM946ES   (1 << DBGU_CIDR_EPROC_SHIFT) /* ARM946ES */
+#  define DBGU_CIDR_EPROC_ARM7TDMI   (2 << DBGU_CIDR_EPROC_SHIFT) /* ARM7TDMI */
+#  define DBGU_CIDR_EPROC_CM3        (3 << DBGU_CIDR_EPROC_SHIFT) /* Cortex-M3 */
+#  define DBGU_CIDR_EPROC_ARM920T    (4 << DBGU_CIDR_EPROC_SHIFT) /* ARM920T */
+#  define DBGU_CIDR_EPROC_ARM926EJS  (5 << DBGU_CIDR_EPROC_SHIFT) /* ARM926EJS */
 #  define DBGU_CIDR_EPROC_CA5        (6 << DBGU_CIDR_EPROC_SHIFT) /* Cortex-A5 */
 #define DBGU_CIDR_NVPSIZ_SHIFT       (8)      /* Bits 8-11: Nonvolatile Program Memory Size */
 #define DBGU_CIDR_NVPSIZ_MASK        (15 << DBGU_CIDR_NVPSIZ_SHIFT)
@@ -191,7 +201,42 @@
 #  define DBGU_CIDR_SRAMSIZ_512K     (15 << DBGU_CIDR_SRAMSIZ_SHIFT) /* 512 Kbytes */
 #define DBGU_CIDR_ARCH_SHIFT         (20)     /* Bits 20-23: Architecture Identifier */
 #define DBGU_CIDR_ARCH_MASK          (15 << DBGU_CIDR_ARCH_SHIFT)
-#  define DBGU_CIDR_ARCH_ATSAMA5xx   (0xa5 << DBGU_CIDR_ARCH_SHIFT) /* ATSAMA5xx Series */
+#  define DBGU_CIDR_ARCH_AT91SAM9xx    (0x19 << DBGU_CIDR_ARCH_SHIFT) /* AT91SAM9xx Series */
+#  define DBGU_CIDR_ARCH_AT91SAM9XExx  (0x29 << DBGU_CIDR_ARCH_SHIFT) /* AT91SAM9XExx Series */
+#  define DBGU_CIDR_ARCH_AT91x34       (0x34 << DBGU_CIDR_ARCH_SHIFT) /* AT91x34 Series */
+#  define DBGU_CIDR_ARCH_CAP7          (0x37 << DBGU_CIDR_ARCH_SHIFT) /* CAP7 Series */
+#  define DBGU_CIDR_ARCH_CAP9          (0x39 << DBGU_CIDR_ARCH_SHIFT) /* CAP9 Series */
+#  define DBGU_CIDR_ARCH_CAP11         (0x3b << DBGU_CIDR_ARCH_SHIFT) /* CAP11 Series */
+#  define DBGU_CIDR_ARCH_AT91x40       (0x40 << DBGU_CIDR_ARCH_SHIFT) /* AT91x40 Series */
+#  define DBGU_CIDR_ARCH_AT91x42       (0x42 << DBGU_CIDR_ARCH_SHIFT) /* AT91x42 Series */
+#  define DBGU_CIDR_ARCH_AT91x55       (0x55 << DBGU_CIDR_ARCH_SHIFT) /* AT91x55 Series */
+#  define DBGU_CIDR_ARCH_AT91SAM7Axx   (0x60 << DBGU_CIDR_ARCH_SHIFT) /* AT91SAM7Axx Series */
+#  define DBGU_CIDR_ARCH_AT91SAM7AQxx  (0x61 << DBGU_CIDR_ARCH_SHIFT) /* AT91SAM7AQxx Series */
+#  define DBGU_CIDR_ARCH_AT91x63       (0x63 << DBGU_CIDR_ARCH_SHIFT) /* AT91x63 Series */
+#  define DBGU_CIDR_ARCH_AT91SAM7Sxx   (0x70 << DBGU_CIDR_ARCH_SHIFT) /* AT91SAM7Sxx Series */
+#  define DBGU_CIDR_ARCH_AT91SAM7XCxx  (0x71 << DBGU_CIDR_ARCH_SHIFT) /* AT91SAM7XCxx Series */
+#  define DBGU_CIDR_ARCH_AT91SAM7SExx  (0x72 << DBGU_CIDR_ARCH_SHIFT) /* AT91SAM7SExx Series */
+#  define DBGU_CIDR_ARCH_AT91SAM7Lxx   (0x73 << DBGU_CIDR_ARCH_SHIFT) /* AT91SAM7Lxx Series */
+#  define DBGU_CIDR_ARCH_AT91SAM7Xxx   (0x75 << DBGU_CIDR_ARCH_SHIFT) /* AT91SAM7Xxx Series */
+#  define DBGU_CIDR_ARCH_AT91SAM7SLxx  (0x76 << DBGU_CIDR_ARCH_SHIFT) /* AT91SAM7SLxx Series */
+#  define DBGU_CIDR_ARCH_ATSAM3UxC     (0x80 << DBGU_CIDR_ARCH_SHIFT) /* ATSAM3UxC Series (100-pin) */
+#  define DBGU_CIDR_ARCH_ATSAM3UxE     (0x81 << DBGU_CIDR_ARCH_SHIFT) /* ATSAM3UxE Series (144-pin) */
+#  define DBGU_CIDR_ARCH_ATSAM3AxC     (0x83 << DBGU_CIDR_ARCH_SHIFT) /* ATSAM3AxC Series (100-pin) */
+#  define DBGU_CIDR_ARCH_ATSAM3XxC     (0x84 << DBGU_CIDR_ARCH_SHIFT) /* ATSAM3XxC Series (100-pin) */
+#  define DBGU_CIDR_ARCH_ATSAM3XxE     (0x85 << DBGU_CIDR_ARCH_SHIFT) /* ATSAM3XxE Series (144-pin) */
+#  define DBGU_CIDR_ARCH_ATSAM3XxG     (0x86 << DBGU_CIDR_ARCH_SHIFT) /* ATSAM3XxG Series (208/217-pin) */
+#  define DBGU_CIDR_ARCH_ATSAM3SxA     (0x88 << DBGU_CIDR_ARCH_SHIFT) /* ATSAM3SxA Series (48-pin) */
+#  define DBGU_CIDR_ARCH_ATSAM3SxB     (0x89 << DBGU_CIDR_ARCH_SHIFT) /* ATSAM3SxB Series (64-pin) */
+#  define DBGU_CIDR_ARCH_ATSAM3SxC     (0x8a << DBGU_CIDR_ARCH_SHIFT) /* ATSAM3SxC Series (100-pin) */
+#  define DBGU_CIDR_ARCH_AT91x92       (0x92 << DBGU_CIDR_ARCH_SHIFT) /* AT91x92 Series */
+#  define DBGU_CIDR_ARCH_ATSAM3NxA     (0x93 << DBGU_CIDR_ARCH_SHIFT) /* ATSAM3NxA Series (48-pin) */
+#  define DBGU_CIDR_ARCH_ATSAM3NxB     (0x94 << DBGU_CIDR_ARCH_SHIFT) /* ATSAM3NxB Series (64-pin) */
+#  define DBGU_CIDR_ARCH_ATSAM3NxC     (0x95 << DBGU_CIDR_ARCH_SHIFT) /* ATSAM3NxC Series (100-pin) */
+#  define DBGU_CIDR_ARCH_ATSAM3SDxA    (0x98 << DBGU_CIDR_ARCH_SHIFT) /* ATSAM3SDxA Series (48-pin) */
+#  define DBGU_CIDR_ARCH_ATSAM3SDxB    (0x99 << DBGU_CIDR_ARCH_SHIFT) /* ATSAM3SDxB Series (64-pin) */
+#  define DBGU_CIDR_ARCH_ATSAM3SDxC    (0x9a << DBGU_CIDR_ARCH_SHIFT) /* ATSAM3SDxC Series (100-pin) */
+#  define DBGU_CIDR_ARCH_ATSAMA5xx     (0xa5 << DBGU_CIDR_ARCH_SHIFT) /* ATSAMA5xx Series */
+#  define DBGU_CIDR_ARCH_AT75Cxx       (0xf0 << DBGU_CIDR_ARCH_SHIFT) /* AT75Cxx Series */
 #define DBGU_CIDR_NVPTYP_SHIFT       (28)     /* Bits 28-30: Nonvolatile Program Memory Type */
 #define DBGU_CIDR_NVPTYP_MASK        (7 << DBGU_CIDR_NVPTYP_SHIFT)
 #  define DBGU_CIDR_NVPTYP_ROM       (0 << DBGU_CIDR_NVPTYP_SHIFT) /* ROM */
