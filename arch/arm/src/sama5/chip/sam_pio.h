@@ -2,7 +2,7 @@
  * arch/arm/src/sama5/chip/sam_pio.h
  * Parallel Input/Output (PIO) Controller definitions for the SAMA5
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,7 +55,11 @@
 #define SAM_PIO_PER_OFFSET         0x0000 /* PIO Enable Register */
 #define SAM_PIO_PDR_OFFSET         0x0004 /* PIO Disable Register */
 #define SAM_PIO_PSR_OFFSET         0x0008 /* PIO Status Register */
-                                          /* 0x000c: Reserved */
+
+#ifdef ATSAMA5D4
+#  define SAM_PIO_ISLR_OFFSET      0x000c /* PIO Interrupt Security Level Register */
+#endif
+
 #define SAM_PIO_OER_OFFSET         0x0010 /* Output Enable Register */
 #define SAM_PIO_ODR_OFFSET         0x0014 /* Output Disable Register */
 #define SAM_PIO_OSR_OFFSET         0x0018 /* Output Status Register */
@@ -107,7 +111,10 @@
 #define SAM_PIO_REHLSR_OFFSET      0x00d4 /* Rising Edge/ High Level Select Register */
 #define SAM_PIO_FRLHSR_OFFSET      0x00d8 /* Fall/Rise - Low/High Status Register */
                                           /* 0x00dc: Reserved */
-#define SAM_PIO_LOCKSR_OFFSET      0x00e0 /* Lock Status */
+#ifdef ATSAMA5D3
+#  define SAM_PIO_LOCKSR_OFFSET    0x00e0 /* Lock Status */
+#endif
+
 #define SAM_PIO_WPMR_OFFSET        0x00e4 /* Write Protect Mode Register */
 #define SAM_PIO_WPSR_OFFSET        0x00e8 /* Write Protect Status Register */
                                           /* 0x00ec-0x00f8: Reserved */
@@ -134,6 +141,11 @@
 #define SAM_PIO_PER(n)             (SAM_PIO_VBASE(n)+SAM_PIO_PER_OFFSET)
 #define SAM_PIO_PDR(n)             (SAM_PIO_VBASE(n)+SAM_PIO_PDR_OFFSET)
 #define SAM_PIO_PSR(n)             (SAM_PIO_VBASE(n)+SAM_PIO_PSR_OFFSET)
+
+#ifdef ATSAMA5D4
+#  define SAM_PIO_ISLR(n)          (SAM_PIO_VBASE(n)+SAM_PIO_ISLR_OFFSET)
+#endif
+
 #define SAM_PIO_OER(n)             (SAM_PIO_VBASE(n)+SAM_PIO_OER_OFFSET)
 #define SAM_PIO_ODR(n)             (SAM_PIO_VBASE(n)+SAM_PIO_ODR_OFFSET)
 #define SAM_PIO_OSR(n)             (SAM_PIO_VBASE(n)+SAM_PIO_OSR_OFFSET)
@@ -175,7 +187,11 @@
 #define SAM_PIO_FELLSR(n)          (SAM_PIO_VBASE(n)+SAM_PIO_FELLSR_OFFSET)
 #define SAM_PIO_REHLSR(n)          (SAM_PIO_VBASE(n)+SAM_PIO_REHLSR_OFFSET)
 #define SAM_PIO_FRLHSR(n)          (SAM_PIO_VBASE(n)+SAM_PIO_FRLHSR_OFFSET)
-#define SAM_PIO_LOCKSR(n)          (SAM_PIO_VBASE(n)+SAM_PIO_LOCKSR_OFFSET)
+
+#ifdef ATSAMA5D3
+#  define SAM_PIO_LOCKSR(n)        (SAM_PIO_VBASE(n)+SAM_PIO_LOCKSR_OFFSET)
+#endif
+
 #define SAM_PIO_WPMR(n)            (SAM_PIO_VBASE(n)+SAM_PIO_WPMR_OFFSET)
 #define SAM_PIO_WPSR(n)            (SAM_PIO_VBASE(n)+SAM_PIO_WPSR_OFFSET)
 #define SAM_PIO_SCHMITT(n)         (SAM_PIO_VBASE(n)+SAM_PIO_SCHMITT_OFFSET)
@@ -185,6 +201,11 @@
 #define SAM_PIOA_PER               (SAM_PIOA_VBASE+SAM_PIO_PER_OFFSET)
 #define SAM_PIOA_PDR               (SAM_PIOA_VBASE+SAM_PIO_PDR_OFFSET)
 #define SAM_PIOA_PSR               (SAM_PIOA_VBASE+SAM_PIO_PSR_OFFSET)
+
+#ifdef ATSAMA5D4
+#  define SAM_PIOA_ISLR            (SAM_PIOA_VBASE+SAM_PIO_ISLR_OFFSET)
+#endif
+
 #define SAM_PIOA_OER               (SAM_PIOA_VBASE+SAM_PIO_OER_OFFSET)
 #define SAM_PIOA_ODR               (SAM_PIOA_VBASE+SAM_PIO_ODR_OFFSET)
 #define SAM_PIOA_OSR               (SAM_PIOA_VBASE+SAM_PIO_OSR_OFFSET)
@@ -226,7 +247,11 @@
 #define SAM_PIOA_FELLSR            (SAM_PIOA_VBASE+SAM_PIO_FELLSR_OFFSET)
 #define SAM_PIOA_REHLSR            (SAM_PIOA_VBASE+SAM_PIO_REHLSR_OFFSET)
 #define SAM_PIOA_FRLHSR            (SAM_PIOA_VBASE+SAM_PIO_FRLHSR_OFFSET)
-#define SAM_PIOA_LOCKSR            (SAM_PIOA_VBASE+SAM_PIO_LOCKSR_OFFSET)
+
+#ifdef ATSAMA5D3
+#  define SAM_PIOA_LOCKSR          (SAM_PIOA_VBASE+SAM_PIO_LOCKSR_OFFSET)
+#endif
+
 #define SAM_PIOA_WPMR              (SAM_PIOA_VBASE+SAM_PIO_WPMR_OFFSET)
 #define SAM_PIOA_WPSR              (SAM_PIOA_VBASE+SAM_PIO_WPSR_OFFSET)
 #define SAM_PIOA_SCHMITT           (SAM_PIOA_VBASE+SAM_PIO_SCHMITT_OFFSET)
@@ -236,6 +261,11 @@
 #define SAM_PIOB_PER               (SAM_PIOB_VBASE+SAM_PIO_PER_OFFSET)
 #define SAM_PIOB_PDR               (SAM_PIOB_VBASE+SAM_PIO_PDR_OFFSET)
 #define SAM_PIOB_PSR               (SAM_PIOB_VBASE+SAM_PIO_PSR_OFFSET)
+
+#ifdef ATSAMA5D4
+#  define SAM_PIOB_ISLR            (SAM_PIOB_VBASE+SAM_PIO_ISLR_OFFSET)
+#endif
+
 #define SAM_PIOB_OER               (SAM_PIOB_VBASE+SAM_PIO_OER_OFFSET)
 #define SAM_PIOB_ODR               (SAM_PIOB_VBASE+SAM_PIO_ODR_OFFSET)
 #define SAM_PIOB_OSR               (SAM_PIOB_VBASE+SAM_PIO_OSR_OFFSET)
@@ -277,7 +307,11 @@
 #define SAM_PIOB_FELLSR            (SAM_PIOB_VBASE+SAM_PIO_FELLSR_OFFSET)
 #define SAM_PIOB_REHLSR            (SAM_PIOB_VBASE+SAM_PIO_REHLSR_OFFSET)
 #define SAM_PIOB_FRLHSR            (SAM_PIOB_VBASE+SAM_PIO_FRLHSR_OFFSET)
-#define SAM_PIOB_LOCKSR            (SAM_PIOB_VBASE+SAM_PIO_LOCKSR_OFFSET)
+
+#ifdef ATSAMA5D3
+#  define SAM_PIOB_LOCKSR          (SAM_PIOB_VBASE+SAM_PIO_LOCKSR_OFFSET)
+#endif
+
 #define SAM_PIOB_WPMR              (SAM_PIOB_VBASE+SAM_PIO_WPMR_OFFSET)
 #define SAM_PIOB_WPSR              (SAM_PIOB_VBASE+SAM_PIO_WPSR_OFFSET)
 #define SAM_PIOB_SCHMITT           (SAM_PIOB_VBASE+SAM_PIO_SCHMITT_OFFSET)
@@ -287,6 +321,11 @@
 #define SAM_PIOC_PER               (SAM_PIOC_VBASE+SAM_PIO_PER_OFFSET)
 #define SAM_PIOC_PDR               (SAM_PIOC_VBASE+SAM_PIO_PDR_OFFSET)
 #define SAM_PIOC_PSR               (SAM_PIOC_VBASE+SAM_PIO_PSR_OFFSET)
+
+#ifdef ATSAMA5D4
+#  define SAM_PIOC_ISLR            (SAM_PIOC_VBASE+SAM_PIO_ISLR_OFFSET)
+#endif
+
 #define SAM_PIOC_OER               (SAM_PIOC_VBASE+SAM_PIO_OER_OFFSET)
 #define SAM_PIOC_ODR               (SAM_PIOC_VBASE+SAM_PIO_ODR_OFFSET)
 #define SAM_PIOC_OSR               (SAM_PIOC_VBASE+SAM_PIO_OSR_OFFSET)
@@ -328,7 +367,11 @@
 #define SAM_PIOC_FELLSR            (SAM_PIOC_VBASE+SAM_PIO_FELLSR_OFFSET)
 #define SAM_PIOC_REHLSR            (SAM_PIOC_VBASE+SAM_PIO_REHLSR_OFFSET)
 #define SAM_PIOC_FRLHSR            (SAM_PIOC_VBASE+SAM_PIO_FRLHSR_OFFSET)
-#define SAM_PIOC_LOCKSR            (SAM_PIOC_VBASE+SAM_PIO_LOCKSR_OFFSET)
+
+#ifdef ATSAMA5D3
+#  define SAM_PIOC_LOCKSR          (SAM_PIOC_VBASE+SAM_PIO_LOCKSR_OFFSET)
+#endif
+
 #define SAM_PIOC_WPMR              (SAM_PIOC_VBASE+SAM_PIO_WPMR_OFFSET)
 #define SAM_PIOC_WPSR              (SAM_PIOC_VBASE+SAM_PIO_WPSR_OFFSET)
 #define SAM_PIOC_SCHMITT           (SAM_PIOC_VBASE+SAM_PIO_SCHMITT_OFFSET)
@@ -338,6 +381,11 @@
 #define SAM_PIOD_PER               (SAM_PIOD_VBASE+SAM_PIO_PER_OFFSET)
 #define SAM_PIOD_PDR               (SAM_PIOD_VBASE+SAM_PIO_PDR_OFFSET)
 #define SAM_PIOD_PSR               (SAM_PIOD_VBASE+SAM_PIO_PSR_OFFSET)
+
+#ifdef ATSAMA5D4
+#  define SAM_PIOD_ISLR            (SAM_PIOD_VBASE+SAM_PIO_ISLR_OFFSET)
+#endif
+
 #define SAM_PIOD_OER               (SAM_PIOD_VBASE+SAM_PIO_OER_OFFSET)
 #define SAM_PIOD_ODR               (SAM_PIOD_VBASE+SAM_PIO_ODR_OFFSET)
 #define SAM_PIOD_OSR               (SAM_PIOD_VBASE+SAM_PIO_OSR_OFFSET)
@@ -379,7 +427,11 @@
 #define SAM_PIOD_FELLSR            (SAM_PIOD_VBASE+SAM_PIO_FELLSR_OFFSET)
 #define SAM_PIOD_REHLSR            (SAM_PIOD_VBASE+SAM_PIO_REHLSR_OFFSET)
 #define SAM_PIOD_FRLHSR            (SAM_PIOD_VBASE+SAM_PIO_FRLHSR_OFFSET)
-#define SAM_PIOD_LOCKSR            (SAM_PIOD_VBASE+SAM_PIO_LOCKSR_OFFSET)
+
+#ifdef ATSAMA5D3
+#  define SAM_PIOD_LOCKSR          (SAM_PIOD_VBASE+SAM_PIO_LOCKSR_OFFSET)
+#endif
+
 #define SAM_PIOD_WPMR              (SAM_PIOD_VBASE+SAM_PIO_WPMR_OFFSET)
 #define SAM_PIOD_WPSR              (SAM_PIOD_VBASE+SAM_PIO_WPSR_OFFSET)
 #define SAM_PIOD_SCHMITT           (SAM_PIOD_VBASE+SAM_PIO_SCHMITT_OFFSET)
@@ -389,6 +441,11 @@
 #define SAM_PIOE_PER               (SAM_PIOE_VBASE+SAM_PIO_PER_OFFSET)
 #define SAM_PIOE_PDR               (SAM_PIOE_VBASE+SAM_PIO_PDR_OFFSET)
 #define SAM_PIOE_PSR               (SAM_PIOE_VBASE+SAM_PIO_PSR_OFFSET)
+
+#ifdef ATSAMA5D4
+#  define SAM_PIOE_ISLR            (SAM_PIOE_VBASE+SAM_PIO_ISLR_OFFSET)
+#endif
+
 #define SAM_PIOE_OER               (SAM_PIOE_VBASE+SAM_PIO_OER_OFFSET)
 #define SAM_PIOE_ODR               (SAM_PIOE_VBASE+SAM_PIO_ODR_OFFSET)
 #define SAM_PIOE_OSR               (SAM_PIOE_VBASE+SAM_PIO_OSR_OFFSET)
@@ -430,7 +487,11 @@
 #define SAM_PIOE_FELLSR            (SAM_PIOE_VBASE+SAM_PIO_FELLSR_OFFSET)
 #define SAM_PIOE_REHLSR            (SAM_PIOE_VBASE+SAM_PIO_REHLSR_OFFSET)
 #define SAM_PIOE_FRLHSR            (SAM_PIOE_VBASE+SAM_PIO_FRLHSR_OFFSET)
-#define SAM_PIOE_LOCKSR            (SAM_PIOE_VBASE+SAM_PIO_LOCKSR_OFFSET)
+
+#ifdef ATSAMA5D3
+#  define SAM_PIOE_LOCKSR          (SAM_PIOE_VBASE+SAM_PIO_LOCKSR_OFFSET)
+#endif
+
 #define SAM_PIOE_WPMR              (SAM_PIOE_VBASE+SAM_PIO_WPMR_OFFSET)
 #define SAM_PIOE_WPSR              (SAM_PIOE_VBASE+SAM_PIO_WPSR_OFFSET)
 #define SAM_PIOE_SCHMITT           (SAM_PIOE_VBASE+SAM_PIO_SCHMITT_OFFSET)
@@ -451,8 +512,8 @@
 
 #define PIO_WPMR_WPEN              (1 << 0)  /* Bit 0:  Write Protect Enable */
 #define PIO_WPMR_WPKEY_SHIFT       (8)       /* Bits 8-31: Write Protect KEY */
-#define PIO_WPMR_WPKEY_MASK        (0xffffff << PIO_WPMR_WPKEY_SHIFT)
-#  define PIO_WPMR_WPKEY           (0x50494f << PIO_WPMR_WPKEY_SHIFT)
+#define PIO_WPMR_WPKEY_MASK        (0x00ffffff << PIO_WPMR_WPKEY_SHIFT)
+#  define PIO_WPMR_WPKEY           (0x0050494f << PIO_WPMR_WPKEY_SHIFT)
 
 /* PIO Write Protect Status Register */
 
@@ -519,7 +580,6 @@
 #  define PIO_DRIVER1_LINE15(d)    ((d) << PIO_DRIVER1_LINE15_SHIFT)
 
 /* I/O Drive Register 2 */
-#define PIO_DRIVER2_
 
 #define PIO_DRIVER2_LINE_SHIFT(n)  (((n)-32) << 1)
 #define PIO_DRIVER2_LINE_MASK(n)   (3 << PIO_DRIVER2_LINE_SHIFT(n))
