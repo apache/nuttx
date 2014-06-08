@@ -417,6 +417,8 @@
 #define PIO_TC5_IOA       (PIO_PERIPHB | PIO_CFG_DEFAULT | PIO_PORT_PIOE | PIO_PIN18)
 #define PIO_TC5_IOB       (PIO_PERIPHB | PIO_CFG_DEFAULT | PIO_PORT_PIOE | PIO_PIN19)
 
+/* What about TC6-8? */
+
 /* Two-Wire Interface -TWIx [3..0] */
 
 #define PIO_TWI0_CK       (PIO_PERIPHA | PIO_CFG_DEFAULT | PIO_PORT_PIOA | PIO_PIN31)

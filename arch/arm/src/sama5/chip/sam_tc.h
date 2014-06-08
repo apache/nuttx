@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/sama5/chip/sam_tc.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,6 +66,10 @@
 #define SAM_TC_IDR_OFFSET        0x0028     /* Interrupt Disable Register */
 #define SAM_TC_IMR_OFFSET        0x002c     /* Interrupt Mask Register */
 
+#ifdef ATSAMA5D4
+#  define SAM_TC_EMR_OFFSET      0x0030     /* Extended Mode Register */
+#endif
+
 #define SAM_TCn_CCR_OFFSET(n)    (SAM_TC_CHAN_OFFSET(n)+SAM_TC_CCR_OFFSET)
 #define SAM_TCn_CMR_OFFSET(n)    (SAM_TC_CHAN_OFFSET(n)+SAM_TC_CMR_OFFSET)
 #define SAM_TCn_SMMR_OFFSET(n)   (SAM_TC_CHAN_OFFSET(n)+SAM_TC_SMMR_OFFSET)
@@ -78,6 +82,10 @@
 #define SAM_TCn_IER_OFFSET(n)    (SAM_TC_CHAN_OFFSET(n)+SAM_TC_IER_OFFSET)
 #define SAM_TCn_IDR_OFFSET(n)    (SAM_TC_CHAN_OFFSET(n)+SAM_TC_IDR_OFFSET)
 #define SAM_TCn_IMR_OFFSET(n)    (SAM_TC_CHAN_OFFSET(n)+SAM_TC_IMR_OFFSET)
+
+#ifdef ATSAMA5D4
+#  define SAM_TCn_EMR_OFFSET(n)  (SAM_TC_CHAN_OFFSET(n)+SAM_TC_EMR_OFFSET)
+#endif
 
 #define SAM_TC0_CCR_OFFSET       SAM_TCn_CCR_OFFSET(0)
 #define SAM_TC0_CMR_OFFSET       SAM_TCn_CMR_OFFSET(0)
@@ -92,6 +100,10 @@
 #define SAM_TC0_IDR_OFFSET       SAM_TCn_IDR_OFFSET(0)
 #define SAM_TC0_IMR_OFFSET       SAM_TCn_IMR_OFFSET(0)
 
+#ifdef ATSAMA5D4
+#  define SAM_TC0_EMR_OFFSET     SAM_TCn_EMR_OFFSET(0)
+#endif
+
 #define SAM_TC1_CCR_OFFSET       SAM_TCn_CCR_OFFSET(1)
 #define SAM_TC1_CMR_OFFSET       SAM_TCn_CMR_OFFSET(1)
 #define SAM_TC1_SMMR_OFFSET      SAM_TCn_SMMR_OFFSET(1)
@@ -104,6 +116,10 @@
 #define SAM_TC1_IER_OFFSET       SAM_TCn_IER_OFFSET(1)
 #define SAM_TC1_IDR_OFFSET       SAM_TCn_IDR_OFFSET(1)
 #define SAM_TC1_IMR_OFFSET       SAM_TCn_IMR_OFFSET(1)
+
+#ifdef ATSAMA5D4
+#  define SAM_TC1_EMR_OFFSET     SAM_TCn_EMR_OFFSET(1)
+#endif
 
 #define SAM_TC2_CCR_OFFSET       SAM_TCn_CCR_OFFSET(2)
 #define SAM_TC2_CMR_OFFSET       SAM_TCn_CMR_OFFSET(2)
@@ -118,12 +134,21 @@
 #define SAM_TC2_IDR_OFFSET       SAM_TCn_IDR_OFFSET(2)
 #define SAM_TC2_IMR_OFFSET       SAM_TCn_IMR_OFFSET(2)
 
+#ifdef ATSAMA5D4
+#  define SAM_TC2_EMR_OFFSET     SAM_TCn_EMR_OFFSET(2)
+#endif
+
 #define SAM_TC_BCR_OFFSET        0x00c0     /* Block Control Register */
 #define SAM_TC_BMR_OFFSET        0x00c4     /* Block Mode Register */
 #define SAM_TC_QIER_OFFSET       0x00c8     /* QDEC Interrupt Enable Register */
 #define SAM_TC_QIDR_OFFSET       0x00cc     /* QDEC Interrupt Disable Register */
 #define SAM_TC_QIMR_OFFSET       0x00d0     /* QDEC Interrupt Mask Register */
 #define SAM_TC_QISR_OFFSET       0x00d4     /* QDEC Interrupt Status Register */
+
+#ifdef ATSAMA5D4
+#  define SAM_TC_FMR_OFFSET      0x00d8     /* Fault Mode Register */
+#endif
+
 #define SAM_TC_WPMR_OFFSET       0x00e4     /* Write Protect Mode Register */
 
 /* TC Register Addresses ************************************************************/
@@ -143,6 +168,10 @@
 #define SAM_TC012_IDR(n)         (SAM_TC012_VBASE+SAM_TCn_IDR_OFFSET(n))
 #define SAM_TC012_IMR(n)         (SAM_TC012_VBASE+SAM_TCn_IMR_OFFSET(n))
 
+#ifdef ATSAMA5D4
+#  define SAM_TC012_EMR(n)       (SAM_TC012_VBASE+SAM_TCn_EMR_OFFSET(n))
+#endif
+
 #define SAM_TC0_CCR              SAM_TC012_CCR(0)
 #define SAM_TC0_CMR              SAM_TC012_CMR(0)
 #define SAM_TC0_SMMR             SAM_TC012_SMMR(0)
@@ -155,6 +184,10 @@
 #define SAM_TC0_IER              SAM_TC012_IER(0)
 #define SAM_TC0_IDR              SAM_TC012_IDR(0)
 #define SAM_TC0_IMR              SAM_TC012_IMR(0)
+
+#ifdef ATSAMA5D4
+#  define SAM_TC0_EMR            SAM_TC012_EMR(0)
+#endif
 
 #define SAM_TC1_CCR              SAM_TC012_CCR(1)
 #define SAM_TC1_CMR              SAM_TC012_CMR(1)
@@ -169,6 +202,10 @@
 #define SAM_TC1_IDR              SAM_TC012_IDR(1)
 #define SAM_TC1_IMR              SAM_TC012_IMR(1)
 
+#ifdef ATSAMA5D4
+#  define SAM_TC1_EMR            SAM_TC012_EMR(1)
+#endif
+
 #define SAM_TC2_CCR              SAM_TC012_CCR(2)
 #define SAM_TC2_CMR              SAM_TC012_CMR(2)
 #define SAM_TC2_SMMR             SAM_TC012_SMMR(2)
@@ -182,12 +219,21 @@
 #define SAM_TC2_IDR              SAM_TC012_IDR(2)
 #define SAM_TC2_IMR              SAM_TC012_IMR(2)
 
+#ifdef ATSAMA5D4
+#  define SAM_TC2_EMR            SAM_TC012_EMR(2)
+#endif
+
 #define SAM_TC012_BCR            (SAM_TC012_VBASE+SAM_TC_BCR_OFFSET)
 #define SAM_TC012_BMR            (SAM_TC012_VBASE+SAM_TC_BMR_OFFSET)
 #define SAM_TC012_QIER           (SAM_TC012_VBASE+SAM_TC_QIER_OFFSET)
 #define SAM_TC012_QIDR           (SAM_TC012_VBASE+SAM_TC_QIDR_OFFSET)
 #define SAM_TC012_QIMR           (SAM_TC012_VBASE+SAM_TC_QIMR_OFFSET)
 #define SAM_TC012_QISR           (SAM_TC012_VBASE+SAM_TC_QISR_OFFSET)
+
+#ifdef ATSAMA5D4
+#  define SAM_TC012_FMR          (SAM_TC012_VBASE+SAM_TC_FMR_OFFSET)
+#endif
+
 #define SAM_TC012_WPMR           (SAM_TC012_VBASE+SAM_TC_WPMR_OFFSET)
 
 #define SAM_TC345_CHAN_BASE(n)   (SAM_TC345_VBASE+SAM_TC_CHAN_OFFSET((n)-3))
@@ -205,6 +251,10 @@
 #define SAM_TC345_IDR(n)         (SAM_TC345_VBASE+SAM_TCn_IDR_OFFSET(n))
 #define SAM_TC345_IMR(n)         (SAM_TC345_VBASE+SAM_TCn_IMR_OFFSET(n))
 
+#ifdef ATSAMA5D4
+#  define SAM_TC345_EMR(n)       (SAM_TC345_VBASE+SAM_TCn_EMR_OFFSET(n))
+#endif
+
 #define SAM_TC3_CCR              SAM_TC345_CCR(3)
 #define SAM_TC3_CMR              SAM_TC345_CMR(3)
 #define SAM_TC3_SMMR             SAM_TC345_SMMR(3)
@@ -217,6 +267,10 @@
 #define SAM_TC3_IER              SAM_TC345_IER(3)
 #define SAM_TC3_IDR              SAM_TC345_IDR(3)
 #define SAM_TC3_IMR              SAM_TC345_IMR(3)
+
+#ifdef ATSAMA5D4
+#  define SAM_TC3_EMR            SAM_TC345_EMR(3)
+#endif
 
 #define SAM_TC4_CCR              SAM_TC345_CCR(4)
 #define SAM_TC4_CMR              SAM_TC345_CMR(4)
@@ -231,6 +285,10 @@
 #define SAM_TC4_IDR              SAM_TC345_IDR(4)
 #define SAM_TC4_IMR              SAM_TC345_IMR(4)
 
+#ifdef ATSAMA5D4
+#  define SAM_TC4_EMR            SAM_TC345_EMR(4)
+#endif
+
 #define SAM_TC5_CCR              SAM_TC345_CCR(5)
 #define SAM_TC5_CMR              SAM_TC345_CMR(5)
 #define SAM_TC5_SMMR             SAM_TC345_SMMR(5)
@@ -244,13 +302,105 @@
 #define SAM_TC5_IDR              SAM_TC345_IDR(5)
 #define SAM_TC5_IMR              SAM_TC345_IMR(5)
 
+#ifdef ATSAMA5D4
+#  define SAM_TC5_EMR            SAM_345_EMR(5)
+#endif
+
 #define SAM_TC345_BCR            (SAM_TC345_VBASE+SAM_TC_BCR_OFFSET)
 #define SAM_TC345_BMR            (SAM_TC345_VBASE+SAM_TC_BMR_OFFSET)
 #define SAM_TC345_QIER           (SAM_TC345_VBASE+SAM_TC_QIER_OFFSET)
 #define SAM_TC345_QIDR           (SAM_TC345_VBASE+SAM_TC_QIDR_OFFSET)
 #define SAM_TC345_QIMR           (SAM_TC345_VBASE+SAM_TC_QIMR_OFFSET)
 #define SAM_TC345_QISR           (SAM_TC345_VBASE+SAM_TC_QISR_OFFSET)
+
+#ifdef ATSAMA5D4
+#  define SAM_TC345_FMR          (SAM_TC345_VBASE+SAM_TC_FMR_OFFSET)
+#endif
+
 #define SAM_TC345_WPMR           (SAM_TC345_VBASE+SAM_TC_WPMR_OFFSET)
+
+#define SAM_TC678_CHAN_BASE(n)   (SAM_TC678_VBASE+SAM_TC_CHAN_OFFSET((n)-6))
+
+#define SAM_TC678_CCRn(n)        (SAM_TC678_VBASE+SAM_TC_CCR_OFFSET(n))
+#define SAM_TC678_CMR(n)         (SAM_TC678_VBASE+SAM_TCn_CMR_OFFSET(n))
+#define SAM_TC678_SMMR(n)        (SAM_TC678_VBASE+SAM_TCn_SMMR_OFFSET(n))
+#define SAM_TC678_RAB(n)         (SAM_TC678_VBASE+SAM_TCn_RAB_OFFSET(n))
+#define SAM_TC678_CV(n)          (SAM_TC678_VBASE+SAM_TCn_CV_OFFSET(n))
+#define SAM_TC678_RA(n)          (SAM_TC678_VBASE+SAM_TCn_RA_OFFSET(n))
+#define SAM_TC678_RB(n)          (SAM_TC678_VBASE+SAM_TCn_RB(n))
+#define SAM_TC678_RC(n)          (SAM_TC678_VBASE+SAM_TCn_RC_OFFSET(n))
+#define SAM_TC678_SR(n)          (SAM_TC678_VBASE+SAM_TCn_SR_OFFSET(n))
+#define SAM_TC678_IER(n)         (SAM_TC678_VBASE+SAM_TCn_IER_OFFSET(n))
+#define SAM_TC678_IDR(n)         (SAM_TC678_VBASE+SAM_TCn_IDR_OFFSET(n))
+#define SAM_TC678_IMR(n)         (SAM_TC678_VBASE+SAM_TCn_IMR_OFFSET(n))
+
+#ifdef ATSAMA5D4
+#  define SAM_TC678_EMR(n)       (SAM_TC678_VBASE+SAM_TCn_EMR_OFFSET(n))
+#endif
+
+#define SAM_TC6_CCR              SAM_TC678_CCR(6)
+#define SAM_TC6_CMR              SAM_TC678_CMR(6)
+#define SAM_TC6_SMMR             SAM_TC678_SMMR(6)
+#define SAM_TC6_RAB              SAM_TC678_RAB(6)
+#define SAM_TC6_CV               SAM_TC678_CV(6)
+#define SAM_TC6_RA               SAM_TC678_RA(6)
+#define SAM_TC6_RB               SAM_TC678_RB(6)
+#define SAM_TC6_RC               SAM_TC678_RC(6)
+#define SAM_TC6_SR               SAM_TC678_SR(6)
+#define SAM_TC6_IER              SAM_TC678_IER(6)
+#define SAM_TC6_IDR              SAM_TC678_IDR(6)
+#define SAM_TC6_IMR              SAM_TC678_IMR(6)
+
+#ifdef ATSAMA5D4
+#  define SAM_TC6_EMR            SAM_TC678_EMR(6)
+#endif
+
+#define SAM_TC7_CCR              SAM_TC678_CCR(7)
+#define SAM_TC7_CMR              SAM_TC678_CMR(7)
+#define SAM_TC7_SMMR             SAM_TC678_SMMR(7)
+#define SAM_TC7_RAB              SAM_TC678_RAB(7)
+#define SAM_TC7_CV               SAM_TC678_CV(7)
+#define SAM_TC7_RA               SAM_TC678_RA(7)
+#define SAM_TC7_RB               SAM_TC678_RB(7)
+#define SAM_TC7_RC               SAM_TC678_RC(7)
+#define SAM_TC7_SR               SAM_TC678_SR(7)
+#define SAM_TC7_IER              SAM_TC678_IER(7)
+#define SAM_TC7_IDR              SAM_TC678_IDR(7)
+#define SAM_TC7_IMR              SAM_TC678_IMR(7)
+
+#ifdef ATSAMA5D4
+#  define SAM_TC7_EMR            SAM_TC678_EMR(7)
+#endif
+
+#define SAM_TC8_CCR              SAM_TC678_CCR(8)
+#define SAM_TC8_CMR              SAM_TC678_CMR(8)
+#define SAM_TC8_SMMR             SAM_TC678_SMMR(8)
+#define SAM_TC8_RAB              SAM_TC678_RAB(8)
+#define SAM_TC8_CV               SAM_TC678_CV(8)
+#define SAM_TC8_RA               SAM_TC678_RA(8)
+#define SAM_TC8_RB               SAM_TC678_RB(8)
+#define SAM_TC8_RC               SAM_TC678_RC(8)
+#define SAM_TC8_SR               SAM_TC678_SR(8)
+#define SAM_TC8_IER              SAM_TC678_IER(8)
+#define SAM_TC8_IDR              SAM_TC678_IDR(8)
+#define SAM_TC8_IMR              SAM_TC678_IMR(8)
+
+#ifdef ATSAMA5D4
+#  define SAM_TC8_EMR            SAM_TC678_EMR(8)
+#endif
+
+#define SAM_TC678_BCR            (SAM_TC678_VBASE+SAM_TC_BCR_OFFSET)
+#define SAM_TC678_BMR            (SAM_TC678_VBASE+SAM_TC_BMR_OFFSET)
+#define SAM_TC678_QIER           (SAM_TC678_VBASE+SAM_TC_QIER_OFFSET)
+#define SAM_TC678_QIDR           (SAM_TC678_VBASE+SAM_TC_QIDR_OFFSET)
+#define SAM_TC678_QIMR           (SAM_TC678_VBASE+SAM_TC_QIMR_OFFSET)
+#define SAM_TC678_QISR           (SAM_TC678_VBASE+SAM_TC_QISR_OFFSET)
+
+#ifdef ATSAMA5D4
+#  define SAM_TC678_FMR          (SAM_TC678_VBASE+SAM_TC_FMR_OFFSET)
+#endif
+
+#define SAM_TC678_WPMR           (SAM_TC678_VBASE+SAM_TC_WPMR_OFFSET)
 
 /* TC Register Bit Definitions ******************************************************/
 
@@ -305,6 +455,16 @@
 #  define TC_CMR_LDRB_RISING     (1 << TC_CMR_LDRB_SHIFT) /* Rising edge of TIOA */
 #  define TC_CMR_LDRB_FALLING    (2 << TC_CMR_LDRB_SHIFT) /* Falling edge of TIOA */
 #  define TC_CMR_LDRB_BOTH       (3 << TC_CMR_LDRB_SHIFT) /* Each edge of TIOA */
+
+#ifdef ATSAMA5D4
+#  define TC_CMR_SBSMPLR_SHIFT   (20)      /* Bits 20-22: Loading Edge Subsampling Ratio */
+#  define TC_CMR_SBSMPLR_MASK    (7 << TC_CMR_SBSMPLR_SHIFT)
+#    define TC_CMR_SBSMPLR_ONE   (0 << TC_CMR_SBSMPLR_SHIFT) /* Load on each selected edge */
+#    define TC_CMR_SBSMPLR_HALF  (1 << TC_CMR_SBSMPLR_SHIFT) /* Load on every 2 selected edges */
+#    define TC_CMR_SBSMPLR_4TH   (2 << TC_CMR_SBSMPLR_SHIFT) /* Load on every 4 selected edges */
+#    define TC_CMR_SBSMPLR_8TH   (3 << TC_CMR_SBSMPLR_SHIFT) /* Load on every 8 selected edges */
+#    define TC_CMR_SBSMPLR_16TH  (4 << TC_CMR_SBSMPLR_SHIFT) /* Load on every 16 selected edges */
+#endif
 
 /* Channel Mode Register -- Waveform mode */
 
@@ -408,6 +568,20 @@
 #define TC_SR_MTIOA              (1 << 17) /* Bit 17: TIOA Mirror */
 #define TC_SR_MTIOB              (1 << 18) /* Bit 18: TIOB Mirror */
 
+#ifdef ATSAMA5D4
+/* Extended Mode Register */
+
+#  define TC_EMR_TRIGSRCA_SHIFT  (0)       /* Bits 0-1: Trigger source for input A */
+#  define TC_EMR_TRIGSRCA_MASK   (3 << TC_EMR_TRIGSRCA_SHIFT)
+#    define TC_EMR_TRIGSRCA_TIOA (0 << TC_EMR_TRIGSRCA_SHIFT) /* Trigger/capture input A driven by TIOAx */
+#    define TC_EMR_TRIGSRCA_PWM  (1 << TC_EMR_TRIGSRCA_SHIFT) /* Trigger/capture input A driven by PWMx */
+#  define TC_EMR_TRIGSRCB_SHIFT  (4)       /* Bits 4-5: Trigger source for input B */
+#  define TC_EMR_TRIGSRCB_MASK   (3 << TC_EMR_TRIGSRCB_SHIFT)
+#    define TC_EMR_TRIGSRCB_TIOB (0 << TC_EMR_TRIGSRCB_SHIFT) /* Trigger/capture input B driven by TIOBx */
+#    define TC_EMR_TRIGSRCB_PWM  (1 << TC_EMR_TRIGSRCB_SHIFT) /* Trigger/capture input B driven PWMx */
+#  define TC_EMR_NODIVCLK        (1 << 8)  /* Bit 8: No divided clock */
+#endif
+
 /* Block Control Register */
 
 #define TC_BCR_SYNC              (1 << 0)  /* Bit 0:  Synchro Command */
@@ -427,8 +601,8 @@
 #define TC_BMR_TC2XC2S_SHIFT     (4)       /* Bits 4-5: External Clock Signal 2 Selection */
 #define TC_BMR_TC2XC2S_MASK      (3 << TC_BMR_TC2XC2S_SHIFT)
 #  define TC_BMR_TC2XC2S_TCLK2   (0 << TC_BMR_TC2XC2S_SHIFT) /* TCLK2 Signal to XC2 */
-#  define TC_BMR_TC2XC2S_TIOA1   (2 << TC_BMR_TC2XC2S_SHIFT) /* TIOA1 Signal to XC2 */
-#  define TC_BMR_TC2XC2S_TIOA2   (3 << TC_BMR_TC2XC2S_SHIFT) /* TIOA2 Signal to XC2 */
+#  define TC_BMR_TC2XC2S_TIOA0   (2 << TC_BMR_TC2XC2S_SHIFT) /* TIOA0 Signal to XC2 */
+#  define TC_BMR_TC2XC2S_TIOA1   (3 << TC_BMR_TC2XC2S_SHIFT) /* TIOA1 Signal to XC2 */
 #define TC_BMR_QDEN              (1 << 8)  /* Bit 8:  Quadrature Decoder ENabled */
 #define TC_BMR_POSEN             (1 << 9)  /* Bit 9:  POSition ENabled */
 #define TC_BMR_SPEEDEN           (1 << 10) /* Bit 10: SPEED ENabled */
@@ -447,11 +621,18 @@
 /* QDEC Interrupt Enable Register, QDEC Interrupt Disable Register, QDEC Interrupt Mask Register, and QDEC Interrupt Status Register.
  */
 
-#define TC_QINT_IDX              (1 << 0)  /* Bit 0:  InDeX */
-#define TC_QINT_DIRCHG           (1 << 1)  /* Bit 1:  DIRection CHanGe */
+#define TC_QINT_IDX              (1 << 0)  /* Bit 0:  Index */
+#define TC_QINT_DIRCHG           (1 << 1)  /* Bit 1:  Direction change */
 #define TC_QINT_QERR             (1 << 2)  /* Bit 2:  Quadrature ERRor */
 
-#define TC_QISR_DIRR             (1 << 8)  /* Bit 8: DIRection */
+#define TC_QISR_DIRR             (1 << 8)  /* Bit 8: Direction */
+
+#ifdef ATSAMA5D4
+/* Fault Mode Register */
+
+#  define TC_FMR_ENCF0           (1 << 0)  /* Bit 0:  ENable Compare Fault Channel 0 */
+#  define TC_FMR_ENCF1           (1 << 1)  /* Bit 1:  ENable Compare Fault Channel 1 */
+#endif
 
 /* Write Protect Mode Register */
 
