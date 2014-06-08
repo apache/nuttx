@@ -60,7 +60,11 @@
 #define SAM_PWM_IMR1_OFFSET        0x0018 /* PWM Interrupt Mask Register 1 */
 #define SAM_PWM_ISR1_OFFSET        0x001c /* PWM Interrupt Status Register 1 */
 #define SAM_PWM_SCM_OFFSET         0x0020 /* PWM Sync Channels Mode Register */
-                                          /* 0x0024 Reserved */
+
+#ifdef ATSAMA5D4
+#  define SAM_PWM_DMAR_OFFSET      0x0024 /* PWM DMA Register */
+#endif
+
 #define SAM_PWM_SCUC_OFFSET        0x0028 /* PWM Sync Channels Update Control Register */
 #define SAM_PWM_SCUP_OFFSET        0x002c /* PWM Sync Channels Update Period Register */
 #define SAM_PWM_SCUPUPD_OFFSET     0x0030 /* PWM Sync Channels Update Period Update Register */
@@ -77,14 +81,23 @@
 #define SAM_PWM_FMR_OFFSET         0x005c /* PWM Fault Mode Register */
 #define SAM_PWM_FSR_OFFSET         0x0060 /* PWM Fault Status Register */
 #define SAM_PWM_FCR_OFFSET         0x0064 /* PWM Fault Clear Register */
-#define SAM_PWM_FPV_OFFSET         0x0068 /* PWM Fault Protection Value Register */
+#define SAM_PWM_FPV_OFFSET         0x0068 /* PWM Fault Protection Value Register 1 */
 #define SAM_PWM_FPE_OFFSET         0x006c /* PWM Fault Protection Enable Register */
                                           /* 0x0070-0x0078 Reserved */
 #define SAM_PWM_ELMR0_OFFSET       0x007c /* PWM Event Line 0 Mode Register */
 #define SAM_PWM_ELMR1_OFFSET       0x0080 /* PWM Event Line 1 Mode Register */
-                                          /* 0x0084-0x00ac Reserved */
+
+#ifdef ATSAMA5D4
+#  define SAM_PWM_SSPR_OFFSET      0x00a0 /* PWM Spread Spectrum Register  */
+#  define SAM_PWM_SSPUP_OFFSET     0x00a4 /* PWM Spread Spectrum Update Register */
+#endif
+
 #define SAM_PWM_SMMR_OFFSET        0x00b0 /* PWM Stepper Motor Mode Register */
-                                          /* 0x00b4-0x00e0 Reserved */
+
+#ifdef ATSAMA5D4
+#  define SAM_PWM_FPV2_OFFSET      0x00c0 /* PWM Fault Protection Value Register 2 */
+#endif
+
 #define SAM_PWM_WPCR_OFFSET        0x00e4 /* PWM Write Protect Control Register */
 #define SAM_PWM_WPSR_OFFSET        0x00e8 /* PWM Write Protect Status Register */
                                           /* 0x00ec - 0x00fc Reserved */
@@ -133,10 +146,8 @@
 #define SAM_PWM_CMPVUPD7_OFFSET    0x01a4 /* PWM Comparison 7 Value Update Register */
 #define SAM_PWM_CMPM7_OFFSET       0x01a8 /* PWM Comparison 7 Mode Register */
 #define SAM_PWM_CMPMUPD7_OFFSET    0x01ac /* PWM Comparison 7 Mode Update Register */
-
                                           /* 0x01b0 - 0x01fc Reserved */
-
-#define SAM_PWM_CHAN_OFFSET(n)     (0x0200 + ((int)(n) << 5)) /* n=0..3 */
+#define SAM_PWM_CHANA_OFFSET(n)    (0x0200 + ((int)(n) << 5)) /* n=0..3 */
 #define SAM_PWM_CMR_OFFSET         0x0000 /* PWM Channel Mode Register */
 #define SAM_PWM_CDTY_OFFSET        0x0004 /* PWM Channel Duty Cycle Register */
 #define SAM_PWM_CDTYUPD_OFFSET     0x0008 /* PWM Channel Duty Cycle Update Register */
@@ -145,6 +156,13 @@
 #define SAM_PWM_CCNT_OFFSET        0x0014 /* PWM Channel Counter Register */
 #define SAM_PWM_DT_OFFSET          0x0018 /* PWM Channel Dead Time Register */
 #define SAM_PWM_DTUPD_OFFSET       0x001c /* PWM Channel Dead Time Update Register */
+
+#define SAM_PWM_CHANAB_DELTA       0x0200 /* Offset of second group from the first */
+
+#ifdef ATSAMA5D4
+#  define SAM_PWM_CHANB_OFFSET(n)  (0x0400 + ((int)(n) << 5)) /* n=0..3 */
+#  define SAM_PWM_CMUPD_OFFSET     0x0000 /* PWM Channel Mode Update Register */
+#endif
 
 /* PWM Register Addresses ***********************************************************/
 
@@ -157,6 +175,11 @@
 #define SAM_PWM_IMR1               (SAM_PWMC_VBASE+SAM_PWM_IMR1_OFFSET)
 #define SAM_PWM_ISR1               (SAM_PWMC_VBASE+SAM_PWM_ISR1_OFFSET)
 #define SAM_PWM_SCM                (SAM_PWMC_VBASE+SAM_PWM_SCM_OFFSET)
+
+#ifdef ATSAMA5D4
+#  define SAM_PWM_DMAR             (SAM_PWMC_VBASE+SAM_PWM_DMAR_OFFSET)
+#endif
+
 #define SAM_PWM_SCUC               (SAM_PWMC_VBASE+SAM_PWM_SCUC_OFFSET)
 #define SAM_PWM_SCUP               (SAM_PWMC_VBASE+SAM_PWM_SCUP_OFFSET)
 #define SAM_PWM_SCUPUPD            (SAM_PWMC_VBASE+SAM_PWM_SCUPUPD_OFFSET)
@@ -177,7 +200,18 @@
 #define SAM_PWM_FPE                (SAM_PWMC_VBASE+SAM_PWM_FPE_OFFSET)
 #define SAM_PWM_ELMR0              (SAM_PWMC_VBASE+SAM_PWM_ELMR0_OFFSET)
 #define SAM_PWM_ELMR1              (SAM_PWMC_VBASE+SAM_PWM_ELMR1_OFFSET)
+
+#ifdef ATSAMA5D4
+#  define SAM_PWM_SSPR             (SAM_PWMC_VBASE+SAM_PWM_SSPR_OFFSET)
+#  define SAM_PWM_SSPUP            (SAM_PWMC_VBASE+SAM_PWM_SSPUP_OFFSET)
+#endif
+
 #define SAM_PWM_SMMR               (SAM_PWMC_VBASE+SAM_PWM_SMMR_OFFSET)
+
+#ifdef ATSAMA5D4
+#  define SAM_PWM_FPV2             (SAM_PWMC_VBASE+SAM_PWM_FPV2_OFFSET)
+#endif
+
 #define SAM_PWM_WPCR               (SAM_PWMC_VBASE+SAM_PWM_WPCR_OFFSET)
 #define SAM_PWM_WPSR               (SAM_PWMC_VBASE+SAM_PWM_WPSR_OFFSET)
 
@@ -226,15 +260,20 @@
 #define SAM_PWM_CMPM7              (SAM_PWMC_VBASE+SAM_PWM_CMPM7_OFFSET)
 #define SAM_PWM_CMPMUPD7           (SAM_PWMC_VBASE+SAM_PWM_CMPMUPD7_OFFSET)
 
-#define SAM_PWM_CHAN_BASE(n)       (SAM_PWMC_VBASE+SAM_PWM_CHAN_OFFSET(n))
-#define SAM_PWM_CMR                (SAM_PWMC_VBASE+SAM_PWM_CMR_OFFSET)
-#define SAM_PWM_CDTY               (SAM_PWMC_VBASE+SAM_PWM_CDTY_OFFSET)
-#define SAM_PWM_CDTYUPD            (SAM_PWMC_VBASE+SAM_PWM_CDTYUPD_OFFSET)
-#define SAM_PWM_CPRD               (SAM_PWMC_VBASE+SAM_PWM_CPRD_OFFSET)
-#define SAM_PWM_CPRDUPD            (SAM_PWMC_VBASE+SAM_PWM_CPRDUPD_OFFSET)
-#define SAM_PWM_CCNT               (SAM_PWMC_VBASE+SAM_PWM_CCNT_OFFSET)
-#define SAM_PWM_DT                 (SAM_PWMC_VBASE+SAM_PWM_DT_OFFSET)
-#define SAM_PWM_DTUPD              (SAM_PWMC_VBASE+SAM_PWM_DTUPD_OFFSET)
+#define SAM_PWM_CHANA_BASE(n)      (SAM_PWMC_VBASE+SAM_PWM_CHANA_OFFSET(n))
+#define SAM_PWM_CMR(n)             (SAM_PWM_CHANA_BASE(n)+SAM_PWM_CMR_OFFSET)
+#define SAM_PWM_CDTY(n)            (SAM_PWM_CHANA_BASE(n)+SAM_PWM_CDTY_OFFSET)
+#define SAM_PWM_CDTYUPD(n)         (SAM_PWM_CHANA_BASE(n)+SAM_PWM_CDTYUPD_OFFSET)
+#define SAM_PWM_CPRD(n)            (SAM_PWM_CHANA_BASE(n)+SAM_PWM_CPRD_OFFSET)
+#define SAM_PWM_CPRDUPD(n)         (SAM_PWM_CHANA_BASE(n)+SAM_PWM_CPRDUPD_OFFSET)
+#define SAM_PWM_CCNT(n)            (SAM_PWM_CHANA_BASE(n)+SAM_PWM_CCNT_OFFSET)
+#define SAM_PWM_DT(n)              (SAM_PWM_CHANA_BASE(n)+SAM_PWM_DT_OFFSET)
+#define SAM_PWM_DTUPD(n)           (SAM_PWM_CHANA_BASE(n)+SAM_PWM_DTUPD_OFFSET)
+
+#ifdef ATSAMA5D4
+#  define SAM_PWM_CHANB_BASE(n)    (SAM_PWMC_VBASE+define SAM_PWM_CHANB_OFFSET(n))
+#  define SAM_PWM_CMUPD(n)         (SAM_PWM_CHANB_BASE(n)+SAM_PWM_CMUPD_OFFSET)
+#endif
 
 /* PWM Register Bit Definitions *****************************************************/
 
@@ -290,12 +329,30 @@
 
 /* PWM Sync Channels Mode Register */
 
-#define PWM_SCM_SYNC(n)            (1 << (n))      /* Bits 0-3: Synchronous Channel n, n=0..3 */
-#define PWM_SCM_SYNC0              (1 << 0)  /* Bits 0:  Synchronous Channel n, n=0..3 */
-#define PWM_SCM_UPDM_SHIFT         (16)      /* Bits 16-17: Synchronous Channels Update Mode */
+#define PWM_SCM_SYNC(n)            (1 << (n)) /* Bits 0-3: Synchronous Channel n, n=0..3 */
+#  define PWM_SCM_SYNC0            (1 << 0)   /* Bits 0:  Synchronous Channel 0 */
+#  define PWM_SCM_SYNC1            (1 << 1)   /* Bits 1:  Synchronous Channel 1 */
+#  define PWM_SCM_SYNC2            (1 << 2)   /* Bits 2:  Synchronous Channel 2 */
+#  define PWM_SCM_SYNC3            (1 << 3)   /* Bits 3:  Synchronous Channel 3 */
+#define PWM_SCM_UPDM_SHIFT         (16)       /* Bits 16-17: Synchronous Channels Update Mode */
 #define PWM_SCM_UPDM_MASK          (3 << PWM_SCM_UPDM_SHIFT)
 #  define PWM_SCM_UPDM_MODE0       (0 << PWM_SCM_UPDM_SHIFT) /* Manual double buffer / manual channel update */
 #  define PWM_SCM_UPDM_MODE1       (1 << PWM_SCM_UPDM_SHIFT) /* Manual double buffer / automatic channel update */
+
+#ifdef ATSAMA5D4
+#  define PWM_SCM_PTRM             (1 << 20)  /* Bit 20: DMA Transfer Request Mode */
+#  define PWM_SCM_PTRCS_SHIFT      (21)       /* Bits 21-23: DMA Transfer Request Comparison Selection */
+#  define PWM_SCM_PTRCS_MASK       (7 << PWM_SCM_PTRCS_SHIFT)
+#    define PWM_SCM_PTRCS(n)       ((uint32_t)(n) << PWM_SCM_PTRCS_SHIFT)
+#endif
+
+#ifdef ATSAMA5D4
+/* PWM DMA Register */
+
+#  define PWM_DMAR_DMADUTY_SHIFT   (0)       /* Bits 0-23:  Duty-Cycle Holding Register for DMA Access */
+#  define PWM_DMAR_DMADUTY_MASK    (0x00ffffff << PWM_DMAR_DMADUTY_SHIFT)
+#    define PWM_DMAR_DMADUTY(n)    ((uint32_t)(n) << PWM_DMAR_DMADUTY_SHIFT)
+#endif
 
 /* PWM Sync Channels Update Control Register */
 
@@ -443,11 +500,11 @@
 
 /* PWM Fault Clear Register */
 
-#define PWM_FSR_FIV_SHIFT          (0)     /* Bits 0-7: Fault Clear */
-#define PWM_FSR_FIV_MASK           (0xff << PWM_FSR_FIV_SHIFT)
-#  define PWM_FCR_FIV(n)           (1 << (n)) /* Fault Clear n, n=0..7 */
+#define PWM_FCR_FCLR_SHIFT         (0)     /* Bits 0-7: Fault Clear */
+#define PWM_FCR_FCLR_MASK          (0xff << PWM_FCR_FCLR_SHIFT)
+#  define PWM_FCR_FCLR(n)          (1 << (n)) /* Fault Clear n, n=0..7 */
 
-/* PWM Fault Protection Value Register */
+/* PWM Fault Protection Value Register 1 */
 
 #define PWM_FPV_H(n)               (1 << (n))      /* Bits 0-3: Fault Protection PWMH output on channel n, n=0..3 */
 #  define PWM_FPV_H0               (1 << 0)  /* Bit 0:  Fault Protection PWMH output on channel 0 */
@@ -490,20 +547,54 @@
 #  define PWM_ELMR_CSEL6           (1 << 6)  /* Bit 6:  Comparison 6 Selection */
 #  define PWM_ELMR_CSEL7           (1 << 7)  /* Bit 7:  Comparison 7 Selection */
 
+#ifdef ATSAMA5D4
+/* PWM Spread Spectrum Register  */
+
+#  define PWM_SSPR_SPRD_SHIFT      (0)       /* Bits 0-23: Spread Spectrum Limit Value */
+#  define PWM_SSPR_SPRD_MASK       (0x00ffffff << PWM_SSPR_SPRD_SHIFT)
+#    define PWM_SSPR_SPRD(n)       ((uint32_t)(n) << PWM_SSPR_SPRD_SHIFT)
+#  define PWM_SSPR_SPRDM           (1 << 24) /* Bit 24: Spread Spectrum Counter Mode */
+#endif
+
+#ifdef ATSAMA5D4
+/* PWM Spread Spectrum Update Register */
+
+#  define PWM_SSPUP_SPRDUP_SHIFT   (0)       /* Bits 0-23: Spread Spectrum Limit Value Update */
+#  define PWM_SSPUP_SPRDUP_MASK    (0x00ffffff << PWM_SSPUP_SPRDUP_SHIFT)
+#    define PWM_SSPUP_SPRDUP(n)    ((uint32_t)(n) << PWM_SSPUP_SPRDUP_SHIFT)
+#endif
+
 /* PWM Stepper Motor Mode Register */
 
 #define PWM_SMMR_GCEN(n)           (1 << (n))      /* Bits 0-1: Gray Count ENable, n=0..1 */
-#  define PWM_SMMR_GCEN0           (1 << 0)  /* Bit 0: Enables gray count generation on PWMH/L[0] and PWMH/L[1] */
-#  define PWM_SMMR_GCEN1           (1 << 1)  /* Bits 1: Enables gray count generation on PWMH/L[2] and PWMH/L[3] */
+#  define PWM_SMMR_GCEN0           (1 << 0)        /* Bit 0: Enables gray count generation on PWMH/L[0] and PWMH/L[1] */
+#  define PWM_SMMR_GCEN1           (1 << 1)        /* Bits 1: Enables gray count generation on PWMH/L[2] and PWMH/L[3] */
 #define PWM_SMMR_DOWN(n)           (1 << ((n)+16)) /* Bits 16-17: DOWN Count, n=0..1 */
 #  define PWM_SMMR_DOWN0           (1 << 16)
 #  define PWM_SMMR_DOWN1           (1 << 17)
+
+#ifdef ATSAMA5D4
+/* PWM Fault Protection Value Register 2 */
+
+#define PWM_FPV2_FPZH(n)           (1 << (n)) /* Bits 0-3: Fault Protection Hi-Z for PWMH channel n, n=0..3 */
+#  define PWM_FPV2_FPZH0           (1 << 0)   /* Bit 0:  Fault Protection Hi-Z for PWMH channel 0 */
+#  define PWM_FPV2_FPZH1           (1 << 1)   /* Bit 1:  Fault Protection Hi-Z for PWMH channel 1 */
+#  define PWM_FPV2_FPZH2           (1 << 2)   /* Bit 2:  Fault Protection Hi-Z for PWMH channel 2 */
+#  define PWM_FPV2_FPZH3           (1 << 3)   /* Bit 3:  Fault Protection Hi-Z for PWMH channel 3 */
+#define PWM_FPV2_L(n)              (1 << ((n)+16)) /* Bits 16-19: Fault Protection Hi-Z for PWML channel n, n=0..3 */
+#  define PWM_FPV2_FPZL0           (1 << 16)  /* Bit 16: Fault Protection Hi-Z for PWML channel 0 */
+#  define PWM_FPV2_FPZL1           (1 << 17)  /* Bit 17: Fault Protection Hi-Z for PWML channel 1 */
+#  define PWM_FPV2_FPZL2           (1 << 18)  /* Bit 18: Fault Protection Hi-Z for PWML channel 2 */
+#  define PWM_FPV2_FPZL3           (1 << 19)  /* Bit 19: FFault Protection Hi-Z for PWML channel 3 */
+#endif
 
 /* PWM Write Protect Control Register */
 
 #define PWM_WPCR_WPCMD_SHIFT       (0)       /* Bits 0-1: Write Protect Command */
 #define PWM_WPCR_WPCMD_MASK        (3 << PWM_WPCR_WPCMD_SHIFT)
-#  define PWM_WPCR_WPCMD(n)        ((uint32_t)(n) << PWM_WPCR_WPCMD_SHIFT)
+#  define PWM_WPCR_WPCMD_DSWPROT   (0 << PWM_WPCR_WPCMD_SHIFT) /* Disable software write protection */
+#  define PWM_WPCR_WPCMD_ESWPROT   (1 << PWM_WPCR_WPCMD_SHIFT) /* Enable software write protection */
+#  define PWM_WPCR_WPCMD_EHWPROT   (2 << PWM_WPCR_WPCMD_SHIFT) /* Enable hardware write protection */
 #define PWM_WPCR_WPRG(n)           (1 << ((n)+2)) /* Bits 2-7: Write Protect Register Group n, n=0..5 */
 #  define PWM_WPCR_WPRG0           (1 << 2)  /* Bit 2:  Write Protect Register Group 0 */
 #  define PWM_WPCR_WPRG1           (1 << 3)  /* Bit 3:  Write Protect Register Group 1 */
@@ -512,8 +603,8 @@
 #  define PWM_WPCR_WPRG4           (1 << 6)  /* Bit 6:  Write Protect Register Group 4 */
 #  define PWM_WPCR_WPRG5           (1 << 7)  /* Bit 7:  Write Protect Register Group 5 */
 #define PWM_WPCR_WPKEY_SHIFT       (8)       /* Bits 8-31: Write Protect Key */
-#define PWM_WPCR_WPKEY_MASK        (0xffffff << PWM_WPCR_WPKEY_SHIFT)
-#  define PWM_WPCR_WPKEY           (0x50574d << PWM_WPCR_WPKEY_SHIFT) /* "PWM" in ASCII) */
+#define PWM_WPCR_WPKEY_MASK        (0x00ffffff << PWM_WPCR_WPKEY_SHIFT)
+#  define PWM_WPCR_WPKEY           (0x0050574d << PWM_WPCR_WPKEY_SHIFT) /* "PWM" in ASCII) */
 
 /* PWM Write Protect Status Register */
 
@@ -551,7 +642,7 @@
 
 /* PWM Comparison n Mode Register, n=0..7 */
 
-#define PWM_CMPM_CEN               (1 << 0)) /* Bits 0: Comparison Enable */
+#define PWM_CMPM_CEN               (1 << 0)) /* Bit 0: Comparison Enable */
 #define PWM_CMPM_CTR_SHIFT         (4)       /* Bits 4-7: Comparison Trigger */
 #define PWM_CMPM_CTR_MASK          (15 << PWM_CMPM_CTR_SHIFT)
 #  define PWM_CMPM_CTR(n)          ((uint32_t)(n) << PWM_CMPM_CTR_SHIFT)
@@ -570,7 +661,7 @@
 
 /* PWM Comparison n Mode Update Register, n=0..7 */
 
-#define PWM_CMPMUPD_CENUPD         (1 << 0)  /* Bits 0:  Comparison Enable Update */
+#define PWM_CMPMUPD_CENUPD         (1 << 0)  /* Bit 0:  Comparison Enable Update */
 #define PWM_CMPMUPD_CTRUPD_SHIFT   (4)       /* Bits 4-7: Comparison Trigger Update */
 #define PWM_CMPMUPD_CTRUPD_MASK    (15 << PWM_CMPMUPD_CTRUPD_SHIFT)
 #  define PWM_CMPMUPD_CTRUPD(n)    ((uint32_t)(n) << PWM_CMPMUPD_CTRUPD_SHIFT)
@@ -599,12 +690,17 @@
 #  define PWM_CMR_CPRE_MCKDIV1024  (10 << PWM_CMR_CPRE_SHIFT) /* Master clock/1024 */
 #  define PWM_CMR_CPRE_CLKA        (11 << PWM_CMR_CPRE_SHIFT) /* Clock A */
 #  define PWM_CMR_CPRE_CLKB        (12 << PWM_CMR_CPRE_SHIFT) /* Clock B */
-#define PWM_CMR_CALG               (1 << 8)  /* Bits 8:  Channel Alignment */
-#define PWM_CMR_CPOL               (1 << 9)  /* Bits 9:  Channel Polarity */
-#define PWM_CMR_CES                (1 << 10) /* Bits 10: Counter Event Selection */
-#define PWM_CMR_DTE                (1 << 16) /* Bits 16: Dead-Time Generator Enable */
-#define PWM_CMR_DTHI               (1 << 17) /* Bits 17: Dead-Time PWMH Output Inverted */
-#define PWM_CMR_DTLI               (1 << 18) /* Bits 18: Dead-Time PWML Output Inverted */
+#define PWM_CMR_CALG               (1 << 8)  /* Bit 8:  Channel Alignment */
+#define PWM_CMR_CPOL               (1 << 9)  /* Bit 9:  Channel Polarity */
+#define PWM_CMR_CES                (1 << 10) /* Bit 10: Counter Event Selection */
+
+#ifdef ATSAMA5D4
+#  define PWM_CMR_UPDS             (1 << 11) /* Bit 10: Update Selection */
+#endif
+
+#define PWM_CMR_DTE                (1 << 16) /* Bit 16: Dead-Time Generator Enable */
+#define PWM_CMR_DTHI               (1 << 17) /* Bit 17: Dead-Time PWMH Output Inverted */
+#define PWM_CMR_DTLI               (1 << 18) /* Bit 18: Dead-Time PWML Output Inverted */
 
 /* PWM Channel Duty Cycle Register */
 
@@ -643,5 +739,12 @@
 #define PWM_DTUPD_L_SHIFT          (16)     /* Bits 16-31: Dead-Time Value Update for PWML Output */
 #define PWM_DTUPD_L_MASK           (0xffff << PWM_DTUPD_L_SHIFT)
 #  define PWM_DTUPD_L(n)           ((uint32_t)(n) << PWM_DTUPD_L_SHIFT)
+
+#ifdef ATSAMA5D4
+/* PWM Channel Mode Update Register */
+
+#  define PWM_CMUPD_CPOLUP         (1 << 9)  /* Bit 9:  Channel Polarity Update */
+#  define PWM_CMUPD_CPOLINVUP      (1 << 13) /* Bit 13: Channel Polarity Inversion Update */
+#endif
 
 #endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAM_PWM_H */

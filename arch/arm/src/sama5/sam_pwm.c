@@ -542,7 +542,7 @@ static struct sam_pwm_chan_s g_pwm_chan0 =
   .pwm         = &g_pwm,
 #endif
   .channel     = 0,
-  .base        = SAM_PWM_CHAN_BASE(0),
+  .base        = SAM_PWM_CHANA_BASE(0),
 
 #if defined(CONFIG_SAMA5_PWM_CHAN0_MCK)
   .clksrc      = PWM_CLKSRC_MCK,
@@ -577,7 +577,7 @@ static struct sam_pwm_chan_s g_pwm_chan1 =
   .pwm         = &g_pwm,
 #endif
   .channel     = 1,
-  .base        = SAM_PWM_CHAN_BASE(1),
+  .base        = SAM_PWM_CHANA_BASE(1),
 
 #if defined(CONFIG_SAMA5_PWM_CHAN1_MCK)
   .clksrc      = PWM_CLKSRC_MCK,
@@ -612,7 +612,7 @@ static struct sam_pwm_chan_s g_pwm_chan2 =
   .pwm         = &g_pwm,
 #endif
   .channel     = 2,
-  .base        = SAM_PWM_CHAN_BASE(2),
+  .base        = SAM_PWM_CHANA_BASE(2),
 
 #if defined(CONFIG_SAMA5_PWM_CHAN2_MCK)
   .clksrc      = PWM_CLKSRC_MCK,
@@ -647,7 +647,7 @@ static struct sam_pwm_chan_s g_pwm_chan3 =
   .pwm         = &g_pwm,
 #endif
   .channel     = 3,
-  .base        = SAM_PWM_CHAN_BASE(3),
+  .base        = SAM_PWM_CHANA_BASE(3),
 
 #if defined(CONFIG_SAMA5_PWM_CHAN3_MCK)
   .clksrc      = PWM_CLKSRC_MCK,
