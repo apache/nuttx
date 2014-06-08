@@ -1,7 +1,7 @@
 /****************************************************************************************
  * arch/arm/src/sama5/chip/sam_hsmci.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -79,7 +79,7 @@
                                              /* 0x0100-0x0124: Reserved for PCD registers */
 #define SAM_HSMCI_FIFO_OFFSET         0x0200 /* 0x0200-0x05fc FIFO Memory Aperture */
 
-/* HSMCI register adresses **************************************************************/
+/* HSMCI register addresses *************************************************************/
 
 #define SAM_HSMCI0_CR                 (SAM_HSMCI0_VBASE+SAM_HSMCI_CR_OFFSET)
 #define SAM_HSMCI0_MR                 (SAM_HSMCI0_VBASE+SAM_HSMCI_MR_OFFSET)
@@ -129,29 +129,31 @@
 #define SAM_HSMCI1_WPSR               (SAM_HSMCI1_VBASE+SAM_HSMCI_WPSR_OFFSET)
 #define SAM_HSMCI1_FIFO               (SAM_HSMCI1_VBASE+SAM_HSMCI_FIFO_OFFSET)
 
-#define SAM_HSMCI2_CR                 (SAM_HSMCI2_VBASE+SAM_HSMCI_CR_OFFSET)
-#define SAM_HSMCI2_MR                 (SAM_HSMCI2_VBASE+SAM_HSMCI_MR_OFFSET)
-#define SAM_HSMCI2_DTOR               (SAM_HSMCI2_VBASE+SAM_HSMCI_DTOR_OFFSET)
-#define SAM_HSMCI2_SDCR               (SAM_HSMCI2_VBASE+SAM_HSMCI_SDCR_OFFSET)
-#define SAM_HSMCI2_ARGR               (SAM_HSMCI2_VBASE+SAM_HSMCI_ARGR_OFFSET)
-#define SAM_HSMCI2_CMDR               (SAM_HSMCI2_VBASE+SAM_HSMCI_CMDR_OFFSET)
-#define SAM_HSMCI2_BLKR               (SAM_HSMCI2_VBASE+SAM_HSMCI_BLKR_OFFSET)
-#define SAM_HSMCI2_CSTOR              (SAM_HSMCI2_VBASE+SAM_HSMCI_CSTOR_OFFSET)
-#define SAM_HSMCI2_RSPR0              (SAM_HSMCI2_VBASE+SAM_HSMCI_RSPR0_OFFSET)
-#define SAM_HSMCI2_RSPR1              (SAM_HSMCI2_VBASE+SAM_HSMCI_RSPR1_OFFSET)
-#define SAM_HSMCI2_RSPR2              (SAM_HSMCI2_VBASE+SAM_HSMCI_RSPR2_OFFSET)
-#define SAM_HSMCI2_RSPR3              (SAM_HSMCI2_VBASE+SAM_HSMCI_RSPR3_OFFSET)
-#define SAM_HSMCI2_RDR                (SAM_HSMCI2_VBASE+SAM_HSMCI_RDR_OFFSET)
-#define SAM_HSMCI2_TDR                (SAM_HSMCI2_VBASE+SAM_HSMCI_TDR_OFFSET)
-#define SAM_HSMCI2_SR                 (SAM_HSMCI2_VBASE+SAM_HSMCI_SR_OFFSET)
-#define SAM_HSMCI2_IER                (SAM_HSMCI2_VBASE+SAM_HSMCI_IER_OFFSET)
-#define SAM_HSMCI2_IDR                (SAM_HSMCI2_VBASE+SAM_HSMCI_IDR_OFFSET)
-#define SAM_HSMCI2_IMR                (SAM_HSMCI2_VBASE+SAM_HSMCI_IMR_OFFSET)
-#define SAM_HSMCI2_DMA                (SAM_HSMCI2_VBASE+SAM_HSMCI_DMA_OFFSET)
-#define SAM_HSMCI2_CFG                (SAM_HSMCI2_VBASE+SAM_HSMCI_CFG_OFFSET)
-#define SAM_HSMCI2_WPMR               (SAM_HSMCI2_VBASE+SAM_HSMCI_WPMR_OFFSET)
-#define SAM_HSMCI2_WPSR               (SAM_HSMCI2_VBASE+SAM_HSMCI_WPSR_OFFSET)
-#define SAM_HSMCI2_FIFO               (SAM_HSMCI2_VBASE+SAM_HSMCI_FIFO_OFFSET)
+#ifdef CONFIG_SAMA5_HAVE_HSMCI2
+#  define SAM_HSMCI2_CR               (SAM_HSMCI2_VBASE+SAM_HSMCI_CR_OFFSET)
+#  define SAM_HSMCI2_MR               (SAM_HSMCI2_VBASE+SAM_HSMCI_MR_OFFSET)
+#  define SAM_HSMCI2_DTOR             (SAM_HSMCI2_VBASE+SAM_HSMCI_DTOR_OFFSET)
+#  define SAM_HSMCI2_SDCR             (SAM_HSMCI2_VBASE+SAM_HSMCI_SDCR_OFFSET)
+#  define SAM_HSMCI2_ARGR             (SAM_HSMCI2_VBASE+SAM_HSMCI_ARGR_OFFSET)
+#  define SAM_HSMCI2_CMDR             (SAM_HSMCI2_VBASE+SAM_HSMCI_CMDR_OFFSET)
+#  define SAM_HSMCI2_BLKR             (SAM_HSMCI2_VBASE+SAM_HSMCI_BLKR_OFFSET)
+#  define SAM_HSMCI2_CSTOR            (SAM_HSMCI2_VBASE+SAM_HSMCI_CSTOR_OFFSET)
+#  define SAM_HSMCI2_RSPR0            (SAM_HSMCI2_VBASE+SAM_HSMCI_RSPR0_OFFSET)
+#  define SAM_HSMCI2_RSPR1            (SAM_HSMCI2_VBASE+SAM_HSMCI_RSPR1_OFFSET)
+#  define SAM_HSMCI2_RSPR2            (SAM_HSMCI2_VBASE+SAM_HSMCI_RSPR2_OFFSET)
+#  define SAM_HSMCI2_RSPR3            (SAM_HSMCI2_VBASE+SAM_HSMCI_RSPR3_OFFSET)
+#  define SAM_HSMCI2_RDR              (SAM_HSMCI2_VBASE+SAM_HSMCI_RDR_OFFSET)
+#  define SAM_HSMCI2_TDR              (SAM_HSMCI2_VBASE+SAM_HSMCI_TDR_OFFSET)
+#  define SAM_HSMCI2_SR               (SAM_HSMCI2_VBASE+SAM_HSMCI_SR_OFFSET)
+#  define SAM_HSMCI2_IER              (SAM_HSMCI2_VBASE+SAM_HSMCI_IER_OFFSET)
+#  define SAM_HSMCI2_IDR              (SAM_HSMCI2_VBASE+SAM_HSMCI_IDR_OFFSET)
+#  define SAM_HSMCI2_IMR              (SAM_HSMCI2_VBASE+SAM_HSMCI_IMR_OFFSET)
+#  define SAM_HSMCI2_DMA              (SAM_HSMCI2_VBASE+SAM_HSMCI_DMA_OFFSET)
+#  define SAM_HSMCI2_CFG              (SAM_HSMCI2_VBASE+SAM_HSMCI_CFG_OFFSET)
+#  define SAM_HSMCI2_WPMR             (SAM_HSMCI2_VBASE+SAM_HSMCI_WPMR_OFFSET)
+#  define SAM_HSMCI2_WPSR             (SAM_HSMCI2_VBASE+SAM_HSMCI_WPSR_OFFSET)
+#  define SAM_HSMCI2_FIFO             (SAM_HSMCI2_VBASE+SAM_HSMCI_FIFO_OFFSET)
+#endif
 
 /* HSMCI register bit definitions *******************************************************/
 
@@ -258,13 +260,16 @@
 
 #define HSMCI_BLKR_BCNT_SHIFT         (0)       /* Bits 0-15: MMC/SDIO Block Count - SDIO Byte Count */
 #define HSMCI_BLKR_BCNT_MASK          (0xffff << HSMCI_BLKR_BCNT_SHIFT)
+#  define HSMCI_BLKR_BCNT(n)          ((uint32_t)(n) << HSMCI_BLKR_BCNT_SHIFT)
 #define HSMCI_BLKR_BLKLEN_SHIFT       (16)      /* Bits 16-31: Data Block Length */
 #define HSMCI_BLKR_BLKLEN_MASK        (0xffff << HSMCI_BLKR_BLKLEN_SHIFT)
+#  define HSMCI_BLKR_BLKLEN(n)        ((uint32_t)(n) << HSMCI_BLKR_BLKLEN_SHIFT)
 
 /* HSMCI Completion Signal Timeout Register */
 
 #define HSMCI_CSTOR_CSTOCYC_SHIFT     (0)       /* Bits 0-3: Completion Signal Timeout Cycle Number */
 #define HSMCI_CSTOR_CSTOCYC_MASK      (15 << HSMCI_CSTOR_CSTOCYC_SHIFT)
+#  define HSMCI_CSTOR_CSTOCYC(n)      ((uint32_t)(n) << HSMCI_CSTOR_CSTOCYC_SHIFT)
 #define HSMCI_CSTOR_CSTOMUL_SHIFT     (4)       /* Bits 4-6: Completion Signal Timeout Multiplier */
 #define HSMCI_CSTOR_CSTOMUL_MASK      (7 << HSMCI_CSTOR_CSTOMUL_SHIFT)
 #  define HSMCI_CSTOR_CSTOMUL_1       (0 << HSMCI_CSTOR_CSTOMUL_SHIFT)
@@ -291,6 +296,11 @@
 #define HSMCI_INT_DTIP                (1 << 4)  /* Bit 4:  Data Transfer in Progress */
 #define HSMCI_INT_NOTBUSY             (1 << 5)  /* Bit 6:  HSMCI Not Busy */
 #define HSMCI_INT_SDIOIRQA            (1 << 8)  /* Bit 8:  SDIO Interrupt for Slot A */
+
+#ifdef ATSAMA5D4
+#  define HSMCI_INT_SDIOIRQB          (1 << 9)  /* Bit 9:  SDIO Interrupt for Slot B */
+#endif
+
 #define HSMCI_INT_SDIOWAIT            (1 << 12) /* Bit 12: SDIO Read Wait Operation Status */
 #define HSMCI_INT_CSRCV               (1 << 13) /* Bit 13: CE-ATA Completion Signal Received */
 #define HSMCI_INT_RINDE               (1 << 16) /* Bit 16: Response Index Error */
@@ -312,16 +322,24 @@
 
 /* HSMCI DMA Configuration Register */
 
-#define HSMCI_DMA_OFFSET_SHIFT        (0)       /* Bits 0-1: DMA Write Buffer Offset */
-#define HSMCI_DMA_OFFSET_MASK         (3 << HSMCI_DMA_OFFSET_SHIFT)
+#ifdef ATSAMA5D3
+#  define HSMCI_DMA_OFFSET_SHIFT      (0)       /* Bits 0-1: DMA Write Buffer Offset */
+#  define HSMCI_DMA_OFFSET_MASK       (3 << HSMCI_DMA_OFFSET_SHIFT)
+#    define HSMCI_DMA_OFFSET(n)       ((uint32_t)(n) << HSMCI_DMA_OFFSET_SHIFT)
+#endif
+
 #define HSMCI_DMA_CHKSIZE_SHIFT       (4)       /* Bits 4-6:  DMA Channel Read and Write Chunk Size */
+#define HSMCI_DMA_CHKSIZE_MASK        (7 << HSMCI_DMA_CHKSIZE_SHIFT)
 #  define HSMCI_DMA_CHKSIZE_1         (0 << HSMCI_DMA_CHKSIZE_SHIFT) /* 1 data available */
 #  define HSMCI_DMA_CHKSIZE_4         (1 << HSMCI_DMA_CHKSIZE_SHIFT) /* 4 data available */
 #  define HSMCI_DMA_CHKSIZE_8         (2 << HSMCI_DMA_CHKSIZE_SHIFT) /* 8 data available */
 #  define HSMCI_DMA_CHKSIZE_16        (3 << HSMCI_DMA_CHKSIZE_SHIFT) /* 16 data available */
 #  define HSMCI_DMA_CHKSIZE_32        (4 << HSMCI_DMA_CHKSIZE_SHIFT) /* 32 data available */
 #define HSMCI_DMA_DMAEN               (1 << 8)  /* Bit 8:  DMA Hardware Handshaking Enable */
-#define HSMCI_DMA_ROPT                (1 << 12) /* Bit 12: Read Optimization with padding */
+
+#ifdef ATSAMA5D3
+#  define HSMCI_DMA_ROPT              (1 << 12) /* Bit 12: Read Optimization with padding */
+#endif
 
 /* HSMCI Configuration Register */
 
@@ -332,21 +350,16 @@
 
 /* HSMCI Write Protect Mode Register */
 
-#define HSMCI_WPMR_WP_EN              (1 << 0)  /* Bit 0:  Write Protection Enable */
-#define HSMCI_WPMR_WP_KEY_SHIFT       (8)       /* Bits 8-31: Write Protection Key password */
-#define HSMCI_WPMR_WP_KEY_MASK        (0x00ffffff << HSMCI_WPMR_WP_KEY_SHIFT)
-#  define HSMCI_WPMR_WP_KEY           (0x004d4349 << HSMCI_WPMR_WP_KEY_SHIFT)
+#define HSMCI_WPMR_WPEN               (1 << 0)  /* Bit 0:  Write Protection Enable */
+#define HSMCI_WPMR_WPKEY_SHIFT        (8)       /* Bits 8-31: Write Protection Key password */
+#define HSMCI_WPMR_WPKEY_MASK         (0x00ffffff << HSMCI_WPMR_WPKEY_SHIFT)
+#  define HSMCI_WPMR_WPKEY            (0x004d4349 << HSMCI_WPMR_WPKEY_SHIFT)
 
 /* HSMCI Write Protect Status Register */
 
-#define HSMCI_WPSR_VS_SHIFT           (0)       /* Bits 0-3: Write Protection Violation Status */
-#define HSMCI_WPSR_VS_MASK            (15 << HSMCI_WPSR_VS_SHIFT)
-#  define HSMCI_WPSR_VS_NONE          (0 << HSMCI_WPSR_VS_SHIFT)
-#  define HSMCI_WPSR_VS_WRITE         (1 << HSMCI_WPSR_VS_SHIFT)
-#  define HSMCI_WPSR_VS_RESET         (2 << HSMCI_WPSR_VS_SHIFT)
-#  define HSMCI_WPSR_VS_BOTH          (3 << HSMCI_WPSR_VS_SHIFT)
-#define HSMCI_WPSR_VSRC_SHIFT         (8)       /* Bits 8-23: Write Protection Violation Source */
-#define HSMCI_WPSR_VSRC_MASK          (0xffff << HSMCI_WPSR_VSRC_SHIFT)
+#define HSMCI_WPSR_WPVS               (1 << 0)  /* Bit 0: Write Protection Violation Status */
+#define HSMCI_WPSR_WPVSRC_SHIFT       (8)       /* Bits 8-23: Write Protection Violation Source */
+#define HSMCI_WPSR_WPVSRC_MASK        (0xffff << HSMCI_WPSR_WPVSRC_SHIFT)
 
 /****************************************************************************************
  * Public Types
