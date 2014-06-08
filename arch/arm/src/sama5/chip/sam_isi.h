@@ -126,7 +126,7 @@
 #define ISI_CFG1_SLD_SHIFT         (16)      /* Bits 16-23: Start of Line Delay */
 #define ISI_CFG1_SLD_MASK          (0xff << ISI_CFG1_SLD_SHIFT)
 #  define ISI_CFG1_SLD(n)          ((uint32_t)(n) << ISI_CFG1_SLD_SHIFT)
-#define ISI_CFG1_SFD_SHIFT         (nn)      /* Bits nn-nn: Start of Frame Delay */
+#define ISI_CFG1_SFD_SHIFT         (24)      /* Bits 24-31: Start of Frame Delay */
 #define ISI_CFG1_SFD_MASK          (0xff << ISI_CFG1_SLD_SHIFT)
 #  define ISI_CFG1_SFD(n)          ((uint32_t)(n) << ISI_CFG1_SLD_SHIFT)
 
@@ -299,10 +299,10 @@
 
 /* Write Protection Control Register */
 
-#define ISI_WPCR_WP_EN             (1 << 0)  /* Bit 0:  Write Protection Enable */
-#define ISI_WPCR_WP_KEY_SHIFT      (8)       /* Bits nn-nn: Write Protection KEY Password */
-#define ISI_WPCR_WP_KEY_MASK       (0xffffff << ISI_WPCR_WP_KEY_SHIFT)
-#  define ISI_WPCR_WP_KEY          (0x495349 << ISI_WPCR_WP_KEY_SHIFT) /* (ASCII code for "ISI") */
+#define ISI_WPCR_WPEN              (1 << 0)  /* Bit 0:  Write Protection Enable */
+#define ISI_WPCR_WPKEY_SHIFT       (8)       /* Bits 8-31: Write Protection KEY Password */
+#define ISI_WPCR_WPKEY_MASK        (000xffffff << ISI_WPCR_WPKEY_SHIFT)
+#  define ISI_WPCR_WPKEY           (0x00495349 << ISI_WPCR_WPKEY_SHIFT) /* (ASCII code for "ISI") */
 
 /* Write Protection Status Register */
 

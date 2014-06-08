@@ -265,7 +265,7 @@
 #define CAN_MMR_MTIMEMARK_SHIFT  (0)      /* Bits 0-15: Mailbox Timemark */
 #define CAN_MMR_MTIMEMARK_MASK   (0xffff << CAN_MMR_MTIMEMARK_SHIFT)
 #  define CAN_MMR_MTIMEMARK(n)   ((uint32_t)(n) << 19)
-#define CAN_MMR_PRIOR_SHIFT      (16)      /* Bits 16-nn: Mailbox Priority */
+#define CAN_MMR_PRIOR_SHIFT      (16)      /* Bits 16-19: Mailbox Priority */
 #define CAN_MMR_PRIOR_MASK       (15 << CAN_MMR_PRIOR_SHIFT)
 #  define CAN_MMR_PRIOR(n)       ((uint32_t)(n) << CAN_MMR_PRIOR_SHIFT)
 #define CAN_MMR_MOT_SHIFT        (24)      /* Bits 24-26: Mailbox Object Type */
