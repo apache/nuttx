@@ -187,6 +187,26 @@
 #define SAM_USART3_WPMR              (SAM_USART3_VBASE+SAM_UART_WPMR_OFFSET)
 #define SAM_USART3_WPSR              (SAM_USART3_VBASE+SAM_UART_WPSR_OFFSET)
 
+#ifdef CONFIG_SAMA5_HAVE_USART4
+#  define SAM_USART4_CR                (SAM_USART4_VBASE+SAM_UART_CR_OFFSET)
+#  define SAM_USART4_MR                (SAM_USART4_VBASE+SAM_UART_MR_OFFSET)
+#  define SAM_USART4_IER               (SAM_USART4_VBASE+SAM_UART_IER_OFFSET)
+#  define SAM_USART4_IDR               (SAM_USART4_VBASE+SAM_UART_IDR_OFFSET)
+#  define SAM_USART4_IMR               (SAM_USART4_VBASE+SAM_UART_IMR_OFFSET)
+#  define SAM_USART4_SR                (SAM_USART4_VBASE+SAM_UART_SR_OFFSET)
+#  define SAM_USART4_RHR               (SAM_USART4_VBASE+SAM_UART_RHR_OFFSET)
+#  define SAM_USART4_THR               (SAM_USART4_VBASE+SAM_UART_THR_OFFSET)
+#  define SAM_USART4_BRGR              (SAM_USART4_VBASE+SAM_UART_BRGR_OFFSET)
+#  define SAM_USART4_RTOR              (SAM_USART4_VBASE+SAM_UART_RTOR_OFFSET)
+#  define SAM_USART4_TTGR              (SAM_USART4_VBASE+SAM_UART_TTGR_OFFSET)
+#  define SAM_USART4_FIDI              (SAM_USART4_VBASE+SAM_UART_FIDI_OFFSET)
+#  define SAM_USART4_NER               (SAM_USART4_VBASE+SAM_UART_NER_OFFSET)
+#  define SAM_USART4_IFR               (SAM_USART4_VBASE+SAM_UART_IFR_OFFSET)
+#  define SAM_USART4_MAN               (SAM_USART4_VBASE+SAM_UART_MAN_OFFSET)
+#  define SAM_USART4_WPMR              (SAM_USART4_VBASE+SAM_UART_WPMR_OFFSET)
+#  define SAM_USART4_WPSR              (SAM_USART4_VBASE+SAM_UART_WPSR_OFFSET)
+#endif
+
 /* UART register bit definitions ****************************************************************/
 
 /* UART Control Register */

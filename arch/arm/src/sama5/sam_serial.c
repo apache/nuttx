@@ -86,6 +86,9 @@
 #ifndef CONFIG_USART3_ISUART
 #  undef CONFIG_SAMA5_USART3
 #endif
+#ifndef CONFIG_USART4_ISUART
+#  undef CONFIG_SAMA5_USART4
+#endif
 
 /* Is there a USART/USART enabled? */
 
@@ -93,8 +96,9 @@
 #  define HAVE_UART
 #endif
 
-#if defined(CONFIG_SAMA5_USART0) || defined(CONFIG_SAMA5_USART1) ||\
-    defined(CONFIG_SAMA5_USART2) || defined(CONFIG_SAMA5_USART3)
+#if defined(CONFIG_SAMA5_USART0) || defined(CONFIG_SAMA5_USART1) || \
+    defined(CONFIG_SAMA5_USART2) || defined(CONFIG_SAMA5_USART3) || \
+    defined(CONFIG_SAMA5_USART4)
 #  define HAVE_USART
 #endif
 
@@ -107,6 +111,7 @@
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
+#  undef CONFIG_USART4_SERIAL_CONSOLE
 #  undef HAVE_UART_CONSOLE
 #elif defined(CONFIG_UART0_SERIAL_CONSOLE) && defined(CONFIG_SAMA5_UART0)
 #  undef CONFIG_SAMA5_DBGU_CONSOLE
@@ -115,6 +120,7 @@
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
+#  undef CONFIG_USART4_SERIAL_CONSOLE
 #  define HAVE_UART_CONSOLE 1
 #elif defined(CONFIG_UART1_SERIAL_CONSOLE) && defined(CONFIG_SAMA5_UART1)
 #  undef CONFIG_SAMA5_DBGU_CONSOLE
@@ -123,6 +129,7 @@
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
+#  undef CONFIG_USART4_SERIAL_CONSOLE
 #  define HAVE_UART_CONSOLE 1
 #elif defined(CONFIG_USART0_SERIAL_CONSOLE) && defined(CONFIG_SAMA5_USART0)
 #  undef CONFIG_SAMA5_DBGU_CONSOLE
@@ -131,6 +138,7 @@
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
+#  undef CONFIG_USART4_SERIAL_CONSOLE
 #  define HAVE_UART_CONSOLE 1
 #elif defined(CONFIG_USART1_SERIAL_CONSOLE) && defined(CONFIG_SAMA5_USART1)
 #  undef CONFIG_SAMA5_DBGU_CONSOLE
@@ -139,6 +147,7 @@
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
+#  undef CONFIG_USART4_SERIAL_CONSOLE
 #  define HAVE_UART_CONSOLE 1
 #elif defined(CONFIG_USART2_SERIAL_CONSOLE) && defined(CONFIG_SAMA5_USART2)
 #  undef CONFIG_SAMA5_DBGU_CONSOLE
@@ -147,6 +156,7 @@
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
+#  undef CONFIG_USART4_SERIAL_CONSOLE
 #  define HAVE_UART_CONSOLE 1
 #elif defined(CONFIG_USART3_SERIAL_CONSOLE) && defined(CONFIG_SAMA5_USART3)
 #  undef CONFIG_SAMA5_DBGU_CONSOLE
@@ -155,6 +165,16 @@
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
+#  undef CONFIG_USART4_SERIAL_CONSOLE
+#  define HAVE_UART_CONSOLE 1
+#elif defined(CONFIG_USART4_SERIAL_CONSOLE) && defined(CONFIG_SAMA4_USART4)
+#  undef CONFIG_SAMA5_DBGU_CONSOLE
+#  undef CONFIG_UART0_SERIAL_CONSOLE
+#  undef CONFIG_UART1_SERIAL_CONSOLE
+#  undef CONFIG_USART0_SERIAL_CONSOLE
+#  undef CONFIG_USART1_SERIAL_CONSOLE
+#  undef CONFIG_USART2_SERIAL_CONSOLE
+#  undef CONFIG_USART3_SERIAL_CONSOLE
 #  define HAVE_UART_CONSOLE 1
 #else
 #  warning "No valid CONFIG_USARTn_SERIAL_CONSOLE Setting"
@@ -165,6 +185,7 @@
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
+#  undef CONFIG_USART4_SERIAL_CONSOLE
 #  undef HAVE_UART_CONSOLE
 #endif
 
@@ -179,12 +200,13 @@
 #undef TTYS3_DEV
 #undef TTYS4_DEV
 #undef TTYS5_DEV
+#undef TTYS6_DEV
 
 #if defined(HAVE_UART) || defined(HAVE_USART)
 
-/* Which UART/USART with be tty0/console and which tty1? tty2? tty3? tty4? tty5? */
+/* Which UART/USART with be tty0/console and which tty1? tty2? tty3? tty4? tty5? tty6? */
 
-/* First pick the console and ttys0.  This could be any of UART0-1, USART0-3 */
+/* First pick the console and ttyS0.  This could be any of UART0-1, USART0-4 */
 
 #if defined(CONFIG_UART0_SERIAL_CONSOLE)
 #    define CONSOLE_DEV         g_uart0port  /* UART0 is console */
@@ -208,7 +230,12 @@
 #    define USART2_ASSIGNED     1
 #elif defined(CONFIG_USART3_SERIAL_CONSOLE)
 #    define CONSOLE_DEV         g_usart3port /* USART3 is console */
-#    define TTYS5_DEV           g_usart3port /* USART3 is ttyS0 */
+#    define TTYS0_DEV           g_usart3port /* USART3 is ttyS0 */
+#    define USART3_ASSIGNED     1
+#elif defined(CONFIG_USART4_SERIAL_CONSOLE)
+#    define CONSOLE_DEV         g_usart4port /* USART4 is console */
+#    define TTYS0_DEV           g_usart4port /* USART4 is ttyS0 */
+#    define USART4_ASSIGNED     1
 #else
 #  undef CONSOLE_DEV                         /* No console */
 #  if defined(CONFIG_SAMA5_UART0)
@@ -229,10 +256,13 @@
 #  elif defined(CONFIG_SAMA5_USART3)
 #    define TTYS0_DEV           g_usart3port /* USART3 is ttyS0 */
 #    define USART3_ASSIGNED     1
+#  elif defined(CONFIG_SAMA5_USART4)
+#    define TTYS0_DEV           g_usart4port /* USART4 is ttyS0 */
+#    define USART4_ASSIGNED     4
 #  endif
 #endif
 
-/* Pick ttys1.  This could be any of UART0-1, USART0-3 excluding the console UART. */
+/* Pick ttyS1.  This could be any of UART0-1, USART0-4 excluding the console UART. */
 
 #if defined(CONFIG_SAMA5_UART0) && !defined(UART0_ASSIGNED)
 #  define TTYS1_DEV           g_uart0port  /* UART0 is ttyS1 */
@@ -252,10 +282,13 @@
 #elif defined(CONFIG_SAMA5_USART3) && !defined(USART3_ASSIGNED)
 #  define TTYS1_DEV           g_usart3port /* USART3 is ttyS1 */
 #  define USART3_ASSIGNED     1
+#elif defined(CONFIG_SAMA5_USART4) && !defined(USART4_ASSIGNED)
+#  define TTYS1_DEV           g_usart4port /* USART4 is ttyS1 */
+#  define USART4_ASSIGNED     1
 #endif
 
-/* Pick ttys2.  This could be one of UART1 or USART0-3. It can't be UART0
- * because that was either assigned as ttyS0 or ttys1.  One of these
+/* Pick ttys2.  This could be one of UART1 or USART0-4. It can't be UART0
+ * because that was either assigned as ttyS0 or ttyS1.  One of these
  * could also be the console.
  */
 
@@ -274,11 +307,14 @@
 #elif defined(CONFIG_SAMA5_USART3) && !defined(USART3_ASSIGNED)
 #  define TTYS2_DEV           g_usart3port /* USART3 is ttyS2 */
 #  define USART3_ASSIGNED     1
+#elif defined(CONFIG_SAMA5_USART4) && !defined(USART4_ASSIGNED)
+#  define TTYS2_DEV           g_usart4port /* USART4 is ttyS2 */
+#  define USART4_ASSIGNED     1
 #endif
 
-/* Pick ttys3. This could be one of USART0-3. It can't be UART0-1 because
+/* Pick ttys3. This could be one of USART0-4. It can't be UART0-1 because
  * those have already been assigned to ttsyS0, 1, or 2.  One of
- * USART0-3 could also be the console.
+ * USART0-4 could also be the console.
  */
 
 #if defined(CONFIG_SAMA5_USART0) && !defined(USART0_ASSIGNED)
@@ -293,11 +329,14 @@
 #elif defined(CONFIG_SAMA5_USART3) && !defined(USART3_ASSIGNED)
 #  define TTYS3_DEV           g_usart3port /* USART3 is ttyS3 */
 #  define USART3_ASSIGNED     1
+#elif defined(CONFIG_SAMA5_USART4) && !defined(USART4_ASSIGNED)
+#  define TTYS3_DEV           g_usart4port /* USART4 is ttyS3 */
+#  define USART4_ASSIGNED     1
 #endif
 
-/* Pick ttys4. This could be one of USART1-3. It can't be UART0-1 or USART0
+/* Pick ttyS4. This could be one of USART1-4. It can't be UART0-1 or USART0
  * because those have already been assigned to ttsyS0, 1, 2 or 3.  One of
- * USART1-3 could also be the console.
+ * USART1-4 could also be the console.
  */
 
 #if defined(CONFIG_SAMA5_USART1) && !defined(USART1_ASSIGNED)
@@ -309,11 +348,14 @@
 #elif defined(CONFIG_SAMA5_USART3) && !defined(USART3_ASSIGNED)
 #  define TTYS4_DEV           g_usart3port /* USART3 is ttyS4 */
 #  define USART3_ASSIGNED      1
+#elif defined(CONFIG_SAMA5_USART4) && !defined(USART4_ASSIGNED)
+#  define TTYS4_DEV           g_usart4port /* USART4 is ttyS4 */
+#  define USART4_ASSIGNED      1
 #endif
 
-/* Pick ttys5. This could be one of USART2-3. It can't be UART0-1 or
+/* Pick ttyS5. This could be one of USART2-4. It can't be UART0-1 or
  * USART0-1 because those have already been assigned to ttsyS0, 1, 2,
- * 3 or 4.  One of USART2-3 could also be the console.
+ * 3 or 4.  One of USART2-4 could also be the console.
  */
 
 #if defined(CONFIG_SAMA5_USART2) && !defined(USART2_ASSIGNED)
@@ -322,6 +364,22 @@
 #elif defined(CONFIG_SAMA5_USART3) && !defined(USART3_ASSIGNED)
 #  define TTYS5_DEV           g_usart3port /* USART3 is ttyS5 */
 #  define USART3_ASSIGNED      1
+#elif defined(CONFIG_SAMA5_USART4) && !defined(USART4_ASSIGNED)
+#  define TTYS5_DEV           g_usart3port /* USART4 is ttyS5 */
+#  define USART4_ASSIGNED      1
+#endif
+
+/* Pick ttyS6. This could be one of USART3-4. It can't be UART0-1 or
+ * USART0-2 because those have already been assigned to ttsyS0, 1, 2,
+ * 3, 4, or 5.  One of USART3-4 could also be the console.
+ */
+
+#if defined(CONFIG_SAMA5_USART3) && !defined(USART3_ASSIGNED)
+#  define TTYS6_DEV           g_usart3port /* USART3 is ttyS6 */
+#  define USART3_ASSIGNED      1
+#elif defined(CONFIG_SAMA5_USART4) && !defined(USART4_ASSIGNED)
+#  define TTYS6_DEV           g_usart3port /* USART4 is ttyS6 */
+#  define USART4_ASSIGNED      1
 #endif
 
 /* The UART/USART modules are driven by the main clock (MCK). */
@@ -410,6 +468,10 @@ static char g_usart2txbuffer[CONFIG_USART2_TXBUFSIZE];
 #ifdef CONFIG_SAMA5_USART3
 static char g_usart3rxbuffer[CONFIG_USART3_RXBUFSIZE];
 static char g_usart3txbuffer[CONFIG_USART3_TXBUFSIZE];
+#endif
+#ifdef CONFIG_SAMA5_USART4
+static char g_usart4rxbuffer[CONFIG_USART4_RXBUFSIZE];
+static char g_usart4txbuffer[CONFIG_USART4_TXBUFSIZE];
 #endif
 
 /* This describes the state of the UART0 port. */
@@ -589,6 +651,36 @@ static uart_dev_t g_usart3port =
    },
   .ops      = &g_uart_ops,
   .priv     = &g_usart3priv,
+};
+#endif
+
+/* This describes the state of the USART4 port. */
+
+#ifdef CONFIG_SAMA5_USART4
+static struct up_dev_s g_usart4priv =
+{
+  .usartbase      = SAM_USART4_VBASE,
+  .baud           = CONFIG_USART4_BAUD,
+  .irq            = SAM_IRQ_USART4,
+  .parity         = CONFIG_USART4_PARITY,
+  .bits           = CONFIG_USART4_BITS,
+  .stopbits2      = CONFIG_USART4_2STOP,
+};
+
+static uart_dev_t g_usart4port =
+{
+  .recv     =
+  {
+    .size   = CONFIG_USART4_RXBUFSIZE,
+    .buffer = g_usart4rxbuffer,
+  },
+  .xmit     =
+  {
+    .size   = CONFIG_USART4_TXBUFSIZE,
+    .buffer = g_usart4txbuffer,
+   },
+  .ops      = &g_uart_ops,
+  .priv     = &g_usart4priv,
 };
 #endif
 
@@ -875,6 +967,13 @@ static int up_interrupt(int irq, void *context)
     }
   else
 #endif
+#ifdef CONFIG_SAMA5_USART4
+  if (g_usart4priv.irq == irq)
+    {
+      dev = &g_usart4port;
+    }
+  else
+#endif
     {
       PANIC();
     }
@@ -1157,6 +1256,9 @@ void sam_earlyserialinit(void)
 #ifdef TTYS5_DEV
   up_disableallints(TTYS5_DEV.priv);
 #endif
+#ifdef TTYS6_DEV
+  up_disableallints(TTYS6_DEV.priv);
+#endif
 
   /* Configuration whichever one is the console */
 
@@ -1202,6 +1304,9 @@ void up_serialinit(void)
 #endif
 #ifdef TTYS5_DEV
   (void)uart_register("/dev/ttyS5", &TTYS5_DEV);
+#endif
+#ifdef TTYS6_DEV
+  (void)uart_register("/dev/ttyS6", &TTYS6_DEV);
 #endif
 
 /* Register the DBGU as well */
