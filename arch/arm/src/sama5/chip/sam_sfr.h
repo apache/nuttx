@@ -48,9 +48,9 @@
  ************************************************************************************/
 /* SFR Register Offsets *************************************************************/
 
-                                           /* 0x0000-0x000c: Reserved */
-#define SAM_SFR_DDRCFG_OFFSET       0x0004 /* DDR Configuration register (undocumented) */
-                                           /* 0x0000-0x000c: Reserved */
+                                           /* 0x0000: Reserved */
+#define SAM_SFR_DDRCFG_OFFSET       0x0004 /* DDR Configuration register */
+                                           /* 0x0008-0x000c: Reserved */
 #define SAM_SFR_OHCIICR_OFFSET      0x0010 /* OHCI Interrupt Configuration Register */
 #define SAM_SFR_OHCIISR_OFFSET      0x0014 /* OHCI Interrupt Status Register */
                                            /* 0x0018-0x001c: Reserved */
@@ -88,10 +88,8 @@
 #define SAM_SFR_EBICFG              (SAM_SFR_VBASE+SAM_SFR_EBICFG_OFFSET)
 
 #ifdef ATSAMA5D4
-#  define SAM_SFR_SN0_OFFSET        0x004c /* Serial Number 0 Register */
-#  define SAM_SFR_SN0_OFFSET        0x004c /* Serial Number 0 Register */
-#  define SAM_SFR_SN1_OFFSET        0x0050 /* Serial Number 1 Register */
-#  define SAM_SFR_SN1_OFFSET        0x0050 /* Serial Number 1 Register */
+#  define SAM_SFR_SN0              (SAM_SFR_VBASE+SAM_SFR_SN0_OFFSET)
+#  define SAM_SFR_SN1              (SAM_SFR_VBASE+SAM_SFR_SN1_OFFSET)
 #endif
 
 /* SFR Register Bit Definitions *****************************************************/

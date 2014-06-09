@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/sama5/chip/sam_xdmach
+ * arch/arm/src/sama5/chip/sam_xdmac.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -70,7 +70,7 @@
 #define SAM_XDMACH_CIE_OFFSET       0x0000 /* Channel Interrupt Enable Register */
 #define SAM_XDMACH_CID_OFFSET       0x0004 /* Channel Interrupt Disable Register */
 #define SAM_XDMACH_CIM_OFFSET       0x0008 /* Channel Interrupt Mask Register */
-#define SAM_XDMACH_CIS_OFFSET       0x000C /* Channel Interrupt Status Register */
+#define SAM_XDMACH_CIS_OFFSET       0x000c /* Channel Interrupt Status Register */
 #define SAM_XDMACH_CSA_OFFSET       0x0010 /* Channel Source Address Register */
 #define SAM_XDMACH_CDA_OFFSET       0x0014 /* Channel Destination Address Register */
 #define SAM_XDMACH_CNDA_OFFSET      0x0018 /* Channel Next Descriptor Address Register */
