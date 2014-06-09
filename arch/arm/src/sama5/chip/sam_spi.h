@@ -2,7 +2,7 @@
  * arch/arm/src/sama5/chip/sam_spi.h
  * Serial Peripheral Interface (SPI) definitions for the SAMA5
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -105,6 +105,23 @@
 #define SAM_SPI1_WPCR             (SAM_SPI1_VBASE+SAM_SPI_WPCR_OFFSET)
 #define SAM_SPI1_WPSR             (SAM_SPI1_VBASE+SAM_SPI_WPSR_OFFSET)
 
+#ifdef CONFIG_SAMA5_HAVE_SPI2
+#  define SAM_SPI2_CR             (SAM_SPI2_VBASE+SAM_SPI_CR_OFFSET)
+#  define SAM_SPI2_MR             (SAM_SPI2_VBASE+SAM_SPI_MR_OFFSET)
+#  define SAM_SPI2_RDR            (SAM_SPI2_VBASE+SAM_SPI_RDR_OFFSET)
+#  define SAM_SPI2_TDR            (SAM_SPI2_VBASE+SAM_SPI_TDR_OFFSET)
+#  define SAM_SPI2_SR             (SAM_SPI2_VBASE+SAM_SPI_SR_OFFSET)
+#  define SAM_SPI2_IER            (SAM_SPI2_VBASE+SAM_SPI_IER_OFFSET)
+#  define SAM_SPI2_IDR            (SAM_SPI2_VBASE+SAM_SPI_IDR_OFFSET)
+#  define SAM_SPI2_IMR            (SAM_SPI2_VBASE+SAM_SPI_IMR_OFFSET)
+#  define SAM_SPI2_CSR0           (SAM_SPI2_VBASE+SAM_SPI_CSR0_OFFSET)
+#  define SAM_SPI2_CSR1           (SAM_SPI2_VBASE+SAM_SPI_CSR1_OFFSET)
+#  define SAM_SPI2_CSR2           (SAM_SPI2_VBASE+SAM_SPI_CSR2_OFFSET)
+#  define SAM_SPI2_CSR3           (SAM_SPI2_VBASE+SAM_SPI_CSR3_OFFSET)
+#  define SAM_SPI2_WPCR           (SAM_SPI2_VBASE+SAM_SPI_WPCR_OFFSET)
+#  define SAM_SPI2_WPSR           (SAM_SPI2_VBASE+SAM_SPI_WPSR_OFFSET)
+#endif
+
 /* SPI register bit definitions *********************************************************/
 
 /* SPI Control Register */
@@ -187,10 +204,13 @@
 #  define SPI_CSR_BITS16          (8 << SPI_CSR_BITS_SHIFT) /* 16 */
 #define SPI_CSR_SCBR_SHIFT        (8)       /* Bits 8-15: Serial Clock Baud Rate */
 #define SPI_CSR_SCBR_MASK         (0xff << SPI_CSR_SCBR_SHIFT)
+#  define SPI_CSR_SCBR(n)         ((uint32_t)(n) << SPI_CSR_SCBR_SHIFT)
 #define SPI_CSR_DLYBS_SHIFT       (16)      /* Bits 16-23: Delay Before SPCK */
 #define SPI_CSR_DLYBS_MASK        (0xff << SPI_CSR_DLYBS_SHIFT)
+#  define SPI_CSR_DLYBS(n)        ((uint32_t)(n) << SPI_CSR_DLYBS_SHIFT)
 #define SPI_CSR_DLYBCT_SHIFT      (24)      /* Bits 24-31: Delay Between Consecutive Transfers */
 #define SPI_CSR_DLYBCT_MASK       (0xff << SPI_CSR_DLYBCT_SHIFT)
+#  define SPI_CSR_DLYBCT(n)       ((uint32_t)(n) << SPI_CSR_DLYBCT_SHIFT)
 
 /* SPI Write Protection Control Register */
 

@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/sama5/chip/sam_ssc.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -199,8 +199,8 @@
 #  define SSC_TCMR_CKS_MCK        (0 << SSC_TCMR_CKS_SHIFT) /* Divided Clock */
 #  define SSC_TCMR_CKS_RK         (1 << SSC_TCMR_CKS_SHIFT) /* RK Clock signal */
 #  define SSC_TCMR_CKS_TK         (2 << SSC_TCMR_CKS_SHIFT) /* TK pin */
-#define SSC_TCMR_CKO_SHIFT        (2)       /* Bits 2-3: Transmit Clock Output Mode Selection */
-#define SSC_TCMR_CKO_MASK         (3 << SSC_TCMR_CKO_SHIFT)
+#define SSC_TCMR_CKO_SHIFT        (2)       /* Bits 2-4: Transmit Clock Output Mode Selection */
+#define SSC_TCMR_CKO_MASK         (7 << SSC_TCMR_CKO_SHIFT)
 #  define SSC_TCMR_CKO_NONE       (0 << SSC_TCMR_CKO_SHIFT) /* None, TK pin is an input */
 #  define SSC_TCMR_CKO_CONT       (1 << SSC_TCMR_CKO_SHIFT) /* Continuous Transmit Clock, TK pin is an output */
 #  define SSC_TCMR_CKO_TRANSFER   (2 << SSC_TCMR_CKO_SHIFT) /* Transmit Clock during transfers, TK pin is an output */
@@ -295,8 +295,8 @@
 
 #define SSC_WPMR_WPEN             (1 << 0)  /* Bit 0:  Write Protect Enable */
 #define SSC_WPMR_WPKEY_SHIFT      (8)       /* Bits 8-31: Write Protect KEY */
-#define SSC_WPMR_WPKEY_MASK       (0xffffff << SSC_WPMR_WPKEY_SHIFT)
-#  define SSC_WPMR_WPKEY          (0x535343 << SSC_WPMR_WPKEY_SHIFT) /* "SSC" in ASCII */
+#define SSC_WPMR_WPKEY_MASK       (0x00ffffff << SSC_WPMR_WPKEY_SHIFT)
+#  define SSC_WPMR_WPKEY          (0x00535343 << SSC_WPMR_WPKEY_SHIFT) /* "SSC" in ASCII */
 
 /* Write Protect Status Register */
 
