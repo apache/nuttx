@@ -66,7 +66,11 @@
 #define SAM_LCDC_LCDIDR_OFFSET      0x0030 /* LCD Controller Interrupt Disable Register */
 #define SAM_LCDC_LCDIMR_OFFSET      0x0034 /* LCD Controller Interrupt Mask Register */
 #define SAM_LCDC_LCDISR_OFFSET      0x0038 /* LCD Controller Interrupt Status Register */
-                                           /* 0x003c Reserved */
+
+#ifdef ATSAMA5D4
+#  define SAM_LCDC_LCDATTR_OFFSET   0x003c /* LCD Controller Attribute Register */
+#endif
+
 #define SAM_LCDC_BASECHER_OFFSET    0x0040 /* Base Layer Channel Enable Register */
 #define SAM_LCDC_BASECHDR_OFFSET    0x0044 /* Base Layer Channel Disable Register */
 #define SAM_LCDC_BASECHSR_OFFSET    0x0048 /* Base Layer Channel Status Register */
@@ -192,45 +196,47 @@
 #define SAM_LCDC_HEOCFG40_OFFSET    0x042c /* High-End Overlay Configuration Register 40 */
 #define SAM_LCDC_HEOCFG41_OFFSET    0x0430 /* High-End Overlay Configuration Register 41 */
                                            /* 0x0434-0x043c Reserved */
-#define SAM_LCDC_HCRCHER_OFFSET     0x0440 /* Hardware Cursor Channel Enable Register */
-#define SAM_LCDC_HCRCHDR_OFFSET     0x0444 /* Hardware Cursor Channel Disable Register */
-#define SAM_LCDC_HCRCHSR_OFFSET     0x0448 /* Hardware Cursor Channel Status Register */
-#define SAM_LCDC_HCRIER_OFFSET      0x044c /* Hardware Cursor Interrupt Enable Register */
-#define SAM_LCDC_HCRIDR_OFFSET      0x0450 /* Hardware Cursor Interrupt Disable Register */
-#define SAM_LCDC_HCRIMR_OFFSET      0x0454 /* Hardware Cursor Interrupt Mask Register */
-#define SAM_LCDC_HCRISR_OFFSET      0x0458 /* Hardware Cursor Interrupt Status Register */
-#define SAM_LCDC_HCRHEAD_OFFSET     0x045c /* Hardware Cursor DMA Head Register */
-#define SAM_LCDC_HCRADDR_OFFSET     0x0460 /* Hardware cursor DMA Address Register */
-#define SAM_LCDC_HCRCTRL_OFFSET     0x0464 /* Hardware Cursor DMA Control Register */
-#define SAM_LCDC_HCRNEXT_OFFSET     0x0468 /* Hardware Cursor DMA Next Register */
-#define SAM_LCDC_HCRCFG0_OFFSET     0x046c /* Hardware Cursor Configuration 0 Register */
-#define SAM_LCDC_HCRCFG1_OFFSET     0x0470 /* Hardware Cursor Configuration 1 Register */
-#define SAM_LCDC_HCRCFG2_OFFSET     0x0474 /* Hardware Cursor Configuration 2 Register */
-#define SAM_LCDC_HCRCFG3_OFFSET     0x0478 /* Hardware Cursor Configuration 3 Register */
-#define SAM_LCDC_HCRCFG4_OFFSET     0x047c /* Hardware Cursor Configuration 4 Register */
+#ifdef ATSAMA5D3
+#  define SAM_LCDC_HCRCHER_OFFSET   0x0440 /* Hardware Cursor Channel Enable Register */
+#  define SAM_LCDC_HCRCHDR_OFFSET   0x0444 /* Hardware Cursor Channel Disable Register */
+#  define SAM_LCDC_HCRCHSR_OFFSET   0x0448 /* Hardware Cursor Channel Status Register */
+#  define SAM_LCDC_HCRIER_OFFSET    0x044c /* Hardware Cursor Interrupt Enable Register */
+#  define SAM_LCDC_HCRIDR_OFFSET    0x0450 /* Hardware Cursor Interrupt Disable Register */
+#  define SAM_LCDC_HCRIMR_OFFSET    0x0454 /* Hardware Cursor Interrupt Mask Register */
+#  define SAM_LCDC_HCRISR_OFFSET    0x0458 /* Hardware Cursor Interrupt Status Register */
+#  define SAM_LCDC_HCRHEAD_OFFSET   0x045c /* Hardware Cursor DMA Head Register */
+#  define SAM_LCDC_HCRADDR_OFFSET   0x0460 /* Hardware cursor DMA Address Register */
+#  define SAM_LCDC_HCRCTRL_OFFSET   0x0464 /* Hardware Cursor DMA Control Register */
+#  define SAM_LCDC_HCRNEXT_OFFSET   0x0468 /* Hardware Cursor DMA Next Register */
+#  define SAM_LCDC_HCRCFG0_OFFSET   0x046c /* Hardware Cursor Configuration 0 Register */
+#  define SAM_LCDC_HCRCFG1_OFFSET   0x0470 /* Hardware Cursor Configuration 1 Register */
+#  define SAM_LCDC_HCRCFG2_OFFSET   0x0474 /* Hardware Cursor Configuration 2 Register */
+#  define SAM_LCDC_HCRCFG3_OFFSET   0x0478 /* Hardware Cursor Configuration 3 Register */
+#  define SAM_LCDC_HCRCFG4_OFFSET   0x047c /* Hardware Cursor Configuration 4 Register */
                                            /* 0x0480 Reserved */
-#define SAM_LCDC_HCRCFG6_OFFSET     0x0484 /* Hardware Cursor Configuration 6 Register */
-#define SAM_LCDC_HCRCFG7_OFFSET     0x0488 /* Hardware Cursor Configuration 7 Register */
-#define SAM_LCDC_HCRCFG8_OFFSET     0x048c /* Hardware Cursor Configuration 8 Register */
-#define SAM_LCDC_HCRCFG9_OFFSET     0x0490 /* Hardware Cursor Configuration 9 Register */
+#  define SAM_LCDC_HCRCFG6_OFFSET   0x0484 /* Hardware Cursor Configuration 6 Register */
+#  define SAM_LCDC_HCRCFG7_OFFSET   0x0488 /* Hardware Cursor Configuration 7 Register */
+#  define SAM_LCDC_HCRCFG8_OFFSET   0x048c /* Hardware Cursor Configuration 8 Register */
+#  define SAM_LCDC_HCRCFG9_OFFSET   0x0490 /* Hardware Cursor Configuration 9 Register */
                                            /* 0x0494-0x053c Reserved */
-#define SAM_LCDC_PPCHER_OFFSET      0x0540 /* Post Processing Channel Enable Register */
-#define SAM_LCDC_PPCHDR_OFFSET      0x0544 /* Post Processing Channel Disable Register */
-#define SAM_LCDC_PPCHSR_OFFSET      0x0548 /* Post Processing Channel Status Register */
-#define SAM_LCDC_PPIER_OFFSET       0x054c /* Post Processing Interrupt Enable Register */
-#define SAM_LCDC_PPIDR_OFFSET       0x0550 /* Post Processing Interrupt Disable Register */
-#define SAM_LCDC_PPIMR_OFFSET       0x0554 /* Post Processing Interrupt Mask Register */
-#define SAM_LCDC_PPISR_OFFSET       0x0558 /* Post Processing Interrupt Status Register */
-#define SAM_LCDC_PPHEAD_OFFSET      0x055c /* Post Processing Head Register */
-#define SAM_LCDC_PPADDR_OFFSET      0x0560 /* Post Processing Address Register */
-#define SAM_LCDC_PPCTRL_OFFSET      0x0564 /* Post Processing Control Register */
-#define SAM_LCDC_PPNEXT_OFFSET      0x0568 /* Post Processing Next Register */
-#define SAM_LCDC_PPCFG0_OFFSET      0x056c /* Post Processing Configuration Register 0 */
-#define SAM_LCDC_PPCFG1_OFFSET      0x0570 /* Post Processing Configuration Register 1 */
-#define SAM_LCDC_PPCFG2_OFFSET      0x0574 /* Post Processing Configuration Register 2 */
-#define SAM_LCDC_PPCFG3_OFFSET      0x0578 /* Post Processing Configuration Register 3 */
-#define SAM_LCDC_PPCFG4_OFFSET      0x057c /* Post Processing Configuration Register 4 */
-#define SAM_LCDC_PPCFG5_OFFSET      0x0580 /* Post Processing Configuration Register 5 */
+#  define SAM_LCDC_PPCHER_OFFSET    0x0540 /* Post Processing Channel Enable Register */
+#  define SAM_LCDC_PPCHDR_OFFSET    0x0544 /* Post Processing Channel Disable Register */
+#  define SAM_LCDC_PPCHSR_OFFSET    0x0548 /* Post Processing Channel Status Register */
+#  define SAM_LCDC_PPIER_OFFSET     0x054c /* Post Processing Interrupt Enable Register */
+#  define SAM_LCDC_PPIDR_OFFSET     0x0550 /* Post Processing Interrupt Disable Register */
+#  define SAM_LCDC_PPIMR_OFFSET     0x0554 /* Post Processing Interrupt Mask Register */
+#  define SAM_LCDC_PPISR_OFFSET     0x0558 /* Post Processing Interrupt Status Register */
+#  define SAM_LCDC_PPHEAD_OFFSET    0x055c /* Post Processing Head Register */
+#  define SAM_LCDC_PPADDR_OFFSET    0x0560 /* Post Processing Address Register */
+#  define SAM_LCDC_PPCTRL_OFFSET    0x0564 /* Post Processing Control Register */
+#  define SAM_LCDC_PPNEXT_OFFSET    0x0568 /* Post Processing Next Register */
+#  define SAM_LCDC_PPCFG0_OFFSET    0x056c /* Post Processing Configuration Register 0 */
+#  define SAM_LCDC_PPCFG1_OFFSET    0x0570 /* Post Processing Configuration Register 1 */
+#  define SAM_LCDC_PPCFG2_OFFSET    0x0574 /* Post Processing Configuration Register 2 */
+#  define SAM_LCDC_PPCFG3_OFFSET    0x0578 /* Post Processing Configuration Register 3 */
+#  define SAM_LCDC_PPCFG4_OFFSET    0x057c /* Post Processing Configuration Register 4 */
+#  define SAM_LCDC_PPCFG5_OFFSET    0x0580 /* Post Processing Configuration Register 5 */
+#endif
                                            /* 0x0584-0x05fc Reserved */
 /* 0x0600-0x08fc Base CLUT Registers 0-255 */
 
@@ -250,9 +256,10 @@
 
 /* 0x1600-0x19fc Hardware Cursor CLUT Registers 0-255 */
 
-#define SAM_LCDC_HCRCLUT_OFFSET(n)  (0x1600 + ((n) << 2))
+#ifdef ATSAMA5D3
+#  define SAM_LCDC_HCRCLUT_OFFSET(n) (0x1600 + ((n) << 2))
+#endif
                                            /* 0x1a00-0x1fe4 Reserved */
-
 /* LCDC Register Addresses *********************************************************/
 
 #define SAM_LCDC_LCDCFG0            (SAM_LCDC_VBASE+SAM_LCDC_LCDCFG0_OFFSET)
@@ -270,6 +277,10 @@
 #define SAM_LCDC_LCDIDR             (SAM_LCDC_VBASE+SAM_LCDC_LCDIDR_OFFSET)
 #define SAM_LCDC_LCDIMR             (SAM_LCDC_VBASE+SAM_LCDC_LCDIMR_OFFSET)
 #define SAM_LCDC_LCDISR             (SAM_LCDC_VBASE+SAM_LCDC_LCDISR_OFFSET)
+
+#ifdef ATSAMA5D4
+#  define SAM_LCDC_LCDATTR          (SAM_LCDC_VBASE+SAM_LCDC_LCDATTR_OFFSET)
+#endif
 
 #define SAM_LCDC_BASECHER           (SAM_LCDC_VBASE+SAM_LCDC_BASECHER_OFFSET)
 #define SAM_LCDC_BASECHDR           (SAM_LCDC_VBASE+SAM_LCDC_BASECHDR_OFFSET)
@@ -396,44 +407,46 @@
 #define SAM_LCDC_HEOCFG40           (SAM_LCDC_VBASE+SAM_LCDC_HEOCFG40_OFFSET)
 #define SAM_LCDC_HEOCFG41           (SAM_LCDC_VBASE+SAM_LCDC_HEOCFG41_OFFSET)
 
-#define SAM_LCDC_HCRCHER            (SAM_LCDC_VBASE+SAM_LCDC_HCRCHER_OFFSET)
-#define SAM_LCDC_HCRCHDR            (SAM_LCDC_VBASE+SAM_LCDC_HCRCHDR_OFFSET)
-#define SAM_LCDC_HCRCHSR            (SAM_LCDC_VBASE+SAM_LCDC_HCRCHSR_OFFSET)
-#define SAM_LCDC_HCRIER             (SAM_LCDC_VBASE+SAM_LCDC_HCRIER_OFFSET)
-#define SAM_LCDC_HCRIDR             (SAM_LCDC_VBASE+SAM_LCDC_HCRIDR_OFFSET)
-#define SAM_LCDC_HCRIMR             (SAM_LCDC_VBASE+SAM_LCDC_HCRIMR_OFFSET)
-#define SAM_LCDC_HCRISR             (SAM_LCDC_VBASE+SAM_LCDC_HCRISR_OFFSET)
-#define SAM_LCDC_HCRHEAD            (SAM_LCDC_VBASE+SAM_LCDC_HCRHEAD_OFFSET)
-#define SAM_LCDC_HCRADDR            (SAM_LCDC_VBASE+SAM_LCDC_HCRADDR_OFFSET)
-#define SAM_LCDC_HCRCTRL            (SAM_LCDC_VBASE+SAM_LCDC_HCRCTRL_OFFSET)
-#define SAM_LCDC_HCRNEXT            (SAM_LCDC_VBASE+SAM_LCDC_HCRNEXT_OFFSET)
-#define SAM_LCDC_HCRCFG0            (SAM_LCDC_VBASE+SAM_LCDC_HCRCFG0_OFFSET)
-#define SAM_LCDC_HCRCFG1            (SAM_LCDC_VBASE+SAM_LCDC_HCRCFG1_OFFSET)
-#define SAM_LCDC_HCRCFG2            (SAM_LCDC_VBASE+SAM_LCDC_HCRCFG2_OFFSET)
-#define SAM_LCDC_HCRCFG3            (SAM_LCDC_VBASE+SAM_LCDC_HCRCFG3_OFFSET)
-#define SAM_LCDC_HCRCFG4            (SAM_LCDC_VBASE+SAM_LCDC_HCRCFG4_OFFSET)
-#define SAM_LCDC_HCRCFG6            (SAM_LCDC_VBASE+SAM_LCDC_HCRCFG6_OFFSET)
-#define SAM_LCDC_HCRCFG7            (SAM_LCDC_VBASE+SAM_LCDC_HCRCFG7_OFFSET)
-#define SAM_LCDC_HCRCFG8            (SAM_LCDC_VBASE+SAM_LCDC_HCRCFG8_OFFSET)
-#define SAM_LCDC_HCRCFG9            (SAM_LCDC_VBASE+SAM_LCDC_HCRCFG9_OFFSET)
+#ifdef ATSAMA5D3
+#  define SAM_LCDC_HCRCHER          (SAM_LCDC_VBASE+SAM_LCDC_HCRCHER_OFFSET)
+#  define SAM_LCDC_HCRCHDR          (SAM_LCDC_VBASE+SAM_LCDC_HCRCHDR_OFFSET)
+#  define SAM_LCDC_HCRCHSR          (SAM_LCDC_VBASE+SAM_LCDC_HCRCHSR_OFFSET)
+#  define SAM_LCDC_HCRIER           (SAM_LCDC_VBASE+SAM_LCDC_HCRIER_OFFSET)
+#  define SAM_LCDC_HCRIDR           (SAM_LCDC_VBASE+SAM_LCDC_HCRIDR_OFFSET)
+#  define SAM_LCDC_HCRIMR           (SAM_LCDC_VBASE+SAM_LCDC_HCRIMR_OFFSET)
+#  define SAM_LCDC_HCRISR           (SAM_LCDC_VBASE+SAM_LCDC_HCRISR_OFFSET)
+#  define SAM_LCDC_HCRHEAD          (SAM_LCDC_VBASE+SAM_LCDC_HCRHEAD_OFFSET)
+#  define SAM_LCDC_HCRADDR          (SAM_LCDC_VBASE+SAM_LCDC_HCRADDR_OFFSET)
+#  define SAM_LCDC_HCRCTRL          (SAM_LCDC_VBASE+SAM_LCDC_HCRCTRL_OFFSET)
+#  define SAM_LCDC_HCRNEXT          (SAM_LCDC_VBASE+SAM_LCDC_HCRNEXT_OFFSET)
+#  define SAM_LCDC_HCRCFG0          (SAM_LCDC_VBASE+SAM_LCDC_HCRCFG0_OFFSET)
+#  define SAM_LCDC_HCRCFG1          (SAM_LCDC_VBASE+SAM_LCDC_HCRCFG1_OFFSET)
+#  define SAM_LCDC_HCRCFG2          (SAM_LCDC_VBASE+SAM_LCDC_HCRCFG2_OFFSET)
+#  define SAM_LCDC_HCRCFG3          (SAM_LCDC_VBASE+SAM_LCDC_HCRCFG3_OFFSET)
+#  define SAM_LCDC_HCRCFG4          (SAM_LCDC_VBASE+SAM_LCDC_HCRCFG4_OFFSET)
+#  define SAM_LCDC_HCRCFG6          (SAM_LCDC_VBASE+SAM_LCDC_HCRCFG6_OFFSET)
+#  define SAM_LCDC_HCRCFG7          (SAM_LCDC_VBASE+SAM_LCDC_HCRCFG7_OFFSET)
+#  define SAM_LCDC_HCRCFG8          (SAM_LCDC_VBASE+SAM_LCDC_HCRCFG8_OFFSET)
+#  define SAM_LCDC_HCRCFG9          (SAM_LCDC_VBASE+SAM_LCDC_HCRCFG9_OFFSET)
 
-#define SAM_LCDC_PPCHER             (SAM_LCDC_VBASE+SAM_LCDC_PPCHER_OFFSET)
-#define SAM_LCDC_PPCHDR             (SAM_LCDC_VBASE+SAM_LCDC_PPCHDR_OFFSET)
-#define SAM_LCDC_PPCHSR             (SAM_LCDC_VBASE+SAM_LCDC_PPCHSR_OFFSET)
-#define SAM_LCDC_PPIER              (SAM_LCDC_VBASE+SAM_LCDC_PPIER_OFFSET)
-#define SAM_LCDC_PPIDR              (SAM_LCDC_VBASE+SAM_LCDC_PPIDR_OFFSET)
-#define SAM_LCDC_PPIMR              (SAM_LCDC_VBASE+SAM_LCDC_PPIMR_OFFSET)
-#define SAM_LCDC_PPISR              (SAM_LCDC_VBASE+SAM_LCDC_PPISR_OFFSET)
-#define SAM_LCDC_PPHEAD             (SAM_LCDC_VBASE+SAM_LCDC_PPHEAD_OFFSET)
-#define SAM_LCDC_PPADDR             (SAM_LCDC_VBASE+SAM_LCDC_PPADDR_OFFSET)
-#define SAM_LCDC_PPCTRL             (SAM_LCDC_VBASE+SAM_LCDC_PPCTRL_OFFSET)
-#define SAM_LCDC_PPNEXT             (SAM_LCDC_VBASE+SAM_LCDC_PPNEXT_OFFSET)
-#define SAM_LCDC_PPCFG0             (SAM_LCDC_VBASE+SAM_LCDC_PPCFG0_OFFSET)
-#define SAM_LCDC_PPCFG1             (SAM_LCDC_VBASE+SAM_LCDC_PPCFG1_OFFSET)
-#define SAM_LCDC_PPCFG2             (SAM_LCDC_VBASE+SAM_LCDC_PPCFG2_OFFSET)
-#define SAM_LCDC_PPCFG3             (SAM_LCDC_VBASE+SAM_LCDC_PPCFG3_OFFSET)
-#define SAM_LCDC_PPCFG4             (SAM_LCDC_VBASE+SAM_LCDC_PPCFG4_OFFSET)
-#define SAM_LCDC_PPCFG5             (SAM_LCDC_VBASE+SAM_LCDC_PPCFG5_OFFSET)
+#  define SAM_LCDC_PPCHER           (SAM_LCDC_VBASE+SAM_LCDC_PPCHER_OFFSET)
+#  define SAM_LCDC_PPCHDR           (SAM_LCDC_VBASE+SAM_LCDC_PPCHDR_OFFSET)
+#  define SAM_LCDC_PPCHSR           (SAM_LCDC_VBASE+SAM_LCDC_PPCHSR_OFFSET)
+#  define SAM_LCDC_PPIER            (SAM_LCDC_VBASE+SAM_LCDC_PPIER_OFFSET)
+#  define SAM_LCDC_PPIDR            (SAM_LCDC_VBASE+SAM_LCDC_PPIDR_OFFSET)
+#  define SAM_LCDC_PPIMR            (SAM_LCDC_VBASE+SAM_LCDC_PPIMR_OFFSET)
+#  define SAM_LCDC_PPISR            (SAM_LCDC_VBASE+SAM_LCDC_PPISR_OFFSET)
+#  define SAM_LCDC_PPHEAD           (SAM_LCDC_VBASE+SAM_LCDC_PPHEAD_OFFSET)
+#  define SAM_LCDC_PPADDR           (SAM_LCDC_VBASE+SAM_LCDC_PPADDR_OFFSET)
+#  define SAM_LCDC_PPCTRL           (SAM_LCDC_VBASE+SAM_LCDC_PPCTRL_OFFSET)
+#  define SAM_LCDC_PPNEXT           (SAM_LCDC_VBASE+SAM_LCDC_PPNEXT_OFFSET)
+#  define SAM_LCDC_PPCFG0           (SAM_LCDC_VBASE+SAM_LCDC_PPCFG0_OFFSET)
+#  define SAM_LCDC_PPCFG1           (SAM_LCDC_VBASE+SAM_LCDC_PPCFG1_OFFSET)
+#  define SAM_LCDC_PPCFG2           (SAM_LCDC_VBASE+SAM_LCDC_PPCFG2_OFFSET)
+#  define SAM_LCDC_PPCFG3           (SAM_LCDC_VBASE+SAM_LCDC_PPCFG3_OFFSET)
+#  define SAM_LCDC_PPCFG4           (SAM_LCDC_VBASE+SAM_LCDC_PPCFG4_OFFSET)
+#  define SAM_LCDC_PPCFG5           (SAM_LCDC_VBASE+SAM_LCDC_PPCFG5_OFFSET)
+#endif
 
 /* 0x0600-0x08fc Base CLUT Registers 0-255 */
 
@@ -453,7 +466,9 @@
 
 /* 0x1600-0x19fc Hardware Cursor CLUT Registers 0-255 */
 
-#define SAM_LCDC_HCRCLUT(n)         (SAM_LCDC_VBASE+SAM_LCDC_HCRCLUT_OFFSET(n))
+#ifdef ATSAMA5D3
+#  define SAM_LCDC_HCRCLUT(n)       (SAM_LCDC_VBASE+SAM_LCDC_HCRCLUT_OFFSET(n))
+#endif
 
 /* LCDC Register Bit Definitions ***************************************************/
 
@@ -466,38 +481,69 @@
 #define LCDC_LCDCFG0_CGDISOVR1      (1 << 9)  /* Bit 9:  Clock Gating Disable Control Overlay 1 */
 #define LCDC_LCDCFG0_CGDISOVR2      (1 << 10) /* Bit 10: Clock Gating Disable Control Overlay 2 */
 #define LCDC_LCDCFG0_CGDISHEO       (1 << 11) /* Bit 11: Clock Gating Disable Control HE Overlay */
-#define LCDC_LCDCFG0_CGDISHCR       (1 << 12) /* Bit 12: Clock Gating Disable Control NW Cursor */
-#define LCDC_LCDCFG0_CGDISPP        (1 << 13) /* Bit 13: Clock Gating Disable Control PP */
+
+#ifdef ATSAMA5D3
+#  define LCDC_LCDCFG0_CGDISHCR     (1 << 12) /* Bit 12: Clock Gating Disable Control NW Cursor */
+#  define LCDC_LCDCFG0_CGDISPP      (1 << 13) /* Bit 13: Clock Gating Disable Control PP */
+#endif
+
 #define LCDC_LCDCFG0_CLKDIV_SHIFT   (16)      /* Bits 16-23: LCD Controller Clock Divider */
 #define LCDC_LCDCFG0_CLKDIV_MASK    (0xff << LCDC_LCDCFG0_CLKDIV_SHIFT)
 #  define LCDC_LCDCFG0_CLKDIV(n)    ((uint32_t)(n) << LCDC_LCDCFG0_CLKDIV_SHIFT)
 
 /* LCD Controller Configuration Register 1 */
 
-#define LCDC_LCDCFG1_HSPW_SHIFT     (0)       /* Bits 0-5: Horizontal Sync Pulse Width */
-#define LCDC_LCDCFG1_HSPW_MASK      (0x3f << LCDC_LCDCFG1_HSPW_SHIFT)
-#  define LCDC_LCDCFG1_HSPW(n)      ((uint32_t)(n) << LCDC_LCDCFG1_HSPW_SHIFT)
-#define LCDC_LCDCFG1_VSPW_SHIFT     (16)      /* Bits 16-21: Vertical Sync Pulse Width */
-#define LCDC_LCDCFG1_VSPW_MASK      (0x3f << LCDC_LCDCFG1_VSPW_SHIFT)
-#  define LCDC_LCDCFG1_VSPW(n)      ((uint32_t)(n) << LCDC_LCDCFG1_VSPW_SHIFT)
+#if defined(ATSAMA5D3)
+#  define LCDC_LCDCFG1_HSPW_SHIFT   (0)       /* Bits 0-5: Horizontal Sync Pulse Width */
+#  define LCDC_LCDCFG1_HSPW_MASK    (0x3f << LCDC_LCDCFG1_HSPW_SHIFT)
+#    define LCDC_LCDCFG1_HSPW(n)    ((uint32_t)(n) << LCDC_LCDCFG1_HSPW_SHIFT)
+#  define LCDC_LCDCFG1_VSPW_SHIFT   (16)      /* Bits 16-21: Vertical Sync Pulse Width */
+#  define LCDC_LCDCFG1_VSPW_MASK    (0x3f << LCDC_LCDCFG1_VSPW_SHIFT)
+#    define LCDC_LCDCFG1_VSPW(n)    ((uint32_t)(n) << LCDC_LCDCFG1_VSPW_SHIFT)
+#elif defined(ATSAMA5D4)
+#  define LCDC_LCDCFG1_HSPW_SHIFT   (0)       /* Bits 0-7: Horizontal Sync Pulse Width */
+#  define LCDC_LCDCFG1_HSPW_MASK    (0xff << LCDC_LCDCFG1_HSPW_SHIFT)
+#    define LCDC_LCDCFG1_HSPW(n)    ((uint32_t)(n) << LCDC_LCDCFG1_HSPW_SHIFT)
+#  define LCDC_LCDCFG1_VSPW_SHIFT   (16)      /* Bits 16-23: Vertical Sync Pulse Width */
+#  define LCDC_LCDCFG1_VSPW_MASK    (0xff << LCDC_LCDCFG1_VSPW_SHIFT)
+#    define LCDC_LCDCFG1_VSPW(n)    ((uint32_t)(n) << LCDC_LCDCFG1_VSPW_SHIFT)
+#endif
 
 /* LCD Controller Configuration Register 2 */
 
-#define LCDC_LCDCFG2_VFPW_SHIFT     (0)       /* Bits 0-5: Vertical Front Porch Width */
-#define LCDC_LCDCFG2_VFPW_MASK      (0x3f << LCDC_LCDCFG2_VFPW_SHIFT)
-#  define LCDC_LCDCFG2_VFPW(n)      ((uint32_t)(n) << LCDC_LCDCFG2_VFPW_SHIFT)
-#define LCDC_LCDCFG2_VBPW_SHIFT     (16)      /* Bits 16-21: Vertical Back Porch Width */
-#define LCDC_LCDCFG2_VBPW_MASK      (0x3f << LCDC_LCDCFG2_VBPW_SHIFT)
-#  define LCDC_LCDCFG2_VBPW(n)      ((uint32_t)(n) << LCDC_LCDCFG2_VBPW_SHIFT)
+#if defined(ATSAMA5D3)
+#  define LCDC_LCDCFG2_VFPW_SHIFT   (0)       /* Bits 0-5: Vertical Front Porch Width */
+#  define LCDC_LCDCFG2_VFPW_MASK    (0x3f << LCDC_LCDCFG2_VFPW_SHIFT)
+#    define LCDC_LCDCFG2_VFPW(n)    ((uint32_t)(n) << LCDC_LCDCFG2_VFPW_SHIFT)
+#  define LCDC_LCDCFG2_VBPW_SHIFT   (16)      /* Bits 16-21: Vertical Back Porch Width */
+#  define LCDC_LCDCFG2_VBPW_MASK    (0x3f << LCDC_LCDCFG2_VBPW_SHIFT)
+#    define LCDC_LCDCFG2_VBPW(n)    ((uint32_t)(n) << LCDC_LCDCFG2_VBPW_SHIFT)
+#elif defined(ATSAMA5D4)
+#  define LCDC_LCDCFG2_VFPW_SHIFT   (0)       /* Bits 0-7: Vertical Front Porch Width */
+#  define LCDC_LCDCFG2_VFPW_MASK    (0xff << LCDC_LCDCFG2_VFPW_SHIFT)
+#    define LCDC_LCDCFG2_VFPW(n)    ((uint32_t)(n) << LCDC_LCDCFG2_VFPW_SHIFT)
+#  define LCDC_LCDCFG2_VBPW_SHIFT   (16)      /* Bits 16-23: Vertical Back Porch Width */
+#  define LCDC_LCDCFG2_VBPW_MASK    (0xff << LCDC_LCDCFG2_VBPW_SHIFT)
+#    define LCDC_LCDCFG2_VBPW(n)    ((uint32_t)(n) << LCDC_LCDCFG2_VBPW_SHIFT)
+#endif
 
 /* LCD Controller Configuration Register 3 */
 
-#define LCDC_LCDCFG3_HFPW_SHIFT     (0)       /* Bits 0-8: Horizontal Front Porch Width */
-#define LCDC_LCDCFG3_HFPW_MASK      (0x1ff << LCDC_LCDCFG3_HFPW_SHIFT)
-#  define LCDC_LCDCFG3_HFPW(n)      ((uint32_t)(n) << LCDC_LCDCFG3_HFPW_SHIFT)
-#define LCDC_LCDCFG3_HBPW_SHIFT     (16)      /* Bits 16-24: Horizontal Back Porch Width */
-#define LCDC_LCDCFG3_HBPW_MASK      (0x1ff << LCDC_LCDCFG3_HBPW_SHIFT)
-#  define LCDC_LCDCFG3_HBPW(n)      ((uint32_t)(n) << LCDC_LCDCFG3_HBPW_SHIFT)
+#if defined(ATSAMA5D3)
+#  define LCDC_LCDCFG3_HFPW_SHIFT   (0)       /* Bits 0-8: Horizontal Front Porch Width */
+#  define LCDC_LCDCFG3_HFPW_MASK    (0x1ff << LCDC_LCDCFG3_HFPW_SHIFT)
+#    define LCDC_LCDCFG3_HFPW(n)    ((uint32_t)(n) << LCDC_LCDCFG3_HFPW_SHIFT)
+#  define LCDC_LCDCFG3_HBPW_SHIFT   (16)      /* Bits 16-24: Horizontal Back Porch Width */
+#  define LCDC_LCDCFG3_HBPW_MASK    (0x1ff << LCDC_LCDCFG3_HBPW_SHIFT)
+#    define LCDC_LCDCFG3_HBPW(n)    ((uint32_t)(n) << LCDC_LCDCFG3_HBPW_SHIFT)
+#elif defined(ATSAMA5D4)
+#  define LCDC_LCDCFG3_HFPW_SHIFT   (0)       /* Bits 0-9: Horizontal Front Porch Width */
+#  define LCDC_LCDCFG3_HFPW_MASK    (0x3ff << LCDC_LCDCFG3_HFPW_SHIFT)
+#    define LCDC_LCDCFG3_HFPW(n)    ((uint32_t)(n) << LCDC_LCDCFG3_HFPW_SHIFT)
+#  define LCDC_LCDCFG3_HBPW_SHIFT   (16)      /* Bits 16-25: Horizontal Back Porch Width */
+#  define LCDC_LCDCFG3_HBPW_MASK    (0x3ff << LCDC_LCDCFG3_HBPW_SHIFT)
+#    define LCDC_LCDCFG3_HBPW(n)    ((uint32_t)(n) << LCDC_LCDCFG3_HBPW_SHIFT)
+#endif
 
 /* LCD Controller Configuration Register 4 */
 
@@ -523,12 +569,23 @@
 #  define LCDC_LCDCFG5_MODE_16BPP   (1 << LCDC_LCDCFG5_MODE_SHIFT) /* Output mode 16 bits per pixel */
 #  define LCDC_LCDCFG5_MODE_18BPP   (2 << LCDC_LCDCFG5_MODE_SHIFT) /* Output mode 18 bits per pixel */
 #  define LCDC_LCDCFG5_MODE_24BPP   (3 << LCDC_LCDCFG5_MODE_SHIFT) /* Output mode 24 bits per pixel */
-#define LCDC_LCDCFG5_PP             (1 << 10) /* Bit 10: Post Processing Enable */
+
+#ifdef ATSAMA5D3
+#  define LCDC_LCDCFG5_PP           (1 << 10) /* Bit 10: Post Processing Enable */
+#endif
+
 #define LCDC_LCDCFG5_VSPSU          (1 << 12) /* Bit 12: LCDC VSync Pulse Setup Configuration */
 #define LCDC_LCDCFG5_VSPHO          (1 << 13) /* Bit 13: LCDC VSync Pulse Hold Configuration */
-#define LCDC_LCDCFG5_GUARDTIME_SHIFT (16)     /* Bits 16-20: LCD DISPLAY Guard Time */
-#define LCDC_LCDCFG5_GUARDTIME_MASK  (0x1f << LCDC_LCDCFG5_GUARDTIME_SHIFT)
-#  define LCDC_LCDCFG5_GUARDTIME(n)  ((uint32_t)(n) << LCDC_LCDCFG5_GUARDTIME_SHIFT)
+
+#if defined(ATSAMA5D3)
+#  define LCDC_LCDCFG5_GUARDTIME_SHIFT (16)     /* Bits 16-20: LCD DISPLAY Guard Time */
+#  define LCDC_LCDCFG5_GUARDTIME_MASK  (0x1f << LCDC_LCDCFG5_GUARDTIME_SHIFT)
+#    define LCDC_LCDCFG5_GUARDTIME(n)  ((uint32_t)(n) << LCDC_LCDCFG5_GUARDTIME_SHIFT)
+#elif defined(ATSAMA5D4)
+#  define LCDC_LCDCFG5_GUARDTIME_SHIFT (16)     /* Bits 16-23: LCD DISPLAY Guard Time */
+#  define LCDC_LCDCFG5_GUARDTIME_MASK  (0xff << LCDC_LCDCFG5_GUARDTIME_SHIFT)
+#    define LCDC_LCDCFG5_GUARDTIME(n)  ((uint32_t)(n) << LCDC_LCDCFG5_GUARDTIME_SHIFT)
+#endif
 
 /* LCD Controller Configuration Register 6 */
 
@@ -538,7 +595,7 @@
 #  define LCDC_LCDCFG6_PWMPS_DIV2   (1 << LCDC_LCDCFG6_PWMPS_SHIFT) /* Fcounter = Fpwm_selected_clock/2 */
 #  define LCDC_LCDCFG6_PWMPS_DIV4   (2 << LCDC_LCDCFG6_PWMPS_SHIFT) /* Fcounter = Fpwm_selected_clock/4 */
 #  define LCDC_LCDCFG6_PWMPS_DIV8   (3 << LCDC_LCDCFG6_PWMPS_SHIFT) /* Fcounter = Fpwm_selected_clock/8 */
-#  define LCDC_LCDCFG6_PWMPS_DIV    (4 << LCDC_LCDCFG6_PWMPS_SHIFT) /* Fcounter = Fpwm_selected_clock/16 */
+#  define LCDC_LCDCFG6_PWMPS_DIV16  (4 << LCDC_LCDCFG6_PWMPS_SHIFT) /* Fcounter = Fpwm_selected_clock/16 */
 #  define LCDC_LCDCFG6_PWMPS_DIV32  (5 << LCDC_LCDCFG6_PWMPS_SHIFT) /* Fcounter = Fpwm_selected_clock/32 */
 #  define LCDC_LCDCFG6_PWMPS_DIV64  (6 << LCDC_LCDCFG6_PWMPS_SHIFT) /* Fcounter = Fpwm_selected_clock/64 */
 #define LCDC_LCDCFG6_PWMPOL         (1 << 4)  /* Bit 4: LCD Controller PWM Signal Polarity */
@@ -584,10 +641,27 @@
 #define LCDC_LCDINT_OVR1            (1 << 9)  /* Bit 9:  Overlay 1 Raw Interrupt */
 #define LCDC_LCDINT_OVR2            (1 << 10) /* Bit 10: Overlay 2 Raw Interrupt */
 #define LCDC_LCDINT_HEO             (1 << 11) /* Bit 11: High End Overlay Raw Interrupt */
-#define LCDC_LCDINT_HCR             (1 << 12) /* Bit 12: Hardware Cursor Raw Interrupt */
-#define LCDC_LCDINT_PP              (1 << 13) /* Bit 13: Post Processing Raw Interrupt */
 
-#define LCDC_LCDINT_ALL             (0x00003f17)
+#if defined(ATSAMA5D3)
+#  define LCDC_LCDINT_HCR           (1 << 12) /* Bit 12: Hardware Cursor Raw Interrupt */
+#  define LCDC_LCDINT_PP            (1 << 13) /* Bit 13: Post Processing Raw Interrupt */
+#  define LCDC_LCDINT_ALL           (0x00003f17)
+#elif defined(ATSAMA5D4)
+#  define LCDC_LCDINT_ALL           (0x00000f17)
+#endif
+
+#ifdef ATSAMA5D4
+/* LCD Controller Attribute Register */
+
+#  define LCDC_LCDATTR_BASE         (1 << 0)  /* Bit 0:  Base Layer Update Attribute Register */
+#  define LCDC_LCDATTR_OVR1         (1 << 1)  /* Bit 1:  Overlay 1 Update Attribute Register */
+#  define LCDC_LCDATTR_OVR2         (1 << 2)  /* Bit 2:  Overlay 2 Update Attribute Register */
+#  define LCDC_LCDATTR_HEO          (1 << 3)  /* Bit 3:  High-End Overlay Update Attribute Register */
+#  define LCDC_LCDATTR_BASEA2Q      (1 << 8)  /* Bit 8:  Base Layer Update Attribute Register */
+#  define LCDC_LCDATTR_OVR1A2Q      (1 << 9)  /* Bit 9:  Overlay 1 Update Attribute Register */
+#  define LCDC_LCDATTR_OVR2A2Q      (1 << 10) /* Bit 10: Overlay 2 Update Attribute Register */
+#  define LCDC_LCDATTR_HEOA2Q       (1 << 11) /* Bit 11: High-End Overlay Update Attribute Register */
+#endif
 
 /* Base Layer Channel Enable Register */
 
@@ -1095,7 +1169,7 @@
 #define LCDC_HEOVCTRL_ADDIEN        (1 << 4)  /* Bit 4:  Add Head Descriptor to Queue Interrupt Enable */
 #define LCDC_HEOVCTRL_DONEIEN       (1 << 5)  /* Bit 5:  End of List Interrupt Enable */
 
-/* High-End Overlay VDMA Next Register (32-bit addess) */
+/* High-End Overlay VDMA Next Register (32-bit address) */
 
 /* High-End Overlay Configuration Register 0 */
 
@@ -1119,6 +1193,7 @@
 /* High-End Overlay Configuration Register 1 */
 
 #define LCDC_HEOCFG1_CLUTEN           (1 << 0)  /* Bit 0:  Color Lookup Table Enable */
+#define LCDC_HEOCFG1_YUVEN            (1 << 1)  /* Bit 1:  YUV Color Space Enable */
 #define LCDC_HEOCFG1_RGBMODE_SHIFT    (4)       /* Bits 4-7: RGB Input Mode Selection */
 #define LCDC_HEOCFG1_RGBMODE_MASK     (15 << LCDC_HEOCFG1_RGBMODE_SHIFT)
 #  define LCDC_HEOCFG1_12BPP_RGB444   (0 << LCDC_HEOCFG1_RGBMODE_SHIFT)  /* 12 bpp RGB 444 */
@@ -1141,6 +1216,20 @@
 #  define LCDC_HEOCFG1_CLUTMODE_2BPP  (1 << LCDC_HEOCFG1_CLUTMODE_SHIFT) /* CLUT input 2 bits per pixel */
 #  define LCDC_HEOCFG1_CLUTMODE_4BPP  (2 << LCDC_HEOCFG1_CLUTMODE_SHIFT) /* CLUT input 4 bits per pixel */
 #  define LCDC_HEOCFG1_CLUTMODE_8BPP  (3 << LCDC_HEOCFG1_CLUTMODE_SHIFT) /* CLUT input 8 bits per pixel */
+#define LCDC_HEOCFG1_YUVMODE_SHIFT    (12)      /* Bits 12-15: YUV Mode Input Selection */
+#define LCDC_HEOCFG1_YUVMODE_MASK     (15 << LCDC_HEOCFG1_YUVMODE_SHIFT)
+#  define LCDC_HEOCFG1_32BPP_AYCBCR           (0 << LCDC_HEOCFG1_YUVMODE_SHIFT) /* 32 bpp AYCbCr 444 */
+#  define LCDC_HEOCFG1_16BPP_YCBCR_MODE0      (1 << LCDC_HEOCFG1_YUVMODE_SHIFT) /* 16 bpp Cr(n)Y(n+1)Cb(n)Y(n) 422 */
+#  define LCDC_HEOCFG1_16BPP_YCBCR_MODE1      (2 << LCDC_HEOCFG1_YUVMODE_SHIFT) /* 16 bpp Y(n+1)Cr(n)Y(n)Cb(n) 422 */
+#  define LCDC_HEOCFG1_16BPP_YCBCR_MODE2      (3 << LCDC_HEOCFG1_YUVMODE_SHIFT) /* 16 bpp Cb(n)Y(+1)Cr(n)Y(n) 422 */
+#  define LCDC_HEOCFG1_16BPP_YCBCR_MODE3      (4 << LCDC_HEOCFG1_YUVMODE_SHIFT) /* 16 bpp Y(n+1)Cb(n)Y(n)Cr(n) 422 */
+#  define LCDC_HEOCFG1_16BPP_YCBCR_SEMIPLANAR (5 << LCDC_HEOCFG1_YUVMODE_SHIFT) /* 16 bpp Semiplanar 422 YCbCr */
+#  define LCDC_HEOCFG1_16BPP_YCBCR_PLANAR     (6 << LCDC_HEOCFG1_YUVMODE_SHIFT) /* 16 bpp Planar 422 YCbCr */
+#  define LCDC_HEOCFG1_12BPP_YCBCR_SEMIPLANAR (7 << LCDC_HEOCFG1_YUVMODE_SHIFT) /* 12 bpp Semiplanar 420 YCbCr */
+#  define LCDC_HEOCFG1_12BPP_YCBCR_PLANAR     (8 << LCDC_HEOCFG1_YUVMODE_SHIFT) /* 12 bpp Planar 420 YCbCr */
+#define LCDC_HEOCFG1_YUV422ROT        (1 << 16) /* Bit 16: YUV 4:2:2 Rotation */
+#define LCDC_HEOCFG1_YUV422SWP        (1 << 17) /* Bit 17: YUV 4:2:2 SWAP */
+#define LCDC_HEOCFG1_DSCALEOPT        (1 << 20) /* Bit 20: Down Scaling Bandwidth Optimization */
 
 /* High-End Overlay Configuration Register 2 */
 
@@ -1550,266 +1639,268 @@
 #define LCDC_HEOCFG41_YPHIDEF_MASK  (7 << LCDC_HEOCFG41_YPHIDEF_SHIFT)
 #  define LCDC_HEOCFG41_YPHIDEF(n)  ((uint32_t)(n) << LCDC_HEOCFG41_YPHIDEF_SHIFT)
 
+#ifdef ATSAMA5D3
 /* Hardware Cursor Channel Enable Register */
 
-#define LCDC_HCRCHER_CH             (1 << 0)  /* Bit 0:  Channel Enable */
-#define LCDC_HCRCHER_UPDATE         (1 << 1)  /* Bit 1:  Update Overlay Attributes Enable */
-#define LCDC_HCRCHER_A2Q            (1 << 2)  /* Bit 2:  Add Head Pointer Enable */
+#  define LCDC_HCRCHER_CH           (1 << 0)  /* Bit 0:  Channel Enable */
+#  define LCDC_HCRCHER_UPDATE       (1 << 1)  /* Bit 1:  Update Overlay Attributes Enable */
+#  define LCDC_HCRCHER_A2Q          (1 << 2)  /* Bit 2:  Add Head Pointer Enable */
 
 /* Hardware Cursor Channel Disable Register */
 
-#define LCDC_HCRCHDR_CH             (1 << 0)  /* Bit 0:  Channel Disable */
-#define LCDC_HCRCHDR_CHRST          (1 << 8)  /* Bit 8:  Channel Reset */
+#  define LCDC_HCRCHDR_CH           (1 << 0)  /* Bit 0:  Channel Disable */
+#  define LCDC_HCRCHDR_CHRST        (1 << 8)  /* Bit 8:  Channel Reset */
 
 /* Hardware Cursor Channel Status Register */
 
-#define LCDC_HCRCHSR_CH             (1 << 0)  /* Bit 0:  Channel Status */
-#define LCDC_HCRCHSR_UPDATE         (1 << 1)  /* Bit 1:  Update Overlay Attributes In */
-#define LCDC_HCRCHSR_A2Q            (1 << 2)  /* Bit 2:  Add To Queue Pending */
+#  define LCDC_HCRCHSR_CH           (1 << 0)  /* Bit 0:  Channel Status */
+#  define LCDC_HCRCHSR_UPDATE       (1 << 1)  /* Bit 1:  Update Overlay Attributes In */
+#  define LCDC_HCRCHSR_A2Q          (1 << 2)  /* Bit 2:  Add To Queue Pending */
 
 /* Hardware Cursor Interrupt Enable Register, Hardware Cursor Interrupt Disable Register,
  * Hardware Cursor Interrupt Mask Register, and Hardware Cursor Interrupt Status Register
  */
 
-#define LCDC_HCRINT_DMA             (1 << 2)  /* Bit 2:  End of DMA Transfer */
-#define LCDC_HCRINT_DSCR            (1 << 3)  /* Bit 3:  DMA Descriptor Loaded */
-#define LCDC_HCRINT_ADD             (1 << 4)  /* Bit 4:  Head Descriptor Loaded */
-#define LCDC_HCRINT_DONE            (1 << 5)  /* Bit 5:  End of List Detected */
-#define LCDC_HCRINT_OVR             (1 << 6)  /* Bit 6:  Overflow Detected */
+#  define LCDC_HCRINT_DMA           (1 << 2)  /* Bit 2:  End of DMA Transfer */
+#  define LCDC_HCRINT_DSCR          (1 << 3)  /* Bit 3:  DMA Descriptor Loaded */
+#  define LCDC_HCRINT_ADD           (1 << 4)  /* Bit 4:  Head Descriptor Loaded */
+#  define LCDC_HCRINT_DONE          (1 << 5)  /* Bit 5:  End of List Detected */
+#  define LCDC_HCRINT_OVR           (1 << 6)  /* Bit 6:  Overflow Detected */
 
 /* Hardware Cursor DMA Head Register */
 
-#define LCDC_HCRHEAD_MASK           (0xfffffffc) /* Bits 2-31: DMA Head Pointer */
+#  define LCDC_HCRHEAD_MASK         (0xfffffffc) /* Bits 2-31: DMA Head Pointer */
 
 /* Hardware cursor DMA Address Register (32-bit address) */
 
 /* Hardware Cursor DMA Control Register */
 
-#define LCDC_HCRCTRL_DFETCH         (1 << 0)  /* Bit 0:  Transfer Descriptor Fetch Enable */
-#define LCDC_HCRCTRL_LFETCH         (1 << 1)  /* Bit 1:  Lookup Table Fetch Enable */
-#define LCDC_HCRCTRL_DMAIEN         (1 << 2)  /* Bit 2:  End of DMA Transfer Interrupt Enable */
-#define LCDC_HCRCTRL_DSCRIEN        (1 << 3)  /* Bit 3:  Descriptor Loaded Interrupt Enable */
-#define LCDC_HCRCTRL_ADDIEN         (1 << 4)  /* Bit 4:  Add Head Descriptor to Queue Interrupt Enable */
-#define LCDC_HCRCTRL_DONEIEN        (1 << 5)  /* Bit 5:  End of List Interrupt Enable */
+#  define LCDC_HCRCTRL_DFETCH       (1 << 0)  /* Bit 0:  Transfer Descriptor Fetch Enable */
+#  define LCDC_HCRCTRL_LFETCH       (1 << 1)  /* Bit 1:  Lookup Table Fetch Enable */
+#  define LCDC_HCRCTRL_DMAIEN       (1 << 2)  /* Bit 2:  End of DMA Transfer Interrupt Enable */
+#  define LCDC_HCRCTRL_DSCRIEN      (1 << 3)  /* Bit 3:  Descriptor Loaded Interrupt Enable */
+#  define LCDC_HCRCTRL_ADDIEN       (1 << 4)  /* Bit 4:  Add Head Descriptor to Queue Interrupt Enable */
+#  define LCDC_HCRCTRL_DONEIEN      (1 << 5)  /* Bit 5:  End of List Interrupt Enable */
 
 /* Hardware Cursor DMA Next Register (32-bit address) */
 
 /* Hardware Cursor Configuration 0 Register */
 
-#define LCDC_HCRCFG0_SIF           (1 << 0)  /* Bit 0:  Source Interface */
-#define LCDC_HCRCFG0_BLEN_SHIFT    (4)       /* Bits 4-5: AHB Burst Length */
-#define LCDC_HCRCFG0_BLEN_MASK     (3 << LCDC_HCRCFG0_BLEN_SHIFT)
-#  define LCDC_HCRCFG0_BLEN_SINGLE (0 << LCDC_HCRCFG0_BLEN_SHIFT)
-#  define LCDC_HCRCFG0_BLEN_INCR4  (1 << LCDC_HCRCFG0_BLEN_SHIFT)
-#  define LCDC_HCRCFG0_BLEN_INCR8  (2 << LCDC_HCRCFG0_BLEN_SHIFT)
-#  define LCDC_HCRCFG0_BLEN_INCR16 (3 << LCDC_HCRCFG0_BLEN_SHIFT)
-#define LCDC_HCRCFG0_DLBO          (1 << 8)  /* Bit 8: Defined Length Burst Only */
+#  define LCDC_HCRCFG0_SIF           (1 << 0)  /* Bit 0:  Source Interface */
+#  define LCDC_HCRCFG0_BLEN_SHIFT    (4)       /* Bits 4-5: AHB Burst Length */
+#  define LCDC_HCRCFG0_BLEN_MASK     (3 << LCDC_HCRCFG0_BLEN_SHIFT)
+#    define LCDC_HCRCFG0_BLEN_SINGLE (0 << LCDC_HCRCFG0_BLEN_SHIFT)
+#    define LCDC_HCRCFG0_BLEN_INCR4  (1 << LCDC_HCRCFG0_BLEN_SHIFT)
+#    define LCDC_HCRCFG0_BLEN_INCR8  (2 << LCDC_HCRCFG0_BLEN_SHIFT)
+#    define LCDC_HCRCFG0_BLEN_INCR16 (3 << LCDC_HCRCFG0_BLEN_SHIFT)
+#  define LCDC_HCRCFG0_DLBO          (1 << 8)  /* Bit 8: Defined Length Burst Only */
 
 /* Hardware Cursor Configuration 1 Register */
 
-#define LCDC_HCRCFG1_CLUTEN           (1 << 0)  /* Bit 0:  Color Lookup Table Enable */
-#define LCDC_HCRCFG1_RGBMODE_SHIFT    (4)       /* Bits 4-7: RGB Input Mode Selection */
-#define LCDC_HCRCFG1_RGBMODE_MASK     (15 << LCDC_HCRCFG1_RGBMODE_SHIFT)
-#  define LCDC_HCRCFG1_12BPP_RGB444   (0 << LCDC_HCRCFG1_RGBMODE_SHIFT)  /* 12 bpp RGB 444 */
-#  define LCDC_HCRCFG1_16BPP_ARGB4444 (1 << LCDC_HCRCFG1_RGBMODE_SHIFT)  /* 16 bpp ARGB 4444 */
-#  define LCDC_HCRCFG1_16BPP_RGBA4444 (2 << LCDC_HCRCFG1_RGBMODE_SHIFT)  /* 16 bpp RGBA 4444 */
-#  define LCDC_HCRCFG1_16BPP_RGB565   (3 << LCDC_HCRCFG1_RGBMODE_SHIFT)  /* 16 bpp RGB 565 */
-#  define LCDC_HCRCFG1_16BPP_TRGB1555 (4 << LCDC_HCRCFG1_RGBMODE_SHIFT)  /* 16 bpp TRGB 1555 */
-#  define LCDC_HCRCFG1_18BPP_RGB666   (5 << LCDC_HCRCFG1_RGBMODE_SHIFT)  /* 18 bpp RGB 666 */
-#  define LCDC_HCRCFG1_18BPP_RGB666P  (6 << LCDC_HCRCFG1_RGBMODE_SHIFT)  /* 18 bpp RGB 666 PACKED */
-#  define LCDC_HCRCFG1_19BPP_TRGB1666 (7 << LCDC_HCRCFG1_RGBMODE_SHIFT)  /* 19 bpp TRGB 1666 */
-#  define LCDC_HCRCFG1_19BPP_TRGBP    (8 << LCDC_HCRCFG1_RGBMODE_SHIFT)  /* 19 bpp TRGB 1666 PACKED */
-#  define LCDC_HCRCFG1_24BPP_RGB888   (9 << LCDC_HCRCFG1_RGBMODE_SHIFT)  /* 24 bpp RGB 888 */
-#  define LCDC_HCRCFG1_24BPP_RGB888P  (10 << LCDC_HCRCFG1_RGBMODE_SHIFT) /* 24 bpp RGB 888 PACKED */
-#  define LCDC_HCRCFG1_25BPP_TRGB1888 (11 << LCDC_HCRCFG1_RGBMODE_SHIFT) /* 25 bpp TRGB 1888 */
-#  define LCDC_HCRCFG1_32BPP_ARGB8888 (12 << LCDC_HCRCFG1_RGBMODE_SHIFT) /* 32 bpp ARGB 8888 */
-#  define LCDC_HCRCFG1_32BPP_RGBA8888 (13 << LCDC_HCRCFG1_RGBMODE_SHIFT) /* 32 bpp RGBA 8888 */
-#define LCDC_HCRCFG1_CLUTMODE_SHIFT   (8)       /* Bits 8-9: CLUT Input Mode Selection */
-#define LCDC_HCRCFG1_CLUTMODE_MASK    (3 << LCDC_HCRCFG1_CLUTMODE_SHIFT)
-#  define LCDC_HCRCFG1_CLUTMODE_1BPP  (0 << LCDC_HCRCFG1_CLUTMODE_SHIFT) /* CLUT input 1 bit per pixel */
-#  define LCDC_HCRCFG1_CLUTMODE_2BPP  (1 << LCDC_HCRCFG1_CLUTMODE_SHIFT) /* CLUT input 2 bits per pixel */
-#  define LCDC_HCRCFG1_CLUTMODE_4BPP  (2 << LCDC_HCRCFG1_CLUTMODE_SHIFT) /* CLUT input 4 bits per pixel */
-#  define LCDC_HCRCFG1_CLUTMODE_8BPP  (3 << LCDC_HCRCFG1_CLUTMODE_SHIFT) /* CLUT input 8 bits per pixel */
+#  define LCDC_HCRCFG1_CLUTEN           (1 << 0)  /* Bit 0:  Color Lookup Table Enable */
+#  define LCDC_HCRCFG1_RGBMODE_SHIFT    (4)       /* Bits 4-7: RGB Input Mode Selection */
+#  define LCDC_HCRCFG1_RGBMODE_MASK     (15 << LCDC_HCRCFG1_RGBMODE_SHIFT)
+#    define LCDC_HCRCFG1_12BPP_RGB444   (0 << LCDC_HCRCFG1_RGBMODE_SHIFT)  /* 12 bpp RGB 444 */
+#    define LCDC_HCRCFG1_16BPP_ARGB4444 (1 << LCDC_HCRCFG1_RGBMODE_SHIFT)  /* 16 bpp ARGB 4444 */
+#    define LCDC_HCRCFG1_16BPP_RGBA4444 (2 << LCDC_HCRCFG1_RGBMODE_SHIFT)  /* 16 bpp RGBA 4444 */
+#    define LCDC_HCRCFG1_16BPP_RGB565   (3 << LCDC_HCRCFG1_RGBMODE_SHIFT)  /* 16 bpp RGB 565 */
+#    define LCDC_HCRCFG1_16BPP_TRGB1555 (4 << LCDC_HCRCFG1_RGBMODE_SHIFT)  /* 16 bpp TRGB 1555 */
+#    define LCDC_HCRCFG1_18BPP_RGB666   (5 << LCDC_HCRCFG1_RGBMODE_SHIFT)  /* 18 bpp RGB 666 */
+#    define LCDC_HCRCFG1_18BPP_RGB666P  (6 << LCDC_HCRCFG1_RGBMODE_SHIFT)  /* 18 bpp RGB 666 PACKED */
+#    define LCDC_HCRCFG1_19BPP_TRGB1666 (7 << LCDC_HCRCFG1_RGBMODE_SHIFT)  /* 19 bpp TRGB 1666 */
+#    define LCDC_HCRCFG1_19BPP_TRGBP    (8 << LCDC_HCRCFG1_RGBMODE_SHIFT)  /* 19 bpp TRGB 1666 PACKED */
+#    define LCDC_HCRCFG1_24BPP_RGB888   (9 << LCDC_HCRCFG1_RGBMODE_SHIFT)  /* 24 bpp RGB 888 */
+#    define LCDC_HCRCFG1_24BPP_RGB888P  (10 << LCDC_HCRCFG1_RGBMODE_SHIFT) /* 24 bpp RGB 888 PACKED */
+#    define LCDC_HCRCFG1_25BPP_TRGB1888 (11 << LCDC_HCRCFG1_RGBMODE_SHIFT) /* 25 bpp TRGB 1888 */
+#    define LCDC_HCRCFG1_32BPP_ARGB8888 (12 << LCDC_HCRCFG1_RGBMODE_SHIFT) /* 32 bpp ARGB 8888 */
+#    define LCDC_HCRCFG1_32BPP_RGBA8888 (13 << LCDC_HCRCFG1_RGBMODE_SHIFT) /* 32 bpp RGBA 8888 */
+#  define LCDC_HCRCFG1_CLUTMODE_SHIFT   (8)       /* Bits 8-9: CLUT Input Mode Selection */
+#  define LCDC_HCRCFG1_CLUTMODE_MASK    (3 << LCDC_HCRCFG1_CLUTMODE_SHIFT)
+#    define LCDC_HCRCFG1_CLUTMODE_1BPP  (0 << LCDC_HCRCFG1_CLUTMODE_SHIFT) /* CLUT input 1 bit per pixel */
+#    define LCDC_HCRCFG1_CLUTMODE_2BPP  (1 << LCDC_HCRCFG1_CLUTMODE_SHIFT) /* CLUT input 2 bits per pixel */
+#    define LCDC_HCRCFG1_CLUTMODE_4BPP  (2 << LCDC_HCRCFG1_CLUTMODE_SHIFT) /* CLUT input 4 bits per pixel */
+#    define LCDC_HCRCFG1_CLUTMODE_8BPP  (3 << LCDC_HCRCFG1_CLUTMODE_SHIFT) /* CLUT input 8 bits per pixel */
 
 /* Hardware Cursor Configuration 2 Register */
 
-#define LCDC_HCRCFG2_XPOS_SHIFT     (0)     /* Bits 0-10: Horizontal Window Position */
-#define LCDC_HCRCFG2_XPOS_MASK      (0x7ff << LCDC_HCRCFG2_XPOS_SHIFT)
-#  define LCDC_HCRCFG2_XPOS(n)      ((uint32_t)(n) << LCDC_HCRCFG2_XPOS_SHIFT)
-#define LCDC_HCRCFG2_YPOS_SHIFT     (16)    /* Bits 16-26: Vertical Window Position */
-#define LCDC_HCRCFG2_YPOS_MASK      (0x7ff << LCDC_HCRCFG2_YPOS_SHIFT)
-#  define LCDC_HCRCFG2_YPOS(n)      ((uint32_t)(n) << LCDC_HCRCFG2_YPOS_SHIFT)
+#  define LCDC_HCRCFG2_XPOS_SHIFT   (0)     /* Bits 0-10: Horizontal Window Position */
+#  define LCDC_HCRCFG2_XPOS_MASK    (0x7ff << LCDC_HCRCFG2_XPOS_SHIFT)
+#    define LCDC_HCRCFG2_XPOS(n)    ((uint32_t)(n) << LCDC_HCRCFG2_XPOS_SHIFT)
+#  define LCDC_HCRCFG2_YPOS_SHIFT   (16)    /* Bits 16-26: Vertical Window Position */
+#  define LCDC_HCRCFG2_YPOS_MASK    (0x7ff << LCDC_HCRCFG2_YPOS_SHIFT)
+#    define LCDC_HCRCFG2_YPOS(n)    ((uint32_t)(n) << LCDC_HCRCFG2_YPOS_SHIFT)
 
 /* Hardware Cursor Configuration 3 Register */
 
-#define LCDC_HCRCFG3_XSIZE_SHIFT    (0)     /* Bits 0-10: Horizontal Window Size */
-#define LCDC_HCRCFG3_XSIZE_MASK     (0x7ff << LCDC_HCRCFG3_XSIZE_SHIFT)
-#  define LCDC_HCRCFG3_XSIZE(n)     ((uint32_t)(n) << LCDC_HCRCFG3_XSIZE_SHIFT)
-#define LCDC_HCRCFG3_YSIZE_SHIFT    (16)    /* Bits 16-26: Vertical Window Size */
-#define LCDC_HCRCFG3_YSIZE_MASK     (0x7ff << LCDC_HCRCFG3_YSIZE_SHIFT)
-#  define LCDC_HCRCFG3_YSIZE(n)     ((uint32_t)(n) << LCDC_HCRCFG3_YSIZE_SHIFT)
+#  define LCDC_HCRCFG3_XSIZE_SHIFT  (0)     /* Bits 0-10: Horizontal Window Size */
+#  define LCDC_HCRCFG3_XSIZE_MASK   (0x7ff << LCDC_HCRCFG3_XSIZE_SHIFT)
+#    define LCDC_HCRCFG3_XSIZE(n)   ((uint32_t)(n) << LCDC_HCRCFG3_XSIZE_SHIFT)
+#  define LCDC_HCRCFG3_YSIZE_SHIFT  (16)    /* Bits 16-26: Vertical Window Size */
+#  define LCDC_HCRCFG3_YSIZE_MASK   (0x7ff << LCDC_HCRCFG3_YSIZE_SHIFT)
+#    define LCDC_HCRCFG3_YSIZE(n)   ((uint32_t)(n) << LCDC_HCRCFG3_YSIZE_SHIFT)
 
 /* Hardware Cursor Configuration 4 Register (32-bit horizontal stride value) */
 
 /* Hardware Cursor Configuration 6 Register */
 
-#define LCDC_HCRCFG6_BDEF_SHIFT     (0)       /* Bits 0-7: B Default */
-#define LCDC_HCRCFG6_BDEF_MASK      (0xff << LCDC_HCRCFG6_BDEF_SHIFT)
-#  define LCDC_HCRCFG6_BDEF(n)      ((uint32_t)(n) << LCDC_HCRCFG6_BDEF_SHIFT)
-#define LCDC_HCRCFG6_GDEF_SHIFT     (8)       /* Bits 8-15: G Default */
-#define LCDC_HCRCFG6_GDEF_MASK      (0xff << LCDC_HCRCFG6_GDEF_SHIFT)
-#  define LCDC_HCRCFG6_GDEF(n)      ((uint32_t)(n) << LCDC_HCRCFG6_GDEF_SHIFT)
-#define LCDC_HCRCFG6_RDEF_SHIFT     (16)      /* Bits 16-23: R Default */
-#define LCDC_HCRCFG6_RDEF_MASK      (0xff << LCDC_HCRCFG6_RDEF_SHIFT)
-#  define LCDC_HCRCFG6_RDEF(n)      ((uint32_t)(n) << LCDC_HCRCFG6_RDEF_SHIFT)
+#  define LCDC_HCRCFG6_BDEF_SHIFT   (0)       /* Bits 0-7: B Default */
+#  define LCDC_HCRCFG6_BDEF_MASK    (0xff << LCDC_HCRCFG6_BDEF_SHIFT)
+#    define LCDC_HCRCFG6_BDEF(n)    ((uint32_t)(n) << LCDC_HCRCFG6_BDEF_SHIFT)
+#  define LCDC_HCRCFG6_GDEF_SHIFT   (8)       /* Bits 8-15: G Default */
+#  define LCDC_HCRCFG6_GDEF_MASK    (0xff << LCDC_HCRCFG6_GDEF_SHIFT)
+#    define LCDC_HCRCFG6_GDEF(n)    ((uint32_t)(n) << LCDC_HCRCFG6_GDEF_SHIFT)
+#  define LCDC_HCRCFG6_RDEF_SHIFT   (16)      /* Bits 16-23: R Default */
+#  define LCDC_HCRCFG6_RDEF_MASK    (0xff << LCDC_HCRCFG6_RDEF_SHIFT)
+#    define LCDC_HCRCFG6_RDEF(n)    ((uint32_t)(n) << LCDC_HCRCFG6_RDEF_SHIFT)
 
 /* Hardware Cursor Configuration 7 Register */
 
-#define LCDC_HCRCFG7_BKEY_SHIFT     (0)       /* Bits 0-7: B Color Component Chroma Key */
-#define LCDC_HCRCFG7_BKEY_MASK      (0xff << LCDC_HCRCFG7_BKEY_SHIFT)
-#  define LCDC_HCRCFG7_BKEY(n)      ((uint32_t)(n) << LCDC_HCRCFG7_BKEY_SHIFT)
-#define LCDC_HCRCFG7_GKEY_SHIFT     (8)       /* Bits 8-15: G Color Component Chroma Key */
-#define LCDC_HCRCFG7_GKEY_MASK      (0xff << LCDC_HCRCFG7_GKEY_SHIFT)
-#  define LCDC_HCRCFG7_GKEY(n)      ((uint32_t)(n) << LCDC_HCRCFG7_GKEY_SHIFT)
-#define LCDC_HCRCFG7_RKEY_SHIFT     (16)      /* Bits 16-23: R Color Component Chroma Key */
-#define LCDC_HCRCFG7_RKEY_MASK      (0xff << LCDC_HCRCFG7_RKEY_SHIFT)
-#  define LCDC_HCRCFG7_RKEY(n)      ((uint32_t)(n) << LCDC_HCRCFG7_RKEY_SHIFT)
+#  define LCDC_HCRCFG7_BKEY_SHIFT   (0)       /* Bits 0-7: B Color Component Chroma Key */
+#  define LCDC_HCRCFG7_BKEY_MASK    (0xff << LCDC_HCRCFG7_BKEY_SHIFT)
+#    define LCDC_HCRCFG7_BKEY(n)    ((uint32_t)(n) << LCDC_HCRCFG7_BKEY_SHIFT)
+#  define LCDC_HCRCFG7_GKEY_SHIFT   (8)       /* Bits 8-15: G Color Component Chroma Key */
+#  define LCDC_HCRCFG7_GKEY_MASK    (0xff << LCDC_HCRCFG7_GKEY_SHIFT)
+#    define LCDC_HCRCFG7_GKEY(n)    ((uint32_t)(n) << LCDC_HCRCFG7_GKEY_SHIFT)
+#  define LCDC_HCRCFG7_RKEY_SHIFT   (16)      /* Bits 16-23: R Color Component Chroma Key */
+#  define LCDC_HCRCFG7_RKEY_MASK    (0xff << LCDC_HCRCFG7_RKEY_SHIFT)
+#    define LCDC_HCRCFG7_RKEY(n)    ((uint32_t)(n) << LCDC_HCRCFG7_RKEY_SHIFT)
 
 /* Hardware Cursor Configuration 8 Register */
 
-#define LCDC_HCRCFG8_BMASK_SHIFT    (0)       /* Bits 0-7: B Color Component Chroma Key Mask */
-#define LCDC_HCRCFG8_BMASK_MASK     (0xff << LCDC_HCRCFG8_BMASK_SHIFT)
-#  define LCDC_HCRCFG8_BMASK(n)     ((uint32_t)(n) << LCDC_HCRCFG8_BMASK_SHIFT)
-#define LCDC_HCRCFG8_GMASK_SHIFT    (8)       /* Bits 8-15: G Color Component Chroma Key Mask */
-#define LCDC_HCRCFG8_GMASK_MASK     (0xff << LCDC_HCRCFG8_GMASK_SHIFT)
-#  define LCDC_HCRCFG8_GMASK(n)     ((uint32_t)(n) << LCDC_HCRCFG8_GMASK_SHIFT)
-#define LCDC_HCRCFG8_RMASK_SHIFT    (16)      /* Bits 16-23: R Color Component Chroma Key Mask */
-#define LCDC_HCRCFG8_RMASK_MASK     (0xff << LCDC_HCRCFG8_RMASK_SHIFT)
-#  define LCDC_HCRCFG8_RMASK(n)     ((uint32_t)(n) << LCDC_HCRCFG8_RMASK_SHIFT)
+#  define LCDC_HCRCFG8_BMASK_SHIFT  (0)       /* Bits 0-7: B Color Component Chroma Key Mask */
+#  define LCDC_HCRCFG8_BMASK_MASK   (0xff << LCDC_HCRCFG8_BMASK_SHIFT)
+#    define LCDC_HCRCFG8_BMASK(n)   ((uint32_t)(n) << LCDC_HCRCFG8_BMASK_SHIFT)
+#  define LCDC_HCRCFG8_GMASK_SHIFT  (8)       /* Bits 8-15: G Color Component Chroma Key Mask */
+#  define LCDC_HCRCFG8_GMASK_MASK   (0xff << LCDC_HCRCFG8_GMASK_SHIFT)
+#    define LCDC_HCRCFG8_GMASK(n)   ((uint32_t)(n) << LCDC_HCRCFG8_GMASK_SHIFT)
+#  define LCDC_HCRCFG8_RMASK_SHIFT  (16)      /* Bits 16-23: R Color Component Chroma Key Mask */
+#  define LCDC_HCRCFG8_RMASK_MASK   (0xff << LCDC_HCRCFG8_RMASK_SHIFT)
+#    define LCDC_HCRCFG8_RMASK(n)   ((uint32_t)(n) << LCDC_HCRCFG8_RMASK_SHIFT)
 
 /* Hardware Cursor Configuration 9 Register */
 
-#define LCDC_HCRCFG9_CRKEY          (1 << 0)  /* Bit 0:  Blender Chroma Key Enable */
-#define LCDC_HCRCFG9_INV            (1 << 1)  /* Bit 1:  Blender Inverted Blender Output Enable */
-#define LCDC_HCRCFG9_ITER2BL        (1 << 2)  /* Bit 2:  Blender Iterated Color Enable */
-#define LCDC_HCRCFG9_ITER           (1 << 3)  /* Bit 3:  Blender Use Iterated Color */
-#define LCDC_HCRCFG9_REVALPHA       (1 << 4)  /* Bit 4:  Blender Reverse Alpha */
-#define LCDC_HCRCFG9_GAEN           (1 << 5)  /* Bit 5:  Blender Global Alpha Enable */
-#define LCDC_HCRCFG9_LAEN           (1 << 6)  /* Bit 6:  Blender Local Alpha Enable */
-#define LCDC_HCRCFG9_OVR            (1 << 7)  /* Bit 7:  Blender Overlay Layer Enable */
-#define LCDC_HCRCFG9_DMA            (1 << 8)  /* Bit 8:  Blender DMA Layer Enable */
-#define LCDC_HCRCFG9_REP            (1 << 9)  /* Bit 9:  Use Replication logic to expand RGB color */
-#define LCDC_HCRCFG9_DSTKEY         (1 << 10) /* Bit 10: Destination Chroma Keying */
-#define LCDC_HCRCFG9_GA_SHIFT       (16)      /* Bits 16-23: Blender Global Alpha */
-#define LCDC_HCRCFG9_GA_MASK        (0xff << LCDC_HCRCFG9_GA_SHIFT)
-#  define LCDC_HCRCFG9_GA(n)        ((uint32_t)(n) << LCDC_HCRCFG9_GA_SHIFT)
+#  define LCDC_HCRCFG9_CRKEY        (1 << 0)  /* Bit 0:  Blender Chroma Key Enable */
+#  define LCDC_HCRCFG9_INV          (1 << 1)  /* Bit 1:  Blender Inverted Blender Output Enable */
+#  define LCDC_HCRCFG9_ITER2BL      (1 << 2)  /* Bit 2:  Blender Iterated Color Enable */
+#  define LCDC_HCRCFG9_ITER         (1 << 3)  /* Bit 3:  Blender Use Iterated Color */
+#  define LCDC_HCRCFG9_REVALPHA     (1 << 4)  /* Bit 4:  Blender Reverse Alpha */
+#  define LCDC_HCRCFG9_GAEN         (1 << 5)  /* Bit 5:  Blender Global Alpha Enable */
+#  define LCDC_HCRCFG9_LAEN         (1 << 6)  /* Bit 6:  Blender Local Alpha Enable */
+#  define LCDC_HCRCFG9_OVR          (1 << 7)  /* Bit 7:  Blender Overlay Layer Enable */
+#  define LCDC_HCRCFG9_DMA          (1 << 8)  /* Bit 8:  Blender DMA Layer Enable */
+#  define LCDC_HCRCFG9_REP          (1 << 9)  /* Bit 9:  Use Replication logic to expand RGB color */
+#  define LCDC_HCRCFG9_DSTKEY       (1 << 10) /* Bit 10: Destination Chroma Keying */
+#  define LCDC_HCRCFG9_GA_SHIFT     (16)      /* Bits 16-23: Blender Global Alpha */
+#  define LCDC_HCRCFG9_GA_MASK      (0xff << LCDC_HCRCFG9_GA_SHIFT)
+#    define LCDC_HCRCFG9_GA(n)      ((uint32_t)(n) << LCDC_HCRCFG9_GA_SHIFT)
 
 /* Post Processing Channel Enable Register */
 
-#define LCDC_PPCHER_CH              (1 << 0)  /* Bit 0:  Channel Enable */
-#define LCDC_PPCHER_UPDATE          (1 << 1)  /* Bit 1:  Update Overlay Attributes Enable */
-#define LCDC_PPCHER_A2Q             (1 << 2)  /* Bit 2:  Add Head Pointer Enable */
+#  define LCDC_PPCHER_CH            (1 << 0)  /* Bit 0:  Channel Enable */
+#  define LCDC_PPCHER_UPDATE        (1 << 1)  /* Bit 1:  Update Overlay Attributes Enable */
+#  define LCDC_PPCHER_A2Q           (1 << 2)  /* Bit 2:  Add Head Pointer Enable */
 
 /* Post Processing Channel Disable Register */
 
-#define LCDC_PPCHDR_CH              (1 << 0)  /* Bit 0:  Channel Disable */
-#define LCDC_PPCHDR_CHRST           (1 << 8)  /* Bit 8:  Channel Reset */
+#  define LCDC_PPCHDR_CH            (1 << 0)  /* Bit 0:  Channel Disable */
+#  define LCDC_PPCHDR_CHRST         (1 << 8)  /* Bit 8:  Channel Reset */
 
 /* Post Processing Channel Status Register */
 
-#define LCDC_PPCHSR_CH              (1 << 0)  /* Bit 0:  Channel Status */
-#define LCDC_PPCHSR_UPDATE          (1 << 1)  /* Bit 1:  Update Overlay Attributes In */
-#define LCDC_PPCHSR_A2Q             (1 << 2)  /* Bit 2:  Add To Queue Pending */
+#  define LCDC_PPCHSR_CH            (1 << 0)  /* Bit 0:  Channel Status */
+#  define LCDC_PPCHSR_UPDATE        (1 << 1)  /* Bit 1:  Update Overlay Attributes In */
+#  define LCDC_PPCHSR_A2Q           (1 << 2)  /* Bit 2:  Add To Queue Pending */
 
 /* Post Processing Interrupt Enable Register, Post Processing Interrupt Disable Register,
  * Post Processing Interrupt Mask Register, and Post Processing Interrupt Status Register
  */
 
-#define LCDC_PPINT_DMA              (1 << 2)  /* Bit 2:  End of DMA Transfer */
-#define LCDC_PPINT_DSCR             (1 << 3)  /* Bit 3:  DMA Descriptor Loaded */
-#define LCDC_PPINT_ADD              (1 << 4)  /* Bit 4:  Head Descriptor Loaded */
-#define LCDC_PPINT_DONE             (1 << 5)  /* Bit 5:  End of List Detected */
+#  define LCDC_PPINT_DMA            (1 << 2)  /* Bit 2:  End of DMA Transfer */
+#  define LCDC_PPINT_DSCR           (1 << 3)  /* Bit 3:  DMA Descriptor Loaded */
+#  define LCDC_PPINT_ADD            (1 << 4)  /* Bit 4:  Head Descriptor Loaded */
+#  define LCDC_PPINT_DONE           (1 << 5)  /* Bit 5:  End of List Detected */
 
 /* Post Processing Head Register */
 
-#define LCDC_PPHEAD__MASK           (0xfffffffc) /* Bits 2-31: DMA Head Pointer */
+#  define LCDC_PPHEAD__MASK         (0xfffffffc) /* Bits 2-31: DMA Head Pointer */
 
 /* Post Processing Address Register (32-bit address) */
 
 /* Post Processing Control Register */
 
-#define LCDC_PPCTRL_DFETCH          (1 << 0)  /* Bit 0:  Transfer Descriptor Fetch Enable */
-#define LCDC_PPCTRL_DMAIEN          (1 << 2)  /* Bit 2:  End of DMA Transfer Interrupt Enable */
-#define LCDC_PPCTRL_DSCRIEN         (1 << 3)  /* Bit 3:  Descriptor Loaded Interrupt Enable */
-#define LCDC_PPCTRL_ADDIEN          (1 << 4)  /* Bit 4:  Add Head Descriptor to Queue Interrupt Enable */
-#define LCDC_PPCTRL_DONEIEN         (1 << 5)  /* Bit 5:  End of List Interrupt Enable */
+#  define LCDC_PPCTRL_DFETCH        (1 << 0)  /* Bit 0:  Transfer Descriptor Fetch Enable */
+#  define LCDC_PPCTRL_DMAIEN        (1 << 2)  /* Bit 2:  End of DMA Transfer Interrupt Enable */
+#  define LCDC_PPCTRL_DSCRIEN       (1 << 3)  /* Bit 3:  Descriptor Loaded Interrupt Enable */
+#  define LCDC_PPCTRL_ADDIEN        (1 << 4)  /* Bit 4:  Add Head Descriptor to Queue Interrupt Enable */
+#  define LCDC_PPCTRL_DONEIEN       (1 << 5)  /* Bit 5:  End of List Interrupt Enable */
 
 /* Post Processing Next Register (32-bit address) */
 
 /* Post Processing Configuration Register 0 */
 
-#define LCDC_PPCFG0_SIF             (1 << 0)  /* Bit 0:  Source Interface */
-#define LCDC_PPCFG0_BLEN_SHIFT      (4)       /* Bits 4-5: AHB Burst Length */
-#define LCDC_PPCFG0_BLEN_MASK       (3 << LCDC_PPCFG0_BLEN_SHIFT)
-#  define LCDC_PPCFG0_BLEN_SINGLE   (0 << LCDC_PPCFG0_BLEN_SHIFT)
-#  define LCDC_PPCFG0_BLEN_INCR4    (1 << LCDC_PPCFG0_BLEN_SHIFT)
-#  define LCDC_PPCFG0_BLEN_INCR8    (2 << LCDC_PPCFG0_BLEN_SHIFT)
-#  define LCDC_PPCFG0_BLEN_INCR16   (3 << LCDC_PPCFG0_BLEN_SHIFT)
-#define LCDC_PPCFG0_DLBO            (1 << 8)  /* Bit 8: Defined Length Burst Only */
+#  define LCDC_PPCFG0_SIF           (1 << 0)  /* Bit 0:  Source Interface */
+#  define LCDC_PPCFG0_BLEN_SHIFT    (4)       /* Bits 4-5: AHB Burst Length */
+#  define LCDC_PPCFG0_BLEN_MASK     (3 << LCDC_PPCFG0_BLEN_SHIFT)
+#    define LCDC_PPCFG0_BLEN_SINGLE (0 << LCDC_PPCFG0_BLEN_SHIFT)
+#    define LCDC_PPCFG0_BLEN_INCR4  (1 << LCDC_PPCFG0_BLEN_SHIFT)
+#    define LCDC_PPCFG0_BLEN_INCR8  (2 << LCDC_PPCFG0_BLEN_SHIFT)
+#    define LCDC_PPCFG0_BLEN_INCR16 (3 << LCDC_PPCFG0_BLEN_SHIFT)
+#  define LCDC_PPCFG0_DLBO          (1 << 8)  /* Bit 8: Defined Length Burst Only */
 
 /* Post Processing Configuration Register 1 */
 
-#define LCDC_PPCFG1_PPMODE_SHIFT             (0)       /* Bits 0-2: Post Processing Output Format selection */
-#define LCDC_PPCFG1_PPMODE_MASK              (7 << LCDC_PPCFG1_PPMODE_SHIFT)
-#  define LCDC_PPCFG1_PPMODE_RGB_16BPP       (0 << LCDC_PPCFG1_PPMODE_SHIFT) /* RGB 16 bpp */
-#  define LCDC_PPCFG1_PPMODE_RGB_24BPP_P     (1 << LCDC_PPCFG1_PPMODE_SHIFT) /* RGB 24 bpp PACKED */
-#  define LCDC_PPCFG1_PPMODE_RGB_24BPP_UNP   (2 << LCDC_PPCFG1_PPMODE_SHIFT) /* RGB 24 bpp UNPACKED */
-#  define LCDC_PPCFG1_PPMODE_YCBCR_422_MODE0 (3 << LCDC_PPCFG1_PPMODE_SHIFT) /* YCbCr 422 16 bpp (Mode 0) */
-#  define LCDC_PPCFG1_PPMODE_YCBCR_422_MODE1 (4 << LCDC_PPCFG1_PPMODE_SHIFT) /* YCbCr 422 16 bpp (Mode 1) */
-#  define LCDC_PPCFG1_PPMODE_YCBCR_422_MODE2 (5 << LCDC_PPCFG1_PPMODE_SHIFT) /* YCbCr 422 16 bpp (Mode 2) */
-#  define LCDC_PPCFG1_PPMODE_YCBCR_422_MODE3 (6 << LCDC_PPCFG1_PPMODE_SHIFT) /* YCbCr 422 16 bpp (Mode 3) */
-#define LCDC_PPCFG1_ITUBT601                 (1 << 4)  /* Bit 4:  Color Space Conversion U */
+#  define LCDC_PPCFG1_PPMODE_SHIFT             (0)       /* Bits 0-2: Post Processing Output Format selection */
+#  define LCDC_PPCFG1_PPMODE_MASK              (7 << LCDC_PPCFG1_PPMODE_SHIFT)
+#    define LCDC_PPCFG1_PPMODE_RGB_16BPP       (0 << LCDC_PPCFG1_PPMODE_SHIFT) /* RGB 16 bpp */
+#    define LCDC_PPCFG1_PPMODE_RGB_24BPP_P     (1 << LCDC_PPCFG1_PPMODE_SHIFT) /* RGB 24 bpp PACKED */
+#    define LCDC_PPCFG1_PPMODE_RGB_24BPP_UNP   (2 << LCDC_PPCFG1_PPMODE_SHIFT) /* RGB 24 bpp UNPACKED */
+#    define LCDC_PPCFG1_PPMODE_YCBCR_422_MODE0 (3 << LCDC_PPCFG1_PPMODE_SHIFT) /* YCbCr 422 16 bpp (Mode 0) */
+#    define LCDC_PPCFG1_PPMODE_YCBCR_422_MODE1 (4 << LCDC_PPCFG1_PPMODE_SHIFT) /* YCbCr 422 16 bpp (Mode 1) */
+#    define LCDC_PPCFG1_PPMODE_YCBCR_422_MODE2 (5 << LCDC_PPCFG1_PPMODE_SHIFT) /* YCbCr 422 16 bpp (Mode 2) */
+#    define LCDC_PPCFG1_PPMODE_YCBCR_422_MODE3 (6 << LCDC_PPCFG1_PPMODE_SHIFT) /* YCbCr 422 16 bpp (Mode 3) */
+#  define LCDC_PPCFG1_ITUBT601                 (1 << 4)  /* Bit 4:  Color Space Conversion U */
 
 /* Post Processing Configuration Register 2 (32-bit horizontal stride) */
 
 /* Post Processing Configuration Register 3 */
 
-#define LCDC_PPCFG3_CSCYR_SHIFT     (0)       /* Bits 0-9: Color Space Conversion R coeff for Y */
-#define LCDC_PPCFG3_CSCYR_MASK      (0x3ff << LCDC_PPCFG3_CSCYR_SHIFT)
-#  define LCDC_PPCFG3_CSCYR(n)      ((uint32_t)(n) << LCDC_PPCFG3_CSCYR_SHIFT)
-#define LCDC_PPCFG3_CSCYG_SHIFT     (10)       /* Bits 10-19: Color Space Conversion G coeff for Y */
-#define LCDC_PPCFG3_CSCYG_MASK      (0x3ff << LCDC_PPCFG3_CSCYG_SHIFT)
-#  define LCDC_PPCFG3_CSCYG(n)      ((uint32_t)(n) << LCDC_PPCFG3_CSCYG_SHIFT)
-#define LCDC_PPCFG3_CSCYB_SHIFT     (20)       /* Bits 20-29: Color Space Conversion B coeff for Y */
-#define LCDC_PPCFG3_CSCYB_MASK      (0x3ff << LCDC_PPCFG3_CSCYB_SHIFT)
-#  define LCDC_PPCFG3_CSCYB(n)      ((uint32_t)(n) << LCDC_PPCFG3_CSCYB_SHIFT)
-#define LCDC_PPCFG3_CSCYOFF         (1 << 30)  /* Bit 30: Color Space Conversion Y Offset */
+#  define LCDC_PPCFG3_CSCYR_SHIFT   (0)       /* Bits 0-9: Color Space Conversion R coeff for Y */
+#  define LCDC_PPCFG3_CSCYR_MASK    (0x3ff << LCDC_PPCFG3_CSCYR_SHIFT)
+#    define LCDC_PPCFG3_CSCYR(n)    ((uint32_t)(n) << LCDC_PPCFG3_CSCYR_SHIFT)
+#  define LCDC_PPCFG3_CSCYG_SHIFT   (10)       /* Bits 10-19: Color Space Conversion G coeff for Y */
+#  define LCDC_PPCFG3_CSCYG_MASK    (0x3ff << LCDC_PPCFG3_CSCYG_SHIFT)
+#    define LCDC_PPCFG3_CSCYG(n)    ((uint32_t)(n) << LCDC_PPCFG3_CSCYG_SHIFT)
+#  define LCDC_PPCFG3_CSCYB_SHIFT   (20)       /* Bits 20-29: Color Space Conversion B coeff for Y */
+#  define LCDC_PPCFG3_CSCYB_MASK    (0x3ff << LCDC_PPCFG3_CSCYB_SHIFT)
+#    define LCDC_PPCFG3_CSCYB(n)    ((uint32_t)(n) << LCDC_PPCFG3_CSCYB_SHIFT)
+#  define LCDC_PPCFG3_CSCYOFF       (1 << 30)  /* Bit 30: Color Space Conversion Y Offset */
 
 /* Post Processing Configuration Register 4 */
 
-#define LCDC_PPCFG4_CSCUR_SHIFT     (0)       /* Bits 0-9: Color Space Conversion R coeff for u */
-#define LCDC_PPCFG4_CSCUR_MASK      (0x3ff << LCDC_PPCFG4_CSCUR_SHIFT)
-#  define LCDC_PPCFG4_CSCUR(n)      ((uint32_t)(n) << LCDC_PPCFG4_CSCUR_SHIFT)
-#define LCDC_PPCFG4_CSCUG_SHIFT     (10)       /* Bits 10-19: Color Space Conversion G coeff for u */
-#define LCDC_PPCFG4_CSCUG_MASK      (0x3ff << LCDC_PPCFG4_CSCUG_SHIFT)
-#  define LCDC_PPCFG4_CSCUG(n)      ((uint32_t)(n) << LCDC_PPCFG4_CSCUG_SHIFT)
-#define LCDC_PPCFG4_CSCUB_SHIFT     (20)       /* Bits 20-29: Color Space Conversion B coeff for u */
-#define LCDC_PPCFG4_CSCUB_MASK      (0x3ff << LCDC_PPCFG4_CSCUB_SHIFT)
-#  define LCDC_PPCFG4_CSCUB(n)      ((uint32_t)(n) << LCDC_PPCFG4_CSCUB_SHIFT)
-#define LCDC_PPCFG4_CSCUOFF         (1 << 30)  /* Bit 30: Color Space Conversion u Offset */
+#  define LCDC_PPCFG4_CSCUR_SHIFT   (0)       /* Bits 0-9: Color Space Conversion R coeff for u */
+#  define LCDC_PPCFG4_CSCUR_MASK    (0x3ff << LCDC_PPCFG4_CSCUR_SHIFT)
+#    define LCDC_PPCFG4_CSCUR(n)    ((uint32_t)(n) << LCDC_PPCFG4_CSCUR_SHIFT)
+#  define LCDC_PPCFG4_CSCUG_SHIFT   (10)       /* Bits 10-19: Color Space Conversion G coeff for u */
+#  define LCDC_PPCFG4_CSCUG_MASK    (0x3ff << LCDC_PPCFG4_CSCUG_SHIFT)
+#    define LCDC_PPCFG4_CSCUG(n)    ((uint32_t)(n) << LCDC_PPCFG4_CSCUG_SHIFT)
+#  define LCDC_PPCFG4_CSCUB_SHIFT   (20)       /* Bits 20-29: Color Space Conversion B coeff for u */
+#  define LCDC_PPCFG4_CSCUB_MASK    (0x3ff << LCDC_PPCFG4_CSCUB_SHIFT)
+#    define LCDC_PPCFG4_CSCUB(n)    ((uint32_t)(n) << LCDC_PPCFG4_CSCUB_SHIFT)
+#  define LCDC_PPCFG4_CSCUOFF       (1 << 30)  /* Bit 30: Color Space Conversion u Offset */
 
 /* Post Processing Configuration Register 5 */
 
-#define LCDC_PPCFG5_CSCVR_SHIFT     (0)       /* Bits 0-9: Color Space Conversion R coeff for v */
-#define LCDC_PPCFG5_CSCVR_MASK      (0x3ff << LCDC_PPCFG5_CSCVR_SHIFT)
-#  define LCDC_PPCFG5_CSCVR(n)      ((uint32_t)(n) << LCDC_PPCFG5_CSCVR_SHIFT)
-#define LCDC_PPCFG5_CSCVG_SHIFT     (10)       /* Bits 10-19: Color Space Conversion G coeff for v */
-#define LCDC_PPCFG5_CSCVG_MASK      (0x3ff << LCDC_PPCFG5_CSCVG_SHIFT)
-#  define LCDC_PPCFG5_CSCVG(n)      ((uint32_t)(n) << LCDC_PPCFG5_CSCVG_SHIFT)
-#define LCDC_PPCFG5_CSCVB_SHIFT     (20)       /* Bits 20-29: Color Space Conversion B coeff for v */
-#define LCDC_PPCFG5_CSCVB_MASK      (0x3ff << LCDC_PPCFG5_CSCVB_SHIFT)
-#  define LCDC_PPCFG5_CSCVB(n)      ((uint32_t)(n) << LCDC_PPCFG5_CSCVB_SHIFT)
-#define LCDC_PPCFG5_CSCVOFF         (1 << 30)  /* Bit 30: Color Space Conversion v Offset */
+#  define LCDC_PPCFG5_CSCVR_SHIFT   (0)       /* Bits 0-9: Color Space Conversion R coeff for v */
+#  define LCDC_PPCFG5_CSCVR_MASK    (0x3ff << LCDC_PPCFG5_CSCVR_SHIFT)
+#    define LCDC_PPCFG5_CSCVR(n)    ((uint32_t)(n) << LCDC_PPCFG5_CSCVR_SHIFT)
+#  define LCDC_PPCFG5_CSCVG_SHIFT   (10)       /* Bits 10-19: Color Space Conversion G coeff for v */
+#  define LCDC_PPCFG5_CSCVG_MASK    (0x3ff << LCDC_PPCFG5_CSCVG_SHIFT)
+#    define LCDC_PPCFG5_CSCVG(n)    ((uint32_t)(n) << LCDC_PPCFG5_CSCVG_SHIFT)
+#  define LCDC_PPCFG5_CSCVB_SHIFT   (20)       /* Bits 20-29: Color Space Conversion B coeff for v */
+#  define LCDC_PPCFG5_CSCVB_MASK    (0x3ff << LCDC_PPCFG5_CSCVB_SHIFT)
+#    define LCDC_PPCFG5_CSCVB(n)    ((uint32_t)(n) << LCDC_PPCFG5_CSCVB_SHIFT)
+#  define LCDC_PPCFG5_CSCVOFF       (1 << 30)  /* Bit 30: Color Space Conversion v Offset */
+#endif
 
 /* Base CLUT Registers 0-255 */
 
@@ -1834,7 +1925,7 @@
 #define LCDC_OVR1CLUT_RCLUT_SHIFT   (16)      /* Bits 16-23: R color entry */
 #define LCDC_OVR1CLUT_RCLUT_MASK    (0xff << LCDC_OVR1CLUT_RCLUT_SHIFT)
 #  define LCDC_OVR1CLUT_RCLUT(n)    ((uint32_t)(n) << LCDC_OVR1CLUT_RCLUT_SHIFT)
-#define LCDC_OVR1CLUT_ACLUT_SHIFT   (16)      /* Bits 16-23: Alpha color entry */
+#define LCDC_OVR1CLUT_ACLUT_SHIFT   (24)      /* Bits 24-31: Alpha color entry */
 #define LCDC_OVR1CLUT_ACLUT_MASK    (0xff << LCDC_OVR1CLUT_ACLUT_SHIFT)
 #  define LCDC_OVR1CLUT_ACLUT(n)    ((uint32_t)(n) << LCDC_OVR1CLUT_ACLUT_SHIFT)
 
@@ -1849,7 +1940,7 @@
 #define LCDC_OVR2CLUT_RCLUT_SHIFT   (16)      /* Bits 16-23: R color entry */
 #define LCDC_OVR2CLUT_RCLUT_MASK    (0xff << LCDC_OVR2CLUT_RCLUT_SHIFT)
 #  define LCDC_OVR2CLUT_RCLUT(n)    ((uint32_t)(n) << LCDC_OVR2CLUT_RCLUT_SHIFT)
-#define LCDC_OVR2CLUT_ACLUT_SHIFT   (16)      /* Bits 16-23: Alpha color entry */
+#define LCDC_OVR2CLUT_ACLUT_SHIFT   (24)      /* Bits 24-31: Alpha color entry */
 #define LCDC_OVR2CLUT_ACLUT_MASK    (0xff << LCDC_OVR2CLUT_ACLUT_SHIFT)
 #  define LCDC_OVR2CLUT_ACLUT(n)    ((uint32_t)(n) << LCDC_OVR2CLUT_ACLUT_SHIFT)
 
@@ -1864,24 +1955,26 @@
 #define LCDC_HEOCLUT_RCLUT_SHIFT    (16)      /* Bits 16-23: R color entry */
 #define LCDC_HEOCLUT_RCLUT_MASK     (0xff << LCDC_HEOCLUT_RCLUT_SHIFT)
 #  define LCDC_HEOCLUT_RCLUT(n)     ((uint32_t)(n) << LCDC_HEOCLUT_RCLUT_SHIFT)
-#define LCDC_HEOCLUT_ACLUT_SHIFT    (16)      /* Bits 16-23: Alpha color entry */
+#define LCDC_HEOCLUT_ACLUT_SHIFT    (24)      /* Bits 24-31: Alpha color entry */
 #define LCDC_HEOCLUT_ACLUT_MASK     (0xff << LCDC_HEOCLUT_ACLUT_SHIFT)
 #  define LCDC_HEOCLUT_ACLUT(n)     ((uint32_t)(n) << LCDC_HEOCLUT_ACLUT_SHIFT)
 
 /* Hardware Cursor CLUT Registers 0-255 */
 
-#define LCDC_HCRCLUT_BCLUT_SHIFT    (0)       /* Bits 0-7: B color entry */
-#define LCDC_HCRCLUT_BCLUT_MASK     (0xff << LCDC_HCRCLUT_BCLUT_SHIFT)
-#  define LCDC_HCRCLUT_BCLUT(n)     ((uint32_t)(n) << LCDC_HCRCLUT_BCLUT_SHIFT)
-#define LCDC_HCRCLUT_GCLUT_SHIFT    (8)       /* Bits 8-15: G color entry */
-#define LCDC_HCRCLUT_GCLUT_MASK     (0xff << LCDC_HCRCLUT_GCLUT_SHIFT)
-#  define LCDC_HCRCLUT_GCLUT(n)     ((uint32_t)(n) << LCDC_HCRCLUT_GCLUT_SHIFT)
-#define LCDC_HCRCLUT_RCLUT_SHIFT    (16)      /* Bits 16-23: R color entry */
-#define LCDC_HCRCLUT_RCLUT_MASK     (0xff << LCDC_HCRCLUT_RCLUT_SHIFT)
-#  define LCDC_HCRCLUT_RCLUT(n)     ((uint32_t)(n) << LCDC_HCRCLUT_RCLUT_SHIFT)
-#define LCDC_HCRCLUT_ACLUT_SHIFT    (16)      /* Bits 16-23: Alpha color entry */
-#define LCDC_HCRCLUT_ACLUT_MASK     (0xff << LCDC_HCRCLUT_ACLUT_SHIFT)
-#  define LCDC_HCRCLUT_ACLUT(n)     ((uint32_t)(n) << LCDC_HCRCLUT_ACLUT_SHIFT)
+#ifdef ATSAMA5D3
+#  define LCDC_HCRCLUT_BCLUT_SHIFT  (0)       /* Bits 0-7: B color entry */
+#  define LCDC_HCRCLUT_BCLUT_MASK   (0xff << LCDC_HCRCLUT_BCLUT_SHIFT)
+#    define LCDC_HCRCLUT_BCLUT(n)   ((uint32_t)(n) << LCDC_HCRCLUT_BCLUT_SHIFT)
+#  define LCDC_HCRCLUT_GCLUT_SHIFT  (8)       /* Bits 8-15: G color entry */
+#  define LCDC_HCRCLUT_GCLUT_MASK   (0xff << LCDC_HCRCLUT_GCLUT_SHIFT)
+#    define LCDC_HCRCLUT_GCLUT(n)   ((uint32_t)(n) << LCDC_HCRCLUT_GCLUT_SHIFT)
+#  define LCDC_HCRCLUT_RCLUT_SHIFT  (16)      /* Bits 16-23: R color entry */
+#  define LCDC_HCRCLUT_RCLUT_MASK   (0xff << LCDC_HCRCLUT_RCLUT_SHIFT)
+#    define LCDC_HCRCLUT_RCLUT(n)   ((uint32_t)(n) << LCDC_HCRCLUT_RCLUT_SHIFT)
+#  define LCDC_HCRCLUT_ACLUT_SHIFT  (24)      /* Bits 24-31: Alpha color entry */
+#  define LCDC_HCRCLUT_ACLUT_MASK   (0xff << LCDC_HCRCLUT_ACLUT_SHIFT)
+#    define LCDC_HCRCLUT_ACLUT(n)   ((uint32_t)(n) << LCDC_HCRCLUT_ACLUT_SHIFT)
+#endif
 
 /************************************************************************************
  * Public Types
