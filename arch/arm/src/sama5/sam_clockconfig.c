@@ -224,9 +224,15 @@ static inline void __ramfunc__ sam_pllasetup(void)
 
   /* Configure PLLA */
 
+#ifdef SAMA5_HAVE_PLLAR_DIV
   regval = (BOARD_CKGR_PLLAR_DIV | BOARD_CKGR_PLLAR_COUNT |
             BOARD_CKGR_PLLAR_OUT | BOARD_CKGR_PLLAR_MUL |
             PMC_CKGR_PLLAR_ONE);
+#else
+  regval = (BOARD_CKGR_PLLAR_COUNT | BOARD_CKGR_PLLAR_OUT |
+            BOARD_CKGR_PLLAR_MUL   | PMC_CKGR_PLLAR_ONE);
+#endif
+
   putreg32(regval, SAM_PMC_CKGR_PLLAR);
 
   /* Set the PLL Charge Pump Current Register to zero */
