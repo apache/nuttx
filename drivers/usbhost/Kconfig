@@ -284,6 +284,27 @@ config HIDMOUSE_WTHRESH
 endif # MOUSE_WHEEL
 endif # USBHOST_HIDMOUSE
 
+config USBHOST_RTL8187
+	bool "RTL8187-based wireless LAN"
+	default n
+	depends on NET
+
+if USBHOST_RTL8187
+
+config RTL8187B
+	bool "RTL8187B chip"
+	default y
+
+config RTL8187_VID
+	hex "RTL8187 VID"
+	default 0x0bda
+
+config RTL8187_PID
+	hex "RTL8187 PID"
+	default 0x8189
+
+endif # USBHOST_RTL8187
+
 config USBHOST_TRACE
 	bool "Enable USB HCD tracing for debug"
 	default n

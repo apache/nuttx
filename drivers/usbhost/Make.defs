@@ -60,9 +60,9 @@ CSRCS += usbhost_trace.c
 endif
 endif
 
-# Include add-on USB host driver logic (see misc/drivers)
+# Include add-on USB host driver logic if present and selected (see misc/drivers)
 
-ifeq ($(CONFIG_NET),y)
+ifeq ($(CONFIG_USBHOST_RTL8187),y)
   RTL8187_CSRC := ${shell if [ -f usbhost$(DELIM)rtl8187x.c ]; then echo "rtl8187x.c"; fi}
   CSRCS += $(RTL8187_CSRC)
 endif
