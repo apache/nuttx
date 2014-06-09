@@ -53,7 +53,7 @@
  * This is the configuration results in a CPU clock of 528MHz:
  *
  *   MAINOSC:  Frequency = 12MHz (crystal)
- *   PLLA: PLL Divider = 1, Multiplier = 43+1 to generate PLLACK = 528MHz
+ *   PLLA: PLL Multiplier = 43+1 to generate PLLACK = 528MHz
  *   Master Clock (MCK): Source = PLLACK/1, Prescalar = 1, MDIV = 4 to generate
  *     MCK      =  132MHz
  *     CPU clock = 528MHz
@@ -69,14 +69,12 @@
 
 /* PLLA configuration.
  *
- *   Divider = 1
- *   Multipler = 43+1
+ *   Multipler = 43+1: PLLACK = 44 * 12MHz = 528MHz
  */
 
 #define BOARD_CKGR_PLLAR_COUNT     (63 << PMC_CKGR_PLLAR_COUNT_SHIFT)
 #define BOARD_CKGR_PLLAR_OUT       (0)
 #define BOARD_CKGR_PLLAR_MUL       (43 << PMC_CKGR_PLLAR_MUL_SHIFT)
-#define BOARD_CKGR_PLLAR_DIV       PMC_CKGR_PLLAR_DIV_BYPASS
 
 /* PMC master clock register settings.
  *

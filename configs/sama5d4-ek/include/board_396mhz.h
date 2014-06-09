@@ -54,7 +54,7 @@
  * CPU clock of 396MHz:
  *
  *   MAINOSC:  Frequency = 12MHz (crystal)
- *   PLLA: PLL Divider = 1, Multiplier = 66 to generate PLLACK = 792MHz
+ *   PLLA: PLL Multiplier = 66 to generate PLLACK = 792MHz
  *   Master Clock (MCK): Source = PLLACK/2, Prescalar = 1, MDIV = 3 to generate
  *     MCK      =  132MHz
  *     CPU clock = 396MHz
@@ -70,14 +70,12 @@
 
 /* PLLA configuration.
  *
- *   Divider = 1
- *   Multipler = 66
+ *   Multipler = 66: PLLACK = 66 * 12MHz = 792MHz
  */
 
 #define BOARD_CKGR_PLLAR_COUNT     (63 << PMC_CKGR_PLLAR_COUNT_SHIFT)
 #define BOARD_CKGR_PLLAR_OUT       (0)
 #define BOARD_CKGR_PLLAR_MUL       (65 << PMC_CKGR_PLLAR_MUL_SHIFT)
-#define BOARD_CKGR_PLLAR_DIV       PMC_CKGR_PLLAR_DIV_BYPASS
 
 /* PMC master clock register settings.
  *
