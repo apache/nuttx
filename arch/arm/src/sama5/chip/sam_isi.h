@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/sama5/chip/sam_isi.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -72,7 +72,7 @@
 #define SAM_ISI_DMA_CCTRL_OFFSET   0x0054 /* DMA Codec Control Register */
 #define SAM_ISI_DMA_CDSCR_OFFSET   0x0058 /* DMA Codec Descriptor Address Register */
                                           /* 0x005c-0x00e0 Reserved */
-#define SAM_ISI_WPCR_OFFSET        0x00e4 /* Write Protection Control Register */
+#define SAM_ISI_WPMR_OFFSET        0x00e4 /* Write Protection Mode Register */
 #define SAM_ISI_WPSR_OFFSET        000xe8 /* Write Protection Status Register */
                                           /* 0x00ec-0x00fc Reserved */
 
@@ -101,7 +101,7 @@
 #define SAM_ISI_DMA_CADDR          (SAM_ISI_VBASE+SAM_ISI_DMA_CADDR_OFFSET)
 #define SAM_ISI_DMA_CCTRL          (SAM_ISI_VBASE+SAM_ISI_DMA_CCTRL_OFFSET)
 #define SAM_ISI_DMA_CDSCR          (SAM_ISI_VBASE+SAM_ISI_DMA_CDSCR_OFFSET)
-#define SAM_ISI_WPCR               (SAM_ISI_VBASE+SAM_ISI_WPCR_OFFSET)
+#define SAM_ISI_WPMR               (SAM_ISI_VBASE+SAM_ISI_WPMR_OFFSET)
 #define SAM_ISI_WPSR               (SAM_ISI_VBASE+SAM_ISI_WPSR_OFFSET)
 
 /* ISI Register Bit Definitions *****************************************************/
@@ -147,7 +147,7 @@
 #define ISI_CFG2_IMHSIZE_SHIFT     (16)      /* Bits 16-26: Horizontal Size of the Image Sensor */
 #define ISI_CFG2_IMHSIZE_MASK      (0x7ff << ISI_CFG2_IMHSIZE_SHIFT)
 #  define ISI_CFG2_IMHSIZE(n)      ((uint32_t)(n) << ISI_CFG2_IMHSIZE_SHIFT)
-#define ISI_CFG2_YCCSWAP_SHIFT     (18)      /* Bits 18-29: Defines the YCC Image Data */
+#define ISI_CFG2_YCCSWAP_SHIFT     (28)      /* Bits 28-29: Defines the YCC Image Data */
 #define ISI_CFG2_YCCSWAP_MASK      (3 << ISI_CFG2_YCCSWAP_SHIFT)
 #  define ISI_CFG2_YCCSWAP_DEFAULT (0 << ISI_CFG2_YCCSWAP_SHIFT) /* Cb(i) Y(i) Cr(i) Y(i+1) */
 #  define ISI_CFG2_YCCSWAP_MODE1   (1 << ISI_CFG2_YCCSWAP_SHIFT) /* Cr(i) Y(i) Cb(i) Y(i+1) */
@@ -297,22 +297,17 @@
 
 #define ISI_DMA_CDSR_MASK          (0xfffffffc) /* Bits 2-31: Codec Descriptor Base Address */
 
-/* Write Protection Control Register */
+/* Write Protection Mode Register */
 
-#define ISI_WPCR_WPEN              (1 << 0)  /* Bit 0:  Write Protection Enable */
-#define ISI_WPCR_WPKEY_SHIFT       (8)       /* Bits 8-31: Write Protection KEY Password */
-#define ISI_WPCR_WPKEY_MASK        (000xffffff << ISI_WPCR_WPKEY_SHIFT)
-#  define ISI_WPCR_WPKEY           (0x00495349 << ISI_WPCR_WPKEY_SHIFT) /* (ASCII code for "ISI") */
+#define ISI_WPMR_WPEN              (1 << 0)  /* Bit 0:  Write Protection Enable */
+#define ISI_WPMR_WPKEY_SHIFT       (8)       /* Bits 8-31: Write Protection KEY Password */
+#define ISI_WPMR_WPKEY_MASK        (000xffffff << ISI_WPMR_WPKEY_SHIFT)
+#  define ISI_WPMR_WPKEY           (0x00495349 << ISI_WPMR_WPKEY_SHIFT) /* (ASCII code for "ISI") */
 
 /* Write Protection Status Register */
 
-#define ISI_WPSR_WPVS_SHIFT        (0)      /* Bits 0-3: Write Protection Violation Status */
-#define ISI_WPSR_WPVS_MASK         (15 << ISI_WPSR_WPVS_SHIFT)
-#  define ISI_WPSR_WPVS_NONE       (0 << ISI_WPSR_WPVS_SHIFT) /* No Write Protection Violation */
-#  define ISI_WPSR_WPVS_WR         (1 << ISI_WPSR_WPVS_SHIFT) /* Unauthorized write a control register */
-#  define ISI_WPSR_WPVS_SWRST      (2 << ISI_WPSR_WPVS_SHIFT) /* Software reset w/ Write Protection enabled */
-#  define ISI_WPSR_WPVS_BOTH       (3 << ISI_WPSR_WPVS_SHIFT) /* Both of the above */
-#define ISI_WPSR_WPVSRC_SHIFT      (8)      /* Bits 8-23: Write Protection Violation Source */
+#define ISI_WPSR_WPVS              (1 << 0)  /* Bit 0:  Write Protection Violation Status */
+#define ISI_WPSR_WPVSRC_SHIFT      (8)       /* Bits 8-23: Write Protection Violation Source */
 #define ISI_WPSR_WPVSRC_MASK       (0xffff << ISI_WPSR_WPVSRC_SHIFT)
 #  define ISI_WPSR_WPVSRC_NONE     (0 << ISI_WPSR_WPVSRC_SHIFT) /* No Write Protection Violation */
 #  define ISI_WPSR_WPVSRC_CFG1     (1 << ISI_WPSR_WPVSRC_SHIFT) /* Write access in ISI_CFG1 */
