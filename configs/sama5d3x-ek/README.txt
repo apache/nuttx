@@ -891,29 +891,29 @@ Networking
   the EMAC peripheral; Only the SAMA5D33, SAMA5D34, and SAMA5D35 support
   the GMAC perpheral!  NOTE that the SAMA5D35 supports both!
 
-  Selecting the EMAC0 peripheral
-  ------------------------------
+  Selecting the EMAC peripheral
+  -----------------------------
 
   System Type
     CONFIG_ARCH_CHIP_ATSAMA5D31=y        : SAMA5D31 or SAMAD35 support EMAC
     CONFIG_ARCH_CHIP_ATSAMA5D35=y        : (others do not)
 
   System Type -> SAMA5 Peripheral Support
-    CONFIG_SAMA5_EMAC0=y                 : Enable the EMAC peripheral
+    CONFIG_SAMA5_EMAC=y                  : Enable the EMAC peripheral
 
-  System Type -> EMAC0 device driver options
-    CONFIG_SAMA5_EMAC0_NRXBUFFERS=16     : Set aside some RS and TX buffers
-    CONFIG_SAMA5_EMAC0_NTXBUFFERS=4
-    CONFIG_SAMA5_EMAC0_PHYADDR=1         : KSZ8021/31 PHY is at address 1
-    CONFIG_SAMA5_EMAC0_AUTONEG=y         : Use autonegotiation
-    CONFIG_SAMA5_EMAC0_RMII=y            : Either MII or RMII interface should work
-    CONFIG_SAMA5_EMAC0_PHYSR=30          : Address of PHY status register on KSZ8021/31
-    CONFIG_SAMA5_EMAC0_PHYSR_ALTCONFIG=y : Needed for KSZ8021/31
-    CONFIG_SAMA5_EMAC0_PHYSR_ALTMODE=0x7 : "    " " " "     "
-    CONFIG_SAMA5_EMAC0_PHYSR_10HD=0x1    : "    " " " "     "
-    CONFIG_SAMA5_EMAC0_PHYSR_100HD=0x2   : "    " " " "     "
-    CONFIG_SAMA5_EMAC0_PHYSR_10FD=0x5    : "    " " " "     "
-    CONFIG_SAMA5_EMAC0_PHYSR_100FD=0x6   : "    " " " "     "
+  System Type -> EMAC device driver options
+    CONFIG_SAMA5_EMAC_NRXBUFFERS=16      : Set aside some RS and TX buffers
+    CONFIG_SAMA5_EMAC_NTXBUFFERS=4
+    CONFIG_SAMA5_EMAC_PHYADDR=1          : KSZ8021/31 PHY is at address 1
+    CONFIG_SAMA5_EMAC_AUTONEG=y          : Use autonegotiation
+    CONFIG_SAMA5_EMAC_RMII=y             : Either MII or RMII interface should work
+    CONFIG_SAMA5_EMAC_PHYSR=30           : Address of PHY status register on KSZ8021/31
+    CONFIG_SAMA5_EMAC_PHYSR_ALTCONFIG=y  : Needed for KSZ8021/31
+    CONFIG_SAMA5_EMAC_PHYSR_ALTMODE=0x7  : "    " " " "     "
+    CONFIG_SAMA5_EMAC_PHYSR_10HD=0x1     : "    " " " "     "
+    CONFIG_SAMA5_EMAC_PHYSR_100HD=0x2    : "    " " " "     "
+    CONFIG_SAMA5_EMAC_PHYSR_10FD=0x5     : "    " " " "     "
+    CONFIG_SAMA5_EMAC_PHYSR_100FD=0x6    : "    " " " "     "
 
   PHY selection.  Later in the configuration steps, you will need to select
   the KSZ8021/31 PHY for EMAC (See below)
@@ -2822,7 +2822,7 @@ SAMA5D3x-EK Configuration Options
     CONFIG_SAMA5_UHPHS       - USB Host High Speed
     CONFIG_SAMA5_UDPHS       - USB Device High Speed
     CONFIG_SAMA5_GMAC        - Gigabit Ethernet MAC
-    CONFIG_SAMA5_EMAC0       - Ethernet MAC 0
+    CONFIG_SAMA5_EMAC        - Ethernet MAC
     CONFIG_SAMA5_LCDC        - LCD Controller
     CONFIG_SAMA5_ISI         - Image Sensor Interface
     CONFIG_SAMA5_SSC0        - Synchronous Serial Controller 0

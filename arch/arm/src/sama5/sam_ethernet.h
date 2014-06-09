@@ -60,11 +60,11 @@
 #  undef CONFIG_SAMA5_GMAC_ISETH0
 #endif
 
-#ifndef CONFIG_SAMA5_EMAC0
-#  undef CONFIG_SAMA5_EMAC0_ISETH0
+#ifndef CONFIG_SAMA5_EMAC
+#  undef CONFIG_SAMA5_EMAC_ISETH0
 #endif
 
-#if defined(CONFIG_SAMA5_GMAC_ISETH0) && defined(CONFIG_SAMA5_EMAC0_ISETH0)
+#if defined(CONFIG_SAMA5_GMAC_ISETH0) && defined(CONFIG_SAMA5_EMAC_ISETH0)
 #  error GMAC and EMAC cannot both be ETH0
 #endif
 
@@ -94,7 +94,7 @@
 #  endif
 #endif
 
-#if defined(CONFIG_SAMA5_EMAC0_ISETH0)
+#if defined(CONFIG_SAMA5_EMAC_ISETH0)
 #  if defined(CONFIG_ETH0_PHY_DM9161)
 #    define SAMA5_EMAC_PHY_DM9161 1
 #  elif defined(CONFIG_ETH0_PHY_LAN8700)
@@ -106,7 +106,7 @@
 #  else
 #    error ETH0 PHY unrecognized
 #  endif
-#elif defined(CONFIG_SAMA5_EMAC0)
+#elif defined(CONFIG_SAMA5_EMAC)
 #  if defined(CONFIG_ETH1_PHY_DM9161)
 #    define SAMA5_EMAC_PHY_DM9161 1
 #  elif defined(CONFIG_ETH1_PHY_LAN8700)
@@ -172,7 +172,7 @@ int sam_gmac_initialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAMA5_EMAC0
+#ifdef CONFIG_SAMA5_EMAC
 int sam_emac_initialize(void);
 #endif
 
