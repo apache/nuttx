@@ -456,10 +456,6 @@
 
 #define EMAC_TID_MASK             (0x0000ffff) /* Bits 0-15: For comparisons with received frames TypeID/Length field */
 
-/* IPG Stretch Register */
-
-#define EMAC_IPGS_FL_MASK         (0x0000ffff) /* Bit 0-15: Frame Length */
-
 /* Wake-up on LAN Register */
 
 #define EMAC_WOL_IP_SHIFT         (0)       /* Bits 0-15: ARP Request IP Address */
@@ -469,6 +465,10 @@
 #define EMAC_WOL_ARP              (1 << 17) /* Bit 17: ARP Request Event Enable */
 #define EMAC_WOL_SA1              (1 << 18) /* Bit 18: Specific Address Register 1 Event Enable */
 #define EMAC_WOL_MTI              (1 << 19) /* Bit 19: Multicast Hash Event Enable */
+
+/* IPG Stretch Register */
+
+#define EMAC_IPGS_FL_MASK         (0x0000ffff) /* Bit 0-15: Frame Length */
 
 /* Stacked VLAN Register */
 
