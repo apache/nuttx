@@ -50,10 +50,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* IOB flags */
-
-#define IOBFLAGS_MCAST   (1 << 0) /* Multicast packet */
-
 /* IOB helpers */
 
 #define IOB_DATA(p)      (&(p)->io_data[(p)->io_offset])
@@ -69,8 +65,8 @@
  ****************************************************************************/
 
 /* Represents one I/O buffer.  A packet is contained by one or more I/O
- * buffers in a chain.  The io_flags, io_pktlen, io_vtag and io_priv
- * fields are only valid for the I/O buffer at the head of the chain.
+ * buffers in a chain.  Theio_pktlen and io_priv fields are only valid for
+ * the I/O buffer at the head of the chain.
  */
 
 struct iob_s
@@ -81,7 +77,6 @@ struct iob_s
 
   /* Payload */
 
-  uint8_t  io_flags;    /* Flags associated with the I/O buffer */
 #if CONFIG_IOB_BUFSIZE < 256
   uint8_t  io_len;      /* Length of the data in the entry */
   uint8_t  io_offset;   /* Data begins at this offset */

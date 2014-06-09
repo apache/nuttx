@@ -95,7 +95,6 @@ int iob_clone(FAR struct iob_s *iob1, FAR struct iob_s *iob2)
 
   /* Copy the header information */
 
-  iob2->io_flags = iob1->io_flags;
   iob2->io_pktlen = iob1->io_pktlen;
   iob2->io_priv = iob1->io_priv;
 

@@ -91,6 +91,5 @@ void iob_concat(FAR struct iob_s *iob1, FAR struct iob_s *iob2)
   */
 
   iob1->io_pktlen += iob2->io_pktlen;
-  iob2->io_flags   = 0;
   iob2->io_priv    = NULL;
 }

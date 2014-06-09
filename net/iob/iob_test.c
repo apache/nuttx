@@ -79,7 +79,7 @@ static void dump_chain(struct iob_s *iob)
   int n;
  
   printf("=========================================================\n");
-  printf("pktlen: %d flags: %02x\n", iob->io_pktlen, iob->io_flags);
+  printf("pktlen: %d\n", iob->io_pktlen);
 
   n = 0;
   pktlen = 0;

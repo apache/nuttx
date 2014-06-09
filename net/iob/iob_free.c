@@ -88,7 +88,6 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
     {
       /* Just copy the flags and private information to the next entry. */
 
-      next->io_flags = iob->io_flags;
       next->io_priv  = iob->io_priv;
 
       /* Copy and decrement the total packet length, being careful to

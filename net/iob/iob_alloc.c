@@ -93,7 +93,6 @@ FAR struct iob_s *iob_alloc(void)
       /* Put the I/O buffer in a known state */
 
       iob->io_flink  = NULL; /* Not in a chain */
-      iob->io_flags  = 0;    /* Flags associated with the I/O buffer */
       iob->io_len    = 0;    /* Length of the data in the entry */
       iob->io_offset = 0;    /* Offset to the beginning of data */
       iob->io_pktlen = 0;    /* Total length of the packet */
