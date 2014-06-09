@@ -94,22 +94,28 @@
 uint32_t sam_pllack_frequency(uint32_t mainclk)
 {
   uint32_t regval;
+#ifdef SAMA5_HAVE_PLLAR_DIV
   uint32_t diva;
+#endif
   uint32_t mula;
   uint32_t pllack;
 
-  /* Get the PLLA divider (DIVA) and multiplier (MULA) */
+  /* Get the PLLA configuration.  We will multiply (and possibly divide)
+   * the Main Clock to get the PLLA output clock (PLLACK).
+   */
 
   regval = getreg32(SAM_PMC_CKGR_PLLAR);
+  pllack = mainclk;
 
-  /* DIVA = 0:     Divider output is 0
-   * DIVA = 1:     Divider is bypassed
-   * DIVA = 2-255: Divider output is the selected clock divided by DIVA
+#ifdef SAMA5_HAVE_PLLAR_DIV
+  /* Get the PLLA divider (DIVA)
+   *
+   *   DIVA = 0:     Divider output is 0
+   *   DIVA = 1:     Divider is bypassed
+   *   DIVA = 2-255: Divider output is the selected clock divided by DIVA
    */
 
   diva = (regval & PMC_CKGR_PLLAR_DIV_MASK) >> PMC_CKGR_PLLAR_DIV_SHIFT;
-
-  pllack = mainclk;
   if (diva > 1)
     {
      pllack /= diva;
@@ -118,10 +124,13 @@ uint32_t sam_pllack_frequency(uint32_t mainclk)
     {
       return 0;
     }
+#endif
 
- /* MULA = 0: PLLA is deactivated
-  * MULA > 0: The PLLA Clock frequency is the PLLA input frequency
-  *           multiplied by MULA + 1.
+ /* Get the PLLA multiplier (MULA)
+  *
+  *   MULA = 0: PLLA is deactivated
+  *   MULA > 0: The PLLA Clock frequency is the PLLA input frequency
+  *              multiplied by MULA + 1.
   */
 
   mula = (regval & PMC_CKGR_PLLAR_MUL_MASK) >> PMC_CKGR_PLLAR_MUL_SHIFT;

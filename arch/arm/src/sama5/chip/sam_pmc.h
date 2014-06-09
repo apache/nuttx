@@ -2,7 +2,7 @@
  * arch/arm/src/sama5/chip/sam_pmc.h
  * Power Management Controller (PMC) for the SAMA5
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -88,9 +88,12 @@
 #define SAM_PMC_PCDR1_OFFSET           0x0104 /* Peripheral Clock Disable Register 1 */
 #define SAM_PMC_PCSR1_OFFSET           0x0108 /* Peripheral Clock Status Register 1 */
 #define SAM_PMC_PCR_OFFSET             0x010c /* Peripheral Control Register */
-#define SAM_PMC_OCR_OFFSET             0x0110 /* Oscillator Calibration Register */
 
-/* PMC register adresses ********************************************************************/
+#ifdef ATSAMA5D3
+#  define SAM_PMC_OCR_OFFSET           0x0110 /* Oscillator Calibration Register */
+#endif
+
+/* PMC register addresses *******************************************************************/
 
 #define SAM_PMC_SCER                   (SAM_PMC_VBASE+SAM_PMC_SCER_OFFSET)
 #define SAM_PMC_SCDR                   (SAM_PMC_VBASE+SAM_PMC_SCDR_OFFSET)
@@ -120,7 +123,10 @@
 #define SAM_PMC_PCDR1                  (SAM_PMC_VBASE+SAM_PMC_PCDR1_OFFSET)
 #define SAM_PMC_PCSR1                  (SAM_PMC_VBASE+SAM_PMC_PCSR1_OFFSET)
 #define SAM_PMC_PCR                    (SAM_PMC_VBASE+SAM_PMC_PCR_OFFSET)
-#define SAM_PMC_OCR                    (SAM_PMC_VBASE+SAM_PMC_OCR_OFFSET)
+
+#ifdef ATSAMA5D3
+#  define SAM_PMC_OCR                  (SAM_PMC_VBASE+SAM_PMC_OCR_OFFSET)
+#endif
 
 /* PMC register bit definitions *************************************************************/
 
@@ -128,7 +134,10 @@
  * Clock Status Register common bit-field definitions
  */
 
-#define PMC_PCK                        (1 << 0)  /* Bit 0:  Processor Clock */
+#ifdef ATSAMA5D3
+#  define PMC_PCK                      (1 << 0)  /* Bit 0:  Processor Clock */
+#endif
+
 #define PMC_DDRCK                      (1 << 2)  /* Bit 2:  DDR Clock */
 #define PMC_LCDCK                      (1 << 3)  /* Bit 3:  LCD2x Clock */
 #define PMC_SMDCK                      (1 << 4)  /* Bit 4:  SMD Clock */
@@ -191,33 +200,47 @@
 
 #define PMC_CKGR_MOR_MOSCXTEN          (1 << 0)  /* Bit 0:  Main Crystal Oscillator Enable */
 #define PMC_CKGR_MOR_MOSCXTBY          (1 << 1)  /* Bit 1:  Main Crystal Oscillator Bypass */
-#define PMC_CKGR_MOR_MOSCRCEN          (1 << 3)  /* Bit 3:  Main On-Chip RC Oscillator Enable */
-#define PMC_CKGR_MOR_MOSCXTST_SHIFT    (8)       /* Bits 8-16: Main Crystal Oscillator Start-up Time */
-#define PMC_CKGR_MOR_MOSCXTST_MASK     (0x1ff << PMC_CKGR_MOR_MOSCXTST_SHIFT)
+
+#ifdef ATSAMA5D3
+#  define PMC_CKGR_MOR_MOSCRCEN        (1 << 3)  /* Bit 3:  Main On-Chip RC Oscillator Enable */
+#endif
+
+#define PMC_CKGR_MOR_MOSCXTST_SHIFT    (8)       /* Bits 8-15: Main Crystal Oscillator Start-up Time */
+#define PMC_CKGR_MOR_MOSCXTST_MASK     (0xff << PMC_CKGR_MOR_MOSCXTST_SHIFT)
 #define PMC_CKGR_MOR_KEY_SHIFT         (16)      /* Bits 16-23: Password */
 #define PMC_CKGR_MOR_KEY_MASK          (0xff << PMC_CKGR_MOR_KEY_SHIFT)
 #  define PMC_CKGR_MOR_KEY             (0x37 << PMC_CKGR_MOR_KEY_SHIFT)
 #define PMC_CKGR_MOR_MOSCSEL           (1 << 24) /* Bit 24: Main Oscillator Selection */
 #define PMC_CKGR_MOR_CFDEN             (1 << 25) /* Bit 25: Clock Failure Detector Enable */
 
+#ifdef ATSAMA5D4
+#  define PMC_CKGR_MOR_XT32KFME        (1 << 26) /* Bit 26: Slow Crystal Oscillator Frequency Monitoring Enable */
+#endif
+
 /* PMC Clock Generator Main Clock Frequency Register */
 
 #define PMC_CKGR_MCFR_MAINF_SHIFT      (0)       /* Bits 0-15: Main Clock Frequency */
 #define PMC_CKGR_MCFR_MAINF_MASK       (0xffff << PMC_CKGR_MCFR_MAINF_SHIFT)
+#  define PMC_CKGR_MCFR_MAINF(n)       ((uint32_t)(n) << PMC_CKGR_MCFR_MAINF_SHIFT)
 #define PMC_CKGR_MCFR_MAINFRDY         (1 << 16) /* Bit 16: Main Clock Ready */
 #define PMC_CKGR_MCFR_RCMEAS           (1 << 20) /* Bit 20: RC Oscillator Frequency Measure (write-only) */
 
 /* PMC Clock Generator PLLA Register */
 
-#define PMC_CKGR_PLLAR_DIV_SHIFT       (0)       /* Bits 0-7: Divider */
-#define PMC_CKGR_PLLAR_DIV_MASK        (0xff << PMC_CKGR_PLLAR_DIV_SHIFT)
-#  define PMC_CKGR_PLLAR_DIV_ZERO      (0 << PMC_CKGR_PLLAR_DIV_SHIFT)   /* Divider output is 0 */
-#  define PMC_CKGR_PLLAR_DIV_BYPASS    (1 << PMC_CKGR_PLLAR_DIV_SHIFT)   /* Divider is bypassed (DIV=1) */
-#  define PMC_CKGR_PLLAR_DIV(n)        ((n) << PMC_CKGR_PLLAR_DIV_SHIFT) /* Divider output is DIV=n, n=2..255 */
+#undef SAMA5_HAVE_PLLAR_DIV
+#ifdef ATSAMA5D3
+#  define PMC_CKGR_PLLAR_DIV_SHIFT     (0)       /* Bits 0-7: Divider */
+#  define PMC_CKGR_PLLAR_DIV_MASK      (0xff << PMC_CKGR_PLLAR_DIV_SHIFT)
+#    define PMC_CKGR_PLLAR_DIV_ZERO    (0 << PMC_CKGR_PLLAR_DIV_SHIFT)   /* Divider output is 0 */
+#    define PMC_CKGR_PLLAR_DIV_BYPASS  (1 << PMC_CKGR_PLLAR_DIV_SHIFT)   /* Divider is bypassed (DIV=1) */
+#    define PMC_CKGR_PLLAR_DIV(n)      ((n) << PMC_CKGR_PLLAR_DIV_SHIFT) /* Divider output is DIV=n, n=2..255 */
+#  define SAMA5_HAVE_PLLAR_DIV         1
+#endif
+
 #define PMC_CKGR_PLLAR_COUNT_SHIFT     (8)       /* Bits 8-13: PLLA Counter */
 #define PMC_CKGR_PLLAR_COUNT_MASK      (63 << PMC_CKGR_PLLAR_COUNT_SHIFT)
-#define PMC_CKGR_PLLAR_OUT_SHIFT       (16)       /* Bits 16-17: PLLA Clock Frequency Range */
-#define PMC_CKGR_PLLAR_OUT_MASK        (3 << PMC_CKGR_PLLAR_OUT_SHIFT)
+#define PMC_CKGR_PLLAR_OUT_SHIFT       (14)      /* Bits 14-17: PLLA Clock Frequency Range */
+#define PMC_CKGR_PLLAR_OUT_MASK        (15 << PMC_CKGR_PLLAR_OUT_SHIFT)
 #  define PMC_CKGR_PLLAR_OUT           (0 << PMC_CKGR_PLLAR_OUT_SHIFT) /* To be programmed to 0 */
 #define PMC_CKGR_PLLAR_MUL_SHIFT       (18)      /* Bits 18-24: PLLA Multiplier */
 #define PMC_CKGR_PLLAR_MUL_MASK        (0x7f << PMC_CKGR_PLLAR_MUL_SHIFT)
@@ -247,6 +270,10 @@
 #  define PMC_MCKR_MDIV_PCKDIV4        (2 << PMC_MCKR_MDIV_SHIFT) /* Prescaler Output Clock divided by 4 */
 #  define PMC_MCKR_MDIV_PCKDIV3        (3 << PMC_MCKR_MDIV_SHIFT) /* Prescaler Output Clock divided by 3 */
 #define PMC_MCKR_PLLADIV2              (1 << 12) /* Bit 12: PLLA Divider */
+
+#ifdef ATSAMA5D4
+#  define PMC_MCKR_H32MXDIV            (1 << 24) /* Bit 24: AHB 32-bit Matrix Divisor */
+#endif
 
 /* USB Clock Register PMC_USB */
 
@@ -301,6 +328,10 @@
 #define PMC_SR_CFDS                    (1 << 19) /* Bit 19: Clock Failure Detector Status (SR only) */
 #define PMC_SR_FOS                     (1 << 20) /* Bit 20: Clock Failure Detector Fault Output Status (SR only) */
 
+#ifdef ATSAMA5D4
+#  define PMC_SR_XT32KERR              (1 << 21) /* Bit 21: Slow Crystal Oscillator Error Interrupt */
+#endif
+
 /* PMC Fault Output Clear Register */
 
 #define PMC_FOCLR                      (1 << 0)  /* Bit 0:  Fault Output Clear */
@@ -309,12 +340,16 @@
 
 #define PMC_PLLICPR_ICP_PLLA_SHIFT     (0)       /* Bits 0-1: Charge Pump Current PLLA */
 #define PMC_PLLICPR_ICP_PLLA_MASK      (3 << PMC_PLLICPR_ICP_PLLA_SHIFT)
+#  define PMC_PLLICPR_ICP_PLLA(n)      ((uint32_t)(n) << PMC_PLLICPR_ICP_PLLA_SHIFT)
 #define PMC_PLLICPR_IPLL_PLLA_SHIFT    (8)       /* Bits 8-10: Engineering Configuration PLLA */
 #define PMC_PLLICPR_IPLL_PLLA_MASK     (7 << PMC_PLLICPR_IPLL_PLLA_SHIFT)
+#  define PMC_PLLICPR_IPLL_PLLA(n)     ((uint32_t)(n) << PMC_PLLICPR_IPLL_PLLA_SHIFT)
 #define PMC_PLLICPR_ICP_PLLU_SHIFT     (16)      /* Bits 16-17: Charge Pump Current PLL UTMI */
 #define PMC_PLLICPR_ICP_PLLU_MASK      (3 << PMC_PLLICPR_ICP_PLLU_SHIFT)
+#  define PMC_PLLICPR_ICP_PLLU(n)      ((uint32_t)(n) << PMC_PLLICPR_ICP_PLLU_SHIFT)
 #define PMC_PLLICPR_IVCO_PLLU_SHIFT    (14)      /* Bits 24-15: Voltage Control Output Current PLL UTMI */
 #define PMC_PLLICPR_IVCO_PLLU_MASK     (3 << PMC_PLLICPR_IVCO_PLLU_SHIFT)
+#  define PMC_PLLICPR_IVCO_PLLU(n)     ((uint32_t)(n) << PMC_PLLICPR_IVCO_PLLU_SHIFT)
 
 /* PMC Write Protect Mode Register */
 
@@ -373,19 +408,26 @@
 #define PMC_PCR_PID_MASK               (63 << PMC_PCR_PID_SHIFT)
 #  define PMC_PCR_PID(n)               ((n) << PMC_PCR_PID_SHIFT)
 #define PMC_PCR_CMD                    (1 << 12) /* Bit 12: Command */
-#define PMC_PCR_DIV_SHIFT              (16)      /* Bits 16-17: Divisor Value */
-#define PMC_PCR_DIV_MASK               (3 << PMC_PCR_DIV_SHIFT)
-#  define PMC_PCR_DIV1                 (0 << PMC_PCR_DIV_SHIFT) /* Peripheral clock is MCK */
-#  define PMC_PCR_DIV2                 (1 << PMC_PCR_DIV_SHIFT) /* Peripheral clock is MCK/2 */
-#  define PMC_PCR_DIV4                 (2 << PMC_PCR_DIV_SHIFT) /* Peripheral clock is MCK/4 */
-#  define PMC_PCR_DIV8                 (3 << PMC_PCR_DIV_SHIFT) /* Peripheral clock is MCK/8 */
+
+#ifdef ATSAMA5D3
+#  define PMC_PCR_DIV_SHIFT            (16)      /* Bits 16-17: Divisor Value */
+#  define PMC_PCR_DIV_MASK             (3 << PMC_PCR_DIV_SHIFT)
+#    define PMC_PCR_DIV1               (0 << PMC_PCR_DIV_SHIFT) /* Peripheral clock is MCK */
+#    define PMC_PCR_DIV2               (1 << PMC_PCR_DIV_SHIFT) /* Peripheral clock is MCK/2 */
+#    define PMC_PCR_DIV4               (2 << PMC_PCR_DIV_SHIFT) /* Peripheral clock is MCK/4 */
+#    define PMC_PCR_DIV8               (3 << PMC_PCR_DIV_SHIFT) /* Peripheral clock is MCK/8 */
+#endif
+
 #define PMC_PCR_EN                     (1 << 28) /* Bit 28: Enable */
 
+#ifdef ATSAMA5D3
 /* Oscillator Calibration Register */
 
-#define PMC_OCR_CAL_SHIFT              (0)       /* Bits 0-6: 12 MHz RC Oscillator Calibration bits */
-#define PMC_OCR_CAL_MASK               (0x7f << PMC_OCR_CAL_SHIFT)
-#define PMC_OCR_SEL                    (1 << 7)  /* Bit 7:  Selection of RC Oscillator Calibration bits */
+#  define PMC_OCR_CAL_SHIFT            (0)       /* Bits 0-6: 12 MHz RC Oscillator Calibration bits */
+#  define PMC_OCR_CAL_MASK             (0x7f << PMC_OCR_CAL_SHIFT)
+#    define PMC_OCR_CAL(n)             ((uint32_t)(n) << PMC_OCR_CAL_SHIFT)
+#  define PMC_OCR_SEL                  (1 << 7)  /* Bit 7:  Selection of RC Oscillator Calibration bits */
+#endif
 
 /********************************************************************************************
  * Public Types
