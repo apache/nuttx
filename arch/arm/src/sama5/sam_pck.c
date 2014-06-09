@@ -238,4 +238,4 @@ void sam_pck_enable(enum pckid_e pckid, bool enable)
   putreg32(regval, regaddr);
 }
 
-#endif /* CONFIG_SAMA5_ISI && CONFIG_SAMA5_EMAC0 */
+#endif /* CONFIG_SAMA5_ISI */
