@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_ethernet.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -109,7 +109,7 @@ static inline void up_gmac_initialize(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAMA5_EMAC
+#if defined(CONFIG_SAMA5_EMACA) || defined(CONFIG_SAMA5_EMACB)
 static inline void up_emac_initialize(void)
 {
   int ret;

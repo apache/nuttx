@@ -41,14 +41,11 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/sama5/chip.h>
 
-#if defined(ATSAMA5D3)
-#  include "chip/sama5d3x_emac.h"
-#elif defined(ATSAMA5D4)
-#  include "chip/sama5d4x_emac.h"
-#else
-#  error Unrecognized SAMA5 architecture
+#if defined(CONFIG_SAMA5_EMACA)
+#  include "chip/sam_emaca.h"
+#elif defined(CONFIG_SAMA5_EMACB)
+#  include "chip/sam_emacb.h"
 #endif
 
 #endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAM_EMAC_H */

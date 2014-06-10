@@ -752,7 +752,7 @@ Networking
   -----------------------------
 
   System Type -> SAMA5 Peripheral Support
-    CONFIG_SAMA5_EMAC=y                  : Enable the EMAC peripheral
+    CONFIG_SAMA5_EMACA=y                 : Enable the EMAC A peripheral
 
   System Type -> EMAC device driver options
     CONFIG_SAMA5_EMAC_NRXBUFFERS=16      : Set aside some RS and TX buffers
@@ -2477,7 +2477,7 @@ SAMA5D3-Xplained Configuration Options
     CONFIG_SAMA5_UHPHS       - USB Host High Speed
     CONFIG_SAMA5_UDPHS       - USB Device High Speed
     CONFIG_SAMA5_GMAC        - Gigabit Ethernet MAC
-    CONFIG_SAMA5_EMAC        - Ethernet MAC
+    CONFIG_SAMA5_EMACA       - Ethernet MAC (type A)
     CONFIG_SAMA5_LCDC        - LCD Controller
     CONFIG_SAMA5_ISI         - Image Sensor Interface
     CONFIG_SAMA5_SSC0        - Synchronous Serial Controller 0

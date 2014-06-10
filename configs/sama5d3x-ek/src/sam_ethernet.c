@@ -55,7 +55,7 @@
  ************************************************************************************/
 
 #ifdef CONFIG_SAMA5_PIOE_IRQ
-#ifdef CONFIG_SAMA5_EMAC
+#ifdef CONFIG_SAMA5_EMACA
 static xcpt g_emac_handler;
 #endif
 #ifdef CONFIG_SAMA5_GMAC
@@ -81,8 +81,8 @@ static xcpt g_gmac_handler;
 
 void weak_function sam_netinitialize(void)
 {
-#ifdef CONFIG_SAMA4_EMAC
-  /* Ethernet 10/100 (EMAC) Port
+#ifdef CONFIG_SAMA4_EMACA
+  /* Ethernet 10/100 (EMAC A) Port
    *
    * The main board contains a MICREL PHY device (KSZ8051) operating at 10/100 Mbps.
    * The board supports MII and RMII interface modes.
@@ -138,7 +138,7 @@ xcpt_t sam_phyirq(int intf, xcpt_t irqhandler)
   xcpt_t oldhandler;
   int irq;
 
-#ifdef CONFIG_SAMA5_EMAC
+#ifdef CONFIG_SAMA5_EMACA
   if (intf == EMAC_INTF)
     {
       handler = &g_emac_handler;

@@ -190,8 +190,11 @@ endif
 
 ifeq ($(CONFIG_NET),y)
 CHIP_CSRCS += sam_ethernet.c
-ifeq ($(CONFIG_SAMA5_EMAC),y)
-CHIP_CSRCS += sam_emac.c
+ifeq ($(CONFIG_SAMA5_EMACA),y)
+CHIP_CSRCS += sam_emaca.c
+endif
+ifeq ($(CONFIG_SAMA5_EMACB),y)
+CHIP_CSRCS += sam_emacb.c
 endif
 ifeq ($(CONFIG_SAMA5_GMAC),y)
 CHIP_CSRCS += sam_gmac.c

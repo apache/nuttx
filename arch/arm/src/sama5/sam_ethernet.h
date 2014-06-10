@@ -51,8 +51,13 @@
  ************************************************************************************/
 /* Definitions for use with sam_phy_boardinitialize */
 
-#define GMAC_INTF 0
-#define EMAC_INTF 1
+#if defined(SAMA5_HAVE_EMACA)
+#  define GMAC_INTF 0
+#  define EMAC_INTF 1
+#elif defined(SAMA5_HAVE_EMACB)
+#  define EMAC0_INTF 0
+#  define EMAC1_INTF 1
+#endif
 
 /* Which is ETH0 and which is ETH1? */
 
@@ -60,8 +65,13 @@
 #  undef CONFIG_SAMA5_GMAC_ISETH0
 #endif
 
-#ifndef CONFIG_SAMA5_EMAC
+#ifndef CONFIG_SAMA5_EMACA
 #  undef CONFIG_SAMA5_EMAC_ISETH0
+#endif
+
+#ifndef CONFIG_SAMA5_EMACB
+#  undef CONFIG_SAMA5_EMAC0_ISETH0
+#  undef CONFIG_SAMA5_EMAC1_ISETH0
 #endif
 
 #if defined(CONFIG_SAMA5_GMAC_ISETH0) && defined(CONFIG_SAMA5_EMAC_ISETH0)
@@ -106,7 +116,7 @@
 #  else
 #    error ETH0 PHY unrecognized
 #  endif
-#elif defined(CONFIG_SAMA5_EMAC)
+#elif defined(CONFIG_SAMA5_EMACA)
 #  if defined(CONFIG_ETH1_PHY_DM9161)
 #    define SAMA5_EMAC_PHY_DM9161 1
 #  elif defined(CONFIG_ETH1_PHY_LAN8700)
@@ -129,7 +139,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -172,7 +183,7 @@ int sam_gmac_initialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAMA5_EMAC
+#if defined(CONFIG_SAMA5_EMACA) || defined(CONFIG_SAMA5_EMACB)
 int sam_emac_initialize(void);
 #endif
 

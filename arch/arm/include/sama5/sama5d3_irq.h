@@ -85,7 +85,7 @@
 #define SAM_PID_UHPHS          (32) /* USB Host High Speed */
 #define SAM_PID_UDPHS          (33) /* USB Device High Speed */
 #define SAM_PID_GMAC           (34) /* Gigabit Ethernet MAC */
-#define SAM_PID_EMAC0          (35) /* Ethernet MAC 0 */
+#define SAM_PID_EMAC           (35) /* Ethernet MAC */
 #define SAM_PID_LCDC           (36) /* LCD Controller */
 #define SAM_PID_ISI            (37) /* Image Sensor Interface */
 #define SAM_PID_SSC0           (38) /* Synchronous Serial Controller 0 */
@@ -139,7 +139,7 @@
 #define SAM_IRQ_UHPHS          SAM_PID_UHPHS  /* USB Host High Speed */
 #define SAM_IRQ_UDPHS          SAM_PID_UDPHS  /* USB Device High Speed */
 #define SAM_IRQ_GMAC           SAM_PID_GMAC   /* Gigabit Ethernet MAC */
-#define SAM_IRQ_EMAC0          SAM_PID_EMAC   /* Ethernet MAC 0 */
+#define SAM_IRQ_EMAC           SAM_PID_EMAC   /* Ethernet MAC */
 #define SAM_IRQ_LCDC           SAM_PID_LCDC   /* LCD Controller */
 #define SAM_IRQ_ISI            SAM_PID_ISI    /* Image Sensor Interface */
 #define SAM_IRQ_SSC0           SAM_PID_SSC0   /* Synchronous Serial Controller 0 */
