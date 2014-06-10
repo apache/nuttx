@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/sama5d4-ek/src/sam_ethernet.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,10 +56,10 @@
 
 #ifdef CONFIG_SAMA5_PIOE_IRQ
 #ifdef CONFIG_SAMA5_EMAC0
-static xcpt g_emac_handler;
+static xcpt g_emac0_handler;
 #endif
-#ifdef CONFIG_SAMA5_GMAC
-static xcpt g_gmac_handler;
+#ifdef CONFIG_SAMA5_EMAC1
+static xcpt g_emac1_handler;
 #endif
 #endif
 
@@ -81,43 +81,12 @@ static xcpt g_gmac_handler;
 
 void weak_function sam_netinitialize(void)
 {
-#ifdef CONFIG_SAMA4_EMAC
-  /* Ethernet 10/100 (EMAC) Port
-   *
-   * The main board contains a MICREL PHY device (KSZ8051) operating at 10/100 Mbps.
-   * The board supports MII and RMII interface modes.
-   *
-   * The two independent PHY devices embedded on CM and MB boards are connected to
-   * independent RJ-45 connectors with built-in magnetic and status LEDs.
-   *
-   * At the De-Assertion of Reset:
-   *   PHY ADD[2:0]:001
-   *   CONFIG[2:0]:001,Mode:RMII
-   *   Duplex Mode:Half Duplex
-   *   Isolate Mode:Disable
-   *   Speed Mode:100Mbps
-   *   Nway Auto-Negotiation:Enable
-   *
-   * The KSZ8051 PHY interrtup is available on PE30 INT_ETH1
-  */
-
-  sam_configpio(PIO_INT_ETH1);
+#ifdef CONFIG_SAMA4_EMAC0
+  sam_configpio(PIO_INT_ETH0);
 #endif
 
-#ifdef CONFIG_SAMA4_GMAC
-  /* Tri-Speed Ethernet PHY
-   *
-   * The SAMA5D4-EK  board is equipped with a MICREL PHY devices (MICREL
-   * KSZ9021/31) operating at 10/100/1000 Mbps. The board supports RGMII interface
-   * mode. The Ethernet interface consists of 4 pairs of low voltage differential
-   * pair signals designated from GRX± and GTx± plus control signals for link
-   * activity indicators. These signals can be used to connect to a 10/100/1000
-   * BaseT RJ45 connector integrated on the main board.
-   *
-   * The KSZ9021/31 interrupt is available on PB35 INT_GETH0
-   */
-
-  sam_configpio(PIO_INT_ETH0);
+#ifdef CONFIG_SAMA4_EMAC1
+  sam_configpio(PIO_INT_ETH1);
 #endif
 }
 
@@ -139,18 +108,18 @@ xcpt_t sam_phyirq(int intf, xcpt_t irqhandler)
   int irq;
 
 #ifdef CONFIG_SAMA5_EMAC0
-  if (intf == EMAC_INTF)
+  if (intf == EMAC0_INTF)
     {
-      handler = &g_emac_handler;
-      irq     = IRQ_INT_ETH1;
+      handler = &g_emac0_handler;
+      irq     = IRQ_INT_ETH0;
     }
   else
 #endif
-#ifdef CONFIG_SAMA5_GMAC
-  if (intf == GMAC_INTF)
+#ifdef CONFIG_SAMA5_EMAC1
+  if (intf == EMAC1_INTF)
     {
-      handler = &g_gmac_handler;
-      irq     = IRQ_INT_ETH0;
+      handler = &g_emac1_handler;
+      irq     = IRQ_INT_ETH1;
     }
   else
 #endif

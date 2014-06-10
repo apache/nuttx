@@ -255,7 +255,7 @@
 
 /* Networking */
 
-#if !defined(CONFIG_NET) || (!defined(CONFIG_SAMA5_EMAC) && !defined(CONFIG_SAMA5_GMAC))
+#if !defined(CONFIG_NET) || (!defined(CONFIG_SAMA5_EMACA) && !defined(CONFIG_SAMA5_GMAC))
 #  undef HAVE_NETWORK
 #endif
 
@@ -418,8 +418,8 @@
 
 /* Ethernet */
 
-#ifdef CONFIG_SAMA4_EMAC
- /* ETH1: Ethernet 10/100 (EMAC) Port
+#ifdef CONFIG_SAMA4_EMACA
+ /* ETH1: Ethernet 10/100 (EMAC A) Port
   *
   * The main board contains a MICREL PHY device (KSZ8051) operating at 10/100 Mbps.
   * The board supports MII and RMII interface modes.

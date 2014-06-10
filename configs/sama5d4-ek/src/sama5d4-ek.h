@@ -255,7 +255,7 @@
 
 /* Networking */
 
-#if !defined(CONFIG_NET) || (!defined(CONFIG_SAMA5_EMAC0) && !defined(CONFIG_SAMA5_GMAC))
+#if !defined(CONFIG_NET) || !defined(CONFIG_SAMA5_EMACB)
 #  undef HAVE_NETWORK
 #endif
 
@@ -419,49 +419,79 @@
 
 /* Ethernet */
 
-#ifdef CONFIG_SAMA4_EMAC
- /* ETH1: Ethernet 10/100 (EMAC) Port
-  *
-  * The main board contains a MICREL PHY device (KSZ8051) operating at 10/100 Mbps.
-  * The board supports MII and RMII interface modes.
-  *
-  * The two independent PHY devices embedded on CM and MB boards are connected to
-  * independent RJ-45 connectors with built-in magnetic and status LEDs.
-  *
-  * At the De-Assertion of Reset:
-  *   PHY ADD[2:0]:001
-  *   CONFIG[2:0]:001,Mode:RMII
-  *   Duplex Mode:Half Duplex
-  *   Isolate Mode:Disable
-  *   Speed Mode:100Mbps
-  *   Nway Auto-Negotiation:Enable
-  *
-  * The KSZ8051 PHY interrtup is available on PE30 INT_ETH1
-  */
+#ifdef CONFIG_SAMA4_EMACB
+/* ETH0/1: Ethernet 10/100 (EMAC) Ports
+ *
+ * Networking support via the can be added to NSH by selecting the following
+ * configuration options.  The SAMA5D44 supports two different 10/100Base-T
+ * Ethernet MAC peripherals.
+ *
+ * ------------------------------ ------------------- -------------------------
+ * SAMA5D4 PIO                    SIGNAL              USAGE
+ * ------------------------------ ------------------- -------------------------
+ * PB0/G0_TXCK                    PB0                 G0_TXCK, EXP
+ * PB1/G0_RXCK/SCK2/ISI_PCK       ISI_PCK_PB1         ISI_PCK
+ * PB2/G0_TXEN                    PB2                 G0_TXEN,EXP
+ * PB3/G0_TXER/CTS2/ISI_VSYNC     ISI_VSYNC_PB3       ISI_VSYNC
+ * PB4/G0_CRS/RXD2/ISI_HSYNC      ISI_HSYNC_PB4       ISI_HSYNC
+ * PB5/G0_COL/TXD2/PCK2           ISI_PWD_PB5         ISI_PWD
+ * PB6/G0_RXDV                    PB6                 G0_RXDV, EXP
+ * PB7/G0_RXER                    PB7                 G0_RXER, EXP
+ * PB8/G0_RX0                     PB8                 G0_RX0, EXP
+ * PB9/G0_RX1                     PB9                 G0_RX1, EXP
+ * PB10/G0_RX2/PCK2/PWML1         PB10                AUDIO_PCK2, EXP
+ * PB11/G0_RX3/RTS2/PWMH1         ISI_RST_PB11        ISI_RST
+ * PB12/G0_TX0                    PB12                G0_TX0, EXP
+ * PB13/G0_TX1                    PB13                G0_TX1, EXP
+ * PB14/G0_TX2/SPI2_NPCS1/PWMH0   ZIG_SPI2_NPCS1      ZIG_SPI2_NPCS1
+ * PB15/G0_TX3/SPI2_NPCS2/PWML0   HDMI_RST_PB15       HDMI_RST
+ * PB16/G0_MDC                    PB16                G0_MDC, EXP
+ * PB17/G0_MDIO                   PB17                G0_MDIO, EXP
+ * PE1/A1/MCI0_DB0                G0_IRQ_PE1          G0_IRQ
+ * ------------------------------ ------------------- -------------------------
+ * PA2/LCDDAT2/G1_TXCK            PA                  LCDDAT2, G1_TXCK
+ * PA3/LCDDAT3/G1_RXCK            PA3                 LCDDAT3
+ * PA4/LCDDAT4/G1_TXEN            PA4                 LCDDAT4, G1_TXEN
+ * PA5/LCDDAT5/G1_TXER            PA5                 LCDDAT5
+ * PA6/LCDDAT6/G1_CRS             PA6                 LCDDAT6
+ * PA9/LCDDAT9/G1_COL             PA9                 LCDDAT9
+ * PA10/LCDDAT10/G1_RXDV          PA10                LCDDAT10, G1_RXDV
+ * PA11/LCDDAT11/G1_RXER          PA11                LCDDAT11, G1_RXER
+ * PA12/LCDDAT12/G1_RX0           PA12                LCDDAT12, G1_RX0
+ * PA13/LCDDAT13/G1_RX1           PA13                LCDDAT13, G1_RX1
+ * PA14/LCDDAT14/G1_TX0           PA14                LCDDAT14, G1_TX0
+ * PA15/LCDDAT15/G1_TX1           PA15                LCDDAT15, G1_TX1
+ * PA18/LCDDAT18/G1_RX2           PA18                LCDDAT18
+ * PA19/LCDDAT19/G1_RX3           PA19                LCDDAT19
+ * PA20/LCDDAT20/G1_TX2           PA20                LCDDAT20
+ * PA21/LCDDAT21/G1_TX3           PA21                LCDDAT21
+ * PA22/LCDDAT22/G1_MDC           PA22                LCDDAT22, G1_MDC
+ * PA23/LCDDAT23/G1_MDIO          PA23                LCDDAT23, G1_MDIO
+ * PE2/A2/MCI0_DB1                G1_IRQ_PE2          G1_IRQ
+ * ------------------------------ ------------------- -------------------------
+ *
+ * EMAC2 connects (directly) to a KSZ8081RNB PHY (U10) and is available at
+ * the ETH0 connector.
+ *
+ * EMAC1 connects (indirectly) to another KSZ8081RNB PHY (U7) and is available
+ * at the ETH1 connector.  The ETH1 signals go through a line driver that is
+ * enabled via LCD_ETH1_CONFIG when an LCD is detected:
+ *
+ * - LCD_ETH1_CONFIG = 0: LCD 5v disable
+ * - LCD_ETH1_CONFIG = 1 & LCD_DETECT# =0: LCD 5v enable
+ */
 
-#define PIO_INT_ETH1 (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
-                      PIO_INT_BOTHEDGES | PIO_PORT_PIOE | PIO_PIN30)
-#define IRQ_INT_ETH1 SAM_IRQ_PE30
-
+#ifdef CONFIG_SAMA4_EMAC0
+#  define PIO_INT_ETH0 (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
+                        PIO_INT_BOTHEDGES | PIO_PORT_PIOE | PIO_PIN1)
+#  define IRQ_INT_ETH0 SAM_IRQ_PE1
 #endif
 
-#ifdef CONFIG_SAMA4_GMAC
-  /* ETH0: Tri-Speed Ethernet PHY
-   *
-   * The SAMA5D4 series-CM board is equipped with a MICREL PHY devices (MICREL
-   * KSZ9021/31) operating at 10/100/1000 Mbps. The board supports RGMII interface
-   * mode. The Ethernet interface consists of 4 pairs of low voltage differential
-   * pair signals designated from GRX± and GTx± plus control signals for link
-   * activity indicators. These signals can be used to connect to a 10/100/1000
-   * BaseT RJ45 connector integrated on the main board.
-   *
-   * The KSZ9021/31 interrupt is available on PB35 INT_GETH0
-   */
-
-#define PIO_INT_ETH0 (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
-                      PIO_INT_BOTHEDGES | PIO_PORT_PIOB | PIO_PIN25)
-#define IRQ_INT_ETH0 SAM_IRQ_PB25
-
+#ifdef CONFIG_SAMA4_EMAC1
+#  define PIO_INT_ETH1 (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
+                        PIO_INT_BOTHEDGES | PIO_PORT_PIOE | PIO_PIN2)
+#  define IRQ_INT_ETH1 SAM_IRQ_PE2
+#endif
 #endif
 
 /* SPI Chip Selects *****************************************************************/
