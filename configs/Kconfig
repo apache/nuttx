@@ -1265,7 +1265,7 @@ if ARCH_BOARD_RGMP
 source "configs/rgmp/Kconfig"
 endif
 if ARCH_BOARD_SAMA5D3X_EK
-source "configs/sama5d3-xplained/Kconfig"
+source "configs/sama5d3x-ek/Kconfig"
 endif
 if ARCH_BOARD_SAMA5D3_XPLAINED
 source "configs/sama5d3-xplained/Kconfig"
