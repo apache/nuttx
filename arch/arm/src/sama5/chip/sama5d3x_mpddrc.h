@@ -73,7 +73,7 @@
 #define SAM_MPDDRC_DLL_SS1_OFFSET       0x0084 /* MPDDRC DLL Status Slave 1 Register */
 #define SAM_MPDDRC_DLL_SS2_OFFSET       0x0088 /* MPDDRC DLL Status Slave 2 Register */
 #define SAM_MPDDRC_DLL_SS3_OFFSET       0x008c /* MPDDRC DLL Status Slave 3 Register */
-                                               /* 0x0094- 0x00e0 Reserved */
+                                               /* 0x0094-0x00e0 Reserved */
 #define SAM_MPDDRC_WPCR_OFFSET          0x00e4 /* MPDDRC Write Protect Control Register */
 #define SAM_MPDDRC_WPSR_OFFSET          0x00e8 /* MPDDRC Write Protect Status Register */
                                                /* 0x158-0x1cc Reserved */
@@ -292,7 +292,7 @@
 #define MPDDRC_LPDDR2_LPR_BK_MASK_PASR_MASK  (0xff << MPDDRC_LPDDR2_LPR_BK_MASK_PASR_SHIFT)
 #  define MPDDRC_LPDDR2_LPR_BK_MASK_PASR(n)  ((n) << MPDDRC_LPDDR2_LPR_BK_MASK_PASR_SHIFT)
 #define MPDDRC_LPDDR2_LPR_SEG_MASK_SHIFT     (8)  /* Bits 8-23: Segment Mask*/
-#define MPDDRC_LPDDR2_LPR_SEG_MASK_MASK      (0xff << MPDDRC_LPDDR2_LPR_SEG_MASK_SHIFT)
+#define MPDDRC_LPDDR2_LPR_SEG_MASK_MASK      (0xffff << MPDDRC_LPDDR2_LPR_SEG_MASK_SHIFT)
 #  define MPDDRC_LPDDR2_LPR_SEG_MASK(n)      ((n) << MPDDRC_LPDDR2_LPR_SEG_MASK_SHIFT)
 #define MPDDRC_LPDDR2_LPR_DS_SHIFT           (24) /* Bits 24-27: Drive strength */
 #define MPDDRC_LPDDR2_LPR_DS_MASK            (15 << MPDDRC_LPDDR2_LPR_DS_SHIFT)
