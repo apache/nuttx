@@ -73,9 +73,9 @@
  * Name: sigpending
  *
  * Description:
- *   This function stores the returns the set of signals that are blocked
- *   for delivery and that are pending for the calling process in the space
- *   pointed to by set.
+ *   This function returns the set of signals that are blocked from deliveryi
+ *   and that are pending for the calling process in the space pointed to by
+ *   set.
  *
  * Parameters:
  *   set - The location to return the pending signal set.
