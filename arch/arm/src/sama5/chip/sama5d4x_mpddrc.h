@@ -572,8 +572,8 @@
 
 #define MPDDRC_WPCR_WPEN                     (1 << 0)  /* Bit 0:  Write Protection Enable */
 #define MPDDRC_WPCR_WPKEY_SHIFT              (8)       /* Bits 8-31: Write Protection KEY */
-#define MPDDRC_WPCR_WPKEY_MASK               (0xffffff << MPDDRC_WPCR_WPKEY_SHIFT)
-  #define MPDDRC_WPCR_WPKEY                  (tbd << MPDDRC_WPCR_WPKEY_SHIFT)
+#define MPDDRC_WPCR_WPKEY_MASK               (0x00ffffff << MPDDRC_WPCR_WPKEY_SHIFT)
+  #define MPDDRC_WPCR_WPKEY                  (0x00444452 << MPDDRC_WPCR_WPKEY_SHIFT)
 
 /* MPDDRC Write Protect Status Register */
 
