@@ -1,5 +1,6 @@
 /************************************************************************************
- * arch/arm/src/sama5/chip/sama5d3x_emac.h
+ * arch/arm/src/sama5/chip/sam_emaca.h
+ * This is the form of the EMAC interface used the the SAMA5D3 
  *
  *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMA5_CHIP_SAMA5D3X_EMAC_H
-#define __ARCH_ARM_SRC_SAMA5_CHIP_SAMA5D3X_EMAC_H
+#ifndef __ARCH_ARM_SRC_SAMA5_CHIP_SAM_EMACA_H
+#define __ARCH_ARM_SRC_SAMA5_CHIP_SAM_EMACA_H
 
 /************************************************************************************
  * Included Files
@@ -453,4 +454,4 @@ struct emac_txdesc_s
   uint32_t status;   /* TX status and controls */
 };
 
-#endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAMA5D3X_EMAC_H */
+#endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAM_EMACA_H */

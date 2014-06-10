@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/sama5/sam_emac.c
+ * arch/arm/src/sama5/sam_emaca.c
  *
  *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -78,7 +78,7 @@
 
 #include <arch/board/board.h>
 
-#if defined(CONFIG_NET) && defined(CONFIG_SAMA5_EMAC)
+#if defined(CONFIG_NET) && defined(CONFIG_SAMA5_EMACA)
 
 /****************************************************************************
  * Definitions
@@ -212,7 +212,7 @@
  */
 
 #ifndef CONFIG_DEBUG
-#  undef CONFIG_SAMA5_EMAC_REGDEBUG
+#  undef CONFIG_SAMA5_EMACA_REGDEBUG
 #endif
 
 #ifdef CONFIG_NET_DUMPPACKET
@@ -274,7 +274,7 @@ struct sam_emac_s
 
   /* Debug stuff */
 
-#ifdef CONFIG_SAMA5_EMAC_REGDEBUG
+#ifdef CONFIG_SAMA5_EMACA_REGDEBUG
    bool               wrlast;     /* Last was a write */
    uintptr_t          addrlast;   /* Last address */
    uint32_t           vallast;    /* Last value */
@@ -324,7 +324,7 @@ static uint8_t g_rxbuffer[CONFIG_SAMA5_EMAC_NRXBUFFERS * EMAC_RX_UNITSIZE]
  ****************************************************************************/
 /* Register operations ******************************************************/
 
-#if defined(CONFIG_SAMA5_EMAC_REGDEBUG) && defined(CONFIG_DEBUG)
+#if defined(CONFIG_SAMA5_EMACA_REGDEBUG) && defined(CONFIG_DEBUG)
 static bool sam_checkreg(struct sam_emac_s *priv, bool wr,
                          uint32_t regval, uintptr_t address);
 static uint32_t sam_getreg(struct sam_emac_s *priv, uintptr_t addr);
@@ -415,7 +415,7 @@ static int  sam_emac_configure(struct sam_emac_s *priv);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAMA5_EMAC_REGDEBUG
+#ifdef CONFIG_SAMA5_EMACA_REGDEBUG
 static bool sam_checkreg(struct sam_emac_s *priv, bool wr, uint32_t regval,
                          uintptr_t address)
 {
@@ -461,7 +461,7 @@ static bool sam_checkreg(struct sam_emac_s *priv, bool wr, uint32_t regval,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAMA5_EMAC_REGDEBUG
+#ifdef CONFIG_SAMA5_EMACA_REGDEBUG
 static uint32_t sam_getreg(struct sam_emac_s *priv, uintptr_t address)
 {
   uint32_t regval = getreg32(address);
@@ -483,7 +483,7 @@ static uint32_t sam_getreg(struct sam_emac_s *priv, uintptr_t address)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAMA5_EMAC_REGDEBUG
+#ifdef CONFIG_SAMA5_EMACA_REGDEBUG
 static void sam_putreg(struct sam_emac_s *priv, uintptr_t address,
                        uint32_t regval)
 {
@@ -2965,4 +2965,4 @@ errout:
   return ret;
 }
 
-#endif /* CONFIG_NET && CONFIG_SAMA5_EMAC */
+#endif /* CONFIG_NET && CONFIG_SAMA5_EMACA */

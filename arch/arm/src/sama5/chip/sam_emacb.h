@@ -1,5 +1,8 @@
 /************************************************************************************
- * arch/arm/src/sama5/chip/sama5d4x_emac.h
+ * arch/arm/src/sama5/chip/sam_emacb.h
+ * This is the form of the EMAC interface used the the SAMA5D4 (and also the SAM43).
+ * This is referred as GMAC in the documentation even though it does not support
+ * Gibabit Ethernet.
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +36,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMA5_CHIP_SAMA5D4X_EMAC_H
-#define __ARCH_ARM_SRC_SAMA5_CHIP_SAMA5D4X_EMAC_H
+#ifndef __ARCH_ARM_SRC_SAMA5_CHIP_SAM_EMACB_H
+#define __ARCH_ARM_SRC_SAMA5_CHIP_SAM_EMACB_H
 
 /************************************************************************************
  * Included Files
@@ -677,4 +680,4 @@ struct emac_txdesc_s
   uint32_t status;   /* TX status and controls */
 };
 
-#endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAMA5D4X_EMAC_H */
+#endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAM_EMACB_H */

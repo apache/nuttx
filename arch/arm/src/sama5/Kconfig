@@ -61,11 +61,11 @@ config SAMA5_HAVE_GMAC
 	bool
 	default n
 
-config SAMA5_HAVE_EMAC
+config SAMA5_HAVE_EMACA
 	bool
 	default n
 
-config SAMA5_HAVE_EMAC0
+config SAMA5_HAVE_EMACB
 	bool
 	default n
 
@@ -120,7 +120,7 @@ config ARCH_CHIP_SAMA5D4
 	bool
 	default n
 	select SAMA5_HAVE_AESB
-	select SAMA5_HAVE_EMAC0
+	select SAMA5_HAVE_EMACB
 	select SAMA5_HAVE_EMAC1
 	select SAMA5_HAVE_ICM
 	select SAMA5_HAVE_LCDC
@@ -145,7 +145,7 @@ choice
 config ARCH_CHIP_ATSAMA5D31
 	bool "Atmel ATSAMA5D31"
 	select ARCH_CHIP_SAMA5D3
-	select SAMA5_HAVE_EMAC
+	select SAMA5_HAVE_EMACA
 	select SAMA5_HAVE_HSMCI2
 	select SAMA5_HAVE_LCDC
 	select SAMA5_HAVE_UART0
@@ -172,7 +172,7 @@ config ARCH_CHIP_ATSAMA5D34
 config ARCH_CHIP_ATSAMA5D35
 	bool "Atmel ATSAMA5D35"
 	select ARCH_CHIP_SAMA5D3
-	select SAMA5_HAVE_EMAC
+	select SAMA5_HAVE_EMACA
 	select SAMA5_HAVE_GMAC
 	select SAMA5_HAVE_HSMCI2
 	select SAMA5_HAVE_UART0
@@ -185,7 +185,7 @@ config ARCH_CHIP_ATSAMA5D35
 config ARCH_CHIP_ATSAMA5D36
 	bool "Atmel ATSAMA5D356"
 	select ARCH_CHIP_SAMA5D3
-	select SAMA5_HAVE_EMAC
+	select SAMA5_HAVE_EMACA
 	select SAMA5_HAVE_GMAC
 	select SAMA5_HAVE_HSMCI2
 	select SAMA5_HAVE_LCDC
@@ -422,24 +422,30 @@ config SAMA5_GMAC
 	select NETDEVICES
 	select ARCH_HAVE_PHY
 
-config SAMA5_EMAC
-	bool "10/100MBps Ethernet MAC (EMAC0)"
+config SAMA5_EMACA
+	bool "10/100MBps Ethernet MAC (EMAC)"
 	default n
-	depends on SAMA5_HAVE_EMAC
+	depends on SAMA5_HAVE_EMACA
 	select NETDEVICES
 	select ARCH_HAVE_PHY
+
+config SAMA5_EMACB
+	bool
+	default n
 
 config SAMA5_EMAC0
 	bool "10/100MBps Ethernet MAC (EMAC0)"
 	default n
-	depends on SAMA5_HAVE_EMAC0
+	depends on SAMA5_HAVE_EMACB
+	select SAMA5_EMACB
 	select NETDEVICES
 	select ARCH_HAVE_PHY
 
 config SAMA5_EMAC1
 	bool "10/100MBps Ethernet MAC (EMAC1)"
 	default n
-	depends on SAMA5_HAVE_EMAC1
+	depends on SAMA5_HAVE_EMACB && SAMA5_HAVE_EMAC1
+	select SAMA5_EMACB
 	select NETDEVICES
 	select ARCH_HAVE_PHY
 
@@ -1157,7 +1163,7 @@ config SAMA5_GMAC_REGDEBUG
 endmenu # GMAC device driver options
 endif # SAMA5_GMAC
 
-if SAMA5_EMAC
+if SAMA5_EMACA
 
 menu "EMAC device driver options"
 
@@ -1326,7 +1332,7 @@ config SAMA5_EMAC_PHYSR_100FD
 		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This is the value
 		under the bit mask that represents the 100Mbps, full duplex setting.
 
-config SAMA5_EMAC_REGDEBUG
+config SAMA5_EMACA_REGDEBUG
 	bool "Register-Level Debug"
 	default n
 	depends on DEBUG
@@ -1334,8 +1340,9 @@ config SAMA5_EMAC_REGDEBUG
 		Enable very low-level register access debug.  Depends on DEBUG.
 
 endmenu # EMAC device driver options
-endif # SAMA5_EMAC
+endif # SAMA5_EMACA
 
+if SAMA5_EMACB
 if SAMA5_EMAC0
 
 menu "EMAC0 device driver options"
@@ -1358,20 +1365,6 @@ config SAMA5_EMAC0_NTXBUFFERS
 		NET_BUFSIZE bytes).  This setting provides the number of such packets
 		that can be in flight.  This is also equal to the number of TX
 		descriptors that will be allocated.
-
-config SAMA5_EMAC0_PREALLOCATE
-	bool "Preallocate buffers"
-	default n
-	---help---
-		Buffer an descriptor many may either be allocated from the memory
-		pool or pre-allocated to lie in .bss.  This options selected pre-
-		allocated buffer memory.
-
-config SAMA5_EMAC0_NBC
-	bool "Disable Broadcast"
-	default n
-	---help---
-		Select to disable receipt of broadcast packets.
 
 config SAMA5_EMAC0_PHYADDR
 	int "PHY address"
@@ -1532,13 +1525,6 @@ config SAMA5_EMAC0_PHYSR_100FD
 		This must be provided if SAMA5_EMAC0_AUTONEG is defined.  This is the value
 		under the bit mask that represents the 100Mbps, full duplex setting.
 
-config SAMA5_EMAC0_REGDEBUG
-	bool "Register-Level Debug"
-	default n
-	depends on DEBUG
-	---help---
-		Enable very low-level register access debug.  Depends on DEBUG.
-
 endmenu # EMAC0 device driver options
 endif # SAMA5_EMAC0
 
@@ -1564,20 +1550,6 @@ config SAMA5_EMAC1_NTXBUFFERS
 		NET_BUFSIZE bytes).  This setting provides the number of such packets
 		that can be in flight.  This is also equal to the number of TX
 		descriptors that will be allocated.
-
-config SAMA5_EMAC1_PREALLOCATE
-	bool "Preallocate buffers"
-	default n
-	---help---
-		Buffer an descriptor many may either be allocated from the memory
-		pool or pre-allocated to lie in .bss.  This options selected pre-
-		allocated buffer memory.
-
-config SAMA5_EMAC1_NBC
-	bool "Disable Broadcast"
-	default n
-	---help---
-		Select to disable receipt of broadcast packets.
 
 config SAMA5_EMAC1_PHYADDR
 	int "PHY address"
@@ -1738,27 +1710,45 @@ config SAMA5_EMAC1_PHYSR_100FD
 		This must be provided if SAMA5_EMAC1_AUTONEG is defined.  This is the value
 		under the bit mask that represents the 100Mbps, full duplex setting.
 
-config SAMA5_EMAC1_REGDEBUG
+endmenu # EMAC1 device driver options
+endif # SAMA5_EMAC1
+
+# These apply to both EMAC0 and EMAC1
+
+config SAMA5_EMACB_PREALLOCATE
+	bool "Preallocate buffers"
+	default n
+	---help---
+		Buffer an descriptor many may either be allocated from the memory
+		pool or pre-allocated to lie in .bss.  This options selected pre-
+		allocated buffer memory.
+
+config SAMA5_EMACB_NBC
+	bool "Disable Broadcast"
+	default n
+	---help---
+		Select to disable receipt of broadcast packets.
+
+config SAMA5_EMACB_REGDEBUG
 	bool "Register-Level Debug"
 	default n
 	depends on DEBUG
 	---help---
 		Enable very low-level register access debug.  Depends on DEBUG.
 
-endmenu # EMAC1 device driver options
-endif # SAMA5_EMAC1
+endif # SAMA5_EMACB
 
-if SAMA5_EMAC || SAMA5_EMAC0 || SAMA5_EMAC1 || SAMA5_GMAC
+if SAMA5_EMACA || SAMA5_EMAC0 || SAMA5_EMAC1 || SAMA5_GMAC
 choice
 	prompt "Which device is eth0"
 	default SAMA5_GMAC_ISETH0 if SAMA5_GMAC
-	default SAMA5_EMAC_ISETH0 if SAMA5_EMAC && !SAMA5_GMAC
+	default SAMA5_EMAC_ISETH0 if SAMA5_EMACA && !SAMA5_GMAC
 	default SAMA5_EMAC0_ISETH0 if SAMA5_EMAC0 && !SAM_EMAC && !SAMA5_GMAC
 	default SAMA5_EMAC1_ISETH0 if SAMA5_EMAC1 && !SAM_EMAC && !SAMA5_EMAC0 && !SAMA5_GMAC
 
 config SAMA5_EMAC_ISETH0
 	bool "EMAC is eth0"
-	depends on SAMA5_EMAC
+	depends on SAMA5_EMACA
 
 config SAMA5_EMAC0_ISETH0
 	bool "EMAC0 is eth0"
