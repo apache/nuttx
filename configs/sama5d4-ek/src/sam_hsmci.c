@@ -32,37 +32,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
-/* The SAMA4D4-EK provides a two SD memory card slots:  (1) a full size SD card
- * slot (J10), and (2) a microSD memory card slot (J11).
+
+/* The SAMA4D4-EK provides a two SD memory card slots:  (1) a full size SD
+ * card slot (J10), and (2) a microSD memory card slot (J11).
  *
  * The full size SD card slot connects via HSMCI0.  The card detect discrete
- * is available on PB17 (pulled high).  The write protect descrete is tied to
- * ground (via PP6) and not available to software.  The slot supports 8-bit
- * wide transfer mode, but the NuttX driver currently uses only the 4-bit
- * wide transfer mode
+ * is available on PE5 (pulled high).  The write protect discrete is tied to
+ * ground and is not available to software.  The slot supports 8-bit wide
+ * transfer mode, but the NuttX driver currently uses only the 4-bit wide
+ * transfer mode
  *
- *   PD17 MCI0_CD
- *   PD1  MCI0_DA0
- *   PD2  MCI0_DA1
- *   PD3  MCI0_DA2
- *   PD4  MCI0_DA3
- *   PD5  MCI0_DA4
- *   PD6  MCI0_DA5
- *   PD7  MCI0_DA6
- *   PD8  MCI0_DA7
- *   PD9  MCI0_CK
- *   PD0  MCI0_CDA
+ * ------------------------------ ------------------- -------------------------
+ * SAMA5D4 PIO                    SIGNAL              USAGE
+ * ------------------------------ ------------------- -------------------------
+ * PC4/SPI0_NPCS1/MCI0_CK/PCK1    PC4                 MCI0_CK, ISI_MCK, EXP
+ * PC5/D0/MCI0_CDA                PC5                 MCI0_CDA, NAND_IO0
+ * PC6/D1/MCI0_DA0                PC6                 MCI0_DA0, NAND_IO1
+ * PC7/D2/MCI0_DA1                PC7                 MCI0_DA1, NAND_IO2
+ * PC8/D3/MCI0_DA2                PC8                 MCI0_DA2, NAND_IO3
+ * PC9/D4/MCI0_DA3                PC9                 MCI0_DA3, NAND_IO4
+ * PC10/D5/MCI0_DA4               PC10                MCI0_DA4, NAND_IO5
+ * PC11/D6/MCI0_DA5               PC11                MCI0_DA5, NAND_IO6
+ * PC12/D7/MCI0_DA6               PC12                MCI0_DA6, NAND_IO7
+ * PC13/NRD/NANDOE/MCI0_DA7       PC13                MCI0_DA7, NAND_RE
+ * PE5/A5/CTS3                    MCI0_CD_PE5         MCI0_CD
+ * ------------------------------ ------------------- -------------------------
  *
  * The microSD connects vi HSMCI1.  The card detect discrete is available on
- * PB18 (pulled high):
+ * PE14 (pulled high):
  *
- *   PD18  MCI1_CD
- *   PB20  MCI1_DA0
- *   PB21  MCI1_DA1
- *   PB22  MCI1_DA2
- *   PB23  MCI1_DA3
- *   PB24  MCI1_CK
- *   PB19  MCI1_CDA
+ * ------------------------------ ------------------- -------------------------
+ * SAMA5D4 PIO                    SIGNAL              USAGE
+ * ------------------------------ ------------------- -------------------------
+ * PE14/A14/TCLK1/PWMH3           MCI1_CD_PE14        MCI1_CD
+ * PE15/A15/SCK3/TIOA0            MCI1_PWR_PE15       MCI1_PWR
+ * PE18/A18/TIOA5/MCI1_CK         PE18                MCI1_CK, EXP
+ * PE19/A19/TIOB5/MCI1_CDA        PE19                MCI1_CDA, EXP
+ * PE20/A20/TCLK5/MCI1_DA0        PE20                MCI1_DA0, EXP
+ * PE21/A23/TIOA4/MCI1_DA1        PE21                MCI1_DA1, EXP
+ * PE22/A24/TIOB4/MCI1_DA2        PE22                MCI1_DA2, EXP
+ * PE23/A25/TCLK4/MCI1_DA3        PE23                MCI1_DA3, EXP
+ * PE6/A6/TIOA3                   MCI1_CD_PE6         MCI1_CD
+ * ------------------------------ ------------------- -------------------------
  */
 
 /****************************************************************************
@@ -98,7 +109,7 @@
 struct sam_hsmci_state_s
 {
   struct sdio_dev_s *hsmci;   /* R/W device handle */
-  pio_pinset_t pincfg;        /* Card detect PIO pin configuratin */
+  pio_pinset_t pincfg;        /* Card detect PIO pin configuration */
   uint8_t irq;                /* Interrupt number (same as pid) */
   uint8_t slotno;             /* Slot number */
   bool cd;                    /* TRUE: card is inserted */
