@@ -1186,20 +1186,6 @@ config SAMA5_EMAC_NTXBUFFERS
 		that can be in flight.  This is also equal to the number of TX
 		descriptors that will be allocated.
 
-config SAMA5_EMAC_PREALLOCATE
-	bool "Preallocate buffers"
-	default n
-	---help---
-		Buffer an descriptor many may either be allocated from the memory
-		pool or pre-allocated to lie in .bss.  This options selected pre-
-		allocated buffer memory.
-
-config SAMA5_EMAC_NBC
-	bool "Disable Broadcast"
-	default n
-	---help---
-		Select to disable receipt of broadcast packets.
-
 config SAMA5_EMAC_PHYADDR
 	int "PHY address"
 	default 1
@@ -1331,6 +1317,20 @@ config SAMA5_EMAC_PHYSR_100FD
 	---help---
 		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This is the value
 		under the bit mask that represents the 100Mbps, full duplex setting.
+
+config SAMA5_EMACA_PREALLOCATE
+	bool "Preallocate buffers"
+	default n
+	---help---
+		Buffer an descriptor many may either be allocated from the memory
+		pool or pre-allocated to lie in .bss.  This options selected pre-
+		allocated buffer memory.
+
+config SAMA5_EMACA_NBC
+	bool "Disable Broadcast"
+	default n
+	---help---
+		Select to disable receipt of broadcast packets.
 
 config SAMA5_EMACA_REGDEBUG
 	bool "Register-Level Debug"
