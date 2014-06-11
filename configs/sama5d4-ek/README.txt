@@ -1243,7 +1243,8 @@ HSMCI Card Slots
   HSMCI1
   ------
   The microSD connects vi HSMCI1.  The card detect discrete is available on
-  PE14 (pulled high):
+  PE14 (pulled high).  NOTE that PE15 must be controlled to provide power
+  to the HSMCI1 slot (the HSMCI0 slot is always powered).
 
   ------------------------------ ------------------- -------------------------
   SAMA5D4 PIO                    SIGNAL              USAGE
