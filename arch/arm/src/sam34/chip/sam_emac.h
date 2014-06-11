@@ -379,7 +379,7 @@
 #define EMAC_INT_TCOMP            (1 << 7)  /* Bit 7:  Transmit Complete */
 #define EMAC_INT_ROVR             (1 << 10) /* Bit 10: Receive Overrun */
 #define EMAC_INT_HRESP            (1 << 11) /* Bit 11: Hresp not OK */
-#define EMAC_INT_PFNX             (1 << 12) /* Bit 12: Pause Frame with Non-zero Pause Quantum Received */
+#define EMAC_INT_PFNZ             (1 << 12) /* Bit 12: Pause Frame with Non-zero Pause Quantum Received */
 #define EMAC_INT_PTZ              (1 << 13) /* Bit 13: Pause Time Zero */
 #define EMAC_INT_PTFR             (1 << 14) /* Bit 14: Pause Frame Transmitted */
 #define EMAC_INT_EXINT            (1 << 15) /* Bit 15: External Interrupt (not (SR) */

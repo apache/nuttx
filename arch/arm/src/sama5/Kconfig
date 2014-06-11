@@ -420,6 +420,7 @@ config SAMA5_GMAC
 	default n
 	depends on SAMA5_HAVE_GMAC
 	select NETDEVICES
+	select NETDEV_MULTINIC if SAMA5_EMAC
 	select ARCH_HAVE_PHY
 
 config SAMA5_EMACA
@@ -427,6 +428,7 @@ config SAMA5_EMACA
 	default n
 	depends on SAMA5_HAVE_EMACA
 	select NETDEVICES
+	select NETDEV_MULTINIC if SAMA5_GMAC
 	select ARCH_HAVE_PHY
 
 config SAMA5_EMACB
@@ -439,6 +441,7 @@ config SAMA5_EMAC0
 	depends on SAMA5_HAVE_EMACB
 	select SAMA5_EMACB
 	select NETDEVICES
+	select NETDEV_MULTINIC if SAMA5_EMAC1
 	select ARCH_HAVE_PHY
 
 config SAMA5_EMAC1
@@ -447,6 +450,7 @@ config SAMA5_EMAC1
 	depends on SAMA5_HAVE_EMACB && SAMA5_HAVE_EMAC1
 	select SAMA5_EMACB
 	select NETDEVICES
+	select NETDEV_MULTINIC if SAMA5_EMAC0
 	select ARCH_HAVE_PHY
 
 config SAMA5_LCDC
@@ -1255,68 +1259,68 @@ config SAMA5_EMAC_PHYSR_ALTCONFIG
 		where speed and mode information are combined.  This might mean, for example,
 		separate bits for 10HD, 100HD, 10FD and 100FD.
 
-config SAMA5_EMAC_PHYSR_SPEED
-	hex "PHY Speed Mask"
-	depends on SAMA5_EMAC_AUTONEG && !SAMA5_EMAC_PHYSR_ALTCONFIG
-	---help---
-		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This provides bit mask
-		for isolating the 10 or 100MBps speed indication.
-
-config SAMA5_EMAC_PHYSR_100MBPS
-	hex "PHY 100Mbps Speed Value"
-	depends on SAMA5_EMAC_AUTONEG && !SAMA5_EMAC_PHYSR_ALTCONFIG
-	---help---
-		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This provides the value
-		of the speed bit(s) indicating 100MBps speed.
-
-config SAMA5_EMAC_PHYSR_MODE
-	hex "PHY Mode Mask"
-	depends on SAMA5_EMAC_AUTONEG && !SAMA5_EMAC_PHYSR_ALTCONFIG
-	---help---
-		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This provide bit mask
-		for isolating the full or half duplex mode bits.
-
-config SAMA5_EMAC_PHYSR_FULLDUPLEX
-	hex "PHY Full Duplex Mode Value"
-	depends on SAMA5_EMAC_AUTONEG && !SAMA5_EMAC_PHYSR_ALTCONFIG
-	---help---
-		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This provides the
-		value of the mode bits indicating full duplex mode.
+if SAMA5_EMAC_AUTONEG
+if SAMA5_EMAC_PHYSR_ALTCONFIG
 
 config SAMA5_EMAC_PHYSR_ALTMODE
 	hex "PHY Mode Mask"
-	depends on SAMA5_EMAC_AUTONEG && SAMA5_EMAC_PHYSR_ALTCONFIG
 	---help---
 		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This provide bit mask
 		for isolating the speed and full/half duplex mode bits.
 
 config SAMA5_EMAC_PHYSR_10HD
 	hex "10MBase-T Half Duplex Value"
-	depends on SAMA5_EMAC_AUTONEG && SAMA5_EMAC_PHYSR_ALTCONFIG
 	---help---
 		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This is the value
 		under the bit mask that represents the 10Mbps, half duplex setting.
 
 config SAMA5_EMAC_PHYSR_100HD
 	hex "100Base-T Half Duplex Value"
-	depends on SAMA5_EMAC_AUTONEG && SAMA5_EMAC_PHYSR_ALTCONFIG
 	---help---
 		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This is the value
 		under the bit mask that represents the 100Mbps, half duplex setting.
 
 config SAMA5_EMAC_PHYSR_10FD
 	hex "10Base-T Full Duplex Value"
-	depends on SAMA5_EMAC_AUTONEG && SAMA5_EMAC_PHYSR_ALTCONFIG
 	---help---
 		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This is the value
 		under the bit mask that represents the 10Mbps, full duplex setting.
 
 config SAMA5_EMAC_PHYSR_100FD
 	hex "100Base-T Full Duplex Value"
-	depends on SAMA5_EMAC_AUTONEG && SAMA5_EMAC_PHYSR_ALTCONFIG
 	---help---
 		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This is the value
 		under the bit mask that represents the 100Mbps, full duplex setting.
+
+endif # SAMA5_EMAC_PHYSR_ALTCONFIG
+if !SAMA5_EMAC_PHYSR_ALTCONFIG
+
+config SAMA5_EMAC_PHYSR_SPEED
+	hex "PHY Speed Mask"
+	---help---
+		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This provides bit mask
+		for isolating the 10 or 100MBps speed indication.
+
+config SAMA5_EMAC_PHYSR_100MBPS
+	hex "PHY 100Mbps Speed Value"
+	---help---
+		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This provides the value
+		of the speed bit(s) indicating 100MBps speed.
+
+config SAMA5_EMAC_PHYSR_MODE
+	hex "PHY Mode Mask"
+	---help---
+		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This provide bit mask
+		for isolating the full or half duplex mode bits.
+
+config SAMA5_EMAC_PHYSR_FULLDUPLEX
+	hex "PHY Full Duplex Mode Value"
+	---help---
+		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This provides the
+		value of the mode bits indicating full duplex mode.
+
+endif # !SAMA5_EMAC_PHYSR_ALTCONFIG
+endif # SAMA5_EMAC_AUTONEG
 
 config SAMA5_EMACA_PREALLOCATE
 	bool "Preallocate buffers"
@@ -1343,6 +1347,9 @@ endmenu # EMAC device driver options
 endif # SAMA5_EMACA
 
 if SAMA5_EMACB
+
+menu "EMAC device driver options"
+
 if SAMA5_EMAC0
 
 menu "EMAC0 device driver options"
@@ -1462,69 +1469,68 @@ config SAMA5_EMAC0_PHYSR_ALTCONFIG
 		where speed and mode information are combined.  This might mean, for example,
 		separate bits for 10HD, 100HD, 10FD and 100FD.
 
-config SAMA5_EMAC0_PHYSR_SPEED
-	hex "PHY Speed Mask"
-	depends on SAMA5_EMAC0_AUTONEG && !SAMA5_EMAC0_PHYSR_ALTCONFIG
-	---help---
-		This must be provided if SAMA5_EMAC0_AUTONEG is defined.  This provides bit mask
-		for isolating the 10 or 100MBps speed indication.
-
-config SAMA5_EMAC0_PHYSR_100MBPS
-	hex "PHY 100Mbps Speed Value"
-	depends on SAMA5_EMAC0_AUTONEG && !SAMA5_EMAC0_PHYSR_ALTCONFIG
-	---help---
-		This must be provided if SAMA5_EMAC0_AUTONEG is defined.  This provides the value
-		of the speed bit(s) indicating 100MBps speed.
-
-config SAMA5_EMAC0_PHYSR_MODE
-	hex "PHY Mode Mask"
-	depends on SAMA5_EMAC0_AUTONEG && !SAMA5_EMAC0_PHYSR_ALTCONFIG
-	---help---
-		This must be provided if SAMA5_EMAC0_AUTONEG is defined.  This provide bit mask
-		for isolating the full or half duplex mode bits.
-
-config SAMA5_EMAC0_PHYSR_FULLDUPLEX
-	hex "PHY Full Duplex Mode Value"
-	depends on SAMA5_EMAC0_AUTONEG && !SAMA5_EMAC0_PHYSR_ALTCONFIG
-	---help---
-		This must be provided if SAMA5_EMAC0_AUTONEG is defined.  This provides the
-		value of the mode bits indicating full duplex mode.
+if SAMA5_EMAC0_AUTONEG
+if SAMA5_EMAC0_PHYSR_ALTCONFIG
 
 config SAMA5_EMAC0_PHYSR_ALTMODE
 	hex "PHY Mode Mask"
-	depends on SAMA5_EMAC0_AUTONEG && SAMA5_EMAC0_PHYSR_ALTCONFIG
 	---help---
 		This must be provided if SAMA5_EMAC0_AUTONEG is defined.  This provide bit mask
 		for isolating the speed and full/half duplex mode bits.
 
 config SAMA5_EMAC0_PHYSR_10HD
 	hex "10MBase-T Half Duplex Value"
-	depends on SAMA5_EMAC0_AUTONEG && SAMA5_EMAC0_PHYSR_ALTCONFIG
 	---help---
 		This must be provided if SAMA5_EMAC0_AUTONEG is defined.  This is the value
 		under the bit mask that represents the 10Mbps, half duplex setting.
 
 config SAMA5_EMAC0_PHYSR_100HD
 	hex "100Base-T Half Duplex Value"
-	depends on SAMA5_EMAC0_AUTONEG && SAMA5_EMAC0_PHYSR_ALTCONFIG
 	---help---
 		This must be provided if SAMA5_EMAC0_AUTONEG is defined.  This is the value
 		under the bit mask that represents the 100Mbps, half duplex setting.
 
 config SAMA5_EMAC0_PHYSR_10FD
 	hex "10Base-T Full Duplex Value"
-	depends on SAMA5_EMAC0_AUTONEG && SAMA5_EMAC0_PHYSR_ALTCONFIG
 	---help---
 		This must be provided if SAMA5_EMAC0_AUTONEG is defined.  This is the value
 		under the bit mask that represents the 10Mbps, full duplex setting.
 
 config SAMA5_EMAC0_PHYSR_100FD
 	hex "100Base-T Full Duplex Value"
-	depends on SAMA5_EMAC0_AUTONEG && SAMA5_EMAC0_PHYSR_ALTCONFIG
 	---help---
 		This must be provided if SAMA5_EMAC0_AUTONEG is defined.  This is the value
 		under the bit mask that represents the 100Mbps, full duplex setting.
 
+endif # SAMA5_EMAC0_PHYSR_ALTCONFIG
+if !SAMA5_EMAC0_PHYSR_ALTCONFIG
+
+config SAMA5_EMAC0_PHYSR_SPEED
+	hex "PHY Speed Mask"
+	---help---
+		This must be provided if SAMA5_EMAC0_AUTONEG is defined.  This provides bit mask
+		for isolating the 10 or 100MBps speed indication.
+
+config SAMA5_EMAC0_PHYSR_100MBPS
+	hex "PHY 100Mbps Speed Value"
+	---help---
+		This must be provided if SAMA5_EMAC0_AUTONEG is defined.  This provides the value
+		of the speed bit(s) indicating 100MBps speed.
+
+config SAMA5_EMAC0_PHYSR_MODE
+	hex "PHY Mode Mask"
+	---help---
+		This must be provided if SAMA5_EMAC0_AUTONEG is defined.  This provides the
+		bit mask for isolating the full or half duplex mode bits.
+
+config SAMA5_EMAC0_PHYSR_FULLDUPLEX
+	hex "PHY Full Duplex Mode Value"
+	---help---
+		This must be provided if SAMA5_EMAC0_AUTONEG is defined.  This provides the
+		value of the mode bits indicating full duplex mode.
+
+endif # !SAMA5_EMAC0_PHYSR_ALTCONFIG
+endif # SAMA5_EMAC0_AUTONEG
 endmenu # EMAC0 device driver options
 endif # SAMA5_EMAC0
 
@@ -1647,69 +1653,68 @@ config SAMA5_EMAC1_PHYSR_ALTCONFIG
 		where speed and mode information are combined.  This might mean, for example,
 		separate bits for 10HD, 100HD, 10FD and 100FD.
 
-config SAMA5_EMAC1_PHYSR_SPEED
-	hex "PHY Speed Mask"
-	depends on SAMA5_EMAC1_AUTONEG && !SAMA5_EMAC1_PHYSR_ALTCONFIG
-	---help---
-		This must be provided if SAMA5_EMAC1_AUTONEG is defined.  This provides bit mask
-		for isolating the 10 or 100MBps speed indication.
-
-config SAMA5_EMAC1_PHYSR_100MBPS
-	hex "PHY 100Mbps Speed Value"
-	depends on SAMA5_EMAC1_AUTONEG && !SAMA5_EMAC1_PHYSR_ALTCONFIG
-	---help---
-		This must be provided if SAMA5_EMAC1_AUTONEG is defined.  This provides the value
-		of the speed bit(s) indicating 100MBps speed.
-
-config SAMA5_EMAC1_PHYSR_MODE
-	hex "PHY Mode Mask"
-	depends on SAMA5_EMAC1_AUTONEG && !SAMA5_EMAC1_PHYSR_ALTCONFIG
-	---help---
-		This must be provided if SAMA5_EMAC1_AUTONEG is defined.  This provide bit mask
-		for isolating the full or half duplex mode bits.
-
-config SAMA5_EMAC1_PHYSR_FULLDUPLEX
-	hex "PHY Full Duplex Mode Value"
-	depends on SAMA5_EMAC1_AUTONEG && !SAMA5_EMAC1_PHYSR_ALTCONFIG
-	---help---
-		This must be provided if SAMA5_EMAC1_AUTONEG is defined.  This provides the
-		value of the mode bits indicating full duplex mode.
+if SAMA5_EMAC1_AUTONEG
+if SAMA5_EMAC1_PHYSR_ALTCONFIG
 
 config SAMA5_EMAC1_PHYSR_ALTMODE
 	hex "PHY Mode Mask"
-	depends on SAMA5_EMAC1_AUTONEG && SAMA5_EMAC1_PHYSR_ALTCONFIG
 	---help---
 		This must be provided if SAMA5_EMAC1_AUTONEG is defined.  This provide bit mask
 		for isolating the speed and full/half duplex mode bits.
 
 config SAMA5_EMAC1_PHYSR_10HD
 	hex "10MBase-T Half Duplex Value"
-	depends on SAMA5_EMAC1_AUTONEG && SAMA5_EMAC1_PHYSR_ALTCONFIG
 	---help---
 		This must be provided if SAMA5_EMAC1_AUTONEG is defined.  This is the value
 		under the bit mask that represents the 10Mbps, half duplex setting.
 
 config SAMA5_EMAC1_PHYSR_100HD
 	hex "100Base-T Half Duplex Value"
-	depends on SAMA5_EMAC1_AUTONEG && SAMA5_EMAC1_PHYSR_ALTCONFIG
 	---help---
 		This must be provided if SAMA5_EMAC1_AUTONEG is defined.  This is the value
 		under the bit mask that represents the 100Mbps, half duplex setting.
 
 config SAMA5_EMAC1_PHYSR_10FD
 	hex "10Base-T Full Duplex Value"
-	depends on SAMA5_EMAC1_AUTONEG && SAMA5_EMAC1_PHYSR_ALTCONFIG
 	---help---
 		This must be provided if SAMA5_EMAC1_AUTONEG is defined.  This is the value
 		under the bit mask that represents the 10Mbps, full duplex setting.
 
 config SAMA5_EMAC1_PHYSR_100FD
 	hex "100Base-T Full Duplex Value"
-	depends on SAMA5_EMAC1_AUTONEG && SAMA5_EMAC1_PHYSR_ALTCONFIG
 	---help---
 		This must be provided if SAMA5_EMAC1_AUTONEG is defined.  This is the value
 		under the bit mask that represents the 100Mbps, full duplex setting.
 
+endif # SAMA5_EMAC1_PHYSR_ALTCONFIG
+if !SAMA5_EMAC1_PHYSR_ALTCONFIG
+
+config SAMA5_EMAC1_PHYSR_SPEED
+	hex "PHY Speed Mask"
+	---help---
+		This must be provided if SAMA5_EMAC1_AUTONEG is defined.  This provides bit mask
+		for isolating the 10 or 100MBps speed indication.
+
+config SAMA5_EMAC1_PHYSR_100MBPS
+	hex "PHY 100Mbps Speed Value"
+	---help---
+		This must be provided if SAMA5_EMAC1_AUTONEG is defined.  This provides the value
+		of the speed bit(s) indicating 100MBps speed.
+
+config SAMA5_EMAC1_PHYSR_MODE
+	hex "PHY Mode Mask"
+	---help---
+		This must be provided if SAMA5_EMAC1_AUTONEG is defined.  This provide bit mask
+		for isolating the full or half duplex mode bits.
+
+config SAMA5_EMAC1_PHYSR_FULLDUPLEX
+	hex "PHY Full Duplex Mode Value"
+	---help---
+		This must be provided if SAMA5_EMAC1_AUTONEG is defined.  This provides the
+		value of the mode bits indicating full duplex mode.
+
+endif # !SAMA5_EMAC1_PHYSR_ALTCONFIG
+endif # SAMA5_EMAC1_AUTONEG
 endmenu # EMAC1 device driver options
 endif # SAMA5_EMAC1
 
@@ -1736,6 +1741,7 @@ config SAMA5_EMACB_REGDEBUG
 	---help---
 		Enable very low-level register access debug.  Depends on DEBUG.
 
+endmenu # EMAC device driver options
 endif # SAMA5_EMACB
 
 if SAMA5_EMACA || SAMA5_EMAC0 || SAMA5_EMAC1 || SAMA5_GMAC
