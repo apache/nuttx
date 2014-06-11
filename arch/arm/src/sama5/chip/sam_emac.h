@@ -42,6 +42,13 @@
 
 #include <nuttx/config.h>
 
+/* These two EMAC implementations differ in naming and in register layout but are
+ * functionally equivalent.  Here they are distinguished as 'A' and 'B'.  For now,
+ * the 'A' and 'B' drivers are kept separate (mostly because the 'B' driver needs
+ * to support two EMAC blocks.  But the 'B' driver should replace the 'A' driver
+ * someday.
+ */
+
 #if defined(CONFIG_SAMA5_EMACA)
 #  include "chip/sam_emaca.h"
 #elif defined(CONFIG_SAMA5_EMACB)

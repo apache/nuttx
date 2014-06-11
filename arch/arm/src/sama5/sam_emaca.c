@@ -1,6 +1,9 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_emaca.c
  *
+ * 10/100 Base-T Ethernet driver for the SAMA5D3.  Denoted as 'A' to
+ * distinguish it from the SAMA5D4 EMAC driver.
+ *
  *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -81,7 +84,7 @@
 #if defined(CONFIG_NET) && defined(CONFIG_SAMA5_EMACA)
 
 /****************************************************************************
- * Definitions
+ * Preprocessor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 
@@ -97,7 +100,7 @@
 #  define CONFIG_SAMA5_EMAC_NTXBUFFERS  8
 #endif
 
-#undef CONFIG_SAMA5_EMAC_NBC
+#undef CONFIG_SAMA5_EMACA_NBC
 
 #ifndef CONFIG_SAMA5_EMAC_PHYADDR
 #  error "CONFIG_SAMA5_EMAC_PHYADDR must be defined in the NuttX configuration"
@@ -290,7 +293,7 @@ struct sam_emac_s
 
 static struct sam_emac_s g_emac;
 
-#ifdef CONFIG_SAMA5_EMAC_PREALLOCATE
+#ifdef CONFIG_SAMA5_EMACA_PREALLOCATE
 /* Preallocated data */
 /* TX descriptors list */
 
@@ -565,7 +568,7 @@ static uint16_t sam_txfree(struct sam_emac_s *priv)
 
 static int sam_buffer_initialize(struct sam_emac_s *priv)
 {
-#ifdef CONFIG_SAMA5_EMAC_PREALLOCATE
+#ifdef CONFIG_SAMA5_EMACA_PREALLOCATE
   /* Use pre-allocated buffers */
 
   priv->txdesc   = g_txdesc;
@@ -643,7 +646,7 @@ static int sam_buffer_initialize(struct sam_emac_s *priv)
 
 static void sam_buffer_free(struct sam_emac_s *priv)
 {
-#ifndef CONFIG_SAMA5_EMAC_PREALLOCATE
+#ifndef CONFIG_SAMA5_EMACA_PREALLOCATE
   /* Free allocated buffers */
 
   if (priv->txdesc)
@@ -723,7 +726,7 @@ static int sam_transmit(struct sam_emac_s *priv)
       return -EBUSY;
     }
 
-  /* Setup/Copy data to transmition buffer */
+  /* Setup/Copy data to transmission buffer */
 
   if (dev->d_len > 0)
     {
@@ -1086,7 +1089,9 @@ static int sam_recvframe(struct sam_emac_s *priv)
             }
         }
 
-      /* We have not encount the SOF yet... discard this fragment and keep looking */
+      /* We have not encountered the SOF yet... discard this fragment and
+       * keep looking
+       */
 
       else
         {
@@ -1230,7 +1235,7 @@ static void sam_txdone(struct sam_emac_s *priv)
 {
   struct emac_txdesc_s *txdesc;
 
-  /* Are there any outstanding transmssions?  Loop until either (1) all of
+  /* Are there any outstanding transmissions?  Loop until either (1) all of
    * the TX have been examined, or (2) until we encounter the first
    * descriptor that is still in use by the hardware.
    */
@@ -2525,7 +2530,7 @@ static int sam_phyinit(struct sam_emac_s *priv)
  * Function: sam_ethgpioconfig
  *
  * Description:
- *  Configure GPIOs for the EMAC interface.
+ *  Configure PIOs for the EMAC interface.
  *
  * Parameters:
  *   priv - A reference to the private driver state structure
@@ -2824,7 +2829,7 @@ static int sam_emac_configure(struct sam_emac_s *priv)
   regval &= ~EMAC_NCFGR_CAF;
 #endif
 
-#ifdef CONFIG_SAMA5_EMAC_NBC
+#ifdef CONFIG_SAMA5_EMACA_NBC
   regval |=  EMAC_NCFGR_NBC;
 #else
   regval &= ~EMAC_NCFGR_NBC;
@@ -2895,7 +2900,7 @@ int sam_emac_initialize(void)
   priv->txpoll = wd_create();
   if (!priv->txpoll)
     {
-      nlldbg("ERROR: Failed to create periodic poll timer\n");
+      ndbg("ERROR: Failed to create periodic poll timer\n");
       ret = -EAGAIN;
       goto errout;
     }
@@ -2903,7 +2908,7 @@ int sam_emac_initialize(void)
   priv->txtimeout = wd_create();     /* Create TX timeout timer */
   if (!priv->txpoll)
     {
-      nlldbg("ERROR: Failed to create periodic poll timer\n");
+      ndbg("ERROR: Failed to create periodic poll timer\n");
       ret = -EAGAIN;
       goto errout_with_txpoll;
     }
@@ -2917,7 +2922,7 @@ int sam_emac_initialize(void)
   ret = sam_buffer_initialize(priv);
   if (ret < 0)
     {
-      nlldbg("ERROR: sam_buffer_initialize failed: %d\n", ret);
+      ndbg("ERROR: sam_buffer_initialize failed: %d\n", ret);
       goto errout_with_txtimeout;
     }
 
@@ -2928,7 +2933,7 @@ int sam_emac_initialize(void)
   ret = irq_attach(SAM_IRQ_EMAC, sam_emac_interrupt);
   if (ret < 0)
     {
-      nlldbg("ERROR: Failed to attach the handler to the IRQ%d\n", SAM_IRQ_EMAC);
+      ndbg("ERROR: Failed to attach the handler to the IRQ%d\n", SAM_IRQ_EMAC);
       goto errout_with_buffers;
     }
 
@@ -2941,7 +2946,7 @@ int sam_emac_initialize(void)
   ret = sam_ifdown(&priv->dev);
   if (ret < 0)
     {
-      nlldbg("ERROR: Failed to put the interface in the down state: %d\n", ret);
+      ndbg("ERROR: Failed to put the interface in the down state: %d\n", ret);
       goto errout_with_buffers;
     }
 
@@ -2953,7 +2958,7 @@ int sam_emac_initialize(void)
       return ret;
     }
 
-  nlldbg("ERROR: netdev_register() failed: %d\n", ret);
+  ndbg("ERROR: netdev_register() failed: %d\n", ret);
 
 errout_with_buffers:
   sam_buffer_free(priv);

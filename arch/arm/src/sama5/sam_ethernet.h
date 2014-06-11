@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/sama5/sam_ethernet.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,6 +78,10 @@
 #  error GMAC and EMAC cannot both be ETH0
 #endif
 
+#if defined(CONFIG_SAMA5_EMAC0_ISETH0) && defined(CONFIG_SAMA5_EMAC1_ISETH0)
+#  error EMAC0 and EMAC2 cannot both be ETH0
+#endif
+
 #if defined(CONFIG_SAMA5_GMAC_ISETH0)
 #  if defined(CONFIG_ETH0_PHY_DM9161)
 #    define SAMA5_GMAC_PHY_DM9161 1
@@ -125,6 +129,58 @@
 #    define SAMA5_EMAC_PHY_KSZ8051 1
 #  elif defined(CONFIG_ETH1_PHY_KSZ90x1)
 #    define SAMA5_EMAC_PHY_KSZ90x1 1
+#  else
+#    error ETH1 PHY unrecognized
+#  endif
+#endif
+
+#if defined(CONFIG_SAMA5_EMAC0_ISETH0)
+#  if defined(CONFIG_ETH0_PHY_DM9161)
+#    define SAMA5_EMAC0_PHY_DM9161 1
+#  elif defined(CONFIG_ETH0_PHY_LAN8700)
+#    define SAMA5_EMAC0_PHY_LAN8700 1
+#  elif defined(CONFIG_ETH0_PHY_KSZ8051)
+#    define SAMA5_EMAC0_PHY_KSZ8051 1
+#  elif defined(CONFIG_ETH0_PHY_KSZ90x1)
+#    define SAMA5_EMAC0_PHY_KSZ90x1 1
+#  else
+#    error ETH0 PHY unrecognized
+#  endif
+#elif defined(CONFIG_SAMA5_EMAC0)
+#  if defined(CONFIG_ETH1_PHY_DM9161)
+#    define SAMA5_EMAC0_PHY_DM9161 1
+#  elif defined(CONFIG_ETH1_PHY_LAN8700)
+#    define SAMA5_EMAC0_PHY_LAN8700 1
+#  elif defined(CONFIG_ETH1_PHY_KSZ8051)
+#    define SAMA5_EMAC0_PHY_KSZ8051 1
+#  elif defined(CONFIG_ETH1_PHY_KSZ90x1)
+#    define SAMA5_EMAC0_PHY_KSZ90x1 1
+#  else
+#    error ETH1 PHY unrecognized
+#  endif
+#endif
+
+#if defined(CONFIG_SAMA5_EMAC1_ISETH0)
+#  if defined(CONFIG_ETH0_PHY_DM9161)
+#    define SAMA5_EMAC1_PHY_DM9161 1
+#  elif defined(CONFIG_ETH0_PHY_LAN8700)
+#    define SAMA5_EMAC1_PHY_LAN8700 1
+#  elif defined(CONFIG_ETH0_PHY_KSZ8051)
+#    define SAMA5_EMAC1_PHY_KSZ8051 1
+#  elif defined(CONFIG_ETH0_PHY_KSZ90x1)
+#    define SAMA5_EMAC1_PHY_KSZ90x1 1
+#  else
+#    error ETH0 PHY unrecognized
+#  endif
+#elif defined(CONFIG_SAMA5_EMAC1)
+#  if defined(CONFIG_ETH1_PHY_DM9161)
+#    define SAMA5_EMAC1_PHY_DM9161 1
+#  elif defined(CONFIG_ETH1_PHY_LAN8700)
+#    define SAMA5_EMAC1_PHY_LAN8700 1
+#  elif defined(CONFIG_ETH1_PHY_KSZ8051)
+#    define SAMA5_EMAC1_PHY_KSZ8051 1
+#  elif defined(CONFIG_ETH1_PHY_KSZ90x1)
+#    define SAMA5_EMAC1_PHY_KSZ90x1 1
 #  else
 #    error ETH1 PHY unrecognized
 #  endif
