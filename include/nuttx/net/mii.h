@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/net/mii.h
  *
- *   Copyright (C) 2008-2010, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010, 2012-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -110,9 +110,9 @@
 #define MII_KS8721_INTCS             0x1b      /* Interrupt control/status register */
 #define MII_KS8721_10BTCR            0x1f      /* 10BASE-TX PHY control register */
 
-/* Micrel KSZ805:  0x11, 0x15-0x18, 0x1b, 0x1d, 0x1e-0x1f */
+/* Micrel KSZ8051:  0x11, 0x15-0x18, 0x1b, 0x1d-0x1f */
 
-#define MII_KSZ8051_AFEC1            0x11      /* AFE Control 1  */
+#define MII_KSZ8051_AFEC1            0x11      /* AFE Control 1 */
 #define MII_KSZ8051_RXERR            0x15      /* RXERR Counter */
 #define MII_KSZ8051_OMSO             0x16      /* Operation Mode Strap Override */
 #define MII_KSZ8051_OMSS             0x17      /* Operation Mode Strap Status */
@@ -121,6 +121,19 @@
 #define MII_KSZ8051_LINKMD           0x1d      /* LinkMD(c) Control/Status */
 #define MII_KSZ8051_PHYCTRL1         0x1e      /* PHY Control 1 */
 #define MII_KSZ8051_PHYCTRL2         0x1f      /* PHY Control 2 */
+
+/* Micrel KSZ8081:  0x10-0x11, 0x15-0x18, 0x1b, 0x1d-0x1f */
+
+#define MII_KSZ8081_DRCTRL           0x10      /* Digital Reserve Control */
+#define MII_KSZ8081_AFEC1            0x11      /* AFE Control 1 */
+#define MII_KSZ8081_RXERR            0x15      /* RXERR Counter */
+#define MII_KSZ8081_OMSO             0x16      /* Operation Mode Strap Override */
+#define MII_KSZ8081_OMSS             0x17      /* Operation Mode Strap Status */
+#define MII_KSZ8081_XCTRL            0x18      /* Expanded Control */
+#define MII_KSZ8081_INT              0x1b      /* Interrupt Control/Status */
+#define MII_KSZ8081_LINKMD           0x1d      /* LinkMD(c) Control/Status */
+#define MII_KSZ8081_PHYCTRL1         0x1e      /* PHY Control 1 */
+#define MII_KSZ8081_PHYCTRL2         0x1f      /* PHY Control 2 */
 
 /* National Semiconductor DP83848C PHY Extended Registers. 0x8-0x15, 0x13, 0x1c reserved */
 
@@ -461,13 +474,20 @@
 #define KS8721_10BTCR_ENERGY         (1 << 12) /* Bit 12: Energy detect */
 #define KS8721_10BTCR_PAIRSWAPD      (1 << 13) /* Bit 13: Pairswap disable */
 
-/* KSZ8051-specific register bit settings ***********************************/
-/* KSZ805 MII ID1/2 register bits */
+/* KSZ8051/81-specific register bit settings ********************************/
+/* KSZ8051/81 MII ID1/2 register bits */
 
 #define MII_PHYID1_KSZ8051           0x0022    /* ID1 value for Micrel KSZ8051 */
 #define MII_PHYID2_KSZ8051           0x1550    /* ID2 value for Micrel KSZ8051 */
 
-/* KSZ805 Register 0x1e: PHY Control 1 */
+#define MII_PHYID1_KSZ8081           0x0022    /* ID1 value for Micrel KSZ8081 */
+#define MII_PHYID2_KSZ8081           0x1560    /* ID2 value for Micrel KSZ8081 */
+
+/* KSZ8081 Digital Reserve Control */
+                                               /* Bits 5-15: Reserved */
+#define KSZ8081_DRCTRL_PLLOFF        (1 << 4)  /* Bit 4: Turn PLL off in EDPD mode */
+                                               /* Bits 0-3: Reserved */
+/* KSZ8051/81 Register 0x1e: PHY Control 1 */
                                                /* Bits 10-15: Reserved */
 #define MII_PHYCTRL1_ENPAUSE         (1 << 9)  /* Bit 9: Enable pause */
 #define MII_PHYCTRL1_LINKSTATUS      (1 << 8)  /* Bit 8: Link status */

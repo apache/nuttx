@@ -161,6 +161,9 @@
 #elif defined(SAMA5_EMAC_PHY_KSZ8051)
 #  define MII_OUI_MSB    0x0022
 #  define MII_OUI_LSB    0x05
+#elif defined(SAMA5_EMAC_PHY_KSZ8081)
+#  define MII_OUI_MSB    0x0022
+#  define MII_OUI_LSB    0x05
 #else
 #  error EMAC PHY unrecognized
 #endif
