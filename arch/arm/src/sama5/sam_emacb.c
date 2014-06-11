@@ -158,14 +158,17 @@
 /* PHY definitions */
 
 #if defined(SAMA5_EMAC0_PHY_DM9161)
-#  define MII_OUI_MSB    0x0181
-#  define MII_OUI_LSB    0x2e
+#  define EMAC0_MII_OUI_MSB    0x0181
+#  define EMAC0_MII_OUI_LSB    0x2e
 #elif defined(SAMA5_EMAC0_PHY_LAN8700)
-#  define MII_OUI_MSB    0x0007
-#  define MII_OUI_LSB    0x30
+#  define EMAC0_MII_OUI_MSB    0x0007
+#  define EMAC0_MII_OUI_LSB    0x30
 #elif defined(SAMA5_EMAC0_PHY_KSZ8051)
-#  define MII_OUI_MSB    0x0022
-#  define MII_OUI_LSB    0x05
+#  define EMAC0_MII_OUI_MSB    0x0022
+#  define EMAC0_MII_OUI_LSB    0x05
+#elif defined(SAMA5_EMAC_PHY_KSZ8081)
+#  define EMAC0_MII_OUI_MSB    0x0022
+#  define EMAC0_MII_OUI_LSB    0x05
 #else
 #  error EMAC PHY unrecognized
 #endif
@@ -235,14 +238,17 @@
 /* PHY definitions */
 
 #if defined(SAMA5_EMAC1_PHY_DM9161)
-#  define MII_OUI_MSB    0x0181
-#  define MII_OUI_LSB    0x2e
+#  define EMAC1_MII_OUI_MSB    0x0181
+#  define EMAC1_MII_OUI_LSB    0x2e
 #elif defined(SAMA5_EMAC1_PHY_LAN8700)
-#  define MII_OUI_MSB    0x0007
-#  define MII_OUI_LSB    0x30
+#  define EMAC1_MII_OUI_MSB    0x0007
+#  define EMAC1_MII_OUI_LSB    0x30
 #elif defined(SAMA5_EMAC1_PHY_KSZ8051)
-#  define MII_OUI_MSB    0x0022
-#  define MII_OUI_LSB    0x05
+#  define EMAC1_MII_OUI_MSB    0x0022
+#  define EMAC1_MII_OUI_LSB    0x05
+#elif defined(SAMA5_EMAC1_PHY_KSZ8081)
+#  define EMAC1_MII_OUI_MSB    0x0022
+#  define EMAC1_MII_OUI_LSB    0x05
 #else
 #  error EMAC PHY unrecognized
 #endif
@@ -322,6 +328,8 @@ struct sam_emacattr_s
 
   uint8_t              phyaddr;      /* PHY address */
   uint8_t              physr;        /* PHY status register address */
+  uint16_t             msoui;        /* MS 16 bits of the 18-bit OUI */
+  uint8_t              lsoui;        /* LS 2 bits of the 18-bit OUI */
   bool                 rmii;         /* True: RMII vs. False: MII */
   bool                 clause45;     /* True: Clause 45 behavior */
 //bool                 autoneg;      /* True: Autonegotiate rate and *plex */
@@ -577,6 +585,8 @@ static const struct sam_emacattr_s g_emac0_attr =
 
   .phyaddr      = CONFIG_SAMA5_EMAC0_PHYADDR,
   .physr        = CONFIG_SAMA5_EMAC0_PHYSR,
+  .msoui        = EMAC0_MII_OUI_MSB,
+  .lsoui        = EMAC0_MII_OUI_LSB,
 #ifdef CONFIG_SAMA5_EMAC0_RMII
   .rmii         = true,
 #endif
@@ -643,6 +653,8 @@ static const struct sam_emacattr_s g_emac1_attr =
 
   .phyaddr      = CONFIG_SAMA5_EMAC1_PHYADDR,
   .physr        = CONFIG_SAMA5_EMAC1_PHYSR,
+  .msoui        = EMAC1_MII_OUI_MSB,
+  .lsoui        = EMAC1_MII_OUI_LSB,
 #ifdef CONFIG_SAMA5_EMAC1_RMII
   .rmii         = true,
 #endif
@@ -2400,7 +2412,7 @@ static int sam_phyfind(struct sam_emac_s *priv, uint8_t *phyaddr)
   /* Check current candidate address */
 
   ret = sam_phyread(priv, candidate, MII_PHYID1, &phyval);
-  if (ret == OK && phyval == MII_OUI_MSB)
+  if (ret == OK && phyval == priv->attr->msoui)
     {
       *phyaddr = candidate;
       ret = OK;
@@ -2422,7 +2434,7 @@ static int sam_phyfind(struct sam_emac_s *priv, uint8_t *phyaddr)
           /* Try reading the PHY ID from the candidate PHY address */
 
           ret = sam_phyread(priv, candidate, MII_PHYID1, &phyval);
-          if (ret == OK && phyval == MII_OUI_MSB)
+          if (ret == OK && phyval == priv->attr->msoui)
             {
               ret = OK;
               break;
@@ -2625,8 +2637,9 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
 
   nllvdbg("PHYID2: %04x PHY address: %02x\n", phyid2, priv->phyaddr);
 
-  if (phyid1 == MII_OUI_MSB &&
-     ((phyid2 & MII_PHYID2_OUI_MASK) >> MII_PHYID2_OUI_SHIFT) == MII_OUI_LSB)
+  if (phyid1 == priv->attr->msoui &&
+     ((phyid2 & MII_PHYID2_OUI_MASK) >> MII_PHYID2_OUI_SHIFT) ==
+      (uint16_t)priv->attr->lsoui)
     {
       nllvdbg("  Vendor Model Number:   %04x\n",
              (phyid2 & MII_PHYID2_MODEL_MASK) >> MII_PHYID2_MODEL_SHIFT);

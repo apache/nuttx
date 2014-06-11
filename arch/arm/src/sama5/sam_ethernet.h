@@ -115,6 +115,8 @@
 #    define SAMA5_EMAC_PHY_LAN8700 1
 #  elif defined(CONFIG_ETH0_PHY_KSZ8051)
 #    define SAMA5_EMAC_PHY_KSZ8051 1
+#  elif defined(CONFIG_ETH0_PHY_KSZ8081)
+#    define SAMA5_EMAC_PHY_KSZ8081 1
 #  elif defined(CONFIG_ETH0_PHY_KSZ90x1)
 #    define SAMA5_EMAC_PHY_KSZ90x1 1
 #  else
@@ -127,6 +129,8 @@
 #    define SAMA5_EMAC_PHY_LAN8700 1
 #  elif defined(CONFIG_ETH1_PHY_KSZ8051)
 #    define SAMA5_EMAC_PHY_KSZ8051 1
+#  elif defined(CONFIG_ETH1_PHY_KSZ8081)
+#    define SAMA5_EMAC_PHY_KSZ8081 1
 #  elif defined(CONFIG_ETH1_PHY_KSZ90x1)
 #    define SAMA5_EMAC_PHY_KSZ90x1 1
 #  else
@@ -141,6 +145,8 @@
 #    define SAMA5_EMAC0_PHY_LAN8700 1
 #  elif defined(CONFIG_ETH0_PHY_KSZ8051)
 #    define SAMA5_EMAC0_PHY_KSZ8051 1
+#  elif defined(CONFIG_ETH0_PHY_KSZ8081)
+#    define SAMA5_EMAC0_PHY_KSZ8081 1
 #  elif defined(CONFIG_ETH0_PHY_KSZ90x1)
 #    define SAMA5_EMAC0_PHY_KSZ90x1 1
 #  else
@@ -153,6 +159,8 @@
 #    define SAMA5_EMAC0_PHY_LAN8700 1
 #  elif defined(CONFIG_ETH1_PHY_KSZ8051)
 #    define SAMA5_EMAC0_PHY_KSZ8051 1
+#  elif defined(CONFIG_ETH0_PHY_KSZ8081)
+#    define SAMA5_EMAC0_PHY_KSZ8081 1
 #  elif defined(CONFIG_ETH1_PHY_KSZ90x1)
 #    define SAMA5_EMAC0_PHY_KSZ90x1 1
 #  else
@@ -167,6 +175,8 @@
 #    define SAMA5_EMAC1_PHY_LAN8700 1
 #  elif defined(CONFIG_ETH0_PHY_KSZ8051)
 #    define SAMA5_EMAC1_PHY_KSZ8051 1
+#  elif defined(CONFIG_ETH0_PHY_KSZ8081)
+#    define SAMA5_EMAC1_PHY_KSZ8081 1
 #  elif defined(CONFIG_ETH0_PHY_KSZ90x1)
 #    define SAMA5_EMAC1_PHY_KSZ90x1 1
 #  else
@@ -179,6 +189,8 @@
 #    define SAMA5_EMAC1_PHY_LAN8700 1
 #  elif defined(CONFIG_ETH1_PHY_KSZ8051)
 #    define SAMA5_EMAC1_PHY_KSZ8051 1
+#  elif defined(CONFIG_ETH0_PHY_KSZ8081)
+#    define SAMA5_EMAC1_PHY_KSZ8081 1
 #  elif defined(CONFIG_ETH1_PHY_KSZ90x1)
 #    define SAMA5_EMAC1_PHY_KSZ90x1 1
 #  else
