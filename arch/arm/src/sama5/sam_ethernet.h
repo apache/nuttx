@@ -51,10 +51,10 @@
  ************************************************************************************/
 /* Definitions for use with sam_phy_boardinitialize */
 
-#if defined(SAMA5_HAVE_EMACA)
+#if defined(CONFIG_SAMA5_HAVE_EMACA)
 #  define GMAC_INTF 0
 #  define EMAC_INTF 1
-#elif defined(SAMA5_HAVE_EMACB)
+#elif defined(CONFIG_SAMA5_HAVE_EMACB)
 #  define EMAC0_INTF 0
 #  define EMAC1_INTF 1
 #endif
@@ -239,8 +239,10 @@ int sam_gmac_initialize(void);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SAMA5_EMACA) || defined(CONFIG_SAMA5_EMACB)
+#if defined(CONFIG_SAMA5_EMACA)
 int sam_emac_initialize(void);
+#elif defined(CONFIG_SAMA5_EMACB)
+int sam_emac_initialize(int intf);
 #endif
 
 /************************************************************************************

@@ -88,13 +88,13 @@
  ****************************************************************************/
 /* Configuration ************************************************************/
 
-/* Number of buffer for RX */
+/* Number of buffers for RX */
 
 #ifndef CONFIG_SAMA5_EMAC_NRXBUFFERS
 #  define CONFIG_SAMA5_EMAC_NRXBUFFERS  16
 #endif
 
-/* Number of buffer for TX */
+/* Number of buffers for TX */
 
 #ifndef CONFIG_SAMA5_EMAC_NTXBUFFERS
 #  define CONFIG_SAMA5_EMAC_NTXBUFFERS  8
@@ -267,7 +267,7 @@ struct sam_emac_s
 
   uint8_t               phyaddr;     /* PHY address (pre-defined by pins on reset) */
   uint16_t              txhead;      /* Circular buffer head index */
-  uint16_t              txtail;      /* Circualr buffer tail index */
+  uint16_t              txtail;      /* Circular buffer tail index */
   uint16_t              rxndx;       /* RX index for current processing RX descriptor */
 
   uint8_t              *rxbuffer;    /* Allocated RX buffers */
@@ -2895,7 +2895,7 @@ int sam_emac_initialize(void)
 #endif
   priv->dev.d_private = (void*)&g_emac; /* Used to recover private state from dev */
 
-  /* Create a watchdog for timing polling for and timing of transmisstions */
+  /* Create a watchdog for timing polling for and timing of transmissions */
 
   priv->txpoll = wd_create();
   if (!priv->txpoll)
