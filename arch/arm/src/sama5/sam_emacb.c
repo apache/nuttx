@@ -166,7 +166,7 @@
 #elif defined(SAMA5_EMAC0_PHY_KSZ8051)
 #  define EMAC0_MII_OUI_MSB    0x0022
 #  define EMAC0_MII_OUI_LSB    0x05
-#elif defined(SAMA5_EMAC_PHY_KSZ8081)
+#elif defined(SAMA5_EMAC0_PHY_KSZ8081)
 #  define EMAC0_MII_OUI_MSB    0x0022
 #  define EMAC0_MII_OUI_LSB    0x05
 #else
