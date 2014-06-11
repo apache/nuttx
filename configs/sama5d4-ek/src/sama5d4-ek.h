@@ -333,7 +333,8 @@
 #define IRQ_MCI0_CD   SAM_IRQ_PE5
 
 /* The microSD connects vi HSMCI1.  The card detect discrete is available on
- * PE14 (pulled high):
+ * PE14 (pulled high)  NOTE that PE15 must be controlled to provide power
+ * to the HSMCI1 slot (the HSMCI0 slot is always powered).
  *
  * ------------------------------ ------------------- -------------------------
  * SAMA5D4 PIO                    SIGNAL              USAGE
@@ -353,6 +354,9 @@
 #define PIO_MCI1_CD  (PIO_INPUT | PIO_CFG_DEFAULT | PIO_CFG_DEGLITCH | \
                       PIO_INT_BOTHEDGES | PIO_PORT_PIOE | PIO_PIN14)
 #define IRQ_MCI1_CD   SAM_IRQ_PE14
+
+#define IRQ_MCI1_PWR (PIO_OUTPUT | PIO_CFG_DEFAULT | PIO_OUTPUT_SET | \
+                      PIO_PORT_PIOE | PIO_PIN15)
 
 /* USB Ports ************************************************************************/
 /* The SAMA5D4 series-MB features three USB communication ports:
