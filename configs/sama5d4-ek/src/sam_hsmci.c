@@ -109,7 +109,8 @@
 struct sam_hsmci_state_s
 {
   struct sdio_dev_s *hsmci;   /* R/W device handle */
-  pio_pinset_t pincfg;        /* Card detect PIO pin configuration */
+  pio_pinset_t cdcfg;         /* Card detect PIO pin configuration */
+  pio_pinset_t pwrcfg;        /* Power PIO pin configuration */
   uint8_t irq;                /* Interrupt number (same as pid) */
   uint8_t slotno;             /* Slot number */
   bool cd;                    /* TRUE: card is inserted */
@@ -127,7 +128,7 @@ static int sam_hsmci0_cardetect(int irq, void *regs);
 
 static struct sam_hsmci_state_s g_hsmci0 =
 {
-  .pincfg  = PIO_MCI0_CD,
+  .cdcfg   = PIO_MCI0_CD,
   .irq     = IRQ_MCI0_CD,
   .slotno  = 0,
   .handler = sam_hsmci0_cardetect,
@@ -139,7 +140,8 @@ static int sam_hsmci1_cardetect(int irq, void *regs);
 
 static struct sam_hsmci_state_s g_hsmci1 =
 {
-  .pincfg  = PIO_MCI1_CD,
+  .cdcfg   = PIO_MCI1_CD,
+  .pwrcfg  = IRQ_MCI1_PWR,
   .irq     = IRQ_MCI1_CD,
   .slotno  = 1,
   .handler = sam_hsmci1_cardetect,
@@ -164,7 +166,7 @@ bool sam_cardinserted_internal(struct sam_hsmci_state_s *state)
 
   /* Get the state of the PIO pin */
 
-  inserted = sam_pioread(state->pincfg);
+  inserted = sam_pioread(state->cdcfg);
   fllvdbg("Slot %d inserted: %s\n", state->slotno, inserted ? "NO" : "YES");
   return !inserted;
 }
@@ -272,9 +274,13 @@ int sam_hsmci_initialize(int slotno, int minor)
       return -EINVAL;
     }
 
-  /* Initialize card-detect and write-protect PIOs */
+  /* Initialize card-detect, write-protect, and power enable PIOs */
 
-  sam_configpio(state->pincfg);
+  sam_configpio(state->cdcfg);
+  if (state->pwrcfg != 0)
+    {
+      sam_configpio(state->pwrcfg);
+    }
 
   /* Mount the SDIO-based MMC/SD block driver */
   /* First, get an instance of the SDIO interface */
@@ -297,7 +303,7 @@ int sam_hsmci_initialize(int slotno, int minor)
 
   /* Configure card detect interrupts */
 
-  sam_pioirq(state->pincfg);
+  sam_pioirq(state->cdcfg);
   (void)irq_attach(state->irq, state->handler);
 
   /* Then inform the HSMCI driver if there is or is not a card in the slot. */
