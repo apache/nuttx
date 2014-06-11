@@ -99,7 +99,7 @@ Contents
 Development Environment
 =======================
 
-  Several possible development environments may be use:
+  Several possible development environments may be used:
 
   - Linux or OSX native
   - Cygwin unders Windows
