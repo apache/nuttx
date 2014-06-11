@@ -1253,15 +1253,30 @@ static void up_set_format(struct uart_dev_s *dev)
   /* Configure parity mode */
 
   regval  = up_serialin(priv, STM32_USART_CR1_OFFSET);
-  regval &= ~(USART_CR1_PCE|USART_CR1_PS);
+  regval &= ~(USART_CR1_PCE | USART_CR1_PS | USART_CR1_M);
 
   if (priv->parity == 1)       /* Odd parity */
     {
-      regval |= (USART_CR1_PCE|USART_CR1_PS);
+      regval |= (USART_CR1_PCE | USART_CR1_PS);
     }
   else if (priv->parity == 2)  /* Even parity */
     {
       regval |= USART_CR1_PCE;
+    }
+
+  /* Configure word length (parity uses one of configured bits)
+   *
+   * Default: 1 start, 8 data (no parity), n stop, OR
+   *          1 start, 7 data + parity, n stop
+   */
+
+  if (priv->bits == 9 || (priv->bits == 8 && priv->parity != 0))
+    {
+      /* Select: 1 start, 8 data + parity, n stop, OR
+       *         1 start, 9 data (no parity), n stop.
+       */
+
+      regval |= USART_CR1_M;
     }
 
   up_serialout(priv, STM32_USART_CR1_OFFSET, regval);
@@ -1443,9 +1458,9 @@ static int up_setup(struct uart_dev_s *dev)
   /* Configure CR2 */
   /* Clear STOP, CLKEN, CPOL, CPHA, LBCL, and interrupt enable bits */
 
-  regval = up_serialin(priv, STM32_USART_CR2_OFFSET);
-  regval &= ~(USART_CR2_STOP_MASK|USART_CR2_CLKEN|USART_CR2_CPOL|
-              USART_CR2_CPHA|USART_CR2_LBCL|USART_CR2_LBDIE);
+  regval  = up_serialin(priv, STM32_USART_CR2_OFFSET);
+  regval &= ~(USART_CR2_STOP_MASK | USART_CR2_CLKEN | USART_CR2_CPOL |
+              USART_CR2_CPHA | USART_CR2_LBCL | USART_CR2_LBDIE);
 
   /* Configure STOP bits */
 
@@ -1457,17 +1472,10 @@ static int up_setup(struct uart_dev_s *dev)
   up_serialout(priv, STM32_USART_CR2_OFFSET, regval);
 
   /* Configure CR1 */
-  /* Clear M, TE, REm and all interrupt enable bits */
+  /* Clear TE, REm and all interrupt enable bits */
 
   regval  = up_serialin(priv, STM32_USART_CR1_OFFSET);
-  regval &= ~(USART_CR1_M|USART_CR1_TE|USART_CR1_RE|USART_CR1_ALLINTS);
-
-  /* Configure word length */
-
-  if (priv->bits == 9)         /* Default: 1 start, 8 data, n stop */
-    {
-      regval |= USART_CR1_M;   /* 1 start, 9 data, n stop */
-    }
+  regval &= ~(USART_CR1_TE | USART_CR1_RE | USART_CR1_ALLINTS);
 
   up_serialout(priv, STM32_USART_CR1_OFFSET, regval);
 
@@ -1475,7 +1483,7 @@ static int up_setup(struct uart_dev_s *dev)
   /* Clear CTSE, RTSE, and all interrupt enable bits */
 
   regval  = up_serialin(priv, STM32_USART_CR3_OFFSET);
-  regval &= ~(USART_CR3_CTSIE|USART_CR3_CTSE|USART_CR3_RTSE|USART_CR3_EIE);
+  regval &= ~(USART_CR3_CTSIE | USART_CR3_CTSE | USART_CR3_RTSE | USART_CR3_EIE);
 
   up_serialout(priv, STM32_USART_CR3_OFFSET, regval);
 
@@ -1486,7 +1494,7 @@ static int up_setup(struct uart_dev_s *dev)
   /* Enable Rx, Tx, and the USART */
 
   regval      = up_serialin(priv, STM32_USART_CR1_OFFSET);
-  regval     |= (USART_CR1_UE|USART_CR1_TE|USART_CR1_RE);
+  regval     |= (USART_CR1_UE | USART_CR1_TE | USART_CR1_RE);
   up_serialout(priv, STM32_USART_CR1_OFFSET, regval);
 
 #endif /* CONFIG_SUPPRESS_UART_CONFIG */
@@ -1584,7 +1592,7 @@ static void up_shutdown(struct uart_dev_s *dev)
   /* Disable Rx, Tx, and the UART */
 
   regval  = up_serialin(priv, STM32_USART_CR1_OFFSET);
-  regval &= ~(USART_CR1_UE|USART_CR1_TE|USART_CR1_RE);
+  regval &= ~(USART_CR1_UE | USART_CR1_TE | USART_CR1_RE);
   up_serialout(priv, STM32_USART_CR1_OFFSET, regval);
 }
 
@@ -2063,7 +2071,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
 #ifdef CONFIG_USART_ERRINTS
-      ie |= (USART_CR1_RXNEIE|USART_CR1_PEIE|USART_CR3_EIE);
+      ie |= (USART_CR1_RXNEIE | USART_CR1_PEIE | USART_CR3_EIE);
 #else
       ie |= USART_CR1_RXNEIE;
 #endif
@@ -2071,7 +2079,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
     }
   else
     {
-      ie &= ~(USART_CR1_RXNEIE|USART_CR1_PEIE|USART_CR3_EIE);
+      ie &= ~(USART_CR1_RXNEIE | USART_CR1_PEIE | USART_CR3_EIE);
     }
 
   /* Then set the new interrupt state */
