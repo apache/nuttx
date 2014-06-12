@@ -48,6 +48,10 @@
 #include <errno.h>
 #include <debug.h>
 
+#ifdef CONFIG_NET_PKT
+#  include <netpacket/packet.h>
+#endif
+
 #include <arch/irq.h>
 #include <nuttx/clock.h>
 #include <nuttx/net/uip/uip-arch.h>
@@ -140,6 +144,52 @@ static size_t recvfrom_newdata(FAR struct uip_driver_s *dev,
   return recvlen;
 }
 #endif /* CONFIG_NET_UDP || CONFIG_NET_TCP */
+
+/****************************************************************************
+ * Function: recvfrom_newpktdata
+ *
+ * Description:
+ *   Copy the read data from the packet
+ *
+ * Parameters:
+ *   dev      The structure of the network driver that caused the interrupt
+ *   pstate   recvfrom state structure
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions:
+ *   Running at the interrupt level
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_PKT
+static void recvfrom_newpktdata(FAR struct uip_driver_s *dev,
+                                FAR struct recvfrom_s *pstate)
+{
+  size_t recvlen;
+
+  if (dev->d_len > pstate->rf_buflen)
+    {
+      recvlen = pstate->rf_buflen;
+    }
+  else
+    {
+      recvlen = dev->d_len;
+    }
+
+  /* Copy the new packet data into the user buffer */
+
+  memcpy(pstate->rf_buffer, dev->d_buf, recvlen);
+  nllvdbg("Received %d bytes (of %d)\n", (int)recvlen, (int)dev->d_len);
+
+  /* Update the accumulated size of the data read */
+
+  pstate->rf_recvlen += recvlen;
+  pstate->rf_buffer  += recvlen;
+  pstate->rf_buffer  -= recvlen;
+}
+#endif /* CONFIG_NET_PKT */
 
 /****************************************************************************
  * Function: recvfrom_newtcpdata
@@ -252,7 +302,7 @@ static inline void recvfrom_newudpdata(FAR struct uip_driver_s *dev,
  *   Copy the read data from the packet
  *
  * Parameters:
- *   dev      The sructure of the network driver that caused the interrupt
+ *   dev      The structure of the network driver that caused the interrupt
  *   pstate   recvfrom state structure
  *
  * Returned Value:
@@ -405,6 +455,89 @@ static int recvfrom_timeout(struct recvfrom_s *pstate)
 }
 #endif /* CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */
 #endif /* CONFIG_NET_UDP || CONFIG_NET_TCP */
+
+/****************************************************************************
+ * Function: recvfrom_pktsender
+ *
+ * Description:
+ *
+ * Parameters:
+ *
+ * Returned Values:
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_PKT
+static inline void recvfrom_pktsender(FAR struct uip_driver_s *dev,
+                                      FAR struct recvfrom_s *pstate)
+{
+}
+#endif /* CONFIG_NET_PKT */
+
+/****************************************************************************
+ * Function: recvfrom_pktinterrupt
+ *
+ * Description:
+ *
+ * Parameters:
+ *
+ * Returned Values:
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_PKT
+static uint16_t recvfrom_pktinterrupt(FAR struct uip_driver_s *dev,
+                                      FAR void *conn, FAR void *pvpriv,
+                                      uint16_t flags)
+{
+  struct recvfrom_s *pstate = (struct recvfrom_s *)pvpriv;
+
+  nllvdbg("flags: %04x\n", flags);
+
+  /* 'priv' might be null in some race conditions (?) */
+
+  if (pstate)
+    {
+      /* If a new packet is available, then complete the read action. */
+
+      if ((flags & UIP_NEWDATA) != 0)
+        {
+          /* Copy the packet */
+          recvfrom_newpktdata(dev, pstate);
+
+          /* We are finished. */
+
+          nllvdbg("PKT done\n");
+
+          /* Don't allow any further call backs. */
+
+          pstate->rf_cb->flags   = 0;
+          pstate->rf_cb->priv    = NULL;
+          pstate->rf_cb->event   = NULL;
+#if 0
+          /* Save the sender's address in the caller's 'from' location */
+
+          recvfrom_pktsender(dev, pstate);
+#endif
+          /* indicate that the data has been consumed */
+
+          flags &= ~UIP_NEWDATA;
+
+          /* Wake up the waiting thread, returning the number of bytes
+           * actually read.
+           */
+
+          sem_post(&pstate->rf_sem);
+        }
+    }
+
+  return flags;
+}
+#endif /* CONFIG_NET_PKT */
 
 /****************************************************************************
  * Function: recvfrom_tcpsender
@@ -647,6 +780,7 @@ static uint16_t recvfrom_tcpinterrupt(FAR struct uip_driver_s *dev,
         }
 #endif /* CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */
     }
+
   return flags;
 }
 #endif /* CONFIG_NET_TCP */
@@ -700,7 +834,7 @@ static inline void recvfrom_udpsender(struct uip_driver_s *dev, struct recvfrom_
  *   UDP receive operation via by the uIP layer.
  *
  * Parameters:
- *   dev      The sructure of the network driver that caused the interrupt
+ *   dev      The structure of the network driver that caused the interrupt
  *   conn     The connection structure associated with the socket
  *   flags    Set of events describing why the callback was invoked
  *
@@ -746,11 +880,11 @@ static uint16_t recvfrom_udpinterrupt(struct uip_driver_s *dev, void *pvconn,
 
           recvfrom_udpsender(dev, pstate);
 
-         /* Indicate that the data has been consumed */
+          /* Indicate that the data has been consumed */
 
           flags &= ~UIP_NEWDATA;
 
-           /* Wake up the waiting thread, returning the number of bytes
+          /* Wake up the waiting thread, returning the number of bytes
            * actually read.
            */
 
@@ -786,6 +920,7 @@ static uint16_t recvfrom_udpinterrupt(struct uip_driver_s *dev, void *pvconn,
         }
 #endif /* CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */
     }
+
   return flags;
 }
 #endif /* CONFIG_NET_UDP */
@@ -891,6 +1026,89 @@ static ssize_t recvfrom_result(int result, struct recvfrom_s *pstate)
 #endif /* CONFIG_NET_UDP || CONFIG_NET_TCP */
 
 /****************************************************************************
+ * Function: pkt_recvfrom
+ *
+ * Description:
+ *   Perform the recvfrom operation for packet socket
+ *
+ * Parameters:
+ *
+ * Returned Value:
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_PKT
+static ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
+                           FAR struct sockaddr_ll *from)
+{
+  struct uip_pkt_conn *conn = (struct uip_pkt_conn *)psock->s_conn;
+  struct recvfrom_s state;
+  uip_lock_t save;
+  int ret;
+
+  /* Perform the packet recvfrom() operation */
+
+  /* Initialize the state structure.  This is done with interrupts
+   * disabled because we don't want anything to happen until we
+   * are ready.
+   */
+
+  save = uip_lock();
+  recvfrom_init(psock, buf, len, (struct sockaddr_in *)from, &state);
+
+  /* TODO recvfrom_init() expects from to be of type sockaddr_in, but
+   * in our case is sockaddr_ll
+   */
+
+#if 0
+  ret = uip_pktconnect(conn, NULL);
+  if (ret < 0)
+    {
+      goto errout_with_state;
+    }
+#endif
+
+  /* Set up the callback in the connection */
+
+  state.rf_cb = uip_pktcallbackalloc(conn);
+  if (state.rf_cb)
+    {
+      state.rf_cb->flags  = UIP_NEWDATA|UIP_POLL;
+      state.rf_cb->priv   = (void*)&state;
+      state.rf_cb->event  = recvfrom_pktinterrupt;
+
+      /* Notify the device driver of the receive call */
+
+      /* netdev_rxnotify(conn->ripaddr); */
+
+      /* Wait for either the receive to complete or for an error/timeout to occur.
+       * NOTES:  (1) uip_lockedwait will also terminate if a signal is received, (2)
+       * interrupts are disabled!  They will be re-enabled while the task sleeps
+       * and automatically re-enabled when the task restarts.
+       */
+
+      ret = uip_lockedwait(&state.rf_sem);
+
+      /* Make sure that no further interrupts are processed */
+
+      uip_pktcallbackfree(conn, state.rf_cb);
+      ret = recvfrom_result(ret, &state);
+    }
+  else
+    {
+      ret = -EBUSY;
+    }
+
+errout_with_state:
+  uip_unlock(save);
+  recvfrom_uninit(&state);
+  return ret;
+}
+#endif /* CONFIG_NET_PKT */
+
+/****************************************************************************
  * Function: udp_recvfrom
  *
  * Description:
@@ -900,7 +1118,7 @@ static ssize_t recvfrom_result(int result, struct recvfrom_s *pstate)
  *   psock    Pointer to the socket structure for the SOCK_DRAM socket
  *   buf      Buffer to receive data
  *   len      Length of buffer
- *   infrom   INET ddress of source (may be NULL)
+ *   infrom   INET address of source (may be NULL)
  *
  * Returned Value:
  *   On success, returns the number of characters sent.  On  error,
@@ -992,7 +1210,7 @@ errout_with_state:
  *   psock    Pointer to the socket structure for the SOCK_DRAM socket
  *   buf      Buffer to receive data
  *   len      Length of buffer
- *   infrom   INET ddress of source (may be NULL)
+ *   infrom   INET address of source (may be NULL)
  *
  * Returned Value:
  *   On success, returns the number of characters sent.  On  error,
@@ -1113,7 +1331,7 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
    * 1) Make sure thet there is buffer space to receive additional data
    *    (state.rf_buflen > 0).  This could be zero, for example, if read-ahead
    *    buffering was enabled and we filled the user buffer with data from
-   *    the read-ahead buffers.  Aand
+   *    the read-ahead buffers.  And
    * 2) if read-ahead buffering is enabled (CONFIG_NET_TCP_READAHEAD)
    *    and delay logic is disabled (CONFIG_NET_TCP_RECVDELAY == 0), then we
    *    not want to wait if we already obtained some data from the read-ahead
@@ -1190,7 +1408,7 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
  * Returned Value:
  *   On success, returns the number of characters sent.  If no data is
  *   available to be received and the peer has performed an orderly shutdown,
- *   recv() will return 0.  Othwerwise, on errors, -1 is returned, and errno
+ *   recv() will return 0.  Otherwise, on errors, -1 is returned, and errno
  *   is set appropriately:
  *
  *   EAGAIN
@@ -1225,6 +1443,9 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
                        int flags,FAR struct sockaddr *from,
                        FAR socklen_t *fromlen)
 {
+#if defined(CONFIG_NET_PKT)
+  FAR struct sockaddr_ll *llfrom = (struct sockaddr_ll *)from;
+#endif
 #if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP)
 #ifdef CONFIG_NET_IPv6
   FAR struct sockaddr_in6 *infrom = (struct sockaddr_in6 *)from;
@@ -1275,24 +1496,34 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_RECV);
 
-  /* Perform the TCP/IP or UDP recv() operation */
+  /* Read from the network interface driver buffer */
+  /* Or perform the TCP/IP or UDP recv() operation */
 
-#if defined(CONFIG_NET_UDP) && defined(CONFIG_NET_TCP)
+#if defined(CONFIG_NET_PKT)
+  if (psock->s_type == SOCK_RAW)
+    {
+      ret = pkt_recvfrom(psock, buf, len, llfrom);
+    }
+  else
+#endif
+#if defined(CONFIG_NET_TCP)
   if (psock->s_type == SOCK_STREAM)
     {
       ret = tcp_recvfrom(psock, buf, len, infrom);
     }
   else
+#endif
+#if defined(CONFIG_NET_UDP)
+  if (psock->s_type == SOCK_DGRAM)
     {
       ret = udp_recvfrom(psock, buf, len, infrom);
     }
-#elif defined(CONFIG_NET_TCP)
-  ret = tcp_recvfrom(psock, buf, len, infrom);
-#elif defined(CONFIG_NET_UDP)
-  ret = udp_recvfrom(psock, buf, len, infrom);
-#else
-  ret = -ENOSYS;
+  else
 #endif
+    {
+      ndbg("ERROR: Unsupported socket type: %d\n", psock->s_type
+      ret = -ENOSYS;
+    }
 
   /* Set the socket state to idle */
 

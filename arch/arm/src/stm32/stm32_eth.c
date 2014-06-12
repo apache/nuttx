@@ -56,6 +56,9 @@
 #include <nuttx/net/uip/uip.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/uip/uip-arch.h>
+#if defined(CONFIG_NET_PKT)
+#  include <nuttx/net/uip/uip-pkt.h>
+#endif
 
 #include "up_internal.h"
 
@@ -1589,6 +1592,12 @@ static void stm32_receive(FAR struct stm32_ethmac_s *priv)
 
   while (stm32_recvframe(priv) == OK)
     {
+#ifdef CONFIG_NET_PKT
+      /* When packet sockets are enabled, feed the frame into the packet tap */
+
+      uip_pktinput(&priv->dev);
+#endif
+
       /* Check if the packet is a valid size for the uIP buffer configuration
        * (this should not happen)
        */

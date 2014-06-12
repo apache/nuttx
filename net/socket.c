@@ -91,33 +91,54 @@
 
 int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
 {
-  int err = ENFILE;
+  int err;
 
-  /* Only PF_INET or PF_INET6 domains supported */
+  /* Only PF_INET, PF_INET6 or PF_PACKET domains supported */
 
-#ifdef CONFIG_NET_IPv6
-  if ( domain != PF_INET6)
+  if (
+#if defined(CONFIG_NET_IPv6)
+      domain != PF_INET6
 #else
-  if ( domain != PF_INET)
+      domain != PF_INET
 #endif
+#if defined(CONFIG_NET_PKT)
+      && domain != PF_PACKET
+#endif
+     )
     {
       err = EAFNOSUPPORT;
       goto errout;
     }
 
-  /* Only SOCK_STREAM and possible SOCK_DRAM are supported */
+  /* Only SOCK_STREAM, SOCK_DGRAM and possible SOCK_RAW are supported */
 
-#if defined(CONFIG_NET_TCP) && defined(CONFIG_NET_UDP)
-  if ((type == SOCK_STREAM && protocol != 0 && protocol != IPPROTO_TCP) ||
-      (type == SOCK_DGRAM  && protocol != 0 && protocol != IPPROTO_UDP) ||
-      (type != SOCK_STREAM && type != SOCK_DGRAM))
-#elif defined(CONFIG_NET_TCP)
-  if ((type == SOCK_STREAM && protocol != 0 && protocol != IPPROTO_TCP) ||
-      (type != SOCK_STREAM))
-#elif defined(CONFIG_NET_UDP)
-  if ((type == SOCK_DGRAM  && protocol != 0 && protocol != IPPROTO_UDP) ||
-      (type != SOCK_DGRAM))
+  if (
+#if defined(CONFIG_NET_TCP)
+        (type == SOCK_STREAM && protocol != 0 && protocol != IPPROTO_TCP) ||
 #endif
+#if defined(CONFIG_NET_UDP)
+        (type == SOCK_DGRAM  && protocol != 0 && protocol != IPPROTO_UDP) ||
+#endif
+        (
+#if defined(CONFIG_NET_TCP)
+#if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_PKT)
+         type != SOCK_STREAM &&
+#else
+         type != SOCK_STREAM
+#endif
+#endif
+#if defined(CONFIG_NET_UDP)
+#if defined(CONFIG_NET_PKT)
+         type != SOCK_DGRAM &&
+#else
+         type != SOCK_DGRAM
+#endif
+#endif
+#if defined(CONFIG_NET_PKT)
+         type != SOCK_RAW
+#endif
+        )
+     )
     {
       err = EPROTONOSUPPORT;
       goto errout;
@@ -140,6 +161,20 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
   err = ENOMEM; /* Assume failure to allocate connection instance */
   switch (type)
     {
+#ifdef CONFIG_NET_PKT
+      case SOCK_RAW:
+        {
+          struct uip_pkt_conn *conn = uip_pktalloc();
+          if (conn)
+            {
+              DEBUGASSERT(conn->crefs == 0);
+              psock->s_conn = conn;
+              conn->crefs   = 1;
+            }
+        }
+        break;
+#endif
+
 #ifdef CONFIG_NET_TCP
       case SOCK_STREAM:
         {
@@ -148,17 +183,21 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
            */
 
           struct uip_conn *conn = uip_tcpalloc();
-          if (conn)
+          if (!conn)
             {
-              /* Set the reference count on the connection structure.  This
-               * reference count will be increment only if the socket is
-               * dup'ed
-               */
+              /* Failed to reserve a connection structure */
 
-              DEBUGASSERT(conn->crefs == 0);
-              psock->s_conn  = conn;
-              conn->crefs    = 1;
+              goto errout; /* With err == ENFILE or ENOMEM */
             }
+
+          /* Set the reference count on the connection structure.  This
+           * reference count will be increment only if the socket is
+           * dup'ed
+           */
+
+          DEBUGASSERT(conn->crefs == 0);
+          psock->s_conn = conn;
+          conn->crefs   = 1;
         }
         break;
 #endif
@@ -171,32 +210,27 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
            */
 
           struct uip_udp_conn *conn = uip_udpalloc();
-          if (conn)
+          if (!conn)
             {
-              /* Set the reference count on the connection structure.  This
-               * reference count will be increment only if the socket is
-               * dup'ed
-               */
+              /* Failed to reserve a connection structure */
 
-              DEBUGASSERT(conn->crefs == 0);
-              psock->s_conn = conn;
-              conn->crefs   = 1;
+              goto errout; /* With err == ENFILE or ENOMEM */
             }
+
+          /* Set the reference count on the connection structure.  This
+           * reference count will be increment only if the socket is
+           * dup'ed
+           */
+
+          DEBUGASSERT(conn->crefs == 0);
+          psock->s_conn = conn;
+          conn->crefs   = 1;
         }
         break;
 #endif
 
       default:
         break;
-    }
-
-  /* Did we successfully allocate some kind of connection structure? */
-
-  if (!psock->s_conn)
-    {
-      /* Failed to reserve a connection structure */
-
-      goto errout; /* With err == ENFILE or ENOMEM */
     }
 
   return OK;

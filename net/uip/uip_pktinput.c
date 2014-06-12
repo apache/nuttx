@@ -1,7 +1,8 @@
 /****************************************************************************
- * net/uip/uip_initialize.c
+ * net/uip/uip_pktinput.c
+ * Handling incoming packet input
  *
- *   Copyright (C) 2007-2011, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -42,10 +43,14 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifdef CONFIG_NET
+#if defined(CONFIG_NET) && defined(CONFIG_NET_PKT)
 
-#include <stdint.h>
+#include <debug.h>
+
 #include <nuttx/net/uip/uip.h>
+#include <nuttx/net/uip/uip-arch.h>
+#include <nuttx/net/uip/uip-pkt.h>
+#include <nuttx/net/arp.h>
 
 #include "uip_internal.h"
 
@@ -53,39 +58,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define PKTBUF ((struct uip_eth_hdr *)&dev->d_buf)
+
 /****************************************************************************
  * Public Variables
  ****************************************************************************/
-
-/* IP/TCP/UDP/ICMP statistics for all network interfaces */
-
-#ifdef CONFIG_NET_STATISTICS
-struct uip_stats uip_stat;
-#endif
-
-/* Increasing number used for the IP ID field. */
-
-uint16_t g_ipid;
-
-const uip_ipaddr_t g_alloneaddr =
-#ifdef CONFIG_NET_IPv6
-  {0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff};
-#else
-  0xffffffff;
-#endif
-
-const uip_ipaddr_t g_allzeroaddr =
-#ifdef CONFIG_NET_IPv6
-  {0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
-#else
-  0x00000000;
-#endif
-
-/* Reassembly timer (units: deci-seconds) */
-
-#if UIP_REASSEMBLY && !defined(CONFIG_NET_IPv6)
-uint8_t uip_reasstmr;
-#endif
 
 /****************************************************************************
  * Private Variables
@@ -100,67 +77,64 @@ uint8_t uip_reasstmr;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_initialize
+ * Name: uip_pktinput
  *
  * Description:
- *   Perform initialization of the uIP layer
+ *   Handle incoming packet input
  *
  * Parameters:
- *   None
+ *   dev - The device driver structure containing the received packet
  *
  * Return:
- *   None
+ *   OK  The packet has been processed  and can be deleted
+ *   ERROR Hold the packet and try again later. There is a listening socket
+ *         but no recv in place to catch the packet yet.
+ *
+ * Assumptions:
+ *   Called from the interrupt level or with interrupts disabled.
  *
  ****************************************************************************/
 
-void uip_initialize(void)
+int uip_pktinput(struct uip_driver_s *dev)
 {
-  /* Initialize the locking facility */
+  struct uip_pkt_conn *conn;
+  struct uip_eth_hdr  *pbuf = (struct uip_eth_hdr *)dev->d_buf;
+  int ret = OK;
 
-  uip_lockinit();
+  conn = uip_pktactive(pbuf);
+  if (conn)
+    {
+      uint16_t flags;
 
-  /* Initialize callback support */
+      /* Setup for the application callback */
 
-  uip_callbackinit();
+      dev->d_appdata = dev->d_buf;
+      dev->d_snddata = dev->d_buf;
+      dev->d_sndlen  = 0;
 
-  /* Initialize packet socket suport */
+      /* Perform the application callback */
 
-#ifdef CONFIG_NET_PKT
-  uip_pktinit();
-#endif
+      flags = uip_pktcallback(dev, conn, UIP_NEWDATA);
 
-  /* Initialize the listening port structures */
+      /* If the operation was successful, the UIP_NEWDATA flag is removed
+       * and thus the packet can be deleted (OK will be returned).
+       */
 
-#ifdef CONFIG_NET_TCP
-  uip_listeninit();
+      if ((flags & UIP_NEWDATA) != 0)
+        {
+          /* No.. the packet was not processed now.  Return ERROR so
+           * that the driver may retry again later.
+           */
 
-  /* Initialize the TCP/IP connection structures */
+          ret = ERROR;
+        }
+    }
+  else
+    {
+      nlldbg("No listener\n");
+    }
 
-  uip_tcpinit();
-
-  /* Initialize the TCP/IP read-ahead buffering */
-
-#ifdef CONFIG_NET_TCP_READAHEAD
-  uip_tcpreadahead_init();
-#endif
-#endif /* CONFIG_NET_TCP */
-
-  /* Initialize the TCP/IP write buffering */
-
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-  uip_tcpwrbuffer_init();
-#endif
-
-  /* Initialize the UDP connection structures */
-
-#ifdef CONFIG_NET_UDP
-  uip_udpinit();
-#endif
-
-  /* Initialize IGMP support */
-
-#ifdef CONFIG_NET_IGMP
-  uip_igmpinit();
-#endif
+  return ret;
 }
-#endif /* CONFIG_NET */
+
+#endif /* CONFIG_NET && CONFIG_NET_PKT */

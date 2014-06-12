@@ -1,7 +1,8 @@
 /****************************************************************************
- * net/uip/uip_initialize.c
+ * net/uip/uip_pktpoll.c
+ * Poll for the availability of packet TX data
  *
- *   Copyright (C) 2007-2011, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -42,10 +43,14 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifdef CONFIG_NET
+#if defined(CONFIG_NET) && defined(CONFIG_NET_PKT)
 
-#include <stdint.h>
+#include <debug.h>
+
+#include <nuttx/net/uip/uipopt.h>
 #include <nuttx/net/uip/uip.h>
+#include <nuttx/net/uip/uip-arch.h>
+#include <nuttx/net/uip/uip-pkt.h>
 
 #include "uip_internal.h"
 
@@ -56,36 +61,6 @@
 /****************************************************************************
  * Public Variables
  ****************************************************************************/
-
-/* IP/TCP/UDP/ICMP statistics for all network interfaces */
-
-#ifdef CONFIG_NET_STATISTICS
-struct uip_stats uip_stat;
-#endif
-
-/* Increasing number used for the IP ID field. */
-
-uint16_t g_ipid;
-
-const uip_ipaddr_t g_alloneaddr =
-#ifdef CONFIG_NET_IPv6
-  {0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff};
-#else
-  0xffffffff;
-#endif
-
-const uip_ipaddr_t g_allzeroaddr =
-#ifdef CONFIG_NET_IPv6
-  {0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
-#else
-  0x00000000;
-#endif
-
-/* Reassembly timer (units: deci-seconds) */
-
-#if UIP_REASSEMBLY && !defined(CONFIG_NET_IPv6)
-uint8_t uip_reasstmr;
-#endif
 
 /****************************************************************************
  * Private Variables
@@ -100,67 +75,55 @@ uint8_t uip_reasstmr;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_initialize
+ * Name: uip_pktpoll
  *
  * Description:
- *   Perform initialization of the uIP layer
+ *   Poll a packet "connection" structure for availability of TX data
  *
  * Parameters:
- *   None
+ *   dev - The device driver structure to use in the send operation
+ *   conn - The packet "connection" to poll for TX data
  *
  * Return:
  *   None
  *
+ * Assumptions:
+ *   Called from the interrupt level or with interrupts disabled.
+ *
  ****************************************************************************/
 
-void uip_initialize(void)
+void uip_pktpoll(struct uip_driver_s *dev, struct uip_pkt_conn *conn)
 {
-  /* Initialize the locking facility */
+  nlldbg("IN\n");
 
-  uip_lockinit();
+  /* Verify that the packet connection is valid */
 
-  /* Initialize callback support */
+  if (conn)
+    {
+      /* Setup for the application callback */
 
-  uip_callbackinit();
+      dev->d_appdata = &dev->d_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];
+      dev->d_snddata = &dev->d_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];
 
-  /* Initialize packet socket suport */
+      dev->d_len     = 0;
+      dev->d_sndlen  = 0;
 
-#ifdef CONFIG_NET_PKT
-  uip_pktinit();
-#endif
+      /* Perform the application callback */
 
-  /* Initialize the listening port structures */
+      (void)uip_pktcallback(dev, conn, UIP_POLL);
 
-#ifdef CONFIG_NET_TCP
-  uip_listeninit();
+      /* If the application has data to send, setup the UDP/IP header */
 
-  /* Initialize the TCP/IP connection structures */
+      if (dev->d_sndlen > 0)
+        {
+//        uip_pktsend(dev, conn);
+          return;
+        }
+    }
 
-  uip_tcpinit();
+  /* Make sure that d_len is zero meaning that there is nothing to be sent */
 
-  /* Initialize the TCP/IP read-ahead buffering */
-
-#ifdef CONFIG_NET_TCP_READAHEAD
-  uip_tcpreadahead_init();
-#endif
-#endif /* CONFIG_NET_TCP */
-
-  /* Initialize the TCP/IP write buffering */
-
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-  uip_tcpwrbuffer_init();
-#endif
-
-  /* Initialize the UDP connection structures */
-
-#ifdef CONFIG_NET_UDP
-  uip_udpinit();
-#endif
-
-  /* Initialize IGMP support */
-
-#ifdef CONFIG_NET_IGMP
-  uip_igmpinit();
-#endif
+  dev->d_len = 0;
 }
-#endif /* CONFIG_NET */
+
+#endif /* CONFIG_NET && CONFIG_NET_PKT */

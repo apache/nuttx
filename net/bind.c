@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/bind.c
  *
- *   Copyright (C) 2007-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,11 +43,64 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <errno.h>
+#include <string.h>
+
+#ifdef CONFIG_NET_PKT
+#  include <netpacket/packet.h>
+#endif
 
 #include "net_internal.h"
 
 /****************************************************************************
- * Global Functions
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function: pkt_rawbind
+ *
+ * Description:
+ *   Bind a raw socket to an network device.
+ *
+ * Parameters:
+ *   conn     AF_PACKET connection structure
+ *   addr     Peer address information
+ *
+ * Returned Value:
+ *   0 on success; -1 on error with errno set appropriately
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_PKT
+static int pkt_rawbind(FAR struct uip_pkt_conn *conn,
+                       FAR const struct sockaddr_ll *addr)
+{
+  int ifindex;
+#if 0
+  char hwaddr[6] = {0x00, 0xa1, 0xb1, 0xc1, 0xd1, 0xe1}; /* our MAC for debugging */
+#endif
+  char hwaddr[6] = {0x00, 0xe0, 0xde, 0xad, 0xbe, 0xef}; /* MAC from ifconfig */
+
+  /* Look at the addr and identify network interface */
+
+  ifindex = addr->sll_ifindex;
+
+#if 0
+  /* Get the MAC address of that interface */
+
+  memcpy(hwaddr, g_netdevices->d_mac, 6);
+#endif
+
+  /* Put ifindex and mac address into connection */
+
+  conn->ifindex = ifindex;
+  memcpy(conn->lmac, hwaddr, 6);
+
+  return OK;
+}
+#endif /* CONFIG_NET_PKT */
+
+/****************************************************************************
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -83,6 +136,9 @@
 int psock_bind(FAR struct socket *psock, const struct sockaddr *addr,
               socklen_t addrlen)
 {
+#ifdef CONFIG_NET_PKT
+  FAR const struct sockaddr_ll *lladdr = (const struct sockaddr_ll *)addr;
+#endif
 #if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_UDP)
 #ifdef CONFIG_NET_IPv6
   FAR const struct sockaddr_in6 *inaddr = (const struct sockaddr_in6 *)addr;
@@ -105,9 +161,13 @@ int psock_bind(FAR struct socket *psock, const struct sockaddr *addr,
   /* Verify that a valid address has been provided */
 
 #ifdef CONFIG_NET_IPv6
-  if (addr->sa_family != AF_INET6 || addrlen < sizeof(struct sockaddr_in6))
+  if ((addr->sa_family != AF_PACKET && addr->sa_family != AF_INET6) ||
+      (addr->sa_family == AF_PACKET && addrlen < sizeof(struct sockaddr_ll)) ||
+      (addr->sa_family == AF_INET6 && addrlen < sizeof(struct sockaddr_in6)))
 #else
-  if (addr->sa_family != AF_INET || addrlen < sizeof(struct sockaddr_in))
+  if ((addr->sa_family != AF_PACKET && addr->sa_family != AF_INET) ||
+      (addr->sa_family == AF_PACKET && addrlen < sizeof(struct sockaddr_ll)) ||
+      (addr->sa_family == AF_INET && addrlen < sizeof(struct sockaddr_in)))
 #endif
   {
       err = EBADF;
@@ -118,6 +178,12 @@ int psock_bind(FAR struct socket *psock, const struct sockaddr *addr,
 
   switch (psock->s_type)
     {
+#ifdef CONFIG_NET_PKT
+      case SOCK_RAW:
+        ret = pkt_rawbind(psock->s_conn, lladdr);
+        break;
+#endif
+
 #ifdef CONFIG_NET_TCP
       case SOCK_STREAM:
         ret = uip_tcpbind(psock->s_conn, inaddr);

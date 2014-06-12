@@ -51,6 +51,7 @@
 #include <errno.h>
 #include <arch/irq.h>
 #include <nuttx/net/uip/uip.h>
+#include <nuttx/net/arp.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -101,6 +102,28 @@ FAR struct uip_callback_s *uip_callbackalloc(struct uip_callback_s **list);
 void uip_callbackfree(FAR struct uip_callback_s *cb, struct uip_callback_s **list);
 uint16_t uip_callbackexecute(FAR struct uip_driver_s *dev, void *pvconn,
                              uint16_t flags, FAR struct uip_callback_s *list);
+
+#ifdef CONFIG_NET_PKT
+/* Defined in uip_pktconn.c *************************************************/
+
+void uip_pktinit(void);
+struct uip_pkt_conn *uip_pktalloc(void);
+void uip_pktfree(struct uip_pkt_conn *conn);
+struct uip_pkt_conn *uip_pktactive(struct uip_eth_hdr *buf);
+struct uip_pkt_conn *uip_nextpktconn(struct uip_pkt_conn *conn);
+
+/* Defined in uip_pktcallback.c *********************************************/
+
+uint16_t uip_pktcallback(struct uip_driver_s *dev, struct uip_pkt_conn *conn,
+                         uint16_t flags);
+
+/* Defined in uip_pktinput.c ************************************************/
+
+/* Defined in uip_pktpoll.c *************************************************/
+
+void uip_pktpoll(struct uip_driver_s *dev, struct uip_pkt_conn *conn);
+
+#endif /* CONFIG_NET_PKT */
 
 #ifdef CONFIG_NET_TCP
 /* Defined in uip_tcpconn.c *************************************************/

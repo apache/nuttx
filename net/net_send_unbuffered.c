@@ -55,6 +55,10 @@
 #include <nuttx/net/arp.h>
 #include <nuttx/net/uip/uip-arch.h>
 
+#ifdef CONFIG_NET_PKT
+#  include <nuttx/net/uip/uip-pkt.h>
+#endif
+
 #include "net_internal.h"
 #include "uip/uip_internal.h"
 
@@ -115,7 +119,9 @@ struct send_s
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
+#if defined(CONFIG_NET_TCP) && defined(CONFIG_NET_SOCKOPTS) && \
+   !defined(CONFIG_DISABLE_CLOCK)
+
 static inline int send_timeout(FAR struct send_s *pstate)
 {
   FAR struct socket *psock = 0;
@@ -139,7 +145,191 @@ static inline int send_timeout(FAR struct send_s *pstate)
 #endif /* CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */
 
 /****************************************************************************
- * Function: send_interrupt
+ * Function: pktsend_interrupt
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_PKT)
+static uint16_t pktsend_interrupt(FAR struct uip_driver_s *dev,
+                                  FAR void *pvconn,
+                                  FAR void *pvpriv, uint16_t flags)
+{
+  FAR struct send_s *pstate = (FAR struct send_s *)pvpriv;
+
+  nllvdbg("flags: %04x sent: %d\n", flags, pstate->snd_sent);
+
+  if (pstate)
+    {
+      /* Check if the outgoing packet is available. If my have been claimed
+       * by a send interrupt serving a different thread -OR- if the output
+       * buffer currently contains unprocessed incoming data. In these cases
+       * we will just have to wait for the next polling cycle.
+       */
+
+      if (dev->d_sndlen > 0 || (flags & UIP_NEWDATA) != 0)
+        {
+          /* Another thread has beat us sending data or the buffer is busy,
+           * Check for a timeout. If not timed out, wait for the next
+           * polling cycle and check again.
+           */
+
+          /* No timeout. Just wait for the next polling cycle */
+
+          return flags;
+        }
+
+      /* It looks like we are good to send the data */
+
+      else
+        {
+          /* Copy the user data into d_snddata and send it */
+
+#if 0
+          uip_send(dev, pstate->snd_buffer, pstate->snd_buflen);
+          pstate->snd_sent = pstate->snd_buflen;
+#else
+          /* NOTE: This is almost identical to calling uip_send() while
+           * the data from the sent operation buffer is copied into dev->d_buf
+           * instead of dev->d_snddata
+           */
+
+          if (pstate->snd_buflen > 0 && pstate->snd_buflen < CONFIG_NET_BUFSIZE)
+            {
+              memcpy(dev->d_buf, pstate->snd_buffer, pstate->snd_buflen);
+              dev->d_sndlen = pstate->snd_buflen;
+            }
+
+          pstate->snd_sent = pstate->snd_buflen;
+#endif
+        }
+
+      /* Don't allow any further call backs. */
+
+      pstate->snd_cb->flags    = 0;
+      pstate->snd_cb->priv     = NULL;
+      pstate->snd_cb->event    = NULL;
+
+      /* Wake up the waiting thread */
+
+      sem_post(&pstate->snd_sem);
+    }
+
+  return flags;
+}
+#endif /* CONFIG_NET_PKT */
+
+/****************************************************************************
+ * Function: pktsend
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_PKT)
+static ssize_t pktsend(FAR struct socket *psock, FAR const void *buf,
+                       size_t len, int flags)
+{
+  struct send_s state;
+  uip_lock_t save;
+  int err;
+  int ret;
+
+  /* Verify that the sockfd corresponds to valid, allocated socket */
+
+  if (!psock || psock->s_crefs <= 0)
+    {
+      err = EBADF;
+      goto errout;
+    }
+
+  /* Set the socket state to sending */
+
+  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_SEND);
+
+  /* Perform the send operation */
+
+  /* Initialize the state structure. This is done with interrupts
+   * disabled because we don't want anything to happen until we
+   * are ready.
+   */
+
+  save                = uip_lock();
+  memset(&state, 0, sizeof(struct send_s));
+  (void)sem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
+  state.snd_sock      = psock;          /* Socket descriptor to use */
+  state.snd_buflen    = len;            /* Number of bytes to send */
+  state.snd_buffer    = buf;            /* Buffer to send from */
+
+  if (len > 0)
+    {
+      struct uip_pkt_conn *conn = (struct uip_pkt_conn*)psock->s_conn;
+
+      /* Allocate resource to receive a callback */
+
+      state.snd_cb = uip_pktcallbackalloc(conn);
+      if (state.snd_cb)
+        {
+           /* Set the initial time for calculating timeouts */
+
+#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
+           state.snd_time       = clock_systimer();
+#endif
+
+          /* Set up the callback in the connection */
+
+          state.snd_cb->flags = UIP_POLL;
+          state.snd_cb->priv  = (void*)&state;
+          state.snd_cb->event = pktsend_interrupt;
+
+          /* Wait for the send to complete or an error to occure: NOTES: (1)
+           * uip_lockedwait will also terminate if a signal is received, (2)
+           * interrupts may be disabled! They will be re-enabled while the
+           * task sleeps and automatically re-enabled when the task restarts.
+           */
+
+          ret = uip_lockedwait(&state.snd_sem);
+
+          /* Make sure that no further interrupts are processed */
+
+          uip_pktcallbackfree(conn, state.snd_cb);
+        }
+    }
+
+  sem_destroy(&state.snd_sem);
+  uip_unlock(save);
+
+  /* Set the socket state to idle */
+
+  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
+
+  /* Check for a errors, Errors are signalled by negative errno values
+   * for the send length
+   */
+
+  if (state.snd_sent < 0)
+    {
+      err = state.snd_sent;
+      goto errout;
+    }
+
+  /* If uip_lockedwait failed, then we were probably reawakened by a signal. In
+   * this case, uip_lockedwait will have set errno appropriately.
+   */
+
+  if (ret < 0)
+    {
+      err = -ret;
+      goto errout;
+    }
+
+  /* Return the number of bytes actually sent */
+
+  return state.snd_sent;
+
+errout:
+  set_errno(err);
+  return ERROR;
+}
+#endif /* CONFIG_NET_PKT */
+
+/****************************************************************************
+ * Function: tcpsend_interrupt
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual
@@ -158,8 +348,10 @@ static inline int send_timeout(FAR struct send_s *pstate)
  *
  ****************************************************************************/
 
-static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
-                               FAR void *pvpriv, uint16_t flags)
+#if defined(CONFIG_NET_TCP)
+static uint16_t tcpsend_interrupt(FAR struct uip_driver_s *dev,
+                                  FAR void *pvconn,
+                                  FAR void *pvpriv, uint16_t flags)
 {
   FAR struct uip_conn *conn = (FAR struct uip_conn*)pvconn;
   FAR struct send_s *pstate = (FAR struct send_s *)pvpriv;
@@ -358,7 +550,7 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
       if ((pstate->snd_sent - pstate->snd_acked + sndlen) < conn->winsize)
         {
           /* Set the sequence number for this packet.  NOTE:  uIP updates
-           * sndseq on recept of ACK *before* this function is called.  In that
+           * sndseq on receipt of ACK *before* this function is called.  In that
            * case sndseq will point to the next unacknowledged byte (which might
            * have already been sent).  We will overwrite the value of sndseq
            * here before the packet is sent.
@@ -436,6 +628,139 @@ end_wait:
   sem_post(&pstate->snd_sem);
   return flags;
 }
+#endif
+
+/****************************************************************************
+ * Function: tcpsend
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_TCP)
+ssize_t tcpsend(FAR struct socket *psock, FAR const void *buf, size_t len,
+                int flags)
+{
+  struct send_s state;
+  uip_lock_t save;
+  int err;
+  int ret = OK;
+
+  /* Verify that the sockfd corresponds to valid, allocated socket */
+
+  if (!psock || psock->s_crefs <= 0)
+    {
+      err = EBADF;
+      goto errout;
+    }
+
+  /* If this is an un-connected socket, then return ENOTCONN */
+
+  if (psock->s_type != SOCK_STREAM || !_SS_ISCONNECTED(psock->s_flags))
+    {
+      err = ENOTCONN;
+      goto errout;
+    }
+
+  /* Set the socket state to sending */
+
+  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_SEND);
+
+  /* Perform the TCP send operation */
+
+  /* Initialize the state structure.  This is done with interrupts
+   * disabled because we don't want anything to happen until we
+   * are ready.
+   */
+
+  save                = uip_lock();
+  memset(&state, 0, sizeof(struct send_s));
+  (void)sem_init(&state. snd_sem, 0, 0); /* Doesn't really fail */
+  state.snd_sock      = psock;             /* Socket descriptor to use */
+  state.snd_buflen    = len;               /* Number of bytes to send */
+  state.snd_buffer    = buf;               /* Buffer to send from */
+
+  if (len > 0)
+    {
+      struct uip_conn *conn = (struct uip_conn*)psock->s_conn;
+
+      /* Allocate resources to receive a callback */
+
+      state.snd_cb = uip_tcpcallbackalloc(conn);
+      if (state.snd_cb)
+        {
+          /* Get the initial sequence number that will be used */
+
+          state.snd_isn         = uip_tcpgetsequence(conn->sndseq);
+
+          /* There is no outstanding, unacknowledged data after this
+           * initial sequence number.
+           */
+
+          conn->unacked         = 0;
+
+          /* Set the initial time for calculating timeouts */
+
+#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
+          state.snd_time        = clock_systimer();
+#endif
+          /* Set up the callback in the connection */
+
+          state.snd_cb->flags   = UIP_ACKDATA|UIP_REXMIT|UIP_POLL|UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT;
+          state.snd_cb->priv    = (void*)&state;
+          state.snd_cb->event   = tcpsend_interrupt;
+
+          /* Notify the device driver of the availability of TX data */
+
+          netdev_txnotify(conn->ripaddr);
+
+          /* Wait for the send to complete or an error to occur:  NOTES: (1)
+           * uip_lockedwait will also terminate if a signal is received, (2) interrupts
+           * may be disabled!  They will be re-enabled while the task sleeps and
+           * automatically re-enabled when the task restarts.
+           */
+
+          ret = uip_lockedwait(&state. snd_sem);
+
+          /* Make sure that no further interrupts are processed */
+
+          uip_tcpcallbackfree(conn, state.snd_cb);
+        }
+    }
+
+  sem_destroy(&state. snd_sem);
+  uip_unlock(save);
+
+  /* Set the socket state to idle */
+
+  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
+
+  /* Check for a errors.  Errors are signalled by negative errno values
+   * for the send length
+   */
+
+  if (state.snd_sent < 0)
+    {
+      err = state.snd_sent;
+      goto errout;
+    }
+
+  /* If uip_lockedwait failed, then we were probably reawakened by a signal. In
+   * this case, uip_lockedwait will have set errno appropriately.
+   */
+
+  if (ret < 0)
+    {
+      err = -ret;
+      goto errout;
+    }
+
+  /* Return the number of bytes actually sent */
+
+  return state.snd_sent;
+
+errout:
+  set_errno(err);
+  return ERROR;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -508,127 +833,33 @@ end_wait:
 ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
                    int flags)
 {
-  struct send_s state;
-  uip_lock_t save;
-  int err;
-  int ret = OK;
+  int ret;
 
-  /* Verify that the sockfd corresponds to valid, allocated socket */
-
-  if (!psock || psock->s_crefs <= 0)
+  switch (psock->s_type)
     {
-      err = EBADF;
-      goto errout;
-    }
-
-  /* If this is an un-connected socket, then return ENOTCONN */
-
-  if (psock->s_type != SOCK_STREAM || !_SS_ISCONNECTED(psock->s_flags))
-    {
-      err = ENOTCONN;
-      goto errout;
-    }
-
-  /* Set the socket state to sending */
-
-  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_SEND);
-
-  /* Perform the TCP send operation */
-
-  /* Initialize the state structure.  This is done with interrupts
-   * disabled because we don't want anything to happen until we
-   * are ready.
-   */
-
-  save                = uip_lock();
-  memset(&state, 0, sizeof(struct send_s));
-  (void)sem_init(&state. snd_sem, 0, 0); /* Doesn't really fail */
-  state.snd_sock      = psock;             /* Socket descriptor to use */
-  state.snd_buflen    = len;               /* Number of bytes to send */
-  state.snd_buffer    = buf;               /* Buffer to send from */
-
-  if (len > 0)
-    {
-      struct uip_conn *conn = (struct uip_conn*)psock->s_conn;
-
-      /* Allocate resources to receive a callback */
-
-      state.snd_cb = uip_tcpcallbackalloc(conn);
-      if (state.snd_cb)
+#if defined(CONFIG_NET_PKT)
+      case SOCK_RAW:
         {
-          /* Get the initial sequence number that will be used */
-
-          state.snd_isn         = uip_tcpgetsequence(conn->sndseq);
-
-          /* There is no outstanding, unacknowledged data after this
-           * initial sequence number.
-           */
-
-          conn->unacked         = 0;
-
-          /* Set the initial time for calculating timeouts */
-
-#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
-          state.snd_time        = clock_systimer();
+          ret = pktsend(psock, buf, len, flags);
+          break;
+        }
 #endif
-          /* Set up the callback in the connection */
 
-          state.snd_cb->flags   = UIP_ACKDATA|UIP_REXMIT|UIP_POLL|UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT;
-          state.snd_cb->priv    = (void*)&state;
-          state.snd_cb->event   = send_interrupt;
+#if defined(CONFIG_NET_TCP)
+      case SOCK_STREAM:
+        {
+          ret = tcpsend(psock, buf, len, flags);
+          break;
+        }
+#endif
 
-          /* Notify the device driver of the availability of TX data */
-
-          netdev_txnotify(conn->ripaddr);
-
-          /* Wait for the send to complete or an error to occur:  NOTES: (1)
-           * uip_lockedwait will also terminate if a signal is received, (2) interrupts
-           * may be disabled!  They will be re-enabled while the task sleeps and
-           * automatically re-enabled when the task restarts.
-           */
-
-          ret = uip_lockedwait(&state. snd_sem);
-
-          /* Make sure that no further interrupts are processed */
-
-          uip_tcpcallbackfree(conn, state.snd_cb);
+      default:
+        {
+          ret = ERROR;
         }
     }
 
-  sem_destroy(&state. snd_sem);
-  uip_unlock(save);
-
-  /* Set the socket state to idle */
-
-  psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
-
-  /* Check for a errors.  Errors are signalled by negative errno values
-   * for the send length
-   */
-
-  if (state.snd_sent < 0)
-    {
-      err = state.snd_sent;
-      goto errout;
-    }
-
-  /* If uip_lockedwait failed, then we were probably reawakened by a signal. In
-   * this case, uip_lockedwait will have set errno appropriately.
-   */
-
-  if (ret < 0)
-    {
-      err = -ret;
-      goto errout;
-    }
-
-  /* Return the number of bytes actually sent */
-
-  return state.snd_sent;
-
-errout:
-  set_errno(err);
-  return ERROR;
+  return ret;
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_TCP && !CONFIG_NET_TCP_WRITE_BUFFERS */

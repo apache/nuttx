@@ -46,6 +46,15 @@ ifeq ($(CONFIG_NET_NOINTS),y)
 NET_CSRCS += uip_lock.c
 endif
 
+# Packet socket support
+
+ifeq ($(CONFIG_NET_PKT),y)
+NET_CSRCS += uip_pktconn.c
+NET_CSRCS += uip_pktinput.c
+NET_CSRCS += uip_pktcallback.c
+NET_CSRCS += uip_pktpoll.c
+endif
+
 # IPv6-specific logic
 
 ifeq ($(CONFIG_NET_IPv6),y)

@@ -227,6 +227,9 @@ struct uip_callback_s
 
 /* Protocol-specific support */
 
+#ifdef CONFIG_NET_PKT
+#  include <nuttx/net/uip/uip-pkt.h>
+#endif
 #ifdef CONFIG_NET_TCP
 #  include <nuttx/net/uip/uip-tcp.h>
 #endif
