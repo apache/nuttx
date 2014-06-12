@@ -119,7 +119,7 @@
                                     /* 60 Undefined */
 #define SAM_PID_SMD            (61) /* SMD Soft Modem */
 #define SAM_PID_TWI3           (62) /* Two-Wire Interface 3 */
-#define SAM_PID_CATB           (63) /* Watchdog timer Interrupt */
+#define SAM_PID_CATB           (63) /* Capacitive Touch Module */
 #define SAM_PID_SFR            (64) /* Special Function Register */
 #define SAM_PID_AIC            (65) /* Advanced Interrupt Controller */
 #define SAM_PID_SAIC           (66) /* Secured Advanced Interrupt Controller */
@@ -192,7 +192,7 @@
 
 #define SAM_IRQ_SMD            SAM_PID_SMD     /* SMD Soft Modem */
 #define SAM_IRQ_TWI3           SAM_PID_TWI3    /* Two-Wire Interface 3 */
-#define SAM_IRQ_CATB           SAM_PID_CATB    /* Watchdog timer Interrupt */
+#define SAM_IRQ_CATB           SAM_PID_CATB    /* Capacitive Touch Module */
 #define SAM_IRQ_SFR            SAM_PID_SFR     /* Special Function Register */
 #define SAM_IRQ_AIC            SAM_PID_AIC     /* Advanced Interrupt Controller */
 #define SAM_IRQ_SAIC           SAM_PID_SAIC    /* Secured Advanced Interrupt Controller */

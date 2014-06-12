@@ -111,6 +111,14 @@ CHIP_CSRCS += sam_dmac.c
 endif
 endif
 
+ifeq ($(CONFIG_SAMA5_XDMAC0),y)
+CHIP_CSRCS += sam_xdmac.c
+else
+ifeq ($(CONFIG_SAMA5_XDMAC1),y)
+CHIP_CSRCS += sam_xdmac.c
+endif
+endif
+
 ifeq ($(CONFIG_SAMA5_PIO_IRQ),y)
 CHIP_CSRCS += sam_pioirq.c
 endif
