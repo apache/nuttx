@@ -401,8 +401,14 @@ config SAMA5_DMAC1
 	select ARCH_DMA
 	depends on SAMA5_HAVE_DMA
 
-config SAMA5_XDMAC
-	bool "XDMA Controller (XDMAC)"
+config SAMA5_XDMAC0
+	bool "XDMA Controller (XDMAC0)"
+	default n
+	select ARCH_DMA
+	depends on SAMA5_HAVE_XDMA
+
+config SAMA5_XDMAC1
+	bool "XDMA Controller (XDMAC1)"
 	default n
 	select ARCH_DMA
 	depends on SAMA5_HAVE_XDMA

@@ -66,7 +66,29 @@
 #define SAM_XDMAC_GSWS_OFFSET       0x003c /* Global Channel Software Request Status Register */
 #define SAM_XDMAC_GSWF_OFFSET       0x0040 /* Global Channel Software Flush Request Register */
                                            /* 0x0044–0x004c Reserved */
-#define SAM_XDMACH_OFFSET(n)        (0x0050 + ((n) << 6))
+
+/* Offsets to the base of the DMA channel registers */
+
+#define SAM_XDMAC_CH_OFFSET(n)     (0x0050 + ((n) << 6))
+#  define SAM_XDMAC_CH0_OFFSET     0x0050
+#  define SAM_XDMAC_CH1_OFFSET     0x0090
+#  define SAM_XDMAC_CH2_OFFSET     0x00d0
+#  define SAM_XDMAC_CH3_OFFSET     0x0110
+#  define SAM_XDMAC_CH4_OFFSET     0x0150
+#  define SAM_XDMAC_CH5_OFFSET     0x0190
+#  define SAM_XDMAC_CH6_OFFSET     0x01d0
+#  define SAM_XDMAC_CH7_OFFSET     0x0210
+#  define SAM_XDMAC_CH8_OFFSET     0x0250
+#  define SAM_XDMAC_CH9_OFFSET     0x0290
+#  define SAM_XDMAC_CH10_OFFSET    0x02d0
+#  define SAM_XDMAC_CH11_OFFSET    0x0310
+#  define SAM_XDMAC_CH12_OFFSET    0x0350
+#  define SAM_XDMAC_CH13_OFFSET    0x0390
+#  define SAM_XDMAC_CH14_OFFSET    0x03d0
+#  define SAM_XDMAC_CH15_OFFSET    0x0410
+
+/* Offsets to channel registers relative to the base of the DMA channel registers */
+
 #define SAM_XDMACH_CIE_OFFSET       0x0000 /* Channel Interrupt Enable Register */
 #define SAM_XDMACH_CID_OFFSET       0x0004 /* Channel Interrupt Disable Register */
 #define SAM_XDMACH_CIM_OFFSET       0x0008 /* Channel Interrupt Mask Register */
@@ -104,21 +126,42 @@
 #define SAM_XDMAC0_GSWS             (SAM_XDMAC0_VBASE+SAM_XDMAC_GSWS_OFFSET)
 #define SAM_XDMAC0_GSWF             (SAM_XDMAC0_VBASE+SAM_XDMAC_GSWF_OFFSET)
 
-#define SAM_XDMACH0_BASE(n)         (SAM_XDMAC0_VBASE+SAM_XDMACH_OFFSET(n))
-#define SAM_XDMACH0_CIE(n)          (SAM_XDMACH0_BASE(n)+SAM_XDMACH_CIE_OFFSET)
-#define SAM_XDMACH0_CID(n)          (SAM_XDMACH0_BASE(n)+SAM_XDMACH_CID_OFFSET)
-#define SAM_XDMACH0_CIM(n)          (SAM_XDMACH0_BASE(n)+SAM_XDMACH_CIM_OFFSET)
-#define SAM_XDMACH0_CIS(n)          (SAM_XDMACH0_BASE(n)+SAM_XDMACH_CIS_OFFSET)
-#define SAM_XDMACH0_CSA(n)          (SAM_XDMACH0_BASE(n)+SAM_XDMACH_CSA_OFFSET)
-#define SAM_XDMACH0_CDA(n)          (SAM_XDMACH0_BASE(n)+SAM_XDMACH_CDA_OFFSET)
-#define SAM_XDMACH0_CNDA(n)         (SAM_XDMACH0_BASE(n)+SAM_XDMACH_CNDA_OFFSET)
-#define SAM_XDMACH0_CNDC(n)         (SAM_XDMACH0_BASE(n)+SAM_XDMACH_CNDC_OFFSET)
-#define SAM_XDMACH0_CUBC(n)         (SAM_XDMACH0_BASE(n)+SAM_XDMACH_CUBC_OFFSET)
-#define SAM_XDMACH0_CBC(n)          (SAM_XDMACH0_BASE(n)+SAM_XDMACH_CBC_OFFSET)
-#define SAM_XDMACH0_CC(n)           (SAM_XDMACH0_BASE(n)+SAM_XDMACH_CC_OFFSET)
-#define SAM_XDMACH0_CDSMSP(n)       (SAM_XDMACH0_BASE(n)+SAM_XDMACH_CDSMSP_OFFSET)
-#define SAM_XDMACH0_CSUS(n)         (SAM_XDMACH0_BASE(n)+SAM_XDMACH_CSUS_OFFSET)
-#define SAM_XDMACH0_CDUS(n)         (SAM_XDMACH0_BASE(n)+SAM_XDMACH_CDUS_OFFSET)
+/* Base addresses of XDMAC0 channel registers */
+
+#define SAM_XDMAC0_CH_BASE(n)       (SAM_XDMAC0_VBASE+SAM_XDMAC_CH_OFFSET(n))
+#  define SAM_XDMAC0_CH0_BASE       (SAM_XDMAC0_VBASE+SAM_XDMAC_CH0_OFFSET)
+#  define SAM_XDMAC0_CH1_BASE       (SAM_XDMAC0_VBASE+SAM_XDMAC_CH1_OFFSET)
+#  define SAM_XDMAC0_CH2_BASE       (SAM_XDMAC0_VBASE+SAM_XDMAC_CH2_OFFSET)
+#  define SAM_XDMAC0_CH3_BASE       (SAM_XDMAC0_VBASE+SAM_XDMAC_CH3_OFFSET)
+#  define SAM_XDMAC0_CH4_BASE       (SAM_XDMAC0_VBASE+SAM_XDMAC_CH4_OFFSET)
+#  define SAM_XDMAC0_CH5_BASE       (SAM_XDMAC0_VBASE+SAM_XDMAC_CH5_OFFSET)
+#  define SAM_XDMAC0_CH6_BASE       (SAM_XDMAC0_VBASE+SAM_XDMAC_CH6_OFFSET)
+#  define SAM_XDMAC0_CH7_BASE       (SAM_XDMAC0_VBASE+SAM_XDMAC_CH7_OFFSET)
+#  define SAM_XDMAC0_CH8_BASE       (SAM_XDMAC0_VBASE+SAM_XDMAC_CH8_OFFSET)
+#  define SAM_XDMAC0_CH9_BASE       (SAM_XDMAC0_VBASE+SAM_XDMAC_CH9_OFFSET)
+#  define SAM_XDMAC0_CH10_BASE      (SAM_XDMAC0_VBASE+SAM_XDMAC_CH10_OFFSET)
+#  define SAM_XDMAC0_CH11_BASE      (SAM_XDMAC0_VBASE+SAM_XDMAC_CH11_OFFSET)
+#  define SAM_XDMAC0_CH12_BASE      (SAM_XDMAC0_VBASE+SAM_XDMAC_CH12_OFFSET)
+#  define SAM_XDMAC0_CH13_BASE      (SAM_XDMAC0_VBASE+SAM_XDMAC_CH13_OFFSET)
+#  define SAM_XDMAC0_CH14_BASE      (SAM_XDMAC0_VBASE+SAM_XDMAC_CH14_OFFSET)
+#  define SAM_XDMAC0_CH15_BASE      (SAM_XDMAC0_VBASE+SAM_XDMAC_CH15_OFFSET)
+
+/* Addresses of XDMAC0 channel registers */
+
+#define SAM_XDMACH0_CIE(n)          (SAM_XDMACH0_CH_BASE(n)+SAM_XDMACH_CIE_OFFSET)
+#define SAM_XDMACH0_CID(n)          (SAM_XDMACH0_CH_BASE(n)+SAM_XDMACH_CID_OFFSET)
+#define SAM_XDMACH0_CIM(n)          (SAM_XDMACH0_CH_BASE(n)+SAM_XDMACH_CIM_OFFSET)
+#define SAM_XDMACH0_CIS(n)          (SAM_XDMACH0_CH_BASE(n)+SAM_XDMACH_CIS_OFFSET)
+#define SAM_XDMACH0_CSA(n)          (SAM_XDMACH0_CH_BASE(n)+SAM_XDMACH_CSA_OFFSET)
+#define SAM_XDMACH0_CDA(n)          (SAM_XDMACH0_CH_BASE(n)+SAM_XDMACH_CDA_OFFSET)
+#define SAM_XDMACH0_CNDA(n)         (SAM_XDMACH0_CH_BASE(n)+SAM_XDMACH_CNDA_OFFSET)
+#define SAM_XDMACH0_CNDC(n)         (SAM_XDMACH0_CH_BASE(n)+SAM_XDMACH_CNDC_OFFSET)
+#define SAM_XDMACH0_CUBC(n)         (SAM_XDMACH0_CH_BASE(n)+SAM_XDMACH_CUBC_OFFSET)
+#define SAM_XDMACH0_CBC(n)          (SAM_XDMACH0_CH_BASE(n)+SAM_XDMACH_CBC_OFFSET)
+#define SAM_XDMACH0_CC(n)           (SAM_XDMACH0_CH_BASE(n)+SAM_XDMACH_CC_OFFSET)
+#define SAM_XDMACH0_CDSMSP(n)       (SAM_XDMACH0_CH_BASE(n)+SAM_XDMACH_CDSMSP_OFFSET)
+#define SAM_XDMACH0_CSUS(n)         (SAM_XDMACH0_CH_BASE(n)+SAM_XDMACH_CSUS_OFFSET)
+#define SAM_XDMACH0_CDUS(n)         (SAM_XDMACH0_CH_BASE(n)+SAM_XDMACH_CDUS_OFFSET)
 
 #define SAM_XDMAC1_GTYPE            (SAM_XDMAC1_VBASE+SAM_XDMAC_GTYPE_OFFSET)
 #define SAM_XDMAC1_GCFG             (SAM_XDMAC1_VBASE+SAM_XDMAC_GCFG_OFFSET)
@@ -138,21 +181,42 @@
 #define SAM_XDMAC1_GSWS             (SAM_XDMAC1_VBASE+SAM_XDMAC_GSWS_OFFSET)
 #define SAM_XDMAC1_GSWF             (SAM_XDMAC1_VBASE+SAM_XDMAC_GSWF_OFFSET)
 
-#define SAM_XDMACH1_BASE(n)         (SAM_XDMAC1_VBASE+SAM_XDMACH_OFFSET(n))
-#define SAM_XDMACH1_CIE(n)          (SAM_XDMACH1_BASE(n)+SAM_XDMACH_CIE_OFFSET)
-#define SAM_XDMACH1_CID(n)          (SAM_XDMACH1_BASE(n)+SAM_XDMACH_CID_OFFSET)
-#define SAM_XDMACH1_CIM(n)          (SAM_XDMACH1_BASE(n)+SAM_XDMACH_CIM_OFFSET)
-#define SAM_XDMACH1_CIS(n)          (SAM_XDMACH1_BASE(n)+SAM_XDMACH_CIS_OFFSET)
-#define SAM_XDMACH1_CSA(n)          (SAM_XDMACH1_BASE(n)+SAM_XDMACH_CSA_OFFSET)
-#define SAM_XDMACH1_CDA(n)          (SAM_XDMACH1_BASE(n)+SAM_XDMACH_CDA_OFFSET)
-#define SAM_XDMACH1_CNDA(n)         (SAM_XDMACH1_BASE(n)+SAM_XDMACH_CNDA_OFFSET)
-#define SAM_XDMACH1_CNDC(n)         (SAM_XDMACH1_BASE(n)+SAM_XDMACH_CNDC_OFFSET)
-#define SAM_XDMACH1_CUBC(n)         (SAM_XDMACH1_BASE(n)+SAM_XDMACH_CUBC_OFFSET)
-#define SAM_XDMACH1_CBC(n)          (SAM_XDMACH1_BASE(n)+SAM_XDMACH_CBC_OFFSET)
-#define SAM_XDMACH1_CC(n)           (SAM_XDMACH1_BASE(n)+SAM_XDMACH_CC_OFFSET)
-#define SAM_XDMACH1_CDSMSP(n)       (SAM_XDMACH1_BASE(n)+SAM_XDMACH_CDSMSP_OFFSET)
-#define SAM_XDMACH1_CSUS(n)         (SAM_XDMACH1_BASE(n)+SAM_XDMACH_CSUS_OFFSET)
-#define SAM_XDMACH1_CDUS(n)         (SAM_XDMACH1_BASE(n)+SAM_XDMACH_CDUS_OFFSET)
+/* Base addresses of XDMAC1 channel registers */
+
+#define SAM_XDMAC1_CH_BASE(n)       (SAM_XDMAC1_VBASE+SAM_XDMAC_CH_OFFSET(n))
+#  define SAM_XDMAC1_CH0_BASE       (SAM_XDMAC1_VBASE+SAM_XDMAC_CH0_OFFSET)
+#  define SAM_XDMAC1_CH1_BASE       (SAM_XDMAC1_VBASE+SAM_XDMAC_CH1_OFFSET)
+#  define SAM_XDMAC1_CH2_BASE       (SAM_XDMAC1_VBASE+SAM_XDMAC_CH2_OFFSET)
+#  define SAM_XDMAC1_CH3_BASE       (SAM_XDMAC1_VBASE+SAM_XDMAC_CH3_OFFSET)
+#  define SAM_XDMAC1_CH4_BASE       (SAM_XDMAC1_VBASE+SAM_XDMAC_CH4_OFFSET)
+#  define SAM_XDMAC1_CH5_BASE       (SAM_XDMAC1_VBASE+SAM_XDMAC_CH5_OFFSET)
+#  define SAM_XDMAC1_CH6_BASE       (SAM_XDMAC1_VBASE+SAM_XDMAC_CH6_OFFSET)
+#  define SAM_XDMAC1_CH7_BASE       (SAM_XDMAC1_VBASE+SAM_XDMAC_CH7_OFFSET)
+#  define SAM_XDMAC1_CH8_BASE       (SAM_XDMAC1_VBASE+SAM_XDMAC_CH8_OFFSET)
+#  define SAM_XDMAC1_CH9_BASE       (SAM_XDMAC1_VBASE+SAM_XDMAC_CH9_OFFSET)
+#  define SAM_XDMAC1_CH10_BASE      (SAM_XDMAC1_VBASE+SAM_XDMAC_CH10_OFFSET)
+#  define SAM_XDMAC1_CH11_BASE      (SAM_XDMAC1_VBASE+SAM_XDMAC_CH11_OFFSET)
+#  define SAM_XDMAC1_CH12_BASE      (SAM_XDMAC1_VBASE+SAM_XDMAC_CH12_OFFSET)
+#  define SAM_XDMAC1_CH13_BASE      (SAM_XDMAC1_VBASE+SAM_XDMAC_CH13_OFFSET)
+#  define SAM_XDMAC1_CH14_BASE      (SAM_XDMAC1_VBASE+SAM_XDMAC_CH14_OFFSET)
+#  define SAM_XDMAC1_CH15_BASE      (SAM_XDMAC1_VBASE+SAM_XDMAC_CH15_OFFSET)
+
+/* Addresses of XDMAC0 channel registers */
+
+#define SAM_XDMACH1_CIE(n)          (SAM_XDMACH1_CH_BASE(n)+SAM_XDMACH_CIE_OFFSET)
+#define SAM_XDMACH1_CID(n)          (SAM_XDMACH1_CH_BASE(n)+SAM_XDMACH_CID_OFFSET)
+#define SAM_XDMACH1_CIM(n)          (SAM_XDMACH1_CH_BASE(n)+SAM_XDMACH_CIM_OFFSET)
+#define SAM_XDMACH1_CIS(n)          (SAM_XDMACH1_CH_BASE(n)+SAM_XDMACH_CIS_OFFSET)
+#define SAM_XDMACH1_CSA(n)          (SAM_XDMACH1_CH_BASE(n)+SAM_XDMACH_CSA_OFFSET)
+#define SAM_XDMACH1_CDA(n)          (SAM_XDMACH1_CH_BASE(n)+SAM_XDMACH_CDA_OFFSET)
+#define SAM_XDMACH1_CNDA(n)         (SAM_XDMACH1_CH_BASE(n)+SAM_XDMACH_CNDA_OFFSET)
+#define SAM_XDMACH1_CNDC(n)         (SAM_XDMACH1_CH_BASE(n)+SAM_XDMACH_CNDC_OFFSET)
+#define SAM_XDMACH1_CUBC(n)         (SAM_XDMACH1_CH_BASE(n)+SAM_XDMACH_CUBC_OFFSET)
+#define SAM_XDMACH1_CBC(n)          (SAM_XDMACH1_CH_BASE(n)+SAM_XDMACH_CBC_OFFSET)
+#define SAM_XDMACH1_CC(n)           (SAM_XDMACH1_CH_BASE(n)+SAM_XDMACH_CC_OFFSET)
+#define SAM_XDMACH1_CDSMSP(n)       (SAM_XDMACH1_CH_BASE(n)+SAM_XDMACH_CDSMSP_OFFSET)
+#define SAM_XDMACH1_CSUS(n)         (SAM_XDMACH1_CH_BASE(n)+SAM_XDMACH_CSUS_OFFSET)
+#define SAM_XDMACH1_CDUS(n)         (SAM_XDMACH1_CH_BASE(n)+SAM_XDMACH_CDUS_OFFSET)
 
 /* XDMAC Register Bit Definitions ***************************************************/
 
@@ -227,10 +291,10 @@
 
 /* Channel Next Descriptor Control Register */
 
-#define XDMACH_CNDC_NDE             (1 << 0)  /* Bit 0:  Channel x Next Descriptor Enable */
-#define XDMACH_CNDC_NDSUP           (1 << 1)  /* Bit 1:  Channel x Next Descriptor Source Update */
-#define XDMACH_CNDC_NDDUP           (1 << 2)  /* Bit 2:  Channel x Next Descriptor Destination Update */
-#define XDMACH_CNDC_NDVIEW_SHIFT    (3)       /* Bits 3-4: Channel x Next Descriptor View */
+#define XDMACH_CNDC_NDE             (1 << 0)  /* Bit 0:  Channel Next Descriptor Enable */
+#define XDMACH_CNDC_NDSUP           (1 << 1)  /* Bit 1:  Channel Next Descriptor Source Update */
+#define XDMACH_CNDC_NDDUP           (1 << 2)  /* Bit 2:  Channel Next Descriptor Destination Update */
+#define XDMACH_CNDC_NDVIEW_SHIFT    (3)       /* Bits 3-4: Channel Next Descriptor View */
 #define XDMACH_CNDC_NDVIEW_MASK     (3 << XDMACH_CNDC_NDVIEW_SHIFT)
 #  define XDMACH_CNDC_NDVIEW_NDV0   (0 << XDMACH_CNDC_NDVIEW_SHIFT) /* Next Descriptor View 0 */
 #  define XDMACH_CNDC_NDVIEW_NDV1   (1 << XDMACH_CNDC_NDVIEW_SHIFT) /* Next Descriptor View 1 */
@@ -239,47 +303,47 @@
 
 /* Channel Microblock Control Register */
 
-#define XDMACH_CUBC_UBLEN_MASK      (0x00ffffff)       /* Bits 0-23: Channel x Microblock Length */
+#define XDMACH_CUBC_UBLEN_MASK      (0x00ffffff)       /* Bits 0-23: Channel Microblock Length */
 
 /* Channel Block Control Register */
 
-#define XDMACH_CBC_BLEN_MASK        (0x000000fff)       /* Bits 0-11: Channel x Block Length */
+#define XDMACH_CBC_BLEN_MASK        (0x000000fff)       /* Bits 0-11: Channel Block Length */
 
 /* Channel Configuration Register */
 
-#define XDMACH_CC_TYPE              (1 << 0)  /* Bit 0:  Channel x Transfer Type */
-#define XDMACH_CC_MBSIZE_SHIFT      (1)       /* Bits 1-2: Channel x Memory Burst Size */
+#define XDMACH_CC_TYPE              (1 << 0)  /* Bit 0:  Channel Transfer Type */
+#define XDMACH_CC_MBSIZE_SHIFT      (1)       /* Bits 1-2: Channel Memory Burst Size */
 #define XDMACH_CC_MBSIZE_MASK       (3 << XDMACH_CC_MBSIZE_SHIFT)
 #  define XDMACH_CC_MBSIZE_1        (0 << XDMACH_CC_MBSIZE_SHIFT) /* The memory burst size is set to one */
 #  define XDMACH_CC_MBSIZE_4        (1 << XDMACH_CC_MBSIZE_SHIFT) /* The memory burst size is set to four */
 #  define XDMACH_CC_MBSIZE_8        (2 << XDMACH_CC_MBSIZE_SHIFT) /* The memory burst size is set to eight */
 #  define XDMACH_CC_MBSIZE_16       (3 << XDMACH_CC_MBSIZE_SHIFT) /* The memory burst size is set to sixteen */
-#define XDMACH_CC_DSYNC             (1 << 4)  /* Bit 4:  Channel x Synchronization */
-#define XDMACH_CC_PROT              (1 << 5)  /* Bit 5:  Channel x Protection */
-#define XDMACH_CC_SWREQ             (1 << 6)  /* Bit 6:  Channel x Software Request Trigger */
-#define XDMACH_CC_MEMSET            (1 << 7)  /* Bit 7:  Channel x Fill Block of memory */
-#define XDMACH_CC_CSIZE_SHIFT       (8)       /* Bits 8-10: Channel x Chunk Size */
+#define XDMACH_CC_DSYNC             (1 << 4)  /* Bit 4:  Channel Synchronization */
+#define XDMACH_CC_PROT              (1 << 5)  /* Bit 5:  Channel Protection */
+#define XDMACH_CC_SWREQ             (1 << 6)  /* Bit 6:  Channel Software Request Trigger */
+#define XDMACH_CC_MEMSET            (1 << 7)  /* Bit 7:  Channel Fill Block of memory */
+#define XDMACH_CC_CSIZE_SHIFT       (8)       /* Bits 8-10: Channel Chunk Size */
 #define XDMACH_CC_CSIZE_MASK        (7 << XDMACH_CC_CSIZE_SHIFT)
 #  define XDMACH_CC_CSIZE_1         (0 << XDMACH_CC_CSIZE_SHIFT) /* 1 data transferred */
 #  define XDMACH_CC_CSIZE_2         (1 << XDMACH_CC_CSIZE_SHIFT) /* 2 data transferred */
 #  define XDMACH_CC_CSIZE_4         (2 << XDMACH_CC_CSIZE_SHIFT) /* 4 data transferred */
 #  define XDMACH_CC_CSIZE_8         (3 << XDMACH_CC_CSIZE_SHIFT) /* 8 data transferred */
 #  define XDMACH_CC_CSIZE_16        (4 << XDMACH_CC_CSIZE_SHIFT) /* 16 data transferred */
-#define XDMACH_CC_DWIDTH_SHIFT      (11)      /* Bits 11-12: Channel x Data Width */
+#define XDMACH_CC_DWIDTH_SHIFT      (11)      /* Bits 11-12: Channel Data Width */
 #define XDMACH_CC_DWIDTH_MASK       (3 << XDMACH_CC_DWIDTH_SHIFT)
 #  define XDMACH_CC_DWIDTH_BYTE     (0 << XDMACH_CC_DWIDTH_SHIFT) /* The data size is set to 8 bits */
 #  define XDMACH_CC_DWIDTH_HWORD    (1 << XDMACH_CC_DWIDTH_SHIFT) /* The data size is set to 16 bits */
 #  define XDMACH_CC_DWIDTH_WORD     (2 << XDMACH_CC_DWIDTH_SHIFT) /* The data size is set to 32 bits */
 #  define XDMACH_CC_DWIDTH_DWORD    (3 << XDMACH_CC_DWIDTH_SHIFT) /* The data size is set to 64 bits */
-#define XDMACH_CC_SIF               (1 << 13) /* Bit 13: Channel x Source Interface Identifier */
-#define XDMACH_CC_DIF               (1 << 14) /* Bit 14: Channel x Destination Interface Identifier */
-#define XDMACH_CC_SAM_SHIFT         (16)      /* Bits 16-17: Channel x Source Addressing Mode */
+#define XDMACH_CC_SIF               (1 << 13) /* Bit 13: Channel Source Interface Identifier */
+#define XDMACH_CC_DIF               (1 << 14) /* Bit 14: Channel Destination Interface Identifier */
+#define XDMACH_CC_SAM_SHIFT         (16)      /* Bits 16-17: Channel Source Addressing Mode */
 #define XDMACH_CC_SAM_MASK          (3 << XDMACH_CC_SAM_SHIFT)
 #  define XDMACH_CC_SAM_FIXED       (0 << XDMACH_CC_SAM_SHIFT) /* The address remains unchanged */
 #  define XDMACH_CC_SAM_INCR        (1 << XDMACH_CC_SAM_SHIFT) /* Address is incremented */
 #  define XDMACH_CC_SAM_UBS         (2 << XDMACH_CC_SAM_SHIFT) /* Microblock stride is added */
 #  define XDMACH_CC_SAM_UBSDS       (3 << XDMACH_CC_SAM_SHIFT) /* Microblock stride and data stride is added */
-#define XDMACH_CC_DAM_SHIFT         (18)      /* Bits 18-19: Channel x Destination Addressing Mode */
+#define XDMACH_CC_DAM_SHIFT         (18)      /* Bits 18-19: Channel Destination Addressing Mode */
 #define XDMACH_CC_DAM_MASK          (3 << XDMACH_CC_DAM_SHIFT)
 #  define XDMACH_CC_DAM_FIXED       (0 << XDMACH_CC_DAM_SHIFT) /* The address remains unchanged */
 #  define XDMACH_CC_DAM_INCR        (1 << XDMACH_CC_DAM_SHIFT) /* Address is incremented */
@@ -288,25 +352,113 @@
 #define XDMACH_CC_INITD             (1 << 21) /* Bit 21: Channel Initialization Terminated */
 #define XDMACH_CC_RDIP              (1 << 22) /* Bit 22: Read in Progress */
 #define XDMACH_CC_WRIP              (1 << 23) /* Bit 23: Write in Progress */
-#define XDMACH_CC_PERID_SHIFT       (24)      /* Bits 24-30: Channel x Peripheral Identifier */
+#define XDMACH_CC_PERID_SHIFT       (24)      /* Bits 24-30: Channel Peripheral Identifier */
 #define XDMACH_CC_PERID_MASK        (0x7f << XDMACH_CC_PERID_SHIFT)
 #  define XDMACH_CC_PERID(n)        ((uint32_t)(n) << XDMACH_CC_PERID_SHIFT)
 
 /* Channel Data Stride Memory Set Pattern */
 
-#define XDMACH_CDSMSP_SDS_MSP_SHIFT (0)     /* Bits 0-15: Channel x Source Data stride or Memory Set Pattern */
+#define XDMACH_CDSMSP_SDS_MSP_SHIFT (0)     /* Bits 0-15: Channel Source Data stride or Memory Set Pattern */
 #define XDMACH_CDSMSP_SDS_MSP_MASK  (0xffff << XDMACH_CDSMSP_SDS_MSP_SHIFT)
 #  define XDMACH_CDSMSP_SDS_MSP(n)  ((uint32_t)(n) << XDMACH_CDSMSP_SDS_MSP_SHIFT)
-#define XDMACH_CDSMSP_DDS_MSP_SHIFT (16)    /* Bits 16-31: Channel x Destination Data Stride or Memory Set Pattern */
+#define XDMACH_CDSMSP_DDS_MSP_SHIFT (16)    /* Bits 16-31: Channel Destination Data Stride or Memory Set Pattern */
 #define XDMACH_CDSMSP_DDS_MSP_MASK  (0xffff << XDMACH_CDSMSP_DDS_MSP_SHIFT)
 #  define XDMACH_CDSMSP_DDS_MSP(n)  ((uint32_t)(n) << XDMACH_CDSMSP_DDS_MSP_SHIFT)
 
 /* Channel Source Microblock Stride */
 
-#define XDMACH_CSUS_SUBS_MASK       (0x00ffffff)       /* Bits 0-23: Channel x Source Microblock Stride */
+#define XDMACH_CSUS_SUBS_MASK       (0x00ffffff)       /* Bits 0-23: Channel Source Microblock Stride */
 
 /* Channel Destination Microblock Stride */
 
-#define XDMACH_CDUS_DUBS_MASK       (0x00ffffff)       /* Bits 0-23: Channel x Destination Microblock Stride */
+#define XDMACH_CDUS_DUBS_MASK       (0x00ffffff)       /* Bits 0-23: Channel Destination Microblock Stride */
+
+/* XDMA Channel Definitions *************************************************************/
+/* XDMA Controller 0 Channel Definitions */
+
+#define XDMAC0_CH_HSMCI0            0  /* HSMCI0 Receive/Transmit */
+#define XDMAC0_CH_HSMCI1            1  /* HSMCI1 Receive/Transmit */
+#define XDMAC0_CH_TWI0_TX           2  /* TWI0 Transmit */
+#define XDMAC0_CH_TWI0_RX           3  /* TWI0 Receive */
+#define XDMAC0_CH_TWI1_TX           4  /* TWI1 Transmit */
+#define XDMAC0_CH_TWI1_RX           5  /* TWI1 Receive */
+#define XDMAC0_CH_TWI2_TX           6  /* TWI2 Transmit */
+#define XDMAC0_CH_TWI2_RX           7  /* TWI2 Receive */
+#define XDMAC0_CH_TWI3_TX           8  /* TWI3 Transmit */
+#define XDMAC0_CH_TWI3_RX           9  /* TWI3 Receive */
+#define XDMAC0_CH_SPI0_TX           10 /* SPI0 Transmit */
+#define XDMAC0_CH_SPI0_RX           11 /* SPI0 Receive */
+#define XDMAC0_CH_SPI1_TX           12 /* SPI1 Transmit */
+#define XDMAC0_CH_SPI1_RX           13 /* SPI1 Receive */
+#define XDMAC0_CH_SPI2_TX           14 /* SPI2 Transmit */
+#define XDMAC0_CH_SPI2_RX           15 /* SPI2 Receive */
+#define XDMAC0_CH_USART2_TX         16 /* USART2 Transmit */
+#define XDMAC0_CH_USART2_RX         17 /* USART2 Receive */
+#define XDMAC0_CH_USART3_TX         18 /* USART3 Transmit */
+#define XDMAC0_CH_USART3_RX         19 /* USART3 Receive */
+#define XDMAC0_CH_USART4_TX         20 /* USART4 Transmit */
+#define XDMAC0_CH_USART4_RX         21 /* USART4 Receive */
+#define XDMAC0_CH_UART0_TX          22 /* UART0 Transmit */
+#define XDMAC0_CH_UART0_RX          23 /* UART0 Receive */
+#define XDMAC0_CH_UART1_TX          24 /* UART1 Transmit */
+#define XDMAC0_CH_UART1_RX          25 /* UART1 Receive */
+#define XDMAC0_CH_SSC0_TX           26 /* SSC0 Transmit */
+#define XDMAC0_CH_SSC0_RX           27 /* SSC0 Receive */
+#define XDMAC0_CH_SSC1_TX           28 /* SSC1 Transmit */
+#define XDMAC0_CH_SSC1_RX           29 /* SSC1 Receive */
+#define XDMAC0_CH_DBGU_TX           30 /* DBGU Transmit */
+#define XDMAC0_CH_DBGU_RX           31 /* DBGU Receive */
+#define XDMAC0_CH_ADC_RX            32 /* ADC Receive */
+#define XDMAC0_CH_SMD_TX            33 /* SMD Transmit */
+#define XDMAC0_CH_SMD_RX            34 /* SMD Receive */
+#define XDMAC0_CH_USART0_TX         36 /* USART0 Transmit */
+#define XDMAC0_CH_USART0_RX         37 /* USART0 Receive */
+#define XDMAC0_CH_USART1_TX         38 /* USART1 Transmit */
+#define XDMAC0_CH_USART1_RX         39 /* USART1 Receive */
+#define XDMAC0_CH_AES_RX            40 /* AES Receive */
+#define XDMAC0_CH_AES_TX            41 /* AES Transmit */
+#define XDMAC0_CH_TDES_TX           42 /* TDES Transmit */
+#define XDMAC0_CH_TDES_RX           43 /* TDES Receive */
+#define XDMAC0_CH_SHA_TX            44 /* SHA Transmit */
+#define XDMAC0_CH_CATB_TX           46 /* CATB Transmit */
+#define XDMAC0_CH_CATB_RX           47 /* CATB Receive */
+
+/* XDMA Controller 1 Channel Definitions */
+
+#define XDMAC1_CH_HSMCI0            0  /* HSMCI0 Receive/Transmit */
+#define XDMAC1_CH_HSMCI1            1  /* HSMCI1 Receive/Transmit */
+#define XDMAC1_CH_TWI0_TX           2  /* TWI0 Transmit */
+#define XDMAC1_CH_TWI0_RX           3  /* TWI0 Receive */
+#define XDMAC1_CH_TWI1_TX           4  /* TWI1 Transmit */
+#define XDMAC1_CH_TWI1_RX           5  /* TWI1 Receive */
+#define XDMAC1_CH_TWI2_TX           6  /* TWI2 Transmit */
+#define XDMAC1_CH_TWI2_RX           7  /* TWI2 Receive */
+#define XDMAC1_CH_TWI3_TX           8  /* TWI3 Transmit */
+#define XDMAC1_CH_TWI3_RX           9  /* TWI3 Receive */
+#define XDMAC1_CH_SPI0_TX           10 /* SPI0 Transmit */
+#define XDMAC1_CH_SPI0_RX           11 /* SPI0 Receive */
+#define XDMAC1_CH_SPI1_TX           12 /* SPI1 Transmit */
+#define XDMAC1_CH_SPI1_RX           13 /* SPI1 Receive */
+#define XDMAC1_CH_SPI2_TX           14 /* SPI2 Transmit */
+#define XDMAC1_CH_SPI2_RX           15 /* SPI2 Receive */
+#define XDMAC1_CH_USART2_TX         16 /* USART2 Transmit */
+#define XDMAC1_CH_USART2_RX         17 /* USART2 Receive */
+#define XDMAC1_CH_USART3_TX         18 /* USART3 Transmit */
+#define XDMAC1_CH_USART3_RX         19 /* USART3 Receive */
+#define XDMAC1_CH_USART4_TX         20 /* USART4 Transmit */
+#define XDMAC1_CH_USART4_RX         21 /* USART4 Receive */
+#define XDMAC1_CH_UART0_TX          22 /* UART0 Transmit */
+#define XDMAC1_CH_UART0_RX          23 /* UART0 Receive */
+#define XDMAC1_CH_UART1_TX          24 /* UART1 Transmit */
+#define XDMAC1_CH_UART1_RX          25 /* UART1 Receive */
+#define XDMAC1_CH_SSC0_TX           26 /* SSC0 Transmit */
+#define XDMAC1_CH_SSC0_RX           27 /* SSC0 Receive */
+#define XDMAC1_CH_SSC1_TX           28 /* SSC1 Transmit */
+#define XDMAC1_CH_SSC1_RX           29 /* SSC1 Receive */
+#define XDMAC1_CH_DBGU_TX           30 /* DBGU Transmit */
+#define XDMAC1_CH_DBGU_RX           31 /* DBGU Receive */
+#define XDMAC1_CH_ADC_RX            32 /* ADC Receive */
+#define XDMAC1_CH_SMD_TX            33 /* SMD Transmit */
+#define XDMAC1_CH_SMD_RX            34 /* SMD Receive */
 
 #endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAM_XDMAC_H */
