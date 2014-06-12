@@ -65,8 +65,8 @@
  ****************************************************************************/
 
 /* Represents one I/O buffer.  A packet is contained by one or more I/O
- * buffers in a chain.  Theio_pktlen and io_priv fields are only valid for
- * the I/O buffer at the head of the chain.
+ * buffers in a chain.  The io_pktlen is only valid for the I/O buffer at
+ * the head of the chain.
  */
 
 struct iob_s
@@ -85,7 +85,6 @@ struct iob_s
   uint16_t io_offset;   /* Data begins at this offset */
 #endif
   uint16_t io_pktlen;   /* Total length of the packet */
-  void    *io_priv;     /* User private data attached to the I/O buffer */
 
   uint8_t  io_data[CONFIG_IOB_BUFSIZE];
 };

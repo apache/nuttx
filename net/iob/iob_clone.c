@@ -93,10 +93,9 @@ int iob_clone(FAR struct iob_s *iob1, FAR struct iob_s *iob2)
   DEBUGASSERT(iob2->io_len == 0 && iob2->io_offset == 0 &&
               iob2->io_pktlen == 0 && iob2->io_flink == NULL);
 
-  /* Copy the header information */
+  /* Copy the total packet size from the I/O buffer at the head of the chain */
 
   iob2->io_pktlen = iob1->io_pktlen;
-  iob2->io_priv = iob1->io_priv;
 
   /* Handle special case where there are empty buffers at the head
    * the the list.

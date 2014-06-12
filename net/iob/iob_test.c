@@ -86,8 +86,7 @@ static void dump_chain(struct iob_s *iob)
 
   while (iob)
     {
-      printf("%d. len=%d, offset=%d, priv=%p\n",
-             n, iob->io_len, iob->io_offset, iob->io_priv);
+      printf("%d. len=%d, offset=%d\n", n, iob->io_len, iob->io_offset);
 
       pktlen += iob->io_len;
       iob = iob->io_flink;

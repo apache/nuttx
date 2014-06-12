@@ -86,10 +86,7 @@ void iob_concat(FAR struct iob_s *iob1, FAR struct iob_s *iob2)
 
   iob1->io_flink = iob2;
 
-  /* Combine the total packet size.  flags, VLAN, tags, and private
-  * data from iob2 are lost.
-  */
+  /* Combine the total packet size */
 
   iob1->io_pktlen += iob2->io_pktlen;
-  iob2->io_priv    = NULL;
 }

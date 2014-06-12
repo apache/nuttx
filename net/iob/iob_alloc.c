@@ -96,7 +96,6 @@ FAR struct iob_s *iob_alloc(void)
       iob->io_len    = 0;    /* Length of the data in the entry */
       iob->io_offset = 0;    /* Offset to the beginning of data */
       iob->io_pktlen = 0;    /* Total length of the packet */
-      iob->io_priv   = NULL; /* User private data attached to the I/O buffer */
       return iob;
     }
 
