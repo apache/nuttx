@@ -7427,4 +7427,5 @@
 	  case of 8-bit data with parity.  From Freddie Chopin (2014-6-11).
 	* binfmt/libelf/elf.c:  Fix a compilation error when CONFIG_ELF_DUMPBUFFER
 	  is defined.  From Pelle Windestam (2014-6-12).
-
+	* net/, include/nutt/net, and include/netpacket:  Add support for "raw"
+	  sockets.  From Lazlo Sitzer (2014-6-12).
