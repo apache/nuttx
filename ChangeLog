@@ -7429,3 +7429,5 @@
 	  is defined.  From Pelle Windestam (2014-6-12).
 	* net/, include/nutt/net, and include/netpacket:  Add support for "raw"
 	  sockets.  From Lazlo Sitzer (2014-6-12).
+	* arch/arm/src/sama5:  Add SAMA5D4 XDMAC driver.  Initial check-in is
+	  just the DMAC driver with a few naming changes (2014-6-12).
