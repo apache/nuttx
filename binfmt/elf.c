@@ -255,7 +255,7 @@ static int elf_loadbinary(struct binary_s *binp)
 #endif
 
   elf_dumpbuffer("Entry code", (FAR const uint8_t*)binp->entrypt,
-                 MIN(loadinfo.allocsize - loadinfo.ehdr.e_entry, 512));
+                 MIN(loadinfo.elfsize - loadinfo.ehdr.e_entry, 512));
 
   elf_uninit(&loadinfo);
   return OK;
