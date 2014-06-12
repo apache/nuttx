@@ -55,7 +55,7 @@ struct sockaddr_ll
 {
   uint16_t sll_family;
   uint16_t sll_protocol;
-  sint16_t sll_ifindex;
+  int16_t  sll_ifindex;
 };
 
 #endif  /* __INCLUDE_NETPACKET_PACKET_H */

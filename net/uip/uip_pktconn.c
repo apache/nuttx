@@ -103,33 +103,6 @@ static inline void _uip_semtake(sem_t *sem)
 #define _uip_semgive(sem) sem_post(sem)
 
 /****************************************************************************
- * Name: uip_find_conn()
- *
- * Description:
- *   Find the packet socket connection that uses this interface index
- *   number.  Called only from user user level code, but with interrupts
- *   disabled.
- *
- ****************************************************************************/
-
-static struct uip_pkt_conn *uip_find_conn(uint8_t ifindex)
-{
-  int i;
-
-  /* Now search each connection structure. */
-
-  for (i = 0; i < CONFIG_NET_PKT_CONNS; i++)
-    {
-      if (g_pkt_connections[ i ].ifindex == ifindex)
-        {
-          return &g_pkt_connections[ i ];
-        }
-    }
-
-  return NULL;
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 

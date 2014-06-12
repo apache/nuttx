@@ -160,19 +160,30 @@ int psock_bind(FAR struct socket *psock, const struct sockaddr *addr,
 
   /* Verify that a valid address has been provided */
 
-#ifdef CONFIG_NET_IPv6
-  if ((addr->sa_family != AF_PACKET && addr->sa_family != AF_INET6) ||
-      (addr->sa_family == AF_PACKET && addrlen < sizeof(struct sockaddr_ll)) ||
-      (addr->sa_family == AF_INET6 && addrlen < sizeof(struct sockaddr_in6)))
-#else
-  if ((addr->sa_family != AF_PACKET && addr->sa_family != AF_INET) ||
-      (addr->sa_family == AF_PACKET && addrlen < sizeof(struct sockaddr_ll)) ||
-      (addr->sa_family == AF_INET && addrlen < sizeof(struct sockaddr_in)))
+  if (
+        (
+#if defined(CONFIG_NET_PKT)
+          addr->sa_family != AF_PACKET &&
 #endif
-  {
+#if defined(CONFIG_NET_IPv6)
+          addr->sa_family != AF_INET6
+#else
+          addr->sa_family != AF_INET
+#endif
+        ) ||
+#if defined(CONFIG_NET_PKT)
+      (addr->sa_family == AF_PACKET && addrlen < sizeof(struct sockaddr_ll)) ||
+#endif
+#if defined(CONFIG_NET_IPv6)
+      (addr->sa_family == AF_INET6 && addrlen < sizeof(struct sockaddr_in6))
+#else
+      (addr->sa_family == AF_INET && addrlen < sizeof(struct sockaddr_in))
+#endif
+     )
+    {
       err = EBADF;
       goto errout;
-  }
+    }
 
   /* Perform the binding depending on the protocol type */
 

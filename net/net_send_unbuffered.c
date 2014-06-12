@@ -228,7 +228,7 @@ static ssize_t pktsend(FAR struct socket *psock, FAR const void *buf,
   struct send_s state;
   uip_lock_t save;
   int err;
-  int ret;
+  int ret = OK;
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 

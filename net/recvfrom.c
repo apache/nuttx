@@ -558,7 +558,8 @@ static uint16_t recvfrom_pktinterrupt(FAR struct uip_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
-static inline void recvfrom_tcpsender(struct uip_driver_s *dev, struct recvfrom_s *pstate)
+static inline void recvfrom_tcpsender(FAR struct uip_driver_s *dev,
+                                      FAR struct recvfrom_s *pstate)
 {
 #ifdef CONFIG_NET_IPv6
   FAR struct sockaddr_in6 *infrom = pstate->rf_from;
@@ -1101,7 +1102,9 @@ static ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
       ret = -EBUSY;
     }
 
+#if 0 /* Not used */
 errout_with_state:
+#endif
   uip_unlock(save);
   recvfrom_uninit(&state);
   return ret;
@@ -1521,7 +1524,7 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   else
 #endif
     {
-      ndbg("ERROR: Unsupported socket type: %d\n", psock->s_type
+      ndbg("ERROR: Unsupported socket type: %d\n", psock->s_type);
       ret = -ENOSYS;
     }
 

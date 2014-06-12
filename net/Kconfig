@@ -83,25 +83,6 @@ config NET_SOLINGER
 
 endif # NET_SOCKOPTS
 
-config NET_PKT
-	bool "Socket packet socket support"
-	default n
-	---help---
-		Enable or disbale support for packet sockets.
-		Packet sockets allow receiving and transmitting frames without
-		a transport protocol in between. Frames received are copied into
-		a packet socket tap before they enter uIP. Data written into a
-		packet socket will bypass uIP altogether and be placed in the
-		transmission buffer of the network interface driver.
-
-if NET_PKT
-
-config NET_PKT_CONNS
-	int "Max packet sockets"
-	default 1
-
-endif # NET_PKT
-
 config NET_BUFSIZE
 	int "Network packet buffer size (MTU)"
 	default 1294 if !NET_SLIP && NET_IPv6
@@ -128,6 +109,29 @@ config NET_TCPURGDATA
 		Determines if support for TCP urgent data notification should be
 		compiled in. Urgent data (out-of-band data) is a rarely used TCP feature
 		that is very seldom would be required.
+
+menu "Raw Socket Support"
+
+config NET_PKT
+	bool "Socket packet socket support"
+	default n
+	---help---
+		Enable or disable support for packet sockets.
+
+		Packet sockets allow receiving and transmitting frames without
+		a transport protocol in between. Frames received are copied into
+		a packet socket tap before they enter uIP. Data written into a
+		packet socket will bypass uIP altogether and be placed in the
+		transmission buffer of the network interface driver.
+
+if NET_PKT
+
+config NET_PKT_CONNS
+	int "Max packet sockets"
+	default 1
+
+endif # NET_PKT
+endmenu # Packet Sockets
 
 menu "TCP/IP Networking"
 
