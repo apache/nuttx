@@ -159,7 +159,8 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
 
   if ((flags & UIP_ACKDATA) != 0)
     {
-      FAR sq_entry_t *entry, *next;
+      FAR sq_entry_t *entry;
+      FAR sq_entry_t *next;
       FAR struct uip_wrbuffer_s *segment;
       uint32_t ackno;
 

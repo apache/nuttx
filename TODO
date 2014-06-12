@@ -15,7 +15,7 @@ nuttx/
  (11)  Kernel Build
   (4)  C++ Support
   (6)  Binary loaders (binfmt/)
- (16)  Network (net/, drivers/net)
+ (15)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
  (10)  Libraries (libc/, )
  (12)  File system/Generic drivers (fs/, drivers/)
@@ -769,11 +769,6 @@ o Binary loaders (binfmt/)
 
 o Network (net/, drivers/net)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-  Title:       SOCK_RAW/SOCK_PACKET
-  Description: Should implement SOCK_RAW, SOCK_PACKET
-  Status:      Open.  No changes are planned.
-  Priority:    Low
 
   Title:       MULTIPLE NETWORK INTERFACE SUPPORT
   Description: uIP polling issues / Multiple network interface support:

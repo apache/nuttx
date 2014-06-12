@@ -14,7 +14,7 @@ if NET_IOB
 
 config IOB_NBUFFERS
 	int "Number of pre-allocated network I/O buffers"
-	default 16
+	default 24
 	---help---
 		Each packet is represented by a series of small I/O buffers in a
 		chain.  This setting determines the number of preallocated I/O
@@ -22,7 +22,7 @@ config IOB_NBUFFERS
 
 config IOB_BUFSIZE
 	int "Payload size of one network I/O buffer"
-	default 256
+	default 196
 	---help---
 		Each packet is represented by a series of small I/O buffers in a
 		chain.  This setting determines the data payload each preallocated
