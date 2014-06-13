@@ -3,7 +3,7 @@
  * Definitions for use with AF_PACKET sockets
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
- *   Author: Lazlo <dlsitzer@gmail.comg>
+ *   Author: Daniel Laszlo Sitzer <dlsitzer@gmail.com>
  *
  * Includes some definitions that a compatible with the LGPL GNU C Library
  * header file of the same name.
