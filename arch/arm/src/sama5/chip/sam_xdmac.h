@@ -461,4 +461,74 @@
 #define XDMAC1_CH_SMD_TX            33 /* SMD Transmit */
 #define XDMAC1_CH_SMD_RX            34 /* SMD Receive */
 
+/* Descriptor structure member definitions **********************************************/
+
+/* Next Descriptor Address (32-bit address) */
+
+/* Microblock Control */
+
+#define CHNEXT_UBC_UBLEN_SHIFT      (0)       /* Bits 0-23: Microblock Length */
+#define CHNEXT_UBC_UBLEN_MASK       (0x00ffffff << CHNEXT_UBC_UBLEN_SHIFT)
+#  define CHNEXT_UBC_UBLEN(n)       ((uint32_t)(n) << CHNEXT_UBC_UBLEN_SHIFT)
+#define CHNEXT_UBC_NDE              (1 << 24) /* Bit 24: Next Descriptor Enable */
+#define CHNEXT_UBC_NSEN             (1 << 25) /* Bit 25: Next Descriptor Source Update */
+#define CHNEXT_UBC_NDEN             (1 << 26) /* Bit 26: Next Descriptor Destination Update */
+#define CHNEXT_UBC_NVIEW_SHIFT      (27)      /* Bits 27-29: Next Descriptor View */
+#define CHNEXT_UBC_NVIEW_MASK       (3 << CHNEXT_UBC_NVIEW_SHIFT)
+#  define CHNEXT_UBC_NVIEW_0        (0 << CHNEXT_UBC_NVIEW_SHIFT) /* Next Descriptor View 0 */
+#  define CHNEXT_UBC_NVIEW_1        (1 << CHNEXT_UBC_NVIEW_SHIFT) /* Next Descriptor View 1 */
+#  define CHNEXT_UBC_NVIEW_2        (2 << CHNEXT_UBC_NVIEW_SHIFT) /* Next Descriptor View 2 */
+#  define CHNEXT_UBC_NVIEW_3        (3 << CHNEXT_UBC_NVIEW_SHIFT) /* Next Descriptor View 3 */
+
+/* Source Address (32-bit address) */
+/* Destination Address (32-bit address) */
+
+/* Configuration Register */
+/* Block Control */
+
+/* Data Stride (32-bit value) */
+/* Source Microblock Stride (32-bit value) */
+/* Destination Microblock Stride (32-bit value) */
+
+/****************************************************************************************
+ * Public Types
+ ****************************************************************************************/
+
+struct chnext_view0_s
+{
+  uint32_t nda; /* Next Descriptor Address */
+  uint32_t ubc; /* Microblock Control */
+  uint32_t ta;  /* Transfer Address */
+};
+
+struct chnext_view1_s
+{
+  uint32_t nda; /* Next Descriptor Address */
+  uint32_t ubc; /* Microblock Control */
+  uint32_t sa;  /* Source Address */
+  uint32_t da;  /* Destination Address */
+};
+
+struct chnext_view2_s
+{
+  uint32_t nda; /* Next Descriptor Address */
+  uint32_t ubc; /* Microblock Control */
+  uint32_t sa;  /* Source Address */
+  uint32_t da;  /* Destination Address */
+  uint32_t cfg; /* Configuration Register */
+};
+
+struct chnext_view3_s
+{
+  uint32_t nda; /* Next Descriptor Address */
+  uint32_t ubc; /* Microblock Control */
+  uint32_t sa;  /* Source Address */
+  uint32_t da;  /* Destination Address */
+  uint32_t cfg; /* Configuration Register */
+  uint32_t bc;  /* Block Control */
+  uint32_t ds;  /* Data Stride */
+  uint32_t sus; /* Source Microblock Stride */
+  uint32_t dus; /* Destination Microblock Stride */
+};
+
 #endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAM_XDMAC_H */
