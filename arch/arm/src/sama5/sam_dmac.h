@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/sama5/sam_dmac.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -136,6 +136,8 @@ typedef void (*dma_callback_t)(DMA_HANDLE handle, void *arg, int result);
 /* The following is used for sampling DMA registers when CONFIG DEBUG_DMA is selected */
 
 #ifdef CONFIG_DEBUG_DMA
+#if defined(CONFIG_SAMA5_DMAC0) || defined(CONFIG_SAMA5_DMAC1)
+
 struct sam_dmaregs_s
 {
   /* Global Registers */
@@ -162,7 +164,40 @@ struct sam_dmaregs_s
   uint32_t spip;    /* DMAC Channel Source PinP Configuration Register */
   uint32_t dpip;    /* DMAC Channel Destination PinP Configuration Register */
 };
-#endif
+
+#elif defined(CONFIG_SAMA5_XDMAC0) || defined(CONFIG_SAMA5_XDMAC1)
+
+struct sam_dmaregs_s
+{
+  /* Global Registers */
+
+  uint32_t gtype;   /* Global Type Register */
+  uint32_t gcfg;    /* Global Configuration Register */
+  uint32_t gwac;    /* Global Weighted Arbiter Configuration Register */
+  uint32_t gim;     /* Global Interrupt Mask Register */
+  uint32_t gis;     /* Global Interrupt Status Register */
+  uint32_t gs;      /* Global Channel Status Register */
+  uint32_t grs;     /* Global Channel Read Suspend Register */
+  uint32_t gws;     /* Global Channel Write Suspend Register */
+  uint32_t gsws;    /* Global Channel Software Request Status Register */
+
+  /* Channel Registers */
+
+  uint32_t cis;     /* Channel Interrupt Status Register */
+  uint32_t csa;     /* Channel Source Address Register */
+  uint32_t cda;     /* Channel Destination Address Register */
+  uint32_t cnda;    /* Channel Next Descriptor Address Register */
+  uint32_t cndc;    /* Channel Next Descriptor Control Register */
+  uint32_t cubc;    /* Channel Microblock Control Register */
+  uint32_t cbc;     /* Channel Block Control Register */
+  uint32_t cc;      /* Channel Configuration Register */
+  uint32_t cdsmsp;  /* Channel Data Stride Memory Set Pattern */
+  uint32_t csus;    /* Channel Source Microblock Stride */
+  uint32_t cdus;    /* Channel Destination Microblock Stride */
+};
+
+#endif /* CONFIG_SAMA5_XDMAC0 || CONFIG_SAMA5_XDMAC1 */
+#endif /* CONFIG_DEBUG_DMA */
 
 /************************************************************************************
  * Inline Functions
