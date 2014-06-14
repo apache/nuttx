@@ -7433,4 +7433,9 @@
 	  just the DMAC driver with a few naming changes (2014-6-12).
 	* configs/sama5d4x-ek/ramtest:  Add an SDRAM test configuration
 	  (2014-6-14).
-
+	* libc/stdio/lib_libsnoflush.c, lib_memsistream.c, and lib_memsostream.c:
+	  Add support for seekable memory streams (2014-6-14).
+	* libc/stdio/lib_rawsistream.c, and lib_rawsostream.c:  Add support for
+	  seekable raw streams (2014-6-14).
+	* libc/stdio/lib_stdsistream.c, and lib_stdsostream.c:  Add support for
+	  seekable standard streams (2014-6-14).
