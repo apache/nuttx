@@ -50,7 +50,8 @@ CSRCS += lib_sscanf.c
 
 ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
 
-CSRCS += lib_rawinstream.c lib_rawoutstream.c
+CSRCS += lib_rawinstream.c lib_rawoutstream.c lib_rawsistream.c
+CSRCS += lib_rawsostream.c
 
 # And these depend upon both file descriptors and C streams
 

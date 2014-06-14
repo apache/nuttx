@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/stdio/lib_rawoutstream.c
+ * libc/stdio/lib_rawsostream.c
  *
- *   Copyright (C) 2007-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,12 +48,12 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: rawoutstream_putc
+ * Name: rawsostream_putc
  ****************************************************************************/
 
-static void rawoutstream_putc(FAR struct lib_outstream_s *this, int ch)
+static void rawsostream_putc(FAR struct lib_sostream_s *this, int ch)
 {
-  FAR struct lib_rawoutstream_s *rthis = (FAR struct lib_rawoutstream_s *)this;
+  FAR struct lib_rawsostream_s *rthis = (FAR struct lib_rawsostream_s *)this;
   int nwritten;
   char buffer = ch;
 
@@ -83,33 +83,46 @@ static void rawoutstream_putc(FAR struct lib_outstream_s *this, int ch)
 }
 
 /****************************************************************************
+ * Name: rawsostream_seek
+ ****************************************************************************/
+
+static off_t rawsostream_seek(FAR struct lib_sostream_s *this, off_t offset,
+                              int whence)
+{
+  FAR struct lib_rawsostream_s *mthis = (FAR struct lib_rawsostream_s *)this;
+
+  DEBUGASSERT(this);
+  return lseek(mthis->fd, offset, whence);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_rawoutstream
+ * Name: lib_rawsostream
  *
  * Description:
  *   Initializes a stream for use with a file descriptor.
  *
  * Input parameters:
- *   rawoutstream - User allocated, uninitialized instance of struct
- *                  lib_rawoutstream_s to be initialized.
- *   fd           - User provided file/socket descriptor (must have been opened
- *                  for write access).
+ *   outstream - User allocated, uninitialized instance of struct
+ *               lib_rawsostream_s to be initialized.
+ *   fd        - User provided file/socket descriptor (must have been opened
+ *               for write access).
  *
  * Returned Value:
  *   None (User allocated instance initialized).
  *
  ****************************************************************************/
 
-void lib_rawoutstream(FAR struct lib_rawoutstream_s *rawoutstream, int fd)
+void lib_rawsostream(FAR struct lib_rawsostream_s *outstream, int fd)
 {
-  rawoutstream->public.put   = rawoutstream_putc;
+  outstream->public.put   = rawsostream_putc;
 #ifdef CONFIG_STDIO_LINEBUFFER
-  rawoutstream->public.flush = lib_noflush;
+  outstream->public.flush = lib_snoflush;
 #endif
-  rawoutstream->public.nput  = 0;
-  rawoutstream->fd           = fd;
+  outstream->public.seek  = rawsostream_seek;
+  outstream->public.nput  = 0;
+  outstream->fd           = fd;
 }
-

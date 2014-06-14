@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/stdio/lib_rawsistream.c
+ * libc/stdio/lib_rawoutstream.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,46 +48,38 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: rawsistream_getc
+ * Name: rawoutstream_putc
  ****************************************************************************/
 
-static int rawsistream_getc(FAR struct lib_sistream_s *this)
+static void rawoutstream_putc(FAR struct lib_outstream_s *this, int ch)
 {
-  FAR struct lib_rawsistream_s *rthis = (FAR struct lib_rawsistream_s *)this;
+  FAR struct lib_rawoutstream_s *rthis = (FAR struct lib_rawoutstream_s *)this;
   int nwritten;
-  char ch;
+  char buffer = ch;
 
   DEBUGASSERT(this && rthis->fd >= 0);
 
-  /* Attempt to read one character */
-
-  nwritten = read(rthis->fd, &ch, 1);
-  if (nwritten == 1)
-    {
-      this->nget++;
-      return ch;
-    }
-
-  /* Return EOF on any failure to read from the incoming byte stream. The
-   * only expected error is EINTR meaning that the read was interrupted
-   * by a signal.  A Zero return value would indicated an end-of-file
-   * confition.
+  /* Loop until the character is successfully transferred or until an
+   * irrecoverable error occurs.
    */
 
-  return EOF;
-}
+  do
+    {
+      nwritten = write(rthis->fd, &buffer, 1);
+      if (nwritten == 1)
+        {
+          this->nput++;
+          return;
+        }
 
-/****************************************************************************
- * Name: rawsistream_seek
- ****************************************************************************/
+      /* The only expected error is EINTR, meaning that the write operation
+       * was awakened by a signal.  Zero would not be a valid return value
+       * from write().
+       */
 
-static off_t rawsistream_seek(FAR struct lib_sistream_s *this, off_t offset,
-                              int whence)
-{
-  FAR struct lib_rawsistream_s *mthis = (FAR struct lib_rawsistream_s *)this;
-
-  DEBUGASSERT(this);
-  return lseek(mthis->fd, offset, whence);
+      DEBUGASSERT(nwritten < 0);
+    }
+  while (get_errno() == EINTR);
 }
 
 /****************************************************************************
@@ -95,26 +87,28 @@ static off_t rawsistream_seek(FAR struct lib_sistream_s *this, off_t offset,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_rawsistream
+ * Name: lib_rawoutstream
  *
  * Description:
  *   Initializes a stream for use with a file descriptor.
  *
  * Input parameters:
- *   instream - User allocated, uninitialized instance of struct
- *              lib_rawsistream_s to be initialized.
- *   fd       - User provided file/socket descriptor (must have been opened
- *              for the correct access).
+ *   outstream - User allocated, uninitialized instance of struct
+ *               lib_rawoutstream_s to be initialized.
+ *   fd        - User provided file/socket descriptor (must have been opened
+ *               for write access).
  *
  * Returned Value:
  *   None (User allocated instance initialized).
  *
  ****************************************************************************/
 
-void lib_rawsistream(FAR struct lib_rawsistream_s *instream, int fd)
+void lib_rawoutstream(FAR struct lib_rawoutstream_s *outstream, int fd)
 {
-  instream->public.get  = rawsistream_getc;
-  instream->public.seek = rawsistream_seek;
-  instream->public.nget = 0;
-  instream->fd          = fd;
+  outstream->public.put   = rawoutstream_putc;
+#ifdef CONFIG_STDIO_LINEBUFFER
+  outstream->public.flush = lib_noflush;
+#endif
+  outstream->public.nput  = 0;
+  outstream->fd           = fd;
 }
