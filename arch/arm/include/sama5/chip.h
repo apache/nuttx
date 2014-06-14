@@ -133,8 +133,10 @@
  * - Some parts support a Video Decoder (SAMA5D43 and SAMA5D44)
  * - Includes an L2 data cache, NEON FPU, and TrustZone
  * - New XDMAC DMA controller
- * - There are few differences in the support peripherals (Gigbit Ethernet is not supported,
- *   for example)
+ * - There are few differences in the support peripherals.  As examples:
+ *   Gigbit Ethernet is not supported, for example; 10/100Base-T Ethernet
+ *   is different.  Additional instances of peripherals:  USART4, TWI3,
+ *   and SPI2.
  */
 
 #elif defined(CONFIG_ARCH_CHIP_ATSAMA5D41) || defined(CONFIG_ARCH_CHIP_ATSAMA5D42) || \
