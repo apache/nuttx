@@ -7431,3 +7431,6 @@
 	  sockets.  From Lazlo Sitzer (2014-6-12).
 	* arch/arm/src/sama5:  Add SAMA5D4 XDMAC driver.  Initial check-in is
 	  just the DMAC driver with a few naming changes (2014-6-12).
+	* configs/sama5d4x-ek/ramtest:  Add an SDRAM test configuration
+	  (2014-6-14).
+
