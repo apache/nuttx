@@ -872,9 +872,11 @@ Buttons and LEDs
 Serial Console
 ==============
 
-  Two UARTs are available:
+  Two UART ports are available:
 
-  USART3 Virtual Com
+  Virtual COM / DBGU Port (J24).  Either may be driven by USART3, depending
+  upon the setting of JP19 and JP20:
+
   ------------------------------ ------------------- -------------------------
   SAMA5D4 PIO                    SIGNAL              USAGE
   ------------------------------ ------------------- -------------------------
@@ -882,8 +884,12 @@ Serial Console
   PE17/A17/TXD3/TCLK0            DBGU_TXD3_PE17      DBGU_TXD3 (See JP20)
   ------------------------------ ------------------- -------------------------
 
-  Connects to the SAM3U which will, in turn, provide the serial output on a
-  virual COM port.  JP19 and JP20 can disconnect USART3 from the SAM3U.
+  In one jumper position UART3 connects to the SAM3U which will, in turn,
+  provide the serial output over a USB virtual COM port.  In other other
+  jumper position, UART3 will connect the RS-232 port labelled DBGU (J24).
+
+  I personally prefer the RS-2323 port because my terminal software does not
+  lose the USB Virtual COM everytime I reset or power-cycle the board.
 
   USART4 TTL-Level
   ------------------------------ ------------------- -------------------------
@@ -900,9 +906,9 @@ Serial Console
   - VCC_3V3 is also available at Expansion Interface, J19B pins 21 and 22
   - GND is available J19A pin 11, J19B pin 31, and J19C pin 51
 
-  By default the DBGU/USART3 is used as the NuttX serial console in all
-  configurations (unless otherwise noted).  USART4, however, is the more
-  convenient USART to use during board bring-up.
+  By default the RS-232 DBGU port on USART3 is used as the NuttX serial
+  console in all configurations (unless otherwise noted).  USART4, however,
+  is the also available.
 
 Networking
 ==========
