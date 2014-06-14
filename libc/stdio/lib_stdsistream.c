@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/stdio/lib_stdinstream.c
+ * libc/stdio/lib_stdsistream.c
  *
- *   Copyright (C) 2007-2009, 2011-2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,12 +46,12 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stdinstream_getc
+ * Name: stdsistream_getc
  ****************************************************************************/
 
-static int stdinstream_getc(FAR struct lib_instream_s *this)
+static int stdsistream_getc(FAR struct lib_sistream_s *this)
 {
-  FAR struct lib_stdinstream_s *sthis = (FAR struct lib_stdinstream_s *)this;
+  FAR struct lib_stdsistream_s *sthis = (FAR struct lib_stdsistream_s *)this;
   int ret;
 
   DEBUGASSERT(this);
@@ -68,18 +68,31 @@ static int stdinstream_getc(FAR struct lib_instream_s *this)
 }
 
 /****************************************************************************
+ * Name: stdsistream_seek
+ ****************************************************************************/
+
+static off_t stdsistream_seek(FAR struct lib_sistream_s *this, off_t offset,
+                              int whence)
+{
+  FAR struct lib_stdsistream_s *mthis = (FAR struct lib_stdsistream_s *)this;
+
+  DEBUGASSERT(this);
+  return fseek(mthis->stream, offset, whence);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_stdinstream
+ * Name: lib_stdsistream
  *
  * Description:
  *   Initializes a stream for use with a FILE instance.
  *
  * Input parameters:
  *   instream - User allocated, uninitialized instance of struct
- *              lib_stdinstream_s to be initialized.
+ *              lib_stdsistream_s to be initialized.
  *   stream   - User provided stream instance (must have been opened for
  *              read access).
  *
@@ -88,10 +101,11 @@ static int stdinstream_getc(FAR struct lib_instream_s *this)
  *
  ****************************************************************************/
 
-void lib_stdinstream(FAR struct lib_stdinstream_s *instream,
+void lib_stdsistream(FAR struct lib_stdsistream_s *instream,
                      FAR FILE *stream)
 {
-  instream->public.get  = stdinstream_getc;
+  instream->public.get  = stdsistream_getc;
+  instream->public.seek = stdsistream_seek;
   instream->public.nget = 0;
   instream->stream      = stream;
 }

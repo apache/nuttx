@@ -246,57 +246,64 @@ void lib_memsostream(FAR struct lib_memsostream_s *outstream,
  *
  * Description:
  *   Initializes a stream for use with a FILE instance.
- *   Defined in lib/lib_stdinstream.c and lib/lib_stdoutstream.c
+ *   Defined in lib/stdio/lib_stdinstream.c and lib/stdio/lib_stdoutstream.c
  *
  * Input parameters:
- *   stdinstream  - User allocated, uninitialized instance of struct
- *                  lib_stdinstream_s to be initialized.
- *   stdoutstream - User allocated, uninitialized instance of struct
- *                  lib_stdoutstream_s to be initialized.
- *   stream       - User provided stream instance (must have been opened for
- *                  the correct access).
+ *   instream  - User allocated, uninitialized instance of struct
+ *               lib_stdinstream_s to be initialized.
+ *   outstream - User allocated, uninitialized instance of struct
+ *               lib_stdoutstream_s to be initialized.
+ *   stream    - User provided stream instance (must have been opened for
+ *               the correct access).
  *
  * Returned Value:
  *   None (User allocated instance initialized).
  *
  ****************************************************************************/
 
-void lib_stdinstream(FAR struct lib_stdinstream_s *stdinstream,
-                            FAR FILE *stream);
-void lib_stdoutstream(FAR struct lib_stdoutstream_s *stdoutstream,
-                             FAR FILE *stream);
+void lib_stdinstream(FAR struct lib_stdinstream_s *instream,
+                     FAR FILE *stream);
+void lib_stdoutstream(FAR struct lib_stdoutstream_s *outstream,
+                      FAR FILE *stream);
+void lib_stdsistream(FAR struct lib_stdsistream_s *instream,
+                     FAR FILE *stream);
+void lib_stdsostream(FAR struct lib_stdsostream_s *outstream,
+                     FAR FILE *stream);
 
 /****************************************************************************
- * Name: lib_rawinstream, lib_rawoutstream
+ * Name: lib_rawinstream, lib_rawoutstream, lib_rawsistream, and
+ *       lib_rawsostream,
  *
  * Description:
  *   Initializes a stream for use with a file descriptor.
- *   Defined in lib/lib_rawinstream.c and lib/lib_rawoutstream.c
+ *   Defined in lib/stdio/lib_rawinstream.c and lib/stdio/lib_rawoutstream.c.
+ *   Seekable versions are defined in lib/stdio/lib_rawsistream.c and
+ *   lib/stdio/lib_rawsostream.c
  *
  * Input parameters:
- *   rawinstream  - User allocated, uninitialized instance of struct
- *                  lib_rawinstream_s to be initialized.
- *   rawoutstream - User allocated, uninitialized instance of struct
- *                  lib_rawoutstream_s to be initialized.
- *   fd           - User provided file/socket descriptor (must have been opened
- *                  for the correct access).
+ *   instream  - User allocated, uninitialized instance of struct
+ *               lib_rawinstream_s to be initialized.
+ *   outstream - User allocated, uninitialized instance of struct
+ *               lib_rawoutstream_s to be initialized.
+ *   fd        - User provided file/socket descriptor (must have been opened
+ *               for the correct access).
  *
  * Returned Value:
  *   None (User allocated instance initialized).
  *
  ****************************************************************************/
 
-void lib_rawinstream(FAR struct lib_rawinstream_s *rawinstream,
-                            int fd);
-void lib_rawoutstream(FAR struct lib_rawoutstream_s *rawoutstream,
-                             int fd);
+void lib_rawinstream(FAR struct lib_rawinstream_s *instream, int fd);
+void lib_rawoutstream(FAR struct lib_rawoutstream_s *outstream, int fd);
+void lib_rawsistream(FAR struct lib_rawsistream_s *instream, int fd);
+void lib_rawsostream(FAR struct lib_rawsostream_s *outstream, int fd);
 
 /****************************************************************************
  * Name: lib_lowinstream, lib_lowoutstream
  *
  * Description:
  *   Initializes a stream for use with low-level, architecture-specific I/O.
- *   Defined in lib/lib_lowinstream.c and lib/lib_lowoutstream.c
+ *   Defined in lib/stdio/lib_lowinstream.c and lib/stdio/lib_lowoutstream.c
  *
  * Input parameters:
  *   lowinstream  - User allocated, uninitialized instance of struct
@@ -323,11 +330,11 @@ void lib_lowoutstream(FAR struct lib_outstream_s *lowoutstream);
  *   Initializes NULL streams:
  *
  *   o The stream created by lib_zeroinstream will return an infinitely long
- *     stream of zeroes. Defined in lib/lib_zeroinstream.c
+ *     stream of zeroes. Defined in lib/stdio/lib_zeroinstream.c
  *   o The stream created by lib_nullinstream will return only EOF.
- *     Defined in lib/lib_nullinstream.c
+ *     Defined in lib/stdio/lib_nullinstream.c
  *   o The stream created by lib_nulloutstream will write all data to the
- *     bit-bucket. Defined in lib/lib_nulloutstream.c
+ *     bit-bucket. Defined in lib/stdio/lib_nulloutstream.c
  *
  * Input parameters:
  *   zeroinstream  - User allocated, uninitialized instance of struct
