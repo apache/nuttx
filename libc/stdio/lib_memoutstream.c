@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/stdio/lib_memoutstream.c
  *
- *   Copyright (C) 2007-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -79,27 +79,25 @@ static void memoutstream_putc(FAR struct lib_outstream_s *this, int ch)
  *   Initializes a stream for use with a fixed-size memory buffer.
  *
  * Input parameters:
- *   memoutstream - User allocated, uninitialized instance of struct
+ *   outstream - User allocated, uninitialized instance of struct
  *                  lib_memoutstream_s to be initialized.
  *   bufstart     - Address of the beginning of the fixed-size memory buffer
  *   buflen       - Size of the fixed-sized memory buffer in bytes
  *
  * Returned Value:
- *   None (memoutstream initialized).
+ *   None (outstream initialized).
  *
  ****************************************************************************/
 
-void lib_memoutstream(FAR struct lib_memoutstream_s *memoutstream,
+void lib_memoutstream(FAR struct lib_memoutstream_s *outstream,
                       FAR char *bufstart, int buflen)
 {
-  memoutstream->public.put   = memoutstream_putc;
+  outstream->public.put   = memoutstream_putc;
 #ifdef CONFIG_STDIO_LINEBUFFER
-  memoutstream->public.flush = lib_noflush;
+  outstream->public.flush = lib_noflush;
 #endif
-  memoutstream->public.nput  = 0;          /* Will be buffer index */
-  memoutstream->buffer       = bufstart;   /* Start of buffer */
-  memoutstream->buflen       = buflen - 1; /* Save space for null terminator */
-  memoutstream->buffer[0]    = '\0';       /* Start with an empty string */
+  outstream->public.nput  = 0;          /* Will be buffer index */
+  outstream->buffer       = bufstart;   /* Start of buffer */
+  outstream->buflen       = buflen - 1; /* Save space for null terminator */
+  outstream->buffer[0]    = '\0';       /* Start with an empty string */
 }
-
-

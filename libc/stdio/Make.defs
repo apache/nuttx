@@ -41,9 +41,10 @@ CSRCS += lib_fileno.c lib_printf.c lib_syslog.c lib_lowsyslog.c
 CSRCS += lib_sprintf.c lib_asprintf.c lib_snprintf.c lib_libsprintf.c
 CSRCS += lib_vsprintf.c lib_avsprintf.c lib_vsnprintf.c lib_libvsprintf.c
 CSRCS += lib_dprintf.c lib_vdprintf.c
-CSRCS += lib_meminstream.c lib_memoutstream.c lib_lowinstream.c
-CSRCS += lib_lowoutstream.c lib_zeroinstream.c lib_nullinstream.c
-CSRCS += lib_nulloutstream.c lib_sscanf.c
+CSRCS += lib_meminstream.c lib_memoutstream.c lib_memsistream.c
+CSRCS += lib_memsostream.c lib_lowinstream.c lib_lowoutstream.c
+CSRCS += lib_zeroinstream.c lib_nullinstream.c lib_nulloutstream.c
+CSRCS += lib_sscanf.c
 
 # The remaining sources files depend upon file descriptors
 
@@ -78,7 +79,7 @@ CSRCS += lib_dtoa.c
 endif
 
 ifeq ($(CONFIG_STDIO_LINEBUFFER),y)
-CSRCS += lib_libnoflush.c
+CSRCS += lib_libnoflush.c lib_libsnoflush.c
 endif
 
 # Add the stdio directory to the build

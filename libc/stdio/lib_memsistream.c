@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/stdio/lib_meminstream.c
+ * libc/stdio/lib_memsistream.c
  *
- *   Copyright (C) 2007-2009, 2011-2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,21 +46,22 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: meminstream_getc
+ * Name: memsistream_getc
  ****************************************************************************/
 
-static int meminstream_getc(FAR struct lib_instream_s *this)
+static int memsistream_getc(FAR struct lib_sistream_s *this)
 {
-  FAR struct lib_meminstream_s *mthis = (FAR struct lib_meminstream_s *)this;
+  FAR struct lib_memsistream_s *mthis = (FAR struct lib_memsistream_s *)this;
   int ret;
 
   DEBUGASSERT(this);
 
   /* Get the next character (if any) from the buffer */
 
-  if (this->nget < mthis->buflen)
+  if (mthis->offset < mthis->buflen)
     {
-      ret = mthis->buffer[this->nget];
+      ret = mthis->buffer[mthis->offset];
+      mthis->offset++;
       this->nget++;
     }
   else
@@ -72,18 +73,61 @@ static int meminstream_getc(FAR struct lib_instream_s *this)
 }
 
 /****************************************************************************
+ * Name: memsistream_seek
+ ****************************************************************************/
+
+static off_t memsistream_seek(FAR struct lib_sistream_s *this, off_t offset,
+                              int whence)
+{
+  FAR struct lib_memsistream_s *mthis = (FAR struct lib_memsistream_s *)this;
+  off_t newpos;
+
+  DEBUGASSERT(this);
+
+  switch (whence)
+    {
+      case SEEK_CUR:
+        newpos = (off_t)mthis->offset + offset;
+        break;
+
+      case SEEK_SET:
+        newpos = offset;
+        break;
+
+      case SEEK_END:
+        newpos = (off_t)mthis->buflen + offset;
+        break;
+
+      default:
+        return (off_t)ERROR;
+    }
+
+  /* Make sure that the new position is within range */
+
+  if (newpos < 0 || newpos >= (off_t)mthis->buflen)
+    {
+      return (off_t)ERROR;
+    }
+
+  /* Return the new position */
+
+  mthis->offset = (size_t)newpos;
+  return newpos;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_meminstream
+ * Name: lib_memsistream
  *
  * Description:
  *   Initializes a stream for use with a fixed-size memory buffer.
  *
  * Input parameters:
  *   instream    - User allocated, uninitialized instance of struct
- *                 lib_meminstream_s to be initialized.
+ *                 lib_memsistream_s to be initialized.
  *   bufstart    - Address of the beginning of the fixed-size memory buffer
  *   buflen      - Size of the fixed-sized memory buffer in bytes
  *
@@ -92,13 +136,13 @@ static int meminstream_getc(FAR struct lib_instream_s *this)
  *
  ****************************************************************************/
 
-void lib_meminstream(FAR struct lib_meminstream_s *instream,
+void lib_memsistream(FAR struct lib_memsistream_s *instream,
                      FAR const char *bufstart, int buflen)
 {
-  instream->public.get  = meminstream_getc;
-  instream->public.nget = 0;          /* Will be buffer index */
+  instream->public.get  = memsistream_getc;
+  instream->public.seek = memsistream_seek;
+  instream->public.nget = 0;          /* Total number of characters read */
   instream->buffer      = bufstart;   /* Start of buffer */
+  instream->offset      = 0;          /* Will be the buffer index */
   instream->buflen      = buflen;     /* Length of the buffer */
 }
-
-

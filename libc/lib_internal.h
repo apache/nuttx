@@ -159,6 +159,12 @@ void  stream_semgive(FAR struct streamlist *list);
 int lib_noflush(FAR struct lib_outstream_s *this);
 #endif
 
+/* Defined in lib_libsnoflush.c */
+
+#ifdef CONFIG_STDIO_LINEBUFFER
+int lib_snoflush(FAR struct lib_sostream_s *this);
+#endif
+
 /* Defined in lib_libsprintf.c */
 
 int lib_sprintf(FAR struct lib_outstream_s *obj,

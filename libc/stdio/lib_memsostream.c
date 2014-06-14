@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/stdio/lib_meminstream.c
+ * libc/stdio/lib_memsostream.c
  *
- *   Copyright (C) 2007-2009, 2011-2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,29 +46,70 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: meminstream_getc
+ * Name: memsostream_putc
  ****************************************************************************/
 
-static int meminstream_getc(FAR struct lib_instream_s *this)
+static void memsostream_putc(FAR struct lib_sostream_s *this, int ch)
 {
-  FAR struct lib_meminstream_s *mthis = (FAR struct lib_meminstream_s *)this;
-  int ret;
+  FAR struct lib_memsostream_s *mthis = (FAR struct lib_memsostream_s *)this;
 
   DEBUGASSERT(this);
 
-  /* Get the next character (if any) from the buffer */
+  /* If this will not overrun the buffer, then write the character to the
+   * buffer.  Not that buflen was pre-decremented when the stream was
+   * created so it is okay to write past the end of the buflen by one.
+   */
 
-  if (this->nget < mthis->buflen)
+  if (mthis->offset < mthis->buflen)
     {
-      ret = mthis->buffer[this->nget];
-      this->nget++;
+      mthis->buffer[mthis->offset] = ch;
+      mthis->offset++;
+      this->nput++;
+      mthis->buffer[mthis->offset] = '\0';
     }
-  else
+}
+
+/****************************************************************************
+ * Name: memsostream_seek
+ ****************************************************************************/
+
+static off_t memsostream_seek(FAR struct lib_sostream_s *this, off_t offset,
+                              int whence)
+{
+  FAR struct lib_memsostream_s *mthis = (FAR struct lib_memsostream_s *)this;
+  off_t newpos;
+
+  DEBUGASSERT(this);
+
+  switch (whence)
     {
-      ret = EOF;
+      case SEEK_CUR:
+        newpos = (off_t)mthis->offset + offset;
+        break;
+
+      case SEEK_SET:
+        newpos = offset;
+        break;
+
+      case SEEK_END:
+        newpos = (off_t)mthis->buflen + offset;
+        break;
+
+      default:
+        return (off_t)ERROR;
     }
 
-  return ret;
+  /* Make sure that the new position is within range */
+
+  if (newpos < 0 || newpos >= (off_t)mthis->buflen)
+    {
+      return (off_t)ERROR;
+    }
+
+  /* Return the new position */
+
+  mthis->offset = (size_t)newpos;
+  return newpos;
 }
 
 /****************************************************************************
@@ -76,29 +117,33 @@ static int meminstream_getc(FAR struct lib_instream_s *this)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_meminstream
+ * Name: lib_memsostream
  *
  * Description:
  *   Initializes a stream for use with a fixed-size memory buffer.
  *
  * Input parameters:
- *   instream    - User allocated, uninitialized instance of struct
- *                 lib_meminstream_s to be initialized.
- *   bufstart    - Address of the beginning of the fixed-size memory buffer
- *   buflen      - Size of the fixed-sized memory buffer in bytes
+ *   outstream - User allocated, uninitialized instance of struct
+ *                  lib_memsostream_s to be initialized.
+ *   bufstart     - Address of the beginning of the fixed-size memory buffer
+ *   buflen       - Size of the fixed-sized memory buffer in bytes
  *
  * Returned Value:
- *   None (instream initialized).
+ *   None (outstream initialized).
  *
  ****************************************************************************/
 
-void lib_meminstream(FAR struct lib_meminstream_s *instream,
-                     FAR const char *bufstart, int buflen)
+void lib_memsostream(FAR struct lib_memsostream_s *outstream,
+                     FAR char *bufstart, int buflen)
 {
-  instream->public.get  = meminstream_getc;
-  instream->public.nget = 0;          /* Will be buffer index */
-  instream->buffer      = bufstart;   /* Start of buffer */
-  instream->buflen      = buflen;     /* Length of the buffer */
+  outstream->public.put   = memsostream_putc;
+#ifdef CONFIG_STDIO_LINEBUFFER
+  outstream->public.flush = lib_snoflush;
+#endif
+  outstream->public.seek  = memsostream_seek;
+  outstream->public.nput  = 0;          /* Total number of characters written */
+  outstream->buffer       = bufstart;   /* Start of buffer */
+  outstream->offset       = 0;          /* Will be the buffer index */
+  outstream->buflen       = buflen - 1; /* Save space for null terminator */
+  outstream->buffer[0]    = '\0';       /* Start with an empty string */
 }
-
-

@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/stdio/lib_meminstream.c
+ * libc/stdio/lib_libsnoflush.c
  *
- *   Copyright (C) 2007-2009, 2011-2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,68 +37,68 @@
  * Included Files
  ****************************************************************************/
 
-#include <assert.h>
+#include <nuttx/config.h>
+
+#include <stdbool.h>
+#include <stdio.h>
+#include <fcntl.h>
+#include <errno.h>
+
+#include <nuttx/fs/fs.h>
 
 #include "lib_internal.h"
 
+#ifdef CONFIG_STDIO_LINEBUFFER
+
 /****************************************************************************
- * Private Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: meminstream_getc
- ****************************************************************************/
-
-static int meminstream_getc(FAR struct lib_instream_s *this)
-{
-  FAR struct lib_meminstream_s *mthis = (FAR struct lib_meminstream_s *)this;
-  int ret;
-
-  DEBUGASSERT(this);
-
-  /* Get the next character (if any) from the buffer */
-
-  if (this->nget < mthis->buflen)
-    {
-      ret = mthis->buffer[this->nget];
-      this->nget++;
-    }
-  else
-    {
-      ret = EOF;
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Public Functions
+ * Private Type Declarations
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_meminstream
+ * Private Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Global Constant Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Global Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Constant Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Global Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: lib_snoflush
  *
  * Description:
- *   Initializes a stream for use with a fixed-size memory buffer.
+ *  lib_snoflush() provides a common, dummy flush method for seekable output
+ *  streams that are not flushable.  Only used if CONFIG_STDIO_LINEBUFFER
+ *  is selected.
  *
- * Input parameters:
- *   instream    - User allocated, uninitialized instance of struct
- *                 lib_meminstream_s to be initialized.
- *   bufstart    - Address of the beginning of the fixed-size memory buffer
- *   buflen      - Size of the fixed-sized memory buffer in bytes
- *
- * Returned Value:
- *   None (instream initialized).
+ * Return:
+ *  Always returns OK
  *
  ****************************************************************************/
 
-void lib_meminstream(FAR struct lib_meminstream_s *instream,
-                     FAR const char *bufstart, int buflen)
+int lib_snoflush(FAR struct lib_sostream_s *this)
 {
-  instream->public.get  = meminstream_getc;
-  instream->public.nget = 0;          /* Will be buffer index */
-  instream->buffer      = bufstart;   /* Start of buffer */
-  instream->buflen      = buflen;     /* Length of the buffer */
+  return OK;
 }
 
+#endif /* CONFIG_STDIO_LINEBUFFER */
 
