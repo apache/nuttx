@@ -4,11 +4,11 @@
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * Most of this file derives from Atmel sample code for the SAMA5D3x-EK
+ * Most of this file derives from Atmel sample code for the SAMA5D4x-EK
  * board.  That sample code has licensing that is compatible with the NuttX
  * modified BSD license:
  *
- *   Copyright (c) 2012, Atmel Corporation
+ *   Copyright (c) 2013, Atmel Corporation
  *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,100 @@
  *
  ****************************************************************************/
 
+/* The DDR/SDR SDRAM Controller (DDRSDRC) is a multi-port memory controller.
+ * It comprises four slave AHB interfaces. All simultaneous accesses (four
+ * independent AHB ports) are interleaved to maximize memory bandwidth and
+ * minimize transaction latency due to SDRAM protocol.
+ *
+ * -------------------------------------------------------------------------
+ * DDR2 Configuration
+ *
+ * The DDR2-SDRAM devices are initialized by the following sequence:
+ *
+ * * EBI Chip Select 1 is assigned to the DDR2SDR Controller, Enable DDR2
+ *   clock x2 in PMC.
+ * * Step 1: Program the memory device type
+ * * Step 2:
+ *   - Program the features of DDR2-SDRAM device into the Configuration
+ *     Register.
+ *   - Program the features of DDR2-SDRAM device into the Timing Register
+ *     HDDRSDRC2_T0PR.
+ *   - Program the features of DDR2-SDRAM device into the Timing Register
+ *     HDDRSDRC2_T1PR.
+ *   - Program the features of DDR2-SDRAM device into the Timing Register
+ *     HDDRSDRC2_T2PR.
+ * * Step 3: An NOP command is issued to the DDR2-SDRAM to enable clock.
+ * * Step 4:  An NOP command is issued to the DDR2-SDRAM
+ * * Step 5: An all banks pre-charge command is issued to the DDR2-SDRAM.
+ * * Step 6: An Extended Mode Register set (EMRS2) cycle is  issued to chose
+ *   between commercial or high  temperature operations.
+ * * Step 7: An Extended Mode Register set (EMRS3) cycle is issued to set
+ *   all registers to 0.
+ * * Step 8:  An Extended Mode Register set (EMRS1) cycle is issued to
+ *   enable DLL.
+ * * Step 9:  Program DLL field into the Configuration Register.
+ * * Step 10: A Mode Register set (MRS) cycle is issued to reset DLL.
+ * * Step 11: An all banks pre-charge command is issued to the DDR2-SDRAM.
+ * * Step 12: Two auto-refresh (CBR) cycles are provided. Program the
+ *   auto refresh command (CBR) into the Mode Register.
+ * * Step 13: Program DLL field into the Configuration Register to
+ *   low(Disable DLL reset).
+ * * Step 14: A Mode Register set (MRS) cycle is issued to program the
+ *   parameters of the DDR2-SDRAM devices.
+ * * Step 15: Program OCD field into the Configuration Register to high (OCD
+ *   calibration default).
+ * * Step 16: An Extended Mode Register set (EMRS1) cycle is issued to OCD
+ *   default value.
+ * * Step 17: Program OCD field into the Configuration Register to low (OCD
+ *   calibration mode exit).
+ * * Step 18: An Extended Mode Register set (EMRS1) cycle is issued to
+ *   enable OCD exit.
+ * * Step 19,20: A mode Normal command is provided. Program the Normal mode
+ *   into Mode Register.
+ * * Step 21: Write the refresh rate into the count field in the Refresh
+ *   Timer register. The DDR2-SDRAM device requires a refresh every 15.625
+ *   or 7.81.
+ *
+ * -------------------------------------------------------------------------
+ * SDRAM Configuration
+ *
+ * The SDR-SDRAM devices are initialized by the following sequence:
+ *
+ * * EBI Chip Select 1 is assigned to the DDR2SDR Controller, Enable DDR2
+ *   clock x2 in PMC.
+ * * Step 1. Program the memory device type into the Memory Device Register
+ * * Step 2. Program the features of the SDR-SDRAM device into the Timing
+ *   Register and into the Configuration Register.
+ * * Step 3. For low-power SDRAM, temperature-compensated self refresh
+ *   (TCSR), drive strength (DS) and partial array self refresh (PASR) must
+ *   be set in the Low-power Register.
+ * * Step 4. A NOP command is issued to the SDR-SDRAM. Program NOP command
+ *   into Mode Register, the application must set Mode to 1 in the Mode
+ *   Register. Perform a write access to any SDR-SDRAM address to
+ *   acknowledge this command. Now the clock which drives SDR-SDRAM device
+ *   is enabled.
+ * * Step 5. An all banks pre-charge command is issued to the SDR-SDRAM.
+ *   Program all banks pre-charge command into Mode Register, the application
+ *   must set Mode to 2 in the Mode Register . Perform a write access to any
+ *   SDRSDRAM address to acknowledge this command.
+ * * Step 6. Eight auto-refresh (CBR) cycles are provided. Program the auto
+ *   refresh command (CBR) into Mode Register, the application must set Mode
+ *   to 4 in the Mode Register.  Once in the idle state, two AUTO REFRESH
+ *   cycles must be performed.
+ * * Step 7. A Mode Register set (MRS) cycle is issued to program the
+ *   parameters of the SDRSDRAM devices, in particular CAS latency and burst
+ *   length.
+ * * Step 8. For low-power SDR-SDRAM initialization, an Extended Mode
+ *   Register set (EMRS) cycle is issued to program the SDR-SDRAM parameters
+ *   (TCSR, PASR, DS). The write address must be chosen so that BA[1] is set
+ *   to 1 and BA[0] is set to 0
+ * * Step 9. The application must go into Normal Mode, setting Mode to 0 in
+ *   the Mode Register and perform a write access at any location in the
+ *   SDRAM to acknowledge this command.
+ * * Step 10. Write the refresh rate into the count field in the DDRSDRC
+ *   Refresh Timer register
+ */
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -48,12 +142,15 @@
 
 #include <debug.h>
 
+#include <nuttx/arch.h>
+
 #include "up_arch.h"
 
 #include "sam_periphclks.h"
 #include "chip/sam_memorymap.h"
 #include "chip/sam_pmc.h"
 #include "chip/sam_sfr.h"
+#include "chip/sam_matrix.h"
 #include "chip/sam_mpddrc.h"
 
 #include "sama5d4-ek.h"
@@ -75,15 +172,15 @@
 
   /* Used for SDRAM command handshaking */
 
-#  define DDR2_BA0    (1 << 26)
-#  define DDR2_BA1    (1 << 27)
+#  define DDR2_BA0(r) (1 << ((r) + 26))
+#  define DDR2_BA1(r) (1 << ((r) + 27))
 
 #elif defined(CONFIG_SAMA5D4EK_MT47H64M16HR)
 
   /* Used for SDRAM command handshaking */
 
-#  define DDR2_BA0    (1 << 25)
-#  define DDR2_BA1    (1 << 26)
+#  define DDR2_BA0(r) (1 << ((r) + 25))
+#  define DDR2_BA1(r) (1 << ((r) + 26))
 
 #else
 #  error Unknown SDRAM type
@@ -146,6 +243,41 @@ static inline void sam_sdram_delay(unsigned int loops)
     }
 }
 
+/****************************************************************************
+ * Name: sam_sdram_delay
+ *
+ * Description:
+ *   Precision delay function for SDRAM configuration.
+ *
+ *   This delay loop requires 6 core cycles per iteration.  The actual
+ *   amount of time delayed will then vary with PCK.
+ *
+ ****************************************************************************/
+
+static void sam_config_slaveddr(void)
+{
+  int ddrport;
+
+  /* Disable write protection */
+
+  putreg32(MPDDRC_WPCR_WPKEY, SAM_MATRIX0_WPMR);
+
+  /* Partition internal SRAM */
+
+  putreg32(0, SAM_MATRIX0_SSR(11));
+  putreg32(5, SAM_MATRIX0_SRTSR(11));
+  putreg32(4, SAM_MATRIX0_SASSR(11));
+
+  /* Partition external DDR.  DDR port 0 not used from NWd */
+
+  for (ddrport = 1 ; ddrport < 8 ; ddrport++)
+    {
+      putreg32(0x00ffffff, SAM_MATRIX0_SSR(H64MX_DDR_SLAVE_PORT0 + ddrport));
+      putreg32(0x0000000f, SAM_MATRIX0_SRTSR(H64MX_DDR_SLAVE_PORT0 + ddrport));
+      putreg32(0x0000ffff, SAM_MATRIX0_SASSR(H64MX_DDR_SLAVE_PORT0 + ddrport));
+    }
+}
+
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
@@ -156,7 +288,7 @@ static inline void sam_sdram_delay(unsigned int loops)
  * Description:
  *   Configures DDR2 (MT47H128M16RT 128MB or, optionally,  MT47H64M16HR)
  *
- *   Per the SAMA4D4-EK User guide: "Two DDR2/SDRAM (MT47H64M16HR) used as
+ *   Per the SAMA5D3-EK User guide: "Two DDR2/SDRAM (MT47H64M16HR) used as
  *   main system memory (256 MByte). The board includes 2 Gbits of on-board soldered
  *   DDR2 (double data rate) SDRAM. The footprints can also host two DDR2
  *   (MT47H128M16RT) from Micron® for a total of 512 MBytes of DDR2 memory. The
@@ -169,10 +301,10 @@ static inline void sam_sdram_delay(unsigned int loops)
  *     Column address A[9:0] (1K)
  *     Bank address BA[2:0] a(24,25) (8)
  *
- *  This logic was taken from Atmel sample code for the SAMA5D3x-EK.
+ *  This logic was taken from Atmel sample code for the SAMA5D4-EK.
  *
  *  Input Parameters:
- *     devtype - Either DDRAM_MT47H128M16RT or DDRAM_MT47H64M16HR
+ *    None
  *
  *  Assumptions:
  *    The DDR memory regions is configured as strongly ordered memory.  When
@@ -186,6 +318,10 @@ void sam_sdram_config(void)
   volatile uint8_t *ddr = (uint8_t *)SAM_DDRCS_VSECTION;
   uint32_t regval;
 
+  /* Setup DDR partitions */
+
+  sam_config_slaveddr();
+
   /* Enable x2 clocking to the MPDDRC */
 
   sam_mpddrc_enableclk();
@@ -196,61 +332,50 @@ void sam_sdram_config(void)
   regval |= PMC_DDRCK;
   putreg32(regval, SAM_PMC_SCER);
 
+  /* Step 1: Program the memory device type
+   *
+   * DBW = 0 (32 bits bus wide)
+   * Memory Device = 6 = DDR2-SDRAM = 0x00000006
+   */
+
+  putreg32(MPDDRC_MD_DDR2_SDRAM, SAM_MPDDRC_MD);
+  putreg32(MPDDRC_RD_DATA_PATH_SHIFT_SAMPLING_1CYCLE,
+           SAM_MPDDRC_RD_DATA_PATH);
+
+  regval = MPDDRC_TPR0_TRAS(9)    | /* 6 * 7.5 = 45 ns */
+           MPDDRC_TPR0_TRCD(3)    | /* 2 * 7.5 = 15 ns */
+           MPDDRC_TPR0_TWR(3)     | /* 3 * 7.5 = 22.5 ns */
+           MPDDRC_TPR0_TRC(10)    | /* 8 * 7.5 = 60 ns */
+           MPDDRC_TPR0_TRP(3)     | /* 2 * 7.5 = 15 ns */
+           MPDDRC_TPR0_TRRD(2)    | /* 2 * 7.5 = 15 ns */
+           MPDDRC_TPR0_TWTR(2)    | /* 2 clock cycle */
+           MPDDRC_TPR0_TMRD(2);     /* 2 clock cycles */
+  putreg32(regval, SAM_MPDDRC_TPR0);
+
+  regval = MPDDRC_TPR1_TRFC(31)   | /* 18 * 7.5 = 135 ns (min 127.5 ns for 1Gb DDR) */
+           MPDDRC_TPR1_TXSNR(33)  | /* 20 * 7.5 > 142.5ns TXSNR: Exit self refresh delay to non read command */
+           MPDDRC_TPR1_TXSRD(200) | /* min 200 clock cycles, TXSRD: Exit self refresh delay to Read command */
+           MPDDRC_TPR1_TXP(2);      /* 2 * 7.5 = 15 ns */
+  putreg32(regval, SAM_MPDDRC_TPR1);
+
+  regval = MPDDRC_TPR2_TXARD(7)   | /* min 2 clock cycles */
+           MPDDRC_TPR2_TXARDS(7)  | /*  min 7 clock cycles */
+           MPDDRC_TPR2_TRPA(4)    | /* min 18ns */
+           MPDDRC_TPR2_TRTP(2)    | /* 2 * 7.5 = 15 ns (min 7.5ns) */
+           MPDDRC_TPR2_TFAW(9);
+  putreg32(regval, SAM_MPDDRC_TPR2);
+
   /* Clear the low power register */
 
   putreg32(0, SAM_MPDDRC_LPR);
 
-  /* Enable autofresh during calibration (undocumented) */
-
-  regval  = getreg32(SAM_MPDDRC_HS);
-  regval |= MPDDRC_HS_AUTOREFRESH_CAL;
-  putreg32(regval, SAM_MPDDRC_HS);
-
-  /* Force DDR_DQ and DDR_DQS input buffer always on */
-
-  regval  = getreg32(SAM_SFR_DDRCFG);
-  regval |= SFR_FDQIEN | SFR_FDQSIEN;
-  putreg32(regval, SAM_SFR_DDRCFG);
-
-  /* Configure the slave offset register */
-
-  regval = MPDDRC_DLL_SOR_S0OFF(1) |      /* DLL Slave 0 Delay Line Offset */
-           MPDDRC_DLL_SOR_S1OFF(0) |      /* DLL Slave 1 Delay Line Offset */
-           MPDDRC_DLL_SOR_S2OFF(1) |      /* DLL Slave 2 Delay Line Offset */
-           MPDDRC_DLL_SOR_S3OFF(1);       /* DLL Slave 3 Delay Line Offset */
-  putreg32(regval, SAM_MPDDRC_DLL_SOR);
-
-  /* Configure the master offset register (including upper mystery bits) */
-
-  regval = MPDDRC_DLL_MOR_MOFF(7) |       /* DLL Master Delay Line Offset */
-           MPDDRC_DLL_MOR_CLK90OFF(31) |  /* DLL CLK90 Delay Line Offset */
-           MPDDRC_DLL_MOR_SELOFF |        /* DLL Offset Selection */
-           MPDDRC_DLL_MOR_KEY;            /* Undocumented key */
-  putreg32(regval, SAM_MPDDRC_DLL_MOR);
-
-  /* Configure the I/O calibration register */
-
-  regval  =  getreg32(SAM_MPDDRC_IO_CALIBR);
+  regval = getreg32(SAM_MPDDRC_IO_CALIBR);
   regval &= ~(MPDDRC_IO_CALIBR_RDIV_MASK | MPDDRC_IO_CALIBR_TZQIO_MASK);
-  regval |= (MPDDRC_IO_CALIBR_RZQ48_40 |  MPDDRC_IO_CALIBR_TZQIO(3));
+  regval |=  (MPDDRC_IO_CALIBR_RZQ60_50  | MPDDRC_IO_CALIBR_TZQIO(5) |
+              MPDDRC_IO_CALIBR_EN_CALIB);
   putreg32(regval, SAM_MPDDRC_IO_CALIBR);
 
-  /* Force DDR_DQ and DDR_DQS input buffer always on */
-
-  putreg32(SFR_FDQIEN | SFR_FDQSIEN, SAM_SFR_DDRCFG);
-
-  /* Step 1: Program the memory device type
-   *
-   *   DBW = 0 (32-bit bus wide)
-   *   Memory Device = DDR2-SDRAM
-   */
-
-  putreg32(MPDDRC_MD_DDR2_SDRAM, SAM_MPDDRC_MD);
-
-  /* Step 2: Program the features of DDR2-SDRAM device into the Timing
-   * Register
-   */
-
+  /* Step 2: Program the features of DDR2-SDRAM device into the Timing Register */
 #if defined(CONFIG_SAMA5D4EK_MT47H128M16RT)
 
   /* For MT47H128M16RT
@@ -271,13 +396,14 @@ void sam_sdram_config(void)
    *   UNAL    = Unaliged access supported
    */
 
-  regval = MPDDRC_CR_NC_10 |    /* Number of Column Bits */
-           MPDDRC_CR_NR_14 |    /* Number of Row Bits */
-           MPDDRC_CR_CAS_4 |    /* CAS Latency */
+  regval = MPDDRC_CR_NC_10    | /* Number of Column Bits */
+           MPDDRC_CR_NR_14    | /* Number of Row Bits */
+           MPDDRC_CR_CAS_3    | /* CAS Latency */
            MPDDRC_CR_OCD_EXIT | /* Off-chip Driver */
-           MPDDRC_CR_8BANKS |   /* Number of Banks */
-           MPDDRC_CR_NDQS |     /* Not DQS */
-           MPDDRC_CR_UNAL;      /* upport Unaligned Access */
+           MPDDRC_CR_ZQ_INIT  |
+           MPDDRC_CR_8BANKS   | /* Number of Banks */
+           MPDDRC_CR_NDQS     | /* Not DQS */
+           MPDDRC_CR_UNAL;      /* Support Unaligned Access */
 
 #elif defined(CONFIG_SAMA5D4EK_MT47H64M16HR)
   /* For MT47H64M16HR
@@ -298,12 +424,13 @@ void sam_sdram_config(void)
    *   UNAL    = Unaliged access supported
    */
 
-  regval = MPDDRC_CR_NC_10 |    /* Number of Column Bits */
-           MPDDRC_CR_NR_13 |    /* Number of Row Bits */
-           MPDDRC_CR_CAS_3 |    /* CAS Latency */
+  regval = MPDDRC_CR_NC_10    | /* Number of Column Bits */
+           MPDDRC_CR_NR_13    | /* Number of Row Bits */
+           MPDDRC_CR_CAS_3    | /* CAS Latency */
            MPDDRC_CR_OCD_EXIT | /* Off-chip Driver */
-           MPDDRC_CR_8BANKS |   /* Number of Banks */
-           MPDDRC_CR_NDQS |     /* Not DQS */
+           MPDDRC_CR_ZQ_INIT  |
+           MPDDRC_CR_8BANKS   | /* Number of Banks */
+           MPDDRC_CR_NDQS     | /* Not DQS */
            MPDDRC_CR_UNAL;      /* upport Unaligned Access */
 
 #else
@@ -312,54 +439,16 @@ void sam_sdram_config(void)
 
   putreg32(regval, SAM_MPDDRC_CR);
 
-  /* Configure the Timing Parameter 0 Register */
-
-  regval = MPDDRC_TPR0_TRAS(6) |    /*  Active to Precharge Delay:    6 * 7.5 = 45 ns */
-           MPDDRC_TPR0_TRCD(2) |    /*  Row to Column Delay:          2 * 7.5 = 15 ns */
-           MPDDRC_TPR0_TWR(2) |     /*  Write Recovery Delay:         3 * 7.5 = 22.5 ns */
-           MPDDRC_TPR0_TRC(8) |     /*  Row Cycle Delay:              8 * 7.5 = 60 ns */
-           MPDDRC_TPR0_TRP(2) |     /*  Row Precharge Delay:          2 * 7.5 = 15 ns */
-           MPDDRC_TPR0_TRRD(1) |    /*  Active BankA to Active BankB: 2 * 7.5 = 15 ns */
-           MPDDRC_TPR0_TWTR(2) |    /*  Internal Write to Read Delay: 2 clock cycle */
-           MPDDRC_TPR0_TMRD(2);     /*  Load Mode Register Command to
-                                     *  Activate or Refresh Command:  2 clock cycles */
-  putreg32(regval, SAM_MPDDRC_TPR0);
-
-  /* Configure the Timing Parameter 1 Register */
-
-  regval = MPDDRC_TPR1_TRFC(14) |   /* Row Cycle Delay:
-                                     *   18 * 7.5 = 135 ns (min 127.5 ns for 1Gb DDR) */
-           MPDDRC_TPR1_TXSNR(16) |  /* Exit Self Refresh Delay to Non Read Command:
-                                     *   20 * 7.5 > 142.5ns TXSNR: Exit self refresh
-                                     *   delay to non read command */
-           MPDDRC_TPR1_TXSRD(208) | /* Exit Self Refresh Delay to Read Command:
-                                     *   min 200 clock cycles, TXSRD: Exit self refresh
-                                     *   delay to Read command */
-           MPDDRC_TPR1_TXP(2);      /* Exit Power-down Delay to First Command:
-                                     *   2 * 7.5 = 15 ns */
-  putreg32(regval, SAM_MPDDRC_TPR1);
-
-  /* Configure the Timing Parameter 2 Register */
-
-  regval = MPDDRC_TPR2_TXARD(7) |   /* Exit Active Power Down Delay to Read Command in Mode 'Fast Exit':
-                                     *   min 2 clock cycles */
-           MPDDRC_TPR2_TXARDS(7) |  /* Exit Active Power Down Delay to Read Command in Mode 'Slow Exit':
-                                     *   min 7 clock cycles */
-           MPDDRC_TPR2_TRPA(2) |    /* Row Precharge All Delay:
-                                     *   min 18ns */
-           MPDDRC_TPR2_TRTP(2) |    /* Four Active Windows:
-                                     *   2 * 7.5 = 15 ns (min 7.5ns) */
-           MPDDRC_TPR2_TFAW(10);
-  putreg32(regval, SAM_MPDDRC_TPR2);
-
   /* DDRSDRC Low-power Register */
 
   sam_sdram_delay(USEC_TO_COUNT(200));
 
+#if 0
   regval = MPDDRC_LPR_LPCB_DISABLED |  /* Low-power Feature is inhibited */
            MPDDRC_LPR_TIMEOUT_0CLKS |  /* Activates low-power mode after the end of transfer */
            MPDDRC_LPR_APDE_FAST;       /* Active Power Down Exit Time */
   putreg32(regval, SAM_MPDDRC_LPR);
+#endif
 
   /* Step 3: An NOP command is issued to the DDR2-SDRAM. Program the NOP
    * command into the Mode Register, the application must set MODE to 1 in
@@ -386,7 +475,9 @@ void sam_sdram_config(void)
 
   putreg32(MPDDRC_MR_MODE_NOP, SAM_MPDDRC_MR);
 
-  /* Perform a write access to any DDR2-SDRAM address to acknowledge this command.*/
+  /* Perform a write access to any DDR2-SDRAM address to acknowledge this
+   * command.
+   */
 
   *ddr = 0;
 
@@ -395,11 +486,13 @@ void sam_sdram_config(void)
 
   sam_sdram_delay(NSEC_TO_COUNT(400));
 
-  /* Step 5: An all banks precharge command is issued to the DDR2-SDRAM. */
+  /* Step 5: An all banks pre-charge command is issued to the DDR2-SDRAM. */
 
   putreg32(MPDDRC_MR_MODE_PRCGALL, SAM_MPDDRC_MR);
 
-  /* Perform a write access to any DDR2-SDRAM address to acknowledge this command.*/
+  /* Perform a write access to any DDR2-SDRAM address to acknowledge this
+   * command.
+   */
 
   *ddr = 0;
 
@@ -415,7 +508,7 @@ void sam_sdram_config(void)
    */
 
   putreg32(MPDDRC_MR_MODE_EXTLMR, SAM_MPDDRC_MR);
-  *((volatile uint8_t *)(ddr + DDR2_BA1)) = 0;
+  *((volatile uint8_t *)(ddr + DDR2_BA1(0))) = 0;
 
   /* Wait 2 cycles min */
 
@@ -429,19 +522,21 @@ void sam_sdram_config(void)
    */
 
   putreg32(MPDDRC_MR_MODE_LMR, SAM_MPDDRC_MR);
-  *((volatile uint8_t *)(ddr + DDR2_BA1 + DDR2_BA0)) = 0;
+  *((volatile uint8_t *)(ddr + DDR2_BA1(0) + DDR2_BA0(0))) = 0;
 
   /* Wait 2 cycles min */
 
   sam_sdram_delay(100 /* CYCLES_TO_COUNT(2) */);
 
-  /* Step 8:  An Extended Mode Register set (EMRS1) cycle is issued to enable DLL.
+  /* Step 8:  An Extended Mode Register set (EMRS1) cycle is issued to
+   * enable DLL.
    *
-   * The write address must be chosen so that BA[1] is set to 0 and BA[0] is set to 1.
+   * The write address must be chosen so that BA[1] is set to 0 and BA[0]
+   * is set to 1.
    */
 
   putreg32(MPDDRC_MR_MODE_EXTLMR, SAM_MPDDRC_MR);
-  *((volatile uint8_t *)(ddr + DDR2_BA0)) = 0;
+  *((volatile uint8_t *)(ddr + DDR2_BA0(0))) = 0;
 
   /* An additional 200 cycles of clock are required for locking DLL */
 
@@ -494,7 +589,8 @@ void sam_sdram_config(void)
 
   /* Configure 2nd CBR.
    *
-   * Perform a write access to any DDR2-SDRAM address to acknowledge this command.
+   * Perform a write access to any DDR2-SDRAM address to acknowledge this
+   * command.
    */
 
   putreg32(MPDDRC_MR_MODE_RFSH, SAM_MPDDRC_MR);
@@ -541,7 +637,7 @@ void sam_sdram_config(void)
    */
 
   putreg32(MPDDRC_MR_MODE_EXTLMR, SAM_MPDDRC_MR);
-  *((volatile uint8_t *)(ddr + DDR2_BA0)) = 0;
+  *((volatile uint8_t *)(ddr + DDR2_BA0(0))) = 0;
 
   /* Wait 2 cycles min */
 
@@ -551,11 +647,9 @@ void sam_sdram_config(void)
    * calibration mode exit).
    */
 
-#if 0
   regval  = getreg32(SAM_MPDDRC_CR);
   regval &= ~MPDDRC_CR_OCD_MASK;
   putreg32(regval, SAM_MPDDRC_CR);
-#endif
 
   /* Step 18: An Extended Mode Register set (EMRS1) cycle is issued to
    * enable OCD exit.
@@ -565,7 +659,7 @@ void sam_sdram_config(void)
    */
 
   putreg32(MPDDRC_MR_MODE_EXTLMR, SAM_MPDDRC_MR);
-  *((volatile uint8_t *)(ddr + DDR2_BA0)) = 0;
+  *((volatile uint8_t *)(ddr + DDR2_BA0(0))) = 0;
 
   /* Wait 2 cycles min */
 
@@ -585,21 +679,23 @@ void sam_sdram_config(void)
    * With a 100MHz frequency, the refresh timer count register must to be
    * set with (15.625 /100 MHz) = 1562 i.e. 0x061A or (7.81 /100MHz) = 781
    * i.e. 0x030d.
-   */
-
-  /* For MT47H64M16HR, The refresh period is 64ms (commercial), This equates
+   *
+   * For MT47H64M16HR, The refresh period is 64ms (commercial), This equates
    * to an average refresh rate of 7.8125usec (commercial), To ensure all
    * rows of all banks are properly refreshed, 8192 REFRESH commands must be
    * issued every 64ms (commercial)
+   *
+   *   ((64 x 10(^-3))/8192) x133 x (10^6)
    */
 
-  /* ((64 x 10(^-3))/8192) x133 x (10^6) */
   /* Set Refresh timer 7.8125 us */
 
-  putreg32( MPDDRC_RTR_COUNT(300), SAM_MPDDRC_RTR);
+  putreg32(MPDDRC_RTR_COUNT(695), SAM_MPDDRC_RTR);
 
-  /* OK now we are ready to work on the DDRSDR */
-  /* Wait for end of calibration */
+  /* OK now we are ready to work on the DDRSDR.
+   *
+   * Wait for end of calibration
+   */
 
   sam_sdram_delay(500);
 }
