@@ -54,6 +54,7 @@
 #  include "sam_pio.h"
 #endif
 
+#include "chip.h"
 #include "mmu.h"
 #include "cache.h"
 #include "sctlr.h"
@@ -377,11 +378,13 @@ void up_irqinitialize(void)
    * address 0x0000:0000 in that case anyway.
    */
 
+#ifdef ATSAMA5D3
   putreg32(MATRIX_MRCR_RCB0, SAM_MATRIX_MRCR);   /* Enable Cortex-A5 remap */
+#endif
 
 #if defined(CONFIG_SAMA5_BOOT_ISRAM)
   putreg32(AXIMX_REMAP_REMAP0, SAM_AXIMX_REMAP); /* Remap SRAM */
-#else /* elif defined(CONFIG_SAMA5_BOOT_CS0FLASH) */
+#elif defined(ATSAMA5D3) /* && defined(CONFIG_SAMA5_BOOT_CS0FLASH) */
   putreg32(AXIMX_REMAP_REMAP1, SAM_AXIMX_REMAP); /* Remap NOR FLASH on CS0 */
 #endif
 
