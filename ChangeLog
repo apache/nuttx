@@ -7439,3 +7439,5 @@
 	  seekable raw streams (2014-6-14).
 	* libc/stdio/lib_stdsistream.c, and lib_stdsostream.c:  Add support for
 	  seekable standard streams (2014-6-14).
+	* configs/sam4x-xplained*/src/sam_buttons.c: Button interrupts not being
+	  disabled after being detached.  (2014-6-15).
