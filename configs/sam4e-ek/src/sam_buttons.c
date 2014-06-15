@@ -96,11 +96,24 @@ static xcpt_t board_button_irqx(int irq, xcpt_t irqhandler, xcpt_t *store)
   oldhandler = *store;
   *store = irqhandler;
 
-  /* Configure the interrupt */
+  /* Are we attaching or detaching? */
 
-  sam_gpioirq(irq);
-  (void)irq_attach(irq, irqhandler);
-  sam_gpioirqenable(irq);
+  if (irqhandler != NULL)
+    {
+      /* Configure the interrupt */
+
+      sam_gpioirq(irq);
+      (void)irq_attach(irq, irqhandler);
+      sam_gpioirqenable(irq);
+    }
+  else
+    {
+      /* Detach and disable the interrupt */
+
+      (void)irq_detach(irq)
+      sam_gpioirqdisable(irq);
+    }
+
   irqrestore(flags);
 
   /* Return the old button handler (so that it can be restored) */

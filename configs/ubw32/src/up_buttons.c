@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/ubw32/src/board_buttons.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -186,12 +186,14 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 
   if (id < NUM_BUTTONS)
     {
+      pic32mx_gpioirqdisable(g_buttoncn[id]);
       oldhandler = pic32mx_gpioattach(g_buttonset[id], g_buttoncn[id], irqhandler);
-      if (irqbuttron)
+      if (irqhandler)
         {
           pic32mx_gpioirqenable(g_buttoncn[id]);
         }
     }
+
   return oldhandler;
 }
 #endif
