@@ -7441,3 +7441,6 @@
 	  seekable standard streams (2014-6-14).
 	* configs/sam4x-xplained*/src/sam_buttons.c: Button interrupts not being
 	  disabled after being detached.  (2014-6-15).
+	* binfmt/binfmt_exec.c:  Fix a critical error in exec(); argv was not
+	  being passed (2014-6-15).
+
