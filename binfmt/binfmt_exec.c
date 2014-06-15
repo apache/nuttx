@@ -80,7 +80,7 @@
  *   exits.
  *
  * Input Parameter:
- *   filename - Fulll path to the binary to be loaded
+ *   filename - Full path to the binary to be loaded
  *   argv     - Argument list
  *   exports  - Table of exported symbols
  *   nexports - The number of symbols in exports
@@ -112,6 +112,7 @@ int exec(FAR const char *filename, FAR char * const *argv,
   /* Load the module into memory */
 
   bin->filename = filename;
+  bin->argv     = argv;
   bin->exports  = exports;
   bin->nexports = nexports;
 
@@ -189,4 +190,3 @@ int exec(FAR const char *filename, FAR char * const *argv,
 }
 
 #endif /* CONFIG_BINFMT_DISABLE */
-
