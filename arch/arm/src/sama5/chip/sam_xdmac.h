@@ -272,6 +272,7 @@
  */
 
 #define XDMAC_CHAN(n)               (1 << (n))
+#define XDMAC_CHAN_ALL              (0x0000ffff)
 
 /* Channel Interrupt Enable Register, Channel Interrupt Disable Register, Channel
  * Interrupt Mask Register, and Channel Interrupt Status Register.
@@ -284,6 +285,9 @@
 #define XDMAC_CHINT_RBI             (1 << 4)  /* Bit 4:  Read Bus Error Interrupt  */
 #define XDMAC_CHINT_WBI             (1 << 5)  /* Bit 5:  Write Bus Error Interrupt */ 
 #define XDMAC_CHINT_ROI             (1 << 6)  /* Bit 6:  Request Overflow Error Interrupt Disable Bit */
+
+#define XDMAC_CHINT_ERRORS          (0x00000070)
+#define XDMAC_CHINT_ALL             (0x0000007f)
 
 /* Channel Source Address Register (32-bit address) */
 /* Channel Destination Address Register (32-bit address) */
@@ -303,7 +307,9 @@
 
 /* Channel Microblock Control Register */
 
-#define XDMACH_CUBC_UBLEN_MASK      (0x00ffffff)       /* Bits 0-23: Channel Microblock Length */
+#define XDMACH_CUBC_UBLEN_SHIFT     (0)       /* Bits 0-23: Channel Microblock Length */
+#define XDMACH_CUBC_UBLEN_MASK      (0x00ffffff << XDMACH_CUBC_UBLEN_SHIFT)
+#define XDMACH_CUBC_UBLEN_MAX       (0x00ffffff)
 
 /* Channel Block Control Register */
 
@@ -314,6 +320,7 @@
 #define XDMACH_CC_TYPE              (1 << 0)  /* Bit 0:  Channel Transfer Type */
 #define XDMACH_CC_MBSIZE_SHIFT      (1)       /* Bits 1-2: Channel Memory Burst Size */
 #define XDMACH_CC_MBSIZE_MASK       (3 << XDMACH_CC_MBSIZE_SHIFT)
+#  define XDMACH_CC_MBSIZE(n)       ((uint32_t)(n) << XDMACH_CC_MBSIZE_SHIFT) /* n=0-3 */
 #  define XDMACH_CC_MBSIZE_1        (0 << XDMACH_CC_MBSIZE_SHIFT) /* The memory burst size is set to one */
 #  define XDMACH_CC_MBSIZE_4        (1 << XDMACH_CC_MBSIZE_SHIFT) /* The memory burst size is set to four */
 #  define XDMACH_CC_MBSIZE_8        (2 << XDMACH_CC_MBSIZE_SHIFT) /* The memory burst size is set to eight */
@@ -496,39 +503,39 @@
 
 struct chnext_view0_s
 {
-  uint32_t nda; /* Next Descriptor Address */
-  uint32_t ubc; /* Microblock Control */
-  uint32_t ta;  /* Transfer Address */
+  uint32_t cnda; /* Next Descriptor Address */
+  uint32_t cubc; /* Microblock Control */
+  uint32_t cta;  /* Transfer Address */
 };
 
 struct chnext_view1_s
 {
-  uint32_t nda; /* Next Descriptor Address */
-  uint32_t ubc; /* Microblock Control */
-  uint32_t sa;  /* Source Address */
-  uint32_t da;  /* Destination Address */
+  uint32_t cnda; /* Next Descriptor Address */
+  uint32_t cubc; /* Microblock Control */
+  uint32_t csa;  /* Source Address */
+  uint32_t cda;  /* Destination Address */
 };
 
 struct chnext_view2_s
 {
-  uint32_t nda; /* Next Descriptor Address */
-  uint32_t ubc; /* Microblock Control */
-  uint32_t sa;  /* Source Address */
-  uint32_t da;  /* Destination Address */
-  uint32_t cfg; /* Configuration Register */
+  uint32_t cnda; /* Next Descriptor Address */
+  uint32_t cubc; /* Microblock Control */
+  uint32_t csa;  /* Source Address */
+  uint32_t cda;  /* Destination Address */
+  uint32_t cc;   /* Configuration Register */
 };
 
 struct chnext_view3_s
 {
-  uint32_t nda; /* Next Descriptor Address */
-  uint32_t ubc; /* Microblock Control */
-  uint32_t sa;  /* Source Address */
-  uint32_t da;  /* Destination Address */
-  uint32_t cfg; /* Configuration Register */
-  uint32_t bc;  /* Block Control */
-  uint32_t ds;  /* Data Stride */
-  uint32_t sus; /* Source Microblock Stride */
-  uint32_t dus; /* Destination Microblock Stride */
+  uint32_t cnda; /* Next Descriptor Address */
+  uint32_t cubc; /* Microblock Control */
+  uint32_t csa;  /* Source Address */
+  uint32_t cda;  /* Destination Address */
+  uint32_t cc;   /* Configuration Register */
+  uint32_t cbc;  /* Block Control */
+  uint32_t cds;  /* Data Stride */
+  uint32_t csus; /* Source Microblock Stride */
+  uint32_t cdus; /* Destination Microblock Stride */
 };
 
 #endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAM_XDMAC_H */
