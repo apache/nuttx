@@ -289,9 +289,12 @@
 #define XDMAC_CHINT_ERRORS          (0x00000070)
 #define XDMAC_CHINT_ALL             (0x0000007f)
 
-/* Channel Source Address Register (32-bit address) */
-/* Channel Destination Address Register (32-bit address) */
-/* Channel Next Descriptor Address Register (32-bit address) */
+/* Channel Source Address (SA) Register (aligned 32-bit address) */
+/* Channel Destination Address (DA) Register (aligned 32-bit address) */
+
+/* Channel Next Descriptor Address (CNDA) Register (aligned 32-bit address) */
+
+#define XDMACH_CNDA_NDAIF           (1 << 0)  /* Bit 0:  Channel Next Descriptor Interface */
 
 /* Channel Next Descriptor Control Register */
 

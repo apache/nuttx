@@ -132,13 +132,13 @@ struct sam_xdmach_s
   bool rx;                        /* TRUE: Peripheral to memory transfer */
   uint32_t flags;                 /* DMA channel flags */
   uint32_t base;                  /* DMA register channel base address */
-  uint32_t cfg;                   /* Pre-calculated CFG register for transfer */
+  uint32_t cc;                    /* Pre-calculated CC register for transfer */
   dma_callback_t callback;        /* Callback invoked when the DMA completes */
   void *arg;                      /* Argument passed to callback function */
   uint32_t rxaddr;                /* RX memory address */
   size_t rxsize;                  /* Size of RX memory region */
-  struct dma_linklist_s *llhead;  /* DMA link list head */
-  struct dma_linklist_s *lltail;  /* DMA link list head */
+  struct chnext_view1_s *llhead;  /* DMA link list head */
+  struct chnext_view1_s *lltail;  /* DMA link list head */
 };
 
 /* This structure describes the stae of one DMA controller */
@@ -153,7 +153,7 @@ struct sam_xdmac_s
 
   /* This array describes the available link list descriptors */
 
-  struct dma_linklist_s *desc;
+  struct chnext_view1_s *descr;
 
   /* This array describes each DMA channel */
 
@@ -302,7 +302,7 @@ static const struct sam_pidmap_s g_xdmac1_txchan[] =
 
 /* This array describes the available link list descriptors */
 
-struct dma_linklist_s g_desc0[CONFIG_SAMA5_NLLDESC];
+struct chnext_view1_s g_desc0[CONFIG_SAMA5_NLLDESC];
 
 /* This array describes the state of each XDMAC0 channel 0 */
 
@@ -464,7 +464,7 @@ static struct sam_xdmac_s g_xdmac0 =
 
   /* This array describes the available link list descriptors */
 
-  .desc       = g_desc0,
+  .descr       = g_desc0,
 
   /* This array describes each DMA channel */
 
@@ -478,7 +478,7 @@ static struct sam_xdmac_s g_xdmac0 =
 #ifdef CONFIG_SAMA5_XDMAC1
 /* This array describes the available link list descriptors */
 
-struct dma_linklist_s g_desc1[CONFIG_SAMA5_NLLDESC];
+struct chnext_view1_s g_desc1[CONFIG_SAMA5_NLLDESC];
 
 static struct sam_xdmach_s g_xdmach1[SAM_NDMACHAN] =
 {
@@ -638,7 +638,7 @@ static struct sam_xdmac_s g_xdmac1 =
 
   /* This array describes the available link list descriptors */
 
-  .desc       = g_desc1,
+  .descr       = g_desc1,
 
   /* This array describes each DMA channel */
 
@@ -968,15 +968,15 @@ static uint32_t sam_ntxtransfers(struct sam_xdmach_s *xdmach, uint32_t dmasize)
 }
 
 /****************************************************************************
- * Name: sam_txcubc
+ * Name: sam_cubc
  *
  * Description:
- *  'OR' in the variable CUBC bits
+ *  Calculate the CUBC transfer size
  *
  ****************************************************************************/
 
-static inline uint32_t sam_txcubc(struct sam_xdmach_s *xdmach,
-                                   uint32_t cubc, uint32_t dmasize)
+static inline uint32_t sam_cubc(struct sam_xdmach_s *xdmach,
+                                uint32_t dmasize)
 {
   uint32_t ntransfers;
 
@@ -987,76 +987,7 @@ static inline uint32_t sam_txcubc(struct sam_xdmach_s *xdmach,
   ntransfers = sam_ntxtransfers(xdmach, dmasize);
 
   DEBUGASSERT(ntransfers <= XDMACH_CUBC_UBLEN_MAX);
-  return (cubc & ~XDMACH_CUBC_UBLEN_MASK) |
-         (ntransfers << XDMACH_CUBC_UBLEN_SHIFT);
-}
-
-/****************************************************************************
- * Name: sam_nrxtransfers
- *
- * Description:
- *  Number of RX transfers via DMA
- *
- ****************************************************************************/
-
-static uint32_t sam_nrxtransfers(struct sam_xdmach_s *xdmach, uint32_t dmasize)
-{
-  unsigned int srcwidth;
-
-  /* Adjust the source transfer size for the source chunk size (peripheral
-   * chunk size).  BTSIZE is "the number of transfers to be performed, that
-   * is, for writes it refers to the number of source width transfers
-   * to perform when XDMAC is flow controller. For Reads, BTSIZE refers to
-   * the number of transfers completed on the Source Interface. ..."
-   */
-
-  srcwidth = (xdmach->flags & DMACH_FLAG_PERIPHWIDTH_MASK)
-    >> DMACH_FLAG_PERIPHWIDTH_SHIFT;
-
-  switch (srcwidth)
-    {
-      default:
-      case 0: /* 8 bits, 1 byte */
-        break;
-
-      case 1: /* 16 bits, 2 bytes */
-        dmasize = (dmasize + 1) >> 1;
-        break;
-
-      case 2: /* 32 bits, 4 bytes */
-        dmasize = (dmasize + 3) >> 2;
-        break;
-
-      case 3: /* 64 bits, 8 bytes */
-        dmasize = (dmasize + 7) >> 3;
-        break;
-    }
-
-  return dmasize;
-}
-
-/****************************************************************************
- * Name: sam_rxcubc
- *
- * Description:
- *  'OR' in the variable CUBC bits
- *
- ****************************************************************************/
-
-static inline uint32_t sam_rxcubc(struct sam_xdmach_s *xdmach,
-                                   uint32_t cubc, uint32_t dmasize)
-{
-  uint32_t ntransfers;
-
-  /* Set the buffer transfer size field.  This is the number of transfers to
-   * be performed, that is, the number of source width transfers to perform.
-   */
-
-  ntransfers = sam_nrxtransfers(xdmach, dmasize);
-
-  DEBUGASSERT(ntransfers <= XDMACH_CUBC_UBLEN_MAX);
-  return (cubc & ~XDMACH_CUBC_UBLEN_MASK) |
-         (ntransfers << XDMACH_CUBC_UBLEN_SHIFT);
+  return (ntransfers << XDMACH_CUBC_UBLEN_SHIFT);
 }
 
 /****************************************************************************
@@ -1087,10 +1018,8 @@ static inline uint32_t sam_rxcubc(struct sam_xdmach_s *xdmach,
 
 static inline uint32_t sam_txcc(struct sam_xdmach_s *xdmach)
 {
-  uint32_t regval;
+  uint32_t regval = 0;
   uint32_t field;
-
-  regval = 0;
 
   /* 1. Clear TYPE for a memory to memory transfer, otherwise set
    *    this bit for memory to/from peripheral transfer.
@@ -1245,7 +1174,7 @@ static inline uint32_t sam_txcc(struct sam_xdmach_s *xdmach)
 
 static inline uint32_t sam_rxcc(struct sam_xdmach_s *xdmach)
 {
-  uint32_t regval;
+  uint32_t regval = 0;
   uint32_t field;
 
   /* 1. Clear TYPE for a memory to memory transfer, otherwise set
@@ -1386,12 +1315,12 @@ static inline uint32_t sam_rxcc(struct sam_xdmach_s *xdmach)
  *
  ****************************************************************************/
 
-static struct dma_linklist_s *
-sam_allocdesc(struct sam_xdmach_s *xdmach, struct dma_linklist_s *prev,
-              uint32_t csa, uint32_t cda, uint32_t cubc, uint32_t cc)
+static struct chnext_view1_s *
+sam_allocdesc(struct sam_xdmach_s *xdmach, struct chnext_view1_s *prev,
+              uint32_t csa, uint32_t cda, uint32_t cubc)
 {
   struct sam_xdmac_s *xdmac = sam_controller(xdmach);
-  struct dma_linklist_s *desc = NULL;
+  struct chnext_view1_s *descr = NULL;
   int i;
 
   /* Sanity check -- csa == 0 is the indication that the link is unused.
@@ -1417,16 +1346,15 @@ sam_allocdesc(struct sam_xdmach_s *xdmach, struct dma_linklist_s *prev,
       sam_takechsem(xdmac);
       for (i = 0; i < CONFIG_SAMA5_NLLDESC; i++)
         {
-          if (xdmac->desc[i].csa == 0)
+          if (xdmac->descr[i].csa == 0)
             {
               /* We have it.  Initialize the new link list entry */
 
-              desc        = &xdmac->desc[i];
-              desc->csa   = csa;  /* Source address */
-              desc->cda   = cda;  /* Destination address */
-              desc->cubc  = cubc; /* Control A value */
-              desc->cc    = cc;   /* Control B value */
-              desc->dscr  = 0;    /* Next descriptor address */
+              descr        = &xdmac->descr[i];
+              descr->cnda  = 0;    /* Next Descriptor Address */
+              descr->cubc  = cubc; /* Channel Microblock Control Register */
+              descr->csa   = csa;  /* Source address */
+              descr->cda   = cda;  /* Destination address */
 
               /* And then hook it at the tail of the link list */
 
@@ -1437,7 +1365,7 @@ sam_allocdesc(struct sam_xdmach_s *xdmach, struct dma_linklist_s *prev,
                    */
 
                   DEBUGASSERT(xdmach->llhead == NULL && xdmach->lltail == NULL);
-                  xdmach->llhead = desc;
+                  xdmach->llhead = descr;
                 }
               else
                 {
@@ -1446,35 +1374,30 @@ sam_allocdesc(struct sam_xdmach_s *xdmach, struct dma_linklist_s *prev,
                   /* When the second link is added to the list, that is the
                    * cue that we are going to do the link list transfer.
                    *
-                   * Enable the source and destination descriptor in the link
-                   * list entry just before this one.  We assume that both
-                   * source and destination buffers are non-continuous, but
-                   * this should work even if that is not the case.
+                   * Set the NDE field in the previous descriptor; Clear the
+                   * NDE field in the final descriptor.
                    */
 
-                  prev->cc &= ~XDMAC_CH_CC_BOTHDSCR;
+                  prev->cubc |= CHNEXT_UBC_NDE;
 
                   /* Link the previous tail to the new tail.
                    * REVISIT:  This assumes that the next description is fetched
                    * via AHB IF0.
                    */
 
-                  prev->dscr = (uint32_t)desc;
+                  prev->cnda = (uint32_t)sam_physramaddr((uintptr_t)descr);
                 }
 
-              /* In any event, this is the new tail of the list.  The source
-               * and destination descriptors must be disabled for the last entry
-               * in the link list. */
+              /* In any event, this is the new tail of the list */
 
-              desc->cc  |= XDMAC_CH_CC_BOTHDSCR;
-              xdmach->lltail = desc;
+              xdmach->lltail = descr;
 
-              /* Assume that we will be doing multple buffer transfers and that
+              /* Assume that we will be doing multiple buffer transfers and that
                * that hardware will be accessing the descriptor via DMA.
                */
 
-              cp15_clean_dcache((uintptr_t)desc,
-                                (uintptr_t)desc + sizeof(struct dma_linklist_s));
+              cp15_clean_dcache((uintptr_t)descr,
+                                (uintptr_t)descr + sizeof(struct chnext_view1_s));
               break;
             }
         }
@@ -1484,10 +1407,10 @@ sam_allocdesc(struct sam_xdmach_s *xdmach, struct dma_linklist_s *prev,
        */
 
       sam_givechsem(xdmac);
-      DEBUGASSERT(desc != NULL);
+      DEBUGASSERT(descr != NULL);
     }
 
-  return desc;
+  return descr;
 }
 
 /****************************************************************************
@@ -1503,37 +1426,37 @@ sam_allocdesc(struct sam_xdmach_s *xdmach, struct dma_linklist_s *prev,
 static void sam_freelinklist(struct sam_xdmach_s *xdmach)
 {
   struct sam_xdmac_s *xdmac = sam_controller(xdmach);
-  struct dma_linklist_s *desc;
+  struct chnext_view1_s *descr;
   uintptr_t paddr;
 
   /* Get the head of the link list and detach the link list from the DMA
    * channel
    */
 
-  desc           = xdmach->llhead;
+  descr           = xdmach->llhead;
   xdmach->llhead = NULL;
   xdmach->lltail = NULL;
 
-  while (desc != NULL)
+  while (descr != NULL)
     {
       /* Valid, in-use descriptors never have csa == 0 */
 
-      DEBUGASSERT(desc->csa != 0);
+      DEBUGASSERT(descr->csa != 0);
 
       /* Get the physical address of the next descriptor in the list */
 
-      paddr = desc->dscr;
+      paddr = descr->cnda;
 
       /* Free the descriptor by simply nullifying it and bumping up the
        * semaphore count.
        */
 
-      memset(desc, 0, sizeof(struct dma_linklist_s));
+      memset(descr, 0, sizeof(struct chnext_view1_s));
       sam_givedsem(xdmac);
 
       /* Get the virtual address of the next descriptor in the list */
 
-      desc = (struct dma_linklist_s *)sam_virtramaddr(paddr);
+      descr = (struct chnext_view1_s *)sam_virtramaddr(paddr);
     }
 }
 
@@ -1550,29 +1473,25 @@ static void sam_freelinklist(struct sam_xdmach_s *xdmach)
 static int sam_txbuffer(struct sam_xdmach_s *xdmach, uint32_t paddr,
                         uint32_t maddr, size_t nbytes)
 {
-  uint32_t regval;
   uint32_t cubc;
-  uint32_t cc;
 
   /* If we are appending a buffer to a linklist, then re-use the previously
    * calculated CC register value.  Otherwise, create the CC register value
    * from the properties of the transfer.
    */
 
-  if (xdmach->llhead)
+  if (!xdmach->llhead)
     {
-      cc = xdmach->llhead->cc;
-    }
-  else
-    {
-      cc = sam_txcc(xdmach);
+      xdmach->cc = sam_txcc(xdmach);
     }
 
-  cubc = sam_txcubc(xdmach, regval, nbytes);
+  /* Calculate the number of transfers for CUBC */
+
+  cubc = sam_cubc(xdmach, nbytes);
 
   /* Add the new link list entry */
 
-  if (!sam_allocdesc(xdmach, xdmach->lltail, maddr, paddr, cubc, cc))
+  if (!sam_allocdesc(xdmach, xdmach->lltail, maddr, paddr, cubc))
     {
       return -ENOMEM;
     }
@@ -1593,29 +1512,25 @@ static int sam_txbuffer(struct sam_xdmach_s *xdmach, uint32_t paddr,
 static int sam_rxbuffer(struct sam_xdmach_s *xdmach, uint32_t paddr,
                         uint32_t maddr, size_t nbytes)
 {
-  uint32_t regval;
   uint32_t cubc;
-  uint32_t cc;
 
   /* If we are appending a buffer to a linklist, then re-use the previously
    * calculated CC register value.  Otherwise, create the CC register value
    * from the properties of the transfer.
    */
 
-  if (xdmach->llhead)
+  if (!xdmach->llhead)
     {
-      cc = xdmach->llhead->cc;
-    }
-  else
-    {
-      cc = sam_rxcc(xdmach);
+      xdmach->cc = sam_rxcc(xdmach);
     }
 
-   cubc = sam_rxcubc(xdmach, regval, nbytes);
+  /* Calculate the number of transfers for CUBC */
+
+  cubc = sam_cubc(xdmach, nbytes);
 
   /* Add the new link list entry */
 
-  if (!sam_allocdesc(xdmach, xdmach->lltail, paddr, maddr, cubc, cc))
+  if (!sam_allocdesc(xdmach, xdmach->lltail, paddr, maddr, cubc))
     {
       return -ENOMEM;
     }
@@ -1634,7 +1549,7 @@ static int sam_rxbuffer(struct sam_xdmach_s *xdmach, uint32_t paddr,
 static inline int sam_single(struct sam_xdmach_s *xdmach)
 {
   struct sam_xdmac_s *xdmac = sam_controller(xdmach);
-  struct dma_linklist_s *llhead = xdmach->llhead;
+  struct chnext_view1_s *llhead = xdmach->llhead;
 
   /* 1. Read the XDMAC Global Channel Status Register (XDMAC_GS) to choose a
    *    free channel.
@@ -1670,7 +1585,7 @@ static inline int sam_single(struct sam_xdmach_s *xdmach)
 
   /* 6. Program the Channel Control (CC) Register */
 
-  sam_putdmach(xdmach, llhead->cc, SAM_XDMACH_CC_OFFSET);
+  sam_putdmach(xdmach, xdmach->cc, SAM_XDMACH_CC_OFFSET);
 
   /* 7. Clear the following five registers:
    *
@@ -1730,7 +1645,11 @@ static inline int sam_single(struct sam_xdmach_s *xdmach)
 static inline int sam_multiple(struct sam_xdmach_s *xdmach)
 {
   struct sam_xdmac_s *xdmac = sam_controller(xdmach);
-  struct dma_linklist_s *llhead = xdmach->llhead;
+#ifdef CONFIG_DEBUG
+  struct chnext_view1_s *llhead = xdmach->llhead;
+#endif
+  uintptr_t paddr;
+  uint32_t regval;
 
   DEBUGASSERT(llhead != NULL && llhead->csa != 0);
 
@@ -1755,18 +1674,28 @@ static inline int sam_multiple(struct sam_xdmach_s *xdmach)
 
   /* 3. Build a linked list of transfer descriptors in memory. The
    *    descriptor view is programmable on a per descriptor basis. The
-   *    linked list items structure must be word aligned. MBR_UBC.NDE
+   *    linked list items structure must be word aligned.  CUBC NDE
    *    must be configured to 0 in the last descriptor to terminate the
    *    list.
    *
    * This was done during the RX/TX setup phases of the DMA transfer.
    */
 
-  /* 4. Program field NDA in the XDMAC Channel Next Descriptor Address
-   *    (CNDA) Register (XDMAC_CNDAx) with the first descriptor address
-   *    and bit XDMAC_CNDAx.NDAIF with the master interface identifier.
+  /* Since we are using view1, I imagine that we need to set the Channel
+   * Control (CC) Register.
    */
-#warning Missing logic
+
+  sam_putdmach(xdmach, xdmach->cc, SAM_XDMACH_CC_OFFSET);
+
+  /* 4. Program field NDA in the XDMAC Channel Next Descriptor Address
+   *    (CNDA) Register with the first descriptor address and bit NDAIF
+   *    with the master interface identifier.
+   *
+   * REVIST:  Using NDAIF=0.  Is that correct?
+   */
+
+  paddr = sam_physramaddr((uintptr_t)xdmach->llhead);
+  sam_putdmach(xdmach, (uint32_t)paddr, SAM_XDMACH_CNDA_OFFSET);
 
   /* 5. Program the CNDC register:
    *
@@ -1775,10 +1704,37 @@ static inline int sam_multiple(struct sam_xdmach_s *xdmach)
    *       time, otherwise clear this bit.
    *    c. Set NDDUP to update the destination address at the descriptor
    *       fetch time, otherwise clear this bit.
-   *    d. Program theNDVIEW field to define the length of the first
+   *    d. Program the NDVIEW field to define the length of the first
    *       descriptor.
    */
-#warning Missing logic
+
+  regval = (XDMACH_CNDC_NDE | XDMACH_CNDC_NDVIEW_NDV2);
+
+  /* Update the source address if this is a memory-to-* transfer.
+   *
+   *   TYPE = 0 -> memory-to-memory
+   *   TYPE = 1 && DSYNC = 1 -> memory-to-peripheral
+   */
+
+  if ((xdmach->cc & XDMACH_CC_TYPE) == 0 ||
+      (xdmach->cc & XDMACH_CC_TYPE) != 0)
+    {
+      regval |= XDMACH_CNDC_NDSUP;
+    }
+    
+  /* Update the destination address if this is a *-to-memory transfer.
+   *
+   *   TYPE = 0 -> memory-to-memory
+   *   TYPE = 1 && DSYNC = 0 -> peripheral-to-memory
+   */
+
+  if ((xdmach->cc & XDMACH_CC_TYPE) == 0 ||
+      (xdmach->cc & XDMACH_CC_TYPE) == 0)
+    {
+      regval |= XDMACH_CNDC_NDDUP;
+    }
+
+  sam_putdmach(xdmach, regval, SAM_XDMACH_CNDC_OFFSET);
 
   /* 6. Enable the End of Linked List interrupt by setting the LI bit in the
    *    CIE register.
@@ -1825,7 +1781,7 @@ static void sam_dmaterminate(struct sam_xdmach_s *xdmach, int result)
   /* Disable all channel interrupts */
 
   sam_putdmac(xdmac, chanbit, SAM_XDMAC_GID_OFFSET);
-  sam_putdmach(xdmach, XDMAC_CHINT_ALL, SAM_XDMAC_CDI_OFFSET);
+  sam_putdmach(xdmach, XDMAC_CHINT_ALL, SAM_XDMACH_CID_OFFSET);
 
   /* Under normal operation, the software enables a channel by setting the
    * associated bit in the Global Channel Enable (GE) Register.  The hardware
@@ -1836,7 +1792,7 @@ static void sam_dmaterminate(struct sam_xdmach_s *xdmach, int result)
    */
 
   sam_putdmac(xdmac, chanbit, SAM_XDMAC_GD_OFFSET);
-  while ((sam_getdma(xdmac, chanbit, SAM_XDMAC_GS_OFFSET) & chanbit) != 0);
+  while ((sam_getdmac(xdmac, SAM_XDMAC_GS_OFFSET) & chanbit) != 0);
 
   /* Free the linklist */
 
@@ -1874,63 +1830,64 @@ static int sam_xdmac_interrupt(struct sam_xdmac_s *xdmac)
 {
   struct sam_xdmach_s *xdmach;
   unsigned int chndx;
-  uint32_t regval;
+  uint32_t gpending;
+  uint32_t chpending;
+  uint32_t bit;
 
-  /* Get the XDMAC status register value.  Ignore all masked interrupt
-   * status bits.
-   */
+  /* Get the set of pending, unmasked global XDMAC interrupts */
 
-  regval = sam_getdmac(xdmac, SAM_XDMAC_EBCISR_OFFSET) &
-           sam_getdmac(xdmac, SAM_XDMAC_EBCIMR_OFFSET);
+  gpending = sam_getdmac(xdmac, SAM_XDMAC_GIS_OFFSET) &
+             sam_getdmac(xdmac, SAM_XDMAC_GIM_OFFSET);
 
-  /* Check if the any transfer has completed or any errors have ocurred. */
+  /* Yes.. Check each bit to see which channel(s) have interrupted */
 
-  if (regval & XDMAC_EBC_ALLCHANINTS)
+  for (chndx = 0; chndx < SAM_NDMACHAN && gpending != 0; chndx++)
     {
-      /* Yes.. Check each bit  to see which channel has interrupted */
+      /* Are any interrupts pending for this channel? */
 
-      for (chndx = 0; chndx < SAM_NDMACHAN; chndx++)
+      bit = XDMAC_CHAN(chndx);
+      if ((gpending & bit) != 0)
         {
-          /* Are any interrupts pending for this channel? */
+          xdmach = &xdmac->xdmach[chndx];
 
-          if ((regval & XDMAC_EBC_CHANINTS(chndx)) != 0)
+          /* Get the set of interrupts pending for this channel */
+
+          chpending = sam_getdmach(xdmach, SAM_XDMACH_CIS_OFFSET) &
+                      sam_getdmach(xdmach, SAM_XDMACH_CIM_OFFSET);
+
+          /* Yes.. Did an error occur? */
+
+          if ((chpending & XDMAC_CHINT_ERRORS) != 0)
             {
-              xdmach = &xdmac->xdmach[chndx];
+               /* Yes... Terminate the transfer with an error? */
 
-              /* Yes.. Did an error occur? */
-
-              if ((regval & XDMAC_EBC_ERR(chndx)) != 0)
-                {
-                   /* Yes... Terminate the transfer with an error? */
-
-                   dmalldbg("ERROR: DMA failed: %08x\n", regval);
-                   sam_dmaterminate(xdmach, -EIO);
-                }
-
-              /* Is the transfer complete? */
-
-              else if ((regval & XDMAC_EBC_CBTC(chndx)) != 0)
-               {
-                  /* Yes.. Terminate the transfer with success */
-
-                  sam_dmaterminate(xdmach, OK);
-                }
-
-              /* Otherwise, this must be a Bufffer Transfer Complete (BTC)
-               * interrupt as part of a multiple buffer transfer.
-               */
-
-              else /* if ((regval & XDMAC_EBC_BTC(chndx)) != 0) */
-                {
-                  /* Write the KEEPON field to clear the STALL states */
-
-                  sam_putdmac(xdmac, XDMAC_CHER_KEEP(xdmach->chan),
-                              SAM_XDMAC_CHER_OFFSET);
-                }
+               dmalldbg("ERROR: DMA failed: %08x\n", chpending);
+               sam_dmaterminate(xdmach, -EIO);
             }
+
+          /* Is the transfer complete? */
+
+          else if ((chpending & (XDMAC_CHINT_BI | XDMAC_CHINT_LI)) != 0)
+            {
+              /* Yes.. Terminate the transfer with success */
+
+              sam_dmaterminate(xdmach, OK);
+            }
+
+          /* Else what? */
+
+          else
+            {
+              dmalldbg("ERROR: Unexpected interrupt: %08x\n", chpending);
+              DEBUGPANIC();
+            }
+
+          /* Clear the bit in the sampled set of pending global interrupts */
+
+          gpending &= !bit;
         }
     }
-
+ 
   return OK;
 }
 
@@ -1976,10 +1933,6 @@ void sam_dmainitialize(struct sam_xdmac_s *xdmac)
   /* Disable all DMA channels */
 
   sam_putdmac(xdmac, XDMAC_CHAN_ALL, SAM_XDMAC_GD_OFFSET);
-
-  /* Enable the DMA controller */
-
-  sam_putdmac(xdmac, XDMAC_EN_ENABLE, SAM_XDMAC_EN_OFFSET);
 
   /* Initialize semaphores */
 
@@ -2194,9 +2147,12 @@ void sam_xdmaconfig(DMA_HANDLE handle, uint32_t chflags)
 void sam_dmafree(DMA_HANDLE handle)
 {
   struct sam_xdmach_s *xdmach = (struct sam_xdmach_s *)handle;
+  struct sam_xdmac_s *xdmac;
 
   dmavdbg("xdmach: %p\n", xdmach);
   DEBUGASSERT((xdmach != NULL) && (xdmach->inuse));
+
+  xdmac = sam_controller(xdmach);
 
   /* Make sure that the channel is disabled by writing one to the write-only
    * Global Channel Disable (GD) Register
