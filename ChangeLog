@@ -7443,4 +7443,6 @@
 	  disabled after being detached.  (2014-6-15).
 	* binfmt/binfmt_exec.c:  Fix a critical error in exec(); argv was not
 	  being passed (2014-6-15).
+	* arch/arm/src/sama5/sam_dmac.h:  Fix some critical typos in the SAMA5D3
+	  DMA definitions (2014-6-17).
 
