@@ -106,8 +106,8 @@
 
 /* Register values **********************************************************/
 
-#define XDMAC_CH_CTRLB_BOTHDSCR \
-  (XDMAC_CH_CTRLB_SRCDSCR | XDMAC_CH_CTRLB_DSTDSCR)
+#define XDMAC_CH_CC_BOTHDSCR \
+  (XDMAC_CH_CC_SRCDSCR | XDMAC_CH_CC_DSTDSCR)
 
 /****************************************************************************
  * Private Types
@@ -164,7 +164,7 @@ struct sam_xdmac_s
  * Private Data
  ****************************************************************************/
 
-/* CTRLA field lookups */
+/* Channel Control (CC) Register field lookups */
 
 static const uint32_t g_chanwidth[4] =
 {
@@ -172,13 +172,6 @@ static const uint32_t g_chanwidth[4] =
   XDMACH_CC_DWIDTH_HWORD,
   XDMACH_CC_DWIDTH_WORD,
   XDMACH_CC_DWIDTH_DWORD
-};
-
-static const uint32_t g_fifocfg[3] =
-{
-  XDMAC_CH_CFG_FIFOCFG_ALAP,
-  XDMAC_CH_CFG_FIFOCFG_HALF,
-  XDMAC_CH_CFG_FIFOCFG_ASAP
 };
 
 /* These tables map peripheral IDs to channels.  A lookup is performed
@@ -825,19 +818,10 @@ static uint8_t sam_channel(uint8_t pid, const struct sam_pidmap_s *table,
   return 0x3f;
 }
 
-static uint32_t sam_source_channel(struct sam_xdmach_s *xdmach, uint8_t pid,
-                                   bool isperiph)
+static uint32_t sam_source_channel(struct sam_xdmach_s *xdmach, uint8_t pid)
 {
   const struct sam_pidmap_s *table;
   unsigned int nentries;
-
-  if (!isperiph)
-    {
-      /* The source is memory, not a peripheral. */
-
-      return 0x3f;
-    }
-  else
 
 #ifdef CONFIG_SAMA5_XDMAC0
 #ifdef CONFIG_SAMA5_XDMAC1
@@ -866,19 +850,10 @@ static uint32_t sam_source_channel(struct sam_xdmach_s *xdmach, uint8_t pid,
   return (uint32_t)sam_channel(pid, table, nentries);
 }
 
-static uint32_t sam_sink_channel(struct sam_xdmach_s *xdmach, uint8_t pid,
-                                 bool isperiph)
+static uint32_t sam_sink_channel(struct sam_xdmach_s *xdmach, uint8_t pid)
 {
   const struct sam_pidmap_s *table;
   unsigned int nentries;
-
-  if (!isperiph)
-    {
-      /* The source is memory, not a peripheral. */
-
-      return 0x3f;
-    }
-  else
 
 #ifdef CONFIG_SAMA5_XDMAC0
 #ifdef CONFIG_SAMA5_XDMAC1
@@ -908,173 +883,40 @@ static uint32_t sam_sink_channel(struct sam_xdmach_s *xdmach, uint8_t pid,
 }
 
 /****************************************************************************
- * Name: sam_txcfg
+ * Name: sam_maxtransfer
  *
  * Description:
- *  Decode the flags to get the correct CFG register bit settings for
- *  a transmit (memory to peripheral) transfer.
+ *  Maximum number of bytes that can be sent in one transfer
  *
  ****************************************************************************/
 
-static inline uint32_t sam_txcfg(struct sam_xdmach_s *xdmach)
+static size_t sam_maxtransfer(struct sam_xdmach_s *xdmach)
 {
-  uint32_t regval;
-  unsigned int pid;
-  unsigned int pchan;
-  bool isperiph;
-
-  /* Set transfer (memory to peripheral) DMA channel configuration register */
-
-  regval   = XDMAC_CH_CFG_SOD;
-
-  pid      = (xdmach->flags & DMACH_FLAG_MEMPID_MASK) >> DMACH_FLAG_MEMPID_SHIFT;
-  isperiph = ((xdmach->flags & DMACH_FLAG_MEMISPERIPH) != 0);
-  pchan    = sam_source_channel(xdmach, pid, isperiph);
-
-  regval  |= ((pchan & 0x0f) << XDMAC_CH_CFG_SRCPER_SHIFT);
-  regval  |= ((pchan & 0x30) << (XDMAC_CH_CFG_SRCPERMSB_SHIFT-4));
-  regval  |= (xdmach->flags & DMACH_FLAG_MEMH2SEL) != 0 ? XDMAC_CH_CFG_SRCH2SEL : 0;
-
-  pid      = (xdmach->flags & DMACH_FLAG_PERIPHPID_MASK) >> DMACH_FLAG_PERIPHPID_SHIFT;
-  isperiph = ((xdmach->flags & DMACH_FLAG_PERIPHISPERIPH) != 0);
-  pchan    = sam_sink_channel(xdmach, pid, isperiph);
-
-  regval  |= ((pchan & 0x0f) << XDMAC_CH_CFG_DSTPER_SHIFT);
-  regval  |= ((pchan & 0x30) << (XDMAC_CH_CFG_DSTPERMSB_SHIFT-4));
-  regval  |= (xdmach->flags & DMACH_FLAG_PERIPHH2SEL) != 0 ? XDMAC_CH_CFG_DSTH2SEL : 0;
-
-  return regval;
-}
-
-/****************************************************************************
- * Name: sam_rxcfg
- *
- * Description:
- *  Decode the flags to get the correct CFG register bit settings for
- *  a receive (peripheral to memory) transfer.
- *
- ****************************************************************************/
-
-static inline uint32_t sam_rxcfg(struct sam_xdmach_s *xdmach)
-{
-  uint32_t regval;
-  unsigned int pid;
-  unsigned int pchan;
-  bool isperiph;
-
-  /* Set received (peripheral to memory) DMA channel config */
-
-  regval   = XDMAC_CH_CFG_SOD;
-
-  pid      = (xdmach->flags & DMACH_FLAG_PERIPHPID_MASK) >> DMACH_FLAG_PERIPHPID_SHIFT;
-  isperiph = ((xdmach->flags & DMACH_FLAG_PERIPHISPERIPH) != 0);
-  pchan    = sam_source_channel(xdmach, pid, isperiph);
-
-  regval  |= ((pchan & 0x0f) << XDMAC_CH_CFG_SRCPER_SHIFT);
-  regval  |= ((pchan & 0x30) << (XDMAC_CH_CFG_SRCPERMSB_SHIFT-4));
-  regval  |= (xdmach->flags & DMACH_FLAG_PERIPHH2SEL) != 0 ? XDMAC_CH_CFG_SRCH2SEL : 0;
-
-  pid      = (xdmach->flags & DMACH_FLAG_MEMPID_MASK) >> DMACH_FLAG_MEMPID_SHIFT;
-  isperiph = ((xdmach->flags & DMACH_FLAG_MEMISPERIPH) != 0);
-  pchan    = sam_sink_channel(xdmach, pid, isperiph);
-
-  regval  |= ((pchan & 0x0f) << XDMAC_CH_CFG_DSTPER_SHIFT);
-  regval  |= ((pchan & 0x30) << (XDMAC_CH_CFG_DSTPERMSB_SHIFT-4));
-  regval  |= (xdmach->flags & DMACH_FLAG_MEMH2SEL) != 0 ? XDMAC_CH_CFG_DSTH2SEL : 0;
-
-  return regval;
-}
-
-/****************************************************************************
- * Name: sam_txctrlabits
- *
- * Description:
- *  Decode the flags to get the correct CTRLA register bit settings for
- *  a transmit (memory to peripheral) transfer.  These are only the "fixed"
- *  CTRLA values and  need to be updated with the actual transfer size before
- *  being written to CTRLA sam_txctrla).
- *
- ****************************************************************************/
-
-static inline uint32_t sam_txctrlabits(struct sam_xdmach_s *xdmach)
-{
-  uint32_t regval;
-  unsigned int ndx;
-  unsigned int chunksize;
-
-  DEBUGASSERT(xdmach);
-
-  /* Since this is a transmit, the source is described by the memory selections.
-   * Set the source width (memory width).
-   */
-
-  ndx = (xdmach->flags & DMACH_FLAG_MEMWIDTH_MASK) >> DMACH_FLAG_MEMWIDTH_SHIFT;
-  DEBUGASSERT(ndx < 4);
-  regval = g_chanwidth[ndx];
-
-  /* Set the source chunk size (memory chunk size) */
-
-  chunksize = (xdmach->flags & DMACH_FLAG_MEMCHUNKSIZE_MASK)
-    >> DMACH_FLAG_MEMCHUNKSIZE_SHIFT;
-  regval |= chunksize << XDMAC_CH_CTRLA_SCSIZE_SHIFT;
-
-  /* Since this is a transmit, the destination is described by the peripheral selections.
-   * Set the destination width (peripheral width).
-   */
-
-  ndx = (xdmach->flags & DMACH_FLAG_PERIPHWIDTH_MASK) >> DMACH_FLAG_PERIPHWIDTH_SHIFT;
-  DEBUGASSERT(ndx < 4);
-  regval |= g_chanwidth[ndx];
-
-  /* Set the destination chunk size (peripheral chunk size) */
-
-  chunksize = (xdmach->flags & DMACH_FLAG_PERIPHCHUNKSIZE_MASK)
-    >> DMACH_FLAG_PERIPHCHUNKSIZE_SHIFT;
-  regval |= chunksize << XDMAC_CH_CTRLA_DCSIZE_SHIFT;
-
-  return regval;
-}
-
-/****************************************************************************
- * Name: sam_maxtxtransfer
- *
- * Description:
- *  Maximum number of bytes that can be sent in on transfer
- *
- ****************************************************************************/
-
-static size_t sam_maxtxtransfer(struct sam_xdmach_s *xdmach)
-{
-  unsigned int srcwidth;
+  unsigned int xfrwidth;
   size_t maxtransfer;
 
-  /* Get the maximum transfer size in bytes.  BTSIZE is "the number of
-   * transfers to be performed, that is, for writes it refers to the number
-   * of source width transfers to perform when XDMAC is flow controller. For
-   * Reads, BTSIZE refers to the number of transfers completed on the Source
-   * Interface. ..."
-   */
+  /* Get the maximum transfer size in bytes */
 
-  srcwidth = (xdmach->flags & DMACH_FLAG_MEMWIDTH_MASK)
-    >> DMACH_FLAG_MEMWIDTH_SHIFT;
+  xfrwidth = (xdmach->flags & DMACH_FLAG_PERIPHWIDTH_MASK) >>
+              DMACH_FLAG_PERIPHWIDTH_SHIFT;
 
-  switch (srcwidth)
+  switch (xfrwidth)
     {
       default:
       case 0: /* 8 bits, 1 byte */
-        maxtransfer = XDMAC_CH_CTRLA_BTSIZE_MAX;
+        maxtransfer = XDMACH_CUBC_UBLEN_MAX;
         break;
 
       case 1: /* 16 bits, 2 bytes */
-        maxtransfer = 2 * XDMAC_CH_CTRLA_BTSIZE_MAX;
+        maxtransfer = 2 * XDMACH_CUBC_UBLEN_MAX;
         break;
 
       case 2: /* 32 bits 4 bytes */
-        maxtransfer = 4 * XDMAC_CH_CTRLA_BTSIZE_MAX;
+        maxtransfer = 4 * XDMACH_CUBC_UBLEN_MAX;
         break;
 
       case 3: /* 64 bits, 8 bytes */
-        maxtransfer = 8 * XDMAC_CH_CTRLA_BTSIZE_MAX;
+        maxtransfer = 8 * XDMACH_CUBC_UBLEN_MAX;
         break;
     }
 
@@ -1100,8 +942,8 @@ static uint32_t sam_ntxtransfers(struct sam_xdmach_s *xdmach, uint32_t dmasize)
    * the number of transfers completed on the Source Interface. ..."
    */
 
-  srcwidth = (xdmach->flags & DMACH_FLAG_MEMWIDTH_MASK)
-    >> DMACH_FLAG_MEMWIDTH_SHIFT;
+  srcwidth = (xdmach->flags & DMACH_FLAG_PERIPHWIDTH_MASK) >>
+              DMACH_FLAG_PERIPHWIDTH_SHIFT;
 
   switch (srcwidth)
     {
@@ -1126,15 +968,15 @@ static uint32_t sam_ntxtransfers(struct sam_xdmach_s *xdmach, uint32_t dmasize)
 }
 
 /****************************************************************************
- * Name: sam_txctrla
+ * Name: sam_txcubc
  *
  * Description:
- *  'OR' in the variable CTRLA bits
+ *  'OR' in the variable CUBC bits
  *
  ****************************************************************************/
 
-static inline uint32_t sam_txctrla(struct sam_xdmach_s *xdmach,
-                                   uint32_t ctrla, uint32_t dmasize)
+static inline uint32_t sam_txcubc(struct sam_xdmach_s *xdmach,
+                                   uint32_t cubc, uint32_t dmasize)
 {
   uint32_t ntransfers;
 
@@ -1144,109 +986,9 @@ static inline uint32_t sam_txctrla(struct sam_xdmach_s *xdmach,
 
   ntransfers = sam_ntxtransfers(xdmach, dmasize);
 
-  DEBUGASSERT(ntransfers <= XDMAC_CH_CTRLA_BTSIZE_MAX);
-  return (ctrla & ~XDMAC_CH_CTRLA_BTSIZE_MASK) |
-         (ntransfers << XDMAC_CH_CTRLA_BTSIZE_SHIFT);
-}
-
-/****************************************************************************
- * Name: sam_rxctrlabits
- *
- * Description:
- *  Decode the flags to get the correct CTRLA register bit settings for
- *  a read (peripheral to memory) transfer. These are only the "fixed" CTRLA
- *  values and need to be updated with the actual transfer size before being
- *  written to CTRLA sam_rxctrla).
- *
- ****************************************************************************/
-
-static inline uint32_t sam_rxctrlabits(struct sam_xdmach_s *xdmach)
-{
-  uint32_t regval;
-  unsigned int ndx;
-  unsigned int chunksize;
-
-  DEBUGASSERT(xdmach);
-
-  /* Since this is a receive, the source is described by the peripheral
-   * selections. Set the source width (peripheral width).
-   */
-
-  ndx = (xdmach->flags & DMACH_FLAG_PERIPHWIDTH_MASK)
-    >> DMACH_FLAG_PERIPHWIDTH_SHIFT;
-
-  DEBUGASSERT(ndx < 4);
-  regval = g_chanwidth[ndx];
-
-  /* Set the source chunk size (peripheral chunk size) */
-
-  chunksize = (xdmach->flags & DMACH_FLAG_PERIPHCHUNKSIZE_MASK)
-    >> DMACH_FLAG_PERIPHCHUNKSIZE_SHIFT;
-  regval |= chunksize << XDMAC_CH_CTRLA_SCSIZE_SHIFT;
-
-  /* Since this is a receive, the destination is described by the memory
-   * selections. Set the destination width (memory width).
-   */
-
-  ndx = (xdmach->flags & DMACH_FLAG_MEMWIDTH_MASK)
-    >> DMACH_FLAG_MEMWIDTH_SHIFT;
-
-  DEBUGASSERT(ndx < 4);
-  regval |= g_chanwidth[ndx];
-
-  /* Set the destination chunk size (memory chunk size) */
-
-  chunksize = (xdmach->flags & DMACH_FLAG_MEMCHUNKSIZE_MASK)
-    >> DMACH_FLAG_MEMCHUNKSIZE_SHIFT;
-  regval |= chunksize << XDMAC_CH_CTRLA_DCSIZE_SHIFT;
-
-  return regval;
-}
-
-/****************************************************************************
- * Name: sam_maxrxtransfer
- *
- * Description:
- *  Maximum number of bytes that can be sent in on transfer
- *
- ****************************************************************************/
-
-static size_t sam_maxrxtransfer(struct sam_xdmach_s *xdmach)
-{
-  unsigned int srcwidth;
-  size_t maxtransfer;
-
-  /* Get the maximum transfer size in bytes.  BTSIZE is "the number of
-   * transfers to be performed, that is, for writes it refers to the number
-   * of source width transfers to perform when XDMAC is flow controller. For
-   * Reads, BTSIZE refers to the number of transfers completed on the Source
-   * Interface. ..."
-   */
-
-  srcwidth = (xdmach->flags & DMACH_FLAG_PERIPHWIDTH_MASK)
-    >> DMACH_FLAG_PERIPHWIDTH_SHIFT;
-
-  switch (srcwidth)
-    {
-      default:
-      case 0: /* 8 bits, 1 byte */
-        maxtransfer = XDMAC_CH_CTRLA_BTSIZE_MAX;
-        break;
-
-      case 1: /* 16 bits, 2 bytes */
-        maxtransfer = 2 * XDMAC_CH_CTRLA_BTSIZE_MAX;
-        break;
-
-      case 2: /* 32 bits, 4 bytes */
-        maxtransfer = 4 * XDMAC_CH_CTRLA_BTSIZE_MAX;
-        break;
-
-      case 3: /* 64 bits, 8 bytes */
-        maxtransfer = 8 * XDMAC_CH_CTRLA_BTSIZE_MAX;
-        break;
-    }
-
-  return maxtransfer;
+  DEBUGASSERT(ntransfers <= XDMACH_CUBC_UBLEN_MAX);
+  return (cubc & ~XDMACH_CUBC_UBLEN_MASK) |
+         (ntransfers << XDMACH_CUBC_UBLEN_SHIFT);
 }
 
 /****************************************************************************
@@ -1294,15 +1036,15 @@ static uint32_t sam_nrxtransfers(struct sam_xdmach_s *xdmach, uint32_t dmasize)
 }
 
 /****************************************************************************
- * Name: sam_rxctrla
+ * Name: sam_rxcubc
  *
  * Description:
- *  'OR' in the variable CTRLA bits
+ *  'OR' in the variable CUBC bits
  *
  ****************************************************************************/
 
-static inline uint32_t sam_rxctrla(struct sam_xdmach_s *xdmach,
-                                   uint32_t ctrla, uint32_t dmasize)
+static inline uint32_t sam_rxcubc(struct sam_xdmach_s *xdmach,
+                                   uint32_t cubc, uint32_t dmasize)
 {
   uint32_t ntransfers;
 
@@ -1312,188 +1054,319 @@ static inline uint32_t sam_rxctrla(struct sam_xdmach_s *xdmach,
 
   ntransfers = sam_nrxtransfers(xdmach, dmasize);
 
-  DEBUGASSERT(ntransfers <= XDMAC_CH_CTRLA_BTSIZE_MAX);
-  return (ctrla & ~XDMAC_CH_CTRLA_BTSIZE_MASK) |
-         (ntransfers << XDMAC_CH_CTRLA_BTSIZE_SHIFT);
+  DEBUGASSERT(ntransfers <= XDMACH_CUBC_UBLEN_MAX);
+  return (cubc & ~XDMACH_CUBC_UBLEN_MASK) |
+         (ntransfers << XDMACH_CUBC_UBLEN_SHIFT);
 }
 
 /****************************************************************************
- * Name: sam_txctrlb
+ * Name: sam_txcc
  *
  * Description:
- *  Decode the flags to get the correct CTRLB register bit settings for
- *  a transmit (memory to peripheral) transfer.
+ *  Decode the flags to get the correct Channel Control (CC) Register bit
+ *  settings for a transmit (memory to peripheral) transfer.
+ *
+ * Single Block:
+ *  1. Clear TYPE for a memory to memory transfer, otherwise set
+ *     this bit for memory to/from peripheral transfer.
+ *  2. Program MBSIZE to the memory burst size used.
+ *  3. Program SAM/DAM to the memory addressing scheme.
+ *  4. Program SYNC to select the peripheral transfer direction.
+ *  5. Set PROT to activate a secure channel.
+ *  6. Program CSIZE to configure the channel chunk size (only
+ *     relevant for peripheral synchronized transfer).
+ *  7. Program DWIDTH to configure the transfer data width.
+ *  8. Program SIF, DIF to configure the master interface
+ *     used to read data and write data respectively.
+ *  9. Program PERID to select the active hardware request line
+ *     (only relevant for a peripheral synchronized transfer).
+ *  10. Set SWREQ to use software request (only relevant for a
+ *      peripheral synchronized transfer).
  *
  ****************************************************************************/
 
-static inline uint32_t sam_txctrlb(struct sam_xdmach_s *xdmach)
+static inline uint32_t sam_txcc(struct sam_xdmach_s *xdmach)
 {
   uint32_t regval;
-  unsigned int ahbif;
+  uint32_t field;
 
-  /* Assume that we will not be using the link list and disable the source
-   * and destination descriptors.  The default will be single transfer mode.
+  regval = 0;
+
+  /* 1. Clear TYPE for a memory to memory transfer, otherwise set
+   *    this bit for memory to/from peripheral transfer.
+   *
+   * By convention, TX refers to a memory to peripheral transfer.  So the
+   * source is memory.  Is the "peripheral" destination a peripheral? or
+   * it is really memory?
    */
 
-  regval = XDMAC_CH_CTRLB_BOTHDSCR | XDMAC_CH_CTRLB_IEN;
-
-  /* Select flow control (even if the channel doesn't support it).  The
-   * naming convention from TX is memory to peripheral, but that is really
-   * be determined by bits in the DMA flags.
-   */
-
-  /* Is the memory source really a peripheral? */
-
-  if ((xdmach->flags & DMACH_FLAG_MEMISPERIPH) != 0)
+  if ((xdmach->flags & DMACH_FLAG_PERIPHISPERIPH) != 0)
     {
-      /* Yes.. is the peripheral destination also a peripheral? */
+      /* Yes.. Use peripheral synchronized mode */
 
-      if ((xdmach->flags & DMACH_FLAG_PERIPHISPERIPH) != 0)
-        {
-          /* Yes.. Use peripheral-to-peripheral flow control */
-
-          regval |= XDMAC_CH_CTRLB_FC_P2P;
-        }
-      else
-        {
-          /* No.. Use peripheral-to-memory flow control */
-
-          regval |= XDMAC_CH_CTRLB_FC_P2M;
-        }
+      regval |= XDMACH_CC_TYPE;
     }
-  else
+
+  /* 2. Program MBSIZE to the memory burst size used.
+   *
+   * NOTE: This assumes the same encoding in the DMACH flags as in the CC
+   * register MBSIZE field.
+   */
+
+  field   = (xdmach->flags & DMACH_FLAG_MEMBURST_MASK) >>
+             DMACH_FLAG_MEMBURST_SHIFT;
+  regval |= (field << XDMACH_CC_MBSIZE_SHIFT);
+
+  /* 3. Program SAM/DAM to the memory addressing scheme.
+   *
+   * NOTE: This assumes that 0 means non-incrementing.
+   * TX -> Source is memory.
+   */
+
+  if ((xdmach->flags & DMACH_FLAG_MEMINCREMENT) != 0)
     {
-      /* No, the source is memory.  Is the peripheral destination a
-       * peripheral
+      regval |= XDMACH_CC_SAM_INCR;
+    }
+
+  /* TX -> Destination is peripheral. */
+
+  if ((xdmach->flags & DMACH_FLAG_PERIPHINCREMENT) != 0)
+    {
+      regval |= XDMACH_CC_DAM_INCR;
+    }
+
+  /* 4. Program DSYNC to select the peripheral transfer direction.
+   *
+   * TX -> Memory to peripheral
+   */
+
+  regval |= XDMACH_CC_DSYNC;
+
+  /* 5. Set PROT to activate a secure channel (REVISIT). */
+
+  regval |= XDMACH_CC_PROT; /* Channel is unsecured */
+
+  /* 6. Program CSIZE to configure the channel chunk size (only
+   *    relevant for peripheral synchronized transfer).
+   */
+
+  if ((xdmach->flags & DMACH_FLAG_PERIPHISPERIPH) != 0)
+    {
+      /* Peripheral synchronized mode -- set chunk size.
+       * NOTE that we assume that encoding in the XDMACH flags is the same
+       * as in the CC register CSIZE field.
        */
 
-      if ((xdmach->flags & DMACH_FLAG_PERIPHISPERIPH) != 0)
-        {
-          /* Yes.. Use memory-to-peripheral flow control */
-
-          regval |= XDMAC_CH_CTRLB_FC_M2P;
-        }
-      else
-        {
-          /* No.. Use memory-to-memory flow control */
-
-          regval |= XDMAC_CH_CTRLB_FC_M2M;
-        }
+      field   = (xdmach->flags & DMACH_FLAG_PERIPHCHUNKSIZE_MASK) >>
+                 DMACH_FLAG_PERIPHCHUNKSIZE_SHIFT;
+      regval |= (field << XDMACH_CC_CSIZE_SHIFT);
     }
 
-  /* Source ABH layer */
+  /* 7. Program DWIDTH to configure the transfer data width.
+   *
+   * NOTE that we assume that encoding in the XDMACH flags is the same as in
+   * the CC register CSIZE field.
+   */
 
-  ahbif = (xdmach->flags & DMACH_FLAG_MEMAHB_MASK) >> DMACH_FLAG_MEMAHB_SHIFT;
-  regval |= (ahbif << XDMAC_CH_CTRLB_SIF_SHIFT);
+  field   = (xdmach->flags & DMACH_FLAG_PERIPHWIDTH_MASK) >>
+             DMACH_FLAG_PERIPHWIDTH_SHIFT;
+  regval |= (field << XDMACH_CC_DWIDTH_SHIFT);
 
-  /* Select source address incrementing */
+  /* 8. Program SIF, DIF to configure the master interface
+   *    used to read data and write data respectively.
+   *
+   * TX -> Source is memory
+   */
 
-  if ((xdmach->flags & DMACH_FLAG_MEMINCREMENT) == 0)
+  if ((xdmach->flags & DMACH_FLAG_MEMAHB_MASK) == DMACH_FLAG_MEMAHB_AHB_IF1)
     {
-      regval |= XDMAC_CH_CTRLB_SRCINCR_FIXED;
+      regval |= XDMACH_CC_SIF;
     }
 
-  /* Destination ABH layer */
+  /* TX -> Destination is peripheral */
 
-  ahbif = (xdmach->flags & DMACH_FLAG_PERIPHAHB_MASK) >> DMACH_FLAG_PERIPHAHB_SHIFT;
-  regval |= (ahbif << XDMAC_CH_CTRLB_DIF_SHIFT);
-
-  /* Select destination address incrementing */
-
-  if ((xdmach->flags & DMACH_FLAG_PERIPHINCREMENT) == 0)
+  if ((xdmach->flags & DMACH_FLAG_PERIPHAHB_MASK) == DMACH_FLAG_PERIPHAHB_AHB_IF1)
     {
-      regval |= XDMAC_CH_CTRLB_DSTINCR_FIXED;
+      regval |= XDMACH_CC_DIF;
+    }
+
+  /* 9. Program PERID to select the active hardware request line
+   *    (only relevant for a peripheral synchronized transfer).
+   */
+
+  if ((xdmach->flags & DMACH_FLAG_PERIPHISPERIPH) != 0)
+    {
+      int pid;
+
+      /* Get the PID from the DMACH flags */
+
+      pid = (xdmach->flags & DMACH_FLAG_PERIPHPID_MASK) >>
+             DMACH_FLAG_PERIPHPID_SHIFT;
+
+      /* Look up the DMA channel code for TX:  Peripheral is the sink. */
+
+      field   = sam_sink_channel(xdmach, pid);
+      regval |= (field << XDMACH_CC_CSIZE_SHIFT);
+
+      /* 10. Set SWREQ to use software request (only relevant for a
+       *     peripheral synchronized transfer).
+       */
+
+      regval |= XDMACH_CC_SWREQ;
     }
 
   return regval;
 }
 
 /****************************************************************************
- * Name: sam_rxctrlb
+ * Name: sam_rxcc
  *
  * Description:
- *  Decode the flags to get the correct CTRLB register bit settings for
- *  a receive (peripheral to memory) transfer.
+ *  Decode the flags to get the correct Channel Control (CC) Register bit
+ *  settings for a receive (peripheral to memory) transfer.
+ *
+ *  1. Clear TYPE for a memory to memory transfer, otherwise set
+ *     this bit for memory to/from peripheral transfer.
+ *  2. Program MBSIZE to the memory burst size used.
+ *  3. Program SAM/DAM to the memory addressing scheme.
+ *  4. Program SYNC to select the peripheral transfer direction.
+ *  5. Set PROT to activate a secure channel.
+ *  6. Program CSIZE to configure the channel chunk size (only
+ *     relevant for peripheral synchronized transfer).
+ *  7. Program DWIDTH to configure the transfer data width.
+ *  8. Program SIF, DIF to configure the master interface
+ *     used to read data and write data respectively.
+ *  9. Program PERID to select the active hardware request line
+ *     (only relevant for a peripheral synchronized transfer).
+ *  10. Set SWREQ to use software request (only relevant for a
+ *      peripheral synchronized transfer).
  *
  ****************************************************************************/
 
-static inline uint32_t sam_rxctrlb(struct sam_xdmach_s *xdmach)
+static inline uint32_t sam_rxcc(struct sam_xdmach_s *xdmach)
 {
   uint32_t regval;
-  unsigned int ahbif;
+  uint32_t field;
 
-  /* Assume that we will not be using the link list and disable the source
-   * and destination descriptors.  The default will be single transfer mode.
+  /* 1. Clear TYPE for a memory to memory transfer, otherwise set
+   *    this bit for memory to/from peripheral transfer.
+   *
+   * By convention, RX refers to a peripheral to memory transfer.  So the
+   * source is peripheral.  Is the "peripheral" source a peripheral? or
+   * is it also memory?
    */
-
-  regval = XDMAC_CH_CTRLB_BOTHDSCR | XDMAC_CH_CTRLB_IEN;
-
-  /* Select flow control (even if the channel doesn't support it).  The
-   * naming convention from RX is peripheral to memory, but that is really
-   * be determined by bits in the DMA flags.
-   */
-
-  /* Is the peripheral source really a peripheral? */
 
   if ((xdmach->flags & DMACH_FLAG_PERIPHISPERIPH) != 0)
     {
-      /* Yes.. is the memory destination also a peripheral? */
+      /* Yes.. Use peripheral synchronized mode */
 
-      if ((xdmach->flags & DMACH_FLAG_MEMISPERIPH) != 0)
-        {
-          /* Yes.. Use peripheral-to-peripheral flow control */
-
-          regval |= XDMAC_CH_CTRLB_FC_P2P;
-        }
-      else
-        {
-          /* No.. Use peripheral-to-memory flow control */
-
-          regval |= XDMAC_CH_CTRLB_FC_P2M;
-        }
+      regval |= XDMACH_CC_TYPE;
     }
-  else
+
+  /* 2. Program MBSIZE to the memory burst size used.
+   *
+   * NOTE: This assumes the same encoding in the DMACH flags as in the CC
+   * register MBSIZE field.
+   */
+
+  field   = (xdmach->flags & DMACH_FLAG_MEMBURST_MASK) >>
+             DMACH_FLAG_MEMBURST_SHIFT;
+  regval |= (field << XDMACH_CC_MBSIZE_SHIFT);
+
+  /* 3. Program SAM/DAM to the memory addressing scheme.
+   *
+   * NOTE: This assumes that 0 means non-incrementing.
+   * RX -> Source is peripheral.
+   */
+
+  if ((xdmach->flags & DMACH_FLAG_PERIPHINCREMENT) != 0)
     {
-      /* No, the peripheral source is memory.  Is the memory destination
-       * a peripheral
+      regval |= XDMACH_CC_SAM_INCR;
+    }
+
+  /* RX -> Destination is memory. */
+
+  if ((xdmach->flags & DMACH_FLAG_MEMINCREMENT) != 0)
+    {
+      regval |= XDMACH_CC_DAM_INCR;
+    }
+
+  /* 4. Program DSYNC to select the peripheral transfer direction.
+   *
+   * RX -> Peripheral to memory (DSYNC == 0)
+   */
+
+  /* 5. Set PROT to activate a secure channel (REVISIT) */
+
+  regval |= XDMACH_CC_PROT; /* Channel is unsecured */
+
+  /* 6. Program CSIZE to configure the channel chunk size (only
+   *    relevant for peripheral synchronized transfer).
+   */
+
+  if ((xdmach->flags & DMACH_FLAG_PERIPHISPERIPH) != 0)
+    {
+      /* Peripheral synchronized mode -- set chunk size.
+       * NOTE that we assume that encoding in the XDMACH flags is the same
+       * as in the CC register CSIZE field.
        */
 
-      if ((xdmach->flags & DMACH_FLAG_MEMISPERIPH) != 0)
-        {
-          /* Yes.. Use memory-to-peripheral flow control */
-
-          regval |= XDMAC_CH_CTRLB_FC_M2P;
-        }
-      else
-        {
-          /* No.. Use memory-to-memory flow control */
-
-          regval |= XDMAC_CH_CTRLB_FC_M2M;
-        }
+      field   = (xdmach->flags & DMACH_FLAG_PERIPHCHUNKSIZE_MASK) >>
+                 DMACH_FLAG_PERIPHCHUNKSIZE_SHIFT;
+      regval |= (field << XDMACH_CC_CSIZE_SHIFT);
     }
 
-  /* Source ABH layer */
+  /* 7. Program DWIDTH to configure the transfer data width.
+   *
+   * NOTE that we assume that encoding in the XDMACH flags is the same as in
+   * the CC register CSIZE field.
+   */
 
-  ahbif = (xdmach->flags & DMACH_FLAG_PERIPHAHB_MASK) >> DMACH_FLAG_PERIPHAHB_SHIFT;
-  regval |= (ahbif << XDMAC_CH_CTRLB_SIF_SHIFT);
+  field   = (xdmach->flags & DMACH_FLAG_PERIPHWIDTH_MASK) >>
+             DMACH_FLAG_PERIPHWIDTH_SHIFT;
+  regval |= (field << XDMACH_CC_DWIDTH_SHIFT);
 
-  /* Select source address incrementing */
+  /* 8. Program SIF, DIF to configure the master interface
+   *    used to read data and write data respectively.
+   *
+   * RX -> Source is peripheral
+   */
 
-  if ((xdmach->flags & DMACH_FLAG_PERIPHINCREMENT) == 0)
+  if ((xdmach->flags & DMACH_FLAG_PERIPHAHB_MASK) == DMACH_FLAG_PERIPHAHB_AHB_IF1)
     {
-      regval |= XDMAC_CH_CTRLB_SRCINCR_FIXED;
+      regval |= XDMACH_CC_SIF;
     }
 
-  /* Destination ABH layer */
+  /* RX -> Destination is memory */
 
-  ahbif = (xdmach->flags & DMACH_FLAG_MEMAHB_MASK) >> DMACH_FLAG_MEMAHB_SHIFT;
-  regval |= (ahbif << XDMAC_CH_CTRLB_DIF_SHIFT);
-
-  /* Select address incrementing */
-
-  if ((xdmach->flags & DMACH_FLAG_MEMINCREMENT) == 0)
+  if ((xdmach->flags & DMACH_FLAG_MEMAHB_MASK) == DMACH_FLAG_MEMAHB_AHB_IF1)
     {
-      regval |= XDMAC_CH_CTRLB_DSTINCR_FIXED;
+      regval |= XDMACH_CC_DIF;
+    }
+
+  /* 9. Program PERID to select the active hardware request line
+   *    (only relevant for a peripheral synchronized transfer).
+   */
+
+  if ((xdmach->flags & DMACH_FLAG_PERIPHISPERIPH) != 0)
+    {
+      int pid;
+
+      /* Get the PID from the DMACH flags */
+
+      pid = (xdmach->flags & DMACH_FLAG_PERIPHPID_MASK) >>
+             DMACH_FLAG_PERIPHPID_SHIFT;
+
+      /* Look up the DMA channel code for RX:  Peripheral is the source. */
+
+      field   = sam_source_channel(xdmach, pid);
+      regval |= (field << XDMACH_CC_CSIZE_SHIFT);
+
+      /* 10. Set SWREQ to use software request (only relevant for a
+       *     peripheral synchronized transfer).
+       */
+
+      regval |= XDMACH_CC_SWREQ;
     }
 
   return regval;
@@ -1515,7 +1388,7 @@ static inline uint32_t sam_rxctrlb(struct sam_xdmach_s *xdmach)
 
 static struct dma_linklist_s *
 sam_allocdesc(struct sam_xdmach_s *xdmach, struct dma_linklist_s *prev,
-              uint32_t csa, uint32_t cda, uint32_t ctrla, uint32_t ctrlb)
+              uint32_t csa, uint32_t cda, uint32_t cubc, uint32_t cc)
 {
   struct sam_xdmac_s *xdmac = sam_controller(xdmach);
   struct dma_linklist_s *desc = NULL;
@@ -1551,9 +1424,9 @@ sam_allocdesc(struct sam_xdmach_s *xdmach, struct dma_linklist_s *prev,
               desc        = &xdmac->desc[i];
               desc->csa   = csa;  /* Source address */
               desc->cda   = cda;  /* Destination address */
-              desc->ctrla = ctrla;  /* Control A value */
-              desc->ctrlb = ctrlb;  /* Control B value */
-              desc->dscr  = 0;      /* Next descriptor address */
+              desc->cubc  = cubc; /* Control A value */
+              desc->cc    = cc;   /* Control B value */
+              desc->dscr  = 0;    /* Next descriptor address */
 
               /* And then hook it at the tail of the link list */
 
@@ -1579,7 +1452,7 @@ sam_allocdesc(struct sam_xdmach_s *xdmach, struct dma_linklist_s *prev,
                    * this should work even if that is not the case.
                    */
 
-                  prev->ctrlb &= ~XDMAC_CH_CTRLB_BOTHDSCR;
+                  prev->cc &= ~XDMAC_CH_CC_BOTHDSCR;
 
                   /* Link the previous tail to the new tail.
                    * REVISIT:  This assumes that the next description is fetched
@@ -1593,7 +1466,7 @@ sam_allocdesc(struct sam_xdmach_s *xdmach, struct dma_linklist_s *prev,
                * and destination descriptors must be disabled for the last entry
                * in the link list. */
 
-              desc->ctrlb  |= XDMAC_CH_CTRLB_BOTHDSCR;
+              desc->cc  |= XDMAC_CH_CC_BOTHDSCR;
               xdmach->lltail = desc;
 
               /* Assume that we will be doing multple buffer transfers and that
@@ -1678,38 +1551,32 @@ static int sam_txbuffer(struct sam_xdmach_s *xdmach, uint32_t paddr,
                         uint32_t maddr, size_t nbytes)
 {
   uint32_t regval;
-  uint32_t ctrla;
-  uint32_t ctrlb;
+  uint32_t cubc;
+  uint32_t cc;
 
-  /* If we are appending a buffer to a linklist, then re-use the CTRLA/B
-   * values.  Otherwise, create them from the properties of the transfer.
+  /* If we are appending a buffer to a linklist, then re-use the previously
+   * calculated CC register value.  Otherwise, create the CC register value
+   * from the properties of the transfer.
    */
 
   if (xdmach->llhead)
     {
-      regval = xdmach->llhead->ctrla;
-      ctrlb  = xdmach->llhead->ctrlb;
+      cc = xdmach->llhead->cc;
     }
   else
     {
-      regval = sam_txctrlabits(xdmach);
-      ctrlb  = sam_txctrlb(xdmach);
+      cc = sam_txcc(xdmach);
     }
 
-  ctrla = sam_txctrla(xdmach, regval, nbytes);
+  cubc = sam_txcubc(xdmach, regval, nbytes);
 
   /* Add the new link list entry */
 
-  if (!sam_allocdesc(xdmach, xdmach->lltail, maddr, paddr, ctrla, ctrlb))
+  if (!sam_allocdesc(xdmach, xdmach->lltail, maddr, paddr, cubc, cc))
     {
       return -ENOMEM;
     }
 
-  /* Pre-calculate the transmit CFG register setting (it won't be used until
-   * the DMA is started).
-   */
-
-  xdmach->cfg = sam_txcfg(xdmach);
   return OK;
 }
 
@@ -1727,38 +1594,32 @@ static int sam_rxbuffer(struct sam_xdmach_s *xdmach, uint32_t paddr,
                         uint32_t maddr, size_t nbytes)
 {
   uint32_t regval;
-  uint32_t ctrla;
-  uint32_t ctrlb;
+  uint32_t cubc;
+  uint32_t cc;
 
-  /* If we are appending a buffer to a linklist, then re-use the CTRLA/B
-   * values.  Otherwise, create them from the properties of the transfer.
+  /* If we are appending a buffer to a linklist, then re-use the previously
+   * calculated CC register value.  Otherwise, create the CC register value
+   * from the properties of the transfer.
    */
 
   if (xdmach->llhead)
     {
-      regval = xdmach->llhead->ctrla;
-      ctrlb  = xdmach->llhead->ctrlb;
+      cc = xdmach->llhead->cc;
     }
   else
     {
-      regval = sam_rxctrlabits(xdmach);
-      ctrlb  = sam_rxctrlb(xdmach);
+      cc = sam_rxcc(xdmach);
     }
 
-   ctrla = sam_rxctrla(xdmach, regval, nbytes);
+   cubc = sam_rxcubc(xdmach, regval, nbytes);
 
   /* Add the new link list entry */
 
-  if (!sam_allocdesc(xdmach, xdmach->lltail, paddr, maddr, ctrla, ctrlb))
+  if (!sam_allocdesc(xdmach, xdmach->lltail, paddr, maddr, cubc, cc))
     {
       return -ENOMEM;
     }
 
-  /* Pre-calculate the receive CFG register setting (it won't be used until
-   * the DMA is started).
-   */
-
-  xdmach->cfg = sam_rxcfg(xdmach);
   return OK;
 }
 
@@ -1775,60 +1636,86 @@ static inline int sam_single(struct sam_xdmach_s *xdmach)
   struct sam_xdmac_s *xdmac = sam_controller(xdmach);
   struct dma_linklist_s *llhead = xdmach->llhead;
 
-  /* Clear any pending interrupts from any previous XDMAC transfer by
-   * reading the XDMAC Channel Interrupt Status Register (CIS).
+  /* 1. Read the XDMAC Global Channel Status Register (XDMAC_GS) to choose a
+   *    free channel.
+   *
+   * In this implementation, the free channel is assigned in a different
+   * manner.
+   */
+
+  /* 2. Clear any pending interrupts from any previous XDMAC transfer by
+   *    reading the XDMAC Channel Interrupt Status Register (CIS).
    */
 
   (void)sam_getdmach(xdmach, SAM_XDMACH_CIS_OFFSET);
 
-  /* Write the starting source address in the Channel Source Address (CSA)
-   * Register.
+  /* 3. Write the starting source address in the Channel Source Address (CSA)
+   *    Register.
    */
 
   DEBUGASSERT(llhead != NULL && llhead->csa != 0);
   sam_putdmach(xdmach, llhead->csa, SAM_XDMACH_CSA_OFFSET);
 
-  /* Write the starting destination address in the  Channel Destination
-   * Address Register (CDA).
+  /* 4. Write the starting destination address in the Channel Destination
+   *    Address Register (CDA).
    */
 
   sam_putdmach(xdmach, llhead->cda, SAM_XDMACH_CDA_OFFSET);
 
-  /* Clear the next descriptor address */
-
-  sam_putdmach(xdmach, 0, SAM_XDMAC_CH_DSCR_OFFSET);
-
-  /* Set up the CTRLA register */
-
-  sam_putdmach(xdmach, llhead->ctrla, SAM_XDMAC_CH_CTRLA_OFFSET);
-
-  /* Set up the CTRLB register */
-
-  sam_putdmach(xdmach, llhead->ctrlb, SAM_XDMAC_CH_CTRLB_OFFSET);
-
-  /* Both the DST and SRC DSCR bits should be '1' in CTRLB */
-
-  DEBUGASSERT((llhead->ctrlb & XDMAC_CH_CTRLB_BOTHDSCR) ==
-              XDMAC_CH_CTRLB_BOTHDSCR);
-
-  /* Set up the CFG register */
-
-  sam_putdmach(xdmach, xdmach->cfg, SAM_XDMAC_CH_CFG_OFFSET);
-
-  /* Enable the channel by writing a ‘1’ to the CHER enable bit */
-
-  sam_putdmac(xdmac, XDMAC_CHER_ENA(xdmach->chan), SAM_XDMAC_CHER_OFFSET);
-
-  /* The DMA has been started. Once the transfer completes, hardware sets
-   * the interrupts and disables the channel.  We will receive buffer
-   * complete and transfer complete interrupts.
-   *
-   * Enable error, buffer complete and transfer complete interrupts.
-   * (Since there is only a single buffer, we don't need the buffer
-   * complete interrupt).
+  /* 5. Program field UBLEN in the XDMAC Channel Microblock Control (CUBC)
+   *    Register with the number of data.
    */
 
-  sam_putdmac(xdmac, XDMAC_EBC_CBTCINTS(xdmach->chan), SAM_XDMAC_EBCIER_OFFSET);
+  sam_putdmach(xdmach, llhead->cubc, SAM_XDMACH_CUBC_OFFSET);
+
+  /* 6. Program the Channel Control (CC) Register */
+
+  sam_putdmach(xdmach, llhead->cc, SAM_XDMACH_CC_OFFSET);
+
+  /* 7. Clear the following five registers:
+   *
+   *    XDMAC Channel Next Descriptor Control (CNDC) Register
+   *    XDMAC Channel Block Control (CBC) Register
+   *    XDMAC Channel Data Stride Memory Set Pattern (CDSMSP) Register
+   *    XDMAC Channel Source Microblock Stride (CSUS) Register
+   *    XDMAC Channel Destination Microblock Stride (CDUS)Register
+   *
+   * This respectively indicates that the linked list is disabled, there is
+   * only one block and striding is disabled
+   */
+
+  sam_putdmach(xdmach, 0, SAM_XDMACH_CNDC_OFFSET);
+  sam_putdmach(xdmach, 0, SAM_XDMACH_CBC_OFFSET);
+  sam_putdmach(xdmach, 0, SAM_XDMACH_CDSMSP_OFFSET);
+  sam_putdmach(xdmach, 0, SAM_XDMACH_CSUS_OFFSET);
+  sam_putdmach(xdmach, 0, SAM_XDMACH_CDUS_OFFSET);
+
+  /* 8. Enable the Microblock interrupt by setting the "End of Block"
+   *    interrupt bit in the XDMAC Channel Interrupt Enable (CIE) Register.
+   */
+
+  sam_putdmach(xdmach, XDMAC_CHINT_BI | XDMAC_CHINT_ERRORS,
+               SAM_XDMACH_CIE_OFFSET);
+
+  /*    Enable the Channel Interrupt Enable bit by setting the corresponding
+   *    bit in the XDMAC Global Interrupt Enable (GIE) Register.
+   */
+
+  sam_putdmac(xdmac, XDMAC_CHAN(xdmach->chan), SAM_XDMAC_GIE_OFFSET);
+
+  /* 9. Enable the channel by setting the corresponding bit in the
+   *    XDMAC Global Channel Enable (GE) Register.  The channel bit will
+   *    be set in the GS register by hardware.
+   */
+
+  sam_putdmac(xdmac, XDMAC_CHAN(xdmach->chan), SAM_XDMAC_GE_OFFSET);
+
+  /* 10. The DMA has been started. Once completed, the DMA channel sets the
+   *     corresponding "End of Block Interrupt" Status bit in the channel
+   *     CIS register and generates an global interrupt for the channel.
+   *     The channel bit will be cleared in the GS register by hardware.
+   */
+
   return OK;
 }
 
@@ -1847,52 +1734,78 @@ static inline int sam_multiple(struct sam_xdmach_s *xdmach)
 
   DEBUGASSERT(llhead != NULL && llhead->csa != 0);
 
-  /* Check the first and last CTRLB values */
+  /* Check the first and last Channel Control (CC) Register values */
 
-  DEBUGASSERT((llhead->ctrlb & XDMAC_CH_CTRLB_BOTHDSCR) == 0);
-  DEBUGASSERT((xdmach->lltail->ctrlb & XDMAC_CH_CTRLB_BOTHDSCR) ==
-              XDMAC_CH_CTRLB_BOTHDSCR);
+  DEBUGASSERT((llhead->cc & XDMAC_CH_CC_BOTHDSCR) == 0);
+  DEBUGASSERT((xdmach->lltail->cc & XDMAC_CH_CC_BOTHDSCR) ==
+              XDMAC_CH_CC_BOTHDSCR);
 
-  /* Clear any pending interrupts from any previous XDMAC transfer by
-   * reading the XDMAC Channel Interrupt Status Register (CIS).
+  /* 1. Read the XDMAC Global Channel Status Register (XDMAC_GS) to choose a
+   *    free channel.
+   *
+   * In this implementation, the free channel is assigned in a different
+   * manner.
+   */
+
+  /* 2. Clear any pending interrupts from any previous XDMAC transfer by
+   *    reading the XDMAC Channel Interrupt Status Register (CIS).
    */
 
   (void)sam_getdmach(xdmach, SAM_XDMACH_CIS_OFFSET);
 
-  /* Set up the initial CTRLA register */
-
-  sam_putdmach(xdmach, llhead->ctrla, SAM_XDMAC_CH_CTRLA_OFFSET);
-
-  /* Set up the CTRLB register (will enable descriptors) */
-
-  sam_putdmach(xdmach, llhead->ctrlb, SAM_XDMAC_CH_CTRLB_OFFSET);
-
-  /* Write the channel configuration information into the CFG register */
-
-  sam_putdmach(xdmach, xdmach->cfg, SAM_XDMAC_CH_CFG_OFFSET);
-
-  /* Program the DSCR register with the pointer to the firstlink list entry. */
-
-  sam_putdmach(xdmach, (uint32_t)llhead, SAM_XDMAC_CH_DSCR_OFFSET);
-
-  /* Finally, enable the channel by writing a ‘1’ to the CHER enable */
-
-  sam_putdmac(xdmac, XDMAC_CHER_ENA(xdmach->chan), SAM_XDMAC_CHER_OFFSET);
-
-  /* As each buffer of data is transferred, the CTRLA register is written
-   * back into the link list entry.  The CTRLA contains updated BTSIZE and
-   * DONE bits.  Additionally, the CTRLA DONE bit is asserted when the
-   * buffer transfer has completed.
+  /* 3. Build a linked list of transfer descriptors in memory. The
+   *    descriptor view is programmable on a per descriptor basis. The
+   *    linked list items structure must be word aligned. MBR_UBC.NDE
+   *    must be configured to 0 in the last descriptor to terminate the
+   *    list.
    *
-   * The XDMAC transfer continues until the CTRLB register disables the
-   * descriptor (DSCR bits) registers at the final buffer transfer.
-   *
-   * Enable error, buffer complete and transfer complete interrupts.  We
-   * don't really need the buffer complete interrupts, but we will take them
-   * just to handle stall conditions.
+   * This was done during the RX/TX setup phases of the DMA transfer.
    */
 
-  sam_putdmac(xdmac, XDMAC_EBC_CHANINTS(xdmach->chan), SAM_XDMAC_EBCIER_OFFSET);
+  /* 4. Program field NDA in the XDMAC Channel Next Descriptor Address
+   *    (CNDA) Register (XDMAC_CNDAx) with the first descriptor address
+   *    and bit XDMAC_CNDAx.NDAIF with the master interface identifier.
+   */
+#warning Missing logic
+
+  /* 5. Program the CNDC register:
+   *
+   *    a. Set NDE to enable the descriptor fetch.
+   *    b. Set NDSUP to update the source address at the descriptor fetch
+   *       time, otherwise clear this bit.
+   *    c. Set NDDUP to update the destination address at the descriptor
+   *       fetch time, otherwise clear this bit.
+   *    d. Program theNDVIEW field to define the length of the first
+   *       descriptor.
+   */
+#warning Missing logic
+
+  /* 6. Enable the End of Linked List interrupt by setting the LI bit in the
+   *    CIE register.
+   */
+
+  sam_putdmach(xdmach, XDMAC_CHINT_LI | XDMAC_CHINT_ERRORS,
+               SAM_XDMACH_CIE_OFFSET);
+
+  /*    Enable the Channel Interrupt Enable bit by setting the corresponding
+   *    bit in the XDMAC Global Interrupt Enable (GIE) Register.
+   */
+
+  sam_putdmac(xdmac, XDMAC_CHAN(xdmach->chan), SAM_XDMAC_GIE_OFFSET);
+
+  /* 7. Enable the channel by setting the corresponding bit in the
+   *    XDMAC Global Channel Enable (GE) Register.  The channel bit will
+   *    be set in the GS register by hardware.
+   */
+
+  sam_putdmac(xdmac, XDMAC_CHAN(xdmach->chan), SAM_XDMAC_GE_OFFSET);
+
+  /* 8. The DMA has been started. Once completed, the DMA channel sets the
+   *    corresponding "End of Block Interrupt" Status bit in the channel
+   *    CIS register and generates an global interrupt for the channel.
+   *    The channel bit will be cleared in the GS register by hardware.
+   */
+
   return OK;
 }
 
@@ -1907,16 +1820,23 @@ static inline int sam_multiple(struct sam_xdmach_s *xdmach)
 static void sam_dmaterminate(struct sam_xdmach_s *xdmach, int result)
 {
   struct sam_xdmac_s *xdmac = sam_controller(xdmach);
+  uint32_t chanbit = XDMAC_CHAN(xdmach->chan);
 
   /* Disable all channel interrupts */
 
-  sam_putdmac(xdmac, XDMAC_EBC_CHANINTS(xdmach->chan), SAM_XDMAC_EBCIDR_OFFSET);
+  sam_putdmac(xdmac, chanbit, SAM_XDMAC_GID_OFFSET);
+  sam_putdmach(xdmach, XDMAC_CHINT_ALL, SAM_XDMAC_CDI_OFFSET);
 
-  /* Disable the channel by writing one to the write-only channel disable
-   * register.
+  /* Under normal operation, the software enables a channel by setting the
+   * associated bit in the Global Channel Enable (GE) Register.  The hardware
+   * then disables a channel on transfer completion by clearing channel bit
+   * in the GS register. To disable a channel, setting the channel bit in the
+   * GD register and poll the channel bit in GS register to determine when
+   * the channel has been disabled.
    */
 
-  sam_putdmac(xdmac, XDMAC_CHDR_DIS(xdmach->chan), SAM_XDMAC_CHDR_OFFSET);
+  sam_putdmac(xdmac, chanbit, SAM_XDMAC_GD_OFFSET);
+  while ((sam_getdma(xdmac, chanbit, SAM_XDMAC_GS_OFFSET) & chanbit) != 0);
 
   /* Free the linklist */
 
@@ -2051,15 +1971,15 @@ void sam_dmainitialize(struct sam_xdmac_s *xdmac)
 {
   /* Disable all DMA interrupts */
 
-  sam_putdmac(xdmac, XDMAC_EBC_ALLINTS, SAM_XDMAC_EBCIDR_OFFSET);
+  sam_putdmac(xdmac, XDMAC_CHAN_ALL, SAM_XDMAC_GID_OFFSET);
 
   /* Disable all DMA channels */
 
-  sam_putdmac(xdmac, XDMAC_CHDR_DIS_ALL, SAM_XDMAC_CHDR_OFFSET);
+  sam_putdmac(xdmac, XDMAC_CHAN_ALL, SAM_XDMAC_GD_OFFSET);
 
   /* Enable the DMA controller */
 
-  sam_putdmac(xdmac,XDMAC_EN_ENABLE, SAM_XDMAC_EN_OFFSET);
+  sam_putdmac(xdmac, XDMAC_EN_ENABLE, SAM_XDMAC_EN_OFFSET);
 
   /* Initialize semaphores */
 
@@ -2320,7 +2240,7 @@ int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
    * transfers and the number of bytes per transfer.
    */
 
-  maxtransfer = sam_maxtxtransfer(xdmach);
+  maxtransfer = sam_maxtransfer(xdmach);
   remaining   = nbytes;
 
   /* If this is a large transfer, break it up into smaller buffers */
@@ -2399,7 +2319,7 @@ int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
    * transfers and the number of bytes per transfer.
    */
 
-  maxtransfer = sam_maxrxtransfer(xdmach);
+  maxtransfer = sam_maxtransfer(xdmach);
   remaining   = nbytes;
 
   /* If this is a large transfer, break it up into smaller buffers */
