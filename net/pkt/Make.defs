@@ -1,7 +1,7 @@
 ############################################################################
-# net/uip/Make.defs
+# net/pkt/Make.defs
 #
-#   Copyright (C) 2007, 2009-2010, 2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,27 +35,19 @@
 
 ifeq ($(CONFIG_NET),y)
 
-# Common IP source files
+# Packet socket support
 
-NET_CSRCS += uip_initialize.c uip_setipid.c uip_input.c uip_send.c
-NET_CSRCS += uip_poll.c uip_chksum.c uip_callback.c
+ifeq ($(CONFIG_NET_PKT),y)
+NET_CSRCS += uip_pktconn.c
+NET_CSRCS += uip_pktinput.c
+NET_CSRCS += uip_pktcallback.c
+NET_CSRCS += uip_pktpoll.c
 
-# Non-interrupt level support required?
+# Include packet socket build support
 
-ifeq ($(CONFIG_NET_NOINTS),y)
-NET_CSRCS += uip_lock.c
-endif
+DEPPATH += --dep-path pkt
+VPATH += :pkt
+CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)net$(DELIM)pkt}
 
-# IPv6-specific logic
-
-ifeq ($(CONFIG_NET_IPv6),y)
-NET_CSRCS += uip_neighbor.c
-endif
-
-# Include uip build support
-
-DEPPATH += --dep-path uip
-VPATH += :uip
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)net$(DELIM)uip}
-
-endif
+endif # CONFIG_NET_PKT
+endif # CONFIG_NET

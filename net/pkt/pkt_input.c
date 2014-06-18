@@ -1,6 +1,6 @@
 /****************************************************************************
- * net/uip/uip_pktpoll.c
- * Poll for the availability of packet TX data
+ * net/pkt/pkt_input.c
+ * Handling incoming packet input
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -47,16 +47,18 @@
 
 #include <debug.h>
 
-#include <nuttx/net/uip/uipopt.h>
 #include <nuttx/net/uip/uip.h>
 #include <nuttx/net/uip/uip-arch.h>
 #include <nuttx/net/uip/uip-pkt.h>
+#include <nuttx/net/arp.h>
 
-#include "uip_internal.h"
+#include "uip/uip_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#define PKTBUF ((struct uip_eth_hdr *)&dev->d_buf)
 
 /****************************************************************************
  * Public Variables
@@ -75,55 +77,64 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_pktpoll
+ * Name: uip_pktinput
  *
  * Description:
- *   Poll a packet "connection" structure for availability of TX data
+ *   Handle incoming packet input
  *
  * Parameters:
- *   dev - The device driver structure to use in the send operation
- *   conn - The packet "connection" to poll for TX data
+ *   dev - The device driver structure containing the received packet
  *
  * Return:
- *   None
+ *   OK  The packet has been processed  and can be deleted
+ *   ERROR Hold the packet and try again later. There is a listening socket
+ *         but no recv in place to catch the packet yet.
  *
  * Assumptions:
  *   Called from the interrupt level or with interrupts disabled.
  *
  ****************************************************************************/
 
-void uip_pktpoll(struct uip_driver_s *dev, struct uip_pkt_conn *conn)
+int uip_pktinput(struct uip_driver_s *dev)
 {
-  nlldbg("IN\n");
+  struct uip_pkt_conn *conn;
+  struct uip_eth_hdr  *pbuf = (struct uip_eth_hdr *)dev->d_buf;
+  int ret = OK;
 
-  /* Verify that the packet connection is valid */
-
+  conn = uip_pktactive(pbuf);
   if (conn)
     {
+      uint16_t flags;
+
       /* Setup for the application callback */
 
-      dev->d_appdata = &dev->d_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];
-      dev->d_snddata = &dev->d_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];
-
-      dev->d_len     = 0;
+      dev->d_appdata = dev->d_buf;
+      dev->d_snddata = dev->d_buf;
       dev->d_sndlen  = 0;
 
       /* Perform the application callback */
 
-      (void)uip_pktcallback(dev, conn, UIP_POLL);
+      flags = uip_pktcallback(dev, conn, UIP_NEWDATA);
 
-      /* If the application has data to send, setup the UDP/IP header */
+      /* If the operation was successful, the UIP_NEWDATA flag is removed
+       * and thus the packet can be deleted (OK will be returned).
+       */
 
-      if (dev->d_sndlen > 0)
+      if ((flags & UIP_NEWDATA) != 0)
         {
-//        uip_pktsend(dev, conn);
-          return;
+          /* No.. the packet was not processed now.  Return ERROR so
+           * that the driver may retry again later.
+           */
+
+          ret = ERROR;
         }
     }
+  else
+    {
+      nlldbg("No listener\n");
+    }
 
-  /* Make sure that d_len is zero meaning that there is nothing to be sent */
-
-  dev->d_len = 0;
+  return ret;
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_PKT */

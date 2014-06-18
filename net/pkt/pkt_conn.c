@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/uip/uip_pktconn.c
+ * net/pkt/pkt_conn.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -55,7 +55,7 @@
 #include <nuttx/net/uip/uip-arch.h>
 #include <nuttx/net/arp.h>
 
-#include "uip_internal.h"
+#include "uip/uip_internal.h"
 
 /****************************************************************************
  * Private Data

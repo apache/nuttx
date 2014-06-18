@@ -105,6 +105,7 @@ include icmp/Make.defs
 include igmp/Make.defs
 include tcp/Make.defs
 include udp/Make.defs
+include pkt/Make.defs
 include uip/Make.defs
 endif
 
