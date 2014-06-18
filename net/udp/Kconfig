@@ -1,0 +1,52 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+menu "UDP Networking"
+
+config NET_UDP
+	bool "UDP Networking"
+	default n
+	depends on NET
+	---help---
+		Enable or disable UDP networking support.
+
+if NET_UDP
+
+config NET_UDP_CHECKSUMS
+	bool "UDP checksums"
+	default n
+	---help---
+		Enable/disable UDP checksum support
+
+config NET_UDP_CONNS
+	int "Number of UDP sockets"
+	default 8
+	---help---
+		The maximum amount of open concurrent UDP sockets
+
+config NET_BROADCAST
+	bool "UDP broadcast Rx support"
+	default n
+	---help---
+		Incoming UDP broadcast support
+
+config NET_RXAVAIL
+	bool "Driver-based UDP backlog"
+	default n
+	---help---
+		One problem with UDP communications is that, unlike TCP/IP, there is
+		no backlog of UDP packets.  So if you are listening at the precise
+		moment that the UDP packet is sent, it will not be received.  This
+		is not incompatible with the properties of UDP, but can result in
+		bad performance if packets are missed, time out, and are resent.
+
+		Some Ethernet controllers have built-in RAM and the drivers can
+		support retention of UDP packets in that RAM.  If the drivers
+		supports such a capability, this option may be enabled to use it.
+		NOTE:  If this option is enabled, the driver must support the
+		rxavail() method in the uip_driver_s structure.
+
+endif # NET_UDP
+endmenu # UDP Networking

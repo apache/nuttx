@@ -41,6 +41,13 @@
 #include <nuttx/net/uip/uipopt.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_TCP) && defined(CONFIG_NET_TCP_WRITE_BUFFERS)
 
+#if defined(CONFIG_DEBUG) && defined(CONFIG_NET_TCP_WRBUFFER_DEBUG)
+/* Force debug output (from this file only) */
+
+#  undef  CONFIG_DEBUG_NET
+#  define CONFIG_DEBUG_NET 1
+#endif
+
 #include <queue.h>
 #include <semaphore.h>
 #include <debug.h>

@@ -1,0 +1,193 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+menu "TCP/IP Networking"
+
+config NET_TCP
+	bool "TCP/IP Networking"
+	default n
+	---help---
+		TCP support on or off
+
+if NET_TCP
+
+config NET_TCPURGDATA
+	bool "Urgent data"
+	default n
+	---help---
+		Determines if support for TCP urgent data notification should be
+		compiled in. Urgent data (out-of-band data) is a rarely used TCP feature
+		that is very seldom would be required.
+
+config NET_TCP_CONNS
+	int "Number of TCP/IP connections"
+	default 8
+	---help---
+		Maximum number of TCP/IP connections (all tasks)
+
+config NET_MAX_LISTENPORTS
+	int "Number of listening ports"
+	default 20
+	---help---
+		Maximum number of listening TCP/IP ports (all tasks).  Default: 20
+
+config NET_TCP_READAHEAD
+	bool "Enable TCP/IP read-ahead buffering"
+	default y
+	---help---
+		Read-ahead buffers allows buffering of TCP/IP packets when there is no
+		receive in place to catch the TCP packet.  In that case, the packet
+		will be retained in the NuttX read-ahead buffers.
+
+		You might want to disable TCP/IP read-ahead buffering on a highly
+		memory constrained system that does not have any TCP/IP packet rate
+		issues.
+
+if NET_TCP_READAHEAD
+
+config NET_TCP_READAHEAD_BUFSIZE
+	int "TCP/IP read-ahead buffer size"
+	default 1220 if !NET_SLIP && NET_IPv6
+	default 536 if !NET_SLIP && !NET_IPv6
+	default 256 if NET_SLIP && !NET_IPv6
+	---help---
+		Read-ahead buffers allows buffering of TCP/IP packets when there is no
+		receive in place to catch the TCP packet.  In that case, the packet
+		will be retained in the NuttX read-ahead buffers.
+
+		This setting specifies the size of one TCP/IP read-ahead buffer.
+		This should best be a equal to the maximum packet payload size (MSS).
+
+		Optimally, the size of the read-ahead buffer will should the maximum
+		size of an incoming TCP packet payload (MSS).  This MSS value is
+		determined by NET_BUFSIZE minus the size of TCP, IP, and Ethernet
+		headers (assuming you are using the Ethernet transport).  IPv4 hosts
+		are required to be able to handle an MSS of 536 octets and IPv6 hosts
+		are required to be able to handle an MSS of 1220 octets.
+
+config NET_NTCP_READAHEAD_BUFFERS
+	int "Number of TCP/IP read-ahead buffers"
+	default 8
+	---help---
+		Read-ahead buffers allows buffering of TCP/IP packets when there is no
+		receive in place to catch the TCP packet.  In that case, the packet
+		will be retained in the NuttX read-ahead buffers.
+
+		This setting specifies the number of TCP/IP read-ahead buffers.
+
+endif # NET_TCP_READAHEAD
+
+config NET_TCP_WRITE_BUFFERS
+	bool "Enable TCP/IP write buffering"
+	default n
+	---help---
+		Write buffers allows buffering of ongoing TCP/IP packets, providing
+		for higher performance, streamed output.
+
+		You might want to disable TCP/IP write buffering on a highly memory
+		memory constrained system where there are no performance issues.
+
+if NET_TCP_WRITE_BUFFERS
+
+config NET_TCP_WRITE_BUFSIZE
+	int "TCP/IP write buffer size"
+	default 1220 if !NET_SLIP && NET_IPv6
+	default 536 if !NET_SLIP && !NET_IPv6
+	default 256 if NET_SLIP && !NET_IPv6
+	---help---
+		Write buffers allows buffering of ongoing TCP/IP packets, providing
+		for higher performance, streamed output.
+
+		The size of the write buffer will determine the maximum size of an
+		outgoing TCP packet payload (MSS).  This value should NOT exceed the
+		maximum MSS which is determined by NET_BUFSIZE minus the size of
+		TCP, IP, and Ethernet headers (assuming you are using the Ethernet
+		transport).   IPv4 hosts are required to be able to handle an MSS
+		of 536 octets and IPv6 hosts are required to be able to handle an
+		MSS of 1220 octets.
+
+		This setting specifies the size of one TCP/IP write buffer. This
+		should best be a equal to the maximum packet size (NET_BUFSIZE).
+
+config NET_NTCP_WRITE_BUFFERS
+	int "Number of TCP/IP write buffers"
+	default 8
+	---help---
+		Write buffers allows buffering of ongoing TCP/IP packets, providing
+		for higher performance, streamed output.
+
+		This setting specifies the number of TCP/IP write buffers.
+
+config NET_TCP_WRBUFFER_DEBUG
+	bool "Force write buffer debug"
+	default n
+	depends on DEBUG
+	---help---
+		This option will force debug output from TCP write buffer logic,
+		even with network debug output.  This is not normally something
+		that would want to do but is convenient if you are debugging the
+		write buffer logic and do not want to get overloaded with other
+		network-related debug output.
+
+endif # NET_TCP_WRITE_BUFFERS
+
+config NET_TCP_RECVDELAY
+	int "TCP Rx delay"
+	default 0
+	---help---
+		If NET_TCP_READAHEAD_BUFFERS is undefined, then there will be no buffering
+		of TCP/IP packets:  Any TCP/IP packet received will be ACKed, but its contents
+		will be dropped in the bit-bucket.
+
+		One low-performance option is delay for a short period of time after a
+		TCP/IP packet is received to see if another comes right behind it. Then
+		the packet data from both can be combined.  This option only makes since
+		if performance is not an issue and you need to handle short bursts of
+		small, back-to-back packets.  The delay is in units of deciseconds.
+
+config NET_TCPBACKLOG
+	bool "TCP/IP backlog support"
+	default n
+	---help---
+		Incoming connections pend in a backlog until accept() is called.
+		The size of the backlog is selected when listen() is called.
+
+config NET_TCP_SPLIT
+	bool "Enable packet splitting"
+	default n
+	depends on !NET_TCP_WRITE_BUFFERS
+	---help---
+		send() will not return until the transfer has been ACKed by the
+		recipient.  But under RFC 1122, the host need not ACK each packet
+		immediately; the host may wait for 500 MS before ACKing.  This
+		combination can cause very slow performance with small transfers are
+		made to an RFC 1122 client.  However, the RFC 1122 must ACK at least
+		every second (odd) packet.
+
+		This option enables logic to trick the RFC 1122 host be exploiting
+		this last RFC 1122 requirement:  If an odd number of packets were to
+		be sent, then send() will split the last even packet to guarantee
+		that an even number of packets will be sent and the RFC 1122 host
+		will ACK the final packet immediately.
+
+if NET_TCP_SPLIT
+
+config NET_TCP_SPLIT_SIZE
+	int "Split size threshold"
+	default 40
+	---help---
+		Packets of this size or smaller than this will not be split.
+
+endif # NET_TCP_SPLIT
+
+config NET_SENDFILE
+	bool "Optimized network sendfile()"
+	default n
+	---help---
+		Support larger, higher performance sendfile() for transferring
+		files out a TCP connection.
+
+endif # NET_TCP
+endmenu # TCP/IP Networking
