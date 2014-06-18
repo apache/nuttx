@@ -85,7 +85,7 @@ static int uip_pollpktconnections(struct uip_driver_s *dev,
 
       /* Call back into the driver */
 
-      callback(dev);
+      bstop = callback(dev);
     }
 
   return bstop;

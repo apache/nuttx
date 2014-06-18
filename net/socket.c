@@ -164,13 +164,26 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
 #ifdef CONFIG_NET_PKT
       case SOCK_RAW:
         {
+          /* Allocate the packet socket connection structure and save
+           * in the new socket instance.
+           */
+
           struct uip_pkt_conn *conn = uip_pktalloc();
-          if (conn)
+          if (!conn)
             {
-              DEBUGASSERT(conn->crefs == 0);
-              psock->s_conn = conn;
-              conn->crefs   = 1;
+              /* Failed to reserve a connection structure */
+
+              goto errout;
             }
+
+          /* Set the reference count on the connection structure.  This
+           * reference count will be increment only if the socket is
+           * dup'ed
+           */
+
+          DEBUGASSERT(conn->crefs == 0);
+          psock->s_conn = conn;
+          conn->crefs   = 1;
         }
         break;
 #endif
