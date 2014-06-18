@@ -7445,4 +7445,11 @@
 	  being passed (2014-6-15).
 	* arch/arm/src/sama5/sam_dmac.h:  Fix some critical typos in the SAMA5D3
 	  DMA definitions (2014-6-17).
+	* nuttx/net/net_send_unbuffered.c: Notify the device driver of the
+	  availability of TX data.  From Daniel Lazlo Sitzer (2014-6-18).
+	* net/net_close.c, net_send_unbuffered.c, socket.c, and uip_poll.c:
+	  Various fixes for raw sockets from Daniel Lazlo Sitzer: (1) properly
+	  free the socket in psock_close(), (2)  socket() returns failure when
+	  there is no free socket/connection, and (3) Set number of bytes to
+	  transmit is set in the uip_driver_s instance (2014-6-18).
 
