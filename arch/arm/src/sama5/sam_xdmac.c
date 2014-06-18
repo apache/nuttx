@@ -104,11 +104,6 @@
 #  define CONFIG_SAMA5_NLLDESC SAM_NDMACHAN
 #endif
 
-/* Register values **********************************************************/
-
-#define XDMAC_CH_CC_BOTHDSCR \
-  (XDMAC_CH_CC_SRCDSCR | XDMAC_CH_CC_DSTDSCR)
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -135,7 +130,7 @@ struct sam_xdmach_s
   uint32_t cc;                    /* Pre-calculated CC register for transfer */
   dma_callback_t callback;        /* Callback invoked when the DMA completes */
   void *arg;                      /* Argument passed to callback function */
-  uint32_t rxaddr;                /* RX memory address */
+  uint32_t rxaddr;                /* RX memory address to be invalidated */
   size_t rxsize;                  /* Size of RX memory region */
   struct chnext_view1_s *llhead;  /* DMA link list head */
   struct chnext_view1_s *lltail;  /* DMA link list head */
@@ -931,7 +926,8 @@ static size_t sam_maxtransfer(struct sam_xdmach_s *xdmach)
  *
  ****************************************************************************/
 
-static uint32_t sam_ntxtransfers(struct sam_xdmach_s *xdmach, uint32_t dmasize)
+static uint32_t sam_ntxtransfers(struct sam_xdmach_s *xdmach,
+                                 uint32_t dmasize)
 {
   unsigned int srcwidth;
 
@@ -1652,12 +1648,6 @@ static inline int sam_multiple(struct sam_xdmach_s *xdmach)
   uint32_t regval;
 
   DEBUGASSERT(llhead != NULL && llhead->csa != 0);
-
-  /* Check the first and last Channel Control (CC) Register values */
-
-  DEBUGASSERT((llhead->cc & XDMAC_CH_CC_BOTHDSCR) == 0);
-  DEBUGASSERT((xdmach->lltail->cc & XDMAC_CH_CC_BOTHDSCR) ==
-              XDMAC_CH_CC_BOTHDSCR);
 
   /* 1. Read the XDMAC Global Channel Status Register (XDMAC_GS) to choose a
    *    free channel.
