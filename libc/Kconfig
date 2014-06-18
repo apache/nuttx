@@ -197,7 +197,7 @@ config ARCH_ROMGETC
 	default n
 	---help---
 		In Harvard architectures, data accesses and instruction accesses
-		occur on different busses, perhaps concurrently.  All data accesses
+		occur on different buses, perhaps concurrently.  All data accesses
 		are performed on the data bus unless special machine instructions
 		are used to read data from the instruction address space.  Also, in
 		the typical MCU, the available SRAM data memory is much smaller that
@@ -210,8 +210,8 @@ config ARCH_ROMGETC
 		the function up_romgetc().  up_romgetc() will simply read one byte
 		of data from the instruction space.
 
-		If ARCH_ROMGETC, certain C stdio functions are effected: (1) All
-		format strings in printf, fprintf, sprintf, etc. are assumed to lie
+		If ARCH_ROMGETC is selected, certain C stdio functions are effected: (1)
+		All format strings in printf, fprintf, sprintf, etc. are assumed to lie
 		in FLASH (string arguments for %s are still assumed to reside in SRAM).
 		And (2), the string argument to puts and fputs is assumed to reside
 		in FLASH.  Clearly, these assumptions may have to modified for the
