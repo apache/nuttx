@@ -195,6 +195,10 @@ static uint16_t pktsend_interrupt(FAR struct uip_driver_s *dev,
           if (pstate->snd_buflen > 0 && pstate->snd_buflen < CONFIG_NET_BUFSIZE)
             {
               memcpy(dev->d_buf, pstate->snd_buffer, pstate->snd_buflen);
+
+              /* Set the number of bytes to send */
+
+              dev->d_len = pstate->snd_buflen;
               dev->d_sndlen = pstate->snd_buflen;
             }
 

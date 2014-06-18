@@ -433,6 +433,32 @@ int psock_close(FAR struct socket *psock)
 
       switch (psock->s_type)
         {
+#ifdef CONFIG_NET_PKT
+          case SOCK_RAW:
+            {
+              struct uip_pkt_conn *conn = psock->s_conn;
+
+              /* Is this the last reference to the connection structure (there
+               * could be more if the socket was dup'ed).
+               */
+
+              if (conn->crefs <= 1)
+                {
+                  /* Yes... free the connection structure */
+
+                  conn->crefs = 0;             /* No more references on the connection */
+                  uip_pktfree(psock->s_conn);  /* Free uIP resources */
+                }
+              else
+                {
+                  /* No.. Just decrement the reference count */
+
+                  conn->crefs--;
+                }
+            }
+            break;
+#endif
+
 #ifdef CONFIG_NET_TCP
           case SOCK_STREAM:
             {
