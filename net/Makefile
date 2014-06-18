@@ -103,6 +103,7 @@ include iob/Make.defs
 include arp/Make.defs
 include icmp/Make.defs
 include igmp/Make.defs
+include tcp/Make.defs
 include uip/Make.defs
 endif
 

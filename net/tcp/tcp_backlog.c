@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/uip/uip_tcpbacklog.c
+ * net/tcp/tcp_backlog.c
  *
  *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -50,7 +50,7 @@
 #include <nuttx/net/uip/uip.h>
 #include <nuttx/net/uip/uip-tcp.h>
 
-#include "uip_internal.h"
+#include "uip/uip_internal.h"
 
 /****************************************************************************
  * Private Data

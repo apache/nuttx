@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/uip/uip_tcpwrbuffer.c
+ * net/tcp/tcp_wrbuffer.c
  *
  *   Copyright (C) 2007-2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -45,7 +45,7 @@
 #include <semaphore.h>
 #include <debug.h>
 
-#include "uip_internal.h"
+#include "uip/uip_internal.h"
 
 /****************************************************************************
  * Private Types

@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/uip/uip_tcpreadahead.c
+ * net/tcp/tcp_readahead.c
  *
  *   Copyright (C) 2007-2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -45,7 +45,7 @@
 
 #include <nuttx/net/uip/uip.h>
 
-#include "uip_internal.h"
+#include "uip/uip_internal.h"
 
 /****************************************************************************
  * Private Types

@@ -1,12 +1,14 @@
 /****************************************************************************
- * net/uip/uip_tcpseqno.c
+ * net/tcp/tcp_poll.c
+ * Poll for the availability of TCP TX data
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * Large parts of this file were leveraged from uIP logic:
+ * Adapted for NuttX from logic in uIP which also has a BSD-like license:
  *
- *   Copyright (c) 2001-2003, Adam Dunkels.
+ *   Original author Adam Dunkels <adam@dunkels.com>
+ *   Copyright () 2001-2003, Adam Dunkels.
  *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,10 +39,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Compilation Switches
- ****************************************************************************/
-
-/****************************************************************************
  * Included Files
  ****************************************************************************/
 
@@ -54,19 +52,19 @@
 #include <nuttx/net/uip/uip.h>
 #include <nuttx/net/uip/uip-arch.h>
 
-#include "uip_internal.h"
+#include "uip/uip_internal.h"
 
 /****************************************************************************
- * Public Data
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Data
+ * Public Variables
  ****************************************************************************/
 
-/* g_tcpsequence is used to generate initial TCP sequence numbers */
-
-static uint32_t g_tcpsequence;
+/****************************************************************************
+ * Private Variables
+ ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -77,97 +75,53 @@ static uint32_t g_tcpsequence;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_tcpsetsequence
+ * Name: uip_tcppoll
  *
  * Description:
- *   Set the TCP/IP sequence number
+ *   Poll a TCP connection structure for availability of TX data
+ *
+ * Parameters:
+ *   dev - The device driver structure to use in the send operation
+ *   conn - The TCP "connection" to poll for TX data
+ *
+ * Return:
+ *   None
  *
  * Assumptions:
- *   This function may called from the interrupt level
+ *   Called from the interrupt level or with interrupts disabled.
  *
  ****************************************************************************/
 
-void uip_tcpsetsequence(FAR uint8_t *seqno, uint32_t value)
+void uip_tcppoll(struct uip_driver_s *dev, struct uip_conn *conn)
 {
-  /* Copy the sequence number in network (big-endian) order */
+  uint8_t result;
 
-  *seqno++ =  value >> 24;
-  *seqno++ = (value >> 16) & 0xff;
-  *seqno++ = (value >>  8) & 0xff;
-  *seqno   =  value        & 0xff;
-}
+  /* Verify that the connection is established */
 
-/****************************************************************************
- * Name: uip_tcpgetsequence
- *
- * Description:
- *   Get the TCP/IP sequence number
- *
- * Assumptions:
- *   This function may called from the interrupt level
- *
- ****************************************************************************/
+  if ((conn->tcpstateflags & UIP_TS_MASK) == UIP_ESTABLISHED)
+    {
+      /* Set up for the callback */
 
-uint32_t uip_tcpgetsequence(FAR uint8_t *seqno)
-{
-  uint32_t value;
+      dev->d_snddata = &dev->d_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN];
+      dev->d_appdata = &dev->d_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN];
 
-  /* Combine the sequence number from network (big-endian) order */
+      dev->d_len     = 0;
+      dev->d_sndlen  = 0;
 
-   value = (uint32_t)seqno[0] << 24 |
-           (uint32_t)seqno[1] << 16 |
-           (uint32_t)seqno[2] <<  8 |
-           (uint32_t)seqno[3];
-   return value;
-}
+      /* Perform the callback */
 
-/****************************************************************************
- * Name: uip_tcpaddsequence
- *
- * Description:
- *   Add the length to get the next TCP sequence number.
- *
- * Assumptions:
- *   This function may called from the interrupt level
- *
- ****************************************************************************/
+      result = uip_tcpcallback(dev, conn, UIP_POLL);
 
-uint32_t uip_tcpaddsequence(FAR uint8_t *seqno, uint16_t len)
-{
-  return uip_tcpgetsequence(seqno) + (uint32_t)len;
-}
+      /* Handle the callback response */
 
-/****************************************************************************
- * Name: uip_tcpinitsequence
- *
- * Description:
- *   Set the (initial) the TCP/IP sequence number when a TCP connection is
- *   established.
- *
- * Assumptions:
- *   This function may called from the interrupt level
- *
- ****************************************************************************/
+      uip_tcpappsend(dev, conn, result);
+    }
+  else
+    {
+      /* Nothing to do for this connection */
 
-void uip_tcpinitsequence(FAR uint8_t *seqno)
-{
-  uip_tcpsetsequence(seqno, g_tcpsequence);
-}
-
-/****************************************************************************
- * Name: uip_tcpnextsequence
- *
- * Description:
- *   Increment the TCP/IP sequence number
- *
- * Assumptions:
- *   This function is called from the interrupt level
- *
- ****************************************************************************/
-
-void uip_tcpnextsequence(void)
-{
-  g_tcpsequence++;
+      dev->d_len = 0;
+    }
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_TCP */

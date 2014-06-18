@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/uip/uip_tcpconn.c
+ * net/tcp/tcp_conn.c
  *
  *   Copyright (C) 2007-2011, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -55,7 +55,7 @@
 #include <nuttx/net/uip/uip.h>
 #include <nuttx/net/uip/uip-arch.h>
 
-#include "uip_internal.h"
+#include "uip/uip_internal.h"
 
 /****************************************************************************
  * Public Data

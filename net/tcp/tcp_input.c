@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/uip/uip_tcpinput.c
+ * net/tcp/tcp_input.c
  * Handling incoming TCP input
  *
  *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
@@ -54,7 +54,7 @@
 #include <nuttx/net/uip/uip.h>
 #include <nuttx/net/uip/uip-arch.h>
 
-#include "uip_internal.h"
+#include "uip/uip_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions

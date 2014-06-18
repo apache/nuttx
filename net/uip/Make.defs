@@ -61,26 +61,6 @@ ifeq ($(CONFIG_NET_IPv6),y)
 NET_CSRCS += uip_neighbor.c
 endif
 
-# TCP/IP source files
-
-ifeq ($(CONFIG_NET_TCP),y)
-
-NET_CSRCS += uip_tcpconn.c uip_tcpseqno.c uip_tcppoll.c uip_tcptimer.c
-NET_CSRCS += uip_tcpsend.c uip_tcpinput.c uip_tcpappsend.c uip_listen.c
-NET_CSRCS += uip_tcpcallback.c uip_tcpbacklog.c
-
-# TCP Buffering
-
-ifeq ($(CONFIG_NET_TCP_READAHEAD),y)
-NET_CSRCS += uip_tcpreadahead.c
-endif
-
-ifeq ($(CONFIG_NET_TCP_WRITE_BUFFERS),y)
-NET_CSRCS += uip_tcpwrbuffer.c
-endif
-
-endif
-
 # UDP source files
 
 ifeq ($(CONFIG_NET_UDP),y)
