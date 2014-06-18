@@ -2944,6 +2944,28 @@ Configurations
        DataFlash, SD card or from a TFTPC sever via the Boot ROM.
        Data also is positioned in SDRAM.
 
+       Here are the steps that I use to execute this program in SRAM
+       using only the ROM Bootloader:
+
+       a) Hold the DIS_BOOT button and
+
+       b) With the DIS_BOOT button pressed, power cycle the board.
+
+       c) The serial should show RomBOOT in a terminal window (at 115200
+          8N1) and nothing more.
+
+       d) Press ENTER in the terminal window a few times to enable JTAG.
+
+       e) Start the Segger GDB server.  It should successfully connect to
+          the board via JTAG.
+
+       f) Start GDB
+          gdb> target remote localhost:2331
+          gdb> mon halt (don't do mon reset)
+          gdb> load nuttx
+          gdb> mon reg pc (make sure that the PC is 0x200040
+          gdb> ... and debug ...
+
 To-Do List
 ==========
 

@@ -33,7 +33,7 @@
  *
  ****************************************************************************/
 
-/* The SAMA5D44 has 128 KB of ISRAM beginning at virtual address 0x0030:0000.
+/* The SAMA5D44 has 128 KB of ISRAM beginning at virtual address 0x0020:0000.
  *
  * Vectors in low memory are assumed and 16KB of ISRAM is reserved at the
  * high end of ISRAM for the page table.
@@ -41,7 +41,7 @@
 
 MEMORY
 {
-	isram (W!RX) : ORIGIN = 0x300000, LENGTH = 128K - 16K
+	isram (W!RX) : ORIGIN = 0x00200000, LENGTH = 128K - 16K
 }
 
 OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
