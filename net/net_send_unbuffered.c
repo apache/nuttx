@@ -277,6 +277,11 @@ static ssize_t pktsend(FAR struct socket *psock, FAR const void *buf,
           state.snd_cb->priv  = (void*)&state;
           state.snd_cb->event = pktsend_interrupt;
 
+          /* Notify the device driver of the availability of TX data */
+
+          struct uip_driver_s *dev = netdev_findbyname("eth0");
+          dev->d_txavail(dev);
+
           /* Wait for the send to complete or an error to occure: NOTES: (1)
            * uip_lockedwait will also terminate if a signal is received, (2)
            * interrupts may be disabled! They will be re-enabled while the
