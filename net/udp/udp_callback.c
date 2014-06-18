@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/uip/uip_udpcallback.c
+ * net/udp/udp_callback.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -47,7 +47,7 @@
 #include <nuttx/net/uip/uip.h>
 #include <nuttx/net/uip/uip-arch.h>
 
-#include "uip_internal.h"
+#include "uip/uip_internal.h"
 
 /****************************************************************************
  * Private Data

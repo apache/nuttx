@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/uip/uip_udpinput.c
+ * net/udp/udp_input.c
  * Handling incoming UDP input
  *
  *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
@@ -51,7 +51,7 @@
 #include <nuttx/net/uip/uip.h>
 #include <nuttx/net/uip/uip-arch.h>
 
-#include "uip_internal.h"
+#include "uip/uip_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions

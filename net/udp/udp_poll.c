@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/uip/uip_udppoll.c
+ * net/udp/udp_poll.c
  * Poll for the availability of UDP TX data
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
@@ -51,7 +51,7 @@
 #include <nuttx/net/uip/uip.h>
 #include <nuttx/net/uip/uip-arch.h>
 
-#include "uip_internal.h"
+#include "uip/uip_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions

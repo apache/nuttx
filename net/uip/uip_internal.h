@@ -126,7 +126,7 @@ void uip_pktpoll(struct uip_driver_s *dev, struct uip_pkt_conn *conn);
 #endif /* CONFIG_NET_PKT */
 
 #ifdef CONFIG_NET_TCP
-/* Defined in uip_tcpconn.c *************************************************/
+/* Defined in tcp_conn.c ****************************************************/
 
 void uip_tcpinit(void);
 struct uip_conn *uip_tcpactive(struct uip_tcpip_hdr *buf);
@@ -134,7 +134,7 @@ struct uip_conn *uip_nexttcpconn(struct uip_conn *conn);
 struct uip_conn *uip_tcplistener(uint16_t portno);
 struct uip_conn *uip_tcpaccept(struct uip_tcpip_hdr *buf);
 
-/* Defined in uip_tcpseqno.c ************************************************/
+/* Defined in tcp_seqno.c ***************************************************/
 
 void uip_tcpsetsequence(FAR uint8_t *seqno, uint32_t value);
 uint32_t uip_tcpgetsequence(FAR uint8_t *seqno);
@@ -142,21 +142,21 @@ uint32_t uip_tcpaddsequence(FAR uint8_t *seqno, uint16_t len);
 void uip_tcpinitsequence(FAR uint8_t *seqno);
 void uip_tcpnextsequence(void);
 
-/* Defined in uip_tcppoll.c *************************************************/
+/* Defined in tcp_poll.c ****************************************************/
 
 void uip_tcppoll(struct uip_driver_s *dev, struct uip_conn *conn);
 
-/* Defined in uip_udptimer.c ************************************************/
+/* Defined in tcp_timer.c ***************************************************/
 
 void uip_tcptimer(struct uip_driver_s *dev, struct uip_conn *conn, int hsec);
 
-/* Defined in uip_listen.c **************************************************/
+/* Defined in tcp_listen.c **************************************************/
 
 void uip_listeninit(void);
 bool uip_islistener(uint16_t port);
 int uip_accept(struct uip_driver_s *dev, struct uip_conn *conn, uint16_t portno);
 
-/* Defined in uip_tcpsend.c *************************************************/
+/* Defined in tcp_send.c ****************************************************/
 
 void uip_tcpsend(struct uip_driver_s *dev, struct uip_conn *conn,
                  uint16_t flags, uint16_t len);
@@ -164,18 +164,18 @@ void uip_tcpreset(struct uip_driver_s *dev);
 void uip_tcpack(struct uip_driver_s *dev, struct uip_conn *conn,
                 uint8_t ack);
 
-/* Defined in uip_tcpappsend.c **********************************************/
+/* Defined in tcp_appsend.c *************************************************/
 
 void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn,
                     uint16_t result);
 void uip_tcprexmit(struct uip_driver_s *dev, struct uip_conn *conn,
                    uint16_t result);
 
-/* Defined in uip_tcpinput.c ************************************************/
+/* Defined in tcp_input.c ***************************************************/
 
 void uip_tcpinput(struct uip_driver_s *dev);
 
-/* Defined in uip_tcpcallback.c *********************************************/
+/* Defined in tcp_callback.c ************************************************/
 
 uint16_t uip_tcpcallback(FAR struct uip_driver_s *dev,
                          FAR struct uip_conn *conn, uint16_t flags);
@@ -184,7 +184,7 @@ uint16_t uip_datahandler(FAR struct uip_conn *conn,
                          FAR uint8_t *buffer, uint16_t nbytes);
 #endif
 
-/* Defined in uip_tcpreadahead.c ********************************************/
+/* Defined in tcp_readahead.c ***********************************************/
 
 #ifdef CONFIG_NET_TCP_READAHEAD
 void uip_tcpreadahead_init(void);
@@ -194,7 +194,7 @@ FAR struct uip_readahead_s *uip_tcpreadahead_alloc(void);
 void uip_tcpreadahead_release(FAR struct uip_readahead_s *readahead);
 #endif /* CONFIG_NET_TCP_READAHEAD */
 
-/* Defined in uip_tcpwrbuffer.c *********************************************/
+/* Defined in tcp_wrbuffer.c ************************************************/
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
 void uip_tcpwrbuffer_init(void);
@@ -208,41 +208,41 @@ void uip_tcpwrbuffer_release(FAR struct uip_wrbuffer_s *wrbuffer);
 #endif /* CONFIG_NET_TCP */
 
 #ifdef CONFIG_NET_UDP
-/* Defined in uip_udpconn.c *************************************************/
+/* Defined in udp_conn.c ****************************************************/
 
 void uip_udpinit(void);
 struct uip_udp_conn *uip_udpactive(struct uip_udpip_hdr *buf);
 struct uip_udp_conn *uip_nextudpconn(struct uip_udp_conn *conn);
 
-/* Defined in uip_udppoll.c *************************************************/
+/* Defined in udp_poll.c ****************************************************/
 
 void uip_udppoll(struct uip_driver_s *dev, struct uip_udp_conn *conn);
 
-/* Defined in uip_udpsend.c *************************************************/
+/* Defined in udp_send.c ****************************************************/
 
 void uip_udpsend(struct uip_driver_s *dev, struct uip_udp_conn *conn);
 
-/* Defined in uip_udpinput.c ************************************************/
+/* Defined in udp_input.c ***************************************************/
 
 int uip_udpinput(struct uip_driver_s *dev);
 
-/* Defined in uip_udpcallback.c *********************************************/
+/* Defined in udp_callback.c ************************************************/
 
 uint16_t uip_udpcallback(struct uip_driver_s *dev,
                          struct uip_udp_conn *conn, uint16_t flags);
 #endif /* CONFIG_NET_UDP */
 
 #ifdef CONFIG_NET_ICMP
-/* Defined in uip_icmpinput.c ***********************************************/
+/* Defined in icmp_input.c **************************************************/
 
 void uip_icmpinput(struct uip_driver_s *dev);
 
 #ifdef CONFIG_NET_ICMP_PING
-/* Defined in uip_icmpoll.c *************************************************/
+/* Defined in icmp_poll.c ***************************************************/
 
 void uip_icmppoll(struct uip_driver_s *dev);
 
-/* Defined in uip_icmsend.c *************************************************/
+/* Defined in icmp_send.c ***************************************************/
 
 void uip_icmpsend(struct uip_driver_s *dev, uip_ipaddr_t *destaddr);
 
@@ -250,15 +250,15 @@ void uip_icmpsend(struct uip_driver_s *dev, uip_ipaddr_t *destaddr);
 #endif /* CONFIG_NET_ICMP */
 
 #ifdef CONFIG_NET_IGMP
-/* Defined in uip_igmpinit.c ************************************************/
+/* Defined in igmp_init.c ***************************************************/
 
 void uip_igmpinit(void);
 
-/* Defined in uip_igmpinput.c ***********************************************/
+/* Defined in igmp_input.c **************************************************/
 
 void uip_igmpinput(struct uip_driver_s *dev);
 
-/* Defined in uip_igmpgroup.c ***********************************************/
+/* Defined in igmp_group.c **************************************************/
 
 void uip_grpinit(void);
 FAR struct igmp_group_s *uip_grpalloc(FAR struct uip_driver_s *dev,
@@ -270,28 +270,28 @@ FAR struct igmp_group_s *uip_grpallocfind(FAR struct uip_driver_s *dev,
 void uip_grpfree(FAR struct uip_driver_s *dev,
                  FAR struct igmp_group_s *group);
 
-/* Defined in uip_igmpmsg.c **************************************************/
+/* Defined in igmp_msg.c ****************************************************/
 
 void uip_igmpschedmsg(FAR struct igmp_group_s *group, uint8_t msgid);
 void uip_igmpwaitmsg(FAR struct igmp_group_s *group, uint8_t msgid);
 
-/* Defined in uip_igmppoll.c *************************************************/
+/* Defined in igmp_poll.c ***************************************************/
 
 void uip_igmppoll(FAR struct uip_driver_s *dev);
 
-/* Defined in up_igmpsend.c **************************************************/
+/* Defined in igmp_send.c ***************************************************/
 
 void uip_igmpsend(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group,
                   FAR uip_ipaddr_t *dest);
 
-/* Defined in uip_igmptimer.c ************************************************/
+/* Defined in igmp_timer.c **************************************************/
 
 int uip_decisec2tick(int decisecs);
 void uip_igmpstartticks(FAR struct igmp_group_s *group, int ticks);
 void uip_igmpstarttimer(FAR struct igmp_group_s *group, uint8_t decisecs);
 bool uip_igmpcmptimer(FAR struct igmp_group_s *group, int maxticks);
 
-/* Defined in uip_mcastmac ***************************************************/
+/* Defined in igmp_mcastmac *****************************************************/
 
 void uip_addmcastmac(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *ip);
 void uip_removemcastmac(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *ip);

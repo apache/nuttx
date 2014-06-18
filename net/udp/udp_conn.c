@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/uip/uip_udpconn.c
+ * net/udp/udp_conn.c
  *
  *   Copyright (C) 2007-2009, 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -60,7 +60,7 @@
 #include <nuttx/net/uip/uip.h>
 #include <nuttx/net/uip/uip-arch.h>
 
-#include "uip_internal.h"
+#include "uip/uip_internal.h"
 
 /****************************************************************************
  * Private Data
