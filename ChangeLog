@@ -7452,4 +7452,7 @@
 	  free the socket in psock_close(), (2)  socket() returns failure when
 	  there is no free socket/connection, and (3) Set number of bytes to
 	  transmit is set in the uip_driver_s instance (2014-6-18).
+	* net/tcp:  Move all TCP files from net/uip to net/tcp (2014-6-18).
+	* net/udp:  Move all UDP files from net/uip to net/udp (2014-6-18).
+	* net/pkt:  Move all AF_PACKET files from net/uip to net/pkt (2014-6-18).
 
