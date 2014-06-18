@@ -40,7 +40,7 @@ ifeq ($(CONFIG_NET),y)
 ifeq ($(CONFIG_NET_TCP),y)
 
 NET_CSRCS += tcp_conn.c tcp_seqno.c tcp_poll.c tcp_timer.c tcp_send.c
-NET_CSRCS += tcp_input.c tcp_appsend.c uip_listen.c tcp_callback.c
+NET_CSRCS += tcp_input.c tcp_appsend.c tcp_listen.c tcp_callback.c
 NET_CSRCS += tcp_backlog.c
 
 # TCP Buffering
