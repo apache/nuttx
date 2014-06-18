@@ -33,7 +33,7 @@
  *
  ****************************************************************************/
 
-/* The SAMA5D4 has 128 KB of ISRAM beginning at virtual address 0x0030:0000.
+/* The SAMA5D4 has 128 KB of ISRAM beginning at virtual address 0x0020:0000.
  * This memory configuration, however, loads into the 256MB SDRAM on board
  * the SAMA5D4-EK which lies at 0x2000:0000.  An offset 0x00008000 is
  * reserved by the bootloader.
@@ -44,7 +44,7 @@
 
 MEMORY
 {
-	isram (W!RX) : ORIGIN = 0x300000, LENGTH = 128K - 16K
+	isram (W!RX) : ORIGIN = 0x00200000, LENGTH = 128K - 16K
 	sdram (W!RX) : ORIGIN = 0x20008000, LENGTH = 256M - 32K
 }
 
