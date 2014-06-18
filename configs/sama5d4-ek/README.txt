@@ -2949,7 +2949,8 @@ Configurations
 
        a) Hold the DIS_BOOT button and
 
-       b) With the DIS_BOOT button pressed, power cycle the board.
+       b) With the DIS_BOOT button pressed, power cycle the board. A
+          reset does not seem to be sufficient.
 
        c) The serial should show RomBOOT in a terminal window (at 115200
           8N1) and nothing more.
@@ -2957,9 +2958,10 @@ Configurations
        d) Press ENTER in the terminal window a few times to enable JTAG.
 
        e) Start the Segger GDB server.  It should successfully connect to
-          the board via JTAG.
+          the board via JTAG (if JTAG was correctly enabled in step d)).
 
-       f) Start GDB
+       f) Start GDB, connect, to the GDB server, load NuttX, and debug.
+
           gdb> target remote localhost:2331
           gdb> mon halt (don't do mon reset)
           gdb> load nuttx
