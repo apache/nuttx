@@ -38,10 +38,10 @@ ifeq ($(CONFIG_NET),y)
 # Packet socket support
 
 ifeq ($(CONFIG_NET_PKT),y)
-NET_CSRCS += uip_pktconn.c
-NET_CSRCS += uip_pktinput.c
-NET_CSRCS += uip_pktcallback.c
-NET_CSRCS += uip_pktpoll.c
+NET_CSRCS += pkt_conn.c
+NET_CSRCS += pkt_input.c
+NET_CSRCS += pkt_callback.c
+NET_CSRCS += pkt_poll.c
 
 # Include packet socket build support
 
