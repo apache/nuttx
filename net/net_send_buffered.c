@@ -443,7 +443,7 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
                    int flags)
 {
   uip_lock_t save;
-  size_t     completed = 0;
+  ssize_t    completed = 0;
   int        err;
   int        ret = OK;
 
@@ -469,52 +469,71 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
     {
       struct uip_conn *conn = (struct uip_conn*)psock->s_conn;
 
+      /* Allocate resources to receive a callback */
+
       if (!psock->s_sndcb)
         {
           psock->s_sndcb = uip_tcpcallbackalloc(conn);
+        }
 
+      /* Test if the callback has been allocated*/
+
+      if (!psock->s_sndcb)
+        {
+          /* A buffer allocation error occurred */
+
+          completed = -ENOMEM;
+        }
+      else
+        {
           /* Set up the callback in the connection */
 
           psock->s_sndcb->flags = (UIP_ACKDATA | UIP_REXMIT |UIP_POLL | \
                                   UIP_CLOSE | UIP_ABORT | UIP_TIMEDOUT);
           psock->s_sndcb->priv  = (void*)psock;
           psock->s_sndcb->event = send_interrupt;
-        }
 
-      /* Allocate resources to receive a callback */
-
-      while (completed < len)
-        {
-          FAR struct uip_wrbuffer_s *segment = uip_tcpwrbuffer_alloc(NULL);
-          if (segment)
+          while (completed < len)
             {
-              size_t cnt;
-
-              segment->wb_seqno = (unsigned)-1;
-              segment->wb_nrtx  = 0;
-
-              if (len - completed > CONFIG_NET_TCP_WRITE_BUFSIZE)
+              FAR struct uip_wrbuffer_s *segment = uip_tcpwrbuffer_alloc(NULL);
+              if (segment)
                 {
-                  cnt = CONFIG_NET_TCP_WRITE_BUFSIZE;
+                  size_t cnt;
+
+                  segment->wb_seqno = (unsigned)-1;
+                  segment->wb_nrtx  = 0;
+
+                  if (len - completed > CONFIG_NET_TCP_WRITE_BUFSIZE)
+                    {
+                      cnt = CONFIG_NET_TCP_WRITE_BUFSIZE;
+                    }
+                  else
+                    {
+                      cnt = len - completed;
+                    }
+
+                  segment->wb_nbytes = cnt;
+                  memcpy(segment->wb_buffer, (char*)buf + completed, cnt);
+                  completed += cnt;
+
+                  /* send_interrupt() will refer to all the write buffer by
+                   * conn->writebuff
+                   */
+
+                  sq_addlast(&segment->wb_node, &conn->write_q);
+
+                  /* Notify the device driver of the availability of TX data */
+
+                  netdev_txnotify(conn->ripaddr);
                 }
+
+              /* A buffer allocation error occurred */
+
               else
                 {
-                  cnt = len - completed;
+                  completed = -ENOMEM;
+                  break;
                 }
-
-              segment->wb_nbytes = cnt;
-              memcpy(segment->wb_buffer, (char*)buf + completed, cnt);
-              completed += cnt;
-
-              /* send_interrupt() will refer to all the write buffer by
-               * conn->writebuff
-               */
-
-              sq_addlast(&segment->wb_node, &conn->write_q);
-
-              /* Notify the device driver of the availability of TX data */
-
-              netdev_txnotify(conn->ripaddr);
             }
         }
     }
