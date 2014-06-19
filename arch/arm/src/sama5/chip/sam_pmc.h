@@ -228,22 +228,32 @@
 /* PMC Clock Generator PLLA Register */
 
 #undef SAMA5_HAVE_PLLAR_DIV
-#ifdef ATSAMA5D3
+#if defined(ATSAMA5D3)
 #  define PMC_CKGR_PLLAR_DIV_SHIFT     (0)       /* Bits 0-7: Divider */
 #  define PMC_CKGR_PLLAR_DIV_MASK      (0xff << PMC_CKGR_PLLAR_DIV_SHIFT)
 #    define PMC_CKGR_PLLAR_DIV_ZERO    (0 << PMC_CKGR_PLLAR_DIV_SHIFT)   /* Divider output is 0 */
 #    define PMC_CKGR_PLLAR_DIV_BYPASS  (1 << PMC_CKGR_PLLAR_DIV_SHIFT)   /* Divider is bypassed (DIV=1) */
 #    define PMC_CKGR_PLLAR_DIV(n)      ((n) << PMC_CKGR_PLLAR_DIV_SHIFT) /* Divider output is DIV=n, n=2..255 */
 #  define SAMA5_HAVE_PLLAR_DIV         1
+
+/* According the preliminary documentation, there is no DIV field in the SAMA5D4
+ * PLLAR register.  However, through trial and error, I find that the PLL output
+ * is still disabled if the DIV field is set to zero.
+ */
+
+#elif defined(ATSAMA5D4)
+#  define PMC_CKGR_PLLAR_DIV_BYPASS    (1)       /* Divider is bypassed (DIV=1) */
 #endif
 
 #define PMC_CKGR_PLLAR_COUNT_SHIFT     (8)       /* Bits 8-13: PLLA Counter */
 #define PMC_CKGR_PLLAR_COUNT_MASK      (63 << PMC_CKGR_PLLAR_COUNT_SHIFT)
+#  define PMC_CKGR_PLLAR_COUNT(n)      ((uint32_t)(n) << PMC_CKGR_PLLAR_COUNT_SHIFT)
 #define PMC_CKGR_PLLAR_OUT_SHIFT       (14)      /* Bits 14-17: PLLA Clock Frequency Range */
 #define PMC_CKGR_PLLAR_OUT_MASK        (15 << PMC_CKGR_PLLAR_OUT_SHIFT)
 #  define PMC_CKGR_PLLAR_OUT           (0 << PMC_CKGR_PLLAR_OUT_SHIFT) /* To be programmed to 0 */
 #define PMC_CKGR_PLLAR_MUL_SHIFT       (18)      /* Bits 18-24: PLLA Multiplier */
 #define PMC_CKGR_PLLAR_MUL_MASK        (0x7f << PMC_CKGR_PLLAR_MUL_SHIFT)
+#  define PMC_CKGR_PLLAR_MUL(n)        ((uint32_t)(n) << PMC_CKGR_PLLAR_MUL_SHIFT)
 #define PMC_CKGR_PLLAR_ONE             (1 << 29) /* Bit 29: Always one */
 
 /* PMC Master Clock Register */
