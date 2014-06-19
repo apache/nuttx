@@ -73,12 +73,12 @@
 
 /* 32-bit Encoding:
  *
- *   ..MM MCCC CCDD IIIV PPPB BBBB
+ *   .... .... ..MM MCCC CCDD IIIV PPPB BBBB
  */
 
 /* Input/Output mode:
  *
- *   ..MM M... .... .... .... ....
+ *   .... .... ..MM M... .... .... .... ....
  */
 
 #define PIO_MODE_SHIFT            (19)        /* Bits 19-21: PIO mode */
@@ -93,7 +93,7 @@
 /* These bits set the configuration of the pin:
  * NOTE: No definitions for parallel capture mode
  *
- *   .... .CCC CC.. .... .... ....
+ *   .... .... .... .CCC CC.. .... .... ....
  */
 
 #define PIO_CFG_SHIFT             (14)        /* Bits 14-18: PIO configuration bits */
@@ -107,7 +107,7 @@
 
 /* Drive Strength:
  *
- *   .... .... ..DD .... .... ....
+ *   .... .... .... .... ..DD .... .... ....
  */
 
 #define PIO_DRIVE_SHIFT           (12)        /* Bits 12-13: Drive strength */
@@ -118,7 +118,7 @@
 
 /* Additional interrupt modes:
  *
- *   .... .... .... III. .... ....
+ *   .... .... .... .... .... III. .... ....
  */
 
 #define PIO_INT_SHIFT             (9)         /* Bits 9-11: PIO interrupt bits */
@@ -137,7 +137,7 @@
 
 /* If the pin is an PIO output, then this identifies the initial output value:
  *
- *   .... .... .... ...V .... ....
+ *   .... .... .... .... .... ...V .... ....
  */
 
 #define PIO_OUTPUT_SET            (1 << 8)    /* Bit 8: Inital value of output */
@@ -145,7 +145,7 @@
 
 /* This identifies the PIO port:
  *
- *   .... .... .... .... PPP. ....
+ *   .... .... .... .... .... .... PPP. ....
  */
 
 #define PIO_PORT_SHIFT            (5)         /* Bit 5-7:  Port number */
@@ -158,7 +158,7 @@
 
 /* This identifies the bit in the port:
  *
- *   .... .... .... .... ...B BBBB
+ *   .... .... .... .... .... .... ...B BBBB
  */
 
 #define PIO_PIN_SHIFT             (0)         /* Bits 0-4: PIO number: 0-31 */

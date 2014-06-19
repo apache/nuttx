@@ -52,13 +52,10 @@
 
 #define sam_enableperiph0(s)       putreg32((1 << (s)), SAM_PMC_PCER0)
 #define sam_enableperiph1(s)       putreg32((1 << ((s) - 32)), SAM_PMC_PCER1)
-#define sam_enableperiph2(s)       putreg32((1 << ((s) - 64)), SAM_PMC_PCER2)
 #define sam_disableperiph0(s)      putreg32((1 << (s)), SAM_PMC_PCDR0)
 #define sam_disableperiph1(s)      putreg32((1 << ((s) - 32)), SAM_PMC_PCDR1)
-#define sam_disableperiph2(s)      putreg32((1 << ((s) - 63)), SAM_PMC_PCDR2)
 #define sam_isenabled0(s)          (getreg32(SAM_PMC_PCER0) & (1 << (s)) != 0)
 #define sam_isenabled1(s)          (getreg32(SAM_PMC_PCER1) & (1 << ((s) - 32)) != 0)
-#define sam_isenabled2(s)          (getreg32(SAM_PMC_PCER2) & (1 << ((s) - 64)) != 0)
 
 /* Enable peripheral clocking */
 
@@ -122,10 +119,18 @@
 #define sam_twi3_enableclk()       sam_enableperiph1(SAM_PID_TWI3)
 #define sam_catb_enableclk()       sam_enableperiph1(SAM_PID_CATB)
 
-#define sam_sfr_enableclk()        sam_enableperiph2(SAM_PID_CATB)
-#define sam_aic_enableclk()        sam_enableperiph2(SAM_PID_CATB)
-#define sam_saic_enableclk()       sam_enableperiph2(SAM_PID_CATB)
-#define sam_l2cc_enableclk()       sam_enableperiph2(SAM_PID_CATB)
+/* The Advanced Interrupt Controller and L2CC cache controllers are
+ * continuously clocked. The Power Management Controller has no effect on
+ * their behavior.
+ *
+ * (I presume that this is true of the SFR as well since it has no PMC
+ *  bits to control its clocking).
+ */
+
+#define sam_sfr_enableclk()
+#define sam_aic_enableclk()
+#define sam_saic_enableclk()
+#define sam_l2cc_enableclk()
 
 /* Disable peripheral clocking */
 
@@ -189,10 +194,18 @@
 #define sam_twi3_disableclk()      sam_disableperiph1(SAM_PID_TWI3)
 #define sam_catb_disableclk()      sam_disableperiph1(SAM_PID_CATB)
 
-#define sam_sfr_disableclk()       sam_disableperiph2(SAM_PID_CATB)
-#define sam_aic_disableclk()       sam_disableperiph2(SAM_PID_CATB)
-#define sam_saic_disableclk()      sam_disableperiph2(SAM_PID_CATB)
-#define sam_l2cc_disableclk()      sam_disableperiph2(SAM_PID_CATB)
+/* The Advanced Interrupt Controller and L2CC cache controllers are
+ * continuously clocked. The Power Management Controller has no effect on
+ * their behavior.
+ *
+ * (I presume that this is true of the SFR as well since it has no PMC
+ *  bits to control its clocking).
+ */
+
+#define sam_sfr_disableclk()
+#define sam_aic_disableclk()
+#define sam_saic_disableclk()
+#define sam_l2cc_disableclk()
 
 /* Test if peripheral clocking is enabled */
 
@@ -256,10 +269,18 @@
 #define sam_twi3_isenabled()        sam_isenabled1(SAM_PID_TWI3)
 #define sam_catb_isenabled()        sam_isenabled1(SAM_PID_CATB)
 
-#define sam_sfr_isenabled()         sam_isenabled2(SAM_PID_CATB)
-#define sam_aic_isenabled()         sam_isenabled2(SAM_PID_CATB)
-#define sam_saic_isenabled()        sam_isenabled2(SAM_PID_CATB)
-#define sam_l2cc_isenabled()        sam_isenabled2(SAM_PID_CATB)
+/* The Advanced Interrupt Controller and L2CC cache controllers are
+ * continuously clocked. The Power Management Controller has no effect on
+ * their behavior.
+ *
+ * (I presume that this is true of the SFR as well since it has no PMC
+ *  bits to control its clocking).
+ */
+
+#define sam_sfr_isenabled()         (true)
+#define sam_aic_isenabled()         (true)
+#define sam_saic_isenabled()        (true)
+#define sam_l2cc_isenabled()        (true)
 
 /************************************************************************************
  * Public Types
