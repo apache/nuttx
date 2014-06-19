@@ -7455,4 +7455,10 @@
 	* net/tcp:  Move all TCP files from net/uip to net/tcp (2014-6-18).
 	* net/udp:  Move all UDP files from net/uip to net/udp (2014-6-18).
 	* net/pkt:  Move all AF_PACKET files from net/uip to net/pkt (2014-6-18).
+	* net/Kconfig:  Add option to select CONFIG_NET_GUARDSIZE (2014-6-18).
+	* net/net_send_buffered.c:  Add checks from buffer allocation failures.
+	  from Max/Himax (2014-6-19).
+	* tools/mkfsdata.pl:  Apparently, the trailing the 0x00 in http server
+	  files is seen as a bug in javascript and images.  From Max/Himax
+	  (2014-6-19).
 
