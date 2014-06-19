@@ -86,7 +86,8 @@ foreach $file (@files) {
                 print(OUTPUT "  ");
             }
         }
-        print(OUTPUT "0x00\n};\n\n");
+#       print(OUTPUT "0x00\n};\n\n");
+        print(OUTPUT "\n};\n\n");
         close(FILE);
         push(@fvars, $fvar);
         push(@pfiles, $file);
