@@ -128,9 +128,19 @@ static void sam_dumpaic(const char *msg, int irq)
   lldbg("  IPR: %08x       %08x       %08x       %08x\n",
         getreg32(SAM_AIC_IPR0), getreg32(SAM_AIC_IPR1),
         getreg32(SAM_AIC_IPR2), getreg32(SAM_AIC_IPR3));
+
+  /* SAMA5D4 does not have the FFSR register */
+
+#ifdef SAM_AIC_FFSR
   lldbg("  IMR: %08x CISR: %08x  SPU: %08x FFSR: %08x\n",
         getreg32(SAM_AIC_IMR),  getreg32(SAM_AIC_CISR),
         getreg32(SAM_AIC_SPU),  getreg32(SAM_AIC_FFSR));
+#else
+  lldbg("  IMR: %08x CISR: %08x  SPU: %08x\n",
+        getreg32(SAM_AIC_IMR),  getreg32(SAM_AIC_CISR),
+        getreg32(SAM_AIC_SPU));
+#endif
+
   lldbg("  DCR: %08x WPMR: %08x WPSR: %08x\n",
         getreg32(SAM_AIC_DCR),  getreg32(SAM_AIC_WPMR),
         getreg32(SAM_AIC_WPSR));
@@ -191,7 +201,7 @@ static inline size_t sam_vectorsize(void)
 
 static uint32_t *sam_spurious(int irq, uint32_t *regs)
 {
-  /* This is probably irrevelant since true vectored interrupts are not used
+  /* This is probably irrelevant since true vectored interrupts are not used
    * in this implementation.  The value of AIC_IVR is ignored.
    */
 
@@ -211,7 +221,7 @@ static uint32_t *sam_spurious(int irq, uint32_t *regs)
 
 static uint32_t *sam_fiqhandler(int irq, uint32_t *regs)
 {
-  /* This is probably irrevelant since FIQs are not used in this
+  /* This is probably irrelevant since FIQs are not used in this
    * implementation.
    */
 
@@ -439,7 +449,7 @@ void up_irqinitialize(void)
  *   the irq number of the interrupt and then to call arm_doirq to dispatch
  *   the interrupt.
  *
- *  Input paramters:
+ *  Input parameters:
  *   regs - A pointer to the register save area on the stack.
  *
  ****************************************************************************/
