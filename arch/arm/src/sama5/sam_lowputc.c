@@ -149,10 +149,10 @@
 #  undef HAVE_UART_CONSOLE
 #endif
 
-/* The UART/USART modules are driven by the main clock (MCK). */
+/* The UART/USART modules are driven by the peripheral clock (MCK or MCK2). */
 
-#define SAM_USART_CLOCK  BOARD_MCK_FREQUENCY  /* Frequency of the main clock */
-#define SAM_MR_USCLKS    UART_MR_USCLKS_MCK   /* Source = Main clock */
+#define SAM_USART_CLOCK  BOARD_USART_FREQUENCY /* Frequency of the USART clock */
+#define SAM_MR_USCLKS    UART_MR_USCLKS_MCK    /* Source = Main clock */
 
 /* Select USART parameters for the selected console */
 
