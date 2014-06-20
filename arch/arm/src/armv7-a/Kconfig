@@ -55,4 +55,13 @@ config ARMV7A_OABI_TOOLCHAIN
 	default n
 	depends on ARMV7A_TOOLCHAIN_BUILDROOT
 	---help---
-		Most of the older buildroot toolchains are OABI and are named arm-nuttx-elf- vs. arm-nuttx-eabi-
+		Most of the older buildroot toolchains are OABI and are named
+		arm-nuttx-elf- vs. arm-nuttx-eabi-
+
+config ARMV7A_DECODEFIQ
+	bool "FIQ Handler"
+	default n
+	---help---
+		Select this option if your platform supports the function
+		arm_decodefiq().  This is used primarily to support secure TrustZone
+		interrupts received on the FIQ vector.
