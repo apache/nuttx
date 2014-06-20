@@ -351,6 +351,42 @@ static inline void __ramfunc__ sam_mckdivider(void)
 #endif
 
 /****************************************************************************
+ * Name: sam_h32mxdivider
+ *
+ * Description:
+ *   Set the H32MX divider.
+ *
+ *   0: The AHB 32-bit Matrix frequency is equal to the AHB 64-bit Matrix
+ *      frequency. It is possible only if the AHB 64-bit Matrix frequency
+ *      does not exceed 90 MHz.
+ *   1: H32MXDIV2 The AHB 32-bit Matrix frequency is equal to the AHB 64-bit
+ *      Matrix frequency divided by 2.
+ *
+ ****************************************************************************/
+
+#ifdef PMC_MCKR_H32MXDIV
+static inline void __ramfunc__ sam_h32mxdivider(void)
+{
+  uint32_t regval;
+
+  regval = getreg32(SAM_PMC_MCKR);
+
+  /* Check the 64-bit Matrix frequency (MCK, right?) */
+
+  if (BOARD_MCK_FREQUENCY <= 90000000)
+    {
+      regval &= ~PMC_MCKR_H32MXDIV;
+    }
+  else
+    {
+      regval |= PMC_MCKR_H32MXDIV;
+    }
+
+  putreg32(regval, SAM_PMC_MCKR);
+}
+#endif
+
+/****************************************************************************
  * Name: sam_selectplla
  *
  * Description:
@@ -653,6 +689,10 @@ void __ramfunc__ sam_clockconfig(void)
       /* Configure MCK Divider */
 
       sam_mckdivider();
+
+      /* Configure the H32MX Divider */
+
+      sam_h32mxdivider();
 
       /* Finally, elect the PLLA output as the input clock for PCK and MCK. */
 

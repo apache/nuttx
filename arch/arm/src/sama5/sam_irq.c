@@ -91,7 +91,7 @@ extern uint32_t _vector_end;   /* End+1 of vector block */
 
 static const uint8_t g_srctype[SCRTYPE_NTYPES] =
 {
- 0, 0, 1, 1, 2, 3
+  0, 0, 1, 1, 2, 3
 };
 
 /****************************************************************************
@@ -494,7 +494,7 @@ uint32_t *arm_decodeirq(uint32_t *regs)
   ivr = getreg32(SAM_AIC_IVR);
   putreg32(ivr, SAM_AIC_IVR);
 
-  /* Get the IRQ number from the interrrupt status register.  NOTE that the
+  /* Get the IRQ number from the interrupt status register.  NOTE that the
    * IRQ number is the same is the peripheral ID (PID).
    */
 
@@ -691,4 +691,3 @@ void sam_irq_srctype(int irq, enum sam_srctype_e srctype)
   sam_dumpaic("srctype", irq);
   irqrestore(flags);
 }
-
