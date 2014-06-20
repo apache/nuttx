@@ -384,6 +384,8 @@ static inline void __ramfunc__ sam_h32mxdivider(void)
 
   putreg32(regval, SAM_PMC_MCKR);
 }
+#else
+#  define sam_h32mxdivider()
 #endif
 
 /****************************************************************************
