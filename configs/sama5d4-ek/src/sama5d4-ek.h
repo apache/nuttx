@@ -281,7 +281,7 @@
 
 #define PIO_LED_USER  (PIO_OUTPUT | PIO_CFG_PULLUP | PIO_OUTPUT_SET | \
                        PIO_PORT_PIOE | PIO_PIN8)
-#define PIO_LED_POWER (PIO_OUTPUT | PIO_CFG_PULLUP | PIO_OUTPUT_SET | \
+#define PIO_LED_POWER (PIO_OUTPUT | PIO_CFG_PULLUP | PIO_OUTPUT_CLEAR | \
                        PIO_PORT_PIOE | PIO_PIN9)
 
 /* Buttons **************************************************************************/
