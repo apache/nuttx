@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/armv7-a/arm_vectors.S
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -469,7 +469,8 @@ arm_vectorundefinsn:
  * Name: arm_vectorfiq
  *
  * Description:
- *   Shouldn't happen
+ *   Shouldn't happen unless a arm_decodefiq() is provided.  FIQ is primarily used
+ *   with the TrustZone feature in order to handler secure interrupts.
  *
  ************************************************************************************/
 
@@ -477,7 +478,11 @@ arm_vectorundefinsn:
 	.type	arm_vectorfiq, %function
 
 arm_vectorfiq:
+#ifdef CONFIG_ARMV7A_DECODEFIQ
+#  error Missing logic
+#else
 	subs	pc, lr, #4
+#endif
 	.size	arm_vectorfiq, . - arm_vectorfiq
 
 /************************************************************************************

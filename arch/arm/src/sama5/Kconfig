@@ -101,6 +101,10 @@ config SAMA5_HAVE_TC2
 	bool
 	default n
 
+config SAMA5_HAVE_TRUSTZONE
+	bool
+	default n
+
 config SAMA5_HAVE_TWI3
 	bool
 	default n
@@ -135,6 +139,7 @@ config ARCH_CHIP_SAMA5D4
 	select SAMA5_HAVE_SPI2
 	select SAMA5_HAVE_TC1
 	select SAMA5_HAVE_TC2
+	select SAMA5_HAVE_TRUSTZONE
 	select SAMA5_HAVE_TWI3
 	select ARCH_NAND_HWECC
 
@@ -521,6 +526,12 @@ config SAMA5_VDEC
 	depends on SAMA5_HAVE_VDEC
 
 endmenu # SAMA5 Peripheral Support
+
+config SAMA5_SECURE
+	bool "Enable secure features"
+	default n
+	depends on SAMA5_HAVE_TRUSTZONE && EXPERIMENTAL
+	select ARMV7A_DECODEFIQ if SAMA5_HAVE_SAIC
 
 config SAMA5_PIO_IRQ
 	bool "PIO pin interrupts"
