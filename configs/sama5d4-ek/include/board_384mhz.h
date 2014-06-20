@@ -165,6 +165,13 @@
 #define BOARD_MCK_FREQUENCY        (128000000) /* MCK:     PLLACK / 2 / 1 / 3 */
 #define BOARD_ADCCLK_FREQUENCY     (8000000)   /* ADCCLK:  MCK / ((7+1)*2) */
 
+/* Clocking to certain peripherals may be MCK/2.
+ *
+ * REVISIT:  I am not sure why this is.  Perhaps because of H32MXDIV?
+ */
+
+#define BOARD_USART_FREQUENCY      (BOARD_MCK_FREQUENCY >> 1)
+
 /* HSMCI clocking
  *
  * Multimedia Card Interface clock (MCCK or MCI_CK) is Master Clock (MCK)

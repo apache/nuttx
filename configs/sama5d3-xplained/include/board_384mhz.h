@@ -167,6 +167,12 @@
 #define BOARD_MCK_FREQUENCY        (128000000) /* MCK:     PLLACK / 2 / 1 / 3 */
 #define BOARD_ADCCLK_FREQUENCY     (8000000)   /* ADCCLK:  MCK / ((7+1)*2) */
 
+/* On some SAMA5's, the clocking to peripherals may be divided down from MCK,
+ * but not for the SAMA5D3.
+ */
+
+#define BOARD_USART_FREQUENCY      BOARD_MCK_FREQUENCY
+
 /* HSMCI clocking
  *
  * Multimedia Card Interface clock (MCCK or MCI_CK) is Master Clock (MCK)

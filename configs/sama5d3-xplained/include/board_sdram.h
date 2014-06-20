@@ -63,6 +63,12 @@
 #define BOARD_PCK_FREQUENCY        (sam_pck_frequency(BOARD_MAINOSC_FREQUENCY))
 #define BOARD_MCK_FREQUENCY        (sam_mck_frequency(BOARD_MAINOSC_FREQUENCY))
 
+/* On some SAMA5's, the clocking to peripherals may be divided down from MCK,
+ * but not for the SAMA5D3.
+ */
+
+#define BOARD_USART_FREQUENCY      BOARD_MCK_FREQUENCY
+
 #if defined(CONFIG_SAMA5_EHCI) || defined(CONFIG_SAMA5_OHCI) || \
     defined(CONFIG_SAMA5_UDPHS)
 

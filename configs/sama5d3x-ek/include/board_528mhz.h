@@ -124,6 +124,11 @@
 #define BOARD_MCK_FREQUENCY        (132000000) /* MCK:     PLLACK / 1 / 1 / 4 */
 #define BOARD_ADCCLK_FREQUENCY     (8250000)   /* ADCCLK:  MCK / ((7+1)*2) */
 
+/* On some SAMA5's, the clocking to peripherals may be divided down from MCK,
+ * but not for the SAMA5D3.
+ */
+
+#define BOARD_USART_FREQUENCY      BOARD_MCK_FREQUENCY
 #if defined(CONFIG_SAMA5_EHCI) || defined(CONFIG_SAMA5_OHCI) || \
     defined(CONFIG_SAMA5_UDPHS)
 
