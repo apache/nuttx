@@ -254,12 +254,14 @@
 #define SAM_BOOTMEM_MMUFLAGS     MMU_ROMFLAGS
 #define SAM_ROM_MMUFLAGS         MMU_ROMFLAGS
 #define SAM_ISRAM_MMUFLAGS       MMU_MEMFLAGS
-#define SAM_SMD_MMUFLAGS         MMU_MEMFLAGS
+#define SAM_VDEC_MMUFLAGS        MMU_IOFLAGS
 #define SAM_UDPHSRAM_MMUFLAGS    MMU_IOFLAGS
 #define SAM_UHPOHCI_MMUFLAGS     MMU_IOFLAGS
 #define SAM_UHPEHCI_MMUFLAGS     MMU_IOFLAGS
 #define SAM_AXIMX_MMUFLAGS       MMU_IOFLAGS
 #define SAM_DAP_MMUFLAGS         MMU_IOFLAGS
+#define SAM_SMD_MMUFLAGS         MMU_MEMFLAGS
+#define SAM_L2CC_MMUFLAGS        MMU_IOFLAGS
 
 /* If the NFC is not being used, the NFC SRAM can be used as general purpose
  * SRAM (cached).  If the NFC is used, then the NFC SRAM should be treated

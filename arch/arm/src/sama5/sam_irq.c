@@ -350,7 +350,7 @@ static void sam_aic_initialize(uintptr_t base)
    * EOICR register.
    */
 
-  for (i = 0; i < 8 ; i++)
+  for (i = 0; i < 8; i++)
     {
       putreg32(AIC_EOICR_ENDIT, base + SAM_AIC_EOICR_OFFSET);
     }

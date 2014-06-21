@@ -188,11 +188,21 @@ static const struct section_mapping_s section_mapping[] =
   { SAM_NFCSRAM_PSECTION,  SAM_NFCSRAM_VSECTION,
     SAM_NFCSRAM_MMUFLAGS,  SAM_NFCSRAM_NSECTIONS
   },
+
 #ifndef CONFIG_PAGING /* Internal SRAM is already fully mapped */
   { SAM_ISRAM_PSECTION,    SAM_ISRAM_VSECTION,
     SAM_ISRAM_MMUFLAGS,    SAM_ISRAM_NSECTIONS
   },
 #endif
+
+#ifdef SAM_VDEC_PSECTION
+  /* If the memory map supports a video decoder (VDEC), then map it */
+
+  { SAM_VDEC_PSECTION,     SAM_VDEC_VSECTION,
+    SAM_VDEC_MMUFLAGS,     SAM_VDEC_NSECTIONS
+  },
+#endif
+
   { SAM_SMD_PSECTION,      SAM_SMD_VSECTION,
     SAM_SMD_MMUFLAGS,      SAM_SMD_NSECTIONS
   },
@@ -211,6 +221,14 @@ static const struct section_mapping_s section_mapping[] =
   { SAM_DAP_PSECTION,      SAM_DAP_VSECTION,
     SAM_DAP_MMUFLAGS,      SAM_DAP_NSECTIONS
   },
+
+#ifdef SAM_L2CC_PSECTION
+  /* If the memory map supports an L2 cache controller (L2CC), then map it */
+
+  { SAM_L2CC_PSECTION,     SAM_L2CC_VSECTION,
+    SAM_L2CC_MMUFLAGS,     SAM_L2CC_NSECTIONS
+  },
+#endif
 
 /* SAMA5 CS0 External Memories */
 

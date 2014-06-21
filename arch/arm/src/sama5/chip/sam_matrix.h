@@ -56,6 +56,7 @@
 /* These are bits maps of PIDs in the H64MX SPSELR registers.  These are used by
  * application code to quickly determine if a given PID is served by H32MX or H64MX
  * which, in turn, is needed to know if the peripheral secured in SPSELR).
+ * Reference: "In Matrix" column of "Table 9-1. Peripheral identifiers."
  *
  * NOTE that these hard-code bit values must match the PID assignments in
  * arch/arm/include/sama5/sama5*_irq.h.
