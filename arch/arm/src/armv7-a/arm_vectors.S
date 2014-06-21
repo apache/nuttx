@@ -87,7 +87,7 @@ g_fiqtmp:
  * Name: arm_vectorirq
  *
  * Description:
- *   Interrupt excetpion. Entered in IRQ mode with spsr = SVC CPSR, lr = SVC PC
+ *   Interrupt exception. Entered in IRQ mode with spsr = SVC CPSR, lr = SVC PC
  *
  ************************************************************************************/
 
@@ -109,7 +109,11 @@ arm_vectorirq:
 	/* Then switch back to SVC mode */
 
 	bic		lr, lr, #PSR_MODE_MASK	/* Keep F and T bits */
+#ifdef CONFIG_ARMV7A_DECODEFIQ
+	orr		lr, lr, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
+#else
 	orr		lr, lr, #(PSR_MODE_SVC | PSR_I_BIT)
+#endif
 	msr		cpsr_c, lr				/* Switch to SVC mode */
 
 	/* Create a context structure.  First set aside a stack frame
@@ -259,7 +263,7 @@ arm_vectordata:
 	/* Then switch back to SVC mode */
 
 	bic		lr, lr, #PSR_MODE_MASK	/* Keep F and T bits */
-	orr		lr, lr, #(PSR_MODE_SVC | PSR_I_BIT)
+	orr		lr, lr, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
 	msr		cpsr_c, lr				/* Switch to SVC mode */
 
 	/* Create a context structure.  First set aside a stack frame
@@ -342,7 +346,7 @@ arm_vectorprefetch:
 	/* Then switch back to SVC mode */
 
 	bic		lr, lr, #PSR_MODE_MASK	/* Keep F and T bits */
-	orr		lr, lr, #(PSR_MODE_SVC | PSR_I_BIT)
+	orr		lr, lr, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
 	msr		cpsr_c, lr				/* Switch to SVC mode */
 
 	/* Create a context structure.  First set aside a stack frame
@@ -422,7 +426,7 @@ arm_vectorundefinsn:
 	/* Then switch back to SVC mode */
 
 	bic		lr, lr, #PSR_MODE_MASK	/* Keep F and T bits */
-	orr		lr, lr, #(PSR_MODE_SVC | PSR_I_BIT)
+	orr		lr, lr, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
 	msr		cpsr_c, lr				/* Switch to SVC mode */
 
 	/* Create a context structure.  First set aside a stack frame
@@ -479,7 +483,7 @@ arm_vectorundefinsn:
  *
  * Description:
  *   Shouldn't happen unless a arm_decodefiq() is provided.  FIQ is primarily used
- *   with the TrustZone feature in order to handler secure interrupts.
+ *   with the TrustZone feature in order to handle secure interrupts.
  *
  ************************************************************************************/
 
@@ -502,7 +506,7 @@ arm_vectorfiq:
 	/* Then switch back to SVC mode */
 
 	bic		lr, lr, #PSR_MODE_MASK	/* Keep F and T bits */
-	orr		lr, lr, #(PSR_MODE_SVC | PSR_I_BIT)
+	orr		lr, lr, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
 	msr		cpsr_c, lr				/* Switch to SVC mode */
 
 	/* Create a context structure.  First set aside a stack frame
@@ -560,7 +564,7 @@ arm_vectorfiq:
 	.word	g_fiqtmp
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 .Lfiqstackbase:
-	.word	g_fiqstackbase
+	.word	g_intstackbase
 #endif
 
 #else
@@ -588,20 +592,5 @@ g_intstackbase:
 	.size	g_intstackbase, 4
 	.size	g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~3)
 
-#ifdef CONFIG_ARMV7A_DECODEFIQ
-
-	.globl	g_fiqstackalloc
-	.type	g_fiqstackalloc, object
-	.globl	g_fiqstackbase
-	.type	g_fiqstackbase, object
-
-g_fiqstackalloc:
-	.skip	((CONFIG_ARCH_INTERRUPTSTACK & ~3) - 4)
-g_fiqstackbase:
-	.skip	4
-	.size	g_fiqstackbase, 4
-	.size	g_fiqstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~3)
-
-#endif /* CONFIG_ARMV7A_DECODEFIQ */
 #endif /* CONFIG_ARCH_INTERRUPTSTACK > 3 */
 	.end
