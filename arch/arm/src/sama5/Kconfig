@@ -80,6 +80,7 @@ config SAMA5_HAVE_HSMCI2
 config SAMA5_HAVE_SAIC
 	bool
 	default n
+	select ARMV7A_DECODEFIQ
 
 config SAMA5_HAVE_SBM
 	bool
@@ -531,7 +532,8 @@ config SAMA5_SECURE
 	bool "Enable secure features"
 	default n
 	depends on SAMA5_HAVE_TRUSTZONE && EXPERIMENTAL
-	select ARMV7A_DECODEFIQ if SAMA5_HAVE_SAIC
+	---help---
+		Does not do anything now, but may in the future
 
 config SAMA5_PIO_IRQ
 	bool "PIO pin interrupts"

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/include/armv7-a/irq.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -277,6 +277,9 @@ static inline irqstate_t irqsave(void)
     (
       "\tmrs    %0, cpsr\n"
       "\tcpsid  i\n"
+#if defined(CONFIG_ARMV7A_DECODEFIQ)
+      "\tcpsid  f\n"
+#endif
       : "=r" (cpsr)
       :
       : "memory"
@@ -295,6 +298,9 @@ static inline irqstate_t irqenable(void)
     (
       "\tmrs    %0, cpsr\n"
       "\tcpsie  i\n"
+#if defined(CONFIG_ARMV7A_DECODEFIQ)
+      "\tcpsie  f\n"
+#endif
       : "=r" (cpsr)
       :
       : "memory"
