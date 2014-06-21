@@ -52,6 +52,27 @@
 
 #ifdef ATSAMA5D4
 #  define H64MX_DDR_SLAVE_PORT0          3
+
+/* These are bits maps of PIDs in the H64MX SPSELR registers.  These are used by
+ * application code to quickly determine if a given PID is served by H32MX or H64MX
+ * which, in turn, is needed to know if the peripheral secured in SPSELR).
+ *
+ * NOTE that these hard-code bit values must match the PID assignments in
+ * arch/arm/include/sama5/sama5*_irq.h.
+ */
+
+/* ARM=2, XDMAC0=8, CPKCC=10, AESB=13, MPDDRC=16, MATRIX0=18, VDEC=19 */
+
+#  define H64MX_SPSELR0_PIDS             0x000d2504
+
+/* XDMAC1=50, LCDC=51, ISI=52 */
+
+#  define H64MX_SPSELR1_PIDS             0x001c0000
+
+/* L2CC=67 */
+
+#  define H64MX_SPSELR2_PIDS             0x00000008
+
 #endif
 
 /* MATRIX register offsets **************************************************************/

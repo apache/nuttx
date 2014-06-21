@@ -94,6 +94,19 @@ static const uint8_t g_srctype[SCRTYPE_NTYPES] =
   0, 0, 1, 1, 2, 3
 };
 
+/* This is an arry of bit maps that can be used to quickly determine is the
+ * peripheral identified by its PID is served by H64MX or H32MX.  Then the
+ * appropriate MATRIX SPSELR register can be consulted to determine if the
+ * peripheral interrupts are secured or not.
+ */
+
+#if defined(CONFIG_SAMA5_HAVE_SAIC)
+static const uint32_t g_h64mxpids[3] =
+{
+  H64MX_SPSELR0_PIDS, H64MX_SPSELR1_PIDS, H64MX_SPSELR2_PIDS
+};
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -231,43 +244,10 @@ static uint32_t *sam_spurious(int irq, uint32_t *regs)
 
 static uint32_t *sam_fiqhandler(int irq, uint32_t *regs)
 {
-  /* This is probably irrelevant since FIQs are not used in this
-   * implementation.
-   */
+  /* Dispatch the FIQ */
 
-#if defined(CONFIG_DEBUG_IRQ) || defined(CONFIG_ARCH_STACKDUMP)
-  lldbg("FIQ?: IRQ: %d\n");
-#endif
-  PANIC();
-  return regs; /* Won't get here */
+  return arm_doirq(SAM_IRQ_FIQ, regs);
 }
-
-/****************************************************************************
- * Name: sam_aic_ish64mx
- *
- * Description:
- *   Return true if the peripheral is H64 Matrix.
- *
- * Input Parameter:
- *   PID = IRQ number
- *
- ****************************************************************************/
-
-#if defined(CONFIG_SAMA5_HAVE_SAIC)
-static inline bool sam_aic_ish64mx(uint32_t irq)
-{
-  return (irq == SAM_IRQ_ARM    ||
-          irq == SAM_IRQ_XDMAC0 ||
-       /* irq == SAM_IRQ_CPKCC  || */
-          irq == SAM_IRQ_AESB   ||
-          irq == SAM_IRQ_MPDDRC ||
-          irq == SAM_IRQ_VDEC   ||
-          irq == SAM_IRQ_XDMAC1 ||
-          irq == SAM_IRQ_LCDC   ||
-          irq == SAM_IRQ_ISI    ||
-          irq == SAM_IRQ_L2CC);
-}
-#endif
 
 /****************************************************************************
  * Name: sam_aic_issecure
@@ -285,7 +265,7 @@ static bool sam_aic_issecure(uint32_t irq)
 {
   uintptr_t regaddr;
   uint32_t bit;
-  int regndx;
+  unsigned int regndx;
 
   /* Get the register index and bit mask */
 
@@ -294,7 +274,8 @@ static bool sam_aic_issecure(uint32_t irq)
 
   /* Get the SPSELR register address */
 
-  if (sam_aic_ish64mx(irq))
+  DEBUGASSERT(regndx < 3);
+  if ((g_h64mxpids[regndx] & bit) != 0)
     {
       /* H64MX.  Use Matrix 0 */
 
@@ -626,18 +607,30 @@ uint32_t *arm_decodeirq(uint32_t *regs)
 
 uint32_t *arm_decodefiq(FAR uint32_t *regs)
 {
+  uint32_t ret;
+
   /* In order to distinguish a FIQ from a true secure interrupt we need to
    * check the state of the FIQ line in the SAIC_CISR register.
    */
 
   if ((getreg32(SAM_SAIC_CISR) & AIC_CISR_NFIQ) != 0)
     {
-      return arm_doirq(SAM_IRQ_FIQ, regs);
+      /* Handle the FIQ */
+
+      ret = arm_doirq(SAM_IRQ_FIQ, regs);
+
+      /* Acknowledge interrupt */
+
+      putreg32(AIC_EOICR_ENDIT, SAM_SAIC_EOICR);
     }
   else
     {
-      return sam_decodeirq(SAM_SAIC_VBASE, regs);
+      /* Handle the IRQ */
+
+      ret = sam_decodeirq(SAM_SAIC_VBASE, regs);
     }
+
+  return ret;
 }
 #endif
 

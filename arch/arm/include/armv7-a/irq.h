@@ -44,7 +44,9 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
 #include <nuttx/irq.h>
+
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #endif
@@ -93,7 +95,7 @@
  * The FPU provides an extension register file containing 32 single-
  * precision registers. These can be viewed as:
  *
- * - Sixteen 64-bit doubleword registers, D0-D15
+ * - Sixteen 64-bit double word registers, D0-D15
  * - Thirty-two 32-bit single-word registers, S0-S31
  *   S<2n> maps to the least significant half of D<n>
  *   S<2n+1> maps to the most significant half of D<n>.
@@ -190,8 +192,7 @@
  * Public Types
  ****************************************************************************/
 
-/* This struct defines the way the registers are stored.  We
- * need to save:
+/* This struct defines the way the registers are stored.  We need to save:
  *
  *  1  CPSR
  *  7  Static registers, v1-v7 (aka r4-r10)
@@ -213,16 +214,14 @@
 #ifndef __ASSEMBLY__
 struct xcptcontext
 {
-  /* The following function pointer is non-zero if there
-   * are pending signals to be processed.
+  /* The following function pointer is non-zero if there are pending signals
+   * to be processed.
    */
 
 #ifndef CONFIG_DISABLE_SIGNALS
   void *sigdeliver; /* Actual type is sig_deliver_t */
 
-  /* These are saved copies of LR and CPSR used during
-   * signal processing.
-   */
+  /* These are saved copies of LR and CPSR used during signal processing. */
 
   uint32_t saved_pc;
   uint32_t saved_cpsr;
@@ -233,7 +232,7 @@ struct xcptcontext
   uint32_t regs[XCPTCONTEXT_REGS];
 
   /* Extra fault address register saved for common paging logic.  In the
-   * case of the prefetch abort, this value is the same as regs[REG_R15];
+   * case of the pre-fetch abort, this value is the same as regs[REG_R15];
    * For the case of the data abort, this value is the value of the fault
    * address register (FAR) at the time of data abort exception.
    */
@@ -328,17 +327,18 @@ static inline void irqrestore(irqstate_t flags)
  * Public Variables
  ****************************************************************************/
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 #undef EXTERN
 #ifdef __cplusplus
