@@ -55,6 +55,7 @@
 #include <nuttx/net/uip/uip.h>
 #include <nuttx/net/uip/uip-arch.h>
 
+#include "tcp/tcp.h"
 #include "uip/uip_internal.h"
 
 /****************************************************************************
@@ -320,7 +321,7 @@ void uip_tcpfree(struct uip_conn *conn)
   FAR struct uip_readahead_s *readahead;
 #endif
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-  FAR struct uip_wrbuffer_s *wrbuffer;
+  FAR struct tcp_wrbuffer_s *wrbuffer;
 #endif
   uip_lock_t flags;
 
@@ -365,14 +366,14 @@ void uip_tcpfree(struct uip_conn *conn)
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   /* Release any write buffers attached to the connection */
 
-  while ((wrbuffer = (struct uip_wrbuffer_s *)sq_remfirst(&conn->write_q)) != NULL)
+  while ((wrbuffer = (struct tcp_wrbuffer_s *)sq_remfirst(&conn->write_q)) != NULL)
     {
-      uip_tcpwrbuffer_release(wrbuffer);
+      tcp_wrbuffer_release(wrbuffer);
     }
 
-  while ((wrbuffer = (struct uip_wrbuffer_s *)sq_remfirst(&conn->unacked_q)) != NULL)
+  while ((wrbuffer = (struct tcp_wrbuffer_s *)sq_remfirst(&conn->unacked_q)) != NULL)
     {
-      uip_tcpwrbuffer_release(wrbuffer);
+      tcp_wrbuffer_release(wrbuffer);
     }
 #endif
 

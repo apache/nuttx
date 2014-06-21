@@ -1,9 +1,8 @@
 /****************************************************************************
- * net/tcp/tcp_wrbuffer.c
+ * net/tcp/tcp.h
  *
- *   Copyright (C) 2007-2009, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Jason Jiang  <jasonj@live.cn>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,61 +33,39 @@
  *
  ****************************************************************************/
 
+#ifndef _NET_TCP_TCP_H
+#define _NET_TCP_TCP_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/net/uip/uipopt.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_TCP) && defined(CONFIG_NET_TCP_WRITE_BUFFERS)
+#include <nuttx/config.h>
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_NET_TCP_WRBUFFER_DEBUG)
-/* Force debug output (from this file only) */
+#ifdef CONFIG_NET_TCP
 
-#  undef  CONFIG_DEBUG_NET
-#  define CONFIG_DEBUG_NET 1
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Type Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifdef __cplusplus
+#  define EXTERN extern "C"
+extern "C"
+{
+#else
+#  define EXTERN extern
 #endif
 
-#include <queue.h>
-#include <semaphore.h>
-#include <debug.h>
-
-#include "uip/uip_internal.h"
-
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/* Package all globals used by this logic into a structure */
-
-struct wrbuffer_s
-{
-  /* The semaphore to protect the buffers */
-
-  sem_t sem;
-
-  /* This is the list of available write buffers */
-
-  sq_queue_t freebuffers;
-
-  /* These are the pre-allocated write buffers */
-
-  struct tcp_wrbuffer_s buffers[CONFIG_NET_NTCP_WRITE_BUFFERS];
-};
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/* This is the state of the global write buffer resource */
-
-static struct wrbuffer_s g_wrbuffer;
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -102,19 +79,9 @@ static struct wrbuffer_s g_wrbuffer;
  *
  ****************************************************************************/
 
-void tcp_wrbuffer_initialize(void)
-{
-  int i;
-
-  sq_init(&g_wrbuffer.freebuffers);
-
-  for (i = 0; i < CONFIG_NET_NTCP_WRITE_BUFFERS; i++)
-    {
-      sq_addfirst(&g_wrbuffer.buffers[i].wb_node, &g_wrbuffer.freebuffers);
-    }
-
-  sem_init(&g_wrbuffer.sem, 0, CONFIG_NET_NTCP_WRITE_BUFFERS);
-}
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+void tcp_wrbuffer_initialize(void);
+#endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
 
 /****************************************************************************
  * Function: tcp_wrbuffer_alloc
@@ -129,27 +96,13 @@ void tcp_wrbuffer_initialize(void)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+struct tcp_wrbuffer_s;
+struct timespec;
+
 FAR struct tcp_wrbuffer_s *
-tcp_wrbuffer_alloc(FAR const struct timespec *abstime)
-{
-  int ret;
-
-  if (abstime)
-    {
-      ret = sem_timedwait(&g_wrbuffer.sem, abstime);
-    }
-  else
-    {
-      ret = sem_wait(&g_wrbuffer.sem);
-    }
-
-  if (ret != 0)
-    {
-      return NULL;
-    }
-
-  return (FAR struct tcp_wrbuffer_s*)sq_remfirst(&g_wrbuffer.freebuffers);
-}
+tcp_wrbuffer_alloc(FAR const struct timespec *abstime);
+#endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
 
 /****************************************************************************
  * Function: tcp_wrbuffer_release
@@ -164,10 +117,14 @@ tcp_wrbuffer_alloc(FAR const struct timespec *abstime)
  *
  ****************************************************************************/
 
-void tcp_wrbuffer_release(FAR struct tcp_wrbuffer_s *wrbuffer)
-{
-  sq_addlast(&wrbuffer->wb_node, &g_wrbuffer.freebuffers);
-  sem_post(&g_wrbuffer.sem);
-}
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+void tcp_wrbuffer_release(FAR struct tcp_wrbuffer_s *wrbuffer);
+#endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
 
-#endif /* CONFIG_NET && CONFIG_NET_TCP && CONFIG_NET_TCP_WRITE_BUFFERS */
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* CONFIG_NET_TCP */
+#endif /* _NET_TCP_TCP_H */

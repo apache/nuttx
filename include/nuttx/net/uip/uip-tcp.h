@@ -261,7 +261,7 @@ struct uip_readahead_s
 /* This structure supports TCP write buffering */
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-struct uip_wrbuffer_s
+struct tcp_wrbuffer_s
 {
   sq_entry_t wb_node;      /* Supports a singly linked list */
   uint32_t   wb_seqno;     /* Sequence number of the write segment */
@@ -434,14 +434,6 @@ int uip_unlisten(struct uip_conn *conn);
 FAR struct uip_readahead_s *uip_tcpreadahead_alloc(void);
 void uip_tcpreadahead_release(FAR struct uip_readahead_s *readahead);
 #endif /* CONFIG_NET_TCP_READAHEAD */
-
-/* Access to TCP write buffers */
-
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-struct timespec;
-FAR struct uip_wrbuffer_s *uip_tcpwrbuffer_alloc(FAR const struct timespec *abstime);
-void uip_tcpwrbuffer_release(FAR struct uip_wrbuffer_s *wrbuffer);
-#endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
 
 /* Backlog support */
 

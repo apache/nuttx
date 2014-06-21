@@ -47,6 +47,7 @@
 #include <stdint.h>
 #include <nuttx/net/uip/uip.h>
 
+#include "tcp/tcp.h"
 #include "uip_internal.h"
 
 /****************************************************************************
@@ -148,7 +149,7 @@ void uip_initialize(void)
   /* Initialize the TCP/IP write buffering */
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-  uip_tcpwrbuffer_init();
+  tcp_wrbuffer_initialize();
 #endif
 
   /* Initialize the UDP connection structures */

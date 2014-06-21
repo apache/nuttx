@@ -67,6 +67,7 @@
 #include <nuttx/net/uip/uip-arch.h>
 
 #include "net_internal.h"
+#include "tcp/tcp.h"
 #include "uip/uip_internal.h"
 
 /****************************************************************************
@@ -102,7 +103,7 @@
  *
  ****************************************************************************/
 
-static void send_insert_seqment(FAR struct uip_wrbuffer_s *segment,
+static void send_insert_seqment(FAR struct tcp_wrbuffer_s *segment,
                                 FAR sq_queue_t *q)
 {
   sq_entry_t *entry = (sq_entry_t*)segment;
@@ -111,7 +112,7 @@ static void send_insert_seqment(FAR struct uip_wrbuffer_s *segment,
   sq_entry_t *itr;
   for (itr = sq_peek(q); itr; itr = sq_next(itr))
     {
-      FAR struct uip_wrbuffer_s *segment0 = (FAR struct uip_wrbuffer_s*)itr;
+      FAR struct tcp_wrbuffer_s *segment0 = (FAR struct tcp_wrbuffer_s*)itr;
       if (segment0->wb_seqno < segment->wb_seqno)
         {
           insert = itr;
@@ -168,14 +169,14 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
     {
       FAR sq_entry_t *entry;
       FAR sq_entry_t *next;
-      FAR struct uip_wrbuffer_s *segment;
+      FAR struct tcp_wrbuffer_s *segment;
       uint32_t ackno;
 
       ackno = uip_tcpgetsequence(TCPBUF->ackno);
       for (entry = sq_peek(&conn->unacked_q); entry; entry = next)
         {
           next    = sq_next(entry);
-          segment = (FAR struct uip_wrbuffer_s*)entry;
+          segment = (FAR struct tcp_wrbuffer_s*)entry;
 
           if (segment->wb_seqno < ackno)
             {
@@ -188,7 +189,7 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
 
               /* Return the write buffer to the pool of free buffers */
 
-              uip_tcpwrbuffer_release(segment);
+              tcp_wrbuffer_release(segment);
             }
         }
     }
@@ -217,7 +218,7 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
 
       while ((entry = sq_remlast(&conn->unacked_q)))
         {
-          struct uip_wrbuffer_s *segment = (struct uip_wrbuffer_s*)entry;
+          struct tcp_wrbuffer_s *segment = (struct tcp_wrbuffer_s*)entry;
 
           if (segment->wb_nrtx >= UIP_MAXRTX)
             {
@@ -225,7 +226,7 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
 
               /* Return the write buffer */
 
-              uip_tcpwrbuffer_release(segment);
+              tcp_wrbuffer_release(segment);
 
               /* NOTE expired is different from un-ACKed, it is designed to
                * represent the number of segments that have been sent,
@@ -282,13 +283,13 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
       if (arp_find(conn->ripaddr) != NULL)
 #endif
         {
-          FAR struct uip_wrbuffer_s *segment;
+          FAR struct tcp_wrbuffer_s *segment;
           FAR void *sndbuf;
           size_t sndlen;
 
           /* Get the amount of data that we can send in the next packet */
 
-          segment = (FAR struct uip_wrbuffer_s *)sq_remfirst(&conn->write_q);
+          segment = (FAR struct tcp_wrbuffer_s *)sq_remfirst(&conn->write_q);
           if (segment)
             {
               sndbuf = segment->wb_buffer;
@@ -495,7 +496,7 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
 
           while (completed < len)
             {
-              FAR struct uip_wrbuffer_s *segment = uip_tcpwrbuffer_alloc(NULL);
+              FAR struct tcp_wrbuffer_s *segment = tcp_wrbuffer_alloc(NULL);
               if (segment)
                 {
                   size_t cnt;

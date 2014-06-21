@@ -194,17 +194,6 @@ FAR struct uip_readahead_s *uip_tcpreadahead_alloc(void);
 void uip_tcpreadahead_release(FAR struct uip_readahead_s *readahead);
 #endif /* CONFIG_NET_TCP_READAHEAD */
 
-/* Defined in tcp_wrbuffer.c ************************************************/
-
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-void uip_tcpwrbuffer_init(void);
-
-struct uip_wrbuffer_s;
-struct timespec;
-FAR struct uip_wrbuffer_s *uip_tcpwrbuffer_alloc(FAR const struct timespec *abstime);
-void uip_tcpwrbuffer_release(FAR struct uip_wrbuffer_s *wrbuffer);
-#endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
-
 #endif /* CONFIG_NET_TCP */
 
 #ifdef CONFIG_NET_UDP
