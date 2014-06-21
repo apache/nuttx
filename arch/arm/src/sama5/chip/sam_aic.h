@@ -163,10 +163,10 @@
 
 /* Interrupt Pending Register 0-3 */
 
-#define AIC_IPR0(pid)           (1 << (pid))
-#define AIC_IPR1(pid)           (1 << ((pid) - 32)
-#define AIC_IPR2(pid)           (1 << ((pid) - 64)
-#define AIC_IPR3(pid)           (1 << ((pid) - 96)
+#define AIC_IPR0(pid)          (1 << (pid))
+#define AIC_IPR1(pid)          (1 << ((pid) - 32)
+#define AIC_IPR2(pid)          (1 << ((pid) - 64)
+#define AIC_IPR3(pid)          (1 << ((pid) - 96)
 
 /* Interrupt Mask Register */
 
@@ -220,15 +220,15 @@
 
 /* Write Protect Mode Register */
 
-#define AIC_WPMR_WPEN           (1 << 0)  /* Bit 0:  Write Protect Enable */
-#define AIC_WPMR_WPKEY_SHIFT    (8)       /* Bits 8-31: Write Protect KEY */
-#define AIC_WPMR_WPKEY_MASK     (0x00ffffff << AIC_WPMR_WPKEY_SHIFT)
-#  define AIC_WPMR_WPKEY        (0x00414943 << AIC_WPMR_WPKEY_SHIFT)
+#define AIC_WPMR_WPEN          (1 << 0)  /* Bit 0:  Write Protect Enable */
+#define AIC_WPMR_WPKEY_SHIFT   (8)       /* Bits 8-31: Write Protect KEY */
+#define AIC_WPMR_WPKEY_MASK    (0x00ffffff << AIC_WPMR_WPKEY_SHIFT)
+#  define AIC_WPMR_WPKEY       (0x00414943 << AIC_WPMR_WPKEY_SHIFT)
 
 /* Write Protect Status Register */
 
-#define AIC_WPSR_WPVS           (1 << 0)  /* Bit 0:  Write Protect Violation Status */
-#define AIC_WPSR_WPVSRC_SHIFT   (8)       /* Bits 8-23: Write Protect Violation Source */
-#define AIC_WPSR_WPVSRC_MASK    (0x0000ffff << AIC_WPSR_WPVSRC_SHIFT)
+#define AIC_WPSR_WPVS          (1 << 0)  /* Bit 0:  Write Protect Violation Status */
+#define AIC_WPSR_WPVSRC_SHIFT  (8)       /* Bits 8-23: Write Protect Violation Source */
+#define AIC_WPSR_WPVSRC_MASK   (0x0000ffff << AIC_WPSR_WPVSRC_SHIFT)
 
 #endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAM_AIC_H */

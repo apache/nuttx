@@ -115,16 +115,16 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
       flags = irqsave();
 
-      /* First, handle some special cases when the signal is
-       * being delivered to the currently executing task.
+      /* First, handle some special cases when the signal is being delivered
+       * to the currently executing task.
        */
 
       sdbg("rtcb=0x%p current_regs=0x%p\n", g_readytorun.head, current_regs);
 
       if (tcb == (struct tcb_s*)g_readytorun.head)
         {
-          /* CASE 1:  We are not in an interrupt handler and
-           * a task is signalling itself for some reason.
+          /* CASE 1:  We are not in an interrupt handler and a task is
+           * signalling itself for some reason.
            */
 
           if (!current_regs)
@@ -134,16 +134,16 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
               sigdeliver(tcb);
             }
 
-          /* CASE 2:  We are in an interrupt handler AND the
-           * interrupted task is the same as the one that
-           * must receive the signal, then we will have to modify
-           * the return state as well as the state in the TCB.
+          /* CASE 2:  We are in an interrupt handler AND the interrupted
+           * task is the same as the one that must receive the signal, then
+           * we will have to modify the return state as well as the state
+           * in the TCB.
            *
-           * Hmmm... there looks like a latent bug here: The following
-           * logic would fail in the strange case where we are in an
-           * interrupt handler, the thread is signalling itself, but
-           * a context switch to another task has occurred so that
-           * current_regs does not refer to the thread at g_readytorun.head!
+           * Hmmm... there looks like a latent bug here: The following logic
+           * would fail in the strange case where we are in an interrupt
+           * handler, the thread is signalling itself, but a context switch
+           * to another task has occurred so that current_regs does not
+           * refer to the thread at g_readytorun.head!
            */
 
           else
@@ -162,27 +162,26 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                */
 
               current_regs[REG_PC]      = (uint32_t)up_sigdeliver;
-              current_regs[REG_CPSR]    = PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT;
+              current_regs[REG_CPSR]    = (PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT);
 
-              /* And make sure that the saved context in the TCB
-               * is the same as the interrupt return context.
+              /* And make sure that the saved context in the TCB is the same
+               * as the interrupt return context.
                */
 
               up_savestate(tcb->xcp.regs);
             }
         }
 
-      /* Otherwise, we are (1) signaling a task is not running
-       * from an interrupt handler or (2) we are not in an
-       * interrupt handler and the running task is signalling
-       * some non-running task.
+      /* Otherwise, we are (1) signaling a task is not running from an
+       * interrupt handler or (2) we are not in an interrupt handler and the
+       * running task is signalling some non-running task.
        */
 
       else
         {
-          /* Save the return lr and cpsr and one scratch register
-           * These will be restored by the signal trampoline after
-           * the signals have been delivered.
+          /* Save the return lr and cpsr and one scratch register.  These
+           * will be restored by the signal trampoline after the signals
+           * have been delivered.
            */
 
           tcb->xcp.sigdeliver       = sigdeliver;
@@ -194,7 +193,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            */
 
           tcb->xcp.regs[REG_PC]      = (uint32_t)up_sigdeliver;
-          tcb->xcp.regs[REG_CPSR]    = PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT;
+          tcb->xcp.regs[REG_CPSR]    = (PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT);
         }
 
       irqrestore(flags);
