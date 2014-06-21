@@ -136,7 +136,7 @@ static void sam_dumpaic(const char *msg, uintptr_t base, int irq)
 
   /* SAMA5D4 does not have the FFSR register */
 
-#ifdef SAM_AIC_FFSR
+#if defined(SAM_AIC_FFSR)
   lldbg("  IMR: %08x CISR: %08x  SPU: %08x FFSR: %08x\n",
         getreg32(base + SAM_AIC_IMR_OFFSET),
         getreg32(base + SAM_AIC_CISR_OFFSET),
@@ -253,7 +253,7 @@ static uint32_t *sam_fiqhandler(int irq, uint32_t *regs)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SAMA5_SECURE) && defined(CONFIG_SAMA5_HAVE_SAIC)
+#if defined(CONFIG_SAMA5_HAVE_SAIC)
 static inline bool sam_aic_ish64mx(uint32_t irq)
 {
   return (irq == SAM_IRQ_ARM    ||
@@ -280,7 +280,7 @@ static inline bool sam_aic_ish64mx(uint32_t irq)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SAMA5_SECURE) && defined(CONFIG_SAMA5_HAVE_SAIC)
+#if defined(CONFIG_SAMA5_HAVE_SAIC)
 static bool sam_aic_issecure(uint32_t irq)
 {
   uintptr_t regaddr;
@@ -418,7 +418,7 @@ void up_irqinitialize(void)
 
   sam_aic_initialize(SAM_AIC_VBASE);
 
-#if defined(CONFIG_SAMA5_SECURE) && defined(CONFIG_SAMA5_HAVE_SAIC)
+#if defined(CONFIG_SAMA5_HAVE_SAIC)
   /* Initialize the Secure Advanced Interrupt Controller (SAIC) */
 
   sam_aic_initialize(SAM_SAIC_VBASE);
@@ -621,10 +621,10 @@ uint32_t *arm_decodeirq(uint32_t *regs)
   return sam_decodeirq(SAM_AIC_VBASE, regs);
 }
 
-#if defined(CONFIG_SAMA5_SECURE) && defined(CONFIG_SAMA5_HAVE_SAIC)
+#if defined(CONFIG_SAMA5_HAVE_SAIC)
 /* This is the entry point from the ARM FIQ vector handler */
 
-uint32_t *arm_decodefiq(uint32_t *regs)
+uint32_t *arm_decodefiq(FAR uint32_t *regs)
 {
   /* In order to distinguish a FIQ from a true secure interrupt we need to
    * check the state of the FIQ line in the SAIC_CISR register.
@@ -632,7 +632,7 @@ uint32_t *arm_decodefiq(uint32_t *regs)
 
   if ((getreg32(SAM_SAIC_CISR) & AIC_CISR_NFIQ) != 0)
     {
-      return sam_fiqhandler(SAM_IRQ_FIQ, regs);
+      return arm_doirq(SAM_IRQ_FIQ, regs);
     }
   else
     {
@@ -681,7 +681,7 @@ static void sam_disable_irq(uintptr_t base, int irq)
 
 void up_disable_irq(int irq)
 {
-#if defined(CONFIG_SAMA5_SECURE) && defined(CONFIG_SAMA5_HAVE_SAIC)
+#if defined(CONFIG_SAMA5_HAVE_SAIC)
   if (sam_aic_issecure(irq))
     {
       sam_disable_irq(SAM_SAIC_VBASE, irq);
@@ -733,7 +733,7 @@ static void sam_enable_irq(uintptr_t base, int irq)
 
 void up_enable_irq(int irq)
 {
-#if defined(CONFIG_SAMA5_SECURE) && defined(CONFIG_SAMA5_HAVE_SAIC)
+#if defined(CONFIG_SAMA5_HAVE_SAIC)
   if (sam_aic_issecure(irq))
     {
       sam_enable_irq(SAM_SAIC_VBASE, irq);
@@ -809,7 +809,7 @@ static int sam_prioritize_irq(uint32_t base, int irq, int priority)
 
 int up_prioritize_irq(int irq, int priority)
 {
-#if defined(CONFIG_SAMA5_SECURE) && defined(CONFIG_SAMA5_HAVE_SAIC)
+#if defined(CONFIG_SAMA5_HAVE_SAIC)
   if (sam_aic_issecure(irq))
     {
       sam_prioritize_irq(SAM_SAIC_VBASE, irq, priority);
@@ -867,7 +867,7 @@ static void _sam_irq_srctype(uintptr_t base, int irq,
 
 void sam_irq_srctype(int irq, enum sam_srctype_e srctype)
 {
-#if defined(CONFIG_SAMA5_SECURE) && defined(CONFIG_SAMA5_HAVE_SAIC)
+#if defined(CONFIG_SAMA5_HAVE_SAIC)
   if (sam_aic_issecure(irq))
     {
       _sam_irq_srctype(SAM_SAIC_VBASE, irq, srctype);

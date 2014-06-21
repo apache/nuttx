@@ -63,6 +63,11 @@ g_undeftmp:
 g_aborttmp:
 	.word	0		/* Saved lr */
 	.word	0		/* Saved spsr */
+#ifdef CONFIG_ARMV7A_DECODEFIQ
+g_fiqtmp:
+	.word	0		/* Saved lr */
+	.word	0		/* Saved spsr */
+#endif
 
 /************************************************************************************
  * Assembly Macros
@@ -86,6 +91,7 @@ g_aborttmp:
  *
  ************************************************************************************/
 
+	.globl	arm_decodeirq
 	.globl	arm_vectorirq
 	.type	arm_vectorirq, %function
 
@@ -153,7 +159,6 @@ arm_vectorirq:
 
 	/* Restore the CPSR, SVC mode registers and return */
 
-.Lnoirqset:
 	ldr		r1, [r0, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
 	msr		spsr, r1
 	ldmia	r0, {r0-r15}^			/* Return */
@@ -175,6 +180,7 @@ arm_vectorirq:
  *
  ************************************************************************************/
 
+	.globl	arm_syscall
 	.globl	arm_vectorsvc
 	.type	arm_vectorsvc, %function
 
@@ -235,6 +241,7 @@ arm_vectorsvc:
  *
  ************************************************************************************/
 
+	.globl	arm_dataabort
 	.globl	arm_vectordata
 	.type	arm_vectordata, %function
 
@@ -317,6 +324,7 @@ arm_vectordata:
  *
  ************************************************************************************/
 
+	.globl	arm_prefetchabort
 	.globl	arm_vectorprefetch
 	.type	arm_vectorprefetch, %function
 
@@ -397,6 +405,7 @@ arm_vectorprefetch:
  *
  ************************************************************************************/
 
+	.globl	arm_undefinedinsn
 	.globl	arm_vectorundefinsn
 	.type	arm_vectorundefinsn, %function
 
@@ -474,12 +483,86 @@ arm_vectorundefinsn:
  *
  ************************************************************************************/
 
+#ifdef CONFIG_ARMV7A_DECODEFIQ
+	.globl	arm_decodefiq
+#endif
 	.globl	arm_vectorfiq
 	.type	arm_vectorfiq, %function
 
 arm_vectorfiq:
 #ifdef CONFIG_ARMV7A_DECODEFIQ
-#  error Missing logic
+	/* On entry we are free to use the FIQ mode registers r8 through r14 */
+
+	ldr		r13, .Lfiqtmp			/* Points to temp storage */
+	sub		lr, lr, #4				/* Fixup return */
+	str		lr, [r13]				/* Save in temp storage */
+	mrs		lr, spsr				/* Get SPSR_fiq */
+	str		lr, [r13, #4]			/* Save in temp storage */
+
+	/* Then switch back to SVC mode */
+
+	bic		lr, lr, #PSR_MODE_MASK	/* Keep F and T bits */
+	orr		lr, lr, #(PSR_MODE_SVC | PSR_I_BIT)
+	msr		cpsr_c, lr				/* Switch to SVC mode */
+
+	/* Create a context structure.  First set aside a stack frame
+	 * and store r0-r12 into the frame.
+	 */
+
+	sub		sp, sp, #XCPTCONTEXT_SIZE
+	stmia	sp, {r0-r12}			/* Save the SVC mode regs */
+
+	/* Get the correct values of r13(sp) and r14(lr) in r1 and r2 */
+
+	add		r1, sp, #XCPTCONTEXT_SIZE
+	mov		r2, r14
+
+	/* Get the values for r15(pc) and CPSR in r3 and r4 */
+
+	ldr		r0, .Lfiqtmp			/* Points to temp storage */
+	ldmia	r0, {r3, r4}			/* Recover r1=lr_IRQ, r2=spsr_IRQ */
+
+	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
+	stmia	r0, {r1-r4}
+
+	/* Then call the IRQ handler with interrupts disabled. */
+
+	mov		fp, #0					/* Init frame pointer */
+	mov		r0, sp					/* Get r0=xcp */
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
+	ldr		sp, .Lfiqstackbase		/* SP = interrupt stack base */
+	str		r0, [sp]				/* Save the user stack pointer */
+	mov		r4, sp					/* Save the SP in a preserved register */
+	bic		sp, sp, #7				/* Force 8-byte alignement */
+	bl		arm_decodefiq			/* Call the handler */
+	ldr		sp, [r4]				/* Restore the user stack pointer */
+#else
+	mov		r4, sp					/* Save the SP in a preserved register */
+	bic		sp, sp, #7				/* Force 8-byte alignement */
+	bl		arm_decodefiq			/* Call the handler */
+	mov		sp, r4					/* Restore the possibly unaligned stack pointer */
+#endif
+
+	/* Upon return from arm_decodefiq, r0 holds the pointer to the register
+	 * state save area to use to restore the registers.  This may or may not
+	 * be the same value that was passed to arm_decodefiq:  It will differ if a
+	 * context switch is required.
+	 */
+
+	/* Restore the CPSR, SVC mode registers and return */
+
+	ldr		r1, [r0, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
+	msr		spsr, r1
+	ldmia	r0, {r0-r15}^			/* Return */
+
+.Lfiqtmp:
+	.word	g_fiqtmp
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
+.Lfiqstackbase:
+	.word	g_fiqstackbase
+#endif
+
 #else
 	subs	pc, lr, #4
 #endif
@@ -492,15 +575,33 @@ arm_vectorfiq:
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 	.bss
 	.align	4
+
 	.globl	g_intstackalloc
 	.type	g_intstackalloc, object
 	.globl	g_intstackbase
 	.type	g_intstackbase, object
+
 g_intstackalloc:
 	.skip	((CONFIG_ARCH_INTERRUPTSTACK & ~3) - 4)
 g_intstackbase:
 	.skip	4
 	.size	g_intstackbase, 4
 	.size	g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~3)
-#endif
+
+#ifdef CONFIG_ARMV7A_DECODEFIQ
+
+	.globl	g_fiqstackalloc
+	.type	g_fiqstackalloc, object
+	.globl	g_fiqstackbase
+	.type	g_fiqstackbase, object
+
+g_fiqstackalloc:
+	.skip	((CONFIG_ARCH_INTERRUPTSTACK & ~3) - 4)
+g_fiqstackbase:
+	.skip	4
+	.size	g_fiqstackbase, 4
+	.size	g_fiqstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~3)
+
+#endif /* CONFIG_ARMV7A_DECODEFIQ */
+#endif /* CONFIG_ARCH_INTERRUPTSTACK > 3 */
 	.end
