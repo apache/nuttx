@@ -607,7 +607,7 @@ uint32_t *arm_decodeirq(uint32_t *regs)
 
 uint32_t *arm_decodefiq(FAR uint32_t *regs)
 {
-  uint32_t ret;
+  uint32_t *ret;
 
   /* In order to distinguish a FIQ from a true secure interrupt we need to
    * check the state of the FIQ line in the SAIC_CISR register.
