@@ -7461,4 +7461,7 @@
 	* tools/mkfsdata.pl:  Apparently, the trailing the 0x00 in http server
 	  files is seen as a bug in javascript and images.  From Max/Himax
 	  (2014-6-19).
+	* net/ and include/nutt/net (many files):  Conversion of the TCP
+	  write buffering logic to use I/O buffer chains (not tested on initial
+	  check-in) (2014-6-22).
 

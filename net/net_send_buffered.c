@@ -665,7 +665,7 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
         }
       else
         {
-          FAR struct tcp_wrbuffer_s *wrb = tcp_wrbuffer_alloc();
+          FAR struct tcp_wrbuffer_s *wrb;
 
           /* Set up the callback in the connection */
 
@@ -690,6 +690,7 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
                */
 
               sq_addlast(&wrb->wb_node, &conn->write_q);
+              nvdbg("Queued WRB=%p pktlen=%d\n", wrb, WRB_PKTLEN(wrb));
 
               /* Notify the device driver of the availability of TX data */
 

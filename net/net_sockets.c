@@ -105,6 +105,12 @@ void net_initialize(void)
 
   uip_initialize();
 
+  /* Initialize I/O buffering */
+
+#ifdef CONFIG_NET_IOB
+  iob_initialize();
+#endif
+
 #ifdef CONFIG_NET_ROUTE
   /* Initialize the routing table */
 
