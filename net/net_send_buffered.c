@@ -548,18 +548,21 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
               conn->sent    += sndlen;
             }
 
-          nllvdbg("SEND: nrtx=%d unacked=%d sent=%d\n",
-                  WRB_NRTX(wrb), conn->unacked, conn->sent);
+          nllvdbg("SEND: wrb=%p nrtx=%d unacked=%d sent=%d\n",
+                  wrb, WRB_NRTX(wrb), conn->unacked, conn->sent);
 
           /* Increment the count of bytes sent from this write buffer */
 
           WRB_SENT(wrb) += sndlen;
-          DEBUGASSERT(WRB_SENT(wrb) <= WRB_PKTLEN(wrb));
+
+          nllvdbg("SEND: wrb=%p sent=%d pktlen=%d\n",
+                  wrb, WRB_SENT(wrb), WRB_PKTLEN(wrb));
 
           /* Remove the write buffer from the write queue if the
            * last of the data has been sent from the buffer.
            */
 
+          DEBUGASSERT(WRB_SENT(wrb) <= WRB_PKTLEN(wrb));
           if (WRB_SENT(wrb) >= WRB_PKTLEN(wrb))
             {
               FAR struct tcp_wrbuffer_s *tmp;

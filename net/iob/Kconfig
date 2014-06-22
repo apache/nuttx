@@ -42,4 +42,15 @@ config IOB_NCHAINS
 		I/O buffer chain containers that also carry a payload of usage
 		specific information.
 
+config NET_IOB_DEBUG
+	bool "Force I/O buffer debug"
+	default n
+	depends on DEBUG
+	---help---
+		This option will force debug output from I/O buffer logic,
+		even without network debug output.  This is not normally something
+		that would want to do but is convenient if you are debugging the
+		I/O buffer logic and do not want to get overloaded with other
+		network-related debug output.
+
 endif # NET_IOB

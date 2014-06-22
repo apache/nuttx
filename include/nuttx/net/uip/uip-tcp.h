@@ -134,7 +134,9 @@
 #  define WRB_IOB(wrb)            ((wrb)->wb_iob)
 #  define WRB_COPYOUT(wrb,dest,n) (iob_copyout(dest,(wrb)->wb_iob,(n),0))
 #  define WRB_COPYIN(wrb,src,n)   (iob_copyin((wrb)->wb_iob,src,(n),0))
-#  define WRB_TRIM(wrb,n)         (iob_trimhead((wrb)->wb_iob,(n)))
+
+#  define WRB_TRIM(wrb,n) \
+  do { (wrb)->wb_iob = iob_trimhead((wrb)->wb_iob,(n)); } while (0)
 
 #ifdef CONFIG_DEBUG
 #  define WRB_DUMP(msg,wrb)       tcp_writebuffer_dump(msg,wrb)

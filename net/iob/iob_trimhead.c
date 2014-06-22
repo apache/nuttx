@@ -39,6 +39,13 @@
 
 #include <nuttx/config.h>
 
+#if defined(CONFIG_DEBUG) && defined(CONFIG_NET_IOB_DEBUG)
+/* Force debug output (from this file only) */
+
+#  undef  CONFIG_DEBUG_NET
+#  define CONFIG_DEBUG_NET 1
+#endif
+
 #include <assert.h>
 #include <debug.h>
 
@@ -82,23 +89,22 @@
 FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
 {
   uint16_t pktlen;
-  unsigned int len;
 
-  nllvdbg("iob=%p pktlen=%d trimlen=%d\n", iob, iob->io_pktlen, trimlen);
+  nllvdbg("iob=%p trimlen=%d\n", iob, trimlen);
 
   if (iob && trimlen > 0)
     {
       /* Trim from the head of the I/IO buffer chain */
 
       pktlen = iob->io_pktlen;
-      len    = trimlen;
-
-      while (len > 0 && iob != NULL)
+      while (trimlen > 0 && iob != NULL)
         {
           /* Do we trim this entire I/O buffer away? */
 
-          nllvdbg("iob=%p len=%d vs %d\n", iob, iob->io_len, len);
-          if (iob->io_len <= len)
+          nllvdbg("iob=%p io_len=%d pktlen=%d trimlen=%d\n",
+                  iob, iob->io_len, pktlen, trimlen);
+
+          if (iob->io_len <= trimlen)
             {
               FAR struct iob_s *next;
 
@@ -107,7 +113,7 @@ FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
                */
 
               pktlen        -= iob->io_len;
-              len           -= iob->io_len;
+              trimlen       -= iob->io_len;
               iob->io_len    = 0;
               iob->io_offset = 0;
 
@@ -126,8 +132,9 @@ FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
 
               /* Free this entry and set the next I/O buffer as the head */
 
+              nllvdbg("iob=%p: Freeing\n", iob);
               (void)iob_free(iob);
-              iob   = next;
+              iob = next;
             }
           else
             {
@@ -135,10 +142,10 @@ FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
                * stop the trim.
                */
 
-              pktlen         -= len;
-              iob->io_len    -= len;
-              iob->io_offset += len;
-              len             = 0;
+              pktlen         -= trimlen;
+              iob->io_len    -= trimlen;
+              iob->io_offset += trimlen;
+              trimlen         = 0;
             }
         }
 

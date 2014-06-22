@@ -106,9 +106,10 @@ config NET_TCP_WRBUFFER_DEBUG
 	bool "Force write buffer debug"
 	default n
 	depends on DEBUG
+	select NET_IOB_DEBUG
 	---help---
 		This option will force debug output from TCP write buffer logic,
-		even with network debug output.  This is not normally something
+		even without network debug output.  This is not normally something
 		that would want to do but is convenient if you are debugging the
 		write buffer logic and do not want to get overloaded with other
 		network-related debug output.
