@@ -222,11 +222,11 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
       uint32_t ackno;
 
       ackno = uip_tcpgetsequence(TCPBUF->ackno);
-      nllvdbg("ACK: ackno=%d flags=%04x\n", ackno, flags);
+      nllvdbg("ACK: ackno=%u flags=%04x\n", ackno, flags);
 
-      /* Look at every write buffer int he unacked_q.  The unacked_q
+      /* Look at every write buffer in the unacked_q.  The unacked_q
        * holds write buffers that have been entirely sent, but which
-       * have not yet been acked.
+       * have not yet been ACKed.
        */
 
       for (entry = sq_peek(&conn->unacked_q); entry; entry = next)
@@ -248,7 +248,7 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
               /* Get the sequence number at the end of the data */
 
               lastseq = WRB_SEQNO(wrb) + WRB_PKTLEN(wrb);
-              nllvdbg("ACK: wrb=%p seqno=%d lastseq=%d pktlen=%d ackno=%d\n",
+              nllvdbg("ACK: wrb=%p seqno=%u lastseq=%u pktlen=%u ackno=%u\n",
                       wrb, WRB_SEQNO(wrb), lastseq, WRB_PKTLEN(wrb), ackno);
 
               /* Has the entire buffer been ACKed? */
@@ -274,13 +274,13 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
                    */
 
                   trimlen = ackno - WRB_SEQNO(wrb);
-                  nllvdbg("ACK: wrb=%p trim %d bytes\n", wrb, trimlen);
+                  nllvdbg("ACK: wrb=%p trim %u bytes\n", wrb, trimlen);
                   WRB_TRIM(wrb, trimlen);
 
                   /* Set the new sequence number for what remains */
 
                   WRB_SEQNO(wrb) = ackno;
-                  nllvdbg("ACK: wrb=%p seqno=%d pktlen=%d\n",
+                  nllvdbg("ACK: wrb=%p seqno=%u pktlen=%u\n",
                           wrb, WRB_SEQNO(wrb), WRB_PKTLEN(wrb));
                 }
             }
@@ -306,7 +306,7 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
               nacked = WRB_SENT(wrb);
             }
 
-          nllvdbg("ACK: wrb=%p seqno=%d nacked=%d sent=%d ackno=%d\n",
+          nllvdbg("ACK: wrb=%p seqno=%u nacked=%u sent=%u ackno=%u\n",
                   wrb, WRB_SEQNO(wrb), nacked, WRB_SENT(wrb), ackno);
 
           /* Trim the ACKed bytes from the beginning of the write buffer. */
@@ -315,7 +315,7 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
           WRB_SEQNO(wrb) = ackno;
           WRB_SENT(wrb) -= nacked;
 
-          nllvdbg("ACK: wrb=%p seqno=%d pktlen=%d sent=%d\n",
+          nllvdbg("ACK: wrb=%p seqno=%u pktlen=%u sent=%u\n",
                   wrb, WRB_SEQNO(wrb), WRB_PKTLEN(wrb), WRB_SENT(wrb));
         }
     }
@@ -350,19 +350,22 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
        */
 
       wrb = (FAR struct tcp_wrbuffer_s *)sq_peek(&conn->write_q);
-      if (wrb && WRB_SENT(wrb) > 0)
+      nllvdbg("REXMIT: wrb=%p sent=%u\n", wrb, wrb ? WRB_SENT(wrb) : 0);
+
+      if (wrb != NULL && WRB_SENT(wrb) > 0)
         {
           FAR struct tcp_wrbuffer_s *tmp;
 
           /* Yes.. Reset the number of bytes sent sent from the write buffer */
 
           WRB_SENT(wrb) = 0;
+          nllvdbg("REXMIT: wrb=%p sent=%u\n", wrb, WRB_SENT(wrb));
 
           /* Increment the retransmit count on this write buffer. */
 
           if (++WRB_NRTX(wrb) >= UIP_MAXRTX)
             {
-              nlldbg("Expiring wrb=%p nrtx=%d\n", wrb, WRB_NRTX(wrb));
+              nlldbg("Expiring wrb=%p nrtx=%u\n", wrb, WRB_NRTX(wrb));
 
               /* The maximum retry count as been exhausted. Remove the write
                * buffer at the head of the queue.
@@ -401,7 +404,7 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
 
           if (++WRB_NRTX(wrb) >= UIP_MAXRTX)
             {
-              nlldbg("Expiring wrb=%p nrtx=%d\n", wrb, WRB_NRTX(wrb));
+              nlldbg("Expiring wrb=%p nrtx=%u\n", wrb, WRB_NRTX(wrb));
 
               /* Return the write buffer to the free list */
 
@@ -425,6 +428,10 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
                * when the write buffer with the lowest sequenc number
                * is pulled from the write_q again.
                */
+
+              WRB_SENT(wrb) = 0;
+              nllvdbg("REXMIT: wrb=%p Move to write_q, sent=%u nrtx=%u\n",
+                      wrb, WRB_SENT(wrb), WRB_NRTX(wrb));
 
               send_insert_seqment(wrb, &conn->write_q);
             }
@@ -498,7 +505,7 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
               sndlen = conn->winsize;
             }
 
-          nllvdbg("SEND: wrb=%p pktlen=%d sent=%d sndlen=%d\n",
+          nllvdbg("SEND: wrb=%p pktlen=%u sent=%u sndlen=%u\n",
                   wrb, WRB_PKTLEN(wrb), WRB_SENT(wrb), sndlen);
 
           /* Is this the first we have tried to send from this
@@ -548,14 +555,14 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
               conn->sent    += sndlen;
             }
 
-          nllvdbg("SEND: wrb=%p nrtx=%d unacked=%d sent=%d\n",
+          nllvdbg("SEND: wrb=%p nrtx=%u unacked=%u sent=%u\n",
                   wrb, WRB_NRTX(wrb), conn->unacked, conn->sent);
 
           /* Increment the count of bytes sent from this write buffer */
 
           WRB_SENT(wrb) += sndlen;
 
-          nllvdbg("SEND: wrb=%p sent=%d pktlen=%d\n",
+          nllvdbg("SEND: wrb=%p sent=%u pktlen=%u\n",
                   wrb, WRB_SENT(wrb), WRB_PKTLEN(wrb));
 
           /* Remove the write buffer from the write queue if the
@@ -732,7 +739,7 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
                */
 
               sq_addlast(&wrb->wb_node, &conn->write_q);
-              nvdbg("Queued WRB=%p pktlen=%d write_q(%p,%p)\n",
+              nvdbg("Queued WRB=%p pktlen=%u write_q(%p,%p)\n",
                     wrb, WRB_PKTLEN(wrb),
                     conn->write_q.head, conn->write_q.tail);
 
