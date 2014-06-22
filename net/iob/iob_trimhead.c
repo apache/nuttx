@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <assert.h>
+#include <debug.h>
 
 #include <nuttx/net/iob.h>
 
@@ -83,6 +84,8 @@ FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
   uint16_t pktlen;
   unsigned int len;
 
+  nllvdbg("iob=%p pktlen=%d trimlen=%d\n", iob, iob->io_pktlen, trimlen);
+
   if (iob && trimlen > 0)
     {
       /* Trim from the head of the I/IO buffer chain */
@@ -94,6 +97,7 @@ FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
         {
           /* Do we trim this entire I/O buffer away? */
 
+          nllvdbg("iob=%p len=%d vs %d\n", iob, iob->io_len, len);
           if (iob->io_len <= len)
             {
               FAR struct iob_s *next;
