@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/iob/iob.h
+ * net/uip/uip_iobsend.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,73 +33,73 @@
  *
  ****************************************************************************/
 
-#ifndef __NET_IOB_IOB_H
-#define __NET_IOB_IOB_H 1
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <semaphore.h>
+#include <string.h>
+#include <assert.h>
+#include <debug.h>
 
 #include <nuttx/net/iob.h>
+#include <nuttx/net/uip/uip.h>
+#include <nuttx/net/uip/uip-arch.h>
+
+#ifdef CONFIG_NET_IOB
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Types
+ * Private Type Declarations
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* A list of all free, unallocated I/O buffers */
-
-extern FAR struct iob_s *g_iob_freelist;
-
-/* A list of all free, unallocated I/O buffer queue containers */
-
-extern FAR struct iob_qentry_s *g_iob_freeqlist;
-
-/* Counting semaphores that tracks the number of free IOBs/qentries */
-
-extern sem_t g_iob_sem;
-extern sem_t g_qentry_sem;
-
-/****************************************************************************
- * Public Data
+ * Private Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Public Function Prototypes
+ * Global Constant Data
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_alloc_qentry
+ * Global Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Constant Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Global Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: uip_iobsend
  *
  * Description:
- *   Allocate an I/O buffer chain container by taking the buffer at the head
- *   of the free list. This function is intended only for internal use by
- *   the IOB module.
+ *   Called from socket logic in response to a xmit or poll request from the
+ *   the network interface driver.
+ *
+ * Assumptions:
+ *   Called from the interrupt level or, at a minimum, with interrupts
+ *   disabled.
  *
  ****************************************************************************/
 
-FAR struct iob_qentry_s *iob_alloc_qentry(void);
+void uip_iobsend(FAR struct uip_driver_s *dev, FAR struct iob_s *iob,
+                 unsigned int len, unsigned int offset)
+{
+  DEBUGASSERT(dev && len > 0 && len < CONFIG_NET_BUFSIZE);
 
-/****************************************************************************
- * Name: iob_free_qentry
- *
- * Description:
- *   Free the I/O buffer chain container by returning it to the  free list.
- *   The link to  the next I/O buffer in the chain is return.
- *
- ****************************************************************************/
+  iob_copyout(dev->d_snddata, iob, len, offset);
+  dev->d_sndlen = len;
+}
 
-FAR struct iob_qentry_s *iob_free_qentry(FAR struct iob_qentry_s *iobq);
+#endif /* CONFIG_NET_IOB */
 
-#endif /* __NET_IOB_IOB_H */

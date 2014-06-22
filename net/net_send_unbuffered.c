@@ -467,7 +467,6 @@ static uint16_t tcpsend_interrupt(FAR struct uip_driver_s *dev,
 
       uint32_t sndlen = pstate->snd_buflen - pstate->snd_sent;
 
-
 #if defined(CONFIG_NET_TCP_SPLIT)
 
       /* RFC 1122 states that a host may delay ACKing for up to 500ms but

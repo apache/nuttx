@@ -45,6 +45,8 @@
 
 #include "iob.h"
 
+#if CONFIG_IOB_NCHAINS > 0
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -92,3 +94,4 @@ FAR struct iob_s *iob_remove_queue(FAR struct iob_queue_s *iobq)
   return iob;
 }
 
+#endif /* CONFIG_IOB_NCHAINS > 0 */

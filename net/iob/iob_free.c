@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <semaphore.h>
 #include <assert.h>
 
 #include <nuttx/arch.h>
@@ -86,7 +87,6 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
 
   if (next)
     {
-
       /* Copy and decrement the total packet length, being careful to
        * do nothing too crazy.
        */
@@ -115,8 +115,12 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
    */
 
   flags = irqsave();
-  iob->io_flink  = g_iob_freelist;
+  iob->io_flink = g_iob_freelist;
   g_iob_freelist = iob;
+
+  /* Signal that an IOB is available */
+
+  sem_post(&g_iob_sem);
   irqrestore(flags);
 
   /* And return the I/O buffer after the one that was freed */

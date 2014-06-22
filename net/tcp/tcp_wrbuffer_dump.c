@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/iob/iob.h
+ * net/tcp/tcp_wrbuffer_dump.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,73 +33,57 @@
  *
  ****************************************************************************/
 
-#ifndef __NET_IOB_IOB_H
-#define __NET_IOB_IOB_H 1
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <semaphore.h>
+#include <stdint.h>
+#include <debug.h>
 
 #include <nuttx/net/iob.h>
+#include <nuttx/net/uip/uip-tcp.h>
+
+#ifdef CONFIG_DEBUG
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Pre-processor definitions
+ ****************************************************************************/
+
+/* Select the lowest level debug interface available */
+
+#ifdef CONFIG_CPP_HAVE_VARARGS
+#  ifdef CONFIG_ARCH_LOWPUTC
+#    define message(format, ...) lowsyslog(format, ##__VA_ARGS__)
+#  else
+#    define message(format, ...) syslog(format, ##__VA_ARGS__)
+#  endif
+#else
+#  ifdef CONFIG_ARCH_LOWPUTC
+#    define message lowsyslog
+#  else
+#    define message syslog
+#  endif
+#endif
+
+/****************************************************************************
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* A list of all free, unallocated I/O buffers */
-
-extern FAR struct iob_s *g_iob_freelist;
-
-/* A list of all free, unallocated I/O buffer queue containers */
-
-extern FAR struct iob_qentry_s *g_iob_freeqlist;
-
-/* Counting semaphores that tracks the number of free IOBs/qentries */
-
-extern sem_t g_iob_sem;
-extern sem_t g_qentry_sem;
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: iob_alloc_qentry
+ * Name: tcp_wrbuffer_dump
  *
  * Description:
- *   Allocate an I/O buffer chain container by taking the buffer at the head
- *   of the free list. This function is intended only for internal use by
- *   the IOB module.
+ *  Dump the contents of a write buffer
  *
  ****************************************************************************/
 
-FAR struct iob_qentry_s *iob_alloc_qentry(void);
+void tcp_wrbuffer_dump(FAR const char *msg, FAR struct tcp_wrbuffer_s *wrb)
+{
+  message("%s: WRB=%p segno=%d sent=%d nrtx=%d\n",
+          msg, wrb, WRB_SEQNO(wrb), WRB_SENT(wrb), WRB_NRTX(wrb));
+  iob_dump("I/O Buffer Chain", WRB_IOB(wrb));
+}
 
-/****************************************************************************
- * Name: iob_free_qentry
- *
- * Description:
- *   Free the I/O buffer chain container by returning it to the  free list.
- *   The link to  the next I/O buffer in the chain is return.
- *
- ****************************************************************************/
-
-FAR struct iob_qentry_s *iob_free_qentry(FAR struct iob_qentry_s *iobq);
-
-#endif /* __NET_IOB_IOB_H */
+#endif /* CONFIG_DEBUG */

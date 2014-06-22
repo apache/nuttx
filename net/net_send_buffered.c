@@ -64,6 +64,7 @@
 #include <arch/irq.h>
 #include <nuttx/clock.h>
 #include <nuttx/net/arp.h>
+#include <nuttx/net/iob.h>
 #include <nuttx/net/uip/uip-arch.h>
 
 #include "net_internal.h"
@@ -92,8 +93,8 @@
  *   ascending order of sequence number.
  *
  * Parameters:
- *   segment   The segment to be inserted
- *   q         The write buffer queue in which to insert the segment
+ *   wrb   The segment to be inserted
+ *   q     The write buffer queue in which to insert the segment
  *
  * Returned Value:
  *   None
@@ -103,17 +104,17 @@
  *
  ****************************************************************************/
 
-static void send_insert_seqment(FAR struct tcp_wrbuffer_s *segment,
+static void send_insert_seqment(FAR struct tcp_wrbuffer_s *wrb,
                                 FAR sq_queue_t *q)
 {
-  sq_entry_t *entry = (sq_entry_t*)segment;
+  sq_entry_t *entry = (sq_entry_t*)wrb;
   sq_entry_t *insert = NULL;
 
   sq_entry_t *itr;
   for (itr = sq_peek(q); itr; itr = sq_next(itr))
     {
-      FAR struct tcp_wrbuffer_s *segment0 = (FAR struct tcp_wrbuffer_s*)itr;
-      if (segment0->wb_seqno < segment->wb_seqno)
+      FAR struct tcp_wrbuffer_s *wrb0 = (FAR struct tcp_wrbuffer_s*)itr;
+      if (WRB_SEQNO(wrb0) < WRB_SEQNO(wrb))
         {
           insert = itr;
         }
@@ -131,6 +132,54 @@ static void send_insert_seqment(FAR struct tcp_wrbuffer_s *segment,
     {
       sq_addfirst(entry, q);
     }
+}
+
+/****************************************************************************
+ * Function: lost_connection
+ *
+ * Description:
+ *   The TCP connection has been lost.  Free all write buffers.
+ *
+ * Parameters:
+ *   psock    The socket structure
+ *   conn     The connection structure associated with the socket
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void lost_connection(FAR struct socket *psock,
+                                   FAR struct uip_conn *conn)
+{
+  FAR sq_entry_t *entry;
+  FAR sq_entry_t *next;
+
+  /* Do not allow any further callbacks */
+
+  psock->s_sndcb->flags = 0;
+  psock->s_sndcb->event = NULL;
+
+  /* Free all queued write buffers */
+
+  for (entry = sq_peek(&conn->unacked_q); entry; entry = next)
+    {
+      next = sq_next(entry);
+      tcp_wrbuffer_release((FAR struct tcp_wrbuffer_s *)entry);
+    }
+
+  for (entry = sq_peek(&conn->write_q); entry; entry = next)
+    {
+      next = sq_next(entry);
+      tcp_wrbuffer_release((FAR struct tcp_wrbuffer_s *)entry);
+    }
+
+  /* Reset write buffering variables */
+
+  sq_init(&conn->unacked_q);
+  sq_init(&conn->write_q);
+  conn->expired = 0;
+  conn->sent = 0;
 }
 
 /****************************************************************************
@@ -156,10 +205,10 @@ static void send_insert_seqment(FAR struct tcp_wrbuffer_s *segment,
 static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
                                FAR void *pvpriv, uint16_t flags)
 {
-  FAR struct uip_conn *conn = (FAR struct uip_conn*)pvconn;
+  FAR struct uip_conn *conn = (FAR struct uip_conn *)pvconn;
   FAR struct socket *psock = (FAR struct socket *)pvpriv;
 
-  nllvdbg("flags: %04x\n", flags);
+  //nllvdbg("flags: %04x\n", flags);
 
   /* If this packet contains an acknowledgement, then update the count of
    * acknowledged bytes.
@@ -167,30 +216,101 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
 
   if ((flags & UIP_ACKDATA) != 0)
     {
+      FAR struct tcp_wrbuffer_s *wrb;
       FAR sq_entry_t *entry;
       FAR sq_entry_t *next;
-      FAR struct tcp_wrbuffer_s *segment;
       uint32_t ackno;
 
       ackno = uip_tcpgetsequence(TCPBUF->ackno);
+      nllvdbg("ACK: ackno=%d flags=%04x\n", ackno, flags);
+
+      /* Look at every write buffer int he unacked_q.  The unacked_q
+       * holds write buffers that have been entirely sent, but which
+       * have not yet been acked.
+       */
+
       for (entry = sq_peek(&conn->unacked_q); entry; entry = next)
         {
-          next    = sq_next(entry);
-          segment = (FAR struct tcp_wrbuffer_s*)entry;
+          uint32_t lastseq;
 
-          if (segment->wb_seqno < ackno)
+          /* Check of some or all of this write buffer has been ACKed. */
+
+          next = sq_next(entry);
+          wrb = (FAR struct tcp_wrbuffer_s*)entry;
+
+          /* If the ACKed sequence number is greater than the start
+           * sequence number of the write buffer, then some or all of
+           * the write buffer has been ACKed.
+           */
+
+          if (ackno > WRB_SEQNO(wrb))
             {
-              nllvdbg("ACK: acked=%d buflen=%d ackno=%d\n",
-                      segment->wb_seqno, segment->wb_nbytes, ackno);
+              /* Get the sequence number at the end of the data */
 
-              /* Segment was ACKed. Remove from ACK waiting queue */
+              lastseq = WRB_SEQNO(wrb) + WRB_PKTLEN(wrb);
+              nllvdbg("ACK: seqno=%d lastseq=%d pktlen=%d ackno=%d\n",
+                      WRB_SEQNO(wrb), lastseq, WRB_PKTLEN(wrb), ackno);
 
-              sq_rem(entry, &conn->unacked_q);
+              /* Has the entire buffer been ACKed? */
 
-              /* Return the write buffer to the pool of free buffers */
+              if (ackno >= lastseq)
+                {
+                  /* Yes... Remove the write buffer from ACK waiting queue */
 
-              tcp_wrbuffer_release(segment);
+                  sq_rem(entry, &conn->unacked_q);
+
+                  /* And return the write buffer to the pool of free buffers */
+
+                  tcp_wrbuffer_release(wrb);
+                }
+              else
+                {
+                  /* No, then just trim the ACKed bytes from the beginning
+                   * of the write buffer.  This will free up some I/O buffers
+                   * that can be reused while are still sending the last
+                   * buffers in the chain.
+                   */
+
+                  WRB_TRIM(wrb, ackno - WRB_SEQNO(wrb));
+                  WRB_SEQNO(wrb) = ackno;
+
+                  nllvdbg("ACK: seqno=%d pktlen=%d\n",
+                          WRB_SEQNO(wrb), WRB_PKTLEN(wrb));
+                }
             }
+        }
+
+      /* A special case is the head of the write_q which may be partially
+       * sent and so can still have un-ACKed bytes that could get ACKed
+       * before the entire write buffer has even been sent.
+       */
+
+      wrb = (FAR struct tcp_wrbuffer_s*)sq_peek(&conn->write_q);
+      if (wrb && WRB_SENT(wrb) > 0 && ackno > WRB_SEQNO(wrb))
+        {
+          uint32_t nacked;
+
+          /* Get the sequence number at the end of the data */
+
+          nacked = ackno - WRB_SEQNO(wrb);
+          if (nacked > WRB_SENT(wrb))
+            {
+              /* More data has been ACKed then we have sent? */
+
+              nacked = WRB_SENT(wrb);
+            }
+
+          nllvdbg("ACK: seqno=%d nacked=%d sent=%d ackno=%d\n",
+                  WRB_SEQNO(wrb), nacked, WRB_SENT(wrb), ackno);
+
+          /* Trim the ACKed bytes from the beginning of the write buffer. */
+
+          WRB_TRIM(wrb, nacked);
+          WRB_SEQNO(wrb) = ackno;
+          WRB_SENT(wrb) -= nacked;
+
+          nllvdbg("ACK: seqno=%d pktlen=%d sent=%d\n",
+                  WRB_SEQNO(wrb), WRB_PKTLEN(wrb), WRB_SENT(wrb));
         }
     }
 
@@ -198,35 +318,53 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
 
   else if ((flags & (UIP_CLOSE | UIP_ABORT | UIP_TIMEDOUT)) != 0)
     {
+      nllvdbg("Lost connection: %04x\n", flags);
+
       /* Report not connected */
 
-       nllvdbg("Lost connection\n");
-       net_lostconnection(psock, flags);
-       goto end_wait;
-     }
+      net_lostconnection(psock, flags);
+
+      /* Free write buffers and terminate polling */
+
+      lost_connection(psock, conn);
+      return flags;
+    }
 
    /* Check if we are being asked to retransmit data */
 
    else if ((flags & UIP_REXMIT) != 0)
     {
-      sq_entry_t *entry;
+      FAR struct tcp_wrbuffer_s *wrb;
+      FAR sq_entry_t *entry;
 
-      /* Put all segments that have been sent but not ACKed to write queue
-       * again note, the un-ACKed segment is put at the first of the write_q,
-       * so it can be sent as soon as possible.
+      nllvdbg("REXMIT: %04x\n", flags);
+
+      /* If there is a partially sent write buffer at the head of the
+       * write_q, reset the number of bytes sent.
        */
 
-      while ((entry = sq_remlast(&conn->unacked_q)))
+      wrb = (FAR struct tcp_wrbuffer_s*)sq_peek(&conn->write_q);
+      if (wrb)
         {
-          struct tcp_wrbuffer_s *segment = (struct tcp_wrbuffer_s*)entry;
+          WRB_SENT(wrb) = 0;
+        }
+      
+      /* Move all segments that have been sent but not ACKed to the write
+       * queue again note, the un-ACKed segments are put at the head of the
+       * write_q so they can be resent as soon as possible.
+       */
 
-          if (segment->wb_nrtx >= UIP_MAXRTX)
+      while ((entry = sq_remlast(&conn->unacked_q)) != NULL)
+        {
+          wrb = (FAR struct tcp_wrbuffer_s*)entry;
+
+          /* Free any write buffers that have exceed the retry count */
+
+          if (WRB_NRTX(wrb) >= UIP_MAXRTX)
             {
-              //conn->unacked -= segment->wb_nbytes;
+              /* Return the write buffer to the free list */
 
-              /* Return the write buffer */
-
-              tcp_wrbuffer_release(segment);
+              tcp_wrbuffer_release(wrb);
 
               /* NOTE expired is different from un-ACKed, it is designed to
                * represent the number of segments that have been sent,
@@ -239,8 +377,16 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
               conn->expired++;
               continue;
             }
+          else
+            {
+              /* Insert the write buffer into the write_q (in sequence
+               * number order).  The retransmission will occur below
+               * when the write buffer with the lowest sequenc number
+               * is pulled from the write_q again.
+               */
 
-          send_insert_seqment(segment, &conn->write_q);
+              send_insert_seqment(wrb, &conn->write_q);
+            }
         }
     }
 
@@ -259,7 +405,7 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
    * asked to retransmit data, (3) the connection is still healthy, and (4)
    * the outgoing packet is available for our use.  In this case, we are
    * now free to send more data to receiver -- UNLESS the buffer contains
-   * unprocesed incoming data.  In that event, we will have to wait for the
+   * unprocessed incoming data.  In that event, we will have to wait for the
    * next polling cycle.
    */
 
@@ -283,44 +429,64 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
       if (arp_find(conn->ripaddr) != NULL)
 #endif
         {
-          FAR struct tcp_wrbuffer_s *segment;
-          FAR void *sndbuf;
+          FAR struct tcp_wrbuffer_s *wrb;
           size_t sndlen;
 
-          /* Get the amount of data that we can send in the next packet */
+          /* Peek at the head of the write queue (but don't remove anything
+           * from the write queue yet.
+           */
 
-          segment = (FAR struct tcp_wrbuffer_s *)sq_remfirst(&conn->write_q);
-          if (segment)
+          wrb = (FAR struct tcp_wrbuffer_s *)sq_peek(&conn->write_q);
+          if (wrb)
             {
-              sndbuf = segment->wb_buffer;
-              sndlen = segment->wb_nbytes;
-
-              DEBUGASSERT(sndlen <= uip_mss(conn));
-
-              /* REVISIT:  There should be a check here to assure that we do
-               * not excced the window (conn->winsize).
+              /* Get the amount of data that we can send in the next packet.
+               * We will send either the remaining data in the buffer I/O
+               * buffer chain, or as much as will fit given the MSS and current
+               * window size.
                */
 
-              /* Set the sequence number for this segment.  NOTE: uIP
-               * updates sndseq on receipt of ACK *before* this function
-               * is called. In that case sndseq will point to the next
-               * unacknowledged byte (which might have already been
-               * sent). We will overwrite the value of sndseq here
-               * before the packet is sent.
-               */
-
-              if (segment->wb_nrtx == 0 && segment->wb_seqno == (unsigned)-1)
+              sndlen = WRB_PKTLEN(wrb) - WRB_SENT(wrb);
+              if (sndlen > uip_mss(conn))
                 {
-                  segment->wb_seqno = conn->isn + conn->sent;
+                  sndlen = uip_mss(conn);
                 }
 
-              uip_tcpsetsequence(conn->sndseq, segment->wb_seqno);
+              if (sndlen > conn->winsize)
+                {
+                  sndlen = conn->winsize;
+                }
 
-              /* Then set-up to send that amount of data. (this won't
-               * actually happen until the polling cycle completes).
+              nllvdbg("pktlen=%d sent=%d sndlen=%d\n",
+                      WRB_PKTLEN(wrb), WRB_SENT(wrb), sndlen);
+
+              /* Is this the first we have tried to send from this
+               * write buffer?
                */
 
-              uip_send(dev, sndbuf, sndlen);
+              if (WRB_SENT(wrb) == 0)
+                {
+                  /* Yes..Set the sequence number for this segment.
+                   * NOTE: the TCP stack updates sndseq on receipt of ACK
+                   * *before* this function is called. In that case sndseq
+                   * will point to the next unacknowledged byte (which might
+                   * have already been sent). We will overwrite the value of
+                   * sndseq here before the packet is sent.
+                   */
+
+                  if (WRB_NRTX(wrb) == 0 && WRB_SEQNO(wrb) == (unsigned)-1)
+                    {
+                      WRB_SEQNO(wrb) = conn->isn + conn->sent;
+                    }
+
+                  uip_tcpsetsequence(conn->sndseq, WRB_SEQNO(wrb));
+                }
+
+              /* Then set-up to send that amount of data with the offset
+               * corresponding to the amount of data already sent. (this
+               * won't* actually happen until the polling cycle completes).
+               */
+
+              uip_iobsend(dev, WRB_IOB(wrb), sndlen, WRB_SENT(wrb));
 
               /* Remember how much data we send out now so that we know
                * when everything has been acknowledged.  Just increment
@@ -330,7 +496,7 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
                * this path.
                */
 
-              if (segment->wb_nrtx == 0)
+              if (WRB_NRTX(wrb) == 0)
                 {
                   conn->unacked += sndlen;
                   conn->sent    += sndlen;
@@ -343,11 +509,31 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
                * second interval before expiration.
                */
 
-              segment->wb_nrtx++;
+              WRB_NRTX(wrb)++;
+              nllvdbg("nrtx=%d unacked=%d sent=%d\n",
+                      WRB_NRTX(wrb), conn->unacked, conn->sent);
 
-              /* The segment is waiting for ACK again */
+              /* Remove the write buffer from the write queue if the
+               * last of the data has been sent from the buffer.
+               */
 
-              send_insert_seqment(segment, &conn->unacked_q);
+              WRB_SENT(wrb) += sndlen;
+              DEBUGASSERT(WRB_SENT(wrb) <= WRB_PKTLEN(wrb));
+
+              if (WRB_SENT(wrb) >= WRB_PKTLEN(wrb))
+                {
+                  FAR struct tcp_wrbuffer_s *tmp;
+
+                  tmp = (FAR struct tcp_wrbuffer_s *)sq_remfirst(&conn->write_q);
+                  DEBUGASSERT(tmp == wrb);
+                  UNUSED(tmp);
+
+                  /* Put the I/O buffer chin in the unacked queue; the
+                   * segment is waiting for ACK again
+                   */
+
+                  send_insert_seqment(wrb, &conn->unacked_q);
+                }
 
               /* Only one data can be sent by low level driver at once,
                * tell the caller stop polling the other connection.
@@ -359,15 +545,6 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
     }
 
   /* Continue waiting */
-
-  return flags;
-
-end_wait:
-
-  /* Do not allow any further callbacks */
-
-  psock->s_sndcb->flags = 0;
-  psock->s_sndcb->event = NULL;
 
   return flags;
 }
@@ -444,7 +621,7 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
                    int flags)
 {
   uip_lock_t save;
-  ssize_t    completed = 0;
+  ssize_t    result = 0;
   int        err;
   int        ret = OK;
 
@@ -477,16 +654,19 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
           psock->s_sndcb = uip_tcpcallbackalloc(conn);
         }
 
-      /* Test if the callback has been allocated*/
+      /* Test if the callback has been allocated */
 
       if (!psock->s_sndcb)
         {
           /* A buffer allocation error occurred */
 
-          completed = -ENOMEM;
+          ndbg("ERROR: Failed to allocate callback\n");
+          result = -ENOMEM;
         }
       else
         {
+          FAR struct tcp_wrbuffer_s *wrb = tcp_wrbuffer_alloc();
+
           /* Set up the callback in the connection */
 
           psock->s_sndcb->flags = (UIP_ACKDATA | UIP_REXMIT |UIP_POLL | \
@@ -494,47 +674,35 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
           psock->s_sndcb->priv  = (void*)psock;
           psock->s_sndcb->event = send_interrupt;
 
-          while (completed < len)
+          /* Allocate an write buffer */
+
+          wrb = tcp_wrbuffer_alloc();
+          if (wrb)
             {
-              FAR struct tcp_wrbuffer_s *segment = tcp_wrbuffer_alloc(NULL);
-              if (segment)
-                {
-                  size_t cnt;
+              /* Initialize the write buffer */
 
-                  segment->wb_seqno = (unsigned)-1;
-                  segment->wb_nrtx  = 0;
+              WRB_SEQNO(wrb) = (unsigned)-1;
+              WRB_NRTX(wrb)  = 0;
+              WRB_COPYIN(wrb, (FAR uint8_t *)buf, len);
 
-                  if (len - completed > CONFIG_NET_TCP_WRITE_BUFSIZE)
-                    {
-                      cnt = CONFIG_NET_TCP_WRITE_BUFSIZE;
-                    }
-                  else
-                    {
-                      cnt = len - completed;
-                    }
+              /* send_interrupt() will send data in FIFO order from the
+               * conn->write_q
+               */
 
-                  segment->wb_nbytes = cnt;
-                  memcpy(segment->wb_buffer, (char*)buf + completed, cnt);
-                  completed += cnt;
+              sq_addlast(&wrb->wb_node, &conn->write_q);
 
-                  /* send_interrupt() will refer to all the write buffer by
-                   * conn->writebuff
-                   */
+              /* Notify the device driver of the availability of TX data */
 
-                  sq_addlast(&segment->wb_node, &conn->write_q);
+              netdev_txnotify(conn->ripaddr);
+              result = len;
+            }
 
-                  /* Notify the device driver of the availability of TX data */
+          /* A buffer allocation error occurred */
 
-                  netdev_txnotify(conn->ripaddr);
-                }
-
-              /* A buffer allocation error occurred */
-
-              else
-                {
-                  completed = -ENOMEM;
-                  break;
-                }
+          else
+            {
+              ndbg("ERROR: Failed to allocate write buffer\n");
+              result = -ENOMEM;
             }
         }
     }
@@ -549,9 +717,9 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
    * for the send length
    */
 
-  if (completed < 0)
+  if (result < 0)
     {
-      err = completed;
+      err = result;
       goto errout;
     }
 
@@ -567,7 +735,7 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
 
   /* Return the number of bytes actually sent */
 
-  return completed;
+  return result;
 
 errout:
   set_errno(err);

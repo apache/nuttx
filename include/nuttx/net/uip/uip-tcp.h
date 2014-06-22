@@ -56,6 +56,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <nuttx/net/uip/uipopt.h>
+#include <nuttx/net/uip/uip.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -123,6 +124,25 @@
 #  define UIP_TCP_INITIAL_MSS UIP_TCP_MSS
 #endif
 
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+/* TCP write buffer access macros */
+
+#  define WRB_SEQNO(wrb)          ((wrb)->wb_seqno)
+#  define WRB_PKTLEN(wrb)         ((wrb)->wb_iob->io_pktlen)
+#  define WRB_SENT(wrb)           ((wrb)->wb_sent)
+#  define WRB_NRTX(wrb)           ((wrb)->wb_nrtx)
+#  define WRB_IOB(wrb)            ((wrb)->wb_iob)
+#  define WRB_COPYOUT(wrb,dest,n) (iob_copyout(dest,(wrb)->wb_iob,(n),0))
+#  define WRB_COPYIN(wrb,src,n)   (iob_copyin((wrb)->wb_iob,src,(n),0))
+#  define WRB_TRIM(wrb,n)         (iob_trimhead((wrb)->wb_iob,(n)))
+
+#ifdef CONFIG_DEBUG
+#  define WRB_DUMP(msg,wrb)       tcp_writebuffer_dump(msg,wrb)
+#else
+#  define WRB_DUMP(mgs,wrb)
+#endif
+#endif
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -170,22 +190,28 @@ struct uip_conn
 
   /* Read-ahead buffering.
    *
-   * readahead - A singly linked list of type struct uip_readahead_s
-   *   where the TCP/IP read-ahead data is retained.
+   *   readahead - A singly linked list of type struct uip_readahead_s
+   *               where the TCP/IP read-ahead data is retained.
    */
 
 #ifdef CONFIG_NET_TCP_READAHEAD
   sq_queue_t readahead;   /* Read-ahead buffering */
 #endif
 
-  /* Write buffering */
+  /* Write buffering
+   *
+   *   write_q   - The queue of unsent I/O buffers.  The head of this
+   *               list may be partially sent.  FIFO ordering.
+   *   unacked_q - A queue of completely sent, but unacked I/O buffer
+   *               chains.  Sequence number ordering.
+   */
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   sq_queue_t write_q;     /* Write buffering for segments */
   sq_queue_t unacked_q;   /* Write buffering for un-ACKed segments */
-  size_t     expired;     /* Number segments retransmitted but not yet ACKed,
+  uint16_t   expired;     /* Number segments retransmitted but not yet ACKed,
                            * it can only be updated at UIP_ESTABLISHED state */
-  size_t     sent;        /* The number of bytes sent  */
+  uint16_t   sent;        /* The number of bytes sent  */
   uint32_t   isn;         /* Initial sequence number */
 #endif
 
@@ -261,14 +287,15 @@ struct uip_readahead_s
 /* This structure supports TCP write buffering */
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+struct iob_s;              /* Forward reference */
 struct tcp_wrbuffer_s
 {
   sq_entry_t wb_node;      /* Supports a singly linked list */
   uint32_t   wb_seqno;     /* Sequence number of the write segment */
-  uint16_t   wb_nbytes;    /* Number of bytes available in this buffer */
+  uint16_t   wb_sent;      /* Number of bytes sent from the I/O buffer chain */
   uint8_t    wb_nrtx;      /* The number of retransmissions for the last
                             * segment sent */
-  uint8_t    wb_buffer[CONFIG_NET_TCP_WRITE_BUFSIZE];
+  struct iob_s *wb_iob;    /* Head of the I/O buffer chain */
 };
 #endif
 

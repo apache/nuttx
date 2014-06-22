@@ -40,6 +40,12 @@ ifeq ($(CONFIG_NET),y)
 NET_CSRCS += uip_initialize.c uip_setipid.c uip_input.c uip_send.c
 NET_CSRCS += uip_poll.c uip_chksum.c uip_callback.c
 
+# I/O buffer chain support required?
+
+ifeq ($(CONFIG_NET_IOB),y)
+NET_CSRCS += uip_iobsend.c
+endif
+
 # Non-interrupt level support required?
 
 ifeq ($(CONFIG_NET_NOINTS),y)

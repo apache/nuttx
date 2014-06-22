@@ -75,20 +75,12 @@
 
 void iob_free_chain(FAR struct iob_s *iob)
 {
-  FAR struct iob_s *last;
-  irqstate_t flags;
+  FAR struct iob_s *next;
 
-  /* Find the last entry in the I/O buffer list */
+  /* Free each IOB in the chain -- one at a time to keep the count straight */
 
-  for (last = iob; last->io_flink; last = last->io_flink);
-
-  /* Free the I/O buffer chain by adding it to the head of the free list. We
-   * don't know what context we are called from so we use extreme measures to
-   * protect the free list:  We disable interrupts very briefly.
-   */
-
-  flags = irqsave();
-  last->io_flink = g_iob_freelist;
-  g_iob_freelist = iob;
-  irqrestore(flags);
+  for (; iob; iob = next)
+    {
+      next = iob_free(iob);
+    }
 }

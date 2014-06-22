@@ -55,10 +55,12 @@
 #define IOB_DATA(p)      (&(p)->io_data[(p)->io_offset])
 #define IOB_FREESPACE(p) (CONFIG_IOB_BUFSIZE - (p)->io_len - (p)->io_offset)
 
+#if CONFIG_IOB_NCHAINS > 0
 /* Queue helpers */
 
-#define IOB_QINIT(q)     do { (q)->qh_head = 0; (q)->qh_tail = 0; } while (0)
-#define IOB_QEMPTY(q)    ((q)->head == NULL)
+#  define IOB_QINIT(q)   do { (q)->qh_head = 0; (q)->qh_tail = 0; } while (0)
+#  define IOB_QEMPTY(q)  ((q)->head == NULL)
+#endif
 
 /****************************************************************************
  * Public Types
@@ -89,6 +91,7 @@ struct iob_s
   uint8_t  io_data[CONFIG_IOB_BUFSIZE];
 };
 
+#if CONFIG_IOB_NCHAINS > 0
 /* This container structure supports queuing of I/O buffer chains.  This
  * structure is intended only for internal use by the IOB module.
  */
@@ -113,6 +116,7 @@ struct iob_queue_s
   FAR struct iob_qentry_s *qh_head;
   FAR struct iob_qentry_s *qh_tail;
 };
+#endif /* CONFIG_IOB_NCHAINS > 0 */
 
 /****************************************************************************
  * Global Data
@@ -173,7 +177,9 @@ void iob_free_chain(FAR struct iob_s *iob);
  *
  ****************************************************************************/
 
+#if CONFIG_IOB_NCHAINS > 0
 int iob_add_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq);
+#endif /* CONFIG_IOB_NCHAINS > 0 */
 
 /****************************************************************************
  * Name: iob_add_queue
@@ -183,7 +189,9 @@ int iob_add_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq);
  *
  ****************************************************************************/
 
+#if CONFIG_IOB_NCHAINS > 0
 FAR struct iob_s *iob_remove_queue(FAR struct iob_queue_s *iobq);
+#endif /* CONFIG_IOB_NCHAINS > 0 */
 
 /****************************************************************************
  * Name: iob_free_queue
@@ -193,7 +201,9 @@ FAR struct iob_s *iob_remove_queue(FAR struct iob_queue_s *iobq);
  *
  ****************************************************************************/
 
+#if CONFIG_IOB_NCHAINS > 0
 void iob_free_queue(FAR struct iob_queue_s *qhead);
+#endif /* CONFIG_IOB_NCHAINS > 0 */
 
 /****************************************************************************
  * Name: iob_copyin
@@ -278,11 +288,25 @@ FAR struct iob_s *iob_pack(FAR struct iob_s *iob);
  * Name: iob_contig
  *
  * Description:
- *   Ensure that there is'len' bytes of contiguous space at the beginning
+ *   Ensure that there is 'len' bytes of contiguous space at the beginning
  *   of the I/O buffer chain starting at 'iob'.
  *
  ****************************************************************************/
 
 int iob_contig(FAR struct iob_s *iob, unsigned int len);
+
+/****************************************************************************
+ * Function: iob_dump
+ *
+ * Description:
+ *   Dump the contents of a I/O buffer chain
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG
+void iob_dump(FAR const char *msg, FAR struct iob_s *iob);
+#else
+#  define tcp_writebuffer_dump(wrb)
+#endif
 
 #endif /* _INCLUDE_NUTTX_NET_IOB_H */

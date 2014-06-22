@@ -50,9 +50,13 @@
 
 #include <queue.h>
 #include <semaphore.h>
+#include <string.h>
+#include <assert.h>
 #include <debug.h>
 
-#include "uip/uip_internal.h"
+#include "tcp/tcp.h"
+#include "nuttx/net/iob.h"
+#include "nuttx/net/uip/uip-tcp.h"
 
 /****************************************************************************
  * Private Types
@@ -72,7 +76,7 @@ struct wrbuffer_s
 
   /* These are the pre-allocated write buffers */
 
-  struct tcp_wrbuffer_s buffers[CONFIG_NET_NTCP_WRITE_BUFFERS];
+  struct tcp_wrbuffer_s buffers[CONFIG_NET_TCP_NWRBCHAINS];
 };
 
 /****************************************************************************
@@ -108,12 +112,12 @@ void tcp_wrbuffer_initialize(void)
 
   sq_init(&g_wrbuffer.freebuffers);
 
-  for (i = 0; i < CONFIG_NET_NTCP_WRITE_BUFFERS; i++)
+  for (i = 0; i < CONFIG_NET_TCP_NWRBCHAINS; i++)
     {
       sq_addfirst(&g_wrbuffer.buffers[i].wb_node, &g_wrbuffer.freebuffers);
     }
 
-  sem_init(&g_wrbuffer.sem, 0, CONFIG_NET_NTCP_WRITE_BUFFERS);
+  sem_init(&g_wrbuffer.sem, 0, CONFIG_NET_TCP_NWRBCHAINS);
 }
 
 /****************************************************************************
@@ -129,26 +133,39 @@ void tcp_wrbuffer_initialize(void)
  *
  ****************************************************************************/
 
-FAR struct tcp_wrbuffer_s *
-tcp_wrbuffer_alloc(FAR const struct timespec *abstime)
+FAR struct tcp_wrbuffer_s *tcp_wrbuffer_alloc(void)
 {
-  int ret;
+  FAR struct tcp_wrbuffer_s *wrb;
 
-  if (abstime)
-    {
-      ret = sem_timedwait(&g_wrbuffer.sem, abstime);
-    }
-  else
-    {
-      ret = sem_wait(&g_wrbuffer.sem);
-    }
+  /* We need to allocate two things:  (1) A write buffer structure and (2)
+   * at least one I/O buffer to start the chain.
+   *
+   * Allocate the write buffer structure first then the IOBG.  In order to
+   * avoid deadlocks, we will need to free the IOB first, then the write
+   * buffer
+   */
 
-  if (ret != 0)
+  DEBUGVERIFY(sem_wait(&g_wrbuffer.sem));
+
+  /* Now, we are guaranteed to have a write buffer structure reserved
+   * for us in the free list.
+   */
+
+  wrb = (FAR struct tcp_wrbuffer_s *)sq_remfirst(&g_wrbuffer.freebuffers);
+  DEBUGASSERT(wrb);
+  memset(wrb, 0, sizeof(struct tcp_wrbuffer_s));
+
+  /* Now get the first I/O buffer for the write buffer structure */
+
+  wrb->wb_iob = iob_alloc();
+  if (!wrb->wb_iob)
     {
+      ndbg("ERROR: Failed to allocate I/O buffer\n");
+      tcp_wrbuffer_release(wrb);
       return NULL;
     }
 
-  return (FAR struct tcp_wrbuffer_s*)sq_remfirst(&g_wrbuffer.freebuffers);
+  return wrb;
 }
 
 /****************************************************************************
@@ -164,9 +181,19 @@ tcp_wrbuffer_alloc(FAR const struct timespec *abstime)
  *
  ****************************************************************************/
 
-void tcp_wrbuffer_release(FAR struct tcp_wrbuffer_s *wrbuffer)
+void tcp_wrbuffer_release(FAR struct tcp_wrbuffer_s *wrb)
 {
-  sq_addlast(&wrbuffer->wb_node, &g_wrbuffer.freebuffers);
+  DEBUGASSERT(wrb && wrb->wb_iob);
+
+  /* To avoid deadlocks, we must following this ordering:  Release the I/O
+   * buffer chain first, then the write buffer structure.
+   */
+
+  iob_free_chain(wrb->wb_iob);
+
+  /* Then free the write buffer structure */
+
+  sq_addlast(&wrb->wb_node, &g_wrbuffer.freebuffers);
   sem_post(&g_wrbuffer.sem);
 }
 

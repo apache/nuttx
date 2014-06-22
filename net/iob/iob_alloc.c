@@ -39,6 +39,9 @@
 
 #include <nuttx/config.h>
 
+#include <semaphore.h>
+#include <assert.h>
+
 #include <nuttx/arch.h>
 #include <nuttx/net/iob.h>
 
@@ -61,18 +64,19 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_alloc
+ * Name: iob_tryalloc
  *
  * Description:
- *   Allocate an I/O buffer by taking the buffer at the head of the free list.
+ *   Try to allocate an I/O buffer by taking the buffer at the head of the
+ *   free list.
  *
  ****************************************************************************/
 
-FAR struct iob_s *iob_alloc(void)
+static FAR struct iob_s *iob_tryalloc(void)
 {
   FAR struct iob_s *iob;
   irqstate_t flags;
@@ -85,9 +89,12 @@ FAR struct iob_s *iob_alloc(void)
   iob   = g_iob_freelist;
   if (iob)
     {
-      /* Remove the I/O buffer from the free list */
+      /* Remove the I/O buffer from the free list and decrement the counting
+       * semaphore that tracks the number of free IOBs.
+       */
 
       g_iob_freelist = iob->io_flink;
+      DEBUGVERIFY(sem_trywait(&g_iob_sem));
       irqrestore(flags);
 
       /* Put the I/O buffer in a known state */
@@ -101,4 +108,87 @@ FAR struct iob_s *iob_alloc(void)
 
   irqrestore(flags);
   return NULL;
+}
+
+/****************************************************************************
+ * Name: iob_allocwait
+ *
+ * Description:
+ *   Allocate an I/O buffer, waiting if necessary.  This function cannot be
+ *   called from any interrupt level logic.
+ *
+ ****************************************************************************/
+
+static FAR struct iob_s *iob_allocwait(void)
+{
+  FAR struct iob_s *iob;
+  irqstate_t flags;
+  int ret;
+
+  /* The following must be atomic; interrupt must be disabled so that there
+   * is no conflict with interrupt level I/O buffer allocations.  This is
+   * not as bad as it sounds because interrupts will be re-enabled while
+   * we are waiting for I/O buffers to become free.
+   */
+
+  flags = irqsave();
+  do
+    {
+      /* Try to get an I/O buffer.  If successful, the semaphore count
+       * will be decremented atomically.
+       */
+
+      iob = iob_tryalloc();
+      if (!iob)
+        {
+          /* If not successful, then the semaphore count was less than or
+           * equal to zero (meaning that there are no free buffers).  We
+           * need to wait for an I/O buffer to be released when the semaphore
+           * count will be incremented.
+           */
+
+          ret = sem_wait(&g_iob_sem);
+
+          /* When we wake up from wait, an I/O buffer was returned to
+           * the free list.  However, if there are concurrent allocations
+           * from interrupt handling, then I suspect that there is a
+           * race condition.  But no harm, we will just wait again in
+           * that case.
+           */
+        }
+    }
+  while (ret == OK && !iob);
+
+  irqrestore(flags);
+  return iob;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: iob_alloc
+ *
+ * Description:
+ *   Allocate an I/O buffer by taking the buffer at the head of the free list.
+ *
+ ****************************************************************************/
+
+FAR struct iob_s *iob_alloc(void)
+{
+  /* Were we called from the interrupt level? */
+
+  if (up_interrupt_context())
+    {
+      /* Yes, then try to allocate an I/O buffer without waiting */
+
+      return iob_tryalloc();
+    }
+  else
+    {
+      /* Then allocate an I/O buffer, waiting as necessary */
+
+      return iob_allocwait();
+    }
 }

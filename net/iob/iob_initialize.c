@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdbool.h>
+#include <semaphore.h>
 
 #include <nuttx/net/iob.h>
 
@@ -60,7 +61,9 @@
 /* This is a pool of pre-allocated I/O buffers */
 
 static struct iob_s        g_iob_pool[CONFIG_IOB_NBUFFERS];
+#if CONFIG_IOB_NCHAINS > 0
 static struct iob_qentry_s g_iob_qpool[CONFIG_IOB_NCHAINS];
+#endif
 
 /****************************************************************************
  * Public Data
@@ -72,7 +75,16 @@ FAR struct iob_s *g_iob_freelist;
 
 /* A list of all free, unallocated I/O buffer queue containers */
 
+#if CONFIG_IOB_NCHAINS > 0
 FAR struct iob_qentry_s *g_iob_freeqlist;
+#endif
+
+/* Counting semaphores that tracks the number of free IOBs/qentries */
+
+sem_t g_iob_sem;
+#if CONFIG_IOB_NCHAINS > 0
+sem_t g_qentry_sem;
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -107,6 +119,9 @@ void iob_initialize(void)
           g_iob_freelist = iob;
         }
 
+      sem_init(&g_iob_sem, 0, CONFIG_IOB_NBUFFERS);
+
+#if CONFIG_IOB_NCHAINS > 0
       /* Add each I/O buffer chain queue container to the free list */
 
       for (i = 0; i < CONFIG_IOB_NCHAINS; i++)
@@ -119,6 +134,8 @@ void iob_initialize(void)
           g_iob_freeqlist = iobq;
         }
 
+      sem_init(&g_qentry_sem, 0, CONFIG_IOB_NCHAINS);
+#endif
       initialized = true;
     }
 }

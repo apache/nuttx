@@ -82,6 +82,7 @@ endif # NET_TCP_READAHEAD
 config NET_TCP_WRITE_BUFFERS
 	bool "Enable TCP/IP write buffering"
 	default n
+	select NET_IOB
 	---help---
 		Write buffers allows buffering of ongoing TCP/IP packets, providing
 		for higher performance, streamed output.
@@ -91,34 +92,15 @@ config NET_TCP_WRITE_BUFFERS
 
 if NET_TCP_WRITE_BUFFERS
 
-config NET_TCP_WRITE_BUFSIZE
-	int "TCP/IP write buffer size"
-	default 1220 if !NET_SLIP && NET_IPv6
-	default 536 if !NET_SLIP && !NET_IPv6
-	default 256 if NET_SLIP && !NET_IPv6
-	---help---
-		Write buffers allows buffering of ongoing TCP/IP packets, providing
-		for higher performance, streamed output.
-
-		The size of the write buffer will determine the maximum size of an
-		outgoing TCP packet payload (MSS).  This value should NOT exceed the
-		maximum MSS which is determined by NET_BUFSIZE minus the size of
-		TCP, IP, and Ethernet headers (assuming you are using the Ethernet
-		transport).   IPv4 hosts are required to be able to handle an MSS
-		of 536 octets and IPv6 hosts are required to be able to handle an
-		MSS of 1220 octets.
-
-		This setting specifies the size of one TCP/IP write buffer. This
-		should best be a equal to the maximum packet size (NET_BUFSIZE).
-
-config NET_NTCP_WRITE_BUFFERS
-	int "Number of TCP/IP write buffers"
+config NET_TCP_NWRBCHAINS
+	int "Number of pre-allocated I/O buffer chain heads"
 	default 8
 	---help---
-		Write buffers allows buffering of ongoing TCP/IP packets, providing
-		for higher performance, streamed output.
-
-		This setting specifies the number of TCP/IP write buffers.
+		These tiny nodes are used as "containers" to support queueing of
+		TCP write buffers.  This setting will limit the number of TCP write
+		operations that can be "in-flight" at any give time.  So a good
+		choice for this value would be the same as the maximum number of
+		TCP connections.
 
 config NET_TCP_WRBUFFER_DEBUG
 	bool "Force write buffer debug"

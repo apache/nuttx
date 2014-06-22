@@ -98,10 +98,8 @@ void tcp_wrbuffer_initialize(void);
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
 struct tcp_wrbuffer_s;
-struct timespec;
 
-FAR struct tcp_wrbuffer_s *
-tcp_wrbuffer_alloc(FAR const struct timespec *abstime);
+FAR struct tcp_wrbuffer_s *tcp_wrbuffer_alloc(void);
 #endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
 
 /****************************************************************************
@@ -118,7 +116,23 @@ tcp_wrbuffer_alloc(FAR const struct timespec *abstime);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-void tcp_wrbuffer_release(FAR struct tcp_wrbuffer_s *wrbuffer);
+void tcp_wrbuffer_release(FAR struct tcp_wrbuffer_s *wrb);
+#endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
+
+/****************************************************************************
+ * Function: tcp_writebuffer_dump
+ *
+ * Description:
+ *   Dump the contents of a write buffer.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+#ifdef CONFIG_DEBUG
+void tcp_writebuffer_dump(FAR const char *msg, FAR struct tcp_wrbuffer_s *wrb);
+#else
+#  define tcp_writebuffer_dump(msg,wrb)
+#endif
 #endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
 
 #undef EXTERN

@@ -39,12 +39,15 @@
 
 #include <nuttx/config.h>
 
+#include <semaphore.h>
 #include <assert.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/net/iob.h>
 
 #include "iob.h"
+
+#if CONFIG_IOB_NCHAINS > 0
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -70,7 +73,7 @@
  * Name: iob_free_qentry
  *
  * Description:
- *   Free the I/O buffer chain container by returning it to the  free list.
+ *   Free the I/O buffer chain container by returning it to the free list.
  *   The link to  the next I/O buffer in the chain is return.
  *
  ****************************************************************************/
@@ -86,11 +89,17 @@ FAR struct iob_qentry_s *iob_free_qentry(FAR struct iob_qentry_s *iobq)
    */
 
   flags = irqsave();
-  iobq->qe_flink   = g_iob_freeqlist;
+  iobq->qe_flink = g_iob_freeqlist;
   g_iob_freeqlist = iobq;
+
+  /* Signal that an I/O buffer chain container is available */
+
+  sem_post(&g_qentry_sem);
   irqrestore(flags);
 
   /* And return the I/O buffer chain container after the one that was freed */
 
   return nextq;
 }
+
+#endif /* CONFIG_IOB_NCHAINS > 0 */

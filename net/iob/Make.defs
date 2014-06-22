@@ -43,6 +43,10 @@ NET_CSRCS += iob_free_chain.c iob_free_qentry.c iob_free_queue.c
 NET_CSRCS += iob_initialize.c iob_pack.c iob_remove_queue.c iob_trimhead.c
 NET_CSRCS += iob_trimtail.c
 
+ifeq ($(CONFIG_DEBUG),y)
+NET_CSRCS += iob_dump.c
+endif
+
 # Include iob build support
 
 DEPPATH += --dep-path iob

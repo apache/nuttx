@@ -51,6 +51,9 @@ endif
 
 ifeq ($(CONFIG_NET_TCP_WRITE_BUFFERS),y)
 NET_CSRCS += tcp_wrbuffer.c
+ifeq ($(CONFIG_DEBUG),y)
+NET_CSRCS += tcp_wrbuffer_dump.c
+endif
 endif
 
 # Include TCP build support

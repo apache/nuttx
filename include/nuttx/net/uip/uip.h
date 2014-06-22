@@ -391,7 +391,14 @@ extern int uip_lockedwait(sem_t *sem);
  * len The maximum amount of data bytes to be sent.
  */
 
-extern void uip_send(struct uip_driver_s *dev, const void *buf, int len);
+extern void uip_send(FAR struct uip_driver_s *dev, FAR const void *buf,
+                     int len);
+
+#ifdef CONFIG_NET_IOB
+struct iob_s;
+extern void uip_iobsend(FAR struct uip_driver_s *dev, FAR struct iob_s *buf,
+                        unsigned int len, unsigned int offset);
+#endif
 
 /* uIP convenience and converting functions.
  *

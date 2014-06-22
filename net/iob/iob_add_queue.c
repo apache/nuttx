@@ -47,6 +47,8 @@
 
 #include "iob.h"
 
+#if CONFIG_IOB_NCHAINS > 0
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -102,3 +104,5 @@ int iob_add_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq)
 
   return 0;
 }
+
+#endif /* CONFIG_IOB_NCHAINS > 0 */

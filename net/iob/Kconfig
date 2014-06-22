@@ -30,10 +30,16 @@ config IOB_BUFSIZE
 
 config IOB_NCHAINS
 	int "Number of pre-allocated I/O buffer chain heads"
-	default 8
+	default 0
 	---help---
-		These tiny nodes are used as "containers" to suppor queueing of
+		These tiny nodes are used as "containers" to support queueing of
 		I/O buffer chains.  This will limit the number of I/O transactions
-		that can be "in-flight" at any give time.
+		that can be "in-flight" at any give time.  The default value of
+		zero disables this features.
+
+		These generic I/O buffer chain containers are not currently used
+		by any logic in NuttX.  That is because their other other specialized
+		I/O buffer chain containers that also carry a payload of usage
+		specific information.
 
 endif # NET_IOB

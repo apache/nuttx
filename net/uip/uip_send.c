@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_send.c
  *
- *   Copyright (C) 2007i, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Based in part on uIP which also has a BSD stylie license:
@@ -42,6 +42,7 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <nuttx/net/uip/uip.h>
@@ -94,13 +95,8 @@
 
 void uip_send(struct uip_driver_s *dev, const void *buf, int len)
 {
-  /* Some sanity checks -- note that the actually available length in the
-   * buffer is considerably less than CONFIG_NET_BUFSIZE.
-   */
+  DEBUGASSERT(dev && len > 0 && len < CONFIG_NET_BUFSIZE);
 
-  if (dev && len > 0 && len < CONFIG_NET_BUFSIZE)
-    {
-      memcpy(dev->d_snddata, buf, len);
-      dev->d_sndlen = len;
-   }
+  memcpy(dev->d_snddata, buf, len);
+  dev->d_sndlen = len;
 }

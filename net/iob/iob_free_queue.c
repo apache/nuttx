@@ -45,6 +45,8 @@
 
 #include "iob.h"
 
+#if CONFIG_IOB_NCHAINS > 0
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -112,3 +114,5 @@ void iob_free_queue(FAR struct iob_queue_s *qhead)
       iob_free_chain(iob);
     }
 }
+
+#endif /* CONFIG_IOB_NCHAINS > 0 */
