@@ -154,7 +154,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
         {
           /* Detach and disable the interrupt */
 
-          (void)irq_detach(IRQ_BP2)
+          (void)irq_detach(IRQ_BP2);
           sam_gpioirqdisable(IRQ_BP2);
         }
 

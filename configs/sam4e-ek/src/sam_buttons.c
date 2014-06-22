@@ -110,7 +110,7 @@ static xcpt_t board_button_irqx(int irq, xcpt_t irqhandler, xcpt_t *store)
     {
       /* Detach and disable the interrupt */
 
-      (void)irq_detach(irq)
+      (void)irq_detach(irq);
       sam_gpioirqdisable(irq);
     }
 
