@@ -99,7 +99,7 @@
  * system time-of-day clock.
  */
 
-#ifdef CLOCK_MONOTONIC
+#ifdef CONFIG_CLOCK_MONOTONIC
 #  define CLOCK_MONOTONIC  2
 #endif
 

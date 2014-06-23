@@ -107,7 +107,7 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
   sdbg("clock_id=%d\n", clock_id);
   DEBUGASSERT(tp != NULL);
 
-#ifdef CLOCK_MONOTONIC
+#ifdef CONFIG_CLOCK_MONOTONIC
   /* CLOCK_MONOTONIC is an optional under POSIX: "If the Monotonic Clock
    * option is supported, all implementations shall support a clock_id
    * of CLOCK_MONOTONIC defined in <time.h>. This clock represents the
