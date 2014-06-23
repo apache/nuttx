@@ -304,7 +304,7 @@ int iob_contig(FAR struct iob_s *iob, unsigned int len);
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG
-void iob_dump(FAR const char *msg, FAR struct iob_s *iob);
+void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len);
 #else
 #  define iob_dump(wrb)
 #endif

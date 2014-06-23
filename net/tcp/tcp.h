@@ -129,7 +129,7 @@ void tcp_wrbuffer_release(FAR struct tcp_wrbuffer_s *wrb);
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
 #ifdef CONFIG_DEBUG
-void tcp_wrbuffer_dump(FAR const char *msg, FAR struct tcp_wrbuffer_s *wrb);
+void tcp_wrbuffer_dump(FAR const char *msg, FAR struct tcp_wrbuffer_s *wrb, unsigned int len);
 #else
 #  define tcp_wrbuffer_dump(msg,wrb)
 #endif

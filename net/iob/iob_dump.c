@@ -50,6 +50,10 @@
  * Pre-processor definitions
  ****************************************************************************/
 
+ #ifndef MIN
+#  define MIN(a,b) ((a) < (b) ? (a) : (b))
+#endif
+
 /* Select the lowest level debug interface available */
 
 #ifdef CONFIG_CPP_HAVE_VARARGS
@@ -78,17 +82,17 @@
  *
  ****************************************************************************/
 
-void iob_dump(FAR const char *msg, FAR struct iob_s *iob)
+void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len)
 {
-  FAR struct iob_s *head = iob;
   uint8_t data[32];
   unsigned int nbytes;
   unsigned int i;
   unsigned int j;
 
-  message("%s: iob=%p pktlen=%d\n", msg, head, head->io_pktlen);
+  message("%s: iob=%p len = %d pktlen=%d\n", msg, iob, len, iob->io_pktlen);
+  len = MIN(len, iob->io_pktlen);
 
-  for (i = 0; i < head->io_pktlen; i += 32)
+  for (i = 0; i < len; i += 32)
     {
       /* Copy 32-bytes into our local buffer */
 
@@ -106,7 +110,7 @@ void iob_dump(FAR const char *msg, FAR struct iob_s *iob)
                   message(" ");
                 }
 
-              if (i + j < head->io_pktlen)
+              if (i + j < len)
                 {
                   message("%02x", data[j]);
                 }
@@ -124,7 +128,7 @@ void iob_dump(FAR const char *msg, FAR struct iob_s *iob)
                   message(" ");
                 }
 
-              if (i + j < head->io_pktlen)
+              if (i + j < len)
                 {
                   if (data[j] >= 0x20 && data[j] < 0x7f)
                     {

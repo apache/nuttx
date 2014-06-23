@@ -139,9 +139,9 @@
   do { (wrb)->wb_iob = iob_trimhead((wrb)->wb_iob,(n)); } while (0)
 
 #ifdef CONFIG_DEBUG
-#  define WRB_DUMP(msg,wrb)       tcp_wrbuffer_dump(msg,wrb)
+#  define WRB_DUMP(msg,wrb,len)   tcp_wrbuffer_dump(msg,wrb,len)
 #else
-#  define WRB_DUMP(msg,wrb)
+#  define WRB_DUMP(msg,wrb,len)
 #endif
 #endif
 
@@ -153,7 +153,7 @@
  *
  * The uip_conn structure is used for identifying a connection. All
  * but one field in the structure are to be considered read-only by an
- * application. The only exception is the "private: field whos purpose
+ * application. The only exception is the 'private' fields whose purpose
  * is to let the application store application-specific state (e.g.,
  * file pointers) for the connection.
  */
@@ -213,7 +213,7 @@ struct uip_conn
   sq_queue_t unacked_q;   /* Write buffering for un-ACKed segments */
   uint16_t   expired;     /* Number segments retransmitted but not yet ACKed,
                            * it can only be updated at UIP_ESTABLISHED state */
-  uint16_t   sent;        /* The number of bytes sent  */
+  uint16_t   sent;        /* The number of bytes sent (ACKed and un-ACKed) */
   uint32_t   isn;         /* Initial sequence number */
 #endif
 

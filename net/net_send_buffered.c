@@ -84,7 +84,7 @@
 #else
 #  define BUF_DUMP(msg,buf,len)
 #  undef  WRB_DUMP
-#  define WRB_DUMP(msg,wrb)
+#  define WRB_DUMP(msg,wrb,len)
 #endif
 
 /****************************************************************************
@@ -188,7 +188,6 @@ static inline void lost_connection(FAR struct socket *psock,
 
   sq_init(&conn->unacked_q);
   sq_init(&conn->write_q);
-  conn->expired = 0;
   conn->sent = 0;
 }
 
@@ -367,11 +366,32 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
       if (wrb != NULL && WRB_SENT(wrb) > 0)
         {
           FAR struct tcp_wrbuffer_s *tmp;
+          uint16_t sent;
 
           /* Yes.. Reset the number of bytes sent sent from the write buffer */
 
+          sent = WRB_SENT(wrb);
+          if (conn->unacked > sent)
+            {
+              conn->unacked -= sent;
+            }
+          else
+            {
+              conn->unacked = 0;
+            }
+
+          if (conn->sent > sent)
+            {
+              conn->sent -= sent;
+            }
+          else
+            {
+              conn->sent = 0;
+            }
+
           WRB_SENT(wrb) = 0;
-          nllvdbg("REXMIT: wrb=%p sent=%u\n", wrb, WRB_SENT(wrb));
+          nllvdbg("REXMIT: wrb=%p sent=%u, conn unacked=%d sent=%d\n",
+                  wrb, WRB_SENT(wrb), conn->unacked, conn->sent);
 
           /* Increment the retransmit count on this write buffer. */
 
@@ -411,6 +431,32 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
       while ((entry = sq_remlast(&conn->unacked_q)) != NULL)
         {
           wrb = (FAR struct tcp_wrbuffer_s*)entry;
+          uint16_t sent;
+
+          /* Reset the number of bytes sent sent from the write buffer */
+
+          sent = WRB_SENT(wrb);
+          if (conn->unacked > sent)
+            {
+              conn->unacked -= sent;
+            }
+          else
+            {
+              conn->unacked = 0;
+            }
+
+          if (conn->sent > sent)
+            {
+              conn->sent -= sent;
+            }
+          else
+            {
+              conn->sent = 0;
+            }
+
+          WRB_SENT(wrb) = 0;
+          nllvdbg("REXMIT: wrb=%p sent=%u, conn unacked=%d sent=%d\n",
+                  wrb, WRB_SENT(wrb), conn->unacked, conn->sent);
 
           /* Free any write buffers that have exceed the retry count */
 
@@ -441,9 +487,7 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
                * is pulled from the write_q again.
                */
 
-              WRB_SENT(wrb) = 0;
-              nllvdbg("REXMIT: wrb=%p Move to write_q, sent=%u nrtx=%u\n",
-                      wrb, WRB_SENT(wrb), WRB_NRTX(wrb));
+              nllvdbg("REXMIT: Moving wrb=%p nrtx=%u\n", wrb, WRB_NRTX(wrb));
 
               send_insert_seqment(wrb, &conn->write_q);
             }
@@ -556,16 +600,11 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
           /* Remember how much data we send out now so that we know
            * when everything has been acknowledged.  Just increment
            * the amount of data sent. This will be needed in
-           * sequence number calculations and we know that this is
-           * not a re-transmission. Re-transmissions do not go through
-           * this path.
+           * sequence number calculations.
            */
 
-          if (WRB_NRTX(wrb) == 0)
-            {
-              conn->unacked += sndlen;
-              conn->sent    += sndlen;
-            }
+          conn->unacked += sndlen;
+          conn->sent    += sndlen;
 
           nllvdbg("SEND: wrb=%p nrtx=%u unacked=%u sent=%u\n",
                   wrb, WRB_NRTX(wrb), conn->unacked, conn->sent);
@@ -754,7 +793,7 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
 
               /* Dump I/O buffer chain */
 
-              WRB_DUMP("I/O buffer chain", wrb);
+              WRB_DUMP("I/O buffer chain", wrb, WRB_PKTLEN(wrb));
 
               /* send_interrupt() will send data in FIFO order from the
                * conn->write_q
