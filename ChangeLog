@@ -7472,4 +7472,7 @@
 	  Kconfig files from Stefan Sperling (2014-6-23).
 	* net/net_send_unbuffered.c:  Remove some spurious white space from
 	  field selectors.  SourceForge ticket #42 (2014-6-23).
+	* arch/arm/src/lpc17xx and configs/lpcexpresso-lpc1768:  Added support
+	  for the lpcxpresso's rtc handler, adc, dac, timers, pwm and mcpwm
+	  drivers.  From Max (himax) (2014-6-23).
 
