@@ -244,6 +244,15 @@ config LPC17_TMR0
 	bool "Timer 0"
 	default n
 
+config LPC17_MAT0_PIN
+	int "TIM1 MAT0 Output Pin"
+	default 1
+	range 1 4
+	depends on LPC17_TMR0
+	---help---
+		If TIM1 is enabled for PWM usage, you also need specifies the timer output
+		channel {1,..,4}
+
 config LPC17_TMR1
 	bool "Timer 1"
 	default n
@@ -267,12 +276,30 @@ config LPC17_PWM0
 config LPC17_PWM1
 	bool "PWM1"
 	default n
-	depends on ARCH_FAMILY_LPC177X || ARCH_FAMILY_LPC178X
+	depends on ARCH_FAMILY_LPC177X || ARCH_FAMILY_LPC178X || ARCH_FAMILY_LPC176X
+
+config LPC17_PWM1_PIN
+	int "TIM1 PWM Output Pin"
+	default 1
+	range 1 4
+	depends on LPC17_PWM1
+	---help---
+		If TIM1 is enabled for PWM usage, you also need specifies the timer output
+		channel {1,..,4}
 
 config LPC17_MCPWM
 	bool "MCPWM"
 	default n
 	depends on ARCH_FAMILY_LPC175X || ARCH_FAMILY_LPC176X
+
+config LPC17_MCPWM1_PIN
+	int "TIM1 MCPWM Output Pin"
+	default 1
+	range 1 4
+	depends on LPC17_MCPWM
+	---help---
+		If TIM1 is enabled for PWM usage, you also need specifies the timer output
+		channel {1,..,4}
 
 config LPC17_QEI
 	bool "QEI"
