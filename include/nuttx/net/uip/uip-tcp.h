@@ -139,9 +139,10 @@
   do { (wrb)->wb_iob = iob_trimhead((wrb)->wb_iob,(n)); } while (0)
 
 #ifdef CONFIG_DEBUG
-#  define WRB_DUMP(msg,wrb,len)   tcp_wrbuffer_dump(msg,wrb,len)
+#  define WRB_DUMP(msg,wrb,len,offset) \
+     tcp_wrbuffer_dump(msg,wrb,len,offset)
 #else
-#  define WRB_DUMP(msg,wrb,len)
+#  define WRB_DUMP(msg,wrb,len,offset)
 #endif
 #endif
 

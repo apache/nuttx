@@ -82,9 +82,9 @@
 #ifdef CONFIG_NET_TCP_WRBUFFER_DUMP
 #  define BUF_DUMP(msg,buf,len) lib_dumpbuffer(msg,buf,len)
 #else
-#  define BUF_DUMP(msg,buf,len)
+#  define BUF_DUMP(msg,buf,len,offset)
 #  undef  WRB_DUMP
-#  define WRB_DUMP(msg,wrb,len)
+#  define WRB_DUMP(msg,wrb,len,offset)
 #endif
 
 /****************************************************************************
@@ -285,12 +285,21 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
                    */
 
                   trimlen = ackno - WRB_SEQNO(wrb);
+                  if (trimlen > WRB_SENT(wrb))
+                    {
+                      /* More data has been ACKed then we have sent? */
+
+                      trimlen = WRB_SENT(wrb);
+                    }
+
                   nllvdbg("ACK: wrb=%p trim %u bytes\n", wrb, trimlen);
+
                   WRB_TRIM(wrb, trimlen);
+                  WRB_SEQNO(wrb) = ackno;
+                  WRB_SENT(wrb) -= trimlen;
 
                   /* Set the new sequence number for what remains */
 
-                  WRB_SEQNO(wrb) = ackno;
                   nllvdbg("ACK: wrb=%p seqno=%u pktlen=%u\n",
                           wrb, WRB_SEQNO(wrb), WRB_PKTLEN(wrb));
                 }
@@ -312,7 +321,7 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
           nacked = ackno - WRB_SEQNO(wrb);
           if (nacked > WRB_SENT(wrb))
             {
-              /* More data has been ACKed then we have sent? */
+              /* More data has been ACKed then we have sent? ASSERT? */
 
               nacked = WRB_SENT(wrb);
             }
@@ -793,7 +802,7 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
 
               /* Dump I/O buffer chain */
 
-              WRB_DUMP("I/O buffer chain", wrb, WRB_PKTLEN(wrb));
+              WRB_DUMP("I/O buffer chain", wrb, WRB_PKTLEN(wrb), 0);
 
               /* send_interrupt() will send data in FIFO order from the
                * conn->write_q

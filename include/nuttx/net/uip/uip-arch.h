@@ -163,7 +163,7 @@ struct uip_driver_s
 
   uint16_t d_len;
 
-  /* When d_buf contains outgoing xmit data, xmtlen is nonzero and represents
+  /* When d_buf contains outgoing xmit data, d_sndlen is nonzero and represents
    * the amount of appllcation data after d_snddata
    */
 

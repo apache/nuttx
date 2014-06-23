@@ -82,37 +82,68 @@
  *
  ****************************************************************************/
 
-void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len)
+void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len,
+              unsigned int offset)
 {
+  FAR struct iob_s *head;
   uint8_t data[32];
+  unsigned int maxlen;
   unsigned int nbytes;
-  unsigned int i;
-  unsigned int j;
+  unsigned int lndx;
+  unsigned int cndx;
 
-  message("%s: iob=%p len = %d pktlen=%d\n", msg, iob, len, iob->io_pktlen);
-  len = MIN(len, iob->io_pktlen);
+  head = iob;
+  message("%s: iob=%p pktlen=%d\n", msg, head, head->io_pktlen);
 
-  for (i = 0; i < len; i += 32)
+  /* Check if the offset is beyond the data in the I/O buffer chain */
+
+  if (offset > head->io_pktlen)
     {
-      /* Copy 32-bytes into our local buffer */
+      ndbg("ERROR: offset is past the end of data: %u > %u\n",
+           offset, head->io_pktlen);
+      return;
+    }
 
-      nbytes = iob_copyout(data, iob, 32, i);
+  /* Dump I/O buffer headers */
+
+  for (; iob; iob = iob->io_flink)
+    {
+      message("  iob=%p len=%d offset=%d\n", iob, iob->io_len, iob->io_offset);
+    }
+
+  /* Get the amount of data to be displayed, limited by the amount that we
+   * have beyond the offset.
+   */
+
+  maxlen = head->io_pktlen - offset;
+  len = MIN(len, maxlen);
+
+  /* Then beginning printing with the buffer containing the offset in groups
+   * of 32 bytes.
+   */
+
+  for (lndx = 0; lndx < len; lndx += 32, offset += 32)
+    {
+      /* Copy 32-bytes into our local buffer from the current offset */
+
+      nbytes = iob_copyout(data, head, 32, offset);
 
       /* Make sure that we have something to print */
 
       if (nbytes > 0)
         {
-          message("%04x: ", i);
-          for (j = 0; j < 32; j++)
+          message("  %04x: ", offset);
+
+          for (cndx = 0; cndx < 32; cndx++)
             {
-              if (j == 16)
+              if (cndx == 16)
                 {
                   message(" ");
                 }
 
-              if (i + j < len)
+              if ((lndx + cndx) < len)
                 {
-                  message("%02x", data[j]);
+                  message("%02x", data[cndx]);
                 }
               else
                 {
@@ -121,18 +152,18 @@ void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len)
             }
 
           message(" ");
-          for (j = 0; j < 32; j++)
+          for (cndx = 0; cndx < 32; cndx++)
             {
-              if (j == 16)
+              if (cndx == 16)
                 {
                   message(" ");
                 }
 
-              if (i + j < len)
+              if ((lndx + cndx) < len)
                 {
-                  if (data[j] >= 0x20 && data[j] < 0x7f)
+                  if (data[cndx] >= 0x20 && data[cndx] < 0x7f)
                     {
-                      message("%c", data[j]);
+                      message("%c", data[cndx]);
                     }
                   else
                     {
