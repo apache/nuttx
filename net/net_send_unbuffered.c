@@ -680,7 +680,7 @@ ssize_t tcpsend(FAR struct socket *psock, FAR const void *buf, size_t len,
 
   save                = uip_lock();
   memset(&state, 0, sizeof(struct send_s));
-  (void)sem_init(&state. snd_sem, 0, 0); /* Doesn't really fail */
+  (void)sem_init(&state.snd_sem, 0, 0);    /* Doesn't really fail */
   state.snd_sock      = psock;             /* Socket descriptor to use */
   state.snd_buflen    = len;               /* Number of bytes to send */
   state.snd_buffer    = buf;               /* Buffer to send from */
@@ -725,7 +725,7 @@ ssize_t tcpsend(FAR struct socket *psock, FAR const void *buf, size_t len,
            * automatically re-enabled when the task restarts.
            */
 
-          ret = uip_lockedwait(&state. snd_sem);
+          ret = uip_lockedwait(&state.snd_sem);
 
           /* Make sure that no further interrupts are processed */
 
@@ -733,7 +733,7 @@ ssize_t tcpsend(FAR struct socket *psock, FAR const void *buf, size_t len,
         }
     }
 
-  sem_destroy(&state. snd_sem);
+  sem_destroy(&state.snd_sem);
   uip_unlock(save);
 
   /* Set the socket state to idle */
