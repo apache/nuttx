@@ -22,7 +22,7 @@ config ARCH_CHIP_AT90USB
 		Atmel AT90USB family of 8-bit AVRs.
 
 config ARCH_CHIP_AT32UC3
-	bool "AVR23 AT32UC3* family"
+	bool "AVR32 AT32UC3* family"
 	select ARCH_FAMILY_AVR32
 	---help---
 		Atmel AT32UC3A/B/C family of 32-bit AVR32s.
