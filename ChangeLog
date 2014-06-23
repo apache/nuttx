@@ -7461,4 +7461,6 @@
 	* tools/mkfsdata.pl:  Apparently, the trailing the 0x00 in http server
 	  files is seen as a bug in javascript and images.  From Max/Himax
 	  (2014-6-19).
-
+	* include/time.h and sched/clock_gettime.c:  Fix typo in conditional
+	  compilation:  CONFIG_CLOCK_MONOTONIC vs. CLOCK_MONOTONIC.  From Manuel
+	  Stühn (2014-6-23).
