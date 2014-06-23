@@ -7464,3 +7464,8 @@
 	* include/time.h and sched/clock_gettime.c:  Fix typo in conditional
 	  compilation:  CONFIG_CLOCK_MONOTONIC vs. CLOCK_MONOTONIC.  From Manuel
 	  Stühn (2014-6-23).
+	* arch/avr/Kconfig and arch/avr/src/avr32/Kconfig:  Fix typos in
+	  Kconfig files from Stefan Sperling (2014-6-23).
+	* net/net_send_unbuffered.c:  Remove some spurious white space from
+	  field selectors.  SourceForge ticket #42 (2014-6-23).
+
