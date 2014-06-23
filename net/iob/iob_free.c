@@ -48,6 +48,7 @@
 
 #include <semaphore.h>
 #include <assert.h>
+#include <debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/net/iob.h>
@@ -88,6 +89,9 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
   FAR struct iob_s *next = iob->io_flink;
   irqstate_t flags;
 
+  nllvdbg("iob=%p io_pktlen=%u io_len=%u next=%p\n",
+          iob, iob->io_pktlen, iob->io_len, next);
+
   /* Copy the data that only exists in the head of a I/O buffer chain into
    * the next entry.
    */
@@ -114,6 +118,9 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
           next->io_pktlen = 0;
           DEBUGASSERT(next->io_len == 0 && next->io_flink == NULL);
         }
+
+      nllvdbg("next=%p io_pktlen=%u io_len=%u\n",
+               next, next->io_pktlen, next->io_len);
     }
 
   /* Free the I/O buffer by adding it to the head of the free list. We don't

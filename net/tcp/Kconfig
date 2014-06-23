@@ -114,6 +114,16 @@ config NET_TCP_WRBUFFER_DEBUG
 		write buffer logic and do not want to get overloaded with other
 		network-related debug output.
 
+config NET_TCP_WRBUFFER_DUMP
+	bool "Force write buffer dump"
+	default n
+	depends on DEBUG_NET || NET_TCP_WRBUFFER_DEBUG
+	select NET_IOB_DEBUG
+	---help---
+		Dump the contents of the write buffers.  You do not want to do this
+		unless you really want to analyze the write buffer transfers in
+		detail.
+
 endif # NET_TCP_WRITE_BUFFERS
 
 config NET_TCP_RECVDELAY

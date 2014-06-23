@@ -97,8 +97,16 @@ void uip_iobsend(FAR struct uip_driver_s *dev, FAR struct iob_s *iob,
 {
   DEBUGASSERT(dev && len > 0 && len < CONFIG_NET_BUFSIZE);
 
+  /* Copy the data from the I/O buffer chain to the device buffer */
+
   iob_copyout(dev->d_snddata, iob, len, offset);
   dev->d_sndlen = len;
+
+#ifdef CONFIG_NET_TCP_WRBUFFER_DUMP
+  /* Dump the outgoing device buffer */
+
+  lib_dumpbuffer("uip_iobsend", dev->d_snddata, len);
+#endif
 }
 
 #endif /* CONFIG_NET_IOB */

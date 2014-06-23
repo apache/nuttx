@@ -306,7 +306,7 @@ int iob_contig(FAR struct iob_s *iob, unsigned int len);
 #ifdef CONFIG_DEBUG
 void iob_dump(FAR const char *msg, FAR struct iob_s *iob);
 #else
-#  define tcp_writebuffer_dump(wrb)
+#  define iob_dump(wrb)
 #endif
 
 #endif /* _INCLUDE_NUTTX_NET_IOB_H */

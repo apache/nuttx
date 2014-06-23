@@ -81,50 +81,18 @@
 void iob_dump(FAR const char *msg, FAR struct iob_s *iob)
 {
   FAR struct iob_s *head = iob;
-  FAR const uint8_t *buffer;
   uint8_t data[32];
   unsigned int nbytes;
   unsigned int i;
   unsigned int j;
-  int len;
 
-  message("%s: IOB=%p pktlen=%d\n", msg, head, head->io_pktlen);
+  message("%s: iob=%p pktlen=%d\n", msg, head, head->io_pktlen);
 
-  buffer = &iob->io_data[iob->io_offset];
-  len    = iob->io_len;
-
-  for (i = 0; i < head->io_pktlen && iob; i += 32)
+  for (i = 0; i < head->io_pktlen; i += 32)
     {
       /* Copy 32-bytes into our local buffer */
 
-      for (nbytes = 0; nbytes < 32; nbytes++)
-        {
-          data[nbytes] = *buffer++;
-
-          /* If we have exhausted the data in this I/O buffer,
-           * then skip to the next I/O buffer in the chain.
-           */
-
-          if (--len <= 0)
-           {
-             iob = iob->io_flink;
-             if (!iob)
-               {
-                 /* Ooops... we are at the end of the chain.
-                  * break out with iob = NULL, len == 0, and
-                  * nbytes <= 32.
-                  */
-
-                 len = 0;
-                 break;
-               }
-
-             /* Get the data from the next I/O buffer in the chain */
-
-             buffer = &iob->io_data[iob->io_offset];
-             len = iob->io_len;
-           }
-        }
+      nbytes = iob_copyout(data, iob, 32, i);
 
       /* Make sure that we have something to print */
 
@@ -140,7 +108,7 @@ void iob_dump(FAR const char *msg, FAR struct iob_s *iob)
 
               if (i + j < head->io_pktlen)
                 {
-                  message("%02x", buffer[j]);
+                  message("%02x", data[j]);
                 }
               else
                 {
@@ -158,9 +126,9 @@ void iob_dump(FAR const char *msg, FAR struct iob_s *iob)
 
               if (i + j < head->io_pktlen)
                 {
-                  if (buffer[j] >= 0x20 && buffer[j] < 0x7f)
+                  if (data[j] >= 0x20 && data[j] < 0x7f)
                     {
-                      message("%c", buffer[j]);
+                      message("%c", data[j]);
                     }
                   else
                     {

@@ -81,7 +81,7 @@
 
 void tcp_wrbuffer_dump(FAR const char *msg, FAR struct tcp_wrbuffer_s *wrb)
 {
-  message("%s: WRB=%p segno=%d sent=%d nrtx=%d\n",
+  message("%s: wrb=%p segno=%d sent=%d nrtx=%d\n",
           msg, wrb, WRB_SEQNO(wrb), WRB_SENT(wrb), WRB_NRTX(wrb));
   iob_dump("I/O Buffer Chain", WRB_IOB(wrb));
 }

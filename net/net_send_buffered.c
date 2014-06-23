@@ -77,6 +77,16 @@
 
 #define TCPBUF ((struct uip_tcpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
 
+/* Debug */
+
+#ifdef CONFIG_NET_TCP_WRBUFFER_DUMP
+#  define BUF_DUMP(msg,buf,len) lib_dumpbuffer(msg,buf,len)
+#else
+#  define BUF_DUMP(msg,buf,len)
+#  undef  WRB_DUMP
+#  define WRB_DUMP(msg,wrb)
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -255,6 +265,8 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
 
               if (ackno >= lastseq)
                 {
+                  nllvdbg("ACK: wrb=%p Freeing write buffer\n", wrb);
+
                   /* Yes... Remove the write buffer from ACK waiting queue */
 
                   sq_rem(entry, &conn->unacked_q);
@@ -296,7 +308,7 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
         {
           uint32_t nacked;
 
-          /* Get the sequence number at the end of the data */
+          /* Number of bytes that were ACKed */
 
           nacked = ackno - WRB_SEQNO(wrb);
           if (nacked > WRB_SENT(wrb))
@@ -574,6 +586,8 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
             {
               FAR struct tcp_wrbuffer_s *tmp;
 
+              nllvdbg("ACK: wrb=%p Move to unacked_q\n", wrb);
+
               tmp = (FAR struct tcp_wrbuffer_s *)sq_remfirst(&conn->write_q);
               DEBUGASSERT(tmp == wrb);
               UNUSED(tmp);
@@ -686,6 +700,10 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
       goto errout;
     }
 
+  /* Dump the incoming buffer */
+
+  BUF_DUMP("psock_send", buf, len);
+
   /* Set the socket state to sending */
 
   psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_SEND);
@@ -733,6 +751,10 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
               WRB_SEQNO(wrb) = (unsigned)-1;
               WRB_NRTX(wrb)  = 0;
               WRB_COPYIN(wrb, (FAR uint8_t *)buf, len);
+
+              /* Dump I/O buffer chain */
+
+              WRB_DUMP("I/O buffer chain", wrb);
 
               /* send_interrupt() will send data in FIFO order from the
                * conn->write_q

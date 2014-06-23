@@ -120,7 +120,7 @@ void tcp_wrbuffer_release(FAR struct tcp_wrbuffer_s *wrb);
 #endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
 
 /****************************************************************************
- * Function: tcp_writebuffer_dump
+ * Function: tcp_wrbuffer_dump
  *
  * Description:
  *   Dump the contents of a write buffer.
@@ -129,9 +129,9 @@ void tcp_wrbuffer_release(FAR struct tcp_wrbuffer_s *wrb);
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
 #ifdef CONFIG_DEBUG
-void tcp_writebuffer_dump(FAR const char *msg, FAR struct tcp_wrbuffer_s *wrb);
+void tcp_wrbuffer_dump(FAR const char *msg, FAR struct tcp_wrbuffer_s *wrb);
 #else
-#  define tcp_writebuffer_dump(msg,wrb)
+#  define tcp_wrbuffer_dump(msg,wrb)
 #endif
 #endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
 
