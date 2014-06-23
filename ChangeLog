@@ -7465,3 +7465,6 @@
 	  write buffering logic to use I/O buffer chains (not tested on initial
 	  check-in) (2014-6-22).
 
+	* include/time.h and sched/clock_gettime.c:  Fix typo in conditional
+	  compilation:  CONFIG_CLOCK_MONOTONIC vs. CLOCK_MONOTONIC.  From Manuel
+	  Stühn (2014-6-23).
