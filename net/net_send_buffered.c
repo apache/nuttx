@@ -82,7 +82,7 @@
 #ifdef CONFIG_NET_TCP_WRBUFFER_DUMP
 #  define BUF_DUMP(msg,buf,len) lib_dumpbuffer(msg,buf,len)
 #else
-#  define BUF_DUMP(msg,buf,len,offset)
+#  define BUF_DUMP(msg,buf,len)
 #  undef  WRB_DUMP
 #  define WRB_DUMP(msg,wrb,len,offset)
 #endif
@@ -573,31 +573,24 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
           nllvdbg("SEND: wrb=%p pktlen=%u sent=%u sndlen=%u\n",
                   wrb, WRB_PKTLEN(wrb), WRB_SENT(wrb), sndlen);
 
-          /* Is this the first we have tried to send from this
-           * write buffer?
+          /* Set the sequence number for this segment.  If we are
+           * retransmitting, then the sequence number will already
+           * be set for this write buffer.
+           */
+           
+           if (WRB_SEQNO(wrb) == (unsigned)-1)
+            {
+              WRB_SEQNO(wrb) = conn->isn + conn->sent;
+            }
+
+          /* The TCP stack updates sndseq on receipt of ACK *before*
+           * this function is called. In that case sndseq will point
+           * to the next unacknowledged byte (which might have already
+           * been sent). We will overwrite the value of sndseq here
+           * before the packet is sent.
            */
 
-          if (WRB_SENT(wrb) == 0)
-            {
-              /* Yes.. Set the sequence number for this segment.  If
-               * we are retransmitting, then the sequence number will
-               * already be set for this write buffer.
-               */
-           
-              if (WRB_SEQNO(wrb) == (unsigned)-1)
-                {
-                  WRB_SEQNO(wrb) = conn->isn + conn->sent;
-                }
-
-              /* The TCP stack updates sndseq on receipt of ACK *before*
-               * this function is called. In that case sndseq will point
-               * to the next unacknowledged byte (which might have already
-               * been sent). We will overwrite the value of sndseq here
-               * before the packet is sent.
-               */
-
-              uip_tcpsetsequence(conn->sndseq, WRB_SEQNO(wrb));
-            }
+          uip_tcpsetsequence(conn->sndseq, WRB_SEQNO(wrb) + WRB_SENT(wrb));
 
           /* Then set-up to send that amount of data with the offset
            * corresponding to the amount of data already sent. (this
@@ -608,8 +601,8 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
 
           /* Remember how much data we send out now so that we know
            * when everything has been acknowledged.  Just increment
-           * the amount of data sent. This will be needed in
-           * sequence number calculations.
+           * the amount of data sent. This will be needed in sequence
+           * number calculations.
            */
 
           conn->unacked += sndlen;
@@ -634,7 +627,7 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
             {
               FAR struct tcp_wrbuffer_s *tmp;
 
-              nllvdbg("ACK: wrb=%p Move to unacked_q\n", wrb);
+              nllvdbg("SEND: wrb=%p Move to unacked_q\n", wrb);
 
               tmp = (FAR struct tcp_wrbuffer_s *)sq_remfirst(&conn->write_q);
               DEBUGASSERT(tmp == wrb);

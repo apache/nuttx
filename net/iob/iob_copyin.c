@@ -188,7 +188,7 @@ int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
       /* Copy from the user buffer to the I/O buffer.  */
 
       memcpy(dest, src, ncopy);
-      nllvdbg("iob=%p, Copy %u bytes, new len=%u\n",
+      nllvdbg("iob=%p Copy %u bytes new len=%u\n",
               iob, ncopy, iob->io_len);
 
       /* Adjust the total length of the copy and the destination address in
