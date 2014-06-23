@@ -16,7 +16,7 @@ config AVR32_AVRTOOLSW
 	depends on HOST_WINDOWS
 
 config AVR32_AVRTOOLSL
-	bool "AVR tools for Windows"
+	bool "AVR tools for Linux"
 	depends on HOST_LINUX
 
 endchoice # Toolchain
