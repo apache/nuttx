@@ -7,7 +7,7 @@
  *
  * This file is a part of NuttX:
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2014 Gregory Nutt. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -159,7 +159,11 @@ static void dac_txint(FAR struct dac_dev_s *dev, bool enable)
 
 static int  dac_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
 {
-  putreg32((msg->am_data>>16)&0xfffff,LPC17_DAC_CR);
+  /* adjust the binary value to the lpc1768's register format (plus high
+   * speed profile in bit 16)
+   */
+
+  putreg32(((((msg->am_data) << 6) | 0x10000) & 0xffff), LPC17_DAC_CR);
   dac_txdone(&g_dacdev);
   return 0;
 }
