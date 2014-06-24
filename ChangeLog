@@ -7488,3 +7488,5 @@
 	* net/: Separate net/net_send_buffered.c and net/net_send_unbuffered.c
 	  to net/tcp/tcp_send_buffered.c, net/tcp/tcp_send_unbuffered.c, and
 	  pkt/pkt_send.c (2014-6-24).
+	* include/net/if.h and /net/arp/arp_inout.c:  Suppress ARP requests on
+	  data sent from packet sockets (2014-6-24).
