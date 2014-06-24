@@ -243,6 +243,8 @@ ssize_t pkt_send(FAR struct socket *psock, FAR const void *buf, size_t len)
       state.snd_cb = uip_pktcallbackalloc(conn);
       if (state.snd_cb)
         {
+          FAR struct uip_driver_s *dev;
+
           /* Set up the callback in the connection */
 
           state.snd_cb->flags = UIP_POLL;
@@ -250,8 +252,20 @@ ssize_t pkt_send(FAR struct socket *psock, FAR const void *buf, size_t len)
           state.snd_cb->event = pktsend_interrupt;
 
           /* Notify the device driver of the availability of TX data */
+          /* TODO better lookup network interface from *psock or *conn */
 
-          struct uip_driver_s *dev = netdev_findbyname("eth0");
+          dev = netdev_findbyname("eth0");
+
+          /* Make sure no ARP frame is sent instead of the frame just written */
+
+          dev->d_flags |= IFF_NOARP;
+
+          /* Notify the device driver that new TX data is available.
+           * NOTES: This is in essence what netdev_txnotify() does, which
+           * is not possible to call since it expects a uip_ipaddr_t as
+           * its single argument to lookup the network interface.
+           */
+
           dev->d_txavail(dev);
 
           /* Wait for the send to complete or an error to occure: NOTES: (1)
@@ -265,6 +279,10 @@ ssize_t pkt_send(FAR struct socket *psock, FAR const void *buf, size_t len)
           /* Make sure that no further interrupts are processed */
 
           uip_pktcallbackfree(conn, state.snd_cb);
+
+          /* Clear the no-ARP bit in the device flags */
+
+          dev->d_flags &= ~IFF_NOARP;
         }
     }
 
