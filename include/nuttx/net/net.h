@@ -125,7 +125,7 @@ struct socketlist
 
 /* Callback from netdev_foreach() */
 
-struct uip_driver_s; /* Forward reference. Defined in nuttx/net/uip/uip-arch.h */
+struct uip_driver_s; /* Forward reference. Defined in nuttx/net/netdev.h */
 typedef int (*netdev_callback_t)(FAR struct uip_driver_s *dev, void *arg);
 
 /****************************************************************************

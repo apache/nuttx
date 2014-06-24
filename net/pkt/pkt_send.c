@@ -52,7 +52,7 @@
 #include <arch/irq.h>
 #include <nuttx/clock.h>
 #include <nuttx/net/arp.h>
-#include <nuttx/net/uip/uip-arch.h>
+#include <nuttx/net/netdev.h>
 #include <nuttx/net/uip/uip-pkt.h>
 
 #include "net_internal.h"

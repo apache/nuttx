@@ -49,7 +49,7 @@
 #include <arch/irq.h>
 
 #include <nuttx/clock.h>
-#include <nuttx/net/uip/uip-arch.h>
+#include <nuttx/net/netdev.h>
 
 #include "net_internal.h"
 #include "uip/uip_internal.h"

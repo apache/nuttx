@@ -46,7 +46,7 @@
 #include <errno.h>
 
 #include <nuttx/net/net.h>
-#include <nuttx/net/uip/uip-arch.h>
+#include <nuttx/net/netdev.h>
 
 #include "net_internal.h"
 

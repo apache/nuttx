@@ -53,7 +53,7 @@
 
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/uip/uip.h>
-#include <nuttx/net/uip/uip-arch.h>
+#include <nuttx/net/netdev.h>
 
 #include "tcp/tcp.h"
 #include "uip/uip_internal.h"

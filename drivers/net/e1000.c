@@ -56,7 +56,7 @@
 
 #include <nuttx/net/uip/uip.h>
 #include <nuttx/net/arp.h>
-#include <nuttx/net/uip/uip-arch.h>
+#include <nuttx/net/netdev.h>
 
 #include <rgmp/pmap.h>
 #include <rgmp/string.h>

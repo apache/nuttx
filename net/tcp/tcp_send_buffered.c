@@ -65,7 +65,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/iob.h>
-#include <nuttx/net/uip/uip-arch.h>
+#include <nuttx/net/netdev.h>
 
 #include "net_internal.h"
 #include "tcp/tcp.h"

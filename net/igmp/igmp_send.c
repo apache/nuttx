@@ -44,7 +44,7 @@
 
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/uip/uip.h>
-#include <nuttx/net/uip/uip-arch.h>
+#include <nuttx/net/netdev.h>
 #include <nuttx/net/uip/uip-ipopt.h>
 #include <nuttx/net/uip/uip-igmp.h>
 
