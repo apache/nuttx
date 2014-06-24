@@ -53,7 +53,7 @@
 #include <nuttx/net/net.h>
 
 #include <net/ethernet.h>
-#include <nuttx/net/uip/uip.h>
+#include <nuttx/net/uip.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/arp.h>
 
