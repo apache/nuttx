@@ -7464,7 +7464,6 @@
 	* net/ and include/nutt/net (many files):  Conversion of the TCP
 	  write buffering logic to use I/O buffer chains (not tested on initial
 	  check-in) (2014-6-22).
-
 	* include/time.h and sched/clock_gettime.c:  Fix typo in conditional
 	  compilation:  CONFIG_CLOCK_MONOTONIC vs. CLOCK_MONOTONIC.  From Manuel
 	  Stühn (2014-6-23).
@@ -7513,3 +7512,5 @@
 	* net/iob:  Add support for throttling read-ahead buffering if the
 	  read-ahead buffering is competing with write buffering for I/O
 	  buffers (2014-6-24).
+	* net/: Many files changed.  Convert existing TCP read-ahead logic
+	  to use I/O buffer chains (2014-6-24).
