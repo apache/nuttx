@@ -88,6 +88,9 @@
  *   Called from socket logic in response to a xmit or poll request from the
  *   the network interface driver.
  *
+ *   This is identical to calling uip_send() except that the data is
+ *   in an I/O buffer chain, rather than a flat buffer.
+ *
  * Assumptions:
  *   Called from the interrupt level or, at a minimum, with interrupts
  *   disabled.

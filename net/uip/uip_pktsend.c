@@ -87,9 +87,9 @@
  *   Called from socket logic in order to send a raw packet in response to
  *   an xmit or poll request from the the network interface driver.
  *
- * This is almost identical to calling uip_send() except that the data to
- * be sent is copied into dev->d_buf (vs. dev->d_snddata), since there is
- * no header on the data.
+ *   This is almost identical to calling uip_send() except that the data to
+ *   be sent is copied into dev->d_buf (vs. dev->d_snddata), since there is
+ *   no header on the data.
  *
  * Assumptions:
  *   Called from the interrupt level or, at a minimum, with interrupts

@@ -7475,4 +7475,13 @@
 	* arch/arm/src/lpc17xx and configs/lpcexpresso-lpc1768:  Added support
 	  for the lpcxpresso's rtc handler, adc, dac, timers, pwm and mcpwm
 	  drivers.  From Max (himax) (2014-6-23).
-
+	* net/tcp/Kconfig:  Cannot enable bother TCP write buffering AND raw
+	  packet sockets.  This should not logically be the case, but is because
+	  the implementations are presently too coupled.  The logic packet
+	  socket logic in net/net_send_unbuffered.c needs to be broken out into
+	  a separate file so that write buffered TCP and packet socket transfers
+	  can co-exist (2014-6-23).
+	* net/uip/uip_pktsend.c:  Move the logic that copies data into the
+	  device buffer from net/net_send_unbuffered.c to net/uip/uip_pktsend.c.
+	  This makes the packet socket design more consistent with TCP and UDP
+	  (2014-6-23).
