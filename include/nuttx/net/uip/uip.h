@@ -311,11 +311,11 @@ extern struct uip_stats uip_stat;
  * TCP/IP stack.
  */
 
-extern void uip_initialize(void);
+void uip_initialize(void);
 
 /* This function may be used at boot time to set the initial ip_id.*/
 
-extern void uip_setipid(uint16_t id);
+void uip_setipid(uint16_t id);
 
 /* Critical section management.  The NuttX configuration setting
  * CONFIG_NET_NOINT indicates that uIP not called from the interrupt level.
@@ -338,10 +338,10 @@ extern void uip_setipid(uint16_t id);
 
 typedef uint8_t uip_lock_t; /* Not really used */
 
-extern void uip_lockinit(void);
-extern uip_lock_t uip_lock(void);
-extern void uip_unlock(uip_lock_t flags);
-extern int uip_lockedwait(sem_t *sem);
+void uip_lockinit(void);
+uip_lock_t uip_lock(void);
+void uip_unlock(uip_lock_t flags);
+int uip_lockedwait(sem_t *sem);
 
 #else
 
@@ -391,13 +391,17 @@ extern int uip_lockedwait(sem_t *sem);
  * len The maximum amount of data bytes to be sent.
  */
 
-extern void uip_send(FAR struct uip_driver_s *dev, FAR const void *buf,
-                     int len);
+void uip_send(FAR struct uip_driver_s *dev, FAR const void *buf, int len);
 
 #ifdef CONFIG_NET_IOB
 struct iob_s;
-extern void uip_iobsend(FAR struct uip_driver_s *dev, FAR struct iob_s *buf,
-                        unsigned int len, unsigned int offset);
+void uip_iobsend(FAR struct uip_driver_s *dev, FAR struct iob_s *buf,
+                 unsigned int len, unsigned int offset);
+#endif
+
+#ifdef CONFIG_NET_PKT
+void uip_pktsend(FAR struct uip_driver_s *dev, FAR const void *buf,
+                 unsigned int len);
 #endif
 
 /* uIP convenience and converting functions.
@@ -547,7 +551,7 @@ extern void uip_iobsend(FAR struct uip_driver_s *dev, FAR struct iob_s *buf,
   (((in_addr_t)(addr1) & (in_addr_t)(mask)) == \
    ((in_addr_t)(addr2) & (in_addr_t)(mask)))
 #else
-extern bool uip_ipaddr_maskcmp(uip_ipaddr_t addr1, uip_ipaddr_t addr2,
+bool uip_ipaddr_maskcmp(uip_ipaddr_t addr1, uip_ipaddr_t addr2,
                                uip_ipaddr_t mask);
 #endif
 

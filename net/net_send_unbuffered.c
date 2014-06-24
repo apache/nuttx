@@ -181,29 +181,10 @@ static uint16_t pktsend_interrupt(FAR struct uip_driver_s *dev,
 
       else
         {
-          /* Copy the user data into d_snddata and send it */
+          /* Copy the packet data into the device packet buffer and send it */
 
-#if 0
-          uip_send(dev, pstate->snd_buffer, pstate->snd_buflen);
+          uip_pktsend(dev, pstate->snd_buffer, pstate->snd_buflen);
           pstate->snd_sent = pstate->snd_buflen;
-#else
-          /* NOTE: This is almost identical to calling uip_send() while
-           * the data from the sent operation buffer is copied into dev->d_buf
-           * instead of dev->d_snddata
-           */
-
-          if (pstate->snd_buflen > 0 && pstate->snd_buflen < CONFIG_NET_BUFSIZE)
-            {
-              memcpy(dev->d_buf, pstate->snd_buffer, pstate->snd_buflen);
-
-              /* Set the number of bytes to send */
-
-              dev->d_len = pstate->snd_buflen;
-              dev->d_sndlen = pstate->snd_buflen;
-            }
-
-          pstate->snd_sent = pstate->snd_buflen;
-#endif
         }
 
       /* Don't allow any further call backs. */

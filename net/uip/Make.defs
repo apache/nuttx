@@ -46,6 +46,12 @@ ifeq ($(CONFIG_NET_IOB),y)
 NET_CSRCS += uip_iobsend.c
 endif
 
+# Raw packet socket support
+
+ifeq ($(CONFIG_NET_PKT),y)
+NET_CSRCS += uip_pktsend.c
+endif
+
 # Non-interrupt level support required?
 
 ifeq ($(CONFIG_NET_NOINTS),y)
