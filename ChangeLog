@@ -7490,6 +7490,23 @@
 	  pkt/pkt_send.c (2014-6-24).
 	* include/net/if.h and /net/arp/arp_inout.c:  Suppress ARP requests on
 	  data sent from packet sockets (2014-6-24).
-	* include/nuttx/net/netconfig.h: Move include/nuttx/net/uipopt.h to
+	* include/nuttx/net/netconfig.h: Move include/nuttx/net/uip/uipopt.h to
 	  include/nuttx/net/netconfig.h (2014-6-24).
-
+	* include/nuttx/net/netdev.h: Move include/nuttx/net/uip/uip-arch.h to
+	  include/nuttx/net/netdev.h (2014-6-24).
+	* include/nuttx/net/tcp.h: Move include/nuttx/net/uip/uip-tcp.h to
+	  include/nuttx/net/tcp.h (2014-6-24).
+	* include/nuttx/net/udp.h: Move include/nuttx/net/uip/uip-udp.h to
+	  include/nuttx/net/udp.h (2014-6-24).
+	* include/nuttx/net/pkt.h: Move include/nuttx/net/uip/uip-pkt.h to
+	  include/nuttx/net/pkt.h (2014-6-24).
+	* include/nuttx/net/icmp.h: Move include/nuttx/net/uip/uip-icmp.h to
+	  include/nuttx/net/icmp.h (2014-6-24).
+	* include/nuttx/net/igmp.h: Move include/nuttx/net/uip/uip-igmp.h to
+	  include/nuttx/net/igmp.h (2014-6-24).
+	* include/nuttx/net/ip.h: Move include/nuttx/net/uip/uip-ipopt.h to
+	  include/nuttx/net/ip.h (2014-6-24).
+	* include/nuttx/net/uip.h: Move include/nuttx/net/uip/uip.h to
+	  include/nuttx/net/uip.h (2014-6-24).
+	* net/uip/uip.h: Rename net/uip/uip_internal.h to net/uip/uip.h
+	  (2014-6-24).
