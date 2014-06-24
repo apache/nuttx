@@ -56,7 +56,7 @@
 #include <nuttx/net/mii.h>
 
 #include <nuttx/net/uip/uip.h>
-#include <nuttx/net/uip/uipopt.h>
+#include <nuttx/net/netconfig.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/uip/uip-arch.h>
 
