@@ -46,6 +46,8 @@
 
 #include <nuttx/net/iob.h>
 
+#ifdef CONFIG_NET_IOB
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -310,4 +312,6 @@ void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len,
 #  define iob_dump(wrb)
 #endif
 
+#endif /* CONFIG_NET_IOB */
 #endif /* _INCLUDE_NUTTX_NET_IOB_H */
+
