@@ -48,7 +48,7 @@
 #include <assert.h>
 #include <errno.h>
 
-#include "net_internal.h"
+#include "net.h"
 
 /****************************************************************************
  * Definitions

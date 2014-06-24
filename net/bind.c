@@ -49,7 +49,7 @@
 #  include <netpacket/packet.h>
 #endif
 
-#include "net_internal.h"
+#include "net.h"
 
 /****************************************************************************
  * Private Functions

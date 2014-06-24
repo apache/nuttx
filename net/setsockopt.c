@@ -46,7 +46,7 @@
 #include <errno.h>
 #include <arch/irq.h>
 
-#include "net_internal.h"
+#include "net.h"
 
 /****************************************************************************
  * Global Functions

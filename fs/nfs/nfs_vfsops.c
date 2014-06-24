@@ -68,8 +68,8 @@
 #include <nuttx/fs/dirent.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/nfs.h>
-#include <nuttx/net/uip/uip.h>
-#include <nuttx/net/uip/uip-udp.h>
+#include <nuttx/net/uip.h>
+#include <nuttx/net/udp.h>
 #include <nuttx/net/netconfig.h>
 
 #include <net/if.h>

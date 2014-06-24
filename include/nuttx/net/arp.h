@@ -52,7 +52,7 @@
 
 #include <net/ethernet.h>
 #include <nuttx/net/netconfig.h>
-#include <nuttx/net/uip/uip.h>
+#include <nuttx/net/uip.h>
 
 /****************************************************************************
  * Pre-Processor Definitions

@@ -45,10 +45,10 @@
 #ifdef CONFIG_NET
 
 #include <stdint.h>
-#include <nuttx/net/uip/uip.h>
+#include <nuttx/net/uip.h>
 
 #include "tcp/tcp.h"
-#include "uip_internal.h"
+#include "uip.h"
 
 /****************************************************************************
  * Pre-processor Definitions

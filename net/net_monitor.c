@@ -44,8 +44,8 @@
 #include <assert.h>
 #include <debug.h>
 
-#include "net_internal.h"
-#include "uip/uip_internal.h"
+#include "net.h"
+#include "uip/uip.h"
 
 /****************************************************************************
  * Private Types

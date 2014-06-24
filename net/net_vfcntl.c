@@ -47,7 +47,7 @@
 
 #include <arch/irq.h>
 #include <nuttx/net/net.h>
-#include "net_internal.h"
+#include "net.h"
 
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 

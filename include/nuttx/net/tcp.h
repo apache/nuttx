@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/net/uip/uip-tcp.h
+ * include/nuttx/net/tcp.h
  * Header file for the uIP TCP/IP stack.
  *
  * The uIP TCP/IP stack header file contains definitions for a number
@@ -43,8 +43,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_NET_UIP_UIP_TCP_H
-#define __INCLUDE_NUTTX_NET_UIP_UIP_TCP_H
+#ifndef __INCLUDE_NUTTX_NET_TCP_H
+#define __INCLUDE_NUTTX_NET_TCP_H
 
 /****************************************************************************
  * Included Files
@@ -56,7 +56,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <nuttx/net/netconfig.h>
-#include <nuttx/net/uip/uip.h>
+#include <nuttx/net/uip.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -526,4 +526,4 @@ int uip_backlogdelete(FAR struct uip_conn *conn, FAR struct uip_conn *blconn);
 #define uip_mss(conn) ((conn)->mss)
 
 #endif /* CONFIG_NET_TCP */
-#endif /* __INCLUDE_NUTTX_NET_UIP_UIP_TCP_H */
+#endif /* __INCLUDE_NUTTX_NET_TCP_H */

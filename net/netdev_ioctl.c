@@ -56,14 +56,14 @@
 #include <netinet/in.h>
 
 #include <nuttx/net/netdev.h>
-#include <nuttx/net/uip/uip.h>
+#include <nuttx/net/uip.h>
 
 #ifdef CONFIG_NET_IGMP
 #  include "sys/sockio.h"
-#  include "nuttx/net/uip/uip-igmp.h"
+#  include "nuttx/net/igmp.h"
 #endif
 
-#include "net_internal.h"
+#include "net.h"
 #include "net_route.h"
 
 /****************************************************************************

@@ -48,7 +48,7 @@
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/arp.h>
 
-#include "net_internal.h"
+#include "net.h"
 
 #ifdef CONFIG_NET_ARP
 

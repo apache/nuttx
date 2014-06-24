@@ -47,10 +47,10 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/net/uip/uip.h>
-#include <nuttx/net/uip/uip-tcp.h>
+#include <nuttx/net/uip.h>
+#include <nuttx/net/tcp.h>
 
-#include "uip/uip_internal.h"
+#include "uip/uip.h"
 
 /****************************************************************************
  * Private Data

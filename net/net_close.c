@@ -54,8 +54,8 @@
 #  include <nuttx/clock.h>
 #endif
 
-#include "net_internal.h"
-#include "uip/uip_internal.h"
+#include "net.h"
+#include "uip/uip.h"
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/uip/uip_internal.h
+ * net/uip/uip.h
  *
  *   Copyright (C) 2007-2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -36,8 +36,8 @@
  *
  ****************************************************************************/
 
-#ifndef _NET_UIP_UIP_INTERNAL_H
-#define _NET_UIP_UIP_INTERNAL_H
+#ifndef _NET_UIP_UIP_H
+#define _NET_UIP_UIP_H
 
 /****************************************************************************
  * Included Files
@@ -50,7 +50,7 @@
 #include <stdbool.h>
 #include <errno.h>
 #include <arch/irq.h>
-#include <nuttx/net/uip/uip.h>
+#include <nuttx/net/uip.h>
 #include <nuttx/net/arp.h>
 
 /****************************************************************************
@@ -293,4 +293,4 @@ void uip_removemcastmac(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *ip);
 #endif
 
 #endif /* CONFIG_NET */
-#endif /* _NET_UIP_UIP_INTERNAL_H */
+#endif /* _NET_UIP_UIP_H */

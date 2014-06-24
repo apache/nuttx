@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/net_internal.h
+ * net/net.h
  *
  *   Copyright (C) 2007-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __NET_INTERNAL_H
-#define __NET_INTERNAL_H
+#ifndef _NET_NET_H
+#define _NET_NET_H
 
 /****************************************************************************
  * Included Files
@@ -48,7 +48,7 @@
 #include <time.h>
 
 #include <nuttx/net/net.h>
-#include <nuttx/net/uip/uip.h>
+#include <nuttx/net/uip.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -236,4 +236,4 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
 #endif
 
 #endif /* CONFIG_NET */
-#endif /* __NET_INTERNAL_H */
+#endif /* _NET_NET_H */

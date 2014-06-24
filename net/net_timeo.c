@@ -45,7 +45,7 @@
 
 #include <nuttx/clock.h>
 
-#include "net_internal.h"
+#include "net.h"
 
 /****************************************************************************
  * Global Functions

@@ -61,7 +61,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/net/enc28j60.h>
 
-#include <nuttx/net/uip/uip.h>
+#include <nuttx/net/uip.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 

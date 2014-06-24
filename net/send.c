@@ -45,7 +45,7 @@
 
 #include "tcp/tcp.h"
 #include "pkt/pkt.h"
-#include "net_internal.h"
+#include "net.h"
 
 /****************************************************************************
  * Definitions

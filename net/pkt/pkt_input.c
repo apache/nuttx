@@ -47,12 +47,12 @@
 
 #include <debug.h>
 
-#include <nuttx/net/uip/uip.h>
+#include <nuttx/net/uip.h>
 #include <nuttx/net/netdev.h>
-#include <nuttx/net/uip/uip-pkt.h>
+#include <nuttx/net/pkt.h>
 #include <nuttx/net/arp.h>
 
-#include "uip/uip_internal.h"
+#include "uip/uip.h"
 
 /****************************************************************************
  * Pre-processor Definitions

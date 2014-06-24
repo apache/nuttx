@@ -48,7 +48,7 @@
 #include <stdarg.h>
 #include <semaphore.h>
 
-#include <nuttx/net/uip/uip.h>
+#include <nuttx/net/uip.h>
 
 /****************************************************************************
  * Pre-processor Definitions

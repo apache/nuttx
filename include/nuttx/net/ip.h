@@ -1,9 +1,9 @@
 /************************************************************************************************************
- * include/nuttx/net/uip/uip-ipopt.h
+ * include/nuttx/net/ip.h
  *
  * Defines values for the IP header options
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,8 +35,8 @@
  *
  ************************************************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_NET_UIP_UIP_IPOPT_H
-#define __INCLUDE_NUTTX_NET_UIP_UIP_IPOPT_H
+#ifndef __INCLUDE_NUTTX_NET_IP_H
+#define __INCLUDE_NUTTX_NET_IP_H
 
 /************************************************************************************************************
  * Included Files
@@ -248,4 +248,4 @@
  * Public Function Prototypes
  ************************************************************************************************************/
 
-#endif /* __INCLUDE_NUTTX_NET_UIP_UIP_IPOPT_H */
+#endif /* __INCLUDE_NUTTX_NET_IP_H */

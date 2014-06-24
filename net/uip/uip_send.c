@@ -45,7 +45,7 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/net/uip/uip.h>
+#include <nuttx/net/uip.h>
 #include <nuttx/net/netdev.h>
 
 /****************************************************************************

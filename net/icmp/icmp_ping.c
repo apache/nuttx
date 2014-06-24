@@ -50,11 +50,11 @@
 #include <net/if.h>
 #include <nuttx/clock.h>
 #include <nuttx/net/netconfig.h>
-#include <nuttx/net/uip/uip.h>
+#include <nuttx/net/uip.h>
 #include <nuttx/net/netdev.h>
 
-#include "uip/uip_internal.h"
-#include "../net_internal.h" /* Should not include this! */
+#include "uip/uip.h"
+#include "../net.h" /* Should not include this! */
 
 /****************************************************************************
  * Pre-processor Definitions

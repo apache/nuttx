@@ -44,7 +44,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include "net_internal.h"
+#include "net.h"
 
 /****************************************************************************
  * Global Functions

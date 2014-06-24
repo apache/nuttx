@@ -47,7 +47,7 @@
 
 #include <nuttx/net/netdev.h>
 
-#include "net_internal.h"
+#include "net.h"
 
 /****************************************************************************
  * Definitions

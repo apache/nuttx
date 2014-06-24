@@ -43,9 +43,9 @@
 #include <queue.h>
 #include <debug.h>
 
-#include <nuttx/net/uip/uip.h>
+#include <nuttx/net/uip.h>
 
-#include "uip/uip_internal.h"
+#include "uip/uip.h"
 
 /****************************************************************************
  * Private Types

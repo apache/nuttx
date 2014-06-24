@@ -61,8 +61,8 @@
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 
-#include "net_internal.h"
-#include "uip/uip_internal.h"
+#include "net.h"
+#include "uip/uip.h"
 
 /****************************************************************************
  * Definitions

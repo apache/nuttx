@@ -48,7 +48,7 @@
 #include <nuttx/net/netdev.h>
 
 #include "net_route.h"
-#include "net_internal.h"
+#include "net.h"
 
 /****************************************************************************
  * Pre-processor Definitions

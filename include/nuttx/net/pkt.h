@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/netpacket/netpacket.h
+ * include/nuttx/net/pkt.h
  * Definitions for use with AF_PACKET sockets
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
@@ -37,8 +37,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_NET_UIP_UIP_PKT_H
-#define __INCLUDE_NUTTX_NET_UIP_UIP_PKT_H
+#ifndef __INCLUDE_NUTTX_NET_PKT_H
+#define __INCLUDE_NUTTX_NET_PKT_H
 
 /****************************************************************************
  * Included Files
@@ -103,4 +103,4 @@ void uip_pktpoll(struct uip_driver_s *dev, struct uip_pkt_conn *conn);
 
 int uip_pktinput(struct uip_driver_s *dev);
 
-#endif /* __INCLUDE_NUTTX_NET_UIP_UIP_PKT_H */
+#endif /* __INCLUDE_NUTTX_NET_PKT_H */

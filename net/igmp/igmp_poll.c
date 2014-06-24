@@ -47,10 +47,10 @@
 #include <debug.h>
 
 #include <nuttx/net/netconfig.h>
-#include <nuttx/net/uip/uip.h>
+#include <nuttx/net/uip.h>
 #include <nuttx/net/netdev.h>
 
-#include "uip/uip_internal.h"
+#include "uip/uip.h"
 
 #ifdef CONFIG_NET_IGMP
 

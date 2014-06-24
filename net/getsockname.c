@@ -48,7 +48,7 @@
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 
-#include "net_internal.h"
+#include "net.h"
 
 #ifdef CONFIG_NET
 

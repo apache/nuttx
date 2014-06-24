@@ -43,9 +43,9 @@
 #include <stdint.h>
 #include <debug.h>
 
-#include <nuttx/net/uip/uip.h>
+#include <nuttx/net/uip.h>
 
-#include "uip_internal.h"
+#include "uip.h"
 
 /****************************************************************************
  * Private Data

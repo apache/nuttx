@@ -1,9 +1,9 @@
 /****************************************************************************
- * include/nuttx/net/uip/uip-igmp.h
+ * include/nuttx/net/igmp.h
  * The definitions in this header file are intended only for internal use
  * by the NuttX port of the uIP stack.
  *
- *   Copyright (C) 2010, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * The NuttX implementation of IGMP was inspired by the IGMP add-on for the
@@ -39,8 +39,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_NET_UIP_UIP_IGMP_H
-#define __INCLUDE_NUTTX_NET_UIP_UIP_IGMP_H
+#ifndef __INCLUDE_NUTTX_NET_IGMP_H
+#define __INCLUDE_NUTTX_NET_IGMP_H
 
 /****************************************************************************
  * Included Files
@@ -54,7 +54,7 @@
 
 #include <netinet/in.h>
 
-#include <nuttx/net/uip/uip.h>
+#include <nuttx/net/uip.h>
 #include <nuttx/net/netdev.h>
 
 #ifdef CONFIG_NET_IGMP
@@ -255,4 +255,4 @@ EXTERN int  igmp_leavegroup(struct uip_driver_s *dev, FAR const struct in_addr *
 #endif
 
 #endif /* CONFIG_NET_IGMP */
-#endif /* __INCLUDE_NUTTX_NET_UIP_UIP_IGMP_H */
+#endif /* __INCLUDE_NUTTX_NET_IGMP_H */

@@ -51,12 +51,12 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
-#include <nuttx/net/uip/uip.h>
+#include <nuttx/net/uip.h>
 #include <nuttx/net/net.h>
 
-#include <uip/uip_internal.h>
+#include <uip/uip.h>
 
-#include "net_internal.h"
+#include "net.h"
 
 /****************************************************************************
  * Pre-processor Definitions

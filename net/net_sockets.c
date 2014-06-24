@@ -49,12 +49,12 @@
 
 #include <nuttx/net/iob.h>
 #include <nuttx/net/arp.h>
-#include <nuttx/net/uip/uip.h>
+#include <nuttx/net/uip.h>
 #include <nuttx/net/net.h>
 #include <nuttx/kmalloc.h>
 
 #include "net_route.h"
-#include "net_internal.h"
+#include "net.h"
 
 /****************************************************************************
  * Pre-processor Definitions

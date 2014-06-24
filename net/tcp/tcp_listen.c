@@ -50,7 +50,7 @@
 
 #include <nuttx/net/netconfig.h>
 
-#include "uip/uip_internal.h"
+#include "uip/uip.h"
 
 /****************************************************************************
  * Private Data

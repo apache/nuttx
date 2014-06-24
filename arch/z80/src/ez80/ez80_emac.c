@@ -58,7 +58,7 @@
 
 #include <arch/io.h>
 
-#include <nuttx/net/uip/uip.h>
+#include <nuttx/net/uip.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 

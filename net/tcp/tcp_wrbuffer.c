@@ -56,7 +56,7 @@
 
 #include "tcp/tcp.h"
 #include "nuttx/net/iob.h"
-#include "nuttx/net/uip/uip-tcp.h"
+#include "nuttx/net/tcp.h"
 
 /****************************************************************************
  * Private Types
