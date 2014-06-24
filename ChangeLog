@@ -7485,3 +7485,6 @@
 	  device buffer from net/net_send_unbuffered.c to net/uip/uip_pktsend.c.
 	  This makes the packet socket design more consistent with TCP and UDP
 	  (2014-6-23).
+	* net/: Separate net/net_send_buffered.c and net/net_send_unbuffered.c
+	  to net/tcp/tcp_send_buffered.c, net/tcp/tcp_send_unbuffered.c, and
+	  pkt/pkt_send.c (2014-6-24).
