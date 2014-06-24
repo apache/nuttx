@@ -67,10 +67,13 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: iob_add_queue
+ * Name: iob_remove_queue
  *
  * Description:
- *   Remove one I/O buffer chain from the heaqd of a queue.
+ *   Remove and return one I/O buffer chain from the head of a queue.
+ *
+ * Returned Value:
+ *   Returns a reference to the I/O buffer chain at the head of the queue.
  *
  ****************************************************************************/
 

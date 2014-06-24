@@ -135,6 +135,9 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
   /* Signal that an IOB is available */
 
   sem_post(&g_iob_sem);
+#if CONFIG_IOB_THROTTLE > 0
+  sem_post(&g_throttle_sem);
+#endif
   irqrestore(flags);
 
   /* And return the I/O buffer after the one that was freed */

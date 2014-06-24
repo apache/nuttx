@@ -414,7 +414,7 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
 
               tmp = (FAR struct tcp_wrbuffer_s *)sq_remfirst(&conn->write_q);
               DEBUGASSERT(tmp == wrb);
-              UNUSED(wrb);
+              UNUSED(tmp);
 
               /* And return the write buffer to the free list */
 

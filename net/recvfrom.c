@@ -80,7 +80,7 @@ struct recvfrom_s
   FAR struct uip_callback_s *rf_cb;        /* Reference to callback instance */
   sem_t                      rf_sem;       /* Semaphore signals recv completion */
   size_t                     rf_buflen;    /* Length of receive buffer */
-  char                      *rf_buffer;    /* Pointer to receive buffer */
+  uint8_t                   *rf_buffer;    /* Pointer to receive buffer */
 #ifdef CONFIG_NET_IPv6
   FAR struct sockaddr_in6   *rf_from;      /* Address of sender */
 #else
@@ -316,69 +316,63 @@ static inline void recvfrom_newudpdata(FAR struct uip_driver_s *dev,
 #if defined(CONFIG_NET_TCP) && defined(CONFIG_NET_TCP_READAHEAD)
 static inline void recvfrom_readahead(struct recvfrom_s *pstate)
 {
-  FAR struct uip_conn        *conn = (FAR struct uip_conn *)pstate->rf_sock->s_conn;
-  FAR struct uip_readahead_s *readahead;
-  size_t                      recvlen;
+  FAR struct uip_conn *conn = (FAR struct uip_conn *)pstate->rf_sock->s_conn;
+  FAR struct iob_s *iob;
+  int recvlen;
 
   /* Check there is any TCP data already buffered in a read-ahead
    * buffer.
    */
 
-  do
+  while ((iob = iob_peek_queue(&conn->readahead)) != NULL &&
+          pstate->rf_buflen > 0)
     {
-      /* Get the read-ahead buffer at the head of the list (if any) */
+      DEBUGASSERT(iob->io_pktlen > 0);
 
-      readahead = (struct uip_readahead_s *)sq_remfirst(&conn->readahead);
-      if (readahead)
+      /* Transfer that buffered data from the I/O buffer chain into
+       * the user buffer.
+       */
+
+      recvlen = iob_copyout(pstate->rf_buffer, iob, pstate->rf_buflen, 0);
+      nllvdbg("Received %d bytes (of %d)\n", recvlen, iob->io_pktlen);
+
+      /* Update the accumulated size of the data read */
+
+      pstate->rf_recvlen += recvlen;
+      pstate->rf_buffer  += recvlen;
+      pstate->rf_buflen  -= recvlen;
+
+      /* If we took all of the ata from the I/O buffer chain is empty, then
+       * release it.  If there is still data available in the I/O buffer
+       * chain, then just trim the data that we have taken from the
+       * beginning of the I/O buffer chain.
+       */
+
+      if (recvlen >= iob->io_pktlen)
         {
-          /* We have a new buffer... transfer that buffered data into
-           * the user buffer.
-           *
-           * First, get the length of the data to transfer.
+          FAR struct iob_s *tmp;
+
+          /* Remove the I/O buffer chain from the head of the read-ahead
+           * buffer queue.
            */
 
-          if (readahead->rh_nbytes > pstate->rf_buflen)
-            {
-              recvlen = pstate->rf_buflen;
-            }
-          else
-            {
-              recvlen = readahead->rh_nbytes;
-            }
+          tmp = iob_remove_queue(&conn->readahead);
+          DEBUGASSERT(tmp == iob);
+          UNUSED(tmp);
 
-          if (recvlen > 0)
-            {
-              /* Copy the read-ahead data into the user buffer */
+          /* And free the I/O buffer chain */
 
-              memcpy(pstate->rf_buffer, readahead->rh_buffer, recvlen);
-              nllvdbg("Received %d bytes (of %d)\n", recvlen, readahead->rh_nbytes);
-
-              /* Update the accumulated size of the data read */
-
-              pstate->rf_recvlen += recvlen;
-              pstate->rf_buffer  += recvlen;
-              pstate->rf_buflen  -= recvlen;
-            }
-
-          /* If the read-ahead buffer is empty, then release it.  If not, then
-           * we will have to move the data down and return the buffer to the
-           * front of the list.
+          (void)iob_free_chain(iob);
+        }
+      else
+        {
+          /* The bytes that we have received from the from of the I/O
+           * buffer chain.
            */
 
-          if (recvlen < readahead->rh_nbytes)
-            {
-              readahead->rh_nbytes -= recvlen;
-              memcpy(readahead->rh_buffer, &readahead->rh_buffer[recvlen],
-                     readahead->rh_nbytes);
-              sq_addfirst(&readahead->rh_node, &conn->readahead);
-            }
-          else
-            {
-              uip_tcpreadahead_release(readahead);
-            }
+          (void)iob_trimhead(iob, recvlen);
         }
     }
-  while (readahead && pstate->rf_buflen > 0);
 }
 #endif /* CONFIG_NET_UDP || CONFIG_NET_TCP */
 
@@ -1252,10 +1246,10 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 #ifdef CONFIG_NET_TCP_READAHEAD
   recvfrom_readahead(&state);
 
-  /* The default return value is the number of bytes that we just copied into
-   * the user buffer.  We will return this if the socket has become disconnected
-   * or if the user request was completely satisfied with data from the readahead
-   * buffers.
+  /* The default return value is the number of bytes that we just copied
+   * into the user buffer.  We will return this if the socket has become
+   * disconnected or if the user request was completely satisfied with
+   * data from the readahead buffers.
    */
 
   ret = state.rf_recvlen;

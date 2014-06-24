@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated April 23, 2014)
+NuttX TODO List (Last updated June 24, 2014)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -15,7 +15,7 @@ nuttx/
  (11)  Kernel Build
   (4)  C++ Support
   (6)  Binary loaders (binfmt/)
- (15)  Network (net/, drivers/net)
+ (13)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
  (10)  Libraries (libc/, )
  (12)  File system/Generic drivers (fs/, drivers/)
@@ -815,26 +815,6 @@ o Network (net/, drivers/net)
                INADDR_ANY(?)
   Status:      Open
   Priority:    Low
-
-  Title:       READ-AHEAD THROTTLING
-  Description: Read-ahead buffers capture incoming TCP data when no user
-               thread is recv-ing the data.  Should add some driver call to
-               support throttling; when there is no listener for new data, the
-               driver should be throttled.  Perhaps the driver should disable
-               RX interrupts when throttled and re-anable on each poll time.
-               recvfrom would, of course, have to un-throttle.
-  Status:      Open.  This is just a thought experiment.  No changes are planned.
-  Priority:    Low.  This is not a bug but an enhancement idea.
-
-  Title:       COMMON TCP BUFFERING
-  Description: TCP read-ahead logic and TCP write buffering logic use a
-               separate set of packet buffers.  It seems like more efficient
-               use of the buffering would be had if a common pool of packet
-               buffers were used for both read-ahead and write buffering.
-               This would probably depend on having READ-AHEAD THROTTLING to
-               prevent run-awary read-ahead logic from consuming all buffers.
-  Status:      Open.  This is just a thought experiment.  No changes are planned.
-  Priority:    Low.  This is not a bug but an enhancement idea.
 
   Title:       STANDARDIZE ETHERNET DRIVER STATISTICS
   Description: Need to standardize collection of statistics from network

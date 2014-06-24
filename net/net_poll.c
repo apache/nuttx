@@ -243,11 +243,11 @@ static inline int net_pollsetup(FAR struct socket *psock,
 #ifdef CONFIG_NET_TCPBACKLOG
   /* Check for read data or backlogged connection availability now */
 
-  if (!sq_empty(&conn->readahead) || uip_backlogavailable(conn))
+  if (!IOB_QEMPTY(&conn->readahead) || uip_backlogavailable(conn))
 #else
   /* Check for read data availability now */
 
-  if (!sq_empty(&conn->readahead))
+  if (!IOB_QEMPTY(&conn->readahead))
 #endif
     {
       /* Normal data may be read without blocking. */

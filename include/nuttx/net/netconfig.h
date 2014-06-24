@@ -280,24 +280,6 @@
 # define CONFIG_NET_BUFSIZE 400
 #endif
 
-#ifdef CONFIG_NET_TCP_READAHEAD
-  /* Number of TCP read-ahead buffers */
-
-#  ifndef CONFIG_NET_NTCP_READAHEAD_BUFFERS
-#   define CONFIG_NET_NTCP_READAHEAD_BUFFERS 4
-#  endif
-
-  /* The size of one TCP read buffer */
-
-#  ifndef CONFIG_NET_TCP_READAHEAD_BUFSIZE
-#    define CONFIG_NET_TCP_READAHEAD_BUFSIZE UIP_TCP_MSS
-#  endif
-
-#else
-#  undef CONFIG_NET_TCP_READAHEAD_BUFSIZE
-#  undef CONFIG_NET_NTCP_READAHEAD_BUFFERS
-#endif
-
 /* Delay after receive to catch a following packet.  No delay should be
  * required if TCP/IP read-ahead buffering is enabled.
  */

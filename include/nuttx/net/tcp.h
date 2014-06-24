@@ -55,7 +55,9 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+
 #include <nuttx/net/netconfig.h>
+#include <nuttx/net/iob.h>
 #include <nuttx/net/uip.h>
 
 /****************************************************************************
@@ -193,12 +195,12 @@ struct uip_conn
 
   /* Read-ahead buffering.
    *
-   *   readahead - A singly linked list of type struct uip_readahead_s
+   *   readahead - A singly linked list of type struct iob_qentry_s
    *               where the TCP/IP read-ahead data is retained.
    */
 
 #ifdef CONFIG_NET_TCP_READAHEAD
-  sq_queue_t readahead;   /* Read-ahead buffering */
+  struct iob_queue_s readahead;   /* Read-ahead buffering */
 #endif
 
   /* Write buffering
@@ -272,25 +274,9 @@ struct uip_conn
   void (*connection_event)(FAR struct uip_conn *conn, uint16_t flags);
 };
 
-/* The following structure is used to handle read-ahead buffering for TCP
- * connection.  When incoming TCP data is received while no application is
- * listening for the data, that data will be retained in these read-ahead
- * buffers so that no data is lost.
- */
-
-#ifdef CONFIG_NET_TCP_READAHEAD
-struct uip_readahead_s
-{
-  sq_entry_t rh_node;      /* Supports a singly linked list */
-  uint16_t   rh_nbytes;    /* Number of bytes available in this buffer */
-  uint8_t    rh_buffer[CONFIG_NET_TCP_READAHEAD_BUFSIZE];
-};
-#endif
-
 /* This structure supports TCP write buffering */
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-struct iob_s;              /* Forward reference */
 struct tcp_wrbuffer_s
 {
   sq_entry_t wb_node;      /* Supports a singly linked list */
@@ -457,13 +443,6 @@ int uip_listen(struct uip_conn *conn);
 /* Stop listening to the port bound to the specified TCP connection */
 
 int uip_unlisten(struct uip_conn *conn);
-
-/* Access to TCP read-ahead buffers */
-
-#ifdef CONFIG_NET_TCP_READAHEAD
-FAR struct uip_readahead_s *uip_tcpreadahead_alloc(void);
-void uip_tcpreadahead_release(FAR struct uip_readahead_s *readahead);
-#endif /* CONFIG_NET_TCP_READAHEAD */
 
 /* Backlog support */
 

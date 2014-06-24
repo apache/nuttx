@@ -36,6 +36,7 @@ config NET_MAX_LISTENPORTS
 config NET_TCP_READAHEAD
 	bool "Enable TCP/IP read-ahead buffering"
 	default y
+	select NET_IOB
 	---help---
 		Read-ahead buffers allows buffering of TCP/IP packets when there is no
 		receive in place to catch the TCP packet.  In that case, the packet
@@ -43,40 +44,14 @@ config NET_TCP_READAHEAD
 
 		You might want to disable TCP/IP read-ahead buffering on a highly
 		memory constrained system that does not have any TCP/IP packet rate
-		issues.
+		issues.  But, if disabled, there will probably be more packet
+		retransmissions or even packet loss.
+
+		Make sure that you check the setting in the I/O Buffering menu.
+		These settings are critical to the reasonable operation of read-
+		ahead buffering.
 
 if NET_TCP_READAHEAD
-
-config NET_TCP_READAHEAD_BUFSIZE
-	int "TCP/IP read-ahead buffer size"
-	default 1220 if !NET_SLIP && NET_IPv6
-	default 536 if !NET_SLIP && !NET_IPv6
-	default 256 if NET_SLIP && !NET_IPv6
-	---help---
-		Read-ahead buffers allows buffering of TCP/IP packets when there is no
-		receive in place to catch the TCP packet.  In that case, the packet
-		will be retained in the NuttX read-ahead buffers.
-
-		This setting specifies the size of one TCP/IP read-ahead buffer.
-		This should best be a equal to the maximum packet payload size (MSS).
-
-		Optimally, the size of the read-ahead buffer will should the maximum
-		size of an incoming TCP packet payload (MSS).  This MSS value is
-		determined by NET_BUFSIZE minus the size of TCP, IP, and Ethernet
-		headers (assuming you are using the Ethernet transport).  IPv4 hosts
-		are required to be able to handle an MSS of 536 octets and IPv6 hosts
-		are required to be able to handle an MSS of 1220 octets.
-
-config NET_NTCP_READAHEAD_BUFFERS
-	int "Number of TCP/IP read-ahead buffers"
-	default 8
-	---help---
-		Read-ahead buffers allows buffering of TCP/IP packets when there is no
-		receive in place to catch the TCP packet.  In that case, the packet
-		will be retained in the NuttX read-ahead buffers.
-
-		This setting specifies the number of TCP/IP read-ahead buffers.
-
 endif # NET_TCP_READAHEAD
 
 config NET_TCP_WRITE_BUFFERS

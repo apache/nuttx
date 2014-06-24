@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/tcp/tcp_callback.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,47 +60,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: uip_readahead
- *
- * Description:
- *   Copy as much received data as possible into the read-ahead buffer
- *
- * Assumptions:
- *   This function is called at the interrupt level with interrupts disabled.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_TCP_READAHEAD
-static int uip_readahead(FAR struct uip_readahead_s *readahead,
-                         FAR uint8_t *buf, int len)
-{
-  int available = CONFIG_NET_TCP_READAHEAD_BUFSIZE - readahead->rh_nbytes;
-  int recvlen   = 0;
-
-  if (len > 0 && available > 0)
-    {
-      /* Get the length of the data to buffer. */
-
-      if (len > available)
-        {
-          recvlen = available;
-        }
-      else
-        {
-          recvlen = len;
-        }
-
-      /* Copy the new appdata into the read-ahead buffer */
-
-      memcpy(&readahead->rh_buffer[readahead->rh_nbytes], buf, recvlen);
-      readahead->rh_nbytes += recvlen;
-    }
-
-  return recvlen;
-}
-#endif
-
-/****************************************************************************
  * Function: uip_dataevent
  *
  * Description:
@@ -141,17 +100,12 @@ uip_dataevent(FAR struct uip_driver_s *dev, FAR struct uip_conn *conn,
       nllvdbg("No listener on connection\n");
 
 #ifdef CONFIG_NET_TCP_READAHEAD
-      /* Save as much data as possible in the read-ahead buffers */
-
-      recvlen = uip_datahandler(conn, buffer, buflen);
-
-      /* There are several complicated buffering issues that are not addressed
-       * properly here.  For example, what if we cannot buffer the entire
-       * packet?  In that case, some data will be accepted but not ACKed.
-       * Therefore it will be resent and duplicated.  Fixing this could be tricky.
+      /* Save as the packet data as in the read-ahead buffer.  NOTE that
+       * partial packets will not be buffered.
        */
 
-     if (recvlen < buflen)
+      recvlen = uip_datahandler(conn, buffer, buflen);
+      if (recvlen < buflen)
 #endif
         {
           /* There is no handler to receive new data and there are no free
@@ -267,8 +221,8 @@ uint16_t uip_tcpcallback(struct uip_driver_s *dev, struct uip_conn *conn,
  *   buflen - The number of bytes to copy to the read-ahead buffer.
  *
  * Returned value:
- *   The number of bytes actually buffered.  This could be less than 'nbytes'
- *   if there is insufficient buffering available.
+ *   The number of bytes actually buffered is returned.  This will be either
+ *   zero or equal to buflen; partial packets are not buffered.
  *
  * Assumptions:
  * - The caller has checked that UIP_NEWDATA is set in flags and that is no
@@ -281,57 +235,44 @@ uint16_t uip_tcpcallback(struct uip_driver_s *dev, struct uip_conn *conn,
 uint16_t uip_datahandler(FAR struct uip_conn *conn, FAR uint8_t *buffer,
                          uint16_t buflen)
 {
-  FAR struct uip_readahead_s *readahead1;
-  FAR struct uip_readahead_s *readahead2 = NULL;
-  uint16_t remaining;
-  uint16_t recvlen = 0;
+  FAR struct iob_s *iob;
+  int ret;
 
-  /* First, we need to determine if we have space to buffer the data.  This
-   * needs to be verified before we actually begin buffering the data. We
-   * will use any remaining space in the last allocated read-ahead buffer
-   * plus as much one additional buffer.  It is expected that the size of
-   * read-ahead buffers are tuned so that one full packet will always fit
-   * into one read-ahead buffer (for example if the buffer size is 420, then
-   * a read-ahead buffer of 366 will hold a full packet of TCP data).
-   */
+  /* Allocate on I/O buffer to start the chain (throttling as necessary) */
 
-  readahead1 = (FAR struct uip_readahead_s*)conn->readahead.tail;
-  if ((readahead1 &&
-      (CONFIG_NET_TCP_READAHEAD_BUFSIZE - readahead1->rh_nbytes) > buflen) ||
-      (readahead2 = uip_tcpreadahead_alloc()) != NULL)
+  iob = iob_alloc(true);
+  if (iob == NULL)
     {
-      /* We have buffer space.  Now try to append add as much data as possible
-       * to the last read-ahead buffer attached to this connection.
-       */
-
-      remaining = buflen;
-      if (readahead1)
-        {
-          recvlen = uip_readahead(readahead1, buffer, remaining);
-          if (recvlen > 0)
-            {
-              buffer    += recvlen;
-              remaining -= recvlen;
-            }
-        }
-
-      /* Do we need to buffer into the newly allocated buffer as well? */
-
-      if (readahead2)
-        {
-          readahead2->rh_nbytes = 0;
-          recvlen += uip_readahead(readahead2, buffer, remaining);
-
-          /* Save the read-ahead buffer in the connection structure where
-           * it can be found with recv() is called.
-           */
-
-          sq_addlast(&readahead2->rh_node, &conn->readahead);
-        }
+      nlldbg("ERROR: Failed to create new I/O buffer chain\n");
+      return 0;
     }
 
-  nllvdbg("Buffered %d bytes (of %d)\n", recvlen, buflen);
-  return recvlen;
+  /* Copy the new appdata into the I/O buffer chain */
+
+  ret = iob_copyin(iob, buffer, buflen, 0, true);
+  if (ret < 0)
+    {
+      /* On a failure, iob_copyin return a negated error value but does
+       * not free any I/O buffers.
+       */
+
+      nlldbg("ERROR: Failed to add data to the I/O buffer chain: %d\n", ret);
+      (void)iob_free_chain(iob);
+      return 0;
+    }
+
+  /* Add the new I/O buffer chain to the tail of the read-ahead queue */
+
+  ret = iob_add_queue(iob, &conn->readahead);
+  if (ret < 0)
+    {
+      nlldbg("ERROR: Failed to queue the I/O buffer chain: %d\n", ret);
+      (void)iob_free_chain(iob);
+      return 0;
+    }
+
+  nllvdbg("Buffered %d bytes\n", buflen);
+  return buflen;
 }
 #endif /* CONFIG_NET_TCP_READAHEAD */
 

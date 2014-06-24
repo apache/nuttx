@@ -183,17 +183,6 @@ uint16_t uip_tcpcallback(FAR struct uip_driver_s *dev,
 uint16_t uip_datahandler(FAR struct uip_conn *conn,
                          FAR uint8_t *buffer, uint16_t nbytes);
 #endif
-
-/* Defined in tcp_readahead.c ***********************************************/
-
-#ifdef CONFIG_NET_TCP_READAHEAD
-void uip_tcpreadahead_init(void);
-
-struct uip_readahead_s;
-FAR struct uip_readahead_s *uip_tcpreadahead_alloc(void);
-void uip_tcpreadahead_release(FAR struct uip_readahead_s *readahead);
-#endif /* CONFIG_NET_TCP_READAHEAD */
-
 #endif /* CONFIG_NET_TCP */
 
 #ifdef CONFIG_NET_UDP

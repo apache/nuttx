@@ -105,7 +105,7 @@ static FAR struct iob_qentry_s *iob_tryalloc_qentry(void)
        */
 
       g_iob_freeqlist = iobq->qe_flink;
-      DEBVERIFY(sem_trywait(&g_qentry_sem));
+      DEBUGVERIFY(sem_trywait(&g_qentry_sem));
 
       /* Put the I/O buffer in a known state */
 
@@ -186,32 +186,20 @@ static FAR struct iob_qentry_s *iob_allocwait_qentry(void)
 
 FAR struct iob_qentry_s *iob_alloc_qentry(void)
 {
-  FAR struct iob_qentry_s *iobq;
-  irqstate_t flags;
+  /* Were we called from the interrupt level? */
 
-  /* We don't know what context we are called from so we use extreme measures
-   * to protect the free list:  We disable interrupts very briefly.
-   */
-
-  flags = irqsave();
-  iobq  = g_iob_freeqlist;
-  if (iobq)
+  if (up_interrupt_context())
     {
-      /* Remove the I/O buffer chain container from the free list and
-       * decrement the counting semaphore that tracks the number of free
-       * containers.
-       */
+      /* Yes, then try to allocate an I/O buffer without waiting */
 
-      g_iob_freeqlist = iobq->qe_flink;
-      DEBVERIFY(sem_trywait(&g_qentry_sem));
-
-      /* Put the I/O buffer in a known state */
-
-      iobq->qe_head = NULL; /* Nothing is contained */
+      return iob_tryalloc_qentry();
     }
+  else
+    {
+      /* Then allocate an I/O buffer, waiting as necessary */
 
-  irqrestore(flags);
-  return iobq;
+      return iob_allocwait_qentry();
+    }
 }
 
 #endif /* CONFIG_IOB_NCHAINS > 0 */

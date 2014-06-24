@@ -139,18 +139,12 @@ void uip_initialize(void)
 
   uip_tcpinit();
 
-  /* Initialize the TCP/IP read-ahead buffering */
-
-#ifdef CONFIG_NET_TCP_READAHEAD
-  uip_tcpreadahead_init();
-#endif
-#endif /* CONFIG_NET_TCP */
-
   /* Initialize the TCP/IP write buffering */
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   tcp_wrbuffer_initialize();
 #endif
+#endif /* CONFIG_NET_TCP */
 
   /* Initialize the UDP connection structures */
 

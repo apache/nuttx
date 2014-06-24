@@ -223,5 +223,5 @@ int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
       offset = 0;
     }
 
-  return 0;
+  return OK;
 }

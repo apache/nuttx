@@ -48,8 +48,8 @@ config IOB_NCHAINS
 config IOB_THROTTLE
 	int "I/O buffer throttle value"
 	default 0 if !NET_TCP_WRITE_BUFFERS || !NET_TCP_READAHEAD
-	default 8 if NET_TCP_WRITE_BUFFERS && !NET_TCP_READAHEAD
-	depends on NET_TCP_WRITE_BUFFERS && !NET_TCP_READAHEAD
+	default 8 if NET_TCP_WRITE_BUFFERS && NET_TCP_READAHEAD
+	depends on NET_TCP_WRITE_BUFFERS && NET_TCP_READAHEAD
 	---help---
 		TCP write buffering and read-ahead buffer use the same pool of free
 		I/O buffers.  In order to prevent uncontrolled incoming TCP packets

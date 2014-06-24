@@ -95,7 +95,7 @@ static FAR struct iob_s *iob_tryalloc(bool throttled)
 #if CONFIG_IOB_THROTTLE > 0
   /* Select the semaphore count to check. */
 
-  sem = (throttled ? : &g_throttled_sem, &g_iob_sem);
+  sem = (throttled ? &g_throttle_sem : &g_iob_sem);
 #endif
 
   /* We don't know what context we are called from so we use extreme measures
@@ -107,7 +107,7 @@ static FAR struct iob_s *iob_tryalloc(bool throttled)
 #if CONFIG_IOB_THROTTLE > 0
   /* If there are free I/O buffers for this allocation */
 
-  DEBUGVERIFY(sem_getvalue(sem, semcount));
+  DEBUGVERIFY(sem_getvalue(sem, &semcount));
   if (semcount > 0)
 #endif
     {
@@ -124,7 +124,9 @@ static FAR struct iob_s *iob_tryalloc(bool throttled)
           g_iob_freelist = iob->io_flink;
           DEBUGVERIFY(sem_trywait(&g_iob_sem));
 #if CONFIG_IOB_THROTTLE > 0
-          DEBUGVERIFY(sem_trywait(&g_throttle_sem));
+          //DEBUGVERIFY(sem_trywait(&g_throttle_sem));
+          g_throttle_sem.semcount--;
+          DEBUGASSERT(g_throttle_sem.semcount >= -CONFIG_IOB_THROTTLE);
 #endif
           irqrestore(flags);
 
@@ -161,7 +163,7 @@ static FAR struct iob_s *iob_allocwait(bool throttled)
 #if CONFIG_IOB_THROTTLE > 0
   /* Select the semaphore count to check. */
 
-  sem = (throttled ? : &g_throttled_sem, &g_iob_sem);
+  sem = (throttled ? &g_throttle_sem : &g_iob_sem);
 #else
   sem = &g_iob_sem;
 #endif

@@ -317,9 +317,6 @@ void uip_tcpfree(struct uip_conn *conn)
 {
   FAR struct uip_callback_s *cb;
   FAR struct uip_callback_s *next;
-#ifdef CONFIG_NET_TCP_READAHEAD
-  FAR struct uip_readahead_s *readahead;
-#endif
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   FAR struct tcp_wrbuffer_s *wrbuffer;
 #endif
@@ -357,10 +354,7 @@ void uip_tcpfree(struct uip_conn *conn)
 #ifdef CONFIG_NET_TCP_READAHEAD
   /* Release any read-ahead buffers attached to the connection */
 
-  while ((readahead = (struct uip_readahead_s *)sq_remfirst(&conn->readahead)) != NULL)
-    {
-      uip_tcpreadahead_release(readahead);
-    }
+  iob_free_queue(&conn->readahead);
 #endif
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
@@ -545,7 +539,7 @@ struct uip_conn *uip_tcpaccept(struct uip_tcpip_hdr *buf)
 #ifdef CONFIG_NET_TCP_READAHEAD
       /* Initialize the list of TCP read-ahead buffers */
 
-      sq_init(&conn->readahead);
+      IOB_QINIT(&conn->readahead);
 #endif
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
@@ -700,7 +694,7 @@ int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in *addr)
 #ifdef CONFIG_NET_TCP_READAHEAD
   /* Initialize the list of TCP read-ahead buffers */
 
-  sq_init(&conn->readahead);
+  IOB_QINIT(&conn->readahead);
 #endif
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS

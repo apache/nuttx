@@ -97,7 +97,7 @@
 /* Queue helpers */
 
 #  define IOB_QINIT(q)   do { (q)->qh_head = 0; (q)->qh_tail = 0; } while (0)
-#  define IOB_QEMPTY(q)  ((q)->head == NULL)
+#  define IOB_QEMPTY(q)  ((q)->qh_head == NULL)
 #endif
 
 /****************************************************************************
@@ -220,16 +220,36 @@ int iob_add_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq);
 #endif /* CONFIG_IOB_NCHAINS > 0 */
 
 /****************************************************************************
- * Name: iob_add_queue
+ * Name: iob_remove_queue
  *
  * Description:
- *   Remove one I/O buffer chain from the heaqd of a queue.
+ *   Remove and return one I/O buffer chain from the head of a queue.
+ *
+ * Returned Value:
+ *   Returns a reference to the I/O buffer chain at the head of the queue.
  *
  ****************************************************************************/
 
 #if CONFIG_IOB_NCHAINS > 0
 FAR struct iob_s *iob_remove_queue(FAR struct iob_queue_s *iobq);
 #endif /* CONFIG_IOB_NCHAINS > 0 */
+
+/****************************************************************************
+ * Name: iob_peek_queue
+ *
+ * Description:
+ *   Return a reference to the I/O buffer chain at the head of a queue. This
+ *   is similar to iob_remove_queue except that the I/O buffer chain is in
+ *   place at the head of the queue.  The I/O buffer chain may safely be
+ *   modified by the caller but must be removed from the queue before it can
+ *   be freed.
+ *
+ * Returned Value:
+ *   Returns a reference to the I/O buffer chain at the head of the queue.
+ *
+ ****************************************************************************/
+
+FAR struct iob_s *iob_peek_queue(FAR struct iob_queue_s *iobq);
 
 /****************************************************************************
  * Name: iob_free_queue
