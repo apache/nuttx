@@ -45,7 +45,7 @@
 #include <wdog.h>
 #include <debug.h>
 
-#include <nuttx/net/uip/uipopt.h>
+#include <nuttx/net/netconfig.h>
 #include <nuttx/net/arp.h>
 
 #include "net_internal.h"

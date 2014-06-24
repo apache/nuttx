@@ -70,7 +70,7 @@
 #include <nuttx/fs/nfs.h>
 #include <nuttx/net/uip/uip.h>
 #include <nuttx/net/uip/uip-udp.h>
-#include <nuttx/net/uip/uipopt.h>
+#include <nuttx/net/netconfig.h>
 
 #include <net/if.h>
 #include <netinet/in.h>

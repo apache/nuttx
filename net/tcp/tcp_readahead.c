@@ -37,7 +37,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/net/uip/uipopt.h>
+#include <nuttx/net/netconfig.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_TCP) && defined(CONFIG_NET_TCP_READAHEAD)
 
 #include <queue.h>

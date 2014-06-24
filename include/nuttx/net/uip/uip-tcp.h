@@ -55,7 +55,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <nuttx/net/uip/uipopt.h>
+#include <nuttx/net/netconfig.h>
 #include <nuttx/net/uip/uip.h>
 
 /****************************************************************************

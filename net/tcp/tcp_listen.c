@@ -48,7 +48,7 @@
 #include <stdbool.h>
 #include <debug.h>
 
-#include <nuttx/net/uip/uipopt.h>
+#include <nuttx/net/netconfig.h>
 
 #include "uip/uip_internal.h"
 

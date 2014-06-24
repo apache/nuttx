@@ -60,7 +60,7 @@
 
 #include <arpa/inet.h>
 
-#include <nuttx/net/uip/uipopt.h>
+#include <nuttx/net/netconfig.h>
 
 /****************************************************************************
  * Pre-processor Definitions

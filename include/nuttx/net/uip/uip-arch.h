@@ -57,7 +57,7 @@
 #  include <nuttx/net/uip/uip-igmp.h>
 #endif
 
-#include <nuttx/net/uip/uipopt.h>
+#include <nuttx/net/netconfig.h>
 #include <net/ethernet.h>
 
 /****************************************************************************

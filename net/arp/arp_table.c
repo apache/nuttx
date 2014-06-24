@@ -53,7 +53,7 @@
 #include <netinet/in.h>
 
 #include <net/ethernet.h>
-#include <nuttx/net/uip/uipopt.h>
+#include <nuttx/net/netconfig.h>
 #include <nuttx/net/uip/uip-arch.h>
 #include <nuttx/net/arp.h>
 

@@ -38,7 +38,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/net/uip/uipopt.h>
+#include <nuttx/net/netconfig.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_TCP) && defined(CONFIG_NET_TCP_WRITE_BUFFERS)
 
 #if defined(CONFIG_DEBUG) && defined(CONFIG_NET_TCP_WRBUFFER_DEBUG)
