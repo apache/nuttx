@@ -327,6 +327,17 @@ void arp_out(struct uip_driver_s *dev)
   in_addr_t               ipaddr;
   in_addr_t               destipaddr;
 
+#ifdef CONFIG_NET_PKT
+  /* Skip sending ARP requests when the frame to be transmitted was
+   * written into a packet socket.
+   */
+
+  if ((dev->d_flags & IFF_NOARP) == IFF_NOARP)
+    {
+      return;
+    }
+#endif
+
   /* Find the destination IP address in the ARP table and construct
    * the Ethernet header. If the destination IP address isn't on the
    * local network, we use the default router's IP address instead.
