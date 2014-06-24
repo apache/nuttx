@@ -128,6 +128,9 @@ void tcp_wrbuffer_initialize(void)
  *   the free list.  This function is called from TCP logic when a buffer
  *   of TCP data is about to sent
  *
+ * Input parameters:
+ *   None
+ *
  * Assumptions:
  *   Called from user logic with interrupts enabled.
  *
@@ -157,7 +160,7 @@ FAR struct tcp_wrbuffer_s *tcp_wrbuffer_alloc(void)
 
   /* Now get the first I/O buffer for the write buffer structure */
 
-  wrb->wb_iob = iob_alloc();
+  wrb->wb_iob = iob_alloc(false);
   if (!wrb->wb_iob)
     {
       ndbg("ERROR: Failed to allocate I/O buffer\n");

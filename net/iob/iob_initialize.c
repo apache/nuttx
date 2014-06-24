@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_NET_IOB_DEBUG)
+#if defined(CONFIG_DEBUG) && defined(CONFIG_IOB_DEBUG)
 /* Force debug output (from this file only) */
 
 #  undef  CONFIG_DEBUG_NET
@@ -88,9 +88,12 @@ FAR struct iob_qentry_s *g_iob_freeqlist;
 
 /* Counting semaphores that tracks the number of free IOBs/qentries */
 
-sem_t g_iob_sem;
+sem_t g_iob_sem;            /* Counts free I/O buffers */
+#if CONFIG_IOB_THROTTLE > 0
+sem_t g_throttle_sem;       /* Counts available I/O buffers when throttled */
+#endif
 #if CONFIG_IOB_NCHAINS > 0
-sem_t g_qentry_sem;
+sem_t g_qentry_sem;         /* Counts free I/O buffer queue containers */
 #endif
 
 /****************************************************************************

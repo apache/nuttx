@@ -133,7 +133,7 @@
 #  define WRB_NRTX(wrb)           ((wrb)->wb_nrtx)
 #  define WRB_IOB(wrb)            ((wrb)->wb_iob)
 #  define WRB_COPYOUT(wrb,dest,n) (iob_copyout(dest,(wrb)->wb_iob,(n),0))
-#  define WRB_COPYIN(wrb,src,n)   (iob_copyin((wrb)->wb_iob,src,(n),0))
+#  define WRB_COPYIN(wrb,src,n)   (iob_copyin((wrb)->wb_iob,src,(n),0,false))
 
 #  define WRB_TRIM(wrb,n) \
   do { (wrb)->wb_iob = iob_trimhead((wrb)->wb_iob,(n)); } while (0)

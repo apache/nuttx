@@ -43,6 +43,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include <nuttx/net/iob.h>
 
@@ -51,6 +52,41 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
+
+/* I/O buffer allocation logic supports a throttle value for the TCP
+ * read-ahead buffering to prevent the read-ahead from consuming all
+ * available I/O buffers.  This throttle only applies if both TCP write
+ * buffering and TCP read-ahead buffering are enabled.
+ */
+
+#if !defined(CONFIG_NET_TCP_WRITE_BUFFERS) || !defined(CONFIG_NET_TCP_READAHEAD)
+#  undef CONFIG_IOB_THROTTLE
+#  define CONFIG_IOB_THROTTLE 0
+#endif
+
+/* The correct way to disable throttling is to the the throttle value to
+ * zero.
+ */
+
+#if !defined(CONFIG_IOB_THROTTLE)
+#  define CONFIG_IOB_THROTTLE 0
+#endif
+
+/* Some I/O buffers should be allocated */
+
+#if !defined(CONFIG_IOB_NBUFFERS)
+#  warning CONFIG_IOB_NBUFFERS not defined
+#  define CONFIG_IOB_NBUFFERS 0
+#endif
+
+#if CONFIG_IOB_NBUFFERS < 1
+#  error CONFIG_IOB_NBUFFERS is zero
+#endif
+
+#if CONFIG_IOB_NBUFFERS <= CONFIG_IOB_THROTTLE
+#  error CONFIG_IOB_NBUFFERS <= CONFIG_IOB_THROTTLE
+#endif
 
 /* IOB helpers */
 
@@ -146,7 +182,7 @@ void iob_initialize(void);
  *
  ****************************************************************************/
 
-FAR struct iob_s *iob_alloc(void);
+FAR struct iob_s *iob_alloc(bool throttled);
 
 /****************************************************************************
  * Name: iob_free
@@ -217,7 +253,7 @@ void iob_free_queue(FAR struct iob_queue_s *qhead);
  ****************************************************************************/
 
 int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
-               unsigned int len, unsigned int offset);
+               unsigned int len, unsigned int offset, bool throttled);
 
 /****************************************************************************
  * Name: iob_copyout
@@ -239,7 +275,7 @@ int iob_copyout(FAR uint8_t *dest, FAR const struct iob_s *iob,
  *
  ****************************************************************************/
 
-int iob_clone(FAR struct iob_s *iob1, FAR struct iob_s *iob2);
+int iob_clone(FAR struct iob_s *iob1, FAR struct iob_s *iob2, bool throttled);
 
 /****************************************************************************
  * Name: iob_concat

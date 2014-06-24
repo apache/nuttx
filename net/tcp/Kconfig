@@ -107,7 +107,7 @@ config NET_TCP_WRBUFFER_DEBUG
 	bool "Force write buffer debug"
 	default n
 	depends on DEBUG
-	select NET_IOB_DEBUG
+	select IOB_DEBUG
 	---help---
 		This option will force debug output from TCP write buffer logic,
 		even without network debug output.  This is not normally something
@@ -119,7 +119,7 @@ config NET_TCP_WRBUFFER_DUMP
 	bool "Force write buffer dump"
 	default n
 	depends on DEBUG_NET || NET_TCP_WRBUFFER_DEBUG
-	select NET_IOB_DEBUG
+	select IOB_DEBUG
 	---help---
 		Dump the contents of the write buffers.  You do not want to do this
 		unless you really want to analyze the write buffer transfers in

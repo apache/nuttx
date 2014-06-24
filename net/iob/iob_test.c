@@ -121,7 +121,7 @@ int main(int argc, char **argv)
   int i;
 
   iob_initialize();
-  iob = iob_alloc();
+  iob = iob_alloc(false);
 
   for (i = 0; i < 4096; i++)
     {
@@ -129,11 +129,11 @@ int main(int argc, char **argv)
     }
   memset(buffer2, 0xff, 4096);
 
-  iob_copyin(iob, buffer2, 47, 0);
+  iob_copyin(iob, buffer2, 47, 0, false);
   printf("Copy IN: 47, offset 0\n");
   dump_chain(iob);
 
-  iob_copyin(iob, buffer1, 4096, 47);
+  iob_copyin(iob, buffer1, 4096, 47, false);
   printf("Copy IN: 4096, offset 47\n");
   dump_chain(iob);
 

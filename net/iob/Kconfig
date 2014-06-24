@@ -14,7 +14,9 @@ if NET_IOB
 
 config IOB_NBUFFERS
 	int "Number of pre-allocated network I/O buffers"
-	default 24
+	default 24 if (NET_TCP_WRITE_BUFFERS && !NET_TCP_READAHEAD) || (!NET_TCP_WRITE_BUFFERS && NET_TCP_READAHEAD)
+	default 36 if NET_TCP_WRITE_BUFFERS && NET_TCP_READAHEAD
+	default 8 if !NET_TCP_WRITE_BUFFERS && !NET_TCP_READAHEAD
 	---help---
 		Each packet is represented by a series of small I/O buffers in a
 		chain.  This setting determines the number of preallocated I/O
@@ -30,7 +32,8 @@ config IOB_BUFSIZE
 
 config IOB_NCHAINS
 	int "Number of pre-allocated I/O buffer chain heads"
-	default 0
+	default 0 if !NET_TCP_READAHEAD
+	default 8 if NET_TCP_READAHEAD
 	---help---
 		These tiny nodes are used as "containers" to support queueing of
 		I/O buffer chains.  This will limit the number of I/O transactions
@@ -42,7 +45,20 @@ config IOB_NCHAINS
 		I/O buffer chain containers that also carry a payload of usage
 		specific information.
 
-config NET_IOB_DEBUG
+config IOB_THROTTLE
+	int "I/O buffer throttle value"
+	default 0 if !NET_TCP_WRITE_BUFFERS || !NET_TCP_READAHEAD
+	default 8 if NET_TCP_WRITE_BUFFERS && !NET_TCP_READAHEAD
+	depends on NET_TCP_WRITE_BUFFERS && !NET_TCP_READAHEAD
+	---help---
+		TCP write buffering and read-ahead buffer use the same pool of free
+		I/O buffers.  In order to prevent uncontrolled incoming TCP packets
+		from hogging all of the available, pre-allocated I/O buffers, a
+		throttling value is required.  This throttle value assures that
+		I/O buffers will be denied to the read-ahead logic before TCP writes
+		are halted.
+
+config IOB_DEBUG
 	bool "Force I/O buffer debug"
 	default n
 	depends on DEBUG

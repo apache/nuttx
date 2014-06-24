@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_NET_IOB_DEBUG)
+#if defined(CONFIG_DEBUG) && defined(CONFIG_IOB_DEBUG)
 /* Force debug output (from this file only) */
 
 #  undef  CONFIG_DEBUG_NET
@@ -83,34 +83,59 @@
  *
  ****************************************************************************/
 
-static FAR struct iob_s *iob_tryalloc(void)
+static FAR struct iob_s *iob_tryalloc(bool throttled)
 {
   FAR struct iob_s *iob;
   irqstate_t flags;
+#if CONFIG_IOB_THROTTLE > 0
+  FAR sem_t *sem;
+  int semcount;
+#endif
+
+#if CONFIG_IOB_THROTTLE > 0
+  /* Select the semaphore count to check. */
+
+  sem = (throttled ? : &g_throttled_sem, &g_iob_sem);
+#endif
 
   /* We don't know what context we are called from so we use extreme measures
    * to protect the free list:  We disable interrupts very briefly.
    */
 
   flags = irqsave();
-  iob   = g_iob_freelist;
-  if (iob)
+
+#if CONFIG_IOB_THROTTLE > 0
+  /* If there are free I/O buffers for this allocation */
+
+  DEBUGVERIFY(sem_getvalue(sem, semcount));
+  if (semcount > 0)
+#endif
     {
-      /* Remove the I/O buffer from the free list and decrement the counting
-       * semaphore that tracks the number of free IOBs.
-       */
+      /* Take the I/O buffer from the head of the free list */
 
-      g_iob_freelist = iob->io_flink;
-      DEBUGVERIFY(sem_trywait(&g_iob_sem));
-      irqrestore(flags);
+      iob = g_iob_freelist;
+      if (iob)
+        {
+          /* Remove the I/O buffer from the free list and decrement the
+           * counting semaphore(s) that tracks the number of available
+           * IOBs.
+           */
 
-      /* Put the I/O buffer in a known state */
+          g_iob_freelist = iob->io_flink;
+          DEBUGVERIFY(sem_trywait(&g_iob_sem));
+#if CONFIG_IOB_THROTTLE > 0
+          DEBUGVERIFY(sem_trywait(&g_throttle_sem));
+#endif
+          irqrestore(flags);
 
-      iob->io_flink  = NULL; /* Not in a chain */
-      iob->io_len    = 0;    /* Length of the data in the entry */
-      iob->io_offset = 0;    /* Offset to the beginning of data */
-      iob->io_pktlen = 0;    /* Total length of the packet */
-      return iob;
+          /* Put the I/O buffer in a known state */
+
+          iob->io_flink  = NULL; /* Not in a chain */
+          iob->io_len    = 0;    /* Length of the data in the entry */
+          iob->io_offset = 0;    /* Offset to the beginning of data */
+          iob->io_pktlen = 0;    /* Total length of the packet */
+          return iob;
+        }
     }
 
   irqrestore(flags);
@@ -126,11 +151,20 @@ static FAR struct iob_s *iob_tryalloc(void)
  *
  ****************************************************************************/
 
-static FAR struct iob_s *iob_allocwait(void)
+static FAR struct iob_s *iob_allocwait(bool throttled)
 {
   FAR struct iob_s *iob;
   irqstate_t flags;
+  FAR sem_t *sem;
   int ret;
+
+#if CONFIG_IOB_THROTTLE > 0
+  /* Select the semaphore count to check. */
+
+  sem = (throttled ? : &g_throttled_sem, &g_iob_sem);
+#else
+  sem = &g_iob_sem;
+#endif
 
   /* The following must be atomic; interrupt must be disabled so that there
    * is no conflict with interrupt level I/O buffer allocations.  This is
@@ -145,7 +179,7 @@ static FAR struct iob_s *iob_allocwait(void)
        * will be decremented atomically.
        */
 
-      iob = iob_tryalloc();
+      iob = iob_tryalloc(throttled);
       if (!iob)
         {
           /* If not successful, then the semaphore count was less than or
@@ -154,7 +188,7 @@ static FAR struct iob_s *iob_allocwait(void)
            * count will be incremented.
            */
 
-          ret = sem_wait(&g_iob_sem);
+          ret = sem_wait(sem);
 
           /* When we wake up from wait, an I/O buffer was returned to
            * the free list.  However, if there are concurrent allocations
@@ -182,7 +216,7 @@ static FAR struct iob_s *iob_allocwait(void)
  *
  ****************************************************************************/
 
-FAR struct iob_s *iob_alloc(void)
+FAR struct iob_s *iob_alloc(bool throttled)
 {
   /* Were we called from the interrupt level? */
 
@@ -190,12 +224,12 @@ FAR struct iob_s *iob_alloc(void)
     {
       /* Yes, then try to allocate an I/O buffer without waiting */
 
-      return iob_tryalloc();
+      return iob_tryalloc(throttled);
     }
   else
     {
       /* Then allocate an I/O buffer, waiting as necessary */
 
-      return iob_allocwait();
+      return iob_allocwait(throttled);
     }
 }

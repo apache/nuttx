@@ -64,12 +64,19 @@ extern FAR struct iob_s *g_iob_freelist;
 
 /* A list of all free, unallocated I/O buffer queue containers */
 
+#if CONFIG_IOB_NCHAINS > 0
 extern FAR struct iob_qentry_s *g_iob_freeqlist;
+#endif
 
 /* Counting semaphores that tracks the number of free IOBs/qentries */
 
-extern sem_t g_iob_sem;
-extern sem_t g_qentry_sem;
+extern sem_t g_iob_sem;       /* Counts free I/O buffers */
+#if CONFIG_IOB_THROTTLE > 0
+extern sem_t g_throttle_sem;  /* Counts available I/O buffers when throttled */
+#endif
+#if CONFIG_IOB_NCHAINS > 0
+extern sem_t g_qentry_sem;    /* Counts free I/O buffer queue containers */
+#endif
 
 /****************************************************************************
  * Public Data

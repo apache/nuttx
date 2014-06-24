@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_NET_IOB_DEBUG)
+#if defined(CONFIG_DEBUG) && defined(CONFIG_IOB_DEBUG)
 /* Force debug output (from this file only) */
 
 #  undef  CONFIG_DEBUG_NET

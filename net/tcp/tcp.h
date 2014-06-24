@@ -153,6 +153,9 @@ void tcp_wrbuffer_initialize(void);
  *   the free list.  This function is called from TCP logic when a buffer
  *   of TCP data is about to sent
  *
+ * Input parameters:
+ *   None
+ *
  * Assumptions:
  *   Called from user logic with interrupts enabled.
  *

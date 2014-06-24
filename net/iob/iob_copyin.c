@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_NET_IOB_DEBUG)
+#if defined(CONFIG_DEBUG) && defined(CONFIG_IOB_DEBUG)
 /* Force debug output (from this file only) */
 
 #  undef  CONFIG_DEBUG_NET
@@ -90,7 +90,7 @@
  ****************************************************************************/
 
 int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
-               unsigned int len, unsigned int offset)
+               unsigned int len, unsigned int offset, bool throttled)
 {
   FAR struct iob_s *head = iob;
   FAR struct iob_s *next;
@@ -206,7 +206,7 @@ int iob_copyin(FAR struct iob_s *iob, FAR const uint8_t *src,
         {
           /* Yes.. allocate a new buffer */
 
-          next = iob_alloc();
+          next = iob_alloc(throttled);
           if (next == NULL)
             {
               ndbg("ERROR: Failed to allocate I/O buffer\n");
