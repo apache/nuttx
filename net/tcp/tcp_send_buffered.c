@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/net_send_buffered.c
+ * net/tcp/tcp_send_buffered.c
  *
  *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -658,20 +658,16 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: psock_send
+ * Function: tcp_send
  *
  * Description:
- *   The send() call may be used only when the socket is in a connected state
- *   (so that the intended recipient is known). The only difference between
- *   send() and write() is the presence of flags. With zero flags parameter,
- *   send() is equivalent to write(). Also, send(sockfd,buf,len,flags) is
- *   equivalent to sendto(sockfd,buf,len,flags,NULL,0).
+ *   The tcp_send() call may be used only when the TCP socket is in a
+ *   connected state (so that the intended recipient is known).
  *
  * Parameters:
  *   psock    An instance of the internal socket structure.
  *   buf      Data to send
  *   len      Length of data to send
- *   flags    Send flags
  *
  * Returned Value:
  *   On success, returns the number of characters sent.  On  error,
@@ -709,9 +705,6 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
  *     The socket is not connected, and no target has been given.
  *   ENOTSOCK
  *     The argument s is not a socket.
- *   EOPNOTSUPP
- *     Some bit in the flags argument is inappropriate for the socket
- *     type.
  *   EPIPE
  *     The local end has been shut down on a connection oriented socket.
  *     In this case the process will also receive a SIGPIPE unless
@@ -721,8 +714,7 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
  *
  ****************************************************************************/
 
-ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
-                   int flags)
+ssize_t tcp_send(FAR struct socket *psock, FAR const void *buf, size_t len)
 {
   uip_lock_t save;
   ssize_t    result = 0;
@@ -743,7 +735,7 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
 
   /* Dump the incoming buffer */
 
-  BUF_DUMP("psock_send", buf, len);
+  BUF_DUMP("tcp_send", buf, len);
 
   /* Set the socket state to sending */
 

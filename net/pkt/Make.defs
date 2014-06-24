@@ -38,6 +38,13 @@ ifeq ($(CONFIG_NET),y)
 # Packet socket support
 
 ifeq ($(CONFIG_NET_PKT),y)
+
+# Socket layer
+
+SOCK_CSRCS += pkt_send.c
+
+# Transport layer
+
 NET_CSRCS += pkt_conn.c
 NET_CSRCS += pkt_input.c
 NET_CSRCS += pkt_callback.c

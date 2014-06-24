@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/tcp/tcp.h
+ * net/pkt/pkt.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef _NET_TCP_TCP_H
-#define _NET_TCP_TCP_H
+#ifndef _NET_PKT_PKT_H
+#define _NET_PKT_PKT_H
 
 /****************************************************************************
  * Included Files
@@ -44,7 +44,7 @@
 
 #include <sys/types.h>
 
-#ifdef CONFIG_NET_TCP
+#ifdef CONFIG_NET_PKT
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -71,10 +71,10 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Function: tcp_send
+ * Function: pkt_send
  *
  * Description:
- *   The tcp_send() call may be used only when the TCP socket is in a
+ *   The pkt_send() call may be used only when the packet socket is in a
  *   connected state (so that the intended recipient is known).
  *
  * Parameters:
@@ -128,80 +128,13 @@ extern "C"
  ****************************************************************************/
 
 struct socket;
-ssize_t tcp_send(FAR struct socket *psock, FAR const void *buf, size_t len);
+ssize_t pkt_send(FAR struct socket *psock, FAR const void *buf, size_t len);
 
-/****************************************************************************
- * Function: tcp_wrbuffer_initialize
- *
- * Description:
- *   Initialize the list of free write buffers
- *
- * Assumptions:
- *   Called once early initialization.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-void tcp_wrbuffer_initialize(void);
-#endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
-
-/****************************************************************************
- * Function: tcp_wrbuffer_alloc
- *
- * Description:
- *   Allocate a TCP write buffer by taking a pre-allocated buffer from
- *   the free list.  This function is called from TCP logic when a buffer
- *   of TCP data is about to sent
- *
- * Assumptions:
- *   Called from user logic with interrupts enabled.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-struct tcp_wrbuffer_s;
-
-FAR struct tcp_wrbuffer_s *tcp_wrbuffer_alloc(void);
-#endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
-
-/****************************************************************************
- * Function: tcp_wrbuffer_release
- *
- * Description:
- *   Release a TCP write buffer by returning the buffer to the free list.
- *   This function is called from user logic after it is consumed the
- *   buffered data.
- *
- * Assumptions:
- *   Called from interrupt level with interrupts disabled.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-void tcp_wrbuffer_release(FAR struct tcp_wrbuffer_s *wrb);
-#endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
-
-/****************************************************************************
- * Function: tcp_wrbuffer_dump
- *
- * Description:
- *   Dump the contents of a write buffer.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-#ifdef CONFIG_DEBUG
-void tcp_wrbuffer_dump(FAR const char *msg, FAR struct tcp_wrbuffer_s *wrb,
-                       unsigned int len, unsigned int offset);
-#else
-#  define tcp_wrbuffer_dump(msg,wrb)
-#endif
-#endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* CONFIG_NET_TCP */
-#endif /* _NET_TCP_TCP_H */
+#endif /* CONFIG_NET_PKT */
+#endif /* _NET_PKT_PKT_H */
