@@ -63,7 +63,7 @@
 #include <nuttx/net/gmii.h>
 #include <nuttx/net/uip/uip.h>
 #include <nuttx/net/arp.h>
-#include <nuttx/net/uip/uip-arch.h>
+#include <nuttx/net/netdev.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
