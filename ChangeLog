@@ -7510,3 +7510,6 @@
 	  include/nuttx/net/uip.h (2014-6-24).
 	* net/uip/uip.h: Rename net/uip/uip_internal.h to net/uip/uip.h
 	  (2014-6-24).
+	* net/iob:  Add support for throttling read-ahead buffering if the
+	  read-ahead buffering is competing with write buffering for I/O
+	  buffers (2014-6-24).
