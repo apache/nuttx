@@ -1,8 +1,9 @@
 /************************************************************************************
- * arch/arm/src/sam34/sam_periphclks.h
+ * arch/arm/src/sam34/sam_rtc.h
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Bob Doiron
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,48 +34,28 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAM34_SAM_PERIPHCLKS_H
-#define __ARCH_ARM_SRC_SAM34_SAM_PERIPHCLKS_H
-
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_SAM34_SAM4CM_SUPC_H
+#define __ARCH_ARM_SRC_SAM34_SAM4CM_SUPC_H
+
 #include <nuttx/config.h>
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
-#  include "sam3u_periphclks.h"
-#elif defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
-#  include "sam3x_periphclks.h"
-#elif defined(CONFIG_ARCH_CHIP_SAM4CM)
-#  include "sam4cm_periphclks.h"
-#elif defined(CONFIG_ARCH_CHIP_SAM4E)
-#  include "sam4e_periphclks.h"
-#elif defined(CONFIG_ARCH_CHIP_SAM4L)
-#  include "sam4l_periphclks.h"
-#elif defined(CONFIG_ARCH_CHIP_SAM4S)
-#  include "sam4s_periphclks.h"
-#else
-#  error Unknown SAM chip
-#endif
+#include "chip.h"
+
+#if defined(CONFIG_ARCH_CHIP_SAM4CM)
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
 
 /************************************************************************************
- * Public Types
- ************************************************************************************/
-
-/************************************************************************************
- * Inline Functions
+ * Public Data
  ************************************************************************************/
 
 #ifndef __ASSEMBLY__
-
-/************************************************************************************
- * Public Data
- ************************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -86,13 +67,18 @@ extern "C"
 #endif
 
 /************************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ************************************************************************************/
+
+uint32_t supc_get_slcd_power_mode(void);
+void supc_set_slcd_power_mode(uint32_t mode);
+void supc_set_slcd_ldo_output(uint32_t vrout);
 
 #undef EXTERN
 #if defined(__cplusplus)
 }
-#endif
-
+#endif /* __cplusplus */
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_SAM34_SAM_PERIPHCLKS_H */
+
+#endif /* __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_SUPC_H */
+#endif /* __ARCH_ARM_SRC_SAM34_SAM4CM_SUPC_H */

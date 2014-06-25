@@ -78,6 +78,11 @@ config ARCH_CHIP_ATSAM3A4C
 	select ARCH_CORTEXM3
 	select ARCH_CHIP_SAM3A
 
+config ARCH_CHIP_ATSAM4CMP16B
+	bool "ATSAM4CMP16B"
+	select ARCH_CORTEXM4
+	select ARCH_CHIP_SAM4CM
+
 config ARCH_CHIP_ATSAM4LC2C
 	bool "ATSAM4LC2C"
 	select ARCH_CORTEXM4
@@ -223,6 +228,10 @@ config ARCH_CHIP_SAM3X
 	default n
 
 config ARCH_CHIP_SAM3A
+	bool
+	default n
+
+config ARCH_CHIP_SAM4CM
 	bool
 	default n
 
@@ -387,6 +396,11 @@ config SAM34_IISC
 	bool "Inter-IC Sound (I2S) Controller"
 	default n
 	depends on ARCH_CHIP_SAM4L
+
+config SAM34_SLCDC
+	bool "Segment LCD Controller (SLCDC)"
+	default n
+	depends on ARCH_CHIP_SAM4CM
 
 config SAM34_LCDCA
 	bool "LCD Controller A (LCDCA)"
@@ -558,13 +572,13 @@ config SAM34_TWIM3
 config SAM34_UART0
 	bool "UART 0"
 	default y
-	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S || ARCH_CHIP_SAM4E
+	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4CM || ARCH_CHIP_SAM4S || ARCH_CHIP_SAM4E
 	select ARCH_HAVE_UART0
 
 config SAM34_UART1
 	bool "UART 1"
 	default n
-	depends on ARCH_CHIP_SAM4S || ARCH_CHIP_SAM4E
+	depends on ARCH_CHIP_SAM4CM || ARCH_CHIP_SAM4S || ARCH_CHIP_SAM4E
 	select ARCH_HAVE_UART1
 
 config SAM34_UDP
@@ -602,13 +616,13 @@ config SAM34_USART2
 	bool "USART 2"
 	default n
 	select ARCH_HAVE_USART2
-	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4L
+	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4CM || ARCH_CHIP_SAM4L
 
 config SAM34_USART3
 	bool "USART 3"
 	default n
 	select ARCH_HAVE_USART3
-	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4L
+	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4CM || ARCH_CHIP_SAM4L
 
 config SAM34_WDT
 	bool "Watchdog Timer (WDT)"

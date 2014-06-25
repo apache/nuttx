@@ -56,11 +56,19 @@
 #define SAM_RSTC_SR_OFFSET      0x04 /* Status Register */
 #define SAM_RSTC_MR_OFFSET      0x08 /* Mode Register  */
 
+#if defined(CONFIG_ARCH_CHIP_SAM4CM)
+#  define SAM_RSTC_CPMR_OFFSET  0x0c /* Coprocessor Mode Register */
+#endif
+
 /* RSTC register addresses **************************************************************/
 
 #define SAM_RSTC_CR             (SAM_RSTC_BASE+SAM_RSTC_CR_OFFSET)
 #define SAM_RSTC_SR             (SAM_RSTC_BASE+SAM_RSTC_SR_OFFSET)
 #define SAM_RSTC_MR             (SAM_RSTC_BASE+SAM_RSTC_MR_OFFSET)
+
+#if defined(CONFIG_ARCH_CHIP_SAM4CM)
+#  define SAM_RSTC_CPMR         (SAM_RSTC_BASE+SAM_RSTC_CPMR_OFFSET)
+#endif
 
 /* RSTC register bit definitions ********************************************************/
 
@@ -96,6 +104,14 @@
 #define RSTC_MR_KEY_SHIFT       (24)      /* Bits 24-31:  Password */
 #define RSTC_MR_KEY_MASK        (0xff << RSTC_CR_KEY_SHIFT)
 #  define RSTC_MR_KEY           (0xa5 << RSTC_CR_KEY_SHIFT)
+
+#if defined(CONFIG_ARCH_CHIP_SAM4CM)
+/* Coprocessor Mode Register */
+
+#  define RSTC_CPMR_CPROCEN     (1 << 0)  /* Coprocessor (second processor) Enable */
+#  define RSTC_CPMR_CPEREN      (1 << 4)  /* Coprocessor Peripheral Enable */
+#  define RSTC_CPMR_CPKEY       (0x5a << 24) /* Key */
+#endif
 
 /****************************************************************************************
  * Public Types

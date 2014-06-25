@@ -1,8 +1,8 @@
 /************************************************************************************
- * arch/arm/src/sam34/sam4s_gpio.h
- * General Purpose Input/Output (GPIO) definitions for the SAM4S
+ * arch/arm/src/sam34/sam4cm_gpio.h
+ * General Purpose Input/Output (GPIO) definitions for the SAM4CM
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,8 +34,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAM34_SAM4S_GPIO_H
-#define __ARCH_ARM_SRC_SAM34_SAM4S_GPIO_H
+#ifndef __ARCH_ARM_SRC_SAM34_SAM4CM_GPIO_H
+#define __ARCH_ARM_SRC_SAM34_SAM4CM_GPIO_H
 
 /************************************************************************************
  * Included Files
