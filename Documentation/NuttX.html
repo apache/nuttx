@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: April 29, 2014</p>
+      <p>Last Updated: June 25, 2014</p>
     </td>
   </tr>
 </table>
@@ -511,7 +511,12 @@
   <td><br></td>
   <td>
     <p>
-      <li>File transfers via TFTP and FTP (<code>get</code> and <code>put</code>), HTML (<code>wget</code>), and Zmodem (<code>sz</code> and <code>rz</code>).</li>
+      <li>
+        File transfers via TFTP and FTP (<code>get</code> and <code>put</code>), HTML (<code>wget</code>), and Zmodem (<code>sz</code> and <code>rz</code>).
+      </li>
+      <li>
+        Intel HEX file conversions.
+      </li>
     </p>
 </tr>
 <tr>
@@ -1134,17 +1139,17 @@
 <h2>Git Repository</h2>
 <p>
   The working version of NuttX is available from the SourceForge GIT repository  <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/">here</a>.
-  That same page provides the URLS and instructions for <i>cloning</i> the GIT repository.
+  That same page provides the URLs and instructions for <i>cloning</i> the GIT repository.
 </p>
 
 <h2>Released Versions</h2>
 <p>
   In addition to the ever-changing GIT repository, there are frozen released versions of NuttX available.
-  The current release is NuttX 7.2.
-  NuttX 7.2 is the 102<sup>nd</sup> release of NuttX.
-  It was released on April 29, 2014, and is available for download from the
+  The current release is NuttX 7.3.
+  NuttX 7.3 is the 103<sup>rd</sup> release of NuttX.
+  It was released on June 25, 2014, and is available for download from the
   <a href="http://sourceforge.net/projects/nuttx/files/">SourceForge</a> website.
-  Note that the release consists of two tarballs:  <code>nuttx-7.2.tar.gz</code> and <code>apps-7.2.tar.gz</code>.
+  Note that the release consists of two tarballs:  <code>nuttx-7.3.tar.gz</code> and <code>apps-7.3.tar.gz</code>.
   Both may be needed (see the top-level <code>nuttx/README.txt</code> file for build information).
 </p>
 
@@ -1153,16 +1158,18 @@
 <ul>
   <li><b>nuttx</b>.
     <ul><p>
-      Release notes for NuttX 7.12 are available <a href="http://sourceforge.net/projects/nuttx/files/nuttx/nuttx-7.2/">here</a>;
+      Release notes for NuttX 7.3 are available <a href="http://sourceforge.net/projects/nuttx/files/nuttx/nuttx-7.3/">here</a>;
       release notes for all released versions on NuttX are available in the <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/ReleaseNotes">SourceForge GIT</a>
-      The ChangeLog for all releases of NuttX is available at the bottom of the ChangeLog file that can viewed in the <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/ChangeLog">SourceForge GIT</a>.
+      The ChangeLog for all releases of NuttX is available in the ChangeLog file that can viewed in the <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/ChangeLog">SourceForge GIT</a>.
+      The ChangeLog for the current release is at the bottom of that file.
     </p>
   </li></ul>
   <li><b>apps</b>.
     <ul><p>
-      Release notes for NuttX 7.2 are available <a href="http://sourceforge.net/projects/nuttx/files/nuttx/nuttx-7.2/">here</a>;
+      Release notes for NuttX 7.3 are available <a href="http://sourceforge.net/projects/nuttx/files/nuttx/nuttx-7.3/">here</a>;
       release notes for all released versions on NuttX are available in the <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/ReleaseNotes">SourceForge GIT</a>
-      The ChangeLog for the all releases of apps is available at the bottom of the ChangeLog file that can viewed in the <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/apps/ChangeLog.txt">SourceForge GIT</a>.
+      The ChangeLog for the all releases of apps is available in the ChangeLog file that can viewed in the <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/apps/ChangeLog.txt">SourceForge GIT</a>.
+      The ChangeLog for the current release is at the bottom of that file.
     </p>
   </li></ul>
   <li><b>NxWidgets</b>.
@@ -1213,8 +1220,8 @@
       <li><a href="#armcortexa5">ARM Cortex-A5</a> (2)</li>
       <li><a href="#armcortexa8">ARM Cortex-A8</a> (1)</li>
       <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (3)</li>
-      <li><a href="#armcortexm3">ARM Cortex-M3</a> (25)</li>
-      <li><a href="#armcortexm4">ARM Cortex-M4</a> (13)</li>
+      <li><a href="#armcortexm3">ARM Cortex-M3</a> (27)</li>
+      <li><a href="#armcortexm4">ARM Cortex-M4</a> (15)</li>
     </ul>
   <li>Atmel AVR
     <ul>
@@ -1283,10 +1290,12 @@
       <li><a href="#at91samd20">Atmel SAMD20</a> <small>(ARM Cortex-M0+)</small></li>
       <li><a href="#at91sam3u">Atmel SAM3U</a> <small>(ARM Cortex-M3)</small></li>
       <li><a href="#at91sam3x">Atmel SAM3X</a> <small>(ARM Cortex-M3)</small></li>
+      <li><a href="#at91sam4c">Atmel SAM4C</a> <small>(ARM Cortex-M4)</small></li>
+      <li><a href="#at91sam4e">Atmel SAM4E</a> <small>(ARM Cortex-M4)</small></li>
       <li><a href="#at91sam4l">Atmel SAM4L</a> <small>(ARM Cortex-M4)</small></li>
       <li><a href="#at91sam4s">Atmel SAM4S</a> <small>(ARM Cortex-M4)</small></li>
-      <li><a href="#at91sam4e">Atmel SAM4E</a> <small>(ARM Cortex-M4)</small></li>
       <li><a href="#at91sama5d3">Atmel SAMA5D3</a> <small>(ARM Cortex-A5)</small></li>
+      <li><a href="#at91sama5d4">Atmel SAMA5D4</a> <small>(ARM Cortex-A5)</small></li>
     </ul>
   </li>
   <li>Freescale
@@ -1344,6 +1353,7 @@
     <ul>
       <li><a href="#str71x">STMicro STR71x</a> <small>(ARM7TDMI)</small></li>
       <li><a href="#stm32l152">STMicro STM32L152</a> <small>(STM32 L &quot;EnergyLite&quot; Line, ARM Cortex-M3)</small></li>
+      <li><a href="#stm32l162">STMicro STM32L162</a> <small>(STM32 L &quot;EnergyLite&quot; Medium+ Density, ARM Cortex-M3)</small></li>
       <li><a href="#stm32f100x">STMicro STM32F100x</a> <small>(STM32 F1 &quot;Value Line&quot;Family, ARM Cortex-M3)</small></li>
       <li><a href="#stm32f103cx">STMicro STM32F103C4/C8</a> <small>(STM32 F1 &quot;Low- and Medium-Density Line&quot; Family, ARM Cortex-M3)</small></li>
       <li><a href="#stm32f103x">STMicro STM32F103x</a> <small>(STM32 F1 Family, ARM Cortex-M3)</small></li>
@@ -1688,7 +1698,7 @@
   <td>
     <a name="nxplpc315x"><b>NXP LPC315x</b>.</a>
     Support for the NXP <a href="http://ics.nxp.com/products/lpc3000/lpc313x.lpc314x.lpc315x/">LPC315x</a> family has been incorporated into the code base as of NuttX-6.4.
-    Support has added for the Embedded Artists EA3152 board in NuttX-6.11.
+    Support was added for the Embedded Artists EA3152 board in NuttX-6.11.
     </p>
     <ul>
       <p>
@@ -1873,6 +1883,41 @@
         </p>
       </li>
     </ul>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="at91sama5d4"><b>Atmel SAMA5D4</b>.</a>
+      There is a port in progress on one Atmel SAMA5D4 board:
+    <p>
+    <ul>
+      <li><p><b>Atmel SAMA5D4-EK/MB development boards</b>
+        This is the  port of NuttX to the Atmel SAMA5D4-MB development board (which should be compatible witht he SAMA5D4-EK).
+        These boards feature the Atmel SAMA5D44 microprocessors with compatibility with most of the SAMA5D3 peripherals.
+      </p>
+      <p><b>STATUS</b>.
+        At the time of the release of NuttX-7.3, the basic port for the SAMA5D4-MB was complete and undergoing test.
+        The board has some basic functionality.
+        There are, however, too many outstanding issues to claim full availability in NuttX-7.3.
+        Look for a stable SAMA5D4-EK release in NuttX-7.4!
+        Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/sama5d4-ek/README.txt">README</a> file for current status.
+      <p></li>
+    </ul>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
     <p>
       <b>Development Environments:</b>
       1) Linux with native Linux GNU toolchain, 2) Cygwin/MSYS with Cygwin GNU toolchain, 3) Cygwin/MSYS  with Windows native toolchain, or 4) Native Windows.
@@ -2234,7 +2279,20 @@ nsh>
     </p>
   </td>
 </tr>
-
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="stm32l162"><b>STMicro STM32F152x/162x(STM32 F1 &quot;EnergyLite&quot; Medium+ Density Family)</b>.</a>
+      Support for the STM32152 and STM32162 Medium+ density parts from Jussi Kivilinna and Sami Pelkonen was included in NuttX-7.3, extending the basic STM32F152x support.
+      This is <i>architecture-only</i> support, meaning that support for the boards with these chips is available, but not support for any publicly available boards is included.
+    </p>
+  </td>
+</tr>
 <tr>
   <td><br></td>
   <td><hr></td>
@@ -2602,6 +2660,7 @@ nsh>
     <p>
       <a name="nxplpc176x"><b>NXP LPC1766, LPC1768, and LPC1769</b>.</a>
       Drivers are available for CAN, DAC, Ethernet, GPIO, GPIO interrupts, I2C, UARTs, SPI, SSP, USB host, and USB device.
+      Additional drivers for the RTC, ADC, DAC, Timers, PWM and MCPWM were contributed by Max (himax) in NuttX-7.3.
       Verified LPC17xx onfigurations are available for three boards.
       <ul>
         <li>
@@ -2919,6 +2978,9 @@ nsh>
         <li><b>NuttX-6.21</b>
           A USB OTG host controller driver was added in NuttX 6.21.
         </li>
+        <li><b>NuttX-7.3</b>
+          Support for the Olimex STM32 H405 board was added in NuttX-7.3.
+        </li>
         <li>
           Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/stm3240g-eval/README.txt">README</a> file for further information.
         </li>
@@ -2973,6 +3035,11 @@ nsh>
         All drivers for the STM32 F4 family may be used with this board as well.
       </p>
     </ul>
+    <p>
+      <b>Olimex STM32 H405</b>.
+      Support for the Olimex STM32 H405 development board was contributed by Martin Lederhilger and appeared in NuttX-7.3.
+      See the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/olimex-stm32-h405/README.txt">README</a> file for further information about the NuttX port.
+    </p>
   </td>
 </tr>
 <tr>
@@ -2986,7 +3053,7 @@ nsh>
       <a name="stm32f427x"><b>STMicro STM32 F427/437</b>.</a>
       General architectural support was provided for the F427/437 family in NuttX 6.27.
       Specific support includes the STM32F427I, STM32F427Z, and STM32F427V chips.
-      This is <i>architecture-only</i> support, meaning that support for the boards with these chips is available, but not support for any publically available boards is included..
+      This is <i>architecture-only</i> support, meaning that support for the boards with these chips is available, but not support for any publicly available boards is included.
       This support was contributed by Mike Smith.
     </p>
     <p>
@@ -3184,6 +3251,52 @@ Mem:         29232       5920      23312      23312
   <td><br></td>
   <td>
     <p>
+      <a name="at91sam4c"><b>Atmel SAM4C</b>.</a>
+      General architectural support was provided for SAM4CM family in NuttX 7.3
+      This was <i>architecture-only</i> support, meaning that support for the boards with these chips is available, but no support for any publicly available boards was included.
+      The SAM4CM port should be compatible with most of the SAM3/4 drivers (like HSMCI, DMAC, etc.) but those have not be verified on hardware as of this writing.
+      This support was contributed in part by Max Neklyudov.
+    </p>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="at91sam4e"><b>Atmel SAM4E</b>.</a>
+      General architectural support was provided for the SAM4E family in NuttX 6.32.
+      This was <i>architecture-only</i> support, meaning that support for the boards with these chips is available, but no support for any publicly available boards was included.
+      This support was contributed in part by Mitko.
+    </p>
+    <p>
+      <b>Atmel SAM4E-EK</b>.
+      Board support was added for the SAM4E-EK development board in NuttX 7.1.
+      A fully functional NuttShell (NSH) configuration is available
+      (see the <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH User Guide</a>).
+      That NSH configuration includes networking support and support for an AT25 Serial FLASH file system.
+    </p>
+    <ul>
+      <b>STATUS</b>.
+      A new Ethernet MAC driver has been developed and is functional in the NSH configuration.
+      A DMA-base SPI driver is supported and has been verified with the AT25 Serial FLASH.
+      Touchscreen and LCD support was added in NuttX-7.3, but has not been fully integrated as of this writing.
+      The SAM4E-EK should be compatible with most of the other SAM3/4 drivers (like HSMCI, DMAC, etc.) but those have not be verified on the SAM4E-EK as of this writing.
+      Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/sam4e-ek/README.txt">README</a> file for further information.
+    </ul>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
       <a name="at91sam4s"><b>Atmel SAM4S</b>.</a>
       There are ports to two Atmel SAM4S board:
     </p>
@@ -3199,6 +3312,8 @@ Mem:         29232       5920      23312      23312
           As of this writing, the basic port is code complete and a fully verified configuration exists for the the NuttShell <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH</a>).
           The first fully functional SAM4S Xplained port was released in NuttX-6.28.
           Support for the on-board 1MB SRAM was added in NuttX-6.29.
+          An RTT driver was Bob Doiron in NuttX-7.3.
+          Bob also added an high resolution RTC emulation using the RTT for the sub-second counter.
           Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/sam4s-xplained/README.txt">README</a> file for further information.
         </p>
       </ul>
@@ -3909,8 +4024,7 @@ BFD_ASSERT (*plt_offset != (bfd_vma) -1);
   <td>
     <p>
       <b>P112</b>.
-      The P112 is a hobbyist single board computer based on a 16MHz Z80182 with up to 1MB of memory, serial,
-parallel and diskette IO, and realtime clock, in a 3.5-inch drive form factor..
+      The P112 is a hobbyist single board computer based on a 16MHz Z80182 with up to 1MB of memory, serial, parallel and diskette IO, and realtime clock, in a 3.5-inch drive form factor.
       The P112 computer originated as a commercial product of &quot;D-X Designs Pty Ltd&quot[ of Australia.
     </p>
     </p>
