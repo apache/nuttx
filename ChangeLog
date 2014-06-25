@@ -7514,3 +7514,4 @@
 	  buffers (2014-6-24).
 	* net/: Many files changed.  Convert existing TCP read-ahead logic
 	  to use I/O buffer chains (2014-6-24).
+	* net/: Clean up all TCP and UDP related naming (204-6-24).
