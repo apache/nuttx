@@ -387,7 +387,7 @@ uint16_t uip_ipchksum(struct uip_driver_s *dev);
  * to by d_appdata.
  */
 
-uint16_t uip_tcpchksum(struct uip_driver_s *dev);
+uint16_t tcp_chksum(struct uip_driver_s *dev);
 
 uint16_t uip_udpchksum(struct uip_driver_s *dev);
 uint16_t uip_icmpchksum(struct uip_driver_s *dev, int len);

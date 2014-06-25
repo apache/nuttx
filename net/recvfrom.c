@@ -58,13 +58,14 @@
 
 #include "net.h"
 #include "uip/uip.h"
+#include "tcp/tcp.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
 #define UDPBUF ((struct uip_udpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
-#define TCPBUF ((struct uip_tcpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
+#define TCPBUF ((struct tcp_iphdr_s *)&dev->d_buf[UIP_LLH_LEN])
 
 /****************************************************************************
  * Private Types
@@ -224,15 +225,15 @@ static inline void recvfrom_newtcpdata(FAR struct uip_driver_s *dev,
  if (recvlen < dev->d_len)
    {
 #ifdef CONFIG_NET_TCP_READAHEAD
-      FAR struct uip_conn *conn   = (FAR struct uip_conn *)pstate->rf_sock->s_conn;
-      FAR uint8_t         *buffer = (FAR uint8_t *)dev->d_appdata + recvlen;
-      uint16_t             buflen = dev->d_len - recvlen;
+      FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pstate->rf_sock->s_conn;
+      FAR uint8_t *buffer = (FAR uint8_t *)dev->d_appdata + recvlen;
+      uint16_t buflen = dev->d_len - recvlen;
 #ifdef CONFIG_DEBUG_NET
-      uint16_t             nsaved;
+      uint16_t nsaved;
 
-      nsaved = uip_datahandler(conn, buffer, buflen);
+      nsaved = tcp_datahandler(conn, buffer, buflen);
 #else
-      (void)uip_datahandler(conn, buffer, buflen);
+      (void)tcp_datahandler(conn, buffer, buflen);
 #endif
 
       /* There are complicated buffering issues that are not addressed fully
@@ -316,7 +317,7 @@ static inline void recvfrom_newudpdata(FAR struct uip_driver_s *dev,
 #if defined(CONFIG_NET_TCP) && defined(CONFIG_NET_TCP_READAHEAD)
 static inline void recvfrom_readahead(struct recvfrom_s *pstate)
 {
-  FAR struct uip_conn *conn = (FAR struct uip_conn *)pstate->rf_sock->s_conn;
+  FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pstate->rf_sock->s_conn;
   FAR struct iob_s *iob;
   int recvlen;
 
@@ -1342,11 +1343,11 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   if (state.rf_buflen > 0)
 #endif
     {
-      struct uip_conn *conn = (struct uip_conn *)psock->s_conn;
+      FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)psock->s_conn;
 
       /* Set up the callback in the connection */
 
-      state.rf_cb = uip_tcpcallbackalloc(conn);
+      state.rf_cb = tcp_callbackalloc(conn);
       if (state.rf_cb)
         {
           state.rf_cb->flags   = UIP_NEWDATA|UIP_POLL|UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT;
@@ -1363,7 +1364,7 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
           /* Make sure that no further interrupts are processed */
 
-          uip_tcpcallbackfree(conn, state.rf_cb);
+          tcp_callbackfree(conn, state.rf_cb);
           ret = recvfrom_result(ret, &state);
         }
       else

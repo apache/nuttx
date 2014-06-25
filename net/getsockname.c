@@ -153,7 +153,7 @@ int getsockname(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
 #ifdef CONFIG_NET_TCP
       case SOCK_STREAM:
         {
-          struct uip_conn *tcp_conn = (struct uip_conn *)psock->s_conn;
+          FAR struct tcp_conn_s *tcp_conn = (FAR struct tcp_conn_s *)psock->s_conn;
           outaddr->sin_port = tcp_conn->lport; /* Already in network byte order */
         }
         break;

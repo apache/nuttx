@@ -133,11 +133,11 @@ void uip_initialize(void)
   /* Initialize the listening port structures */
 
 #ifdef CONFIG_NET_TCP
-  uip_listeninit();
+  tcp_listeninit();
 
   /* Initialize the TCP/IP connection structures */
 
-  uip_tcpinit();
+  tcp_initialize();
 
   /* Initialize the TCP/IP write buffering */
 

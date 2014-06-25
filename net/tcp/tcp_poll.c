@@ -53,6 +53,7 @@
 #include <nuttx/net/netdev.h>
 
 #include "uip/uip.h"
+#include "tcp/tcp.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -75,7 +76,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_tcppoll
+ * Name: tcp_poll
  *
  * Description:
  *   Poll a TCP connection structure for availability of TX data
@@ -92,7 +93,7 @@
  *
  ****************************************************************************/
 
-void uip_tcppoll(struct uip_driver_s *dev, struct uip_conn *conn)
+void tcp_poll(FAR struct uip_driver_s *dev, FAR struct tcp_conn_s *conn)
 {
   uint8_t result;
 
@@ -110,11 +111,11 @@ void uip_tcppoll(struct uip_driver_s *dev, struct uip_conn *conn)
 
       /* Perform the callback */
 
-      result = uip_tcpcallback(dev, conn, UIP_POLL);
+      result = tcp_callback(dev, conn, UIP_POLL);
 
       /* Handle the callback response */
 
-      uip_tcpappsend(dev, conn, result);
+      tcp_appsend(dev, conn, result);
     }
   else
     {

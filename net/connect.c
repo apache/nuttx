@@ -60,7 +60,7 @@
 #ifdef CONFIG_NET_TCP
 struct tcp_connect_s
 {
-  FAR struct uip_conn       *tc_conn;    /* Reference to TCP connection structure */
+  FAR struct tcp_conn_s     *tc_conn;    /* Reference to TCP connection structure */
   FAR struct uip_callback_s *tc_cb;      /* Reference to callback instance */
   sem_t                      tc_sem;     /* Semaphore signals recv completion */
   int                        tc_result;  /* OK on success, otherwise a negated errno. */
@@ -72,15 +72,18 @@ struct tcp_connect_s
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
-static inline int tcp_setup_callbacks(FAR struct socket *psock,
-                                      FAR struct tcp_connect_s *pstate);
-static inline void tcp_teardown_callbacks(struct tcp_connect_s *pstate, int status);
-static uint16_t tcp_connect_interrupt(struct uip_driver_s *dev, void *pvconn,
-                                    void *pvpriv, uint16_t flags);
+static inline int psock_setup_callbacks(FAR struct socket *psock,
+                                        FAR struct tcp_connect_s *pstate);
+static inline void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
+                                          int status);
+static uint16_t psock_connect_interrupt(FAR struct uip_driver_s *dev,
+                                        FAR void *pvconn, FAR void *pvpriv,
+                                        uint16_t flags);
 #ifdef CONFIG_NET_IPv6
-static inline int tcp_connect(FAR struct socket *psock, const struct sockaddr_in6 *inaddr);
+static inline int psock_tcp_connect(FAR struct socket *psock,
+                                    FAR const struct sockaddr_in6 *inaddr);
 #else
-static inline int tcp_connect(FAR struct socket *psock, const struct sockaddr_in *inaddr);
+static inline int psock_tcp_connect(FAR struct socket *psock, const struct sockaddr_in *inaddr);
 #endif
 #endif /* CONFIG_NET_TCP */
 
@@ -88,14 +91,14 @@ static inline int tcp_connect(FAR struct socket *psock, const struct sockaddr_in
  * Private Functions
  ****************************************************************************/
 /****************************************************************************
- * Name: tcp_setup_callbacks
+ * Name: psock_setup_callbacks
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
-static inline int tcp_setup_callbacks(FAR struct socket *psock,
-                                      FAR struct tcp_connect_s *pstate)
+static inline int psock_setup_callbacks(FAR struct socket *psock,
+                                        FAR struct tcp_connect_s *pstate)
 {
-  FAR struct uip_conn *conn = psock->s_conn;
+  FAR struct tcp_conn_s *conn = psock->s_conn;
   int ret = -EBUSY;
 
   /* Initialize the TCP state structure */
@@ -106,14 +109,14 @@ static inline int tcp_setup_callbacks(FAR struct socket *psock,
 
   /* Set up the callbacks in the connection */
 
-  pstate->tc_cb = uip_tcpcallbackalloc(conn);
+  pstate->tc_cb = tcp_callbackalloc(conn);
   if (pstate->tc_cb)
     {
       /* Set up the connection "interrupt" handler */
 
       pstate->tc_cb->flags   = UIP_NEWDATA|UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT|UIP_CONNECTED;
       pstate->tc_cb->priv    = (void*)pstate;
-      pstate->tc_cb->event   = tcp_connect_interrupt;
+      pstate->tc_cb->event   = psock_connect_interrupt;
 
       /* Set up the connection event monitor */
 
@@ -125,18 +128,18 @@ static inline int tcp_setup_callbacks(FAR struct socket *psock,
 #endif /* CONFIG_NET_TCP */
 
 /****************************************************************************
- * Name: tcp_teardown_callbacks
+ * Name: psock_teardown_callbacks
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
-static inline void tcp_teardown_callbacks(struct tcp_connect_s *pstate,
-                                          int status)
+static inline void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
+                                            int status)
 {
-  FAR struct uip_conn *conn = pstate->tc_conn;
+  FAR struct tcp_conn_s *conn = pstate->tc_conn;
 
   /* Make sure that no further interrupts are processed */
 
-  uip_tcpcallbackfree(conn, pstate->tc_cb);
+  tcp_callbackfree(conn, pstate->tc_cb);
 
   pstate->tc_cb = NULL;
 
@@ -154,7 +157,7 @@ static inline void tcp_teardown_callbacks(struct tcp_connect_s *pstate,
 #endif /* CONFIG_NET_TCP */
 
 /****************************************************************************
- * Name: tcp_connect_interrupt
+ * Name: psock_connect_interrupt
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual
@@ -174,8 +177,9 @@ static inline void tcp_teardown_callbacks(struct tcp_connect_s *pstate,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
-static uint16_t tcp_connect_interrupt(struct uip_driver_s *dev, void *pvconn,
-                                      void *pvpriv, uint16_t flags)
+static uint16_t psock_connect_interrupt(FAR struct uip_driver_s *dev,
+                                        FAR void *pvconn, FAR void *pvpriv,
+                                        uint16_t flags)
 {
   struct tcp_connect_s *pstate = (struct tcp_connect_s *)pvpriv;
 
@@ -239,7 +243,7 @@ static uint16_t tcp_connect_interrupt(struct uip_driver_s *dev, void *pvconn,
 
       /* Stop further callbacks */
 
-      tcp_teardown_callbacks(pstate, pstate->tc_result);
+      psock_teardown_callbacks(pstate, pstate->tc_result);
 
       /* Wake up the waiting thread */
 
@@ -251,7 +255,7 @@ static uint16_t tcp_connect_interrupt(struct uip_driver_s *dev, void *pvconn,
 #endif /* CONFIG_NET_TCP */
 
 /****************************************************************************
- * Name: tcp_connect
+ * Name: psock_tcp_connect
  *
  * Description:
  *   Perform a TCP connection
@@ -270,9 +274,11 @@ static uint16_t tcp_connect_interrupt(struct uip_driver_s *dev, void *pvconn,
 
 #ifdef CONFIG_NET_TCP
 #ifdef CONFIG_NET_IPv6
-static inline int tcp_connect(FAR struct socket *psock, const struct sockaddr_in6 *inaddr)
+static inline int psock_tcp_connect(FAR struct socket *psock,
+                                    FAR const struct sockaddr_in6 *inaddr)
 #else
-static inline int tcp_connect(FAR struct socket *psock, const struct sockaddr_in *inaddr)
+static inline int psock_tcp_connect(FAR struct socket *psock,
+                                    FAR const struct sockaddr_in *inaddr)
 #endif
 {
   struct tcp_connect_s state;
@@ -296,14 +302,14 @@ static inline int tcp_connect(FAR struct socket *psock, const struct sockaddr_in
     {
       /* Perform the uIP connection operation */
 
-      ret = uip_tcpconnect(psock->s_conn, inaddr);
+      ret = psock_tcp_connect(psock->s_conn, inaddr);
     }
 
   if (ret >= 0)
     {
       /* Set up the callbacks in the connection */
 
-      ret = tcp_setup_callbacks(psock, &state);
+      ret = psock_setup_callbacks(psock, &state);
       if (ret >= 0)
         {
           /* Wait for either the connect to complete or for an error/timeout
@@ -336,7 +342,7 @@ static inline int tcp_connect(FAR struct socket *psock, const struct sockaddr_in
 
           /* Make sure that no further interrupts are processed */
 
-          tcp_teardown_callbacks(&state, ret);
+          psock_teardown_callbacks(&state, ret);
         }
 
       /* Mark the connection bound and connected */
@@ -475,7 +481,7 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
 
           /* Its not ... connect it */
 
-          ret = tcp_connect(psock, inaddr);
+          ret = psock_tcp_connect(psock, inaddr);
           if (ret < 0)
             {
               err = -ret;

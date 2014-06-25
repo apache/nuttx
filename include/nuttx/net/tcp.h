@@ -80,7 +80,7 @@
 
 #define TCP_OPT_MSS_LEN 4   /* Length of TCP MSS option. */
 
-/* The TCP states used in the struct uip_conn tcpstateflags field */
+/* The TCP states used in the struct tcp_conn_s tcpstateflags field */
 
 #define UIP_TS_MASK     0x0f /* Bits 0-3: TCP state */
 #define UIP_CLOSED      0x00 /* The connection is not in use and available */
@@ -154,7 +154,7 @@
 
 /* Representation of a uIP TCP connection.
  *
- * The uip_conn structure is used for identifying a connection. All
+ * The tcp_conn_s structure is used for identifying a connection. All
  * but one field in the structure are to be considered read-only by an
  * application. The only exception is the 'private' fields whose purpose
  * is to let the application store application-specific state (e.g.,
@@ -163,9 +163,9 @@
 
 struct uip_driver_s;      /* Forward reference */
 struct uip_callback_s;    /* Forward reference */
-struct uip_backlog_s;     /* Forward reference */
+struct tcp_backlog_s;     /* Forward reference */
 
-struct uip_conn
+struct tcp_conn_s
 {
   dq_entry_t node;        /* Implements a doubly linked list */
   uip_ipaddr_t ripaddr;   /* The IP address of the remote host */
@@ -227,12 +227,12 @@ struct uip_conn
    *     structure in which this connection is backlogged.
    *   backlog - The pending connection backlog.  If this connection is
    *     configured as a listener with backlog, then this refers to the
-   *     struct uip_backlog_s tear-off structure that manages that backlog.
+   *     struct tcp_backlog_s tear-off structure that manages that backlog.
    */
 
 #ifdef CONFIG_NET_TCPBACKLOG
-  FAR struct uip_conn      *blparent;
-  FAR struct uip_backlog_s *backlog;
+  FAR struct tcp_conn_s    *blparent;
+  FAR struct tcp_backlog_s *backlog;
 #endif
 
   /* Application callbacks:
@@ -264,14 +264,14 @@ struct uip_conn
   /* accept() is called when the TCP logic has created a connection */
 
   FAR void *accept_private;
-  int (*accept)(FAR struct uip_conn *listener, struct uip_conn *conn);
+  int (*accept)(FAR struct tcp_conn_s *listener, FAR struct tcp_conn_s *conn);
 
   /* connection_event() is called on any of the subset of connection-related
    * events.
    */
 
   FAR void *connection_private;
-  void (*connection_event)(FAR struct uip_conn *conn, uint16_t flags);
+  void (*connection_event)(FAR struct tcp_conn_s *conn, uint16_t flags);
 };
 
 /* This structure supports TCP write buffering */
@@ -290,22 +290,22 @@ struct tcp_wrbuffer_s
 
 /* Support for listen backlog:
  *
- *   struct uip_blcontainer_s describes one backlogged connection
- *   struct uip_backlog_s is a "tear-off" describing all backlog for a
+ *   struct tcp_blcontainer_s describes one backlogged connection
+ *   struct tcp_backlog_s is a "tear-off" describing all backlog for a
  *      listener connection
  */
 
 #ifdef CONFIG_NET_TCPBACKLOG
-struct uip_blcontainer_s
+struct tcp_blcontainer_s
 {
-  sq_entry_t           bc_node;    /* Implements a singly linked list */
-  FAR struct uip_conn *bc_conn;    /* Holds reference to the new connection structure */
+  sq_entry_t bc_node;             /* Implements a singly linked list */
+  FAR struct tcp_conn_s *bc_conn; /* Holds reference to the new connection structure */
 };
 
-struct uip_backlog_s
+struct tcp_backlog_s
 {
-  sq_queue_t           bl_free;    /* Implements a singly-linked list of free containers */
-  sq_queue_t           bl_pending; /* Implements a singly-linked list of pending connections */
+  sq_queue_t bl_free;             /* Implements a singly-linked list of free containers */
+  sq_queue_t bl_pending;          /* Implements a singly-linked list of pending connections */
 };
 #endif
 
@@ -314,7 +314,7 @@ struct uip_backlog_s
  */
 
 #ifdef CONFIG_NET_STATISTICS
-struct uip_tcp_stats_s
+struct tcp_stats_s
 {
   uip_stats_t drop;       /* Number of dropped TCP segments */
   uip_stats_t recv;       /* Number of received TCP segments */
@@ -331,7 +331,7 @@ struct uip_tcp_stats_s
 
 /* The TCP and IP headers */
 
-struct uip_tcpip_hdr
+struct tcp_iphdr_s
 {
 #ifdef CONFIG_NET_IPv6
 
@@ -395,25 +395,27 @@ struct uip_tcpip_hdr
  * normally something done by the implementation of the socket() API
  */
 
-struct uip_conn *uip_tcpalloc(void);
+struct tcp_conn_s *tcp_alloc(void);
 
 /* Allocate a new TCP data callback */
 
-#define uip_tcpcallbackalloc(conn)   uip_callbackalloc(&conn->list)
-#define uip_tcpcallbackfree(conn,cb) uip_callbackfree(cb, &conn->list)
+#define tcp_callbackalloc(conn)   uip_callbackalloc(&conn->list)
+#define tcp_callbackfree(conn,cb) uip_callbackfree(cb, &conn->list)
 
 /* Free a connection structure that is no longer in use. This should
  * be done by the implementation of close()
  */
 
-void uip_tcpfree(struct uip_conn *conn);
+void tcp_free(FAR struct tcp_conn_s *conn);
 
 /* Bind a TCP connection to a local address */
 
 #ifdef CONFIG_NET_IPv6
-int uip_tcpbind(struct uip_conn *conn, const struct sockaddr_in6 *addr);
+int tcp_bind(FAR struct tcp_conn_s *conn,
+             FAR const struct sockaddr_in6 *addr);
 #else
-int uip_tcpbind(struct uip_conn *conn, const struct sockaddr_in *addr);
+int tcp_bind(FAR struct tcp_conn_s *conn,
+             FAR const struct sockaddr_in *addr);
 #endif
 
 /* This function implements the UIP specific parts of the standard
@@ -425,50 +427,54 @@ int uip_tcpbind(struct uip_conn *conn, const struct sockaddr_in *addr);
  * the SYN_SENT state and sets the retransmission timer to 0. This will
  * cause a TCP SYN segment to be sent out the next time this connection
  * is periodically processed, which usually is done within 0.5 seconds
- * after the call to uip_tcpconnect().
+ * after the call to tcp_connect().
  *
  * This function is called from normal user level code.
  */
 
 #ifdef CONFIG_NET_IPv6
-int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in6 *addr);
+int tcp_connect(FAR struct tcp_conn_s *conn,
+                FAR const struct sockaddr_in6 *addr);
 #else
-int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in *addr);
+int tcp_connect(FAR struct tcp_conn_s *conn,
+                FAR const struct sockaddr_in *addr);
 #endif
 
 /* Start listening to the port bound to the specified TCP connection */
 
-int uip_listen(struct uip_conn *conn);
+int tcp_listen(FAR struct tcp_conn_s *conn);
 
 /* Stop listening to the port bound to the specified TCP connection */
 
-int uip_unlisten(struct uip_conn *conn);
+int tcp_unlisten(FAR struct tcp_conn_s *conn);
 
 /* Backlog support */
 
 #ifdef CONFIG_NET_TCPBACKLOG
 /* APIs to create and terminate TCP backlog support */
 
-int uip_backlogcreate(FAR struct uip_conn *conn, int nblg);
-int uip_backlogdestroy(FAR struct uip_conn *conn);
+int tcp_backlogcreate(FAR struct tcp_conn_s *conn, int nblg);
+int tcp_backlogdestroy(FAR struct tcp_conn_s *conn);
 
 /* APIs to manage individual backlog actions */
 
-int uip_backlogadd(FAR struct uip_conn *conn, FAR struct uip_conn *blconn);
+int tcp_backlogadd(FAR struct tcp_conn_s *conn,
+                   FAR struct tcp_conn_s *blconn);
 #ifndef CONFIG_DISABLE_POLL
-bool uip_backlogavailable(FAR struct uip_conn *conn);
+bool tcp_backlogavailable(FAR struct tcp_conn_s *conn);
 #else
-#  define uip_backlogavailable(conn)   (false);
+#  define tcp_backlogavailable(conn)   (false);
 #endif
-FAR struct uip_conn *uip_backlogremove(FAR struct uip_conn *conn);
-int uip_backlogdelete(FAR struct uip_conn *conn, FAR struct uip_conn *blconn);
+FAR struct tcp_conn_s *tcp_backlogremove(FAR struct tcp_conn_s *conn);
+int tcp_backlogdelete(FAR struct tcp_conn_s *conn,
+                      FAR struct tcp_conn_s *blconn);
 
 #else
-#  define uip_backlogcreate(conn,nblg) (-ENOSYS)
-#  define uip_backlogdestroy(conn)     (-ENOSYS)
-#  define uip_backlogadd(conn,blconn)  (-ENOSYS)
-#  define uip_backlogavailable(conn)   (false);
-#  define uip_backlogremove(conn)      (NULL)
+#  define tcp_backlogcreate(conn,nblg) (-ENOSYS)
+#  define tcp_backlogdestroy(conn)     (-ENOSYS)
+#  define tcp_backlogadd(conn,blconn)  (-ENOSYS)
+#  define tcp_backlogavailable(conn)   (false);
+#  define tcp_backlogremove(conn)      (NULL)
 #endif
 
 /* Tell the sending host to stop sending data.

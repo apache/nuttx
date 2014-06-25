@@ -75,7 +75,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define TCPBUF ((struct uip_tcpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
+#define TCPBUF ((struct tcp_iphdr_s *)&dev->d_buf[UIP_LLH_LEN])
 
 /* Debug */
 
@@ -96,7 +96,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: send_insert_seqment
+ * Function: psock_insert_segment
  *
  * Description:
  *   Insert a new segment in a write buffer queue, keep the segment queue in
@@ -114,8 +114,8 @@
  *
  ****************************************************************************/
 
-static void send_insert_seqment(FAR struct tcp_wrbuffer_s *wrb,
-                                FAR sq_queue_t *q)
+static void psock_insert_segment(FAR struct tcp_wrbuffer_s *wrb,
+                                 FAR sq_queue_t *q)
 {
   sq_entry_t *entry = (sq_entry_t*)wrb;
   sq_entry_t *insert = NULL;
@@ -145,7 +145,7 @@ static void send_insert_seqment(FAR struct tcp_wrbuffer_s *wrb,
 }
 
 /****************************************************************************
- * Function: lost_connection
+ * Function: psock_lost_connection
  *
  * Description:
  *   The TCP connection has been lost.  Free all write buffers.
@@ -159,8 +159,8 @@ static void send_insert_seqment(FAR struct tcp_wrbuffer_s *wrb,
  *
  ****************************************************************************/
 
-static inline void lost_connection(FAR struct socket *psock,
-                                   FAR struct uip_conn *conn)
+static inline void psock_lost_connection(FAR struct socket *psock,
+                                         FAR struct tcp_conn_s *conn)
 {
   FAR sq_entry_t *entry;
   FAR sq_entry_t *next;
@@ -192,7 +192,7 @@ static inline void lost_connection(FAR struct socket *psock,
 }
 
 /****************************************************************************
- * Function: send_interrupt
+ * Function: psock_send_interrupt
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual
@@ -211,10 +211,11 @@ static inline void lost_connection(FAR struct socket *psock,
  *
  ****************************************************************************/
 
-static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
-                               FAR void *pvpriv, uint16_t flags)
+static uint16_t psock_send_interrupt(FAR struct uip_driver_s *dev,
+                                     FAR void *pvconn, FAR void *pvpriv,
+                                     uint16_t flags)
 {
-  FAR struct uip_conn *conn = (FAR struct uip_conn *)pvconn;
+  FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
   FAR struct socket *psock = (FAR struct socket *)pvpriv;
 
   nllvdbg("flags: %04x\n", flags);
@@ -230,7 +231,7 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
       FAR sq_entry_t *next;
       uint32_t ackno;
 
-      ackno = uip_tcpgetsequence(TCPBUF->ackno);
+      ackno = tcp_getsequence(TCPBUF->ackno);
       nllvdbg("ACK: ackno=%u flags=%04x\n", ackno, flags);
 
       /* Look at every write buffer in the unacked_q.  The unacked_q
@@ -352,7 +353,7 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
 
       /* Free write buffers and terminate polling */
 
-      lost_connection(psock, conn);
+      psock_lost_connection(psock, conn);
       return flags;
     }
 
@@ -498,7 +499,7 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
 
               nllvdbg("REXMIT: Moving wrb=%p nrtx=%u\n", wrb, WRB_NRTX(wrb));
 
-              send_insert_seqment(wrb, &conn->write_q);
+              psock_insert_segment(wrb, &conn->write_q);
             }
         }
     }
@@ -590,7 +591,7 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
            * before the packet is sent.
            */
 
-          uip_tcpsetsequence(conn->sndseq, WRB_SEQNO(wrb) + WRB_SENT(wrb));
+          tcp_setsequence(conn->sndseq, WRB_SEQNO(wrb) + WRB_SENT(wrb));
 
           /* Then set-up to send that amount of data with the offset
            * corresponding to the amount of data already sent. (this
@@ -637,7 +638,7 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
                * segment is waiting for ACK again
                */
 
-              send_insert_seqment(wrb, &conn->unacked_q);
+              psock_insert_segment(wrb, &conn->unacked_q);
             }
 
           /* Only one data can be sent by low level driver at once,
@@ -658,10 +659,10 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: tcp_send
+ * Function: psock_tcp_send
  *
  * Description:
- *   The tcp_send() call may be used only when the TCP socket is in a
+ *   The psock_tcp_send() call may be used only when the TCP socket is in a
  *   connected state (so that the intended recipient is known).
  *
  * Parameters:
@@ -714,7 +715,8 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
  *
  ****************************************************************************/
 
-ssize_t tcp_send(FAR struct socket *psock, FAR const void *buf, size_t len)
+ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
+                       size_t len)
 {
   uip_lock_t save;
   ssize_t    result = 0;
@@ -735,7 +737,7 @@ ssize_t tcp_send(FAR struct socket *psock, FAR const void *buf, size_t len)
 
   /* Dump the incoming buffer */
 
-  BUF_DUMP("tcp_send", buf, len);
+  BUF_DUMP("psock_tcp_send", buf, len);
 
   /* Set the socket state to sending */
 
@@ -745,13 +747,13 @@ ssize_t tcp_send(FAR struct socket *psock, FAR const void *buf, size_t len)
 
   if (len > 0)
     {
-      struct uip_conn *conn = (struct uip_conn*)psock->s_conn;
+      FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)psock->s_conn;
 
       /* Allocate resources to receive a callback */
 
       if (!psock->s_sndcb)
         {
-          psock->s_sndcb = uip_tcpcallbackalloc(conn);
+          psock->s_sndcb = tcp_callbackalloc(conn);
         }
 
       /* Test if the callback has been allocated */
@@ -772,7 +774,7 @@ ssize_t tcp_send(FAR struct socket *psock, FAR const void *buf, size_t len)
           psock->s_sndcb->flags = (UIP_ACKDATA | UIP_REXMIT |UIP_POLL | \
                                   UIP_CLOSE | UIP_ABORT | UIP_TIMEDOUT);
           psock->s_sndcb->priv  = (void*)psock;
-          psock->s_sndcb->event = send_interrupt;
+          psock->s_sndcb->event = psock_send_interrupt;
 
           /* Allocate an write buffer */
 
@@ -789,7 +791,7 @@ ssize_t tcp_send(FAR struct socket *psock, FAR const void *buf, size_t len)
 
               WRB_DUMP("I/O buffer chain", wrb, WRB_PKTLEN(wrb), 0);
 
-              /* send_interrupt() will send data in FIFO order from the
+              /* psock_send_interrupt() will send data in FIFO order from the
                * conn->write_q
                */
 

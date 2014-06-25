@@ -53,6 +53,7 @@
 #include <nuttx/net/netdev.h>
 
 #include "uip/uip.h"
+#include "tcp/tcp.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -75,7 +76,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_tcpappsend
+ * Name: tcp_appsend
  *
  * Description:
  *   Handle application or TCP protocol response.  If this function is called
@@ -95,8 +96,8 @@
  *
  ****************************************************************************/
 
-void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn,
-                    uint16_t result)
+void tcp_appsend(FAR struct uip_driver_s *dev, FAR struct tcp_conn_s *conn,
+                 uint16_t result)
 {
   /* Handle the result based on the application response */
 
@@ -111,7 +112,7 @@ void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn,
       conn->tcpstateflags = UIP_CLOSED;
       nllvdbg("TCP state: UIP_CLOSED\n");
 
-      uip_tcpsend(dev, conn, TCP_RST | TCP_ACK, UIP_IPTCPH_LEN);
+      tcp_send(dev, conn, TCP_RST | TCP_ACK, UIP_IPTCPH_LEN);
     }
 
   /* Check for connection closed */
@@ -124,7 +125,7 @@ void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn,
       nllvdbg("TCP state: UIP_FIN_WAIT_1\n");
 
       dev->d_sndlen  = 0;
-      uip_tcpsend(dev, conn, TCP_FIN | TCP_ACK, UIP_IPTCPH_LEN);
+      tcp_send(dev, conn, TCP_FIN | TCP_ACK, UIP_IPTCPH_LEN);
     }
 
   /* None of the above */
@@ -158,12 +159,12 @@ void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn,
 #endif
       /* Then handle the rest of the operation just as for the rexmit case */
 
-      uip_tcprexmit(dev, conn, result);
+      tcp_rexmit(dev, conn, result);
     }
 }
 
 /****************************************************************************
- * Name: uip_tcprexmit
+ * Name: tcp_rexmit
  *
  * Description:
  *   Handle application retransmission
@@ -181,8 +182,8 @@ void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn,
  *
  ****************************************************************************/
 
-void uip_tcprexmit(struct uip_driver_s *dev, struct uip_conn *conn,
-                   uint16_t result)
+void tcp_rexmit(FAR struct uip_driver_s *dev, FAR struct tcp_conn_s *conn,
+                uint16_t result)
 {
   nllvdbg("result: %04x d_sndlen: %d conn->unacked: %d\n",
           result, dev->d_sndlen, conn->unacked);
@@ -203,14 +204,14 @@ void uip_tcprexmit(struct uip_driver_s *dev, struct uip_conn *conn,
        * the IP and TCP headers.
        */
 
-      uip_tcpsend(dev, conn, TCP_ACK | TCP_PSH, dev->d_sndlen + UIP_TCPIP_HLEN);
+      tcp_send(dev, conn, TCP_ACK | TCP_PSH, dev->d_sndlen + UIP_TCPIP_HLEN);
     }
 
   /* If there is no data to send, just send out a pure ACK if one is requested`. */
 
   else if ((result & UIP_SNDACK) != 0)
     {
-      uip_tcpsend(dev, conn, TCP_ACK, UIP_TCPIP_HLEN);
+      tcp_send(dev, conn, TCP_ACK, UIP_TCPIP_HLEN);
     }
 
   /* There is nothing to do -- drop the packet */

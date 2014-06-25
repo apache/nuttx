@@ -65,7 +65,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: uip_backlogcreate
+ * Function: tcp_backlogcreate
  *
  * Description:
  *   Called from the listen() logic to setup the backlog as specified in the
@@ -76,10 +76,10 @@
  *
  ****************************************************************************/
 
-int uip_backlogcreate(FAR struct uip_conn *conn, int nblg)
+int tcp_backlogcreate(FAR struct tcp_conn_s *conn, int nblg)
 {
-  FAR struct uip_backlog_s     *bls = NULL;
-  FAR struct uip_blcontainer_s *blc;
+  FAR struct tcp_backlog_s     *bls = NULL;
+  FAR struct tcp_blcontainer_s *blc;
   uip_lock_t flags;
   int size;
   int offset;
@@ -103,18 +103,18 @@ int uip_backlogcreate(FAR struct uip_conn *conn, int nblg)
        * on 64-bit address machines -- REVISIT
        */
 
-      offset = (sizeof(struct uip_backlog_s) + 3) & ~3;
+      offset = (sizeof(struct tcp_backlog_s) + 3) & ~3;
 
       /* Then determine the full size of the allocation include the
-       * uip_backlog_s, a pre-allocated array of struct uip_blcontainer_s
+       * tcp_backlog_s, a pre-allocated array of struct tcp_blcontainer_s
        * and alignment padding
        */
 
-      size = offset + nblg * sizeof(struct uip_blcontainer_s);
+      size = offset + nblg * sizeof(struct tcp_blcontainer_s);
 
       /* Then allocate that much */
 
-      bls = (FAR struct uip_backlog_s *)kzalloc(size);
+      bls = (FAR struct tcp_backlog_s *)kzalloc(size);
       if (!bls)
         {
           nlldbg("Failed to allocate backlog\n");
@@ -123,7 +123,7 @@ int uip_backlogcreate(FAR struct uip_conn *conn, int nblg)
 
       /* Then add all of the pre-allocated containers to the free list */
 
-      blc = (FAR struct uip_blcontainer_s*)(((FAR uint8_t*)bls) + offset);
+      blc = (FAR struct tcp_blcontainer_s*)(((FAR uint8_t*)bls) + offset);
       for (i = 0; i < nblg; i++)
         {
           sq_addfirst(&blc->bc_node, &bls->bl_free);
@@ -134,7 +134,7 @@ int uip_backlogcreate(FAR struct uip_conn *conn, int nblg)
   /* Destroy any existing backlog (shouldn't be any) */
 
   flags = uip_lock();
-  uip_backlogdestroy(conn);
+  tcp_backlogdestroy(conn);
 
   /* Now install the backlog tear-off in the connection.  NOTE that bls may
    * actually be NULL if nblg is <= 0;  In that case, we are disabling backlog
@@ -148,13 +148,13 @@ int uip_backlogcreate(FAR struct uip_conn *conn, int nblg)
 }
 
 /****************************************************************************
- * Function: uip_backlogdestroy
+ * Function: tcp_backlogdestroy
  *
  * Description:
- *   (1) Called from uip_tcpfree() whenever a connection is freed.
- *   (2) Called from uip_backlogcreate() to destroy any old backlog
+ *   (1) Called from tcp_free() whenever a connection is freed.
+ *   (2) Called from tcp_backlogcreate() to destroy any old backlog
  *
- *   NOTE: This function may re-enter uip_tcpfree when a connection that
+ *   NOTE: This function may re-enter tcp_free when a connection that
  *   is freed that has pending connections.
  *
  * Assumptions:
@@ -163,11 +163,11 @@ int uip_backlogcreate(FAR struct uip_conn *conn, int nblg)
  *
  ****************************************************************************/
 
-int uip_backlogdestroy(FAR struct uip_conn *conn)
+int tcp_backlogdestroy(FAR struct tcp_conn_s *conn)
 {
-  FAR struct uip_backlog_s     *blg;
-  FAR struct uip_blcontainer_s *blc;
-  FAR struct uip_conn          *blconn;
+  FAR struct tcp_backlog_s     *blg;
+  FAR struct tcp_blcontainer_s *blc;
+  FAR struct tcp_conn_s        *blconn;
 
   nllvdbg("conn=%p\n", conn);
 
@@ -189,7 +189,7 @@ int uip_backlogdestroy(FAR struct uip_conn *conn)
 
        /* Handle any pending connections in the backlog */
 
-       while ((blc = (FAR struct uip_blcontainer_s*)sq_remfirst(&blg->bl_pending)) != NULL)
+       while ((blc = (FAR struct tcp_blcontainer_s*)sq_remfirst(&blg->bl_pending)) != NULL)
          {
            blconn = blc->bc_conn;
            if (blconn)
@@ -199,7 +199,7 @@ int uip_backlogdestroy(FAR struct uip_conn *conn)
                blconn->blparent = NULL;
                blconn->backlog  = NULL;
                blconn->crefs    = 0;
-               uip_tcpfree(blconn);
+               tcp_free(blconn);
              }
          }
 
@@ -212,10 +212,10 @@ int uip_backlogdestroy(FAR struct uip_conn *conn)
 }
 
 /****************************************************************************
- * Function: uip_backlogadd
+ * Function: tcp_backlogadd
  *
  * Description:
- *  Called uip_listen when a new connection is made with a listener socket
+ *  Called tcp_listen when a new connection is made with a listener socket
  *  but when there is no accept() in place to receive the connection.  This
  *  function adds the new connection to the backlog.
  *
@@ -224,10 +224,10 @@ int uip_backlogdestroy(FAR struct uip_conn *conn)
  *
  ****************************************************************************/
 
-int uip_backlogadd(FAR struct uip_conn *conn, FAR struct uip_conn *blconn)
+int tcp_backlogadd(FAR struct tcp_conn_s *conn, FAR struct tcp_conn_s *blconn)
 {
-  FAR struct uip_backlog_s     *bls;
-  FAR struct uip_blcontainer_s *blc;
+  FAR struct tcp_backlog_s     *bls;
+  FAR struct tcp_blcontainer_s *blc;
   int ret = -EINVAL;
 
   nllvdbg("conn=%p blconn=%p\n", conn, blconn);
@@ -244,7 +244,7 @@ int uip_backlogadd(FAR struct uip_conn *conn, FAR struct uip_conn *blconn)
     {
        /* Allocate a container for the connection from the free list */
 
-       blc = (FAR struct uip_blcontainer_s *)sq_remfirst(&bls->bl_free);
+       blc = (FAR struct tcp_blcontainer_s *)sq_remfirst(&bls->bl_free);
        if (!blc)
          {
            nlldbg("Failed to allocate container\n");
@@ -265,7 +265,7 @@ int uip_backlogadd(FAR struct uip_conn *conn, FAR struct uip_conn *blconn)
 }
 
 /****************************************************************************
- * Function: uip_backlogremove
+ * Function: tcp_backlogremove
  *
  * Description:
  *  Called from poll().  Before waiting for a new connection, poll will
@@ -277,14 +277,14 @@ int uip_backlogadd(FAR struct uip_conn *conn, FAR struct uip_conn *blconn)
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_POLL
-bool uip_backlogavailable(FAR struct uip_conn *conn)
+bool tcp_backlogavailable(FAR struct tcp_conn_s *conn)
 {
   return (conn && conn->backlog && !sq_empty(&conn->backlog->bl_pending));
 }
 #endif
 
 /****************************************************************************
- * Function: uip_backlogremove
+ * Function: tcp_backlogremove
  *
  * Description:
  *  Called from accept().  Before waiting for a new connection, accept will
@@ -295,11 +295,11 @@ bool uip_backlogavailable(FAR struct uip_conn *conn)
  *
  ****************************************************************************/
 
-struct uip_conn *uip_backlogremove(FAR struct uip_conn *conn)
+struct tcp_conn_s *tcp_backlogremove(FAR struct tcp_conn_s *conn)
 {
-  FAR struct uip_backlog_s     *bls;
-  FAR struct uip_blcontainer_s *blc;
-  FAR struct uip_conn          *blconn = NULL;
+  FAR struct tcp_backlog_s     *bls;
+  FAR struct tcp_blcontainer_s *blc;
+  FAR struct tcp_conn_s        *blconn = NULL;
 
 #ifdef CONFIG_DEBUG
   if (!conn)
@@ -315,7 +315,7 @@ struct uip_conn *uip_backlogremove(FAR struct uip_conn *conn)
         * (FIFO)
         */
 
-       blc = (FAR struct uip_blcontainer_s *)sq_remfirst(&bls->bl_pending);
+       blc = (FAR struct tcp_blcontainer_s *)sq_remfirst(&bls->bl_pending);
        if (blc)
          {
            /* Extract the connection reference from the container and put
@@ -333,23 +333,23 @@ struct uip_conn *uip_backlogremove(FAR struct uip_conn *conn)
 }
 
 /****************************************************************************
- * Function: uip_backlogdelete
+ * Function: tcp_backlogdelete
  *
  * Description:
- *  Called from uip_tcpfree() when a connection is freed that this also
- *  retained in the pending connectino list of a listener.  We simply need
- *  to remove the defunct connecton from the list.
+ *  Called from tcp_free() when a connection is freed that this also
+ *  retained in the pending connection list of a listener.  We simply need
+ *  to remove the defunct connection from the list.
  *
  * Assumptions:
  *   Called from the interrupt level with interrupts disabled
  *
  ****************************************************************************/
 
-int uip_backlogdelete(FAR struct uip_conn *conn, FAR struct uip_conn *blconn)
+int tcp_backlogdelete(FAR struct tcp_conn_s *conn, FAR struct tcp_conn_s *blconn)
 {
-  FAR struct uip_backlog_s     *bls;
-  FAR struct uip_blcontainer_s *blc;
-  FAR struct uip_blcontainer_s *prev;
+  FAR struct tcp_backlog_s     *bls;
+  FAR struct tcp_blcontainer_s *blc;
+  FAR struct tcp_blcontainer_s *prev;
 
   nllvdbg("conn=%p blconn=%p\n", conn, blconn);
 
@@ -365,9 +365,9 @@ int uip_backlogdelete(FAR struct uip_conn *conn, FAR struct uip_conn *blconn)
     {
        /* Find the container hold the connection */
 
-       for (blc = (FAR struct uip_blcontainer_s *)sq_peek(&bls->bl_pending), prev = NULL;
+       for (blc = (FAR struct tcp_blcontainer_s *)sq_peek(&bls->bl_pending), prev = NULL;
             blc;
-            prev = blc, blc = (FAR struct uip_blcontainer_s *)sq_next(&blc->bc_node))
+            prev = blc, blc = (FAR struct tcp_blcontainer_s *)sq_next(&blc->bc_node))
          {
             if (blc->bc_conn == blconn)
               {

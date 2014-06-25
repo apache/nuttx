@@ -43,6 +43,8 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
+#include <nuttx/net/tcp.h>
+
 #include "tcp/tcp.h"
 #include "pkt/pkt.h"
 #include "net.h"
@@ -137,7 +139,7 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
 #if defined(CONFIG_NET_PKT)
       case SOCK_RAW:
         {
-          ret = pkt_send(psock, buf, len);
+          ret = psock_pkt_send(psock, buf, len);
           break;
         }
 #endif
@@ -145,7 +147,7 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
 #if defined(CONFIG_NET_TCP)
       case SOCK_STREAM:
         {
-          ret = tcp_send(psock, buf, len);
+          ret = psock_tcp_send(psock, buf, len);
           break;
         }
 #endif

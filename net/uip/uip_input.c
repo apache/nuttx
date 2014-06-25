@@ -54,7 +54,7 @@
  * statement. While it would be possible to break the uip_input()
  * function into many smaller functions, this would increase the code
  * size because of the overhead of parameter passing and the fact that
- * the optimier would not be as efficient.
+ * the optimizer would not be as efficient.
  *
  * The principle is that we have a small buffer, called the d_buf,
  * in which the device driver puts an incoming packet. The TCP/IP
@@ -93,6 +93,8 @@
 # include "uip_neighbor.h"
 #endif /* CONFIG_NET_IPv6 */
 
+#include "tcp/tcp.h"
+#include "udp/udp.h"
 #include "uip.h"
 
 /****************************************************************************
@@ -506,7 +508,7 @@ int uip_input(struct uip_driver_s *dev)
     {
 #ifdef CONFIG_NET_TCP
       case UIP_PROTO_TCP:   /* TCP input */
-        uip_tcpinput(dev);
+        tcp_input(dev);
         break;
 #endif
 

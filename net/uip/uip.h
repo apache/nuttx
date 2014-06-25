@@ -125,66 +125,6 @@ void uip_pktpoll(struct uip_driver_s *dev, struct uip_pkt_conn *conn);
 
 #endif /* CONFIG_NET_PKT */
 
-#ifdef CONFIG_NET_TCP
-/* Defined in tcp_conn.c ****************************************************/
-
-void uip_tcpinit(void);
-struct uip_conn *uip_tcpactive(struct uip_tcpip_hdr *buf);
-struct uip_conn *uip_nexttcpconn(struct uip_conn *conn);
-struct uip_conn *uip_tcplistener(uint16_t portno);
-struct uip_conn *uip_tcpaccept(struct uip_tcpip_hdr *buf);
-
-/* Defined in tcp_seqno.c ***************************************************/
-
-void uip_tcpsetsequence(FAR uint8_t *seqno, uint32_t value);
-uint32_t uip_tcpgetsequence(FAR uint8_t *seqno);
-uint32_t uip_tcpaddsequence(FAR uint8_t *seqno, uint16_t len);
-void uip_tcpinitsequence(FAR uint8_t *seqno);
-void uip_tcpnextsequence(void);
-
-/* Defined in tcp_poll.c ****************************************************/
-
-void uip_tcppoll(struct uip_driver_s *dev, struct uip_conn *conn);
-
-/* Defined in tcp_timer.c ***************************************************/
-
-void uip_tcptimer(struct uip_driver_s *dev, struct uip_conn *conn, int hsec);
-
-/* Defined in tcp_listen.c **************************************************/
-
-void uip_listeninit(void);
-bool uip_islistener(uint16_t port);
-int uip_accept(struct uip_driver_s *dev, struct uip_conn *conn, uint16_t portno);
-
-/* Defined in tcp_send.c ****************************************************/
-
-void uip_tcpsend(struct uip_driver_s *dev, struct uip_conn *conn,
-                 uint16_t flags, uint16_t len);
-void uip_tcpreset(struct uip_driver_s *dev);
-void uip_tcpack(struct uip_driver_s *dev, struct uip_conn *conn,
-                uint8_t ack);
-
-/* Defined in tcp_appsend.c *************************************************/
-
-void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn,
-                    uint16_t result);
-void uip_tcprexmit(struct uip_driver_s *dev, struct uip_conn *conn,
-                   uint16_t result);
-
-/* Defined in tcp_input.c ***************************************************/
-
-void uip_tcpinput(struct uip_driver_s *dev);
-
-/* Defined in tcp_callback.c ************************************************/
-
-uint16_t uip_tcpcallback(FAR struct uip_driver_s *dev,
-                         FAR struct uip_conn *conn, uint16_t flags);
-#ifdef CONFIG_NET_TCP_READAHEAD
-uint16_t uip_datahandler(FAR struct uip_conn *conn,
-                         FAR uint8_t *buffer, uint16_t nbytes);
-#endif
-#endif /* CONFIG_NET_TCP */
-
 #ifdef CONFIG_NET_UDP
 /* Defined in udp_conn.c ****************************************************/
 

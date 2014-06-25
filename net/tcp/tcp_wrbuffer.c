@@ -54,9 +54,10 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/net/iob.h>
+#include <nuttx/net/tcp.h>
+
 #include "tcp/tcp.h"
-#include "nuttx/net/iob.h"
-#include "nuttx/net/tcp.h"
 
 /****************************************************************************
  * Private Types

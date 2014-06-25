@@ -46,6 +46,7 @@
 #include <nuttx/net/uip.h>
 #include <nuttx/net/netdev.h>
 
+#include "tcp/tcp.h"
 #include "uip.h"
 
 /****************************************************************************
@@ -196,7 +197,7 @@ static int uip_polludpconnections(FAR struct uip_driver_s *dev,
 static inline int uip_polltcpconnections(FAR struct uip_driver_s *dev,
                                          uip_poll_callback_t callback)
 {
-  FAR struct uip_conn *conn  = NULL;
+  FAR struct tcp_conn_s *conn  = NULL;
   int bstop = 0;
 
   /* Traverse all of the active TCP connections and perform the poll action */
@@ -205,7 +206,7 @@ static inline int uip_polltcpconnections(FAR struct uip_driver_s *dev,
     {
       /* Perform the TCP TX poll */
 
-      uip_tcppoll(dev, conn);
+      tcp_poll(dev, conn);
 
       /* Call back into the driver */
 
@@ -235,7 +236,7 @@ static inline int uip_polltcpconnections(FAR struct uip_driver_s *dev,
 static inline int uip_polltcptimer(FAR struct uip_driver_s *dev,
                                    uip_poll_callback_t callback, int hsec)
 {
-  FAR struct uip_conn *conn  = NULL;
+  FAR struct tcp_conn_s *conn  = NULL;
   int bstop = 0;
 
   /* Traverse all of the active TCP connections and perform the poll action */
@@ -244,7 +245,7 @@ static inline int uip_polltcptimer(FAR struct uip_driver_s *dev,
     {
       /* Perform the TCP timer poll */
 
-      uip_tcptimer(dev, conn, hsec);
+      tcp_timer(dev, conn, hsec);
 
       /* Call back into the driver */
 

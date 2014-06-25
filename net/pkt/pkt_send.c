@@ -85,12 +85,12 @@ struct send_s
  ****************************************************************************/
 
 /****************************************************************************
- * Function: pktsend_interrupt
+ * Function: psock_send_interrupt
  ****************************************************************************/
 
-static uint16_t pktsend_interrupt(FAR struct uip_driver_s *dev,
-                                  FAR void *pvconn,
-                                  FAR void *pvpriv, uint16_t flags)
+static uint16_t psock_send_interrupt(FAR struct uip_driver_s *dev,
+                                     FAR void *pvconn,
+                                     FAR void *pvpriv, uint16_t flags)
 {
   FAR struct send_s *pstate = (FAR struct send_s *)pvpriv;
 
@@ -145,10 +145,10 @@ static uint16_t pktsend_interrupt(FAR struct uip_driver_s *dev,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: pkt_send
+ * Function: psock_pkt_send
  *
  * Description:
- *   The pkt_send() call may be used only when the packet socket is in a
+ *   The psock_pkt_send() call may be used only when the packet socket is in a
  *   connected state (so that the intended recipient is known).
  *
  * Parameters:
@@ -201,7 +201,8 @@ static uint16_t pktsend_interrupt(FAR struct uip_driver_s *dev,
  *
  ****************************************************************************/
 
-ssize_t pkt_send(FAR struct socket *psock, FAR const void *buf, size_t len)
+ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
+                       size_t len)
 {
   struct send_s state;
   uip_lock_t save;
@@ -249,7 +250,7 @@ ssize_t pkt_send(FAR struct socket *psock, FAR const void *buf, size_t len)
 
           state.snd_cb->flags = UIP_POLL;
           state.snd_cb->priv  = (void*)&state;
-          state.snd_cb->event = pktsend_interrupt;
+          state.snd_cb->event = psock_send_interrupt;
 
           /* Notify the device driver of the availability of TX data */
           /* TODO better lookup network interface from *psock or *conn */

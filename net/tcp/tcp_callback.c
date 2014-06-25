@@ -50,6 +50,7 @@
 #include <nuttx/net/netdev.h>
 
 #include "uip/uip.h"
+#include "tcp/tcp.h"
 
 /****************************************************************************
  * Private Data
@@ -74,7 +75,7 @@
  ****************************************************************************/
 
 static inline uint16_t
-uip_dataevent(FAR struct uip_driver_s *dev, FAR struct uip_conn *conn,
+uip_dataevent(FAR struct uip_driver_s *dev, FAR struct tcp_conn_s *conn,
               uint16_t flags)
 {
   uint16_t ret;
@@ -104,7 +105,7 @@ uip_dataevent(FAR struct uip_driver_s *dev, FAR struct uip_conn *conn,
        * partial packets will not be buffered.
        */
 
-      recvlen = uip_datahandler(conn, buffer, buflen);
+      recvlen = tcp_datahandler(conn, buffer, buflen);
       if (recvlen < buflen)
 #endif
         {
@@ -135,7 +136,7 @@ uip_dataevent(FAR struct uip_driver_s *dev, FAR struct uip_conn *conn,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: uip_tcpcallback
+ * Function: tcp_callback
  *
  * Description:
  *   Inform the application holding the TCP socket of a change in state.
@@ -145,8 +146,8 @@ uip_dataevent(FAR struct uip_driver_s *dev, FAR struct uip_conn *conn,
  *
  ****************************************************************************/
 
-uint16_t uip_tcpcallback(struct uip_driver_s *dev, struct uip_conn *conn,
-                         uint16_t flags)
+uint16_t tcp_callback(FAR struct uip_driver_s *dev, FAR struct tcp_conn_s *conn,
+                      uint16_t flags)
 {
   /* Preserve the UIP_ACKDATA, UIP_CLOSE, and UIP_ABORT in the response.
    * These is needed by uIP to handle responses and buffer state.  The
@@ -206,7 +207,7 @@ uint16_t uip_tcpcallback(struct uip_driver_s *dev, struct uip_conn *conn,
 }
 
 /****************************************************************************
- * Function: uip_datahandler
+ * Function: tcp_datahandler
  *
  * Description:
  *   Handle data that is not accepted by the application.  This may be called
@@ -232,7 +233,7 @@ uint16_t uip_tcpcallback(struct uip_driver_s *dev, struct uip_conn *conn,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP_READAHEAD
-uint16_t uip_datahandler(FAR struct uip_conn *conn, FAR uint8_t *buffer,
+uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn, FAR uint8_t *buffer,
                          uint16_t buflen)
 {
   FAR struct iob_s *iob;

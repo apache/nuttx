@@ -55,12 +55,13 @@
 #include <nuttx/net/netdev.h>
 
 #include "uip/uip.h"
+#include "tcp/tcp.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define BUF ((struct uip_tcpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
+#define BUF ((struct tcp_iphdr_s *)&dev->d_buf[UIP_LLH_LEN])
 
 /****************************************************************************
  * Public Variables
@@ -79,7 +80,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_tcpinput
+ * Name: tcp_input
  *
  * Description:
  *   Handle incoming TCP input
@@ -95,10 +96,10 @@
  *
  ****************************************************************************/
 
-void uip_tcpinput(struct uip_driver_s *dev)
+void tcp_input(struct uip_driver_s *dev)
 {
-  struct uip_conn *conn = NULL;
-  struct uip_tcpip_hdr *pbuf = BUF;
+  struct tcp_conn_s *conn = NULL;
+  struct tcp_iphdr_s *pbuf = BUF;
   uint16_t tmp16;
   uint16_t flags;
   uint8_t  opt;
@@ -115,7 +116,7 @@ void uip_tcpinput(struct uip_driver_s *dev)
 
   /* Start of TCP input header processing code. */
 
-  if (uip_tcpchksum(dev) != 0xffff)
+  if (tcp_chksum(dev) != 0xffff)
     {
       /* Compute and check the TCP checksum. */
 
@@ -129,7 +130,7 @@ void uip_tcpinput(struct uip_driver_s *dev)
 
   /* Demultiplex this segment. First check any active connections. */
 
-  conn = uip_tcpactive(pbuf);
+  conn = tcp_active(pbuf);
   if (conn)
     {
       /* We found an active connection.. Check for the subsequent SYN
@@ -162,7 +163,7 @@ void uip_tcpinput(struct uip_driver_s *dev)
        */
 
       tmp16 = pbuf->destport;
-      if (uip_islistener(tmp16))
+      if (tcp_islistener(tmp16))
         {
           /* We matched the incoming packet with a connection in LISTEN.
            * We now need to create a new connection and send a SYNACK in
@@ -173,7 +174,7 @@ void uip_tcpinput(struct uip_driver_s *dev)
            * user application to accept it.
            */
 
-          conn = uip_tcpaccept(pbuf);
+          conn = tcp_alloc_accept(pbuf);
           if (conn)
             {
               /* The connection structure was successfully allocated.  Now see if
@@ -182,12 +183,12 @@ void uip_tcpinput(struct uip_driver_s *dev)
                */
 
               conn->crefs = 1;
-              if (uip_accept(dev, conn, tmp16) != OK)
+              if (tcp_accept_connection(dev, conn, tmp16) != OK)
                 {
                   /* No, then we have to give the connection back and drop the packet */
 
                   conn->crefs = 0;
-                  uip_tcpfree(conn);
+                  tcp_free(conn);
                   conn = NULL;
                 }
             }
@@ -262,7 +263,7 @@ void uip_tcpinput(struct uip_driver_s *dev)
 
           /* Our response will be a SYNACK. */
 
-          uip_tcpack(dev, conn, TCP_ACK | TCP_SYN);
+          tcp_ack(dev, conn, TCP_ACK | TCP_SYN);
           return;
         }
     }
@@ -283,7 +284,7 @@ reset:
 #ifdef CONFIG_NET_STATISTICS
   uip_stat.tcp.synrst++;
 #endif
-  uip_tcpreset(dev);
+  tcp_reset(dev);
   return;
 
 found:
@@ -305,7 +306,7 @@ found:
       conn->tcpstateflags = UIP_CLOSED;
       nlldbg("RESET - TCP state: UIP_CLOSED\n");
 
-      (void)uip_tcpcallback(dev, conn, UIP_ABORT);
+      (void)tcp_callback(dev, conn, UIP_ABORT);
       goto drop;
     }
 
@@ -337,7 +338,7 @@ found:
       if ((dev->d_len > 0 || ((pbuf->flags & (TCP_SYN | TCP_FIN)) != 0)) &&
           memcmp(pbuf->seqno, conn->rcvseq, 4) != 0)
         {
-          uip_tcpsend(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
+          tcp_send(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
           return;
         }
     }
@@ -361,14 +362,14 @@ found:
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
       unackseq = conn->isn + conn->sent;
 #else
-      unackseq = uip_tcpaddsequence(conn->sndseq, conn->unacked);
+      unackseq = tcp_addsequence(conn->sndseq, conn->unacked);
 #endif
 
       /* Get the sequence number of that has just been acknowledged by this
        * incoming packet.
        */
 
-      ackseq = uip_tcpgetsequence(pbuf->ackno);
+      ackseq = tcp_getsequence(pbuf->ackno);
 
       /* Check how many of the outstanding bytes have been acknowledged. For
        * a most uIP send operation, this should always be true.  However,
@@ -394,7 +395,7 @@ found:
           if ((conn->tcpstateflags & UIP_TS_MASK) == UIP_ESTABLISHED)
             {
               nlldbg("ERROR: conn->sndseq %d, conn->unacked %d\n",
-                     uip_tcpgetsequence(conn->sndseq), conn->unacked);
+                     tcp_getsequence(conn->sndseq), conn->unacked);
               goto reset;
             }
         }
@@ -406,7 +407,7 @@ found:
 
       nllvdbg("sndseq: %08x->%08x unackseq: %08x new unacked: %d\n",
               conn->sndseq, ackseq, unackseq, conn->unacked);
-      uip_tcpsetsequence(conn->sndseq, ackseq);
+      tcp_setsequence(conn->sndseq, ackseq);
 
       /* Do RTT estimation, unless we have done retransmissions. */
 
@@ -460,8 +461,8 @@ found:
             conn->tcpstateflags = UIP_ESTABLISHED;
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-            conn->isn           = uip_tcpgetsequence(pbuf->ackno);
-            uip_tcpsetsequence(conn->sndseq, conn->isn);
+            conn->isn           = tcp_getsequence(pbuf->ackno);
+            tcp_setsequence(conn->sndseq, conn->isn);
             conn->sent          = 0;
 #endif
             conn->unacked       = 0;
@@ -475,8 +476,8 @@ found:
               }
 
             dev->d_sndlen       = 0;
-            result              = uip_tcpcallback(dev, conn, flags);
-            uip_tcpappsend(dev, conn, result);
+            result              = tcp_callback(dev, conn, flags);
+            tcp_appsend(dev, conn, result);
             return;
           }
 
@@ -484,7 +485,7 @@ found:
 
         if ((pbuf->flags & TCP_CTL) == TCP_SYN)
           {
-            uip_tcpack(dev, conn, TCP_ACK | TCP_SYN);
+            tcp_ack(dev, conn, TCP_ACK | TCP_SYN);
             return;
           }
 
@@ -558,21 +559,21 @@ found:
             conn->unacked       = 0;
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-            conn->isn           = uip_tcpgetsequence(pbuf->ackno);
-            uip_tcpsetsequence(conn->sndseq, conn->isn);
+            conn->isn           = tcp_getsequence(pbuf->ackno);
+            tcp_setsequence(conn->sndseq, conn->isn);
 #endif
             dev->d_len          = 0;
             dev->d_sndlen       = 0;
 
             nllvdbg("TCP state: UIP_ESTABLISHED\n");
-            result = uip_tcpcallback(dev, conn, UIP_CONNECTED | UIP_NEWDATA);
-            uip_tcpappsend(dev, conn, result);
+            result = tcp_callback(dev, conn, UIP_CONNECTED | UIP_NEWDATA);
+            tcp_appsend(dev, conn, result);
             return;
           }
 
         /* Inform the application that the connection failed */
 
-        (void)uip_tcpcallback(dev, conn, UIP_ABORT);
+        (void)tcp_callback(dev, conn, UIP_ABORT);
 
         /* The connection is closed after we send the RST */
 
@@ -586,7 +587,7 @@ found:
             goto drop;
           }
 
-        uip_tcpreset(dev);
+        tcp_reset(dev);
         return;
 
       case UIP_ESTABLISHED:
@@ -628,14 +629,14 @@ found:
                 flags |= UIP_NEWDATA;
               }
 
-            (void)uip_tcpcallback(dev, conn, flags);
+            (void)tcp_callback(dev, conn, flags);
 
             conn->tcpstateflags = UIP_LAST_ACK;
             conn->unacked       = 1;
             conn->nrtx          = 0;
             nllvdbg("TCP state: UIP_LAST_ACK\n");
 
-            uip_tcpsend(dev, conn, TCP_FIN | TCP_ACK, UIP_IPTCPH_LEN);
+            tcp_send(dev, conn, TCP_FIN | TCP_ACK, UIP_IPTCPH_LEN);
             return;
           }
 
@@ -709,12 +710,12 @@ found:
 
             /* Provide the packet to the application */
 
-            result = uip_tcpcallback(dev, conn, flags);
+            result = tcp_callback(dev, conn, flags);
 
             /* If the application successfully handled the incoming data,
              * then UIP_SNDACK will be set in the result.  In this case,
              * we need to update the sequence number.  The ACK will be
-             * send by uip_tcpappsend().
+             * send by tcp_appsend().
              */
 
             if ((result & UIP_SNDACK) != 0)
@@ -726,7 +727,7 @@ found:
 
             /* Send the response, ACKing the data or not, as appropriate */
 
-            uip_tcpappsend(dev, conn, result);
+            tcp_appsend(dev, conn, result);
             return;
           }
 
@@ -742,7 +743,7 @@ found:
             conn->tcpstateflags = UIP_CLOSED;
             nllvdbg("UIP_LAST_ACK TCP state: UIP_CLOSED\n");
 
-            (void)uip_tcpcallback(dev, conn, UIP_CLOSE);
+            (void)tcp_callback(dev, conn, UIP_CLOSE);
           }
         break;
 
@@ -773,8 +774,8 @@ found:
               }
 
             uip_incr32(conn->rcvseq, 1);
-            (void)uip_tcpcallback(dev, conn, UIP_CLOSE);
-            uip_tcpsend(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
+            (void)tcp_callback(dev, conn, UIP_CLOSE);
+            tcp_send(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
             return;
           }
         else if ((flags & UIP_ACKDATA) != 0)
@@ -787,7 +788,7 @@ found:
 
         if (dev->d_len > 0)
           {
-            uip_tcpsend(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
+            tcp_send(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
             return;
           }
 
@@ -806,21 +807,21 @@ found:
             nllvdbg("TCP state: UIP_TIME_WAIT\n");
 
             uip_incr32(conn->rcvseq, 1);
-            (void)uip_tcpcallback(dev, conn, UIP_CLOSE);
-            uip_tcpsend(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
+            (void)tcp_callback(dev, conn, UIP_CLOSE);
+            tcp_send(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
             return;
           }
 
         if (dev->d_len > 0)
           {
-            uip_tcpsend(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
+            tcp_send(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
             return;
           }
 
         goto drop;
 
       case UIP_TIME_WAIT:
-        uip_tcpsend(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
+        tcp_send(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
         return;
 
       case UIP_CLOSING:

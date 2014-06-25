@@ -58,7 +58,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define BUF ((struct uip_tcpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
+#define BUF ((struct tcp_iphdr_s *)&dev->d_buf[UIP_LLH_LEN])
 
 /****************************************************************************
  * Public Variables
@@ -73,7 +73,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_tcpsendcomplete
+ * Name: tcp_sendcomplete
  *
  * Description:
  *   Complete the final portions of the send operation.  This function sets
@@ -90,9 +90,9 @@
  *
  ****************************************************************************/
 
-static void uip_tcpsendcomplete(FAR struct uip_driver_s *dev)
+static void tcp_sendcomplete(FAR struct uip_driver_s *dev)
 {
-  FAR struct uip_tcpip_hdr *pbuf = BUF;
+  FAR struct tcp_iphdr_s *pbuf = BUF;
 
   pbuf->ttl         = UIP_TTL;
 
@@ -117,7 +117,7 @@ static void uip_tcpsendcomplete(FAR struct uip_driver_s *dev)
   /* Calculate TCP checksum. */
 
   pbuf->tcpchksum   = 0;
-  pbuf->tcpchksum   = ~(uip_tcpchksum(dev));
+  pbuf->tcpchksum   = ~(tcp_chksum(dev));
 
 #ifdef CONFIG_NET_IPv6
 
@@ -152,7 +152,7 @@ static void uip_tcpsendcomplete(FAR struct uip_driver_s *dev)
 }
 
 /****************************************************************************
- * Name: uip_tcpsendcommon
+ * Name: tcp_sendcommon
  *
  * Description:
  *   We're done with the input processing. We are now ready to send a reply
@@ -171,10 +171,10 @@ static void uip_tcpsendcomplete(FAR struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static void uip_tcpsendcommon(FAR struct uip_driver_s *dev,
-                              FAR struct uip_conn *conn)
+static void tcp_sendcommon(FAR struct uip_driver_s *dev,
+                           FAR struct tcp_conn_s *conn)
 {
-  FAR struct uip_tcpip_hdr *pbuf = BUF;
+  FAR struct tcp_iphdr_s *pbuf = BUF;
 
   memcpy(pbuf->ackno, conn->rcvseq, 4);
   memcpy(pbuf->seqno, conn->sndseq, 4);
@@ -205,7 +205,7 @@ static void uip_tcpsendcommon(FAR struct uip_driver_s *dev,
    * the message.
    */
 
-  uip_tcpsendcomplete(dev);
+  tcp_sendcomplete(dev);
 }
 
 /****************************************************************************
@@ -213,7 +213,7 @@ static void uip_tcpsendcommon(FAR struct uip_driver_s *dev,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_tcpsend
+ * Name: tcp_send
  *
  * Description:
  *   Setup to send a TCP packet
@@ -232,19 +232,19 @@ static void uip_tcpsendcommon(FAR struct uip_driver_s *dev,
  *
  ****************************************************************************/
 
-void uip_tcpsend(FAR struct uip_driver_s *dev, FAR struct uip_conn *conn,
-                 uint16_t flags, uint16_t len)
+void tcp_send(FAR struct uip_driver_s *dev, FAR struct tcp_conn_s *conn,
+              uint16_t flags, uint16_t len)
 {
-  FAR struct uip_tcpip_hdr *pbuf = BUF;
+  FAR struct tcp_iphdr_s *pbuf = BUF;
 
   pbuf->flags     = flags;
   dev->d_len     = len;
   pbuf->tcpoffset = (UIP_TCPH_LEN / 4) << 4;
-  uip_tcpsendcommon(dev, conn);
+  tcp_sendcommon(dev, conn);
 }
 
 /****************************************************************************
- * Name: uip_tcpreset
+ * Name: tcp_reset
  *
  * Description:
  *   Send a TCP reset (no-data) message
@@ -260,9 +260,9 @@ void uip_tcpsend(FAR struct uip_driver_s *dev, FAR struct uip_conn *conn,
  *
  ****************************************************************************/
 
-void uip_tcpreset(FAR struct uip_driver_s *dev)
+void tcp_reset(FAR struct uip_driver_s *dev)
 {
-  FAR struct uip_tcpip_hdr *pbuf = BUF;
+  FAR struct tcp_iphdr_s *pbuf = BUF;
   uint16_t tmp16;
   uint8_t seqbyte;
 
@@ -321,11 +321,11 @@ void uip_tcpreset(FAR struct uip_driver_s *dev)
 
   /* And send out the RST packet */
 
-  uip_tcpsendcomplete(dev);
+  tcp_sendcomplete(dev);
 }
 
 /****************************************************************************
- * Name: uip_tcpack
+ * Name: tcp_ack
  *
  * Description:
  *   Send the SYN or SYNACK response.
@@ -343,10 +343,10 @@ void uip_tcpreset(FAR struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-void uip_tcpack(FAR struct uip_driver_s *dev, FAR struct uip_conn *conn,
-                uint8_t ack)
+void tcp_ack(FAR struct uip_driver_s *dev, FAR struct tcp_conn_s *conn,
+             uint8_t ack)
 {
-  struct uip_tcpip_hdr *pbuf = BUF;
+  struct tcp_iphdr_s *pbuf = BUF;
 
   /* Save the ACK bits */
 
@@ -363,7 +363,7 @@ void uip_tcpack(FAR struct uip_driver_s *dev, FAR struct uip_conn *conn,
 
   /* Complete the common portions of the TCP message */
 
-  uip_tcpsendcommon(dev, conn);
+  tcp_sendcommon(dev, conn);
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_TCP */

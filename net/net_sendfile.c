@@ -72,7 +72,7 @@
 #  define CONFIG_NET_TCP_SPLIT_SIZE 40
 #endif
 
-#define TCPBUF ((struct uip_tcpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
+#define TCPBUF ((struct tcp_iphdr_s *)&dev->d_buf[UIP_LLH_LEN])
 
 /****************************************************************************
  * Private Types
@@ -164,7 +164,7 @@ static uint16_t ack_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
        * is the number of bytes to be acknowledged.
        */
 
-      pstate->snd_acked = uip_tcpgetsequence(TCPBUF->ackno) - pstate->snd_isn;
+      pstate->snd_acked = tcp_getsequence(TCPBUF->ackno) - pstate->snd_isn;
       nllvdbg("ACK: acked=%d sent=%d flen=%d\n",
              pstate->snd_acked, pstate->snd_sent, pstate->snd_flen);
 
@@ -225,7 +225,7 @@ static uint16_t ack_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
 static uint16_t sendfile_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
                                    FAR void *pvpriv, uint16_t flags)
 {
-  FAR struct uip_conn *conn = (FAR struct uip_conn*)pvconn;
+  FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s*)pvconn;
   FAR struct sendfile_s *pstate = (FAR struct sendfile_s *)pvpriv;
   int ret;
 
@@ -305,7 +305,7 @@ static uint16_t sendfile_interrupt(FAR struct uip_driver_s *dev, FAR void *pvcon
           seqno = pstate->snd_sent + pstate->snd_isn;
           nllvdbg("SEND: sndseq %08x->%08x len: %d\n", conn->sndseq, seqno, ret);
 
-          uip_tcpsetsequence(conn->sndseq, seqno);
+          tcp_setsequence(conn->sndseq, seqno);
 
           /* Check if the destination IP address is in the ARP table.  If not,
            * then the send won't actually make it out... it will be replaced with
@@ -449,7 +449,7 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
                      size_t count)
 {
   FAR struct socket *psock = sockfd_socket(outfd);
-  FAR struct uip_conn *conn = (FAR struct uip_conn*)psock->s_conn;
+  FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s*)psock->s_conn;
   struct sendfile_s state;
   uip_lock_t save;
   int err;
@@ -490,7 +490,7 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
 
   /* Allocate resources to receive a callback */
 
-  state.snd_datacb = uip_tcpcallbackalloc(conn);
+  state.snd_datacb = tcp_callbackalloc(conn);
 
   if (state.snd_datacb == NULL)
     {
@@ -499,7 +499,7 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
       goto errout_locked;
     }
 
-  state.snd_ackcb = uip_tcpcallbackalloc(conn);
+  state.snd_ackcb = tcp_callbackalloc(conn);
 
   if (state.snd_ackcb == NULL)
     {
@@ -510,7 +510,7 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
 
   /* Get the initial sequence number that will be used */
 
-  state.snd_isn          = uip_tcpgetsequence(conn->sndseq);
+  state.snd_isn          = tcp_getsequence(conn->sndseq);
 
   /* There is no outstanding, unacknowledged data after this
    * initial sequence number.
@@ -550,10 +550,10 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
 
   psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
 
-  uip_tcpcallbackfree(conn, state.snd_ackcb);
+  tcp_callbackfree(conn, state.snd_ackcb);
 
  errout_datacb:
-  uip_tcpcallbackfree(conn, state.snd_datacb);
+  tcp_callbackfree(conn, state.snd_datacb);
 
  errout_locked:
 

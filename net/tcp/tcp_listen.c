@@ -51,21 +51,22 @@
 #include <nuttx/net/netconfig.h>
 
 #include "uip/uip.h"
+#include "tcp/tcp.h"
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/* The uip_listenports list all currently listening ports. */
+/* The tcp_listenports list all currently listening ports. */
 
-static struct uip_conn *uip_listenports[CONFIG_NET_MAX_LISTENPORTS];
+static FAR struct tcp_conn_s *tcp_listenports[CONFIG_NET_MAX_LISTENPORTS];
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: uip_findlistener
+ * Function: tcp_findlistener
  *
  * Description:
  *   Return the connection listener for connections on this port (if any)
@@ -75,7 +76,7 @@ static struct uip_conn *uip_listenports[CONFIG_NET_MAX_LISTENPORTS];
  *
  ****************************************************************************/
 
-struct uip_conn *uip_findlistener(uint16_t portno)
+FAR struct tcp_conn_s *tcp_findlistener(uint16_t portno)
 {
   int ndx;
 
@@ -87,7 +88,7 @@ struct uip_conn *uip_findlistener(uint16_t portno)
        * local port number?
        */
 
-      struct uip_conn *conn = uip_listenports[ndx];
+      FAR struct tcp_conn_s *conn = tcp_listenports[ndx];
       if (conn && conn->lport == portno)
         {
           /* Yes.. we found a listener on this port */
@@ -106,7 +107,7 @@ struct uip_conn *uip_findlistener(uint16_t portno)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: uip_listeninit
+ * Function: tcp_listeninit
  *
  * Description:
  *   Setup the listening data structures
@@ -117,17 +118,17 @@ struct uip_conn *uip_findlistener(uint16_t portno)
  *
  ****************************************************************************/
 
-void uip_listeninit(void)
+void tcp_listeninit(void)
 {
   int ndx;
   for (ndx = 0; ndx < CONFIG_NET_MAX_LISTENPORTS; ndx++)
     {
-      uip_listenports[ndx] = NULL;
+      tcp_listenports[ndx] = NULL;
     }
 }
 
 /****************************************************************************
- * Function: uip_unlisten
+ * Function: tcp_unlisten
  *
  * Description:
  *   Stop listening to the port bound to the specified TCP connection
@@ -137,7 +138,7 @@ void uip_listeninit(void)
  *
  ****************************************************************************/
 
-int uip_unlisten(struct uip_conn *conn)
+int tcp_unlisten(FAR struct tcp_conn_s *conn)
 {
   uip_lock_t flags;
   int ndx;
@@ -146,9 +147,9 @@ int uip_unlisten(struct uip_conn *conn)
   flags = uip_lock();
   for (ndx = 0; ndx < CONFIG_NET_MAX_LISTENPORTS; ndx++)
     {
-      if (uip_listenports[ndx] == conn)
+      if (tcp_listenports[ndx] == conn)
         {
-          uip_listenports[ndx] = NULL;
+          tcp_listenports[ndx] = NULL;
           ret = OK;
           break;
         }
@@ -159,7 +160,7 @@ int uip_unlisten(struct uip_conn *conn)
 }
 
 /****************************************************************************
- * Function: uip_listen
+ * Function: tcp_listen
  *
  * Description:
  *   Start listening to the port bound to the specified TCP connection
@@ -169,7 +170,7 @@ int uip_unlisten(struct uip_conn *conn)
  *
  ****************************************************************************/
 
-int uip_listen(struct uip_conn *conn)
+int tcp_listen(FAR struct tcp_conn_s *conn)
 {
   uip_lock_t flags;
   int ndx;
@@ -183,7 +184,7 @@ int uip_listen(struct uip_conn *conn)
 
   /* First, check if there is already a socket listening on this port */
 
-  if (uip_islistener(conn->lport))
+  if (tcp_islistener(conn->lport))
     {
       /* Yes, then we must refuse this request */
 
@@ -203,11 +204,11 @@ int uip_listen(struct uip_conn *conn)
         {
           /* Is the next slot available? */
 
-          if (!uip_listenports[ndx])
+          if (!tcp_listenports[ndx])
             {
               /* Yes.. we found it */
 
-              uip_listenports[ndx] = conn;
+              tcp_listenports[ndx] = conn;
               ret = OK;
               break;
             }
@@ -219,7 +220,7 @@ int uip_listen(struct uip_conn *conn)
 }
 
 /****************************************************************************
- * Function: uip_islistener
+ * Function: tcp_islistener
  *
  * Description:
  *   Return true is there is a listener for the specified port
@@ -229,13 +230,13 @@ int uip_listen(struct uip_conn *conn)
  *
  ****************************************************************************/
 
-bool uip_islistener(uint16_t portno)
+bool tcp_islistener(uint16_t portno)
 {
-  return uip_findlistener(portno) != NULL;
+  return tcp_findlistener(portno) != NULL;
 }
 
 /****************************************************************************
- * Function: uip_accept
+ * Function: tcp_accept_connection
  *
  * Description:
  *   Accept the new connection for the specified listening port.
@@ -245,10 +246,10 @@ bool uip_islistener(uint16_t portno)
  *
  ****************************************************************************/
 
-int uip_accept(struct uip_driver_s *dev, struct uip_conn *conn,
-               uint16_t portno)
+int tcp_accept_connection(FAR struct uip_driver_s *dev,
+                          FAR struct tcp_conn_s *conn, uint16_t portno)
 {
-  struct uip_conn *listener;
+  FAR struct tcp_conn_s *listener;
   int ret = ERROR;
 
   /* The interrupt logic has already allocated and initialized a TCP
@@ -256,7 +257,7 @@ int uip_accept(struct uip_driver_s *dev, struct uip_conn *conn,
    * connection.
    */
 
-  listener = uip_findlistener(portno);
+  listener = tcp_findlistener(portno);
   if (listener)
     {
       /* Yes, there is a listener.  Is it accepting connections now? */
@@ -274,10 +275,10 @@ int uip_accept(struct uip_driver_s *dev, struct uip_conn *conn,
            * may be waiting on poll()/select() that the connection is available.
            */
 
-          ret = uip_backlogadd(listener, conn);
+          ret = tcp_backlogadd(listener, conn);
           if (ret == OK)
             {
-              (void)uip_tcpcallback(dev, listener, UIP_BACKLOG);
+              (void)tcp_callback(dev, listener, UIP_BACKLOG);
             }
         }
 #endif

@@ -71,10 +71,10 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Function: pkt_send
+ * Function: psock_pkt_send
  *
  * Description:
- *   The pkt_send() call may be used only when the packet socket is in a
+ *   The psock_pkt_send() call may be used only when the packet socket is in a
  *   connected state (so that the intended recipient is known).
  *
  * Parameters:
@@ -128,7 +128,8 @@ extern "C"
  ****************************************************************************/
 
 struct socket;
-ssize_t pkt_send(FAR struct socket *psock, FAR const void *buf, size_t len);
+ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
+                       size_t len);
 
 
 #undef EXTERN

@@ -153,9 +153,9 @@ static uint16_t netclose_interrupt(FAR struct uip_driver_s *dev,
                                    uint16_t flags)
 {
 #ifdef CONFIG_NET_SOLINGER
-  FAR struct tcp_close_s *pstate = (struct tcp_close_s *)pvpriv;
+  FAR struct tcp_close_s *pstate = (FAR struct tcp_close_s *)pvpriv;
 #endif
-  FAR struct uip_conn *conn = (FAR struct uip_conn *)pvconn;
+  FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
 
   DEBUGASSERT(conn != NULL);
 
@@ -190,7 +190,7 @@ static uint16_t netclose_interrupt(FAR struct uip_driver_s *dev,
         {
           /* Free connection resources */
 
-          uip_tcpfree(conn);
+          tcp_free(conn);
 
           /* Stop further callbacks */
 
@@ -273,7 +273,7 @@ end_wait:
 static inline int netclose_disconnect(FAR struct socket *psock)
 {
   struct tcp_close_s state;
-  FAR struct uip_conn *conn;
+  FAR struct tcp_conn_s *conn;
   uip_lock_t flags;
 #ifdef CONFIG_NET_SOLINGER
   bool linger;
@@ -283,7 +283,7 @@ static inline int netclose_disconnect(FAR struct socket *psock)
   /* Interrupts are disabled here to avoid race conditions */
 
   flags = uip_lock();
-  conn = (struct uip_conn*)psock->s_conn;
+  conn = (FAR struct tcp_conn_s *)psock->s_conn;
 
   /* If we have a semi-permanent write buffer callback in place, then
    * release it now.
@@ -292,7 +292,7 @@ static inline int netclose_disconnect(FAR struct socket *psock)
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   if (psock->s_sndcb)
     {
-      uip_tcpcallbackfree(conn, psock->s_sndcb);
+      tcp_callbackfree(conn, psock->s_sndcb);
       psock->s_sndcb = NULL;
     }
 #endif
@@ -304,7 +304,7 @@ static inline int netclose_disconnect(FAR struct socket *psock)
   /* Check for the case where the host beat us and disconnected first */
 
   if (conn->tcpstateflags == UIP_ESTABLISHED &&
-      (state.cl_cb = uip_tcpcallbackalloc(conn)) != NULL)
+      (state.cl_cb = tcp_callbackalloc(conn)) != NULL)
     {
       /* Set up to receive TCP data event callbacks */
 
@@ -368,12 +368,12 @@ static inline int netclose_disconnect(FAR struct socket *psock)
           /* We are now disconnected */
 
           sem_destroy(&state.cl_sem);
-          uip_tcpcallbackfree(conn, state.cl_cb);
+          tcp_callbackfree(conn, state.cl_cb);
 
           /* Free the connection */
 
-          conn->crefs = 0;             /* No more references on the connection */
-          uip_tcpfree(conn);           /* Free uIP resources */
+          conn->crefs = 0;          /* No more references on the connection */
+          tcp_free(conn);           /* Free uIP resources */
 
           /* Get the result of the close */
 
@@ -383,7 +383,7 @@ static inline int netclose_disconnect(FAR struct socket *psock)
     }
   else
     {
-      uip_tcpfree(conn);
+      tcp_free(conn);
     }
 
   uip_unlock(flags);
@@ -462,7 +462,7 @@ int psock_close(FAR struct socket *psock)
 #ifdef CONFIG_NET_TCP
           case SOCK_STREAM:
             {
-              struct uip_conn *conn = psock->s_conn;
+              FAR struct tcp_conn_s *conn = psock->s_conn;
 
               /* Is this the last reference to the connection structure (there
                * could be more if the socket was dup'ed).
@@ -472,7 +472,7 @@ int psock_close(FAR struct socket *psock)
                 {
                   /* Yes... then perform the disconnection now */
 
-                  uip_unlisten(conn);                /* No longer accepting connections */
+                  tcp_unlisten(conn);                /* No longer accepting connections */
                   conn->crefs = 0;                   /* Discard our reference to the connection */
                   err = netclose_disconnect(psock);  /* Break any current connections */
                   if (err < 0)

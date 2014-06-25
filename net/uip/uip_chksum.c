@@ -202,7 +202,7 @@ uint16_t uip_ipchksum(struct uip_driver_s *dev)
 
 /* Calculate the TCP checksum of the packet in d_buf and d_appdata. */
 
-uint16_t uip_tcpchksum(struct uip_driver_s *dev)
+uint16_t tcp_chksum(struct uip_driver_s *dev)
 {
   return upper_layer_chksum(dev, UIP_PROTO_TCP);
 }

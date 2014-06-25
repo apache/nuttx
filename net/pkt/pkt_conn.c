@@ -219,7 +219,7 @@ struct uip_pkt_conn *uip_pktactive(struct uip_eth_hdr *buf)
 
   while (conn)
     {
-      /* FIXME lmac in conn should have been set by pkt_rawbind() */
+      /* FIXME lmac in conn should have been set by pkt_bind() */
 
       if (uip_ethaddr_cmp(buf->dest, conn->lmac))
         {

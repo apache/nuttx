@@ -53,6 +53,7 @@
 #include <nuttx/net/netdev.h>
 
 #include "uip/uip.h"
+#include "tcp/tcp.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -75,7 +76,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_tcptimer
+ * Name: tcp_timer
  *
  * Description:
  *   Handle a TCP timer expiration for the provided TCP connection
@@ -93,8 +94,8 @@
  *
  ****************************************************************************/
 
-void uip_tcptimer(FAR struct uip_driver_s *dev, FAR struct uip_conn *conn,
-                  int hsec)
+void tcp_timer(FAR struct uip_driver_s *dev, FAR struct tcp_conn_s *conn,
+               int hsec)
 {
   uint8_t result;
 
@@ -103,7 +104,7 @@ void uip_tcptimer(FAR struct uip_driver_s *dev, FAR struct uip_conn *conn,
 
   /* Increase the TCP sequence number */
 
-  uip_tcpnextsequence();
+  tcp_nextsequence();
 
   /* Reset the length variables. */
 
@@ -128,7 +129,7 @@ void uip_tcptimer(FAR struct uip_driver_s *dev, FAR struct uip_conn *conn,
 
           /* Notify upper layers about the timeout */
 
-          result = uip_tcpcallback(dev, conn, UIP_TIMEDOUT);
+          result = tcp_callback(dev, conn, UIP_TIMEDOUT);
 
           nllvdbg("TCP state: UIP_CLOSED\n");
         }
@@ -172,16 +173,16 @@ void uip_tcptimer(FAR struct uip_driver_s *dev, FAR struct uip_conn *conn,
                   conn->tcpstateflags = UIP_CLOSED;
                   nllvdbg("TCP state: UIP_CLOSED\n");
 
-                  /* We call uip_tcpcallback() with UIP_TIMEDOUT to
+                  /* We call tcp_callback() with UIP_TIMEDOUT to
                    * inform the application that the connection has
                    * timed out.
                    */
 
-                  result = uip_tcpcallback(dev, conn, UIP_TIMEDOUT);
+                  result = tcp_callback(dev, conn, UIP_TIMEDOUT);
 
                   /* We also send a reset packet to the remote host. */
 
-                  uip_tcpsend(dev, conn, TCP_RST | TCP_ACK, UIP_IPTCPH_LEN);
+                  tcp_send(dev, conn, TCP_RST | TCP_ACK, UIP_IPTCPH_LEN);
                   goto done;
                 }
 
@@ -208,13 +209,13 @@ void uip_tcptimer(FAR struct uip_driver_s *dev, FAR struct uip_conn *conn,
                      * SYNACK.
                      */
 
-                    uip_tcpack(dev, conn, TCP_ACK | TCP_SYN);
+                    tcp_ack(dev, conn, TCP_ACK | TCP_SYN);
                     goto done;
 
                   case UIP_SYN_SENT:
                     /* In the SYN_SENT state, we retransmit out SYN. */
 
-                    uip_tcpack(dev, conn, TCP_SYN);
+                    tcp_ack(dev, conn, TCP_SYN);
                     goto done;
 
                   case UIP_ESTABLISHED:
@@ -223,8 +224,8 @@ void uip_tcptimer(FAR struct uip_driver_s *dev, FAR struct uip_conn *conn,
                      * the code for sending out the packet.
                      */
 
-                    result = uip_tcpcallback(dev, conn, UIP_REXMIT);
-                    uip_tcprexmit(dev, conn, result);
+                    result = tcp_callback(dev, conn, UIP_REXMIT);
+                    tcp_rexmit(dev, conn, result);
                     goto done;
 
                   case UIP_FIN_WAIT_1:
@@ -232,7 +233,7 @@ void uip_tcptimer(FAR struct uip_driver_s *dev, FAR struct uip_conn *conn,
                   case UIP_LAST_ACK:
                     /* In all these states we should retransmit a FINACK. */
 
-                    uip_tcpsend(dev, conn, TCP_FIN | TCP_ACK, UIP_IPTCPH_LEN);
+                    tcp_send(dev, conn, TCP_FIN | TCP_ACK, UIP_IPTCPH_LEN);
                     goto done;
                 }
             }
@@ -246,8 +247,8 @@ void uip_tcptimer(FAR struct uip_driver_s *dev, FAR struct uip_conn *conn,
            * application for new data.
            */
 
-          result = uip_tcpcallback(dev, conn, UIP_POLL);
-          uip_tcpappsend(dev, conn, result);
+          result = tcp_callback(dev, conn, UIP_POLL);
+          tcp_appsend(dev, conn, result);
           goto done;
         }
     }

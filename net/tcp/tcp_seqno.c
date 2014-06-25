@@ -77,7 +77,7 @@ static uint32_t g_tcpsequence;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_tcpsetsequence
+ * Name: tcp_setsequence
  *
  * Description:
  *   Set the TCP/IP sequence number
@@ -87,7 +87,7 @@ static uint32_t g_tcpsequence;
  *
  ****************************************************************************/
 
-void uip_tcpsetsequence(FAR uint8_t *seqno, uint32_t value)
+void tcp_setsequence(FAR uint8_t *seqno, uint32_t value)
 {
   /* Copy the sequence number in network (big-endian) order */
 
@@ -98,7 +98,7 @@ void uip_tcpsetsequence(FAR uint8_t *seqno, uint32_t value)
 }
 
 /****************************************************************************
- * Name: uip_tcpgetsequence
+ * Name: tcp_getsequence
  *
  * Description:
  *   Get the TCP/IP sequence number
@@ -108,7 +108,7 @@ void uip_tcpsetsequence(FAR uint8_t *seqno, uint32_t value)
  *
  ****************************************************************************/
 
-uint32_t uip_tcpgetsequence(FAR uint8_t *seqno)
+uint32_t tcp_getsequence(FAR uint8_t *seqno)
 {
   uint32_t value;
 
@@ -122,7 +122,7 @@ uint32_t uip_tcpgetsequence(FAR uint8_t *seqno)
 }
 
 /****************************************************************************
- * Name: uip_tcpaddsequence
+ * Name: tcp_addsequence
  *
  * Description:
  *   Add the length to get the next TCP sequence number.
@@ -132,13 +132,13 @@ uint32_t uip_tcpgetsequence(FAR uint8_t *seqno)
  *
  ****************************************************************************/
 
-uint32_t uip_tcpaddsequence(FAR uint8_t *seqno, uint16_t len)
+uint32_t tcp_addsequence(FAR uint8_t *seqno, uint16_t len)
 {
-  return uip_tcpgetsequence(seqno) + (uint32_t)len;
+  return tcp_getsequence(seqno) + (uint32_t)len;
 }
 
 /****************************************************************************
- * Name: uip_tcpinitsequence
+ * Name: tcp_initsequence
  *
  * Description:
  *   Set the (initial) the TCP/IP sequence number when a TCP connection is
@@ -149,13 +149,13 @@ uint32_t uip_tcpaddsequence(FAR uint8_t *seqno, uint16_t len)
  *
  ****************************************************************************/
 
-void uip_tcpinitsequence(FAR uint8_t *seqno)
+void tcp_initsequence(FAR uint8_t *seqno)
 {
-  uip_tcpsetsequence(seqno, g_tcpsequence);
+  tcp_setsequence(seqno, g_tcpsequence);
 }
 
 /****************************************************************************
- * Name: uip_tcpnextsequence
+ * Name: tcp_nextsequence
  *
  * Description:
  *   Increment the TCP/IP sequence number
@@ -165,7 +165,7 @@ void uip_tcpinitsequence(FAR uint8_t *seqno)
  *
  ****************************************************************************/
 
-void uip_tcpnextsequence(void)
+void tcp_nextsequence(void)
 {
   g_tcpsequence++;
 }

@@ -55,7 +55,7 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static void connection_event(struct uip_conn *conn, uint16_t flags);
+static void connection_event(FAR struct tcp_conn_s *conn, uint16_t flags);
 
 /****************************************************************************
  * Private Functions
@@ -78,7 +78,7 @@ static void connection_event(struct uip_conn *conn, uint16_t flags);
  *
  ****************************************************************************/
 
-static void connection_event(FAR struct uip_conn *conn, uint16_t flags)
+static void connection_event(FAR struct tcp_conn_s *conn, uint16_t flags)
 {
   FAR struct socket *psock = (FAR struct socket *)conn->connection_private;
 
@@ -124,7 +124,7 @@ static void connection_event(FAR struct uip_conn *conn, uint16_t flags)
 
 int net_startmonitor(FAR struct socket *psock)
 {
-  FAR struct uip_conn *conn = psock->s_conn;
+  FAR struct tcp_conn_s *conn = psock->s_conn;
 
   DEBUGASSERT(psock && conn);
 
@@ -161,7 +161,7 @@ int net_startmonitor(FAR struct socket *psock)
  *
  ****************************************************************************/
 
-void net_stopmonitor(FAR struct uip_conn *conn)
+void net_stopmonitor(FAR struct tcp_conn_s *conn)
 {
   DEBUGASSERT(conn);
 

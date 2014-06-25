@@ -195,7 +195,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
            * socket instance.
            */
 
-          struct uip_conn *conn = uip_tcpalloc();
+          FAR struct tcp_conn_s *conn = tcp_alloc();
           if (!conn)
             {
               /* Failed to reserve a connection structure */

@@ -66,7 +66,7 @@
 #  define CONFIG_NET_TCP_SPLIT_SIZE 40
 #endif
 
-#define TCPBUF ((struct uip_tcpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
+#define TCPBUF ((struct tcp_iphdr_s *)&dev->d_buf[UIP_LLH_LEN])
 
 /****************************************************************************
  * Private Types
@@ -163,7 +163,7 @@ static uint16_t tcpsend_interrupt(FAR struct uip_driver_s *dev,
                                   FAR void *pvconn,
                                   FAR void *pvpriv, uint16_t flags)
 {
-  FAR struct uip_conn *conn = (FAR struct uip_conn*)pvconn;
+  FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
   FAR struct send_s *pstate = (FAR struct send_s *)pvpriv;
 
   nllvdbg("flags: %04x acked: %d sent: %d\n",
@@ -187,7 +187,7 @@ static uint16_t tcpsend_interrupt(FAR struct uip_driver_s *dev,
        * is the number of bytes to be acknowledged.
        */
 
-      pstate->snd_acked = uip_tcpgetsequence(TCPBUF->ackno) - pstate->snd_isn;
+      pstate->snd_acked = tcp_getsequence(TCPBUF->ackno) - pstate->snd_isn;
       nllvdbg("ACK: acked=%d sent=%d buflen=%d\n",
               pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
 
@@ -367,7 +367,7 @@ static uint16_t tcpsend_interrupt(FAR struct uip_driver_s *dev,
 
           seqno = pstate->snd_sent + pstate->snd_isn;
           nllvdbg("SEND: sndseq %08x->%08x\n", conn->sndseq, seqno);
-          uip_tcpsetsequence(conn->sndseq, seqno);
+          tcp_setsequence(conn->sndseq, seqno);
 
           /* Then set-up to send that amount of data. (this won't actually
            * happen until the polling cycle completes).
@@ -542,16 +542,16 @@ ssize_t tcp_send(FAR struct socket *psock, FAR const void *buf, size_t len)
 
   if (len > 0)
     {
-      struct uip_conn *conn = (struct uip_conn*)psock->s_conn;
+      FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)psock->s_conn;
 
       /* Allocate resources to receive a callback */
 
-      state.snd_cb = uip_tcpcallbackalloc(conn);
+      state.snd_cb = tcp_callbackalloc(conn);
       if (state.snd_cb)
         {
           /* Get the initial sequence number that will be used */
 
-          state.snd_isn         = uip_tcpgetsequence(conn->sndseq);
+          state.snd_isn         = tcp_getsequence(conn->sndseq);
 
           /* There is no outstanding, unacknowledged data after this
            * initial sequence number.
@@ -584,7 +584,7 @@ ssize_t tcp_send(FAR struct socket *psock, FAR const void *buf, size_t len)
 
           /* Make sure that no further interrupts are processed */
 
-          uip_tcpcallbackfree(conn, state.snd_cb);
+          tcp_callbackfree(conn, state.snd_cb);
         }
     }
 

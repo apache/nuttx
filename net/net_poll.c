@@ -183,7 +183,7 @@ static uint16_t poll_interrupt(FAR struct uip_driver_s *dev, FAR void *conn,
 static inline int net_pollsetup(FAR struct socket *psock,
                                 FAR struct pollfd *fds)
 {
-  FAR struct uip_conn *conn = psock->s_conn;
+  FAR struct tcp_conn_s *conn = psock->s_conn;
   FAR struct net_poll_s *info;
   FAR struct uip_callback_s *cb;
   uip_lock_t flags;
@@ -212,7 +212,7 @@ static inline int net_pollsetup(FAR struct socket *psock,
 
   /* Allocate a TCP/IP callback structure */
 
-  cb = uip_tcpcallbackalloc(conn);
+  cb = tcp_callbackalloc(conn);
   if (!cb)
     {
       ret = -EBUSY;
@@ -243,7 +243,7 @@ static inline int net_pollsetup(FAR struct socket *psock,
 #ifdef CONFIG_NET_TCPBACKLOG
   /* Check for read data or backlogged connection availability now */
 
-  if (!IOB_QEMPTY(&conn->readahead) || uip_backlogavailable(conn))
+  if (!IOB_QEMPTY(&conn->readahead) || tcp_backlogavailable(conn))
 #else
   /* Check for read data availability now */
 
@@ -342,7 +342,7 @@ errout_with_lock:
 static inline int net_pollteardown(FAR struct socket *psock,
                                    FAR struct pollfd *fds)
 {
-  FAR struct uip_conn *conn = psock->s_conn;
+  FAR struct tcp_conn_s *conn = psock->s_conn;
   FAR struct net_poll_s *info;
   uip_lock_t flags;
 
@@ -364,7 +364,7 @@ static inline int net_pollteardown(FAR struct socket *psock,
       /* Release the callback */
 
       flags = uip_lock();
-      uip_tcpcallbackfree(conn, info->cb);
+      tcp_callbackfree(conn, info->cb);
       uip_unlock(flags);
 
       /* Release the poll/select data slot */

@@ -56,7 +56,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: pkt_rawbind
+ * Function: pkt_bind
  *
  * Description:
  *   Bind a raw socket to an network device.
@@ -71,8 +71,8 @@
  ****************************************************************************/
 
 #ifdef CONFIG_NET_PKT
-static int pkt_rawbind(FAR struct uip_pkt_conn *conn,
-                       FAR const struct sockaddr_ll *addr)
+static int pkt_bind(FAR struct uip_pkt_conn *conn,
+                    FAR const struct sockaddr_ll *addr)
 {
   int ifindex;
 #if 0
@@ -191,13 +191,13 @@ int psock_bind(FAR struct socket *psock, const struct sockaddr *addr,
     {
 #ifdef CONFIG_NET_PKT
       case SOCK_RAW:
-        ret = pkt_rawbind(psock->s_conn, lladdr);
+        ret = pkt_bind(psock->s_conn, lladdr);
         break;
 #endif
 
 #ifdef CONFIG_NET_TCP
       case SOCK_STREAM:
-        ret = uip_tcpbind(psock->s_conn, inaddr);
+        ret = tcp_bind(psock->s_conn, inaddr);
         psock->s_flags |= _SF_BOUND;
         break;
 #endif

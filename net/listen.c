@@ -88,7 +88,7 @@
 int listen(int sockfd, int backlog)
 {
   FAR struct socket *psock = sockfd_socket(sockfd);
-  struct uip_conn *conn;
+  struct tcp_conn_s *conn;
   int err;
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
@@ -115,7 +115,7 @@ int listen(int sockfd, int backlog)
 
   /* Verify that the sockfd corresponds to a connected SOCK_STREAM */
 
-  conn = (struct uip_conn *)psock->s_conn;
+  conn = (FAR struct tcp_conn_s *)psock->s_conn;
   if (psock->s_type != SOCK_STREAM || !psock->s_conn || conn->lport <= 0)
     {
       err = EOPNOTSUPP;
@@ -125,7 +125,7 @@ int listen(int sockfd, int backlog)
   /* Set up the backlog for this connection */
 
 #ifdef CONFIG_NET_TCPBACKLOG
-  err = uip_backlogcreate(conn, backlog);
+  err = tcp_backlogcreate(conn, backlog);
   if (err < 0)
     {
       err = -err;
@@ -137,7 +137,7 @@ int listen(int sockfd, int backlog)
    * is called and enables poll()/select() logic.
    */
 
-  uip_listen(conn);
+  tcp_listen(conn);
   psock->s_flags |= _SF_LISTENING;
   return OK;
 

@@ -169,7 +169,7 @@ FAR struct socket *sockfd_socket(int sockfd);
 
 #ifdef CONFIG_NET_TCP
 int net_startmonitor(FAR struct socket *psock);
-void net_stopmonitor(FAR struct uip_conn *conn);
+void net_stopmonitor(FAR struct tcp_conn_s *conn);
 void net_lostconnection(FAR struct socket *psock, uint16_t flags);
 #endif
 

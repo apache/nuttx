@@ -69,7 +69,7 @@ struct accept_s
 #else
   FAR struct sockaddr_in  *acpt_addr;       /* Return connection adress */
 #endif
-  FAR struct uip_conn     *acpt_newconn;    /* The accepted connection */
+  FAR struct tcp_conn_s   *acpt_newconn;    /* The accepted connection */
   int                      acpt_result;     /* The result of the wait */
 };
 
@@ -101,7 +101,7 @@ struct accept_s
 
 #ifdef CONFIG_NET_TCP
 #ifdef CONFIG_NET_IPv6
-static inline void accept_tcpsender(FAR struct uip_conn *conn,
+static inline void accept_tcpsender(FAR struct tcp_conn_s *conn,
                                     FAR struct sockaddr_in6 *addr)
 {
   if (addr)
@@ -112,7 +112,7 @@ static inline void accept_tcpsender(FAR struct uip_conn *conn,
     }
 }
 #else
-static inline void accept_tcpsender(FAR struct uip_conn *conn,
+static inline void accept_tcpsender(FAR struct tcp_conn_s *conn,
                                     FAR struct sockaddr_in *addr)
 {
   if (addr)
@@ -143,7 +143,8 @@ static inline void accept_tcpsender(FAR struct uip_conn *conn,
  *
  ****************************************************************************/
 
-static int accept_interrupt(struct uip_conn *listener, struct uip_conn *conn)
+static int accept_interrupt(FAR struct tcp_conn_s *listener,
+                            FAR struct tcp_conn_s *conn)
 {
   struct accept_s *pstate = (struct accept_s *)listener->accept_private;
   int ret = -EINVAL;
@@ -255,7 +256,7 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
 {
   FAR struct socket *psock = sockfd_socket(sockfd);
   FAR struct socket *pnewsock;
-  FAR struct uip_conn *conn;
+  FAR struct tcp_conn_s *conn;
   struct accept_s state;
 #ifdef CONFIG_NET_IPv6
   FAR struct sockaddr_in6 *inaddr = (struct sockaddr_in6 *)addr;
@@ -345,10 +346,10 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
    */
 
   save = uip_lock();
-  conn = (struct uip_conn *)psock->s_conn;
+  conn = (struct tcp_conn_s *)psock->s_conn;
 
 #ifdef CONFIG_NET_TCPBACKLOG
-  state.acpt_newconn = uip_backlogremove(conn);
+  state.acpt_newconn = tcp_backlogremove(conn);
   if (state.acpt_newconn)
     {
       /* Yes... get the address of the connected client */

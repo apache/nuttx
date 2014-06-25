@@ -68,7 +68,7 @@
 
 /* The array containing all uIP TCP connections. */
 
-static struct uip_conn g_tcp_connections[CONFIG_NET_TCP_CONNS];
+static struct tcp_conn_s g_tcp_connections[CONFIG_NET_TCP_CONNS];
 
 /* A list of all free TCP connections */
 
@@ -135,7 +135,7 @@ static int uip_selectport(uint16_t portno)
               g_last_tcp_port = 4096;
             }
         }
-      while (uip_tcplistener(htons(g_last_tcp_port)));
+      while (tcp_listener(htons(g_last_tcp_port)));
     }
   else
     {
@@ -143,7 +143,7 @@ static int uip_selectport(uint16_t portno)
        * connection is using this local port.
        */
 
-      if (uip_tcplistener(portno))
+      if (tcp_listener(portno))
         {
           /* It is in use... return EADDRINUSE */
 
@@ -161,7 +161,7 @@ static int uip_selectport(uint16_t portno)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_tcpinit()
+ * Name: tcp_initialize()
  *
  * Description:
  *   Initialize the TCP/IP connection structures.  Called only once and only
@@ -169,7 +169,7 @@ static int uip_selectport(uint16_t portno)
  *
  ****************************************************************************/
 
-void uip_tcpinit(void)
+void tcp_initialize(void)
 {
   int i;
 
@@ -192,7 +192,7 @@ void uip_tcpinit(void)
 }
 
 /****************************************************************************
- * Name: uip_tcpalloc()
+ * Name: tcp_alloc()
  *
  * Description:
  *   Find a free TCP/IP connection structure and allocate it
@@ -202,9 +202,9 @@ void uip_tcpinit(void)
  *
  ****************************************************************************/
 
-struct uip_conn *uip_tcpalloc(void)
+FAR struct tcp_conn_s *tcp_alloc(void)
 {
-  struct uip_conn *conn;
+  FAR struct tcp_conn_s *conn;
   uip_lock_t flags;
 
   /* Because this routine is called from both interrupt level and
@@ -216,7 +216,7 @@ struct uip_conn *uip_tcpalloc(void)
 
   /* Return the entry from the head of the free list */
 
-  conn = (struct uip_conn *)dq_remfirst(&g_free_tcp_connections);
+  conn = (FAR struct tcp_conn_s *)dq_remfirst(&g_free_tcp_connections);
 
 #ifndef CONFIG_NET_SOLINGER
   /* Is the free list empty? */
@@ -229,8 +229,8 @@ struct uip_conn *uip_tcpalloc(void)
        * that is about to be closed anyway.
        */
 
-      FAR struct uip_conn *tmp =
-        (FAR struct uip_conn *)g_active_tcp_connections.head;
+      FAR struct tcp_conn_s *tmp =
+        (FAR struct tcp_conn_s *)g_active_tcp_connections.head;
 
       while (tmp)
         {
@@ -260,7 +260,7 @@ struct uip_conn *uip_tcpalloc(void)
 
           /* Look at the next active connection */
 
-          tmp = (FAR struct uip_conn *)tmp->node.flink;
+          tmp = (FAR struct tcp_conn_s *)tmp->node.flink;
         }
 
       /* Did we find a connection that we can re-use? */
@@ -282,11 +282,11 @@ struct uip_conn *uip_tcpalloc(void)
            * waiting for it.
            */
 
-          uip_tcpfree(conn);
+          tcp_free(conn);
 
           /* Now there is guaranteed to be one free connection.  Get it! */
 
-          conn = (struct uip_conn *)dq_remfirst(&g_free_tcp_connections);
+          conn = (FAR struct tcp_conn_s *)dq_remfirst(&g_free_tcp_connections);
         }
     }
 #endif
@@ -297,7 +297,7 @@ struct uip_conn *uip_tcpalloc(void)
 
   if (conn)
     {
-      memset(conn, 0, sizeof(struct uip_conn));
+      memset(conn, 0, sizeof(struct tcp_conn_s));
       conn->tcpstateflags = UIP_ALLOCATED;
     }
 
@@ -305,7 +305,7 @@ struct uip_conn *uip_tcpalloc(void)
 }
 
 /****************************************************************************
- * Name: uip_tcpfree()
+ * Name: tcp_free()
  *
  * Description:
  *   Free a connection structure that is no longer in use. This should be
@@ -313,7 +313,7 @@ struct uip_conn *uip_tcpalloc(void)
  *
  ****************************************************************************/
 
-void uip_tcpfree(struct uip_conn *conn)
+void tcp_free(FAR struct tcp_conn_s *conn)
 {
   FAR struct uip_callback_s *cb;
   FAR struct uip_callback_s *next;
@@ -337,7 +337,7 @@ void uip_tcpfree(struct uip_conn *conn)
   for (cb = conn->list; cb; cb = next)
     {
       next = cb->flink;
-      uip_tcpcallbackfree(conn, cb);
+      tcp_callbackfree(conn, cb);
     }
 
   /* UIP_ALLOCATED means that that the connection is not in the active list
@@ -376,7 +376,7 @@ void uip_tcpfree(struct uip_conn *conn)
 
   if (conn->backlog)
     {
-      uip_backlogdestroy(conn);
+      tcp_backlogdestroy(conn);
     }
 
   /* If this connection is, itself, backlogged, then remove it from the
@@ -385,7 +385,7 @@ void uip_tcpfree(struct uip_conn *conn)
 
   if (conn->blparent)
     {
-      uip_backlogdelete(conn->blparent, conn);
+      tcp_backlogdelete(conn->blparent, conn);
     }
 #endif
 
@@ -397,7 +397,7 @@ void uip_tcpfree(struct uip_conn *conn)
 }
 
 /****************************************************************************
- * Name: uip_tcpactive()
+ * Name: tcp_active()
  *
  * Description:
  *   Find a connection structure that is the appropriate
@@ -408,10 +408,10 @@ void uip_tcpfree(struct uip_conn *conn)
  *
  ****************************************************************************/
 
-struct uip_conn *uip_tcpactive(struct uip_tcpip_hdr *buf)
+FAR struct tcp_conn_s *tcp_active(struct tcp_iphdr_s *buf)
 {
-  struct uip_conn *conn      = (struct uip_conn *)g_active_tcp_connections.head;
-  in_addr_t        srcipaddr = uip_ip4addr_conv(buf->srcipaddr);
+  FAR struct tcp_conn_s *conn = (struct tcp_conn_s *)g_active_tcp_connections.head;
+  in_addr_t srcipaddr = uip_ip4addr_conv(buf->srcipaddr);
 
   while (conn)
     {
@@ -430,7 +430,7 @@ struct uip_conn *uip_tcpactive(struct uip_tcpip_hdr *buf)
 
       /* Look at the next active connection */
 
-      conn = (struct uip_conn *)conn->node.flink;
+      conn = (FAR struct tcp_conn_s *)conn->node.flink;
     }
 
   return conn;
@@ -448,20 +448,20 @@ struct uip_conn *uip_tcpactive(struct uip_tcpip_hdr *buf)
  *
  ****************************************************************************/
 
-struct uip_conn *uip_nexttcpconn(struct uip_conn *conn)
+FAR struct tcp_conn_s *uip_nexttcpconn(FAR struct tcp_conn_s *conn)
 {
   if (!conn)
     {
-      return (struct uip_conn *)g_active_tcp_connections.head;
+      return (FAR struct tcp_conn_s *)g_active_tcp_connections.head;
     }
   else
     {
-      return (struct uip_conn *)conn->node.flink;
+      return (FAR struct tcp_conn_s *)conn->node.flink;
     }
 }
 
 /****************************************************************************
- * Name: uip_tcplistener()
+ * Name: tcp_listener()
  *
  * Description:
  *   Given a local port number (in network byte order), find the TCP
@@ -472,9 +472,9 @@ struct uip_conn *uip_nexttcpconn(struct uip_conn *conn)
  *
  ****************************************************************************/
 
-struct uip_conn *uip_tcplistener(uint16_t portno)
+FAR struct tcp_conn_s *tcp_listener(uint16_t portno)
 {
-  struct uip_conn *conn;
+  FAR struct tcp_conn_s *conn;
   int i;
 
   /* Check if this port number is in use by any active UIP TCP connection */
@@ -494,10 +494,10 @@ struct uip_conn *uip_tcplistener(uint16_t portno)
 }
 
 /****************************************************************************
- * Name: uip_tcpaccept()
+ * Name: tcp_alloc_accept()
  *
  * Description:
- *    Called when uip_interupt matches the incoming packet with a connection
+ *    Called when uip_interrupt matches the incoming packet with a connection
  *    in LISTEN. In that case, this function will create a new connection and
  *    initialize it to send a SYNACK in return.
  *
@@ -506,9 +506,9 @@ struct uip_conn *uip_tcplistener(uint16_t portno)
  *
  ****************************************************************************/
 
-struct uip_conn *uip_tcpaccept(struct uip_tcpip_hdr *buf)
+FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct tcp_iphdr_s *buf)
 {
-  struct uip_conn *conn = uip_tcpalloc();
+  FAR struct tcp_conn_s *conn = tcp_alloc();
   if (conn)
     {
       /* Fill in the necessary fields for the new connection. */
@@ -524,7 +524,7 @@ struct uip_conn *uip_tcpaccept(struct uip_tcpip_hdr *buf)
       uip_ipaddr_copy(conn->ripaddr, uip_ip4addr_conv(buf->srcipaddr));
       conn->tcpstateflags = UIP_SYN_RCVD;
 
-      uip_tcpinitsequence(conn->sndseq);
+      tcp_initsequence(conn->sndseq);
       conn->unacked       = 1;
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
       conn->expired       = 0;
@@ -560,7 +560,7 @@ struct uip_conn *uip_tcpaccept(struct uip_tcpip_hdr *buf)
 }
 
 /****************************************************************************
- * Name: uip_tcpbind()
+ * Name: tcp_bind()
  *
  * Description:
  *   This function implements the UIP specific parts of the standard TCP
@@ -575,9 +575,11 @@ struct uip_conn *uip_tcpaccept(struct uip_tcpip_hdr *buf)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-int uip_tcpbind(struct uip_conn *conn, const struct sockaddr_in6 *addr)
+int tcp_bind(FAR struct tcp_conn_s *conn,
+             FAR const struct sockaddr_in6 *addr)
 #else
-int uip_tcpbind(struct uip_conn *conn, const struct sockaddr_in *addr)
+int tcp_bind(FAR struct tcp_conn_s *conn,
+             FAR const struct sockaddr_in *addr)
 #endif
 {
   uip_lock_t flags;
@@ -613,7 +615,7 @@ int uip_tcpbind(struct uip_conn *conn, const struct sockaddr_in *addr)
 }
 
 /****************************************************************************
- * Name: uip_tcpconnect()
+ * Name: tcp_connect
  *
  * Description:
  *   This function implements the UIP specific parts of the standard
@@ -625,7 +627,7 @@ int uip_tcpbind(struct uip_conn *conn, const struct sockaddr_in *addr)
  *   the SYN_SENT state and sets the retransmission timer to 0. This will
  *   cause a TCP SYN segment to be sent out the next time this connection
  *   is periodically processed, which usually is done within 0.5 seconds
- *   after the call to uip_tcpconnect().
+ *   after the call to tcp_connect().
  *
  * Assumptions:
  *   This function is called from normal user level code.
@@ -633,9 +635,11 @@ int uip_tcpbind(struct uip_conn *conn, const struct sockaddr_in *addr)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in6 *addr)
+int tcp_connect(FAR struct tcp_conn_s *conn,
+                FAR const struct sockaddr_in6 *addr)
 #else
-int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in *addr)
+int tcp_connect(FAR struct tcp_conn_s *conn,
+                FAR const struct sockaddr_in *addr)
 #endif
 {
   uip_lock_t flags;
@@ -667,7 +671,7 @@ int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in *addr)
   /* Initialize and return the connection structure, bind it to the port number */
 
   conn->tcpstateflags = UIP_SYN_SENT;
-  uip_tcpinitsequence(conn->sndseq);
+  tcp_initsequence(conn->sndseq);
 
   conn->mss        = UIP_TCP_INITIAL_MSS;
   conn->unacked    = 1;    /* TCP length of the SYN is one. */

@@ -70,11 +70,73 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
+#ifdef CONFIG_NET_TCP
+/* Defined in tcp_conn.c ****************************************************/
+
+void tcp_initialize(void);
+struct tcp_conn_s *tcp_active(FAR struct tcp_iphdr_s *buf);
+struct tcp_conn_s *uip_nexttcpconn(FAR struct tcp_conn_s *conn);
+struct tcp_conn_s *tcp_listener(uint16_t portno);
+struct tcp_conn_s *tcp_alloc_accept(FAR struct tcp_iphdr_s *buf);
+
+/* Defined in tcp_seqno.c ***************************************************/
+
+void tcp_setsequence(FAR uint8_t *seqno, uint32_t value);
+uint32_t tcp_getsequence(FAR uint8_t *seqno);
+uint32_t tcp_addsequence(FAR uint8_t *seqno, uint16_t len);
+void tcp_initsequence(FAR uint8_t *seqno);
+void tcp_nextsequence(void);
+
+/* Defined in tcp_poll.c ****************************************************/
+
+void tcp_poll(FAR struct uip_driver_s *dev, FAR struct tcp_conn_s *conn);
+
+/* Defined in tcp_timer.c ***************************************************/
+
+void tcp_timer(FAR struct uip_driver_s *dev, FAR struct tcp_conn_s *conn,
+               int hsec);
+
+/* Defined in tcp_listen.c **************************************************/
+
+void tcp_listeninit(void);
+bool tcp_islistener(uint16_t port);
+int tcp_accept_connection(FAR struct uip_driver_s *dev,
+                          FAR struct tcp_conn_s *conn, uint16_t portno);
+
+/* Defined in tcp_send.c ****************************************************/
+
+void tcp_send(FAR struct uip_driver_s *dev, FAR struct tcp_conn_s *conn,
+              uint16_t flags, uint16_t len);
+void tcp_reset(FAR struct uip_driver_s *dev);
+void tcp_ack(FAR struct uip_driver_s *dev, FAR struct tcp_conn_s *conn,
+             uint8_t ack);
+
+/* Defined in tcp_appsend.c *************************************************/
+
+void tcp_appsend(FAR struct uip_driver_s *dev, FAR struct tcp_conn_s *conn,
+                 uint16_t result);
+void tcp_rexmit(FAR struct uip_driver_s *dev, FAR struct tcp_conn_s *conn,
+                uint16_t result);
+
+/* Defined in tcp_input.c ***************************************************/
+
+void tcp_input(FAR struct uip_driver_s *dev);
+
+/* Defined in tcp_callback.c ************************************************/
+
+uint16_t tcp_callback(FAR struct uip_driver_s *dev,
+                      FAR struct tcp_conn_s *conn, uint16_t flags);
+#ifdef CONFIG_NET_TCP_READAHEAD
+uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn,
+                         FAR uint8_t *buffer, uint16_t nbytes);
+#endif
+#endif /* CONFIG_NET_TCP */
+
 /****************************************************************************
- * Function: tcp_send
+ * Function: psock_tcp_send
  *
  * Description:
- *   The tcp_send() call may be used only when the TCP socket is in a
+ *   The psock_tcp_send() call may be used only when the TCP socket is in a
  *   connected state (so that the intended recipient is known).
  *
  * Parameters:
@@ -128,7 +190,8 @@ extern "C"
  ****************************************************************************/
 
 struct socket;
-ssize_t tcp_send(FAR struct socket *psock, FAR const void *buf, size_t len);
+ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
+                       size_t len);
 
 /****************************************************************************
  * Function: tcp_wrbuffer_initialize
