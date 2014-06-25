@@ -370,41 +370,6 @@ int uip_lockedwait(sem_t *sem);
  * data, etc.
  */
 
-/* Send data on the current connection.
- *
- * This function is used to send out a single segment of TCP
- * data. Only applications that have been invoked by uIP for event
- * processing can send data.
- *
- * The amount of data that actually is sent out after a call to this
- * funcion is determined by the maximum amount of data TCP allows. uIP
- * will automatically crop the data so that only the appropriate
- * amount of data is sent. The function uip_mss() can be used to query
- * uIP for the amount of data that actually will be sent.
- *
- * Note: This function does not guarantee that the sent data will
- * arrive at the destination. If the data is lost in the network, the
- * application will be invoked with the UIP_REXMIT flag set.  The
- * application will then have to resend the data using this function.
- *
- * data A pointer to the data which is to be sent.
- *
- * len The maximum amount of data bytes to be sent.
- */
-
-void uip_send(FAR struct uip_driver_s *dev, FAR const void *buf, int len);
-
-#ifdef CONFIG_NET_IOB
-struct iob_s;
-void uip_iobsend(FAR struct uip_driver_s *dev, FAR struct iob_s *buf,
-                 unsigned int len, unsigned int offset);
-#endif
-
-#ifdef CONFIG_NET_PKT
-void uip_pktsend(FAR struct uip_driver_s *dev, FAR const void *buf,
-                 unsigned int len);
-#endif
-
 /* uIP convenience and converting functions.
  *
  * These functions can be used for converting between different data

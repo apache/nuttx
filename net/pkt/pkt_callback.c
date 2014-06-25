@@ -48,6 +48,7 @@
 #include <nuttx/net/netdev.h>
 
 #include "uip/uip.h"
+#include "pkt/pkt.h"
 
 /****************************************************************************
  * Private Data
@@ -62,7 +63,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: uip_pktcallback
+ * Function: pkt_callback
  *
  * Description:
  *   Inform the application holding the packet socket of a change in state.
@@ -75,8 +76,8 @@
  *
  ****************************************************************************/
 
-uint16_t uip_pktcallback(FAR struct uip_driver_s *dev,
-                         FAR struct uip_pkt_conn *conn, uint16_t flags)
+uint16_t pkt_callback(FAR struct uip_driver_s *dev,
+                      FAR struct pkt_conn_s *conn, uint16_t flags)
 {
   nllvdbg("flags: %04x\n", flags);
 

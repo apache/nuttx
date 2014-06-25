@@ -662,7 +662,7 @@ static uint16_t psock_send_interrupt(FAR struct uip_driver_s *dev,
  * Function: psock_tcp_send
  *
  * Description:
- *   The psock_tcp_send() call may be used only when the TCP socket is in a
+ *   psock_tcp_send() call may be used only when the TCP socket is in a
  *   connected state (so that the intended recipient is known).
  *
  * Parameters:

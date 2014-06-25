@@ -53,6 +53,7 @@
 #include <nuttx/net/arp.h>
 
 #include "uip/uip.h"
+#include "pkt/pkt.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -77,7 +78,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_pktinput
+ * Name: pkt_input
  *
  * Description:
  *   Handle incoming packet input
@@ -95,13 +96,13 @@
  *
  ****************************************************************************/
 
-int uip_pktinput(struct uip_driver_s *dev)
+int pkt_input(struct uip_driver_s *dev)
 {
-  struct uip_pkt_conn *conn;
-  struct eth_hdr_s  *pbuf = (struct eth_hdr_s *)dev->d_buf;
+  FAR struct pkt_conn_s *conn;
+  FAR struct eth_hdr_s  *pbuf = (struct eth_hdr_s *)dev->d_buf;
   int ret = OK;
 
-  conn = uip_pktactive(pbuf);
+  conn = pkt_active(pbuf);
   if (conn)
     {
       uint16_t flags;
@@ -114,7 +115,7 @@ int uip_pktinput(struct uip_driver_s *dev)
 
       /* Perform the application callback */
 
-      flags = uip_pktcallback(dev, conn, UIP_NEWDATA);
+      flags = pkt_callback(dev, conn, UIP_NEWDATA);
 
       /* If the operation was successful, the UIP_NEWDATA flag is removed
        * and thus the packet can be deleted (OK will be returned).

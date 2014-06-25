@@ -56,6 +56,7 @@
 #include <nuttx/net/arp.h>
 
 #include "uip/uip.h"
+#include "pkt/pkt.h"
 
 /****************************************************************************
  * Private Data
@@ -63,7 +64,7 @@
 
 /* The array containing all packet socket connections */
 
-static struct uip_pkt_conn g_pkt_connections[CONFIG_NET_PKT_CONNS];
+static struct pkt_conn_s g_pkt_connections[CONFIG_NET_PKT_CONNS];
 
 /* A list of all free packet socket connections */
 
@@ -107,7 +108,7 @@ static inline void _uip_semtake(sem_t *sem)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_pktinit()
+ * Name: pkt_initialize()
  *
  * Description:
  *   Initialize the packet socket connection structures.  Called once and
@@ -115,7 +116,7 @@ static inline void _uip_semtake(sem_t *sem)
  *
  ****************************************************************************/
 
-void uip_pktinit(void)
+void pkt_initialize(void)
 {
   int i;
 
@@ -134,23 +135,23 @@ void uip_pktinit(void)
 }
 
 /****************************************************************************
- * Name: uip_pktpalloc()
+ * Name: pkt_palloc()
  *
  * Description:
  *   Alloc a new, uninitialized packet socket connection structure.
  *
  ****************************************************************************/
 
-struct uip_pkt_conn *uip_pktalloc(void)
+FAR struct pkt_conn_s *pkt_alloc(void)
 {
-  struct uip_pkt_conn *conn;
+  FAR struct pkt_conn_s *conn;
 
   /* The free list is only accessed from user, non-interrupt level and
    * is protected by a semaphore (that behaves like a mutex).
    */
 
   _uip_semtake(&g_free_sem);
-  conn = (struct uip_pkt_conn *)dq_remfirst(&g_free_pkt_connections);
+  conn = (FAR struct pkt_conn_s *)dq_remfirst(&g_free_pkt_connections);
   if (conn)
     {
       /* Make sure that the connection is marked as uninitialized */
@@ -167,7 +168,7 @@ struct uip_pkt_conn *uip_pktalloc(void)
 }
 
 /****************************************************************************
- * Name: uip_pktfree()
+ * Name: pkt_free()
  *
  * Description:
  *   Free a packet socket connection structure that is no longer in use.
@@ -175,7 +176,7 @@ struct uip_pkt_conn *uip_pktalloc(void)
  *
  ****************************************************************************/
 
-void uip_pktfree(struct uip_pkt_conn *conn)
+void pkt_free(FAR struct pkt_conn_s *conn)
 {
   /* The free list is only accessed from user, non-interrupt level and
    * is protected by a semaphore (that behaves like a mutex).
@@ -196,7 +197,7 @@ void uip_pktfree(struct uip_pkt_conn *conn)
 }
 
 /****************************************************************************
- * Name: uip_pktactive()
+ * Name: pkt_active()
  *
  * Description:
  *   Find a connection structure that is the appropriate
@@ -207,15 +208,15 @@ void uip_pktfree(struct uip_pkt_conn *conn)
  *
  ****************************************************************************/
 
-struct uip_pkt_conn *uip_pktactive(struct eth_hdr_s *buf)
+FAR struct pkt_conn_s *pkt_active(struct eth_hdr_s *buf)
 {
   #define uip_ethaddr_cmp(addr1, addr2) \
   ((addr1[0] == addr2[0]) && (addr1[1] == addr2[1]) && \
    (addr1[2] == addr2[2]) && (addr1[3] == addr2[3]) && \
    (addr1[4] == addr2[4]) && (addr1[5] == addr2[5]))
 
-  FAR struct uip_pkt_conn *conn =
-    (struct uip_pkt_conn *)g_active_pkt_connections.head;
+  FAR struct pkt_conn_s *conn =
+    (FAR struct pkt_conn_s *)g_active_pkt_connections.head;
 
   while (conn)
     {
@@ -230,7 +231,7 @@ struct uip_pkt_conn *uip_pktactive(struct eth_hdr_s *buf)
 
       /* Look at the next active connection */
 
-      conn = (struct uip_pkt_conn *)conn->node.flink;
+      conn = (FAR struct pkt_conn_s *)conn->node.flink;
     }
 
   return conn;
@@ -248,15 +249,15 @@ struct uip_pkt_conn *uip_pktactive(struct eth_hdr_s *buf)
  *
  ****************************************************************************/
 
-struct uip_pkt_conn *uip_nextpktconn(struct uip_pkt_conn *conn)
+FAR struct pkt_conn_s *uip_nextpktconn(FAR struct pkt_conn_s *conn)
 {
   if (!conn)
     {
-      return (struct uip_pkt_conn *)g_active_pkt_connections.head;
+      return (FAR struct pkt_conn_s *)g_active_pkt_connections.head;
     }
   else
     {
-      return (struct uip_pkt_conn *)conn->node.flink;
+      return (FAR struct pkt_conn_s *)conn->node.flink;
     }
 }
 

@@ -53,6 +53,7 @@
 #include <nuttx/net/pkt.h>
 
 #include "uip/uip.h"
+#include "pkt/pkt.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -75,7 +76,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_pktpoll
+ * Name: pkt_poll
  *
  * Description:
  *   Poll a packet "connection" structure for availability of TX data
@@ -92,7 +93,7 @@
  *
  ****************************************************************************/
 
-void uip_pktpoll(struct uip_driver_s *dev, struct uip_pkt_conn *conn)
+void pkt_poll(FAR struct uip_driver_s *dev, FAR struct pkt_conn_s *conn)
 {
   nlldbg("IN\n");
 
@@ -110,7 +111,7 @@ void uip_pktpoll(struct uip_driver_s *dev, struct uip_pkt_conn *conn)
 
       /* Perform the application callback */
 
-      (void)uip_pktcallback(dev, conn, UIP_POLL);
+      (void)pkt_callback(dev, conn, UIP_POLL);
 
       /* If the application has data to send, setup the UDP/IP header */
 

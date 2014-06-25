@@ -48,6 +48,7 @@
 #include "net.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
+#include "pkt/pkt.h"
 
 /****************************************************************************
  * Global Functions
@@ -170,7 +171,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
            * in the new socket instance.
            */
 
-          struct uip_pkt_conn *conn = uip_pktalloc();
+          FAR struct pkt_conn_s *conn = pkt_alloc();
           if (!conn)
             {
               /* Failed to reserve a connection structure */

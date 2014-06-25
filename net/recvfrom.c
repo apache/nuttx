@@ -60,6 +60,7 @@
 #include "uip/uip.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
+#include "pkt/pkt.h"
 
 /****************************************************************************
  * Definitions
@@ -1038,9 +1039,9 @@ static ssize_t recvfrom_result(int result, struct recvfrom_s *pstate)
 
 #ifdef CONFIG_NET_PKT
 static ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
-                           FAR struct sockaddr_ll *from)
+                            FAR struct sockaddr_ll *from)
 {
-  struct uip_pkt_conn *conn = (struct uip_pkt_conn *)psock->s_conn;
+  FAR struct pkt_conn_s *conn = (FAR struct pkt_conn_s *)psock->s_conn;
   struct recvfrom_s state;
   uip_lock_t save;
   int ret;
@@ -1060,7 +1061,7 @@ static ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
    */
 
 #if 0
-  ret = uip_pktconnect(conn, NULL);
+  ret = pkt_connect(conn, NULL);
   if (ret < 0)
     {
       goto errout_with_state;
@@ -1069,7 +1070,7 @@ static ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   /* Set up the callback in the connection */
 
-  state.rf_cb = uip_pktcallbackalloc(conn);
+  state.rf_cb = pkt_callbackalloc(conn);
   if (state.rf_cb)
     {
       state.rf_cb->flags  = UIP_NEWDATA|UIP_POLL;
@@ -1090,7 +1091,7 @@ static ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
       /* Make sure that no further interrupts are processed */
 
-      uip_pktcallbackfree(conn, state.rf_cb);
+      pkt_callbackfree(conn, state.rf_cb);
       ret = recvfrom_result(ret, &state);
     }
   else

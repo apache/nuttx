@@ -96,6 +96,7 @@
 #include "uip/uip.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
+#include "pkt/pkt.h"
 #include "icmp/icmp.h"
 #include "igmp/igmp.h"
 

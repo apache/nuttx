@@ -57,6 +57,7 @@
 
 #include "net.h"
 #include "uip/uip.h"
+#include "tcp/tcp.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -443,10 +444,10 @@ end_wait:
  ****************************************************************************/
 
 /****************************************************************************
- * Function: tcp_send
+ * Function: psock_tcp_send
  *
  * Description:
- *   The tcp_send() call may be used only when the TCP socket is in a
+ *   psock_tcp_send() call may be used only when the TCP socket is in a
  *   connected state (so that the intended recipient is known).
  *
  * Parameters:
@@ -499,7 +500,8 @@ end_wait:
  *
  ****************************************************************************/
 
-ssize_t tcp_send(FAR struct socket *psock, FAR const void *buf, size_t len)
+ssize_t psock_tcp_send(FAR struct socket *psock,
+                       FAR const void *buf, size_t len)
 {
   struct send_s state;
   uip_lock_t save;

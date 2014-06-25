@@ -73,7 +73,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_NET_PKT
-static int pkt_bind(FAR struct uip_pkt_conn *conn,
+static int pkt_bind(FAR struct pkt_conn_s *conn,
                     FAR const struct sockaddr_ll *addr)
 {
   int ifindex;

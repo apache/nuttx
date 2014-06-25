@@ -1595,7 +1595,7 @@ static void stm32_receive(FAR struct stm32_ethmac_s *priv)
 #ifdef CONFIG_NET_PKT
       /* When packet sockets are enabled, feed the frame into the packet tap */
 
-      uip_pktinput(&priv->dev);
+      pkt_input(&priv->dev);
 #endif
 
       /* Check if the packet is a valid size for the uIP buffer configuration

@@ -50,6 +50,7 @@
 #include "uip/uip.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
+#include "pkt/pkt.h"
 #include "igmp/igmp.h"
 
 /****************************************************************************
@@ -129,7 +130,7 @@ void uip_initialize(void)
   /* Initialize packet socket suport */
 
 #ifdef CONFIG_NET_PKT
-  uip_pktinit();
+  pkt_initialize();
 #endif
 
   /* Initialize the listening port structures */

@@ -69,6 +69,26 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+struct eth_hdr_s; /* Forward reference */
+
+/* Defined in pkt_conn.c ****************************************************/
+
+void pkt_initialize(void);
+struct pkt_conn_s *pkt_alloc(void);
+void pkt_free(FAR struct pkt_conn_s *conn);
+struct pkt_conn_s *pkt_active(FAR struct eth_hdr_s *buf);
+struct pkt_conn_s *uip_nextpktconn(FAR struct pkt_conn_s *conn);
+
+/* Defined in pkt_callback.c ************************************************/
+
+uint16_t pkt_callback(FAR struct uip_driver_s *dev,
+                      FAR struct pkt_conn_s *conn, uint16_t flags);
+
+/* Defined in pkt_input.c ***************************************************/
+
+/* Defined in pkt_poll.c ****************************************************/
+
+void pkt_poll(FAR struct uip_driver_s *dev, FAR struct pkt_conn_s *conn);
 
 /****************************************************************************
  * Function: psock_pkt_send

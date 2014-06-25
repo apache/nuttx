@@ -49,6 +49,7 @@
 #include "uip/uip.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
+#include "pkt/pkt.h"
 #include "icmp/icmp.h"
 #include "igmp/igmp.h"
 
@@ -76,7 +77,7 @@
 static int uip_pollpktconnections(struct uip_driver_s *dev,
                                   uip_poll_callback_t callback)
 {
-  struct uip_pkt_conn *pkt_conn = NULL;
+  FAR struct pkt_conn_s *pkt_conn = NULL;
   int bstop = 0;
 
   /* Traverse all of the allocated packet connections and perform the poll action */
@@ -85,7 +86,7 @@ static int uip_pollpktconnections(struct uip_driver_s *dev,
     {
       /* Perform the packet TX poll */
 
-      uip_pktpoll(dev, pkt_conn);
+      pkt_poll(dev, pkt_conn);
 
       /* Call back into the driver */
 

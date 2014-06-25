@@ -55,7 +55,7 @@
 
 /* Representation of a uIP packet socket connection */
 
-struct uip_pkt_conn
+struct pkt_conn_s
 {
   dq_entry_t node;     /* Supports a double linked list */
   uint8_t    lmac[6];  /* The local Ethernet address in network byte order */
@@ -86,21 +86,19 @@ struct uip_pkt_conn
  * normally something done by the implementation of the socket() API
  */
 
-struct uip_pkt_conn *uip_pktalloc(void);
+FAR struct pkt_conn_s *pkt_alloc(void);
 
 /* Allocate a new packet socket data callback */
 
-#define uip_pktcallbackalloc(conn)   uip_callbackalloc(&conn->list)
-#define uip_pktcallbackfree(conn,cb) uip_callbackfree(cb, &conn->list)
+#define pkt_callbackalloc(conn)   uip_callbackalloc(&conn->list)
+#define pkt_callbackfree(conn,cb) uip_callbackfree(cb, &conn->list)
 
 /* Free a connection structure that is no longer in use. This should
  * be done by the implementation of close()
  */
 
-void uip_pktfree(struct uip_pkt_conn *conn);
-
-void uip_pktpoll(struct uip_driver_s *dev, struct uip_pkt_conn *conn);
-
-int uip_pktinput(struct uip_driver_s *dev);
+void pkt_free(FAR struct pkt_conn_s *conn);
+void pkt_poll(FAR struct uip_driver_s *dev, FAR struct pkt_conn_s *conn);
+int pkt_input(FAR struct uip_driver_s *dev);
 
 #endif /* __INCLUDE_NUTTX_NET_PKT_H */

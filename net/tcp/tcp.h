@@ -70,7 +70,6 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifdef CONFIG_NET_TCP
 /* Defined in tcp_conn.c ****************************************************/
 
 void tcp_initialize(void);
@@ -130,7 +129,6 @@ uint16_t tcp_callback(FAR struct uip_driver_s *dev,
 uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn,
                          FAR uint8_t *buffer, uint16_t nbytes);
 #endif
-#endif /* CONFIG_NET_TCP */
 
 /****************************************************************************
  * Function: psock_tcp_send

@@ -57,6 +57,7 @@
 
 #include "net.h"
 #include "uip/uip.h"
+#include "pkt/pkt.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -237,11 +238,11 @@ ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
 
   if (len > 0)
     {
-      struct uip_pkt_conn *conn = (struct uip_pkt_conn*)psock->s_conn;
+      FAR struct pkt_conn_s *conn = (FAR struct pkt_conn_s *)psock->s_conn;
 
       /* Allocate resource to receive a callback */
 
-      state.snd_cb = uip_pktcallbackalloc(conn);
+      state.snd_cb = pkt_callbackalloc(conn);
       if (state.snd_cb)
         {
           FAR struct uip_driver_s *dev;
@@ -279,7 +280,7 @@ ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
 
           /* Make sure that no further interrupts are processed */
 
-          uip_pktcallbackfree(conn, state.snd_cb);
+          pkt_callbackfree(conn, state.snd_cb);
 
           /* Clear the no-ARP bit in the device flags */
 

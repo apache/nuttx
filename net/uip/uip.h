@@ -96,35 +96,104 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* Defined in uip_callback.c ************************************************/
+/****************************************************************************
+ * Function: uip_callbackinit
+ *
+ * Description:
+ *   Configure the pre-allocated callback structures into a free list.
+ *   This is called internally as part of uIP initialization and should not
+ *   be accessed from the application or socket layer.
+ *
+ * Assumptions:
+ *   This function is called with interrupts disabled.
+ *
+ ****************************************************************************/
 
 void uip_callbackinit(void);
-FAR struct uip_callback_s *uip_callbackalloc(struct uip_callback_s **list);
-void uip_callbackfree(FAR struct uip_callback_s *cb, struct uip_callback_s **list);
-uint16_t uip_callbackexecute(FAR struct uip_driver_s *dev, void *pvconn,
+
+/****************************************************************************
+ * Function: uip_callbackalloc
+ *
+ * Description:
+ *   Allocate a callback container from the free list.
+ *   This is called internally as part of uIP initialization and should not
+ *   be accessed from the application or socket layer.
+ *
+ * Assumptions:
+ *   This function is called with interrupts disabled.
+ *
+ ****************************************************************************/
+
+FAR struct uip_callback_s *uip_callbackalloc(FAR struct uip_callback_s **list);
+
+/****************************************************************************
+ * Function: uip_callbackfree
+ *
+ * Description:
+ *   Return a callback container to the free list.
+ *   This is called internally as part of uIP initialization and should not
+ *   be accessed from the application or socket layer.
+ *
+ * Assumptions:
+ *   This function is called with interrupts disabled.
+ *
+ ****************************************************************************/
+
+void uip_callbackfree(FAR struct uip_callback_s *cb,
+                      FAR struct uip_callback_s **list);
+
+/****************************************************************************
+ * Function: uip_callbackexecute
+ *
+ * Description:
+ *   Execute a list of callbacks.
+ *   This is called internally as part of uIP initialization and should not
+ *   be accessed from the application or socket layer.
+ *
+ * Assumptions:
+ *   This function is called with interrupts disabled.
+ *
+ ****************************************************************************/
+
+uint16_t uip_callbackexecute(FAR struct uip_driver_s *dev, FAR void *pvconn,
                              uint16_t flags, FAR struct uip_callback_s *list);
 
+/****************************************************************************
+ * Send data on the current connection.
+ *
+ * This function is used to send out a single segment of TCP
+ * data. Only applications that have been invoked by uIP for event
+ * processing can send data.
+ *
+ * The amount of data that actually is sent out after a call to this
+ * function is determined by the maximum amount of data TCP allows. uIP
+ * will automatically crop the data so that only the appropriate
+ * amount of data is sent. The function uip_mss() can be used to query
+ * uIP for the amount of data that actually will be sent.
+ *
+ * Note: This function does not guarantee that the sent data will
+ * arrive at the destination. If the data is lost in the network, the
+ * application will be invoked with the UIP_REXMIT flag set.  The
+ * application will then have to resend the data using this function.
+ *
+ * data A pointer to the data which is to be sent.
+ *
+ * len The maximum amount of data bytes to be sent.
+ *
+ ****************************************************************************/
+
+void uip_send(FAR struct uip_driver_s *dev, FAR const void *buf, int len);
+
+#ifdef CONFIG_NET_IOB
+struct iob_s;
+void uip_iobsend(FAR struct uip_driver_s *dev, FAR struct iob_s *buf,
+                 unsigned int len, unsigned int offset);
+#endif
+
 #ifdef CONFIG_NET_PKT
-/* Defined in uip_pktconn.c *************************************************/
-
-void uip_pktinit(void);
-struct uip_pkt_conn *uip_pktalloc(void);
-void uip_pktfree(struct uip_pkt_conn *conn);
-struct uip_pkt_conn *uip_pktactive(struct eth_hdr_s *buf);
-struct uip_pkt_conn *uip_nextpktconn(struct uip_pkt_conn *conn);
-
-/* Defined in uip_pktcallback.c *********************************************/
-
-uint16_t uip_pktcallback(struct uip_driver_s *dev, struct uip_pkt_conn *conn,
-                         uint16_t flags);
-
-/* Defined in uip_pktinput.c ************************************************/
-
-/* Defined in uip_pktpoll.c *************************************************/
-
-void uip_pktpoll(struct uip_driver_s *dev, struct uip_pkt_conn *conn);
-
-#endif /* CONFIG_NET_PKT */
+void uip_pktsend(FAR struct uip_driver_s *dev, FAR const void *buf,
+                 unsigned int len);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus
