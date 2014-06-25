@@ -7255,7 +7255,7 @@
 	  Ticket #26.  up_prioritize_irq should not be called if
 	  CONFIG_ARCH_IRQPRIO is not defined (2014-4-25).
 
-7.3 2014-xx-xx Gregory Nutt <gnutt@nuttx.org>
+7.3 2014-06-25 Gregory Nutt <gnutt@nuttx.org>
 
 	* arch/arm/src/sama5/sam_clockconfig.c:  Needed function sam_pmcwait()
 	  is needed when UDPHS, EHCI, or OHCI is configured but may not be
@@ -7371,13 +7371,13 @@
 	* configs/viewtool-stm32f107/nsh: Configuration refreshed (2014-5-23).
 	* arch/arm/src/stm32/stm32_i2c_alt.c: Final driver from Max Kriegleder et al.
 	  Reduces footprint and fixes a bug.  (2014-5-23).
-	* tools/configure.sh:  In-place SED edit an mess up permissions on windows.
+	* tools/configure.sh:  In-place SED edit messes up permissions on windows.
 	  From Hannes Delago (2014-5-25).
 	* include/nuttx/mtd/mtd.h:  Needs forward reference to struct spi_dev_s.
 	  (2014-5-25).
 	* arch/arm/src/stm32/stm32_i2c.c and stm32_i2c_alt.c:  Back out PX4 fixes
 	  that were reverted in the PX4 repositories (2014-5-25).
-	* sched/Kconfig:  CONFIG_START_YEAR/MONTH/DAY are not required is the
+	* sched/Kconfig:  CONFIG_START_YEAR/MONTH/DAY are not required if the
 	  RTC is enabled (2014-5-26).
 	* arch/arm/src/stm32/stm32_rtcc.c:  Add retry logic to RTC initialization.
 	  It sometimes takes longer for the RTC to initialize, at least as noted
@@ -7397,7 +7397,7 @@
 	  freed. From Max Holtzberg (2014-6-2).
 	* TCP fallback allocation: Added all states in which the connections are
 	  about to be closed.  Fallback mechanism is disabled when SO_LINGER is
-	  enabled to prevent deadlocks in netclos_disconnect().  From Max Holtzberg
+	  enabled to prevent deadlocks in netclose_disconnect().  From Max Holtzberg
 	  (2014-6-2).
 	* configs/olimex-stm32_h405:  Support for the Olimex STM32 H405 board
 	  contributed by Martin Lederhilger (2014-6-3).
@@ -7406,7 +7406,7 @@
 	* net/iob:  Add generic I/O buffering.  Not currently used by anything.
 	  (2014-6-4).
 	* arch/arm/include/sama5 and arch/arm/src/sama5:  Basic framework to
-	  support the SAMA5D4 family.  Incomplete on initial check-in (201406-3).
+	  support the SAMA5D4 family.  Incomplete on initial check-in (2014-6-3).
 	* arch/arm/src/sama5/chip/sam_xdmac.h: Beginning of XDMAC register
 	  definition header file (incomplete) (2014-6-4).
 	* arch/arm/src/sama5/chip/sam_l2cc.h:  Add SAMA5D4 L2CC register definition
@@ -7415,7 +7415,7 @@
 	  data when USB cable disconnected/re-connected.  From Lizhuoyi (2014-6-6).
 	* drivers/usbdev/pl2303.c:  Same change cloned for PL2303 (2014-6-6).
 	* arch/arm/src/lpc2378:  Fix several typos. From Lizhuoyi (2014-6-6).
-	* arch/arm/src/lpc17xx/lpb17_gpdma.c:  Fix an error when DMA is
+	* arch/arm/src/lpc17xx/lpc17_gpdma.c:  Fix an error when DMA is
 	  started:  The read-modify-write fails when the DMA is started.  This
 	  is because the value read is not the same as the value set (on write
 	  it is the number of transfers to do; on read it is the number of
@@ -7519,3 +7519,5 @@
 	  (204-6-25).
 	* arch/arm/src/sam34 and include/sam34:  Add support for the SAM4CM
 	  family.  From Max Neklyudov (2014-6-25).
+
+7.4 2014-xx-xx Gregory Nutt <gnutt@nuttx.org>

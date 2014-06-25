@@ -6350,3 +6350,250 @@ Bugfixes (see the ChangeLog for details).  Some of these are very important:
       - telnetd Example:  Naming is confused.  In someplaces 'telnetd',
         and in others 'shell.'  All changes to telnetd.  Noted by Pelle
         Windestam.
+
+NuttX-7.3
+---------
+
+The 103rd release of NuttX, Version 7.3, was made on June 25, 2014,
+and is available for download from the SourceForge website.  Note
+that release consists of two tarballs:  nuttx-7.3.tar.gz and
+apps-7.3.tar.gz.  Both may be needed (see the top-level nuttx/README.txt
+file for build information).
+
+Additional new features and extended functionality:
+
+    * Core OS:
+
+      - Dynamic loader: Framework to support Pascal P-Code as a binary
+        format that can be exec'ed from a file system.
+      - Dynamic Loader:  Extend the binfmt interface to handle error
+        conditions where format-specific clean-up is needed in the event
+        of error conditions.  This is needed by the P-Code binfmt.
+
+    * Networking
+
+      - IOB:  Add a generic I/O buffer chain logic.  This logic uses small,
+        pre-allocated buffers that can be chained together to support
+        transfers of any size, using fewer resources and also without
+        committing in advance to a TCP window size.  There is now only
+        one I/O type used in the networking and it is these I/O buffer
+        chains.
+      - TCP Write Buffering:  TCP write buffering logic converted to use
+        I/O buffer chains.
+      - TCP Read-Ahead Buffering:  TCP read-ahead buffering logic converted
+        to use I/O buffer chains.
+      - Includes logic to support throttling of read-ahead buffering if
+        the read-ahead buffering is competing with write buffering for
+        I/O buffers.
+      - Raw Sockets:  Add support for the AF_PACKET socket family.  From
+        Daniel Lazlo Sitzer.
+
+    * Common Drivers:
+
+      - W25 Serial FLASH driver extended by Mark Whitehorn to support the
+        8Mbit W25Q80BV part.
+      - Add support for Fujitsu MB85RS1MT RAMTRON part.  From Charles Ash.
+      - Enhancements to the generic timer interface to support capture mode
+        from Bob Doiron.
+      - Add an rxflowcontrol method to the serial interface to better
+        support RX flow control. This involves common changes in addition to minor updates to all MCU-specific serial drivers (only fully implemented for the STM32). From Jussi Kivilinna.
+
+    * Atmel SAM4C
+
+      - Add support for the SAM4CM family.  From Max Neklyudov.
+
+    * Atmel SAM4E/4S Drivers:
+
+      - RTT driver from Bob Doiron.  Also added high resolution RTC
+        emulation using the RTT for the sub-second counter.
+
+    * Atmel SAM4E/4S Board Support:
+
+      - The SAM4S Xplained Pro now uses the extended timer/counter
+        features. From Bob Doiron.
+      - Added a touchscreen and LCD driver for the SAM4E-EK board (the LCD,
+        however, not yet fully functional).
+
+    * Atmel SAMA5:
+
+      - Optimized, high performance, assembly language memcpy().  This is
+        the same optimized memcpy() function that Mike Smith brought in
+        for the ARMv7-M with minor tweaks by David Sidrane to work with
+        the ARMv7-A.
+      - Basic support added for the SAMA5D4 family.
+
+    * Atmel SAMA5 Drivers:
+
+      - SAMA5D4:  New drivers unique to the SAMA5D4: XDMAC, SAIC, and
+        others.
+
+    * Atmel SAMA5 Board Support:
+
+      - SAMA5D4-MB:  Initial board support for the SAMA5D4-MB/EK boards.
+
+    * STMicro STM32
+
+      - Add support for the STM32152 and STM32162 Medium+ density parts
+        (plus miscellaneous other improvements to the original STM32151
+        logic).  From Jussi Kivilinna and Sami Pelkonen.
+
+    * STMicro STM32 Boards:
+
+      - Support for the Olimex STM32 H405 board contributed by Martin
+        Lederhilger.
+
+    * STMicro STM32 Drivers:
+
+      - Implement the rxflowcontrol method to the serial interface to better
+        support RX flow control. From Jussi Kivilinna.
+
+    * NXP LPC17xx Drivers:
+
+      - Added support for the RTC, ADC, DAC, Timers, PWM and MCPWM
+        drivers.  From Max (himax).
+
+    * NXP LPC17xx Boards:
+
+      - Support for the RTC, ADC, DAC, Timers, PWM and MCPWM integrated
+        in the LPCXpresso LPC1768 board support.  From Max (himax).
+
+    * Library:
+
+      - Add support for seek-able streams.
+
+    * Configuration/Build System:
+
+      - Restructured network directories, header files, and naming to
+        better modularize the networking and to better integrate the
+        networking with the rest of NuttX.
+
+    * Applications:
+
+      - prun:  An NSH built-in application that can be used to run
+        Pascal P-Code programs either programatically or from the NSH
+        command line.
+      - netpkt:  A "raw" socket test from Lazlo Sitzer.
+      - hex2bin:  A library and built-in task to convert from
+        Intel HEX to binary format.  It can write the binary data to a file or it can store the binary data to memory (to support, for example, a loader).
+
+Bugfixes.  Only the most critical bugfixes are listed here (see the ChangeLog for the complete list of bugfixes and for additional, more detailed bugfix information):
+
+    * Core OS:
+
+      - Dynamic Loader: Fix an error in a symbol table search function.
+        Noted by Pelle Windestam.
+      - Dynamic Loader:  Fix a critical error in exec(); argv was not
+        being passed.
+      - mq_notify:  Test for a valid signal number was inverted; this
+        function could not have been working correctly before???  From
+        eero.nurkkala.
+      - Fix typo in conditional compilation:  CONFIG_CLOCK_MONOTONIC vs.
+        CLOCK_MONOTONIC.  From Manuel Stühn.
+
+    * Graphics
+
+      - Fix typos in several RGB conversion macros.
+
+    * Networking:
+
+      - Modify TCP timout handling to provent situations where connections
+        may not be freed. From Max Holtzberg.
+      - Improved TCP fallback allocation logic from Max Holtzberg. Also,
+        fallback mechanism is disabled when SO_LINGER is to prevent
+        deadlocks.
+      - Write Buffering:  Add checks from buffer allocation failures. From
+        Max/Himax.
+
+    * Network Utilities:
+
+      - webserver: httpd_fs_open() should return OK on success and ERROR on
+        failure, not 1 and 0.
+
+    * Common Drivers:
+
+      - Make sure that all references to up_prioritize_irq() are
+        conditioned on CONFIG_ARCH_IRQPRIO.  Problem noted by Mike Smith.
+      - CC3000: Correct SPI mode for CC3000 is CPOL=0 CHPA=1. From Jussi
+        Kivilinna.
+      - CC3000: Fix a race condition in thread start-up logic. From Jussi
+        Kivilinna.
+      - CC3000: Additional fixes including a compilation failure if POLL is
+        enabled. From Jussi Kivilinna.
+
+    * USB Drivers:
+
+      - CDC/ACM and PL2303 device:  Reset RX head to avoid resending last
+        serial data when USB cable disconnected/re-connected.  From
+        Lizhuoyi.
+
+    * TI Tiva/Stellaris Boards:
+
+      - The Nucleo-F401RE has no on-board crystals and, hence, needs to run
+        with the PLL input from the on-chip HSI clock.
+
+    * STMicro STM32 Drivers:
+
+      - Serial:  Handle configuration for the case of 8-bit data with
+        parity.  From Freddie Chopin.
+
+    * Atmel SAM3/4 Boards:
+
+      - There was a cloned error in all SAM3/4 board configurations (and
+        for a few other architectures as well).  Button interrupts not
+        being disabled after being detached.  As a result, unexpected
+        interrupts could be received after the button interrupt was
+        detached.
+
+    * Atmel SAMA5:
+
+      - Fix some critical typos in the SAMA5D3 DMA definitions.
+
+    * STMicro STM32 Drivers
+
+      - I2C: Add an alternative I2C implementation for the STM32 F103 that
+        works around errata in that specific part.  From Patrizio Simona.
+      - RTCC:  Add retry logic to RTC initialization. It sometimes takes
+        longer for the RTC to initialize, at least as noted on an F2 part.
+        From Daniel Lazlo Sitzer.
+
+    * NXP LPC17xx Drivers
+
+      - GPDMA:  Fix an error when DMA is started:  The read-modify-write
+        fails when the DMA is started.  This is because the value read is
+        not the same as the value set (on write it is the number of
+        transfers to do; on read it is the number of transfers completed).
+        From Lizhuoyi.
+
+    * Library:
+
+      - snprintf():  If the size passed to snprintf() is zero, then
+        snprintf() must write nothing, but instead return the size of the
+        buffer needed to hold the entire string.  From Sami Pelkonen.
+
+    * Configuration/Build System:
+
+      - The alternate console device CONFIG_NSH_CONDEV must not be defined
+        unconditionally. This causes errors when using Telnet sessions.
+        This was solved by adding CONFIG_NSH_ALTCONDEV: CONFIG_NSH_ALTCONDEV enables or disables the feature then, if
+        enabled, CONFIG_NSH_CONDEV provides the alternative console
+        device name.
+      - Many files: Convert all old-style GCC variadic macros to the C99
+        form.  Recent GCC changes tightens up that behavior and can cause
+        some problems (at least for the IAR compiler for some reason).
+        Noted by Bob Grimes.
+      - tools/configure.sh:  In-place SED edit messes up permissions on
+        windows. From Hannes Delago.
+
+    * Build Tools:
+
+      - tools/mkfsdata.pl:  Apparently, the trailing the 0x00 in http
+        server files is seen as a bug in javascript and images.  From
+        Max/Himax.
+
+    * Other Applications:
+
+      - I2C Tool:  Fix to show the updated register address on each
+        fetch (vs. showing the same starting address each time).  From
+        Ryan VanSickle.
+      - CLE was not returning the terminating newline character. But
+        reported by Max kriegleder.
