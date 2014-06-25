@@ -248,7 +248,7 @@
  * header
  */
 
-#define BUF ((struct uip_eth_hdr *)priv->dev.d_buf)
+#define BUF ((struct eth_hdr_s *)priv->dev.d_buf)
 
 /****************************************************************************
  * Private Types

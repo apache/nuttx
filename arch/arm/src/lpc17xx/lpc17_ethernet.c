@@ -152,7 +152,7 @@
 
 /* This is a helper pointer for accessing the contents of the Ethernet header */
 
-#define BUF ((struct uip_eth_hdr *)priv->lp_dev.d_buf)
+#define BUF ((struct eth_hdr_s *)priv->lp_dev.d_buf)
 
 /* This is the number of ethernet GPIO pins that must be configured */
 

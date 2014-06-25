@@ -213,7 +213,7 @@
 
 /* This is a helper pointer for accessing the contents of the Ethernet header */
 
-#define BUF ((struct uip_eth_hdr *)priv->pd_dev.d_buf)
+#define BUF ((struct eth_hdr_s *)priv->pd_dev.d_buf)
 
 /* PHYs *********************************************************************/
 /* Select PHY-specific values.  Add more PHYs as needed. */

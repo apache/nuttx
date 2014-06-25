@@ -151,7 +151,7 @@
 
 /* This is a helper pointer for accessing the contents of the Ethernet header */
 
-#define ETHBUF ((struct uip_eth_hdr *)priv->ld_dev.d_buf)
+#define ETHBUF ((struct eth_hdr_s *)priv->ld_dev.d_buf)
 
 #define TIVA_MAX_MDCCLK 2500000
 
