@@ -7517,3 +7517,5 @@
 	* net/: Clean up all TCP and UDP related naming (204-6-24).
 	* net/: Clean up all ICMP, IGMP, ARP, and PKT related naming
 	  (204-6-25).
+	* arch/arm/src/sam34 and include/sam34:  Add support for the SAM4CM
+	  family.  From Max Neklyudov (2014-6-25).
