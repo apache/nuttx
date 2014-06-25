@@ -49,6 +49,7 @@
 #include "uip/uip.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
+#include "icmp/icmp.h"
 
 /****************************************************************************
  * Private Data
@@ -112,7 +113,7 @@ static inline int uip_pollicmp(FAR struct uip_driver_s *dev,
 {
   /* Perform the UDP TX poll */
 
-  uip_icmppoll(dev);
+  icmp_poll(dev);
 
   /* Call back into the driver */
 

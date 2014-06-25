@@ -96,6 +96,7 @@
 #include "uip/uip.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
+#include "icmp/icmp.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -436,7 +437,7 @@ int uip_input(struct uip_driver_s *dev)
       if (pbuf->proto == UIP_PROTO_ICMP)
         {
           nlldbg("Possible ping config packet received\n");
-          uip_icmpinput(dev);
+          icmp_input(dev);
           goto drop;
         }
       else
@@ -526,7 +527,7 @@ int uip_input(struct uip_driver_s *dev)
 #else
       case UIP_PROTO_ICMP6: /* ICMP6 input */
 #endif
-        uip_icmpinput(dev);
+        icmp_input(dev);
         break;
 #endif
 

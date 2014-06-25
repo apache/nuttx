@@ -125,23 +125,6 @@ void uip_pktpoll(struct uip_driver_s *dev, struct uip_pkt_conn *conn);
 
 #endif /* CONFIG_NET_PKT */
 
-#ifdef CONFIG_NET_ICMP
-/* Defined in icmp_input.c **************************************************/
-
-void uip_icmpinput(struct uip_driver_s *dev);
-
-#ifdef CONFIG_NET_ICMP_PING
-/* Defined in icmp_poll.c ***************************************************/
-
-void uip_icmppoll(struct uip_driver_s *dev);
-
-/* Defined in icmp_send.c ***************************************************/
-
-void uip_icmpsend(struct uip_driver_s *dev, uip_ipaddr_t *destaddr);
-
-#endif /* CONFIG_NET_ICMP_PING */
-#endif /* CONFIG_NET_ICMP */
-
 #ifdef CONFIG_NET_IGMP
 /* Defined in igmp_init.c ***************************************************/
 

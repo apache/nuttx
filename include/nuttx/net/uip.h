@@ -249,7 +249,7 @@ struct uip_callback_s
  */
 
 #ifdef CONFIG_NET_STATISTICS
-struct uip_ip_stats_s
+struct ip_stats_s
 {
   uip_stats_t drop;       /* Number of dropped packets at the IP layer */
   uip_stats_t recv;       /* Number of received packets at the IP layer */
@@ -270,22 +270,22 @@ struct uip_ip_stats_s
 
 struct uip_stats
 {
-  struct uip_ip_stats_s   ip;   /* IP statistics */
+  struct ip_stats_s   ip;   /* IP statistics */
 
 #ifdef CONFIG_NET_ICMP
-  struct uip_icmp_stats_s icmp; /* ICMP statistics */
+  struct icmp_stats_s icmp; /* ICMP statistics */
 #endif
 
 #ifdef CONFIG_NET_IGMP
-  struct uip_igmp_stats_s igmp; /* IGMP statistics */
+  struct igmp_stats_s igmp; /* IGMP statistics */
 #endif
 
 #ifdef CONFIG_NET_TCP
-  struct tcp_stats_s      tcp;  /* TCP statistics */
+  struct tcp_stats_s  tcp;  /* TCP statistics */
 #endif
 
 #ifdef CONFIG_NET_UDP
-  struct udp_stats_s      udp;  /* UDP statistics */
+  struct udp_stats_s  udp;  /* UDP statistics */
 #endif
 };
 #endif /* CONFIG_NET_STATISTICS */

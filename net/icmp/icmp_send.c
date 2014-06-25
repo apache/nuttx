@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/icmp/icmp_send.c
  *
- *   Copyright (C) 2008-2010, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010, 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,12 +47,13 @@
 #include <nuttx/net/netdev.h>
 
 #include "uip/uip.h"
+#include "icmp/icmp.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ICMPBUF ((struct uip_icmpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
+#define ICMPBUF ((struct icmp_iphdr_s *)&dev->d_buf[UIP_LLH_LEN])
 
 /****************************************************************************
  * Public Variables
@@ -71,7 +72,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_icmpsend
+ * Name: icmp_send
  *
  * Description:
  *   Setup to send an ICMP packet
@@ -87,9 +88,9 @@
  *
  ****************************************************************************/
 
-void uip_icmpsend(struct uip_driver_s *dev, uip_ipaddr_t *destaddr)
+void icmp_send(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *destaddr)
 {
-  struct uip_icmpip_hdr *picmp = ICMPBUF;
+  FAR struct icmp_iphdr_s *picmp = ICMPBUF;
 
   if (dev->d_sndlen > 0)
     {
@@ -149,7 +150,7 @@ void uip_icmpsend(struct uip_driver_s *dev, uip_ipaddr_t *destaddr)
       /* Calculate the ICMP checksum. */
 
       picmp->icmpchksum  = 0;
-      picmp->icmpchksum  = ~(uip_icmpchksum(dev, dev->d_sndlen));
+      picmp->icmpchksum  = ~(icmp_chksum(dev, dev->d_sndlen));
       if (picmp->icmpchksum == 0)
         {
           picmp->icmpchksum = 0xffff;

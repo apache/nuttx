@@ -2,7 +2,7 @@
  * net/icmp/icmp_input.c
  * Handling incoming ICMP/ICMP6 input
  *
- *   Copyright (C) 2007-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -54,6 +54,7 @@
 #include <nuttx/net/netdev.h>
 
 #include "uip/uip.h"
+#include "icmp/icmp.h"
 
 #ifdef CONFIG_NET_ICMP
 
@@ -61,7 +62,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ICMPBUF ((struct uip_icmpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
+#define ICMPBUF ((struct icmp_iphdr_s *)&dev->d_buf[UIP_LLH_LEN])
 
 /****************************************************************************
  * Public Variables
@@ -72,7 +73,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMP_PING
-struct uip_callback_s *g_echocallback = NULL;
+FAR struct uip_callback_s *g_echocallback = NULL;
 #endif
 
 /****************************************************************************
@@ -84,7 +85,7 @@ struct uip_callback_s *g_echocallback = NULL;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_icmpinput
+ * Name: icmp_input
  *
  * Description:
  *   Handle incoming ICMP/ICMP6 input
@@ -101,9 +102,9 @@ struct uip_callback_s *g_echocallback = NULL;
  *
  ****************************************************************************/
 
-void uip_icmpinput(struct uip_driver_s *dev)
+void icmp_input(FAR struct uip_driver_s *dev)
 {
-  struct uip_icmpip_hdr *picmp = ICMPBUF;
+  FAR struct icmp_iphdr_s *picmp = ICMPBUF;
 
 #ifdef CONFIG_NET_STATISTICS
   uip_stat.icmp.recv++;
@@ -146,7 +147,7 @@ void uip_icmpinput(struct uip_driver_s *dev)
       /* The slow way... sum over the ICMP message */
 
       picmp->icmpchksum = 0;
-      picmp->icmpchksum = ~uip_icmpchksum(dev, (((uint16_t)picmp->len[0] << 8) | (uint16_t)picmp->len[1]) - UIP_IPH_LEN);
+      picmp->icmpchksum = ~icmp_chksum(dev, (((uint16_t)picmp->len[0] << 8) | (uint16_t)picmp->len[1]) - UIP_IPH_LEN);
       if (picmp->icmpchksum == 0)
         {
           picmp->icmpchksum = 0xffff;
@@ -235,7 +236,7 @@ typeerr:
           picmp->options[1] = 1;  /* Options length, 1 = 8 bytes. */
           memcpy(&(picmp->options[2]), &dev->d_mac, IFHWADDRLEN);
           picmp->icmpchksum = 0;
-          picmp->icmpchksum = ~uip_icmp6chksum(dev);
+          picmp->icmpchksum = ~icmp_6chksum(dev);
         }
       else
         {
@@ -254,7 +255,7 @@ typeerr:
       uiphdr_ipaddr_copy(picmp->destipaddr, picmp->srcipaddr);
       uiphdr_ipaddr_copy(picmp->srcipaddr, &dev->d_ipaddr);
       picmp->icmpchksum = 0;
-      picmp->icmpchksum = ~uip_icmp6chksum(dev);
+      picmp->icmpchksum = ~icmp_6chksum(dev);
     }
 
   /* If an ICMP echo reply is received then there should also be

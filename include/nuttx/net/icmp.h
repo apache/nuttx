@@ -110,7 +110,7 @@
 
 /* The ICMP and IP headers */
 
-struct uip_icmpip_hdr
+struct icmp_iphdr_s
 {
 #ifdef CONFIG_NET_IPv6
 
@@ -178,7 +178,7 @@ struct uip_icmpip_hdr
  */
 
 #ifdef CONFIG_NET_STATISTICS
-struct uip_icmp_stats_s
+struct icmp_stats_s
 {
   uip_stats_t drop;       /* Number of dropped ICMP packets */
   uip_stats_t recv;       /* Number of received ICMP packets */

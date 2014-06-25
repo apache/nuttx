@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/icmp/icmp_poll.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,7 +69,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_icmppoll
+ * Name: icmp_poll
  *
  * Description:
  *   Poll a UDP "connection" structure for availability of TX data
@@ -85,7 +85,7 @@
  *
  ****************************************************************************/
 
-void uip_icmppoll(struct uip_driver_s *dev)
+void icmp_poll(FAR struct uip_driver_s *dev)
 {
   /* Setup for the application callback */
 

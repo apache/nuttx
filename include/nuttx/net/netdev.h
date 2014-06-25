@@ -389,7 +389,6 @@ uint16_t uip_ipchksum(struct uip_driver_s *dev);
 
 uint16_t tcp_chksum(struct uip_driver_s *dev);
 uint16_t udp_chksum(struct uip_driver_s *dev);
-uint16_t uip_icmpchksum(struct uip_driver_s *dev, int len);
+uint16_t icmp_chksum(struct uip_driver_s *dev, int len);
 
 #endif /* __INCLUDE_NUTTX_NET_NETDEV_H */
-

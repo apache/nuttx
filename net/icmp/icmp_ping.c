@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/icmp/icmp_ping.c
  *
- *   Copyright (C) 2008-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,19 +54,21 @@
 #include <nuttx/net/netdev.h>
 
 #include "uip/uip.h"
-#include "../net.h" /* Should not include this! */
+#include "icmp/icmp.h"
+
+#include "net.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ICMPBUF ((struct uip_icmpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
-#define ICMPDAT (&dev->d_buf[UIP_LLH_LEN + sizeof(struct uip_icmpip_hdr)])
+#define ICMPBUF ((struct icmp_iphdr_s *)&dev->d_buf[UIP_LLH_LEN])
+#define ICMPDAT (&dev->d_buf[UIP_LLH_LEN + sizeof(struct icmp_iphdr_s)])
 
 /* Allocate a new ICMP data callback */
 
-#define uip_icmpcallbackalloc()   uip_callbackalloc(&g_echocallback)
-#define uip_icmpcallbackfree(cb)  uip_callbackfree(cb, &g_echocallback)
+#define icmp_callbackalloc()   uip_callbackalloc(&g_echocallback)
+#define icmp_callbackfree(cb)  uip_callbackfree(cb, &g_echocallback)
 
 /****************************************************************************
  * Private Types
@@ -116,7 +118,7 @@ struct icmp_ping_s
  *
  ****************************************************************************/
 
-static inline int ping_timeout(struct icmp_ping_s *pstate)
+static inline int ping_timeout(FAR struct icmp_ping_s *pstate)
 {
   uint32_t elapsed =  clock_systimer() - pstate->png_time;
   if (elapsed >= pstate->png_ticks)
@@ -148,11 +150,11 @@ static inline int ping_timeout(struct icmp_ping_s *pstate)
  *
  ****************************************************************************/
 
-static uint16_t ping_interrupt(struct uip_driver_s *dev, void *conn,
-                               void *pvpriv, uint16_t flags)
+static uint16_t ping_interrupt(FAR struct uip_driver_s *dev, FAR void *conn,
+                               FAR void *pvpriv, uint16_t flags)
 {
-  struct icmp_ping_s *pstate = (struct icmp_ping_s *)pvpriv;
-  uint8_t *ptr;
+  FAR struct icmp_ping_s *pstate = (struct icmp_ping_s *)pvpriv;
+  FAR uint8_t *ptr;
   int i;
 
   nllvdbg("flags: %04x\n", flags);
@@ -166,7 +168,8 @@ static uint16_t ping_interrupt(struct uip_driver_s *dev, void *conn,
 
       if ((flags & UIP_ECHOREPLY) != 0 && conn != NULL)
         {
-          struct uip_icmpip_hdr *icmp = (struct uip_icmpip_hdr *)conn;
+          FAR struct icmp_iphdr_s *icmp = (FAR struct icmp_iphdr_s *)conn;
+
           nlldbg("ECHO reply: id=%d seqno=%d\n",
                  ntohs(icmp->id), ntohs(icmp->seqno));
 
@@ -202,7 +205,7 @@ static uint16_t ping_interrupt(struct uip_driver_s *dev, void *conn,
           (flags & UIP_NEWDATA) == 0 &&   /* No incoming data */
           !pstate->png_sent)              /* Request not sent */
         {
-          struct uip_icmpip_hdr *picmp = ICMPBUF;
+          FAR struct icmp_iphdr_s *picmp = ICMPBUF;
 
           /* We can send the ECHO request now.
            *
@@ -232,7 +235,7 @@ static uint16_t ping_interrupt(struct uip_driver_s *dev, void *conn,
           nlldbg("Send ECHO request: seqno=%d\n", pstate->png_seqno);
 
           dev->d_sndlen = pstate->png_datlen + 4;
-          uip_icmpsend(dev, &pstate->png_addr);
+          icmp_send(dev, &pstate->png_addr);
           pstate->png_sent = true;
           return flags;
         }
@@ -342,7 +345,7 @@ int uip_ping(uip_ipaddr_t addr, uint16_t id, uint16_t seqno,
 
   /* Set up the callback */
 
-  state.png_cb = uip_icmpcallbackalloc();
+  state.png_cb = icmp_callbackalloc();
   if (state.png_cb)
     {
       state.png_cb->flags   = UIP_POLL|UIP_ECHOREPLY;
@@ -364,7 +367,7 @@ int uip_ping(uip_ipaddr_t addr, uint16_t id, uint16_t seqno,
       nlldbg("Start time: 0x%08x seqno: %d\n", state.png_time, seqno);
       uip_lockedwait(&state.png_sem);
 
-      uip_icmpcallbackfree(state.png_cb);
+      icmp_callbackfree(state.png_cb);
     }
 
   uip_unlock(save);

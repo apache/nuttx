@@ -178,7 +178,7 @@ struct uip_igmphdr_s
 };
 
 #ifdef CONFIG_NET_STATISTICS
-struct uip_igmp_stats_s
+struct igmp_stats_s
 {
   uint32_t length_errors;
   uint32_t chksum_errors;
