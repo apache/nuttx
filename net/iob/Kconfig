@@ -3,8 +3,10 @@
 # see misc/tools/kconfig-language.txt.
 #
 
+menu "Network I/O Buffer Support"
+
 config NET_IOB
-	bool "Network I/O buffer support"
+	bool "Enable generic network I/O buffer support"
 	default n
 	---help---
 		This setting will build the networking I/O buffer (IOB) support
@@ -70,3 +72,4 @@ config IOB_DEBUG
 		network-related debug output.
 
 endif # NET_IOB
+endmenu # Network I/O buffer support

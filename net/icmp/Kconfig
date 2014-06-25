@@ -3,8 +3,10 @@
 # see misc/tools/kconfig-language.txt.
 #
 
+menu "ICMP Networking Support"
+
 config NET_ICMP
-	bool "ICMP networking support"
+	bool "Enable ICMP networking"
 	default n
 	depends on NET
 	---help---
@@ -27,3 +29,4 @@ config NET_PINGADDRCONF
 		Use "ping" packet for setting IP address
 
 endif # NET_ICMP
+endmenu # ICMP Networking Support

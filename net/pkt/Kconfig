@@ -24,4 +24,4 @@ config NET_PKT_CONNS
 	default 1
 
 endif # NET_PKT
-endmenu # PRaw Socket Support
+endmenu # Raw Socket Support

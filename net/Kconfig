@@ -102,6 +102,17 @@ config NET_BUFSIZE
 		IPv6 hosts are required to be able to handle an MSS of 1220 octets,
 		resulting in a minimum buffer size of of 1220+20+40+14 = 1294
 
+config NET_RECEIVE_WINDOW
+	int "Receive window size"
+	default 1220 if !NET_SLIP && NET_IPv6
+	default 536 if !NET_SLIP && !NET_IPv6
+	default 256 if NET_SLIP && !NET_IPv6
+	---help---
+		The size of the advertised receiver's window.   Should be set low
+		(i.e., to the size of the MSS) if the application is slow to process
+		incoming data, or high (32768 bytes) if the application processes
+		data quickly.
+
 config NET_GUARDSIZE
 	int "Driver I/O guard size"
 	default 2
@@ -118,26 +129,14 @@ source "net/tcp/Kconfig"
 source "net/udp/Kconfig"
 source "net/icmp/Kconfig"
 source "net/igmp/Kconfig"
+source "net/arp/Kconfig"
+source "net/iob/Kconfig"
 
 config NET_STATISTICS
 	bool "Collect network statistics"
 	default n
 	---help---
 		uIP statistics on or off
-
-config NET_RECEIVE_WINDOW
-	int "Receive window size"
-	default 1220 if !NET_SLIP && NET_IPv6
-	default 536 if !NET_SLIP && !NET_IPv6
-	default 256 if NET_SLIP && !NET_IPv6
-	---help---
-		The size of the advertised receiver's window.   Should be set low
-		(i.e., to the size of the MSS) if the application is slow to process
-		incoming data, or high (32768 bytes) if the application processes
-		data quickly.
-
-source "net/arp/Kconfig"
-source "net/iob/Kconfig"
 
 config NET_ROUTE
 	bool "Routing table suport"

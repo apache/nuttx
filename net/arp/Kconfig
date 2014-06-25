@@ -3,6 +3,8 @@
 # see misc/tools/kconfig-language.txt.
 #
 
+menu "ARP Configuration"
+
 config NET_ARP
 	bool
 	default y if !NET_SLIP
@@ -26,3 +28,4 @@ config NET_ARP_IPIN
 		from incoming IP packets.
 
 endif # NET_ARP
+endmenu # ARP Configuration

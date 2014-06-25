@@ -3,8 +3,10 @@
 # see misc/tools/kconfig-language.txt.
 #
 
+menu "IGMPv2 Client Support"
+
 config NET_IGMP
-	bool "IGMPv2 clientsupport"
+	bool "IGMPv2 client support"
 	default n
 	depends on NET
 	---help---
@@ -20,3 +22,4 @@ config PREALLOC_IGMPGROUPS
 		level group created (by the IGMP server). Default: 4.
 
 endif # NET_IGMP
+endmenu # IGMPv2 Client Support
