@@ -80,7 +80,7 @@
 
 /* This is a helper pointer for accessing the contents of the Ethernet header */
 
-#define BUF ((struct uip_eth_hdr *)cs89x0->cs_dev.d_buf)
+#define BUF ((struct eth_hdr_s *)cs89x0->cs_dev.d_buf)
 
 /* If there is only one CS89x0 instance, then mapping the CS89x0 IRQ to
  * a driver state instance is trivial.

@@ -77,7 +77,7 @@
  * some compilers refuse to pack 6 byte structures.
  */
 
-struct uip_eth_hdr
+struct eth_hdr_s
 {
   uint8_t  dest[6]; /* Ethernet destination address (6 bytes) */
   uint8_t  src[6];  /* Ethernet source address (6 bytes) */
@@ -99,7 +99,8 @@ struct arp_entry
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif

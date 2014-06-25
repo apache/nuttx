@@ -78,7 +78,7 @@
 
 /* This is a helper pointer for accessing the contents of the Ethernet header */
 
-#define BUF ((struct uip_eth_hdr *)priv->d_dev.d_buf)
+#define BUF ((struct eth_hdr_s *)priv->d_dev.d_buf)
 
 /****************************************************************************
  * Private Types

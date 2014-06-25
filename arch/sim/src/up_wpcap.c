@@ -60,7 +60,7 @@ extern int uipdriver_setmacaddr(unsigned char *macaddr);
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define BUF ((struct uip_eth_hdr *)&uip_buf[0])
+#define BUF ((struct eth_hdr_s *)&uip_buf[0])
 
 #ifndef CONFIG_EXAMPLES_UIP_DHCPC
 #  define UIP_IPADDR (10 << 24 | 0 << 16 | 0 << 8 | 1)

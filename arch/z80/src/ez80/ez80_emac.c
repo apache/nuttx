@@ -233,7 +233,7 @@
 
 /* This is a helper pointer for accessing the contents of the Ethernet header */
 
-#define ETHBUF ((struct uip_eth_hdr *)priv->dev.d_buf)
+#define ETHBUF ((struct eth_hdr_s *)priv->dev.d_buf)
 
 /****************************************************************************
  * Private Types

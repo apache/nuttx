@@ -80,7 +80,7 @@
 
 #define RASIZE         4  /* Size of ROUTER ALERT */
 
-#define ETHBUF        ((struct uip_eth_hdr *)&dev->d_buf[0])
+#define ETHBUF        ((struct eth_hdr_s *)&dev->d_buf[0])
 #define ARPBUF        ((struct arp_hdr_s *)&dev->d_buf[UIP_LLH_LEN])
 #define IPBUF         ((struct arp_iphdr_s *)&dev->d_buf[UIP_LLH_LEN])
 
@@ -253,7 +253,7 @@ void arp_arpin(struct uip_driver_s *dev)
 
         if (uip_ipaddr_cmp(ipaddr, dev->d_ipaddr))
           {
-            struct uip_eth_hdr *peth = ETHBUF;
+            struct eth_hdr_s *peth = ETHBUF;
 
             /* First, we register the one who made the request in our ARP
              * table, since it is likely that we will do more communication
@@ -322,7 +322,7 @@ void arp_out(struct uip_driver_s *dev)
 {
   const struct arp_entry *tabptr = NULL;
   struct arp_hdr_s       *parp   = ARPBUF;
-  struct uip_eth_hdr     *peth   = ETHBUF;
+  struct eth_hdr_s     *peth   = ETHBUF;
   struct arp_iphdr_s     *pip    = IPBUF;
   in_addr_t               ipaddr;
   in_addr_t               destipaddr;

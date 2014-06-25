@@ -207,7 +207,7 @@ void uip_pktfree(struct uip_pkt_conn *conn)
  *
  ****************************************************************************/
 
-struct uip_pkt_conn *uip_pktactive(struct uip_eth_hdr *buf)
+struct uip_pkt_conn *uip_pktactive(struct eth_hdr_s *buf)
 {
   #define uip_ethaddr_cmp(addr1, addr2) \
   ((addr1[0] == addr2[0]) && (addr1[1] == addr2[1]) && \

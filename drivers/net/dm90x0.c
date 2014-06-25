@@ -270,7 +270,7 @@
 
 /* This is a helper pointer for accessing the contents of the Ethernet header */
 
-#define BUF ((struct uip_eth_hdr *)dm9x->dm_dev.d_buf)
+#define BUF ((struct eth_hdr_s *)dm9x->dm_dev.d_buf)
 
 /****************************************************************************
  * Private Types

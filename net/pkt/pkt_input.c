@@ -58,7 +58,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define PKTBUF ((struct uip_eth_hdr *)&dev->d_buf)
+#define PKTBUF ((struct eth_hdr_s *)&dev->d_buf)
 
 /****************************************************************************
  * Public Variables
@@ -98,7 +98,7 @@
 int uip_pktinput(struct uip_driver_s *dev)
 {
   struct uip_pkt_conn *conn;
-  struct uip_eth_hdr  *pbuf = (struct uip_eth_hdr *)dev->d_buf;
+  struct eth_hdr_s  *pbuf = (struct eth_hdr_s *)dev->d_buf;
   int ret = OK;
 
   conn = uip_pktactive(pbuf);
