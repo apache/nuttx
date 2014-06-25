@@ -52,6 +52,7 @@
 #include <nuttx/net/igmp.h>
 
 #include "uip/uip.h"
+#include "igmp/igmp.h"
 
 #ifdef CONFIG_NET_IGMP
 
@@ -136,7 +137,7 @@ int igmp_leavegroup(struct uip_driver_s *dev, FAR const struct in_addr *grpaddr)
 
   /* Find the entry corresponding to the address leaving the group */
 
-  group = uip_grpfind(dev, &grpaddr->s_addr);
+  group = igmp_grpfind(dev, &grpaddr->s_addr);
   ndbg("Leaving group: %p\n", group);
   if (group)
     {
@@ -160,16 +161,16 @@ int igmp_leavegroup(struct uip_driver_s *dev, FAR const struct in_addr *grpaddr)
         {
           ndbg("Schedule Leave Group message\n");
           IGMP_STATINCR(uip_stat.igmp.leave_sched);
-          uip_igmpwaitmsg(group, IGMP_LEAVE_GROUP);
+          igmp_waitmsg(group, IGMP_LEAVE_GROUP);
         }
 
       /* Free the group structure (state is now Non-Member */
 
-      uip_grpfree(dev, group);
+      igmp_grpfree(dev, group);
 
       /* And remove the group address from the ethernet drivers MAC filter set */
 
-      uip_removemcastmac(dev, (FAR uip_ipaddr_t *)&grpaddr->s_addr);
+      igmp_removemcastmac(dev, (FAR uip_ipaddr_t *)&grpaddr->s_addr);
       return OK;
     }
 

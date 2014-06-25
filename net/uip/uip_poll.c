@@ -50,6 +50,7 @@
 #include "tcp/tcp.h"
 #include "udp/udp.h"
 #include "icmp/icmp.h"
+#include "igmp/igmp.h"
 
 /****************************************************************************
  * Private Data
@@ -125,7 +126,7 @@ static inline int uip_pollicmp(FAR struct uip_driver_s *dev,
  * Function: uip_polligmp
  *
  * Description:
- *   Poll all UDP connections for available packets to send.
+ *   Poll all IGMP connections for available packets to send.
  *
  * Assumptions:
  *   This function is called from the MAC device driver and may be called from
@@ -137,9 +138,9 @@ static inline int uip_pollicmp(FAR struct uip_driver_s *dev,
 static inline int uip_polligmp(FAR struct uip_driver_s *dev,
                                uip_poll_callback_t callback)
 {
-  /* Perform the UDP TX poll */
+  /* Perform the IGMP TX poll */
 
-  uip_igmppoll(dev);
+  igmp_poll(dev);
 
   /* Call back into the driver */
 

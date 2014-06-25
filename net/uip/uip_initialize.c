@@ -50,6 +50,7 @@
 #include "uip/uip.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
+#include "igmp/igmp.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -156,7 +157,7 @@ void uip_initialize(void)
   /* Initialize IGMP support */
 
 #ifdef CONFIG_NET_IGMP
-  uip_igmpinit();
+  igmp_initialize();
 #endif
 }
 #endif /* CONFIG_NET */

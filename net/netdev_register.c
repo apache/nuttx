@@ -128,7 +128,7 @@ int netdev_register(FAR struct uip_driver_s *dev)
       /* Configure the device for IGMP support */
 
 #ifdef CONFIG_NET_IGMP
-      uip_igmpdevinit(dev);
+      igmp_devinit(dev);
 #endif
       netdev_semgive();
 

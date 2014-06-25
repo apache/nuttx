@@ -68,6 +68,5 @@ endif
 
 DEPPATH += --dep-path uip
 VPATH += :uip
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)net$(DELIM)uip}
 
 endif

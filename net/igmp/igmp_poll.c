@@ -51,6 +51,7 @@
 #include <nuttx/net/netdev.h>
 
 #include "uip/uip.h"
+#include "igmp/igmp.h"
 
 #ifdef CONFIG_NET_IGMP
 
@@ -104,7 +105,7 @@ static inline void uip_schedsend(FAR struct uip_driver_s *dev, FAR struct igmp_g
 
   /* Send the message */
 
-  uip_igmpsend(dev, group, dest);
+  igmp_send(dev, group, dest);
 
   /* Indicate that the message has been sent */
 
@@ -125,7 +126,7 @@ static inline void uip_schedsend(FAR struct uip_driver_s *dev, FAR struct igmp_g
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  uip_igmppoll
+ * Name:  igmp_poll
  *
  * Description:
  *   Poll the groups associated with the device to see if any IGMP messages
@@ -140,7 +141,7 @@ static inline void uip_schedsend(FAR struct uip_driver_s *dev, FAR struct igmp_g
  *
  ****************************************************************************/
 
-void uip_igmppoll(FAR struct uip_driver_s *dev)
+void igmp_poll(FAR struct uip_driver_s *dev)
 {
   FAR struct igmp_group_s *group;
 

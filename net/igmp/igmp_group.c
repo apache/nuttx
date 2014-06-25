@@ -59,6 +59,7 @@
 #include <nuttx/net/igmp.h>
 
 #include "uip/uip.h"
+#include "igmp/igmp.h"
 
 #ifdef CONFIG_NET_IGMP
 
@@ -133,7 +134,7 @@ static FAR sq_queue_t g_freelist;
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  uip_grpheapalloc
+ * Name:  igmp_grpheapalloc
  *
  * Description:
  *   Allocate a new group from heap memory.
@@ -143,13 +144,13 @@ static FAR sq_queue_t g_freelist;
  *
  ****************************************************************************/
 
-static inline FAR struct igmp_group_s *uip_grpheapalloc(void)
+static inline FAR struct igmp_group_s *igmp_grpheapalloc(void)
 {
   return (FAR struct igmp_group_s *)kzalloc(sizeof(struct igmp_group_s));
 }
 
 /****************************************************************************
- * Name:  uip_grpprealloc
+ * Name:  igmp_grpprealloc
  *
  * Description:
  *   Allocate a new group from the pre-allocated groups.
@@ -161,7 +162,7 @@ static inline FAR struct igmp_group_s *uip_grpheapalloc(void)
  ****************************************************************************/
 
 #if CONFIG_PREALLOC_IGMPGROUPS > 0
-static inline FAR struct igmp_group_s *uip_grpprealloc(void)
+static inline FAR struct igmp_group_s *igmp_grpprealloc(void)
 {
   FAR struct igmp_group_s *group =
     (FAR struct igmp_group_s *)sq_remfirst(&g_freelist);
@@ -181,7 +182,7 @@ static inline FAR struct igmp_group_s *uip_grpprealloc(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  uip_grpinit
+ * Name:  igmp_grpinit
  *
  * Description:
  *   One-time initialization of group data.
@@ -191,7 +192,7 @@ static inline FAR struct igmp_group_s *uip_grpprealloc(void)
  *
  ****************************************************************************/
 
-void uip_grpinit(void)
+void igmp_grpinit(void)
 {
   FAR struct igmp_group_s *group;
   int i;
@@ -208,7 +209,7 @@ void uip_grpinit(void)
 }
 
 /****************************************************************************
- * Name:  uip_grpalloc
+ * Name:  igmp_grpalloc
  *
  * Description:
  *   Allocate a new group from heap memory.
@@ -218,8 +219,8 @@ void uip_grpinit(void)
  *
  ****************************************************************************/
 
-FAR struct igmp_group_s *uip_grpalloc(FAR struct uip_driver_s *dev,
-                                      FAR const uip_ipaddr_t *addr)
+FAR struct igmp_group_s *igmp_grpalloc(FAR struct uip_driver_s *dev,
+                                       FAR const uip_ipaddr_t *addr)
 {
   FAR struct igmp_group_s *group;
   uip_lock_t flags;
@@ -229,7 +230,7 @@ FAR struct igmp_group_s *uip_grpalloc(FAR struct uip_driver_s *dev,
     {
 #if CONFIG_PREALLOC_IGMPGROUPS > 0
       grplldbg("Use a pre-allocated group entry\n");
-      group = uip_grpprealloc();
+      group = igmp_grpprealloc();
 #else
       grplldbg("Cannot allocate from interrupt handler\n");
       group = NULL;
@@ -238,7 +239,7 @@ FAR struct igmp_group_s *uip_grpalloc(FAR struct uip_driver_s *dev,
   else
     {
       grplldbg("Allocate from the heap\n");
-      group = uip_grpheapalloc();
+      group = igmp_grpheapalloc();
     }
 
   grplldbg("group: %p\n", group);
@@ -271,7 +272,7 @@ FAR struct igmp_group_s *uip_grpalloc(FAR struct uip_driver_s *dev,
 }
 
 /****************************************************************************
- * Name:  uip_grpfind
+ * Name:  igmp_grpfind
  *
  * Description:
  *   Find an existing group.
@@ -281,8 +282,8 @@ FAR struct igmp_group_s *uip_grpalloc(FAR struct uip_driver_s *dev,
  *
  ****************************************************************************/
 
-FAR struct igmp_group_s *uip_grpfind(FAR struct uip_driver_s *dev,
-                                     FAR const uip_ipaddr_t *addr)
+FAR struct igmp_group_s *igmp_grpfind(FAR struct uip_driver_s *dev,
+                                      FAR const uip_ipaddr_t *addr)
 {
   FAR struct igmp_group_s *group;
   uip_lock_t flags;
@@ -311,7 +312,7 @@ FAR struct igmp_group_s *uip_grpfind(FAR struct uip_driver_s *dev,
 }
 
 /****************************************************************************
- * Name:  uip_grpallocfind
+ * Name:  igmp_grpallocfind
  *
  * Description:
  *   Find an existing group.  If not found, create a new group for the
@@ -322,15 +323,15 @@ FAR struct igmp_group_s *uip_grpfind(FAR struct uip_driver_s *dev,
  *
  ****************************************************************************/
 
-FAR struct igmp_group_s *uip_grpallocfind(FAR struct uip_driver_s *dev,
-                                          FAR const uip_ipaddr_t *addr)
+FAR struct igmp_group_s *igmp_grpallocfind(FAR struct uip_driver_s *dev,
+                                           FAR const uip_ipaddr_t *addr)
 {
-  FAR struct igmp_group_s *group = uip_grpfind(dev, addr);
+  FAR struct igmp_group_s *group = igmp_grpfind(dev, addr);
 
   grplldbg("group: %p addr: %08x\n", group, (int)*addr);
   if (!group)
     {
-      group = uip_grpalloc(dev, addr);
+      group = igmp_grpalloc(dev, addr);
     }
 
   grplldbg("group: %p\n", group);
@@ -338,7 +339,7 @@ FAR struct igmp_group_s *uip_grpallocfind(FAR struct uip_driver_s *dev,
 }
 
 /****************************************************************************
- * Name:  uip_grpfree
+ * Name:  igmp_grpfree
  *
  * Description:
  *   Release a previously allocated group.
@@ -348,7 +349,7 @@ FAR struct igmp_group_s *uip_grpallocfind(FAR struct uip_driver_s *dev,
  *
  ****************************************************************************/
 
-void uip_grpfree(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group)
+void igmp_grpfree(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group)
 {
   uip_lock_t flags;
 

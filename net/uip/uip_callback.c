@@ -48,7 +48,7 @@
 #include <nuttx/net/uip.h>
 #include <nuttx/net/netdev.h>
 
-#include "uip.h"
+#include "uip/uip.h"
 
 /****************************************************************************
  * Private Data

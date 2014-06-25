@@ -49,6 +49,7 @@
 #include <nuttx/net/igmp.h>
 
 #include "uip/uip.h"
+#include "igmp/igmp.h"
 
 #ifdef CONFIG_NET_IGMP
 
@@ -73,7 +74,7 @@
 /* Buffer layout */
 
 #define RASIZE      (4)
-#define IGMPBUF     ((struct uip_igmphdr_s *)&dev->d_buf[UIP_LLH_LEN])
+#define IGMPBUF     ((struct igmp_iphdr_s *)&dev->d_buf[UIP_LLH_LEN])
 
 /****************************************************************************
  * Public Variables
@@ -87,7 +88,7 @@
  * Private Functions
  ****************************************************************************/
 
-static uint16_t uip_igmpchksum(FAR uint8_t *buffer, int buflen)
+static uint16_t igmp_chksum(FAR uint8_t *buffer, int buflen)
 {
   uint16_t sum = uip_chksum((FAR uint16_t*)buffer, buflen);
   return sum ? sum : 0xffff;
@@ -98,7 +99,7 @@ static uint16_t uip_igmpchksum(FAR uint8_t *buffer, int buflen)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_igmpsend
+ * Name: igmp_send
  *
  * Description:
  *   Sends an IGMP IP packet on a network interface. This function constructs
@@ -118,8 +119,8 @@ static uint16_t uip_igmpchksum(FAR uint8_t *buffer, int buflen)
  *
  ****************************************************************************/
 
-void uip_igmpsend(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group,
-                  FAR uip_ipaddr_t *destipaddr)
+void igmp_send(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group,
+               FAR uip_ipaddr_t *destipaddr)
 {
   nllvdbg("msgid: %02x destipaddr: %08x\n", group->msgid, (int)*destipaddr);
 
@@ -158,7 +159,7 @@ void uip_igmpsend(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group,
   /* Calculate IP checksum. */
 
   IGMPBUF->ipchksum    = 0;
-  IGMPBUF->ipchksum    = ~uip_igmpchksum((FAR uint8_t *)IGMPBUF, UIP_IPH_LEN + RASIZE);
+  IGMPBUF->ipchksum    = ~igmp_chksum((FAR uint8_t *)IGMPBUF, UIP_IPH_LEN + RASIZE);
 
   /* Set up the IGMP message */
 
@@ -169,7 +170,7 @@ void uip_igmpsend(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group,
   /* Calculate the IGMP checksum. */
 
   IGMPBUF->chksum      = 0;
-  IGMPBUF->chksum      = ~uip_igmpchksum(&IGMPBUF->type, UIP_IPIGMPH_LEN);
+  IGMPBUF->chksum      = ~igmp_chksum(&IGMPBUF->type, UIP_IPIGMPH_LEN);
 
   IGMP_STATINCR(uip_stat.igmp.poll_send);
   IGMP_STATINCR(uip_stat.ip.sent);

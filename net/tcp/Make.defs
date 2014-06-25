@@ -66,7 +66,6 @@ endif
 
 DEPPATH += --dep-path tcp
 VPATH += :tcp
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)net$(DELIM)tcp}
 
 endif # CONFIG_NET_TCP
 endif # CONFIG_NET

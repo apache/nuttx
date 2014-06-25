@@ -54,7 +54,6 @@ NET_CSRCS += pkt_poll.c
 
 DEPPATH += --dep-path pkt
 VPATH += :pkt
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)net$(DELIM)pkt}
 
 endif # CONFIG_NET_PKT
 endif # CONFIG_NET

@@ -52,6 +52,7 @@
 #include <nuttx/net/igmp.h>
 
 #include "uip/uip.h"
+#include "igmp/igmp.h"
 
 #ifdef CONFIG_NET_IGMP
 
@@ -59,7 +60,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define IGMPBUF ((struct uip_igmphdr_s *)&dev->d_buf[UIP_LLH_LEN])
+#define IGMPBUF ((struct igmp_iphdr_s *)&dev->d_buf[UIP_LLH_LEN])
 
 /****************************************************************************
  * Private Functions
@@ -70,7 +71,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  uip_igmpinput
+ * Name:  igmp_input
  *
  * Description:
  *   An IGMP packet has been received.
@@ -111,7 +112,7 @@
  *
  ****************************************************************************/
 
-void uip_igmpinput(struct uip_driver_s *dev)
+void igmp_input(struct uip_driver_s *dev)
 {
   FAR struct igmp_group_s *group;
   uip_ipaddr_t destipaddr;
@@ -141,7 +142,7 @@ void uip_igmpinput(struct uip_driver_s *dev)
   /* Find the group (or create a new one) using the incoming IP address*/
 
   destipaddr = uip_ip4addr_conv(IGMPBUF->destipaddr);
-  group = uip_grpallocfind(dev, &destipaddr);
+  group = igmp_grpallocfind(dev, &destipaddr);
   if (!group)
     {
       nlldbg("Failed to allocate/find group: %08x\n", destipaddr);
@@ -205,11 +206,11 @@ void uip_igmpinput(struct uip_driver_s *dev)
 
                     if (!uip_ipaddr_cmp(member->grpaddr, g_allsystems))
                       {
-                        ticks = uip_decisec2tick((int)IGMPBUF->maxresp);
+                        ticks = igmp_decisec2tick((int)IGMPBUF->maxresp);
                         if (IS_IDLEMEMBER(member->flags) ||
-                            uip_igmpcmptimer(member, ticks))
+                            igmp_cmptimer(member, ticks))
                           {
-                            uip_igmpstartticks(member, ticks);
+                            igmp_startticks(member, ticks);
                             CLR_IDLEMEMBER(member->flags);
                           }
                       }
@@ -225,11 +226,11 @@ void uip_igmpinput(struct uip_driver_s *dev)
 
                 IGMP_STATINCR(uip_stat.igmp.ucast_query);
                 grpaddr = uip_ip4addr_conv(IGMPBUF->grpaddr);
-                group   = uip_grpallocfind(dev, &grpaddr);
-                ticks   = uip_decisec2tick((int)IGMPBUF->maxresp);
-                if (IS_IDLEMEMBER(group->flags) || uip_igmpcmptimer(group, ticks))
+                group   = igmp_grpallocfind(dev, &grpaddr);
+                ticks   = igmp_decisec2tick((int)IGMPBUF->maxresp);
+                if (IS_IDLEMEMBER(group->flags) || igmp_cmptimer(group, ticks))
                   {
-                    uip_igmpstartticks(group, ticks);
+                    igmp_startticks(group, ticks);
                     CLR_IDLEMEMBER(group->flags);
                   }
               }
@@ -244,10 +245,10 @@ void uip_igmpinput(struct uip_driver_s *dev)
 
             nlldbg("Query to a specific group with the group address as destination\n");
 
-            ticks = uip_decisec2tick((int)IGMPBUF->maxresp);
-            if (IS_IDLEMEMBER(group->flags) || uip_igmpcmptimer(group, ticks))
+            ticks = igmp_decisec2tick((int)IGMPBUF->maxresp);
+            if (IS_IDLEMEMBER(group->flags) || igmp_cmptimer(group, ticks))
               {
-                uip_igmpstartticks(group, ticks);
+                igmp_startticks(group, ticks);
                 CLR_IDLEMEMBER(group->flags);
               }
           }

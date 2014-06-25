@@ -97,6 +97,7 @@
 #include "tcp/tcp.h"
 #include "udp/udp.h"
 #include "icmp/icmp.h"
+#include "igmp/igmp.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -458,7 +459,7 @@ int uip_input(struct uip_driver_s *dev)
         {
 #ifdef CONFIG_NET_IGMP
           uip_ipaddr_t destip = uip_ip4addr_conv(pbuf->destipaddr);
-          if (uip_grpfind(dev, &destip) == NULL)
+          if (igmp_grpfind(dev, &destip) == NULL)
 #endif
             {
 #ifdef CONFIG_NET_STATISTICS
@@ -536,7 +537,7 @@ int uip_input(struct uip_driver_s *dev)
 #ifdef CONFIG_NET_IGMP
 #ifndef CONFIG_NET_IPv6
       case UIP_PROTO_IGMP:  /* IGMP input */
-        uip_igmpinput(dev);
+        igmp_input(dev);
         break;
 #endif
 #endif

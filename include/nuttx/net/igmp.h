@@ -124,7 +124,7 @@
  * (0x11); in other messages it is set to 0 and ignored by the receiver.
  */
 
-struct uip_igmphdr_s
+struct igmp_iphdr_s
 {
 #ifdef CONFIG_NET_IPv6
 
@@ -224,7 +224,8 @@ struct igmp_group_s
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -237,7 +238,7 @@ EXTERN uip_ipaddr_t g_allrouters;
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  uip_igmpdevinit
+ * Name:  igmp_devinit
  *
  * Description:
  *   Called when a new network device is registered to configure that device
@@ -245,9 +246,11 @@ EXTERN uip_ipaddr_t g_allrouters;
  *
  ****************************************************************************/
 
-EXTERN void uip_igmpdevinit(struct uip_driver_s *dev);
-EXTERN int  igmp_joingroup(struct uip_driver_s *dev, FAR const struct in_addr *grpaddr);
-EXTERN int  igmp_leavegroup(struct uip_driver_s *dev, FAR const struct in_addr *grpaddr);
+void igmp_devinit(FAR struct uip_driver_s *dev);
+int igmp_joingroup(FAR struct uip_driver_s *dev,
+                   FAR const struct in_addr *grpaddr);
+int igmp_leavegroup(FAR struct uip_driver_s *dev,
+                    FAR const struct in_addr *grpaddr);
 
 #undef EXTERN
 #if defined(__cplusplus)

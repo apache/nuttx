@@ -51,6 +51,5 @@ endif
 
 DEPPATH += --dep-path iob
 VPATH += :iob
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)net$(DELIM)iob}
 
 endif

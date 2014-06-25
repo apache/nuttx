@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/uip/uip_setipid.c
+ * net/icmp/icmp.h
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,45 +33,63 @@
  *
  ****************************************************************************/
 
+#ifndef __NET_ICMP_ICMP_H
+#define __NET_ICMP_ICMP_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifdef CONFIG_NET
 
-#include <stdint.h>
-#include <debug.h>
+#include <sys/types.h>
 
-#include <nuttx/net/uip.h>
-
-#include "uip/uip.h"
+#ifdef CONFIG_NET_ICMP
 
 /****************************************************************************
- * Private Data
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functions
+ * Public Type Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Public Data
  ****************************************************************************/
 
-/****************************************************************************
- * Function: uip_setipid
- *
- * Description:
- *   This function may be used at boot time to set the initial ip_id.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-void uip_setipid(uint16_t id)
+#ifdef __cplusplus
+#  define EXTERN extern "C"
+extern "C"
 {
-  g_ipid = id;
-}
+#else
+#  define EXTERN extern
+#endif
 
-#endif /* CONFIG_NET */
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/* Defined in icmp_input.c **************************************************/
+
+void icmp_input(FAR struct uip_driver_s *dev);
+
+/* Defined in icmp_poll.c ***************************************************/
+
+#ifdef CONFIG_NET_ICMP_PING
+void icmp_poll(FAR struct uip_driver_s *dev);
+#endif /* CONFIG_NET_ICMP_PING */
+
+/* Defined in icmp_send.c ***************************************************/
+
+#ifdef CONFIG_NET_ICMP_PING
+void icmp_send(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *destaddr);
+#endif /* CONFIG_NET_ICMP_PING */
+
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* CONFIG_NET_ICMP */
+#endif /* __NET_ICMP_ICMP_H */

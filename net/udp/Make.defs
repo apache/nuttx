@@ -45,7 +45,6 @@ NET_CSRCS += udp_conn.c udp_poll.c udp_send.c udp_input.c udp_callback.c
 
 DEPPATH += --dep-path udp
 VPATH += :udp
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)net$(DELIM)udp}
 
 endif # CONFIG_NET_UDP
 endif # CONFIG_NET

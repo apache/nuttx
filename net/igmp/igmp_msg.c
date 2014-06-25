@@ -51,6 +51,7 @@
 #include <nuttx/net/igmp.h>
 
 #include "uip/uip.h"
+#include "igmp/igmp.h"
 
 #ifdef CONFIG_NET_IGMP
 
@@ -67,7 +68,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_igmpschedmsg
+ * Name: igmp_schedmsg
  *
  * Description:
  *   Schedule a message to be send at the next driver polling interval.
@@ -77,7 +78,7 @@
  *
  ****************************************************************************/
 
-void uip_igmpschedmsg(FAR struct igmp_group_s *group, uint8_t msgid)
+void igmp_schedmsg(FAR struct igmp_group_s *group, uint8_t msgid)
 {
   uip_lock_t flags;
 
@@ -91,7 +92,7 @@ void uip_igmpschedmsg(FAR struct igmp_group_s *group, uint8_t msgid)
 }
 
 /****************************************************************************
- * Name: uip_igmpwaitmsg
+ * Name: igmp_waitmsg
  *
  * Description:
  *   Schedule a message to be send at the next driver polling interval and
@@ -103,7 +104,7 @@ void uip_igmpschedmsg(FAR struct igmp_group_s *group, uint8_t msgid)
  *
  ****************************************************************************/
 
-void uip_igmpwaitmsg(FAR struct igmp_group_s *group, uint8_t msgid)
+void igmp_waitmsg(FAR struct igmp_group_s *group, uint8_t msgid)
 {
   uip_lock_t flags;
 
@@ -112,7 +113,7 @@ void uip_igmpwaitmsg(FAR struct igmp_group_s *group, uint8_t msgid)
   flags = uip_lock();
   DEBUGASSERT(!IS_WAITMSG(group->flags));
   SET_WAITMSG(group->flags);
-  uip_igmpschedmsg(group, msgid);
+  igmp_schedmsg(group, msgid);
 
   /* Then wait for the message to be sent */
 

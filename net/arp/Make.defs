@@ -44,7 +44,6 @@ NET_CSRCS += arp_inout.c arp_table.c arp_timer.c
 
 DEPPATH += --dep-path arp
 VPATH += :arp
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)net$(DELIM)arp}
 
 endif
 endif

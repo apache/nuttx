@@ -50,6 +50,7 @@
 #include <nuttx/net/uip.h>
 
 #include "uip/uip.h"
+#include "igmp/igmp.h"
 
 #ifdef CONFIG_NET_IGMP
 
@@ -90,14 +91,14 @@ static void uip_mcastmac(uip_ipaddr_t *ip, FAR uint8_t *mac)
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  uip_addmcastmac
+ * Name:  igmp_addmcastmac
  *
  * Description:
  *   Add an IGMP MAC address to the device's MAC filter table.
  *
  ****************************************************************************/
 
-void uip_addmcastmac(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *ip)
+void igmp_addmcastmac(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *ip)
 {
   uint8_t mcastmac[6];
 
@@ -110,14 +111,14 @@ void uip_addmcastmac(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *ip)
 }
 
 /****************************************************************************
- * Name:  uip_removemcastmac
+ * Name:  igmp_removemcastmac
  *
  * Description:
  *   Remove an IGMP MAC address from the device's MAC filter table.
  *
  ****************************************************************************/
 
-void uip_removemcastmac(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *ip)
+void igmp_removemcastmac(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *ip)
 {
   uint8_t mcastmac[6];
 

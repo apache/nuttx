@@ -90,7 +90,8 @@ extern struct uip_callback_s *g_echocallback;
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -124,55 +125,6 @@ uint16_t uip_pktcallback(struct uip_driver_s *dev, struct uip_pkt_conn *conn,
 void uip_pktpoll(struct uip_driver_s *dev, struct uip_pkt_conn *conn);
 
 #endif /* CONFIG_NET_PKT */
-
-#ifdef CONFIG_NET_IGMP
-/* Defined in igmp_init.c ***************************************************/
-
-void uip_igmpinit(void);
-
-/* Defined in igmp_input.c **************************************************/
-
-void uip_igmpinput(struct uip_driver_s *dev);
-
-/* Defined in igmp_group.c **************************************************/
-
-void uip_grpinit(void);
-FAR struct igmp_group_s *uip_grpalloc(FAR struct uip_driver_s *dev,
-                                      FAR const uip_ipaddr_t *addr);
-FAR struct igmp_group_s *uip_grpfind(FAR struct uip_driver_s *dev,
-                                     FAR const uip_ipaddr_t *addr);
-FAR struct igmp_group_s *uip_grpallocfind(FAR struct uip_driver_s *dev,
-                                          FAR const uip_ipaddr_t *addr);
-void uip_grpfree(FAR struct uip_driver_s *dev,
-                 FAR struct igmp_group_s *group);
-
-/* Defined in igmp_msg.c ****************************************************/
-
-void uip_igmpschedmsg(FAR struct igmp_group_s *group, uint8_t msgid);
-void uip_igmpwaitmsg(FAR struct igmp_group_s *group, uint8_t msgid);
-
-/* Defined in igmp_poll.c ***************************************************/
-
-void uip_igmppoll(FAR struct uip_driver_s *dev);
-
-/* Defined in igmp_send.c ***************************************************/
-
-void uip_igmpsend(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group,
-                  FAR uip_ipaddr_t *dest);
-
-/* Defined in igmp_timer.c **************************************************/
-
-int uip_decisec2tick(int decisecs);
-void uip_igmpstartticks(FAR struct igmp_group_s *group, int ticks);
-void uip_igmpstarttimer(FAR struct igmp_group_s *group, uint8_t decisecs);
-bool uip_igmpcmptimer(FAR struct igmp_group_s *group, int maxticks);
-
-/* Defined in igmp_mcastmac *****************************************************/
-
-void uip_addmcastmac(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *ip);
-void uip_removemcastmac(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *ip);
-
-#endif /* CONFIG_NET_IGMP */
 
 #undef EXTERN
 #ifdef __cplusplus

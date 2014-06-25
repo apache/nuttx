@@ -51,6 +51,7 @@
 #include <nuttx/net/igmp.h>
 
 #include "uip/uip.h"
+#include "igmp/igmp.h"
 
 #ifdef CONFIG_NET_IGMP
 
@@ -128,27 +129,27 @@ int igmp_joingroup(struct uip_driver_s *dev, FAR const struct in_addr *grpaddr)
 
   /* Check if a this address is already in the group */
 
-  group = uip_grpfind(dev, &grpaddr->s_addr);
+  group = igmp_grpfind(dev, &grpaddr->s_addr);
   if (!group)
     {
        /* No... allocate a new entry */
 
        nvdbg("Join to new group: %08x\n", grpaddr->s_addr);
-       group = uip_grpalloc(dev, &grpaddr->s_addr);
+       group = igmp_grpalloc(dev, &grpaddr->s_addr);
        IGMP_STATINCR(uip_stat.igmp.joins);
 
        /* Send the Membership Report */
 
        IGMP_STATINCR(uip_stat.igmp.report_sched);
-       uip_igmpwaitmsg(group, IGMPv2_MEMBERSHIP_REPORT);
+       igmp_waitmsg(group, IGMPv2_MEMBERSHIP_REPORT);
 
        /* And start the timer at 10*100 msec */
 
-       uip_igmpstarttimer(group, 10);
+       igmp_starttimer(group, 10);
 
        /* Add the group (MAC) address to the ether drivers MAC filter list */
 
-       uip_addmcastmac(dev, (FAR uip_ipaddr_t *)&grpaddr->s_addr);
+       igmp_addmcastmac(dev, (FAR uip_ipaddr_t *)&grpaddr->s_addr);
        return OK;
     }
 

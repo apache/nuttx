@@ -39,14 +39,13 @@ ifeq ($(CONFIG_NET),y)
 
 ifeq ($(CONFIG_NET_IGMP),y)
 
-NET_CSRCS += igmp_group.c igmp_init.c igmp_input.c igmp_join.c igmp_leave.c
+NET_CSRCS += igmp_group.c igmp_initialize.c igmp_input.c igmp_join.c igmp_leave.c
 NET_CSRCS += igmp_mcastmac.c igmp_msg.c igmp_poll.c igmp_send.c igmp_timer.c
 
 # Include igmp build support
 
 DEPPATH += --dep-path igmp
 VPATH += :igmp
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)net$(DELIM)uip}
 
 endif
 endif

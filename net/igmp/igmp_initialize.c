@@ -2,7 +2,7 @@
  * net/igmp/igmp_init.c
  * IGMP initialization logic
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * The NuttX implementation of IGMP was inspired by the IGMP add-on for the
@@ -51,6 +51,7 @@
 #include <nuttx/net/igmp.h>
 
 #include "uip/uip.h"
+#include "igmp/igmp.h"
 
 #ifdef CONFIG_NET_IGMP
 
@@ -74,14 +75,14 @@ uip_ipaddr_t g_allrouters;
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  uip_igmpinit
+ * Name:  igmp_initialize
  *
  * Description:
  *   Perform one-time IGMP initialization.
  *
  ****************************************************************************/
 
-void uip_igmpinit(void)
+void igmp_initialize(void)
 {
   nvdbg("IGMP initializing\n");
 
@@ -90,11 +91,11 @@ void uip_igmpinit(void)
 
   /* Initialize the group allocation logic */
 
-  uip_grpinit();
+  igmp_grpinit();
 }
 
 /****************************************************************************
- * Name:  uip_igmpdevinit
+ * Name:  igmp_devinit
  *
  * Description:
  *   Called when a new network device is registered to configure that device
@@ -102,19 +103,19 @@ void uip_igmpinit(void)
  *
  ****************************************************************************/
 
-void uip_igmpdevinit(struct uip_driver_s *dev)
+void igmp_devinit(struct uip_driver_s *dev)
 {
   nvdbg("IGMP initializing dev %p\n", dev);
   DEBUGASSERT(dev->grplist.head == NULL);
 
   /* Add the all systems address to the group */
 
-  (void)uip_grpalloc(dev, &g_allsystems);
+  (void)igmp_grpalloc(dev, &g_allsystems);
 
   /* Allow the IGMP messages at the MAC level */
 
-  uip_addmcastmac(dev, &g_allrouters);
-  uip_addmcastmac(dev, &g_allsystems);
+  igmp_addmcastmac(dev, &g_allrouters);
+  igmp_addmcastmac(dev, &g_allsystems);
 }
 
 #endif /* CONFIG_NET_IGMP */

@@ -54,6 +54,5 @@ endif
 
 DEPPATH += --dep-path icmp
 VPATH += :icmp
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)net$(DELIM)icmp}
 
 endif

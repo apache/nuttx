@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/uip/uip_setipid.c
+ * net/igmp/igmp.h
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,45 +33,93 @@
  *
  ****************************************************************************/
 
+#ifndef _NET_IGMP_IGMP_H
+#define _NET_IGMP_IGMP_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifdef CONFIG_NET
 
-#include <stdint.h>
-#include <debug.h>
+#include <sys/types.h>
 
-#include <nuttx/net/uip.h>
-
-#include "uip/uip.h"
+#ifdef CONFIG_NET_IGMP
 
 /****************************************************************************
- * Private Data
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functions
+ * Public Type Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Public Data
  ****************************************************************************/
 
-/****************************************************************************
- * Function: uip_setipid
- *
- * Description:
- *   This function may be used at boot time to set the initial ip_id.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-void uip_setipid(uint16_t id)
+#ifdef __cplusplus
+#  define EXTERN extern "C"
+extern "C"
 {
-  g_ipid = id;
-}
+#else
+#  define EXTERN extern
+#endif
 
-#endif /* CONFIG_NET */
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/* Defined in igmp_init.c ***************************************************/
+
+void igmp_initialize(void);
+
+/* Defined in igmp_input.c **************************************************/
+
+void igmp_input(struct uip_driver_s *dev);
+
+/* Defined in igmp_group.c **************************************************/
+
+void igmp_grpinit(void);
+FAR struct igmp_group_s *igmp_grpalloc(FAR struct uip_driver_s *dev,
+                                       FAR const uip_ipaddr_t *addr);
+FAR struct igmp_group_s *igmp_grpfind(FAR struct uip_driver_s *dev,
+                                      FAR const uip_ipaddr_t *addr);
+FAR struct igmp_group_s *igmp_grpallocfind(FAR struct uip_driver_s *dev,
+                                           FAR const uip_ipaddr_t *addr);
+void igmp_grpfree(FAR struct uip_driver_s *dev,
+                  FAR struct igmp_group_s *group);
+
+/* Defined in igmp_msg.c ****************************************************/
+
+void igmp_schedmsg(FAR struct igmp_group_s *group, uint8_t msgid);
+void igmp_waitmsg(FAR struct igmp_group_s *group, uint8_t msgid);
+
+/* Defined in igmp_poll.c ***************************************************/
+
+void igmp_poll(FAR struct uip_driver_s *dev);
+
+/* Defined in igmp_send.c ***************************************************/
+
+void igmp_send(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group,
+                  FAR uip_ipaddr_t *dest);
+
+/* Defined in igmp_timer.c **************************************************/
+
+int igmp_decisec2tick(int decisecs);
+void igmp_startticks(FAR struct igmp_group_s *group, int ticks);
+void igmp_starttimer(FAR struct igmp_group_s *group, uint8_t decisecs);
+bool igmp_cmptimer(FAR struct igmp_group_s *group, int maxticks);
+
+/* Defined in igmp_mcastmac *************************************************/
+
+void igmp_addmcastmac(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *ip);
+void igmp_removemcastmac(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *ip);
+
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* CONFIG_NET_IGMP */
+#endif /* _NET_IGMP_IGMP_H */
