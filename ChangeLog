@@ -7515,3 +7515,5 @@
 	* net/: Many files changed.  Convert existing TCP read-ahead logic
 	  to use I/O buffer chains (2014-6-24).
 	* net/: Clean up all TCP and UDP related naming (204-6-24).
+	* net/: Clean up all ICMP, IGMP, ARP, and PKT related naming
+	  (204-6-25).
