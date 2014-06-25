@@ -2036,6 +2036,9 @@ int up_i2creset(FAR struct i2c_dev_s * dev)
   scl_gpio = MKI2C_OUTPUT(priv->config->scl_pin);
   sda_gpio = MKI2C_OUTPUT(priv->config->sda_pin);
 
+  stm32_configgpio(scl_gpio);
+  stm32_configgpio(sda_gpio);
+
   /* Let SDA go high */
 
   stm32_gpiowrite(sda_gpio, 1);
