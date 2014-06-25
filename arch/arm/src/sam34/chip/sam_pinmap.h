@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/sam34/chip/sam_pinmap.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,8 @@
 #  include "chip/sam3u_pinmap.h"
 #elif defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
 #  include "chip/sam3x_pinmap.h"
+#elif defined(CONFIG_ARCH_CHIP_SAM4CM)
+#  include "chip/sam4cm_pinmap.h"
 #elif defined(CONFIG_ARCH_CHIP_SAM4E)
 #  include "chip/sam4e_pinmap.h"
 #elif defined(CONFIG_ARCH_CHIP_SAM4L)

@@ -355,6 +355,55 @@
 #  define SAM34_NUDPFS                0             /* No USB full speed device */
 #  define SAM34_NUHPFS                0             /* No USB full speed embedded host */
 
+/* AT91SAM4C Family *****************************************************************/
+/* FEATURE     SAM4CMP16B
+ * ----------- ---------
+ * Flash        1024KB
+ * SRAM         128KB
+ * SMC          Yes
+ * GMCC         2KB
+ * Package      LQFP144
+ *              LFBGA144
+ * No. PIOs     117
+ * SHDN Pin     No
+ * EMAC         MII
+ * CAN          2
+ * EBI          Yes
+ * EBI data     8
+ * EBI ch       4
+ * EBI addr     24
+ * SDRAM        ---
+ * DMA          4
+ * 16-bit ADC0  16ch
+ * 16-bit ADC1  8ch
+ * 12-bit DAC   2ch
+ * Timer        9
+ * PDC Channels 24+9
+ * USART        2
+ * UART         2
+ * SPI          1
+ * HSMCI        4 bit
+ */
+
+#elif defined(CONFIG_ARCH_CHIP_ATSAM4CMP16B)
+/* Internal memory */
+
+#  define SAM34_FLASH_SIZE            (1024*1024)  /* 1024KB */
+#  define SAM34_SRAM0_SIZE            (128*1024)   /* 128KB */
+#  define SAM34_SRAM1_SIZE            0            /* None */
+#  define SAM34_NFCSRAM_SIZE          0            /* None */
+
+/* Peripherals */
+
+#  define SAM34_NDMACHAN              21           /* 21 PDC Channels */
+#  define SAM34_NMCI2                 0            /* No memory card interface */
+#  define SAM32_NSLCD                 1            /* 1 segment LCD interface */
+#  define SAM32_NAESA                 1            /* 1 advanced encryption standard */
+#  define SAM32_NUDPHS                0            /* No USB high speed device */
+#  define SAM32_NUHPHS                0            /* No USB high speed embedded host */
+#  define SAM32_NUDPFS                0            /* No USB full speed device */
+#  define SAM32_NUHPFS                0            /* No USB full speed embedded host */
+
 /* AT91SAM4L Family *****************************************************************/
 /* Sub-family differences:
  *

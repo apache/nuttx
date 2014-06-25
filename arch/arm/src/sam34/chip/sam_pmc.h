@@ -1,6 +1,7 @@
 /********************************************************************************************
  * arch/arm/src/sam34/chip/sam_pmc.h
- * Power Management Controller (PMC) for the SAM3U, SAM3X, SAM3A, SAM4E, and SAM4S
+ * Power Management Controller (PMC) for the SAM3U, SAM3X, SAM3A, SAM4CM, SAM4E, and
+ * SAM4S
  *
  *   Copyright (C) 2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -57,7 +58,8 @@
 #define SAM_PMC_SCSR_OFFSET              0x0008 /* System Clock Status Register */
                                                 /* 0x000c: Reserved */
 #if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A) || \
-    defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
+    defined(CONFIG_ARCH_CHIP_SAM4CM) || defined(CONFIG_ARCH_CHIP_SAM4S) || \
+    defined(CONFIG_ARCH_CHIP_SAM4E)
 #  define SAM_PMC_PCER0_OFFSET           0x0010 /* Peripheral Clock Enable Register 0 */
 #  define SAM_PMC_PCDR0_OFFSET           0x0014 /* Peripheral Clock Disable Register 0 */
 #  define SAM_PMC_PCSR0_OFFSET           0x0018 /* Peripheral Clock Status Register 0 */
@@ -76,7 +78,7 @@
 #define SAM_PMC_CKGR_MCFR_OFFSET         0x0024 /* Main Clock Frequency Register */
 #define SAM_PMC_CKGR_PLLAR_OFFSET        0x0028 /* PLLA Register */
 
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM4CM) || defined(CONFIG_ARCH_CHIP_SAM4S)
 #  define SAM_PMC_CKGR_PLLBR_OFFSET      0x002c /* PLLB Register */
 #endif
                                                 /* 0x002c: Reserved (SAM3U)*/
@@ -106,7 +108,8 @@
 #define SAM_PMC_WPSR_OFFSET              0x00e8 /* Write Protect Status Register */
 
 #if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A) || \
-    defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
+    defined(CONFIG_ARCH_CHIP_SAM4CM) || defined(CONFIG_ARCH_CHIP_SAM4S) || \
+    defined(CONFIG_ARCH_CHIP_SAM4E)
                                                 /* 0x00ec-0x00fc Reserved */
 #  define SAM_PMC_PCER1_OFFSET           0x0100 /* Peripheral Clock Enable Register 1 */
 #  define SAM_PMC_PCDR1_OFFSET           0x0104 /* Peripheral Clock Disable Register 1 */
@@ -132,7 +135,8 @@
 #define SAM_PMC_SCSR                     (SAM_PMC_BASE+SAM_PMC_SCSR_OFFSET)
 
 #if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A) || \
-    defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
+    defined(CONFIG_ARCH_CHIP_SAM4CM) || defined(CONFIG_ARCH_CHIP_SAM4S) || \
+    defined(CONFIG_ARCH_CHIP_SAM4E)
 #  define SAM_PMC_PCER0                  (SAM_PMC_BASE+SAM_PMC_PCER0_OFFSET)
 #  define SAM_PMC_PCDR0                  (SAM_PMC_BASE+SAM_PMC_PCDR0_OFFSET)
 #  define SAM_PMC_PCSR0                  (SAM_PMC_BASE+SAM_PMC_PCSR0_OFFSET)
@@ -151,7 +155,7 @@
 #define SAM_PMC_CKGR_MCFR                (SAM_PMC_BASE+SAM_PMC_CKGR_MCFR_OFFSET)
 #define SAM_PMC_CKGR_PLLAR               (SAM_PMC_BASE+SAM_PMC_CKGR_PLLAR_OFFSET)
 
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM4CM) || defined(CONFIG_ARCH_CHIP_SAM4S)
 #  define SAM_PMC_CKGR_PLLBR             (SAM_PMC_BASE+SAM_PMC_CKGR_PLLBR_OFFSET)
 #endif
 
@@ -176,7 +180,8 @@
 #define SAM_PMC_WPSR                     (SAM_PMC_BASE+SAM_PMC_WPSR_OFFSET)
 
 #if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A) || \
-    defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
+    defined(CONFIG_ARCH_CHIP_SAM4CM) || defined(CONFIG_ARCH_CHIP_SAM4S) || \
+    defined(CONFIG_ARCH_CHIP_SAM4E)
 #  define SAM_PMC_PCER1                  (SAM_PMC_BASE+SAM_PMC_PCER1_OFFSET)
 #  define SAM_PMC_PCDR1                  (SAM_PMC_BASE+SAM_PMC_PCDR1_OFFSET)
 #  define SAM_PMC_PCSR1                  (SAM_PMC_BASE+SAM_PMC_PCSR1_OFFSET)
@@ -212,6 +217,12 @@
 #define PMC_PCK0                         (1 << 8)  /* Bit 8:  Programmable Clock 0 Output Enable */
 #define PMC_PCK1                         (1 << 9)  /* Bit 9:  Programmable Clock 1 Output Enable */
 #define PMC_PCK2                         (1 << 10) /* Bit 10: Programmable Clock 2 Output Enable */
+
+#if defined(CONFIG_ARCH_CHIP_SAM4CM)
+#  define PMC_CPCK                       (1 << 16)
+#  define PMC_CPBMCK                     (1 << 17)
+#  define PMC_CPKEY                      (0xa << 20)
+#endif
 
 /* PMC Peripheral Clock Enable Register, PMC Peripheral Clock Disable Register, and PMC
  * Peripheral Clock Status Register common bit-field definitions.
@@ -317,7 +328,7 @@
 
 /* PLLB Register */
 
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM4CM) || defined(CONFIG_ARCH_CHIP_SAM4S)
 #  define PMC_CKGR_PLLBR_DIV_SHIFT       (0)       /* Bits 0-7: Divider */
 #  define PMC_CKGR_PLLBR_DIV_MASK        (0xff << PMC_CKGR_PLLBR_DIV_SHIFT)
 #    define PMC_CKGR_PLLBR_DIV_ZERO      (0 << PMC_CKGR_PLLBR_DIV_SHIFT)   /* Divider output is 0 */
@@ -327,6 +338,13 @@
 #  define PMC_CKGR_PLLBR_COUNT_MASK      (63 << PMC_CKGR_PLLBR_COUNT_SHIFT)
 #  define PMC_CKGR_PLLBR_MUL_SHIFT       (16)      /* Bits 16-26: PLLA Multiplier */
 #  define PMC_CKGR_PLLBR_MUL_MASK        (0x7ff << PMC_CKGR_PLLBR_MUL_SHIFT)
+
+#  if defined(CONFIG_ARCH_CHIP_SAM4CM)
+#    define PMC_CKGR_PLLBR_SRCB_SHIFT    (29)
+#    define PMC_CKGR_PLLBR_SRCB_MASK     (1 << PMC_CKGR_PLLBR_SRCB_SHIFT)
+#      define PMC_CKGR_PLLBR_SRCB_MAIN   (0 << PMC_CKGR_PLLBR_SRCB_SHIFT)
+#      define PMC_CKGR_PLLBR_SRCB_PLLA   (1 << PMC_CKGR_PLLBR_SRCB_SHIFT)
+#  endif
 #endif
 
 /* USB Clock Register PMC_USB */
@@ -350,12 +368,12 @@
 #  define PMC_MCKR_CSS_MAIN              (1 << PMC_MCKR_CSS_SHIFT) /* Main Clock */
 #  define PMC_MCKR_CSS_PLLA              (2 << PMC_MCKR_CSS_SHIFT) /* PLLA Clock */
 
-#  if defined(CONFIG_ARCH_CHIP_SAM4S)
-#    define PMC_MCKR_CSS_PLLB            (3 << PMC_MCKR_CSS_SHIFT) /* PLLB Clock */
-#  elif defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
-        defined(CONFIG_ARCH_CHIP_SAM3A)
-#    define PMC_MCKR_CSS_UPLL            (3 << PMC_MCKR_CSS_SHIFT) /* UPLL Clock */
-#  endif
+#if defined(CONFIG_ARCH_CHIP_SAM4CM) || defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define PMC_MCKR_CSS_PLLB              (3 << PMC_MCKR_CSS_SHIFT) /* PLLB Clock */
+#elif defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
+      defined(CONFIG_ARCH_CHIP_SAM3A)
+#  define PMC_MCKR_CSS_UPLL            (3 << PMC_MCKR_CSS_SHIFT) /* UPLL Clock */
+#endif
 
 #define PMC_MCKR_PRES_SHIFT              (4)       /* Bits 4-6: Processor Clock Prescaler */
 #define PMC_MCKR_PRES_MASK               (7 << PMC_MCKR_PRES_SHIFT)
@@ -373,11 +391,24 @@
 #  define PMC_MCKR_PLLADIV2              (1 << 12) /* Bit 12: PLLA Divider */
 #endif
 
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM4CM) || defined(CONFIG_ARCH_CHIP_SAM4S)
 #  define PMC_MCKR_PLLBDIV2              (1 << 13) /* Bit 13: PLLB Divider */
 #elif defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A) || \
       defined(CONFIG_ARCH_CHIP_SAM3U)
 #  define PMC_MCKR_UPLLDIV2              (1 << 13) /* Bit 13: UPLL Divider */
+#endif
+
+#if defined(CONFIG_ARCH_CHIP_SAM4CM)
+#  define PMC_MCKR_CPCSS_SHIFT           (16)
+#  define PMC_MCKR_CPCSS_MASK            (0x7 << PMC_MCKR_CPCSS_SHIFT)
+#    define PMC_MCKR_CPCSS_SLOW          (0 << PMC_MCKR_CPCSS_SHIFT) /* Slow Clock */
+#    define PMC_MCKR_CCPSS_MAIN          (1 << PMC_MCKR_CPCSS_SHIFT) /* Main Clock */
+#    define PMC_MCKR_CCPSS_PLLA          (2 << PMC_MCKR_CPCSS_SHIFT) /* PLLA Clock */
+#    define PMC_MCKR_CCPSS_PLLB          (3 << PMC_MCKR_CPCSS_SHIFT) /* PLLB Clock */
+#    define PMC_MCKR_CCPSS_MCK           (4 << PMC_MCKR_CPCSS_SHIFT) /* Master Clock */
+#  define PMC_MCKR_CPPRES_SHIFT          (20)
+#  define PMC_MCKR_CPPRES_MASK           (0xF << PMC_MCKR_CPPRES_SHIFT)
+#    define PMC_MCKR_CPPRES(D)           (((D) - 1) << PMC_MCKR_CPPRES_SHIFT)
 #endif
 
 /* PMC Programmable Clock Register (0,1,2) */
@@ -414,7 +445,7 @@
 #define PMC_INT_MOSCXTS                  (1 << 0)  /* Bit 0:  Main Crystal Oscillator Status Interrupt */
 #define PMC_INT_LOCKA                    (1 << 1)  /* Bit 1:  PLL A Lock Interrupt */
 
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM4CM) || defined(CONFIG_ARCH_CHIP_SAM4S)
 #  define PMC_INT_LOCKB                  (1 << 2)  /* Bit 2:  PLL B Lock Interrupt */
 #endif
 
