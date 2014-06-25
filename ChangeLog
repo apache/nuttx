@@ -7521,3 +7521,7 @@
 	  family.  From Max Neklyudov (2014-6-25).
 
 7.4 2014-xx-xx Gregory Nutt <gnutt@nuttx.org>
+
+	* arch/arm/src/stm32/stm32_i2c.c:  Fix missing configuration of
+	  GPIO pins in I2C driver.  Fix from Alex D. (2014-6-25).
+
