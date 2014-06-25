@@ -50,6 +50,8 @@
 #endif
 
 #include "net.h"
+#include "tcp/tcp.h"
+#include "udp/udp.h"
 
 /****************************************************************************
  * Private Functions
@@ -204,7 +206,7 @@ int psock_bind(FAR struct socket *psock, const struct sockaddr *addr,
 
 #ifdef CONFIG_NET_UDP
       case SOCK_DGRAM:
-        ret = uip_udpbind(psock->s_conn, inaddr);
+        ret = udp_bind(psock->s_conn, inaddr);
         break;
 #endif
 

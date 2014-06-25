@@ -53,6 +53,7 @@
 
 #include "net.h"
 #include "uip/uip.h"
+#include "udp/udp.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -297,7 +298,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
                      socklen_t tolen)
 {
 #ifdef CONFIG_NET_UDP
-  FAR struct uip_udp_conn *conn;
+  FAR struct udp_conn_s *conn;
 #ifdef CONFIG_NET_IPv6
   FAR const struct sockaddr_in6 *into = (const struct sockaddr_in6 *)to;
 #else
@@ -378,8 +379,8 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
 
   /* Setup the UDP socket */
 
-  conn = (struct uip_udp_conn *)psock->s_conn;
-  ret = uip_udpconnect(conn, into);
+  conn = (FAR struct udp_conn_s *)psock->s_conn;
+  ret = udp_connect(conn, into);
   if (ret < 0)
     {
       uip_unlock(save);
@@ -389,7 +390,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
 
   /* Set up the callback in the connection */
 
-  state.st_cb = uip_udpcallbackalloc(conn);
+  state.st_cb = udp_callbackalloc(conn);
   if (state.st_cb)
     {
       state.st_cb->flags   = UIP_POLL;
@@ -410,7 +411,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
 
       /* Make sure that no further interrupts are processed */
 
-      uip_udpcallbackfree(conn, state.st_cb);
+      udp_callbackfree(conn, state.st_cb);
     }
   uip_unlock(save);
 

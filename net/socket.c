@@ -46,6 +46,8 @@
 #include <debug.h>
 
 #include "net.h"
+#include "tcp/tcp.h"
+#include "udp/udp.h"
 
 /****************************************************************************
  * Global Functions
@@ -222,7 +224,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
            * socket instance.
            */
 
-          struct uip_udp_conn *conn = uip_udpalloc();
+          FAR struct udp_conn_s *conn = udp_alloc();
           if (!conn)
             {
               /* Failed to reserve a connection structure */

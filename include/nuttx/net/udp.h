@@ -71,7 +71,7 @@
 
 struct uip_driver_s;      /* Forward reference */
 struct uip_callback_s;    /* Forward reference */
-struct uip_udp_conn
+struct udp_conn_s
 {
   dq_entry_t node;        /* Supports a doubly linked list */
   uip_ipaddr_t ripaddr;   /* The IP address of the remote peer */
@@ -87,7 +87,7 @@ struct uip_udp_conn
 
 /* The UDP and IP headers */
 
-struct uip_udpip_hdr
+struct udp_iphdr_s
 {
 #ifdef CONFIG_NET_IPv6
 
@@ -132,7 +132,7 @@ struct uip_udpip_hdr
  */
 
 #ifdef CONFIG_NET_STATISTICS
-struct uip_udp_stats_s
+struct udp_stats_s
 {
   uip_stats_t drop;         /* Number of dropped UDP segments */
   uip_stats_t recv;         /* Number of recived UDP segments */
@@ -159,31 +159,33 @@ struct uip_udp_stats_s
  * normally something done by the implementation of the socket() API
  */
 
-extern struct uip_udp_conn *uip_udpalloc(void);
+FAR struct udp_conn_s *udp_alloc(void);
 
 /* Allocate a new TCP data callback */
 
-#define uip_udpcallbackalloc(conn)   uip_callbackalloc(&conn->list)
-#define uip_udpcallbackfree(conn,cb) uip_callbackfree(cb, &conn->list)
+#define udp_callbackalloc(conn)   uip_callbackalloc(&conn->list)
+#define udp_callbackfree(conn,cb) uip_callbackfree(cb, &conn->list)
 
 /* Free a connection structure that is no longer in use. This should
  * be done by the implementation of close()
  */
 
-extern void uip_udpfree(struct uip_udp_conn *conn);
+void udp_free(FAR struct udp_conn_s *conn);
 
 /* Bind a UDP connection to a local address */
 
 #ifdef CONFIG_NET_IPv6
-extern int uip_udpbind(struct uip_udp_conn *conn, const struct sockaddr_in6 *addr);
+int udp_bind(FAR struct udp_conn_s *conn,
+             FAR const struct sockaddr_in6 *addr);
 #else
-extern int uip_udpbind(struct uip_udp_conn *conn, const struct sockaddr_in *addr);
+int udp_bind(FAR struct udp_conn_s *conn,
+             FAR const struct sockaddr_in *addr);
 #endif
 
 /* This function sets up a new UDP connection. The function will
  * automatically allocate an unused local port for the new
  * connection. However, another port can be chosen by using the
- * uip_udpbind() call, after the uip_udpconnect() function has been
+ * udp_bind() call, after the udp_connect() function has been
  * called.
  *
  * This function is called as part of the implementation of sendto
@@ -193,14 +195,16 @@ extern int uip_udpbind(struct uip_udp_conn *conn, const struct sockaddr_in *addr
  */
 
 #ifdef CONFIG_NET_IPv6
-extern int uip_udpconnect(struct uip_udp_conn *conn, const struct sockaddr_in6 *addr);
+int udp_connect(FAR struct udp_conn_s *conn,
+                FAR const struct sockaddr_in6 *addr);
 #else
-extern int uip_udpconnect(struct uip_udp_conn *conn, const struct sockaddr_in *addr);
+int udp_connect(FAR struct udp_conn_s *conn,
+                FAR const struct sockaddr_in *addr);
 #endif
 
 /* Enable/disable UDP callbacks on a connection */
 
-extern void uip_udpenable(struct uip_udp_conn *conn);
-extern void uip_udpdisable(struct uip_udp_conn *conn);
+void udp_enable(FAR struct udp_conn_s *conn);
+void udp_disable(FAR struct udp_conn_s *conn);
 
 #endif /* __INCLUDE_NUTTX_NET_UDP_H */

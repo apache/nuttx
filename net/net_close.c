@@ -497,7 +497,7 @@ int psock_close(FAR struct socket *psock)
 #ifdef CONFIG_NET_UDP
           case SOCK_DGRAM:
             {
-              struct uip_udp_conn *conn = psock->s_conn;
+              FAR struct udp_conn_s *conn = psock->s_conn;
 
               /* Is this the last reference to the connection structure (there
                * could be more if the socket was dup'ed).
@@ -507,8 +507,8 @@ int psock_close(FAR struct socket *psock)
                 {
                   /* Yes... free the connection structure */
 
-                  conn->crefs = 0;             /* No more references on the connection */
-                  uip_udpfree(psock->s_conn);  /* Free uIP resources */
+                  conn->crefs = 0;          /* No more references on the connection */
+                  udp_free(psock->s_conn);  /* Free uIP resources */
                 }
               else
                 {

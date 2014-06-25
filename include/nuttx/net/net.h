@@ -104,7 +104,7 @@ struct socket
 #endif
 #endif
 
-  FAR void     *s_conn;      /* Connection: struct tcp_conn_s or uip_udp_conn */
+  FAR void     *s_conn;      /* Connection: struct tcp_conn_s or udp_conn_s */
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   /* Callback instance for TCP send */

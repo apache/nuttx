@@ -51,12 +51,13 @@
 #include <nuttx/net/netdev.h>
 
 #include "uip/uip.h"
+#include "udp/udp.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define UDPBUF ((struct uip_udpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
+#define UDPBUF ((struct udp_iphdr_s *)&dev->d_buf[UIP_LLH_LEN])
 
 /****************************************************************************
  * Public Variables
@@ -75,7 +76,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_udpsend
+ * Name: udp_send
  *
  * Description:
  *   Set-up to send a UDP packet
@@ -92,9 +93,9 @@
  *
  ****************************************************************************/
 
-void uip_udpsend(struct uip_driver_s *dev, struct uip_udp_conn *conn)
+void udp_send(struct uip_driver_s *dev, struct udp_conn_s *conn)
 {
-  struct uip_udpip_hdr *pudpbuf = UDPBUF;
+  FAR struct udp_iphdr_s *pudpbuf = UDPBUF;
 
   if (dev->d_sndlen > 0)
     {
@@ -155,7 +156,7 @@ void uip_udpsend(struct uip_driver_s *dev, struct uip_udp_conn *conn)
       /* Calculate UDP checksum. */
 
       pudpbuf->udpchksum   = 0;
-      pudpbuf->udpchksum   = ~(uip_udpchksum(dev));
+      pudpbuf->udpchksum   = ~(udp_chksum(dev));
       if (pudpbuf->udpchksum == 0)
         {
           pudpbuf->udpchksum = 0xffff;

@@ -52,6 +52,8 @@
 
 #include "net.h"
 #include "uip/uip.h"
+#include "tcp/tcp.h"
+#include "udp/udp.h"
 
 /****************************************************************************
  * Private Types
@@ -494,7 +496,7 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
 #ifdef CONFIG_NET_UDP
       case SOCK_DGRAM:
         {
-          ret = uip_udpconnect(psock->s_conn, inaddr);
+          ret = udp_connect(psock->s_conn, inaddr);
           if (ret < 0)
             {
               err = -ret;

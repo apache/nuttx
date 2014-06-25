@@ -52,6 +52,7 @@
 #include <nuttx/net/netdev.h>
 
 #include "uip/uip.h"
+#include "udp/udp.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -74,7 +75,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_udppoll
+ * Name: udp_poll
  *
  * Description:
  *   Poll a UDP "connection" structure for availability of TX data
@@ -91,7 +92,7 @@
  *
  ****************************************************************************/
 
-void uip_udppoll(FAR struct uip_driver_s *dev, FAR struct uip_udp_conn *conn)
+void udp_poll(FAR struct uip_driver_s *dev, FAR struct udp_conn_s *conn)
 {
   /* Verify that the UDP connection is valid */
 
@@ -107,13 +108,13 @@ void uip_udppoll(FAR struct uip_driver_s *dev, FAR struct uip_udp_conn *conn)
 
       /* Perform the application callback */
 
-      (void)uip_udpcallback(dev, conn, UIP_POLL);
+      (void)udp_callback(dev, conn, UIP_POLL);
 
       /* If the application has data to send, setup the UDP/IP header */
 
       if (dev->d_sndlen > 0)
         {
-          uip_udpsend(dev, conn);
+          udp_send(dev, conn);
           return;
         }
     }

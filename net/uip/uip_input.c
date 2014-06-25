@@ -93,9 +93,9 @@
 # include "uip_neighbor.h"
 #endif /* CONFIG_NET_IPv6 */
 
+#include "uip/uip.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
-#include "uip.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -414,7 +414,7 @@ int uip_input(struct uip_driver_s *dev)
       uip_ipaddr_cmp(pbuf->destipaddr, g_alloneaddr))
 #endif
     {
-      return uip_udpinput(dev);
+      return udp_input(dev);
     }
 
   /* In most other cases, the device must be assigned a non-zero IP
@@ -514,7 +514,7 @@ int uip_input(struct uip_driver_s *dev)
 
 #ifdef CONFIG_NET_UDP
       case UIP_PROTO_UDP:   /* UDP input */
-        uip_udpinput(dev);
+        udp_input(dev);
         break;
 #endif
 

@@ -210,7 +210,7 @@ struct uip_ip_hdr
  *   flink   - Supports a singly linked list
  *   event   - Provides the address of the callback function entry point.
  *             pvconn is a pointer to one of struct tcp_conn_s or struct
- *             uip_udp_conn.
+ *             udp_conn_s.
  *   priv    - Holds a reference to application specific data that will
  *             provided
  *   flags   - Set by the application to inform the uIP layer which flags
@@ -285,7 +285,7 @@ struct uip_stats
 #endif
 
 #ifdef CONFIG_NET_UDP
-  struct uip_udp_stats_s  udp;  /* UDP statistics */
+  struct udp_stats_s      udp;  /* UDP statistics */
 #endif
 };
 #endif /* CONFIG_NET_STATISTICS */

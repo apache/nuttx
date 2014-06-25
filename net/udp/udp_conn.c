@@ -61,6 +61,7 @@
 #include <nuttx/net/netdev.h>
 
 #include "uip/uip.h"
+#include "udp/udp.h"
 
 /****************************************************************************
  * Private Data
@@ -68,7 +69,7 @@
 
 /* The array containing all uIP UDP connections. */
 
-struct uip_udp_conn g_udp_connections[CONFIG_NET_UDP_CONNS];
+struct udp_conn_s g_udp_connections[CONFIG_NET_UDP_CONNS];
 
 /* A list of all free UDP connections */
 
@@ -120,7 +121,7 @@ static inline void _uip_semtake(FAR sem_t *sem)
  *
  ****************************************************************************/
 
-static FAR struct uip_udp_conn *uip_find_conn(uint16_t portno)
+static FAR struct udp_conn_s *uip_find_conn(uint16_t portno)
 {
   int i;
 
@@ -198,7 +199,7 @@ static uint16_t uip_selectport(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_udpinit()
+ * Name: udp_initialize()
  *
  * Description:
  *   Initialize the UDP connection structures.  Called once and only from
@@ -206,7 +207,7 @@ static uint16_t uip_selectport(void)
  *
  ****************************************************************************/
 
-void uip_udpinit(void)
+void udp_initialize(void)
 {
   int i;
 
@@ -228,23 +229,23 @@ void uip_udpinit(void)
 }
 
 /****************************************************************************
- * Name: uip_udpalloc()
+ * Name: udp_alloc()
  *
  * Description:
  *   Allocate a new, uninitialized UDP connection structure.
  *
  ****************************************************************************/
 
-struct uip_udp_conn *uip_udpalloc(void)
+FAR struct udp_conn_s *udp_alloc(void)
 {
-  struct uip_udp_conn *conn;
+  FAR struct udp_conn_s *conn;
 
   /* The free list is only accessed from user, non-interrupt level and
    * is protected by a semaphore (that behaves like a mutex).
    */
 
   _uip_semtake(&g_free_sem);
-  conn = (struct uip_udp_conn *)dq_remfirst(&g_free_udp_connections);
+  conn = (FAR struct udp_conn_s *)dq_remfirst(&g_free_udp_connections);
   if (conn)
     {
       /* Make sure that the connection is marked as uninitialized */
@@ -261,16 +262,16 @@ struct uip_udp_conn *uip_udpalloc(void)
 }
 
 /****************************************************************************
- * Name: uip_udpfree()
+ * Name: udp_free()
  *
  * Description:
  *   Free a UDP connection structure that is no longer in use. This should be
- *   done by the implementation of close().  uip_udpdisable must have been
+ *   done by the implementation of close().  udp_disable must have been
  *   previously called.
  *
  ****************************************************************************/
 
-void uip_udpfree(struct uip_udp_conn *conn)
+void udp_free(FAR struct udp_conn_s *conn)
 {
   /* The free list is only accessed from user, non-interrupt level and
    * is protected by a semaphore (that behaves like a mutex).
@@ -292,7 +293,7 @@ void uip_udpfree(struct uip_udp_conn *conn)
 }
 
 /****************************************************************************
- * Name: uip_udpactive()
+ * Name: udp_active()
  *
  * Description:
  *   Find a connection structure that is the appropriate
@@ -303,10 +304,10 @@ void uip_udpfree(struct uip_udp_conn *conn)
  *
  ****************************************************************************/
 
-struct uip_udp_conn *uip_udpactive(FAR struct uip_udpip_hdr *buf)
+FAR struct udp_conn_s *udp_active(FAR struct udp_iphdr_s *buf)
 {
-  FAR struct uip_udp_conn *conn =
-    (FAR struct uip_udp_conn *)g_active_udp_connections.head;
+  FAR struct udp_conn_s *conn =
+    (FAR struct udp_conn_s *)g_active_udp_connections.head;
 
   while (conn)
     {
@@ -332,7 +333,7 @@ struct uip_udp_conn *uip_udpactive(FAR struct uip_udpip_hdr *buf)
 
       /* Look at the next active connection */
 
-      conn = (struct uip_udp_conn *)conn->node.flink;
+      conn = (FAR struct udp_conn_s *)conn->node.flink;
     }
 
   return conn;
@@ -350,20 +351,20 @@ struct uip_udp_conn *uip_udpactive(FAR struct uip_udpip_hdr *buf)
  *
  ****************************************************************************/
 
-FAR struct uip_udp_conn *uip_nextudpconn(FAR struct uip_udp_conn *conn)
+FAR struct udp_conn_s *uip_nextudpconn(FAR struct udp_conn_s *conn)
 {
   if (!conn)
     {
-      return (struct uip_udp_conn *)g_active_udp_connections.head;
+      return (FAR struct udp_conn_s *)g_active_udp_connections.head;
     }
   else
     {
-      return (struct uip_udp_conn *)conn->node.flink;
+      return (FAR struct udp_conn_s *)conn->node.flink;
     }
 }
 
 /****************************************************************************
- * Name: uip_udpbind()
+ * Name: udp_bind()
  *
  * Description:
  *   This function implements the UIP specific parts of the standard UDP
@@ -375,11 +376,9 @@ FAR struct uip_udp_conn *uip_nextudpconn(FAR struct uip_udp_conn *conn)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-int uip_udpbind(FAR struct uip_udp_conn *conn,
-                FAR const struct sockaddr_in6 *addr)
+int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr_in6 *addr)
 #else
-int uip_udpbind(FAR struct uip_udp_conn *conn,
-                FAR const struct sockaddr_in *addr)
+int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr_in *addr)
 #endif
 {
   int ret = -EADDRINUSE;
@@ -417,16 +416,16 @@ int uip_udpbind(FAR struct uip_udp_conn *conn,
 }
 
 /****************************************************************************
- * Name: uip_udpconnect()
+ * Name: udp_connect()
  *
  * Description:
  *   This function sets up a new UDP connection. The function will
  *   automatically allocate an unused local port for the new
  *   connection. However, another port can be chosen by using the
- *   uip_udpbind() call, after the uip_udpconnect() function has been
+ *   udp_bind() call, after the udp_connect() function has been
  *   called.
  *
- * uip_udpenable() must be called before the connection is made active (i.e.,
+ * udp_enable() must be called before the connection is made active (i.e.,
  * is eligible for callbacks.
  *
  * addr The address of the remote host.
@@ -437,11 +436,11 @@ int uip_udpbind(FAR struct uip_udp_conn *conn,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-int uip_udpconnect(FAR struct uip_udp_conn *conn,
-                   FAR const struct sockaddr_in6 *addr)
+int udp_connect(FAR struct udp_conn_s *conn,
+                FAR const struct sockaddr_in6 *addr)
 #else
-int uip_udpconnect(FAR struct uip_udp_conn *conn,
-                   FAR const struct sockaddr_in *addr)
+int udp_connect(FAR struct udp_conn_s *conn,
+                FAR const struct sockaddr_in *addr)
 #endif
 {
   /* Has this address already been bound to a local port (lport)? */

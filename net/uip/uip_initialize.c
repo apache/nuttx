@@ -47,8 +47,9 @@
 #include <stdint.h>
 #include <nuttx/net/uip.h>
 
+#include "uip/uip.h"
 #include "tcp/tcp.h"
-#include "uip.h"
+#include "udp/udp.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -149,7 +150,7 @@ void uip_initialize(void)
   /* Initialize the UDP connection structures */
 
 #ifdef CONFIG_NET_UDP
-  uip_udpinit();
+  udp_initialize();
 #endif
 
   /* Initialize IGMP support */

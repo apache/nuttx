@@ -59,12 +59,13 @@
 #include "net.h"
 #include "uip/uip.h"
 #include "tcp/tcp.h"
+#include "udp/udp.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-#define UDPBUF ((struct uip_udpip_hdr *)&dev->d_buf[UIP_LLH_LEN])
+#define UDPBUF ((struct udp_iphdr_s *)&dev->d_buf[UIP_LLH_LEN])
 #define TCPBUF ((struct tcp_iphdr_s *)&dev->d_buf[UIP_LLH_LEN])
 
 /****************************************************************************
@@ -1135,10 +1136,10 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
                             FAR struct sockaddr_in *infrom )
 #endif
 {
-  struct uip_udp_conn *conn = (struct uip_udp_conn *)psock->s_conn;
-  struct recvfrom_s    state;
-  uip_lock_t           save;
-  int                  ret;
+  FAR struct udp_conn_s *conn = (FAR struct udp_conn_s *)psock->s_conn;
+  struct recvfrom_s state;
+  uip_lock_t save;
+  int ret;
 
   /* Perform the UDP recvfrom() operation */
 
@@ -1152,7 +1153,7 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   /* Setup the UDP remote connection */
 
-  ret = uip_udpconnect(conn, NULL);
+  ret = udp_connect(conn, NULL);
   if (ret < 0)
     {
       goto errout_with_state;
@@ -1160,7 +1161,7 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   /* Set up the callback in the connection */
 
-  state.rf_cb = uip_udpcallbackalloc(conn);
+  state.rf_cb = udp_callbackalloc(conn);
   if (state.rf_cb)
     {
       /* Set up the callback in the connection */
@@ -1183,7 +1184,7 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
       /* Make sure that no further interrupts are processed */
 
-      uip_udpcallbackfree(conn, state.rf_cb);
+      udp_callbackfree(conn, state.rf_cb);
       ret = recvfrom_result(ret, &state);
     }
   else

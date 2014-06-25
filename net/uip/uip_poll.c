@@ -46,8 +46,9 @@
 #include <nuttx/net/uip.h>
 #include <nuttx/net/netdev.h>
 
+#include "uip/uip.h"
 #include "tcp/tcp.h"
-#include "uip.h"
+#include "udp/udp.h"
 
 /****************************************************************************
  * Private Data
@@ -161,16 +162,16 @@ static inline int uip_polligmp(FAR struct uip_driver_s *dev,
 static int uip_polludpconnections(FAR struct uip_driver_s *dev,
                                   uip_poll_callback_t callback)
 {
-  FAR struct uip_udp_conn *udp_conn = NULL;
+  FAR struct udp_conn_s *conn = NULL;
   int bstop = 0;
 
   /* Traverse all of the allocated UDP connections and perform the poll action */
 
-  while (!bstop && (udp_conn = uip_nextudpconn(udp_conn)))
+  while (!bstop && (conn = uip_nextudpconn(conn)))
     {
       /* Perform the UDP TX poll */
 
-      uip_udppoll(dev, udp_conn);
+      udp_poll(dev, conn);
 
       /* Call back into the driver */
 

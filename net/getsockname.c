@@ -162,7 +162,7 @@ int getsockname(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
 #ifdef CONFIG_NET_UDP
       case SOCK_DGRAM:
         {
-          struct uip_udp_conn *udp_conn = (struct uip_udp_conn *)psock->s_conn;
+          FAR struct udp_conn_s *udp_conn = (FAR struct udp_conn_s *)psock->s_conn;
           outaddr->sin_port = udp_conn->lport; /* Already in network byte order */
         }
         break;

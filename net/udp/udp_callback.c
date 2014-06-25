@@ -48,6 +48,7 @@
 #include <nuttx/net/netdev.h>
 
 #include "uip/uip.h"
+#include "udp/udp.h"
 
 /****************************************************************************
  * Private Data
@@ -62,7 +63,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: uip_udpcallback
+ * Function: udp_callback
  *
  * Description:
  *   Inform the application holding the UDP socket of a change in state.
@@ -75,8 +76,8 @@
  *
  ****************************************************************************/
 
-uint16_t uip_udpcallback(struct uip_driver_s *dev, struct uip_udp_conn *conn,
-                         uint16_t flags)
+uint16_t udp_callback(FAR struct uip_driver_s *dev,
+                      FAR struct udp_conn_s *conn, uint16_t flags)
 {
   nllvdbg("flags: %04x\n", flags);
 

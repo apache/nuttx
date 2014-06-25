@@ -125,31 +125,6 @@ void uip_pktpoll(struct uip_driver_s *dev, struct uip_pkt_conn *conn);
 
 #endif /* CONFIG_NET_PKT */
 
-#ifdef CONFIG_NET_UDP
-/* Defined in udp_conn.c ****************************************************/
-
-void uip_udpinit(void);
-struct uip_udp_conn *uip_udpactive(struct uip_udpip_hdr *buf);
-struct uip_udp_conn *uip_nextudpconn(struct uip_udp_conn *conn);
-
-/* Defined in udp_poll.c ****************************************************/
-
-void uip_udppoll(struct uip_driver_s *dev, struct uip_udp_conn *conn);
-
-/* Defined in udp_send.c ****************************************************/
-
-void uip_udpsend(struct uip_driver_s *dev, struct uip_udp_conn *conn);
-
-/* Defined in udp_input.c ***************************************************/
-
-int uip_udpinput(struct uip_driver_s *dev);
-
-/* Defined in udp_callback.c ************************************************/
-
-uint16_t uip_udpcallback(struct uip_driver_s *dev,
-                         struct uip_udp_conn *conn, uint16_t flags);
-#endif /* CONFIG_NET_UDP */
-
 #ifdef CONFIG_NET_ICMP
 /* Defined in icmp_input.c **************************************************/
 

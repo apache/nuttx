@@ -106,7 +106,7 @@ int net_clone(FAR struct socket *psock1, FAR struct socket *psock2)
 #ifdef CONFIG_NET_UDP
   if (psock2->s_type == SOCK_DGRAM)
     {
-      FAR struct uip_udp_conn *conn = psock2->s_conn;
+      FAR struct udp_conn_s *conn = psock2->s_conn;
       DEBUGASSERT(conn->crefs > 0 && conn->crefs < 255);
       conn->crefs++;
     }
