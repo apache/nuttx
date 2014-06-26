@@ -68,9 +68,9 @@
 
 /* The following flags may be set in the set of flags before calling the
  * application callback. The UIP_ACKDATA, UIP_NEWDATA, and UIP_CLOSE flags
- * may be set at the same time, whereas the others are mutualy exclusive.
+ * may be set at the same time, whereas the others are mutually exclusive.
  *
- *   UIP_ACKDATA   IN:  Signifies that the outstanding data was acked and
+ *   UIP_ACKDATA   IN:  Signifies that the outstanding data was ACKed and
  *                      the application should send out new data instead
  *                      of retransmitting the last data (TCP only)
  *                 OUT: Input state must be preserved on output.

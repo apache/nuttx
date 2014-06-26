@@ -43,6 +43,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
+#include <nuttx/net/uip.h>
 #include <nuttx/net/tcp.h>
 
 #include "tcp/tcp.h"
