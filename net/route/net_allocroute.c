@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/net_allocroute.c
+ * net/route/net_allocroute.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,7 +46,7 @@
 #include <arch/irq.h>
 
 #include "net.h"
-#include "net_route.h"
+#include "route/route.h"
 
 #if defined(CONFIG_NET) && defined(CONFIG_NET_ROUTE)
 

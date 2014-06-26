@@ -1,0 +1,23 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+menu "Routing Table Configuration"
+
+config NET_ROUTE
+	bool "Routing table support"
+	default n
+	---help---
+		Build in support for a routing table.  See include/net/route.h
+
+if NET_ROUTE
+
+config NET_MAXROUTES
+	int "Routing table size"
+	default 4
+	---help---
+		The size of the routing table (in entries).
+
+endif # NET_ROUTE
+endmenu # ARP Configuration

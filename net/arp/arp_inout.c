@@ -67,7 +67,7 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/arp.h>
 
-#include "net_route.h"
+#include "route/route.h"
 
 #ifdef CONFIG_NET_ARP
 

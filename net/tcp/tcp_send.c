@@ -1,5 +1,5 @@
 /****************************************************************************
- * net//tcp_send.c
+ * net/tcp/tcp_send.c
  *
  *   Copyright (C) 2007-2010, 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

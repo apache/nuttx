@@ -138,18 +138,7 @@ config NET_STATISTICS
 	---help---
 		uIP statistics on or off
 
-config NET_ROUTE
-	bool "Routing table suport"
-	default n
-	---help---
-		Build in support for a routing table.  See include/net/route.h
-
-config NET_MAXROUTES
-	int "Routing table size"
-	default 4
-	depends on NET_ROUTE
-	---help---
-		The size of the routing table (in entries).
+source "net/route/Kconfig"
 
 config NET_MULTICAST
 	bool "Multi-cast Tx support"

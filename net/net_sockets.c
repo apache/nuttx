@@ -53,8 +53,8 @@
 #include <nuttx/net/net.h>
 #include <nuttx/kmalloc.h>
 
-#include "net_route.h"
 #include "net.h"
+#include "route/route.h"
 
 /****************************************************************************
  * Pre-processor Definitions

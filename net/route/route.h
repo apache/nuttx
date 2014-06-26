@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/net_route.h
+ * net/route/route.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __NET_NET_ROUTE_H
-#define __NET_NET_ROUTE_H
+#ifndef __NET_ROUTE_ROUTE_H
+#define __NET_ROUTE_ROUTE_H
 
 /****************************************************************************
  * Included Files
@@ -260,4 +260,4 @@ int net_foreachroute(route_handler_t handler, FAR void *arg);
 #endif
 
 #endif /* CONFIG_NET_ROUTE */
-#endif /* __NET_NET_ROUTE_H */
+#endif /* __NET_ROUTE_ROUTE_H */

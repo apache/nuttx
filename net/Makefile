@@ -62,13 +62,6 @@ SOCK_CSRCS += net_timeo.c net_dsec2timeval.c net_timeval2dsec.c
 endif
 endif
 
-# Routing table support
-
-ifeq ($(CONFIG_NET_ROUTE),y)
-SOCK_CSRCS += net_addroute.c net_allocroute.c net_delroute.c
-SOCK_CSRCS += net_foreachroute.c net_router.c netdev_router.c
-endif
-
 # Support for network access using streams
 
 ifneq ($(CONFIG_NFILE_STREAMS),0)
@@ -101,6 +94,7 @@ include tcp/Make.defs
 include udp/Make.defs
 include pkt/Make.defs
 include uip/Make.defs
+include route/Make.defs
 endif
 
 ASRCS		= $(SOCK_ASRCS) $(NETDEV_ASRCS) $(NET_ASRCS)

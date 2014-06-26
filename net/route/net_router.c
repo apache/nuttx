@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/net_delroute.c
+ * net/route/net_router.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -44,7 +44,7 @@
 #include <errno.h>
 
 #include "net.h"
-#include "net_route.h"
+#include "route/route.h"
 
 #if defined(CONFIG_NET) && defined(CONFIG_NET_ROUTE)
 
@@ -54,9 +54,8 @@
 
 struct route_match_s
 {
-  FAR struct net_route_s *prev;     /* Predecessor in the list */
-  uip_ipaddr_t            target;   /* The target IP address to match */
-  uip_ipaddr_t            netmask;  /* The network mask to match */
+  uip_ipaddr_t target;   /* The target IP address on an external network to match */
+  uip_ipaddr_t router;   /* The IP address of the router on one of our networks*/
 };
 
 /****************************************************************************
@@ -80,39 +79,21 @@ struct route_match_s
 
 static int net_match(FAR struct net_route_s *route, FAR void *arg)
 {
-  FAR struct route_match_s *match = ( FAR struct route_match_s *)arg;
+  FAR struct route_match_s *match = (FAR struct route_match_s *)arg;
 
-  /* To match, the masked target address must be the same, and the masks
-   * must be the same.
+  /* To match, the masked target addresses must be the same.  In the event
+   * of multiple matches, only the first is returned.  There not (yet) any
+   * concept for the precedence of networks.
    */
 
-  if (uip_ipaddr_maskcmp(route->target, match->target, match->netmask) &&
-      uip_ipaddr_cmp(route->netmask, match->netmask))
+  if (uip_ipaddr_maskcmp(route->target, match->target, route->netmask))
     {
-      /* They match.. Remove the entry from the routing table */
+      /* They match.. Copy the router address */
 
-      if (match->prev)
-        {
-          (void)sq_remafter((FAR sq_entry_t *)match->prev,
-                            (FAR sq_queue_t *)&g_routes);
-        }
-      else
-        {
-          (void)sq_remfirst((FAR sq_queue_t *)&g_routes);
-        }
-
-      /* And free the routing table entry by adding it to the free list */
-
-      net_freeroute(route);
-
-      /* Return a non-zero value to terminate the traversal */
-
+      uip_ipaddr_copy(match->router, route->router);
       return 1;
     }
 
-  /* Next time we are here, this will be the previous entry */
-
-  match->prev = route;
   return 0;
 }
 
@@ -121,31 +102,63 @@ static int net_match(FAR struct net_route_s *route, FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_delroute
+ * Function: net_router
  *
  * Description:
- *   Remove an existing route from the routing table
+ *   Given an IP address on a external network, return the address of the
+ *   router on a local network that can forward to the external network.
  *
  * Parameters:
+ *   target - An IP address on a remote network to use in the lookup.
+ *   router - The address of router on a local network that can forward our
+ *     packets to the target.
+ *
+ *   NOTE:  For IPv6, router will be an array, for IPv4 it will be a scalar
+ *   value.  Hence, the change in the function signature.
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
  *
  ****************************************************************************/
 
-int net_delroute(uip_ipaddr_t target, uip_ipaddr_t netmask)
+#ifdef CONFIG_NET_IPv6
+int net_router(uip_ipaddr_t target, uip_ipaddr_t router)
+#else
+int net_router(uip_ipaddr_t target, FAR uip_ipaddr_t *router)
+#endif
 {
   struct route_match_s match;
+  int ret;
 
   /* Set up the comparison structure */
 
-  match.prev = NULL;
+  memset(&match, 0, sizeof(struct route_match_s));
   uip_ipaddr_copy(match.target, target);
-  uip_ipaddr_copy(match.netmask, netmask);
 
-  /* Then remove the entry from the routing table */
+  /* Find an router entry with the routing table that can forward to this
+   * address
+   */
 
-  return net_foreachroute(net_match, &match) ? OK : -ENOENT;
+  ret = net_foreachroute(net_match, &match);
+  if (ret > 0)
+    {
+      /* We found a route.  Return the router address. */
+
+#ifdef CONFIG_NET_IPv6
+      uip_ipaddr_copy(router, match.target);
+#else
+      uip_ipaddr_copy(*router, match.target);
+#endif
+      ret = OK;
+    }
+  else
+    {
+      /* There is no route for this address */
+
+      ret = -ENOENT;
+    }
+
+  return ret;
 }
 
-#endif /* CONFIG_NET && CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */
+#endif /* CONFIG_NET && CONFIG_NET_ROUTE */
