@@ -64,7 +64,7 @@ config SAMA5D3xEK_NOR_START
 	---help---
 		The default behavior of the NOR boot program is to initialize the
 		NOR FLASH at CS0, then patiently wait for you to break into the
-		program with GDB.  An alternative behvior is enabled with this
+		program with GDB.  An alternative behavior is enabled with this
 		option:  If SAMA5D3xEK_NOR_START is defined, then it will not wait but
 		will, instead, immediately start the program in NOR FLASH.
 

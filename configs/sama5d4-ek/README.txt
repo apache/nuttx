@@ -62,6 +62,7 @@ Contents
   - NXFLAT Toolchain
   - Loading Code into SRAM with J-Link
   - Writing to FLASH using SAM-BA
+  - Creating and Using DRAMBOOT
   - Running NuttX from SDRAM
   - PIO Usage
   - Buttons and LEDs
@@ -328,14 +329,108 @@ Writing to FLASH using SAM-BA
        re-open the terminal emulator program.
     10. Power cycle the board.
 
+Creating and Using DRAMBOOT
+===========================
+
+  In order to have more control of debugging code that runs out of DARM,
+  I created the sama5d4-ek/dramboot configuration.  That configuration is
+  described below under "Configurations."
+
+  Here are some general instructions on how to build an use dramboot:
+
+  Building:
+  1. Remove any old configurations (if applicable).
+
+       cd <nuttx>
+       make distclean
+
+  2. Install and build the dramboot configuration.  This steps will establish
+     the dramboot configuration and setup the PATH variable in order to do
+     the build:
+
+       cd tools
+       ./configure.sh sama5d4-ek/dramboot
+       cd -
+       . ./setenv.sh
+
+     Before sourcing the setenv.sh file above, you should examine it and
+     perform edits as necessary so that TOOLCHAIN_BIN is the correct path
+     to the directory than holds your toolchain binaries.
+
+     NOTE:  Be aware that the default dramboot also disables the watchdog.
+     Since you will not be able to re-enable the watchdog later, you may
+     need to set CONFIG_SAMA5_WDT=y in the NuttX configuration file.
+
+     Then make dramboot:
+
+       make
+
+     This will result in an ELF binary called 'nuttx' and also HEX and
+     binary versions called 'nuttx.hex' and 'nuttx.bin'.
+
+  3. Rename the binaries.  Since you will need two versions of NuttX:  this
+     dramboot version that runs in internal SRAM and another under test in
+     NOR FLASH, I rename the resulting binary files so that they can be
+     distinguished:
+
+       mv nuttx dramboot
+       mv nuttx.hex dramboot.hex
+       mv nuttx.bin dramboot.bin
+
+   4. Build the "real" DRAM configuration.  This will create the nuttx.hex
+      that you will load using dramboot.
+
+   5. Restart the system holding DIS_BOOT.  You should see the RamBOOT
+      prompt on the 115200 8N1 serial console (and nothing) more.  Hit
+      the ENTER key with the focus on your terminal window a few time.
+      This will enable JTAG.
+
+   6. Then start the J-Link GDB server and GDB.  In GDB, I do the following:
+
+       (gdb) mon heal                 # Halt the CPU
+       (gdb) load dramboot            # Load dramboot into internal SRAM
+       (gdb) mon go                   # Start dramboot
+
+      You should see this message:
+
+        Send Intel HEX file now
+
+      Load your program by sending the nuttx.hex via the terminal program.
+      Then:
+
+       (gdb) mon halt                 # Break in
+       (gdb) mon reg pc = 0x20000040  # Set the PC to DRAM entry point
+       (gdb) mon go                   # And jump into DRAM
+
+      The dramboot program can also be configured to jump directly into
+      DRAM without requiring the final halt and go by setting
+      CONFIG_SAMA5D4EK_DRAM_START=y in the NuttX configuration.  However,
+      since I have been debugging the early boot sequence, the above
+      sequence has been most convenient for me since it allows me to
+      step into the program in SDRAM.
+
+   7. An option is to use the SAM-BA tool to write the DRAMBOOT image into
+      Serial FLASH.  Then, the system will boot from Serial FLASH by
+      copying the DRAMBOOT image in SRAM which will run, download the nuttx.hex
+      file, and then start the image loaded into DRAM automatically.  This is
+      a very convenient usage!
+
+      NOTES: (1) There is that must be closed to enable use of the AT25
+      Serial Flash.  (2) If using SAM-BA, make sure that you load the DRAM
+      boot program into the boot area via the pull-down menu.
+
 Running NuttX from SDRAM
 ========================
 
   NuttX may be executed from SDRAM.  But this case means that the NuttX
   binary must reside on some other media (typically NAND FLASH, Serial
-  FLASH, or, perhaps even a TFTP server).  In these cases, an intermediate
-  bootloader such as U-Boot or Barebox must be used to configure the
-  SAMA5D4 clocks and SDRAM and then to copy the NuttX binary into SDRAM.
+  FLASH) or transferred over some interface (perhaps a UARt or even a
+  TFTP server).  In these cases, an intermediate bootloader such as U-Boot
+  or Barebox must be used to configure the SAMA5D4 clocks and SDRAM and
+  then to copy the NuttX binary into SDRAM.
+
+  The SRAMBOOT program is another option (see above). But this section
+  will focus on U-Boot.
 
     - NuttX Configuration
     - Boot sequence
@@ -2420,6 +2515,10 @@ Watchdog Timer
   the WDT, we cannot disable the watchdog time if CONFIG_SAMA5_WDT=y.  So,
   be forewarned:  You have only 16 seconds to run your watchdog timer test!
 
+  NOTE:  If you are using the dramboot program to run from DRAM as I did,
+  beware that the default version also disables the watchdog.  You will
+  need a special version of dramboot with CONFIG_SAMA5_WDT=y.
+
 TRNG and /dev/random
 ====================
 
@@ -2809,6 +2908,9 @@ Configurations
   Summary:  Some of the descriptions below are long and wordy. Here is the
   concise summary of the available SAMA4D4-EK configurations:
 
+    dramboot: This is a little program to help debug of code in DRAM.  See
+      the description below and the section above entitled "Creating and
+      Using DRAMBOOT" for more information
     nsh:  This is another NSH configuration, not too different from the
       demo configuration.  The nsh configuration is, however, bare bones.
       It is the simplest possible NSH configuration and is useful as a
@@ -2823,6 +2925,86 @@ Configurations
 
   Now for the gory details:
 
+  dramboot:
+    This is a little program to help debug of code in DRAM.  It does the
+    following:
+
+    - It configures DRAM,
+    - It loads and Intel HEX file into DRAM over the terminal port,
+    - Waits for you to break in with GDB.
+
+    At that point, you can set the PC and begin executing from SDRAM under
+    debug control.  See the section entitled "Creating and Using
+    DRAMBOOT" above.
+
+    NOTES:
+
+    1. This configuration uses the the USART3 for the serial console
+       which is available at the "DBGU" RS-232 connector (J24).  That
+       is easily changed by reconfiguring to (1) enable a different
+       serial peripheral, and (2) selecting that serial peripheral as
+       the console device.
+
+    2. By default, this configuration is set up to build on Windows
+       under either a Cygwin or MSYS environment using a recent, Windows-
+       native, generic ARM EABI GCC toolchain (such as the CodeSourcery
+       toolchain).  Both the build environment and the toolchain
+       selection can easily be changed by reconfiguring:
+
+       CONFIG_HOST_WINDOWS=y                   : Windows operating system
+       CONFIG_WINDOWS_CYGWIN=y                 : POSIX environment under windows
+       CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
+
+       If you are running on Linux, make *certain* that you have
+       CONFIG_HOST_LINUX=y *before* the first make or you will create a
+       corrupt configuration that may not be easy to recover from. See
+       the warning in the section "Information Common to All Configurations"
+       for further information.
+
+    3. This configuration executes out of internal SRAM flash and is
+       loaded into SRAM by the boot RomBoot from NAND, Serial
+       DataFlash, SD card or from a TFTPC sever via the Boot ROM.
+       Data also is positioned in SRAM.
+
+    2. The default dramboot program initializes the DRAM memory,
+       displays a message, loads an Intel HEX program into DRAM over the
+       serial console and halts.  The dramboot program can also be
+       configured to jump directly into DRAM without requiring the
+       final halt and go by setting CONFIG_SAMA5D4EK_DRAM_START=y in the
+       NuttX configuration.
+
+    3. Be aware that the default dramboot also disables the watchdog.
+       Since you will not be able to re-enable the watchdog later, you may
+       need to set CONFIG_SAMA5_WDT=y in the NuttX configuration file.
+
+    4. If you put dramboot on the Serial FLASH, you can automatically
+       boot to SDRAM on reset.  See the section "Creating and Using DRAMBOOT"
+       above.
+
+    5. Here are the steps that I use to execute this program in SRAM
+       using only the ROM Bootloader:
+
+       a) Hold the DIS_BOOT button and
+
+       b) With the DIS_BOOT button pressed, power cycle the board. A
+          reset does not seem to be sufficient.
+
+       c) The serial should show RomBOOT in a terminal window (at 115200
+          8N1) and nothing more.
+
+       d) Press ENTER in the terminal window a few times to enable JTAG.
+
+       e) Start the Segger GDB server.  It should successfully connect to
+          the board via JTAG (if JTAG was correctly enabled in step d)).
+
+       f) Start GDB, connect, to the GDB server, load NuttX, and debug.
+
+          gdb> target remote localhost:2331
+          gdb> mon halt (don't do mon reset)
+          gdb> load nuttx
+          gdb> mon reg pc (make sure that the PC is 0x200040
+          gdb> ... and debug ...
+
   nsh:
 
     This configuration directory provide the NuttShell (NSH).  This is a
@@ -2830,6 +3012,7 @@ Configurations
     functionality.
 
     NOTES:
+
     1. This configuration uses the the USART3 for the serial console
        which is available at the "DBGU" RS-232 connector (J24).  That
        is easily changed by reconfiguring to (1) enable a different
@@ -2917,6 +3100,7 @@ Configurations
     bringing up SDRAM.
 
     NOTES:
+
     1. This configuration uses the the USART3 for the serial console
        which is available at the "DBGU" RS-232 connector (J24).  That
        is easily changed by reconfiguring to (1) enable a different
@@ -2942,7 +3126,7 @@ Configurations
     3. This configuration executes out of internal SRAM flash and is
        loaded into SRAM by the boot ROM SDRAM from NAND, Serial
        DataFlash, SD card or from a TFTPC sever via the Boot ROM.
-       Data also is positioned in SDRAM.
+       Data also is positioned in SRAM.
 
        Here are the steps that I use to execute this program in SRAM
        using only the ROM Bootloader:
