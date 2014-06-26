@@ -42,7 +42,11 @@ ifeq ($(CONFIG_SAMA5_BOOT_ISRAM),y)
 endif
 
 ifeq ($(CONFIG_SAMA5_BOOT_SDRAM),y)
-  LDSCRIPT = ddram.ld
+ifeq ($(CONFIG_SAMA5D4EK_DRAM_BOOT),y)
+  LDSCRIPT = dramboot.ld
+else
+  LDSCRIPT = uboot.ld
+endif
 endif
 
 ifeq ($(WINTOOL),y)
