@@ -69,6 +69,7 @@
 #ifdef ATSAMA5D4
 #  define SAM_SFR_SN0_OFFSET        0x004c /* Serial Number 0 Register */
 #  define SAM_SFR_SN1_OFFSET        0x0050 /* Serial Number 1 Register */
+#  define SAM_SFR_AICREDIR_OFFSET   0x0054 /* AIC Redirection Register */
 #endif
 
 /* SFR Register Addresses ***********************************************************/
@@ -88,8 +89,9 @@
 #define SAM_SFR_EBICFG              (SAM_SFR_VBASE+SAM_SFR_EBICFG_OFFSET)
 
 #ifdef ATSAMA5D4
-#  define SAM_SFR_SN0              (SAM_SFR_VBASE+SAM_SFR_SN0_OFFSET)
-#  define SAM_SFR_SN1              (SAM_SFR_VBASE+SAM_SFR_SN1_OFFSET)
+#  define SAM_SFR_SN0               (SAM_SFR_VBASE+SAM_SFR_SN0_OFFSET)
+#  define SAM_SFR_SN1               (SAM_SFR_VBASE+SAM_SFR_SN1_OFFSET)
+#  define SAM_SFR_AICREDIR          (SAM_SFR_VBASE+SAM_SFR_AICREDIR_OFFSET)
 #endif
 
 /* SFR Register Bit Definitions *****************************************************/
@@ -215,6 +217,13 @@
 #ifdef ATSAMA5D4
 /* Serial Number 0 Register (32-bit value) */
 /* Serial Number 1 Register (32-bit value) */
+
+/* AIC Redirection Register */
+
+#  define SFR_AICREDIR_ENABLE       (1 << 0)  /* Bit 0: 1=All interrupts to AIC */
+#  define SFR_AICREDIR_DISABLE      (0)       /* Bit 0: 0=Secure interrupts to SAIC */
+#  define SFR_AICREDIR_KEY          (0x5f67b102) /* Bits 1-31: Access key */
+
 #endif
 
 #endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAM_SFR_H */

@@ -80,7 +80,6 @@ config SAMA5_HAVE_HSMCI2
 config SAMA5_HAVE_SAIC
 	bool
 	default n
-	select ARMV7A_DECODEFIQ
 
 config SAMA5_HAVE_SBM
 	bool
@@ -275,6 +274,12 @@ config SAMA5_HSMC
 config SAMA5_SMD
 	bool "SMD Soft Modem (SMD)"
 	default n
+
+config SAMA5_SAIC
+	bool "Secure Advanced Interrupt Controller (SAIC)"
+	default n
+	depends on SAMA5_HAVE_SAIC
+	select ARMV7A_DECODEFIQ
 
 config SAMA5_UART0
 	bool "UART 0"
