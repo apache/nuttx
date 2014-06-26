@@ -47,6 +47,8 @@
 
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/tcp.h>
+#include <nuttx/net/udp.h>
 
 #include "net.h"
 

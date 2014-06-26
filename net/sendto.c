@@ -50,6 +50,7 @@
 
 #include <nuttx/clock.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/udp.h>
 
 #include "net.h"
 #include "uip/uip.h"

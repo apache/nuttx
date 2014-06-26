@@ -45,6 +45,10 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/net/tcp.h>
+#include <nuttx/net/udp.h>
+#include <nuttx/net/pkt.h>
+
 #include "net.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"

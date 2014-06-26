@@ -48,6 +48,7 @@
 
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/uip.h>
+#include <nuttx/net/netstats.h>
 #include <nuttx/net/igmp.h>
 
 #include "uip/uip.h"
@@ -136,11 +137,11 @@ int igmp_joingroup(struct uip_driver_s *dev, FAR const struct in_addr *grpaddr)
 
        nvdbg("Join to new group: %08x\n", grpaddr->s_addr);
        group = igmp_grpalloc(dev, &grpaddr->s_addr);
-       IGMP_STATINCR(uip_stat.igmp.joins);
+       IGMP_STATINCR(g_netstats.igmp.joins);
 
        /* Send the Membership Report */
 
-       IGMP_STATINCR(uip_stat.igmp.report_sched);
+       IGMP_STATINCR(g_netstats.igmp.report_sched);
        igmp_waitmsg(group, IGMPv2_MEMBERSHIP_REPORT);
 
        /* And start the timer at 10*100 msec */

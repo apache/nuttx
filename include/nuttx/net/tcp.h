@@ -316,16 +316,16 @@ struct tcp_backlog_s
 #ifdef CONFIG_NET_STATISTICS
 struct tcp_stats_s
 {
-  uip_stats_t drop;       /* Number of dropped TCP segments */
-  uip_stats_t recv;       /* Number of received TCP segments */
-  uip_stats_t sent;       /* Number of sent TCP segments */
-  uip_stats_t chkerr;     /* Number of TCP segments with a bad checksum */
-  uip_stats_t ackerr;     /* Number of TCP segments with a bad ACK number */
-  uip_stats_t rst;        /* Number of received TCP RST (reset) segments */
-  uip_stats_t rexmit;     /* Number of retransmitted TCP segments */
-  uip_stats_t syndrop;    /* Number of dropped SYNs due to too few
+  net_stats_t drop;       /* Number of dropped TCP segments */
+  net_stats_t recv;       /* Number of received TCP segments */
+  net_stats_t sent;       /* Number of sent TCP segments */
+  net_stats_t chkerr;     /* Number of TCP segments with a bad checksum */
+  net_stats_t ackerr;     /* Number of TCP segments with a bad ACK number */
+  net_stats_t rst;        /* Number of received TCP RST (reset) segments */
+  net_stats_t rexmit;     /* Number of retransmitted TCP segments */
+  net_stats_t syndrop;    /* Number of dropped SYNs due to too few
                              available connections */
-  uip_stats_t synrst;     /* Number of SYNs for closed ports triggering a RST */
+  net_stats_t synrst;     /* Number of SYNs for closed ports triggering a RST */
 };
 #endif
 

@@ -48,6 +48,7 @@
 
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/uip.h>
+#include <nuttx/net/igmp.h>
 
 #include "uip/uip.h"
 #include "igmp/igmp.h"

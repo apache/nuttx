@@ -45,6 +45,7 @@
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/uip.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/netstats.h>
 
 #include "uip/uip.h"
 #include "icmp/icmp.h"
@@ -160,8 +161,8 @@ void icmp_send(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *destaddr)
               dev->d_len, (picmp->len[0] << 8) | picmp->len[1]);
 
 #ifdef CONFIG_NET_STATISTICS
-      uip_stat.icmp.sent++;
-      uip_stat.ip.sent++;
+      g_netstats.icmp.sent++;
+      g_netstats.ip.sent++;
 #endif
     }
 }

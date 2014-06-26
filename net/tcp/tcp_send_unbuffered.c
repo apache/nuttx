@@ -54,6 +54,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/tcp.h>
 
 #include "net.h"
 #include "uip/uip.h"

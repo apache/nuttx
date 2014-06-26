@@ -49,6 +49,9 @@
 
 #include <arch/irq.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/tcp.h>
+#include <nuttx/net/udp.h>
+#include <nuttx/net/pkt.h>
 
 #ifdef CONFIG_NET_SOLINGER
 #  include <nuttx/clock.h>

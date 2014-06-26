@@ -49,6 +49,7 @@
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/uip.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/netstats.h>
 
 #include "uip/uip.h"
 #include "igmp/igmp.h"
@@ -91,7 +92,7 @@ static inline void uip_schedsend(FAR struct uip_driver_s *dev, FAR struct igmp_g
       dest = &group->grpaddr;
       nllvdbg("Send IGMPv2_MEMBERSHIP_REPORT, dest=%08x flags=%02x\n",
                *dest, group->flags);
-      IGMP_STATINCR(uip_stat.igmp.report_sched);
+      IGMP_STATINCR(g_netstats.igmp.report_sched);
       SET_LASTREPORT(group->flags); /* Remember we were the last to report */
     }
   else
@@ -100,7 +101,7 @@ static inline void uip_schedsend(FAR struct uip_driver_s *dev, FAR struct igmp_g
       dest = &g_allrouters;
       nllvdbg("Send IGMP_LEAVE_GROUP, dest=%08x flags=%02x\n",
                *dest, group->flags);
-      IGMP_STATINCR(uip_stat.igmp.leave_sched);
+      IGMP_STATINCR(g_netstats.igmp.leave_sched);
     }
 
   /* Send the message */

@@ -44,6 +44,8 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/net/tcp.h>
+
 #include "net.h"
 #include "uip/uip.h"
 

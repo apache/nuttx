@@ -46,6 +46,7 @@
 
 #include <stdint.h>
 #include <nuttx/net/uip.h>
+#include <nuttx/net/netstats.h>
 
 #include "uip/uip.h"
 #include "tcp/tcp.h"
@@ -64,7 +65,7 @@
 /* IP/TCP/UDP/ICMP statistics for all network interfaces */
 
 #ifdef CONFIG_NET_STATISTICS
-struct uip_stats uip_stat;
+struct net_stats_s g_netstats;
 #endif
 
 /* Increasing number used for the IP ID field. */

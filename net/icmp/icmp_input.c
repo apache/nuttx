@@ -52,6 +52,7 @@
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/uip.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/netstats.h>
 
 #include "uip/uip.h"
 #include "icmp/icmp.h"
@@ -107,7 +108,7 @@ void icmp_input(FAR struct uip_driver_s *dev)
   FAR struct icmp_iphdr_s *picmp = ICMPBUF;
 
 #ifdef CONFIG_NET_STATISTICS
-  uip_stat.icmp.recv++;
+  g_netstats.icmp.recv++;
 #endif
 
 #ifndef CONFIG_NET_IPv6
@@ -171,8 +172,8 @@ void icmp_input(FAR struct uip_driver_s *dev)
               dev->d_len, (picmp->len[0] << 8) | picmp->len[1]);
 
 #ifdef CONFIG_NET_STATISTICS
-      uip_stat.icmp.sent++;
-      uip_stat.ip.sent++;
+      g_netstats.icmp.sent++;
+      g_netstats.ip.sent++;
 #endif
     }
 
@@ -199,8 +200,8 @@ void icmp_input(FAR struct uip_driver_s *dev)
 
 typeerr:
 #ifdef CONFIG_NET_STATISTICS
-  uip_stat.icmp.typeerr++;
-  uip_stat.icmp.drop++;
+  g_netstats.icmp.typeerr++;
+  g_netstats.icmp.drop++;
 #endif
   dev->d_len = 0;
 
@@ -295,19 +296,19 @@ typeerr:
           dev->d_len, (picmp->len[0] << 8) | picmp->len[1]);
 
 #ifdef CONFIG_NET_STATISTICS
-  uip_stat.icmp.sent++;
-  uip_stat.ip.sent++;
+  g_netstats.icmp.sent++;
+  g_netstats.ip.sent++;
 #endif
   return;
 
 typeerr:
 #ifdef CONFIG_NET_STATISTICS
-  uip_stat.icmp.typeerr++;
+  g_netstats.icmp.typeerr++;
 #endif
 
 drop:
 #ifdef CONFIG_NET_STATISTICS
-  uip_stat.icmp.drop++;
+  g_netstats.icmp.drop++;
 #endif
   dev->d_len = 0;
 

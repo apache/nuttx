@@ -50,6 +50,8 @@
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/uip.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/udp.h>
+#include <nuttx/net/netstats.h>
 
 #include "uip/uip.h"
 #include "udp/udp.h"
@@ -102,7 +104,7 @@ int udp_input(FAR struct uip_driver_s *dev)
   int ret = OK;
 
 #ifdef CONFIG_NET_STATISTICS
-  uip_stat.udp.recv++;
+  g_netstats.udp.recv++;
 #endif
 
   /* UDP processing is really just a hack. We don't do anything to the UDP/IP
@@ -116,8 +118,8 @@ int udp_input(FAR struct uip_driver_s *dev)
   if (pbuf->udpchksum != 0 && udp_chksum(dev) != 0xffff)
     {
 #ifdef CONFIG_NET_STATISTICS
-      uip_stat.udp.drop++;
-      uip_stat.udp.chkerr++;
+      g_netstats.udp.drop++;
+      g_netstats.udp.chkerr++;
 #endif
       nlldbg("Bad UDP checksum\n");
       dev->d_len = 0;

@@ -49,6 +49,7 @@
 #include <debug.h>
 
 #include <nuttx/net/netconfig.h>
+#include <nuttx/net/tcp.h>
 
 #include "uip/uip.h"
 #include "tcp/tcp.h"

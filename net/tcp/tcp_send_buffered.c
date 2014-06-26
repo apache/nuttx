@@ -66,6 +66,7 @@
 #include <nuttx/net/arp.h>
 #include <nuttx/net/iob.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/tcp.h>
 
 #include "net.h"
 #include "tcp/tcp.h"

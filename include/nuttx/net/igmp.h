@@ -56,6 +56,7 @@
 
 #include <nuttx/net/uip.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/netconfig.h>
 
 #ifdef CONFIG_NET_IGMP
 
@@ -180,17 +181,17 @@ struct igmp_iphdr_s
 #ifdef CONFIG_NET_STATISTICS
 struct igmp_stats_s
 {
-  uint32_t length_errors;
-  uint32_t chksum_errors;
-  uint32_t v1_received;
-  uint32_t joins;
-  uint32_t leaves;
-  uint32_t leave_sched;
-  uint32_t report_sched;
-  uint32_t poll_send;
-  uint32_t ucast_query;
-  uint32_t query_received;
-  uint32_t report_received;
+  net_stats_t length_errors;
+  net_stats_t chksum_errors;
+  net_stats_t v1_received;
+  net_stats_t joins;
+  net_stats_t leaves;
+  net_stats_t leave_sched;
+  net_stats_t report_sched;
+  net_stats_t poll_send;
+  net_stats_t ucast_query;
+  net_stats_t query_received;
+  net_stats_t report_received;
 };
 
 # define IGMP_STATINCR(p) ((p)++)

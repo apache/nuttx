@@ -51,6 +51,7 @@
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/uip.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/netstats.h>
 
 #include "uip/uip.h"
 
@@ -146,8 +147,8 @@ static void tcp_sendcomplete(FAR struct uip_driver_s *dev)
           dev->d_len, (pbuf->len[0] << 8) | pbuf->len[1]);
 
 #ifdef CONFIG_NET_STATISTICS
-  uip_stat.tcp.sent++;
-  uip_stat.ip.sent++;
+  g_netstats.tcp.sent++;
+  g_netstats.ip.sent++;
 #endif
 }
 
@@ -267,7 +268,7 @@ void tcp_reset(FAR struct uip_driver_s *dev)
   uint8_t seqbyte;
 
 #ifdef CONFIG_NET_STATISTICS
-  uip_stat.tcp.rst++;
+  g_netstats.tcp.rst++;
 #endif
 
   pbuf->flags     = TCP_RST | TCP_ACK;

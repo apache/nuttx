@@ -54,6 +54,7 @@
 #include <nuttx/net/uip.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/arp.h>
+#include <nuttx/net/pkt.h>
 
 #include "uip/uip.h"
 #include "pkt/pkt.h"

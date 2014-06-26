@@ -134,10 +134,10 @@ struct udp_iphdr_s
 #ifdef CONFIG_NET_STATISTICS
 struct udp_stats_s
 {
-  uip_stats_t drop;         /* Number of dropped UDP segments */
-  uip_stats_t recv;         /* Number of recived UDP segments */
-  uip_stats_t sent;         /* Number of sent UDP segments */
-  uip_stats_t chkerr;       /* Number of UDP segments with a bad checksum */
+  net_stats_t drop;         /* Number of dropped UDP segments */
+  net_stats_t recv;         /* Number of recived UDP segments */
+  net_stats_t sent;         /* Number of sent UDP segments */
+  net_stats_t chkerr;       /* Number of UDP segments with a bad checksum */
 };
 #endif
 

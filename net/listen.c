@@ -44,6 +44,8 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/net/tcp.h>
+
 #include "net.h"
 
 /****************************************************************************

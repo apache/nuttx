@@ -51,6 +51,8 @@
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/uip.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/tcp.h>
+#include <nuttx/net/netstats.h>
 
 #include "uip/uip.h"
 #include "tcp/tcp.h"
@@ -200,7 +202,7 @@ void tcp_timer(FAR struct uip_driver_s *dev, FAR struct tcp_conn_s *conn,
                */
 
 #ifdef CONFIG_NET_STATISTICS
-              uip_stat.tcp.rexmit++;
+              g_netstats.tcp.rexmit++;
 #endif
               switch(conn->tcpstateflags & UIP_TS_MASK)
                 {

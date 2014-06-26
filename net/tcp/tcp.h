@@ -72,6 +72,8 @@ extern "C"
 
 /* Defined in tcp_conn.c ****************************************************/
 
+struct tcp_iphdr_s; /* Forward reference */
+
 void tcp_initialize(void);
 struct tcp_conn_s *tcp_active(FAR struct tcp_iphdr_s *buf);
 struct tcp_conn_s *uip_nexttcpconn(FAR struct tcp_conn_s *conn);

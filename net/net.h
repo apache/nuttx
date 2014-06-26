@@ -168,6 +168,8 @@ FAR struct socket *sockfd_socket(int sockfd);
 /* net_connect.c *************************************************************/
 
 #ifdef CONFIG_NET_TCP
+struct tcp_conn_s; /* Forward reference */
+
 int net_startmonitor(FAR struct socket *psock);
 void net_stopmonitor(FAR struct tcp_conn_s *conn);
 void net_lostconnection(FAR struct socket *psock, uint16_t flags);

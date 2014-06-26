@@ -1,14 +1,13 @@
 /****************************************************************************
- * net/pkt/pkt_input.c
- * Handling incoming packet input
+ * include/nuttx/net/netstats.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * Adapted for NuttX from logic in uIP which also has a BSD-like license:
+ * This logic was leveraged from uIP which also has a BSD-style license:
  *
- *   Original author Adam Dunkels <adam@dunkels.com>
- *   Copyright () 2001-2003, Adam Dunkels.
+ *   Author Adam Dunkels <adam@dunkels.com>
+ *   Copyright (c) 2001-2003, Adam Dunkels.
  *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,105 +37,101 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_NET_NETSTATS_H
+#define __INCLUDE_NUTTX_NET_NETSTATS_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_PKT)
 
-#include <debug.h>
+#include <stdint.h>
 
-#include <nuttx/net/uip.h>
-#include <nuttx/net/netdev.h>
-#include <nuttx/net/pkt.h>
-#include <nuttx/net/arp.h>
-#include <nuttx/net/pkt.h>
+#include <nuttx/net/netconfig.h>
 
-#include "uip/uip.h"
-#include "pkt/pkt.h"
+#ifdef CONFIG_NET_PKT
+#  include <nuttx/net/pkt.h>
+#endif
+#ifdef CONFIG_NET_TCP
+#  include <nuttx/net/tcp.h>
+#endif
+#ifdef CONFIG_NET_UDP
+#  include <nuttx/net/udp.h>
+#endif
+#ifdef CONFIG_NET_ICMP
+#  include <nuttx/net/icmp.h>
+#endif
+#ifdef CONFIG_NET_IGMP
+#  include <nuttx/net/igmp.h>
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define PKTBUF ((struct eth_hdr_s *)&dev->d_buf)
-
 /****************************************************************************
- * Public Variables
+ * Public Type Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
+/* The structure holding the uIP statistics that are gathered if
+ * CONFIG_NET_STATISTICS is defined.
+ */
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: pkt_input
- *
- * Description:
- *   Handle incoming packet input
- *
- * Parameters:
- *   dev - The device driver structure containing the received packet
- *
- * Return:
- *   OK  The packet has been processed  and can be deleted
- *   ERROR Hold the packet and try again later. There is a listening socket
- *         but no recv in place to catch the packet yet.
- *
- * Assumptions:
- *   Called from the interrupt level or with interrupts disabled.
- *
- ****************************************************************************/
-
-int pkt_input(struct uip_driver_s *dev)
+#ifdef CONFIG_NET_STATISTICS
+struct ip_stats_s
 {
-  FAR struct pkt_conn_s *conn;
-  FAR struct eth_hdr_s  *pbuf = (struct eth_hdr_s *)dev->d_buf;
-  int ret = OK;
+  net_stats_t drop;       /* Number of dropped packets at the IP layer */
+  net_stats_t recv;       /* Number of received packets at the IP layer */
+  net_stats_t sent;       /* Number of sent packets at the IP layer */
+  net_stats_t vhlerr;     /* Number of packets dropped due to wrong
+                             IP version or header length */
+  net_stats_t hblenerr;   /* Number of packets dropped due to wrong
+                             IP length, high byte */
+  net_stats_t lblenerr;   /* Number of packets dropped due to wrong
+                             IP length, low byte */
+  net_stats_t fragerr;    /* Number of packets dropped since they
+                             were IP fragments */
+  net_stats_t chkerr;     /* Number of packets dropped due to IP
+                             checksum errors */
+  net_stats_t protoerr;   /* Number of packets dropped since they
+                             were neither ICMP, UDP nor TCP */
+};
 
-  conn = pkt_active(pbuf);
-  if (conn)
-    {
-      uint16_t flags;
+struct net_stats_s
+{
+  struct ip_stats_s   ip;   /* IP statistics */
 
-      /* Setup for the application callback */
+#ifdef CONFIG_NET_ICMP
+  struct icmp_stats_s icmp; /* ICMP statistics */
+#endif
 
-      dev->d_appdata = dev->d_buf;
-      dev->d_snddata = dev->d_buf;
-      dev->d_sndlen  = 0;
+#ifdef CONFIG_NET_IGMP
+  struct igmp_stats_s igmp; /* IGMP statistics */
+#endif
 
-      /* Perform the application callback */
+#ifdef CONFIG_NET_TCP
+  struct tcp_stats_s  tcp;  /* TCP statistics */
+#endif
 
-      flags = pkt_callback(dev, conn, UIP_NEWDATA);
+#ifdef CONFIG_NET_UDP
+  struct udp_stats_s  udp;  /* UDP statistics */
+#endif
+};
+#endif /* CONFIG_NET_STATISTICS */
 
-      /* If the operation was successful, the UIP_NEWDATA flag is removed
-       * and thus the packet can be deleted (OK will be returned).
-       */
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
-      if ((flags & UIP_NEWDATA) != 0)
-        {
-          /* No.. the packet was not processed now.  Return ERROR so
-           * that the driver may retry again later.
-           */
+/* This is the structure in which the statistics are gathered. */
 
-          ret = ERROR;
-        }
-    }
-  else
-    {
-      nlldbg("No listener\n");
-    }
+#ifdef CONFIG_NET_STATISTICS
+extern struct net_stats_s g_netstats;
+#endif
 
-  return ret;
-}
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
-#endif /* CONFIG_NET && CONFIG_NET_PKT */
+#endif /* __INCLUDE_NUTTX_NET_NETSTATS_H */

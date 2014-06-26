@@ -69,12 +69,14 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-struct eth_hdr_s; /* Forward reference */
+
+ struct eth_hdr_s; /* Forward reference */
+struct pkt_conn_s; /* Forward refernce */
 
 /* Defined in pkt_conn.c ****************************************************/
 
 void pkt_initialize(void);
-struct pkt_conn_s *pkt_alloc(void);
+FAR struct pkt_conn_s *pkt_alloc(void);
 void pkt_free(FAR struct pkt_conn_s *conn);
 struct pkt_conn_s *pkt_active(FAR struct eth_hdr_s *buf);
 struct pkt_conn_s *uip_nextpktconn(FAR struct pkt_conn_s *conn);

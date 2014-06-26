@@ -50,6 +50,7 @@
 
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/uip.h>
+#include <nuttx/net/netstats.h>
 #include <nuttx/net/igmp.h>
 
 #include "uip/uip.h"
@@ -134,7 +135,7 @@ static void igmp_timeout(int argc, uint32_t arg, ...)
        * for the message to be sent.
        */
 
-      IGMP_STATINCR(uip_stat.igmp.report_sched);
+      IGMP_STATINCR(g_netstats.igmp.report_sched);
       igmp_schedmsg(group, IGMPv2_MEMBERSHIP_REPORT);
 
       /* Also note:  The Membership Report is sent at most two times becasue

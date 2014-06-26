@@ -51,8 +51,10 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
+#include <nuttx/net/iob.h>
 #include <nuttx/net/uip.h>
 #include <nuttx/net/net.h>
+#include <nuttx/net/tcp.h>
 
 #include <uip/uip.h>
 

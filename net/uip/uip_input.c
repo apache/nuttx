@@ -88,6 +88,7 @@
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/uip.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/netstats.h>
 
 #ifdef CONFIG_NET_IPv6
 # include "uip_neighbor.h"
@@ -314,7 +315,7 @@ int uip_input(struct uip_driver_s *dev)
   /* This is where the input processing starts. */
 
 #ifdef CONFIG_NET_STATISTICS
-  uip_stat.ip.recv++;
+  g_netstats.ip.recv++;
 #endif
 
   /* Start of IP input header processing code. */
@@ -327,8 +328,8 @@ int uip_input(struct uip_driver_s *dev)
       /* IP version and header length. */
 
 #ifdef CONFIG_NET_STATISTICS
-      uip_stat.ip.drop++;
-      uip_stat.ip.vhlerr++;
+      g_netstats.ip.drop++;
+      g_netstats.ip.vhlerr++;
 #endif
       nlldbg("Invalid IPv6 version: %d\n", pbuf->vtc >> 4);
       goto drop;
@@ -342,8 +343,8 @@ int uip_input(struct uip_driver_s *dev)
       /* IP version and header length. */
 
 #ifdef CONFIG_NET_STATISTICS
-      uip_stat.ip.drop++;
-      uip_stat.ip.vhlerr++;
+      g_netstats.ip.drop++;
+      g_netstats.ip.vhlerr++;
 #endif
       nlldbg("Invalid IP version or header length: %02x\n", pbuf->vhl);
       goto drop;
@@ -394,8 +395,8 @@ int uip_input(struct uip_driver_s *dev)
         }
 #else /* UIP_REASSEMBLY */
 #ifdef CONFIG_NET_STATISTICS
-      uip_stat.ip.drop++;
-      uip_stat.ip.fragerr++;
+      g_netstats.ip.drop++;
+      g_netstats.ip.fragerr++;
 #endif
       nlldbg("IP fragment dropped\n");
       goto drop;
@@ -464,7 +465,7 @@ int uip_input(struct uip_driver_s *dev)
 #endif
             {
 #ifdef CONFIG_NET_STATISTICS
-              uip_stat.ip.drop++;
+              g_netstats.ip.drop++;
 #endif
               goto drop;
             }
@@ -482,7 +483,7 @@ int uip_input(struct uip_driver_s *dev)
           pbuf->destipaddr[0] != 0xff02)
         {
 #ifdef CONFIG_NET_STATISTICS
-          uip_stat.ip.drop++;
+          g_netstats.ip.drop++;
 #endif
           goto drop;
         }
@@ -495,8 +496,8 @@ int uip_input(struct uip_driver_s *dev)
       /* Compute and check the IP header checksum. */
 
 #ifdef CONFIG_NET_STATISTICS
-      uip_stat.ip.drop++;
-      uip_stat.ip.chkerr++;
+      g_netstats.ip.drop++;
+      g_netstats.ip.chkerr++;
 #endif
       nlldbg("Bad IP checksum\n");
       goto drop;
@@ -545,8 +546,8 @@ int uip_input(struct uip_driver_s *dev)
 
       default:              /* Unrecognized/unsupported protocol */
 #ifdef CONFIG_NET_STATISTICS
-        uip_stat.ip.drop++;
-        uip_stat.ip.protoerr++;
+        g_netstats.ip.drop++;
+        g_netstats.ip.protoerr++;
 #endif
 
         nlldbg("Unrecognized IP protocol\n");

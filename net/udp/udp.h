@@ -72,6 +72,9 @@ extern "C"
 
 /* Defined in udp_conn.c ****************************************************/
 
+struct udp_iphdr_s; /* Forward reference */
+struct udp_conn_s; /* Forward reference */
+
 void udp_initialize(void);
 FAR struct udp_conn_s *udp_active(FAR struct udp_iphdr_s *buf);
 FAR struct udp_conn_s *uip_nextudpconn(FAR struct udp_conn_s *conn);

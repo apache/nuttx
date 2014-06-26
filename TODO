@@ -384,7 +384,7 @@ o Kernel Build
                ps       sched_foreach()
                ifup     netdev_foreach()
                ifdown   netdev_foreach()
-               ifconfig netdev_foreach(), uip_stat()
+               ifconfig netdev_foreach(), g_netstats
                ping     uip_ping()
 
   Status:      Open

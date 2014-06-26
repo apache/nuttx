@@ -45,6 +45,7 @@
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/uip.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/netstats.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/igmp.h>
 
@@ -172,8 +173,8 @@ void igmp_send(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group,
   IGMPBUF->chksum      = 0;
   IGMPBUF->chksum      = ~igmp_chksum(&IGMPBUF->type, UIP_IPIGMPH_LEN);
 
-  IGMP_STATINCR(uip_stat.igmp.poll_send);
-  IGMP_STATINCR(uip_stat.ip.sent);
+  IGMP_STATINCR(g_netstats.igmp.poll_send);
+  IGMP_STATINCR(g_netstats.ip.sent);
 
   nllvdbg("Outgoing IGMP packet length: %d (%d)\n",
           dev->d_len, (IGMPBUF->len[0] << 8) | IGMPBUF->len[1]);

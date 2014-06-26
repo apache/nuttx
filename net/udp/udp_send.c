@@ -49,6 +49,8 @@
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/uip.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/udp.h>
+#include <nuttx/net/netstats.h>
 
 #include "uip/uip.h"
 #include "udp/udp.h"
@@ -169,8 +171,8 @@ void udp_send(struct uip_driver_s *dev, struct udp_conn_s *conn)
               dev->d_len, (pudpbuf->len[0] << 8) | pudpbuf->len[1]);
 
 #ifdef CONFIG_NET_STATISTICS
-      uip_stat.udp.sent++;
-      uip_stat.ip.sent++;
+      g_netstats.udp.sent++;
+      g_netstats.ip.sent++;
 #endif
     }
 }

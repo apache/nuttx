@@ -302,6 +302,6 @@
  * uIP.
  */
 
-typedef uint16_t uip_stats_t;
+typedef uint16_t net_stats_t;
 
 #endif /* __INCLUDE_NUTTX_NET_NETCONFG_H */

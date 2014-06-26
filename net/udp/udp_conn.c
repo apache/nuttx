@@ -59,6 +59,7 @@
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/uip.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/udp.h>
 
 #include "uip/uip.h"
 #include "udp/udp.h"

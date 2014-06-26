@@ -49,6 +49,7 @@
 
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/uip.h>
+#include <nuttx/net/netstats.h>
 #include <nuttx/net/igmp.h>
 
 #include "uip/uip.h"
@@ -153,14 +154,14 @@ int igmp_leavegroup(struct uip_driver_s *dev, FAR const struct in_addr *grpaddr)
       CLR_WAITMSG(group->flags);
       uip_unlock(flags);
 
-      IGMP_STATINCR(uip_stat.igmp.leaves);
+      IGMP_STATINCR(g_netstats.igmp.leaves);
 
       /* Send a leave if the flag is set according to the state diagram */
 
       if (IS_LASTREPORT(group->flags))
         {
           ndbg("Schedule Leave Group message\n");
-          IGMP_STATINCR(uip_stat.igmp.leave_sched);
+          IGMP_STATINCR(g_netstats.igmp.leave_sched);
           igmp_waitmsg(group, IGMP_LEAVE_GROUP);
         }
 

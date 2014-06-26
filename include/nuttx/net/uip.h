@@ -226,79 +226,9 @@ struct uip_callback_s
   uint16_t flags;
 };
 
-/* Protocol-specific support */
-
-#ifdef CONFIG_NET_PKT
-#  include <nuttx/net/pkt.h>
-#endif
-#ifdef CONFIG_NET_TCP
-#  include <nuttx/net/tcp.h>
-#endif
-#ifdef CONFIG_NET_UDP
-#  include <nuttx/net/udp.h>
-#endif
-#ifdef CONFIG_NET_ICMP
-#  include <nuttx/net/icmp.h>
-#endif
-#ifdef CONFIG_NET_IGMP
-#  include <nuttx/net/igmp.h>
-#endif
-
-/* The structure holding the uIP statistics that are gathered if
- * CONFIG_NET_STATISTICS is defined.
- */
-
-#ifdef CONFIG_NET_STATISTICS
-struct ip_stats_s
-{
-  uip_stats_t drop;       /* Number of dropped packets at the IP layer */
-  uip_stats_t recv;       /* Number of received packets at the IP layer */
-  uip_stats_t sent;       /* Number of sent packets at the IP layer */
-  uip_stats_t vhlerr;     /* Number of packets dropped due to wrong
-                             IP version or header length */
-  uip_stats_t hblenerr;   /* Number of packets dropped due to wrong
-                             IP length, high byte */
-  uip_stats_t lblenerr;   /* Number of packets dropped due to wrong
-                             IP length, low byte */
-  uip_stats_t fragerr;    /* Number of packets dropped since they
-                             were IP fragments */
-  uip_stats_t chkerr;     /* Number of packets dropped due to IP
-                             checksum errors */
-  uip_stats_t protoerr;   /* Number of packets dropped since they
-                             were neither ICMP, UDP nor TCP */
-};
-
-struct uip_stats
-{
-  struct ip_stats_s   ip;   /* IP statistics */
-
-#ifdef CONFIG_NET_ICMP
-  struct icmp_stats_s icmp; /* ICMP statistics */
-#endif
-
-#ifdef CONFIG_NET_IGMP
-  struct igmp_stats_s igmp; /* IGMP statistics */
-#endif
-
-#ifdef CONFIG_NET_TCP
-  struct tcp_stats_s  tcp;  /* TCP statistics */
-#endif
-
-#ifdef CONFIG_NET_UDP
-  struct udp_stats_s  udp;  /* UDP statistics */
-#endif
-};
-#endif /* CONFIG_NET_STATISTICS */
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
-
-/* This is the structure in which the statistics are gathered. */
-
-#ifdef CONFIG_NET_STATISTICS
-extern struct uip_stats uip_stat;
-#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -308,7 +238,7 @@ extern struct uip_stats uip_stat;
  *
  * The uIP initialization functions are used for booting uIP.
  *
- * This function should be called at boot up to initilize the uIP
+ * This function should be called at boot up to initialize the uIP
  * TCP/IP stack.
  */
 

@@ -53,6 +53,8 @@
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/uip.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/tcp.h>
+#include <nuttx/net/netstats.h>
 
 #include "uip/uip.h"
 #include "tcp/tcp.h"
@@ -111,7 +113,7 @@ void tcp_input(struct uip_driver_s *dev)
   dev->d_appdata = &dev->d_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN];
 
 #ifdef CONFIG_NET_STATISTICS
-  uip_stat.tcp.recv++;
+  g_netstats.tcp.recv++;
 #endif
 
   /* Start of TCP input header processing code. */
@@ -121,8 +123,8 @@ void tcp_input(struct uip_driver_s *dev)
       /* Compute and check the TCP checksum. */
 
 #ifdef CONFIG_NET_STATISTICS
-      uip_stat.tcp.drop++;
-      uip_stat.tcp.chkerr++;
+      g_netstats.tcp.drop++;
+      g_netstats.tcp.chkerr++;
 #endif
       nlldbg("Bad TCP checksum\n");
       goto drop;
@@ -202,7 +204,7 @@ void tcp_input(struct uip_driver_s *dev)
                */
 
 #ifdef CONFIG_NET_STATISTICS
-              uip_stat.tcp.syndrop++;
+              g_netstats.tcp.syndrop++;
 #endif
               nlldbg("No free TCP connections\n");
               goto drop;
@@ -282,7 +284,7 @@ reset:
     }
 
 #ifdef CONFIG_NET_STATISTICS
-  uip_stat.tcp.synrst++;
+  g_netstats.tcp.synrst++;
 #endif
   tcp_reset(dev);
   return;

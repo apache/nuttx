@@ -48,6 +48,8 @@
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/uip.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/tcp.h>
+#include <nuttx/net/netstats.h>
 
 #include "uip/uip.h"
 #include "tcp/tcp.h"
@@ -116,8 +118,8 @@ uip_dataevent(FAR struct uip_driver_s *dev, FAR struct tcp_conn_s *conn,
          nllvdbg("Dropped %d bytes\n", dev->d_len);
 
  #ifdef CONFIG_NET_STATISTICS
-          uip_stat.tcp.syndrop++;
-          uip_stat.tcp.drop++;
+          g_netstats.tcp.syndrop++;
+          g_netstats.tcp.drop++;
 #endif
           /* Clear the UIP_SNDACK bit so that no ACK will be sent */
 

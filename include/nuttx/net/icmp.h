@@ -180,10 +180,10 @@ struct icmp_iphdr_s
 #ifdef CONFIG_NET_STATISTICS
 struct icmp_stats_s
 {
-  uip_stats_t drop;       /* Number of dropped ICMP packets */
-  uip_stats_t recv;       /* Number of received ICMP packets */
-  uip_stats_t sent;       /* Number of sent ICMP packets */
-  uip_stats_t typeerr;    /* Number of ICMP packets with a wrong type */
+  net_stats_t drop;       /* Number of dropped ICMP packets */
+  net_stats_t recv;       /* Number of received ICMP packets */
+  net_stats_t sent;       /* Number of sent ICMP packets */
+  net_stats_t typeerr;    /* Number of ICMP packets with a wrong type */
 };
 #endif
 
