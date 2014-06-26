@@ -7526,4 +7526,5 @@
 	  GPIO pins in I2C driver.  Fix from Alex D. (2014-6-25).
 	* NET: Fix an include file ordering problem when CONFIG_NET_STATISTICS=y.
 	  (2014-6-26).
-
+	* include/nuttx/net/netstats.h: Move statistcs from uip.h to new netstats.h
+	  to remove nasty circular inclusion problem (2014-6-26).
