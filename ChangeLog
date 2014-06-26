@@ -7531,4 +7531,7 @@
 	* arch/arm/src/sama5:  Add logic to redirect all SAMA5D4 interrupts to
 	  the AIC (2014-6-26).
 	* net/route: Move routing table functions to net/route (2014-6-26).
+	* net/utils: Move some files into net/utils (2014-6-26).
+	* net/:  Repartition initialization logic so that net/uip is at the bottom
+	  of the food chain, instead of at the top.
 
