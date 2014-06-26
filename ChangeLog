@@ -7534,4 +7534,8 @@
 	* net/utils: Move some files into net/utils (2014-6-26).
 	* net/:  Repartition initialization logic so that net/uip is at the bottom
 	  of the food chain, instead of at the top.
+	* apps/include/hex2bin.h:  The hex2bin library did not build with
+	  debug disabled (2014-6-26).
+	* configs/sama5d4-ek/dramboot and src/dram_main.c:  Add a boot loader that
+	  runs from ISRAM and loads an Intel HEX file into DRAM (2014-6-26).
 
