@@ -39,6 +39,11 @@ ifeq ($(CONFIG_NET),y)
 
 # Basic networking support
 
+NET_ASRCS   =
+NET_CSRCS   = net_initialize.c
+
+# Socket support
+
 SOCK_ASRCS  =
 SOCK_CSRCS  = bind.c connect.c getsockname.c recv.c recvfrom.c socket.c
 SOCK_CSRCS += sendto.c net_sockets.c net_close.c net_dup.c net_dup2.c

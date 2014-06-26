@@ -49,10 +49,6 @@
 #include <nuttx/net/netstats.h>
 
 #include "uip/uip.h"
-#include "tcp/tcp.h"
-#include "udp/udp.h"
-#include "pkt/pkt.h"
-#include "igmp/igmp.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -120,46 +116,8 @@ uint8_t uip_reasstmr;
 
 void uip_initialize(void)
 {
-  /* Initialize the locking facility */
-
-  net_lockinitialize();
-
   /* Initialize callback support */
 
   uip_callbackinit();
-
-  /* Initialize packet socket support */
-
-#ifdef CONFIG_NET_PKT
-  pkt_initialize();
-#endif
-
-  /* Initialize the listening port structures */
-
-#ifdef CONFIG_NET_TCP
-  tcp_listeninit();
-
-  /* Initialize the TCP/IP connection structures */
-
-  tcp_initialize();
-
-  /* Initialize the TCP/IP write buffering */
-
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-  tcp_wrbuffer_initialize();
-#endif
-#endif /* CONFIG_NET_TCP */
-
-  /* Initialize the UDP connection structures */
-
-#ifdef CONFIG_NET_UDP
-  udp_initialize();
-#endif
-
-  /* Initialize IGMP support */
-
-#ifdef CONFIG_NET_IGMP
-  igmp_initialize();
-#endif
 }
 #endif /* CONFIG_NET */

@@ -47,14 +47,11 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/net/iob.h>
-#include <nuttx/net/arp.h>
 #include <nuttx/net/uip.h>
 #include <nuttx/net/net.h>
 #include <nuttx/kmalloc.h>
 
 #include "net.h"
-#include "route/route.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -97,37 +94,6 @@ static void _net_semtake(FAR struct socketlist *list)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/* This is called from the initialization logic to configure the socket layer */
-
-void net_initialize(void)
-{
-  /* Initialize the uIP layer */
-
-  uip_initialize();
-
-  /* Initialize I/O buffering */
-
-#ifdef CONFIG_NET_IOB
-  iob_initialize();
-#endif
-
-#ifdef CONFIG_NET_ROUTE
-  /* Initialize the routing table */
-
-  net_initroute();
-#endif
-
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
-  /* Initialize the socket layer */
-
-  netdev_seminit();
-#endif
-
-  /* Initialize the periodic ARP timer */
-
-  arp_timer_init();
-}
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
 
