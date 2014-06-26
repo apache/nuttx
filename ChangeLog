@@ -7530,4 +7530,5 @@
 	  to remove nasty circular inclusion problem (2014-6-26).
 	* arch/arm/src/sama5:  Add logic to redirect all SAMA5D4 interrupts to
 	  the AIC (2014-6-26).
+	* net/route: Move routing table functions to net/route (2014-6-26).
 
