@@ -153,10 +153,10 @@ static void igmp_timeout(int argc, uint32_t arg, ...)
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  igmp_starttimer
+ * Name:  igmp_decisec2tick
  *
  * Description:
- *   Start the IGMP timer.
+ *   Convert the deci-second value to units of system clock ticks.
  *
  * Assumptions:
  *   This function may be called from most any context.
@@ -225,14 +225,14 @@ void igmp_starttimer(FAR struct igmp_group_s *group, uint8_t decisecs)
 
 bool igmp_cmptimer(FAR struct igmp_group_s *group, int maxticks)
 {
-  uip_lock_t flags;
+  net_lock_t flags;
   int remaining;
 
   /* Disable interrupts so that there is no race condition with the actual
    * timer expiration.
    */
 
-  flags = uip_lock();
+  flags = net_lock();
 
   /* Get the timer remaining on the watchdog.  A time of <= zero means that
    * the watchdog was never started.
@@ -251,11 +251,11 @@ bool igmp_cmptimer(FAR struct igmp_group_s *group, int maxticks)
       /* Cancel the watchdog timer and return true */
 
       wd_cancel(group->wdog);
-      uip_unlock(flags);
+      net_unlock(flags);
       return true;
     }
 
-  uip_unlock(flags);
+  net_unlock(flags);
   return false;
 }
 

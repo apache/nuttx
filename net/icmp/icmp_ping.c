@@ -328,7 +328,7 @@ int uip_ping(uip_ipaddr_t addr, uint16_t id, uint16_t seqno,
              uint16_t datalen, int dsecs)
 {
   struct icmp_ping_s state;
-  uip_lock_t save;
+  net_lock_t save;
 
   /* Initialize the state structure */
 
@@ -341,7 +341,7 @@ int uip_ping(uip_ipaddr_t addr, uint16_t id, uint16_t seqno,
   state.png_datlen = datalen;          /* The length of data to send in the ECHO request */
   state.png_sent   = false;            /* ECHO request not yet sent */
 
-  save             = uip_lock();
+  save             = net_lock();
   state.png_time   = clock_systimer();
 
   /* Set up the callback */
@@ -359,19 +359,19 @@ int uip_ping(uip_ipaddr_t addr, uint16_t id, uint16_t seqno,
       netdev_txnotify(state.png_addr);
 
       /* Wait for either the full round trip transfer to complete or
-       * for timeout to occur. (1) uip_lockedwait will also terminate if a
+       * for timeout to occur. (1) net_lockedwait will also terminate if a
        * signal is received, (2) interrupts may be disabled!  They will
        * be re-enabled while the task sleeps and automatically
        * re-enabled when the task restarts.
        */
 
       nlldbg("Start time: 0x%08x seqno: %d\n", state.png_time, seqno);
-      uip_lockedwait(&state.png_sem);
+      net_lockedwait(&state.png_sem);
 
       icmp_callbackfree(state.png_cb);
     }
 
-  uip_unlock(save);
+  net_unlock(save);
 
   /* Return the negated error number in the event of a failure, or the
    * sequence number of the ECHO reply on success.

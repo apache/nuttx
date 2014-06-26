@@ -74,12 +74,12 @@ int net_foreachroute(route_handler_t handler, FAR void *arg)
 {
   FAR struct net_route_s *route;
   FAR struct net_route_s *next;
-  uip_lock_t save;
+  net_lock_t save;
   int ret = 0;
 
   /* Prevent concurrent access to the routing table */
 
-  save = uip_lock();
+  save = net_lock();
 
   /* Visit each entry in the routing table */
 
@@ -95,7 +95,7 @@ int net_foreachroute(route_handler_t handler, FAR void *arg)
 
   /* Unlock uIP */
 
-  uip_unlock(save);
+  net_unlock(save);
   return ret;
 }
 

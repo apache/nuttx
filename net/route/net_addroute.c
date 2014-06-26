@@ -80,7 +80,7 @@ int net_addroute(uip_ipaddr_t target, uip_ipaddr_t netmask,
                  uip_ipaddr_t router)
 {
   FAR struct net_route_s *route;
-  uip_lock_t save;
+  net_lock_t save;
 
   /* Allocate a route entry */
 
@@ -99,12 +99,12 @@ int net_addroute(uip_ipaddr_t target, uip_ipaddr_t netmask,
 
   /* Get exclusive address to the networking data structures */
 
-  save = uip_lock();
+  save = net_lock();
 
   /* Then add the new entry to the table */
 
   sq_addlast((FAR sq_entry_t *)route, (FAR sq_queue_t *)&g_routes);
-  uip_unlock(save);
+  net_unlock(save);
   return OK;
 }
 

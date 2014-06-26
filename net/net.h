@@ -184,7 +184,6 @@ int psock_close(FAR struct socket *psock);
 #if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
 int net_timeo(uint32_t start_time, socktimeo_t timeo);
 socktimeo_t net_timeval2dsec(FAR struct timeval *tv);
-void net_dsec2timeval(uint16_t dsec, FAR struct timeval *tv);
 #endif
 
 /* net_register.c ************************************************************/

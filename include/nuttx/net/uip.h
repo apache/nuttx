@@ -5,7 +5,7 @@
  * are used by uIP programs as well as internal uIP structures and function
  * declarations.
  *
- *   Copyright (C) 2007-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * This logic was leveraged from uIP which also has a BSD-style license:
@@ -259,37 +259,37 @@ void uip_setipid(uint16_t id);
 
 /* Semaphore based locking for non-interrupt based logic.
  *
- * uip_lock_t       -- Not used.  Only for compatibility
- * uip_lockinit()   -- Initializes an underlying semaphore/mutex
- * uip_lock()       -- Takes the semaphore().  Implements a re-entrant mutex.
- * uip_unlock()     -- Gives the semaphore().
- * uip_lockedwait() -- Like pthread_cond_wait(); releases the semaphore
- *                     momemtarily to wait on another semaphore()
+ * net_lock_t           -- Not used.  Only for compatibility
+ * net_lockinitialize() -- Initializes an underlying semaphore/mutex
+ * net_lock()           -- Takes the semaphore().  Implements a re-entrant mutex.
+ * net_unlock()         -- Gives the semaphore().
+ * net_lockedwait()     -- Like pthread_cond_wait(); releases the semaphore
+ *                         momemtarily to wait on another semaphore()
  */
 
-typedef uint8_t uip_lock_t; /* Not really used */
+typedef uint8_t net_lock_t; /* Not really used */
 
-void uip_lockinit(void);
-uip_lock_t uip_lock(void);
-void uip_unlock(uip_lock_t flags);
-int uip_lockedwait(sem_t *sem);
+void net_lockinitialize(void);
+net_lock_t net_lock(void);
+void net_unlock(net_lock_t flags);
+int net_lockedwait(sem_t *sem);
 
 #else
 
 /* Enable/disable locking for interrupt based logic:
  *
- * uip_lock_t       -- The processor specific representation of interrupt state.
- * uip_lockinit()   -- (Does not exist).
- * uip_lock()       -- Disables interrupts.
- * uip_unlock()     -- Conditionally restores interrupts.
- * uip_lockedwait() -- Just wait for the semaphore.
+ * net_lock_t           -- The processor specific representation of interrupt state.
+ * net_lockinitialize() -- (Does not exist).
+ * net_lock()           -- Disables interrupts.
+ * net_unlock()         -- Conditionally restores interrupts.
+ * net_lockedwait()     -- Just wait for the semaphore.
  */
 
-#  define uip_lock_t        irqstate_t
-#  define uip_lockinit()
-#  define uip_lock()        irqsave()
-#  define uip_unlock(f)     irqrestore(f)
-#  define uip_lockedwait(s) sem_wait(s)
+#  define net_lock_t        irqstate_t
+#  define net_lockinitialize()
+#  define net_lock()        irqsave()
+#  define net_unlock(f)     irqrestore(f)
+#  define net_lockedwait(s) sem_wait(s)
 
 #endif
 
@@ -448,7 +448,7 @@ int uip_lockedwait(sem_t *sem);
    ((in_addr_t)(addr2) & (in_addr_t)(mask)))
 #else
 bool uip_ipaddr_maskcmp(uip_ipaddr_t addr1, uip_ipaddr_t addr2,
-                               uip_ipaddr_t mask);
+                        uip_ipaddr_t mask);
 #endif
 
 /* Mask out the network part of an IP address.

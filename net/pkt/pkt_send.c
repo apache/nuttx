@@ -206,7 +206,7 @@ ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
                        size_t len)
 {
   struct send_s state;
-  uip_lock_t save;
+  net_lock_t save;
   int err;
   int ret = OK;
 
@@ -229,7 +229,7 @@ ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
    * are ready.
    */
 
-  save                = uip_lock();
+  save                = net_lock();
   memset(&state, 0, sizeof(struct send_s));
   (void)sem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
   state.snd_sock      = psock;          /* Socket descriptor to use */
@@ -271,12 +271,12 @@ ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
           dev->d_txavail(dev);
 
           /* Wait for the send to complete or an error to occure: NOTES: (1)
-           * uip_lockedwait will also terminate if a signal is received, (2)
+           * net_lockedwait will also terminate if a signal is received, (2)
            * interrupts may be disabled! They will be re-enabled while the
            * task sleeps and automatically re-enabled when the task restarts.
            */
 
-          ret = uip_lockedwait(&state.snd_sem);
+          ret = net_lockedwait(&state.snd_sem);
 
           /* Make sure that no further interrupts are processed */
 
@@ -289,7 +289,7 @@ ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
     }
 
   sem_destroy(&state.snd_sem);
-  uip_unlock(save);
+  net_unlock(save);
 
   /* Set the socket state to idle */
 
@@ -305,8 +305,8 @@ ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
       goto errout;
     }
 
-  /* If uip_lockedwait failed, then we were probably reawakened by a signal. In
-   * this case, uip_lockedwait will have set errno appropriately.
+  /* If net_lockedwait failed, then we were probably reawakened by a signal. In
+   * this case, net_lockedwait will have set errno appropriately.
    */
 
   if (ret < 0)

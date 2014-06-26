@@ -278,7 +278,7 @@ static inline int netclose_disconnect(FAR struct socket *psock)
 {
   struct tcp_close_s state;
   FAR struct tcp_conn_s *conn;
-  uip_lock_t flags;
+  net_lock_t flags;
 #ifdef CONFIG_NET_SOLINGER
   bool linger;
 #endif
@@ -286,7 +286,7 @@ static inline int netclose_disconnect(FAR struct socket *psock)
 
   /* Interrupts are disabled here to avoid race conditions */
 
-  flags = uip_lock();
+  flags = net_lock();
   conn = (FAR struct tcp_conn_s *)psock->s_conn;
 
   /* If we have a semi-permanent write buffer callback in place, then
@@ -367,7 +367,7 @@ static inline int netclose_disconnect(FAR struct socket *psock)
         {
           /* Wait for the disconnect event */
 
-          (void)uip_lockedwait(&state.cl_sem);
+          (void)net_lockedwait(&state.cl_sem);
 
           /* We are now disconnected */
 
@@ -390,7 +390,7 @@ static inline int netclose_disconnect(FAR struct socket *psock)
       tcp_free(conn);
     }
 
-  uip_unlock(flags);
+  net_unlock(flags);
   return ret;
 }
 #endif /* CONFIG_NET_TCP */

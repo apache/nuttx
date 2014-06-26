@@ -457,7 +457,7 @@ static void slip_txtask(int argc, char *argv[])
 {
   FAR struct slip_driver_s *priv;
   unsigned int index = *(argv[1]) - '0';
-  uip_lock_t flags;
+  net_lock_t flags;
 
   ndbg("index: %d\n", index);
   DEBUGASSERT(index < CONFIG_SLIP_NINTERFACES);
@@ -493,10 +493,10 @@ static void slip_txtask(int argc, char *argv[])
            * (above), it may be larger.
            */
 
-          flags = uip_lock();
+          flags = net_lock();
           priv->dev.d_buf = priv->txbuf;
           (void)uip_timer(&priv->dev, slip_uiptxpoll, SLIP_POLLHSEC);
-          uip_unlock(flags);
+          net_unlock(flags);
           slip_semgive(priv);
         }
     }
@@ -646,7 +646,7 @@ static int slip_rxtask(int argc, char *argv[])
 {
   FAR struct slip_driver_s *priv;
   unsigned int index = *(argv[1]) - '0';
-  uip_lock_t flags;
+  net_lock_t flags;
   int ch;
 
   ndbg("index: %d\n", index);
@@ -717,7 +717,7 @@ static int slip_rxtask(int argc, char *argv[])
           priv->dev.d_buf = priv->rxbuf;
           priv->dev.d_len = priv->rxlen;
 
-          flags = uip_lock();
+          flags = net_lock();
           uip_input(&priv->dev);
 
           /* If the above function invocation resulted in data that should
@@ -729,7 +729,7 @@ static int slip_rxtask(int argc, char *argv[])
             {
               slip_transmit(priv);
             }
-          uip_unlock(flags);
+          net_unlock(flags);
           slip_semgive(priv);
         }
       else

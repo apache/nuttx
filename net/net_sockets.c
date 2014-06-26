@@ -81,7 +81,7 @@ static void _net_semtake(FAR struct socketlist *list)
 {
   /* Take the semaphore (perhaps waiting) */
 
-  while (uip_lockedwait(&list->sl_sem) != 0)
+  while (net_lockedwait(&list->sl_sem) != 0)
     {
       /* The only case that an error should occr here is if
        * the wait was awakened by a signal.

@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/net_dsec2timeval.c
+ * net/utils/net_dsec2timeval.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
 
 #include <sys/socket.h>
 #include <stdint.h>
@@ -48,7 +47,7 @@
 #include "net.h"
 
 /****************************************************************************
- * Global Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -69,12 +68,10 @@
  *
  ****************************************************************************/
 
-void net_dsec2timeval(uint16_t dsec, struct timeval *tv)
+void net_dsec2timeval(uint16_t dsec, FAR struct timeval *tv)
 {
   uint16_t remainder;
   tv->tv_sec  = dsec / DSEC_PER_SEC;
   remainder   = dsec - tv->tv_sec * DSEC_PER_SEC;
   tv->tv_usec = remainder * USEC_PER_DSEC;
 }
-
-#endif /* CONFIG_NET && CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */

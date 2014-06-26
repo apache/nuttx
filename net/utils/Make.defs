@@ -1,7 +1,7 @@
 ############################################################################
-# net/uip/Make.defs
+# net/utils/Make.defs
 #
-#   Copyright (C) 2007, 2009-2010, 2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,32 +35,18 @@
 
 ifeq ($(CONFIG_NET),y)
 
-# Common IP source files
+NET_CSRCS += net_dsec2timeval.c 
 
-NET_CSRCS += uip_initialize.c uip_setipid.c uip_input.c uip_send.c
-NET_CSRCS += uip_poll.c uip_chksum.c uip_callback.c
+# Non-interrupt level support required?
 
-# I/O buffer chain support required?
-
-ifeq ($(CONFIG_NET_IOB),y)
-NET_CSRCS += uip_iobsend.c
+ifeq ($(CONFIG_NET_NOINTS),y)
+NET_CSRCS += net_lock.c
 endif
 
-# Raw packet socket support
+# Include utility build support
 
-ifeq ($(CONFIG_NET_PKT),y)
-NET_CSRCS += uip_pktsend.c
+DEPPATH += --dep-path utils
+VPATH += :utils
+
 endif
-
-# IPv6-specific logic
-
-ifeq ($(CONFIG_NET_IPv6),y)
-NET_CSRCS += uip_neighbor.c
-endif
-
-# Include uip build support
-
-DEPPATH += --dep-path uip
-VPATH += :uip
-
 endif

@@ -286,7 +286,7 @@ static inline int psock_tcp_connect(FAR struct socket *psock,
 #endif
 {
   struct tcp_connect_s state;
-  uip_lock_t           flags;
+  net_lock_t           flags;
   int                  ret = OK;
 
   /* Interrupts must be disabled through all of the following because
@@ -294,7 +294,7 @@ static inline int psock_tcp_connect(FAR struct socket *psock,
    * setup.
    */
 
-  flags = uip_lock();
+  flags = net_lock();
 
   /* Get the connection reference from the socket */
 
@@ -317,19 +317,19 @@ static inline int psock_tcp_connect(FAR struct socket *psock,
       if (ret >= 0)
         {
           /* Wait for either the connect to complete or for an error/timeout
-           * to occur. NOTES:  (1) uip_lockedwait will also terminate if a signal
+           * to occur. NOTES:  (1) net_lockedwait will also terminate if a signal
            * is received, (2) interrupts may be disabled!  They will be re-
            * enabled while the task sleeps and automatically re-disabled
            * when the task restarts.
            */
 
-          ret = uip_lockedwait(&state.tc_sem);
+          ret = net_lockedwait(&state.tc_sem);
 
           /* Uninitialize the state structure */
 
           (void)sem_destroy(&state.tc_sem);
 
-          /* If uip_lockedwait failed, recover the negated error (probably -EINTR) */
+          /* If net_lockedwait failed, recover the negated error (probably -EINTR) */
 
           if (ret < 0)
             {
@@ -357,7 +357,7 @@ static inline int psock_tcp_connect(FAR struct socket *psock,
         }
     }
 
-    uip_unlock(flags);
+    net_unlock(flags);
     return ret;
 }
 #endif /* CONFIG_NET_TCP */

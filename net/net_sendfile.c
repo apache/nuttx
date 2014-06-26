@@ -451,7 +451,7 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
   FAR struct socket *psock = sockfd_socket(outfd);
   FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s*)psock->s_conn;
   struct sendfile_s state;
-  uip_lock_t save;
+  net_lock_t save;
   int err;
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
@@ -479,7 +479,7 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
    * are ready.
    */
 
-  save  = uip_lock();
+  save  = net_lock();
 
   memset(&state, 0, sizeof(struct sendfile_s));
   sem_init(&state. snd_sem, 0, 0);          /* Doesn't really fail */
@@ -542,7 +542,7 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
 
       netdev_txnotify(conn->ripaddr);
 
-      uip_lockedwait(&state.snd_sem);
+      net_lockedwait(&state.snd_sem);
     }
   while (state.snd_sent >= 0 && state.snd_acked < state.snd_flen);
 
@@ -558,7 +558,7 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
  errout_locked:
 
   sem_destroy(&state. snd_sem);
-  uip_unlock(save);
+  net_unlock(save);
 
  errout:
 

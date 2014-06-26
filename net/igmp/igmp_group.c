@@ -223,7 +223,7 @@ FAR struct igmp_group_s *igmp_grpalloc(FAR struct uip_driver_s *dev,
                                        FAR const uip_ipaddr_t *addr)
 {
   FAR struct igmp_group_s *group;
-  uip_lock_t flags;
+  net_lock_t flags;
 
   nllvdbg("addr: %08x dev: %p\n", *addr, dev);
   if (up_interrupt_context())
@@ -260,12 +260,12 @@ FAR struct igmp_group_s *igmp_grpalloc(FAR struct uip_driver_s *dev,
 
       /* Interrupts must be disabled in order to modify the group list */
 
-      flags = uip_lock();
+      flags = net_lock();
 
       /* Add the group structure to the list in the device structure */
 
       sq_addfirst((FAR sq_entry_t*)group, &dev->grplist);
-      uip_unlock(flags);
+      net_unlock(flags);
     }
 
   return group;
@@ -286,7 +286,7 @@ FAR struct igmp_group_s *igmp_grpfind(FAR struct uip_driver_s *dev,
                                       FAR const uip_ipaddr_t *addr)
 {
   FAR struct igmp_group_s *group;
-  uip_lock_t flags;
+  net_lock_t flags;
 
   grplldbg("Searching for addr %08x\n", (int)*addr);
 
@@ -294,7 +294,7 @@ FAR struct igmp_group_s *igmp_grpfind(FAR struct uip_driver_s *dev,
    * called from.
    */
 
-  flags = uip_lock();
+  flags = net_lock();
   for (group = (FAR struct igmp_group_s *)dev->grplist.head;
        group;
        group = group->next)
@@ -307,7 +307,7 @@ FAR struct igmp_group_s *igmp_grpfind(FAR struct uip_driver_s *dev,
         }
     }
 
-  uip_unlock(flags);
+  net_unlock(flags);
   return group;
 }
 
@@ -351,13 +351,13 @@ FAR struct igmp_group_s *igmp_grpallocfind(FAR struct uip_driver_s *dev,
 
 void igmp_grpfree(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group)
 {
-  uip_lock_t flags;
+  net_lock_t flags;
 
   grplldbg("Free: %p flags: %02x\n", group, group->flags);
 
   /* Cancel the wdog */
 
-  flags = uip_lock();
+  flags = net_lock();
   wd_cancel(group->wdog);
 
   /* Remove the group structure from the group list in the device structure */
@@ -381,7 +381,7 @@ void igmp_grpfree(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group)
     {
       grplldbg("Put back on free list\n");
       sq_addlast((FAR sq_entry_t*)group, &g_freelist);
-      uip_unlock(flags);
+      net_unlock(flags);
     }
   else
 #endif
@@ -390,7 +390,7 @@ void igmp_grpfree(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group)
        * this function is executing within an interrupt handler.
        */
 
-      uip_unlock(flags);
+      net_unlock(flags);
       grplldbg("Call sched_kfree()\n");
       sched_kfree(group);
     }

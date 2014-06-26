@@ -45,6 +45,7 @@
 #include <errno.h>
 
 #include "net.h"
+#include "utils/utils.h"
 
 /****************************************************************************
  * Global Functions

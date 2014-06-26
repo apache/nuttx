@@ -206,14 +206,14 @@ void tcp_initialize(void)
 FAR struct tcp_conn_s *tcp_alloc(void)
 {
   FAR struct tcp_conn_s *conn;
-  uip_lock_t flags;
+  net_lock_t flags;
 
   /* Because this routine is called from both interrupt level and
    * and from user level, we have not option but to disable interrupts
    * while accessing g_free_tcp_connections[];
    */
 
-  flags = uip_lock();
+  flags = net_lock();
 
   /* Return the entry from the head of the free list */
 
@@ -292,7 +292,7 @@ FAR struct tcp_conn_s *tcp_alloc(void)
     }
 #endif
 
-  uip_unlock(flags);
+  net_unlock(flags);
 
   /* Mark the connection allocated */
 
@@ -321,7 +321,7 @@ void tcp_free(FAR struct tcp_conn_s *conn)
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   FAR struct tcp_wrbuffer_s *wrbuffer;
 #endif
-  uip_lock_t flags;
+  net_lock_t flags;
 
   /* Because g_free_tcp_connections is accessed from user level and interrupt
    * level, code, it is necessary to keep interrupts disabled during this
@@ -329,7 +329,7 @@ void tcp_free(FAR struct tcp_conn_s *conn)
    */
 
   DEBUGASSERT(conn->crefs == 0);
-  flags = uip_lock();
+  flags = net_lock();
 
   /* Free remaining callbacks, actually there should be only the close callback
    * left.
@@ -394,7 +394,7 @@ void tcp_free(FAR struct tcp_conn_s *conn)
 
   conn->tcpstateflags = UIP_CLOSED;
   dq_addlast(&conn->node, &g_free_tcp_connections);
-  uip_unlock(flags);
+  net_unlock(flags);
 }
 
 /****************************************************************************
@@ -583,14 +583,14 @@ int tcp_bind(FAR struct tcp_conn_s *conn,
              FAR const struct sockaddr_in *addr)
 #endif
 {
-  uip_lock_t flags;
+  net_lock_t flags;
   int port;
 
   /* Verify or select a local port */
 
-  flags = uip_lock();
+  flags = net_lock();
   port = uip_selectport(ntohs(addr->sin_port));
-  uip_unlock(flags);
+  net_unlock(flags);
 
   if (port < 0)
     {
@@ -643,7 +643,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn,
                 FAR const struct sockaddr_in *addr)
 #endif
 {
-  uip_lock_t flags;
+  net_lock_t flags;
   int port;
 
   /* The connection is expected to be in the UIP_ALLOCATED state.. i.e.,
@@ -660,9 +660,9 @@ int tcp_connect(FAR struct tcp_conn_s *conn,
    * one now.
    */
 
-  flags = uip_lock();
+  flags = net_lock();
   port = uip_selectport(ntohs(conn->lport));
-  uip_unlock(flags);
+  net_unlock(flags);
 
   if (port < 0)
     {
@@ -715,9 +715,9 @@ int tcp_connect(FAR struct tcp_conn_s *conn,
    * this operation.
    */
 
-  flags = uip_lock();
+  flags = net_lock();
   dq_addlast(&conn->node, &g_active_tcp_connections);
-  uip_unlock(flags);
+  net_unlock(flags);
 
   return OK;
 }

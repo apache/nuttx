@@ -719,7 +719,7 @@ static uint16_t psock_send_interrupt(FAR struct uip_driver_s *dev,
 ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
                        size_t len)
 {
-  uip_lock_t save;
+  net_lock_t save;
   ssize_t    result = 0;
   int        err;
   int        ret = OK;
@@ -744,7 +744,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
   psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_SEND);
 
-  save = uip_lock();
+  save = net_lock();
 
   if (len > 0)
     {
@@ -817,7 +817,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
         }
     }
 
-  uip_unlock(save);
+  net_unlock(save);
 
   /* Set the socket state to idle */
 
@@ -833,8 +833,8 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
       goto errout;
     }
 
-  /* If uip_lockedwait failed, then we were probably reawakened by a signal.
-   * In this case, uip_lockedwait will have set errno appropriately.
+  /* If net_lockedwait failed, then we were probably reawakened by a signal.
+   * In this case, net_lockedwait will have set errno appropriately.
    */
 
   if (ret < 0)

@@ -141,11 +141,11 @@ void tcp_listeninit(void)
 
 int tcp_unlisten(FAR struct tcp_conn_s *conn)
 {
-  uip_lock_t flags;
+  net_lock_t flags;
   int ndx;
   int ret = -EINVAL;
 
-  flags = uip_lock();
+  flags = net_lock();
   for (ndx = 0; ndx < CONFIG_NET_MAX_LISTENPORTS; ndx++)
     {
       if (tcp_listenports[ndx] == conn)
@@ -156,7 +156,7 @@ int tcp_unlisten(FAR struct tcp_conn_s *conn)
         }
     }
 
-  uip_unlock(flags);
+  net_unlock(flags);
   return ret;
 }
 
@@ -173,7 +173,7 @@ int tcp_unlisten(FAR struct tcp_conn_s *conn)
 
 int tcp_listen(FAR struct tcp_conn_s *conn)
 {
-  uip_lock_t flags;
+  net_lock_t flags;
   int ndx;
   int ret;
 
@@ -181,7 +181,7 @@ int tcp_listen(FAR struct tcp_conn_s *conn)
    * is accessed from interrupt level as well.
    */
 
-  flags = uip_lock();
+  flags = net_lock();
 
   /* First, check if there is already a socket listening on this port */
 
@@ -216,7 +216,7 @@ int tcp_listen(FAR struct tcp_conn_s *conn)
         }
     }
 
-  uip_unlock(flags);
+  net_unlock(flags);
   return ret;
 }
 

@@ -127,18 +127,18 @@ void net_initroute(void)
 FAR struct net_route_s *net_allocroute(void)
 {
   FAR struct net_route_s *route;
-  uip_lock_t save;
+  net_lock_t save;
 
   /* Get exclusive address to the networking data structures */
 
-  save = uip_lock();
+  save = net_lock();
 
   /* Then add the new entry to the table */
 
   route = (FAR struct net_route_s *)
     sq_remfirst((FAR sq_queue_t *)&g_freeroutes);
 
-  uip_unlock(save);
+  net_unlock(save);
   return route;
 }
 
@@ -158,18 +158,18 @@ FAR struct net_route_s *net_allocroute(void)
 
 void net_freeroute(FAR struct net_route_s *route)
 {
-  uip_lock_t save;
+  net_lock_t save;
 
   DEBUGASSERT(route);
 
   /* Get exclusive address to the networking data structures */
 
-  save = uip_lock();
+  save = net_lock();
 
   /* Then add the new entry to the table */
 
   sq_addlast((FAR sq_entry_t *)route, (FAR sq_queue_t *)&g_freeroutes);
-  uip_unlock(save);
+  net_unlock(save);
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_ROUTE */

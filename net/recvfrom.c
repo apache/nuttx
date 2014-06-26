@@ -986,7 +986,7 @@ static void recvfrom_init(FAR struct socket *psock, FAR void *buf, size_t len,
  *   Evaluate the result of the recv operations
  *
  * Parameters:
- *   result   The result of the uip_lockedwait operation (may indicate EINTR)
+ *   result   The result of the net_lockedwait operation (may indicate EINTR)
  *   pstate   A pointer to the state structure to be initialized
  *
  * Returned Value:
@@ -1014,8 +1014,8 @@ static ssize_t recvfrom_result(int result, struct recvfrom_s *pstate)
       return pstate->rf_result;
     }
 
-  /* If uip_lockedwait failed, then we were probably reawakened by a signal. In
-   * this case, uip_lockedwait will have set errno appropriately.
+  /* If net_lockedwait failed, then we were probably reawakened by a signal. In
+   * this case, net_lockedwait will have set errno appropriately.
    */
 
   if (result < 0)
@@ -1047,7 +1047,7 @@ static ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 {
   FAR struct pkt_conn_s *conn = (FAR struct pkt_conn_s *)psock->s_conn;
   struct recvfrom_s state;
-  uip_lock_t save;
+  net_lock_t save;
   int ret;
 
   /* Perform the packet recvfrom() operation */
@@ -1057,7 +1057,7 @@ static ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
    * are ready.
    */
 
-  save = uip_lock();
+  save = net_lock();
   recvfrom_init(psock, buf, len, (struct sockaddr_in *)from, &state);
 
   /* TODO recvfrom_init() expects from to be of type sockaddr_in, but
@@ -1086,12 +1086,12 @@ static ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
       /* netdev_rxnotify(conn->ripaddr); */
 
       /* Wait for either the receive to complete or for an error/timeout to occur.
-       * NOTES:  (1) uip_lockedwait will also terminate if a signal is received, (2)
+       * NOTES:  (1) net_lockedwait will also terminate if a signal is received, (2)
        * interrupts are disabled!  They will be re-enabled while the task sleeps
        * and automatically re-enabled when the task restarts.
        */
 
-      ret = uip_lockedwait(&state.rf_sem);
+      ret = net_lockedwait(&state.rf_sem);
 
       /* Make sure that no further interrupts are processed */
 
@@ -1106,7 +1106,7 @@ static ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 #if 0 /* Not used */
 errout_with_state:
 #endif
-  uip_unlock(save);
+  net_unlock(save);
   recvfrom_uninit(&state);
   return ret;
 }
@@ -1143,7 +1143,7 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 {
   FAR struct udp_conn_s *conn = (FAR struct udp_conn_s *)psock->s_conn;
   struct recvfrom_s state;
-  uip_lock_t save;
+  net_lock_t save;
   int ret;
 
   /* Perform the UDP recvfrom() operation */
@@ -1153,7 +1153,7 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
    * are ready.
    */
 
-  save = uip_lock();
+  save = net_lock();
   recvfrom_init(psock, buf, len, infrom, &state);
 
   /* Setup the UDP remote connection */
@@ -1180,12 +1180,12 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
       netdev_rxnotify(conn->ripaddr);
 
       /* Wait for either the receive to complete or for an error/timeout to occur.
-       * NOTES:  (1) uip_lockedwait will also terminate if a signal is received, (2)
+       * NOTES:  (1) net_lockedwait will also terminate if a signal is received, (2)
        * interrupts are disabled!  They will be re-enabled while the task sleeps
        * and automatically re-enabled when the task restarts.
        */
 
-      ret = uip_lockedwait(&state. rf_sem);
+      ret = net_lockedwait(&state. rf_sem);
 
       /* Make sure that no further interrupts are processed */
 
@@ -1198,7 +1198,7 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
     }
 
 errout_with_state:
-  uip_unlock(save);
+  net_unlock(save);
   recvfrom_uninit(&state);
   return ret;
 }
@@ -1234,7 +1234,7 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 #endif
 {
   struct recvfrom_s       state;
-  uip_lock_t              save;
+  net_lock_t              save;
   int                     ret;
 
   /* Initialize the state structure.  This is done with interrupts
@@ -1242,7 +1242,7 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
    * are ready.
    */
 
-  save = uip_lock();
+  save = net_lock();
   recvfrom_init(psock, buf, len, infrom, &state);
 
   /* Handle any any TCP data already buffered in a read-ahead buffer.  NOTE
@@ -1361,12 +1361,12 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
           state.rf_cb->event   = recvfrom_tcpinterrupt;
 
           /* Wait for either the receive to complete or for an error/timeout to occur.
-           * NOTES:  (1) uip_lockedwait will also terminate if a signal is received, (2)
+           * NOTES:  (1) net_lockedwait will also terminate if a signal is received, (2)
            * interrupts may be disabled!  They will be re-enabled while the task sleeps
            * and automatically re-enabled when the task restarts.
            */
 
-          ret = uip_lockedwait(&state.rf_sem);
+          ret = net_lockedwait(&state.rf_sem);
 
           /* Make sure that no further interrupts are processed */
 
@@ -1379,7 +1379,7 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
         }
     }
 
-  uip_unlock(save);
+  net_unlock(save);
   recvfrom_uninit(&state);
   return (ssize_t)ret;
 }

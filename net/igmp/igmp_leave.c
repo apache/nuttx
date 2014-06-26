@@ -132,7 +132,7 @@
 int igmp_leavegroup(struct uip_driver_s *dev, FAR const struct in_addr *grpaddr)
 {
   struct igmp_group_s *group;
-  uip_lock_t flags;
+  net_lock_t flags;
 
   DEBUGASSERT(dev && grpaddr);
 
@@ -148,11 +148,11 @@ int igmp_leavegroup(struct uip_driver_s *dev, FAR const struct in_addr *grpaddr)
        * could interfere with the Leave Group.
        */
 
-      flags = uip_lock();
+      flags = net_lock();
       wd_cancel(group->wdog);
       CLR_SCHEDMSG(group->flags);
       CLR_WAITMSG(group->flags);
-      uip_unlock(flags);
+      net_unlock(flags);
 
       IGMP_STATINCR(g_netstats.igmp.leaves);
 

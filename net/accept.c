@@ -265,7 +265,7 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
 #else
   FAR struct sockaddr_in *inaddr = (struct sockaddr_in *)addr;
 #endif
-  uip_lock_t save;
+  net_lock_t save;
   int newfd;
   int err;
   int ret;
@@ -347,7 +347,7 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
    * this listener.
    */
 
-  save = uip_lock();
+  save = net_lock();
   conn = (struct tcp_conn_s *)psock->s_conn;
 
 #ifdef CONFIG_NET_TCPBACKLOG
@@ -396,12 +396,12 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
       conn->accept          = accept_interrupt;
 
       /* Wait for the send to complete or an error to occur:  NOTES: (1)
-       * uip_lockedwait will also terminate if a signal is received, (2) interrupts
+       * net_lockedwait will also terminate if a signal is received, (2) interrupts
        * may be disabled!  They will be re-enabled while the task sleeps and
        * automatically re-enabled when the task restarts.
        */
 
-      ret = uip_lockedwait(&state.acpt_sem);
+      ret = net_lockedwait(&state.acpt_sem);
 
       /* Make sure that no further interrupts are processed */
 
@@ -424,8 +424,8 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
           goto errout_with_lock;
         }
 
-      /* If uip_lockedwait failed, then we were probably reawakened by a signal. In
-       * this case, uip_lockedwait will have set errno appropriately.
+      /* If net_lockedwait failed, then we were probably reawakened by a signal. In
+       * this case, net_lockedwait will have set errno appropriately.
        */
 
       if (ret < 0)
@@ -448,11 +448,11 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
   /* Begin monitoring for TCP connection events on the newly connected socket */
 
   net_startmonitor(pnewsock);
-  uip_unlock(save);
+  net_unlock(save);
   return newfd;
 
 errout_with_lock:
-  uip_unlock(save);
+  net_unlock(save);
 
 errout_with_socket:
   sockfd_release(newfd);

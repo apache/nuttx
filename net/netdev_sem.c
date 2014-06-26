@@ -129,7 +129,7 @@ void netdev_semtake(void)
     {
       /* No.. take the semaphore (perhaps waiting) */
 
-      while (uip_lockedwait(&g_devlock.sem) != 0)
+      while (net_lockedwait(&g_devlock.sem) != 0)
         {
           /* The only case that an error should occur here is if
            * the wait was awakened by a signal.

@@ -80,15 +80,15 @@
 
 void igmp_schedmsg(FAR struct igmp_group_s *group, uint8_t msgid)
 {
-  uip_lock_t flags;
+  net_lock_t flags;
 
   /* The following should be atomic */
 
-  flags = uip_lock();
+  flags = net_lock();
   DEBUGASSERT(!IS_SCHEDMSG(group->flags));
   group->msgid = msgid;
   SET_SCHEDMSG(group->flags);
-  uip_unlock(flags);
+  net_unlock(flags);
 }
 
 /****************************************************************************
@@ -100,17 +100,17 @@ void igmp_schedmsg(FAR struct igmp_group_s *group, uint8_t msgid)
  *
  * Assumptions:
  *   This function cannot be called from an interrupt handler (if you try it,
- *   uip_lockedwait will assert).
+ *   net_lockedwait will assert).
  *
  ****************************************************************************/
 
 void igmp_waitmsg(FAR struct igmp_group_s *group, uint8_t msgid)
 {
-  uip_lock_t flags;
+  net_lock_t flags;
 
   /* Schedule to send the message */
 
-  flags = uip_lock();
+  flags = net_lock();
   DEBUGASSERT(!IS_WAITMSG(group->flags));
   SET_WAITMSG(group->flags);
   igmp_schedmsg(group, msgid);
@@ -121,9 +121,9 @@ void igmp_waitmsg(FAR struct igmp_group_s *group, uint8_t msgid)
     {
       /* Wait for the semaphore to be posted */
 
-      while (uip_lockedwait(&group->sem) != 0)
+      while (net_lockedwait(&group->sem) != 0)
         {
-          /* The only error that should occur from uip_lockedwait() is if
+          /* The only error that should occur from net_lockedwait() is if
            * the wait is awakened by a signal.
            */
 
@@ -134,7 +134,7 @@ void igmp_waitmsg(FAR struct igmp_group_s *group, uint8_t msgid)
   /* The message has been sent and we are no longer waiting */
 
   CLR_WAITMSG(group->flags);
-  uip_unlock(flags);
+  net_unlock(flags);
 }
 
 #endif /* CONFIG_NET_IGMP */

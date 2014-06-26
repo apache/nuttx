@@ -1543,14 +1543,14 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
 static void enc_irqworker(FAR void *arg)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)arg;
-  uip_lock_t lock;
+  net_lock_t lock;
   uint8_t eir;
 
   DEBUGASSERT(priv);
 
   /* Get exclusive access to both uIP and the SPI bus. */
 
-  lock = uip_lock();
+  lock = net_lock();
   enc_lock(priv);
 
   /* Disable further interrupts by clearing the global interrupt enable bit.
@@ -1746,7 +1746,7 @@ static void enc_irqworker(FAR void *arg)
   /* Release lock on the SPI bus and uIP */
 
   enc_unlock(priv);
-  uip_unlock(lock);
+  net_unlock(lock);
 }
 
 /****************************************************************************
@@ -1808,7 +1808,7 @@ static int enc_interrupt(int irq, FAR void *context)
 static void enc_toworker(FAR void *arg)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)arg;
-  uip_lock_t lock;
+  net_lock_t lock;
   int ret;
 
   nlldbg("Tx timeout\n");
@@ -1816,7 +1816,7 @@ static void enc_toworker(FAR void *arg)
 
   /* Get exclusive access to uIP */
 
-  lock = uip_lock();
+  lock = net_lock();
 
   /* Increment statistics and dump debug info */
 
@@ -1839,7 +1839,7 @@ static void enc_toworker(FAR void *arg)
 
   /* Release lock on uIP */
 
-  uip_unlock(lock);
+  net_unlock(lock);
 }
 
 /****************************************************************************
@@ -1902,13 +1902,13 @@ static void enc_txtimeout(int argc, uint32_t arg, ...)
 static void enc_pollworker(FAR void *arg)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)arg;
-  uip_lock_t lock;
+  net_lock_t lock;
 
   DEBUGASSERT(priv);
 
   /* Get exclusive access to both uIP and the SPI bus. */
 
-  lock = uip_lock();
+  lock = net_lock();
   enc_lock(priv);
 
   /* Verify that the hardware is ready to send another packet.  The driver
@@ -1930,7 +1930,7 @@ static void enc_pollworker(FAR void *arg)
   /* Release lock on the SPI bus and uIP */
 
   enc_unlock(priv);
-  uip_unlock(lock);
+  net_unlock(lock);
 
   /* Setup the watchdog poll timer again */
 

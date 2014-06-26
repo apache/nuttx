@@ -306,7 +306,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
   FAR const struct sockaddr_in *into = (const struct sockaddr_in *)to;
 #endif
   struct sendto_s state;
-  uip_lock_t save;
+  net_lock_t save;
   int ret;
 #endif
   int err;
@@ -365,7 +365,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
    * are ready.
    */
 
-  save = uip_lock();
+  save = net_lock();
   memset(&state, 0, sizeof(struct sendto_s));
   sem_init(&state.st_sem, 0, 0);
   state.st_buflen = len;
@@ -384,7 +384,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
   ret = udp_connect(conn, into);
   if (ret < 0)
     {
-      uip_unlock(save);
+      net_unlock(save);
       err = -ret;
       goto errout;
     }
@@ -403,19 +403,19 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
       netdev_txnotify(conn->ripaddr);
 
       /* Wait for either the receive to complete or for an error/timeout to occur.
-       * NOTES:  (1) uip_lockedwait will also terminate if a signal is received, (2)
+       * NOTES:  (1) net_lockedwait will also terminate if a signal is received, (2)
        * interrupts may be disabled!  They will be re-enabled while the task sleeps
        * and automatically re-enabled when the task restarts.
        */
 
-      uip_lockedwait(&state.st_sem);
+      net_lockedwait(&state.st_sem);
 
       /* Make sure that no further interrupts are processed */
 
       udp_callbackfree(conn, state.st_cb);
     }
-  uip_unlock(save);
 
+  net_unlock(save);
   sem_destroy(&state.st_sem);
 
   /* Set the socket state to idle */

@@ -101,7 +101,7 @@ static inline void _uip_semtake(FAR sem_t *sem)
 {
   /* Take the semaphore (perhaps waiting) */
 
-  while (uip_lockedwait(sem) != 0)
+  while (net_lockedwait(sem) != 0)
     {
       /* The only case that an error should occur here is if
        * the wait was awakened by a signal.
@@ -167,7 +167,7 @@ static uint16_t uip_selectport(void)
    * listen port number that is not being used by any other connection.
    */
 
-  uip_lock_t flags = uip_lock();
+  net_lock_t flags = net_lock();
   do
     {
       /* Guess that the next available port number will be the one after
@@ -190,7 +190,7 @@ static uint16_t uip_selectport(void)
    */
 
   portno = g_last_udp_port;
-  uip_unlock(flags);
+  net_unlock(flags);
 
   return portno;
 }
@@ -383,7 +383,7 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr_in *addr)
 #endif
 {
   int ret = -EADDRINUSE;
-  uip_lock_t flags;
+  net_lock_t flags;
 
   /* Is the user requesting to bind to any port? */
 
@@ -398,7 +398,7 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr_in *addr)
     {
       /* Interrupts must be disabled while access the UDP connection list */
 
-      flags = uip_lock();
+      flags = net_lock();
 
       /* Is any other UDP connection bound to this port? */
 
@@ -410,7 +410,7 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr_in *addr)
           ret         = OK;
         }
 
-      uip_unlock(flags);
+      net_unlock(flags);
     }
 
   return ret;

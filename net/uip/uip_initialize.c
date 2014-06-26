@@ -122,13 +122,13 @@ void uip_initialize(void)
 {
   /* Initialize the locking facility */
 
-  uip_lockinit();
+  net_lockinitialize();
 
   /* Initialize callback support */
 
   uip_callbackinit();
 
-  /* Initialize packet socket suport */
+  /* Initialize packet socket support */
 
 #ifdef CONFIG_NET_PKT
   pkt_initialize();

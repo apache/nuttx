@@ -92,7 +92,7 @@ static inline void _uip_semtake(sem_t *sem)
 {
   /* Take the semaphore (perhaps waiting) */
 
-  while (uip_lockedwait(sem) != 0)
+  while (net_lockedwait(sem) != 0)
     {
       /* The only case that an error should occur here is if
        * the wait was awakened by a signal.

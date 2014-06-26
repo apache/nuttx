@@ -131,6 +131,7 @@ source "net/icmp/Kconfig"
 source "net/igmp/Kconfig"
 source "net/arp/Kconfig"
 source "net/iob/Kconfig"
+source "net/utils/Kconfig"
 
 config NET_STATISTICS
 	bool "Collect network statistics"

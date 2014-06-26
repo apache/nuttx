@@ -80,7 +80,7 @@ int tcp_backlogcreate(FAR struct tcp_conn_s *conn, int nblg)
 {
   FAR struct tcp_backlog_s     *bls = NULL;
   FAR struct tcp_blcontainer_s *blc;
-  uip_lock_t flags;
+  net_lock_t flags;
   int size;
   int offset;
   int i;
@@ -133,7 +133,7 @@ int tcp_backlogcreate(FAR struct tcp_conn_s *conn, int nblg)
 
   /* Destroy any existing backlog (shouldn't be any) */
 
-  flags = uip_lock();
+  flags = net_lock();
   tcp_backlogdestroy(conn);
 
   /* Now install the backlog tear-off in the connection.  NOTE that bls may
@@ -143,7 +143,7 @@ int tcp_backlogcreate(FAR struct tcp_conn_s *conn, int nblg)
    */
 
   conn->backlog = bls;
-  uip_unlock(flags);
+  net_unlock(flags);
   return OK;
 }
 

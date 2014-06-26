@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/uip/uip_lock.c
+ * net/utils/net_lock.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,8 @@
 #include <nuttx/arch.h>
 #include <nuttx/net/uip.h>
 
+#include "utils/utils.h"
+
 #if defined(CONFIG_NET) && defined(CONFIG_NET_NOINTS)
 
 /****************************************************************************
@@ -93,27 +95,27 @@ static void uip_takesem(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: uip_lockinit
+ * Function: net_lockinitialize
  *
  * Description:
  *   Initialize the locking facility
  *
  ****************************************************************************/
 
-void uip_lockinit(void)
+void net_lockinitialize(void)
 {
   sem_init(&g_uipsem, 0, 1);
 }
 
 /****************************************************************************
- * Function: uip_lock
+ * Function: net_lock
  *
  * Description:
  *   Take the lock
  *
  ****************************************************************************/
 
-uip_lock_t uip_lock(void)
+net_lock_t net_lock(void)
 {
   pid_t me = getpid();
 
@@ -141,14 +143,14 @@ uip_lock_t uip_lock(void)
 }
 
 /****************************************************************************
- * Function: uip_unlock
+ * Function: net_unlock
  *
  * Description:
  *   Release the lock.
  *
  ****************************************************************************/
 
-void uip_unlock(uip_lock_t flags)
+void net_unlock(net_lock_t flags)
 {
   DEBUGASSERT(g_holder == getpid() && g_count > 0);
 
@@ -171,14 +173,14 @@ void uip_unlock(uip_lock_t flags)
 }
 
 /****************************************************************************
- * Function: uip_lockedwait
+ * Function: net_lockedwait
  *
  * Description:
  *   Atomically wait for sem while temporarily releasing g_uipsem.
  *
  ****************************************************************************/
 
-int uip_lockedwait(sem_t *sem)
+int net_lockedwait(sem_t *sem)
 {
   pid_t        me = getpid();
   unsigned int count;

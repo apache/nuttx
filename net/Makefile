@@ -58,7 +58,7 @@ endif
 ifeq ($(CONFIG_NET_SOCKOPTS),y)
 SOCK_CSRCS += setsockopt.c getsockopt.c
 ifneq ($(CONFIG_DISABLE_CLOCK),y)
-SOCK_CSRCS += net_timeo.c net_dsec2timeval.c net_timeval2dsec.c
+SOCK_CSRCS += net_timeo.c net_timeval2dsec.c
 endif
 endif
 
