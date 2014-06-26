@@ -378,9 +378,11 @@ Creating and Using DRAMBOOT
        mv nuttx.bin dramboot.bin
 
    4. Build the "real" DRAM configuration.  This will create the nuttx.hex
-      that you will load using dramboot.
+      that you will load using dramboot.  Note that you must select
+      CONFIG_SAMA5D4EK_DRAM_BOOT=y.  This controls the origin at which the
+      code is linked and positions it correctly for the DRAMBOOT program.
 
-   5. Restart the system holding DIS_BOOT.  You should see the RamBOOT
+   5. Restart the system holding DIS_BOOT.  You should see the RomBOOT
       prompt on the 115200 8N1 serial console (and nothing) more.  Hit
       the ENTER key with the focus on your terminal window a few time.
       This will enable JTAG.
@@ -2677,7 +2679,7 @@ SAMA4D4-EK Configuration Options
 
     CONFIG_RAM_START=0x20000000
 
-  CONFIG_RAM_VSTART - The virutal start address of installed DRAM
+  CONFIG_RAM_VSTART - The virtual start address of installed DRAM
 
     CONFIG_RAM_VSTART=0x20000000
 
@@ -2926,6 +2928,7 @@ Configurations
   Now for the gory details:
 
   dramboot:
+
     This is a little program to help debug of code in DRAM.  It does the
     following:
 
@@ -3037,10 +3040,20 @@ Configurations
 
     3. This configuration executes out of SDRAM flash and is loaded into
        SDRAM from NAND, Serial DataFlash, SD card or from a TFTPC sever via
-       U-Boot or BareBox.  Data also is positioned in SDRAM.
+       U-Boot, BareBox, or the DRAMBOOT configuration described above.  Data
+       also is positioned in SDRAM.
 
-       I did most testing with nuttx.bin on an SD card.  These are the
-       commands that I used to boot NuttX from the SD card:
+       The load address is different for the DRAMBOOT program and the Linux
+       bootloaders.  This can easily be reconfigured, however:
+
+         CONFIG_SAMA5D4EK_DRAM_BOOT=y
+
+       See the section above entitled "Creating and Using DRAMBOOT" above
+       for more information.
+
+       At times, have have tested with nuttx.bin on an SD card and booting
+       with U-Boot.  These are the commands that I used to boot NuttX from
+       the SD card:
 
          U-Boot> fatload mmc 0 0x20008000 nuttx.bin
          U-Boot> go 0x20008040
@@ -3093,7 +3106,8 @@ Configurations
     STATUS:
        See the To-Do list below
 
-  ramtest
+  ramtest:
+
     This is a stripped down version of NSH that runs out of
     internal SRAM.  It configures SDRAM and supports only the RAM test
     at apps/examples/ramtest.  This configuration is useful for
