@@ -7521,3 +7521,7 @@
 	  family.  From Max Neklyudov (2014-6-25).
 
 7.4 2014-xx-xx Gregory Nutt <gnutt@nuttx.org>
+
+	* NET: Fix an include file ordering problem when CONFIG_NET_STATISTICS=y.
+	  (2014-6-26).
+
