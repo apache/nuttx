@@ -121,6 +121,11 @@ int dram_main(int argc, char *argv)
       for(;;);
     }
 
+  /* No success indication.. The following cache/MMu operations will clobber
+   * any I/O that we attempt (Hmm.. unless, perhaps, if we delayed.  But who
+   * wants a delay?).
+   */
+
   /* Interrupts must be disabled through the following.  In this configuration,
    * there should only be timer interrupts.  Your NuttX configuration must use
    * CONFIG_SERIAL_LOWCONSOLE=y or printf() will hang when the interrupts
