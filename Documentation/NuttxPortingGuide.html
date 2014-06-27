@@ -2926,13 +2926,13 @@ void board_led_off(int led);
     <p>
     <b><code>include/nuttx/net/netdev.h</code></b>.
     All structures and APIs needed to work with Ethernet drivers are provided in this header file.
-    The structure <code>struct uip_driver_s</code> defines the interface and is passed to uIP via
+    The structure <code>struct net_driver_s</code> defines the interface and is passed to uIP via
     <code>netdev_register()</code>.
     </p>
   </li>
   <li>
     <p>
-    <b><code>int netdev_register(FAR struct uip_driver_s *dev);</code></b>.
+    <b><code>int netdev_register(FAR struct net_driver_s *dev);</code></b>.
     Each Ethernet driver registers itself by calling <code>netdev_register()</code>.
     </p>
   </li>
