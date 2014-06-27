@@ -1,0 +1,8 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+#menu "Network Device Operations"
+
+#endmenu # Network Device Operations

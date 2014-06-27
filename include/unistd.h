@@ -119,7 +119,7 @@ EXTERN int       optind; /* Index into argv */
 EXTERN int       optopt; /* unrecognized option character */
 #else
 #  define optarg  (*(getoptargp()))
-#  define optind  (*(getopindgp()))
+#  define optind  (*(getoptindp()))
 #  define optopt  (*(getoptoptp()))
 #endif
 
@@ -183,7 +183,7 @@ int     getopt(int argc, FAR char *const argv[], FAR const char *optstring);
  */
 
 FAR char **getoptargp(void); /* Optional argument following option */
-int       *getopindgp(void); /* Index into argv */
+int       *getoptindp(void); /* Index into argv */
 int       *getoptoptp(void); /* unrecognized option character */
 
 #undef EXTERN

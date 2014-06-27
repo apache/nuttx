@@ -165,7 +165,8 @@ typedef void *imaxdiv_t; /* Dummy type since imaxdiv is not yet supported */
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -174,13 +175,13 @@ extern "C" {
  *  macros. Function prototypes shall be provided."
  */
 
-EXTERN intmax_t  imaxabs(intmax_t);
-EXTERN imaxdiv_t imaxdiv(intmax_t, intmax_t);
-EXTERN intmax_t  strtoimax(const char *, char **, int);
-EXTERN uintmax_t strtoumax(const char *, char **, int);
+intmax_t  imaxabs(intmax_t);
+imaxdiv_t imaxdiv(intmax_t, intmax_t);
+intmax_t  strtoimax(const char *, char **, int);
+uintmax_t strtoumax(const char *, char **, int);
 
-EXTERN intmax_t  wcstoimax(const wchar_t *, wchar_t **, int);
-EXTERN uintmax_t wcstoumax(const wchar_t *, wchar_t **, int);
+intmax_t  wcstoimax(const wchar_t *, wchar_t **, int);
+uintmax_t wcstoumax(const wchar_t *, wchar_t **, int);
 
 #undef EXTERN
 #ifdef __cplusplus

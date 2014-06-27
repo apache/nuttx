@@ -50,7 +50,7 @@ config SAMA5D4EK_DRAM_MAIN
 		by SAMA5D4EK_DRAM_START.
 
 		NOTE: If you use this boot loader, then your program must be built at
-		origin 0x2000:0000, not at 0x2100:0000 as is customary with U-Boot.
+		origin 0x2000:0000, not at 0x2000:8000 as is customary with U-Boot.
 
 config SAMA5D4EK_DRAM_START
 	bool "Start DRAM program"
@@ -71,7 +71,7 @@ config SAMA5D4EK_DRAM_BOOT
 		Select this option if you are going to boot using the sdram_main
 		bootloader (created with SAMA5D4EK_DRAM_MAIN=y).  This selection
 		will simply origin your program at 0x2000:0000 as required by the
-		sdram_main bootloader (vs. 0x2100:0000 as required by U-Boot).
+		sdram_main bootloader (vs. 0x2000:8000 as required by U-Boot).
 
 config SAMA5D4EK_NAND_AUTOMOUNT
 	bool "NAND FLASH auto-mount"

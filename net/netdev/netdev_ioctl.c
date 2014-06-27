@@ -423,6 +423,21 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
 # error "IOCTL Commands not implemented"
 #endif
 
+#ifdef CONFIG_NETDEV_PHY_IOCTL
+      case SIOCGMIIPHY: /* Get address of MII PHY in use */
+      case SIOCGMIIREG: /* Get MII register via MDIO */
+      case SIOCSMIIREG: /* Set MII register via MDIO */
+        {
+          dev = netdev_ifrdev(req);
+          if (dev && dev->d_ioctl)
+            {
+              struct mii_ioctl_data *mii_data = &req->ifr_ifru.ifru_mii_data;
+              ret = dev->d_ioctl(cmd, mii_data);
+            }
+        }
+        break;
+#endif
+
       default:
         {
           ret = -ENOTTY;

@@ -187,6 +187,9 @@ struct uip_driver_s
   int (*d_addmac)(struct uip_driver_s *dev, FAR const uint8_t *mac);
   int (*d_rmmac)(struct uip_driver_s *dev, FAR const uint8_t *mac);
 #endif
+#ifdef CONFIG_NETDEV_PHY_IOCTL
+  int (*d_ioctl)(int cmd, struct mii_ioctl_data *req);
+#endif
 
   /* Drivers may attached device-specific, private information */
 

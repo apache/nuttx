@@ -57,10 +57,21 @@
 #define IFF_RUNNING     (1 << 2)
 #define IFF_NOARP       (1 << 7)
 
-
 /*******************************************************************************************
  * Public Type Definitions
  *******************************************************************************************/
+
+/* Part of the I/F request used to read from or write to the MII/PHY management
+ * interface when SIOCxMIIREG ioctl was called.
+ */
+
+struct mii_ioctl_data
+{
+  uint16_t phy_id;      /* PHY device address */
+  uint16_t reg_num;     /* PHY register address */
+  uint16_t val_in;      /* PHY input data */
+  uint16_t val_out;     /* PHY output data */
+};
 
 /* This is the newer form if the I/F request structure that can be used with both IPv4
  * and IPv6.
@@ -79,6 +90,7 @@ struct lifreq
     int                     lifru_count;              /* Number of devices */
     int                     lifru_mtu;                /* MTU size */
     uint8_t                 lifru_flags;              /* Interface flags */
+    struct mii_ioctl_data   lifru_mii_data;           /* MII request data */
   } lifr_ifru;
 };
 
@@ -90,6 +102,10 @@ struct lifreq
 #define lifr_mtu            lifr_ifru.lifru_mtu       /* MTU */
 #define lifr_count          lifr_ifru.lifru_count     /* Number of devices */
 #define lifr_flags          lifr_ifru.lifru_flags     /* interface flags */
+#define lifr_mii_phy_id     lifr_ifru.lifru_mii_data.phy_id  /* PHY device address */
+#define lifr_mii_reg_num    lifr_ifru.lifru_mii_data.reg_num /* PHY register address */
+#define lifr_mii_val_in     lifr_ifru.lifru_mii_data.val_in  /* PHY input data */
+#define lifr_mii_val_out    lifr_ifru.lifru_mii_data.val_out /* PHY output data */
 
 /* This is the older I/F request that should only be used with IPv4.  However, since
  * NuttX only supports IPv4 or 6 (not both), we can force the older structure to
@@ -110,6 +126,7 @@ struct ifreq
     int                     ifru_count;               /* Number of devices */
     int                     ifru_mtu;                 /* MTU size */
     uint8_t                 ifru_flags;               /* Interface flags */
+    struct mii_ioctl_data   ifru_mii_data;            /* MII request data */
   } ifr_ifru;
 };
 
@@ -121,6 +138,10 @@ struct ifreq
 #define ifr_mtu             ifr_ifru.ifru_mtu         /* MTU */
 #define ifr_count           ifr_ifru.ifru_count       /* Number of devices */
 #define ifr_flags           ifr_ifru.ifru_flags       /* interface flags */
+#define ifr_mii_phy_id      ifr_ifru.ifru_mii_data.phy_id  /* PHY device address */
+#define ifr_mii_reg_num     ifr_ifru.ifru_mii_data.reg_num /* PHY register address */
+#define ifr_mii_val_in      ifr_ifru.ifru_mii_data.val_in  /* PHY input data */
+#define ifr_mii_val_out     ifr_ifru.ifru_mii_data.val_out /* PHY output data */
 
 #else /* CONFIG_NET_IPv6 */
 
@@ -134,6 +155,10 @@ struct ifreq
 #define ifr_mtu             lifr_ifru.lifru_mtu       /* MTU */
 #define ifr_count           lifr_ifru.lifru_count     /* Number of devices */
 #define ifr_flags           lifr_ifru.lifru_flags     /* interface flags */
+#define ifr_mii_phy_id      lifr_ifru.lifru_mii_data.phy_id  /* PHY device address */
+#define ifr_mii_reg_num     lifr_ifru.lifru_mii_data.reg_num /* PHY register address */
+#define ifr_mii_val_in      lifr_ifru.lifru_mii_data.val_in  /* PHY input data */
+#define ifr_mii_val_out     lifr_ifru.lifru_mii_data.val_out /* PHY output data */
 
 #endif /* CONFIG_NET_IPv6 */
 

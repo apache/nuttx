@@ -42,8 +42,10 @@
  ************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <stdlib.h>
+#include <math.h>
 
 /************************************************************
  * Definitions
