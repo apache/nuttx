@@ -684,7 +684,7 @@ There are also common-separated value (CSV) values in the source try that
 provide information about symbols.  In particular:
 
   nuttx/syscall/syscall.csv - Describes the NuttX RTOS interface, and
-  nuttx/lib/lib.csv         - Describes the NuttX C library interface.
+  nuttx/lib/libc.csv        - Describes the NuttX C library interface.
 
 There is a tool at nuttx/tools/mksymtab that will use these CSV files as
 input to generate a generic symbol table.  See nuttx/tools/README.txt for

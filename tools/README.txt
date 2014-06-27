@@ -207,7 +207,7 @@ mksymtab.c, cvsparser.c, and cvsparser.h
   Example:
 
     cd nuttx/tools
-    cat ../syscall/syscall.csv ../lib/lib.csv | sort >tmp.csv
+    cat ../syscall/syscall.csv ../lib/libc.csv | sort >tmp.csv
     ./mksymtab.exe tmp.csv tmp.c
 
 mkctags.sh

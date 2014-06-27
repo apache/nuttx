@@ -52,7 +52,7 @@ Library Database
 
 Information about functions available in the NuttX C library information is
 maintained in a database.  That "database" is implemented as a simple comma-
-separated-value file, lib.csv.  Most spreadsheets programs will accept this
+separated-value file, libc.csv.  Most spreadsheets programs will accept this
 format and can be used to maintain the library database.
 
 This library database will (eventually) be used to generate symbol library

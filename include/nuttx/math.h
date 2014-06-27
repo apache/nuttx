@@ -150,6 +150,14 @@ double      round (double x);
 long double roundl(long double x);
 #endif
 
+float       rintf(float x);      /* Not implemented */
+#if CONFIG_HAVE_DOUBLE
+double_t    rint(double_t x);
+#endif
+#ifdef CONFIG_HAVE_LONG_DOUBLE
+long double rintl(long double x); /* Not implemented */
+#endif
+
 float       fabsf (float x);
 #if CONFIG_HAVE_DOUBLE
 double      fabs  (double x);

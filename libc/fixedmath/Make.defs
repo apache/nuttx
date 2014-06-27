@@ -35,7 +35,7 @@
 
 # Add the fixed precision math C files to the build
 
-CSRCS += lib_rint.c lib_fixedmath.c lib_b16sin.c lib_b16cos.c lib_b16atan2.c
+CSRCS += lib_fixedmath.c lib_b16sin.c lib_b16cos.c lib_b16atan2.c
 
 # Add the fixed precision math directory to the build
 
