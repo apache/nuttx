@@ -665,6 +665,9 @@ static void stm32_rxdescinit(FAR struct stm32_ethmac_s *priv);
 
 /* PHY Initialization */
 
+#ifdef CONFIG_NETDEV_PHY_IOCTL
+static int  stm32_ioctl(int cmd, struct mii_ioctl_data *req);
+#endif
 static int  stm32_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *value);
 static int  stm32_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t value);
 #ifdef CONFIG_ETH0_PHY_DM9161
@@ -2476,6 +2479,63 @@ static void stm32_rxdescinit(FAR struct stm32_ethmac_s *priv)
 }
 
 /****************************************************************************
+ * Function: stm32_ioctl
+ *
+ * Description:
+ *  Executes the SIOCxMIIxxx command and responds using the request struct
+ *  that must be provided as its 2nd parameter.
+ *
+ *  When called with SIOCGMIIPHY it will get the PHY address for the device
+ *  and write it to the req->phy_id field of the request struct.
+ *
+ *  When called with SIOCGMIIREG it will read a register of the PHY that is
+ *  specified using the req->reg_no struct field and then write its output
+ *  to the req->val_out field.
+ *
+ *  When called with SIOCSMIIREG it will write to a register of the PHY that
+ *  is specified using the req->reg_no struct field and use req->val_in as
+ *  its input.
+ *
+ * Parameters:
+ *   cmd - SIOCxMIIxxx command code
+ *   req - request structure also used to return values
+ *
+ * Returned Value: Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDEV_PHY_IOCTL
+static int stm32_ioctl(int cmd, struct mii_ioctl_data *req)
+{
+  int ret = -ENOTTY;
+
+  switch (cmd)
+  {
+  case SIOCGMIIPHY: /* Get MII PHY address */
+    req->phy_id = CONFIG_STM32_PHYADDR;
+    ret = OK;
+    break;
+
+  case SIOCGMIIREG: /* Get register from MII PHY */
+    ret = stm32_phyread(req->phy_id, req->reg_num, &req->val_out);
+    break;
+
+  case SIOCSMIIREG: /* Set register in MII PHY */
+    ret = stm32_phywrite(req->phy_id, req->reg_num, req->val_in);
+    break;
+
+  default:
+    ret = -EINVAL;
+    break;
+  }
+
+  return ret;
+}
+#endif /* CONFIG_NETDEV_PHY_IOCTL */
+
+/****************************************************************************
  * Function: stm32_phyread
  *
  * Description:
@@ -3460,6 +3520,9 @@ int stm32_ethinitialize(int intf)
 #ifdef CONFIG_NET_IGMP
   priv->dev.d_addmac  = stm32_addmac;   /* Add multicast MAC address */
   priv->dev.d_rmmac   = stm32_rmmac;    /* Remove multicast MAC address */
+#endif
+#ifdef CONFIG_NETDEV_PHY_IOCTL
+  priv->dev.d_ioctl   = stm32_ioctl;    /* Support PHY ioctl() calls */
 #endif
   priv->dev.d_private = (void*)g_stm32ethmac; /* Used to recover private state from dev */
 
