@@ -7540,4 +7540,6 @@
 	  runs from ISRAM and loads an Intel HEX file into DRAM (2014-6-26).
 	* configs/sama5d4-ek/nsh and scripts/: Setup the SAMA5D4-EK NSHi
 	  configuration to use the DRAMBOOT loader by default (2014-6-26).
+	* Various changes associated with symbol tables.  Most from Pelle Windestam
+	  (2014-6-27).
 
