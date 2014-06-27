@@ -96,7 +96,7 @@ struct emac_driver_s
 
   /* This holds the information visible to uIP/NuttX */
 
-  struct uip_driver_s d_dev;  /* Interface understood by uIP */
+  struct net_driver_s d_dev;  /* Interface understood by uIP */
 };
 
 /****************************************************************************
@@ -112,7 +112,7 @@ static struct emac_driver_s g_emac[CONFIG_HCS12_NINTERFACES];
 /* Common TX logic */
 
 static int  emac_transmit(FAR struct emac_driver_s *priv);
-static int  emac_uiptxpoll(struct uip_driver_s *dev);
+static int  emac_uiptxpoll(struct net_driver_s *dev);
 
 /* Interrupt handling */
 
@@ -127,12 +127,12 @@ static void emac_txtimeout(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
-static int emac_ifup(struct uip_driver_s *dev);
-static int emac_ifdown(struct uip_driver_s *dev);
-static int emac_txavail(struct uip_driver_s *dev);
+static int emac_ifup(struct net_driver_s *dev);
+static int emac_ifdown(struct net_driver_s *dev);
+static int emac_txavail(struct net_driver_s *dev);
 #ifdef CONFIG_NET_IGMP
-static int emac_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
-static int emac_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
+static int emac_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
+static int emac_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
 
 /****************************************************************************
@@ -202,7 +202,7 @@ static int emac_transmit(FAR struct emac_driver_s *priv)
  *
  ****************************************************************************/
 
-static int emac_uiptxpoll(struct uip_driver_s *dev)
+static int emac_uiptxpoll(struct net_driver_s *dev)
 {
   FAR struct emac_driver_s *priv = (FAR struct emac_driver_s *)dev->d_private;
 
@@ -452,7 +452,7 @@ static void emac_polltimer(int argc, uint32_t arg, ...)
  *
  ****************************************************************************/
 
-static int emac_ifup(struct uip_driver_s *dev)
+static int emac_ifup(struct net_driver_s *dev)
 {
   FAR struct emac_driver_s *priv = (FAR struct emac_driver_s *)dev->d_private;
 
@@ -489,7 +489,7 @@ static int emac_ifup(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static int emac_ifdown(struct uip_driver_s *dev)
+static int emac_ifdown(struct net_driver_s *dev)
 {
   FAR struct emac_driver_s *priv = (FAR struct emac_driver_s *)dev->d_private;
   irqstate_t flags;
@@ -535,7 +535,7 @@ static int emac_ifdown(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static int emac_txavail(struct uip_driver_s *dev)
+static int emac_txavail(struct net_driver_s *dev)
 {
   FAR struct emac_driver_s *priv = (FAR struct emac_driver_s *)dev->d_private;
   irqstate_t flags;
@@ -580,7 +580,7 @@ static int emac_txavail(struct uip_driver_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int emac_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+static int emac_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct emac_driver_s *priv = (FAR struct emac_driver_s *)dev->d_private;
 
@@ -609,7 +609,7 @@ static int emac_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int emac_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+static int emac_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct emac_driver_s *priv = (FAR struct emac_driver_s *)dev->d_private;
 

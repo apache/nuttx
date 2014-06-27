@@ -319,7 +319,7 @@ struct ez80emac_driver_s
 
   /* This holds the information visible to uIP/NuttX */
 
-  struct uip_driver_s dev;  /* Interface understood by uIP */
+  struct net_driver_s dev;  /* Interface understood by uIP */
 };
 
 /****************************************************************************
@@ -355,7 +355,7 @@ static void ez80emac_machash(FAR uint8_t *mac, int *ndx, int *bitno)
 /* TX/RX logic */
 
 static int  ez80emac_transmit(struct ez80emac_driver_s *priv);
-static int  ez80emac_uiptxpoll(struct uip_driver_s *dev);
+static int  ez80emac_uiptxpoll(struct net_driver_s *dev);
 
 static inline FAR struct ez80emac_desc_s *ez80emac_rwp(void);
 static inline FAR struct ez80emac_desc_s *ez80emac_rrp(void);
@@ -374,12 +374,12 @@ static void ez80emac_txtimeout(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
-static int  ez80emac_ifup(struct uip_driver_s *dev);
-static int  ez80emac_ifdown(struct uip_driver_s *dev);
-static int  ez80emac_txavail(struct uip_driver_s *dev);
+static int  ez80emac_ifup(struct net_driver_s *dev);
+static int  ez80emac_ifdown(struct net_driver_s *dev);
+static int  ez80emac_txavail(struct net_driver_s *dev);
 #ifdef CONFIG_NET_IGMP
-static int ez80emac_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
-static int ez80emac_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
+static int ez80emac_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
+static int ez80emac_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
 
 /* Initialization */
@@ -1064,7 +1064,7 @@ static int ez80emac_transmit(struct ez80emac_driver_s *priv)
  *
  ****************************************************************************/
 
-static int ez80emac_uiptxpoll(struct uip_driver_s *dev)
+static int ez80emac_uiptxpoll(struct net_driver_s *dev)
 {
   struct ez80emac_driver_s *priv = (struct ez80emac_driver_s *)dev->d_private;
   int ret = 0;
@@ -1628,7 +1628,7 @@ static void ez80emac_polltimer(int argc, uint32_t arg, ...)
  *
  ****************************************************************************/
 
-static int ez80emac_ifup(FAR struct uip_driver_s *dev)
+static int ez80emac_ifup(FAR struct net_driver_s *dev)
 {
   FAR struct ez80emac_driver_s *priv = (FAR struct ez80emac_driver_s *)dev->d_private;
   uint8_t regval;
@@ -1723,7 +1723,7 @@ static int ez80emac_ifup(FAR struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static int ez80emac_ifdown(struct uip_driver_s *dev)
+static int ez80emac_ifdown(struct net_driver_s *dev)
 {
   struct ez80emac_driver_s *priv = (struct ez80emac_driver_s *)dev->d_private;
   irqstate_t flags;
@@ -1775,7 +1775,7 @@ static int ez80emac_ifdown(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static int ez80emac_txavail(struct uip_driver_s *dev)
+static int ez80emac_txavail(struct net_driver_s *dev)
 {
   struct ez80emac_driver_s *priv = (struct ez80emac_driver_s *)dev->d_private;
   irqstate_t flags;
@@ -1817,7 +1817,7 @@ static int ez80emac_txavail(struct uip_driver_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int ez80emac_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+static int ez80emac_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct ez80emac_driver_s *priv = (FAR struct ez80emac_driver_s *)dev->d_private;
 
@@ -1847,7 +1847,7 @@ static int ez80emac_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int ez80emac_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+static int ez80emac_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct ez80emac_driver_s *priv = (FAR struct ez80emac_driver_s *)dev->d_private;
 
@@ -2173,7 +2173,7 @@ errout:
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_MCFILTER
-int up_multicastfilter(FAR struct uip_driver_s *dev, FAR uint8_t *mac, bool enable)
+int up_multicastfilter(FAR struct net_driver_s *dev, FAR uint8_t *mac, bool enable)
 {
   FAR struct ez80emac_driver_s *priv = (FAR struct ez80emac_driver_s *)dev->priv;
   uint8_t regval;

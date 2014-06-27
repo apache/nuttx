@@ -178,7 +178,7 @@ struct kinetis_driver_s
 
   /* This holds the information visible to uIP/NuttX */
 
-  struct uip_driver_s dev;     /* Interface understood by uIP */
+  struct net_driver_s dev;     /* Interface understood by uIP */
 
   /* Statistics */
 
@@ -224,7 +224,7 @@ static inline uint16_t kinesis_swap16(uint16_t value);
 
 static bool kinetics_txringfull(FAR struct kinetis_driver_s *priv);
 static int  kinetis_transmit(FAR struct kinetis_driver_s *priv);
-static int  kinetis_uiptxpoll(struct uip_driver_s *dev);
+static int  kinetis_uiptxpoll(struct net_driver_s *dev);
 
 /* Interrupt handling */
 
@@ -239,12 +239,12 @@ static void kinetis_txtimeout(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
-static int kinetis_ifup(struct uip_driver_s *dev);
-static int kinetis_ifdown(struct uip_driver_s *dev);
-static int kinetis_txavail(struct uip_driver_s *dev);
+static int kinetis_ifup(struct net_driver_s *dev);
+static int kinetis_ifdown(struct net_driver_s *dev);
+static int kinetis_txavail(struct net_driver_s *dev);
 #ifdef CONFIG_NET_IGMP
-static int kinetis_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
-static int kinetis_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
+static int kinetis_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
+static int kinetis_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
 
 /* PHY/MII support */
@@ -434,7 +434,7 @@ static int kinetis_transmit(FAR struct kinetis_driver_s *priv)
  *
  ****************************************************************************/
 
-static int kinetis_uiptxpoll(struct uip_driver_s *dev)
+static int kinetis_uiptxpoll(struct net_driver_s *dev)
 {
   FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)dev->d_private;
 
@@ -783,7 +783,7 @@ static void kinetis_polltimer(int argc, uint32_t arg, ...)
  *
  ****************************************************************************/
 
-static int kinetis_ifup(struct uip_driver_s *dev)
+static int kinetis_ifup(struct net_driver_s *dev)
 {
   FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)dev->d_private;
   uint32_t regval;
@@ -896,7 +896,7 @@ static int kinetis_ifup(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static int kinetis_ifdown(struct uip_driver_s *dev)
+static int kinetis_ifdown(struct net_driver_s *dev)
 {
   FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)dev->d_private;
   irqstate_t flags;
@@ -948,7 +948,7 @@ static int kinetis_ifdown(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static int kinetis_txavail(struct uip_driver_s *dev)
+static int kinetis_txavail(struct net_driver_s *dev)
 {
   FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)dev->d_private;
   irqstate_t flags;
@@ -1000,7 +1000,7 @@ static int kinetis_txavail(struct uip_driver_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int kinetis_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+static int kinetis_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)dev->d_private;
 
@@ -1029,7 +1029,7 @@ static int kinetis_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int kinetis_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+static int kinetis_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)dev->d_private;
 
