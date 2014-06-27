@@ -7542,6 +7542,10 @@
 	  configuration to use the DRAMBOOT loader by default (2014-6-26).
 	* binfmt: Various changes associated with symbol tables.  Most from Pelle
 	  Windestam (2014-6-27).
-	* Networkin: Add network device ioctl to access PHY registers. From Daniel
+	* Networking: Add network device ioctl to access PHY registers. From Daniel
 	  Lazlo Sitzer (2014-6-27).
 	* net/netdev:  Move net/netdev*.c to net/netdev/netdev*.c (2014-6-27).
+	* arch/arm/src/sam34/chip/sam4cm_ipc.h:  Add SAM4CM IPC register header
+	  file.  From Max Neklyudov (2104-6-27).
+	* arch/arm/src/sam34:  Various fixes PMC and clock configuration for the
+	  SAM4CM port from Max Neklyudov (2104-6-27).
