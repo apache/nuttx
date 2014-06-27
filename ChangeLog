@@ -7551,4 +7551,8 @@
 	  SAM4CM port from Max Neklyudov (2104-6-27).
 	* configs/sama5d4-ek/src/dram_main.c: SAMA5D4:  Bootloader needs to flush
 	  D-Cache to memory before disabling the caches (2014-6-27).
+	* net/Makefile: Fix a Make.defs inclusion omitted in a previous check-in
+	  (2014-6-17).
+	* net/utils:  Move net/uip/uip_chksum.c to net/utils/net_chksum.c
+	  (2014-6-17).
 
