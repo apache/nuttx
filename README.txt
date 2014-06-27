@@ -1152,6 +1152,8 @@ nuttx
  |   `- README.txt
  |- mm/
  |   `- README.txt
+ |- net/
+ |   `- README.txt
  |- syscall/
  |   `- README.txt
  `- tools/

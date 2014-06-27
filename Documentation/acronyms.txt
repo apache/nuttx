@@ -1,0 +1,43 @@
+AIC    Advanced Interrupt Controller (Atmel SAM)
+ADC    Analog to Digital Conversion
+ARP    Address Resolution Protocol (networking)
+BCH    Block to Character
+CAN    Controller Area Network
+DEVIF  Device Interface (networking)
+DAC    Digital to Analog Conversion
+DEV    Device
+DRAM   Dynamic RAM
+FAT    File Allocation Table
+FTL    FLASH Translation Layer
+I2C    Inter-Integrated Circuit
+I2S    Inter IC Sound
+ICMP   Internet Control Message Protocol (networking)
+IOB    I/O Buffer (networking)
+LIBC   The "C" Library
+MM     Memory Management/Manager
+MMC    Multi-Media Card
+MMCSD  See MMC and SD
+MTD    Memory Technology Device
+NFS    Network File System
+NETDEV Network Device (networking)
+NSH    NuttShell
+NX     NuttX, the NuttX Graphics server (graphics)
+NXFFS  NuttX Flash File System
+NXWM   The NuttX Window Manager (graphics)
+PID    Peripheral ID (Atmel SAM)
+PWM    Pulse Width Modulation
+PKT    "Raw" Packet socket (networking)
+RAM    Random Access Memory
+SAIC   Secure Advanced Interrupt Controller (Atmel SAM)
+SD     Secure Digital
+SPI    Serial Periperhal Interface
+TCP    Transmission Control Protocol (networking)
+TSC    Touchscreen Controller
+TWI    Two-Wire Interface
+UDP    User Datagram Protocol (networking)
+UART   Universal Asynchronous Receiver/Transmitter
+USB    Universal Serial Bus
+USART  Universal Synchronous/Asynchronous Receiver/Transmitter
+WDT    Watchdog Timer
+
+
