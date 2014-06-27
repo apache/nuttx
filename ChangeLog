@@ -7549,3 +7549,6 @@
 	  file.  From Max Neklyudov (2104-6-27).
 	* arch/arm/src/sam34:  Various fixes PMC and clock configuration for the
 	  SAM4CM port from Max Neklyudov (2104-6-27).
+	* configs/sama5d4-ek/src/dram_main.c: SAMA5D4:  Bootloader needs to flushi
+	  D-Cache to memory before disabling the caches (2014-6-27).
+
