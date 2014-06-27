@@ -94,6 +94,7 @@ include udp/Make.defs
 include pkt/Make.defs
 include uip/Make.defs
 include route/Make.defs
+include utils/Make.defs
 endif
 
 ASRCS		= $(SOCK_ASRCS) $(NETDEV_ASRCS) $(NET_ASRCS)

@@ -38,7 +38,7 @@ ifeq ($(CONFIG_NET),y)
 # Common IP source files
 
 NET_CSRCS += uip_initialize.c uip_setipid.c uip_input.c uip_send.c
-NET_CSRCS += uip_poll.c uip_chksum.c uip_callback.c
+NET_CSRCS += uip_poll.c uip_callback.c
 
 # I/O buffer chain support required?
 

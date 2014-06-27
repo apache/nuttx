@@ -35,7 +35,7 @@
 
 ifeq ($(CONFIG_NET),y)
 
-NET_CSRCS += net_dsec2timeval.c 
+NET_CSRCS += net_dsec2timeval.c net_chksum.c
 
 # Non-interrupt level support required?
 
@@ -48,5 +48,4 @@ endif
 DEPPATH += --dep-path utils
 VPATH += :utils
 
-endif
 endif

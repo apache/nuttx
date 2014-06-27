@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/uip/uip_chksum.c
+ * net/utils/net_chksum.c
  *
  *   Copyright (C) 2007-2010, 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,7 +48,7 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/icmp.h>
 
-#include "uip/uip.h"
+#include "utils/utils.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -142,10 +142,6 @@ static uint16_t icmp_6chksum(FAR struct uip_driver_s *dev)
 
 #endif /* UIP_ARCH_CHKSUM */
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
 /* Calculate the Internet checksum over a buffer. */
 
 #if !UIP_ARCH_ADD32
@@ -173,6 +169,10 @@ static inline void uip_carry32(FAR uint8_t *sum, uint16_t op16)
         }
     }
 }
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 void uip_incr32(FAR uint8_t *op32, uint16_t op16)
 {

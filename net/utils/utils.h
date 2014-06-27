@@ -84,6 +84,7 @@ extern "C"
  *
  ****************************************************************************/
 
+struct timeval;
 void net_dsec2timeval(uint16_t dsec, FAR struct timeval *tv);
 
 #undef EXTERN
