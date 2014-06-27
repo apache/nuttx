@@ -73,12 +73,6 @@ config NET_SOCKOPTS
 	---help---
 		Enable or disable support for socket options
 
-config NETDEV_PHY_IOCTL
-	bool "Enable PHY ioctl()"
-	default n
-	---help---
-		Enable support for ioctl() commands to access PHY registers"
-
 if NET_SOCKOPTS
 
 config NET_SOLINGER
@@ -130,6 +124,7 @@ config NET_GUARDSIZE
 		packet size will be chopped down to the size indicated in the TCP
 		header.
 
+source "net/netdev/Kconfig"
 source "net/pkt/Kconfig"
 source "net/tcp/Kconfig"
 source "net/udp/Kconfig"
