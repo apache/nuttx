@@ -3,6 +3,12 @@
 # see misc/tools/kconfig-language.txt.
 #
 
-#menu "Network Device Operations"
+menu "Network Device Operations"
 
-#endmenu # Network Device Operations
+config NETDEV_PHY_IOCTL
+	bool "Enable PHY ioctl()"
+	default n
+	---help---
+		Enable support for ioctl() commands to access PHY registers"
+
+endmenu # Network Device Operations
