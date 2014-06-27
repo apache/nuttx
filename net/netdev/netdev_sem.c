@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/netdev_count.c
+ * net/netdev/netdev_sem.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,22 +38,40 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
-#include <string.h>
+#include <sys/types.h>
+
+#include <unistd.h>
+#include <semaphore.h>
+#include <assert.h>
 #include <errno.h>
 
-#include <nuttx/net/netdev.h>
-
 #include "net.h"
+#include "netdev/netdev.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Definitions
  ****************************************************************************/
+
+#define NO_HOLDER (pid_t)-1
 
 /****************************************************************************
  * Priviate Types
  ****************************************************************************/
+
+/* There is at least on context in which recursive semaphores are required:
+ * When netdev_foreach is used with a telnet client, we will deadlock if we
+ * do not provide this capability.
+ */
+
+struct netdev_sem_s
+{
+  sem_t        sem;
+  pid_t        holder;
+  unsigned int count;
+};
 
 /****************************************************************************
  * Private Data
@@ -62,6 +80,8 @@
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+
+static struct netdev_sem_s g_devlock;
 
 /****************************************************************************
  * Private Functions
@@ -72,31 +92,88 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: netdev_count
+ * Function: netdev_seminit
  *
  * Description:
- *   Return the number of network devices
- *
- * Parameters:
- *   None
- *
- * Returned Value:
- *   The number of network devices
- *
- * Assumptions:
- *  Called from normal user mode
+ *   Initialize the network device semaphore.
  *
  ****************************************************************************/
 
-int netdev_count(void)
+void netdev_seminit(void)
 {
-  struct uip_driver_s *dev;
-  int ndev;
+  sem_init(&g_devlock.sem, 0, 1);
+  g_devlock.holder = NO_HOLDER;
+  g_devlock.count  = 0;
+}
 
-  netdev_semtake();
-  for (dev = g_netdevices, ndev = 0; dev; dev = dev->flink, ndev++);
-  netdev_semgive();
-  return ndev;
+/****************************************************************************
+ * Function: netdev_semtake
+ *
+ * Description:
+ *   Get exclusive access to the network device list.
+ *
+ ****************************************************************************/
+
+void netdev_semtake(void)
+{
+  pid_t me = getpid();
+
+  /* Does this thread already hold the semaphore? */
+
+  if (g_devlock.holder == me)
+    {
+      /* Yes.. just increment the reference count */
+
+      g_devlock.count++;
+    }
+  else
+    {
+      /* No.. take the semaphore (perhaps waiting) */
+
+      while (net_lockedwait(&g_devlock.sem) != 0)
+        {
+          /* The only case that an error should occur here is if
+           * the wait was awakened by a signal.
+           */
+
+          ASSERT(errno == EINTR);
+        }
+
+      /* Now this thread holds the semaphore */
+
+      g_devlock.holder = me;
+      g_devlock.count  = 1;
+    }
+}
+
+/****************************************************************************
+ * Function: netdev_semtake
+ *
+ * Description:
+ *   Release exclusive access to the network device list
+ *
+ ****************************************************************************/
+
+void netdev_semgive(void)
+{
+  DEBUGASSERT(g_devlock.holder == getpid() && g_devlock.count > 0);
+
+  /* If the count would go to zero, then release the semaphore */
+
+  if (g_devlock.count == 1)
+    {
+      /* We no longer hold the semaphore */
+
+      g_devlock.holder = NO_HOLDER;
+      g_devlock.count  = 0;
+      sem_post(&g_devlock.sem);
+    }
+  else
+    {
+      /* We still hold the semaphore. Just decrement the count */
+
+      g_devlock.count--;
+    }
 }
 
 #endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */

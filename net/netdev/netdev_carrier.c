@@ -1,8 +1,8 @@
 /****************************************************************************
- * net/netdev_findbyname.c
+ * net/netdev/netdev_carrier.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Author: Max Holtzberg <mh@uvc.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -40,19 +40,27 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
+#include <sys/socket.h>
+#include <stdio.h>
+#include <semaphore.h>
+#include <assert.h>
 #include <string.h>
 #include <errno.h>
+#include <debug.h>
 
+#include <net/if.h>
+#include <net/ethernet.h>
 #include <nuttx/net/netdev.h>
 
 #include "net.h"
+#include "netdev/netdev.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Priviate Types
+ * Private Types
  ****************************************************************************/
 
 /****************************************************************************
@@ -72,40 +80,55 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: netdev_findbyname
+ * Function: netdev_carrier_on
  *
  * Description:
- *   Find a previously registered network device using its assigned
- *   network interface name
+ *   Notifies the uip layer about an available carrier.
+ *   (e.g. a cable was plugged in)
  *
  * Parameters:
- *   ifname The interface name of the device of interest
+ *   dev - The device driver structure
  *
  * Returned Value:
- *  Pointer to driver on success; null on failure
- *
- * Assumptions:
- *  Called from normal user mode
+ *   0:Success; negated errno on failure
  *
  ****************************************************************************/
 
-FAR struct uip_driver_s *netdev_findbyname(const char *ifname)
+int netdev_carrier_on(FAR struct uip_driver_s *dev)
 {
-  struct uip_driver_s *dev;
-  if (ifname)
+  if (dev)
     {
-      netdev_semtake();
-      for (dev = g_netdevices; dev; dev = dev->flink)
-        {
-          if (strcmp(ifname, dev->d_ifname) == 0)
-            {
-              netdev_semgive();
-              return dev;
-            }
-        }
-      netdev_semgive();
+      dev->d_flags |= IFF_RUNNING;
+      return OK;
     }
-  return NULL;
+
+  return -EINVAL;
+}
+
+/****************************************************************************
+ * Function: netdev_carrier_off
+ *
+ * Description:
+ *   Notifies the uip layer about an disappeared carrier.
+ *   (e.g. a cable was unplugged)
+ *
+ * Parameters:
+ *   dev - The device driver structure
+ *
+ * Returned Value:
+ *   0:Success; negated errno on failure
+ *
+ ****************************************************************************/
+
+int netdev_carrier_off(FAR struct uip_driver_s *dev)
+{
+  if (dev)
+    {
+      dev->d_flags &= ~IFF_RUNNING;
+      return OK;
+    }
+
+  return -EINVAL;
 }
 
 #endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */

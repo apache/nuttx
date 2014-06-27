@@ -53,6 +53,7 @@
 #include <nuttx/net/udp.h>
 
 #include "net.h"
+#include "netdev/netdev.h"
 #include "uip/uip.h"
 #include "udp/udp.h"
 

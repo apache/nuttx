@@ -69,6 +69,7 @@
 #include <nuttx/net/tcp.h>
 
 #include "net.h"
+#include "netdev/netdev.h"
 #include "tcp/tcp.h"
 #include "uip/uip.h"
 

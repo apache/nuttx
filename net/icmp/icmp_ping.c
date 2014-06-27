@@ -54,6 +54,7 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/icmp.h>
 
+#include "netdev/netdev.h"
 #include "uip/uip.h"
 #include "icmp/icmp.h"
 

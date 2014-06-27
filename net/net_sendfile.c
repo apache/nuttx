@@ -62,6 +62,7 @@
 #include <nuttx/net/netdev.h>
 
 #include "net.h"
+#include "netdev/netdev.h"
 #include "uip/uip.h"
 
 /****************************************************************************

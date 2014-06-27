@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/netdev_txnotify.c
+ * net/netdev/netdev_count.c
  *
- *   Copyright (C) 2007-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,21 +40,20 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
-#include <sys/types.h>
 #include <string.h>
 #include <errno.h>
-#include <debug.h>
 
 #include <nuttx/net/netdev.h>
 
 #include "net.h"
+#include "netdev/netdev.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Priviate Types
+ * Private Types
  ****************************************************************************/
 
 /****************************************************************************
@@ -74,34 +73,31 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: netdev_txnotify
+ * Function: netdev_count
  *
  * Description:
- *   Notify the device driver that new TX data is available.
+ *   Return the number of network devices
  *
  * Parameters:
- *   raddr - The remote address to send the data
+ *   None
  *
  * Returned Value:
- *  None
+ *   The number of network devices
  *
  * Assumptions:
  *  Called from normal user mode
  *
  ****************************************************************************/
 
-void netdev_txnotify(const uip_ipaddr_t raddr)
+int netdev_count(void)
 {
-  /* Find the device driver that serves the subnet of the remote address */
+  struct uip_driver_s *dev;
+  int ndev;
 
-  struct uip_driver_s *dev = netdev_findbyaddr(raddr);
-
-  if (dev && dev->d_txavail)
-    {
-      /* Notify the device driver that new TX data is available. */
-
-      (void)dev->d_txavail(dev);
-    }
+  netdev_semtake();
+  for (dev = g_netdevices, ndev = 0; dev; dev = dev->flink, ndev++);
+  netdev_semgive();
+  return ndev;
 }
 
 #endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */

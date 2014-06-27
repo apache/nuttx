@@ -47,6 +47,7 @@
 #include <nuttx/net/arp.h>
 
 #include "net.h"
+#include "netdev/netdev.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
 #include "pkt/pkt.h"

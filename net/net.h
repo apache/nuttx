@@ -148,12 +148,6 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* List of registered ethernet device drivers */
-
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
-EXTERN struct uip_driver_s *g_netdevices;
-#endif
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -184,46 +178,6 @@ int psock_close(FAR struct socket *psock);
 #if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
 int net_timeo(uint32_t start_time, socktimeo_t timeo);
 socktimeo_t net_timeval2dsec(FAR struct timeval *tv);
-#endif
-
-/* net_register.c ************************************************************/
-
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
-void netdev_seminit(void);
-void netdev_semtake(void);
-void netdev_semgive(void);
-#endif
-
-/* net_findbyname.c **********************************************************/
-
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
-FAR struct uip_driver_s *netdev_findbyname(FAR const char *ifname);
-#endif
-
-/* net_findbyaddr.c **********************************************************/
-
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
-FAR struct uip_driver_s *netdev_findbyaddr(const uip_ipaddr_t addr);
-#endif
-
-/* net_txnotify.c ************************************************************/
-
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
-void netdev_txnotify(const uip_ipaddr_t addr);
-#endif
-
-/* net_rxnotify.c ************************************************************/
-
-#if CONFIG_NSOCKET_DESCRIPTORS > 0 && defined(CONFIG_NET_RXAVAIL)
-void netdev_rxnotify(const uip_ipaddr_t addr);
-#else
-#  define netdev_rxnotify(addr)
-#endif
-
-/* net_count.c ***************************************************************/
-
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
-int netdev_count(void);
 #endif
 
 /* send.c ********************************************************************/

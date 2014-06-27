@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/netdev_unregister.c
+ * net/netdev/netdev_register.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,9 +53,10 @@
 #include <nuttx/net/netdev.h>
 
 #include "net.h"
+#include "netdev/netdev.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #ifdef CONFIG_NET_SLIP
@@ -65,16 +66,22 @@
 #endif
 
 /****************************************************************************
- * Priviate Types
+ * Private Types
  ****************************************************************************/
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
+static int g_next_devnum = 0;
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+
+/* List of registered ethernet device drivers */
+
+struct uip_driver_s *g_netdevices = NULL;
 
 /****************************************************************************
  * Private Functions
@@ -85,64 +92,49 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: netdev_unregister
+ * Function: netdev_register
  *
  * Description:
- *   Unregister a network device driver.
+ *   Register a network device driver and assign a name to it so tht it can
+ *   be found in subsequent network ioctl operations on the device.
  *
  * Parameters:
- *   dev - The device driver structure to un-register
+ *   dev - The device driver structure to register
  *
  * Returned Value:
  *   0:Success; negated errno on failure
  *
  * Assumptions:
- *   Currently only called for USB networking devices when the device is
- *   physically removed from the slot
+ *   Called during system initialization from normal user mode
  *
  ****************************************************************************/
 
-int netdev_unregister(FAR struct uip_driver_s *dev)
+int netdev_register(FAR struct uip_driver_s *dev)
 {
-  struct uip_driver_s *prev;
-  struct uip_driver_s *curr;
-
   if (dev)
     {
+      int devnum;
       netdev_semtake();
 
-      /* Find the device in the list of known network devices */
+      /* Assign a device name to the interface */
 
-      for (prev = NULL, curr = g_netdevices;
-           curr && curr != dev;
-           prev = curr, curr = curr->flink);
+      devnum = g_next_devnum++;
+      snprintf(dev->d_ifname, IFNAMSIZ, NETDEV_FORMAT, devnum );
 
-      /* Remove the device to the list of known network devices */
+      /* Add the device to the list of known network devices */
 
-      if (curr)
-        {
-          /* Where was the entry */
+      dev->flink  = g_netdevices;
+      g_netdevices = dev;
 
-          if (prev)
-            {
-              /* The entry was in the middle or at the end of the list */
+      /* Configure the device for IGMP support */
 
-              prev->flink = curr->flink;
-            }
-          else
-            {
-               /* The entry was at the beginning of the list */
-
-               g_netdevices = curr;
-            }
-
-          curr->flink = NULL;
-        }
-
+#ifdef CONFIG_NET_IGMP
+      igmp_devinit(dev);
+#endif
       netdev_semgive();
 
 #ifdef CONFIG_NET_ETHERNET
-      nlldbg("Unregistered MAC: %02x:%02x:%02x:%02x:%02x:%02x as dev: %s\n",
+      nlldbg("Registered MAC: %02x:%02x:%02x:%02x:%02x:%02x as dev: %s\n",
              dev->d_mac.ether_addr_octet[0], dev->d_mac.ether_addr_octet[1],
              dev->d_mac.ether_addr_octet[2], dev->d_mac.ether_addr_octet[3],
              dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5],
@@ -152,7 +144,6 @@ int netdev_unregister(FAR struct uip_driver_s *dev)
 #endif
       return OK;
     }
-
   return -EINVAL;
 }
 

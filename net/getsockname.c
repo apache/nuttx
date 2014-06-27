@@ -51,6 +51,7 @@
 #include <nuttx/net/udp.h>
 
 #include "net.h"
+#include "netdev/netdev.h"
 
 #ifdef CONFIG_NET
 

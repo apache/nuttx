@@ -1,8 +1,8 @@
 /****************************************************************************
- * net/netdev_carrier.c
+ * net/netdev/netdev_txnotify.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
- *   Author: Max Holtzberg <mh@uvc.de>
+ *   Copyright (C) 2007-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -40,26 +40,22 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
-#include <sys/socket.h>
-#include <stdio.h>
-#include <semaphore.h>
-#include <assert.h>
+#include <sys/types.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
 
-#include <net/if.h>
-#include <net/ethernet.h>
 #include <nuttx/net/netdev.h>
 
 #include "net.h"
+#include "netdev/netdev.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Types
+ * Priviate Types
  ****************************************************************************/
 
 /****************************************************************************
@@ -79,55 +75,34 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: netdev_carrier_on
+ * Function: netdev_txnotify
  *
  * Description:
- *   Notifies the uip layer about an available carrier.
- *   (e.g. a cable was plugged in)
+ *   Notify the device driver that new TX data is available.
  *
  * Parameters:
- *   dev - The device driver structure
+ *   raddr - The remote address to send the data
  *
  * Returned Value:
- *   0:Success; negated errno on failure
+ *  None
+ *
+ * Assumptions:
+ *  Called from normal user mode
  *
  ****************************************************************************/
 
-int netdev_carrier_on(FAR struct uip_driver_s *dev)
+void netdev_txnotify(const uip_ipaddr_t raddr)
 {
-  if (dev)
+  /* Find the device driver that serves the subnet of the remote address */
+
+  struct uip_driver_s *dev = netdev_findbyaddr(raddr);
+
+  if (dev && dev->d_txavail)
     {
-      dev->d_flags |= IFF_RUNNING;
-      return OK;
+      /* Notify the device driver that new TX data is available. */
+
+      (void)dev->d_txavail(dev);
     }
-
-  return -EINVAL;
-}
-
-/****************************************************************************
- * Function: netdev_carrier_off
- *
- * Description:
- *   Notifies the uip layer about an disappeared carrier.
- *   (e.g. a cable was unplugged)
- *
- * Parameters:
- *   dev - The device driver structure
- *
- * Returned Value:
- *   0:Success; negated errno on failure
- *
- ****************************************************************************/
-
-int netdev_carrier_off(FAR struct uip_driver_s *dev)
-{
-  if (dev)
-    {
-      dev->d_flags &= ~IFF_RUNNING;
-      return OK;
-    }
-
-  return -EINVAL;
 }
 
 #endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */

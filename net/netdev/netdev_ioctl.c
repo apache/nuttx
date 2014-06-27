@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/netdev_ioctl.c
+ * net/netdev/netdev_ioctl.c
  *
  *   Copyright (C) 2007-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -64,6 +64,7 @@
 #endif
 
 #include "net.h"
+#include "netdev/netdev.h"
 #include "route/route.h"
 
 /****************************************************************************

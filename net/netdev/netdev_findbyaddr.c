@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/netdev_foreach.c
+ * net/netdev/netdev_findbyaddr.c
  *
- *   Copyright (C) 2007-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,18 +40,23 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
+#include <stdbool.h>
+#include <string.h>
+#include <errno.h>
 #include <debug.h>
-#include <nuttx/net/net.h>
+
 #include <nuttx/net/netdev.h>
 
 #include "net.h"
+#include "netdev/netdev.h"
+#include "route/route.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Priviate Types
+ * Private Types
  ****************************************************************************/
 
 /****************************************************************************
@@ -67,48 +72,144 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Global Functions
+ * Function: netdev_maskcmp
  ****************************************************************************/
 
 /****************************************************************************
- * Function: netdev_foreach
+ * Function: netdev_finddevice
  *
  * Description:
- *   Enumerate each registered network device.
- *
- *   NOTE: netdev semaphore held throughout enumeration.
+ *   Find a previously registered network device by matching a local address
+ *   with the subnet served by the device.  Only "up" devices are considered
+ *   (since a "down" device has no meaningful address).
  *
  * Parameters:
- *   callback - Will be called for each registered device
- *   arg      - User argument passed to callback()
+ *   addr - Pointer to the remote address of a connection
  *
  * Returned Value:
- *  0:Enumeration completed 1:Enumeration terminated early by callback
+ *  Pointer to driver on success; null on failure
  *
  * Assumptions:
  *  Called from normal user mode
  *
  ****************************************************************************/
 
-int netdev_foreach(netdev_callback_t callback, void *arg)
+static FAR struct uip_driver_s *netdev_finddevice(const uip_ipaddr_t addr)
 {
   struct uip_driver_s *dev;
-  int ret = 0;
 
-  if (callback)
+  /* Examine each registered network device */
+
+  netdev_semtake();
+  for (dev = g_netdevices; dev; dev = dev->flink)
     {
-      netdev_semtake();
-      for (dev = g_netdevices; dev; dev = dev->flink)
+      /* Is the interface in the "up" state? */
+
+      if ((dev->d_flags & IFF_UP) != 0)
         {
-          if (callback(dev, arg) != 0)
+          /* Yes.. check for an address match (under the netmask) */
+
+          if (uip_ipaddr_maskcmp(dev->d_ipaddr, addr, dev->d_netmask))
             {
-              ret = 1;
-              break;
+              /* Its a match */
+
+              netdev_semgive();
+              return dev;
             }
         }
-      netdev_semgive();
     }
-  return ret;
+
+  /* No device with the matching address found */
+
+  netdev_semgive();
+  return NULL;
+}
+
+/****************************************************************************
+ * Global Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function: netdev_findbyaddr
+ *
+ * Description:
+ *   Find a previously registered network device by matching an arbitrary
+ *   IP address.
+ *
+ * Parameters:
+ *   addr - Pointer to the remote address of a connection
+ *
+ * Returned Value:
+ *  Pointer to driver on success; null on failure
+ *
+ * Assumptions:
+ *  Called from normal user mode
+ *
+ ****************************************************************************/
+
+FAR struct uip_driver_s *netdev_findbyaddr(const uip_ipaddr_t addr)
+{
+  struct uip_driver_s *dev;
+#ifdef CONFIG_NET_ROUTE
+  uip_ipaddr_t router;
+  int ret;
+#endif
+
+  /* First, see if the address maps to the a local network */
+
+  dev = netdev_finddevice(addr);
+  if (dev)
+    {
+      return dev;
+    }
+
+  /* No.. The address lies on an external network */
+
+#ifdef CONFIG_NET_ROUTE
+  /* If we have a routing table, then perhaps we can find the the local
+   * address of a router that can forward packets to the external network.
+   */
+
+#ifdef CONFIG_NET_IPv6
+  ret = net_router(addr, router);
+#else
+  ret = net_router(addr, &router);
+#endif
+  if (ret >= 0)
+    {
+      /* Success... try to find the network device associated with the local
+       * router address
+       */
+
+      dev = netdev_finddevice(router);
+      if (dev)
+        {
+          return dev;
+        }
+    }
+#endif /* CONFIG_NET_ROUTE */
+
+  /* The above lookup will fail if the packet is being sent out of our
+   * out subnet to a router and there is no routing information.
+   *
+   * However, if there is only a single, registered network interface, then
+   * the decision is pretty easy.  Use that device and its default router
+   * address.
+   */
+
+  netdev_semtake();
+  if (g_netdevices && !g_netdevices->flink)
+    {
+      dev = g_netdevices;
+    }
+  netdev_semgive();
+
+  /* If we will did not find the network device, then we might as well fail
+   * because we are not configured properly to determine the route to the
+   * target.
+   */
+
+  return dev;
 }
 
 #endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */

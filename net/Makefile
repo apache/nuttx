@@ -82,15 +82,9 @@ endif
 # Support for operations on network devices
 
 NETDEV_ASRCS =
-NETDEV_CSRCS = netdev_register.c netdev_ioctl.c net_poll.c netdev_txnotify.c \
-		  netdev_findbyname.c netdev_findbyaddr.c netdev_count.c \
-		  netdev_foreach.c netdev_unregister.c netdev_sem.c \
-		  netdev_carrier.c
+NETDEV_CSRCS =
 
-ifeq ($(CONFIG_NET_RXAVAIL),y)
-NETDEV_CSRCS += netdev_rxnotify.c
-endif
-
+include netdev/Make.defs
 include iob/Make.defs
 include arp/Make.defs
 include icmp/Make.defs
