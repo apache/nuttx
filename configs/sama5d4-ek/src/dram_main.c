@@ -103,6 +103,10 @@ int dram_main(int argc, char *argv)
 
   /* DRAM was already initialized at boot time, so we are ready to load the
    * Intel HEX stream into DRAM.
+   *
+   * Hmm.. With no hardware handshake, there is a possibility of data loss
+   * to overruning incoming data buffer.  So far I have not seen this at
+   * 115200 8N1, but still it is a possibility.
    */
 
   printf("Send Intel HEX file now\n");
@@ -121,10 +125,17 @@ int dram_main(int argc, char *argv)
       for(;;);
     }
 
-  /* No success indication.. The following cache/MMu operations will clobber
+  /* No success indication.. The following cache/MMU operations will clobber
    * any I/O that we attempt (Hmm.. unless, perhaps, if we delayed.  But who
    * wants a delay?).
    */
+
+  /* Flush the entire data cache assure that everything is in memory before
+   * we disable caching.
+   */
+
+  cp15_clean_dcache((uintptr_t)SAM_DDRCS_VSECTION,
+                    (uintptr_t)(SAM_DDRCS_VSECTION + CONFIG_SAMA5_DDRCS_SIZE));
 
   /* Interrupts must be disabled through the following.  In this configuration,
    * there should only be timer interrupts.  Your NuttX configuration must use
