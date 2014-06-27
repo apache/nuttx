@@ -239,16 +239,16 @@ static inline void sam_pmcsetup(void)
   //putreg32(PMC_PMMR_MASK, SAM_PMC_PMMR);
 #endif
 
+  /* Setup PLLA and wait for LOCKA */
+
+  putreg32(BOARD_CKGR_PLLAR, SAM_PMC_CKGR_PLLAR);
+  sam_pmcwait(PMC_INT_LOCKA);
+
 #ifdef CONFIG_ARCH_CHIP_SAM4CM
   /* Setup PLLB and wait for LOCKB */
 
   putreg32(BOARD_CKGR_PLLBR, SAM_PMC_CKGR_PLLBR);
   sam_pmcwait(PMC_INT_LOCKB);
-#else
-  /* Setup PLLA and wait for LOCKA */
-
-  putreg32(BOARD_CKGR_PLLAR, SAM_PMC_CKGR_PLLAR);
-  sam_pmcwait(PMC_INT_LOCKA);
 #endif
 
 #ifdef CONFIG_USBDEV
