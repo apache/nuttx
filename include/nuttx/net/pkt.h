@@ -98,7 +98,7 @@ FAR struct pkt_conn_s *pkt_alloc(void);
  */
 
 void pkt_free(FAR struct pkt_conn_s *conn);
-void pkt_poll(FAR struct uip_driver_s *dev, FAR struct pkt_conn_s *conn);
-int pkt_input(FAR struct uip_driver_s *dev);
+void pkt_poll(FAR struct net_driver_s *dev, FAR struct pkt_conn_s *conn);
+int pkt_input(FAR struct net_driver_s *dev);
 
 #endif /* __INCLUDE_NUTTX_NET_PKT_H */

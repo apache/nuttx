@@ -94,7 +94,7 @@
  *
  ****************************************************************************/
 
-void pkt_poll(FAR struct uip_driver_s *dev, FAR struct pkt_conn_s *conn)
+void pkt_poll(FAR struct net_driver_s *dev, FAR struct pkt_conn_s *conn)
 {
   nlldbg("IN\n");
 

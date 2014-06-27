@@ -322,7 +322,7 @@ struct dm9x_driver_s
 
   /* This holds the information visible to uIP/NuttX */
 
-  struct uip_driver_s dm_dev;
+  struct net_driver_s dm_dev;
 };
 
 /****************************************************************************
@@ -376,7 +376,7 @@ static bool dm9x_rxchecksumready(uint8_t);
 /* Common TX logic */
 
 static int  dm9x_transmit(struct dm9x_driver_s *dm9x);
-static int  dm9x_uiptxpoll(struct uip_driver_s *dev);
+static int  dm9x_uiptxpoll(struct net_driver_s *dev);
 
 /* Interrupt handling */
 
@@ -391,12 +391,12 @@ static void dm9x_txtimeout(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
-static int dm9x_ifup(struct uip_driver_s *dev);
-static int dm9x_ifdown(struct uip_driver_s *dev);
-static int dm9x_txavail(struct uip_driver_s *dev);
+static int dm9x_ifup(struct net_driver_s *dev);
+static int dm9x_ifdown(struct net_driver_s *dev);
+static int dm9x_txavail(struct net_driver_s *dev);
 #ifdef CONFIG_NET_IGMP
-static int dm9x_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
-static int dm9x_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
+static int dm9x_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
+static int dm9x_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
 
 /* Initialization functions */
@@ -839,7 +839,7 @@ static int dm9x_transmit(struct dm9x_driver_s *dm9x)
  *
  ****************************************************************************/
 
-static int dm9x_uiptxpoll(struct uip_driver_s *dev)
+static int dm9x_uiptxpoll(struct net_driver_s *dev)
 {
   struct dm9x_driver_s *dm9x = (struct dm9x_driver_s *)dev->d_private;
 
@@ -1360,7 +1360,7 @@ static inline void dm9x_phymode(struct dm9x_driver_s *dm9x)
  *
  ****************************************************************************/
 
-static int dm9x_ifup(struct uip_driver_s *dev)
+static int dm9x_ifup(struct net_driver_s *dev)
 {
   struct dm9x_driver_s *dm9x = (struct dm9x_driver_s *)dev->d_private;
   uint8_t netstatus;
@@ -1425,7 +1425,7 @@ static int dm9x_ifup(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static int dm9x_ifdown(struct uip_driver_s *dev)
+static int dm9x_ifdown(struct net_driver_s *dev)
 {
   struct dm9x_driver_s *dm9x = (struct dm9x_driver_s *)dev->d_private;
   irqstate_t flags;
@@ -1478,7 +1478,7 @@ static int dm9x_ifdown(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static int dm9x_txavail(struct uip_driver_s *dev)
+static int dm9x_txavail(struct net_driver_s *dev)
 {
   struct dm9x_driver_s *dm9x = (struct dm9x_driver_s *)dev->d_private;
   irqstate_t flags;
@@ -1525,7 +1525,7 @@ static int dm9x_txavail(struct uip_driver_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int dm9x_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+static int dm9x_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct dm9x_driver_s *priv = (FAR struct dm9x_driver_s *)dev->d_private;
 
@@ -1555,7 +1555,7 @@ static int dm9x_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int dm9x_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+static int dm9x_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct dm9x_driver_s *priv = (FAR struct dm9x_driver_s *)dev->d_private;
 

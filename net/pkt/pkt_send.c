@@ -90,7 +90,7 @@ struct send_s
  * Function: psock_send_interrupt
  ****************************************************************************/
 
-static uint16_t psock_send_interrupt(FAR struct uip_driver_s *dev,
+static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
                                      FAR void *pvconn,
                                      FAR void *pvpriv, uint16_t flags)
 {
@@ -246,7 +246,7 @@ ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
       state.snd_cb = pkt_callbackalloc(conn);
       if (state.snd_cb)
         {
-          FAR struct uip_driver_s *dev;
+          FAR struct net_driver_s *dev;
 
           /* Set up the callback in the connection */
 

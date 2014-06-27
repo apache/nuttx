@@ -94,7 +94,7 @@
  *
  ****************************************************************************/
 
-int netdev_carrier_on(FAR struct uip_driver_s *dev)
+int netdev_carrier_on(FAR struct net_driver_s *dev)
 {
   if (dev)
     {
@@ -120,7 +120,7 @@ int netdev_carrier_on(FAR struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-int netdev_carrier_off(FAR struct uip_driver_s *dev)
+int netdev_carrier_off(FAR struct net_driver_s *dev)
 {
   if (dev)
     {

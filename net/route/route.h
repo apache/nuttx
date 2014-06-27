@@ -229,13 +229,13 @@ int net_router(uip_ipaddr_t target, FAR uip_ipaddr_t *router);
  *
  ****************************************************************************/
 
-struct uip_driver_s;
+struct net_driver_s;
 
 #ifdef CONFIG_NET_IPv6
-void netdev_router(FAR struct uip_driver_s *dev, uip_ipaddr_t target,
+void netdev_router(FAR struct net_driver_s *dev, uip_ipaddr_t target,
                    uip_ipaddr_t router);
 #else
-void netdev_router(FAR struct uip_driver_s *dev, uip_ipaddr_t target,
+void netdev_router(FAR struct net_driver_s *dev, uip_ipaddr_t target,
                    FAR uip_ipaddr_t *router);
 #endif
 

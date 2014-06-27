@@ -153,7 +153,7 @@ static inline int close_timeout(FAR struct tcp_close_s *pstate)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
-static uint16_t netclose_interrupt(FAR struct uip_driver_s *dev,
+static uint16_t netclose_interrupt(FAR struct net_driver_s *dev,
                                    FAR void *pvconn, FAR void *pvpriv,
                                    uint16_t flags)
 {

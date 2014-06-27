@@ -113,7 +113,7 @@
  *
  ****************************************************************************/
 
-void igmp_input(struct uip_driver_s *dev)
+void igmp_input(struct net_driver_s *dev)
 {
   FAR struct igmp_group_s *group;
   uip_ipaddr_t destipaddr;

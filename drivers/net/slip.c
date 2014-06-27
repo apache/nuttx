@@ -176,7 +176,7 @@ struct slip_driver_s
 
   /* This holds the information visible to uIP/NuttX */
 
-  struct uip_driver_s dev;  /* Interface understood by uIP */
+  struct net_driver_s dev;  /* Interface understood by uIP */
   uint8_t rxbuf[CONFIG_NET_BUFSIZE + 2];
   uint8_t txbuf[CONFIG_NET_BUFSIZE + 2];
 };
@@ -202,7 +202,7 @@ static void slip_semtake(FAR struct slip_driver_s *priv);
 static void slip_write(FAR struct slip_driver_s *priv, const uint8_t *buffer, int len);
 static void slip_putc(FAR struct slip_driver_s *priv, int ch);
 static int slip_transmit(FAR struct slip_driver_s *priv);
-static int slip_uiptxpoll(struct uip_driver_s *dev);
+static int slip_uiptxpoll(struct net_driver_s *dev);
 static void slip_txtask(int argc, char *argv[]);
 
 /* Packet receiver task */
@@ -213,12 +213,12 @@ static int slip_rxtask(int argc, char *argv[]);
 
 /* NuttX callback functions */
 
-static int slip_ifup(struct uip_driver_s *dev);
-static int slip_ifdown(struct uip_driver_s *dev);
-static int slip_txavail(struct uip_driver_s *dev);
+static int slip_ifup(struct net_driver_s *dev);
+static int slip_ifdown(struct net_driver_s *dev);
+static int slip_txavail(struct net_driver_s *dev);
 #ifdef CONFIG_NET_IGMP
-static int slip_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
-static int slip_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
+static int slip_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
+static int slip_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
 
 /****************************************************************************
@@ -419,7 +419,7 @@ static int slip_transmit(FAR struct slip_driver_s *priv)
  *
  ****************************************************************************/
 
-static int slip_uiptxpoll(struct uip_driver_s *dev)
+static int slip_uiptxpoll(struct net_driver_s *dev)
 {
   FAR struct slip_driver_s *priv = (FAR struct slip_driver_s *)dev->d_private;
 
@@ -760,7 +760,7 @@ static int slip_rxtask(int argc, char *argv[])
  *
  ****************************************************************************/
 
-static int slip_ifup(struct uip_driver_s *dev)
+static int slip_ifup(struct net_driver_s *dev)
 {
   FAR struct slip_driver_s *priv = (FAR struct slip_driver_s *)dev->d_private;
 
@@ -790,7 +790,7 @@ static int slip_ifup(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static int slip_ifdown(struct uip_driver_s *dev)
+static int slip_ifdown(struct net_driver_s *dev)
 {
   FAR struct slip_driver_s *priv = (FAR struct slip_driver_s *)dev->d_private;
 
@@ -816,7 +816,7 @@ static int slip_ifdown(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static int slip_txavail(struct uip_driver_s *dev)
+static int slip_txavail(struct net_driver_s *dev)
 {
   FAR struct slip_driver_s *priv = (FAR struct slip_driver_s *)dev->d_private;
 
@@ -851,7 +851,7 @@ static int slip_txavail(struct uip_driver_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int slip_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+static int slip_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct slip_driver_s *priv = (FAR struct slip_driver_s *)dev->d_private;
 
@@ -880,7 +880,7 @@ static int slip_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int slip_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+static int slip_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct slip_driver_s *priv = (FAR struct slip_driver_s *)dev->d_private;
 

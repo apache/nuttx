@@ -72,18 +72,18 @@ extern "C"
 
 /* Defined in icmp_input.c **************************************************/
 
-void icmp_input(FAR struct uip_driver_s *dev);
+void icmp_input(FAR struct net_driver_s *dev);
 
 /* Defined in icmp_poll.c ***************************************************/
 
 #ifdef CONFIG_NET_ICMP_PING
-void icmp_poll(FAR struct uip_driver_s *dev);
+void icmp_poll(FAR struct net_driver_s *dev);
 #endif /* CONFIG_NET_ICMP_PING */
 
 /* Defined in icmp_send.c ***************************************************/
 
 #ifdef CONFIG_NET_ICMP_PING
-void icmp_send(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *destaddr);
+void icmp_send(FAR struct net_driver_s *dev, FAR uip_ipaddr_t *destaddr);
 #endif /* CONFIG_NET_ICMP_PING */
 
 #undef EXTERN

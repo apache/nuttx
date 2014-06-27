@@ -264,7 +264,7 @@ struct sam_emac_s
 
   /* This holds the information visible to uIP/NuttX */
 
-  struct uip_driver_s   dev;         /* Interface understood by uIP */
+  struct net_driver_s   dev;         /* Interface understood by uIP */
 
   /* Used to track transmit and receive descriptors */
 
@@ -350,7 +350,7 @@ static void sam_buffer_free(struct sam_emac_s *priv);
 /* Common TX logic */
 
 static int  sam_transmit(struct sam_emac_s *priv);
-static int  sam_uiptxpoll(struct uip_driver_s *dev);
+static int  sam_uiptxpoll(struct net_driver_s *dev);
 static void sam_dopoll(struct sam_emac_s *priv);
 
 /* Interrupt handling */
@@ -367,12 +367,12 @@ static void sam_txtimeout(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
-static int  sam_ifup(struct uip_driver_s *dev);
-static int  sam_ifdown(struct uip_driver_s *dev);
-static int  sam_txavail(struct uip_driver_s *dev);
+static int  sam_ifup(struct net_driver_s *dev);
+static int  sam_ifdown(struct net_driver_s *dev);
+static int  sam_txavail(struct net_driver_s *dev);
 #ifdef CONFIG_NET_IGMP
-static int  sam_addmac(struct uip_driver_s *dev, const uint8_t *mac);
-static int  sam_rmmac(struct uip_driver_s *dev, const uint8_t *mac);
+static int  sam_addmac(struct net_driver_s *dev, const uint8_t *mac);
+static int  sam_rmmac(struct net_driver_s *dev, const uint8_t *mac);
 #endif
 
 /* PHY Initialization */
@@ -700,7 +700,7 @@ static void sam_buffer_free(struct sam_emac_s *priv)
 
 static int sam_transmit(struct sam_emac_s *priv)
 {
-  struct uip_driver_s *dev = &priv->dev;
+  struct net_driver_s *dev = &priv->dev;
   volatile struct emac_txdesc_s *txdesc;
   uintptr_t virtaddr;
   uint32_t regval;
@@ -818,7 +818,7 @@ static int sam_transmit(struct sam_emac_s *priv)
  *
  ****************************************************************************/
 
-static int sam_uiptxpoll(struct uip_driver_s *dev)
+static int sam_uiptxpoll(struct net_driver_s *dev)
 {
   struct sam_emac_s *priv = (struct sam_emac_s *)dev->d_private;
 
@@ -873,7 +873,7 @@ static int sam_uiptxpoll(struct uip_driver_s *dev)
 
 static void sam_dopoll(struct sam_emac_s *priv)
 {
-  struct uip_driver_s *dev = &priv->dev;
+  struct net_driver_s *dev = &priv->dev;
 
   /* Check if the there are any free TX descriptors.  We cannot perform the
    * TX poll if we do not have buffering for another packet.
@@ -913,7 +913,7 @@ static void sam_dopoll(struct sam_emac_s *priv)
 static int sam_recvframe(struct sam_emac_s *priv)
 {
   struct emac_rxdesc_s *rxdesc;
-  struct uip_driver_s *dev;
+  struct net_driver_s *dev;
   const uint8_t *src;
   uint8_t  *dest;
   uintptr_t physaddr;
@@ -1148,7 +1148,7 @@ static int sam_recvframe(struct sam_emac_s *priv)
 
 static void sam_receive(struct sam_emac_s *priv)
 {
-  struct uip_driver_s *dev = &priv->dev;
+  struct net_driver_s *dev = &priv->dev;
 
   /* Loop while while sam_recvframe() successfully retrieves valid
    * EMAC frames.
@@ -1548,7 +1548,7 @@ static void sam_txtimeout(int argc, uint32_t arg, ...)
 static void sam_polltimer(int argc, uint32_t arg, ...)
 {
   struct sam_emac_s *priv = (struct sam_emac_s *)arg;
-  struct uip_driver_s   *dev  = &priv->dev;
+  struct net_driver_s   *dev  = &priv->dev;
 
   /* Check if the there are any free TX descriptors.  We cannot perform the
    * TX poll if we do not have buffering for another packet.
@@ -1583,7 +1583,7 @@ static void sam_polltimer(int argc, uint32_t arg, ...)
  *
  ****************************************************************************/
 
-static int sam_ifup(struct uip_driver_s *dev)
+static int sam_ifup(struct net_driver_s *dev)
 {
   struct sam_emac_s *priv = (struct sam_emac_s *)dev->d_private;
   int ret;
@@ -1653,7 +1653,7 @@ static int sam_ifup(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static int sam_ifdown(struct uip_driver_s *dev)
+static int sam_ifdown(struct net_driver_s *dev)
 {
   struct sam_emac_s *priv = (struct sam_emac_s *)dev->d_private;
   irqstate_t flags;
@@ -1703,7 +1703,7 @@ static int sam_ifdown(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static int sam_txavail(struct uip_driver_s *dev)
+static int sam_txavail(struct net_driver_s *dev)
 {
   struct sam_emac_s *priv = (struct sam_emac_s *)dev->d_private;
   irqstate_t flags;
@@ -1748,7 +1748,7 @@ static int sam_txavail(struct uip_driver_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int sam_addmac(struct uip_driver_s *dev, const uint8_t *mac)
+static int sam_addmac(struct net_driver_s *dev, const uint8_t *mac)
 {
   struct sam_emac_s *priv = (struct sam_emac_s *)dev->d_private;
 
@@ -1782,7 +1782,7 @@ static int sam_addmac(struct uip_driver_s *dev, const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int sam_rmmac(struct uip_driver_s *dev, const uint8_t *mac)
+static int sam_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 {
   struct sam_emac_s *priv = (struct sam_emac_s *)dev->d_private;
 
@@ -2747,7 +2747,7 @@ static void sam_emac_reset(struct sam_emac_s *priv)
 
 static void sam_macaddress(struct sam_emac_s *priv)
 {
-  struct uip_driver_s *dev = &priv->dev;
+  struct net_driver_s *dev = &priv->dev;
   uint32_t regval;
 
   nllvdbg("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",

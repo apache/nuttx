@@ -90,42 +90,42 @@ void tcp_nextsequence(void);
 
 /* Defined in tcp_poll.c ****************************************************/
 
-void tcp_poll(FAR struct uip_driver_s *dev, FAR struct tcp_conn_s *conn);
+void tcp_poll(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn);
 
 /* Defined in tcp_timer.c ***************************************************/
 
-void tcp_timer(FAR struct uip_driver_s *dev, FAR struct tcp_conn_s *conn,
+void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                int hsec);
 
 /* Defined in tcp_listen.c **************************************************/
 
 void tcp_listeninit(void);
 bool tcp_islistener(uint16_t port);
-int tcp_accept_connection(FAR struct uip_driver_s *dev,
+int tcp_accept_connection(FAR struct net_driver_s *dev,
                           FAR struct tcp_conn_s *conn, uint16_t portno);
 
 /* Defined in tcp_send.c ****************************************************/
 
-void tcp_send(FAR struct uip_driver_s *dev, FAR struct tcp_conn_s *conn,
+void tcp_send(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
               uint16_t flags, uint16_t len);
-void tcp_reset(FAR struct uip_driver_s *dev);
-void tcp_ack(FAR struct uip_driver_s *dev, FAR struct tcp_conn_s *conn,
+void tcp_reset(FAR struct net_driver_s *dev);
+void tcp_ack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
              uint8_t ack);
 
 /* Defined in tcp_appsend.c *************************************************/
 
-void tcp_appsend(FAR struct uip_driver_s *dev, FAR struct tcp_conn_s *conn,
+void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                  uint16_t result);
-void tcp_rexmit(FAR struct uip_driver_s *dev, FAR struct tcp_conn_s *conn,
+void tcp_rexmit(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                 uint16_t result);
 
 /* Defined in tcp_input.c ***************************************************/
 
-void tcp_input(FAR struct uip_driver_s *dev);
+void tcp_input(FAR struct net_driver_s *dev);
 
 /* Defined in tcp_callback.c ************************************************/
 
-uint16_t tcp_callback(FAR struct uip_driver_s *dev,
+uint16_t tcp_callback(FAR struct net_driver_s *dev,
                       FAR struct tcp_conn_s *conn, uint16_t flags);
 #ifdef CONFIG_NET_TCP_READAHEAD
 uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn,

@@ -572,7 +572,7 @@ struct stm32_ethmac_s
 
   /* This holds the information visible to uIP/NuttX */
 
-  struct uip_driver_s  dev;         /* Interface understood by uIP */
+  struct net_driver_s  dev;         /* Interface understood by uIP */
 
   /* Used to track transmit and receive descriptors */
 
@@ -627,7 +627,7 @@ static inline bool stm32_isfreebuffer(FAR struct stm32_ethmac_s *priv);
 /* Common TX logic */
 
 static int  stm32_transmit(FAR struct stm32_ethmac_s *priv);
-static int  stm32_uiptxpoll(struct uip_driver_s *dev);
+static int  stm32_uiptxpoll(struct net_driver_s *dev);
 static void stm32_dopoll(FAR struct stm32_ethmac_s *priv);
 
 /* Interrupt handling */
@@ -650,12 +650,12 @@ static void stm32_txtimeout(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
-static int  stm32_ifup(struct uip_driver_s *dev);
-static int  stm32_ifdown(struct uip_driver_s *dev);
-static int  stm32_txavail(struct uip_driver_s *dev);
+static int  stm32_ifup(struct net_driver_s *dev);
+static int  stm32_ifdown(struct net_driver_s *dev);
+static int  stm32_txavail(struct net_driver_s *dev);
 #ifdef CONFIG_NET_IGMP
-static int  stm32_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
-static int  stm32_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
+static int  stm32_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
+static int  stm32_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
 
 /* Descriptor Initialization */
@@ -1159,7 +1159,7 @@ static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static int stm32_uiptxpoll(struct uip_driver_s *dev)
+static int stm32_uiptxpoll(struct net_driver_s *dev)
 {
   FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)dev->d_private;
 
@@ -1240,7 +1240,7 @@ static int stm32_uiptxpoll(struct uip_driver_s *dev)
 
 static void stm32_dopoll(FAR struct stm32_ethmac_s *priv)
 {
-  FAR struct uip_driver_s *dev = &priv->dev;
+  FAR struct net_driver_s *dev = &priv->dev;
 
   /* Check if the next TX descriptor is owned by the Ethernet DMA or
    * CPU.  We cannot perform the TX poll if we are unable to accept
@@ -1503,7 +1503,7 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
 
           if ((rxdesc->rdes0 & ETH_RDES0_ES) == 0)
             {
-              struct uip_driver_s *dev = &priv->dev;
+              struct net_driver_s *dev = &priv->dev;
 
               /* Get the Frame Length of the received packet: substruct 4
                * bytes of the CRC
@@ -1587,7 +1587,7 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
 
 static void stm32_receive(FAR struct stm32_ethmac_s *priv)
 {
-  struct uip_driver_s *dev = &priv->dev;
+  struct net_driver_s *dev = &priv->dev;
 
   /* Loop while while stm32_recvframe() successfully retrieves valid
    * Ethernet frames.
@@ -1964,7 +1964,7 @@ static void stm32_txtimeout(int argc, uint32_t arg, ...)
 static void stm32_polltimer(int argc, uint32_t arg, ...)
 {
   FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)arg;
-  FAR struct uip_driver_s   *dev  = &priv->dev;
+  FAR struct net_driver_s   *dev  = &priv->dev;
 
   /* Check if the next TX descriptor is owned by the Ethernet DMA or CPU.  We
    * cannot perform the timer poll if we are unable to accept another packet
@@ -2031,7 +2031,7 @@ static void stm32_polltimer(int argc, uint32_t arg, ...)
  *
  ****************************************************************************/
 
-static int stm32_ifup(struct uip_driver_s *dev)
+static int stm32_ifup(struct net_driver_s *dev)
 {
   FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)dev->d_private;
   int ret;
@@ -2077,7 +2077,7 @@ static int stm32_ifup(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static int stm32_ifdown(struct uip_driver_s *dev)
+static int stm32_ifdown(struct net_driver_s *dev)
 {
   FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)dev->d_private;
   irqstate_t flags;
@@ -2127,7 +2127,7 @@ static int stm32_ifdown(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static int stm32_txavail(struct uip_driver_s *dev)
+static int stm32_txavail(struct net_driver_s *dev)
 {
   FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)dev->d_private;
   irqstate_t flags;
@@ -2216,7 +2216,7 @@ static uint32_t stm32_calcethcrc(const uint8_t *data, size_t length)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int stm32_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+static int stm32_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   uint32_t crc;
   uint32_t hashindex;
@@ -2273,7 +2273,7 @@ static int stm32_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int stm32_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+static int stm32_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   uint32_t crc;
   uint32_t hashindex;
@@ -3303,7 +3303,7 @@ static int stm32_macconfig(FAR struct stm32_ethmac_s *priv)
 
 static void stm32_macaddress(FAR struct stm32_ethmac_s *priv)
 {
-  FAR struct uip_driver_s *dev = &priv->dev;
+  FAR struct net_driver_s *dev = &priv->dev;
   uint32_t regval;
 
   nllvdbg("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",

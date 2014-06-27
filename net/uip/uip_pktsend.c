@@ -97,7 +97,7 @@
  *
  ****************************************************************************/
 
-void uip_pktsend(FAR struct uip_driver_s *dev, FAR const void *buf,
+void uip_pktsend(FAR struct net_driver_s *dev, FAR const void *buf,
                  unsigned int len)
 {
   DEBUGASSERT(dev && len > 0 && len < CONFIG_NET_BUFSIZE);

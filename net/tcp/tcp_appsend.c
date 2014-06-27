@@ -97,7 +97,7 @@
  *
  ****************************************************************************/
 
-void tcp_appsend(FAR struct uip_driver_s *dev, FAR struct tcp_conn_s *conn,
+void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                  uint16_t result)
 {
   /* Handle the result based on the application response */
@@ -183,7 +183,7 @@ void tcp_appsend(FAR struct uip_driver_s *dev, FAR struct tcp_conn_s *conn,
  *
  ****************************************************************************/
 
-void tcp_rexmit(FAR struct uip_driver_s *dev, FAR struct tcp_conn_s *conn,
+void tcp_rexmit(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                 uint16_t result)
 {
   nllvdbg("result: %04x d_sndlen: %d conn->unacked: %d\n",

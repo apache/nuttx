@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/utils/net_chksum.c
  *
- *   Copyright (C) 2007-2010, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -104,7 +104,7 @@ static uint16_t chksum(uint16_t sum, FAR const uint8_t *data, uint16_t len)
   return sum;
 }
 
-static uint16_t upper_layer_chksum(FAR struct uip_driver_s *dev, uint8_t proto)
+static uint16_t upper_layer_chksum(FAR struct net_driver_s *dev, uint8_t proto)
 {
   struct uip_ip_hdr *pbuf = BUF;
   uint16_t upper_layer_len;
@@ -134,7 +134,7 @@ static uint16_t upper_layer_chksum(FAR struct uip_driver_s *dev, uint8_t proto)
 }
 
 #ifdef CONFIG_NET_IPv6
-static uint16_t icmp_6chksum(FAR struct uip_driver_s *dev)
+static uint16_t icmp_6chksum(FAR struct net_driver_s *dev)
 {
   return upper_layer_chksum(dev, UIP_PROTO_ICMP6);
 }
@@ -169,18 +169,19 @@ static inline void uip_carry32(FAR uint8_t *sum, uint16_t op16)
         }
     }
 }
+#endif /* UIP_ARCH_ADD32 */
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
+#if !UIP_ARCH_ADD32
 void uip_incr32(FAR uint8_t *op32, uint16_t op16)
 {
   op32[3] += (op16 & 0xff);
   op32[2] += (op16 >> 8);
   uip_carry32(op32, op16);
 }
-
 #endif /* UIP_ARCH_ADD32 */
 
 #if !UIP_ARCH_CHKSUM
@@ -192,7 +193,7 @@ uint16_t uip_chksum(FAR uint16_t *data, uint16_t len)
 /* Calculate the IP header checksum of the packet header in d_buf. */
 
 #ifndef UIP_ARCH_IPCHKSUM
-uint16_t uip_ipchksum(FAR struct uip_driver_s *dev)
+uint16_t uip_ipchksum(FAR struct net_driver_s *dev)
 {
   uint16_t sum;
 
@@ -203,7 +204,7 @@ uint16_t uip_ipchksum(FAR struct uip_driver_s *dev)
 
 /* Calculate the TCP checksum of the packet in d_buf and d_appdata. */
 
-uint16_t tcp_chksum(FAR struct uip_driver_s *dev)
+uint16_t tcp_chksum(FAR struct net_driver_s *dev)
 {
   return upper_layer_chksum(dev, UIP_PROTO_TCP);
 }
@@ -211,7 +212,7 @@ uint16_t tcp_chksum(FAR struct uip_driver_s *dev)
 /* Calculate the UDP checksum of the packet in d_buf and d_appdata. */
 
 #ifdef CONFIG_NET_UDP_CHECKSUMS
-uint16_t udp_chksum(FAR struct uip_driver_s *dev)
+uint16_t udp_chksum(FAR struct net_driver_s *dev)
 {
   return upper_layer_chksum(dev, UIP_PROTO_UDP);
 }
@@ -220,7 +221,7 @@ uint16_t udp_chksum(FAR struct uip_driver_s *dev)
 /* Calculate the checksum of the ICMP message */
 
 #if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING)
-uint16_t icmp_chksum(FAR struct uip_driver_s *dev, int len)
+uint16_t icmp_chksum(FAR struct net_driver_s *dev, int len)
 {
   FAR struct icmp_iphdr_s *picmp = ICMPBUF;
   return uip_chksum((uint16_t*)&picmp->type, len);

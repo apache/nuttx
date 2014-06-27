@@ -97,7 +97,7 @@
  *
  ****************************************************************************/
 
-void uip_iobsend(FAR struct uip_driver_s *dev, FAR struct iob_s *iob,
+void uip_iobsend(FAR struct net_driver_s *dev, FAR struct iob_s *iob,
                  unsigned int len, unsigned int offset)
 {
   DEBUGASSERT(dev && len > 0 && len < CONFIG_NET_BUFSIZE);

@@ -93,7 +93,7 @@
 
 int netdev_foreach(netdev_callback_t callback, void *arg)
 {
-  struct uip_driver_s *dev;
+  struct net_driver_s *dev;
   int ret = 0;
 
   if (callback)

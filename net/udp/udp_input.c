@@ -97,7 +97,7 @@
  *
  ****************************************************************************/
 
-int udp_input(FAR struct uip_driver_s *dev)
+int udp_input(FAR struct net_driver_s *dev)
 {
   FAR struct udp_conn_s *conn;
   FAR struct udp_iphdr_s *pbuf = UDPBUF;

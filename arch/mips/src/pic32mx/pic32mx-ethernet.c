@@ -353,7 +353,7 @@ struct pic32mx_driver_s
 
   /* This holds the information visible to uIP/NuttX */
 
-  struct uip_driver_s pd_dev;  /* Interface understood by uIP */
+  struct net_driver_s pd_dev;  /* Interface understood by uIP */
 
   /* Descriptors and packet buffers */
 
@@ -410,7 +410,7 @@ static struct pic32mx_rxdesc_s *pic32mx_rxdesc(struct pic32mx_driver_s *priv);
 /* Common TX logic */
 
 static int  pic32mx_transmit(struct pic32mx_driver_s *priv);
-static int  pic32mx_uiptxpoll(struct uip_driver_s *dev);
+static int  pic32mx_uiptxpoll(struct net_driver_s *dev);
 static void pic32mx_poll(struct pic32mx_driver_s *priv);
 static void pic32mx_timerpoll(struct pic32mx_driver_s *priv);
 
@@ -428,12 +428,12 @@ static void pic32mx_txtimeout(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
-static int pic32mx_ifup(struct uip_driver_s *dev);
-static int pic32mx_ifdown(struct uip_driver_s *dev);
-static int pic32mx_txavail(struct uip_driver_s *dev);
+static int pic32mx_ifup(struct net_driver_s *dev);
+static int pic32mx_ifdown(struct net_driver_s *dev);
+static int pic32mx_txavail(struct net_driver_s *dev);
 #ifdef CONFIG_NET_IGMP
-static int pic32mx_addmac(struct uip_driver_s *dev, const uint8_t *mac);
-static int pic32mx_rmmac(struct uip_driver_s *dev, const uint8_t *mac);
+static int pic32mx_addmac(struct net_driver_s *dev, const uint8_t *mac);
+static int pic32mx_rmmac(struct net_driver_s *dev, const uint8_t *mac);
 #endif
 
 /* PHY initialization functions */
@@ -1132,7 +1132,7 @@ static int pic32mx_transmit(struct pic32mx_driver_s *priv)
  *
  ****************************************************************************/
 
-static int pic32mx_uiptxpoll(struct uip_driver_s *dev)
+static int pic32mx_uiptxpoll(struct net_driver_s *dev)
 {
   struct pic32mx_driver_s *priv = (struct pic32mx_driver_s *)dev->d_private;
   int ret = OK;
@@ -1864,7 +1864,7 @@ static void pic32mx_polltimer(int argc, uint32_t arg, ...)
  *
  ****************************************************************************/
 
-static int pic32mx_ifup(struct uip_driver_s *dev)
+static int pic32mx_ifup(struct net_driver_s *dev)
 {
   struct pic32mx_driver_s *priv = (struct pic32mx_driver_s *)dev->d_private;
   uint32_t regval;
@@ -2166,7 +2166,7 @@ static int pic32mx_ifup(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static int pic32mx_ifdown(struct uip_driver_s *dev)
+static int pic32mx_ifdown(struct net_driver_s *dev)
 {
   struct pic32mx_driver_s *priv = (struct pic32mx_driver_s *)dev->d_private;
   irqstate_t flags;
@@ -2212,7 +2212,7 @@ static int pic32mx_ifdown(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static int pic32mx_txavail(struct uip_driver_s *dev)
+static int pic32mx_txavail(struct net_driver_s *dev)
 {
   struct pic32mx_driver_s *priv = (struct pic32mx_driver_s *)dev->d_private;
   irqstate_t flags;
@@ -2262,7 +2262,7 @@ static int pic32mx_txavail(struct uip_driver_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int pic32mx_addmac(struct uip_driver_s *dev, const uint8_t *mac)
+static int pic32mx_addmac(struct net_driver_s *dev, const uint8_t *mac)
 {
   struct pic32mx_driver_s *priv = (struct pic32mx_driver_s *)dev->d_private;
 
@@ -2292,7 +2292,7 @@ static int pic32mx_addmac(struct uip_driver_s *dev, const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int pic32mx_rmmac(struct uip_driver_s *dev, const uint8_t *mac)
+static int pic32mx_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 {
   struct pic32mx_driver_s *priv = (struct pic32mx_driver_s *)dev->d_private;
 

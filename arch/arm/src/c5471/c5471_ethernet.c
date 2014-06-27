@@ -330,7 +330,7 @@ struct c5471_driver_s
 
   /* This holds the information visible to uIP/NuttX */
 
-  struct uip_driver_s c_dev;  /* Interface understood by uIP */
+  struct net_driver_s c_dev;  /* Interface understood by uIP */
 };
 
 /****************************************************************************
@@ -359,7 +359,7 @@ static inline void c5471_incrxcpu(struct c5471_driver_s *c5471);
 /* Common TX logic */
 
 static int  c5471_transmit(struct c5471_driver_s *c5471);
-static int  c5471_uiptxpoll(struct uip_driver_s *dev);
+static int  c5471_uiptxpoll(struct net_driver_s *dev);
 
 /* Interrupt handling */
 
@@ -380,12 +380,12 @@ static void c5471_txtimeout(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
-static int c5471_ifup(struct uip_driver_s *dev);
-static int c5471_ifdown(struct uip_driver_s *dev);
-static int c5471_txavail(struct uip_driver_s *dev);
+static int c5471_ifup(struct net_driver_s *dev);
+static int c5471_ifdown(struct net_driver_s *dev);
+static int c5471_txavail(struct net_driver_s *dev);
 #ifdef CONFIG_NET_IGMP
-static int c5471_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
-static int c5471_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
+static int c5471_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
+static int c5471_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
 
 /* Initialization functions */
@@ -844,7 +844,7 @@ static inline void c5471_incrxcpu(struct c5471_driver_s *c5471)
 
 static int c5471_transmit(struct c5471_driver_s *c5471)
 {
-  struct uip_driver_s *dev = &c5471->c_dev;
+  struct net_driver_s *dev = &c5471->c_dev;
   volatile uint16_t *packetmem;
   uint16_t framelen;
   bool bfirstframe;
@@ -974,7 +974,7 @@ static int c5471_transmit(struct c5471_driver_s *c5471)
  *
  ****************************************************************************/
 
-static int c5471_uiptxpoll(struct uip_driver_s *dev)
+static int c5471_uiptxpoll(struct net_driver_s *dev)
 {
   struct c5471_driver_s *c5471 = (struct c5471_driver_s *)dev->d_private;
 
@@ -1126,7 +1126,7 @@ static void c5471_rxstatus(struct c5471_driver_s *c5471)
 
 static void c5471_receive(struct c5471_driver_s *c5471)
 {
-  struct uip_driver_s *dev = &c5471->c_dev;
+  struct net_driver_s *dev = &c5471->c_dev;
   uint16_t *packetmem;
   bool bmore = true;
   int packetlen = 0;
@@ -1580,7 +1580,7 @@ static void c5471_polltimer(int argc, uint32_t arg, ...)
  *
  ****************************************************************************/
 
-static int c5471_ifup(struct uip_driver_s *dev)
+static int c5471_ifup(struct net_driver_s *dev)
 {
   struct c5471_driver_s *c5471 = (struct c5471_driver_s *)dev->d_private;
   volatile uint32_t clearbits;
@@ -1640,7 +1640,7 @@ static int c5471_ifup(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static int c5471_ifdown(struct uip_driver_s *dev)
+static int c5471_ifdown(struct net_driver_s *dev)
 {
   struct c5471_driver_s *c5471 = (struct c5471_driver_s *)dev->d_private;
   irqstate_t flags;
@@ -1695,7 +1695,7 @@ static int c5471_ifdown(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static int c5471_txavail(struct uip_driver_s *dev)
+static int c5471_txavail(struct net_driver_s *dev)
 {
   struct c5471_driver_s *c5471 = (struct c5471_driver_s *)dev->d_private;
   irqstate_t flags;
@@ -1742,7 +1742,7 @@ static int c5471_txavail(struct uip_driver_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int c5471_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+static int c5471_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct c5471_driver_s *priv = (FAR struct c5471_driver_s *)dev->d_private;
 
@@ -1772,7 +1772,7 @@ static int c5471_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int c5471_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+static int c5471_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct c5471_driver_s *priv = (FAR struct c5471_driver_s *)dev->d_private;
 
@@ -2066,7 +2066,7 @@ static void c5471_reset(struct c5471_driver_s *c5471)
 
 static void c5471_macassign(struct c5471_driver_s *c5471)
 {
-  struct uip_driver_s *dev = &c5471->c_dev;
+  struct net_driver_s *dev = &c5471->c_dev;
   uint8_t *mptr = dev->d_mac.ether_addr_octet;
   register uint32_t tmp;
 

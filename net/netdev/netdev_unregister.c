@@ -103,10 +103,10 @@
  *
  ****************************************************************************/
 
-int netdev_unregister(FAR struct uip_driver_s *dev)
+int netdev_unregister(FAR struct net_driver_s *dev)
 {
-  struct uip_driver_s *prev;
-  struct uip_driver_s *curr;
+  struct net_driver_s *prev;
+  struct net_driver_s *curr;
 
   if (dev)
     {

@@ -90,9 +90,9 @@
  *
  ****************************************************************************/
 
-FAR struct uip_driver_s *netdev_findbyname(const char *ifname)
+FAR struct net_driver_s *netdev_findbyname(const char *ifname)
 {
-  struct uip_driver_s *dev;
+  struct net_driver_s *dev;
   if (ifname)
     {
       netdev_semtake();

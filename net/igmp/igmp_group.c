@@ -219,7 +219,7 @@ void igmp_grpinit(void)
  *
  ****************************************************************************/
 
-FAR struct igmp_group_s *igmp_grpalloc(FAR struct uip_driver_s *dev,
+FAR struct igmp_group_s *igmp_grpalloc(FAR struct net_driver_s *dev,
                                        FAR const uip_ipaddr_t *addr)
 {
   FAR struct igmp_group_s *group;
@@ -282,7 +282,7 @@ FAR struct igmp_group_s *igmp_grpalloc(FAR struct uip_driver_s *dev,
  *
  ****************************************************************************/
 
-FAR struct igmp_group_s *igmp_grpfind(FAR struct uip_driver_s *dev,
+FAR struct igmp_group_s *igmp_grpfind(FAR struct net_driver_s *dev,
                                       FAR const uip_ipaddr_t *addr)
 {
   FAR struct igmp_group_s *group;
@@ -323,7 +323,7 @@ FAR struct igmp_group_s *igmp_grpfind(FAR struct uip_driver_s *dev,
  *
  ****************************************************************************/
 
-FAR struct igmp_group_s *igmp_grpallocfind(FAR struct uip_driver_s *dev,
+FAR struct igmp_group_s *igmp_grpallocfind(FAR struct net_driver_s *dev,
                                            FAR const uip_ipaddr_t *addr)
 {
   FAR struct igmp_group_s *group = igmp_grpfind(dev, addr);
@@ -349,7 +349,7 @@ FAR struct igmp_group_s *igmp_grpallocfind(FAR struct uip_driver_s *dev,
  *
  ****************************************************************************/
 
-void igmp_grpfree(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group)
+void igmp_grpfree(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group)
 {
   net_lock_t flags;
 

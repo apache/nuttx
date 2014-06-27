@@ -91,7 +91,7 @@
  *
  ****************************************************************************/
 
-static void tcp_sendcomplete(FAR struct uip_driver_s *dev)
+static void tcp_sendcomplete(FAR struct net_driver_s *dev)
 {
   FAR struct tcp_iphdr_s *pbuf = BUF;
 
@@ -172,7 +172,7 @@ static void tcp_sendcomplete(FAR struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static void tcp_sendcommon(FAR struct uip_driver_s *dev,
+static void tcp_sendcommon(FAR struct net_driver_s *dev,
                            FAR struct tcp_conn_s *conn)
 {
   FAR struct tcp_iphdr_s *pbuf = BUF;
@@ -233,7 +233,7 @@ static void tcp_sendcommon(FAR struct uip_driver_s *dev,
  *
  ****************************************************************************/
 
-void tcp_send(FAR struct uip_driver_s *dev, FAR struct tcp_conn_s *conn,
+void tcp_send(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
               uint16_t flags, uint16_t len)
 {
   FAR struct tcp_iphdr_s *pbuf = BUF;
@@ -261,7 +261,7 @@ void tcp_send(FAR struct uip_driver_s *dev, FAR struct tcp_conn_s *conn,
  *
  ****************************************************************************/
 
-void tcp_reset(FAR struct uip_driver_s *dev)
+void tcp_reset(FAR struct net_driver_s *dev)
 {
   FAR struct tcp_iphdr_s *pbuf = BUF;
   uint16_t tmp16;
@@ -344,7 +344,7 @@ void tcp_reset(FAR struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-void tcp_ack(FAR struct uip_driver_s *dev, FAR struct tcp_conn_s *conn,
+void tcp_ack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
              uint8_t ack)
 {
   struct tcp_iphdr_s *pbuf = BUF;

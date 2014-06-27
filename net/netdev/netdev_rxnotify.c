@@ -96,7 +96,7 @@ void netdev_rxnotify(const uip_ipaddr_t raddr)
 
   /* Find the device driver that serves the subnet of the remote address */
 
-  struct uip_driver_s *dev = netdev_findbyaddr(raddr);
+  struct net_driver_s *dev = netdev_findbyaddr(raddr);
 
   if (dev && dev->d_rxavail)
     {

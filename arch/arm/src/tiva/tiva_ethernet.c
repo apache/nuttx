@@ -207,7 +207,7 @@ struct tiva_driver_s
 
   /* This holds the information visible to uIP/NuttX */
 
-  struct uip_driver_s ld_dev;  /* Interface understood by uIP */
+  struct net_driver_s ld_dev;  /* Interface understood by uIP */
 };
 
 /****************************************************************************
@@ -238,7 +238,7 @@ static uint16_t tiva_phyread(struct tiva_driver_s *priv, int regaddr);
 /* Common TX logic */
 
 static int  tiva_transmit(struct tiva_driver_s *priv);
-static int  tiva_uiptxpoll(struct uip_driver_s *dev);
+static int  tiva_uiptxpoll(struct net_driver_s *dev);
 
 /* Interrupt handling */
 
@@ -253,12 +253,12 @@ static void tiva_txtimeout(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
-static int  tiva_ifup(struct uip_driver_s *dev);
-static int  tiva_ifdown(struct uip_driver_s *dev);
-static int  tiva_txavail(struct uip_driver_s *dev);
+static int  tiva_ifup(struct net_driver_s *dev);
+static int  tiva_ifdown(struct net_driver_s *dev);
+static int  tiva_txavail(struct net_driver_s *dev);
 #ifdef CONFIG_NET_IGMP
-static int  tiva_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
-static int  tiva_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
+static int  tiva_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
+static int  tiva_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
 
 /****************************************************************************
@@ -593,7 +593,7 @@ static int tiva_transmit(struct tiva_driver_s *priv)
  *
  ****************************************************************************/
 
-static int tiva_uiptxpoll(struct uip_driver_s *dev)
+static int tiva_uiptxpoll(struct net_driver_s *dev)
 {
   struct tiva_driver_s *priv = (struct tiva_driver_s *)dev->d_private;
   int ret = OK;
@@ -1024,7 +1024,7 @@ static void tiva_polltimer(int argc, uint32_t arg, ...)
  *
  ****************************************************************************/
 
-static int tiva_ifup(struct uip_driver_s *dev)
+static int tiva_ifup(struct net_driver_s *dev)
 {
   struct tiva_driver_s *priv = (struct tiva_driver_s *)dev->d_private;
   irqstate_t flags;
@@ -1180,7 +1180,7 @@ static int tiva_ifup(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static int tiva_ifdown(struct uip_driver_s *dev)
+static int tiva_ifdown(struct net_driver_s *dev)
 {
   struct tiva_driver_s *priv = (struct tiva_driver_s *)dev->d_private;
   irqstate_t flags;
@@ -1265,7 +1265,7 @@ static int tiva_ifdown(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static int tiva_txavail(struct uip_driver_s *dev)
+static int tiva_txavail(struct net_driver_s *dev)
 {
   struct tiva_driver_s *priv = (struct tiva_driver_s *)dev->d_private;
   irqstate_t flags;
@@ -1311,7 +1311,7 @@ static int tiva_txavail(struct uip_driver_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int tiva_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+static int tiva_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct tiva_driver_s *priv = (FAR struct tiva_driver_s *)dev->d_private;
 
@@ -1341,7 +1341,7 @@ static int tiva_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int tiva_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+static int tiva_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct tiva_driver_s *priv = (FAR struct tiva_driver_s *)dev->d_private;
 

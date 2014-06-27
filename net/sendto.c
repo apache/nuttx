@@ -163,7 +163,7 @@ static inline int send_timeout(FAR struct sendto_s *pstate)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_UDP
-static uint16_t sendto_interrupt(struct uip_driver_s *dev, void *conn,
+static uint16_t sendto_interrupt(struct net_driver_s *dev, void *conn,
                                  void *pvpriv, uint16_t flags)
 {
   FAR struct sendto_s *pstate = (FAR struct sendto_s *)pvpriv;

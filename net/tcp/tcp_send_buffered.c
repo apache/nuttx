@@ -213,7 +213,7 @@ static inline void psock_lost_connection(FAR struct socket *psock,
  *
  ****************************************************************************/
 
-static uint16_t psock_send_interrupt(FAR struct uip_driver_s *dev,
+static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
                                      FAR void *pvconn, FAR void *pvpriv,
                                      uint16_t flags)
 {

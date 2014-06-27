@@ -281,7 +281,7 @@ struct lpc17_driver_s
 
   /* This holds the information visible to uIP/NuttX */
 
-  struct uip_driver_s lp_dev;  /* Interface understood by uIP */
+  struct net_driver_s lp_dev;  /* Interface understood by uIP */
 };
 
 /****************************************************************************
@@ -325,7 +325,7 @@ static void lpc17_putreg(uint32_t val, uint32_t addr);
 
 static int  lpc17_txdesc(struct lpc17_driver_s *priv);
 static int  lpc17_transmit(struct lpc17_driver_s *priv);
-static int  lpc17_uiptxpoll(struct uip_driver_s *dev);
+static int  lpc17_uiptxpoll(struct net_driver_s *dev);
 
 /* Interrupt handling */
 
@@ -341,12 +341,12 @@ static void lpc17_txtimeout(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
-static int lpc17_ifup(struct uip_driver_s *dev);
-static int lpc17_ifdown(struct uip_driver_s *dev);
-static int lpc17_txavail(struct uip_driver_s *dev);
+static int lpc17_ifup(struct net_driver_s *dev);
+static int lpc17_ifdown(struct net_driver_s *dev);
+static int lpc17_txavail(struct net_driver_s *dev);
 #ifdef CONFIG_NET_IGMP
-static int lpc17_addmac(struct uip_driver_s *dev, const uint8_t *mac);
-static int lpc17_rmmac(struct uip_driver_s *dev, const uint8_t *mac);
+static int lpc17_addmac(struct net_driver_s *dev, const uint8_t *mac);
+static int lpc17_rmmac(struct net_driver_s *dev, const uint8_t *mac);
 #endif
 
 /* Initialization functions */
@@ -666,7 +666,7 @@ static int lpc17_transmit(struct lpc17_driver_s *priv)
  *
  ****************************************************************************/
 
-static int lpc17_uiptxpoll(struct uip_driver_s *dev)
+static int lpc17_uiptxpoll(struct net_driver_s *dev)
 {
   struct lpc17_driver_s *priv = (struct lpc17_driver_s *)dev->d_private;
   int ret = OK;
@@ -1250,7 +1250,7 @@ static void lpc17_polltimer(int argc, uint32_t arg, ...)
  *
  ****************************************************************************/
 
-static int lpc17_ifup(struct uip_driver_s *dev)
+static int lpc17_ifup(struct net_driver_s *dev)
 {
   struct lpc17_driver_s *priv = (struct lpc17_driver_s *)dev->d_private;
   uint32_t regval;
@@ -1419,7 +1419,7 @@ static int lpc17_ifup(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static int lpc17_ifdown(struct uip_driver_s *dev)
+static int lpc17_ifdown(struct net_driver_s *dev)
 {
   struct lpc17_driver_s *priv = (struct lpc17_driver_s *)dev->d_private;
   irqstate_t flags;
@@ -1461,7 +1461,7 @@ static int lpc17_ifdown(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static int lpc17_txavail(struct uip_driver_s *dev)
+static int lpc17_txavail(struct net_driver_s *dev)
 {
   struct lpc17_driver_s *priv = (struct lpc17_driver_s *)dev->d_private;
   irqstate_t flags;
@@ -1509,7 +1509,7 @@ static int lpc17_txavail(struct uip_driver_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int lpc17_addmac(struct uip_driver_s *dev, const uint8_t *mac)
+static int lpc17_addmac(struct net_driver_s *dev, const uint8_t *mac)
 {
   struct lpc17_driver_s *priv = (struct lpc17_driver_s *)dev->d_private;
 
@@ -1539,7 +1539,7 @@ static int lpc17_addmac(struct uip_driver_s *dev, const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int lpc17_rmmac(struct uip_driver_s *dev, const uint8_t *mac)
+static int lpc17_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 {
   struct lpc17_driver_s *priv = (struct lpc17_driver_s *)dev->d_private;
 

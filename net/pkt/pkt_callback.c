@@ -77,7 +77,7 @@
  *
  ****************************************************************************/
 
-uint16_t pkt_callback(FAR struct uip_driver_s *dev,
+uint16_t pkt_callback(FAR struct net_driver_s *dev,
                       FAR struct pkt_conn_s *conn, uint16_t flags)
 {
   nllvdbg("flags: %04x\n", flags);

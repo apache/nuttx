@@ -195,7 +195,7 @@ static void arp_dump(struct arp_hdr_s *arp)
  */
 
 #ifdef CONFIG_NET_ARP_IPIN
-void arp_ipin(struct uip_driver_s *dev)
+void arp_ipin(struct net_driver_s *dev)
 {
   in_addr_t srcipaddr;
 
@@ -232,7 +232,7 @@ void arp_ipin(struct uip_driver_s *dev)
  * variable d_len.
  */
 
-void arp_arpin(struct uip_driver_s *dev)
+void arp_arpin(struct net_driver_s *dev)
 {
   struct arp_hdr_s *parp = ARPBUF;
   in_addr_t ipaddr;
@@ -321,7 +321,7 @@ void arp_arpin(struct uip_driver_s *dev)
  * buffer, and the length of the packet is in the field d_len.
  */
 
-void arp_out(struct uip_driver_s *dev)
+void arp_out(struct net_driver_s *dev)
 {
   const struct arp_entry *tabptr = NULL;
   struct arp_hdr_s       *parp   = ARPBUF;

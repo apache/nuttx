@@ -113,7 +113,7 @@ struct net_poll_s
  ****************************************************************************/
 
 #ifdef HAVE_NETPOLL
-static uint16_t poll_interrupt(FAR struct uip_driver_s *dev, FAR void *conn,
+static uint16_t poll_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
                                FAR void *pvpriv, uint16_t flags)
 {
   FAR struct net_poll_s *info = (FAR struct net_poll_s *)pvpriv;

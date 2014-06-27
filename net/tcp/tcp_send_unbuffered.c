@@ -162,7 +162,7 @@ static inline int send_timeout(FAR struct send_s *pstate)
  *
  ****************************************************************************/
 
-static uint16_t tcpsend_interrupt(FAR struct uip_driver_s *dev,
+static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
                                   FAR void *pvconn,
                                   FAR void *pvpriv, uint16_t flags)
 {

@@ -98,7 +98,7 @@
  *
  ****************************************************************************/
 
-void tcp_input(struct uip_driver_s *dev)
+void tcp_input(struct net_driver_s *dev)
 {
   struct tcp_conn_s *conn = NULL;
   struct tcp_iphdr_s *pbuf = BUF;

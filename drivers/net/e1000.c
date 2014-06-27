@@ -125,7 +125,7 @@ struct e1000_dev
 
   /* This holds the information visible to uIP/NuttX */
 
-  struct uip_driver_s uip_dev;  /* Interface understood by uIP */
+  struct net_driver_s uip_dev;  /* Interface understood by uIP */
 };
 
 struct e1000_dev_head
@@ -146,7 +146,7 @@ static struct e1000_dev_head e1000_list = {0};
 /* Common TX logic */
 
 static int  e1000_transmit(struct e1000_dev *e1000);
-static int  e1000_uiptxpoll(struct uip_driver_s *dev);
+static int  e1000_uiptxpoll(struct net_driver_s *dev);
 
 /* Interrupt handling */
 
@@ -159,12 +159,12 @@ static void e1000_txtimeout(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
-static int e1000_ifup(struct uip_driver_s *dev);
-static int e1000_ifdown(struct uip_driver_s *dev);
-static int e1000_txavail(struct uip_driver_s *dev);
+static int e1000_ifup(struct net_driver_s *dev);
+static int e1000_ifdown(struct net_driver_s *dev);
+static int e1000_txavail(struct net_driver_s *dev);
 #ifdef CONFIG_NET_IGMP
-static int e1000_addmac(struct uip_driver_s *dev, const uint8_t *mac);
-static int e1000_rmmac(struct uip_driver_s *dev, const uint8_t *mac);
+static int e1000_addmac(struct net_driver_s *dev, const uint8_t *mac);
+static int e1000_rmmac(struct net_driver_s *dev, const uint8_t *mac);
 #endif
 
 /****************************************************************************
@@ -476,7 +476,7 @@ static int e1000_transmit(struct e1000_dev *e1000)
  *
  ****************************************************************************/
 
-static int e1000_uiptxpoll(struct uip_driver_s *dev)
+static int e1000_uiptxpoll(struct net_driver_s *dev)
 {
   struct e1000_dev *e1000 = (struct e1000_dev *)dev->d_private;
   int tail = e1000->tx_ring.tail;
@@ -705,7 +705,7 @@ static void e1000_polltimer(int argc, uint32_t arg, ...)
  *
  ****************************************************************************/
 
-static int e1000_ifup(struct uip_driver_s *dev)
+static int e1000_ifup(struct net_driver_s *dev)
 {
   struct e1000_dev *e1000 = (struct e1000_dev *)dev->d_private;
 
@@ -749,7 +749,7 @@ static int e1000_ifup(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static int e1000_ifdown(struct uip_driver_s *dev)
+static int e1000_ifdown(struct net_driver_s *dev)
 {
   struct e1000_dev *e1000 = (struct e1000_dev *)dev->d_private;
   irqstate_t flags;
@@ -799,7 +799,7 @@ static int e1000_ifdown(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static int e1000_txavail(struct uip_driver_s *dev)
+static int e1000_txavail(struct net_driver_s *dev)
 {
   struct e1000_dev *e1000 = (struct e1000_dev *)dev->d_private;
   int tail = e1000->tx_ring.tail;
@@ -846,7 +846,7 @@ static int e1000_txavail(struct uip_driver_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int e1000_addmac(struct uip_driver_s *dev, const uint8_t *mac)
+static int e1000_addmac(struct net_driver_s *dev, const uint8_t *mac)
 {
   /* Add the MAC address to the hardware multicast routing table */
 
@@ -873,7 +873,7 @@ static int e1000_addmac(struct uip_driver_s *dev, const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int e1000_rmmac(struct uip_driver_s *dev, const uint8_t *mac)
+static int e1000_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 {
   /* Add the MAC address to the hardware multicast routing table */
 

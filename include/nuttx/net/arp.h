@@ -134,7 +134,7 @@ void arp_init(void);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ARP_IPIN
-void arp_ipin(struct uip_driver_s *dev);
+void arp_ipin(struct net_driver_s *dev);
 #else
 # define arp_ipin(dev)
 #endif
@@ -152,7 +152,7 @@ void arp_ipin(struct uip_driver_s *dev);
  *
  ****************************************************************************/
 
-void arp_arpin(struct uip_driver_s *dev);
+void arp_arpin(struct net_driver_s *dev);
 
 /****************************************************************************
  * Name: arp_arpin
@@ -171,7 +171,7 @@ void arp_arpin(struct uip_driver_s *dev);
  *
  ****************************************************************************/
 
-void arp_out(struct uip_driver_s *dev);
+void arp_out(struct net_driver_s *dev);
 
 /****************************************************************************
  * Function: arp_timer_init

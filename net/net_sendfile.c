@@ -144,7 +144,7 @@ static inline int sendfile_timeout(FAR struct sendfile_s *pstate)
 }
 #endif /* CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */
 
-static uint16_t ack_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
+static uint16_t ack_interrupt(FAR struct net_driver_s *dev, FAR void *pvconn,
                               FAR void *pvpriv, uint16_t flags)
 {
   FAR struct sendfile_s *pstate = (FAR struct sendfile_s *)pvpriv;
@@ -223,7 +223,7 @@ static uint16_t ack_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
  *
  ****************************************************************************/
 
-static uint16_t sendfile_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
+static uint16_t sendfile_interrupt(FAR struct net_driver_s *dev, FAR void *pvconn,
                                    FAR void *pvpriv, uint16_t flags)
 {
   FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s*)pvconn;

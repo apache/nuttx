@@ -91,7 +91,7 @@
 
 int netdev_count(void)
 {
-  struct uip_driver_s *dev;
+  struct net_driver_s *dev;
   int ndev;
 
   netdev_semtake();

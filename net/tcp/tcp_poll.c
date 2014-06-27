@@ -94,7 +94,7 @@
  *
  ****************************************************************************/
 
-void tcp_poll(FAR struct uip_driver_s *dev, FAR struct tcp_conn_s *conn)
+void tcp_poll(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
 {
   uint8_t result;
 

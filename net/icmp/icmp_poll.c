@@ -86,7 +86,7 @@
  *
  ****************************************************************************/
 
-void icmp_poll(FAR struct uip_driver_s *dev)
+void icmp_poll(FAR struct net_driver_s *dev)
 {
   /* Setup for the application callback */
 

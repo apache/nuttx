@@ -103,7 +103,7 @@ FAR struct uip_callback_s *g_echocallback = NULL;
  *
  ****************************************************************************/
 
-void icmp_input(FAR struct uip_driver_s *dev)
+void icmp_input(FAR struct net_driver_s *dev)
 {
   FAR struct icmp_iphdr_s *picmp = ICMPBUF;
 

@@ -99,7 +99,7 @@ static void uip_mcastmac(uip_ipaddr_t *ip, FAR uint8_t *mac)
  *
  ****************************************************************************/
 
-void igmp_addmcastmac(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *ip)
+void igmp_addmcastmac(FAR struct net_driver_s *dev, FAR uip_ipaddr_t *ip)
 {
   uint8_t mcastmac[6];
 
@@ -119,7 +119,7 @@ void igmp_addmcastmac(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *ip)
  *
  ****************************************************************************/
 
-void igmp_removemcastmac(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *ip)
+void igmp_removemcastmac(FAR struct net_driver_s *dev, FAR uip_ipaddr_t *ip)
 {
   uint8_t mcastmac[6];
 

@@ -260,7 +260,7 @@ struct enc_driver_s
 
   /* This holds the information visible to uIP/NuttX */
 
-  struct uip_driver_s   dev;           /* Interface understood by uIP */
+  struct net_driver_s   dev;           /* Interface understood by uIP */
 
   /* Statistics */
 
@@ -328,7 +328,7 @@ static void enc_wrphy(FAR struct enc_driver_s *priv, uint8_t phyaddr,
 
 static int  enc_txenqueue(FAR struct enc_driver_s *priv);
 static int  enc_transmit(FAR struct enc_driver_s *priv);
-static int  enc_uiptxpoll(struct uip_driver_s *dev);
+static int  enc_uiptxpoll(struct net_driver_s *dev);
 
 /* Common RX logic */
 
@@ -355,13 +355,13 @@ static void enc_polltimer(int argc, uint32_t arg, ...);
 
 /* NuttX callback functions */
 
-static int  enc_ifup(struct uip_driver_s *dev);
-static int  enc_ifdown(struct uip_driver_s *dev);
-static int  enc_txavail(struct uip_driver_s *dev);
-static int  enc_rxavail(struct uip_driver_s *dev);
+static int  enc_ifup(struct net_driver_s *dev);
+static int  enc_ifdown(struct net_driver_s *dev);
+static int  enc_txavail(struct net_driver_s *dev);
+static int  enc_rxavail(struct net_driver_s *dev);
 #ifdef CONFIG_NET_IGMP
-static int  enc_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
-static int  enc_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
+static int  enc_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
+static int  enc_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
 
 /* Initialization */
@@ -1196,7 +1196,7 @@ static int enc_txenqueue(FAR struct enc_driver_s *priv)
  *
  ****************************************************************************/
 
-static int enc_uiptxpoll(struct uip_driver_s *dev)
+static int enc_uiptxpoll(struct net_driver_s *dev)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)dev->d_private;
   int ret = OK;
@@ -2165,7 +2165,7 @@ static void enc_polltimer(int argc, uint32_t arg, ...)
  *
  ****************************************************************************/
 
-static int enc_ifup(struct uip_driver_s *dev)
+static int enc_ifup(struct net_driver_s *dev)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)dev->d_private;
   int ret;
@@ -2239,7 +2239,7 @@ static int enc_ifup(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static int enc_ifdown(struct uip_driver_s *dev)
+static int enc_ifdown(struct net_driver_s *dev)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)dev->d_private;
   irqstate_t flags;
@@ -2297,7 +2297,7 @@ static int enc_ifdown(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static int enc_txavail(struct uip_driver_s *dev)
+static int enc_txavail(struct net_driver_s *dev)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)dev->d_private;
   irqstate_t flags;
@@ -2352,7 +2352,7 @@ static int enc_txavail(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static int enc_rxavail(struct uip_driver_s *dev)
+static int enc_rxavail(struct net_driver_s *dev)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)dev->d_private;
 
@@ -2384,7 +2384,7 @@ static int enc_rxavail(struct uip_driver_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int enc_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+static int enc_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)dev->d_private;
 
@@ -2422,7 +2422,7 @@ static int enc_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int enc_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+static int enc_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)dev->d_private;
 

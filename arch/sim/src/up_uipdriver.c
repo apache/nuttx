@@ -84,7 +84,7 @@ struct timer
  ****************************************************************************/
 
 static struct timer g_periodic_timer;
-static struct uip_driver_s g_sim_dev;
+static struct net_driver_s g_sim_dev;
 
 /****************************************************************************
  * Private Functions
@@ -115,7 +115,7 @@ static inline int up_comparemac(uint8_t *paddr1, struct ether_addr *paddr2)
 }
 #endif
 
-static int sim_uiptxpoll(struct uip_driver_s *dev)
+static int sim_uiptxpoll(struct net_driver_s *dev)
 {
   /* If the polling resulted in data that should be sent out on the network,
    * the field d_len is set to a value > 0.

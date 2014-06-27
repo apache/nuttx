@@ -161,7 +161,7 @@
  * file pointers) for the connection.
  */
 
-struct uip_driver_s;      /* Forward reference */
+struct net_driver_s;      /* Forward reference */
 struct uip_callback_s;    /* Forward reference */
 struct tcp_backlog_s;     /* Forward reference */
 

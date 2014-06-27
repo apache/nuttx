@@ -89,7 +89,7 @@
  *
  ****************************************************************************/
 
-void icmp_send(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *destaddr)
+void icmp_send(FAR struct net_driver_s *dev, FAR uip_ipaddr_t *destaddr)
 {
   FAR struct icmp_iphdr_s *picmp = ICMPBUF;
 

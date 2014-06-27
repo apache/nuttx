@@ -143,7 +143,7 @@ static void ioctl_setipaddr(FAR uip_ipaddr_t *outaddr, FAR const void *inaddr)
  *
  ****************************************************************************/
 
-static void ioctl_ifup(FAR struct uip_driver_s *dev)
+static void ioctl_ifup(FAR struct net_driver_s *dev)
 {
   /* Make sure that the device supports the d_ifup() method */
 
@@ -165,7 +165,7 @@ static void ioctl_ifup(FAR struct uip_driver_s *dev)
     }
 }
 
-static void ioctl_ifdown(FAR struct uip_driver_s *dev)
+static void ioctl_ifdown(FAR struct net_driver_s *dev)
 {
   /* Make sure that the device supports the d_ifdown() method */
 
@@ -201,7 +201,7 @@ static void ioctl_ifdown(FAR struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static FAR struct uip_driver_s *netdev_ifrdev(FAR struct ifreq *req)
+static FAR struct net_driver_s *netdev_ifrdev(FAR struct ifreq *req)
 {
   if (!req)
     {
@@ -236,7 +236,7 @@ static FAR struct uip_driver_s *netdev_ifrdev(FAR struct ifreq *req)
 static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
                            FAR struct ifreq *req)
 {
-  FAR struct uip_driver_s *dev;
+  FAR struct net_driver_s *dev;
   int ret = -EINVAL;
 
   nvdbg("cmd: %d\n", cmd);
@@ -463,7 +463,7 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static FAR struct uip_driver_s *netdev_imsfdev(FAR struct ip_msfilter *imsf)
+static FAR struct net_driver_s *netdev_imsfdev(FAR struct ip_msfilter *imsf)
 {
   if (!imsf)
     {
@@ -500,7 +500,7 @@ static FAR struct uip_driver_s *netdev_imsfdev(FAR struct ip_msfilter *imsf)
 static int netdev_imsfioctl(FAR struct socket *psock, int cmd,
                             FAR struct ip_msfilter *imsf)
 {
-  FAR struct uip_driver_s *dev;
+  FAR struct net_driver_s *dev;
   int ret = -EINVAL;
 
   nvdbg("cmd: %d\n", cmd);

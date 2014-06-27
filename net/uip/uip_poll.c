@@ -74,7 +74,7 @@
  ****************************************************************************/
 
 #if defined(CONFIG_NET_PKT)
-static int uip_pollpktconnections(struct uip_driver_s *dev,
+static int uip_pollpktconnections(struct net_driver_s *dev,
                                   uip_poll_callback_t callback)
 {
   FAR struct pkt_conn_s *pkt_conn = NULL;
@@ -110,7 +110,7 @@ static int uip_pollpktconnections(struct uip_driver_s *dev,
  ****************************************************************************/
 
 #if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING)
-static inline int uip_pollicmp(FAR struct uip_driver_s *dev,
+static inline int uip_pollicmp(FAR struct net_driver_s *dev,
                                uip_poll_callback_t callback)
 {
   /* Perform the UDP TX poll */
@@ -136,7 +136,7 @@ static inline int uip_pollicmp(FAR struct uip_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static inline int uip_polligmp(FAR struct uip_driver_s *dev,
+static inline int uip_polligmp(FAR struct net_driver_s *dev,
                                uip_poll_callback_t callback)
 {
   /* Perform the IGMP TX poll */
@@ -162,7 +162,7 @@ static inline int uip_polligmp(FAR struct uip_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_UDP
-static int uip_polludpconnections(FAR struct uip_driver_s *dev,
+static int uip_polludpconnections(FAR struct net_driver_s *dev,
                                   uip_poll_callback_t callback)
 {
   FAR struct udp_conn_s *conn = NULL;
@@ -198,7 +198,7 @@ static int uip_polludpconnections(FAR struct uip_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
-static inline int uip_polltcpconnections(FAR struct uip_driver_s *dev,
+static inline int uip_polltcpconnections(FAR struct net_driver_s *dev,
                                          uip_poll_callback_t callback)
 {
   FAR struct tcp_conn_s *conn  = NULL;
@@ -237,7 +237,7 @@ static inline int uip_polltcpconnections(FAR struct uip_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
-static inline int uip_polltcptimer(FAR struct uip_driver_s *dev,
+static inline int uip_polltcptimer(FAR struct net_driver_s *dev,
                                    uip_poll_callback_t callback, int hsec)
 {
   FAR struct tcp_conn_s *conn  = NULL;
@@ -291,7 +291,7 @@ static inline int uip_polltcptimer(FAR struct uip_driver_s *dev,
  *
  ****************************************************************************/
 
-int uip_poll(FAR struct uip_driver_s *dev, uip_poll_callback_t callback)
+int uip_poll(FAR struct net_driver_s *dev, uip_poll_callback_t callback)
 {
   int bstop;
 
@@ -366,7 +366,7 @@ int uip_poll(FAR struct uip_driver_s *dev, uip_poll_callback_t callback)
  *
  ****************************************************************************/
 
-int uip_timer(FAR struct uip_driver_s *dev, uip_poll_callback_t callback,
+int uip_timer(FAR struct net_driver_s *dev, uip_poll_callback_t callback,
               int hsec)
 {
   int bstop;

@@ -69,7 +69,7 @@
 
 /* Representation of a uIP UDP connection */
 
-struct uip_driver_s;      /* Forward reference */
+struct net_driver_s;      /* Forward reference */
 struct uip_callback_s;    /* Forward reference */
 struct udp_conn_s
 {

@@ -247,10 +247,10 @@ EXTERN uip_ipaddr_t g_allrouters;
  *
  ****************************************************************************/
 
-void igmp_devinit(FAR struct uip_driver_s *dev);
-int igmp_joingroup(FAR struct uip_driver_s *dev,
+void igmp_devinit(FAR struct net_driver_s *dev);
+int igmp_joingroup(FAR struct net_driver_s *dev,
                    FAR const struct in_addr *grpaddr);
-int igmp_leavegroup(FAR struct uip_driver_s *dev,
+int igmp_leavegroup(FAR struct net_driver_s *dev,
                     FAR const struct in_addr *grpaddr);
 
 #undef EXTERN

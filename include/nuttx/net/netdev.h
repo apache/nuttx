@@ -73,14 +73,14 @@
  * of this structure.
  */
 
-struct uip_driver_s
+struct net_driver_s
 {
   /* This link is used to maintain a single-linked list of ethernet drivers.
    * Must be the first field in the structure due to blink type casting.
    */
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
-  FAR struct uip_driver_s *flink;
+  FAR struct net_driver_s *flink;
 
   /* This is the name of network device assigned when netdev_register was called.
    * This name is only used to support socket ioctl lookups by device name
@@ -177,15 +177,15 @@ struct uip_driver_s
 
   /* Driver callbacks */
 
-  int (*d_ifup)(struct uip_driver_s *dev);
-  int (*d_ifdown)(struct uip_driver_s *dev);
-  int (*d_txavail)(struct uip_driver_s *dev);
+  int (*d_ifup)(struct net_driver_s *dev);
+  int (*d_ifdown)(struct net_driver_s *dev);
+  int (*d_txavail)(struct net_driver_s *dev);
 #ifdef CONFIG_NET_RXAVAIL
-  int (*d_rxavail)(struct uip_driver_s *dev);
+  int (*d_rxavail)(struct net_driver_s *dev);
 #endif
 #ifdef CONFIG_NET_IGMP
-  int (*d_addmac)(struct uip_driver_s *dev, FAR const uint8_t *mac);
-  int (*d_rmmac)(struct uip_driver_s *dev, FAR const uint8_t *mac);
+  int (*d_addmac)(struct net_driver_s *dev, FAR const uint8_t *mac);
+  int (*d_rmmac)(struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
 #ifdef CONFIG_NETDEV_PHY_IOCTL
   int (*d_ioctl)(int cmd, struct mii_ioctl_data *req);
@@ -263,7 +263,7 @@ struct uip_driver_s
  *           }
  */
 
-int uip_input(struct uip_driver_s *dev);
+int uip_input(struct net_driver_s *dev);
 
 /* Polling of connections
  *
@@ -315,9 +315,9 @@ int uip_input(struct uip_driver_s *dev);
  *   }
  */
 
-typedef int (*uip_poll_callback_t)(struct uip_driver_s *dev);
-int uip_poll(struct uip_driver_s *dev, uip_poll_callback_t callback);
-int uip_timer(struct uip_driver_s *dev, uip_poll_callback_t callback, int hsec);
+typedef int (*uip_poll_callback_t)(struct net_driver_s *dev);
+int uip_poll(struct net_driver_s *dev, uip_poll_callback_t callback);
+int uip_timer(struct net_driver_s *dev, uip_poll_callback_t callback, int hsec);
 
 /* Carrier detection
  * Call netdev_carrier_on when the carrier has become available and the device
@@ -327,8 +327,8 @@ int uip_timer(struct uip_driver_s *dev, uip_poll_callback_t callback, int hsec);
  * into non operational state.
  */
 
-int netdev_carrier_on(FAR struct uip_driver_s *dev);
-int netdev_carrier_off(FAR struct uip_driver_s *dev);
+int netdev_carrier_on(FAR struct net_driver_s *dev);
+int netdev_carrier_off(FAR struct net_driver_s *dev);
 
 /* By defining UIP_ARCH_CHKSUM, the architecture can replace up_incr32
  * with hardware assisted solutions.
@@ -375,7 +375,7 @@ uint16_t uip_chksum(uint16_t *buf, uint16_t len);
  * buffer.
  */
 
-uint16_t uip_ipchksum(struct uip_driver_s *dev);
+uint16_t uip_ipchksum(struct net_driver_s *dev);
 
 /* Calculate the TCP checksum of the packet in d_buf and d_appdata.
  *
@@ -390,8 +390,8 @@ uint16_t uip_ipchksum(struct uip_driver_s *dev);
  * to by d_appdata.
  */
 
-uint16_t tcp_chksum(struct uip_driver_s *dev);
-uint16_t udp_chksum(struct uip_driver_s *dev);
-uint16_t icmp_chksum(struct uip_driver_s *dev, int len);
+uint16_t tcp_chksum(struct net_driver_s *dev);
+uint16_t udp_chksum(struct net_driver_s *dev);
+uint16_t icmp_chksum(struct net_driver_s *dev, int len);
 
 #endif /* __INCLUDE_NUTTX_NET_NETDEV_H */

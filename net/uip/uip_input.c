@@ -307,7 +307,7 @@ nullreturn:
  *
  ****************************************************************************/
 
-int uip_input(struct uip_driver_s *dev)
+int uip_input(struct net_driver_s *dev)
 {
   struct uip_ip_hdr *pbuf = BUF;
   uint16_t iplen;

@@ -100,7 +100,7 @@
 int getsockname(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen)
 {
   FAR struct socket *psock = sockfd_socket(sockfd);
-  FAR struct uip_driver_s *dev;
+  FAR struct net_driver_s *dev;
 
 #if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_UDP)
 #ifdef CONFIG_NET_IPv6

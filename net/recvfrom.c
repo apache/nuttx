@@ -122,7 +122,7 @@ struct recvfrom_s
  ****************************************************************************/
 
 #if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP)
-static size_t recvfrom_newdata(FAR struct uip_driver_s *dev,
+static size_t recvfrom_newdata(FAR struct net_driver_s *dev,
                                FAR struct recvfrom_s *pstate)
 {
   size_t recvlen;
@@ -172,7 +172,7 @@ static size_t recvfrom_newdata(FAR struct uip_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_PKT
-static void recvfrom_newpktdata(FAR struct uip_driver_s *dev,
+static void recvfrom_newpktdata(FAR struct net_driver_s *dev,
                                 FAR struct recvfrom_s *pstate)
 {
   size_t recvlen;
@@ -218,7 +218,7 @@ static void recvfrom_newpktdata(FAR struct uip_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
-static inline void recvfrom_newtcpdata(FAR struct uip_driver_s *dev,
+static inline void recvfrom_newtcpdata(FAR struct net_driver_s *dev,
                                        FAR struct recvfrom_s *pstate)
 {
   /* Take as much data from the packet as we can */
@@ -290,7 +290,7 @@ static inline void recvfrom_newtcpdata(FAR struct uip_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_UDP
-static inline void recvfrom_newudpdata(FAR struct uip_driver_s *dev,
+static inline void recvfrom_newudpdata(FAR struct net_driver_s *dev,
                                        FAR struct recvfrom_s *pstate)
 {
   /* Take as much data from the packet as we can */
@@ -472,7 +472,7 @@ static int recvfrom_timeout(struct recvfrom_s *pstate)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_PKT
-static inline void recvfrom_pktsender(FAR struct uip_driver_s *dev,
+static inline void recvfrom_pktsender(FAR struct net_driver_s *dev,
                                       FAR struct recvfrom_s *pstate)
 {
 }
@@ -492,7 +492,7 @@ static inline void recvfrom_pktsender(FAR struct uip_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_PKT
-static uint16_t recvfrom_pktinterrupt(FAR struct uip_driver_s *dev,
+static uint16_t recvfrom_pktinterrupt(FAR struct net_driver_s *dev,
                                       FAR void *conn, FAR void *pvpriv,
                                       uint16_t flags)
 {
@@ -560,7 +560,7 @@ static uint16_t recvfrom_pktinterrupt(FAR struct uip_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
-static inline void recvfrom_tcpsender(FAR struct uip_driver_s *dev,
+static inline void recvfrom_tcpsender(FAR struct net_driver_s *dev,
                                       FAR struct recvfrom_s *pstate)
 {
 #ifdef CONFIG_NET_IPv6
@@ -604,7 +604,7 @@ static inline void recvfrom_tcpsender(FAR struct uip_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
-static uint16_t recvfrom_tcpinterrupt(FAR struct uip_driver_s *dev,
+static uint16_t recvfrom_tcpinterrupt(FAR struct net_driver_s *dev,
                                       FAR void *conn, FAR void *pvpriv,
                                       uint16_t flags)
 {
@@ -807,7 +807,7 @@ static uint16_t recvfrom_tcpinterrupt(FAR struct uip_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_UDP
-static inline void recvfrom_udpsender(struct uip_driver_s *dev, struct recvfrom_s *pstate)
+static inline void recvfrom_udpsender(struct net_driver_s *dev, struct recvfrom_s *pstate)
 {
 #ifdef CONFIG_NET_IPv6
   FAR struct sockaddr_in6 *infrom = pstate->rf_from;
@@ -850,7 +850,7 @@ static inline void recvfrom_udpsender(struct uip_driver_s *dev, struct recvfrom_
  ****************************************************************************/
 
 #ifdef CONFIG_NET_UDP
-static uint16_t recvfrom_udpinterrupt(struct uip_driver_s *dev, void *pvconn,
+static uint16_t recvfrom_udpinterrupt(struct net_driver_s *dev, void *pvconn,
                                       void *pvpriv, uint16_t flags)
 {
   struct recvfrom_s *pstate = (struct recvfrom_s *)pvpriv;

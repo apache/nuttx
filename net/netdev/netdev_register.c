@@ -81,7 +81,7 @@ static int g_next_devnum = 0;
 
 /* List of registered ethernet device drivers */
 
-struct uip_driver_s *g_netdevices = NULL;
+struct net_driver_s *g_netdevices = NULL;
 
 /****************************************************************************
  * Private Functions
@@ -109,7 +109,7 @@ struct uip_driver_s *g_netdevices = NULL;
  *
  ****************************************************************************/
 
-int netdev_register(FAR struct uip_driver_s *dev)
+int netdev_register(FAR struct net_driver_s *dev)
 {
   if (dev)
     {

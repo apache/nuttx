@@ -77,7 +77,7 @@
  ****************************************************************************/
 
 static inline uint16_t
-uip_dataevent(FAR struct uip_driver_s *dev, FAR struct tcp_conn_s *conn,
+uip_dataevent(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
               uint16_t flags)
 {
   uint16_t ret;
@@ -148,7 +148,7 @@ uip_dataevent(FAR struct uip_driver_s *dev, FAR struct tcp_conn_s *conn,
  *
  ****************************************************************************/
 
-uint16_t tcp_callback(FAR struct uip_driver_s *dev, FAR struct tcp_conn_s *conn,
+uint16_t tcp_callback(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                       uint16_t flags)
 {
   /* Preserve the UIP_ACKDATA, UIP_CLOSE, and UIP_ABORT in the response.

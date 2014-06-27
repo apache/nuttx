@@ -125,8 +125,8 @@ struct socketlist
 
 /* Callback from netdev_foreach() */
 
-struct uip_driver_s; /* Forward reference. Defined in nuttx/net/netdev.h */
-typedef int (*netdev_callback_t)(FAR struct uip_driver_s *dev, void *arg);
+struct net_driver_s; /* Forward reference. Defined in nuttx/net/netdev.h */
+typedef int (*netdev_callback_t)(FAR struct net_driver_s *dev, void *arg);
 
 /****************************************************************************
  * Public Data
@@ -294,12 +294,12 @@ int net_vfcntl(int sockfd, int cmd, va_list ap);
  * addresses
  */
 
-int netdev_register(FAR struct uip_driver_s *dev);
+int netdev_register(FAR struct net_driver_s *dev);
 
 /* netdev-unregister.c *********************************************************/
 /* Unregister a network device driver. */
 
-int netdev_unregister(FAR struct uip_driver_s *dev);
+int netdev_unregister(FAR struct net_driver_s *dev);
 
 /* net_foreach.c ************************************************************/
 /* Enumerates all registered network devices */

@@ -110,7 +110,7 @@ struct cs89x0_driver_s
 
   /* This holds the information visible to uIP/NuttX */
 
-  struct uip_driver_s cs_dev;  /* Interface understood by uIP */
+  struct net_driver_s cs_dev;  /* Interface understood by uIP */
 
   /* Driver statistics */
 

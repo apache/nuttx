@@ -156,7 +156,7 @@ void uip_callbackfree(FAR struct uip_callback_s *cb,
  *
  ****************************************************************************/
 
-uint16_t uip_callbackexecute(FAR struct uip_driver_s *dev, FAR void *pvconn,
+uint16_t uip_callbackexecute(FAR struct net_driver_s *dev, FAR void *pvconn,
                              uint16_t flags, FAR struct uip_callback_s *list);
 
 /****************************************************************************
@@ -183,16 +183,16 @@ uint16_t uip_callbackexecute(FAR struct uip_driver_s *dev, FAR void *pvconn,
  *
  ****************************************************************************/
 
-void uip_send(FAR struct uip_driver_s *dev, FAR const void *buf, int len);
+void uip_send(FAR struct net_driver_s *dev, FAR const void *buf, int len);
 
 #ifdef CONFIG_NET_IOB
 struct iob_s;
-void uip_iobsend(FAR struct uip_driver_s *dev, FAR struct iob_s *buf,
+void uip_iobsend(FAR struct net_driver_s *dev, FAR struct iob_s *buf,
                  unsigned int len, unsigned int offset);
 #endif
 
 #ifdef CONFIG_NET_PKT
-void uip_pktsend(FAR struct uip_driver_s *dev, FAR const void *buf,
+void uip_pktsend(FAR struct net_driver_s *dev, FAR const void *buf,
                  unsigned int len);
 #endif
 

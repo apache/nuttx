@@ -152,7 +152,7 @@ static inline int ping_timeout(FAR struct icmp_ping_s *pstate)
  *
  ****************************************************************************/
 
-static uint16_t ping_interrupt(FAR struct uip_driver_s *dev, FAR void *conn,
+static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
                                FAR void *pvpriv, uint16_t flags)
 {
   FAR struct icmp_ping_s *pstate = (struct icmp_ping_s *)pvpriv;

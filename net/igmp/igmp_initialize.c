@@ -103,7 +103,7 @@ void igmp_initialize(void)
  *
  ****************************************************************************/
 
-void igmp_devinit(struct uip_driver_s *dev)
+void igmp_devinit(struct net_driver_s *dev)
 {
   nvdbg("IGMP initializing dev %p\n", dev);
   DEBUGASSERT(dev->grplist.head == NULL);

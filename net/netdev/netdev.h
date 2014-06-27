@@ -70,7 +70,7 @@ extern "C"
 /* List of registered Ethernet device drivers */
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
-EXTERN struct uip_driver_s *g_netdevices;
+EXTERN struct net_driver_s *g_netdevices;
 #endif
 
 /****************************************************************************
@@ -88,13 +88,13 @@ void netdev_semgive(void);
 /* netdev_findbyname.c *******************************************************/
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
-FAR struct uip_driver_s *netdev_findbyname(FAR const char *ifname);
+FAR struct net_driver_s *netdev_findbyname(FAR const char *ifname);
 #endif
 
 /* netdev_findbyaddr.c *******************************************************/
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
-FAR struct uip_driver_s *netdev_findbyaddr(const uip_ipaddr_t addr);
+FAR struct net_driver_s *netdev_findbyaddr(const uip_ipaddr_t addr);
 #endif
 
 /* netdev_txnotify.c *********************************************************/

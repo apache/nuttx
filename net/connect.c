@@ -80,7 +80,7 @@ static inline int psock_setup_callbacks(FAR struct socket *psock,
                                         FAR struct tcp_connect_s *pstate);
 static inline void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
                                           int status);
-static uint16_t psock_connect_interrupt(FAR struct uip_driver_s *dev,
+static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
                                         FAR void *pvconn, FAR void *pvpriv,
                                         uint16_t flags);
 #ifdef CONFIG_NET_IPv6
@@ -181,7 +181,7 @@ static inline void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
-static uint16_t psock_connect_interrupt(FAR struct uip_driver_s *dev,
+static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
                                         FAR void *pvconn, FAR void *pvpriv,
                                         uint16_t flags)
 {

@@ -220,7 +220,7 @@ void uip_callbackfree(FAR struct uip_callback_s *cb,
  *
  ****************************************************************************/
 
-uint16_t uip_callbackexecute(FAR struct uip_driver_s *dev, void *pvconn,
+uint16_t uip_callbackexecute(FAR struct net_driver_s *dev, void *pvconn,
                              uint16_t flags, FAR struct uip_callback_s *list)
 {
   FAR struct uip_callback_s *next;

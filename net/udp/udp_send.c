@@ -95,7 +95,7 @@
  *
  ****************************************************************************/
 
-void udp_send(struct uip_driver_s *dev, struct udp_conn_s *conn)
+void udp_send(struct net_driver_s *dev, struct udp_conn_s *conn)
 {
   FAR struct udp_iphdr_s *pudpbuf = UDPBUF;
 

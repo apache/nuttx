@@ -208,7 +208,7 @@ void up_timerhook(void);
 int  up_netinitialize(void);
 void up_netuninitialize(void);
 # ifdef CONFIG_ARCH_MCFILTER
-int up_multicastfilter(FAR struct uip_driver_s *dev, FAR uint8_t *mac, bool enable);
+int up_multicastfilter(FAR struct net_driver_s *dev, FAR uint8_t *mac, bool enable);
 # else
 #   define up_multicastfilter(dev, mac, enable)
 # endif

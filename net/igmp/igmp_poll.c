@@ -79,7 +79,7 @@
  *
  ****************************************************************************/
 
-static inline void uip_schedsend(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group)
+static inline void uip_schedsend(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group)
 {
   uip_ipaddr_t *dest;
 
@@ -142,7 +142,7 @@ static inline void uip_schedsend(FAR struct uip_driver_s *dev, FAR struct igmp_g
  *
  ****************************************************************************/
 
-void igmp_poll(FAR struct uip_driver_s *dev)
+void igmp_poll(FAR struct net_driver_s *dev)
 {
   FAR struct igmp_group_s *group;
 
