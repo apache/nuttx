@@ -64,7 +64,7 @@
   UNUSED(SAM_IRQ_RESERVED_7)          /* Vector 16+7: Reserved */
   VECTOR(sam_uart0, SAM_IRQ_UART0)    /* Vector 16+8: Universal Asynchronous Receiver Transmitter 0 */
   UNUSED(SAM_IRQ_RESERVED_9)          /* Vector 16+9: Reserved */
-//VECTOR(sam_smc, SAM_IRQ_SMC)        /* Vector 16+10: Static Memory Controller */
+  UNUSED(SAM_IRQ_RESERVED_10)         /* Vector 16+10: Unused */
   VECTOR(sam_pioa, SAM_IRQ_PIOA)      /* Vector 16+11: Parallel I/O Controller A */
   VECTOR(sam_piob, SAM_IRQ_PIOB)      /* Vector 16+12: Parallel I/O Controller B */
   UNUSED(SAM_IRQ_RESERVED_13)         /* Vector 16+13: Reserved */
