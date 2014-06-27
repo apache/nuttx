@@ -133,7 +133,7 @@ void igmp_input(struct net_driver_s *dev)
 
   /* Calculate and check the IGMP checksum */
 
-  if (uip_chksum((uint16_t*)&IGMPBUF->type, UIP_IGMPH_LEN) != 0)
+  if (net_chksum((uint16_t*)&IGMPBUF->type, UIP_IGMPH_LEN) != 0)
     {
       IGMP_STATINCR(g_netstats.igmp.chksum_errors);
       nlldbg("Checksum error\n");

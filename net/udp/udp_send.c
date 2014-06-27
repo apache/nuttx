@@ -53,6 +53,7 @@
 #include <nuttx/net/netstats.h>
 
 #include "uip/uip.h"
+#include "utils/utils.h"
 #include "udp/udp.h"
 
 /****************************************************************************
@@ -144,7 +145,7 @@ void udp_send(struct net_driver_s *dev, struct udp_conn_s *conn)
       /* Calculate IP checksum. */
 
       pudpbuf->ipchksum    = 0;
-      pudpbuf->ipchksum    = ~(uip_ipchksum(dev));
+      pudpbuf->ipchksum    = ~(ip_chksum(dev));
 
 #endif /* CONFIG_NET_IPv6 */
 

@@ -57,6 +57,7 @@
 #include <nuttx/net/netstats.h>
 
 #include "uip/uip.h"
+#include "utils/utils.h"
 #include "tcp/tcp.h"
 
 /****************************************************************************
@@ -210,7 +211,7 @@ void tcp_input(struct net_driver_s *dev)
               goto drop;
             }
 
-          uip_incr32(conn->rcvseq, 1);
+          net_incr32(conn->rcvseq, 1);
 
           /* Parse the TCP MSS option, if present. */
 
@@ -474,7 +475,7 @@ found:
             if (dev->d_len > 0)
               {
                 flags          |= UIP_NEWDATA;
-                uip_incr32(conn->rcvseq, dev->d_len);
+                net_incr32(conn->rcvseq, dev->d_len);
               }
 
             dev->d_sndlen       = 0;
@@ -557,7 +558,7 @@ found:
             conn->tcpstateflags = UIP_ESTABLISHED;
             memcpy(conn->rcvseq, pbuf->seqno, 4);
 
-            uip_incr32(conn->rcvseq, 1);
+            net_incr32(conn->rcvseq, 1);
             conn->unacked       = 0;
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
@@ -623,7 +624,7 @@ found:
              * been closed.
              */
 
-            uip_incr32(conn->rcvseq, dev->d_len + 1);
+            net_incr32(conn->rcvseq, dev->d_len + 1);
             flags |= UIP_CLOSE;
 
             if (dev->d_len > 0)
@@ -657,7 +658,7 @@ found:
                 dev->d_urglen = dev->d_len;
               }
 
-            uip_incr32(conn->rcvseq, dev->d_urglen);
+            net_incr32(conn->rcvseq, dev->d_urglen);
             dev->d_len     -= dev->d_urglen;
             dev->d_urgdata  = dev->d_appdata;
             dev->d_appdata += dev->d_urglen;
@@ -724,7 +725,7 @@ found:
               {
                 /* Update the sequence number using the saved length */
 
-                uip_incr32(conn->rcvseq, len);
+                net_incr32(conn->rcvseq, len);
               }
 
             /* Send the response, ACKing the data or not, as appropriate */
@@ -757,7 +758,7 @@ found:
 
         if (dev->d_len > 0)
           {
-            uip_incr32(conn->rcvseq, dev->d_len);
+            net_incr32(conn->rcvseq, dev->d_len);
           }
 
         if ((pbuf->flags & TCP_FIN) != 0)
@@ -775,7 +776,7 @@ found:
                 nllvdbg("TCP state: UIP_CLOSING\n");
               }
 
-            uip_incr32(conn->rcvseq, 1);
+            net_incr32(conn->rcvseq, 1);
             (void)tcp_callback(dev, conn, UIP_CLOSE);
             tcp_send(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
             return;
@@ -799,7 +800,7 @@ found:
       case UIP_FIN_WAIT_2:
         if (dev->d_len > 0)
           {
-            uip_incr32(conn->rcvseq, dev->d_len);
+            net_incr32(conn->rcvseq, dev->d_len);
           }
 
         if ((pbuf->flags & TCP_FIN) != 0)
@@ -808,7 +809,7 @@ found:
             conn->timer         = 0;
             nllvdbg("TCP state: UIP_TIME_WAIT\n");
 
-            uip_incr32(conn->rcvseq, 1);
+            net_incr32(conn->rcvseq, 1);
             (void)tcp_callback(dev, conn, UIP_CLOSE);
             tcp_send(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
             return;

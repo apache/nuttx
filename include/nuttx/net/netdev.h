@@ -330,68 +330,71 @@ int uip_timer(struct net_driver_s *dev, uip_poll_callback_t callback, int hsec);
 int netdev_carrier_on(FAR struct net_driver_s *dev);
 int netdev_carrier_off(FAR struct net_driver_s *dev);
 
-/* By defining UIP_ARCH_CHKSUM, the architecture can replace up_incr32
- * with hardware assisted solutions.
- */
+/****************************************************************************
+ * Name: net_chksum
+ *
+ * Description:
+ *   Calculate the Internet checksum over a buffer.
+ *
+ *   The Internet checksum is the one's complement of the one's complement
+ *   sum of all 16-bit words in the buffer.
+ *
+ *   See RFC1071.
+ *
+ *   If CONFIG_NET_ARCH_CHKSUM is defined, then this function must be
+ *   provided by architecture-specific logic.
+ *
+ * Input Parameters:
+ *
+ *   buf - A pointer to the buffer over which the checksum is to be computed.
+ *
+ *   len - The length of the buffer over which the checksum is to be computed.
+ *
+ * Returned Value:
+ *   The Internet checksum of the buffer.
+ *
+ ****************************************************************************/
 
-/* Carry out a 32-bit addition.
- *
- * op32 - A pointer to a 4-byte array representing a 32-bit
- *   integer in network byte order (big endian).  This value may not
- *   be word aligned. The value pointed to by op32 is modified in place
- *
- * op16 - A 16-bit integer in host byte order.
- */
+uint16_t net_chksum(FAR uint16_t *data, uint16_t len);
 
-void uip_incr32(uint8_t *op32, uint16_t op16);
+/****************************************************************************
+ * Name: net_incr32
+ *
+ * Description:
+ *
+ *   Carry out a 32-bit addition.
+ *
+ *   By defining CONFIG_NET_ARCH_INCR32, the architecture can replace
+ *   net_incr32 with hardware assisted solutions.
+ *
+ * Input Parameters:
+ *   op32 - A pointer to a 4-byte array representing a 32-bit integer in
+ *          network byte order (big endian).  This value may not be word
+ *          aligned. The value pointed to by op32 is modified in place
+ *
+ *   op16 - A 16-bit integer in host byte order.
+ *
+ ****************************************************************************/
 
-/* Calculate the Internet checksum over a buffer.
- *
- * The Internet checksum is the one's complement of the one's
- * complement sum of all 16-bit words in the buffer.
- *
- * See RFC1071.
- *
- * Note: This function is not called in the current version of uIP,
- * but future versions might make use of it.
- *
- * buf A pointer to the buffer over which the checksum is to be
- * computed.
- *
- * len The length of the buffer over which the checksum is to
- * be computed.
- *
- * Return:  The Internet checksum of the buffer.
- */
+void net_incr32(FAR uint8_t *op32, uint16_t op16);
 
-uint16_t uip_chksum(uint16_t *buf, uint16_t len);
+/****************************************************************************
+ * Name: ip_chksum
+ *
+ * Description:
+ *   Calculate the IP header checksum of the packet header in d_buf.
+ *
+ *   The IP header checksum is the Internet checksum of the 20 bytes of
+ *   the IP header.
+ *
+ *   If CONFIG_NET_ARCH_CHKSUM is defined, then this function must be
+ *   provided by architecture-specific logic.
+ *
+ * Returned Value:
+ *   The IP header checksum of the IP header in the d_buf buffer.
+ *
+ ****************************************************************************/
 
-/* Calculate the IP header checksum of the packet header in d_buf.
- *
- * The IP header checksum is the Internet checksum of the 20 bytes of
- * the IP header.
- *
- * Return:  The IP header checksum of the IP header in the d_buf
- * buffer.
- */
-
-uint16_t uip_ipchksum(struct net_driver_s *dev);
-
-/* Calculate the TCP checksum of the packet in d_buf and d_appdata.
- *
- * The TCP checksum is the Internet checksum of data contents of the
- * TCP segment, and a pseudo-header as defined in RFC793.
- *
- * Note: The d_appdata pointer that points to the packet data may
- * point anywhere in memory, so it is not possible to simply calculate
- * the Internet checksum of the contents of the d_buf buffer.
- *
- * Return:  The TCP checksum of the TCP segment in d_buf and pointed
- * to by d_appdata.
- */
-
-uint16_t tcp_chksum(struct net_driver_s *dev);
-uint16_t udp_chksum(struct net_driver_s *dev);
-uint16_t icmp_chksum(struct net_driver_s *dev, int len);
+uint16_t ip_chksum(FAR struct net_driver_s *dev);
 
 #endif /* __INCLUDE_NUTTX_NET_NETDEV_H */

@@ -48,6 +48,7 @@
 #include <nuttx/net/netstats.h>
 
 #include "uip/uip.h"
+#include "utils/utils.h"
 #include "icmp/icmp.h"
 
 /****************************************************************************
@@ -144,7 +145,7 @@ void icmp_send(FAR struct net_driver_s *dev, FAR uip_ipaddr_t *destaddr)
       /* Calculate IP checksum. */
 
       picmp->ipchksum    = 0;
-      picmp->ipchksum    = ~(uip_ipchksum(dev));
+      picmp->ipchksum    = ~(ip_chksum(dev));
 
 #endif /* CONFIG_NET_IPv6 */
 

@@ -56,6 +56,7 @@
 
 #include "uip/uip.h"
 #include "icmp/icmp.h"
+#include "utils/utils.h"
 
 #ifdef CONFIG_NET_ICMP
 

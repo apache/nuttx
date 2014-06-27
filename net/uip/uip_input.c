@@ -107,8 +107,8 @@
 
 /* Macros. */
 
-#define BUF     ((struct uip_ip_hdr *)&dev->d_buf[UIP_LLH_LEN])
-#define FBUF    ((struct uip_ip_hdr *)&uip_reassbuf[0])
+#define BUF     ((FAR struct net_iphdr_s *)&dev->d_buf[UIP_LLH_LEN])
+#define FBUF    ((FAR struct net_iphdr_s *)&uip_reassbuf[0])
 
 /* IP fragment re-assembly */
 
@@ -149,8 +149,8 @@ static uint8_t uip_reassflags;
 #if UIP_REASSEMBLY && !defined(CONFIG_NET_IPv6)
 static uint8_t uip_reass(void)
 {
-  struct uip_ip_hdr *pbuf  = BUF;
-  struct uip_ip_hdr *pfbuf = FBUF;
+  FAR struct net_iphdr_s *pbuf  = BUF;
+  FAR struct net_iphdr_s *pfbuf = FBUF;
   uint16_t offset;
   uint16_t len;
   uint16_t i;
@@ -277,7 +277,7 @@ static uint8_t uip_reass(void)
         pbuf->len[0] = uip_reasslen >> 8;
         pbuf->len[1] = uip_reasslen & 0xff;
         pbuf->ipchksum = 0;
-        pbuf->ipchksum = ~(uip_ipchksum(dev));
+        pbuf->ipchksum = ~(ip_chksum(dev));
 
         return uip_reasslen;
       }
@@ -307,9 +307,9 @@ nullreturn:
  *
  ****************************************************************************/
 
-int uip_input(struct net_driver_s *dev)
+int uip_input(FAR struct net_driver_s *dev)
 {
-  struct uip_ip_hdr *pbuf = BUF;
+  FAR struct net_iphdr_s *pbuf = BUF;
   uint16_t iplen;
 
   /* This is where the input processing starts. */
@@ -491,7 +491,7 @@ int uip_input(struct net_driver_s *dev)
     }
 
 #ifndef CONFIG_NET_IPv6
-  if (uip_ipchksum(dev) != 0xffff)
+  if (ip_chksum(dev) != 0xffff)
     {
       /* Compute and check the IP header checksum. */
 

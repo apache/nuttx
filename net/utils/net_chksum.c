@@ -54,7 +54,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define BUF ((struct uip_ip_hdr *)&dev->d_buf[UIP_LLH_LEN])
+#define BUF ((struct net_iphdr_s *)&dev->d_buf[UIP_LLH_LEN])
 #define ICMPBUF ((struct icmp_iphdr_s *)&dev->d_buf[UIP_LLH_LEN])
 
 /****************************************************************************
@@ -65,7 +65,11 @@
  * Private Functions
  ****************************************************************************/
 
-#if !UIP_ARCH_CHKSUM
+/****************************************************************************
+ * Name: chksum
+ ****************************************************************************/
+
+#if !CONFIG_NET_ARCH_CHKSUM
 static uint16_t chksum(uint16_t sum, FAR const uint8_t *data, uint16_t len)
 {
   uint16_t t;
@@ -103,10 +107,16 @@ static uint16_t chksum(uint16_t sum, FAR const uint8_t *data, uint16_t len)
 
   return sum;
 }
+#endif /* CONFIG_NET_ARCH_CHKSUM */
 
+/****************************************************************************
+ * Name: upper_layer_chksum
+ ****************************************************************************/
+
+#if !CONFIG_NET_ARCH_CHKSUM
 static uint16_t upper_layer_chksum(FAR struct net_driver_s *dev, uint8_t proto)
 {
-  struct uip_ip_hdr *pbuf = BUF;
+  FAR struct net_iphdr_s *pbuf = BUF;
   uint16_t upper_layer_len;
   uint16_t sum;
 
@@ -132,20 +142,31 @@ static uint16_t upper_layer_chksum(FAR struct net_driver_s *dev, uint8_t proto)
 
   return (sum == 0) ? 0xffff : htons(sum);
 }
+#endif /* CONFIG_NET_ARCH_CHKSUM */
 
+/****************************************************************************
+ * Name: icmp_6chksum
+ ****************************************************************************/
+
+#if !CONFIG_NET_ARCH_CHKSUM
 #ifdef CONFIG_NET_IPv6
 static uint16_t icmp_6chksum(FAR struct net_driver_s *dev)
 {
   return upper_layer_chksum(dev, UIP_PROTO_ICMP6);
 }
 #endif /* CONFIG_NET_IPv6 */
+#endif /* CONFIG_NET_ARCH_CHKSUM */
 
-#endif /* UIP_ARCH_CHKSUM */
+/****************************************************************************
+ * Name: net_carry32
+ *
+ * Description:
+ *   Calculate the Internet checksum over a buffer.
+ *
+ ****************************************************************************/
 
-/* Calculate the Internet checksum over a buffer. */
-
-#if !UIP_ARCH_ADD32
-static inline void uip_carry32(FAR uint8_t *sum, uint16_t op16)
+#if !CONFIG_NET_ARCH_INCR32
+static inline void net_carry32(FAR uint8_t *sum, uint16_t op16)
 {
   if (sum[2] < (op16 >> 8))
     {
@@ -169,64 +190,154 @@ static inline void uip_carry32(FAR uint8_t *sum, uint16_t op16)
         }
     }
 }
-#endif /* UIP_ARCH_ADD32 */
+#endif /* CONFIG_NET_ARCH_INCR32 */
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-#if !UIP_ARCH_ADD32
-void uip_incr32(FAR uint8_t *op32, uint16_t op16)
+/****************************************************************************
+ * Name: net_incr32
+ *
+ * Description:
+ *
+ *   Carry out a 32-bit addition.
+ *
+ *   By defining CONFIG_NET_ARCH_INCR32, the architecture can replace
+ *   net_incr32 with hardware assisted solutions.
+ *
+ * Input Parameters:
+ *   op32 - A pointer to a 4-byte array representing a 32-bit integer in
+ *          network byte order (big endian).  This value may not be word
+ *          aligned. The value pointed to by op32 is modified in place
+ *
+ *   op16 - A 16-bit integer in host byte order.
+ *
+ ****************************************************************************/
+
+#if !CONFIG_NET_ARCH_INCR32
+void net_incr32(FAR uint8_t *op32, uint16_t op16)
 {
   op32[3] += (op16 & 0xff);
   op32[2] += (op16 >> 8);
-  uip_carry32(op32, op16);
+  net_carry32(op32, op16);
 }
-#endif /* UIP_ARCH_ADD32 */
+#endif /* CONFIG_NET_ARCH_INCR32 */
 
-#if !UIP_ARCH_CHKSUM
-uint16_t uip_chksum(FAR uint16_t *data, uint16_t len)
+/****************************************************************************
+ * Name: net_chksum
+ *
+ * Description:
+ *   Calculate the Internet checksum over a buffer.
+ *
+ *   The Internet checksum is the one's complement of the one's complement
+ *   sum of all 16-bit words in the buffer.
+ *
+ *   See RFC1071.
+ *
+ *   If CONFIG_NET_ARCH_CHKSUM is defined, then this function must be
+ *   provided by architecture-specific logic.
+ *
+ * Input Parameters:
+ *
+ *   buf - A pointer to the buffer over which the checksum is to be computed.
+ *
+ *   len - The length of the buffer over which the checksum is to be computed.
+ *
+ * Returned Value:
+ *   The Internet checksum of the buffer.
+ *
+ ****************************************************************************/
+
+#if !CONFIG_NET_ARCH_CHKSUM
+uint16_t net_chksum(FAR uint16_t *data, uint16_t len)
 {
   return htons(chksum(0, (uint8_t *)data, len));
 }
+#endif /* CONFIG_NET_ARCH_CHKSUM */
 
-/* Calculate the IP header checksum of the packet header in d_buf. */
+/****************************************************************************
+ * Name: ip_chksum
+ *
+ * Description:
+ *   Calculate the IP header checksum of the packet header in d_buf.
+ *
+ *   The IP header checksum is the Internet checksum of the 20 bytes of
+ *   the IP header.
+ *
+ *   If CONFIG_NET_ARCH_CHKSUM is defined, then this function must be
+ *   provided by architecture-specific logic.
+ *
+ * Returned Value:
+ *   The IP header checksum of the IP header in the d_buf buffer.
+ *
+ ****************************************************************************/
 
-#ifndef UIP_ARCH_IPCHKSUM
-uint16_t uip_ipchksum(FAR struct net_driver_s *dev)
+#if !CONFIG_NET_ARCH_CHKSUM
+uint16_t ip_chksum(FAR struct net_driver_s *dev)
 {
   uint16_t sum;
 
   sum = chksum(0, &dev->d_buf[UIP_LLH_LEN], UIP_IPH_LEN);
   return (sum == 0) ? 0xffff : htons(sum);
 }
-#endif
+#endif /* CONFIG_NET_ARCH_CHKSUM */
 
-/* Calculate the TCP checksum of the packet in d_buf and d_appdata. */
+/****************************************************************************
+ * Name: tcp_chksum
+ *
+ * Description:
+ *   Calculate the TCP checksum of the packet in d_buf and d_appdata.
+ *
+ *   The TCP checksum is the Internet checksum of data contents of the
+ *   TCP segment, and a pseudo-header as defined in RFC793.
+ *
+ *   Note: The d_appdata pointer that points to the packet data may
+ *   point anywhere in memory, so it is not possible to simply calculate
+ *   the Internet checksum of the contents of the d_buf buffer.
+ *
+ * Returned Value:
+ *   The TCP checksum of the TCP segment in d_buf and pointed to by
+ *   d_appdata.
+ *
+ ****************************************************************************/
 
+#if !CONFIG_NET_ARCH_CHKSUM
 uint16_t tcp_chksum(FAR struct net_driver_s *dev)
 {
   return upper_layer_chksum(dev, UIP_PROTO_TCP);
 }
+#endif /* CONFIG_NET_ARCH_CHKSUM */
 
-/* Calculate the UDP checksum of the packet in d_buf and d_appdata. */
+/****************************************************************************
+ * Name: udp_chksum
+ *
+ * Description:
+ *   Calculate the UDP checksum of the packet in d_buf and d_appdata.
+ *
+ ****************************************************************************/
 
-#ifdef CONFIG_NET_UDP_CHECKSUMS
+#if defined(CONFIG_NET_UDP_CHECKSUMS) && !defined(CONFIG_NET_ARCH_CHKSUM)
 uint16_t udp_chksum(FAR struct net_driver_s *dev)
 {
   return upper_layer_chksum(dev, UIP_PROTO_UDP);
 }
-#endif
+#endif /* CONFIG_NET_UDP_CHECKSUMS && !CONFIG_NET_ARCH_CHKSUM */
 
-/* Calculate the checksum of the ICMP message */
+/****************************************************************************
+ * Name: icmp_chksum
+ *
+ * Description:
+ *   Calculate the checksum of the ICMP message
+ *
+ ****************************************************************************/
 
 #if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING)
 uint16_t icmp_chksum(FAR struct net_driver_s *dev, int len)
 {
   FAR struct icmp_iphdr_s *picmp = ICMPBUF;
-  return uip_chksum((uint16_t*)&picmp->type, len);
+  return net_chksum((uint16_t*)&picmp->type, len);
 }
-#endif
+#endif /* CONFIG_NET_ICMP && CONFIG_NET_ICMP_PING */
 
-#endif /* UIP_ARCH_CHKSUM */
 #endif /* CONFIG_NET */

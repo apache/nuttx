@@ -91,7 +91,7 @@
 
 static uint16_t igmp_chksum(FAR uint8_t *buffer, int buflen)
 {
-  uint16_t sum = uip_chksum((FAR uint16_t*)buffer, buflen);
+  uint16_t sum = net_chksum((FAR uint16_t*)buffer, buflen);
   return sum ? sum : 0xffff;
 }
 

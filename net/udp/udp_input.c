@@ -54,6 +54,7 @@
 #include <nuttx/net/netstats.h>
 
 #include "uip/uip.h"
+#include "utils/utils.h"
 #include "udp/udp.h"
 
 /****************************************************************************

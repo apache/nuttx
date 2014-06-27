@@ -54,6 +54,7 @@
 #include <nuttx/net/netstats.h>
 
 #include "uip/uip.h"
+#include "utils/utils.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -139,7 +140,7 @@ static void tcp_sendcomplete(FAR struct net_driver_s *dev)
   /* Calculate IP checksum. */
 
   pbuf->ipchksum    = 0;
-  pbuf->ipchksum    = ~(uip_ipchksum(dev));
+  pbuf->ipchksum    = ~(ip_chksum(dev));
 
 #endif /* CONFIG_NET_IPv6 */
 

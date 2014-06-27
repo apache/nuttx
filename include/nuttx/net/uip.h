@@ -172,7 +172,7 @@ typedef uip_ip4addr_t uip_ipaddr_t;
 
 /* The IP header */
 
-struct uip_ip_hdr
+struct net_iphdr_s
 {
 #ifdef CONFIG_NET_IPv6
 
