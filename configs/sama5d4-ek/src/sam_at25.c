@@ -77,8 +77,8 @@ int sam_at25_automount(int minor)
   FAR struct spi_dev_s *spi;
   FAR struct mtd_dev_s *mtd;
 #ifdef CONFIG_SAMA5D4EK_AT25_CHARDEV
-  uint8_t blockdev[18];
-  uint8_t chardev[12];
+  char blockdev[18];
+  char chardev[12];
 #endif
   static bool initialized = false;
   int ret;

@@ -40,9 +40,15 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
 #include <debug.h>
 
+#include <nuttx/streams.h>
 #include <arch/irq.h>
 #include <apps/hex2bin.h>
 
@@ -57,19 +63,19 @@
 #  error The AT25 Serial FLASH is not available
 #endif
 
-#ifndef CONFIG_SAMA5D4EK_NAND_AUTOMOUNT
-#  error CONFIG_SAMA5D4EK_NAND_AUTOMOUNT must be selected
+#ifndef CONFIG_SAMA5D4EK_AT25_AUTOMOUNT
+#  error CONFIG_SAMA5D4EK_AT25_AUTOMOUNT must be selected
 #endif
 
 #ifndef CONFIG_SAMA5D4EK_AT25_CHARDEV
 #  error CONFIG_SAMA5D4EK_AT25_CHARDEV must be selected
 #endif
 
-#ifndef CONFIG_BOOT_SDRAM_DATA
-#  error CONFIG_BOOT_SDRAM_DATA must be selected
+#ifdef CONFIG_BOOT_SDRAM_DATA
+#  error CONFIG_BOOT_SDRAM_DATA must NOT be selected
 #endif
 
-#if defined(CONFIG_SAMA5D4EK_AT25_PROGSIZE) || CONFIG_SAMA5D4EK_AT25_PROGSIZE < 128
+#if !defined(CONFIG_SAMA5D4EK_AT25_PROGSIZE) || CONFIG_SAMA5D4EK_AT25_PROGSIZE < 128
 #  error Large CONFIG_SAMA5D4EK_AT25_PROGSIZE must be selected
 #endif
 
@@ -84,9 +90,8 @@
  * Private Data
  ****************************************************************************/
 
-static uint8_t g_heximage[CONFIG_SAMA5D4EK_AT25_PROGSIZE];
 static uint8_t g_iobuffer[IOBUFFER_SIZE];
-statid uint8_t g_at25dev[DEVNAME_MAXSIZE];
+static char g_at25dev[DEVNAME_MAXSIZE];
 
 /****************************************************************************
  * Private Functions
@@ -149,11 +154,12 @@ int at25_main(int argc, char *argv)
 
   lib_rawinstream(&rawinstream, 0);
 
-  /* Wrap the memory buffer as a seek-able OUT stream in which we can buffer
-   * the binary data.
+  /* Define a memory buffer of size CONFIG_SAMA5D4EK_AT25_PROGSIZE at the
+   * beginning of SDRAM. Wrap the memory buffer as a seek-able OUT stream in
+   * which we can buffer the binary data.
    */
 
-  lib_memsostream(&memoutstream, (FAR char *)g_heximage,
+  lib_memsostream(&memoutstream, (FAR char *)SAM_DDRCS_VSECTION,
                   CONFIG_SAMA5D4EK_AT25_PROGSIZE);
 
   /* We are ready to load the Intel HEX stream into DRAM.
@@ -186,7 +192,7 @@ int at25_main(int argc, char *argv)
          memoutstream.public.nput);
 
   remaining = memoutstream.public.nput;
-  dest      = g_heximage;
+  dest      = (uint8_t *)CONFIG_SAMA5D4EK_AT25_PROGSIZE;
 
   do
     {
@@ -229,7 +235,7 @@ int at25_main(int argc, char *argv)
     }
 
   remaining = memoutstream.public.nput;
-  src = g_heximage;
+  src = (const uint8_t *)CONFIG_SAMA5D4EK_AT25_PROGSIZE;
 
   do
     {
