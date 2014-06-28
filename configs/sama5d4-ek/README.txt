@@ -63,6 +63,7 @@ Contents
   - Loading Code into SRAM with J-Link
   - Writing to FLASH using SAM-BA
   - Creating and Using DRAMBOOT
+  - Creating and Using AT25BOOT
   - Running NuttX from SDRAM
   - PIO Usage
   - Buttons and LEDs
@@ -419,7 +420,98 @@ Creating and Using DRAMBOOT
 
       NOTES: (1) There is that must be closed to enable use of the AT25
       Serial Flash.  (2) If using SAM-BA, make sure that you load the DRAM
-      boot program into the boot area via the pull-down menu.
+      boot program into the boot area via the pull-down menu.  (3) If
+      you don't have SAM-BA, an alternative is to use the AT25BOOT program
+      described in the next section.
+
+Creating and Using AT25BOOT
+===========================
+
+  To work around some SAM-BA availability issues that I had at one time,
+  I created the AT25BOOT program. AT25BOOT is a tiny program that runs in
+  ISRAM.  AT25BOOT will enable SDRAM and configure the AT25 Serial FLASH.
+  It will prompt and then load an Intel HEX program into SDRAM over the
+  serial console. If the program is successfully loaded in SDRAM, AT25BOOT
+  will copy the program at the beginning of the AT26 Serial FLASH.
+  If the jumpering is set correctly, the SAMA5D4 RomBOOT loader will
+  then boot the program from the serial FLASH the next time that it
+  reset.
+
+  The AT25BOOT configuration is described below under "Configurations."
+
+  Here are some general instructions on how to build an use AT25BOOT:
+
+  Building:
+  1. Remove any old configurations (if applicable).
+
+       cd <nuttx>
+       make distclean
+
+  2. Install and build the AT25BOOT configuration.  This steps will establish
+     the AT25BOOT configuration and setup the PATH variable in order to do
+     the build:
+
+       cd tools
+       ./configure.sh sama5d4-ek/at25boot
+       cd -
+       . ./setenv.sh
+
+     Before sourcing the setenv.sh file above, you should examine it and
+     perform edits as necessary so that TOOLCHAIN_BIN is the correct path
+     to the directory than holds your toolchain binaries.
+
+     Then make AT25BOOT:
+
+       make
+
+     This will result in an ELF binary called 'nuttx' and also HEX and
+     binary versions called 'nuttx.hex' and 'nuttx.bin'.
+
+  3. Rename the binaries.  If you want to save this version of AT25BOOT so
+     that it does not get clobbered later, you may want to rename the
+     binaries:
+
+       mv nuttx at25boot
+       mv nuttx.hex at25boot.hex
+       mv nuttx.bin at25boot.bin
+
+   4. Build the "real" DRAMBOOT configuration.  This will create the
+      dramboot.hex that you will write to the AT25 FLASH using AT25BOOT. See
+      the section above entitled "Creating and Using AT25BOOT" for more
+      information.
+
+   5. Restart the system holding DIS_BOOT.  You should see the RomBOOT
+      prompt on the 115200 8N1 serial console (and nothing) more.  Hit
+      the ENTER key with the focus on your terminal window a few time.
+      This will enable JTAG.
+
+   6. Then start the J-Link GDB server and GDB.  In GDB, I do the following:
+
+       (gdb) mon heal                 # Halt the CPU
+       (gdb) load at25boot            # Load AT25BOOT into internal SRAM
+       (gdb) mon go                   # Start AT25BOOT
+
+      You should see this message:
+
+        Send Intel HEX file now
+
+      Load DRAMBOOT by sending the dramboot.hex via the terminal program.
+      At this point you will get messages indicated whether or not the write
+      to the AT25 FLASH was successful or not.  When you reset the board,
+      it should then boot from the AT25 Serial FLASH and you should again
+      get the prompt:
+
+        Send Intel HEX file now
+
+      But now you are being prompted to load the DRAM program under test
+      (See the section above entitled "Creating and Using AT25BOOT").
+
+   7. An better option, if available, is to use the SAM-BA tool to write the
+      DRAMBOOT image into Serial FLASH.
+
+   NOTES: (1) There is that must be closed to enable use of the AT25
+   Serial Flash.  (2) If using SAM-BA, make sure that you load the DRAM
+   boot program into the boot area via the pull-down menu.
 
 Running NuttX from SDRAM
 ========================
@@ -2910,6 +3002,10 @@ Configurations
   Summary:  Some of the descriptions below are long and wordy. Here is the
   concise summary of the available SAMA4D4-EK configurations:
 
+    at25boot: This is a little program to write a boot loader into the
+      AT25 serial FLASH (in particular, dramboot).  See the description
+      below and the section above entitled "Creating and Using AT25BOOT"
+      for more information
     dramboot: This is a little program to help debug of code in DRAM.  See
       the description below and the section above entitled "Creating and
       Using DRAMBOOT" for more information
@@ -2926,6 +3022,21 @@ Configurations
   before of the status of individual configurations.
 
   Now for the gory details:
+
+  at25boot:
+
+    To work around some SAM-BA availability issues that I had at one time,
+    I created the at25boot program. at25boot is a tiny program that runs in
+    ISRAM.  at25boot will enable SDRAM and configure the AT25 Serial FLASH.
+    It will prompt and then load an Intel HEX program into SDRAM over the
+    serial console. If the program is successfully loaded in SDRAM, at25boot
+    will copy the program at the beginning of the AT26 Serial FLASH.
+    If the jumpering is set correctly, the SAMA5D4 RomBOOT loader will
+    then boot the program from the serial FLASH the next time that it
+    reset.
+
+    The usage is different, otherwise I believe the notes for the dramboot
+    configuration should all apply.
 
   dramboot:
 
