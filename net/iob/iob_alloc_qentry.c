@@ -105,7 +105,16 @@ static FAR struct iob_qentry_s *iob_tryalloc_qentry(void)
        */
 
       g_iob_freeqlist = iobq->qe_flink;
-      DEBUGVERIFY(sem_trywait(&g_qentry_sem));
+
+      /* Take a semaphore count.  Note that we cannot do this in
+       * in the orthodox way by calling sem_wait() or sem_trywait()
+       * because this function may be called from an interrupt
+       * handler. Fortunately we know at at least one free buffer
+       * so a simple decrement is all that is needed.
+       */
+
+      g_qentry_sem.semcount--;
+      DEBUGASSERT(g_qentry_sem.semcount >= 0);
 
       /* Put the I/O buffer in a known state */
 
