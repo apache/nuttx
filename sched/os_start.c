@@ -448,12 +448,7 @@ void os_start(void)
   /* Initialize the network system */
 
 #ifdef CONFIG_NET
-#if 0
-  if (net_initialize != NULL)
-#endif
-    {
-      net_initialize();
-    }
+  net_initialize();
 #endif
 
   /* The processor specific details of running the operating system

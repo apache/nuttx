@@ -116,8 +116,8 @@ int sem_trywait(FAR sem_t *sem)
 
       saved_state = irqsave();
 
-      /* Any further errors could only be occurred because the semaphore
-       * is not available.
+      /* Any further errors could only occurr because the semaphore is not
+       * available.
        */
 
       set_errno(EAGAIN);

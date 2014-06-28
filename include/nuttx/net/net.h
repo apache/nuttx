@@ -156,7 +156,7 @@ int net_checksd(int fd, int oflags);
  * under sched/
  */
 
-void weak_function net_initialize(void);
+void net_initialize(void);
 void net_initlist(FAR struct socketlist *list);
 void net_releaselist(FAR struct socketlist *list);
 
