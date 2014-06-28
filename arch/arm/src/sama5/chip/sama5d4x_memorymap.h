@@ -608,8 +608,19 @@
 #    endif
 #    define PGTABLE_IN_HIGHSRAM   1
 
+  /* If we execute from SRAM, but keep data in SDRAM, then we will also have
+   * to position the initial, IDLE stack in SRAM.  SDRAM will not be ready
+   * soon enough to serve as the stack.
+   *
+   * In this case, the initial IDLE stack can just follow the vector table,
+   * lying between the vector table and the page table.  We don't really
+   * know how much memory to set aside for the vector table, but 4KiB should
+   * be much more than enough
+   */
+
 #    ifdef CONFIG_BOOT_SDRAM_DATA
-#      error CONFIG_BOOT_SDRAM_DATA not suupported in this configuration
+#      define IDLE_STACK_PBASE    (SAM_ISRAM0_PADDR + 0x0001000)
+#      define IDLE_STACK_VBASE    (SAM_ISRAM0_VADDR + 0x0001000)
 #    endif
 
 #  else /* CONFIG_SAMA5_BOOT_ISRAM && CONFIG_ARCH_LOWVECTORS */
@@ -624,6 +635,14 @@
 #      define PGTABLE_BASE_VADDR  SAM_ISRAM0_VADDR
 #    endif
 #    define PGTABLE_IN_LOWSRAM    1
+
+  /* If we execute from SRAM, but keep data in SDRAM, then we will also have
+   * to position the initial, IDLE stack in SRAM.  SDRAM will not be ready
+   * soon enough to serve as the stack.
+   *
+   * In this case, the initial IDLE stack can just follow the page table
+   * in ISRAM.
+   */
 
 #    ifdef CONFIG_BOOT_SDRAM_DATA
 #      define IDLE_STACK_PBASE    (PGTABLE_BASE_PADDR + PGTABLE_SIZE)
