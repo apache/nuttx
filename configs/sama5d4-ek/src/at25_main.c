@@ -122,7 +122,6 @@ int at25_main(int argc, char *argv)
   struct lib_rawinstream_s rawinstream;
   struct lib_memsostream_s memoutstream;
   const uint8_t *src;
-  uint8_t *dest;
   ssize_t nwritten;
   ssize_t nread;
   ssize_t remaining;
@@ -172,9 +171,9 @@ int at25_main(int argc, char *argv)
   printf("Send Intel HEX file now\n");
   fflush(stdout);
 
-  return hex2bin(&rawinstream.public, &memoutstream.public,
-                 (uint32_t)SAM_ISRAM_VSECTION,
-                 (uint32_t)(SAM_ISRAM_VSECTION + CONFIG_SAMA5D4EK_AT25_PROGSIZE),
+  ret = hex2bin(&rawinstream.public, &memoutstream.public,
+                (uint32_t)SAM_ISRAM_VSECTION,
+                (uint32_t)(SAM_ISRAM_VSECTION + CONFIG_SAMA5D4EK_AT25_PROGSIZE),
                 0);
   if (ret < 0)
     {
@@ -192,11 +191,11 @@ int at25_main(int argc, char *argv)
          memoutstream.public.nput);
 
   remaining = memoutstream.public.nput;
-  dest      = (uint8_t *)CONFIG_SAMA5D4EK_AT25_PROGSIZE;
+  src = (uint8_t *)SAM_DDRCS_VSECTION;
 
   do
     {
-      nwritten = write(fd, dest, memoutstream.public.nput);
+      nwritten = write(fd, src, memoutstream.public.nput);
       if (nwritten <= 0)
         {
           int errcode = errno;
@@ -210,7 +209,7 @@ int at25_main(int argc, char *argv)
       else
         {
           remaining -= nwritten;
-          dest += nwritten;
+          src += nwritten;
         }
     }
   while (remaining > 0);
@@ -235,7 +234,7 @@ int at25_main(int argc, char *argv)
     }
 
   remaining = memoutstream.public.nput;
-  src = (const uint8_t *)CONFIG_SAMA5D4EK_AT25_PROGSIZE;
+  src = (const uint8_t *)SAM_DDRCS_VSECTION;
 
   do
     {
@@ -267,7 +266,7 @@ int at25_main(int argc, char *argv)
             }
 
           remaining -= nwritten;
-          dest += nwritten;
+          src += nwritten;
         }
     }
   while (remaining > 0);
