@@ -2628,13 +2628,17 @@ TRNG and /dev/random
 
   NSH can be configured to enable the SAMA5 TRNG peripheral so that it
   provides /dev/random.  The following configuration will enable the TRNG,
-  /dev/random, and the simple test of /dev/random at apps/examples/ranadom:
+  and support for /dev/random:
 
     System Type:
       CONFIG_SAMA5_TRNG=y                 : Enable the TRNG peripheral
 
-    Drivers (automatically selected):
+    Drivers:
       CONFIG_DEV_RANDOM=y                 : Enable /dev/random
+
+  A simple test of /dev/random is available at apps/examples/random and
+  can be enabled as a NSH application via the following additional
+  configuration settings:
 
     Applications -> Examples
       CONFIG_EXAMPLES_RANDOM=y            : Enable apps/examples/random
@@ -3206,52 +3210,113 @@ Configurations
          U-Boot> fatload mmc 0 0x20008000 nuttx.bin
          U-Boot> go 0x20008040
 
-    4. This configuration has support for NSH built-in applications enabled.
-       However, no built-in applications are selected in the base configuration.
+    4. This configuration supports /dev/null, /dev/zero, and /dev/random.
 
-    5. This configuration has support for the FAT file system built in.
-       However, by default, there are no block drivers initialized.  The FAT
-       file system can still be used to create RAM disks.
+         CONFIG_DEV_NULL=y    : Enables /dev/null
+         CONFIG_DEV_ZERO=y    : Enabled /dev/zero
 
-    6. The SAMA5D4-EK includes for an AT25 serial DataFlash.  Support for that
+       Support for /dev/random is implemented using the SAMA5D4's True
+       Random Number Generator (TRNG).  See the section above entitled
+       "TRNG and /dev/random" for information about configuring /dev/random.
+
+        CONFIG_SAMA5_TRNG=y   : Enables the TRNG peripheral
+        CONFIG_DEV_RANDOM=y   : Enables /dev/random
+
+    5. This configuration has support for NSH built-in applications enabled.
+
+    6. This configuration has support for the FAT and ROMFS file systems
+       built in.
+
+       The FAT file system includes long file name support.  Please be aware
+       that Microsoft claims patents against the long file name support (see
+       more discussion in the top-level COPYING file).
+
+         CONFIG_FS_FAT=y        : Enables the FAT file system
+         CONFIG_FAT_LCNAMES=y   : Enable lower case 8.3 file names
+         CONFIG_FAT_LFN=y       : Enables long file name support
+         CONFIG_FAT_MAXFNAME=32 : Arbitrarily limits the size of a path
+                                  segment name to 32 bytes
+
+       The ROMFS file system is enabled simply with:
+
+         CONFIG_FS_ROMFS=y      : Enable ROMFS file system
+
+    6. An NSH star-up script is provided by the ROMFS file system.  The ROMFS
+       file system is mounted at /etc and provides:
+
+         |- dev/
+         |   `- ram0
+         `- etc/
+             `- init.d/
+                 `- rcS
+
+       (There will, of course, be other devices uner /dev include /dev/console,
+       /dev/null, /dev/zero, /dev/random, etc.).
+
+       Relevant configuration options include:
+
+         CONFIG_NSH_ROMFSETC=y           : Enable mounting at of startup file system
+         CONFIG_NSH_ROMFSMOUNTPT="/etc"  : Mount at /etc
+         CONFIG_NSH_ROMFSDEVNO=0         : Device is /dev/ram0
+         CONFIG_NSH_ARCHROMFS=y          : ROMFS image is at
+                                           configs/sama5d4-ek/include/nsh_romfsimg.h
+       The content of /etc/init.d/rcS can be see in the file rcS.template that
+       can be found at: configs/sama5d4-ek/include/rcS.template:
+
+         mkrd -m 2 -s 512 1024
+         mkfatfs /dev/ram1
+         mount -t vfat /dev/ram1 /tmp
+
+       The above commands will create a RAM disk block device at /dev/ram1.
+       The RAM disk will take 0.4MiB of memory (512 x 1024).  Then it will
+       create a FAT file system on the ram disk and mount it at /tmp.  So
+       after NSH starts and runs the rcS script, we will have:
+
+         |- dev/
+         |   |- ram0
+         |   `- ram2
+         |- etc/
+         |   `- init.d/
+         |       `- rcS
+          `- tmp/
+
+       The /tmp directory can them be used for and scratch purpose.
+
+    7. The SAMA5D4-EK includes for an AT25 serial DataFlash.  Support for that
        serial FLASH can be enabled by modifying the NuttX configuration as
        described above in the paragraph entitled "AT25 Serial FLASH".
 
-    7. Enabling HSMCI support. The SAMA4D4-EK provides a two SD memory
+    8. Enabling HSMCI support. The SAMA4D4-EK provides a two SD memory
        card slots:  (1) a full size SD card slot (J10), and (2) a microSD
        memory card slot (J11).  The full size SD card slot connects via HSMCI0;
        the microSD connects vi HSMCI1.  Support for both SD slots can be enabled
        with the settings provided in the paragraph entitled "HSMCI Card Slots"
        above.
 
-    8. Support the USB low-, high- and full-speed OHCI host driver can be enabled
+    9. Support the USB low-, high- and full-speed OHCI host driver can be enabled
        by changing the NuttX configuration file as described in the section
        entitled "USB High-Speed Host" above.
 
-    9. Support the USB high-speed USB device driver (UDPHS) can be enabled
+   10. Support the USB high-speed USB device driver (UDPHS) can be enabled
        by changing the NuttX configuration file as described above in the
        section entitled "USB High-Speed Device."
 
-    10. I2C Tool. NuttX supports an I2C tool at apps/system/i2c that can be
-        used to peek and poke I2C devices.  See the discussion above under
-        "I2C Tool" for detailed configuration settings.
+   11. I2C Tool. NuttX supports an I2C tool at apps/system/i2c that can be
+       used to peek and poke I2C devices.  See the discussion above under
+       "I2C Tool" for detailed configuration settings.
 
-    11. Networking support via the can be added to NSH by modifying the
-        configuration.  See the "Networking" section above for detailed
-        configuration settings.
+   12. Networking support via the can be added to NSH by modifying the
+       configuration.  See the "Networking" section above for detailed
+       configuration settings.
 
-    12. The Real Time Clock/Calendar (RTC) may be enabled by reconfiguring NuttX.
-        See the section entitled "RTC" above for detailed configuration settings.
+   13. The Real Time Clock/Calendar (RTC) may be enabled by reconfiguring NuttX.
+       See the section entitled "RTC" above for detailed configuration settings.
 
-    13. This example can be configured to exercise the watchdog timer test
-        (apps/examples/watchdog).  See the detailed configuration settings in
-        the section entitled "Watchdog Timer" above.
+   14. This example can be configured to exercise the watchdog timer test
+       (apps/examples/watchdog).  See the detailed configuration settings in
+       the section entitled "Watchdog Timer" above.
 
-    14. This example can be configured to enable the SAMA5 TRNG peripheral so
-        that it provides /dev/random.  See the section entitled "TRNG and
-        /dev/random" above for detailed configuration information.
-
-    STATUS:
+   STATUS:
        See the To-Do list below
 
   ramtest:
