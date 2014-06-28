@@ -3180,11 +3180,28 @@ Configurations
          CONFIG_SAMA5D4EK_DRAM_BOOT=y
 
        See the section above entitled "Creating and Using DRAMBOOT" above
-       for more information.
+       for more information.  Here is a summary of the steps that I used
+       to boot the NSH configuration:
 
-       At times, have have tested with nuttx.bin on an SD card and booting
-       with U-Boot.  These are the commands that I used to boot NuttX from
-       the SD card:
+         a. Create the DRAMBOOT program as described above.  It should be
+            configured with CONFIG_SAMA5D4EK_DRAM_START=y so that DRAMBOOT
+            will immediately start the program.  You may not want to do
+            this is your prefer to break in with GDB.
+
+         b. Write the DRAMBOOT program binary (nuttx.bin) to a microSD
+            card as "boot.bin".  Insert the microSD card into the boar;
+            The ROM Booloader should now boot DRAMBOOT on reset and you
+            should see this message:
+
+              Send Intel HEX file now
+
+         c. Build the NSH version of NuttX.  Send the Intel HEX of NSH
+            at the prompt.  After the file is received, NSH should start
+            automatically.
+
+       At times the past, have have tested with nuttx.bin on an SD card and
+       booting with U-Boot.  These are the commands that I used to boot NuttX
+       from the SD card:
 
          U-Boot> fatload mmc 0 0x20008000 nuttx.bin
          U-Boot> go 0x20008040
