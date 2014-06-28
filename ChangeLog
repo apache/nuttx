@@ -7561,4 +7561,7 @@
 	  while we are at it (2014-6-28).
 	* net/iob: Fix some errors in recent network I/O buffering when stack runs
 	  from interrupt level.  Reported by Manuel Stühn (2014-6-28).
+	* net/sockets:  Create the net/sockets directory and hook it into the
+	  build system.  Move all socket-related C files into net/socket.  Move
+	  net/net.h to net/socket/socket.h (2014-6-28).
 
