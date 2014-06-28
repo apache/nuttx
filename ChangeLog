@@ -7557,4 +7557,6 @@
 	  (2014-6-17).
 	* configs/sama5d4-ek/at25boot and src/at25_main.c:  Add a configuration
 	  that will load a bootloader into AT25 Serial FLASH (2014-6-28).
+	* libc/math: Change double_t to double in rint().  Add rintf() and rintl()
+	  while we are at it (2014-6-28).
 
