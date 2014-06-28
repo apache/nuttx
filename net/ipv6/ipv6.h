@@ -1,4 +1,5 @@
-/* net/uip/uip_neighbor.h
+/****************************************************************************
+ * net/ipv6/ipv6.h
  * Header file for database of link-local neighbors, used by IPv6 code and
  * to be used by future ARP code.
  *
@@ -34,16 +35,25 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- */
+ *
+ ****************************************************************************/
 
-#ifndef __UIP_NEIGHBOR_H__
-#define __UIP_NEIGHBOR_H__
+#ifndef __NET_IPV6_IPV6_H
+#define __NET_IPV6_IPV6_H
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
 #include <stdint.h>
 #include <nuttx/net/uip.h>
 #include <net/ethernet.h>
 
-struct uip_neighbor_addr
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+struct net_neighbor_addr_s
 {
 #if UIP_NEIGHBOR_CONF_ADDRTYPE
   UIP_NEIGHBOR_CONF_ADDRTYPE addr;
@@ -52,10 +62,14 @@ struct uip_neighbor_addr
 #endif
 };
 
-void uip_neighbor_init(void);
-void uip_neighbor_add(uip_ipaddr_t ipaddr, struct uip_neighbor_addr *addr);
-void uip_neighbor_update(uip_ipaddr_t ipaddr);
-struct uip_neighbor_addr *uip_neighbor_lookup(uip_ipaddr_t ipaddr);
-void uip_neighbor_periodic(void);
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+void net_neighbor_init(void);
+void net_neighbor_add(uip_ipaddr_t ipaddr, struct net_neighbor_addr_s *addr);
+void net_neighbor_update(uip_ipaddr_t ipaddr);
+struct net_neighbor_addr_s *net_neighbor_lookup(uip_ipaddr_t ipaddr);
+void net_neighbor_periodic(void);
 
 #endif /* __UIP-NEIGHBOR_H__ */

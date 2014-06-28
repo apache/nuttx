@@ -91,7 +91,7 @@
 #include <nuttx/net/netstats.h>
 
 #ifdef CONFIG_NET_IPv6
-# include "uip_neighbor.h"
+#  include "net_neighbor.h"
 #endif /* CONFIG_NET_IPv6 */
 
 #include "uip/uip.h"

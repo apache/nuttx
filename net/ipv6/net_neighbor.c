@@ -1,5 +1,5 @@
-/*
- * uip_neighbor.c
+/****************************************************************************
+ * net/ipv6/net_neighbor.c
  * Database of link-local neighbors, used by IPv6 code and to be used by
  * a future ARP code rewrite.
  *
@@ -31,30 +31,73 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- */
+ *
+ ****************************************************************************/
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
 
 #include <string.h>
 #include <debug.h>
 
-#include "uip_neighbor.h"
+#include "ipv6/ipv6.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 #define MAX_TIME 128
 
 #ifdef UIP_NEIGHBOR_CONF_ENTRIES
-#define ENTRIES UIP_NEIGHBOR_CONF_ENTRIES
+#  define ENTRIES UIP_NEIGHBOR_CONF_ENTRIES
 #else /* UIP_NEIGHBOR_CONF_ENTRIES */
-#define ENTRIES 8
+#  define ENTRIES 8
 #endif /* UIP_NEIGHBOR_CONF_ENTRIES */
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
 
 struct neighbor_entry
 {
   uip_ipaddr_t ipaddr;
-  struct uip_neighbor_addr addr;
+  struct net_neighbor_addr_s addr;
   uint8_t time;
 };
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
 static struct neighbor_entry entries[ENTRIES];
 
-void uip_neighbor_init(void)
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static struct neighbor_entry *find_entry(uip_ipaddr_t ipaddr)
+{
+  int i;
+
+  for (i = 0; i < ENTRIES; ++i)
+    {
+      if (uip_ipaddr_cmp(entries[i].ipaddr, ipaddr))
+        {
+          return &entries[i];
+        }
+    }
+
+  return NULL;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+void net_neighbor_init(void)
 {
   int i;
 
@@ -64,7 +107,7 @@ void uip_neighbor_init(void)
     }
 }
 
-void uip_neighbor_periodic(void)
+void net_neighbor_periodic(void)
 {
   int i;
 
@@ -77,7 +120,7 @@ void uip_neighbor_periodic(void)
     }
 }
 
-void uip_neighbor_add(uip_ipaddr_t ipaddr, struct uip_neighbor_addr *addr)
+void net_neighbor_add(uip_ipaddr_t ipaddr, struct net_neighbor_addr_s *addr)
 {
   uint8_t oldest_time;
   int     oldest;
@@ -118,25 +161,10 @@ void uip_neighbor_add(uip_ipaddr_t ipaddr, struct uip_neighbor_addr *addr)
 
   entries[oldest].time = 0;
   uip_ipaddr_copy(entries[oldest].ipaddr, ipaddr);
-  memcpy(&entries[oldest].addr, addr, sizeof(struct uip_neighbor_addr));
+  memcpy(&entries[oldest].addr, addr, sizeof(struct net_neighbor_addr_s));
 }
 
-static struct neighbor_entry *find_entry(uip_ipaddr_t ipaddr)
-{
-  int i;
-
-  for (i = 0; i < ENTRIES; ++i)
-    {
-      if (uip_ipaddr_cmp(entries[i].ipaddr, ipaddr))
-        {
-          return &entries[i];
-        }
-    }
-
-  return NULL;
-}
-
-void uip_neighbor_update(uip_ipaddr_t ipaddr)
+void net_neighbor_update(uip_ipaddr_t ipaddr)
 {
   struct neighbor_entry *e;
 
@@ -147,7 +175,7 @@ void uip_neighbor_update(uip_ipaddr_t ipaddr)
     }
 }
 
-struct uip_neighbor_addr *uip_neighbor_lookup(uip_ipaddr_t ipaddr)
+struct net_neighbor_addr_s *net_neighbor_lookup(uip_ipaddr_t ipaddr)
 {
   struct neighbor_entry *e;
 

@@ -47,13 +47,6 @@ config NET_PROMISCUOUS
 		Force the Ethernet driver to operate in promiscuous mode (if supported
 		by the Ethernet driver).
 
-config NET_IPv6
-	bool "IPv6"
-	default n
-	depends on EXPERIMENTAL
-	---help---
-		Build in support for IPv6.  Not fully implemented.
-
 config NET_BUFSIZE
 	int "Network packet buffer size (MTU)"
 	default 1294 if !NET_SLIP && NET_IPv6
@@ -97,6 +90,7 @@ config NET_GUARDSIZE
 
 source "net/socket/Kconfig"
 source "net/netdev/Kconfig"
+source "net/ipv6/Kconfig"
 source "net/pkt/Kconfig"
 source "net/tcp/Kconfig"
 source "net/udp/Kconfig"
