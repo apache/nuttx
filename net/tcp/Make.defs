@@ -33,8 +33,6 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_NET),y)
-
 # TCP/IP source files
 
 ifeq ($(CONFIG_NET_TCP),y)
@@ -68,4 +66,3 @@ DEPPATH += --dep-path tcp
 VPATH += :tcp
 
 endif # CONFIG_NET_TCP
-endif # CONFIG_NET

@@ -33,8 +33,6 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_NET),y)
-
 # ICMP source files
 
 ifeq ($(CONFIG_NET_ICMP),y)
@@ -54,5 +52,3 @@ endif
 
 DEPPATH += --dep-path icmp
 VPATH += :icmp
-
-endif

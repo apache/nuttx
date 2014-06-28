@@ -45,45 +45,17 @@ NET_CSRCS   = net_initialize.c
 # Socket support
 
 SOCK_ASRCS  =
-SOCK_CSRCS  = bind.c connect.c getsockname.c recv.c recvfrom.c socket.c
-SOCK_CSRCS += sendto.c net_sockets.c net_close.c net_dup.c net_dup2.c
-SOCK_CSRCS += net_clone.c net_vfcntl.c
-
-VPATH =
-DEPPATH = --dep-path .
-
-# TCP/IP support
-
-ifeq ($(CONFIG_NET_TCP),y)
-SOCK_CSRCS += send.c listen.c accept.c net_monitor.c
-endif
-
-# Socket options
-
-ifeq ($(CONFIG_NET_SOCKOPTS),y)
-SOCK_CSRCS += setsockopt.c getsockopt.c
-ifneq ($(CONFIG_DISABLE_CLOCK),y)
-SOCK_CSRCS += net_timeo.c net_timeval2dsec.c
-endif
-endif
-
-# Support for network access using streams
-
-ifneq ($(CONFIG_NFILE_STREAMS),0)
-SOCK_CSRCS += net_checksd.c
-endif
-
-# Support for sendfile()
-
-ifeq ($(CONFIG_NET_SENDFILE),y)
-SOCK_CSRCS += net_sendfile.c
-endif
+SOCK_CSRCS  =
 
 # Support for operations on network devices
 
 NETDEV_ASRCS =
 NETDEV_CSRCS =
 
+VPATH =
+DEPPATH = --dep-path .
+
+include socket/Make.defs
 include netdev/Make.defs
 include iob/Make.defs
 include arp/Make.defs

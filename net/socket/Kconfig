@@ -1,0 +1,36 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+menu "Socket Support"
+
+config NSOCKET_DESCRIPTORS
+	int "Number of socket descriptor"
+	default 8
+	---help---
+		Maximum number of socket descriptors per task/thread.
+
+config NET_NACTIVESOCKETS
+	int "Max socket operations"
+	default 16
+	---help---
+		Maximum number of concurrent socket operations (recv, send, etc.).
+		Default: 16
+
+config NET_SOCKOPTS
+	bool "Socket options"
+	default n
+	---help---
+		Enable or disable support for socket options
+
+if NET_SOCKOPTS
+
+config NET_SOLINGER
+	bool "SO_LINGER socket option"
+	default n
+	---help---
+		Enable or disable support for the SO_LINGER socket option.
+
+endif # NET_SOCKOPTS
+endmenu # Socket Support

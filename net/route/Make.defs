@@ -33,7 +33,6 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_NET),y)
 ifeq ($(CONFIG_NET_ROUTE),y)
 
 # Routing table support
@@ -46,5 +45,4 @@ SOCK_CSRCS += net_foreachroute.c net_router.c netdev_router.c
 DEPPATH += --dep-path route
 VPATH += :route
 
-endif
 endif

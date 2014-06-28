@@ -35,7 +35,7 @@
 
 ifeq ($(CONFIG_NET_IOB),y)
 
-# Include IOB src files
+# Include IOB source files
 
 NET_CSRCS += iob_add_queue.c iob_alloc.c iob_alloc_qentry.c iob_clone.c
 NET_CSRCS += iob_concat.c iob_copyin.c iob_copyout.c iob_contig.c iob_free.c

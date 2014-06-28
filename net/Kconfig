@@ -54,35 +54,6 @@ config NET_IPv6
 	---help---
 		Build in support for IPv6.  Not fully implemented.
 
-config NSOCKET_DESCRIPTORS
-	int "Number of socket descriptor"
-	default 8
-	---help---
-		Maximum number of socket descriptors per task/thread.
-
-config NET_NACTIVESOCKETS
-	int "Max socket operations"
-	default 16
-	---help---
-		Maximum number of concurrent socket operations (recv, send, etc.).
-		Default: 16
-
-config NET_SOCKOPTS
-	bool "Socket options"
-	default n
-	---help---
-		Enable or disable support for socket options
-
-if NET_SOCKOPTS
-
-config NET_SOLINGER
-	bool "SO_LINGER socket option"
-	default n
-	---help---
-		Enable or disable support for the SO_LINGER socket option.
-
-endif # NET_SOCKOPTS
-
 config NET_BUFSIZE
 	int "Network packet buffer size (MTU)"
 	default 1294 if !NET_SLIP && NET_IPv6
@@ -124,6 +95,7 @@ config NET_GUARDSIZE
 		packet size will be chopped down to the size indicated in the TCP
 		header.
 
+source "net/socket/Kconfig"
 source "net/netdev/Kconfig"
 source "net/pkt/Kconfig"
 source "net/tcp/Kconfig"

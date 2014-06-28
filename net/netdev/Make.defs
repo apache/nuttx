@@ -33,8 +33,6 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_NET),y)
-
 # Support for operations on network devices
 
 NETDEV_CSRCS += netdev_register.c netdev_ioctl.c net_poll.c netdev_txnotify.c
@@ -50,5 +48,3 @@ endif
 
 DEPPATH += --dep-path netdev
 VPATH += :netdev
-
-endif # CONFIG_NET

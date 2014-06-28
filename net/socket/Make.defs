@@ -1,5 +1,5 @@
 ############################################################################
-# net/igmp/Make.defs
+# net/socket/Make.defs
 #
 #   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,16 +33,40 @@
 #
 ############################################################################
 
-# IGMP source files
+# Include socket source files
 
-ifeq ($(CONFIG_NET_IGMP),y)
+SOCK_CSRCS += bind.c connect.c getsockname.c recv.c recvfrom.c socket.c
+SOCK_CSRCS += sendto.c net_sockets.c net_close.c net_dup.c net_dup2.c
+SOCK_CSRCS += net_clone.c net_vfcntl.c
 
-NET_CSRCS += igmp_group.c igmp_initialize.c igmp_input.c igmp_join.c igmp_leave.c
-NET_CSRCS += igmp_mcastmac.c igmp_msg.c igmp_poll.c igmp_send.c igmp_timer.c
+# TCP/IP support
 
-# Include igmp build support
-
-DEPPATH += --dep-path igmp
-VPATH += :igmp
-
+ifeq ($(CONFIG_NET_TCP),y)
+SOCK_CSRCS += send.c listen.c accept.c net_monitor.c
 endif
+
+# Socket options
+
+ifeq ($(CONFIG_NET_SOCKOPTS),y)
+SOCK_CSRCS += setsockopt.c getsockopt.c
+ifneq ($(CONFIG_DISABLE_CLOCK),y)
+SOCK_CSRCS += net_timeo.c net_timeval2dsec.c
+endif
+endif
+
+# Support for network access using streams
+
+ifneq ($(CONFIG_NFILE_STREAMS),0)
+SOCK_CSRCS += net_checksd.c
+endif
+
+# Support for sendfile()
+
+ifeq ($(CONFIG_NET_SENDFILE),y)
+SOCK_CSRCS += net_sendfile.c
+endif
+
+# Include socket build support
+
+DEPPATH += --dep-path socket
+VPATH += :socket

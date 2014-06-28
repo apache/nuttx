@@ -33,8 +33,6 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_NET),y)
-
 # Packet socket support
 
 ifeq ($(CONFIG_NET_PKT),y)
@@ -56,4 +54,3 @@ DEPPATH += --dep-path pkt
 VPATH += :pkt
 
 endif # CONFIG_NET_PKT
-endif # CONFIG_NET

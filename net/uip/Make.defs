@@ -33,8 +33,6 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_NET),y)
-
 # Common IP source files
 
 NET_CSRCS += uip_initialize.c uip_setipid.c uip_input.c uip_send.c
@@ -62,5 +60,3 @@ endif
 
 DEPPATH += --dep-path uip
 VPATH += :uip
-
-endif
