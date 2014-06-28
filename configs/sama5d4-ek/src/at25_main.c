@@ -184,6 +184,13 @@ int at25_main(int argc, char *argv)
       return EXIT_FAILURE;
     }
 
+  /* Replace the vector at offset 0x14 with the size of the image to load
+   * into SRAM.  The RomBOOT loader expects to find this size at that
+   * location.
+   */
+
+  *(uint32_t *)(SAM_DDRCS_VSECTION + 0x14) = memoutstream.public.nput;
+
   /* The HEX file load was successful, write the data to FLASH */
 
   printf("Successfully loaded the Intel HEX file into memory...\n");

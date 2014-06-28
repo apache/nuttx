@@ -424,6 +424,11 @@ Creating and Using DRAMBOOT
       you don't have SAM-BA, an alternative is to use the AT25BOOT program
       described in the next section.
 
+   STATUS:  I don't have a working SAM-BA at the moment and there are issues
+   with my AT25BOOT (see below).  I currently work around these issues by
+   putting DRAMBOOT on a microSD card (as boot.bin).  The RomBOOT loader does
+   boot that image without issue.
+
 Creating and Using AT25BOOT
 ===========================
 
@@ -512,6 +517,11 @@ Creating and Using AT25BOOT
    NOTES: (1) There is that must be closed to enable use of the AT25
    Serial Flash.  (2) If using SAM-BA, make sure that you load the DRAM
    boot program into the boot area via the pull-down menu.
+
+   STATUS:  While this program works great and appears to correctly write
+   the binary image onto the AT25 Serial FLASH, the RomBOOT loader will
+   not boot it!  I believe that is because the secure boot loader has some
+   undocumented requirements that I am unaware of. (2014-6-28)
 
 Running NuttX from SDRAM
 ========================
@@ -3038,6 +3048,11 @@ Configurations
     The usage is different, otherwise I believe the notes for the dramboot
     configuration should all apply.
 
+    STATUS:  While this program works great and appears to correctly write
+    the binary image onto the AT25 Serial FLASH, the RomBOOT loader will
+    not boot it!  I believe that is because the secure boot loader has some
+    undocumented requirements that I am unaware of. (2014-6-28)
+
   dramboot:
 
     This is a little program to help debug of code in DRAM.  It does the
@@ -3118,6 +3133,11 @@ Configurations
           gdb> load nuttx
           gdb> mon reg pc (make sure that the PC is 0x200040
           gdb> ... and debug ...
+
+    STATUS:  I don't have a working SAM-BA at the moment and there are issues
+    with my AT25BOOT (see above).  I currently work around these issues by
+    putting DRAMBOOT on a microSD card (as boot.bin).  The RomBOOT loader does
+    boot that image without issue.
 
   nsh:
 
