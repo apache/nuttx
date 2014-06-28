@@ -7559,4 +7559,6 @@
 	  that will load a bootloader into AT25 Serial FLASH (2014-6-28).
 	* libc/math: Change double_t to double in rint().  Add rintf() and rintl()
 	  while we are at it (2014-6-28).
+	* net/iob: Fix some errors in recent network I/O buffering when stack runs
+	  from interrupt level.  Reported by Manuel Stühn (2014-6-28).
 

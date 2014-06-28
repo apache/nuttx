@@ -306,7 +306,7 @@ static inline int psock_tcp_connect(FAR struct socket *psock,
     {
       /* Perform the uIP connection operation */
 
-      ret = psock_tcp_connect(psock->s_conn, inaddr);
+      ret = tcp_connect(psock->s_conn, inaddr);
     }
 
   if (ret >= 0)
