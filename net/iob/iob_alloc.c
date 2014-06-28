@@ -89,7 +89,6 @@ static FAR struct iob_s *iob_tryalloc(bool throttled)
   irqstate_t flags;
 #if CONFIG_IOB_THROTTLE > 0
   FAR sem_t *sem;
-  int semcount;
 #endif
 
 #if CONFIG_IOB_THROTTLE > 0
@@ -133,6 +132,10 @@ static FAR struct iob_s *iob_tryalloc(bool throttled)
           DEBUGASSERT(g_iob_sem.semcount >= 0);
 
 #if CONFIG_IOB_THROTTLE > 0
+          /* The throttle semaphore is a little more complicated because
+           * it can be negative!  Decrementing is still safe, however.
+           */
+
           g_throttle_sem.semcount--;
           DEBUGASSERT(g_throttle_sem.semcount >= -CONFIG_IOB_THROTTLE);
 #endif
