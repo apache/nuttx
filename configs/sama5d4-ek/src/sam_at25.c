@@ -46,6 +46,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/fs/nxffs.h>
@@ -75,6 +76,10 @@ int sam_at25_automount(int minor)
 {
   FAR struct spi_dev_s *spi;
   FAR struct mtd_dev_s *mtd;
+#ifdef CONFIG_SAMA5D4EK_AT25_CHARDEV
+  uint8_t blockdev[18];
+  uint8_t chardev[12];
+#endif
   static bool initialized = false;
   int ret;
 
@@ -101,12 +106,38 @@ int sam_at25_automount(int minor)
         }
 
 #if defined(CONFIG_SAMA5D4EK_AT25_FTL)
-      /* And finally, use the FTL layer to wrap the MTD driver as a block driver */
+      /* And finally, use the FTL layer to wrap the MTD driver as a block
+       * driver.
+       */
 
-      ret = ftl_initialize(AT25_MINOR, mtd);
+      ret = ftl_initialize(minor, mtd);
       if (ret < 0)
         {
           fdbg("ERROR: Failed to initialize the FTL layer: %d\n", ret);
+          return ret;
+        }
+
+#elif defined(CONFIG_SAMA5D4EK_AT25_CHARDEV)
+      /* Use the FTL layer to wrap the MTD driver as a block driver */
+
+      ret = ftl_initialize(minor, mtd);
+      if (ret < 0)
+        {
+          fdbg("ERROR: Failed to initialize the FTL layer: %d\n", ret);
+          return ret;
+        }
+
+      /* Use the minor number to create device paths */
+
+      snprintf(blockdev, 18, "/dev/mtdblock%d", minor);
+      snprintf(chardev, 12, "/dev/mtd%d", minor);
+
+      /* Now create a character device on the block device */
+
+      ret = bchdev_register(blockdev, chardev, false);
+      if (ret < 0)
+        {
+          fdbg("ERROR: bchdev_register %s failed: %d\n", chardev, ret);
           return ret;
         }
 
@@ -128,8 +159,10 @@ int sam_at25_automount(int minor)
           fdbg("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
           return ret;
         }
+
 #endif
-      /* Now we are initializeed */
+
+      /* Now we are initialized */
 
       initialized = true;
     }

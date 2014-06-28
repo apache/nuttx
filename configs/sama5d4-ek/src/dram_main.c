@@ -85,7 +85,7 @@ typedef void (*dram_entry_t)(void);
  *
  * Description:
  *   dram_main is a tiny program that runs in ISRAM.  dram_main will
- *   configure DRAM, present a prompt, load and Intel HEX file into DRAM,
+ *   configure DRAM, present a prompt, load an Intel HEX file into DRAM,
  *   and either start that program or wait for you to break in with the
  *   debugger.
  *
@@ -105,7 +105,7 @@ int dram_main(int argc, char *argv)
    * Intel HEX stream into DRAM.
    *
    * Hmm.. With no hardware handshake, there is a possibility of data loss
-   * to overruning incoming data buffer.  So far I have not seen this at
+   * to overrunning incoming data buffer.  So far I have not seen this at
    * 115200 8N1, but still it is a possibility.
    */
 

@@ -152,12 +152,25 @@
 #  undef CONFIG_SAMA5D4EK_AT25_NXFFS
 #endif
 
-#if !defined(CONFIG_SAMA5D4EK_AT25_FTL) && !defined(CONFIG_SAMA5D4EK_AT25_NXFFS)
+#if !defined(CONFIG_SAMA5D4EK_AT25_FTL) && !defined(CONFIG_SAMA5D4EK_AT25_CHARDEV) && \
+    !defined(CONFIG_SAMA5D4EK_AT25_NXFFS)
 #  undef HAVE_AT25
+#endif
+
+#if defined(CONFIG_SAMA5D4EK_AT25_FTL) && defined(CONFIG_SAMA5D4EK_AT25_CHARDEV)
+#  warning Both CONFIG_SAMA5D4EK_AT25_CHARDEV and CONFIG_SAMA5D4EK_AT25_FTL are set
+#  warning Ignoring CONFIG_SAMA5D4EK_AT25_FTL
+#  undef CONFIG_SAMA5D4EK_AT25_FTL
 #endif
 
 #if defined(CONFIG_SAMA5D4EK_AT25_FTL) && defined(CONFIG_SAMA5D4EK_AT25_NXFFS)
 #  warning Both CONFIG_SAMA5D4EK_AT25_FTL and CONFIG_SAMA5D4EK_AT25_NXFFS are set
+#  warning Ignoring CONFIG_SAMA5D4EK_AT25_NXFFS
+#  undef CONFIG_SAMA5D4EK_AT25_NXFFS
+#endif
+
+#if defined(CONFIG_SAMA5D4EK_AT25_CHARDEV) && defined(CONFIG_SAMA5D4EK_AT25_NXFFS)
+#  warning Both CONFIG_SAMA5D4EK_AT25_CHARDEV and CONFIG_SAMA5D4EK_AT25_NXFFS are set
 #  warning Ignoring CONFIG_SAMA5D4EK_AT25_NXFFS
 #  undef CONFIG_SAMA5D4EK_AT25_NXFFS
 #endif
@@ -509,25 +522,21 @@
 #endif
 
 /* SPI Chip Selects *****************************************************************/
-/* Both the Ronetix and Embest versions of the SAMAD3x CPU modules include an
- * Atmel AT25DF321A, 32-megabit, 2.7-volt SPI serial flash.  The SPI
- * connection is as follows:
+/* The SAMA5D4-EK includes an Atmel AT25DF321A, 32-megabit, 2.7-volt SPI serial
+ * FLASH on board.  The connection is as follows:
  *
- *   AT25DF321A      SAMA5
- *   --------------- -----------------------------------------------
- *   SI              PD11 SPI0_MOSI
- *   SO              PD10 SPI0_MIS0
- *   SCK             PD12 SPI0_SPCK
- *   /CS             PD13 via NL17SZ126 if JP1 is closed (See below)
+ *   AT25DF321A SAMA5D4-EK      SAMA5
+ *   ---------- --------------- --------------------------------
+ *   SI         AT25_SPI0_SI    PC1 PC1/SPI0_MOSI/PWML2/ISI_D9
+ *   SO         AT25_SPI0_SO    PC0 PC0/SPI0_MISO/PWMH2/ISI_D8
+ *   SCK        AT25_SPI0_SPCK  PC2 PC2/SPI0_SPCK/PWMH3/ISI_D10
+ *   /CS        AT25_SPI0_NCPS0 PC3 PC3/SPI0_NPCS0/PWML3/ISI_D11
  *
- * JP1 and JP2 seem to related to /CS on the Ronetix board, but the usage is
- * less clear.  For the Embest module, JP1 must be closed to connect /CS to
- * PD13; on the Ronetix schematic, JP11 seems only to bypass a resistor (may
- * not be populated?).  I think closing JP1 is correct in either case.
+ * AT25_SPI0_NCPS0 goes to the AT25DF321A as via a NL17SZ126 if JP6 is closed
  */
 
 #define PIO_AT25_NPCS0 (PIO_OUTPUT | PIO_CFG_PULLUP | PIO_OUTPUT_SET | \
-                        PIO_PORT_PIOD | PIO_PIN13)
+                        PIO_PORT_PIOC | PIO_PIN3)
 #define AT25_PORT      SPI0_CS0
 
 /************************************************************************************

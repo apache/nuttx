@@ -63,10 +63,34 @@ config SAMA5D4EK_DRAM_START
 		SAMA5D4EK_DRAM_START is defined, then it will not wait but will,
 		instead, immediately start the program in DRAM.
 
+config SAMA5D4EK_AT25_MAIN
+	bool "Build at25_main"
+	default n
+	depends on SAMA5_BOOT_ISRAM
+	---help---
+		at25_main is a tiny program that runs in ISRAM.  at25_main will
+		enable SDRAM and configure the AT25 Serial FLASH.  It will prompt
+		and then load an Intel HEX program into SDRAM over the serial
+		console. If the program is successfully loaded in SDRAM, at25_main
+		will copy the program at the beginning of the AT26 Serial FLASH.
+		If the jumpering is set correctly, the SAMA5D4 RomBOOT loader will
+		then boot the program from the serial FLASH the next time that it
+		reset.
+
+config SAMA5D4EK_AT25_PROGSIZE
+	int "AT25 partition size"
+	default 131072
+	depends on SAMA5D4EK_AT25_MAIN
+	---help---
+		This is the size of the partition at the beginning to the AT25
+		serial FLASH that will be used to hold the boot program.  Since
+		this program must run from SRAM, there would be no purpose int
+		making this size any larger than the size of the internal SRAM.
+
 config SAMA5D4EK_DRAM_BOOT
 	bool "Using DRAM boot loader"
 	default y
-	depends on SAMA5_BOOT_SDRAM && !SAMA5D4EK_DRAM_MAIN
+	depends on SAMA5_BOOT_SDRAM && !SAMA5D4EK_DRAM_MAIN && !SAMA5D4EK_AT25_MAIN
 	---help---
 		Select this option if you are going to boot using the sdram_main
 		bootloader (created with SAMA5D4EK_DRAM_MAIN=y).  This selection
@@ -115,7 +139,7 @@ endchoice # NAND FLASH configuration
 config SAMA5D4EK_AT25_AUTOMOUNT
 	bool "AT25 serial FLASH auto-mount"
 	default n
-	depends on NSH_ARCHINIT && SAMA5_SPI0 && MTD_AT25
+	depends on (NSH_ARCHINIT || SAMA5D4EK_AT25_MAIN) && SAMA5_SPI0 && MTD_AT25
 	---help---
 		Automatically initialize the AT25 SPI FLASH driver when NSH starts.
 
@@ -131,6 +155,14 @@ config SAMA5D4EK_AT25_FTL
 		block driver that could then, for example, be mounted using FAT or
 		any other file system.  Any file system may be used, but there will
 		be no wear-leveling.
+
+config SAMA5D4EK_AT25_CHARDEV
+	bool "Create AT25 Serial FLASH character driver"
+	---help---
+		Create the MTD driver for the AT25 and "wrap" the AT25 as a standard
+		character driver that could then, for example, via simple open, close,
+		read, write file system operations.  There will be no wear-leveling
+		in this configuration.
 
 config SAMA5D4EK_AT25_NXFFS
 	bool "Create AT25 serial FLASH NXFFS file system"

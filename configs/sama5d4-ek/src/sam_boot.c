@@ -71,7 +71,8 @@ void sam_boardinitialize(void)
    * sam_spiinitialize() has been brought into the link.
    */
 
-#if defined(CONFIG_SAMA5_SPI0) || defined(CONFIG_SAMA5_SPI1)
+#if defined(CONFIG_SAMA5_SPI0) || defined(CONFIG_SAMA5_SPI1) || \
+    defined(CONFIG_SAMA5_SPI2)
   if (sam_spiinitialize)
     {
       sam_spiinitialize();
