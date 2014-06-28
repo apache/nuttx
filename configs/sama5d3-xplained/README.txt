@@ -2265,13 +2265,17 @@ TRNG and /dev/random
 
   NSH can be configured to enable the SAMA5 TRNG peripheral so that it
   provides /dev/random.  The following configuration will enable the TRNG,
-  /dev/random, and the simple test of /dev/random at apps/examples/ranadom:
+  and support for /dev/random:
 
     System Type:
       CONFIG_SAMA5_TRNG=y                 : Enable the TRNG peripheral
 
-    Drivers (automatically selected):
+    Drivers:
       CONFIG_DEV_RANDOM=y                 : Enable /dev/random
+
+  A simple test of /dev/random is available at apps/examples/random and
+  can be enabled as a NSH application via the following additional
+  configuration settings:
 
     Applications -> Examples
       CONFIG_EXAMPLES_RANDOM=y            : Enable apps/examples/random
