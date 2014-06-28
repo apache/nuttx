@@ -48,7 +48,6 @@
 #include <assert.h>
 #include <errno.h>
 
-#include "net.h"
 #include "netdev/netdev.h"
 
 /****************************************************************************

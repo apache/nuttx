@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/net_timeval2dsec.c
+ * net/socket/recv.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,39 +38,40 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
+#ifdef CONFIG_NET
 
+#include <sys/types.h>
 #include <sys/socket.h>
-#include <stdint.h>
 #include <errno.h>
-#include <nuttx/clock.h>
 
-#include "net.h"
+#include "socket/socket.h"
 
 /****************************************************************************
  * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_timeval2dsec
+ * Function: recv
  *
  * Description:
- *   Convert a struct timeval to deciseconds.  Needed by setsockopt() to
- *   save new timeout values.
+ *   The recv() call is identical to recvfrom() with a NULL from parameter.
  *
  * Parameters:
- *   tv   The struct timeval to convert
+ *   sockfd   Socket descriptor of socket
+ *   buf      Buffer to receive data
+ *   len      Length of buffer
+ *   flags    Receive flags
  *
  * Returned Value:
- *   the converted value
+ *  (see recvfrom)
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-socktimeo_t net_timeval2dsec(struct timeval *tv)
+ssize_t recv(int sockfd, FAR void *buf, size_t len, int flags)
 {
-  return (uint16_t)(tv->tv_sec* DSEC_PER_SEC + tv->tv_usec / USEC_PER_DSEC);
+  return recvfrom(sockfd, buf, len, flags, NULL, 0);
 }
 
-#endif /* CONFIG_NET && CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */
+#endif /* CONFIG_NET */

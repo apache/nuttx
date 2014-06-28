@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/net_close.c
+ * net/socket/net_close.c
  *
  *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -57,7 +57,7 @@
 #  include <nuttx/clock.h>
 #endif
 
-#include "net.h"
+#include "socket/socket.h"
 #include "netdev/netdev.h"
 #include "uip/uip.h"
 #include "pkt/pkt.h"

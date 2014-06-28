@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/net_sendfile.c
+ * net/socket/net_sendfile.c
  *
  *   Copyright (C) 2013 UVC Ingenieure. All rights reserved.
  *   Copyright (C) 2007-2013 Gregory Nutt. All rights reserved.
@@ -61,7 +61,7 @@
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 
-#include "net.h"
+#include "socket/socket.h"
 #include "netdev/netdev.h"
 #include "uip/uip.h"
 

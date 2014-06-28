@@ -63,7 +63,7 @@
 #  include "nuttx/net/igmp.h"
 #endif
 
-#include "net.h"
+#include "socket/socket.h"
 #include "netdev/netdev.h"
 #include "route/route.h"
 

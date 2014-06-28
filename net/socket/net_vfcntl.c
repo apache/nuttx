@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/net_vfcntl.c
+ * net/socket/net_vfcntl.c
  *
  *   Copyright (C) 2009, 2012-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -47,7 +47,7 @@
 
 #include <arch/irq.h>
 #include <nuttx/net/net.h>
-#include "net.h"
+#include "socket/socket.h"
 
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 

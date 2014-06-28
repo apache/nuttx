@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/recvfrom.c
+ * net/socket/recvfrom.c
  *
  *   Copyright (C) 2007-2009, 2011-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -60,7 +60,7 @@
 #include <nuttx/net/udp.h>
 #include <nuttx/net/pkt.h>
 
-#include "net.h"
+#include "socket/socket.h"
 #include "netdev/netdev.h"
 #include "uip/uip.h"
 #include "tcp/tcp.h"

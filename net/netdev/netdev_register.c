@@ -52,7 +52,6 @@
 #include <net/ethernet.h>
 #include <nuttx/net/netdev.h>
 
-#include "net.h"
 #include "netdev/netdev.h"
 
 /****************************************************************************

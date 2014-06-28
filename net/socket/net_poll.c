@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/net_poll.c
+ * net/socket/net_poll.c
  *
  *   Copyright (C) 2008-2009, 2011-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -58,7 +58,7 @@
 
 #include <uip/uip.h>
 
-#include "net.h"
+#include "socket/socket.h"
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/net_clone.c
+ * net/socket/net_dup2.c
  *
- *   Copyright (C) 2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,91 +38,88 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifdef CONFIG_NET
 
 #include <sys/socket.h>
+#include <sched.h>
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/arch.h>
-#include <nuttx/net/tcp.h>
-#include <nuttx/net/udp.h>
+#include "socket/socket.h"
 
-#include "net.h"
+#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
 /****************************************************************************
  * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_clone
+ * Function: net_dup2
  *
  * Description:
- *   Performs the low level, common portion of net_dup() and net_dup2()
+ *   Clone a socket descriptor to an arbitray descriptor number.  If file
+ *   descriptors are implemented, then this is called by dup2() for the case
+ *   of socket file descriptors.  If file descriptors are not implemented,
+ *   then this function IS dup2().
  *
  ****************************************************************************/
 
-int net_clone(FAR struct socket *psock1, FAR struct socket *psock2)
+#if CONFIG_NFILE_DESCRIPTORS > 0
+int net_dup2(int sockfd1, int sockfd2)
+#else
+int dup2(int sockfd1, int sockfd2)
+#endif
 {
-  net_lock_t flags;
-  int ret = OK;
+  FAR struct socket *psock1;
+  FAR struct socket *psock2;
+  int err;
+  int ret;
 
-  /* Parts of this operation need to be atomic */
+  /* Lock the scheduler throughout the following */
 
-  flags = net_lock();
+  sched_lock();
+
+  /* Get the socket structures underly both descriptors */
+
+  psock1 = sockfd_socket(sockfd1);
+  psock2 = sockfd_socket(sockfd2);
+
+  /* Verify that the sockfd1 and sockfd2 both refer to valid socket
+   * descriptors and that sockfd2 corresponds to allocated socket
+   */
+
+  if (!psock1 || !psock2 || psock1->s_crefs <= 0)
+    {
+      err = EBADF;
+      goto errout;
+    }
+
+  /* If sockfd2 also valid, allocated socket, then we will have to
+   * close it!
+   */
+
+  if (psock2->s_crefs > 0)
+    {
+      net_close(sockfd2);
+    }
 
   /* Duplicate the socket state */
 
-  psock2->s_type     = psock1->s_type;      /* Protocol type: Only SOCK_STREAM or SOCK_DGRAM */
-  psock2->s_flags    = psock1->s_flags;     /* See _SF_* definitions */
-#ifdef CONFIG_NET_SOCKOPTS
-  psock2->s_options  = psock1->s_options;   /* Selected socket options */
-#ifndef CONFIG_DISABLE_CLOCK
-  psock2->s_rcvtimeo = psock1->s_rcvtimeo;  /* Receive timeout value (in deciseconds) */
-  psock2->s_sndtimeo = psock1->s_sndtimeo;  /* Send timeout value (in deciseconds) */
-#ifdef CONFIG_NET_SOLINGER
-  psock2->s_linger   = psock1->s_linger;    /* Linger timeout value (in deciseconds) */
-#endif
-#endif
-#endif
-  psock2->s_conn     = psock1->s_conn;      /* UDP or TCP connection structure */
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-  psock2->s_sndcb    = NULL;                /* Force allocation of new callback
-                                             * instance for TCP send */
-#endif
-
-  /* Increment the reference count on the connection */
-
-  DEBUGASSERT(psock2->s_conn);
-  psock2->s_crefs    = 1;                   /* One reference on the new socket itself */
-
-#ifdef CONFIG_NET_TCP
-  if (psock2->s_type == SOCK_STREAM)
+  ret = net_clone(psock1, psock2);
+  if (ret < 0)
     {
-      FAR struct tcp_conn_s *conn = psock2->s_conn;
-      DEBUGASSERT(conn->crefs > 0 && conn->crefs < 255);
-      conn->crefs++;
-    }
-  else
-#endif
-#ifdef CONFIG_NET_UDP
-  if (psock2->s_type == SOCK_DGRAM)
-    {
-      FAR struct udp_conn_s *conn = psock2->s_conn;
-      DEBUGASSERT(conn->crefs > 0 && conn->crefs < 255);
-      conn->crefs++;
-    }
-  else
-#endif
-    {
-      ndbg("Unsupported type: %d\n", psock2->s_type);
-      ret = -EBADF;
+      err = -ret;
+      goto errout;
     }
 
-  net_unlock(flags);
-  return ret;
+  sched_unlock();
+  return OK;
+
+errout:
+  sched_unlock();
+  errno = err;
+  return ERROR;
 }
 
-#endif /* CONFIG_NET */
+#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS > 0 */
 
 

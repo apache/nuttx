@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/accept.c
+ * net/socket/accept.c
  *
  *   Copyright (C) 2007-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -53,7 +53,7 @@
 
 #include <nuttx/net/tcp.h>
 
-#include "net.h"
+#include "socket/socket.h"
 
 /****************************************************************************
  * Definitions

@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/net_dup2.c
+ * net/socket/net_timeo.c
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,88 +38,48 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#if defined(CONFIG_NET) && defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
 
-#include <sys/socket.h>
-#include <sched.h>
-#include <errno.h>
+#include <stdint.h>
 #include <debug.h>
 
-#include "net.h"
+#include <nuttx/clock.h>
 
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+#include "socket/socket.h"
 
 /****************************************************************************
  * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_dup2
+ * Function: net_timeo
  *
  * Description:
- *   Clone a socket descriptor to an arbitray descriptor number.  If file
- *   descriptors are implemented, then this is called by dup2() for the case
- *   of socket file descriptors.  If file descriptors are not implemented,
- *   then this function IS dup2().
+ *   Check if a timeout has elapsed.  This can be called from a socket poll
+ *   function to determine if a timeout has occurred.
+ *
+ * Parameters:
+ *   start_time Timeout start time in system clock ticks
+ *   timeout    Timeout value in deciseconds.
+ *
+ * Returned Value:
+ *   0 (FALSE) if not timeout; 1 (TRUE) if timeout
+ *
+ * Assumptions:
  *
  ****************************************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-int net_dup2(int sockfd1, int sockfd2)
-#else
-int dup2(int sockfd1, int sockfd2)
-#endif
+int net_timeo(uint32_t start_time, socktimeo_t timeo)
 {
-  FAR struct socket *psock1;
-  FAR struct socket *psock2;
-  int err;
-  int ret;
+  uint32_t timeo_ticks =  DSEC2TICK(timeo);
+  uint32_t elapsed     =  clock_systimer() - start_time;
 
-  /* Lock the scheduler throughout the following */
-
-  sched_lock();
-
-  /* Get the socket structures underly both descriptors */
-
-  psock1 = sockfd_socket(sockfd1);
-  psock2 = sockfd_socket(sockfd2);
-
-  /* Verify that the sockfd1 and sockfd2 both refer to valid socket
-   * descriptors and that sockfd2 corresponds to allocated socket
-   */
-
-  if (!psock1 || !psock2 || psock1->s_crefs <= 0)
+  if (elapsed >= timeo_ticks)
     {
-      err = EBADF;
-      goto errout;
+      return TRUE;
     }
-
-  /* If sockfd2 also valid, allocated socket, then we will have to
-   * close it!
-   */
-
-  if (psock2->s_crefs > 0)
-    {
-      net_close(sockfd2);
-    }
-
-  /* Duplicate the socket state */
-
-  ret = net_clone(psock1, psock2);
-  if (ret < 0)
-    {
-      err = -ret;
-      goto errout;
-    }
-
-  sched_unlock();
-  return OK;
-
-errout:
-  sched_unlock();
-  errno = err;
-  return ERROR;
+  return FALSE;
 }
 
-#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS > 0 */
-
+#endif /* CONFIG_NET && CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */
 

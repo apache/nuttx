@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/net_monitor.c
+ * net/socket/net_monitor.c
  *
  *   Copyright (C) 2007-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,7 +46,7 @@
 
 #include <nuttx/net/tcp.h>
 
-#include "net.h"
+#include "socket/socket.h"
 #include "uip/uip.h"
 
 /****************************************************************************

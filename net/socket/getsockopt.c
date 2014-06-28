@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/getsockopt.c
+ * net/socket/getsockopt.c
  *
  *   Copyright (C) 2007-2009, 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -44,7 +44,7 @@
 #include <sys/socket.h>
 #include <errno.h>
 
-#include "net.h"
+#include "socket/socket.h"
 #include "utils/utils.h"
 
 /****************************************************************************

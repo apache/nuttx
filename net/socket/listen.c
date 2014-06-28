@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/listen.c
+ * net/socket/listen.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,7 +46,7 @@
 
 #include <nuttx/net/tcp.h>
 
-#include "net.h"
+#include "socket/socket.h"
 
 /****************************************************************************
  * Global Functions

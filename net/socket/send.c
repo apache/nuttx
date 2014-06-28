@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/send.c
+ * net/socket/send.c
  *
  *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -47,7 +47,7 @@
 
 #include "tcp/tcp.h"
 #include "pkt/pkt.h"
-#include "net.h"
+#include "socket/socket.h"
 
 /****************************************************************************
  * Definitions

@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/net_checksd.c
+ * net/utils/net_timeval2dsec.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,51 +38,36 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#if defined(CONFIG_NET) && !defined(CONFIG_DISABLE_CLOCK)
 
-#include <sys/socket.h>
+#include <nuttx/clock.h>
 
-#include <sched.h>
-#include <errno.h>
-#include <debug.h>
-
-#include "net.h"
+#include "utils/utils.h"
 
 /****************************************************************************
  * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: net_checksd
+ * Function: net_timeval2dsec
  *
  * Description:
- *   Check if the socket descriptor is valid for the provided TCB and if it
- *   supports the requested access.  This trivial operation is part of the
- *   fdopen() operation when the fdopen() is performed on a socket descriptor.
- *   It simply performs some sanity checking before permitting the socket
- *   descriptor to be wrapped as a C FILE stream.
+ *   Convert a struct timeval to deciseconds.  Needed by setsockopt() to
+ *   save new timeout values.
+ *
+ * Parameters:
+ *   tv   The struct timeval to convert
+ *
+ * Returned Value:
+ *   The converted value
+ *
+ * Assumptions:
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET) && CONFIG_NFILE_DESCRIPTORS > 0
-int net_checksd(int sd, int oflags)
+unsigned int net_timeval2dsec(struct timeval *tv)
 {
-  FAR struct socket *psock = sockfd_socket(sd);
-
-  /* Verify that the sockfd corresponds to valid, allocated socket */
-
-  if (!psock || psock->s_crefs <= 0)
-    {
-      nvdbg("No valid socket for sd: %d\n", sd);
-      return -EBADF;
-    }
-
-  /* NOTE:  We permit the socket FD to be "wrapped" in a stream as
-   * soon as the socket descriptor is created by socket().  Therefore
-   * (1) we don't care if the socket is connected yet, and (2) there
-   * are no access restrictions that can be enforced yet.
-   */
-
-  return OK;
+  return (unsigned int)(tv->tv_sec * DSEC_PER_SEC + tv->tv_usec / USEC_PER_DSEC);
 }
-#endif /* CONIG_NET && CONFIG_NFILE_DESCRIPTORS > 0 */
 
+#endif /* CONFIG_NET && !CONFIG_DISABLE_CLOCK */

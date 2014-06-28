@@ -46,7 +46,6 @@
 
 #include <arch/irq.h>
 
-#include "net.h"
 #include "route/route.h"
 
 #if defined(CONFIG_NET) && defined(CONFIG_NET_ROUTE)

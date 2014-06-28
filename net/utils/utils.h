@@ -66,6 +66,11 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
+struct net_driver_s;      /* Forward reference */
+#if !defined(CONFIG_DISABLE_CLOCK)
+struct timeval;           /* Forward reference */
+#endif
+
 /****************************************************************************
  * Function: net_dsec2timeval
  *
@@ -84,8 +89,30 @@ extern "C"
  *
  ****************************************************************************/
 
-struct timeval;
+#if !defined(CONFIG_DISABLE_CLOCK)
 void net_dsec2timeval(uint16_t dsec, FAR struct timeval *tv);
+#endif
+
+/****************************************************************************
+ * Function: net_timeval2dsec
+ *
+ * Description:
+ *   Convert a struct timeval to deciseconds.  Needed by setsockopt() to
+ *   save new timeout values.
+ *
+ * Parameters:
+ *   tv   The struct timeval to convert
+ *
+ * Returned Value:
+ *   The converted value
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_DISABLE_CLOCK)
+unsigned int net_timeval2dsec(FAR struct timeval *tv);
+#endif
 
 /****************************************************************************
  * Name: tcp_chksum

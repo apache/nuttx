@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/net.h
+ * net/socket/socket.h
  *
- *   Copyright (C) 2007-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef _NET_NET_H
-#define _NET_NET_H
+#ifndef _NET_SOCKET_SOCKET_H
+#define _NET_SOCKET_SOCKET_H
 
 /****************************************************************************
  * Included Files
@@ -177,7 +177,6 @@ int psock_close(FAR struct socket *psock);
 
 #if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
 int net_timeo(uint32_t start_time, socktimeo_t timeo);
-socktimeo_t net_timeval2dsec(FAR struct timeval *tv);
 #endif
 
 /* send.c ********************************************************************/
@@ -191,4 +190,4 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
 #endif
 
 #endif /* CONFIG_NET */
-#endif /* _NET_NET_H */
+#endif /* _NET_SOCKET_SOCKET_H */

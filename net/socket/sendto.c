@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/sendto.c
+ * net/socket/sendto.c
  *
  *   Copyright (C) 2007-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -52,7 +52,7 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/udp.h>
 
-#include "net.h"
+#include "socket/socket.h"
 #include "netdev/netdev.h"
 #include "uip/uip.h"
 #include "udp/udp.h"

@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/socket.c
+ * net/socket/socket.c
  *
  *   Copyright (C) 2007-2009, 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -49,7 +49,7 @@
 #include <nuttx/net/udp.h>
 #include <nuttx/net/pkt.h>
 
-#include "net.h"
+#include "socket/socket.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
 #include "pkt/pkt.h"

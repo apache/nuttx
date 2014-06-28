@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/net_dup.c
+ * net/socket/net_dup.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -44,7 +44,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include "net.h"
+#include "socket/socket.h"
 
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 

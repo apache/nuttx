@@ -44,7 +44,7 @@
 #include <errno.h>
 #include <nuttx/clock.h>
 
-#include "net.h"
+#include "utils/utils.h"
 
 /****************************************************************************
  * Public Functions

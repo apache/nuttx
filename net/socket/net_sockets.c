@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/net_sockets.c
+ * net/socket/net_sockets.c
  *
  *   Copyright (C) 2007-2009, 2011-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,7 +51,7 @@
 #include <nuttx/net/net.h>
 #include <nuttx/kmalloc.h>
 
-#include "net.h"
+#include "socket/socket.h"
 
 /****************************************************************************
  * Pre-processor Definitions

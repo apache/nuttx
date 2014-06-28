@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/getsockname.c
+ * net/socket/getsockname.c
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -50,7 +50,7 @@
 #include <nuttx/net/tcp.h>
 #include <nuttx/net/udp.h>
 
-#include "net.h"
+#include "socket/socket.h"
 #include "netdev/netdev.h"
 
 #ifdef CONFIG_NET

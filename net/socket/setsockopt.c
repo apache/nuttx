@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/setsockopt.c
+ * net/socket/setsockopt.c
  *
  *   Copyright (C) 2007, 2008, 2011-2012, 2014 Gregory Nutt. All rights
  *     reserved.
@@ -46,7 +46,8 @@
 #include <errno.h>
 #include <arch/irq.h>
 
-#include "net.h"
+#include "socket/socket.h"
+#include "utils/utils.h"
 
 /****************************************************************************
  * Global Functions
@@ -184,7 +185,7 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
 
           /* Get the timeout value */
 
-          timeo = net_timeval2dsec((struct timeval *)value);
+          timeo = (socktimeo_t)net_timeval2dsec((struct timeval *)value);
 
           /* Save the timeout value */
 
