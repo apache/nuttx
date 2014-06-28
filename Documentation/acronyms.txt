@@ -2,19 +2,23 @@ AIC    Advanced Interrupt Controller (Atmel SAM)
 ADC    Analog to Digital Conversion
 ARP    Address Resolution Protocol (networking)
 BCH    Block to Character
+BINFMT Binary Format (Dynamic Loader)
 CAN    Controller Area Network
+CP15   Coprocessor 15 (ARM)
 DEVIF  Device Interface (networking)
 DAC    Digital to Analog Conversion
 DEV    Device
 DRAM   Dynamic RAM
 FAT    File Allocation Table
 FTL    FLASH Translation Layer
+IRQ    Interrupt Request
 I2C    Inter-Integrated Circuit
 I2S    Inter IC Sound
 ICMP   Internet Control Message Protocol (networking)
 IOB    I/O Buffer (networking)
 LIBC   The "C" Library
 MM     Memory Management/Manager
+MMAP   Memory Map
 MMC    Multi-Media Card
 MMCSD  See MMC and SD
 MTD    Memory Technology Device

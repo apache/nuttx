@@ -66,6 +66,10 @@ ifeq ($(CONFIG_SAMA5D4EK_DRAM_MAIN),y)
 CSRCS += dram_main.c
 endif
 
+ifeq ($(CONFIG_SAMA5D4EK_AT25_MAIN),y)
+CSRCS += at25_main.c
+endif
+
 ifeq ($(CONFIG_MTD_AT25),y)
 ifeq ($(CONFIG_SAMA5_SPI0),y)
 CSRCS += sam_at25.c
