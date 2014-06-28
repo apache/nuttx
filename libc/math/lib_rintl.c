@@ -75,11 +75,11 @@
  * Private Variables
  ************************************************************/
 
-double rint(double x)
+long double rintl(long double x)
 {
-  long   linteger;
-  double fremainder;
-  double ret;
+  int64_t     llinteger;
+  long double fremainder;
+  long double ret;
 
   /* If the current rounding mode rounds toward negative
    * infinity, rint() is identical to floor().  If the current
@@ -102,8 +102,8 @@ double rint(double x)
    * |rint(x)-x|=1/2, then rint(x) is even.
    */
 
-  linteger  = (long)x;
-  fremainder = x - (double)linteger;
+  llinteger  = (int64_t)x;
+  fremainder = x - (long double)llinteger;
 
   if (x < 0.0)
     {
@@ -111,11 +111,11 @@ double rint(double x)
 
       if (fremainder == -0.5)
         {
-          linteger = ((linteger+1)&~1);
+          llinteger = ((llinteger+1)&~1);
         }
       else if (fremainder < -0.5)
         {
-          linteger--;
+          llinteger--;
         }
     }
   else
@@ -124,15 +124,15 @@ double rint(double x)
 
       if (fremainder == 0.5)
         {
-          linteger = ((linteger+1)&~1);
+          llinteger = ((llinteger+1)&~1);
         }
       else if (fremainder > 0.5)
         {
-          linteger++;
+          llinteger++;
         }
     }
 
-  ret = (double)linteger;
+  ret = (long double)llinteger;
 #endif
 
   return ret;

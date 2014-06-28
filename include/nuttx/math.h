@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/math.h
  *
- *   Copyright (C) 2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -152,7 +152,7 @@ long double roundl(long double x);
 
 float       rintf(float x);      /* Not implemented */
 #if CONFIG_HAVE_DOUBLE
-double_t    rint(double_t x);
+double      rint(double x);
 #endif
 #ifdef CONFIG_HAVE_LONG_DOUBLE
 long double rintl(long double x); /* Not implemented */

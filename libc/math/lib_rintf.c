@@ -1,7 +1,7 @@
 /************************************************************
- * libc/fixedmath/lib_rint.c
+ * libc/fixedmath/lib_rintf.c
  *
- *   Copyright (C) 2007, 2011, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,25 +75,25 @@
  * Private Variables
  ************************************************************/
 
-double rint(double x)
+float rintf(float x)
 {
-  long   linteger;
-  double fremainder;
-  double ret;
+  long  linteger;
+  float fremainder;
+  float ret;
 
   /* If the current rounding mode rounds toward negative
-   * infinity, rint() is identical to floor().  If the current
-   * rounding mode rounds toward positive infinity, rint() is
-   * identical to ceil().
+   * infinity, rintf() is identical to floorf().  If the current
+   * rounding mode rounds toward positive infinity, rintf() is
+   * identical to ceilf().
    */
 
 #if defined(CONFIG_FP_ROUND_POSITIVE) && CONFIG_FP_ROUNDING_POSITIVE != 0
 
-  ret = ceil(x);
+  ret = ceilf(x);
 
 #elif defined(CONFIG_FP_ROUND_NEGATIVE) && CONFIG_FP_ROUNDING_NEGATIVE != 0
 
-  ret = floor(x);
+  ret = floorf(x);
 
 #else
 
@@ -103,7 +103,7 @@ double rint(double x)
    */
 
   linteger  = (long)x;
-  fremainder = x - (double)linteger;
+  fremainder = x - (float)linteger;
 
   if (x < 0.0)
     {
@@ -132,7 +132,7 @@ double rint(double x)
         }
     }
 
-  ret = (double)linteger;
+  ret = (float)linteger;
 #endif
 
   return ret;
