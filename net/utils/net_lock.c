@@ -71,14 +71,14 @@ static unsigned int g_count   = 0;
  ****************************************************************************/
 
 /****************************************************************************
- * Function: uip_takesem
+ * Function: _net_takesem
  *
  * Description:
  *   Take the semaphore
  *
  ****************************************************************************/
 
-static void uip_takesem(void)
+static void _net_takesem(void)
 {
   while (sem_wait(&g_uipsem) != 0)
     {
@@ -131,7 +131,7 @@ net_lock_t net_lock(void)
     {
       /* No.. take the semaphore (perhaps waiting) */
 
-      uip_takesem();
+      _net_takesem();
 
       /* Now this thread holds the semaphore */
 
@@ -204,7 +204,7 @@ int net_lockedwait(sem_t *sem)
 
       /* Recover the uIP semaphore at the proper count */
 
-      uip_takesem();
+      _net_takesem();
       g_holder = me;
       g_count  = count;
     }

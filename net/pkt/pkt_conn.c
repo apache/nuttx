@@ -81,14 +81,14 @@ static dq_queue_t g_active_pkt_connections;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _uip_semtake() and _uip_semgive()
+ * Name: _pkt_semtake() and _pkt_semgive()
  *
  * Description:
  *   Take/give semaphore
  *
  ****************************************************************************/
 
-static inline void _uip_semtake(sem_t *sem)
+static inline void _pkt_semtake(sem_t *sem)
 {
   /* Take the semaphore (perhaps waiting) */
 
@@ -102,7 +102,7 @@ static inline void _uip_semtake(sem_t *sem)
     }
 }
 
-#define _uip_semgive(sem) sem_post(sem)
+#define _pkt_semgive(sem) sem_post(sem)
 
 /****************************************************************************
  * Public Functions
@@ -151,7 +151,7 @@ FAR struct pkt_conn_s *pkt_alloc(void)
    * is protected by a semaphore (that behaves like a mutex).
    */
 
-  _uip_semtake(&g_free_sem);
+  _pkt_semtake(&g_free_sem);
   conn = (FAR struct pkt_conn_s *)dq_remfirst(&g_free_pkt_connections);
   if (conn)
     {
@@ -164,7 +164,7 @@ FAR struct pkt_conn_s *pkt_alloc(void)
       dq_addlast(&conn->node, &g_active_pkt_connections);
     }
 
-  _uip_semgive(&g_free_sem);
+  _pkt_semgive(&g_free_sem);
   return conn;
 }
 
@@ -185,7 +185,7 @@ void pkt_free(FAR struct pkt_conn_s *conn)
 
   DEBUGASSERT(conn->crefs == 0);
 
-  _uip_semtake(&g_free_sem);
+  _pkt_semtake(&g_free_sem);
 
   /* Remove the connection from the active list */
 
@@ -194,7 +194,7 @@ void pkt_free(FAR struct pkt_conn_s *conn)
   /* Free the connection */
 
   dq_addlast(&conn->node, &g_free_pkt_connections);
-  _uip_semgive(&g_free_sem);
+  _pkt_semgive(&g_free_sem);
 }
 
 /****************************************************************************

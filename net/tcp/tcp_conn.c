@@ -88,7 +88,7 @@ static uint16_t g_last_tcp_port;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_selectport()
+ * Name: tcp_selectport()
  *
  * Description:
  *   If the port number is zero; select an unused port for the connection.
@@ -112,7 +112,7 @@ static uint16_t g_last_tcp_port;
  *
  ****************************************************************************/
 
-static int uip_selectport(uint16_t portno)
+static int tcp_selectport(uint16_t portno)
 {
   if (portno == 0)
     {
@@ -589,7 +589,7 @@ int tcp_bind(FAR struct tcp_conn_s *conn,
   /* Verify or select a local port */
 
   flags = net_lock();
-  port = uip_selectport(ntohs(addr->sin_port));
+  port = tcp_selectport(ntohs(addr->sin_port));
   net_unlock(flags);
 
   if (port < 0)
@@ -661,7 +661,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn,
    */
 
   flags = net_lock();
-  port = uip_selectport(ntohs(conn->lport));
+  port = tcp_selectport(ntohs(conn->lport));
   net_unlock(flags);
 
   if (port < 0)

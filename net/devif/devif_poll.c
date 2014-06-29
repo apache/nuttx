@@ -62,7 +62,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: uip_pollpktconnections
+ * Function: devif_poll_pkt_connections
  *
  * Description:
  *   Poll all packet connections for available packets to send.
@@ -74,8 +74,8 @@
  ****************************************************************************/
 
 #if defined(CONFIG_NET_PKT)
-static int uip_pollpktconnections(struct net_driver_s *dev,
-                                  uip_poll_callback_t callback)
+static int devif_poll_pkt_connections(FAR struct net_driver_s *dev,
+                                      uip_poll_callback_t callback)
 {
   FAR struct pkt_conn_s *pkt_conn = NULL;
   int bstop = 0;
@@ -98,7 +98,7 @@ static int uip_pollpktconnections(struct net_driver_s *dev,
 #endif /* CONFIG_NET_PKT */
 
 /****************************************************************************
- * Function: uip_pollicmp
+ * Function: devif_poll_icmp
  *
  * Description:
  *   Poll all UDP connections for available packets to send.
@@ -110,8 +110,8 @@ static int uip_pollpktconnections(struct net_driver_s *dev,
  ****************************************************************************/
 
 #if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING)
-static inline int uip_pollicmp(FAR struct net_driver_s *dev,
-                               uip_poll_callback_t callback)
+static inline int devif_poll_icmp(FAR struct net_driver_s *dev,
+                                  uip_poll_callback_t callback)
 {
   /* Perform the UDP TX poll */
 
@@ -124,7 +124,7 @@ static inline int uip_pollicmp(FAR struct net_driver_s *dev,
 #endif /* CONFIG_NET_ICMP && CONFIG_NET_ICMP_PING */
 
 /****************************************************************************
- * Function: uip_polligmp
+ * Function: devif_poll_igmp
  *
  * Description:
  *   Poll all IGMP connections for available packets to send.
@@ -136,8 +136,8 @@ static inline int uip_pollicmp(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static inline int uip_polligmp(FAR struct net_driver_s *dev,
-                               uip_poll_callback_t callback)
+static inline int devif_poll_igmp(FAR struct net_driver_s *dev,
+                                  uip_poll_callback_t callback)
 {
   /* Perform the IGMP TX poll */
 
@@ -150,7 +150,7 @@ static inline int uip_polligmp(FAR struct net_driver_s *dev,
 #endif /* CONFIG_NET_IGMP */
 
 /****************************************************************************
- * Function: uip_polludpconnections
+ * Function: devif_poll_udp_connections
  *
  * Description:
  *   Poll all UDP connections for available packets to send.
@@ -162,8 +162,8 @@ static inline int uip_polligmp(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_UDP
-static int uip_polludpconnections(FAR struct net_driver_s *dev,
-                                  uip_poll_callback_t callback)
+static int devif_poll_udp_connections(FAR struct net_driver_s *dev,
+                                      uip_poll_callback_t callback)
 {
   FAR struct udp_conn_s *conn = NULL;
   int bstop = 0;
@@ -186,7 +186,7 @@ static int uip_polludpconnections(FAR struct net_driver_s *dev,
 #endif /* CONFIG_NET_UDP */
 
 /****************************************************************************
- * Function: uip_polltcpconnections
+ * Function: devif_poll_tcp_connections
  *
  * Description:
  *   Poll all UDP connections for available packets to send.
@@ -198,8 +198,8 @@ static int uip_polludpconnections(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
-static inline int uip_polltcpconnections(FAR struct net_driver_s *dev,
-                                         uip_poll_callback_t callback)
+static inline int devif_poll_tcp_connections(FAR struct net_driver_s *dev,
+                                             uip_poll_callback_t callback)
 {
   FAR struct tcp_conn_s *conn  = NULL;
   int bstop = 0;
@@ -220,11 +220,11 @@ static inline int uip_polltcpconnections(FAR struct net_driver_s *dev,
   return bstop;
 }
 #else
-# define uip_polltcpconnections(dev, callback) (0)
+# define devif_poll_tcp_connections(dev, callback) (0)
 #endif
 
 /****************************************************************************
- * Function: uip_polltcptimer
+ * Function: devif_poll_tcp_timer
  *
  * Description:
  *   The TCP timer has expired.  Update TCP timing state in each active,
@@ -237,8 +237,8 @@ static inline int uip_polltcpconnections(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_TCP
-static inline int uip_polltcptimer(FAR struct net_driver_s *dev,
-                                   uip_poll_callback_t callback, int hsec)
+static inline int devif_poll_tcp_timer(FAR struct net_driver_s *dev,
+                                       uip_poll_callback_t callback, int hsec)
 {
   FAR struct tcp_conn_s *conn  = NULL;
   int bstop = 0;
@@ -259,7 +259,7 @@ static inline int uip_polltcptimer(FAR struct net_driver_s *dev,
   return bstop;
 }
 #else
-# define uip_polltcptimer(dev, callback, hsec) (0)
+# define devif_poll_tcp_timer(dev, callback, hsec) (0)
 #endif
 
 /****************************************************************************
@@ -300,14 +300,14 @@ int uip_poll(FAR struct net_driver_s *dev, uip_poll_callback_t callback)
    */
 
 #ifdef CONFIG_NET_PKT
-  bstop = uip_pollpktconnections(dev, callback);
+  bstop = devif_poll_pkt_connections(dev, callback);
   if (!bstop)
 #endif
     {
       /* Check for pendig IGMP messages */
 
 #ifdef CONFIG_NET_IGMP
-      bstop = uip_polligmp(dev, callback);
+      bstop = devif_poll_igmp(dev, callback);
       if (!bstop)
 #endif
         {
@@ -315,7 +315,7 @@ int uip_poll(FAR struct net_driver_s *dev, uip_poll_callback_t callback)
            * action.
            */
 
-          bstop = uip_polltcpconnections(dev, callback);
+          bstop = devif_poll_tcp_connections(dev, callback);
           if (!bstop)
             {
 #ifdef CONFIG_NET_UDP
@@ -323,7 +323,7 @@ int uip_poll(FAR struct net_driver_s *dev, uip_poll_callback_t callback)
                * the poll action
                */
 
-              bstop = uip_polludpconnections(dev, callback);
+              bstop = devif_poll_udp_connections(dev, callback);
               if (!bstop)
 #endif
                 {
@@ -332,7 +332,7 @@ int uip_poll(FAR struct net_driver_s *dev, uip_poll_callback_t callback)
                    * request.
                    */
 
-                  bstop = uip_pollicmp(dev, callback);
+                  bstop = devif_poll_icmp(dev, callback);
 #endif
                 }
             }
@@ -385,14 +385,14 @@ int uip_timer(FAR struct net_driver_s *dev, uip_poll_callback_t callback,
    */
 
 #ifdef CONFIG_NET_PKT
-  bstop = uip_pollpktconnections(dev, callback);
+  bstop = devif_poll_pkt_connections(dev, callback);
   if (!bstop)
 #endif
     {
       /* Check for pending IGMP messages */
 
 #ifdef CONFIG_NET_IGMP
-      bstop = uip_polligmp(dev, callback);
+      bstop = devif_poll_igmp(dev, callback);
       if (!bstop)
 #endif
         {
@@ -400,7 +400,7 @@ int uip_timer(FAR struct net_driver_s *dev, uip_poll_callback_t callback,
            * timer action.
            */
 
-          bstop = uip_polltcptimer(dev, callback, hsec);
+          bstop = devif_poll_tcp_timer(dev, callback, hsec);
           if (!bstop)
             {
               /* Traverse all of the allocated UDP connections and perform
@@ -408,7 +408,7 @@ int uip_timer(FAR struct net_driver_s *dev, uip_poll_callback_t callback,
                */
 
 #ifdef CONFIG_NET_UDP
-              bstop = uip_polludpconnections(dev, callback);
+              bstop = devif_poll_udp_connections(dev, callback);
               if (!bstop)
 #endif
                 {
@@ -417,7 +417,7 @@ int uip_timer(FAR struct net_driver_s *dev, uip_poll_callback_t callback,
                    * request.
                    */
 
-                  bstop = uip_pollicmp(dev, callback);
+                  bstop = devif_poll_icmp(dev, callback);
 #endif
                 }
             }

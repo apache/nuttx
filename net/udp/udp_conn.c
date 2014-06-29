@@ -37,10 +37,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Compilation Switches
- ****************************************************************************/
-
-/****************************************************************************
  * Included Files
  ****************************************************************************/
 
@@ -90,14 +86,14 @@ static uint16_t g_last_udp_port;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _uip_semtake() and _uip_semgive()
+ * Name: _udp_semtake() and _udp_semgive()
  *
  * Description:
  *   Take/give semaphore
  *
  ****************************************************************************/
 
-static inline void _uip_semtake(FAR sem_t *sem)
+static inline void _udp_semtake(FAR sem_t *sem)
 {
   /* Take the semaphore (perhaps waiting) */
 
@@ -111,10 +107,10 @@ static inline void _uip_semtake(FAR sem_t *sem)
     }
 }
 
-#define _uip_semgive(sem) sem_post(sem)
+#define _udp_semgive(sem) sem_post(sem)
 
 /****************************************************************************
- * Name: uip_find_conn()
+ * Name: udp_find_conn()
  *
  * Description:
  *   Find the UDP connection that uses this local port number.  Called only
@@ -122,7 +118,7 @@ static inline void _uip_semtake(FAR sem_t *sem)
  *
  ****************************************************************************/
 
-static FAR struct udp_conn_s *uip_find_conn(uint16_t portno)
+static FAR struct udp_conn_s *udp_find_conn(uint16_t portno)
 {
   int i;
 
@@ -140,7 +136,7 @@ static FAR struct udp_conn_s *uip_find_conn(uint16_t portno)
 }
 
 /****************************************************************************
- * Name: uip_selectport()
+ * Name: udp_select_port()
  *
  * Description:
  *   Select an unused port number.
@@ -159,7 +155,7 @@ static FAR struct udp_conn_s *uip_find_conn(uint16_t portno)
  *
  ****************************************************************************/
 
-static uint16_t uip_selectport(void)
+static uint16_t udp_select_port(void)
 {
   uint16_t portno;
 
@@ -183,7 +179,7 @@ static uint16_t uip_selectport(void)
           g_last_udp_port = 4096;
         }
     }
-  while (uip_find_conn(htons(g_last_udp_port)));
+  while (udp_find_conn(htons(g_last_udp_port)));
 
   /* Initialize and return the connection structure, bind it to the
    * port number
@@ -245,7 +241,7 @@ FAR struct udp_conn_s *udp_alloc(void)
    * is protected by a semaphore (that behaves like a mutex).
    */
 
-  _uip_semtake(&g_free_sem);
+  _udp_semtake(&g_free_sem);
   conn = (FAR struct udp_conn_s *)dq_remfirst(&g_free_udp_connections);
   if (conn)
     {
@@ -258,7 +254,7 @@ FAR struct udp_conn_s *udp_alloc(void)
       dq_addlast(&conn->node, &g_active_udp_connections);
     }
 
-  _uip_semgive(&g_free_sem);
+  _udp_semgive(&g_free_sem);
   return conn;
 }
 
@@ -280,7 +276,7 @@ void udp_free(FAR struct udp_conn_s *conn)
 
   DEBUGASSERT(conn->crefs == 0);
 
-  _uip_semtake(&g_free_sem);
+  _udp_semtake(&g_free_sem);
   conn->lport = 0;
 
   /* Remove the connection from the active list */
@@ -290,7 +286,7 @@ void udp_free(FAR struct udp_conn_s *conn)
   /* Free the connection */
 
   dq_addlast(&conn->node, &g_free_udp_connections);
-  _uip_semgive(&g_free_sem);
+  _udp_semgive(&g_free_sem);
 }
 
 /****************************************************************************
@@ -391,7 +387,7 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr_in *addr)
     {
       /* Yes.. Find an unused local port number */
 
-      conn->lport = htons(uip_selectport());
+      conn->lport = htons(udp_select_port());
       ret         = OK;
     }
   else
@@ -402,7 +398,7 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr_in *addr)
 
       /* Is any other UDP connection bound to this port? */
 
-      if (!uip_find_conn(addr->sin_port))
+      if (!udp_find_conn(addr->sin_port))
         {
           /* No.. then bind the socket to the port */
 
@@ -452,7 +448,7 @@ int udp_connect(FAR struct udp_conn_s *conn,
        * connection structure.
        */
 
-      conn->lport = htons(uip_selectport());
+      conn->lport = htons(udp_select_port());
     }
 
   /* Is there a remote port (rport) */

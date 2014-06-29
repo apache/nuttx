@@ -108,7 +108,7 @@
 /* Macros. */
 
 #define BUF     ((FAR struct net_iphdr_s *)&dev->d_buf[UIP_LLH_LEN])
-#define FBUF    ((FAR struct net_iphdr_s *)&uip_reassbuf[0])
+#define FBUF    ((FAR struct net_iphdr_s *)&g_reassembly_buffer[0])
 
 /* IP fragment re-assembly */
 
@@ -125,11 +125,11 @@
  ****************************************************************************/
 
 #if UIP_REASSEMBLY && !defined(CONFIG_NET_IPv6)
-static uint8_t uip_reassbuf[UIP_REASS_BUFSIZE];
-static uint8_t uip_reassbitmap[UIP_REASS_BUFSIZE / (8 * 8)];
-static const uint8_t bitmap_bits[8] = {0xff, 0x7f, 0x3f, 0x1f, 0x0f, 0x07, 0x03, 0x01};
-static uint16_t uip_reasslen;
-static uint8_t uip_reassflags;
+static uint8_t g_reassembly_buffer[UIP_REASS_BUFSIZE];
+static uint8_t g_reassembly_bitmap[UIP_REASS_BUFSIZE / (8 * 8)];
+static const uint8_t g_bitmap_bits[8] = {0xff, 0x7f, 0x3f, 0x1f, 0x0f, 0x07, 0x03, 0x01};
+static uint16_t g_reassembly_len;
+static uint8_t g_reassembly_flags;
 #endif /* UIP_REASSEMBLY */
 
 /****************************************************************************
@@ -137,7 +137,7 @@ static uint8_t uip_reassflags;
  ****************************************************************************/
 
 /****************************************************************************
- * Function: uip_reass
+ * Function: devif_reassembly
  *
  * Description:
  *   IP fragment reassembly: not well-tested.
@@ -147,7 +147,7 @@ static uint8_t uip_reassflags;
  ****************************************************************************/
 
 #if UIP_REASSEMBLY && !defined(CONFIG_NET_IPv6)
-static uint8_t uip_reass(void)
+static uint8_t devif_reassembly(void)
 {
   FAR struct net_iphdr_s *pbuf  = BUF;
   FAR struct net_iphdr_s *pfbuf = FBUF;
@@ -162,13 +162,13 @@ static uint8_t uip_reass(void)
 
   if (!g_reassembly_timer)
     {
-      memcpy(uip_reassbuf, &pbuf->vhl, UIP_IPH_LEN);
+      memcpy(g_reassembly_buffer, &pbuf->vhl, UIP_IPH_LEN);
       g_reassembly_timer   = UIP_REASS_MAXAGE;
-      uip_reassflags = 0;
+      g_reassembly_flags = 0;
 
       /* Clear the bitmap. */
 
-      memset(uip_reassbitmap, 0, sizeof(uip_reassbitmap));
+      memset(g_reassembly_bitmap, 0, sizeof(g_reassembly_bitmap));
     }
 
   /* Check if the incoming fragment matches the one currently present
@@ -195,7 +195,7 @@ static uint8_t uip_reass(void)
 
       /* Copy the fragment into the reassembly buffer, at the right offset. */
 
-      memcpy(&uip_reassbuf[UIP_IPH_LEN + offset], (char *)pbuf + (int)((pbuf->vhl & 0x0f) * 4), len);
+      memcpy(&g_reassembly_buffer[UIP_IPH_LEN + offset], (char *)pbuf + (int)((pbuf->vhl & 0x0f) * 4), len);
 
     /* Update the bitmap. */
 
@@ -203,8 +203,8 @@ static uint8_t uip_reass(void)
       {
         /* If the two endpoints are in the same byte, we only update that byte. */
 
-        uip_reassbitmap[offset / (8 * 8)] |=
-          bitmap_bits[(offset / 8 ) & 7] & ~bitmap_bits[((offset + len) / 8 ) & 7];
+        g_reassembly_bitmap[offset / (8 * 8)] |=
+          g_bitmap_bits[(offset / 8 ) & 7] & ~g_bitmap_bits[((offset + len) / 8 ) & 7];
 
       }
     else
@@ -213,12 +213,12 @@ static uint8_t uip_reass(void)
          * in the endpoints and fill the stuff inbetween with 0xff.
          */
 
-        uip_reassbitmap[offset / (8 * 8)] |= bitmap_bits[(offset / 8 ) & 7];
+        g_reassembly_bitmap[offset / (8 * 8)] |= g_bitmap_bits[(offset / 8 ) & 7];
         for (i = 1 + offset / (8 * 8); i < (offset + len) / (8 * 8); ++i)
           {
-            uip_reassbitmap[i] = 0xff;
+            g_reassembly_bitmap[i] = 0xff;
           }
-        uip_reassbitmap[(offset + len) / (8 * 8)] |= ~bitmap_bits[((offset + len) / 8 ) & 7];
+        g_reassembly_bitmap[(offset + len) / (8 * 8)] |= ~g_bitmap_bits[((offset + len) / 8 ) & 7];
       }
 
     /* If this fragment has the More Fragments flag set to zero, we know that
@@ -229,8 +229,8 @@ static uint8_t uip_reass(void)
 
     if ((pbuf->ipoffset[0] & IP_MF) == 0)
       {
-        uip_reassflags |= UIP_REASS_FLAG_LASTFRAG;
-        uip_reasslen = offset + len;
+        g_reassembly_flags |= UIP_REASS_FLAG_LASTFRAG;
+        g_reassembly_len = offset + len;
       }
 
     /* Finally, we check if we have a full packet in the buffer. We do this
@@ -238,15 +238,15 @@ static uint8_t uip_reass(void)
      * are set.
      */
 
-    if (uip_reassflags & UIP_REASS_FLAG_LASTFRAG)
+    if (g_reassembly_flags & UIP_REASS_FLAG_LASTFRAG)
       {
         /* Check all bytes up to and including all but the last byte in
          * the bitmap.
          */
 
-        for (i = 0; i < uip_reasslen / (8 * 8) - 1; ++i)
+        for (i = 0; i < g_reassembly_len / (8 * 8) - 1; ++i)
           {
-            if (uip_reassbitmap[i] != 0xff)
+            if (g_reassembly_bitmap[i] != 0xff)
               {
                 goto nullreturn;
               }
@@ -256,7 +256,7 @@ static uint8_t uip_reass(void)
          * right amount of bits.
          */
 
-        if (uip_reassbitmap[uip_reasslen / (8 * 8)] != (uint8_t)~bitmap_bits[uip_reasslen / 8 & 7])
+        if (g_reassembly_bitmap[g_reassembly_len / (8 * 8)] != (uint8_t)~g_bitmap_bits[g_reassembly_len / 8 & 7])
           {
             goto nullreturn;
           }
@@ -267,19 +267,19 @@ static uint8_t uip_reass(void)
          */
 
         g_reassembly_timer = 0;
-        memcpy(pbuf, pfbuf, uip_reasslen);
+        memcpy(pbuf, pfbuf, g_reassembly_len);
 
         /* Pretend to be a "normal" (i.e., not fragmented) IP packet from
          * now on.
          */
 
         pbuf->ipoffset[0] = pbuf->ipoffset[1] = 0;
-        pbuf->len[0] = uip_reasslen >> 8;
-        pbuf->len[1] = uip_reasslen & 0xff;
+        pbuf->len[0] = g_reassembly_len >> 8;
+        pbuf->len[1] = g_reassembly_len & 0xff;
         pbuf->ipchksum = 0;
         pbuf->ipchksum = ~(ip_chksum(dev));
 
-        return uip_reasslen;
+        return g_reassembly_len;
       }
   }
 
@@ -388,7 +388,7 @@ int uip_input(FAR struct net_driver_s *dev)
   if ((pbuf->ipoffset[0] & 0x3f) != 0 || pbuf->ipoffset[1] != 0)
     {
 #if UIP_REASSEMBLY
-      dev->d_len = uip_reass();
+      dev->d_len = devif_reassembly();
       if (dev->d_len == 0)
         {
           goto drop;
