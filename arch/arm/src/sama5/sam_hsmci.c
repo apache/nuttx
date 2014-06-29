@@ -1189,7 +1189,7 @@ static void sam_cmddump(struct sam_dev_s *priv)
     {
       sam_hsmcidump(priv, &priv->cmdsamples[SAMPLENDX_AFTER_CMDR],
                     "After command setup");
-      sam_hsmcidump(priv, &g_cmdsamples[SAMPLENDX_AT_WAKEUP],
+      sam_hsmcidump(priv, &priv->cmdsamples[SAMPLENDX_AT_WAKEUP],
                     "After wakeup");
 #ifdef CONFIG_SAMA5_HSMCI_XFRDEBUG
       priv->cmdinitialized = false;
