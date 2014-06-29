@@ -7577,3 +7577,5 @@
 	* SAMA5: Various fixes related to DMA in order to get the HSMCI
 	  driver to build for the SAMA5D4 (2014-6-29).
 	* SAMA5D4-EK: Fix HSMCI card-detect pin selection (2014-6-29).
+	* net/:  Still renaming, mostly uip_* to net_* (2014-6-29).
+
