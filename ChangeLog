@@ -7574,4 +7574,6 @@
 	* arch/arm/src/sama5/Kconfig and sam_hsmci.c:  Add configuration to
 	  assign an XDMAC channel to an HSMCI (2014-6029).
 	* Various fixes for networking and tiny webserver from Max (2014-6-29).
-
+	* SAMA5: Various fixes related to DMA in order to get the HSMCI
+	  driver to build for the SAMA5D4 (2014-6-29).
+	* SAMA5D4-EK: Fix HSMCI card-detect pin selection (2014-6-29).
