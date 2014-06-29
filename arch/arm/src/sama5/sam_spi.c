@@ -1440,8 +1440,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
             ((uint32_t)spi->pid << DMACH_FLAG_PERIPHPID_SHIFT) |
             DMACH_FLAG_PERIPHH2SEL | DMACH_FLAG_PERIPHISPERIPH |
             DMACH_FLAG_PERIPHAHB_AHB_IF2 | DMACH_FLAG_PERIPHWIDTH_8BITS |
-            DMACH_FLAG_PERIPHCHUNKSIZE_1 |
-            ((uint32_t)(0x3f) << DMACH_FLAG_MEMPID_SHIFT) |
+            DMACH_FLAG_PERIPHCHUNKSIZE_1 | DMACH_FLAG_MEMPID(0x3f) |
             DMACH_FLAG_MEMAHB_AHB_IF0 | DMACH_FLAG_MEMWIDTH_8BITS |
             DMACH_FLAG_MEMCHUNKSIZE_1;
 
@@ -1464,8 +1463,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
             ((uint32_t)spi->pid << DMACH_FLAG_PERIPHPID_SHIFT) |
             DMACH_FLAG_PERIPHH2SEL | DMACH_FLAG_PERIPHISPERIPH |
             DMACH_FLAG_PERIPHAHB_AHB_IF2 | DMACH_FLAG_PERIPHWIDTH_8BITS |
-            DMACH_FLAG_PERIPHCHUNKSIZE_1 |
-            ((uint32_t)(0x3f) << DMACH_FLAG_MEMPID_SHIFT) |
+            DMACH_FLAG_PERIPHCHUNKSIZE_1 | DMACH_FLAG_MEMPID(0x3f) |
             DMACH_FLAG_MEMAHB_AHB_IF0 | DMACH_FLAG_MEMWIDTH_8BITS |
             DMACH_FLAG_MEMCHUNKSIZE_1;
 
