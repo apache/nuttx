@@ -86,8 +86,8 @@ void igmp_initialize(void)
 {
   nvdbg("IGMP initializing\n");
 
-  uip_ipaddr(g_allrouters, 224, 0, 0, 2);
-  uip_ipaddr(g_allsystems, 224, 0, 0, 1);
+  net_ipaddr(g_allrouters, 224, 0, 0, 2);
+  net_ipaddr(g_allsystems, 224, 0, 0, 1);
 
   /* Initialize the group allocation logic */
 

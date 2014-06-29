@@ -250,7 +250,7 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
            * device.
            */
 
-          if (!uip_ipaddr_maskcmp(pstate->png_addr, dev->d_ipaddr, dev->d_netmask))
+          if (!net_ipaddr_maskcmp(pstate->png_addr, dev->d_ipaddr, dev->d_netmask))
             {
               /* Destination address was not on the local network served by this
                * device.  If a timeout occurs, then the most likely reason is

@@ -85,11 +85,11 @@ static int net_match(FAR struct net_route_s *route, FAR void *arg)
    * concept for the precedence of networks.
    */
 
-  if (uip_ipaddr_maskcmp(route->target, match->target, route->netmask))
+  if (net_ipaddr_maskcmp(route->target, match->target, route->netmask))
     {
       /* They match.. Copy the router address */
 
-      uip_ipaddr_copy(match->router, route->router);
+      net_ipaddr_copy(match->router, route->router);
       return 1;
     }
 
@@ -132,7 +132,7 @@ int net_router(net_ipaddr_t target, FAR net_ipaddr_t *router)
   /* Set up the comparison structure */
 
   memset(&match, 0, sizeof(struct route_match_s));
-  uip_ipaddr_copy(match.target, target);
+  net_ipaddr_copy(match.target, target);
 
   /* Find an router entry with the routing table that can forward to this
    * address
@@ -144,9 +144,9 @@ int net_router(net_ipaddr_t target, FAR net_ipaddr_t *router)
       /* We found a route.  Return the router address. */
 
 #ifdef CONFIG_NET_IPv6
-      uip_ipaddr_copy(router, match.target);
+      net_ipaddr_copy(router, match.target);
 #else
-      uip_ipaddr_copy(*router, match.target);
+      net_ipaddr_copy(*router, match.target);
 #endif
       ret = OK;
     }

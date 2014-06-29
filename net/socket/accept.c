@@ -110,7 +110,7 @@ static inline void accept_tcpsender(FAR struct tcp_conn_s *conn,
     {
       addr->sin_family = AF_INET6;
       addr->sin_port   = conn->rport;
-      uip_ipaddr_copy(addr->sin6_addr.s6_addr, conn->ripaddr);
+      net_ipaddr_copy(addr->sin6_addr.s6_addr, conn->ripaddr);
     }
 }
 #else
@@ -121,7 +121,7 @@ static inline void accept_tcpsender(FAR struct tcp_conn_s *conn,
     {
       addr->sin_family = AF_INET;
       addr->sin_port   = conn->rport;
-      uip_ipaddr_copy(addr->sin_addr.s_addr, conn->ripaddr);
+      net_ipaddr_copy(addr->sin_addr.s_addr, conn->ripaddr);
     }
 }
 #endif /* CONFIG_NET_IPv6 */

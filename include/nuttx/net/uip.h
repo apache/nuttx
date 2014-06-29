@@ -308,7 +308,7 @@ int net_lockedwait(sem_t *sem);
  *   addr3 The forth octet of the IPv4 address.
  */
 
-#define uip_ipaddr(addr, addr0, addr1, addr2, addr3) \
+#define net_ipaddr(addr, addr0, addr1, addr2, addr3) \
   do { \
     addr = HTONL((uint32_t)(addr0) << 24 | (uint32_t)(addr1) << 16 | \
                  (uint32_t)(addr2) << 8  | (uint32_t)(addr3)); \
@@ -365,15 +365,15 @@ int net_lockedwait(sem_t *sem);
  *
  *   net_ipaddr_t ipaddr1, ipaddr2;
  *
- *   uip_ipaddr(&ipaddr1, 192,16,1,2);
- *   uip_ipaddr_copy(&ipaddr2, &ipaddr1);
+ *   net_ipaddr(&ipaddr1, 192,16,1,2);
+ *   net_ipaddr_copy(&ipaddr2, &ipaddr1);
  *
  * dest The destination for the copy.
  * src The source from where to copy.
  */
 
 #ifndef CONFIG_NET_IPv6
-#  define uip_ipaddr_copy(dest, src) \
+#  define net_ipaddr_copy(dest, src) \
    do { \
      (dest) = (in_addr_t)(src); \
    } while (0)
@@ -383,8 +383,8 @@ int net_lockedwait(sem_t *sem);
      ((uint16_t*)(dest))[1] = ((uint16_t*)(src))[1]; \
    } while (0)
 #else /* !CONFIG_NET_IPv6 */
-#  define uip_ipaddr_copy(dest, src)    memcpy(&dest, &src, sizeof(net_ip6addr_t))
-#  define uiphdr_ipaddr_copy(dest, src) uip_ipaddr_copy(dest, src)
+#  define net_ipaddr_copy(dest, src)    memcpy(&dest, &src, sizeof(net_ip6addr_t))
+#  define uiphdr_ipaddr_copy(dest, src) net_ipaddr_copy(dest, src)
 #endif /* !CONFIG_NET_IPv6 */
 
 /* Compare two IP addresses
@@ -393,8 +393,8 @@ int net_lockedwait(sem_t *sem);
  *
  *   net_ipaddr_t ipaddr1, ipaddr2;
  *
- *   uip_ipaddr(&ipaddr1, 192,16,1,2);
- *   if (uip_ipaddr_cmp(ipaddr2, ipaddr1))
+ *   net_ipaddr(&ipaddr1, 192,16,1,2);
+ *   if (net_ipaddr_cmp(ipaddr2, ipaddr1))
  *     {
  *       printf("They are the same");
  *     }
@@ -404,11 +404,11 @@ int net_lockedwait(sem_t *sem);
  */
 
 #ifndef CONFIG_NET_IPv6
-#  define uip_ipaddr_cmp(addr1, addr2)    (addr1 == addr2)
-#  define uiphdr_ipaddr_cmp(addr1, addr2) uip_ipaddr_cmp(uip_ip4addr_conv(addr1), uip_ip4addr_conv(addr2))
+#  define net_ipaddr_cmp(addr1, addr2)    (addr1 == addr2)
+#  define uiphdr_ipaddr_cmp(addr1, addr2) net_ipaddr_cmp(uip_ip4addr_conv(addr1), uip_ip4addr_conv(addr2))
 #else /* !CONFIG_NET_IPv6 */
-#  define uip_ipaddr_cmp(addr1, addr2)    (memcmp(&addr1, &addr2, sizeof(net_ip6addr_t)) == 0)
-#  define uiphdr_ipaddr_cmp(addr1, addr2) uip_ipaddr_cmp(addr, addr2)
+#  define net_ipaddr_cmp(addr1, addr2)    (memcmp(&addr1, &addr2, sizeof(net_ip6addr_t)) == 0)
+#  define uiphdr_ipaddr_cmp(addr1, addr2) net_ipaddr_cmp(addr, addr2)
 #endif /* !CONFIG_NET_IPv6 */
 
 /* Compare two IP addresses with netmasks
@@ -420,10 +420,10 @@ int net_lockedwait(sem_t *sem);
  *
  *   net_ipaddr_t ipaddr1, ipaddr2, mask;
  *
- *   uip_ipaddr(&mask, 255,255,255,0);
- *   uip_ipaddr(&ipaddr1, 192,16,1,2);
- *   uip_ipaddr(&ipaddr2, 192,16,1,3);
- *   if (uip_ipaddr_maskcmp(ipaddr1, ipaddr2, &mask))
+ *   net_ipaddr(&mask, 255,255,255,0);
+ *   net_ipaddr(&ipaddr1, 192,16,1,2);
+ *   net_ipaddr(&ipaddr2, 192,16,1,3);
+ *   if (net_ipaddr_maskcmp(ipaddr1, ipaddr2, &mask))
  *     {
  *       printf("They are the same");
  *     }
@@ -434,11 +434,11 @@ int net_lockedwait(sem_t *sem);
  */
 
 #ifndef CONFIG_NET_IPv6
-#  define uip_ipaddr_maskcmp(addr1, addr2, mask) \
+#  define net_ipaddr_maskcmp(addr1, addr2, mask) \
   (((in_addr_t)(addr1) & (in_addr_t)(mask)) == \
    ((in_addr_t)(addr2) & (in_addr_t)(mask)))
 #else
-bool uip_ipaddr_maskcmp(net_ipaddr_t addr1, net_ipaddr_t addr2,
+bool net_ipaddr_maskcmp(net_ipaddr_t addr1, net_ipaddr_t addr2,
                         net_ipaddr_t mask);
 #endif
 
@@ -451,9 +451,9 @@ bool uip_ipaddr_maskcmp(net_ipaddr_t addr1, net_ipaddr_t addr2,
  *
  *   net_ipaddr_t ipaddr1, ipaddr2, netmask;
  *
- *   uip_ipaddr(&ipaddr1, 192,16,1,2);
- *   uip_ipaddr(&netmask, 255,255,255,0);
- *   uip_ipaddr_mask(&ipaddr2, &ipaddr1, &netmask);
+ *   net_ipaddr(&ipaddr1, 192,16,1,2);
+ *   net_ipaddr(&netmask, 255,255,255,0);
+ *   net_ipaddr_mask(&ipaddr2, &ipaddr1, &netmask);
  *
  * In the example above, the variable "ipaddr2" will contain the IP
  * address 192.168.1.0.
@@ -463,7 +463,7 @@ bool uip_ipaddr_maskcmp(net_ipaddr_t addr1, net_ipaddr_t addr2,
  * mask The netmask.
  */
 
-#define uip_ipaddr_mask(dest, src, mask) \
+#define net_ipaddr_mask(dest, src, mask) \
   do { \
     (in_addr_t)(dest) = (in_addr_t)(src) & (in_addr_t)(mask); \
   } while (0)

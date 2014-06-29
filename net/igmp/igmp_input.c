@@ -164,7 +164,7 @@ void igmp_input(struct net_driver_s *dev)
 
         /* Check if the query was sent to all systems */
 
-        if (uip_ipaddr_cmp(destipaddr, g_allsystems))
+        if (net_ipaddr_cmp(destipaddr, g_allsystems))
           {
             /* Yes... Now check the if this this is a general or a group
              * specific query.
@@ -205,7 +205,7 @@ void igmp_input(struct net_driver_s *dev)
                   {
                     /* Skip over the all systems group entry */
 
-                    if (!uip_ipaddr_cmp(member->grpaddr, g_allsystems))
+                    if (!net_ipaddr_cmp(member->grpaddr, g_allsystems))
                       {
                         ticks = igmp_decisec2tick((int)IGMPBUF->maxresp);
                         if (IS_IDLEMEMBER(member->flags) ||

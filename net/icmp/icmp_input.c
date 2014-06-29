@@ -214,7 +214,7 @@ typeerr:
 
   if (picmp->type == ICMP6_NEIGHBOR_SOLICITATION)
     {
-      if (uip_ipaddr_cmp(picmp->icmp6data, dev->d_ipaddr))
+      if (net_ipaddr_cmp(picmp->icmp6data, dev->d_ipaddr))
         {
           if (picmp->options[0] == ICMP6_OPTION_SOURCE_LINK_ADDRESS)
             {

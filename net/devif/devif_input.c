@@ -413,9 +413,9 @@ int uip_input(FAR struct net_driver_s *dev)
 #if defined(CONFIG_NET_BROADCAST) && defined(CONFIG_NET_UDP)
   if (pbuf->proto == UIP_PROTO_UDP &&
 #ifndef CONFIG_NET_IPv6
-      uip_ipaddr_cmp(uip_ip4addr_conv(pbuf->destipaddr), g_alloneaddr))
+      net_ipaddr_cmp(uip_ip4addr_conv(pbuf->destipaddr), g_alloneaddr))
 #else
-      uip_ipaddr_cmp(pbuf->destipaddr, g_alloneaddr))
+      net_ipaddr_cmp(pbuf->destipaddr, g_alloneaddr))
 #endif
     {
       return udp_input(dev);
@@ -429,7 +429,7 @@ int uip_input(FAR struct net_driver_s *dev)
   else
 #endif
 #ifdef CONFIG_NET_ICMP
-  if (uip_ipaddr_cmp(dev->d_ipaddr, g_allzeroaddr))
+  if (net_ipaddr_cmp(dev->d_ipaddr, g_allzeroaddr))
     {
       /* If we are configured to use ping IP address configuration and
        * hasn't been assigned an IP address yet, we accept all ICMP
@@ -457,7 +457,7 @@ int uip_input(FAR struct net_driver_s *dev)
     {
       /* Check if the packet is destined for our IP address. */
 #ifndef CONFIG_NET_IPv6
-      if (!uip_ipaddr_cmp(uip_ip4addr_conv(pbuf->destipaddr), dev->d_ipaddr))
+      if (!net_ipaddr_cmp(uip_ip4addr_conv(pbuf->destipaddr), dev->d_ipaddr))
         {
 #ifdef CONFIG_NET_IGMP
           net_ipaddr_t destip = uip_ip4addr_conv(pbuf->destipaddr);
@@ -479,7 +479,7 @@ int uip_input(FAR struct net_driver_s *dev)
        * multicast packets that are sent to the ff02::/16 addresses.
        */
 
-      if (!uip_ipaddr_cmp(pbuf->destipaddr, dev->d_ipaddr) &&
+      if (!net_ipaddr_cmp(pbuf->destipaddr, dev->d_ipaddr) &&
           pbuf->destipaddr[0] != 0xff02)
         {
 #ifdef CONFIG_NET_STATISTICS

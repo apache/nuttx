@@ -84,7 +84,7 @@ static struct neighbor_entry *find_entry(net_ipaddr_t ipaddr)
 
   for (i = 0; i < ENTRIES; ++i)
     {
-      if (uip_ipaddr_cmp(entries[i].ipaddr, ipaddr))
+      if (net_ipaddr_cmp(entries[i].ipaddr, ipaddr))
         {
           return &entries[i];
         }
@@ -143,7 +143,7 @@ void net_neighbor_add(net_ipaddr_t ipaddr, struct net_neighbor_addr_s *addr)
           oldest = i;
           break;
         }
-      if (uip_ipaddr_cmp(entries[i].ipaddr, addr))
+      if (net_ipaddr_cmp(entries[i].ipaddr, addr))
         {
           oldest = i;
           break;
@@ -160,7 +160,7 @@ void net_neighbor_add(net_ipaddr_t ipaddr, struct net_neighbor_addr_s *addr)
    */
 
   entries[oldest].time = 0;
-  uip_ipaddr_copy(entries[oldest].ipaddr, ipaddr);
+  net_ipaddr_copy(entries[oldest].ipaddr, ipaddr);
   memcpy(&entries[oldest].addr, addr, sizeof(struct net_neighbor_addr_s));
 }
 

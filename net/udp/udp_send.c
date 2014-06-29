@@ -122,8 +122,8 @@ void udp_send(struct net_driver_s *dev, struct udp_conn_s *conn)
       pudpbuf->nexthdr     = UIP_PROTO_UDP;
       pudpbuf->hoplimit    = conn->ttl;
 
-      uip_ipaddr_copy(pudpbuf->srcipaddr, &dev->d_ipaddr);
-      uip_ipaddr_copy(pudpbuf->destipaddr, &conn->ripaddr);
+      net_ipaddr_copy(pudpbuf->srcipaddr, &dev->d_ipaddr);
+      net_ipaddr_copy(pudpbuf->destipaddr, &conn->ripaddr);
 
 #else /* CONFIG_NET_IPv6 */
 

@@ -92,12 +92,12 @@ static int net_devmatch(FAR struct net_route_s *route, FAR void *arg)
    * not (yet) any concept for the precedence of networks.
    */
 
-  if (uip_ipaddr_maskcmp(route->target, match->target, route->netmask) &&
-      uip_ipaddr_maskcmp(route->router, dev->d_ipaddr, dev->d_netmask))
+  if (net_ipaddr_maskcmp(route->target, match->target, route->netmask) &&
+      net_ipaddr_maskcmp(route->router, dev->d_ipaddr, dev->d_netmask))
     {
       /* They match.. Copy the router address */
 
-      uip_ipaddr_copy(match->router, route->router);
+      net_ipaddr_copy(match->router, route->router);
       return 1;
     }
 
@@ -146,7 +146,7 @@ void netdev_router(FAR struct net_driver_s *dev, net_ipaddr_t target,
 
   memset(&match, 0, sizeof(struct route_devmatch_s));
   match.dev = dev;
-  uip_ipaddr_copy(match.target, target);
+  net_ipaddr_copy(match.target, target);
 
   /* Find an router entry with the routing table that can forward to this
    * address using this device.
@@ -158,9 +158,9 @@ void netdev_router(FAR struct net_driver_s *dev, net_ipaddr_t target,
       /* We found a route.  Return the router address. */
 
 #ifdef CONFIG_NET_IPv6
-      uip_ipaddr_copy(router, match.target);
+      net_ipaddr_copy(router, match.target);
 #else
-      uip_ipaddr_copy(*router, match.target);
+      net_ipaddr_copy(*router, match.target);
 #endif
       ret = OK;
     }
@@ -171,9 +171,9 @@ void netdev_router(FAR struct net_driver_s *dev, net_ipaddr_t target,
        */
 
 #ifdef CONFIG_NET_IPv6
-      uip_ipaddr_copy(router, dev->d_draddr);
+      net_ipaddr_copy(router, dev->d_draddr);
 #else
-      uip_ipaddr_copy(*router, dev->d_draddr);
+      net_ipaddr_copy(*router, dev->d_draddr);
 #endif
     }
 }

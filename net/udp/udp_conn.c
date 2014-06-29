@@ -319,8 +319,8 @@ FAR struct udp_conn_s *udp_active(FAR struct udp_iphdr_s *buf)
 
       if (conn->lport != 0 && buf->destport == conn->lport &&
           (conn->rport == 0 || buf->srcport == conn->rport) &&
-            (uip_ipaddr_cmp(conn->ripaddr, g_allzeroaddr) ||
-             uip_ipaddr_cmp(conn->ripaddr, g_alloneaddr) ||
+            (net_ipaddr_cmp(conn->ripaddr, g_allzeroaddr) ||
+             net_ipaddr_cmp(conn->ripaddr, g_alloneaddr) ||
              uiphdr_ipaddr_cmp(buf->srcipaddr, &conn->ripaddr)))
         {
           /* Matching connection found.. return a reference to it */
@@ -456,12 +456,12 @@ int udp_connect(FAR struct udp_conn_s *conn,
   if (addr)
     {
       conn->rport = addr->sin_port;
-      uip_ipaddr_copy(conn->ripaddr, addr->sin_addr.s_addr);
+      net_ipaddr_copy(conn->ripaddr, addr->sin_addr.s_addr);
     }
   else
     {
       conn->rport = 0;
-      uip_ipaddr_copy(conn->ripaddr, g_allzeroaddr);
+      net_ipaddr_copy(conn->ripaddr, g_allzeroaddr);
     }
 
   conn->ttl = UIP_TTL;
