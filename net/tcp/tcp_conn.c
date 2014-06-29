@@ -316,8 +316,8 @@ FAR struct tcp_conn_s *tcp_alloc(void)
 
 void tcp_free(FAR struct tcp_conn_s *conn)
 {
-  FAR struct uip_callback_s *cb;
-  FAR struct uip_callback_s *next;
+  FAR struct devif_callback_s *cb;
+  FAR struct devif_callback_s *next;
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   FAR struct tcp_wrbuffer_s *wrbuffer;
 #endif

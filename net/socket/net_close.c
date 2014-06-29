@@ -74,13 +74,13 @@
 #ifdef CONFIG_NET_TCP
 struct tcp_close_s
 {
-  FAR struct uip_callback_s *cl_cb;     /* Reference to TCP callback instance */
+  FAR struct devif_callback_s *cl_cb; /* Reference to TCP callback instance */
 #ifdef CONFIG_NET_SOLINGER
-  FAR struct socket         *cl_psock;  /* Reference to the TCP socket */
-  sem_t                      cl_sem;    /* Signals disconnect completion */
-  int                        cl_result; /* The result of the close */
+  FAR struct socket       *cl_psock;  /* Reference to the TCP socket */
+  sem_t                    cl_sem;    /* Signals disconnect completion */
+  int                      cl_result; /* The result of the close */
 #ifndef CONFIG_DISABLE_CLOCK
-  uint32_t                   cl_start;  /* Time close started (in ticks) */
+  uint32_t                 cl_start;  /* Time close started (in ticks) */
 #endif
 #endif
 };

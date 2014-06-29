@@ -109,7 +109,7 @@ struct socket
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   /* Callback instance for TCP send */
 
-  FAR struct uip_callback_s *s_sndcb;
+  FAR struct devif_callback_s *s_sndcb;
 #endif
 };
 

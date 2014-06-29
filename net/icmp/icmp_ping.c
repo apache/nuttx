@@ -76,7 +76,7 @@
 
 struct icmp_ping_s
 {
-  FAR struct uip_callback_s *png_cb; /* Reference to callback instance */
+  FAR struct devif_callback_s *png_cb; /* Reference to callback instance */
 
   sem_t        png_sem;     /* Use to manage the wait for the response */
   uint32_t     png_time;    /* Start time for determining timeouts */

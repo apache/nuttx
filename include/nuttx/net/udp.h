@@ -70,7 +70,7 @@
 /* Representation of a uIP UDP connection */
 
 struct net_driver_s;      /* Forward reference */
-struct uip_callback_s;    /* Forward reference */
+struct devif_callback_s;    /* Forward reference */
 struct udp_conn_s
 {
   dq_entry_t node;        /* Supports a doubly linked list */
@@ -82,7 +82,7 @@ struct udp_conn_s
 
   /* Defines the list of UDP callbacks */
 
-  struct uip_callback_s *list;
+  struct devif_callback_s *list;
 };
 
 /* The UDP and IP headers */

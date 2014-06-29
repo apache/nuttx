@@ -74,12 +74,12 @@
 
 struct send_s
 {
-  FAR struct socket         *snd_sock;    /* Points to the parent socket structure */
-  FAR struct uip_callback_s *snd_cb;      /* Reference to callback instance */
-  sem_t                      snd_sem;     /* Used to wake up the waiting thread */
-  FAR const uint8_t         *snd_buffer;  /* Points to the buffer of data to send */
-  size_t                     snd_buflen;  /* Number of bytes in the buffer to send */
-  ssize_t                    snd_sent;    /* The number of bytes sent */
+  FAR struct socket      *snd_sock;    /* Points to the parent socket structure */
+  FAR struct devif_callback_s *snd_cb; /* Reference to callback instance */
+  sem_t                   snd_sem;     /* Used to wake up the waiting thread */
+  FAR const uint8_t      *snd_buffer;  /* Points to the buffer of data to send */
+  size_t                  snd_buflen;  /* Number of bytes in the buffer to send */
+  ssize_t                 snd_sent;    /* The number of bytes sent */
 };
 
 /****************************************************************************

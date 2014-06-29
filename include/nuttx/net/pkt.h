@@ -65,7 +65,7 @@ struct pkt_conn_s
 
   /* Defines the list of packet callbacks */
 
-  struct uip_callback_s *list;
+  struct devif_callback_s *list;
 };
 
 /****************************************************************************

@@ -84,9 +84,9 @@
 
 struct net_poll_s
 {
-  FAR struct socket *psock;      /* Needed to handle loss of connection */
-  struct pollfd *fds;            /* Needed to handle poll events */
-  FAR struct uip_callback_s *cb; /* Needed to teardown the poll */
+  FAR struct socket *psock;        /* Needed to handle loss of connection */
+  struct pollfd *fds;              /* Needed to handle poll events */
+  FAR struct devif_callback_s *cb; /* Needed to teardown the poll */
 };
 
 /****************************************************************************
@@ -188,7 +188,7 @@ static inline int net_pollsetup(FAR struct socket *psock,
 {
   FAR struct tcp_conn_s *conn = psock->s_conn;
   FAR struct net_poll_s *info;
-  FAR struct uip_callback_s *cb;
+  FAR struct devif_callback_s *cb;
   net_lock_t flags;
   int ret;
 

@@ -64,10 +64,10 @@
 #ifdef CONFIG_NET_TCP
 struct tcp_connect_s
 {
-  FAR struct tcp_conn_s     *tc_conn;    /* Reference to TCP connection structure */
-  FAR struct uip_callback_s *tc_cb;      /* Reference to callback instance */
-  sem_t                      tc_sem;     /* Semaphore signals recv completion */
-  int                        tc_result;  /* OK on success, otherwise a negated errno. */
+  FAR struct tcp_conn_s  *tc_conn;    /* Reference to TCP connection structure */
+  FAR struct devif_callback_s *tc_cb; /* Reference to callback instance */
+  sem_t                   tc_sem;     /* Semaphore signals recv completion */
+  int                     tc_result;  /* OK on success, otherwise a negated errno. */
 };
 #endif
 

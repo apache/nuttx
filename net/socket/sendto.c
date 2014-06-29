@@ -87,14 +87,14 @@
 struct sendto_s
 {
 #ifdef CONFIG_NET_SENDTO_TIMEOUT
-  FAR struct socket *st_sock;       /* Points to the parent socket structure */
-  uint32_t st_time;                 /* Last send time for determining timeout */
+  FAR struct socket *st_sock;         /* Points to the parent socket structure */
+  uint32_t st_time;                   /* Last send time for determining timeout */
 #endif
-  FAR struct uip_callback_s *st_cb; /* Reference to callback instance */
-  sem_t st_sem;                     /* Semaphore signals sendto completion */
-  uint16_t st_buflen;               /* Length of send buffer (error if <0) */
-  const char *st_buffer;            /* Pointer to send buffer */
-  int st_sndlen;                    /* Result of the send (length sent or negated errno) */
+  FAR struct devif_callback_s *st_cb; /* Reference to callback instance */
+  sem_t st_sem;                       /* Semaphore signals sendto completion */
+  uint16_t st_buflen;                 /* Length of send buffer (error if <0) */
+  const char *st_buffer;              /* Pointer to send buffer */
+  int st_sndlen;                      /* Result of the send (length sent or negated errno) */
 };
 
 /****************************************************************************

@@ -162,7 +162,7 @@
  */
 
 struct net_driver_s;      /* Forward reference */
-struct uip_callback_s;    /* Forward reference */
+struct devif_callback_s;  /* Forward reference */
 struct tcp_backlog_s;     /* Forward reference */
 
 struct tcp_conn_s
@@ -239,7 +239,7 @@ struct tcp_conn_s
    *
    * Data transfer events are retained in 'list'.  Event handlers in 'list'
    * are called for events specified in the flags set within struct
-   * uip_callback_s
+   * devif_callback_s
    *
    * When an callback is executed from 'list', the input flags are normally
    * returned, however, the implementation may set one of the following:
@@ -259,7 +259,7 @@ struct tcp_conn_s
    *                 dev->d_len should also be cleared).
    */
 
-  FAR struct uip_callback_s *list;
+  FAR struct devif_callback_s *list;
 
   /* accept() is called when the TCP logic has created a connection */
 

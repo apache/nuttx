@@ -87,18 +87,18 @@
 
 struct sendfile_s
 {
-  FAR struct socket         *snd_sock;    /* Points to the parent socket structure */
-  FAR struct uip_callback_s *snd_datacb;  /* Data callback */
-  FAR struct uip_callback_s *snd_ackcb;   /* ACK callback */
-  FAR struct file           *snd_file;    /* File structure of the input file */
-  sem_t                      snd_sem;     /* Used to wake up the waiting thread */
-  off_t                      snd_foffset; /* Input file offset */
-  size_t                     snd_flen;    /* File length */
-  ssize_t                    snd_sent;    /* The number of bytes sent */
-  uint32_t                   snd_isn;     /* Initial sequence number */
-  uint32_t                   snd_acked;   /* The number of bytes acked */
+  FAR struct socket *snd_sock;    /* Points to the parent socket structure */
+  FAR struct devif_callback_s *snd_datacb; /* Data callback */
+  FAR struct devif_callback_s *snd_ackcb;  /* ACK callback */
+  FAR struct file   *snd_file;    /* File structure of the input file */
+  sem_t              snd_sem;     /* Used to wake up the waiting thread */
+  off_t              snd_foffset; /* Input file offset */
+  size_t             snd_flen;    /* File length */
+  ssize_t            snd_sent;    /* The number of bytes sent */
+  uint32_t           snd_isn;     /* Initial sequence number */
+  uint32_t           snd_acked;   /* The number of bytes acked */
 #if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
-  uint32_t                   snd_time;    /* Last send time for determining timeout */
+  uint32_t           snd_time;    /* Last send time for determining timeout */
 #endif
 };
 

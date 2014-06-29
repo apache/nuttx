@@ -82,7 +82,7 @@ extern uint8_t g_reassembly_timer;
 /* List of applications waiting for ICMP ECHO REPLY */
 
 #if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING)
-extern struct uip_callback_s *g_echocallback;
+extern struct devif_callback_s *g_echocallback;
 #endif
 
 /****************************************************************************
@@ -141,7 +141,7 @@ void devif_callback_init(void);
  *
  ****************************************************************************/
 
-FAR struct uip_callback_s *devif_callback_alloc(FAR struct uip_callback_s **list);
+FAR struct devif_callback_s *devif_callback_alloc(FAR struct devif_callback_s **list);
 
 /****************************************************************************
  * Function: devif_callback_free
@@ -156,8 +156,8 @@ FAR struct uip_callback_s *devif_callback_alloc(FAR struct uip_callback_s **list
  *
  ****************************************************************************/
 
-void devif_callback_free(FAR struct uip_callback_s *cb,
-                         FAR struct uip_callback_s **list);
+void devif_callback_free(FAR struct devif_callback_s *cb,
+                         FAR struct devif_callback_s **list);
 
 /****************************************************************************
  * Function: devif_callback_execute
@@ -173,7 +173,7 @@ void devif_callback_free(FAR struct uip_callback_s *cb,
  ****************************************************************************/
 
 uint16_t devif_callback_execute(FAR struct net_driver_s *dev, FAR void *pvconn,
-                                uint16_t flags, FAR struct uip_callback_s *list);
+                                uint16_t flags, FAR struct devif_callback_s *list);
 
 /****************************************************************************
  * Send data on the current connection.

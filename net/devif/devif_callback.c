@@ -54,8 +54,8 @@
  * Private Data
  ****************************************************************************/
 
-static struct uip_callback_s g_cbprealloc[CONFIG_NET_NACTIVESOCKETS];
-static FAR struct uip_callback_s *g_cbfreelist = NULL;
+static struct devif_callback_s g_cbprealloc[CONFIG_NET_NACTIVESOCKETS];
+static FAR struct devif_callback_s *g_cbfreelist = NULL;
 
 /****************************************************************************
  * Private Functions
@@ -101,9 +101,9 @@ void devif_callback_init(void)
  *
  ****************************************************************************/
 
-FAR struct uip_callback_s *devif_callback_alloc(FAR struct uip_callback_s **list)
+FAR struct devif_callback_s *devif_callback_alloc(FAR struct devif_callback_s **list)
 {
-  struct uip_callback_s *ret;
+  FAR struct devif_callback_s *ret;
   net_lock_t save;
 
   /* Check  the head of the free list */
@@ -115,7 +115,7 @@ FAR struct uip_callback_s *devif_callback_alloc(FAR struct uip_callback_s **list
       /* Remove the next instance from the head of the free list */
 
       g_cbfreelist = ret->flink;
-      memset(ret, 0, sizeof(struct uip_callback_s));
+      memset(ret, 0, sizeof(struct devif_callback_s));
 
       /* Add the newly allocated instance to the head of the specified list */
 
@@ -153,11 +153,11 @@ FAR struct uip_callback_s *devif_callback_alloc(FAR struct uip_callback_s **list
  *
  ****************************************************************************/
 
-void devif_callback_free(FAR struct uip_callback_s *cb,
-                         FAR struct uip_callback_s **list)
+void devif_callback_free(FAR struct devif_callback_s *cb,
+                         FAR struct devif_callback_s **list)
 {
-  FAR struct uip_callback_s *prev;
-  FAR struct uip_callback_s *curr;
+  FAR struct devif_callback_s *prev;
+  FAR struct devif_callback_s *curr;
   net_lock_t save;
 
   if (cb)
@@ -221,9 +221,9 @@ void devif_callback_free(FAR struct uip_callback_s *cb,
  ****************************************************************************/
 
 uint16_t devif_callback_execute(FAR struct net_driver_s *dev, void *pvconn,
-                                uint16_t flags, FAR struct uip_callback_s *list)
+                                uint16_t flags, FAR struct devif_callback_s *list)
 {
-  FAR struct uip_callback_s *next;
+  FAR struct devif_callback_s *next;
   net_lock_t save;
 
   /* Loop for each callback in the list and while there are still events

@@ -75,7 +75,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMP_PING
-FAR struct uip_callback_s *g_echocallback = NULL;
+FAR struct devif_callback_s *g_echocallback = NULL;
 #endif
 
 /****************************************************************************
