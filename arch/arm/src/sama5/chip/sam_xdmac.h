@@ -384,7 +384,7 @@
 #define XDMACH_CDUS_DUBS_MASK       (0x00ffffff)       /* Bits 0-23: Channel Destination Microblock Stride */
 
 /* XDMA Channel Definitions *************************************************************/
-/* XDMA Controller 0 Channel Definitions */
+/* XDMA Controller 0 Channel Definitions (always secure) */
 
 #define XDMAC0_CH_HSMCI0            0  /* HSMCI0 Receive/Transmit */
 #define XDMAC0_CH_HSMCI1            1  /* HSMCI1 Receive/Transmit */
@@ -433,7 +433,7 @@
 #define XDMAC0_CH_CATB_TX           46 /* CATB Transmit */
 #define XDMAC0_CH_CATB_RX           47 /* CATB Receive */
 
-/* XDMA Controller 1 Channel Definitions */
+/* XDMA Controller 1 Channel Definitions (never secure) */
 
 #define XDMAC1_CH_HSMCI0            0  /* HSMCI0 Receive/Transmit */
 #define XDMAC1_CH_HSMCI1            1  /* HSMCI1 Receive/Transmit */

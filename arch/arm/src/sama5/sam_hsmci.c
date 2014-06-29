@@ -79,16 +79,54 @@
 
 /* Configuration ************************************************************/
 
-#if defined(CONFIG_SAMA5_HSMCI0) && !defined(CONFIG_SAMA5_DMAC0)
-#  warning "HSMCI0 support requires CONFIG_SAMA5_DMAC0"
-#endif
+#if defined(ATSAMA5D3)
+  /* The SAMA5D3 has three HSMCI blocks: HSMCI0-2.  HSMCI0 requires DMAC0
+   * support, HSMCI1-2 require DMAC1 support.
+   */
 
-#if defined(CONFIG_SAMA5_HSMCI1) && !defined(CONFIG_SAMA5_DMAC1)
-#  warning "HSMCI1 support requires CONFIG_SAMA5_DMAC1"
-#endif
+#  define HSMCI0_DMAC 0
+#  define HSMCI1_DMAC 1
+#  define HSMCI2_DMAC 1
 
-#if defined(CONFIG_SAMA5_HSMCI2) && !defined(CONFIG_SAMA5_DMAC1)
-#  warning "HSMCI2 support requires CONFIG_SAMA5_DMAC1"
+#  if defined(CONFIG_SAMA5_HSMCI0) && !defined(CONFIG_SAMA5_DMAC0)
+#    error "HSMCI0 support requires CONFIG_SAMA5_DMAC0"
+#  endif
+
+#  if defined(CONFIG_SAMA5_HSMCI1) && !defined(CONFIG_SAMA5_DMAC1)
+#    error "HSMCI1 support requires CONFIG_SAMA5_DMAC1"
+#  endif
+
+#  if defined(CONFIG_SAMA5_HSMCI2) && !defined(CONFIG_SAMA5_DMAC1)
+#    error "HSMCI2 support requires CONFIG_SAMA5_DMAC1"
+#  endif
+
+#elif defined(ATSAMA5D4)
+  /* The SAMA5D3 has two HSMCI blocks: HSMCI0-1.  They can be driven
+   * either by XDMAC0 (secure) or XDMAC1 (unsecure).
+   */
+
+#  if !defined(CONFIG_SAMA5_XDMAC0) && !defined(CONFIG_SAMA5_XDMAC1)
+#    error HSMCI0/1 require CONFIG_SAMA5_XDMAC0 and/or CONFIG_SAMA5_XDMAC1
+#  endif
+
+#  if defined(CONFIG_SAMA5_XDMAC0) && defined(SAMA5_HSMCI0_XDMAC0)
+#    define HSMCI0_DMAC 0
+#  elif defined(CONFIG_SAMA5_XDMAC1)
+#    define HSMCI0_DMAC 1
+#  else
+#    error No valid DMA configuration for HSMCI0
+#  endif
+
+#  if defined(CONFIG_SAMA5_XDMAC0) && defined(SAMA5_HSMCI1_XDMAC0)
+#    define HSMCI1_DMAC 0
+#  elif defined(CONFIG_SAMA5_XDMAC1)
+#    define HSMCI1_DMAC 1
+#  else
+#    error No valid DMA configuration for HSMCI1
+#  endif
+
+#else
+#  error Unrecognized SAMA5 architecture
 #endif
 
 #ifndef CONFIG_SCHED_WORKQUEUE
@@ -2915,7 +2953,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
 
       /* For DMA channel selection */
 
-      dmac = 0;
+      dmac = HSMCI0_DMAC;
       pid  = SAM_PID_HSMCI0;
     }
   else
@@ -2952,7 +2990,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
 
       /* For DMA channel selection */
 
-      dmac = 1;
+      dmac = HSMCI1_DMAC;
       pid  = SAM_PID_HSMCI1;
     }
   else
@@ -2989,7 +3027,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
 
       /* For DMA channel selection */
 
-      dmac = 1;
+      dmac = HSMCI2_DMAC;
       pid  = SAM_PID_HSMCI2;
     }
   else
