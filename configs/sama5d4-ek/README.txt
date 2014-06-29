@@ -3094,9 +3094,11 @@ Configurations
     This is a little program to help debug of code in DRAM.  It does the
     following:
 
-    - It configures DRAM,
-    - It loads and Intel HEX file into DRAM over the terminal port,
-    - Waits for you to break in with GDB.
+    - Sets the clocking so that the SAMA5 is running at 528MHz.
+    - Configures DRAM,
+    - Loads and Intel HEX file into DRAM over the terminal port,
+    - Waits for you to break in with GDB (or optionally starts the
+      newly loaded program).
 
     At that point, you can set the PC and begin executing from SDRAM under
     debug control.  See the section entitled "Creating and Using
