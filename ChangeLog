@@ -7564,4 +7564,8 @@
 	* net/sockets:  Create the net/sockets directory and hook it into the
 	  build system.  Move all socket-related C files into net/socket.  Move
 	  net/net.h to net/socket/socket.h (2014-6-28).
-
+	* net/ipv6:  Move IPv6 files from net/uip to net/ipv6 (2014-6-28).
+	* net/devif:  Rename net/uip to net/devif.  Rename uip/uip.h to
+	  devif/devif.h (2014-6-28).
+	* net/devif: Rename many functions in net/devif from uip_* to devif_*
+	  (2014-6-28).
