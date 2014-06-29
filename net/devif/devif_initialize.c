@@ -118,6 +118,6 @@ void devif_initialize(void)
 {
   /* Initialize callback support */
 
-  uip_callbackinit();
+  devif_callback_init();
 }
 #endif /* CONFIG_NET */

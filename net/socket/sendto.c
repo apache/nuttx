@@ -207,7 +207,7 @@ static uint16_t sendto_interrupt(struct net_driver_s *dev, void *conn,
         {
           /* Copy the user data into d_snddata and send it */
 
-          uip_send(dev, pstate->st_buffer, pstate->st_buflen);
+          devif_send(dev, pstate->st_buffer, pstate->st_buflen);
           pstate->st_sndlen = pstate->st_buflen;
         }
 
@@ -392,7 +392,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
 
   /* Set up the callback in the connection */
 
-  state.st_cb = udp_callbackalloc(conn);
+  state.st_cb = udp_callback_alloc(conn);
   if (state.st_cb)
     {
       state.st_cb->flags   = UIP_POLL;
@@ -413,7 +413,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
 
       /* Make sure that no further interrupts are processed */
 
-      udp_callbackfree(conn, state.st_cb);
+      udp_callback_free(conn, state.st_cb);
     }
 
   net_unlock(save);

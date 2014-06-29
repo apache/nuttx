@@ -113,7 +113,7 @@ static inline int psock_setup_callbacks(FAR struct socket *psock,
 
   /* Set up the callbacks in the connection */
 
-  pstate->tc_cb = tcp_callbackalloc(conn);
+  pstate->tc_cb = tcp_callback_alloc(conn);
   if (pstate->tc_cb)
     {
       /* Set up the connection "interrupt" handler */
@@ -143,7 +143,7 @@ static inline void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
 
   /* Make sure that no further interrupts are processed */
 
-  tcp_callbackfree(conn, pstate->tc_cb);
+  tcp_callback_free(conn, pstate->tc_cb);
 
   pstate->tc_cb = NULL;
 

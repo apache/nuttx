@@ -81,13 +81,13 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_pktsend
+ * Name: devif_pkt_send
  *
  * Description:
  *   Called from socket logic in order to send a raw packet in response to
  *   an xmit or poll request from the the network interface driver.
  *
- *   This is almost identical to calling uip_send() except that the data to
+ *   This is almost identical to calling devif_send() except that the data to
  *   be sent is copied into dev->d_buf (vs. dev->d_snddata), since there is
  *   no header on the data.
  *
@@ -97,8 +97,8 @@
  *
  ****************************************************************************/
 
-void uip_pktsend(FAR struct net_driver_s *dev, FAR const void *buf,
-                 unsigned int len)
+void devif_pkt_send(FAR struct net_driver_s *dev, FAR const void *buf,
+                    unsigned int len)
 {
   DEBUGASSERT(dev && len > 0 && len < CONFIG_NET_BUFSIZE);
 

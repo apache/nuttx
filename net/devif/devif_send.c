@@ -81,7 +81,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_send
+ * Name: devif_send
  *
  * Description:
  *   Called from socket logic in response to a xmit or poll request from the
@@ -93,7 +93,7 @@
  *
  ****************************************************************************/
 
-void uip_send(struct net_driver_s *dev, const void *buf, int len)
+void devif_send(struct net_driver_s *dev, const void *buf, int len)
 {
   DEBUGASSERT(dev && len > 0 && len < CONFIG_NET_BUFSIZE);
 

@@ -161,11 +161,6 @@ struct udp_stats_s
 
 FAR struct udp_conn_s *udp_alloc(void);
 
-/* Allocate a new TCP data callback */
-
-#define udp_callbackalloc(conn)   uip_callbackalloc(&conn->list)
-#define udp_callbackfree(conn,cb) uip_callbackfree(cb, &conn->list)
-
 /* Free a connection structure that is no longer in use. This should
  * be done by the implementation of close()
  */

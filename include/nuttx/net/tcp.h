@@ -397,11 +397,6 @@ struct tcp_iphdr_s
 
 struct tcp_conn_s *tcp_alloc(void);
 
-/* Allocate a new TCP data callback */
-
-#define tcp_callbackalloc(conn)   uip_callbackalloc(&conn->list)
-#define tcp_callbackfree(conn,cb) uip_callbackfree(cb, &conn->list)
-
 /* Free a connection structure that is no longer in use. This should
  * be done by the implementation of close()
  */

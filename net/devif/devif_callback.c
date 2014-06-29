@@ -66,7 +66,7 @@ static FAR struct uip_callback_s *g_cbfreelist = NULL;
  ****************************************************************************/
 
 /****************************************************************************
- * Function: uip_callbackinit
+ * Function: devif_callback_init
  *
  * Description:
  *   Configure the pre-allocated callback structures into a free list.
@@ -78,7 +78,7 @@ static FAR struct uip_callback_s *g_cbfreelist = NULL;
  *
  ****************************************************************************/
 
-void uip_callbackinit(void)
+void devif_callback_init(void)
 {
   int i;
   for (i = 0; i < CONFIG_NET_NACTIVESOCKETS; i++)
@@ -89,7 +89,7 @@ void uip_callbackinit(void)
 }
 
 /****************************************************************************
- * Function: uip_callbackalloc
+ * Function: devif_callback_alloc
  *
  * Description:
  *   Allocate a callback container from the free list.
@@ -101,7 +101,7 @@ void uip_callbackinit(void)
  *
  ****************************************************************************/
 
-FAR struct uip_callback_s *uip_callbackalloc(FAR struct uip_callback_s **list)
+FAR struct uip_callback_s *devif_callback_alloc(FAR struct uip_callback_s **list)
 {
   struct uip_callback_s *ret;
   net_lock_t save;
@@ -141,7 +141,7 @@ FAR struct uip_callback_s *uip_callbackalloc(FAR struct uip_callback_s **list)
 }
 
 /****************************************************************************
- * Function: uip_callbackfree
+ * Function: devif_callback_free
  *
  * Description:
  *   Return a callback container to the free list.
@@ -153,8 +153,8 @@ FAR struct uip_callback_s *uip_callbackalloc(FAR struct uip_callback_s **list)
  *
  ****************************************************************************/
 
-void uip_callbackfree(FAR struct uip_callback_s *cb,
-                      FAR struct uip_callback_s **list)
+void devif_callback_free(FAR struct uip_callback_s *cb,
+                         FAR struct uip_callback_s **list)
 {
   FAR struct uip_callback_s *prev;
   FAR struct uip_callback_s *curr;
@@ -208,7 +208,7 @@ void uip_callbackfree(FAR struct uip_callback_s *cb,
 }
 
 /****************************************************************************
- * Function: uip_callbackexecute
+ * Function: devif_callback_execute
  *
  * Description:
  *   Execute a list of callbacks.
@@ -220,8 +220,8 @@ void uip_callbackfree(FAR struct uip_callback_s *cb,
  *
  ****************************************************************************/
 
-uint16_t uip_callbackexecute(FAR struct net_driver_s *dev, void *pvconn,
-                             uint16_t flags, FAR struct uip_callback_s *list)
+uint16_t devif_callback_execute(FAR struct net_driver_s *dev, void *pvconn,
+                                uint16_t flags, FAR struct uip_callback_s *list)
 {
   FAR struct uip_callback_s *next;
   net_lock_t save;

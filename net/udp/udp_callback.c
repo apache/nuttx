@@ -88,7 +88,7 @@ uint16_t udp_callback(FAR struct net_driver_s *dev,
     {
       /* Perform the callback */
 
-      flags = uip_callbackexecute(dev, conn, flags, conn->list);
+      flags = devif_callback_execute(dev, conn, flags, conn->list);
     }
 
   return flags;

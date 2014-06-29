@@ -338,7 +338,7 @@ void tcp_free(FAR struct tcp_conn_s *conn)
   for (cb = conn->list; cb; cb = next)
     {
       next = cb->flink;
-      tcp_callbackfree(conn, cb);
+      tcp_callback_free(conn, cb);
     }
 
   /* UIP_ALLOCATED means that that the connection is not in the active list

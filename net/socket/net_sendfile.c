@@ -491,7 +491,7 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
 
   /* Allocate resources to receive a callback */
 
-  state.snd_datacb = tcp_callbackalloc(conn);
+  state.snd_datacb = tcp_callback_alloc(conn);
 
   if (state.snd_datacb == NULL)
     {
@@ -500,7 +500,7 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
       goto errout_locked;
     }
 
-  state.snd_ackcb = tcp_callbackalloc(conn);
+  state.snd_ackcb = tcp_callback_alloc(conn);
 
   if (state.snd_ackcb == NULL)
     {
@@ -551,10 +551,10 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
 
   psock->s_flags = _SS_SETSTATE(psock->s_flags, _SF_IDLE);
 
-  tcp_callbackfree(conn, state.snd_ackcb);
+  tcp_callback_free(conn, state.snd_ackcb);
 
  errout_datacb:
-  tcp_callbackfree(conn, state.snd_datacb);
+  tcp_callback_free(conn, state.snd_datacb);
 
  errout_locked:
 

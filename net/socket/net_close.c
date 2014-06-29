@@ -60,6 +60,7 @@
 #include "socket/socket.h"
 #include "netdev/netdev.h"
 #include "devif/devif.h"
+#include "tcp/tcp.h"
 #include "pkt/pkt.h"
 
 /****************************************************************************
@@ -297,7 +298,7 @@ static inline int netclose_disconnect(FAR struct socket *psock)
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   if (psock->s_sndcb)
     {
-      tcp_callbackfree(conn, psock->s_sndcb);
+      tcp_callback_free(conn, psock->s_sndcb);
       psock->s_sndcb = NULL;
     }
 #endif
@@ -309,7 +310,7 @@ static inline int netclose_disconnect(FAR struct socket *psock)
   /* Check for the case where the host beat us and disconnected first */
 
   if (conn->tcpstateflags == UIP_ESTABLISHED &&
-      (state.cl_cb = tcp_callbackalloc(conn)) != NULL)
+      (state.cl_cb = tcp_callback_alloc(conn)) != NULL)
     {
       /* Set up to receive TCP data event callbacks */
 
@@ -373,7 +374,7 @@ static inline int netclose_disconnect(FAR struct socket *psock)
           /* We are now disconnected */
 
           sem_destroy(&state.cl_sem);
-          tcp_callbackfree(conn, state.cl_cb);
+          tcp_callback_free(conn, state.cl_cb);
 
           /* Free the connection */
 

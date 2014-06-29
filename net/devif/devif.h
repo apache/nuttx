@@ -114,7 +114,7 @@ extern "C"
 void devif_initialize(void);
 
 /****************************************************************************
- * Function: uip_callbackinit
+ * Function: devif_callback_init
  *
  * Description:
  *   Configure the pre-allocated callback structures into a free list.
@@ -126,10 +126,10 @@ void devif_initialize(void);
  *
  ****************************************************************************/
 
-void uip_callbackinit(void);
+void devif_callback_init(void);
 
 /****************************************************************************
- * Function: uip_callbackalloc
+ * Function: devif_callback_alloc
  *
  * Description:
  *   Allocate a callback container from the free list.
@@ -141,10 +141,10 @@ void uip_callbackinit(void);
  *
  ****************************************************************************/
 
-FAR struct uip_callback_s *uip_callbackalloc(FAR struct uip_callback_s **list);
+FAR struct uip_callback_s *devif_callback_alloc(FAR struct uip_callback_s **list);
 
 /****************************************************************************
- * Function: uip_callbackfree
+ * Function: devif_callback_free
  *
  * Description:
  *   Return a callback container to the free list.
@@ -156,11 +156,11 @@ FAR struct uip_callback_s *uip_callbackalloc(FAR struct uip_callback_s **list);
  *
  ****************************************************************************/
 
-void uip_callbackfree(FAR struct uip_callback_s *cb,
-                      FAR struct uip_callback_s **list);
+void devif_callback_free(FAR struct uip_callback_s *cb,
+                         FAR struct uip_callback_s **list);
 
 /****************************************************************************
- * Function: uip_callbackexecute
+ * Function: devif_callback_execute
  *
  * Description:
  *   Execute a list of callbacks.
@@ -172,8 +172,8 @@ void uip_callbackfree(FAR struct uip_callback_s *cb,
  *
  ****************************************************************************/
 
-uint16_t uip_callbackexecute(FAR struct net_driver_s *dev, FAR void *pvconn,
-                             uint16_t flags, FAR struct uip_callback_s *list);
+uint16_t devif_callback_execute(FAR struct net_driver_s *dev, FAR void *pvconn,
+                                uint16_t flags, FAR struct uip_callback_s *list);
 
 /****************************************************************************
  * Send data on the current connection.
@@ -199,17 +199,17 @@ uint16_t uip_callbackexecute(FAR struct net_driver_s *dev, FAR void *pvconn,
  *
  ****************************************************************************/
 
-void uip_send(FAR struct net_driver_s *dev, FAR const void *buf, int len);
+void devif_send(FAR struct net_driver_s *dev, FAR const void *buf, int len);
 
 #ifdef CONFIG_NET_IOB
 struct iob_s;
-void uip_iobsend(FAR struct net_driver_s *dev, FAR struct iob_s *buf,
-                 unsigned int len, unsigned int offset);
+void devif_iob_send(FAR struct net_driver_s *dev, FAR struct iob_s *buf,
+                    unsigned int len, unsigned int offset);
 #endif
 
 #ifdef CONFIG_NET_PKT
-void uip_pktsend(FAR struct net_driver_s *dev, FAR const void *buf,
-                 unsigned int len);
+void devif_pkt_send(FAR struct net_driver_s *dev, FAR const void *buf,
+                    unsigned int len);
 #endif
 
 #undef EXTERN

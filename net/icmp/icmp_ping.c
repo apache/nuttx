@@ -67,8 +67,8 @@
 
 /* Allocate a new ICMP data callback */
 
-#define icmp_callbackalloc()   uip_callbackalloc(&g_echocallback)
-#define icmp_callbackfree(cb)  uip_callbackfree(cb, &g_echocallback)
+#define icmp_callback_alloc()   devif_callback_alloc(&g_echocallback)
+#define icmp_callback_free(cb)  devif_callback_free(cb, &g_echocallback)
 
 /****************************************************************************
  * Private Types
@@ -345,7 +345,7 @@ int uip_ping(uip_ipaddr_t addr, uint16_t id, uint16_t seqno,
 
   /* Set up the callback */
 
-  state.png_cb = icmp_callbackalloc();
+  state.png_cb = icmp_callback_alloc();
   if (state.png_cb)
     {
       state.png_cb->flags   = UIP_POLL|UIP_ECHOREPLY;
@@ -367,7 +367,7 @@ int uip_ping(uip_ipaddr_t addr, uint16_t id, uint16_t seqno,
       nlldbg("Start time: 0x%08x seqno: %d\n", state.png_time, seqno);
       net_lockedwait(&state.png_sem);
 
-      icmp_callbackfree(state.png_cb);
+      icmp_callback_free(state.png_cb);
     }
 
   net_unlock(save);

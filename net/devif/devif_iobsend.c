@@ -82,13 +82,13 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_iobsend
+ * Name: devif_iob_send
  *
  * Description:
  *   Called from socket logic in response to a xmit or poll request from the
  *   the network interface driver.
  *
- *   This is identical to calling uip_send() except that the data is
+ *   This is identical to calling devif_send() except that the data is
  *   in an I/O buffer chain, rather than a flat buffer.
  *
  * Assumptions:
@@ -97,8 +97,8 @@
  *
  ****************************************************************************/
 
-void uip_iobsend(FAR struct net_driver_s *dev, FAR struct iob_s *iob,
-                 unsigned int len, unsigned int offset)
+void devif_iob_send(FAR struct net_driver_s *dev, FAR struct iob_s *iob,
+                    unsigned int len, unsigned int offset)
 {
   DEBUGASSERT(dev && len > 0 && len < CONFIG_NET_BUFSIZE);
 
@@ -110,7 +110,7 @@ void uip_iobsend(FAR struct net_driver_s *dev, FAR struct iob_s *iob,
 #ifdef CONFIG_NET_TCP_WRBUFFER_DUMP
   /* Dump the outgoing device buffer */
 
-  lib_dumpbuffer("uip_iobsend", dev->d_snddata, len);
+  lib_dumpbuffer("devif_iob_send", dev->d_snddata, len);
 #endif
 }
 

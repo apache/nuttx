@@ -50,6 +50,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Allocate a new TCP data callback */
+
+#define udp_callback_alloc(conn)   devif_callback_alloc(&conn->list)
+#define udp_callback_free(conn,cb) devif_callback_free(cb, &conn->list)
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/

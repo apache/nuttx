@@ -58,6 +58,7 @@
 
 #include <devif/devif.h>
 
+#include "tcp/tcp.h"
 #include "socket/socket.h"
 
 /****************************************************************************
@@ -214,7 +215,7 @@ static inline int net_pollsetup(FAR struct socket *psock,
 
   /* Allocate a TCP/IP callback structure */
 
-  cb = tcp_callbackalloc(conn);
+  cb = tcp_callback_alloc(conn);
   if (!cb)
     {
       ret = -EBUSY;
@@ -366,7 +367,7 @@ static inline int net_pollteardown(FAR struct socket *psock,
       /* Release the callback */
 
       flags = net_lock();
-      tcp_callbackfree(conn, info->cb);
+      tcp_callback_free(conn, info->cb);
       net_unlock(flags);
 
       /* Release the poll/select data slot */

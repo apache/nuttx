@@ -1075,7 +1075,7 @@ static ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   /* Set up the callback in the connection */
 
-  state.rf_cb = pkt_callbackalloc(conn);
+  state.rf_cb = pkt_callback_alloc(conn);
   if (state.rf_cb)
     {
       state.rf_cb->flags  = UIP_NEWDATA|UIP_POLL;
@@ -1096,7 +1096,7 @@ static ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
       /* Make sure that no further interrupts are processed */
 
-      pkt_callbackfree(conn, state.rf_cb);
+      pkt_callback_free(conn, state.rf_cb);
       ret = recvfrom_result(ret, &state);
     }
   else
@@ -1167,7 +1167,7 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   /* Set up the callback in the connection */
 
-  state.rf_cb = udp_callbackalloc(conn);
+  state.rf_cb = udp_callback_alloc(conn);
   if (state.rf_cb)
     {
       /* Set up the callback in the connection */
@@ -1190,7 +1190,7 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
       /* Make sure that no further interrupts are processed */
 
-      udp_callbackfree(conn, state.rf_cb);
+      udp_callback_free(conn, state.rf_cb);
       ret = recvfrom_result(ret, &state);
     }
   else
@@ -1354,7 +1354,7 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
       /* Set up the callback in the connection */
 
-      state.rf_cb = tcp_callbackalloc(conn);
+      state.rf_cb = tcp_callback_alloc(conn);
       if (state.rf_cb)
         {
           state.rf_cb->flags   = UIP_NEWDATA|UIP_POLL|UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT;
@@ -1371,7 +1371,7 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
           /* Make sure that no further interrupts are processed */
 
-          tcp_callbackfree(conn, state.rf_cb);
+          tcp_callback_free(conn, state.rf_cb);
           ret = recvfrom_result(ret, &state);
         }
       else

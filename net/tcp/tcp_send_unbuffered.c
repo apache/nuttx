@@ -376,7 +376,7 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
            * happen until the polling cycle completes).
            */
 
-          uip_send(dev, &pstate->snd_buffer[pstate->snd_sent], sndlen);
+          devif_send(dev, &pstate->snd_buffer[pstate->snd_sent], sndlen);
 
           /* Check if the destination IP address is in the ARP table.  If not,
            * then the send won't actually make it out... it will be replaced with
@@ -550,7 +550,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
 
       /* Allocate resources to receive a callback */
 
-      state.snd_cb = tcp_callbackalloc(conn);
+      state.snd_cb = tcp_callback_alloc(conn);
       if (state.snd_cb)
         {
           /* Get the initial sequence number that will be used */
@@ -588,7 +588,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
 
           /* Make sure that no further interrupts are processed */
 
-          tcp_callbackfree(conn, state.snd_cb);
+          tcp_callback_free(conn, state.snd_cb);
         }
     }
 

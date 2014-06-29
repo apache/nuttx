@@ -88,11 +88,6 @@ struct pkt_conn_s
 
 FAR struct pkt_conn_s *pkt_alloc(void);
 
-/* Allocate a new packet socket data callback */
-
-#define pkt_callbackalloc(conn)   uip_callbackalloc(&conn->list)
-#define pkt_callbackfree(conn,cb) uip_callbackfree(cb, &conn->list)
-
 /* Free a connection structure that is no longer in use. This should
  * be done by the implementation of close()
  */

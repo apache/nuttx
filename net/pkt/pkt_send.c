@@ -124,7 +124,7 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
         {
           /* Copy the packet data into the device packet buffer and send it */
 
-          uip_pktsend(dev, pstate->snd_buffer, pstate->snd_buflen);
+          devif_pkt_send(dev, pstate->snd_buffer, pstate->snd_buflen);
           pstate->snd_sent = pstate->snd_buflen;
         }
 
@@ -243,7 +243,7 @@ ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
 
       /* Allocate resource to receive a callback */
 
-      state.snd_cb = pkt_callbackalloc(conn);
+      state.snd_cb = pkt_callback_alloc(conn);
       if (state.snd_cb)
         {
           FAR struct net_driver_s *dev;
@@ -281,7 +281,7 @@ ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
 
           /* Make sure that no further interrupts are processed */
 
-          pkt_callbackfree(conn, state.snd_cb);
+          pkt_callback_free(conn, state.snd_cb);
 
           /* Clear the no-ARP bit in the device flags */
 

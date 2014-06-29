@@ -185,7 +185,7 @@ void icmp_input(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NET_ICMP_PING
   else if (picmp->type == ICMP_ECHO_REPLY && g_echocallback)
     {
-      (void)uip_callbackexecute(dev, picmp, UIP_ECHOREPLY, g_echocallback);
+      (void)devif_callback_execute(dev, picmp, UIP_ECHOREPLY, g_echocallback);
     }
 #endif
 
@@ -273,7 +273,7 @@ typeerr:
         {
           /* Dispatch the ECHO reply to the waiting thread */
 
-          flags = uip_callbackexecute(dev, picmp, flags, g_echocallback);
+          flags = devif_callback_execute(dev, picmp, flags, g_echocallback);
         }
 
       /* If the ECHO reply was not handled, then drop the packet */
