@@ -126,6 +126,13 @@ static uint16_t upper_layer_chksum(FAR struct net_driver_s *dev, uint8_t proto)
   upper_layer_len = (((uint16_t)(pbuf->len[0]) << 8) + pbuf->len[1]) - UIP_IPH_LEN;
 #endif /* CONFIG_NET_IPv6 */
 
+  /* Verify some minimal assumptions */
+
+  if (upper_layer_len > CONFIG_NET_BUFSIZE)
+    {
+      return 0;
+    }
+
   /* First sum pseudo-header. */
 
   /* IP protocol and length fields. This addition cannot carry. */

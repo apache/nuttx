@@ -148,26 +148,44 @@ static void work_process(FAR struct wqueue_s *wqueue)
            */
 
           worker = work->worker;
-          arg    = work->arg;
 
-          /* Mark the work as no longer being queued */
-
-          work->worker = NULL;
-
-          /* Do the work.  Re-enable interrupts while the work is being
-           * performed... we don't have any idea how long that will take!
+          /* Check for a race condition where the work may be nullified
+           * before it is removed from the queue.
            */
 
-          irqrestore(flags);
-          worker(arg);
+          if (worker != NULL)
+            {
+              /* Extract the work argument (before re-enabling interrupts) */
 
-          /* Now, unfortunately, since we re-enabled interrupts we don't
-           * know the state of the work list and we will have to start
-           * back at the head of the list.
-           */
+              arg = work->arg;
 
-          flags = irqsave();
-          work  = (FAR struct work_s *)wqueue->q.head;
+              /* Mark the work as no longer being queued */
+
+              work->worker = NULL;
+
+              /* Do the work.  Re-enable interrupts while the work is being
+               * performed... we don't have any idea how long that will take!
+               */
+
+              irqrestore(flags);
+              worker(arg);
+
+              /* Now, unfortunately, since we re-enabled interrupts we don't
+               * know the state of the work list and we will have to start
+               * back at the head of the list.
+               */
+
+              flags = irqsave();
+              work  = (FAR struct work_s *)wqueue->q.head;
+            }
+          else
+            {
+              /* Cancelled.. Just move to the next work in the list with
+               * interrupts still disabled.
+               */
+
+              work = (FAR struct work_s *)work->dq.flink;
+            }
         }
       else
         {
