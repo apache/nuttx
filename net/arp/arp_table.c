@@ -148,7 +148,7 @@ void arp_timer(void)
 void arp_update(uint16_t *pipaddr, uint8_t *ethaddr)
 {
   struct arp_entry *tabptr = NULL;
-  in_addr_t         ipaddr = uip_ip4addr_conv(pipaddr);
+  in_addr_t         ipaddr = net_ip4addr_conv32(pipaddr);
   int               i;
 
   /* Walk through the ARP mapping table and try to find an entry to

@@ -139,8 +139,8 @@ void udp_send(struct net_driver_s *dev, struct udp_conn_s *conn)
       pudpbuf->ttl         = conn->ttl;
       pudpbuf->proto       = UIP_PROTO_UDP;
 
-      uiphdr_ipaddr_copy(pudpbuf->srcipaddr, &dev->d_ipaddr);
-      uiphdr_ipaddr_copy(pudpbuf->destipaddr, &conn->ripaddr);
+      net_ipaddr_hdrcopy(pudpbuf->srcipaddr, &dev->d_ipaddr);
+      net_ipaddr_hdrcopy(pudpbuf->destipaddr, &conn->ripaddr);
 
       /* Calculate IP checksum. */
 

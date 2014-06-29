@@ -317,9 +317,9 @@ int net_lockedwait(sem_t *sem);
 /* Convert an IPv4 address of the form uint16_t[2] to an in_addr_t */
 
 #ifdef CONFIG_ENDIAN_BIG
-#  define uip_ip4addr_conv(addr) (((in_addr_t)((uint16_t*)addr)[0] << 16) | (in_addr_t)((uint16_t*)addr)[1])
+#  define net_ip4addr_conv32(addr) (((in_addr_t)((uint16_t*)addr)[0] << 16) | (in_addr_t)((uint16_t*)addr)[1])
 #else
-#  define uip_ip4addr_conv(addr) (((in_addr_t)((uint16_t*)addr)[1] << 16) | (in_addr_t)((uint16_t*)addr)[0])
+#  define net_ip4addr_conv32(addr) (((in_addr_t)((uint16_t*)addr)[1] << 16) | (in_addr_t)((uint16_t*)addr)[0])
 #endif
 
 /* Extract individual bytes from a 32-bit IPv4 IP address that is in network byte order */
@@ -377,14 +377,14 @@ int net_lockedwait(sem_t *sem);
    do { \
      (dest) = (in_addr_t)(src); \
    } while (0)
-#  define uiphdr_ipaddr_copy(dest, src) \
+#  define net_ipaddr_hdrcopy(dest, src) \
    do { \
      ((uint16_t*)(dest))[0] = ((uint16_t*)(src))[0]; \
      ((uint16_t*)(dest))[1] = ((uint16_t*)(src))[1]; \
    } while (0)
 #else /* !CONFIG_NET_IPv6 */
 #  define net_ipaddr_copy(dest, src)    memcpy(&dest, &src, sizeof(net_ip6addr_t))
-#  define uiphdr_ipaddr_copy(dest, src) net_ipaddr_copy(dest, src)
+#  define net_ipaddr_hdrcopy(dest, src) net_ipaddr_copy(dest, src)
 #endif /* !CONFIG_NET_IPv6 */
 
 /* Compare two IP addresses
@@ -405,7 +405,7 @@ int net_lockedwait(sem_t *sem);
 
 #ifndef CONFIG_NET_IPv6
 #  define net_ipaddr_cmp(addr1, addr2)    (addr1 == addr2)
-#  define uiphdr_ipaddr_cmp(addr1, addr2) net_ipaddr_cmp(uip_ip4addr_conv(addr1), uip_ip4addr_conv(addr2))
+#  define uiphdr_ipaddr_cmp(addr1, addr2) net_ipaddr_cmp(net_ip4addr_conv32(addr1), net_ip4addr_conv32(addr2))
 #else /* !CONFIG_NET_IPv6 */
 #  define net_ipaddr_cmp(addr1, addr2)    (memcmp(&addr1, &addr2, sizeof(net_ip6addr_t)) == 0)
 #  define uiphdr_ipaddr_cmp(addr1, addr2) net_ipaddr_cmp(addr, addr2)

@@ -412,7 +412,7 @@ void tcp_free(FAR struct tcp_conn_s *conn)
 FAR struct tcp_conn_s *tcp_active(struct tcp_iphdr_s *buf)
 {
   FAR struct tcp_conn_s *conn = (struct tcp_conn_s *)g_active_tcp_connections.head;
-  in_addr_t srcipaddr = uip_ip4addr_conv(buf->srcipaddr);
+  in_addr_t srcipaddr = net_ip4addr_conv32(buf->srcipaddr);
 
   while (conn)
     {
@@ -522,7 +522,7 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct tcp_iphdr_s *buf)
       conn->lport         = buf->destport;
       conn->rport         = buf->srcport;
       conn->mss           = UIP_TCP_INITIAL_MSS;
-      net_ipaddr_copy(conn->ripaddr, uip_ip4addr_conv(buf->srcipaddr));
+      net_ipaddr_copy(conn->ripaddr, net_ip4addr_conv32(buf->srcipaddr));
       conn->tcpstateflags = UIP_SYN_RCVD;
 
       tcp_initsequence(conn->sndseq);

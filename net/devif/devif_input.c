@@ -413,7 +413,7 @@ int uip_input(FAR struct net_driver_s *dev)
 #if defined(CONFIG_NET_BROADCAST) && defined(CONFIG_NET_UDP)
   if (pbuf->proto == UIP_PROTO_UDP &&
 #ifndef CONFIG_NET_IPv6
-      net_ipaddr_cmp(uip_ip4addr_conv(pbuf->destipaddr), g_alloneaddr))
+      net_ipaddr_cmp(net_ip4addr_conv32(pbuf->destipaddr), g_alloneaddr))
 #else
       net_ipaddr_cmp(pbuf->destipaddr, g_alloneaddr))
 #endif
@@ -457,10 +457,10 @@ int uip_input(FAR struct net_driver_s *dev)
     {
       /* Check if the packet is destined for our IP address. */
 #ifndef CONFIG_NET_IPv6
-      if (!net_ipaddr_cmp(uip_ip4addr_conv(pbuf->destipaddr), dev->d_ipaddr))
+      if (!net_ipaddr_cmp(net_ip4addr_conv32(pbuf->destipaddr), dev->d_ipaddr))
         {
 #ifdef CONFIG_NET_IGMP
-          net_ipaddr_t destip = uip_ip4addr_conv(pbuf->destipaddr);
+          net_ipaddr_t destip = net_ip4addr_conv32(pbuf->destipaddr);
           if (igmp_grpfind(dev, &destip) == NULL)
 #endif
             {

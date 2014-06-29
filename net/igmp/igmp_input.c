@@ -142,7 +142,7 @@ void igmp_input(struct net_driver_s *dev)
 
   /* Find the group (or create a new one) using the incoming IP address*/
 
-  destipaddr = uip_ip4addr_conv(IGMPBUF->destipaddr);
+  destipaddr = net_ip4addr_conv32(IGMPBUF->destipaddr);
   group = igmp_grpallocfind(dev, &destipaddr);
   if (!group)
     {
@@ -226,7 +226,7 @@ void igmp_input(struct net_driver_s *dev)
                  */
 
                 IGMP_STATINCR(g_netstats.igmp.ucast_query);
-                grpaddr = uip_ip4addr_conv(IGMPBUF->grpaddr);
+                grpaddr = net_ip4addr_conv32(IGMPBUF->grpaddr);
                 group   = igmp_grpallocfind(dev, &grpaddr);
                 ticks   = igmp_decisec2tick((int)IGMPBUF->maxresp);
                 if (IS_IDLEMEMBER(group->flags) || igmp_cmptimer(group, ticks))

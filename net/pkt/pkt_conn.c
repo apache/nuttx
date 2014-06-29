@@ -211,7 +211,7 @@ void pkt_free(FAR struct pkt_conn_s *conn)
 
 FAR struct pkt_conn_s *pkt_active(struct eth_hdr_s *buf)
 {
-  #define uip_ethaddr_cmp(addr1, addr2) \
+  #define eth_addr_cmp(addr1, addr2) \
   ((addr1[0] == addr2[0]) && (addr1[1] == addr2[1]) && \
    (addr1[2] == addr2[2]) && (addr1[3] == addr2[3]) && \
    (addr1[4] == addr2[4]) && (addr1[5] == addr2[5]))
@@ -223,7 +223,7 @@ FAR struct pkt_conn_s *pkt_active(struct eth_hdr_s *buf)
     {
       /* FIXME lmac in conn should have been set by pkt_bind() */
 
-      if (uip_ethaddr_cmp(buf->dest, conn->lmac))
+      if (eth_addr_cmp(buf->dest, conn->lmac))
         {
           /* Matching connection found.. return a reference to it */
 
