@@ -270,16 +270,19 @@ int sam_hsmci_initialize(int slotno, int minor)
   state = sam_hsmci_state(slotno);
   if (!state)
     {
-      fdbg("No state for slotno %d\n", slotno);
+      fdbg("ERROR: No state for slotno %d\n", slotno);
       return -EINVAL;
     }
 
   /* Initialize card-detect, write-protect, and power enable PIOs */
 
   sam_configpio(state->cdcfg);
+  sam_dumppio(state->cdcfg, "HSMCI Card Detect");
+
   if (state->pwrcfg != 0)
     {
       sam_configpio(state->pwrcfg);
+      sam_dumppio(state->pwrcfg, "HSMCI Power");
     }
 
   /* Mount the SDIO-based MMC/SD block driver */
@@ -288,7 +291,7 @@ int sam_hsmci_initialize(int slotno, int minor)
   state->hsmci = sdio_initialize(slotno);
   if (!state->hsmci)
     {
-      fdbg("Failed to initialize SDIO slot %d\n",  slotno);
+      fdbg("ERROR: Failed to initialize SDIO slot %d\n",  slotno);
       return -ENODEV;
     }
 
@@ -297,7 +300,7 @@ int sam_hsmci_initialize(int slotno, int minor)
   ret = mmcsd_slotinitialize(minor, state->hsmci);
   if (ret != OK)
     {
-      fdbg("Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
+      fdbg("ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
       return ret;
     }
 
@@ -334,7 +337,7 @@ bool sam_cardinserted(int slotno)
   state = sam_hsmci_state(slotno);
   if (!state)
     {
-      fdbg("No state for slotno %d\n", slotno);
+      fdbg("ERROR: No state for slotno %d\n", slotno);
       return false;
     }
 
