@@ -77,10 +77,10 @@
 #  undef HAVE_HSMCI
 #endif
 
-/* We need PIO interrupts on PIOD to support card detect interrupts */
+/* We need PIO interrupts on PIOE to support card detect interrupts */
 
-#if defined(HAVE_HSMCI) && !defined(CONFIG_SAMA5_PIOD_IRQ)
-#  warning PIOD interrupts not enabled.  No MMC/SD support.
+#if defined(HAVE_HSMCI) && !defined(CONFIG_SAMA5_PIOE_IRQ)
+#  warning PIOE interrupts not enabled.  No MMC/SD support.
 #  undef HAVE_HSMCI
 #endif
 
@@ -346,13 +346,13 @@
 #define IRQ_MCI0_CD   SAM_IRQ_PE5
 
 /* The microSD connects vi HSMCI1.  The card detect discrete is available on
- * PE14 (pulled high)  NOTE that PE15 must be controlled to provide power
+ * PE6 (pulled high)  NOTE that PE15 must be controlled to provide power
  * to the HSMCI1 slot (the HSMCI0 slot is always powered).
  *
  * ------------------------------ ------------------- -------------------------
  * SAMA5D4 PIO                    SIGNAL              USAGE
  * ------------------------------ ------------------- -------------------------
- * PE14/A14/TCLK1/PWMH3           MCI1_CD_PE14        MCI1_CD
+ * PE14/A14/TCLK1/PWMH3           MCI1_CD_PE14        MCI1_CD               ???
  * PE15/A15/SCK3/TIOA0            MCI1_PWR_PE15       MCI1_PWR
  * PE18/A18/TIOA5/MCI1_CK         PE18                MCI1_CK, EXP
  * PE19/A19/TIOB5/MCI1_CDA        PE19                MCI1_CDA, EXP
@@ -365,8 +365,8 @@
  */
 
 #define PIO_MCI1_CD  (PIO_INPUT | PIO_CFG_DEFAULT | PIO_CFG_DEGLITCH | \
-                      PIO_INT_BOTHEDGES | PIO_PORT_PIOE | PIO_PIN14)
-#define IRQ_MCI1_CD   SAM_IRQ_PE14
+                      PIO_INT_BOTHEDGES | PIO_PORT_PIOE | PIO_PIN6)
+#define IRQ_MCI1_CD   SAM_IRQ_PE6
 
 #define IRQ_MCI1_PWR (PIO_OUTPUT | PIO_CFG_DEFAULT | PIO_OUTPUT_SET | \
                       PIO_PORT_PIOE | PIO_PIN15)
