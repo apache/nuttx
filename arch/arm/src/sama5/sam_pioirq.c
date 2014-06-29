@@ -378,6 +378,21 @@ void sam_pioirq(pio_pinset_t pinset)
   uint32_t base = sam_piobase(pinset);
   int      pin  = sam_piopin(pinset);
 
+  /* Enable writing to PIO registers */
+
+  putreg32(PIO_WPMR_WPKEY, base + SAM_PIO_WPMR_OFFSET);
+
+#if defined(SAMA5_SAIC) && defined(SAM_PIO_ISLR_OFFSET)
+  /* Is the interrupt secure? */
+
+   if ((pinset & PIO_INT_SECURE) != 0)
+     {
+       uint32_t regval = getreg32(base + SAM_PIO_ISLR_OFFSET);
+       regval &= ~pin;
+       putreg32(regval, base + SAM_PIO_ISLR_OFFSET);
+     }
+#endif
+
    /* Are any additional interrupt modes selected? */
 
    if ((pinset & _PIO_INT_AIM) != 0)
@@ -414,6 +429,10 @@ void sam_pioirq(pio_pinset_t pinset)
 
        putreg32(pin, base + SAM_PIO_AIMDR_OFFSET);
      }
+
+  /* Disable writing to PIO registers */
+
+  putreg32(PIO_WPMR_WPEN | PIO_WPMR_WPKEY, base + SAM_PIO_WPMR_OFFSET);
 }
 
 /************************************************************************************

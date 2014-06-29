@@ -73,15 +73,15 @@
 
 /* 32-bit Encoding:
  *
- *   .... .... ..MM MCCC CCDD IIIV PPPB BBBB
+ *   .... .... .MMM CCCC CDDI IISV PPPB BBBB
  */
 
 /* Input/Output mode:
  *
- *   .... .... ..MM M... .... .... .... ....
+ *   .... .... .MMM .... .... .... .... ....
  */
 
-#define PIO_MODE_SHIFT            (19)        /* Bits 19-21: PIO mode */
+#define PIO_MODE_SHIFT            (20)        /* Bits 20-22: PIO mode */
 #define PIO_MODE_MASK             (7 << PIO_MODE_SHIFT)
 #  define PIO_INPUT               (0 << PIO_MODE_SHIFT) /* Input */
 #  define PIO_OUTPUT              (1 << PIO_MODE_SHIFT) /* Output */
@@ -93,10 +93,10 @@
 /* These bits set the configuration of the pin:
  * NOTE: No definitions for parallel capture mode
  *
- *   .... .... .... .CCC CC.. .... .... ....
+ *   .... .... .... CCCC C... .... .... ....
  */
 
-#define PIO_CFG_SHIFT             (14)        /* Bits 14-18: PIO configuration bits */
+#define PIO_CFG_SHIFT             (15)        /* Bits 15-19: PIO configuration bits */
 #define PIO_CFG_MASK              (31 << PIO_CFG_SHIFT)
 #  define PIO_CFG_DEFAULT         (0  << PIO_CFG_SHIFT) /* Default, no attribute */
 #  define PIO_CFG_PULLUP          (1  << PIO_CFG_SHIFT) /* Bit 11: Internal pull-up */
@@ -107,10 +107,10 @@
 
 /* Drive Strength:
  *
- *   .... .... .... .... ..DD .... .... ....
+ *   .... .... .... .... .DD. .... .... ....
  */
 
-#define PIO_DRIVE_SHIFT           (12)        /* Bits 12-13: Drive strength */
+#define PIO_DRIVE_SHIFT           (13)        /* Bits 13-14: Drive strength */
 #define PIO_DRIVE_MASK            (7 << PIO_DRIVE_SHIFT)
 #  define PIO_DRIVE_LOW           (0 << PIO_DRIVE_SHIFT)
 #  define PIO_DRIVE_MEDIUM        (2 << PIO_DRIVE_SHIFT)
@@ -118,10 +118,10 @@
 
 /* Additional interrupt modes:
  *
- *   .... .... .... .... .... III. .... ....
+ *   .... .... .... .... ...I II.. .... ....
  */
 
-#define PIO_INT_SHIFT             (9)         /* Bits 9-11: PIO interrupt bits */
+#define PIO_INT_SHIFT             (10)        /* Bits 9-12: PIO interrupt bits */
 #define PIO_INT_MASK              (7 << PIO_INT_SHIFT)
 #  define _PIO_INT_AIM            (1 << 10)   /* Bit 10: Additional Interrupt modes */
 #  define _PIO_INT_LEVEL          (1 << 9)    /* Bit 9: Level detection interrupt */
@@ -135,12 +135,24 @@
 #  define PIO_INT_FALLING         (_PIO_INT_AIM | _PIO_INT_EDGE  | _PIO_INT_FL)
 #  define PIO_INT_BOTHEDGES       (0)
 
+/* If the pin is an interrupt, then this determines if the pin is a secure interrupt:
+ *
+ *   .... .... .... .... .... ..S. .... ....
+ */
+
+#ifdef SAMA5_SAIC
+#  define PIO_INT_SECURE          (1 << 9)    /* Bit 9: Secure interrupt */
+#else
+#  define PIO_INT_SECURE          (0)
+#endif
+#define PIO_INT_UNSECURE          (0)
+
 /* If the pin is an PIO output, then this identifies the initial output value:
  *
  *   .... .... .... .... .... ...V .... ....
  */
 
-#define PIO_OUTPUT_SET            (1 << 8)    /* Bit 8: Inital value of output */
+#define PIO_OUTPUT_SET            (1 << 8)    /* Bit 8: Initial value of output */
 #define PIO_OUTPUT_CLEAR          (0)
 
 /* This identifies the PIO port:
