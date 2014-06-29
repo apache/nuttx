@@ -413,13 +413,13 @@ config SAMA5_DMAC1
 	depends on SAMA5_HAVE_DMA
 
 config SAMA5_XDMAC0
-	bool "XDMA Controller (XDMAC0)"
+	bool "XDMA Controller (XDMAC0, always secure)"
 	default n
 	select ARCH_DMA
 	depends on SAMA5_HAVE_XDMA
 
 config SAMA5_XDMAC1
-	bool "XDMA Controller (XDMAC1)"
+	bool "XDMA Controller (XDMAC1, never secure)"
 	default n
 	select ARCH_DMA
 	depends on SAMA5_HAVE_XDMA
@@ -2399,6 +2399,43 @@ endif # SAMA5_SSC0 || SAMA5_SSC1
 
 if SAMA5_HSMCI0 || SAMA5_HSMCI1 || SAMA5_HSMCI2
 menu "HSMCI device driver options"
+
+if SAMA5_XDMAC0 || SAMA5_XDMAC1
+
+choice
+	prompt "HSMCI0 XDMAC Selection"
+	default SAMA5_HSMCI0_XDMAC0 if SAMA5_XDMAC0
+	default SAMA5_HSMCI0_XDMAC1 if !SAMA5_XDMAC0 && SAMA5_XDMAC1
+	depends on SAMA5_HSMCI0
+
+config SAMA5_HSMCI0_XDMAC0
+	bool "XDMAC0 (always secure)"
+	depends on SAMA5_XDMAC0
+
+config SAMA5_HSMCI0_XDMAC1
+	bool "XDMAC1 (never secure)"
+	depends on SAMA5_XDMAC1
+
+endchoice # HSMCI0 XDMAC Selection
+
+choice
+	prompt "HSMCI1 XDMAC Selection"
+	default SAMA5_HSMCI1_XDMAC0 if SAMA5_XDMAC0
+	default SAMA5_HSMCI1_XDMAC1 if !SAMA5_XDMAC0 && SAMA5_XDMAC1
+	depends on SAMA5_HSMCI1
+
+config SAMA5_HSMCI1_XDMAC0
+	bool "XDMAC0 (always secure)"
+	depends on SAMA5_XDMAC0
+
+config SAMA5_HSMCI1_XDMAC1
+	bool "XDMAC1 (never secure)"
+	depends on SAMA5_XDMAC1
+
+endchoice # HSMCI1 XDMAC Selection
+
+# There is no HSMCI2 on the platforms that support XDMAC
+endif # SAMA5_XDMAC0 || SAMA5_XDMAC1
 
 config SAMA5_HSMCI_RDPROOF
 	bool "Read Proof Enable"
