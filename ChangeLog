@@ -7569,3 +7569,9 @@
 	  devif/devif.h (2014-6-28).
 	* net/devif: Rename many functions in net/devif from uip_* to devif_*
 	  (2014-6-28).
+	* configs/sama5d4-ek/src/nsh:  The SAMA5D4-EK NSH configuration now
+	  supports the RTC by default (2014-6-29).
+	* arch/arm/src/sama5/Kconfig and sam_hsmci.c:  Add configuration to
+	  assign an XDMAC channel to an HSMCI (2014-6029).
+	* Various fixes for networking and tiny webserver from Max (2014-6-29).
+
