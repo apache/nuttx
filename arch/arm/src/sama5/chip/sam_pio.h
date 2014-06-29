@@ -124,14 +124,7 @@
 #define SAM_PIO_DRIVER2_OFFSET     0x011c /* I/O Drive Register 2 */
                                           /* 0x0120-0x14c: Reserved */
 
-#define SAM_PIO_PCIER_OFFSET       0x0154 /* Parallel Capture Interrupt Enable Register */
-#define SAM_PIO_PCIDR_OFFSET       0x0158 /* Parallel Capture Interrupt Disable Register */
-#define SAM_PIO_PCIMR_OFFSET       0x015c /* Parallel Capture Interrupt Mask Register */
-#define SAM_PIO_PCISR_OFFSET       0x0160 /* Parallel Capture Interrupt Status Register */
-#define SAM_PIO_PCRHR_OFFSET       0x0164 /* Parallel Capture Reception Holding Register */
-                                          /* 0x0168-0x018c: Reserved for PDC registers */
-
-/* PIO register adresses ****************************************************************/
+/* PIO register addresses ***************************************************************/
 
 #define PIOA                       (0)
 #define PIOB                       (1)
