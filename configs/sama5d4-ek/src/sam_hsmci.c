@@ -59,12 +59,12 @@
  * ------------------------------ ------------------- -------------------------
  *
  * The microSD connects vi HSMCI1.  The card detect discrete is available on
- * PE14 (pulled high):
+ * PE6 (pulled high):
  *
  * ------------------------------ ------------------- -------------------------
  * SAMA5D4 PIO                    SIGNAL              USAGE
  * ------------------------------ ------------------- -------------------------
- * PE14/A14/TCLK1/PWMH3           MCI1_CD_PE14        MCI1_CD
+ * PE14/A14/TCLK1/PWMH3           MCI1_CD_PE14        MCI1_CD               ???
  * PE15/A15/SCK3/TIOA0            MCI1_PWR_PE15       MCI1_PWR
  * PE18/A18/TIOA5/MCI1_CK         PE18                MCI1_CK, EXP
  * PE19/A19/TIOB5/MCI1_CDA        PE19                MCI1_CDA, EXP
