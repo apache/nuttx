@@ -2487,9 +2487,27 @@ RTC
       CONFIG_RTC=y                         : Use the RTC for system time
       CONFIG_RTC_DATETIME=y                : RTC supports data/time
 
-  The RTC supports an alarm that may be enable with the following settings.
-  However, there is nothing in the system that currently makes use of this
-  alarm.
+  You can set the RTC using the NSH date command:
+
+    NuttShell (NSH) NuttX-7.3
+    nsh> help date
+    date usage:  date [-s "MMM DD HH:MM:SS YYYY"]
+    nsh> date
+    Jan 01 00:34:45 2012
+    nsh> date -s "JUN 29 7:30:00 2014"
+    nsh> date
+    Jun 29 07:30:01 2014
+
+  After a power cycle and reboot:
+
+    NuttShell (NSH) NuttX-7.3
+    nsh> date
+    Jun 29 07:30:55 2014
+    nsh>
+
+  The RTC also supports an alarm that may be enable with the following
+  settings.  However, there is nothing in the system that currently makes
+  use of this alarm.
 
     Drivers:
       CONFIG_RTC_ALARM=y                   : Enable the RTC alarm

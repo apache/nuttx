@@ -5,6 +5,15 @@ README
   development board. This board features the Atmel SAMA5D44 microprocessor.
   See http://www.atmel.com for further information.
 
+  This port was actually performed on a board designated SAMA5D4-MB.  This
+  board should be equivalent to the SAMA5D4-EK.  However, care should be
+  taken when I refer to PIO, Connector, or Jumper Usage in this document.
+  Please consult the schematic for your actual board-in-hand to verify that
+  information.
+
+  SAMA5D44
+  --------
+
     ---------------------------- -------------
     PARAMETER                    SAMA5D44
     ---------------------------- -------------
@@ -2580,15 +2589,37 @@ RTC
       CONFIG_RTC=y                         : Use the RTC for system time
       CONFIG_RTC_DATETIME=y                : RTC supports data/time
 
-  The RTC supports an alarm that may be enable with the following settings.
-  However, there is nothing in the system that currently makes use of this
-  alarm.
+  NOTE:  If you want the RTC to preserve time over power cycles, you will
+  need to install a battery in the battery holder (J12) and close the jumper,
+  JP13.
+
+  You can set the RTC using the NSH date command:
+
+    NuttShell (NSH) NuttX-7.3
+    nsh> help date
+    date usage:  date [-s "MMM DD HH:MM:SS YYYY"]
+    nsh> date
+    Jan 01 00:34:45 2012
+    nsh> date -s "JUN 29 7:30:00 2014"
+    nsh> date
+    Jun 29 07:30:01 2014
+
+  After a power cycle and reboot:
+
+    NuttShell (NSH) NuttX-7.3
+    nsh> date
+    Jun 29 07:30:55 2014
+    nsh>
+
+  The RTC also supports an alarm that may be enable with the following
+  settings.  However, there is nothing in the system that currently makes
+  use of this alarm.
 
     Drivers:
       CONFIG_RTC_ALARM=y                   : Enable the RTC alarm
 
     Library Routines
-      CONFIG_SCHED_WORKQUEUE=y              : Alarm needs work queue support
+      CONFIG_SCHED_WORKQUEUE=y             : Alarm needs work queue support
 
 Watchdog Timer
 ==============
@@ -2599,7 +2630,8 @@ Watchdog Timer
 
     System Type:
       CONFIG_SAMA5_WDT=y                  : Enable the WDT peripheral
-                                          : Defaults in "RTC Configuration" should be OK
+                                          : Defaults values for others settings
+                                            should be OK
 
     Drivers (this will automatically be selected):
       CONFIG_WATCHDOG=y                   : Enables watchdog timer driver support
@@ -3282,35 +3314,48 @@ Configurations
 
        The /tmp directory can them be used for and scratch purpose.
 
-    7. The SAMA5D4-EK includes for an AT25 serial DataFlash.  Support for that
+    7. The Real Time Clock/Calendar (RTC) is enabled in this configuration.
+       See the section entitled "RTC" above for detailed configuration
+       settings.
+
+       The RTC alarm is not enabled by default since there is nothing in
+       this configuration that uses it.  The alarm can easily be enabled,
+       however, as described in the "RTC" section.
+
+       The time value from the RTC will be used as the NuttX system time
+       in all timestamp operations.  You may use the NSH 'date' command
+       to set or view the RTC as described above in the "RTC" section.
+       
+       NOTE:  If you want the RTC to preserve time over power cycles, you
+       will need to install a battery in the battery holder (J12) and close
+       the jumper, JP13.
+
+    8. The SAMA5D4-EK includes for an AT25 serial DataFlash.  Support for that
        serial FLASH can be enabled by modifying the NuttX configuration as
        described above in the paragraph entitled "AT25 Serial FLASH".
 
-    8. Enabling HSMCI support. The SAMA4D4-EK provides a two SD memory
+    9. Enabling HSMCI support. The SAMA4D4-EK provides a two SD memory
        card slots:  (1) a full size SD card slot (J10), and (2) a microSD
        memory card slot (J11).  The full size SD card slot connects via HSMCI0;
        the microSD connects vi HSMCI1.  Support for both SD slots can be enabled
        with the settings provided in the paragraph entitled "HSMCI Card Slots"
        above.
 
-    9. Support the USB low-, high- and full-speed OHCI host driver can be enabled
+   10. Support the USB low-, high- and full-speed OHCI host driver can be enabled
        by changing the NuttX configuration file as described in the section
        entitled "USB High-Speed Host" above.
 
-   10. Support the USB high-speed USB device driver (UDPHS) can be enabled
+   11. Support the USB high-speed USB device driver (UDPHS) can be enabled
        by changing the NuttX configuration file as described above in the
        section entitled "USB High-Speed Device."
 
-   11. I2C Tool. NuttX supports an I2C tool at apps/system/i2c that can be
+   12. I2C Tool. NuttX supports an I2C tool at apps/system/i2c that can be
        used to peek and poke I2C devices.  See the discussion above under
        "I2C Tool" for detailed configuration settings.
 
-   12. Networking support via the can be added to NSH by modifying the
+   13. Networking support via the can be added to NSH by modifying the
        configuration.  See the "Networking" section above for detailed
        configuration settings.
-
-   13. The Real Time Clock/Calendar (RTC) may be enabled by reconfiguring NuttX.
-       See the section entitled "RTC" above for detailed configuration settings.
 
    14. This example can be configured to exercise the watchdog timer test
        (apps/examples/watchdog).  See the detailed configuration settings in
