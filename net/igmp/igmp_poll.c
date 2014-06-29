@@ -51,7 +51,7 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/netstats.h>
 
-#include "uip/uip.h"
+#include "devif/devif.h"
 #include "igmp/igmp.h"
 
 #ifdef CONFIG_NET_IGMP

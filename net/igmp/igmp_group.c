@@ -58,7 +58,7 @@
 #include <nuttx/net/uip.h>
 #include <nuttx/net/igmp.h>
 
-#include "uip/uip.h"
+#include "devif/devif.h"
 #include "igmp/igmp.h"
 
 #ifdef CONFIG_NET_IGMP

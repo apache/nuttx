@@ -59,7 +59,7 @@
 
 #include "socket/socket.h"
 #include "netdev/netdev.h"
-#include "uip/uip.h"
+#include "devif/devif.h"
 #include "pkt/pkt.h"
 
 /****************************************************************************

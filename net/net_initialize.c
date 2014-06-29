@@ -47,6 +47,7 @@
 #include <nuttx/net/arp.h>
 
 #include "socket/socket.h"
+#include "devif/devif.h"
 #include "netdev/netdev.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
@@ -94,7 +95,7 @@ void net_initialize(void)
 
   /* Initialize the device interface layer */
 
-  uip_initialize();
+  devif_initialize();
 
 #ifdef CONFIG_NET_PKT
   /* Initialize packet socket support */

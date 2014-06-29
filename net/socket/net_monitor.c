@@ -47,7 +47,7 @@
 #include <nuttx/net/tcp.h>
 
 #include "socket/socket.h"
-#include "uip/uip.h"
+#include "devif/devif.h"
 
 /****************************************************************************
  * Private Types

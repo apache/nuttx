@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/uip/uip_setipid.c
+ * net/devif/devif_iobsend.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,40 +38,81 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifdef CONFIG_NET
 
-#include <stdint.h>
+#include <string.h>
+#include <assert.h>
 #include <debug.h>
 
+#include <nuttx/net/iob.h>
 #include <nuttx/net/uip.h>
+#include <nuttx/net/netdev.h>
 
-#include "uip/uip.h"
+#ifdef CONFIG_NET_IOB
 
 /****************************************************************************
- * Private Data
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functions
+ * Private Type Declarations
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Private Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Function: uip_setipid
+ * Global Constant Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Global Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Constant Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Global Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: uip_iobsend
  *
  * Description:
- *   This function may be used at boot time to set the initial ip_id.
+ *   Called from socket logic in response to a xmit or poll request from the
+ *   the network interface driver.
+ *
+ *   This is identical to calling uip_send() except that the data is
+ *   in an I/O buffer chain, rather than a flat buffer.
  *
  * Assumptions:
+ *   Called from the interrupt level or, at a minimum, with interrupts
+ *   disabled.
  *
  ****************************************************************************/
 
-void uip_setipid(uint16_t id)
+void uip_iobsend(FAR struct net_driver_s *dev, FAR struct iob_s *iob,
+                 unsigned int len, unsigned int offset)
 {
-  g_ipid = id;
+  DEBUGASSERT(dev && len > 0 && len < CONFIG_NET_BUFSIZE);
+
+  /* Copy the data from the I/O buffer chain to the device buffer */
+
+  iob_copyout(dev->d_snddata, iob, len, offset);
+  dev->d_sndlen = len;
+
+#ifdef CONFIG_NET_TCP_WRBUFFER_DUMP
+  /* Dump the outgoing device buffer */
+
+  lib_dumpbuffer("uip_iobsend", dev->d_snddata, len);
+#endif
 }
 
-#endif /* CONFIG_NET */
+#endif /* CONFIG_NET_IOB */
+

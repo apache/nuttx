@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/uip/uip_pktsend.c
+ * net/devif/devif_setipid.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,78 +38,40 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#ifdef CONFIG_NET
 
-#include <string.h>
-#include <assert.h>
+#include <stdint.h>
 #include <debug.h>
 
 #include <nuttx/net/uip.h>
-#include <nuttx/net/netdev.h>
 
-#ifdef CONFIG_NET_PKT
+#include "devif/devif.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Private Type Declarations
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Global Constant Data
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Constant Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Global Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: uip_pktsend
+ * Function: uip_setipid
  *
  * Description:
- *   Called from socket logic in order to send a raw packet in response to
- *   an xmit or poll request from the the network interface driver.
- *
- *   This is almost identical to calling uip_send() except that the data to
- *   be sent is copied into dev->d_buf (vs. dev->d_snddata), since there is
- *   no header on the data.
+ *   This function may be used at boot time to set the initial ip_id.
  *
  * Assumptions:
- *   Called from the interrupt level or, at a minimum, with interrupts
- *   disabled.
  *
  ****************************************************************************/
 
-void uip_pktsend(FAR struct net_driver_s *dev, FAR const void *buf,
-                 unsigned int len)
+void uip_setipid(uint16_t id)
 {
-  DEBUGASSERT(dev && len > 0 && len < CONFIG_NET_BUFSIZE);
-
-  /* Copy the data into the device packet buffer */
-
-  memcpy(dev->d_buf, buf, len);
-
-  /* Set the number of bytes to send */
-
-  dev->d_len    = len;
-  dev->d_sndlen = len;
+  g_ipid = id;
 }
 
-#endif /* CONFIG_NET_PKT */
+#endif /* CONFIG_NET */

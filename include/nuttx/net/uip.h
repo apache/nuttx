@@ -234,16 +234,6 @@ struct uip_callback_s
  * Public Function Prototypes
  ****************************************************************************/
 
-/* uIP initialization functions
- *
- * The uIP initialization functions are used for booting uIP.
- *
- * This function should be called at boot up to initialize the uIP
- * TCP/IP stack.
- */
-
-void uip_initialize(void);
-
 /* This function may be used at boot time to set the initial ip_id.*/
 
 void uip_setipid(uint16_t id);

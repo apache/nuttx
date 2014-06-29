@@ -53,7 +53,7 @@
 #include <nuttx/net/arp.h>
 #include <nuttx/net/pkt.h>
 
-#include "uip/uip.h"
+#include "devif/devif.h"
 #include "pkt/pkt.h"
 
 /****************************************************************************

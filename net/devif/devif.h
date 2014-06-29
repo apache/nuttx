@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/uip/uip.h
+ * net/devif/devif.h
  *
  *   Copyright (C) 2007-2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -36,8 +36,8 @@
  *
  ****************************************************************************/
 
-#ifndef _NET_UIP_UIP_H
-#define _NET_UIP_UIP_H
+#ifndef _NET_DEVIF_DEVIF_H
+#define _NET_DEVIF_DEVIF_H
 
 /****************************************************************************
  * Included Files
@@ -76,7 +76,7 @@ extern uint16_t g_ipid;
 /* Reassembly timer (units: deci-seconds) */
 
 #if UIP_REASSEMBLY && !defined(CONFIG_NET_IPv6)
-extern uint8_t uip_reasstmr;
+extern uint8_t g_reassembly_timer;
 #endif
 
 /* List of applications waiting for ICMP ECHO REPLY */
@@ -96,6 +96,22 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
+
+/****************************************************************************
+ * Name: devif_initialize
+ *
+ * Description:
+ *   Perform initialization of the network device interface layer
+ *
+ * Parameters:
+ *   None
+ *
+ * Return:
+ *   None
+ *
+ ****************************************************************************/
+
+void devif_initialize(void);
 
 /****************************************************************************
  * Function: uip_callbackinit
@@ -202,4 +218,4 @@ void uip_pktsend(FAR struct net_driver_s *dev, FAR const void *buf,
 #endif
 
 #endif /* CONFIG_NET */
-#endif /* _NET_UIP_UIP_H */
+#endif /* _NET_DEVIF_DEVIF_H */

@@ -54,7 +54,7 @@
 #include <nuttx/net/uip.h>
 #include <nuttx/net/netdev.h>
 
-#include "uip/uip.h"
+#include "devif/devif.h"
 
 /****************************************************************************
  * Public Data

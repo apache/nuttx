@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/uip/uip_iobsend.c
+ * net/devif/devif_pktsend.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -43,11 +43,10 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/net/iob.h>
 #include <nuttx/net/uip.h>
 #include <nuttx/net/netdev.h>
 
-#ifdef CONFIG_NET_IOB
+#ifdef CONFIG_NET_PKT
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -82,14 +81,15 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_iobsend
+ * Name: uip_pktsend
  *
  * Description:
- *   Called from socket logic in response to a xmit or poll request from the
- *   the network interface driver.
+ *   Called from socket logic in order to send a raw packet in response to
+ *   an xmit or poll request from the the network interface driver.
  *
- *   This is identical to calling uip_send() except that the data is
- *   in an I/O buffer chain, rather than a flat buffer.
+ *   This is almost identical to calling uip_send() except that the data to
+ *   be sent is copied into dev->d_buf (vs. dev->d_snddata), since there is
+ *   no header on the data.
  *
  * Assumptions:
  *   Called from the interrupt level or, at a minimum, with interrupts
@@ -97,22 +97,19 @@
  *
  ****************************************************************************/
 
-void uip_iobsend(FAR struct net_driver_s *dev, FAR struct iob_s *iob,
-                 unsigned int len, unsigned int offset)
+void uip_pktsend(FAR struct net_driver_s *dev, FAR const void *buf,
+                 unsigned int len)
 {
   DEBUGASSERT(dev && len > 0 && len < CONFIG_NET_BUFSIZE);
 
-  /* Copy the data from the I/O buffer chain to the device buffer */
+  /* Copy the data into the device packet buffer */
 
-  iob_copyout(dev->d_snddata, iob, len, offset);
+  memcpy(dev->d_buf, buf, len);
+
+  /* Set the number of bytes to send */
+
+  dev->d_len    = len;
   dev->d_sndlen = len;
-
-#ifdef CONFIG_NET_TCP_WRBUFFER_DUMP
-  /* Dump the outgoing device buffer */
-
-  lib_dumpbuffer("uip_iobsend", dev->d_snddata, len);
-#endif
 }
 
-#endif /* CONFIG_NET_IOB */
-
+#endif /* CONFIG_NET_PKT */

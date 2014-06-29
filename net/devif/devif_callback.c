@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/uip/uip_callback.c
+ * net/devif/devif_callback.c
  *
  *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,7 +48,7 @@
 #include <nuttx/net/uip.h>
 #include <nuttx/net/netdev.h>
 
-#include "uip/uip.h"
+#include "devif/devif.h"
 
 /****************************************************************************
  * Private Data

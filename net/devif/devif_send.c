@@ -1,13 +1,13 @@
 /****************************************************************************
- * net/uip/uip_initialize.c
+ * net/devif/devif_send.c
  *
- *   Copyright (C) 2007-2011, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * Adapted for NuttX from logic in uIP which also has a BSD-like license:
+ * Based in part on uIP which also has a BSD stylie license:
  *
- *   Original author Adam Dunkels <adam@dunkels.com>
- *   Copyright () 2001-2003, Adam Dunkels.
+ *   Author: Adam Dunkels <adam@dunkels.com>
+ *   Copyright (c) 2001-2003, Adam Dunkels.
  *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,83 +41,62 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#ifdef CONFIG_NET
+#include <string.h>
+#include <assert.h>
+#include <debug.h>
 
-#include <stdint.h>
 #include <nuttx/net/uip.h>
-#include <nuttx/net/netstats.h>
-
-#include "uip/uip.h"
+#include <nuttx/net/netdev.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Private Type Declarations
  ****************************************************************************/
 
-/* IP/TCP/UDP/ICMP statistics for all network interfaces */
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
 
-#ifdef CONFIG_NET_STATISTICS
-struct net_stats_s g_netstats;
-#endif
+/****************************************************************************
+ * Global Constant Data
+ ****************************************************************************/
 
-/* Increasing number used for the IP ID field. */
+/****************************************************************************
+ * Global Variables
+ ****************************************************************************/
 
-uint16_t g_ipid;
-
-const uip_ipaddr_t g_alloneaddr =
-#ifdef CONFIG_NET_IPv6
-  {0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff};
-#else
-  0xffffffff;
-#endif
-
-const uip_ipaddr_t g_allzeroaddr =
-#ifdef CONFIG_NET_IPv6
-  {0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
-#else
-  0x00000000;
-#endif
-
-/* Reassembly timer (units: deci-seconds) */
-
-#if UIP_REASSEMBLY && !defined(CONFIG_NET_IPv6)
-uint8_t uip_reasstmr;
-#endif
+/****************************************************************************
+ * Private Constant Data
+ ****************************************************************************/
 
 /****************************************************************************
  * Private Variables
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functions
+ * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: uip_initialize
+ * Name: uip_send
  *
  * Description:
- *   Perform initialization of the uIP layer
+ *   Called from socket logic in response to a xmit or poll request from the
+ *   the network interface driver.
  *
- * Parameters:
- *   None
- *
- * Return:
- *   None
+ * Assumptions:
+ *   Called from the interrupt level or, at a minimum, with interrupts
+ *   disabled.
  *
  ****************************************************************************/
 
-void uip_initialize(void)
+void uip_send(struct net_driver_s *dev, const void *buf, int len)
 {
-  /* Initialize callback support */
+  DEBUGASSERT(dev && len > 0 && len < CONFIG_NET_BUFSIZE);
 
-  uip_callbackinit();
+  memcpy(dev->d_snddata, buf, len);
+  dev->d_sndlen = len;
 }
-#endif /* CONFIG_NET */

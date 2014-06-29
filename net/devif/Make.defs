@@ -1,5 +1,5 @@
 ############################################################################
-# net/uip/Make.defs
+# net/devif/Make.defs
 #
 #   Copyright (C) 2007, 2009-2010, 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,24 +33,24 @@
 #
 ############################################################################
 
-# Common IP source files
+# Network device interface source files
 
-NET_CSRCS += uip_initialize.c uip_setipid.c uip_input.c uip_send.c
-NET_CSRCS += uip_poll.c uip_callback.c
+NET_CSRCS += devif_initialize.c devif_setipid.c devif_input.c devif_send.c
+NET_CSRCS += devif_poll.c devif_callback.c
 
 # I/O buffer chain support required?
 
 ifeq ($(CONFIG_NET_IOB),y)
-NET_CSRCS += uip_iobsend.c
+NET_CSRCS += devif_iobsend.c
 endif
 
 # Raw packet socket support
 
 ifeq ($(CONFIG_NET_PKT),y)
-NET_CSRCS += uip_pktsend.c
+NET_CSRCS += devif_pktsend.c
 endif
 
-# Include uip build support
+# Include network device interface build support
 
-DEPPATH += --dep-path uip
-VPATH += :uip
+DEPPATH += --dep-path devif
+VPATH += :devif

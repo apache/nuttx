@@ -56,7 +56,7 @@
 #include <nuttx/net/net.h>
 #include <nuttx/net/tcp.h>
 
-#include <uip/uip.h>
+#include <devif/devif.h>
 
 #include "socket/socket.h"
 

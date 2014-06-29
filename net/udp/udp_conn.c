@@ -61,7 +61,7 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/udp.h>
 
-#include "uip/uip.h"
+#include "devif/devif.h"
 #include "udp/udp.h"
 
 /****************************************************************************

@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/uip/uip_poll.c
+ * net/devif/devif_poll.c
  *
  *   Copyright (C) 2007-2010, 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,7 +46,7 @@
 #include <nuttx/net/uip.h>
 #include <nuttx/net/netdev.h>
 
-#include "uip/uip.h"
+#include "devif/devif.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
 #include "pkt/pkt.h"
@@ -374,9 +374,9 @@ int uip_timer(FAR struct net_driver_s *dev, uip_poll_callback_t callback,
   /* Increment the timer used by the IP reassembly logic */
 
 #if UIP_REASSEMBLY
-  if (uip_reasstmr != 0 && uip_reasstmr < UIP_REASS_MAXAGE)
+  if (g_reassembly_timer != 0 && g_reassembly_timer < UIP_REASS_MAXAGE)
     {
-      uip_reasstmr += hsec;
+      g_reassembly_timer += hsec;
     }
 #endif /* UIP_REASSEMBLY */
 

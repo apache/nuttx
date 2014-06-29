@@ -52,7 +52,7 @@
 #include <nuttx/net/udp.h>
 #include <nuttx/net/netstats.h>
 
-#include "uip/uip.h"
+#include "devif/devif.h"
 #include "utils/utils.h"
 #include "udp/udp.h"
 

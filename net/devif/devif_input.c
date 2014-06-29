@@ -94,7 +94,7 @@
 #  include "net_neighbor.h"
 #endif /* CONFIG_NET_IPv6 */
 
-#include "uip/uip.h"
+#include "devif/devif.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
 #include "pkt/pkt.h"
@@ -155,15 +155,15 @@ static uint8_t uip_reass(void)
   uint16_t len;
   uint16_t i;
 
-  /* If uip_reasstmr is zero, no packet is present in the buffer, so we
-   * write the IP header of the fragment into the reassembly
-   * buffer. The timer is updated with the maximum age.
+  /* If g_reassembly_timer is zero, no packet is present in the buffer, so
+   * we write the IP header of the fragment into the reassembly buffer.  The
+   * timer is updated with the maximum age.
    */
 
-  if (!uip_reasstmr)
+  if (!g_reassembly_timer)
     {
       memcpy(uip_reassbuf, &pbuf->vhl, UIP_IPH_LEN);
-      uip_reasstmr   = UIP_REASS_MAXAGE;
+      g_reassembly_timer   = UIP_REASS_MAXAGE;
       uip_reassflags = 0;
 
       /* Clear the bitmap. */
@@ -189,7 +189,7 @@ static uint8_t uip_reass(void)
 
       if (offset > UIP_REASS_BUFSIZE || offset + len > UIP_REASS_BUFSIZE)
         {
-          uip_reasstmr = 0;
+          g_reassembly_timer = 0;
           goto nullreturn;
         }
 
@@ -266,7 +266,7 @@ static uint8_t uip_reass(void)
          * the timer.
          */
 
-        uip_reasstmr = 0;
+        g_reassembly_timer = 0;
         memcpy(pbuf, pfbuf, uip_reasslen);
 
         /* Pretend to be a "normal" (i.e., not fragmented) IP packet from

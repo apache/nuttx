@@ -47,7 +47,7 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/icmp.h>
 
-#include "uip/uip.h"
+#include "devif/devif.h"
 
 /****************************************************************************
  * Pre-processor Definitions

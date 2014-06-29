@@ -71,7 +71,7 @@
 #include "socket/socket.h"
 #include "netdev/netdev.h"
 #include "tcp/tcp.h"
-#include "uip/uip.h"
+#include "devif/devif.h"
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -57,7 +57,7 @@
 #include <nuttx/net/tcp.h>
 
 #include "tcp/tcp.h"
-#include "uip/uip.h"
+#include "devif/devif.h"
 
 /****************************************************************************
  * Public Data

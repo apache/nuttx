@@ -51,7 +51,7 @@
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/tcp.h>
 
-#include "uip/uip.h"
+#include "devif/devif.h"
 #include "tcp/tcp.h"
 
 /****************************************************************************
