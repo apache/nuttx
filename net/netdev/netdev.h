@@ -94,19 +94,19 @@ FAR struct net_driver_s *netdev_findbyname(FAR const char *ifname);
 /* netdev_findbyaddr.c *******************************************************/
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
-FAR struct net_driver_s *netdev_findbyaddr(const uip_ipaddr_t addr);
+FAR struct net_driver_s *netdev_findbyaddr(const net_ipaddr_t addr);
 #endif
 
 /* netdev_txnotify.c *********************************************************/
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
-void netdev_txnotify(const uip_ipaddr_t addr);
+void netdev_txnotify(const net_ipaddr_t addr);
 #endif
 
 /* netdev_rxnotify.c *********************************************************/
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0 && defined(CONFIG_NET_RXAVAIL)
-void netdev_rxnotify(const uip_ipaddr_t addr);
+void netdev_rxnotify(const net_ipaddr_t addr);
 #else
 #  define netdev_rxnotify(addr)
 #endif

@@ -54,8 +54,8 @@
 struct route_match_s
 {
   FAR struct net_route_s *prev;     /* Predecessor in the list */
-  uip_ipaddr_t            target;   /* The target IP address to match */
-  uip_ipaddr_t            netmask;  /* The network mask to match */
+  net_ipaddr_t            target;   /* The target IP address to match */
+  net_ipaddr_t            netmask;  /* The network mask to match */
 };
 
 /****************************************************************************
@@ -132,7 +132,7 @@ static int net_match(FAR struct net_route_s *route, FAR void *arg)
  *
  ****************************************************************************/
 
-int net_delroute(uip_ipaddr_t target, uip_ipaddr_t netmask)
+int net_delroute(net_ipaddr_t target, net_ipaddr_t netmask)
 {
   struct route_match_s match;
 

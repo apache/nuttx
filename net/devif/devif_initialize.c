@@ -68,14 +68,14 @@ struct net_stats_s g_netstats;
 
 uint16_t g_ipid;
 
-const uip_ipaddr_t g_alloneaddr =
+const net_ipaddr_t g_alloneaddr =
 #ifdef CONFIG_NET_IPv6
   {0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff};
 #else
   0xffffffff;
 #endif
 
-const uip_ipaddr_t g_allzeroaddr =
+const net_ipaddr_t g_allzeroaddr =
 #ifdef CONFIG_NET_IPv6
   {0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000};
 #else

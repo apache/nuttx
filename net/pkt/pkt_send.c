@@ -265,7 +265,7 @@ ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
 
           /* Notify the device driver that new TX data is available.
            * NOTES: This is in essence what netdev_txnotify() does, which
-           * is not possible to call since it expects a uip_ipaddr_t as
+           * is not possible to call since it expects a net_ipaddr_t as
            * its single argument to lookup the network interface.
            */
 

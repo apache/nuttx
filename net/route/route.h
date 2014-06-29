@@ -66,9 +66,9 @@
 struct net_route_s
 {
   FAR struct net_route_s *flink; /* Supports a singly linked list */
-  uip_ipaddr_t target;           /* The destination network */
-  uip_ipaddr_t netmask;          /* The network address mask */
-  uip_ipaddr_t router;           /* Route packets via this router */
+  net_ipaddr_t target;           /* The destination network */
+  net_ipaddr_t netmask;          /* The network address mask */
+  net_ipaddr_t router;           /* Route packets via this router */
 };
 
 /* Type of the call out function pointer provided to net_foreachroute() */
@@ -161,8 +161,8 @@ void net_freeroute(FAR struct net_route_s *route);
  *
  ****************************************************************************/
 
-int net_addroute(uip_ipaddr_t target, uip_ipaddr_t netmask,
-                 uip_ipaddr_t router);
+int net_addroute(net_ipaddr_t target, net_ipaddr_t netmask,
+                 net_ipaddr_t router);
 
 /****************************************************************************
  * Function: net_delroute
@@ -177,7 +177,7 @@ int net_addroute(uip_ipaddr_t target, uip_ipaddr_t netmask,
  *
  ****************************************************************************/
 
-int net_delroute(uip_ipaddr_t target, uip_ipaddr_t netmask);
+int net_delroute(net_ipaddr_t target, net_ipaddr_t netmask);
 
 /****************************************************************************
  * Function: net_router
@@ -200,9 +200,9 @@ int net_delroute(uip_ipaddr_t target, uip_ipaddr_t netmask);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-int net_router(uip_ipaddr_t target, uip_ipaddr_t router);
+int net_router(net_ipaddr_t target, net_ipaddr_t router);
 #else
-int net_router(uip_ipaddr_t target, FAR uip_ipaddr_t *router);
+int net_router(net_ipaddr_t target, FAR net_ipaddr_t *router);
 #endif
 
 /****************************************************************************
@@ -232,11 +232,11 @@ int net_router(uip_ipaddr_t target, FAR uip_ipaddr_t *router);
 struct net_driver_s;
 
 #ifdef CONFIG_NET_IPv6
-void netdev_router(FAR struct net_driver_s *dev, uip_ipaddr_t target,
-                   uip_ipaddr_t router);
+void netdev_router(FAR struct net_driver_s *dev, net_ipaddr_t target,
+                   net_ipaddr_t router);
 #else
-void netdev_router(FAR struct net_driver_s *dev, uip_ipaddr_t target,
-                   FAR uip_ipaddr_t *router);
+void netdev_router(FAR struct net_driver_s *dev, net_ipaddr_t target,
+                   FAR net_ipaddr_t *router);
 #endif
 
 /****************************************************************************

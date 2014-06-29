@@ -67,8 +67,8 @@
  * Public Data
  ****************************************************************************/
 
-uip_ipaddr_t g_allsystems;
-uip_ipaddr_t g_allrouters;
+net_ipaddr_t g_allsystems;
+net_ipaddr_t g_allrouters;
 
 /****************************************************************************
  * Public Functions

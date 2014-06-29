@@ -53,8 +53,8 @@
 
 struct route_match_s
 {
-  uip_ipaddr_t target;   /* The target IP address on an external network to match */
-  uip_ipaddr_t router;   /* The IP address of the router on one of our networks*/
+  net_ipaddr_t target;   /* The target IP address on an external network to match */
+  net_ipaddr_t router;   /* The IP address of the router on one of our networks*/
 };
 
 /****************************************************************************
@@ -121,9 +121,9 @@ static int net_match(FAR struct net_route_s *route, FAR void *arg)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-int net_router(uip_ipaddr_t target, uip_ipaddr_t router)
+int net_router(net_ipaddr_t target, net_ipaddr_t router)
 #else
-int net_router(uip_ipaddr_t target, FAR uip_ipaddr_t *router)
+int net_router(net_ipaddr_t target, FAR net_ipaddr_t *router)
 #endif
 {
   struct route_match_s match;

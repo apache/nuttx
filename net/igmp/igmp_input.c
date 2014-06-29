@@ -116,8 +116,8 @@
 void igmp_input(struct net_driver_s *dev)
 {
   FAR struct igmp_group_s *group;
-  uip_ipaddr_t destipaddr;
-  uip_ipaddr_t grpaddr;
+  net_ipaddr_t destipaddr;
+  net_ipaddr_t grpaddr;
   unsigned int ticks;
 
   nllvdbg("IGMP message: %04x%04x\n", IGMPBUF->destipaddr[1], IGMPBUF->destipaddr[0]);

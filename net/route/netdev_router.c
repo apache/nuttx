@@ -57,8 +57,8 @@
 struct route_devmatch_s
 {
   FAR struct net_driver_s *dev; /* The route must use this device */
-  uip_ipaddr_t target;   /* The target IP address on an external network to match */
-  uip_ipaddr_t router;   /* The IP address of the router on one of our networks*/
+  net_ipaddr_t target;   /* The target IP address on an external network to match */
+  net_ipaddr_t router;   /* The IP address of the router on one of our networks*/
 };
 
 /****************************************************************************
@@ -132,11 +132,11 @@ static int net_devmatch(FAR struct net_route_s *route, FAR void *arg)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-void netdev_router(FAR struct net_driver_s *dev, uip_ipaddr_t target,
-                   uip_ipaddr_t router)
+void netdev_router(FAR struct net_driver_s *dev, net_ipaddr_t target,
+                   net_ipaddr_t router)
 #else
-void netdev_router(FAR struct net_driver_s *dev, uip_ipaddr_t target,
-                   FAR uip_ipaddr_t *router)
+void netdev_router(FAR struct net_driver_s *dev, net_ipaddr_t target,
+                   FAR net_ipaddr_t *router)
 #endif
 {
   struct route_devmatch_s match;

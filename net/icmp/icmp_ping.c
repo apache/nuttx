@@ -82,7 +82,7 @@ struct icmp_ping_s
   uint32_t     png_time;    /* Start time for determining timeouts */
   uint32_t     png_ticks;   /* System clock ticks to wait */
   int          png_result;  /* 0: success; <0:negated errno on fail */
-  uip_ipaddr_t png_addr;    /* The peer to be ping'ed */
+  net_ipaddr_t png_addr;    /* The peer to be ping'ed */
   uint16_t     png_id;      /* Used to match requests with replies */
   uint16_t     png_seqno;   /* IN: seqno to send; OUT: seqno recieved */
   uint16_t     png_datlen;  /* The length of data to send in the ECHO request */
@@ -323,7 +323,7 @@ end_wait:
  *
  ****************************************************************************/
 
-int uip_ping(uip_ipaddr_t addr, uint16_t id, uint16_t seqno,
+int uip_ping(net_ipaddr_t addr, uint16_t id, uint16_t seqno,
              uint16_t datalen, int dsecs)
 {
   struct icmp_ping_s state;

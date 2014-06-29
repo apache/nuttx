@@ -122,8 +122,8 @@ struct icmp_iphdr_s
   uint8_t  len[2];          /* 16-bit Payload length */
   uint8_t  proto;           /*  8-bit Next header (same as IPv4 protocol field) */
   uint8_t  ttl;             /*  8-bit Hop limit (like IPv4 TTL field) */
-  uip_ip6addr_t srcipaddr;  /* 128-bit Source address */
-  uip_ip6addr_t destipaddr; /* 128-bit Destination address */
+  net_ip6addr_t srcipaddr;  /* 128-bit Source address */
+  net_ip6addr_t destipaddr; /* 128-bit Destination address */
 
 #else /* CONFIG_NET_IPv6 */
 
@@ -191,18 +191,20 @@ struct icmp_stats_s
  * Public Data
  ****************************************************************************/
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
-EXTERN int uip_ping(uip_ipaddr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen, int dsecs);
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+int uip_ping(net_ipaddr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
+             int dsecs);
 
 #undef EXTERN
 #ifdef __cplusplus

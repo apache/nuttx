@@ -95,7 +95,7 @@
  *
  ****************************************************************************/
 
-static void ioctl_getipaddr(FAR void *outaddr, FAR const uip_ipaddr_t *inaddr)
+static void ioctl_getipaddr(FAR void *outaddr, FAR const net_ipaddr_t *inaddr)
 {
 #ifdef CONFIG_NET_IPv6
   FAR struct sockaddr_in6 *dest = (FAR struct sockaddr_in6 *)outaddr;
@@ -124,7 +124,7 @@ static void ioctl_getipaddr(FAR void *outaddr, FAR const uip_ipaddr_t *inaddr)
  *
  ****************************************************************************/
 
-static void ioctl_setipaddr(FAR uip_ipaddr_t *outaddr, FAR const void *inaddr)
+static void ioctl_setipaddr(FAR net_ipaddr_t *outaddr, FAR const void *inaddr)
 {
 #ifdef CONFIG_NET_IPv6
   FAR const struct sockaddr_in6 *src = (FAR const struct sockaddr_in6 *)inaddr;
@@ -396,7 +396,7 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
           if (dev)
             {
               ioctl_ifdown(dev);
-              memset(&dev->d_ipaddr, 0, sizeof(uip_ipaddr_t));
+              memset(&dev->d_ipaddr, 0, sizeof(net_ipaddr_t));
               ret = OK;
             }
         }
@@ -569,9 +569,9 @@ static int netdev_rtioctl(FAR struct socket *psock, int cmd,
         {
           if (rtentry)
             {
-              uip_ipaddr_t target;
-              uip_ipaddr_t netmask;
-              uip_ipaddr_t router;
+              net_ipaddr_t target;
+              net_ipaddr_t netmask;
+              net_ipaddr_t router;
 #ifdef CONFIG_NET_IPv6
               FAR struct sockaddr_in6 *addr;
 #else
@@ -586,17 +586,17 @@ static int netdev_rtioctl(FAR struct socket *psock, int cmd,
 
 #ifdef CONFIG_NET_IPv6
               addr    = (FAR struct sockaddr_in6 *)rtentry->rt_target;
-              target  = (uip_ipaddr_t)addr->sin6_addr.u6_addr16;
+              target  = (net_ipaddr_t)addr->sin6_addr.u6_addr16;
 
               addr    = (FAR struct sockaddr_in6 *)rtentry->rt_netmask;
-              netmask = (uip_ipaddr_t)addr->sin6_addr.u6_addr16;
+              netmask = (net_ipaddr_t)addr->sin6_addr.u6_addr16;
 
               /* The router is an optional argument */
 
               if (rtentry->rt_router)
                 {
                   addr   = (FAR struct sockaddr_in6 *)rtentry->rt_router;
-                  router = (uip_ipaddr_t)addr->sin6_addr.u6_addr16;
+                  router = (net_ipaddr_t)addr->sin6_addr.u6_addr16;
                 }
               else
                 {
@@ -604,17 +604,17 @@ static int netdev_rtioctl(FAR struct socket *psock, int cmd,
                 }
 #else
               addr    = (FAR struct sockaddr_in *)rtentry->rt_target;
-              target  = (uip_ipaddr_t)addr->sin_addr.s_addr;
+              target  = (net_ipaddr_t)addr->sin_addr.s_addr;
 
               addr    = (FAR struct sockaddr_in *)rtentry->rt_netmask;
-              netmask = (uip_ipaddr_t)addr->sin_addr.s_addr;
+              netmask = (net_ipaddr_t)addr->sin_addr.s_addr;
 
               /* The router is an optional argument */
 
               if (rtentry->rt_router)
                 {
                   addr   = (FAR struct sockaddr_in *)rtentry->rt_router;
-                  router = (uip_ipaddr_t)addr->sin_addr.s_addr;
+                  router = (net_ipaddr_t)addr->sin_addr.s_addr;
                 }
               else
                 {
@@ -630,8 +630,8 @@ static int netdev_rtioctl(FAR struct socket *psock, int cmd,
         {
           if (rtentry)
             {
-              uip_ipaddr_t target;
-              uip_ipaddr_t netmask;
+              net_ipaddr_t target;
+              net_ipaddr_t netmask;
 #ifdef CONFIG_NET_IPv6
               FAR struct sockaddr_in6 *addr;
 #else
@@ -647,16 +647,16 @@ static int netdev_rtioctl(FAR struct socket *psock, int cmd,
 
 #ifdef CONFIG_NET_IPv6
               addr    = (FAR struct sockaddr_in6 *)rtentry->rt_target;
-              target  = (uip_ipaddr_t)addr->sin6_addr.u6_addr16;
+              target  = (net_ipaddr_t)addr->sin6_addr.u6_addr16;
 
               addr    = (FAR struct sockaddr_in6 *)rtentry->rt_netmask;
-              netmask = (uip_ipaddr_t)addr->sin6_addr.u6_addr16;
+              netmask = (net_ipaddr_t)addr->sin6_addr.u6_addr16;
 #else
               addr    = (FAR struct sockaddr_in *)rtentry->rt_target;
-              target  = (uip_ipaddr_t)addr->sin_addr.s_addr;
+              target  = (net_ipaddr_t)addr->sin_addr.s_addr;
 
               addr    = (FAR struct sockaddr_in *)rtentry->rt_netmask;
-              netmask = (uip_ipaddr_t)addr->sin_addr.s_addr;
+              netmask = (net_ipaddr_t)addr->sin_addr.s_addr;
 #endif
               ret = net_delroute(target, netmask);
             }

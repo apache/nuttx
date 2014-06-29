@@ -168,7 +168,7 @@ struct tcp_backlog_s;     /* Forward reference */
 struct tcp_conn_s
 {
   dq_entry_t node;        /* Implements a doubly linked list */
-  uip_ipaddr_t ripaddr;   /* The IP address of the remote host */
+  net_ipaddr_t ripaddr;   /* The IP address of the remote host */
   uint8_t  rcvseq[4];     /* The sequence number that we expect to
                            * receive next */
   uint8_t  sndseq[4];     /* The sequence number that was last sent by us */
@@ -343,8 +343,8 @@ struct tcp_iphdr_s
   uint8_t  len[2];          /* 16-bit Payload length */
   uint8_t  proto;           /*  8-bit Next header (same as IPv4 protocol field) */
   uint8_t  ttl;             /*  8-bit Hop limit (like IPv4 TTL field) */
-  uip_ip6addr_t srcipaddr;  /* 128-bit Source address */
-  uip_ip6addr_t destipaddr; /* 128-bit Destination address */
+  net_ip6addr_t srcipaddr;  /* 128-bit Source address */
+  net_ip6addr_t destipaddr; /* 128-bit Destination address */
 
 #else /* CONFIG_NET_IPv6 */
 

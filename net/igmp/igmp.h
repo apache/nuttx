@@ -82,11 +82,11 @@ void igmp_input(struct net_driver_s *dev);
 
 void igmp_grpinit(void);
 FAR struct igmp_group_s *igmp_grpalloc(FAR struct net_driver_s *dev,
-                                       FAR const uip_ipaddr_t *addr);
+                                       FAR const net_ipaddr_t *addr);
 FAR struct igmp_group_s *igmp_grpfind(FAR struct net_driver_s *dev,
-                                      FAR const uip_ipaddr_t *addr);
+                                      FAR const net_ipaddr_t *addr);
 FAR struct igmp_group_s *igmp_grpallocfind(FAR struct net_driver_s *dev,
-                                           FAR const uip_ipaddr_t *addr);
+                                           FAR const net_ipaddr_t *addr);
 void igmp_grpfree(FAR struct net_driver_s *dev,
                   FAR struct igmp_group_s *group);
 
@@ -102,7 +102,7 @@ void igmp_poll(FAR struct net_driver_s *dev);
 /* Defined in igmp_send.c ***************************************************/
 
 void igmp_send(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group,
-                  FAR uip_ipaddr_t *dest);
+                  FAR net_ipaddr_t *dest);
 
 /* Defined in igmp_timer.c **************************************************/
 
@@ -113,8 +113,8 @@ bool igmp_cmptimer(FAR struct igmp_group_s *group, int maxticks);
 
 /* Defined in igmp_mcastmac *************************************************/
 
-void igmp_addmcastmac(FAR struct net_driver_s *dev, FAR uip_ipaddr_t *ip);
-void igmp_removemcastmac(FAR struct net_driver_s *dev, FAR uip_ipaddr_t *ip);
+void igmp_addmcastmac(FAR struct net_driver_s *dev, FAR net_ipaddr_t *ip);
+void igmp_removemcastmac(FAR struct net_driver_s *dev, FAR net_ipaddr_t *ip);
 
 #undef EXTERN
 #ifdef __cplusplus

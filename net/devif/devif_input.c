@@ -460,7 +460,7 @@ int uip_input(FAR struct net_driver_s *dev)
       if (!uip_ipaddr_cmp(uip_ip4addr_conv(pbuf->destipaddr), dev->d_ipaddr))
         {
 #ifdef CONFIG_NET_IGMP
-          uip_ipaddr_t destip = uip_ip4addr_conv(pbuf->destipaddr);
+          net_ipaddr_t destip = uip_ip4addr_conv(pbuf->destipaddr);
           if (igmp_grpfind(dev, &destip) == NULL)
 #endif
             {

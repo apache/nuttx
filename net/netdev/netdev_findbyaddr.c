@@ -93,7 +93,7 @@
  *
  ****************************************************************************/
 
-static FAR struct net_driver_s *netdev_finddevice(const uip_ipaddr_t addr)
+static FAR struct net_driver_s *netdev_finddevice(const net_ipaddr_t addr)
 {
   struct net_driver_s *dev;
 
@@ -146,11 +146,11 @@ static FAR struct net_driver_s *netdev_finddevice(const uip_ipaddr_t addr)
  *
  ****************************************************************************/
 
-FAR struct net_driver_s *netdev_findbyaddr(const uip_ipaddr_t addr)
+FAR struct net_driver_s *netdev_findbyaddr(const net_ipaddr_t addr)
 {
   struct net_driver_s *dev;
 #ifdef CONFIG_NET_ROUTE
-  uip_ipaddr_t router;
+  net_ipaddr_t router;
   int ret;
 #endif
 

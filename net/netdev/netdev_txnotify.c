@@ -90,7 +90,7 @@
  *
  ****************************************************************************/
 
-void netdev_txnotify(const uip_ipaddr_t raddr)
+void netdev_txnotify(const net_ipaddr_t raddr)
 {
   /* Find the device driver that serves the subnet of the remote address */
 

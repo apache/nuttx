@@ -161,13 +161,13 @@
 
 /* Representation of an IP address */
 
-typedef in_addr_t uip_ip4addr_t;
-typedef uint16_t uip_ip6addr_t[8];
+typedef in_addr_t net_ip4addr_t;
+typedef uint16_t net_ip6addr_t[8];
 
 #ifdef CONFIG_NET_IPv6
-typedef uip_ip6addr_t uip_ipaddr_t;
+typedef net_ip6addr_t net_ipaddr_t;
 #else
-typedef uip_ip4addr_t uip_ipaddr_t;
+typedef net_ip4addr_t net_ipaddr_t;
 #endif
 
 /* The IP header */
@@ -184,8 +184,8 @@ struct net_iphdr_s
   uint8_t  len[2];          /* 16-bit Payload length */
   uint8_t  proto;           /*  8-bit Next header (same as IPv4 protocol field) */
   uint8_t  ttl;             /*  8-bit Hop limit (like IPv4 TTL field) */
-  uip_ip6addr_t srcipaddr;  /* 128-bit Source address */
-  uip_ip6addr_t destipaddr; /* 128-bit Destination address */
+  net_ip6addr_t srcipaddr;  /* 128-bit Source address */
+  net_ip6addr_t destipaddr; /* 128-bit Destination address */
 
 #else /* CONFIG_NET_IPv6 */
 
@@ -299,7 +299,7 @@ int net_lockedwait(sem_t *sem);
  *
  * This function constructs an IPv4 address in network byte order.
  *
- *   addr  A pointer to a uip_ipaddr_t variable that will be
+ *   addr  A pointer to a net_ipaddr_t variable that will be
  *         filled in with the IPv4 address.
  *   addr0 The first octet of the IPv4 address.
  *   addr1 The second octet of the IPv4 address.
@@ -362,7 +362,7 @@ int net_lockedwait(sem_t *sem);
  *
  * Example:
  *
- *   uip_ipaddr_t ipaddr1, ipaddr2;
+ *   net_ipaddr_t ipaddr1, ipaddr2;
  *
  *   uip_ipaddr(&ipaddr1, 192,16,1,2);
  *   uip_ipaddr_copy(&ipaddr2, &ipaddr1);
@@ -382,7 +382,7 @@ int net_lockedwait(sem_t *sem);
      ((uint16_t*)(dest))[1] = ((uint16_t*)(src))[1]; \
    } while (0)
 #else /* !CONFIG_NET_IPv6 */
-#  define uip_ipaddr_copy(dest, src)    memcpy(&dest, &src, sizeof(uip_ip6addr_t))
+#  define uip_ipaddr_copy(dest, src)    memcpy(&dest, &src, sizeof(net_ip6addr_t))
 #  define uiphdr_ipaddr_copy(dest, src) uip_ipaddr_copy(dest, src)
 #endif /* !CONFIG_NET_IPv6 */
 
@@ -390,7 +390,7 @@ int net_lockedwait(sem_t *sem);
  *
  * Example:
  *
- *   uip_ipaddr_t ipaddr1, ipaddr2;
+ *   net_ipaddr_t ipaddr1, ipaddr2;
  *
  *   uip_ipaddr(&ipaddr1, 192,16,1,2);
  *   if (uip_ipaddr_cmp(ipaddr2, ipaddr1))
@@ -406,7 +406,7 @@ int net_lockedwait(sem_t *sem);
 #  define uip_ipaddr_cmp(addr1, addr2)    (addr1 == addr2)
 #  define uiphdr_ipaddr_cmp(addr1, addr2) uip_ipaddr_cmp(uip_ip4addr_conv(addr1), uip_ip4addr_conv(addr2))
 #else /* !CONFIG_NET_IPv6 */
-#  define uip_ipaddr_cmp(addr1, addr2)    (memcmp(&addr1, &addr2, sizeof(uip_ip6addr_t)) == 0)
+#  define uip_ipaddr_cmp(addr1, addr2)    (memcmp(&addr1, &addr2, sizeof(net_ip6addr_t)) == 0)
 #  define uiphdr_ipaddr_cmp(addr1, addr2) uip_ipaddr_cmp(addr, addr2)
 #endif /* !CONFIG_NET_IPv6 */
 
@@ -417,7 +417,7 @@ int net_lockedwait(sem_t *sem);
  *
  * Example:
  *
- *   uip_ipaddr_t ipaddr1, ipaddr2, mask;
+ *   net_ipaddr_t ipaddr1, ipaddr2, mask;
  *
  *   uip_ipaddr(&mask, 255,255,255,0);
  *   uip_ipaddr(&ipaddr1, 192,16,1,2);
@@ -437,8 +437,8 @@ int net_lockedwait(sem_t *sem);
   (((in_addr_t)(addr1) & (in_addr_t)(mask)) == \
    ((in_addr_t)(addr2) & (in_addr_t)(mask)))
 #else
-bool uip_ipaddr_maskcmp(uip_ipaddr_t addr1, uip_ipaddr_t addr2,
-                        uip_ipaddr_t mask);
+bool uip_ipaddr_maskcmp(net_ipaddr_t addr1, net_ipaddr_t addr2,
+                        net_ipaddr_t mask);
 #endif
 
 /* Mask out the network part of an IP address.
@@ -448,7 +448,7 @@ bool uip_ipaddr_maskcmp(uip_ipaddr_t addr1, uip_ipaddr_t addr2,
  *
  * Example:
  *
- *   uip_ipaddr_t ipaddr1, ipaddr2, netmask;
+ *   net_ipaddr_t ipaddr1, ipaddr2, netmask;
  *
  *   uip_ipaddr(&ipaddr1, 192,16,1,2);
  *   uip_ipaddr(&netmask, 255,255,255,0);

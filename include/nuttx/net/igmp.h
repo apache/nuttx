@@ -137,8 +137,8 @@ struct igmp_iphdr_s
   uint8_t  len[2];          /* 16-bit Payload length */
   uint8_t  proto;           /*  8-bit Next header (same as IPv4 protocol field) */
   uint8_t  ttl;             /*  8-bit Hop limit (like IPv4 TTL field) */
-  uip_ip6addr_t srcipaddr;  /* 128-bit Source address */
-  uip_ip6addr_t destipaddr; /* 128-bit Destination address */
+  net_ip6addr_t srcipaddr;  /* 128-bit Source address */
+  net_ip6addr_t destipaddr; /* 128-bit Destination address */
 
 #else /* CONFIG_NET_IPv6 */
 
@@ -211,7 +211,7 @@ typedef FAR struct wdog_s *WDOG_ID;
 struct igmp_group_s
 {
   struct igmp_group_s *next;    /* Implements a singly-linked list */
-  uip_ipaddr_t         grpaddr; /* Group IP address */
+  net_ipaddr_t         grpaddr; /* Group IP address */
   WDOG_ID              wdog;    /* WDOG used to detect timeouts */
   sem_t                sem;     /* Used to wait for message transmission */
   volatile uint8_t     flags;   /* See IGMP_ flags definitions */
@@ -231,8 +231,8 @@ extern "C"
 #define EXTERN extern
 #endif
 
-EXTERN uip_ipaddr_t g_allsystems;
-EXTERN uip_ipaddr_t g_allrouters;
+EXTERN net_ipaddr_t g_allsystems;
+EXTERN net_ipaddr_t g_allrouters;
 
 /****************************************************************************
  * Public Function Prototypes

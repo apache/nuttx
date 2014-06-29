@@ -66,8 +66,8 @@
  * Public Data
  ****************************************************************************/
 
-extern const uip_ipaddr_t g_alloneaddr;
-extern const uip_ipaddr_t g_allzeroaddr;
+extern const net_ipaddr_t g_alloneaddr;
+extern const net_ipaddr_t g_allzeroaddr;
 
 /* Increasing number used for the IP ID field. */
 
