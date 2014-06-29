@@ -3330,16 +3330,17 @@ Configurations
        will need to install a battery in the battery holder (J12) and close
        the jumper, JP13.
 
-    8. The SAMA5D4-EK includes for an AT25 serial DataFlash.  Support for that
-       serial FLASH can be enabled by modifying the NuttX configuration as
-       described above in the paragraph entitled "AT25 Serial FLASH".
-
-    9. Enabling HSMCI support. The SAMA4D4-EK provides a two SD memory
+    8. Enabling HSMCI support. The SAMA4D4-EK provides a two SD memory
        card slots:  (1) a full size SD card slot (J10), and (2) a microSD
        memory card slot (J11).  The full size SD card slot connects via HSMCI0;
        the microSD connects vi HSMCI1.  Support for both SD slots can be enabled
        with the settings provided in the paragraph entitled "HSMCI Card Slots"
        above.
+
+    9. The SAMA5D4-EK includes for an AT25 serial DataFlash.  That support is
+       NOT enabled in this configuration.  Support for that serial FLASH can
+       be enabled by modifying the NuttX configuration as described above in
+       the paragraph entitled "AT25 Serial FLASH".
 
    10. Support the USB low-, high- and full-speed OHCI host driver can be enabled
        by changing the NuttX configuration file as described in the section
