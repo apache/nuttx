@@ -100,7 +100,8 @@
 
 #  define DMACH_FLAG_PERIPHPID_SHIFT          (2)       /* Bits 1-7: Peripheral PID */
 #  define DMACH_FLAG_PERIPHPID_MASK           (0x3f << DMACH_FLAG_PERIPHPID_SHIFT)
-#    define DMACH_FLAG_PERIPHPID(n)           ((uint32_t) << DMACH_FLAG_PERIPHPID_SHIFT)
+#    define DMACH_FLAG_PERIPHPID(n)           ((uint32_t)(n) << DMACH_FLAG_PERIPHPID_SHIFT)
+#    define DMACH_FLAG_PERIPHPID_MAX          DMACH_FLAG_PERIPHPID_MASK
 #  define DMACH_FLAG_PERIPHH2SEL              (1 << 8)  /* Bits 8: HW handshaking */
 #  define DMACH_FLAG_PERIPHISPERIPH           (1 << 9)  /* Bits 9: 0=memory; 1=peripheral */
 #  define DMACH_FLAG_PERIPHAHB_SHIFT          (10)      /* Bits 10-11: Peripheral ABH layer number */
@@ -138,6 +139,7 @@
 #  define DMACH_FLAG_MEMPID_SHIFT             (17)      /* Bits 17-22: Memory PID */
 #  define DMACH_FLAG_MEMPID_MASK              (0x3f << DMACH_FLAG_MEMPID_SHIFT)
 #    define DMACH_FLAG_MEMPID(n)              ((uint32_t)(n) << DMACH_FLAG_MEMPID_SHIFT)
+#    define DMACH_FLAG_MEMPID_MAX             DMACH_FLAG_MEMPID_MASK
 #  define DMACH_FLAG_MEMH2SEL                 (1 << 23) /* Bits 23: HW handshaking */
 #  define DMACH_FLAG_MEMISPERIPH              (1 << 24) /* Bits 24: 0=memory; 1=peripheral */
 #  define DMACH_FLAG_MEMAHB_SHIFT             (25)      /* Bits 25-26: Peripheral ABH layer number */
@@ -199,7 +201,8 @@
 
 #  define DMACH_FLAG_PERIPHPID_SHIFT          (0)       /* Bits 0-7: Peripheral PID */
 #  define DMACH_FLAG_PERIPHPID_MASK           (0x7f << DMACH_FLAG_PERIPHPID_SHIFT)
-#    define DMACH_FLAG_PERIPHPID(n)           ((uint32_t) << DMACH_FLAG_PERIPHPID_SHIFT)
+#    define DMACH_FLAG_PERIPHPID(n)           ((uint32_t)(n) << DMACH_FLAG_PERIPHPID_SHIFT)
+#    define DMACH_FLAG_PERIPHPID_MAX          DMACH_FLAG_PERIPHPID_MASK
 #  define DMACH_FLAG_PERIPHH2SEL              (0)       /* No HW handshaking */
 #  define DMACH_FLAG_PERIPHISPERIPH           (1 << 7)  /* Bit 7:  0=memory; 1=peripheral */
 #  define DMACH_FLAG_PERIPHAHB_MASK           (1 << 8)  /* Bit 8:  Peripheral ABH layer 1 */
@@ -234,6 +237,7 @@
  */
 
 #  define DMACH_FLAG_MEMPID(n)                (0)       /* No memory peripheral identifier */
+#    define DMACH_FLAG_MEMPID_MAX             (0)
 #  define DMACH_FLAG_MEMH2SEL                 (0)       /* No HW handshaking */
 #  define DMACH_FLAG_MEMISPERIPH              (0)       /* No peripheral-to-peripheral */
 #  define DMACH_FLAG_MEMAHB_MASK              (1 << 16) /* Bit 16: Memory ABH layer 1 */

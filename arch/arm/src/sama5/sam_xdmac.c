@@ -1707,7 +1707,7 @@ static inline int sam_multiple(struct sam_xdmach_s *xdmach)
    */
 
   if ((xdmach->cc & XDMACH_CC_TYPE) == 0 ||
-      (xdmach->cc & XDMACH_CC_TYPE) != 0)
+      (xdmach->cc & XDMACH_CC_DSYNC) != 0)
     {
       regval |= XDMACH_CNDC_NDSUP;
     }
@@ -1989,7 +1989,7 @@ void weak_function up_dmainitialize(void)
 }
 
 /****************************************************************************
- * Name: sam_xdmachannel
+ * Name: sam_dmachannel
  *
  *   Allocate a DMA channel.  This function sets aside a DMA channel then
  *   gives the caller exclusive access to the DMA channel.
@@ -2005,7 +2005,7 @@ void weak_function up_dmainitialize(void)
  *
  ****************************************************************************/
 
-DMA_HANDLE sam_xdmachannel(uint8_t dmacno, uint32_t chflags)
+DMA_HANDLE sam_dmachannel(uint8_t dmacno, uint32_t chflags)
 {
   struct sam_xdmac_s *xdmac;
   struct sam_xdmach_s *xdmach;
@@ -2086,14 +2086,14 @@ DMA_HANDLE sam_xdmachannel(uint8_t dmacno, uint32_t chflags)
 }
 
 /************************************************************************************
- * Name: sam_xdmaconfig
+ * Name: sam_dmaconfig
  *
  * Description:
  *   There are two channel usage models:  (1) The channel is allocated and configured
  *   in one step.  This is the typical case where a DMA channel performs a constant
  *   role.  The alternative is (2) where the DMA channel is reconfigured on the fly.
- *   In this case, the chflags provided to sam_xdmachannel are not used and
- *   sam_xdmaconfig() is called before each DMA to configure the DMA channel
+ *   In this case, the chflags provided to sam_dmachannel are not used and
+ *   sam_dmaconfig() is called before each DMA to configure the DMA channel
  *   appropriately.
  *
  * Returned Value:
@@ -2101,7 +2101,7 @@ DMA_HANDLE sam_xdmachannel(uint8_t dmacno, uint32_t chflags)
  *
  ************************************************************************************/
 
-void sam_xdmaconfig(DMA_HANDLE handle, uint32_t chflags)
+void sam_dmaconfig(DMA_HANDLE handle, uint32_t chflags)
 {
   struct sam_xdmach_s *xdmach = (struct sam_xdmach_s *)handle;
 
@@ -2126,7 +2126,7 @@ void sam_xdmaconfig(DMA_HANDLE handle, uint32_t chflags)
  *
  * Description:
  *   Release a DMA channel.  NOTE:  The 'handle' used in this argument must
- *   NEVER be used again until sam_xdmachannel() is called again to re-gain
+ *   NEVER be used again until sam_dmachannel() is called again to re-gain
  *   a valid handle.
  *
  * Returned Value:
@@ -2390,7 +2390,7 @@ void sam_dmastop(DMA_HANDLE handle)
  *   Sample DMA register contents
  *
  * Assumptions:
- *   - DMA handle allocated by sam_xdmachannel()
+ *   - DMA handle allocated by sam_dmachannel()
  *
  ****************************************************************************/
 
@@ -2444,7 +2444,7 @@ void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs)
  *   Dump previously sampled DMA register contents
  *
  * Assumptions:
- *   - DMA handle allocated by sam_xdmachannel()
+ *   - DMA handle allocated by sam_dmachannel()
  *
  ****************************************************************************/
 

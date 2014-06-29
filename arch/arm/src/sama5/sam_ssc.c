@@ -186,31 +186,29 @@
 
 /* DMA configuration */
 
-#define DMA_PID(pid)      ((pid) << DMACH_FLAG_PERIPHPID_SHIFT)
-
 #define DMA8_FLAGS \
   (DMACH_FLAG_PERIPHAHB_AHB_IF2 | DMACH_FLAG_PERIPHH2SEL | \
    DMACH_FLAG_PERIPHISPERIPH | DMACH_FLAG_PERIPHWIDTH_8BITS | \
-   DMACH_FLAG_PERIPHCHUNKSIZE_1 | \
-   ((0x3f) << DMACH_FLAG_MEMPID_SHIFT) | DMACH_FLAG_MEMAHB_AHB_IF0 | \
-   DMACH_FLAG_MEMWIDTH_16BITS | DMACH_FLAG_MEMINCREMENT | \
-   DMACH_FLAG_MEMCHUNKSIZE_4)
+   DMACH_FLAG_PERIPHCHUNKSIZE_1 | DMACH_FLAG_MEMPID_MAX | \
+   DMACH_FLAG_MEMAHB_AHB_IF0 | DMACH_FLAG_MEMWIDTH_16BITS | \
+   DMACH_FLAG_MEMINCREMENT | DMACH_FLAG_MEMCHUNKSIZE_4| \
+   DMACH_FLAG_MEMBURST_4)
 
 #define DMA16_FLAGS \
   (DMACH_FLAG_PERIPHAHB_AHB_IF2 | DMACH_FLAG_PERIPHH2SEL | \
    DMACH_FLAG_PERIPHISPERIPH | DMACH_FLAG_PERIPHWIDTH_16BITS | \
-   DMACH_FLAG_PERIPHCHUNKSIZE_1 | \
-   ((0x3f) << DMACH_FLAG_MEMPID_SHIFT) | DMACH_FLAG_MEMAHB_AHB_IF0 | \
-   DMACH_FLAG_MEMWIDTH_16BITS | DMACH_FLAG_MEMINCREMENT | \
-   DMACH_FLAG_MEMCHUNKSIZE_4)
+   DMACH_FLAG_PERIPHCHUNKSIZE_1 | DMACH_FLAG_MEMPID_MAX | \
+   DMACH_FLAG_MEMAHB_AHB_IF0 | DMACH_FLAG_MEMWIDTH_16BITS | \
+   DMACH_FLAG_MEMINCREMENT | DMACH_FLAG_MEMCHUNKSIZE_4 | \
+   DMACH_FLAG_MEMBURST_4)
 
 #define DMA32_FLAGS \
   (DMACH_FLAG_PERIPHAHB_AHB_IF2 | DMACH_FLAG_PERIPHH2SEL | \
    DMACH_FLAG_PERIPHISPERIPH | DMACH_FLAG_PERIPHWIDTH_32BITS | \
-   DMACH_FLAG_PERIPHCHUNKSIZE_1 | \
-   ((0x3f) << DMACH_FLAG_MEMPID_SHIFT) | DMACH_FLAG_MEMAHB_AHB_IF0 | \
-   DMACH_FLAG_MEMWIDTH_32BITS | DMACH_FLAG_MEMINCREMENT | \
-   DMACH_FLAG_MEMCHUNKSIZE_4)
+   DMACH_FLAG_PERIPHCHUNKSIZE_1 | DMACH_FLAG_MEMPID_MAX | \
+   DMACH_FLAG_MEMAHB_AHB_IF0 | DMACH_FLAG_MEMWIDTH_32BITS | \
+   DMACH_FLAG_MEMINCREMENT | DMACH_FLAG_MEMCHUNKSIZE_4 | \
+   DMACH_FLAG_MEMBURST_4)
 
 /* DMA timeout.  The value is not critical; we just don't want the system to
  * hang in the event that a DMA does not finish.  This is set to
@@ -2658,20 +2656,20 @@ static void ssc_clocking(struct sam_ssc_s *priv)
 
 static int ssc_dma_flags(struct sam_ssc_s *priv, uint32_t *dmaflags)
 {
-  uint32_t regval;
+  uint32_t flags;
 
   switch (priv->datalen)
     {
     case 8:
-      regval = DMA8_FLAGS;
+      flags = DMA8_FLAGS;
       break;
 
     case 16:
-      regval = DMA16_FLAGS;
+      flags = DMA16_FLAGS;
       break;
 
     case 32:
-      regval = DMA32_FLAGS;
+      flags = DMA32_FLAGS;
       break;
 
     default:
@@ -2679,7 +2677,7 @@ static int ssc_dma_flags(struct sam_ssc_s *priv, uint32_t *dmaflags)
       return -ENOSYS;
     }
 
-  *dmaflags = (regval | DMA_PID(priv->pid));
+  *dmaflags = (flags | DMACH_FLAG_PERIPHPID(priv->pid));
   return OK;
 }
 

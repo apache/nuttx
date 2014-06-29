@@ -100,6 +100,11 @@
 #    error "HSMCI2 support requires CONFIG_SAMA5_DMAC1"
 #  endif
 
+  /* System Bus Interfaces */
+
+#  define HSMCI_SYSBUS_IF  DMACH_FLAG_PERIPHAHB_AHB_IF2
+#  define MEMORY_SYSBUS_IF DMACH_FLAG_MEMAHB_AHB_IF0
+
 #elif defined(ATSAMA5D4)
   /* The SAMA5D3 has two HSMCI blocks: HSMCI0-1.  They can be driven
    * either by XDMAC0 (secure) or XDMAC1 (unsecure).
@@ -124,6 +129,18 @@
 #  else
 #    error No valid DMA configuration for HSMCI1
 #  endif
+
+  /* System Bus Interfaces
+   *
+   * HSMCI0 is on H32MX, APB1; HSMCI1 is on H32MX, APB0.  Both are
+   * accessible on MATRIX IF1.
+   *
+   * Memory is available on either port 5 (IF0 for both XDMAC0 and 1) or
+   * port 6 (IF1 for both XDMAC0 and 1).
+   */
+
+#  define HSMCI_SYSBUS_IF  DMACH_FLAG_PERIPHAHB_AHB_IF1
+#  define MEMORY_SYSBUS_IF DMACH_FLAG_MEMAHB_AHB_IF0
 
 #else
 #  error Unrecognized SAMA5 architecture
@@ -193,22 +210,22 @@
 
 #ifdef HSCMI_FIFODMA
 #  define DMA_FLAGS(pid) \
-    (((pid) << DMACH_FLAG_PERIPHPID_SHIFT) | DMACH_FLAG_PERIPHAHB_AHB_IF2 | \
+    (DMACH_FLAG_PERIPHPID(pid) | HSMCI_SYSBUS_IF | \
      DMACH_FLAG_PERIPHH2SEL | DMACH_FLAG_PERIPHISPERIPH |  \
      DMACH_FLAG_PERIPHWIDTH_32BITS | DMACH_FLAG_PERIPHINCREMENT | \
      DMACH_FLAG_PERIPHCHUNKSIZE_1 | \
-     ((0x3f) << DMACH_FLAG_MEMPID_SHIFT) | DMACH_FLAG_MEMAHB_AHB_IF0 | \
+     DMACH_FLAG_MEMPID_MAX | MEMORY_SYSBUS_IF | \
      DMACH_FLAG_MEMWIDTH_32BITS | DMACH_FLAG_MEMINCREMENT | \
-     DMACH_FLAG_MEMCHUNKSIZE_4)
+     DMACH_FLAG_MEMCHUNKSIZE_4 | DMACH_FLAG_MEMBURST_4)
 
 #else
 #  define DMA_FLAGS(pid) \
-    (((pid) << DMACH_FLAG_PERIPHPID_SHIFT) | DMACH_FLAG_PERIPHAHB_AHB_IF2 | \
+    (DMACH_FLAG_PERIPHPID(pid) | HSMCI_SYSBUS_IF | \
      DMACH_FLAG_PERIPHH2SEL | DMACH_FLAG_PERIPHISPERIPH |  \
      DMACH_FLAG_PERIPHWIDTH_32BITS | DMACH_FLAG_PERIPHCHUNKSIZE_1 | \
-     ((0x3f) << DMACH_FLAG_MEMPID_SHIFT) | DMACH_FLAG_MEMAHB_AHB_IF0 | \
+     DMACH_FLAG_MEMPID_MAX | MEMORY_SYSBUS_IF | \
      DMACH_FLAG_MEMWIDTH_32BITS | DMACH_FLAG_MEMINCREMENT | \
-     DMACH_FLAG_MEMCHUNKSIZE_4)
+     DMACH_FLAG_MEMCHUNKSIZE_4 | DMACH_FLAG_MEMBURST_4)
 
 #endif
 
@@ -1172,7 +1189,7 @@ static void sam_cmddump(struct sam_dev_s *priv)
     {
       sam_hsmcidump(priv, &priv->cmdsamples[SAMPLENDX_AFTER_CMDR],
                     "After command setup");
-      sam_hsmcidump(priv, &g_cmdsamples[SAMPLENDX_AT_WAKEUP],
+      sam_hsmcidump(priv, &priv->cmdsamples[SAMPLENDX_AT_WAKEUP],
                     "After wakeup");
 #ifdef CONFIG_SAMA5_HSMCI_XFRDEBUG
       priv->cmdinitialized = false;
