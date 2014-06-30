@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/stdint.h
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -81,54 +81,54 @@
 
 /* Limits of minimum-width integer types */
 
-#define INT8_LEASTN_MIN     0x80
-#define INT8_LEASTN_MAX     0x7f
-#define UINT8_LEASTN_MAX    0xff
+#define INT_LEAST8_MIN      0x80
+#define INT_LEAST8_MAX      0x7f
+#define UINT_LEAST8_MAX     0xff
 
-#define INT16_LEASTN_MIN    0x8000
-#define INT16_LEASTN_MAX    0x7fff
-#define UINT16_LEASTN_MAX   0xffff
+#define INT_LEAST16_MIN     0x8000
+#define INT_LEAST16_MAX     0x7fff
+#define UINT_LEAST16_MAX    0xffff
 
 #ifdef __INT24_DEFINED
-#  define INT24_LEASTN_MIN  0x800000
-#  define INT24_LEASTN_MAX  0x7fffff
-#  define UINT24_LEASTN_MAX 0xffffff
+#  define INT_LEAST24_MIN   0x800000
+#  define INT_LEAST24_MAX   0x7fffff
+#  define UINT_LEAST24_MAX  0xffffff
 #endif
 
-#define INT32_LEASTN_MIN    0x80000000
-#define INT32_LEASTN_MAX    0x7fffffff
-#define UINT32_LEASTN_MAX   0xffffffff
+#define INT_LEAST32_MIN     0x80000000
+#define INT_LEAST32_MAX     0x7fffffff
+#define UINT_LEAST32_MAX    0xffffffff
 
 #ifdef __INT64_DEFINED
-#  define INT64_LEASTN_MIN  0x8000000000000000
-#  define INT64_LEASTN_MAX  0x7fffffffffffffff
-#  define UINT64_LEASTN_MAX 0xffffffffffffffff
+#  define INT_LEAST64_MIN   0x8000000000000000
+#  define INT_LEAST64_MAX   0x7fffffffffffffff
+#  define UINT_LEAST64_MAX  0xffffffffffffffff
 #endif
 
 /* Limits of fastest minimum-width integer types */
 
-#define INT8_FASTN_MIN      0x80
-#define INT8_FASTN_MAX      0x7f
-#define UINT8_FASTN_MAX     0xff
+#define INT_FAST8_MIN       0x80
+#define INT_FAST8_MAX       0x7f
+#define UINT_FAST8_MAX      0xff
 
-#define INT16_FASTN_MIN     0x8000
-#define INT16_FASTN_MAX     0x7fff
-#define UINT16_FASTN_MAX    0xffff
+#define INT_FAST16_MIN      0x8000
+#define INT_FAST16_MAX      0x7fff
+#define UINT_FAST16_MAX     0xffff
 
 #ifdef __INT24_DEFINED
-#  define INT24_FASTN_MIN   0x800000
-#  define INT24_FASTN_MAX   0x7fffff
-#  define UINT24_FASTN_MAX  0xffffff
+#  define INT_FAST24_MIN    0x800000
+#  define INT_FAST24_MAX    0x7fffff
+#  define UINT_FAST24_MAX   0xffffff
 #endif
 
-#define INT32_FASTN_MIN     0x80000000
-#define INT32_FASTN_MAX     0x7fffffff
-#define UINT32_FASTN_MAX    0xffffffff
+#define INT_FAST32_MIN      0x80000000
+#define INT_FAST32_MAX      0x7fffffff
+#define UINT_FAST32_MAX     0xffffffff
 
 #ifdef __INT64_DEFINED
-#  define INT64_FASTN_MIN   0x8000000000000000
-#  define INT64_FASTN_MAX   0x7fffffffffffffff
-#  define UINT64_FASTN_MAX  0xffffffffffffffff
+#  define INT_FAST64_MIN    0x8000000000000000
+#  define INT_FAST64_MAX    0x7fffffffffffffff
+#  define UINT_FAST64_MAX   0xffffffffffffffff
 #endif
 
 /* Limits of integer types capable of holding object pointers */
@@ -186,13 +186,13 @@
 
 #ifdef CONFIG_SMALL_MEMORY
 
-#define SIZE_MAX     UINT16_MAX  /* See sys/types.h */
-#define RSIZE_MAX    UINT16_MAX
+#define SIZE_MAX            UINT16_MAX  /* See sys/types.h */
+#define RSIZE_MAX           UINT16_MAX
 
 #else /* CONFIG_SMALL_MEMORY */
 
-#define SIZE_MAX     UINT32_MAX  /* See sys/types.h */
-#define RSIZE_MAX    UINT32_MAX
+#define SIZE_MAX            UINT32_MAX  /* See sys/types.h */
+#define RSIZE_MAX           UINT32_MAX
 
 #endif /* CONFIG_SMALL_MEMORY */
 
