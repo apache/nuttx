@@ -1125,47 +1125,47 @@ Networking
   Ethernet MAC peripherals.
 
   ------------------------------ ------------------- -------------------------
-  SAMA5D4 PIO                    SIGNAL              USAGE
+  SAMA5D4 PIO                    SAMA5D4-MB          KSZ8081RNB
   ------------------------------ ------------------- -------------------------
-  PB0/G0_TXCK                    PB0                 G0_TXCK, EXP
-  PB1/G0_RXCK/SCK2/ISI_PCK       ISI_PCK_PB1         ISI_PCK
-  PB2/G0_TXEN                    PB2                 G0_TXEN,EXP
-  PB3/G0_TXER/CTS2/ISI_VSYNC     ISI_VSYNC_PB3       ISI_VSYNC
-  PB4/G0_CRS/RXD2/ISI_HSYNC      ISI_HSYNC_PB4       ISI_HSYNC
-  PB5/G0_COL/TXD2/PCK2           ISI_PWD_PB5         ISI_PWD
-  PB6/G0_RXDV                    PB6                 G0_RXDV, EXP
-  PB7/G0_RXER                    PB7                 G0_RXER, EXP
-  PB8/G0_RX0                     PB8                 G0_RX0, EXP
-  PB9/G0_RX1                     PB9                 G0_RX1, EXP
-  PB10/G0_RX2/PCK2/PWML1         PB10                AUDIO_PCK2, EXP
-  PB11/G0_RX3/RTS2/PWMH1         ISI_RST_PB11        ISI_RST
-  PB12/G0_TX0                    PB12                G0_TX0, EXP
-  PB13/G0_TX1                    PB13                G0_TX1, EXP
-  PB14/G0_TX2/SPI2_NPCS1/PWMH0   ZIG_SPI2_NPCS1      ZIG_SPI2_NPCS1
-  PB15/G0_TX3/SPI2_NPCS2/PWML0   HDMI_RST_PB15       HDMI_RST
-  PB16/G0_MDC                    PB16                G0_MDC, EXP
-  PB17/G0_MDIO                   PB17                G0_MDIO, EXP
-  PE1/A1/MCI0_DB0                G0_IRQ_PE1          G0_IRQ
+  PB0/G0_TXCK                    G0_TXCK_PB0         RXF_CLK/B-CAST_OFF
+  PB1/G0_RXCK/SCK2/ISI_PCK       (RMII, not used)    (RMII, not used)
+  PB2/G0_TXEN                    G0_TXEN_PB2         TXEN
+  PB3/G0_TXER/CTS2/ISI_VSYNC     (RMII, not used)    (RMII, not used)
+  PB4/G0_CRS/RXD2/ISI_HSYNC      (RMII, not used)    (RMII, not used)
+  PB5/G0_COL/TXD2/PCK2           (RMII, not used)    (RMII, not used)
+  PB6/G0_RXDV                    G0_RXDV_PB6         CRS_DV/CONFIG2
+  PB7/G0_RXER                    G0_RXER_PB7         RXER/ISO
+  PB8/G0_RX0                     G0_RX0_PB8          RXD0/DUPLEX
+  PB9/G0_RX1                     G0_RX1_PB9          RXD1/PHYAD2
+  PB10/G0_RX2/PCK2/PWML1         (RMII, not used)    (RMII, not used)
+  PB11/G0_RX3/RTS2/PWMH1         (RMII, not used)    (RMII, not used)
+  PB12/G0_TX0                    G0_TX0_PB12         TXD0
+  PB13/G0_TX1                    G0_TX1_PB13         TXD1
+  PB14/G0_TX2/SPI2_NPCS1/PWMH0   (RMII, not used)    (RMII, not used)
+  PB15/G0_TX3/SPI2_NPCS2/PWML0   (RMII, not used)    (RMII, not used)
+  PB16/G0_MDC                    G0_MDC_PB16         MDC
+  PB17/G0_MDIO                   G0_MDIO_PB17        MDIO
+  PE1/A1/MCI0_DB0                G0_IRQ_PE1          nINTRP/NAND_TREE
   ------------------------------ ------------------- -------------------------
-  PA2/LCDDAT2/G1_TXCK            PA                  LCDDAT2, G1_TXCK
-  PA3/LCDDAT3/G1_RXCK            PA3                 LCDDAT3
-  PA4/LCDDAT4/G1_TXEN            PA4                 LCDDAT4, G1_TXEN
-  PA5/LCDDAT5/G1_TXER            PA5                 LCDDAT5
-  PA6/LCDDAT6/G1_CRS             PA6                 LCDDAT6
-  PA9/LCDDAT9/G1_COL             PA9                 LCDDAT9
-  PA10/LCDDAT10/G1_RXDV          PA10                LCDDAT10, G1_RXDV
-  PA11/LCDDAT11/G1_RXER          PA11                LCDDAT11, G1_RXER
-  PA12/LCDDAT12/G1_RX0           PA12                LCDDAT12, G1_RX0
-  PA13/LCDDAT13/G1_RX1           PA13                LCDDAT13, G1_RX1
-  PA14/LCDDAT14/G1_TX0           PA14                LCDDAT14, G1_TX0
-  PA15/LCDDAT15/G1_TX1           PA15                LCDDAT15, G1_TX1
-  PA18/LCDDAT18/G1_RX2           PA18                LCDDAT18
-  PA19/LCDDAT19/G1_RX3           PA19                LCDDAT19
-  PA20/LCDDAT20/G1_TX2           PA20                LCDDAT20
-  PA21/LCDDAT21/G1_TX3           PA21                LCDDAT21
-  PA22/LCDDAT22/G1_MDC           PA22                LCDDAT22, G1_MDC
-  PA23/LCDDAT23/G1_MDIO          PA23                LCDDAT23, G1_MDIO
-  PE2/A2/MCI0_DB1                G1_IRQ_PE2          G1_IRQ
+  PA2/LCDDAT2/G1_TXCK            G1_TXCK_PA2         RXF_CLK/B-CAST_OFF
+  PA3/LCDDAT3/G1_RXCK            (RMII, not used)    (RMII, not used)
+  PA4/LCDDAT4/G1_TXEN            G1_TXEN_PA4         TXEN
+  PA5/LCDDAT5/G1_TXER            (RMII, not used)    (RMII, not used)
+  PA6/LCDDAT6/G1_CRS             (RMII, not used)    (RMII, not used)
+  PA9/LCDDAT9/G1_COL             (RMII, not used)    (RMII, not used)
+  PA10/LCDDAT10/G1_RXDV          G1_RXDV_PA10        CRS_DV/CONFIG2
+  PA11/LCDDAT11/G1_RXER          G1_RXER_PA11        RXER/ISO
+  PA12/LCDDAT12/G1_RX0           G1_RX0_PA12         RXD0/DUPLEX
+  PA13/LCDDAT13/G1_RX1           G1_RX1_PA13         RXD1/PHYAD2
+  PA18/LCDDAT18/G1_RX2           (RMII, not used)    (RMII, not used)
+  PA19/LCDDAT19/G1_RX3           (RMII, not used)    (RMII, not used)
+  PA14/LCDDAT14/G1_TX0           G1_TX0_PA14         TXD0
+  PA15/LCDDAT15/G1_TX1           G1_TX1_PA15         TXD1
+  PA20/LCDDAT20/G1_TX2           (RMII, not used)    (RMII, not used)
+  PA21/LCDDAT21/G1_TX3           (RMII, not used)    (RMII, not used)
+  PA22/LCDDAT22/G1_MDC           G1_MDC_PA22         MDC
+  PA23/LCDDAT23/G1_MDIO          G1_MDIO_PA23        MDIO
+  PE2/A2/MCI0_DB1                G1_IRQ_PE2          nINTRP/NAND_TREE
   ------------------------------ ------------------- -------------------------
 
   EMAC2 connects (directly) to a KSZ8081RNB PHY (U10) and is available at
@@ -1188,10 +1188,10 @@ Networking
 
   System Type -> EMAC device driver options
     CONFIG_SAMA5_EMAC0_NRXBUFFERS=16     : Set aside some RS and TX buffers
-    CONFIG_SAMA5_EMAC0_NTXBUFFERS=4
+    CONFIG_SAMA5_EMAC0_NTXBUFFERS=8
     CONFIG_SAMA5_EMAC0_PHYADDR=1         : KSZ8081 PHY is at address 1
     CONFIG_SAMA5_EMAC0_AUTONEG=y         : Use autonegotiation
-    CONFIG_SAMA5_EMAC0_RMII=y            : Either MII or RMII interface should work
+    CONFIG_SAMA5_EMAC0_RMII=y            : The RMII interfaces is used on the board
     CONFIG_SAMA5_EMAC0_PHYSR=30          : Address of PHY status register on KSZ8081
     CONFIG_SAMA5_EMAC0_PHYSR_ALTCONFIG=y : Needed for KSZ8081
     CONFIG_SAMA5_EMAC0_PHYSR_ALTMODE=0x7 : "    " " " "     "
@@ -1207,21 +1207,21 @@ Networking
   -----------------------------
 
   System Type -> SAMA5 Peripheral Support
-    CONFIG_SAMA5_EMAC0=y                 : Enable the EMAC peripheral
+    CONFIG_SAMA5_EMAC1=y                 : Enable the EMAC peripheral
 
   System Type -> EMAC device driver options
-    CONFIG_SAMA5_EMAC0_NRXBUFFERS=16     : Set aside some RS and TX buffers
-    CONFIG_SAMA5_EMAC0_NTXBUFFERS=4
-    CONFIG_SAMA5_EMAC0_PHYADDR=1         : KSZ8081 PHY is at address 1
-    CONFIG_SAMA5_EMAC0_AUTONEG=y         : Use autonegotiation
-    CONFIG_SAMA5_EMAC0_RMII=y            : Either MII or RMII interface should work
-    CONFIG_SAMA5_EMAC0_PHYSR=30          : Address of PHY status register on KSZ8081
-    CONFIG_SAMA5_EMAC0_PHYSR_ALTCONFIG=y : Needed for KSZ8081
-    CONFIG_SAMA5_EMAC0_PHYSR_ALTMODE=0x7 : "    " " " "     "
-    CONFIG_SAMA5_EMAC0_PHYSR_10HD=0x1    : "    " " " "     "
-    CONFIG_SAMA5_EMAC0_PHYSR_100HD=0x2   : "    " " " "     "
-    CONFIG_SAMA5_EMAC0_PHYSR_10FD=0x5    : "    " " " "     "
-    CONFIG_SAMA5_EMAC0_PHYSR_100FD=0x6   : "    " " " "     "
+    CONFIG_SAMA5_EMAC1_NRXBUFFERS=16     : Set aside some RS and TX buffers
+    CONFIG_SAMA5_EMAC1_NTXBUFFERS=8
+    CONFIG_SAMA5_EMAC1_PHYADDR=1         : KSZ8081 PHY is at address 1
+    CONFIG_SAMA5_EMAC1_AUTONEG=y         : Use autonegotiation
+    CONFIG_SAMA5_EMAC1_RMII=y            : The RMII interfaces is used on the board
+    CONFIG_SAMA5_EMAC1_PHYSR=30          : Address of PHY status register on KSZ8081
+    CONFIG_SAMA5_EMAC1_PHYSR_ALTCONFIG=y : Needed for KSZ8081
+    CONFIG_SAMA5_EMAC1_PHYSR_ALTMODE=0x7 : "    " " " "     "
+    CONFIG_SAMA5_EMAC1_PHYSR_10HD=0x1    : "    " " " "     "
+    CONFIG_SAMA5_EMAC1_PHYSR_100HD=0x2   : "    " " " "     "
+    CONFIG_SAMA5_EMAC1_PHYSR_10FD=0x5    : "    " " " "     "
+    CONFIG_SAMA5_EMAC1_PHYSR_100FD=0x6   : "    " " " "     "
 
   PHY selection.  Later in the configuration steps, you will need to select
   the KSZ8081 PHY for EMAC (See below)
@@ -1241,17 +1241,20 @@ Networking
     CONFIG_NET_SOCKOPTS=y                : Enable socket operations
     CONFIG_NET_BUFSIZE=562               : Maximum packet size (MTD) 1518 is more standard
     CONFIG_NET_RECEIVE_WINDOW=562        : Should be the same as CONFIG_NET_BUFSIZE
+    CONFIG_NET_ARP=y                     : ARP support should be enabled
+    CONFIG_NET_ARP_IPIN=y                : IP address harvesting (optional)
     CONFIG_NET_TCP=y                     : Enable TCP/IP networking
     CONFIG_NET_TCPBACKLOG=y              : Support TCP/IP backlog
-    CONFIG_NET_TCP_READAHEAD_BUFSIZE=562 : Read-ahead buffer size
+    CONFIG_NET_TCP_READAHEAD=y           : Enable TCP read-ahead buffering
+    CONFIG_NET_TCP_WRITE_BUFFERS=y       : Enable TCP write buffering
     CONFIG_NET_UDP=y                     : Enable UDP networking
+    CONFIG_NET_BROADCAST=y               : Support UDP broadcase packets
     CONFIG_NET_ICMP=y                    : Enable ICMP networking
     CONFIG_NET_ICMP_PING=y               : Needed for NSH ping command
                                          : Defaults should be okay for other options
   Device drivers -> Network Device/PHY Support
     CONFIG_NETDEVICES=y                  : Enabled PHY selection
-    CONFIG_ETH0_PHY_KSZ8081=y            : Select the KSZ8081 PHY (for EMAC), OR
-    CONFIG_ETH0_PHY_KSZ90x1=y            : Select the KSZ9031 PHY (for GMAC)
+    CONFIG_ETH0_PHY_KSZ8081=y            : Select the KSZ8081 PHY used with EMAC0 and 1
 
   Application Configuration -> Network Utilities
     CONFIG_NETUTILS_DNSCLIENT=y          : Enable host address resolution
@@ -1540,7 +1543,7 @@ HSMCI Card Slots
 
     4) Before removing the card, you must umount the file system.  This is
        equivalent to "ejecting" or "safely removing" the card on Windows:  It
-       flushes any cached data to the card and makes the SD card unavailable
+       flushes any cached data to an SD card and makes the SD card unavailable
        to the applications.
 
          nsh> umount -t /mnt/sd1
@@ -3341,31 +3344,37 @@ Configurations
        in a different manner, this HSMCI1 slot may not be useful to you
        anyway.
 
-       STATUS:  There is an unresolved issue with HSMCI0 as of this writing.
+       STATUS:  There are unresolved issue with HSMCI0 as of this writing.
        No errors are reported so most the handshaking signals and command
        transfers are working, but all data transfers return the value zero
        (with or without DMA).  This seems like some pin configuration issue.
 
-    9. The SAMA5D4-EK includes for an AT25 serial DataFlash.  That support is
+       Also, we should be receiving interrupts when an SD card is inserted
+       or removed; we are not.
+
+       If these behaviors are a problem for you, then you may want to
+       disable HSMCI0 as well.
+
+    9. Networking support via the can be added to NSH by modifying the
+       configuration.  See the "Networking" section above for detailed
+       configuration settings.
+
+   10. The SAMA5D4-EK includes for an AT25 serial DataFlash.  That support is
        NOT enabled in this configuration.  Support for that serial FLASH can
        be enabled by modifying the NuttX configuration as described above in
        the paragraph entitled "AT25 Serial FLASH".
 
-   10. Support the USB low-, high- and full-speed OHCI host driver can be enabled
+   11. Support the USB low-, high- and full-speed OHCI host driver can be enabled
        by changing the NuttX configuration file as described in the section
        entitled "USB High-Speed Host" above.
 
-   11. Support the USB high-speed USB device driver (UDPHS) can be enabled
+   12. Support the USB high-speed USB device driver (UDPHS) can be enabled
        by changing the NuttX configuration file as described above in the
        section entitled "USB High-Speed Device."
 
-   12. I2C Tool. NuttX supports an I2C tool at apps/system/i2c that can be
+   13. I2C Tool. NuttX supports an I2C tool at apps/system/i2c that can be
        used to peek and poke I2C devices.  See the discussion above under
        "I2C Tool" for detailed configuration settings.
-
-   13. Networking support via the can be added to NSH by modifying the
-       configuration.  See the "Networking" section above for detailed
-       configuration settings.
 
    14. This example can be configured to exercise the watchdog timer test
        (apps/examples/watchdog).  See the detailed configuration settings in
@@ -3443,9 +3452,12 @@ To-Do List
 
 2) HSCMI TX DMA support is currently commented out.
 
-3) Currently HSMCI1 does not work correctly.  No errors are reported so all of
+3) Currently HSMCI0 does not work correctly.  No errors are reported so all of
    the card handshakes must be working, but only zero values are read from the
    card (with or without DMA).  Sounds like a pin configuration issue.
+
+   Also, we should be receiving interrupts when an SD card is inserted or
+   removed; we are not.
 
 4) Some drivers may require some adjustments if you intend to run from SDRAM.
    That is because in this case macros like BOARD_MCK_FREQUENCY are not constants

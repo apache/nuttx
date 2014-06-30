@@ -94,164 +94,170 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* EMAC0 Configuration ******************************************************/
-/* Number of buffers for RX */
 
-#ifndef CONFIG_SAMA5_EMAC0_NRXBUFFERS
-#  define CONFIG_SAMA5_EMAC0_NRXBUFFERS  16
-#endif
+#ifdef CONFIG_SAMA5_EMAC0
+  /* Number of buffers for RX */
 
-/* Number of buffers for TX */
+#  ifndef CONFIG_SAMA5_EMAC0_NRXBUFFERS
+#    define CONFIG_SAMA5_EMAC0_NRXBUFFERS  16
+#  endif
 
-#ifndef CONFIG_SAMA5_EMAC0_NTXBUFFERS
-#  define CONFIG_SAMA5_EMAC0_NTXBUFFERS  8
-#endif
+  /* Number of buffers for TX */
 
-#ifndef CONFIG_SAMA5_EMAC0_PHYADDR
-#  error "CONFIG_SAMA5_EMAC0_PHYADDR must be defined in the NuttX configuration"
-#endif
+#  ifndef CONFIG_SAMA5_EMAC0_NTXBUFFERS
+#    define CONFIG_SAMA5_EMAC0_NTXBUFFERS  8
+#  endif
 
-#if !defined(CONFIG_SAMA5_EMAC0_MII) && !defined(CONFIG_SAMA5_EMAC0_RMII)
-#  warning "Neither CONFIG_SAMA5_EMAC0_MII nor CONFIG_SAMA5_EMAC0_RMII defined"
-#endif
+#  ifndef CONFIG_SAMA5_EMAC0_PHYADDR
+#    error "CONFIG_SAMA5_EMAC0_PHYADDR must be defined in the NuttX configuration"
+#  endif
 
-#if defined(CONFIG_SAMA5_EMAC0_MII) && defined(CONFIG_SAMA5_EMAC0_RMII)
-#  error "Both CONFIG_SAMA5_EMAC0_MII and CONFIG_SAMA5_EMAC0_RMII defined"
-#endif
+#  if !defined(CONFIG_SAMA5_EMAC0_MII) && !defined(CONFIG_SAMA5_EMAC0_RMII)
+#    warning "Neither CONFIG_SAMA5_EMAC0_MII nor CONFIG_SAMA5_EMAC0_RMII defined"
+#  endif
 
-#ifndef CONFIG_SAMA5_EMAC0_PHYSR
-#  error "CONFIG_SAMA5_EMAC0_PHYSR must be defined in the NuttX configuration"
-#endif
+#  if defined(CONFIG_SAMA5_EMAC0_MII) && defined(CONFIG_SAMA5_EMAC0_RMII)
+#    error "Both CONFIG_SAMA5_EMAC0_MII and CONFIG_SAMA5_EMAC0_RMII defined"
+#  endif
 
-#ifdef CONFIG_SAMA5_EMAC0_AUTONEG
-#  ifdef CONFIG_SAMA5_EMAC0_PHYSR_ALTCONFIG
-#    ifndef CONFIG_SAMA5_EMAC0_PHYSR_ALTMODE
-#      error "CONFIG_SAMA5_EMAC0_PHYSR_ALTMODE must be defined in the NuttX configuration"
-#    endif
-#    ifndef CONFIG_SAMA5_EMAC0_PHYSR_10HD
-#      error "CONFIG_SAMA5_EMAC0_PHYSR_10HD must be defined in the NuttX configuration"
-#    endif
-#    ifndef CONFIG_SAMA5_EMAC0_PHYSR_100HD
-#      error "CONFIG_SAMA5_EMAC0_PHYSR_100HD must be defined in the NuttX configuration"
-#    endif
-#    ifndef CONFIG_SAMA5_EMAC0_PHYSR_10FD
-#      error "CONFIG_SAMA5_EMAC0_PHYSR_10FD must be defined in the NuttX configuration"
-#    endif
-#    ifndef CONFIG_SAMA5_EMAC0_PHYSR_100FD
-#      error "CONFIG_SAMA5_EMAC0_PHYSR_100FD must be defined in the NuttX configuration"
-#    endif
-#  else
-#    ifndef CONFIG_SAMA5_EMAC0_PHYSR_SPEED
-#      error "CONFIG_SAMA5_EMAC0_PHYSR_SPEED must be defined in the NuttX configuration"
-#    endif
-#    ifndef CONFIG_SAMA5_EMAC0_PHYSR_100MBPS
-#      error "CONFIG_SAMA5_EMAC0_PHYSR_100MBPS must be defined in the NuttX configuration"
-#    endif
-#    ifndef CONFIG_SAMA5_EMAC0_PHYSR_MODE
-#      error "CONFIG_SAMA5_EMAC0_PHYSR_MODE must be defined in the NuttX configuration"
-#    endif
-#    ifndef CONFIG_SAMA5_EMAC0_PHYSR_FULLDUPLEX
-#      error "CONFIG_SAMA5_EMAC0_PHYSR_FULLDUPLEX must be defined in the NuttX configuration"
+#  ifndef CONFIG_SAMA5_EMAC0_PHYSR
+#    error "CONFIG_SAMA5_EMAC0_PHYSR must be defined in the NuttX configuration"
+#  endif
+
+#  ifdef CONFIG_SAMA5_EMAC0_AUTONEG
+#    ifdef CONFIG_SAMA5_EMAC0_PHYSR_ALTCONFIG
+#      ifndef CONFIG_SAMA5_EMAC0_PHYSR_ALTMODE
+#        error "CONFIG_SAMA5_EMAC0_PHYSR_ALTMODE must be defined in the NuttX configuration"
+#      endif
+#      ifndef CONFIG_SAMA5_EMAC0_PHYSR_10HD
+#        error "CONFIG_SAMA5_EMAC0_PHYSR_10HD must be defined in the NuttX configuration"
+#      endif
+#      ifndef CONFIG_SAMA5_EMAC0_PHYSR_100HD
+#        error "CONFIG_SAMA5_EMAC0_PHYSR_100HD must be defined in the NuttX configuration"
+#      endif
+#      ifndef CONFIG_SAMA5_EMAC0_PHYSR_10FD
+#        error "CONFIG_SAMA5_EMAC0_PHYSR_10FD must be defined in the NuttX configuration"
+#      endif
+#      ifndef CONFIG_SAMA5_EMAC0_PHYSR_100FD
+#        error "CONFIG_SAMA5_EMAC0_PHYSR_100FD must be defined in the NuttX configuration"
+#      endif
+#    else
+#      ifndef CONFIG_SAMA5_EMAC0_PHYSR_SPEED
+#        error "CONFIG_SAMA5_EMAC0_PHYSR_SPEED must be defined in the NuttX configuration"
+#      endif
+#      ifndef CONFIG_SAMA5_EMAC0_PHYSR_100MBPS
+#        error "CONFIG_SAMA5_EMAC0_PHYSR_100MBPS must be defined in the NuttX configuration"
+#      endif
+#      ifndef CONFIG_SAMA5_EMAC0_PHYSR_MODE
+#        error "CONFIG_SAMA5_EMAC0_PHYSR_MODE must be defined in the NuttX configuration"
+#      endif
+#      ifndef CONFIG_SAMA5_EMAC0_PHYSR_FULLDUPLEX
+#        error "CONFIG_SAMA5_EMAC0_PHYSR_FULLDUPLEX must be defined in the NuttX configuration"
+#      endif
 #    endif
 #  endif
-#endif
 
-/* PHY definitions */
+  /* PHY definitions */
 
-#if defined(SAMA5_EMAC0_PHY_DM9161)
-#  define EMAC0_MII_OUI_MSB    0x0181
-#  define EMAC0_MII_OUI_LSB    0x2e
-#elif defined(SAMA5_EMAC0_PHY_LAN8700)
-#  define EMAC0_MII_OUI_MSB    0x0007
-#  define EMAC0_MII_OUI_LSB    0x30
-#elif defined(SAMA5_EMAC0_PHY_KSZ8051)
-#  define EMAC0_MII_OUI_MSB    0x0022
-#  define EMAC0_MII_OUI_LSB    0x05
-#elif defined(SAMA5_EMAC0_PHY_KSZ8081)
-#  define EMAC0_MII_OUI_MSB    0x0022
-#  define EMAC0_MII_OUI_LSB    0x05
-#else
-#  error EMAC PHY unrecognized
-#endif
+#  if defined(SAMA5_EMAC0_PHY_DM9161)
+#    define EMAC0_MII_OUI_MSB    0x0181
+#    define EMAC0_MII_OUI_LSB    0x2e
+#  elif defined(SAMA5_EMAC0_PHY_LAN8700)
+#    define EMAC0_MII_OUI_MSB    0x0007
+#    define EMAC0_MII_OUI_LSB    0x30
+#  elif defined(SAMA5_EMAC0_PHY_KSZ8051)
+#    define EMAC0_MII_OUI_MSB    0x0022
+#    define EMAC0_MII_OUI_LSB    0x05
+#  elif defined(SAMA5_EMAC0_PHY_KSZ8081)
+#    define EMAC0_MII_OUI_MSB    0x0022
+#    define EMAC0_MII_OUI_LSB    0x05
+#  else
+#    error EMAC PHY unrecognized
+#  endif
+#endif /* CONFIG_SAMA5_EMAC0 */
 
 /* EMAC1 Configuration ******************************************************/
-/* Number of buffers for RX */
 
-#ifndef CONFIG_SAMA5_EMAC1_NRXBUFFERS
-#  define CONFIG_SAMA5_EMAC1_NRXBUFFERS  16
-#endif
+#ifdef CONFIG_SAMA5_EMAC1
+  /* Number of buffers for RX */
 
-/* Number of buffers for TX */
+#  ifndef CONFIG_SAMA5_EMAC1_NRXBUFFERS
+#    define CONFIG_SAMA5_EMAC1_NRXBUFFERS  16
+#  endif
 
-#ifndef CONFIG_SAMA5_EMAC1_NTXBUFFERS
-#  define CONFIG_SAMA5_EMAC1_NTXBUFFERS  8
-#endif
+  /* Number of buffers for TX */
 
-#ifndef CONFIG_SAMA5_EMAC1_PHYADDR
-#  error "CONFIG_SAMA5_EMAC1_PHYADDR must be defined in the NuttX configuration"
-#endif
+#  ifndef CONFIG_SAMA5_EMAC1_NTXBUFFERS
+#    define CONFIG_SAMA5_EMAC1_NTXBUFFERS  8
+#  endif
 
-#if !defined(CONFIG_SAMA5_EMAC1_MII) && !defined(CONFIG_SAMA5_EMAC1_RMII)
-#  warning "Neither CONFIG_SAMA5_EMAC1_MII nor CONFIG_SAMA5_EMAC1_RMII defined"
-#endif
+#  ifndef CONFIG_SAMA5_EMAC1_PHYADDR
+#    error "CONFIG_SAMA5_EMAC1_PHYADDR must be defined in the NuttX configuration"
+#  endif
 
-#if defined(CONFIG_SAMA5_EMAC1_MII) && defined(CONFIG_SAMA5_EMAC1_RMII)
-#  error "Both CONFIG_SAMA5_EMAC1_MII and CONFIG_SAMA5_EMAC1_RMII defined"
-#endif
+#  if !defined(CONFIG_SAMA5_EMAC1_MII) && !defined(CONFIG_SAMA5_EMAC1_RMII)
+#    warning "Neither CONFIG_SAMA5_EMAC1_MII nor CONFIG_SAMA5_EMAC1_RMII defined"
+#  endif
 
-#ifndef CONFIG_SAMA5_EMAC1_PHYSR
-#  error "CONFIG_SAMA5_EMAC1_PHYSR must be defined in the NuttX configuration"
-#endif
+#  if defined(CONFIG_SAMA5_EMAC1_MII) && defined(CONFIG_SAMA5_EMAC1_RMII)
+#    error "Both CONFIG_SAMA5_EMAC1_MII and CONFIG_SAMA5_EMAC1_RMII defined"
+#  endif
 
-#ifdef CONFIG_SAMA5_EMAC1_AUTONEG
-#  ifdef CONFIG_SAMA5_EMAC1_PHYSR_ALTCONFIG
-#    ifndef CONFIG_SAMA5_EMAC1_PHYSR_ALTMODE
-#      error "CONFIG_SAMA5_EMAC1_PHYSR_ALTMODE must be defined in the NuttX configuration"
-#    endif
-#    ifndef CONFIG_SAMA5_EMAC1_PHYSR_10HD
-#      error "CONFIG_SAMA5_EMAC1_PHYSR_10HD must be defined in the NuttX configuration"
-#    endif
-#    ifndef CONFIG_SAMA5_EMAC1_PHYSR_100HD
-#      error "CONFIG_SAMA5_EMAC1_PHYSR_100HD must be defined in the NuttX configuration"
-#    endif
-#    ifndef CONFIG_SAMA5_EMAC1_PHYSR_10FD
-#      error "CONFIG_SAMA5_EMAC1_PHYSR_10FD must be defined in the NuttX configuration"
-#    endif
-#    ifndef CONFIG_SAMA5_EMAC1_PHYSR_100FD
-#      error "CONFIG_SAMA5_EMAC1_PHYSR_100FD must be defined in the NuttX configuration"
-#    endif
-#  else
-#    ifndef CONFIG_SAMA5_EMAC1_PHYSR_SPEED
-#      error "CONFIG_SAMA5_EMAC1_PHYSR_SPEED must be defined in the NuttX configuration"
-#    endif
-#    ifndef CONFIG_SAMA5_EMAC1_PHYSR_100MBPS
-#      error "CONFIG_SAMA5_EMAC1_PHYSR_100MBPS must be defined in the NuttX configuration"
-#    endif
-#    ifndef CONFIG_SAMA5_EMAC1_PHYSR_MODE
-#      error "CONFIG_SAMA5_EMAC1_PHYSR_MODE must be defined in the NuttX configuration"
-#    endif
-#    ifndef CONFIG_SAMA5_EMAC1_PHYSR_FULLDUPLEX
-#      error "CONFIG_SAMA5_EMAC1_PHYSR_FULLDUPLEX must be defined in the NuttX configuration"
+#  ifndef CONFIG_SAMA5_EMAC1_PHYSR
+#    error "CONFIG_SAMA5_EMAC1_PHYSR must be defined in the NuttX configuration"
+#  endif
+
+#  ifdef CONFIG_SAMA5_EMAC1_AUTONEG
+#    ifdef CONFIG_SAMA5_EMAC1_PHYSR_ALTCONFIG
+#      ifndef CONFIG_SAMA5_EMAC1_PHYSR_ALTMODE
+#        error "CONFIG_SAMA5_EMAC1_PHYSR_ALTMODE must be defined in the NuttX configuration"
+#      endif
+#      ifndef CONFIG_SAMA5_EMAC1_PHYSR_10HD
+#        error "CONFIG_SAMA5_EMAC1_PHYSR_10HD must be defined in the NuttX configuration"
+#      endif
+#      ifndef CONFIG_SAMA5_EMAC1_PHYSR_100HD
+#        error "CONFIG_SAMA5_EMAC1_PHYSR_100HD must be defined in the NuttX configuration"
+#      endif
+#      ifndef CONFIG_SAMA5_EMAC1_PHYSR_10FD
+#        error "CONFIG_SAMA5_EMAC1_PHYSR_10FD must be defined in the NuttX configuration"
+#      endif
+#      ifndef CONFIG_SAMA5_EMAC1_PHYSR_100FD
+#        error "CONFIG_SAMA5_EMAC1_PHYSR_100FD must be defined in the NuttX configuration"
+#      endif
+#    else
+#      ifndef CONFIG_SAMA5_EMAC1_PHYSR_SPEED
+#        error "CONFIG_SAMA5_EMAC1_PHYSR_SPEED must be defined in the NuttX configuration"
+#      endif
+#      ifndef CONFIG_SAMA5_EMAC1_PHYSR_100MBPS
+#        error "CONFIG_SAMA5_EMAC1_PHYSR_100MBPS must be defined in the NuttX configuration"
+#      endif
+#      ifndef CONFIG_SAMA5_EMAC1_PHYSR_MODE
+#        error "CONFIG_SAMA5_EMAC1_PHYSR_MODE must be defined in the NuttX configuration"
+#      endif
+#      ifndef CONFIG_SAMA5_EMAC1_PHYSR_FULLDUPLEX
+#        error "CONFIG_SAMA5_EMAC1_PHYSR_FULLDUPLEX must be defined in the NuttX configuration"
+#      endif
 #    endif
 #  endif
-#endif
 
-/* PHY definitions */
+  /* PHY definitions */
 
-#if defined(SAMA5_EMAC1_PHY_DM9161)
-#  define EMAC1_MII_OUI_MSB    0x0181
-#  define EMAC1_MII_OUI_LSB    0x2e
-#elif defined(SAMA5_EMAC1_PHY_LAN8700)
-#  define EMAC1_MII_OUI_MSB    0x0007
-#  define EMAC1_MII_OUI_LSB    0x30
-#elif defined(SAMA5_EMAC1_PHY_KSZ8051)
-#  define EMAC1_MII_OUI_MSB    0x0022
-#  define EMAC1_MII_OUI_LSB    0x05
-#elif defined(SAMA5_EMAC1_PHY_KSZ8081)
-#  define EMAC1_MII_OUI_MSB    0x0022
-#  define EMAC1_MII_OUI_LSB    0x05
-#else
-#  error EMAC PHY unrecognized
-#endif
+#  if defined(SAMA5_EMAC1_PHY_DM9161)
+#    define EMAC1_MII_OUI_MSB    0x0181
+#    define EMAC1_MII_OUI_LSB    0x2e
+#  elif defined(SAMA5_EMAC1_PHY_LAN8700)
+#    define EMAC1_MII_OUI_MSB    0x0007
+#    define EMAC1_MII_OUI_LSB    0x30
+#  elif defined(SAMA5_EMAC1_PHY_KSZ8051)
+#    define EMAC1_MII_OUI_MSB    0x0022
+#    define EMAC1_MII_OUI_LSB    0x05
+#  elif defined(SAMA5_EMAC1_PHY_KSZ8081)
+#    define EMAC1_MII_OUI_MSB    0x0022
+#    define EMAC1_MII_OUI_LSB    0x05
+#  else
+#    error EMAC PHY unrecognized
+#  endif
+#endif /* CONFIG_SAMA5_EMAC0 */
 
 /* Common Configuration *****************************************************/
 
