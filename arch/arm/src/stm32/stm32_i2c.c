@@ -278,7 +278,7 @@ struct stm32_i2c_priv_s
 
 struct stm32_i2c_inst_s
 {
-  struct i2c_ops_s        *ops;  /* Standard I2C operations */
+  const struct i2c_ops_s  *ops;  /* Standard I2C operations */
   struct stm32_i2c_priv_s *priv; /* Common driver private data structure */
 
   uint32_t    frequency;   /* Frequency used in this instantiation */
@@ -384,7 +384,7 @@ static const struct stm32_i2c_config_s stm32_i2c1_config =
 #endif
 };
 
-struct stm32_i2c_priv_s stm32_i2c1_priv =
+static struct stm32_i2c_priv_s stm32_i2c1_priv =
 {
   .config     = &stm32_i2c1_config,
   .refs       = 0,
@@ -413,7 +413,7 @@ static const struct stm32_i2c_config_s stm32_i2c2_config =
 #endif
 };
 
-struct stm32_i2c_priv_s stm32_i2c2_priv =
+static struct stm32_i2c_priv_s stm32_i2c2_priv =
 {
   .config     = &stm32_i2c2_config,
   .refs       = 0,
@@ -442,7 +442,7 @@ static const struct stm32_i2c_config_s stm32_i2c3_config =
 #endif
 };
 
-struct stm32_i2c_priv_s stm32_i2c3_priv =
+static struct stm32_i2c_priv_s stm32_i2c3_priv =
 {
   .config     = &stm32_i2c3_config,
   .refs       = 0,
@@ -458,7 +458,7 @@ struct stm32_i2c_priv_s stm32_i2c3_priv =
 
 /* Device Structures, Instantiation */
 
-struct i2c_ops_s stm32_i2c_ops =
+static const struct i2c_ops_s stm32_i2c_ops =
 {
   .setfrequency       = stm32_i2c_setfrequency,
   .setaddress         = stm32_i2c_setaddress,
