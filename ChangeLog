@@ -7605,3 +7605,10 @@
 	  to clean this up? For now I've put together a quick patch that
 	  defines those macros to 1, consistent with the rest of unistd.h.
 	  From Kosma Moczek (2014-6-30)
+	* arch/arm/src/sama5/sam_memories.c:  Fix some logic in conversion
+	  of physical and virtal DRAM addresses when running out of DRAM.  This
+	  is an important bug fix for the SAMA5D3 and 4 when running out of
+	  DRAM (2014-6-30).
+	* arch/arm/src/sama5/sam_pio.c:  Another *critical* SAMA5D3 and 4 bug
+	  fix:  PIO clocking must be enabled for all input pins or else the
+	  value that is read never changes. (2014-6-30).
