@@ -137,7 +137,7 @@ static inline int sam_piopin(pio_pinset_t cfgset)
 static inline int sam_configinput(uintptr_t base, uint32_t pin,
                                   pio_pinset_t cfgset)
 {
-#if defined(PIO_HAVE_SCHMITT) || defined(PIO_HAVE_DRIVE) || defined(SAM_PIO_ISLR_OFFSET)
+#if defined(PIO_HAVE_SCHMITT) || defined(PIO_HAVE_DRIVE)
   uint32_t regval;
 #endif
 #if defined(PIO_HAVE_DRIVE)
@@ -150,14 +150,6 @@ static inline int sam_configinput(uintptr_t base, uint32_t pin,
   /* Disable interrupts on the pin */
 
   putreg32(pin, base + SAM_PIO_IDR_OFFSET);
-
-#if defined(SAM_PIO_ISLR_OFFSET)
-  /* Assume unsecure */
-
-  regval  = getreg32(base + SAM_PIO_ISLR_OFFSET);
-  regval |= pin;
-  putreg32(regval, base + SAM_PIO_ISLR_OFFSET);
-#endif
 
   /* Enable/disable the pull-up as requested */
 
@@ -256,21 +248,9 @@ static inline int sam_configinput(uintptr_t base, uint32_t pin,
 static inline int sam_configoutput(uintptr_t base, uint32_t pin,
                                    pio_pinset_t cfgset)
 {
-#if defined(SAM_PIO_ISLR_OFFSET)
-  uint32_t regval;
-#endif
-
   /* Disable interrupts on the pin */
 
   putreg32(pin, base + SAM_PIO_IDR_OFFSET);
-
-#if defined(SAM_PIO_ISLR_OFFSET)
-  /* Assume unsecure */
-
-  regval  = getreg32(base + SAM_PIO_ISLR_OFFSET);
-  regval |= pin;
-  putreg32(regval, base + SAM_PIO_ISLR_OFFSET);
-#endif
 
   /* Enable/disable the pull-up as requested */
 
@@ -342,14 +322,6 @@ static inline int sam_configperiph(uintptr_t base, uint32_t pin,
   /* Disable interrupts on the pin */
 
   putreg32(pin, base + SAM_PIO_IDR_OFFSET);
-
-#if defined(SAM_PIO_ISLR_OFFSET)
-  /* Assume unsecure */
-
-  regval = getreg32(base + SAM_PIO_ISLR_OFFSET);
-  regval |= pin;
-  putreg32(regval, base + SAM_PIO_ISLR_OFFSET);
-#endif
 
   /* Enable/disable the pull-up as requested */
 
@@ -466,7 +438,21 @@ int sam_configpio(pio_pinset_t cfgset)
 
   flags = irqsave();
 
-  /* Enable writing to PIO registers */
+  /* Enable writing to PIO registers.  The following registers are protected:
+   *
+   *  - PIO Enable/Disable Registers (PER/PDR)
+   *  - PIO Output Enable/Disable Registers (OER/ODR)
+   *  - PIO Interrupt Security Level Register (ISLR)
+   *  - PIO Input Filter Enable/Disable Registers (IFER/IFDR)
+   *  - PIO Multi-driver Enable/Disable Registers (MDER/MDDR)
+   *  - PIO Pull-Up Enable/Disable Registers (PUER/PUDR)
+   *  - PIO Peripheral ABCD Select Register 1/2 (ABCDSR1/2)
+   *  - PIO Output Write Enable/Disable Registers
+   *  - PIO Pad Pull-Down Enable/Disable Registers (PPER/PPDR)
+   *
+   * I suspect that the default state is the WPMR is unprotected, so these
+   * operations could probably all be avoided.
+   */
 
   putreg32(PIO_WPMR_WPKEY, base + SAM_PIO_WPMR_OFFSET);
 
