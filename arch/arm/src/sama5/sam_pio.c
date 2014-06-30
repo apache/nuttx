@@ -86,7 +86,7 @@ static const uint8_t g_piopid[SAM_NPIO] =
 
 /* Used to determine if a PIO port is configured to support interrupts */
 
-static const bool g_piointterrupts[SAM_NPIO] =
+static const bool g_piointerrupt[SAM_NPIO] =
 {
 #ifdef CONFIG_SAMA5_PIOA_IRQ
   true,
@@ -109,14 +109,9 @@ static const bool g_piointterrupts[SAM_NPIO] =
   false,
 #endif
 #ifdef CONFIG_SAMA5_PIOE_IRQ
-  true,
+  true
 #else
-  false,
-#endif
-#ifdef CONFIG_SAMA5_PIOF_IRQ
-  true,
-#else
-  false,
+  false
 #endif
 };
 
