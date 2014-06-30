@@ -196,6 +196,7 @@ static int sam_piointerrupt(uint32_t base, int irq0, void *context)
           pending &= ~bit;
         }
     }
+
   return OK;
 }
 
