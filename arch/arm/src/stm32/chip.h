@@ -81,6 +81,7 @@
  */
 
 #  elif defined(CONFIG_ARCH_CHIP_STM32F103RB) || \
+        defined(CONFIG_ARCH_CHIP_STM32F103RC) || \
         defined(CONFIG_ARCH_CHIP_STM32F103RD) || \
         defined(CONFIG_ARCH_CHIP_STM32F103RE)
 #    include "chip/stm32f103r_pinmap.h"
