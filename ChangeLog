@@ -7578,4 +7578,30 @@
 	  driver to build for the SAMA5D4 (2014-6-29).
 	* SAMA5D4-EK: Fix HSMCI card-detect pin selection (2014-6-29).
 	* net/:  Still renaming, mostly uip_* to net_* (2014-6-29).
-
+	* arch/arm/src/stm32/stm32_i2c.c and stm32_i2c_alt.c, and
+	  libc/time/lib_daysbeforemonth.c:  Make variable definitions
+	  'static const' when possible to save RAM usage.  From Kosma
+	  Moczek (2014-6-30).
+	* include/stdint.h: Correct naming of [U]INT_LEASTn_{MAX|MIN}
+	  and [U]INT_FASTn{MAX|MIN}. From Kosma Moczek (2014-6-30). 
+	* drivers/mtd/mtd-config:  Extend erase block size to 18-bits in
+	  order (decrease block size to 14-bits) to handle parts with large
+	  erase blocks. From Kosma Moczek (2014-6-30). 
+	* drivers/analog/adc.c: Remove empty ADC write method. From Kosma
+	  Moczek (2014-6-30).
+	* arch/arm/src/stm32/stm32_serial.c: Unconfigure GPIO pins when
+	  closing a serial port to prevent back effects from back-powering on
+	  the TX pin. From Kosma Moczek (2014-6-30)
+	* arch/arm/src/stm32/Kconfig:  Move temperature ranges from chip
+	  selection configuration prompts. Reorder MCUs in choice menu;
+	  remove duplicates. Add support for the STM32F103RC and RD.  From
+	  Kosma Moczek (2014-6-30)
+	* configs/sam4s-xplained-pro:  Correct description of LEDs and
+	  usage. From Kosma Moczek (2014-6-30)
+	* include/unistd.h: Some POSIX_* and _POSIX_* macros are defined
+	  without value, whereas (as far as I can tell) the newer versions
+	  of the standard require them to have the value corresponding to
+	  the standard version implemented, like 200809L. Are the any plans
+	  to clean this up? For now I've put together a quick patch that
+	  defines those macros to 1, consistent with the rest of unistd.h.
+	  From Kosma Moczek (2014-6-30)
