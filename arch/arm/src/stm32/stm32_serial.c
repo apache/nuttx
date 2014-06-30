@@ -1594,6 +1594,38 @@ static void up_shutdown(struct uart_dev_s *dev)
   regval  = up_serialin(priv, STM32_USART_CR1_OFFSET);
   regval &= ~(USART_CR1_UE | USART_CR1_TE | USART_CR1_RE);
   up_serialout(priv, STM32_USART_CR1_OFFSET, regval);
+
+  /* Release pins. "If the serial-attached device is powered down, the TX
+   * pin causes back-powering, potentially confusing the device to the point
+   * of complete lock-up."
+   *
+   * REVISIT:  Is unconfiguring the pins appropriate for all device?  If not,
+   * then this may need to be a configuration option.
+   */
+
+  stm32_unconfiggpio(priv->tx_gpio);
+  stm32_unconfiggpio(priv->rx_gpio);
+
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+  if (priv->cts_gpio != 0)
+    {
+      stm32_unconfiggpio(priv->cts_gpio);
+    }
+#endif
+
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  if (priv->rts_gpio != 0)
+    {
+      stm32_unconfiggpio(priv->rts_gpio);
+    }
+#endif
+
+#if HAVE_RS485
+  if (priv->rs485_dir_gpio != 0)
+    {
+      stm32_unconfiggpio(priv->rs485_dir_gpio);
+    }
+#endif
 }
 
 /****************************************************************************
