@@ -592,7 +592,7 @@ Configurations
 
     3. Since networking is enabled, you will see some boot-up delays when
        the network connection is established.  These delays can be quite
-       large is no network is attached (A production design to bring up the
+       large if no network is attached (A production design to bring up the
        network asynchronously to avoid these start up delays).
 
     4. This configuration uses the default USART1 serial console.  That
