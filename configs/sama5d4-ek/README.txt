@@ -3355,9 +3355,17 @@ Configurations
        If these behaviors are a problem for you, then you may want to
        disable HSMCI0 as well.
 
-    9. Networking support via the can be added to NSH by modifying the
-       configuration.  See the "Networking" section above for detailed
-       configuration settings.
+    9. Networking is supported via EMAC0.  See the "Networking" section
+       above for detailed configuration settings.  DHCP is not used in
+       this configuration; rather, a hard-coded IP address of 10.0.0.2 is
+       used with a netmask of 255.255.255.0.  The host is assumed to be
+       10.0.0.1 in places.  You can reconfigure to enabled DHCPC or to
+       change these addresses as you see fit.
+
+       Since networking is enabled, you will see some boot-up delays until
+       the network connection is established.  These delays can be quite
+       large if no network is attached (A production design would bring up
+       the network asynchronously to avoid these start up delays).
 
    10. The SAMA5D4-EK includes for an AT25 serial DataFlash.  That support is
        NOT enabled in this configuration.  Support for that serial FLASH can
