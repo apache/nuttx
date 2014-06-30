@@ -3330,15 +3330,21 @@ Configurations
        will need to install a battery in the battery holder (J12) and close
        the jumper, JP13.
 
-    8. Support for HSMCI0 and HSMCI1 is built-in by default. The SAMA4D4-EK
-       provides a two SD memory card slots:  (1) a full size SD card slot
-       (J10), and (2) a microSD memory card slot (J11).  The full size SD
-       card slot connects via HSMCI0; the microSD connects vi HSMCI1.
-       Support for both SD slots can be enabled with the settings provided
+    8. Support for HSMCI0 is built-in by default. The SAMA4D4-EK provides
+       two SD memory card slots:  (1) a full size SD card slot (J10), and
+       (2) a microSD memory card slot (J11).  The full size SD card slot
+       connects via HSMCI0; the microSD connects vi HSMCI1.  Support for
+       the microSD slot could also be enabled with the settings provided
        in the paragraph entitled "HSMCI Card Slots" above.
 
        NOTE:  For now I am boot off the microSD slot so, unless are booting
-       in a different manner, this HSMCI1 slot may not be useful to you.
+       in a different manner, this HSMCI1 slot may not be useful to you
+       anyway.
+
+       STATUS:  There is an unresolved issue with HSMCI0 as of this writing.
+       No errors are reported so most the handshaking signals and command
+       transfers are working, but all data transfers return the value zero
+       (with or without DMA).  This seems like some pin configuration issue.
 
     9. The SAMA5D4-EK includes for an AT25 serial DataFlash.  That support is
        NOT enabled in this configuration.  Support for that serial FLASH can
@@ -3437,7 +3443,11 @@ To-Do List
 
 2) HSCMI TX DMA support is currently commented out.
 
-3) Some drivers may require some adjustments if you intend to run from SDRAM.
+3) Currently HSMCI1 does not work correctly.  No errors are reported so all of
+   the card handshakes must be working, but only zero values are read from the
+   card (with or without DMA).  Sounds like a pin configuration issue.
+
+4) Some drivers may require some adjustments if you intend to run from SDRAM.
    That is because in this case macros like BOARD_MCK_FREQUENCY are not constants
    but are instead function calls:  The MCK clock frequency is not known in
    advance but instead has to be calculated from the bootloader PLL configuration.
