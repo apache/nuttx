@@ -68,7 +68,6 @@
 static int     adc_open(FAR struct file *filep);
 static int     adc_close(FAR struct file *filep);
 static ssize_t adc_read(FAR struct file *, FAR char *, size_t);
-static ssize_t adc_write(FAR struct file *filep, FAR const char *buffer, size_t buflen);
 static int     adc_ioctl(FAR struct file *filep,int cmd,unsigned long arg);
 
 /****************************************************************************
@@ -80,7 +79,7 @@ static const struct file_operations adc_fops =
   adc_open,     /* open */
   adc_close,    /* close */
   adc_read,     /* read */
-  adc_write,    /* write */
+  0,            /* write */
   0,            /* seek */
   adc_ioctl     /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
@@ -345,15 +344,6 @@ return_with_irqdisabled:
 
   avdbg("Returning: %d\n", ret);
   return ret;
-}
-
-/************************************************************************************
- * Name: adc_write
- ************************************************************************************/
-
-static ssize_t adc_write(FAR struct file *filep, FAR const char *buffer, size_t buflen)
-{
-  return 0;
 }
 
 /************************************************************************************
