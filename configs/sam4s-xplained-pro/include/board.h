@@ -197,7 +197,7 @@
  *
  *   LED              GPIO
  *   ---------------- -----
- *   D301 Yellow LED   PC10
+ *   D301 Yellow LED  PC23
  *
  * Both can be illuminated by driving the GPIO output to ground (low).
  */
@@ -233,7 +233,7 @@
 #define LED_D301_ON false /* GPIO low for ON */
 
 /* Thus if D301 is statically on, NuttX has successfully booted and is,
- * apparently, running normmally.
+ * apparently, running normally.
  */
 
 /* Button definitions ***************************************************************/

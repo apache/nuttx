@@ -14,7 +14,7 @@ README
     - IS66WV51216DBLL ISSI SRAM 8Mb 512K x 16 55ns PSRAM 2.5v-3.6v
     - Four Atmel QTouch buttons
     - External voltage input
-    - Four LEDs, two controllable from software
+    - Two LEDs, one controllable from software
     - Xplained expansion headers
     - Footprint for external serial Flash (not fitted)
 
@@ -288,37 +288,40 @@ Buttons and LEDs
 
   LEDs
   ----
-
-  There are four LEDs on board the SAM4X Xplained board, two of these can be
+=======================
+  There is one LED on board the SAM4S Xplained board Pro that can be
   controlled by software in the SAM4S:
 
-      LED              GPIO
-      ---------------- -----
-      D9  Yellow LED   PC10
-      D10 Yellow LED   PC17
+    LED              GPIO
+    ---------------- -----
+    LED0 Yellow LED   PC23
 
-  Both can be illuminated by driving the GPIO output to ground (low).
+  It can be illuminated by driving the GPIO output to ground (low).
 
-  These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
+  If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on
+  board the SAM4S Xplained Pro, otherwise it can controlled by the user
+  with functions defined into boards file src/sam_userleds.c.
+
+  The user LED is not used by the board port unless CONFIG_ARCH_LEDS is
   defined.  In that case, the usage by the board port is defined in
-  include/board.h and src/sam_leds.c. The LEDs are used to encode OS-related
-  events as follows:
+  include/board.h and src/sam_leds.c. The LEDs are used to encode OS-
+  related events as follows:
 
-    SYMBOL                Meaning                     LED state
-                                                    D9       D10
-    -------------------  -----------------------  -------- --------
-    LED_STARTED          NuttX has been started     OFF      OFF
-    LED_HEAPALLOCATE     Heap has been allocated    OFF      OFF
-    LED_IRQSENABLED      Interrupts enabled         OFF      OFF
-    LED_STACKCREATED     Idle stack created         ON       OFF
-    LED_INIRQ            In an interrupt              No change
-    LED_SIGNAL           In a signal handler          No change
-    LED_ASSERTION        An assertion failed          No change
-    LED_PANIC            The system has crashed     OFF      Blinking
-    LED_IDLE             MCU is is sleep mode         Not used
+    SYMBOL                Meaning                   LED state
+                                                    LED0
+    -------------------  -----------------------  -----------
+    LED_STARTED          NuttX has been started     OFF
+    LED_HEAPALLOCATE     Heap has been allocated    OFF
+    LED_IRQSENABLED      Interrupts enabled         OFF
+    LED_STACKCREATED     Idle stack created         ON
+    LED_INIRQ            In an interrupt            No change
+    LED_SIGNAL           In a signal handler        No change
+    LED_ASSERTION        An assertion failed        No change
+    LED_PANIC            The system has crashed     OFF
+    LED_IDLE             MCU is is sleep mode       Not used
 
-  Thus if D9 is statically on, NuttX has successfully booted and is,
-  apparently, running normmally.  If D10 is flashing at approximately
+  Thus if LED0 is statically on, NuttX has successfully booted and is,
+  apparently, running normally.  If LED0 is flashing at approximately
   2Hz, then a fatal error has been detected and the system has halted.
 
 Serial Consoles
