@@ -761,7 +761,7 @@ uintptr_t sam_physregaddr(uintptr_t virtregaddr)
    * address
    */
 
-  dbg("Bad virtual address: %08lx\n|", virtregaddr);
+  dbg("Bad virtual address: %08lx\n", virtregaddr);
   DEBUGPANIC();
   return virtregaddr;
 }
@@ -867,7 +867,7 @@ uintptr_t sam_physramaddr(uintptr_t virtramaddr)
 
   if (virtramaddr != 0)
     {
-      dbg("Bad virtual address: %08lx\n|", virtramaddr);
+      dbg("Bad virtual address: %08lx\n", virtramaddr);
       DEBUGPANIC();
     }
 
