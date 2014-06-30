@@ -1,8 +1,10 @@
 /****************************************************************************
  * drivers/mtd/mtd_config.c
  *
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2013 Ken Pettit. All rights reserved.
  *   Author: Ken Pettit <pettitkd@gmail.com>
+ *           With Updates from Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -89,22 +91,22 @@
 
 struct mtdconfig_struct_s
 {
-  FAR struct mtd_dev_s *mtd; /* Contained MTD interface */
-  sem_t        exclsem;      /* Supports mutual exclusion */
-  uint16_t     blocksize;    /* Size of blocks in contained MTD */
-  uint16_t     erasesize;    /* Size of erase block  in contained MTD */
-  size_t       nblocks;      /* Number of blocks available */
-  size_t       neraseblocks; /* Number of erase blocks available */
-  off_t        readoff;      /* Read offset (for hexdump) */
-  FAR uint8_t *buffer;       /* Temp block read buffer */
+  FAR struct mtd_dev_s *mtd;  /* Contained MTD interface */
+  sem_t        exclsem;       /* Supports mutual exclusion */
+  uint32_t     blocksize :14; /* Size of blocks in contained MTD */
+  uint32_t     erasesize :18; /* Size of erase block  in contained MTD */
+  size_t       nblocks;       /* Number of blocks available */
+  size_t       neraseblocks;  /* Number of erase blocks available */
+  off_t        readoff;       /* Read offset (for hexdump) */
+  FAR uint8_t *buffer;        /* Temp block read buffer */
 };
 
 struct mtdconfig_header_s
 {
-  uint8_t      flags;        /* Entry control flags */
-  uint8_t      instance;     /* Instance of the item */
-  uint16_t     id;           /* ID of the config data item */
-  uint16_t     len;          /* Length of the data block */
+  uint8_t      flags;         /* Entry control flags */
+  uint8_t      instance;      /* Instance of the item */
+  uint16_t     id;            /* ID of the config data item */
+  uint16_t     len;           /* Length of the data block */
 } packed_struct;
 
 /****************************************************************************
