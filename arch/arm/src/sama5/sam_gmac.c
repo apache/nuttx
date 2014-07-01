@@ -2762,8 +2762,6 @@ static void sam_rxreset(struct sam_gmac_s *priv)
 
 static void sam_gmac_reset(struct sam_gmac_s *priv)
 {
-  uint32_t regval;
-
   /* Disable all GMAC interrupts */
 
   sam_putreg(priv, SAM_GMAC_IDR, GMAC_INT_ALL);
@@ -2773,10 +2771,9 @@ static void sam_gmac_reset(struct sam_gmac_s *priv)
   sam_rxreset(priv);
   sam_txreset(priv);
 
-  /* Disable RX, TX, and statistics */
+  /* Make sure that RX and TX are disabled; clear statistics registers */
 
-  regval = GMAC_NCR_TXEN | GMAC_NCR_RXEN | GMAC_NCR_WESTAT | GMAC_NCR_CLRSTAT;
-  sam_putreg(priv, SAM_GMAC_NCR, regval);
+  sam_putreg(priv, SAM_GMAC_NCR, GMAC_NCR_CLRSTAT);
 
   /* Disable clocking to the GMAC peripheral */
 
@@ -2849,14 +2846,10 @@ static int sam_gmac_configure(struct sam_gmac_s *priv)
 
   sam_gmac_enableclk();
 
-  /* Disable TX, RX, interrupts, etc. */
+  /* Disable TX, RX, clear statistics.  Disable all interrupts. */
 
-  sam_putreg(priv, SAM_GMAC_NCR, 0);
+  sam_putreg(priv, SAM_GMAC_NCR, GMAC_NCR_CLRSTAT);
   sam_putreg(priv, SAM_GMAC_IDR, GMAC_INT_ALL);
-
-  regval = sam_getreg(priv, SAM_GMAC_NCR);
-  regval |= GMAC_NCR_CLRSTAT;
-  sam_putreg(priv, SAM_GMAC_NCR, regval);
 
   /* Clear all status bits in the receive status register. */
 
@@ -2920,7 +2913,7 @@ static int sam_gmac_configure(struct sam_gmac_s *priv)
   sam_rxreset(priv);
   sam_txreset(priv);
 
-  /* Enable Rx and Tx, plus the stats register. */
+  /* Enable Rx and Tx, plus the statistics registers. */
 
   regval  = sam_getreg(priv, SAM_GMAC_NCR);
   regval |= (GMAC_NCR_RXEN | GMAC_NCR_TXEN | GMAC_NCR_WESTAT);
