@@ -486,10 +486,10 @@ int tcp_backlogdelete(FAR struct tcp_conn_s *conn,
   } while (0)
 
 /* Get the current maximum segment size that can be sent on the current
- * connection.
+ * TCP connection.
  */
 
-#define uip_mss(conn) ((conn)->mss)
+#define tcp_mss(conn) ((conn)->mss)
 
 #endif /* CONFIG_NET_TCP */
 #endif /* __INCLUDE_NUTTX_NET_TCP_H */

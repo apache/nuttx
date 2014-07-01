@@ -185,7 +185,7 @@ uint16_t devif_callback_execute(FAR struct net_driver_s *dev, FAR void *pvconn,
  * The amount of data that actually is sent out after a call to this
  * function is determined by the maximum amount of data TCP allows. uIP
  * will automatically crop the data so that only the appropriate
- * amount of data is sent. The function uip_mss() can be used to query
+ * amount of data is sent. The function tcp_mss() can be used to query
  * uIP for the amount of data that actually will be sent.
  *
  * Note: This function does not guarantee that the sent data will

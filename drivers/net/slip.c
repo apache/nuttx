@@ -102,7 +102,7 @@
  * a MTU of 296 and window of 256, but actually only sends 168 bytes of data:
  * 40 + 128.  I believe that is to allow for the 2x worst cast packet
  * expansion.  Ideally we would like to advertise the 256 MSS, but restrict
- * uIP to 128 bytes (possibly by modifying the uip_mss() macro).
+ * uIP to 128 bytes (possibly by modifying the tcp_mss() macro).
  */
 
 #if CONFIG_NET_BUFSIZE < 296
