@@ -75,7 +75,7 @@
 
 #if defined(CONFIG_NET_PKT)
 static int devif_poll_pkt_connections(FAR struct net_driver_s *dev,
-                                      uip_poll_callback_t callback)
+                                      devif_poll_callback_t callback)
 {
   FAR struct pkt_conn_s *pkt_conn = NULL;
   int bstop = 0;
@@ -111,7 +111,7 @@ static int devif_poll_pkt_connections(FAR struct net_driver_s *dev,
 
 #if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING)
 static inline int devif_poll_icmp(FAR struct net_driver_s *dev,
-                                  uip_poll_callback_t callback)
+                                  devif_poll_callback_t callback)
 {
   /* Perform the UDP TX poll */
 
@@ -137,7 +137,7 @@ static inline int devif_poll_icmp(FAR struct net_driver_s *dev,
 
 #ifdef CONFIG_NET_IGMP
 static inline int devif_poll_igmp(FAR struct net_driver_s *dev,
-                                  uip_poll_callback_t callback)
+                                  devif_poll_callback_t callback)
 {
   /* Perform the IGMP TX poll */
 
@@ -163,7 +163,7 @@ static inline int devif_poll_igmp(FAR struct net_driver_s *dev,
 
 #ifdef CONFIG_NET_UDP
 static int devif_poll_udp_connections(FAR struct net_driver_s *dev,
-                                      uip_poll_callback_t callback)
+                                      devif_poll_callback_t callback)
 {
   FAR struct udp_conn_s *conn = NULL;
   int bstop = 0;
@@ -199,7 +199,7 @@ static int devif_poll_udp_connections(FAR struct net_driver_s *dev,
 
 #ifdef CONFIG_NET_TCP
 static inline int devif_poll_tcp_connections(FAR struct net_driver_s *dev,
-                                             uip_poll_callback_t callback)
+                                             devif_poll_callback_t callback)
 {
   FAR struct tcp_conn_s *conn  = NULL;
   int bstop = 0;
@@ -238,7 +238,7 @@ static inline int devif_poll_tcp_connections(FAR struct net_driver_s *dev,
 
 #ifdef CONFIG_NET_TCP
 static inline int devif_poll_tcp_timer(FAR struct net_driver_s *dev,
-                                       uip_poll_callback_t callback, int hsec)
+                                       devif_poll_callback_t callback, int hsec)
 {
   FAR struct tcp_conn_s *conn  = NULL;
   int bstop = 0;
@@ -267,11 +267,11 @@ static inline int devif_poll_tcp_timer(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: uip_poll
+ * Function: devif_poll
  *
  * Description:
  *   This function will traverse each active uIP connection structure and
- *   will perform TCP and UDP polling operations. uip_poll() may be called
+ *   will perform TCP and UDP polling operations. devif_poll() may be called
  *   asynchronously with the network driver can accept another outgoing
  *   packet.
  *
@@ -291,7 +291,7 @@ static inline int devif_poll_tcp_timer(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-int uip_poll(FAR struct net_driver_s *dev, uip_poll_callback_t callback)
+int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 {
   int bstop;
 
@@ -343,12 +343,12 @@ int uip_poll(FAR struct net_driver_s *dev, uip_poll_callback_t callback)
 }
 
 /****************************************************************************
- * Function: uip_timer
+ * Function: devif_timer
  *
  * Description:
  *   These function will traverse each active uIP connection structure and
  *   perform TCP timer operations (and UDP polling operations). The Ethernet
- *   driver MUST implement logic to periodically call uip_timer().
+ *   driver MUST implement logic to periodically call devif_timer().
  *
  *   This function will call the provided callback function for every active
  *   connection. Polling will continue until all connections have been polled
@@ -366,8 +366,8 @@ int uip_poll(FAR struct net_driver_s *dev, uip_poll_callback_t callback)
  *
  ****************************************************************************/
 
-int uip_timer(FAR struct net_driver_s *dev, uip_poll_callback_t callback,
-              int hsec)
+int devif_timer(FAR struct net_driver_s *dev, devif_poll_callback_t callback,
+                int hsec)
 {
   int bstop;
 

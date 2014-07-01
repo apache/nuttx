@@ -1167,7 +1167,7 @@ static int enc_transmit(FAR struct enc_driver_s *priv)
  *
  * Description:
  *   The transmitter is available, check if uIP has any outgoing packets ready
- *   to send.  This is a callback from uip_poll().  uip_poll() may be called:
+ *   to send.  This is a callback from devif_poll().  devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
  *   2. When the preceding TX packet send timesout and the interface is reset
@@ -1276,7 +1276,7 @@ static void enc_txif(FAR struct enc_driver_s *priv)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)uip_poll(&priv->dev, enc_uiptxpoll);
+  (void)devif_poll(&priv->dev, enc_uiptxpoll);
 }
 
 /****************************************************************************
@@ -1835,7 +1835,7 @@ static void enc_toworker(FAR void *arg)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)uip_poll(&priv->dev, enc_uiptxpoll);
+  (void)devif_poll(&priv->dev, enc_uiptxpoll);
 
   /* Release lock on uIP */
 
@@ -1924,7 +1924,7 @@ static void enc_pollworker(FAR void *arg)
        * in progress, we will missing TCP time state updates?
        */
 
-      (void)uip_timer(&priv->dev, enc_uiptxpoll, ENC_POLLHSEC);
+      (void)devif_timer(&priv->dev, enc_uiptxpoll, ENC_POLLHSEC);
     }
 
   /* Release lock on the SPI bus and uIP */
@@ -2144,7 +2144,7 @@ static int enc_txavail(struct net_driver_s *dev)
         {
           /* The interface is up and TX is idle; poll uIP for new XMIT data */
 
-          (void)uip_poll(&priv->dev, enc_uiptxpoll);
+          (void)devif_poll(&priv->dev, enc_uiptxpoll);
         }
     }
 

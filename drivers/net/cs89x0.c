@@ -311,7 +311,7 @@ static int cs89x0_transmit(struct cs89x0_driver_s *cs89x0)
  *
  * Description:
  *   The transmitter is available, check if uIP has any outgoing packets ready
- *   to send.  This is a callback from uip_poll().  uip_poll() may be called:
+ *   to send.  This is a callback from devif_poll().  devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
  *   2. When the preceding TX packet send timesout and the interface is reset
@@ -518,7 +518,7 @@ static void cs89x0_txdone(struct cs89x0_driver_s *cs89x0, uint16_t isq)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)uip_poll(&cs89x0->cs_dev, cs89x0_uiptxpoll);
+  (void)devif_poll(&cs89x0->cs_dev, cs89x0_uiptxpoll);
 }
 
 /****************************************************************************
@@ -663,7 +663,7 @@ static void cs89x0_txtimeout(int argc, uint32_t arg, ...)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)uip_poll(&cs89x0->cs_dev, cs89x0_uiptxpoll);
+  (void)devif_poll(&cs89x0->cs_dev, cs89x0_uiptxpoll);
 }
 
 /****************************************************************************
@@ -692,7 +692,7 @@ static void cs89x0_polltimer(int argc, uint32_t arg, ...)
 
   /* If so, update TCP timing states and poll uIP for new XMIT data */
 
-  (void)uip_timer(&cs89x0->cs_dev, cs89x0_uiptxpoll, CS89x0_POLLHSEC);
+  (void)devif_timer(&cs89x0->cs_dev, cs89x0_uiptxpoll, CS89x0_POLLHSEC);
 
   /* Setup the watchdog poll timer again */
 
@@ -811,7 +811,7 @@ static int cs89x0_txavail(struct net_driver_s *dev)
 
       /* If so, then poll uIP for new XMIT data */
 
-      (void)uip_poll(&cs89x0->cs_dev, cs89x0_uiptxpoll);
+      (void)devif_poll(&cs89x0->cs_dev, cs89x0_uiptxpoll);
     }
 
   irqrestore(flags);

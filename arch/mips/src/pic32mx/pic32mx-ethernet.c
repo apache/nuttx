@@ -1113,7 +1113,7 @@ static int pic32mx_transmit(struct pic32mx_driver_s *priv)
  *
  * Description:
  *   The transmitter is available, check if uIP has any outgoing packets ready
- *   to send.  This is a callback from uip_poll().  uip_poll() may be called:
+ *   to send.  This is a callback from devif_poll().  devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
  *   2. When the preceding TX packet send timesout and the interface is reset
@@ -1212,7 +1212,7 @@ static void pic32mx_poll(struct pic32mx_driver_s *priv)
           /* And perform the poll */
 
           priv->pd_polling = true;
-          (void)uip_poll(&priv->pd_dev, pic32mx_uiptxpoll);
+          (void)devif_poll(&priv->pd_dev, pic32mx_uiptxpoll);
 
           /* Free any buffer left attached after the poll */
 
@@ -1258,7 +1258,7 @@ static void pic32mx_timerpoll(struct pic32mx_driver_s *priv)
           /* And perform the poll */
 
           priv->pd_polling = true;
-          (void)uip_timer(&priv->pd_dev, pic32mx_uiptxpoll, PIC32MX_POLLHSEC);
+          (void)devif_timer(&priv->pd_dev, pic32mx_uiptxpoll, PIC32MX_POLLHSEC);
 
           /* Free any buffer left attached after the poll */
 

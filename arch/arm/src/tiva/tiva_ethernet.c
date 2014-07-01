@@ -577,7 +577,7 @@ static int tiva_transmit(struct tiva_driver_s *priv)
  *
  * Description:
  *   The transmitter is available, check if uIP has any outgoing packets ready
- *   to send.  This is a callback from uip_poll().  uip_poll() may be called:
+ *   to send.  This is a callback from devif_poll().  devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
  *   2. When the preceding TX packet send timesout and the interface is reset
@@ -839,7 +839,7 @@ static void tiva_txdone(struct tiva_driver_s *priv)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)uip_poll(&priv->ld_dev, tiva_uiptxpoll);
+  (void)devif_poll(&priv->ld_dev, tiva_uiptxpoll);
 }
 
 /****************************************************************************
@@ -963,7 +963,7 @@ static void tiva_txtimeout(int argc, uint32_t arg, ...)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)uip_poll(&priv->ld_dev, tiva_uiptxpoll);
+  (void)devif_poll(&priv->ld_dev, tiva_uiptxpoll);
 }
 
 /****************************************************************************
@@ -999,7 +999,7 @@ static void tiva_polltimer(int argc, uint32_t arg, ...)
     {
       /* If so, update TCP timing states and poll uIP for new XMIT data */
 
-      (void)uip_timer(&priv->ld_dev, tiva_uiptxpoll, TIVA_POLLHSEC);
+      (void)devif_timer(&priv->ld_dev, tiva_uiptxpoll, TIVA_POLLHSEC);
 
       /* Setup the watchdog poll timer again */
 
@@ -1285,7 +1285,7 @@ static int tiva_txavail(struct net_driver_s *dev)
        * for new Tx data
        */
 
-      (void)uip_poll(&priv->ld_dev, tiva_uiptxpoll);
+      (void)devif_poll(&priv->ld_dev, tiva_uiptxpoll);
     }
 
   irqrestore(flags);

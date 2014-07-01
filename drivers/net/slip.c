@@ -402,7 +402,7 @@ static int slip_transmit(FAR struct slip_driver_s *priv)
  *
  * Description:
  *   Check if uIP has any outgoing packets ready to send.  This is a
- *   callback from uip_poll().  uip_poll() may be called:
+ *   callback from devif_poll().  devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete, or
  *   2. When the preceding TX packet send times o ]ut and the interface is reset
@@ -495,7 +495,7 @@ static void slip_txtask(int argc, char *argv[])
 
           flags = net_lock();
           priv->dev.d_buf = priv->txbuf;
-          (void)uip_timer(&priv->dev, slip_uiptxpoll, SLIP_POLLHSEC);
+          (void)devif_timer(&priv->dev, slip_uiptxpoll, SLIP_POLLHSEC);
           net_unlock(flags);
           slip_semgive(priv);
         }

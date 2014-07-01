@@ -1140,7 +1140,7 @@ static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
  *
  * Description:
  *   The transmitter is available, check if uIP has any outgoing packets ready
- *   to send.  This is a callback from uip_poll().  uip_poll() may be called:
+ *   to send.  This is a callback from devif_poll().  devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
  *   2. When the preceding TX packet send timesout and the interface is reset
@@ -1266,7 +1266,7 @@ static void stm32_dopoll(FAR struct stm32_ethmac_s *priv)
 
       if (dev->d_buf)
         {
-          (void)uip_poll(dev, stm32_uiptxpoll);
+          (void)devif_poll(dev, stm32_uiptxpoll);
 
           /* We will, most likely end up with a buffer to be freed.  But it
            * might not be the same one that we allocated above.
@@ -1994,7 +1994,7 @@ static void stm32_polltimer(int argc, uint32_t arg, ...)
           /* Update TCP timing states and poll uIP for new XMIT data.
            */
 
-          (void)uip_timer(dev, stm32_uiptxpoll, STM32_POLLHSEC);
+          (void)devif_timer(dev, stm32_uiptxpoll, STM32_POLLHSEC);
 
           /* We will, most likely end up with a buffer to be freed.  But it
            * might not be the same one that we allocated above.

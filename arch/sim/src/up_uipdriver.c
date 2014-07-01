@@ -202,7 +202,7 @@ void uipdriver_loop(void)
   else if (timer_expired(&g_periodic_timer))
     {
       timer_reset(&g_periodic_timer);
-      uip_timer(&g_sim_dev, sim_uiptxpoll, 1);
+      devif_timer(&g_sim_dev, sim_uiptxpoll, 1);
     }
   sched_unlock();
 }

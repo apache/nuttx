@@ -457,7 +457,7 @@ static int e1000_transmit(struct e1000_dev *e1000)
  *
  * Description:
  *   The transmitter is available, check if uIP has any outgoing packets ready
- *   to send.  This is a callback from uip_poll().  uip_poll() may be called:
+ *   to send.  This is a callback from devif_poll().  devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
  *   2. When the preceding TX packet send timesout and the interface is reset
@@ -641,7 +641,7 @@ static void e1000_txtimeout(int argc, uint32_t arg, ...)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)uip_poll(&e1000->netdev, e1000_uiptxpoll);
+  (void)devif_poll(&e1000->netdev, e1000_uiptxpoll);
 }
 
 /****************************************************************************
@@ -681,7 +681,7 @@ static void e1000_polltimer(int argc, uint32_t arg, ...)
    * we will missing TCP time state updates?
    */
 
-  (void)uip_timer(&e1000->netdev, e1000_uiptxpoll, E1000_POLLHSEC);
+  (void)devif_timer(&e1000->netdev, e1000_uiptxpoll, E1000_POLLHSEC);
 
   /* Setup the watchdog poll timer again */
 
@@ -819,7 +819,7 @@ static int e1000_txavail(struct net_driver_s *dev)
 
       if (e1000->tx_ring.desc[tail].desc_status)
         {
-          (void)uip_poll(&e1000->netdev, e1000_uiptxpoll);
+          (void)devif_poll(&e1000->netdev, e1000_uiptxpoll);
         }
     }
 
@@ -938,7 +938,7 @@ static irqreturn_t e1000_interrupt_handler(int irq, void *dev_id)
 
   if (intr_cause & (1<<0))
     {
-      uip_poll(&e1000->netdev, e1000_uiptxpoll);
+      devif_poll(&e1000->netdev, e1000_uiptxpoll);
     }
 
 

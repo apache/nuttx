@@ -731,7 +731,7 @@ static int sam_transmit(struct sam_gmac_s *priv)
  *
  * Description:
  *   The transmitter is available, check if uIP has any outgoing packets ready
- *   to send.  This is a callback from uip_poll().  uip_poll() may be called:
+ *   to send.  This is a callback from devif_poll().  devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
  *   2. When the preceding TX packet send timesout and the interface is reset
@@ -815,7 +815,7 @@ static void sam_dopoll(struct sam_gmac_s *priv)
     {
       /* If we have the descriptor, then poll uIP for new XMIT data. */
 
-      (void)uip_poll(dev, sam_uiptxpoll);
+      (void)devif_poll(dev, sam_uiptxpoll);
     }
 }
 
@@ -1510,7 +1510,7 @@ static void sam_polltimer(int argc, uint32_t arg, ...)
     {
       /* Update TCP timing states and poll uIP for new XMIT data. */
 
-      (void)uip_timer(dev, sam_uiptxpoll, SAM_POLLHSEC);
+      (void)devif_timer(dev, sam_uiptxpoll, SAM_POLLHSEC);
     }
 
   /* Setup the watchdog poll timer again */

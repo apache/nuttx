@@ -163,8 +163,8 @@ struct net_driver_s
 
   uint16_t d_len;
 
-  /* When d_buf contains outgoing xmit data, d_sndlen is nonzero and represents
-   * the amount of appllcation data after d_snddata
+  /* When d_buf contains outgoing xmit data, d_sndlen is non-zero and represents
+   * the amount of application data after d_snddata
    */
 
   uint16_t d_sndlen;
@@ -195,6 +195,8 @@ struct net_driver_s
 
   void *d_private;
 };
+
+typedef int (*devif_poll_callback_t)(struct net_driver_s *dev);
 
 /****************************************************************************
  * Public Variables
@@ -268,15 +270,15 @@ int devif_input(struct net_driver_s *dev);
 /* Polling of connections
  *
  * These functions will traverse each active uIP connection structure and
- * perform appropriate operatios:  uip_timer() will perform TCP timer
- * operations (and UDP polling operations); uip_poll() will perform TCP
+ * perform appropriate operations:  devif_timer() will perform TCP timer
+ * operations (and UDP polling operations); devif_poll() will perform TCP
  * and UDP polling operations. The CAN driver MUST implement logic to
- * periodically call uip_timer(); uip_poll() may be called asychronously
+ * periodically call devif_timer(); devif_poll() may be called asynchronously
  * from the network driver can accept another outgoing packet.
  *
  * In both cases, these functions will call the provided callback function
  * for every active connection. Polling will continue until all connections
- * have been polled or until the user-suplied function returns a non-zero
+ * have been polled or until the user-supplied function returns a non-zero
  * value (which it should do only if it cannot accept further write data).
  *
  * When the callback function is called, there may be an outbound packet
@@ -296,7 +298,7 @@ int devif_input(struct net_driver_s *dev);
  *   }
  *
  *   ...
- *   uip_poll(dev, driver_callback);
+ *   devif_poll(dev, driver_callback);
  *
  * Note: If you are writing a uIP device driver that needs ARP (Address
  * Resolution Protocol), e.g., when running uIP over Ethernet, you will
@@ -315,9 +317,8 @@ int devif_input(struct net_driver_s *dev);
  *   }
  */
 
-typedef int (*uip_poll_callback_t)(struct net_driver_s *dev);
-int uip_poll(struct net_driver_s *dev, uip_poll_callback_t callback);
-int uip_timer(struct net_driver_s *dev, uip_poll_callback_t callback, int hsec);
+int devif_poll(struct net_driver_s *dev, devif_poll_callback_t callback);
+int devif_timer(struct net_driver_s *dev, devif_poll_callback_t callback, int hsec);
 
 /* Carrier detection
  * Call netdev_carrier_on when the carrier has become available and the device
