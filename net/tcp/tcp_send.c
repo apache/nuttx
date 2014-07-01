@@ -190,7 +190,7 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
 
   if (conn->tcpstateflags & UIP_STOPPED)
     {
-      /* If the connection has issued uip_stop(), we advertise a zero
+      /* If the connection has issued UIP_STOPPED, we advertise a zero
        * window so that the remote host will stop sending data.
        */
 

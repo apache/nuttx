@@ -674,7 +674,7 @@ found:
 
         /* If d_len > 0 we have TCP data in the packet, and we flag this
          * by setting the UIP_NEWDATA flag. If the application has stopped
-         * the data flow using uip_stop(), we must not accept any data
+         * the data flow using UIP_STOPPED, we must not accept any data
          * packets from the remote host.
          */
 

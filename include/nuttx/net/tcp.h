@@ -472,19 +472,6 @@ int tcp_backlogdelete(FAR struct tcp_conn_s *conn,
 #  define tcp_backlogremove(conn)      (NULL)
 #endif
 
-/* Restart the current connection, if is has previously been stopped
- * with uip_stop().
- *
- * This function will open the receiver's window again so that we start
- * receiving data for the current connection.
- */
-
-#define uip_restart(conn,f) \
-  do { \
-    (f) |= UIP_NEWDATA; \
-    (conn)->tcpstateflags &= ~UIP_STOPPED; \
-  } while (0)
-
 /* Get the current maximum segment size that can be sent on the current
  * TCP connection.
  */
