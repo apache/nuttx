@@ -265,7 +265,7 @@ static void emac_receive(FAR struct emac_driver_s *priv)
 #endif
         {
           arp_ipin(&priv->d_dev);
-          uip_input(&priv->d_dev);
+          devif_input(&priv->d_dev);
 
           /* If the above function invocation resulted in data that should be
            * sent out on the network, the field  d_len will set to a value > 0.

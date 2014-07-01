@@ -989,7 +989,7 @@ static void dm9x_receive(struct dm9x_driver_s *dm9x)
 #endif
             {
               arp_ipin(&dm9x->dm_dev);
-              uip_input(&dm9x->dm_dev);
+              devif_input(&dm9x->dm_dev);
 
              /* If the above function invocation resulted in data that should be
               * sent out on the network, the field  d_len will set to a value > 0.

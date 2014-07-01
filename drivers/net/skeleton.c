@@ -265,7 +265,7 @@ static void skel_receive(FAR struct skel_driver_s *skel)
 #endif
         {
           arp_ipin(&skel->sk_dev);
-          uip_input(&skel->sk_dev);
+          devif_input(&skel->sk_dev);
 
           /* If the above function invocation resulted in data that should be
            * sent out on the network, the field  d_len will set to a value > 0.

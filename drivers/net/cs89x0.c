@@ -439,7 +439,7 @@ static void cs89x0_receive(struct cs89x0_driver_s *cs89x0, uint16_t isq)
 #endif
     {
       arp_ipin(&cs89x0->cs_dev);
-      uip_input(&cs89x0->cs_dev);
+      devif_input(&cs89x0->cs_dev);
 
       /* If the above function invocation resulted in data that should be
        * sent out on the network, the field  d_len will set to a value > 0.

@@ -227,7 +227,7 @@ struct net_driver_s
  *     dev->d_len = devicedriver_poll();
  *     if (dev->d_len > 0)
  *       {
- *         uip_input(dev);
+ *         devif_input(dev);
  *         if (dev->d_len > 0)
  *           {
  *             devicedriver_send();
@@ -246,7 +246,7 @@ struct net_driver_s
  *         if (BUF->type == HTONS(UIP_ETHTYPE_IP))
  *           {
  *             arp_ipin();
- *             uip_input(dev);
+ *             devif_input(dev);
  *             if (dev->d_len > 0)
  *               {
  *                 arp_out();
@@ -263,7 +263,7 @@ struct net_driver_s
  *           }
  */
 
-int uip_input(struct net_driver_s *dev);
+int devif_input(struct net_driver_s *dev);
 
 /* Polling of connections
  *
