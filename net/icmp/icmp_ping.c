@@ -297,7 +297,7 @@ end_wait:
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_ping
+ * Name: imcp_ping
  *
  * Description:
  *   Send a ECHO request and wait for the ECHO response
@@ -323,8 +323,8 @@ end_wait:
  *
  ****************************************************************************/
 
-int uip_ping(net_ipaddr_t addr, uint16_t id, uint16_t seqno,
-             uint16_t datalen, int dsecs)
+int icmp_ping(net_ipaddr_t addr, uint16_t id, uint16_t seqno,
+              uint16_t datalen, int dsecs)
 {
   struct icmp_ping_s state;
   net_lock_t save;

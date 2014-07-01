@@ -385,7 +385,7 @@ o Kernel Build
                ifup     netdev_foreach()
                ifdown   netdev_foreach()
                ifconfig netdev_foreach(), g_netstats
-               ping     uip_ping()
+               ping     icmp_ping()
 
   Status:      Open
   Priority:    Medium/High -- the kernel build configuration is not fully fielded

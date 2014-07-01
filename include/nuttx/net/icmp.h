@@ -203,8 +203,8 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-int uip_ping(net_ipaddr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
-             int dsecs);
+int icmp_ping(net_ipaddr_t addr, uint16_t id, uint16_t seqno, uint16_t datalen,
+              int dsecs);
 
 #undef EXTERN
 #ifdef __cplusplus
