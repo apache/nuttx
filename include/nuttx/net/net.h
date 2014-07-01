@@ -144,6 +144,10 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
+/* This function may be used at boot time to set the initial ip_id.*/
+
+void net_setipid(uint16_t id);
+
 /* net_checksd.c *************************************************************/
 /* Check if the socket descriptor is valid for the provided TCB and if it
  * supports the requested access.

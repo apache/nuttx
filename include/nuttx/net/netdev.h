@@ -206,7 +206,8 @@ typedef int (*devif_poll_callback_t)(struct net_driver_s *dev);
  * Public Function Prototypes
  ****************************************************************************/
 
-/* uIP device driver functions
+/****************************************************************************
+ * uIP device driver functions
  *
  * These functions are used by a network device driver for interacting
  * with uIP.
@@ -263,11 +264,13 @@ typedef int (*devif_poll_callback_t)(struct net_driver_s *dev);
  *                 devicedriver_send();
  *               }
  *           }
- */
+ *
+ ****************************************************************************/
 
 int devif_input(struct net_driver_s *dev);
 
-/* Polling of connections
+/****************************************************************************
+ * Polling of connections
  *
  * These functions will traverse each active uIP connection structure and
  * perform appropriate operations:  devif_timer() will perform TCP timer
@@ -315,18 +318,22 @@ int devif_input(struct net_driver_s *dev);
  *       }
  *     return 0;
  *   }
- */
+ *
+ ****************************************************************************/
 
 int devif_poll(struct net_driver_s *dev, devif_poll_callback_t callback);
 int devif_timer(struct net_driver_s *dev, devif_poll_callback_t callback, int hsec);
 
-/* Carrier detection
+/****************************************************************************
+ * Carrier detection
+ *
  * Call netdev_carrier_on when the carrier has become available and the device
  * is ready to receive/transmit packets.
  *
  * Call detdev_carrier_off when the carrier disappeared and the device has moved
  * into non operational state.
- */
+ *
+ ****************************************************************************/
 
 int netdev_carrier_on(FAR struct net_driver_s *dev);
 int netdev_carrier_off(FAR struct net_driver_s *dev);

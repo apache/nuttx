@@ -35,7 +35,7 @@
 
 # Network device interface source files
 
-NET_CSRCS += devif_initialize.c devif_setipid.c devif_input.c devif_send.c
+NET_CSRCS += devif_initialize.c net_setipid.c devif_input.c devif_send.c
 NET_CSRCS += devif_poll.c devif_callback.c
 
 # I/O buffer chain support required?

@@ -235,10 +235,6 @@ struct devif_callback_s
  * Public Function Prototypes
  ****************************************************************************/
 
-/* This function may be used at boot time to set the initial ip_id.*/
-
-void uip_setipid(uint16_t id);
-
 /* Critical section management.  The NuttX configuration setting
  * CONFIG_NET_NOINT indicates that uIP not called from the interrupt level.
  * If CONFIG_NET_NOINTS is defined, then these will map to semaphore

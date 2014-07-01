@@ -472,20 +472,6 @@ int tcp_backlogdelete(FAR struct tcp_conn_s *conn,
 #  define tcp_backlogremove(conn)      (NULL)
 #endif
 
-/* Tell the sending host to stop sending data.
- *
- * This function will close our receiver's window so that we stop
- * receiving data for the current connection.
- */
-
-#define uip_stop(conn) ((conn)->tcpstateflags |= UIP_STOPPED)
-
-/* Find out if the current connection has been previously stopped with
- * uip_stop().
- */
-
-#define uip_stopped(conn) ((conn)->tcpstateflags & UIP_STOPPED)
-
 /* Restart the current connection, if is has previously been stopped
  * with uip_stop().
  *

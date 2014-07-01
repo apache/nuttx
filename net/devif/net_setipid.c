@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/devif/devif_setipid.c
+ * net/devif/net_setipid.c
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -60,7 +60,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: uip_setipid
+ * Function: net_setipid
  *
  * Description:
  *   This function may be used at boot time to set the initial ip_id.
@@ -69,7 +69,7 @@
  *
  ****************************************************************************/
 
-void uip_setipid(uint16_t id)
+void net_setipid(uint16_t id)
 {
   g_ipid = id;
 }
