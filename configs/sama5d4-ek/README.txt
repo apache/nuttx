@@ -3208,7 +3208,32 @@ Configurations
        the warning in the section "Information Common to All Configurations"
        for further information.
 
-    3. This configuration executes out of SDRAM flash and is loaded into
+    3. This configuration supports logging of debug output to a circular
+       buffer in RAM.  This feature is discussed fully in this Wiki page:
+       http://nuttx.org/doku.php?id=wiki:howtos:syslog . Relevant configuration settings are summarized below:
+
+       File System:
+       CONFIG_SYSLOG_ENABLE=n      : (Output debug info unconditionally)
+       CONFIG_SYSLOG=y             : Enables the System Logging feature.
+
+       Device Drivers:
+       CONFIG_RAMLOG=y             : Enable the RAM-based logging feature.
+       CONFIG_RAMLOG_CONSOLE=n     : (We don't use the RAMLOG console)
+       CONFIG_RAMLOG_SYSLOG=y      : This enables the RAM-based logger as the
+                                     system logger.
+       CONFIG_RAMLOG_NONBLOCKING=y : Needs to be non-blocking for dmesg
+       CONFIG_RAMLOG_BUFSIZE=16384 : Buffer size is 16KiB
+
+       NOTE: This RAMLOG feature is really only of value if debug output
+       is enabled.  But, by default, no debug output is disabled in this
+       configuration.  Therefore, there is no logic that will add anything
+       to the RAM buffer.  This feature is configured and in place only
+       to support any future debugging needs that you may have.
+
+       If you don't plan on using the debug features, then by all means
+       disable this feature and save 16KiB of RAM!
+
+    4. This configuration executes out of SDRAM flash and is loaded into
        SDRAM from NAND, Serial DataFlash, SD card or from a TFTPC sever via
        U-Boot, BareBox, or the DRAMBOOT configuration described above.  Data
        also is positioned in SDRAM.
@@ -3245,7 +3270,7 @@ Configurations
          U-Boot> fatload mmc 0 0x20008000 nuttx.bin
          U-Boot> go 0x20008040
 
-    4. This configuration supports /dev/null, /dev/zero, and /dev/random.
+    5. This configuration supports /dev/null, /dev/zero, and /dev/random.
 
          CONFIG_DEV_NULL=y    : Enables /dev/null
          CONFIG_DEV_ZERO=y    : Enabled /dev/zero
@@ -3257,9 +3282,9 @@ Configurations
         CONFIG_SAMA5_TRNG=y   : Enables the TRNG peripheral
         CONFIG_DEV_RANDOM=y   : Enables /dev/random
 
-    5. This configuration has support for NSH built-in applications enabled.
+    6. This configuration has support for NSH built-in applications enabled.
 
-    6. This configuration has support for the FAT and ROMFS file systems
+    7. This configuration has support for the FAT and ROMFS file systems
        built in.
 
        The FAT file system includes long file name support.  Please be aware
@@ -3276,7 +3301,7 @@ Configurations
 
          CONFIG_FS_ROMFS=y      : Enable ROMFS file system
 
-    6. An NSH star-up script is provided by the ROMFS file system.  The ROMFS
+    8. An NSH star-up script is provided by the ROMFS file system.  The ROMFS
        file system is mounted at /etc and provides:
 
          |- dev/
@@ -3317,7 +3342,7 @@ Configurations
 
        The /tmp directory can them be used for and scratch purpose.
 
-    7. The Real Time Clock/Calendar (RTC) is enabled in this configuration.
+    9. The Real Time Clock/Calendar (RTC) is enabled in this configuration.
        See the section entitled "RTC" above for detailed configuration
        settings.
 
@@ -3328,12 +3353,12 @@ Configurations
        The time value from the RTC will be used as the NuttX system time
        in all timestamp operations.  You may use the NSH 'date' command
        to set or view the RTC as described above in the "RTC" section.
-       
+
        NOTE:  If you want the RTC to preserve time over power cycles, you
        will need to install a battery in the battery holder (J12) and close
        the jumper, JP13.
 
-    8. Support for HSMCI0 is built-in by default. The SAMA4D4-EK provides
+   10. Support for HSMCI0 is built-in by default. The SAMA4D4-EK provides
        two SD memory card slots:  (1) a full size SD card slot (J10), and
        (2) a microSD memory card slot (J11).  The full size SD card slot
        connects via HSMCI0; the microSD connects vi HSMCI1.  Support for
@@ -3355,7 +3380,7 @@ Configurations
        If these behaviors are a problem for you, then you may want to
        disable HSMCI0 as well.
 
-    9. Networking is supported via EMAC0.  See the "Networking" section
+   11. Networking is supported via EMAC0.  See the "Networking" section
        above for detailed configuration settings.  DHCP is not used in
        this configuration; rather, a hard-coded IP address of 10.0.0.2 is
        used with a netmask of 255.255.255.0.  The host is assumed to be
@@ -3367,24 +3392,24 @@ Configurations
        large if no network is attached (A production design would bring up
        the network asynchronously to avoid these start up delays).
 
-   10. The SAMA5D4-EK includes for an AT25 serial DataFlash.  That support is
+   12. The SAMA5D4-EK includes for an AT25 serial DataFlash.  That support is
        NOT enabled in this configuration.  Support for that serial FLASH can
        be enabled by modifying the NuttX configuration as described above in
        the paragraph entitled "AT25 Serial FLASH".
 
-   11. Support the USB low-, high- and full-speed OHCI host driver can be enabled
-       by changing the NuttX configuration file as described in the section
-       entitled "USB High-Speed Host" above.
+   13. Support the USB low-, high- and full-speed OHCI host driver can be
+       enabled by changing the NuttX configuration file as described in the
+       section entitled "USB High-Speed Host" above.
 
-   12. Support the USB high-speed USB device driver (UDPHS) can be enabled
+   14. Support the USB high-speed USB device driver (UDPHS) can be enabled
        by changing the NuttX configuration file as described above in the
        section entitled "USB High-Speed Device."
 
-   13. I2C Tool. NuttX supports an I2C tool at apps/system/i2c that can be
+   15. I2C Tool. NuttX supports an I2C tool at apps/system/i2c that can be
        used to peek and poke I2C devices.  See the discussion above under
        "I2C Tool" for detailed configuration settings.
 
-   14. This example can be configured to exercise the watchdog timer test
+   16. This example can be configured to exercise the watchdog timer test
        (apps/examples/watchdog).  See the detailed configuration settings in
        the section entitled "Watchdog Timer" above.
 
