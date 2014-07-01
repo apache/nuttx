@@ -42,6 +42,7 @@
 #include <sys/types.h>
 #include <sys/ioctl.h>
 
+#include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -735,10 +736,10 @@ int ramlog_sysloginit(void)
 int syslog_putc(int ch)
 {
   FAR struct ramlog_dev_s *priv = &g_sysdev;
-#ifdef CONFIG_RAMLOG_CRLF
   int ret;
 
-  /* Ignore carriage returns */
+#ifdef CONFIG_RAMLOG_CRLF
+  /* Ignore carriage returns.  But return success. */
 
   if (ch == '\r')
     {
@@ -754,13 +755,28 @@ int syslog_putc(int ch)
         {
           /* The buffer is full and nothing was saved. */
 
-          return ch;
+          goto errout;
         }
     }
 #endif
 
-  (void)ramlog_addchar(priv, ch);
-  return ch;
+  /* Add the character to the RAMLOG */
+
+  ret = ramlog_addchar(priv, ch);
+  if (ret >= 0)
+    {
+      /* Return the character added on success */
+
+      return ch;
+    }
+
+  /* On a failure, we need to return EOF and set the errno so that
+   * work like all other putc-like functions.
+   */
+
+errout:
+  set_errno(-ret);
+  return EOF;
 }
 #endif
 
