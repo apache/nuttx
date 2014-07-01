@@ -81,7 +81,7 @@ struct tcp_iphdr_s; /* Forward reference */
 
 void tcp_initialize(void);
 struct tcp_conn_s *tcp_active(FAR struct tcp_iphdr_s *buf);
-struct tcp_conn_s *uip_nexttcpconn(FAR struct tcp_conn_s *conn);
+struct tcp_conn_s *tcp_nextconn(FAR struct tcp_conn_s *conn);
 struct tcp_conn_s *tcp_listener(uint16_t portno);
 struct tcp_conn_s *tcp_alloc_accept(FAR struct tcp_iphdr_s *buf);
 

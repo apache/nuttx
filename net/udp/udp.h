@@ -82,7 +82,7 @@ struct udp_conn_s; /* Forward reference */
 
 void udp_initialize(void);
 FAR struct udp_conn_s *udp_active(FAR struct udp_iphdr_s *buf);
-FAR struct udp_conn_s *uip_nextudpconn(FAR struct udp_conn_s *conn);
+FAR struct udp_conn_s *udp_nextconn(FAR struct udp_conn_s *conn);
 
 /* Defined in udp_poll.c ****************************************************/
 

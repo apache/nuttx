@@ -438,7 +438,7 @@ FAR struct tcp_conn_s *tcp_active(struct tcp_iphdr_s *buf)
 }
 
 /****************************************************************************
- * Name: uip_nexttcpconn()
+ * Name: tcp_nextconn()
  *
  * Description:
  *   Traverse the list of active TCP connections
@@ -449,7 +449,7 @@ FAR struct tcp_conn_s *tcp_active(struct tcp_iphdr_s *buf)
  *
  ****************************************************************************/
 
-FAR struct tcp_conn_s *uip_nexttcpconn(FAR struct tcp_conn_s *conn)
+FAR struct tcp_conn_s *tcp_nextconn(FAR struct tcp_conn_s *conn)
 {
   if (!conn)
     {

@@ -337,7 +337,7 @@ FAR struct udp_conn_s *udp_active(FAR struct udp_iphdr_s *buf)
 }
 
 /****************************************************************************
- * Name: uip_nextudpconn()
+ * Name: udp_nextconn()
  *
  * Description:
  *   Traverse the list of allocated UDP connections
@@ -348,7 +348,7 @@ FAR struct udp_conn_s *udp_active(FAR struct udp_iphdr_s *buf)
  *
  ****************************************************************************/
 
-FAR struct udp_conn_s *uip_nextudpconn(FAR struct udp_conn_s *conn)
+FAR struct udp_conn_s *udp_nextconn(FAR struct udp_conn_s *conn)
 {
   if (!conn)
     {

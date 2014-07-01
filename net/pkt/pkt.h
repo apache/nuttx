@@ -84,7 +84,7 @@ void pkt_initialize(void);
 FAR struct pkt_conn_s *pkt_alloc(void);
 void pkt_free(FAR struct pkt_conn_s *conn);
 struct pkt_conn_s *pkt_active(FAR struct eth_hdr_s *buf);
-struct pkt_conn_s *uip_nextpktconn(FAR struct pkt_conn_s *conn);
+struct pkt_conn_s *pkt_nextconn(FAR struct pkt_conn_s *conn);
 
 /* Defined in pkt_callback.c ************************************************/
 

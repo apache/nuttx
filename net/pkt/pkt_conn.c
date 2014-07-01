@@ -239,7 +239,7 @@ FAR struct pkt_conn_s *pkt_active(struct eth_hdr_s *buf)
 }
 
 /****************************************************************************
- * Name: uip_nextpktconn()
+ * Name: pkt_nextconn()
  *
  * Description:
  *   Traverse the list of allocated packet connections
@@ -250,7 +250,7 @@ FAR struct pkt_conn_s *pkt_active(struct eth_hdr_s *buf)
  *
  ****************************************************************************/
 
-FAR struct pkt_conn_s *uip_nextpktconn(FAR struct pkt_conn_s *conn)
+FAR struct pkt_conn_s *pkt_nextconn(FAR struct pkt_conn_s *conn)
 {
   if (!conn)
     {

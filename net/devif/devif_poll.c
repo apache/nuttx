@@ -82,7 +82,7 @@ static int devif_poll_pkt_connections(FAR struct net_driver_s *dev,
 
   /* Traverse all of the allocated packet connections and perform the poll action */
 
-  while (!bstop && (pkt_conn = uip_nextpktconn(pkt_conn)))
+  while (!bstop && (pkt_conn = pkt_nextconn(pkt_conn)))
     {
       /* Perform the packet TX poll */
 
@@ -170,7 +170,7 @@ static int devif_poll_udp_connections(FAR struct net_driver_s *dev,
 
   /* Traverse all of the allocated UDP connections and perform the poll action */
 
-  while (!bstop && (conn = uip_nextudpconn(conn)))
+  while (!bstop && (conn = udp_nextconn(conn)))
     {
       /* Perform the UDP TX poll */
 
@@ -206,7 +206,7 @@ static inline int devif_poll_tcp_connections(FAR struct net_driver_s *dev,
 
   /* Traverse all of the active TCP connections and perform the poll action */
 
-  while (!bstop && (conn = uip_nexttcpconn(conn)))
+  while (!bstop && (conn = tcp_nextconn(conn)))
     {
       /* Perform the TCP TX poll */
 
@@ -245,7 +245,7 @@ static inline int devif_poll_tcp_timer(FAR struct net_driver_s *dev,
 
   /* Traverse all of the active TCP connections and perform the poll action */
 
-  while (!bstop && (conn = uip_nexttcpconn(conn)))
+  while (!bstop && (conn = tcp_nextconn(conn)))
     {
       /* Perform the TCP timer poll */
 
