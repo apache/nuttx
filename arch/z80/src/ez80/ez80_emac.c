@@ -1048,7 +1048,7 @@ static int ez80emac_transmit(struct ez80emac_driver_s *priv)
  *
  * Description:
  *   The transmitter is available, check if uIP has any outgoing packets ready
- *   to send.  This is a callback from uip_poll().  uip_poll() may be called:
+ *   to send.  This is a callback from devif_poll().  devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
  *   2. When the preceding TX packet send timesout and the interface is reset
@@ -1578,7 +1578,7 @@ static void ez80emac_txtimeout(int argc, uint32_t arg, ...)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)uip_poll(&priv->dev, ez80emac_uiptxpoll);
+  (void)devif_poll(&priv->dev, ez80emac_uiptxpoll);
 }
 
 /****************************************************************************
@@ -1604,7 +1604,7 @@ static void ez80emac_polltimer(int argc, uint32_t arg, ...)
 
   /* Poll uIP for new XMIT data */
 
-  (void)uip_timer(&priv->dev, ez80emac_uiptxpoll, EMAC_POLLHSEC);
+  (void)devif_timer(&priv->dev, ez80emac_uiptxpoll, EMAC_POLLHSEC);
 
   /* Setup the watchdog poll timer again */
 
@@ -1791,7 +1791,7 @@ static int ez80emac_txavail(struct net_driver_s *dev)
 
       /* If so, then poll uIP for new XMIT data */
 
-      (void)uip_poll(&priv->dev, ez80emac_uiptxpoll);
+      (void)devif_poll(&priv->dev, ez80emac_uiptxpoll);
     }
 
   irqrestore(flags);

@@ -183,7 +183,7 @@ static int emac_transmit(FAR struct emac_driver_s *priv)
  *
  * Description:
  *   The transmitter is available, check if uIP has any outgoing packets ready
- *   to send.  This is a callback from uip_poll().  uip_poll() may be called:
+ *   to send.  This is a callback from devif_poll().  devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
  *   2. When the preceding TX packet send timesout and the interface is reset
@@ -323,7 +323,7 @@ static void emac_txdone(FAR struct emac_driver_s *priv)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)uip_poll(&priv->d_dev, emac_uiptxpoll);
+  (void)devif_poll(&priv->d_dev, emac_uiptxpoll);
 }
 
 /****************************************************************************
@@ -394,7 +394,7 @@ static void emac_txtimeout(int argc, uint32_t arg, ...)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)uip_poll(&priv->d_dev, emac_uiptxpoll);
+  (void)devif_poll(&priv->d_dev, emac_uiptxpoll);
 }
 
 /****************************************************************************
@@ -428,7 +428,7 @@ static void emac_polltimer(int argc, uint32_t arg, ...)
    * we will missing TCP time state updates?
    */
 
-  (void)uip_timer(&priv->d_dev, emac_uiptxpoll, HCS12_POLLHSEC);
+  (void)devif_timer(&priv->d_dev, emac_uiptxpoll, HCS12_POLLHSEC);
 
   /* Setup the watchdog poll timer again */
 
@@ -554,7 +554,7 @@ static int emac_txavail(struct net_driver_s *dev)
 
       /* If so, then poll uIP for new XMIT data */
 
-      (void)uip_poll(&priv->d_dev, emac_uiptxpoll);
+      (void)devif_poll(&priv->d_dev, emac_uiptxpoll);
     }
 
   irqrestore(flags);
