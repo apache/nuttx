@@ -7606,7 +7606,7 @@
 	  defines those macros to 1, consistent with the rest of unistd.h.
 	  From Kosma Moczek (2014-6-30)
 	* arch/arm/src/sama5/sam_memories.c:  Fix some logic in conversion
-	  of physical and virtal DRAM addresses when running out of DRAM.  This
+	  of physical and virtual DRAM addresses when running out of DRAM.  This
 	  is an important bug fix for the SAMA5D3 and 4 when running out of
 	  DRAM (2014-6-30).
 	* arch/arm/src/sama5/sam_pio.c:  Another *critical* SAMA5D3 and 4 bug
@@ -7615,3 +7615,6 @@
 	* net/:  Many more functions renamed to follow new modularizaiton of
 	  the networking code.  This is part of an ongoing repartitioning
 	  effort and there is still more to be done (2014-6-30).
+	* arch/arm/src/sam34/sam_emac.c, sama5/sam_emaca.c, sam_emacb.c, and
+	  sam_gmac.c:  Fix cloned error:  Wrong bits being cleared before ORing
+	  in new bits (2014-7-1).
