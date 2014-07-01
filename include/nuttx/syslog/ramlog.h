@@ -82,7 +82,7 @@
  * If CONFIG_RAMLOG_CONSOLE or CONFIG_RAMLOG_SYSLOG is selected, then the
  * following may also be provided:
  *
- * CONFIG_RAMLOG_CONSOLE_BUFSIZE - Size of the console RAM log.  Default: 1024
+ * CONFIG_RAMLOG_BUFSIZE - Size of the console RAM log.  Default: 1024
  */
 
 #ifndef CONFIG_DEV_CONSOLE
@@ -105,8 +105,8 @@
 #  undef CONFIG_RAMLOG_SYSLOG
 #endif
 
-#ifndef CONFIG_RAMLOG_CONSOLE_BUFSIZE
-#  define CONFIG_RAMLOG_CONSOLE_BUFSIZE 1024
+#ifndef CONFIG_RAMLOG_BUFSIZE
+#  define CONFIG_RAMLOG_BUFSIZE 1024
 #endif
 
 /* The normal behavior of the RAM log when used as a SYSLOG is to return

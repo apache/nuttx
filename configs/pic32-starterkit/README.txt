@@ -1147,7 +1147,7 @@ Where <subdir> is one of the following:
 
       Logging is currently set up to use 16Kb of memory:
 
-      CONFIG_RAMLOG_CONSOLE_BUFSIZE=16384
+      CONFIG_RAMLOG_BUFSIZE=16384
 
     There are a few other configuration differences as necessary to support
     this different device configuration. Just the do the 'diff' if you are

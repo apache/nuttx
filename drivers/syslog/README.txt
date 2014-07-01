@@ -61,4 +61,4 @@ ramlog.c
    If CONFIG_RAMLOG_CONSOLE or CONFIG_RAMLOG_SYSLOG is selected, then the
    following may also be provided:
 
-   CONFIG_RAMLOG_CONSOLE_BUFSIZE - Size of the console RAM log.  Default: 1024
+   CONFIG_RAMLOG_BUFSIZE - Size of the console RAM log.  Default: 1024
