@@ -2,9 +2,10 @@ drivers/syslog README File
 ==========================
 
 This README file discusses the SYLOG drivers that can be found in the
-drivers/syslog directory.  In NuttX, syslog output is equivalent to
-debug output and, therefore, the syslogging interfaces are defined in the
-header file include/debug.h.
+drivers/syslog directory.  The syslogging interfaces are defined in the
+header file include/syslog.h.  In NuttX, "syslog output" is really
+synonymous to "debug output" and, therefore, the debugging interfaces
+defined in the header file include/debug.h are also sysloggin interfaces.
 
 By default, all system log output goes to console (/dev/console).  But that
 behavior can be changed by the defining CONFIG_SYSLOG in the NuttX
