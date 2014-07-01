@@ -7618,3 +7618,5 @@
 	* arch/arm/src/sam34/sam_emac.c, sama5/sam_emaca.c, sam_emacb.c, and
 	  sam_gmac.c:  Fix cloned error:  Wrong bits being cleared before ORing
 	  in new bits (2014-7-1).
+	* drivers/syslog/ramlog.c: syslog_putc needs to set the errno and
+	  return EOF on a failure (2014-7-1).
