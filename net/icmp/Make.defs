@@ -48,7 +48,7 @@ endif
 endif
 endif
 
-# Include uip build support
+# Include ICMP build support
 
 DEPPATH += --dep-path icmp
 VPATH += :icmp

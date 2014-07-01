@@ -1,5 +1,5 @@
 /****************************************************************************
- * netuip/devif_input.c
+ * net/devif/devif_input.c
  * The uIP TCP/IP stack code.
  *
  *   Copyright (C) 2007-2009, 2013-2014 Gregory Nutt. All rights reserved.
