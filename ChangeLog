@@ -7612,3 +7612,6 @@
 	* arch/arm/src/sama5/sam_pio.c:  Another *critical* SAMA5D3 and 4 bug
 	  fix:  PIO clocking must be enabled for all input pins or else the
 	  value that is read never changes. (2014-6-30).
+	* net/:  Many more functions renamed to follow new modularizaiton of
+	  the networking code.  This is part of an ongoing repartitioning
+	  effort and there is still more to be done (2014-6-30).
