@@ -2289,7 +2289,7 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
   /* Setup the EMAC link speed */
 
   regval  = sam_getreg(priv, SAM_EMAC_NCFGR);
-  regval &= (EMAC_NCFGR_SPD | EMAC_NCFGR_FD);
+  regval &= ~(EMAC_NCFGR_SPD | EMAC_NCFGR_FD);
 
   if (((advertise & lpa) & MII_ADVERTISE_100BASETXFULL) != 0)
     {
@@ -2658,8 +2658,6 @@ static void sam_rxreset(struct sam_emac_s *priv)
 
 static void sam_emac_reset(struct sam_emac_s *priv)
 {
-  uint32_t regval;
-
   /* Disable all EMAC interrupts */
 
   sam_putreg(priv, SAM_EMAC_IDR, EMAC_INT_ALL);
@@ -2669,10 +2667,9 @@ static void sam_emac_reset(struct sam_emac_s *priv)
   sam_rxreset(priv);
   sam_txreset(priv);
 
-  /* Disable RX, TX, and statistics */
+  /* Make sure that RX and TX are disabled; clear statistics registers */
 
-  regval = EMAC_NCR_TXEN | EMAC_NCR_RXEN | EMAC_NCR_WESTAT | EMAC_NCR_CLRSTAT;
-  sam_putreg(priv, SAM_EMAC_NCR, regval);
+  sam_putreg(priv, SAM_EMAC_NCR, EMAC_NCR_CLRSTAT);
 
   /* Disable clocking to the EMAC peripheral */
 
@@ -2745,14 +2742,10 @@ static int sam_emac_configure(struct sam_emac_s *priv)
 
   sam_emac_enableclk();
 
-  /* Disable TX, RX, interrupts, etc. */
+   /* Disable TX, RX, clear statistics.  Disable all interrupts. */
 
-  sam_putreg(priv, SAM_EMAC_NCR, 0);
+  sam_putreg(priv, SAM_EMAC_NCR, EMAC_NCR_CLRSTAT);
   sam_putreg(priv, SAM_EMAC_IDR, EMAC_INT_ALL);
-
-  regval = sam_getreg(priv, SAM_EMAC_NCR);
-  regval |= EMAC_NCR_CLRSTAT;
-  sam_putreg(priv, SAM_EMAC_NCR, regval);
 
   /* Clear all status bits in the receive status register. */
 
@@ -2795,7 +2788,7 @@ static int sam_emac_configure(struct sam_emac_s *priv)
   sam_rxreset(priv);
   sam_txreset(priv);
 
-  /* Enable Rx and Tx, plus the stats register. */
+  /* Enable Rx and Tx, plus the statistics registers. */
 
   regval  = sam_getreg(priv, SAM_EMAC_NCR);
   regval |= (EMAC_NCR_RXEN | EMAC_NCR_TXEN | EMAC_NCR_WESTAT);
