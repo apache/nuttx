@@ -932,7 +932,7 @@ Where <subdir> is one of the following:
 
         Logging is currently can be set up to use any amount of memory (here 8KB):
 
-          CONFIG_RAMLOG_CONSOLE_BUFSIZE=8192
+          CONFIG_RAMLOG_BUFSIZE=8192
 
         STATUS:
           2013-7-4:  This configuration was last verified.
