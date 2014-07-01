@@ -63,7 +63,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: uip_dataevent
+ * Function: tcp_data_event
  *
  * Description:
  *   Handle data that is not accepted by the application because there is no
@@ -77,8 +77,8 @@
  ****************************************************************************/
 
 static inline uint16_t
-uip_dataevent(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
-              uint16_t flags)
+tcp_data_event(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
+               uint16_t flags)
 {
   uint16_t ret;
 
@@ -191,7 +191,7 @@ uint16_t tcp_callback(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
     {
       /* Data was not handled.. dispose of it appropriately */
 
-      flags = uip_dataevent(dev, conn, flags);
+      flags = tcp_data_event(dev, conn, flags);
     }
 
   /* Check if there is a connection-related event and a connection
