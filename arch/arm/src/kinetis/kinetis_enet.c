@@ -523,7 +523,7 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
 #endif
         {
           arp_ipin(&priv->dev);
-          uip_input(&priv->dev);
+          devif_input(&priv->dev);
 
           /* If the above function invocation resulted in data that should be
            * sent out on the network, the field  d_len will set to a value > 0.

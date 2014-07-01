@@ -1239,7 +1239,7 @@ static void c5471_receive(struct c5471_driver_s *c5471)
 #endif
         {
           arp_ipin(dev);
-          uip_input(dev);
+          devif_input(dev);
 
           /* If the above function invocation resulted in data that should be
            * sent out on the network, the field  d_len will set to a value > 0.
