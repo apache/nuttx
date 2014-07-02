@@ -115,7 +115,7 @@ static inline int up_comparemac(uint8_t *paddr1, struct ether_addr *paddr2)
 }
 #endif
 
-static int sim_uiptxpoll(struct net_driver_s *dev)
+static int sim_txpoll(struct net_driver_s *dev)
 {
   /* If the polling resulted in data that should be sent out on the network,
    * the field d_len is set to a value > 0.
@@ -202,7 +202,7 @@ void uipdriver_loop(void)
   else if (timer_expired(&g_periodic_timer))
     {
       timer_reset(&g_periodic_timer);
-      devif_timer(&g_sim_dev, sim_uiptxpoll, 1);
+      devif_timer(&g_sim_dev, sim_txpoll, 1);
     }
   sched_unlock();
 }

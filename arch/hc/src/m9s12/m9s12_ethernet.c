@@ -112,7 +112,7 @@ static struct emac_driver_s g_emac[CONFIG_HCS12_NINTERFACES];
 /* Common TX logic */
 
 static int  emac_transmit(FAR struct emac_driver_s *priv);
-static int  emac_uiptxpoll(struct net_driver_s *dev);
+static int  emac_txpoll(struct net_driver_s *dev);
 
 /* Interrupt handling */
 
@@ -179,7 +179,7 @@ static int emac_transmit(FAR struct emac_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: emac_uiptxpoll
+ * Function: emac_txpoll
  *
  * Description:
  *   The transmitter is available, check if uIP has any outgoing packets ready
@@ -202,7 +202,7 @@ static int emac_transmit(FAR struct emac_driver_s *priv)
  *
  ****************************************************************************/
 
-static int emac_uiptxpoll(struct net_driver_s *dev)
+static int emac_txpoll(struct net_driver_s *dev)
 {
   FAR struct emac_driver_s *priv = (FAR struct emac_driver_s *)dev->d_private;
 
@@ -323,7 +323,7 @@ static void emac_txdone(FAR struct emac_driver_s *priv)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)devif_poll(&priv->d_dev, emac_uiptxpoll);
+  (void)devif_poll(&priv->d_dev, emac_txpoll);
 }
 
 /****************************************************************************
@@ -394,7 +394,7 @@ static void emac_txtimeout(int argc, uint32_t arg, ...)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)devif_poll(&priv->d_dev, emac_uiptxpoll);
+  (void)devif_poll(&priv->d_dev, emac_txpoll);
 }
 
 /****************************************************************************
@@ -428,7 +428,7 @@ static void emac_polltimer(int argc, uint32_t arg, ...)
    * we will missing TCP time state updates?
    */
 
-  (void)devif_timer(&priv->d_dev, emac_uiptxpoll, HCS12_POLLHSEC);
+  (void)devif_timer(&priv->d_dev, emac_txpoll, HCS12_POLLHSEC);
 
   /* Setup the watchdog poll timer again */
 
@@ -554,7 +554,7 @@ static int emac_txavail(struct net_driver_s *dev)
 
       /* If so, then poll uIP for new XMIT data */
 
-      (void)devif_poll(&priv->d_dev, emac_uiptxpoll);
+      (void)devif_poll(&priv->d_dev, emac_txpoll);
     }
 
   irqrestore(flags);

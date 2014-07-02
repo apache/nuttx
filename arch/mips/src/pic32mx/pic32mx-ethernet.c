@@ -410,7 +410,7 @@ static struct pic32mx_rxdesc_s *pic32mx_rxdesc(struct pic32mx_driver_s *priv);
 /* Common TX logic */
 
 static int  pic32mx_transmit(struct pic32mx_driver_s *priv);
-static int  pic32mx_uiptxpoll(struct net_driver_s *dev);
+static int  pic32mx_txpoll(struct net_driver_s *dev);
 static void pic32mx_poll(struct pic32mx_driver_s *priv);
 static void pic32mx_timerpoll(struct pic32mx_driver_s *priv);
 
@@ -1109,7 +1109,7 @@ static int pic32mx_transmit(struct pic32mx_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: pic32mx_uiptxpoll
+ * Function: pic32mx_txpoll
  *
  * Description:
  *   The transmitter is available, check if uIP has any outgoing packets ready
@@ -1132,7 +1132,7 @@ static int pic32mx_transmit(struct pic32mx_driver_s *priv)
  *
  ****************************************************************************/
 
-static int pic32mx_uiptxpoll(struct net_driver_s *dev)
+static int pic32mx_txpoll(struct net_driver_s *dev)
 {
   struct pic32mx_driver_s *priv = (struct pic32mx_driver_s *)dev->d_private;
   int ret = OK;
@@ -1212,7 +1212,7 @@ static void pic32mx_poll(struct pic32mx_driver_s *priv)
           /* And perform the poll */
 
           priv->pd_polling = true;
-          (void)devif_poll(&priv->pd_dev, pic32mx_uiptxpoll);
+          (void)devif_poll(&priv->pd_dev, pic32mx_txpoll);
 
           /* Free any buffer left attached after the poll */
 
@@ -1258,7 +1258,7 @@ static void pic32mx_timerpoll(struct pic32mx_driver_s *priv)
           /* And perform the poll */
 
           priv->pd_polling = true;
-          (void)devif_timer(&priv->pd_dev, pic32mx_uiptxpoll, PIC32MX_POLLHSEC);
+          (void)devif_timer(&priv->pd_dev, pic32mx_txpoll, PIC32MX_POLLHSEC);
 
           /* Free any buffer left attached after the poll */
 

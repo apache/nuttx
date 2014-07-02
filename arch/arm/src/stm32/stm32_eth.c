@@ -627,7 +627,7 @@ static inline bool stm32_isfreebuffer(FAR struct stm32_ethmac_s *priv);
 /* Common TX logic */
 
 static int  stm32_transmit(FAR struct stm32_ethmac_s *priv);
-static int  stm32_uiptxpoll(struct net_driver_s *dev);
+static int  stm32_txpoll(struct net_driver_s *dev);
 static void stm32_dopoll(FAR struct stm32_ethmac_s *priv);
 
 /* Interrupt handling */
@@ -1136,7 +1136,7 @@ static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
 }
 
 /****************************************************************************
- * Function: stm32_uiptxpoll
+ * Function: stm32_txpoll
  *
  * Description:
  *   The transmitter is available, check if uIP has any outgoing packets ready
@@ -1159,7 +1159,7 @@ static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-static int stm32_uiptxpoll(struct net_driver_s *dev)
+static int stm32_txpoll(struct net_driver_s *dev)
 {
   FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)dev->d_private;
 
@@ -1266,7 +1266,7 @@ static void stm32_dopoll(FAR struct stm32_ethmac_s *priv)
 
       if (dev->d_buf)
         {
-          (void)devif_poll(dev, stm32_uiptxpoll);
+          (void)devif_poll(dev, stm32_txpoll);
 
           /* We will, most likely end up with a buffer to be freed.  But it
            * might not be the same one that we allocated above.
@@ -1994,7 +1994,7 @@ static void stm32_polltimer(int argc, uint32_t arg, ...)
           /* Update TCP timing states and poll uIP for new XMIT data.
            */
 
-          (void)devif_timer(dev, stm32_uiptxpoll, STM32_POLLHSEC);
+          (void)devif_timer(dev, stm32_txpoll, STM32_POLLHSEC);
 
           /* We will, most likely end up with a buffer to be freed.  But it
            * might not be the same one that we allocated above.

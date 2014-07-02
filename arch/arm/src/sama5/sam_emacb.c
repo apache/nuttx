@@ -451,7 +451,7 @@ static void sam_buffer_free(struct sam_emac_s *priv);
 /* Common TX logic */
 
 static int  sam_transmit(struct sam_emac_s *priv);
-static int  sam_uiptxpoll(struct net_driver_s *dev);
+static int  sam_txpoll(struct net_driver_s *dev);
 static void sam_dopoll(struct sam_emac_s *priv);
 
 /* Interrupt handling */
@@ -1117,7 +1117,7 @@ static int sam_transmit(struct sam_emac_s *priv)
 }
 
 /****************************************************************************
- * Function: sam_uiptxpoll
+ * Function: sam_txpoll
  *
  * Description:
  *   The transmitter is available, check if uIP has any outgoing packets ready
@@ -1140,7 +1140,7 @@ static int sam_transmit(struct sam_emac_s *priv)
  *
  ****************************************************************************/
 
-static int sam_uiptxpoll(struct net_driver_s *dev)
+static int sam_txpoll(struct net_driver_s *dev)
 {
   struct sam_emac_s *priv = (struct sam_emac_s *)dev->d_private;
 
@@ -1205,7 +1205,7 @@ static void sam_dopoll(struct sam_emac_s *priv)
     {
       /* If we have the descriptor, then poll uIP for new XMIT data. */
 
-      (void)devif_poll(dev, sam_uiptxpoll);
+      (void)devif_poll(dev, sam_txpoll);
     }
 }
 
@@ -1910,7 +1910,7 @@ static void sam_polltimer(int argc, uint32_t arg, ...)
     {
       /* Update TCP timing states and poll uIP for new XMIT data. */
 
-      (void)devif_timer(dev, sam_uiptxpoll, SAM_POLLHSEC);
+      (void)devif_timer(dev, sam_txpoll, SAM_POLLHSEC);
     }
 
   /* Setup the watchdog poll timer again */

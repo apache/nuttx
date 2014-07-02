@@ -238,7 +238,7 @@ static uint16_t tiva_phyread(struct tiva_driver_s *priv, int regaddr);
 /* Common TX logic */
 
 static int  tiva_transmit(struct tiva_driver_s *priv);
-static int  tiva_uiptxpoll(struct net_driver_s *dev);
+static int  tiva_txpoll(struct net_driver_s *dev);
 
 /* Interrupt handling */
 
@@ -573,7 +573,7 @@ static int tiva_transmit(struct tiva_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: tiva_uiptxpoll
+ * Function: tiva_txpoll
  *
  * Description:
  *   The transmitter is available, check if uIP has any outgoing packets ready
@@ -593,7 +593,7 @@ static int tiva_transmit(struct tiva_driver_s *priv)
  *
  ****************************************************************************/
 
-static int tiva_uiptxpoll(struct net_driver_s *dev)
+static int tiva_txpoll(struct net_driver_s *dev)
 {
   struct tiva_driver_s *priv = (struct tiva_driver_s *)dev->d_private;
   int ret = OK;
@@ -839,7 +839,7 @@ static void tiva_txdone(struct tiva_driver_s *priv)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)devif_poll(&priv->ld_dev, tiva_uiptxpoll);
+  (void)devif_poll(&priv->ld_dev, tiva_txpoll);
 }
 
 /****************************************************************************
@@ -963,7 +963,7 @@ static void tiva_txtimeout(int argc, uint32_t arg, ...)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)devif_poll(&priv->ld_dev, tiva_uiptxpoll);
+  (void)devif_poll(&priv->ld_dev, tiva_txpoll);
 }
 
 /****************************************************************************
@@ -999,7 +999,7 @@ static void tiva_polltimer(int argc, uint32_t arg, ...)
     {
       /* If so, update TCP timing states and poll uIP for new XMIT data */
 
-      (void)devif_timer(&priv->ld_dev, tiva_uiptxpoll, TIVA_POLLHSEC);
+      (void)devif_timer(&priv->ld_dev, tiva_txpoll, TIVA_POLLHSEC);
 
       /* Setup the watchdog poll timer again */
 
@@ -1285,7 +1285,7 @@ static int tiva_txavail(struct net_driver_s *dev)
        * for new Tx data
        */
 
-      (void)devif_poll(&priv->ld_dev, tiva_uiptxpoll);
+      (void)devif_poll(&priv->ld_dev, tiva_txpoll);
     }
 
   irqrestore(flags);
