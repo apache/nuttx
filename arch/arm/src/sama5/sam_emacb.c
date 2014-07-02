@@ -843,7 +843,7 @@ static uint16_t sam_txinuse(struct sam_emac_s *priv)
   uint32_t txhead32 = (uint32_t)priv->txhead;
   if ((uint32_t)priv->txtail > txhead32)
     {
-      return txhead32 += priv->attr->ntxbuffers;
+      txhead32 += priv->attr->ntxbuffers;
     }
 
   return (uint16_t)(txhead32 - (uint32_t)priv->txtail);
@@ -1259,7 +1259,6 @@ static int sam_recvframe(struct sam_emac_s *priv)
 
   cp15_invalidate_dcache((uintptr_t)rxdesc,
                          (uintptr_t)rxdesc + sizeof(struct emac_rxdesc_s));
-
   nllvdbg("rxndx: %d\n", rxndx);
 
   while ((rxdesc->addr & EMACRXD_ADDR_OWNER) != 0)
@@ -1615,7 +1614,7 @@ static void sam_txdone(struct sam_emac_s *priv)
 
       /* At least one TX descriptor is available.  Re-enable RX interrupts.
        * RX interrupts may previously have been disabled when we ran out of
-       * TX descriptors (see commits in sam_transmit()).
+       * TX descriptors (see comments in sam_transmit()).
        */
 
       sam_putreg(priv, SAM_EMAC_IER_OFFSET, EMAC_INT_RCOMP);

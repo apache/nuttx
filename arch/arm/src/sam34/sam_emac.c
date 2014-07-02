@@ -516,7 +516,7 @@ static uint16_t sam_txinuse(struct sam_emac_s *priv)
   uint32_t txhead32 = (uint32_t)priv->txhead;
   if ((uint32_t)priv->txtail > txhead32)
     {
-      return txhead32 += CONFIG_SAM34_EMAC_NTXBUFFERS;
+      txhead32 += CONFIG_SAM34_EMAC_NTXBUFFERS;
     }
 
   return (uint16_t)(txhead32 - (uint32_t)priv->txtail);
@@ -1251,7 +1251,7 @@ static void sam_txdone(struct sam_emac_s *priv)
 
       /* At least one TX descriptor is available.  Re-enable RX interrupts.
        * RX interrupts may previously have been disabled when we ran out of
-       * TX desciptors (see commits in sam_transmit()).
+       * TX descriptors (see comments in sam_transmit()).
        */
 
       sam_putreg(priv, SAM_EMAC_IER, EMAC_INT_RCOMP);
