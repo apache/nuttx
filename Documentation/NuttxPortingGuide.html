@@ -184,9 +184,11 @@
 .
 |- nuttx
 |   |-- <a href="#topmakefile">Makefile</a>
+|   |-- Kconfig
 |   |-- <a href="#DirStructDocumentation">Documentation</a>
 |   |   `-- <i>(documentation files)</i>/
 |   |-- <a href="#DirStructArch">arch</a>/
+|   |   |-- Kconfig
 |   |   |-- <i>&lt;arch-name&gt;</i>/
 |   |   |   |-- include/
 |   |   |   |   |--<i>&lt;chip-name&gt;</i>/
@@ -201,6 +203,7 @@
 |   |   `-- <i>&lt;other-architecture directories&gt;</i>/
 |   |-- <a href="#DirStructBinFmt">binfmt</a>/
 |   |   |-- Makefile
+|   |   |-- Kconfig
 |   |   |-- <i>(binfmt-specific sub-directories)</i>/
 |   |   |   `-- <i>(binfmt-specific source files)</i>
 |   |   `-- <i>(common binfmt source files)</i>
@@ -216,16 +219,19 @@
 |   |   `-- <i>&lt;(other board directories)&gt;</i>/
 |   |-- <a href="#DirStructDrivers">drivers</a>/
 |   |   |-- Makefile
+|   |   |-- Kconfig
 |   |   |-- <i>(driver-specific sub-directories)/</i>
 |   |   |   `-- <i>(driver-specific source files)</i>
 |   |   `-- <i>(common driver source files)</i>
 |   |-- <a href="#DirStructFs">fs</a>/
 |   |   |-- Makefile
+|   |   |-- Kconfig
 |   |   |-- <i>(file system-specific sub-directories)</i>/
 |   |   |   `-- <i>(file system-specific source files)</i>
 |   |   `-- <i>(common file system source files)</i>
 |   |-- <a href="#DirStructGraphics">graphics</a>/
 |   |   |-- Makefile
+|   |   |-- Kconfig
 |   |   |-- <i>(feature-specific sub-directories)</i>/
 |   |   |   `-- <i>(feature-specific source files library source files)</i>
 |   |   `-- <i>(common graphics-related source files)</i>
@@ -237,43 +243,76 @@
 |   |       `-- <i>(non-standard header files)</i>
 |   |-- <a href="#DirStructLib">libc</a>/
 |   |   |-- Makefile
+|   |   |-- Kconfig
 |   |   `-- <i>(libc source files)</i>
 |   |-- <a href="#DirStructLibXX">libxx</a>/
 |   |   |-- Makefile
+|   |   |-- Kconfig
 |   |   `-- <i>(libxx management source files)</i>
 |   |-- <a href="#DirStructMm">mm</a>/
 |   |   |-- Makefile
+|   |   |-- Kconfig
 |   |   `-- <i>(memory management source files)</i>
 |   |-- <a href="#DirStructNet">net</a>/
 |   |   |-- Makefile
-|   |   |-- uip/
-|   |   |   `-- <i>(uip source files)</i>
-|   |   `-- <i>(BSD socket source files)</i>
+|   |   |-- Kconfig
+|   |   |-- arp/
+|   |   |   `-- <i>(ARP source files)</i>
+|   |   |-- devif/
+|   |   |   `-- <i>(Ethernet device interface source files)</i>
+|   |   |-- icmp/
+|   |   |   `-- <i>(ICMP source files)</i>
+|   |   |-- igmp/
+|   |   |   `-- <i>(IGMP source files)</i>
+|   |   |-- iob/
+|   |   |   `-- <i>(I/O buffering source files)</i>
+|   |   |-- ipv6/
+|   |   |   `-- <i>(IPv6 source files)</i>
+|   |   |-- netdev/
+|   |   |   `-- <i>(Socket device interface source files)</i>
+|   |   |-- pkt/
+|   |   |   `-- <i>(Packet socket source files)</i>
+|   |   |-- route/
+|   |   |   `-- <i>(Routing table source files)</i>
+|   |   |-- socket/
+|   |   |   `-- <i>(BSD socket source files)</i>
+|   |   |-- tcp/
+|   |   |   `-- <i>(TCP source files)</i>
+|   |   |-- udp/
+|   |   |   `-- <i>(UDP source files)</i>
+|   |   `-- utils/
+|   |       `-- <i>(Miscellaneous, utility source files)</i>
 |   |-- <a href="#DirStructSched">sched</a>/
 |   |   |-- Makefile
+|   |   |-- Kconfig
 |   |   `-- <i>(sched source files)</i>
 |   |-- <a href="#DirStructSysCall">syscall</a>/
 |   |   |-- Makefile
+|   |   |-- Kconfig
 |   |   `-- <i>(syscall source files)</i>
 |   `-- <a href="#DirStructTools">tools</a>/
 |       `-- <i>(miscellaneous scripts and programs)</i>
 `- apps
     |-- <a href="#DirStructNetUtils">netutils</a>/
     |   |-- Makefile
+    |   |-- Kconfig
     |   |-- <i>(network feature sub-directories)</i>/
     |   |   `-- <i>(network feature source files)</i>
     |   `-- <i>(netutils common files)</i>
     |--  <a href="#DirStructNshLib">nshlib</a>/
     |   |-- Makefile
+    |   |-- Kconfig
     |   `-- <i>NuttShell (NSH) files</i>
     |-- <i>(Board-specific applications)</i>/
     |   |-- Makefile
+    |   |-- Kconfig
     |   |-- <i>(Board-specific application sub-directories)</i>/
     |   |   `-- <i>(Board-specific application source files)</i>
     |   `-- <i>(Board-specific common files)</i>
     `-- <a href="#DirStructExamples">examples</a>/
         `-- <i>(example)</i>/
             |-- Makefile
+            |-- Kconfig
             `-- <i>(example source files)</i>
 </pre></ul>
 
@@ -1223,10 +1262,42 @@ include/
 |-- netinet/
 |   `-- <i>(Standard header files)</i>
 |-- nuttx/
+|   |-analog/
+|   |  `-- <i>(Analog driver header files)</i>
+|   |-audio/
+|   |  `-- <i>(Audio driver header files)</i>
+|   |-binfmt/
+|   |  `-- <i>(Binary format header files)</i>
+|   |-fs/
+|   |  `-- <i>(File System header files)</i>
+|   |-input/
+|   |  `-- <i>(Input device driver header files)</i>
+|   |-lcd/
+|   |  `-- <i>(LCD driver header files)</i>
+|   |-mtd/
+|   |  `-- <i>(Memory technology device header files)</i>
+|   |-serial/
+|   |  `-- <i>(Serial driver header files)</i>
 |   |-net/
-|   | `-- uip/
-|   |     `-- <i>(uIP specific header files)</i>
-|   `-- <i>(NuttX specific header files)</i>
+|   |  `-- <i>(Networking header files)</i>
+|   |-nx/
+|   |  `-- <i>(NX graphics header files)</i>
+|   |-power/
+|   |  `-- <i>(Power management header files)</i>
+|   |-sensors/
+|   |  `-- <i>(Sensor device driver header files)</i>
+|   |-sercomm/
+|   |  `-- <i>(SERCOMM driver header files)</i>
+|   |-serial/
+|   |  `-- <i>(Serial driver header files)</i>
+|   |-spi/
+|   |  `-- <i>(SPI driver header files)</i>
+|   |-syslog/
+|   |  `-- <i>(SYSLOG header files)</i>
+|   |-usb/
+|   |  `-- <i>(USB driver header files)</i>
+|   `-wireless/
+|      `-- <i>(Wireless device driver header files)</i>
 `- sys/
     `-- <i>(More standard header files)</i>
 </per></ul>
@@ -1292,8 +1363,7 @@ libc/
 
 <h2>2.12 <a name="DirStructNet">nuttx/net</a></h2>
 <p>
-  This directory contains the implementation of the NuttX internal socket APIs.
-  The subdirectory, <code>uip</code> contains the uIP port.
+  This directory contains the implementation of the NuttX networking layer including internal socket APIs.
 </P>
 
 <h2>2.13 <a name="DirStructSched">nuttx/sched</a></h2>

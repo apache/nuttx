@@ -1303,7 +1303,7 @@ static void enc_txif(FAR struct enc_driver_s *priv)
 
       wd_cancel(priv->txtimeout);
 
-      /* Poll for uip packets */
+      /* Poll for TX packets from the networking layer */
 
       devif_poll(&priv->dev, enc_txpoll);
     }
@@ -1319,7 +1319,7 @@ static void enc_txif(FAR struct enc_driver_s *priv)
  * Function: enc_rxldpkt
  *
  * Description:
- *   Load packet from the enc's RX buffer to the uip d_buf.
+ *   Load packet from the enc's RX buffer to the driver d_buf.
  *
  * Parameters:
  *   priv  - Reference to the driver state structure

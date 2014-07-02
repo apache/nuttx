@@ -498,9 +498,9 @@ FAR struct tcp_conn_s *tcp_listener(uint16_t portno)
  * Name: tcp_alloc_accept()
  *
  * Description:
- *    Called when uip_interrupt matches the incoming packet with a connection
- *    in LISTEN. In that case, this function will create a new connection and
- *    initialize it to send a SYNACK in return.
+ *    Called when driver interrupt processing matches the incoming packet
+ *    with a connection in LISTEN. In that case, this function will create
+ *    a new connection and initialize it to send a SYNACK in return.
  *
  * Assumptions:
  *   This function is called from UIP logic at interrupt level

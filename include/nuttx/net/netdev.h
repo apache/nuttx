@@ -290,7 +290,7 @@ int devif_input(struct net_driver_s *dev);
  * out the packet.
  *
  * Example:
- *   int driver_callback(struct uip_driver_dev *dev)
+ *   int driver_callback(struct net_driver_s *dev)
  *   {
  *     if (dev->d_len > 0)
  *       {
@@ -308,7 +308,7 @@ int devif_input(struct net_driver_s *dev);
  * need to call the arp_out() function in the callback function
  * before sending the packet:
  *
- *   int driver_callback(struct uip_driver_dev *dev)
+ *   int driver_callback(struct net_driver_s *dev)
  *   {
  *     if (dev->d_len > 0)
  *       {
@@ -316,6 +316,7 @@ int devif_input(struct net_driver_s *dev);
  *         devicedriver_send();
  *         return 1; <-- Terminates polling if necessary
  *       }
+ *
  *     return 0;
  *   }
  *
