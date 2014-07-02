@@ -7612,15 +7612,16 @@
 	* arch/arm/src/sama5/sam_pio.c:  Another *critical* SAMA5D3 and 4 bug
 	  fix:  PIO clocking must be enabled for all input pins or else the
 	  value that is read never changes. (2014-6-30).
-	* net/:  Many more functions renamed to follow new modularizaiton of
+	* net/:  Many more functions renamed to follow new modularization of
 	  the networking code.  This is part of an ongoing repartitioning
-	  effort and there is still more to be done (2014-6-30).
+	  effort and there is still more to be done.  There will be no additional
+	  notations in this ChangeLog until the renaming is complete (2014-6-30).
 	* arch/arm/src/sam34/sam_emac.c, sama5/sam_emaca.c, sam_emacb.c, and
 	  sam_gmac.c:  Fix cloned error:  Wrong bits being cleared before ORing
 	  in new bits (2014-7-1).
 	* drivers/syslog/ramlog.c: syslog_putc needs to set the errno and
 	  return EOF on a failure (2014-7-1).
 	* SAM3/4 and SAMA5 Ethernet:  Fix an error in the function that
-	  determines the number of free TX descriptors.  This is an importnat
+	  determines the number of free TX descriptors.  This is an important
 	  bugfix on busy networks (2014-7-2).
 
