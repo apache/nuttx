@@ -7620,3 +7620,7 @@
 	  in new bits (2014-7-1).
 	* drivers/syslog/ramlog.c: syslog_putc needs to set the errno and
 	  return EOF on a failure (2014-7-1).
+	* SAM3/4 and SAMA5 Ethernet:  Fix an error in the function that
+	  determines the number of free TX descriptors.  This is an importnat
+	  bugfix on busy networks (2014-7-2).
+
