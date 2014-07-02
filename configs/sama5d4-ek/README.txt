@@ -1760,11 +1760,6 @@ USB High-Speed Host
     Application Configuration -> NSH Library
       CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
 
-  NOTE:  When OHCI is selected, the SAMA5 will operate at 384MHz instead of
-  396MHz.  This is so that the PLL generates a frequency which is a multiple
-  of the 48MHz needed for OHCI.  The delay loop calibration values that are
-  used will be off slightly because of this.
-
   EHCI
   ----
 
@@ -3023,29 +3018,12 @@ Configurations
      create a very corrupt configuration that may not be easy to recover
      from.
 
-  4. The SAMA5Dx is running at 396MHz by default in these configurations.
-     This is because the original timing for the PLLs, NOR FLASH, and SDRAM
-     came from the Atmel NoOS sample code which runs at that rate.
-
-     The SAMA5Dx is capable of running at 528MHz, however, and is easily
-     re-configured:
+  4. The SAMA5Dx is running at 528MHz by default in these configurations.
 
        Board Selection -> CPU Frequency
-         CONFIG_SAMA5D4EK_396MHZ=n     # Disable 396MHz operation
-         CONFIG_SAMA5D4EK_528MHZ=y     # Enable 528MHz operation
-
-     If you switch to 528MHz, you should also check the loop calibration
-     value in your .config file.  Of course, it would be best to re-calibrate
-     the timing loop, but these values should get you in the ballpark:
-
-       CONFIG_BOARD_LOOPSPERMSEC=49341  # Calibrated on SAMA5D3-EK at 396MHz
-                                        # running from ISRAM
-       CONFIG_BOARD_LOOPSPERMSEC=65775  # Calibrated on SAMA5D3-Xplained at
-                                        # 528MHz running from SDRAM
-
-     Operation at 528MHz has been verified but is not the default in these
-     configurations because most testing was done at 396MHz.  NAND has not
-     been verified at these rates.
+         CONFIG_SAMA5D4EK_528MHZ=y       : Enable 528MHz operation
+         CONFIG_BOARD_LOOPSPERMSEC=65775 : Calibrated on SAMA5D3-Xplained at
+                                         : 528MHz running from SDRAM
 
   Configuration Sub-directories
   -----------------------------
