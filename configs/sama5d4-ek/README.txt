@@ -3287,8 +3287,8 @@ Configurations
 
     6. This configuration has support for NSH built-in applications enabled.
 
-    7. This configuration has support for the FAT and ROMFS file systems
-       built in.
+    7. This configuration has support for the FAT, ROMFS, and PROCFS file
+       systems built in.
 
        The FAT file system includes long file name support.  Please be aware
        that Microsoft claims patents against the long file name support (see
@@ -3304,14 +3304,19 @@ Configurations
 
          CONFIG_FS_ROMFS=y      : Enable ROMFS file system
 
-    8. An NSH star-up script is provided by the ROMFS file system.  The ROMFS
+       The ROMFS file system is enabled simply with:
+
+         CONFIG_FS_PROCFS=y     : Enable PROCFS file system
+
+    8. An NSH start-up script is provided by the ROMFS file system.  The ROMFS
        file system is mounted at /etc and provides:
 
          |- dev/
-         |   `- ram0
+         |   |- ...
+         |   `- ram0                     : ROMFS block driver
          `- etc/
              `- init.d/
-                 `- rcS
+                 `- rcS                  : Start-up script
 
        (There will, of course, be other devices uner /dev include /dev/console,
        /dev/null, /dev/zero, /dev/random, etc.).
@@ -3326,24 +3331,86 @@ Configurations
        The content of /etc/init.d/rcS can be see in the file rcS.template that
        can be found at: configs/sama5d4-ek/include/rcS.template:
 
-         mkrd -m 2 -s 512 1024
+         # Mount the procfs file system at /proc
+
+         mount -f procfs /proc
+         echo "rcS: Mounted /proc"
+
+         # Create a RAMDISK at /dev/ram1, size 0.5MiB, format it with a FAT
+         # file system and mount it at /tmp
+
+         mkrd -m 1 -s 512 1024
          mkfatfs /dev/ram1
          mount -t vfat /dev/ram1 /tmp
+         echo "rcS: Mounted /tmp"
 
-       The above commands will create a RAM disk block device at /dev/ram1.
-       The RAM disk will take 0.4MiB of memory (512 x 1024).  Then it will
-       create a FAT file system on the ram disk and mount it at /tmp.  So
-       after NSH starts and runs the rcS script, we will have:
+       The above commands will mount the procfs file system at /proc and a
+       RAM disk at /tmp.
+
+       The second group of commands will: (1) Create a RAM disk block device
+       at /dev/ram1 (mkrd).  The RAM disk will take 0.4MiB of memory (512 x
+       1024).  Then it will then: (2) create a FAT file system on the ram
+       disk (mkfatfs) and (3) mount it at /tmp (mount).
+
+       So after NSH starts and runs the rcS script, we will have:
 
          |- dev/
-         |   |- ram0
-         |   `- ram2
+         |   |- ...
+         |   `- ram0                     : ROMFS block driver
+         |   `- ram1                     : RAM disk block driver
          |- etc/
          |   `- init.d/
-         |       `- rcS
-          `- tmp/
+                 `- rcS                  : Start-up script
+         |- proc/
+         |   |- 0/                       : Information about Task ID 0
+         |   |  |- cmdline
+         |   |  |- stack
+         |   |  |- status
+         |   |  `- group/
+         |   |      |- fd
+         |   |      `- status
+         |   |- 1/                       : Information about Task ID 1
+         |   |  `- ...                   : Same psuedo-directories as for Task ID 0
+         |   |- ...                      : ...
+         |   |- n/                       : Information about Task ID n
+         |   |  `- ...
+         |   |- uptime                   : Processor uptime
+         `- tmp/
 
-       The /tmp directory can them be used for and scratch purpose.
+       The /tmp directory can them be used for and scratch purpose.  The
+       pseudo-files in the proc/ directory can be used to query properties
+       of NuttX.  As examples:
+
+         nsh> cat /proc/1/stack
+         StackBase:  0x2003b1e8
+         StackSize:  2044
+
+         nsh> cat /proc/uptime
+              31.89
+
+         nsh> cat /proc/1/status
+         Name:       work
+         Type:       Kernel thread
+         State:      Signal wait
+         Priority:   192
+         Scheduler:  SCHED_FIFO
+         SigMask:    00000000
+
+         nsh> cat /proc/1/cmdline
+         work
+
+         nsh> cat /proc/1/group/status
+         Flags:      0x00
+         Members:    1
+
+         nsh> cat /proc/1/group/fd
+
+         FD  POS      OFLAGS
+          0        0 0003
+          1        0 0003
+          2        0 0003
+
+         SD  RF TYP FLAGS
 
     9. The Real Time Clock/Calendar (RTC) is enabled in this configuration.
        See the section entitled "RTC" above for detailed configuration
