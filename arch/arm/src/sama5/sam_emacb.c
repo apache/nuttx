@@ -58,6 +58,13 @@
 
 #include <nuttx/config.h>
 
+#if defined(CONFIG_DEBUG) && defined(CONFIG_SAMA5_EMACB_DEBUG)
+  /* Force debug output (from this file only) */
+
+#  undef  CONFIG_DEBUG_NET
+#  define CONFIG_DEBUG_NET 1
+#endif
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <time.h>
@@ -1608,7 +1615,7 @@ static void sam_txdone(struct sam_emac_s *priv)
 
       /* At least one TX descriptor is available.  Re-enable RX interrupts.
        * RX interrupts may previously have been disabled when we ran out of
-       * TX desciptors (see commits in sam_transmit()).
+       * TX descriptors (see commits in sam_transmit()).
        */
 
       sam_putreg(priv, SAM_EMAC_IER_OFFSET, EMAC_INT_RCOMP);
@@ -1626,7 +1633,7 @@ static void sam_txdone(struct sam_emac_s *priv)
  *   Common hardware interrupt handler
  *
  * Parameters:
- *   priv    - Reference to the EMAC private state strucure
+ *   priv    - Reference to the EMAC private state structure
  *
  * Returned Value:
  *   OK on success
@@ -1727,7 +1734,7 @@ static int sam_emac_interrupt(struct sam_emac_s *priv)
   /* Check for the receipt of an RX packet.
    *
    * RXCOMP indicates that a packet has been received and stored in memory.
-   *   The RXCOMP bit is cleared whent he interrupt status register was read.
+   *   The RXCOMP bit is cleared when the interrupt status register was read.
    * RSR:REC indicates that one or more frames have been received and placed
    *   in memory. This indication is cleared by writing a one to this bit.
    */
@@ -1779,7 +1786,7 @@ static int sam_emac_interrupt(struct sam_emac_s *priv)
     }
 
 #ifdef CONFIG_DEBUG_NET
-  /* Check for PAUSE Frame recieved (PFRE).
+  /* Check for PAUSE Frame received (PFRE).
    *
    * ISR:PFRE indicates that a pause frame has been received with non-zero
    * pause quantum.  Cleared on a read.

@@ -1758,6 +1758,17 @@ config SAMA5_EMACB_NBC
 	---help---
 		Select to disable receipt of broadcast packets.
 
+config SAMA5_EMACB_DEBUG
+	bool "Force EMAC0/1 DEBUG"
+	default n
+	depends on DEBUG && !DEBUG_NET
+	---help---
+		This option will force debug output from EMAC driver even without
+		network debug output enabled.  This is not normally something
+		that would want to do but is convenient if you are debugging the
+		driver and do not want to get overloaded with other
+		network-related debug output.
+
 config SAMA5_EMACB_REGDEBUG
 	bool "Register-Level Debug"
 	default n
