@@ -1402,10 +1402,10 @@ static int sam_recvframe(struct sam_emac_s *priv)
                */
 
               nllvdbg("rxndx: %d d_len: %d\n", priv->rxndx, dev->d_len);
-
               if (pktlen < dev->d_len)
                 {
-                  nlldbg("ERROR: Buffer size %d; frame size %d\n", dev->d_len, pktlen);
+                  nlldbg("ERROR: Buffer size %d; frame size %d\n",
+                         dev->d_len, pktlen);
                   return -E2BIG;
                 }
 
@@ -1558,6 +1558,9 @@ static void sam_receive(struct sam_emac_s *priv)
 static void sam_txdone(struct sam_emac_s *priv)
 {
   struct emac_txdesc_s *txdesc;
+#ifndef __NO_KLUDGES__
+  int ntxdone = 0;
+#endif
 
   /* Are there any outstanding transmissions?  Loop until either (1) all of
    * the TX descriptors have been examined, or (2) until we encounter the
@@ -1574,7 +1577,20 @@ static void sam_txdone(struct sam_emac_s *priv)
 
       /* Is this TX descriptor still in use? */
 
+#ifndef __NO_KLUDGES__
+# warning REVISIT
+      /* I have seen cases where we receive interrupts, but the USED
+       * bit is never set in the TX descriptor.  This logic assumes
+       * that if we got the interrupt, then there most be at least
+       * one packet that completed.  This is not necessarily a safe
+       * assumption.
+       */
+
+      ntxdone++;
+      if ((txdesc->status & EMACTXD_STA_USED) == 0 && ntxdone > 1)
+#else
       if ((txdesc->status & EMACTXD_STA_USED) == 0)
+#endif
         {
           /* Yes.. the descriptor is still in use.  However, I have seen a
            * case (only repeatable on start-up) where the USED bit is never
@@ -1602,6 +1618,14 @@ static void sam_txdone(struct sam_emac_s *priv)
               break;
             }
         }
+
+#ifndef __NO_KLUDGES__
+      /* Make sure that the USED bit is set */
+
+      txdesc->status = (uint32_t)EMACTXD_STA_USED;
+      cp15_clean_dcache((uintptr_t)txdesc,
+                        (uintptr_t)txdesc + sizeof(struct emac_txdesc_s));
+#endif
 
       /* Increment the tail index */
 

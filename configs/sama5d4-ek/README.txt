@@ -1124,6 +1124,9 @@ Networking
   configuration options.  The SAMA5D44 supports two different 10/100Base-T
   Ethernet MAC peripherals.
 
+    NOTE:  See the "kludge" for EMAC that is documented in the To-Do
+    list at the end of this README file.
+
   ------------------------------ ------------------- -------------------------
   SAMA5D4 PIO                    SAMA5D4-MB          KSZ8081RNB
   ------------------------------ ------------------- -------------------------
@@ -3392,6 +3395,9 @@ Configurations
        large if no network is attached (A production design would bring up
        the network asynchronously to avoid these start up delays).
 
+       See the "kludge" for EMAC that is documented in the To-Do list at
+       the end of this README file.
+
    12. The SAMA5D4-EK includes for an AT25 serial DataFlash.  That support is
        NOT enabled in this configuration.  Support for that serial FLASH can
        be enabled by modifying the NuttX configuration as described above in
@@ -3492,7 +3498,37 @@ To-Do List
    Also, we should be receiving interrupts when an SD card is inserted or
    removed; we are not.
 
-4) Some drivers may require some adjustments if you intend to run from SDRAM.
+4) There is a kludge in place in the Ethernet code to work around a problem
+   that I see.  The problem that I see is as follows:
+
+     a. To send packets, the software keeps a queue of TX descriptors in
+        memory.
+
+     b. When a packet is ready to be sent, the software clears bit 31 of a
+        status word in the descriptor meaning that the descriptor now
+        "belongs" to the hardware.
+
+     c. The hardware sets bit 31 in memory when the transfer completes.
+
+   The problem that I see is that:
+
+     d. Occasionally bit 31 of the status word is not cleared even though
+        the Ethernet packet was successfully sent.
+
+   Since the software does not see bit 31 set, it seems like the transfer
+   did not complete and the Ethernet locks up.
+
+   The workaround/kludge that is in place makes this assumption:  If an
+   Ethernet transfer complete interrupt is received, then at least one
+   packet must have completed.  In this case, the software ignores
+   checking the USED bit for one packet.
+
+   With this kludge in place, the driver appears to work fine.  However,
+   there is a danger to what I have done:  If a spurious interrupt
+   occurs, than the USED bit would not be set and the transfer would be
+   lost.
+
+5) Some drivers may require some adjustments if you intend to run from SDRAM.
    That is because in this case macros like BOARD_MCK_FREQUENCY are not constants
    but are instead function calls:  The MCK clock frequency is not known in
    advance but instead has to be calculated from the bootloader PLL configuration.
