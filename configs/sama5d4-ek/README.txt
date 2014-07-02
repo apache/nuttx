@@ -1260,7 +1260,7 @@ Networking
     CONFIG_NETUTILS_DNSCLIENT=y          : Enable host address resolution
     CONFIG_NETUTILS_TELNETD=y            : Enable the Telnet daemon
     CONFIG_NETUTILS_TFTPC=y              : Enable TFTP data file transfers for get and put commands
-    CONFIG_NETUTILS_UIPLIB=y             : Network library support is needed
+    CONFIG_NETUTILS_NETLIB=y             : Network library support is needed
     CONFIG_NETUTILS_WEBCLIENT=y          : Needed for wget support
                                          : Defaults should be okay for other options
   Application Configuration -> NSH Library
