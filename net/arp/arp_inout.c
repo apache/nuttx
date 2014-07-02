@@ -351,7 +351,7 @@ void arp_out(struct net_driver_s *dev)
 
   /* First check if destination is a local broadcast. */
 
-  if (uiphdr_ipaddr_cmp(pip->eh_destipaddr, g_broadcast_ipaddr))
+  if (net_ipaddr_hdrcmp(pip->eh_destipaddr, g_broadcast_ipaddr))
     {
       memcpy(peth->dest, g_broadcast_ethaddr.ether_addr_octet, ETHER_ADDR_LEN);
     }

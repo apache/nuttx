@@ -400,11 +400,15 @@ int net_lockedwait(sem_t *sem);
  */
 
 #ifndef CONFIG_NET_IPv6
-#  define net_ipaddr_cmp(addr1, addr2)    (addr1 == addr2)
-#  define uiphdr_ipaddr_cmp(addr1, addr2) net_ipaddr_cmp(net_ip4addr_conv32(addr1), net_ip4addr_conv32(addr2))
+#  define net_ipaddr_cmp(addr1, addr2) \
+     (addr1 == addr2)
+#  define net_ipaddr_hdrcmp(addr1, addr2) \
+     net_ipaddr_cmp(net_ip4addr_conv32(addr1), net_ip4addr_conv32(addr2))
 #else /* !CONFIG_NET_IPv6 */
-#  define net_ipaddr_cmp(addr1, addr2)    (memcmp(&addr1, &addr2, sizeof(net_ip6addr_t)) == 0)
-#  define uiphdr_ipaddr_cmp(addr1, addr2) net_ipaddr_cmp(addr, addr2)
+#  define net_ipaddr_cmp(addr1, addr2) \
+     (memcmp(&addr1, &addr2, sizeof(net_ip6addr_t)) == 0)
+#  define net_ipaddr_hdrcmp(addr1, addr2) \
+     net_ipaddr_cmp(addr, addr2)
 #endif /* !CONFIG_NET_IPv6 */
 
 /* Compare two IP addresses with netmasks

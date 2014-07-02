@@ -176,8 +176,8 @@ static uint8_t devif_reassembly(void)
    * fragment into the buffer.
    */
 
-  if (uiphdr_addr_cmp(pbuf->srcipaddr, pfbuf->srcipaddr) &&
-      uiphdr_addr_cmp(pbuf->destipaddr == pfbuf->destipaddr) &&
+  if (net_ipaddr_hdrcmp(pbuf->srcipaddr, pfbuf->srcipaddr) &&
+      net_ipaddr_hdrcmp(pbuf->destipaddr, pfbuf->destipaddr) &&
       pbuf->g_ipid[0] == pfbuf->g_ipid[0] && pbuf->g_ipid[1] == pfbuf->g_ipid[1])
     {
       len = (pbuf->len[0] << 8) + pbuf->len[1] - (pbuf->vhl & 0x0f) * 4;

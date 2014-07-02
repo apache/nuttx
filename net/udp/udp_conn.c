@@ -321,7 +321,7 @@ FAR struct udp_conn_s *udp_active(FAR struct udp_iphdr_s *buf)
           (conn->rport == 0 || buf->srcport == conn->rport) &&
             (net_ipaddr_cmp(conn->ripaddr, g_allzeroaddr) ||
              net_ipaddr_cmp(conn->ripaddr, g_alloneaddr) ||
-             uiphdr_ipaddr_cmp(buf->srcipaddr, &conn->ripaddr)))
+             net_ipaddr_hdrcmp(buf->srcipaddr, &conn->ripaddr)))
         {
           /* Matching connection found.. return a reference to it */
 
