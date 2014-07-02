@@ -2318,9 +2318,9 @@ I2C Tool
       CONFIG_SAMA5_TWI2=y                   : Enable TWI2
 
     System Type -> TWI device driver options
-      SAMA5_TWI0_FREQUENCY=100000           : Select a TWI0 frequency
-      SAMA5_TWI1_FREQUENCY=100000           : Select a TWI1 frequency
-      SAMA5_TWI2_FREQUENCY=100000           : Select a TWI2 frequency
+      SAMA5_TWI0_FREQUENCY=100000           : Select a TWI0 frequency (default)
+      SAMA5_TWI1_FREQUENCY=100000           : Select a TWI1 frequency (default)
+      SAMA5_TWI2_FREQUENCY=100000           : Select a TWI2 frequency (default)
 
     Device Drivers -> I2C Driver Support
       CONFIG_I2C=y                          : Enable I2C support
@@ -3286,6 +3286,9 @@ Configurations
         CONFIG_DEV_RANDOM=y   : Enables /dev/random
 
     6. This configuration has support for NSH built-in applications enabled.
+       Only one built-in application is included by default, however:  The
+       I2C Tool.  See the section above entitle "I2C Tool" and the note with
+       regar to I2C below.
 
     7. This configuration has support for the FAT, ROMFS, and PROCFS file
        systems built in.
@@ -3318,7 +3321,7 @@ Configurations
              `- init.d/
                  `- rcS                  : Start-up script
 
-       (There will, of course, be other devices uner /dev include /dev/console,
+       (There will, of course, be other devices under /dev including /dev/console,
        /dev/null, /dev/zero, /dev/random, etc.).
 
        Relevant configuration options include:
@@ -3360,20 +3363,20 @@ Configurations
          |   `- ram1                     : RAM disk block driver
          |- etc/
          |   `- init.d/
-                 `- rcS                  : Start-up script
+         |       `- rcS                  : Start-up script
          |- proc/
          |   |- 0/                       : Information about Task ID 0
-         |   |  |- cmdline
-         |   |  |- stack
-         |   |  |- status
-         |   |  `- group/
-         |   |      |- fd
-         |   |      `- status
+         |   |  |- cmdline               : Command line used to start the task
+         |   |  |- stack                 : Stack allocation
+         |   |  |- status                : Current task status
+         |   |  `- group/                : Information about the task group
+         |   |      |- fd                : File descriptors open in the group
+         |   |      `- status            : Status of the group
          |   |- 1/                       : Information about Task ID 1
          |   |  `- ...                   : Same psuedo-directories as for Task ID 0
          |   |- ...                      : ...
          |   |- n/                       : Information about Task ID n
-         |   |  `- ...
+         |   |  `- ...                   : Same psuedo-directories as for Task ID 0
          |   |- uptime                   : Processor uptime
          `- tmp/
 
@@ -3465,22 +3468,24 @@ Configurations
        See the "kludge" for EMAC that is documented in the To-Do list at
        the end of this README file.
 
-   12. The SAMA5D4-EK includes for an AT25 serial DataFlash.  That support is
+   12. I2C Tool. This configuration enables TWI0 (only) as an I2C master
+       device.  This configuration also supports the I2C tool at
+       apps/system/i2c that can be used to peek and poke I2C devices on the
+       TIW0 bus.  See the discussion above under "I2C Tool" for detailed
+       configuration settings.
+
+   13. The SAMA5D4-EK includes for an AT25 serial DataFlash.  That support is
        NOT enabled in this configuration.  Support for that serial FLASH can
        be enabled by modifying the NuttX configuration as described above in
        the paragraph entitled "AT25 Serial FLASH".
 
-   13. Support the USB low-, high- and full-speed OHCI host driver can be
+   14. Support the USB low-, high- and full-speed OHCI host driver can be
        enabled by changing the NuttX configuration file as described in the
        section entitled "USB High-Speed Host" above.
 
-   14. Support the USB high-speed USB device driver (UDPHS) can be enabled
+   15. Support the USB high-speed USB device driver (UDPHS) can be enabled
        by changing the NuttX configuration file as described above in the
        section entitled "USB High-Speed Device."
-
-   15. I2C Tool. NuttX supports an I2C tool at apps/system/i2c that can be
-       used to peek and poke I2C devices.  See the discussion above under
-       "I2C Tool" for detailed configuration settings.
 
    16. This example can be configured to exercise the watchdog timer test
        (apps/examples/watchdog).  See the detailed configuration settings in
