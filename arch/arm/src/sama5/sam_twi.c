@@ -1167,8 +1167,9 @@ static void twi_hw_initialize(struct twi_dev_s *priv, unsigned int pid,
   /* Determine the maximum valid frequency setting */
 
   mck = BOARD_MCK_FREQUENCY;
-  DEBUGASSERT((mck >> 3) <= TWI_MAX_FREQUENCY);
 
+#ifdef SAMA5_HAVE_PMC_PCR_DIV
+  DEBUGASSERT((mck >> 3) <= TWI_MAX_FREQUENCY);
   if (mck <= TWI_MAX_FREQUENCY)
     {
       priv->frequency = mck;
@@ -1189,6 +1190,14 @@ static void twi_hw_initialize(struct twi_dev_s *priv, unsigned int pid,
       priv->frequency = (mck >> 3);
       regval          = PMC_PCR_DIV8;
     }
+
+#else
+  /* No DIV field in the PCR register */
+ 
+  priv->frequency     = mck;
+  regval              = 0;
+
+#endif /* SAMA5_HAVE_PMC_PCR_DIV */
 
   /* Set the TWI peripheral input clock to the maximum, valid frequency */
 
