@@ -312,7 +312,7 @@ static void enc_wrphy(FAR struct enc_driver_s *priv, uint8_t phyaddr,
 /* Common TX logic */
 
 static int  enc_transmit(FAR struct enc_driver_s *priv);
-static int  enc_uiptxpoll(struct net_driver_s *dev);
+static int  enc_txpoll(struct net_driver_s *dev);
 
 /* Interrupt handling */
 
@@ -1163,7 +1163,7 @@ static int enc_transmit(FAR struct enc_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: enc_uiptxpoll
+ * Function: enc_txpoll
  *
  * Description:
  *   The transmitter is available, check if uIP has any outgoing packets ready
@@ -1184,7 +1184,7 @@ static int enc_transmit(FAR struct enc_driver_s *priv)
  *
  ****************************************************************************/
 
-static int enc_uiptxpoll(struct net_driver_s *dev)
+static int enc_txpoll(struct net_driver_s *dev)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)dev->d_private;
 
@@ -1276,7 +1276,7 @@ static void enc_txif(FAR struct enc_driver_s *priv)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)devif_poll(&priv->dev, enc_uiptxpoll);
+  (void)devif_poll(&priv->dev, enc_txpoll);
 }
 
 /****************************************************************************
@@ -1835,7 +1835,7 @@ static void enc_toworker(FAR void *arg)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)devif_poll(&priv->dev, enc_uiptxpoll);
+  (void)devif_poll(&priv->dev, enc_txpoll);
 
   /* Release lock on uIP */
 
@@ -1924,7 +1924,7 @@ static void enc_pollworker(FAR void *arg)
        * in progress, we will missing TCP time state updates?
        */
 
-      (void)devif_timer(&priv->dev, enc_uiptxpoll, ENC_POLLHSEC);
+      (void)devif_timer(&priv->dev, enc_txpoll, ENC_POLLHSEC);
     }
 
   /* Release lock on the SPI bus and uIP */
@@ -2144,7 +2144,7 @@ static int enc_txavail(struct net_driver_s *dev)
         {
           /* The interface is up and TX is idle; poll uIP for new XMIT data */
 
-          (void)devif_poll(&priv->dev, enc_uiptxpoll);
+          (void)devif_poll(&priv->dev, enc_txpoll);
         }
     }
 

@@ -359,7 +359,7 @@ static inline void c5471_incrxcpu(struct c5471_driver_s *c5471);
 /* Common TX logic */
 
 static int  c5471_transmit(struct c5471_driver_s *c5471);
-static int  c5471_uiptxpoll(struct net_driver_s *dev);
+static int  c5471_txpoll(struct net_driver_s *dev);
 
 /* Interrupt handling */
 
@@ -954,7 +954,7 @@ static int c5471_transmit(struct c5471_driver_s *c5471)
 }
 
 /****************************************************************************
- * Function: c5471_uiptxpoll
+ * Function: c5471_txpoll
  *
  * Description:
  *   The transmitter is available, check if uIP has any outgoing packets ready
@@ -974,7 +974,7 @@ static int c5471_transmit(struct c5471_driver_s *c5471)
  *
  ****************************************************************************/
 
-static int c5471_uiptxpoll(struct net_driver_s *dev)
+static int c5471_txpoll(struct net_driver_s *dev)
 {
   struct c5471_driver_s *c5471 = (struct c5471_driver_s *)dev->d_private;
 
@@ -1403,7 +1403,7 @@ static void c5471_txdone(struct c5471_driver_s *c5471)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)devif_poll(&c5471->c_dev, c5471_uiptxpoll);
+  (void)devif_poll(&c5471->c_dev, c5471_txpoll);
 }
 
 /****************************************************************************
@@ -1522,7 +1522,7 @@ static void c5471_txtimeout(int argc, uint32_t arg, ...)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)devif_poll(&c5471->c_dev, c5471_uiptxpoll);
+  (void)devif_poll(&c5471->c_dev, c5471_txpoll);
 }
 
 /****************************************************************************
@@ -1554,7 +1554,7 @@ static void c5471_polltimer(int argc, uint32_t arg, ...)
     {
       /* If so, update TCP timing states and poll uIP for new XMIT data */
 
-      (void)devif_timer(&c5471->c_dev, c5471_uiptxpoll, C5471_POLLHSEC);
+      (void)devif_timer(&c5471->c_dev, c5471_txpoll, C5471_POLLHSEC);
     }
 
   /* Setup the watchdog poll timer again */
@@ -1715,7 +1715,7 @@ static int c5471_txavail(struct net_driver_s *dev)
        {
           /* If so, then poll uIP for new XMIT data */
 
-          (void)devif_poll(&c5471->c_dev, c5471_uiptxpoll);
+          (void)devif_poll(&c5471->c_dev, c5471_txpoll);
        }
     }
 

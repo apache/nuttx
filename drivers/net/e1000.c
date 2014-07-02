@@ -146,7 +146,7 @@ static struct e1000_dev_head e1000_list = {0};
 /* Common TX logic */
 
 static int  e1000_transmit(struct e1000_dev *e1000);
-static int  e1000_uiptxpoll(struct net_driver_s *dev);
+static int  e1000_txpoll(struct net_driver_s *dev);
 
 /* Interrupt handling */
 
@@ -453,7 +453,7 @@ static int e1000_transmit(struct e1000_dev *e1000)
 }
 
 /****************************************************************************
- * Function: e1000_uiptxpoll
+ * Function: e1000_txpoll
  *
  * Description:
  *   The transmitter is available, check if uIP has any outgoing packets ready
@@ -476,7 +476,7 @@ static int e1000_transmit(struct e1000_dev *e1000)
  *
  ****************************************************************************/
 
-static int e1000_uiptxpoll(struct net_driver_s *dev)
+static int e1000_txpoll(struct net_driver_s *dev)
 {
   struct e1000_dev *e1000 = (struct e1000_dev *)dev->d_private;
   int tail = e1000->tx_ring.tail;
@@ -641,7 +641,7 @@ static void e1000_txtimeout(int argc, uint32_t arg, ...)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)devif_poll(&e1000->netdev, e1000_uiptxpoll);
+  (void)devif_poll(&e1000->netdev, e1000_txpoll);
 }
 
 /****************************************************************************
@@ -681,7 +681,7 @@ static void e1000_polltimer(int argc, uint32_t arg, ...)
    * we will missing TCP time state updates?
    */
 
-  (void)devif_timer(&e1000->netdev, e1000_uiptxpoll, E1000_POLLHSEC);
+  (void)devif_timer(&e1000->netdev, e1000_txpoll, E1000_POLLHSEC);
 
   /* Setup the watchdog poll timer again */
 
@@ -819,7 +819,7 @@ static int e1000_txavail(struct net_driver_s *dev)
 
       if (e1000->tx_ring.desc[tail].desc_status)
         {
-          (void)devif_poll(&e1000->netdev, e1000_uiptxpoll);
+          (void)devif_poll(&e1000->netdev, e1000_txpoll);
         }
     }
 
@@ -938,7 +938,7 @@ static irqreturn_t e1000_interrupt_handler(int irq, void *dev_id)
 
   if (intr_cause & (1<<0))
     {
-      devif_poll(&e1000->netdev, e1000_uiptxpoll);
+      devif_poll(&e1000->netdev, e1000_txpoll);
     }
 
 

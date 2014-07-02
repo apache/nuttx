@@ -112,7 +112,7 @@ static struct skel_driver_s g_skel[CONFIG_skeleton_NINTERFACES];
 /* Common TX logic */
 
 static int  skel_transmit(FAR struct skel_driver_s *skel);
-static int  skel_uiptxpoll(struct net_driver_s *dev);
+static int  skel_txpoll(struct net_driver_s *dev);
 
 /* Interrupt handling */
 
@@ -179,7 +179,7 @@ static int skel_transmit(FAR struct skel_driver_s *skel)
 }
 
 /****************************************************************************
- * Function: skel_uiptxpoll
+ * Function: skel_txpoll
  *
  * Description:
  *   The transmitter is available, check if uIP has any outgoing packets ready
@@ -202,7 +202,7 @@ static int skel_transmit(FAR struct skel_driver_s *skel)
  *
  ****************************************************************************/
 
-static int skel_uiptxpoll(struct net_driver_s *dev)
+static int skel_txpoll(struct net_driver_s *dev)
 {
   FAR struct skel_driver_s *skel = (FAR struct skel_driver_s *)dev->d_private;
 
@@ -323,7 +323,7 @@ static void skel_txdone(FAR struct skel_driver_s *skel)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)devif_poll(&skel->sk_dev, skel_uiptxpoll);
+  (void)devif_poll(&skel->sk_dev, skel_txpoll);
 }
 
 /****************************************************************************
@@ -394,7 +394,7 @@ static void skel_txtimeout(int argc, uint32_t arg, ...)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)devif_poll(&skel->sk_dev, skel_uiptxpoll);
+  (void)devif_poll(&skel->sk_dev, skel_txpoll);
 }
 
 /****************************************************************************
@@ -428,7 +428,7 @@ static void skel_polltimer(int argc, uint32_t arg, ...)
    * we will missing TCP time state updates?
    */
 
-  (void)devif_timer(&skel->sk_dev, skel_uiptxpoll, skeleton_POLLHSEC);
+  (void)devif_timer(&skel->sk_dev, skel_txpoll, skeleton_POLLHSEC);
 
   /* Setup the watchdog poll timer again */
 
@@ -554,7 +554,7 @@ static int skel_txavail(struct net_driver_s *dev)
 
       /* If so, then poll uIP for new XMIT data */
 
-      (void)devif_poll(&skel->sk_dev, skel_uiptxpoll);
+      (void)devif_poll(&skel->sk_dev, skel_txpoll);
     }
 
   irqrestore(flags);

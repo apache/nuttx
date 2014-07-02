@@ -376,7 +376,7 @@ static bool dm9x_rxchecksumready(uint8_t);
 /* Common TX logic */
 
 static int  dm9x_transmit(struct dm9x_driver_s *dm9x);
-static int  dm9x_uiptxpoll(struct net_driver_s *dev);
+static int  dm9x_txpoll(struct net_driver_s *dev);
 
 /* Interrupt handling */
 
@@ -819,7 +819,7 @@ static int dm9x_transmit(struct dm9x_driver_s *dm9x)
 }
 
 /****************************************************************************
- * Function: dm9x_uiptxpoll
+ * Function: dm9x_txpoll
  *
  * Description:
  *   The transmitter is available, check if uIP has any outgoing packets ready
@@ -839,7 +839,7 @@ static int dm9x_transmit(struct dm9x_driver_s *dm9x)
  *
  ****************************************************************************/
 
-static int dm9x_uiptxpoll(struct net_driver_s *dev)
+static int dm9x_txpoll(struct net_driver_s *dev)
 {
   struct dm9x_driver_s *dm9x = (struct dm9x_driver_s *)dev->d_private;
 
@@ -1086,7 +1086,7 @@ static void dm9x_txdone(struct dm9x_driver_s *dm9x)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)devif_poll(&dm9x->dm_dev, dm9x_uiptxpoll);
+  (void)devif_poll(&dm9x->dm_dev, dm9x_txpoll);
 }
 
 /****************************************************************************
@@ -1249,7 +1249,7 @@ static void dm9x_txtimeout(int argc, uint32_t arg, ...)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)devif_poll(&dm9x->dm_dev, dm9x_uiptxpoll);
+  (void)devif_poll(&dm9x->dm_dev, dm9x_txpoll);
 }
 
 /****************************************************************************
@@ -1291,7 +1291,7 @@ static void dm9x_polltimer(int argc, uint32_t arg, ...)
     {
       /* If so, update TCP timing states and poll uIP for new XMIT data */
 
-      (void)devif_timer(&dm9x->dm_dev, dm9x_uiptxpoll, DM6X_POLLHSEC);
+      (void)devif_timer(&dm9x->dm_dev, dm9x_txpoll, DM6X_POLLHSEC);
     }
 
   /* Setup the watchdog poll timer again */
@@ -1499,7 +1499,7 @@ static int dm9x_txavail(struct net_driver_s *dev)
         {
           /* If so, then poll uIP for new XMIT data */
 
-          (void)devif_poll(&dm9x->dm_dev, dm9x_uiptxpoll);
+          (void)devif_poll(&dm9x->dm_dev, dm9x_txpoll);
         }
     }
   irqrestore(flags);

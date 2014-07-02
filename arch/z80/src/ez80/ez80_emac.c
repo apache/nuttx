@@ -355,7 +355,7 @@ static void ez80emac_machash(FAR uint8_t *mac, int *ndx, int *bitno)
 /* TX/RX logic */
 
 static int  ez80emac_transmit(struct ez80emac_driver_s *priv);
-static int  ez80emac_uiptxpoll(struct net_driver_s *dev);
+static int  ez80emac_txpoll(struct net_driver_s *dev);
 
 static inline FAR struct ez80emac_desc_s *ez80emac_rwp(void);
 static inline FAR struct ez80emac_desc_s *ez80emac_rrp(void);
@@ -1044,7 +1044,7 @@ static int ez80emac_transmit(struct ez80emac_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: ez80emac_uiptxpoll
+ * Function: ez80emac_txpoll
  *
  * Description:
  *   The transmitter is available, check if uIP has any outgoing packets ready
@@ -1064,7 +1064,7 @@ static int ez80emac_transmit(struct ez80emac_driver_s *priv)
  *
  ****************************************************************************/
 
-static int ez80emac_uiptxpoll(struct net_driver_s *dev)
+static int ez80emac_txpoll(struct net_driver_s *dev)
 {
   struct ez80emac_driver_s *priv = (struct ez80emac_driver_s *)dev->d_private;
   int ret = 0;
@@ -1578,7 +1578,7 @@ static void ez80emac_txtimeout(int argc, uint32_t arg, ...)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)devif_poll(&priv->dev, ez80emac_uiptxpoll);
+  (void)devif_poll(&priv->dev, ez80emac_txpoll);
 }
 
 /****************************************************************************
@@ -1604,7 +1604,7 @@ static void ez80emac_polltimer(int argc, uint32_t arg, ...)
 
   /* Poll uIP for new XMIT data */
 
-  (void)devif_timer(&priv->dev, ez80emac_uiptxpoll, EMAC_POLLHSEC);
+  (void)devif_timer(&priv->dev, ez80emac_txpoll, EMAC_POLLHSEC);
 
   /* Setup the watchdog poll timer again */
 
@@ -1791,7 +1791,7 @@ static int ez80emac_txavail(struct net_driver_s *dev)
 
       /* If so, then poll uIP for new XMIT data */
 
-      (void)devif_poll(&priv->dev, ez80emac_uiptxpoll);
+      (void)devif_poll(&priv->dev, ez80emac_txpoll);
     }
 
   irqrestore(flags);

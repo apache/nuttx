@@ -325,7 +325,7 @@ static void lpc17_putreg(uint32_t val, uint32_t addr);
 
 static int  lpc17_txdesc(struct lpc17_driver_s *priv);
 static int  lpc17_transmit(struct lpc17_driver_s *priv);
-static int  lpc17_uiptxpoll(struct net_driver_s *dev);
+static int  lpc17_txpoll(struct net_driver_s *dev);
 
 /* Interrupt handling */
 
@@ -643,7 +643,7 @@ static int lpc17_transmit(struct lpc17_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: lpc17_uiptxpoll
+ * Function: lpc17_txpoll
  *
  * Description:
  *   The transmitter is available, check if uIP has any outgoing packets ready
@@ -666,7 +666,7 @@ static int lpc17_transmit(struct lpc17_driver_s *priv)
  *
  ****************************************************************************/
 
-static int lpc17_uiptxpoll(struct net_driver_s *dev)
+static int lpc17_txpoll(struct net_driver_s *dev)
 {
   struct lpc17_driver_s *priv = (struct lpc17_driver_s *)dev->d_private;
   int ret = OK;
@@ -977,7 +977,7 @@ static void lpc17_txdone(struct lpc17_driver_s *priv)
 
   else
     {
-      (void)devif_poll(&priv->lp_dev, lpc17_uiptxpoll);
+      (void)devif_poll(&priv->lp_dev, lpc17_txpoll);
     }
 }
 
@@ -1188,7 +1188,7 @@ static void lpc17_txtimeout(int argc, uint32_t arg, ...)
 
       /* Then poll uIP for new XMIT data */
 
-      (void)devif_poll(&priv->lp_dev, lpc17_uiptxpoll);
+      (void)devif_poll(&priv->lp_dev, lpc17_txpoll);
     }
 }
 
@@ -1225,7 +1225,7 @@ static void lpc17_polltimer(int argc, uint32_t arg, ...)
        * we will missing TCP time state updates?
        */
 
-      (void)devif_timer(&priv->lp_dev, lpc17_uiptxpoll, LPC17_POLLHSEC);
+      (void)devif_timer(&priv->lp_dev, lpc17_txpoll, LPC17_POLLHSEC);
     }
 
   /* Setup the watchdog poll timer again */
@@ -1482,7 +1482,7 @@ static int lpc17_txavail(struct net_driver_s *dev)
         {
           /* If so, then poll uIP for new XMIT data */
 
-          (void)devif_poll(&priv->lp_dev, lpc17_uiptxpoll);
+          (void)devif_poll(&priv->lp_dev, lpc17_txpoll);
         }
     }
 

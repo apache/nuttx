@@ -202,7 +202,7 @@ static void slip_semtake(FAR struct slip_driver_s *priv);
 static void slip_write(FAR struct slip_driver_s *priv, const uint8_t *buffer, int len);
 static void slip_putc(FAR struct slip_driver_s *priv, int ch);
 static int slip_transmit(FAR struct slip_driver_s *priv);
-static int slip_uiptxpoll(struct net_driver_s *dev);
+static int slip_txpoll(struct net_driver_s *dev);
 static void slip_txtask(int argc, char *argv[]);
 
 /* Packet receiver task */
@@ -398,7 +398,7 @@ static int slip_transmit(FAR struct slip_driver_s *priv)
 }
 
 /****************************************************************************
- * Function: slip_uiptxpoll
+ * Function: slip_txpoll
  *
  * Description:
  *   Check if uIP has any outgoing packets ready to send.  This is a
@@ -419,7 +419,7 @@ static int slip_transmit(FAR struct slip_driver_s *priv)
  *
  ****************************************************************************/
 
-static int slip_uiptxpoll(struct net_driver_s *dev)
+static int slip_txpoll(struct net_driver_s *dev)
 {
   FAR struct slip_driver_s *priv = (FAR struct slip_driver_s *)dev->d_private;
 
@@ -495,7 +495,7 @@ static void slip_txtask(int argc, char *argv[])
 
           flags = net_lock();
           priv->dev.d_buf = priv->txbuf;
-          (void)devif_timer(&priv->dev, slip_uiptxpoll, SLIP_POLLHSEC);
+          (void)devif_timer(&priv->dev, slip_txpoll, SLIP_POLLHSEC);
           net_unlock(flags);
           slip_semgive(priv);
         }

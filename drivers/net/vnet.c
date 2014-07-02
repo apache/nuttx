@@ -119,7 +119,7 @@ static struct vnet_driver_s g_vnet[CONFIG_VNET_NINTERFACES];
 /* Common TX logic */
 
 static int  vnet_transmit(FAR struct vnet_driver_s *vnet);
-static int  vnet_uiptxpoll(struct net_driver_s *dev);
+static int  vnet_txpoll(struct net_driver_s *dev);
 
 /* Interrupt handling */
 
@@ -198,7 +198,7 @@ static int vnet_transmit(FAR struct vnet_driver_s *vnet)
 }
 
 /****************************************************************************
- * Function: vnet_uiptxpoll
+ * Function: vnet_txpoll
  *
  * Description:
  *   The transmitter is available, check if uIP has any outgoing packets ready
@@ -221,7 +221,7 @@ static int vnet_transmit(FAR struct vnet_driver_s *vnet)
  *
  ****************************************************************************/
 
-static int vnet_uiptxpoll(struct net_driver_s *dev)
+static int vnet_txpoll(struct net_driver_s *dev)
 {
 	FAR struct vnet_driver_s *vnet = (FAR struct vnet_driver_s *)dev->d_private;
 
@@ -345,7 +345,7 @@ static void vnet_txdone(FAR struct vnet_driver_s *vnet)
 
 	/* Then poll uIP for new XMIT data */
 
-	(void)devif_poll(&vnet->sk_dev, vnet_uiptxpoll);
+	(void)devif_poll(&vnet->sk_dev, vnet_txpoll);
 }
 
 /****************************************************************************
@@ -377,7 +377,7 @@ static void vnet_txtimeout(int argc, uint32_t arg, ...)
 
 	/* Then poll uIP for new XMIT data */
 
-	(void)devif_poll(&vnet->sk_dev, vnet_uiptxpoll);
+	(void)devif_poll(&vnet->sk_dev, vnet_txpoll);
 }
 
 /****************************************************************************
@@ -417,7 +417,7 @@ static void vnet_polltimer(int argc, uint32_t arg, ...)
 	 * we will missing TCP time state updates?
 	 */
 
-	(void)devif_timer(&vnet->sk_dev, vnet_uiptxpoll, VNET_POLLHSEC);
+	(void)devif_timer(&vnet->sk_dev, vnet_txpoll, VNET_POLLHSEC);
 
 	/* Setup the watchdog poll timer again */
 
@@ -545,7 +545,7 @@ static int vnet_txavail(struct net_driver_s *dev)
 
 		/* If so, then poll uIP for new XMIT data */
 
-		(void)devif_poll(&vnet->sk_dev, vnet_uiptxpoll);
+		(void)devif_poll(&vnet->sk_dev, vnet_txpoll);
     }
 
 out:

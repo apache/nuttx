@@ -116,7 +116,7 @@ static void cs89x0_putppreg(struct cs89x0_driver_s *cs89x0, int addr,
 /* Common TX logic */
 
 static int  cs89x0_transmit(struct cs89x0_driver_s *cs89x0);
-static int  cs89x0_uiptxpoll(struct net_driver_s *dev);
+static int  cs89x0_txpoll(struct net_driver_s *dev);
 
 /* Interrupt handling */
 
@@ -307,7 +307,7 @@ static int cs89x0_transmit(struct cs89x0_driver_s *cs89x0)
 }
 
 /****************************************************************************
- * Function: cs89x0_uiptxpoll
+ * Function: cs89x0_txpoll
  *
  * Description:
  *   The transmitter is available, check if uIP has any outgoing packets ready
@@ -327,7 +327,7 @@ static int cs89x0_transmit(struct cs89x0_driver_s *cs89x0)
  *
  ****************************************************************************/
 
-static int cs89x0_uiptxpoll(struct net_driver_s *dev)
+static int cs89x0_txpoll(struct net_driver_s *dev)
 {
   struct cs89x0_driver_s *cs89x0 = (struct cs89x0_driver_s *)dev->d_private;
 
@@ -518,7 +518,7 @@ static void cs89x0_txdone(struct cs89x0_driver_s *cs89x0, uint16_t isq)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)devif_poll(&cs89x0->cs_dev, cs89x0_uiptxpoll);
+  (void)devif_poll(&cs89x0->cs_dev, cs89x0_txpoll);
 }
 
 /****************************************************************************
@@ -663,7 +663,7 @@ static void cs89x0_txtimeout(int argc, uint32_t arg, ...)
 
   /* Then poll uIP for new XMIT data */
 
-  (void)devif_poll(&cs89x0->cs_dev, cs89x0_uiptxpoll);
+  (void)devif_poll(&cs89x0->cs_dev, cs89x0_txpoll);
 }
 
 /****************************************************************************
@@ -692,7 +692,7 @@ static void cs89x0_polltimer(int argc, uint32_t arg, ...)
 
   /* If so, update TCP timing states and poll uIP for new XMIT data */
 
-  (void)devif_timer(&cs89x0->cs_dev, cs89x0_uiptxpoll, CS89x0_POLLHSEC);
+  (void)devif_timer(&cs89x0->cs_dev, cs89x0_txpoll, CS89x0_POLLHSEC);
 
   /* Setup the watchdog poll timer again */
 
@@ -811,7 +811,7 @@ static int cs89x0_txavail(struct net_driver_s *dev)
 
       /* If so, then poll uIP for new XMIT data */
 
-      (void)devif_poll(&cs89x0->cs_dev, cs89x0_uiptxpoll);
+      (void)devif_poll(&cs89x0->cs_dev, cs89x0_txpoll);
     }
 
   irqrestore(flags);
