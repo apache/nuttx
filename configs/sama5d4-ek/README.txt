@@ -1124,6 +1124,9 @@ Networking
   configuration options.  The SAMA5D44 supports two different 10/100Base-T
   Ethernet MAC peripherals.
 
+    NOTE:  See the "kludge" for EMAC that is documented in the To-Do
+    list at the end of this README file.
+
   ------------------------------ ------------------- -------------------------
   SAMA5D4 PIO                    SAMA5D4-MB          KSZ8081RNB
   ------------------------------ ------------------- -------------------------
@@ -1757,11 +1760,6 @@ USB High-Speed Host
     Application Configuration -> NSH Library
       CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
 
-  NOTE:  When OHCI is selected, the SAMA5 will operate at 384MHz instead of
-  396MHz.  This is so that the PLL generates a frequency which is a multiple
-  of the 48MHz needed for OHCI.  The delay loop calibration values that are
-  used will be off slightly because of this.
-
   EHCI
   ----
 
@@ -2315,9 +2313,9 @@ I2C Tool
       CONFIG_SAMA5_TWI2=y                   : Enable TWI2
 
     System Type -> TWI device driver options
-      SAMA5_TWI0_FREQUENCY=100000           : Select a TWI0 frequency
-      SAMA5_TWI1_FREQUENCY=100000           : Select a TWI1 frequency
-      SAMA5_TWI2_FREQUENCY=100000           : Select a TWI2 frequency
+      SAMA5_TWI0_FREQUENCY=100000           : Select a TWI0 frequency (default)
+      SAMA5_TWI1_FREQUENCY=100000           : Select a TWI1 frequency (default)
+      SAMA5_TWI2_FREQUENCY=100000           : Select a TWI2 frequency (default)
 
     Device Drivers -> I2C Driver Support
       CONFIG_I2C=y                          : Enable I2C support
@@ -3020,29 +3018,12 @@ Configurations
      create a very corrupt configuration that may not be easy to recover
      from.
 
-  4. The SAMA5Dx is running at 396MHz by default in these configurations.
-     This is because the original timing for the PLLs, NOR FLASH, and SDRAM
-     came from the Atmel NoOS sample code which runs at that rate.
-
-     The SAMA5Dx is capable of running at 528MHz, however, and is easily
-     re-configured:
+  4. The SAMA5Dx is running at 528MHz by default in these configurations.
 
        Board Selection -> CPU Frequency
-         CONFIG_SAMA5D4EK_396MHZ=n     # Disable 396MHz operation
-         CONFIG_SAMA5D4EK_528MHZ=y     # Enable 528MHz operation
-
-     If you switch to 528MHz, you should also check the loop calibration
-     value in your .config file.  Of course, it would be best to re-calibrate
-     the timing loop, but these values should get you in the ballpark:
-
-       CONFIG_BOARD_LOOPSPERMSEC=49341  # Calibrated on SAMA5D3-EK at 396MHz
-                                        # running from ISRAM
-       CONFIG_BOARD_LOOPSPERMSEC=65775  # Calibrated on SAMA5D3-Xplained at
-                                        # 528MHz running from SDRAM
-
-     Operation at 528MHz has been verified but is not the default in these
-     configurations because most testing was done at 396MHz.  NAND has not
-     been verified at these rates.
+         CONFIG_SAMA5D4EK_528MHZ=y       : Enable 528MHz operation
+         CONFIG_BOARD_LOOPSPERMSEC=65775 : Calibrated on SAMA5D3-Xplained at
+                                         : 528MHz running from SDRAM
 
   Configuration Sub-directories
   -----------------------------
@@ -3283,9 +3264,12 @@ Configurations
         CONFIG_DEV_RANDOM=y   : Enables /dev/random
 
     6. This configuration has support for NSH built-in applications enabled.
+       Only one built-in application is included by default, however:  The
+       I2C Tool.  See the section above entitle "I2C Tool" and the note with
+       regar to I2C below.
 
-    7. This configuration has support for the FAT and ROMFS file systems
-       built in.
+    7. This configuration has support for the FAT, ROMFS, and PROCFS file
+       systems built in.
 
        The FAT file system includes long file name support.  Please be aware
        that Microsoft claims patents against the long file name support (see
@@ -3301,16 +3285,21 @@ Configurations
 
          CONFIG_FS_ROMFS=y      : Enable ROMFS file system
 
-    8. An NSH star-up script is provided by the ROMFS file system.  The ROMFS
+       The ROMFS file system is enabled simply with:
+
+         CONFIG_FS_PROCFS=y     : Enable PROCFS file system
+
+    8. An NSH start-up script is provided by the ROMFS file system.  The ROMFS
        file system is mounted at /etc and provides:
 
          |- dev/
-         |   `- ram0
+         |   |- ...
+         |   `- ram0                     : ROMFS block driver
          `- etc/
              `- init.d/
-                 `- rcS
+                 `- rcS                  : Start-up script
 
-       (There will, of course, be other devices uner /dev include /dev/console,
+       (There will, of course, be other devices under /dev including /dev/console,
        /dev/null, /dev/zero, /dev/random, etc.).
 
        Relevant configuration options include:
@@ -3323,24 +3312,86 @@ Configurations
        The content of /etc/init.d/rcS can be see in the file rcS.template that
        can be found at: configs/sama5d4-ek/include/rcS.template:
 
-         mkrd -m 2 -s 512 1024
+         # Mount the procfs file system at /proc
+
+         mount -f procfs /proc
+         echo "rcS: Mounted /proc"
+
+         # Create a RAMDISK at /dev/ram1, size 0.5MiB, format it with a FAT
+         # file system and mount it at /tmp
+
+         mkrd -m 1 -s 512 1024
          mkfatfs /dev/ram1
          mount -t vfat /dev/ram1 /tmp
+         echo "rcS: Mounted /tmp"
 
-       The above commands will create a RAM disk block device at /dev/ram1.
-       The RAM disk will take 0.4MiB of memory (512 x 1024).  Then it will
-       create a FAT file system on the ram disk and mount it at /tmp.  So
-       after NSH starts and runs the rcS script, we will have:
+       The above commands will mount the procfs file system at /proc and a
+       RAM disk at /tmp.
+
+       The second group of commands will: (1) Create a RAM disk block device
+       at /dev/ram1 (mkrd).  The RAM disk will take 0.4MiB of memory (512 x
+       1024).  Then it will then: (2) create a FAT file system on the ram
+       disk (mkfatfs) and (3) mount it at /tmp (mount).
+
+       So after NSH starts and runs the rcS script, we will have:
 
          |- dev/
-         |   |- ram0
-         |   `- ram2
+         |   |- ...
+         |   `- ram0                     : ROMFS block driver
+         |   `- ram1                     : RAM disk block driver
          |- etc/
          |   `- init.d/
-         |       `- rcS
-          `- tmp/
+         |       `- rcS                  : Start-up script
+         |- proc/
+         |   |- 0/                       : Information about Task ID 0
+         |   |  |- cmdline               : Command line used to start the task
+         |   |  |- stack                 : Stack allocation
+         |   |  |- status                : Current task status
+         |   |  `- group/                : Information about the task group
+         |   |      |- fd                : File descriptors open in the group
+         |   |      `- status            : Status of the group
+         |   |- 1/                       : Information about Task ID 1
+         |   |  `- ...                   : Same psuedo-directories as for Task ID 0
+         |   |- ...                      : ...
+         |   |- n/                       : Information about Task ID n
+         |   |  `- ...                   : Same psuedo-directories as for Task ID 0
+         |   |- uptime                   : Processor uptime
+         `- tmp/
 
-       The /tmp directory can them be used for and scratch purpose.
+       The /tmp directory can them be used for and scratch purpose.  The
+       pseudo-files in the proc/ directory can be used to query properties
+       of NuttX.  As examples:
+
+         nsh> cat /proc/1/stack
+         StackBase:  0x2003b1e8
+         StackSize:  2044
+
+         nsh> cat /proc/uptime
+              31.89
+
+         nsh> cat /proc/1/status
+         Name:       work
+         Type:       Kernel thread
+         State:      Signal wait
+         Priority:   192
+         Scheduler:  SCHED_FIFO
+         SigMask:    00000000
+
+         nsh> cat /proc/1/cmdline
+         work
+
+         nsh> cat /proc/1/group/status
+         Flags:      0x00
+         Members:    1
+
+         nsh> cat /proc/1/group/fd
+
+         FD  POS      OFLAGS
+          0        0 0003
+          1        0 0003
+          2        0 0003
+
+         SD  RF TYP FLAGS
 
     9. The Real Time Clock/Calendar (RTC) is enabled in this configuration.
        See the section entitled "RTC" above for detailed configuration
@@ -3392,22 +3443,27 @@ Configurations
        large if no network is attached (A production design would bring up
        the network asynchronously to avoid these start up delays).
 
-   12. The SAMA5D4-EK includes for an AT25 serial DataFlash.  That support is
+       See the "kludge" for EMAC that is documented in the To-Do list at
+       the end of this README file.
+
+   12. I2C Tool. This configuration enables TWI0 (only) as an I2C master
+       device.  This configuration also supports the I2C tool at
+       apps/system/i2c that can be used to peek and poke I2C devices on the
+       TIW0 bus.  See the discussion above under "I2C Tool" for detailed
+       configuration settings.
+
+   13. The SAMA5D4-EK includes for an AT25 serial DataFlash.  That support is
        NOT enabled in this configuration.  Support for that serial FLASH can
        be enabled by modifying the NuttX configuration as described above in
        the paragraph entitled "AT25 Serial FLASH".
 
-   13. Support the USB low-, high- and full-speed OHCI host driver can be
+   14. Support the USB low-, high- and full-speed OHCI host driver can be
        enabled by changing the NuttX configuration file as described in the
        section entitled "USB High-Speed Host" above.
 
-   14. Support the USB high-speed USB device driver (UDPHS) can be enabled
+   15. Support the USB high-speed USB device driver (UDPHS) can be enabled
        by changing the NuttX configuration file as described above in the
        section entitled "USB High-Speed Device."
-
-   15. I2C Tool. NuttX supports an I2C tool at apps/system/i2c that can be
-       used to peek and poke I2C devices.  See the discussion above under
-       "I2C Tool" for detailed configuration settings.
 
    16. This example can be configured to exercise the watchdog timer test
        (apps/examples/watchdog).  See the detailed configuration settings in
@@ -3492,7 +3548,37 @@ To-Do List
    Also, we should be receiving interrupts when an SD card is inserted or
    removed; we are not.
 
-4) Some drivers may require some adjustments if you intend to run from SDRAM.
+4) There is a kludge in place in the Ethernet code to work around a problem
+   that I see.  The problem that I see is as follows:
+
+     a. To send packets, the software keeps a queue of TX descriptors in
+        memory.
+
+     b. When a packet is ready to be sent, the software clears bit 31 of a
+        status word in the descriptor meaning that the descriptor now
+        "belongs" to the hardware.
+
+     c. The hardware sets bit 31 in memory when the transfer completes.
+
+   The problem that I see is that:
+
+     d. Occasionally bit 31 of the status word is not cleared even though
+        the Ethernet packet was successfully sent.
+
+   Since the software does not see bit 31 set, it seems like the transfer
+   did not complete and the Ethernet locks up.
+
+   The workaround/kludge that is in place makes this assumption:  If an
+   Ethernet transfer complete interrupt is received, then at least one
+   packet must have completed.  In this case, the software ignores
+   checking the USED bit for one packet.
+
+   With this kludge in place, the driver appears to work fine.  However,
+   there is a danger to what I have done:  If a spurious interrupt
+   occurs, than the USED bit would not be set and the transfer would be
+   lost.
+
+5) Some drivers may require some adjustments if you intend to run from SDRAM.
    That is because in this case macros like BOARD_MCK_FREQUENCY are not constants
    but are instead function calls:  The MCK clock frequency is not known in
    advance but instead has to be calculated from the bootloader PLL configuration.
