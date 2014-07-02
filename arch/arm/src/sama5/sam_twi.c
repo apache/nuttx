@@ -1169,6 +1169,8 @@ static void twi_hw_initialize(struct twi_dev_s *priv, unsigned int pid,
   mck = BOARD_MCK_FREQUENCY;
 
 #ifdef SAMA5_HAVE_PMC_PCR_DIV
+  /* Select the optimal value for the PCR DIV field */
+
   DEBUGASSERT((mck >> 3) <= TWI_MAX_FREQUENCY);
   if (mck <= TWI_MAX_FREQUENCY)
     {
@@ -1193,7 +1195,7 @@ static void twi_hw_initialize(struct twi_dev_s *priv, unsigned int pid,
 
 #else
   /* No DIV field in the PCR register */
- 
+
   priv->frequency     = mck;
   regval              = 0;
 
