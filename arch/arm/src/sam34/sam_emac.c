@@ -918,6 +918,9 @@ static int sam_recvframe(struct sam_emac_s *priv)
   dev        = &priv->dev;
   dev->d_len = 0;
 
+  dest       = dev->d_buf;
+  pktlen     = 0;
+
   rxndx      = priv->rxndx;
   rxdesc     = &priv->rxdesc[rxndx];
   isframe    = false;
