@@ -62,7 +62,7 @@
  * Private Data
  ****************************************************************************/
 
-static sem_t        g_uipsem;
+static sem_t        g_netlock;
 static pid_t        g_holder  = NO_HOLDER;
 static unsigned int g_count   = 0;
 
@@ -80,7 +80,7 @@ static unsigned int g_count   = 0;
 
 static void _net_takesem(void)
 {
-  while (sem_wait(&g_uipsem) != 0)
+  while (sem_wait(&g_netlock) != 0)
     {
       /* The only case that an error should occur here is if the wait was
        * awakened by a signal.
@@ -104,7 +104,7 @@ static void _net_takesem(void)
 
 void net_lockinitialize(void)
 {
-  sem_init(&g_uipsem, 0, 1);
+  sem_init(&g_netlock, 0, 1);
 }
 
 /****************************************************************************
@@ -162,7 +162,7 @@ void net_unlock(net_lock_t flags)
 
       g_holder = NO_HOLDER;
       g_count  = 0;
-      sem_post(&g_uipsem);
+      sem_post(&g_netlock);
     }
   else
     {
@@ -176,7 +176,7 @@ void net_unlock(net_lock_t flags)
  * Function: net_lockedwait
  *
  * Description:
- *   Atomically wait for sem while temporarily releasing g_uipsem.
+ *   Atomically wait for sem while temporarily releasing g_netlock.
  *
  ****************************************************************************/
 
@@ -196,7 +196,7 @@ int net_lockedwait(sem_t *sem)
       count    = g_count;
       g_holder = NO_HOLDER;
       g_count  = 0;
-      sem_post(&g_uipsem);
+      sem_post(&g_netlock);
 
       /* Now take the semaphore */
 
