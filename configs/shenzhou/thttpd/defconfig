@@ -801,7 +801,7 @@ CONFIG_NETUTILS_TFTPC=y
 #
 # uIP support library
 #
-CONFIG_NETUTILS_UIPLIB=y
+CONFIG_NETUTILS_NETLIB=y
 
 #
 # uIP web client
