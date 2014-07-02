@@ -452,7 +452,7 @@ static uint16_t sam_txinuse(struct sam_gmac_s *priv)
   uint32_t txhead32 = (uint32_t)priv->txhead;
   if ((uint32_t)priv->txtail > txhead32)
     {
-      return txhead32 += CONFIG_SAMA5_GMAC_NTXBUFFERS;
+      txhead32 += CONFIG_SAMA5_GMAC_NTXBUFFERS;
     }
 
   return (uint16_t)(txhead32 - (uint32_t)priv->txtail);
@@ -712,8 +712,8 @@ static int sam_transmit(struct sam_gmac_s *priv)
 
   /* If we have no more available TX descriptors, then we must disable the
    * RCOMP interrupt to stop further RX processing.  Why?  Because EACH RX
-   * packet that is dispatch is also an opportunity to replay with the a TX
-   * packet.  So, if we cannot handle an RX packet replay, then we disable
+   * packet that is dispatched is also an opportunity to reply with a TX
+   * packet.  So, if we cannot handle an RX packet reply, then we disable
    * all RX packet processing.
    */
 
@@ -1062,8 +1062,8 @@ static int sam_recvframe(struct sam_gmac_s *priv)
  * Function: sam_receive
  *
  * Description:
- *   An interrupt was received indicating the availability of a new RX packet
- *   in FIFO memory.
+ *   An interrupt was received indicating the availability of onr or more
+ *   new RX packets in FIFO memory.
  *
  * Parameters:
  *   priv  - Reference to the driver state structure
@@ -1150,8 +1150,8 @@ static void sam_receive(struct sam_gmac_s *priv)
  * Function: sam_txdone
  *
  * Description:
- *   An interrupt was received indicating that a frame has completed
- *   transmission.
+ *   An interrupt was received indicating that one or more frames have
+ *   completed transmission.
  *
  * Parameters:
  *   priv  - Reference to the driver state structure
@@ -1168,9 +1168,9 @@ static void sam_txdone(struct sam_gmac_s *priv)
 {
   struct gmac_txdesc_s *txdesc;
 
-  /* Are there any outstanding transmssions?  Loop until either (1) all of
-   * the TX have been examined, or (2) until we encounter the first
-   * descriptor that is still in use by the hardware.
+  /* Are there any outstanding transmissions?  Loop until either (1) all of
+   * the TX descriptors have been examined, or (2) until we encounter the
+   * first descriptor that is still in use by the hardware.
    */
 
   while (priv->txhead != priv->txtail)
@@ -1221,7 +1221,7 @@ static void sam_txdone(struct sam_gmac_s *priv)
 
       /* At least one TX descriptor is available.  Re-enable RX interrupts.
        * RX interrupts may previously have been disabled when we ran out of
-       * TX desciptors (see commits in sam_transmit()).
+       * TX descriptors (see comments in sam_transmit()).
        */
 
       sam_putreg(priv, SAM_GMAC_IER, GMAC_INT_RCOMP);

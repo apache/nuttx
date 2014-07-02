@@ -843,7 +843,7 @@ static uint16_t sam_txinuse(struct sam_emac_s *priv)
   uint32_t txhead32 = (uint32_t)priv->txhead;
   if ((uint32_t)priv->txtail > txhead32)
     {
-      return txhead32 += priv->attr->ntxbuffers;
+      txhead32 += priv->attr->ntxbuffers;
     }
 
   return (uint16_t)(txhead32 - (uint32_t)priv->txtail);
@@ -1102,8 +1102,8 @@ static int sam_transmit(struct sam_emac_s *priv)
 
   /* If we have no more available TX descriptors, then we must disable the
    * RCOMP interrupt to stop further RX processing.  Why?  Because EACH RX
-   * packet that is dispatch is also an opportunity to replay with the a TX
-   * packet.  So, if we cannot handle an RX packet replay, then we disable
+   * packet that is dispatched is also an opportunity to replay with a TX
+   * packet.  So, if we cannot handle an RX packet reply, then we disable
    * all RX packet processing.
    */
 
@@ -1259,7 +1259,6 @@ static int sam_recvframe(struct sam_emac_s *priv)
 
   cp15_invalidate_dcache((uintptr_t)rxdesc,
                          (uintptr_t)rxdesc + sizeof(struct emac_rxdesc_s));
-
   nllvdbg("rxndx: %d\n", rxndx);
 
   while ((rxdesc->addr & EMACRXD_ADDR_OWNER) != 0)
@@ -1403,10 +1402,10 @@ static int sam_recvframe(struct sam_emac_s *priv)
                */
 
               nllvdbg("rxndx: %d d_len: %d\n", priv->rxndx, dev->d_len);
-
               if (pktlen < dev->d_len)
                 {
-                  nlldbg("ERROR: Buffer size %d; frame size %d\n", dev->d_len, pktlen);
+                  nlldbg("ERROR: Buffer size %d; frame size %d\n",
+                         dev->d_len, pktlen);
                   return -E2BIG;
                 }
 
@@ -1454,8 +1453,8 @@ static int sam_recvframe(struct sam_emac_s *priv)
  * Function: sam_receive
  *
  * Description:
- *   An interrupt was received indicating the availability of a new RX packet
- *   in FIFO memory.
+ *   An interrupt was received indicating the availability of one or more
+ *   new RX packets in FIFO memory.
  *
  * Parameters:
  *   priv  - Reference to the driver state structure
@@ -1542,8 +1541,8 @@ static void sam_receive(struct sam_emac_s *priv)
  * Function: sam_txdone
  *
  * Description:
- *   An interrupt was received indicating that a frame has completed
- *   transmission.
+ *   An interrupt was received indicating that one or more frames have
+ *   completed transmission.
  *
  * Parameters:
  *   priv  - Reference to the driver state structure
@@ -1559,10 +1558,13 @@ static void sam_receive(struct sam_emac_s *priv)
 static void sam_txdone(struct sam_emac_s *priv)
 {
   struct emac_txdesc_s *txdesc;
+#ifndef __NO_KLUDGES__
+  int ntxdone = 0;
+#endif
 
   /* Are there any outstanding transmissions?  Loop until either (1) all of
-   * the TX have been examined, or (2) until we encounter the first
-   * descriptor that is still in use by the hardware.
+   * the TX descriptors have been examined, or (2) until we encounter the
+   * first descriptor that is still in use by the hardware.
    */
 
   while (priv->txhead != priv->txtail)
@@ -1575,7 +1577,20 @@ static void sam_txdone(struct sam_emac_s *priv)
 
       /* Is this TX descriptor still in use? */
 
+#ifndef __NO_KLUDGES__
+# warning REVISIT
+      /* I have seen cases where we receive interrupts, but the USED
+       * bit is never set in the TX descriptor.  This logic assumes
+       * that if we got the interrupt, then there most be at least
+       * one packet that completed.  This is not necessarily a safe
+       * assumption.
+       */
+
+      ntxdone++;
+      if ((txdesc->status & EMACTXD_STA_USED) == 0 && ntxdone > 1)
+#else
       if ((txdesc->status & EMACTXD_STA_USED) == 0)
+#endif
         {
           /* Yes.. the descriptor is still in use.  However, I have seen a
            * case (only repeatable on start-up) where the USED bit is never
@@ -1604,6 +1619,14 @@ static void sam_txdone(struct sam_emac_s *priv)
             }
         }
 
+#ifndef __NO_KLUDGES__
+      /* Make sure that the USED bit is set */
+
+      txdesc->status = (uint32_t)EMACTXD_STA_USED;
+      cp15_clean_dcache((uintptr_t)txdesc,
+                        (uintptr_t)txdesc + sizeof(struct emac_txdesc_s));
+#endif
+
       /* Increment the tail index */
 
       if (++priv->txtail >= priv->attr->ntxbuffers)
@@ -1615,7 +1638,7 @@ static void sam_txdone(struct sam_emac_s *priv)
 
       /* At least one TX descriptor is available.  Re-enable RX interrupts.
        * RX interrupts may previously have been disabled when we ran out of
-       * TX descriptors (see commits in sam_transmit()).
+       * TX descriptors (see comments in sam_transmit()).
        */
 
       sam_putreg(priv, SAM_EMAC_IER_OFFSET, EMAC_INT_RCOMP);
