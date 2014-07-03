@@ -1658,6 +1658,15 @@ config STM32_CCMEXCLUDE
 		and (2) it appears to be impossible to execute ELF modules from CCM
 		RAM.
 
+config STM32_CCM_PROCFS
+	bool "CCM PROCFS support"
+	default n
+	depends on STM32_CCMEXCLUDE && MM_MULTIHEAP && FS_PROCFS
+	---help---
+		Select to build in support for /proc/ccm.  Reading from /proc/ccm
+		will provide statistics about CCM memory use similar to what you
+		would get from mallinfo() for the user heap.
+
 config STM32_DMACAPABLE
 	bool "Workaround non-DMA capable memory"
 	depends on ARCH_DMA
