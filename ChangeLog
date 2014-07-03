@@ -7629,4 +7629,6 @@
 	  Max Neklyudov (2014-7-3).
 	* arch/arm/src/stm32 and fs/procfs:  Add a procfs entry to show the
 	  state of the CCM heap usage.  From Pelle Winderstam (2013-7-3).
-
+	* SAMA5 OHCI: Fix an error in a DEBUGASSERT statment.  Causes assertion
+	  to fire improperly when a low- or full-speed device is removed and
+	  CONFIG_DEBUG=y (2013-7-3).
