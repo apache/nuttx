@@ -81,6 +81,9 @@ extern const struct procfs_operations uptime_operations;
 extern const struct procfs_operations mtd_procfsoperations;
 extern const struct procfs_operations part_procfsoperations;
 extern const struct procfs_operations smartfs_procfsoperations;
+#if defined(CONFIG_STM32_CCMEXCLUDE) && defined(CONFIG_MM_MULTIHEAP) && !defined(FS_PROCFS_EXCLUDE_CCM)
+extern const struct procfs_operations ccm_procfsoperations;
+#endif
 
 /****************************************************************************
  * Private Types
@@ -113,6 +116,9 @@ static const struct procfs_entry_s g_procfsentries[] =
 
 #if !defined(CONFIG_FS_PROCFS_EXCLUDE_UPTIME)
   { "uptime",           &uptime_operations },
+#endif
+#if defined(CONFIG_STM32_CCMEXCLUDE) && defined(CONFIG_MM_MULTIHEAP) && !defined(FS_PROCFS_EXCLUDE_CCM)
+  { "ccm",             &ccm_procfsoperations },
 #endif
 };
 
