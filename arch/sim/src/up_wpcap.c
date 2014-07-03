@@ -62,7 +62,7 @@ extern int uipdriver_setmacaddr(unsigned char *macaddr);
 
 #define BUF ((struct eth_hdr_s *)&uip_buf[0])
 
-#ifndef CONFIG_EXAMPLES_UIP_DHCPC
+#ifndef CONFIG_EXAMPLES_WEBSERVER_DHCPC
 #  define UIP_IPADDR (10 << 24 | 0 << 16 | 0 << 8 | 1)
 #else
 #  define UIP_IPADDR (0)

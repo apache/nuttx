@@ -104,7 +104,7 @@ Configuration Subdirectories
     about the dhcpd example.
 
   httpd:
-    This builds the uIP web server example using the examples/uip application
+    This builds the uIP web server example using the examples/webserver application
     (for execution from FLASH). See apps/examples/README.txt for information
     about httpd.
 
