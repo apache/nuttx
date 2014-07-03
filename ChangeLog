@@ -7627,3 +7627,6 @@
 	* SAM4 AES driver.  Contributed by Max Neklyudov (2014-7-3).
 	* crypto/ and include/crypto:  Beginnings of a crypto/ subsystem from
 	  Max Neklyudov (2014-7-3).
+	* arch/arm/src/stm32 and fs/procfs:  Add a procfs entry to show the
+	  state of the CCM heap usage.  From Pelle Winderstam (2013-7-3).
+
