@@ -1,5 +1,5 @@
 #!/bin/bash
-# configs/ntosd-dm320/uip/setenv.sh
+# configs/ntosd-dm320/webserver/setenv.sh
 #
 #   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

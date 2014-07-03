@@ -339,10 +339,10 @@ Configuration Sub-Directories
     This alternative configuration directory is similar to nettest
     except that is use examples/upd to exercise UDP.
 
-  uip
+  webserver
 
     This configuration file demonstrates the tiny webserver
-    at examples/uip.
+    at examples/webserver.
 
 Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^

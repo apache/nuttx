@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/ntosd-dm320/uip/ld.script
+ * configs/ntosd-dm320/webserver/ld.script
  *
  *   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

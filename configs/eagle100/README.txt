@@ -383,7 +383,7 @@ Configuration Sub-Directories
          CONFIG_ARM7M_TOOLCHAIN_CODESOURCERYW=y
 
   httpd:
-    This builds the uIP web server example using the examples/uip application
+    This builds the uIP web server example using the examples/webserver application
     (for execution from FLASH).
 
     NOTES:

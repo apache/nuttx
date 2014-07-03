@@ -160,4 +160,4 @@ Configuration Sub-Directories
 
   httpd
 
-    This configuration uses the tiny webserver for uiP.
+    This configuration uses the tiny webserver for uIP.

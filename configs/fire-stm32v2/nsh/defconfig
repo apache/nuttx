@@ -765,7 +765,7 @@ CONFIG_EXAMPLES_NSH=y
 #
 # uIP Web Server Example
 #
-# CONFIG_EXAMPLES_UIP is not set
+# CONFIG_EXAMPLES_WEBSERVER is not set
 
 #
 # USB Serial Test Example
