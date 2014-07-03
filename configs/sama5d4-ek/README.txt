@@ -3463,7 +3463,17 @@ Configurations
        be configured as a USB host port if desired).
 
        Support for Mass Storage Class and USB (Boot) Keyboard class is also
-       enabled.
+       enabled.  The keyboard class was useful for verifying that low-speed
+       devices can connect successfully, but is otherwise not used by this
+       configuration.  Feel free to disable it if you like:
+
+         CONFIG_USBHOST_HIDKBD=n
+
+       You could also replace the NSH stdin device to take input from a USB
+       keyboard with:
+
+         CONFIG_NSH_USBKBD=y
+         CONFIG_NSH_USBKBD_DEVNAME="/dev/kbda"
 
    14. Support the USB high-speed USB device driver (UDPHS) is not enabled by
        default but could be enabled by changing the NuttX configuration file as
