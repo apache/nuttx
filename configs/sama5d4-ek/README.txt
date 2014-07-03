@@ -1580,7 +1580,7 @@ USB Ports
 
     PIO  Signal Name    Function
     ---- -------------- -------------------------------------------------------
-    PE10 EN5V_USBA      VBus power enable (via MN2 power switch) to VBus pin of
+    PE10 USBA_EN5V_PE10 VBus power enable (via MN2 power switch) to VBus pin of
                         the OTG connector (host)
     PE31 USBA_VBUS_PE31 VBus sensing from the VBus pin of the OTG connector (device)
 
@@ -1589,7 +1589,7 @@ USB Ports
 
     PIO  Signal Name    Function
     ---- -------------- -------------------------------------------------------
-    PE11 EN5V_USBB      VBus power enable (via MN4 power switch).  To the A1
+    PE11 USBB_EN5V_PE11 VBus power enable (via MN4 power switch).  To the A1
                         pin of J5 Dual USB A connector
 
   Port C
@@ -1597,15 +1597,15 @@ USB Ports
 
     PIO  Signal Name    Function
     ---- -------------- -------------------------------------------------------
-    PE12 EN5V_USBC      VBus power enable (via MN4 power switch).  To the B1
+    PE12 USB_OVCUR_PD9  VBus power enable (via MN4 power switch).  To the B1
                         pin of J5 Dual USB A connector
 
   Both Ports B and C
   ------------------
 
-    PIO  Signal Name Function
-    ---- ----------- -------------------------------------------------------
-    PE5  OVCUR_USB   Combined over-current indication from port A and B
+    PIO  Signal Name   Function
+    ---- ------------- -------------------------------------------------------
+    PD9  USB_OVCUR_PD9 Combined over-current indication from port A and B
 
 USB High-Speed Device
 =====================
@@ -1774,10 +1774,13 @@ USB High-Speed Host
     System Type -> USB High Speed Host driver options
       CONFIG_SAMA5_EHCI=y                  : High-speed EHCI support
       CONFIG_SAMA5_OHCI=y                  : Low/full-speed OHCI support
-                                               : Defaults for values probably OK for both
+                                           : Defaults for values probably OK for both
+      CONFIG_SAMA5_UHPHS_RHPORT1=n         : (Reserved for use by USB device)
+      CONFIG_SAMA5_UHPHS_RHPORT2=y         : Enable port B
+      CONFIG_SAMA5_UHPHS_RHPORT3=y         : Enable port C
+
     Device Drivers
       CONFIG_USBHOST=y                     : Enable USB host support
-      CONFIG_USBHOST_INT_DISABLE=y         : Interrupt endpoints not needed
       CONFIG_USBHOST_ISOC_DISABLE=y        : Isochronous endpoints not needed
 
     Device Drivers -> USB Host Driver Support
@@ -3452,18 +3455,24 @@ Configurations
        TIW0 bus.  See the discussion above under "I2C Tool" for detailed
        configuration settings.
 
-   13. The SAMA5D4-EK includes for an AT25 serial DataFlash.  That support is
-       NOT enabled in this configuration.  Support for that serial FLASH can
+   13. Support the USB low-, high- and full-speed OHCI host driver is enabled
+       enabled with the NuttX configuration file as described in the section
+       above entitled "USB High-Speed Host".  Only port B and port C, the
+       larger "Type A" connectors, are enabled; port A (the smaller OTG
+       connector) is reserved for future use with USB device (but could also
+       be configured as a USB host port if desired).
+
+       Support for Mass Storage Class and USB (Boot) Keyboard class is also
+       enabled.
+
+   14. Support the USB high-speed USB device driver (UDPHS) is not enabled by
+       default but could be enabled by changing the NuttX configuration file as
+       described above in the section entitled "USB High-Speed Device."
+
+   15. The SAMA5D4-EK includes for an AT25 serial DataFlash.  That support is
+       NOT enabled in this configuration.  Support for that serial FLASH could
        be enabled by modifying the NuttX configuration as described above in
        the paragraph entitled "AT25 Serial FLASH".
-
-   14. Support the USB low-, high- and full-speed OHCI host driver can be
-       enabled by changing the NuttX configuration file as described in the
-       section entitled "USB High-Speed Host" above.
-
-   15. Support the USB high-speed USB device driver (UDPHS) can be enabled
-       by changing the NuttX configuration file as described above in the
-       section entitled "USB High-Speed Device."
 
    16. This example can be configured to exercise the watchdog timer test
        (apps/examples/watchdog).  See the detailed configuration settings in
