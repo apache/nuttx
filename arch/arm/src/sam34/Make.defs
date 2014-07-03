@@ -134,6 +134,10 @@ CHIP_CSRCS += sam_spi.c
 endif
 endif
 
+ifeq ($(CONFIG_SAM34_AES),y)
+CHIP_CSRCS += sam_aes.c
+endif
+
 ifeq ($(CONFIG_SAM34_RTC),y)
 CHIP_CSRCS += sam_rtc.c
 endif

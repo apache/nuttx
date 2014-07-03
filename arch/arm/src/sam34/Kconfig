@@ -279,9 +279,9 @@ config SAM34_ADC12B
 	depends on !ARCH_CHIP_SAM4E
 
 config SAM34_AES
-	bool "AES"
+	bool "Advanced Encryption Standard (AES)"
 	default n
-	depends on ARCH_CHIP_SAM4E
+	depends on ARCH_CHIP_SAM4CM || ARCH_CHIP_SAM4E
 
 config SAM34_AESA
 	bool "Advanced Encryption Standard (AESA)"
