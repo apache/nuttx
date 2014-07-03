@@ -55,10 +55,9 @@ config FS_PROCFS_EXCLUDE_SMARTFS
 	default n
 
 config FS_PROCFS_EXCLUDE_CCM
-        bool "Exclude ccm memory usage"
-        depends on STM32_CCMEXCLUDE
-        default n
+	bool "Exclude CCM memory usage"
+	depends on STM32_CCM_PROCFS
+	default n
 
-endmenu
-
-endif
+endmenu #
+endif # FS_PROCFS

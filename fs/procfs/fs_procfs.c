@@ -78,10 +78,21 @@
 extern const struct procfs_operations proc_operations;
 extern const struct procfs_operations cpuload_operations;
 extern const struct procfs_operations uptime_operations;
+
+/* This is not good.  These are implemented in drivers/mtd.  Having to
+ * deal with them here is not a good coupling.
+ */
+
 extern const struct procfs_operations mtd_procfsoperations;
 extern const struct procfs_operations part_procfsoperations;
 extern const struct procfs_operations smartfs_procfsoperations;
-#if defined(CONFIG_STM32_CCMEXCLUDE) && defined(CONFIG_MM_MULTIHEAP) && !defined(FS_PROCFS_EXCLUDE_CCM)
+
+/* And even worse, this one is specific to the STM32.  The solution to
+ * this nasty couple would be to replace this hard-coded, ROM-able
+ * operations table with a RAM-base registration table.
+ */
+
+#if defined(CONFIG_STM32_CCM_PROCFS)
 extern const struct procfs_operations ccm_procfsoperations;
 #endif
 
@@ -117,7 +128,8 @@ static const struct procfs_entry_s g_procfsentries[] =
 #if !defined(CONFIG_FS_PROCFS_EXCLUDE_UPTIME)
   { "uptime",           &uptime_operations },
 #endif
-#if defined(CONFIG_STM32_CCMEXCLUDE) && defined(CONFIG_MM_MULTIHEAP) && !defined(FS_PROCFS_EXCLUDE_CCM)
+
+#if defined(#if defined(CONFIG_STM32_CCM_PROCFS)
   { "ccm",             &ccm_procfsoperations },
 #endif
 };

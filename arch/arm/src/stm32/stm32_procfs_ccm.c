@@ -82,13 +82,10 @@
 
 struct ccm_file_s
 {
-  struct procfs_file_s  base;        /* Base open file structure */
-  unsigned int linesize;             /* Number of valid characters in line[] */
+  struct procfs_file_s  base;    /* Base open file structure */
+  unsigned int linesize;         /* Number of valid characters in line[] */
   char line[CCM_LINELEN];        /* Pre-allocated buffer for formatted lines */
-
-  /* Add context specific data types for managing an open file here */
 };
-
 
 /****************************************************************************
  * Private Function Prototypes
@@ -100,10 +97,8 @@ static int     ccm_open(FAR struct file *filep, FAR const char *relpath,
 static int     ccm_close(FAR struct file *filep);
 static ssize_t ccm_read(FAR struct file *filep, FAR char *buffer,
                         size_t buflen);
-
 static int     ccm_dup(FAR const struct file *oldp,
                        FAR struct file *newp);
-
 static int     ccm_stat(FAR const char *relpath, FAR struct stat *buf);
 
 /****************************************************************************
@@ -124,12 +119,12 @@ const struct procfs_operations ccm_procfsoperations =
   ccm_open,       /* open */
   ccm_close,      /* close */
   ccm_read,       /* read */
-  NULL,            /* write */
+  NULL,           /* write */
   ccm_dup,        /* dup */
-  NULL,            /* opendir */
-  NULL,            /* closedir */
-  NULL,            /* readdir */
-  NULL,            /* rewinddir */
+  NULL,           /* opendir */
+  NULL,           /* closedir */
+  NULL,           /* readdir */
+  NULL,           /* rewinddir */
   ccm_stat        /* stat */
 };
 
@@ -294,7 +289,7 @@ static int ccm_dup(FAR const struct file *oldp, FAR struct file *newp)
       return -ENOMEM;
     }
 
-  /* The copy the file attribtes from the old attributes to the new */
+  /* The copy the file attributes from the old attributes to the new */
 
   memcpy(newpriv, oldpriv, sizeof(struct ccm_file_s));
 
