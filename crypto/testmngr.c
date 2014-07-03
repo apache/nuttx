@@ -78,7 +78,7 @@ static int do_test_aes(FAR struct cipher_testvec* test, int mode, int encrypt)
 #define AES_CYPHER_TEST_ENCRYPT(mode, mode_str, count, template) \
   for (i = 0; i < count; i++) { \
     if (do_test_aes(template + i, mode, CYPHER_ENCRYPT)) { \
-      cryptdbg("Failed " mode_str " encrypt test #%i\n", i); \
+      cryptlldbg("Failed " mode_str " encrypt test #%i\n", i); \
       return -1; \
     } \
   }
@@ -86,7 +86,7 @@ static int do_test_aes(FAR struct cipher_testvec* test, int mode, int encrypt)
 #define AES_CYPHER_TEST_DECRYPT(mode, mode_str, count, template) \
   for (i = 0; i < count; i++) { \
     if (do_test_aes(template + i, mode, CYPHER_DECRYPT)) { \
-      cryptdbg("Failed " mode_str " decrypt test #%i\n", i); \
+      cryptlldbg("Failed " mode_str " decrypt test #%i\n", i); \
       return -1; \
     } \
   }

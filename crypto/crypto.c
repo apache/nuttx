@@ -76,9 +76,9 @@ void up_cryptoinitialize(void)
 #if defined(CONFIG_CRYPTO_ALGTEST)
   res = crypto_test();
   if (res)
-    cryptdbg("crypto test failed\n");
+    cryptlldbg("crypto test failed\n");
   else
-    cryptvdbg("crypto test OK\n");
+    cryptllvdbg("crypto test OK\n");
 #endif
 
   return res;

@@ -56,9 +56,9 @@
  *    that the output is not buffered.  The first character indicates the
  *    system system (e.g., n=network, f=filesystm, etc.).  If the first
  *    character is missing (i.e., dbg()), then it is common.  The common
- *    dbg() macro is enabled by CONFIG_DEBUG.  Subystem debug requires an
+ *    dbg() macro is enabled by CONFIG_DEBUG.  Subsystem debug requires an
  *    additional configuration setting to enable it (e.g., CONFIG_DEBUG_NET
- *    for the network, CONFIG_DEBUG_FS for the file syste, etc).
+ *    for the network, CONFIG_DEBUG_FS for the file system, etc).
  *
  *    In general, error messages and output of importance use [a-z]dbg().
  *    [a-z]dbg() is implementation dependent but usually uses file descriptors.
@@ -66,7 +66,7 @@
  *    directed stdout).  Therefore [a-z]dbg() should not be used in interrupt
  *    handlers.
  *
- * [a-z]vdbg() -- Identifcal to [a-z]dbg() except that it also requires that
+ * [a-z]vdbg() -- Identical to [a-z]dbg() except that it also requires that
  *    CONFIG_DEBUG_VERBOSE be defined.  This is intended for general debug
  *    output that you would normally want to suppress.
  *
@@ -81,7 +81,7 @@
  *    in low-level code where it is inappropriate to use file descriptors.  For
  *    example, only [a-z]lldbg() should be used in interrupt handlers.
  *
- * [a-z]llvdbg() -- Identifcal to [a-z]lldbg() except that it also requires that
+ * [a-z]llvdbg() -- Identical to [a-z]lldbg() except that it also requires that
  *    CONFIG_DEBUG_VERBOSE be defined.  This is intended for general debug
  *    output that you would normally want to suppress.
  */
@@ -224,6 +224,18 @@
 # define fllvdbg(x...)
 #endif
 
+#ifdef CONFIG_DEBUG_CRYPTO
+# define cryptdbg(format, ...)    dbg(format, ##__VA_ARGS__)
+# define cryptlldbg(format, ...)  lldbg(format, ##__VA_ARGS__)
+# define cryptvdbg(format, ...)   vdbg(format, ##__VA_ARGS__)
+# define cryptllvdbg(format, ...) llvdbg(format, ##__VA_ARGS__)
+#else
+# define cryptdbg(x...)
+# define cryptlldbg(x...)
+# define cryptvdbg(x...)
+# define cryptllvdbg(x...)
+#endif
+
 #ifdef CONFIG_DEBUG_INPUT
 # define idbg(format, ...)    dbg(format, ##__VA_ARGS__)
 # define illdbg(format, ...)  lldbg(format, ##__VA_ARGS__)
@@ -302,179 +314,191 @@
 
 #ifdef CONFIG_DEBUG
 # ifndef CONFIG_ARCH_LOWPUTC
-#  define lldbg (void)
+#  define lldbg      (void)
 # endif
 # ifndef CONFIG_DEBUG_VERBOSE
-#  define vdbg (void)
-#  define llvdbg (void)
+#  define vdbg       (void)
+#  define llvdbg     (void)
 # else
 #  ifndef CONFIG_ARCH_LOWPUTC
-#    define llvdbg (void)
+#    define llvdbg   (void)
 #  endif
 # endif
 #else
-# define dbg    (void)
-# define lldbg  (void)
-# define vdbg   (void)
-# define llvdbg (void)
+# define dbg         (void)
+# define lldbg       (void)
+# define vdbg        (void)
+# define llvdbg      (void)
 #endif
 
 /* Subsystem specific debug */
 
 #ifdef CONFIG_DEBUG_MM
-# define mdbg    dbg
-# define mlldbg  lldbg
-# define mvdbg   vdbg
-# define mllvdbg llvdbg
+# define mdbg        dbg
+# define mlldbg      lldbg
+# define mvdbg       vdbg
+# define mllvdbg     llvdbg
 #else
-# define mdbg    (void)
-# define mlldbg  (void)
-# define mvdbg   (void)
-# define mllvdbg (void)
+# define mdbg        (void)
+# define mlldbg      (void)
+# define mvdbg       (void)
+# define mllvdbg     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_SCHED
-# define sdbg    dbg
-# define slldbg  lldbg
-# define svdbg   vdbg
-# define sllvdbg llvdbg
+# define sdbg        dbg
+# define slldbg      lldbg
+# define svdbg       vdbg
+# define sllvdbg     llvdbg
 #else
-# define sdbg    (void)
-# define slldbg  (void)
-# define svdbg   (void)
-# define sllvdbg (void)
+# define sdbg        (void)
+# define slldbg      (void)
+# define svdbg       (void)
+# define sllvdbg     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_PAGING
-# define pgdbg    dbg
-# define pglldbg  lldbg
-# define pgvdbg   vdbg
-# define pgllvdbg llvdbg
+# define pgdbg       dbg
+# define pglldbg     lldbg
+# define pgvdbg      vdbg
+# define pgllvdbg    llvdbg
 #else
-# define pgdbg    (void)
-# define pglldbg  (void)
-# define pgvdbg   (void)
-# define pgllvdbg (void)
+# define pgdbg       (void)
+# define pglldbg     (void)
+# define pgvdbg      (void)
+# define pgllvdbg    (void)
 #endif
 
 #ifdef CONFIG_DEBUG_DMA
-# define dmadbg    dbg
-# define dmalldbg  lldbg
-# define dmavdbg   vdbg
-# define dmallvdbg llvdbg
+# define dmadbg      dbg
+# define dmalldbg    lldbg
+# define dmavdbg     vdbg
+# define dmallvdbg   llvdbg
 #else
-# define dmadbg    (void)
-# define dmalldbg  (void)
-# define dmavdbg   (void)
-# define dmallvdbg (void)
+# define dmadbg      (void)
+# define dmalldbg    (void)
+# define dmavdbg     (void)
+# define dmallvdbg   (void)
 #endif
 
 #ifdef CONFIG_DEBUG_NET
-# define ndbg    dbg
-# define nlldbg  lldbg
-# define nvdbg   vdbg
-# define nllvdbg llvdbg
+# define ndbg        dbg
+# define nlldbg      lldbg
+# define nvdbg       vdbg
+# define nllvdbg     llvdbg
 #else
-# define ndbg    (void)
-# define nlldbg  (void)
-# define nvdbg   (void)
-# define nllvdbg (void)
+# define ndbg        (void)
+# define nlldbg      (void)
+# define nvdbg       (void)
+# define nllvdbg     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_USB
-# define udbg    dbg
-# define ulldbg  lldbg
-# define uvdbg   vdbg
-# define ullvdbg llvdbg
+# define udbg        dbg
+# define ulldbg      lldbg
+# define uvdbg       vdbg
+# define ullvdbg     llvdbg
 #else
-# define udbg    (void)
-# define ulldbg  (void)
-# define uvdbg   (void)
-# define ullvdbg (void)
+# define udbg        (void)
+# define ulldbg      (void)
+# define uvdbg       (void)
+# define ullvdbg     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_FS
-# define fdbg    dbg
-# define flldbg  lldbg
-# define fvdbg   vdbg
-# define fllvdbg llvdbg
+# define fdbg        dbg
+# define flldbg      lldbg
+# define fvdbg       vdbg
+# define fllvdbg     llvdbg
 #else
-# define fdbg    (void)
-# define flldbg  (void)
-# define fvdbg   (void)
-# define fllvdbg (void)
+# define fdbg        (void)
+# define flldbg      (void)
+# define fvdbg       (void)
+# define fllvdbg     (void)
+#endif
+
+#ifdef CONFIG_DEBUG_CRYPTO
+# define cryptdbg    dbg
+# define cryptlldbg  lldbg
+# define cryptvdbg   vdbg
+# define cryptllvdbg llvdbg
+#else
+# define cryptdbg    (void)
+# define cryptlldbg  (void)
+# define cryptvdbg   (void)
+# define cryptllvdbg (void)
 #endif
 
 #ifdef CONFIG_DEBUG_INPUT
-# define idbg    dbg
-# define illdbg  lldbg
-# define ivdbg   vdbg
-# define illvdbg llvdbg
+# define idbg        dbg
+# define illdbg      lldbg
+# define ivdbg       vdbg
+# define illvdbg     llvdbg
 #else
-# define idbg    (void)
-# define illdbg  (void)
-# define ivdbg   (void)
-# define illvdbg (void)
+# define idbg        (void)
+# define illdbg      (void)
+# define ivdbg       (void)
+# define illvdbg     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_ANALOG
-# define adbg    dbg
-# define alldbg  lldbg
-# define avdbg   vdbg
-# define allvdbg llvdbg
+# define adbg        dbg
+# define alldbg      lldbg
+# define avdbg       vdbg
+# define allvdbg     llvdbg
 #else
-# define adbg    (void)
-# define alldbg  (void)
-# define avdbg   (void)
-# define allvdbg (void)
+# define adbg        (void)
+# define alldbg      (void)
+# define avdbg       (void)
+# define allvdbg     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_GRAPHICS
-# define gdbg    dbg
-# define glldbg  lldbg
-# define gvdbg   vdbg
-# define gllvdbg llvdbg
+# define gdbg        dbg
+# define glldbg      lldbg
+# define gvdbg       vdbg
+# define gllvdbg     llvdbg
 #else
-# define gdbg    (void)
-# define glldbg  (void)
-# define gvdbg   (void)
-# define gllvdbg (void)
+# define gdbg        (void)
+# define glldbg      (void)
+# define gvdbg       (void)
+# define gllvdbg     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_BINFMT
-# define bdbg    dbg
-# define blldbg  lldbg
-# define bvdbg   vdbg
-# define bllvdbg llvdbg
+# define bdbg        dbg
+# define blldbg      lldbg
+# define bvdbg       vdbg
+# define bllvdbg     llvdbg
 #else
-# define bdbg    (void)
-# define blldbg  (void)
-# define bvdbg   (void)
-# define bllvdbg (void)
+# define bdbg        (void)
+# define blldbg      (void)
+# define bvdbg       (void)
+# define bllvdbg     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_LIB
-# define ldbg    dbg
-# define llldbg  lldbg
-# define lvdbg   vdbg
-# define lllvdbg llvdbg
+# define ldbg        dbg
+# define llldbg      lldbg
+# define lvdbg       vdbg
+# define lllvdbg     llvdbg
 #else
-# define ldbg    (void)
-# define llldbg  (void)
-# define lvdbg   (void)
-# define lllvdbg (void)
+# define ldbg        (void)
+# define llldbg      (void)
+# define lvdbg       (void)
+# define lllvdbg     (void)
 #endif
 
 #ifdef CONFIG_DEBUG_AUDIO
-# define auddbg    dbg
-# define audlldbg  lldbg
-# define audvdbg   vdbg
-# define audllvdbg llvdbg
+# define auddbg      dbg
+# define audlldbg    lldbg
+# define audvdbg     vdbg
+# define audllvdbg   llvdbg
 #else
-# define auddbg    (void)
-# define audlldbg  (void)
-# define audvdbg   (void)
-# define audllvdbg (void)
+# define auddbg      (void)
+# define audlldbg    (void)
+# define audvdbg     (void)
+# define audllvdbg   (void)
 #endif
 
 #endif /* CONFIG_CPP_HAVE_VARARGS */
@@ -610,9 +634,10 @@ extern "C"
 
 /* Dump a buffer of data */
 
-void lib_dumpbuffer(FAR const char *msg, FAR const uint8_t *buffer, unsigned int buflen);
+void lib_dumpbuffer(FAR const char *msg, FAR const uint8_t *buffer,
+                    unsigned int buflen);
 
-/* The system logging interfaces are pnormally accessed via the macros
+/* The system logging interfaces are normally accessed via the macros
  * provided above.  If the cross-compiler's C pre-processor supports a
  * variable number of macro arguments, then those macros below will map all
  * debug statements to the logging interfaces declared in syslog.h.

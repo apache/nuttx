@@ -60,23 +60,11 @@
 #define CYPHER_ENCRYPT 1
 #define CYPHER_DECRYPT 0
 
-#ifdef CONFIG_DEBUG_CRYPTO
-#  define cryptdbg lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define cryptvdbg lldbg
-#  else
-#    define cryptvdbg(x...)
-#  endif
-#else
-#  define cryptdbg(x...)
-#  define cryptvdbg(x...)
-#endif
-
-#ifndef __ASSEMBLY__
-
 /************************************************************************************
  * Public Data
  ************************************************************************************/
+
+#ifndef __ASSEMBLY__
 
 #undef EXTERN
 #if defined(__cplusplus)
