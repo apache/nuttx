@@ -44,11 +44,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
-#include <semaphore.h>
-#include <crypto/crypto.h>
 
+#include <crypto/crypto.h>
 #include <arch/board/board.h>
 #include <nuttx/arch.h>
 
@@ -62,20 +62,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#define CONFIG_DEBUG_CRYPTO
-
-#ifdef CONFIG_DEBUG_CRYPTO
-#  define cryptdbg lldbg
-#  ifdef CONFIG_DEBUG_VERBOSE
-#    define cryptvdbg lldbg
-#  else
-#    define cryptvdbg(x...)
-#  endif
-#else
-#  define cryptdbg(x...)
-#  define cryptvdbg(x...)
-#endif
 
 #define AES_BLOCK_SIZE 16
 
