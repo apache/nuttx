@@ -7624,4 +7624,6 @@
 	* SAM3/4 and SAMA5 Ethernet:  Fix an error in the function that
 	  determines the number of free TX descriptors.  This is an important
 	  bugfix on busy networks (2014-7-2).
-
+	* SAM4 AES driver.  Contributed by Max Neklyudov (2014-7-3).
+	* crypto/ and include/crypto:  Beginnings of a crypto/ subsystem from
+	  Max Neklyudov (2014-7-3).
