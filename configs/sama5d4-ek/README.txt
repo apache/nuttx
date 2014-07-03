@@ -3475,6 +3475,10 @@ Configurations
          CONFIG_NSH_USBKBD=y
          CONFIG_NSH_USBKBD_DEVNAME="/dev/kbda"
 
+       [Using the RAMLOG with the USB keyboard is, however, probably a bad
+       idea because you cannot type the 'dmesg' command to view the RAMLOG
+       without a keyboard attached.]
+
    14. Support the USB high-speed USB device driver (UDPHS) is not enabled by
        default but could be enabled by changing the NuttX configuration file as
        described above in the section entitled "USB High-Speed Device."
