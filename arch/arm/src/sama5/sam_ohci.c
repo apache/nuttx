@@ -1880,7 +1880,7 @@ static void sam_wdh_bottomhalf(void)
 
   /* Invalidate D-cache to force re-reading of the Done Head */
 
-# if 0 /* Apparently insufficient */
+#if 0 /* Apparently insufficient */
   cp15_invalidate_dcache((uintptr_t)&g_hcca.donehead,
                          (uintptr_t)&g_hcca.donehead + sizeof(uint32_t));
 #else

@@ -492,15 +492,13 @@ static inline void sam_usbclockconfig(void)
    *    PMC_USB register. USBDIV must be 9 (division by 10) if UPLLCK is
    *    selected.
    *
-   * REVISIT:  The divisor of 10 produces a rate that is too high. Division
-   * by 5, however, seems to work just fine.  No idea why?
+   * REVISIT:  The divisor of 10 produces a rate that is too high with
+   * SAMA5D3.  A divisor of 5, however, seems to work just fine for the
+   * SAMA5D3.  The SAMA5D4, on the other hand, needs the divisor of 10.
+   * No idea why?  Let the board.h file decide which to use.
    */
 
-#if 1 /* REVISIT */
-  regval |= PMC_USB_USBDIV(4);  /* Division by 5 */
-#else
-  regval |= PMC_USB_USBDIV(9);  /* Division by 10 */
-#endif
+  regval |= PMC_USB_USBDIV(BOARD_UPLL_OHCI_DIV-1);
   putreg32(regval, SAM_PMC_USB);
 
 #else /* BOARD_USE_UPLL */
