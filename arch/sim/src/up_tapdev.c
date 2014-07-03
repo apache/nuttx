@@ -62,7 +62,7 @@
 #include <linux/net.h>
 
 extern int syslog(const char *format, ...);
-extern int uipdriver_setmacaddr(unsigned char *macaddr);
+extern int netdriver_setmacaddr(unsigned char *macaddr);
 
 /****************************************************************************
  * Private Definitions
@@ -73,15 +73,15 @@ extern int uipdriver_setmacaddr(unsigned char *macaddr);
 #define DEVTAP          "/dev/net/tun"
 
 #ifndef CONFIG_EXAMPLES_WEBSERVER_DHCPC
-#  define UIP_IPADDR0   192
-#  define UIP_IPADDR1   168
-#  define UIP_IPADDR2   0
-#  define UIP_IPADDR3   128
+#  define TAP_IPADDR0   192
+#  define TAP_IPADDR1   168
+#  define TAP_IPADDR2   0
+#  define TAP_IPADDR3   128
 #else
-#  define UIP_IPADDR0   0
-#  define UIP_IPADDR1   0
-#  define UIP_IPADDR2   0
-#  define UIP_IPADDR3   0
+#  define TAP_IPADDR0   0
+#  define TAP_IPADDR1   0
+#  define TAP_IPADDR2   0
+#  define TAP_IPADDR3   0
 #endif
 
 /****************************************************************************
@@ -157,7 +157,7 @@ static int up_setmacaddr(void)
         {
           /* Set the MAC address */
 
-          ret = uipdriver_setmacaddr(&req.ifr_hwaddr.sa_data);
+          ret = netdriver_setmacaddr(&req.ifr_hwaddr.sa_data);
         }
     }
 
@@ -197,7 +197,7 @@ void tapdev_init(void)
   /* Assign an IPv4 address to the tap device */
 
   snprintf(buf, sizeof(buf), "/sbin/ifconfig tap0 inet %d.%d.%d.%d\n",
-           UIP_IPADDR0, UIP_IPADDR1, UIP_IPADDR2, UIP_IPADDR3);
+           TAP_IPADDR0, TAP_IPADDR1, TAP_IPADDR2, TAP_IPADDR3);
   system(buf);
 
   /* Set the MAC address */

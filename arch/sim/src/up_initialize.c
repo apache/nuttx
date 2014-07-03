@@ -128,6 +128,6 @@ void up_initialize(void)
 #endif
 
 #ifdef CONFIG_NET
-  uipdriver_init();         /* Our "real" network driver */
+  netdriver_init();         /* Our "real" network driver */
 #endif
 }

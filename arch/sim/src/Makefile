@@ -73,7 +73,7 @@ CSRCS += up_romgetc.c
 endif
 
 ifeq ($(CONFIG_NET),y)
-CSRCS += up_uipdriver.c
+CSRCS += up_netdriver.c
 HOSTCFLAGS += -DNETDEV_BUFSIZE=$(CONFIG_NET_BUFSIZE)
 ifneq ($(HOSTOS),Cygwin)
 HOSTSRCS += up_tapdev.c up_netdev.c
