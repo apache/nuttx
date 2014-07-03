@@ -92,7 +92,7 @@ extern const struct procfs_operations smartfs_procfsoperations;
  * operations table with a RAM-base registration table.
  */
 
-#if defined(CONFIG_STM32_CCM_PROCFS)
+#if defined(CONFIG_STM32_CCM_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_CCM)
 extern const struct procfs_operations ccm_procfsoperations;
 #endif
 
@@ -129,7 +129,7 @@ static const struct procfs_entry_s g_procfsentries[] =
   { "uptime",           &uptime_operations },
 #endif
 
-#if defined(#if defined(CONFIG_STM32_CCM_PROCFS)
+#if defined(CONFIG_STM32_CCM_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_CCM)
   { "ccm",             &ccm_procfsoperations },
 #endif
 };
