@@ -103,7 +103,7 @@ void up_idle(void)
   /* Run the network if enabled */
 
 #ifdef CONFIG_NET
-  uipdriver_loop();
+  netdriver_loop();
 #endif
 
   /* Fake some power management stuff for testing purposes */

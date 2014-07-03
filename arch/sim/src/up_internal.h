@@ -222,12 +222,12 @@ extern void wpcap_send(unsigned char *buf, unsigned int buflen);
 #define netdev_send(buf,buflen) wpcap_send(buf,buflen)
 #endif
 
-/* up_uipdriver.c *********************************************************/
+/* up_netdriver.c *********************************************************/
 
 #ifdef CONFIG_NET
-extern int uipdriver_init(void);
-extern int uipdriver_setmacaddr(unsigned char *macaddr);
-extern void uipdriver_loop(void);
+extern int netdriver_init(void);
+extern int netdriver_setmacaddr(unsigned char *macaddr);
+extern void netdriver_loop(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

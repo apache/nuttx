@@ -1,5 +1,5 @@
 /****************************************************************************
- * up_uipdriver.c
+ * arch/sim/src/up_netdriver.c
  *
  *   Copyright (C) 2007, 2009-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -138,7 +138,7 @@ static int sim_txpoll(struct net_driver_s *dev)
  * Public Functions
  ****************************************************************************/
 
-void uipdriver_loop(void)
+void netdriver_loop(void)
 {
   /* netdev_read will return 0 on a timeout event and >0 on a data received event */
 
@@ -207,7 +207,7 @@ void uipdriver_loop(void)
   sched_unlock();
 }
 
-int uipdriver_init(void)
+int netdriver_init(void)
 {
   /* Internal initalization */
 
@@ -220,7 +220,7 @@ int uipdriver_init(void)
   return OK;
 }
 
-int uipdriver_setmacaddr(unsigned char *macaddr)
+int netdriver_setmacaddr(unsigned char *macaddr)
 {
   (void)memcpy(g_sim_dev.d_mac.ether_addr_octet, macaddr, IFHWADDRLEN);
   return 0;

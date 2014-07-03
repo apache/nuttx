@@ -54,18 +54,16 @@
 #include <stdlib.h>
 #include <malloc.h>
 
-extern int uipdriver_setmacaddr(unsigned char *macaddr);
+extern int netdriver_setmacaddr(unsigned char *macaddr);
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define BUF ((struct eth_hdr_s *)&uip_buf[0])
-
 #ifndef CONFIG_EXAMPLES_WEBSERVER_DHCPC
-#  define UIP_IPADDR (10 << 24 | 0 << 16 | 0 << 8 | 1)
+#  define WCAP_IPADDR (10 << 24 | 0 << 16 | 0 << 8 | 1)
 #else
-#  define UIP_IPADDR (0)
+#  define WCAP_IPADDR (0)
 #endif
 
 /****************************************************************************
@@ -231,7 +229,7 @@ static void set_ethaddr(struct in_addr addr)
                  adapters->PhysicalAddress[2], adapters->PhysicalAddress[3],
                  adapters->PhysicalAddress[4], adapters->PhysicalAddress[5]);
 
-                 (void)uipdriver_setmacaddr(adapters->PhysicalAddress);
+                 (void)netdriver_setmacaddr(adapters->PhysicalAddress);
               break;
             }
         }
@@ -253,7 +251,7 @@ void wpcap_init(void)
   struct in_addr addr;
   FARPROC dlladdr;
 
-  addr.s_addr = htonl(UIP_IPADDR);
+  addr.s_addr = htonl(WCAP_IPADDR);
   printf("wpcap_init: IP address: %s\n", inet_ntoa(addr));
 
   wpcap = LoadLibrary("wpcap.dll");

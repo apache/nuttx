@@ -82,7 +82,7 @@
  * Function: netdev_carrier_on
  *
  * Description:
- *   Notifies the uip layer about an available carrier.
+ *   Notifies the networking layer about an available carrier.
  *   (e.g. a cable was plugged in)
  *
  * Parameters:
@@ -108,7 +108,7 @@ int netdev_carrier_on(FAR struct net_driver_s *dev)
  * Function: netdev_carrier_off
  *
  * Description:
- *   Notifies the uip layer about an disappeared carrier.
+ *   Notifies the networking layer about an disappeared carrier.
  *   (e.g. a cable was unplugged)
  *
  * Parameters:
