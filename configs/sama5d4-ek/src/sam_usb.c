@@ -284,10 +284,11 @@ void weak_function sam_usbinitialize(void)
   sam_configpio(PIO_USBC_VBUS_ENABLE); /* VBUS enable, initially OFF */
 #endif
 
-#if defined(CONFIG_SAMA5_UHPHS_RHPORT2) || defined(CONFIG_SAMA5_UHPHS_RHPORT3)
-  /* Configure Port B/C VBUS overrcurrent detection */
+#ifdef HAVE_USBOVCUR
 
-  sam_configpio(PIO_USBBC_VBUS_OVERCURRENT); /* VBUS overcurrent */
+  /* Configure Port B/C VBUS over-current detection */
+
+  sam_configpio(PIO_USBBC_VBUS_OVERCURRENT); /* VBUS over-current */
 #endif
 #endif /* HAVE_USBHOST */
 }
@@ -296,7 +297,7 @@ void weak_function sam_usbinitialize(void)
  * Name: sam_usbhost_initialize
  *
  * Description:
- *   Called at application startup time to initialize the USB host functionality.
+ *   Called at application start-up time to initialize the USB host functionality.
  *   This function will start a thread that will monitor for device
  *   connection/disconnection events.
  *
@@ -457,17 +458,17 @@ void sam_usbhost_vbusdrive(int rhport, bool enable)
  * Name: sam_setup_overcurrent
  *
  * Description:
- *   Setup to receive an interrupt-level callback if an overcurrent condition is
+ *   Setup to receive an interrupt-level callback if an over-current condition is
  *   detected on port B or C.
  *
  *   REVISIT: Since this is a common signal, we will need to come up with some way
  *   to inform both EHCI and OHCI drivers when this error occurs.
  *
  * Input paramter:
- *   handler - New overcurrent interrupt handler
+ *   handler - New over-current interrupt handler
  *
  * Returned value:
- *   Old overcurrent interrupt handler
+ *   Old over-current interrupt handler
  *
  ************************************************************************************/
 
