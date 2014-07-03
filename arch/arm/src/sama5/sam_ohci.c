@@ -2510,7 +2510,7 @@ errout:
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
- *   ep - The endpint to be freed.
+ *   ep - The endpoint to be freed.
  *
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
@@ -2535,8 +2535,7 @@ static int sam_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   /* There should not be any pending, real TDs linked to this ED */
 
   ed = eplist->ed;
-  DEBUGASSERT((ed->hw.headp & ED_HEADP_ADDR_MASK) ==
-              sam_physramaddr((uintptr_t)rhport->ep0.tail));
+  DEBUGASSERT((ed->hw.headp & ED_HEADP_ADDR_MASK) == ed->hw.tailp);
 
   /* We must have exclusive access to the ED pool, the bulk list, the periodic list
    * and the interrupt table.
