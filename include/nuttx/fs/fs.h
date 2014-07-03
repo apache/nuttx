@@ -662,6 +662,17 @@ off_t file_seek(FAR struct file *filep, off_t offset, int whence);
 
 void devnull_register(void);
 
+/* crypto/cryptodev.c *******************************************************/
+/****************************************************************************
+ * Name: devcrypto_register
+ *
+ * Description:
+ *   Register /dev/crypto
+ *
+ ****************************************************************************/
+
+void devcrypto_register(void);
+
 /* drivers/dev_zero.c *******************************************************/
 /****************************************************************************
  * Name: devzero_register

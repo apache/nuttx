@@ -194,6 +194,14 @@ void up_initialize(void)
   devnull_register();   /* Standard /dev/null */
 #endif
 
+#if defined(CONFIG_CRYPTO)
+  up_cryptoinitialize();
+#endif
+
+#if defined(CONFIG_CRYPTO_CRYPTODEV)
+  devcrypto_register(); /* /dev/crypto */
+#endif
+
 #if defined(CONFIG_DEV_ZERO)
   devzero_register();   /* Standard /dev/zero */
 #endif

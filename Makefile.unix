@@ -183,6 +183,11 @@ KERNDEPDIRS += net
 endif
 CLEANDIRS += net
 
+ifeq ($(CONFIG_CRYPTO),y)
+KERNDEPDIRS += crypto
+endif
+CLEANDIRS += crypto
+
 #
 # Extra objects used in the final link.
 #
@@ -242,6 +247,12 @@ endif
 
 ifeq ($(CONFIG_NET),y)
 NUTTXLIBS += lib/libnet$(LIBEXT)
+endif
+
+# Add libraries for Crypto API support
+
+ifeq ($(CONFIG_CRYPTO),y)
+NUTTXLIBS += lib/libcrypto$(LIBEXT)
 endif
 
 # Add libraries for file system support
@@ -512,6 +523,12 @@ net/libnet$(LIBEXT): context
 
 lib/libnet$(LIBEXT): net/libnet$(LIBEXT)
 	$(Q) install net/libnet$(LIBEXT) lib/libnet$(LIBEXT)
+
+crypto/libcrypto$(LIBEXT): context
+	$(Q) $(MAKE) -C crypto TOPDIR="$(TOPDIR)" libcrypto$(LIBEXT) EXTRADEFINES=$(KDEFINE)
+
+lib/libcrypto$(LIBEXT): crypto/libcrypto$(LIBEXT)
+	$(Q) install crypto/libcrypto$(LIBEXT) lib/libcrypto$(LIBEXT)
 
 fs/libfs$(LIBEXT): context
 	$(Q) $(MAKE) -C fs TOPDIR="$(TOPDIR)" libfs$(LIBEXT) EXTRADEFINES=$(KDEFINE)

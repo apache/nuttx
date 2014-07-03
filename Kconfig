@@ -405,6 +405,13 @@ config DEBUG_NET
 	---help---
 		Enable network debug SYSLOG output (disabled by default)
 
+config DEBUG_CRYPTO
+	bool "Crypto Debug Output"
+	default n
+	depends on CRYPTO
+	---help---
+		Enable Crypto debug SYSLOG output (disabled by default)
+
 config DEBUG_USB
 	bool "USB Debug Output"
 	default n
@@ -683,6 +690,10 @@ endmenu
 
 menu "Networking Support"
 source net/Kconfig
+endmenu
+
+menu "Crypto API"
+source crypto/Kconfig
 endmenu
 
 menu "File Systems"

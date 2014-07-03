@@ -1,0 +1,26 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+config CRYPTO
+  bool "Crypto API support"
+  default n
+  ---help---
+    Enable or disable Crypto API features
+
+if CRYPTO
+
+config CRYPTO_AES
+  bool "AES cypher support"
+  default n
+
+config CRYPTO_ALGTEST
+  bool "Perform automatic crypto algorithms test on startup"
+  default n
+
+config CRYPTO_CRYPTODEV
+  bool "cryptodev support"
+  default n
+
+endif
