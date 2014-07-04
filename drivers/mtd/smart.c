@@ -578,7 +578,9 @@ static ssize_t smart_bytewrite(struct smart_struct_s *dev, size_t offset,
       /* First calculate the start block and number of blocks affected */
 
       startblock = offset / dev->geo.blocksize;
-      nblocks = (nbytes + dev->geo.blocksize-1) / dev->geo.blocksize;
+      nblocks    = (offset - startblock * dev->geo.blocksize + nbytes +
+                    dev->geo.blocksize-1) / dev->geo.blocksize;
+
       DEBUGASSERT(nblocks <= dev->mtdBlksPerSector);
 
       /* Do a block read */
