@@ -572,7 +572,7 @@ static ssize_t smart_bytewrite(struct smart_struct_s *dev, size_t offset,
     {
       /* Perform block-based read-modify-write */
 
-      uint16_t  startblock;
+      uint32_t  startblock;
       uint16_t  nblocks;
 
       /* First calculate the start block and number of blocks affected */
@@ -1462,7 +1462,7 @@ static inline int smart_writesector(struct smart_struct_s *dev, unsigned long ar
   int       ret;
   uint16_t  x;
   bool      needsrelocate = FALSE;
-  uint16_t  mtdblock;
+  uint32_t  mtdblock;
   uint16_t  physsector;
   struct    smart_read_write_s *req;
   struct    smart_sect_header_s *header;
