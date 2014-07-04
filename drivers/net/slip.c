@@ -74,8 +74,8 @@
 
 /* Configuration ************************************************************/
 
-#if UIP_LLH_LEN > 0
-#  error "UIP_LLH_LEN must be set to zero"
+#if NET_LLH_LEN > 0
+#  error "NET_LLH_LEN must be set to zero"
 #endif
 
 #ifndef CONFIG_NET_NOINTS

@@ -1715,9 +1715,9 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
   /* But don't let the buffer size exceed the MSS of the socket type */
 
-  if (buflen > UIP_UDP_MSS)
+  if (buflen > UDP_MSS)
     {
-      buflen = UIP_UDP_MSS;
+      buflen = UDP_MSS;
     }
 
   /* Create an instance of the mountpt state structure */

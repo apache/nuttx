@@ -433,9 +433,9 @@ static void cs89x0_receive(struct cs89x0_driver_s *cs89x0, uint16_t isq)
   /* We only accept IP packets of the configured type and ARP packets */
 
 #ifdef CONFIG_NET_IPv6
-  if (BUF->type == HTONS(UIP_ETHTYPE_IP6))
+  if (BUF->type == HTONS(ETHTYPE_IP6))
 #else
-  if (BUF->type == HTONS(UIP_ETHTYPE_IP))
+  if (BUF->type == HTONS(ETHTYPE_IP))
 #endif
     {
       arp_ipin(&cs89x0->cs_dev);
@@ -451,7 +451,7 @@ static void cs89x0_receive(struct cs89x0_driver_s *cs89x0, uint16_t isq)
           cs89x0_transmit(cs89x0);
         }
     }
-  else if (BUF->type == htons(UIP_ETHTYPE_ARP))
+  else if (BUF->type == htons(ETHTYPE_ARP))
     {
        arp_arpin(&cs89x0->cs_dev);
 

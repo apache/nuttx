@@ -859,9 +859,9 @@ static void lpc17_rxdone(struct lpc17_driver_s *priv)
           /* We only accept IP packets of the configured type and ARP packets */
 
 #ifdef CONFIG_NET_IPv6
-          if (BUF->type == HTONS(UIP_ETHTYPE_IP6))
+          if (BUF->type == HTONS(ETHTYPE_IP6))
 #else
-          if (BUF->type == HTONS(UIP_ETHTYPE_IP))
+          if (BUF->type == HTONS(ETHTYPE_IP))
 #endif
             {
               /* Handle the incoming Rx packet */
@@ -881,7 +881,7 @@ static void lpc17_rxdone(struct lpc17_driver_s *priv)
                   lpc17_response(priv);
                 }
             }
-          else if (BUF->type == htons(UIP_ETHTYPE_ARP))
+          else if (BUF->type == htons(ETHTYPE_ARP))
             {
               EMAC_STAT(priv, rx_arp);
               arp_arpin(&priv->lp_dev);

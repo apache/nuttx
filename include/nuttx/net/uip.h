@@ -139,7 +139,7 @@
  *   snprintf(dev->d_appdata, UIP_APPDATA_SIZE, "%u\n", i);
  */
 
-#define UIP_APPDATA_SIZE (CONFIG_NET_BUFSIZE - UIP_LLH_LEN - UIP_TCPIP_HLEN)
+#define UIP_APPDATA_SIZE (CONFIG_NET_BUFSIZE - NET_LLH_LEN - UIP_TCPIP_HLEN)
 
 #define UIP_PROTO_ICMP  1
 #define UIP_PROTO_IGMP  2
@@ -205,7 +205,7 @@ struct net_iphdr_s
 #endif /* CONFIG_NET_IPv6 */
 };
 
-/* Describes a uIP callback
+/* Describes a device interface callback
  *
  *   flink   - Supports a singly linked list
  *   event   - Provides the address of the callback function entry point.
@@ -213,8 +213,8 @@ struct net_iphdr_s
  *             udp_conn_s.
  *   priv    - Holds a reference to application specific data that will
  *             provided
- *   flags   - Set by the application to inform the uIP layer which flags
- *             are and are not handled by the callback.
+ *   flags   - Set by the application to inform the lower layer which flags
+ *             were and were not handled by the callback.
  */
 
 struct net_driver_s;       /* Forward reference */

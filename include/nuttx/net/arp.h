@@ -60,13 +60,13 @@
 
 /* Recognized values of the type bytes in the Ethernet header */
 
-#define UIP_ETHTYPE_ARP 0x0806 /* Address resolution protocol */
-#define UIP_ETHTYPE_IP  0x0800 /* IP protocol */
-#define UIP_ETHTYPE_IP6 0x86dd /* IP protocol version 6 */
+#define ETHTYPE_ARP     0x0806 /* Address resolution protocol */
+#define ETHTYPE_IP      0x0800 /* IP protocol */
+#define ETHTYPE_IP6     0x86dd /* IP protocol version 6 */
 
 /* Size of the Ethernet header */
 
-#define UIP_ETHH_LEN   14      /* Minimum size: 2*6 + 2 */
+#define ETHHDR_LEN      14      /* Minimum size: 2*6 + 2 */
 
 /****************************************************************************
  * Public Types

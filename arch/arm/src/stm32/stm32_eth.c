@@ -1613,9 +1613,9 @@ static void stm32_receive(FAR struct stm32_ethmac_s *priv)
       /* We only accept IP packets of the configured type and ARP packets */
 
 #ifdef CONFIG_NET_IPv6
-      else if (BUF->type == HTONS(UIP_ETHTYPE_IP6))
+      else if (BUF->type == HTONS(ETHTYPE_IP6))
 #else
-      else if (BUF->type == HTONS(UIP_ETHTYPE_IP))
+      else if (BUF->type == HTONS(ETHTYPE_IP))
 #endif
         {
           nllvdbg("IP frame\n");
@@ -1635,7 +1635,7 @@ static void stm32_receive(FAR struct stm32_ethmac_s *priv)
              stm32_transmit(priv);
            }
         }
-      else if (BUF->type == htons(UIP_ETHTYPE_ARP))
+      else if (BUF->type == htons(ETHTYPE_ARP))
         {
           nllvdbg("ARP frame\n");
 

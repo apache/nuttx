@@ -120,10 +120,10 @@
  * This is a long established rule.
  */
 
-#if UIP_TCP_MSS > 576
+#if TCP_MSS > 576
 #  define UIP_TCP_INITIAL_MSS 576
 #else
-#  define UIP_TCP_INITIAL_MSS UIP_TCP_MSS
+#  define UIP_TCP_INITIAL_MSS TCP_MSS
 #endif
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS

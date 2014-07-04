@@ -107,13 +107,13 @@
 
 /* Macros. */
 
-#define BUF     ((FAR struct net_iphdr_s *)&dev->d_buf[UIP_LLH_LEN])
+#define BUF     ((FAR struct net_iphdr_s *)&dev->d_buf[NET_LLH_LEN])
 #define FBUF    ((FAR struct net_iphdr_s *)&g_reassembly_buffer[0])
 
 /* IP fragment re-assembly */
 
 #define IP_MF                   0x20
-#define UIP_REASS_BUFSIZE       (CONFIG_NET_BUFSIZE - UIP_LLH_LEN)
+#define UIP_REASS_BUFSIZE       (CONFIG_NET_BUFSIZE - NET_LLH_LEN)
 #define UIP_REASS_FLAG_LASTFRAG 0x01
 
 /****************************************************************************

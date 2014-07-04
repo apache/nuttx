@@ -64,7 +64,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define BUF ((struct tcp_iphdr_s *)&dev->d_buf[UIP_LLH_LEN])
+#define BUF ((struct tcp_iphdr_s *)&dev->d_buf[NET_LLH_LEN])
 
 /****************************************************************************
  * Public Variables
@@ -110,8 +110,8 @@ void tcp_input(struct net_driver_s *dev)
   int      len;
   int      i;
 
-  dev->d_snddata = &dev->d_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN];
-  dev->d_appdata = &dev->d_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN];
+  dev->d_snddata = &dev->d_buf[UIP_IPTCPH_LEN + NET_LLH_LEN];
+  dev->d_appdata = &dev->d_buf[UIP_IPTCPH_LEN + NET_LLH_LEN];
 
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.tcp.recv++;
@@ -219,7 +219,7 @@ void tcp_input(struct net_driver_s *dev)
             {
               for (i = 0; i < ((pbuf->tcpoffset >> 4) - 5) << 2 ;)
                 {
-                  opt = dev->d_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN + i];
+                  opt = dev->d_buf[UIP_TCPIP_HLEN + NET_LLH_LEN + i];
                   if (opt == TCP_OPT_END)
                     {
                       /* End of options. */
@@ -233,13 +233,13 @@ void tcp_input(struct net_driver_s *dev)
                       ++i;
                     }
                   else if (opt == TCP_OPT_MSS &&
-                          dev->d_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN + 1 + i] == TCP_OPT_MSS_LEN)
+                          dev->d_buf[UIP_TCPIP_HLEN + NET_LLH_LEN + 1 + i] == TCP_OPT_MSS_LEN)
                     {
                       /* An MSS option with the right option length. */
 
-                      tmp16 = ((uint16_t)dev->d_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN + 2 + i] << 8) |
-                               (uint16_t)dev->d_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN + 3 + i];
-                      conn->mss = tmp16 > UIP_TCP_MSS ? UIP_TCP_MSS : tmp16;
+                      tmp16 = ((uint16_t)dev->d_buf[UIP_TCPIP_HLEN + NET_LLH_LEN + 2 + i] << 8) |
+                               (uint16_t)dev->d_buf[UIP_IPTCPH_LEN + NET_LLH_LEN + 3 + i];
+                      conn->mss = tmp16 > TCP_MSS ? TCP_MSS : tmp16;
 
                       /* And we are done processing options. */
 
@@ -251,7 +251,7 @@ void tcp_input(struct net_driver_s *dev)
                        * can skip past them.
                        */
 
-                      if (dev->d_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN + 1 + i] == 0)
+                      if (dev->d_buf[UIP_TCPIP_HLEN + NET_LLH_LEN + 1 + i] == 0)
                         {
                           /* If the length field is zero, the options are malformed
                            * and we don't process them further.
@@ -259,7 +259,7 @@ void tcp_input(struct net_driver_s *dev)
 
                           break;
                         }
-                      i += dev->d_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN + 1 + i];
+                      i += dev->d_buf[UIP_TCPIP_HLEN + NET_LLH_LEN + 1 + i];
                     }
                 }
             }
@@ -509,7 +509,7 @@ found:
               {
                 for (i = 0; i < ((pbuf->tcpoffset >> 4) - 5) << 2 ;)
                   {
-                    opt = dev->d_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN + i];
+                    opt = dev->d_buf[UIP_IPTCPH_LEN + NET_LLH_LEN + i];
                     if (opt == TCP_OPT_END)
                       {
                         /* End of options. */
@@ -523,14 +523,14 @@ found:
                         ++i;
                       }
                     else if (opt == TCP_OPT_MSS &&
-                              dev->d_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN + 1 + i] == TCP_OPT_MSS_LEN)
+                              dev->d_buf[UIP_TCPIP_HLEN + NET_LLH_LEN + 1 + i] == TCP_OPT_MSS_LEN)
                       {
                         /* An MSS option with the right option length. */
 
                         tmp16 =
-                          (dev->d_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN + 2 + i] << 8) |
-                          dev->d_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN + 3 + i];
-                        conn->mss = tmp16 > UIP_TCP_MSS ? UIP_TCP_MSS : tmp16;
+                          (dev->d_buf[UIP_TCPIP_HLEN + NET_LLH_LEN + 2 + i] << 8) |
+                          dev->d_buf[UIP_TCPIP_HLEN + NET_LLH_LEN + 3 + i];
+                        conn->mss = tmp16 > TCP_MSS ? TCP_MSS : tmp16;
 
                         /* And we are done processing options. */
 
@@ -542,7 +542,7 @@ found:
                          * easily can skip past them.
                          */
 
-                        if (dev->d_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN + 1 + i] == 0)
+                        if (dev->d_buf[UIP_TCPIP_HLEN + NET_LLH_LEN + 1 + i] == 0)
                           {
                             /* If the length field is zero, the options are
                              * malformed and we don't process them further.
@@ -550,7 +550,7 @@ found:
 
                             break;
                           }
-                        i += dev->d_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN + 1 + i];
+                        i += dev->d_buf[UIP_TCPIP_HLEN + NET_LLH_LEN + 1 + i];
                       }
                   }
               }
@@ -692,7 +692,7 @@ found:
          * When the application is called, the d_len field
          * contains the length of the incoming data. The application can
          * access the incoming data through the global pointer
-         * d_appdata, which usually points UIP_IPTCPH_LEN + UIP_LLH_LEN
+         * d_appdata, which usually points UIP_IPTCPH_LEN + NET_LLH_LEN
          *  bytes into the d_buf array.
          *
          * If the application wishes to send any data, this data should be

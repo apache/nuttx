@@ -514,7 +514,7 @@ static int tiva_transmit(struct tiva_driver_s *priv)
 
       pktlen     = priv->ld_dev.d_len;
       nllvdbg("Sending packet, pktlen: %d\n", pktlen);
-      DEBUGASSERT(pktlen > UIP_LLH_LEN);
+      DEBUGASSERT(pktlen > NET_LLH_LEN);
 
       dbuf       = priv->ld_dev.d_buf;
       regval     = (uint32_t)(pktlen - 14);
@@ -676,7 +676,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
        * and 4 byte FCS that are not copied into the uIP packet.
        */
 
-      if (pktlen > (CONFIG_NET_BUFSIZE + 6) || pktlen <= (UIP_LLH_LEN + 6))
+      if (pktlen > (CONFIG_NET_BUFSIZE + 6) || pktlen <= (NET_LLH_LEN + 6))
         {
           int wordlen;
 
@@ -758,9 +758,9 @@ static void tiva_receive(struct tiva_driver_s *priv)
       /* We only accept IP packets of the configured type and ARP packets */
 
 #ifdef CONFIG_NET_IPv6
-      if (ETHBUF->type == HTONS(UIP_ETHTYPE_IP6))
+      if (ETHBUF->type == HTONS(ETHTYPE_IP6))
 #else
-      if (ETHBUF->type == HTONS(UIP_ETHTYPE_IP))
+      if (ETHBUF->type == HTONS(ETHTYPE_IP))
 #endif
         {
           nllvdbg("IP packet received (%02x)\n", ETHBUF->type);
@@ -779,7 +779,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
               tiva_transmit(priv);
             }
         }
-      else if (ETHBUF->type == htons(UIP_ETHTYPE_ARP))
+      else if (ETHBUF->type == htons(ETHTYPE_ARP))
         {
           nllvdbg("ARP packet received (%02x)\n", ETHBUF->type);
           EMAC_STAT(priv, rx_arp);

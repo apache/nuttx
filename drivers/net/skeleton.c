@@ -259,9 +259,9 @@ static void skel_receive(FAR struct skel_driver_s *skel)
       /* We only accept IP packets of the configured type and ARP packets */
 
 #ifdef CONFIG_NET_IPv6
-      if (BUF->type == HTONS(UIP_ETHTYPE_IP6))
+      if (BUF->type == HTONS(ETHTYPE_IP6))
 #else
-      if (BUF->type == HTONS(UIP_ETHTYPE_IP))
+      if (BUF->type == HTONS(ETHTYPE_IP))
 #endif
         {
           arp_ipin(&skel->sk_dev);
@@ -277,7 +277,7 @@ static void skel_receive(FAR struct skel_driver_s *skel)
              skel_transmit(skel);
            }
         }
-      else if (BUF->type == htons(UIP_ETHTYPE_ARP))
+      else if (BUF->type == htons(ETHTYPE_ARP))
         {
           arp_arpin(&skel->sk_dev);
 

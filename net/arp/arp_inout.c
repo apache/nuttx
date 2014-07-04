@@ -84,8 +84,8 @@
 #define RASIZE         4  /* Size of ROUTER ALERT */
 
 #define ETHBUF        ((struct eth_hdr_s *)&dev->d_buf[0])
-#define ARPBUF        ((struct arp_hdr_s *)&dev->d_buf[UIP_LLH_LEN])
-#define IPBUF         ((struct arp_iphdr_s *)&dev->d_buf[UIP_LLH_LEN])
+#define ARPBUF        ((struct arp_hdr_s *)&dev->d_buf[NET_LLH_LEN])
+#define IPBUF         ((struct arp_iphdr_s *)&dev->d_buf[NET_LLH_LEN])
 
 /****************************************************************************
  * Private Types
@@ -237,7 +237,7 @@ void arp_arpin(struct net_driver_s *dev)
   struct arp_hdr_s *parp = ARPBUF;
   in_addr_t ipaddr;
 
-  if (dev->d_len < (sizeof(struct arp_hdr_s) + UIP_LLH_LEN))
+  if (dev->d_len < (sizeof(struct arp_hdr_s) + NET_LLH_LEN))
     {
       nlldbg("Too small\n");
       dev->d_len = 0;
@@ -276,8 +276,8 @@ void arp_arpin(struct net_driver_s *dev)
             net_ipaddr_hdrcopy(parp->ah_sipaddr, &dev->d_ipaddr);
             arp_dump(parp);
 
-            peth->type          = HTONS(UIP_ETHTYPE_ARP);
-            dev->d_len          = sizeof(struct arp_hdr_s) + UIP_LLH_LEN;
+            peth->type          = HTONS(ETHTYPE_ARP);
+            dev->d_len          = sizeof(struct arp_hdr_s) + NET_LLH_LEN;
           }
         break;
 
@@ -432,13 +432,13 @@ void arp_out(struct net_driver_s *dev)
 
           parp->ah_opcode   = HTONS(ARP_REQUEST);
           parp->ah_hwtype   = HTONS(ARP_HWTYPE_ETH);
-          parp->ah_protocol = HTONS(UIP_ETHTYPE_IP);
+          parp->ah_protocol = HTONS(ETHTYPE_IP);
           parp->ah_hwlen    = ETHER_ADDR_LEN;
           parp->ah_protolen = 4;
           arp_dump(parp);
 
-          peth->type        = HTONS(UIP_ETHTYPE_ARP);
-          dev->d_len        = sizeof(struct arp_hdr_s) + UIP_LLH_LEN;
+          peth->type        = HTONS(ETHTYPE_ARP);
+          dev->d_len        = sizeof(struct arp_hdr_s) + NET_LLH_LEN;
           return;
         }
 
@@ -450,8 +450,8 @@ void arp_out(struct net_driver_s *dev)
   /* Finish populating the Ethernet header */
 
   memcpy(peth->src, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
-  peth->type  = HTONS(UIP_ETHTYPE_IP);
-  dev->d_len += UIP_LLH_LEN;
+  peth->type  = HTONS(ETHTYPE_IP);
+  dev->d_len += NET_LLH_LEN;
 }
 
 #endif /* CONFIG_NET_ARP */

@@ -60,7 +60,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define BUF ((struct tcp_iphdr_s *)&dev->d_buf[UIP_LLH_LEN])
+#define BUF ((struct tcp_iphdr_s *)&dev->d_buf[NET_LLH_LEN])
 
 /****************************************************************************
  * Public Variables
@@ -358,8 +358,8 @@ void tcp_ack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
   pbuf->optdata[0] = TCP_OPT_MSS;
   pbuf->optdata[1] = TCP_OPT_MSS_LEN;
-  pbuf->optdata[2] = (UIP_TCP_MSS) / 256;
-  pbuf->optdata[3] = (UIP_TCP_MSS) & 255;
+  pbuf->optdata[2] = (TCP_MSS) / 256;
+  pbuf->optdata[3] = (TCP_MSS) & 255;
   dev->d_len       = UIP_IPTCPH_LEN + TCP_OPT_MSS_LEN;
   pbuf->tcpoffset  = ((UIP_TCPH_LEN + TCP_OPT_MSS_LEN) / 4) << 4;
 

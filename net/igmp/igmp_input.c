@@ -61,7 +61,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define IGMPBUF ((struct igmp_iphdr_s *)&dev->d_buf[UIP_LLH_LEN])
+#define IGMPBUF ((struct igmp_iphdr_s *)&dev->d_buf[NET_LLH_LEN])
 
 /****************************************************************************
  * Private Functions
@@ -124,7 +124,7 @@ void igmp_input(struct net_driver_s *dev)
 
   /* Verify the message length */
 
-  if (dev->d_len < UIP_LLH_LEN+UIP_IPIGMPH_LEN)
+  if (dev->d_len < NET_LLH_LEN+UIP_IPIGMPH_LEN)
     {
       IGMP_STATINCR(g_netstats.igmp.length_errors);
       nlldbg("Length error\n");
