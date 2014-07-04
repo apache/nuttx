@@ -47,9 +47,9 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <crypto/crypto.h>
-#include <arch/board/board.h>
+#include <nuttx/crypto/crypto.h>
 #include <nuttx/arch.h>
+#include <arch/board/board.h>
 
 #include "up_internal.h"
 #include "up_arch.h"
