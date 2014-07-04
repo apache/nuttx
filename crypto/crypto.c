@@ -44,8 +44,9 @@
 #include <string.h>
 #include <poll.h>
 #include <errno.h>
+
 #include <nuttx/fs/fs.h>
-#include <crypto/crypto.h>
+#include <nuttx/crypto/crypto.h>
 
 /****************************************************************************
  * Private Function Prototypes

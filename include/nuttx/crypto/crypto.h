@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/crypto/cryptodev.h
+ * include/nuttx/crypto/crypto.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author:  Max Nekludov <macscomp@gmail.com>
@@ -33,63 +33,62 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_CRYPTO_CRYPTODEV_H
-#define __INCLUDE_CRYPTO_CRYPTODEV_H
+#ifndef __INCLUDE_NUTTX_CRYPTO_CRYPTO_H
+#define __INCLUDE_NUTTX_CRYPTO_CRYPTO_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <debug.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
 
-#define RIJNDAEL128_BLOCK_LEN   16
-#define AES_BLOCK_LEN           RIJNDAEL128_BLOCK_LEN
+#if defined(CONFIG_CRYPTO_AES)
+#  define AES_MODE_MIN 1
 
-#define CRYPTO_ALGORITHM_MIN    1
-#define CRYPTO_AES_ECB          1
-#define CRYPTO_AES_CBC          2
-#define CRYPTO_AES_CTR          3
-#define CRYPTO_ALGORITHM_MAX    1
+#  define AES_MODE_ECB 1
+#  define AES_MODE_CBC 2
+#  define AES_MODE_CTR 3
 
-#define CRYPTO_FLAG_HARDWARE    0x01000000 /* hardware accelerated */
-#define CRYPTO_FLAG_SOFTWARE    0x02000000 /* software implementation */
+#  define AES_MODE_MAX 3
+#endif
 
-#define COP_ENCRYPT             1
-#define COP_DECRYPT             2
-#define COP_F_BATCH             0x0008 /* Batch op if possible */
+#define CYPHER_ENCRYPT 1
+#define CYPHER_DECRYPT 0
 
-#define CIOCGSESSION            101
-#define CIOCFSESSION            102
-#define CIOCCRYPT               103
+/************************************************************************************
+ * Public Data
+ ************************************************************************************/
 
-typedef char* caddr_t;
+#ifndef __ASSEMBLY__
 
-struct session_op
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
 {
-  uint32_t cipher;    /* ie. CRYPTO_AES_EBC */
-  uint32_t mac;
+#else
+#define EXTERN extern
+#endif
 
-  uint32_t keylen;    /* cipher key */
-  caddr_t key;
-  int mackeylen;      /* mac key */
-  caddr_t mackey;
+/************************************************************************************
+ * Public Function Prototypes
+ ************************************************************************************/
 
-  uint32_t ses;       /* returns: session # */
-};
+#if defined(CONFIG_CRYPTO_AES)
+int up_aesinitialize(void);
+int aes_cypher(FAR void *out, FAR const void *in, uint32_t size, FAR const void *iv,
+               FAR const void *key, uint32_t keysize, int mode, int encrypt);
+#endif
 
-struct crypt_op
-{
-  uint32_t ses;
-  uint16_t op;        /* i.e. COP_ENCRYPT */
-  uint16_t flags;
-  unsigned len;
-  caddr_t src, dst;   /* become iov[] inside kernel */
-  caddr_t mac;        /* must be big enough for chosen MAC */
-  caddr_t iv;
-};
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
 
-#endif /* __INCLUDE_CRYPTO_CRYPTODEV_H */
+#endif /* __ASSEMBLY__ */
+#endif /* __INCLUDE_NUTTX_CRYPTO_CRYPTO_H */

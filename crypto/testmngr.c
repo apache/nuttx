@@ -44,12 +44,11 @@
 #include <string.h>
 #include <poll.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <nuttx/fs/fs.h>
-
-#include <crypto/crypto.h>
 #include <nuttx/kmalloc.h>
-#include <debug.h>
+#include <nuttx/crypto/crypto.h>
 
 #ifdef CONFIG_CRYPTO_ALGTEST
 
