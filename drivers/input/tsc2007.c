@@ -84,7 +84,7 @@
 #undef CONFIG_TSC2007_REFCNT
 
 /* I don't think that it is necessary to activate the converters before
- * making meaurements.  However, I will keep this functionality enabled
+ * making measurements.  However, I will keep this functionality enabled
  * until I have a change to prove that that activation is unnecessary.
  */
 
@@ -128,7 +128,7 @@
 
 /* This describes the state of one contact */
 
-enum tsc2007_contact_3
+enum tsc2007_contact_e
 {
   CONTACT_NONE = 0,                    /* No contact */
   CONTACT_DOWN,                        /* First contact */
