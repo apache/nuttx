@@ -1427,9 +1427,9 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
           /* We only accept IP packets of the configured type and ARP packets */
 
 #ifdef CONFIG_NET_IPv6
-          if (BUF->type == HTONS(UIP_ETHTYPE_IP6))
+          if (BUF->type == HTONS(ETHTYPE_IP6))
 #else
-          if (BUF->type == HTONS(UIP_ETHTYPE_IP))
+          if (BUF->type == HTONS(ETHTYPE_IP))
 #endif
             {
               /* Handle the incoming IP packet */
@@ -1449,7 +1449,7 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
                   pic32mx_response(priv);
                 }
             }
-          else if (BUF->type == htons(UIP_ETHTYPE_ARP))
+          else if (BUF->type == htons(ETHTYPE_ARP))
             {
               /* Handle the incoming ARP packet */
 
