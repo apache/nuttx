@@ -7640,3 +7640,6 @@
 	  or MAXNAMELEN.  Noted by Douglas Beattie (2014-7-4).
 	* drivers/mtd/smart.c: Increase some variables from uint16_t to uint32_t
 	  to handle larger device sizes.  From Ken Pettit (2014-7-4).
+	* SAMA5 OHCI: Pointers to allocated port values were not being nullified
+	  after being deallocated.  This caused some assertions to fire when
+	  debug was enabled (2014-7-4).
