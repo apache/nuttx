@@ -1,5 +1,5 @@
 /************************************************************************************************************
- * include/nuttx/net/ip.h
+ * include/nuttx/net/ipopt.h
  *
  * Defines values for the IP header options
  *
@@ -35,8 +35,8 @@
  *
  ************************************************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_NET_IP_H
-#define __INCLUDE_NUTTX_NET_IP_H
+#ifndef __INCLUDE_NUTTX_NET_IPOPT_H
+#define __INCLUDE_NUTTX_NET_IPOPT_H
 
 /************************************************************************************************************
  * Included Files
@@ -248,4 +248,4 @@
  * Public Function Prototypes
  ************************************************************************************************************/
 
-#endif /* __INCLUDE_NUTTX_NET_IP_H */
+#endif /* __INCLUDE_NUTTX_NET_IPOPT_H */
