@@ -49,13 +49,14 @@
 #include <arch/irq.h>
 
 #include <nuttx/clock.h>
+#include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/udp.h>
 
-#include "socket/socket.h"
 #include "netdev/netdev.h"
 #include "devif/devif.h"
 #include "udp/udp.h"
+#include "socket/socket.h"
 
 /****************************************************************************
  * Pre-processor Definitions

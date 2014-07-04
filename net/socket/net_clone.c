@@ -45,6 +45,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/net/net.h>
 #include <nuttx/net/tcp.h>
 #include <nuttx/net/udp.h>
 

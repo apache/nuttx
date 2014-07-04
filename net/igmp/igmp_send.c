@@ -160,7 +160,7 @@ void igmp_send(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group,
   /* Calculate IP checksum. */
 
   IGMPBUF->ipchksum    = 0;
-  IGMPBUF->ipchksum    = ~igmp_chksum((FAR uint8_t *)IGMPBUF, UIP_IPH_LEN + RASIZE);
+  IGMPBUF->ipchksum    = ~igmp_chksum((FAR uint8_t *)IGMPBUF, IPHDR_LEN + RASIZE);
 
   /* Set up the IGMP message */
 

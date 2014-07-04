@@ -58,14 +58,16 @@
 #include <arch/irq.h>
 #include <nuttx/clock.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/net/net.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/tcp.h>
 
-#include "socket/socket.h"
 #include "netdev/netdev.h"
 #include "devif/devif.h"
 #include "tcp/tcp.h"
+#include "socket/socket.h"
+
 
 /****************************************************************************
  * Definitions

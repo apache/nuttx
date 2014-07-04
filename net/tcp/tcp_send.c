@@ -104,8 +104,8 @@ static void tcp_sendcomplete(FAR struct net_driver_s *dev)
    * length.
    */
 
-  pbuf->len[0]      = ((dev->d_len - UIP_IPH_LEN) >> 8);
-  pbuf->len[1]      = ((dev->d_len - UIP_IPH_LEN) & 0xff);
+  pbuf->len[0]      = ((dev->d_len - IPHDR_LEN) >> 8);
+  pbuf->len[1]      = ((dev->d_len - IPHDR_LEN) & 0xff);
 
 #else /* CONFIG_NET_IPv6 */
 

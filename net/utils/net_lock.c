@@ -46,7 +46,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/net/uip.h>
+#include <nuttx/net/net.h>
 
 #include "utils/utils.h"
 

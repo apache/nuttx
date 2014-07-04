@@ -55,7 +55,7 @@
  ****************************************************************************/
 
 /* Socket descriptors are the index into the TCB sockets list, offset by the
- * following amount. This offset is used to distinquish file descriptors from
+ * following amount. This offset is used to distinguish file descriptors from
  * socket descriptors
  */
 
@@ -84,6 +84,8 @@ typedef uint16_t socktimeo_t;
 /* This is the internal representation of a socket reference by a file
  * descriptor.
  */
+
+struct devif_callback_s;     /* Forward reference */
 
 struct socket
 {
@@ -128,6 +130,24 @@ struct socketlist
 struct net_driver_s; /* Forward reference. Defined in nuttx/net/netdev.h */
 typedef int (*netdev_callback_t)(FAR struct net_driver_s *dev, void *arg);
 
+#ifdef CONFIG_NET_NOINTS
+/* Semaphore based locking for non-interrupt based logic.
+ *
+ * net_lock_t -- Not used.  Only for compatibility
+ */
+
+typedef uint8_t net_lock_t; /* Not really used */
+
+#else
+
+/* Enable/disable locking for interrupt based logic:
+ *
+ * net_lock_t -- The processor specific representation of interrupt state.
+ */
+
+#  define net_lock_t        irqstate_t
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -143,6 +163,42 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/* net_lock.c ****************************************************************/
+/* Critical section management.  The NuttX configuration setting
+ * CONFIG_NET_NOINT indicates that uIP not called from the interrupt level.
+ * If CONFIG_NET_NOINTS is defined, then these will map to semaphore
+ * controls.  Otherwise, it assumed that uIP will be called from interrupt
+ * level handling and these will map to interrupt enable/disable controls.
+ */
+
+#ifdef CONFIG_NET_NOINTS
+/* Semaphore based locking for non-interrupt based logic.
+ *
+ * net_lock()           -- Takes the semaphore().  Implements a re-entrant mutex.
+ * net_unlock()         -- Gives the semaphore().
+ * net_lockedwait()     -- Like pthread_cond_wait(); releases the semaphore
+ *                         momentarily to wait on another semaphore()
+ */
+
+net_lock_t net_lock(void);
+void net_unlock(net_lock_t flags);
+int net_lockedwait(sem_t *sem);
+
+#else
+
+/* Enable/disable locking for interrupt based logic:
+ *
+ * net_lock()           -- Disables interrupts.
+ * net_unlock()         -- Conditionally restores interrupts.
+ * net_lockedwait()     -- Just wait for the semaphore.
+ */
+
+#  define net_lock()        irqsave()
+#  define net_unlock(f)     irqrestore(f)
+#  define net_lockedwait(s) sem_wait(s)
+
+#endif
 
 /* This function may be used at boot time to set the initial ip_id.*/
 

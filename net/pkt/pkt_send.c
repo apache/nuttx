@@ -51,13 +51,14 @@
 
 #include <arch/irq.h>
 #include <nuttx/clock.h>
+#include <nuttx/net/net.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/pkt.h>
 
-#include "socket/socket.h"
 #include "netdev/netdev.h"
 #include "devif/devif.h"
+#include "socket/socket.h"
 #include "pkt/pkt.h"
 
 /****************************************************************************

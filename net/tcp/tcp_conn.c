@@ -52,12 +52,12 @@
 #include <arch/irq.h>
 
 #include <nuttx/net/netconfig.h>
-#include <nuttx/net/uip.h>
+#include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/tcp.h>
 
-#include "tcp/tcp.h"
 #include "devif/devif.h"
+#include "tcp/tcp.h"
 
 /****************************************************************************
  * Public Data

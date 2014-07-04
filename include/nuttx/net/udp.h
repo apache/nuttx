@@ -70,7 +70,8 @@
 /* Representation of a uIP UDP connection */
 
 struct net_driver_s;      /* Forward reference */
-struct devif_callback_s;    /* Forward reference */
+struct devif_callback_s;  /* Forward reference */
+
 struct udp_conn_s
 {
   dq_entry_t node;        /* Supports a doubly linked list */

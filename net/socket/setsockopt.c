@@ -46,6 +46,8 @@
 #include <errno.h>
 #include <arch/irq.h>
 
+#include <nuttx/net/net.h>
+
 #include "socket/socket.h"
 #include "utils/utils.h"
 

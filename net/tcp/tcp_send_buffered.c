@@ -63,6 +63,7 @@
 
 #include <arch/irq.h>
 #include <nuttx/clock.h>
+#include <nuttx/net/net.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/iob.h>
 #include <nuttx/net/netdev.h>

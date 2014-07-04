@@ -55,6 +55,8 @@
 
 /* Representation of a uIP packet socket connection */
 
+struct devif_callback_s; /* Forward reference */
+
 struct pkt_conn_s
 {
   dq_entry_t node;     /* Supports a double linked list */

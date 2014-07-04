@@ -45,7 +45,7 @@
 #include <debug.h>
 
 #include <nuttx/net/netconfig.h>
-#include <nuttx/net/uip.h>
+#include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 
 #include "devif/devif.h"

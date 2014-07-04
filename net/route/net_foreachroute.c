@@ -42,6 +42,8 @@
 #include <stdint.h>
 #include <errno.h>
 
+#include <nuttx/net/net.h>
+
 #include <arch/irq.h>
 
 #include "route/route.h"

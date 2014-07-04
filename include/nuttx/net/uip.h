@@ -54,10 +54,6 @@
 #include <stdbool.h>
 #include <queue.h>
 
-#ifdef CONFIG_NET_NOINTS
-#  include <semaphore.h>
-#endif
-
 #include <arpa/inet.h>
 
 #include <nuttx/net/netconfig.h>
@@ -65,94 +61,20 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Values for the IP protocol field */
 
-/* The following flags may be set in the set of flags before calling the
- * application callback. The UIP_ACKDATA, UIP_NEWDATA, and UIP_CLOSE flags
- * may be set at the same time, whereas the others are mutually exclusive.
- *
- *   UIP_ACKDATA   IN:  Signifies that the outstanding data was ACKed and
- *                      the application should send out new data instead
- *                      of retransmitting the last data (TCP only)
- *                 OUT: Input state must be preserved on output.
- *   UIP_NEWDATA   IN:  Set to indicate that the peer has sent us new data.
- *                 OUT: Cleared (only) by the application logic to indicate
- *                      that the new data was consumed, suppressing further
- *                      attempts to process the new data.
- *   UIP_SNDACK    IN:  Not used; always zero
- *                 OUT: Set by the application if the new data was consumed
- *                      and an ACK should be sent in the response. (TCP only)
- *   UIP_REXMIT    IN:  Tells the application to retransmit the data that
- *                      was last sent. (TCP only)
- *                 OUT: Not used
- *   UIP_POLL      IN:  Used for polling the application.  This is provided
- *                      periodically from the drivers to support (1) timed
- *                      operations, and (2) to check if the application has
- *                      data that it wants to send
- *                 OUT: Not used
- *   UIP_BACKLOG   IN:  There is a new connection in the backlog list set
- *                      up by the listen() command. (TCP only)
- *                 OUT: Not used
- *   UIP_CLOSE     IN:  The remote host has closed the connection, thus the
- *                      connection has gone away. (TCP only)
- *                 OUT: The application signals that it wants to close the
- *                      connection. (TCP only)
- *   UIP_ABORT     IN:  The remote host has aborted the connection, thus the
- *                      connection has gone away. (TCP only)
- *                 OUT: The application signals that it wants to abort the
- *                      connection. (TCP only)
- *   UIP_CONNECTED IN:  We have got a connection from a remote host and have
- *                      set up a new connection for it, or an active connection
- *                      has been successfully established. (TCP only)
- *                 OUT: Not used
- *   UIP_TIMEDOUT  IN:  The connection has been aborted due to too many
- *                      retransmissions. (TCP only)
- *                 OUT: Not used
- *   UIP_ECHOREPLY IN:  An ICMP Echo Reply has been received.  Used to support
- *                      ICMP ping from applications. (ICMP only)
- *                 OUT: Cleared (only) by the application logic to indicate
- *                      that the reply was processed, suppressing further
- *                      attempts to process the reply.
- */
-
-#define UIP_ACKDATA    (1 << 0)
-#define UIP_NEWDATA    (1 << 1)
-#define UIP_SNDACK     (1 << 2)
-#define UIP_REXMIT     (1 << 3)
-#define UIP_POLL       (1 << 4)
-#define UIP_BACKLOG    (1 << 5)
-#define UIP_CLOSE      (1 << 6)
-#define UIP_ABORT      (1 << 7)
-#define UIP_CONNECTED  (1 << 8)
-#define UIP_TIMEDOUT   (1 << 9)
-#define UIP_ECHOREPLY  (1 << 10)
-
-#define UIP_CONN_EVENTS (UIP_CLOSE|UIP_ABORT|UIP_CONNECTED|UIP_TIMEDOUT)
-
-/* The buffer size available for user data in the d_buf buffer.
- *
- * This macro holds the available size for user data in the
- * d_buf buffer. The macro is intended to be used for checking
- * bounds of available user data.
- *
- * Example:
- *
- *   snprintf(dev->d_appdata, UIP_APPDATA_SIZE, "%u\n", i);
- */
-
-#define UIP_APPDATA_SIZE (CONFIG_NET_BUFSIZE - NET_LLH_LEN - UIP_TCPIP_HLEN)
-
-#define UIP_PROTO_ICMP  1
-#define UIP_PROTO_IGMP  2
-#define UIP_PROTO_TCP   6
-#define UIP_PROTO_UDP   17
-#define UIP_PROTO_ICMP6 58
+#define IP_PROTO_ICMP  1
+#define IP_PROTO_IGMP  2
+#define IP_PROTO_TCP   6
+#define IP_PROTO_UDP   17
+#define IP_PROTO_ICMP6 58
 
 /* Header sizes */
 
 #ifdef CONFIG_NET_IPv6
-# define UIP_IPH_LEN    40    /* Size of IP header */
+# define IPHDR_LEN     40    /* Size of IP header */
 #else
-# define UIP_IPH_LEN    20    /* Size of IP header */
+# define IPHDR_LEN     20    /* Size of IP header */
 #endif
 
 /****************************************************************************
@@ -205,28 +127,6 @@ struct net_iphdr_s
 #endif /* CONFIG_NET_IPv6 */
 };
 
-/* Describes a device interface callback
- *
- *   flink   - Supports a singly linked list
- *   event   - Provides the address of the callback function entry point.
- *             pvconn is a pointer to one of struct tcp_conn_s or struct
- *             udp_conn_s.
- *   priv    - Holds a reference to application specific data that will
- *             provided
- *   flags   - Set by the application to inform the lower layer which flags
- *             were and were not handled by the callback.
- */
-
-struct net_driver_s;       /* Forward reference */
-struct devif_callback_s
-{
-  FAR struct devif_callback_s *flink;
-  uint16_t (*event)(FAR struct net_driver_s *dev, FAR void *pvconn,
-                    FAR void *pvpriv, uint16_t flags);
-  FAR void *priv;
-  uint16_t flags;
-};
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -234,51 +134,6 @@ struct devif_callback_s
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-/* Critical section management.  The NuttX configuration setting
- * CONFIG_NET_NOINT indicates that uIP not called from the interrupt level.
- * If CONFIG_NET_NOINTS is defined, then these will map to semaphore
- * controls.  Otherwise, it assumed that uIP will be called from interrupt
- * level handling and these will map to interrupt enable/disable controls.
- */
-
-#ifdef CONFIG_NET_NOINTS
-
-/* Semaphore based locking for non-interrupt based logic.
- *
- * net_lock_t           -- Not used.  Only for compatibility
- * net_lockinitialize() -- Initializes an underlying semaphore/mutex
- * net_lock()           -- Takes the semaphore().  Implements a re-entrant mutex.
- * net_unlock()         -- Gives the semaphore().
- * net_lockedwait()     -- Like pthread_cond_wait(); releases the semaphore
- *                         momemtarily to wait on another semaphore()
- */
-
-typedef uint8_t net_lock_t; /* Not really used */
-
-void net_lockinitialize(void);
-net_lock_t net_lock(void);
-void net_unlock(net_lock_t flags);
-int net_lockedwait(sem_t *sem);
-
-#else
-
-/* Enable/disable locking for interrupt based logic:
- *
- * net_lock_t           -- The processor specific representation of interrupt state.
- * net_lockinitialize() -- (Does not exist).
- * net_lock()           -- Disables interrupts.
- * net_unlock()         -- Conditionally restores interrupts.
- * net_lockedwait()     -- Just wait for the semaphore.
- */
-
-#  define net_lock_t        irqstate_t
-#  define net_lockinitialize()
-#  define net_lock()        irqsave()
-#  define net_unlock(f)     irqrestore(f)
-#  define net_lockedwait(s) sem_wait(s)
-
-#endif
 
 /* uIP application functions
  *

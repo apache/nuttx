@@ -149,7 +149,7 @@ void icmp_input(FAR struct net_driver_s *dev)
       /* The slow way... sum over the ICMP message */
 
       picmp->icmpchksum = 0;
-      picmp->icmpchksum = ~icmp_chksum(dev, (((uint16_t)picmp->len[0] << 8) | (uint16_t)picmp->len[1]) - UIP_IPH_LEN);
+      picmp->icmpchksum = ~icmp_chksum(dev, (((uint16_t)picmp->len[0] << 8) | (uint16_t)picmp->len[1]) - IPHDR_LEN);
       if (picmp->icmpchksum == 0)
         {
           picmp->icmpchksum = 0xffff;

@@ -72,6 +72,20 @@ struct timeval;           /* Forward reference */
 #endif
 
 /****************************************************************************
+ * Function: net_lockinitialize
+ *
+ * Description:
+ *   Initialize the locking facility
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_NOINTS
+void net_lockinitialize(void);
+#else
+#  define net_lockinitialize()
+#endif
+
+/****************************************************************************
  * Function: net_dsec2timeval
  *
  * Description:

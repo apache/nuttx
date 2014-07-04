@@ -54,6 +54,7 @@
 #include "pkt/pkt.h"
 #include "igmp/igmp.h"
 #include "route/route.h"
+#include "utils/utils.h"
 
 /****************************************************************************
  * Pre-processor Definitions
