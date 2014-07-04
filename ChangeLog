@@ -7636,3 +7636,7 @@
 	  was not selected and the SMART sector size was larger than the mt
 	  device's block size (like it would be if using SMARTFS on larger
 	  flash devices).  From Ken Pettit (2014-7-3).
+	* tools/mkdeps.c: NAME_MAX not available on SunOS; use FILENAME_MAX
+	  or MAXNAMELEN.  Noted by Douglas Beattie (2014-7-4).
+	* drivers/mtd/smart.c: Increase some variables from uint16_t to uint32_t
+	  to handle larger device sizes.  From Ken Pettit (2014-7-4).
