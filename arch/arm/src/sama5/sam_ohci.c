@@ -1394,12 +1394,12 @@ static int sam_ep0enqueue(struct sam_rhport_s *rhport)
   tdtail = sam_tdalloc();
   if (!tdtail)
     {
-      sam_edfree(rhport->ep0.ed);
+      sam_edfree(edctrl);
       irqrestore(flags);
       return -ENOMEM;
     }
 
-  rhport->ep0.ed = edctrl;
+  rhport->ep0.ed   = edctrl;
   rhport->ep0.tail = tdtail;
 
   /* ControlListEnable.  This bit is cleared to disable the processing of the
@@ -1466,7 +1466,7 @@ static int sam_ep0enqueue(struct sam_rhport_s *rhport)
  * Name: sam_ep0dequeue
  *
  * Description:
- *   Remove the ED for EP0 from the control ED list and posssibly disable control
+ *   Remove the ED for EP0 from the control ED list and possibly disable control
  *   list processing.
  *
  * Input Parameters:
@@ -1548,6 +1548,7 @@ static void sam_ep0dequeue(struct sam_rhport_s *rhport)
           sam_putreg(regval, SAM_USBHOST_CTRL);
         }
     }
+
   irqrestore(flags);
 
   /* Release any TDs that may still be attached to the ED. */
@@ -1567,6 +1568,9 @@ static void sam_ep0dequeue(struct sam_rhport_s *rhport)
 
   sam_tdfree(tdtail);
   sam_edfree(edctrl);
+
+  rhport->ep0.ed   = NULL;
+  rhport->ep0.tail = NULL;
 }
 
 /*******************************************************************************
