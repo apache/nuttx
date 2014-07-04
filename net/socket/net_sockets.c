@@ -47,7 +47,6 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/net/uip.h>
 #include <nuttx/net/net.h>
 #include <nuttx/kmalloc.h>
 

@@ -57,7 +57,6 @@
 #include <nuttx/irq.h>
 #include <nuttx/net/net.h>
 
-#include <nuttx/net/uip.h>
 #include <nuttx/net/netdev.h>
 
 #if defined(CONFIG_NET) && defined(CONFIG_NET_SLIP)

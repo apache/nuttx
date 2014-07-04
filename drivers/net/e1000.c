@@ -54,7 +54,6 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 
-#include <nuttx/net/uip.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 

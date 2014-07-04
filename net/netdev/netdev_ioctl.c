@@ -56,7 +56,6 @@
 #include <netinet/in.h>
 
 #include <nuttx/net/netdev.h>
-#include <nuttx/net/uip.h>
 
 #ifdef CONFIG_NET_IGMP
 #  include "sys/sockio.h"

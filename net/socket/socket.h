@@ -48,7 +48,6 @@
 #include <time.h>
 
 #include <nuttx/net/net.h>
-#include <nuttx/net/uip.h>
 
 /****************************************************************************
  * Pre-processor Definitions

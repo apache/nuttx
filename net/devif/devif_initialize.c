@@ -45,7 +45,6 @@
 #ifdef CONFIG_NET
 
 #include <stdint.h>
-#include <nuttx/net/uip.h>
 #include <nuttx/net/netstats.h>
 
 #include "devif/devif.h"

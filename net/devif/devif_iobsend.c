@@ -44,7 +44,6 @@
 #include <debug.h>
 
 #include <nuttx/net/iob.h>
-#include <nuttx/net/uip.h>
 #include <nuttx/net/netdev.h>
 
 #ifdef CONFIG_NET_IOB

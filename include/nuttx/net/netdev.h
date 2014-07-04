@@ -52,7 +52,6 @@
 #include <stdint.h>
 #include <net/if.h>
 
-#include <nuttx/net/uip.h>
 #ifdef CONFIG_NET_IGMP
 #  include <nuttx/net/igmp.h>
 #endif

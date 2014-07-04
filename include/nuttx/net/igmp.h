@@ -54,7 +54,6 @@
 
 #include <netinet/in.h>
 
-#include <nuttx/net/uip.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/netconfig.h>
 

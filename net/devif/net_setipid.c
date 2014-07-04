@@ -43,8 +43,6 @@
 #include <stdint.h>
 #include <debug.h>
 
-#include <nuttx/net/uip.h>
-
 #include "devif/devif.h"
 
 /****************************************************************************

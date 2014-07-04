@@ -51,7 +51,6 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
-#include <nuttx/net/uip.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 

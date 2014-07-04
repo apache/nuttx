@@ -58,7 +58,6 @@
 
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/iob.h>
-#include <nuttx/net/uip.h>
 
 /****************************************************************************
  * Pre-processor Definitions

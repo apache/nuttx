@@ -45,8 +45,6 @@
 #include <queue.h>
 #include <net/if.h>
 
-#include <nuttx/net/uip.h>
-
 #ifdef CONFIG_NET_ROUTE
 
 /****************************************************************************
