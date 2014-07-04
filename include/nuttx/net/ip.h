@@ -1,9 +1,9 @@
 /****************************************************************************
- * include/nuttx/net/uip.h
+ * include/nuttx/net/ip.h
  *
- * The uIP header file contains definitions for a number of C macros that
- * are used by uIP programs as well as internal uIP structures and function
- * declarations.
+ * The uIP header file contains IP-related definitions for a number of C
+ * macros that are used by applications as well as internally by the
+ * OS networking logic.
  *
  *   Copyright (C) 2007-2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -41,8 +41,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_NET_UIP_H
-#define __INCLUDE_NUTTX_NET_UIP_H
+#ifndef __INCLUDE_NUTTX_NET_IP_H
+#define __INCLUDE_NUTTX_NET_IP_H
 
 /****************************************************************************
  * Included Files
@@ -323,4 +323,4 @@ bool net_ipaddr_maskcmp(net_ipaddr_t addr1, net_ipaddr_t addr2,
     (in_addr_t)(dest) = (in_addr_t)(src) & (in_addr_t)(mask); \
   } while (0)
 
-#endif /* __INCLUDE_NUTTX_NET_UIP_H */
+#endif /* __INCLUDE_NUTTX_NET_IP_H */
