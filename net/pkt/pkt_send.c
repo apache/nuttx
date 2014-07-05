@@ -56,7 +56,6 @@
 #include <nuttx/net/net.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/ip.h>
-#include <nuttx/net/pkt.h>
 
 #include "netdev/netdev.h"
 #include "devif/devif.h"

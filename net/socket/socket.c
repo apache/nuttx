@@ -47,7 +47,6 @@
 
 #include <nuttx/net/tcp.h>
 #include <nuttx/net/udp.h>
-#include <nuttx/net/pkt.h>
 
 #include "socket/socket.h"
 #include "tcp/tcp.h"

@@ -45,7 +45,6 @@
 
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
-#include <nuttx/net/pkt.h>
 
 #include "devif/devif.h"
 #include "pkt/pkt.h"

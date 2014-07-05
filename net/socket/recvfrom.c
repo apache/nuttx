@@ -61,7 +61,6 @@
 #include <nuttx/net/ip.h>
 #include <nuttx/net/tcp.h>
 #include <nuttx/net/udp.h>
-#include <nuttx/net/pkt.h>
 
 #include "netdev/netdev.h"
 #include "devif/devif.h"
@@ -69,7 +68,6 @@
 #include "udp/udp.h"
 #include "pkt/pkt.h"
 #include "socket/socket.h"
-
 
 /****************************************************************************
  * Definitions

@@ -59,6 +59,23 @@
  * Public Type Definitions
  ****************************************************************************/
 
+/* Representation of a uIP packet socket connection */
+
+struct devif_callback_s; /* Forward reference */
+
+struct pkt_conn_s
+{
+  dq_entry_t node;     /* Supports a double linked list */
+  uint8_t    lmac[6];  /* The local Ethernet address in network byte order */
+  uint8_t    ifindex;
+  uint16_t   proto;
+  uint8_t    crefs;    /* Reference counts on this instance */
+
+  /* Defines the list of packet callbacks */
+
+  struct devif_callback_s *list;
+};
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -76,24 +93,127 @@ extern "C"
  ****************************************************************************/
 
  struct eth_hdr_s; /* Forward reference */
-struct pkt_conn_s; /* Forward refernce */
 
 /* Defined in pkt_conn.c ****************************************************/
+/****************************************************************************
+ * Name: pkt_initialize()
+ *
+ * Description:
+ *   Initialize the packet socket connection structures.  Called once and
+ *   only from the UIP layer.
+ *
+ ****************************************************************************/
 
 void pkt_initialize(void);
+
+/****************************************************************************
+ * Name: pkt_palloc()
+ *
+ * Description:
+ *   Allocate a new, uninitialized packet socket connection structure. This
+ *   is normally something done by the implementation of the socket() API
+ *
+ ****************************************************************************/
+
 FAR struct pkt_conn_s *pkt_alloc(void);
+
+/****************************************************************************
+ * Name: pkt_free()
+ *
+ * Description:
+ *   Free a packet socket connection structure that is no longer in use.
+ *   This should be done by the implementation of close().
+ *
+ ****************************************************************************/
+
 void pkt_free(FAR struct pkt_conn_s *conn);
+
+/****************************************************************************
+ * Name: pkt_active()
+ *
+ * Description:
+ *   Find a connection structure that is the appropriate
+ *   connection to be used with the provided Ethernet header
+ *
+ * Assumptions:
+ *   This function is called from UIP logic at interrupt level
+ *
+ ****************************************************************************/
+
 struct pkt_conn_s *pkt_active(FAR struct eth_hdr_s *buf);
+
+/****************************************************************************
+ * Name: pkt_nextconn()
+ *
+ * Description:
+ *   Traverse the list of allocated packet connections
+ *
+ * Assumptions:
+ *   This function is called from UIP logic at interrupt level (or with
+ *   interrupts disabled).
+ *
+ ****************************************************************************/
+
 struct pkt_conn_s *pkt_nextconn(FAR struct pkt_conn_s *conn);
 
 /* Defined in pkt_callback.c ************************************************/
+/****************************************************************************
+ * Function: pkt_callback
+ *
+ * Description:
+ *   Inform the application holding the packet socket of a change in state.
+ *
+ * Returned Value:
+ *   OK if packet has been processed, otherwise ERROR.
+ *
+ * Assumptions:
+ *   This function is called at the interrupt level with interrupts disabled.
+ *
+ ****************************************************************************/
 
 uint16_t pkt_callback(FAR struct net_driver_s *dev,
                       FAR struct pkt_conn_s *conn, uint16_t flags);
 
 /* Defined in pkt_input.c ***************************************************/
+/****************************************************************************
+ * Name: pkt_input
+ *
+ * Description:
+ *   Handle incoming packet input
+ *
+ * Parameters:
+ *   dev - The device driver structure containing the received packet
+ *
+ * Return:
+ *   OK  The packet has been processed  and can be deleted
+ *   ERROR Hold the packet and try again later. There is a listening socket
+ *         but no recv in place to catch the packet yet.
+ *
+ * Assumptions:
+ *   Called from the interrupt level or with interrupts disabled.
+ *
+ ****************************************************************************/
+
+/* pkt_input() is prototyped in include/nuttx/net/pkt.h */
 
 /* Defined in pkt_poll.c ****************************************************/
+/****************************************************************************
+ * Name: pkt_poll
+ *
+ * Description:
+ *   Poll a packet "connection" structure for availability of TX data
+ *
+ * Parameters:
+ *   dev - The device driver structure to use in the send operation
+ *   conn - The packet "connection" to poll for TX data
+ *
+ * Return:
+ *   None
+ *
+ * Assumptions:
+ *   Called from the interrupt level or with interrupts disabled.
+ *
+ ****************************************************************************/
 
 void pkt_poll(FAR struct net_driver_s *dev, FAR struct pkt_conn_s *conn);
 
@@ -157,7 +277,6 @@ void pkt_poll(FAR struct net_driver_s *dev, FAR struct pkt_conn_s *conn);
 struct socket;
 ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
                        size_t len);
-
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -46,31 +46,11 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <queue.h>
-
 #include <nuttx/net/netconfig.h>
 
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
-
-/* Representation of a uIP packet socket connection */
-
-struct devif_callback_s; /* Forward reference */
-
-struct pkt_conn_s
-{
-  dq_entry_t node;     /* Supports a double linked list */
-  uint8_t    lmac[6];  /* The local Ethernet address in network byte order */
-  uint8_t    ifindex;
-  uint16_t   proto;
-  uint8_t    crefs;    /* Reference counts on this instance */
-
-  /* Defines the list of packet callbacks */
-
-  struct devif_callback_s *list;
-};
 
 /****************************************************************************
  * Public Data
@@ -79,25 +59,12 @@ struct pkt_conn_s
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-/* uIP application functions
- *
- * Functions used by an application running of top of uIP. This includes
- * functions for opening and closing connections, sending and receiving
- * data, etc.
- *
- * Find a free connection structure and allocate it for use. This is
- * normally something done by the implementation of the socket() API
+/* This function provides the interface between Ethernet device drivers and
+ * packet socket logic.  All frames that are received should be provided to
+ * pkt_input() prior to other routing.
  */
 
-FAR struct pkt_conn_s *pkt_alloc(void);
-
-/* Free a connection structure that is no longer in use. This should
- * be done by the implementation of close()
- */
-
-void pkt_free(FAR struct pkt_conn_s *conn);
-void pkt_poll(FAR struct net_driver_s *dev, FAR struct pkt_conn_s *conn);
+struct net_driver_s; /* Forward reference */
 int pkt_input(FAR struct net_driver_s *dev);
 
 #endif /* __INCLUDE_NUTTX_NET_PKT_H */

@@ -54,7 +54,6 @@
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/arp.h>
-#include <nuttx/net/pkt.h>
 
 #include "devif/devif.h"
 #include "pkt/pkt.h"
@@ -139,7 +138,8 @@ void pkt_initialize(void)
  * Name: pkt_palloc()
  *
  * Description:
- *   Alloc a new, uninitialized packet socket connection structure.
+ *   Allocate a new, uninitialized packet socket connection structure. This
+ *   is normally something done by the implementation of the socket() API
  *
  ****************************************************************************/
 

@@ -51,12 +51,12 @@
 
 #include <nuttx/net/tcp.h>
 #include <nuttx/net/udp.h>
-#include <nuttx/net/pkt.h>
 
 #include "socket/socket.h"
 #include "netdev/netdev.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
+#include "pkt/pkt.h"
 
 /****************************************************************************
  * Private Functions
