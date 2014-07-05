@@ -96,6 +96,10 @@ ifeq ($(CONFIG_SAMA5_EMACB),y)
 CSRCS += sam_ethernet.c
 endif
 
+ifeq ($(CONFIG_INPUT_MXT),y)
+CSRCS += sam_maxtouch.c
+endif
+
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
 CSRCS += sam_nsh.c
 endif

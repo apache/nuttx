@@ -92,6 +92,7 @@ Contents
   - Watchdog Timer
   - TRNG and /dev/random
   - I2S Audio Support
+  - TM7000 LCD/Touchscreen
   - SAMA4D4-EK Configuration Options
   - Configurations
   - To-Do List
@@ -2771,6 +2772,36 @@ I2S Audio Support
     Library Routines
       CONFIG_SCHED_WORKQUEUE=y          : Driver needs work queue support
 
+TM7000 LCD/Touchscreen
+======================
+
+  The TM7000 LCD is available for the SAMA5D4-EK.  See documentation
+  available on the Precision Design Associates website:
+  http://www.pdaatl.com/doc/tm7000.pdf
+
+  The TM7000 features an touchscreen controol
+
+    - 7 inch LCD at 800x480 18-bit RGB resolution and white backlight
+    - Projected Capacitive Multi-Touch Controller based on the Atmel
+      MXT768E maXTouch™ IC
+    - 4 Capacitive “Navigation” Keys available via an Atmel AT42QT1070
+      QTouch™ Button Sensor IC
+    - 200 bytes of non-volatile serial EEPROM
+
+  Both the MXT768E and the AT42QT1070 are I2C devices with interrupting
+  PIO pins:
+
+  ------------------------ -----------------
+  SAMA5D4-EK               TM7000
+  ------------------------ -----------------
+  J9 pin 5 LCD_PE24        J4 pin 5 ~CHG_mxt
+  J9 pin 6 LCD_PE25        J4 pin 6 ~CHG_QT
+  J9 pin 7 LCD_TWCK0_PA31  J4 pin 7 SCL_0
+  J9 pin 8 LCD_TWD0_PA30   J4 pin 8 SDA_0
+  ------------------------ -----------------
+
+  The schematic indicates the the MXT468E address is 0x4c/0x4d.
+  
 SAMA4D4-EK Configuration Options
 =================================
 
