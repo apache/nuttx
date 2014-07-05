@@ -197,7 +197,7 @@ struct net_iphdr_s
  * This function constructs an IPv6 address.
  */
 
-#define uip_ip6addr(addr, addr0,addr1,addr2,addr3,addr4,addr5,addr6,addr7) \
+#define ip6_addr(addr, addr0,addr1,addr2,addr3,addr4,addr5,addr6,addr7) \
   do { \
     ((uint16_t*)(addr))[0] = HTONS((addr0)); \
     ((uint16_t*)(addr))[1] = HTONS((addr1)); \
