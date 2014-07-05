@@ -54,10 +54,11 @@
 #include <wdog.h>
 #include <errno.h>
 
+#include <arpa/inet.h>
+#include <net/ethernet.h>
+
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-
-#include <net/ethernet.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
 

@@ -54,6 +54,9 @@
 #include <stdlib.h>
 #include <malloc.h>
 
+#include <netinet/in.h>
+
+
 extern int netdriver_setmacaddr(unsigned char *macaddr);
 
 /****************************************************************************

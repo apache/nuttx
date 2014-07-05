@@ -48,6 +48,8 @@
 #include <wdog.h>
 #include <errno.h>
 
+#include <arpa/inet.h>
+
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
