@@ -7650,4 +7650,8 @@
 	  uip.h was removed.  There are probably a few of these that were
 	  missed! (2014-7-4).
 	* drivers/input/mxt.c/h and include/nuttx/input/mxt.h:  Add very basic
-	  support for the Atmel maXTouch touchscreen controller (2014-6-5).
+	  support for the Atmel maXTouch touchscreen controller (2014-7-5).
+	* net/*/*.h: Start moving the private definitions from header files
+	  at include/nuttx/net to the corresponding header file under net/.
+	  So far pkt.h, upd.h, and igmp.h have been sanitized.  Still a few
+	  to go (2014-7-5)
