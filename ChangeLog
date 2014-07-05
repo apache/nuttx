@@ -7643,3 +7643,9 @@
 	* SAMA5 OHCI: Pointers to allocated port values were not being nullified
 	  after being deallocated.  This caused some assertions to fire when
 	  debug was enabled (2014-7-4).
+	* include/nuttx/net/ip.h and ipopt.h:  ip.h renamed ipopt.h.  Moved
+	  parts of uip.h to net.h. Renamed the rest of uip.h to ip.h.  Removed
+	  all includes of uip.h; added includes of ip.h wherever needed.
+	  Tried to fix problems of the now missing sneak inclusions because
+	  uip.h was removed.  There are probably a few of these that were
+	  missed! (2014-7-4).
