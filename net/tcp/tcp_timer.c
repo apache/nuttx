@@ -100,8 +100,8 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 {
   uint8_t result;
 
-  dev->d_snddata = &dev->d_buf[UIP_IPTCPH_LEN + NET_LLH_LEN];
-  dev->d_appdata = &dev->d_buf[UIP_IPTCPH_LEN + NET_LLH_LEN];
+  dev->d_snddata = &dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN];
+  dev->d_appdata = &dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN];
 
   /* Increase the TCP sequence number */
 
@@ -183,7 +183,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
                   /* We also send a reset packet to the remote host. */
 
-                  tcp_send(dev, conn, TCP_RST | TCP_ACK, UIP_IPTCPH_LEN);
+                  tcp_send(dev, conn, TCP_RST | TCP_ACK, IPTCP_HDRLEN);
                   goto done;
                 }
 
@@ -234,7 +234,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                   case UIP_LAST_ACK:
                     /* In all these states we should retransmit a FINACK. */
 
-                    tcp_send(dev, conn, TCP_FIN | TCP_ACK, UIP_IPTCPH_LEN);
+                    tcp_send(dev, conn, TCP_FIN | TCP_ACK, IPTCP_HDRLEN);
                     goto done;
                 }
             }

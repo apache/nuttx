@@ -515,7 +515,7 @@ static int tiva_transmit(struct tiva_driver_s *priv)
 
       pktlen     = priv->ld_dev.d_len;
       nllvdbg("Sending packet, pktlen: %d\n", pktlen);
-      DEBUGASSERT(pktlen > NET_LLH_LEN);
+      DEBUGASSERT(pktlen > NET_LL_HDRLEN);
 
       dbuf       = priv->ld_dev.d_buf;
       regval     = (uint32_t)(pktlen - 14);
@@ -677,7 +677,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
        * and 4 byte FCS that are not copied into the uIP packet.
        */
 
-      if (pktlen > (CONFIG_NET_BUFSIZE + 6) || pktlen <= (NET_LLH_LEN + 6))
+      if (pktlen > (CONFIG_NET_BUFSIZE + 6) || pktlen <= (NET_LL_HDRLEN + 6))
         {
           int wordlen;
 

@@ -62,8 +62,8 @@
 
 /* Header sizes */
 
-#define UIP_UDPH_LEN   8                             /* Size of UDP header */
-#define UIP_IPUDPH_LEN (UIP_UDPH_LEN + IPHDR_LEN)    /* Size of IP + UDP header */
+#define UDP_HDRLEN   8                           /* Size of UDP header */
+#define IPUDP_HDRLEN (UDP_HDRLEN + IP_HDRLEN)    /* Size of IP + UDP header */
 
 /****************************************************************************
  * Public Type Definitions

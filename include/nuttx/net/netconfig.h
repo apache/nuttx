@@ -89,11 +89,11 @@
 #  ifdef CONFIG_NET_IPv6
 #    error "SLIP is not implemented for IPv6"
 #  endif
-#  define NET_LLH_LEN         0
+#  define NET_LL_HDRLEN         0
 #else
 #  define CONFIG_NET_ETHERNET 1
 #  define CONFIG_NET_ARP      1
-#  define NET_LLH_LEN         14
+#  define NET_LL_HDRLEN         14
 #endif
 
 /* Layer 3/4 Configuration Options ******************************************/
@@ -158,10 +158,10 @@
 #endif
 
 /* The UDP maximum packet size. This is should not be to set to more
- * than CONFIG_NET_BUFSIZE - NET_LLH_LEN - UIP_IPUDPH_LEN.
+ * than CONFIG_NET_BUFSIZE - NET_LL_HDRLEN - IPUDP_HDRLEN.
  */
 
-#define UDP_MSS (CONFIG_NET_BUFSIZE - NET_LLH_LEN - UIP_IPUDPH_LEN)
+#define UDP_MSS (CONFIG_NET_BUFSIZE - NET_LL_HDRLEN - IPUDP_HDRLEN)
 
 /* TCP configuration options */
 
@@ -223,10 +223,10 @@
 #define UIP_MAXSYNRTX 5
 
 /* The TCP maximum segment size. This is should not be set to more
- * than CONFIG_NET_BUFSIZE - NET_LLH_LEN - UIP_TCPIP_HLEN.
+ * than CONFIG_NET_BUFSIZE - NET_LL_HDRLEN - IPTCP_HDRLEN.
  */
 
-#define TCP_MSS (CONFIG_NET_BUFSIZE - NET_LLH_LEN - UIP_TCPIP_HLEN)
+#define TCP_MSS (CONFIG_NET_BUFSIZE - NET_LL_HDRLEN - IPTCP_HDRLEN)
 
 /* The size of the advertised receiver's window.
  *

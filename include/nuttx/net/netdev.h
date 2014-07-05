@@ -112,7 +112,7 @@ struct net_driver_s
    * driver should place incoming data into this buffer. When sending data,
    * the device driver should read the link level headers and the TCP/IP
    * headers from this buffer. The size of the link level headers is
-   * configured by the NET_LLH_LEN define.
+   * configured by the NET_LL_HDRLEN define.
    *
    * uIP will handle only a single buffer for both incoming and outgoing
    * packets.  However, the drive design may be concurrently send and

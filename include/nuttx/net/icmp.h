@@ -103,8 +103,8 @@
 
 /* Header sizes */
 
-#define UIP_ICMPH_LEN   4                           /* Size of ICMP header */
-#define UIP_IPICMPH_LEN (UIP_ICMPH_LEN + IPHDR_LEN) /* Size of IP + ICMP header */
+#define ICMP_HDRLEN    4                         /* Size of ICMP header */
+#define IPICMP_HDRLEN  (ICMP_HDRLEN + IP_HDRLEN) /* Size of IP + ICMP header */
 
 /****************************************************************************
  * Public Type Definitions

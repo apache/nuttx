@@ -60,7 +60,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define BUF ((struct tcp_iphdr_s *)&dev->d_buf[NET_LLH_LEN])
+#define BUF ((struct tcp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN])
 
 /****************************************************************************
  * Public Variables
@@ -104,8 +104,8 @@ static void tcp_sendcomplete(FAR struct net_driver_s *dev)
    * length.
    */
 
-  pbuf->len[0]      = ((dev->d_len - IPHDR_LEN) >> 8);
-  pbuf->len[1]      = ((dev->d_len - IPHDR_LEN) & 0xff);
+  pbuf->len[0]      = ((dev->d_len - IP_HDRLEN) >> 8);
+  pbuf->len[1]      = ((dev->d_len - IP_HDRLEN) & 0xff);
 
 #else /* CONFIG_NET_IPv6 */
 
@@ -241,7 +241,7 @@ void tcp_send(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
   pbuf->flags     = flags;
   dev->d_len     = len;
-  pbuf->tcpoffset = (UIP_TCPH_LEN / 4) << 4;
+  pbuf->tcpoffset = (TCP_HDRLEN / 4) << 4;
   tcp_sendcommon(dev, conn);
 }
 
@@ -273,7 +273,7 @@ void tcp_reset(FAR struct net_driver_s *dev)
 #endif
 
   pbuf->flags     = TCP_RST | TCP_ACK;
-  dev->d_len      = UIP_IPTCPH_LEN;
+  dev->d_len      = IPTCP_HDRLEN;
   pbuf->tcpoffset = 5 << 4;
 
   /* Flip the seqno and ackno fields in the TCP header. */
@@ -360,8 +360,8 @@ void tcp_ack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
   pbuf->optdata[1] = TCP_OPT_MSS_LEN;
   pbuf->optdata[2] = (TCP_MSS) / 256;
   pbuf->optdata[3] = (TCP_MSS) & 255;
-  dev->d_len       = UIP_IPTCPH_LEN + TCP_OPT_MSS_LEN;
-  pbuf->tcpoffset  = ((UIP_TCPH_LEN + TCP_OPT_MSS_LEN) / 4) << 4;
+  dev->d_len       = IPTCP_HDRLEN + TCP_OPT_MSS_LEN;
+  pbuf->tcpoffset  = ((TCP_HDRLEN + TCP_OPT_MSS_LEN) / 4) << 4;
 
   /* Complete the common portions of the TCP message */
 

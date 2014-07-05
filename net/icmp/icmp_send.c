@@ -57,7 +57,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ICMPBUF ((struct icmp_iphdr_s *)&dev->d_buf[NET_LLH_LEN])
+#define ICMPBUF ((struct icmp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN])
 
 /****************************************************************************
  * Public Variables
@@ -102,13 +102,13 @@ void icmp_send(FAR struct net_driver_s *dev, FAR net_ipaddr_t *destaddr)
        * the IP and ICMP headers (and, eventually, the Ethernet header)
        */
 
-      dev->d_len = dev->d_sndlen + UIP_IPICMPH_LEN;
+      dev->d_len = dev->d_sndlen + IPICMP_HDRLEN;
 
       /* The total size of the data (for ICMP checksum calculation) includes
        * the size of the ICMP header
        */
 
-      dev->d_sndlen += UIP_ICMPH_LEN;
+      dev->d_sndlen += ICMP_HDRLEN;
 
       /* Initialize the IP header.  Note that for IPv6, the IP length field
        * does not include the IPv6 IP header length.

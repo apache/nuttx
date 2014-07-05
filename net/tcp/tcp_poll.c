@@ -103,8 +103,8 @@ void tcp_poll(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
     {
       /* Set up for the callback */
 
-      dev->d_snddata = &dev->d_buf[UIP_IPTCPH_LEN + NET_LLH_LEN];
-      dev->d_appdata = &dev->d_buf[UIP_IPTCPH_LEN + NET_LLH_LEN];
+      dev->d_snddata = &dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN];
+      dev->d_appdata = &dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN];
 
       dev->d_len     = 0;
       dev->d_sndlen  = 0;

@@ -62,7 +62,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define UDPBUF ((struct udp_iphdr_s *)&dev->d_buf[NET_LLH_LEN])
+#define UDPBUF ((struct udp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN])
 
 /****************************************************************************
  * Public Variables
@@ -108,7 +108,7 @@ void udp_send(struct net_driver_s *dev, struct udp_conn_s *conn)
        * the IP and UDP headers (and, eventually, the Ethernet header)
        */
 
-      dev->d_len = dev->d_sndlen + UIP_IPUDPH_LEN;
+      dev->d_len = dev->d_sndlen + IPUDP_HDRLEN;
 
       /* Initialize the IP header.  Note that for IPv6, the IP length field
        * does not include the IPv6 IP header length.
@@ -155,7 +155,7 @@ void udp_send(struct net_driver_s *dev, struct udp_conn_s *conn)
 
       pudpbuf->srcport     = conn->lport;
       pudpbuf->destport    = conn->rport;
-      pudpbuf->udplen      = HTONS(dev->d_sndlen + UIP_UDPH_LEN);
+      pudpbuf->udplen      = HTONS(dev->d_sndlen + UDP_HDRLEN);
 
 #ifdef CONFIG_NET_UDP_CHECKSUMS
       /* Calculate UDP checksum. */

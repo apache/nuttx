@@ -103,8 +103,8 @@ void pkt_poll(FAR struct net_driver_s *dev, FAR struct pkt_conn_s *conn)
     {
       /* Setup for the application callback */
 
-      dev->d_appdata = &dev->d_buf[NET_LLH_LEN + UIP_IPUDPH_LEN];
-      dev->d_snddata = &dev->d_buf[NET_LLH_LEN + UIP_IPUDPH_LEN];
+      dev->d_appdata = &dev->d_buf[NET_LL_HDRLEN + IPUDP_HDRLEN];
+      dev->d_snddata = &dev->d_buf[NET_LL_HDRLEN + IPUDP_HDRLEN];
 
       dev->d_len     = 0;
       dev->d_sndlen  = 0;

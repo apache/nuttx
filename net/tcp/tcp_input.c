@@ -64,7 +64,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define BUF ((struct tcp_iphdr_s *)&dev->d_buf[NET_LLH_LEN])
+#define BUF ((struct tcp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN])
 
 /****************************************************************************
  * Public Variables
@@ -110,8 +110,8 @@ void tcp_input(struct net_driver_s *dev)
   int      len;
   int      i;
 
-  dev->d_snddata = &dev->d_buf[UIP_IPTCPH_LEN + NET_LLH_LEN];
-  dev->d_appdata = &dev->d_buf[UIP_IPTCPH_LEN + NET_LLH_LEN];
+  dev->d_snddata = &dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN];
+  dev->d_appdata = &dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN];
 
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.tcp.recv++;
@@ -219,7 +219,7 @@ void tcp_input(struct net_driver_s *dev)
             {
               for (i = 0; i < ((pbuf->tcpoffset >> 4) - 5) << 2 ;)
                 {
-                  opt = dev->d_buf[UIP_TCPIP_HLEN + NET_LLH_LEN + i];
+                  opt = dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN + i];
                   if (opt == TCP_OPT_END)
                     {
                       /* End of options. */
@@ -233,12 +233,12 @@ void tcp_input(struct net_driver_s *dev)
                       ++i;
                     }
                   else if (opt == TCP_OPT_MSS &&
-                          dev->d_buf[UIP_TCPIP_HLEN + NET_LLH_LEN + 1 + i] == TCP_OPT_MSS_LEN)
+                          dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN + 1 + i] == TCP_OPT_MSS_LEN)
                     {
                       /* An MSS option with the right option length. */
 
-                      tmp16 = ((uint16_t)dev->d_buf[UIP_TCPIP_HLEN + NET_LLH_LEN + 2 + i] << 8) |
-                               (uint16_t)dev->d_buf[UIP_IPTCPH_LEN + NET_LLH_LEN + 3 + i];
+                      tmp16 = ((uint16_t)dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN + 2 + i] << 8) |
+                               (uint16_t)dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN + 3 + i];
                       conn->mss = tmp16 > TCP_MSS ? TCP_MSS : tmp16;
 
                       /* And we are done processing options. */
@@ -251,7 +251,7 @@ void tcp_input(struct net_driver_s *dev)
                        * can skip past them.
                        */
 
-                      if (dev->d_buf[UIP_TCPIP_HLEN + NET_LLH_LEN + 1 + i] == 0)
+                      if (dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN + 1 + i] == 0)
                         {
                           /* If the length field is zero, the options are malformed
                            * and we don't process them further.
@@ -259,7 +259,7 @@ void tcp_input(struct net_driver_s *dev)
 
                           break;
                         }
-                      i += dev->d_buf[UIP_TCPIP_HLEN + NET_LLH_LEN + 1 + i];
+                      i += dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN + 1 + i];
                     }
                 }
             }
@@ -324,7 +324,7 @@ found:
    * len) and the length of the IP header (20 bytes).
    */
 
-  dev->d_len -= (len + IPHDR_LEN);
+  dev->d_len -= (len + IP_HDRLEN);
 
   /* First, check if the sequence number of the incoming packet is
    * what we're expecting next. If not, we send out an ACK with the
@@ -341,7 +341,7 @@ found:
       if ((dev->d_len > 0 || ((pbuf->flags & (TCP_SYN | TCP_FIN)) != 0)) &&
           memcmp(pbuf->seqno, conn->rcvseq, 4) != 0)
         {
-          tcp_send(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
+          tcp_send(dev, conn, TCP_ACK, IPTCP_HDRLEN);
           return;
         }
     }
@@ -509,7 +509,7 @@ found:
               {
                 for (i = 0; i < ((pbuf->tcpoffset >> 4) - 5) << 2 ;)
                   {
-                    opt = dev->d_buf[UIP_IPTCPH_LEN + NET_LLH_LEN + i];
+                    opt = dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN + i];
                     if (opt == TCP_OPT_END)
                       {
                         /* End of options. */
@@ -523,13 +523,13 @@ found:
                         ++i;
                       }
                     else if (opt == TCP_OPT_MSS &&
-                              dev->d_buf[UIP_TCPIP_HLEN + NET_LLH_LEN + 1 + i] == TCP_OPT_MSS_LEN)
+                              dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN + 1 + i] == TCP_OPT_MSS_LEN)
                       {
                         /* An MSS option with the right option length. */
 
                         tmp16 =
-                          (dev->d_buf[UIP_TCPIP_HLEN + NET_LLH_LEN + 2 + i] << 8) |
-                          dev->d_buf[UIP_TCPIP_HLEN + NET_LLH_LEN + 3 + i];
+                          (dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN + 2 + i] << 8) |
+                          dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN + 3 + i];
                         conn->mss = tmp16 > TCP_MSS ? TCP_MSS : tmp16;
 
                         /* And we are done processing options. */
@@ -542,7 +542,7 @@ found:
                          * easily can skip past them.
                          */
 
-                        if (dev->d_buf[UIP_TCPIP_HLEN + NET_LLH_LEN + 1 + i] == 0)
+                        if (dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN + 1 + i] == 0)
                           {
                             /* If the length field is zero, the options are
                              * malformed and we don't process them further.
@@ -550,7 +550,7 @@ found:
 
                             break;
                           }
-                        i += dev->d_buf[UIP_TCPIP_HLEN + NET_LLH_LEN + 1 + i];
+                        i += dev->d_buf[IPTCP_HDRLEN + NET_LL_HDRLEN + 1 + i];
                       }
                   }
               }
@@ -639,7 +639,7 @@ found:
             conn->nrtx          = 0;
             nllvdbg("TCP state: UIP_LAST_ACK\n");
 
-            tcp_send(dev, conn, TCP_FIN | TCP_ACK, UIP_IPTCPH_LEN);
+            tcp_send(dev, conn, TCP_FIN | TCP_ACK, IPTCP_HDRLEN);
             return;
           }
 
@@ -692,7 +692,7 @@ found:
          * When the application is called, the d_len field
          * contains the length of the incoming data. The application can
          * access the incoming data through the global pointer
-         * d_appdata, which usually points UIP_IPTCPH_LEN + NET_LLH_LEN
+         * d_appdata, which usually points IPTCP_HDRLEN + NET_LL_HDRLEN
          *  bytes into the d_buf array.
          *
          * If the application wishes to send any data, this data should be
@@ -778,7 +778,7 @@ found:
 
             net_incr32(conn->rcvseq, 1);
             (void)tcp_callback(dev, conn, UIP_CLOSE);
-            tcp_send(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
+            tcp_send(dev, conn, TCP_ACK, IPTCP_HDRLEN);
             return;
           }
         else if ((flags & UIP_ACKDATA) != 0)
@@ -791,7 +791,7 @@ found:
 
         if (dev->d_len > 0)
           {
-            tcp_send(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
+            tcp_send(dev, conn, TCP_ACK, IPTCP_HDRLEN);
             return;
           }
 
@@ -811,20 +811,20 @@ found:
 
             net_incr32(conn->rcvseq, 1);
             (void)tcp_callback(dev, conn, UIP_CLOSE);
-            tcp_send(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
+            tcp_send(dev, conn, TCP_ACK, IPTCP_HDRLEN);
             return;
           }
 
         if (dev->d_len > 0)
           {
-            tcp_send(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
+            tcp_send(dev, conn, TCP_ACK, IPTCP_HDRLEN);
             return;
           }
 
         goto drop;
 
       case UIP_TIME_WAIT:
-        tcp_send(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
+        tcp_send(dev, conn, TCP_ACK, IPTCP_HDRLEN);
         return;
 
       case UIP_CLOSING:

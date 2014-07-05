@@ -66,7 +66,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ICMPBUF ((struct icmp_iphdr_s *)&dev->d_buf[NET_LLH_LEN])
+#define ICMPBUF ((struct icmp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN])
 
 /****************************************************************************
  * Public Variables
@@ -151,7 +151,7 @@ void icmp_input(FAR struct net_driver_s *dev)
       /* The slow way... sum over the ICMP message */
 
       picmp->icmpchksum = 0;
-      picmp->icmpchksum = ~icmp_chksum(dev, (((uint16_t)picmp->len[0] << 8) | (uint16_t)picmp->len[1]) - IPHDR_LEN);
+      picmp->icmpchksum = ~icmp_chksum(dev, (((uint16_t)picmp->len[0] << 8) | (uint16_t)picmp->len[1]) - IP_HDRLEN);
       if (picmp->icmpchksum == 0)
         {
           picmp->icmpchksum = 0xffff;

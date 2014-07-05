@@ -107,13 +107,13 @@
 
 /* Macros. */
 
-#define BUF     ((FAR struct net_iphdr_s *)&dev->d_buf[NET_LLH_LEN])
+#define BUF     ((FAR struct net_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN])
 #define FBUF    ((FAR struct net_iphdr_s *)&g_reassembly_buffer[0])
 
 /* IP fragment re-assembly */
 
 #define IP_MF                   0x20
-#define UIP_REASS_BUFSIZE       (CONFIG_NET_BUFSIZE - NET_LLH_LEN)
+#define UIP_REASS_BUFSIZE       (CONFIG_NET_BUFSIZE - NET_LL_HDRLEN)
 #define UIP_REASS_FLAG_LASTFRAG 0x01
 
 /****************************************************************************
@@ -162,7 +162,7 @@ static uint8_t devif_reassembly(void)
 
   if (!g_reassembly_timer)
     {
-      memcpy(g_reassembly_buffer, &pbuf->vhl, IPHDR_LEN);
+      memcpy(g_reassembly_buffer, &pbuf->vhl, IP_HDRLEN);
       g_reassembly_timer   = UIP_REASS_MAXAGE;
       g_reassembly_flags = 0;
 
@@ -195,7 +195,7 @@ static uint8_t devif_reassembly(void)
 
       /* Copy the fragment into the reassembly buffer, at the right offset. */
 
-      memcpy(&g_reassembly_buffer[IPHDR_LEN + offset], (char *)pbuf + (int)((pbuf->vhl & 0x0f) * 4), len);
+      memcpy(&g_reassembly_buffer[IP_HDRLEN + offset], (char *)pbuf + (int)((pbuf->vhl & 0x0f) * 4), len);
 
     /* Update the bitmap. */
 
@@ -367,7 +367,7 @@ int devif_input(FAR struct net_driver_s *dev)
    * the size of the IPv6 header (40 bytes).
    */
 
-  iplen = (pbuf->len[0] << 8) + pbuf->len[1] + IPHDR_LEN;
+  iplen = (pbuf->len[0] << 8) + pbuf->len[1] + IP_HDRLEN;
 #else
   iplen = (pbuf->len[0] << 8) + pbuf->len[1];
 #endif /* CONFIG_NET_IPv6 */

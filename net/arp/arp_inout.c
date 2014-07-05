@@ -86,8 +86,8 @@
 #define RASIZE         4  /* Size of ROUTER ALERT */
 
 #define ETHBUF        ((struct eth_hdr_s *)&dev->d_buf[0])
-#define ARPBUF        ((struct arp_hdr_s *)&dev->d_buf[NET_LLH_LEN])
-#define IPBUF         ((struct arp_iphdr_s *)&dev->d_buf[NET_LLH_LEN])
+#define ARPBUF        ((struct arp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN])
+#define IPBUF         ((struct arp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN])
 
 /****************************************************************************
  * Private Types
@@ -239,7 +239,7 @@ void arp_arpin(struct net_driver_s *dev)
   struct arp_hdr_s *parp = ARPBUF;
   in_addr_t ipaddr;
 
-  if (dev->d_len < (sizeof(struct arp_hdr_s) + NET_LLH_LEN))
+  if (dev->d_len < (sizeof(struct arp_hdr_s) + NET_LL_HDRLEN))
     {
       nlldbg("Too small\n");
       dev->d_len = 0;
@@ -279,7 +279,7 @@ void arp_arpin(struct net_driver_s *dev)
             arp_dump(parp);
 
             peth->type          = HTONS(ETHTYPE_ARP);
-            dev->d_len          = sizeof(struct arp_hdr_s) + NET_LLH_LEN;
+            dev->d_len          = sizeof(struct arp_hdr_s) + NET_LL_HDRLEN;
           }
         break;
 
@@ -440,7 +440,7 @@ void arp_out(struct net_driver_s *dev)
           arp_dump(parp);
 
           peth->type        = HTONS(ETHTYPE_ARP);
-          dev->d_len        = sizeof(struct arp_hdr_s) + NET_LLH_LEN;
+          dev->d_len        = sizeof(struct arp_hdr_s) + NET_LL_HDRLEN;
           return;
         }
 
@@ -453,7 +453,7 @@ void arp_out(struct net_driver_s *dev)
 
   memcpy(peth->src, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
   peth->type  = HTONS(ETHTYPE_IP);
-  dev->d_len += NET_LLH_LEN;
+  dev->d_len += NET_LL_HDRLEN;
 }
 
 #endif /* CONFIG_NET_ARP */

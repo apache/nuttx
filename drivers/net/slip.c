@@ -73,8 +73,8 @@
 
 /* Configuration ************************************************************/
 
-#if NET_LLH_LEN > 0
-#  error "NET_LLH_LEN must be set to zero"
+#if NET_LL_HDRLEN > 0
+#  error "NET_LL_HDRLEN must be set to zero"
 #endif
 
 #ifndef CONFIG_NET_NOINTS
@@ -708,7 +708,7 @@ static int slip_rxtask(int argc, char *argv[])
        * enough to hold an IP header.
        */
 
-      if (priv->rxlen >= IPHDR_LEN)
+      if (priv->rxlen >= IP_HDRLEN)
         {
           /* Handle the IP input.  Get exclusive access to uIP. */
 

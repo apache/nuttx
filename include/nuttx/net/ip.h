@@ -73,9 +73,9 @@
 /* Header sizes */
 
 #ifdef CONFIG_NET_IPv6
-# define IPHDR_LEN     40    /* Size of IP header */
+# define IP_HDRLEN     40    /* Size of IP header */
 #else
-# define IPHDR_LEN     20    /* Size of IP header */
+# define IP_HDRLEN     20    /* Size of IP header */
 #endif
 
 /****************************************************************************

@@ -61,7 +61,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define IGMPBUF ((struct igmp_iphdr_s *)&dev->d_buf[NET_LLH_LEN])
+#define IGMPBUF ((struct igmp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN])
 
 /****************************************************************************
  * Private Functions
@@ -124,7 +124,7 @@ void igmp_input(struct net_driver_s *dev)
 
   /* Verify the message length */
 
-  if (dev->d_len < NET_LLH_LEN+UIP_IPIGMPH_LEN)
+  if (dev->d_len < NET_LL_HDRLEN+IPIGMP_HDRLEN)
     {
       IGMP_STATINCR(g_netstats.igmp.length_errors);
       nlldbg("Length error\n");
@@ -133,7 +133,7 @@ void igmp_input(struct net_driver_s *dev)
 
   /* Calculate and check the IGMP checksum */
 
-  if (net_chksum((uint16_t*)&IGMPBUF->type, UIP_IGMPH_LEN) != 0)
+  if (net_chksum((uint16_t*)&IGMPBUF->type, IGMP_HDRLEN) != 0)
     {
       IGMP_STATINCR(g_netstats.igmp.chksum_errors);
       nlldbg("Checksum error\n");

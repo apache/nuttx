@@ -78,12 +78,12 @@
 
 /* Header sizes:
  *
- * UIP_IGMPH_LEN   - Size of IGMP header in bytes
- * UIP_IPIGMPH_LEN - Size of IP + Size of IGMP header + Size of router alert
+ * IGMP_HDRLEN   - Size of IGMP header in bytes
+ * IPIGMP_HDRLEN - Size of IP + Size of IGMP header + Size of router alert
  */
 
-#define UIP_IGMPH_LEN            8
-#define UIP_IPIGMPH_LEN          (UIP_IGMPH_LEN + IPHDR_LEN + 4)
+#define IGMP_HDRLEN              8
+#define IPIGMP_HDRLEN            (IGMP_HDRLEN + IP_HDRLEN + 4)
 
 /* Group flags */
 

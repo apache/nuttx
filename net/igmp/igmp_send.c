@@ -75,7 +75,7 @@
 /* Buffer layout */
 
 #define RASIZE      (4)
-#define IGMPBUF     ((struct igmp_iphdr_s *)&dev->d_buf[NET_LLH_LEN])
+#define IGMPBUF     ((struct igmp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN])
 
 /****************************************************************************
  * Public Variables
@@ -129,11 +129,11 @@ void igmp_send(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group,
    * bytes for the ROUTER ALERT (and, eventually, the Ethernet header)
    */
 
-  dev->d_len           = UIP_IPIGMPH_LEN;
+  dev->d_len           = IPIGMP_HDRLEN;
 
   /* The total size of the data is the size of the IGMP header */
 
-  dev->d_sndlen        = UIP_IGMPH_LEN;
+  dev->d_sndlen        = IGMP_HDRLEN;
 
   /* Add the router alert option */
 
@@ -160,7 +160,7 @@ void igmp_send(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group,
   /* Calculate IP checksum. */
 
   IGMPBUF->ipchksum    = 0;
-  IGMPBUF->ipchksum    = ~igmp_chksum((FAR uint8_t *)IGMPBUF, IPHDR_LEN + RASIZE);
+  IGMPBUF->ipchksum    = ~igmp_chksum((FAR uint8_t *)IGMPBUF, IP_HDRLEN + RASIZE);
 
   /* Set up the IGMP message */
 
@@ -171,14 +171,14 @@ void igmp_send(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group,
   /* Calculate the IGMP checksum. */
 
   IGMPBUF->chksum      = 0;
-  IGMPBUF->chksum      = ~igmp_chksum(&IGMPBUF->type, UIP_IPIGMPH_LEN);
+  IGMPBUF->chksum      = ~igmp_chksum(&IGMPBUF->type, IPIGMP_HDRLEN);
 
   IGMP_STATINCR(g_netstats.igmp.poll_send);
   IGMP_STATINCR(g_netstats.ip.sent);
 
   nllvdbg("Outgoing IGMP packet length: %d (%d)\n",
           dev->d_len, (IGMPBUF->len[0] << 8) | IGMPBUF->len[1]);
-  igmp_dumppkt(RA, UIP_IPIGMPH_LEN + RASIZE);
+  igmp_dumppkt(RA, IPIGMP_HDRLEN + RASIZE);
 }
 
 #endif /* CONFIG_NET_IGMP */

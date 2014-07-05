@@ -104,9 +104,8 @@
 
 /* TCP header sizes */
 
-#define UIP_TCPH_LEN    20                         /* Size of TCP header */
-#define UIP_IPTCPH_LEN  (UIP_TCPH_LEN + IPHDR_LEN) /* Size of IP + TCP header */
-#define UIP_TCPIP_HLEN  UIP_IPTCPH_LEN
+#define TCP_HDRLEN    20                       /* Size of TCP header */
+#define IPTCP_HDRLEN  (TCP_HDRLEN + IP_HDRLEN) /* Size of IP + TCP header */
 
 /* Initial minimum MSS according to RFC 879
  *
@@ -121,9 +120,9 @@
  */
 
 #if TCP_MSS > 576
-#  define UIP_TCP_INITIAL_MSS 576
+#  define TCP_INITIAL_MSS 576
 #else
-#  define UIP_TCP_INITIAL_MSS TCP_MSS
+#  define TCP_INITIAL_MSS TCP_MSS
 #endif
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS

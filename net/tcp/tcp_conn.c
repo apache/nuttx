@@ -522,7 +522,7 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct tcp_iphdr_s *buf)
       conn->nrtx          = 0;
       conn->lport         = buf->destport;
       conn->rport         = buf->srcport;
-      conn->mss           = UIP_TCP_INITIAL_MSS;
+      conn->mss           = TCP_INITIAL_MSS;
       net_ipaddr_copy(conn->ripaddr, net_ip4addr_conv32(buf->srcipaddr));
       conn->tcpstateflags = UIP_SYN_RCVD;
 
@@ -675,7 +675,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn,
   conn->tcpstateflags = UIP_SYN_SENT;
   tcp_initsequence(conn->sndseq);
 
-  conn->mss        = UIP_TCP_INITIAL_MSS;
+  conn->mss        = TCP_INITIAL_MSS;
   conn->unacked    = 1;    /* TCP length of the SYN is one. */
   conn->nrtx       = 0;
   conn->timer      = 1;    /* Send the SYN next time around. */
