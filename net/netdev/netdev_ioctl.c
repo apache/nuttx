@@ -65,6 +65,7 @@
 
 #include "socket/socket.h"
 #include "netdev/netdev.h"
+#include "igmp/igmp.h"
 #include "route/route.h"
 
 /****************************************************************************

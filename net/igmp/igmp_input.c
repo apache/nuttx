@@ -54,6 +54,7 @@
 
 #include "devif/devif.h"
 #include "igmp/igmp.h"
+#include "utils/utils.h"
 
 #ifdef CONFIG_NET_IGMP
 
@@ -207,7 +208,7 @@ void igmp_input(struct net_driver_s *dev)
 
                     if (!net_ipaddr_cmp(member->grpaddr, g_allsystems))
                       {
-                        ticks = igmp_decisec2tick((int)IGMPBUF->maxresp);
+                        ticks = net_dsec2tick((int)IGMPBUF->maxresp);
                         if (IS_IDLEMEMBER(member->flags) ||
                             igmp_cmptimer(member, ticks))
                           {
@@ -228,7 +229,7 @@ void igmp_input(struct net_driver_s *dev)
                 IGMP_STATINCR(g_netstats.igmp.ucast_query);
                 grpaddr = net_ip4addr_conv32(IGMPBUF->grpaddr);
                 group   = igmp_grpallocfind(dev, &grpaddr);
-                ticks   = igmp_decisec2tick((int)IGMPBUF->maxresp);
+                ticks   = net_dsec2tick((int)IGMPBUF->maxresp);
                 if (IS_IDLEMEMBER(group->flags) || igmp_cmptimer(group, ticks))
                   {
                     igmp_startticks(group, ticks);
@@ -246,7 +247,7 @@ void igmp_input(struct net_driver_s *dev)
 
             nlldbg("Query to a specific group with the group address as destination\n");
 
-            ticks = igmp_decisec2tick((int)IGMPBUF->maxresp);
+            ticks = net_dsec2tick((int)IGMPBUF->maxresp);
             if (IS_IDLEMEMBER(group->flags) || igmp_cmptimer(group, ticks))
               {
                 igmp_startticks(group, ticks);

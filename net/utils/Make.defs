@@ -33,7 +33,8 @@
 #
 ############################################################################
 
-NET_CSRCS += net_dsec2timeval.c net_timeval2dsec.c net_chksum.c
+NET_CSRCS += net_dsec2tick.c net_dsec2timeval.c net_timeval2dsec.c
+NET_CSRCS += net_chksum.c
 
 # Non-interrupt level support required?
 

@@ -55,6 +55,7 @@
 
 #include "devif/devif.h"
 #include "igmp/igmp.h"
+#include "utils/utils.h"
 
 #ifdef CONFIG_NET_IGMP
 
@@ -153,28 +154,6 @@ static void igmp_timeout(int argc, uint32_t arg, ...)
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  igmp_decisec2tick
- *
- * Description:
- *   Convert the deci-second value to units of system clock ticks.
- *
- * Assumptions:
- *   This function may be called from most any context.
- *
- ****************************************************************************/
-
-int igmp_decisec2tick(int decisecs)
-{
-  /* Convert the deci-second comparison value to clock ticks.  The CLK_TCK
-   * value is the number of clock ticks per second; decisecs argument is the
-   * maximum delay in 100's of milliseconds.  CLK_TCK/10 is then the number
-   * of clock ticks in 100 milliseconds.
-   */
-
-  return CLK_TCK * decisecs / 10;
-}
-
-/****************************************************************************
  * Name:  igmp_startticks and igmp_starttimer
  *
  * Description:
@@ -185,7 +164,7 @@ int igmp_decisec2tick(int decisecs)
  *
  ****************************************************************************/
 
-void igmp_startticks(FAR struct igmp_group_s *group, int ticks)
+void igmp_startticks(FAR struct igmp_group_s *group, unsigned int ticks)
 {
   int ret;
 
@@ -206,7 +185,7 @@ void igmp_starttimer(FAR struct igmp_group_s *group, uint8_t decisecs)
    */
 
   gtmrdbg("decisecs: %d\n", decisecs);
-  igmp_startticks(group, igmp_decisec2tick(decisecs));
+  igmp_startticks(group, net_dsec2tick(decisecs));
 }
 
 /****************************************************************************

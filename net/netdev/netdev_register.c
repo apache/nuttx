@@ -53,6 +53,7 @@
 #include <nuttx/net/netdev.h>
 
 #include "netdev/netdev.h"
+#include "igmp/igmp.h"
 
 /****************************************************************************
  * Pre-processor Definitions
