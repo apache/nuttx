@@ -60,6 +60,7 @@
 #include "netdev/netdev.h"
 #include "devif/devif.h"
 #include "tcp/tcp.h"
+#include "udp/udp.h"
 #include "pkt/pkt.h"
 #include "socket/socket.h"
 

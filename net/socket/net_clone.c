@@ -49,6 +49,7 @@
 #include <nuttx/net/tcp.h>
 #include <nuttx/net/udp.h>
 
+#include "udp/udp.h"
 #include "socket/socket.h"
 
 /****************************************************************************

@@ -68,26 +68,6 @@
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
-
-/* Representation of a uIP UDP connection */
-
-struct net_driver_s;      /* Forward reference */
-struct devif_callback_s;  /* Forward reference */
-
-struct udp_conn_s
-{
-  dq_entry_t node;        /* Supports a doubly linked list */
-  net_ipaddr_t ripaddr;   /* The IP address of the remote peer */
-  uint16_t lport;         /* The local port number in network byte order */
-  uint16_t rport;         /* The remote port number in network byte order */
-  uint8_t  ttl;           /* Default time-to-live */
-  uint8_t  crefs;         /* Reference counts on this instance */
-
-  /* Defines the list of UDP callbacks */
-
-  struct devif_callback_s *list;
-};
-
 /* The UDP and IP headers */
 
 struct udp_iphdr_s
@@ -151,58 +131,5 @@ struct udp_stats_s
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-/* uIP application functions
- *
- * Functions used by an application running of top of uIP. This includes
- * functions for opening and closing connections, sending and receiving
- * data, etc.
- *
- * Find a free connection structure and allocate it for use. This is
- * normally something done by the implementation of the socket() API
- */
-
-FAR struct udp_conn_s *udp_alloc(void);
-
-/* Free a connection structure that is no longer in use. This should
- * be done by the implementation of close()
- */
-
-void udp_free(FAR struct udp_conn_s *conn);
-
-/* Bind a UDP connection to a local address */
-
-#ifdef CONFIG_NET_IPv6
-int udp_bind(FAR struct udp_conn_s *conn,
-             FAR const struct sockaddr_in6 *addr);
-#else
-int udp_bind(FAR struct udp_conn_s *conn,
-             FAR const struct sockaddr_in *addr);
-#endif
-
-/* This function sets up a new UDP connection. The function will
- * automatically allocate an unused local port for the new
- * connection. However, another port can be chosen by using the
- * udp_bind() call, after the udp_connect() function has been
- * called.
- *
- * This function is called as part of the implementation of sendto
- * and recvfrom.
- *
- * addr The address of the remote host.
- */
-
-#ifdef CONFIG_NET_IPv6
-int udp_connect(FAR struct udp_conn_s *conn,
-                FAR const struct sockaddr_in6 *addr);
-#else
-int udp_connect(FAR struct udp_conn_s *conn,
-                FAR const struct sockaddr_in *addr);
-#endif
-
-/* Enable/disable UDP callbacks on a connection */
-
-void udp_enable(FAR struct udp_conn_s *conn);
-void udp_disable(FAR struct udp_conn_s *conn);
 
 #endif /* __INCLUDE_NUTTX_NET_UDP_H */

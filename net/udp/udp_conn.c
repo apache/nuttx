@@ -230,7 +230,8 @@ void udp_initialize(void)
  * Name: udp_alloc()
  *
  * Description:
- *   Allocate a new, uninitialized UDP connection structure.
+ *   Allocate a new, uninitialized UDP connection structure.  This is
+ *   normally something done by the implementation of the socket() API
  *
  ****************************************************************************/
 
@@ -264,8 +265,7 @@ FAR struct udp_conn_s *udp_alloc(void)
  *
  * Description:
  *   Free a UDP connection structure that is no longer in use. This should be
- *   done by the implementation of close().  udp_disable must have been
- *   previously called.
+ *   done by the implementation of close().
  *
  ****************************************************************************/
 
@@ -423,10 +423,12 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr_in *addr)
  *   udp_bind() call, after the udp_connect() function has been
  *   called.
  *
- * udp_enable() must be called before the connection is made active (i.e.,
- * is eligible for callbacks.
+ *   This function is called as part of the implementation of sendto
+ *   and recvfrom.
  *
- * addr The address of the remote host.
+ * Input Parameters:
+ *   conn - A reference to UDP connection structure
+ *   addr - The address of the remote host.
  *
  * Assumptions:
  *   This function is called user code.  Interrupts may be enabled.

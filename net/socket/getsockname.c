@@ -50,8 +50,9 @@
 #include <nuttx/net/tcp.h>
 #include <nuttx/net/udp.h>
 
-#include "socket/socket.h"
 #include "netdev/netdev.h"
+#include "udp/udp.h"
+#include "socket/socket.h"
 
 #ifdef CONFIG_NET
 
