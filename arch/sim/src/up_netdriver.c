@@ -155,7 +155,7 @@ void netdriver_loop(void)
        * MAC address
        */
 
-      if (g_sim_dev.d_len > NET_LLH_LEN && up_comparemac(BUF->ether_dhost, &g_sim_dev.d_mac) == 0)
+      if (g_sim_dev.d_len > NET_LL_HDRLEN && up_comparemac(BUF->ether_dhost, &g_sim_dev.d_mac) == 0)
         {
           /* We only accept IP packets of the configured type and ARP packets */
 
