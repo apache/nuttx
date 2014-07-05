@@ -48,8 +48,9 @@
 #include <debug.h>
 
 #include <nuttx/net/netconfig.h>
-#include <nuttx/net/igmp.h>
 #include <nuttx/net/netstats.h>
+#include <nuttx/net/ip.h>
+#include <nuttx/net/igmp.h>
 
 #include "devif/devif.h"
 #include "igmp/igmp.h"

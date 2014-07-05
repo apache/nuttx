@@ -54,8 +54,9 @@
 
 #include <netinet/in.h>
 
-#include <nuttx/net/netdev.h>
 #include <nuttx/net/netconfig.h>
+#include <nuttx/net/netdev.h>
+#include <nuttx/net/ip.h>
 
 #ifdef CONFIG_NET_IGMP
 
@@ -82,7 +83,7 @@
  */
 
 #define UIP_IGMPH_LEN            8
-#define UIP_IPIGMPH_LEN          (UIP_IGMPH_LEN + UIP_IPH_LEN + 4)
+#define UIP_IPIGMPH_LEN          (UIP_IGMPH_LEN + IPHDR_LEN + 4)
 
 /* Group flags */
 

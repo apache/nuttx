@@ -47,9 +47,12 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <netinet/in.h>
+
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netstats.h>
+#include <nuttx/net/ip.h>
 #include <nuttx/net/igmp.h>
 
 #include "devif/devif.h"

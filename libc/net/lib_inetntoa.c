@@ -38,8 +38,11 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <stdio.h>
+
 #include <arpa/inet.h>
+#include <netinet/in.h>
 
 #ifndef CONFIG_NET_IPv6
 

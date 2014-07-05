@@ -43,6 +43,7 @@
 #include <nuttx/config.h>
 #ifdef CONFIG_NET
 
+#include <sys/socket.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdarg.h>

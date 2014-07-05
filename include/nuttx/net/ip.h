@@ -55,6 +55,7 @@
 #include <queue.h>
 
 #include <arpa/inet.h>
+#include <netinet/in.h>
 
 #include <nuttx/net/netconfig.h>
 

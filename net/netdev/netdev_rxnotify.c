@@ -46,6 +46,7 @@
 #include <debug.h>
 
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/ip.h>
 
 #include "netdev/netdev.h"
 

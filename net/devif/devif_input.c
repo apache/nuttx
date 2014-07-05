@@ -88,6 +88,7 @@
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/netstats.h>
+#include <nuttx/net/ip.h>
 
 #ifdef CONFIG_NET_IPv6
 #  include "net_neighbor.h"

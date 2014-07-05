@@ -56,7 +56,7 @@
 #include "devif/devif.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
-#include "socket/socket.h
+#include "socket/socket.h"
 
 /****************************************************************************
  * Private Types

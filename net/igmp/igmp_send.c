@@ -45,6 +45,7 @@
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/netstats.h>
+#include <nuttx/net/ip.h>
 #include <nuttx/net/ipopt.h>
 #include <nuttx/net/igmp.h>
 
@@ -151,7 +152,7 @@ void igmp_send(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group,
   IGMPBUF->ipoffset[0] = UIP_TCPFLAG_DONTFRAG >> 8;
   IGMPBUF->ipoffset[1] = UIP_TCPFLAG_DONTFRAG & 0xff;
   IGMPBUF->ttl         = IGMP_TTL;
-  IGMPBUF->proto       = UIP_PROTO_IGMP;
+  IGMPBUF->proto       = IP_PROTO_IGMP;
 
   net_ipaddr_hdrcopy(IGMPBUF->srcipaddr, &dev->d_ipaddr);
   net_ipaddr_hdrcopy(IGMPBUF->destipaddr, destipaddr);

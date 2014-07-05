@@ -48,10 +48,12 @@
 #include <debug.h>
 
 #include <net/if.h>
+
 #include <nuttx/clock.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/ip.h>
 #include <nuttx/net/icmp.h>
 
 #include "netdev/netdev.h"

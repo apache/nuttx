@@ -48,7 +48,9 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+
 #include <nuttx/net/netconfig.h>
+#include <nuttx/net/ip.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -101,8 +103,8 @@
 
 /* Header sizes */
 
-#define UIP_ICMPH_LEN   4                             /* Size of ICMP header */
-#define UIP_IPICMPH_LEN (UIP_ICMPH_LEN + UIP_IPH_LEN) /* Size of IP + ICMP header */
+#define UIP_ICMPH_LEN   4                           /* Size of ICMP header */
+#define UIP_IPICMPH_LEN (UIP_ICMPH_LEN + IPHDR_LEN) /* Size of IP + ICMP header */
 
 /****************************************************************************
  * Public Type Definitions

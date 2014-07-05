@@ -50,7 +50,9 @@
 
 #include <stdint.h>
 
+#include <netinet/in.h>
 #include <net/ethernet.h>
+
 #include <nuttx/net/netconfig.h>
 
 /****************************************************************************

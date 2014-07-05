@@ -49,9 +49,12 @@
 #include <debug.h>
 
 #include <net/if.h>
+#include <arpa/inet.h>
+
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/netstats.h>
+#include <nuttx/net/ip.h>
 
 #include "devif/devif.h"
 #include "icmp/icmp.h"

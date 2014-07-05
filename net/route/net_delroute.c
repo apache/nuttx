@@ -43,6 +43,8 @@
 #include <string.h>
 #include <errno.h>
 
+#include <nuttx/net/ip.h>
+
 #include "route/route.h"
 
 #if defined(CONFIG_NET) && defined(CONFIG_NET_ROUTE)

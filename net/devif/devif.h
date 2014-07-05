@@ -52,6 +52,7 @@
 #include <arch/irq.h>
 
 #include <nuttx/net/arp.h>
+#include <nuttx/net/ip.h>
 
 /****************************************************************************
  * Pre-processor Definitions

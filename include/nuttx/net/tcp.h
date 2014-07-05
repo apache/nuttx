@@ -58,6 +58,7 @@
 
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/iob.h>
+#include <nuttx/net/ip.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -103,9 +104,9 @@
 
 /* TCP header sizes */
 
-#define UIP_TCPH_LEN    20    /* Size of TCP header */
-#define UIP_IPTCPH_LEN (UIP_TCPH_LEN + UIP_IPH_LEN)    /* Size of IP + TCP header */
-#define UIP_TCPIP_HLEN UIP_IPTCPH_LEN
+#define UIP_TCPH_LEN    20                         /* Size of TCP header */
+#define UIP_IPTCPH_LEN  (UIP_TCPH_LEN + IPHDR_LEN) /* Size of IP + TCP header */
+#define UIP_TCPIP_HLEN  UIP_IPTCPH_LEN
 
 /* Initial minimum MSS according to RFC 879
  *

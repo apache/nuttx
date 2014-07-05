@@ -47,6 +47,7 @@
 #include <nuttx/net/icmp.h>
 
 #include "devif/devif.h"
+#include "icmp/icmp.h"
 
 /****************************************************************************
  * Pre-processor Definitions

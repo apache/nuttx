@@ -61,11 +61,13 @@
 #include <debug.h>
 
 #include <netinet/in.h>
+#include <arpa/inet.h>
 
 #include <net/ethernet.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/arp.h>
+#include <nuttx/net/ip.h>
 
 #include "netdev/netdev.h"
 #include "route/route.h"

@@ -91,42 +91,43 @@
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
 /* Functions to convert between nost and network byte ordering */
 
-EXTERN uint32_t    ntohl(uint32_t nl);
-EXTERN uint16_t    ntohs(uint16_t ns);
-EXTERN uint32_t    htonl(uint32_t hl);
-EXTERN uint16_t    htons(uint16_t hs);
+uint32_t    ntohl(uint32_t nl);
+uint16_t    ntohs(uint16_t ns);
+uint32_t    htonl(uint32_t hl);
+uint16_t    htons(uint16_t hs);
 
 /* Functions to manipulate address representations */
 
-EXTERN int         inet_aton(FAR const char *cp, FAR struct in_addr *inp);
-EXTERN in_addr_t   inet_addr(FAR const char *cp);
-EXTERN in_addr_t   inet_network(FAR const char *cp);
+int         inet_aton(FAR const char *cp, FAR struct in_addr *inp);
+in_addr_t   inet_addr(FAR const char *cp);
+in_addr_t   inet_network(FAR const char *cp);
 
 #ifdef CONFIG_CAN_PASS_STRUCTS
-EXTERN FAR char   *inet_ntoa(struct in_addr in);
-EXTERN in_addr_t   inet_lnaof(struct in_addr in);
-EXTERN in_addr_t   inet_netof(struct in_addr in);
+FAR char   *inet_ntoa(struct in_addr in);
+in_addr_t   inet_lnaof(struct in_addr in);
+in_addr_t   inet_netof(struct in_addr in);
 #else
-EXTERN FAR char   *_inet_ntoa(in_addr_t in);
+FAR char   *_inet_ntoa(in_addr_t in);
 # define inet_ntoa(in) _inet_ntoa(in.s_addr);
 
-EXTERN in_addr_t   _inet_lnaof(in_addr_t in);
+in_addr_t   _inet_lnaof(in_addr_t in);
 # define inet_lnaof(in) _inet_lnaof(in.s_addr);
 
-EXTERN in_addr_t   _inet_netof(in_addr_t in);
+in_addr_t   _inet_netof(in_addr_t in);
 # define inet_netof(in) _inet_netof(in.s_addr);
 #endif
-EXTERN struct in_addr inet_makeaddr(in_addr_t net, in_addr_t host);
+struct in_addr inet_makeaddr(in_addr_t net, in_addr_t host);
 
-EXTERN int         inet_pton(int af, FAR const char *src, FAR void *dst);
-EXTERN const char *inet_ntop(int af, FAR const void *src, FAR char *dst, socklen_t size);
+int         inet_pton(int af, FAR const char *src, FAR void *dst);
+const char *inet_ntop(int af, FAR const void *src, FAR char *dst, socklen_t size);
 
 #undef EXTERN
 #ifdef __cplusplus

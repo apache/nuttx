@@ -51,6 +51,7 @@
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/netstats.h>
+#include <nuttx/net/ip.h>
 
 #include "devif/devif.h"
 #include "utils/utils.h"
@@ -180,7 +181,7 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
   memcpy(pbuf->ackno, conn->rcvseq, 4);
   memcpy(pbuf->seqno, conn->sndseq, 4);
 
-  pbuf->proto    = UIP_PROTO_TCP;
+  pbuf->proto    = IP_PROTO_TCP;
   pbuf->srcport  = conn->lport;
   pbuf->destport = conn->rport;
 

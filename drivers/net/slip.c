@@ -56,8 +56,8 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/net/net.h>
-
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/ip.h>
 
 #if defined(CONFIG_NET) && defined(CONFIG_NET_SLIP)
 
@@ -708,7 +708,7 @@ static int slip_rxtask(int argc, char *argv[])
        * enough to hold an IP header.
        */
 
-      if (priv->rxlen >= UIP_IPH_LEN)
+      if (priv->rxlen >= IPHDR_LEN)
         {
           /* Handle the IP input.  Get exclusive access to uIP. */
 

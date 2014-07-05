@@ -46,10 +46,13 @@
 
 #include <debug.h>
 
+#include <arpa/inet.h>
+
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
-#include <nuttx/net/udp.h>
 #include <nuttx/net/netstats.h>
+#include <nuttx/net/ip.h>
+#include <nuttx/net/udp.h>
 
 #include "devif/devif.h"
 #include "utils/utils.h"
@@ -118,7 +121,7 @@ void udp_send(struct net_driver_s *dev, struct udp_conn_s *conn)
       pudpbuf->flow        = 0x00;
       pudpbuf->len[0]      = (dev->d_sndlen >> 8);
       pudpbuf->len[1]      = (dev->d_sndlen & 0xff);
-      pudpbuf->nexthdr     = UIP_PROTO_UDP;
+      pudpbuf->nexthdr     = IP_PROTO_UDP;
       pudpbuf->hoplimit    = conn->ttl;
 
       net_ipaddr_copy(pudpbuf->srcipaddr, &dev->d_ipaddr);
@@ -136,7 +139,7 @@ void udp_send(struct net_driver_s *dev, struct udp_conn_s *conn)
       pudpbuf->ipoffset[0] = 0;
       pudpbuf->ipoffset[1] = 0;
       pudpbuf->ttl         = conn->ttl;
-      pudpbuf->proto       = UIP_PROTO_UDP;
+      pudpbuf->proto       = IP_PROTO_UDP;
 
       net_ipaddr_hdrcopy(pudpbuf->srcipaddr, &dev->d_ipaddr);
       net_ipaddr_hdrcopy(pudpbuf->destipaddr, &conn->ripaddr);

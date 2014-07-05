@@ -44,6 +44,8 @@
 
 #include <sys/types.h>
 
+#include <nuttx/net/ip.h>
+
 #ifdef CONFIG_NET_IGMP
 
 /****************************************************************************

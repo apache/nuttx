@@ -53,10 +53,12 @@
 #endif
 
 #include <arch/irq.h>
+
 #include <nuttx/clock.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/iob.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/ip.h>
 #include <nuttx/net/tcp.h>
 #include <nuttx/net/udp.h>
 #include <nuttx/net/pkt.h>

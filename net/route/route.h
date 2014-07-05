@@ -43,7 +43,10 @@
 #include <nuttx/config.h>
 
 #include <queue.h>
+
 #include <net/if.h>
+
+#include <nuttx/net/ip.h>
 
 #ifdef CONFIG_NET_ROUTE
 

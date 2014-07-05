@@ -45,6 +45,7 @@
 #include <debug.h>
 
 #include <nuttx/net/net.h>
+#include <nuttx/net/ip.h>
 
 #include <arch/irq.h>
 

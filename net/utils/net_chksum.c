@@ -45,6 +45,7 @@
 
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/ip.h>
 #include <nuttx/net/icmp.h>
 
 #include "utils/utils.h"
@@ -158,7 +159,7 @@ static uint16_t upper_layer_chksum(FAR struct net_driver_s *dev, uint8_t proto)
 #ifdef CONFIG_NET_IPv6
 static uint16_t icmp_6chksum(FAR struct net_driver_s *dev)
 {
-  return upper_layer_chksum(dev, UIP_PROTO_ICMP6);
+  return upper_layer_chksum(dev, IP_PROTO_ICMP6);
 }
 #endif /* CONFIG_NET_IPv6 */
 #endif /* CONFIG_NET_ARCH_CHKSUM */
@@ -311,7 +312,7 @@ uint16_t ip_chksum(FAR struct net_driver_s *dev)
 #if !CONFIG_NET_ARCH_CHKSUM
 uint16_t tcp_chksum(FAR struct net_driver_s *dev)
 {
-  return upper_layer_chksum(dev, UIP_PROTO_TCP);
+  return upper_layer_chksum(dev, IP_PROTO_TCP);
 }
 #endif /* CONFIG_NET_ARCH_CHKSUM */
 
@@ -326,7 +327,7 @@ uint16_t tcp_chksum(FAR struct net_driver_s *dev)
 #if defined(CONFIG_NET_UDP_CHECKSUMS) && !defined(CONFIG_NET_ARCH_CHKSUM)
 uint16_t udp_chksum(FAR struct net_driver_s *dev)
 {
-  return upper_layer_chksum(dev, UIP_PROTO_UDP);
+  return upper_layer_chksum(dev, IP_PROTO_UDP);
 }
 #endif /* CONFIG_NET_UDP_CHECKSUMS && !CONFIG_NET_ARCH_CHKSUM */
 

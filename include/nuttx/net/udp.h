@@ -52,7 +52,9 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+
 #include <nuttx/net/netconfig.h>
+#include <nuttx/net/ip.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -60,8 +62,8 @@
 
 /* Header sizes */
 
-#define UIP_UDPH_LEN    8     /* Size of UDP header */
-#define UIP_IPUDPH_LEN (UIP_UDPH_LEN + UIP_IPH_LEN)    /* Size of IP + UDP header */
+#define UIP_UDPH_LEN   8                             /* Size of UDP header */
+#define UIP_IPUDPH_LEN (UIP_UDPH_LEN + IPHDR_LEN)    /* Size of IP + UDP header */
 
 /****************************************************************************
  * Public Type Definitions

@@ -53,7 +53,9 @@
 #include <arch/irq.h>
 
 #include <nuttx/net/netconfig.h>
+#include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/ip.h>
 #include <nuttx/net/udp.h>
 
 #include "devif/devif.h"

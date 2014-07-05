@@ -43,6 +43,8 @@
 #include <string.h>
 #include <debug.h>
 
+#include <nuttx/net/ip.h>
+
 #include "ipv6/ipv6.h"
 
 /****************************************************************************

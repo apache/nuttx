@@ -73,6 +73,7 @@
 
 #include <net/if.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 
 #include "nfs.h"
 #include "rpc.h"

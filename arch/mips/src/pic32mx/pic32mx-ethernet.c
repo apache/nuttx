@@ -51,10 +51,11 @@
 #include <errno.h>
 #include <assert.h>
 
+#include <arpa/inet.h>
+
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/net/mii.h>
-
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
