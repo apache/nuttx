@@ -128,6 +128,7 @@ static struct sama5d4ek_tscinfo_s g_mxtinfo =
 {
   .lower =
   {
+    .address   = (0x4c >> 1),
     .frequency = CONFIG_SAMA5D4EK_MXT_I2CFREQUENCY,
 
     .attach    = mxt_attach,

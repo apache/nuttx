@@ -123,14 +123,6 @@ struct mxt_lower_s
   uint8_t address;     /* 7-bit I2C address (only bits 0-6 used) */
   uint32_t frequency;  /* I2C frequency */
 
-#ifndef CONFIG_MXT_MULTIPLE
-  /* If multiple MXT devices are supported, then an IRQ number must
-   * be provided for each so that their interrupts can be distinguished.
-   */
-
-  int irq;             /* IRQ number received by interrupt handler. */
-#endif
-
   /* True: Swap X and Y values */
 
   bool swapxy;
