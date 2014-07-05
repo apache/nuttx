@@ -63,6 +63,7 @@
 #define HAVE_USBOVCUR   1
 #define HAVE_USBMONITOR 1
 #define HAVE_NETWORK    1
+#define HAVE_MAXTOUCH   1
 
 /* HSMCI */
 /* Can't support MMC/SD if the card interface(s) are not enable */
@@ -296,6 +297,24 @@
 #  undef HAVE_NETWORK
 #endif
 
+/* maXTouch controller */
+
+#ifndef CONFIG_INPUT_MXT
+#  undef HAVE_MAXTOUCH
+#endif
+
+#ifdef HAVE_MAXTOUCH
+#  ifndef CONFIG_SAMA5_TWI0
+#    warning CONFIG_SAMA5_TWI0 is required for touchscreen support
+#    undef HAVE_MAXTOUCH
+#  endif
+
+#  ifndef CONFIG_SAMA5_PIOE_IRQ
+#    warning PIOE interrupts not enabled.  No touchsreen support.
+#    undef HAVE_MAXTOUCH
+#  endif
+#endif
+
 /* LEDs *****************************************************************************/
 /* There are 3 LEDs on the SAMA5D4-EK:
  *
@@ -337,6 +356,43 @@
 #define PIO_BTN_USER (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
                       PIO_INT_BOTHEDGES | PIO_PORT_PIOE | PIO_PIN13)
 #define IRQ_BTN_USER  SAM_IRQ_PE13
+
+/* TM7000 LCD/Touchscreen ***********************************************************/
+/* The TM7000 LCD is available for the SAMA5D4-EK.  See documentation
+ * available on the Precision Design Associates website:
+ * http://www.pdaatl.com/doc/tm7000.pdf
+ *
+ * The TM7000 features an touchscreen controol
+ *
+ *   - 7 inch LCD at 800x480 18-bit RGB resolution and white backlight
+ *   - Projected Capacitive Multi-Touch Controller based on the Atmel
+ *     MXT768E maXTouch™ IC
+ *   - 4 Capacitive “Navigation” Keys available via an Atmel AT42QT1070
+ *     QTouch™ Button Sensor IC
+ *   - 200 bytes of non-volatile serial EEPROM
+ *
+ * Both the MXT768E and the AT42QT1070 are I2C devices with interrupting
+ * PIO pins:
+ *
+ * ------------------------ -----------------
+ * SAMA5D4-EK               TM7000
+ * ------------------------ -----------------
+ * J9 pin 5 LCD_PE24        J4 pin 5 ~CHG_mxt
+ * J9 pin 6 LCD_PE25        J4 pin 6 ~CHG_QT
+ * J9 pin 7 LCD_TWCK0_PA31  J4 pin 7 SCL_0
+ * J9 pin 8 LCD_TWD0_PA30   J4 pin 8 SDA_0
+ * ------------------------ -----------------
+ *
+ * The schematic indicates the the MXT468E address is 0x4c/0x4d.
+ */
+
+#define PIO_CHG_MXT  (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
+                      PIO_INT_BOTHEDGES | PIO_PORT_PIOE | PIO_PIN24)
+#define IRQ_CHG_MXT   SAM_IRQ_PE24
+
+#define PIO_CHG_QT   (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
+                      PIO_INT_BOTHEDGES | PIO_PORT_PIOE | PIO_PIN25)
+#define IRQ_CHG_QT    SAM_IRQ_PE25
 
 /* HSMCI Card Slots *****************************************************************/
 /* The SAMA4D4-EK provides a two SD memory card slots:  (1) a full size SD
