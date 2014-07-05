@@ -94,15 +94,15 @@ struct sama5d4ek_tscinfo_s
  * Private Function Prototypes
  ****************************************************************************/
 
-/* IRQ/GPIO access callbacks.  These operations all hidden behind
- * callbacks to isolate the maXTouch driver from differences in GPIO
+/* IRQ/PIO access callbacks.  These operations all hidden behind
+ * callbacks to isolate the maXTouch driver from differences in PIO
  * interrupt handling by varying boards and MCUs.  If possible,
  * interrupts should be configured on both rising and falling edges
  * so that contact and loss-of-contact events can be detected.
  *
- *   attach  - Attach the maXTouch interrupt handler to the GPIO interrupt
- *   enable  - Enable or disable the GPIO interrupt
- *   clear   - Acknowledge/clear any pending GPIO interrupt
+ *   attach  - Attach the maXTouch interrupt handler to the PIO interrupt
+ *   enable  - Enable or disable the PIO interrupt
+ *   clear   - Acknowledge/clear any pending PIO interrupt
  */
 
 static int  mxt_attach(FAR const struct mxt_lower_s *lower, mxt_handler_t isr,
@@ -141,15 +141,15 @@ static struct sama5d4ek_tscinfo_s g_mxtinfo =
  ****************************************************************************/
 
 /****************************************************************************
- * IRQ/GPIO access callbacks.  These operations all hidden behind
- * callbacks to isolate the maXTouch driver from differences in GPIO
+ * IRQ/PIO access callbacks.  These operations all hidden behind
+ * callbacks to isolate the maXTouch driver from differences in PIO
  * interrupt handling by varying boards and MCUs.  If possible,
  * interrupts should be configured on both rising and falling edges
  * so that contact and loss-of-contact events can be detected.
  *
- *   attach  - Attach the maXTouch interrupt handler to the GPIO interrupt
- *   enable  - Enable or disable the GPIO interrupt
- *   clear   - Acknowledge/clear any pending GPIO interrupt
+ *   attach  - Attach the maXTouch interrupt handler to the PIO interrupt
+ *   enable  - Enable or disable the PIO interrupt
+ *   clear   - Acknowledge/clear any pending PIO interrupt
  *
  ****************************************************************************/
 
@@ -158,8 +158,8 @@ static int mxt_attach(FAR const struct mxt_lower_s *lower, mxt_handler_t isr,
 {
   if (isr)
     {
-      /* Just save the address of the handler for now.  The new handler will
-       * be attached when the interrupt is next enabled.
+      /* Just save the address of the handler and its argument for now.  The
+       * new handler will called via mxt_interrupt() when the interrupt occurs.
        */
 
       ivdbg("Attaching %p\n", isr);
