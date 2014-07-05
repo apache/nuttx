@@ -7655,3 +7655,6 @@
 	  at include/nuttx/net to the corresponding header file under net/.
 	  So far pkt.h, upd.h, and igmp.h have been sanitized.  Still a few
 	  to go (2014-7-5)
+	* configs/sama5d4-ek/src/sam_maxtouch.c:  Add board support for the
+	  maXTouch touchscreen controller (2014-7-5).
+
