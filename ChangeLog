@@ -7649,3 +7649,5 @@
 	  Tried to fix problems of the now missing sneak inclusions because
 	  uip.h was removed.  There are probably a few of these that were
 	  missed! (2014-7-4).
+	* drivers/input/mxt.c/h and include/nuttx/input/mxt.h:  Add very basic
+	  support for the Atmel maXTouch touchscreen controller (2014-6-5).
