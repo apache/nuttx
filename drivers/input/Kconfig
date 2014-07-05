@@ -128,6 +128,23 @@ config ADS7843E_THRESHY
 
 endif
 
+config INPUT_MXT
+	bool "Atmel maXTouch Driver"
+	default n
+	---help---
+		Enables support for the Atmel maXTouch driver
+
+if INPUT_MXT
+
+config MXT_NPOLLWAITERS
+	int "Number poll waiters"
+	default 4
+	depends on !DISABLE_POLL
+	---help---
+		Maximum number of threads that can be waiting on poll()
+
+endif # INPUT_MXT
+
 config INPUT_STMPE811
 	bool "STMicro STMPE811 Driver"
 	default n

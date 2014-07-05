@@ -51,6 +51,10 @@ ifeq ($(CONFIG_INPUT_MAX11802),y)
   CSRCS += max11802.c
 endif
 
+ifeq ($(CONFIG_INPUT_MXT),y)
+  CSRCS += mxt.c
+endif
+
 ifeq ($(CONFIG_INPUT_STMPE811),y)
   CSRCS += stmpe811_base.c
 ifneq ($(CONFIG_INPUT_STMPE811_TSC_DISABLE),y)
