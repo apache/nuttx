@@ -44,11 +44,11 @@
 
 #include <nuttx/net/iob.h>
 #include <nuttx/net/net.h>
-#include <nuttx/net/arp.h>
 
 #include "socket/socket.h"
 #include "devif/devif.h"
 #include "netdev/netdev.h"
+#include "arp/arp.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
 #include "pkt/pkt.h"
@@ -87,6 +87,10 @@ void net_initialize(void)
   /* Initialize the locking facility */
 
   net_lockinitialize();
+
+  /* Clear the ARP table */
+
+  arp_reset();
 
   /* Initialize I/O buffering */
 
@@ -146,7 +150,7 @@ void net_initialize(void)
 
   /* Initialize the periodic ARP timer */
 
-  arp_timer_init();
+  arp_timer_initialize();
 }
 
 #endif /* CONFIG_NET */

@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/arp/arp_timer.c
+ * net/arp/arp.h
  *
- *   Copyright (C) 2007-2009, 2011, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,75 +33,31 @@
  *
  ****************************************************************************/
 
+#ifndef __NET_ARP_ARP_H
+#define __NET_ARP_ARP_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#ifdef CONFIG_NET
-
-#include <stdint.h>
-#include <time.h>
-#include <wdog.h>
-#include <debug.h>
-
-#include <nuttx/net/netconfig.h>
-
-#include <arp/arp.h>
-
-#ifdef CONFIG_NET_ARP
-
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* ARP timer interval = 10 seconds. CLK_TCK is the number of clock ticks
- * per second
- */
-
-#define ARPTIMER_WDINTERVAL (10*CLK_TCK)
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static WDOG_ID g_arptimer;           /* ARP timer */
-
-/****************************************************************************
- * Private Functions
+ * Public Types
  ****************************************************************************/
 
 /****************************************************************************
- * Function: arptimer_poll
+ * Public Function Prototypes
+ ****************************************************************************/
+
+ #ifdef CONFIG_NET_ARP
+/****************************************************************************
+ * Name: arp_reset
  *
  * Description:
- *   Periodic timer handler.  Called from the timer interrupt handler.
- *
- * Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
+ *   Re-initialize the ARP table.
  *
  ****************************************************************************/
 
-static void arptimer_poll(int argc, uint32_t arg, ...)
-{
-  /* Call the ARP timer function every 10 seconds. */
-
-  arp_timer();
-
-  /* Setup the watchdog timer again */
-
-  (void)wd_start(g_arptimer, ARPTIMER_WDINTERVAL, arptimer_poll, 0);
-}
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
+void arp_reset(void);
 
 /****************************************************************************
  * Function: arp_timer_initialize
@@ -121,13 +77,28 @@ static void arptimer_poll(int argc, uint32_t arg, ...)
  *
  ****************************************************************************/
 
-void arp_timer_initialize(void)
-{
-  /* Create and start the ARP timer */
+void arp_timer_initialize(void);
 
-  g_arptimer = wd_create();
- (void)wd_start(g_arptimer, ARPTIMER_WDINTERVAL, arptimer_poll, 0);
-}
+/****************************************************************************
+ * Name: arp_timer
+ *
+ * Description:
+ *   This function performs periodic timer processing in the ARP module
+ *   and should be called at regular intervals.  The recommended interval
+ *   is 10 seconds between the calls.  It is responsible for flushing old
+ *   entries in the ARP table.
+ *
+ ****************************************************************************/
+
+void arp_timer(void);
+
+#else /* CONFIG_NET_ARP */
+
+/* If ARP is disabled, stub out all ARP interfaces */
+
+# define arp_reset()
+# define arp_timer_initialize(void)
+# define arp_timer()
 
 #endif /* CONFIG_NET_ARP */
-#endif /* CONFIG_NET */
+#endif /* __UIP-NEIGHBOR_H__ */

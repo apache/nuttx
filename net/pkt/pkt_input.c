@@ -48,7 +48,6 @@
 #include <debug.h>
 
 #include <nuttx/net/netdev.h>
-#include <nuttx/net/pkt.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/pkt.h>
 

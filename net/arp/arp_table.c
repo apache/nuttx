@@ -58,6 +58,8 @@
 #include <nuttx/net/arp.h>
 #include <nuttx/net/ip.h>
 
+#include <arp/arp.h>
+
 #ifdef CONFIG_NET_ARP
 
 /****************************************************************************
@@ -86,17 +88,17 @@ static uint8_t g_arptime;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arp_init
+ * Name: arp_reset
  *
  * Description:
- *   Initialize the ARP module. This function must be called before any of
- *   the other ARP functions.
+ *   Re-initialize the ARP table.
  *
  ****************************************************************************/
 
-void arp_init(void)
+void arp_reset(void)
 {
   int i;
+
   for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
     {
       memset(&g_arptable[i].at_ipaddr, 0, sizeof(in_addr_t));
@@ -116,7 +118,7 @@ void arp_init(void)
 
 void arp_timer(void)
 {
-  struct arp_entry *tabptr;
+  FAR struct arp_entry *tabptr;
   int i;
 
   ++g_arptime;
@@ -146,7 +148,7 @@ void arp_timer(void)
  *
  ****************************************************************************/
 
-void arp_update(uint16_t *pipaddr, uint8_t *ethaddr)
+void arp_update(FAR uint16_t *pipaddr, FAR uint8_t *ethaddr)
 {
   struct arp_entry *tabptr = NULL;
   in_addr_t         ipaddr = net_ip4addr_conv32(pipaddr);
@@ -240,9 +242,9 @@ void arp_update(uint16_t *pipaddr, uint8_t *ethaddr)
  *
  ****************************************************************************/
 
-struct arp_entry *arp_find(in_addr_t ipaddr)
+FAR struct arp_entry *arp_find(in_addr_t ipaddr)
 {
-  struct arp_entry *tabptr;
+  FAR struct arp_entry *tabptr;
   int i;
 
   for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)

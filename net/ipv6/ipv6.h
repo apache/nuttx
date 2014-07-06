@@ -74,4 +74,4 @@ void net_neighbor_update(net_ipaddr_t ipaddr);
 struct net_neighbor_addr_s *net_neighbor_lookup(net_ipaddr_t ipaddr);
 void net_neighbor_periodic(void);
 
-#endif /* __UIP-NEIGHBOR_H__ */
+#endif /* __NET_IPV6_IPV6_H */
