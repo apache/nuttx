@@ -89,16 +89,16 @@ static void connection_event(FAR struct tcp_conn_s *conn, uint16_t flags)
     {
       nllvdbg("flags: %04x s_flags: %02x\n", flags, psock->s_flags);
 
-      /* UIP_CLOSE, UIP_ABORT, or UIP_TIMEDOUT: Loss-of-connection events */
+      /* TCP_CLOSE, TCP_ABORT, or TCP_TIMEDOUT: Loss-of-connection events */
 
-      if ((flags & (UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT)) != 0)
+      if ((flags & (TCP_CLOSE | TCP_ABORT | TCP_TIMEDOUT)) != 0)
         {
           net_lostconnection(psock, flags);
         }
 
-      /* UIP_CONNECTED: The socket is successfully connected */
+      /* TCP_CONNECTED: The socket is successfully connected */
 
-      else if ((flags & UIP_CONNECTED) != 0)
+      else if ((flags & TCP_CONNECTED) != 0)
         {
           /* Indicate that the socket is now connected */
 
@@ -144,7 +144,7 @@ int net_startmonitor(FAR struct socket *psock)
   if (!(conn->tcpstateflags == TCP_ESTABLISHED ||
         conn->tcpstateflags == TCP_SYN_RCVD))
     {
-      connection_event(conn, UIP_CLOSE);
+      connection_event(conn, TCP_CLOSE);
     }
 
   return OK;
@@ -196,9 +196,9 @@ void net_lostconnection(FAR struct socket *psock, uint16_t flags)
 
   /* These loss-of-connection events may be reported:
    *
-   *   UIP_CLOSE: The remote host has closed the connection
-   *   UIP_ABORT: The remote host has aborted the connection
-   *   UIP_TIMEDOUT: Connection aborted due to too many retransmissions.
+   *   TCP_CLOSE: The remote host has closed the connection
+   *   TCP_ABORT: The remote host has aborted the connection
+   *   TCP_TIMEDOUT: Connection aborted due to too many retransmissions.
    *
    * And we need to set these two socket status bits appropriately:
    *
@@ -207,7 +207,7 @@ void net_lostconnection(FAR struct socket *psock, uint16_t flags)
    *  _SF_CONNECTED==0 && _SF_CLOSED==0 - the socket was rudely disconnected
    */
 
-  if ((flags & UIP_CLOSE) != 0)
+  if ((flags & TCP_CLOSE) != 0)
     {
       /* The peer gracefully closed the connection.  Marking the
        * connection as disconnected will suppress some subsequent
@@ -218,7 +218,7 @@ void net_lostconnection(FAR struct socket *psock, uint16_t flags)
       psock->s_flags &= ~_SF_CONNECTED;
       psock->s_flags |= _SF_CLOSED;
     }
-  else if ((flags & (UIP_ABORT|UIP_TIMEDOUT)) != 0)
+  else if ((flags & (TCP_ABORT | TCP_TIMEDOUT)) != 0)
     {
       /* The loss of connection was less than graceful.  This will (eventually)
        * be reported as an ENOTCONN error.

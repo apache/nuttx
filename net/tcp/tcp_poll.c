@@ -111,7 +111,7 @@ void tcp_poll(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
 
       /* Perform the callback */
 
-      result = tcp_callback(dev, conn, UIP_POLL);
+      result = tcp_callback(dev, conn, TCP_POLL);
 
       /* Handle the callback response */
 

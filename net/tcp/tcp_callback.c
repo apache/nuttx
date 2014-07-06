@@ -68,7 +68,7 @@
  *   listener in place ready to receive the data.
  *
  * Assumptions:
- * - The caller has checked that UIP_NEWDATA is set in flags and that is no
+ * - The caller has checked that TCP_NEWDATA is set in flags and that is no
  *   other handler available to process the incoming data.
  * - This function is called at the interrupt level with interrupts disabled.
  *
@@ -84,10 +84,10 @@ tcp_data_event(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
    * placed in the read-ahead buffer -OR- if it zero length
    */
 
-  ret = (flags & ~UIP_NEWDATA) | UIP_SNDACK;
+  ret = (flags & ~TCP_NEWDATA) | TCP_SNDACK;
 
   /* Is there new data?  With non-zero length?  (Certain connection events
-   * can have zero-length with UIP_NEWDATA set just to cause an ACK).
+   * can have zero-length with TCP_NEWDATA set just to cause an ACK).
    */
 
   if (dev->d_len > 0)
@@ -119,9 +119,9 @@ tcp_data_event(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
           g_netstats.tcp.syndrop++;
           g_netstats.tcp.drop++;
 #endif
-          /* Clear the UIP_SNDACK bit so that no ACK will be sent */
+          /* Clear the TCP_SNDACK bit so that no ACK will be sent */
 
-          ret &= ~UIP_SNDACK;
+          ret &= ~TCP_SNDACK;
         }
     }
 
@@ -149,9 +149,9 @@ tcp_data_event(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 uint16_t tcp_callback(FAR struct net_driver_s *dev,
                       FAR struct tcp_conn_s *conn, uint16_t flags)
 {
-  /* Preserve the UIP_ACKDATA, UIP_CLOSE, and UIP_ABORT in the response.
+  /* Preserve the TCP_ACKDATA, TCP_CLOSE, and TCP_ABORT in the response.
    * These is needed by uIP to handle responses and buffer state.  The
-   * UIP_NEWDATA indication will trigger the ACK response, but must be
+   * TCP_NEWDATA indication will trigger the ACK response, but must be
    * explicitly set in the callback.
    */
 
@@ -161,18 +161,18 @@ uint16_t tcp_callback(FAR struct net_driver_s *dev,
    * the input flags are normally returned, however, the implementation
    * may set one of the following:
    *
-   *   UIP_CLOSE   - Gracefully close the current connection
-   *   UIP_ABORT   - Abort (reset) the current connection on an error that
-   *                 prevents UIP_CLOSE from working.
+   *   TCP_CLOSE   - Gracefully close the current connection
+   *   TCP_ABORT   - Abort (reset) the current connection on an error that
+   *                 prevents TCP_CLOSE from working.
    *
    * And/Or set/clear the following:
    *
-   *   UIP_NEWDATA - May be cleared to indicate that the data was consumed
+   *   TCP_NEWDATA - May be cleared to indicate that the data was consumed
    *                 and that no further process of the new data should be
    *                 attempted.
-   *   UIP_SNDACK  - If UIP_NEWDATA is cleared, then UIP_SNDACK may be set
+   *   TCP_SNDACK  - If TCP_NEWDATA is cleared, then TCP_SNDACK may be set
    *                 to indicate that an ACK should be included in the response.
-   *                 (In UIP_NEWDATA is cleared but UIP_SNDACK is not set, then
+   *                 (In TCP_NEWDATA is cleared but TCP_SNDACK is not set, then
    *                 dev->d_len should also be cleared).
    */
 
@@ -185,7 +185,7 @@ uint16_t tcp_callback(FAR struct net_driver_s *dev,
    * be re-transmitted at a better time.
    */
 
-  if ((flags & UIP_NEWDATA) != 0)
+  if ((flags & TCP_NEWDATA) != 0)
     {
       /* Data was not handled.. dispose of it appropriately */
 
@@ -196,7 +196,7 @@ uint16_t tcp_callback(FAR struct net_driver_s *dev,
    * callback.
    */
 
-  if (((flags & UIP_CONN_EVENTS) != 0) && conn->connection_event)
+  if (((flags & TCP_CONN_EVENTS) != 0) && conn->connection_event)
     {
       /* Perform the callback */
 
@@ -226,7 +226,7 @@ uint16_t tcp_callback(FAR struct net_driver_s *dev,
  *   zero or equal to buflen; partial packets are not buffered.
  *
  * Assumptions:
- * - The caller has checked that UIP_NEWDATA is set in flags and that is no
+ * - The caller has checked that TCP_NEWDATA is set in flags and that is no
  *   other handler available to process the incoming data.
  * - This function is called at the interrupt level with interrupts disabled.
  *

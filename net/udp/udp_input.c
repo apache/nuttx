@@ -142,13 +142,13 @@ int udp_input(FAR struct net_driver_s *dev)
 
           /* Perform the application callback */
 
-          flags = udp_callback(dev, conn, UIP_NEWDATA);
+          flags = udp_callback(dev, conn, UDP_NEWDATA);
 
-          /* If the operation was successful, the UIP_NEWDATA flag is removed
+          /* If the operation was successful, the UDP_NEWDATA flag is removed
            * and thus the packet can be deleted (OK will be returned).
            */
 
-          if ((flags & UIP_NEWDATA) != 0)
+          if ((flags & UDP_NEWDATA) != 0)
             {
               /* No.. the packet was not processed now.  Return ERROR so
                * that the driver may retry again later.

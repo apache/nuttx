@@ -168,12 +168,12 @@ static uint16_t netclose_interrupt(FAR struct net_driver_s *dev,
 
   nllvdbg("conn: %p flags: %04x\n", conn, flags);
 
-  /* UIP_CLOSE:    The remote host has closed the connection
-   * UIP_ABORT:    The remote host has aborted the connection
-   * UIP_TIMEDOUT: The remote did not respond, the connection timed out
+  /* TCP_CLOSE:    The remote host has closed the connection
+   * TCP_ABORT:    The remote host has aborted the connection
+   * TCP_TIMEDOUT: The remote did not respond, the connection timed out
    */
 
-  if ((flags & (UIP_CLOSE | UIP_ABORT | UIP_TIMEDOUT)) != 0)
+  if ((flags & (TCP_CLOSE | TCP_ABORT | TCP_TIMEDOUT)) != 0)
     {
       /* The disconnection is complete */
 
@@ -225,23 +225,23 @@ static uint16_t netclose_interrupt(FAR struct net_driver_s *dev,
   else if (conn->unacked != 0)
     {
       /* No... we are still waiting for ACKs.  Drop any received data, but
-       * do not yet report UIP_CLOSE in the response.
+       * do not yet report TCP_CLOSE in the response.
        */
 
       dev->d_len = 0;
-      flags = (flags & ~UIP_NEWDATA);
+      flags = (flags & ~TCP_NEWDATA);
     }
 
 #endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
 
   else
     {
-      /* Drop data received in this state and make sure that UIP_CLOSE
+      /* Drop data received in this state and make sure that TCP_CLOSE
        * is set in the response
        */
 
       dev->d_len = 0;
-      flags = (flags & ~UIP_NEWDATA) | UIP_CLOSE;
+      flags = (flags & ~TCP_NEWDATA) | TCP_CLOSE;
     }
 
   return flags;
@@ -315,8 +315,8 @@ static inline int netclose_disconnect(FAR struct socket *psock)
     {
       /* Set up to receive TCP data event callbacks */
 
-      state.cl_cb->flags = (UIP_NEWDATA | UIP_POLL | UIP_CLOSE | UIP_ABORT | \
-                            UIP_TIMEDOUT);
+      state.cl_cb->flags = (TCP_NEWDATA | TCP_POLL | TCP_CLOSE | TCP_ABORT |
+                            TCP_TIMEDOUT);
       state.cl_cb->event = netclose_interrupt;
 
 #ifdef CONFIG_NET_SOLINGER

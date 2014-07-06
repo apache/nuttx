@@ -130,7 +130,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
           /* Notify upper layers about the timeout */
 
-          result = tcp_callback(dev, conn, UIP_TIMEDOUT);
+          result = tcp_callback(dev, conn, TCP_TIMEDOUT);
 
           nllvdbg("TCP state: TCP_CLOSED\n");
         }
@@ -174,12 +174,12 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                   conn->tcpstateflags = TCP_CLOSED;
                   nllvdbg("TCP state: TCP_CLOSED\n");
 
-                  /* We call tcp_callback() with UIP_TIMEDOUT to
+                  /* We call tcp_callback() with TCP_TIMEDOUT to
                    * inform the application that the connection has
                    * timed out.
                    */
 
-                  result = tcp_callback(dev, conn, UIP_TIMEDOUT);
+                  result = tcp_callback(dev, conn, TCP_TIMEDOUT);
 
                   /* We also send a reset packet to the remote host. */
 
@@ -225,7 +225,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                      * the code for sending out the packet.
                      */
 
-                    result = tcp_callback(dev, conn, UIP_REXMIT);
+                    result = tcp_callback(dev, conn, TCP_REXMIT);
                     tcp_rexmit(dev, conn, result);
                     goto done;
 
@@ -248,7 +248,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
            * application for new data.
            */
 
-          result = tcp_callback(dev, conn, UIP_POLL);
+          result = tcp_callback(dev, conn, TCP_POLL);
           tcp_appsend(dev, conn, result);
           goto done;
         }

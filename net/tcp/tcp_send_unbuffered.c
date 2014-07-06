@@ -148,7 +148,7 @@ static inline int send_timeout(FAR struct send_s *pstate)
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual
- *   send operation when polled by the uIP layer.
+ *   send operation when polled by the lower, device interfacing layer.
  *
  * Parameters:
  *   dev      The structure of the network driver that caused the interrupt
@@ -177,7 +177,7 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
    * acknowledged bytes.
    */
 
-  if ((flags & UIP_ACKDATA) != 0)
+  if ((flags & TCP_ACKDATA) != 0)
     {
       /* Update the timeout */
 
@@ -211,7 +211,7 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
 
   /* Check if we are being asked to retransmit data */
 
-  else if ((flags & UIP_REXMIT) != 0)
+  else if ((flags & TCP_REXMIT) != 0)
     {
       /* Yes.. in this case, reset the number of bytes that have been sent
        * to the number of bytes that have been ACKed.
@@ -232,7 +232,7 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
 
  /* Check for a loss of connection */
 
-  else if ((flags & (UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT)) != 0)
+  else if ((flags & (TCP_CLOSE | TCP_ABORT | TCP_TIMEDOUT)) != 0)
     {
       /* Report not connected */
 
@@ -264,7 +264,7 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
    * next polling cycle.
    */
 
-  if ((flags & UIP_NEWDATA) == 0 && pstate->snd_sent < pstate->snd_buflen)
+  if ((flags & TCP_NEWDATA) == 0 && pstate->snd_sent < pstate->snd_buflen)
     {
       uint32_t seqno;
 
@@ -571,7 +571,8 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
 #endif
           /* Set up the callback in the connection */
 
-          state.snd_cb->flags   = UIP_ACKDATA|UIP_REXMIT|UIP_POLL|UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT;
+          state.snd_cb->flags   = (TCP_ACKDATA | TCP_REXMIT | TCP_POLL |
+                                   TCP_CLOSE | TCP_ABORT | TCP_TIMEDOUT);
           state.snd_cb->priv    = (void*)&state;
           state.snd_cb->event   = tcpsend_interrupt;
 

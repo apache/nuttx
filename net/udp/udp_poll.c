@@ -108,7 +108,7 @@ void udp_poll(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
 
       /* Perform the application callback */
 
-      (void)udp_callback(dev, conn, UIP_POLL);
+      (void)udp_callback(dev, conn, UDP_POLL);
 
       /* If the application has data to send, setup the UDP/IP header */
 

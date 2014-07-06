@@ -118,7 +118,8 @@ static inline int psock_setup_callbacks(FAR struct socket *psock,
     {
       /* Set up the connection "interrupt" handler */
 
-      pstate->tc_cb->flags   = UIP_NEWDATA|UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT|UIP_CONNECTED;
+      pstate->tc_cb->flags   = (TCP_NEWDATA | TCP_CLOSE | TCP_ABORT |
+                                TCP_TIMEDOUT | TCP_CONNECTED);
       pstate->tc_cb->priv    = (void*)pstate;
       pstate->tc_cb->event   = psock_connect_interrupt;
 
@@ -165,7 +166,7 @@ static inline void psock_teardown_callbacks(FAR struct tcp_connect_s *pstate,
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual
- *   connection operation via by the uIP layer.
+ *   connection operation via by the lower, device interfacing layer.
  *
  * Parameters:
  *   dev      The sructure of the network driver that caused the interrupt
@@ -204,29 +205,29 @@ static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
        *       to accept new connections.
        */
 
-      /* UIP_CLOSE: The remote host has closed the connection
-       * UIP_ABORT: The remote host has aborted the connection
+      /* TCP_CLOSE: The remote host has closed the connection
+       * TCP_ABORT: The remote host has aborted the connection
        */
 
-      if ((flags & (UIP_CLOSE|UIP_ABORT)) != 0)
+      if ((flags & (TCP_CLOSE | TCP_ABORT)) != 0)
         {
           /* Indicate that remote host refused the connection */
 
           pstate->tc_result = -ECONNREFUSED;
         }
 
-      /* UIP_TIMEDOUT: Connection aborted due to too many retransmissions. */
+      /* TCP_TIMEDOUT: Connection aborted due to too many retransmissions. */
 
-      else if ((flags & UIP_TIMEDOUT) != 0)
+      else if ((flags & TCP_TIMEDOUT) != 0)
         {
           /* Indicate that the remote host is unreachable (or should this be timedout?) */
 
           pstate->tc_result = -ETIMEDOUT;
         }
 
-      /* UIP_CONNECTED: The socket is successfully connected */
+      /* TCP_CONNECTED: The socket is successfully connected */
 
-      else if ((flags & UIP_CONNECTED) != 0)
+      else if ((flags & TCP_CONNECTED) != 0)
         {
           /* Indicate that the socket is no longer connected */
 
@@ -240,7 +241,7 @@ static uint16_t psock_connect_interrupt(FAR struct net_driver_s *dev,
           /* Drop data received in this state */
 
           dev->d_len = 0;
-          return flags & ~UIP_NEWDATA;
+          return flags & ~TCP_NEWDATA;
         }
 
       nllvdbg("Resuming: %d\n", pstate->tc_result);

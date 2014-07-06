@@ -309,7 +309,7 @@ found:
       conn->tcpstateflags = TCP_CLOSED;
       nlldbg("RESET - TCP state: TCP_CLOSED\n");
 
-      (void)tcp_callback(dev, conn, UIP_ABORT);
+      (void)tcp_callback(dev, conn, TCP_ABORT);
       goto drop;
     }
 
@@ -435,7 +435,7 @@ found:
 
         /* Set the acknowledged flag. */
 
-       flags |= UIP_ACKDATA;
+       flags |= TCP_ACKDATA;
 
        /* Reset the retransmission timer. */
 
@@ -455,11 +455,11 @@ found:
       case TCP_SYN_RCVD:
         /* In SYN_RCVD we have sent out a SYNACK in response to a SYN, and
          * we are waiting for an ACK that acknowledges the data we sent
-         * out the last time. Therefore, we want to have the UIP_ACKDATA
+         * out the last time. Therefore, we want to have the TCP_ACKDATA
          * flag set. If so, we enter the ESTABLISHED state.
          */
 
-        if ((flags & UIP_ACKDATA) != 0)
+        if ((flags & TCP_ACKDATA) != 0)
           {
             conn->tcpstateflags = TCP_ESTABLISHED;
 
@@ -469,12 +469,12 @@ found:
             conn->sent          = 0;
 #endif
             conn->unacked       = 0;
-            flags               = UIP_CONNECTED;
+            flags               = TCP_CONNECTED;
             nllvdbg("TCP state: TCP_ESTABLISHED\n");
 
             if (dev->d_len > 0)
               {
-                flags          |= UIP_NEWDATA;
+                flags          |= TCP_NEWDATA;
                 net_incr32(conn->rcvseq, dev->d_len);
               }
 
@@ -501,7 +501,7 @@ found:
          * state.
          */
 
-        if ((flags & UIP_ACKDATA) != 0 && (pbuf->flags & TCP_CTL) == (TCP_SYN | TCP_ACK))
+        if ((flags & TCP_ACKDATA) != 0 && (pbuf->flags & TCP_CTL) == (TCP_SYN | TCP_ACK))
           {
             /* Parse the TCP MSS option, if present. */
 
@@ -569,14 +569,14 @@ found:
             dev->d_sndlen       = 0;
 
             nllvdbg("TCP state: TCP_ESTABLISHED\n");
-            result = tcp_callback(dev, conn, UIP_CONNECTED | UIP_NEWDATA);
+            result = tcp_callback(dev, conn, TCP_CONNECTED | TCP_NEWDATA);
             tcp_appsend(dev, conn, result);
             return;
           }
 
         /* Inform the application that the connection failed */
 
-        (void)tcp_callback(dev, conn, UIP_ABORT);
+        (void)tcp_callback(dev, conn, TCP_ABORT);
 
         /* The connection is closed after we send the RST */
 
@@ -595,7 +595,7 @@ found:
 
       case TCP_ESTABLISHED:
         /* In the ESTABLISHED state, we call upon the application to feed
-         * data into the d_buf. If the UIP_ACKDATA flag is set, the
+         * data into the d_buf. If the TCP_ACKDATA flag is set, the
          * application should put new data into the buffer, otherwise we are
          * retransmitting an old segment, and the application should put that
          * data into the buffer.
@@ -625,11 +625,11 @@ found:
              */
 
             net_incr32(conn->rcvseq, dev->d_len + 1);
-            flags |= UIP_CLOSE;
+            flags |= TCP_CLOSE;
 
             if (dev->d_len > 0)
               {
-                flags |= UIP_NEWDATA;
+                flags |= TCP_NEWDATA;
               }
 
             (void)tcp_callback(dev, conn, flags);
@@ -673,20 +673,20 @@ found:
           }
 
         /* If d_len > 0 we have TCP data in the packet, and we flag this
-         * by setting the UIP_NEWDATA flag. If the application has stopped
+         * by setting the TCP_NEWDATA flag. If the application has stopped
          * the data flow using TCP_STOPPED, we must not accept any data
          * packets from the remote host.
          */
 
         if (dev->d_len > 0 && (conn->tcpstateflags & TCP_STOPPED) == 0)
           {
-            flags |= UIP_NEWDATA;
+            flags |= TCP_NEWDATA;
           }
 
         /* If this packet constitutes an ACK for outstanding data (flagged
-         * by the UIP_ACKDATA flag), we should call the application since it
+         * by the TCP_ACKDATA flag), we should call the application since it
          * might want to send more data. If the incoming packet had data
-         * from the peer (as flagged by the UIP_NEWDATA flag), the
+         * from the peer (as flagged by the TCP_NEWDATA flag), the
          * application must also be notified.
          *
          * When the application is called, the d_len field
@@ -701,7 +701,7 @@ found:
          * send, d_len must be set to 0.
          */
 
-        if ((flags & (UIP_NEWDATA | UIP_ACKDATA)) != 0)
+        if ((flags & (TCP_NEWDATA | TCP_ACKDATA)) != 0)
           {
             /* Clear sndlen and remember the size in d_len.  The application
              * may modify d_len and we will need this value later when we
@@ -716,12 +716,12 @@ found:
             result = tcp_callback(dev, conn, flags);
 
             /* If the application successfully handled the incoming data,
-             * then UIP_SNDACK will be set in the result.  In this case,
+             * then TCP_SNDACK will be set in the result.  In this case,
              * we need to update the sequence number.  The ACK will be
              * send by tcp_appsend().
              */
 
-            if ((result & UIP_SNDACK) != 0)
+            if ((result & TCP_SNDACK) != 0)
               {
                 /* Update the sequence number using the saved length */
 
@@ -738,15 +738,15 @@ found:
 
       case TCP_LAST_ACK:
         /* We can close this connection if the peer has acknowledged our
-         * FIN. This is indicated by the UIP_ACKDATA flag.
+         * FIN. This is indicated by the TCP_ACKDATA flag.
          */
 
-        if ((flags & UIP_ACKDATA) != 0)
+        if ((flags & TCP_ACKDATA) != 0)
           {
             conn->tcpstateflags = TCP_CLOSED;
             nllvdbg("TCP_LAST_ACK TCP state: TCP_CLOSED\n");
 
-            (void)tcp_callback(dev, conn, UIP_CLOSE);
+            (void)tcp_callback(dev, conn, TCP_CLOSE);
           }
         break;
 
@@ -763,7 +763,7 @@ found:
 
         if ((pbuf->flags & TCP_FIN) != 0)
           {
-            if ((flags & UIP_ACKDATA) != 0)
+            if ((flags & TCP_ACKDATA) != 0)
               {
                 conn->tcpstateflags = TCP_TIME_WAIT;
                 conn->timer         = 0;
@@ -777,11 +777,11 @@ found:
               }
 
             net_incr32(conn->rcvseq, 1);
-            (void)tcp_callback(dev, conn, UIP_CLOSE);
+            (void)tcp_callback(dev, conn, TCP_CLOSE);
             tcp_send(dev, conn, TCP_ACK, IPTCP_HDRLEN);
             return;
           }
-        else if ((flags & UIP_ACKDATA) != 0)
+        else if ((flags & TCP_ACKDATA) != 0)
           {
             conn->tcpstateflags = TCP_FIN_WAIT_2;
             conn->unacked = 0;
@@ -810,7 +810,7 @@ found:
             nllvdbg("TCP state: TCP_TIME_WAIT\n");
 
             net_incr32(conn->rcvseq, 1);
-            (void)tcp_callback(dev, conn, UIP_CLOSE);
+            (void)tcp_callback(dev, conn, TCP_CLOSE);
             tcp_send(dev, conn, TCP_ACK, IPTCP_HDRLEN);
             return;
           }
@@ -828,7 +828,7 @@ found:
         return;
 
       case TCP_CLOSING:
-        if ((flags & UIP_ACKDATA) != 0)
+        if ((flags & TCP_ACKDATA) != 0)
           {
             conn->tcpstateflags = TCP_TIME_WAIT;
             conn->timer        = 0;

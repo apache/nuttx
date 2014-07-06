@@ -155,7 +155,7 @@ static uint16_t ack_interrupt(FAR struct net_driver_s *dev, FAR void *pvconn,
 
   nllvdbg("flags: %04x\n", flags);
 
-  if ((flags & UIP_ACKDATA) != 0)
+  if ((flags & TCP_ACKDATA) != 0)
     {
       /* Update the timeout */
 
@@ -175,9 +175,9 @@ static uint16_t ack_interrupt(FAR struct net_driver_s *dev, FAR void *pvconn,
 
       dev->d_sndlen = 0;
 
-      flags &= ~UIP_ACKDATA;
+      flags &= ~TCP_ACKDATA;
     }
-  else if ((flags & UIP_REXMIT) != 0)
+  else if ((flags & TCP_REXMIT) != 0)
     {
       nlldbg("REXMIT\n");
 
@@ -190,7 +190,7 @@ static uint16_t ack_interrupt(FAR struct net_driver_s *dev, FAR void *pvconn,
 
   /* Check for a loss of connection */
 
-  else if ((flags & (UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT)) != 0)
+  else if ((flags & (TCP_CLOSE | TCP_ABORT | TCP_TIMEDOUT)) != 0)
     {
       /* Report not connected */
 
@@ -212,10 +212,10 @@ static uint16_t ack_interrupt(FAR struct net_driver_s *dev, FAR void *pvconn,
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual
- *   send operation when polled by the uIP layer.
+ *   send operation when polled by the lower, device interfacing layer.
  *
  * Parameters:
- *   dev      The sructure of the network driver that caused the interrupt
+ *   dev      The structure of the network driver that caused the interrupt
  *   conn     The connection structure associated with the socket
  *   flags    Set of events describing why the callback was invoked
  *
@@ -239,7 +239,7 @@ static uint16_t sendfile_interrupt(FAR struct net_driver_s *dev, FAR void *pvcon
 
   /* Check for a loss of connection */
 
-  if ((flags & (UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT)) != 0)
+  if ((flags & (TCP_CLOSE | TCP_ABORT | TCP_TIMEDOUT)) != 0)
     {
       /* Report not connected */
 
@@ -258,7 +258,7 @@ static uint16_t sendfile_interrupt(FAR struct net_driver_s *dev, FAR void *pvcon
    * next polling cycle.
    */
 
-  if ((flags & UIP_NEWDATA) == 0 && pstate->snd_sent < pstate->snd_flen)
+  if ((flags & TCP_NEWDATA) == 0 && pstate->snd_sent < pstate->snd_flen)
     {
       /* Get the amount of data that we can send in the next packet */
 
@@ -531,7 +531,8 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
 
   /* Set up the ACK callback in the connection */
 
-  state.snd_ackcb->flags = UIP_ACKDATA|UIP_REXMIT|UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT;
+  state.snd_ackcb->flags = (TCP_ACKDATA | TCP_REXMIT | TCP_CLOSE |
+                            TCP_ABORT | TCP_TIMEDOUT);
   state.snd_ackcb->priv  = (void*)&state;
   state.snd_ackcb->event = ack_interrupt;
 
@@ -539,7 +540,7 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
 
   do
     {
-      state.snd_datacb->flags = UIP_POLL;
+      state.snd_datacb->flags = TCP_POLL;
       state.snd_datacb->priv  = (void*)&state;
       state.snd_datacb->event = sendfile_interrupt;
 

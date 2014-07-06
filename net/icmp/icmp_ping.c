@@ -136,7 +136,8 @@ static inline int ping_timeout(FAR struct icmp_ping_s *pstate)
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual
- *   ECHO request and/or ECHO reply actions when polled by the uIP layer.
+ *   ECHO request and/or ECHO reply actions when polled by the lower, device
+ *   interfacing layer.
  *
  * Parameters:
  *   dev        The structure of the network driver that caused the interrupt
@@ -168,7 +169,7 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
        * response from a previous ping.
        */
 
-      if ((flags & UIP_ECHOREPLY) != 0 && conn != NULL)
+      if ((flags & ICMP_ECHOREPLY) != 0 && conn != NULL)
         {
           FAR struct icmp_iphdr_s *icmp = (FAR struct icmp_iphdr_s *)conn;
 
@@ -179,7 +180,7 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
             {
               /* Consume the ECHOREPLY */
 
-              flags     &= ~UIP_ECHOREPLY;
+              flags     &= ~ICMP_ECHOREPLY;
               dev->d_len = 0;
 
               /* Return the result to the caller */
@@ -204,7 +205,7 @@ static uint16_t ping_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
        */
 
       if (dev->d_sndlen <= 0 &&           /* Packet available */
-          (flags & UIP_NEWDATA) == 0 &&   /* No incoming data */
+          (flags & ICMP_NEWDATA) == 0 &&  /* No incoming data */
           !pstate->png_sent)              /* Request not sent */
         {
           FAR struct icmp_iphdr_s *picmp = ICMPBUF;
@@ -350,7 +351,7 @@ int icmp_ping(net_ipaddr_t addr, uint16_t id, uint16_t seqno,
   state.png_cb = icmp_callback_alloc();
   if (state.png_cb)
     {
-      state.png_cb->flags   = UIP_POLL|UIP_ECHOREPLY;
+      state.png_cb->flags   = (ICMP_POLL | ICMP_ECHOREPLY);
       state.png_cb->priv    = (void*)&state;
       state.png_cb->event   = ping_interrupt;
       state.png_result      = -EINTR; /* Assume sem-wait interrupted by signal */

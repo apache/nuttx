@@ -106,7 +106,7 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
   /* Check for connection aborted */
 
-  if ((result & UIP_ABORT) != 0)
+  if ((result & TCP_ABORT) != 0)
     {
       dev->d_sndlen = 0;
       conn->tcpstateflags = TCP_CLOSED;
@@ -117,7 +117,7 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
   /* Check for connection closed */
 
-  else if ((result & UIP_CLOSE) != 0)
+  else if ((result & TCP_CLOSE) != 0)
     {
       conn->tcpstateflags = TCP_FIN_WAIT_1;
       conn->unacked  = 1;
@@ -209,7 +209,7 @@ void tcp_rexmit(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
   /* If there is no data to send, just send out a pure ACK if one is requested`. */
 
-  else if ((result & UIP_SNDACK) != 0)
+  else if ((result & TCP_SNDACK) != 0)
     {
       tcp_send(dev, conn, TCP_ACK, IPTCP_HDRLEN);
     }

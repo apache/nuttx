@@ -147,7 +147,7 @@ static inline int send_timeout(FAR struct sendto_s *pstate)
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual
- *   send operation when polled by the uIP layer.
+ *   send operation when polled by the lower, device interfacing layer.
  *
  * Parameters:
  *   dev        The sructure of the network driver that caused the interrupt
@@ -178,7 +178,7 @@ static uint16_t sendto_interrupt(struct net_driver_s *dev, void *conn,
        * we will just have to wait for the next polling cycle.
        */
 
-      if (dev->d_sndlen > 0 || (flags & UIP_NEWDATA) != 0)
+      if (dev->d_sndlen > 0 || (flags & UDP_NEWDATA) != 0)
         {
            /* Another thread has beat us sending data or the buffer is busy,
             * Check for a timeout.  If not timed out, wait for the next
@@ -396,7 +396,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
   state.st_cb = udp_callback_alloc(conn);
   if (state.st_cb)
     {
-      state.st_cb->flags   = UIP_POLL;
+      state.st_cb->flags   = UDP_POLL;
       state.st_cb->priv    = (void*)&state;
       state.st_cb->event   = sendto_interrupt;
 
@@ -432,7 +432,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
       goto errout;
     }
 
-  /* Sucess */
+  /* Success */
 
   return state.st_sndlen;
 #else

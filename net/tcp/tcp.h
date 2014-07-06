@@ -183,18 +183,18 @@ struct tcp_conn_s
    * When an callback is executed from 'list', the input flags are normally
    * returned, however, the implementation may set one of the following:
    *
-   *   UIP_CLOSE   - Gracefully close the current connection
-   *   UIP_ABORT   - Abort (reset) the current connection on an error that
-   *                 prevents UIP_CLOSE from working.
+   *   TCP_CLOSE   - Gracefully close the current connection
+   *   TCP_ABORT   - Abort (reset) the current connection on an error that
+   *                 prevents TCP_CLOSE from working.
    *
    * And/Or set/clear the following:
    *
-   *   UIP_NEWDATA - May be cleared to indicate that the data was consumed
+   *   TCP_NEWDATA - May be cleared to indicate that the data was consumed
    *                 and that no further process of the new data should be
    *                 attempted.
-   *   UIP_SNDACK  - If UIP_NEWDATA is cleared, then UIP_SNDACK may be set
+   *   TCP_SNDACK  - If TCP_NEWDATA is cleared, then TCP_SNDACK may be set
    *                 to indicate that an ACK should be included in the response.
-   *                 (In UIP_NEWDATA is cleared bu UIP_SNDACK is not set, then
+   *                 (In TCP_NEWDATA is cleared bu TCP_SNDACK is not set, then
    *                 dev->d_len should also be cleared).
    */
 
@@ -757,7 +757,7 @@ uint16_t tcp_callback(FAR struct net_driver_s *dev,
  *   zero or equal to buflen; partial packets are not buffered.
  *
  * Assumptions:
- * - The caller has checked that UIP_NEWDATA is set in flags and that is no
+ * - The caller has checked that TCP_NEWDATA is set in flags and that is no
  *   other handler available to process the incoming data.
  * - This function is called at the interrupt level with interrupts disabled.
  *

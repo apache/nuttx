@@ -95,7 +95,7 @@ struct net_poll_s
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual
- *   TCP receive operation via by the uIP layer.
+ *   TCP receive operation via by the device interface layer.
  *
  * Parameters:
  *   dev      The structure of the network driver that caused the interrupt
@@ -128,21 +128,21 @@ static uint16_t poll_interrupt(FAR struct net_driver_s *dev, FAR void *conn,
 
       /* Check for data or connection availability events. */
 
-      if ((flags & (UIP_NEWDATA|UIP_BACKLOG)) != 0)
+      if ((flags & (TCP_NEWDATA | TCP_BACKLOG)) != 0)
         {
           eventset |= POLLIN & info->fds->events;
         }
 
       /* A poll is a sign that we are free to send data. */
 
-      if ((flags & UIP_POLL) != 0)
+      if ((flags & TCP_POLL) != 0)
         {
           eventset |= (POLLOUT & info->fds->events);
         }
 
       /* Check for a loss of connection events. */
 
-      if ((flags & (UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT)) != 0)
+      if ((flags & (TCP_CLOSE | TCP_ABORT | TCP_TIMEDOUT)) != 0)
         {
           /* Marki that the connection has been lost */
 
@@ -230,7 +230,8 @@ static inline int net_pollsetup(FAR struct socket *psock,
    * callback processing.
    */
 
-  cb->flags    = (UIP_NEWDATA|UIP_BACKLOG|UIP_POLL|UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT);
+  cb->flags    = (TCP_NEWDATA | TCP_BACKLOG | TCP_POLL | TCP_CLOSE |
+                  TCP_ABORT | TCP_TIMEDOUT);
   cb->priv     = (FAR void *)info;
   cb->event    = poll_interrupt;
 

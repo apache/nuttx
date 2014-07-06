@@ -279,7 +279,7 @@ int tcp_accept_connection(FAR struct net_driver_s *dev,
           ret = tcp_backlogadd(listener, conn);
           if (ret == OK)
             {
-              (void)tcp_callback(dev, listener, UIP_BACKLOG);
+              (void)tcp_callback(dev, listener, TCP_BACKLOG);
             }
         }
 #endif

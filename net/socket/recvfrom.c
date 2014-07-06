@@ -508,7 +508,7 @@ static uint16_t recvfrom_pktinterrupt(FAR struct net_driver_s *dev,
     {
       /* If a new packet is available, then complete the read action. */
 
-      if ((flags & UIP_NEWDATA) != 0)
+      if ((flags & PKT_NEWDATA) != 0)
         {
           /* Copy the packet */
           recvfrom_newpktdata(dev, pstate);
@@ -529,7 +529,7 @@ static uint16_t recvfrom_pktinterrupt(FAR struct net_driver_s *dev,
 #endif
           /* indicate that the data has been consumed */
 
-          flags &= ~UIP_NEWDATA;
+          flags &= ~PKT_NEWDATA;
 
           /* Wake up the waiting thread, returning the number of bytes
            * actually read.
@@ -591,7 +591,7 @@ static inline void recvfrom_tcpsender(FAR struct net_driver_s *dev,
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual
- *   TCP receive operation via by the uIP layer.
+ *   TCP receive operation via by the lower, device interfacing layer.
  *
  * Parameters:
  *   dev      The structure of the network driver that caused the interrupt
@@ -621,7 +621,7 @@ static uint16_t recvfrom_tcpinterrupt(FAR struct net_driver_s *dev,
     {
       /* If new data is available, then complete the read action. */
 
-      if ((flags & UIP_NEWDATA) != 0)
+      if ((flags & TCP_NEWDATA) != 0)
         {
           /* Copy the data from the packet (saving any unused bytes from the
            * packet in the read-ahead buffer).
@@ -637,7 +637,7 @@ static uint16_t recvfrom_tcpinterrupt(FAR struct net_driver_s *dev,
            * should be sent.
            */
 
-          flags = (flags & ~UIP_NEWDATA) | UIP_SNDACK;
+          flags = (flags & ~TCP_NEWDATA) | TCP_SNDACK;
 
           /* Check for transfer complete.  We will consider the transfer
            * complete in own of two different ways, depending on the setting
@@ -690,12 +690,12 @@ static uint16_t recvfrom_tcpinterrupt(FAR struct net_driver_s *dev,
 
       /* Check for a loss of connection.
        *
-       * UIP_CLOSE: The remote host has closed the connection
-       * UIP_ABORT: The remote host has aborted the connection
-       * UIP_TIMEDOUT: Connection aborted due to too many retransmissions.
+       * TCP_CLOSE: The remote host has closed the connection
+       * TCP_ABORT: The remote host has aborted the connection
+       * TCP_TIMEDOUT: Connection aborted due to too many retransmissions.
        */
 
-      else if ((flags & (UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT)) != 0)
+      else if ((flags & (TCP_CLOSE | TCP_ABORT | TCP_TIMEDOUT)) != 0)
         {
           nllvdbg("Lost connection\n");
 
@@ -711,7 +711,7 @@ static uint16_t recvfrom_tcpinterrupt(FAR struct net_driver_s *dev,
 
           /* Check if the peer gracefully closed the connection. */
 
-          if ((flags & UIP_CLOSE) != 0)
+          if ((flags & TCP_CLOSE) != 0)
             {
               /* This case should always return success (zero)! The value of
                * rf_recvlen, if zero, will indicate that the connection was
@@ -838,7 +838,7 @@ static inline void recvfrom_udpsender(struct net_driver_s *dev, struct recvfrom_
  *
  * Description:
  *   This function is called from the interrupt level to perform the actual
- *   UDP receive operation via by the uIP layer.
+ *   UDP receive operation via by the lower, device interfacing layer.
  *
  * Parameters:
  *   dev      The structure of the network driver that caused the interrupt
@@ -867,7 +867,7 @@ static uint16_t recvfrom_udpinterrupt(struct net_driver_s *dev, void *pvconn,
     {
       /* If new data is available, then complete the read action. */
 
-      if ((flags & UIP_NEWDATA) != 0)
+      if ((flags & UDP_NEWDATA) != 0)
         {
           /* Copy the data from the packet */
 
@@ -889,7 +889,7 @@ static uint16_t recvfrom_udpinterrupt(struct net_driver_s *dev, void *pvconn,
 
           /* Indicate that the data has been consumed */
 
-          flags &= ~UIP_NEWDATA;
+          flags &= ~UDP_NEWDATA;
 
           /* Wake up the waiting thread, returning the number of bytes
            * actually read.
@@ -1082,7 +1082,7 @@ static ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   state.rf_cb = pkt_callback_alloc(conn);
   if (state.rf_cb)
     {
-      state.rf_cb->flags  = UIP_NEWDATA|UIP_POLL;
+      state.rf_cb->flags  = (PKT_NEWDATA | PKT_POLL);
       state.rf_cb->priv   = (void*)&state;
       state.rf_cb->event  = recvfrom_pktinterrupt;
 
@@ -1176,7 +1176,7 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
     {
       /* Set up the callback in the connection */
 
-      state.rf_cb->flags   = UIP_NEWDATA|UIP_POLL;
+      state.rf_cb->flags   = (UDP_NEWDATA | UDP_POLL);
       state.rf_cb->priv    = (void*)&state;
       state.rf_cb->event   = recvfrom_udpinterrupt;
 
@@ -1361,14 +1361,18 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
       state.rf_cb = tcp_callback_alloc(conn);
       if (state.rf_cb)
         {
-          state.rf_cb->flags   = UIP_NEWDATA|UIP_POLL|UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT;
+          state.rf_cb->flags   = (TCP_NEWDATA | TCP_POLL | TCP_CLOSE |
+                                  TCP_ABORT | TCP_TIMEDOUT);
           state.rf_cb->priv    = (void*)&state;
           state.rf_cb->event   = recvfrom_tcpinterrupt;
 
-          /* Wait for either the receive to complete or for an error/timeout to occur.
-           * NOTES:  (1) net_lockedwait will also terminate if a signal is received, (2)
-           * interrupts may be disabled!  They will be re-enabled while the task sleeps
-           * and automatically re-enabled when the task restarts.
+          /* Wait for either the receive to complete or for an error/timeout
+           * to occur.
+           *
+           * NOTES:  (1) net_lockedwait will also terminate if a signal is
+           * received, (2) interrupts may be disabled!  They will be re-
+           * enabled while the task sleeps and automatically re-enabled when
+           * the task restarts.
            */
 
           ret = net_lockedwait(&state.rf_sem);
