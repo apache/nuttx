@@ -1027,6 +1027,9 @@ static int twi_registercallback(FAR struct i2c_dev_s *dev,
  *   Receive a block of data on I2C using the previously selected I2C
  *   frequency and slave address.
  *
+ * Returned Value:
+ *   Returns zero on success; a negated errno value on failure.
+ *
  *******************************************************************************/
 
 #ifdef CONFIG_I2C_TRANSFER

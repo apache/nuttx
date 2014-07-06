@@ -291,20 +291,8 @@ static int mxt_getreg(FAR struct mxt_dev_s *priv, uint16_t regaddr,
    */
 
   ret = I2C_TRANSFER(priv->i2c, msg, 2);
-  if (ret == 2)
+  if (ret < 0)
     {
-      ret = OK;
-    }
-
-  /* The return value was an error or some number of messages other than 2 */
-
-  else
-    {
-      if (ret >= 0)
-        {
-          ret = -EIO;
-        }
-
       idbg("ERROR: I2C_TRANSFER failed: %d\n", ret);
     }
 
@@ -344,20 +332,8 @@ static int mxt_putreg(FAR struct mxt_dev_s *priv, uint16_t regaddr,
    */
 
   ret = I2C_TRANSFER(priv->i2c, msg, 2);
-  if (ret == 2)
+  if (ret < 0)
     {
-      ret = OK;
-    }
-
-  /* The return value was an error or some number of messages other than 2 */
-
-  else
-    {
-      if (ret >= 0)
-        {
-          ret = -EIO;
-        }
-
       idbg("ERROR: I2C_TRANSFER failed: %d\n", ret);
     }
 
@@ -387,7 +363,7 @@ static FAR struct mxt_object_s *mxt_object(FAR struct mxt_dev_s *priv,
         }
     }
 
-  idbg("ERROR: Invalid object type\n");
+  idbg("ERROR: Invalid object type: %d\n", type);
   return NULL;
 }
 
