@@ -1382,7 +1382,7 @@ static int mxt_getobjtab(FAR struct mxt_dev_s *priv)
   tabsize = priv->info.nobjects * sizeof(struct mxt_object_s);
   ret = mxt_getreg(priv, MXT_OBJECT_START, (FAR uint8_t *)priv->objtab,
                    tabsize);
-  if (ret)
+  if (ret < 0)
     {
       return ret;
     }
@@ -1507,7 +1507,7 @@ static int mxt_hwinitialize(FAR struct mxt_dev_s *priv)
   /* Get object table information */
 
   ret = mxt_getobjtab(priv);
-  if (ret)
+  if (ret < 0)
     {
       goto errout_with_objtab;
     }
@@ -1520,7 +1520,7 @@ static int mxt_hwinitialize(FAR struct mxt_dev_s *priv)
   /* Update matrix size in the info structure */
 
   ret = mxt_getreg(priv, MXT_MATRIX_X_SIZE, (FAR uint8_t *)&regval, 1);
-  if (ret)
+  if (ret < 0)
     {
       goto errout_with_objtab;
     }
@@ -1528,7 +1528,7 @@ static int mxt_hwinitialize(FAR struct mxt_dev_s *priv)
   info->xsize = regval;
 
   ret = mxt_getreg(priv, MXT_MATRIX_Y_SIZE, (FAR uint8_t *)&regval, 1);
-  if (ret)
+  if (ret < 0)
     {
       goto errout_with_objtab;
     }
@@ -1577,7 +1577,7 @@ static int mxt_hwinitialize(FAR struct mxt_dev_s *priv)
   /* Force the CHG pin to the high state */
 
   ret = mxt_chghigh(priv);
-  if (ret)
+  if (ret < 0)
     {
       goto errout_with_sample;
     }
