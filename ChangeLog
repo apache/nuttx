@@ -7661,4 +7661,5 @@
 	  at include/nuttx/net to the corresponding header file under net/.
 	  This additional header files have been sanitized: arp.h, icmp.h, tcp.h
 	  (2014-7-6)
-
+	* net/: Add a few missing configuration options to the Kconfig files
+	  (2014-7-8).
