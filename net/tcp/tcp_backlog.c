@@ -50,6 +50,7 @@
 #include <nuttx/net/net.h>
 
 #include "devif/devif.h"
+#include "tcp/tcp.h"
 
 /****************************************************************************
  * Private Data

@@ -880,7 +880,7 @@ FAR struct tcp_conn_s *tcp_backlogremove(FAR struct tcp_conn_s *conn);
 
 #ifdef CONFIG_NET_TCPBACKLOG
 int tcp_backlogdelete(FAR struct tcp_conn_s *conn,
-                      FAR struct tcp_conn_s *blconn)
+                      FAR struct tcp_conn_s *blconn);
 #else
 #  define tcp_backlogdelete(c,b) (-ENOSYS)
 #endif

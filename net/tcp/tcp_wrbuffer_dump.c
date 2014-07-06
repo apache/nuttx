@@ -44,6 +44,8 @@
 
 #include <nuttx/net/iob.h>
 
+#include "tcp/tcp.h"
+
 #ifdef CONFIG_DEBUG
 
 /****************************************************************************
