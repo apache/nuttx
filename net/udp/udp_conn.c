@@ -467,7 +467,7 @@ int udp_connect(FAR struct udp_conn_s *conn,
       net_ipaddr_copy(conn->ripaddr, g_allzeroaddr);
     }
 
-  conn->ttl = UIP_TTL;
+  conn->ttl = IP_TTL;
   return OK;
 }
 

@@ -515,8 +515,8 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct tcp_iphdr_s *buf)
     {
       /* Fill in the necessary fields for the new connection. */
 
-      conn->rto           = UIP_RTO;
-      conn->timer         = UIP_RTO;
+      conn->rto           = TCP_RTO;
+      conn->timer         = TCP_RTO;
       conn->sa            = 0;
       conn->sv            = 4;
       conn->nrtx          = 0;
@@ -679,7 +679,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn,
   conn->unacked    = 1;    /* TCP length of the SYN is one. */
   conn->nrtx       = 0;
   conn->timer      = 1;    /* Send the SYN next time around. */
-  conn->rto        = UIP_RTO;
+  conn->rto        = TCP_RTO;
   conn->sa         = 0;
   conn->sv         = 16;   /* Initial value of the RTT variance. */
   conn->lport      = htons((uint16_t)port);

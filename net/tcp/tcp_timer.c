@@ -164,11 +164,11 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
                   conn->expired > 0 ||
 #else
-                  conn->nrtx == UIP_MAXRTX ||
+                  conn->nrtx == TCP_MAXRTX ||
 #endif
                   ((conn->tcpstateflags == TCP_SYN_SENT ||
                     conn->tcpstateflags == TCP_SYN_RCVD) &&
-                    conn->nrtx == UIP_MAXSYNRTX)
+                    conn->nrtx == TCP_MAXSYNRTX)
                  )
                 {
                   conn->tcpstateflags = TCP_CLOSED;
@@ -189,7 +189,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
              /* Exponential backoff. */
 
-              conn->timer = UIP_RTO << (conn->nrtx > 4 ? 4: conn->nrtx);
+              conn->timer = TCP_RTO << (conn->nrtx > 4 ? 4: conn->nrtx);
               (conn->nrtx)++;
 
               /* Ok, so we need to retransmit. We do this differently

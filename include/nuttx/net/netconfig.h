@@ -105,7 +105,7 @@
  * This should normally not be changed.
  */
 
-#define UIP_TTL 64
+#define IP_TTL 64
 
 #ifdef CONFIG_NET_TCP_REASSEMBLY
 #  ifndef CONFIG_NET_TCP_REASS_MAXAGE
@@ -160,7 +160,7 @@
  *
  * Since the TCP connections are statically allocated, turning this
  * configuration knob down results in less RAM used. Each TCP
- * connection requires approximatly 30 bytes of memory.
+ * connection requires approximately 30 bytes of memory.
  */
 
 #ifndef CONFIG_NET_TCP_CONNS
@@ -194,7 +194,7 @@
  * This should not be changed.
  */
 
-#define UIP_RTO 3
+#define TCP_RTO 3
 
 /* The maximum number of times a segment should be retransmitted
  * before the connection should be aborted.
@@ -202,7 +202,7 @@
  * This should not be changed.
  */
 
-#define UIP_MAXRTX  8
+#define TCP_MAXRTX  8
 
 /* The maximum number of times a SYN segment should be retransmitted
  * before a connection request should be deemed to have been
@@ -211,7 +211,7 @@
  * This should not need to be changed.
  */
 
-#define UIP_MAXSYNRTX 5
+#define TCP_MAXSYNRTX 5
 
 /* The TCP maximum segment size. This is should not be set to more
  * than CONFIG_NET_BUFSIZE - NET_LL_HDRLEN - IPTCP_HDRLEN.

@@ -122,7 +122,7 @@ void icmp_send(FAR struct net_driver_s *dev, FAR net_ipaddr_t *destaddr)
       picmp->len[0]      = (dev->d_sndlen >> 8);
       picmp->len[1]      = (dev->d_sndlen & 0xff);
       picmp->nexthdr     = IP_PROTO_ICMP;
-      picmp->hoplimit    = UIP_TTL;
+      picmp->hoplimit    = IP_TTL;
 
       net_ipaddr_copy(picmp->srcipaddr, &dev->d_ipaddr);
       net_ipaddr_copy(picmp->destipaddr, destaddr);
@@ -138,7 +138,7 @@ void icmp_send(FAR struct net_driver_s *dev, FAR net_ipaddr_t *destaddr)
       picmp->ipid[1]     = g_ipid & 0xff;
       picmp->ipoffset[0] = TCPFLAG_DONTFRAG >> 8;
       picmp->ipoffset[1] = TCPFLAG_DONTFRAG & 0xff;
-      picmp->ttl         = UIP_TTL;
+      picmp->ttl         = IP_TTL;
       picmp->proto       = IP_PROTO_ICMP;
 
       net_ipaddr_hdrcopy(picmp->srcipaddr, &dev->d_ipaddr);

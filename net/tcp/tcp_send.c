@@ -98,7 +98,7 @@ static void tcp_sendcomplete(FAR struct net_driver_s *dev)
 {
   FAR struct tcp_iphdr_s *pbuf = BUF;
 
-  pbuf->ttl         = UIP_TTL;
+  pbuf->ttl         = IP_TTL;
 
 #ifdef CONFIG_NET_IPv6
 

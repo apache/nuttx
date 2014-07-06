@@ -408,7 +408,7 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
 
           /* Increment the retransmit count on this write buffer. */
 
-          if (++WRB_NRTX(wrb) >= UIP_MAXRTX)
+          if (++WRB_NRTX(wrb) >= TCP_MAXRTX)
             {
               nlldbg("Expiring wrb=%p nrtx=%u\n", wrb, WRB_NRTX(wrb));
 
@@ -473,7 +473,7 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
 
           /* Free any write buffers that have exceed the retry count */
 
-          if (++WRB_NRTX(wrb) >= UIP_MAXRTX)
+          if (++WRB_NRTX(wrb) >= TCP_MAXRTX)
             {
               nlldbg("Expiring wrb=%p nrtx=%u\n", wrb, WRB_NRTX(wrb));
 
