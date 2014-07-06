@@ -7657,4 +7657,8 @@
 	  to go (2014-7-5)
 	* configs/sama5d4-ek/src/sam_maxtouch.c:  Add board support for the
 	  maXTouch touchscreen controller (2014-7-5).
+	* net/*/*.h: Finish moving the private definitions from header files
+	  at include/nuttx/net to the corresponding header file under net/.
+	  This additional header files have been sanitized: arp.h, icmp.h, tcp.h
+	  (2014-7-6)
 
