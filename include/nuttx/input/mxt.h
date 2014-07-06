@@ -79,13 +79,6 @@
 #  error "Work queue support required.  CONFIG_SCHED_WORKQUEUE must be selected."
 #endif
 
-/* I2C addresses ************************************************************/
-
-#define MXT_APP_LOW           0x4a
-#define MXT_APP_HIGH          0x4b
-#define MXT_BOOT_LOW          0x24
-#define MXT_BOOT_HIGH         0x25
-
 /* Helper macros ************************************************************/
 
 #define MXT_ATTACH(s,isr,arg) ((s)->attach(s,isr,arg))
@@ -120,8 +113,8 @@ struct mxt_lower_s
 {
   /* Device characterization */
 
+  uint32_t frequency;  /* Initial I2C frequency */
   uint8_t address;     /* 7-bit I2C address (only bits 0-6 used) */
-  uint32_t frequency;  /* I2C frequency */
 
   /* True: Swap X and Y values */
 

@@ -70,9 +70,10 @@
 #  define CONFIG_SAMA5D4EK_MXT_DEVMINOR 0
 #endif
 
-/* The touchscreen communicates on TWI0 */
+/* The touchscreen communicates on TWI0, I2C address 0x4c */
 
-#define MXT_BUSNUM 0
+#define MXT_TWI_BUS      0
+#define MXT_I2C_ADDRESS  0x4c
 
 /****************************************************************************
  * Private Types
@@ -128,7 +129,7 @@ static struct sama5d4ek_tscinfo_s g_mxtinfo =
 {
   .lower =
   {
-    .address   = (0x4c >> 1),
+    .address   = MXT_I2C_ADDRESS,
     .frequency = CONFIG_SAMA5D4EK_MXT_I2CFREQUENCY,
 
     .attach    = mxt_attach,
@@ -259,10 +260,10 @@ int arch_tcinitialize(int minor)
 
       /* Get an instance of the I2C interface for the touchscreen chip select */
 
-      i2c = up_i2cinitialize(MXT_BUSNUM);
+      i2c = up_i2cinitialize(MXT_TWI_BUS);
       if (!i2c)
         {
-          idbg("Failed to initialize I2C%d\n", MXT_BUSNUM);
+          idbg("Failed to initialize I2C%d\n", MXT_TWI_BUS);
           return -ENODEV;
         }
 

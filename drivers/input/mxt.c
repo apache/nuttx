@@ -126,21 +126,6 @@ struct mxt_info_s
 };
 #define MXT_INFO_SIZE 7
 
-struct mxt_object_s
-{
-  uint8_t type;                    /* Object type */
-  uint8_t addr[2];                 /* Start address */
-  uint8_t size;                    /* Size of each instance - 1 */
-  uint8_t ninstances;              /* Number of instances - 1 */
-  uint8_t nids;                    /* Number of report IDs */
-};
-
-struct mxt_msg_s
-{
-  uint8_t id;                      /* Report ID */
-  uint8_t body[7];                 /* Message body */
-};
-
 /* Describes the state of the MXT driver */
 
 struct mxt_dev_s
@@ -814,7 +799,7 @@ static void mxt_worker(FAR void *arg)
           uint32_t chksum;
           int status;
 
-          status = msg_body[0]
+          status = msg.body[0];
           chksum = (uint32_t)msg.body[1] |
                   ((uint32_t)msg.body[2] << 8) |
                   ((uint32_t)msg.body[3] << 16);
@@ -845,8 +830,8 @@ static void mxt_worker(FAR void *arg)
       else
         {
           ivdbg("Ignored: id=%u message={%02x %02x %02x %02x %02x %02x %02x}\n",
-                msg->id, msg->body[0], msg->body[1], msg->body[2], msg->body[3],
-                msg->body[4], msg->body[5], msg->body[6], msg->body[7]);
+                msg.id, msg.body[0], msg.body[1], msg.body[2], msg.body[3],
+                msg.body[4], msg.body[5], msg.body[6]);
         }
     }
   while (id != 0xff);
@@ -1705,7 +1690,7 @@ int mxt_register(FAR struct i2c_dev_s *i2c,
   ret = mxt_hwinitialize(priv);
   if (ret < 0)
     {
-      idbg("ERROR: mxt_hwinitialize failed: %d\n", reg);
+      idbg("ERROR: mxt_hwinitialize failed: %d\n", ret);
       goto errout_with_irq;
     }
 

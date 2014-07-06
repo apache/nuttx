@@ -70,8 +70,6 @@
 #  define MXT_OBJECT_NUM         0x06 /* Number of objects */
 #define MXT_OBJECT_START         0x07
 
-#define MXT_OBJECT_SIZE          6
-
 /* Object types */
 
 #define MXT_DEBUG_DIAGNOSTIC_T37 37
@@ -255,6 +253,25 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+/* This structure describes one maXTouch object */
+
+struct mxt_object_s
+{
+  uint8_t type;                    /* Object type */
+  uint8_t addr[2];                 /* Start address */
+  uint8_t size;                    /* Size of each instance - 1 */
+  uint8_t ninstances;              /* Number of instances - 1 */
+  uint8_t nids;                    /* Number of report IDs */
+};
+#define MXT_OBJECT_SIZE 6
+
+/* This structure describes one maXTouch message */
+
+struct mxt_msg_s
+{
+  uint8_t id;                      /* Report ID */
+  uint8_t body[7];                 /* Message body */
+};
 
 /****************************************************************************
  * Public Data
