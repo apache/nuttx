@@ -141,8 +141,8 @@ int net_startmonitor(FAR struct socket *psock)
    * the monitoring callback.)
    */
 
-  if (!(conn->tcpstateflags == UIP_ESTABLISHED ||
-        conn->tcpstateflags == UIP_SYN_RCVD))
+  if (!(conn->tcpstateflags == TCP_ESTABLISHED ||
+        conn->tcpstateflags == TCP_SYN_RCVD))
     {
       connection_event(conn, UIP_CLOSE);
     }

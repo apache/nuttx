@@ -99,7 +99,7 @@ void tcp_poll(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
 
   /* Verify that the connection is established */
 
-  if ((conn->tcpstateflags & UIP_TS_MASK) == UIP_ESTABLISHED)
+  if ((conn->tcpstateflags & TCP_STATE_MASK) == TCP_ESTABLISHED)
     {
       /* Set up for the callback */
 

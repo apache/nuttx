@@ -109,8 +109,8 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
   if ((result & UIP_ABORT) != 0)
     {
       dev->d_sndlen = 0;
-      conn->tcpstateflags = UIP_CLOSED;
-      nllvdbg("TCP state: UIP_CLOSED\n");
+      conn->tcpstateflags = TCP_CLOSED;
+      nllvdbg("TCP state: TCP_CLOSED\n");
 
       tcp_send(dev, conn, TCP_RST | TCP_ACK, IPTCP_HDRLEN);
     }
@@ -119,10 +119,10 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
   else if ((result & UIP_CLOSE) != 0)
     {
-      conn->tcpstateflags = UIP_FIN_WAIT_1;
+      conn->tcpstateflags = TCP_FIN_WAIT_1;
       conn->unacked  = 1;
       conn->nrtx     = 0;
-      nllvdbg("TCP state: UIP_FIN_WAIT_1\n");
+      nllvdbg("TCP state: TCP_FIN_WAIT_1\n");
 
       dev->d_sndlen  = 0;
       tcp_send(dev, conn, TCP_FIN | TCP_ACK, IPTCP_HDRLEN);

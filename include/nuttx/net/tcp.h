@@ -64,46 +64,46 @@
 
 /* TCP definitions */
 
-#define TCP_FIN         0x01
-#define TCP_SYN         0x02
-#define TCP_RST         0x04
-#define TCP_PSH         0x08
-#define TCP_ACK         0x10
-#define TCP_URG         0x20
-#define TCP_CTL         0x3f
+#define TCP_FIN           0x01
+#define TCP_SYN           0x02
+#define TCP_RST           0x04
+#define TCP_PSH           0x08
+#define TCP_ACK           0x10
+#define TCP_URG           0x20
+#define TCP_CTL           0x3f
 
-#define TCP_OPT_END     0   /* End of TCP options list */
-#define TCP_OPT_NOOP    1   /* "No-operation" TCP option */
-#define TCP_OPT_MSS     2   /* Maximum segment size TCP option */
+#define TCP_OPT_END       0   /* End of TCP options list */
+#define TCP_OPT_NOOP      1   /* "No-operation" TCP option */
+#define TCP_OPT_MSS       2   /* Maximum segment size TCP option */
 
-#define TCP_OPT_MSS_LEN 4   /* Length of TCP MSS option. */
+#define TCP_OPT_MSS_LEN   4   /* Length of TCP MSS option. */
 
 /* The TCP states used in the struct tcp_conn_s tcpstateflags field */
 
-#define UIP_TS_MASK     0x0f /* Bits 0-3: TCP state */
-#define UIP_CLOSED      0x00 /* The connection is not in use and available */
-#define UIP_ALLOCATED   0x01 /* The connection is allocated, but not yet initialized */
-#define UIP_SYN_RCVD    0x02
-#define UIP_SYN_SENT    0x03
-#define UIP_ESTABLISHED 0x04
-#define UIP_FIN_WAIT_1  0x05
-#define UIP_FIN_WAIT_2  0x06
-#define UIP_CLOSING     0x07
-#define UIP_TIME_WAIT   0x08
-#define UIP_LAST_ACK    0x09
-#define UIP_STOPPED     0x10 /* Bit 4: stopped */
-                             /* Bit 5-7: Unused, but not available */
+#define TCP_STATE_MASK    0x0f /* Bits 0-3: TCP state */
+#  define TCP_CLOSED      0x00 /* The connection is not in use and available */
+#  define TCP_ALLOCATED   0x01 /* The connection is allocated, but not yet initialized */
+#  define TCP_SYN_RCVD    0x02
+#  define TCP_SYN_SENT    0x03
+#  define TCP_ESTABLISHED 0x04
+#  define TCP_FIN_WAIT_1  0x05
+#  define TCP_FIN_WAIT_2  0x06
+#  define TCP_CLOSING     0x07
+#  define TCP_TIME_WAIT   0x08
+#  define TCP_LAST_ACK    0x09
+#  define TCP_STOPPED     0x10 /* Bit 4: stopped */
+                               /* Bit 5-7: Unused, but not available */
 
 /* Flag bits in 16-bit flags+ipoffset IPv4 TCP header field */
 
-#define UIP_TCPFLAG_RESERVED  0x8000
-#define UIP_TCPFLAG_DONTFRAG  0x4000
-#define UIP_TCPFLAG_MOREFRAGS 0x2000
+#define TCPFLAG_RESERVED  0x8000
+#define TCPFLAG_DONTFRAG  0x4000
+#define TCPFLAG_MOREFRAGS 0x2000
 
 /* TCP header sizes */
 
-#define TCP_HDRLEN    20                       /* Size of TCP header */
-#define IPTCP_HDRLEN  (TCP_HDRLEN + IP_HDRLEN) /* Size of IP + TCP header */
+#define TCP_HDRLEN        20                       /* Size of TCP header */
+#define IPTCP_HDRLEN      (TCP_HDRLEN + IP_HDRLEN) /* Size of IP + TCP header */
 
 /* Initial minimum MSS according to RFC 879
  *

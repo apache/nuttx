@@ -429,7 +429,7 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
                * retransmitted, and un-ACKed, if expired is not zero, the
                * connection will be closed.
                *
-               * field expired can only be updated at UIP_ESTABLISHED state
+               * field expired can only be updated at TCP_ESTABLISHED state
                */
 
               conn->expired++;
@@ -486,7 +486,7 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
                * retransmitted, and un-ACKed, if expired is not zero, the
                * connection will be closed.
                *
-               * field expired can only be updated at UIP_ESTABLISHED state
+               * field expired can only be updated at TCP_ESTABLISHED state
                */
 
               conn->expired++;
@@ -526,7 +526,7 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
    * next polling cycle.
    */
 
-  if ((conn->tcpstateflags & UIP_ESTABLISHED) &&
+  if ((conn->tcpstateflags & TCP_ESTABLISHED) &&
       (flags & (UIP_POLL | UIP_REXMIT)) &&
       !(sq_empty(&conn->write_q)))
     {

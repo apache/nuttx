@@ -310,7 +310,7 @@ static inline int netclose_disconnect(FAR struct socket *psock)
 
   /* Check for the case where the host beat us and disconnected first */
 
-  if (conn->tcpstateflags == UIP_ESTABLISHED &&
+  if (conn->tcpstateflags == TCP_ESTABLISHED &&
       (state.cl_cb = tcp_callback_alloc(conn)) != NULL)
     {
       /* Set up to receive TCP data event callbacks */

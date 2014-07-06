@@ -118,24 +118,24 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
    * out.
    */
 
-  if (conn->tcpstateflags == UIP_TIME_WAIT ||
-      conn->tcpstateflags == UIP_FIN_WAIT_2)
+  if (conn->tcpstateflags == TCP_TIME_WAIT ||
+      conn->tcpstateflags == TCP_FIN_WAIT_2)
     {
       /* Increment the connection timer */
 
       conn->timer += hsec;
-      if (conn->timer >= UIP_TIME_WAIT_TIMEOUT)
+      if (conn->timer >= TCP_TIME_WAIT_TIMEOUT)
         {
-          conn->tcpstateflags = UIP_CLOSED;
+          conn->tcpstateflags = TCP_CLOSED;
 
           /* Notify upper layers about the timeout */
 
           result = tcp_callback(dev, conn, UIP_TIMEDOUT);
 
-          nllvdbg("TCP state: UIP_CLOSED\n");
+          nllvdbg("TCP state: TCP_CLOSED\n");
         }
     }
-  else if (conn->tcpstateflags != UIP_CLOSED)
+  else if (conn->tcpstateflags != TCP_CLOSED)
     {
       /* If the connection has outstanding data, we increase the connection's
        * timer and see if it has reached the RTO value in which case we
@@ -166,13 +166,13 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 #else
                   conn->nrtx == UIP_MAXRTX ||
 #endif
-                  ((conn->tcpstateflags == UIP_SYN_SENT ||
-                    conn->tcpstateflags == UIP_SYN_RCVD) &&
+                  ((conn->tcpstateflags == TCP_SYN_SENT ||
+                    conn->tcpstateflags == TCP_SYN_RCVD) &&
                     conn->nrtx == UIP_MAXSYNRTX)
                  )
                 {
-                  conn->tcpstateflags = UIP_CLOSED;
-                  nllvdbg("TCP state: UIP_CLOSED\n");
+                  conn->tcpstateflags = TCP_CLOSED;
+                  nllvdbg("TCP state: TCP_CLOSED\n");
 
                   /* We call tcp_callback() with UIP_TIMEDOUT to
                    * inform the application that the connection has
@@ -203,9 +203,9 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 #ifdef CONFIG_NET_STATISTICS
               g_netstats.tcp.rexmit++;
 #endif
-              switch(conn->tcpstateflags & UIP_TS_MASK)
+              switch (conn->tcpstateflags & TCP_STATE_MASK)
                 {
-                  case UIP_SYN_RCVD:
+                  case TCP_SYN_RCVD:
                     /* In the SYN_RCVD state, we should retransmit our
                      * SYNACK.
                      */
@@ -213,13 +213,13 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                     tcp_ack(dev, conn, TCP_ACK | TCP_SYN);
                     goto done;
 
-                  case UIP_SYN_SENT:
+                  case TCP_SYN_SENT:
                     /* In the SYN_SENT state, we retransmit out SYN. */
 
                     tcp_ack(dev, conn, TCP_SYN);
                     goto done;
 
-                  case UIP_ESTABLISHED:
+                  case TCP_ESTABLISHED:
                     /* In the ESTABLISHED state, we call upon the application
                      * to do the actual retransmit after which we jump into
                      * the code for sending out the packet.
@@ -229,9 +229,9 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                     tcp_rexmit(dev, conn, result);
                     goto done;
 
-                  case UIP_FIN_WAIT_1:
-                  case UIP_CLOSING:
-                  case UIP_LAST_ACK:
+                  case TCP_FIN_WAIT_1:
+                  case TCP_CLOSING:
+                  case TCP_LAST_ACK:
                     /* In all these states we should retransmit a FINACK. */
 
                     tcp_send(dev, conn, TCP_FIN | TCP_ACK, IPTCP_HDRLEN);
@@ -242,7 +242,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
       /* The connection does not have outstanding data */
 
-      else if ((conn->tcpstateflags & UIP_TS_MASK) == UIP_ESTABLISHED)
+      else if ((conn->tcpstateflags & TCP_STATE_MASK) == TCP_ESTABLISHED)
         {
           /* If there was no need for a retransmission, we poll the
            * application for new data.

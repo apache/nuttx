@@ -232,11 +232,11 @@
 
 /* How long a connection should stay in the TIME_WAIT state.
  *
- * This configiration option has no real implication, and it should be
+ * This configuration option has no real implication, and it should be
  * left untouched. Units: half second.
  */
 
-#define UIP_TIME_WAIT_TIMEOUT (60*2)
+#define TCP_TIME_WAIT_TIMEOUT (60*2)
 
 /* ARP configuration options */
 

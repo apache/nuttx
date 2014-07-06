@@ -190,9 +190,9 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
   net_ipaddr_hdrcopy(pbuf->srcipaddr, &dev->d_ipaddr);
   net_ipaddr_hdrcopy(pbuf->destipaddr, &conn->ripaddr);
 
-  if (conn->tcpstateflags & UIP_STOPPED)
+  if (conn->tcpstateflags & TCP_STOPPED)
     {
-      /* If the connection has issued UIP_STOPPED, we advertise a zero
+      /* If the connection has issued TCP_STOPPED, we advertise a zero
        * window so that the remote host will stop sending data.
        */
 
