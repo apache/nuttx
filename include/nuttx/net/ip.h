@@ -136,19 +136,7 @@ struct net_iphdr_s
  * Public Function Prototypes
  ****************************************************************************/
 
-/* uIP application functions
- *
- * Functions used by an application running of top of uIP. This includes
- * functions for opening and closing connections, sending and receiving
- * data, etc.
- */
-
-/* uIP convenience and converting functions.
- *
- * These functions can be used for converting between different data
- * formats used by uIP.
- *
- * Construct an IP address from four bytes.
+/* Construct an IPv4 address from four bytes.
  *
  * This function constructs an IPv4 address in network byte order.
  *
@@ -174,7 +162,9 @@ struct net_iphdr_s
 #  define net_ip4addr_conv32(addr) (((in_addr_t)((uint16_t*)addr)[1] << 16) | (in_addr_t)((uint16_t*)addr)[0])
 #endif
 
-/* Extract individual bytes from a 32-bit IPv4 IP address that is in network byte order */
+/* Extract individual bytes from a 32-bit IPv4 IP address that is in network
+ * byte order.
+ */
 
 #ifdef CONFIG_ENDIAN_BIG
    /* Big-endian byte order: 11223344 */
@@ -209,9 +199,7 @@ struct net_iphdr_s
     ((uint16_t*)(addr))[7] = HTONS((addr7)); \
   } while (0)
 
-/* Copy an IP address to another IP address.
- *
- * Copies an IP address from one place to another.
+/* Copy an IP address from one place to another.
  *
  * Example:
  *
@@ -267,14 +255,15 @@ struct net_iphdr_s
      net_ipaddr_cmp(addr, addr2)
 #endif /* !CONFIG_NET_IPv6 */
 
-/* Compare two IP addresses with netmasks
- *
- * Compares two IP addresses with netmasks. The masks are used to mask
- * out the bits that are to be compared.
+/* Compare two IP addresses under a netmask.  The mask is used to mask
+ * out the bits that are to be compared:  Buts within the mask much
+ * match exactly; bits outside if the mask are ignored.
  *
  * Example:
  *
- *   net_ipaddr_t ipaddr1, ipaddr2, mask;
+ *   net_ipaddr_t ipaddr1;
+ *   net_ipaddr_t ipaddr2;
+ *   net_ipaddr_t mask;
  *
  *   net_ipaddr(&mask, 255,255,255,0);
  *   net_ipaddr(&ipaddr1, 192,16,1,2);
@@ -298,9 +287,7 @@ bool net_ipaddr_maskcmp(net_ipaddr_t addr1, net_ipaddr_t addr2,
                         net_ipaddr_t mask);
 #endif
 
-/* Mask out the network part of an IP address.
- *
- * Masks out the network part of an IP address, given the address and
+/* Mask out the network part of an IP address, given the address and
  * the netmask.
  *
  * Example:

@@ -219,7 +219,7 @@ void net_initialize(void);
 void net_initlist(FAR struct socketlist *list);
 void net_releaselist(FAR struct socketlist *list);
 
-/* Given a socket descriptor, return the underly NuttX-specific socket
+/* Given a socket descriptor, return the underlying NuttX-specific socket
  * structure.
  */
 

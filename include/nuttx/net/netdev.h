@@ -333,8 +333,8 @@ int devif_timer(struct net_driver_s *dev, devif_poll_callback_t callback, int hs
  * Call netdev_carrier_on when the carrier has become available and the device
  * is ready to receive/transmit packets.
  *
- * Call detdev_carrier_off when the carrier disappeared and the device has moved
- * into non operational state.
+ * Call detdev_carrier_off when the carrier disappeared and the device has
+ * moved into non operational state.
  *
  ****************************************************************************/
 
