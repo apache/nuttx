@@ -1176,13 +1176,19 @@ Networking
   the ETH0 connector.
 
   EMAC1 connects (indirectly) to another KSZ8081RNB PHY (U7) and is available
-  at the ETH1 connector.  The ETH1 signals go through a line driver that is
-  enabled via LCD_ETH1_CONFIG when an LCD is detected:
+  at the ETH1 connector.
 
-  - LCD_ETH1_CONFIG = 0: LCD 5v disable
-  - LCD_ETH1_CONFIG = 1 & LCD_DETECT# =0: LCD 5v enable
+  The ETH1 signals go through line drivers that are enabled via the board
+  LCD_ETH1_CONFIG signal.  Jumper JP2 selects either the EMAC1 or the LCD by
+  controlling the the LCD_ETH1_CONFIG signal on the board.
 
-  But where does LCD_ETH1_CONFIG come from?
+    - JP2 open, LCD_ETH1_CONFIG pulled high:
+
+      LCD_ETH1_CONFIG=1: LCD 5v enable(LCD_DETECT#=0); ETH1 disable
+
+    - JP2 closed, LCD_ETH1_CONFIG grounded:
+
+      LCD_ETH1_CONFIG=0: LCD 5v disable; ETH1 enable
 
   Selecting the EMAC0 peripheral
   -----------------------------
@@ -2779,7 +2785,7 @@ TM7000 LCD/Touchscreen
   available on the Precision Design Associates website:
   http://www.pdaatl.com/doc/tm7000.pdf
 
-  The TM7000 features an touchscreen controol
+  The TM7000 features:
 
     - 7 inch LCD at 800x480 18-bit RGB resolution and white backlight
     - Projected Capacitive Multi-Touch Controller based on the Atmel
@@ -2788,6 +2794,19 @@ TM7000 LCD/Touchscreen
       QTouch™ Button Sensor IC
     - 200 bytes of non-volatile serial EEPROM
 
+  Jumper JP2 selects either the EMAC1 or the LCD by controlling the
+  the LCD_ETH1_CONFIG signal on the board.
+
+    - JP2 open, LCD_ETH1_CONFIG pulled high:
+
+      LCD_ETH1_CONFIG=1: LCD 5v enable(LCD_DETECT#=0); ETH1 disable
+
+    - JP2 closed, LCD_ETH1_CONFIG grounded:
+
+      LCD_ETH1_CONFIG=0: LCD 5v disable; ETH1 enable
+
+  maXTouch
+  --------
   Both the MXT768E and the AT42QT1070 are I2C devices with interrupting
   PIO pins:
 
@@ -2801,7 +2820,39 @@ TM7000 LCD/Touchscreen
   ------------------------ -----------------
 
   The schematic indicates the the MXT468E address is 0x4c/0x4d.
-  
+
+  Here are the configuration settings the configuration settings that will
+  enable the maXTouch touchscreen controller:
+
+  System Type
+    CONFIG_SAMA5_TWI0=y     : Enable the TWI0 peripheral
+    CONFIG_SAMA5_PIO_IRQ=y  : Support for PIOE interrupts
+    CONFIG_SAMA5_PIOE_IRQ=y
+
+  Device Drivers
+    CONFIG_INPUT=y          : Input device support
+    CONFIG_INPUT_MXT=y      : Enable maXTouch input device
+
+  Board Configuration
+    CONFIG_SAMA5D4EK_MXT_DEVMINOR=0
+    CONFIG_SAMA5D4EK_MXT_I2CFREQUENCY=100000
+
+  There is a test at apps/examples/touchscreen that can be enabled to
+  build in a touchscreen test:
+
+    CONFIG_EXAMPLES_TOUCHSCREEN=y
+    CONFIG_EXAMPLES_TOUCHSCREEN_ARCHINIT=y
+    CONFIG_EXAMPLES_TOUCHSCREEN_DEVPATH="/dev/input0"
+    CONFIG_EXAMPLES_TOUCHSCREEN_MINOR=0
+
+  QTouch Button Sensor
+  --------------------
+  To be provided.
+
+  LCD
+  ---
+  To be provided.
+
 SAMA4D4-EK Configuration Options
 =================================
 
