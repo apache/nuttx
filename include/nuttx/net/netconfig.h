@@ -107,25 +107,16 @@
 
 #define UIP_TTL 64
 
-/* Turn on support for IP packet reassembly.
- *
- * uIP supports reassembly of fragmented IP packets. This features
- * requires an additonal amount of RAM to hold the reassembly buffer
- * and the reassembly code size is approximately 700 bytes.  The
- * reassembly buffer is of the same size as the d_buf buffer
- * (configured by CONFIG_NET_BUFSIZE).
- *
- * Note: IP packet reassembly is not heavily tested.
- */
+#ifdef CONFIG_NET_TCP_REASSEMBLY
+#  ifndef CONFIG_NET_TCP_REASS_MAXAGE
+  /* The maximum time an IP fragment should wait in the reassembly
+   * buffer before it is dropped.  Units are deci-seconds, the range
+   * of the timer is 8-bits.
+   */
 
-#define UIP_REASSEMBLY 0
-
-/* The maximum time an IP fragment should wait in the reassembly
- * buffer before it is dropped.  Units are deci-seconds, the range
- * of the timer is 8-bits.
- */
-
-#define UIP_REASS_MAXAGE (20*10) /* 20 seconds */
+#    define CONFIG_NET_TCP_REASS_MAXAGE (20*10) /* 20 seconds */
+#  endif
+#endif
 
 /* Network drivers often receive packets with garbage at the end
  * and are longer than the size of packet in the TCP header.  The
@@ -249,23 +240,25 @@
 
 /* ARP configuration options */
 
+#ifndef CONFIG_NET_ARPTAB_SIZE
 /* The size of the ARP table.
  *
  * This option should be set to a larger value if this uIP node will
  * have many connections from the local network.
  */
 
-#ifndef CONFIG_NET_ARPTAB_SIZE
 # define CONFIG_NET_ARPTAB_SIZE 8
 #endif
 
-/* The maxium age of ARP table entries measured in 10ths of seconds.
+#ifndef CONFIG_NET_ARPTAB_SIZE
+/* The maximum age of ARP table entries measured in 10ths of seconds.
  *
- * An UIP_ARP_MAXAGE of 120 corresponds to 20 minutes (BSD
+ * An CONFIG_NET_ARP_MAXAGE of 120 corresponds to 20 minutes (BSD
  * default).
  */
 
-#define UIP_ARP_MAXAGE 120
+#  define CONFIG_NET_ARP_MAXAGE 120
+#endif
 
 /* General configuration options */
 

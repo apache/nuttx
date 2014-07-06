@@ -105,16 +105,16 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Macros. */
+/* Macros */
 
-#define BUF     ((FAR struct net_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN])
-#define FBUF    ((FAR struct net_iphdr_s *)&g_reassembly_buffer[0])
+#define BUF                  ((FAR struct net_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN])
+#define FBUF                 ((FAR struct net_iphdr_s *)&g_reassembly_buffer[0])
 
 /* IP fragment re-assembly */
 
-#define IP_MF                   0x20
-#define UIP_REASS_BUFSIZE       (CONFIG_NET_BUFSIZE - NET_LL_HDRLEN)
-#define UIP_REASS_FLAG_LASTFRAG 0x01
+#define IP_MF                0x20
+#define TCP_REASS_BUFSIZE    (CONFIG_NET_BUFSIZE - NET_LL_HDRLEN)
+#define TCP_REASS_LASTFRAG   0x01
 
 /****************************************************************************
  * Public Variables
@@ -124,13 +124,18 @@
  * Private Variables
  ****************************************************************************/
 
-#if UIP_REASSEMBLY && !defined(CONFIG_NET_IPv6)
-static uint8_t g_reassembly_buffer[UIP_REASS_BUFSIZE];
-static uint8_t g_reassembly_bitmap[UIP_REASS_BUFSIZE / (8 * 8)];
-static const uint8_t g_bitmap_bits[8] = {0xff, 0x7f, 0x3f, 0x1f, 0x0f, 0x07, 0x03, 0x01};
+#if defined(CONFIG_NET_TCP_REASSEMBLY) && !defined(CONFIG_NET_IPv6)
+
+static uint8_t g_reassembly_buffer[TCP_REASS_BUFSIZE];
+static uint8_t g_reassembly_bitmap[TCP_REASS_BUFSIZE / (8 * 8)];
+
+static const uint8_t g_bitmap_bits[8] =
+  {0xff, 0x7f, 0x3f, 0x1f, 0x0f, 0x07, 0x03, 0x01};
+
 static uint16_t g_reassembly_len;
 static uint8_t g_reassembly_flags;
-#endif /* UIP_REASSEMBLY */
+
+#endif /* CONFIG_NET_TCP_REASSEMBLY */
 
 /****************************************************************************
  * Private Functions
@@ -146,7 +151,7 @@ static uint8_t g_reassembly_flags;
  *
  ****************************************************************************/
 
-#if UIP_REASSEMBLY && !defined(CONFIG_NET_IPv6)
+#if defined(CONFIG_NET_TCP_REASSEMBLY) && !defined(CONFIG_NET_IPv6)
 static uint8_t devif_reassembly(void)
 {
   FAR struct net_iphdr_s *pbuf  = BUF;
@@ -163,7 +168,7 @@ static uint8_t devif_reassembly(void)
   if (!g_reassembly_timer)
     {
       memcpy(g_reassembly_buffer, &pbuf->vhl, IP_HDRLEN);
-      g_reassembly_timer   = UIP_REASS_MAXAGE;
+      g_reassembly_timer = CONFIG_NET_TCP_REASS_MAXAGE;
       g_reassembly_flags = 0;
 
       /* Clear the bitmap. */
@@ -187,7 +192,7 @@ static uint8_t devif_reassembly(void)
        * reassembly buffer, we discard the entire packet.
        */
 
-      if (offset > UIP_REASS_BUFSIZE || offset + len > UIP_REASS_BUFSIZE)
+      if (offset > TCP_REASS_BUFSIZE || offset + len > TCP_REASS_BUFSIZE)
         {
           g_reassembly_timer = 0;
           goto nullreturn;
@@ -229,7 +234,7 @@ static uint8_t devif_reassembly(void)
 
     if ((pbuf->ipoffset[0] & IP_MF) == 0)
       {
-        g_reassembly_flags |= UIP_REASS_FLAG_LASTFRAG;
+        g_reassembly_flags |= TCP_REASS_LASTFRAG;
         g_reassembly_len = offset + len;
       }
 
@@ -238,7 +243,7 @@ static uint8_t devif_reassembly(void)
      * are set.
      */
 
-    if (g_reassembly_flags & UIP_REASS_FLAG_LASTFRAG)
+    if (g_reassembly_flags & TCP_REASS_LASTFRAG)
       {
         /* Check all bytes up to and including all but the last byte in
          * the bitmap.
@@ -286,7 +291,7 @@ static uint8_t devif_reassembly(void)
 nullreturn:
   return 0;
 }
-#endif /* UIP_REASSEMBLY */
+#endif /* CONFIG_NET_TCP_REASSEMBLY */
 
 /****************************************************************************
  * Public Functions
@@ -387,20 +392,20 @@ int devif_input(FAR struct net_driver_s *dev)
 
   if ((pbuf->ipoffset[0] & 0x3f) != 0 || pbuf->ipoffset[1] != 0)
     {
-#if UIP_REASSEMBLY
+#if defined(CONFIG_NET_TCP_REASSEMBLY)
       dev->d_len = devif_reassembly();
       if (dev->d_len == 0)
         {
           goto drop;
         }
-#else /* UIP_REASSEMBLY */
+#else /* CONFIG_NET_TCP_REASSEMBLY */
 #ifdef CONFIG_NET_STATISTICS
       g_netstats.ip.drop++;
       g_netstats.ip.fragerr++;
 #endif
       nlldbg("IP fragment dropped\n");
       goto drop;
-#endif /* UIP_REASSEMBLY */
+#endif /* CONFIG_NET_TCP_REASSEMBLY */
     }
 #endif /* CONFIG_NET_IPv6 */
 

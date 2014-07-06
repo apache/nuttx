@@ -20,6 +20,13 @@ config NET_ARPTAB_SIZE
 	---help---
 		The size of the ARP table (in entries).
 
+config NET_ARP_MAXAGE
+	int "Max ARP entry age"
+	default 120
+	---help---
+		The maximum age of ARP table entries measured in deciseconds.  The
+		default value of 120 corresponds to 20 minutes (BSD default).
+
 config NET_ARP_IPIN
 	bool "ARP address harvesting"
 	default n

@@ -57,8 +57,8 @@
 
 struct net_neighbor_addr_s
 {
-#if UIP_NEIGHBOR_CONF_ADDRTYPE
-  UIP_NEIGHBOR_CONF_ADDRTYPE addr;
+#if CONFIG_NET_IPV6_NEIGHBOR_ADDRTYPE
+  CONFIG_NET_IPV6_NEIGHBOR_ADDRTYPE addr;
 #else
   struct ether_addr addr;
 #endif

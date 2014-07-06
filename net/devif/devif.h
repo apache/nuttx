@@ -157,7 +157,7 @@ extern uint16_t g_ipid;
 
 /* Reassembly timer (units: deci-seconds) */
 
-#if UIP_REASSEMBLY && !defined(CONFIG_NET_IPv6)
+#if defined(CONFIG_NET_TCP_REASSEMBLY) && !defined(CONFIG_NET_IPv6)
 extern uint8_t g_reassembly_timer;
 #endif
 

@@ -21,6 +21,33 @@ config NET_TCPURGDATA
 		compiled in. Urgent data (out-of-band data) is a rarely used TCP feature
 		that is very seldom would be required.
 
+config NET_TCP_REASSEMBLY
+	bool "TCP reassembly"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		Enable support for IP packet reassembly of fragmented IP packets.
+
+		This features requires an additional amount of RAM to hold the
+		reassembly buffer and the reassembly code size is approximately 700
+		bytes.  The reassembly buffer is of the same size as the d_buf buffer
+		(configured by CONFIG_NET_BUFSIZE).
+
+		Note: IP packet reassembly is not heavily tested (and, hence,
+		EXPERIMENTAL).
+
+if NET_TCP_REASSEMBLY
+
+config NET_TCP_REASS_MAXAGE
+	int "IP fragment timeout"
+	default 200
+	---help---
+		The maximum time an IP fragment should wait in the reassembly buffer
+		before it is dropped.  Units are deci-seconds, the range of the timer
+		is 8-bits.  Default: 20 seconds.
+
+endif # NET_TCP_REASSEMBLY
+
 config NET_TCP_CONNS
 	int "Number of TCP/IP connections"
 	default 8

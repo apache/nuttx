@@ -125,7 +125,9 @@ void arp_timer(void)
   for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
     {
       tabptr = &g_arptable[i];
-      if (tabptr->at_ipaddr != 0 && g_arptime - tabptr->at_time >= UIP_ARP_MAXAGE)
+
+      if (tabptr->at_ipaddr != 0 &&
+          g_arptime - tabptr->at_time >= CONFIG_NET_ARP_MAXAGE)
         {
           tabptr->at_ipaddr = 0;
         }

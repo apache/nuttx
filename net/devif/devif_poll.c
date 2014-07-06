@@ -372,12 +372,13 @@ int devif_timer(FAR struct net_driver_s *dev, devif_poll_callback_t callback,
 
   /* Increment the timer used by the IP reassembly logic */
 
-#if UIP_REASSEMBLY
-  if (g_reassembly_timer != 0 && g_reassembly_timer < UIP_REASS_MAXAGE)
+#if defined(CONFIG_NET_TCP_REASSEMBLY) && !defined(CONFIG_NET_IPv6)
+  if (g_reassembly_timer != 0 &&
+      g_reassembly_timer < CONFIG_NET_TCP_REASS_MAXAGE)
     {
       g_reassembly_timer += hsec;
     }
-#endif /* UIP_REASSEMBLY */
+#endif
 
   /* Traverse all of the active packet connections and perform the poll
    * action.
