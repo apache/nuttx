@@ -47,6 +47,7 @@
 #include <nuttx/net/netstats.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/ipopt.h>
+#include <nuttx/net/tcp.h>
 #include <nuttx/net/igmp.h>
 
 #include "devif/devif.h"

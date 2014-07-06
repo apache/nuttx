@@ -565,7 +565,7 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct tcp_iphdr_s *buf)
  * Name: tcp_bind()
  *
  * Description:
- *   This function implements the UIP specific parts of the standard TCP
+ *   This function implements the lower level parts of the standard TCP
  *   bind() operation.
  *
  * Return:
@@ -620,7 +620,7 @@ int tcp_bind(FAR struct tcp_conn_s *conn,
  * Name: tcp_connect
  *
  * Description:
- *   This function implements the UIP specific parts of the standard
+ *   This function implements the lower level parts of the standard
  *   TCP connect() operation:  It connects to a remote host using TCP.
  *
  *   This function is used to start a new connection to the specified

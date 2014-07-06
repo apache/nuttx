@@ -47,10 +47,10 @@
 
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
-#include <nuttx/net/tcp.h>
 #include <nuttx/net/udp.h>
 
 #include "netdev/netdev.h"
+#include "tcp/tcp.h"
 #include "udp/udp.h"
 #include "socket/socket.h"
 

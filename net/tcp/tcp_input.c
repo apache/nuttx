@@ -99,10 +99,10 @@
  *
  ****************************************************************************/
 
-void tcp_input(struct net_driver_s *dev)
+void tcp_input(FAR struct net_driver_s *dev)
 {
-  struct tcp_conn_s *conn = NULL;
-  struct tcp_iphdr_s *pbuf = BUF;
+  FAR struct tcp_conn_s *conn = NULL;
+  FAR struct tcp_iphdr_s *pbuf = BUF;
   uint16_t tmp16;
   uint16_t flags;
   uint8_t  opt;

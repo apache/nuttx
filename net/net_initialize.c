@@ -111,7 +111,7 @@ void net_initialize(void)
 #ifdef CONFIG_NET_TCP
   /* Initialize the listening port structures */
 
-  tcp_listeninit();
+  tcp_listen_initialize();
 
   /* Initialize the TCP/IP connection structures */
 

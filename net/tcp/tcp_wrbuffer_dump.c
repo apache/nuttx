@@ -43,7 +43,6 @@
 #include <debug.h>
 
 #include <nuttx/net/iob.h>
-#include <nuttx/net/tcp.h>
 
 #ifdef CONFIG_DEBUG
 

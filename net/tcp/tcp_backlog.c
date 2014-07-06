@@ -48,7 +48,6 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/net/net.h>
-#include <nuttx/net/tcp.h>
 
 #include "devif/devif.h"
 
@@ -295,7 +294,7 @@ bool tcp_backlogavailable(FAR struct tcp_conn_s *conn)
  *
  ****************************************************************************/
 
-struct tcp_conn_s *tcp_backlogremove(FAR struct tcp_conn_s *conn)
+FAR struct tcp_conn_s *tcp_backlogremove(FAR struct tcp_conn_s *conn)
 {
   FAR struct tcp_backlog_s     *bls;
   FAR struct tcp_blcontainer_s *blc;
@@ -345,7 +344,8 @@ struct tcp_conn_s *tcp_backlogremove(FAR struct tcp_conn_s *conn)
  *
  ****************************************************************************/
 
-int tcp_backlogdelete(FAR struct tcp_conn_s *conn, FAR struct tcp_conn_s *blconn)
+int tcp_backlogdelete(FAR struct tcp_conn_s *conn,
+                      FAR struct tcp_conn_s *blconn)
 {
   FAR struct tcp_backlog_s     *bls;
   FAR struct tcp_blcontainer_s *blc;

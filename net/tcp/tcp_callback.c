@@ -47,7 +47,6 @@
 
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
-#include <nuttx/net/tcp.h>
 #include <nuttx/net/netstats.h>
 
 #include "devif/devif.h"
@@ -147,8 +146,8 @@ tcp_data_event(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
  *
  ****************************************************************************/
 
-uint16_t tcp_callback(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
-                      uint16_t flags)
+uint16_t tcp_callback(FAR struct net_driver_s *dev,
+                      FAR struct tcp_conn_s *conn, uint16_t flags)
 {
   /* Preserve the UIP_ACKDATA, UIP_CLOSE, and UIP_ABORT in the response.
    * These is needed by uIP to handle responses and buffer state.  The

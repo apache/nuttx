@@ -49,7 +49,6 @@
 #  include <netpacket/packet.h>
 #endif
 
-#include <nuttx/net/tcp.h>
 #include <nuttx/net/udp.h>
 
 #include "socket/socket.h"

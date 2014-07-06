@@ -50,8 +50,8 @@
 
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
-#include <nuttx/net/tcp.h>
 #include <nuttx/net/netstats.h>
+#include <nuttx/net/tcp.h>
 
 #include "devif/devif.h"
 #include "tcp/tcp.h"

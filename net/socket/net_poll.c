@@ -53,7 +53,6 @@
 #include <nuttx/arch.h>
 #include <nuttx/net/iob.h>
 #include <nuttx/net/net.h>
-#include <nuttx/net/tcp.h>
 
 #include <devif/devif.h>
 #include "tcp/tcp.h"

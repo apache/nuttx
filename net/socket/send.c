@@ -43,8 +43,6 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-#include <nuttx/net/tcp.h>
-
 #include "tcp/tcp.h"
 #include "pkt/pkt.h"
 #include "socket/socket.h"

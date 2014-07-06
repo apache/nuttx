@@ -43,6 +43,10 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <queue.h>
+
+#include <nuttx/net/iob.h>
+#include <nuttx/net/ip.h>
 
 #ifdef CONFIG_NET_TCP
 
@@ -55,9 +59,194 @@
 #define tcp_callback_alloc(conn)   devif_callback_alloc(&conn->list)
 #define tcp_callback_free(conn,cb) devif_callback_free(cb, &conn->list)
 
+/* Get the current maximum segment size that can be sent on the current
+ * TCP connection.
+ */
+
+#define tcp_mss(conn)              ((conn)->mss)
+
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+/* TCP write buffer access macros */
+
+#  define WRB_SEQNO(wrb)          ((wrb)->wb_seqno)
+#  define WRB_PKTLEN(wrb)         ((wrb)->wb_iob->io_pktlen)
+#  define WRB_SENT(wrb)           ((wrb)->wb_sent)
+#  define WRB_NRTX(wrb)           ((wrb)->wb_nrtx)
+#  define WRB_IOB(wrb)            ((wrb)->wb_iob)
+#  define WRB_COPYOUT(wrb,dest,n) (iob_copyout(dest,(wrb)->wb_iob,(n),0))
+#  define WRB_COPYIN(wrb,src,n)   (iob_copyin((wrb)->wb_iob,src,(n),0,false))
+
+#  define WRB_TRIM(wrb,n) \
+  do { (wrb)->wb_iob = iob_trimhead((wrb)->wb_iob,(n)); } while (0)
+
+#ifdef CONFIG_DEBUG
+#  define WRB_DUMP(msg,wrb,len,offset) \
+     tcp_wrbuffer_dump(msg,wrb,len,offset)
+#else
+#  define WRB_DUMP(msg,wrb,len,offset)
+#endif
+#endif
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
+
+/* Representation of a TCP connection.
+ *
+ * The tcp_conn_s structure is used for identifying a connection. All
+ * but one field in the structure are to be considered read-only by an
+ * application. The only exception is the 'private' fields whose purpose
+ * is to let the application store application-specific state (e.g.,
+ * file pointers) for the connection.
+ */
+
+struct net_driver_s;      /* Forward reference */
+struct devif_callback_s;  /* Forward reference */
+struct tcp_backlog_s;     /* Forward reference */
+
+struct tcp_conn_s
+{
+  dq_entry_t node;        /* Implements a doubly linked list */
+  net_ipaddr_t ripaddr;   /* The IP address of the remote host */
+  uint8_t  rcvseq[4];     /* The sequence number that we expect to
+                           * receive next */
+  uint8_t  sndseq[4];     /* The sequence number that was last sent by us */
+  uint8_t  crefs;         /* Reference counts on this instance */
+  uint8_t  sa;            /* Retransmission time-out calculation state
+                           * variable */
+  uint8_t  sv;            /* Retransmission time-out calculation state
+                           * variable */
+  uint8_t  rto;           /* Retransmission time-out */
+  uint8_t  tcpstateflags; /* TCP state and flags */
+  uint8_t  timer;         /* The retransmission timer (units: half-seconds) */
+  uint8_t  nrtx;          /* The number of retransmissions for the last
+                           * segment sent */
+  uint16_t lport;         /* The local TCP port, in network byte order */
+  uint16_t rport;         /* The remoteTCP port, in network byte order */
+  uint16_t mss;           /* Current maximum segment size for the
+                           * connection */
+  uint16_t winsize;       /* Current window size of the connection */
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+  uint32_t unacked;       /* Number bytes sent but not yet ACKed */
+#else
+  uint16_t unacked;       /* Number bytes sent but not yet ACKed */
+#endif
+
+  /* Read-ahead buffering.
+   *
+   *   readahead - A singly linked list of type struct iob_qentry_s
+   *               where the TCP/IP read-ahead data is retained.
+   */
+
+#ifdef CONFIG_NET_TCP_READAHEAD
+  struct iob_queue_s readahead;   /* Read-ahead buffering */
+#endif
+
+  /* Write buffering
+   *
+   *   write_q   - The queue of unsent I/O buffers.  The head of this
+   *               list may be partially sent.  FIFO ordering.
+   *   unacked_q - A queue of completely sent, but unacked I/O buffer
+   *               chains.  Sequence number ordering.
+   */
+
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+  sq_queue_t write_q;     /* Write buffering for segments */
+  sq_queue_t unacked_q;   /* Write buffering for un-ACKed segments */
+  uint16_t   expired;     /* Number segments retransmitted but not yet ACKed,
+                           * it can only be updated at UIP_ESTABLISHED state */
+  uint16_t   sent;        /* The number of bytes sent (ACKed and un-ACKed) */
+  uint32_t   isn;         /* Initial sequence number */
+#endif
+
+  /* Listen backlog support
+   *
+   *   blparent - The backlog parent.  If this connection is backlogged,
+   *     this field will be non-null and will refer to the TCP connection
+   *     structure in which this connection is backlogged.
+   *   backlog - The pending connection backlog.  If this connection is
+   *     configured as a listener with backlog, then this refers to the
+   *     struct tcp_backlog_s tear-off structure that manages that backlog.
+   */
+
+#ifdef CONFIG_NET_TCPBACKLOG
+  FAR struct tcp_conn_s    *blparent;
+  FAR struct tcp_backlog_s *backlog;
+#endif
+
+  /* Application callbacks:
+   *
+   * Data transfer events are retained in 'list'.  Event handlers in 'list'
+   * are called for events specified in the flags set within struct
+   * devif_callback_s
+   *
+   * When an callback is executed from 'list', the input flags are normally
+   * returned, however, the implementation may set one of the following:
+   *
+   *   UIP_CLOSE   - Gracefully close the current connection
+   *   UIP_ABORT   - Abort (reset) the current connection on an error that
+   *                 prevents UIP_CLOSE from working.
+   *
+   * And/Or set/clear the following:
+   *
+   *   UIP_NEWDATA - May be cleared to indicate that the data was consumed
+   *                 and that no further process of the new data should be
+   *                 attempted.
+   *   UIP_SNDACK  - If UIP_NEWDATA is cleared, then UIP_SNDACK may be set
+   *                 to indicate that an ACK should be included in the response.
+   *                 (In UIP_NEWDATA is cleared bu UIP_SNDACK is not set, then
+   *                 dev->d_len should also be cleared).
+   */
+
+  FAR struct devif_callback_s *list;
+
+  /* accept() is called when the TCP logic has created a connection */
+
+  FAR void *accept_private;
+  int (*accept)(FAR struct tcp_conn_s *listener, FAR struct tcp_conn_s *conn);
+
+  /* connection_event() is called on any of the subset of connection-related
+   * events.
+   */
+
+  FAR void *connection_private;
+  void (*connection_event)(FAR struct tcp_conn_s *conn, uint16_t flags);
+};
+
+/* This structure supports TCP write buffering */
+
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+struct tcp_wrbuffer_s
+{
+  sq_entry_t wb_node;      /* Supports a singly linked list */
+  uint32_t   wb_seqno;     /* Sequence number of the write segment */
+  uint16_t   wb_sent;      /* Number of bytes sent from the I/O buffer chain */
+  uint8_t    wb_nrtx;      /* The number of retransmissions for the last
+                            * segment sent */
+  struct iob_s *wb_iob;    /* Head of the I/O buffer chain */
+};
+#endif
+
+/* Support for listen backlog:
+ *
+ *   struct tcp_blcontainer_s describes one backlogged connection
+ *   struct tcp_backlog_s is a "tear-off" describing all backlog for a
+ *      listener connection
+ */
+
+#ifdef CONFIG_NET_TCPBACKLOG
+struct tcp_blcontainer_s
+{
+  sq_entry_t bc_node;             /* Implements a singly linked list */
+  FAR struct tcp_conn_s *bc_conn; /* Holds reference to the new connection structure */
+};
+
+struct tcp_backlog_s
+{
+  sq_queue_t bl_free;             /* Implements a singly-linked list of free containers */
+  sq_queue_t bl_pending;          /* Implements a singly-linked list of pending connections */
+};
+#endif
 
 /****************************************************************************
  * Public Data
@@ -79,64 +268,624 @@ extern "C"
 
 struct tcp_iphdr_s; /* Forward reference */
 
+/****************************************************************************
+ * Name: tcp_initialize()
+ *
+ * Description:
+ *   Initialize the TCP/IP connection structures.  Called only once and only
+ *   from the UIP layer at start-up in normal user mode.
+ *
+ ****************************************************************************/
+
 void tcp_initialize(void);
-struct tcp_conn_s *tcp_active(FAR struct tcp_iphdr_s *buf);
-struct tcp_conn_s *tcp_nextconn(FAR struct tcp_conn_s *conn);
-struct tcp_conn_s *tcp_listener(uint16_t portno);
-struct tcp_conn_s *tcp_alloc_accept(FAR struct tcp_iphdr_s *buf);
+
+/****************************************************************************
+ * Name: tcp_alloc()
+ *
+ * Description:
+ *   Find a free TCP/IP connection structure and allocate it
+ *   for use.  This is normally something done by the implementation of the
+ *   socket() API but is also called from the interrupt level when a TCP
+ *   packet is received while "listening"
+ *
+ ****************************************************************************/
+
+FAR struct tcp_conn_s *tcp_alloc(void);
+
+/****************************************************************************
+ * Name: tcp_free()
+ *
+ * Description:
+ *   Free a connection structure that is no longer in use. This should be
+ *   done by the implementation of close()
+ *
+ ****************************************************************************/
+
+void tcp_free(FAR struct tcp_conn_s *conn);
+
+/****************************************************************************
+ * Name: tcp_active()
+ *
+ * Description:
+ *   Find a connection structure that is the appropriate
+ *   connection to be used with the provided TCP/IP header
+ *
+ * Assumptions:
+ *   This function is called from UIP logic at interrupt level
+ *
+ ****************************************************************************/
+
+FAR struct tcp_conn_s *tcp_active(struct tcp_iphdr_s *buf);
+
+/****************************************************************************
+ * Name: tcp_nextconn()
+ *
+ * Description:
+ *   Traverse the list of active TCP connections
+ *
+ * Assumptions:
+ *   This function is called from UIP logic at interrupt level (or with
+ *   interrupts disabled).
+ *
+ ****************************************************************************/
+
+FAR struct tcp_conn_s *tcp_nextconn(FAR struct tcp_conn_s *conn);
+
+/****************************************************************************
+ * Name: tcp_listener()
+ *
+ * Description:
+ *   Given a local port number (in network byte order), find the TCP
+ *   connection that listens on this this port.
+ *
+ *   Primary uses: (1) to determine if a port number is available, (2) to
+ *   To identify the socket that will accept new connections on a local port.
+ *
+ ****************************************************************************/
+
+FAR struct tcp_conn_s *tcp_listener(uint16_t portno);
+
+/****************************************************************************
+ * Name: tcp_alloc_accept()
+ *
+ * Description:
+ *    Called when driver interrupt processing matches the incoming packet
+ *    with a connection in LISTEN. In that case, this function will create
+ *    a new connection and initialize it to send a SYNACK in return.
+ *
+ * Assumptions:
+ *   This function is called from UIP logic at interrupt level
+ *
+ ****************************************************************************/
+
+FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct tcp_iphdr_s *buf);
+
+/****************************************************************************
+ * Name: tcp_bind()
+ *
+ * Description:
+ *   This function implements the lower level parts of the standard TCP
+ *   bind() operation.
+ *
+ * Return:
+ *   0 on success or -EADDRINUSE on failure
+ *
+ * Assumptions:
+ *   This function is called from normal user level code.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+int tcp_bind(FAR struct tcp_conn_s *conn,
+             FAR const struct sockaddr_in6 *addr);
+#else
+int tcp_bind(FAR struct tcp_conn_s *conn,
+             FAR const struct sockaddr_in *addr);
+#endif
+
+/****************************************************************************
+ * Name: tcp_connect
+ *
+ * Description:
+ *   This function implements the lower level parts of the standard
+ *   TCP connect() operation:  It connects to a remote host using TCP.
+ *
+ *   This function is used to start a new connection to the specified
+ *   port on the specified host. It uses the connection structure that was
+ *   allocated by a preceding socket() call.  It sets the connection to
+ *   the SYN_SENT state and sets the retransmission timer to 0. This will
+ *   cause a TCP SYN segment to be sent out the next time this connection
+ *   is periodically processed, which usually is done within 0.5 seconds
+ *   after the call to tcp_connect().
+ *
+ * Assumptions:
+ *   This function is called from normal user level code.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv6
+int tcp_connect(FAR struct tcp_conn_s *conn,
+                FAR const struct sockaddr_in6 *addr);
+#else
+int tcp_connect(FAR struct tcp_conn_s *conn,
+                FAR const struct sockaddr_in *addr);
+#endif
 
 /* Defined in tcp_seqno.c ***************************************************/
+/****************************************************************************
+ * Name: tcp_setsequence
+ *
+ * Description:
+ *   Set the TCP/IP sequence number
+ *
+ * Assumptions:
+ *   This function may called from the interrupt level
+ *
+ ****************************************************************************/
 
 void tcp_setsequence(FAR uint8_t *seqno, uint32_t value);
+
+/****************************************************************************
+ * Name: tcp_getsequence
+ *
+ * Description:
+ *   Get the TCP/IP sequence number
+ *
+ * Assumptions:
+ *   This function may called from the interrupt level
+ *
+ ****************************************************************************/
+
 uint32_t tcp_getsequence(FAR uint8_t *seqno);
+
+/****************************************************************************
+ * Name: tcp_addsequence
+ *
+ * Description:
+ *   Add the length to get the next TCP sequence number.
+ *
+ * Assumptions:
+ *   This function may called from the interrupt level
+ *
+ ****************************************************************************/
+
 uint32_t tcp_addsequence(FAR uint8_t *seqno, uint16_t len);
+
+/****************************************************************************
+ * Name: tcp_initsequence
+ *
+ * Description:
+ *   Set the (initial) the TCP/IP sequence number when a TCP connection is
+ *   established.
+ *
+ * Assumptions:
+ *   This function may called from the interrupt level
+ *
+ ****************************************************************************/
+
 void tcp_initsequence(FAR uint8_t *seqno);
+
+/****************************************************************************
+ * Name: tcp_nextsequence
+ *
+ * Description:
+ *   Increment the TCP/IP sequence number
+ *
+ * Assumptions:
+ *   This function is called from the interrupt level
+ *
+ ****************************************************************************/
+
 void tcp_nextsequence(void);
 
 /* Defined in tcp_poll.c ****************************************************/
+/****************************************************************************
+ * Name: tcp_poll
+ *
+ * Description:
+ *   Poll a TCP connection structure for availability of TX data
+ *
+ * Parameters:
+ *   dev - The device driver structure to use in the send operation
+ *   conn - The TCP "connection" to poll for TX data
+ *
+ * Return:
+ *   None
+ *
+ * Assumptions:
+ *   Called from the interrupt level or with interrupts disabled.
+ *
+ ****************************************************************************/
 
 void tcp_poll(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn);
 
 /* Defined in tcp_timer.c ***************************************************/
+/****************************************************************************
+ * Name: tcp_timer
+ *
+ * Description:
+ *   Handle a TCP timer expiration for the provided TCP connection
+ *
+ * Parameters:
+ *   dev  - The device driver structure to use in the send operation
+ *   conn - The TCP "connection" to poll for TX data
+ *   hsed - The polling interval in halves of a second
+ *
+ * Return:
+ *   None
+ *
+ * Assumptions:
+ *   Called from the interrupt level or with interrupts disabled.
+ *
+ ****************************************************************************/
 
 void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                int hsec);
 
 /* Defined in tcp_listen.c **************************************************/
+/****************************************************************************
+ * Function: tcp_listen_initialize
+ *
+ * Description:
+ *   Setup the listening data structures
+ *
+ * Assumptions:
+ *   Called early in the initialization phase while the system is still
+ *   single-threaded.
+ *
+ ****************************************************************************/
 
-void tcp_listeninit(void);
-bool tcp_islistener(uint16_t port);
+void tcp_listen_initialize(void);
+
+/****************************************************************************
+ * Function: tcp_unlisten
+ *
+ * Description:
+ *   Stop listening to the port bound to the specified TCP connection
+ *
+ * Assumptions:
+ *   Called from normal user code.
+ *
+ ****************************************************************************/
+
+int tcp_unlisten(FAR struct tcp_conn_s *conn);
+
+/****************************************************************************
+ * Function: tcp_listen
+ *
+ * Description:
+ *   Start listening to the port bound to the specified TCP connection
+ *
+ * Assumptions:
+ *   Called from normal user code.
+ *
+ ****************************************************************************/
+
+int tcp_listen(FAR struct tcp_conn_s *conn);
+
+/****************************************************************************
+ * Function: tcp_islistener
+ *
+ * Description:
+ *   Return true is there is a listener for the specified port
+ *
+ * Assumptions:
+ *   Called at interrupt level
+ *
+ ****************************************************************************/
+
+bool tcp_islistener(uint16_t portno);
+
+/****************************************************************************
+ * Function: tcp_accept_connection
+ *
+ * Description:
+ *   Accept the new connection for the specified listening port.
+ *
+ * Assumptions:
+ *   Called at interrupt level
+ *
+ ****************************************************************************/
+
 int tcp_accept_connection(FAR struct net_driver_s *dev,
                           FAR struct tcp_conn_s *conn, uint16_t portno);
 
 /* Defined in tcp_send.c ****************************************************/
+/****************************************************************************
+ * Name: tcp_send
+ *
+ * Description:
+ *   Setup to send a TCP packet
+ *
+ * Parameters:
+ *   dev    - The device driver structure to use in the send operation
+ *   conn   - The TCP connection structure holding connection information
+ *   flags  - flags to apply to the TCP header
+ *   len    - length of the message
+ *
+ * Return:
+ *   None
+ *
+ * Assumptions:
+ *   Called from the interrupt level or with interrupts disabled.
+ *
+ ****************************************************************************/
 
 void tcp_send(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
               uint16_t flags, uint16_t len);
+
+/****************************************************************************
+ * Name: tcp_reset
+ *
+ * Description:
+ *   Send a TCP reset (no-data) message
+ *
+ * Parameters:
+ *   dev    - The device driver structure to use in the send operation
+ *
+ * Return:
+ *   None
+ *
+ * Assumptions:
+ *   Called from the interrupt level or with interrupts disabled.
+ *
+ ****************************************************************************/
+
 void tcp_reset(FAR struct net_driver_s *dev);
+
+/****************************************************************************
+ * Name: tcp_ack
+ *
+ * Description:
+ *   Send the SYN or SYNACK response.
+ *
+ * Parameters:
+ *   dev  - The device driver structure to use in the send operation
+ *   conn - The TCP connection structure holding connection information
+ *   ack  - The ACK response to send
+ *
+ * Return:
+ *   None
+ *
+ * Assumptions:
+ *   Called from the interrupt level or with interrupts disabled.
+ *
+ ****************************************************************************/
+
 void tcp_ack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
              uint8_t ack);
 
 /* Defined in tcp_appsend.c *************************************************/
+/****************************************************************************
+ * Name: tcp_appsend
+ *
+ * Description:
+ *   Handle application or TCP protocol response.  If this function is called
+ *   with dev->d_sndlen > 0, then this is an application attempting to send
+ *   packet.
+ *
+ * Parameters:
+ *   dev    - The device driver structure to use in the send operation
+ *   conn   - The TCP connection structure holding connection information
+ *   result - App result event sent
+ *
+ * Return:
+ *   None
+ *
+ * Assumptions:
+ *   Called from the interrupt level or with interrupts disabled.
+ *
+ ****************************************************************************/
 
 void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                  uint16_t result);
+
+/****************************************************************************
+ * Name: tcp_rexmit
+ *
+ * Description:
+ *   Handle application retransmission
+ *
+ * Parameters:
+ *   dev    - The device driver structure to use in the send operation
+ *   conn   - The TCP connection structure holding connection information
+ *   result - App result event sent
+ *
+ * Return:
+ *   None
+ *
+ * Assumptions:
+ *   Called from the interrupt level or with interrupts disabled.
+ *
+ ****************************************************************************/
+
 void tcp_rexmit(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                 uint16_t result);
 
 /* Defined in tcp_input.c ***************************************************/
+/****************************************************************************
+ * Name: tcp_input
+ *
+ * Description:
+ *   Handle incoming TCP input
+ *
+ * Parameters:
+ *   dev - The device driver structure containing the received TCP packet.
+ *
+ * Return:
+ *   None
+ *
+ * Assumptions:
+ *   Called from the interrupt level or with interrupts disabled.
+ *
+ ****************************************************************************/
 
 void tcp_input(FAR struct net_driver_s *dev);
 
 /* Defined in tcp_callback.c ************************************************/
+/****************************************************************************
+ * Function: tcp_callback
+ *
+ * Description:
+ *   Inform the application holding the TCP socket of a change in state.
+ *
+ * Assumptions:
+ *   This function is called at the interrupt level with interrupts disabled.
+ *
+ ****************************************************************************/
 
 uint16_t tcp_callback(FAR struct net_driver_s *dev,
                       FAR struct tcp_conn_s *conn, uint16_t flags);
+
+/****************************************************************************
+ * Function: tcp_datahandler
+ *
+ * Description:
+ *   Handle data that is not accepted by the application.  This may be called
+ *   either (1) from the data receive logic if it cannot buffer the data, or
+ *   (2) from the TCP event logic is there is no listener in place ready to
+ *   receive the data.
+ *
+ * Input Parameters:
+ *   conn - A pointer to the TCP connection structure
+ *   buffer - A pointer to the buffer to be copied to the read-ahead
+ *     buffers
+ *   buflen - The number of bytes to copy to the read-ahead buffer.
+ *
+ * Returned value:
+ *   The number of bytes actually buffered is returned.  This will be either
+ *   zero or equal to buflen; partial packets are not buffered.
+ *
+ * Assumptions:
+ * - The caller has checked that UIP_NEWDATA is set in flags and that is no
+ *   other handler available to process the incoming data.
+ * - This function is called at the interrupt level with interrupts disabled.
+ *
+ ****************************************************************************/
+
 #ifdef CONFIG_NET_TCP_READAHEAD
-uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn,
-                         FAR uint8_t *buffer, uint16_t nbytes);
+uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn, FAR uint8_t *buffer,
+                         uint16_t nbytes);
 #endif
 
+/* Defined in tcp_backlog.c *************************************************/
+/****************************************************************************
+ * Function: tcp_backlogcreate
+ *
+ * Description:
+ *   Called from the listen() logic to setup the backlog as specified in the
+ *   the listen arguments.
+ *
+ * Assumptions:
+ *   Called from normal user code. Interrupts may be disabled.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_TCPBACKLOG
+int tcp_backlogcreate(FAR struct tcp_conn_s *conn, int nblg);
+#else
+#  define tcp_backlogcreate(c,n) (-ENOSYS)
+#endif
+
+/****************************************************************************
+ * Function: tcp_backlogdestroy
+ *
+ * Description:
+ *   (1) Called from tcp_free() whenever a connection is freed.
+ *   (2) Called from tcp_backlogcreate() to destroy any old backlog
+ *
+ *   NOTE: This function may re-enter tcp_free when a connection that
+ *   is freed that has pending connections.
+ *
+ * Assumptions:
+ *   The caller has disabled interrupts so that there can be no conflict
+ *   with ongoing, interrupt driven activity
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_TCPBACKLOG
+int tcp_backlogdestroy(FAR struct tcp_conn_s *conn);
+#else
+#  define tcp_backlogdestroy(conn)     (-ENOSYS)
+#endif
+
+/****************************************************************************
+ * Function: tcp_backlogadd
+ *
+ * Description:
+ *  Called tcp_listen when a new connection is made with a listener socket
+ *  but when there is no accept() in place to receive the connection.  This
+ *  function adds the new connection to the backlog.
+ *
+ * Assumptions:
+ *   Called from the interrupt level with interrupts disabled
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_TCPBACKLOG
+int tcp_backlogadd(FAR struct tcp_conn_s *conn,
+                   FAR struct tcp_conn_s *blconn);
+#else
+#  define tcp_backlogadd(conn,blconn)  (-ENOSYS)
+#endif
+
+/****************************************************************************
+ * Function: tcp_backlogavailable
+ *
+ * Description:
+ *  Called from poll().  Before waiting for a new connection, poll will
+ *  call this API to see if there are pending connections in the backlog.
+ *
+ * Assumptions:
+ *   Called from normal user code, but with interrupts disabled,
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_TCPBACKLOG) && !defined(CONFIG_DISABLE_POLL)
+bool tcp_backlogavailable(FAR struct tcp_conn_s *conn);
+#else
+#  define tcp_backlogavailable(c) (false);
+#endif
+
+/****************************************************************************
+ * Function: tcp_backlogremove
+ *
+ * Description:
+ *  Called from accept().  Before waiting for a new connection, accept will
+ *  call this API to see if there are pending connections in the backlog.
+ *
+ * Assumptions:
+ *   Called from normal user code, but with interrupts disabled,
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_TCPBACKLOG
+FAR struct tcp_conn_s *tcp_backlogremove(FAR struct tcp_conn_s *conn);
+#else
+#  define tcp_backlogremove(c) (NULL)
+#endif
+
+/****************************************************************************
+ * Function: tcp_backlogdelete
+ *
+ * Description:
+ *  Called from tcp_free() when a connection is freed that this also
+ *  retained in the pending connection list of a listener.  We simply need
+ *  to remove the defunct connection from the list.
+ *
+ * Assumptions:
+ *   Called from the interrupt level with interrupts disabled
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_TCPBACKLOG
+int tcp_backlogdelete(FAR struct tcp_conn_s *conn,
+                      FAR struct tcp_conn_s *blconn)
+#else
+#  define tcp_backlogdelete(c,b) (-ENOSYS)
+#endif
+
+/* Defined in tcp_send_buffered.c or tcp_send_unbuffered.c ******************/
 /****************************************************************************
  * Function: psock_tcp_send
  *
@@ -198,6 +947,7 @@ struct socket;
 ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
                        size_t len);
 
+/* Defined in tcp_wrbuffer.c ************************************************/
 /****************************************************************************
  * Function: tcp_wrbuffer_initialize
  *

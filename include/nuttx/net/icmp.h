@@ -51,6 +51,7 @@
 
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/ip.h>
+#include <nuttx/net/tcp.h>
 
 /****************************************************************************
  * Pre-processor Definitions

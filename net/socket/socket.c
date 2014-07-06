@@ -45,7 +45,6 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/net/tcp.h>
 #include <nuttx/net/udp.h>
 
 #include "socket/socket.h"
