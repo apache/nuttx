@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/bch/bchdev_driver.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -186,6 +186,7 @@ static ssize_t bch_read(FAR struct file *filep, FAR char *buffer, size_t len)
     {
       filep->f_pos += len;
     }
+
   bchlib_semgive(bch);
   return ret;
 }
@@ -249,6 +250,13 @@ static int bch_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
       bchlib_semgive(bch);
     }
+#if defined(CONFIG_BCH_ENCRYPTION)
+  else if (cmd == DIOC_SETKEY)
+    {
+      memcpy(bch->key, (void*)arg, CONFIG_BCH_ENCRYPTION_KEY_SIZE);
+      ret = OK;
+    }
+#endif
 
   return ret;
 }

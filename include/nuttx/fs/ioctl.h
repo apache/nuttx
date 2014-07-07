@@ -143,6 +143,10 @@
                                            *      FIOC_GETPRIV released.
                                            */
 
+#define DIOC_SETKEY     _DIOC(0X0004)     /* IN:  Encryption key
+                                           * OUT: None
+                                           */
+
 /* NuttX block driver ioctl definitions *************************************/
 
 #define _BIOCVALID(c)   (_IOC_TYPE(c)==_BIOCBASE)

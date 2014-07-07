@@ -2,3 +2,13 @@
 # For a description of the syntax of this configuration file,
 # see misc/tools/kconfig-language.txt.
 #
+
+config BCH_ENCRYPTION
+	bool "Enable encryption feature"
+	default n
+	depends on CRYPTO_AES
+
+config BCH_ENCRYPTION_KEY_SIZE
+	int "AES key size"
+	default 16
+	depends on BCH_ENCRYPTION

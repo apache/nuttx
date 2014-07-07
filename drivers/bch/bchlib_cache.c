@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/bch/bchlib_cache.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,10 @@
 
 #include "bch_internal.h"
 
+#if defined(CONFIG_BCH_ENCRYPTION)
+#  include <crypto/crypto.h>
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -64,6 +68,51 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: bch_xor
+ ****************************************************************************/
+
+#if defined(CONFIG_BCH_ENCRYPTION)
+static void bch_xor(uint32_t *R, uint32_t *A, uint32_t *B)
+{
+  R[0] = A[0] ^ B[0];
+  R[1] = A[1] ^ B[1];
+  R[2] = A[2] ^ B[2];
+  R[3] = A[3] ^ B[3];
+}
+#endif
+
+/****************************************************************************
+ * Name: bch_cypher
+ ****************************************************************************/
+
+#if defined(CONFIG_BCH_ENCRYPTION)
+static int bch_cypher(FAR struct bchlib_s *bch, int encrypt)
+{
+  int blocks = bch->sectsize / 16;
+  uint32_t *buffer = (uint32_t*)bch->buffer;
+  int i;
+
+  for (i = 0; i < blocks; i++, buffer += 16 / sizeof(uint32_t) )
+    {
+      uint32_t T[4];
+      uint32_t X[4] = {bch->sector, 0, 0, i};
+
+      aes_cypher(X, X, 16, NULL, bch->key, CONFIG_BCH_ENCRYPTION_KEY_SIZE,
+                 AES_MODE_ECB, CYPHER_ENCRYPT);
+
+      /* Xor-Encrypt-Xor */
+
+      bch_xor(T, X, buffer);
+      aes_cypher(T, T, 16, NULL, bch->key, CONFIG_BCH_ENCRYPTION_KEY_SIZE,
+                 AES_MODE_ECB, encrypt);
+      bch_xor(buffer, X, T);
+    }
+
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -85,16 +134,41 @@ int bchlib_flushsector(FAR struct bchlib_s *bch)
   FAR struct inode *inode;
   ssize_t ret = OK;
 
+  /* Check if the sector has been modified and is out of synch with the
+   * media.
+   */
+
   if (bch->dirty)
     {
       inode = bch->inode;
+
+#if defined(CONFIG_BCH_ENCRYPTION)
+      /* Encrypt data as necessary */
+
+      bch_cypher(bch, CYPHER_ENCRYPT);
+#endif
+
+      /* Write the sector to the media */
+
       ret = inode->u.i_bops->write(inode, bch->buffer, bch->sector, 1);
       if (ret < 0)
         {
           fdbg("Write failed: %d\n");
         }
+
+#if defined(CONFIG_BCH_ENCRYPTION)
+      /* Computation overhead to save memory for extra sector buffer
+       * TODO: Add configuration switch for extra sector buffer
+       */
+
+      bch_cypher(bch, CYPHER_DECRYPT);
+#endif
+
+      /* The sector is now in sync with the media */
+
       bch->dirty = false;
     }
+
   return (int)ret;
 }
 
@@ -127,6 +201,9 @@ int bchlib_readsector(FAR struct bchlib_s *bch, size_t sector)
           fdbg("Read failed: %d\n");
         }
       bch->sector = sector;
+#if defined(CONFIG_BCH_ENCRYPTION)
+      bch_cypher(bch, CYPHER_DECRYPT);
+#endif
     }
   return (int)ret;
 }
