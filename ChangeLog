@@ -7674,3 +7674,8 @@
 	  From  Max Nekludov (2014-7-7)
 	* SAMA5D3/4 I2C: Test for read or write operation was reversed.  How
 	  could this have worked before? (2014-7-7).
+	* SAMA5D3/4 PIO Interrupts:  Correct a typo in
+	  arch/arm/src/sama5/sam_pio.h that could disable PIO interrupt support
+	  if only PIOE interrupts were enabled (2014-7-7).
+	* SAMA5D4 PIO Interrupts: Macro SAM_PION_VBASE is not defined for the
+	  SAMA5D4 and must be replaced with a table lookup (2014-7-7).
