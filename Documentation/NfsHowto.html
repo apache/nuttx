@@ -175,7 +175,7 @@ char *mountpoint;
 ret = mount(NULL, mountpoint, string &quot;nfs&quot;, 0, (FAR void *)&data);
 </pre></ul>
 <p>
-  NOTE that:  (1) the block driver paramter is <code>NULL</code>.
+  NOTE that:  (1) the block driver parameter is <code>NULL</code>.
   The <code>mount()</code> is smart enough to know that no block driver is needed with the NFS file system.
   (2) The NFS file system is identified with the simple string &quot;nfs&quot;
   (3) A reference to <code>struct nfs_args</code> is passed as an NFS-specific argument.
