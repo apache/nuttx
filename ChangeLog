@@ -7664,6 +7664,11 @@
 	* net/: Add a few missing configuration options to the Kconfig files
 	  (2014-7-8).
 	* net/iob/iob_trimhead_queue.c and socket/recvfrom.c:  Important fix to
-	  the read-ahead buffer queue managment: Consumed bytes were being
+	  the read-ahead buffer queue management: Consumed bytes were being
 	  trimmed from the head of the queue, but the queue head itself was
 	  not being updated.  From Rony XLN (2014-7-7).
+	* drivers/bch:  Add configurable AES encryption support to block-to-
+	  character (BCH) driver.  This allows any block device to be accessed
+	  as an encrypted character device.  From  Max Nekludov (2014-7-7).
+	* SAM3/4: Fix compile of sam_aes.c if CONFIG_CRYPTO_AES is defined.
+	  From  Max Nekludov (2014-7-7)
