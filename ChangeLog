@@ -7672,3 +7672,5 @@
 	  as an encrypted character device.  From  Max Nekludov (2014-7-7).
 	* SAM3/4: Fix compile of sam_aes.c if CONFIG_CRYPTO_AES is defined.
 	  From  Max Nekludov (2014-7-7)
+	* SAMA5D3/4 I2C: Test for read or write operation was reversed.  How
+	  could this have worked before? (2014-7-7).
