@@ -87,14 +87,14 @@
 static inline uint32_t sam_piobase(pio_pinset_t pinset)
 {
   int port = (pinset & PIO_PORT_MASK) >> PIO_PORT_SHIFT;
-  return SAM_PION_VBASE(port >> PIO_PORT_SHIFT);
+  return sam_pion_vbase(port >> PIO_PORT_SHIFT);
 }
 
 /****************************************************************************
  * Name: sam_piopin
  *
  * Description:
- *   Returun the base address of the PIO register set
+ *   Return the base address of the PIO register set
  *
  ****************************************************************************/
 
@@ -107,7 +107,7 @@ static inline int sam_piopin(pio_pinset_t pinset)
  * Name: sam_irqbase
  *
  * Description:
- *   Return pio information associated with this IRQ
+ *   Return PIO information associated with this IRQ
  *
  ****************************************************************************/
 
@@ -169,10 +169,10 @@ static int sam_irqbase(int irq, uint32_t *base, int *pin)
 }
 
 /****************************************************************************
- * Name: sam_pioa/b/cinterrupt
+ * Name: sam_pioa/b/c/d/e/finterrupt
  *
  * Description:
- *   Receive PIOA/B/C interrupts
+ *   Receive PIOA/B/C/D/E/F interrupts
  *
  ****************************************************************************/
 
