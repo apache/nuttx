@@ -75,10 +75,10 @@ static xcpt_t g_irqsw0;
  * Name: board_button_initialize
  *
  * Description:
- *   board_button_initialize() must be called to initialize button resources.  After
- *   that, board_buttons() may be called to collect the current state of all
- *   buttons or board_button_irq() may be called to register button interrupt
- *   handlers.
+ *   board_button_initialize() must be called to initialize button resources.
+ *   After that, board_buttons() may be called to collect the current state
+ *   of all buttons or board_button_irq() may be called to register button
+ *   interrupt handlers.
  *
  ****************************************************************************/
 
@@ -87,16 +87,16 @@ void board_button_initialize(void)
   (void)sam_configgpio(GPIO_SW0);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: board_buttons
  *
  * Description:
- *   After board_button_initialize() has been called, board_buttons() may be called to collect
- *   the state of all buttons.  board_buttons() returns an 8-bit bit set with each bit
- *   associated with a button.  See the BUTTON* definitions above for the meaning of
- *   each bit in the returned value.
+ *   After board_button_initialize() has been called, board_buttons() may be
+ *   called to collect the state of all buttons.  board_buttons() returns an
+ *   8-bit bit set with each bit associated with a button.  See the BUTTON*
+ *   definitions above for the meaning of each bit in the returned value.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 uint8_t board_buttons(void)
 {
@@ -147,7 +147,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
         {
           /* Configure the interrupt */
 
-          sam_gpioirq(IRQ_SW0);
+          sam_gpioirq(GPIO_SW0);
           (void)irq_attach(IRQ_SW0, irqhandler);
           sam_gpioirqenable(IRQ_SW0);
         }

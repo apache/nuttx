@@ -78,7 +78,8 @@ static xcpt_t g_irqbutton2;
  ****************************************************************************/
 
 #if defined(CONFIG_SAM34_GPIOA_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
-static xcpt_t board_button_irqx(int irq, xcpt_t irqhandler, xcpt_t *store)
+static xcpt_t board_button_irqx(gpio_pinset_t pinset, int irq,
+                                xcpt_t irqhandler, xcpt_t *store)
 {
   xcpt_t oldhandler;
   irqstate_t flags;
@@ -100,7 +101,7 @@ static xcpt_t board_button_irqx(int irq, xcpt_t irqhandler, xcpt_t *store)
     {
       /* Configure the interrupt */
 
-      sam_gpioirq(irq);
+      sam_gpioirq(pinset);
       (void)irq_attach(irq, irqhandler);
       sam_gpioirqenable(irq);
     }
@@ -185,11 +186,13 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 {
   if (id == BUTTON1)
     {
-      return board_button_irqx(IRQ_BUTTON1, irqhandler, &g_irqbutton1);
+      return board_button_irqx(GPIO_BUTTON1, IRQ_BUTTON1,
+                               irqhandler, &g_irqbutton1);
     }
   else if (id == BUTTON2)
     {
-      return board_button_irqx(IRQ_BUTTON2, irqhandler, &g_irqbutton2);
+      return board_button_irqx(GPIO_BUTTON2, IRQ_BUTTON2,
+                               irqhandler, &g_irqbutton2);
     }
   else
     {

@@ -91,10 +91,10 @@ static xcpt_t g_irquser1;
  * Name: board_button_initialize
  *
  * Description:
- *   board_button_initialize() must be called to initialize button resources.  After
- *   that, board_buttons() may be called to collect the current state of all
- *   buttons or board_button_irq() may be called to register button interrupt
- *   handlers.
+ *   board_button_initialize() must be called to initialize button resources.
+ *   After that, board_buttons() may be called to collect the current state
+ *   of all buttons or board_button_irq() may be called to register button
+ *   interrupt handlers.
  *
  ****************************************************************************/
 
@@ -107,10 +107,10 @@ void board_button_initialize(void)
  * Name: board_buttons
  *
  * Description:
- *   After board_button_initialize() has been called, board_buttons() may be called to
- *   collect the state of all buttons.  board_buttons() returns an 8-bit bit set
- *   with each bit associated with a button.  See the BUTTON* definitions
- *   above for the meaning of each bit in the returned value.
+ *   After board_button_initialize() has been called, board_buttons() may be
+ *   called to collect the state of all buttons.  board_buttons() returns an
+ *   8-bit bit set with each bit associated with a button.  See the BUTTON*
+ *   definitions above for the meaning of each bit in the returned value.
  *
  ****************************************************************************/
 
@@ -155,11 +155,24 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
       oldhandler = g_irquser1;
       g_irquser1 = irqhandler;
 
-      /* Configure the interrupt */
+      /* Are we attaching or detaching? */
 
-      sam_pioirq(IRQ_USER1);
-      (void)irq_attach(IRQ_USER1, irqhandler);
-      sam_pioirqenable(IRQ_USER1);
+      if (irqhandler != NULL)
+        {
+          /* Configure the interrupt */
+
+          sam_pioirq(PIO_USER1);
+          (void)irq_attach(IRQ_USER1, irqhandler);
+          sam_pioirqenable(IRQ_USER1);
+        }
+      else
+        {
+          /* Disable and detach the interrupt */
+
+          sam_pioirqdisable(IRQ_USER1);
+          (void)irq_detach(IRQ_USER1);
+        }
+
       irqrestore(flags);
     }
 

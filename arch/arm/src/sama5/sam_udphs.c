@@ -1567,7 +1567,7 @@ static void sam_req_rddisable(uint8_t epno)
  *     'inflight' field to hold the maximum size of the transfer; but
  *     'inflight' is not used with FIFO transfers.
  *
- *     When the transfer completes, the 'recvsize' paramter must be the
+ *     When the transfer completes, the 'recvsize' parameter must be the
  *     size of the transfer that just completed.   For the case of DMA,
  *     that is the size of the DMA transfer that has just been written to
  *     memory; for the FIFO transfer, recvsize is the number of bytes

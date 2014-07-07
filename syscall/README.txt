@@ -104,7 +104,7 @@ Each type field has a format as follows:
         A similar situation exists for unions.  For example, the formal
         parameter type union sigval -- You cannot cast a uintptr_t to
         a union sigval, but you can cast to the type of one of the union
-        member types when passing the actual paramter.  Similarly, we
+        member types when passing the actual parameter.  Similarly, we
         cannot cast a union sigval to a uinptr_t either.  Rather, we need
         to cast a specific union member fieldname to uintptr_t.
 

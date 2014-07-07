@@ -80,7 +80,8 @@ static xcpt_t g_irq_tamp;
  ****************************************************************************/
 
 #if defined(CONFIG_SAM34_GPIOA_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
-static xcpt_t board_button_irqx(int irq, xcpt_t irqhandler, xcpt_t *store)
+static xcpt_t board_button_irqx(gpio_pinset_t pinset, int irq,
+                                xcpt_t irqhandler, xcpt_t *store)
 {
   xcpt_t oldhandler;
   irqstate_t flags;
@@ -102,7 +103,7 @@ static xcpt_t board_button_irqx(int irq, xcpt_t irqhandler, xcpt_t *store)
     {
       /* Configure the interrupt */
 
-      sam_gpioirq(irq);
+      sam_gpioirq(pinset);
       (void)irq_attach(irq, irqhandler);
       sam_gpioirqenable(irq);
     }
@@ -130,10 +131,10 @@ static xcpt_t board_button_irqx(int irq, xcpt_t irqhandler, xcpt_t *store)
  * Name: board_button_initialize
  *
  * Description:
- *   board_button_initialize() must be called to initialize button resources.  After
- *   that, board_buttons() may be called to collect the current state of all
- *   buttons or board_button_irq() may be called to register button interrupt
- *   handlers.
+ *   board_button_initialize() must be called to initialize button resources.
+ *   After that, board_buttons() may be called to collect the current state
+ *   of all buttons or board_button_irq() may be called to register button
+ *   interrupt handlers.
  *
  ****************************************************************************/
 
@@ -145,16 +146,16 @@ void board_button_initialize(void)
   (void)sam_configgpio(GPIO_TAMP);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: board_buttons
  *
  * Description:
- *   After board_button_initialize() has been called, board_buttons() may be called to collect
- *   the state of all buttons.  board_buttons() returns an 8-bit bit set with each bit
- *   associated with a button.  See the BUTTON* definitions above for the meaning of
- *   each bit in the returned value.
+ *   After board_button_initialize() has been called, board_buttons() may be
+ *   called to collect the state of all buttons.  board_buttons() returns an
+ *   8-bit bit set with each bit associated with a button.  See the BUTTON*
+ *   definitions above for the meaning of each bit in the returned value.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 uint8_t board_buttons(void)
 {
@@ -192,16 +193,20 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
   switch (id)
     {
       case BUTTON_SCROLLUP:
-        return board_button_irqx(IRQ_SCROLLUP, irqhandler, &g_irq_scrollup);
+        return board_button_irqx(GPIO_SCROLLUP, IRQ_SCROLLUP,
+                                 irqhandler, &g_irq_scrollup);
 
       case BUTTON_SCROLLDOWN:
-        return board_button_irqx(IRQ_SCROLLDWN, irqhandler, &g_irq_scrolldown);
+        return board_button_irqx(GPIO_SCROLLDWN, IRQ_SCROLLDWN,
+                                 irqhandler, &g_irq_scrolldown);
 
       case BUTTON_WAKU:
-        return board_button_irqx(IRQ_WAKU, irqhandler, &g_irq_waku);
+        return board_button_irqx(GPIO_WAKU, IRQ_WAKU,
+                                 irqhandler, &g_irq_waku);
 
       case BUTTON_TAMP:
-        return board_button_irqx(IRQ_WAKU, irqhandler, &g_irq_tamp);
+        return board_button_irqx(GPIO_TAMP, IRQ_WAKU,
+                                 irqhandler, &g_irq_tamp);
 
       default:
         return NULL;

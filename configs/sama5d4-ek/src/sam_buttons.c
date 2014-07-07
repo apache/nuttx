@@ -151,11 +151,24 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
       oldhandler = g_irquser1;
       g_irquser1 = irqhandler;
 
-      /* Configure the interrupt */
+      /* Are we attaching or detaching? */
 
-      sam_pioirq(IRQ_USER1);
-      (void)irq_attach(IRQ_USER1, irqhandler);
-      sam_pioirqenable(IRQ_USER1);
+      if (irqhandler != NULL)
+        {
+          /* Configure the interrupt */
+
+          sam_pioirq(PIO_BTN_USER);
+          (void)irq_attach(IRQ_BTN_USER, irqhandler);
+          sam_pioirqenable(IRQ_BTN_USER);
+        }
+      else
+        {
+          /* Disable and detach the interrupt */
+
+          sam_pioirqdisable(IRQ_BTN_USER);
+          (void)irq_detach(IRQ_BTN_USER);
+        }
+
       irqrestore(flags);
     }
 

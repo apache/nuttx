@@ -425,7 +425,7 @@ typedef struct poff_debugfuncinfo_s poff_debugfuncinfo_t;
 
 struct poff_debugarginfo_s
 {
-  /* This is the size, in bytes, of one input paramter */
+  /* This is the size, in bytes, of one input parameter */
 
   uint32_t da_size;
 };

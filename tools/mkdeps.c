@@ -394,7 +394,7 @@ static void parse_args(int argc, char **argv)
       fprintf(stderr, "  Windows Native : [%s]\n", g_winnative ? "TRUE" : "FALSE");
     }
 
-  /* Check for required paramters */
+  /* Check for required parameters */
 
   if (!g_cc)
     {

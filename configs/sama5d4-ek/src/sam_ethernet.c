@@ -105,12 +105,14 @@ xcpt_t sam_phyirq(int intf, xcpt_t irqhandler)
   irqstate_t flags;
   xcpt_t *handler;
   xcpt_t oldhandler;
+  pio_pinset_t pinset;
   int irq;
 
 #ifdef CONFIG_SAMA5_EMAC0
   if (intf == EMAC0_INTF)
     {
       handler = &g_emac0_handler;
+      pinset  = PIO_INT_ETH0;
       irq     = IRQ_INT_ETH0;
     }
   else
@@ -119,6 +121,7 @@ xcpt_t sam_phyirq(int intf, xcpt_t irqhandler)
   if (intf == EMAC1_INTF)
     {
       handler = &g_emac1_handler;
+      pinset  = PIO_INT_ETH1;
       irq     = IRQ_INT_ETH1;
     }
   else
@@ -141,7 +144,7 @@ xcpt_t sam_phyirq(int intf, xcpt_t irqhandler)
 
   /* Configure the interrupt */
 
-  sam_pioirq(irq);
+  sam_pioirq(pinset);
   (void)irq_attach(irq, irqhandler);
   sam_pioirqenable(irq);
 

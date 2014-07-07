@@ -553,7 +553,7 @@ off_t nxffs_iotell(FAR struct nxffs_volume_s *volume);
  *   over bad blocks and block headers as necessary.
  *
  * Input Parameters:
- *   volume - Describes the NXFFS volume.  The paramters ioblock and iooffset
+ *   volume - Describes the NXFFS volume.  The parameters ioblock and iooffset
  *     in the volume structure determine the behavior of nxffs_getc().
  *   reserve - If less than this much space is available at the end of the
  *     block, then skip to the next block.
