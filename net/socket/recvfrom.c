@@ -376,11 +376,12 @@ static inline void recvfrom_readahead(struct recvfrom_s *pstate)
         }
       else
         {
-          /* The bytes that we have received from the from of the I/O
-           * buffer chain.
+          /* The bytes that we have received from the head of the I/O
+           * buffer chain (probably changing the head of the I/O
+           * buffer queue).
            */
 
-          (void)iob_trimhead(iob, recvlen);
+          (void)iob_trimhead_queue(&conn->readahead, recvlen);
         }
     }
 }

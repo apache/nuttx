@@ -249,7 +249,9 @@ FAR struct iob_s *iob_remove_queue(FAR struct iob_queue_s *iobq);
  *
  ****************************************************************************/
 
+#if CONFIG_IOB_NCHAINS > 0
 FAR struct iob_s *iob_peek_queue(FAR struct iob_queue_s *iobq);
+#endif
 
 /****************************************************************************
  * Name: iob_free_queue
@@ -317,6 +319,27 @@ void iob_concat(FAR struct iob_s *iob1, FAR struct iob_s *iob2);
  ****************************************************************************/
 
 FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen);
+
+/****************************************************************************
+ * Name: iob_trimhead_queue
+ *
+ * Description:
+ *   Remove bytes from the beginning of an I/O chain at the head of the
+ *   queue.  Emptied I/O buffers are freed and, hence, the head of the
+ *   queue may change.
+ *
+ *   This function is just a wrapper around iob_trimhead() that assures that
+ *   the iob at the head of queue is modified with the trimming operations.
+ *
+ * Returned Value:
+ *   The new iob at the head of the queue is returned.
+ *
+ ****************************************************************************/
+
+#if CONFIG_IOB_NCHAINS > 0
+FAR struct iob_s *iob_trimhead_queue(FAR struct iob_queue_s *qhead,
+                                     unsigned int trimlen);
+#endif
 
 /****************************************************************************
  * Name: iob_trimtail
