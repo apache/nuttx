@@ -4,7 +4,7 @@
 #
 
 config BCH_ENCRYPTION
-	bool "Enable encryption feature"
+	bool "Enable BCH encryption"
 	default n
 	depends on CRYPTO_AES
 
