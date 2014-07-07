@@ -83,11 +83,12 @@
 
 /* Bit definitions for the flags field in struct i2c_msg_s */
 
-#define I2C_M_READ           0x0001          /* read data, from slave to master */
-#define I2C_M_TEN            0x0002          /* ten bit address */
-#define I2C_M_NORESTART      0x0080          /* message should not begin with (re-)start of transfer */
+#define I2C_M_READ           0x0001 /* Read data, from slave to master */
+#define I2C_M_TEN            0x0002 /* Ten bit address */
+#define I2C_M_NORESTART      0x0080 /* Message should not begin with
+                                     * (re-)start of transfer */
 
-/* Access macros */
+/* Access macros ************************************************************/
 
 /****************************************************************************
  * Name: I2C_SETFREQUENCY
