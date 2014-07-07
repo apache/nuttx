@@ -126,7 +126,7 @@ uint8_t board_buttons(void)
  *   This function may be called to register an interrupt handler that will
  *   be called when a button is depressed or released.  The ID value is one
  *   of the BUTTON* definitions provided above. The previous interrupt
- *   handler address isreturned (so that it may restored, if so desired).
+ *   handler address is returned (so that it may restored, if so desired).
  *
  * Configuration Notes:
  *   Configuration CONFIG_SAMA5_PIO_IRQ must be selected to enable the
@@ -155,11 +155,25 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
       oldhandler = g_irquser1;
       g_irquser1 = irqhandler;
 
+      /* Are we attaching or detaching? */
+
+      if (irqhandler != NULL)
+        {
+          /* Configure the interrupt */
+
+          sam_pioirq(PIO_USER);
+          (void)irq_attach(IRQ_USER1, irqhandler);
+          sam_pioirqenable(IRQ_USER1);
+        }
+      else
+        {
+          /* Disable and detach the interrupt */
+
+          sam_pioirqdisable(IRQ_USER1);
+          (void)irq_detach(IRQ_USER1);
+        }
       /* Configure the interrupt */
 
-      sam_pioirq(IRQ_USER1);
-      (void)irq_attach(IRQ_USER1, irqhandler);
-      sam_pioirqenable(IRQ_USER1);
       irqrestore(flags);
     }
 

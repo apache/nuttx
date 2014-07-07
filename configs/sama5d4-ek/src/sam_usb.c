@@ -464,7 +464,7 @@ void sam_usbhost_vbusdrive(int rhport, bool enable)
  *   REVISIT: Since this is a common signal, we will need to come up with some way
  *   to inform both EHCI and OHCI drivers when this error occurs.
  *
- * Input paramter:
+ * Input Parameters:
  *   handler - New over-current interrupt handler
  *
  * Returned value:
@@ -494,7 +494,7 @@ xcpt_t sam_setup_overcurrent(xcpt_t handler)
 
   /* Configure the interrupt */
 
-  sam_pioirq(IRQ_USBBC_VBUS_OVERCURRENT);
+  sam_pioirq(PIO_USBBC_VBUS_OVERCURRENT);
   (void)irq_attach(IRQ_USBBC_VBUS_OVERCURRENT, handler);
   sam_pioirqenable(IRQ_USBBC_VBUS_OVERCURRENT);
 
