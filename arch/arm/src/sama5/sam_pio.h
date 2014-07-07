@@ -51,11 +51,10 @@
  ************************************************************************************/
 /* Configuration ********************************************************************/
 
-#undef CONFIG_SAMA5_PIO_IRQ
-#if defined(CONFIG_SAMA5_PIOA_IRQ) || defined(CONFIG_SAMA5_PIOB_IRQ) || \
-    defined(CONFIG_SAMA5_PIOC_IRQ) || defined(CONFIG_SAMA5_PIOD_IRQ) || \
-    defined(CONFIG_SAMA5_PIOD_IRQ)
-#  define CONFIG_SAMA5_PIO_IRQ 1
+#if !defined(CONFIG_SAMA5_PIOA_IRQ) && !defined(CONFIG_SAMA5_PIOB_IRQ) && \
+    !defined(CONFIG_SAMA5_PIOC_IRQ) && !defined(CONFIG_SAMA5_PIOD_IRQ) && \
+    !defined(CONFIG_SAMA5_PIOE_IRQ) && !defined(CONFIG_SAMA5_PIOF_IRQ)
+#  undef CONFIG_SAMA5_PIO_IRQ
 #endif
 
 #ifndef CONFIG_DEBUG
@@ -215,6 +214,17 @@
 /* Must be big enough to hold the 32-bit encoding */
 
 typedef uint32_t pio_pinset_t;
+
+/* SAM_PION_VBASE will only be defined if the PIO register blocks are contiguous.
+ * If not defined, then we need to do a table lookup.
+ */
+
+#ifndef SAM_PION_VBASE
+extern const uintptr_t g_piobase[SAM_NPIO];
+#  define sam_pion_vbase(n) (g_piobase[(n)])
+#else
+#  define sam_pion_vbase(n) SAM_PION_VBASE(n)
+#endif
 
 /************************************************************************************
  * Inline Functions

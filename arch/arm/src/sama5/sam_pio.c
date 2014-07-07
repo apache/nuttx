@@ -66,6 +66,22 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* SAM_PION_VBASE will only be defined if the PIO register blocks are
+ * contiguous.  If not defined, then we need to do a table lookup.
+ */
+
+#ifndef SAM_PION_VBASE
+const uintptr_t g_piobase[SAM_NPIO] =
+{
+  SAM_PIOA_VBASE, SAM_PIOB_VBASE, SAM_PIOC_VBASE, SAM_PIOD_VBASE,
+  SAM_PIOE_VBASE
+};
+#endif
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 /* Maps a port number to the standard port character */
@@ -115,20 +131,6 @@ static const bool g_piointerrupt[SAM_NPIO] =
 #endif
 };
 
-/* SAM_PION_VBASE will only be defined if the PIO register blocks are
- * contiguous.  If not defined, then we need to do a table lookup.
- */
-
-#ifndef SAM_PION_VBASE
-  static const uintptr_t g_piobase[SAM_NPIO] =
-  {
-    SAM_PIOA_VBASE, SAM_PIOB_VBASE, SAM_PIOC_VBASE, SAM_PIOD_VBASE,
-    SAM_PIOE_VBASE
-  };
-
-# define SAM_PION_VBASE(n) (g_piobase[(n)])
-#endif
-
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -146,7 +148,7 @@ static inline uintptr_t sam_piobase(pio_pinset_t cfgset)
 
   if (port < SAM_NPIO)
     {
-      return SAM_PION_VBASE(port);
+      return sam_pion_vbase(port);
     }
   else
     {
@@ -730,7 +732,7 @@ int sam_dumppio(uint32_t pinset, const char *msg)
   /* Get the base address associated with the PIO port */
 
   port = (pinset & PIO_PORT_MASK) >> PIO_PORT_SHIFT;
-  base = SAM_PION_VBASE(port);
+  base = sam_pion_vbase(port);
 
   /* The following requires exclusive access to the PIO registers */
 
