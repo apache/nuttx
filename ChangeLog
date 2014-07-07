@@ -5780,7 +5780,7 @@
 	* net/send.c and net_sendfile.c:  Reset the send timeout when the
 	  data is ACKed, not when the data is sent.  Remove conditions on
 	  checking for timeout.  From Max Holtzberg (2013-10-17).
-	* net/net_sendfile.c:  Correct paramter passed to netdev_txnotify()
+	* net/net_sendfile.c:  Correct parameter passed to netdev_txnotify()
 	  from Max Holtzberg (2013-10-17).
 	* include/nuttx/net/uip/uip-tcp.h, net/send.c, uip/uip_tcpconn.c, and
 	  uip/uip_tcpinput.c:  Change how the initial minimum MSS is calculated.
@@ -7679,3 +7679,5 @@
 	  if only PIOE interrupts were enabled (2014-7-7).
 	* SAMA5D4 PIO Interrupts: Macro SAM_PION_VBASE is not defined for the
 	  SAMA5D4 and must be replaced with a table lookup (2014-7-7).
+	* configs/sam*: Fix some cloned errors in SAM GPIO interrupt setup
+	  (1014-7-7).
