@@ -1034,6 +1034,26 @@ Buttons and LEDs
   Closing JP2 will bring PE13 to ground so 1) PE13 should have a weak pull-up,
   and 2) when PB2 is pressed, a low value will be senses.
 
+  Support for pollable buttons is enabled with:
+
+    CONFIG_ARCH_BUTTONS=y
+
+  For interrupt driven buttons, add:
+
+    CONFIG_ARCH_IRQBUTTONS=y
+
+  Program interfaces for button access are described in nuttx/include/nuttx/arch.h
+
+  There is an example that can be enabled to test button interrupts.  That
+  example is enabled like:
+
+    CONFIG_EXAMPLES_BUTTONS=y
+    CONFIG_EXAMPLES_BUTTONS_MAX=0
+    CONFIG_EXAMPLES_BUTTONS_MIN=0
+    CONFIG_EXAMPLES_BUTTONS_NAME0="PB_USER"
+    CONFIG_EXAMPLES_IRQBUTTONS_MAX=0
+    CONFIG_EXAMPLES_IRQBUTTONS_MIN=0
+
   LEDs
   ----
   There are 3 LEDs on the SAMA5D4-EK:
@@ -3336,7 +3356,31 @@ Configurations
          U-Boot> fatload mmc 0 0x20008000 nuttx.bin
          U-Boot> go 0x20008040
 
-    5. This configuration supports /dev/null, /dev/zero, and /dev/random.
+    5. Board LEDs and buttons are supported as described under "Buttons and
+       LEDs".  The interrupt button test is also enabled as an NSH built-in
+       commands.  To run this test, you simply inter the command:
+
+          nsh>buttons [npresses]
+
+       The interrupt button test will log button press information to the
+       syslog.  Since the RAMLOG is enabled, the SYSLOG output will be
+       captured to a circular buffer in ram and may be examined using the
+       NSH dmesg command:
+
+       nsh> buttons 2
+       nsh> dmesg
+       maxbuttons: 2
+       Attached handler at 200106f0 to button 0 [PB_USER], oldhandler:0
+       IRQ:81 Button 0:PB_USER SET:01:
+         PB_USER depressed
+       IRQ:81 Button 0:PB_USER SET:00:
+         PB_USER released
+       IRQ:81 Button 0:PB_USER SET:01:
+         PB_USER depressed
+       IRQ:81 Button 0:PB_USER SET:00:
+         PB_USER released
+
+    6. This configuration supports /dev/null, /dev/zero, and /dev/random.
 
          CONFIG_DEV_NULL=y    : Enables /dev/null
          CONFIG_DEV_ZERO=y    : Enabled /dev/zero
@@ -3348,12 +3392,13 @@ Configurations
         CONFIG_SAMA5_TRNG=y   : Enables the TRNG peripheral
         CONFIG_DEV_RANDOM=y   : Enables /dev/random
 
-    6. This configuration has support for NSH built-in applications enabled.
-       Only one built-in application is included by default, however:  The
-       I2C Tool.  See the section above entitle "I2C Tool" and the note with
-       regar to I2C below.
+    7. This configuration has support for NSH built-in applications enabled.
+       Two built-in applications are included by default:  (1) The I2C Tool.
+       See the section above entitle "I2C Tool" and the note with regard to
+       I2C below. And (2) the interrupting button test as described above
+       in these notes.
 
-    7. This configuration has support for the FAT, ROMFS, and PROCFS file
+    8. This configuration has support for the FAT, ROMFS, and PROCFS file
        systems built in.
 
        The FAT file system includes long file name support.  Please be aware
@@ -3374,7 +3419,7 @@ Configurations
 
          CONFIG_FS_PROCFS=y     : Enable PROCFS file system
 
-    8. An NSH start-up script is provided by the ROMFS file system.  The ROMFS
+    9. An NSH start-up script is provided by the ROMFS file system.  The ROMFS
        file system is mounted at /etc and provides:
 
          |- dev/
@@ -3478,7 +3523,7 @@ Configurations
 
          SD  RF TYP FLAGS
 
-    9. The Real Time Clock/Calendar (RTC) is enabled in this configuration.
+   10. The Real Time Clock/Calendar (RTC) is enabled in this configuration.
        See the section entitled "RTC" above for detailed configuration
        settings.
 
@@ -3494,7 +3539,7 @@ Configurations
        will need to install a battery in the battery holder (J12) and close
        the jumper, JP13.
 
-   10. Support for HSMCI0 is built-in by default. The SAMA4D4-EK provides
+   11. Support for HSMCI0 is built-in by default. The SAMA4D4-EK provides
        two SD memory card slots:  (1) a full size SD card slot (J10), and
        (2) a microSD memory card slot (J11).  The full size SD card slot
        connects via HSMCI0; the microSD connects vi HSMCI1.  Support for
@@ -3516,7 +3561,7 @@ Configurations
        If these behaviors are a problem for you, then you may want to
        disable HSMCI0 as well.
 
-   11. Networking is supported via EMAC0.  See the "Networking" section
+   12. Networking is supported via EMAC0.  See the "Networking" section
        above for detailed configuration settings.  DHCP is not used in
        this configuration; rather, a hard-coded IP address of 10.0.0.2 is
        used with a netmask of 255.255.255.0.  The host is assumed to be
@@ -3531,13 +3576,13 @@ Configurations
        See the "kludge" for EMAC that is documented in the To-Do list at
        the end of this README file.
 
-   12. I2C Tool. This configuration enables TWI0 (only) as an I2C master
+   13. I2C Tool. This configuration enables TWI0 (only) as an I2C master
        device.  This configuration also supports the I2C tool at
        apps/system/i2c that can be used to peek and poke I2C devices on the
        TIW0 bus.  See the discussion above under "I2C Tool" for detailed
        configuration settings.
 
-   13. Support the USB low-, high- and full-speed OHCI host driver is enabled
+   14. Support the USB low-, high- and full-speed OHCI host driver is enabled
        enabled with the NuttX configuration file as described in the section
        above entitled "USB High-Speed Host".  Only port B and port C, the
        larger "Type A" connectors, are enabled; port A (the smaller OTG
@@ -3561,16 +3606,16 @@ Configurations
        idea because you cannot type the 'dmesg' command to view the RAMLOG
        without a keyboard attached.]
 
-   14. Support the USB high-speed USB device driver (UDPHS) is not enabled by
+   15. Support the USB high-speed USB device driver (UDPHS) is not enabled by
        default but could be enabled by changing the NuttX configuration file as
        described above in the section entitled "USB High-Speed Device."
 
-   15. The SAMA5D4-EK includes for an AT25 serial DataFlash.  That support is
+   16. The SAMA5D4-EK includes for an AT25 serial DataFlash.  That support is
        NOT enabled in this configuration.  Support for that serial FLASH could
        be enabled by modifying the NuttX configuration as described above in
        the paragraph entitled "AT25 Serial FLASH".
 
-   16. This example can be configured to exercise the watchdog timer test
+   17. This example can be configured to exercise the watchdog timer test
        (apps/examples/watchdog).  See the detailed configuration settings in
        the section entitled "Watchdog Timer" above.
 
