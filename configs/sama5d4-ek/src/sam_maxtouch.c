@@ -269,7 +269,7 @@ int arch_tcinitialize(int minor)
 
        /* Configure maXTouch CHG interrupts */
 
-      sam_pioirq(IRQ_CHG_MXT);
+      sam_pioirq(PIO_CHG_MXT);
       (void)irq_attach(IRQ_CHG_MXT, mxt_interrupt);
 
       /* Initialize and register the I2C touchscreen device */

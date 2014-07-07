@@ -233,7 +233,7 @@ static int  mxt_poll(FAR struct file *filep, struct pollfd *fds, bool setup);
 
 static int  mxt_getinfo(struct mxt_dev_s *priv);
 static int  mxt_getobjtab(FAR struct mxt_dev_s *priv);
-static int  mxt_chghigh(FAR struct mxt_dev_s *priv);
+static int  mxt_clrpending(FAR struct mxt_dev_s *priv);
 static int  mxt_hwinitialize(FAR struct mxt_dev_s *priv);
 
 /****************************************************************************
@@ -268,6 +268,8 @@ static int mxt_getreg(FAR struct mxt_dev_s *priv, uint16_t regaddr,
   struct i2c_msg_s msg[2];
   uint8_t addrbuf[2];
   int ret;
+
+  ivdbg("regaddr:%04x buflen=%d\n", regaddr, buflen);
 
   /* Set up to write the address */
 
@@ -309,6 +311,8 @@ static int mxt_putreg(FAR struct mxt_dev_s *priv, uint16_t regaddr,
   struct i2c_msg_s msg[2];
   uint8_t addrbuf[2];
   int ret;
+
+  ivdbg("regaddr:%04x buflen=%d\n", regaddr, buflen);
 
   /* Set up to write the address */
 
@@ -378,8 +382,9 @@ static int mxt_getmessage(FAR struct mxt_dev_s *priv,
   uint16_t regaddr;
 
   object = mxt_object(priv, MXT_GEN_MESSAGE_T5);
-  if (!object)
+  if (object == NULL)
     {
+      idbg("ERROR: mxt_object failed\n");
       return -EINVAL;
     }
 
@@ -635,15 +640,17 @@ static void mxt_touch_event(FAR struct mxt_dev_s *priv,
   sample = &priv->sample[ndx];
   if ((status & MXT_DETECT) == 0)
     {
-      /* Ignore the event if the if there was no contact:
+      /* Ignore the event if there was no contact to be lost:
        *
-       *   CONTACT_NONE = No touch and already reported
-       *   CONTACT_LOST   = No touch, but not reported)
+       *   CONTACT_NONE = No touch and loss-of-contact already reported
+       *   CONTACT_LOST = No touch and unreported loss-of-contact.
        */
 
       if (sample->contact == CONTACT_NONE)
         {
-          goto errout;
+          /* Return without posting any event */
+
+          return;
         }
 
       sample->contact = CONTACT_LOST;
@@ -726,11 +733,6 @@ static void mxt_touch_event(FAR struct mxt_dev_s *priv,
 
   priv->event = true;
   mxt_notify(priv);
-
-  /* Exit, re-enabling maXTouch interrupts */
-
-errout:
-  priv->lower->enable(priv->lower, true);
 }
 
 /****************************************************************************
@@ -743,6 +745,7 @@ static void mxt_worker(FAR void *arg)
   FAR const struct mxt_lower_s *lower;
   struct mxt_msg_s msg;
   uint8_t id;
+  int ret;
 
   ASSERT(priv != NULL);
 
@@ -759,9 +762,10 @@ static void mxt_worker(FAR void *arg)
     {
       /* Retrieve the next message from the maXTouch */
 
-      if (mxt_getmessage(priv, &msg))
+      ret = mxt_getmessage(priv, &msg);
+      if (ret < 0)
         {
-          idbg("ERROR: Failed to read msg\n");
+          idbg("ERROR: mxt_getmessage failed: %d\n", ret);
           return;
         }
 
@@ -810,7 +814,12 @@ static void mxt_worker(FAR void *arg)
                 msg.body[4], msg.body[5], msg.body[6]);
         }
     }
-  while (id != 0xff);
+  while (id != 0x00 && id != 0xff);
+
+  /* Acknowledge and re-enable maXTouch interrupts */
+
+  MXT_CLEAR(lower);
+  MXT_ENABLE(lower);
 }
 
 /****************************************************************************
@@ -830,7 +839,7 @@ static int mxt_interrupt(FAR const struct mxt_lower_s *lower, FAR void *arg)
 
   /* Disable further interrupts */
 
-  lower->enable(lower, false);
+  MXT_DISABLE(lower);
 
   /* Transfer processing to the worker thread.  Since maXTouch interrupts are
    * disabled while the work is pending, no special action should be required
@@ -1406,7 +1415,7 @@ static int mxt_getobjtab(FAR struct mxt_dev_s *priv)
           idmax  = 0;
         }
 
-      ivdbg("%2d. Type %d Start %d size: %d instances: %d IDs: %u-%u\n",
+      ivdbg("%2d. type %2d addr %04x size: %d instances: %d IDs: %u-%u\n",
             i, object->type, MXT_GETUINT16(object->addr), object->size + 1,
             object->ninstances + 1, idmin, idmax);
 
@@ -1437,36 +1446,45 @@ static int mxt_getobjtab(FAR struct mxt_dev_s *priv)
 }
 
 /****************************************************************************
- * Name: mxt_chghigh
+ * Name: mxt_clrpending
+ *
+ *   Clear any pending messages be reading messages until there are no
+ *   pending messages.  This will force the CHG pin to the high state and
+ *   prevent spurious initial interrupts.
+ *
  ****************************************************************************/
 
-static int mxt_chghigh(FAR struct mxt_dev_s *priv)
+static int mxt_clrpending(FAR struct mxt_dev_s *priv)
 {
   struct mxt_msg_s msg;
   int retries = 10;
   int ret;
 
-  /* Read dummy message to make high CHG pin */
+  /* Read dummy message until there are no more to read (or until we have
+   * tried 10 times).  NOTE: The MXT748E seems to return msg.id == 0x00
+   * when there are no pending messages.
+   */
 
   do
     {
       ret = mxt_getmessage(priv, &msg);
       if (ret < 0)
         {
+          idbg("ERROR: mxt_getmessage failed: %d\n", ret);
           return ret;
         }
     }
-  while (msg.id != 0xff && --retries > 0);
+  while (msg.id != 0x00 && msg.id != 0xff && --retries > 0);
 
-  /* Check for a timeout */
+  /* Complain if we exceed the retry limit */
 
   if (retries <= 0)
     {
-      idbg("ERROR: CHG pin did not clear\n");
+      idbg("ERROR: CHG pin did not clear: ID=%02x\n", msg.id);
       return -EBUSY;
     }
 
-  return 0;
+  return OK;
 }
 
 /****************************************************************************
@@ -1574,22 +1592,29 @@ static int mxt_hwinitialize(FAR struct mxt_dev_s *priv)
       goto errout_with_objtab;
     }
 
-  /* Force the CHG pin to the high state */
+  /* Clear any pending messages.  This will force the CHG pin to the high
+   * state and prevent spurious interrupts.
+   */
 
-  ret = mxt_chghigh(priv);
+  ret = mxt_clrpending(priv);
   if (ret < 0)
     {
+      idbg("ERROR: mxt_clrpending failed: %d\n", ret);
       goto errout_with_sample;
     }
 
   return OK;
 
+  /* Error exits */
+
 errout_with_sample:
   kfree(priv->sample);
   priv->sample = NULL;
+
 errout_with_objtab:
   kfree(priv->objtab);
   priv->objtab = NULL;
+
   return ret;
 }
 
@@ -1650,7 +1675,7 @@ int mxt_register(FAR struct i2c_dev_s *i2c,
   /* Make sure that interrupts are disabled */
 
   MXT_CLEAR(lower);
-  MXT_ENABLE(lower);
+  MXT_DISABLE(lower);
 
   /* Attach the interrupt handler */
 
@@ -1683,7 +1708,14 @@ int mxt_register(FAR struct i2c_dev_s *i2c,
     }
 
   /* Schedule work to perform the initial sampling and to set the data
-   * availability conditions. */
+   * availability conditions.  The worker will enable MXT interrupts
+   * when it completes its initialization.
+   *
+   * NOTE: At present, this really does nothing for the case of the MXT
+   * driver.  This could be replaced with MXT_ENABLE(lower).  Or,
+   * alternatively, eliminate mxt_clrpending() which does basically the
+   * same thing.
+   */
 
   ret = work_queue(HPWORK, &priv->work, mxt_worker, priv, 0);
   if (ret != 0)
