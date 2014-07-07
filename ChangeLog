@@ -7663,3 +7663,7 @@
 	  (2014-7-6)
 	* net/: Add a few missing configuration options to the Kconfig files
 	  (2014-7-8).
+	* net/iob/iob_trimhead_queue.c and socket/recvfrom.c:  Important fix to
+	  the read-ahead buffer queue managment: Consumed bytes were being
+	  trimmed from the head of the queue, but the queue head itself was
+	  not being updated.  From Rony XLN (2014-7-7).
