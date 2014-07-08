@@ -4360,7 +4360,7 @@ config SAMA5_DDRCS_HEAP
 
 		*** DO NOT SELECT THIS OPTION IF YOU ARE EXECUTING FROM SDRAM!!**
 		In this case, the remaining SDRAM will automatically be added to the
-		heap (using RAM_END)
+		heap.
 
 if SAMA5_DDRCS_HEAP
 
@@ -4379,7 +4379,39 @@ config SAMA5_DDRCS_HEAP_SIZE
 		Add the region of DDR-SDRAM beginning at SAMA5_DDRCS_HEAP_OFFSET
 		and of size SAMA5_DDRCS_HEAP_SIZE to the heap.
 
-endif #SAMA5_DDRCS_HEAP
+endif # SAMA5_DDRCS_HEAP
+
+config SAMA5_DDRCS_RESERVE
+	bool "Reserve DDR-SDRAM"
+	default n
+	depends on SAMA5_BOOT_SDRAM
+	---help---
+		This option is available only we are executing out of SDRAM.  In
+		this case, by default, all of DRAM available from the end of the
+		program through the end of DRAM (RAM_START + RAM_END) is
+		automatically added to the heap.  However, there are certain cases
+		where you may want to reserve a block of DRAM for other purposes
+		such a large DMA buffer or an LCD framebuffer.  In those cases, you
+		can select this option to specify the end of the DRAM memory to add
+		to the heap; DRAM after this address will not be part of the heap
+		and so will be available for other purposes.
+
+		NOTE:  There is way to reserve memory before the start of the
+		program in DRAM using this mechanism.  That configuration is
+		possible, but not using this configuration setting.
+
+if SAMA5_DDRCS_RESERVE
+
+config SAMA5_DDRCS_HEAP_END
+	hex "DDR-SDRAM heap end"
+	default 0x30000000
+	---help---
+		Add the region of DDR-SDRAM beginning at the first available byte
+		after the memory used by the DRAM probably through this virtual
+		address (minus one).  This will reserve the memory starting at
+		this address through RAM_SIZE + RAM_END for other purposes.
+
+endif # SAMA5_DDRCS_RESERVE
 
 config SAMA5_EBICS0_HEAP
 	bool "Include EBICS0 SRAM/PSRAM in heap"
