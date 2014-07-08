@@ -3051,11 +3051,11 @@ Configurations
       used to verify the SAMA5D3x-EK TFT LCD.  This test case focuses on
       general window controls, movement, mouse and keyboard input.  It
       requires no user interaction.
-   nxwm: This is a special configuration setup for the NxWM window manager
+    nxwm: This is a special configuration setup for the NxWM window manager
       UnitTest.  It integrates support for both the SAMA5 LCDC and the
       SAMA5 ADC touchscreen controller and provides a more advance
       graphics demo. It provides an interactive windowing experience.
-   ov2640:  A test of the SAMA5 ISI using an OV2640 camera.
+    ov2640:  A test of the SAMA5 ISI using an OV2640 camera.  INCOMPLETE!
 
   There may be issues with some of these configurations.  See the details
   before of the status of individual configurations.

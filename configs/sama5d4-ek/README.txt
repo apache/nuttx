@@ -2825,6 +2825,140 @@ TM7000 LCD/Touchscreen
 
       LCD_ETH1_CONFIG=0: LCD 5v disable; ETH1 enable
 
+  LCD Connector
+  -------------
+
+  ------------------------- ----------------------- --------
+  SAMA5D4-EK                TM7000                  FUNCTION
+  ------------------------- ----------------------- --------
+  LCD_PE24       J9 pin 5   ~MXT_CHG      J4 pin 5  MXT
+  LCD_PE25       J9 pin 6   ~QT_CHG       J4 pin 6  QT
+  LCD_TWCK0_PA31 J9 pin 7   I2C SCL       J4 pin 7  MXT,QT
+  LCD_TWD0_PA30  J9 pin 8   I2C SDA       J4 pin 8  MXT,QT
+  LCD_DAT0_PA0   J9 pin 18  LCD_DATA_0    J4 pin 18 LCD
+  LCD_DAT1_PA1   J9 pin 19  LCD_DATA_1    J4 pin 19 LCD
+  LCD_DAT2_PA2   J9 pin 20  LCD_DATA_2    J4 pin 20 LCD
+  LCD_DAT3_PA3   J9 pin 21  LCD_DATA_3    J4 pin 21 LCD
+  LCD_DAT4_PA4   J9 pin 22  LCD_DATA_4    J4 pin 22 LCD
+  LCD_DAT3_PA5   J9 pin 23  LCD_DATA_5    J4 pin 23 LCD
+  LCD_DAT6_PA6   J9 pin 24  LCD_DATA_6    J4 pin 24 LCD
+  LCD_DAT7_PA7   J9 pin 25  LCD_DATA_7    J4 pin 25 LCD
+  LCD_DAT8_PA8   J9 pin 26  LCD_DATA_8    J4 pin 26 LCD
+  LCD_DAT9_PA9   J9 pin 27  LCD_DATA_9    J4 pin 27 LCD
+  LCD_DAT10_PA10 J9 pin 28  LCD_DATA_10   J4 pin 28 LCD
+  LCD_DAT11_PA11 J9 pin 29  LCD_DATA_ 1   J4 pin 29 LCD
+  LCD_DAT12_PA12 J9 pin 16  LCD_DATA_12   J4 pin 16 LCD
+  LCD_DAT13_PA13 J9 pin 12  LCD_DATA_13   J4 pin 12 LCD
+  LCD_DAT14_PA14 J9 pin 14  LCD_DATA_14   J4 pin 14 LCD
+  LCD_DAT15_PA15 J9 pin 10  LCD_DATA_15   J4 pin 10 LCD
+  ------------------------- ----------------------- --------
+  LCD_DAT16_PA16 J10 pin 5  LCD_DATA_16   J5 pin 5  LCD
+  LCD_DAT17_PA17 J10 pin 6  LCD_DATA_17   J5 pin 6  LCD
+  LCD_DAT18_PA18 J10 pin 7  LCD_DATA_18   J5 pin 7  LCD
+  LCD_DAT19_PA19 J10 pin 8  LCD_DATA_19   J5 pin 8  LCD
+  LCD_DAT20_PA20 J10 pin 9  LCD_DATA_20   J5 pin 9  LCD
+  LCD_DAT21_PA21 J10 pin 10 LCD_DATA_21   J5 pin 10 LCD
+  LCD_DAT22_PA22 J10 pin 11 LCD_DATA_22   J5 pin 11 LCD
+  LCD_DAT23_PA23 J10 pin 12 LCD_DATA_23   J5 pin 12 LCD
+  LCD_DISP_PA25  J10 pin 15 DISP          J5 pin 15 LCD (Display Enable)
+  LCD_PWM_PA24   J10 pin 16 Backlight PWM J5 pin 16 LCD
+  LCD_VSYNC_PA26 J10 pin 17 VSYNC         J5 pin 17 LCD
+  LCD_HSYNC_PA27 J10 pin 18 HSYNC         J5 pin 18 LCD
+  LCD_DEN_PA29   J10 pin 19 DE            J5 pin 19 LCD
+  LCD_PCK_PA28   J10 pin 20 PCLK          J5 pin 20 LCD
+  AD0_XP         J10 pin 23 N/C           J5 pin 23 N/A
+  AD1_XM         J10 pin 24 N/C           J5 pin 24 N/A
+  AD2_YP         J10 pin 25 N/C           J5 pin 25 N/A
+  AD3_YM         J10 pin 26 N/C           J5 pin 26 N/A
+  AD4_LR         J10 pin 27 N/C           J5 pin 27 N/A
+  1Wire_PE28     J10 pin 28 1-Wire        J5 pin 28 EE
+  LCD_SPI1_SO    J10 pin 31 N/C           J5 pin 31 N/A
+  LCD_SPI1_SI    J10 pin 32 N/C           J5 pin 32 N/A
+  LCD_SPI1_CLK   J10 pin 33 N/C           J5 pin 33 N/A
+  LCD_SPI1_CS2   J10 pin 34 N/C           J5 pin 34 N/A
+  EN_PWRLCD      J10 pin 35 N/C           J5 pin 35 N/A
+  LCD_DETECT#    J10 pin 36 LCD Presence  J5 pin 36 All
+  RXD4_PE26      J10 pin 37 N/C           J5 pin 37 N/A
+  XD4_PE27       J10 pin 38 N/C           J5 pin 38 N/A
+  ------------------------- ----------------------- --------
+
+  LCD Configuration
+  -----------------
+
+  Here is a configuration that enables the LCD with backlight in RGB565
+  color mode.  Notice that this configuration sets up an LCD framebuffer of
+  size 6,291,456 (0x0060:0000, 6MiB) at the end of DRAM. DRAM begins at
+  address 0x2000:0000 and has size 268,435,456 (0x1000:0000); The
+  framebuffer the begins at 0x2000:0000 + 0x1000:0000 - 0x0060:0000 =
+  0x2fa0:0000.
+
+    System Type -> SAMA5 Peripheral Support ->
+    CONFIG_SAMA5_LCDC=y                    : Enable LCDC
+
+    System Type -> LCDC Configuration ->
+    CONFIG_SAMA5_LCDC_BACKLIGHT=y          : With backlight
+    CONFIG_SAMA5_LCDC_DEFBACKLIGHT=0xc8
+    CONFIG_SAMA5_LCDC_BACKCOLOR=0x7b5d     : Color to use when clearing the display
+    CONFIG_SAMA5_LCDC_FB_VBASE=0x2fa00000  : Set aside the framebuffer
+    CONFIG_SAMA5_LCDC_FB_PBASE=0x2fa00000
+    CONFIG_SAMA5_LCDC_FB_SIZE=6291456
+    CONFIG_SAMA5_LCDC_BASE_ROT0=y          : No rotation
+    CONFIG_SAMA5_LCDC_BASE_RGB565=y        : RGB565 color format
+
+  This framebuffer size must then be subtracted from the memory available in the
+  heap (0x3000:0000 - 0x0058:0000 = 0x2fa8:0000):
+
+    System Type -> Heap Configuration ->
+    CONFIG_SAMA5_DDRCS_RESERVE=y           : Reserve DRAM for the framebuffer
+    CONFIG_SAMA5_DDRCS_HEAP_END=0x2fa00000 : End of DRAM heap (excludes framebuffer)
+
+  There are several simple graphics examples under apps/examples/ that can
+  be use to verify the LCD: nx, nxhello, nximage, nxlines, nxtext.  See
+  apps/examples/README.txt for information about configuring these examples.
+
+  For example, these settings will enable the apps/examples/nx example.  The
+  NX example is a simple test using the NuttX graphics system (NX).  This
+  test case focuses on general window controls, movement, mouse and keyboard
+  input.  It requires no user interaction.
+
+  First you need to enable NuttX graphics support:
+
+    Graphics Support ->
+    CONFIG_NX=y                            : Enable NX graphics
+    CONFIG_NX_NPLANES=1                    : 1 color plane
+    CONFIG_NX_PACKEDMSFIRST=y
+
+    Graphics Support -> Supported Pixel Depths ->
+    CONFIG_NX_DISABLE_1BPP=y               : Disable all resolutions except 16 bpp
+    CONFIG_NX_DISABLE_2BPP=y
+    CONFIG_NX_DISABLE_4BPP=y
+    CONFIG_NX_DISABLE_8BPP=y
+    CONFIG_NX_DISABLE_24BPP=y
+    CONFIG_NX_DISABLE_32BPP=y
+
+    Graphics Support -> Input Devices ->
+    CONFIG_NX_MOUSE=y                      : Build in mouse/touchscreen support (not used)
+    CONFIG_NX_KBD=y                        : Build in keyboard support (not used)
+
+    Graphics Support -> Framed Window Borders ->
+    CONFIG_NXTK_BORDERWIDTH=4              : Framed window configuration
+    CONFIG_NXTK_DEFAULT_BORDERCOLORS=y
+
+    Graphics Support -> Font Selections ->
+    CONFIG_NXFONTS_CHARBITS=7              : Font configuration
+    CONFIG_NXFONT_SERIF22X28B=y
+
+  Then you can enable the NX example:
+
+    Application Configuration -> Examples -> NX graphics example
+    CONFIG_EXAMPLES_NX=y                   : Enable the NX example
+    CONFIG_EXAMPLES_NX_VPLANE=0            : Use color plane 0
+    CONFIG_EXAMPLES_NX_DEVNO=0             : Use device zero
+    CONFIG_EXAMPLES_NX_DEFAULT_COLORS=y    : Use default colors
+    CONFIG_EXAMPLES_NX_DEFAULT_FONT=y      : Use default fonts
+    CONFIG_EXAMPLES_NX_BPP=16              : Use 16 bpp
+    CONFIG_EXAMPLES_NX_TOOLBAR_HEIGHT=16   : Configure toolbar
+
   maXTouch
   --------
   Both the MXT768E and the AT42QT1070 are I2C devices with interrupting
