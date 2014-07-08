@@ -227,7 +227,7 @@ static void stmpe811_enable(FAR struct stmpe811_config_s *state, bool enable)
 
   /* Attach and enable, or detach and disable.  Enabling and disabling GPIO
    * interrupts is a multi-step process so the safest thing is to keep
-   * interrupts disabled during the reconfiguratino.
+   * interrupts disabled during the reconfiguration.
    */
 
   flags = irqsave();

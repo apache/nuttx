@@ -85,7 +85,7 @@ int task_reparent(pid_t ppid, pid_t chpid)
   irqstate_t flags;
   int ret;
 
-  /* Disable interrupts so that nothing can change in the relatinoship of
+  /* Disable interrupts so that nothing can change in the relationship of
    * the three task:  Child, current parent, and new parent.
    */
 
@@ -217,7 +217,7 @@ int task_reparent(pid_t ppid, pid_t chpid)
   irqstate_t flags;
   int ret;
 
-  /* Disable interrupts so that nothing can change in the relatinoship of
+  /* Disable interrupts so that nothing can change in the relationship of
    * the three task:  Child, current parent, and new parent.
    */
 

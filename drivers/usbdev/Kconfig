@@ -552,7 +552,7 @@ config USBMSC_BULKOUTREQLEN
 		the completed READ request to the caller as each packet is received.
 		Therefore, there is no benefit in increasing the size of this buffer
 		beyond the maximum size of one packet.  Default:  512 or 64 bytes
-		(depending upon if dual speed operatino is supported or not).
+		(depending upon if dual speed operation is supported or not).
 
 config USBMSC_VENDORID
 	hex "Mass storage Vendor ID"

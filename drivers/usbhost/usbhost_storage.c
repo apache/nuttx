@@ -257,7 +257,7 @@ static int usbhost_ioctl(FAR struct inode *inode, int cmd,
  * Private Data
  ****************************************************************************/
 
-/* This structure provides the registry entry ID informatino that will  be
+/* This structure provides the registry entry ID information that will  be
  * used to associate the USB host mass storage class to a connected USB
  * device.
  */

@@ -175,7 +175,7 @@ static int usbhost_disconnected(FAR struct usbhost_class_s *class);
  * Private Data
  ****************************************************************************/
 
-/* This structure provides the registry entry ID informatino that will  be
+/* This structure provides the registry entry ID information that will  be
  * used to associate the USB class driver to a connected USB device.
  */
 
