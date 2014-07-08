@@ -7681,3 +7681,11 @@
 	  SAMA5D4 and must be replaced with a table lookup (2014-7-7).
 	* configs/sam*: Fix some cloned errors in SAM GPIO interrupt setup
 	  (1014-7-7).
+	* arch/arm/src/sama5/Kconfig and sam_allocateheap.c:  Add a
+	  configuration option to reserve DRAM for a framebuffer when executing
+	  out of DRAM.  This optional was available before when executing out of
+	  NOR, but needs to work a little differently in this case (2014-7-7).
+	* arch/arm/src/sama5/sam_lcd.c and chip/sam_lcdc.h: Adapt the SAMA5D3
+	  LCDC driver to work with the SAMA5D4 which has no hardware cursor
+	  (2014-7-7).
+	* configs/sama5d4-ek:  Add options to support an LCD (2014-7-7).
