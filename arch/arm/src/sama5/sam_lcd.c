@@ -570,14 +570,21 @@
 
 /* Layer helpers */
 
-#define LCDC_NLAYERS 5
+#ifdef SAMA5_HAVE_LCDC_HCRCH
+#  define LCDC_NLAYERS 5
+#else
+#  define LCDC_NLAYERS 4
+#endif
 
 #define LAYER(i)     g_lcdc.layer[i]
 #define LAYER_BASE   g_lcdc.layer[LCDC_LAYER_BASE]
 #define LAYER_OVR1   g_lcdc.layer[LCDC_LAYER_OVR1]
 #define LAYER_OVR2   g_lcdc.layer[LCDC_LAYER_OVR2]
 #define LAYER_HEO    g_lcdc.layer[LCDC_LAYER_HEO]
-#define LAYER_HCR    g_lcdc.layer[LCDC_LAYER_HCR]
+
+#ifdef SAMA5_HAVE_LCDC_HCRCH
+#  define LAYER_HCR  g_lcdc.layer[LCDC_LAYER_HCR]
+#endif
 
 /****************************************************************************
  * Private Types
@@ -589,8 +596,10 @@ enum sam_layer_e
   LCDC_LAYER_BASE = 0,     /* LCD base layer, display fixed size image */
   LCDC_LAYER_OVR1,         /* LCD Overlay 1 */
   LCDC_LAYER_OVR2,         /* LCD Overlay 2 */
-  LCDC_LAYER_HEO,          /* LCD HighEndOverlay, support resize */
-  LCDC_LAYER_HCR           /* LCD Cursor, max size 128x128 */
+  LCDC_LAYER_HEO           /* LCD HighEndOverlay, support resize */
+#ifdef SAMA5_HAVE_LCDC_HCRCH
+  , LCDC_LAYER_HCR         /* LCD Cursor, max size 128x128 */
+#endif
 };
 
 /* Possible rotations supported by all layers */
@@ -718,7 +727,9 @@ static void sam_base_disable(void);
 static void sam_ovr1_disable(void);
 static void sam_ovr2_disable(void);
 static void sam_heo_disable(void);
+#ifdef SAMA5_HAVE_LCDC_HCRCH
 static void sam_hcr_disable(void);
+#endif
 static void sam_lcd_disable(void);
 static void sam_layer_orientation(void);
 static void sam_layer_color(void);
@@ -800,84 +811,149 @@ static pio_pinset_t g_lcdcpins[] =
 
 static const uintptr_t g_layerenable[LCDC_NLAYERS] =
 {
-  SAM_LCDC_BASECHER, SAM_LCDC_OVR1CHER, SAM_LCDC_OVR2CHER, SAM_LCDC_HEOCHER,
-  SAM_LCDC_HCRCHER
+  SAM_LCDC_BASECHER,
+  SAM_LCDC_OVR1CHER,
+  SAM_LCDC_OVR2CHER,
+  SAM_LCDC_HEOCHER
+#ifdef SAMA5_HAVE_LCDC_HCRCH
+  , SAM_LCDC_HCRCHER
+#endif
 };
 
 static const uintptr_t g_layerdisable[LCDC_NLAYERS] =
 {
-  SAM_LCDC_BASECHDR, SAM_LCDC_OVR1CHDR, SAM_LCDC_OVR2CHDR, SAM_LCDC_HEOCHDR,
-  SAM_LCDC_HCRCHDR
+  SAM_LCDC_BASECHDR,
+  SAM_LCDC_OVR1CHDR,
+  SAM_LCDC_OVR2CHDR,
+  SAM_LCDC_HEOCHDR
+#ifdef SAMA5_HAVE_LCDC_HCRCH
+  , SAM_LCDC_HCRCHDR
+#endif
 };
 
 static const uintptr_t g_layerstatus[LCDC_NLAYERS] =
 {
-  SAM_LCDC_BASECHSR, SAM_LCDC_OVR1CHSR, SAM_LCDC_OVR2CHSR, SAM_LCDC_HEOCHSR,
-  SAM_LCDC_HCRCHSR
+  SAM_LCDC_BASECHSR,
+  SAM_LCDC_OVR1CHSR,
+  SAM_LCDC_OVR2CHSR,
+  SAM_LCDC_HEOCHSR
+#ifdef SAMA5_HAVE_LCDC_HCRCH
+  , SAM_LCDC_HCRCHSR
+#endif
 };
 
 static const uintptr_t g_layerblend[LCDC_NLAYERS] =
 {
-  SAM_LCDC_BASECFG4, SAM_LCDC_OVR1CFG9, SAM_LCDC_OVR2CFG9, SAM_LCDC_HEOCFG12,
-  SAM_LCDC_HCRCFG9
+  SAM_LCDC_BASECFG4,
+  SAM_LCDC_OVR1CFG9,
+  SAM_LCDC_OVR2CFG9,
+  SAM_LCDC_HEOCFG12
+#ifdef SAMA5_HAVE_LCDC_HCRCH
+  , SAM_LCDC_HCRCFG9
+#endif
 };
 
 static const uintptr_t g_layerhead[LCDC_NLAYERS] =
 {
-  SAM_LCDC_BASEHEAD, SAM_LCDC_OVR1HEAD, SAM_LCDC_OVR2HEAD, SAM_LCDC_HEOHEAD,
-  SAM_LCDC_HCRHEAD
+  SAM_LCDC_BASEHEAD,
+  SAM_LCDC_OVR1HEAD,
+  SAM_LCDC_OVR2HEAD,
+  SAM_LCDC_HEOHEAD
+#ifdef SAMA5_HAVE_LCDC_HCRCH
+  , SAM_LCDC_HCRHEAD
+#endif
 };
 
 static const uintptr_t g_layeraddr[LCDC_NLAYERS] =
 {
-  SAM_LCDC_BASEADDR, SAM_LCDC_OVR1ADDR, SAM_LCDC_OVR2ADDR, SAM_LCDC_HEOADDR,
-  SAM_LCDC_HCRADDR
+  SAM_LCDC_BASEADDR,
+  SAM_LCDC_OVR1ADDR,
+  SAM_LCDC_OVR2ADDR,
+  SAM_LCDC_HEOADDR
+#ifdef SAMA5_HAVE_LCDC_HCRCH
+  , SAM_LCDC_HCRADDR
+#endif
 };
 
 static const uintptr_t g_layerctrl[LCDC_NLAYERS] =
 {
-  SAM_LCDC_BASECTRL, SAM_LCDC_OVR1CTRL, SAM_LCDC_OVR2CTRL, SAM_LCDC_HEOCTRL,
-  SAM_LCDC_HCRCTRL
+  SAM_LCDC_BASECTRL,
+  SAM_LCDC_OVR1CTRL,
+  SAM_LCDC_OVR2CTRL,
+  SAM_LCDC_HEOCTRL
+#ifdef SAMA5_HAVE_LCDC_HCRCH
+  , SAM_LCDC_HCRCTRL
+#endif
 };
 
 static const uintptr_t g_layernext[LCDC_NLAYERS] =
 {
-  SAM_LCDC_BASENEXT, SAM_LCDC_OVR1NEXT, SAM_LCDC_OVR2NEXT, SAM_LCDC_HEONEXT,
-  SAM_LCDC_HCRNEXT
+  SAM_LCDC_BASENEXT,
+  SAM_LCDC_OVR1NEXT,
+  SAM_LCDC_OVR2NEXT,
+  SAM_LCDC_HEONEXT
+#ifdef SAMA5_HAVE_LCDC_HCRCH
+  , SAM_LCDC_HCRNEXT
+#endif
 };
 
 static const uintptr_t g_layercfg[LCDC_NLAYERS] =
 {
-  SAM_LCDC_BASECFG0, SAM_LCDC_OVR1CFG0, SAM_LCDC_OVR2CFG0, SAM_LCDC_HEOCFG0,
-  SAM_LCDC_HCRCFG0
+  SAM_LCDC_BASECFG0,
+  SAM_LCDC_OVR1CFG0,
+  SAM_LCDC_OVR2CFG0,
+  SAM_LCDC_HEOCFG0
+#ifdef SAMA5_HAVE_LCDC_HCRCH
+  , SAM_LCDC_HCRCFG0
+#endif
 };
 
 static const uintptr_t g_layercolor[LCDC_NLAYERS] =
 {
-  SAM_LCDC_BASECFG1, SAM_LCDC_OVR1CFG1, SAM_LCDC_OVR2CFG1, SAM_LCDC_HEOCFG1,
-  SAM_LCDC_HCRCFG1
+  SAM_LCDC_BASECFG1,
+  SAM_LCDC_OVR1CFG1,
+  SAM_LCDC_OVR2CFG1,
+  SAM_LCDC_HEOCFG1
+#ifdef SAMA5_HAVE_LCDC_HCRCH
+  , SAM_LCDC_HCRCFG1
+#endif
 };
 
 #ifdef SAMA5_HAVE_POSITION
 static const uintptr_t g_layerpos[LCDC_NLAYERS] =
 {
-  0,                 SAM_LCDC_OVR1CFG2, SAM_LCDC_OVR2CFG2, SAM_LCDC_HEOCFG2,
-  SAM_LCDC_HCRCFG2
+  0,
+  SAM_LCDC_OVR1CFG2,
+  SAM_LCDC_OVR2CFG2,
+  SAM_LCDC_HEOCFG2
+#ifdef SAMA5_HAVE_LCDC_HCRCH
+  , SAM_LCDC_HCRCFG2
+#endif
 };
 #endif
 
 #ifdef SAMA5_HAVE_SIZE
 static const uintptr_t g_layersize[LCDC_NLAYERS] =
 {
-  0,                 SAM_LCDC_OVR1CFG3, SAM_LCDC_OVR2CFG3, SAM_LCDC_HEOCFG3,
-  SAM_LCDC_HCRCFG3
+  0,
+  SAM_LCDC_OVR1CFG3,
+  SAM_LCDC_OVR2CFG3,
+  SAM_LCDC_HEOCFG3
+#ifdef SAMA5_HAVE_LCDC_HCRCH
+  , SAM_LCDC_HCRCFG3
+#endif
 };
 #endif
 
 static const uintptr_t g_layerstride[LCDC_NLAYERS] =
 {
-  SAM_LCDC_BASECFG2, SAM_LCDC_OVR1CFG4, SAM_LCDC_OVR2CFG4, SAM_LCDC_HEOCFG5,
-  SAM_LCDC_HCRCFG4
+  SAM_LCDC_BASECFG2,
+  SAM_LCDC_OVR1CFG4,
+  SAM_LCDC_OVR2CFG4,
+  SAM_LCDC_HEOCFG5
+#ifdef SAMA5_HAVE_LCDC_HCRCH
+  , SAM_LCDC_HCRCFG4
+#endif
 };
 
 #ifdef SAMA5_HAVE_PSTRIDE
@@ -891,8 +967,13 @@ static const uintptr_t g_layerpstride[LCDC_NLAYERS] =
 #ifdef CONFIG_FB_CMAP
 static const uintptr_t g_layerclut[LCDC_NLAYERS] =
 {
-  SAM_LCDC_BASECLUT, SAM_LCDC_OVR1CLUT, SAM_LCDC_OVR2CLUT, SAM_LCDC_HEOCLUT,
-  SAM_LCDC_HCRCLUT
+  SAM_LCDC_BASECLUT,
+  SAM_LCDC_OVR1CLUT,
+  SAM_LCDC_OVR2CLUT,
+  SAM_LCDC_HEOCLUT
+#ifdef SAMA5_HAVE_LCDC_HCRCH
+  , SAM_LCDC_HCRCLUT
+#endif
 };
 #endif
 
@@ -1718,6 +1799,7 @@ static void sam_heo_disable(void)
  *
  ****************************************************************************/
 
+#ifdef SAMA5_HAVE_LCDC_HCRCH
 static void sam_hcr_disable(void)
 {
   struct sam_dscr_s *dscr;
@@ -1762,6 +1844,7 @@ static void sam_hcr_disable(void)
 
   while ((sam_getreg(SAM_LCDC_HCRCHSR) & LCDC_HCRCHSR_CH) != 0);
 }
+#endif
 
 /****************************************************************************
  * Name: sam_lcd_disable
@@ -1779,7 +1862,9 @@ static void sam_lcd_disable(void)
   sam_ovr1_disable();
   sam_ovr2_disable();
   sam_heo_disable();
+#ifdef SAMA5_HAVE_LCDC_HCRCH
   sam_hcr_disable();
+#endif
 
   /* Disable DMA path */
 
@@ -2075,6 +2160,7 @@ static void sam_layer_color(void)
 #  endif
 #endif
 
+#ifdef SAMA5_HAVE_LCDC_HCRCH
 #ifdef CONFIG_SAMA5_LCDC_HCR
   /* Hardware Cursor color configuration, GA 0xff, Key #000000 */
 
@@ -2106,6 +2192,7 @@ static void sam_layer_color(void)
 #  else
 #    error Support for this resolution is not yet supported
 #  endif
+#endif
 #endif
 }
 
@@ -2273,12 +2360,14 @@ static void sam_layer_configure(void)
   LAYER_HEO.framebuffer  = (uint8_t *)SAMA5_LCDC_BUFFER_HEO;
 #endif
 
+#ifdef SAMA5_HAVE_LCDC_HCRCH
   memset(&LAYER_HCR, 0, sizeof(struct sam_layer_s));
   LAYER_HCR.dscr         = (struct sam_dscr_s *)SAMA5_LCDC_HCR_DSCR;
   LAYER_HCR.lid          = LCDC_LAYER_HCR;
 #ifdef CONFIG_SAMA5_LCDC_HCR
   LAYER_HCR.framebuffer  = (uint8_t *)SAMA5_LCDC_BUFFER_HCR;
 #endif
+#endif /* SAMA5_HAVE_LCDC_HCRCH */
 }
 
 /****************************************************************************
