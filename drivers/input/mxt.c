@@ -756,6 +756,15 @@ static void mxt_worker(FAR void *arg)
   lower = priv->lower;
   DEBUGASSERT(lower != NULL);
 
+  /* Get exclusive access to the MXT driver data structure */
+
+  do
+    {
+      ret = sem_wait(&priv->devsem);
+      DEBUGASSERT(ret == 0 || errno == EINTR);
+    }
+  while (ret < 0);
+
   /* Loop, processing each message from the maXTouch */
 
   do
@@ -766,7 +775,7 @@ static void mxt_worker(FAR void *arg)
       if (ret < 0)
         {
           idbg("ERROR: mxt_getmessage failed: %d\n", ret);
-          return;
+          goto errout_with_semaphore;
         }
 
       id = msg.id;
@@ -815,6 +824,11 @@ static void mxt_worker(FAR void *arg)
         }
     }
   while (id != 0x00 && id != 0xff);
+
+errout_with_semaphore:
+  /* Release our lock on the MXT device */
+
+  sem_post(&priv->devsem);
 
   /* Acknowledge and re-enable maXTouch interrupts */
 
@@ -894,6 +908,7 @@ static int mxt_open(FAR struct file *filep)
     {
       /* More than 255 opens; uint8_t overflows to zero */
 
+      idbg("ERROR: Too many opens: %d\n", priv->crefs);
       ret = -EMFILE;
       goto errout_with_sem;
     }
@@ -906,7 +921,12 @@ static int mxt_open(FAR struct file *filep)
     {
       /* Touch enable */
 
-      mxt_putobject(priv, MXT_TOUCH_MULTI_T9, MXT_TOUCH_CTRL, 0x83);
+      ret = mxt_putobject(priv, MXT_TOUCH_MULTI_T9, MXT_TOUCH_CTRL, 0x83);
+      if (ret < 0)
+        {
+          idbg("ERROR: Failed to enable touch: %d\n", ret);
+          goto errout_with_sem;
+        }
     }
 
   /* Save the new open count on success */
@@ -924,9 +944,9 @@ errout_with_sem:
 
 static int mxt_close(FAR struct file *filep)
 {
-  FAR struct inode         *inode;
+  FAR struct inode *inode;
   FAR struct mxt_dev_s *priv;
-  int                       ret;
+  int ret;
 
   DEBUGASSERT(filep);
   inode = filep->f_inode;
@@ -956,7 +976,11 @@ static int mxt_close(FAR struct file *filep)
         {
           /* Touch disable */
 
-          mxt_putobject(priv, MXT_TOUCH_MULTI_T9, MXT_TOUCH_CTRL, 0);
+          ret = mxt_putobject(priv, MXT_TOUCH_MULTI_T9, MXT_TOUCH_CTRL, 0);
+          if (ret < 0)
+            {
+              idbg("ERROR: Failed to disable touch: %d\n", ret);
+            }
         }
     }
 
@@ -1393,6 +1417,7 @@ static int mxt_getobjtab(FAR struct mxt_dev_s *priv)
                    tabsize);
   if (ret < 0)
     {
+      idbg("ERROR: Failed to object table size: %d\n", ret);
       return ret;
     }
 
@@ -1532,7 +1557,13 @@ static int mxt_hwinitialize(FAR struct mxt_dev_s *priv)
 
   /* Perform a soft reset */
 
-  mxt_putobject(priv, MXT_GEN_COMMAND_T6, MXT_COMMAND_RESET, 1);
+  ret = mxt_putobject(priv, MXT_GEN_COMMAND_T6, MXT_COMMAND_RESET, 1);
+  if (ret < 0)
+    {
+      idbg("ERROR: Soft reset failed: %d\n", ret);
+      goto errout_with_objtab;
+    }
+
   usleep(MXT_RESET_TIME);
 
   /* Update matrix size in the info structure */
@@ -1540,6 +1571,7 @@ static int mxt_hwinitialize(FAR struct mxt_dev_s *priv)
   ret = mxt_getreg(priv, MXT_MATRIX_X_SIZE, (FAR uint8_t *)&regval, 1);
   if (ret < 0)
     {
+      idbg("ERROR: Failed to get X size: %d\n", ret);
       goto errout_with_objtab;
     }
 
@@ -1548,6 +1580,7 @@ static int mxt_hwinitialize(FAR struct mxt_dev_s *priv)
   ret = mxt_getreg(priv, MXT_MATRIX_Y_SIZE, (FAR uint8_t *)&regval, 1);
   if (ret < 0)
     {
+      idbg("ERROR: Failed to get Y size: %d\n", ret);
       goto errout_with_objtab;
     }
 
