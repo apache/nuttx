@@ -79,15 +79,64 @@
  * the RAM region beginning at CONFIG_RAM_START.  The "usable" top would
  * exclude, for example, any memory reserved at the top of the for the 16KB
  * page table.
+ *
+ * A special may occur when we execute from DRAM.  In that case,
+ * CONFIG_RAM_VSTART must be set to the (virtual) start of DRAM and
+ * CONFIG_RAM_SIZE must be set to the size of the DRAM.  These settings are
+ * necessary to provide the DRAM MMU mappings when the system boots and, by
+ * default, the DRAM memory will be added to the heap all the way up to
+ * CONFIG_RAM_VEND
+ *
+ * However, there are certain cases where you may want to reserve a block of
+ * DRAM for other purposes such a large DMA buffer or an LCD framebuffer.
+ * In those cases, the CONFIG_SAMA5_DDRCS_RESERVE can select a different end
+ * of the DRAM memory to add to the heap.  If CONFIG_SAMA5_DDRCS_RESERVE is
+ * selected, then the setting CONFIG_SAMA5_DDRCS_HEAP_END provides the end
+ * (plus one) (virtual) address of memory to be added to the heap; DRAM after
+ * this address will not be part of the heap and so will be available for
+ * other purposes
+ *
+ *   NOTE: There is way to reserve memory before the start of the program
+ *   in DRAM using this mechanism.  That configuration is possible, but
+ *   not using this configuration setting.
  */
 
 /* Memory Regions ***********************************************************/
+/* Check if we have been asked to reserve memory at the end of the primary
+ * memory region.  This option is only available if we are executing from
+ * DRAM and only if CONFIG_SAMA5_DDRCS_RESERVE is selected.
+ */
+
+#ifdef CONFIG_SAMA5_DDRCS_RESERVE
+
+  /* CONFIG_SAMA5_DDRCS_HEAP_END specifies the end (plus one) of the DRAM
+   * to add to the heap.  Memory starting at CONFIG_SAMA5_DDRCS_HEAP_END
+   * and extending to CONFIG_RAM_VEND is then available for other purposes.
+   */
+
+#  if !defined(CONFIG_SAMA5_DDRCS_HEAP_END)
+#    error CONFIG_SAMA5_DDRCS_HEAP_END must be defined in this configuration
+#  elif CONFIG_SAMA5_DDRCS_HEAP_END > CONFIG_RAM_VEND
+#    error CONFIG_SAMA5_DDRCS_HEAP_END is beyond CONFIG_RAM_VEND
+#  elif CONFIG_SAMA5_DDRCS_HEAP_END < CONFIG_RAM_VSTART
+#    error CONFIG_SAMA5_DDRCS_HEAP_END is before CONFIG_RAM_VSTART
+# endif
+
+#  define SAMA5_PRIMARY_HEAP_END CONFIG_SAMA5_DDRCS_HEAP_END
+#else
+  /* Otherwise, add the RAM all the way to the the end of the primary memory
+   * region to the heap.
+   */
+
+#  define SAMA5_PRIMARY_HEAP_END CONFIG_RAM_VEND
+#endif
+
 /* We cannot use the memory for heap if it is not enabled.  Or, if it is
  * enabled, but does not hold SDRAM, SRAM, or PSRAM.
  *
  * We cannot add the region if it is if we are executing from it!  In that
  * case, the remainder of the memory will automatically be added to the heap
- * based on g_idle_topstack and CONFIG_RAM_VEND.
+ * based on g_idle_topstack and SAMA5_PRIMARY_HEAP_END.
  */
 
 #if defined(CONFIG_SAMA5_BOOT_ISRAM)
@@ -207,10 +256,10 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
    */
 
   uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend + CONFIG_MM_KERNEL_HEAPSIZE;
-  size_t    usize = CONFIG_RAM_VEND - ubase;
+  size_t    usize = SAMA5_PRIMARY_HEAP_END - ubase;
   int       log2;
 
-  DEBUGASSERT(ubase < (uintptr_t)CONFIG_RAM_VEND);
+  DEBUGASSERT(ubase < (uintptr_t)SAMA5_PRIMARY_HEAP_END);
 
   /* Return the user-space heap settings */
 
@@ -225,7 +274,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 
   board_led_on(LED_HEAPALLOCATE);
   *heap_start = (FAR void*)&_ebss;
-  *heap_size  = CONFIG_RAM_VEND - (size_t)&_ebss;
+  *heap_size  = SAMA5_PRIMARY_HEAP_END - (size_t)&_ebss;
 
 #else
   /* Both data and the heap are in ISRAM.  The heap is then from the end of
@@ -234,7 +283,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 
   board_led_on(LED_HEAPALLOCATE);
   *heap_start = (FAR void*)g_idle_topstack;
-  *heap_size  = CONFIG_RAM_VEND - g_idle_topstack;
+  *heap_size  = SAMA5_PRIMARY_HEAP_END - g_idle_topstack;
 #endif
 }
 
@@ -258,10 +307,10 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
    */
 
   uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend + CONFIG_MM_KERNEL_HEAPSIZE;
-  size_t    usize = CONFIG_RAM_VEND - ubase;
+  size_t    usize = SAMA5_PRIMARY_HEAP_END - ubase;
   int       log2;
 
-  DEBUGASSERT(ubase < (uintptr_t)CONFIG_RAM_VEND);
+  DEBUGASSERT(ubase < (uintptr_t)SAMA5_PRIMARY_HEAP_END);
 
   /* Return the kernel heap settings (i.e., the part of the heap region
    * that was not dedicated to the user heap).
