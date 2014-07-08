@@ -112,21 +112,21 @@ FAR struct iob_s *iob_trimhead(FAR struct iob_s *iob, unsigned int trimlen)
                * data size.
                */
 
-              pktlen        -= iob->io_len;
-              trimlen       -= iob->io_len;
-              iob->io_len    = 0;
-              iob->io_offset = 0;
+              pktlen  -= iob->io_len;
+              trimlen -= iob->io_len;
 
               /* Check if this was the last entry in the chain */
 
               next = iob->io_flink;
-              if (!next)
+              if (next == NULL)
                 {
                   /* Yes.. break out of the loop returning the empty
                    * I/O buffer chain containing only one empty entry.
                    */
 
                   DEBUGASSERT(pktlen == 0);
+                  iob->io_len    = 0;
+                  iob->io_offset = 0;
                   break;
                 }
 
