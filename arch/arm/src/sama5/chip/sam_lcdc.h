@@ -197,6 +197,7 @@
 #define SAM_LCDC_HEOCFG41_OFFSET    0x0430 /* High-End Overlay Configuration Register 41 */
                                            /* 0x0434-0x043c Reserved */
 #ifdef ATSAMA5D3
+#  define SAMA5_HAVE_LCDC_HCRCH     1      /* Supports conditional compilation */
 #  define SAM_LCDC_HCRCHER_OFFSET   0x0440 /* Hardware Cursor Channel Enable Register */
 #  define SAM_LCDC_HCRCHDR_OFFSET   0x0444 /* Hardware Cursor Channel Disable Register */
 #  define SAM_LCDC_HCRCHSR_OFFSET   0x0448 /* Hardware Cursor Channel Status Register */
@@ -219,6 +220,7 @@
 #  define SAM_LCDC_HCRCFG8_OFFSET   0x048c /* Hardware Cursor Configuration 8 Register */
 #  define SAM_LCDC_HCRCFG9_OFFSET   0x0490 /* Hardware Cursor Configuration 9 Register */
                                            /* 0x0494-0x053c Reserved */
+#  define SAMA5_HAVE_LCDC_PPCH      1      /* Supports conditional compilation */
 #  define SAM_LCDC_PPCHER_OFFSET    0x0540 /* Post Processing Channel Enable Register */
 #  define SAM_LCDC_PPCHDR_OFFSET    0x0544 /* Post Processing Channel Disable Register */
 #  define SAM_LCDC_PPCHSR_OFFSET    0x0548 /* Post Processing Channel Status Register */
