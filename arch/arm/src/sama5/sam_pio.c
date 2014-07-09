@@ -61,6 +61,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Macros to convert a pin to a vanilla input */
+
+#define PIO_INPUT_BITS (PIO_INPUT | PIO_CFG_DEFAULT)
+#define MK_INPUT(p)    (((p) & (PIO_PORT_MASK | PIO_PIN_MASK)) | PIO_INPUT_BITS)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -335,7 +340,7 @@ static inline int sam_configinput(uintptr_t base, uint32_t pin,
   /* Enable/disable the Schmitt trigger */
 
   regval = getreg32(base + SAM_PIO_SCHMITT_OFFSET);
-  if ((cfgset & PIO_CFG_PULLDOWN) != 0)
+  if ((cfgset & PIO_CFG_SCHMITT) != 0)
     {
       regval |= pin;
     }
@@ -369,6 +374,11 @@ static inline int sam_configinput(uintptr_t base, uint32_t pin,
   regval |= drive << shift;
   putreg32(regval, base + offset);
 #endif
+
+  /* Clear some output only bits.  Mostly this just simplifies debug. */
+
+  putreg32(pin, base + SAM_PIO_MDDR_OFFSET);
+  putreg32(pin, base + SAM_PIO_CODR_OFFSET);
 
   /* Configure the pin as an input and enable the PIO function */
 
@@ -630,7 +640,11 @@ int sam_configpio(pio_pinset_t cfgset)
 
   putreg32(PIO_WPMR_WPKEY, base + SAM_PIO_WPMR_OFFSET);
 
-  /* Handle the pin configuration according to pin type */
+  /* Put the pin in an intial state -- a vanilla input pint */
+
+  (void)sam_configinput(base, pin, MK_INPUT(cfgset));
+
+  /* Then handle the real pin configuration according to pin type */
 
   switch (cfgset & PIO_MODE_MASK)
     {

@@ -98,11 +98,11 @@
 #define PIO_CFG_SHIFT             (15)        /* Bits 15-19: PIO configuration bits */
 #define PIO_CFG_MASK              (31 << PIO_CFG_SHIFT)
 #  define PIO_CFG_DEFAULT         (0  << PIO_CFG_SHIFT) /* Default, no attribute */
-#  define PIO_CFG_PULLUP          (1  << PIO_CFG_SHIFT) /* Bit 11: Internal pull-up */
-#  define PIO_CFG_PULLDOWN        (2  << PIO_CFG_SHIFT) /* Bit 11: Internal pull-down */
-#  define PIO_CFG_DEGLITCH        (4  << PIO_CFG_SHIFT) /* Bit 12: Internal glitch filter */
-#  define PIO_CFG_OPENDRAIN       (8  << PIO_CFG_SHIFT) /* Bit 13: Open drain */
-#  define PIO_CFG_SCHMITT         (16 << PIO_CFG_SHIFT) /* Bit 13: Schmitt trigger */
+#  define PIO_CFG_PULLUP          (1  << PIO_CFG_SHIFT) /* Bit 15: Internal pull-up */
+#  define PIO_CFG_PULLDOWN        (2  << PIO_CFG_SHIFT) /* Bit 16: Internal pull-down */
+#  define PIO_CFG_DEGLITCH        (4  << PIO_CFG_SHIFT) /* Bit 17: Internal glitch filter */
+#  define PIO_CFG_OPENDRAIN       (8  << PIO_CFG_SHIFT) /* Bit 18: Open drain */
+#  define PIO_CFG_SCHMITT         (16 << PIO_CFG_SHIFT) /* Bit 19: Schmitt trigger */
 
 /* Drive Strength:
  *
