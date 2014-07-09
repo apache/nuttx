@@ -56,6 +56,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/clock.h>
 #include <nuttx/i2c.h>
 
 #include <arch/irq.h>
@@ -96,8 +97,18 @@
 #endif
 
 /* Driver internal definitions *************************************************/
+/* If verbose I2C debug output is enable, then allow more time before we declare
+ * a timeout.  The debug output from twi_interrupt will really slow things down!
+ *
+ * With a very slow clock (say 100,000 Hz), less than 100 usec would be required
+ * to transfer on byte.  So these define a "long" timeout.
+ */
 
-#define TWI_TIMEOUT ((20 * CLK_TCK) / 1000) /* 20 mS */
+#if defined(CONFIG_DEBUG_I2C) && defined(CONFIG_DEBUG_VERBOSE)
+#  define TWI_TIMEOUT_MSPB (50)  /* 50 msec/byte */
+#else
+#  define TWI_TIMEOUT_MSPB (5)   /* 5 msec/byte */
+#endif
 
 /* Clocking to the TWO module(s) is provided by the main clocked, divided down
  * as necessary.
@@ -200,7 +211,7 @@ static inline void twi_putrel(struct twi_dev_s *priv, unsigned int offset,
 
 /* I2C transfer helper functions */
 
-static int twi_wait(struct twi_dev_s *priv);
+static int twi_wait(struct twi_dev_s *priv, unsigned int size);
 static void twi_wakeup(struct twi_dev_s *priv, int result);
 static int twi_interrupt(struct twi_dev_s *priv);
 #ifdef CONFIG_SAMA5_TWI0
@@ -248,7 +259,7 @@ static int twi_registercallback(FAR struct i2c_dev_s *dev,
 static uint32_t twi_hw_setfrequency(struct twi_dev_s *priv,
           uint32_t frequency);
 static void twi_hw_initialize(struct twi_dev_s *priv, uint32_t frequency);
-static void twi_initialize(struct twi_dev_s *priv, uint32_t frequency);
+static int twi_initialize(struct twi_dev_s *priv, uint32_t frequency);
 
 /*******************************************************************************
  * Private Data
@@ -504,11 +515,28 @@ static inline void twi_putrel(struct twi_dev_s *priv, unsigned int offset,
  *
  *******************************************************************************/
 
-static int twi_wait(struct twi_dev_s *priv)
+static int twi_wait(struct twi_dev_s *priv, unsigned int size)
 {
-  /* Start a timeout to avoid hangs */
+  uint32_t timeout;
 
-  wd_start(priv->timeout, TWI_TIMEOUT, twi_timeout, 1, (uint32_t)priv);
+  /* Calculate a timeout value based on the size of the transfer
+   *
+   *   ticks = msec-per-byte * bytes / msec-per-tick
+   *
+   * There is no concern about arithmetic overflow for reasonable transfer sizes.
+   */
+
+  timeout = (TWI_TIMEOUT_MSPB * size) / MSEC_PER_TICK;
+  if (timeout < 1)
+    {
+      timeout = 1;
+    }
+
+  /* Then start the timeout.  This timeout is needed to avoid hangs if/when an
+   * TWI transfer stalls.
+   */
+
+  wd_start(priv->timeout, timeout, twi_timeout, 1, (uint32_t)priv);
 
   /* Wait for either the TWI transfer or the timeout to complete */
 
@@ -720,7 +748,7 @@ static void twi_timeout(int argc, uint32_t arg, ...)
 {
   struct twi_dev_s *priv = (struct twi_dev_s *)arg;
 
-  i2clldbg("TWI%d Timeout!\n", priv->attr->twi);
+  i2clldbg("ERROR: TWI%d Timeout!\n", priv->attr->twi);
   twi_wakeup(priv, -ETIMEDOUT);
 }
 
@@ -903,7 +931,7 @@ static int twi_write(FAR struct i2c_dev_s *dev, const uint8_t *wbuffer, int wbuf
 
   twi_takesem(&priv->exclsem);
 
-  /* Initiate the wrte */
+  /* Initiate the write */
 
   priv->msg  = &msg;
   priv->msgc = 1;
@@ -920,7 +948,7 @@ static int twi_write(FAR struct i2c_dev_s *dev, const uint8_t *wbuffer, int wbuf
    * we are waiting.
    */
 
-  ret = twi_wait(priv);
+  ret = twi_wait(priv, wbuflen);
   if (ret < 0)
     {
       i2cdbg("ERROR: Transfer failed: %d\n", ret);
@@ -978,7 +1006,7 @@ static int twi_read(FAR struct i2c_dev_s *dev, uint8_t *rbuffer, int rbuflen)
    * we are waiting.
    */
 
-  ret = twi_wait(priv);
+  ret = twi_wait(priv, rbuflen);
   if (ret < 0)
     {
       i2cdbg("ERROR: Transfer failed: %d\n", ret);
@@ -1001,27 +1029,37 @@ static int twi_writeread(FAR struct i2c_dev_s *dev, const uint8_t *wbuffer,
                          int wbuflen, uint8_t *rbuffer, int rbuflen)
 {
   struct twi_dev_s *priv = (struct twi_dev_s *)dev;
+  struct i2c_msg_s msgv[2];
   irqstate_t flags;
   int ret;
 
-  struct i2c_msg_s msgv[2] =
-  {
-    {
-      .addr   = priv->address,
-      .flags  = priv->flags,
-      .buffer = (uint8_t *)wbuffer,  /* Override const */
-      .length = wbuflen
-    },
-    {
-      .addr   = priv->address,
-      .flags  = priv->flags | ((rbuflen > 0) ? I2C_M_READ : I2C_M_NORESTART),
-      .buffer = rbuffer,
-      .length = (rbuflen < 0) ? -rbuflen : rbuflen
-    }
-  };
-
   DEBUGASSERT(dev != NULL);
   i2cvdbg("TWI%d wbuflen: %d rbuflen: %d\n", priv->attr->twi, wbuflen, rbuflen);
+
+  /* Format two messages: The first is a write */
+
+  msgv[0].addr   = priv->address;
+  msgv[0].flags  = priv->flags;
+  msgv[0].buffer = (uint8_t *)wbuffer;  /* Override const */
+  msgv[0].length = wbuflen;
+
+  /* The second is either a read (rbuflen > 0) or a write (rbuflen < 0) with
+   * no restart.
+   */
+
+  if (rbuflen > 0)
+    {
+      msgv[1].flags = (priv->flags | I2C_M_READ);
+    }
+  else
+    {
+      msgv[1].flags = (priv->flags | I2C_M_NORESTART),
+      rbuflen = -rbuflen;
+    }
+
+  msgv[1].addr   = priv->address;
+  msgv[1].buffer = rbuffer;
+  msgv[1].length = rbuflen;
 
   /* Get exclusive access to the device */
 
@@ -1044,7 +1082,7 @@ static int twi_writeread(FAR struct i2c_dev_s *dev, const uint8_t *wbuffer,
    * while we are waiting.
    */
 
-  ret = twi_wait(priv);
+  ret = twi_wait(priv, wbuflen + rbuflen);
   if (ret < 0)
     {
       i2cdbg("ERROR: Transfer failed: %d\n", ret);
@@ -1105,10 +1143,24 @@ static int twi_transfer(FAR struct i2c_dev_s *dev,
 {
   struct twi_dev_s *priv = (struct twi_dev_s *)dev;
   irqstate_t flags;
+  unsigned int size;
+  int i;
   int ret;
 
-  DEBUGASSERT(dev != NULL);
+  DEBUGASSERT(dev != NULL && msgs != NULL && count > 0);
   i2cvdbg("TWI%d count: %d\n", priv->attr->twi, count);
+
+  /* Calculate the total transfer size so that we can calculate a reasonable
+   * timeout value.
+   */
+
+  size = 0;
+  for (i = 0; i < count; i++)
+    {
+      size += msgs[i].length;
+    }
+
+  DEBUGASSERT(size > 0);
 
   /* Get exclusive access to the device */
 
@@ -1131,7 +1183,7 @@ static int twi_transfer(FAR struct i2c_dev_s *dev,
    * while we are waiting.
    */
 
-  ret = twi_wait(priv);
+  ret = twi_wait(priv, size);
   if (ret < 0)
     {
       i2cdbg("ERROR: Transfer failed: %d\n", ret);
@@ -1312,18 +1364,45 @@ static void twi_hw_initialize(struct twi_dev_s *priv, uint32_t frequency)
 }
 
 /*******************************************************************************
- * Name: twi_sw_initialize
+ * Name: twi_initialize
  *
  * Description:
  *   Initialize/Re-initialize one TWI state structure.  This logic performs
  *   only repeatable initialization afte (1) the one-time initialization, and
- *   (2) after each bus reset.
+ *   (2) after each bus reset (after up_i2cunintialize() has been called).
  *
  *******************************************************************************/
 
-static void twi_initialize(struct twi_dev_s *priv, uint32_t frequency)
+static int twi_initialize(struct twi_dev_s *priv, uint32_t frequency)
 {
   irqstate_t flags = irqsave();
+  int ret;
+
+  /* Allocate a watchdog timer */
+
+  priv->timeout = wd_create();
+  if (priv->timeout == NULL)
+    {
+      idbg("ERROR: Failed to allocate a timer\n");
+      ret = -EAGAIN;
+      goto errout_with_irq;
+    }
+
+  /* Attach Interrupt Handler */
+
+  ret = irq_attach(priv->attr->irq, priv->attr->handler);
+  if (ret < 0)
+    {
+      idbg("ERROR: Failed to attach irq %d\n", priv->attr->irq);
+      goto errout_with_wdog;
+    }
+
+  /* Initialize the TWI driver structure (retaining address and flags) */
+
+  priv->dev.ops = &g_twiops;
+
+  sem_init(&priv->exclsem, 0, 1);
+  sem_init(&priv->waitsem, 0, 0);
 
   /* Configure PIO pins */
 
@@ -1338,6 +1417,15 @@ static void twi_initialize(struct twi_dev_s *priv, uint32_t frequency)
 
   up_enable_irq(priv->attr->irq);
   irqrestore(flags);
+  return OK;
+
+errout_with_wdog:
+  wd_delete(priv->timeout);
+  priv->timeout = NULL;
+
+errout_with_irq:
+  irqrestore(flags);
+  return ret;
 }
 
 /*******************************************************************************
@@ -1356,6 +1444,7 @@ struct i2c_dev_s *up_i2cinitialize(int bus)
 {
   struct twi_dev_s *priv;
   uint32_t frequency;
+  int ret;
 
   i2cvdbg("Initializing TWI%d\n", bus);
 
@@ -1420,30 +1509,22 @@ struct i2c_dev_s *up_i2cinitialize(int bus)
       return NULL;
     }
 
-  /* Perform all one time TWI initialization */
+  /* Perform one-time TWI initialization.  These may be set by driver logic
+   * and the settings need to persist through up_i2creset.
+   */
 
-  irqstate_t flags = irqsave();
-
-  priv->dev.ops = &g_twiops;
   priv->address = 0;
   priv->flags   = 0;
 
-  sem_init(&priv->exclsem, 0, 1);
-  sem_init(&priv->waitsem, 0, 0);
+  /* Perform repeatable TWI initialization */
 
-  /* Allocate a watchdog timer */
+  ret = twi_initialize(priv, frequency);
+  if (ret < 0)
+    {
+      idbg("ERROR: TWI Initialization failed: %d\n", ret);
+      return NULL;
+    }
 
-  priv->timeout = wd_create();
-  DEBUGASSERT(priv->timeout != 0);
-
-  /* Attach Interrupt Handler */
-
-  irq_attach(priv->attr->irq, priv->attr->handler);
-
-  /* Now perform repeatable initialization  */
-
-  twi_initialize(priv, frequency);
-  irqrestore(flags);
   return &priv->dev;
 }
 
@@ -1602,8 +1683,11 @@ int up_i2creset(FAR struct i2c_dev_s *dev)
 
   /* Re-initialize the port (using the saved frequency) */
 
-  twi_initialize(priv, frequency);
-  ret = OK;
+  ret = twi_initialize(priv, frequency);
+  if (ret < 0)
+    {
+      idbg("ERROR: TWI Initialization failed: %d\n", ret);
+    }
 
 out:
 
