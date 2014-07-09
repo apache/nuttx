@@ -87,10 +87,10 @@ const uintptr_t g_piobase[SAM_NPIO] =
 /* Maps a port number to the standard port character */
 
 #ifdef CONFIG_DEBUG_GPIO
-  static const char g_portchar[SAM_NPIO] =
-  {
-    'A', 'B', 'C', 'D', 'E'
-  };
+static const char g_portchar[SAM_NPIO] =
+{
+  'A', 'B', 'C', 'D', 'E'
+};
 #endif
 
 /* Map a PIO number to the PIO peripheral identifier (PID) */
@@ -131,6 +131,10 @@ static const bool g_piointerrupt[SAM_NPIO] =
 #endif
 };
 
+/* This is an array of ports that PIO enable forced on */
+
+static uint32_t g_forced[SAM_NPIO];
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -160,11 +164,11 @@ static inline uintptr_t sam_piobase(pio_pinset_t cfgset)
  * Name: sam_piopin
  *
  * Description:
- *   Return the base address of the PIO register set
+ *   Return a bitmask corresponding to the bit position in a PIO register
  *
  ****************************************************************************/
 
-static inline int sam_piopin(pio_pinset_t cfgset)
+static inline uint32_t sam_piopin(pio_pinset_t cfgset)
 {
   return 1 << ((cfgset & PIO_PIN_MASK) >> PIO_PIN_SHIFT);
 }
@@ -228,9 +232,11 @@ static void sam_pio_disableclk(pio_pinset_t cfgset)
   uintptr_t base;
   int pid;
 
-  /* Leave clocking enabled for configured interrupt ports */
+  /* Leave clocking enabled for configured interrupt ports or for ports that
+   * have forced enabling of PIO clocking.
+   */
 
-  if (port < SAM_NPIO && !g_piointerrupt[port])
+  if (port < SAM_NPIO && !g_piointerrupt[port] && g_forced[port] == 0)
     {
       /* Get the base address of the PIO port */
 
@@ -437,7 +443,10 @@ static inline int sam_configoutput(uintptr_t base, uint32_t pin,
       putreg32(pin, base + SAM_PIO_MDDR_OFFSET);
     }
 
-  /* Set default value */
+  /* Set default value. This is to be done before the pin is configured as
+   * an output in order to avoid any glitches at the time of the
+   * configuration.
+   */
 
   if ((cfgset & PIO_OUTPUT_SET) != 0)
     {
@@ -721,6 +730,56 @@ bool sam_pioread(pio_pinset_t pinset)
     }
 
   return 0;
+}
+
+/************************************************************************************
+ * Name: sam_pio_forceclk
+ *
+ * Description:
+ *   Enable PIO clocking.  This logic is overly conservative and does not enable PIO
+ *   clocking unless necessary (PIO input selected, glitch/filtering enable, or PIO
+ *   interrupts enabled).  There are, however, certain conditions were we may want
+ *   for force the PIO clock to be enabled.  An example is reading the input value
+ *   from an open drain output.
+ *
+ *   The PIO automatic enable/disable logic is not smart enough enough to know about
+ *   these cases.  For those cases, sam_pio_forceclk() is provided.
+ *
+ ************************************************************************************/
+
+void sam_pio_forceclk(pio_pinset_t pinset, bool enable)
+{
+  unsigned int port;
+  uint32_t pin;
+  irqstate_t flags;
+
+  /* Extract the port number */
+
+  port = (pinset & PIO_PORT_MASK) >> PIO_PORT_SHIFT;
+  pin  = sam_piopin(pinset);
+
+  /* The remainder of this operation must be atomic */
+
+  flags = irqsave();
+
+  /* Are we enabling or disabling clocking */
+
+  if (enable)
+    {
+      /* Indicate that clocking is forced and enable the clock */
+
+      g_forced[port] |= pin;
+      sam_pio_enableclk(pinset);
+    }
+  else
+    {
+      /* Clocking is no longer forced for this pin */
+
+      g_forced[port] &= ~pin;
+      sam_pio_disableclk(pinset);
+    }
+
+  irqrestore(flags);
 }
 
 /************************************************************************************
