@@ -69,6 +69,7 @@
 #include "sam_periphclks.h"
 #include "sam_pio.h"
 #include "sam_twi.h"
+#include "sam_pmc.h"  // REMOVE ME
 
 #if defined(CONFIG_SAMA5_TWI0) || defined(CONFIG_SAMA5_TWI1) || \
     defined(CONFIG_SAMA5_TWI2) || defined(CONFIG_SAMA5_TWI3)
@@ -1146,11 +1147,38 @@ static int twi_transfer(FAR struct i2c_dev_s *dev,
  * Initialization
  *******************************************************************************/
 
+/****************************************************************************
+ * Name: twi_enableclk
+ *
+ * Description:
+ *   Enable clocking on the selected TWI
+ *
+ ****************************************************************************/
+
+static void twi_enableclk(struct twi_dev_s *priv)
+{
+  int pid;
+
+  /* Get the peripheral ID associated with the TWI device port and enable
+   * clocking to the TWI block.
+   */
+
+  pid = priv->attr->pid;
+  if (pid < 32)
+    {
+      sam_enableperiph0(pid);
+    }
+  else
+    {
+      sam_enableperiph1(pid);
+    }
+}
+
 /*******************************************************************************
  * Name: twi_hw_setfrequency
  *
  * Description:
- *   Set the frequence for the next transfer
+ *   Set the frequency for the next transfer
  *
  *******************************************************************************/
 
@@ -1213,6 +1241,10 @@ static void twi_hw_initialize(struct twi_dev_s *priv, uint32_t frequency)
   uint32_t mck;
 
   i2cvdbg("TWI%d Initializing\n", priv->attr->twi);
+
+  /* Enable peripheral clocking */
+
+  twi_enableclk(priv);
 
   /* SVEN: TWI Slave Mode Enabled */
 
@@ -1283,7 +1315,9 @@ static void twi_hw_initialize(struct twi_dev_s *priv, uint32_t frequency)
  * Name: twi_sw_initialize
  *
  * Description:
- *   Initialize/Re-initialize one TWI state structure
+ *   Initialize/Re-initialize one TWI state structure.  This logic performs
+ *   only repeatable initialization afte (1) the one-time initialization, and
+ *   (2) after each bus reset.
  *
  *******************************************************************************/
 
@@ -1296,27 +1330,9 @@ static void twi_initialize(struct twi_dev_s *priv, uint32_t frequency)
   sam_configpio(priv->attr->sclcfg);
   sam_configpio(priv->attr->sdacfg);
 
-  /* Initialize the device structure */
-
-  priv->dev.ops = &g_twiops;
-  priv->address = 0;
-  priv->flags   = 0;
-
-  sem_init(&priv->exclsem, 0, 1);
-  sem_init(&priv->waitsem, 0, 0);
-
-  /* Allocate a watchdog timer */
-
-  priv->timeout = wd_create();
-  DEBUGASSERT(priv->timeout != 0);
-
   /* Configure and enable the TWI hardware */
 
   twi_hw_initialize(priv, frequency);
-
-  /* Attach Interrupt Handler */
-
-  irq_attach(priv->attr->irq, priv->attr->handler);
 
   /* Enable Interrupts */
 
@@ -1351,10 +1367,6 @@ struct i2c_dev_s *up_i2cinitialize(int bus)
       priv       = &g_twi0;
       priv->attr = &g_twi0attr;
 
-      /* Enable peripheral clocking */
-
-      sam_twi0_enableclk();
-
       /* Select the (initial) TWI frequency */
 
       frequency = CONFIG_SAMA5_TWI0_FREQUENCY;
@@ -1368,10 +1380,6 @@ struct i2c_dev_s *up_i2cinitialize(int bus)
 
       priv       = &g_twi1;
       priv->attr = &g_twi1attr;
-
-      /* Enable peripheral clocking */
-
-      sam_twi1_enableclk();
 
       /* Select the (initial) TWI frequency */
 
@@ -1387,10 +1395,6 @@ struct i2c_dev_s *up_i2cinitialize(int bus)
       priv       = &g_twi2;
       priv->attr = &g_twi2attr;
 
-      /* Enable peripheral clocking */
-
-      sam_twi2_enableclk();
-
       /* Select the (initial) TWI frequency */
 
       frequency = CONFIG_SAMA5_TWI2_FREQUENCY;
@@ -1405,10 +1409,6 @@ struct i2c_dev_s *up_i2cinitialize(int bus)
       priv       = &g_twi3;
       priv->attr = &g_twi2attr;
 
-      /* Enable peripheral clocking */
-
-      sam_twi3_enableclk();
-
       /* Select the (initial) TWI frequency */
 
       frequency = CONFIG_SAMA5_TWI3_FREQUENCY;
@@ -1420,9 +1420,30 @@ struct i2c_dev_s *up_i2cinitialize(int bus)
       return NULL;
     }
 
-  /* Initialize the TWI peripheral */
+  /* Perform all one time TWI initialization */
+
+  irqstate_t flags = irqsave();
+
+  priv->dev.ops = &g_twiops;
+  priv->address = 0;
+  priv->flags   = 0;
+
+  sem_init(&priv->exclsem, 0, 1);
+  sem_init(&priv->waitsem, 0, 0);
+
+  /* Allocate a watchdog timer */
+
+  priv->timeout = wd_create();
+  DEBUGASSERT(priv->timeout != 0);
+
+  /* Attach Interrupt Handler */
+
+  irq_attach(priv->attr->irq, priv->attr->handler);
+
+  /* Now perform repeatable initialization  */
 
   twi_initialize(priv, frequency);
+  irqrestore(flags);
   return &priv->dev;
 }
 
@@ -1501,6 +1522,14 @@ int up_i2creset(FAR struct i2c_dev_s *dev)
   sam_configpio(sclpin);
   sam_configpio(sdapin);
 
+  /* Peripheral clocking must be enabled in order to read valid data from
+   * the output pin (clocking is enabled automatically for pins configured
+   * as inputs).
+   */
+
+  sam_pio_forceclk(sclpin, true);
+  sam_pio_forceclk(sdapin, true);
+
   /* Let SDA go high (i.e., floating since this is an open-drain output). */
 
   sam_piowrite(sdapin, true);
@@ -1565,6 +1594,11 @@ int up_i2creset(FAR struct i2c_dev_s *dev)
   up_udelay(10);
   sam_piowrite(sdapin, true);
   up_udelay(10);
+
+  /* Clocking is no longer forced */
+
+  sam_pio_forceclk(sclpin, false);
+  sam_pio_forceclk(sdapin, false);
 
   /* Re-initialize the port (using the saved frequency) */
 
