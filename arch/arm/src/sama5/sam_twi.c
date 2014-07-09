@@ -70,7 +70,6 @@
 #include "sam_periphclks.h"
 #include "sam_pio.h"
 #include "sam_twi.h"
-#include "sam_pmc.h"  // REMOVE ME
 
 #if defined(CONFIG_SAMA5_TWI0) || defined(CONFIG_SAMA5_TWI1) || \
     defined(CONFIG_SAMA5_TWI2) || defined(CONFIG_SAMA5_TWI3)
@@ -110,7 +109,7 @@
 #  define TWI_TIMEOUT_MSPB (5)   /* 5 msec/byte */
 #endif
 
-/* Clocking to the TWO module(s) is provided by the main clocked, divided down
+/* Clocking to the TWI module(s) is provided by the main clock, divided down
  * as necessary.
  */
 
@@ -162,7 +161,10 @@ struct twi_dev_s
   struct i2c_dev_s    dev;        /* Generic I2C device */
   const struct twi_attr_s *attr;  /* Invariant attributes of TWI device */
   struct i2c_msg_s    *msg;       /* Message list */
-  uint32_t            frequency;  /* TWI clock frequency */
+  uint32_t            twiclk;     /* TWI input clock frequency */
+#ifdef CONFIG_I2C_RESET
+  uint32_t            frequency;  /* TWI transfer clock frequency */
+#endif
   uint16_t            address;    /* Slave address */
   uint16_t            flags;      /* Transfer flags */
   uint8_t             msgc;       /* Number of message in the message list */
@@ -259,7 +261,6 @@ static int twi_registercallback(FAR struct i2c_dev_s *dev,
 static uint32_t twi_hw_setfrequency(struct twi_dev_s *priv,
           uint32_t frequency);
 static void twi_hw_initialize(struct twi_dev_s *priv, uint32_t frequency);
-static int twi_initialize(struct twi_dev_s *priv, uint32_t frequency);
 
 /*******************************************************************************
  * Private Data
@@ -1245,9 +1246,9 @@ static uint32_t twi_hw_setfrequency(struct twi_dev_s *priv, uint32_t frequency)
 
   for (ckdiv = 0; ckdiv < 8; ckdiv++)
     {
-      /* Calulate the CLDIV value using the current CKDIV guess */
+      /* Calculate the CLDIV value using the current CKDIV guess */
 
-      cldiv = ((priv->frequency / (frequency << 1)) - 4) / (1 << ckdiv);
+      cldiv = ((priv->twiclk / (frequency << 1)) - 4) / (1 << ckdiv);
 
       /* Is CLDIV in range? */
 
@@ -1270,12 +1271,19 @@ static uint32_t twi_hw_setfrequency(struct twi_dev_s *priv, uint32_t frequency)
            ((uint32_t)cldiv << TWI_CWGR_CLDIV_SHIFT);
   twi_putrel(priv, SAM_TWI_CWGR_OFFSET, regval);
 
-  /* Return the actual frequency */
+  /* Calculate the actual I2C frequency */
 
-  actual = (priv->frequency / 2) / (((1 << ckdiv) * cldiv) + 2);
+  actual = (priv->twiclk / 2) / (((1 << ckdiv) * cldiv) + 2);
   i2cvdbg("TWI%d frequency: %d ckdiv: %d cldiv: %d actual: %d\n",
           priv->attr->twi, frequency, ckdiv, cldiv, actual);
 
+  /* Save the requested frequency (for I2C reset) and return the
+   * actual frequency.
+   */
+
+#ifdef CONFIG_I2C_RESET
+  priv->frequency = frequency;
+#endif
   return actual;
 }
 
@@ -1283,16 +1291,24 @@ static uint32_t twi_hw_setfrequency(struct twi_dev_s *priv, uint32_t frequency)
  * Name: twi_hw_initialize
  *
  * Description:
- *   Initialize one TWI peripheral for I2C operation
+ *   Initialize/Re-initialize the TWI peripheral.  This logic performs only
+ *   repeatable initialization after either (1) the one-time initialization, or
+ *   (2) after each bus reset.
  *
  *******************************************************************************/
 
 static void twi_hw_initialize(struct twi_dev_s *priv, uint32_t frequency)
 {
+  irqstate_t flags = irqsave();
   uint32_t regval;
   uint32_t mck;
 
   i2cvdbg("TWI%d Initializing\n", priv->attr->twi);
+
+  /* Configure PIO pins */
+
+  sam_configpio(priv->attr->sclcfg);
+  sam_configpio(priv->attr->sdacfg);
 
   /* Enable peripheral clocking */
 
@@ -1326,30 +1342,30 @@ static void twi_hw_initialize(struct twi_dev_s *priv, uint32_t frequency)
   DEBUGASSERT((mck >> 3) <= TWI_MAX_FREQUENCY);
   if (mck <= TWI_MAX_FREQUENCY)
     {
-      priv->frequency = mck;
-      regval          = PMC_PCR_DIV1;
+      priv->twiclk = mck;
+      regval       = PMC_PCR_DIV1;
     }
   else if ((mck >> 1) <= TWI_MAX_FREQUENCY)
     {
-      priv->frequency = (mck >> 1);
-      regval          = PMC_PCR_DIV2;
+      priv->twiclk = (mck >> 1);
+      regval       = PMC_PCR_DIV2;
     }
   else if ((mck >> 2) <= TWI_MAX_FREQUENCY)
     {
-      priv->frequency = (mck >> 2);
-      regval          = PMC_PCR_DIV4;
+      priv->twiclk = (mck >> 2);
+      regval       = PMC_PCR_DIV4;
     }
   else /* if ((mck >> 3) <= TWI_MAX_FREQUENCY) */
     {
-      priv->frequency = (mck >> 3);
-      regval          = PMC_PCR_DIV8;
+      priv->twiclk = (mck >> 3);
+      regval       = PMC_PCR_DIV8;
     }
 
 #else
   /* No DIV field in the PCR register */
 
-  priv->frequency     = mck;
-  regval              = 0;
+  priv->twiclk     = mck;
+  regval           = 0;
 
 #endif /* SAMA5_HAVE_PMC_PCR_DIV */
 
@@ -1360,72 +1376,12 @@ static void twi_hw_initialize(struct twi_dev_s *priv, uint32_t frequency)
 
   /* Set the initial TWI data transfer frequency */
 
-  (void)twi_hw_setfrequency(priv, frequency);
-}
-
-/*******************************************************************************
- * Name: twi_initialize
- *
- * Description:
- *   Initialize/Re-initialize one TWI state structure.  This logic performs
- *   only repeatable initialization afte (1) the one-time initialization, and
- *   (2) after each bus reset (after up_i2cunintialize() has been called).
- *
- *******************************************************************************/
-
-static int twi_initialize(struct twi_dev_s *priv, uint32_t frequency)
-{
-  irqstate_t flags = irqsave();
-  int ret;
-
-  /* Allocate a watchdog timer */
-
-  priv->timeout = wd_create();
-  if (priv->timeout == NULL)
-    {
-      idbg("ERROR: Failed to allocate a timer\n");
-      ret = -EAGAIN;
-      goto errout_with_irq;
-    }
-
-  /* Attach Interrupt Handler */
-
-  ret = irq_attach(priv->attr->irq, priv->attr->handler);
-  if (ret < 0)
-    {
-      idbg("ERROR: Failed to attach irq %d\n", priv->attr->irq);
-      goto errout_with_wdog;
-    }
-
-  /* Initialize the TWI driver structure (retaining address and flags) */
-
-  priv->dev.ops = &g_twiops;
-
-  sem_init(&priv->exclsem, 0, 1);
-  sem_init(&priv->waitsem, 0, 0);
-
-  /* Configure PIO pins */
-
-  sam_configpio(priv->attr->sclcfg);
-  sam_configpio(priv->attr->sdacfg);
-
-  /* Configure and enable the TWI hardware */
-
-  twi_hw_initialize(priv, frequency);
+  twi_hw_setfrequency(priv, frequency);
 
   /* Enable Interrupts */
 
   up_enable_irq(priv->attr->irq);
   irqrestore(flags);
-  return OK;
-
-errout_with_wdog:
-  wd_delete(priv->timeout);
-  priv->timeout = NULL;
-
-errout_with_irq:
-  irqrestore(flags);
-  return ret;
 }
 
 /*******************************************************************************
@@ -1444,6 +1400,7 @@ struct i2c_dev_s *up_i2cinitialize(int bus)
 {
   struct twi_dev_s *priv;
   uint32_t frequency;
+  irqstate_t flags;
   int ret;
 
   i2cvdbg("Initializing TWI%d\n", bus);
@@ -1509,30 +1466,57 @@ struct i2c_dev_s *up_i2cinitialize(int bus)
       return NULL;
     }
 
-  /* Perform one-time TWI initialization.  These may be set by driver logic
-   * and the settings need to persist through up_i2creset.
-   */
+  /* Perform one-time TWI initialization */
 
+  flags = irqsave();
+
+  /* Allocate a watchdog timer */
+
+  priv->timeout = wd_create();
+  if (priv->timeout == NULL)
+    {
+      idbg("ERROR: Failed to allocate a timer\n");
+      goto errout_with_irq;
+    }
+
+  /* Attach Interrupt Handler */
+
+  ret = irq_attach(priv->attr->irq, priv->attr->handler);
+  if (ret < 0)
+    {
+      idbg("ERROR: Failed to attach irq %d\n", priv->attr->irq);
+      goto errout_with_wdog;
+    }
+
+  /* Initialize the TWI driver structure */
+
+  priv->dev.ops = &g_twiops;
   priv->address = 0;
   priv->flags   = 0;
 
-  /* Perform repeatable TWI initialization */
+  (void)sem_init(&priv->exclsem, 0, 1);
+  (void)sem_init(&priv->waitsem, 0, 0);
 
-  ret = twi_initialize(priv, frequency);
-  if (ret < 0)
-    {
-      idbg("ERROR: TWI Initialization failed: %d\n", ret);
-      return NULL;
-    }
+  /* Perform repeatable TWI hardware initialization */
 
+  twi_hw_initialize(priv, frequency);
+  irqrestore(flags);
   return &priv->dev;
+
+errout_with_wdog:
+  wd_delete(priv->timeout);
+  priv->timeout = NULL;
+
+errout_with_irq:
+  irqrestore(flags);
+  return NULL;
 }
 
 /*******************************************************************************
  * Name: up_i2cuninitalize
  *
  * Description:
- *   Uninitialise an I2C device
+ *   Uninitialize an I2C device
  *
  *******************************************************************************/
 
@@ -1542,7 +1526,7 @@ int up_i2cuninitialize(FAR struct i2c_dev_s *dev)
 
   i2cvdbg("TWI%d Un-initializing\n", priv->attr->twi);
 
-  /* Disable interrupts */
+  /* Disable TWI interrupts */
 
   up_disable_irq(priv->attr->irq);
 
@@ -1558,7 +1542,7 @@ int up_i2cuninitialize(FAR struct i2c_dev_s *dev)
 
   /* Detach Interrupt Handler */
 
-  irq_detach(priv->attr->irq);
+  (void)irq_detach(priv->attr->irq);
   return OK;
 }
 
@@ -1576,7 +1560,6 @@ int up_i2creset(FAR struct i2c_dev_s *dev)
   struct twi_dev_s *priv = (struct twi_dev_s *)dev;
   unsigned int clockcnt;
   unsigned int stretchcnt;
-  uint32_t frequency;
   uint32_t sclpin;
   uint32_t sdapin;
   int ret;
@@ -1587,15 +1570,11 @@ int up_i2creset(FAR struct i2c_dev_s *dev)
 
   twi_takesem(&priv->exclsem);
 
-  /* Uninitialize the port, saving the currently selected frequency.  Other
-   * dynamically configured data (address and transfer flags) will be
-   * preserved.
-   */
+  /* Disable TWI interrupts */
 
-  frequency = priv->frequency;
-  up_i2cuninitialize(&priv->dev);
+  up_disable_irq(priv->attr->irq);
 
-  /* Use GPIO configuration to un-wedge the bus */
+  /* Use PIO configuration to un-wedge the bus */
 
   sclpin = MKI2C_OUTPUT(priv->attr->sclcfg);
   sdapin = MKI2C_OUTPUT(priv->attr->sdacfg);
@@ -1628,7 +1607,7 @@ int up_i2creset(FAR struct i2c_dev_s *dev)
       if (clockcnt++ > 10)
         {
           ret = -ETIMEDOUT;
-          goto out;
+          goto errout_with_lock;
         }
 
       /* Sniff to make sure that clock stretching has finished.  SCL should
@@ -1645,7 +1624,7 @@ int up_i2creset(FAR struct i2c_dev_s *dev)
           if (stretchcnt++ > 10)
             {
               ret = -EAGAIN;
-              goto out;
+              goto errout_with_lock;
             }
 
           up_udelay(10);
@@ -1681,15 +1660,12 @@ int up_i2creset(FAR struct i2c_dev_s *dev)
   sam_pio_forceclk(sclpin, false);
   sam_pio_forceclk(sdapin, false);
 
-  /* Re-initialize the port (using the saved frequency) */
+  /* Re-initialize the port hardware */
 
-  ret = twi_initialize(priv, frequency);
-  if (ret < 0)
-    {
-      idbg("ERROR: TWI Initialization failed: %d\n", ret);
-    }
+  twi_hw_initialize(priv, priv->frequency);
+  ret = OK;
 
-out:
+errout_with_lock:
 
   /* Release our lock on the bus */
 
