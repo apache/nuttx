@@ -336,6 +336,23 @@ void sam_pioirqdisable(int irq);
 #endif
 
 /************************************************************************************
+ * Name: sam_pio_forceclk
+ *
+ * Description:
+ *   Enable PIO clocking.  This logic is overly conservative and does not enable PIO
+ *   clocking unless necessary (PIO input selected, glitch/filtering enable, or PIO
+ *   interrupts enabled).  There are, however, certain conditions were we may want
+ *   for force the PIO clock to be enabled.  An example is reading the input value
+ *   from an open drain output.
+ *
+ *   The PIO automatic enable/disable logic is not smart enough enough to know about
+ *   these cases.  For those cases, sam_pio_forceclk() is provided.
+ *
+ ************************************************************************************/
+
+void sam_pio_forceclk(pio_pinset_t pinset, bool enable);
+
+/************************************************************************************
  * Function:  sam_dumppio
  *
  * Description:
