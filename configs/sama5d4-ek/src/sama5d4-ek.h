@@ -394,6 +394,11 @@
                       PIO_INT_BOTHEDGES | PIO_PORT_PIOE | PIO_PIN25)
 #define IRQ_CHG_QT    SAM_IRQ_PE25
 
+/* The touchscreen communicates on TWI0, I2C address 0x4c */
+
+#define MXT_TWI_BUS      0
+#define MXT_I2C_ADDRESS  0x4c
+
 /* HSMCI Card Slots *****************************************************************/
 /* The SAMA4D4-EK provides a two SD memory card slots:  (1) a full size SD
  * card slot (J10), and (2) a microSD memory card slot (J11).
@@ -632,6 +637,12 @@
 #define PIO_AT25_NPCS0 (PIO_OUTPUT | PIO_CFG_PULLUP | PIO_OUTPUT_SET | \
                         PIO_PORT_PIOC | PIO_PIN3)
 #define AT25_PORT      SPI0_CS0
+
+/* ACT8865 power management chip ****************************************************/
+/* The PMIC communicates on TWI0, I2C address 0x5b */
+
+#define PMIC_TWI_BUS     0
+#define PMIC_I2C_ADDRESS 0x5b
 
 /************************************************************************************
  * Public Types

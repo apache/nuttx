@@ -120,9 +120,7 @@ static void mxt_clear(FAR const struct mxt_lower_s *lower);
  * of the maXTouch and provides some board-specific hooks.
  *
  * Memory for this structure is provided by the caller.  It is not copied
- * by the driver and is presumed to persist while the driver is active. The
- * memory must be writable because, under certain circumstances, the driver
- * may modify certain values.
+ * by the driver and is presumed to persist while the driver is active.
  */
 
 static struct sama5d4ek_tscinfo_s g_mxtinfo =
