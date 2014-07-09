@@ -7687,5 +7687,10 @@
 	  NOR, but needs to work a little differently in this case (2014-7-7).
 	* arch/arm/src/sama5/sam_lcd.c and chip/sam_lcdc.h: Adapt the SAMA5D3
 	  LCDC driver to work with the SAMA5D4 which has no hardware cursor
-	  (2014-7-7).
+	  (2014-7-8).
 	* configs/sama5d4-ek:  Add options to support an LCD (2014-7-7).
+	* arch/arm/src/sama5/sam_twi.c:  Now support the up_i2creset() method
+	  (2014-7-9)
+	* drivers/input/mxt.c:  Use i2c_reset() if it thinks that the bus
+	  might by hung (2014-7-9).
+
