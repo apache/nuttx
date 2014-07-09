@@ -7693,4 +7693,10 @@
 	  (2014-7-9)
 	* drivers/input/mxt.c:  Use i2c_reset() if it thinks that the bus
 	  might by hung (2014-7-9).
-
+	* arch/arm/src/sama5/sam_pio.c/.h:  Add a new interface
+	  sam_pio_forceclk() that can be used to force PIO clocking on.  I am
+	  afraid I was too conservative with PIO clocking in the initial design;
+	  this is the price (2014-7-9).
+	* arch/arm/src/sama5/sam_twi.c: Use sam_pio_forceclk() so that we can
+	  read the current state of an open-drain output in the TWI reset logic
+	  (2014-7-9).
