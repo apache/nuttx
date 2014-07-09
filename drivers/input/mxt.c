@@ -192,10 +192,13 @@ static int  mxt_getreg(FAR struct mxt_dev_s *priv, uint16_t regaddr,
 static int  mxt_putreg(FAR struct mxt_dev_s *priv, uint16_t regaddr,
               FAR const uint8_t *buffer, size_t buflen);
 
-/* MXT object access */
+/* MXT object/message access */
 
 static FAR struct mxt_object_s *mxt_object(FAR struct mxt_dev_s *priv,
               uint8_t type);
+#ifdef CONFIG_I2C_RESET
+static inline bool mxt_nullmsg(FAR struct mxt_msg_s *msg);
+#endif
 
 /* Poll support */
 
@@ -253,6 +256,14 @@ static const struct file_operations mxt_fops =
   , mxt_poll   /* poll */
 #endif
 };
+
+#ifdef CONFIG_I2C_RESET
+static const struct mxt_msg_s g_nullmsg =
+{
+  .id = 0,
+  .body = {0, 0, 0, 0, 0, 0, 0},
+};
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -412,6 +423,17 @@ static int mxt_putobject(FAR struct mxt_dev_s *priv, uint8_t type,
   regaddr = MXT_GETUINT16(object->addr);
   return mxt_putreg(priv, regaddr + offset, (FAR const uint8_t *)&value, 1);
 }
+
+/****************************************************************************
+ * Name: mxt_nullmsg
+ ****************************************************************************/
+
+#ifdef CONFIG_I2C_RESET
+static inline bool mxt_nullmsg(FAR struct mxt_msg_s *msg)
+{
+  return (memcmp(msg, &g_nullmsg, sizeof(struct mxt_msg_s)) == 0);
+}
+#endif
 
 /****************************************************************************
  * Name: mxt_notify
@@ -745,6 +767,7 @@ static void mxt_worker(FAR void *arg)
   FAR const struct mxt_lower_s *lower;
   struct mxt_msg_s msg;
   uint8_t id;
+  int retries;
   int ret;
 
   ASSERT(priv != NULL);
@@ -767,6 +790,7 @@ static void mxt_worker(FAR void *arg)
 
   /* Loop, processing each message from the maXTouch */
 
+  retries = 0;
   do
     {
       /* Retrieve the next message from the maXTouch */
@@ -795,6 +819,8 @@ static void mxt_worker(FAR void *arg)
 
           ivdbg("T6: status: %02x checksum: %06lx\n",
                 status, (unsigned long)chksum);
+
+          retries = 0;
         }
       else
 #endif
@@ -804,6 +830,7 @@ static void mxt_worker(FAR void *arg)
       if (id >= priv->t9idmin && id <= priv->t9idmax)
         {
           mxt_touch_event(priv, &msg, id - priv->t9idmin);
+          retries = 0;
         }
 
 #ifdef CONFIG_MXT_BUTTONS
@@ -812,18 +839,42 @@ static void mxt_worker(FAR void *arg)
       else if (msg.id == priv->t19id)
         {
           mxt_button_event(priv, &msg);
+          retries = 0;
         }
 #endif
-      /* Any others ignored */
+
+#ifdef CONFIG_I2C_RESET
+      /* A message of all zeroes probably means that the bus is hung */
+
+      else if (mxt_nullmsg(&msg))
+        {
+          /* Try to shake the bus free */
+
+          ivdbg("WARNING: Null message... resetting I2C\n");
+
+          ret = up_i2creset(priv->i2c);
+          if (ret < 0)
+            {
+              idbg("ERROR: up_i2creset failed: %d\n", ret);
+              break;
+            }
+
+          retries++;
+        }
+#endif
+
+      /* Any other message IDs are ignored */
 
       else
         {
           ivdbg("Ignored: id=%u message={%02x %02x %02x %02x %02x %02x %02x}\n",
                 msg.id, msg.body[0], msg.body[1], msg.body[2], msg.body[3],
                 msg.body[4], msg.body[5], msg.body[6]);
+
+          retries++;
         }
     }
-  while (id != 0x00 && id != 0xff);
+  while (id != 0xff && retries < 16);
 
 errout_with_semaphore:
   /* Release our lock on the MXT device */
@@ -1482,7 +1533,7 @@ static int mxt_getobjtab(FAR struct mxt_dev_s *priv)
 static int mxt_clrpending(FAR struct mxt_dev_s *priv)
 {
   struct mxt_msg_s msg;
-  int retries = 10;
+  int retries = 16;
   int ret;
 
   /* Read dummy message until there are no more to read (or until we have
@@ -1498,14 +1549,32 @@ static int mxt_clrpending(FAR struct mxt_dev_s *priv)
           idbg("ERROR: mxt_getmessage failed: %d\n", ret);
           return ret;
         }
+
+#ifdef CONFIG_I2C_RESET
+      /* A message of all zeroes probably means that the bus is hung */
+
+      if (mxt_nullmsg(&msg))
+        {
+          /* Try to shake the bus free */
+
+          ivdbg("WARNING: Null message... resetting I2C\n");
+
+          ret = up_i2creset(priv->i2c);
+          if (ret < 0)
+            {
+              idbg("ERROR: up_i2creset failed: %d\n", ret);
+              return ret;
+            }
+        }
+#endif
     }
-  while (msg.id != 0x00 && msg.id != 0xff && --retries > 0);
+  while (msg.id != 0xff && --retries > 0);
 
   /* Complain if we exceed the retry limit */
 
   if (retries <= 0)
     {
-      idbg("ERROR: CHG pin did not clear: ID=%02x\n", msg.id);
+      idbg("ERROR: Failed to clear messages: ID=%02x\n", msg.id);
       return -EBUSY;
     }
 

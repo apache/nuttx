@@ -670,6 +670,11 @@ void sam_piowrite(pio_pinset_t pinset, bool value)
 
   if (base != 0)
     {
+      /* Set or clear the output as requested.  NOTE: that there is no
+       * check if the pin is actually configured as an output so this could,
+       * potentially, do nothing.
+       */
+
       if (value)
         {
           putreg32(pin, base + SAM_PIO_SODR_OFFSET);
@@ -697,17 +702,21 @@ bool sam_pioread(pio_pinset_t pinset)
 
   if (base != 0)
     {
-      pin  = sam_piopin(pinset);
+      pin = sam_piopin(pinset);
 
-      if ((pinset & PIO_MODE_MASK) == PIO_OUTPUT)
-        {
-          regval = getreg32(base + SAM_PIO_ODSR_OFFSET);
-        }
-      else
-        {
-          regval = getreg32(base + SAM_PIO_PDSR_OFFSET);
-        }
+      /* For output PIOs, the ODSR register provides the output value to
+       * drive the pin.  The PDSR register, on the the other hand, provides
+       * the current sensed value on a pin, whether the pin is configured
+       * as an input, an output or as a peripheral.
+       *
+       * There is small delay between the setting in ODSR and PDSR but
+       * otherwise the they should be the same unless something external
+       * is driving the pin.
+       *
+       * Let's assume that PDSR is what the caller wants.
+       */
 
+      regval = getreg32(base + SAM_PIO_PDSR_OFFSET);
       return (regval & pin) != 0;
     }
 
