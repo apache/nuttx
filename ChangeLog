@@ -7700,3 +7700,7 @@
 	* arch/arm/src/sama5/sam_twi.c: Use sam_pio_forceclk() so that we can
 	  read the current state of an open-drain output in the TWI reset logic
 	  (2014-7-9).
+	* arch/arm/src/sama5/sam_pio.c/.h: Fix a typo in Schmitt trigger
+	  configuration; Configure pin as a a vanilla input first so that final
+	  pin configuration is more read-able (i.e., easier to debug)
+	  (2014-7-9).
