@@ -1574,7 +1574,11 @@ int up_i2creset(FAR struct i2c_dev_s *dev)
 
   up_disable_irq(priv->attr->irq);
 
-  /* Use PIO configuration to un-wedge the bus */
+  /* Use PIO configuration to un-wedge the bus.
+   *
+   * Reconfigure both pins as open drain outputs with initial output value
+   * "high" (i.e., floating since these are open-drain outputs).
+   */
 
   sclpin = MKI2C_OUTPUT(priv->attr->sclcfg);
   sdapin = MKI2C_OUTPUT(priv->attr->sdacfg);
@@ -1589,10 +1593,6 @@ int up_i2creset(FAR struct i2c_dev_s *dev)
 
   sam_pio_forceclk(sclpin, true);
   sam_pio_forceclk(sdapin, true);
-
-  /* Let SDA go high (i.e., floating since this is an open-drain output). */
-
-  sam_piowrite(sdapin, true);
 
   /* Clock the bus until any slaves currently driving it low let it float.
    * Reading from the output will return the actual sensed level on the
