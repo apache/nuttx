@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/sama5d4-ek/src/up_adc.c
+ * configs/sama5d4-ek/src/sam_adc.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

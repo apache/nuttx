@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/sama5d3-xplained/src/up_spi.c
+ * configs/sama5d3-xplained/src/sam_spi.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

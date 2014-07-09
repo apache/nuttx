@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/sama5d3x-ek/src/up_can.c
+ * configs/sama5d3x-ek/src/sam_can.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
