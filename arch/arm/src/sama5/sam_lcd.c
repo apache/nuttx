@@ -2067,7 +2067,7 @@ static void sam_layer_color(void)
              LCDC_BASECFG1_16BPP_RGB565);
 
 #else
-#  error Support for this resolution is not yet supported
+#  error Support for this resolution is not yet implemented
 #endif
 
 #ifdef CONFIG_SAMA5_LCDC_OVR1
@@ -2096,7 +2096,7 @@ static void sam_layer_color(void)
              LCDC_OVR1CFG9_GA(0xff) | LCDC_OVR1CFG9_GAEN);
 
 #  else
-#    error Support for this resolution is not yet supported
+#    error Support for this resolution is not yet implemented
 #  endif
 #endif
 
@@ -2126,7 +2126,7 @@ static void sam_layer_color(void)
              LCDC_OVR2CFG9_GA(0xff) | LCDC_OVR2CFG9_GAEN);
 
 #  else
-#    error Support for this resolution is not yet supported
+#    error Support for this resolution is not yet implemented
 #  endif
 #endif
 
@@ -2156,7 +2156,7 @@ static void sam_layer_color(void)
              LCDC_HEOCFG9_GA(0xff) | LCDC_HEOCFG9_GAEN);
 
 #  else
-#    error Support for this resolution is not yet supported
+#    error Support for this resolution is not yet implemented
 #  endif
 #endif
 
@@ -2190,7 +2190,7 @@ static void sam_layer_color(void)
              LCDC_HCRCFG9_GA(0xff) | LCDC_HCRCFG9_GAEN);
 
 #  else
-#    error Support for this resolution is not yet supported
+#    error Support for this resolution is not yet implemented
 #  endif
 #endif
 #endif

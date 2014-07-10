@@ -168,8 +168,11 @@
 #define BUTTON_USER_BIT   (1 << BUTTON_USER)
 
 /* LCD Interface, Geometry and Timing ***********************************************/
+/* This configuration applies only to the TM7000 LCD/Touchscreen module.  Other LCDs
+ * will require changes.
+ */
 
-#define BOARD_LCDC_OUTPUT_BPP 18       /* Output format to H/W is 18BPP RGB666 */
+#define BOARD_LCDC_OUTPUT_BPP 24       /* Output format to H/W is 24BPP RGB888 */
 #define BOARD_LCDC_WIDTH      800      /* Display width (pixels) */
 #define BOARD_LCDC_HEIGHT     480      /* Display height (rows) */
 #undef  BOARD_LCDC_MCK_MUL2            /* Source clock is Mck (vs 2*Mck) */
