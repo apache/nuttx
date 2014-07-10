@@ -3423,7 +3423,8 @@ Configurations
        There may be some differences in released SAMA5D4-EK board.  Also,
        this configuration assumes that you have the TM7000 LCD/Touchscreen
        attached.  If you do not, you should disable the LCD and touchscreen
-       drivers as described above under "TM7000 LCD/Touchscreen.
+       drivers as described above under "TM7000 LCD/Touchscreen" and also
+       below.
 
     3. By default, this configuration is set up to build on Windows
        under either a Cygwin or MSYS environment using a recent, Windows-
@@ -3540,11 +3541,15 @@ Configurations
         CONFIG_DEV_RANDOM=y   : Enables /dev/random
 
     8. This configuration has support for NSH built-in applications enabled.
-       Two built-in applications are included by default:  (1) The I2C Tool.
-       See the section above entitle "I2C Tool" and the note with regard to
-       I2C below. (2) The interrupting button test as described above
-       in these notes.  And (3) the touchscreen test program as described
-       above under "TM7000 LCD/Touchscreen" and also below in this notes.
+       Two built-in applications are included by default:
+
+       a. The I2C Tool.  See the section above entitled "I2C Tool" and the
+          note with regard to I2C below.
+       b. The interrupting button test as described above in these notes.
+       c. The touchscreen test program as described above under "TM7000
+          LCD/Touchscreen" and also below in this notes.
+       d. An LCD/graphics test program.  See the section above entitle
+          "TM7000 LCD/Touchscreen" and also below in this notes.
 
     9. This configuration has support for the FAT, ROMFS, and PROCFS file
        systems built in.
@@ -3770,12 +3775,38 @@ Configurations
 
          nsh> tc [<number-of-touches>]
 
-   18. The SAMA5D4-EK includes for an AT25 serial DataFlash.  That support is
+   18. Support for the TM7000 LCD is enabled by default.  See the section above
+       entitled "TM7000 LCD/Touchscreen" for detailed configuration information.
+       You will probably want to disable this option if you are not using the
+       TM7000 LCD.
+
+       There are several LCD test programs available.  One is built into this
+       configuration:  apps/examples/nx.  The NX example is a simple test
+       using the NuttX graphics system (NX).  This test case focuses on general
+       window controls, movement, mouse and keyboard input.  It requires no
+       user interaction.
+
+       There are several simple graphics examples under apps/examples/ that
+       could be configured to verify LCD/graphics operation:
+
+         a. nxhello.  Just displays "Hello, World!" at the center of the
+            display.
+         b. nximage.  Displays the NuttX logo in the center of the display.
+         c. nxlines.  Shows many fat lines.  This generally looks like a
+            "clock" with a cicle and a rotating line in the center.
+         d. nxtext.  This demonstrates scrolling text with pop-up windows on
+            top of the test.  The pop-up windows come and go without
+            corrupting the scrolling text.
+
+       See apps/examples/README.txt for information about configuring these
+       examples.
+
+   19. The SAMA5D4-EK includes for an AT25 serial DataFlash.  That support is
        NOT enabled in this configuration.  Support for that serial FLASH could
        be enabled by modifying the NuttX configuration as described above in
        the paragraph entitled "AT25 Serial FLASH".
 
-   19. This example can be configured to exercise the watchdog timer test
+   20. This example can be configured to exercise the watchdog timer test
        (apps/examples/watchdog).  See the detailed configuration settings in
        the section entitled "Watchdog Timer" above.
 
