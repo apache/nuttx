@@ -3293,6 +3293,10 @@ Configurations
       demo configuration.  The nsh configuration is, however, bare bones.
       It is the simplest possible NSH configuration and is useful as a
       platform for debugging and integrating new features in isolation.
+    nxwm: This is a special configuration setup for the NxWM window manager
+      UnitTest.  It integrates support for both the SAMA5 LCDC and the
+      SAMA5 ADC touchscreen controller and provides a more advance
+      graphics demo. It provides an interactive windowing experience.
     ramtest: This is a stripped down version of NSH that runs out of
       internal SRAM.  It configures SDRAM and supports only the RAM test
       at apps/examples/ramtest.  This configuration is useful for
@@ -3819,6 +3823,101 @@ Configurations
    20. This example can be configured to exercise the watchdog timer test
        (apps/examples/watchdog).  See the detailed configuration settings in
        the section entitled "Watchdog Timer" above.
+
+   STATUS:
+       See the To-Do list below
+
+  nxwm:
+
+    This is a special configuration setup for the NxWM window manager
+    UnitTest.  It integrates support for both the SAMA5 LCDC and the
+    SAMA5 ADC touchscreen controller and provides a more advance
+    graphics demo. It provides an interactive windowing experience.
+
+    This configuration is set up generally like the nsh configuration
+    except that:
+
+    - It boots into a graphic, window manage environment instead of
+      the serial console command line.
+    - The console command line is still available within NxConsole
+      windows.
+    - Obviously, the nx and touchscreen built in applications cannot
+      be supported.
+
+    The NxWM window manager is a tiny window manager tailored for use
+    with smaller LCDs but which is show here on the larger, SAMA5D4-EK
+    TM7000 LCD.  It supports a toolchain, a start window, and
+    multiple application windows.  However, to make the best use of
+    the visible LCD space, only one application window is visible at
+    at time.
+
+    The NxWM window manager can be found here:
+
+      nuttx-git/NxWidgets/nxwm
+
+    The NxWM unit test can be found at:
+
+      nuttx-git/NxWidgets/UnitTests/nxwm
+
+    Documentation for installing the NxWM unit test can be found here:
+
+      nuttx-git/NxWidgets/UnitTests/README.txt
+
+    Here is the quick summary of the build steps.  These steps assume that
+    you have the entire NuttX GIT in some directory ~/nuttx-git.  You may
+    have these components installed elsewhere.  In that case, you will need
+    to adjust all of the paths in the following accordingly:
+
+    1. Install the nxwm configuration
+
+       $ cd ~/nuttx-git/nuttx/tools
+       $ ./configure.sh sama5d4-ek/nxwm
+
+    2. Make the build context (only)
+
+       $ cd ..
+       $ . ./setenv.sh
+       $ make context
+       ...
+
+       NOTE: the use of the setenv.sh file is optional.  All that it will
+       do is to adjust your PATH variable so that the build system can find
+       your tools.  If you use it, you will most likely need to modify the
+       script so that it has the correct path to your tool binaries
+       directory.
+
+    3. Install the nxwm unit test
+
+       $ cd ~/nuttx-git/NxWidgets
+       $ tools/install.sh ~/nuttx-git/apps nxwm
+       Creating symbolic link
+        - To ~/nuttx-git/NxWidgets/UnitTests/nxwm
+        - At ~/nuttx-git/apps/external
+
+    4. Build the NxWidgets library
+
+       $ cd ~/nuttx-git/NxWidgets/libnxwidgets
+       $ make TOPDIR=~/nuttx-git/nuttx
+       ...
+
+    5. Build the NxWM library
+
+       $ cd ~/nuttx-git/NxWidgets/nxwm
+       $ make TOPDIR=~/nuttx-git/nuttx
+       ...
+
+    6. Built NuttX with the installed unit test as the application
+
+       $ cd ~/nuttx-git/nuttx
+       $ make
+
+    NOTE: The NxWM example was designed tiny displays.  On this large 800x480
+    display, the icons are too tiny to be usable.  I have created a large
+    320x320 logo for the opening screen and added image scaling to expand
+    the images in the taskbar.  The expanded images are not great.  If I
+    ever get past the opening screen, the same problems will exist in the
+    application toolbar and in the start winow.  These icons are not yet
+    scaled.
 
    STATUS:
        See the To-Do list below

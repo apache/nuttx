@@ -3368,7 +3368,7 @@ Configurations
     have these components installed elsewhere.  In that case, you will need
     to adjust all of the paths in the following accordingly:
 
-    1. Intall the nxwm configuration
+    1. Install the nxwm configuration
 
        $ cd ~/nuttx-git/nuttx/tools
        $ ./configure.sh sama5d3x-ek/nxwm
