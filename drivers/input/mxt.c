@@ -80,8 +80,8 @@
  */
 
 #define MXT_GETUINT16(p) \
-  (((uint16_t)(((FAR uint8_t*)(p))[0]) << 8) | \
-    (uint16_t)(((FAR uint8_t*)(p))[1]))
+  (((uint16_t)(((FAR uint8_t*)(p))[1]) << 8) | \
+    (uint16_t)(((FAR uint8_t*)(p))[0]))
 
 /****************************************************************************
  * Private Types
@@ -164,8 +164,6 @@ struct mxt_dev_s
   volatile bool event;             /* True: An unreported event is buffered */
   sem_t devsem;                    /* Manages exclusive access to this structure */
   sem_t waitsem;                   /* Used to wait for the availability of data */
-  uint16_t xres;                   /* X resolution */
-  uint16_t yres;                   /* Y resolution */
   uint32_t frequency;              /* Current I2C frequency */
 
   char phys[64];                   /* Device physical location */
@@ -196,6 +194,15 @@ static int  mxt_putreg(FAR struct mxt_dev_s *priv, uint16_t regaddr,
 
 static FAR struct mxt_object_s *mxt_object(FAR struct mxt_dev_s *priv,
               uint8_t type);
+static int mxt_getmessage(FAR struct mxt_dev_s *priv,
+              FAR struct mxt_msg_s *msg);
+static int mxt_putobject(FAR struct mxt_dev_s *priv, uint8_t type,
+              uint8_t offset, uint8_t value);
+#if 0 /* Not used */
+static int mxt_getobject(FAR struct mxt_dev_s *priv, uint8_t type,
+              uint8_t offset, FAR uint8_t *value);
+#endif
+static int  mxt_flushmsgs(FAR struct mxt_dev_s *priv);
 #ifdef CONFIG_I2C_RESET
 static inline bool mxt_nullmsg(FAR struct mxt_msg_s *msg);
 #endif
@@ -236,7 +243,6 @@ static int  mxt_poll(FAR struct file *filep, struct pollfd *fds, bool setup);
 
 static int  mxt_getinfo(struct mxt_dev_s *priv);
 static int  mxt_getobjtab(FAR struct mxt_dev_s *priv);
-static int  mxt_clrpending(FAR struct mxt_dev_s *priv);
 static int  mxt_hwinitialize(FAR struct mxt_dev_s *priv);
 
 /****************************************************************************
@@ -415,13 +421,94 @@ static int mxt_putobject(FAR struct mxt_dev_s *priv, uint8_t type,
   uint16_t regaddr;
 
   object = mxt_object(priv, type);
-  if (!object || offset >= object->size + 1)
+  if (object == NULL || offset >= object->size + 1)
     {
       return -EINVAL;
     }
 
   regaddr = MXT_GETUINT16(object->addr);
-  return mxt_putreg(priv, regaddr + offset, (FAR const uint8_t *)&value, 1);
+  return mxt_putreg(priv, regaddr + offset, &value, 1);
+}
+
+/****************************************************************************
+ * Name: mxt_getobject
+ ****************************************************************************/
+
+#if 0 /* Not used */
+static int mxt_getobject(FAR struct mxt_dev_s *priv, uint8_t type,
+                         uint8_t offset, FAR uint8_t *value)
+{
+  FAR struct mxt_object_s *object;
+  uint16_t regaddr;
+
+  object = mxt_object(priv, type);
+  if (object == NULL || offset >= object->size + 1)
+    {
+      return -EINVAL;
+    }
+
+  regaddr = MXT_GETUINT16(object->addr);
+  return mxt_getreg(priv, regaddr + offset, value, 1);
+}
+#endif
+
+/****************************************************************************
+ * Name: mxt_flushmsgs
+ *
+ *   Clear any pending messages be reading messages until there are no
+ *   pending messages.  This will force the CHG pin to the high state and
+ *   prevent spurious initial interrupts.
+ *
+ ****************************************************************************/
+
+static int mxt_flushmsgs(FAR struct mxt_dev_s *priv)
+{
+  struct mxt_msg_s msg;
+  int retries = 16;
+  int ret;
+
+  /* Read dummy message until there are no more to read (or until we have
+   * tried 10 times).
+   */
+
+  do
+    {
+      ret = mxt_getmessage(priv, &msg);
+      if (ret < 0)
+        {
+          idbg("ERROR: mxt_getmessage failed: %d\n", ret);
+          return ret;
+        }
+
+#ifdef CONFIG_I2C_RESET
+      /* A message of all zeroes probably means that the bus is hung */
+
+      if (mxt_nullmsg(&msg))
+        {
+          /* Try to shake the bus free */
+
+          ivdbg("WARNING: Null message... resetting I2C\n");
+
+          ret = up_i2creset(priv->i2c);
+          if (ret < 0)
+            {
+              idbg("ERROR: up_i2creset failed: %d\n", ret);
+              return ret;
+            }
+        }
+#endif
+    }
+  while (msg.id != 0xff && --retries > 0);
+
+  /* Complain if we exceed the retry limit */
+
+  if (retries <= 0)
+    {
+      idbg("ERROR: Failed to clear messages: ID=%02x\n", msg.id);
+      return -EBUSY;
+    }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -865,7 +952,7 @@ static void mxt_worker(FAR void *arg)
 
       /* Any other message IDs are ignored */
 
-      else
+      else if (msg.id != 0xff)
         {
           ivdbg("Ignored: id=%u message={%02x %02x %02x %02x %02x %02x %02x}\n",
                 msg.id, msg.body[0], msg.body[1], msg.body[2], msg.body[3],
@@ -978,6 +1065,23 @@ static int mxt_open(FAR struct file *filep)
           idbg("ERROR: Failed to enable touch: %d\n", ret);
           goto errout_with_sem;
         }
+
+      /* Clear any pending messages by reading all messages.  This will
+       * force the CHG interrupt pin to the high state and prevent spurious
+       * interrupts when they are enabled.
+       */
+
+      ret = mxt_flushmsgs(priv);
+      if (ret < 0)
+        {
+          idbg("ERROR: mxt_flushmsgs failed: %d\n", ret);
+          mxt_putobject(priv, MXT_TOUCH_MULTI_T9, MXT_TOUCH_CTRL, 0);
+          goto errout_with_sem;
+        }
+
+      /* Enable touch interrupts */
+
+      MXT_ENABLE(priv->lower);
     }
 
   /* Save the new open count on success */
@@ -1025,6 +1129,10 @@ static int mxt_close(FAR struct file *filep)
     {
       if (--priv->crefs < 1)
         {
+          /* Disable touch interrupts */
+
+          MXT_ENABLE(priv->lower);
+
           /* Touch disable */
 
           ret = mxt_putobject(priv, MXT_TOUCH_MULTI_T9, MXT_TOUCH_CTRL, 0);
@@ -1137,7 +1245,7 @@ static ssize_t mxt_read(FAR struct file *filep, FAR char *buffer, size_t len)
           sample->contact == CONTACT_MOVE)
         {
           int newcount    = ncontacts + 1;
-          ssize_t newsize = SIZEOF_TOUCH_SAMPLE_S(ncontacts);
+          ssize_t newsize = SIZEOF_TOUCH_SAMPLE_S(newcount);
 
           /* Would this sample exceed the buffer size provided by the
            * caller?
@@ -1522,66 +1630,6 @@ static int mxt_getobjtab(FAR struct mxt_dev_s *priv)
 }
 
 /****************************************************************************
- * Name: mxt_clrpending
- *
- *   Clear any pending messages be reading messages until there are no
- *   pending messages.  This will force the CHG pin to the high state and
- *   prevent spurious initial interrupts.
- *
- ****************************************************************************/
-
-static int mxt_clrpending(FAR struct mxt_dev_s *priv)
-{
-  struct mxt_msg_s msg;
-  int retries = 16;
-  int ret;
-
-  /* Read dummy message until there are no more to read (or until we have
-   * tried 10 times).  NOTE: The MXT748E seems to return msg.id == 0x00
-   * when there are no pending messages.
-   */
-
-  do
-    {
-      ret = mxt_getmessage(priv, &msg);
-      if (ret < 0)
-        {
-          idbg("ERROR: mxt_getmessage failed: %d\n", ret);
-          return ret;
-        }
-
-#ifdef CONFIG_I2C_RESET
-      /* A message of all zeroes probably means that the bus is hung */
-
-      if (mxt_nullmsg(&msg))
-        {
-          /* Try to shake the bus free */
-
-          ivdbg("WARNING: Null message... resetting I2C\n");
-
-          ret = up_i2creset(priv->i2c);
-          if (ret < 0)
-            {
-              idbg("ERROR: up_i2creset failed: %d\n", ret);
-              return ret;
-            }
-        }
-#endif
-    }
-  while (msg.id != 0xff && --retries > 0);
-
-  /* Complain if we exceed the retry limit */
-
-  if (retries <= 0)
-    {
-      idbg("ERROR: Failed to clear messages: ID=%02x\n", msg.id);
-      return -EBUSY;
-    }
-
-  return OK;
-}
-
-/****************************************************************************
  * Name: mxt_hwinitialize
  ****************************************************************************/
 
@@ -1589,8 +1637,6 @@ static int mxt_hwinitialize(FAR struct mxt_dev_s *priv)
 {
   struct mxt_info_s *info = &priv->info;
   unsigned int nslots;
-  uint16_t xres;
-  uint16_t yres;
   uint8_t regval;
   int ret;
 
@@ -1655,27 +1701,11 @@ static int mxt_hwinitialize(FAR struct mxt_dev_s *priv)
 
   info->ysize = regval;
 
-  ivdbg("family: %u variant: %u version: %u.%u.%02x\n",
-        info->family, info->variant, info->version >> 4, info->version & 0xf,
+  ivdbg("Family: %u variant: %u version: %u.%u.%02x\n",
+        info->family, info->variant, info->version >> 4, info->version & 0x0f,
         info->build);
   ivdbg("Matrix size: (%u,%u) objects: %u\n",
         info->xsize, info->ysize, info->nobjects);
-
-  /* Set up the touchscreen resolution */
-
-  xres = info->xsize - 1;
-  yres = info->ysize - 1;
-
-  if (priv->lower->swapxy)
-    {
-      priv->xres = yres;
-      priv->yres = xres;
-    }
-  else
-    {
-      priv->xres = xres;
-      priv->yres = yres;
-    }
 
   /* How many multi touch "slots" */
 
@@ -1694,24 +1724,9 @@ static int mxt_hwinitialize(FAR struct mxt_dev_s *priv)
       goto errout_with_objtab;
     }
 
-  /* Clear any pending messages.  This will force the CHG pin to the high
-   * state and prevent spurious interrupts.
-   */
-
-  ret = mxt_clrpending(priv);
-  if (ret < 0)
-    {
-      idbg("ERROR: mxt_clrpending failed: %d\n", ret);
-      goto errout_with_sample;
-    }
-
   return OK;
 
   /* Error exits */
-
-errout_with_sample:
-  kfree(priv->sample);
-  priv->sample = NULL;
 
 errout_with_objtab:
   kfree(priv->objtab);
@@ -1809,31 +1824,14 @@ int mxt_register(FAR struct i2c_dev_s *i2c,
       goto errout_with_hwinit;
     }
 
-  /* Schedule work to perform the initial sampling and to set the data
-   * availability conditions.  The worker will enable MXT interrupts
-   * when it completes its initialization.
-   *
-   * NOTE: At present, this really does nothing for the case of the MXT
-   * driver.  This could be replaced with MXT_ENABLE(lower).  Or,
-   * alternatively, eliminate mxt_clrpending() which does basically the
-   * same thing.
+  /* And return success.  MXT interrupts will not be enable until the
+   * MXT device has been opened (see mxt_open).
    */
-
-  ret = work_queue(HPWORK, &priv->work, mxt_worker, priv, 0);
-  if (ret != 0)
-    {
-      idbg("Failed to queue work: %d\n", ret);
-      goto errout_with_dev;
-    }
-
-  /* And return success */
 
   return OK;
 
   /* Error clean-up exits */
 
-errout_with_dev:
-  (void)unregister_driver(devname);
 errout_with_hwinit:
   kfree(priv->objtab);
   kfree(priv->sample);
