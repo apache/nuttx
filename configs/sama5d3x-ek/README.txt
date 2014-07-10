@@ -3443,7 +3443,7 @@ Configurations
        320x320 logo for the opening screen and added image scaling to expand
        the images in the taskbar.  The expanded images are not great.  If I
        ever get past the opening screen, the same problems will exist in the
-       application toolbar and in the start winow.  These icons are not yet
+       application toolbar and in the start window.  These icons are not yet
        scaled.
 
     Bottom line:  Not ready for prime time.

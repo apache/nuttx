@@ -3289,10 +3289,12 @@ Configurations
     dramboot: This is a little program to help debug of code in DRAM.  See
       the description below and the section above entitled "Creating and
       Using DRAMBOOT" for more information
-    nsh:  This is another NSH configuration, not too different from the
-      demo configuration.  The nsh configuration is, however, bare bones.
-      It is the simplest possible NSH configuration and is useful as a
-      platform for debugging and integrating new features in isolation.
+    nsh:  This is an NuttShell (NSH) configuration that supports extensive
+      functionality as possible (unlike the minimal ramtest configuration).
+      See the detailed description below for a summary of the feature
+      set supported by this configuration.  You may want to disable some
+      of these features if you plan to use the NSH as a platform for
+      debugging and integrating new features.
     nxwm: This is a special configuration setup for the NxWM window manager
       UnitTest.  It integrates support for both the SAMA5 LCDC and the
       SAMA5 ADC touchscreen controller and provides a more advance
@@ -3911,13 +3913,12 @@ Configurations
        $ cd ~/nuttx-git/nuttx
        $ make
 
-    NOTE: The NxWM example was designed tiny displays.  On this large 800x480
-    display, the icons are too tiny to be usable.  I have created a large
-    320x320 logo for the opening screen and added image scaling to expand
-    the images in the taskbar.  The expanded images are not great.  If I
-    ever get past the opening screen, the same problems will exist in the
-    application toolbar and in the start winow.  These icons are not yet
-    scaled.
+    NOTE: The NxWM example was designed tiny displays.  On this larger
+    800x480 display, the icons are too tiny to be usable.  I have created
+    a larger 320x320 logo for the opening screen and added image scaling
+    to expand the images in the taskbar.  The expanded images are not great.
+    The same problems exist in the application toolbar and in the start
+    window.  These icons are not yet scaled.
 
    STATUS:
        See the To-Do list below
