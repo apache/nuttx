@@ -761,6 +761,17 @@ static void mxt_touch_event(FAR struct mxt_dev_s *priv,
   ivdbg("ndx=%u status=%02x pos(%u,%u) area=%u pressure=%u\n",
         ndx, status, x, y, area, pressure);
 
+  /* The normal sequence that we would see for a touch would be something
+   * like:
+   *
+   *   1. MXT_DETECT + MXT_PRESS
+   *   2. MXT_DETECT + MXT_AMP
+   *   3. MXT_DETECT + MXT_MOVE + MXT_AMP
+   *   4. MXT_RELEASE
+   *
+   * So we really only need to check MXT_DETECT to drive this state machine.
+   */
+
   /* Is this a loss of contact? */
 
   sample = &priv->sample[ndx];

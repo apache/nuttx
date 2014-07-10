@@ -2987,6 +2987,9 @@ TM7000 LCD/Touchscreen
     CONFIG_INPUT=y          : Input device support
     CONFIG_INPUT_MXT=y      : Enable maXTouch input device
 
+    Optionally, use CONFIG_ARCH_HAVE_I2CRESET=y if you have issues
+    with other I2C devices on board locking up the I2C bus.
+
   Board Configuration
     CONFIG_SAMA5D4EK_MXT_DEVMINOR=0
     CONFIG_SAMA5D4EK_MXT_I2CFREQUENCY=100000
@@ -2998,6 +3001,10 @@ TM7000 LCD/Touchscreen
     CONFIG_EXAMPLES_TOUCHSCREEN_ARCHINIT=y
     CONFIG_EXAMPLES_TOUCHSCREEN_DEVPATH="/dev/input0"
     CONFIG_EXAMPLES_TOUCHSCREEN_MINOR=0
+
+  Usage is like:
+
+    nsh> tc [<number-of-touches>]
 
   QTouch Button Sensor
   --------------------
@@ -3412,7 +3419,13 @@ Configurations
        serial peripheral, and (2) selecting that serial peripheral as
        the console device.
 
-    2. By default, this configuration is set up to build on Windows
+    2. This configuration was verified using the SAMA5D4-MB, Rev C. board.
+       There may be some differences in released SAMA5D4-EK board.  Also,
+       this configuration assumes that you have the TM7000 LCD/Touchscreen
+       attached.  If you do not, you should disable the LCD and touchscreen
+       drivers as described above under "TM7000 LCD/Touchscreen.
+
+    3. By default, this configuration is set up to build on Windows
        under either a Cygwin or MSYS environment using a recent, Windows-
        native, generic ARM EABI GCC toolchain (such as the CodeSourcery
        toolchain).  Both the build environment and the toolchain
@@ -3428,7 +3441,7 @@ Configurations
        the warning in the section "Information Common to All Configurations"
        for further information.
 
-    3. This configuration supports logging of debug output to a circular
+    4. This configuration supports logging of debug output to a circular
        buffer in RAM.  This feature is discussed fully in this Wiki page:
        http://nuttx.org/doku.php?id=wiki:howtos:syslog . Relevant configuration settings are summarized below:
 
@@ -3453,7 +3466,7 @@ Configurations
        If you don't plan on using the debug features, then by all means
        disable this feature and save 16KiB of RAM!
 
-    4. This configuration executes out of SDRAM flash and is loaded into
+    5. This configuration executes out of SDRAM flash and is loaded into
        SDRAM from NAND, Serial DataFlash, SD card or from a TFTPC sever via
        U-Boot, BareBox, or the DRAMBOOT configuration described above.  Data
        also is positioned in SDRAM.
@@ -3490,7 +3503,7 @@ Configurations
          U-Boot> fatload mmc 0 0x20008000 nuttx.bin
          U-Boot> go 0x20008040
 
-    5. Board LEDs and buttons are supported as described under "Buttons and
+    6. Board LEDs and buttons are supported as described under "Buttons and
        LEDs".  The interrupt button test is also enabled as an NSH built-in
        commands.  To run this test, you simply inter the command:
 
@@ -3514,7 +3527,7 @@ Configurations
        IRQ:81 Button 0:PB_USER SET:00:
          PB_USER released
 
-    6. This configuration supports /dev/null, /dev/zero, and /dev/random.
+    7. This configuration supports /dev/null, /dev/zero, and /dev/random.
 
          CONFIG_DEV_NULL=y    : Enables /dev/null
          CONFIG_DEV_ZERO=y    : Enabled /dev/zero
@@ -3526,13 +3539,14 @@ Configurations
         CONFIG_SAMA5_TRNG=y   : Enables the TRNG peripheral
         CONFIG_DEV_RANDOM=y   : Enables /dev/random
 
-    7. This configuration has support for NSH built-in applications enabled.
+    8. This configuration has support for NSH built-in applications enabled.
        Two built-in applications are included by default:  (1) The I2C Tool.
        See the section above entitle "I2C Tool" and the note with regard to
-       I2C below. And (2) the interrupting button test as described above
-       in these notes.
+       I2C below. (2) The interrupting button test as described above
+       in these notes.  And (3) the touchscreen test program as described
+       above under "TM7000 LCD/Touchscreen" and also below in this notes.
 
-    8. This configuration has support for the FAT, ROMFS, and PROCFS file
+    9. This configuration has support for the FAT, ROMFS, and PROCFS file
        systems built in.
 
        The FAT file system includes long file name support.  Please be aware
@@ -3553,7 +3567,7 @@ Configurations
 
          CONFIG_FS_PROCFS=y     : Enable PROCFS file system
 
-    9. An NSH start-up script is provided by the ROMFS file system.  The ROMFS
+   10. An NSH start-up script is provided by the ROMFS file system.  The ROMFS
        file system is mounted at /etc and provides:
 
          |- dev/
@@ -3657,7 +3671,7 @@ Configurations
 
          SD  RF TYP FLAGS
 
-   10. The Real Time Clock/Calendar (RTC) is enabled in this configuration.
+   11. The Real Time Clock/Calendar (RTC) is enabled in this configuration.
        See the section entitled "RTC" above for detailed configuration
        settings.
 
@@ -3673,7 +3687,7 @@ Configurations
        will need to install a battery in the battery holder (J12) and close
        the jumper, JP13.
 
-   11. Support for HSMCI0 is built-in by default. The SAMA4D4-EK provides
+   12. Support for HSMCI0 is built-in by default. The SAMA4D4-EK provides
        two SD memory card slots:  (1) a full size SD card slot (J10), and
        (2) a microSD memory card slot (J11).  The full size SD card slot
        connects via HSMCI0; the microSD connects vi HSMCI1.  Support for
@@ -3695,7 +3709,7 @@ Configurations
        If these behaviors are a problem for you, then you may want to
        disable HSMCI0 as well.
 
-   12. Networking is supported via EMAC0.  See the "Networking" section
+   13. Networking is supported via EMAC0.  See the "Networking" section
        above for detailed configuration settings.  DHCP is not used in
        this configuration; rather, a hard-coded IP address of 10.0.0.2 is
        used with a netmask of 255.255.255.0.  The host is assumed to be
@@ -3710,13 +3724,13 @@ Configurations
        See the "kludge" for EMAC that is documented in the To-Do list at
        the end of this README file.
 
-   13. I2C Tool. This configuration enables TWI0 (only) as an I2C master
+   14. I2C Tool. This configuration enables TWI0 (only) as an I2C master
        device.  This configuration also supports the I2C tool at
        apps/system/i2c that can be used to peek and poke I2C devices on the
        TIW0 bus.  See the discussion above under "I2C Tool" for detailed
        configuration settings.
 
-   14. Support the USB low-, high- and full-speed OHCI host driver is enabled
+   15. Support the USB low-, high- and full-speed OHCI host driver is enabled
        enabled with the NuttX configuration file as described in the section
        above entitled "USB High-Speed Host".  Only port B and port C, the
        larger "Type A" connectors, are enabled; port A (the smaller OTG
@@ -3740,16 +3754,28 @@ Configurations
        idea because you cannot type the 'dmesg' command to view the RAMLOG
        without a keyboard attached.]
 
-   15. Support the USB high-speed USB device driver (UDPHS) is not enabled by
+   16. Support the USB high-speed USB device driver (UDPHS) is not enabled by
        default but could be enabled by changing the NuttX configuration file as
        described above in the section entitled "USB High-Speed Device."
 
-   16. The SAMA5D4-EK includes for an AT25 serial DataFlash.  That support is
+   17. Support for the maXTouch MXT768E touchscreen driver on the TM7000
+       LCD/Touchscreen module is enabled by default.  See the section above
+       entitled "TM7000 LCD/Touchscreen" for detailed configuration information.
+       You will probably want to disable this option if you are not using the
+       TM7000 LCD/Touchscreen.
+
+       The Touchscreen test program is also built in.  This test program can
+       be found in the source tree at apps/examples/touchscreen.  Usage is
+       like:
+
+         nsh> tc [<number-of-touches>]
+
+   18. The SAMA5D4-EK includes for an AT25 serial DataFlash.  That support is
        NOT enabled in this configuration.  Support for that serial FLASH could
        be enabled by modifying the NuttX configuration as described above in
        the paragraph entitled "AT25 Serial FLASH".
 
-   17. This example can be configured to exercise the watchdog timer test
+   19. This example can be configured to exercise the watchdog timer test
        (apps/examples/watchdog).  See the detailed configuration settings in
        the section entitled "Watchdog Timer" above.
 
