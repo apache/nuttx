@@ -1281,8 +1281,8 @@ static void sam_dmasetup(int lid, struct sam_dscr_s *dscr, uint8_t *buffer)
       /* 31.6.2.2 Programming a DMA Channel:
        *
        * 4. Write the DSCR.CHXNEXT register with the address location
-       * of the descriptor structure and set DFETCH field of the
-       * DSCR.CHXCTRL register to one.
+       *    of the descriptor structure and set DFETCH field of the
+       *    DSCR.CHXCTRL register to one.
        */
 
       sam_putreg(g_layeraddr[lid], physbuffer);
@@ -2267,6 +2267,7 @@ static void sam_lcd_enable(void)
   regval = LCDC_LCDCFG5_HSPOL | LCDC_LCDCFG5_VSPOL |
            LCDC_LCDCFG5_VSPDLYS | LCDC_LCDCFG5_DISPDLY |
            LCDC_LCDCFG5_GUARDTIME(BOARD_LCDC_GUARDTIME);
+
 #if BOARD_LCDC_OUTPUT_BPP == 16
   regval |= LCDC_LCDCFG5_MODE_12BPP;
 #elif BOARD_LCDC_OUTPUT_BPP == 16
@@ -2278,6 +2279,7 @@ static void sam_lcd_enable(void)
 #else
 #  error Unknown or undefined output resolution
 #endif
+
   sam_putreg(SAM_LCDC_LCDCFG5, regval);
 
   regval = BOARD_LCDC_PWMPS | BOARD_LCDC_PWMPOL |
