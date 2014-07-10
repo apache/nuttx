@@ -7705,4 +7705,6 @@
 	  pin configuration is more read-able (i.e., easier to debug)
 	  (2014-7-9).
 	* drivers/input/mxt:  The maXTouch driver works! (2014-7-10).
+	* configs/sama5d4-ek:  The TM7000 LCD works! (2014-7-10).
+	* configs/sama5d4-ek/NxWM:  Add an NxWM configuration (2014-7-10).
 
