@@ -2814,6 +2814,12 @@ TM7000 LCD/Touchscreen
       QTouch™ Button Sensor IC
     - 200 bytes of non-volatile serial EEPROM
 
+  NOTE: It appears that my TM7000 differs slightly from the version
+  described in the tm7000.pdf file:  That document claims that the
+  hardware interface to the LCD is 18-bit RGB666; but the one that
+  I have is certainly 24-bit RGB888.  If you have LCD issues, you may
+  need to tweak some of the settings in configs/sama5d4-ek/include/board.h.
+
   Jumper JP2 selects either the EMAC1 or the LCD by controlling the
   the LCD_ETH1_CONFIG signal on the board.
 
@@ -3785,6 +3791,10 @@ Configurations
        using the NuttX graphics system (NX).  This test case focuses on general
        window controls, movement, mouse and keyboard input.  It requires no
        user interaction.
+
+       The test is executed by simply typing:
+
+         nsh> nx
 
        There are several simple graphics examples under apps/examples/ that
        could be configured to verify LCD/graphics operation:
