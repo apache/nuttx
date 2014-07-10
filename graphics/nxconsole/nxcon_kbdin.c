@@ -42,6 +42,7 @@
 #include <fcntl.h>
 #include <sched.h>
 #include <assert.h>
+#include <poll.h>
 #include <errno.h>
 #include <debug.h>
 
