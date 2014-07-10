@@ -170,9 +170,17 @@
 /* LCD Interface, Geometry and Timing ***********************************************/
 /* This configuration applies only to the TM7000 LCD/Touchscreen module.  Other LCDs
  * will require changes.
+ *
+ * NOTE: The TM7000 user manual claims that the hardware interface is 18-bit RGB666.
+ * If you select that, you will get a very pink display (because the upper, "red"
+ * bits floating high).  By trial and error, the 24-bit select was found to produce
+ * the correct color output.
+ *
+ * NOTE: Timings come from the smaller SAMA5D3x-EK LCD and have not been optimized
+ * for this display.
  */
 
-#define BOARD_LCDC_OUTPUT_BPP 24       /* Output format to H/W is 24BPP RGB888 */
+#define BOARD_LCDC_OUTPUT_BPP 24       /* Output format to H/W is 24 bpp RGB888 */
 #define BOARD_LCDC_WIDTH      800      /* Display width (pixels) */
 #define BOARD_LCDC_HEIGHT     480      /* Display height (rows) */
 #undef  BOARD_LCDC_MCK_MUL2            /* Source clock is Mck (vs 2*Mck) */
