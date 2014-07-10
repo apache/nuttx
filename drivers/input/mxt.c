@@ -203,9 +203,6 @@ static int mxt_getobject(FAR struct mxt_dev_s *priv, uint8_t type,
               uint8_t offset, FAR uint8_t *value);
 #endif
 static int  mxt_flushmsgs(FAR struct mxt_dev_s *priv);
-#ifdef CONFIG_I2C_RESET
-static inline bool mxt_nullmsg(FAR struct mxt_msg_s *msg);
-#endif
 
 /* Poll support */
 
@@ -263,14 +260,6 @@ static const struct file_operations mxt_fops =
 #endif
 };
 
-#ifdef CONFIG_I2C_RESET
-static const struct mxt_msg_s g_nullmsg =
-{
-  .id = 0,
-  .body = {0, 0, 0, 0, 0, 0, 0},
-};
-#endif
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -284,36 +273,65 @@ static int mxt_getreg(FAR struct mxt_dev_s *priv, uint16_t regaddr,
 {
   struct i2c_msg_s msg[2];
   uint8_t addrbuf[2];
+  int retries;
   int ret;
 
-  ivdbg("regaddr:%04x buflen=%d\n", regaddr, buflen);
+  /* Try up to three times to read the register */
 
-  /* Set up to write the address */
-
-  addrbuf[0]    = regaddr & 0xff;
-  addrbuf[1]    = (regaddr >> 8) & 0xff;
-
-  msg[0].addr   = priv->lower->address;
-  msg[0].flags  = 0;
-  msg[0].buffer = addrbuf;
-  msg[0].length = 2;
-
-  /* Followed by the read data */
-
-  msg[1].addr   = priv->lower->address;
-  msg[1].flags  = I2C_M_READ;
-  msg[1].buffer = buffer;
-  msg[1].length = buflen;
-
-  /* Read the register data.  The returned value is the number messages
-   * completed.
-   */
-
-  ret = I2C_TRANSFER(priv->i2c, msg, 2);
-  if (ret < 0)
+  for (retries = 1; retries <= 3; retries++)
     {
-      idbg("ERROR: I2C_TRANSFER failed: %d\n", ret);
+      ivdbg("retries=%d regaddr=%04x buflen=%d\n", retries, regaddr, buflen);
+
+      /* Set up to write the address */
+
+      addrbuf[0]    = regaddr & 0xff;
+      addrbuf[1]    = (regaddr >> 8) & 0xff;
+
+      msg[0].addr   = priv->lower->address;
+      msg[0].flags  = 0;
+      msg[0].buffer = addrbuf;
+      msg[0].length = 2;
+
+      /* Followed by the read data */
+
+      msg[1].addr   = priv->lower->address;
+      msg[1].flags  = I2C_M_READ;
+      msg[1].buffer = buffer;
+      msg[1].length = buflen;
+
+      /* Read the register data.  The returned value is the number messages
+       * completed.
+       */
+
+      ret = I2C_TRANSFER(priv->i2c, msg, 2);
+      if (ret < 0)
+        {
+#ifdef CONFIG_I2C_RESET
+          /* Perhaps the I2C bus is locked up?  Try to shake the bus free */
+
+          idbg("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
+
+          ret = up_i2creset(priv->i2c);
+          if (ret < 0)
+            {
+              idbg("ERROR: up_i2creset failed: %d\n", ret);
+              break;
+            }
+#else
+          idbg("ERROR: I2C_TRANSFER failed: %d\n", ret);
+#endif
+        }
+      else
+        {
+          /* The I2C transfer was successful... break out of the loop and
+           * return the success indication.
+           */
+
+          break;
+        }
     }
+
+  /* Return the last status returned by I2C_TRANSFER */
 
   return ret;
 }
@@ -327,36 +345,64 @@ static int mxt_putreg(FAR struct mxt_dev_s *priv, uint16_t regaddr,
 {
   struct i2c_msg_s msg[2];
   uint8_t addrbuf[2];
+  int retries;
   int ret;
 
-  ivdbg("regaddr:%04x buflen=%d\n", regaddr, buflen);
+  /* Try up to three times to read the register */
 
-  /* Set up to write the address */
-
-  addrbuf[0]    = regaddr & 0xff;
-  addrbuf[1]    = (regaddr >> 8) & 0xff;
-
-  msg[0].addr   = priv->lower->address;
-  msg[0].flags  = 0;
-  msg[0].buffer = addrbuf;
-  msg[0].length = 2;
-
-  /* Followed by the write data (with no repeated start) */
-
-  msg[1].addr   = priv->lower->address;
-  msg[1].flags  = I2C_M_NORESTART;
-  msg[1].buffer = (FAR uint8_t *)buffer;
-  msg[1].length = buflen;
-
-  /* Read the register data.  The returned value is the number messages
-   * completed.
-   */
-
-  ret = I2C_TRANSFER(priv->i2c, msg, 2);
-  if (ret < 0)
+  for (retries = 1; retries <= 3; retries++)
     {
-      idbg("ERROR: I2C_TRANSFER failed: %d\n", ret);
+      ivdbg("retries=%d regaddr=%04x buflen=%d\n", retries, regaddr, buflen);
+
+      /* Set up to write the address */
+
+      addrbuf[0]    = regaddr & 0xff;
+      addrbuf[1]    = (regaddr >> 8) & 0xff;
+
+      msg[0].addr   = priv->lower->address;
+      msg[0].flags  = 0;
+      msg[0].buffer = addrbuf;
+      msg[0].length = 2;
+
+      /* Followed by the write data (with no repeated start) */
+
+      msg[1].addr   = priv->lower->address;
+      msg[1].flags  = I2C_M_NORESTART;
+      msg[1].buffer = (FAR uint8_t *)buffer;
+      msg[1].length = buflen;
+
+      /* Write the register data.  The returned value is the number messages
+       * completed.
+       */
+
+      ret = I2C_TRANSFER(priv->i2c, msg, 2);
+      if (ret < 0)
+        {
+#ifdef CONFIG_I2C_RESET
+          /* Perhaps the I2C bus is locked up?  Try to shake the bus free */
+
+          idbg("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
+
+          ret = up_i2creset(priv->i2c);
+          if (ret < 0)
+            {
+              idbg("ERROR: up_i2creset failed: %d\n", ret);
+            }
+#else
+          idbg("ERROR: I2C_TRANSFER failed: %d\n", ret);
+#endif
+        }
+      else
+        {
+          /* The I2C transfer was successful... break out of the loop and
+           * return the success indication.
+           */
+
+          break;
+        }
     }
+
+  /* Return the last status returned by I2C_TRANSFER */
 
   return ret;
 }
@@ -479,24 +525,6 @@ static int mxt_flushmsgs(FAR struct mxt_dev_s *priv)
           idbg("ERROR: mxt_getmessage failed: %d\n", ret);
           return ret;
         }
-
-#ifdef CONFIG_I2C_RESET
-      /* A message of all zeroes probably means that the bus is hung */
-
-      if (mxt_nullmsg(&msg))
-        {
-          /* Try to shake the bus free */
-
-          ivdbg("WARNING: Null message... resetting I2C\n");
-
-          ret = up_i2creset(priv->i2c);
-          if (ret < 0)
-            {
-              idbg("ERROR: up_i2creset failed: %d\n", ret);
-              return ret;
-            }
-        }
-#endif
     }
   while (msg.id != 0xff && --retries > 0);
 
@@ -510,17 +538,6 @@ static int mxt_flushmsgs(FAR struct mxt_dev_s *priv)
 
   return OK;
 }
-
-/****************************************************************************
- * Name: mxt_nullmsg
- ****************************************************************************/
-
-#ifdef CONFIG_I2C_RESET
-static inline bool mxt_nullmsg(FAR struct mxt_msg_s *msg)
-{
-  return (memcmp(msg, &g_nullmsg, sizeof(struct mxt_msg_s)) == 0);
-}
-#endif
 
 /****************************************************************************
  * Name: mxt_notify
@@ -930,27 +947,9 @@ static void mxt_worker(FAR void *arg)
         }
 #endif
 
-#ifdef CONFIG_I2C_RESET
-      /* A message of all zeroes probably means that the bus is hung */
-
-      else if (mxt_nullmsg(&msg))
-        {
-          /* Try to shake the bus free */
-
-          ivdbg("WARNING: Null message... resetting I2C\n");
-
-          ret = up_i2creset(priv->i2c);
-          if (ret < 0)
-            {
-              idbg("ERROR: up_i2creset failed: %d\n", ret);
-              break;
-            }
-
-          retries++;
-        }
-#endif
-
-      /* Any other message IDs are ignored */
+      /* 0xff marks the end of the messages; any other message IDs are ignored
+       * (after complaining a little).
+       */
 
       else if (msg.id != 0xff)
         {
