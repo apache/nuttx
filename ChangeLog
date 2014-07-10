@@ -7704,3 +7704,5 @@
 	  configuration; Configure pin as a a vanilla input first so that final
 	  pin configuration is more read-able (i.e., easier to debug)
 	  (2014-7-9).
+	* drivers/input/mxt:  The maXTouch driver works! (2014-7-10).
+
