@@ -7707,4 +7707,6 @@
 	* drivers/input/mxt:  The maXTouch driver works! (2014-7-10).
 	* configs/sama5d4-ek:  The TM7000 LCD works! (2014-7-10).
 	* configs/sama5d4-ek/NxWM:  Add an NxWM configuration (2014-7-10).
+	* drivers/mtc_rwbuffer.c (and others): Add an MTD layer that will add
+	  read-ahead or write buffering to any MTD driver (incomplete) (2014-7-11).
 
