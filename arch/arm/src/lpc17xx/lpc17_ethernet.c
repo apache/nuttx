@@ -1083,7 +1083,9 @@ static int lpc17_interrupt(int irq, void *context)
           if ((status & ETH_INT_RXFIN) != 0)
             {
               EMAC_STAT(priv, rx_finished);
+#if 0 /* REVISIT: Reported to cause false alarm assertions */
               DEBUGASSERT(lpc17_getreg(LPC17_ETH_RXPRODIDX) == lpc17_getreg(LPC17_ETH_RXCONSIDX));
+#endif
             }
 
           /* RX DONE -- Triggered when a receive descriptor has been
