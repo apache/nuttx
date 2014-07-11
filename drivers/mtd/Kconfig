@@ -350,7 +350,7 @@ config M25P_MEMORY_TYPE
 		The memory type for M25 "P" series is 0x20, but the driver also supports "F" series
 		devices, such as the EON EN25F80 part which adds a 4K sector erase capability.  The
 		memory type for "F" series parts from EON is 0x31.  The 4K sector erase size will
-		automatically be enabled when filessytems that can use it are enabled, such as SMART.
+		automatically be enabled when filesytems that can use it are enabled, such as SMART.
 
 config M25P_SUBSECTOR_ERASE
 	bool "Sub-Sector Erase"
@@ -385,7 +385,7 @@ config MTD_SMART_SECTOR_SIZE
 		files.
 
 config MTD_SMART_WRITEBUFFER
-	bool "Enable SMART write bufferingr"
+	bool "Enable SMART write buffering"
 	default n
 	depends on DRVR_WRITEBUFFER
 

@@ -35,6 +35,8 @@ config LOOP
 		file (or character device) as a block device.  See losetup() and
 		loteardown() in include/nuttx/fs/fs.h.
 
+menu "Buffering"
+
 config DRVR_WRITEBUFFER
 	bool "Enable write buffer support"
 	default n
@@ -78,6 +80,8 @@ config DRVR_INVALIDATE
 	default n
 
 endif # DRVR_WRITEBUFFER || DRVR_READAHEAD
+
+endmenu # Buffering
 
 config RAMDISK
 	bool "RAM Disk Support"
