@@ -114,8 +114,8 @@ void lib_streaminit(FAR struct streamlist *list)
     }
 }
 
-/* this function is called when a TCB is destroyed.  Note that is
- * does not close the file by release this inode.  This happens
+/* This function is called when a TCB is destroyed.  Note that is
+ * does not close the files by releasing the inode.  This happens
  * separately when the file descriptor list is freed.
  */
 
