@@ -26,6 +26,16 @@ config MTD_PARTITION
 		managing the sub-region of flash beginning at 'offset' (in blocks)
 		and of size 'nblocks' on the device specified by 'mtd'.
 
+config FTL_WRITEBUFFER
+	bool "Enable write buffering in the FTL layer"
+	default n
+	depends on DRVR_WRITEBUFFER
+
+config FTL_READAHEAD
+	bool "Enable read-ahead buffering in the FTL layer"
+	default n
+	depends on DRVR_READAHEAD
+
 config MTD_SECT512
 	bool "512B sector conversion"
 	default n
@@ -70,6 +80,8 @@ config MTD_WRBUFFER
 	bool "Enable MTD write buffering
 	default n
 	depends on DRVR_WRITEBUFFER
+	select DRVR_INVALIDATE
+	select DRVR_READBYTES
 	---help---
 		Build the mtd_rwbuffer layer and enable support for write buffering.
 
@@ -87,6 +99,8 @@ config MTD_READAHEAD
 	bool "Enable MTD read-ahead buffering
 	default n
 	depends on DRVR_READAHEAD
+	select DRVR_INVALIDATE
+	select DRVR_READBYTES
 	---help---
 		Build the mtd_rwbuffer layer and enable support for read-ahead buffering.
 
@@ -360,14 +374,27 @@ config MTD_SMART
 		(typically 2K - 4K based on memory size) and relocating sectors as needed when
 		an erase block needs to be erased.
 
+if MTD_SMART
+
 config MTD_SMART_SECTOR_SIZE
 	int "SMART Device sector size"
-    depends on MTD_SMART
 	default 1024
 	---help---
-		Sets the size of a single alloction on the SMART device.  Larger sector sizes
+		Sets the size of a single allocation on the SMART device.  Larger sector sizes
 		reduce overhead per sector, but cause more wasted space with a lot of smaller
 		files.
+
+config MTD_SMART_WRITEBUFFER
+	bool "Enable SMART write bufferingr"
+	default n
+	depends on DRVR_WRITEBUFFER
+
+config MTD_SMART_READAHEAD
+	bool "Enable SMART read-ahead buffering"
+	default n
+	depends on DRVR_READAHEAD
+
+endif # MTD_SMART
 
 config MTD_RAMTRON
 	bool "SPI-based RAMTRON NVRAM Devices FM25V10"

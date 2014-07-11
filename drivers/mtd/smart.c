@@ -105,9 +105,9 @@
                                              * other for our use, such as format
                                              * sector, etc. */
 
-#if defined(CONFIG_DRVR_READAHEAD) || (defined(CONFIG_DRVR_WRITABLE) && \
-    defined(CONFIG_DRVR_WRITEBUFFER))
-#  define CONFIG_SMART_RWBUFFER 1
+#if defined(CONFIG_MTD_SMART_READAHEAD) || (defined(CONFIG_DRVR_WRITABLE) && \
+    defined(CONFIG_MTD_SMART_WRITEBUFFER))
+#  define SMART_HAVE_RWBUFFER 1
 #endif
 
 #ifndef CONFIG_MTD_SMART_SECTOR_SIZE

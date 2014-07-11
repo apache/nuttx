@@ -389,7 +389,7 @@ static int rwb_rhreload(struct rwbuffer_s *rwb, off_t startblock)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DRVR_WRITEBUFFER
+#if defined(CONFIG_DRVR_WRITEBUFFER) && defined(CONFIG_DRVR_INVALIDATE)
 int rwb_invalidate_writebuffer(FAR struct rwbuffer_s *rwb,
                                off_t startblock, size_t blockcount)
 {
@@ -525,7 +525,7 @@ int rwb_invalidate_writebuffer(FAR struct rwbuffer_s *rwb,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DRVR_READAHEAD
+#if defined(CONFIG_DRVR_READAHEAD)  && defined(CONFIG_DRVR_INVALIDATE)
 int rwb_invalidate_readahead(FAR struct rwbuffer_s *rwb,
                                off_t startblock, size_t blockcount)
 {
@@ -924,6 +924,7 @@ int rwb_write(FAR struct rwbuffer_s *rwb, off_t startblock,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_DRVR_REMOVABLE
 int rwb_mediaremoved(FAR struct rwbuffer_s *rwb)
 {
 #ifdef CONFIG_DRVR_WRITEBUFFER
@@ -946,6 +947,7 @@ int rwb_mediaremoved(FAR struct rwbuffer_s *rwb)
 
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: rwb_invalidate
@@ -955,6 +957,7 @@ int rwb_mediaremoved(FAR struct rwbuffer_s *rwb)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_DRVR_INVALIDATE
 int rwb_invalidate(FAR struct rwbuffer_s *rwb,
                    off_t startblock, size_t blockcount)
 {
@@ -980,6 +983,7 @@ int rwb_invalidate(FAR struct rwbuffer_s *rwb,
 
   return OK;
 }
+#endif
 
 #endif /* CONFIG_DRVR_WRITEBUFFER || CONFIG_DRVR_READAHEAD */
 

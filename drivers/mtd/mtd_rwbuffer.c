@@ -62,6 +62,14 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
+#ifndef CONFIG_DRVR_INVALIDATE
+#  error This driver requires CONFIG_DRVR_INVALIDATE
+#endif
+
+#ifndef CONFIG_DRVR_READBYTES
+#  error This driver requires CONFIG_DRVR_READBYTES
+#endif
+
 #ifndef CONFIG_MTD_NWRBLOCKS
 #  define CONFIG_MTD_NWRBLOCKS 4
 #endif
@@ -233,7 +241,7 @@ static ssize_t mtd_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
    * needs to read any data.
    */
 
-  return mtd_readbytes(&priv->rwb, offset, nbytes, buffer);
+  return rwb_readbytes(&priv->rwb, offset, nbytes, buffer);
 }
 
 /************************************************************************************

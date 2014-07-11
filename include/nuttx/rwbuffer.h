@@ -186,14 +186,21 @@ ssize_t rwb_write(FAR struct rwbuffer_s *rwb,
 
 /* Character oriented transfers */
 
-ssize_t mtd_readbytes(FAR struct rwbuffer_s *dev, off_t offset,
+#ifdef CONFIG_DRVR_READBYTES
+ssize_t rwb_readbytes(FAR struct rwbuffer_s *dev, off_t offset,
                       size_t nbytes, FAR uint8_t *buffer);
+#endif
 
 /* Media events */
 
+#ifdef CONFIG_DRVR_REMOVABLE
 int rwb_mediaremoved(FAR struct rwbuffer_s *rwb);
+#endif
+
+#ifdef CONFIG_DRVR_INVALIDATE
 int rwb_invalidate(FAR struct rwbuffer_s *rwb,
                    off_t startblock, size_t blockcount);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -62,6 +62,23 @@ config DRVR_READAHEAD
 		Enable generic read-ahead buffering support that can be used by a
 		variety of drivers.
 
+if DRVR_WRITEBUFFER || DRVR_READAHEAD
+
+config DRVR_READBYTES
+	bool "Support byte read method"
+	default y if MTD_BYTE_WRITE
+	default n if !MTD_BYTE_WRITE
+
+config DRVR_REMOVABLE
+	bool "Support removable media"
+	default n
+
+config DRVR_INVALIDATE
+	bool "Support cache invalidation"
+	default n
+
+endif # DRVR_WRITEBUFFER || DRVR_READAHEAD
+
 config RAMDISK
 	bool "RAM Disk Support"
 	default n
