@@ -7709,4 +7709,6 @@
 	* configs/sama5d4-ek/NxWM:  Add an NxWM configuration (2014-7-10).
 	* drivers/mtc_rwbuffer.c (and others): Add an MTD layer that will add
 	  read-ahead or write buffering to any MTD driver (incomplete) (2014-7-11).
+	* arch/arm/src/lpc17xx/lpc17_ethernet.c: Comment out an assertion that
+	  is reported to fire inappropriately.  From Max (2014-7-11).
 
