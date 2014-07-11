@@ -77,7 +77,7 @@ config MTD_BYTE_WRITE
 		this option if it is enabled.
 
 config MTD_WRBUFFER
-	bool "Enable MTD write buffering
+	bool "Enable MTD write buffering"
 	default n
 	depends on DRVR_WRITEBUFFER
 	select DRVR_INVALIDATE
@@ -96,7 +96,7 @@ config MTD_NWRBLOCKS
 endif # MTD_WRBUFFER
 
 config MTD_READAHEAD
-	bool "Enable MTD read-ahead buffering
+	bool "Enable MTD read-ahead buffering"
 	default n
 	depends on DRVR_READAHEAD
 	select DRVR_INVALIDATE
