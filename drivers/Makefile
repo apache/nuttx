@@ -1,7 +1,7 @@
 ############################################################################
 # drivers/Makefile
 #
-#   Copyright (C) 2007-2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -73,7 +73,14 @@ ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
   CSRCS += dev_null.c dev_zero.c loop.c
 
 ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
-  CSRCS += ramdisk.c rwbuffer.c
+  CSRCS += ramdisk.c
+ifneq ($(CONFIG_DRVR_WRITEBUFFER),y)
+  CSRCS += rwbuffer.c
+else
+ifneq ($(CONFIG_DRVR_READAHEAD),y)
+  CSRCS += rwbuffer.c
+endif
+endif
 endif
 
 ifeq ($(CONFIG_CAN),y)

@@ -35,6 +35,33 @@ config LOOP
 		file (or character device) as a block device.  See losetup() and
 		loteardown() in include/nuttx/fs/fs.h.
 
+config DRVR_WRITEBUFFER
+	bool "Enable write buffer support"
+	default n
+	---help---
+		Enable generic write buffering support that can be used by a variety
+		of drivers.
+
+if DRVR_WRITEBUFFER
+
+config DRVR_WRDELAY
+	int "Write flush delay"
+	default 350
+	---help---
+		If there is no write activity for this configured amount of time,
+		then the contents will be automatically flushed to the media.  This
+		reduces the likelihood that data will be stuck in the write buffer
+		at the time of power down.
+
+endif # DRVR_WRITEBUFFER
+
+config DRVR_READAHEAD
+	bool "Enable read-ahead buffer support"
+	default n
+	---help---
+		Enable generic read-ahead buffering support that can be used by a
+		variety of drivers.
+
 config RAMDISK
 	bool "RAM Disk Support"
 	default n

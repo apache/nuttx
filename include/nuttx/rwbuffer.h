@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/rwbuffer.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,10 +33,6 @@
  *
  ****************************************************************************/
 
-/****************************************************************************
- * Included Files
- ****************************************************************************/
-
 #ifndef __INCLUDE_NUTTX_RWBUFFER_H
 #define __INCLUDE_NUTTX_RWBUFFER_H
 
@@ -51,7 +47,7 @@
 #include <semaphore.h>
 #include <nuttx/wqueue.h>
 
-#if defined(CONFIG_FS_WRITEBUFFER) || defined(CONFIG_FS_READAHEAD)
+#if defined(CONFIG_DRVR_WRITEBUFFER) || defined(CONFIG_DRVR_READAHEAD)
 
 /**********************************************************************
  * Pre-processor Definitions
@@ -107,45 +103,50 @@ struct rwbuffer_s
 
   uint16_t      blocksize;       /* The size of one block */
   size_t        nblocks;         /* The total number blocks supported */
-  FAR void     *dev;             /* Device state passed to callout functions */
 
-  /* Write buffer setup.  If CONFIG_FS_WRITEBUFFER is defined, but you
-   * want read-ahead-only operation, (1) set wrmaxblocks to zero and do
-   * not use rwb_write().
+  /* Read-ahead/Write buffer sizes.  Buffering can be disabled (even if it
+   * is enabled in the configuration) by setting the buffer size to zero
+   * blocks.
    */
 
-#ifdef CONFIG_FS_WRITEBUFFER
+#ifdef CONFIG_DRVR_WRITEBUFFER
   uint16_t      wrmaxblocks;     /* The number of blocks to buffer in memory */
-  rwbflush_t    wrflush;         /* Callout to flush the write buffer */
+#endif
+#ifdef CONFIG_DRVR_READAHEAD
+  uint16_t      rhmaxblocks;     /* The number of blocks to buffer in memory */
 #endif
 
-  /* Read-ahead buffer setup.  If CONFIG_FS_READAHEAD is defined but you
-   * want write-buffer-only operation, then (1) set rhmaxblocks to zero and
-   * do not use rwb_read().
+  /* Callback functions.
+   *
+   * wrflush.  This callback is normally used to flush the contents of
+   *   the write buffer.  If write buffering is disabled, then this
+   *   function will instead be used to perform unbuffered writes.
+   * rhrelad.  This callback is normally used to read new data into the
+   *   read-ahead buffer.  If read-ahead buffering is disabled, then this
+   *   function will instead be used to perform unbuffered reads.
    */
 
-#ifdef CONFIG_FS_READAHEAD
-  uint16_t      rhmaxblocks;     /* The number of blocks to buffer in memory */
+  FAR void     *dev;             /* Device state passed to callout functions */
+  rwbflush_t    wrflush;         /* Callout to flush the write buffer */
   rwbreload_t   rhreload;        /* Callout to reload the read-ahead buffer */
-#endif
 
   /********************************************************************/
-  /* The user should never modify any of the remaing fields */
+  /* The user should never modify any of the remaining fields */
 
-  /* This is the state of the write buffer */
+  /* This is the state of the write buffering */
 
-#ifdef CONFIG_FS_WRITEBUFFER
+#ifdef CONFIG_DRVR_WRITEBUFFER
   sem_t         wrsem;           /* Enforces exclusive access to the write buffer */
-  struct work_s work;            /* Delayed work to flush buffer after adelay with no activity */
+  struct work_s work;            /* Delayed work to flush buffer after a delay with no activity */
   uint8_t      *wrbuffer;        /* Allocated write buffer */
   uint16_t      wrnblocks;       /* Number of blocks in write buffer */
   off_t         wrblockstart;    /* First block in write buffer */
   off_t         wrexpectedblock; /* Next block expected */
 #endif
 
-  /* This is the state of the read-ahead buffer */
+  /* This is the state of the read-ahead buffering */
 
-#ifdef CONFIG_FS_READAHEAD
+#ifdef CONFIG_DRVR_READAHEAD
   sem_t         rhsem;           /* Enforces exclusive access to the write buffer */
   uint8_t      *rhbuffer;        /* Allocated read-ahead buffer */
   uint16_t      rhnblocks;       /* Number of blocks in read-ahead buffer */
@@ -160,7 +161,8 @@ struct rwbuffer_s
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN EXTERN "C"
-EXTERN "C" {
+EXTERN "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -171,22 +173,32 @@ EXTERN "C" {
 
 /* Buffer initialization */
 
-EXTERN int rwb_initialize(FAR struct rwbuffer_s *rwb);
-EXTERN void rwb_uninitialize(FAR struct rwbuffer_s *rwb);
+int rwb_initialize(FAR struct rwbuffer_s *rwb);
+void rwb_uninitialize(FAR struct rwbuffer_s *rwb);
 
-/* Buffer transfers */
+/* Block oriented transfers */
 
-EXTERN ssize_t rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock,
-                        size_t blockcount, FAR uint8_t *rdbuffer);
-EXTERN ssize_t rwb_write(FAR struct rwbuffer_s *rwb,
-                         off_t startblock, size_t blockcount,
-                         FAR const uint8_t *wrbuffer);
-EXTERN int rwb_mediaremoved(FAR struct rwbuffer_s *rwb);
+ssize_t rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock,
+                 size_t blockcount, FAR uint8_t *rdbuffer);
+ssize_t rwb_write(FAR struct rwbuffer_s *rwb,
+                  off_t startblock, size_t blockcount,
+                  FAR const uint8_t *wrbuffer);
+
+/* Character oriented transfers */
+
+ssize_t mtd_readbytes(FAR struct rwbuffer_s *dev, off_t offset,
+                      size_t nbytes, FAR uint8_t *buffer);
+
+/* Media events */
+
+int rwb_mediaremoved(FAR struct rwbuffer_s *rwb);
+int rwb_invalidate(FAR struct rwbuffer_s *rwb,
+                   off_t startblock, size_t blockcount);
 
 #undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
 
-#endif /* CONFIG_FS_WRITEBUFFER || CONFIG_READAHEAD_BUFFER */
+#endif /* CONFIG_DRVR_WRITEBUFFER || CONFIG_DRVR_READAHEAD */
 #endif /* __INCLUDE_NUTTX_RWBUFFER_H */

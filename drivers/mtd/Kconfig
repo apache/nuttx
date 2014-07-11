@@ -66,12 +66,48 @@ config MTD_BYTE_WRITE
 		support such writes.  The SMART file system can take advantage of
 		this option if it is enabled.
 
+config MTD_WRBUFFER
+	bool "Enable MTD write buffering
+	default n
+	depends on DRVR_WRITEBUFFER
+	---help---
+		Build the mtd_rwbuffer layer and enable support for write buffering.
+
+if MTD_WRBUFFER
+
+config MTD_NWRBLOCKS
+	int "MTD write buffer size"
+	default 4
+	---help---
+		The size of the MTD write buffer (in blocks)
+
+endif # MTD_WRBUFFER
+
+config MTD_READAHEAD
+	bool "Enable MTD read-ahead buffering
+	default n
+	depends on DRVR_READAHEAD
+	---help---
+		Build the mtd_rwbuffer layer and enable support for read-ahead buffering.
+
+if MTD_READAHEAD
+
+config MTD_NRDBLOCKS
+	int "MTD read-head buffer size"
+	default 4
+	---help---
+		The size of the MTD read-ahead buffer (in blocks)
+
+endif # MTD_READAHEAD
+
 config MTD_CONFIG
 	bool "Enable Dev Config (MTD based) device"
 	default n
 	---help---
 		Provides a /dev/config device for saving / restoring application
 		configuration data to a standard MTD device or partition.
+
+if MTD_CONFIG
 
 config MTD_CONFIG_RAM_CONSOLIDATE
 	bool "Always use RAM consolidation method (work in progress)"
@@ -97,12 +133,13 @@ config MTD_CONFIG_RAM_CONSOLIDATE
 
 config MTD_CONFIG_ERASEDVALUE
 	hex "Erased value of bytes on the MTD device"
-	depends on MTD_CONFIG
 	default 0xff
 	---help---
 		Specifies the value of the erased state of the MTD FLASH.  For
 		most FLASH parts, this is 0xff, but could also be zero depending
 		on the device.
+
+endif # MTD_CONFIG
 
 comment "MTD Device Drivers"
 

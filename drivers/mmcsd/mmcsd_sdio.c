@@ -144,7 +144,7 @@ struct mmcsd_state_s
 #endif
   /* Read-ahead and write buffering support */
 
-#if defined(CONFIG_FS_WRITEBUFFER) || defined(CONFIG_FS_READAHEAD)
+#if defined(CONFIG_DRVR_WRITEBUFFER) || defined(CONFIG_DRVR_READAHEAD)
   struct rwbuffer_s rwbuffer;
 #endif
 };
@@ -203,7 +203,7 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_state_s *priv,
 static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
                  FAR uint8_t *buffer, off_t startblock, size_t nblocks);
 #endif
-#ifdef CONFIG_FS_READAHEAD
+#ifdef CONFIG_DRVR_READAHEAD
 static ssize_t mmcsd_reload(FAR void *dev, FAR uint8_t *buffer,
                  off_t startblock, size_t nblocks);
 #endif
@@ -214,7 +214,7 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
 static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
                  FAR const uint8_t *buffer, off_t startblock, size_t nblocks);
 #endif
-#ifdef CONFIG_FS_WRITEBUFFER
+#ifdef CONFIG_DRVR_WRITEBUFFER
 static ssize_t mmcsd_flush(FAR void *dev, FAR const uint8_t *buffer,
                  off_t startblock, size_t nblocks);
 #endif
@@ -1538,7 +1538,7 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_FS_READAHEAD
+#ifdef CONFIG_DRVR_READAHEAD
 static ssize_t mmcsd_reload(FAR void *dev, FAR uint8_t *buffer,
                             off_t startblock, size_t nblocks)
 {
@@ -1911,12 +1911,12 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_FS_WRITABLE) && defined(CONFIG_FS_WRITEBUFFER)
+#if defined(CONFIG_FS_WRITABLE) && defined(CONFIG_DRVR_WRITEBUFFER)
 static ssize_t mmcsd_flush(FAR void *dev, FAR const uint8_t *buffer,
                            off_t startblock, size_t nblocks)
 {
   FAR struct mmcsd_state_s *priv = (FAR struct mmcsd_state_s *)dev;
-#ifndef CONFIG_MMCSD_MULTIBLOCK_DISABLE
+#ifdef CONFIG_MMCSD_MULTIBLOCK_DISABLE
   size_t block;
   size_t endblock;
 #endif
@@ -2028,7 +2028,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
                           size_t startsector, unsigned int nsectors)
 {
   FAR struct mmcsd_state_s *priv;
-#if !defined(CONFIG_FS_READAHEAD) && defined(CONFIG_MMCSD_MULTIBLOCK_DISABLE)
+#if !defined(CONFIG_DRVR_READAHEAD) && defined(CONFIG_MMCSD_MULTIBLOCK_DISABLE)
   size_t sector;
   size_t endsector;
 #endif
@@ -2043,7 +2043,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
     {
       mmcsd_takesem(priv);
 
-#if defined(CONFIG_FS_READAHEAD)
+#if defined(CONFIG_DRVR_READAHEAD)
       /* Get the data from the read-ahead buffer */
 
       ret = rwb_read(&priv->rwbuffer, startsector, nsectors, buffer);
@@ -2103,7 +2103,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode, FAR const unsigned char *buf
                            size_t startsector, unsigned int nsectors)
 {
   FAR struct mmcsd_state_s *priv;
-#if !defined(CONFIG_FS_WRITEBUFFER) && defined(CONFIG_MMCSD_MULTIBLOCK_DISABLE)
+#if defined(CONFIG_MMCSD_MULTIBLOCK_DISABLE)
   size_t sector;
   size_t endsector;
 #endif
@@ -2115,7 +2115,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode, FAR const unsigned char *buf
 
   mmcsd_takesem(priv);
 
-#if defined(CONFIG_FS_WRITEBUFFER)
+#if defined(CONFIG_DRVR_WRITEBUFFER)
   /* Write the data to the write buffer */
 
   ret = rwb_write(&priv->rwbuffer, startsector, nsectors, buffer);
@@ -3271,9 +3271,10 @@ int mmcsd_slotinitialize(int minor, FAR struct sdio_dev_s *dev)
             }
         }
 
-#if defined(CONFIG_FS_WRITEBUFFER) || defined(CONFIG_FS_READAHEAD)
+#if defined(CONFIG_DRVR_WRITEBUFFER) || defined(CONFIG_DRVR_READAHEAD)
       /* Initialize buffering */
 
+#warning "Missing setup of rwbuffer"
       ret = rwb_initialize(&priv->rwbuffer);
       if (ret < 0)
         {
@@ -3298,7 +3299,7 @@ int mmcsd_slotinitialize(int minor, FAR struct sdio_dev_s *dev)
   return OK;
 
 errout_with_buffers:
-#if defined(CONFIG_FS_WRITEBUFFER) || defined(CONFIG_FS_READAHEAD)
+#if defined(CONFIG_DRVR_WRITEBUFFER) || defined(CONFIG_DRVR_READAHEAD)
   rwb_uninitialize(&priv->rwbuffer);
 errout_with_hwinit:
 #endif

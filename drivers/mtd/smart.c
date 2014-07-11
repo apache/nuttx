@@ -105,7 +105,8 @@
                                              * other for our use, such as format
                                              * sector, etc. */
 
-#if defined(CONFIG_FS_READAHEAD) || (defined(CONFIG_FS_WRITABLE) && defined(CONFIG_FS_WRITEBUFFER))
+#if defined(CONFIG_DRVR_READAHEAD) || (defined(CONFIG_DRVR_WRITABLE) && \
+    defined(CONFIG_DRVR_WRITEBUFFER))
 #  define CONFIG_SMART_RWBUFFER 1
 #endif
 

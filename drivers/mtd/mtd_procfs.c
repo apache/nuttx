@@ -327,6 +327,7 @@ static int mtd_stat(const char *relpath, struct stat *buf)
  * in the procfs system simply for information purposes (if desired).
  *
  ****************************************************************************/
+
 int mtd_register(FAR struct mtd_dev_s *mtd, FAR const char *name)
 {
   FAR struct mtd_dev_s *plast;
@@ -359,6 +360,8 @@ int mtd_register(FAR struct mtd_dev_s *mtd, FAR const char *name)
 
       plast->pnext = mtd;
     }
+
+  return OK;
 }
 
 #endif /* !CONFIG_DISABLE_MOUNTPOINT && CONFIG_FS_PROCFS */
