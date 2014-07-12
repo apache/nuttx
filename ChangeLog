@@ -7720,3 +7720,7 @@
 	  color is now configurable (2014-7-11).
 	* graphics/nxmu/nxmu_server.c and nxsu/nx_setbgcolor.c:  Don't change
 	  the background if the color did not really change (2014-7-11).
+	* arch/arm/src/sama5/sam_ldc.c and sama5d4-ek/include/board.h:  Back
+	  out the delay kludge.  The actual fix to the LDC instability was to
+	  drive the LCD at 2xMCK instead of 1xMCK (2013-7-12).
+	* drivers/input/mxt.c:  Fix an error in the state machine (2014-7-12).
