@@ -183,7 +183,7 @@
 #define BOARD_LCDC_OUTPUT_BPP 24       /* Output format to H/W is 24 bpp RGB888 */
 #define BOARD_LCDC_WIDTH      800      /* Display width (pixels) */
 #define BOARD_LCDC_HEIGHT     480      /* Display height (rows) */
-#undef  BOARD_LCDC_MCK_MUL2            /* Source clock is Mck (vs 2*Mck) */
+#define BOARD_LCDC_MCK_MUL2   1        /* Source clock is 2*Mck (vs Mck) */
 #define BOARD_LCDC_PIXCLK_INV 1        /* Invert pixel clock, use falling edge */
 #define BOARD_LCDC_GUARDTIME  9        /* Guard time (frames) */
 #define BOARD_LCDC_VSPW       2        /* Vertical pulse width (lines) */
@@ -210,6 +210,8 @@
  * necessary and, in fact, is certainly not necessary in other LCDC
  * configurations.  Perhaps the delay would not be necessary if timings were
  * more precise?
+ *
+ * Delays are in units of microseconds.
  */
 
 #define BOARD_LCDC_ENABLE_DELAY (50*1000)

@@ -3836,89 +3836,125 @@ Configurations
     SAMA5 ADC touchscreen controller and provides a more advance
     graphics demo. It provides an interactive windowing experience.
 
-    This configuration is set up generally like the nsh configuration
-    except that:
+    NOTES:
 
-    - It boots into a graphic, window manage environment instead of
-      the serial console command line.
-    - The console command line is still available within NxConsole
-      windows.
-    - Obviously, the nx and touchscreen built in applications cannot
-      be supported.
+    1. The NxWM window manager is a tiny window manager tailored for use
+       with smaller LCDs but which is show here on the larger, SAMA5D4-EK
+       TM7000 LCD.  It supports a toolchain, a start window, and
+       multiple application windows.  However, to make the best use of
+       the visible LCD space, only one application window is visible at
+       at time.
 
-    The NxWM window manager is a tiny window manager tailored for use
-    with smaller LCDs but which is show here on the larger, SAMA5D4-EK
-    TM7000 LCD.  It supports a toolchain, a start window, and
-    multiple application windows.  However, to make the best use of
-    the visible LCD space, only one application window is visible at
-    at time.
+        The NxWM window manager can be found here:
 
-    The NxWM window manager can be found here:
+          nuttx-git/NxWidgets/nxwm
 
-      nuttx-git/NxWidgets/nxwm
+        The NxWM unit test can be found at:
 
-    The NxWM unit test can be found at:
+          nuttx-git/NxWidgets/UnitTests/nxwm
 
-      nuttx-git/NxWidgets/UnitTests/nxwm
+        Documentation for installing the NxWM unit test can be found here:
 
-    Documentation for installing the NxWM unit test can be found here:
+          nuttx-git/NxWidgets/UnitTests/README.txt
 
-      nuttx-git/NxWidgets/UnitTests/README.txt
+    2. This configuration is set up generally like the nsh configuration
+       except that:
 
-    Here is the quick summary of the build steps.  These steps assume that
-    you have the entire NuttX GIT in some directory ~/nuttx-git.  You may
-    have these components installed elsewhere.  In that case, you will need
-    to adjust all of the paths in the following accordingly:
+       - It boots into a graphic, window manage environment instead of
+         the serial console command line.
+       - The console command line is still available within NxConsole
+         windows.
+       - Obviously, the nx and touchscreen built in applications cannot
+         be supported.
 
-    1. Install the nxwm configuration
+    3. NSH Console Access.
 
-       $ cd ~/nuttx-git/nuttx/tools
-       $ ./configure.sh sama5d4-ek/nxwm
+       This configuration boots directly into a graphic, window manage
+       environment.  There is no serial console.  Some initial stdout
+       information will go to the USART3 serial output, but otherwise
+       the serial port will be silent.
 
-    2. Make the build context (only)
+       Access to the NSH console is available in two ways:
 
-       $ cd ..
-       $ . ./setenv.sh
-       $ make context
-       ...
+       a. The NxWM provides a graphics-based terminals (called NxConsoles);
+          The console command line is still available within NxConsole
+          windows once NxWM is up and running.  The console input is still
+          via stdin (the host terminal window), but console output will go
+          to the NxConsole terminal.
 
-       NOTE: the use of the setenv.sh file is optional.  All that it will
-       do is to adjust your PATH variable so that the build system can find
-       your tools.  If you use it, you will most likely need to modify the
-       script so that it has the correct path to your tool binaries
-       directory.
+          NOTES:
 
-    3. Install the nxwm unit test
+          i)  Later I plan to integrate a USB keyboard so that the
+              console input will come from a keyboard attached to the
+              SAMA5D4-EK.
+          ii) It would also not be a difficult task to add a serial console
+              as part of the NxWM console.  That is an option if a serial
+              console is really necessary but is not currently planned.
 
-       $ cd ~/nuttx-git/NxWidgets
-       $ tools/install.sh ~/nuttx-git/apps nxwm
-       Creating symbolic link
-        - To ~/nuttx-git/NxWidgets/UnitTests/nxwm
-        - At ~/nuttx-git/apps/external
+       b. Telnet NSH sessions are still supported and this is, in general,
+          the convenient way to access the shell (and RAMLOG).
 
-    4. Build the NxWidgets library
+       As with the NSH configuration, debug output will still go to the
+       circular RAMLOG buffer but cannot be accessed from a serial console.
+       Instead, you will need use the dmesg command from an NxConsole or
+       from a Telnet session to see the debug output
 
-       $ cd ~/nuttx-git/NxWidgets/libnxwidgets
-       $ make TOPDIR=~/nuttx-git/nuttx
-       ...
+    4. Here is the quick summary of the build steps.  These steps assume
+       that you have the entire NuttX GIT in some directory ~/nuttx-git.
+       You may have these components installed elsewhere.  In that case, you
+       will need to adjust all of the paths in the following accordingly:
 
-    5. Build the NxWM library
+        a. Install the nxwm configuration
 
-       $ cd ~/nuttx-git/NxWidgets/nxwm
-       $ make TOPDIR=~/nuttx-git/nuttx
-       ...
+           $ cd ~/nuttx-git/nuttx/tools
+           $ ./configure.sh sama5d4-ek/nxwm
 
-    6. Built NuttX with the installed unit test as the application
+        b. Make the build context (only)
 
-       $ cd ~/nuttx-git/nuttx
-       $ make
+           $ cd ..
+           $ . ./setenv.sh
+           $ make context
+           ...
 
-    NOTE: The NxWM example was designed tiny displays.  On this larger
-    800x480 display, the icons are too tiny to be usable.  I have created
-    a larger 320x320 logo for the opening screen and added image scaling
-    to expand the images in the taskbar.  The expanded images are not great.
-    The same problems exist in the application toolbar and in the start
-    window.  These icons are not yet scaled.
+           NOTE: the use of the setenv.sh file is optional.  All that it
+           will do is to adjust your PATH variable so that the build system
+           can find your tools.  If you use it, you will most likely need to
+           modify the script so that it has the correct path to your tool
+           binary directory.
+
+        c. Install the nxwm unit test
+
+           $ cd ~/nuttx-git/NxWidgets
+           $ tools/install.sh ~/nuttx-git/apps nxwm
+           Creating symbolic link
+            - To ~/nuttx-git/NxWidgets/UnitTests/nxwm
+            - At ~/nuttx-git/apps/external
+
+        d. Build the NxWidgets library
+
+           $ cd ~/nuttx-git/NxWidgets/libnxwidgets
+           $ make TOPDIR=~/nuttx-git/nuttx
+           ...
+
+        e. Build the NxWM library
+
+           $ cd ~/nuttx-git/NxWidgets/nxwm
+           $ make TOPDIR=~/nuttx-git/nuttx
+           ...
+
+        f. Built NuttX with the installed unit test as the application
+
+           $ cd ~/nuttx-git/nuttx
+           $ make
+
+    5. The NxWM example was designed tiny displays.  On this larger 800x480
+       display, the icons are too tiny to be usable.  I have created a
+       larger 320x320 logo for the opening screen and added image scaling
+       to expand the images in the taskbar.  The expanded images are not
+       great. The same problems exist in the application toolbar and in the
+       start window.  These icons are not yet scaled.
+
+       I plan to correct these images in the very near future.
 
    STATUS:
        See the To-Do list below
