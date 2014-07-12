@@ -387,11 +387,11 @@
  */
 
 #define PIO_CHG_MXT  (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
-                      PIO_INT_BOTHEDGES | PIO_PORT_PIOE | PIO_PIN24)
+                      PIO_INT_FALLING | PIO_PORT_PIOE | PIO_PIN24)
 #define IRQ_CHG_MXT   SAM_IRQ_PE24
 
 #define PIO_CHG_QT   (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
-                      PIO_INT_BOTHEDGES | PIO_PORT_PIOE | PIO_PIN25)
+                      PIO_INT_FALLING | PIO_PORT_PIOE | PIO_PIN25)
 #define IRQ_CHG_QT    SAM_IRQ_PE25
 
 /* The touchscreen communicates on TWI0, I2C address 0x4c */
