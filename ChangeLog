@@ -7714,3 +7714,9 @@
 	* drivers/mtd (mostly): Addition rwbuffer interfaces should not be
 	  enabled unless they are needed; if rwbuffer support is enabled, it
 	  should not be unconditionally enabled in SMART and FTL (2014-7-11).
+	* libnx/nxglib/nxglib_colorcmp.c and include/nuttx/nx/nxglib.h: New
+	  utility to compare two colors (2014-7-11).
+	* graphics/Kconfig and nxbe/nxbe_configure.c: The initial background
+	  color is now configurable (2014-7-11).
+	* graphics/nxmu/nxmu_server.c and nxsu/nx_setbgcolor.c:  Don't change
+	  the background if the color did not really change (2014-7-11).
