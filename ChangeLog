@@ -7724,3 +7724,9 @@
 	  out the delay kludge.  The actual fix to the LDC instability was to
 	  drive the LCD at 2xMCK instead of 1xMCK (2013-7-12).
 	* drivers/input/mxt.c:  Fix an error in the state machine (2014-7-12).
+	* drivers/input/mxt.c:  Add thresholding so that "move" reports are not
+	  generated unless there is a significant change in the reported
+	  position (2014-7-12).
+	* SAMA5D4-EK MXT: The maXTouch should be able to handler an I2C
+	  frequency of 400KHz.  Valid interrupts should occur only on the
+	  falling edge of the ~CHG signal (2014-7-12).
