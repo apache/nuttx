@@ -2973,18 +2973,6 @@ int up_fbinitialize(void)
   sam_show_hcr();
 #endif
 
-#if defined(BOARD_LCDC_ENABLE_DELAY) && BOARD_LCDC_ENABLE_DELAY > 0
-  /* Delay a bit after enabling the LDC. I presume that a delay of a few
-   * frame times allows some unstable clocking to synchronize before we
-   * start thrashing the framebuffer?  But I am not sure why this is
-   * necessary and, in fact, is certainly not necessary in most LCDC
-   * configurations.  Perhaps this delay would not be necessary if timings
-   * were more precise?
-   */
-
-  usleep(BOARD_LCDC_ENABLE_DELAY);
-#endif
-
   /* Enable the backlight.
    *
    * REVISIT:  Backlight level could be dynamically adjustable
