@@ -86,14 +86,31 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-/* This describes the state of one contact */
+/* This enumeration describes the state of one contact.
+ *
+ *                  |
+ *                  v
+ *             CONTACT_NONE            (1) Touch
+ *           / (1)        ^ (3)        (2) Release
+ *          v              \           (3) Event reported
+ *     CONTACT_NEW     CONTACT_LOST
+ *          \ (3)          ^ (2)
+ *           v            /
+ *           CONTACT_REPORT
+ *             \ (1)    ^ (3)
+ *              v      /
+ *            CONTACT_MOVE
+ *
+ * NOTE: This state transition diagram is simplified.  There are a few other
+ * sneaky transitions to handle unexpected conditions.
+ */
 
 enum mxt_contact_e
 {
   CONTACT_NONE = 0,                /* No contact */
   CONTACT_NEW,                     /* New contact */
   CONTACT_MOVE,                    /* Same contact, possibly different position */
-  CONTACT_REPORT,                  /* Contact reported*/
+  CONTACT_REPORT,                  /* Contact reported */
   CONTACT_LOST,                    /* Contact lost */
 };
 
@@ -790,6 +807,22 @@ static void mxt_touch_event(FAR struct mxt_dev_s *priv,
           return;
         }
 
+      /* State is one of CONTACT_NEW, CONTACT_MOVE, CONTACT_REPORT or
+       * CONTACT_LOST.
+       *
+       * NOTE: Here we do not check for these other states because there is
+       * not much that can be done anyway.  The transition to CONTACK_LOST
+       * really only makes sense if the preceding state was CONTACT_REPORT.
+       * If we were in (unreported) CONTACT_NEW or CONTACT_MOVE states, then
+       * this will overwrite that event and it will not be reported.  This
+       * opens the possibility for contact lost reports when no contact was
+       * ever reported.
+       *
+       * We could improve this be leaving the unreported states in place,
+       * remembering that the contact was lost, and then reporting the loss-
+       * of-contact after touch state is reported.
+       */
+
       sample->contact = CONTACT_LOST;
     }
   else
@@ -813,17 +846,7 @@ static void mxt_touch_event(FAR struct mxt_dev_s *priv,
       sample->pressure = pressure;
       sample->valid    = true;
 
-      /* If the last loss-of-contact event has not been processed yet, then
-       * let's bump up the touch identifier and hope that the client is smart
-       * enough to infer the loss-of-contact event for the preceding touch.
-       */
-
-      if (sample->contact == CONTACT_LOST)
-        {
-           priv->id++;
-        }
-
-      /* If this is not the first touch report, then report it a move:
+      /* If this is not the first touch report, then report it as a move:
        * Same contact, same ID, but a potentially new position.  If
        * The move event has not been reported, then just overwrite the
        * move.  That is harmless.
@@ -846,7 +869,7 @@ static void mxt_touch_event(FAR struct mxt_dev_s *priv,
        * data.
        *
        * This the state must be one of CONTACT_NONE or CONTACT_LOST (see
-       * above) and we have a new contact with a new ID>
+       * above) and we have a new contact with a new ID.
        */
 
       else if (sample->contact != CONTACT_NEW)
@@ -1344,16 +1367,18 @@ static ssize_t mxt_read(FAR struct file *filep, FAR char *buffer, size_t len)
                 }
               else
                 {
-                  if (sample->contact == CONTACT_REPORT)
+                  /* We have contact.  Is it the first contact? */
+
+                  if (sample->contact == CONTACT_NEW)
                     {
-                      /* First loss of contact */
+                      /* Yes.. first contact. */
 
                       point->flags = TOUCH_DOWN | TOUCH_ID_VALID |
                                      TOUCH_POS_VALID;
                     }
                   else /* if (sample->contact == CONTACT_MOVE) */
                     {
-                      /* Movement of the same contact */
+                      /* No.. then it must be movement of the same contact */
 
                       point->flags = TOUCH_MOVE | TOUCH_ID_VALID |
                                      TOUCH_POS_VALID;
