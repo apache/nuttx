@@ -49,6 +49,10 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 
+#ifndef CONFIG_NX_BGCOLOR
+#  define CONFIG_NX_BGCOLOR 0
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -56,6 +60,15 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+static const nxgl_mxpixel_t g_bgcolor[CONFIG_NX_NPLANES] =
+{
+  CONFIG_NX_BGCOLOR
+
+#if CONFIG_NX_NPLANES > 1
+#  warning Missing logic for multiple color planes
+#endif
+};
 
 /****************************************************************************
  * Public Data
@@ -91,6 +104,10 @@ int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be)
       gdbg("Failed to get vinfo\n");
       return ret;
     }
+
+  /* Set the initial background color */
+
+  nxgl_colorcopy(be->bgcolor, g_bgcolor);
 
   /* Check the number of color planes */
 

@@ -25,9 +25,19 @@ config NX_NPLANES
 	int "Number of Color Planes"
 	default 1
 	---help---
-		Some YUV color formats requires support for multiple planes, one for each
-		color component.  Unless you have such special hardware, this value should be
-		undefined or set to 1.
+		Some YUV color formats requires support for multiple planes, one for
+		each color component.  Unless you have such special hardware (and
+		are willing to debug a lot of untested logic), this value should be
+		set to 1.
+
+config NX_BGCOLOR
+	hex "Initial background color"
+	default 0x0
+	---help---
+		NX will clear the background plane initially.  This is the default
+		color that will be used when the background is cleared.  Note: This
+		logic would have to be extended if you want to support multiple
+		color planes.
 
 config NX_WRITEONLY
 	bool "Write-only Graphics Device"

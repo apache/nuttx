@@ -486,9 +486,18 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev)
 
          case NX_SVRMSG_SETBGCOLOR: /* Set the color of the background */
            {
-             FAR struct nxsvrmsg_setbgcolor_s *bgcolormsg = (FAR struct nxsvrmsg_setbgcolor_s *)buffer;
-             nxgl_colorcopy(fe.be.bgcolor, bgcolormsg->color);
-             nxbe_fill(&fe.be.bkgd, &fe.be.bkgd.bounds, bgcolormsg->color);
+             FAR struct nxsvrmsg_setbgcolor_s *bgcolormsg =
+               (FAR struct nxsvrmsg_setbgcolor_s *)buffer;
+
+             /* Has the background color changed? */
+
+             if (!nxgl_colorcmp(fe.be.bgcolor, bgcolormsg->color))
+               {
+                 /* Yes.. fill the background */
+
+                 nxgl_colorcopy(fe.be.bgcolor, bgcolormsg->color);
+                 nxbe_fill(&fe.be.bkgd, &fe.be.bkgd.bounds, bgcolormsg->color);
+               }
            }
            break;
 

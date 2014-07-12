@@ -1,7 +1,7 @@
 ############################################################################
 # libnx/nxglib/Make.defs
 #
-#   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -37,14 +37,14 @@
 
 ifeq ($(CONFIG_NX),y)
 
-CSRCS += nxglib_circlepts.c nxglib_circletraps.c nxglib_colorcopy.c
-CSRCS += nxglib_intersecting.c nxglib_nonintersecting.c nxglib_nullrect.c
-CSRCS += nxglib_rectadd.c nxglib_rectcopy.c nxglib_rectinside.c
-CSRCS += nxglib_rectintersect.c nxglib_rectoffset.c nxglib_rectoverlap.c
-CSRCS += nxglib_rectsize.c nxglib_rectunion.c nxglib_rgb2yuv.c
-CSRCS += nxglib_runcopy.c nxglib_runoffset.c nxglib_splitline.c
-CSRCS += nxglib_trapcopy.c nxglib_trapoffset.c nxglib_vectoradd.c
-CSRCS += nxglib_vectsubtract.c nxglib_yuv2rgb.c
+CSRCS += nxglib_circlepts.c nxglib_circletraps.c nxglib_colorcmp.c
+CSRCS += nxglib_colorcopy.c nxglib_intersecting.c nxglib_nonintersecting.c
+CSRCS += nxglib_nullrect.c nxglib_rectadd.c nxglib_rectcopy.c
+CSRCS += nxglib_rectinside.c nxglib_rectintersect.c nxglib_rectoffset.c
+CSRCS += nxglib_rectoverlap.c nxglib_rectsize.c nxglib_rectunion.c
+CSRCS += nxglib_rgb2yuv.c nxglib_runcopy.c nxglib_runoffset.c
+CSRCS += nxglib_splitline.c nxglib_trapcopy.c nxglib_trapoffset.c
+CSRCS += nxglib_vectoradd.c nxglib_vectsubtract.c nxglib_yuv2rgb.c
 
 # Add the nxglib/ directory to the build
 

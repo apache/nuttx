@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxsu/nx_setbgcolor.c
+ * libnx/nxglib/nxglib_colorcmp.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,11 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <errno.h>
-#include <debug.h>
-
-#include <nuttx/nx/nx.h>
-#include "nxfe.h"
+#include <nuttx/nx/nxglib.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -70,42 +66,27 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_setbgcolor
+ * Name: nxgl_colorcmp
  *
  * Description:
- *  Set the color of the background
- *
- * Input Parameters:
- *   handle  - The connection handle
- *   color - The color to use in the background
- *
- * Return:
- *   OK on success; ERROR on failure with errno set appropriately
+ *   This is essentially memcmp for colors.  This does very little for us
+ *   other than hide all of the conditional compilation for planar colors
+ *   in one place.
  *
  ****************************************************************************/
 
-int nx_setbgcolor(NXHANDLE handle,
-                  nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
+bool nxgl_colorcmp(const nxgl_mxpixel_t color1[CONFIG_NX_NPLANES],
+                   const nxgl_mxpixel_t color2[CONFIG_NX_NPLANES])
 {
-  FAR struct nxfe_state_s *fe = (FAR struct nxfe_state_s *)handle;
+  int i;
 
-#ifdef CONFIG_DEBUG
-  if (!fe)
+  for (i = 0; i < CONFIG_NX_NPLANES; i++)
     {
-      errno = EINVAL;
-      return ERROR;
-    }
-#endif
-
-  /* Has the background color changed? */
-
-  if (!nxgl_colorcmp(fe.be.bgcolor, bgcolormsg->color))
-    {
-      /* Yes.. fill the background */
-
-      nxgl_colorcopy(fe->be.bgcolor, color);
-      nxbe_fill(&fe->be.bkgd, &fe->be.bkgd.bounds, color);
+      if (color1[i] != color2[i])
+        {
+          return false;
+        }
     }
 
-  return OK;
+  return true;
 }
