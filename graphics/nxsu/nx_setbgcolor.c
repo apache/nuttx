@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxsu/nx_setbgcolor.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -99,7 +99,7 @@ int nx_setbgcolor(NXHANDLE handle,
 
   /* Has the background color changed? */
 
-  if (!nxgl_colorcmp(fe.be.bgcolor, bgcolormsg->color))
+  if (!nxgl_colorcmp(fe->be.bgcolor, color))
     {
       /* Yes.. fill the background */
 
