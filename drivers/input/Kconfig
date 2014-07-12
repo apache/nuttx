@@ -113,8 +113,8 @@ config ADS7843E_THRESHX
 	default 12
 	---help---
 		New touch positions will only be reported when the X or Y data changes by these
-		thresholds. This trades reduces data rate for some loss in dragging accuracy.  For
-		12-bit values so the raw ranges are 0-4095. So for example, if your display is
+		thresholds. This trades reduced data rates for some loss in dragging accuracy.  For
+		12-bit values the raw ranges are 0-4095. So for example, if your display is
 		320x240, then THRESHX=13 and THRESHY=17 would correspond to one pixel.  Default: 12
 
 config ADS7843E_THRESHY
@@ -122,8 +122,8 @@ config ADS7843E_THRESHY
 	default 12
 	---help---
 		New touch positions will only be reported when the X or Y data changes by these
-		thresholds. This trades reduces data rate for some loss in dragging accuracy.  For
-		12-bit values so the raw ranges are 0-4095. So for example, if your display is
+		thresholds. This trades reduced data rates for some loss in dragging accuracy.  For
+		12-bit values the raw ranges are 0-4095. So for example, if your display is
 		320x240, then THRESHX=13 and THRESHY=17 would correspond to one pixel.  Default: 12
 
 endif
@@ -136,12 +136,52 @@ config INPUT_MXT
 
 if INPUT_MXT
 
+config MXT_THRESHX
+	int "X threshold"
+	default 5
+	---help---
+		New touch positions will only be reported when the X or Y data
+		changes by these thresholds. This trades reduced data rates for some
+		loss in dragging accuracy.  For 12-bit values the raw ranges are
+		0-4095. So for example, if your display is 800x480, then THRESHX=5
+		and THRESHY=8 would correspond to a one pixel change. Default: 5
+
+		NOTE: This does nothing to reduce the interrupt rate.  It only
+		reduces the rate at which touch events are reports.
+
+config MXT_THRESHY
+	int "Y threshold"
+	default 8
+	---help---
+		New touch positions will only be reported when the X or Y data
+		changes by these thresholds. This trades reduced data rates for some
+		loss in dragging accuracy.  For 12-bit values the raw ranges are
+		0-4095. So for example, if your display is 800x480, then THRESHX=5
+		and THRESHY=8 would correspond to a one pixel change. Default: 8
+
+		NOTE: This does nothing to reduce the interrupt rate.  It only
+		reduces the rate at which touch events are reports.
+
 config MXT_NPOLLWAITERS
 	int "Number poll waiters"
 	default 4
 	depends on !DISABLE_POLL
 	---help---
 		Maximum number of threads that can be waiting on poll()
+
+config MXT_DISABLE_DEBUG_VERBOSE
+	bool "Disable verbose debug output"
+	default y
+	depends on DEBUG_VERBOSE && DEBUG_INPUT
+	---help---
+		The maXTouch tends to generate interrupts at a high rate during the
+		contact.  If verbose debug is enabled in this driver, you may not
+		be able to get anything done because of the high debug output rate.
+
+		This setting will allow you to keep verbose touchscreen debug output
+		in other modules, but to specifically suppress the debug out from
+		the MXT driver.  Debug (non-verbose) errors will still be generated,
+		but the chit-chat level will be eliminated.
 
 endif # INPUT_MXT
 
@@ -223,8 +263,8 @@ config STMPE811_THRESHX
 	---help---
 		STMPE811 touchscreen data comes in a a very high rate.  New touch positions
 		will only be reported when the X or Y data changes by these thresholds.
-		This trades reduces data rate for some loss in dragging accuracy.  The
-		STMPE811 is configure for 12-bit values so the raw ranges are 0-4095. So
+		This trades reduced data rates for some loss in dragging accuracy.  The
+		STMPE811 is configure for 12-bit values the raw ranges are 0-4095. So
 		for example, if your display is 320x240, then THRESHX=13 and THRESHY=17
 		would correspond to one pixel.  Default: 12
 
@@ -235,8 +275,8 @@ config STMPE811_THRESHY
 	---help---
 		STMPE811 touchscreen data comes in a a very high rate.  New touch positions
 		will only be reported when the X or Y data changes by these thresholds.
-		This trades reduces data rate for some loss in dragging accuracy.  The
-		STMPE811 is configure for 12-bit values so the raw ranges are 0-4095. So
+		This trades reduced data rates for some loss in dragging accuracy.  The
+		STMPE811 is configure for 12-bit values the raw ranges are 0-4095. So
 		for example, if your display is 320x240, then THRESHX=13 and THRESHY=17
 		would correspond to one pixel.  Default: 12
 

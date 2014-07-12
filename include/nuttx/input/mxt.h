@@ -59,6 +59,26 @@
 #  define CONFIG_MXT_NPOLLWAITERS 2
 #endif
 
+/* Thresholding
+ *
+ * New touch positions will only be reported when the X or Y data
+ * changes by these thresholds. This trades reduced data rates for some
+ * loss in dragging accuracy.  For 12-bit values the raw ranges are
+ * 0-4095. So for example, if your display is 800x480, then THRESHX=5
+ * and THRESHY=8 would correspond to a one pixel change.
+ *
+ * NOTE: This does nothing to reduce the interrupt rate.  It only
+ * reduces the rate at which touch events are reports.
+ */
+
+#ifndef CONFIG_MXT_MXT_THRESHX
+#  define CONFIG_MXT_MXT_THRESHX 5
+#endif
+
+#ifndef CONFIG_MXT_MXT_THRESHY
+#  define CONFIG_MXT_MXT_THRESHY 8
+#endif
+
 /* Buttons are not supported */
 
 #undef CONFIG_MXT_BUTTONS

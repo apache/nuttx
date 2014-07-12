@@ -39,6 +39,12 @@
 
 #include <nuttx/config.h>
 
+/* Suppress verbose debug output so that we don't swamp the system */
+
+#ifdef CONFIG_MXT_DISABLE_DEBUG_VERBOSE
+#  undef CONFIG_DEBUG_VERBOSE
+#endif
+
 #include <sys/types.h>
 
 #include <stdbool.h>
@@ -73,6 +79,12 @@
 
 #define DEV_FORMAT   "/dev/input%d"
 #define DEV_NAMELEN  16
+
+/* This is a value for the threshold that guarantees a big difference on the
+ * first pendown (but can't overflow).
+ */
+
+#define INVALID_POSITION 0x1000
 
 /* Get a 16-bit value in little endian order (not necessarily aligned).  The
  * source data is in little endian order.  The host byte order does not
@@ -123,6 +135,8 @@ struct mxt_sample_s
   bool     valid;                  /* True: x,y,pressure contain valid, sampled data */
   uint16_t x;                      /* Measured X position */
   uint16_t y;                      /* Measured Y position */
+  uint16_t lastx;                  /* Last reported X position */
+  uint16_t lasty;                  /* Last reported Y position */
   uint8_t  area;                   /* Contact area */
   uint8_t  pressure;               /* Contact pressure */
 };
@@ -824,6 +838,13 @@ static void mxt_touch_event(FAR struct mxt_dev_s *priv,
        */
 
       sample->contact = CONTACT_LOST;
+
+      /* Reset the last position so that we guarantee that the next position
+       * will pass the thresholding test.
+       */
+
+      sample->lastx = INVALID_POSITION;
+      sample->lasty = INVALID_POSITION;
     }
   else
     {
@@ -847,21 +868,49 @@ static void mxt_touch_event(FAR struct mxt_dev_s *priv,
       sample->valid    = true;
 
       /* If this is not the first touch report, then report it as a move:
-       * Same contact, same ID, but a potentially new position.  If
-       * The move event has not been reported, then just overwrite the
-       * move.  That is harmless.
+       * Same contact, same ID, but with a new, updated position.
+       * The CONTACT_REPORT state means that a contacted has been detected,
+       * but all contact events have been successfully reported.
        */
 
-      if (sample->contact == CONTACT_REPORT ||
-          sample->contact == CONTACT_MOVE)
+      if (sample->contact == CONTACT_REPORT)
         {
-          /* Not a new contact.  Indicate a contact move event */
+          uint16_t xdiff;
+          uint16_t ydiff;
 
-          sample->contact = CONTACT_MOVE;
-
-          /* This state will be set to CONTACT_REPORT after it
-           * been reported.
+          /* Not a new contact.  Check if the new measurements represent a
+           * non-trivial change in position.  A trivial change is detected
+           * by comparing the change in position since the last report
+           * against configurable threshold values.
+           *
+           * REVISIT:  Should a large change in pressure also generate a
+           * event?
            */
+
+          xdiff = x > sample->lastx ? (x - sample->lastx) : (sample->lastx - x);
+          ydiff = y > sample->lasty ? (y - sample->lasty) : (sample->lasty - y);
+
+          /* Check the thresholds */
+
+          if (xdiff < CONFIG_MXT_THRESHX && ydiff < CONFIG_MXT_THRESHY)
+            {
+              /* Report a contact move event.  This state will be set back
+               * to CONTACT_REPORT after it been reported.
+               */
+
+              sample->contact = CONTACT_MOVE;
+
+              /* Update the last position for next threshold calculations */
+
+              sample->lastx   = x;
+              sample->lasty   = y;
+            }
+          else
+            {
+              /* Bail without reporting anything for this event */
+
+              return;
+            }
         }
 
       /* If we have seen this contact before but it has not yet been
@@ -872,7 +921,8 @@ static void mxt_touch_event(FAR struct mxt_dev_s *priv,
        * above) and we have a new contact with a new ID.
        */
 
-      else if (sample->contact != CONTACT_NEW)
+      else if (sample->contact != CONTACT_NEW &&
+               sample->contact != CONTACT_MOVE)
         {
           /* First contact.  Save the contact event and assign a new
            * ID to the contact.
@@ -880,6 +930,11 @@ static void mxt_touch_event(FAR struct mxt_dev_s *priv,
 
           sample->contact = CONTACT_NEW;
           sample->id      = priv->id++;
+
+          /* Update the last position for next threshold calculations */
+
+          sample->lastx   = x;
+          sample->lasty   = y;
 
           /* This state will be set to CONTACT_REPORT after it
            * been reported.
