@@ -633,8 +633,12 @@ void nxgl_trapcopy(FAR struct nxgl_trapezoid_s *dest,
  *
  ****************************************************************************/
 
+#if CONFIG_NX_NPLANES == 1
+#  define nxgl_colorcopy(d,s) do { (d)[0] = s[0]; } while (0)
+#else
 void nxgl_colorcopy(nxgl_mxpixel_t dest[CONFIG_NX_NPLANES],
                     const nxgl_mxpixel_t src[CONFIG_NX_NPLANES]);
+#endif
 
 /****************************************************************************
  * Name: nxgl_colorcmp
@@ -646,8 +650,12 @@ void nxgl_colorcopy(nxgl_mxpixel_t dest[CONFIG_NX_NPLANES],
  *
  ****************************************************************************/
 
+#if CONFIG_NX_NPLANES == 1
+#  define nxgl_colorcmp(d,s) ((d)[0] == s[0])
+#else
 bool nxgl_colorcmp(const nxgl_mxpixel_t color1[CONFIG_NX_NPLANES],
                    const nxgl_mxpixel_t color2[CONFIG_NX_NPLANES]);
+#endif
 
 /****************************************************************************
  * Name: nxgl_splitline

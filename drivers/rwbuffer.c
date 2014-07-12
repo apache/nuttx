@@ -834,9 +834,13 @@ int rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock, uint32_t nblocks,
     }
   else
 #else
-  {
-    ret = rwb->rhreload(rwb->dev, startblock, nblocks, rdbuffer);
-  }
+    {
+      /* No read-ahead buffering, (re)load the data directly into
+       * the user buffer.
+       */
+
+      ret = rwb->rhreload(rwb->dev, startblock, nblocks, rdbuffer);
+    }
 #endif
 
   return ret;

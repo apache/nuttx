@@ -37,14 +37,18 @@
 
 ifeq ($(CONFIG_NX),y)
 
-CSRCS += nxglib_circlepts.c nxglib_circletraps.c nxglib_colorcmp.c
-CSRCS += nxglib_colorcopy.c nxglib_intersecting.c nxglib_nonintersecting.c
-CSRCS += nxglib_nullrect.c nxglib_rectadd.c nxglib_rectcopy.c
-CSRCS += nxglib_rectinside.c nxglib_rectintersect.c nxglib_rectoffset.c
-CSRCS += nxglib_rectoverlap.c nxglib_rectsize.c nxglib_rectunion.c
-CSRCS += nxglib_rgb2yuv.c nxglib_runcopy.c nxglib_runoffset.c
-CSRCS += nxglib_splitline.c nxglib_trapcopy.c nxglib_trapoffset.c
-CSRCS += nxglib_vectoradd.c nxglib_vectsubtract.c nxglib_yuv2rgb.c
+CSRCS += nxglib_circlepts.c nxglib_circletraps.c nxglib_intersecting.c
+CSRCS += nxglib_nonintersecting.c nxglib_nullrect.c nxglib_rectadd.c
+CSRCS += nxglib_rectcopy.c nxglib_rectinside.c nxglib_rectintersect.c
+CSRCS += nxglib_rectoffset.c nxglib_rectoverlap.c nxglib_rectsize.c
+CSRCS += nxglib_rectunion.c nxglib_rgb2yuv.c nxglib_runcopy.c
+CSRCS += nxglib_runoffset.c nxglib_splitline.c nxglib_trapcopy.c
+CSRCS += nxglib_trapoffset.c nxglib_vectoradd.c nxglib_vectsubtract.c
+CSRCS += nxglib_yuv2rgb.c
+
+ifneq ($(CONFIG_NX_NPLANES),1)
+CSRCS += nxglib_colorcmp.c nxglib_colorcopy.c
+endif
 
 # Add the nxglib/ directory to the build
 
