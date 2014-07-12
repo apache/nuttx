@@ -203,6 +203,17 @@
 #define BOARD_LCDC_PIXELCLOCK \
   (BOARD_LCDC_HSPERIOD * BOARD_LCDC_VSPERIOD * BOARD_LCDC_FRAMERATE)
 
+/* This specifies a delay after enabling the LCDC.  This was found
+ * experimentally and is very much a kludge.  I presume that a delay of a
+ * couple of frame times allows some unstable clocking to synchronize before
+ * we start thrashing the framebuffer?  But I am not sure why this is
+ * necessary and, in fact, is certainly not necessary in other LCDC
+ * configurations.  Perhaps the delay would not be necessary if timings were
+ * more precise?
+ */
+
+#define BOARD_LCDC_ENABLE_DELAY (50*1000)
+
 /* Backlight prescaler value and PWM output polarity */
 
 #define BOARD_LCDC_PWMPS      LCDC_LCDCFG6_PWMPS_DIV1
