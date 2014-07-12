@@ -178,7 +178,7 @@ if INPUT_MXT
 
 config SAMA5D4EK_MXT_I2CFREQUENCY
 	int "maXTouch I2C frequency"
-	default 100000
+	default 400000
 
 config SAMA5D4EK_MXT_DEVMINOR
 	int "/dev/input minor number"
