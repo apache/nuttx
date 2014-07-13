@@ -3429,8 +3429,12 @@ Configurations
        and, in fact, putting a guard band around the framebuffers seems to
        eliminate the problem.
     c) There are some occasional start up issues.  It appears that the LCDC
-       is programed incorrectly and groups of pixels in the images are
+       is programmed incorrectly and groups of pixels in the images are
        reversed (producing an odd serrated look to the images).
+       Update:  I corrected a similar problem on the SAMA5D4-EK by
+       increasing the SCLK from MCK to 2*MCK.  That eliminated all start up
+       problems with the SAMA5D4-EK and needs to be tried on the SAMA5D3e-EK
+       as well.  This is controlled by an LCD setting in include/board.h.
     d) I think that there may be more issues if GRAPHICS and INPUT debug is
        off.  I have not tested with DEBUG off.
     e) The biggest problem is the touchscreen accuracy.  The touchscreen
