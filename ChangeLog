@@ -7730,3 +7730,6 @@
 	* SAMA5D4-EK MXT: The maXTouch should be able to handler an I2C
 	  frequency of 400KHz.  Valid interrupts should occur only on the
 	  falling edge of the ~CHG signal (2014-7-12).
+	* SAMA5D3x-EK: Use larger icons in NxWM configuration instead of
+	  scaling (2014-7-14).
+
