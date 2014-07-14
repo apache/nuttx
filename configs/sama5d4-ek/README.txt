@@ -1382,7 +1382,8 @@ Networking
   so that access to the NSH prompt is not delayed.
 
   This delay will be especially long if the board is not connected to
-  a network.
+  a network.  On the order of a minute!  You will probably think that
+  NuttX has crashed!
 
 AT25 Serial FLASH
 =================
