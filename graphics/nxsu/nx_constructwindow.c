@@ -144,7 +144,7 @@ int nx_constructwindow(NXHANDLE handle, NXWINDOW hwnd,
 
   /* Provide the initial mouse settings */
 
-#ifdef CONFIG_NX_MOUSE
+#ifdef CONFIG_NX_XYINPUT
   nxsu_mousereport(wnd);
 #endif
 

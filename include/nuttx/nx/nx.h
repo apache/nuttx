@@ -164,7 +164,7 @@ struct nx_callback_s
    *
    **************************************************************************/
 
-#ifdef CONFIG_NX_MOUSE
+#ifdef CONFIG_NX_XYINPUT
   void (*mousein)(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
                   uint8_t buttons, FAR void *arg);
 #endif
@@ -917,7 +917,7 @@ int nx_kbdin(NXHANDLE handle, uint8_t nch, FAR const uint8_t *ch);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NX_MOUSE
+#ifdef CONFIG_NX_XYINPUT
 int nx_mousein(NXHANDLE handle, nxgl_coord_t x, nxgl_coord_t y, uint8_t buttons);
 #endif
 

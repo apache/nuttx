@@ -259,7 +259,7 @@ static inline int nxmu_setup(FAR const char *mqname, FAR NX_DRIVERTYPE *dev,
 
   /* Initialize the mouse position */
 
-#ifdef CONFIG_NX_MOUSE
+#ifdef CONFIG_NX_XYINPUT
   nxmu_mouseinit(fe->be.vinfo.xres, fe->be.vinfo.yres);
 #endif
   return OK;
@@ -501,7 +501,7 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev)
            }
            break;
 
-#ifdef CONFIG_NX_MOUSE
+#ifdef CONFIG_NX_XYINPUT
          case NX_SVRMSG_MOUSEIN: /* New mouse report from mouse client */
            {
              FAR struct nxsvrmsg_mousein_s *mousemsg = (FAR struct nxsvrmsg_mousein_s *)buffer;

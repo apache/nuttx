@@ -46,7 +46,7 @@
 #include <nuttx/nx/nx.h>
 #include <nuttx/nx/nxmu.h>
 
-#ifdef CONFIG_NX_MOUSE
+#ifdef CONFIG_NX_XYINPUT
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -97,4 +97,4 @@ int nx_mousein(NXHANDLE handle, nxgl_coord_t x, nxgl_coord_t y, uint8_t buttons)
   return nxmu_sendserver(conn, &outmsg, sizeof(struct nxsvrmsg_mousein_s));
 }
 
-#endif /* CONFIG_NX_MOUSE */
+#endif /* CONFIG_NX_XYINPUT */

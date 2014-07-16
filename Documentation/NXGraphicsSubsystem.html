@@ -923,7 +923,7 @@ struct nx_callback_s
                    FAR const struct nxgl_point_s *pos,
                    FAR const struct nxgl_rect_s *bounds,
                    FAR void *arg);
-#ifdef CONFIG_NX_MOUSE
+#ifdef CONFIG_NX_XYINPUT
   void (*mousein)(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
                   uint8_t buttons, FAR void *arg);
 #endif
@@ -1001,7 +1001,7 @@ void position(NXWINDOW hwnd, FAR const struct nxgl_size_s *size,
 <h4>2.3.3.3 <a name="nxcbmousein"><code>mousein()</code></a></h4>
 <p><b>Callback Function Prototype:</b></p>
 <ul><pre>
-#ifdef CONFIG_NX_MOUSE
+#ifdef CONFIG_NX_XYINPUT
 void mousein(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
              uint8_t buttons, FAR void *arg);
 #endif
@@ -1987,7 +1987,7 @@ int nx_kbdin(NXHANDLE handle, uint8_t nch, FAR const uint8_t *ch);
 #include &lt;nuttx/nx/nxglib.h&gt;
 #include &lt;nuttx/nx/nx.h&gt;
 
-#ifdef CONFIG_NX_MOUSE
+#ifdef CONFIG_NX_XYINPUT
 int nx_mousein(NXHANDLE handle, nxgl_coord_t x, nxgl_coord_t y, uint8_t buttons);
 #endif
 </pre></ul>
@@ -3259,8 +3259,8 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
 
 <ul>
   <dl>
-    <dt><code>CONFIG_NX_MOUSE</code>:
-      <dd>Build in support for mouse input.
+    <dt><code>CONFIG_NX_XYINPUT</code>:
+      <dd>Build in support for an X/Y input such as a mouse or a touscreen.
     <dt><code>CONFIG_NX_KBD</code>:
       <dd>Build in support of keypad/keyboard input.
     <dt><code>CONFIG_NX_WRITEONLY</code>:

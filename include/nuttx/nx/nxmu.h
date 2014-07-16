@@ -209,7 +209,7 @@ struct nxclimsg_newposition_s
 
 /* This message reports a new mouse event to a particular window */
 
-#ifdef CONFIG_NX_MOUSE
+#ifdef CONFIG_NX_XYINPUT
 struct nxclimsg_mousein_s
 {
   uint32_t msgid;                /* NX_SVRMSG_MOUSEIN */
@@ -423,7 +423,7 @@ struct nxsvrmsg_setbgcolor_s
  * interrupt handler).
  */
 
-#ifdef CONFIG_NX_MOUSE
+#ifdef CONFIG_NX_XYINPUT
 struct nxsvrmsg_mousein_s
 {
   uint32_t msgid;                  /* NX_SVRMSG_MOUSEIN */

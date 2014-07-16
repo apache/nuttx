@@ -220,7 +220,7 @@ void nxfe_redrawreq(FAR struct nxbe_window_s *wnd,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NX_MOUSE
+#ifdef CONFIG_NX_XYINPUT
 void nxmu_mouseinit(int x, int y);
 #endif
 
@@ -238,7 +238,7 @@ void nxmu_mouseinit(int x, int y);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NX_MOUSE
+#ifdef CONFIG_NX_XYINPUT
 int nxmu_mousereport(struct nxbe_window_s *wnd);
 #endif
 
@@ -252,7 +252,7 @@ int nxmu_mousereport(struct nxbe_window_s *wnd);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NX_MOUSE
+#ifdef CONFIG_NX_XYINPUT
 int nxmu_mousein(FAR struct nxfe_state_s *fe,
                  FAR const struct nxgl_point_s *pos, int button);
 #endif

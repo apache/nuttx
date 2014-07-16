@@ -122,7 +122,7 @@ void nxfe_reportposition(FAR struct nxbe_window_s *wnd);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NX_MOUSE
+#ifdef CONFIG_NX_XYINPUT
 void nxsu_mouseinit(int x, int y);
 #endif
 
@@ -140,7 +140,7 @@ void nxsu_mouseinit(int x, int y);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NX_MOUSE
+#ifdef CONFIG_NX_XYINPUT
 int nxsu_mousereport(struct nxbe_window_s *wnd);
 #endif
 

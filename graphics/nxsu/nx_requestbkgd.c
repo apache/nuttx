@@ -138,7 +138,7 @@ int nx_requestbkgd(NXHANDLE handle, FAR const struct nx_callback_s *cb,
 
   /* Provide the mouse settings to the client */
 
-#ifdef CONFIG_NX_MOUSE
+#ifdef CONFIG_NX_XYINPUT
   nxsu_mousereport(&be->bkgd);
 #endif
 

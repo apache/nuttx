@@ -213,7 +213,7 @@ int nx_eventhandler(NXHANDLE handle)
       }
       break;
 
-#ifdef CONFIG_NX_MOUSE
+#ifdef CONFIG_NX_XYINPUT
     case NX_CLIMSG_MOUSEIN:
       {
         FAR struct nxclimsg_mousein_s *mouse = (FAR struct nxclimsg_mousein_s *)buffer;

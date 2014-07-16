@@ -47,7 +47,7 @@
 #include <nuttx/nx/nx.h>
 #include "nxfe.h"
 
-#ifdef CONFIG_NX_MOUSE
+#ifdef CONFIG_NX_XYINPUT
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -232,4 +232,4 @@ int nxmu_mousein(FAR struct nxfe_state_s *fe,
   return OK;
 }
 
-#endif /* CONFIG_NX_MOUSE */
+#endif /* CONFIG_NX_XYINPUT */

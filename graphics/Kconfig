@@ -118,11 +118,42 @@ config NX_PACKEDMSFIRST
 
 menu "Input Devices"
 
-config NX_MOUSE
-	bool "Mouse/Touchscreen Support"
+config NX_XYINPUT
+	bool
 	default n
+
+choice
+	prompt "Mouse/Touchscreen Support"
+	default NX_XYINPUT_NONE
+
+config NX_XYINPUT_NONE
+	bool "No X/Y input device"
 	---help---
-		Build in support for mouse or touchscreeninput.
+		There is no X/Y positional input device connected
+
+config NX_XYINPUT_MOUSE
+	bool "Mouse device support"
+	select NX_XYINPUT
+	---help---
+		X/Y positional input is provided by a mouse.  The only difference
+		between the mouse and touchscreen selection is in the presence or
+		absence of the mouse buttons.  This difference is not used within
+		NuttX itself, however, graphics applications may need this
+		information, for example, to handle the different ways that graphic
+		elements are selected and dragged.
+
+config NX_XYINPUT_TOUCHSCREEN
+	bool "Touchscreen device support"
+	select NX_XYINPUT
+	---help---
+		X/Y positional input is provided by a touchscreen.  The only difference
+		between the mouse and touchscreen selection is in the presence or
+		absence of the mouse buttons.  This difference is not used within
+		NuttX itself, however, graphics applications may need this
+		information, for example, to handle the different ways that graphic
+		elements are selected and dragged.
+
+endchoice # Mouse/Touchscreen Support
 
 config NX_KBD
 	bool "Keyboard Support"

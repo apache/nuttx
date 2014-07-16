@@ -188,7 +188,7 @@ struct nxcon_state_s
    */
 
 #ifndef CONFIG_DISABLE_POLL
-  struct pollfd *fds[CONFIG_RAMLOG_NPOLLWAITERS];
+  struct pollfd *fds[CONFIG_NXCONSOLE_NPOLLWAITERS];
 #endif
 #endif /* CONFIG_NXCONSOLE_NXKBDIN */
 };

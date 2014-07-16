@@ -275,8 +275,9 @@ CONFIG_NX_DISABLE_32BPP
 CONFIG_NX_PACKEDMSFIRST
   If a pixel depth of less than 8-bits is used, then NX needs to know if the
   pixels pack from the MS to LS or from LS to MS
-CONFIG_NX_MOUSE
-  Build in support for mouse input.
+CONFIG_NX_XYINPUT
+  Build in support for a X/Y positional input device such as a mouse or a
+  touchscreen.
 CONFIG_NX_KBD
   Build in support of keypad/keyboard input.
 CONFIG_NXTK_BORDERWIDTH
