@@ -7732,4 +7732,6 @@
 	  falling edge of the ~CHG signal (2014-7-12).
 	* SAMA5D3x-EK: Use larger icons in NxWM configuration instead of
 	  scaling (2014-7-14).
+	* Graphics: Rename CONFIG_NX_MOUSE to CONFIG_NX_INPUT, then add
+	  CONFIG_NX_XYINPUT_MOUSE and CONFIG_XYINPUT_TOUCHSCREEN (2014-7-16).
 
