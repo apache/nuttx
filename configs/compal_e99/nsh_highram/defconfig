@@ -412,7 +412,7 @@ CONFIG_NX_PACKEDMSFIRST=y
 #
 # Input Devices
 #
-# CONFIG_NX_MOUSE is not set
+# CONFIG_NX_XYINPUT is not set
 CONFIG_NX_KBD=y
 
 #

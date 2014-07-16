@@ -2944,7 +2944,7 @@ TM7000 LCD/Touchscreen
     CONFIG_NX_DISABLE_32BPP=y
 
     Graphics Support -> Input Devices ->
-    CONFIG_NX_MOUSE=y                      : Build in mouse/touchscreen support (not used)
+    CONFIG_NX_XYINPUT=y                      : Build in mouse/touchscreen support (not used)
     CONFIG_NX_KBD=y                        : Build in keyboard support (not used)
 
     Graphics Support -> Framed Window Borders ->
