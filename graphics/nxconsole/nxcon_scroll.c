@@ -1,7 +1,7 @@
 /****************************************************************************
  * nuttx/graphics/nxconsole/nxcon_scroll.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -118,7 +118,7 @@ static inline void nxcon_movedisplay(FAR struct nxcon_state_s *priv,
       ret = priv->ops->fill(priv, &rect, priv->wndo.wcolor);
       if (ret < 0)
         {
-          gdbg("fill failed: %d\n", errno);
+          gdbg("Fill failed: %d\n", errno);
         }
 
       /* Fill each character that might lie within in the bounding box */
@@ -133,7 +133,7 @@ static inline void nxcon_movedisplay(FAR struct nxcon_state_s *priv,
         }
     }
 
-  /* Finally, clear the bottom part of the display */
+  /* Finally, clear the vacated part of the display */
 
   rect.pt1.y = bottom;
   rect.pt2.y = priv->wndo.wsize.h- 1;
@@ -141,7 +141,7 @@ static inline void nxcon_movedisplay(FAR struct nxcon_state_s *priv,
   ret = priv->ops->fill(priv, &rect, priv->wndo.wcolor);
   if (ret < 0)
     {
-      gdbg("nxcon_movedisplay: fill failed: %d\n", errno);
+      gdbg("Fill failed: %d\n", errno);
     }
 }
 #else
@@ -152,6 +152,10 @@ static inline void nxcon_movedisplay(FAR struct nxcon_state_s *priv,
   struct nxgl_point_s offset;
   int ret;
 
+  /* Add the line separation value to the scroll height */
+
+  scrollheight += CONFIG_NXCONSOLE_LINESEPARATION;
+
   /* Move the display in the range of 0-height up one scrollheight.  The
    * line at the bottom will be reset to the background color automatically.
    *
@@ -159,7 +163,7 @@ static inline void nxcon_movedisplay(FAR struct nxcon_state_s *priv,
    */
 
   rect.pt1.x = 0;
-  rect.pt1.y = scrollheight + CONFIG_NXCONSOLE_LINESEPARATION;
+  rect.pt1.y = scrollheight;
   rect.pt2.x = priv->wndo.wsize.w - 1;
   rect.pt2.y = priv->wndo.wsize.h - 1;
 
@@ -168,12 +172,22 @@ static inline void nxcon_movedisplay(FAR struct nxcon_state_s *priv,
   offset.x   = 0;
   offset.y   = -scrollheight;
 
-  /* Move the source rectangle */
+  /* Move the source rectangle upward by the scrollheight */
 
   ret = priv->ops->move(priv, &rect, &offset);
   if (ret < 0)
     {
-      gdbg("move failed: %d\n", errno);
+      gdbg("Move failed: %d\n", errno);
+    }
+
+  /* Finally, clear the vacated bottom part of the display */
+
+  rect.pt1.y = priv->wndo.wsize.h - scrollheight;
+
+  ret = priv->ops->fill(priv, &rect, priv->wndo.wcolor);
+  if (ret < 0)
+    {
+      gdbg("Fill failed: %d\n", errno);
     }
 }
 #endif
