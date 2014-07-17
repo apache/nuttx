@@ -249,7 +249,7 @@ config PREALLOC_CHILDSTATUS
 		setting is not defined or if it is defined to be zero then a value
 		of 2*MAX_TASKS is used.
 
-		Note that there cannot be more that MAX_TASKS tasks in total.
+		Note that there cannot be more than MAX_TASKS tasks in total.
 		However, the number of child status structures may need to be
 		significantly larger because this number includes the maximum number
 		of tasks that are running PLUS the number of tasks that have exit'ed
