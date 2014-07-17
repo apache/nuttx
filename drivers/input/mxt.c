@@ -892,7 +892,7 @@ static void mxt_touch_event(FAR struct mxt_dev_s *priv,
 
           /* Check the thresholds */
 
-          if (xdiff < CONFIG_MXT_THRESHX && ydiff < CONFIG_MXT_THRESHY)
+          if (xdiff >= CONFIG_MXT_THRESHX || ydiff >= CONFIG_MXT_THRESHY)
             {
               /* Report a contact move event.  This state will be set back
                * to CONTACT_REPORT after it been reported.
