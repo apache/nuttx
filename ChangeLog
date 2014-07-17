@@ -7734,4 +7734,6 @@
 	  scaling (2014-7-14).
 	* Graphics: Rename CONFIG_NX_MOUSE to CONFIG_NX_INPUT, then add
 	  CONFIG_NX_XYINPUT_MOUSE and CONFIG_XYINPUT_TOUCHSCREEN (2014-7-16).
+	* drivers/input/mxt.c:  Fix error in threshoold test... backward
+	  logic (2014-7-16).
 
