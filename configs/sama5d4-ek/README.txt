@@ -92,6 +92,7 @@ Contents
   - Watchdog Timer
   - TRNG and /dev/random
   - I2S Audio Support
+  - WM8904 Support
   - TM7000 LCD/Touchscreen
   - SAMA4D4-EK Configuration Options
   - Configurations
@@ -2799,6 +2800,26 @@ I2S Audio Support
     Library Routines
       CONFIG_SCHED_WORKQUEUE=y          : Driver needs work queue support
 
+WM8904 Support
+==============
+
+  SAMA5D4 Interface
+  ---- ------------------ ---------------- ---------- ---------------------------------------
+  PIO  USAGE              BOARD SIGNAL     WM8904 PIN NOTE
+  ---- ------------------ ---------------- ---------- ---------------------------------------
+  PA30 TWD0               AUDIO_TWD0_PA30  SDA        Pulled up, See J23 note below
+  PA31 TWCK0              AUDIO_TWCK0_PA31 SCLK       Pulled up
+  PB10 AUDIO_PCK2/EXP     AUDIO_PCK2_PB10  MCLK
+  PB27 AUDIO/HDMI_TK0/EXP AUDIO_TK0_PB27   BCLK/GPIO4 Note TK0 and RK0 are mutually exclusive
+  PB26 AUDIO_RK0          AUDIO_RK0_PB26   "  "/"   " "  " " " " " " " " " "      " "       "
+  PB30 AUDIO_RF/ZIG_TWCK2 AUDIO_RF0_PB30   LRCLK      Note TF0 and RF0 are mutually exclusive
+  PB31 AUDIO/HDMI_TF0/EXP AUDIO_TF0_PB31   "   "      "  " " " " " " " " " "      " "       "
+  PB29 AUDIO_RD0/ZIG_TWD2 AUDIO_RD0_PB29   ADCDAT
+  PB28 AUDIO/HDMI_TD0/EXP AUDIO_TD0_PB28   ACDAT
+  PE4  AUDIO_IRQ          AUDIO_IRQ_PE4    IRQ/GPIO1  Audio interrupt
+  ---- ------------------ ---------------- ---------- ---------------------------------------
+  Note that jumper J23 must be closed to connect AUDIO_TWD0_PA30
+
 TM7000 LCD/Touchscreen
 ======================
 
@@ -3479,6 +3500,14 @@ Configurations
 
        If you don't plan on using the debug features, then by all means
        disable this feature and save 16KiB of RAM!
+
+       NOTE: There is an issue with capturing data in the RAMLOG:  If
+       the system crashes, all of the crash dump information will into
+       the RAMLOG and you will be unable to access it!  You can tell that
+       the system has crashed because (a) it will be unresponsive and (b)
+       the RED LED will be blinking at about 2Hz.
+
+       That is another good reason to disable the RAMLOG!
 
     5. This configuration executes out of SDRAM flash and is loaded into
        SDRAM from NAND, Serial DataFlash, SD card or from a TFTPC sever via
