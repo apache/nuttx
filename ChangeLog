@@ -7736,4 +7736,7 @@
 	  CONFIG_NX_XYINPUT_MOUSE and CONFIG_XYINPUT_TOUCHSCREEN (2014-7-16).
 	* drivers/input/mxt.c:  Fix error in threshoold test... backward
 	  logic (2014-7-16).
-
+	* graphics/nxconsole/nxcon_scroll.c:  Fix scrolling in the NxConsole
+	  for the case of the framebuffer device.  In this case, the logic
+	  for clearing the vacated region at the bottom was missing so garbage
+	  up from the last, uncleared line (2014-7-17).
