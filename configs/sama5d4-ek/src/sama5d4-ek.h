@@ -620,6 +620,35 @@
 #endif
 #endif
 
+/* WM8904 Audio Codec ***************************************************************/
+/* SAMA5D4 Interface
+ * ---- ------------------ ---------------- ---------- ------------------------------
+ * PIO  USAGE              BOARD SIGNAL     WM8904 PIN NOTE
+ * ---- ------------------ ---------------- ---------- ------------------------------
+ * PA30 TWD0               AUDIO_TWD0_PA30  SDA        Pulled up, See J23 note below
+ * PA31 TWCK0              AUDIO_TWCK0_PA31 SCLK       Pulled up
+ * PB10 AUDIO_PCK2/EXP     AUDIO_PCK2_PB10  MCLK
+ * PB27 AUDIO/HDMI_TK0/EXP AUDIO_TK0_PB27   BCLK/GPIO4 TK0/RK0 are mutually exclusive
+ * PB26 AUDIO_RK0          AUDIO_RK0_PB26   "  "/"   " " "/" " " " "      " "       "
+ * PB30 AUDIO_RF/ZIG_TWCK2 AUDIO_RF0_PB30   LRCLK      TF0/RF0 are mutually exclusive
+ * PB31 AUDIO/HDMI_TF0/EXP AUDIO_TF0_PB31   "   "      " "/" " " " "      " "       "
+ * PB29 AUDIO_RD0/ZIG_TWD2 AUDIO_RD0_PB29   ADCDAT
+ * PB28 AUDIO/HDMI_TD0/EXP AUDIO_TD0_PB28   ACDAT
+ * PE4  AUDIO_IRQ          AUDIO_IRQ_PE4    IRQ/GPIO1  Audio interrupt
+ * ---- ------------------ ---------------- ---------- ------------------------------
+ * Note that jumper J23 must be closed to connect AUDIO_TWD0_PA30
+ */
+
+/* Pin Disambiguation */
+
+#define PIO_SSC0_TD    PIO_SSC0_TD_2
+
+/* Audio Interrupt */
+
+#define PIO_INT_WM8904 (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
+                        PIO_INT_BOTHEDGES | PIO_PORT_PIOE | PIO_PIN4)
+#define IRQ_INT_WM8904 SAM_IRQ_PE4
+
 /* SPI Chip Selects *****************************************************************/
 /* The SAMA5D4-EK includes an Atmel AT25DF321A, 32-megabit, 2.7-volt SPI serial
  * FLASH on board.  The connection is as follows:
