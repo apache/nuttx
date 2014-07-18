@@ -82,3 +82,25 @@ config VS1053_BUFFER_SIZE
 endif # AUDIO_DRIVER_SPECIFIC_BUFFERS
 
 endif # VS1053
+
+config AUDIO_WM8904
+	bool "WM8904 audio chip"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		Select to enable support for the WM8904 Audio codec by Wolfson
+		Microelectonics.  This chip is a lower level audio chip.. basically
+		an exotic D-to-A.  It includes no builtin support for audion CODECS
+		The WM8904 provides:
+
+			- Low power consumption
+			- High SNR
+			- Stereo digital microphone input
+			- Digital Dynamic Range Controller (compressor / limiter)
+			- Digital sidetone mixing
+			- Ground-referenced headphone driver
+			- Ground-referenced line outputs
+
+if AUDIO_WM8904
+endif # AUDIO_WM8904
+

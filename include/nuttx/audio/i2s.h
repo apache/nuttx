@@ -177,7 +177,7 @@
  *              performed in the context of the worker thread.
  *   arg      - An opaque argument that will be provided to the callback
  *              when the transfer complete.
- *   timeout  - The timeout value to use.  The transfer will be canceled
+ *   timeout  - The timeout value to use.  The transfer will be cancelled
  *              and an ETIMEDOUT error will be reported if this timeout
  *              elapsed without completion of the DMA transfer.  Units
  *              are system clock ticks.  Zero means no timeout.

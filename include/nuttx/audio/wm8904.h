@@ -61,8 +61,24 @@
 
 /* Pre-requisistes */
 
+#ifndef CONFIG_AUDIO
+#  error CONFIG_AUDIO is required for audio subsystem support
+#endif
+
+#ifndef CONFIG_I2S
+#  error CONFIG_I2S is required by the WM8904 driver
+#endif
+
+#ifndef CONFIG_I2C
+#  error CONFIG_I2C is required by the WM8904 driver
+#endif
+
 #ifndef CONFIG_I2C_TRANSFER
-#  error "CONFIG_I2C_TRANSFER is required in the I2C configuration"
+#  error CONFIG_I2C_TRANSFER is required in the I2C configuration
+#endif
+
+#ifndef CONFIG_SCHED_WORKQUEUE
+#  error CONFIG_SCHED_WORKQUEUE is required by the WM8904 driver
 #endif
 
 /* Default configuration values */
@@ -73,7 +89,6 @@
 #define WM8904_DETACH(s)         ((s)->attach(s,NULL,NULL))
 #define WM8904_ENABLE(s)         ((s)->enable(s,true))
 #define WM8904_DISABLE(s)        ((s)->enable(s,false))
-#define WM8904_CLEAR(s)          ((s)->clear(s))
 
 /****************************************************************************
  * Public Types
@@ -109,15 +124,14 @@ struct wm8904_lower_s
    * interrupts should be configured on both rising and falling edges
    * so that contact and loss-of-contact events can be detected.
    *
-   * attach  - Attach the WM8904 interrupt handler to the GPIO interrupt
+   * attach  - Attach or detacth the WM8904 interrupt handler to the GPIO
+   *           interrupt
    * enable  - Enable or disable the GPIO interrupt
-   * clear   - Acknowledge/clear any pending GPIO interrupt
    */
 
   int  (*attach)(FAR const struct wm8904_lower_s *lower, wm8904_handler_t isr,
                  FAR void *arg);
   void (*enable)(FAR const struct wm8904_lower_s *lower, bool enable);
-  void (*clear)(FAR const struct wm8904_lower_s *lower);
 };
 
 /****************************************************************************
@@ -137,7 +151,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: wm8904_register
+ * Name: wm8904_initialize
  *
  * Description:
  *   Initialize the WM8904 device.

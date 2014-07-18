@@ -60,8 +60,8 @@
 #define WM8904_SWRST_ID              0x00 /* SW Reset and ID */
 #define WM8904_BIAS_CTRL             0x04 /* Bias Control */
 #define WM8904_VMID_CTRL             0x05 /* VMID Control */
-#define WM8904_MIC_BIAS_CTRL         0x06 /* Mic Bias Control */
-#define WM8904_MIC_BIAS_CTRL         0x07 /* Mic Bias Control */
+#define WM8904_MIC_BIAS_CTRL0        0x06 /* Mic Bias Control 0 */
+#define WM8904_MIC_BIAS_CTRL1        0x07 /* Mic Bias Control 1 */
 #define WM8904_ANALOG_ADC            0x0a /* Analogue ADC */
 #define WM8904_PM0                   0x0c /* Power Management 0 */
 #define WM8904_PM2                   0x0e /* Power Management 2 */
@@ -181,7 +181,7 @@
 #  define WM8904_VMID_RES_FASTSTART  (3 << WM8904_VMID_RES_SHIFT) /* 2 x 5k divider */
 #define WM8904_VMID_ENA              (1 << 0)  /* Bit 0:  VMID buffer enable */
 
-/* 0x06 Mic Bias Control */
+/* 0x06 Mic Bias Control 0 */
 
 #define WM8904_MICDET_THR_SHIFT      (4)       /* Bits 4-6: MICBIAS current detect threshold */
 #define WM8904_MICDET_THR_MASK       (7 << WM8904_MICDET_THR_SHIFT)
@@ -192,7 +192,7 @@
 #define WM8904_MICDET_ENA            (1 << 1)  /* Bit 1:  MICBIAS current/short circuit detect enable */
 #define WM8904_MICBIAS_ENA           (1 << 0)  /* Bit 0:  MICBIAS enable */
 
-/* 0x07 Mic Bias Control */
+/* 0x07 Mic Bias Control 1 */
 
 #define WM8904_MICBIAS_SEL_MASK      (0x0007)  /* Bits 0-2: Selects MICBIAS voltage */
 
@@ -264,7 +264,7 @@
 /* 0x18 Audio Interface 0 */
 
 #define WM8904_DACL_DATINV           (1 << 12) /* Bit 12: Left DAC invert */
-#define WM8904_DACR_DATINV           (1 << 11) /* Bit 11: Right DAC invert* /
+#define WM8904_DACR_DATINV           (1 << 11) /* Bit 11: Right DAC invert */
 #define WM8904_DAC_BOOST_SHIFT       (9)       /* Bits 9-10: DAC digital input volume boost */
 #define WM8904_DAC_BOOST_MASK        (3 << WM8904_DAC_BOOST_SHIFT)
 #  define WM8904_DAC_BOOST_0DB       (0 << WM8904_DAC_BOOST_SHIFT)
