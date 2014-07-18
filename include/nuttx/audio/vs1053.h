@@ -111,8 +111,9 @@ extern "C"
  *
  ****************************************************************************/
 
-struct spi_dev_s; /* see nuttx/spi/spi.h */
-struct audio_lowerhalf_s; /* see nutt/audio.h */
+struct spi_dev_s;         /* See nuttx/spi/spi.h */
+struct audio_lowerhalf_s; /* See nuttx/audio/audio.h */
+
 FAR struct audio_lowerhalf_s *vs1053_initialize(FAR struct spi_dev_s *spi,
                           FAR const struct vs1053_lower_s *lower,
                           unsigned int devno);

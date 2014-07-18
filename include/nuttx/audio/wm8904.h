@@ -1,8 +1,12 @@
 /****************************************************************************
- * include/nuttx/input/mxt.h
+ * include/nuttx/audio/wm8904.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Author:  Gregory Nutt <gnutt@nuttx.org>
+ *
+ * Reference:
+ *   "WM8904 Ultra Low Power CODEC for Portable Audio Applications, Pre-
+ *    Production", September 2012, Rev 3.3, Wolfson Microelectronics
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,135 +37,87 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_INPUT_MXT_H
-#define __INCLUDE_NUTTX_INPUT_MXT_H
+#ifndef __INCLUDE_NUTTX_AUDIO_WM8904_H
+#define __INCLUDE_NUTTX_AUDIO_WM8904_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
 #include <stdint.h>
 #include <stdbool.h>
 
-#include <nuttx/i2c.h>
+#include <nuttx/irq.h>
 
-#if defined(CONFIG_INPUT) && defined(CONFIG_INPUT_MXT)
+#ifdef CONFIG_AUDIO_WM8904
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ************************************************************/
-/* Maximum number of threads than can be waiting for POLL events */
-
-#ifndef CONFIG_MXT_NPOLLWAITERS
-#  define CONFIG_MXT_NPOLLWAITERS 2
-#endif
-
-/* Thresholding
+/* Configuration ************************************************************
  *
- * New touch positions will only be reported when the X or Y data
- * changes by these thresholds. This trades reduced data rates for some
- * loss in dragging accuracy.  For 12-bit values the raw ranges are
- * 0-4095. So for example, if your display is 800x480, then THRESHX=5
- * and THRESHY=8 would correspond to a one pixel change.
- *
- * NOTE: This does nothing to reduce the interrupt rate.  It only
- * reduces the rate at which touch events are reports.
+ * CONFIG_AUDIO_WM8904 - Enabled WM8904 support
  */
 
-#ifndef CONFIG_MXT_MXT_THRESHX
-#  define CONFIG_MXT_MXT_THRESHX 5
-#endif
-
-#ifndef CONFIG_MXT_MXT_THRESHY
-#  define CONFIG_MXT_MXT_THRESHY 8
-#endif
-
-/* Buttons are not supported */
-
-#undef CONFIG_MXT_BUTTONS
-
-/* Check for some required settings.  This can save the user a lot of time
- * in getting the right configuration.
- */
+/* Pre-requisistes */
 
 #ifndef CONFIG_I2C_TRANSFER
 #  error "CONFIG_I2C_TRANSFER is required in the I2C configuration"
 #endif
 
-#ifdef CONFIG_DISABLE_SIGNALS
-#  error "Signals are required.  CONFIG_DISABLE_SIGNALS must not be selected."
-#endif
-
-#ifndef CONFIG_SCHED_WORKQUEUE
-#  error "Work queue support required.  CONFIG_SCHED_WORKQUEUE must be selected."
-#endif
+/* Default configuration values */
 
 /* Helper macros ************************************************************/
 
-#define MXT_ATTACH(s,isr,arg) ((s)->attach(s,isr,arg))
-#define MXT_DETACH(s)         ((s)->attach(s,NULL,NULL))
-#define MXT_ENABLE(s)         ((s)->enable(s,true))
-#define MXT_DISABLE(s)        ((s)->enable(s,false))
-#define MXT_CLEAR(s)          ((s)->clear(s))
+#define WM8904_ATTACH(s,isr,arg) ((s)->attach(s,isr,arg))
+#define WM8904_DETACH(s)         ((s)->attach(s,NULL,NULL))
+#define WM8904_ENABLE(s)         ((s)->enable(s,true))
+#define WM8904_DISABLE(s)        ((s)->enable(s,false))
+#define WM8904_CLEAR(s)          ((s)->clear(s))
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
-
-/* This is the type of the MXT interrupt handler.  The lower level code will
- * intercept the interrupt and provide the upper level with the private data
- * that was provided when the interrupt was attached.
+/* This is the type of the WM8904 interrupt handler.  The lower level code
+ * will intercept the interrupt and provide the upper level with the private
+ * data that was provided when the interrupt was attached.
  */
 
-struct mxt_lower_s;
-typedef CODE int (*mxt_handler_t)(FAR const struct mxt_lower_s *lower,
-                                  FAR void *arg);
+struct wm8904_lower_s; /* Forward reference.  Defined below */
 
-/* A reference to a structure of this type must be passed to the MXT
+typedef CODE int (*wm8904_handler_t)(FAR const struct wm8904_lower_s *lower,
+                                     FAR void *arg);
+
+/* A reference to a structure of this type must be passed to the WM8904
  * driver.  This structure provides information about the configuration
- * of the MXT and provides some board-specific hooks.
+ * of the WM8904 and provides some board-specific hooks.
  *
  * Memory for this structure is provided by the caller.  It is not copied
  * by the driver and is presumed to persist while the driver is active.
  */
 
-struct mxt_lower_s
+struct wm8904_lower_s
 {
   /* Device characterization */
 
   uint32_t frequency;  /* Initial I2C frequency */
   uint8_t address;     /* 7-bit I2C address (only bits 0-6 used) */
 
-  /* True: Swap X and Y values */
-
-  bool swapxy;
-
-#ifdef CONFIG_MXT_BUTTONS
-  /* Buttons are not currently supported.  But if they were we
-   * would need to know which which.
-   */
-
-  uint8_t bmask;       /* Bit encoded, see MXT_GPIOn_MASK */
-#endif
-
   /* IRQ/GPIO access callbacks.  These operations all hidden behind
-   * callbacks to isolate the MXT driver from differences in GPIO
+   * callbacks to isolate the WM8904 driver from differences in GPIO
    * interrupt handling by varying boards and MCUs.  If possible,
    * interrupts should be configured on both rising and falling edges
    * so that contact and loss-of-contact events can be detected.
    *
-   * attach  - Attach the MXT interrupt handler to the GPIO interrupt
+   * attach  - Attach the WM8904 interrupt handler to the GPIO interrupt
    * enable  - Enable or disable the GPIO interrupt
    * clear   - Acknowledge/clear any pending GPIO interrupt
    */
 
-  int  (*attach)(FAR const struct mxt_lower_s *lower, mxt_handler_t isr,
+  int  (*attach)(FAR const struct wm8904_lower_s *lower, wm8904_handler_t isr,
                  FAR void *arg);
-  void (*enable)(FAR const struct mxt_lower_s *lower, bool enable);
-  void (*clear)(FAR const struct mxt_lower_s *lower);
+  void (*enable)(FAR const struct wm8904_lower_s *lower, bool enable);
+  void (*clear)(FAR const struct wm8904_lower_s *lower);
 };
 
 /****************************************************************************
@@ -170,7 +126,7 @@ struct mxt_lower_s
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" 
+extern "C"
 {
 #else
 #define EXTERN extern
@@ -181,17 +137,17 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mxt_register
+ * Name: wm8904_register
  *
  * Description:
- *   Configure the maXTouch to use the provided I2C device instance.  This
- *   will register the driver as /dev/inputN where N is the minor device
- *   number
+ *   Initialize the WM8904 device.
  *
  * Input Parameters:
  *   i2c     - An I2C driver instance
+ *   i2s     - An I2S driver instance
  *   lower   - Persistent board configuration data
  *   minor   - The input device minor number
+ *   session - Returned if multi-sessions are supported
  *
  * Returned Value:
  *   Zero is returned on success.  Otherwise, a negated errno value is
@@ -199,13 +155,18 @@ extern "C"
  *
  ****************************************************************************/
 
-int mxt_register(FAR struct i2c_dev_s *i2c,
-                 FAR const struct mxt_lower_s *lower, int minor);
+struct i2c_dev_s;         /* Forward reference. Defined in include/nuttx/i2c.h */
+struct i2s_dev_s;         /* Forward reference. Defined in include/nuttx/audio/i2s.h */
+struct audio_lowerhalf_s; /* Forward reference. Defined in nuttx/audio/audio.h */
+
+FAR struct audio_lowerhalf_s *
+  wm8904_initialize(FAR struct i2c_dev_s *i2c, FAR struct i2s_dev_s *i2s,
+                    FAR const struct wm8904_lower_s *lower, unsigned int devno);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* CONFIG_INPUT && CONFIG_INPUT_MXT */
-#endif /* __INCLUDE_NUTTX_INPUT_MXT_H */
+#endif /* CONFIG_AUDIO_WM8904 */
+#endif /* __INCLUDE_NUTTX_AUDIO_WM8904_H */
