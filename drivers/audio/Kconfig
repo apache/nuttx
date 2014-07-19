@@ -6,7 +6,7 @@
 config AUDIO_I2SCHAR
 	bool "I2S character driver (for testing only)"
 	default n
-	depends on I2S
+	depends on I2S && AUDIO
 	---help---
 		This selection enables a simple character driver that supports I2S
 		transfers via a read() and write().  The intent of this driver is to
@@ -38,6 +38,7 @@ endif #AUDIO_I2SCHAR
 config VS1053
 	bool "VS1053 codec chip"
 	default n
+	depends on AUDIO
 	---help---
 		Select to enable support for the VS1053 Audio codec by VLSI Solutions.
 		This chip provides encoding and decoding of MP3, WMA, AAC and Ogg
@@ -86,11 +87,11 @@ endif # VS1053
 config AUDIO_WM8904
 	bool "WM8904 audio chip"
 	default n
-	depends on EXPERIMENTAL
+	depends on AUDIO && EXPERIMENTAL
 	---help---
 		Select to enable support for the WM8904 Audio codec by Wolfson
 		Microelectonics.  This chip is a lower level audio chip.. basically
-		an exotic D-to-A.  It includes no builtin support for audion CODECS
+		an exotic D-to-A.  It includes no built-in support for audio CODECS
 		The WM8904 provides:
 
 			- Low power consumption
@@ -100,6 +101,9 @@ config AUDIO_WM8904
 			- Digital sidetone mixing
 			- Ground-referenced headphone driver
 			- Ground-referenced line outputs
+
+		NOTE: This driver also depends on both I2C and I2S support although
+		that dependency is not explicit here.
 
 if AUDIO_WM8904
 endif # AUDIO_WM8904

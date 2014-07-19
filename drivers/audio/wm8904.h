@@ -57,7 +57,8 @@
 
 /* Registers Addresses ******************************************************/
 
-#define WM8904_SWRST_ID              0x00 /* SW Reset and ID */
+#define WM8904_SWRST                 0x00 /* SW Reset and ID */
+#define WM8904_ID                    0x00 /* SW Reset and ID */
 #define WM8904_BIAS_CTRL             0x04 /* Bias Control */
 #define WM8904_VMID_CTRL             0x05 /* VMID Control */
 #define WM8904_MIC_BIAS_CTRL0        0x06 /* Mic Bias Control 0 */
@@ -77,7 +78,7 @@
 #define WM8904_DAC_VOL_LEFT          0x1e /* DAC Digital Volume Left */
 #define WM8904_DAC_VOL_RIGHT         0x1f /* DAC Digital Volume Right */
 #define WM8904_DAC_DIGI0             0x20 /* DAC Digital 0 */
-#define WM8904_DATA_DIGI1            0x21 /* DAC Digital 1 */
+#define WM8904_DAC_DIGI1             0x21 /* DAC Digital 1 */
 #define WM8904_ADC_VOL_LEFT          0x24 /* ADC Digital Volume Left */
 #define WM8904_ADC_VOL_RIGHT         0x25 /* ADC Digital Volume Right */
 #define WM8904_ADC_DIGI              0x26 /* ADC Digital */
@@ -155,6 +156,109 @@
 #define WM8904_ADC_TEST              0xc6 /* ADC Test  */
 #define WM8904_FLL_NCO_TEST0         0xf7 /* FLL NCO Test 0 */
 #define WM8904_FLL_NCO_TEST1         0xf8 /* FLL NCO Test 1 */
+
+/* Register Default Values **************************************************/
+/* Registers have some undocumented bits set on power up.  These probably
+ * should be retained on writes (?).
+ */
+
+#define WM8904_SWRST_DEFAULT           0x8904
+#define WM8904_ID_DEFAULT              0x0018
+#define WM8904_BIAS_CTRL_DEFAULT       0x0000
+#define WM8904_VMID_CTRL_DEFAULT       0x0000
+#define WM8904_MIC_BIAS_CTRL0_DEFAULT  0x0000
+#define WM8904_MIC_BIAS_CTRL1_DEFAULT  0x0000
+#define WM8904_ANALOG_ADC_DEFAULT      0x0001
+#define WM8904_PM0_DEFAULT             0x0000
+#define WM8904_PM2_DEFAULT             0x0000
+#define WM8904_PM3_DEFAULT             0x0000
+#define WM8904_PM6_DEFAULT             0x0000
+#define WM8904_CLKRATE0_DEFAULT        0x8c5e
+#define WM8904_CLKRATE1_DEFAULT        0x0c05
+#define WM8904_CLKRATE2_DEFAULT        0x0000
+#define WM8904_AIF0_DEFAULT            0x0050
+#define WM8904_AIF1_DEFAULT            0x000a
+#define WM8904_AIF2_DEFAULT            0x00e4
+#define WM8904_AIF3_DEFAULT            0x0040
+#define WM8904_DAC_VOL_LEFT_DEFAULT    0x00c0
+#define WM8904_DAC_VOL_RIGHT_DEFAULT   0x00c0
+#define WM8904_DAC_DIGI0_DEFAULT       0x0000
+#define WM8904_DAC_DIGI1_DEFAULT       0x0004
+#define WM8904_ADC_VOL_LEFT_DEFAULT    0x00c0
+#define WM8904_ADC_VOL_RIGHT_DEFAULT   0x00c0
+#define WM8904_ADC_DIGI_DEFAULT        0x0010
+#define WM8904_MIC_DIGI_DEFAULT        0x0000
+#define WM8904_DRC0_DEFAULT            0x01af
+#define WM8904_DRC1_DEFAULT            0x3248
+#define WM8904_DRC2_DEFAULT            0x0000
+#define WM8904_DRC3_DEFAULT            0x0000
+#define WM8904_ANA_LEFT_IN0_DEFAULT    0x0085
+#define WM8904_ANA_RIGHT_IN0_DEFAULT   0x0085
+#define WM8904_ANA_LEFT_IN1_DEFAULT    0x0044
+#define WM8904_ANA_RIGHT_IN1_DEFAULT   0x0044
+#define WM8904_ANA_LEFT_OUT1_DEFAULT   0x002d
+#define WM8904_ANA_RIGHT_OUT1_DEFAULT  0x002d
+#define WM8904_ANA_LEFT_OUT2_DEFAULT   0x0039
+#define WM8904_ANA_RIGHT_OUT2_DEFAULT  0x0039
+#define WM8904_ANA_OUT12_ZC_DEFAULT    0x0000
+#define WM8904_DC_SERVO0_DEFAULT       0x0000
+#define WM8904_DC_SERVO2_DEFAULT       0xaaaa
+#define WM8904_DC_SERVO4_DEFAULT       0xaaaa
+#define WM8904_DC_SERVO5_DEFAULT       0xaaaa
+#define WM8904_DC_SERVO6_DEFAULT       0x0000
+#define WM8904_DC_SERVO7_DEFAULT       0x0000
+#define WM8904_DC_SERVO8_DEFAULT       0x0000
+#define WM8904_DC_SERVO9_DEFAULT       0x0000
+#define WM8904_DC_SERVO_RDBACK_DEFAULT 0x0000
+#define WM8904_ANA_HP0_DEFAULT         0x0000
+#define WM8904_ANA_LINEOUT0_DEFAULT    0x0000
+#define WM8904_CHG_PUMP0_DEFAULT       0x0000
+#define WM8904_CLASS_W0_DEFAULT        0x0000
+#define WM8904_WR_SEQ0_DEFAULT         0x0000
+#define WM8904_WR_SEQ1_DEFAULT         0x0000
+#define WM8904_WR_SEQ2_DEFAULT         0x0000
+#define WM8904_WR_SEQ3_DEFAULT         0x0000
+#define WM8904_WR_SEQ4_DEFAULT         0x0000
+#define WM8904_FLL_CTRL1_DEFAULT       0x0000
+#define WM8904_FLL_CTRL2_DEFAULT       0x0007
+#define WM8904_FLL_CTRL3_DEFAULT       0x0000
+#define WM8904_FLL_CTRL4_DEFAULT       0x2ee0
+#define WM8904_FLL_CTRL5_DEFAULT       0x0004
+#define WM8904_GPIO_CTRL1_DEFAULT      0x0014
+#define WM8904_GPIO_CTRL2_DEFAULT      0x0010
+#define WM8904_GPIO_CTRL3_DEFAULT      0x0010
+#define WM8904_GPIO_CTRL4_DEFAULT      0x0000
+#define WM8904_DIGI_PULLS_DEFAULT      0x0000
+#define WM8904_INT_MASK_DEFAULT        0xffff
+#define WM8904_INT_POL_DEFAULT         0x0000
+#define WM8904_INT_DEBOUNCE_DEFAULT    0x0000
+#define WM8904_EQ1_DEFAULT             0x0000
+#define WM8904_EQ2_DEFAULT             0x000c
+#define WM8904_EQ3_DEFAULT             0x000c
+#define WM8904_EQ4_DEFAULT             0x000c
+#define WM8904_EQ5_DEFAULT             0x000c
+#define WM8904_EQ6_DEFAULT             0x000c
+#define WM8904_EQ7_DEFAULT             0x0fca
+#define WM8904_EQ8_DEFAULT             0x0400
+#define WM8904_EQ9_DEFAULT             0x00d8
+#define WM8904_EQ10_DEFAULT            0x1eb5
+#define WM8904_EQ11_DEFAULT            0xf145
+#define WM8904_EQ12_DEFAULT            0x0b75
+#define WM8904_EQ13_DEFAULT            0x01c5
+#define WM8904_EQ14_DEFAULT            0x1c54
+#define WM8904_EQ15_DEFAULT            0xf373
+#define WM8904_EQ16_DEFAULT            0x0a54
+#define WM8904_EQ17_DEFAULT            0x0558
+#define WM8904_EQ18_DEFAULT            0x168e
+#define WM8904_EQ19_DEFAULT            0xf829
+#define WM8904_EQ20_DEFAULT            0x07ad
+#define WM8904_EQ21_DEFAULT            0x1103
+#define WM8904_EQ22_DEFAULT            0x0564
+#define WM8904_EQ23_DEFAULT            0x0559
+#define WM8904_EQ24_DEFAULT            0x4000
+#define WM8904_ADC_TEST_DEFAULT        0x0000
+#define WM8904_FLL_NCO_TEST0_DEFAULT   0x0000
+#define WM8904_FLL_NCO_TEST1_DEFAULT   0x0019
 
 /* Register Bit Definitions *************************************************/
 

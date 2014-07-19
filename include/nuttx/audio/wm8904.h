@@ -83,6 +83,16 @@
 
 /* Default configuration values */
 
+#ifndef CONFIG_WM8904_I2CFREQUENCY
+#  define CONFIG_WM8904_I2CFREQUENCY 400000
+#endif
+
+#if CONFIG_WM8904_I2CFREQUENCY > 400000
+#  warning WM8904 I2C frequency cannot exceed 400KHz
+#  undef CONFIG_WM8904_I2CFREQUENCY
+#  define CONFIG_WM8904_I2CFREQUENCY 400000
+#endif
+
 /* Helper macros ************************************************************/
 
 #define WM8904_ATTACH(s,isr,arg) ((s)->attach(s,isr,arg))

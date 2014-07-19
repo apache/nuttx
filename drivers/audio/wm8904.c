@@ -6,11 +6,11 @@
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author:  Gregory Nutt <gnutt@nuttx.org>
  *
- * Reference:
- *   "WM8904 Ultra Low Power CODEC for Portable Audio Applications, Pre-
+ * References:
+ * - "WM8904 Ultra Low Power CODEC for Portable Audio Applications, Pre-
  *    Production", September 2012, Rev 3.3, Wolfson Microelectronics
  *
- * The framework for this driver is based on Ken Pettit's VS1053 driver.
+ * -  The framework for this driver is based on Ken Pettit's VS1053 driver.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -96,7 +96,7 @@
 #  define CONFIG_WM8904_WORKER_STACKSIZE  768
 #endif
 
-#define WM8904_DUMMY                      0xFF
+#define WM8904_DUMMY                      0xff
 #define WM8904_DEFAULT_XTALI              12288000
 #define WM8904_DATA_FREQ                  20000000
 #define WM8904_RST_USECS                  2000
@@ -199,6 +199,13 @@ static int     wm8904_cancelbuffer(FAR struct audio_lowerhalf_s *dev,
 static int     wm8904_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
                  unsigned long arg);
 
+/* Initialization */
+
+static void    wm8904_audio_output(FAR struct wm8904_dev_s *priv);
+#if 0 /* Not used */
+static void    wm8904_audio_input(FAR struct wm8904_dev_s *priv);
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -241,11 +248,71 @@ static const struct audio_ops_s g_audioops =
 
 static uint16_t wm8904_readreg(FAR struct wm8904_dev_s *priv, uint8_t regaddr)
 {
-  FAR struct i2c_dev_s *i2c = priv->i2c;
-  uint16_t regval;
-#warning Missing logic
-  audvdbg("Read: %02x -> %04x\n", regaddr, regval);
-  return regval;
+  int retries;
+
+  /* Try up to three times to read the register */
+
+  for (retries = 1; retries <= 3; retries++)
+    {
+      struct i2c_msg_s msg[2];
+      uint8_t data[2];
+      int ret;
+
+      /* Set up to write the address */
+
+      msg[0].addr   = priv->lower->address;
+      msg[0].flags  = 0;
+      msg[0].buffer = &regaddr;
+      msg[0].length = 1;
+
+      /* Followed by the read data */
+
+      msg[1].addr   = priv->lower->address;
+      msg[1].flags  = I2C_M_READ;
+      msg[1].buffer = data;
+      msg[1].length = 2;
+
+      /* Read the register data.  The returned value is the number messages
+       * completed.
+       */
+
+      ret = I2C_TRANSFER(priv->i2c, msg, 2);
+      if (ret < 0)
+        {
+#ifdef CONFIG_I2C_RESET
+          /* Perhaps the I2C bus is locked up?  Try to shake the bus free */
+
+          idbg("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
+
+          ret = up_i2creset(priv->i2c);
+          if (ret < 0)
+            {
+              idbg("ERROR: up_i2creset failed: %d\n", ret);
+              break;
+            }
+#else
+          idbg("ERROR: I2C_TRANSFER failed: %d\n", ret);
+#endif
+        }
+      else
+        {
+          uint16_t regval;
+
+          /* The I2C transfer was successful... break out of the loop and
+           * return the value read.
+           */
+
+          regval = ((uint16_t)data[0] << 8) | (uint16_t)data[1]
+          audvdbg("READ: %02x -> %04x\n", regaddr, regval);
+          return regval;
+        }
+
+      ivdbg("retries=%d regaddr=%04x\n", retries, regaddr);
+    }
+
+  /* No error indication is returned on a failure... just return zero */
+
+  return 0;
 }
 
 /************************************************************************************
@@ -256,18 +323,70 @@ static uint16_t wm8904_readreg(FAR struct wm8904_dev_s *priv, uint8_t regaddr)
  *
  ************************************************************************************/
 
-static void wm8904_writereg(FAR struct wm8904_dev_s *priv, uint8_t regaddr, uint16_t regval)
+static void wm8904_writereg(FAR struct wm8904_dev_s *priv, uint8_t regaddr,
+                            uint16_t regval)
 {
-  FAR struct i2c_dev_s *i2c = priv->i2c;
+  int retries;
 
-  /* Select the AUDIO_CTRL device on the I2C bus */
+  /* Try up to three times to read the register */
 
-  audvdbg("Write: %02x <- %04x\n", regaddr, regval);
-#warning "Missing logic"
+  for (retries = 1; retries <= 3; retries++)
+    {
+      struct i2c_msg_s msg[2];
+      uint8_t data[2];
+      int ret;
 
-  /* Short delay after a write for WM8904 processing time */
-  /* REVISIT: Necessary for the WM8904? */
-  usleep(10);
+      /* Set up to write the address */
+
+      msg[0].addr   = priv->lower->address;
+      msg[0].flags  = 0;
+      msg[0].buffer = &regaddr;
+      msg[0].length = 1;
+
+      /* Followed by the read data */
+
+      data[0]       = regval >> 8;
+      data[1]       = regval & 0xff;
+
+      msg[1].addr   = priv->lower->address;
+      msg[1].flags  = I2C_M_NORESTART;
+      msg[1].buffer = data;
+      msg[1].length = 2;
+
+      /* Read the register data.  The returned value is the number messages
+       * completed.
+       */
+
+      ret = I2C_TRANSFER(priv->i2c, msg, 2);
+      if (ret < 0)
+        {
+#ifdef CONFIG_I2C_RESET
+          /* Perhaps the I2C bus is locked up?  Try to shake the bus free */
+
+          idbg("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
+
+          ret = up_i2creset(priv->i2c);
+          if (ret < 0)
+            {
+              idbg("ERROR: up_i2creset failed: %d\n", ret);
+              break;
+            }
+#else
+          idbg("ERROR: I2C_TRANSFER failed: %d\n", ret);
+#endif
+        }
+      else
+        {
+          /* The I2C transfer was successful... break out of the loop and
+           * return the value read.
+           */
+
+          audvdbg("Write: %02x <- %04x\n", regaddr, regval);
+          return;
+        }
+
+      ivdbg("retries=%d regaddr=%04x\n", retries, regaddr);
+    }
 }
 
 /************************************************************************************
@@ -1458,6 +1577,190 @@ static int wm8904_release(FAR struct audio_lowerhalf_s *dev)
 }
 
 /****************************************************************************
+ * Name: wm8904_audio_output
+ *
+ * Description:
+ *   Initialize and configure the WM8904 device as an audio output device.
+ *
+ * Input Parameters:
+ *   prive   - A reference to the driver state structure
+ *
+ * Returned Value:
+ *   None.  No failures are detected.
+ *
+ ****************************************************************************/
+
+static void wm8904_audio_output(FAR struct wm8904_dev_s *priv)
+{
+  uint16_t regval;
+
+  /* Bias Control.
+   * Preserve undocumented default bit.WM8904_DUMMY
+   */
+
+  regval = WM8904_ISEL_HIGH | WM8904_BIAS_ENA | 0x0010;
+  wm8904_writereg(priv, WM8904_BIAS_CTRL, regval);
+
+  /* VMID Control */
+
+  regval = WM8904_VMID_BUF_ENA | WM8904_VMID_RES_NORMAL | WM8904_VMID_ENA;
+  wm8904_writereg(priv, WM8904_VMID_CTRL, regval);
+
+  /* Mic Bias Control 0 */
+  /* MICDET_ENA=1, MICBIAS_ENA=1   */
+
+  regval = WM8904_MICDET_ENA | WM8904_MICBIAS_ENA;
+  wm8904_writereg(priv, WM8904_MIC_BIAS_CTRL0, regval);
+
+  /* Mic Bias Control 1. */
+
+  wm8904_writereg(priv, WM8904_MIC_BIAS_CTRL1, 0xc000);
+
+  /* Power Management 0 */
+
+  regval = WM8904_INL_ENA | WM8904_INR_ENA;
+  wm8904_writereg(priv, WM8904_PM0, regval);
+
+  /* Power Management 2 */
+
+  regval = WM8904_HPL_PGA_ENA | WM8904_HPR_PGA_ENA;
+  wm8904_writereg(priv, WM8904_PM2, regval);
+
+  /* Power Management 6 */
+  /* DACL_ENA=1, DACR_ENA=1, ADCL_ENA=1, ADCR_ENA=1  */
+
+  regval = WM8904_DACL_ENA | WM8904_DACR_ENA | WM8904_ADCL_ENA | WM8904_ADCR_ENA;
+  wm8904_writereg(priv, WM8904_PM6, regval);
+
+  /* Clock Rates 0.
+   *
+   * This value sets TOCLK_RATE_DIV16=0, TOCLK_RATE_X4=0, and MCLK_DIV=0 while
+   * preserving the state of some undocumented bits (see wm8904.h).
+   */
+
+  wm8904_writereg(priv, WM8904_CLKRATE0, 0x845e);
+
+  /* Clock Rates 2 */
+
+  regval = WM8904_SYSCLK_SRC | WM8904_CLK_SYS_ENA | WM8904_CLK_DSP_ENA;
+  wm8904_writereg(priv, WM8904_CLKRATE2, regval);
+
+  /* Audio Interface 1.
+   *
+   * This value sets AIFADC_TDM=0, AIFADC_TDM_CHAN=0, BCLK_DIR=1 while preserving
+   * the state of some undocumented bits (see wm8904.h).
+   */
+
+  wm8904_writereg(priv, WM8904_AIF1, 0x404A);
+
+  /* Audio Interface 3 */
+
+  regval = WM8904_LRCLK_DIR | WM8904_LRCLK_RATE(64);
+  wm8904_writereg(priv, WM8904_AIF3, regval);
+
+  /* DAC Digital 1 */
+
+  wm8904_writereg(priv, WM8904_DAC_DIGI1, 0);
+
+  /* Analogue Left Input 0 */
+  /* Analogue Right Input 0 */
+
+  regval =  WM8904_IN_VOL(5);
+  wm8904_writereg(priv, WM8904_ANA_LEFT_IN0, regval);
+  wm8904_writereg(priv, WM8904_ANA_RIGHT_IN0, regval);
+
+  /* Analogue Left Input 1 */
+
+  wm8904_writereg(priv, WM8904_ANA_LEFT_IN1, 0);
+  wm8904_writereg(priv, WM8904_ANA_RIGHT_IN1, 0);
+
+  /* Analogue OUT1 Right */
+
+  regval = WM8904_HPOUT_MUTE | WM8904_HPOUTZC | WM8904_HPOUT_VOL(29);
+  wm8904_writereg(priv, WM8904_ANA_RIGHT_OUT1, regval);
+
+  /* DC Servo 0 */
+  /* DCS_ENA_CHAN_1=1, DCS_ENA_CHAN_0=1 */
+
+  regval = WM8904_DCS_ENA_CHAN_1 | WM8904_DCS_ENA_CHAN_0;
+  wm8904_writereg(priv, WM8904_DC_SERVO0, regval);
+
+  /* Analogue HP 0 */
+
+  regval = WM8904_HPL_RMV_SHORT | WM8904_HPL_ENA_OUTP | WM8904_HPL_ENA_DLY | WM8904_HPL_ENA |
+           WM8904_HPR_RMV_SHORT | WM8904_HPR_ENA_OUTP | WM8904_HPR_ENA_DLY | WM8904_HPR_ENA;
+  wm8904_writereg(priv, WM8904_ANA_HP0, regval);
+
+  /* Charge Pump 0 */
+
+  wm8904_writereg(priv, WM8904_CHG_PUMP0, WM8904_CP_ENA);
+
+  /* Class W 0 */
+
+  regval = WM8904_CP_DYN_PWR | 0x0004;
+  wm8904_writereg(priv, WM8904_CLASS_W0, regval);
+
+  /* FLL Control 1 */
+
+  wm8904_writereg(priv, WM8904_FLL_CTRL1, 0);
+
+  regval = WM8904_FLL_FRACN_ENA | WM8904_FLL_ENA;
+  wm8904_writereg(priv, WM8904_FLL_CTRL1, regval);
+
+  /* FLL Control 2 */
+
+  regval = WM8904_FLL_OUTDIV(8) | WM8904_FLL_FRATIO_DIV16;
+  wm8904_writereg(priv, WM8904_FLL_CTRL2, regval);
+
+  /* FLL Control 3 */
+
+  wm8904_writereg(priv, WM8904_FLL_CTRL3, 16384);
+
+  /* FLL Control 4 */
+
+  regval = WM8904_FLL_N(187) | WM8904_FLL_GAIN_X1;
+  wm8904_writereg(priv, WM8904_FLL_CTRL4, regval);
+
+  wm8904_writereg(priv, WM8904_DUMMY, 0x55AA);
+}
+
+/****************************************************************************
+ * Name: wm8904_audio_input
+ *
+ * Description:
+ *   Initialize and configure the WM8904 device as an audio output device
+ *   (Right input only).
+ *
+ * Input Parameters:
+ *   prive   - A reference to the driver state structure
+ *
+ * Returned Value:
+ *   None.  No failures are detected.
+ *
+ ****************************************************************************/
+
+#if 0 /* Not used */
+static void wm8904_audio_input(FAR struct wm8904_dev_s *priv)
+{
+  /* Analogue Left Input 0  */
+
+  wm8904_writereg(priv, WM8904_ANA_LEFT_IN0, WM8904_INMUTE);
+
+  /* Analogue Right Input 0 */
+
+  wm8904_writereg(priv, WM8904_ANA_RIGHT_IN0, WM8904_IN_VOL(5));
+
+  /* Analogue Left Input 1 */
+
+  wm8904_writereg(priv, WM8904_ANA_LEFT_IN1, 0);
+
+  /* Analogue Right Input 1 */
+
+  wm8904_writereg(priv, WM8904_ANA_RIGHT_IN1, WM8904_IP_SEL_N_IN2L);
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -1485,6 +1788,7 @@ FAR struct audio_lowerhalf_s *
                     FAR const struct wm8904_lower_s *lower, unsigned int devno)
 {
   FAR struct wm8904_dev_s *priv;
+  uint16_t regval;
 
   /* Sanity check */
 
@@ -1527,17 +1831,28 @@ FAR struct audio_lowerhalf_s *
       I2C_SETFREQUENCY(i2c, lower->frequency);
       I2C_SETADDRESS(i2c, lower->address, 7);
 
-      /* Verify the device ID read from the chip */
-#warning Missing logic
+      /* Software reset */
 
-      /* Initialize the WM8904 hardware */
-#warning Missing logic
+      wm8904_writereg(priv, WM8904_SWRST, 0);
+
+      /* Verify that WM8904 is present and available on this I2C */
+
+      regval = wm8904_readreg(priv, WM8904_ID);
+      if (regval != WM8904_SW_RST_DEV_ID1)
+        {
+          auddbg("ERROR: WM8904 not found: ID=%04x\n", regval);
+          return -ENODEV;
+        }
+WM8904_DUMMY
+      /* Configure the WM8904 hardware as an audio input device */
+
+      wm8904_audio_output(priv);
 
       /* Attach our ISR to this device */
 
       WM8904_ATTACH(lower, wm8904_interrupt, priv);
 
-      /* Put the drive in the 'shutdown' status */
+      /* Put the driver in the 'shutdown' state */
 
       wm8904_shutdown(&priv->dev);
     }
