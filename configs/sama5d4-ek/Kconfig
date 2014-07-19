@@ -198,43 +198,17 @@ config SAMA5D4EK_CHANNEL
 		Selects the PWM channel number that will be used to perform the PWM
 		test.  See apps/examples/pwm.
 
-if AUDIO_I2SCHAR && (SAMA5_SSC0 || SAMA5_SSC1)
+if AUDIO_WM8904
 
-if SAMA5_SSC0 && SAMA5_SSC1
-
-config SAMA5D4EK_SSC_PORT
-	int "SSC port number"
-	default 0
-	range 0 1
+config SAMA5D4EK_WM8904_I2CFREQUENCY
+	int "WM8904 I2C Frequency"
+	default 400000
+	range 1 400000
 	---help---
-		Specify the I2S port to use, i.e., 0 for SSC0 or 1 for SSC1
+		This option selects the I2C frequency to use when communicating with
+		the WM8904 device.  The default, 400KHz, is the maximum supported by
+		the WM8904.  If you have problems communicating with the WM8904,
+		then you might want to try lowering this rate.
 
-endif # SAMA5_SSC0 && SAMA5_SSC1
-
-if SAMA5_SSC0 && !SAMA5_SSC1
-
-config SAMA5D4EK_SSC_PORT
-	int
-	default 0
-
-endif # SAMA5_SSC0 && !SAMA5_SSC1
-
-if !SAMA5_SSC0 && SAMA5_SSC1
-
-config SAMA5D4EK_SSC_PORT
-	int
-	default 1
-
-endif # SAMA5_SSC0 && !SAMA5_SSC1
-
-config SAMA5D4EK_I2SCHAR_MINOR
-	int "I2S character driver minor number"
-	default 0
-	---help---
-		The minor device number to use when registering the I2S character
-		device.  The driver will be registered at /dev/is2charN where N is
-		the value provided by this setting.
-
-endif # AUDIO_I2SCHAR && (SAMA5_SSC0 || SAMA5_SSC1)
-
+endif # AUDIO_WM8904
 endif # ARCH_BOARD_SAMA5D4_EK

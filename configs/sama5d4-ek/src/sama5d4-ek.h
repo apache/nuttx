@@ -64,6 +64,7 @@
 #define HAVE_USBMONITOR 1
 #define HAVE_NETWORK    1
 #define HAVE_MAXTOUCH   1
+#define HAVE_WM8904     1
 
 /* HSMCI */
 /* Can't support MMC/SD if the card interface(s) are not enable */
@@ -312,6 +313,36 @@
 #  ifndef CONFIG_SAMA5_PIOE_IRQ
 #    warning PIOE interrupts not enabled.  No touchsreen support.
 #    undef HAVE_MAXTOUCH
+#  endif
+#endif
+
+/* Audio */
+/* Default configuration values */
+
+#ifndef CONFIG_AUDIO_WM8904
+#  undef HAVE_WM8904
+#endif
+
+#ifdef HAVE_WM8904
+#  ifndef CONFIG_SAMA5_TWI0
+#    warning CONFIG_SAMA5_TWI0 is required for audio support
+#    undef HAVE_WM8904
+#  endif
+
+#  ifndef CONFIG_SAMA5_SSC0
+#    warning CONFIG_SAMA5_SSC0 is required for audio support
+#    undef HAVE_WM8904
+#  endif
+
+#  ifndef CONFIG_SAMA5D4EK_WM8904_I2CFREQUENCY
+#    warning Defaulting to maximum WM8904 I2C frequency
+#    define CONFIG_SAMA5D4EK_WM8904_I2CFREQUENCY 400000
+#  endif
+
+#  if CONFIG_SAMA5D4EK_WM8904_I2CFREQUENCY > 400000
+#    warning WM8904 I2C frequency cannot exceed 400KHz
+#    undef CONFIG_SAMA5D4EK_WM8904_I2CFREQUENCY
+#    define CONFIG_SAMA5D4EK_WM8904_I2CFREQUENCY 400000
 #  endif
 #endif
 
@@ -649,6 +680,15 @@
                         PIO_INT_BOTHEDGES | PIO_PORT_PIOE | PIO_PIN4)
 #define IRQ_INT_WM8904 SAM_IRQ_PE4
 
+/* The MW8904 communicates on TWI0, I2C address 0x1a for control operations */
+
+#define WM8904_TWI_BUS      0
+#define WM8904_I2C_ADDRESS  0x1a
+
+/* The MW8904 transfers data on SSC0 */
+
+#define WM8904_SSC_BUS      0
+
 /* SPI Chip Selects *****************************************************************/
 /* The SAMA5D4-EK includes an Atmel AT25DF321A, 32-megabit, 2.7-volt SPI serial
  * FLASH on board.  The connection is as follows:
@@ -858,6 +898,27 @@ void board_led_initialize(void);
 #ifdef CONFIG_NSH_LIBRARY
 int nsh_archinitialize(void);
 #endif
+
+/****************************************************************************
+ * Name: sam_wm8904_initialize
+ *
+ * Description:
+ *   This function is called by platform-specific, setup logic to configure
+ *   and register the WM8904 device.  This function will register the driver
+ *   as /dev/wm8904[x] where x is determined by the minor device number.
+ *
+ * Input Parameters:
+ *   minor - The input device minor number
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_WM8904
+int sam_wm8904_initialize(int minor);
+#endif /* HAVE_WM8904 */
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_SAMA5D4_EK_SRC_SAMA5D4_EK_H */
