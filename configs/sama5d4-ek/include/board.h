@@ -227,7 +227,13 @@
 
 #define BOARD_EBICS3_NAND_DATAADDR  0x60000000
 
-/* PIO configuration ****************************************************************/
+/* Pin disambiguation ***************************************************************/
+
+/* PCK0 is provided to the WM8904 audio CODEC via PB26 */
+
+#ifdef CONFIG_AUDIO_WM8904
+#  define PIO_PMC_PCK0          PIO_PMC_PCK0_1
+#endif
 
 /************************************************************************************
  * Assembly Language Macros
