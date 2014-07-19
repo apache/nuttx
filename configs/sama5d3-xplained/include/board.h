@@ -52,6 +52,11 @@
  * definitions will configure operational clocking.
  */
 
+/* On-board crystal frequencies */
+
+#define BOARD_MAINOSC_FREQUENCY    (12000000)  /* MAINOSC: 12MHz crystal on-board */
+#define BOARD_SLOWCLK_FREQUENCY    (32768)     /* Slow Clock: 32.768KHz */
+
 #if defined(CONFIG_SAMA5_BOOT_SDRAM)
 /* When booting from SDRAM, NuttX is loaded in SDRAM by an intermediate bootloader.
  * That bootloader had to have already configured the PLL and SDRAM for proper
