@@ -191,7 +191,7 @@
 
 #define ADC_MR_SLEEP               (1 << 5)  /* Bit 5:  Sleep Mode */
 
-#ifdef ATSAMA53
+#ifdef ATSAMA5D3
 #  define ADC_MR_FWUP              (1 << 6)  /* Bit 6:  Fast Wake Up */
 #endif
 
@@ -217,7 +217,7 @@
 #  define ADC_MR_STARTUP_896       (14 << ADC_MR_STARTUP_SHIFT) /* 896 periods of ADCClock */
 #  define ADC_MR_STARTUP_960       (15 << ADC_MR_STARTUP_SHIFT) /* 960 periods of ADCClock */
 
-#ifdef ATSAMA53
+#ifdef ATSAMA5D3
 #  define ADC_MR_SETTLING_SHIFT    (20)      /* Bits 20-21: Analog Settling Time */
 #  define ADC_MR_SETTLING_MASK     (15 << ADC_MR_SETTLING_SHIFT)
 #    define ADC_MR_SETTLING_3      (0 << ADC_MR_SETTLING_SHIFT) /* 3 periods of ADCClock */
@@ -231,7 +231,7 @@
 #define ADC_MR_TRACKTIM_MASK       (15 << ADC_MR_TRACKTIM_SHIFT)
 #  define ADC_MR_TRACKTIM(n)       ((uint32_t)(n) << ADC_MR_TRACKTIM_SHIFT)
 
-#ifdef ATSAMA53
+#ifdef ATSAMA5D3
 #  define ADC_MR_TRANSFER_SHIFT    (28)      /* Bits 28-29: Transfer Period */
 #  define ADC_MR_TRANSFER_MASK     (3 << ADC_MR_TRANSFER_SHIFT)
 #    define ADC_MR_TRANSFER        (2 << ADC_MR_TRANSFER_SHIFT) /* Must be 2 */
@@ -257,7 +257,7 @@
 #define ADC_SEQR1_USCH4_MASK       (15 << ADC_SEQR1_USCH4_SHIFT)
 #  define ADC_SEQR1_USCH4(v)       ((uint32_t)(v) << ADC_SEQR1_USCH4_SHIFT)
 
-#ifdef ATSAMA53
+#ifdef ATSAMA5D3
 #  define ADC_SEQR1_USCH5_SHIFT    (16) /* Bits 16-19: User sequence number 5 */
 #  define ADC_SEQR1_USCH5_MASK     (15 << ADC_SEQR1_USCH5_SHIFT)
 #    define ADC_SEQR1_USCH5(v)     ((uint32_t)(v) << ADC_SEQR1_USCH5_SHIFT)
@@ -272,7 +272,7 @@
 #    define ADC_SEQR1_USCH8(v)     ((uint32_t)(v) << ADC_SEQR1_USCH8_SHIFT)
 #endif
 
-#ifdef ATSAMA53
+#ifdef ATSAMA5D3
 /* Channel Sequence Register 2 */
 
 #  define ADC_SEQR2_USCH_SHIFT(n)  (((n)-9) << 2) /* n=9..11 */
@@ -302,7 +302,7 @@
 #define ADC_CH4                    (1 << 4)  /* Bit 4:  Channel 4 Enable */
 #define ADC_CH5                    (1 << 5)  /* Bit 5:  Channel 5 Enable */
 
-#ifdef ATSAMA53
+#ifdef ATSAMA5D3
 #  define ADC_CH6                  (1 << 6)  /* Bit 6:  Channel 6 Enable */
 #  define ADC_CH7                  (1 << 7)  /* Bit 7:  Channel 7 Enable */
 #  define ADC_CH8                  (1 << 8)  /* Bit 8:  Channel 8 Enable */
@@ -314,9 +314,9 @@
 #define TSD_4WIRE_ALL              (0x0000000f)
 #define TSD_5WIRE_ALL              (0x0000001f)
 
-#if defined(ATSAMA53)
+#if defined(ATSAMA5D3)
 #  define ADC_CHALL                (0x00000fff)
-#elif defined(ATSAMA54)
+#elif defined(ATSAMA5D4)
 #  define ADC_CHALL                (0x0000001f)
 #endif
 
@@ -340,7 +340,7 @@
 #define ADC_INT_EOC3               (1 << 3)  /* Bit 3:  End of Conversion 3 */
 #define ADC_INT_EOC4               (1 << 4)  /* Bit 4:  End of Conversion 4 */
 
-#if defined(ATSAMA53)
+#if defined(ATSAMA5D3)
 #  define ADC_INT_EOC5             (1 << 5)  /* Bit 5:  End of Conversion 5 */
 #  define ADC_INT_EOC6             (1 << 6)  /* Bit 6:  End of Conversion 6 */
 #  define ADC_INT_EOC7             (1 << 7)  /* Bit 7:  End of Conversion 7 */
@@ -349,7 +349,7 @@
 #  define ADC_INT_EOC10            (1 << 10) /* Bit 10: End of Conversion 10 */
 #  define ADC_INT_EOC11            (1 << 11) /* Bit 11: End of Conversion 11 */
 #  define ADC_INT_EOCALL           (0x00000fff)
-#elif defined(ATSAMA54)
+#elif defined(ATSAMA5D4)
 #  define ADC_INT_EOCALL           (0x0000001f)
 #endif
 
@@ -357,7 +357,7 @@
 #define ADC_INT_YRDY               (1 << 21) /* Bit 21: TS Measure YPOS Ready Interrupt */
 #define ADC_INT_PRDY               (1 << 22) /* Bit 22: TS Measure Pressure Ready Interrupt */
 
-#ifdef ATSAMA53
+#ifdef ATSAMA5D3
 #  define ADC_INT_EOCAL            (1 << 23) /* Bit 23: End of Calibration Sequence */
 #endif
 
@@ -379,7 +379,7 @@
 #define ADC_OVER_OVRE3             (1 << 3)  /* Bit 3:  Overrun Error 3 */
 #define ADC_OVER_OVRE4             (1 << 4)  /* Bit 4:  Overrun Error 4 */
 
-#ifdef ATSAMA53
+#ifdef ATSAMA5D3
 #  define ADC_OVER_OVRE5           (1 << 5)  /* Bit 5:  Overrun Error 5 */
 #  define ADC_OVER_OVRE6           (1 << 6)  /* Bit 6:  Overrun Error 6 */
 #  define ADC_OVER_OVRE7           (1 << 7)  /* Bit 7:  Overrun Error 7 */
