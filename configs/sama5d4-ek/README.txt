@@ -91,8 +91,7 @@ Contents
   - RTC
   - Watchdog Timer
   - TRNG and /dev/random
-  - I2S Audio Support
-  - WM8904 Support
+  - Audio Support
   - TM7000 LCD/Touchscreen
   - SAMA4D4-EK Configuration Options
   - Configurations
@@ -2709,116 +2708,84 @@ TRNG and /dev/random
       CONFIG_EXAMPLES_MAXSAMPLES=64       : Default settings are probably OK
       CONFIG_EXAMPLES_NSAMPLES=8
 
-I2S Audio Support
-=================
+Audio Support
+==============
 
+  WM8904 CODEC
+  ------------
   The SAMA4D4-EK has two devices on-board that can be used for verification
   of I2S functionality:  HDMI and a WM8904 audio CODEC.  As of this writing,
   the I2S driver is present, but there are not drivers for either the HDMI
   or the WM8904.
 
-  WM8904 Audio CODEC Interface
-  ----------------------------
+  WM8904 Audio CODEC Interface:
+  ---- ------------------ ---------------- ------------- ---------------------------------------
+  PIO  USAGE              BOARD SIGNAL     WM8904 PIN    NOTE
+  ---- ------------------ ---------------- ------------- ---------------------------------------
+  PA30 TWD0               AUDIO_TWD0_PA30  3  SDA        Pulled up, See J23 note below
+  PA31 TWCK0              AUDIO_TWCK0_PA31 2  SCLK       Pulled up
+  PB10 AUDIO_PCK2/EXP     AUDIO_PCK2_PB10  28 MCLK
+  PB27 AUDIO/HDMI_TK0/EXP AUDIO_TK0_PB27   29 BCLK/GPIO4 Note TK0 and RK0 are mutually exclusive
+  PB26 AUDIO_RK0          AUDIO_RK0_PB26   29 "  "/"   " "  " " " " " " " " " "      " "       "
+  PB30 AUDIO_RF/ZIG_TWCK2 AUDIO_RF0_PB30   30 LRCLK      Note TF0 and RF0 are mutually exclusive
+  PB31 AUDIO/HDMI_TF0/EXP AUDIO_TF0_PB31   30 "   "      "  " " " " " " " " " "      " "       "
+  PB29 AUDIO_RD0/ZIG_TWD2 AUDIO_RD0_PB29   31 ADCDAT
+  PB28 AUDIO/HDMI_TD0/EXP AUDIO_TD0_PB28   32 ACDAT
+  PE4  AUDIO_IRQ          AUDIO_IRQ_PE4    1  IRQ/GPIO1  Audio interrupt
+  ---- ------------------ ---------------- ------------- ---------------------------------------
+  Note that jumper J23 must be closed to connect AUDIO_TWD0_PA30
 
-    ------------- ---------------- -----------------
-    WM8904        SAMA5D4          NuttX Pin Name
-    ------------- ---------------- -----------------
-     3 SDA        PA30 TWD0        PIO_TWI0_D
-     2 SCLK       PA31 TWCK0       PIO_TWI0_CK
-    28 MCLK       PD30 PCK0        PIO_PMC_PCK0
-    29 BCLK/GPIO4 PC16 TK          PIO_SSC0_TK
-    "" "        " PC19 RK          PIO_SSC0_RK
-    30 LRCLK      PC17 TF          PIO_SSC0_TF
-    "" "   "      PC20 RF          PIO_SSC0_RF
-    31 ADCDAT     PC21 RD          PIO_SSC0_RD
-    32 DACDAT     PC18 TD          PIO_SSC0_TD
-     1 IRQ/GPIO1  PD16 INT_AUDIO   N/A
-    ------------- ---------------- -----------------
+  WM8904 Configuration
+  --------------------
+    System Type -> SAMA5 Peripheral Support
+      CONFIG_SAMA5_TWI0=y                   : Enable TWI0 driver support
+      CONFIG_SAMA5_SSCO=y                   : Enable SSC0 driver support
+      CONFIG_SAMA5_XDMAC1=y                 : XDMAC0 required by SSC0
+
+    System Type -> SSC0 Configuration
+      CONFIG_SAMA5_SSC_MAXINFLIGHT=16
+      CONFIG_SAMA5_SSC0_DATALEN=16
+
+    Device Drivers -> SPI Driver Support
+      CONFIG_SPI=y                          : Enable SPI support
+      CONFIG_SPI_EXCHANGE=y                 : Support the exchange method
+
+    System Type -> SSC Configuration
+      CONFIG_SAMA5_SSC_MAXINFLIGHT=16       : Up to 16 pending DMA transfers
+      CONFIG_SAMA5_SSC0_MASTER=y            : Master mode
+      CONFIG_SAMA5_SSC0_DATALEN=16          : 16-bit data
+      CONFIG_SAMA5_SSC0_RX=n                : No receiver
+      CONFIG_SAMA5_SSC0_TX=y                : Support a transmitter
+      CONFIG_SAMA5_SSC0_TX_MCKDIV=y         : Transmitter gets clock from MCK/2
+      CONFIG_SAMA5_SSC0_MCKDIV_SAMPLERATE=48000 : Sampling at 48K samples/sec
+      CONFIG_SAMA5_SSC0_TX_TKOUTPUT_XFR=y   : Outputs clock on TK when transferring data
+
+    Audio
+      CONFIG_AUDIO=y                        : Audio support needed
+      CONFIG_AUDIO_FORMAT_PCM=y             : Only PCM files are supported
+
+    Drivers -> Audio
+      CONFIG_I2S=y                          : General I2S support
+      CONFIG_AUDIO_DEVICES=y                : Audio device support
+      CONFIG_AUDIO_NUM_BUFFERS=8            : Number of audio buffers
+      CONFIG_AUDIO_BUFFER_NUMBYTES=8192     : Audio buffer size
+      CONFIG_AUDIO_WM8904=y                 : Build WM8904 driver character driver
+
+    Board Selection
+      CONFIG_SAMA5D4EK_WM8904_I2CFREQUENCY=400000
+
+    Library Routines
+      CONFIG_SCHED_WORKQUEUE=y              : MW8904 driver needs work queue support
 
   I2S Loopback Test
   -----------------
 
   The I2S driver was verified using a special I2C character driver (at
   nuttx/drivers/audio/i2schar.c) and a test driver at apps/examples/i2schar.
-  The I2S driver was verified in loopback mode with no audio device.
-
-  [NOTE: The above statement is anticipatory:  As of this writing I2S driver
-   verification is underway and still not complete].
-
-  This section describes the modifications to the NSH configuration that were
-  used to perform the I2S testing:
-
-    System Type -> SAMA5 Peripheral Support
-      CONFIG_SAMA5_SSCO=y              : Enable SSC0 driver support
-      CONFIG_SAMA5_DMAC0=y             : DMAC0 required by SSC0
-
-    Alternatively, SSC1 could have be used:
-
-    System Type -> SAMA5 Peripheral Support
-      CONFIG_SAMA5_SSC1=y              : Enable SSC0 driver support
-      CONFIG_SAMA5_DMAC1=y             : DMAC0 required by SSC0
-
-    System Type -> SSC Configuration
-      CONFIG_SAMA5_SSC_MAXINFLIGHT=16  : Up to 16 pending DMA transfers
-      CONFIG_SAMA5_SSC0_MASTER=y       : Master mode
-      CONFIG_SAMA5_SSC0_DATALEN=16     : 16-bit data
-      CONFIG_SAMA5_SSC0_RX=y           : Support a receiver
-      CONFIG_SAMA5_SSC0_RX_RKINPUT=y   : Receiver gets clock from RK input
-      CONFIG_SAMA5_SSC0_TX=y           : Support a transmitter
-      CONFIG_SAMA5_SSC0_TX_MCKDIV=y    : Transmitter gets clock from MCK/2
-      CONFIG_SAMA5_SSC0_MCKDIV_SAMPLERATE=48000 : Sampling at 48K samples/sec
-      CONFIG_SAMA5_SSC0_TX_TKOUTPUT_XFR=y  : Outputs clock on TK when transferring data
-      CONFIG_SAMA5_SSC0_LOOPBACK=y     : Loopmode mode connects RD/TD and RK/TK
-
-    Audio
-      CONFIG_AUDIO=y                   : Audio support needed
-                                       : Defaults should be okay
-
-    Drivers -> Audio
-      CONFIG_I2S=y                     : General I2S support
-      CONFIG_AUDIO_DEVICES=y           : Audio device support
-      CONFIG_AUDIO_I2SCHAR=y           : Build I2S character driver
-
-    The following describes how I have the test application at
-    apps/examples/i2schar configured:
-
-      CONFIG_EXAMPLES_I2SCHAR=y
-      CONFIG_EXAMPLES_I2SCHAR_DEVPATH="/dev/i2schar0"
-      CONFIG_EXAMPLES_I2SCHAR_TX=y
-      CONFIG_EXAMPLES_I2SCHAR_TXBUFFERS=4
-      CONFIG_EXAMPLES_I2SCHAR_TXSTACKSIZE=1536
-      CONFIG_EXAMPLES_I2SCHAR_RX=y
-      CONFIG_EXAMPLES_I2SCHAR_RXBUFFERS=4
-      CONFIG_EXAMPLES_I2SCHAR_RXSTACKSIZE=1536
-      CONFIG_EXAMPLES_I2SCHAR_BUFSIZE=256
-      CONFIG_EXAMPLES_I2SCHAR_DEVINIT=y
-
-    Board Selection
-      CONFIG_SAMA5D4EK_I2SCHAR_MINOR=0
-      CONFIG_SAMA5D4EK_SSC_PORT=0     : 0 or SSC0, 1 for SSC1
-
-    Library Routines
-      CONFIG_SCHED_WORKQUEUE=y          : Driver needs work queue support
-
-WM8904 Support
-==============
-
-  SAMA5D4 Interface
-  ---- ------------------ ---------------- ---------- ---------------------------------------
-  PIO  USAGE              BOARD SIGNAL     WM8904 PIN NOTE
-  ---- ------------------ ---------------- ---------- ---------------------------------------
-  PA30 TWD0               AUDIO_TWD0_PA30  SDA        Pulled up, See J23 note below
-  PA31 TWCK0              AUDIO_TWCK0_PA31 SCLK       Pulled up
-  PB10 AUDIO_PCK2/EXP     AUDIO_PCK2_PB10  MCLK
-  PB27 AUDIO/HDMI_TK0/EXP AUDIO_TK0_PB27   BCLK/GPIO4 Note TK0 and RK0 are mutually exclusive
-  PB26 AUDIO_RK0          AUDIO_RK0_PB26   "  "/"   " "  " " " " " " " " " "      " "       "
-  PB30 AUDIO_RF/ZIG_TWCK2 AUDIO_RF0_PB30   LRCLK      Note TF0 and RF0 are mutually exclusive
-  PB31 AUDIO/HDMI_TF0/EXP AUDIO_TF0_PB31   "   "      "  " " " " " " " " " "      " "       "
-  PB29 AUDIO_RD0/ZIG_TWD2 AUDIO_RD0_PB29   ADCDAT
-  PB28 AUDIO/HDMI_TD0/EXP AUDIO_TD0_PB28   ACDAT
-  PE4  AUDIO_IRQ          AUDIO_IRQ_PE4    IRQ/GPIO1  Audio interrupt
-  ---- ------------------ ---------------- ---------- ---------------------------------------
-  Note that jumper J23 must be closed to connect AUDIO_TWD0_PA30
+  The I2S driver was verified in loopback mode with no audio device.  That
+  test case has never been exercised on the SAMA454-EK.  See the README.txt
+  file at SAMA5D4-EK for information about how you might implement this test
+  for the SAMA5D4-EK.
 
 TM7000 LCD/Touchscreen
 ======================

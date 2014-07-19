@@ -76,6 +76,14 @@ CSRCS += sam_at25.c
 endif
 endif
 
+ifeq ($(CONFIG_AUDIO_WM8904),y)
+ifeq ($(CONFIG_SAMA5_TWI0),y)
+ifeq ($(CONFIG_SAMA5_SSC0),y)
+CSRCS += sam_wm8904.c
+endif
+endif
+endif
+
 ifeq ($(CONFIG_SAMA5_HSMCI0),y)
 CSRCS += sam_hsmci.c
 else

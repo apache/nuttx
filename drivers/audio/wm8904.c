@@ -1843,7 +1843,7 @@ FAR struct audio_lowerhalf_s *
           auddbg("ERROR: WM8904 not found: ID=%04x\n", regval);
           return -ENODEV;
         }
-WM8904_DUMMY
+
       /* Configure the WM8904 hardware as an audio input device */
 
       wm8904_audio_output(priv);

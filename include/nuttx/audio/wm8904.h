@@ -59,7 +59,7 @@
  * CONFIG_AUDIO_WM8904 - Enabled WM8904 support
  */
 
-/* Pre-requisistes */
+/* Pre-requisites */
 
 #ifndef CONFIG_AUDIO
 #  error CONFIG_AUDIO is required for audio subsystem support
@@ -82,16 +82,6 @@
 #endif
 
 /* Default configuration values */
-
-#ifndef CONFIG_WM8904_I2CFREQUENCY
-#  define CONFIG_WM8904_I2CFREQUENCY 400000
-#endif
-
-#if CONFIG_WM8904_I2CFREQUENCY > 400000
-#  warning WM8904 I2C frequency cannot exceed 400KHz
-#  undef CONFIG_WM8904_I2CFREQUENCY
-#  define CONFIG_WM8904_I2CFREQUENCY 400000
-#endif
 
 /* Helper macros ************************************************************/
 

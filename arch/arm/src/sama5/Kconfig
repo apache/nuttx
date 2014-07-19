@@ -483,14 +483,14 @@ config SAMA5_SSC0
 	bool "Synchronous Serial Controller 0 (SSC0)"
 	default n
 	select I2S
-	depends on SAMA5_DMAC0
+	depends on SAMA5_DMAC0 || SAMA5_XDMAC0 || SAMA5_XDMAC1
 	select AUDIO
 
 config SAMA5_SSC1
 	bool "Synchronous Serial Controller 1 (SSC1)"
 	default n
 	select I2S
-	depends on SAMA5_DMAC1
+	depends on SAMA5_DMAC1 || SAMA5_XDMAC0 || SAMA5_XDMAC1
 	select AUDIO
 
 config SAMA5_CAN0
