@@ -58,6 +58,12 @@
 
 /* Slow Clock Controller Configuration Register */
 
+#ifdef ATSAMA5D3
+#  define SCKC_CR_RCEN        (1 << 0)  /* Bit 0: Internal 32 kHz RC Oscillator */
+#  define SCKC_CR_OSC32EN     (1 << 1)  /* Bit 1: 32768 Hz Oscillator */
+#  define SCKC_CR_OSC32BYP    (1 << 2)  /* Bit 2: 2768Hz Oscillator Bypass */
+#endif
+
 #define SCKC_CR_OSCSEL        (1 << 3)  /* Bit 3:  Slow Clock Selector */
 
 #endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAM_SCKC_H */

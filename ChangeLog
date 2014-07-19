@@ -7746,4 +7746,6 @@
 	  (2014-7-18).
 	* configs/sama5d4-ek/src/sam_wm8904.c:  Add logic to configure and
 	  initialize the WM8904 audio CODEC (2014-7-17).
+	* arch/arm/src/sama5/sam_sckc.c/.h and chip/sam_sckc.h:  Add SAMA5
+	  slow clock support.
 
