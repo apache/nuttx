@@ -159,7 +159,7 @@ int sam_isi_initialize(void)
    * initialized?
    */
 
-  g_isi.actual = sam_pck_configure(ISI_PCKID, CONFIG_ISI_MCKFREQ);
+  g_isi.actual = sam_pck_configure(ISI_PCKID, PCKSRC_MCK, CONFIG_ISI_MCKFREQ);
   gvdbg("PCK%d frequency=%d actual=%d\n",
         ISI_PCKID, CONFIG_ISI_MCKFREQ, g_isi.actual);
 

@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/sama5/sam_pck.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,6 +61,12 @@ enum pckid_e
   PCK2
 };
 
+enum pckid_clksrc_e
+{
+  PCKSRC_MCK = 0,  /* Source clock is the master clock (MCK) or PLLA output (PLLACK) */
+  PCKSRC_SCK       /* Source clock is the slow clock (SCK) */
+};
+
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
@@ -87,6 +93,8 @@ extern "C" {
  *
  * Input Parameters:
  *   pckid - Identifies the programmable clock output (0, 1, or 2)
+ *   clocksrc - MCK or SCK.  If MCK is selected, the logic will automatically
+ *     select the PLLACK clock if it seems like a better choice.
  *   frequency - Defines the desired frequency.  The exact frequency may
  *     not be attainable.  In this case, frequency is interpreted to be
  *     a not-to-exceed frequency.
@@ -96,7 +104,8 @@ extern "C" {
  *
  ****************************************************************************/
 
-uint32_t sam_pck_configure(enum pckid_e pckid, uint32_t frequency);
+uint32_t sam_pck_configure(enum pckid_e pckid, enum pckid_clksrc_e clksrc,
+                           uint32_t frequency);
 
 /****************************************************************************
  * Function: sam_pck_enable
