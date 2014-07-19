@@ -280,7 +280,7 @@ int sam_wm8904_initialize(int minor)
        */
 
       sam_sckc_enable(true);
-      (void)sam_pck_configure(PCK0, BOARD_SLOWCLK_FREQUENCY);
+      (void)sam_pck_configure(PCK0, PCKSRC_SCK, BOARD_SLOWCLK_FREQUENCY);
 
       /* Enable the DAC master clock */
 

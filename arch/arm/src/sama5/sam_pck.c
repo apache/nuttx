@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_pck.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -91,6 +91,8 @@
  *
  * Input Parameters:
  *   pckid - Identifies the programmable clock output (0, 1, or 2)
+ *   clocksrc - MCK or SCK.  If MCK is selected, the logic will automatically
+ *     select the PLLACK clock if it seems like a better choice.
  *   frequency - Defines the desired frequency.  The exact frequency may
  *     not be attainable.  In this case, frequency is interpreted to be
  *     a not-to-exceed frequency.
@@ -100,64 +102,78 @@
  *
  ****************************************************************************/
 
-uint32_t sam_pck_configure(enum pckid_e pckid, uint32_t frequency)
+uint32_t sam_pck_configure(enum pckid_e pckid, enum pckid_clksrc_e clksrc,
+                           uint32_t frequency)
 {
   uint32_t regval;
   uint32_t clkin;
   uint32_t actual;
 
-  /* Pick a clock source.  Several are possible but only MCK or PLLA is
+  /* Pick a clock source.  Several are possible but only MCK, PLLA, of SCK is
    * chosen here.
    */
 
-  DEBUGASSERT(BOARD_MCK_FREQUENCY < BOARD_PLLA_FREQUENCY);
-  if (frequency <= BOARD_MCK_FREQUENCY ||
-      frequency < BOARD_PLLA_FREQUENCY / 64)
+  if (clksrc == PCKSRC_SCK)
     {
-      regval = PMC_PCK_CSS_MCK;
-      clkin  = BOARD_MCK_FREQUENCY;
+      /* Pick the slow clock */
+
+      regval = PMC_PCK_CSS_SLOW;
+      clkin  = BOARD_SCK_FREQUENCY
     }
   else
     {
-      regval = PMC_PCK_CSS_PLLA;
-      clkin  = BOARD_PLLA_FREQUENCY;
+      DEBUGASSERT(BOARD_MCK_FREQUENCY < BOARD_PLLA_FREQUENCY);
+
+      /* Pick the PLLACK if it seems like a better choice */
+
+      if (frequency <= BOARD_MCK_FREQUENCY ||
+          frequency < BOARD_PLLA_FREQUENCY / 64)
+        {
+          regval = PMC_PCK_CSS_MCK;
+          clkin  = BOARD_MCK_FREQUENCY;
+        }
+      else
+        {
+          regval = PMC_PCK_CSS_PLLA;
+          clkin  = BOARD_PLLA_FREQUENCY;
+        }
     }
 
   /* The the larger smallest divisor that does not exceed the requested
    * frequency.
    */
 
-  if (frequency > clkin)
+  if (frequency >= clkin)
     {
       regval |= PMC_PCK_PRES_DIV1;
       actual  = clkin;
     }
-  else if (frequency > (clkin >> 1))
+  else if (frequency >= (clkin >> 1))
     {
       regval |= PMC_PCK_PRES_DIV2;
       actual = clkin >> 1;
     }
-  else if (frequency > (clkin >> 2))
+  else if (frequency >= (clkin >> 2))
     {
       regval |= PMC_PCK_PRES_DIV4;
       actual = clkin >> 2;
     }
-  else if (frequency > (clkin >> 3))
+  else if (frequency >= (clkin >> 3))
     {
       regval |= PMC_PCK_PRES_DIV8;
       actual = clkin >> 3;
     }
-  else if (frequency > (clkin >> 4))
+  else if (frequency >= (clkin >> 4))
     {
       regval |= PMC_PCK_PRES_DIV16;
       actual = clkin >> 4;
     }
-  else if (frequency > (clkin >> 5))
+  else if (frequency >= (clkin >> 5))
     {
       regval |= PMC_PCK_PRES_DIV32;
       actual = clkin >> 5;
     }
-  else if (frequency > (clkin >> 6))
+  else if (frequency >= (clkin >> 6))
     {
       regval |= PMC_PCK_PRES_DIV64;
       actual = clkin >> 6;
