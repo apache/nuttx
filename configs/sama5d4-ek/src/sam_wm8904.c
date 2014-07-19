@@ -49,10 +49,14 @@
 #include <nuttx/audio/i2s.h>
 #include <nuttx/audio/wm8904.h>
 
+#include <arch/board/board.h>
+
 #include "up_arch.h"
 #include "sam_pio.h"
 #include "sam_twi.h"
 #include "sam_ssc.h"
+#include "sam_sckc.h"
+#include "sam_pck.h"
 
 #include "sama5d4-ek.h"
 
@@ -269,6 +273,18 @@ int sam_wm8904_initialize(int minor)
           ret = -ENODEV;
           goto errout_with_i2s;
         }
+
+      /* Configure the DAC master clock.  This clock is provided by PCK0 (PB26)
+       * that is connected to the WM8904 BCLK/GPIO4 and also drives the SSC
+       * TK0 input clock.
+       */
+
+      sam_sckc_enable(true);
+      (void)sam_pck_configure(PCK0, BOARD_SLOWCLK_FREQUENCY);
+
+      /* Enable the DAC master clock */
+
+      sam_pck_enable(PCK0, true);
 
       /* Configure WM8904 interrupts */
 

@@ -2754,7 +2754,8 @@ Audio Support
       CONFIG_SAMA5_SSC_MAXINFLIGHT=16       : Up to 16 pending DMA transfers
       CONFIG_SAMA5_SSC0_MASTER=y            : Master mode
       CONFIG_SAMA5_SSC0_DATALEN=16          : 16-bit data
-      CONFIG_SAMA5_SSC0_RX=n                : No receiver
+      CONFIG_SAMA5_SSC0_RX=y                : Support a receiver
+      CONFIG_SAMA5_SSC0_RX_RKINPUT=y        : Receiver gets clock from RK input
       CONFIG_SAMA5_SSC0_TX=y                : Support a transmitter
       CONFIG_SAMA5_SSC0_TX_MCKDIV=y         : Transmitter gets clock from MCK/2
       CONFIG_SAMA5_SSC0_MCKDIV_SAMPLERATE=48000 : Sampling at 48K samples/sec
