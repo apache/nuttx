@@ -7748,4 +7748,5 @@
 	  initialize the WM8904 audio CODEC (2014-7-17).
 	* arch/arm/src/sama5/sam_sckc.c/.h and chip/sam_sckc.h:  Add SAMA5
 	  slow clock support.
-
+	* arch/arm/src/sama5/sam_pck.c and .h:  Add support to use the slow
+	  clock as the PCK clock source (2014-7-19).
