@@ -92,7 +92,39 @@ void sam_sckc_enable(bool enable)
 {
   uint32_t regval;
 
-  /* Enable / disable the slow clock */
+#ifdef ATSAMA5D3
+  /* REVISIT: Missing the logic that disables the external OSC32 */
+  /* Enable external OSC 32 kHz */
+
+  regval  = getreg32(SAM_SCKC_CR);
+  regval |= SCKC_CR_OSC32EN;
+  putreg32(regval, SAM_SCKC_CR);
+
+  /* Wait 5 slow clock cycles for clock stabilization */
+
+  up_udelay(5 * USEC_PER_SEC / BOARD_SLOWCLK_FREQUENCY);
+
+  /* Disable OSC 32 kHz bypass */
+
+  regval &= ~SCKC_CR_OSC32BYP;
+  putreg32(regval, SAM_SCKC_CR);
+
+  /* Switch slow clock source to external OSC 32 kHz (*/
+
+  regval |= SCKC_CR_OSCSEL;
+  putreg32(regval, SAM_SCKC_CR);
+
+  /* Wait 5 slow clock cycles for internal resynchronization */
+
+  up_udelay(5 * USEC_PER_SEC / BOARD_SLOWCLK_FREQUENCY);
+
+  /* Disable internal RC 32 kHz */
+
+  regval &= ~SCKC_CR_RCEN;
+  putreg32(regval, SAM_SCKC_CR);
+
+#else
+  /* Switch slow clock source to external OSC 32 kHz */
 
   regval = enable ? SCKC_CR_OSCSEL : 0;
   putreg32(regval, SAM_SCKC_CR);
@@ -100,4 +132,5 @@ void sam_sckc_enable(bool enable)
   /* Wait 5 slow clock cycles for internal resynchronization */
 
   up_udelay(5 * USEC_PER_SEC / BOARD_SLOWCLK_FREQUENCY);
+#endif
 }
