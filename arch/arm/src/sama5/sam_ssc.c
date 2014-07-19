@@ -87,12 +87,28 @@
 #  define SAMA5_SSC_MAXINFLIGHT 16
 #endif
 
-#if defined(CONFIG_SAMA5_SSC0) && !defined(CONFIG_SAMA5_DMAC0)
-#  error CONFIG_SAMA5_DMAC0 required by SSC0
+#if defined(CONFIG_SAMA5_SSC0)
+#  if defined(CONFIG_SAMA5_HAVE_XDMA)
+#    if !defined(CONFIG_SAMA5_XDMAC0) && !defined(CONFIG_SAMA5_XDMAC1)
+#      error CONFIG_SAMA5_XDMAC1 (or XDMAC0) required by SSC0
+#    endif
+#  else
+#    if !defined(CONFIG_SAMA5_DMAC0)
+#      error CONFIG_SAMA5_DMAC0 required by SSC0
+#    endif
+#  endif
 #endif
 
-#if defined(CONFIG_SAMA5_SSC1) && !defined(CONFIG_SAMA5_DMAC1)
-#  error CONFIG_SAMA5_DMAC1 required by SSC1
+#if defined(CONFIG_SAMA5_SSC1)
+#  if defined(CONFIG_SAMA5_HAVE_XDMA)
+#    if !defined(CONFIG_SAMA5_XDMAC0) && !defined(CONFIG_SAMA5_XDMAC1)
+#      error CONFIG_SAMA5_XDMAC1 (or XDMAC0) required by SSC1
+#    endif
+#  else
+#    if !defined(CONFIG_SAMA5_DMAC1)
+#      error CONFIG_SAMA5_DMAC0 required by SSC1
+#    endif
+#  endif
 #endif
 
 #ifndef CONFIG_SAMA5_SSC0_DATALEN
