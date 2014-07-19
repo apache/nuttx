@@ -7744,3 +7744,6 @@
 	  for a WM8904 audio driver.  The initial driver check-in is simply Ken
 	  Pettit's VS1053 driver forced to compile with only WM8904 definitions
 	  (2014-7-18).
+	* configs/sama5d4-ek/src/sam_wm8904.c:  Add logic to configure and
+	  initialize the WM8904 audio CODEC (2014-7-17).
+
