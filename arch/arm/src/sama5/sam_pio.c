@@ -337,16 +337,18 @@ static inline int sam_configinput(uintptr_t base, uint32_t pin,
     }
 
 #ifdef PIO_HAVE_SCHMITT
-  /* Enable/disable the Schmitt trigger */
+  /* Enable/disable the Schmitt trigger:  Zero enables.  Schmitt triggered
+   * inputs are enabled by default.
+   */
 
   regval = getreg32(base + SAM_PIO_SCHMITT_OFFSET);
   if ((cfgset & PIO_CFG_SCHMITT) != 0)
     {
-      regval |= pin;
+      regval &= ~pin;
     }
   else
     {
-      regval &= ~pin;
+      regval |= pin;
     }
 
   putreg32(regval, base + SAM_PIO_SCHMITT_OFFSET);
