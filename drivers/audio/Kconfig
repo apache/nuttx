@@ -87,7 +87,7 @@ endif # VS1053
 config AUDIO_WM8904
 	bool "WM8904 audio chip"
 	default n
-	depends on AUDIO && EXPERIMENTAL
+	depends on AUDIO
 	---help---
 		Select to enable support for the WM8904 Audio codec by Wolfson
 		Microelectonics.  This chip is a lower level audio chip.. basically
