@@ -2962,7 +2962,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
       sam_configpio(PIO_MCI0_DA2);   /* Data 2 of Slot A */
       sam_configpio(PIO_MCI0_DA3);   /* Data 3 of Slot A */
       sam_configpio(PIO_MCI0_CK);    /* Common SD clock */
-      sam_configpio(PIO_MCI0_CDA);   /* Command/Response of Slot A*/
+      sam_configpio(PIO_MCI0_CDA);   /* Command/Response of Slot A */
 
       /* Enable the HSMCI0 peripheral clock.  This really should be done in
        * sam_enable (as well as disabling peripheral clocks in sam_disable().
@@ -3145,7 +3145,7 @@ void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
  *
  * Input Parameters:
  *   dev       - An instance of the SDIO driver device state structure.
- *   wrprotect - true is a card is writeprotected.
+ *   wrprotect - true is a card is write protected.
  *
  * Returned Values:
  *   None
