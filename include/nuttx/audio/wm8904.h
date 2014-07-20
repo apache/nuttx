@@ -57,6 +57,15 @@
 /* Configuration ************************************************************
  *
  * CONFIG_AUDIO_WM8904 - Enabled WM8904 support
+ * CONFIG_WM8904_INITVOLUME - The initial volume level in the range {0..1000}
+ * CONFIG_WM8904_INFLIGHT - Maximum number of buffers that the WM8904 driver
+ *   will send to the I2S driver before any have completed.
+ * CONFIG_WM8904_MSG_PRIO - Priority of messages sent to the WM8904 worker
+ *   thread.
+ * CONFIG_WM8904_BUFFER_SIZE - Preferred buffer size
+ * CONFIG_WM8904_NUM_BUFFERS - Preferred number of buffers
+ * CONFIG_WM8904_WORKER_STACKSIZE - Stack size to use when creating the the
+ *   WM8904 worker thread.
  */
 
 /* Pre-requisites */
@@ -82,6 +91,34 @@
 #endif
 
 /* Default configuration values */
+
+#ifndef CONFIG_WM8904_INITVOLUME
+#  define CONFIG_WM8904_INITVOLUME 250
+#endif
+
+#ifndef CONFIG_WM8904_INFLIGHT
+#  define CONFIG_WM8904_INFLIGHT          2
+#endif
+
+#if CONFIG_WM8904_INFLIGHT > 255
+#  error CONFIG_WM8904_INFLIGHT must fit in a uint8_t
+#endif
+
+#ifndef CONFIG_WM8904_MSG_PRIO
+#  define CONFIG_WM8904_MSG_PRIO          1
+#endif
+
+#ifndef CONFIG_WM8904_BUFFER_SIZE
+#  define CONFIG_WM8904_BUFFER_SIZE       8192
+#endif
+
+#ifndef CONFIG_WM8904_NUM_BUFFERS
+#  define CONFIG_WM8904_NUM_BUFFERS       4
+#endif
+
+#ifndef CONFIG_WM8904_WORKER_STACKSIZE
+#  define CONFIG_WM8904_WORKER_STACKSIZE  768
+#endif
 
 /* Helper macros ************************************************************/
 

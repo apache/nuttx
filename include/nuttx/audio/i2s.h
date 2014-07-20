@@ -60,8 +60,8 @@
  *
  * Description:
  *   Set the I2S RX sample rate.  NOTE:  This will have no effect if (1) the
- *   driver does not support an I2C receiver or if (2) the sample rate is
- *   driven by the I2C frame clock.  This may also have unexpected side-
+ *   driver does not support an I2S receiver or if (2) the sample rate is
+ *   driven by the I2S frame clock.  This may also have unexpected side-
  *   effects of the RX sample is coupled with the TX sample rate.
  *
  * Input Parameters:
@@ -130,8 +130,8 @@
  *
  * Description:
  *   Set the I2S TX sample rate.  NOTE:  This will have no effect if (1) the
- *   driver does not support an I2C transmitter or if (2) the sample rate is
- *   driven by the I2C frame clock.  This may also have unexpected side-
+ *   driver does not support an I2S transmitter or if (2) the sample rate is
+ *   driven by the I2S frame clock.  This may also have unexpected side-
  *   effects of the TX sample is coupled with the RX sample rate.
  *
  * Input Parameters:
@@ -176,7 +176,7 @@
  *              the completion of the transfer.  The callback will be
  *              performed in the context of the worker thread.
  *   arg      - An opaque argument that will be provided to the callback
- *              when the transfer complete.
+ *              when the transfer completes.
  *   timeout  - The timeout value to use.  The transfer will be cancelled
  *              and an ETIMEDOUT error will be reported if this timeout
  *              elapsed without completion of the DMA transfer.  Units

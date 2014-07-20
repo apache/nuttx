@@ -53,11 +53,13 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <string.h>
-#include <debug.h>
 #include <errno.h>
+#include <fixedmath.h>
 #include <queue.h>
+#include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/clock.h>
 #include <nuttx/i2c.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
@@ -71,30 +73,6 @@
 /****************************************************************************
  * Private Definitions
  ****************************************************************************/
-
-#ifndef CONFIG_WM8904_XTALI
-#  define CONFIG_WM8904_XTALI             12288000
-#endif
-
-#ifndef CONFIG_WM8904_MP3_DECODE_FREQ
-#  define CONFIG_WM8904_MP3_DECODE_FREQ   43000000
-#endif
-
-#ifndef CONFIG_WM8904_MSG_PRIO
-#  define CONFIG_WM8904_MSG_PRIO          1
-#endif
-
-#ifndef CONFIG_WM8904_BUFFER_SIZE
-#  define CONFIG_WM8904_BUFFER_SIZE       8192
-#endif
-
-#ifndef CONFIG_WM8904_NUM_BUFFERS
-#  define CONFIG_WM8904_NUM_BUFFERS       2
-#endif
-
-#ifndef CONFIG_WM8904_WORKER_STACKSIZE
-#  define CONFIG_WM8904_WORKER_STACKSIZE  768
-#endif
 
 #define WM8904_DUMMY                      0xff
 #define WM8904_DEFAULT_XTALI              12288000
@@ -123,87 +101,122 @@ struct wm8904_dev_s
   const FAR struct wm8904_lower_s *lower;   /* Pointer to the board lower functions */
   FAR struct i2c_dev_s   *i2c;              /* I2C driver to use */
   FAR struct i2s_dev_s   *i2s;              /* I2S driver to use */
-  FAR struct ap_buffer_s *apb;              /* Pointer to the buffer we are processing */
-  struct dq_queue_s       apbq;             /* Our queue for enqueued buffers */
-  unsigned long           frequency;        /* Frequency to run the I2C bus at. */
-  unsigned long           actual;           /* Current chip frequency */
+  struct dq_queue_s       pendq;            /* Queue of pending buffers to be sent */
+  struct dq_queue_s       doneq;            /* Queue of sent buffers to be returned */
   mqd_t                   mq;               /* Message queue for receiving messages */
   char                    mqname[16];       /* Our message queue name */
   pthread_t               threadid;         /* ID of our thread */
-  sem_t                   apbq_sem;         /* Audio Pipeline Buffer Queue sem access */
+  sem_t                   pendsem;          /* Protect pendq */
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
-  int16_t                 volume;           /* Current volume level */
 #ifndef CONFIG_AUDIO_EXCLUDE_BALANCE
-  int16_t                 balance;          /* Current balance level */
+  uint16_t                balance;          /* Current balance level (b16) */
 #endif  /* CONFIG_AUDIO_EXCLUDE_BALANCE */
+  uint8_t                 volume;           /* Current volume level {0..63} */
 #endif  /* CONFIG_AUDIO_EXCLUDE_VOLUME */
-#ifndef CONFIG_AUDIO_EXCLUDE_TONE
-  uint8_t                 bass;             /* Bass level */
-  uint8_t                 treble;           /* Bass level */
-#endif
-  uint16_t                endfillbytes;
-  uint8_t                 endfillchar;      /* Fill char to send when no more data */
-  uint8_t                 running;
-  uint8_t                 paused;
-  uint8_t                 endmode;
+  volatile uint8_t        inflight;         /* Number of audio buffers in-flight */
+  bool                    running;          /* True: Worker thread is running */
+  bool                    paused;           /* True: Playing is paused */
+  bool                    mute;             /* True: Output is muted */
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
-  uint8_t                 cancelmode;
+  bool                    terminating;      /* True: Stop requested */
 #endif
-  uint8_t                 busy;             /* Set true when device reserved */
+  bool                    reserved;         /* True: Device is reserved */
+  volatile int            result;           /* The result of the last transfer */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     wm8904_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
-                 FAR struct audio_caps_s *caps);
-static int     wm8904_shutdown(FAR struct audio_lowerhalf_s *dev);
+static uint16_t wm8904_readreg(FAR struct wm8904_dev_s *priv,
+                  uint8_t regaddr);
+static void     wm8904_writereg(FAR struct wm8904_dev_s *priv,
+                  uint8_t regaddr, uint16_t regval);
+static void     wm8904_takesem(sem_t *sem);
+#define         wm8904_givesem(s) sem_post(s)
+
+#ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
+static inline uint16_t wm8904_scalevolume(uint16_t volume, b16_t scale);
+static void     wm8904_setvolume(FAR struct wm8904_dev_s *priv,
+                 uint16_t volume, bool mute);
+#endif
+#ifndef CONFIG_AUDIO_EXCLUDE_TONE
+static void     wm8904_setbass(FAR struct wm8904_dev_s *priv, uint8_t bass);
+static void     wm8904_settreble(FAR struct wm8904_dev_s *priv, uint8_t treble);
+#endif
+static int      wm8904_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
+                  FAR struct audio_caps_s *caps);
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-static int     wm8904_configure(FAR struct audio_lowerhalf_s *dev,
-                 FAR void *session, FAR const struct audio_caps_s *caps);
-static int     wm8904_start(FAR struct audio_lowerhalf_s *dev,
-                 FAR void *session);
-#ifndef CONFIG_AUDIO_EXCLUDE_STOP
-static int     wm8904_stop(FAR struct audio_lowerhalf_s *dev,
-                 FAR void *session);
-#endif
-#ifndef CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME
-static int     wm8904_pause(FAR struct audio_lowerhalf_s *dev,
-                 FAR void *session);
-static int     wm8904_resume(FAR struct audio_lowerhalf_s *dev,
-                 FAR void *session);
-#endif  /* CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME */
-static int     wm8904_reserve(FAR struct audio_lowerhalf_s *dev,
-                 FAR void** ppContext);
-static int     wm8904_release(FAR struct audio_lowerhalf_s *dev,
-                 FAR void* pContext);
+static int      wm8904_configure(FAR struct audio_lowerhalf_s *dev,
+                  FAR void *session, FAR const struct audio_caps_s *caps);
 #else
-static int     wm8904_configure(FAR struct audio_lowerhalf_s *dev,
-                 FAR const struct audio_caps_s *caps);
-static int     wm8904_start(FAR struct audio_lowerhalf_s *dev);
+static int      wm8904_configure(FAR struct audio_lowerhalf_s *dev,
+                  FAR const struct audio_caps_s *caps);
+#endif
+static int      wm8904_softreset(FAR struct wm8904_dev_s *priv);
+static int      wm8904_hardreset(FAR struct wm8904_dev_s *priv);
+static int      wm8904_shutdown(FAR struct audio_lowerhalf_s *dev);
+static void     wm8904_senddone(FAR struct i2s_dev_s *i2s,
+                  FAR struct ap_buffer_s *apb, FAR void *arg, int result);
+static void     wm8904_returnbuffers(FAR struct wm8904_dev_s *priv);
+static int      wm8904_sendbuffer(FAR struct wm8904_dev_s *priv);
+static int      wm8904_interrupt(FAR const struct wm8904_lower_s *lower,
+                  FAR void *arg);
+static void    *wm8904_workerthread(pthread_addr_t pvarg);
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+static int      wm8904_start(FAR struct audio_lowerhalf_s *dev,
+                  FAR void *session);
+#else
+static int      wm8904_start(FAR struct audio_lowerhalf_s *dev);
+#endif
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
-static int     wm8904_stop(FAR struct audio_lowerhalf_s *dev);
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+static int      wm8904_stop(FAR struct audio_lowerhalf_s *dev,
+                  FAR void* session);
+#else
+static int      wm8904_stop(FAR struct audio_lowerhalf_s *dev);
+#endif
 #endif
 #ifndef CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME
-static int     wm8904_pause(FAR struct audio_lowerhalf_s *dev);
-static int     wm8904_resume(FAR struct audio_lowerhalf_s *dev);
-#endif  /* CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME */
-static int     wm8904_reserve(FAR struct audio_lowerhalf_s *dev);
-static int     wm8904_release(FAR struct audio_lowerhalf_s *dev);
-#endif /* CONFIG_AUDIO_MULTI_SESION */
-static int     wm8904_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
-                 FAR struct ap_buffer_s *apb);
-static int     wm8904_cancelbuffer(FAR struct audio_lowerhalf_s *dev,
-                 FAR struct ap_buffer_s *apb);
-static int     wm8904_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
-                 unsigned long arg);
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+static int      wm8904_pause(FAR struct audio_lowerhalf_s *dev,
+                  FAR void* session);
+#else
+static int      wm8904_pause(FAR struct audio_lowerhalf_s *dev);
+#endif
+#endif
+#ifndef CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+static int      wm8904_resume(FAR struct audio_lowerhalf_s *dev,
+                  FAR void* session);
+#else
+static int      wm8904_resume(FAR struct audio_lowerhalf_s *dev);
+#endif
+#endif
+static int      wm8904_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
+                  FAR struct ap_buffer_s *apb);
+static int      wm8904_cancelbuffer(FAR struct audio_lowerhalf_s *dev,
+                  FAR struct ap_buffer_s *apb);
+static int      wm8904_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
+                  unsigned long arg);
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+static int      wm8904_reserve(FAR struct audio_lowerhalf_s *dev,
+                  FAR void **session);
+#else
+static int      wm8904_reserve(FAR struct audio_lowerhalf_s *dev);
+#endif
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+static int      wm8904_release(FAR struct audio_lowerhalf_s *dev,
+                  FAR void *session);
+#else
+static int      wm8904_release(FAR struct audio_lowerhalf_s *dev);
+#endif
 
 /* Initialization */
 
-static void    wm8904_audio_output(FAR struct wm8904_dev_s *priv);
+static void     wm8904_audio_output(FAR struct wm8904_dev_s *priv);
 #if 0 /* Not used */
-static void    wm8904_audio_input(FAR struct wm8904_dev_s *priv);
+static void     wm8904_audio_input(FAR struct wm8904_dev_s *priv);
 #endif
 
 /****************************************************************************
@@ -390,6 +403,43 @@ static void wm8904_writereg(FAR struct wm8904_dev_s *priv, uint8_t regaddr,
 }
 
 /************************************************************************************
+ * Name: wm8904_takesem
+ *
+ * Description:
+ *  Take a semaphore count, handling the nasty EINTR return if we are interrupted
+ *  by a signal.
+ *
+ ************************************************************************************/
+
+static void wm8904_takesem(sem_t *sem)
+{
+  int ret;
+
+  do
+    {
+      ret = sem_wait(sem);
+      DEBUGASSERT(ret == 0 || errno == EINTR);
+    }
+  while (ret < 0);
+}
+
+/************************************************************************************
+ * Name: wm8904_scalevolume
+ *
+ * Description:
+ *   Set the right and left volume values in the WM8904 device based on the current
+ *   volume and balance settings.
+ *
+ ************************************************************************************/
+
+#ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
+static inline uint16_t wm8904_scalevolume(uint16_t volume, b16_t scale)
+{
+  return b16toi((b16_t)volume * scale);
+}
+#endif
+
+/************************************************************************************
  * Name: wm8904_setvolume
  *
  * Description:
@@ -399,25 +449,19 @@ static void wm8904_writereg(FAR struct wm8904_dev_s *priv, uint8_t regaddr,
  ************************************************************************************/
 
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
-static void wm8904_setvolume(FAR struct wm8904_dev_s *priv)
+static void wm8904_setvolume(FAR struct wm8904_dev_s *priv, uint16_t volume,
+                             bool mute)
 {
-  FAR struct i2c_dev_s *i2c = priv->i2c;
-  uint32_t              leftlevel;
-  uint32_t              rightlevel;
-
-  /* Constrain balance */
+  uint32_t leftlevel;
+  uint32_t rightlevel;
+  uint16_t regval;
 
 #ifndef CONFIG_AUDIO_EXCLUDE_BALANCE
-  if (priv->balance > 1000)
-    {
-      priv->balance = 1000;
-    }
-
-  /* Calculate the left channel volume level */
+  /* Calculate the left channel volume level {0..1000} */
 
   if (priv->balance <= 500)
     {
-      leftlevel = priv->volume;
+      leftlevel = volume;
     }
   else if (priv->balance == 1000)
     {
@@ -425,14 +469,14 @@ static void wm8904_setvolume(FAR struct wm8904_dev_s *priv)
     }
   else
     {
-      leftlevel = priv->volume * (1000 - priv->balance) / 500;
+      leftlevel = wm8904_scalevolume(volume, b16ONE - (b16_t)priv->balance);
     }
 
-  /* Calculate the right channel volume level */
+  /* Calculate the right channel volume level {0..1000} */
 
   if (priv->balance >= 500)
     {
-      rightlevel = priv->volume;
+      rightlevel = volume;
     }
   else if (priv->balance == 0)
     {
@@ -440,14 +484,35 @@ static void wm8904_setvolume(FAR struct wm8904_dev_s *priv)
     }
   else
     {
-      rightlevel = priv->volume * priv->balance / 500;
+      rightlevel = wm8904_scalevolume(volume, (b16_t)priv->balance);
     }
 #else
-  leftlevel = rightlevel = priv->volume;
+  leftlevel  = priv->volume;
+  rightlevel = priv->volume;
 #endif
 
   /* Set the volume */
-#warning Missing logic
+
+  regval = WM8904_HPOUTZC | WM8904_HPOUT_VOL(leftlevel);
+  if (mute)
+    {
+      regval |= WM8904_HPOUT_MUTE;
+    }
+
+  wm8904_writereg(priv, WM8904_ANA_LEFT_OUT1, regval);
+
+  regval = WM8904_HPOUTZC | WM8904_HPOUT_VOL(rightlevel);
+  if (mute)
+    {
+      regval |= WM8904_HPOUT_MUTE;
+    }
+
+  wm8904_writereg(priv, WM8904_ANA_RIGHT_OUT1, regval);
+
+  /* Remember the volume level and mute settings */
+
+  priv->volume = volume;
+  priv->mute   = mute;
 }
 #endif /* CONFIG_AUDIO_EXCLUDE_VOLUME */
 
@@ -455,18 +520,32 @@ static void wm8904_setvolume(FAR struct wm8904_dev_s *priv)
  * Name: wm8904_setbass
  *
  * Description:
- *   Set the bass and treble level as specified in the context's bass and treble
- *   variables..
+ *   Set the bass level.
  *
  *   The level and range are in whole percentage levels (0-100).
  *
  ************************************************************************************/
 
 #ifndef CONFIG_AUDIO_EXCLUDE_TONE
-static void wm8904_setbass(FAR struct wm8904_dev_s *priv)
+static void wm8904_setbass(FAR struct wm8904_dev_s *priv, uint8_t bass)
 {
-  FAR struct i2c_dev_s *i2c = priv->i2c;
+#warning Missing logic
+}
+#endif /* CONFIG_AUDIO_EXCLUDE_TONE */
 
+/************************************************************************************
+ * Name: wm8904_settreble
+ *
+ * Description:
+ *   Set the treble level .
+ *
+ *   The level and range are in whole percentage levels (0-100).
+ *
+ ************************************************************************************/
+
+#ifndef CONFIG_AUDIO_EXCLUDE_TONE
+static void wm8904_settreble(FAR struct wm8904_dev_s *priv, uint8_t treble)
+{
 #warning Missing logic
 }
 #endif /* CONFIG_AUDIO_EXCLUDE_TONE */
@@ -684,10 +763,10 @@ static int wm8904_configure(FAR struct audio_lowerhalf_s *dev,
                             FAR const struct audio_caps_s *caps)
 #endif
 {
-  int     ret = OK;
 #if !defined(CONFIG_AUDIO_EXCLUDE_VOLUME) || !defined(CONFIG_AUDIO_EXCLUDE_TONE)
   FAR struct wm8904_dev_s *priv = (FAR struct wm8904_dev_s *)dev;
 #endif
+  int ret = OK;
 
   audvdbg("Entry\n");
 
@@ -695,75 +774,85 @@ static int wm8904_configure(FAR struct audio_lowerhalf_s *dev,
 
   switch (caps->ac_type)
     {
-      case AUDIO_TYPE_FEATURE:
+    case AUDIO_TYPE_FEATURE:
 
-        /* Process based on Feature Unit */
+      /* Process based on Feature Unit */
 
-        switch (*((uint16_t *) caps->ac_format))
-          {
+      switch (*((uint16_t *)caps->ac_format))
+        {
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
-            case AUDIO_FU_VOLUME:
-              /* Set the volume */
+        case AUDIO_FU_VOLUME:
+          {
+            /* Set the volume */
 
-              priv->volume = *((uint16_t *) caps->ac_controls);
-              wm8904_setvolume(priv);
+            uint16_t volume = *(uint16_t *)caps->ac_controls;
+            if (volume >= 0 && volume <= 1000)
+              {
+                /* Scale the volume setting to the range {0.. 63} */
 
-              break;
+                wm8904_setvolume(priv, (63 * volume / 1000), priv->mute);
+              }
+            else
+              {
+                ret = -EDOM;
+              }
+           }
+          break;
 #endif  /* CONFIG_AUDIO_EXCLUDE_VOLUME */
 
-#if !defined(CONFIG_AUDIO_EXCLUDE_TONE) && !defined(CONFIG_AUDIO_EXCLUDE_VOLUME)
-            case AUDIO_FU_BALANCE:
-              /* Set the volume */
-
-              priv->balance = *((uint16_t *) caps->ac_controls);
-              wm8904_setvolume(priv);
-
-              break;
-#endif
-
 #ifndef CONFIG_AUDIO_EXCLUDE_TONE
-            case AUDIO_FU_BASS:
-              /* Set the bass.  The percentage level (0-100) is in the
-               * ac_controls[0] parameter.
-               */
+        case AUDIO_FU_BASS:
+          {
+            /* Set the bass.  The percentage level (0-100) is in the
+             * ac_controls[0] parameter.
+             */
 
-              priv->bass = caps->ac_controls[0];
-              if (priv->bass > 100)
-                priv->bass = 100;
-              wm8904_setbass(priv);
+            uint8_t bass = caps->ac_controls[0];
+            if (bass <= 100)
+              {
+                wm8904_setbass(priv, bass);
+              }
+            else
+              {
+                ret = -EDOM;
+              }
+          }
+          break;
 
-              break;
+        case AUDIO_FU_TREBLE:
+          {
+            /* Set the treble.  The percentage level (0-100) is in the
+             * ac_controls[0] parameter.
+             */
 
-            case AUDIO_FU_TREBLE:
-              /* Set the treble.  The percentage level (0-100) is in the
-               * ac_controls[0] parameter.
-               */
-
-              priv->treble = caps->ac_controls[0];
-              if (priv->treble > 100)
-                priv->treble = 100;
-              wm8904_setbass(priv);
-
-              break;
+            uint8_t treble = caps->ac_controls[0];
+            if (treble <= 100)
+              {
+                wm8904_settreble(priv, treble);
+              }
+            else
+              {
+                ret = -EDOM;
+              }
+          }
+          break;
 #endif  /* CONFIG_AUDIO_EXCLUDE_TONE */
 
-            default:
-              /* Others we don't support */
-
-              break;
-          }
-
+        default:
+          ret = -ENOTTY;
+          break;
+        }
         break;
 
-      case AUDIO_TYPE_PROCESSING:
-
+    case AUDIO_TYPE_PROCESSING:
+      {
         /* We only support STEREO_EXTENDER */
 
         if (*((uint16_t *) caps->ac_format) == AUDIO_PU_STEREO_EXTENDER)
           {
           }
-
-        break;
+      }
+      break;
     }
 
   return ret;
@@ -787,8 +876,9 @@ static int wm8904_softreset(FAR struct wm8904_dev_s *priv)
   /* Now issue a reset command */
 #warning Missing logic
 
-  /* Switch to the lowest frequency */
-#warning Missing logic
+  /* Select the lowest power consumption mode of operation */
+  /* REVISIT */
+
   return OK;
 }
 
@@ -818,222 +908,168 @@ static int wm8904_hardreset(FAR struct wm8904_dev_s *priv)
 static int wm8904_shutdown(FAR struct audio_lowerhalf_s *dev)
 {
   FAR struct wm8904_dev_s *priv = (FAR struct wm8904_dev_s *)dev;
-  FAR struct i2c_dev_s  *i2c = priv->i2c;
 
 #warning Missing logic
   return OK;
 }
 
 /****************************************************************************
- * Name: wm8904_feeddata
+ * Name: wm8904_senddone
  *
  * Description:
- *   Feeds more data to the wm8904 chip from the enqueued buffers.  It will
- *   continue feeding data until the WM8904 line indicates it can't accept
- *   any more data.
+ *   This is the I2S callback function that is invoked when the transfer
+ *   completes.
  *
  ****************************************************************************/
 
-static void wm8904_feeddata(FAR struct wm8904_dev_s *priv)
+static void  wm8904_senddone(FAR struct i2s_dev_s *i2s,
+                             FAR struct ap_buffer_s *apb, FAR void *arg,
+                             int result)
 {
-  FAR struct i2s_dev_s *i2s = priv->i2s;
-  FAR struct ap_buffer_s *apb;
-  FAR uint8_t *samp = NULL;
-  uint16_t regval;
-  int nbytes;
+  FAR struct wm8904_dev_s *priv = (FAR struct wm8904_dev_s *)arg;
+  struct audio_msg_s msg;
+  irqstate_t flags;
   int ret;
 
-  /* Local stack copy of our active buffer */
+  DEBUGASSERT(i2s && priv && priv->running && apb);
 
-  apb = priv->apb;
-  //auddbg("Entry apb=%p, Bytes left=%d\n", apb, apb->nbytes - apb->curbyte);
+  /* We do not place any restriction on the context in which this function
+   * is called.  It may be called from an interrupt handler.  Therefore, the
+   * doneq and in-flight values might be accessed from the interrupt level.
+   * Not the best design.  But we will use interrupt controls to protect
+   * against that possibility.
+   */
 
-  /* Setup pointer to the next sample in the buffer */
+  flags = irqsave();
 
-  if (apb)
+  /* Add the completed buffer to the end of our doneq.  We do not yet
+   * decrement the reference count.
+   */
+
+  dq_addlast((FAR dq_entry_t *)apb, &priv->doneq);
+
+  /* And decrement the number of buffers in-flight */
+
+  DEBUGASSERT(inflight > 0);
+  priv->inflight--;
+
+  /* Save the result of the transfer */
+  /* REVISIT:  This can be overwritten */
+
+  priv->result = result;
+  irqrestore(flags);
+
+  /* Now send a message to the worker thread, informing it that there are
+   * buffers in the done queue that need to be cleaned up.
+   */
+
+  DEBUGASSERT(lower && priv);
+
+  /* Create an (empty) message and send it to the worker thread */
+
+  msg.msgId = AUDIO_MSG_COMPLETE;
+  ret = mq_send(priv->mq, &msg, sizeof(msg), CONFIG_WM8904_MSG_PRIO);
+  if (ret < 0)
     {
-      samp = &apb->samp[apb->curbyte];
+      audlldbg("ERROR: mq_send failed: %d\n", errno);
     }
-  else if (!priv->endmode)
+}
+
+/****************************************************************************
+ * Name: wm8904_returnbuffers
+ *
+ * Description:
+ *   This function is called after the complete of one or more data
+ *   transfers.  This function will empty the done queue and release our
+ *   reference to each buffer.
+ *
+ ****************************************************************************/
+
+static void wm8904_returnbuffers(FAR struct wm8904_dev_s *priv)
+{
+  FAR struct ap_buffer_s *apb;
+   irqstate_t flags;
+
+  /* The doneq and in-flight values might be accessed from the interrupt
+   * level in some implementations.  Not the best design.  But we will
+   * use interrupt controls to protect against that possibility.
+   */
+
+  flags = irqsave();
+  while (dq_peek(&priv->doneq) != NULL)
     {
-      return;
+      /* Take next buffer from the queue of completed transfers */
+
+      apb = (FAR struct ap_buffer_s *)dq_remfirst(&priv->doneq);
+      irqrestore(flags);
+
+      /* Release our reference to the audio buffer */
+
+      apb_free(apb);
+      flags = irqsave();
     }
 
-  /* Loop until the FIFO is full */
+  irqrestore(flags);
+}
 
-#warning Missing/bogus logic
-  while (false)
+/****************************************************************************
+ * Name: wm8904_sendbuffer
+ *
+ * Description:
+ *   Start the transfer an audio buffer to the WM8904 via I2S.  This
+ *   will not wait for the transfer to complete but will return immediately.
+ *   the wmd8904_senddone called will be invoked when the transfer
+ *   completes, stimulating the worker thread to call this function again.
+ *
+ ****************************************************************************/
+
+static int wm8904_sendbuffer(FAR struct wm8904_dev_s *priv)
+{
+  FAR struct ap_buffer_s *apb;
+  irqstate_t flags;
+  int ret = OK;
+
+  /* Loop while there are audio buffers to be sent and we have few than
+   * CONFIG_WM8904_INFLIGHT then "in-flight"
+   *
+   * The 'inflight' value might be modified from the interrupt level in some
+   * implementations.  We will use interrupt controls to protect against
+   * that possibility.
+   *
+   * The 'pendq', on the other hand, is protected via a semaphore.  Let's
+   * hold the semaphore while we are busy here and disable the interrupts
+   * only while accessing 'inflight'.
+   */
+
+  wm8904_takesem(&priv->pendsem);
+  while (priv->inflight < CONFIG_WM8904_INFLIGHT &&
+         dq_peek(&priv->pendq) != NULL && !priv->paused)
     {
-      /* If endmode, then send fill characters */
+      /* Take next buffer from the queue of pending transfers */
 
-      if (priv->endmode)
+      apb = (FAR struct ap_buffer_s *)dq_remfirst(&priv->pendq);
+      audvdbg("Sending apb=%p, size=%d\n", apb, apb->nbytes);
+
+      /* Increment the number of buffers in-flight before sending in order
+       * to avoid a possible race condition.
+       */
+
+      flags = irqsave();
+      priv->inflight++;
+      irqrestore(flags);
+
+      /* Send the entire audio buffer via I2S */
+
+      ret = I2S_SEND(priv->i2s, apb, wm8904_senddone, priv, 500 / MSEC_PER_TICK);
+      if (ret < 0)
         {
-          nbytes = 32;
-          while (nbytes)
-            {
-#warning BOGUS I2S_SEND call
-              I2S_SEND(i2s, NULL, NULL, priv, 0);
-              nbytes--;
-            }
-
-          /* For the WM8904, after the file has been played, we must
-           * send 2052 bytes of endfillchar per the datasheet.
-           */
-
-          priv->endfillbytes += 32;
-
-          /* Process end mode logic.  We send 2080 bytes of endfillchar as
-           * directed by the datasheet, then set SM_CANCEL.  Then we wait
-           * until the chip clears SM_CANCEL while sending endfillchar
-           * 32 bytes at a time.
-           */
-
-          if (priv->endfillbytes == 32*65)
-            {
-              /* After at least 2052 bytes, we send an SM_CANCEL */
-
-              WM8904_DISABLE(priv->lower);
-#warning Missing logic
-              WM8904_ENABLE(priv->lower);
-            }
-          else if (priv->endfillbytes >= 32*130)
-            {
-              /* Do a hard reset and terminate */
-
-              wm8904_hardreset(priv);
-              priv->running = false;
-              priv->endmode = false;
-              break;
-            }
-          else if (priv->endfillbytes > 32*65)
-            {
-              /* After each 32 byte of endfillchar, check the status
-               * register to see if SM_CANCEL has been cleared.  If
-               * it has been cleared, then we're done.
-               */
-#warning Missing logic
-              priv->running = false;
-              priv->endmode = false;
-              break;
-            }
-        }
-      else
-        {
-          /* Send 32 more bytes.  We only send 32 at a time because this is
-           * the meaning of WM8904 active from the chip ... that it can
-           * accept at least 32 more bytes.  After each 32 byte block, we
-           * will recheck the WM8904 line again.
-           */
-
-          nbytes = apb->nbytes - apb->curbyte;
-          if (nbytes > 32)
-            {
-              nbytes = 32;
-            }
-#if 1
-          I2S_SNDBLOCK(priv->i2s, samp, nbytes);
-          samp += nbytes;
-#else
-          nbytes = nbytes;
-          while (nbytes--)
-            {
-              /* Send next byte from the buffer */
-
-#warning BOGUS I2S_SEND call
-              I2S_SEND(i2s, NULL, NULL, priv, 0);
-              samp++;
-            }
-#endif
-          apb->curbyte += nbytes;
-
-          /* Test if we are in cancel mode.  If we are, then we need
-           * to continue sending file data and check for the SM_CANCEL
-           * bit going inactive.
-           */
-
-#ifndef CONFIG_AUDIO_EXCLUDE_STOP
-          if (priv->cancelmode)
-            {
-              /* Check the SM_CANCEL bit */
-#warning Missing logic
-
-              /* Cancel has begun.  Switch to endmode */
-
-              apb->curbyte = apb->nbytes = 0;
-            }
-#endif /* CONFIG_AUDIO_EXCLUDE_STOP */
-
-          /* Test if we are at the end of the buffer */
-
-          if (apb->curbyte >= apb->nbytes)
-            {
-              if (apb->nbytes != apb->nmaxbytes)
-                {
-                  /* Mark the device as endmode */
-
-                  priv->endmode = true;
-#ifndef CONFIG_AUDIO_EXCLUDE_STOP
-                  if (priv->cancelmode)
-                    {
-                      /* If we are in cancel mode, then we don't dequeue the buffer
-                       * or need to send another SM_CANCEL, so jump into the middle
-                       * of the stop sequence.
-                       */
-
-                      priv->endfillbytes = 32*65+1;
-                      continue;
-                    }
-                  else
-#endif  /* CONFIG_AUDIO_EXCLUDE_STOP */
-                    {
-                      priv->endfillbytes = 0;
-                    }
-                }
-
-              /* We referenced the buffer so we must free it */
-
-              apb_free(apb);
-#ifdef CONFIG_AUDIO_MULTI_SESSION
-              priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_DEQUEUE,
-                              apb, OK, NULL);
-#else
-              priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_DEQUEUE,
-                              apb, OK);
-#endif
-
-              /* Lock the buffer queue to pop the next buffer */
-
-              if ((ret = sem_wait(&priv->apbq_sem)) != OK)
-                {
-#ifdef CONFIG_AUDIO_MULTI_SESSION
-                  priv->dev.upper(priv->dev.priv,
-                                  AUDIO_CALLBACK_IOERR, NULL, ret, NULL);
-#else
-                  priv->dev.upper(priv->dev.priv,
-                                  AUDIO_CALLBACK_IOERR, NULL, ret);
-#endif
-                  auddbg("I/O error!\n");
-                  break;
-                }
-
-              /* Pop the next entry */
-
-              apb = (struct ap_buffer_s *) dq_remfirst(&priv->apbq);
-              priv->apb = apb;
-
-              //auddbg("Next Buffer = %p, bytes = %d\n", apb, apb ? apb->nbytes : 0);
-              if (apb == NULL)
-                {
-                  sem_post(&priv->apbq_sem);
-                  break;
-                }
-
-              samp = &apb->samp[apb->curbyte];
-              apb_reference(apb);                /* Add our buffer reference */
-              sem_post(&priv->apbq_sem);
-            }
+          auddbg("ERROR: I2S_SEND failed: %d\n", ret);
+          break;
         }
     }
+
+  wm8904_givesem(&priv->pendsem);
+  return ret;
 }
 
 /****************************************************************************
@@ -1051,22 +1087,24 @@ static int wm8904_interrupt(FAR const struct wm8904_lower_s *lower,
 {
   FAR struct wm8904_dev_s *priv = (FAR struct wm8904_dev_s *)arg;
   struct audio_msg_s msg;
+  int ret;
 
   DEBUGASSERT(lower && priv);
 
   /* Create a message and send it to the worker thread */
+  /* REVISIT this */
 
   if (priv->running)
     {
       msg.msgId = AUDIO_MSG_DATA_REQUEST;
-      mq_send(priv->mq, &msg, sizeof(msg), CONFIG_WM8904_MSG_PRIO);
-    }
-  else
-    {
-      msg.msgId = AUDIO_MSG_DATA_REQUEST;
+      ret = mq_send(priv->mq, &msg, sizeof(msg), CONFIG_WM8904_MSG_PRIO);
+      if (ret < 0)
+        {
+          audlldbg("ERROR: mq_send failed: %d\n", errno);
+        }
     }
 
-  return 0;
+  return OK;
 }
 
 /****************************************************************************
@@ -1080,85 +1118,96 @@ static int wm8904_interrupt(FAR const struct wm8904_lower_s *lower,
 static void *wm8904_workerthread(pthread_addr_t pvarg)
 {
   FAR struct wm8904_dev_s *priv = (struct wm8904_dev_s *) pvarg;
-  struct audio_msg_s      msg;
+  struct audio_msg_s msg;
   FAR struct ap_buffer_s *apb;
-  int                     size;
-  int                     prio;
-#ifndef CONFIG_AUDIO_EXCLUDE_STOP
-  uint16_t                regval;
-#endif
+  int msglen;
+  int prio;
 
-  auddbg("Entry\n");
+  audvdbg("Entry\n");
 
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
-  priv->cancelmode = 0;
+  priv->terminating = false;
 #endif
-  priv->endmode = priv->endfillbytes = 0;
 
-  /* Fill the WM8904 FIFO with initial data.  */
-
-  wm8904_feeddata(priv);
-
-  /* Loop as long as we are supposed to be running */
+  /* Mark ourself as running and make sure that WM8904 interrupts are
+   * enabled.
+   */
 
   priv->running = true;
   WM8904_ENABLE(priv->lower);
-  while (priv->running || priv->endmode)
+  wm8904_setvolume(priv, priv->volume, false);
+
+  /* Loop as long as we are supposed to be running */
+
+  while (priv->running || priv->inflight > 0)
     {
-      /* Check if the WM8904 can accept more data */
-#warning Missing logic
+      /* Check if we have been asked to terminate.  We have to check if we
+       * still have buffers in-flight.  If we do, then we can't stop until
+       * birds come back to roost.
+       */
+
+      if (priv->terminating && priv->inflight <= 0)
         {
-          wm8904_feeddata(priv);    /* Feed more data to the WM8904 FIFO */
+          /* We are IDLE.  Break out of the loop and exit. */
+
+          break;
+        }
+      else
+        {
+          /* Check if we can send more audio buffers to the WM8904 */
+
+          wm8904_sendbuffer(priv);
         }
 
       /* Wait for messages from our message queue */
 
-      size = mq_receive(priv->mq, &msg, sizeof(msg), &prio);
+      msglen = mq_receive(priv->mq, &msg, sizeof(msg), &prio);
 
       /* Handle the case when we return with no message */
 
-      if (size == 0)
+      if (msglen < sizeof(struct audio_msg_s))
         {
-          /* Should we just stop running? */
-
-          priv->running = false;
-          break;
+          auddbg("ERROR: Message too small: %d\n", msglen);
+          continue;
         }
 
       /* Process the message */
 
       switch (msg.msgId)
         {
-          /* The ISR has requested more data */
+          /* The ISR has requested more data.  We will catch this case at
+           * the top of the loop.
+           */
 
           case AUDIO_MSG_DATA_REQUEST:
-            usleep(500);
-            wm8904_feeddata(priv);   /* Feed more data to the WM8904 FIFO */
+            /* REVISIT this */
             break;
 
           /* Stop the playback */
 
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
           case AUDIO_MSG_STOP:
-            /* Send CANCEL message to WM8904 */
+            /* Indicate that we are terminating */
 
-            WM8904_DISABLE(priv->lower);
-#warning Missing logic
-            WM8904_ENABLE(priv->lower);
-
-            /* Set cancelmode */
-
-            priv->cancelmode = true;
-
+            priv->terminating = true;
             break;
 #endif
 
-          /* We will wake up when a new buffer enqueued just in case */
+          /* We have a new buffer to send.  We will catch this case at
+           * the top of the loop.
+           */
 
           case AUDIO_MSG_ENQUEUE:
             break;
 
+          /* We will wake up from the I2S callback with this message */
+
+          case AUDIO_MSG_COMPLETE:
+            wm8904_returnbuffers(priv);
+            break;
+
           default:
+            auddbg("ERROR: Ignoring message ID %d\n", msg.msgID);
             break;
         }
     }
@@ -1166,26 +1215,22 @@ static void *wm8904_workerthread(pthread_addr_t pvarg)
   /* Disable the WM8904 interrupt */
 
   WM8904_DISABLE(priv->lower);
+  wm8904_setvolume(priv, priv->volume, true);
 
-  /* Cancel any leftover buffer in our queue */
+  /* Return any pending buffers in our pending queue */
 
-  if (sem_wait(&priv->apbq_sem) == OK)
+  wm8904_takesem(&priv->pendsem);
+  while ((apb = (FAR struct ap_buffer_s *)dq_remfirst(&priv->pendq)) != NULL)
     {
-      /* Get the next buffer from the queue */
+      /* Release our reference to the buffer */
 
-      while ((apb = (FAR struct ap_buffer_s *) dq_remfirst(&priv->apbq)) != NULL)
-        ;
+      apb_free(apb);
     }
+  wm8904_givesem(&priv->pendsem);
 
-  sem_post(&priv->apbq_sem);
+  /* Return any pending buffers in our done queue */
 
-  /* Free the active buffer */
-
-  if (priv->apb != NULL)
-    {
-      apb_free(priv->apb);
-      priv->apb = NULL;
-    }
+  wm8904_returnbuffers(priv);
 
   /* Close the message queue */
 
@@ -1201,16 +1246,15 @@ static void *wm8904_workerthread(pthread_addr_t pvarg)
   priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_COMPLETE, NULL, OK);
 #endif
 
-  auddbg("Exit\n");
-
+  audvdbg("Exit\n");
   return NULL;
 }
 
 /****************************************************************************
  * Name: wm8904_start
  *
- * Description: Start the configured operation (audio streaming, volume
- *              enabled, etc.).
+ * Description:
+ *   Start the configured operation (audio streaming, volume enabled, etc.).
  *
  ****************************************************************************/
 
@@ -1221,20 +1265,20 @@ static int wm8904_start(FAR struct audio_lowerhalf_s *dev)
 #endif
 {
   FAR struct wm8904_dev_s *priv = (FAR struct wm8904_dev_s *)dev;
-  struct mq_attr      attr;
-  struct sched_param  sparam;
-  pthread_attr_t      tattr;
-  int                 ret;
-  FAR void           *value;
+  struct sched_param sparam;
+  struct mq_attr attr;
+  pthread_attr_t tattr;
+  FAR void *value;
+  int ret;
 
-  auddbg("Entry\n");
+  audvdbg("Entry\n");
 
   /* Do a soft reset, just in case */
 
   wm8904_softreset(priv);
 
-  /* Increase the frequency of the part during processing */
-#warning Missing logic
+  /* Exit reduced power modes of operation */
+  /* REVISIT */
 
   /* Create a message queue for the worker thread */
 
@@ -1250,29 +1294,15 @@ static int wm8904_start(FAR struct audio_lowerhalf_s *dev)
     {
       /* Error creating message queue! */
 
-      auddbg("Couldn't allocate message queue\n");
+      auddbg("ERROR: Couldn't allocate message queue\n");
       return -ENOMEM;
-    }
-
-  /* Pop the first enqueued buffer */
-
-  if ((ret = sem_wait(&priv->apbq_sem)) == OK)
-    {
-      priv->apb = (FAR struct ap_buffer_s *) dq_remfirst(&priv->apbq);
-      apb_reference(priv->apb);               /* Add our buffer reference */
-      sem_post(&priv->apbq_sem);
-    }
-  else
-    {
-      auddbg("Error getting APB Queue sem\n");
-      return ret;
     }
 
   /* Join any old worker thread we had created to prevent a memory leak */
 
   if (priv->threadid != 0)
     {
-      auddbg("Joining old thread\n");
+      audvdbg("Joining old thread\n");
       pthread_join(priv->threadid, &value);
     }
 
@@ -1283,17 +1313,17 @@ static int wm8904_start(FAR struct audio_lowerhalf_s *dev)
   (void)pthread_attr_setschedparam(&tattr, &sparam);
   (void)pthread_attr_setstacksize(&tattr, CONFIG_WM8904_WORKER_STACKSIZE);
 
-  auddbg("Starting workerthread\n");
+  audvdbg("Starting worker thread\n");
   ret = pthread_create(&priv->threadid, &tattr, wm8904_workerthread,
-      (pthread_addr_t) priv);
+                       (pthread_addr_t)priv);
   if (ret != OK)
     {
-      auddbg("Can't create worker thread, errno=%d\n", errno);
+      auddbg("ERROR: pthread_create failed: %d\n", ret);
     }
   else
     {
       pthread_setname_np(priv->threadid, "wm8904");
-      auddbg("Created worker thread\n");
+      audvdbg("Created worker thread\n");
     }
 
   return ret;
@@ -1315,8 +1345,8 @@ static int wm8904_stop(FAR struct audio_lowerhalf_s *dev)
 #endif
 {
   FAR struct wm8904_dev_s *priv = (FAR struct wm8904_dev_s *)dev;
-  struct audio_msg_s  term_msg;
-  FAR void*           value;
+  struct audio_msg_s term_msg;
+  FAR void *value;
 
   /* Send a message to stop all audio streaming */
 
@@ -1329,12 +1359,9 @@ static int wm8904_stop(FAR struct audio_lowerhalf_s *dev)
   pthread_join(priv->threadid, &value);
   priv->threadid = 0;
 
-  /* Reduce the decoder's operating frequency to save power */
-#warning Missing logic
+  /* Enter into a reduced power usage mode */
+  /* REVISIT: */
 
-  /* Wait for a bit */
-
-  up_mdelay(40);
   return OK;
 }
 #endif
@@ -1355,13 +1382,15 @@ static int wm8904_pause(FAR struct audio_lowerhalf_s *dev)
 {
   FAR struct wm8904_dev_s *priv = (FAR struct wm8904_dev_s *)dev;
 
-  if (!priv->running)
-    return OK;
+  if (priv->running && !priv->paused)
+    {
+      /* Disable interrupts to prevent us from suppling any more data */
 
-  /* Disable interrupts to prevent us from suppling any more data */
+      priv->paused = true;
+      wm8904_setvolume(priv, priv->volume, true);
+      WM8904_DISABLE(priv->lower);
+    }
 
-  priv->paused = true;
-  WM8904_DISABLE(priv->lower);
   return OK;
 }
 #endif /* CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME */
@@ -1369,7 +1398,7 @@ static int wm8904_pause(FAR struct audio_lowerhalf_s *dev)
 /****************************************************************************
  * Name: wm8904_resume
  *
- * Description: Resuems the playback.
+ * Description: Resumes the playback.
  *
  ****************************************************************************/
 
@@ -1382,14 +1411,17 @@ static int wm8904_resume(FAR struct audio_lowerhalf_s *dev)
 {
   FAR struct wm8904_dev_s *priv = (FAR struct wm8904_dev_s *)dev;
 
-  if (!priv->running)
-    return OK;
+  if (priv->running && priv->paused)
+    {
+      priv->paused = false;
+      wm8904_setvolume(priv, priv->volume, false);
 
-  /* Enable interrupts to allow suppling data */
+      /* Enable interrupts to allow sampling data */
 
-  priv->paused = false;
-  wm8904_feeddata(priv);
-  WM8904_ENABLE(priv->lower);
+      wm8904_sendbuffer(priv);
+      WM8904_ENABLE(priv->lower);
+    }
+
   return OK;
 }
 #endif /* CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME */
@@ -1402,32 +1434,38 @@ static int wm8904_resume(FAR struct audio_lowerhalf_s *dev)
  ****************************************************************************/
 
 static int wm8904_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
-                                FAR struct ap_buffer_s *apb )
+                                FAR struct ap_buffer_s *apb)
 {
   FAR struct wm8904_dev_s *priv = (FAR struct wm8904_dev_s *)dev;
   struct audio_msg_s  term_msg;
-  int ret;
+  int ret = -EAGAIN;
 
   audvdbg("Entry\n");
 
-  /* Lock access to the apbq */
+  /* Take a reference on the new audio buffer */
 
-  if ((ret = sem_wait(&priv->apbq_sem)) == OK)
+  apb_reference(apb);
+
+  /* Add the new buffer to the tail of pending audio buffers */
+
+  wm8904_takesem(&priv->pendsem);
+  apb->flags = AUDIO_APB_OUTPUT_ENQUEUED;
+  dq_addlast(&apb->dq_entry, &priv->pendq);
+  wm8904_givesem(&priv->pendsem);
+
+  /* Send a message indicating a new buffer enqueued */
+
+  if (priv->mq != NULL)
     {
-      /* We can now safely add the buffer to the queue */
-
-      apb->curbyte = 0;
-      apb->flags = AUDIO_APB_OUTPUT_ENQUEUED;
-      dq_addlast(&apb->dq_entry, &priv->apbq);
-      sem_post(&priv->apbq_sem);
-
-      /* Send a message indicating a new buffer enqueued */
-
-      if (priv->mq != NULL)
+      term_msg.msgId  = AUDIO_MSG_ENQUEUE;
+      term_msg.u.data = 0;
+      ret = mq_send(priv->mq, &term_msg, sizeof(term_msg), CONFIG_WM8904_MSG_PRIO);
+      if (ret < 0)
         {
-          term_msg.msgId = AUDIO_MSG_ENQUEUE;
-          term_msg.u.data = 0;
-          mq_send(priv->mq, &term_msg, sizeof(term_msg), CONFIG_WM8904_MSG_PRIO);
+          int errcode = errno;
+          DEBUGASSERT(errcode > 0);
+          auddbg("ERROR: mq_send failed: %d\n", errcode);
+          UNUSED(errcode);
         }
     }
 
@@ -1442,7 +1480,7 @@ static int wm8904_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
  ****************************************************************************/
 
 static int wm8904_cancelbuffer(FAR struct audio_lowerhalf_s *dev,
-                               FAR struct ap_buffer_s *apb )
+                               FAR struct ap_buffer_s *apb)
 {
   return OK;
 }
@@ -1478,9 +1516,9 @@ static int wm8904_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
 #ifdef CONFIG_AUDIO_DRIVER_SPECIFIC_BUFFERS
       case AUDIOIOC_GETBUFFERINFO:
 
-        bufinfo = (FAR struct ap_buffer_info_s *) arg;
+        bufinfo              = (FAR struct ap_buffer_info_s *) arg;
         bufinfo->buffer_size = CONFIG_WM8904_BUFFER_SIZE;
-        bufinfo->nbuffers = CONFIG_WM8904_NUM_BUFFERS;
+        bufinfo->nbuffers    = CONFIG_WM8904_NUM_BUFFERS;
         break;
 #endif
 
@@ -1510,12 +1548,8 @@ static int wm8904_reserve(FAR struct audio_lowerhalf_s *dev)
 
   /* Borrow the APBQ semaphore for thread sync */
 
-  if (sem_wait(&priv->apbq_sem) != OK)
-    {
-      return -EBUSY;
-    }
-
-  if (priv->busy)
+  wm8904_takesem(&priv->pendsem);
+  if (priv->reserved)
     {
       ret = -EBUSY;
     }
@@ -1524,14 +1558,18 @@ static int wm8904_reserve(FAR struct audio_lowerhalf_s *dev)
       /* Initialize the session context.  We don't really use it. */
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-      *session = NULL;
+     *session           = NULL;
 #endif
-      priv->busy    = true;
-      priv->running = false;
-      priv->paused  = false;
+      priv->inflight    = 0;
+      priv->running     = false;
+      priv->paused      = false;
+#ifndef CONFIG_AUDIO_EXCLUDE_STOP
+      priv->terminating = false;
+#endif
+      priv->reserved    = true;
     }
 
-  sem_post(&priv->apbq_sem);
+  wm8904_givesem(&priv->pendsem);
 
   return ret;
 }
@@ -1563,15 +1601,12 @@ static int wm8904_release(FAR struct audio_lowerhalf_s *dev)
 
   /* Borrow the APBQ semaphore for thread sync */
 
-  if (sem_wait(&priv->apbq_sem) != OK)
-    {
-      return -EBUSY;
-    }
+  wm8904_takesem(&priv->pendsem);
 
   /* Really we should free any queued buffers here */
 
-  priv->busy = false;
-  sem_post(&priv->apbq_sem);
+  priv->reserved = false;
+  wm8904_givesem(&priv->pendsem);
 
   return OK;
 }
@@ -1583,7 +1618,7 @@ static int wm8904_release(FAR struct audio_lowerhalf_s *dev)
  *   Initialize and configure the WM8904 device as an audio output device.
  *
  * Input Parameters:
- *   prive   - A reference to the driver state structure
+ *   priv - A reference to the driver state structure
  *
  * Returned Value:
  *   None.  No failures are detected.
@@ -1674,13 +1709,12 @@ static void wm8904_audio_output(FAR struct wm8904_dev_s *priv)
   wm8904_writereg(priv, WM8904_ANA_LEFT_IN1, 0);
   wm8904_writereg(priv, WM8904_ANA_RIGHT_IN1, 0);
 
+  /* Analogue OUT1 Left */
   /* Analogue OUT1 Right */
 
-  regval = WM8904_HPOUT_MUTE | WM8904_HPOUTZC | WM8904_HPOUT_VOL(29);
-  wm8904_writereg(priv, WM8904_ANA_RIGHT_OUT1, regval);
+  wm8904_setvolume(priv, CONFIG_WM8904_INITVOLUME, true);
 
   /* DC Servo 0 */
-  /* DCS_ENA_CHAN_1=1, DCS_ENA_CHAN_0=1 */
 
   regval = WM8904_DCS_ENA_CHAN_1 | WM8904_DCS_ENA_CHAN_0;
   wm8904_writereg(priv, WM8904_DC_SERVO0, regval);
@@ -1796,35 +1830,23 @@ FAR struct audio_lowerhalf_s *
 
   /* Allocate a WM8904 device structure */
 
-  priv = (FAR struct wm8904_dev_s *)kmalloc(sizeof(struct wm8904_dev_s));
+  priv = (FAR struct wm8904_dev_s *)kzalloc(sizeof(struct wm8904_dev_s));
   if (priv)
     {
-      /* Initialize the WM8904 device structure */
+      /* Initialize the WM8904 device structure.  Since we used kzalloc,
+       * only the non-zero elements of the structure need to be initialized.
+       */
 
       priv->dev.ops    = &g_audioops;
-      priv->dev.upper  = NULL;
-      priv->dev.priv   = NULL;
       priv->lower      = lower;
-      priv->frequency  = CONFIG_WM8904_XTALI / 7;
       priv->i2c        = i2c;
-      priv->mq         = NULL;
-      priv->busy       = false;
-      priv->threadid   = 0;
-      priv->running    = 0;
-
-#ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
-      priv->volume     = 250;            /* 25% volume as default */
-#ifndef CONFIG_AUDIO_EXCLUDE_BALANCE
-      priv->balance    = 500;            /* Center balance */
-#endif
+#if !defined(CONFIG_AUDIO_EXCLUDE_VOLUME) && !defined(CONFIG_AUDIO_EXCLUDE_BALANCE)
+      priv->balance    = b16HALF;            /* Center balance */
 #endif
 
-#ifndef CONFIG_AUDIO_EXCLUDE_TONE
-      priv->bass       = 0;
-      priv->treble     = 0;
-#endif
-      sem_init(&priv->apbq_sem, 0, 1);
-      dq_init(&priv->apbq);
+      sem_init(&priv->pendsem, 0, 1);
+      dq_init(&priv->pendq);
+      dq_init(&priv->doneq);
 
       /* Initialize I2C */
 
@@ -1841,7 +1863,7 @@ FAR struct audio_lowerhalf_s *
       if (regval != WM8904_SW_RST_DEV_ID1)
         {
           auddbg("ERROR: WM8904 not found: ID=%04x\n", regval);
-          return -ENODEV;
+          goto errout_with_dev;
         }
 
       /* Configure the WM8904 hardware as an audio input device */
@@ -1855,7 +1877,13 @@ FAR struct audio_lowerhalf_s *
       /* Put the driver in the 'shutdown' state */
 
       wm8904_shutdown(&priv->dev);
+      return &priv->dev;
     }
 
-  return &priv->dev;
+  return NULL;
+
+errout_with_dev:
+  sem_destroy(&priv->pendsem);
+  kfree(priv);
+  return NULL;
 }
