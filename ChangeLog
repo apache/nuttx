@@ -7750,3 +7750,5 @@
 	  slow clock support.
 	* arch/arm/src/sama5/sam_pck.c and .h:  Add support to use the slow
 	  clock as the PCK clock source (2014-7-19).
+	* drivers/audio/wm8904.c/:  The WM8904 audio driver is mostly code
+	  complete and ready to begin initial testing (2014-7-19).
