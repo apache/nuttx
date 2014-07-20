@@ -7752,3 +7752,6 @@
 	  clock as the PCK clock source (2014-7-19).
 	* drivers/audio/wm8904.c/:  The WM8904 audio driver is mostly code
 	  complete and ready to begin initial testing (2014-7-19).
+	* arch/arm/src/sama5/sam_pio.c:  Logic for Schmitt trigger selection
+	  backward (2014-7-20).
+
