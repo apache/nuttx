@@ -836,7 +836,7 @@ static void sam_disablewaitints(struct sam_dev_s *priv,
    * operation.
    */
 
-  flags = irqsave();
+  flags            = irqsave();
   priv->waitevents = 0;
   priv->wkupevent  = wkupevent;
   priv->waitmask   = 0;
@@ -1267,9 +1267,7 @@ static void sam_eventtimeout(int argc, uint32_t arg)
   struct sam_dev_s *priv = (struct sam_dev_s *)arg;
 
   DEBUGASSERT(argc == 1 && priv != NULL);
-
-  /* This can, apparently, happen under certain race conditions */
-  /* DEBUGASSERT((priv->waitevents & SDIOWAIT_TIMEOUT) != 0); */
+  DEBUGASSERT((priv->waitevents & SDIOWAIT_TIMEOUT) == 0);
 
   /* Is a data transfer complete event expected? */
 
