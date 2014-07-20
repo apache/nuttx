@@ -54,12 +54,12 @@
  *
  * Alternative pin selections are provided with a numeric suffix like _1, _2, etc.  Drivers, however, will
  * use the pin selection without the numeric suffix.  Additional definitions are required in the board.h
- * file.  For example, if we wanted the PCK0on PB26, then the following definition should appear in the
+ * file.  For example, if we wanted the PCK0 on PB26, then the following definition should appear in the
  * board.h header file for that board:
  *
  *   #define PIO_PMC_PCK0 PIO_PMC_PCK0_1
  *
- * The LCD driver will then automatically configure PA16 as the DAT16 pin.
+ * The PCK logic will then automatically configure PB26 as the PCK0 pin.
  */
 
 /* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!

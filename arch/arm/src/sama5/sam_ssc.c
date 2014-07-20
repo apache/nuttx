@@ -52,6 +52,7 @@
 #include <debug.h>
 
 #include <arch/board/board.h>
+
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
@@ -200,29 +201,51 @@
 #define SSC_CLKOUT_CONT   1 /* Continuous */
 #define SSC_CLKOUT_XFER   2 /* Only output clock during transfers */
 
+/* Bus configuration differ with chip */
+
+#if defined(ATSAMA5D3)
+  /* System bus interfaces */
+
+#  define DMACH_FLAG_PERIPH_IF DMACH_FLAG_PERIPHAHB_AHB_IF2
+#  define DMACH_FLAG_MEM_IF    DMACH_FLAG_MEMAHB_AHB_IF0
+
+#elif defined(ATSAMA5D4)
+  /* System Bus Interfaces
+   *
+   * Both SSC0 and SSC1 are APB1; HSMCI1 is on H32MX.  Both are accessible
+   * on MATRIX IF1.
+   *
+   * Memory is available on either port 5 (IF0 for both XDMAC0 and 1) or
+   * port 6 (IF1 for both XDMAC0 and 1).
+   */
+
+#  define DMACH_FLAG_PERIPH_IF DMACH_FLAG_PERIPHAHB_AHB_IF1
+#  define DMACH_FLAG_MEM_IF    DMACH_FLAG_MEMAHB_AHB_IF0
+#endif
+
 /* DMA configuration */
 
 #define DMA8_FLAGS \
-  (DMACH_FLAG_PERIPHAHB_AHB_IF2 | DMACH_FLAG_PERIPHH2SEL | \
+  (DMACH_FLAG_PERIPH_IF | DMACH_FLAG_PERIPHH2SEL | \
    DMACH_FLAG_PERIPHISPERIPH | DMACH_FLAG_PERIPHWIDTH_8BITS | \
    DMACH_FLAG_PERIPHCHUNKSIZE_1 | DMACH_FLAG_MEMPID_MAX | \
-   DMACH_FLAG_MEMAHB_AHB_IF0 | DMACH_FLAG_MEMWIDTH_16BITS | \
+   DMACH_FLAG_MEM_IF | DMACH_FLAG_MEMWIDTH_16BITS | \
    DMACH_FLAG_MEMINCREMENT | DMACH_FLAG_MEMCHUNKSIZE_4| \
    DMACH_FLAG_MEMBURST_4)
 
 #define DMA16_FLAGS \
-  (DMACH_FLAG_PERIPHAHB_AHB_IF2 | DMACH_FLAG_PERIPHH2SEL | \
+  (DMACH_FLAG_PERIPH_IF | DMACH_FLAG_PERIPHH2SEL | \
    DMACH_FLAG_PERIPHISPERIPH | DMACH_FLAG_PERIPHWIDTH_16BITS | \
    DMACH_FLAG_PERIPHCHUNKSIZE_1 | DMACH_FLAG_MEMPID_MAX | \
-   DMACH_FLAG_MEMAHB_AHB_IF0 | DMACH_FLAG_MEMWIDTH_16BITS | \
+   DMACH_FLAG_MEM_IF | DMACH_FLAG_MEMWIDTH_16BITS | \
    DMACH_FLAG_MEMINCREMENT | DMACH_FLAG_MEMCHUNKSIZE_4 | \
    DMACH_FLAG_MEMBURST_4)
 
 #define DMA32_FLAGS \
-  (DMACH_FLAG_PERIPHAHB_AHB_IF2 | DMACH_FLAG_PERIPHH2SEL | \
+  (DMACH_FLAG_PERIPH_IF | DMACH_FLAG_PERIPHH2SEL | \
    DMACH_FLAG_PERIPHISPERIPH | DMACH_FLAG_PERIPHWIDTH_32BITS | \
    DMACH_FLAG_PERIPHCHUNKSIZE_1 | DMACH_FLAG_MEMPID_MAX | \
-   DMACH_FLAG_MEMAHB_AHB_IF0 | DMACH_FLAG_MEMWIDTH_32BITS | \
+   DMACH_FLAG_MEM_IF | DMACH_FLAG_MEMWIDTH_32BITS | \
    DMACH_FLAG_MEMINCREMENT | DMACH_FLAG_MEMCHUNKSIZE_4 | \
    DMACH_FLAG_MEMBURST_4)
 
@@ -2610,6 +2633,7 @@ static void ssc_clocking(struct sam_ssc_s *priv)
   /* Determine the maximum SSC peripheral clock frequency */
 
   mck = BOARD_MCK_FREQUENCY;
+#ifdef SAMA5_HAVE_PMC_PCR_DIV
   DEBUGASSERT((mck >> 3) <= SAM_SSC_MAXPERCLK);
 
   if (mck <= SAM_SSC_MAXPERCLK)
@@ -2632,6 +2656,13 @@ static void ssc_clocking(struct sam_ssc_s *priv)
       priv->frequency = (mck >> 3);
       regval          = PMC_PCR_DIV8;
     }
+
+#else
+  /* No PCR_DIV field */
+
+  priv->frequency     = mck;
+  regval              = 0;
+#endif
 
   /* Set the maximum SSC peripheral clock frequency */
 
