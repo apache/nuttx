@@ -228,11 +228,25 @@
 #define BOARD_EBICS3_NAND_DATAADDR  0x60000000
 
 /* Pin disambiguation ***************************************************************/
+/* Alternative pin selections are provided with a numeric suffix like _1, _2, etc. 
+ * Drivers, however, will use the pin selection without the numeric suffix. 
+ * Additional definitions are required in this board.h file.  For example, if we
+ * wanted the PCK0on PB26, then the following definition should appear in the
+ * board.h header file for that board:
+ *
+ *   #define PIO_PMC_PCK0 PIO_PMC_PCK0_1
+ *
+ * The PCK logic will then automatically configure PB26 as the PCK0 pin.
+ */
+
+/* SSC0 TD is provided on PB28 */
+
+#define PIO_SSC0_TD           PIO_SSC0_TD_2
 
 /* PCK0 is provided to the WM8904 audio CODEC via PB26 */
 
 #ifdef CONFIG_AUDIO_WM8904
-#  define PIO_PMC_PCK0          PIO_PMC_PCK0_1
+#  define PIO_PMC_PCK0        PIO_PMC_PCK0_1
 #endif
 
 /************************************************************************************

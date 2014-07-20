@@ -153,8 +153,7 @@ static int      wm8904_configure(FAR struct audio_lowerhalf_s *dev,
 static int      wm8904_configure(FAR struct audio_lowerhalf_s *dev,
                   FAR const struct audio_caps_s *caps);
 #endif
-static int      wm8904_softreset(FAR struct wm8904_dev_s *priv);
-static int      wm8904_hardreset(FAR struct wm8904_dev_s *priv);
+static int      wm8904_reset(FAR struct wm8904_dev_s *priv);
 static int      wm8904_shutdown(FAR struct audio_lowerhalf_s *dev);
 static void     wm8904_senddone(FAR struct i2s_dev_s *i2s,
                   FAR struct ap_buffer_s *apb, FAR void *arg, int result);
@@ -315,7 +314,7 @@ static uint16_t wm8904_readreg(FAR struct wm8904_dev_s *priv, uint8_t regaddr)
            * return the value read.
            */
 
-          regval = ((uint16_t)data[0] << 8) | (uint16_t)data[1]
+          regval = ((uint16_t)data[0] << 8) | (uint16_t)data[1];
           audvdbg("READ: %02x -> %04x\n", regaddr, regval);
           return regval;
         }
@@ -859,41 +858,23 @@ static int wm8904_configure(FAR struct audio_lowerhalf_s *dev,
 }
 
 /****************************************************************************
- * Name: wm8904_softreset
+ * Name: wm8904_reset
  *
  * Description:
- *   Performs a soft reset on the WM8904 chip by setting the RESET bit of
- *   the MODE register.
+ *   Performs a soft reset on the WM8904 chip by writing to the SWRST
+ *   register.
  *
  ****************************************************************************/
 
-static int wm8904_softreset(FAR struct wm8904_dev_s *priv)
+static int wm8904_reset(FAR struct wm8904_dev_s *priv)
 {
   /* First disable interrupts */
 
   WM8904_DISABLE(priv->lower);
 
   /* Now issue a reset command */
-#warning Missing logic
 
-  /* Select the lowest power consumption mode of operation */
-  /* REVISIT */
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: wm8904_hardreset
- *
- * Description:
- *   Performs a hardware reset on the WM8904 chip by toggling the RST line,
- *   disabling interrupts, and setting the default operating frequency.
- *
- ****************************************************************************/
-
-static int wm8904_hardreset(FAR struct wm8904_dev_s *priv)
-{
-  WM8904_DISABLE(priv->lower);
+  wm8904_writereg(priv, WM8904_SWRST, 0);
   return OK;
 }
 
@@ -909,7 +890,7 @@ static int wm8904_shutdown(FAR struct audio_lowerhalf_s *dev)
 {
   FAR struct wm8904_dev_s *priv = (FAR struct wm8904_dev_s *)dev;
 
-#warning Missing logic
+  wm8904_reset(priv);
   return OK;
 }
 
@@ -950,7 +931,7 @@ static void  wm8904_senddone(FAR struct i2s_dev_s *i2s,
 
   /* And decrement the number of buffers in-flight */
 
-  DEBUGASSERT(inflight > 0);
+  DEBUGASSERT(priv->inflight > 0);
   priv->inflight--;
 
   /* Save the result of the transfer */
@@ -962,10 +943,6 @@ static void  wm8904_senddone(FAR struct i2s_dev_s *i2s,
   /* Now send a message to the worker thread, informing it that there are
    * buffers in the done queue that need to be cleaned up.
    */
-
-  DEBUGASSERT(lower && priv);
-
-  /* Create an (empty) message and send it to the worker thread */
 
   msg.msgId = AUDIO_MSG_COMPLETE;
   ret = mq_send(priv->mq, &msg, sizeof(msg), CONFIG_WM8904_MSG_PRIO);
@@ -1207,7 +1184,7 @@ static void *wm8904_workerthread(pthread_addr_t pvarg)
             break;
 
           default:
-            auddbg("ERROR: Ignoring message ID %d\n", msg.msgID);
+            auddbg("ERROR: Ignoring message ID %d\n", msg.msgId);
             break;
         }
     }
@@ -1275,7 +1252,7 @@ static int wm8904_start(FAR struct audio_lowerhalf_s *dev)
 
   /* Do a soft reset, just in case */
 
-  wm8904_softreset(priv);
+  wm8904_reset(priv);
 
   /* Exit reduced power modes of operation */
   /* REVISIT */
@@ -1508,7 +1485,7 @@ static int wm8904_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
        */
 
       case AUDIOIOC_HWRESET:
-        wm8904_hardreset((FAR struct wm8904_dev_s *)dev);
+        wm8904_reset((FAR struct wm8904_dev_s *)dev);
         break;
 
        /* Report our preferred buffer size and quantity */
