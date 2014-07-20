@@ -2761,12 +2761,12 @@ Audio Support
     Audio
       CONFIG_AUDIO=y                        : Audio support needed
       CONFIG_AUDIO_FORMAT_PCM=y             : Only PCM files are supported
+      CONFIG_AUDIO_NUM_BUFFERS=8            : Number of audio buffers
+      CONFIG_AUDIO_BUFFER_NUMBYTES=8192     : Audio buffer size
 
     Drivers -> Audio
       CONFIG_I2S=y                          : General I2S support
       CONFIG_AUDIO_DEVICES=y                : Audio device support
-      CONFIG_AUDIO_NUM_BUFFERS=8            : Number of audio buffers
-      CONFIG_AUDIO_BUFFER_NUMBYTES=8192     : Audio buffer size
       CONFIG_AUDIO_WM8904=y                 : Build WM8904 driver character driver
 
     Board Selection
@@ -2784,6 +2784,33 @@ Audio Support
   test case has never been exercised on the SAMA454-EK.  See the README.txt
   file at SAMA5D4-EK for information about how you might implement this test
   for the SAMA5D4-EK.
+
+  The NxPlayer
+  ------------
+
+  The NxPlayer is a audio library and command line application for playing
+  audio file.  The NxPlayer can be found at apps/system/nxplayer.  If you
+  would like to add the NxPlayer, here are some recommended configuration
+  settings:
+
+  System Libraries and NSH Add-Ons -> NxPlayer media player / command line ->
+    CONFIG_NXPLAYER_PLAYTHREAD_STACKSIZE=1500    : Size of the audio player stack
+    CONFIG_SYSTEM_NXPLAYER=y                     : Build the NxPlayer library
+    CONFIG_NXPLAYER_COMMAND_LINE=y               : Build command line application
+    CONFIG_NXPLAYER_INCLUDE_HELP=y               : Includes a help command
+    CONFIG_NXPLAYER_INCLUDE_DEVICE_SEARCH=n      : (Since there is only one audio device)
+    CONFIG_NXPLAYER_INCLUDE_PREFERRED_DEVICE=y   : Only one audio device is supported
+    CONFIG_NXPLAYER_FMT_FROM_EXT=n               : (Since only PCM is supported)
+    NXPLAYER_FMT_FROM_HEADER=n                   : (Since only PCM is supported)
+    CONFIG_NXPLAYER_INCLUDE_MEDIADIR=y           : Specify a media directory
+    CONFIG_NXPLAYER_DEFAULT_MEDIADIR="/mnt/sdcard"  : See below
+    CONFIG_NXPLAYER_RECURSIVE_MEDIA_SEARCH=y     : Search all sub-directories
+    CONFIG_NXPLAYER_INCLUDE_SYSTEM_RESET=y       : Add support for reset command
+
+  You must include the full path to the location where NxPlayer can find the
+  media files.  That path is given by CONFIG_NXPLAYER_DEFAULT_MEDIADIR.
+  Here I use the example "/mnt/scard".  That is a location where you could,
+  for example, mount an MMC/SD card driver.
 
 TM7000 LCD/Touchscreen
 ======================
