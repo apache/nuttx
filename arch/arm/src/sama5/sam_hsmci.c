@@ -114,20 +114,28 @@
 #    error HSMCI0/1 require CONFIG_SAMA5_XDMAC0 and/or CONFIG_SAMA5_XDMAC1
 #  endif
 
-#  if defined(CONFIG_SAMA5_XDMAC0) && defined(SAMA5_HSMCI0_XDMAC0)
-#    define HSMCI0_DMAC 0
-#  elif defined(CONFIG_SAMA5_XDMAC1)
-#    define HSMCI0_DMAC 1
-#  else
-#    error No valid DMA configuration for HSMCI0
+  /* If both XDMAC blocks are enabled, then we have to select which
+   * used by each HSMCI block.
+   */
+
+#  if defined(CONFIG_SAMA5_HSMCI0)
+#    if defined(CONFIG_SAMA5_HSMCI0_XDMAC0) && defined(CONFIG_SAMA5_XDMAC0)
+#      define HSMCI0_DMAC 0
+#    elif defined(CONFIG_SAMA5_HSMCI0_XDMAC1) && defined(CONFIG_SAMA5_XDMAC1)
+#      define HSMCI0_DMAC 1
+#    else
+#      error No valid DMA configuration for HSMCI0
+#    endif
 #  endif
 
-#  if defined(CONFIG_SAMA5_XDMAC0) && defined(SAMA5_HSMCI1_XDMAC0)
-#    define HSMCI1_DMAC 0
-#  elif defined(CONFIG_SAMA5_XDMAC1)
-#    define HSMCI1_DMAC 1
-#  else
-#    error No valid DMA configuration for HSMCI1
+#  if defined(CONFIG_SAMA5_HSMCI1)
+#    if defined(CONFIG_SAMA5_HSMCI1_XDMAC0) && defined(CONFIG_SAMA5_XDMAC0)
+#      define HSMCI1_DMAC 0
+#    elif defined(CONFIG_SAMA5_HSMCI0_XDMAC1) && defined(CONFIG_SAMA5_XDMAC1)
+#      define HSMCI1_DMAC 1
+#    else
+#      error No valid DMA configuration for HSMCI1
+#    endif
 #  endif
 
   /* System Bus Interfaces
@@ -968,22 +976,22 @@ static void sam_hsmcidump(struct sam_dev_s *priv,
                           struct sam_hsmciregs_s *regs, const char *msg)
 {
   fdbg("HSMCI Registers: %s\n", msg);
-  fdbg("     MR[%08x]: %08x\n", priv->base + SAM_HSMCI_MR_OFFSET,    regs->mr);
-  fdbg("   DTOR[%08x]: %08x\n", priv->base + SAM_HSMCI_DTOR_OFFSET,  regs->dtor);
-  fdbg("   SDCR[%08x]: %08x\n", priv->base + SAM_HSMCI_SDCR_OFFSET,  regs->sdcr);
-  fdbg("   ARGR[%08x]: %08x\n", priv->base + SAM_HSMCI_ARGR_OFFSET,  regs->argr);
-  fdbg("   BLKR[%08x]: %08x\n", priv->base + SAM_HSMCI_BLKR_OFFSET,  regs->blkr);
-  fdbg("  CSTOR[%08x]: %08x\n", priv->base + SAM_HSMCI_CSTOR_OFFSET, regs->cstor);
-  fdbg("  RSPR0[%08x]: %08x\n", priv->base + SAM_HSMCI_RSPR0_OFFSET, regs->rsp0);
-  fdbg("  RSPR1[%08x]: %08x\n", priv->base + SAM_HSMCI_RSPR1_OFFSET, regs->rsp1);
-  fdbg("  RSPR2[%08x]: %08x\n", priv->base + SAM_HSMCI_RSPR2_OFFSET, regs->rsp2);
-  fdbg("  RSPR3[%08x]: %08x\n", priv->base + SAM_HSMCI_RSPR3_OFFSET, regs->rsp3);
-  fdbg("     SR[%08x]: %08x\n", priv->base + SAM_HSMCI_SR_OFFSET,    regs->sr);
-  fdbg("    IMR[%08x]: %08x\n", priv->base + SAM_HSMCI_IMR_OFFSET,   regs->imr);
-  fdbg("    DMA[%08x]: %08x\n", priv->base + SAM_HSMCI_DMA_OFFSET,   regs->dma);
-  fdbg("    CFG[%08x]: %08x\n", priv->base + SAM_HSMCI_CFG_OFFSET,   regs->cfg);
-  fdbg("   WPMR[%08x]: %08x\n", priv->base + SAM_HSMCI_WPMR_OFFSET,  regs->wpmr);
-  fdbg("   WPSR[%08x]: %08x\n", priv->base + SAM_HSMCI_WPSR_OFFSET,  regs->wpsr);
+  fdbg("      MR[%08x]: %08x\n", priv->base + SAM_HSMCI_MR_OFFSET,    regs->mr);
+  fdbg("    DTOR[%08x]: %08x\n", priv->base + SAM_HSMCI_DTOR_OFFSET,  regs->dtor);
+  fdbg("    SDCR[%08x]: %08x\n", priv->base + SAM_HSMCI_SDCR_OFFSET,  regs->sdcr);
+  fdbg("    ARGR[%08x]: %08x\n", priv->base + SAM_HSMCI_ARGR_OFFSET,  regs->argr);
+  fdbg("    BLKR[%08x]: %08x\n", priv->base + SAM_HSMCI_BLKR_OFFSET,  regs->blkr);
+  fdbg("   CSTOR[%08x]: %08x\n", priv->base + SAM_HSMCI_CSTOR_OFFSET, regs->cstor);
+  fdbg("   RSPR0[%08x]: %08x\n", priv->base + SAM_HSMCI_RSPR0_OFFSET, regs->rsp0);
+  fdbg("   RSPR1[%08x]: %08x\n", priv->base + SAM_HSMCI_RSPR1_OFFSET, regs->rsp1);
+  fdbg("   RSPR2[%08x]: %08x\n", priv->base + SAM_HSMCI_RSPR2_OFFSET, regs->rsp2);
+  fdbg("   RSPR3[%08x]: %08x\n", priv->base + SAM_HSMCI_RSPR3_OFFSET, regs->rsp3);
+  fdbg("      SR[%08x]: %08x\n", priv->base + SAM_HSMCI_SR_OFFSET,    regs->sr);
+  fdbg("     IMR[%08x]: %08x\n", priv->base + SAM_HSMCI_IMR_OFFSET,   regs->imr);
+  fdbg("     DMA[%08x]: %08x\n", priv->base + SAM_HSMCI_DMA_OFFSET,   regs->dma);
+  fdbg("     CFG[%08x]: %08x\n", priv->base + SAM_HSMCI_CFG_OFFSET,   regs->cfg);
+  fdbg("    WPMR[%08x]: %08x\n", priv->base + SAM_HSMCI_WPMR_OFFSET,  regs->wpmr);
+  fdbg("    WPSR[%08x]: %08x\n", priv->base + SAM_HSMCI_WPSR_OFFSET,  regs->wpsr);
 }
 #endif
 
@@ -2049,7 +2057,8 @@ static void sam_blocksetup(FAR struct sdio_dev_s *dev, unsigned int blocklen,
   struct sam_dev_s *priv = (struct sam_dev_s *)dev;
   uint32_t regval;
 
-  DEBUGASSERT(dev != NULL && nblocks > 0 && nblocks < 65535 && blocklen < 65535);
+  DEBUGASSERT(dev != NULL && nblocks > 0 && nblocks < 65535);
+  DEBUGASSERT(blocklen < 65535 && (blocklen & 3) == 0);
 
   /* Make read/write proof (or not).  This is a legacy behavior: This really
    * just needs be be done once at initialization time.
