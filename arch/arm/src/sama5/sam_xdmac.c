@@ -115,7 +115,7 @@ struct sam_pidmap_s
   uint8_t pchan;                  /* DMA channel */
 };
 
-/* This structure descibes one DMA channel */
+/* This structure describes one DMA channel */
 
 struct sam_xdmach_s
 {
@@ -1487,7 +1487,8 @@ static int sam_txbuffer(struct sam_xdmach_s *xdmach, uint32_t paddr,
 
   /* Calculate the number of transfers for CUBC */
 
-  cubc = sam_cubc(xdmach, nbytes);
+  cubc  = sam_cubc(xdmach, nbytes);
+  cubc |= (CHNEXT_UBC_NVIEW_1 | CHNEXT_UBC_NSEN);
 
   /* Add the new link list entry */
 
@@ -1526,7 +1527,8 @@ static int sam_rxbuffer(struct sam_xdmach_s *xdmach, uint32_t paddr,
 
   /* Calculate the number of transfers for CUBC */
 
-  cubc = sam_cubc(xdmach, nbytes);
+  cubc  = sam_cubc(xdmach, nbytes);
+  cubc |= (CHNEXT_UBC_NVIEW_1 | CHNEXT_UBC_NSEN);
 
   /* Add the new link list entry */
 
