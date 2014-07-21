@@ -323,6 +323,7 @@ struct sam_dmaregs_s
 
   /* Channel Registers */
 
+  uint32_t cim;     /* Channel Interrupt Mask Register */
   uint32_t cis;     /* Channel Interrupt Status Register */
   uint32_t csa;     /* Channel Source Address Register */
   uint32_t cda;     /* Channel Destination Address Register */
