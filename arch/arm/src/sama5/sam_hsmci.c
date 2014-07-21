@@ -179,16 +179,6 @@
 
 #define HSCMI_NOTXDMA            1
 
-/* There are two ways to DMA:
- *
- *   (1) Use the FIFO address, incrementing the address on the HSMCI side
- *   (2) Use the TDR/RDR address with no address increment
- *
- * Both work.
- */
-
-#undef HSCMI_FIFODMA
-
 /* Timing */
 
 #define HSMCI_CMDTIMEOUT         (100000)
@@ -198,35 +188,17 @@
 
 #define HSMCI_DTIMER_DATATIMEOUT (0x000fffff)
 
-/* DMA configuration flags.  There are two ways to to this:
- *
- *   (1) Use the FIFO address, incrementing the address on the HSMCI side
- *   (2) Use the TDR/RDR address with no address increment
- *
- * REVISIT:  Is memory always on IF0?
- */
+/* DMA configuration flags */
 
 #define HSMCI_DMA_CHKSIZE HSMCI_DMA_CHKSIZE_1
 
-#ifdef HSCMI_FIFODMA
-#  define DMA_FLAGS(pid) \
-    (DMACH_FLAG_PERIPHPID(pid) | HSMCI_SYSBUS_IF | \
-     DMACH_FLAG_PERIPHH2SEL | DMACH_FLAG_PERIPHISPERIPH |  \
-     DMACH_FLAG_PERIPHWIDTH_32BITS | DMACH_FLAG_PERIPHINCREMENT | \
-     DMACH_FLAG_PERIPHCHUNKSIZE_1 | \
-     DMACH_FLAG_MEMPID_MAX | MEMORY_SYSBUS_IF | \
-     DMACH_FLAG_MEMWIDTH_32BITS | DMACH_FLAG_MEMINCREMENT | \
-     DMACH_FLAG_MEMCHUNKSIZE_4 | DMACH_FLAG_MEMBURST_1)
-#else
-#  define DMA_FLAGS(pid) \
-    (DMACH_FLAG_PERIPHPID(pid) | HSMCI_SYSBUS_IF | \
-     DMACH_FLAG_PERIPHH2SEL | DMACH_FLAG_PERIPHISPERIPH |  \
-     DMACH_FLAG_PERIPHWIDTH_32BITS | DMACH_FLAG_PERIPHCHUNKSIZE_1 | \
-     DMACH_FLAG_MEMPID_MAX | MEMORY_SYSBUS_IF | \
-     DMACH_FLAG_MEMWIDTH_32BITS | DMACH_FLAG_MEMINCREMENT | \
-     DMACH_FLAG_MEMCHUNKSIZE_4 | DMACH_FLAG_MEMBURST_1)
-
-#endif
+#define DMA_FLAGS(pid) \
+  (DMACH_FLAG_PERIPHPID(pid) | HSMCI_SYSBUS_IF | \
+   DMACH_FLAG_PERIPHH2SEL | DMACH_FLAG_PERIPHISPERIPH |  \
+   DMACH_FLAG_PERIPHWIDTH_32BITS | DMACH_FLAG_PERIPHCHUNKSIZE_1 | \
+   DMACH_FLAG_MEMPID_MAX | MEMORY_SYSBUS_IF | \
+   DMACH_FLAG_MEMWIDTH_32BITS | DMACH_FLAG_MEMINCREMENT | \
+   DMACH_FLAG_MEMCHUNKSIZE_4 | DMACH_FLAG_MEMBURST_1)
 
 /* Status errors:
  *
@@ -1026,13 +998,18 @@ static void sam_hsmcidump(struct sam_dev_s *priv,
 #ifdef CONFIG_SAMA5_HSMCI_XFRDEBUG
 static void sam_xfrsample(struct sam_dev_s *priv, int index)
 {
-  struct sam_xfrregs_s *regs = &priv->xfrsamples[index];
+  /* On a multiple block transfer, only sample on the first block */
+
+  if ((priv->smplset & (1 << index)) == 0)
+    {
+      struct sam_xfrregs_s *regs = &priv->xfrsamples[index];
 
 #ifdef CONFIG_DEBUG_DMA
-  sam_dmasample(priv->dma, &regs->dma);
+      sam_dmasample(priv->dma, &regs->dma);
 #endif
-  sam_hsmcisample(priv, &regs->hsmci);
-  priv->smplset |= (1 << index);
+      sam_hsmcisample(priv, &regs->hsmci);
+      priv->smplset |= (1 << index);
+    }
 }
 #endif
 
@@ -1204,49 +1181,56 @@ static void sam_dmacallback(DMA_HANDLE handle, void *arg, int result)
   struct sam_dev_s *priv = (struct sam_dev_s *)arg;
   sdio_eventset_t wkupevent;
 
-  /* Mark the DMA not busy and sample DMA registers */
-
-  priv->dmabusy = false;
-  sam_xfrsample((struct sam_dev_s *)arg, SAMPLENDX_DMA_CALLBACK);
-
-  /* Disable the DMA handshaking */
-
-  sam_putreg(priv, 0, SAM_HSMCI_DMA_OFFSET);
-
-  /* Terminate the transfer with an I/O error in the event of a DMA failure */
-
-  if (result < 0)
-    {
-      wkupevent = (result == -ETIMEDOUT ? SDIOWAIT_TIMEOUT : SDIOWAIT_ERROR);
-      flldbg("ERROR: DMA failed: result=%d wkupevent=%04x\n", result, wkupevent);
-
-      /* sam_endtransfer will terminate the transfer and wait up the waiting
-       * client in this case.
-       */
-
-      sam_endtransfer(priv, wkupevent);
-    }
-
-  /* The DMA completed without error.  Wake-up the waiting client if (1) both the
-   * HSMCI and DMA completion events, and (2) There is a client waiting for
-   * this event.
-   *
-   * If the HSMCI transfer event has already completed, it must have completed
-   * successfully (because the DMA was not cancelled).  sam_endtransfer() should
-   * have already received the SDIOWAIT_TRANSFERDONE event, but this event would
-   * not yet have been recorded.  We need to post the SDIOWAIT_TRANSFERDONE
-   * again in this case here.
-   *
-   * The timeout will remain active until sam_endwait() is eventually called
-   * so we should not have any concern about hangs if the HSMCI transfer never
-   * completed.
+  /* Is DMA still active?  We can get this callback when sam_dmastop() is
+   * called too.
    */
 
-  else if (!priv->xfrbusy && (priv->waitevents & SDIOWAIT_TRANSFERDONE) != 0)
+  if (priv->dmabusy)
     {
-      /* Okay.. wake up any waiting threads */
+      /* Mark the DMA not busy and sample DMA registers */
 
-      sam_endwait(priv, SDIOWAIT_TRANSFERDONE);
+      priv->dmabusy = false;
+      sam_xfrsample((struct sam_dev_s *)arg, SAMPLENDX_DMA_CALLBACK);
+
+      /* Disable the DMA handshaking */
+
+      sam_putreg(priv, 0, SAM_HSMCI_DMA_OFFSET);
+
+      /* Terminate the transfer with an I/O error in the event of a DMA failure */
+
+      if (result < 0)
+        {
+          wkupevent = (result == -ETIMEDOUT ? SDIOWAIT_TIMEOUT : SDIOWAIT_ERROR);
+          flldbg("ERROR: DMA failed: result=%d wkupevent=%04x\n", result, wkupevent);
+
+          /* sam_endtransfer will terminate the transfer and wait up the waiting
+           * client in this case.
+           */
+
+          sam_endtransfer(priv, wkupevent);
+        }
+
+      /* The DMA completed without error.  Wake-up the waiting client if (1) both the
+       * HSMCI and DMA completion events, and (2) There is a client waiting for
+       * this event.
+       *
+       * If the HSMCI transfer event has already completed, it must have completed
+       * successfully (because the DMA was not cancelled).  sam_endtransfer() should
+       * have already received the SDIOWAIT_TRANSFERDONE event, but this event would
+       * not yet have been recorded.  We need to post the SDIOWAIT_TRANSFERDONE
+       * again in this case here.
+       *
+       * The timeout will remain active until sam_endwait() is eventually called
+       * so we should not have any concern about hangs if the HSMCI transfer never
+       * completed.
+       */
+
+      else if (!priv->xfrbusy && (priv->waitevents & SDIOWAIT_TRANSFERDONE) != 0)
+        {
+          /* Okay.. wake up any waiting threads */
+
+          sam_endwait(priv, SDIOWAIT_TRANSFERDONE);
+        }
     }
 }
 
@@ -1294,7 +1278,23 @@ static void sam_eventtimeout(int argc, uint32_t arg)
   DEBUGASSERT(argc == 1 && priv != NULL);
   sam_xfrsample((struct sam_dev_s *)arg, SAMPLENDX_TIMEOUT);
 
-  /* Is a data transfer complete event expected? */
+  /* Make sure that any hung DMA is stopped.  dmabusy == false is the cue
+   * so the DMA callback is ignored.
+   */
+
+  priv->dmabusy = false;
+  sam_dmastop(priv->dma);
+
+  /* Disable the DMA handshaking */
+
+  sam_putreg(priv, 0, SAM_HSMCI_DMA_OFFSET);
+
+  /* Make sure that any hung HSMCI transfer is stopped */
+
+  sam_disablexfrints(priv);
+  sam_notransfer(priv);
+
+  /* Is a data timeout complete event expected? (should always be the case) */
 
   if ((priv->waitevents & SDIOWAIT_TIMEOUT) != 0)
     {
@@ -1380,8 +1380,16 @@ static void sam_endtransfer(struct sam_dev_s *priv,
 
   if ((wkupevent & (SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR)) != 0)
     {
-      sam_dmastop(priv->dma);
+      /* dmabusy == false gives the DMA callback handler a clue about what
+       * is going on.
+       */
+
       priv->dmabusy = false;
+      sam_dmastop(priv->dma);
+
+      /* Disable the DMA handshaking */
+
+      sam_putreg(priv, 0, SAM_HSMCI_DMA_OFFSET);
     }
 
   /* The transfer is complete.  Wake-up the waiting client if (1) both the
@@ -1418,11 +1426,13 @@ static void sam_endtransfer(struct sam_dev_s *priv,
 
 static void sam_notransfer(struct sam_dev_s *priv)
 {
+  uint32_t regval;
+
   /* Make read/write proof (or not).  This is a legacy behavior: This really
    * just needs be be done once at initialization time.
    */
 
-  uint32_t regval = sam_getreg(priv, SAM_HSMCI_MR_OFFSET);
+  regval  = sam_getreg(priv, SAM_HSMCI_MR_OFFSET);
   regval &= ~(HSMCI_MR_RDPROOF | HSMCI_MR_WRPROOF);
   sam_putreg(priv, regval, SAM_HSMCI_MR_OFFSET);
 
@@ -1437,7 +1447,7 @@ static void sam_notransfer(struct sam_dev_s *priv)
 }
 
 /****************************************************************************
- * Interrrupt Handling
+ * Interrupt Handling
  ****************************************************************************/
 
 /****************************************************************************
@@ -1968,7 +1978,7 @@ static int sam_sendcmd(FAR struct sdio_dev_s *dev,
       break;
     }
 
-  /* 'OR' in data transer related bits */
+  /* 'OR' in data transfer related bits */
 
   switch (cmd & MMCSD_DATAXFR_MASK)
     {
@@ -2098,10 +2108,12 @@ static int sam_cancel(FAR struct sdio_dev_s *dev)
   /* Make sure that the DMA is stopped (it will be stopped automatically
    * on normal transfers, but not necessarily when the transfer terminates
    * on an error condition.
+   *
+   * dmabusy == false let's the DMA callback know what is happening.
    */
 
-  sam_dmastop(priv->dma);
   priv->dmabusy = false;
+  sam_dmastop(priv->dma);
 
   /* Disable the DMA handshaking */
 
@@ -2683,34 +2695,57 @@ static bool sam_dmasupported(FAR struct sdio_dev_s *dev)
  ****************************************************************************/
 
 static int sam_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
-                          size_t buflen)
+                            size_t buflen)
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)dev;
   uint32_t paddr;
   uint32_t maddr;
+  uint32_t regval;
+  unsigned int blocksize;
+  unsigned int nblocks;
+  unsigned int offset;
+  unsigned int i;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
   DEBUGASSERT(((uint32_t)buffer & 3) == 0);
 
-  /* Physical address of the HSCMI RDR register and of the buffer location
-   * in RAM.
+  /* How many blocks?  That should have been saved by the sam_blocksetup()
+   * method earlier.
    */
 
-#ifdef HSCMI_FIFODMA
-  paddr = hsmci_physregaddr(priv, SAM_HSMCI_FIFO_OFFSET);
-#else
-  paddr = hsmci_physregaddr(priv, SAM_HSMCI_RDR_OFFSET);
-#endif
-  maddr = sam_physramaddr((uintptr_t)buffer);
+  regval    = sam_getreg(priv, SAM_HSMCI_BLKR_OFFSET);
+  nblocks   = ((regval &  HSMCI_BLKR_BCNT_MASK) >> HSMCI_BLKR_BCNT_SHIFT);
+  blocksize = ((regval &  HSMCI_BLKR_BLKLEN_MASK) >> HSMCI_BLKR_BLKLEN_SHIFT);
 
-  /* Setup register sampling */
+  DEBUGASSERT(nblocks > 0 && blocksize > 0 && (blocksize & 3) == 0);
+
+  /* Physical address of the HSCMI source register, either the TDR (for
+   * single transfers) or the first FIFO register, and the physcal address
+   * of the buffer in RAM.
+   */
+
+  offset = (nblocks == 1 ? SAM_HSMCI_RDR_OFFSET : SAM_HSMCI_FIFO_OFFSET);
+  paddr  = hsmci_physregaddr(priv, offset);
+  maddr  = sam_physramaddr((uintptr_t)buffer);
+
+  /* Setup register sampling (only works for the case of nblocks == 1) */
 
   sam_xfrsampleinit(priv);
   sam_xfrsample(priv, SAMPLENDX_BEFORE_SETUP);
 
-  /* Configure the RX DMA */
+  /* Set DMA for each block */
 
-  sam_dmarxsetup(priv->dma, paddr, maddr, buflen);
+  for (i = 0; i < nblocks; i++)
+    {
+      /* Configure the RX DMA */
+
+      sam_dmarxsetup(priv->dma, paddr, maddr, buflen);
+
+      /* Update addresses for the next block */
+
+      paddr += sizeof(uint32_t);
+      maddr += blocksize;
+   }
 
   /* Enable DMA handshaking */
 
@@ -2725,7 +2760,7 @@ static int sam_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   sam_dmastart(priv->dma, sam_dmacallback, priv);
 
   /* Configure transfer-related interrupts.  Transfer interrupts are not
-   * enabled until after the transfer is stard with an SD command (i.e.,
+   * enabled until after the transfer is started with an SD command (i.e.,
    * at the beginning of sam_eventwait().
    */
 
@@ -2754,33 +2789,57 @@ static int sam_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
  ****************************************************************************/
 
 static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
-                          FAR const uint8_t *buffer, size_t buflen)
+                            FAR const uint8_t *buffer, size_t buflen)
 {
 #ifndef HSCMI_NOTXDMA
   struct sam_dev_s *priv = (struct sam_dev_s *)dev;
   uint32_t paddr;
   uint32_t maddr;
+  uint32_t regval;
+  unsigned int blocksize;
+  unsigned int nblocks;
+  unsigned int offset;
+  unsigned int i;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
   DEBUGASSERT(((uint32_t)buffer & 3) == 0);
 
-  /* Physical address of the HSCMI TDR registr */
+  /* How many blocks?  That should have been saved by the sam_blocksetup()
+   * method earlier.
+   */
 
-#ifdef HSCMI_FIFODMA
-  paddr = hsmci_physregaddr(priv, SAM_HSMCI_FIFO_OFFSET);
-#else
-  paddr = hsmci_physregaddr(priv, SAM_HSMCI_TDR_OFFSET);
-#endif
-  maddr = sam_physramaddr((uintptr_t)buffer);
+  regval    = sam_getreg(priv, SAM_HSMCI_BLKR_OFFSET);
+  nblocks   = ((regval &  HSMCI_BLKR_BCNT_SHIFT) >> HSMCI_BLKR_BCNT_SHIFT);
+  blocksize = ((regval &  HSMCI_BLKR_BLKLEN_MASK) >> HSMCI_BLKR_BLKLEN_SHIFT);
+  DEBUGASSERT(nblocks > 0 && blocksize > 0 && (blocksize & 3) == 0);
 
-  /* Setup register sampling */
+  /* Physical address of the HSCMI source register, either the TDR (for
+   * single transfers) or the first FIFO register, and the physcal address
+   * of the buffer in RAM.
+   */
+
+  offset = (nblocks == 1 ? SAM_HSMCI_TDR_OFFSET : SAM_HSMCI_FIFO_OFFSET);
+  paddr  = hsmci_physregaddr(priv, offset);
+  maddr  = sam_physramaddr((uintptr_t)buffer);
+
+  /* Setup register sampling (only works for the case of nblocks == 1) */
 
   sam_xfrsampleinit(priv);
   sam_xfrsample(priv, SAMPLENDX_BEFORE_SETUP);
 
-  /* Configure the TX DMA */
+  /* Set DMA for each block */
 
-  sam_dmatxsetup(priv->dma, paddr, maddr, buflen);
+  for (i = 0; i < nblocks; i++)
+    {
+      /* Configure the TX DMA */
+
+      sam_dmatxsetup(priv->dma, paddr, maddr, buflen);
+
+      /* Update addresses for the next block */
+
+      paddr += sizeof(uint32_t);
+      maddr += blocksize;
+   }
 
   /* Enable DMA handshaking */
 
