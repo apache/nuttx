@@ -216,8 +216,7 @@
      DMACH_FLAG_PERIPHCHUNKSIZE_1 | \
      DMACH_FLAG_MEMPID_MAX | MEMORY_SYSBUS_IF | \
      DMACH_FLAG_MEMWIDTH_32BITS | DMACH_FLAG_MEMINCREMENT | \
-     DMACH_FLAG_MEMCHUNKSIZE_4 | DMACH_FLAG_MEMBURST_4)
-
+     DMACH_FLAG_MEMCHUNKSIZE_4 | DMACH_FLAG_MEMBURST_1)
 #else
 #  define DMA_FLAGS(pid) \
     (DMACH_FLAG_PERIPHPID(pid) | HSMCI_SYSBUS_IF | \
@@ -225,7 +224,7 @@
      DMACH_FLAG_PERIPHWIDTH_32BITS | DMACH_FLAG_PERIPHCHUNKSIZE_1 | \
      DMACH_FLAG_MEMPID_MAX | MEMORY_SYSBUS_IF | \
      DMACH_FLAG_MEMWIDTH_32BITS | DMACH_FLAG_MEMINCREMENT | \
-     DMACH_FLAG_MEMCHUNKSIZE_4 | DMACH_FLAG_MEMBURST_4)
+     DMACH_FLAG_MEMCHUNKSIZE_4 | DMACH_FLAG_MEMBURST_1)
 
 #endif
 
@@ -334,12 +333,14 @@
 #    define SAMPLENDX_AFTER_SETUP   2
 #    define SAMPLENDX_END_TRANSFER  3
 #    define SAMPLENDX_DMA_CALLBACK  4
-#    define DEBUG_NDMASAMPLES       5
+#    define SAMPLENDX_TIMEOUT       5
+#    define DEBUG_NDMASAMPLES       6
 #  else
 #    define SAMPLENDX_BEFORE_SETUP  0
 #    define SAMPLENDX_AFTER_SETUP   1
 #    define SAMPLENDX_END_TRANSFER  2
-#    define DEBUG_NDMASAMPLES       3
+#    define SAMPLENDX_TIMEOUT       3
+#    define DEBUG_NDMASAMPLES       4
 #  endif
 #endif
 
@@ -408,8 +409,9 @@ struct sam_dev_s
   volatile sdio_eventset_t wkupevent; /* The event that caused the wakeup */
   WDOG_ID            waitwdog;   /* Watchdog that handles event timeouts */
   uint8_t            hsmci;      /* HSMCI (0, 1, or 2) */
-  bool               dmabusy;    /* TRUE: DMA transfer is in progress (not used) */
-  bool               txbusy;     /* TRUE: TX transfer is in progress (for delay calculation) */
+  volatile bool      dmabusy;    /* TRUE: DMA transfer is in progress */
+  volatile bool      xfrbusy;    /* TRUE: Transfer is in progress */
+  volatile bool      txbusy;     /* TRUE: TX transfer is in progress (for delay calculation) */
 
   /* Callback support */
 
@@ -475,7 +477,7 @@ static inline void sam_putreg(struct sam_dev_s *priv, uint32_t value,
 
 static inline void sam_configwaitints(struct sam_dev_s *priv, uint32_t waitmask,
               sdio_eventset_t waitevents);
-static void sam_disablewaitints(struct sam_dev_s *priv, sdio_eventset_t wkupevents);
+static void sam_disablewaitints(struct sam_dev_s *priv, sdio_eventset_t wkupevent);
 static inline void sam_configxfrints(struct sam_dev_s *priv, uint32_t xfrmask);
 static void sam_disablexfrints(struct sam_dev_s *priv);
 static inline void sam_enableints(struct sam_dev_s *priv);
@@ -495,8 +497,8 @@ static void sam_hsmcidump(struct sam_dev_s *priv,
 #ifdef CONFIG_SAMA5_HSMCI_XFRDEBUG
 static void sam_xfrsampleinit(struct sam_dev_s *priv);
 static void sam_xfrsample(struct sam_dev_s *priv, int index);
-static void sam_xfrdumpone(struct sam_dev_s *priv,
-              struct sam_xfrregs_s *regs, const char *msg);
+static void sam_xfrdumpone(struct sam_dev_s *priv, int index,
+              const char *msg);
 static void sam_xfrdump(struct sam_dev_s *priv);
 #else
 #  define   sam_xfrsampleinit(priv)
@@ -1064,13 +1066,22 @@ static void sam_xfrsampleinit(struct sam_dev_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_HSMCI_XFRDEBUG
-static void sam_xfrdumpone(struct sam_dev_s *priv,
-                           struct sam_xfrregs_s *regs, const char *msg)
+static void sam_xfrdumpone(struct sam_dev_s *priv, int index,
+                           const char *msg)
 {
+  if ((priv->smplset & (1 << index)) != 0)
+    {
+      struct sam_xfrregs_s *regs = &priv->xfrsamples[index];
+
 #ifdef CONFIG_DEBUG_DMA
-  sam_dmadump(priv->dma, &regs->dma, msg);
+      sam_dmadump(priv->dma, &regs->dma, msg);
 #endif
-  sam_hsmcidump(priv, &regs->hsmci, msg);
+      sam_hsmcidump(priv, &regs->hsmci, msg);
+    }
+  else
+    {
+      fdbg("%s: Not collected\n", msg);
+    }
 }
 #endif
 
@@ -1089,38 +1100,16 @@ static void  sam_xfrdump(struct sam_dev_s *priv)
   if (priv->xfrinitialized)
 #endif
     {
-      if ((priv->smplset & (1 << SAMPLENDX_BEFORE_SETUP)) != 0)
-        {
-          sam_xfrdumpone(priv, &priv->xfrsamples[SAMPLENDX_BEFORE_SETUP],
-                         "Before setup");
-        }
+      sam_xfrdumpone(priv, SAMPLENDX_BEFORE_SETUP, "Before setup");
 #ifdef CONFIG_DEBUG_DMA
-      if ((priv->smplset & (1 << SAMPLENDX_BEFORE_SETUP)) != 0)
-        {
-          sam_xfrdumpone(priv, &priv->xfrsamples[SAMPLENDX_BEFORE_ENABLE],
-                         "Before DMA enable");
-        }
+      sam_xfrdumpone(priv, SAMPLENDX_BEFORE_ENABLE, "Before DMA enable");
 #endif
-
-      if ((priv->smplset & (1 << SAMPLENDX_BEFORE_SETUP)) != 0)
-        {
-          sam_xfrdumpone(priv, &priv->xfrsamples[SAMPLENDX_AFTER_SETUP],
-                         "After setup");
-        }
-
-      if ((priv->smplset & (1 << SAMPLENDX_BEFORE_SETUP)) != 0)
-        {
-          sam_xfrdumpone(priv, &priv->xfrsamples[SAMPLENDX_END_TRANSFER],
-                         "End of transfer");
-        }
-
+      sam_xfrdumpone(priv, SAMPLENDX_AFTER_SETUP, "After setup");
+      sam_xfrdumpone(priv, SAMPLENDX_END_TRANSFER, "End of transfer");
 #ifdef CONFIG_DEBUG_DMA
-      if ((priv->smplset & (1 << SAMPLENDX_BEFORE_SETUP)) != 0)
-        {
-          sam_xfrdumpone(priv, &priv->xfrsamples[SAMPLENDX_DMA_CALLBACK],
-                         "DMA Callback");
-        }
+      sam_xfrdumpone(priv, SAMPLENDX_DMA_CALLBACK, "DMA Callback");
 #endif
+      sam_xfrdumpone(priv, SAMPLENDX_TIMEOUT, "Timeout");
 
       priv->smplset        = 0;
 #ifdef CONFIG_SAMA5_HSMCI_CMDDEBUG
@@ -1213,16 +1202,52 @@ static void sam_cmddump(struct sam_dev_s *priv)
 static void sam_dmacallback(DMA_HANDLE handle, void *arg, int result)
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)arg;
+  sdio_eventset_t wkupevent;
 
-  /* We don't really do anything at the completion of DMA.  The termination
-   * of the transfer is driven by the HSMCI interrupts.
-   *
-   * Mark the DMA not busy.
-   */
+  /* Mark the DMA not busy and sample DMA registers */
 
   priv->dmabusy = false;
-
   sam_xfrsample((struct sam_dev_s *)arg, SAMPLENDX_DMA_CALLBACK);
+
+  /* Disable the DMA handshaking */
+
+  sam_putreg(priv, 0, SAM_HSMCI_DMA_OFFSET);
+
+  /* Terminate the transfer with an I/O error in the event of a DMA failure */
+
+  if (result < 0)
+    {
+      wkupevent = (result == -ETIMEDOUT ? SDIOWAIT_TIMEOUT : SDIOWAIT_ERROR);
+      flldbg("ERROR: DMA failed: result=%d wkupevent=%04x\n", result, wkupevent);
+
+      /* sam_endtransfer will terminate the transfer and wait up the waiting
+       * client in this case.
+       */
+
+      sam_endtransfer(priv, wkupevent);
+    }
+
+  /* The DMA completed without error.  Wake-up the waiting client if (1) both the
+   * HSMCI and DMA completion events, and (2) There is a client waiting for
+   * this event.
+   *
+   * If the HSMCI transfer event has already completed, it must have completed
+   * successfully (because the DMA was not cancelled).  sam_endtransfer() should
+   * have already received the SDIOWAIT_TRANSFERDONE event, but this event would
+   * not yet have been recorded.  We need to post the SDIOWAIT_TRANSFERDONE
+   * again in this case here.
+   *
+   * The timeout will remain active until sam_endwait() is eventually called
+   * so we should not have any concern about hangs if the HSMCI transfer never
+   * completed.
+   */
+
+  else if (!priv->xfrbusy && (priv->waitevents & SDIOWAIT_TRANSFERDONE) != 0)
+    {
+      /* Okay.. wake up any waiting threads */
+
+      sam_endwait(priv, SDIOWAIT_TRANSFERDONE);
+    }
 }
 
 /****************************************************************************
@@ -1267,7 +1292,7 @@ static void sam_eventtimeout(int argc, uint32_t arg)
   struct sam_dev_s *priv = (struct sam_dev_s *)arg;
 
   DEBUGASSERT(argc == 1 && priv != NULL);
-  DEBUGASSERT((priv->waitevents & SDIOWAIT_TIMEOUT) == 0);
+  sam_xfrsample((struct sam_dev_s *)arg, SAMPLENDX_TIMEOUT);
 
   /* Is a data transfer complete event expected? */
 
@@ -1276,7 +1301,7 @@ static void sam_eventtimeout(int argc, uint32_t arg)
       /* Yes.. wake up any waiting threads */
 
       sam_endwait(priv, SDIOWAIT_TIMEOUT);
-      flldbg("Timeout\n");
+      flldbg("ERROR: Timeout\n");
     }
 }
 
@@ -1353,18 +1378,23 @@ static void sam_endtransfer(struct sam_dev_s *priv,
    * on an error condition).
    */
 
-  sam_dmastop(priv->dma);
-  priv->dmabusy = false;
-
-  /* Disable the DMA handshaking */
-
-  sam_putreg(priv, 0, SAM_HSMCI_DMA_OFFSET);
-
-  /* Is a thread wait for these data transfer complete events? */
-
-  if ((priv->waitevents & wkupevent) != 0)
+  if ((wkupevent & (SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR)) != 0)
     {
-      /* Yes.. wake up any waiting threads */
+      sam_dmastop(priv->dma);
+      priv->dmabusy = false;
+    }
+
+  /* The transfer is complete.  Wake-up the waiting client if (1) both the
+   * HSMCI and DMA completion events, and (2) There is a client waiting for
+   * this event.
+   *
+   * The timeout will remain active until sam_endwait() is eventually called
+   * so we should not have any concern about hangs if the DMA never completes.
+   */
+
+  if (!priv->dmabusy && (priv->waitevents & wkupevent) != 0)
+    {
+      /* Okay.. wake up any waiting threads */
 
       sam_endwait(priv, wkupevent);
     }
@@ -1374,8 +1404,9 @@ static void sam_endtransfer(struct sam_dev_s *priv,
  * Name: sam_notransfer
  *
  * Description:
- *   Setup for no transfer.  This is the default setup that is overriddden
- *   by sam_dmarecvsetup or sam_dmasendsetup
+ *   Setup for no transfer.  This is called both before beginning a new
+ *   transfer and when a transfer completes.  In the first case, this is the
+ *   default setup that is overridden by sam_dmarecvsetup or sam_dmasendsetup
  *
  * Input Parameters:
  *   priv   - An instance of the HSMCI device interface
@@ -1398,6 +1429,11 @@ static void sam_notransfer(struct sam_dev_s *priv)
   /* Clear the block size and count */
 
   sam_putreg(priv, 0, SAM_HSMCI_BLKR_OFFSET);
+
+  /* Clear transfer flags (DMA could still be active in a corner case) */
+
+  priv->xfrbusy = false;
+  priv->txbusy  = false;
 }
 
 /****************************************************************************
@@ -1643,7 +1679,6 @@ static void sam_reset(FAR struct sdio_dev_s *dev)
   priv->waitmask   = 0;      /* Interrupt enables for event waiting */
   priv->wkupevent  = 0;      /* The event that caused the wakeup */
   priv->dmabusy    = false;  /* No DMA in progress */
-  priv->txbusy     = false;  /* No TX in progress */
   wd_cancel(priv->waitwdog); /* Cancel any timeouts */
 
   /* Interrupt mode data transfer support */
@@ -2067,7 +2102,6 @@ static int sam_cancel(FAR struct sdio_dev_s *dev)
 
   sam_dmastop(priv->dma);
   priv->dmabusy = false;
-  priv->txbusy  = false;
 
   /* Disable the DMA handshaking */
 
@@ -2464,7 +2498,7 @@ static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev,
   sam_enableints(priv);
 
   /* There is a race condition here... the event may have completed before
-   * we get here.  In this case waitevents will be zero, but wkupevents will
+   * we get here.  In this case waitevents will be zero, but wkupevent will
    * be non-zero (and, hopefully, the semaphore count will also be non-zero).
    */
 
@@ -2686,6 +2720,7 @@ static int sam_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   /* Start the DMA */
 
   priv->dmabusy = true;
+  priv->xfrbusy = true;
   priv->txbusy  = false;
   sam_dmastart(priv->dma, sam_dmacallback, priv);
 
@@ -2755,6 +2790,7 @@ static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
   /* Start the DMA */
 
   priv->dmabusy = true;
+  priv->xfrbusy = true;
   priv->txbusy  = true;
   sam_dmastart(priv->dma, sam_dmacallback, priv);
 
@@ -2781,6 +2817,7 @@ static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
   sam_configxfrints(priv, HSMCI_DMASEND_INTS);
 
   priv->dmabusy = false;
+  priv->xfrbusy = true;
   priv->txbusy  = true;
 
   /* Nullify register sampling */
