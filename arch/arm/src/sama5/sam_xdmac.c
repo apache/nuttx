@@ -1067,9 +1067,11 @@ static inline uint32_t sam_txcc(struct sam_xdmach_s *xdmach)
 
   regval |= XDMACH_CC_DSYNC;
 
+#if 0 /* REVISIT */
   /* 5. Set PROT to activate a secure channel (REVISIT). */
 
   regval |= XDMACH_CC_PROT; /* Channel is unsecured */
+#endif
 
   /* 6. Program CSIZE to configure the channel chunk size (only
    *    relevant for peripheral synchronized transfer).
@@ -1223,9 +1225,11 @@ static inline uint32_t sam_rxcc(struct sam_xdmach_s *xdmach)
    * RX -> Peripheral to memory (DSYNC == 0)
    */
 
+#if 0 /* REVISIT */
   /* 5. Set PROT to activate a secure channel (REVISIT) */
 
   regval |= XDMACH_CC_PROT; /* Channel is unsecured */
+#endif
 
   /* 6. Program CSIZE to configure the channel chunk size (only
    *    relevant for peripheral synchronized transfer).
