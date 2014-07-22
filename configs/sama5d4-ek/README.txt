@@ -3737,16 +3737,9 @@ Configurations
        in a different manner, this HSMCI1 slot may not be useful to you
        anyway.
 
-       STATUS:  There are unresolved issue with HSMCI0 as of this writing.
-       No errors are reported so most the handshaking signals and command
-       transfers are working, but all data transfers return the value zero
-       (with or without DMA).  This seems like some pin configuration issue.
-
-       Also, we should be receiving interrupts when an SD card is inserted
-       or removed; we are not.
-
-       If these behaviors are a problem for you, then you may want to
-       disable HSMCI0 as well.
+       STATUS:  Seems to be completely functional.  TX DMA is currently
+       disabled; there was a problem at one time but that has probably
+       been fixed.  HSCMI with TX DMA re-enabled needs to be verified.
 
    13. Networking is supported via EMAC0.  See the "Networking" section
        above for detailed configuration settings.  DHCP is not used in
@@ -4048,16 +4041,13 @@ To-Do List
    endpoint support in the EHCI driver is untested (but works in similar
    EHCI drivers).
 
-2) HSCMI TX DMA support is currently commented out.
+2) HSCMI TX DMA support is currently commented out.  There were problems at
+   one time (on the SAMA5D3) and the temporary workaround was simpley to
+   disable TX DMA.  There have been several fixes to both HSMCI and DMA
+   support since then and TX DMA is very likely okay now.  But this needs
+   to be verified by re-enabled HSMCI TX DMA.
 
-3) Currently HSMCI0 does not work correctly.  No errors are reported so all of
-   the card handshakes must be working, but only zero values are read from the
-   card (with or without DMA).  Sounds like a pin configuration issue.
-
-   Also, we should be receiving interrupts when an SD card is inserted or
-   removed; we are not.
-
-4) There is a kludge in place in the Ethernet code to work around a problem
+3) There is a kludge in place in the Ethernet code to work around a problem
    that I see.  The problem that I see is as follows:
 
      a. To send packets, the software keeps a queue of TX descriptors in
@@ -4087,7 +4077,7 @@ To-Do List
    occurs, than the USED bit would not be set and the transfer would be
    lost.
 
-5) Some drivers may require some adjustments if you intend to run from SDRAM.
+4) Some drivers may require some adjustments if you intend to run from SDRAM.
    That is because in this case macros like BOARD_MCK_FREQUENCY are not constants
    but are instead function calls:  The MCK clock frequency is not known in
    advance but instead has to be calculated from the bootloader PLL configuration.
