@@ -1,7 +1,7 @@
 /*******************************************************************************
  * arch/arm/src/stm32/stm32_otgfsdev.c
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -4055,7 +4055,7 @@ static void stm32_epout_disable(FAR struct stm32_ep_s *privep)
   while ((stm32_getreg(regaddr) & OTGFS_DOEPINT_EPDISD) == 0);
 #else
   /* REVISIT: */
-  up_mdelay(50);
+  up_udelay(10);
 #endif
 
   /* Clear the EPDISD interrupt indication */
@@ -4113,7 +4113,6 @@ static void stm32_epin_disable(FAR struct stm32_ep_s *privep)
    */
 
 #if 0
-
   /* Make sure that there is no pending IPEPNE interrupt (because we are
    * to poll this bit below).
    */
@@ -4136,7 +4135,6 @@ static void stm32_epin_disable(FAR struct stm32_ep_s *privep)
   /* Clear the INEPNE interrupt indication */
 
   stm32_putreg(OTGFS_DIEPINT_INEPNE, regaddr);
-
 #endif
 
   /* Deactivate and disable the endpoint by setting the EPDIS and SNAK bits
@@ -4174,7 +4172,6 @@ static void stm32_epin_disable(FAR struct stm32_ep_s *privep)
   /* Cancel any queued write requests */
 
   stm32_req_cancel(privep, -ESHUTDOWN);
-
   irqrestore(flags);
 }
 
@@ -4197,6 +4194,7 @@ static int stm32_ep_disable(FAR struct usbdev_ep_s *ep)
       return -EINVAL;
     }
 #endif
+
   usbtrace(TRACE_EPDISABLE, privep->epphy);
 
   /* Is this an IN or an OUT endpoint */
@@ -4236,6 +4234,7 @@ static FAR struct usbdev_req_s *stm32_ep_allocreq(FAR struct usbdev_ep_s *ep)
       return NULL;
     }
 #endif
+
   usbtrace(TRACE_EPALLOCREQ, ((FAR struct stm32_ep_s *)ep)->epphy);
 
   privreq = (FAR struct stm32_req_s *)kmalloc(sizeof(struct stm32_req_s));
@@ -4485,7 +4484,7 @@ static int stm32_epout_setstall(FAR struct stm32_ep_s *privep)
   while ((stm32_getreg(regaddr) & OTGFS_DOEPINT_EPDISD) == 0);
 #else
   /* REVISIT: */
-  up_mdelay(50);
+  up_udelay(10);
 #endif
 
   /* Disable Global OUT NAK mode */
@@ -4870,7 +4869,7 @@ static int stm32_wakeup(struct usbdev_s *dev)
  * Name: stm32_selfpowered
  *
  * Description:
- *   Sets/clears the device selfpowered feature
+ *   Sets/clears the device self-powered feature
  *
  *******************************************************************************/
 
@@ -4926,8 +4925,6 @@ static int stm32_pullup(struct usbdev_s *dev, bool enable)
     }
 
   stm32_putreg(regval, STM32_OTGFS_DCTL);
-  up_mdelay(3);
-
   irqrestore(flags);
   return OK;
 }
@@ -5133,7 +5130,7 @@ static void stm32_hwinitialize(FAR struct stm32_usbdev_s *priv)
   uint32_t address;
   int i;
 
-  /* At startup the core is in FS mode. */
+  /* At start-up the core is in FS mode. */
 
   /* Disable global interrupts by clearing the GINTMASK bit in the GAHBCFG
    * register; Set the TXFELVL bit in the GAHBCFG register so that TxFIFO
@@ -5204,7 +5201,7 @@ static void stm32_hwinitialize(FAR struct stm32_usbdev_s *priv)
   up_mdelay(50);
 
   /* Initialize device mode */
-  /* Restart the Phy Clock */
+  /* Restart the PHY Clock */
 
   stm32_putreg(0, STM32_OTGFS_PCGCCTL);
 
@@ -5215,7 +5212,7 @@ static void stm32_hwinitialize(FAR struct stm32_usbdev_s *priv)
   regval |= OTGFS_DCFG_PFIVL_80PCT;
   stm32_putreg(regval, STM32_OTGFS_DCFG);
 
-  /* Set full speed phy */
+  /* Set full speed PHY */
 
   regval = stm32_getreg(STM32_OTGFS_DCFG);
   regval &= ~OTGFS_DCFG_DSPD_MASK;
@@ -5637,6 +5634,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 
   flags = irqsave();
   stm32_usbreset(priv);
+  irqrestore(flags);
 
   /* Unbind the class driver */
 
@@ -5644,6 +5642,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 
   /* Disable USB controller interrupts */
 
+  flags = irqsave();
   up_disable_irq(STM32_IRQ_OTGFS);
 
   /* Disconnect device */
