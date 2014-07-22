@@ -47,8 +47,8 @@
 
 #include <nuttx/i2c.h>
 #include <nuttx/audio/i2s.h>
+#include <nuttx/audio/pcm.h>
 #include <nuttx/audio/wm8904.h>
-#include <nuttx/audio/pcm_decode.h>
 
 #include <arch/board/board.h>
 
@@ -152,13 +152,13 @@ static int wm8904_attach(FAR const struct wm8904_lower_s *lower,
        * new handler will called via wm8904_interrupt() when the interrupt occurs.
        */
 
-      ivdbg("Attaching %p\n", isr);
+      audvdbg("Attaching %p\n", isr);
       g_mxtinfo.handler = isr;
       g_mxtinfo.arg = arg;
     }
   else
     {
-      ivdbg("Detaching %p\n", g_mxtinfo.handler);
+      audvdbg("Detaching %p\n", g_mxtinfo.handler);
       wm8904_enable(lower, false);
       g_mxtinfo.handler = NULL;
       g_mxtinfo.arg = NULL;
