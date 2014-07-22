@@ -334,6 +334,11 @@
 #    undef HAVE_WM8904
 #  endif
 
+#  ifndef CONFIG_AUDIO_FORMAT_PCM
+#    warning CONFIG_AUDIO_FORMAT_PCM is required for audio support
+#    undef HAVE_WM8904
+#  endif
+
 #  ifndef CONFIG_SAMA5D4EK_WM8904_I2CFREQUENCY
 #    warning Defaulting to maximum WM8904 I2C frequency
 #    define CONFIG_SAMA5D4EK_WM8904_I2CFREQUENCY 400000

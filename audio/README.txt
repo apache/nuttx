@@ -17,12 +17,12 @@ This directory holds the NuttX audio subsystem upper-half.  The upper-half provi
 a common interface for applications to interface with and also defines a bind
 layer for specific lower-half audio device drivers.
 
-  audio.c   - The upper-half driver that binds to a lower-half driver from the
-              drivers/audio subdirectory.  For each attached audio device, there
-              will be an instance of this upper-half driver bound to the
-              instance of the lower half driver context.
-  pcm.c     - Routines to manage PCM / WAV type data.  Currently just a placeholder.
-  README    - This file!
+  audio.c      - The upper-half driver that binds to a lower-half driver from the
+                 drivers/audio subdirectory.  For each attached audio device, there
+                 will be an instance of this upper-half driver bound to the
+                 instance of the lower half driver context.
+  pcm_decode.c - Routines to decode PCM / WAV type data.
+  README       - This file!
 
 Portions of the the audio system interface have application interfaces.  Those
 portions reside in the nuttx/libc/audio directory where the will be built for

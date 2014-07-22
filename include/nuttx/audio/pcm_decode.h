@@ -1,8 +1,8 @@
 /****************************************************************************
- * audio/pcm.c
+ * include/nuttx/audio/pcm_decode.h
  *
- *   Copyright (C) 2013 Ken Pettit. All rights reserved.
- *   Author: Ken Pettit <pettitkd@gmail.com>
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Author:  Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,62 +33,86 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_AUDIO_PCM_DECODE_H
+#define __INCLUDE_NUTTX_AUDIO_PCM_DECODE_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-#include <semaphore.h>
-#include <errno.h>
-#include <debug.h>
 
-#include <nuttx/kmalloc.h>
-#include <nuttx/audio/audio.h>
+#include <nuttx/irq.h>
 
-#if defined(CONFIG_AUDIO) && defined(CONFIG_AUDIO_FORMAT_PCM)
+#ifdef CONFIG_AUDIO_FORMAT_PCM
 
 /****************************************************************************
- * Preprocessor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
-
-/* Configuration ************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: audio_pcm_init
+/* Configuration ************************************************************
  *
- * Initialized the Audio PCM library.
- *
+ * CONFIG_AUDIO_FORMAT_PCM - Enabled PCM support
+ */
+
+/* Pre-requisites */
+
+#ifndef CONFIG_AUDIO
+#  error CONFIG_AUDIO is required for PCM support
+#endif
+
+#ifndef CONFIG_SCHED_WORKQUEUE
+#  error CONFIG_SCHED_WORKQUEUE is required by the PCM driver
+#endif
+
+/* Default configuration values */
+
+/****************************************************************************
+ * Public Types
  ****************************************************************************/
 
-int audio_pcm_initialize(void)
+ /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
 {
-  /* Initialze the Audio PCM routines */
+#else
+#define EXTERN extern
+#endif
 
-  return OK;
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: pcm_decode_initialize
+ *
+ * Description:
+ *   Initialize the PCM device.  The PCM device accepts and contains a
+ *   low-level audio DAC-type device.  It then returns a new audio lower
+ *   half interface at adds a PCM decoding from end to the low-level
+ *   audio device
+ *
+ * Input Parameters:
+ *   dev - A reference to the low-level audio DAC-type device to contain.
+ *
+ * Returned Value:
+ *   On success, a new audio device instance is returned that wraps the
+ *   low-level device and provides a PCM decoding front end.  NULL is
+ *   returned on failure.
+ *
+ ****************************************************************************/
+
+FAR struct audio_lowerhalf_s *
+  pcm_decode_initialize(FAR struct audio_lowerhalf_s *dev);
+
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
 
-#endif /* CONFIG_AUDIO && CONFIG_AUDIO_FORMAT_PCM */
-
+#endif /* CONFIG_AUDIO_FORMAT_PCM */
+#endif /* __INCLUDE_NUTTX_AUDIO_PCM_DECODE_H */

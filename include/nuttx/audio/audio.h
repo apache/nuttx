@@ -287,9 +287,9 @@
 /* Define the size of AP Buffer sample count base on CONFIG */
 
 #ifdef CONFIG_AUDIO_LARGE_BUFFERS
-typedef uint32_t  apb_samp_t;
+typedef uint32_t apb_samp_t;
 #else
-typedef uint16_t  apb_samp_t;
+typedef uint16_t apb_samp_t;
 #endif
 
 /* This structure is used to describe the audio device capabilities */
@@ -375,8 +375,7 @@ struct audio_msg_s
   } u;
 };
 
-
-/* Strucure defining the built-in sounds */
+/* Structure defining the built-in sounds */
 
 #ifdef CONFIG_AUDIO_BUILTIN_SOUNDS
 struct audio_sound_s
@@ -390,7 +389,7 @@ struct audio_sound_s
 
 #endif
 
-/* Structure for allocating, freeing and enqueuing audio pipeline
+/* Structure for allocating, freeing and enqueueing audio pipeline
  * buffers via the AUDIOIOC_ALLOCBUFFER, AUDIOIOC_FREEBUFFER,
  * and AUDIOIOC_ENQUEUEBUFFER ioctls.
  */
@@ -404,7 +403,7 @@ struct audio_buf_desc_s
   union
   {
     FAR struct ap_buffer_s  *pBuffer;     /* Buffer to free / enqueue */
-    FAR struct ap_buffer_s  **ppBuffer;   /* Pointer to receive alloced buffer */
+    FAR struct ap_buffer_s  **ppBuffer;   /* Pointer to receive allocated buffer */
   } u;
 };
 
@@ -467,7 +466,7 @@ struct audio_ops_s
   /* Start audio streaming in the configured mode.  For input and synthesis
    * devices, this means it should begin sending streaming audio data.  For output
    * or processing type device, it means it should begin processing of any enqueued
-   * Audio Pipline Buffers.
+   * Audio Pipeline Buffers.
    */
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
@@ -568,7 +567,7 @@ struct audio_ops_s
    */
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-  CODE int (*reserve)(FAR struct audio_lowerhalf_s *dev, FAR void **psession );
+  CODE int (*reserve)(FAR struct audio_lowerhalf_s *dev, FAR void **psession);
 #else
   CODE int (*reserve)(FAR struct audio_lowerhalf_s *dev);
 #endif
@@ -576,7 +575,7 @@ struct audio_ops_s
   /* Release a session.  */
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-  CODE int (*release)(FAR struct audio_lowerhalf_s *dev, FAR void *session );
+  CODE int (*release)(FAR struct audio_lowerhalf_s *dev, FAR void *session);
 #else
   CODE int (*release)(FAR struct audio_lowerhalf_s *dev);
 #endif
