@@ -7756,4 +7756,12 @@
 	  backward (2014-7-20).
 	* drivers/net/slip.c:  Fix an error in SLIP escaping.  From Max
 	  Neklyudov (2014-7-22).
+	* drivers/input/Kconfg: Add missing configuration option to select the
+	  MAX11802 touchscreen controller. From Petteri Aimonen (2014-7-22).
+	* arm/src/stm32/chip/stm32_dac.h:  Fix typos, from Peterri Aimonen
+	  (2014-7-22).
+	* arch/arm/src/stm32/stm32_otgfsdev.c: STM32 OTGFS device:  Various
+	  changes to try to reduce that amount of time in interrupts handles and
+	  with interrupts disbled.  Needs verification on other platforms.  From
+	  Petteri Aimonen (2014-7-22).
 
