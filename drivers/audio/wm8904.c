@@ -235,8 +235,8 @@ static const struct audio_ops_s g_audioops =
   wm8904_pause,         /* pause          */
   wm8904_resume,        /* resume         */
 #endif
-  NULL,                 /* alloc_buffer   */
-  NULL,                 /* free_buffer    */
+  NULL,                 /* allocbuffer    */
+  NULL,                 /* freebuffer     */
   wm8904_enqueuebuffer, /* enqueue_buffer */
   wm8904_cancelbuffer,  /* cancel_buffer  */
   wm8904_ioctl,         /* ioctl          */
@@ -589,28 +589,9 @@ static int wm8904_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
         switch (caps->ac_subtype)
           {
             case AUDIO_TYPE_QUERY:
-              /* The input formats we can decode / accept */
-
-              *((uint16_t *) &caps->ac_format[0]) = 0
-#ifdef CONFIG_AUDIO_FORMAT_AC3
-                    | (1 << (AUDIO_FMT_AC3 - 1))
-#endif
-#ifdef CONFIG_AUDIO_FORMAT_MP3
-                    | (1 << (AUDIO_FMT_MP3 - 1))
-#endif
-#ifdef CONFIG_AUDIO_FORMAT_WMA
-                    | (1 << (AUDIO_FMT_WMA - 1))
-#endif
-#ifdef CONFIG_AUDIO_FORMAT_MIDI
-                    | (1 << (AUDIO_FMT_MIDI - 1))
-#endif
-#ifdef CONFIG_AUDIO_FORMAT_PCM
-                    | (1 << (AUDIO_FMT_PCM - 1))
-#endif
-#ifdef CONFIG_AUDIO_FORMAT_OGG_VORBIS
-                    | (1 << (AUDIO_FMT_OGG_VORBIS - 1))
-#endif
-                ;
+              /* We don't decode any formats!  Only something above us in
+               * the audio stream can perform decoding on our behalf.
+               */
 
               /* The types of audio units we implement */
 
@@ -619,16 +600,11 @@ static int wm8904_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
               break;
 
-            /* Report sub-formats for MIDI if requested */
-
-#ifdef CONFIG_AUDIO_FORMAT_MIDI
             case AUDIO_FMT_MIDI:
               /* We only support Format 0 */
 
-              caps->ac_controls[0] = AUDIO_SUBFMT_MIDI_0;
-              caps->ac_controls[1] = AUDIO_SUBFMT_END;
+              caps->ac_controls[0] = AUDIO_SUBFMT_END;
               break;
-#endif
 
             default:
               caps->ac_controls[0] = AUDIO_SUBFMT_END;
@@ -650,23 +626,14 @@ static int wm8904_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
               /* Report the Sample rates we support */
 
               caps->ac_controls[0] = AUDIO_SAMP_RATE_8K | AUDIO_SAMP_RATE_11K |
-                                      AUDIO_SAMP_RATE_16K | AUDIO_SAMP_RATE_22K |
-                                      AUDIO_SAMP_RATE_32K | AUDIO_SAMP_RATE_44K |
-                                      AUDIO_SAMP_RATE_48K;
+                                     AUDIO_SAMP_RATE_16K | AUDIO_SAMP_RATE_22K |
+                                     AUDIO_SAMP_RATE_32K | AUDIO_SAMP_RATE_44K |
+                                     AUDIO_SAMP_RATE_48K;
               break;
 
             case AUDIO_FMT_MP3:
             case AUDIO_FMT_WMA:
             case AUDIO_FMT_PCM:
-              /* Report the Bit rates we support.  The bit rate support is actually a
-               * complex function of the format and selected sample rate, and the datasheet
-               * has multiple tables to indicate the supported bit rate vs sample rate vs
-               * format.  The selected sample rate should be provided in the ac_format
-               * field of the query, and only a single sample rate should be given.
-               */
-
-              /* TODO:  Create a table or set of tables to report this! */
-
               break;
 
             default:
@@ -1785,18 +1752,16 @@ static void wm8904_audio_input(FAR struct wm8904_dev_s *priv)
  *   i2c     - An I2C driver instance
  *   i2s     - An I2S driver instance
  *   lower   - Persistent board configuration data
- *   minor   - The input device minor number
- *   session - Returned if multi-sessions are supported
  *
  * Returned Value:
- *   Zero is returned on success.  Otherwise, a negated errno value is
- *   returned to indicate the nature of the failure.
+ *   A new lower half audio interface is returned for the WM8904 device is
+ *   returned on success; NULL is returned on failure.
  *
  ****************************************************************************/
 
 FAR struct audio_lowerhalf_s *
   wm8904_initialize(FAR struct i2c_dev_s *i2c, FAR struct i2s_dev_s *i2s,
-                    FAR const struct wm8904_lower_s *lower, unsigned int devno)
+                    FAR const struct wm8904_lower_s *lower)
 {
   FAR struct wm8904_dev_s *priv;
   uint16_t regval;

@@ -197,12 +197,10 @@ extern "C"
  *   i2c     - An I2C driver instance
  *   i2s     - An I2S driver instance
  *   lower   - Persistent board configuration data
- *   minor   - The input device minor number
- *   session - Returned if multi-sessions are supported
  *
  * Returned Value:
- *   Zero is returned on success.  Otherwise, a negated errno value is
- *   returned to indicate the nature of the failure.
+ *   A new lower half audio interface is returned for the WM8904 device is
+ *   returned on success; NULL is returned on failure.
  *
  ****************************************************************************/
 
@@ -212,7 +210,7 @@ struct audio_lowerhalf_s; /* Forward reference. Defined in nuttx/audio/audio.h *
 
 FAR struct audio_lowerhalf_s *
   wm8904_initialize(FAR struct i2c_dev_s *i2c, FAR struct i2s_dev_s *i2s,
-                    FAR const struct wm8904_lower_s *lower, unsigned int devno);
+                    FAR const struct wm8904_lower_s *lower);
 
 #undef EXTERN
 #ifdef __cplusplus
