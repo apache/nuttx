@@ -85,7 +85,7 @@ CONFIG_ARCH="sim"
 #
 # Simulation Configuration Options
 #
-CONFIG_SIM_M32=y
+# CONFIG_SIM_M32 is not set
 # CONFIG_SIM_WALLTIME is not set
 
 #
