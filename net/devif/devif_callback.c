@@ -43,6 +43,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <debug.h>
+#include <assert.h>
 
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>

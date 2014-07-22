@@ -47,6 +47,7 @@
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
+#include <assert.h>
 
 #ifdef CONFIG_NET_PKT
 #  include <netpacket/packet.h>
