@@ -7754,4 +7754,6 @@
 	  complete and ready to begin initial testing (2014-7-19).
 	* arch/arm/src/sama5/sam_pio.c:  Logic for Schmitt trigger selection
 	  backward (2014-7-20).
+	* drivers/net/slip.c:  Fix an error in SLIP escaping.  From Max
+	  Neklyudov (2014-7-22).
 
