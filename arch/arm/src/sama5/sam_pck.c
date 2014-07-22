@@ -53,8 +53,6 @@
 
 #include "sam_pck.h"
 
-#ifdef CONFIG_SAMA5_ISI
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -118,8 +116,13 @@ uint32_t sam_pck_configure(enum pckid_e pckid, enum pckid_clksrc_e clksrc,
       /* Pick the slow clock */
 
       regval = PMC_PCK_CSS_SLOW;
-      clkin  = BOARD_SCK_FREQUENCY
+      clkin  = BOARD_SLOWCLK_FREQUENCY;
     }
+
+  /* If the source is not the slow clock, then pick either the MCK or the
+   * PLLACK, whichever will best realize the target frequency.
+   */
+
   else
     {
       DEBUGASSERT(BOARD_MCK_FREQUENCY < BOARD_PLLA_FREQUENCY);
@@ -254,4 +257,3 @@ void sam_pck_enable(enum pckid_e pckid, bool enable)
   putreg32(regval, regaddr);
 }
 
-#endif /* CONFIG_SAMA5_ISI */
