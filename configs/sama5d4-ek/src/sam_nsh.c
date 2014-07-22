@@ -87,7 +87,7 @@
 int nsh_archinitialize(void)
 {
 #if defined(HAVE_NAND) || defined(HAVE_AT25) || defined(HAVE_HSMCI) || \
-    defined(HAVE_USBHOST) || defined(HAVE_USBMONITOR)
+    defined(HAVE_USBHOST) || defined(HAVE_USBMONITOR) || defined(HAVE_WM8904)
   int ret;
 #endif
 
@@ -98,7 +98,6 @@ int nsh_archinitialize(void)
   if (ret < 0)
     {
       message("ERROR: sam_nand_automount failed: %d\n", ret);
-      return ret;
     }
 #endif
 
@@ -109,7 +108,6 @@ int nsh_archinitialize(void)
   if (ret < 0)
     {
       message("ERROR: sam_at25_automount failed: %d\n", ret);
-      return ret;
     }
 #endif
 
@@ -122,7 +120,6 @@ int nsh_archinitialize(void)
     {
       message("ERROR: sam_hsmci_initialize(%d,%d) failed: %d\n",
               HSMCI0_SLOTNO, HSMCI0_MINOR, ret);
-      return ret;
     }
 #endif
 
@@ -134,7 +131,6 @@ int nsh_archinitialize(void)
     {
       message("ERROR: sam_hsmci_initialize(%d,%d) failed: %d\n",
               HSMCI1_SLOTNO, HSMCI1_MINOR, ret);
-      return ret;
     }
 #endif
 #endif
@@ -148,7 +144,6 @@ int nsh_archinitialize(void)
   if (ret != OK)
     {
       message("ERROR: Failed to initialize USB host: %d\n", ret);
-      return ret;
     }
 #endif
 
@@ -158,9 +153,24 @@ int nsh_archinitialize(void)
   ret = usbmonitor_start(0, NULL);
   if (ret != OK)
     {
-      message("nsh_archinitialize: Start USB monitor: %d\n", ret);
+      message("ERROR: Failed to start the USB monitor: %d\n", ret);
     }
 #endif
+
+#ifdef HAVE_WM8904
+  /* Start the USB Monitor */
+
+  ret = sam_wm8904_initialize(0);
+  if (ret != OK)
+    {
+      message("ERROR: Failed to initialize WM8904 audio: %d\n", ret);
+    }
+#endif
+
+  /* If we got here then perhaps not all initialization was successful, but
+   * at least enough succeeded to bring-up NSH with perhaps reduced
+   * capabilities.
+   */
 
   return OK;
 }

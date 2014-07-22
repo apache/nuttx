@@ -243,11 +243,26 @@
 
 #define PIO_SSC0_TD           PIO_SSC0_TD_2
 
-/* PCK0 is provided to the WM8904 audio CODEC via PB26 */
+/* PCK2 is provides the MCLK to the WM8904 audio CODEC via PB10 */
 
-#ifdef CONFIG_AUDIO_WM8904
-#  define PIO_PMC_PCK0        PIO_PMC_PCK0_1
-#endif
+#define PIO_PMC_PCK2          PIO_PMC_PCK2_1
+
+/* PCK0 and PCK1 are not currently used, but the PCK logic wants these definitions
+ * anyway.  The assignments here are arbitrary and will not be used (at least not
+ * until we implement ISI of HDMI).
+ *
+ * PIO_PMC_PCK0_1: PB26 is used by I2S with the WM8904 (AUDIO_RK0_PB26)
+ * PIO_PMC_PCK0_2: PD8  is the HDMI MCLK (HDMI_MCK_PD8)
+ * PIO_PMC_PCK0_3: PA24 is used for the LCD backlight (LCD_PWM_PA24)
+ *
+ * PIO_PMC_PCK1_1: PD31 goes to the expansion interface and is not used on-board
+ *                 (EXP_PD31).
+ * PIO_PMC_PCK1_2: PC24 is used for ISI data (ISI_D5)
+ * PIO_PMC_PCK1_3: PC4  is ISI_MCK_PC4, MCI0_CK_PC4, EXP_PC4
+ */
+
+#define PIO_PMC_PCK0          PIO_PMC_PCK0_2
+#define PIO_PMC_PCK1          PIO_PMC_PCK1_1
 
 /************************************************************************************
  * Assembly Language Macros
