@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/audio/pcm_decode.h
+ * include/nuttx/audio/pcm.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author:  Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_AUDIO_PCM_DECODE_H
-#define __INCLUDE_NUTTX_AUDIO_PCM_DECODE_H
+#ifndef __INCLUDE_NUTTX_AUDIO_PCM_H
+#define __INCLUDE_NUTTX_AUDIO_PCM_H
 
 /****************************************************************************
  * Included Files
@@ -62,14 +62,45 @@
 #endif
 
 #ifndef CONFIG_SCHED_WORKQUEUE
-#  error CONFIG_SCHED_WORKQUEUE is required by the PCM driver
+#  error CONFIG_SCHED_WORKQUEUE is required by the PCM decoder
 #endif
 
 /* Default configuration values */
 
+/* WAVE Header Definitions **************************************************/
+/* All values are little endian */
+
+#define WAV_CHUNKID       0x46464952  /* "RIFF" */
+#define WAV_FORMAT        0x45564157  /* "WAVE" */
+#define WAV_SUBCHKID1     0x20746d66  /* "fmt " */
+#define WAV_SUBCHKLEN1    16          /* Size of a PCM subchunk */
+#define WAV_COMPRESSION   1           /* Linear quantization */
+#define WAV_MONO          1           /* nchannels=1 */
+#define WAV_STEREO        2           /* nchannels=2 */
+#define WAV_DATA          0x61746164  /* "data"
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+/* Standard WAV file header format */
+
+struct wav_header_s
+{
+  uint32_t chkid;         /* Contains the letters "RIFF" in ASCII form. */
+  uint32_t chklen;        /* Size of the rest of the following chunk */
+  uint32_t format;        /* Contains the letters "WAVE" */
+  uint32_t subchkid1;     /* Contains the letters "fmt " */
+  uint32_t subchklen1;    /* Size of the following subchunk (16 for PCM) */
+  uint16_t compression;   /* PCM=1 (i.e. Linear quantization) */
+  uint16_t nchannels;     /* Mono=1, Stereo=2 */
+  uint32_t samprate;      /* 8000, 44100, ... */
+  uint32_t byterate;      /* samprate * nchannels * bpsamp / 8 */
+  uint16_t align;         /* nchannels * bpsamp / 8 */
+  uint16_t bpsamp;        /* Bits per sample: 8 bits = 8, 16 bits = 16 */
+  uint32_t subchkid2;     /* Contains the letters "data" */
+  uint32_t subchklen2;    /* Number of bytes in the data */
+};
 
  /****************************************************************************
  * Public Data
@@ -115,4 +146,4 @@ FAR struct audio_lowerhalf_s *
 #endif
 
 #endif /* CONFIG_AUDIO_FORMAT_PCM */
-#endif /* __INCLUDE_NUTTX_AUDIO_PCM_DECODE_H */
+#endif /* __INCLUDE_NUTTX_AUDIO_PCM_H */

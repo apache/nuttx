@@ -49,6 +49,7 @@
 
 #include <sys/types.h>
 #include <sys/ioctl.h>
+
 #include <stdint.h>
 #include <stdio.h>
 #include <fcntl.h>
@@ -294,16 +295,16 @@ static uint16_t wm8904_readreg(FAR struct wm8904_dev_s *priv, uint8_t regaddr)
 #ifdef CONFIG_I2C_RESET
           /* Perhaps the I2C bus is locked up?  Try to shake the bus free */
 
-          idbg("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
+          auddbg("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
 
           ret = up_i2creset(priv->i2c);
           if (ret < 0)
             {
-              idbg("ERROR: up_i2creset failed: %d\n", ret);
+              auddbg("ERROR: up_i2creset failed: %d\n", ret);
               break;
             }
 #else
-          idbg("ERROR: I2C_TRANSFER failed: %d\n", ret);
+          auddbg("ERROR: I2C_TRANSFER failed: %d\n", ret);
 #endif
         }
       else
@@ -319,7 +320,7 @@ static uint16_t wm8904_readreg(FAR struct wm8904_dev_s *priv, uint8_t regaddr)
           return regval;
         }
 
-      ivdbg("retries=%d regaddr=%04x\n", retries, regaddr);
+      audvdbg("retries=%d regaddr=%02x\n", retries, regaddr);
     }
 
   /* No error indication is returned on a failure... just return zero */
@@ -375,16 +376,16 @@ static void wm8904_writereg(FAR struct wm8904_dev_s *priv, uint8_t regaddr,
 #ifdef CONFIG_I2C_RESET
           /* Perhaps the I2C bus is locked up?  Try to shake the bus free */
 
-          idbg("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
+          auddbg("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
 
           ret = up_i2creset(priv->i2c);
           if (ret < 0)
             {
-              idbg("ERROR: up_i2creset failed: %d\n", ret);
+              auddbg("ERROR: up_i2creset failed: %d\n", ret);
               break;
             }
 #else
-          idbg("ERROR: I2C_TRANSFER failed: %d\n", ret);
+          auddbg("ERROR: I2C_TRANSFER failed: %d\n", ret);
 #endif
         }
       else
@@ -397,7 +398,7 @@ static void wm8904_writereg(FAR struct wm8904_dev_s *priv, uint8_t regaddr,
           return;
         }
 
-      ivdbg("retries=%d regaddr=%04x\n", retries, regaddr);
+      audvdbg("retries=%d regaddr=%02x\n", retries, regaddr);
     }
 }
 
@@ -1792,6 +1793,7 @@ FAR struct audio_lowerhalf_s *
 
       /* Initialize I2C */
 
+      auddbg("address=%02x frequency=%d\n", lower->address, lower->frequency);
       I2C_SETFREQUENCY(i2c, lower->frequency);
       I2C_SETADDRESS(i2c, lower->address, 7);
 

@@ -55,7 +55,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/audio/audio.h>
-#include <nuttx/audio/pcm_decode.h>
+#include <nuttx/audio/pcm.h>
 
 #if defined(CONFIG_AUDIO) && defined(CONFIG_AUDIO_FORMAT_PCM)
 
@@ -98,6 +98,10 @@ struct pcm_decode_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
+#ifdef CONFIG_PCM_DEBUG
+static void pcm_dump(FAR const struct wav_header_s *wav)
+#endif
 
 /* struct audio_lowerhalf_s methods *****************************************/
 
@@ -176,6 +180,49 @@ static int  pcm_release(FAR struct audio_lowerhalf_s *dev);
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: pcm_dump
+ *
+ * Description:
+ *    Dump a WAV file header.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PCM_DEBUG
+static void pcm_dump(FAR const struct wav_header_s *wav)
+{
+  printf( "Wave file header\n");
+  printf( "  Chunk ID:        0x%08x\n", wav->chkid);
+  printf( "  Chunk Size:      %u\n",     wav->chklen);
+  printf( "  Format:          0x%08x\n", wav->format);
+  printf( "  SubChunk ID:     0x%08x\n", wav->subchkid1);
+  printf( "  Subchunk1 Size:  %u\n",     wav->subchklen1);
+  printf( "  Audio Format:    0x%04x\n", wav->compression);
+  printf( "  Num. Channels:   %d\n",     wav->nchannels);
+  printf( "  Sample Rate:     %u\n",     wav->samprate);
+  printf( "  Byte Rate:       %u\n",     wav->byterate);
+  printf( "  Block Align:     %d\n",     wav->align);
+  printf( "  Bits Per Sample: %d\n",     wav->bpsamp);
+  printf( "  Subchunk2 ID:    0x%08x\n", wav->subchkid2);
+  printf( "  Subchunk2 Size:  %u\n",     wav->subchklen2);
+}
+#endif
+
+/****************************************************************************
+ * Name: pcm_validwav
+ *
+ * Description:
+ *    Return true if this is a valid WAV file header
+ *
+ ****************************************************************************/
+
+static inline bool pcm_validwav(FAR const struct wav_header_s *wav)
+{
+  return (wav->chkid == WAV_CHUNKID &&
+          wav->format == WAV_FORMAT &&
+          wav->subchklen1 == WAV_SUBCHKLEN1);
+}
 
 /****************************************************************************
  * Name: pcm_getcaps
