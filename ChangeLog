@@ -7764,4 +7764,12 @@
 	  changes to try to reduce that amount of time in interrupts handles and
 	  with interrupts disbled.  Needs verification on other platforms.  From
 	  Petteri Aimonen (2014-7-22).
-
+	* arch/arm/src/sama5/sam_pck.c: Fix a recently introduced typo that was
+	  being masked by some bad conditional compilation (2015=4-7-22).
+	* drivers/audio/wm8904.c and include/nuttx/audio/wm8904.h: Remove WM8904
+	  driver unused parameters, clean-up comments, remove some kruft in
+	  capability reporting (2014-7-22).
+	* audio/Makefile and pcm_decode.c, include/nuttx/audio/pcm_decode.c,
+	  configs/sama5d4-ek/src/sam_wm8904.c and others:  Add new framework for
+	  the PCM decoder.  It is now a 'front end' for lower-level drivers like
+	  the WM8904 that performs the PCM decoding from end (2014-7-22).
