@@ -1517,10 +1517,10 @@ HSMCI Card Slots
   following settings:
 
     System Type->ATSAMA5 Peripheral Support
-      CONFIG_SAMA5_HSMCI0=y                 : Enable HSMCI0 support
-      CONFIG_SAMA5_HSMCI1=y                 : Enable HSMCI1 support
-      CONFIG_SAMA5_XDMAC1=y                 : XDMAC1 is needed by HSMCI0/1
-
+      CONFIG_SAMA5_HSMCI0=y                 : To enable HSMCI0 support
+      CONFIG_SAMA5_HSMCI1=y                 : To enable HSMCI1 support
+      CONFIG_SAMA5_XDMAC0=y                 : XDMAC0 is needed by HSMCI0/1
+                                            : (HSMCI0 seemds to be secure by default)
     System Type
       CONFIG_SAMA5_PIO_IRQ=y                : PIO interrupts needed
       CONFIG_SAMA5_PIOE_IRQ=y               : Card detect pins are on PE5 and PE6
@@ -2740,7 +2740,7 @@ Audio Support
     System Type -> SAMA5 Peripheral Support
       CONFIG_SAMA5_TWI0=y                   : Enable TWI0 driver support
       CONFIG_SAMA5_SSCO=y                   : Enable SSC0 driver support
-      CONFIG_SAMA5_XDMAC1=y                 : XDMAC0 required by SSC0
+      CONFIG_SAMA5_XDMAC0=y                 : XDMAC0 required by SSC0
 
     System Type -> SSC0 Configuration
       CONFIG_SAMA5_SSC_MAXINFLIGHT=16
