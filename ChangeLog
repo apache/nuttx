@@ -7773,3 +7773,8 @@
 	  configs/sama5d4-ek/src/sam_wm8904.c and others:  Add new framework for
 	  the PCM decoder.  It is now a 'front end' for lower-level drivers like
 	  the WM8904 that performs the PCM decoding from end (2014-7-22).
+	* audio/pcm_decode.c, configs/sama5d4-ek/src/sam_wm8904.c,
+	  drivers/audio/wm8904.c, and include/nuttx/audio/pcm.h:  Rename
+	  pcm_decode.h to pcm.h since it will hold more than just decoding
+	  definitions.  Fix some porting errors like idbg should auddbg, etc.
+	  Add wav file header and a few low-level wav utilities (2014-7-22).
