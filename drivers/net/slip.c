@@ -355,12 +355,12 @@ static int slip_transmit(FAR struct slip_driver_s *priv)
               if (len > 0)
                 {
                   slip_write(priv, start, len);
-
-                  /* Reset */
-
-                  start = src + 1;
-                  len   = 0;
                 }
+
+              /* Reset */
+
+              start = src + 1;
+              len   = 0;
 
               /* Then send the escape sequence */
 
