@@ -1500,7 +1500,7 @@ static int wm8904_reserve(FAR struct audio_lowerhalf_s *dev)
     }
   else
     {
-      /* Initialize the session context.  We don't really use it. */
+      /* Initialize the session context */
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
      *session           = NULL;

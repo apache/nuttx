@@ -68,38 +68,59 @@
 /* Default configuration values */
 
 /* WAVE Header Definitions **************************************************/
-/* All values are little endian */
+/* All values are little 32-bit or 16-bit endian */
 
-#define WAV_CHUNKID       0x46464952  /* "RIFF" */
-#define WAV_FORMAT        0x45564157  /* "WAVE" */
-#define WAV_SUBCHKID1     0x20746d66  /* "fmt " */
-#define WAV_SUBCHKLEN1    16          /* Size of a PCM subchunk */
-#define WAV_COMPRESSION   1           /* Linear quantization */
-#define WAV_MONO          1           /* nchannels=1 */
-#define WAV_STEREO        2           /* nchannels=2 */
-#define WAV_DATA          0x61746164  /* "data"
+#define WAV_HDR_CHUNKID   0x46464952  /* "RIFF" */
+#define WAV_HDR_FORMAT    0x45564157  /* "WAVE" */
+#define WAV_FMT_CHUNKID   0x20746d66  /* "fmt " */
+#define WAV_FMT_CHUNKLEN  16          /* Size of a PCM subchunk */
+#define WAV_FMT_FORMAT    1           /* Linear quantization */
+#define WAV_FMT_MONO      1           /* nchannels=1 */
+#define WAV_FMT_STEREO    2           /* nchannels=2 */
+#define WAV_DATA_CHUNKID  0x61746164  /* "data" */
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+/* The standard WAV header consist of three chunks
+ *
+ * 1. A WAV header chunk,
+ * 2. A format chunk, and
+ * 3. A data chunk.
+ */
 
-/* Standard WAV file header format */
-
-struct wav_header_s
+struct wav_hdrchunk_s
 {
-  uint32_t chkid;         /* Contains the letters "RIFF" in ASCII form. */
-  uint32_t chklen;        /* Size of the rest of the following chunk */
+  uint32_t chunkid;       /* Contains the letters "RIFF" in ASCII form. */
+  uint32_t chunklen;      /* Size of the rest of the following chunk */
   uint32_t format;        /* Contains the letters "WAVE" */
-  uint32_t subchkid1;     /* Contains the letters "fmt " */
-  uint32_t subchklen1;    /* Size of the following subchunk (16 for PCM) */
-  uint16_t compression;   /* PCM=1 (i.e. Linear quantization) */
+};
+
+struct wav_formatchunk_s
+{
+  uint32_t chunkid;       /* Contains the letters "fmt " */
+  uint32_t chunklen;      /* Size of the following chunk (16 for PCM) */
+  uint16_t format;        /* PCM=1 (i.e. Linear quantization) */
   uint16_t nchannels;     /* Mono=1, Stereo=2 */
   uint32_t samprate;      /* 8000, 44100, ... */
   uint32_t byterate;      /* samprate * nchannels * bpsamp / 8 */
   uint16_t align;         /* nchannels * bpsamp / 8 */
   uint16_t bpsamp;        /* Bits per sample: 8 bits = 8, 16 bits = 16 */
-  uint32_t subchkid2;     /* Contains the letters "data" */
-  uint32_t subchklen2;    /* Number of bytes in the data */
+};
+
+struct wav_datachunk_s
+{
+  uint32_t chunkid;       /* Contains the letters "data" */
+  uint32_t chunklen;      /* Number of bytes in the data */
+};
+
+/* The standard WAV file header format is then these three chunks */
+
+struct wav_header_s
+{
+  struct wav_hdrchunk_s    hdr;
+  struct wav_formatchunk_s fmt;
+  struct wav_datachunk_s   data;
 };
 
  /****************************************************************************

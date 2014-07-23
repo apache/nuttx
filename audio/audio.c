@@ -386,9 +386,10 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR struct audio_caps_s *caps = (FAR struct audio_caps_s*)((uintptr_t)arg);
           DEBUGASSERT(lower->ops->getcaps != NULL);
 
-          audvdbg("AUDIOIOC_GETCAPS: Device=%d", caps->ac_type);
+          audvdbg("AUDIOIOC_GETCAPS: Device=%d\n", caps->ac_type);
 
           /* Call the lower-half driver capabilities handler */
+
           ret = lower->ops->getcaps(lower, caps->ac_type, caps);
         }
         break;
@@ -399,7 +400,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             (FAR const struct audio_caps_desc_s*)((uintptr_t)arg);
           DEBUGASSERT(lower->ops->configure != NULL);
 
-          audvdbg("AUDIOIOC_INITIALIZE: Device=%d", caps->caps.ac_type);
+          audvdbg("AUDIOIOC_INITIALIZE: Device=%d\n", caps->caps.ac_type);
 
           /* Call the lower-half driver configure handler */
 
