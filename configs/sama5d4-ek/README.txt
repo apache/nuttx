@@ -3600,6 +3600,9 @@ Configurations
           LCD/Touchscreen" and also below in this notes.
        d. An LCD/graphics test program.  See the section above entitle
           "TM7000 LCD/Touchscreen" and also below in this notes.
+       e. The NxPlayer command line media player.  This is a work in
+          progress see the "Audio Support" section above and additional
+          notes below.
 
     9. This configuration has support for the FAT, ROMFS, and PROCFS file
        systems built in.
@@ -3848,12 +3851,40 @@ Configurations
        See apps/examples/README.txt for information about configuring these
        examples.
 
-   19. The SAMA5D4-EK includes for an AT25 serial DataFlash.  That support is
+   19. NxPlayer
+
+       This configuration has the command NxPlayer enabled.  That player is still a work in progress and is only tested as of this writing.
+
+       At present, the the WM8904 driver is not included in the
+       configuration.  Instead the "NULL" audio device in built in to
+       support higher level testing (there are also some unresolved I2C
+       communication issues the the current WM8904 driver).
+
+       This configuration depends on media files in the default mountpoint
+       at /mnt/sdard.  You will need to mount the media before running
+       NxPlayer.  Here are the general steps to play a file:
+
+         a. You will need an (full size) SD card containing the .WAV files
+            that you want to play (.WAV is only format supported as of this
+            writing).  That SD card should be inserted in the HSMCI0 media
+            slot A (best done before powering up).
+
+         b. Then from NSH prompt, you need to mount the media volume like:
+
+           nsh> mount -t vfat /dev/mmcsd0 /mnt/sdcard
+
+         c. Then you can run the media player like:
+
+           nsh> nxplayer
+           nxplayer> device pcm0
+           nxplayer> play <filename>
+
+   20. The SAMA5D4-EK includes for an AT25 serial DataFlash.  That support is
        NOT enabled in this configuration.  Support for that serial FLASH could
        be enabled by modifying the NuttX configuration as described above in
        the paragraph entitled "AT25 Serial FLASH".
 
-   20. This example can be configured to exercise the watchdog timer test
+   21. This example can be configured to exercise the watchdog timer test
        (apps/examples/watchdog).  See the detailed configuration settings in
        the section entitled "Watchdog Timer" above.
 
@@ -3982,7 +4013,7 @@ Configurations
 
        This configuration has the media player application enabled.  That
        player is still a work in progress and is only partially integrated
-       with the NxPlay as of this writing.
+       with the NxPlayer as of this writing.
 
        At present, the the WM8904 driver is not included in the
        configuration.  Instead the "NULL" audio device in built in to
