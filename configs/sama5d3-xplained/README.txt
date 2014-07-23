@@ -1041,6 +1041,7 @@ HSMCI Card Slots
     Device Drivers -> MMC/SD Driver Support
       CONFIG_MMCSD=y                        : Enable MMC/SD support
       CONFIG_MMSCD_NSLOTS=1                 : One slot per driver instance
+      CONFIG_MMCSD_MULTIBLOCK_DISABLE=y     : (REVISIT)
       CONFIG_MMCSD_HAVECARDDETECT=y         : Supports card-detect PIOs
       CONFIG_MMCSD_MMCSUPPORT=n             : Interferes with some SD cards
       CONFIG_MMCSD_SPI=n                    : No SPI-based MMC/SD support
@@ -2792,6 +2793,12 @@ To-Do List
    EHCI drivers).
 
 2) HSCMI TX DMA support is currently commented out.
+
+   Also, CONFIG_MMCSD_MULTIBLOCK_DISABLE=y is set to disable multi-block
+   transfers.
+
+   Both of these issues need to be revisited to determine there is or
+   is not a real problem.
 
 3) GMAC has only been tested on a 10/100Base-T network.  I don't have a
    1000Base-T network to support additional testing.

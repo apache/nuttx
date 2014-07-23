@@ -1528,6 +1528,7 @@ HSMCI Card Slots
     Device Drivers -> MMC/SD Driver Support
       CONFIG_MMCSD=y                        : Enable MMC/SD support
       CONFIG_MMSCD_NSLOTS=1                 : One slot per driver instance
+      CONFIG_MMCSD_MULTIBLOCK_DISABLE=y     : (REVISIT)
       CONFIG_MMCSD_HAVECARDDETECT=y         : Supports card-detect PIOs
       CONFIG_MMCSD_MMCSUPPORT=n             : Interferes with some SD cards
       CONFIG_MMCSD_SPI=n                    : No SPI-based MMC/SD support
@@ -4042,10 +4043,13 @@ To-Do List
    EHCI drivers).
 
 2) HSCMI TX DMA support is currently commented out.  There were problems at
-   one time (on the SAMA5D3) and the temporary workaround was simpley to
+   one time (on the SAMA5D3) and the temporary workaround was simply to
    disable TX DMA.  There have been several fixes to both HSMCI and DMA
    support since then and TX DMA is very likely okay now.  But this needs
    to be verified by re-enabled HSMCI TX DMA.
+
+   Also, CONFIG_MMCSD_MULTIBLOCK_DISABLE=y is set to disable multi-block
+   transfers.
 
 3) There is a kludge in place in the Ethernet code to work around a problem
    that I see.  The problem that I see is as follows:
