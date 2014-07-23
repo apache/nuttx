@@ -7788,3 +7788,6 @@
 	* drivers/audio/audio_null.c, include/nuttx/audio/audio_null.c, and
 	  configs/sama5d4-ek/src/sam_audio_null.c: Add a NULL audio device that
 	  can be used to simply unit-level testing of audio decoders (2014-7/23).
+	* audio/pcm_decode.c, include/nuttx/audio/audio.h, and drivers/audio/audio_null.c
+	  and wm8904.c: Add ioctls so that PCM decoder can configure the driver
+	  bitrate, num channels, and sample width (2014-7-23).
