@@ -7778,3 +7778,6 @@
 	  pcm_decode.h to pcm.h since it will hold more than just decoding
 	  definitions.  Fix some porting errors like idbg should auddbg, etc.
 	  Add wav file header and a few low-level wav utilities (2014-7-22).
+	* audio/pcm_decode.c and include/nuttx/audio/pcm.h:  Flesh out a few
+	  more PCM methods, still incomplete.  Re-vision PCM structure
+	  definition (2014-7-22).
