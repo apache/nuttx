@@ -50,13 +50,14 @@
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
-EXTERN FAR char *basename(FAR char *path);
-EXTERN FAR char *dirname(FAR char *path);
+FAR char *basename(FAR char *path);
+FAR char *dirname(FAR char *path);
 
 #undef EXTERN
 #ifdef __cplusplus

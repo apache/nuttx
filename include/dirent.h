@@ -93,21 +93,22 @@ typedef void DIR;
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
 /* POSIX-like File System Interfaces */
 
-EXTERN int        closedir(FAR DIR *dirp);
-EXTERN FAR DIR   *opendir(FAR const char *path);
-EXTERN FAR struct dirent *readdir(FAR DIR *dirp);
-EXTERN int        readdir_r(FAR DIR *dirp, FAR struct dirent *entry,
-                            FAR struct dirent **result);
-EXTERN void       rewinddir(FAR DIR *dirp);
-EXTERN void       seekdir(FAR DIR *dirp, off_t loc);
-EXTERN off_t      telldir(FAR DIR *dirp);
+int        closedir(FAR DIR *dirp);
+FAR DIR   *opendir(FAR const char *path);
+FAR struct dirent *readdir(FAR DIR *dirp);
+int        readdir_r(FAR DIR *dirp, FAR struct dirent *entry,
+                     FAR struct dirent **result);
+void       rewinddir(FAR DIR *dirp);
+void       seekdir(FAR DIR *dirp, off_t loc);
+off_t      telldir(FAR DIR *dirp);
 
 #undef EXTERN
 #if defined(__cplusplus)
