@@ -3443,13 +3443,6 @@ Configurations
        example requires is a touch in the far, far, upper left corner of
        the display.  In that region, I cannot get reliable touch measurements
        and so I cannot get past the opening display.
-    f) The NxWM example was designed tiny displays.  On this large 800x480
-       display, the icons are too tiny to be usable.  I have created a large
-       320x320 logo for the opening screen and added image scaling to expand
-       the images in the taskbar.  The expanded images are not great.  If I
-       ever get past the opening screen, the same problems will exist in the
-       application toolbar and in the start window.  These icons are not yet
-       scaled.
 
     Bottom line:  Not ready for prime time.
 
@@ -3496,25 +3489,21 @@ To-Do List
    just do not have a good test bed (or sufficient CAN knowledge) for
    good CAN testing.
 
-7) The NxWM example does not work well.  This example was designed to work
-   with much smaller displays and does not look good or work well with the
-   SAMA5D3x-EK's 800x480 display.  See above for details.
-
-8) There are lots of LCDC hardware features that are not tested with NuttX.
+7) There are lots of LCDC hardware features that are not tested with NuttX.
    The simple NuttX graphics system does not have support for all of the
    layers and other features of the LCDC.
 
-9) I have a Camera, but there is still no ISI driver.  I am not sure what to
+8) I have a Camera, but there is still no ISI driver.  I am not sure what to
    do with the camera.  NuttX needs something like V4L to provide the
    definition for what a camera driver is supposed to do.
 
    I will probably develop a test harness for ISI, but it is of only
    minimal value with no OS infrastructure to deal with images and video.
 
-10) GMAC has only been tested on a 10/100Base-T network.  I don't have a
-    1000Base-T network to support additional testing.
+9) GMAC has only been tested on a 10/100Base-T network.  I don't have a
+   1000Base-T network to support additional testing.
 
-11) Some drivers may require some adjustments if you intend to run from SDRAM.
+10) Some drivers may require some adjustments if you intend to run from SDRAM.
     That is because in this case macros like BOARD_MCK_FREQUENCY are not constants
     but are instead function calls:  The MCK clock frequency is not known in
     advance but instead has to be calculated from the bootloader PLL configuration.
