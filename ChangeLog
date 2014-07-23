@@ -7796,3 +7796,6 @@
 	* configs/sama5d4-ek/nxwm/defconfig:  The NxPlayer and audio system are
 	  now enabled in the default configuration (although they have not yet
 	  been fully integrated into the NxWM media player) (2014-7-23).
+	* configs/sama5d4-ek/nsh/defconfig: Enable the command line media player
+	  in the NSH configuration as well (still does not work, however)
+	  (2014-7-23).
