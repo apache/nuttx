@@ -95,7 +95,7 @@ struct wm8904_dev_s
    * "half" that is referred to as "lower".
    */
 
-  struct audio_lowerhalf_s dev;             /* WM8904 audio lower half (this drive) */
+  struct audio_lowerhalf_s dev;             /* WM8904 audio lower half (this device) */
 
   /* Our specific driver data goes here */
 
@@ -181,15 +181,10 @@ static int      wm8904_stop(FAR struct audio_lowerhalf_s *dev);
 #ifdef CONFIG_AUDIO_MULTI_SESSION
 static int      wm8904_pause(FAR struct audio_lowerhalf_s *dev,
                   FAR void* session);
-#else
-static int      wm8904_pause(FAR struct audio_lowerhalf_s *dev);
-#endif
-#endif
-#ifndef CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME
-#ifdef CONFIG_AUDIO_MULTI_SESSION
 static int      wm8904_resume(FAR struct audio_lowerhalf_s *dev,
                   FAR void* session);
 #else
+static int      wm8904_pause(FAR struct audio_lowerhalf_s *dev);
 static int      wm8904_resume(FAR struct audio_lowerhalf_s *dev);
 #endif
 #endif
@@ -1755,8 +1750,8 @@ static void wm8904_audio_input(FAR struct wm8904_dev_s *priv)
  *   lower   - Persistent board configuration data
  *
  * Returned Value:
- *   A new lower half audio interface is returned for the WM8904 device is
- *   returned on success; NULL is returned on failure.
+ *   A new lower half audio interface for the WM8904 device is returned on
+ *   success; NULL is returned on failure.
  *
  ****************************************************************************/
 

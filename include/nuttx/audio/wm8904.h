@@ -93,7 +93,7 @@
 /* Default configuration values */
 
 #ifndef CONFIG_WM8904_INITVOLUME
-#  define CONFIG_WM8904_INITVOLUME 250
+#  define CONFIG_WM8904_INITVOLUME       250
 #endif
 
 #ifndef CONFIG_WM8904_INFLIGHT
@@ -199,8 +199,8 @@ extern "C"
  *   lower   - Persistent board configuration data
  *
  * Returned Value:
- *   A new lower half audio interface is returned for the WM8904 device is
- *   returned on success; NULL is returned on failure.
+ *   A new lower half audio interface for the WM8904 device is returned on
+ *   success; NULL is returned on failure.
  *
  ****************************************************************************/
 

@@ -106,5 +106,57 @@ config AUDIO_WM8904
 		that dependency is not explicit here.
 
 if AUDIO_WM8904
+
+config WM8904_INITVOLUME
+	int "WM8904 initial volume setting"
+	default 250
+
+config WM8904_INFLIGHT
+	int "WM8904 maximum in-flight audio buffers"
+	default 2
+
+config WM8904_MSG_PRIO
+	int "WM8904 message priority"
+	default 1
+
+config WM8904_BUFFER_SIZE
+	int "WM8904 preferred buffer size"
+	default 8192
+
+config WM8904_NUM_BUFFERS
+	int "WM8904 preferred number of buffers"
+	default 4
+
+config WM8904_WORKER_STACKSIZE
+	int "WM8904 worker thread stack size"
+	default 768
+
 endif # AUDIO_WM8904
 
+config AUDIO_NULL
+	bool "NULL audio device"
+	default n
+	depends on AUDIO
+	---help---
+		A do-nothinig audio device driver to simplify testing of audio
+		decoders.
+
+if AUDIO_NULL
+
+config AUDIO_NULL_MSG_PRIO
+	int "Null audio device message priority"
+	default 1
+
+config UDIO_NULL_BUFFER_SIZE
+	int "Null audio device preferred buffer size"
+	default 8192
+
+config AUDIO_NULL_NUM_BUFFERS
+	int "Null audio device preferred number of buffers"
+	default 4
+
+config AUDIO_NULL_WORKER_STACKSIZE
+	int "Null audio device worker thread stack size"
+	default 768
+
+endif # AUDIO_NULL

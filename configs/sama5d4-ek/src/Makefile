@@ -84,6 +84,10 @@ endif
 endif
 endif
 
+ifeq ($(CONFIG_AUDIO_NULL),y)
+CSRCS += sam_audio_null.c
+endif
+
 ifeq ($(CONFIG_SAMA5_HSMCI0),y)
 CSRCS += sam_hsmci.c
 else

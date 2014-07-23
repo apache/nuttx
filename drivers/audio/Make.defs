@@ -47,6 +47,10 @@ ifeq ($(CONFIG_AUDIO_WM8904),y)
 CSRCS += wm8904.c
 endif
 
+ifeq ($(CONFIG_AUDIO_NULL),y)
+CSRCS += audio_null.c
+endif
+
 ifeq ($(CONFIG_AUDIO_I2SCHAR),y)
 CSRCS += i2schar.c
 endif
