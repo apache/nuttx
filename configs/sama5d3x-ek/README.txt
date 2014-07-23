@@ -1200,6 +1200,7 @@ HSMCI Card Slots
     Device Drivers -> MMC/SD Driver Support
       CONFIG_MMCSD=y                        : Enable MMC/SD support
       CONFIG_MMSCD_NSLOTS=1                 : One slot per driver instance
+      CONFIG_MMCSD_MULTIBLOCK_DISABLE=y     : (REVISIT)
       CONFIG_MMCSD_HAVECARDDETECT=y         : Supports card-detect PIOs
       CONFIG_MMCSD_MMCSUPPORT=n             : Interferes with some SD cards
       CONFIG_MMCSD_SPI=n                    : No SPI-based MMC/SD support
@@ -3475,6 +3476,12 @@ To-Do List
    EHCI drivers).
 
 4) HSCMI TX DMA support is currently commented out.
+
+   Also, CONFIG_MMCSD_MULTIBLOCK_DISABLE=y is set to disable multi-block
+   transfers.
+
+   Both of these issues need to be revisited to determine there is or
+   is not a real problem.
 
 5) I believe that there is an issue when the internal AT25 FLASH is
    formatted by NuttX.  That format works fine with Linux, but does not
