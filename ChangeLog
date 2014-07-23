@@ -7781,3 +7781,8 @@
 	* audio/pcm_decode.c and include/nuttx/audio/pcm.h:  Flesh out a few
 	  more PCM methods, still incomplete.  Re-vision PCM structure
 	  definition (2014-7-22).
+	* configs/sama*:  Disable MMC/SD multiblock transfers in all SAMA5D3/4
+	  configurations.  I suspect an issue but have not had time to run it
+	  down yet so the easiest thing is simply to disable the feature for
+	  now (2014-7-23).
+
