@@ -7791,3 +7791,8 @@
 	* audio/pcm_decode.c, include/nuttx/audio/audio.h, and drivers/audio/audio_null.c
 	  and wm8904.c: Add ioctls so that PCM decoder can configure the driver
 	  bitrate, num channels, and sample width (2014-7-23).
+	* drivers/audio/Kconfig: Fix a typo in the audio Kconfig file,
+	  UDIO->AUDIO (2014-7-23).
+	* configs/sama5d4-ek/nxwm/defconfig:  The NxPlayer and audio system are
+	  now enabled in the default configuration (although they have not yet
+	  been fully integrated into the NxWM media player) (2014-7-23).
