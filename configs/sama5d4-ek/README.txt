@@ -2792,7 +2792,22 @@ Audio Support
   The NxPlayer is a audio library and command line application for playing
   audio file.  The NxPlayer can be found at apps/system/nxplayer.  If you
   would like to add the NxPlayer, here are some recommended configuration
-  settings:
+  settings.
+
+  First of all, the NxPlayer depends on the NuttX audio subsystem.  Here are some recommended settings for the audio subsystem:
+
+  Audio Support ->
+    CONFIG_AUDIO=y
+    CONFIG_AUDIO_NUM_BUFFERS=4
+    CONFIG_AUDIO_BUFFER_NUMBYTES=8192
+    CONFIG_AUDIO_FORMAT_PCM=y
+
+    CONFIG_AUDIO_NULL=y
+    CONFIG_AUDIO_NULL_BUFFER_SIZE=8192
+    CONFIG_AUDIO_NULL_MSG_PRIO=1
+    CONFIG_AUDIO_NULL_WORKER_STACKSIZE=768
+
+  Then the NxPlayer can be enabled as follows:
 
   System Libraries and NSH Add-Ons -> NxPlayer media player / command line ->
     CONFIG_NXPLAYER_PLAYTHREAD_STACKSIZE=1500    : Size of the audio player stack
@@ -2801,7 +2816,7 @@ Audio Support
     CONFIG_NXPLAYER_INCLUDE_HELP=y               : Includes a help command
     CONFIG_NXPLAYER_INCLUDE_DEVICE_SEARCH=n      : (Since there is only one audio device)
     CONFIG_NXPLAYER_INCLUDE_PREFERRED_DEVICE=y   : Only one audio device is supported
-    CONFIG_NXPLAYER_FMT_FROM_EXT=n               : (Since only PCM is supported)
+    CONFIG_NXPLAYER_FMT_FROM_EXT=y               : (Since only PCM is supported)
     NXPLAYER_FMT_FROM_HEADER=n                   : (Since only PCM is supported)
     CONFIG_NXPLAYER_INCLUDE_MEDIADIR=y           : Specify a media directory
     CONFIG_NXPLAYER_DEFAULT_MEDIADIR="/mnt/sdcard"  : See below
@@ -3883,39 +3898,7 @@ Configurations
        - Obviously, the nx and touchscreen built in applications cannot
          be supported.
 
-    3. NSH Console Access.
-
-       This configuration boots directly into a graphic, window manage
-       environment.  There is no serial console.  Some initial stdout
-       information will go to the USART3 serial output, but otherwise
-       the serial port will be silent.
-
-       Access to the NSH console is available in two ways:
-
-       a. The NxWM provides a graphics-based terminals (called NxConsoles);
-          The console command line is still available within NxConsole
-          windows once NxWM is up and running.  The console input is still
-          via stdin (the host terminal window), but console output will go
-          to the NxConsole terminal.
-
-          NOTES:
-
-          i)  Later I plan to integrate a USB keyboard so that the
-              console input will come from a keyboard attached to the
-              SAMA5D4-EK.
-          ii) It would also not be a difficult task to add a serial console
-              as part of the NxWM console.  That is an option if a serial
-              console is really necessary but is not currently planned.
-
-       b. Telnet NSH sessions are still supported and this is, in general,
-          the convenient way to access the shell (and RAMLOG).
-
-       As with the NSH configuration, debug output will still go to the
-       circular RAMLOG buffer but cannot be accessed from a serial console.
-       Instead, you will need use the dmesg command from an NxConsole or
-       from a Telnet session to see the debug output
-
-    4. Here is the quick summary of the build steps.  These steps assume
+    3. Here is the quick summary of the build steps.  These steps assume
        that you have the entire NuttX GIT in some directory ~/nuttx-git.
        You may have these components installed elsewhere.  In that case, you
        will need to adjust all of the paths in the following accordingly:
@@ -3963,14 +3946,71 @@ Configurations
            $ cd ~/nuttx-git/nuttx
            $ make
 
-    5. The NxWM example was designed tiny displays.  On this larger 800x480
-       display, the icons are too tiny to be usable.  I have created a
-       larger 320x320 logo for the opening screen and added image scaling
-       to expand the images in the taskbar.  The expanded images are not
-       great. The same problems exist in the application toolbar and in the
-       start window.  These icons are not yet scaled.
+    4. NSH Console Access.
 
-       I plan to correct these images in the very near future.
+       This configuration boots directly into a graphic, window manage
+       environment.  There is no serial console.  Some initial stdout
+       information will go to the USART3 serial output, but otherwise
+       the serial port will be silent.
+
+       Access to the NSH console is available in two ways:
+
+       a. The NxWM provides a graphics-based terminals (called NxConsoles);
+          The console command line is still available within NxConsole
+          windows once NxWM is up and running.  The console input is still
+          via stdin (the host terminal window), but console output will go
+          to the NxConsole terminal.
+
+          NOTES:
+
+          i)  Later I plan to integrate a USB keyboard so that the
+              console input will come from a keyboard attached to the
+              SAMA5D4-EK.
+          ii) It would also not be a difficult task to add a serial console
+              as part of the NxWM console.  That is an option if a serial
+              console is really necessary but is not currently planned.
+
+       b. Telnet NSH sessions are still supported and this is, in general,
+          the convenient way to access the shell (and RAMLOG).
+
+       As with the NSH configuration, debug output will still go to the
+       circular RAMLOG buffer but cannot be accessed from a serial console.
+       Instead, you will need use the dmesg command from an NxConsole or
+       from a Telnet session to see the debug output
+
+    5. Media Player
+
+       This configuration has the media player application enabled.  That
+       player is still a work in progress and is only partially integrated
+       with the NxPlay as of this writing.
+
+       At present, the the WM8904 driver is not included in the
+       configuration.  Instead the "NULL" audio device in built in to
+       support higher level testing (there are also some unresolved I2C
+       communication issues the the current WM8904 driver).
+
+       This configuration depends on media files in the default mountpoint
+       at /mnt/sdard.  If you see the message "Media volume not mounted"
+       in the media player text box, then you will need to mount the media
+       volume:
+
+         a. You will need an (full size) SD card containing the .WAV files
+            that you want to play (.WAV is only format supported as of this
+            writing).  That SD card should be inserted in the HSMCI0 media
+            slot A (best done before powering up).
+
+         b. Then from NSH prompt, you need to mount the media volume like:
+
+           nsh> mount -t vfat /dev/mmcsd0 /mnt/sdcard
+
+         c. Then if you close the old media player window and bring up a
+            new one, you should see the .WAV files on the SD card in the lis
+            box.
+
+       Currently the list box is not scollable.  So you will be limited to
+       the number .WAV files that will fit in the existing list box (a
+       scrollable list box class exists, but has not been integrated into
+       the media play demo).
 
    STATUS:
        See the To-Do list below
