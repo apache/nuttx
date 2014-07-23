@@ -147,7 +147,7 @@ config AUDIO_NULL_MSG_PRIO
 	int "Null audio device message priority"
 	default 1
 
-config UDIO_NULL_BUFFER_SIZE
+config AUDIO_NULL_BUFFER_SIZE
 	int "Null audio device preferred buffer size"
 	default 8192
 
