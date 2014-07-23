@@ -695,12 +695,13 @@ static int pcm_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
   FAR struct pcm_decode_s *priv = (FAR struct pcm_decode_s *)dev;
   FAR struct audio_lowerhalf_s *lower;
   apb_samp_t bytesleft;
+  int ret;
 
   DEBUGASSERT(priv);
   audvdbg("Received buffer %p, streaming=%d\n", apb, priv->streaming);
 
   lower = priv->lower;
-  DEBUGASSERT(lower && lower->ops->enqueuebuffer);
+  DEBUGASSERT(lower && lower->ops->enqueuebuffer && lower->ops->ioctl);
 
   /* Are we streaming yet? */
 
@@ -734,8 +735,33 @@ static int pcm_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
 
           priv->streaming = true;
 
-          /* Configure the lower level for the number of channels and bitrate */
-#warning Missing logic
+          /* Configure the lower level for the number of channels, bitrate,
+           * and sample bitwidth.
+           */
+
+          ret = lower->ops->ioctl(lower, AUDIOIOC_BITRATE,
+                                  (unsigned long)priv->samprate);
+          if (ret < 0)
+            {
+              auddbg("ERROR: Failed to set bit rate: %d\n", ret);
+              return ret;
+            }
+
+          ret = lower->ops->ioctl(lower, AUDIOIOC_NCHANNELS,
+                                  (unsigned long)priv->nchannels);
+          if (ret < 0)
+            {
+              auddbg("ERROR: Failed to set number of channels: %d\n", ret);
+              return ret;
+            }
+
+          ret = lower->ops->ioctl(lower, AUDIOIOC_SAMPWIDTH,
+                                  (unsigned long)priv->bpsamp);
+          if (ret < 0)
+            {
+              auddbg("ERROR: Failed to set sample width: %d\n", ret);
+              return ret;
+            }
 
           /* Bump up the data offset and pass the buffer to the lower level */
 

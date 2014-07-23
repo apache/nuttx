@@ -1448,20 +1448,47 @@ static int wm8904_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
        */
 
       case AUDIOIOC_HWRESET:
-        wm8904_reset((FAR struct wm8904_dev_s *)dev);
+        {
+          audvdbg("AUDIOIOC_HWRESET:\n");
+          wm8904_reset((FAR struct wm8904_dev_s *)dev);
+        }
         break;
 
        /* Report our preferred buffer size and quantity */
 
 #ifdef CONFIG_AUDIO_DRIVER_SPECIFIC_BUFFERS
       case AUDIOIOC_GETBUFFERINFO:
-
-        bufinfo              = (FAR struct ap_buffer_info_s *) arg;
-        bufinfo->buffer_size = CONFIG_WM8904_BUFFER_SIZE;
-        bufinfo->nbuffers    = CONFIG_WM8904_NUM_BUFFERS;
+        {
+          audvdbg("AUDIOIOC_GETBUFFERINFO:\n");
+          bufinfo              = (FAR struct ap_buffer_info_s *) arg;
+          bufinfo->buffer_size = CONFIG_WM8904_BUFFER_SIZE;
+          bufinfo->nbuffers    = CONFIG_WM8904_NUM_BUFFERS;
+        }
         break;
 #endif
 
+      /* Data stream configuration */
+
+      case AUDIOIOC_BITRATE:
+        {
+          audvdbg("AUDIOIOC_BITRATE: Set bit rate: %lu\n", arg);
+#warning Missing logic
+        }
+        break;
+
+      case AUDIOIOC_NCHANNELS:
+        {
+          audvdbg("AUDIOIOC_NCHANNELS: Set number of channels: %lu\n", arg);
+#warning Missing logic
+        }
+        break;
+
+      case AUDIOIOC_SAMPWIDTH:
+        {
+          audvdbg("AUDIOIOC_SAMPWIDTH: Set sample width: %lu\n", arg);
+#warning Missing logic
+        }
+        break;
       default:
         break;
     }

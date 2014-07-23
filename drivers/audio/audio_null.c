@@ -661,17 +661,43 @@ static int null_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
        */
 
       case AUDIOIOC_HWRESET:
+        {
+          audvdbg("AUDIOIOC_HWRESET:\n");
+        }
         break;
 
        /* Report our preferred buffer size and quantity */
 
 #ifdef CONFIG_AUDIO_DRIVER_SPECIFIC_BUFFERS
       case AUDIOIOC_GETBUFFERINFO:
-        bufinfo              = (FAR struct ap_buffer_info_s *) arg;
-        bufinfo->buffer_size = CONFIG_AUDIO_NULL_BUFFER_SIZE;
-        bufinfo->nbuffers    = CONFIG_AUDIO_NULL_NUM_BUFFERS;
+        {
+          audvdbg("AUDIOIOC_GETBUFFERINFO:\n");
+          bufinfo              = (FAR struct ap_buffer_info_s *) arg;
+          bufinfo->buffer_size = CONFIG_AUDIO_NULL_BUFFER_SIZE;
+          bufinfo->nbuffers    = CONFIG_AUDIO_NULL_NUM_BUFFERS;
+        }
         break;
 #endif
+
+      /* Data stream configuration */
+
+      case AUDIOIOC_BITRATE:
+        {
+          audvdbg("AUDIOIOC_BITRATE: Set bit rate: %lu\n", arg);
+        }
+        break;
+
+      case AUDIOIOC_NCHANNELS:
+        {
+          audvdbg("AUDIOIOC_NCHANNELS: Set number of channels: %lu\n", arg);
+        }
+        break;
+
+      case AUDIOIOC_SAMPWIDTH:
+        {
+          audvdbg("AUDIOIOC_SAMPWIDTH: Set sample width: %lu\n", arg);
+        }
+        break;
 
       default:
         break;

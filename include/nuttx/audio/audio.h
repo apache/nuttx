@@ -122,6 +122,16 @@
 #define AUDIOIOC_UNREGISTERMQ       _AUDIOIOC(15)
 #define AUDIOIOC_HWRESET            _AUDIOIOC(16)
 
+/* Additional ioctl commands support operations between audio decoders
+ * and low-level audio drivers.  This ioctls are not used by the higher
+ * level audio logic and need be implemented only in low-level audio
+ * drivers that are driven by a decoder.
+ */
+
+#define AUDIOIOC_BITRATE            _AUDIOIOC(17)
+#define AUDIOIOC_NCHANNELS          _AUDIOIOC(18)
+#define AUDIOIOC_SAMPWIDTH          _AUDIOIOC(19)
+
 /* Audio Device Types *******************************************************/
 /* The NuttX audio interface support different types of audio devices for
  * input, output, synthesis, and manupulation of audio data.  A given driver/
