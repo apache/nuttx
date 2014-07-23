@@ -7785,4 +7785,6 @@
 	  configurations.  I suspect an issue but have not had time to run it
 	  down yet so the easiest thing is simply to disable the feature for
 	  now (2014-7-23).
-
+	* drivers/audio/audio_null.c, include/nuttx/audio/audio_null.c, and
+	  configs/sama5d4-ek/src/sam_audio_null.c: Add a NULL audio device that
+	  can be used to simply unit-level testing of audio decoders (2014-7/23).
