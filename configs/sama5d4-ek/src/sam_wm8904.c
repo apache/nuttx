@@ -334,7 +334,7 @@ int sam_wm8904_initialize(int minor)
   return OK;
 
   /* Error exits.  Unfortunately there is no mechanism in place now to
-   * recover from most errors on initialization failures.
+   * recover resources from most errors on initialization failures.
    */
 
 errout_with_pcm:

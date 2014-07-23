@@ -158,12 +158,22 @@ int nsh_archinitialize(void)
 #endif
 
 #ifdef HAVE_WM8904
-  /* Start the USB Monitor */
+  /* Configure WM8904 audio */
 
   ret = sam_wm8904_initialize(0);
   if (ret != OK)
     {
       message("ERROR: Failed to initialize WM8904 audio: %d\n", ret);
+    }
+#endif
+
+#ifdef HAVE_AUDIO_NULL
+  /* Configure the NULL audio device */
+
+  ret = sam_audio_null_initialize(0);
+  if (ret != OK)
+    {
+      message("ERROR: Failed to initialize the NULL audio device: %d\n", ret);
     }
 #endif
 

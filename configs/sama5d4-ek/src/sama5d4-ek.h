@@ -65,6 +65,7 @@
 #define HAVE_NETWORK    1
 #define HAVE_MAXTOUCH   1
 #define HAVE_WM8904     1
+#define HAVE_AUDIO_NULL 1
 
 /* HSMCI */
 /* Can't support MMC/SD if the card interface(s) are not enable */
@@ -317,7 +318,7 @@
 #endif
 
 /* Audio */
-/* Default configuration values */
+/* PCM/WM8904 driver */
 
 #ifndef CONFIG_AUDIO_WM8904
 #  undef HAVE_WM8904
@@ -348,6 +349,23 @@
 #    warning WM8904 I2C frequency cannot exceed 400KHz
 #    undef CONFIG_SAMA5D4EK_WM8904_I2CFREQUENCY
 #    define CONFIG_SAMA5D4EK_WM8904_I2CFREQUENCY 400000
+#  endif
+#endif
+
+/* PCM/null driver */
+
+#ifndef CONFIG_AUDIO_NULL
+#  undef HAVE_AUDIO_NULL
+#endif
+
+#ifdef HAVE_WM8904
+#  undef HAVE_AUDIO_NULL
+#endif
+
+#ifdef HAVE_AUDIO_NULL
+#  ifndef CONFIG_AUDIO_FORMAT_PCM
+#    warning CONFIG_AUDIO_FORMAT_PCM is required for audio support
+#    undef HAVE_AUDIO_NULL
 #  endif
 #endif
 
@@ -924,6 +942,25 @@ int nsh_archinitialize(void);
 #ifdef HAVE_WM8904
 int sam_wm8904_initialize(int minor);
 #endif /* HAVE_WM8904 */
+
+/****************************************************************************
+ * Name: sam_audio_null_initialize
+ *
+ * Description:
+ *   Set up to use the NULL audio device for PCM unit-level testing.
+ *
+ * Input Parameters:
+ *   minor - The input device minor number
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_AUDIO_NULL
+int sam_audio_null_initialize(int minor);
+#endif /* HAVE_AUDIO_NULL */
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_SAMA5D4_EK_SRC_SAMA5D4_EK_H */
