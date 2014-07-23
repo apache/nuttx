@@ -178,7 +178,7 @@ static const struct audio_ops_s g_audioops =
 static int null_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
                           FAR struct audio_caps_s *caps)
 {
-  audvdbg("Entry\n");
+  audvdbg("type=%d\n", type);
 
   /* Validate the structure */
 
@@ -342,11 +342,11 @@ static int null_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
 static int null_configure(FAR struct audio_lowerhalf_s *dev,
-                            FAR void *session,
-                            FAR const struct audio_caps_s *caps)
+                          FAR void *session,
+                          FAR const struct audio_caps_s *caps)
 #else
 static int null_configure(FAR struct audio_lowerhalf_s *dev,
-                            FAR const struct audio_caps_s *caps)
+                          FAR const struct audio_caps_s *caps)
 #endif
 {
   audvdbg("Return OK\n");
@@ -606,6 +606,7 @@ static int null_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
   /* Take a reference */
 
   apb_reference(apb);
+  audvdbg("apb=%p curbyte=%d nbytes=%d\n", apb, apb->curbyte, apb->nbytes);
 
   /* say that we consumed all of the data */
 
@@ -627,9 +628,11 @@ static int null_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
  ****************************************************************************/
 
 static int null_cancelbuffer(FAR struct audio_lowerhalf_s *dev,
-                               FAR struct ap_buffer_s *apb)
+                             FAR struct ap_buffer_s *apb)
 {
-  audvdbg("Return OK\n");
+  audvdbg("apb=%p curbyte=%d nbytes=%d, return OK\n",
+          apb, apb->curbyte, apb->nbytes);
+
   return OK;
 }
 
@@ -646,6 +649,8 @@ static int null_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
 #ifdef CONFIG_AUDIO_DRIVER_SPECIFIC_BUFFERS
   FAR struct ap_buffer_info_s *bufinfo;
 #endif
+
+  audvdbg("cmd=%d arg=%ld\n");
 
   /* Deal with ioctls passed from the upper-half driver */
 
@@ -760,5 +765,6 @@ FAR struct audio_lowerhalf_s *audio_null_initialize(void)
       return &priv->dev;
     }
 
+  auddbg("ERROR: Failed to allocate null audio device\n");
   return NULL;
 }
