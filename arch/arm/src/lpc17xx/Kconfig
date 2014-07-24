@@ -517,6 +517,12 @@ config ADC_CHANLIST
 		(2) provide an array g_adc_chanlist[] with the channel numbers
 		matching the ADC0_MASK within the board-specific library.
 
+config ADC_BURSTMODE
+    bool "One interrupt at the end of all ADC cconversions"
+    default n
+    ---help---
+        Select this if you want to generate only one interrupt once all selected channels has been converted by the ADC
+
 config ADC_NCHANNELS
 	int "ADC0 number of channels"
 	depends on ADC_CHANLIST
@@ -726,6 +732,13 @@ config NET_MULTICAST
 	---help---
 		Enable receipt of multicast (and unicast) frames. Automatically set
 		if NET_IGMP is selected.
+
+config NET_WORKER_THREAD
+    bool "Net worker thread enable"
+    default y
+    depends on SCHED_WORKQUEUE
+    ---help---
+        Enable use of ethernet worker thread (depends on CONFIG_SCHED_WORKQUEUE).
 
 endmenu
 
