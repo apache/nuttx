@@ -7802,3 +7802,6 @@
 	* audio/Kconfig, audio.c, and include/nuttx/audio/audio.h: Add hooks for
 	  fast-forward and rewind needed by CMediaPlayer; add hooks for
 	  equalizer settings needed by the WM8904 (2014-7-24).
+	* drivers/audio/audio_null.c and wm8904.c: Fix some compile errors when
+	  audio DEBUG is enabled (2014-7-24).
+	* SAMA5D4-EK NxWM:  Configuration refreshed (2014-7-24).
