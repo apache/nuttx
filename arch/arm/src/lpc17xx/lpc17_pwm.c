@@ -304,7 +304,6 @@ static int pwm_timer(FAR struct lpc17_pwmtimer_s *priv,
                      FAR const struct pwm_info_s *info)
 {
   irqstate_t flags;
-  uint32_t regval;
 
   flags = irqsave();
 
@@ -462,7 +461,7 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
 
   lpc17_configgpio(GPIO_PWM1p1_1);
 
-  putreg32(1, LPC17_PWM1_PR);        /* Prescaler count frequency:Fpclk/1 */
+  putreg32(1, LPC17_PWM1_PR);        /* Prescaler count frequency: Fpclk/1 */
   putreg32(1 << 1, LPC17_PWM1_MCR);  /* Reset on match register MR0 */
 
   irqrestore(flags);
