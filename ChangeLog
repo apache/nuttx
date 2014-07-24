@@ -7799,3 +7799,6 @@
 	* configs/sama5d4-ek/nsh/defconfig: Enable the command line media player
 	  in the NSH configuration as well (still does not work, however)
 	  (2014-7-23).
+	* audio/Kconfig, audio.c, and include/nuttx/audio/audio.h: Add hooks for
+	  fast-forward and rewind needed by CMediaPlayer; add hooks for
+	  equalizer settings needed by the WM8904 (2014-7-24).
