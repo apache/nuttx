@@ -116,15 +116,16 @@ struct stat
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
-EXTERN int mkdir(FAR const char *pathname, mode_t mode);
-EXTERN int mkfifo(FAR const char *pathname, mode_t mode);
-EXTERN int stat(const char *path, FAR struct stat *buf);
-EXTERN int fstat(int fd, FAR struct stat *buf);
+int mkdir(FAR const char *pathname, mode_t mode);
+int mkfifo(FAR const char *pathname, mode_t mode);
+int stat(const char *path, FAR struct stat *buf);
+int fstat(int fd, FAR struct stat *buf);
 
 #undef EXTERN
 #if defined(__cplusplus)
