@@ -352,7 +352,7 @@ static int null_configure(FAR struct audio_lowerhalf_s *dev,
   switch (caps->ac_type)
     {
     case AUDIO_TYPE_FEATURE:
-      audvdbg("  AUDIO_TYPE_FEATURE\:n");
+      audvdbg("  AUDIO_TYPE_FEATURE\n");
 
       /* Process based on Feature Unit */
 
@@ -383,8 +383,8 @@ static int null_configure(FAR struct audio_lowerhalf_s *dev,
     case AUDIO_TYPE_OUTPUT:
       audvdbg("  AUDIO_TYPE_OUTPUT:\n");
       audvdbg("    Number of channels: %u\n", caps->ac_channels);
-      audvdbg("    Sample rate:        %u\n", ac_controls.hw[0]);
-      audvdbg("    Sample width:       %u\n", ac_controls.b[2]);
+      audvdbg("    Sample rate:        %u\n", caps->ac_controls.hw[0]);
+      audvdbg("    Sample width:       %u\n", caps->ac_controls.b[2]);
       break;
 
     case AUDIO_TYPE_PROCESSING:
