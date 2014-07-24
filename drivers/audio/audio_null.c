@@ -186,12 +186,8 @@ static int null_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
   /* Fill in the caller's structure based on requested info */
 
-  caps->ac_format[0]   = 0;
-  caps->ac_format[1]   = 0;
-  caps->ac_controls[0] = 0;
-  caps->ac_controls[1] = 0;
-  caps->ac_controls[2] = 0;
-  caps->ac_controls[3] = 0;
+  caps->ac_format.hw  = 0;
+  caps->ac_controls.w = 0;
 
   switch (caps->ac_type)
     {
@@ -214,19 +210,19 @@ static int null_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
               /* The types of audio units we implement */
 
-              caps->ac_controls[0] = AUDIO_TYPE_OUTPUT | AUDIO_TYPE_FEATURE |
-                                     AUDIO_TYPE_PROCESSING;
+              caps->ac_controls.b[0] = AUDIO_TYPE_OUTPUT | AUDIO_TYPE_FEATURE |
+                                       AUDIO_TYPE_PROCESSING;
 
               break;
 
             case AUDIO_FMT_MIDI:
               /* We only support Format 0 */
 
-              caps->ac_controls[0] = AUDIO_SUBFMT_END;
+              caps->ac_controls.b[0] = AUDIO_SUBFMT_END;
               break;
 
             default:
-              caps->ac_controls[0] = AUDIO_SUBFMT_END;
+              caps->ac_controls.b[0] = AUDIO_SUBFMT_END;
               break;
           }
 
@@ -244,10 +240,10 @@ static int null_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
               /* Report the Sample rates we support */
 
-              caps->ac_controls[0] = AUDIO_SAMP_RATE_8K | AUDIO_SAMP_RATE_11K |
-                                     AUDIO_SAMP_RATE_16K | AUDIO_SAMP_RATE_22K |
-                                     AUDIO_SAMP_RATE_32K | AUDIO_SAMP_RATE_44K |
-                                     AUDIO_SAMP_RATE_48K;
+              caps->ac_controls.b[0] = AUDIO_SAMP_RATE_8K | AUDIO_SAMP_RATE_11K |
+                                       AUDIO_SAMP_RATE_16K | AUDIO_SAMP_RATE_22K |
+                                       AUDIO_SAMP_RATE_32K | AUDIO_SAMP_RATE_44K |
+                                       AUDIO_SAMP_RATE_48K;
               break;
 
             case AUDIO_FMT_MP3:
@@ -271,8 +267,8 @@ static int null_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
           {
             /* Fill in the ac_controls section with the Feature Units we have */
 
-            caps->ac_controls[0] = AUDIO_FU_VOLUME | AUDIO_FU_BASS | AUDIO_FU_TREBLE;
-            caps->ac_controls[1] = AUDIO_FU_BALANCE >> 8;
+            caps->ac_controls.b[0] = AUDIO_FU_VOLUME | AUDIO_FU_BASS | AUDIO_FU_TREBLE;
+            caps->ac_controls.b[1] = AUDIO_FU_BALANCE >> 8;
           }
         else
           {
@@ -293,14 +289,14 @@ static int null_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
               /* Provide the type of Processing Units we support */
 
-              caps->ac_controls[0] = AUDIO_PU_STEREO_EXTENDER;
+              caps->ac_controls.b[0] = AUDIO_PU_STEREO_EXTENDER;
               break;
 
             case AUDIO_PU_STEREO_EXTENDER:
 
               /* Provide capabilities of our Stereo Extender */
 
-              caps->ac_controls[0] = AUDIO_STEXT_ENABLE | AUDIO_STEXT_WIDTH;
+              caps->ac_controls.b[0] = AUDIO_STEXT_ENABLE | AUDIO_STEXT_WIDTH;
               break;
 
             default:
@@ -360,21 +356,21 @@ static int null_configure(FAR struct audio_lowerhalf_s *dev,
 
       /* Process based on Feature Unit */
 
-      switch (*((uint16_t *)caps->ac_format))
+      switch (caps->ac_format.hw)
         {
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
         case AUDIO_FU_VOLUME:
-          audvdbg("    Volume: %d\n", *(uint16_t *)caps->ac_controls);
+          audvdbg("    Volume: %d\n", caps->ac_controls.hw[0]);
           break;
 #endif  /* CONFIG_AUDIO_EXCLUDE_VOLUME */
 
 #ifndef CONFIG_AUDIO_EXCLUDE_TONE
         case AUDIO_FU_BASS:
-          audvdbg("    Bass: %d\n", caps->ac_controls[0]);
+          audvdbg("    Bass: %d\n", caps->ac_controls.b[0]);
           break;
 
         case AUDIO_FU_TREBLE:
-          audvdbg("    Treble: %d\n", caps->ac_controls[0]);
+          audvdbg("    Treble: %d\n", caps->ac_controls.b[0]);
           break;
 #endif  /* CONFIG_AUDIO_EXCLUDE_TONE */
 
@@ -387,8 +383,8 @@ static int null_configure(FAR struct audio_lowerhalf_s *dev,
     case AUDIO_TYPE_OUTPUT:
       audvdbg("  AUDIO_TYPE_OUTPUT:\n");
       audvdbg("    Number of channels: %u\n", caps->ac_channels);
-      audvdbg("    Sample rate:        %u\n", *(uint16_t*)&ac_controls[0]);
-      audvdbg("    Sample width:       %u\n", ac_controls[2]);
+      audvdbg("    Sample rate:        %u\n", ac_controls.hw[0]);
+      audvdbg("    Sample width:       %u\n", ac_controls.b[2]);
       break;
 
     case AUDIO_TYPE_PROCESSING:

@@ -563,12 +563,9 @@ static int wm8904_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
   /* Fill in the caller's structure based on requested info */
 
-  caps->ac_format[0]   = 0;
-  caps->ac_format[1]   = 0;
-  caps->ac_controls[0] = 0;
-  caps->ac_controls[1] = 0;
-  caps->ac_controls[2] = 0;
-  caps->ac_controls[3] = 0;
+  caps->ac_format[0]  = 0;
+  caps->ac_format[1]  = 0;
+  caps->ac_controls.w = 0;
 
   switch (caps->ac_type)
     {
@@ -591,7 +588,7 @@ static int wm8904_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
               /* The types of audio units we implement */
 
-              caps->ac_controls[0] = AUDIO_TYPE_OUTPUT | AUDIO_TYPE_FEATURE |
+              caps->ac_controls.b[0] = AUDIO_TYPE_OUTPUT | AUDIO_TYPE_FEATURE |
                                      AUDIO_TYPE_PROCESSING;
 
               break;
@@ -599,11 +596,11 @@ static int wm8904_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
             case AUDIO_FMT_MIDI:
               /* We only support Format 0 */
 
-              caps->ac_controls[0] = AUDIO_SUBFMT_END;
+              caps->ac_controls.b[0] = AUDIO_SUBFMT_END;
               break;
 
             default:
-              caps->ac_controls[0] = AUDIO_SUBFMT_END;
+              caps->ac_controls.b[0] = AUDIO_SUBFMT_END;
               break;
           }
 
@@ -621,7 +618,7 @@ static int wm8904_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
               /* Report the Sample rates we support */
 
-              caps->ac_controls[0] = AUDIO_SAMP_RATE_8K | AUDIO_SAMP_RATE_11K |
+              caps->ac_controls.b[0] = AUDIO_SAMP_RATE_8K | AUDIO_SAMP_RATE_11K |
                                      AUDIO_SAMP_RATE_16K | AUDIO_SAMP_RATE_22K |
                                      AUDIO_SAMP_RATE_32K | AUDIO_SAMP_RATE_44K |
                                      AUDIO_SAMP_RATE_48K;
@@ -648,8 +645,8 @@ static int wm8904_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
           {
             /* Fill in the ac_controls section with the Feature Units we have */
 
-            caps->ac_controls[0] = AUDIO_FU_VOLUME | AUDIO_FU_BASS | AUDIO_FU_TREBLE;
-            caps->ac_controls[1] = AUDIO_FU_BALANCE >> 8;
+            caps->ac_controls.b[0] = AUDIO_FU_VOLUME | AUDIO_FU_BASS | AUDIO_FU_TREBLE;
+            caps->ac_controls.b[1] = AUDIO_FU_BALANCE >> 8;
           }
         else
           {
@@ -670,14 +667,14 @@ static int wm8904_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
               /* Provide the type of Processing Units we support */
 
-              caps->ac_controls[0] = AUDIO_PU_STEREO_EXTENDER;
+              caps->ac_controls.b[0] = AUDIO_PU_STEREO_EXTENDER;
               break;
 
             case AUDIO_PU_STEREO_EXTENDER:
 
               /* Provide capabilities of our Stereo Extender */
 
-              caps->ac_controls[0] = AUDIO_STEXT_ENABLE | AUDIO_STEXT_WIDTH;
+              caps->ac_controls.b[0] = AUDIO_STEXT_ENABLE | AUDIO_STEXT_WIDTH;
               break;
 
             default:
@@ -748,7 +745,7 @@ static int wm8904_configure(FAR struct audio_lowerhalf_s *dev,
           {
             /* Set the volume */
 
-            uint16_t volume = *(uint16_t *)caps->ac_controls;
+            uint16_t volume = caps->ac_controls.hw[0];
             audvdbg("    Volume: %d\n", volume);
 
             if (volume >= 0 && volume <= 1000)
@@ -769,10 +766,10 @@ static int wm8904_configure(FAR struct audio_lowerhalf_s *dev,
         case AUDIO_FU_BASS:
           {
             /* Set the bass.  The percentage level (0-100) is in the
-             * ac_controls[0] parameter.
+             * ac_controls.b[0] parameter.
              */
 
-            uint8_t bass = caps->ac_controls[0];
+            uint8_t bass = caps->ac_controls.b[0];
             audvdbg("    Bass: %d\n", bass);
 
             if (bass <= 100)
@@ -789,10 +786,10 @@ static int wm8904_configure(FAR struct audio_lowerhalf_s *dev,
         case AUDIO_FU_TREBLE:
           {
             /* Set the treble.  The percentage level (0-100) is in the
-             * ac_controls[0] parameter.
+             * ac_controls.b[0] parameter.
              */
 
-            uint8_t treble = caps->ac_controls[0];
+            uint8_t treble = caps->ac_controls.b[0];
             audvdbg("    Treble: %d\n", treble);
 
             if (treble <= 100)
@@ -817,8 +814,8 @@ static int wm8904_configure(FAR struct audio_lowerhalf_s *dev,
     case AUDIO_TYPE_OUTPUT:
       audvdbg("  AUDIO_TYPE_OUTPUT:\n");
       audvdbg("    Number of channels: %u\n", caps->ac_channels);
-      audvdbg("    Sample rate:        %u\n", *(uint16_t*)&ac_controls[0]);
-      audvdbg("    Sample width:       %u\n", ac_controls[2]);
+      audvdbg("    Sample rate:        %u\n", ac_controls.hw[0]);
+      audvdbg("    Sample width:       %u\n", ac_controls.b[2]);
 #warning Missing logic
       break;
 

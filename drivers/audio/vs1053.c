@@ -568,12 +568,8 @@ static int vs1053_getcaps(FAR struct audio_lowerhalf_s *lower, int type,
 
   /* Fill in the caller's structure based on requested info */
 
-  pCaps->ac_format[0] = 0;
-  pCaps->ac_format[1] = 0;
-  pCaps->ac_controls[0] = 0;
-  pCaps->ac_controls[1] = 0;
-  pCaps->ac_controls[2] = 0;
-  pCaps->ac_controls[3] = 0;
+  pCaps->ac_format.hw  = 0;
+  pCaps->ac_controls.w = 0;
 
   switch (pCaps->ac_type)
     {
@@ -592,7 +588,7 @@ static int vs1053_getcaps(FAR struct audio_lowerhalf_s *lower, int type,
             case AUDIO_TYPE_QUERY:
               /* The input formats we can decode / accept */
 
-              *((uint16_t *) &pCaps->ac_format[0]) = 0
+              pCaps->ac_format.hw = 0
 #ifdef CONFIG_AUDIO_FORMAT_AC3
                     | (1 << (AUDIO_FMT_AC3 - 1))
 #endif
@@ -615,7 +611,7 @@ static int vs1053_getcaps(FAR struct audio_lowerhalf_s *lower, int type,
 
               /* The types of audio units we implement */
 
-              pCaps->ac_controls[0] = AUDIO_TYPE_OUTPUT | AUDIO_TYPE_FEATURE |
+              pCaps->ac_controls.b[0] = AUDIO_TYPE_OUTPUT | AUDIO_TYPE_FEATURE |
                                       AUDIO_TYPE_PROCESSING;
 
               break;
@@ -626,13 +622,13 @@ static int vs1053_getcaps(FAR struct audio_lowerhalf_s *lower, int type,
             case AUDIO_FMT_MIDI:
               /* We only support Format 0 */
 
-              pCaps->ac_controls[0] = AUDIO_SUBFMT_MIDI_0;
-              pCaps->ac_controls[1] = AUDIO_SUBFMT_END;
+              pCaps->ac_controls.b[0] = AUDIO_SUBFMT_MIDI_0;
+              pCaps->ac_controls.b[1] = AUDIO_SUBFMT_END;
               break;
 #endif
 
             default:
-              pCaps->ac_controls[0] = AUDIO_SUBFMT_END;
+              pCaps->ac_controls.b[0] = AUDIO_SUBFMT_END;
               break;
           }
 
@@ -650,7 +646,7 @@ static int vs1053_getcaps(FAR struct audio_lowerhalf_s *lower, int type,
 
               /* Report the Sample rates we support */
 
-              pCaps->ac_controls[0] = AUDIO_SAMP_RATE_8K | AUDIO_SAMP_RATE_11K |
+              pCaps->ac_controls.b[0] = AUDIO_SAMP_RATE_8K | AUDIO_SAMP_RATE_11K |
                                       AUDIO_SAMP_RATE_16K | AUDIO_SAMP_RATE_22K |
                                       AUDIO_SAMP_RATE_32K | AUDIO_SAMP_RATE_44K |
                                       AUDIO_SAMP_RATE_48K;
@@ -686,8 +682,8 @@ static int vs1053_getcaps(FAR struct audio_lowerhalf_s *lower, int type,
           {
             /* Fill in the ac_controls section with the Feature Units we have */
 
-            pCaps->ac_controls[0] = AUDIO_FU_VOLUME | AUDIO_FU_BASS | AUDIO_FU_TREBLE;
-            pCaps->ac_controls[1] = AUDIO_FU_BALANCE >> 8;
+            pCaps->ac_controls.b[0] = AUDIO_FU_VOLUME | AUDIO_FU_BASS | AUDIO_FU_TREBLE;
+            pCaps->ac_controls.b[1] = AUDIO_FU_BALANCE >> 8;
           }
         else
           {
@@ -708,14 +704,14 @@ static int vs1053_getcaps(FAR struct audio_lowerhalf_s *lower, int type,
 
               /* Provide the type of Processing Units we support */
 
-              pCaps->ac_controls[0] = AUDIO_PU_STEREO_EXTENDER;
+              pCaps->ac_controls.b[0] = AUDIO_PU_STEREO_EXTENDER;
               break;
 
             case AUDIO_PU_STEREO_EXTENDER:
 
               /* Proivde capabilities of our Stereo Extender */
 
-              pCaps->ac_controls[0] = AUDIO_STEXT_ENABLE | AUDIO_STEXT_WIDTH;
+              pCaps->ac_controls.b[0] = AUDIO_STEXT_ENABLE | AUDIO_STEXT_WIDTH;
               break;
 
             default:
@@ -777,13 +773,13 @@ static int vs1053_configure(FAR struct audio_lowerhalf_s *lower,
 
         /* Process based on Feature Unit */
 
-        switch (*((uint16_t *) pCaps->ac_format))
+        switch (pCaps->ac_format.hw)
           {
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
             case AUDIO_FU_VOLUME:
               /* Set the volume */
 
-              dev->volume = *((uint16_t *) pCaps->ac_controls);
+              dev->volume = pCaps->ac_controls.hw[0]);
               vs1053_setvolume(dev);
 
               break;
@@ -793,7 +789,7 @@ static int vs1053_configure(FAR struct audio_lowerhalf_s *lower,
             case AUDIO_FU_BALANCE:
               /* Set the volume */
 
-              dev->balance = *((uint16_t *) pCaps->ac_controls);
+              dev->balance = pCaps->ac_controls.hw[0]);
               vs1053_setvolume(dev);
 
               break;
@@ -805,7 +801,7 @@ static int vs1053_configure(FAR struct audio_lowerhalf_s *lower,
                * ac_controls[0] parameter.
                */
 
-              dev->bass = pCaps->ac_controls[0];
+              dev->bass = pCaps->ac_controls.b[0];
               if (dev->bass > 100)
                 dev->bass = 100;
               vs1053_setbass(dev);
@@ -814,10 +810,10 @@ static int vs1053_configure(FAR struct audio_lowerhalf_s *lower,
 
             case AUDIO_FU_TREBLE:
               /* Set the treble.  The percentage level (0-100) is in the
-               * ac_controls[0] parameter.
+               * ac_controls.b[0] parameter.
                */
 
-              dev->treble = pCaps->ac_controls[0];
+              dev->treble = pCaps->ac_controls.b[0];
               if (dev->treble > 100)
                 dev->treble = 100;
               vs1053_setbass(dev);
@@ -840,7 +836,7 @@ static int vs1053_configure(FAR struct audio_lowerhalf_s *lower,
 
         /* We only support STEREO_EXTENDER */
 
-        if (*((uint16_t *) pCaps->ac_format) == AUDIO_PU_STEREO_EXTENDER)
+        if (pCaps->ac_format.hw == AUDIO_PU_STEREO_EXTENDER)
           {
           }
 

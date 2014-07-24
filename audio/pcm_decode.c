@@ -407,7 +407,7 @@ static int pcm_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
   if (caps->ac_subtype == AUDIO_TYPE_QUERY)
     {
-      *((uint16_t *)&caps->ac_format[0]) = (1 << (AUDIO_FMT_PCM - 1));
+      caps->ac_format.hw = (1 << (AUDIO_FMT_PCM - 1));
     }
 
   return caps->ac_len;
@@ -749,12 +749,12 @@ static int pcm_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
 
           DEBUGASSERT(priv->samprate < 65535);
 
-          caps.ac_len         = sizeof(struct audio_caps_s);
-          caps.ac_type        = AUDIO_TYPE_OUTPUT;
-          caps.ac_channels    = priv->nchannels;
+          caps.ac_len            = sizeof(struct audio_caps_s);
+          caps.ac_type           = AUDIO_TYPE_OUTPUT;
+          caps.ac_channels       = priv->nchannels;
 
-          *((uint16_t *)&caps.ac_controls[0]) = (uint16_t)priv->samprate;
-          caps.ac_controls[2] = priv->bpsamp;
+          caps.ac_controls.hw[0] = (uint16_t)priv->samprate;
+          caps.ac_controls.b[2]  = priv->bpsamp;
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
           ret = lower->ops->configure(lower, priv->session, &caps);

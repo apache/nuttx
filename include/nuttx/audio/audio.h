@@ -300,10 +300,19 @@ struct audio_caps_s
   uint8_t ac_type;          /* Capabilities (device) type */
   uint8_t ac_subtype;       /* Capabilities sub-type, if needed */
   uint8_t ac_channels;      /* Number of channels (1, 2, 5, 7) */
-  uint8_t ac_format[2];     /* Audio data format(s) for this device */
-  uint8_t ac_controls[4];   /* Device specific controls. For AUDIO_DEVICE_QUERY,
-                             * this field reports the device type supported
-                             * by this lower-half driver. */
+
+  union                     /* Audio data format(s) for this device */
+  {
+    uint8_t  b[2];
+    uint16_t hw;
+  } ac_format;
+
+  union                     /* Device specific controls. For AUDIO_DEVICE_QUERY, */
+  {                         /*   this field reports the device type supported */
+    uint8_t  b[4];          /*   by this lower-half driver. */
+    uint16_t hw[2];
+    uint32_t w;
+  } ac_controls;
 };
 
 struct audio_caps_desc_s
