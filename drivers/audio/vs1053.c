@@ -833,6 +833,9 @@ static int vs1053_configure(FAR struct audio_lowerhalf_s *lower,
 
         break;
 
+      case AUDIO_TYPE_OUTPUT:
+        break;
+
       case AUDIO_TYPE_PROCESSING:
 
         /* We only support STEREO_EXTENDER */

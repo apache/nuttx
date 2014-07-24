@@ -122,33 +122,6 @@
 #define AUDIOIOC_UNREGISTERMQ       _AUDIOIOC(15)
 #define AUDIOIOC_HWRESET            _AUDIOIOC(16)
 
-/* Additional ioctl commands support operations between audio decoders
- * and low-level audio drivers.  This ioctls are not used by the higher
- * level audio logic and need be implemented only in low-level audio
- * drivers that are driven by a decoder.
- *
- * AUDIOIOC_BITRATE - Set bit rate
- *
- *   ioctl argument:  Audio bit rate in bits per second
- *                    Range: 1-65535 BPS (Compare to AUDIO_BIT_RATE_* definitions)
- *
- * AUDIOIOC_NCHANNELS - Set number of audio channels
- *
- *   ioctl argument:  Number of audio channels.  1=MONO, 2=STEREO, etc.
- *                    Range: 1-255, however most drivers will support only
- *                    1 and possibly 2
- *
- * AUDIOIOC_SAMPWIDTH - Set sample bit width
- *
- *   ioctl argument:  Sample bit width:  8=8-bit data, 16=16-bit data, etc.
- *                    Range: 1-255, however, many drivers will support only
- *                    one sample bit width.
- */
-
-#define AUDIOIOC_BITRATE            _AUDIOIOC(17)
-#define AUDIOIOC_NCHANNELS          _AUDIOIOC(18)
-#define AUDIOIOC_SAMPWIDTH          _AUDIOIOC(19)
-
 /* Audio Device Types *******************************************************/
 /* The NuttX audio interface support different types of audio devices for
  * input, output, synthesis, and manipulation of audio data.  A given driver/
@@ -184,8 +157,8 @@
 #define AUDIO_FMT_WAV               0x07
 #define AUDIO_FMT_MP3               0x08
 #define AUDIO_FMT_MIDI              0x09
-#define AUDIO_FMT_OGG_VORBIS        0x0A
-#define AUDIO_FMT_FLAC              0x0B
+#define AUDIO_FMT_OGG_VORBIS        0x0a
+#define AUDIO_FMT_FLAC              0x0b
 
 /* Audio Sub-Format Types ***************************************************/
 
@@ -199,11 +172,11 @@
 #define AUDIO_SUBFMT_PCM_S8         0x07
 #define AUDIO_SUBFMT_PCM_U16_LE     0x08
 #define AUDIO_SUBFMT_PCM_S16_BE     0x09
-#define AUDIO_SUBFMT_PCM_S16_LE     0x0A
-#define AUDIO_SUBFMT_PCM_U16_BE     0x0B
-#define AUDIO_SUBFMT_MIDI_0         0x0C
-#define AUDIO_SUBFMT_MIDI_1         0x0D
-#define AUDIO_SUBFMT_MIDI_2         0x0E
+#define AUDIO_SUBFMT_PCM_S16_LE     0x0a
+#define AUDIO_SUBFMT_PCM_U16_BE     0x0b
+#define AUDIO_SUBFMT_MIDI_0         0x0c
+#define AUDIO_SUBFMT_MIDI_1         0x0d
+#define AUDIO_SUBFMT_MIDI_2         0x0e
 
 /* Supported Sampling Rates *************************************************/
 
@@ -276,7 +249,7 @@
 
 /* Audio Pipeline Buffer (AP Buffer) flags **********************************/
 
-#define AUDIO_ABP_ALIGNMENT         0x000F  /* Mask to define buffer alignment */
+#define AUDIO_ABP_ALIGNMENT         0x000f  /* Mask to define buffer alignment */
 #define AUDIO_ABP_CANDMA            0x0010  /* Set if the data is DMA'able */
 #define AUDIO_ABP_STATIC            0x0020  /* Set if statically allocated */
 #define AUDIO_ABP_ACTIVE            0x0040  /* Set if this buffer is still active.

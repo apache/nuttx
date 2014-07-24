@@ -730,13 +730,14 @@ static int wm8904_configure(FAR struct audio_lowerhalf_s *dev,
 #endif
   int ret = OK;
 
-  audvdbg("Entry\n");
+  audvdbg("ac_type: %d\n", caps->ac_type);
 
   /* Process the configure operation */
 
   switch (caps->ac_type)
     {
     case AUDIO_TYPE_FEATURE:
+      audvdbg("  AUDIO_TYPE_FEATURE\:n");
 
       /* Process based on Feature Unit */
 
@@ -748,6 +749,8 @@ static int wm8904_configure(FAR struct audio_lowerhalf_s *dev,
             /* Set the volume */
 
             uint16_t volume = *(uint16_t *)caps->ac_controls;
+            audvdbg("    Volume: %d\n", volume);
+
             if (volume >= 0 && volume <= 1000)
               {
                 /* Scale the volume setting to the range {0.. 63} */
@@ -770,6 +773,8 @@ static int wm8904_configure(FAR struct audio_lowerhalf_s *dev,
              */
 
             uint8_t bass = caps->ac_controls[0];
+            audvdbg("    Bass: %d\n", bass);
+
             if (bass <= 100)
               {
                 wm8904_setbass(priv, bass);
@@ -788,6 +793,8 @@ static int wm8904_configure(FAR struct audio_lowerhalf_s *dev,
              */
 
             uint8_t treble = caps->ac_controls[0];
+            audvdbg("    Treble: %d\n", treble);
+
             if (treble <= 100)
               {
                 wm8904_settreble(priv, treble);
@@ -801,19 +808,21 @@ static int wm8904_configure(FAR struct audio_lowerhalf_s *dev,
 #endif  /* CONFIG_AUDIO_EXCLUDE_TONE */
 
         default:
+          auddbg("    Unrecognized feature unit\n");
           ret = -ENOTTY;
           break;
         }
         break;
 
-    case AUDIO_TYPE_PROCESSING:
-      {
-        /* We only support STEREO_EXTENDER */
+    case AUDIO_TYPE_OUTPUT:
+      audvdbg("  AUDIO_TYPE_OUTPUT:\n");
+      audvdbg("    Number of channels: %u\n", caps->ac_channels);
+      audvdbg("    Sample rate:        %u\n", *(uint16_t*)&ac_controls[0]);
+      audvdbg("    Sample width:       %u\n", ac_controls[2]);
+#warning Missing logic
+      break;
 
-        if (*((uint16_t *) caps->ac_format) == AUDIO_PU_STEREO_EXTENDER)
-          {
-          }
-      }
+    case AUDIO_TYPE_PROCESSING:
       break;
     }
 
@@ -1467,29 +1476,8 @@ static int wm8904_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
         break;
 #endif
 
-      /* Data stream configuration */
-
-      case AUDIOIOC_BITRATE:
-        {
-          audvdbg("AUDIOIOC_BITRATE: Set bit rate: %lu\n", arg);
-#warning Missing logic
-        }
-        break;
-
-      case AUDIOIOC_NCHANNELS:
-        {
-          audvdbg("AUDIOIOC_NCHANNELS: Set number of channels: %lu\n", arg);
-#warning Missing logic
-        }
-        break;
-
-      case AUDIOIOC_SAMPWIDTH:
-        {
-          audvdbg("AUDIOIOC_SAMPWIDTH: Set sample width: %lu\n", arg);
-#warning Missing logic
-        }
-        break;
       default:
+        audvdbg("Ignored\n");
         break;
     }
 

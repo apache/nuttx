@@ -349,6 +349,53 @@ static int null_configure(FAR struct audio_lowerhalf_s *dev,
                           FAR const struct audio_caps_s *caps)
 #endif
 {
+  audvdbg("ac_type: %d\n", caps->ac_type);
+
+  /* Process the configure operation */
+
+  switch (caps->ac_type)
+    {
+    case AUDIO_TYPE_FEATURE:
+      audvdbg("  AUDIO_TYPE_FEATURE\:n");
+
+      /* Process based on Feature Unit */
+
+      switch (*((uint16_t *)caps->ac_format))
+        {
+#ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
+        case AUDIO_FU_VOLUME:
+          audvdbg("    Volume: %d\n", *(uint16_t *)caps->ac_controls);
+          break;
+#endif  /* CONFIG_AUDIO_EXCLUDE_VOLUME */
+
+#ifndef CONFIG_AUDIO_EXCLUDE_TONE
+        case AUDIO_FU_BASS:
+          audvdbg("    Bass: %d\n", caps->ac_controls[0]);
+          break;
+
+        case AUDIO_FU_TREBLE:
+          audvdbg("    Treble: %d\n", caps->ac_controls[0]);
+          break;
+#endif  /* CONFIG_AUDIO_EXCLUDE_TONE */
+
+        default:
+          auddbg("    Unrecognized feature unit\n");
+          break;
+        }
+      break;
+
+    case AUDIO_TYPE_OUTPUT:
+      audvdbg("  AUDIO_TYPE_OUTPUT:\n");
+      audvdbg("    Number of channels: %u\n", caps->ac_channels);
+      audvdbg("    Sample rate:        %u\n", *(uint16_t*)&ac_controls[0]);
+      audvdbg("    Sample width:       %u\n", ac_controls[2]);
+      break;
+
+    case AUDIO_TYPE_PROCESSING:
+      audvdbg("  AUDIO_TYPE_PROCESSING:\n");
+      break;
+    }
+
   audvdbg("Return OK\n");
   return OK;
 }
@@ -678,26 +725,6 @@ static int null_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
         }
         break;
 #endif
-
-      /* Data stream configuration */
-
-      case AUDIOIOC_BITRATE:
-        {
-          audvdbg("AUDIOIOC_BITRATE: Set bit rate: %lu\n", arg);
-        }
-        break;
-
-      case AUDIOIOC_NCHANNELS:
-        {
-          audvdbg("AUDIOIOC_NCHANNELS: Set number of channels: %lu\n", arg);
-        }
-        break;
-
-      case AUDIOIOC_SAMPWIDTH:
-        {
-          audvdbg("AUDIOIOC_SAMPWIDTH: Set sample width: %lu\n", arg);
-        }
-        break;
 
       default:
         break;

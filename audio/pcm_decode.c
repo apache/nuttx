@@ -95,6 +95,12 @@ struct pcm_decode_s
 
   FAR struct audio_lowerhalf_s *lower;
 
+  /* Session returned from the lower level driver */
+
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+  FAR void *session;
+#endif
+
   /* These are values extracted from WAV file header */
 
   uint32_t samprate;      /* 8000, 44100, ... */
@@ -701,7 +707,7 @@ static int pcm_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
   audvdbg("Received buffer %p, streaming=%d\n", apb, priv->streaming);
 
   lower = priv->lower;
-  DEBUGASSERT(lower && lower->ops->enqueuebuffer && lower->ops->ioctl);
+  DEBUGASSERT(lower && lower->ops->enqueuebuffer && lower->ops->configure);
 
   /* Are we streaming yet? */
 
@@ -731,6 +737,8 @@ static int pcm_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
 
       if (pcm_parsewav(priv, &apb->samp[apb->curbyte]))
         {
+          struct audio_caps_s caps;
+
           /* Now we are streaming */
 
           priv->streaming = true;
@@ -739,27 +747,23 @@ static int pcm_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
            * and sample bitwidth.
            */
 
-          ret = lower->ops->ioctl(lower, AUDIOIOC_BITRATE,
-                                  (unsigned long)priv->samprate);
-          if (ret < 0)
-            {
-              auddbg("ERROR: Failed to set bit rate: %d\n", ret);
-              return ret;
-            }
+          DEBUGASSERT(priv->samprate < 65535);
 
-          ret = lower->ops->ioctl(lower, AUDIOIOC_NCHANNELS,
-                                  (unsigned long)priv->nchannels);
-          if (ret < 0)
-            {
-              auddbg("ERROR: Failed to set number of channels: %d\n", ret);
-              return ret;
-            }
+          caps.ac_len         = sizeof(struct audio_caps_s);
+          caps.ac_type        = AUDIO_TYPE_OUTPUT;
+          caps.ac_channels    = priv->nchannels;
 
-          ret = lower->ops->ioctl(lower, AUDIOIOC_SAMPWIDTH,
-                                  (unsigned long)priv->bpsamp);
+          *((uint16_t *)&caps.ac_controls[0]) = (uint16_t)priv->samprate;
+          caps.ac_controls[2] = priv->bpsamp;
+
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+          ret = lower->ops->configure(lower, priv->session, &caps);
+#else
+          ret = lower->ops->configure(lower, &caps);
+#endif
           if (ret < 0)
             {
-              auddbg("ERROR: Failed to set sample width: %d\n", ret);
+              auddbg("ERROR: Failed to set PCM configuration: %d\n", ret);
               return ret;
             }
 
@@ -849,14 +853,22 @@ static int pcm_reserve(FAR struct audio_lowerhalf_s *dev)
 {
   FAR struct pcm_decode_s *priv = (FAR struct pcm_decode_s *)dev;
   FAR struct audio_lowerhalf_s *lower;
+  int ret;
 
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+  DEBUGASSERT(priv && session);
+#else
   DEBUGASSERT(priv);
+#endif
 
   /* It is not necessary to reserve the upper half.  What we really need to
    * do is to reserved the lower device driver for exclusive use by the PCM
    * decoder.  That effectively reserves the upper PCM decoder along with
    * the lower driver (which is then not available for use by other
    * decoders).
+   *
+   * We do, however, need to remember the session returned by the lower
+   * level.
    */
 
   lower = priv->lower;
@@ -864,10 +876,17 @@ static int pcm_reserve(FAR struct audio_lowerhalf_s *dev)
 
   audvdbg("Defer to lower reserve\n");
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-  return lower->ops->reserve(lower, session);
+  ret = lower->ops->reserve(lower, &priv->session);
+
+  /* Return a copy of the session to the caller */
+
+  *session = priv->session;
+
 #else
-  return lower->ops->reserve(lower);
+  ret = lower->ops->reserve(lower);
 #endif
+
+  return ret;
 }
 
 /****************************************************************************
