@@ -191,7 +191,6 @@ static void rtc_dumptime(FAR struct tm *tp, FAR const char *msg)
 static int rtc_setup(void)
 {
   uint32_t regval;
-  int ret;
 
   /* Clear all register to be default */
 
@@ -210,7 +209,7 @@ static int rtc_setup(void)
   /* Enable counters */
 
   putreg32((uint32_t)0x01, LPC17_RTC_CCR);
-  return ret;
+  return OK;
 }
 
 /************************************************************************************
@@ -230,16 +229,11 @@ static int rtc_setup(void)
 
 static int rtc_resume(void)
 {
-#ifdef CONFIG_RTC_ALARM
-  uint32_t regval;
-#endif
-  int ret;
-
   /* Clear the RTC alarm flags */
 
 #ifdef CONFIG_RTC_ALARM
 #endif
-  return ret;
+  return OK;
 }
 
 /************************************************************************************
@@ -286,18 +280,19 @@ static int rtc_interrupt(int irq, void *context)
 
 int up_rtcinitialize(void)
 {
-  uint32_t regval;
   int ret;
 
   rtc_dumpregs("On reset");
 
   /* Attach the RTC interrupt handler */
 
+#if CONFIG_RTC_ALARM
   ret = irq_attach(LPC17_IRQ_RTC, rtc_interrupt);
   if (ret == OK)
     {
-    up_enable_irq(LPC17_IRQ_RTC);
+      up_enable_irq(LPC17_IRQ_RTC);
     }
+#endif /*CONFIG_RTC_ALARM*/
 
   /* Perform the one-time setup of the RTC */
 
@@ -389,7 +384,6 @@ int up_rtc_getdatetime(FAR struct tm *tp)
 int up_rtc_settime(FAR const struct timespec *tp)
 {
   FAR struct tm newtime;
-  int ret;
 
   /* Break out the time values (not that the time is set only to units of seconds) */
 
@@ -405,7 +399,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
   putreg32((((newtime.tm_mon)+1) & RTC_MONTH_MASK), LPC17_RTC_MONTH);
   putreg32(((newtime.tm_year) & RTC_YEAR_MASK)+1900, LPC17_RTC_YEAR);
 
-  return ret;
+  return OK;
 }
 
 /************************************************************************************
@@ -426,7 +420,6 @@ int up_rtc_settime(FAR const struct timespec *tp)
 #ifdef CONFIG_RTC_ALARM
 int up_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
 {
-  irqstate_t flags;
   int ret = -EBUSY;
 
   /* Is there already something waiting on the ALARM? */
