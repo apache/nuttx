@@ -126,6 +126,23 @@
  * and low-level audio drivers.  This ioctls are not used by the higher
  * level audio logic and need be implemented only in low-level audio
  * drivers that are driven by a decoder.
+ *
+ * AUDIOIOC_BITRATE - Set bit rate
+ *
+ *   ioctl argument:  Audio bit rate in bits per second
+ *                    Range: 1-65535 BPS (Compare to AUDIO_BIT_RATE_* definitions)
+ *
+ * AUDIOIOC_NCHANNELS - Set number of audio channels
+ *
+ *   ioctl argument:  Number of audio channels.  1=MONO, 2=STEREO, etc.
+ *                    Range: 1-255, however most drivers will support only
+ *                    1 and possibly 2
+ *
+ * AUDIOIOC_SAMPWIDTH - Set sample bit width
+ *
+ *   ioctl argument:  Sample bit width:  8=8-bit data, 16=16-bit data, etc.
+ *                    Range: 1-255, however, many drivers will support only
+ *                    one sample bit width.
  */
 
 #define AUDIOIOC_BITRATE            _AUDIOIOC(17)
@@ -134,9 +151,9 @@
 
 /* Audio Device Types *******************************************************/
 /* The NuttX audio interface support different types of audio devices for
- * input, output, synthesis, and manupulation of audio data.  A given driver/
+ * input, output, synthesis, and manipulation of audio data.  A given driver/
  * device could support a combination of these device type.  The following
- * is a list of bit-field definitons for defining the device type.
+ * is a list of bit-field definitions for defining the device type.
  */
 
 #define AUDIO_TYPE_QUERY            0x00
@@ -151,7 +168,7 @@
 
 /* Audio Format Types *******************************************************/
 /* The following defines the audio data format types in NuttX.  During a
- * format query, these will be converted to bit positions withing the
+ * format query, these will be converted to bit positions within the
  * ac_format field, meaning we currently only support up to 16 formats. To
  * support more than that, we will use the FMT_OTHER entry, and the
  * interfacing software can perform a second query to get the other formats.

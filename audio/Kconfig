@@ -20,6 +20,8 @@ config AUDIO_MULTI_SESSION
 		Selecting this feature adds support for tracking multiple concurrent
 		sessions with the lower-level audio devices.
 
+menu "Audio Buffer Configuration"
+
 config AUDIO_LARGE_BUFFERS
 	bool "Support Audio Buffers with greater than 65K samples"
 	default n
@@ -55,6 +57,8 @@ config AUDIO_DRIVER_SPECIFIC_BUFFERS
 		regardless of the specific audio device in use.  Specifying 'y' here
 		adds extra code which allows the lower-level audio device to specify
 		a partucular size and number of buffers.
+
+endmenu # Audio Buffer Configuration
 
 menu "Supported Audio Formats"
 
@@ -116,11 +120,28 @@ config AUDIO_EXCLUDE_BALANCE
 	---help---
 		Exclude building support for changing the balance.
 
+config AUDIO_EXCLUDE_EQUALIZER
+	bool "Exclude equalizer controls"
+	default y
+	---help---
+		Exclude building support for setting equalization.
+
+config AUDIO_EQUALIZER_NBANDS
+	int "Number of equalizer bands"
+	default 8
+	depends on !AUDIO_EXCLUDE_EQUALIZER
+	---help---
+		If equalizer support is not excluded, then it will be necessary to
+		provide the (maximum) number of equalization bands to be supported.
+
 config AUDIO_EXCLUDE_TONE
 	bool "Exclude tone (bass and treble) controls"
-	default n
+	default y if !AUDIO_EXCLUDE_EQUALIZER
+	default n if AUDIO_EXCLUDE_EQUALIZER
 	---help---
-		Exclude building support for changing the bass and treble.
+		Exclude building support for changing the bass and treble.  Normally
+		you would not select both tone controls and equalizer support unless
+		your underlying hardware supports both options.
 
 config AUDIO_EXCLUDE_PAUSE_RESUME
 	bool "Exclude pause and resume controls"
@@ -137,10 +158,27 @@ config AUDIO_EXCLUDE_STOP
 	default n
 	---help---
 		Exclude building support for stopping audio files once they are
-		submitted.  If the sound system is being used to play short ssytem
-		notification or error type sounds that typicaly only last a second
+		submitted.  If the sound system is being used to play short sytem
+		notification or error type sounds that typically only last a second
 		or two, then there is no need (or chance) to stop the sound
 		playback once it has started.
+
+config AUDIO_EXCLUDE_FFORWARD
+	bool "Exclude fast forward controls"
+	default n if !AUDIO_EXCLUDE_STOP
+	default y if AUDIO_EXCLUDE_STOP
+	---help---
+		Exclude building support for fast forwarding through audio files
+		once they are submitted.  Selecting this option would only make
+		if the underlying audio decoding logic is capable of sub-sampling
+		in the stream of audio data.
+
+config AUDIO_EXCLUDE_REWIND
+	bool "Exclude rewind controls"
+	default y
+	---help---
+		Rewind may be supported by some audio devices, but not the typical
+		device that receives a non-seekable, stream of audio buffers.
 
 endmenu
 
