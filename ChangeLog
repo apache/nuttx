@@ -7805,3 +7805,23 @@
 	* drivers/audio/audio_null.c and wm8904.c: Fix some compile errors when
 	  audio DEBUG is enabled (2014-7-24).
 	* SAMA5D4-EK NxWM:  Configuration refreshed (2014-7-24).
+	* arch/arm/src/armv7-m/up_initialstate.c:  Correct the initial value of
+	  the BASEPRI register.  This was apparently never being initialized!
+	  From Max (2014-7-24).
+	* configs/mbed/src/up_adc.c, up_dac.c, and up_pwm.c and include/board.h:
+	  Port ADC, DAC, and PWM logic from the configs/zkit-arm-1769.  From Max
+	  (2014-7-24).
+	* arch/arm/src/lpc17xx/lpc176x_rtc.c: Eliminate warnings.  From Max
+	  (2014-7-24).
+	* arch/arm/src/lpc17xx/lpc17_pwm.c, lpc17_timer.c, lpc17_dac.c: Mostly
+	  cosmetic updates from Max (2014-7-24).
+	* arch/arm/src/lpc17xx/lpc17_adc.c and Kconfig : Added burstmode ADC
+	  conversion mode, with CONFIG_ADC_BURSTMODE option in Kconfig.  From
+	  Max (2014-7-24).
+	* arch/arm/src/lpc17xx/lpc17_ethernet.c: Added option to use the kernel
+	  worker thread to do most of the workload with CONFIG_NET_WORKER_THREAD
+	  option in Kconfig.  Eliminated a problem with PHY DP83848C : it doesn't
+	  need a specific initialization on mbed. Critical bufix: From time to
+	  time (after some hours) the Ethernet receiver would lose one receive
+	  interrupt and the IP stack never recover because there is no receive
+	  watchdog as the transmit watchdog.  From Max (2013-7-24).
