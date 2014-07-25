@@ -49,10 +49,6 @@ config SAMA5_HAVE_XDMA
 	bool
 	default n
 
-config SAMA5_HAVE_L2CC
-	bool
-	default n
-
 config SAMA5_HAVE_LCDC
 	bool
 	default n
@@ -123,6 +119,8 @@ config ARCH_CHIP_SAMA5D3
 config ARCH_CHIP_SAMA5D4
 	bool
 	default n
+	select ARMV7A_HAVE_L2CC_PL310
+	select ARCH_NAND_HWECC
 	select SAMA5_HAVE_AESB
 	select SAMA5_HAVE_EMACB
 	select SAMA5_HAVE_EMAC1
@@ -132,7 +130,6 @@ config ARCH_CHIP_SAMA5D4
 	select SAMA5_HAVE_UART1
 	select SAMA5_HAVE_USART4
 	select SAMA5_HAVE_XDMA
-	select SAMA5_HAVE_L2CC
 	select SAMA5_HAVE_SAIC
 	select SAMA5_HAVE_SBM
 	select SAMA5_HAVE_SFC
@@ -141,7 +138,6 @@ config ARCH_CHIP_SAMA5D4
 	select SAMA5_HAVE_TC2
 	select SAMA5_HAVE_TRUSTZONE
 	select SAMA5_HAVE_TWI3
-	select ARCH_NAND_HWECC
 
 choice
 	prompt "Atmel AT91SAMA5 Chip Selection"
@@ -241,11 +237,6 @@ config SAMA5_AESB
 config SAMA5_DBGU
 	bool "Debug Unit (DBGU)"
 	default n
-
-config SAMA5_L2CC
-	bool "L2 Cache Controller (L2CC)"
-	default n
-	depends on SAMA5_HAVE_L2CC
 
 config SAMA5_PIT
 	bool "Periodic Interval Timer (PIT)"
