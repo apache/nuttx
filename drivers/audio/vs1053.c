@@ -1818,27 +1818,27 @@ struct audio_lowerhalf_s *vs1053_initialize(FAR struct spi_dev_s *spi,
     {
       /* Initialize the VS1053 device structure */
 
-      dev->lower.ops = &g_audioops;
+      dev->lower.ops   = &g_audioops;
       dev->lower.upper = NULL;
-      dev->lower.priv = NULL;
-      dev->hw_lower = lower;
-      dev->spi_freq = CONFIG_VS1053_XTALI / 7;
-      dev->spi = spi;
-      dev->mq = NULL;
-      dev->busy = FALSE;
-      dev->threadid = 0;
-      dev->running = 0;
+      dev->lower.priv  = NULL;
+      dev->hw_lower    = lower;
+      dev->spi_freq    = CONFIG_VS1053_XTALI / 7;
+      dev->spi         = spi;
+      dev->mq          = NULL;
+      dev->busy        = FALSE;
+      dev->threadid    = 0;
+      dev->running     = 0;
 
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
-      dev->volume = 250;                /* 25% volume as default */
+      dev->volume      = 250;           /* 25% volume as default */
 #ifndef CONFIG_AUDIO_EXCLUDE_BALANCE
-      dev->balance = 500;               /* Center balance */
+      dev->balance     = 500;           /* Center balance */
 #endif
 #endif
 
 #ifndef CONFIG_AUDIO_EXCLUDE_TONE
-      dev->bass = 0;
-      dev->treble = 0;
+      dev->bass        = 0;
+      dev->treble      = 0;
 #endif
       sem_init(&dev->apbq_sem, 0, 1);
       dq_init(&dev->apbq);
