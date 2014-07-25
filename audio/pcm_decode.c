@@ -205,6 +205,17 @@ static int  pcm_release(FAR struct audio_lowerhalf_s *dev, FAR void *session);
 static int  pcm_release(FAR struct audio_lowerhalf_s *dev);
 #endif
 
+/* Audio callback */
+
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+static void pcm_callback(FAR void *arg, uint16_t reason,
+              FAR struct ap_buffer_s *apb, uint16_t status,
+              FAR void *session);
+#else
+static void pcm_callback(FAR void *arg, uint16_t reason,
+              FAR struct ap_buffer_s *apb, uint16_t status);
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -925,6 +936,42 @@ static int pcm_release(FAR struct audio_lowerhalf_s *dev)
 }
 
 /****************************************************************************
+ * Name: pcm_callback
+ *
+ * Description:
+ *   Lower-to-upper level callback for buffer dequeueing.
+ *
+ * Input Parameters:
+ *   priv - The value of the 'priv' field from out audio_lowerhalf_s.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+/* Audio callback */
+
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+static void pcm_callback(FAR void *arg, uint16_t reason,
+              FAR struct ap_buffer_s *apb, uint16_t status,
+              FAR void *session)
+#else
+static void pcm_callback(FAR void *arg, uint16_t reason,
+              FAR struct ap_buffer_s *apb, uint16_t status)
+{
+  FAR struct pcm_decode_s *priv = (FAR struct pcm_decode_s *)arg;
+
+  /* Just forward the event to our upper half (I know, too many halves) */
+
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+  priv->export.upper(priv->export.priv, reason, apb, status, session);
+#else
+  priv->export.upper(priv->export.priv, reason, apb, status);
+#endif
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -967,6 +1014,8 @@ FAR struct audio_lowerhalf_s *
    * false fields.
    */
 
+  /* Setup our operations */
+
   ops                  = &priv->ops;
   ops->getcaps         = pcm_getcaps;
   ops->configure       = pcm_configure;
@@ -995,9 +1044,21 @@ FAR struct audio_lowerhalf_s *
   ops->reserve         = pcm_reserve;
   ops->release         = pcm_release;
 
+  /* Set up our struct audio_lower_half that we will register with the
+   * system.  The registration process will fill in the priv->export.upper
+   * and priv fields with the correct callback information.
+   */
+
   priv->export.ops     = &priv->ops;
-  priv->export.priv    = priv;
+
+  /* Save the struct audio_lower_half of the low-level audio device.  Set
+   * out callback information for the lower-level audio device.  Our
+   * callback will simply forward to the upper callback.
+   */
+
   priv->lower          = dev;
+  dev->upper           = pcm_callback;
+  dev->priv            = priv;
 
   return &priv->export;
 }
