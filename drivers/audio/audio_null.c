@@ -583,6 +583,9 @@ static int null_stop(FAR struct audio_lowerhalf_s *dev)
   FAR void *value;
 
   /* Send a message to stop all audio streaming */
+  /* REVISIT: There should be a check to see if the worker thread is still
+   * running.
+   */
 
   term_msg.msgId = AUDIO_MSG_STOP;
   term_msg.u.data = 0;

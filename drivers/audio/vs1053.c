@@ -647,9 +647,9 @@ static int vs1053_getcaps(FAR struct audio_lowerhalf_s *lower, int type,
               /* Report the Sample rates we support */
 
               pCaps->ac_controls.b[0] = AUDIO_SAMP_RATE_8K | AUDIO_SAMP_RATE_11K |
-                                      AUDIO_SAMP_RATE_16K | AUDIO_SAMP_RATE_22K |
-                                      AUDIO_SAMP_RATE_32K | AUDIO_SAMP_RATE_44K |
-                                      AUDIO_SAMP_RATE_48K;
+                                        AUDIO_SAMP_RATE_16K | AUDIO_SAMP_RATE_22K |
+                                        AUDIO_SAMP_RATE_32K | AUDIO_SAMP_RATE_44K |
+                                        AUDIO_SAMP_RATE_48K;
               break;
 
             case AUDIO_FMT_MP3:
@@ -779,7 +779,7 @@ static int vs1053_configure(FAR struct audio_lowerhalf_s *lower,
             case AUDIO_FU_VOLUME:
               /* Set the volume */
 
-              dev->volume = pCaps->ac_controls.hw[0]);
+              dev->volume = pCaps->ac_controls.hw[0];
               vs1053_setvolume(dev);
 
               break;
@@ -789,7 +789,7 @@ static int vs1053_configure(FAR struct audio_lowerhalf_s *lower,
             case AUDIO_FU_BALANCE:
               /* Set the volume */
 
-              dev->balance = pCaps->ac_controls.hw[0]);
+              dev->balance = pCaps->ac_controls.hw[0];
               vs1053_setvolume(dev);
 
               break;
