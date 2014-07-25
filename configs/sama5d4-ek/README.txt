@@ -3871,13 +3871,17 @@ Configurations
 
          b. Then from NSH prompt, you need to mount the media volume like:
 
-           nsh> mount -t vfat /dev/mmcsd0 /mnt/sdcard
+              nsh> mount -t vfat /dev/mmcsd0 /mnt/sdcard
+
+            NOTE:  The SAMA5D4-EK board support allows an application to
+            connect to the SD card detect signal.  That application could
+            then auto-mount the SD card.
 
          c. Then you can run the media player like:
 
-           nsh> nxplayer
-           nxplayer> device pcm0
-           nxplayer> play <filename>
+              nsh> nxplayer
+              nxplayer> device pcm0
+              nxplayer> play <filename>
 
    20. The SAMA5D4-EK includes for an AT25 serial DataFlash.  That support is
        NOT enabled in this configuration.  Support for that serial FLASH could
@@ -4021,18 +4025,37 @@ Configurations
        communication issues the the current WM8904 driver).
 
        This configuration depends on media files in the default mountpoint
-       at /mnt/sdard.  If you see the message "Media volume not mounted"
-       in the media player text box, then you will need to mount the media
-       volume:
+       at /mnt/sdard (configurable).  If you see the message "Media volume
+       not mounted" in the media player text box, then you will need to
+       mount the media volume:
 
          a. You will need an (full size) SD card containing the .WAV files
             that you want to play (.WAV is only format supported as of this
             writing).  That SD card should be inserted in the HSMCI0 media
             slot A (best done before powering up).
 
-         b. Then from NSH prompt, you need to mount the media volume like:
+         b. Then from NSH prompt, you need to mount the media volume from
+            an NSH session like:
 
-           nsh> mount -t vfat /dev/mmcsd0 /mnt/sdcard
+              nsh> mount -t vfat /dev/mmcsd0 /mnt/sdcard
+
+            I usually do this via Telnet from the host PC.  Here is a
+            complete host Telnet session:
+
+              $ telnet 10.0.0.2
+              Trying 10.0.0.2...
+              Connected to 10.0.0.2.
+              Escape character is '^]'.
+
+              NuttShell (NSH) NuttX-7.3
+              nsh> mount -t vfat /dev/mmcsd0 /mnt/sdcard
+              nsh> exit
+              Connection closed by foreign host.
+
+            NOTE:  The SAMA5D4-EK board support allows an application to
+            connect to the SD card detect signal.  That application could
+            then auto-mount the SD card.  The capability is, however, not
+            implemented in this demo.
 
          c. Then if you close the old media player window and bring up a
             new one, you should see the .WAV files on the SD card in the lis
