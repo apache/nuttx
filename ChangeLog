@@ -7825,3 +7825,5 @@
 	  time (after some hours) the Ethernet receiver would lose one receive
 	  interrupt and the IP stack never recover because there is no receive
 	  watchdog as the transmit watchdog.  From Max (2013-7-24).
+	* audio/pcm_decode.c: Add missing audio callback forwarding logic
+	  (2014-7-25).
