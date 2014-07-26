@@ -31,6 +31,10 @@ config PL310_LOCKDOWN_BY_LINE
 	bool "PL310 Lockdown by Line"
 	default n
 
+config PL310_ADDRESS_FILTERING
+	bool "PL310 Address Filtering by Line"
+	default n
+
 endif # ARMV7A_L2CC_PL310
 
 choice
