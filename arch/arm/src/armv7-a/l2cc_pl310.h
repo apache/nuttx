@@ -447,12 +447,15 @@
 
 /* Address filter start */
 
-#define L2CC_FLSTRT_ENABLE         (1 << 0)     /* Bit 0: Address filter enable */
-#define L2CC_FLSTRT_MASK           (0xfff00000) /* Bits 20-31: Bits 20-31 of address mask */
+#ifdef PL310_ADDRESS_FILTERING
+#  define L2CC_FLSTRT_ENABLE       (1 << 0)     /* Bit 0: Address filter enable */
+#  define L2CC_FLSTRT_MASK         (0xfff00000) /* Bits 20-31: Bits 20-31 of address mask */
 
 /* Address filter end */
 
-#define L2CC_FLEND_MASK            (0xfff00000) /* Bits 20-31: Bits 20-31 of address mask */
+#ifdef PL310_ADDRESS_FILTERING
+#  define L2CC_FLEND_MASK          (0xfff00000) /* Bits 20-31: Bits 20-31 of address mask */
+#endif
 
 /* Debug Control Register */
 
