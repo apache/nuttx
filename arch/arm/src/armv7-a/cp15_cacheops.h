@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/armv7-a/cache.h
+ * arch/arm/src/armv7-a/cp15_cacheops.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -46,8 +46,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_ARMV7_A_CACHE_H
-#define __ARCH_ARM_SRC_ARMV7_A_CACHE_H
+#ifndef __ARCH_ARM_SRC_ARMV7_A_CP15_CACHEOPS_H
+#define __ARCH_ARM_SRC_ARMV7_A_CP15_CACHEOPS_H
 
 /************************************************************************************
  * Included Files
@@ -987,4 +987,4 @@ void cp15_flush_dcache(uintptr_t start, uintptr_t end);
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif  /* __ARCH_ARM_SRC_ARMV7_A_CACHE_H */
+#endif  /* __ARCH_ARM_SRC_ARMV7_A_CP15_CACHEOPS_H */
