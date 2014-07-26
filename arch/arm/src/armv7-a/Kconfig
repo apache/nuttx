@@ -5,14 +5,38 @@
 
 comment "ARMv7-A Configuration Options"
 
+config ARMV7A_HAVE_L2CC
+	bool
+	default n
+	---help---
+	Selected by the configuration tool if the architecutre supports any kind of L2 cache.
+
 config ARMV7A_HAVE_L2CC_PL310
 	bool
 	default n
+	select ARMV7A_HAVE_L2CC
+	---help---
+		Set by architecture-specific code if the hardware supports a PL310
+		r3p2 L2 cache (only version r3p2 is supported).
+
+if ARMV7A_HAVE_L2CC
+
+menu "L2 Cache Configuration"
+
+config ARMV7A_L2CC
+	bool
+	default n
+		---help---
+		Set by the configuration tool if the architecture specific L2CC is
+		enabled.  This is an architecture-independent setting to inform
+		firmware that an L2 cache is present and that standard L2 cache
+		operations are supported.
 
 config ARMV7A_L2CC_PL310
 	bool "ARMv7-A L2CC P310 Support"
 	default n
 	depends on ARMV7A_HAVE_L2CC_PL310
+	select ARMV7A_L2CC
 	---help---
 		Enable the 2 Cache Controller (L2CC) is based on the L2CC-PL310 ARM
 		multi-way cache macrocell, version r3p2.  The addition of an on-chip
@@ -25,7 +49,6 @@ if ARMV7A_L2CC_PL310
 config PL310_LOCKDOWN_BY_MASTER
 	bool "PL310 Lockdown by Master"
 	default n
-	depends on ARMV7A_L2CC_PL310
 
 config PL310_LOCKDOWN_BY_LINE
 	bool "PL310 Lockdown by Line"
@@ -36,6 +59,57 @@ config PL310_ADDRESS_FILTERING
 	default n
 
 endif # ARMV7A_L2CC_PL310
+
+choice
+	prompt "L2 Cache Associativity"
+	default ARMV7A_ASSOCIATIVITY_8WAY
+	depends on ARMV7A_L2CC
+	---help---
+		This choice specifies the associativity of L2 cache in terms of the
+		number of ways.  This value could be obtained by querying cache
+		configuration registers.  However, by defining a configuration
+		setting instead, we can avoid using RAM memory to hold information
+		about properties of the memory.
+
+config ARMV7A_ASSOCIATIVITY_8WAY
+	bool "8-Way Associativity"
+
+config ARMV7A_ASSOCIATIVITY_16WAY
+	bool "16-Way Associativity"
+
+endchoice # L2 Cache Associativity
+
+choice
+	prompt "L2 Cache Way Size"
+	default ARMV7A_WAYSIZE_16KB
+	depends on ARMV7A_L2CC
+	---help---
+		This choice specifies size of each way. This value can be obtained
+		by querying cache configuration registers.  However, by defining a
+		configuration setting instead, we can avoid using RAM memory to hold
+		information
+
+config ARMV7A_WAYSIZE_16KB
+	bool "16 KiB"
+
+config ARMV7A_WAYSIZE_32KB
+	bool "32 KiB"
+
+config ARMV7A_WAYSIZE_64KB
+	bool "64 KiB"
+
+config ARMV7A_WAYSIZE_128KB
+	bool "128 KiB"
+
+config ARMV7A_WAYSIZE_256KB
+	bool "256 KiB"
+
+config ARMV7A_WAYSIZE_512KB
+	bool "512 KiB"
+
+endchoice # L2 Cache Associativity
+endmenu # L2 Cache Configuration
+endif # 
 
 choice
 	prompt "Toolchain Selection"
@@ -80,7 +154,7 @@ config ARMV7A_TOOLCHAIN_GNU_OABI
 	---help---
 		This option should work for any GNU toolchain configured for arm-elf-.
 
-endchoice
+endchoice # ARMV7A_HAVE_L2CC
 
 config ARMV7A_OABI_TOOLCHAIN
 	bool "OABI (vs EABI)"

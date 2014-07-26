@@ -7,6 +7,9 @@
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
+ * Reference: "CoreLink™ Level 2 Cache Controller L2C-310", Revision r3p2,
+ *   Technical Reference Manual, ARM DDI 0246F (ID011711), ARM
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -56,7 +59,7 @@
  ************************************************************************************/
 /* General Definitions **************************************************************/
 
-#define CACHE_LINE_SIZE            32
+#define PL310_CACHE_LINE_SIZE      32
 
 #ifdef CONFIG_PL310_LOCKDOWN_BY_MASTER
 #  define PL310_NLOCKREGS          8
@@ -191,28 +194,37 @@
 
 /* Auxiliary Control Register */
 
-#define L2CC_ACR_HPSO              (1 << 10) /* Bit 10:  High Priority for SO and Dev Reads Enable */
-#define L2CC_ACR_SBDLE             (1 << 11) /* Bit 11:  Store Buffer Device Limitation Enable */
-#define L2CC_ACR_EXCC              (1 << 12) /* Bit 12:  Exclusive Cache Configuration */
-#define L2CC_ACR_SAIE              (1 << 13) /* Bit 13:  Shared Attribute Invalidate Enable */
-#define L2CC_ACR_ASS               (1 << 16) /* Bit 16:  Associativity */
+#define L2CC_ACR_FLZE              (1 << 0)  /* Bit 0:  Full line zero enable */
+#define L2CC_ACR_HPSO              (1 << 10) /* Bit 10: High Priority for SO and Dev Reads Enable */
+#define L2CC_ACR_SBDLE             (1 << 11) /* Bit 11: Store Buffer Device Limitation Enable */
+#define L2CC_ACR_EXCC              (1 << 12) /* Bit 12: Exclusive Cache Configuration */
+#define L2CC_ACR_SAIE              (1 << 13) /* Bit 13: Shared Attribute Invalidate Enable */
+#define L2CC_ACR_ASS               (1 << 16) /* Bit 16: Associativity */
 #define L2CC_ACR_WAYSIZE_SHIFT     (17)      /* Bits 17-19: Way Size */
 #define L2CC_ACR_WAYSIZE_MASK      (7 << L2CC_ACR_WAYSIZE_SHIFT)
 #  define L2CC_ACR_WAYSIZE_16KB    (1 << L2CC_ACR_WAYSIZE_SHIFT)
-#define L2CC_ACR_EMBEN             (1 << 20) /* Bit 20:  Event Monitor Bus Enable */
-#define L2CC_ACR_PEN               (1 << 21) /* Bit 21:  Parity Enable */
-#define L2CC_ACR_SAOEN             (1 << 22) /* Bit 22:  Shared Attribute Override Enable */
+#  define L2CC_ACR_WAYSIZE_32KB    (2 << L2CC_ACR_WAYSIZE_SHIFT)
+#  define L2CC_ACR_WAYSIZE_64KB    (3 << L2CC_ACR_WAYSIZE_SHIFT)
+#  define L2CC_ACR_WAYSIZE_128KB   (4 << L2CC_ACR_WAYSIZE_SHIFT)
+#  define L2CC_ACR_WAYSIZE_256KB   (5 << L2CC_ACR_WAYSIZE_SHIFT)
+#  define L2CC_ACR_WAYSIZE_512KB   (6 << L2CC_ACR_WAYSIZE_SHIFT)
+#define L2CC_ACR_EMBEN             (1 << 20) /* Bit 20: Event Monitor Bus Enable */
+#define L2CC_ACR_PEN               (1 << 21) /* Bit 21: Parity Enable */
+#define L2CC_ACR_SAOEN             (1 << 22) /* Bit 22: Shared Attribute Override Enable */
 #define L2CC_ACR_FWA_SHIFT         (23)      /* Bits 23-24:  Force Write Allocate */
 #define L2CC_ACR_FWA_MASK          (3 << L2CC_ACR_FWA_SHIFT)
 #  define L2CC_ACR_FWA_AWCACHE     (0 << L2CC_ACR_FWA_SHIFT) /* Use AWCACHE attributes for WA */
 #  define L2CC_ACR_FWA_NOALLOC     (1 << L2CC_ACR_FWA_SHIFT) /* No allocate */
 #  define L2CC_ACR_FWA_OVERRIDE    (2 << L2CC_ACR_FWA_SHIFT) /* Override AWCACHE attributes */
 #  define L2CC_ACR_FWA_MAPPED      (3 << L2CC_ACR_FWA_SHIFT) /* Internally mapped to 00 */
-#define L2CC_ACR_CRPOL             (1 << 25) /* Bit 25:  Cache Replacement Policy */
-#define L2CC_ACR_NSLEN             (1 << 26) /* Bit 26:  Non-Secure Lockdown Enable */
-#define L2CC_ACR_NSIAC             (1 << 27) /* Bit 27:  Non-Secure Interrupt Access Control */
-#define L2CC_ACR_DPEN              (1 << 28) /* Bit 28:  Data Prefetch Enable */
-#define L2CC_ACR_IPEN              (1 << 29) /* Bit 29:  Instruction Prefetch Enable */
+#define L2CC_ACR_CRPOL             (1 << 25) /* Bit 25: Cache Replacement Policy */
+#define L2CC_ACR_NSLEN             (1 << 26) /* Bit 26: Non-Secure Lockdown Enable */
+#define L2CC_ACR_NSIAC             (1 << 27) /* Bit 27: Non-Secure Interrupt Access Control */
+#define L2CC_ACR_DPEN              (1 << 28) /* Bit 28: Data Prefetch Enable */
+#define L2CC_ACR_IPEN              (1 << 29) /* Bit 29: Instruction Prefetch Enable */
+#define L2CC_ACR_EBRESP            (1 << 30) /* Bit 30: Early BRESP enable */
+
+#define L2CC_ACR_SBZ               (0x8000c1fe)
 
 /* Tag RAM Control Register */
 
@@ -450,6 +462,7 @@
 #ifdef PL310_ADDRESS_FILTERING
 #  define L2CC_FLSTRT_ENABLE       (1 << 0)     /* Bit 0: Address filter enable */
 #  define L2CC_FLSTRT_MASK         (0xfff00000) /* Bits 20-31: Bits 20-31 of address mask */
+#endif
 
 /* Address filter end */
 
@@ -465,9 +478,9 @@
 
 /* Prefetch Control Register */
 
-#define L2CC_PCR_OFFSET_SHIFT      (0)       /* Bits 0-4: Prefetch Offset */
-#define L2CC_PCR_OFFSET_MASK       (31 << L2CC_PCR_OFFSET_SHIFT)
-#  define L2CC_PCR_OFFSET(n)       ((uint32_t)(n) << L2CC_PCR_OFFSET_SHIFT)
+#define L2CC_PCR_SHIFT             (0)       /* Bits 0-4: Prefetch Offset */
+#define L2CC_PCR_MASK              (31 << L2CC_PCR_SHIFT)
+#  define L2CC_PCR_PREFETCH(n)     ((uint32_t)(n) << L2CC_PCR_SHIFT)
 #define L2CC_PCR_NSIDEN            (1 << 21) /* Bit 21: Not Same ID on Exclusive Sequence Enable */
 #define L2CC_PCR_IDLEN             (1 << 23) /* Bit 23: INCR Double Linefill Enable */
 #define L2CC_PCR_PDEN              (1 << 24) /* Bit 24: Prefetch Drop Enable */

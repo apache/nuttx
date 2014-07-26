@@ -54,6 +54,8 @@ CMN_ASRCS += arm_saveusercontext.S arm_vectoraddrexcptn.S arm_vfork.S
 CMN_ASRCS += cp15_coherent_dcache.S cp15_invalidate_dcache.S
 CMN_ASRCS += cp15_clean_dcache.S cp15_flush_dcache.S cp15_invalidate_dcache_all.S
 
+# Configuration dependent assembly language files
+
 ifeq ($(CONFIG_ARCH_MEMCPY),y)
 CMN_ASRCS += arm_memcpy.S
 endif
@@ -71,7 +73,11 @@ CMN_CSRCS += arm_releasepending.c arm_reprioritizertr.c
 CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_syscall.c
 CMN_CSRCS += arm_unblocktask.c arm_undefinedinsn.c
 
-# Configuration dependent C and assembly language files
+# Configuration dependent C files
+
+ifeq ($(CONFIG_ARMV7A_L2CC_PL310),y)
+CMN_CSRCS += arm_l2cc_pl310.c
+endif
 
 ifeq ($(CONFIG_PAGING),y)
 CMN_CSRCS += arm_allocpage.c arm_checkmapping.c arm_pginitialize.c
