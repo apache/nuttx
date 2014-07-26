@@ -1,6 +1,9 @@
 /************************************************************************************
  * arch/arm/src/armv7-a/chip/l2cc_pl310.h
  *
+ * Register definitions for the L2 Cache Controller (L2CC) is based on the
+ * L2CC-PL310 ARM multi-way cache macrocell, version r3p2.
+ *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -51,6 +54,16 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+/* General Definitions **************************************************************/
+
+#define CACHE_LINE_SIZE            32
+
+#ifdef CONFIG_PL310_LOCKDOWN_BY_MASTER
+#  define PL310_NLOCKREGS          8
+#else
+#  define PL310_NLOCKREGS          1
+#endif
+
 /* L2CC Register Offsets ************************************************************/
 
 #define L2CC_IDR_OFFSET            0x0000 /* Cache ID Register */
@@ -86,9 +99,23 @@
 #define L2CC_CIIR_OFFSET           0x07f8 /* Clean Invalidate Index Register */
 #define L2CC_CIWR_OFFSET           0x07fc /* Clean Invalidate Way Register */
                                           /* 0x0800-0x08fc Reserved */
-#define L2CC_DLKR_OFFSET           0x0900 /* Data Lockdown Register */
-#define L2CC_ILKR_OFFSET           0x0904 /* Instruction Lockdown Register */
-                                          /* 0x0908-0x0f3c Reserved */
+
+/* Data and Instruction Lockdown registers where n=0-7.  The registers for n > 0 are
+ * implemented if the option pl310_LOCKDOWN_BY_MASTER is enabled. Otherwise, they are
+ * unused
+ */
+
+#define L2CC_DLKR_OFFSET(n)        (0x0900 + ((n) << 3)) /* Data Lockdown Register */
+#define L2CC_ILKR_OFFSET(n)        (0x0904 + ((n) << 3)) /* Instruction Lockdown Register */
+                                          /* 0x0940-0x0f4c Reserved */
+#ifdef CONFIG_PL310_LOCKDOWN_BY_LINE
+#  define L2CC_LKLN_OFFSET         0x0950 /* Lock Line Enable Register */
+#  define L2CC_UNLKW_OFFSET        0x0954 /* Unlock Way Register */
+#endif
+                                          /* 0x0958-0x0bfc Reserved */
+#define L2CC_FLSTRT_OFFSET         0x0c00 /* Address filter start */
+#define L2CC_FLEND_OFFSET          0x0c04 /* Address filter end */
+                                          /* 0x0c08-0x0f3c Reserved */
 #define L2CC_DCR_OFFSET            0x0f40 /* Debug Control Register */
                                           /* 0x0f44-0x0f5c Reserved */
 #define L2CC_PCR_OFFSET            0x0f60 /* Prefetch Control Register */
@@ -121,8 +148,16 @@
 #define L2CC_CIPALR                (L2CC_VBASE+L2CC_CIPALR_OFFSET)
 #define L2CC_CIIR                  (L2CC_VBASE+L2CC_CIIR_OFFSET)
 #define L2CC_CIWR                  (L2CC_VBASE+L2CC_CIWR_OFFSET)
-#define L2CC_DLKR                  (L2CC_VBASE+L2CC_DLKR_OFFSET)
-#define L2CC_ILKR                  (L2CC_VBASE+L2CC_ILKR_OFFSET)
+#define L2CC_DLKR(n)               (L2CC_VBASE+L2CC_DLKR_OFFSET(n))
+#define L2CC_ILKR(n)               (L2CC_VBASE+L2CC_ILKR_OFFSET(n))
+
+#ifdef CONFIG_PL310_LOCKDOWN_BY_LINE
+#  define L2CC_LKLN                (L2CC_VBASE+L2CC_LKLN_OFFSET)
+#  define L2CC_UNLKW               (L2CC_VBASE+L2CC_UNLKW_OFFSET)
+#endif
+
+#define L2CC_FLSTRT                (L2CC_VBASE+L2CC_FLSTRT_OFFSET)
+#define L2CC_FLEND                 (L2CC_VBASE+L2CC_FLEND_OFFSET)
 #define L2CC_DCR                   (L2CC_VBASE+L2CC_DCR_OFFSET)
 #define L2CC_PCR                   (L2CC_VBASE+L2CC_PCR_OFFSET)
 #define L2CC_POWCR                 (L2CC_VBASE+L2CC_POWCR_OFFSET)
@@ -130,6 +165,14 @@
 /* L2CC Register Bit Definitions ****************************************************/
 
 /* Cache ID Register (32-bit ID) */
+
+#define L2CC_IDR_REV_MASK          0x0000003f
+#  define L2CC_IDR_REV_R0P0        0x00000000
+#  define L2CC_IDR_REV_R1P0        0x00000002
+#  define L2CC_IDR_REV_R2P0        0x00000004
+#  define L2CC_IDR_REV_R3P0        0x00000005
+#  define L2CC_IDR_REV_R3P1        0x00000006
+#  define L2CC_IDR_REV_R3P2        0x00000008
 
 /* Cache Type Register */
 
@@ -386,6 +429,30 @@
 #  define L2CC_ILKR_ILK5           (1 << 5)   /* Bit 5:  Instruction Lockdown in Way Number 5 */
 #  define L2CC_ILKR_ILK6           (1 << 6)   /* Bit 6:  Instruction Lockdown in Way Number 6 */
 #  define L2CC_ILKR_ILK7           (1 << 7)   /* Bit 7:  Instruction Lockdown in Way Number 7 */
+
+/* Lock Line Enable Register */
+
+#ifdef CONFIG_PL310_LOCKDOWN_BY_LINE
+#  define L2CC_LKLN_ENABLE         (1 << 0)  /* Bit 0: Lockdown by line enable */
+#endif
+
+/* Unlock Way Register */
+
+#ifdef CONFIG_PL310_LOCKDOWN_BY_LINE
+#  define L2CC_UNLKW_WAY_SHIFT     (0)       /* Bits 0-15: Unlock line for corresponding way */
+#  define L2CC_UNLKW_WAY_MASK      (0xffff << L2CC_UNLKW_WAY_SHIFT)
+#    define L2CC_UNLKW_WAY_SET(n)  ((uint32_t)(n) << L2CC_UNLKW_WAY_SHIFT)
+#    define L2CC_UNLKW_WAY_BIT(n)  ((1 << (n)) << L2CC_UNLKW_WAY_SHIFT)
+#endif
+
+/* Address filter start */
+
+#define L2CC_FLSTRT_ENABLE         (1 << 0)     /* Bit 0: Address filter enable */
+#define L2CC_FLSTRT_MASK           (0xfff00000) /* Bits 20-31: Bits 20-31 of address mask */
+
+/* Address filter end */
+
+#define L2CC_FLEND_MASK            (0xfff00000) /* Bits 20-31: Bits 20-31 of address mask */
 
 /* Debug Control Register */
 
