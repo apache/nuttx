@@ -7847,3 +7847,6 @@
 	  improvements (2014-7-26)
 	* arch/arm/src/armv7-a/Kconfig: L2 Cache currently depends on
 	  EXPERIMENTAL because it does not yet work properly (2014-7-26).
+	* include/nuttx/audio/audio.h: Move subsampling rate definitions from
+	  nxplayer.h to audio.h (2014-7-17).
+
