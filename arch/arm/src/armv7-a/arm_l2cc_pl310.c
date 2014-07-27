@@ -284,7 +284,7 @@ static void pl310_flush_all(void)
   /* Drain the STB. Operation complete when all buffers, LRB, LFB, STB, and
    * EB, are empty.
    */
- 
+
   putreg32(0, L2CC_CSR);
 }
 
@@ -313,9 +313,14 @@ int l2cc_initialize(void)
   uint32_t regval;
   int i;
 
-  /* Make sure that this is a PL310 cache, version r3p2 */
+  /* Make sure that this is a PL310 cache, version r3p2.
+   *
+   * REVISIT: The SAMA5D4 is supposed to report its ID as 0x410000C8 which is
+   * r3p2, but the chip that I have actually* reports 0x410000C9 which is some
+   * later revision.
+   */
 
-  DEBUGASSERT((getreg32(L2CC_IDR) & L2CC_IDR_REV_MASK) == L2CC_IDR_REV_R3P2);
+  //DEBUGASSERT((getreg32(L2CC_IDR) & L2CC_IDR_REV_MASK) == L2CC_IDR_REV_R3P2);
 
   /* Make sure that actual cache configuration agrees with the configured
    * cache configuration.
@@ -506,19 +511,19 @@ void l2cc_sync(void)
  *
  ***************************************************************************/
 
-static void l2cc_invalidate_all(void)
+void l2cc_invalidate_all(void)
 {
   irqstate_t flags;
+  uint32_t regval;
 
   /* Invalidate all ways */
 
   flags = irqsave();
 
-  /* Verify that we are not attempting to invalidate the L2 cache while it
-   * is enabled
-   */
+  /* Disable the L2 cache while we invalidate it */
 
-  DEBUGASSERT((getreg32(L2CC_CR) & L2CC_CR_L2CEN) == 0);
+  regval = getreg32(L2CC_CR);
+  l2cc_disable();
 
   /* Invalidate all ways by writing the bit mask of ways to be invalidated
    * the Invalidate Way Register (IWR).
@@ -533,8 +538,12 @@ static void l2cc_invalidate_all(void)
   /* Drain the STB. Operation complete when all buffers, LRB, LFB, STB, and
    * EB, are empty.
    */
- 
+
   putreg32(0, L2CC_CSR);
+
+  /* Then re-enable the L2 cache if it was enabled before */
+
+  putreg32(regval, L2CC_CR);
   irqrestore(flags);
 }
 
@@ -629,7 +638,7 @@ void l2cc_invalidate(uintptr_t startaddr, uintptr_t endaddr)
   /* Drain the STB. Operation complete when all buffers, LRB, LFB, STB, and
    * EB, are empty.
    */
- 
+
   flags = irqsave();
   putreg32(0, L2CC_CSR);
   irqrestore(flags);
@@ -667,7 +676,7 @@ void l2cc_clean_all(void)
   /* Drain the STB. Operation complete when all buffers, LRB, LFB, STB, and
    * EB, are empty.
    */
- 
+
   putreg32(0, L2CC_CSR);
   irqrestore(flags);
 }
@@ -719,7 +728,7 @@ void l2cc_clean(uintptr_t startaddr, uintptr_t endaddr)
        * this in small chunks so that we do not have to keep interrupts
        * disabled throughout the whole flush.
        */
- 
+
       cleansize = endaddr - startaddr;
       gulpend   = startaddr + MIN(cleansize, PL310_GULP_SIZE);
 
@@ -747,7 +756,7 @@ void l2cc_clean(uintptr_t startaddr, uintptr_t endaddr)
   /* Drain the STB. Operation complete when all buffers, LRB, LFB, STB, and
    * EB, are empty.
    */
- 
+
   flags = irqsave();
   putreg32(0, L2CC_CSR);
   irqrestore(flags);
@@ -825,7 +834,7 @@ void l2cc_flush(uint32_t startaddr, uint32_t endaddr)
        * this in small chunks so that we do not have to keep interrupts
        * disabled throughout the whole flush.
        */
- 
+
       flushsize = endaddr - startaddr;
       gulpend   = startaddr + MIN(flushsize, PL310_GULP_SIZE);
 
@@ -853,7 +862,7 @@ void l2cc_flush(uint32_t startaddr, uint32_t endaddr)
   /* Drain the STB. Operation complete when all buffers, LRB, LFB, STB, and
    * EB, are empty.
    */
- 
+
   flags = irqsave();
   putreg32(0, L2CC_CSR);
   irqrestore(flags);

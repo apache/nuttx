@@ -147,7 +147,7 @@ void l2cc_sync(void);
  *
  ***************************************************************************/
 
-static void l2cc_invalidate_all(void);
+void l2cc_invalidate_all(void);
 
 /***************************************************************************
  * Name: l2cc_invalidate
@@ -237,6 +237,22 @@ void l2cc_flush(uint32_t startaddr, uint32_t endaddr);
 }
 #endif
 #endif /* __ASSEMBLY__ */
+
+#else /* CONFIG_ARMV7A_L2CC */
+  /* Provide simple definitions to concentrate the inline conditional
+   * compilation in one place.
+   */
+
+#  define l2cc_initialize() (0)
+#  define l2cc_enable()
+#  define l2cc_disable()
+#  define l2cc_sync()
+#  define l2cc_invalidate_all()
+#  define l2cc_invalidate(s,e)
+#  define l2cc_clean_all()
+#  define l2cc_clean(s,e)
+#  define l2cc_flush_all()
+#  define l2cc_flush(s,e)
 
 #endif /* CONFIG_ARMV7A_L2CC */
 #endif  /* __ARCH_ARM_SRC_ARMV7_A_L2CC_H */
