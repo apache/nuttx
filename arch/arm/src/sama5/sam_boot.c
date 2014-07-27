@@ -41,6 +41,7 @@
 
 #include <stdint.h>
 #include <assert.h>
+#include <debug.h>
 
 #ifdef CONFIG_PAGING
 #  include <nuttx/page.h>
@@ -567,7 +568,7 @@ static void sam_copyvectorblock(void)
 #else
   /* Flush the DCache to assure that the vector data is in physical in ISRAM */
 
-  cp15_clean_dcache((uintptr_t)SAM_VECTOR_VSRAM,
+  arch_clean_dcache((uintptr_t)SAM_VECTOR_VSRAM,
                     (uintptr_t)SAM_VECTOR_VSRAM + sam_vectorsize());
 #endif
 }
@@ -702,6 +703,10 @@ void up_boot(void)
 
 #endif /* CONFIG_ARCH_ROMPGTABLE */
 
+  /* Enable the L2 cache */
+
+  DEBUGVERIFY(l2cc_initialize());
+
 #ifdef CONFIG_ARCH_RAMFUNCS
   /* Copy any necessary code sections from FLASH to RAM.  The correct
    * destination in SRAM is given by _sramfuncs and _eramfuncs.  The
@@ -718,7 +723,7 @@ void up_boot(void)
    * be available when fetched into the I-Cache.
    */
 
-  cp15_clean_dcache((uintptr_t)&_sramfuncs, (uintptr_t)&_eramfuncs)
+  arch_clean_dcache((uintptr_t)&_sramfuncs, (uintptr_t)&_eramfuncs)
 #endif
 
   /* Setup up vector block.  _vector_start and _vector_end are exported from
