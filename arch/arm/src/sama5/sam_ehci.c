@@ -1118,7 +1118,7 @@ static int sam_qtd_invalidate(struct sam_qtd_s *qtd, uint32_t **bp, void *arg)
    * memory over the specified address range.
    */
 
-  cp15_invalidate_dcache((uintptr_t)&qtd->hw,
+  arch_invalidate_dcache((uintptr_t)&qtd->hw,
                          (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
   return OK;
 }
@@ -1137,7 +1137,7 @@ static int sam_qh_invalidate(struct sam_qh_s *qh)
 {
   /* Invalidate the QH first so that we reload the qTD list head */
 
-  cp15_invalidate_dcache((uintptr_t)&qh->hw,
+  arch_invalidate_dcache((uintptr_t)&qh->hw,
                          (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
 
   /* Then invalidate all of the qTD entries in the queue */
@@ -1163,12 +1163,12 @@ static int sam_qtd_flush(struct sam_qtd_s *qtd, uint32_t **bp, void *arg)
    */
 
 #if 0 /* Didn't behave as expected */
-  cp15_flush_dcache((uintptr_t)&qtd->hw,
+  arch_flush_dcache((uintptr_t)&qtd->hw,
                     (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
 #else
-  cp15_clean_dcache((uintptr_t)&qtd->hw,
+  arch_clean_dcache((uintptr_t)&qtd->hw,
                     (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
-  cp15_invalidate_dcache((uintptr_t)&qtd->hw,
+  arch_invalidate_dcache((uintptr_t)&qtd->hw,
                          (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
 #endif
 
@@ -1191,12 +1191,12 @@ static int sam_qh_flush(struct sam_qh_s *qh)
    */
 
 #if 0 /* Didn't behave as expected */
-  cp15_flush_dcache((uintptr_t)&qh->hw,
+  arch_flush_dcache((uintptr_t)&qh->hw,
                     (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
 #else
-  cp15_clean_dcache((uintptr_t)&qh->hw,
+  arch_clean_dcache((uintptr_t)&qh->hw,
                      (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
-  cp15_invalidate_dcache((uintptr_t)&qh->hw,
+  arch_invalidate_dcache((uintptr_t)&qh->hw,
                          (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
 #endif
 
@@ -1407,7 +1407,7 @@ static void sam_qh_enqueue(struct sam_qh_s *qhead, struct sam_qh_s *qh)
 
   physaddr = (uintptr_t)sam_physramaddr((uintptr_t)qh);
   qhead->hw.hlp = sam_swap32(physaddr | QH_HLP_TYP_QH);
-  cp15_clean_dcache((uintptr_t)&qhead->hw,
+  arch_clean_dcache((uintptr_t)&qhead->hw,
                     (uintptr_t)&qhead->hw + sizeof(struct ehci_qh_s));
 }
 
@@ -1545,10 +1545,10 @@ static int sam_qtd_addbpl(struct sam_qtd_s *qtd, const void *buffer, size_t bufl
    */
 
 #if 0 /* Didn't behave as expected */
-  cp15_flush_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
+  arch_flush_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
 #else
-  cp15_clean_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
-  cp15_invalidate_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
+  arch_clean_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
+  arch_invalidate_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
 #endif
 
   /* Loop, adding the aligned physical addresses of the buffer to the buffer page
@@ -2096,7 +2096,7 @@ static ssize_t sam_async_transfer(struct sam_rhport_s *rhport,
        * invalid in this memory region.
        */
 
-      cp15_invalidate_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
+      arch_invalidate_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
     }
 #endif
 
@@ -2331,7 +2331,7 @@ static int sam_qtd_ioccheck(struct sam_qtd_s *qtd, uint32_t **bp, void *arg)
 
   /* Make sure we reload the QH from memory */
 
-  cp15_invalidate_dcache((uintptr_t)&qtd->hw,
+  arch_invalidate_dcache((uintptr_t)&qtd->hw,
                          (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
   sam_qtd_print(qtd);
 
@@ -2382,7 +2382,7 @@ static int sam_qh_ioccheck(struct sam_qh_s *qh, uint32_t **bp, void *arg)
 
   /* Make sure we reload the QH from memory */
 
-  cp15_invalidate_dcache((uintptr_t)&qh->hw,
+  arch_invalidate_dcache((uintptr_t)&qh->hw,
                          (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
   sam_qh_print(qh);
 
@@ -2436,7 +2436,7 @@ static int sam_qh_ioccheck(struct sam_qh_s *qh, uint32_t **bp, void *arg)
        */
 
       **bp = qh->hw.hlp;
-      cp15_clean_dcache((uintptr_t)*bp, (uintptr_t)*bp + sizeof(uint32_t));
+      arch_clean_dcache((uintptr_t)*bp, (uintptr_t)*bp + sizeof(uint32_t));
 
       /* Check for errors, update the data toggle */
 
@@ -2536,7 +2536,7 @@ static inline void sam_ioc_bottomhalf(void)
   /* Check the Asynchronous Queue */
   /* Make sure that the head of the asynchronous queue is invalidated */
 
-  cp15_invalidate_dcache((uintptr_t)&g_asynchead.hw,
+  arch_invalidate_dcache((uintptr_t)&g_asynchead.hw,
                          (uintptr_t)&g_asynchead.hw + sizeof(struct ehci_qh_s));
 
   /* Set the back pointer to the forward qTD pointer of the asynchronous
@@ -2562,7 +2562,7 @@ static inline void sam_ioc_bottomhalf(void)
   /* Check the Interrupt Queue */
   /* Make sure that the head of the interrupt queue is invalidated */
 
-  cp15_invalidate_dcache((uintptr_t)&g_intrhead.hw,
+  arch_invalidate_dcache((uintptr_t)&g_intrhead.hw,
                          (uintptr_t)&g_intrhead.hw + sizeof(struct ehci_qh_s));
 
   /* Set the back pointer to the forward qTD pointer of the asynchronous
@@ -4294,7 +4294,7 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
   g_asynchead.hw.overlay.token = sam_swap32(QH_TOKEN_HALTED);
   g_asynchead.fqp              = sam_swap32(QTD_NQP_T);
 
-  cp15_clean_dcache((uintptr_t)&g_asynchead.hw,
+  arch_clean_dcache((uintptr_t)&g_asynchead.hw,
                     (uintptr_t)&g_asynchead.hw + sizeof(struct ehci_qh_s));
 
   /* Set the Current Asynchronous List Address. */
@@ -4325,9 +4325,9 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
 
   /* Set the Periodic Frame List Base Address. */
 
-  cp15_clean_dcache((uintptr_t)&g_intrhead.hw,
+  arch_clean_dcache((uintptr_t)&g_intrhead.hw,
                     (uintptr_t)&g_intrhead.hw + sizeof(struct ehci_qh_s));
-  cp15_clean_dcache((uintptr_t)g_framelist,
+  arch_clean_dcache((uintptr_t)g_framelist,
                     (uintptr_t)g_framelist + FRAME_LIST_SIZE * sizeof(uint32_t));
 
   physaddr = sam_physramaddr((uintptr_t)g_framelist);

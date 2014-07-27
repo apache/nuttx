@@ -652,7 +652,7 @@ static void sam_adc_dmadone(void *arg)
        * newly DMAed data from RAM.
        */
 
-      cp15_invalidate_dcache((uintptr_t)buffer,
+      arch_invalidate_dcache((uintptr_t)buffer,
                              (uintptr_t)buffer + SAMA5_ADC_SAMPLES * sizeof(uint16_t));
 
       /* Process each sample */

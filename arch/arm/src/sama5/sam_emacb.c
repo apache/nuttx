@@ -1060,7 +1060,7 @@ static int sam_transmit(struct sam_emac_s *priv)
 
       virtaddr = sam_virtramaddr(txdesc->addr);
       memcpy((void *)virtaddr, dev->d_buf, dev->d_len);
-      cp15_clean_dcache((uint32_t)virtaddr, (uint32_t)virtaddr + dev->d_len);
+      arch_clean_dcache((uint32_t)virtaddr, (uint32_t)virtaddr + dev->d_len);
     }
 
   /* Update TX descriptor status. */
@@ -1074,7 +1074,7 @@ static int sam_transmit(struct sam_emac_s *priv)
   /* Update the descriptor status and flush the updated value to RAM */
 
   txdesc->status = status;
-  cp15_clean_dcache((uint32_t)txdesc,
+  arch_clean_dcache((uint32_t)txdesc,
                     (uint32_t)txdesc + sizeof(struct emac_txdesc_s));
 
   /* Increment the head index */
@@ -1261,7 +1261,7 @@ static int sam_recvframe(struct sam_emac_s *priv)
 
   /* Invalidate the RX descriptor to force re-fetching from RAM */
 
-  cp15_invalidate_dcache((uintptr_t)rxdesc,
+  arch_invalidate_dcache((uintptr_t)rxdesc,
                          (uintptr_t)rxdesc + sizeof(struct emac_rxdesc_s));
   nllvdbg("rxndx: %d\n", rxndx);
 
@@ -1284,7 +1284,7 @@ static int sam_recvframe(struct sam_emac_s *priv)
 
               /* Flush the modified RX descriptor to RAM */
 
-              cp15_clean_dcache((uintptr_t)rxdesc,
+              arch_clean_dcache((uintptr_t)rxdesc,
                                 (uintptr_t)rxdesc +
                                 sizeof(struct emac_rxdesc_s));
 
@@ -1329,7 +1329,7 @@ static int sam_recvframe(struct sam_emac_s *priv)
 
                   /* Flush the modified RX descriptor to RAM */
 
-                  cp15_clean_dcache((uintptr_t)rxdesc,
+                  arch_clean_dcache((uintptr_t)rxdesc,
                                     (uintptr_t)rxdesc +
                                     sizeof(struct emac_rxdesc_s));
 
@@ -1359,7 +1359,7 @@ static int sam_recvframe(struct sam_emac_s *priv)
           physaddr = (uintptr_t)(rxdesc->addr & EMACRXD_ADDR_MASK);
           src = (const uint8_t *)sam_virtramaddr(physaddr);
 
-          cp15_invalidate_dcache((uintptr_t)src, (uintptr_t)src + copylen);
+          arch_invalidate_dcache((uintptr_t)src, (uintptr_t)src + copylen);
 
           /* And do the copy */
 
@@ -1389,7 +1389,7 @@ static int sam_recvframe(struct sam_emac_s *priv)
 
                   /* Flush the modified RX descriptor to RAM */
 
-                  cp15_clean_dcache((uintptr_t)rxdesc,
+                  arch_clean_dcache((uintptr_t)rxdesc,
                                     (uintptr_t)rxdesc +
                                     sizeof(struct emac_rxdesc_s));
 
@@ -1429,7 +1429,7 @@ static int sam_recvframe(struct sam_emac_s *priv)
 
           /* Flush the modified RX descriptor to RAM */
 
-          cp15_clean_dcache((uintptr_t)rxdesc,
+          arch_clean_dcache((uintptr_t)rxdesc,
                             (uintptr_t)rxdesc +
                             sizeof(struct emac_rxdesc_s));
 
@@ -1442,7 +1442,7 @@ static int sam_recvframe(struct sam_emac_s *priv)
 
     /* Invalidate the RX descriptor to force re-fetching from RAM */
 
-    cp15_invalidate_dcache((uintptr_t)rxdesc,
+    arch_invalidate_dcache((uintptr_t)rxdesc,
                            (uintptr_t)rxdesc + sizeof(struct emac_rxdesc_s));
   }
 
@@ -1576,7 +1576,7 @@ static void sam_txdone(struct sam_emac_s *priv)
       /* Yes.. check the next buffer at the tail of the list */
 
       txdesc = &priv->txdesc[priv->txtail];
-      cp15_invalidate_dcache((uintptr_t)txdesc,
+      arch_invalidate_dcache((uintptr_t)txdesc,
                              (uintptr_t)txdesc + sizeof(struct emac_txdesc_s));
 
       /* Is this TX descriptor still in use? */
@@ -1609,7 +1609,7 @@ static void sam_txdone(struct sam_emac_s *priv)
               sam_physramaddr((uintptr_t)txdesc) != sam_getreg(priv, SAM_EMAC_TBQB_OFFSET))
             {
               txdesc->status = (uint32_t)EMACTXD_STA_USED;
-              cp15_clean_dcache((uintptr_t)txdesc,
+              arch_clean_dcache((uintptr_t)txdesc,
                                 (uintptr_t)txdesc + sizeof(struct emac_txdesc_s));
             }
           else
@@ -1627,7 +1627,7 @@ static void sam_txdone(struct sam_emac_s *priv)
       /* Make sure that the USED bit is set */
 
       txdesc->status = (uint32_t)EMACTXD_STA_USED;
-      cp15_clean_dcache((uintptr_t)txdesc,
+      arch_clean_dcache((uintptr_t)txdesc,
                         (uintptr_t)txdesc + sizeof(struct emac_txdesc_s));
 #endif
 
@@ -3175,7 +3175,7 @@ static void sam_txreset(struct sam_emac_s *priv)
 
   /* Flush the entire TX descriptor table to RAM */
 
-  cp15_clean_dcache((uintptr_t)txdesc,
+  arch_clean_dcache((uintptr_t)txdesc,
                     (uintptr_t)txdesc +
                     priv->attr->ntxbuffers * sizeof(struct emac_txdesc_s));
 
@@ -3239,7 +3239,7 @@ static void sam_rxreset(struct sam_emac_s *priv)
 
   /* Flush the entire RX descriptor table to RAM */
 
-  cp15_clean_dcache((uintptr_t)rxdesc,
+  arch_clean_dcache((uintptr_t)rxdesc,
                     (uintptr_t)rxdesc +
                     priv->attr->nrxbuffers * sizeof(struct emac_rxdesc_s));
 

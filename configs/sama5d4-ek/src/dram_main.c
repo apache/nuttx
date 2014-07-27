@@ -134,7 +134,7 @@ int dram_main(int argc, char *argv)
    * we disable caching.
    */
 
-  cp15_clean_dcache((uintptr_t)SAM_DDRCS_VSECTION,
+  arch_clean_dcache((uintptr_t)SAM_DDRCS_VSECTION,
                     (uintptr_t)(SAM_DDRCS_VSECTION + CONFIG_SAMA5_DDRCS_SIZE));
 
   /* Interrupts must be disabled through the following.  In this configuration,
@@ -155,8 +155,8 @@ int dram_main(int argc, char *argv)
 
   /* Invalidate caches and TLBs */
 
-  cp15_invalidate_icache();
-  cp15_invalidate_dcache_all();
+  arch_invalidate_icache();
+  arch_invalidate_dcache_all();
   cp15_invalidate_tlbs();
 
   /* Then jump into NOR flash */
