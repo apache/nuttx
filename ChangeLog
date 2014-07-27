@@ -7830,3 +7830,20 @@
 	* arch/arm/armv7-a/l2cc_pl310.h:  Move arch/arm/sama5/chip/sam_l2cc.h to
 	  arch/arm/armv7-a/l2cc_pl310.h.  Adjust the two corresponding Kconfig
 	  files as well (2014-7-25).
+	* arch/arm/src/armv7-a/arm_l2cc_pl310.c, l2cc.h, l2cc_pl310.h, Kconfig:
+	  Add initial support for the ARM L2CC-PL310 L2 cache (2014-7-26).
+	* arch/arm/src/armv7-a/cp15_cacheops.h: Rename ARMv7-A cache.h to
+	  cp15_cache.h.  Things will be broken on this commit until I get the
+	  new cache.h in place (2014-7-26).
+	* arch/arm/src/armv7-a/cache.h: New cache.h file.  Renames all functions
+	  like cp15_XYZ_cache() to arch_XYZ_cache() and adds L2 cache support if
+	  L2 cache is enabled (2014-7-26).
+	* arch/arm/src/sama5/*.c (many files): Change naming from cp_XYZ_cache()
+	  to arch_XYP_cache() so that all cache operations will pick up L2
+	  support if it is enabled (2014-7-26).
+	* arch/arm/src/sama5/sam_boot.c: Enables cache early in boot-up sequence
+	  (2014-7-26).
+	* arch/arm/src/armv7-a/arm_l2cc_pl310.c and l2cc.h: Minor bugfixes/
+	  improvements (2014-7-26)
+	* arch/arm/src/armv7-a/Kconfig: L2 Cache currently depends on
+	  EXPERIMENTAL because it does not yet work properly (2014-7-26).
