@@ -125,6 +125,10 @@ config ARCH_HAVE_IRQPRIO
 	bool
 	default n
 
+config ARCH_L2CACHE
+	bool
+	default n
+
 config CUSTOM_STACK
 	bool
 	default n

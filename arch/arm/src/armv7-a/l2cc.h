@@ -43,7 +43,7 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_ARMV7A_L2CC
+#ifdef CONFIG_ARCH_L2CACHE
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -67,7 +67,7 @@ extern "C"
  ****************************************************************************/
 
 /***************************************************************************
- * Name: l2cc_initialize
+ * Name: up_l2ccinitialize
  *
  * Description:
  *   One time configuration of the L2 cache.  The L2 cache will be enabled
@@ -78,11 +78,13 @@ extern "C"
  *   settings.
  *
  * Returned Value:
- *   Always returns OK.
+ *   None
  *
  ***************************************************************************/
 
-int l2cc_initialize(void);
+#if 0 /* Prototyped in up_internal.h */
+void up_l2ccinitialize(void);
+#endif
 
 /***************************************************************************
  * Name: l2cc_enable
@@ -238,12 +240,11 @@ void l2cc_flush(uint32_t startaddr, uint32_t endaddr);
 #endif
 #endif /* __ASSEMBLY__ */
 
-#else /* CONFIG_ARMV7A_L2CC */
+#else /* CONFIG_ARCH_L2CACHE */
   /* Provide simple definitions to concentrate the inline conditional
    * compilation in one place.
    */
 
-#  define l2cc_initialize() (0)
 #  define l2cc_enable()
 #  define l2cc_disable()
 #  define l2cc_sync()
@@ -254,5 +255,5 @@ void l2cc_flush(uint32_t startaddr, uint32_t endaddr);
 #  define l2cc_flush_all()
 #  define l2cc_flush(s,e)
 
-#endif /* CONFIG_ARMV7A_L2CC */
+#endif /* CONFIG_ARCH_L2CACHE */
 #endif  /* __ARCH_ARM_SRC_ARMV7_A_L2CC_H */

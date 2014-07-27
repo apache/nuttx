@@ -703,10 +703,6 @@ void up_boot(void)
 
 #endif /* CONFIG_ARCH_ROMPGTABLE */
 
-  /* Enable the L2 cache */
-
-  DEBUGVERIFY(l2cc_initialize());
-
 #ifdef CONFIG_ARCH_RAMFUNCS
   /* Copy any necessary code sections from FLASH to RAM.  The correct
    * destination in SRAM is given by _sramfuncs and _eramfuncs.  The

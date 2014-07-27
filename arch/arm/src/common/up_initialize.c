@@ -246,5 +246,9 @@ void up_initialize(void)
   /* Initialize USB -- device and/or host */
 
   up_usbinitialize();
+
+  /* Initialize the L2 cache if present and selected */
+
+  up_l2ccinitialize();
   board_led_on(LED_IRQSENABLED);
 }

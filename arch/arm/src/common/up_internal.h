@@ -449,6 +449,14 @@ void lowconsole_init(void);
 void weak_function up_dmainitialize(void);
 #endif
 
+/* Cache control ************************************************************/
+
+#ifdef CONFIG_ARCH_L2CACHE
+void up_l2ccinitialize(void);
+#else
+#  define up_l2ccinitialize()
+#endif
+
 /* Memory management ********************************************************/
 
 #if CONFIG_MM_REGIONS > 1
@@ -475,10 +483,10 @@ void board_led_off(int led);
 
 /* Networking ***************************************************************/
 
-/* Defined in board/up_network.c for board-specific ethernet implementations,
- * or chip/xyx_ethernet.c for chip-specific ethernet implementations, or
+/* Defined in board/up_network.c for board-specific Ethernet implementations,
+ * or chip/xyx_ethernet.c for chip-specific Ethernet implementations, or
  * common/up_etherstub.c for a cornercase where the network is enabled yet
- * there is no ethernet driver to be initialized.
+ * there is no Ethernet driver to be initialized.
  */
 
 #ifdef CONFIG_NET
