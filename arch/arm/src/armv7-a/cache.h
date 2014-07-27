@@ -102,7 +102,7 @@ static inline void arch_invalidate_dcache(uintptr_t start, uintptr_t end)
 
 static inline void arch_invalidate_dcache_all(void)
 {
-#ifdef CONFIG_ARMV7A_L2CC
+#ifdef CONFIG_ARCH_L2CACHE
   irqstate_t flags = irqsave();
   cp15_invalidate_dcache_all();
   l2cc_invalidate_all();

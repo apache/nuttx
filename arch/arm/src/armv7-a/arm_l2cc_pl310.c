@@ -172,10 +172,10 @@
 
 /* Bit 25: Cache Replacement Policy
  *
- * Default: 0=Pseudo-random replacement using lfsr
+ * Default: 1=Round robin replacement policy
  */
 
-#define L2CC_ACR_CRPOL_CONFIG      (0) /* 0=Pseudo-random replacement */
+#define L2CC_ACR_CRPOL_CONFIG      L2CC_ACR_CRPOL /* 1=Round robin replacement policy */
 
 /* Bit 26: Non-Secure Lockdown Enable
  *
@@ -293,7 +293,7 @@ static void pl310_flush_all(void)
  ****************************************************************************/
 
 /***************************************************************************
- * Name: l2cc_initialize
+ * Name: up_l2ccinitialize
  *
  * Description:
  *   One time configuration of the L2 cache.  The L2 cache will be enabled
@@ -304,11 +304,11 @@ static void pl310_flush_all(void)
  *   settings.
  *
  * Returned Value:
- *   Always returns OK.
+ *   None
  *
  ***************************************************************************/
 
-int l2cc_initialize(void)
+void up_l2ccinitialize(void)
 {
   uint32_t regval;
   int i;
@@ -326,10 +326,13 @@ int l2cc_initialize(void)
    * cache configuration.
    */
 
+
 #if defined(CONFIG_ARMV7A_ASSOCIATIVITY_8WAY)
   DEBUGASSERT((getreg32(L2CC_ACR) & L2CC_ACR_ASS) == 0);
-#elif defined(CONFIG_ARMV7A_ASSOCIATIVITY_8WAY)
+#elif defined(CONFIG_ARMV7A_ASSOCIATIVITY_16WAY)
   DEBUGASSERT((getreg32(L2CC_ACR) & L2CC_ACR_ASS) == 1);
+#else
+#  error No associativity selected
 #endif
 
 #if defined(CONFIG_ARMV7A_WAYSIZE_16KB)
@@ -344,6 +347,8 @@ int l2cc_initialize(void)
   DEBUGASSERT((getreg32(L2CC_ACR) & L2CC_ACR_WAYSIZE_MASK) == L2CC_ACR_WAYSIZE_256KB);
 #elif defined(CONFIG_ARMV7A_WAYSIZE_512KB)
   DEBUGASSERT((getreg32(L2CC_ACR) & L2CC_ACR_WAYSIZE_MASK) == L2CC_ACR_WAYSIZE_512KB);
+#else
+#  error No way size selected
 #endif
 
   /* L2 configuration can only be changed if the cache is disabled,
@@ -389,8 +394,8 @@ int l2cc_initialize(void)
 
       for (i = 0; i < PL310_NLOCKREGS; i++)
         {
-          putreg32(0, L2CC_DLKR_OFFSET(i));
-          putreg32(0, L2CC_ILKR_OFFSET(i));
+          putreg32(0, L2CC_DLKR(i));
+          putreg32(0, L2CC_ILKR(i));
         }
 
       /* Configure the cache properties */
@@ -408,8 +413,6 @@ int l2cc_initialize(void)
 
   lldbg("(%d ways) * (%d bytes/way) = %d bytes\n",
         PL310_NWAYS, PL310_WAYSIZE, PL310_CACHE_SIZE);
-
-  return OK;
 }
 
 /***************************************************************************
