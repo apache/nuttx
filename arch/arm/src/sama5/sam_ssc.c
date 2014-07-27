@@ -1214,7 +1214,7 @@ static int ssc_rxdma_setup(struct sam_ssc_s *priv)
        * DMA buffer after starting the DMA transfer.
        */
 
-      cp15_invalidate_dcache((uintptr_t)apb->samp,
+      arch_invalidate_dcache((uintptr_t)apb->samp,
                              (uintptr_t)apb->samp + apb->nmaxbytes);
 
     }
@@ -1623,7 +1623,7 @@ static int ssc_txdma_setup(struct sam_ssc_s *priv)
        * before starting the DMA.
        */
 
-      cp15_clean_dcache((uintptr_t)apb->samp,
+      arch_clean_dcache((uintptr_t)apb->samp,
                         (uintptr_t)apb->samp + apb->nbytes);
 
     }

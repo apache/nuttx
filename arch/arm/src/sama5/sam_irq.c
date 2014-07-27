@@ -531,8 +531,8 @@ void up_irqinitialize(void)
   /* Make sure that there is no trace of any previous mapping */
 
   vectorsize = sam_vectorsize();
-  cp15_invalidate_icache();
-  cp15_invalidate_dcache(0, vectorsize);
+  arch_invalidate_icache();
+  arch_invalidate_dcache(0, vectorsize);
   mmu_invalidate_region(0, vectorsize);
 
 #if 0 /* Disabled on reset */
