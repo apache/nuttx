@@ -646,7 +646,7 @@ static int vs1053_getcaps(FAR struct audio_lowerhalf_s *lower, int type,
 
               /* Report the Sample rates we support */
 
-              pCaps->ac_controls.b[0] = AUDIO_SAMP_RATE_8K | AUDIO_SAMP_RATE_11K |
+              pCaps->ac_controls.b[0] = AUDIO_SAMP_RATE_8K  | AUDIO_SAMP_RATE_11K |
                                         AUDIO_SAMP_RATE_16K | AUDIO_SAMP_RATE_22K |
                                         AUDIO_SAMP_RATE_32K | AUDIO_SAMP_RATE_44K |
                                         AUDIO_SAMP_RATE_48K;

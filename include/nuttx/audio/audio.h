@@ -76,7 +76,7 @@
 /* The Audio module uses a standard character driver framework.  However, a
  * lot of the Audio driver functionality is configured via a device control
  * interface, such as sampling rate, volume, data format, etc.
- * The Audio ioctl commands are lised below:
+ * The Audio ioctl commands are listed below:
  *
  * AUDIOIOC_GETCAPS - Get the Audio Device Capabilities
  *
@@ -193,6 +193,17 @@
 #define AUDIO_SAMP_RATE_172K        0x0400
 #define AUDIO_SAMP_RATE_192K        0x0800
 
+/* Audio Sub-sampling Ratios  ***********************************************/
+
+#define AUDIO_SUBSAMPLE_NONE        0
+#define AUDIO_SUBSAMPLE_2X          2
+#define AUDIO_SUBSAMPLE_4X          4
+#define AUDIO_SUBSAMPLE_8X          5
+#define AUDIO_SUBSAMPLE_16X         16
+
+#define AUDIO_SUBSAMPLE_MIN         AUDIO_SUBSAMPLE_2X
+#define AUDIO_SUBSAMPLE_MAX         AUDIO_SUBSAMPLE_16X
+
 /* Supported Bit Rates *************************************************/
 
 #define AUDIO_BIT_RATE_22K          0x01
@@ -230,6 +241,8 @@
 #define AUDIO_PU_UPDOWNMIX          0x01
 #define AUDIO_PU_DOLBY_PROLOGIC     0x02
 #define AUDIO_PU_STEREO_EXTENDER    0x03
+#define AUDIO_PU_SUBSAMPLE_FORWARD  0x04
+#define AUDIO_PU_SUBSAMPLE_REWIND   0x05
 
 /* Stereo Extender PU Controls **********************************************/
 
@@ -283,18 +296,6 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
-/* Fast-forward and rewind by sub-sampling may be supported.  If so, then
- * this enumeration specifies the sub-sampling:
- */
-
-enum nxplayer_subsample_e
-{
-  SUBSAMPLE_1X = 0,           /* Normal speed (no direction change) */
-  SUBSAMPLE_2X,
-  SUBSAMPLE_4X,
-  SUBSAMPLE_8X,
-  SUBSAMPLE_16X
-};
 
 /* Define the size of AP Buffer sample count base on CONFIG */
 
