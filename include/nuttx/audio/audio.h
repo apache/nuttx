@@ -283,6 +283,18 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+/* Fast-forward and rewind by sub-sampling may be supported.  If so, then
+ * this enumeration specifies the sub-sampling:
+ */
+
+enum nxplayer_subsample_e
+{
+  SUBSAMPLE_1X = 0,           /* Normal speed (no direction change) */
+  SUBSAMPLE_2X,
+  SUBSAMPLE_4X,
+  SUBSAMPLE_8X,
+  SUBSAMPLE_16X
+};
 
 /* Define the size of AP Buffer sample count base on CONFIG */
 
