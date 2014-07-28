@@ -7859,3 +7859,6 @@
 	  while integrating fast forward by sub-sampling (2014-7-27).
 	* audio/pcm_decode.c: Back out a change; the fix really belongs in
 	  NxPlayer. (2014-7-27).
+	* arch/arm/src/lpc17xx/lpc17_adc.c and arch/arm/src/lpc17xx/lpc17_ethernet.c:
+	  ADC updates from Max.  Also fixes some syntax errors that I introduced in
+	  the last commit (2014-7-28).
