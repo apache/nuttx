@@ -125,8 +125,7 @@ struct pcm_decode_s
 
   uint8_t  subsample;              /* Fast forward rate: See AUDIO_SUBSAMPLE_* defns */
   uint8_t  skip;                   /* Number of samples to be skipped */
-  uint8_t  npartial;               /* Size of the partial sample */
-  uint8_t  partial[4];             /* Holds the partial sample */
+  uint8_t  npartial;               /* Size of the partially copied sample */
 
   /* REVISIT: I think we could get rid of all of this special buffer
    * processing.  It seems like we should be able to do the sub-sampling
@@ -817,7 +816,7 @@ static FAR struct ap_buffer_s *pcm_subsample(FAR struct pcm_decode_s *priv,
 
   skipsize = priv->align * (priv->subsample - 1);
 
-  /* Let's deal with any partial sample data from the last buffer */
+  /* Let's deal with any partial samples from the last buffer */
 
   if (priv->npartial > 0)
     {
@@ -832,36 +831,27 @@ static FAR struct ap_buffer_s *pcm_subsample(FAR struct pcm_decode_s *priv,
 
       if (priv->npartial + srcsize < priv->align)
         {
-          dest = &priv->partial[priv->npartial];
-          src  = &apb->samp[apb->curbyte];
-          memcpy(dest, src, srcsize);
+          /* Update the partial sample size */
 
           priv->npartial += srcsize;
-          apb->curbyte   += srcsize;
-          goto exit_apb_empty;
+
+          /* And just return the buffer with no modification */
+
+          return apb;
         }
 
-      /* No, we do at least have enough to complete the partial sample */
-      /* Copy the first part of the partial sample that was saved from
-       * the last buffer.
+      /* No, we do at least have enough to complete the sample.  Copy copy data
+       * from the new audio buffer to complete the sample.
        */
 
-      src = priv->partial;
-      for (i = 0; i < priv->npartial; i++)
-        {
-          *dest++ = *src++;
-        }
-
-      priv->npartial = 0;
-
-      /* Now copy data from new audio buffer to complete the sample */
-
       src  = &apb->samp[apb->curbyte];
-      for (i = 0; i < priv->align; i++)
+      for (i = priv->npartial; i < priv->align; i++)
         {
           *dest++ = *src++;
           apb->curbyte++;
         }
+
+      priv->npartial = 0;
 
       /* Update the number of bytes in the working buffer and reset the skip
        * value
@@ -904,55 +894,41 @@ static FAR struct ap_buffer_s *pcm_subsample(FAR struct pcm_decode_s *priv,
             }
         }
 
-      /* We have skipped over the required number of bytes and we are ready
-       * to take the next sample.  Is there space for a whole sample in the
-       * buffer?
-       */
-
-      else if (srcsize < priv->align)
-        {
-          /* No.. copy the partial sample to the partial sample buffer */
-
-          dest = priv->partial;
-          for (i = 0; i < srcsize; i++)
-            {
-              *dest++ = *src++;
-            }
-
-          priv->npartial = srcsize;
-          apb->curbyte  += srcsize;
-
-          /* We are finished with this audio buffer.  On the next buffer,
-           * the fact that skip == 0 and that priv->npartial > 0 will kick
-           * off the re-synchronization logic at the beginning of this
-           * function.
-           */
-
-          goto exit_apb_empty;
-        }
-
-      /* Plenty of space!  Copy the sample from the audio buffer into the
-       * working buffer.
-       */
+      /* Copy the sample from the audio buffer into the working buffer. */
 
       else
         {
+          unsigned int copysize;
+
+          /* Do we have space for the whole sample? */
+
+          if (srcsize < priv->align)
+            {
+              /* No.. this is a partial copy */
+
+              copysize       = srcsize;
+              priv->npartial = srcsize;
+            }
+          else
+            {
+              copysize       = priv->align;
+              priv->skip     = skipsize;
+            }
+
           /* Now copy the sample from new audio buffer to working buffer */
 
-          for (i = 0; i < priv->align; i++)
+          for (i = 0; i < copysize; i++)
             {
               *dest++ = *src++;
             }
 
           /* Update indices and sizes and reset the skip value */
 
-          apb->curbyte  += priv->align;
-          srcsize       -= priv->align;
+          apb->curbyte  += copysize;
+          srcsize       -= copysize;
 
-          work->nbytes  += priv->align;
-          destsize      -= priv->align;
-
-          priv->skip     = skipsize;
+          work->nbytes  += copysize;
+          destsize      -= copysize;
         }
     }
 
@@ -1001,43 +977,42 @@ static FAR struct ap_buffer_s *pcm_subsample(FAR struct pcm_decode_s *priv,
                 }
             }
 
-          /* We have skipped over the required number of bytes and we are
-           * ready to take the next sample.  Is there space for a whole
-           * sample in the buffer?
-           */
-
-          else if (srcsize < priv->align)
-            {
-              /* No.. copy the partial sample to the partial sample buffer */
-
-              dest = priv->partial;
-              for (i = 0; i < srcsize; i++)
-                {
-                  *dest++ = *src++;
-                }
-
-              priv->npartial = srcsize;
-              break;
-            }
-
-          /* Plenty of space!  Copy the sample from the end of the audio
-           * buffer to the beginning.
-           */
+          /* Copy the sample from the end of the audio buffer to the beginning. */
 
           else
             {
+              unsigned int copysize;
+
+              /* Do we have space for the whole sample? */
+
+              if (srcsize < priv->align)
+                {
+                  /* No.. this is a partial copy */
+
+                  copysize       = srcsize;
+                  priv->npartial = srcsize;
+                }
+              else
+                {
+                  /* Copy the whole sample and re-arm the skip size */
+
+                  copysize       = priv->align;
+                  priv->skip     = skipsize;
+                }
+
               /* Now copy the sample from new audio buffer to working buffer */
 
-              for (i = 0; i < priv->align; i++)
+              for (i = 0; i < copysize; i++)
                 {
                   *dest++ = *src++;
                 }
 
-              /* Update indices and sizes and reset the skip value */
+              /* Updates bytes available in the source buffer and bytes
+               * remaining in the dest buffer.
+               */
 
-              srcsize       -= priv->align;
-              destsize      -= priv->align;
-              priv->skip     = skipsize;
+              srcsize  -= copysize;
+              destsize -= copysize;
             }
         }
 
