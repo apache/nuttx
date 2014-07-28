@@ -421,9 +421,7 @@ static int adc_interrupt(int irq, void *context)
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)g_adcdev.ad_priv;
   volatile uint32_t regVal, regVal2, regVal3;
 
-//lpc17_gpiowrite(LPCXPRESSO_GPIO0_21, 1);    /* Set pin P0.21 */
-
-  /* Teste si une interruption a bien eu lieu */
+  /* Verify that an interrupt has actually occured */
 
   regVal2 = getreg32(LPC17_ADC_STAT);  /* Read ADSTAT will clear the interrupt flag */
   if ((regVal2) & (1<<16))
@@ -431,6 +429,7 @@ static int adc_interrupt(int irq, void *context)
       if ((priv->mask & 0x01) != 0)
         {
           regVal = getreg32(LPC17_ADC_DR0);
+
 #ifdef CONFIG_ADC_DIRECT_ACCESS
           /* Store the data value plus the status bits */
 
@@ -438,10 +437,10 @@ static int adc_interrupt(int irq, void *context)
           ADC0IntDone = 1;
 #else /* CONFIG_ADC_DIRECT_ACCESS */
 #ifdef CONFIG_ADC_WORKER_THREAD
-      /* Store the data value plus the status bits */
+          /* Store the data value plus the status bits */
 
-      ADC0Buffer0[0] = regVal;
-      ADC0IntDone = 1;
+          ADC0Buffer0[0] = regVal;
+          ADC0IntDone = 1;
 
 #else /* CONFIG_ADC_WORKER_THREAD */
       if ((regVal) & (1 << 31))
@@ -451,130 +450,116 @@ static int adc_interrupt(int irq, void *context)
 
 #endif /* CONFIG_ADC_WORKER_THREAD */
 #endif /* CONFIG_ADC_DIRECT_ACCESS */
+        }
 
-#ifdef CONFIG_ADC_DEBUG_DAC
-      /* Adjust the binary value to the lpc1768's register format (plus high
-       * speed profile in bit 16)
-       */
-
-//    putreg32(((((regVal >> 4) & 0xFFF) << 6)| 0x10000) & 0xffff, LPC17_DAC_CR);
-#endif /*CONFIG_ADC_DEBUG_DAC*/
-    }
-
-  if ((priv->mask & 0x02) != 0)
-    {
-      regVal = getreg32(LPC17_ADC_DR1);
+      if ((priv->mask & 0x02) != 0)
+        {
+          regVal = getreg32(LPC17_ADC_DR1);
 
 #ifdef CONFIG_ADC_DIRECT_ACCESS
-      /* Store the data value plus the status bits */
+          /* Store the data value plus the status bits */
 
-      ADC1Buffer0[0] = regVal;
-      ADC0IntDone = 1;
+          ADC1Buffer0[0] = regVal;
+          ADC0IntDone = 1;
 
 #else /*CONFIG_ADC_DIRECT_ACCESS*/
 #ifdef CONFIG_ADC_WORKER_THREAD
-      /* Store the data value plus the status bits */
+          /* Store the data value plus the status bits */
 
-      ADC1Buffer0[0] = regVal;
-      ADC0IntDone = 1;
+          ADC1Buffer0[0] = regVal;
+          ADC0IntDone = 1;
 
 #else /*CONFIG_ADC_WORKER_THREAD*/
-      if ((regVal) & (1 << 31))
-        {
-          adc_receive(&g_adcdev, 1, (regVal >> 4) & 0xFFF);
-        }
+          if ((regVal) & (1 << 31))
+            {
+              adc_receive(&g_adcdev, 1, (regVal >> 4) & 0xFFF);
+            }
 
 #endif /*CONFIG_ADC_WORKER_THREAD*/
 #endif /*CONFIG_ADC_DIRECT_ACCESS*/
-    }
+        }
 
-  if ((priv->mask & 0x04) != 0)
-    {
-      regVal = getreg32(LPC17_ADC_DR2);
+      if ((priv->mask & 0x04) != 0)
+        {
+          regVal = getreg32(LPC17_ADC_DR2);
 
 #ifdef CONFIG_ADC_DIRECT_ACCESS
-      /* Store the data value plus the status bits */
+          /* Store the data value plus the status bits */
 
-      ADC2Buffer0[0] = regVal;
-      ADC0IntDone = 1;
+          ADC2Buffer0[0] = regVal;
+          ADC0IntDone = 1;
 
 #else /*CONFIG_ADC_DIRECT_ACCESS*/
 #ifdef CONFIG_ADC_WORKER_THREAD
-      /* Store the data value plus the status bits */
+          /* Store the data value plus the status bits */
 
-      ADC2Buffer0[0] = regVal;
-      ADC0IntDone = 1;
+          ADC2Buffer0[0] = regVal;
+          ADC0IntDone = 1;
 
 #else /*CONFIG_ADC_WORKER_THREAD*/
-      if ((regVal) & (1 << 31))
-        {
-          adc_receive(&g_adcdev, 2, (regVal >> 4) & 0xFFF);
-        }
+          if ((regVal) & (1 << 31))
+            {
+              adc_receive(&g_adcdev, 2, (regVal >> 4) & 0xFFF);
+            }
 
 #endif /*CONFIG_ADC_WORKER_THREAD*/
 #endif /*CONFIG_ADC_DIRECT_ACCESS*/
-    }
+        }
+
+      if ((priv->mask & 0x08) != 0)
+        {
+          regVal = getreg32(LPC17_ADC_DR3);
+          if ((regVal) & (1 << 31))
+            {
+              adc_receive(&g_adcdev, 3, (regVal >> 4) & 0xFFF);
+            }
+        }
+
+      if ((priv->mask & 0x10) != 0)
+        {
+          regVal = getreg32(LPC17_ADC_DR4);
+          if ((regVal) & (1 << 31))
+            {
+              adc_receive(&g_adcdev, 4, (regVal >> 4) & 0xFFF);
+            }
+        }
+
+      if ((priv->mask & 0x20) != 0)
+        {
+          regVal = getreg32(LPC17_ADC_DR5);
+          if ((regVal) & (1 << 31))
+            {
+              adc_receive(&g_adcdev, 5, (regVal >> 4) & 0xFFF);
+            }
+        }
+
+      if ((priv->mask & 0x40) != 0)
+        {
+          regVal = getreg32(LPC17_ADC_DR6);
+          if ((regVal) & (1 << 31))
+            {
+              adc_receive(&g_adcdev, 6, (regVal >> 4) & 0xFFF);
+            }
+        }
+
+      if ((priv->mask & 0x80) != 0)
+        {
+          regVal = getreg32(LPC17_ADC_DR7);
+          if ((regVal) & (1 << 31))
+            {
+              adc_receive(&g_adcdev, 7, (regVal >> 4) & 0xFFF);
+            }
+        }
 
 #ifdef CONFIG_ADC_WORKER_THREAD
-  /* Store the data value plus the status bits */
-
-  ADC2Buffer0[0] = regVal;
-  ADC0IntDone = 1;
-
-#else /* CONFIG_ADC_WORKER_THREAD */
-  if ((priv->mask & 0x08) != 0)
-    {
-      regVal = getreg32(LPC17_ADC_DR3);
-      if ((regVal) & (1 << 31))
+      if (ADC0IntDone == 1)
         {
-          adc_receive(&g_adcdev, 3, (regVal >> 4) & 0xFFF);
+          work_queue(HPWORK, &priv->irqwork, (worker_t)adc_irqworker,
+                     (FAR void *)priv, 0);
         }
-    }
-
-  if ((priv->mask & 0x10) != 0)
-    {
-      regVal = getreg32(LPC17_ADC_DR4);
-      if ((regVal) & (1 << 31))
-        {
-          adc_receive(&g_adcdev, 4, (regVal >> 4) & 0xFFF);
-        }
-    }
-
-  if ((priv->mask & 0x20) != 0)
-    {
-      regVal = getreg32(LPC17_ADC_DR5);
-      if ((regVal) & (1 << 31))
-        {
-          adc_receive(&g_adcdev, 5, (regVal >> 4) & 0xFFF);
-        }
-    }
-
-  if ((priv->mask & 0x40) != 0)
-    {
-      regVal = getreg32(LPC17_ADC_DR6);
-      if ((regVal) & (1 << 31))
-        {
-          adc_receive(&g_adcdev, 6, (regVal >> 4) & 0xFFF);
-        }
-    }
-
-  if ((priv->mask & 0x80) != 0)
-    {
-      regVal = getreg32(LPC17_ADC_DR7);
-      if ((regVal) & (1 << 31))
-        {
-          adc_receive(&g_adcdev, 7, (regVal >> 4) & 0xFFF);
-        }
-    }
 
 #endif /*CONFIG_ADC_WORKER_THREAD*/
-#ifdef CONFIG_ADC_WORKER_THREAD
-  if (ADC0IntDone == 1)
-    {
-      work_queue(HPWORK, &priv->irqwork, (worker_t)adc_irqworker, (FAR void *)priv, 0);
     }
-
-#endif /*CONFIG_ADC_WORKER_THREAD*/
 
   regVal3 = getreg32(LPC17_ADC_GDR); /* Read ADGDR clear the DONE and OVERRUN bits */
   putreg32((priv->mask) |            /* Select channels 0 to 7 on ADC0 */
