@@ -1455,8 +1455,6 @@ static int pcm_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
   lower = priv->lower;
   DEBUGASSERT(lower && lower->ops->enqueuebuffer && lower->ops->configure);
 
-  apb->curbyte = 0;
-
   /* Are we streaming yet? */
 
   if (priv->streaming)
