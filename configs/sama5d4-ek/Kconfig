@@ -6,6 +6,15 @@
 if ARCH_BOARD_SAMA5D4_EK
 
 choice
+	prompt "SAMA5D4-EK Board Version"
+	default SAMA5D4_MB_REVC
+
+config SAMA5D4_MB_REVC
+	bool "SAMA5D4-MB Rev. C"
+
+endchoice # SAMA5D4-EK Board Version
+
+choice
 	prompt "CPU Frequency"
 	default SAMA5D4EK_396MHZ
 

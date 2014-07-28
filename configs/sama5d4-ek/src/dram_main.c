@@ -102,7 +102,7 @@ int dram_main(int argc, char *argv)
 
   /* Disable the PMC.  This is necessary on the SAMA5D4-MB Rev C. board.  On
    * that board, the PMIC can lock up the I2C bus.  The work around is
-   * difficult:
+   * awkward:
    *
    *   1. Open JP23 (disabling the WM8904 data line)
    *   2. Execute DRAMBOOT.  The PMIC will be disabled while JP23 is closed.
