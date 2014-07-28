@@ -737,7 +737,7 @@ static int wm8904_configure(FAR struct audio_lowerhalf_s *dev,
 
       /* Process based on Feature Unit */
 
-      switch (*((uint16_t *)caps->ac_format))
+      switch (caps->ac_format.hw)
         {
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
         case AUDIO_FU_VOLUME:
