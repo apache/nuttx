@@ -528,11 +528,13 @@ void up_irqinitialize(void)
   putreg32(AXIMX_REMAP_REMAP1, SAM_AXIMX_REMAP); /* Remap NOR FLASH on CS0 */
 #endif
 
-  /* Make sure that there is no trace of any previous mapping */
+  /* Make sure that there is no trace of any previous mapping (here we
+   * that the L2 cache has not yet been enabled.
+   */
 
   vectorsize = sam_vectorsize();
-  arch_invalidate_icache();
-  arch_invalidate_dcache(0, vectorsize);
+  cp15_invalidate_icache();
+  cp15_invalidate_dcache(0, vectorsize);
   mmu_invalidate_region(0, vectorsize);
 
 #if 0 /* Disabled on reset */

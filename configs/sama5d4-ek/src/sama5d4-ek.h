@@ -985,7 +985,7 @@ int sam_audio_null_initialize(int minor);
  ****************************************************************************/
 
 #ifdef HAVE_PMIC
-void sam_pmic_initialize(void)
+void sam_pmic_initialize(void);
 #else
 #  define sam_pmic_initialize()
 #endif

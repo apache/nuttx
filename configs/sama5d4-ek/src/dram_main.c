@@ -111,7 +111,7 @@ int dram_main(int argc, char *argv)
    *      JP23 will be closed and the PMIC will be initialized.
    */
 
-  sam_pmic_initialize()
+  sam_pmic_initialize();
 
   /* DRAM was already initialized at boot time, so we are ready to load the
    * Intel HEX stream into DRAM.
@@ -167,8 +167,8 @@ int dram_main(int argc, char *argv)
 
   /* Invalidate caches and TLBs */
 
-  arch_invalidate_icache();
-  arch_invalidate_dcache_all();
+  cp15_invalidate_icache();
+  cp15_invalidate_dcache_all();
   cp15_invalidate_tlbs();
 
   /* Then jump into NOR flash */
