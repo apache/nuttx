@@ -7863,3 +7863,8 @@
 	  ADC updates from Max.  Also fixes some syntax errors that I introduced in
 	  the last commit (2014-7-28).
 	* audio/pcm_decode.c:  Fix a logic error in a DEBUG assertion (2014-7-28).
+	* configs/sama5d4-ek/src/sam_pmic.c, dram_main.c, sama5d4-ek.h, Makefile.
+	  Add logic to disable the faulty PMIC.  This must be done with JP23 open.
+	  It is performed only from the DRAMBOOT loader (2014-7-28).
+	* drivers/audio/wm8904.c: Fix some compile problems with the WM8904 driver
+	  due to recent audio subsystem changes (2014-7-28).
