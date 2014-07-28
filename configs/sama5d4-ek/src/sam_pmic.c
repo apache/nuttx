@@ -39,17 +39,12 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
-#include <stdio.h>
-#include <debug.h>
-#include <assert.h>
+#include <stdint.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <nuttx/i2c.h>
 
-#include <arch/board/board.h>
-
-#include "up_arch.h"
 #include "sam_twi.h"
 
 #include "sama5d4-ek.h"
@@ -113,15 +108,15 @@ void sam_pmic_initialize(void)
 
       buffer[0] = 0x0b;
       buffer[1] = 0xee;
-      (void)I2C_SEND(i2c, buffer, 2);
+      (void)I2C_WRITE(i2c, buffer, 2);
 
       buffer[0] = 0x02;
       buffer[1] = 0x0f;
-      (void)I2C_SEND(i2c, buffer, 2);
+      (void)I2C_WRITE(i2c, buffer, 2);
 
       buffer[0] = 0x03;
       buffer[1] = 0x0f;
-      (void)I2C_SEND(i2c, buffer, 2);
+      (void)I2C_WRITE(i2c, buffer, 2);
    }
 }
 
