@@ -649,18 +649,27 @@ static int null_resume(FAR struct audio_lowerhalf_s *dev)
 static int null_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
                                 FAR struct ap_buffer_s *apb)
 {
-  /* Take a reference */
+  FAR struct null_dev_s *priv = (FAR struct null_dev_s *)dev;
 
-  apb_reference(apb);
   audvdbg("apb=%p curbyte=%d nbytes=%d\n", apb, apb->curbyte, apb->nbytes);
 
-  /* say that we consumed all of the data */
+  /* Say that we consumed all of the data */
 
   apb->curbyte = apb->nbytes;
 
-  /* Release the reference and return success */
+  /* And return the buffer to the upper level */
 
-  apb_free(apb);
+  DEBUGASSERT(priv && apb && priv->dev.upper);
+
+  /* The buffer belongs to to an upper level.  Just forward the event to
+   * the next level up.
+   */
+
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+  priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_DEQUEUE, apb, OK, NULL);
+#else
+  priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_DEQUEUE, apb, OK);
+#endif
 
   audvdbg("Return OK\n");
   return OK;
