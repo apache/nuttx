@@ -7857,3 +7857,5 @@
 	  level (2014-7-27)
 	* include/nuttx/audio/audio.h and audio/pcm_decode.c: Misc bugfixes
 	  while integrating fast forward by sub-sampling (2014-7-27).
+	* audio/pcm_decode.c: Back out a change; the fix really belongs in
+	  NxPlayer. (2014-7-27).
