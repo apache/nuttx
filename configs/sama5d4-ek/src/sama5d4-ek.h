@@ -372,8 +372,12 @@
 
 /* PMIC */
 
-#ifndef CONFIG_SAMA5_TWI0
+#if !defined(CONFIG_SAMA5_TWI0) || !defined(CONFIG_SAMA5D4_MB_REVC)
 #  undef HAVE_PMIC
+#endif
+
+#ifndef CONFIG_EXPERIMENTAL
+#  undef HAVE_PMIC /* REVISIT: Disable anyway because it does not yet work */
 #endif
 
 /* LEDs *****************************************************************************/
