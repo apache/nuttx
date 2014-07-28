@@ -1317,6 +1317,7 @@ static void lpc17_polltimer(int argc, uint32_t arg, ...)
       lpc17_rxdone(priv);
 
 #endif /*CONFIG_NET_WORKER_THREAD*/
+    }
 
   /* Setup the watchdog poll timer again */
 
