@@ -569,6 +569,16 @@ static void pcm_subsample(FAR struct pcm_decode_s *priv,
               *dest++ = *src++;
             }
         }
+      else
+        {
+          /* If the data is already position at the beginning of the audio
+           * buffer, then just increment the buffer pointers around the
+           * data.
+           */
+
+          src  += copysize;
+          dest += copysize;
+        }
 
       /* Update the number of bytes in the working buffer and reset the
        * skip value
