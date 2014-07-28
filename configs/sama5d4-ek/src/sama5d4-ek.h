@@ -66,6 +66,7 @@
 #define HAVE_MAXTOUCH   1
 #define HAVE_WM8904     1
 #define HAVE_AUDIO_NULL 1
+#define HAVE_PMIC       1
 
 /* HSMCI */
 /* Can't support MMC/SD if the card interface(s) are not enable */
@@ -367,6 +368,12 @@
 #    warning CONFIG_AUDIO_FORMAT_PCM is required for audio support
 #    undef HAVE_AUDIO_NULL
 #  endif
+#endif
+
+/* PMIC */
+
+#ifndef CONFIG_SAMA5_TWI0
+#  undef HAVE_PMIC
 #endif
 
 /* LEDs *****************************************************************************/
@@ -733,8 +740,9 @@
 /* ACT8865 power management chip ****************************************************/
 /* The PMIC communicates on TWI0, I2C address 0x5b */
 
-#define PMIC_TWI_BUS     0
-#define PMIC_I2C_ADDRESS 0x5b
+#define PMIC_TWI_BUS       0
+#define PMIC_I2C_ADDRESS   0x5b
+#define PMIC_I2C_FREQUENCY 400000 /* 400KHz max */
 
 /************************************************************************************
  * Public Types
@@ -961,6 +969,26 @@ int sam_wm8904_initialize(int minor);
 #ifdef HAVE_AUDIO_NULL
 int sam_audio_null_initialize(int minor);
 #endif /* HAVE_AUDIO_NULL */
+
+/****************************************************************************
+ * Name: sam_pmic_initialize
+ *
+ * Description:
+ *   Currently, this function only disables the PMIC.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_PMIC
+void sam_pmic_initialize(void)
+#else
+#  define sam_pmic_initialize()
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_SAMA5D4_EK_SRC_SAMA5D4_EK_H */

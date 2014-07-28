@@ -93,13 +93,25 @@ typedef void (*dram_entry_t)(void);
 
 int dram_main(int argc, char *argv)
 {
-  int ret;
-
   /* Here we have a in memory value we can change in the debugger
    * to begin booting in NOR Flash
    */
 
   static volatile uint32_t wait = DRAM_BOOT_MODE;
+  int ret;
+
+  /* Disable the PMC.  This is necessary on the SAMA5D4-MB Rev C. board.  On
+   * that board, the PMIC can lock up the I2C bus.  The work around is
+   * difficult:
+   *
+   *   1. Open JP23 (disabling the WM8904 data line)
+   *   2. Execute DRAMBOOT.  The PMIC will be disabled while JP23 is closed.
+   *   3. At the prompt to "Send the Intel HEX file now", close JP23
+   *   4. Send the NuttX file.  When NuttX starts, the WM8904 is initialized,
+   *      JP23 will be closed and the PMIC will be initialized.
+   */
+
+  sam_pmic_initialize()
 
   /* DRAM was already initialized at boot time, so we are ready to load the
    * Intel HEX stream into DRAM.
