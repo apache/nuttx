@@ -198,7 +198,7 @@
 #define AUDIO_SUBSAMPLE_NONE        0
 #define AUDIO_SUBSAMPLE_2X          2
 #define AUDIO_SUBSAMPLE_4X          4
-#define AUDIO_SUBSAMPLE_8X          5
+#define AUDIO_SUBSAMPLE_8X          8
 #define AUDIO_SUBSAMPLE_16X         16
 
 #define AUDIO_SUBSAMPLE_MIN         AUDIO_SUBSAMPLE_2X

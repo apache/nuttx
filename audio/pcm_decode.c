@@ -127,6 +127,12 @@ struct pcm_decode_s
   uint8_t  skip;                   /* Number of samples to be skipped */
   uint8_t  npartial;               /* Size of the partial sample */
   uint8_t  partial[4];             /* Holds the partial sample */
+
+  /* REVISIT: I think we could get rid of all of this special buffer
+   * processing.  It seems like we should be able to do the sub-sampling
+   * in place without any additional buffers.
+   */
+
   struct audio_buf_desc_s bufdesc; /* Allocated buffer description */
   FAR struct ap_buffer_s *ffwd;    /* Audio buffer being subsampled into */
   FAR struct ap_buffer_s *next;    /* Next available, empty audio buffer */
@@ -518,7 +524,12 @@ static int pcm_subsample_configure(FAR struct pcm_decode_s *priv,
            * driver.
            */
 
-         audvdbg("Start subsampling: apb=%p\n", priv->apb);
+          audvdbg("Start subsampling: apb=%p\n", priv->apb);
+
+          /* REVISIT: I think we could get rid of this special buffer.  It
+           * seems like we should be able to do the sub-sampling in place
+           * without any additional buffers.
+           */
 
           if (priv->apb == NULL)
             {
@@ -531,7 +542,7 @@ static int pcm_subsample_configure(FAR struct pcm_decode_s *priv,
               if (ret < 0)
                 {
                   /* Driver doesn't report it's buffer size.  Use defaults. */
- 
+
                   bufinfo.buffer_size = CONFIG_AUDIO_BUFFER_NUMBYTES;
                   bufinfo.nbuffers    = CONFIG_AUDIO_NUM_BUFFERS;
                 }
@@ -580,7 +591,7 @@ static int pcm_subsample_configure(FAR struct pcm_decode_s *priv,
           priv->subsample = subsample;
         }
     }
- 
+
   /* 2. Were already fast forwarding and we have been asked to change the
    *    subsampling rate.
    */
@@ -651,7 +662,7 @@ static int pcm_subsample_configure(FAR struct pcm_decode_s *priv,
       /* And indicate that we are in normal play mode.  This will take
        * effect when the next audio buffer is received.
        */
- 
+
       priv->next      = NULL;
       priv->npartial  = 0;
       priv->skip      = 0;
@@ -720,7 +731,7 @@ static void pcm_subsample_callback(FAR struct pcm_decode_s *priv,
   /* We are still streaming.  At any given time, our working audio may be
    * (a) the current working buffer, (a) the next working buffer or it, or
    * (c) in possession of the lower level driver.  None of these are the
-   * case now since we just got our working audio buffer back from the 
+   * case now since we just got our working audio buffer back from the
    *
    * 2. We have no fast forward working buffer.  Use it buffer as our
    *    fast forward working buffer.  This should never happen.
@@ -805,7 +816,7 @@ static FAR struct ap_buffer_s *pcm_subsample(FAR struct pcm_decode_s *priv,
   /* This is the number of bytes that we need to skip between samples */
 
   skipsize = priv->align * (priv->subsample - 1);
-  
+
   /* Let's deal with any partial sample data from the last buffer */
 
   if (priv->npartial > 0)
@@ -950,7 +961,7 @@ static FAR struct ap_buffer_s *pcm_subsample(FAR struct pcm_decode_s *priv,
    * is the case?
    *
    * REVISIT:  Should there be a threshold here so that we do not send
-   * really tiny buffers to the 
+   * really tiny buffers to the lower-level driver.
    */
 
   if (srcsize > 0)
@@ -1049,7 +1060,7 @@ exit_apb_empty:
   /* Is there anything in the working buffer?
    *
    * REVISIT:  Should there be a threshold here so that we do not send
-   * really tiny buffers to the 
+   * really tiny buffers to the lower-level driver.
    */
 
   if (work->nbytes > 0)
@@ -1444,6 +1455,8 @@ static int pcm_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
   lower = priv->lower;
   DEBUGASSERT(lower && lower->ops->enqueuebuffer && lower->ops->configure);
 
+  apb->curbyte = 0;
+
   /* Are we streaming yet? */
 
   if (priv->streaming)
@@ -1464,9 +1477,11 @@ static int pcm_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
 
           audvdbg("Pass to lower enqueuebuffer: apb=%p curbyte=%d nbytes=%d\n",
                   apb, apb->curbyte, apb->nbytes);
- 
+
           return lower->ops->enqueuebuffer(lower, apb);
         }
+
+      return OK;
     }
 
   /* No.. then this must be the first buffer that we have seen (since we
@@ -1536,6 +1551,8 @@ static int pcm_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
 
               return lower->ops->enqueuebuffer(lower, apb);
             }
+
+          return OK;
         }
     }
 
@@ -1737,7 +1754,7 @@ static void pcm_callback(FAR void *arg, uint16_t reason,
   FAR struct pcm_decode_s *priv = (FAR struct pcm_decode_s *)arg;
 
 #ifndef CONFIG_AUDIO_EXCLUDE_FFORWARD
-  /* If this is our internal working audio buffer that we use for subsampling,
+  /* If this is our internal working audio buffer that we use for sub-sampling,
    * then we are the owner of the buffer and we don't want to return it to
    * the upper level.
    */
