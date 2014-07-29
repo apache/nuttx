@@ -86,8 +86,9 @@
 
 int nsh_archinitialize(void)
 {
-#if defined(HAVE_NAND) || defined(HAVE_AT25) || defined(HAVE_HSMCI) || \
-    defined(HAVE_USBHOST) || defined(HAVE_USBMONITOR) || defined(HAVE_WM8904)
+#if defined(HAVE_NAND)    || defined(HAVE_AT25)       || defined(HAVE_HSMCI)  || \
+    defined(HAVE_USBHOST) || defined(HAVE_USBMONITOR) || defined(HAVE_WM8904) || \
+    defined(HAVE_AUTOMOUNTER)
   int ret;
 #endif
 
@@ -136,7 +137,7 @@ int nsh_archinitialize(void)
 #endif
 
 #ifdef HAVE_AUTOMOUNTER
-  /* Initialize the automounter */
+  /* Initialize the auto-mounter */
 
   sam_automount_initialize();
 #endif
