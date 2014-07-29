@@ -97,7 +97,7 @@
  * asked to mount the NAND part
  */
 
-#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_SAMA5_NAND_AUTOMOUNT)
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_SAMA5D3XEK_NAND_BLOCKMOUNT)
 #  undef HAVE_NAND
 #endif
 
@@ -142,7 +142,7 @@
  * asked to mount the AT25 part
  */
 
-#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_SAMA5D3xEK_AT25_AUTOMOUNT)
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_SAMA5D3xEK_AT25_BLOCKMOUNT)
 #  undef HAVE_AT25
 #endif
 
@@ -192,7 +192,7 @@
  * asked to mount the AT25 part
  */
 
-#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_SAMA5D3xEK_AT24_AUTOMOUNT)
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_SAMA5D3xEK_AT24_BLOCKMOUNT)
 #  undef HAVE_AT24
 #endif
 

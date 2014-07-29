@@ -76,6 +76,10 @@ CSRCS += sam_at25.c
 endif
 endif
 
+ifeq ($(CONFIG_FS_AUTOMOUNTER),y)
+CSRCS += sam_automount.c
+endif
+
 ifeq ($(CONFIG_AUDIO_WM8904),y)
 ifeq ($(CONFIG_SAMA5_TWI0),y)
 ifeq ($(CONFIG_SAMA5_SSC0),y)

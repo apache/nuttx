@@ -63,8 +63,8 @@
 #  error The AT25 Serial FLASH is not available
 #endif
 
-#ifndef CONFIG_SAMA5D4EK_AT25_AUTOMOUNT
-#  error CONFIG_SAMA5D4EK_AT25_AUTOMOUNT must be selected
+#ifndef CONFIG_SAMA5D4EK_AT25_BLOCKMOUNT
+#  error CONFIG_SAMA5D4EK_AT25_BLOCKMOUNT must be selected
 #endif
 
 #ifndef CONFIG_SAMA5D4EK_AT25_CHARDEV

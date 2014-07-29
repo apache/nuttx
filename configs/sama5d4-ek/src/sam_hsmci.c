@@ -204,14 +204,42 @@ static int sam_hsmci_cardetect(struct sam_hsmci_state_s *state)
 #ifdef CONFIG_SAMA5_HSMCI0
 static int sam_hsmci0_cardetect(int irq, void *regs)
 {
-  return sam_hsmci_cardetect(&g_hsmci0);
+  int ret;
+
+  /* Handle the card detect interrupt.  The interrupt level logic will
+   * kick of the driver-level operations to initialize the MMC/SD block
+   * device.
+   */
+
+  ret = sam_hsmci_cardetect(&g_hsmci0);
+
+#ifdef CONFIG_SAMA5D4EK_HSMCI0_AUTOMOUNT
+  /* Let the automounter know about the insertion event */
+
+  sam_automount_event(HSMCI0_SLOTNO, sam_cardinserted(HSMCI0_SLOTNO));
+#endif
+
+  return ret;
 }
 #endif
 
 #ifdef CONFIG_SAMA5_HSMCI1
 static int sam_hsmci1_cardetect(int irq, void *regs)
 {
-  return sam_hsmci_cardetect(&g_hsmci1);
+  int ret;
+
+  /* Handle the card detect interrupt.  The interrupt level logic will
+   * kick of the driver-level operations to initialize the MMC/SD block
+   * device.
+   */
+
+  ret = sam_hsmci_cardetect(&g_hsmci1);
+
+#ifdef CONFIG_SAMA5D4EK_HSMCI1_AUTOMOUNT
+  /* Let the automounter know about the insertion event */
+
+  sam_automount_event(HSMCI1_SLOTNO, sam_cardinserted(HSMCI1_SLOTNO));
+#endif
 }
 #endif
 
