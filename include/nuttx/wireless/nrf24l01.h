@@ -209,219 +209,306 @@ struct nrf24l01_config_s
  * Public Functions
  ************************************************************************************/
 
-/** Register the nRF24L01+ device.
+/************************************************************************************
+ * Register the nRF24L01+ device.
  *
- * \param spi SPI Device structure
- * \param cfg Board specific configuration info
- * \return Pointer to newly allocated nrf24l01 device structure or NULL on error  (errno is set accordingly in this case).
+ * Input Parmeters:
+ *   spi - SPI Device structure
+ *   cfg Board specific configuration info
+ *
+ * Returned Value:
+ *   Pointer to newly allocated nrf24l01 device structure or NULL on error
+ *   (errno is set accordingly in this case).
  *
  * Possible errors:
  *  - ENOMEM: Out of kernel memory to allocate the device
- **/
+ *
+ ************************************************************************************/
 
 int nrf24l01_register(FAR struct spi_dev_s *spi, FAR struct nrf24l01_config_s *cfg);
 
-/** Initialize the nRF24L01+ chip to a default initial state.
+/************************************************************************************
+ * Initialize the nRF24L01+ chip to a default initial state.
  *
- * \param dev Pointer to a registered nRF24L01 device structure
- **/
+ * Input Parmeters:
+ *   dev Pointer to a registered nRF24L01 device structure
+ *
+ ************************************************************************************/
 
 int nrf24l01_init(FAR struct nrf24l01_dev_s *dev);
 
-/** Get a pointer to the registered device
- */
+/************************************************************************************
+ * Get a pointer to the registered device
+ ************************************************************************************/
 
 FAR struct nrf24l01_dev_s * nrf24l01_getinstance(void);
 
-/** Set the default TX address.
+/************************************************************************************
+ * Set the default TX address.
  *
- * \param dev Pointer to an nRF24L01 device structure
- * \param addr TX address  (LSByte first)
+ * Input Parmeters:
+ *   dev Pointer to an nRF24L01 device structure
+ *   addr TX address  (LSByte first)
  *
- * \return 0
- **/
+ * Returned Value:
+ *   0
+ *
+ ************************************************************************************/
 
 int nrf24l01_settxaddr(FAR struct nrf24l01_dev_s *dev, FAR const uint8_t *addr);
 
-/** Get the default TX address.
+/************************************************************************************
+ * Get the default TX address.
  *
- * \param dev Pointer to an nRF24L01 device structure
- * \param addr TX address  (LSByte first)
+ * Input Parmeters:
+ *   dev Pointer to an nRF24L01 device structure
+ *   addr TX address  (LSByte first)
  *
- * \return 0
- **/
+ * Returned Value:
+ *   0
+ *
+ ************************************************************************************/
 
 int nrf24l01_gettxaddr(FAR struct nrf24l01_dev_s *dev, FAR uint8_t *addr);
 
-/** Configure auto-retransmit
+/************************************************************************************
+ * Configure auto-retransmit
  *
- * \param dev Pointer to an nRF24L01 device structure
- * \param retrdelay  Auto-retransmit delay
- * \param retrcount  Auto-retransmit count  (0 - 15)
- * \return 0
- **/
+ * Input Parmeters:
+ *   dev Pointer to an nRF24L01 device structure
+ *   retrdelay  Auto-retransmit delay
+ *   retrcount  Auto-retransmit count  (0 - 15)
+ *
+ * Returned Value:
+ *   0
+ *
+ ************************************************************************************/
 
-int nrf24l01_setretransmit(FAR struct nrf24l01_dev_s *dev, nrf24l01_retransmit_delay_t retrdelay, uint8_t retrcount);
+int nrf24l01_setretransmit(FAR struct nrf24l01_dev_s *dev,
+                           nrf24l01_retransmit_delay_t retrdelay, uint8_t retrcount);
 
-/** Configure a RX pipe.
+/************************************************************************************
+ * Configure a RX pipe.
  *
- * \param dev Pointer to an nRF24L01 device structure
- * \param pipeno Pipe number to configure
- * \param pipecfg Pointer to configuration data
+ * Input Parmeters:
+ *   dev Pointer to an nRF24L01 device structure
+ *   pipeno Pipe number to configure
+ *   pipecfg Pointer to configuration data
  *
- * \return 0
- **/
+ * Returned Value:
+ *   0
+ *
+ ************************************************************************************/
 
 int nrf24l01_setpipeconfig(FAR struct nrf24l01_dev_s *dev, unsigned int pipeno,
     FAR const nrf24l01_pipecfg_t *pipecfg);
 
-/** Get pipe configuration.
+/************************************************************************************
+ * Get pipe configuration.
  *
- * \param dev Pointer to an nRF24L01 device structure
- * \param pipeno Pipe number to configure
- * \param pipecfg Pointer to configuration data used to store the config
+ * Input Parmeters:
+ *   dev Pointer to an nRF24L01 device structure
+ *   pipeno Pipe number to configure
+ *   pipecfg Pointer to configuration data used to store the config
  *
- * \return 0
- **/
+ * Returned Value:
+ *   0
+ *
+ ************************************************************************************/
 
 int nrf24l01_getpipeconfig(FAR struct nrf24l01_dev_s *dev, unsigned int pipeno,
     FAR nrf24l01_pipecfg_t *pipecfg);
 
-/** Enable a RX pipe.
+/************************************************************************************
+ * Enable a RX pipe.
  *
- * \param dev Pointer to an nRF24L01 device structure
- * \param pipeno Pipe number
- * \param enable true to enable the pipe, false to disable it
+ * Input Parmeters:
+ *   dev Pointer to an nRF24L01 device structure
+ *   pipeno Pipe number
+ *   enable true to enable the pipe, false to disable it
  *
- * \return 0
- **/
+ * Returned Value:
+ *   0
+ *
+ ************************************************************************************/
 
-int nrf24l01_enablepipe(FAR struct nrf24l01_dev_s *dev, unsigned int pipeno, bool enable);
+int nrf24l01_enablepipe(FAR struct nrf24l01_dev_s *dev, unsigned int pipeno,
+                        bool enable);
 
-/** Configure RF.
+/************************************************************************************
+ * Configure RF.
  *
- * \param dev Pointer to an nRF24L01 device structure
- * \param datarate Datarate
- * \param outpower Output power
+ * Input Parmeters:
+ *   dev Pointer to an nRF24L01 device structure
+ *   datarate Datarate
+ *   outpower Output power
  *
- * \return 0
- **/
+ * Returned Value:
+ *   0
+ *
+ ************************************************************************************/
 
 int nrf24l01_setuprf(FAR struct nrf24l01_dev_s *dev, nrf24l01_datarate_t datarate,
     int outpower);
 
-/** Configure the TX output power.
+/************************************************************************************
+ * Configure the TX output power.
  *
  * Note that hardware supports only -18, -12, -6 and 0 dBm values.
  *
- * \param dev Pointer to an nRF24L01 device structure
- * \param outpower Output power (in dBm).
+ * Input Parmeters:
+ *   dev Pointer to an nRF24L01 device structure
+ *   outpower Output power (in dBm).
  *
- * \return 0
- **/
+ * Returned Value:
+ *   0
+ *
+ ************************************************************************************/
 
 int nrf24l01_settxpower(FAR struct nrf24l01_dev_s *dev, int outpower);
 
-/** Get the current TX output power.
+/************************************************************************************
+ * Get the current TX output power.
  *
  * Note that hardware supports only -18, -12, -6 and 0 dBm values.
  *
- * \param dev Pointer to an nRF24L01 device structure
- * \return outpower Output power (in dBm)
- **/
+ * Input Parmeters:
+ *   dev Pointer to an nRF24L01 device structure
+ *
+ * Returned Value:
+ *   outpower Output power (in dBm)
+ *
+ ************************************************************************************/
 
 int nrf24l01_gettxpower(FAR struct nrf24l01_dev_s *dev);
 
-/** Set transmission data rate
-
- * \param dev Pointer to an nRF24L01 device structure
- * \return datarate Data rate
- **/
-
-int nrf24l01_setdatarate(FAR struct nrf24l01_dev_s *dev, nrf24l01_datarate_t datarate);
-
-/** Set radio frequency.
+/************************************************************************************
+ * Set transmission data rate
  *
- * \param dev Pointer to an nRF24L01 device structure
- * \param freq New frequency value  (in Mhz: 2400 to 2525)
+ * Input Parmeters:
+ *   dev Pointer to an nRF24L01 device structure
  *
- * \return OK
- **/
+ * Returned Value:
+ *   datarate Data rate
+ *
+ ************************************************************************************/
+
+int nrf24l01_setdatarate(FAR struct nrf24l01_dev_s *dev,
+                         nrf24l01_datarate_t datarate);
+
+/************************************************************************************
+ * Set radio frequency.
+ *
+ * Input Parmeters:
+ *   dev Pointer to an nRF24L01 device structure
+ *   freq New frequency value  (in Mhz: 2400 to 2525)
+ *
+ * Returned Value:
+ *   OK
+ *
+ ************************************************************************************/
 
 int nrf24l01_setradiofreq(FAR struct nrf24l01_dev_s *dev, uint32_t freq);
 
-/** Get current radio frequency.
+/************************************************************************************
+ * Get current radio frequency.
  *
- * \param dev Pointer to an nRF24L01 device structure
+ * Input Parmeters:
+ *   dev Pointer to an nRF24L01 device structure
  *
- * \return Radio frequency  (in Mhz)
- **/
+ * Returned Value:
+ *   Radio frequency  (in Mhz)
+ *
+ ************************************************************************************/
 
 uint32_t nrf24l01_getradiofreq(FAR struct nrf24l01_dev_s *dev);
 
-/** Configure address length.
+/************************************************************************************
+ * Configure address length.
  *
- * \param dev Pointer to an nRF24L01 device structure
- * \param width Address width to use (3-5)
- * \return 0
- **/
+ * Input Parmeters:
+ *   dev Pointer to an nRF24L01 device structure
+ *   width Address width to use (3-5)
+ *
+ * Returned Value:
+ *   0
+ *
+ ************************************************************************************/
 
 int nrf24l01_setaddrwidth(FAR struct nrf24l01_dev_s *dev, uint32_t width);
 
-/** Change the current lifecycle state of the nRF24L01+ chip.
+/************************************************************************************
+ * Change the current lifecycle state of the nRF24L01+ chip.
  *
- * \param dev Pointer to an nRF24L01 device structure
- * \param state New state to put the nRF24L01 module into
- **/
+ * Input Parmeters:
+ *   dev Pointer to an nRF24L01 device structure
+ *   state New state to put the nRF24L01 module into
+ *
+ ************************************************************************************/
 
 int nrf24l01_changestate(FAR struct nrf24l01_dev_s *dev, nrf24l01_state_t state);
 
-/** Send data to the default address.
+/************************************************************************************
+ * Send data to the default address.
  *
- * \param dev Pointer to an nRF24L01 device structure
- * \param data Pointer on the data buffer
- * \param datalen Length of the buffer (in bytes)
+ * Input Parmeters:
+ *   dev Pointer to an nRF24L01 device structure
+ *   data Pointer on the data buffer
+ *   datalen Length of the buffer (in bytes)
  *
- * \return
- **/
+ * Returned Value:
+ *
+ ************************************************************************************/
 
-int nrf24l01_send(FAR struct nrf24l01_dev_s *dev, FAR const uint8_t *data, size_t datalen);
+int nrf24l01_send(FAR struct nrf24l01_dev_s *dev, FAR const uint8_t *data,
+                  size_t datalen);
 
-/** Send data to the specified address.
+/************************************************************************************
+ * Send data to the specified address.
  *
- * \param dev Pointer to an nRF24L01 device structure
- * \param data Pointer on the data buffer
- * \param datalen Length of the buffer (in bytes)
- * \param destaddr Destination address
+ * Input Parmeters:
+ *   dev Pointer to an nRF24L01 device structure
+ *   data Pointer on the data buffer
+ *   datalen Length of the buffer (in bytes)
+ *   destaddr Destination address
  *
- * \return
- **/
+ * Returned Value:
+ *
+ ************************************************************************************/
 
 int nrf24l01_sendto(FAR struct nrf24l01_dev_s *dev, FAR const uint8_t *data,
     size_t datalen, FAR const uint8_t *destaddr);
 
-/** Get the retransmits count of the last transmission.
+/************************************************************************************
+ * Get the retransmits count of the last transmission.
  * This value is meaningful only if auto-acknowledge is enabled.
  *
- * \param dev Pointer to an nRF24L01 device structure
- * \return Retransmit count, or NRF24L01_XMIT_MAXRT if no ACK received  (transmission failure)
- */
+ * Input Parmeters:
+ *   dev Pointer to an nRF24L01 device structure
+ *
+ * Returned Value:
+ *   Retransmit count, or NRF24L01_XMIT_MAXRT if no ACK received (transmission
+ *   failure)
+ *
+ ************************************************************************************/
 
 int nrf24l01_xmitcount(FAR struct nrf24l01_dev_s *dev);
 
-
 #ifdef CONFIG_WL_NRF24L01_RXSUPPORT
 
-/** Read the next received frame.
+/************************************************************************************
+ * Read the next received frame.
  *
- * \param dev Pointer to an nRF24L01 device structure
- * \param buffer Pointer on buffer used to store the received frame bytes
- * \param buflen Length of the buffer (in bytes)
- * \param recvpipe Pointer to a byte value used to store the pipe number of the frame
+ *   dev Pointer to an nRF24L01 device structure
+ *   buffer Pointer on buffer used to store the received frame bytes
+ *   buflen Length of the buffer (in bytes)
+ *   recvpipe Pointer to a byte value used to store the pipe number of the frame
  *     (use NULL if the pipe number info is not required)
  *
- * \return Length of the actual data
- **/
+ * Returned Value:
+ *   Length of the actual data
+ *
+ ************************************************************************************/
 
 ssize_t nrf24l01_recv(struct nrf24l01_dev_s *dev, uint8_t *buffer,
     size_t buflen, uint8_t *recvpipe);

@@ -284,12 +284,12 @@ void inode_semgive(void)
  *
  ****************************************************************************/
 
-FAR struct inode *inode_search(const char **path,
+FAR struct inode *inode_search(FAR const char **path,
                                FAR struct inode **peer,
                                FAR struct inode **parent,
-                               const char **relpath)
+                               FAR const char **relpath)
 {
-  const char       *name  = *path + 1; /* Skip over leading '/' */
+  FAR const char   *name  = *path + 1; /* Skip over leading '/' */
   FAR struct inode *node  = root_inode;
   FAR struct inode *left  = NULL;
   FAR struct inode *above = NULL;

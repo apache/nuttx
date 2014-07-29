@@ -251,9 +251,10 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
-#define EXTERN extern
+#  define EXTERN extern
 #endif
 
 struct cc1101_dev_s;
@@ -318,7 +319,7 @@ struct c1101_rfsettings_s
  * RF Configuration Database
  ****************************************************************************/
 
-// \todo Recalculate ERP in maximum power level
+/* TODO Recalculate ERP in maximum power level */
 
 /* 868 MHz, GFSK, 100 kbps, ISM Region 1 (Europe only)
  *
@@ -371,90 +372,124 @@ EXTERN const struct c1101_rfsettings_s cc1101_rfsettings_ISM2_905MHzGFSK250kbps;
  * Public Function Prototypes
  ****************************************************************************/
 
-/** Initialize Chipcon CC1101 Chip.
+/****************************************************************************
+ * Initialize Chipcon CC1101 Chip.
  *  After initialization CC1101 is ready to listen, receive and transmit
  *  messages on the default channel 0 at given RF configuration.
  *
- * \param spi SPI Device Structure
- * \param isrpin Select the CC1101_PIN_GDOx used to signal interrupts
- * \param rfsettings Pointer to default RF Settings loaded at boot time.
- * \return Pointer to newly allocated CC1101 structure or NULL on error with errno set.
+ * Input Parameters:
+ *   spi SPI Device Structure
+ *   isrpin Select the CC1101_PIN_GDOx used to signal interrupts
+ *   rfsettings Pointer to default RF Settings loaded at boot time.
+ *
+ * Returned Value:
+ *   Pointer to newly allocated CC1101 structure or NULL on error with errno
+ *   set.
  *
  * Possible errno as set by this function on error:
  *  - ENODEV: When device addressed is not compatible or it is not a CC1101
  *  - EFAULT: When there is no device
  *  - ENOMEM: Out of kernel memory to allocate the device
- *  - EBUSY: When device is already addressed by other device driver (not yet supported by low-level driver)
- **/
+ *  - EBUSY: When device is already addressed by other device driver (not yet
+ *    supported by low-level driver)
+ *
+ ****************************************************************************/
 
 struct cc1101_dev_s * cc1101_init(struct spi_dev_s * spi, uint8_t isrpin,
     uint32_t pinset, const struct c1101_rfsettings_s * rfsettings);
 
-/** Deinitialize Chipcon CC1101 Chip
+/****************************************************************************
+ ** Deinitialize Chipcon CC1101 Chip
  *
- * \param dev Device to CC1101 device structure, as returned by the cc1101_init()
- * \return OK On success
+ * Input Parameters:
+ *   dev Device to CC1101 device structure, as returned by the cc1101_init()
  *
- **/
+ * Returned Value:
+ *   OK On success
+ *
+ ****************************************************************************/
 
 int cc1101_deinit(struct cc1101_dev_s * dev);
 
-/** Power up device, start conversion. \return Zero on success. */
+/****************************************************************************
+ * Power up device, start conversion. Returns zero on success.
+ ****************************************************************************/
 
 int cc1101_powerup(struct cc1101_dev_s * dev);
 
-/** Power down device, stop conversion. \return Zero on success. */
+/****************************************************************************
+ * Power down device, stop conversion. Returns zero on success.
+ ****************************************************************************/
 
 int cc1101_powerdown(struct cc1101_dev_s * dev);
 
-/** Set Multi Purpose Output Function. \return Zero on success. */
+/****************************************************************************
+ * Set Multi Purpose Output Function. Returns zero on success.
+ ****************************************************************************/
 
 int cc1101_setgdo(struct cc1101_dev_s * dev, uint8_t pin, uint8_t function);
 
-/** Set RF settings. Use one from the database above. */
+/****************************************************************************
+ * Set RF settings. Use one from the database above.
+ ****************************************************************************/
 
-int cc1101_setrf(struct cc1101_dev_s * dev, const struct c1101_rfsettings_s *settings);
+int cc1101_setrf(struct cc1101_dev_s * dev,
+                 const struct c1101_rfsettings_s *settings);
 
-/** Set Channel.
+/****************************************************************************
+ * Set Channel.
  *  Note that regulatory check is made and sending may be prohibited.
  *
- * \retval 0 On success, sending and receiving is allowed.
- * \retval 1 Only receive mode is allowed.
- * \retval <0 On error.
- */
+ * Returned Value:
+ *   0 On success, sending and receiving is allowed.
+ *   1 Only receive mode is allowed.
+ *   <0 On error.
+ *
+ ****************************************************************************/
 
 int cc1101_setchannel(struct cc1101_dev_s * dev, uint8_t channel);
 
-/** Set Output Power
+/****************************************************************************
+ * Set Output Power
  *
- * \param power Value from 0 - 8, where 0 means power off, and values
+ * Input Parameters:
+ *   power Value from 0 - 8, where 0 means power off, and values
  *  from 1 .. 8 denote the following output power in dBm:
  *   {-30, -20, -15, -10, -5, 0, 5, 10} [dBm]
  *
  * If power is above the regulatory limit (defined by the RF settings)
  * it is limited.
  *
- * \return Actual output power in range from 0..8.
- */
+ * Returned Value:
+ *   Actual output power in range from 0..8.
+ *
+ ****************************************************************************/
 
 uint8_t cc1101_setpower(struct cc1101_dev_s * dev, uint8_t power);
 
-/** Convert RSSI as obtained from CC1101 to [dBm] */
+/****************************************************************************
+ * Convert RSSI as obtained from CC1101 to [dBm] */
 
 int cc1101_calcRSSIdBm(int rssi);
 
-/** Enter receive mode and wait for a packet.
+/****************************************************************************
+ * Enter receive mode and wait for a packet.
  *  If transmission is in progress, receive mode is entered upon its
  *  completion. As long cc1101_idle() is not called, each transmission
  *  returns to receive mode.
  *
- * \param dev Device to CC1101 structure
- * \return Zero on success.
- */
+ * Input Parameters:
+ *   dev Device to CC1101 structure
+ *
+ * Returned Value:
+ *   Zero on success.
+ *
+ ****************************************************************************/
 
 int cc1101_receive(struct cc1101_dev_s * dev);
 
-/** Read received packet
+/****************************************************************************
+ * Read received packet
  *
  * If size of buffer is too small then the remaining part of data can
  * be discarded by the driver.
@@ -470,33 +505,45 @@ int cc1101_receive(struct cc1101_dev_s * dev);
  *
  * NOTE: messages length are typically defined by the MAC, transmit/
  *   receive windows at some rate.
- */
+ *
+ ****************************************************************************/
 
 int cc1101_read(struct cc1101_dev_s * dev, uint8_t * buf, size_t size);
 
-/** Write data to be send, using the cc1101_send()
+/****************************************************************************
+ * Write data to be send, using the cc1101_send()
  *
- * \param dev Device to CC1101 structure
- * \param buf Pointer to data.
- * \param size Size must be within limits, otherwise data is truncated.
- *    Present driver limitation supports a single cc1101_write()
- *    prioer cc1101_send() is called.
- */
+ * Input Parameters:
+ *   dev  Device to CC1101 structure
+ *   buf  Pointer to data.
+ *   size Size must be within limits, otherwise data is truncated.
+ *        Present driver limitation supports a single cc1101_write()
+ *        prioer cc1101_send() is called.
+ *
+ ****************************************************************************/
 
 int cc1101_write(struct cc1101_dev_s * dev, const uint8_t * buf, size_t size);
 
-/** Send data previously writtenusing cc1101_write()
+/****************************************************************************
+ * Send data previously written using cc1101_write()
  *
- * \param dev Device to CC1101 structure
- * \return Zero on success.
- */
+ * Input Parameters:
+ *   dev Device to CC1101 structure
+ *
+ * Returned Value:
+ *   Zero on success.
+ *
+ ****************************************************************************/
 
 int cc1101_send(struct cc1101_dev_s * dev);
 
-/** Enter idle state (after reception and transmission completes).
+/****************************************************************************
+ * Enter idle state (after reception and transmission completes).
  *
- * \return Zero on success.
- */
+ * Returned Value:
+ *   Zero on success.
+ *
+ ****************************************************************************/
 
 int cc1101_idle(struct cc1101_dev_s * dev);
 

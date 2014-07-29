@@ -56,7 +56,7 @@
  ****************************************************************************/
 /* Configuration ************************************************************
  *
- * CONFIG_AUDIO_WM8904 - Enabled WM8904 support
+ * CONFIG_AUDIO_WM8904 - Enables WM8904 support
  * CONFIG_WM8904_INITVOLUME - The initial volume level in the range {0..1000}
  * CONFIG_WM8904_INFLIGHT - Maximum number of buffers that the WM8904 driver
  *   will send to the I2S driver before any have completed.
@@ -161,14 +161,14 @@ struct wm8904_lower_s
    * interrupts should be configured on both rising and falling edges
    * so that contact and loss-of-contact events can be detected.
    *
-   * attach  - Attach or detacth the WM8904 interrupt handler to the GPIO
+   * attach  - Attach or detach the WM8904 interrupt handler to the GPIO
    *           interrupt
    * enable  - Enable or disable the GPIO interrupt
    */
 
-  int  (*attach)(FAR const struct wm8904_lower_s *lower, wm8904_handler_t isr,
-                 FAR void *arg);
-  void (*enable)(FAR const struct wm8904_lower_s *lower, bool enable);
+  CODE int  (*attach)(FAR const struct wm8904_lower_s *lower,
+                      wm8904_handler_t isr, FAR void *arg);
+  CODE void (*enable)(FAR const struct wm8904_lower_s *lower, bool enable);
 };
 
 /****************************************************************************
