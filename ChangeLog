@@ -7874,3 +7874,6 @@
 	* fs/fs_automount.c and include/nuttx/fs/automount.h (plus hooks in other
 	  files):  Add support for an auto-mounter that will automatically mount
 	  and unmount a file system a media is inserted and removed (2014-7-29 .
+	* configs/sama5d4-ek/src/sam_automount.c:  Add automounter support for
+	  HSMCI0 and HSMCI1 (2014-7-29).
+
