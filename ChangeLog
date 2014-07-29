@@ -7876,4 +7876,11 @@
 	  and unmount a file system a media is inserted and removed (2014-7-29 .
 	* configs/sama5d4-ek/src/sam_automount.c:  Add automounter support for
 	  HSMCI0 and HSMCI1 (2014-7-29).
-
+	* configs/sama5d4-ek/Kconfig and src/sam_hsmci.c: Minor warning/latent
+	  bug clean-up of auto-mounter logic (2014-7-29).
+	* configs/sama5d4-ek/README.txt anand src/sam_nsh.c, fs/fs_automount.c,
+	  and include/nuttx/fs/automount.h: Cosmetic updates to comments and
+	  README files and some naming (2014-7-29).
+	* configs/sama5d4-ek/nsh/defconfig and nxwm/defconfig: The SAMA5D4-EK
+	  NSH and NxWM configurations now have the auto-mounter configured to
+	  automatically mount the FAT file system on HSMCI0 at /mnt/sdcard (2014-7-29).
