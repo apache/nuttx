@@ -52,11 +52,16 @@
 #include "chip/sam_pit.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
-/* The PIT counter runs at a rate of the main clock (MCK) divided by 16 */
+/* The PIT counter runs at a rate of the main clock (MCK) divided by 16.
+ *
+ * On the SAMA5D4, the clocking to the PIC may be divided down from MCK.
+ * Perhaps because of H32MXDIV?  We will let the board.h tell us the correct
+ * PIT include clock by defining BOARD_PIT_FREQUENCY.
+ */
 
-#define PIT_CLOCK (BOARD_MCK_FREQUENCY >> 4)
+#define PIT_CLOCK (BOARD_PIT_FREQUENCY >> 4)
 
 /* The desired timer interrupt frequency is provided by the definition
  * CLK_TCK (see include/time.h).  CLK_TCK defines the desired number of
