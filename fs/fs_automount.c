@@ -397,7 +397,7 @@ static void automount_timeout(int argc, uint32_t arg1, ...)
  * Name: automount_worker
  *
  * Description:
- *   Performs automount actions on the worker thread.
+ *   Performs auto-mount actions on the worker thread.
  *
  * Input Parameters:
  *   arg - Work argument set by work_queue()
@@ -450,7 +450,7 @@ static void automount_worker(FAR void *arg)
  *
  * Input Parameters:
  *   lower - Persistent board configuration data
- *   arg - Data associated with the automounter
+ *   arg - Data associated with the auto-mounter
  *   inserted - True: Media has been inserted. False: media has been removed
  *
  * Returned Value:
@@ -523,13 +523,13 @@ static int automount_interrupt(FAR const struct automount_lower_s *lower,
  * Name: automount_initialize
  *
  * Description:
- *   Configure the automounter.
+ *   Configure the auto mounter.
  *
  * Input Parameters:
  *   lower - Persistent board configuration data
  *
  * Returned Value:
- *   A void* handle.  The only use for this handle is with auto_uninitialize().
+ *   A void* handle.  The only use for this handle is with automount_uninitialize().
  *   NULL is returned on any failure.
  *
  ****************************************************************************/
@@ -542,7 +542,7 @@ FAR void *automount_initialize(FAR const struct automount_lower_s *lower)
   fvdbg("lower=%p\n", lower);
   DEBUGASSERT(lower);
 
-  /* Allocate an automounter state structure */
+  /* Allocate an auto-mounter state structure */
 
   priv = (FAR struct automounter_state_s *)
     kzalloc(sizeof(struct automounter_state_s));
@@ -563,7 +563,7 @@ FAR void *automount_initialize(FAR const struct automount_lower_s *lower)
   if (!priv->wdog)
     {
       fdbg("ERROR: Failed to create a timer\n");
-      auto_uninitialize(priv);
+      automount_uninitialize(priv);
       return NULL;
     }
 
@@ -590,7 +590,7 @@ FAR void *automount_initialize(FAR const struct automount_lower_s *lower)
   if (ret < 0)
     {
       fdbg("ERROR: Failed to attach automount interrupt: %d\n", ret);
-      auto_uninitialize(priv);
+      automount_uninitialize(priv);
       return NULL;
     }
 
@@ -599,7 +599,7 @@ FAR void *automount_initialize(FAR const struct automount_lower_s *lower)
 }
 
 /****************************************************************************
- * Name: auto_uninitialize
+ * Name: automount_uninitialize
  *
  * Description:
  *   Stop the automounter and free resources that it used.  NOTE that the
@@ -613,7 +613,7 @@ FAR void *automount_initialize(FAR const struct automount_lower_s *lower)
  *
  ****************************************************************************/
 
-void auto_uninitialize(FAR void *handle)
+void automount_uninitialize(FAR void *handle)
 {
   FAR struct automounter_state_s *priv = (FAR struct automounter_state_s *)handle;
   FAR const struct automount_lower_s *lower;

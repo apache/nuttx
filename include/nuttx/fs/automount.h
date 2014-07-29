@@ -161,7 +161,7 @@ extern "C"
  *   lower - Persistent board configuration data
  *
  * Returned Value:
- *   A void* handle.  The only use for this handle is with auto_uninitialize().
+ *   A void* handle.  The only use for this handle is with automount_uninitialize().
  *   NULL is returned on any failure.
  *
  ****************************************************************************/
@@ -169,7 +169,7 @@ extern "C"
 FAR void *automount_initialize(FAR const struct automount_lower_s *lower);
 
 /****************************************************************************
- * Name: auto_uninitialize
+ * Name: automount_uninitialize
  *
  * Description:
  *   Stop the automounter and free resources that it used.  NOTE that the
@@ -183,7 +183,7 @@ FAR void *automount_initialize(FAR const struct automount_lower_s *lower);
  *
  ****************************************************************************/
 
-void auto_uninitialize(FAR void *handle);
+void automount_uninitialize(FAR void *handle);
 
 #undef EXTERN
 #ifdef __cplusplus
