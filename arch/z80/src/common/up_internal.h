@@ -63,7 +63,7 @@
 #include "chip/switch.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Determine which (if any) console driver to use.  If a console is enabled
