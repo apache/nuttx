@@ -198,7 +198,7 @@ config SAMA5D4EK_HSMCI0_AUTOMOUNT_FSTYPE
 
 config SAMA5D4EK_HSMCI0_AUTOMOUNT_BLKDEV
 	string "HSMCI0 block device"
-	default "/dev/mmcds0"
+	default "/dev/mmcsd0"
 
 config SAMA5D4EK_HSMCI0_AUTOMOUNT_MOUNTPOINT
 	string "HSMCI0 mount point"
@@ -227,11 +227,11 @@ config SAMA5D4EK_HSMCI1_AUTOMOUNT_FSTYPE
 
 config SAMA5D4EK_HSMCI1_AUTOMOUNT_BLKDEV
 	string "HSMCI1 block device"
-	default "/dev/mmcds0"
+	default "/dev/mmcsd1"
 
 config SAMA5D4EK_HSMCI1_AUTOMOUNT_MOUNTPOINT
 	string "HSMCI1 mount point"
-	default "/mnt/sdcard0"
+	default "/mnt/sdcard1"
 
 config SAMA5D4EK_HSMCI1_AUTOMOUNT_DDELAY
 	int "HSMCI1 debounce delay (milliseconds)"
