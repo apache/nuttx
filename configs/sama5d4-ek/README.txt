@@ -80,6 +80,7 @@ Contents
   - Networking
   - AT25 Serial FLASH
   - HSMCI Card Slots
+  - Auto-Mounter
   - USB Ports
   - USB High-Speed Device
   - USB High-Speed Host
@@ -1573,6 +1574,9 @@ HSMCI Card Slots
         nsh> cat /mnt/sd1/atest.txt
         This is a test
 
+       NOTE:  See the next section entitled "Auto-Mounter" for another way
+       to mount your SD card.
+
     4) Before removing the card, you must umount the file system.  This is
        equivalent to "ejecting" or "safely removing" the card on Windows:  It
        flushes any cached data to an SD card and makes the SD card unavailable
@@ -1584,6 +1588,24 @@ HSMCI Card Slots
        that can be used by an application to automatically unmount the
        volume when it is removed.  But those callbacks are not used in
        these configurations.
+
+Auto-Mounter
+============
+
+  NuttX implements an auto-mounter than can make working with SD cards easier.  With the auto-mounter, the file system will be automatically mounted when the SD card in the SD card is inserted into the HSMCI slot and automatically unmounted when the SD card is removed.
+
+  Here is a sample configuration for the auto-mounter:
+
+    File System Configuration
+      CONFIG_FS_AUTOMOUNTER=y
+
+    Board-Specific Options
+      CONFIG_SAMA5D4EK_HSMCI0_AUTOMOUNT=y
+      CONFIG_SAMA5D4EK_HSMCI0_AUTOMOUNT_FSTYPE="vfat"
+      CONFIG_SAMA5D4EK_HSMCI0_AUTOMOUNT_BLKDEV="/dev/mmcsd0"
+      CONFIG_SAMA5D4EK_HSMCI0_AUTOMOUNT_MOUNTPOINT="/mnt/sdcard"
+      CONFIG_SAMA5D4EK_HSMCI0_AUTOMOUNT_DDELAY=1000
+      CONFIG_SAMA5D4EK_HSMCI0_AUTOMOUNT_UDELAY=2000
 
 USB Ports
 =========
@@ -3486,7 +3508,8 @@ Configurations
 
     4. This configuration supports logging of debug output to a circular
        buffer in RAM.  This feature is discussed fully in this Wiki page:
-       http://nuttx.org/doku.php?id=wiki:howtos:syslog . Relevant configuration settings are summarized below:
+       http://nuttx.org/doku.php?id=wiki:howtos:syslog . Relevant
+       configuration settings are summarized below:
 
        File System:
        CONFIG_SYSLOG_ENABLE=n      : (Output debug info unconditionally)
@@ -3756,9 +3779,18 @@ Configurations
        in a different manner, this HSMCI1 slot may not be useful to you
        anyway.
 
+       The auto-mounter is also enabled.  See the section above entitled
+       "Auto-Mounter".
+
        STATUS:  Seems to be completely functional.  TX DMA is currently
        disabled; there was a problem at one time but that has probably
        been fixed.  HSCMI with TX DMA re-enabled needs to be verified.
+
+       There does seem to be an issue with removing then re-inserting
+       an SD card.  In that case, the SD card will fail to mount the
+       when the card is re-inserted.  Hopefully this problem will be
+       fixed before you read this (in which case, I forgot to remove
+       this note).
 
    13. Networking is supported via EMAC0.  See the "Networking" section
        above for detailed configuration settings.  DHCP is not used in
@@ -3870,20 +3902,24 @@ Configurations
 
        This configuration depends on media files in the default mountpoint
        at /mnt/sdard.  You will need to mount the media before running
-       NxPlayer.  Here are the general steps to play a file:
+       NxPlayer,  Here are the general steps to play a file:
 
          a. You will need an (full size) SD card containing the .WAV files
             that you want to play (.WAV is only format supported as of this
             writing).  That SD card should be inserted in the HSMCI0 media
             slot A (best done before powering up).
 
-         b. Then from NSH prompt, you need to mount the media volume like:
+         b. If the NuttX auto-mounter is enabled and properly configured,
+            then the FAT file system appear at /mnt/sdcard.  If the auto-
+            mounter is not enabled, then here are the steps to manually
+            mount the FAT file system:
+
+             Then from NSH prompt, you need to mount the media volume like:
 
               nsh> mount -t vfat /dev/mmcsd0 /mnt/sdcard
 
-            NOTE:  The SAMA5D4-EK board support allows an application to
-            connect to the SD card detect signal.  That application could
-            then auto-mount the SD card.
+            NOTE:  The automatically is enabled by default in this
+            configuration.
 
          c. Then you can run the media player like:
 
