@@ -7868,3 +7868,6 @@
 	  It is performed only from the DRAMBOOT loader (2014-7-28).
 	* drivers/audio/wm8904.c: Fix some compile problems with the WM8904 driver
 	  due to recent audio subsystem changes (2014-7-28).
+	* arch/arm/src/sama5/sam_timerisr.c and configs/sama5d3*/include/board*.h:
+	  Correct system timer frequency.  Input clock is MCK/2, not MCK
+	  (2014-7-29).
