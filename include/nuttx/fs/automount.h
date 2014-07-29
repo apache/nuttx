@@ -66,6 +66,7 @@
 #define AUTOMOUNT_DETACH(s)         ((s)->attach(s,NULL,NULL))
 #define AUTOMOUNT_ENABLE(s)         ((s)->enable(s,true))
 #define AUTOMOUNT_DISABLE(s)        ((s)->enable(s,false))
+#define AUTOMOUNT_INSERTED(s)       ((s)->inserted(s))
 
 /****************************************************************************
  * Public Types
@@ -127,10 +128,11 @@ struct automount_lower_s
    * enable  - Enable or disable the media change interrupt
    */
 
-  CODE int  (*attach)(FAR const struct automount_lower_s *lower,
+  CODE int (*attach)(FAR const struct automount_lower_s *lower,
                       automount_handler_t isr, FAR void *arg);
   CODE void (*enable)(FAR const struct automount_lower_s *lower,
                       bool enable);
+  CODE bool (*inserted)(FAR const struct automount_lower_s *lower);
 };
 
 /****************************************************************************
@@ -170,7 +172,8 @@ FAR void *automount_initialize(FAR const struct automount_lower_s *lower);
  * Name: auto_uninitialize
  *
  * Description:
- *   Stop the automounter and free resources that it used.
+ *   Stop the automounter and free resources that it used.  NOTE that the
+ *   mount is left in its last state mounted/unmounted state.
  *
  * Input Parameters:
  *   handle - The value previously returned by automount_initialize();

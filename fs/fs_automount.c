@@ -562,6 +562,11 @@ FAR void *automount_initialize(FAR const struct automount_lower_s *lower)
       return NULL;
     }
 
+  /* Handle the initial state of the mount on the caller's thread */
+
+  priv->inserted = AUTOMOUNT_INSERTED(lower);
+  automount_worker(priv);
+
   /* Attach and enable automounter interrupts */
 
   ret = AUTOMOUNT_ATTACH(lower, automount_interrupt, priv);
@@ -580,7 +585,8 @@ FAR void *automount_initialize(FAR const struct automount_lower_s *lower)
  * Name: auto_uninitialize
  *
  * Description:
- *   Stop the automounter and free resources that it used.
+ *   Stop the automounter and free resources that it used.  NOTE that the
+ *   mount is left in its last state mounted/unmounted state.
  *
  * Input Parameters:
  *   handle - The value previously returned by automount_initialize();
