@@ -106,6 +106,10 @@ ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
 
 CSRCS += fs_fsync.c fs_mount.c fs_umount.c fs_foreachmountpoint.c
 
+ifeq ($(CONFIG_FS_AUTOMOUNTER),y)
+CSRCS += fs_automount.c
+endif
+
 include fat/Make.defs
 include romfs/Make.defs
 include nxffs/Make.defs

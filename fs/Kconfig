@@ -9,6 +9,26 @@ config DISABLE_MOUNTPOINT
 	bool "Disable support for mount points"
 	default n
 
+config FS_AUTOMOUNTER
+	bool "Auto-mounter"
+	default n
+	depends on !DISABLE_MOUNTPOINT
+	---help---
+		The automounter provides an OS-internal mechanism for automatically
+		mounting and unmounting removable media as the media is inserted and
+		removed.  See include/nuttx/fs/automout.h for interfacing details.
+
+config FS_AUTOMOUNTER_DEBUG
+	bool "Auto-mounter debug"
+	default n
+	depends on FS_AUTOMOUNTER && DEBUG
+	---help---
+		Normally, the auto-mounter will generate debug output when sub-system
+		level file system debug is enabled.  This option will select debug
+		output from the logic related to the auto-mount feature even when file
+		system debug is not enable.  This is useful primarily for in vivo
+		unit testing of the auto-mount feature.
+
 config DISABLE_PSEUDOFS_OPERATIONS
 	bool "Disable pseudo-filesystem operations"
 	default y if DEFAULT_SMALL
