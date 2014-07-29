@@ -240,6 +240,8 @@ static int sam_hsmci1_cardetect(int irq, void *regs)
 
   sam_automount_event(HSMCI1_SLOTNO, sam_cardinserted(HSMCI1_SLOTNO));
 #endif
+
+  return ret;
 }
 #endif
 
