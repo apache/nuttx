@@ -169,6 +169,7 @@
  * REVISIT:  I am not sure why this is.  Perhaps because of H32MXDIV?
  */
 
+#define BOARD_PIT_FREQUENCY        (BOARD_MCK_FREQUENCY >> 1)
 #define BOARD_USART_FREQUENCY      (BOARD_MCK_FREQUENCY >> 1)
 
 /* HSMCI clocking

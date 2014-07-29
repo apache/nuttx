@@ -127,7 +127,9 @@
  * but not for the SAMA5D3.
  */
 
+#define BOARD_PIT_FREQUENCY        BOARD_MCK_FREQUENCY
 #define BOARD_USART_FREQUENCY      BOARD_MCK_FREQUENCY
+
 #if defined(CONFIG_SAMA5_EHCI) || defined(CONFIG_SAMA5_OHCI) || \
     defined(CONFIG_SAMA5_UDPHS)
 
