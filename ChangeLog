@@ -7871,3 +7871,6 @@
 	* arch/arm/src/sama5/sam_timerisr.c and configs/sama5d3*/include/board*.h:
 	  Correct system timer frequency.  Input clock is MCK/2, not MCK
 	  (2014-7-29).
+	* fs/fs_automount.c and include/nuttx/fs/automount.h (plus hooks in other
+	  files):  Add support for an auto-mounter that will automatically mount
+	  and unmount a file system a media is inserted and removed (2014-7-29 .

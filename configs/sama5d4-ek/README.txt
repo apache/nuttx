@@ -3801,9 +3801,17 @@ Configurations
          CONFIG_NSH_USBKBD=y
          CONFIG_NSH_USBKBD_DEVNAME="/dev/kbda"
 
-       [Using the RAMLOG with the USB keyboard is, however, probably a bad
-       idea because you cannot type the 'dmesg' command to view the RAMLOG
-       without a keyboard attached.]
+       The keyboard is currently configured to poll at 80 MSec intervals.
+       This is controlled by:
+
+          CONFIG_HIDKBD_POLLUSEC=80000
+
+       which can be reduced if better keyboard response is required.
+
+       NOTE: You will not have access to the RAMLOG via the NSH dmseg command
+       if the USB keyboard is selected.  You can still access NSH via Telnet
+       or you may want to disable the RAMLOG so that debug information comes
+       out on the console.
 
    16. Support the USB high-speed USB device driver (UDPHS) is not enabled by
        default but could be enabled by changing the NuttX configuration file as
@@ -3992,20 +4000,12 @@ Configurations
 
        a. The NxWM provides a graphics-based terminals (called NxConsoles);
           The console command line is still available within NxConsole
-          windows once NxWM is up and running.  The console input is still
-          via stdin (the host terminal window), but console output will go
-          to the NxConsole terminal.
+          windows once NxWM is up and running.  The console input (stdin) is
+          provided via a USB HID keyboard, but console output will go to the
+          NxConsole terminal.  See below for more information about the USB
+          HID keyboard input,
 
-          NOTES:
-
-          i)  Later I plan to integrate a USB keyboard so that the
-              console input will come from a keyboard attached to the
-              SAMA5D4-EK.
-          ii) It would also not be a difficult task to add a serial console
-              as part of the NxWM console.  That is an option if a serial
-              console is really necessary but is not currently planned.
-
-       b. Telnet NSH sessions are still supported and this is, in general,
+|      b. Telnet NSH sessions are still supported and this is, in general,
           the convenient way to access the shell (and RAMLOG).
 
        As with the NSH configuration, debug output will still go to the
@@ -4013,7 +4013,51 @@ Configurations
        Instead, you will need use the dmesg command from an NxConsole or
        from a Telnet session to see the debug output
 
-    5. Media Player
+    5. USB HID Keyboard Input
+
+       USB keyboard support is enabled in the default configuration, but
+       can be disabled:
+
+         CONFIG_USBHOST_HIDKBD=y
+
+       Not all keyboards may be supported; only "boot" keyboards will be
+       recognized.
+
+       The USB keyboard is configured to replace the NSH stdin device some
+       that NSH will take input from the USB keyboard.  These are the
+       relevant configuration options:
+
+         CONFIG_NSH_USBKBD=y
+         CONFIG_NSH_USBKBD_DEVNAME="/dev/kbda"
+
+       When NSH comes up, it will attempt to open /dev/kbda and replace
+       stdin with that device.  If no USB keyboard is connected when you
+       start the NxConsole, you will see:
+
+         Waiting for a keyboard...
+
+       NSH will then automatically start when the keyboard is attached:
+
+         NuttShell (NSH) NuttX-7.3
+         nsh>
+
+       If the keyboard is detached, NSH will stop and wait for you to
+       re-attach the keyboard:
+
+         nsh> nsh: nsh_session: readline failed: 1
+         Please re-connect the keyboard...
+
+       And the session will restart when the keyboard is reconnected.
+
+       The keyboard is currently configured to poll at 80 MSec intervals.
+       That might not be fast enough for you if you are a fast typist.  This
+       polling rate is controlled by:
+
+          CONFIG_HIDKBD_POLLUSEC=80000
+
+       which can be reduced if better keyboard response is required.
+
+    6. Media Player
 
        This configuration has the media player application enabled.  That
        player is still a work in progress and is only partially integrated
