@@ -105,8 +105,9 @@ int dram_main(int argc, char *argv)
    * awkward:
    *
    *   1. Open JP23 (disabling the WM8904 data line)
-   *   2. Execute DRAMBOOT.  The PMIC will be disabled while JP23 is closed.
-   *   3. At the prompt to "Send the Intel HEX file now", close JP23
+   *   2. Execute DRAMBOOT.  The WM8904 will be disabled while JP23 is open.
+   *   3. At the prompt to "Send the Intel HEX file now", close JP23,
+   *      enabling the WM8904.
    *   4. Send the NuttX file.  When NuttX starts, the WM8904 is initialized,
    *      JP23 will be closed and the PMIC will be initialized.
    */
