@@ -92,7 +92,7 @@
  * asked to mount the AT25 part
  */
 
-#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_SAM4EEK_AT25_AUTOMOUNT)
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_SAM4EEK_AT25_BLOCKMOUNT)
 #  undef HAVE_AT25
 #endif
 

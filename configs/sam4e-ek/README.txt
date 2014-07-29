@@ -572,7 +572,7 @@ AT25 Serial FLASH
       CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
 
     Board Selection
-      CONFIG_SAM4EEK_AT25_AUTOMOUNT=y       : Mounts AT25 for NSH
+      CONFIG_SAM4EEK_AT25_BLOCKMOUNT=y       : Mounts AT25 for NSH
       CONFIG_SAM4EEK_AT25_FTL=y             : Create block driver for FAT
 
   You can then format the AT25 FLASH for a FAT file system and mount the

@@ -199,6 +199,8 @@ static void automount_mount(FAR struct automounter_state_s *priv)
   FAR const struct automount_lower_s *lower = priv->lower;
   int ret;
 
+  fvdbg("Mounting %s\n", lower->mountpoint);
+
   /* Check if the something is already mounted at the mountpoint. */
 
   ret = automount_findinode(lower->mountpoint);
@@ -273,6 +275,8 @@ static int automount_unmount(FAR struct automounter_state_s *priv)
 {
   FAR const struct automount_lower_s *lower = priv->lower;
   int ret;
+
+  fvdbg("Unmounting %s\n", lower->mountpoint);
 
   /* Check if the something is already mounted at the mountpoint. */
 
@@ -366,6 +370,7 @@ static void automount_timeout(int argc, uint32_t arg1, ...)
     (FAR struct automounter_state_s *)((uintptr_t)arg1);
   int ret;
 
+  fllvdbg("Timeout!\n");
   DEBUGASSERT(argc == 1 && priv);
 
   /* Check the state of things.  This timeout at the interrupt level and
@@ -379,7 +384,7 @@ static void automount_timeout(int argc, uint32_t arg1, ...)
 
   /* Queue work to occur immediately. */
 
-  ret = work_queue(LPWORK, &priv->work, automount_worker, priv,  0);
+  ret = work_queue(LPWORK, &priv->work, automount_worker, priv, 0);
   if (ret < 0)
     {
       /* NOTE: Currently, work_cancel only returns success */
@@ -565,7 +570,19 @@ FAR void *automount_initialize(FAR const struct automount_lower_s *lower)
   /* Handle the initial state of the mount on the caller's thread */
 
   priv->inserted = AUTOMOUNT_INSERTED(lower);
-  automount_worker(priv);
+
+  /* Set up the first action at a delay from the initialization time (to
+   * allow time for any extended block driver initialization to complete.
+   */
+
+  ret = work_queue(LPWORK, &priv->work, automount_worker, priv,
+                   priv->lower->ddelay);
+  if (ret < 0)
+    {
+      /* NOTE: Currently, work_cancel only returns success */
+
+      fdbg("ERROR: Failed to schedule work: %d\n", ret);
+    }
 
   /* Attach and enable automounter interrupts */
 

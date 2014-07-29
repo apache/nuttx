@@ -55,18 +55,19 @@
  ************************************************************************************/
 /* Configuration ************************************************************/
 
-#define HAVE_HSMCI      1
-#define HAVE_AT25       1
-#define HAVE_NAND       1
-#define HAVE_USBHOST    1
-#define HAVE_USBDEV     1
-#define HAVE_USBOVCUR   1
-#define HAVE_USBMONITOR 1
-#define HAVE_NETWORK    1
-#define HAVE_MAXTOUCH   1
-#define HAVE_WM8904     1
-#define HAVE_AUDIO_NULL 1
-#define HAVE_PMIC       1
+#define HAVE_HSMCI       1
+#define HAVE_AT25        1
+#define HAVE_NAND        1
+#define HAVE_AUTOMOUNTER 1
+#define HAVE_USBHOST     1
+#define HAVE_USBDEV      1
+#define HAVE_USBOVCUR    1
+#define HAVE_USBMONITOR  1
+#define HAVE_NETWORK     1
+#define HAVE_MAXTOUCH    1
+#define HAVE_WM8904      1
+#define HAVE_AUDIO_NULL  1
+#define HAVE_PMIC        1
 
 /* HSMCI */
 /* Can't support MMC/SD if the card interface(s) are not enable */
@@ -100,7 +101,7 @@
  * asked to mount the NAND part
  */
 
-#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_SAMA5D4EK_NAND_AUTOMOUNT)
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_SAMA5D4EK_NAND_BLOCKMOUNT)
 #  undef HAVE_NAND
 #endif
 
@@ -145,7 +146,7 @@
  * asked to mount the AT25 part
  */
 
-#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_SAMA5D4EK_AT25_AUTOMOUNT)
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_SAMA5D4EK_AT25_BLOCKMOUNT)
 #  undef HAVE_AT25
 #endif
 
@@ -218,6 +219,75 @@
 #     define HSMCI1_MINOR  CONFIG_NSH_MMCSDMINOR
 #  endif
 #else
+#endif
+
+/* Automounter.  Currently only works with HSMCI. */
+
+#if !defined(CONFIG_FS_AUTOMOUNTER) || !defined(HAVE_HSMCI)
+#  undef HAVE_AUTOMOUNTER
+#endif
+
+#ifndef CONFIG_SAMA5_HSMCI0
+#  undef CONFIG_SAMA5D4EK_HSMCI0_AUTOMOUNT
+#endif
+
+#ifndef CONFIG_SAMA5_HSMCI1
+#  undef CONFIG_SAMA5D4EK_HSMCI1_AUTOMOUNT
+#endif
+
+#if !defined(CONFIG_SAMA5D4EK_HSMCI0_AUTOMOUNT) && \
+    !defined(CONFIG_SAMA5D4EK_HSMCI1_AUTOMOUNT)
+#  undef HAVE_AUTOMOUNTER
+#endif
+
+#ifdef HAVE_AUTOMOUNTER
+#  ifdef CONFIG_SAMA5D4EK_HSMCI0_AUTOMOUNT
+  /* HSMCI0 Automounter defaults */
+
+#    ifndef CONFIG_SAMA5D4EK_HSMCI0_AUTOMOUNT_FSTYPE
+#      define CONFIG_SAMA5D4EK_HSMCI0_AUTOMOUNT_FSTYPE "vfat"
+#    endif
+
+#    ifndef CONFIG_SAMA5D4EK_HSMCI0_AUTOMOUNT_BLKDEV
+#      define CONFIG_SAMA5D4EK_HSMCI0_AUTOMOUNT_BLKDEV "/dev/mmcds0"
+#    endif
+
+#    ifndef CONFIG_SAMA5D4EK_HSMCI0_AUTOMOUNT_MOUNTPOINT
+#      define CONFIG_SAMA5D4EK_HSMCI0_AUTOMOUNT_MOUNTPOINT "/mnt/sdcard0"
+#    endif
+
+#    ifndef CONFIG_SAMA5D4EK_HSMCI0_AUTOMOUNT_DDELAY
+#      define CONFIG_SAMA5D4EK_HSMCI0_AUTOMOUNT_DDELAY 1000
+#    endif
+
+#    ifndef CONFIG_SAMA5D4EK_HSMCI0_AUTOMOUNT_UDELAY
+#      define CONFIG_SAMA5D4EK_HSMCI0_AUTOMOUNT_UDELAY 2000
+#    endif
+#  endif
+
+#  ifdef CONFIG_SAMA5D4EK_HSMCI1_AUTOMOUNT
+  /* HSMCI1 Automounter defaults */
+
+#    ifndef CONFIG_SAMA5D4EK_HSMCI1_AUTOMOUNT_FSTYPE
+#      define CONFIG_SAMA5D4EK_HSMCI1_AUTOMOUNT_FSTYPE "vfat"
+#    endif
+
+#    ifndef CONFIG_SAMA5D4EK_HSMCI1_AUTOMOUNT_BLKDEV
+#      define CONFIG_SAMA5D4EK_HSMCI1_AUTOMOUNT_BLKDEV "/dev/mmcds0"
+#    endif
+
+#    ifndef CONFIG_SAMA5D4EK_HSMCI1_AUTOMOUNT_MOUNTPOINT
+#      define CONFIG_SAMA5D4EK_HSMCI1_AUTOMOUNT_MOUNTPOINT "/mnt/sdcard0"
+#    endif
+
+#    ifndef CONFIG_SAMA5D4EK_HSMCI1_AUTOMOUNT_DDELAY
+#      define CONFIG_SAMA5D4EK_HSMCI1_AUTOMOUNT_DDELAY 1000
+#    endif
+
+#    ifndef CONFIG_SAMA5D4EK_HSMCI1_AUTOMOUNT_UDELAY
+#      define CONFIG_SAMA5D4EK_HSMCI1_AUTOMOUNT_UDELAY 2000
+#    endif
+#  endif
 #endif
 
 /* USB Host / USB Device */
@@ -856,6 +926,52 @@ int sam_hsmci_initialize(int slotno, int minor);
 
 #ifdef HAVE_HSMCI
 bool sam_cardinserted(int slotno);
+#endif
+
+/************************************************************************************
+ * Name:  sam_automount_initialize
+ *
+ * Description:
+ *   Configure auto-mounters for each enable and so configured HSMCI
+ *
+ * Input Parameters:
+ *   None
+ *
+ *  Returned Value:
+ *    None
+ *
+ ************************************************************************************/
+
+#ifdef HAVE_AUTOMOUNTER
+void sam_automount_initialize(void);
+#endif
+
+/************************************************************************************
+ * Name:  sam_automount_event
+ *
+ * Description:
+ *   The HSMCI card detection logic has detected an insertion or removal event.  It
+ *   has already scheduled the MMC/SD block driver operations.  Now we need to
+ *   schedule the auto-mount event which will occur with a substantial delay to make
+ *   sure that everything has settle down.
+ *
+ * Input Parameters:
+ *   slotno - Identifies the HSMCI0 slot: HSMCI0 or HSMCI1_SLOTNO.  There is a
+ *      terminology problem here:  Each HSMCI supports two slots, slot A and slot B.
+ *      Only slot A is used.  So this is not a really a slot, but an HSCMI peripheral
+ *      number.
+ *   inserted - True if the card is inserted in the slot.  False otherwise.
+ *
+ *  Returned Value:
+ *    None
+ *
+ *  Assumptions:
+ *    Interrupts are disabled.
+ *
+ ************************************************************************************/
+
+#ifdef HAVE_AUTOMOUNTER
+void sam_automount_event(int slotno, bool inserted);
 #endif
 
 /************************************************************************************

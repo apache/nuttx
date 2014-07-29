@@ -135,6 +135,12 @@ int nsh_archinitialize(void)
 #endif
 #endif
 
+#ifdef HAVE_AUTOMOUNTER
+  /* Initialize the automounter */
+
+  sam_automount_initialize();
+#endif
+
 #ifdef HAVE_USBHOST
   /* Initialize USB host operation.  sam_usbhost_initialize() starts a thread
    * will monitor for USB connection and disconnection events.

@@ -107,7 +107,7 @@ struct automount_lower_s
 
   uint32_t ddelay;
 
-  /* Unmount delay time in sysem clock ticks.  If a volume has open
+  /* Unmount delay time in system clock ticks.  If a volume has open
    * references at the time that the media is removed, then we will be
    * unable to unmount it.  In that case, hopefully, the clients of the
    * mount will eventually fail with file access errors and eventually close

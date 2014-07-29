@@ -1434,8 +1434,8 @@ AT25 Serial FLASH
       CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
 
     Board Selection
-      CONFIG_SAMA5D4EK_AT25_AUTOMOUNT=y         : Mounts AT25 for NSH
-      CONFIG_SAMA5D4EK_AT25_FTL=y               : Create block driver for FAT
+      CONFIG_SAMA5D4EK_AT25_BLOCKMOUNT=y    : Mounts AT25 for NSH
+      CONFIG_SAMA5D4EK_AT25_FTL=y           : Create block driver for FAT
 
   NOTE: that you must close JP6 in order to enable the AT25 FLASH chip select.
 
@@ -2119,8 +2119,8 @@ NAND Support
       to enable SDRAM as described above.
 
     Board Selection
-      CONFIG_SAMA5D4EK_NAND_AUTOMOUNT=y     : Enable FS support on NAND
-      CONFIG_SAMA5D4EK_NAND_NXFFS=y         : Use the NXFFS file system
+      CONFIG_SAMA5D4EK_NAND_BLOCKMOUNT=y : Enable FS support on NAND
+      CONFIG_SAMA5D4EK_NAND_NXFFS=y      : Use the NXFFS file system
 
       Other file systems are not recommended because only NXFFS can handle
       bad blocks and only NXFFS performs wear-levelling.
@@ -2143,8 +2143,8 @@ NAND Support
       Defaults for all other NXFFS settings should be okay.
 
     Board Selection
-      CONFIG_SAMA5D4EK_NAND_AUTOMOUNT=y     : Enable FS support on NAND
-      CONFIG_SAMA5D4EK_NAND_FTL=y           : Use an flash translation layer
+      CONFIG_SAMA5D4EK_NAND_BLOCKOMOUNT=y : Enable FS support on NAND
+      CONFIG_SAMA5D4EK_NAND_FTL=y         : Use an flash translation layer
 
       NOTE:  FTL will require some significant buffering because of
       the large size of the NAND flash blocks.  You will also need
@@ -2161,7 +2161,7 @@ NAND Support
     Using NAND with NXFFS
     ---------------------
 
-    With the options CONFIG_SAMA5D4EK_NAND_AUTOMOUNT=y and
+    With the options CONFIG_SAMA5D4EK_NAND_BLOCKMOUNT=y and
     CONFIG_SAMA5D4EK_NAND_NXFFS=y, the NAND FLASH will be mounted in the NSH
     start-up logic before the NSH prompt appears.  There is no feedback as
     to whether or not the mount was successful.  You can, however, see the

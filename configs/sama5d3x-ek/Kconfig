@@ -68,7 +68,7 @@ config SAMA5D3xEK_NOR_START
 		option:  If SAMA5D3xEK_NOR_START is defined, then it will not wait but
 		will, instead, immediately start the program in NOR FLASH.
 
-config SAMA5_NAND_AUTOMOUNT
+config SAMA5D3XEK_NAND_BLOCKMOUNT
 	bool "NAND FLASH auto-mount"
 	default n
 	depends on NSH_ARCHINIT && SAMA5_EBICS3_NAND
@@ -78,7 +78,7 @@ config SAMA5_NAND_AUTOMOUNT
 choice
 	prompt "NAND FLASH configuration"
 	default SAMA5D3xEK_NAND_NXFFS
-	depends on SAMA5_NAND_AUTOMOUNT
+	depends on SAMA5D3XEK_NAND_BLOCKMOUNT
 
 config SAMA5D3xEK_NAND_FTL
 	bool "Create NAND FLASH block driver"
@@ -107,7 +107,7 @@ config SAMA5D3xEK_NAND_NXFFS
 
 endchoice # NAND FLASH configuration
 
-config SAMA5D3xEK_AT25_AUTOMOUNT
+config SAMA5D3xEK_AT25_BLOCKMOUNT
 	bool "AT25 serial FLASH auto-mount"
 	default n
 	depends on NSH_ARCHINIT && SAMA5_SPI0 && MTD_AT25
@@ -117,7 +117,7 @@ config SAMA5D3xEK_AT25_AUTOMOUNT
 choice
 	prompt "AT25 serial FLASH configuration"
 	default SAMA5D3xEK_AT25_FTL
-	depends on SAMA5D3xEK_AT25_AUTOMOUNT
+	depends on SAMA5D3xEK_AT25_BLOCKMOUNT
 
 config SAMA5D3xEK_AT25_FTL
 	bool "Create AT25 Serial FLASH block driver"
@@ -137,7 +137,7 @@ config SAMA5D3xEK_AT25_NXFFS
 
 endchoice # AT25 serial FLASH configuration
 
-config SAMA5D3xEK_AT24_AUTOMOUNT
+config SAMA5D3xEK_AT24_BLOCKMOUNT
 	bool "AT24 Serial EEPROM auto-mount"
 	default n
 	depends on NSH_ARCHINIT && SAMA5_TWI0 && MTD_AT24XX
@@ -158,7 +158,7 @@ config SAMA5D3xEK_AT24_AUTOMOUNT
 choice
 	prompt "AT24 serial EPPROM configuration"
 	default SAMA5D3xEK_AT24_FTL
-	depends on SAMA5D3xEK_AT24_AUTOMOUNT
+	depends on SAMA5D3xEK_AT24_BLOCKMOUNT
 
 config SAMA5D3xEK_AT24_FTL
 	bool "Create AT24 block driver"

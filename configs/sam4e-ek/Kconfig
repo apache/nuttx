@@ -17,7 +17,7 @@ config SAM4EEK_120MHZ
 
 endchoice # CPU Frequency
 
-config SAM4EEK_AT25_AUTOMOUNT
+config SAM4EEK_AT25_BLOCKMOUNT
 	bool "AT25 serial FLASH auto-mount"
 	default n
 	depends on SAM34_SPI0 && MTD_AT25
@@ -27,7 +27,7 @@ config SAM4EEK_AT25_AUTOMOUNT
 choice
 	prompt "AT25 serial FLASH configuration"
 	default SAM4EEK_AT25_FTL
-	depends on SAM4EEK_AT25_AUTOMOUNT
+	depends on SAM4EEK_AT25_BLOCKMOUNT
 
 config SAM4EEK_AT25_FTL
 	bool "Create AT25 Serial FLASH block driver"

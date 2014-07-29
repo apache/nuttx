@@ -106,7 +106,7 @@ config SAMA5D4EK_DRAM_BOOT
 		will simply origin your program at 0x2000:0000 as required by the
 		sdram_main bootloader (vs. 0x2000:8000 as required by U-Boot).
 
-config SAMA5D4EK_NAND_AUTOMOUNT
+config SAMA5D4EK_NAND_BLOCKMOUNT
 	bool "NAND FLASH auto-mount"
 	default n
 	depends on NSH_ARCHINIT && SAMA5_EBICS3_NAND
@@ -116,7 +116,7 @@ config SAMA5D4EK_NAND_AUTOMOUNT
 choice
 	prompt "NAND FLASH configuration"
 	default SAMA5D4EK_NAND_NXFFS
-	depends on SAMA5D4EK_NAND_AUTOMOUNT
+	depends on SAMA5D4EK_NAND_BLOCKMOUNT
 
 config SAMA5D4EK_NAND_FTL
 	bool "Create NAND FLASH block driver"
@@ -145,7 +145,7 @@ config SAMA5D4EK_NAND_NXFFS
 
 endchoice # NAND FLASH configuration
 
-config SAMA5D4EK_AT25_AUTOMOUNT
+config SAMA5D4EK_AT25_BLOCKMOUNT
 	bool "AT25 serial FLASH auto-mount"
 	default n
 	depends on (NSH_ARCHINIT || SAMA5D4EK_AT25_MAIN) && SAMA5_SPI0 && MTD_AT25
@@ -155,7 +155,7 @@ config SAMA5D4EK_AT25_AUTOMOUNT
 choice
 	prompt "AT25 serial FLASH configuration"
 	default SAMA5D4EK_AT25_FTL
-	depends on SAMA5D4EK_AT25_AUTOMOUNT
+	depends on SAMA5D4EK_AT25_BLOCKMOUNT
 
 config SAMA5D4EK_AT25_FTL
 	bool "Create AT25 Serial FLASH block driver"
@@ -182,6 +182,67 @@ config SAMA5D4EK_AT25_NXFFS
 		NXFFS is that it can be very slow.
 
 endchoice # AT25 serial FLASH configuration
+
+if FS_AUTOMOUNTER
+
+config SAMA5D4EK_HSMCI0_AUTOMOUNT
+	bool "HSMCI0 automounter"
+	default n
+	depends on SAMA5_HSMCI0
+
+if SAMA5D4EK_HSMCI0_AUTOMOUNT
+
+config SAMA5D4EK_HSMCI0_AUTOMOUNT_FSTYPE
+	string "HSMCI0 file system type"
+	default "vfat"
+
+config SAMA5D4EK_HSMCI0_AUTOMOUNT_BLKDEV
+	string "HSMCI0 block device"
+	default "/dev/mmcds0"
+
+config SAMA5D4EK_HSMCI0_AUTOMOUNT_MOUNTPOINT
+	string "HSMCI0 mount point"
+	default "/mnt/sdcard0"
+
+config SAMA5D4EK_HSMCI0_AUTOMOUNT_DDELAY
+	int "HSMCI0 debounce delay (milliseconds)"
+	default 1000
+
+config SAMA5D4EK_HSMCI0_AUTOMOUNT_UDELAY
+	int "HSMCI0 unmount retry delay (milliseconds)"
+	default 2000
+
+endif # SAMA5D4EK_HSMCI0_AUTOMOUNT
+
+config SAMA5D4EK_HSMCI1_AUTOMOUNT
+	bool "HSMCI1 automounter"
+	default n
+	depends on SAMA5_HSMCI1
+
+if SAMA5D4EK_HSMCI1_AUTOMOUNT
+
+config SAMA5D4EK_HSMCI1_AUTOMOUNT_FSTYPE
+	string "HSMCI1 file system type"
+	default "vfat"
+
+config SAMA5D4EK_HSMCI1_AUTOMOUNT_BLKDEV
+	string "HSMCI1 block device"
+	default "/dev/mmcds0"
+
+config SAMA5D4EK_HSMCI1_AUTOMOUNT_MOUNTPOINT
+	string "HSMCI1 mount point"
+	default "/mnt/sdcard0"
+
+config SAMA5D4EK_HSMCI1_AUTOMOUNT_DDELAY
+	int "HSMCI1 debounce delay (milliseconds)"
+	default 1000
+
+config SAMA5D4EK_HSMCI1_AUTOMOUNT_UDELAY
+	int "HSMCI1 unmount retry delay (milliseconds)"
+	default 2000
+
+endif # SAMA5D4EK_HSMCI1_AUTOMOUNT
+endif # FS_AUTOMOUNTER
 
 if INPUT_MXT
 
