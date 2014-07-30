@@ -560,8 +560,8 @@ Running NuttX from SDRAM
   advance but instead has to be calculated from the bootloader PLL configuration.
   See the TODO list at the end of this file for further information.
 
-NuttX Configuration
--------------------
+  NuttX Configuration
+  -------------------
 
   In order to run from SDRAM, NuttX must be built at origin 0x20008000 in
   SDRAM (skipping over SDRAM memory used by the bootloader).  The following
@@ -577,8 +577,8 @@ NuttX Configuration
   SDRAM.  Since NuttX is already running from SDRAM, it must accept the SDRAM
   configuration as set up by the bootloader.
 
-Boot sequence
--------------
+  Boot sequence
+  -------------
 
   Reference: http://www.at91.com/linux4sam/bin/view/Linux4SAM/GettingStarted
 
@@ -606,8 +606,8 @@ Boot sequence
 
    4. Then NuttX runs from SDRAM
 
-NAND FLASH Memory Map
----------------------
+  NAND FLASH Memory Map
+  ---------------------
 
   Reference: http://www.at91.com/linux4sam/bin/view/Linux4SAM/GettingStarted
 
@@ -619,8 +619,8 @@ NAND FLASH Memory Map
   0x0020:0000 - 0x007f:ffff: NuttX
   0x0080:0000 - end:         Available for use as a NAND file system
 
-Programming the AT91Boostrap Binary
------------------------------------
+  Programming the AT91Boostrap Binary
+  -----------------------------------
 
   Reference: http://www.at91.com/linux4sam/bin/view/Linux4SAM/AT91Bootstrap
 
@@ -664,8 +664,8 @@ Programming the AT91Boostrap Binary
      at91bootstrap binary file and to program the binary to the NandFlash.
    - Close SAM-BA, remove the USB Device cable.
 
-Programming U-Boot
--------------------
+  Programming U-Boot
+  -------------------
 
   Reference http://www.at91.com/linux4sam/bin/view/Linux4SAM/U-Boot
 
@@ -709,8 +709,8 @@ Programming U-Boot
 
   You should now be able to interrupt with U-Boot vie the DBGU interface.
 
-Load NuttX with U-Boot on AT91 boards
--------------------------------------
+  Load NuttX with U-Boot on AT91 boards
+  -------------------------------------
 
   Reference http://www.at91.com/linux4sam/bin/view/Linux4SAM/U-Boot
 
@@ -3005,7 +3005,7 @@ TM7000 LCD/Touchscreen
     CONFIG_NX_DISABLE_32BPP=y
 
     Graphics Support -> Input Devices ->
-    CONFIG_NX_XYINPUT=y                      : Build in mouse/touchscreen support (not used)
+    CONFIG_NX_XYINPUT=y                    : Build in mouse/touchscreen support (not used)
     CONFIG_NX_KBD=y                        : Build in keyboard support (not used)
 
     Graphics Support -> Framed Window Borders ->
