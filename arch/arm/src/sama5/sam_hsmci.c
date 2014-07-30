@@ -1571,7 +1571,6 @@ static int sam_hsmci_interrupt(struct sam_dev_s *priv)
 
                   priv->buffer    = NULL;
                   priv->remaining = 0;
-
                   sam_endtransfer(priv, SDIOWAIT_TRANSFERDONE);
                 }
             }
@@ -3081,6 +3080,8 @@ static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
 static void sam_callback(void *arg)
 {
   struct sam_dev_s *priv = (struct sam_dev_s*)arg;
+  irqstate_t flags;
+  int ret;
 
   /* Is a callback registered? */
 
@@ -3088,6 +3089,7 @@ static void sam_callback(void *arg)
   fvdbg("Callback %p(%p) cbevents: %02x cdstatus: %02x\n",
         priv->callback, priv->cbarg, priv->cbevents, priv->cdstatus);
 
+  flags = irqsave();
   if (priv->callback)
     {
       /* Yes.. Check for enabled callback events */
@@ -3121,26 +3123,39 @@ static void sam_callback(void *arg)
 
       priv->cbevents = 0;
 
-      /* Callbacks cannot be performed in the context of an interrupt handler.
-       * If we are in an interrupt handler, then queue the callback to be
-       * performed later on the work thread.
+      /* This function is called either from (1) the context of the calling
+       * thread or from the the context of (2) card detection logic.  The
+       * caller may or may not have interrupts disabled (we have them
+       & disabled here!).
+       *
+       * So to minimize the possibility of recursive behavior and to assure
+       * that callback is always performed outside of the interrupt handling
+       * context and with interrupts enabled, the callback is always performed
+       * on the lower priority work thread.
        */
 
-      if (up_interrupt_context())
-        {
-          /* Yes.. queue it */
+      /* First cancel any existing work */
 
-           fllvdbg("Queuing callback to %p(%p)\n", priv->callback, priv->cbarg);
-          (void)work_queue(LPWORK, &priv->cbwork, (worker_t)priv->callback, priv->cbarg, 0);
+      ret = work_cancel(LPWORK, &priv->cbwork);
+      if (ret < 0)
+        {
+          /* NOTE: Currently, work_cancel only returns success */
+
+          fdbg("ERROR: Failed to cancel work: %d\n", ret);
         }
-      else
-        {
-          /* No.. then just call the callback here */
 
-          fvdbg("Callback to %p(%p)\n", priv->callback, priv->cbarg);
-          priv->callback(priv->cbarg);
+      fllvdbg("Queuing callback to %p(%p)\n", priv->callback, priv->cbarg);
+      ret = work_queue(LPWORK, &priv->cbwork, (worker_t)priv->callback,
+                       priv->cbarg, 0);
+      if (ret < 0)
+        {
+          /* NOTE: Currently, work_queue only returns success */
+
+          fdbg("ERROR: Failed to schedule work: %d\n", ret);
         }
     }
+
+  irqrestore(flags);
 }
 
 /****************************************************************************
@@ -3342,6 +3357,9 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
  * Returned Values:
  *   None
  *
+ * Assumptions:
+ *   May be called from an interrupt handler.
+ *
  ****************************************************************************/
 
 void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
@@ -3350,7 +3368,10 @@ void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
   uint8_t cdstatus;
   irqstate_t flags;
 
-  /* Update card status */
+  /* Update card status.  Interrupts are disabled here because if we are
+   * not called from an interrupt handler, then the following steps must
+   * still be atomic.
+   */
 
   flags = irqsave();
   cdstatus = priv->cdstatus;
