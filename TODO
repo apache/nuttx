@@ -19,7 +19,7 @@ nuttx/
   (4)  USB (drivers/usbdev, drivers/usbhost)
  (10)  Libraries (libc/, )
  (12)  File system/Generic drivers (fs/, drivers/)
-  (5)  Graphics subystem (graphics/)
+  (6)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
   (5)  Build system / Toolchains
@@ -1275,6 +1275,13 @@ o Graphics subystem (graphics/)
   Priority:    Medium.  Not important for day-to-day testing but would be
                a critical improvement if NxConsole were to be used in a
                product.
+
+  Title:       NXCONSOLE VT100 SUPPORT
+  Description: If the NxConsole will be used with the Emacs-like command line
+               editor (CLE), then it will need to support VT100 cursor control
+               commands.
+  Status:      Open
+  Priority:    Low, the need has not yet arisen.
 
 o Pascal Add-On (pcode/)
   ^^^^^^^^^^^^^^^^^^^^^^
