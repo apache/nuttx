@@ -2312,7 +2312,7 @@ static void mmcsd_mediachange(FAR void *arg)
   if (SDIO_PRESENT(priv->dev))
     {
       /* No... process the card insertion.  This could cause chaos if we think
-       * that a card is already present and there are mounted filesystems!
+       * that a card is already present and there are mounted file systems!
        * NOTE that mmcsd_probe() will always re-enable callbacks appropriately.
        */
 
@@ -2374,7 +2374,7 @@ static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
         }
 
       /* Then send ACMD42 with the argument to disconnect the CD/DAT3
-       * pullup
+       * pull-up
        *
        * TODO: May want to disable, then re-enable around data transfers
        * to support card detection"
@@ -2455,7 +2455,7 @@ static int mmcsd_mmcinitialize(FAR struct mmcsd_state_s *priv)
    * slot.
    *
    * Send CMD2, ALL_SEND_CID. This implementation supports only one MMC slot.
-   * If mulitple cards were installed, each card would respond to CMD2 by
+   * If multiple cards were installed, each card would respond to CMD2 by
    * sending its CID (only one card completes the response at a time).  The
    * driver should send CMD2 and assign an RCAs until no response to
    * ALL_SEND_CID is received. CMD2 causes transition to identification state/
@@ -3023,6 +3023,10 @@ static int mmcsd_probe(FAR struct mmcsd_state_s *priv)
 
               SDIO_CALLBACKENABLE(priv->dev, SDIOMEDIA_EJECTED);
             }
+
+          /* REVISIT: There is a problem here.  If mmcsd_initialize() returns a
+           * failure, then no events are initialized.
+           */
         }
 
       /* In any event, we have probed this card */
@@ -3123,7 +3127,7 @@ static int mmcsd_hwinitialize(FAR struct mmcsd_state_s *priv)
    *
    *  1. Mechanical insertion that can be detected using the WP switch
    *     that is closed when a card is inserted into then SD slot (SD
-   *     "hot insertion capable" card conector only)
+   *     "hot insertion capable" card connector only)
    *  2. Electrical insertion that can be sensed using the pull-up resistor
    *     on CD/DAT3 (both SD/MMC),
    *  3. Or by periodic attempts to initialize the card from software.
