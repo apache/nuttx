@@ -185,6 +185,7 @@
  * I don't have any clue why at the moment.  This option suppresses TX DMA (only).
  */
 
+#undef  HSCMI_NORXDMA
 #define HSCMI_NOTXDMA            1
 
 /* Timing */
@@ -264,7 +265,7 @@
 #define HSMCI_DATA_TIMEOUT_ERRORS \
   ( HSMCI_INT_CSTOE | HSMCI_INT_DTOE )
 
-#define HSMCI_DATA_DMARECV_ERRORS \
+#define HSMCI_DATA_RECV_ERRORS \
   ( HSMCI_INT_OVRE  | HSMCI_INT_BLKOVRE | HSMCI_INT_CSTOE | HSMCI_INT_DTOE | \
     HSMCI_INT_DCRCE )
 
@@ -285,8 +286,10 @@
  *   1: DMA buffer transfer has completed.
  */
 
+#define HSMCI_RECV_INTS \
+  ( HSMCI_DATA_RECV_ERRORS | HSMCI_INT_RXRDY)
 #define HSMCI_DMARECV_INTS \
-  ( HSMCI_DATA_DMARECV_ERRORS | HSMCI_INT_XFRDONE /* | HSMCI_INT_DMADONE */ )
+  ( HSMCI_DATA_RECV_ERRORS | HSMCI_INT_XFRDONE /* | HSMCI_INT_DMADONE */ )
 #define HSMCI_DMASEND_INTS \
   ( HSMCI_DATA_DMASEND_ERRORS | HSMCI_INT_XFRDONE /* | HSMCI_INT_DMADONE */ )
 
@@ -404,6 +407,11 @@ struct sam_dev_s
   /* Interrupt mode data transfer support */
 
   uint32_t           xfrmask;    /* Interrupt enables for data transfer */
+
+  /* Interrupt mode data transfer support */
+
+  uint32_t          *buffer;     /* Address of current R/W buffer */
+  ssize_t            remaining;  /* Number of bytes remaining in the transfer */
 
   /* DMA data transfer support */
 
@@ -542,6 +550,10 @@ static int  sam_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
               uint32_t arg);
 static void sam_blocksetup(FAR struct sdio_dev_s *dev, unsigned int blocklen,
               unsigned int nblocks);
+static int  sam_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
+              size_t nbytes);
+static int  sam_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer,
+              size_t nbytes);
 static int  sam_cancel(FAR struct sdio_dev_s *dev);
 static int  sam_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd);
 static int  sam_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd,
@@ -567,10 +579,14 @@ static int  sam_registercallback(FAR struct sdio_dev_s *dev,
 #ifdef CONFIG_SDIO_DMA
 static bool sam_dmasupported(FAR struct sdio_dev_s *dev);
 #endif
+#ifndef HSCMI_NORXDMA
 static int  sam_dmarecvsetup(FAR struct sdio_dev_s *dev,
               FAR uint8_t *buffer, size_t buflen);
+#endif
+#ifndef HSCMI_NOTXDMA
 static int  sam_dmasendsetup(FAR struct sdio_dev_s *dev,
               FAR const uint8_t *buffer, size_t buflen);
+#endif
 
 /* Initialization/uninitialization/reset ************************************/
 
@@ -590,8 +606,8 @@ static const struct sdio_dev_s g_callbacks =
   .attach           = sam_attach,
   .sendcmd          = sam_sendcmd,
   .blocksetup       = sam_blocksetup,
-  .recvsetup        = sam_dmarecvsetup,
-  .sendsetup        = sam_dmasendsetup,
+  .recvsetup        = sam_recvsetup,
+  .sendsetup        = sam_sendsetup,
   .cancel           = sam_cancel,
   .waitresponse     = sam_waitresponse,
   .recvR1           = sam_recvshort,
@@ -607,8 +623,16 @@ static const struct sdio_dev_s g_callbacks =
   .registercallback = sam_registercallback,
 #ifdef CONFIG_SDIO_DMA
   .dmasupported     = sam_dmasupported,
+#ifndef HSCMI_NORXDMA
   .dmarecvsetup     = sam_dmarecvsetup,
+#else
+  .dmarecvsetup     = sam_recvsetup,
+#endif
+#ifndef HSCMI_NOTXDMA
   .dmasendsetup     = sam_dmasendsetup,
+#else
+  .dmasendsetup     = sam_sendsetup,
+#endif
 #endif
 };
 
@@ -1498,12 +1522,12 @@ static int sam_hsmci_interrupt(struct sam_dev_s *priv)
         }
 
       /* Handle in progress, interrupt driven data transfers ****************/
-      /* Do any of these interrupts signal the end a data transfer? */
+      /* Do any of these interrupts signal a data transfer event? */
 
       pending = enabled & priv->xfrmask;
       if (pending != 0)
         {
-          /* Yes.. the transfer is complete.  Did it complete with an error? */
+          /* Yes.. Did the transfer complete with an error? */
 
           if ((pending & HSMCI_DATA_ERRORS) != 0)
             {
@@ -1523,9 +1547,40 @@ static int sam_hsmci_interrupt(struct sam_dev_s *priv)
                   sam_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_ERROR);
                 }
             }
+
+          /* No, If RXRDY is enabled, then we are doing a non-DMA receive.
+           * We need to transfer word(s) from the RDR register to the user
+           * buffer.
+           */
+
+          else if ((pending & HSMCI_INT_RXRDY) != 0)
+            {
+              /* Interrupt mode data transfer support */
+
+              DEBUGASSERT(!priv->dmabusy && priv->xfrbusy && !priv->txbusy);
+              DEBUGASSERT(priv->buffer && priv->remaining > 0);
+
+              *priv->buffer++  = sam_getreg(priv, SAM_HSMCI_RDR_OFFSET);
+              priv->remaining -= sizeof(uint32_t);
+
+              /* Are we finished? */
+
+              if (priv->remaining <= 0)
+                {
+                  /* Yes.. End the transfer */
+
+                  priv->buffer    = NULL;
+                  priv->remaining = 0;
+
+                  sam_endtransfer(priv, SDIOWAIT_TRANSFERDONE);
+                }
+            }
+
+          /* Otherwise it must be a DMA transfer that completed successfully */
+
           else
             {
-              /* No.. Then the transfer must have completed successfully */
+              /* End the transfer */
 
               sam_endtransfer(priv, SDIOWAIT_TRANSFERDONE);
             }
@@ -2074,6 +2129,138 @@ static void sam_blocksetup(FAR struct sdio_dev_s *dev, unsigned int blocklen,
   regval = (blocklen << HSMCI_BLKR_BLKLEN_SHIFT) |
            (nblocks  << HSMCI_BLKR_BCNT_SHIFT);
   sam_putreg(priv, regval, SAM_HSMCI_BLKR_OFFSET);
+}
+
+/****************************************************************************
+ * Name: sam_recvsetup
+ *
+ * Description:
+ *   Setup hardware in preparation for data transfer from the card in non-DMA
+ *   (interrupt driven mode).  This method will do whatever controller setup
+ *   is necessary.  This would be called for SD memory just BEFORE sending
+ *   CMD13 (SEND_STATUS), CMD17 (READ_SINGLE_BLOCK), CMD18
+ *   (READ_MULTIPLE_BLOCKS), ACMD51 (SEND_SCR), etc.  Normally, SDIO_WAITEVENT
+ *   will be called to receive the indication that the transfer is complete.
+ *
+ * Input Parameters:
+ *   dev    - An instance of the SDIO device interface
+ *   buffer - Address of the buffer in which to receive the data
+ *   buflen - The number of bytes in the transfer
+ *
+ * Returned Value:
+ *   Number of bytes sent on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+static int sam_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
+                         size_t buflen)
+{
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev;
+
+  DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
+  DEBUGASSERT(((uint32_t)buffer & 3) == 0);
+
+  /* Initialize register sampling */
+
+  sam_xfrsampleinit(priv);
+  sam_xfrsample(priv, SAMPLENDX_BEFORE_SETUP);
+
+  /* Disable DMA handshaking */
+
+  sam_putreg(priv, 0, SAM_HSMCI_DMA_OFFSET);
+
+  /* Setup of the transfer configuration */
+
+  priv->dmabusy = false;
+  priv->xfrbusy = true;
+  priv->txbusy  = false;
+
+  /* Save the destination buffer information for use by the interrupt handler */
+
+  priv->buffer    = (uint32_t*)buffer;
+  priv->remaining = buflen;
+
+  /* And enable interrupts */
+
+  sam_configxfrints(priv, HSMCI_RECV_INTS);
+  sam_xfrsample(priv, SAMPLENDX_AFTER_SETUP);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: sam_sendsetup
+ *
+ * Description:
+ *   Setup hardware in preparation for data transfer from the card.  This method
+ *   will do whatever controller setup is necessary.  This would be called
+ *   for SD memory just AFTER sending CMD24 (WRITE_BLOCK), CMD25
+ *   (WRITE_MULTIPLE_BLOCK), ... and before SDIO_SENDDATA is called.
+ *
+ * Input Parameters:
+ *   dev    - An instance of the SDIO device interface
+ *   buffer - Address of the buffer containing the data to send
+ *   buflen - The number of bytes in the transfer
+ *
+ * Returned Value:
+ *   Number of bytes sent on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+static int sam_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer,
+                         size_t buflen)
+{
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev;
+  unsigned int nwords;
+  const uint32_t *ptr;
+  uint32_t sr;
+
+  DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
+  DEBUGASSERT(((uint32_t)buffer & 3) == 0);
+
+  /* Disable DMA handshaking */
+
+  sam_putreg(priv, 0, SAM_HSMCI_DMA_OFFSET);
+  sam_configxfrints(priv, HSMCI_DMASEND_INTS);
+
+  priv->dmabusy = false;
+  priv->xfrbusy = true;
+  priv->txbusy  = true;
+
+  /* Nullify register sampling */
+
+  sam_xfrsampleinit(priv);
+
+  /* Copy each word to the TX FIFO
+   *
+   * REVISIT:  If TX data underruns occur, then it may be necessary to
+   * disable pre-emption around this loop.
+   */
+
+  nwords = (buflen + 3) >> 2;
+  ptr = (const uint32_t *)buffer;
+
+  while (nwords > 0)
+    {
+      /* Check the HSMCI status */
+
+      sr = sam_getreg(priv, SAM_HSMCI_SR_OFFSET);
+      if ((sr & HSMCI_DATA_DMASEND_ERRORS) != 0)
+        {
+          /* Some fatal error has occurred */
+
+          fdbg("ERROR: sr %08x\n", sr);
+          return -EIO;
+        }
+      else if ((sr & HSMCI_INT_TXRDY) != 0)
+        {
+          /* TXRDY -- transfer another word */
+
+          sam_putreg(priv, *ptr++, SAM_HSMCI_TDR_OFFSET);
+          nwords--;
+        }
+    }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -2703,6 +2890,7 @@ static bool sam_dmasupported(FAR struct sdio_dev_s *dev)
  *
  ****************************************************************************/
 
+#ifndef HSCMI_NORXDMA
 static int sam_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
                             size_t buflen)
 {
@@ -2729,7 +2917,7 @@ static int sam_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   DEBUGASSERT(nblocks > 0 && blocksize > 0 && (blocksize & 3) == 0);
 
   /* Physical address of the HSCMI source register, either the TDR (for
-   * single transfers) or the first FIFO register, and the physcal address
+   * single transfers) or the first FIFO register, and the physical address
    * of the buffer in RAM.
    */
 
@@ -2777,6 +2965,7 @@ static int sam_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   sam_configxfrints(priv, HSMCI_DMARECV_INTS);
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: sam_dmasendsetup
@@ -2797,10 +2986,10 @@ static int sam_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
  *
  ****************************************************************************/
 
+#ifndef HSCMI_NOTXDMA
 static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
                             FAR const uint8_t *buffer, size_t buflen)
 {
-#ifndef HSCMI_NOTXDMA
   struct sam_dev_s *priv = (struct sam_dev_s *)dev;
   uint32_t paddr;
   uint32_t maddr;
@@ -2823,7 +3012,7 @@ static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
   DEBUGASSERT(nblocks > 0 && blocksize > 0 && (blocksize & 3) == 0);
 
   /* Physical address of the HSCMI source register, either the TDR (for
-   * single transfers) or the first FIFO register, and the physcal address
+   * single transfers) or the first FIFO register, and the physical address
    * of the buffer in RAM.
    */
 
@@ -2869,62 +3058,9 @@ static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   sam_xfrsample(priv, SAMPLENDX_AFTER_SETUP);
   sam_configxfrints(priv, HSMCI_DMASEND_INTS);
-
-#else
-  struct sam_dev_s *priv = (struct sam_dev_s *)dev;
-  unsigned int nwords;
-  const uint32_t *ptr;
-  uint32_t sr;
-
-  DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
-  DEBUGASSERT(((uint32_t)buffer & 3) == 0);
-
-  /* Disable DMA handshaking */
-
-  sam_putreg(priv, 0, SAM_HSMCI_DMA_OFFSET);
-  sam_configxfrints(priv, HSMCI_DMASEND_INTS);
-
-  priv->dmabusy = false;
-  priv->xfrbusy = true;
-  priv->txbusy  = true;
-
-  /* Nullify register sampling */
-
-  sam_xfrsampleinit(priv);
-
-  /* Copy each word to the TX FIFO
-   *
-   * REVISIT:  If TX data underruns occur, then it may be necessary to
-   * disable pre-emption around this loop.
-   */
-
-  nwords = (buflen + 3) >> 2;
-  ptr = (const uint32_t *)buffer;
-
-  while (nwords > 0)
-    {
-      /* Check the HSMCI status */
-
-      sr = sam_getreg(priv, SAM_HSMCI_SR_OFFSET);
-      if ((sr & HSMCI_DATA_DMASEND_ERRORS) != 0)
-        {
-          /* Some fatal error has occurred */
-
-          fdbg("ERROR: sr %08x\n", sr);
-          return -EIO;
-        }
-      else if ((sr & HSMCI_INT_TXRDY) != 0)
-        {
-          /* TXRDY -- transfer another word */
-
-          sam_putreg(priv, *ptr++, SAM_HSMCI_TDR_OFFSET);
-          nwords--;
-        }
-    }
-
-#endif
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Initialization/uninitialization/reset
