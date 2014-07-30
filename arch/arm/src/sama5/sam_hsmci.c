@@ -181,12 +181,10 @@
 #  endif
 #endif
 
-/* TX-DMA is not reliable.  Often, the TX DMA will hang after transferring 64 bytes or so.
- * I don't have any clue why at the moment.  This option suppresses TX DMA (only).
- */
+/* These were once helpful.  Perhaps they will be so again some time. */
 
-#undef  HSCMI_NORXDMA
-#define HSCMI_NOTXDMA            1
+#undef  HSCMI_NORXDMA            /* Define to disable RX DMA */
+#undef  HSCMI_NOTXDMA            /* Define to disable TX DMA */
 
 /* Timing */
 

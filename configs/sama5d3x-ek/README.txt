@@ -76,6 +76,7 @@ Contents
   - Networking
   - AT25 Serial FLASH
   - HSMCI Card Slots
+  - Auto-Mounter
   - USB Ports
   - USB High-Speed Device
   - USB High-Speed Host
@@ -1245,6 +1246,9 @@ HSMCI Card Slots
         nsh> cat /mnt/sd1/atest.txt
         This is a test
 
+       NOTE:  See the next section entitled "Auto-Mounter" for another way
+       to mount your SD card.
+
     4) Before removing the card, you must umount the file system.  This is
        equivalent to "ejecting" or "safely removing" the card on Windows:  It
        flushes any cached data to the card and makes the SD card unavailable
@@ -1256,6 +1260,29 @@ HSMCI Card Slots
        that can be used by an application to automatically unmount the
        volume when it is removed.  But those callbacks are not used in
        these configurations.
+
+Auto-Mounter
+============
+
+  NuttX implements an auto-mounter than can make working with SD cards
+  easier.  With the auto-mounter, the file system will be automatically
+  mounted when the SD card is inserted into the HSMCI slot and automatically
+  unmounted when the SD card is removed.
+
+  The auto-mounter is enable with:
+
+      CONFIG_FS_AUTOMOUNTER=y
+
+  However, to use the automounter you will to provide some additional
+  board-level support.  See configs/sama5d4-ek for and example of how
+  you might do this.
+
+  WARNING:  SD cards should never be removed without first unmounting
+  them.  This is to avoid data and possible corruption of the file
+  system.  Certainly this is the case if you are writing to the SD card
+  at the time of the removal.  If you use the SD card for read-only access,
+  however, then I cannot think of any reason why removing the card without
+  mounting would be harmful.
 
 USB Ports
 =========
@@ -3020,7 +3047,7 @@ Configurations
      configurations because most testing was done at 396MHz.  NAND has not
      been verified at these rates.
 
-   5. By default, all of these configurations run from ISRAM or NOR FLASH
+  5. By default, all of these configurations run from ISRAM or NOR FLASH
      (as indicated below in each description of the configuration).
      Operation from SDRAM is also an option as described in the paragraph
      entitled, "Running NuttX from SDRAM."
@@ -3464,19 +3491,23 @@ To-Do List
    booting directly into NOR FLASH.  So although I cannot confirm this
    behavior, this appears to be no longer an issue.
 
-3) Neither USB OHCI nor EHCI support Isochronous endpoints.  Interrupt
+2) Neither USB OHCI nor EHCI support Isochronous endpoints.  Interrupt
    endpoint support in the EHCI driver is untested (but works in similar
    EHCI drivers).
 
-4) HSCMI TX DMA support is currently commented out.
+3) HSCMI. CONFIG_MMCSD_MULTIBLOCK_DISABLE=y is set to disable multi-block
+   transfers because of some issues that I saw during testing.  The is very
+   low priority to me but might be important to you if you are need very
+   high performance SD card accesses.
 
-   Also, CONFIG_MMCSD_MULTIBLOCK_DISABLE=y is set to disable multi-block
-   transfers.
+   The last time I used HSMCI with a SAMA5D3, I had to disable TX DMA
+   in the HSMCI driver.  Much has changed since then and I have reverified
+   that TX DMA transfers are functional using a SAMA5D4.  The SAMA5D4,
+   however, has a different DMA subsystem.  So... if you suspect issues
+   HSMCI writes, you might try disabling the TX DMA again in the
+   sam_hsmci.c driver.
 
-   Both of these issues need to be revisited to determine there is or
-   is not a real problem.
-
-5) I believe that there is an issue when the internal AT25 FLASH is
+4) I believe that there is an issue when the internal AT25 FLASH is
    formatted by NuttX.  That format works fine with Linux, but does not
    appear to work with Windows.  Reformatting on Windows can resolve this.
    NOTE:  This is not a SAMA5Dx issue.
@@ -3485,30 +3516,30 @@ To-Do List
    formatting function (mkfatfs).  It is likely that these fixes will
    eliminate this issue, but that has not yet been verified.
 
-6) CAN testing has not yet been performed due to issues with cabling.  I
+5) CAN testing has not yet been performed due to issues with cabling.  I
    just do not have a good test bed (or sufficient CAN knowledge) for
    good CAN testing.
 
-7) There are lots of LCDC hardware features that are not tested with NuttX.
+6) There are lots of LCDC hardware features that are not tested with NuttX.
    The simple NuttX graphics system does not have support for all of the
    layers and other features of the LCDC.
 
-8) I have a Camera, but there is still no ISI driver.  I am not sure what to
+7) I have a Camera, but there is still no ISI driver.  I am not sure what to
    do with the camera.  NuttX needs something like V4L to provide the
    definition for what a camera driver is supposed to do.
 
    I will probably develop a test harness for ISI, but it is of only
    minimal value with no OS infrastructure to deal with images and video.
 
-9) GMAC has only been tested on a 10/100Base-T network.  I don't have a
+8) GMAC has only been tested on a 10/100Base-T network.  I don't have a
    1000Base-T network to support additional testing.
 
-10) Some drivers may require some adjustments if you intend to run from SDRAM.
-    That is because in this case macros like BOARD_MCK_FREQUENCY are not constants
-    but are instead function calls:  The MCK clock frequency is not known in
-    advance but instead has to be calculated from the bootloader PLL configuration.
+9) Some drivers may require some adjustments if you intend to run from SDRAM.
+   That is because in this case macros like BOARD_MCK_FREQUENCY are not constants
+   but are instead function calls:  The MCK clock frequency is not known in
+   advance but instead has to be calculated from the bootloader PLL configuration.
 
-    As of this writing, all drivers have been converted to run from SDRAM except
-    for the PWM and the Timer/Counter drivers.  These drivers use the
-    BOARD_MCK_FREQUENCY definition in more complex ways and will require some
-    minor redesign and re-testing before they can be available.
+   As of this writing, all drivers have been converted to run from SDRAM except
+   for the PWM and the Timer/Counter drivers.  These drivers use the
+   BOARD_MCK_FREQUENCY definition in more complex ways and will require some
+   minor redesign and re-testing before they can be available.
