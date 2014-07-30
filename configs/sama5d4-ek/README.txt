@@ -4060,30 +4060,27 @@ Configurations
        recognized.
 
        The USB keyboard is configured to replace the NSH stdin device some
-       that NSH will take input from the USB keyboard.  These are the
-       relevant configuration options:
+       that NSH will take input from the USB keyboard.  This has to be
+       done a little differently for the case of NxWM::CNxConsoles than
+       in the standard NSH configuration.  Here the relevant configuration
+       options are:
 
-         CONFIG_NSH_USBKBD=y
-         CONFIG_NSH_USBKBD_DEVNAME="/dev/kbda"
+         CONFIG_NXWM_KEYBOARD_USBHOST=y
+         CONFIG_NXWM_KEYBOARD_DEVPATH="/dev/kbda"
 
-       When NSH comes up, it will attempt to open /dev/kbda and replace
-       stdin with that device.  If no USB keyboard is connected when you
-       start the NxConsole, you will see:
-
-         Waiting for a keyboard...
-
-       NSH will then automatically start when the keyboard is attached:
+       NSH will then automatically start when the NxConsole is started:
 
          NuttShell (NSH) NuttX-7.3
          nsh>
 
-       If the keyboard is detached, NSH will stop and wait for you to
-       re-attach the keyboard:
+       When the NxConsole comes up, it will attempt to use /dev/kbda device
+       for input.  Obviously, you cannot enter text if there is no keyboard
+       but otherwise you will not see any indication whether a keyboard is
+       connected or not.
 
-         nsh> nsh: nsh_session: readline failed: 1
-         Please re-connect the keyboard...
-
-       And the session will restart when the keyboard is reconnected.
+       If the keyboard is detached, you not be able to enter text until the
+       keyboard is reconnected.  Again, there is no other special indication
+       of the keyboard state.
 
        The keyboard is currently configured to poll at 80 MSec intervals.
        That might not be fast enough for you if you are a fast typist.  This
