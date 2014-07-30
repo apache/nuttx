@@ -7883,12 +7883,25 @@
 	  README files and some naming (2014-7-29).
 	* configs/sama5d4-ek/nsh/defconfig and nxwm/defconfig: The SAMA5D4-EK
 	  NSH and NxWM configurations now have the auto-mounter configured to
-	  automatically mount the FAT file system on HSMCI0 at /mnt/sdcard (2014-7-29).
-	* arch/arm/src/sama5/sam_hsmci.c: Add method to do RX transfer without DMA. 
-	  The 8-byte SCR transfer was failing silently with the DMA transfer, leaving
-	  the SD card in single bit mode (2014-7-29).
+	  automatically mount the FAT file system on HSMCI0 at /mnt/sdcard
+	  (2014-7-29).
+	* arch/arm/src/sama5/sam_hsmci.c: Add method to do RX transfer without
+	  DMA.  The 8-byte SCR transfer was failing silently with the DMA
+	  transfer, leaving the SD card in single bit mode (2014-7-29).
 	* arch/arm/src/sama5/sam_hsmci.c: Fix a problem on card insertion/removal
 	  callback handling.  Interrupts were being disable so that the callbacks
 	  occurred with interrupts disabled.  This resulted in loss of some
 	  interrupts and some not-so-good behaviors.  The solution is to perform
-	  all callbacks on the work thread unconditionally (2014-7-29).
+	  all callbacks on the work thread unconditionally (2014-7-30).
+	* nuttx/fs/fs_automount.c: Auto-mounter:  Fix state setting.  Not
+	  harmful other than it can cause a debug assertion to fire if you
+	  manually unmount the media before removing it which is, of course,
+	  what you are supposed to do (2014-7-30).
+	* arch/arm/src/sama5/sam_hsmci.c and README files: Re-enable TX DMA and
+	  verify that DMA writes to the SD card are functional.  They are so now
+	  TX DMA is re-enabled in the driver.  This might affect the SAMA5D3
+	  platforms where the TX DMA problem was found.  The SAMA4D3 and 4 use
+	  the same HSMCI driver.  Much has change since then and it is not
+	  surprising that DMA is now functional.  However, the has not be re-
+	  verified on the SAMA5D3 which has a different DMA controller
+	  (2014-7-30).
