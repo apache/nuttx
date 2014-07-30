@@ -1477,6 +1477,7 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
 
   SDIO_BLOCKSETUP(priv->dev, priv->blocksize, nblocks);
   SDIO_WAITENABLE(priv->dev, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT|SDIOWAIT_ERROR);
+
 #ifdef CONFIG_SDIO_DMA
   if (priv->dma)
     {
@@ -1877,7 +1878,6 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
       fdbg("ERROR: mmcsd_recvR1 for CMD25 failed: %d\n", ret);
       return ret;
     }
-
 
   /* Wait for the transfer to complete */
 
@@ -2606,7 +2606,7 @@ static int mmcsd_sdinitialize(FAR struct mmcsd_state_s *priv)
 
   /* Send CMD9, SEND_CSD, in standby state/data-transfer mode to obtain the
    * Card Specific Data (CSD) register.  The argument is the RCA that we
-   * just obtained from CMD3.  The card stays in standy state/data-transfer
+   * just obtained from CMD3.  The card stays in standby state/data-transfer
    * mode.
    */
 
@@ -3264,7 +3264,7 @@ int mmcsd_slotinitialize(int minor, FAR struct sdio_dev_s *dev)
 
               SDIO_CALLBACKENABLE(priv->dev, SDIOMEDIA_INSERTED);
 
-              fdbg("MMC/SD slot is empty\n");
+              fvdbg("MMC/SD slot is empty\n");
             }
           else
             {

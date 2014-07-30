@@ -246,7 +246,7 @@ int mount(FAR const char *source, FAR const char *target,
       ret = find_blockdriver(source, mountflags, &blkdrvr_inode);
       if (ret < 0)
         {
-          fdbg("Failed to find block driver %s\n", source);
+          fdbg("ERROR: Failed to find block driver %s\n", source);
           errcode = -ret;
           goto errout;
         }
@@ -260,7 +260,7 @@ int mount(FAR const char *source, FAR const char *target,
   else
 #endif /* NONBDFS_SUPPORT */
     {
-      fdbg("Failed to find file system %s\n", filesystemtype);
+      fdbg("ERROR: Failed to find file system %s\n", filesystemtype);
       errcode = ENODEV;
       goto errout;
     }
@@ -281,7 +281,7 @@ int mount(FAR const char *source, FAR const char *target,
        *  -ENOMEM - Failed to allocate in-memory resources for the operation
        */
 
-      fdbg("Failed to reserve inode\n");
+      fdbg("ERROR: Failed to reserve inode\n");
       errcode = -ret;
       goto errout_with_semaphore;
     }
@@ -295,7 +295,7 @@ int mount(FAR const char *source, FAR const char *target,
     {
       /* The filesystem does not support the bind operation ??? */
 
-      fdbg("Filesystem does not support bind\n");
+      fdbg("ERROR: Filesystem does not support bind\n");
       errcode = EINVAL;
       goto errout_with_mountpt;
     }
@@ -325,7 +325,7 @@ int mount(FAR const char *source, FAR const char *target,
        * error.
        */
 
-      fdbg("Bind method failed: %d\n", ret);
+      fdbg("ERROR: Bind method failed: %d\n", ret);
 #ifdef BDFS_SUPPORT
 #ifdef NONBDFS_SUPPORT
       if (blkdrvr_inode)
@@ -400,7 +400,7 @@ errout:
   return ERROR;
 
 #else
-  fdbg("No filesystems enabled\n");
+  fdbg("ERROR: No filesystems enabled\n");
   set_errno(ENOSYS);
   return ERROR;
 #endif /* BDFS_SUPPORT || NONBDFS_SUPPORT */
