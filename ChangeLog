@@ -7887,3 +7887,8 @@
 	* arch/arm/src/sama5/sam_hsmci.c: Add method to do RX transfer without DMA. 
 	  The 8-byte SCR transfer was failing silently with the DMA transfer, leaving
 	  the SD card in single bit mode (2014-7-29).
+	* arch/arm/src/sama5/sam_hsmci.c: Fix a problem on card insertion/removal
+	  callback handling.  Interrupts were being disable so that the callbacks
+	  occurred with interrupts disabled.  This resulted in loss of some
+	  interrupts and some not-so-good behaviors.  The solution is to perform
+	  all callbacks on the work thread unconditionally (2014-7-29).
