@@ -7884,3 +7884,6 @@
 	* configs/sama5d4-ek/nsh/defconfig and nxwm/defconfig: The SAMA5D4-EK
 	  NSH and NxWM configurations now have the auto-mounter configured to
 	  automatically mount the FAT file system on HSMCI0 at /mnt/sdcard (2014-7-29).
+	* arch/arm/src/sama5/sam_hsmci.c: Add method to do RX transfer without DMA. 
+	  The 8-byte SCR transfer was failing silently with the DMA transfer, leaving
+	  the SD card in single bit mode (2014-7-29).
