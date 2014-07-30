@@ -3893,7 +3893,7 @@ Configurations
 
    19. NxPlayer
 
-       This configuration has the command NxPlayer enabled.  That player is still a work in progress and is only tested as of this writing.
+       This configuration has the command line NxPlayer enabled.
 
        At present, the the WM8904 driver is not included in the
        configuration.  Instead the "NULL" audio device in built in to
@@ -3918,7 +3918,7 @@ Configurations
 
               nsh> mount -t vfat /dev/mmcsd0 /mnt/sdcard
 
-            NOTE:  The automatically is enabled by default in this
+            NOTE:  The auto-mounter is enabled by default in this
             configuration.
 
          c. Then you can run the media player like:
@@ -4114,8 +4114,12 @@ Configurations
             writing).  That SD card should be inserted in the HSMCI0 media
             slot A (best done before powering up).
 
-         b. Then from NSH prompt, you need to mount the media volume from
-            an NSH session like:
+         b. If the NuttX auto-mounter is enabled and properly configured,
+            then the FAT file system appear at /mnt/sdcard.  If the auto-
+            mounter is not enabled, then you need to perform the following
+            steps to manually mount the FAT file system:
+
+             Then from NSH prompt, you need to mount the media volume like:
 
               nsh> mount -t vfat /dev/mmcsd0 /mnt/sdcard
 
@@ -4132,10 +4136,8 @@ Configurations
               nsh> exit
               Connection closed by foreign host.
 
-            NOTE:  The SAMA5D4-EK board support allows an application to
-            connect to the SD card detect signal.  That application could
-            then auto-mount the SD card.  The capability is, however, not
-            implemented in this demo.
+            NOTE:  The auto-mounter is enabled by default in this
+            configuration.
 
          c. Then if you close the old media player window and bring up a
             new one, you should see the .WAV files on the SD card in the lis
