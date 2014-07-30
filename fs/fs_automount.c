@@ -328,14 +328,15 @@ static int automount_unmount(FAR struct automounter_state_s *priv)
             }
         }
 
-      /* Successfully unmounted */
-
-      priv->mounted = false;
-      return OK;
+      /* Fall through */
 
     case OK_NOENT:
-      /* I suppose this is okay */
+      /* The mountpoint is not present.  This is normal behavior in the
+       * case where the user manually un-mounted the volume before removing
+       * media.  Nice job, Mr. user.
+       */
 
+      priv->mounted = false;
       return OK;
 
     default:
