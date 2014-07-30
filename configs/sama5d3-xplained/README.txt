@@ -64,6 +64,7 @@ Contents
   - Networking
   - AT25 Serial FLASH
   - HSMCI Card Slots
+  - Auto-Mounter
   - USB Ports
   - USB High-Speed Device
   - USB High-Speed Host
@@ -1086,6 +1087,9 @@ HSMCI Card Slots
         nsh> cat /mnt/sd1/atest.txt
         This is a test
 
+       NOTE:  See the next section entitled "Auto-Mounter" for another way
+       to mount your SD card.
+
     4) Before removing the card, you must umount the file system.  This is
        equivalent to "ejecting" or "safely removing" the card on Windows:  It
        flushes any cached data to the card and makes the SD card unavailable
@@ -1097,6 +1101,29 @@ HSMCI Card Slots
        that can be used by an application to automatically unmount the
        volume when it is removed.  But those callbacks are not used in
        these configurations.
+
+Auto-Mounter
+============
+
+  NuttX implements an auto-mounter than can make working with SD cards
+  easier.  With the auto-mounter, the file system will be automatically
+  mounted when the SD card is inserted into the HSMCI slot and automatically
+  unmounted when the SD card is removed.
+
+  The auto-mounter is enable with:
+
+      CONFIG_FS_AUTOMOUNTER=y
+
+  However, to use the automounter you will to provide some additional
+  board-level support.  See configs/sama5d4-ek for and example of how
+  you might do this.
+
+  WARNING:  SD cards should never be removed without first unmounting
+  them.  This is to avoid data and possible corruption of the file
+  system.  Certainly this is the case if you are writing to the SD card
+  at the time of the removal.  If you use the SD card for read-only access,
+  however, then I cannot think of any reason why removing the card without
+  mounting would be harmful.
 
 USB Ports
 =========
@@ -2792,13 +2819,17 @@ To-Do List
    endpoint support in the EHCI driver is untested (but works in similar
    EHCI drivers).
 
-2) HSCMI TX DMA support is currently commented out.
+2) HSCMI. CONFIG_MMCSD_MULTIBLOCK_DISABLE=y is set to disable multi-block
+   transfers because of some issues that I saw during testing.  The is very
+   low priority to me but might be important to you if you are need very
+   high performance SD card accesses.
 
-   Also, CONFIG_MMCSD_MULTIBLOCK_DISABLE=y is set to disable multi-block
-   transfers.
-
-   Both of these issues need to be revisited to determine there is or
-   is not a real problem.
+   The last time I used HSMCI with a SAMA5D3, I had to disable TX DMA
+   in the HSMCI driver.  Much has changed since then and I have reverified
+   that TX DMA transfers are functional using a SAMA5D4.  The SAMA5D4,
+   however, has a different DMA subsystem.  So... if you suspect issues
+   HSMCI writes, you might try disabling the TX DMA again in the
+   sam_hsmci.c driver.
 
 3) GMAC has only been tested on a 10/100Base-T network.  I don't have a
    1000Base-T network to support additional testing.

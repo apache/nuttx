@@ -3792,10 +3792,6 @@ Configurations
        The auto-mounter is also enabled.  See the section above entitled
        "Auto-Mounter".
 
-       STATUS:  Seems to be completely functional.  TX DMA is currently
-       disabled; there was a problem at one time but that has probably
-       been fixed.  HSCMI with TX DMA re-enabled needs to be verified.
-
    13. Networking is supported via EMAC0.  See the "Networking" section
        above for detailed configuration settings.  DHCP is not used in
        this configuration; rather, a hard-coded IP address of 10.0.0.2 is
@@ -4222,15 +4218,10 @@ To-Do List
    endpoint support in the EHCI driver is untested (but works in similar
    EHCI drivers).
 
-2) HSCMI TX DMA support is currently commented out.  There were problems at
-   one time (on the SAMA5D3) and the temporary workaround was simply to
-   disable TX DMA.  There have been several fixes to both HSMCI and DMA
-   support since then and TX DMA is very likely okay now.  But this needs
-   to be verified by re-enabled HSMCI TX DMA.
-
-   Also, CONFIG_MMCSD_MULTIBLOCK_DISABLE=y is set to disable multi-block
-   transfers.  The is very low priority to me but might be important to you
-   if you are need very high performance SD card accesses.
+2) HSCMI. CONFIG_MMCSD_MULTIBLOCK_DISABLE=y is set to disable multi-block
+   transfers because of some issues that I saw during testing.  The is very
+   low priority to me but might be important to you if you are need very
+   high performance SD card accesses.
 
 3) There is a kludge in place in the Ethernet code to work around a problem
    that I see.  The problem that I see is as follows:
