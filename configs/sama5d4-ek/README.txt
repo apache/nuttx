@@ -1592,7 +1592,10 @@ HSMCI Card Slots
 Auto-Mounter
 ============
 
-  NuttX implements an auto-mounter than can make working with SD cards easier.  With the auto-mounter, the file system will be automatically mounted when the SD card in the SD card is inserted into the HSMCI slot and automatically unmounted when the SD card is removed.
+  NuttX implements an auto-mounter than can make working with SD cards
+  easier.  With the auto-mounter, the file system will be automatically
+  mounted when the SD card is inserted into the HSMCI slot and automatically
+  unmounted when the SD card is removed.
 
   Here is a sample configuration for the auto-mounter:
 
@@ -1606,6 +1609,13 @@ Auto-Mounter
       CONFIG_SAMA5D4EK_HSMCI0_AUTOMOUNT_MOUNTPOINT="/mnt/sdcard"
       CONFIG_SAMA5D4EK_HSMCI0_AUTOMOUNT_DDELAY=1000
       CONFIG_SAMA5D4EK_HSMCI0_AUTOMOUNT_UDELAY=2000
+
+  WARNING:  SD cards should never be removed without first unmounting
+  them.  This is to avoid data and possible corruption of the file
+  system.  Certainly this is the case if you are writing to the SD card
+  at the time of the removal.  If you use the SD card for read-only access,
+  however, then I cannot think of any reason why removing the card without
+  mounting would be harmful.
 
 USB Ports
 =========
@@ -3786,12 +3796,6 @@ Configurations
        disabled; there was a problem at one time but that has probably
        been fixed.  HSCMI with TX DMA re-enabled needs to be verified.
 
-       There does seem to be an issue with removing then re-inserting
-       an SD card.  In that case, the SD card will fail to mount the
-       when the card is re-inserted.  Hopefully this problem will be
-       fixed before you read this (in which case, I forgot to remove
-       this note).
-
    13. Networking is supported via EMAC0.  See the "Networking" section
        above for detailed configuration settings.  DHCP is not used in
        this configuration; rather, a hard-coded IP address of 10.0.0.2 is
@@ -4225,7 +4229,8 @@ To-Do List
    to be verified by re-enabled HSMCI TX DMA.
 
    Also, CONFIG_MMCSD_MULTIBLOCK_DISABLE=y is set to disable multi-block
-   transfers.
+   transfers.  The is very low priority to me but might be important to you
+   if you are need very high performance SD card accesses.
 
 3) There is a kludge in place in the Ethernet code to work around a problem
    that I see.  The problem that I see is as follows:
