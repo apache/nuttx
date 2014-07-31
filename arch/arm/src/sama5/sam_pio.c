@@ -245,7 +245,7 @@ static void sam_pio_disableclk(pio_pinset_t cfgset)
     {
       /* Get the base address of the PIO port */
 
-      base = g_piobase[port];
+      base = sam_pion_vbase(port);
 
       /* Are any pins configured as PIO inputs?
        *
