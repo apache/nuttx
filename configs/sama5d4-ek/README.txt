@@ -4140,10 +4140,17 @@ Configurations
             new one, you should see the .WAV files on the SD card in the lis
             box.
 
-       Currently the list box is not scollable.  So you will be limited to
-       the number .WAV files that will fit in the existing list box (a
-       scrollable list box class exists, but has not been integrated into
-       the media play demo).
+       Things still to do:
+
+         a. Currently the list box is not scrollable.  So you will be
+            limited to the number .WAV files that will fit in the existing
+            list box (a scrollable list box class exists, but has not been
+            integrated into the media play demo).
+
+         b. Although the lower level NxPlayer does support them, there are
+            no controls at the GUI for balance or tone/equalization.
+
+         c. There is no visual indication of play status or end of playing.
 
    STATUS:
        See the To-Do list below
@@ -4259,3 +4266,6 @@ To-Do List
    for the PWM and the Timer/Counter drivers.  These drivers use the
    BOARD_MCK_FREQUENCY definition in more complex ways and will require some
    minor redesign and re-testing before they can be available.
+
+5) Board-related I2C issues have prevented integration of the WM8904 audio
+   decoder.  So the NxWM Media Player demo cannot produce sounds.
