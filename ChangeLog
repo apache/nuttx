@@ -7905,3 +7905,12 @@
 	  surprising that DMA is now functional.  However, the has not be re-
 	  verified on the SAMA5D3 which has a different DMA controller
 	  (2014-7-30).
+	* arch/arm/src/sama5/sam_dmac.c, sam_pio.c, and sam_pioirq.c: Changes
+	  needed for a clean SAMA5D3 build after all of the recent SAMA5D4
+	  changes (2014-7-31).
+	* configs/sama5d3x-ek/nsh/defconfig: Refresh configuration (2014-7-31).
+	* configs/sama5d3x-ek/Kconfig, README.txt, src/sam_wm8904.c, Makefile,
+	  sam_nsh.c, and sama5d3x-ek.h: Add support for the WM8904 audio CODEC
+	  (2014-7-31).
+	* configs/sama5d3x-ek/nxplayer:  Add a configuration to support the
+	  command line NxPlayer (2014-7-31).
