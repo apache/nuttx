@@ -514,6 +514,15 @@ Boot sequence
 
    4. Then NuttX runs from SDRAM
 
+DRAMBOOT
+--------
+
+  See also configs/sama5d4-ek/README.txt for a description of the DRAMBOOT
+  program.  This is a tiny version of NuttX that can run out of internal
+  SRAM.  If you put this program on the HSMCI1 microSD card as boot.bin, then
+  it will boot on power up and you can download NuttX directly into DRAM by
+  sending the nuttx.hex file over the serial connection.
+
 NAND FLASH Memory Map
 ---------------------
 

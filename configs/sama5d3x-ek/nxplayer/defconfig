@@ -468,7 +468,13 @@ CONFIG_DEV_NULL=y
 # CONFIG_ARCH_HAVE_PWM_PULSECOUNT is not set
 # CONFIG_PWM is not set
 CONFIG_ARCH_HAVE_I2CRESET=y
-# CONFIG_I2C is not set
+CONFIG_I2C=y
+# CONFIG_I2C_SLAVE is not set
+CONFIG_I2C_TRANSFER=y
+# CONFIG_I2C_WRITEREAD is not set
+# CONFIG_I2C_POLLED is not set
+# CONFIG_I2C_TRACE is not set
+CONFIG_I2C_RESET=y
 # CONFIG_SPI is not set
 CONFIG_I2S=y
 # CONFIG_RTC is not set
@@ -901,7 +907,7 @@ CONFIG_NSH_CONSOLE=y
 # USB Trace Support
 #
 # CONFIG_NSH_ALTCONDEV is not set
-# CONFIG_NSH_ARCHINIT is not set
+CONFIG_NSH_ARCHINIT=y
 
 #
 # NxWidgets/NxWM
@@ -943,6 +949,7 @@ CONFIG_NSH_CONSOLE=y
 #
 # I2C tool
 #
+# CONFIG_SYSTEM_I2CTOOL is not set
 
 #
 # INI File Parser
