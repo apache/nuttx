@@ -106,7 +106,7 @@ int sem_wait(FAR sem_t *sem)
 
   /* Assume any errors reported are due to invalid arguments. */
 
-  errno = EINVAL;
+  set_errno(EINVAL);
 
   if (sem)
     {
@@ -168,7 +168,7 @@ int sem_wait(FAR sem_t *sem)
 #endif
           /* Add the TCB to the prioritized semaphore wait queue */
 
-          errno = 0;
+          set_errno(0);
           up_block_task(rtcb, TSTATE_WAIT_SEM);
 
           /* When we resume at this point, either (1) the semaphore has been
@@ -191,7 +191,7 @@ int sem_wait(FAR sem_t *sem)
            * race conditions.
            */
 
-          if (errno != EINTR && errno != ETIMEDOUT)
+          if (get_errno() != EINTR && get_errno() != ETIMEDOUT)
             {
               /* Not awakened by a signal or a timeout... We hold the semaphore */
 
