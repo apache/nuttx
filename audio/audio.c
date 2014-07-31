@@ -585,6 +585,8 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case AUDIOIOC_REGISTERMQ:
         {
+          audvdbg("AUDIOIOC_REGISTERMQ\n");
+
           upper->usermq = (mqd_t) arg;
           ret = OK;
         }
@@ -597,6 +599,8 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case AUDIOIOC_UNREGISTERMQ:
         {
+          audvdbg("AUDIOIOC_UNREGISTERMQ\n");
+
           upper->usermq = NULL;
           ret = OK;
         }
@@ -609,6 +613,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case AUDIOIOC_RESERVE:
         {
+          audvdbg("AUDIOIOC_RESERVE\n");
           DEBUGASSERT(lower->ops->reserve != NULL);
 
           /* Call lower-half to perform the reservation */
@@ -628,6 +633,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case AUDIOIOC_RELEASE:
         {
+          audvdbg("AUDIOIOC_RELEASE\n");
           DEBUGASSERT(lower->ops->release != NULL);
 
           /* Call lower-half to perform the release */
