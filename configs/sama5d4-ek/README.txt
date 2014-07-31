@@ -2427,19 +2427,19 @@ I2C Tool
     responding on TWI0 (the default) like this:
 
       nsh> i2c dev 0x03 0x77
-          0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+           0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
       00:          -- -- -- -- -- -- -- -- -- -- -- -- --
-      10: -- -- -- -- -- -- -- -- -- -- 1a -- -- -- -- --
+      10: -- -- -- -- -- -- -- -- -- -- -- 1b -- -- -- --
       20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-      30: -- -- -- -- -- -- -- -- -- 39 -- -- -- 3d -- --
-      40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-      50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-      60: 60 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+      30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+      40: -- -- -- -- -- -- -- -- -- -- -- -- 4c -- -- --
+      50: 50 -- -- -- -- -- -- -- -- -- -- 5b -- -- -- --
+      60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
       70: -- -- -- -- -- -- -- --
       nsh>
 
-     Address 0x1a is the WM8904.  Address 0x39 is the SIL9022A. I am not sure
-     what is at address 0x3d and 0x60
+     Addresses 0x1b, 0x4c, and 0x50 are devices on the TM7000 module.
+     0x5b is the address of the on-board PMIC chip.
 
 SAMA5 ADC Support
 =================
@@ -2771,17 +2771,18 @@ Audio Support
   WM8904 Configuration
   --------------------
     System Type -> SAMA5 Peripheral Support
+      CONFIG_SAMA5_XDMAC0=y                 : XDMAC0 required by SSC0
       CONFIG_SAMA5_TWI0=y                   : Enable TWI0 driver support
       CONFIG_SAMA5_SSCO=y                   : Enable SSC0 driver support
-      CONFIG_SAMA5_XDMAC0=y                 : XDMAC0 required by SSC0
 
     System Type -> SSC0 Configuration
       CONFIG_SAMA5_SSC_MAXINFLIGHT=16
       CONFIG_SAMA5_SSC0_DATALEN=16
 
-    Device Drivers -> SPI Driver Support
-      CONFIG_SPI=y                          : Enable SPI support
-      CONFIG_SPI_EXCHANGE=y                 : Support the exchange method
+    Device Drivers -> I2C Driver Support
+      CONFIG_I2C=y                          : Enable I2C support
+      CONFIG_I2C_EXCHANGE=y                 : Support the exchange method
+      CONFIG_I2C_RESET=n                    : (Maybe y, if you have bus problems)
 
     System Type -> SSC Configuration
       CONFIG_SAMA5_SSC_MAXINFLIGHT=16       : Up to 16 pending DMA transfers
@@ -2826,7 +2827,11 @@ Audio Support
   would like to add the NxPlayer, here are some recommended configuration
   settings.
 
-  First of all, the NxPlayer depends on the NuttX audio subsystem.  Here are some recommended settings for the audio subsystem:
+  First of all, the NxPlayer depends on the NuttX audio subsystem.  See the
+  "WM8904 Configuration" above for an example of how the audio subsystem is
+  configured to use the WM8904 CODED with PCM decoding.  Or, for testing
+  purposes, here is how might want to configure NULL, do-nothing audio
+  device:
 
   Audio Support ->
     CONFIG_AUDIO=y
@@ -2842,14 +2847,14 @@ Audio Support
   Then the NxPlayer can be enabled as follows:
 
   System Libraries and NSH Add-Ons -> NxPlayer media player / command line ->
-    CONFIG_NXPLAYER_PLAYTHREAD_STACKSIZE=1500    : Size of the audio player stack
     CONFIG_SYSTEM_NXPLAYER=y                     : Build the NxPlayer library
+    CONFIG_NXPLAYER_PLAYTHREAD_STACKSIZE=1500    : Size of the audio player stack
     CONFIG_NXPLAYER_COMMAND_LINE=y               : Build command line application
     CONFIG_NXPLAYER_INCLUDE_HELP=y               : Includes a help command
     CONFIG_NXPLAYER_INCLUDE_DEVICE_SEARCH=n      : (Since there is only one audio device)
     CONFIG_NXPLAYER_INCLUDE_PREFERRED_DEVICE=y   : Only one audio device is supported
     CONFIG_NXPLAYER_FMT_FROM_EXT=y               : (Since only PCM is supported)
-    NXPLAYER_FMT_FROM_HEADER=n                   : (Since only PCM is supported)
+    CONFIG_NXPLAYER_FMT_FROM_HEADER=n            : (Since only PCM is supported)
     CONFIG_NXPLAYER_INCLUDE_MEDIADIR=y           : Specify a media directory
     CONFIG_NXPLAYER_DEFAULT_MEDIADIR="/mnt/sdcard"  : See below
     CONFIG_NXPLAYER_RECURSIVE_MEDIA_SEARCH=y     : Search all sub-directories
@@ -4268,4 +4273,5 @@ To-Do List
    minor redesign and re-testing before they can be available.
 
 5) Board-related I2C issues have prevented integration of the WM8904 audio
-   decoder.  So the NxWM Media Player demo cannot produce sounds.
+   decoder.  So the NxPlayer and NxWM Media Player demo cannot produce
+   sounds.
