@@ -1649,6 +1649,8 @@ SDRAM Support
       CONFIG_SAMA5_DDRCS=y                  : Tell the system that DRAM is at the DDR CS
       CONFIG_SAMA5_DDRCS_SIZE=268435456     : 2Gb DRAM -> 256MB
       CONFIG_SAMA5_DDRCS_LPDDR2=y           : Its DDR2
+
+    Board Selection
       CONFIG_SAMA5D3xEK_MT47H128M16RT=y     : This is the type of DDR2
 
     System Type->Heap Configuration
@@ -1717,6 +1719,8 @@ SDRAM Support
       CONFIG_SAMA5_DDRCS=y                  : Tell the system that DRAM is at the DDR CS
       CONFIG_SAMA5_DDRCS_SIZE=268435456     : 2Gb DRAM -> 256GB
       CONFIG_SAMA5_DDRCS_LPDDR2=y           : Its DDR2
+
+    Board Selection
       CONFIG_SAMA5D3xEK_MT47H128M16RT=y     : This is the type of DDR2
 
     System Type->Heap Configuration
@@ -2699,15 +2703,87 @@ I2S Audio Support
      1 IRQ/GPIO1  PD16 INT_AUDIO   N/A
     ------------- ---------------- -----------------
 
+  WM8904 Configuration
+  --------------------
+
+    System Type -> SAMA5 Peripheral Support
+      CONFIG_SAMA5_DMAC0=y                  : DMAC0 required by SSC0
+      CONFIG_SAMA5_TWI0=y                   : Enable TWI0 driver support
+      CONFIG_SAMA5_SSCO=y                   : Enable SSC0 driver support
+
+    System Type -> SSC0 Configuration
+      CONFIG_SAMA5_SSC_MAXINFLIGHT=16
+      CONFIG_SAMA5_SSC0_DATALEN=16
+
+    Device Drivers -> I2C Driver Support
+      CONFIG_I2C=y                          : Enable I2C support
+      CONFIG_I2C_EXCHANGE=y                 : Support the exchange method
+      CONFIG_I2C_RESET=n                    : (Maybe y, if you have bus problems)
+
+    System Type -> SSC Configuration
+      CONFIG_SAMA5_SSC_MAXINFLIGHT=16       : Up to 16 pending DMA transfers
+      CONFIG_SAMA5_SSC0_DATALEN=16          : 16-bit data
+      CONFIG_SAMA5_SSC0_RX=y                : Support a receiver (although it is not used!)
+      CONFIG_SAMA5_SSC0_TX_TKINPUT=y        : Receiver gets clock the RK0 input
+      CONFIG_SAMA5_SSC0_TX=y                : Support a transmitter
+      CONFIG_SAMA5_SSC0_TX_TKINPUT=y        : Transmitter gets clock the TK0 input
+
+    Audio
+      CONFIG_AUDIO=y                        : Audio support needed
+      CONFIG_AUDIO_FORMAT_PCM=y             : Only PCM files are supported
+      CONFIG_AUDIO_NUM_BUFFERS=8            : Number of audio buffers
+      CONFIG_AUDIO_BUFFER_NUMBYTES=8192     : Audio buffer size
+
+    Drivers -> Audio
+      CONFIG_I2S=y                          : General I2S support
+      CONFIG_AUDIO_DEVICES=y                : Audio device support
+      CONFIG_AUDIO_WM8904=y                 : Build WM8904 driver character driver
+
+    Board Selection
+      CONFIG_SAMA5D3xEK_WM8904_I2CFREQUENCY=400000
+
+    Library Routines
+      CONFIG_SCHED_WORKQUEUE=y              : MW8904 driver needs work queue support
+
+  The NxPlayer
+  ------------
+
+  The NxPlayer is a audio library and command line application for playing
+  audio file.  The NxPlayer can be found at apps/system/nxplayer.  If you
+  would like to add the NxPlayer, here are some recommended configuration
+  settings.
+
+  First of all, the NxPlayer depends on the NuttX audio subsystem.  See the
+  "WM8904 Configuration" above for an example of how the audio subsystem is
+  configured to use the WM8904 CODED with PCM decoding.
+
+  Then the NxPlayer can be enabled as follows:
+
+  System Libraries and NSH Add-Ons -> NxPlayer media player / command line ->
+    CONFIG_SYSTEM_NXPLAYER=y                     : Build the NxPlayer library
+    CONFIG_NXPLAYER_PLAYTHREAD_STACKSIZE=1500    : Size of the audio player stack
+    CONFIG_NXPLAYER_COMMAND_LINE=y               : Build command line application
+    CONFIG_NXPLAYER_INCLUDE_HELP=y               : Includes a help command
+    CONFIG_NXPLAYER_INCLUDE_DEVICE_SEARCH=n      : (Since there is only one audio device)
+    CONFIG_NXPLAYER_INCLUDE_PREFERRED_DEVICE=y   : Only one audio device is supported
+    CONFIG_NXPLAYER_FMT_FROM_EXT=y               : (Since only PCM is supported)
+    CONFIG_NXPLAYER_FMT_FROM_HEADER=n            : (Since only PCM is supported)
+    CONFIG_NXPLAYER_INCLUDE_MEDIADIR=y           : Specify a media directory
+    CONFIG_NXPLAYER_DEFAULT_MEDIADIR="/mnt/sdcard"  : See below
+    CONFIG_NXPLAYER_RECURSIVE_MEDIA_SEARCH=y     : Search all sub-directories
+    CONFIG_NXPLAYER_INCLUDE_SYSTEM_RESET=y       : Add support for reset command
+
+  You must include the full path to the location where NxPlayer can find the
+  media files.  That path is given by CONFIG_NXPLAYER_DEFAULT_MEDIADIR.
+  Here I use the example "/mnt/scard".  That is a location where you could,
+  for example, mount an MMC/SD card driver.
+
   I2S Loopback Test
   -----------------
 
   The I2S driver was verified using a special I2C character driver (at
   nuttx/drivers/audio/i2schar.c) and a test driver at apps/examples/i2schar.
   The I2S driver was verified in loopback mode with no audio device.
-
-  [NOTE: The above statement is anticipatory:  As of this writing I2S driver
-   verification is underway and still not complete].
 
   This section describes the modifications to the NSH configuration that were
   used to perform the I2S testing:
@@ -2720,7 +2796,7 @@ I2S Audio Support
 
     System Type -> SAMA5 Peripheral Support
       CONFIG_SAMA5_SSC1=y              : Enable SSC0 driver support
-      CONFIG_SAMA5_DMAC1=y             : DMAC0 required by SSC0
+      CONFIG_SAMA5_DMAC0=y             : DMAC0 required by SSC0
 
     System Type -> SSC Configuration
       CONFIG_SAMA5_SSC_MAXINFLIGHT=16  : Up to 16 pending DMA transfers
@@ -3079,6 +3155,8 @@ Configurations
       used to verify the SAMA5D3x-EK TFT LCD.  This test case focuses on
       general window controls, movement, mouse and keyboard input.  It
       requires no user interaction.
+    nxplayer:  A command line media player using the on-board WM8904 audio
+      CODEC.
     nxwm: This is a special configuration setup for the NxWM window manager
       UnitTest.  It integrates support for both the SAMA5 LCDC and the
       SAMA5 ADC touchscreen controller and provides a more advance
@@ -3365,6 +3443,56 @@ Configurations
     verify the SAMA5D3x-EK TFT LCD.  This test case focuses on general
     window controls, movement, mouse and keyboard input.  It requires no
     user interaction.
+
+  nxplayer
+
+    A command line media player using the on-board WM8904 audio CODEC.
+    This configuration is based on the nsh configuration above with the
+    following extensions:
+
+      a. It runs at 528MHz
+      b. It includes SDRAM support
+      c. Support for the WM8904 audio CODEC is enabled along with
+         support for TWI0, SSC0, and DMAC0 needed by the SM8904.
+      d. Support for the full size SD card slot (HSMCI0) is enable
+      e. The NxPlayer command line media player is built in.
+
+    NOTES:
+
+    1. See the NOTEs for the nsh configuration.  Since this configuration
+       derives from that configuration, all notes apply.
+
+    2. Using NxPlayer
+
+       This configuration depends on media files in the default mountpoint
+       at /mnt/sdard.  You will need to mount the media before running
+       NxPlayer,  Here are the general steps to play a file:
+
+         a. You will need an (full size) SD card containing the .WAV files
+            that you want to play (.WAV is only format supported as of this
+            writing).  That SD card should be inserted in the HSMCI0 media
+            slot A (best done before powering up).
+
+         b. If the NuttX auto-mounter is enabled and properly configured,
+            then the FAT file system appear at /mnt/sdcard.  If the auto-
+            mounter is not enabled, then here are the steps to manually
+            mount the FAT file system:
+
+             Then from NSH prompt, you need to mount the media volume like:
+
+              nsh> mount -t vfat /dev/mmcsd0 /mnt/sdcard
+
+            NOTE:  There is an auto-mounter that could be used to eliminate
+            this step.  The automounter is not enabled or integrated into
+            in this configuration, however.  See the sectino entitle
+            "Auto-Mounter " above
+
+         c. Then you can run the media player like:
+
+              nsh> nxplayer
+              nxplayer> device pcm0
+              nxplayer> play <filename>
+
 
   nxwm:
 

@@ -247,4 +247,18 @@ config SAMA5D3xEK_OV2640_DEMO
 		Enable the SAMA5 OV2640 camera demo
 
 endif # VIDEO_OV2640
+
+if AUDIO_WM8904
+
+config SAMA5D3xEK_WM8904_I2CFREQUENCY
+	int "WM8904 I2C Frequency"
+	default 400000
+	range 1 400000
+	---help---
+		This option selects the I2C frequency to use when communicating with
+		the WM8904 device.  The default, 400KHz, is the maximum supported by
+		the WM8904.  If you have problems communicating with the WM8904,
+		then you might want to try lowering this rate.
+
+endif # AUDIO_WM8904
 endif # ARCH_BOARD_SAMA5D3X_EK

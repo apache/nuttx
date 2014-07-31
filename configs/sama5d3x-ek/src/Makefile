@@ -1,7 +1,7 @@
 ############################################################################
 # configs/sama5d3x-ek/src/Makefile
 #
-#   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -103,6 +103,14 @@ CSRCS += sam_ethernet.c
 else
 ifeq ($(CONFIG_SAMA5_GMAC),y)
 CSRCS += sam_ethernet.c
+endif
+endif
+
+ifeq ($(CONFIG_AUDIO_WM8904),y)
+ifeq ($(CONFIG_SAMA5_TWI0),y)
+ifeq ($(CONFIG_SAMA5_SSC0),y)
+CSRCS += sam_wm8904.c
+endif
 endif
 endif
 

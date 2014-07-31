@@ -64,6 +64,7 @@
 #define HAVE_USBMONITOR 1
 #define HAVE_NETWORK    1
 #define HAVE_CAMERA     1
+#define HAVE_WM8904     1
 
 /* HSMCI */
 /* Can't support MMC/SD if the card interface(s) are not enable */
@@ -318,6 +319,41 @@
 #  undef HAVE_NETWORK
 #endif
 
+/* Audio */
+/* PCM/WM8904 driver */
+
+#ifndef CONFIG_AUDIO_WM8904
+#  undef HAVE_WM8904
+#endif
+
+#ifdef HAVE_WM8904
+#  ifndef CONFIG_SAMA5_TWI0
+#    warning CONFIG_SAMA5_TWI0 is required for audio support
+#    undef HAVE_WM8904
+#  endif
+
+#  ifndef CONFIG_SAMA5_SSC0
+#    warning CONFIG_SAMA5_SSC0 is required for audio support
+#    undef HAVE_WM8904
+#  endif
+
+#  ifndef CONFIG_AUDIO_FORMAT_PCM
+#    warning CONFIG_AUDIO_FORMAT_PCM is required for audio support
+#    undef HAVE_WM8904
+#  endif
+
+#  ifndef CONFIG_SAMA5D3xEK_WM8904_I2CFREQUENCY
+#    warning Defaulting to maximum WM8904 I2C frequency
+#    define CONFIG_SAMA5D3xEK_WM8904_I2CFREQUENCY 400000
+#  endif
+
+#  if CONFIG_SAMA5D3xEK_WM8904_I2CFREQUENCY > 400000
+#    warning WM8904 I2C frequency cannot exceed 400KHz
+#    undef CONFIG_SAMA5D3xEK_WM8904_I2CFREQUENCY
+#    define CONFIG_SAMA5D3xEK_WM8904_I2CFREQUENCY 400000
+#  endif
+#endif
+
 /* Camera */
 
 #define OV2640_BUS 1
@@ -549,6 +585,39 @@
 
 #endif
 
+/* WM8904 Audio Codec ***************************************************************/
+/* SAMA5D3-EK Interface
+ *   ------------- ---------------- -----------------
+ *   WM8904        SAMA5D3          NuttX Pin Name
+ *   ------------- ---------------- -----------------
+ *    3 SDA        PA30 TWD0        PIO_TWI0_D
+ *    2 SCLK       PA31 TWCK0       PIO_TWI0_CK
+ *   28 MCLK       PD30 PCK0        PIO_PMC_PCK0
+ *   29 BCLK/GPIO4 PC16 TK          PIO_SSC0_TK
+ *   "" "        " PC19 RK          PIO_SSC0_RK
+ *   30 LRCLK      PC17 TF          PIO_SSC0_TF
+ *   "" "   "      PC20 RF          PIO_SSC0_RF
+ *   31 ADCDAT     PC21 RD          PIO_SSC0_RD
+ *   32 DACDAT     PC18 TD          PIO_SSC0_TD
+ *    1 IRQ/GPIO1  PD16 INT_AUDIO   N/A
+ *   ------------- ---------------- -----------------
+ */
+
+/* Audio Interrupt */
+
+#define PIO_INT_WM8904 (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
+                        PIO_INT_BOTHEDGES | PIO_PORT_PIOD | PIO_PIN16)
+#define IRQ_INT_WM8904 SAM_IRQ_PD16
+
+/* The MW8904 communicates on TWI0, I2C address 0x1a for control operations */
+
+#define WM8904_TWI_BUS      0
+#define WM8904_I2C_ADDRESS  0x1a
+
+/* The MW8904 transfers data on SSC0 */
+
+#define WM8904_SSC_BUS      0
+
 /* SPI Chip Selects *****************************************************************/
 /* Both the Ronetix and Embest versions of the SAMAD3x CPU modules include an
  * Atmel AT25DF321A, 32-megabit, 2.7-volt SPI serial flash.  The SPI
@@ -742,6 +811,27 @@ int sam_usbhost_initialize(void);
 #ifdef HAVE_NETWORK
 void weak_function sam_netinitialize(void);
 #endif
+
+/****************************************************************************
+ * Name: sam_wm8904_initialize
+ *
+ * Description:
+ *   This function is called by platform-specific, setup logic to configure
+ *   and register the WM8904 device.  This function will register the driver
+ *   as /dev/wm8904[x] where x is determined by the minor device number.
+ *
+ * Input Parameters:
+ *   minor - The input device minor number
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_WM8904
+int sam_wm8904_initialize(int minor);
+#endif /* HAVE_WM8904 */
 
 /************************************************************************************
  * Name: board_led_initialize

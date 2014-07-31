@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/sama5d3x-ek/src/sam_nsh.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -86,8 +86,9 @@
 
 int nsh_archinitialize(void)
 {
-#if defined(HAVE_NAND) || defined(HAVE_AT25) || defined(HAVE_AT24) || \
-    defined(HAVE_HSMCI) || defined(HAVE_USBHOST) || defined(HAVE_USBMONITOR)
+#if defined(HAVE_NAND)  || defined(HAVE_AT25)    || defined(HAVE_AT24)       || \
+    defined(HAVE_HSMCI) || defined(HAVE_USBHOST) || defined(HAVE_USBMONITOR) ||\
+    defined(HAVE_WM8904)
   int ret;
 #endif
 
@@ -170,6 +171,16 @@ int nsh_archinitialize(void)
   if (ret != OK)
     {
       message("nsh_archinitialize: Start USB monitor: %d\n", ret);
+    }
+#endif
+
+#ifdef HAVE_WM8904
+  /* Configure WM8904 audio */
+
+  ret = sam_wm8904_initialize(0);
+  if (ret != OK)
+    {
+      message("ERROR: Failed to initialize WM8904 audio: %d\n", ret);
     }
 #endif
 
