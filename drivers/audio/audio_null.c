@@ -650,12 +650,17 @@ static int null_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
                                 FAR struct ap_buffer_s *apb)
 {
   FAR struct null_dev_s *priv = (FAR struct null_dev_s *)dev;
+  bool final;
 
   audvdbg("apb=%p curbyte=%d nbytes=%d\n", apb, apb->curbyte, apb->nbytes);
 
   /* Say that we consumed all of the data */
 
   apb->curbyte = apb->nbytes;
+
+  /* Check if this was the last buffer in the stream */
+
+  done = ((apb->flags & AUDIO_APB_FINAL) != 0);
 
   /* And return the buffer to the upper level */
 
@@ -670,6 +675,17 @@ static int null_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
 #else
   priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_DEQUEUE, apb, OK);
 #endif
+
+  /* Say we are done playing if this was the last buffer in the stream */
+
+  if (done)
+    {
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+      priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_COMPLETE, NULL, OK, NULL);
+#else
+      priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_COMPLETE, NULL, OK);
+#endif
+    }
 
   audvdbg("Return OK\n");
   return OK;

@@ -289,9 +289,10 @@
 
 /* Audio Pipeline Buffer flags */
 
-#define AUDIO_APB_OUTPUT_ENQUEUED   0x0001;
-#define AUDIO_APB_OUTPUT_PROCESS    0x0002;
-#define AUDIO_APB_DEQUEUED          0x0004;
+#define AUDIO_APB_OUTPUT_ENQUEUED   (1 << 0)
+#define AUDIO_APB_OUTPUT_PROCESS    (1 << 1)
+#define AUDIO_APB_DEQUEUED          (1 << 2)
+#define AUDIO_APB_FINAL             (1 << 3) /* Last buffer in the stream */
 
 /****************************************************************************
  * Public Types

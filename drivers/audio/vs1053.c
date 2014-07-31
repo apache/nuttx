@@ -43,7 +43,9 @@
 
 #include <sys/types.h>
 #include <sys/ioctl.h>
+
 #include <stdint.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <string.h>
@@ -111,7 +113,7 @@ struct vs1053_struct_s
 
   const FAR struct vs1053_lower_s *hw_lower;/* Pointer to the hardware lower functions */
   FAR struct spi_dev_s    *spi;             /* Pointer to the SPI bus */
-  FAR struct ap_buffer_s  *pBuf;            /* Pointer to the buffer we are processing */
+  FAR struct ap_buffer_s  *apb;             /* Pointer to the buffer we are processing */
   struct dq_queue_s       apbq;             /* Our queue for enqueued buffers */
   unsigned long           spi_freq;         /* Frequency to run the SPI bus at. */
   unsigned long           chip_freq;        /* Current chip frequency */
@@ -131,13 +133,13 @@ struct vs1053_struct_s
 #endif
   uint16_t                endfillbytes;
   uint8_t                 endfillchar;      /* Fill char to send when no more data */
-  uint8_t                 running;
-  uint8_t                 paused;
-  uint8_t                 endmode;
+  bool                    running;
+  bool                    paused;
+  bool                    endmode;
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
-  uint8_t                 cancelmode;
+  bool                    cancelmode;
 #endif
-  uint8_t                 busy;             /* Set true when device reserved */
+  bool                    busy;             /* Set true when device reserved */
 };
 
 /****************************************************************************
@@ -511,7 +513,7 @@ static void vs1053_setvolume(FAR struct vs1053_struct_s *dev)
   leftreg = vs1053_logapprox(leftlevel / 10);
   rightreg = vs1053_logapprox(rightlevel / 10);
 
-  /* Lock the SPI bus to get exclsive access to the chip. */
+  /* Lock the SPI bus to get exclusive access to the chip. */
 
   vs1053_spi_lock(spi, dev->spi_freq);
   vs1053_writereg(dev, VS1053_SCI_VOL, (leftreg << 8) | rightreg);
@@ -941,7 +943,7 @@ static void vs1053_feeddata(FAR struct vs1053_struct_s *dev)
   int                   ret;
   uint8_t               *pSamp = NULL;
   uint16_t              reg;
-  struct ap_buffer_s    *pBuf;
+  struct ap_buffer_s    *apb;
   FAR struct spi_dev_s  *spi = dev->spi;
 
   /* Check for false interrupt caused by an SCI transaction */
@@ -960,14 +962,14 @@ static void vs1053_feeddata(FAR struct vs1053_struct_s *dev)
 
   /* Local stack copy of our active buffer */
 
-  pBuf = dev->pBuf;
-  //auddbg("Entry pBuf=%p, Bytes left=%d\n", pBuf, pBuf->nbytes - pBuf->curbyte);
+  apb = dev->apb;
+  //auddbg("Entry apb=%p, Bytes left=%d\n", apb, apb->nbytes - apb->curbyte);
 
   /* Setup pointer to the next sample in the buffer */
 
-  if (pBuf)
+  if (apb)
     {
-      pSamp = &pBuf->samp[pBuf->curbyte];
+      pSamp = &apb->samp[apb->curbyte];
     }
   else if (!dev->endmode)
     {
@@ -1018,14 +1020,14 @@ static void vs1053_feeddata(FAR struct vs1053_struct_s *dev)
               /* Do a hard reset and terminate */
 
               vs1053_hardreset(dev);
-              dev->running = FALSE;
-              dev->endmode = FALSE;
+              dev->running = false;
+              dev->endmode = false;
               break;
             }
           else if (dev->endfillbytes > 32*65)
             {
               /* After each 32 byte of endfillchar, check the status
-               * register to see if SM_CANCEL has been cleard.  If
+               * register to see if SM_CANCEL has been cleared.  If
                * it has been cleared, then we're done.
                */
 
@@ -1041,8 +1043,9 @@ static void vs1053_feeddata(FAR struct vs1053_struct_s *dev)
                   auddbg("EndFillChar: 0x%0X\n", dev->endfillchar);
                   reg = vs1053_readreg(dev, VS1053_SCI_MODE);
                   vs1053_writereg(dev, VS1053_SCI_MODE, reg | VS1053_SM_RESET);
-                  dev->running = FALSE;
-                  dev->endmode = FALSE;
+
+                  dev->running = false;
+                  dev->endmode = false;
                   break;
                 }
             }
@@ -1055,7 +1058,7 @@ static void vs1053_feeddata(FAR struct vs1053_struct_s *dev)
            * will recheck the DREQ line again.
            */
 
-          bytecount = pBuf->nbytes - pBuf->curbyte;
+          bytecount = apb->nbytes - apb->curbyte;
           if (bytecount > 32)
             {
               bytecount = 32;
@@ -1073,7 +1076,7 @@ static void vs1053_feeddata(FAR struct vs1053_struct_s *dev)
               pSamp++;
             }
 #endif
-          pBuf->curbyte += bytecount;
+          apb->curbyte += bytecount;
 
           /* Test if we are in cancel mode.  If we are, then we need
            * to continue sending file data and check for the SM_CANCEL
@@ -1097,16 +1100,19 @@ static void vs1053_feeddata(FAR struct vs1053_struct_s *dev)
                 {
                   /* Cancel has begun.  Switch to endmode */
 
-                  pBuf->curbyte = pBuf->nbytes = 0;
+                  apb->nbytes  = 0;
+                  apb->curbyte = 0;
                 }
             }
 #endif /* CONFIG_AUDIO_EXCLUDE_STOP */
 
           /* Test if we are at the end of the buffer */
 
-          if (pBuf->curbyte >= pBuf->nbytes)
+          if (apb->curbyte >= apb->nbytes)
             {
-              if (pBuf->nbytes != pBuf->nmaxbytes)
+              /* Check if this was the final buffer in stream */
+
+              if ((apb->flags & AUDIO_APB_FINAL) != 0)
                 {
                   /* This is the final buffer.  Get the VS1053 endfillchar */
 
@@ -1119,7 +1125,8 @@ static void vs1053_feeddata(FAR struct vs1053_struct_s *dev)
 
                   /* Mark the device as endmode */
 
-                  dev->endmode = TRUE;
+                  dev->endmode = true;
+
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
                   if (dev->cancelmode)
                     {
@@ -1140,13 +1147,13 @@ static void vs1053_feeddata(FAR struct vs1053_struct_s *dev)
 
               /* We referenced the buffer so we must free it */
 
-              apb_free(pBuf);
+              apb_free(apb);
 #ifdef CONFIG_AUDIO_MULTI_SESSION
               dev->lower.upper(dev->lower.priv, AUDIO_CALLBACK_DEQUEUE,
-                  pBuf, OK, NULL);
+                  apb, OK, NULL);
 #else
               dev->lower.upper(dev->lower.priv, AUDIO_CALLBACK_DEQUEUE,
-                  pBuf, OK);
+                  apb, OK);
 #endif
 
               /* Lock the buffer queue to pop the next buffer */
@@ -1167,18 +1174,18 @@ static void vs1053_feeddata(FAR struct vs1053_struct_s *dev)
 
               /* Pop the next entry */
 
-              pBuf = (struct ap_buffer_s *) dq_remfirst(&dev->apbq);
-              dev->pBuf = pBuf;
+              apb = (struct ap_buffer_s *) dq_remfirst(&dev->apbq);
+              dev->apb = apb;
 
-              //auddbg("Next Buffer = %p, bytes = %d\n", pBuf, pBuf ? pBuf->nbytes : 0);
-              if (pBuf == NULL)
+              //auddbg("Next Buffer = %p, bytes = %d\n", apb, apb ? apb->nbytes : 0);
+              if (apb == NULL)
                 {
                   sem_post(&dev->apbq_sem);
                   break;
                 }
 
-              pSamp = &pBuf->samp[pBuf->curbyte];
-              apb_reference(pBuf);                /* Add our buffer reference */
+              pSamp = &apb->samp[apb->curbyte];
+              apb_reference(apb);                /* Add our buffer reference */
               sem_post(&dev->apbq_sem);
             }
         }
@@ -1254,7 +1261,7 @@ static void *vs1053_workerthread(pthread_addr_t pvarg)
 {
   FAR struct vs1053_struct_s *dev = (struct vs1053_struct_s *) pvarg;
   struct audio_msg_s      msg;
-  FAR struct ap_buffer_s *pBuf;
+  FAR struct ap_buffer_s *apb;
   int                     size;
   int                     prio;
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
@@ -1265,9 +1272,10 @@ static void *vs1053_workerthread(pthread_addr_t pvarg)
   auddbg("Entry\n");
 
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
-  dev->cancelmode = 0;
+  dev->cancelmode   = false;
 #endif
-  dev->endmode = dev->endfillbytes = 0;
+  dev->endmode      = false;
+  dev->endfillbytes = 0;
 
   /* Fill the VS1053 FIFO with initial data.  */
 
@@ -1284,7 +1292,7 @@ static void *vs1053_workerthread(pthread_addr_t pvarg)
 
   /* Loop as long as we are supposed to be running */
 
-  dev->running = TRUE;
+  dev->running = true;
   dev->hw_lower->enable(dev->hw_lower);   /* Enable the DREQ interrupt */
   while (dev->running || dev->endmode)
     {
@@ -1303,7 +1311,7 @@ static void *vs1053_workerthread(pthread_addr_t pvarg)
         {
           /* Should we just stop running? */
 
-          dev->running = FALSE;
+          dev->running = false;
           break;
         }
 
@@ -1338,7 +1346,7 @@ static void *vs1053_workerthread(pthread_addr_t pvarg)
 
             /* Set cancelmode */
 
-            dev->cancelmode = TRUE;
+            dev->cancelmode = true;
 
             break;
 #endif
@@ -1363,7 +1371,7 @@ static void *vs1053_workerthread(pthread_addr_t pvarg)
     {
       /* Get the next buffer from the queue */
 
-      while ((pBuf = (FAR struct ap_buffer_s *) dq_remfirst(&dev->apbq)) != NULL)
+      while ((apb = (FAR struct ap_buffer_s *) dq_remfirst(&dev->apbq)) != NULL)
         ;
     }
 
@@ -1371,10 +1379,10 @@ static void *vs1053_workerthread(pthread_addr_t pvarg)
 
   /* Free the active buffer */
 
-  if (dev->pBuf != NULL)
+  if (dev->apb != NULL)
     {
-      apb_free(dev->pBuf);
-      dev->pBuf = NULL;
+      apb_free(dev->apb);
+      dev->apb = NULL;
     }
 
   /* Close the message queue */
@@ -1458,8 +1466,8 @@ static int vs1053_start(FAR struct audio_lowerhalf_s *lower)
 
   if ((ret = sem_wait(&dev->apbq_sem)) == OK)
     {
-      dev->pBuf = (FAR struct ap_buffer_s *) dq_remfirst(&dev->apbq);
-      apb_reference(dev->pBuf);               /* Add our buffer reference */
+      dev->apb = (FAR struct ap_buffer_s *) dq_remfirst(&dev->apbq);
+      apb_reference(dev->apb);               /* Add our buffer reference */
       sem_post(&dev->apbq_sem);
     }
   else
@@ -1560,11 +1568,13 @@ static int vs1053_pause(FAR struct audio_lowerhalf_s *lower)
   FAR struct vs1053_struct_s *dev = (struct vs1053_struct_s *) lower;
 
   if (!dev->running)
-    return OK;
+    {
+      return OK;
+    }
 
-  /* Disable interrupts to prevent us from suppling any more data */
+  /* Disable interrupts to prevent us from supplying any more data */
 
-  dev->paused = TRUE;
+  dev->paused = true;
   dev->hw_lower->disable(dev->hw_lower);   /* Disable the DREQ interrupt */
   return OK;
 }
@@ -1587,11 +1597,13 @@ static int vs1053_resume(FAR struct audio_lowerhalf_s *lower)
   FAR struct vs1053_struct_s *dev = (struct vs1053_struct_s *) lower;
 
   if (!dev->running)
-    return OK;
+    {
+      return OK;
+    }
 
   /* Enable interrupts to allow suppling data */
 
-  dev->paused = FALSE;
+  dev->paused = false;
   vs1053_feeddata(dev);
   dev->hw_lower->enable(dev->hw_lower);   /* Enable the DREQ interrupt */
   return OK;
@@ -1621,7 +1633,7 @@ static int vs1053_enqueuebuffer(FAR struct audio_lowerhalf_s *lower,
       /* We can now safely add the buffer to the queue */
 
       apb->curbyte = 0;
-      apb->flags = AUDIO_APB_OUTPUT_ENQUEUED;
+      apb->flags  |= AUDIO_APB_OUTPUT_ENQUEUED;
       dq_addlast(&apb->dq_entry, &dev->apbq);
       sem_post(&dev->apbq_sem);
 
@@ -1730,9 +1742,9 @@ static int vs1053_reserve(FAR struct audio_lowerhalf_s *lower)
 #ifdef CONFIG_AUDIO_MULTI_SESSION
       *psession = NULL;
 #endif
-      dev->busy = TRUE;
-      dev->running = FALSE;
-      dev->paused = FALSE;
+      dev->busy    = true;
+      dev->running = false;
+      dev->paused  = false;
     }
 
   sem_post(&dev->apbq_sem);
@@ -1774,7 +1786,7 @@ static int vs1053_release(FAR struct audio_lowerhalf_s *lower)
 
   /* Really we should free any queued buffers here */
 
-  dev->busy = 0;
+  dev->busy = false;
   sem_post(&dev->apbq_sem);
 
   return OK;
@@ -1825,9 +1837,9 @@ struct audio_lowerhalf_s *vs1053_initialize(FAR struct spi_dev_s *spi,
       dev->spi_freq    = CONFIG_VS1053_XTALI / 7;
       dev->spi         = spi;
       dev->mq          = NULL;
-      dev->busy        = FALSE;
+      dev->busy        = false;
       dev->threadid    = 0;
-      dev->running     = 0;
+      dev->running     = false;
 
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
       dev->volume      = 250;           /* 25% volume as default */

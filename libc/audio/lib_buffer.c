@@ -118,15 +118,15 @@ int apb_alloc(FAR struct audio_buf_desc_s *bufdesc)
 {
   uint32_t            bufsize;
   int                 ret;
-  struct ap_buffer_s  *pBuf;
+  struct ap_buffer_s  *apb;
 
   DEBUGASSERT(bufdesc->u.ppBuffer != NULL);
 
   /* Perform a user mode allocation */
 
   bufsize = sizeof(struct ap_buffer_s) + bufdesc->numbytes;
-  pBuf = lib_umalloc(bufsize);
-  *bufdesc->u.ppBuffer = pBuf;
+  apb = lib_umalloc(bufsize);
+  *bufdesc->u.ppBuffer = apb;
 
   /* Test if the allocation was successful or not */
 
@@ -138,15 +138,17 @@ int apb_alloc(FAR struct audio_buf_desc_s *bufdesc)
     {
       /* Populate the buffer contents */
 
-      memset(pBuf, 0, bufsize);
-      pBuf->i.channels = 1;
-      pBuf->crefs = 1;
-      pBuf->nmaxbytes = bufdesc->numbytes;
-      pBuf->nbytes = 0;
+      memset(apb, 0, bufsize);
+      apb->i.channels = 1;
+      apb->crefs      = 1;
+      apb->nmaxbytes  = bufdesc->numbytes;
+      apb->nbytes     = 0;
+      apb->flags      = 0;
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-      pBuf->session = bufdesc->session;
+      apb->session    = bufdesc->session;
 #endif
-      sem_init(&pBuf->sem, 0, 1);
+
+      sem_init(&apb->sem, 0, 1);
       ret = sizeof(struct audio_buf_desc_s);
     }
 
