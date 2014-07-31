@@ -1171,6 +1171,7 @@ static void *wm8904_workerthread(pthread_addr_t pvarg)
 
       apb_free(apb);
     }
+
   wm8904_givesem(&priv->pendsem);
 
   /* Return any pending buffers in our done queue */
@@ -1398,17 +1399,23 @@ static int wm8904_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
   dq_addlast(&apb->dq_entry, &priv->pendq);
   wm8904_givesem(&priv->pendsem);
 
-  /* Send a message indicating a new buffer enqueued */
+  /* Send a message to the worker thread indicating that a new buffer has been
+   * enqueued.  If mq is NULL, then the playing has not yet started.  In that
+   * case we are just "priming the pump" and we don't need to send any message.
+   */
 
+  ret = OK;
   if (priv->mq != NULL)
     {
       term_msg.msgId  = AUDIO_MSG_ENQUEUE;
       term_msg.u.data = 0;
+
       ret = mq_send(priv->mq, &term_msg, sizeof(term_msg), CONFIG_WM8904_MSG_PRIO);
       if (ret < 0)
         {
           int errcode = errno;
           DEBUGASSERT(errcode > 0);
+
           auddbg("ERROR: mq_send failed: %d\n", errcode);
           UNUSED(errcode);
         }
@@ -1789,6 +1796,7 @@ FAR struct audio_lowerhalf_s *
       priv->dev.ops    = &g_audioops;
       priv->lower      = lower;
       priv->i2c        = i2c;
+      priv->i2s        = i2s;
 #if !defined(CONFIG_AUDIO_EXCLUDE_VOLUME) && !defined(CONFIG_AUDIO_EXCLUDE_BALANCE)
       priv->balance    = b16HALF;            /* Center balance */
 #endif
