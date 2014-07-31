@@ -7914,3 +7914,9 @@
 	  (2014-7-31).
 	* configs/sama5d3x-ek/nxplayer:  Add a configuration to support the
 	  command line NxPlayer (2014-7-31).
+	* audio/audio.c: More debug output (2014-7-31).
+	* configs/sama5d3x-ek/README.txt: REAME update (2014-7-31).
+	* drivers/audio/wm8904.c: Was not saving i2s interface instance
+	  (2014-7-31).
+	* sched/sem_wait.c: Use set_errno() and get_errno().  Direct access
+	  inside the OS may not be supported in the future (2014-7-31).
