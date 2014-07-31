@@ -1426,7 +1426,7 @@ sam_allocdesc(struct sam_dmach_s *dmach, struct dma_linklist_s *prev,
                    * via AHB IF0.
                    */
 
-                  prev->dscr = (uint32_t)sam_physramaddr((uintptr_t)descr);
+                  prev->dscr = (uint32_t)sam_physramaddr((uintptr_t)desc);
                 }
 
               /* In any event, this is the new tail of the list.  The source

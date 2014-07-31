@@ -53,10 +53,11 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "sam_pio.h"
-#include "sam_periphclks.h"
 #include "chip/sam_pio.h"
 #include "chip/sam_pmc.h"
+
+#include "sam_pio.h"
+#include "sam_periphclks.h"
 
 #ifdef CONFIG_SAMA5_PIO_IRQ
 
