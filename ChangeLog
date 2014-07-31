@@ -7920,3 +7920,11 @@
 	  (2014-7-31).
 	* sched/sem_wait.c: Use set_errno() and get_errno().  Direct access
 	  inside the OS may not be supported in the future (2014-7-31).
+	* drivers/audio/audio_null.c, vs1053.c, wm8904.c, include/nuttx/audio/audio.h,
+	  libc/audio/lib_buffer.c: Change how the end of the audio stream is
+	  detected by the leaf audio component.  This used by be done by looking
+	  for the first partial buffer.  That does not work with the in-place
+	  sub-sampling performed by the PCM decoder:  That always reduces the
+	  size of the buffer so that all buffers only partially filled by the
+	  time they get to the leaf.  Now, a flag is set in the audio buffer
+	  flags set to indicate the final buffer in the stream (2014-7-31).
