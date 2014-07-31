@@ -2778,7 +2778,7 @@ I2S Audio Support
     CONFIG_NXPLAYER_FMT_FROM_EXT=y               : (Since only PCM is supported)
     CONFIG_NXPLAYER_FMT_FROM_HEADER=n            : (Since only PCM is supported)
     CONFIG_NXPLAYER_INCLUDE_MEDIADIR=y           : Specify a media directory
-    CONFIG_NXPLAYER_DEFAULT_MEDIADIR="/mnt/sdcard"  : See below
+    CONFIG_NXPLAYER_DEFAULT_MEDIADIR="/music"    : See nxplayer configuration
     CONFIG_NXPLAYER_RECURSIVE_MEDIA_SEARCH=y     : Search all sub-directories
     CONFIG_NXPLAYER_INCLUDE_SYSTEM_RESET=y       : Add support for reset command
 
@@ -3474,7 +3474,7 @@ Configurations
     2. Using NxPlayer
 
        This configuration depends on media files in the default mountpoint
-       at /mnt/sdard.  You will need to mount the media before running
+       at /music.  You will need to mount the media before running
        NxPlayer,  Here are the general steps to play a file:
 
          a. You will need an (full size) SD card containing the .WAV files
@@ -3483,25 +3483,30 @@ Configurations
             slot A (best done before powering up).
 
          b. If the NuttX auto-mounter is enabled and properly configured,
-            then the FAT file system appear at /mnt/sdcard.  If the auto-
+            then the FAT file system appear at /music.  If the auto-
             mounter is not enabled, then here are the steps to manually
             mount the FAT file system:
 
              Then from NSH prompt, you need to mount the media volume like:
 
-              nsh> mount -t vfat /dev/mmcsd0 /mnt/sdcard
+              nsh> mount -t vfat /dev/mmcsd0 /music
 
             NOTE:  There is an auto-mounter that could be used to eliminate
-            this step.  The automounter is not enabled or integrated into
-            in this configuration, however.  See the sectino entitle
-            "Auto-Mounter " above
+            this step.  The auto mounter is not enabled or integrated into
+            in this configuration, however.  See the section entitle
+            "Auto-Mounter " above.
 
-         c. Then you can run the media player like:
+         c. You can then see the available .wav files like:
 
-              nsh> nxplayer
-              nxplayer> device pcm0
-              nxplayer> play <filename>
+               nsh>ls /music
 
+         d. Then you can run the media player like:
+
+               nsh> nxplayer
+               nxplayer> device pcm0
+               nxplayer> play <filename>
+
+            where <filename> is name or path of the .WAV file to be playerd.
 
   nxwm:
 
