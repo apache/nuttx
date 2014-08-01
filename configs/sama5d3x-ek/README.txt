@@ -2733,9 +2733,12 @@ I2S Audio Support
       CONFIG_SAMA5_SSC_MAXINFLIGHT=16       : Up to 16 pending DMA transfers
       CONFIG_SAMA5_SSC0_DATALEN=16          : 16-bit data
       CONFIG_SAMA5_SSC0_RX=y                : Support a receiver (although it is not used!)
-      CONFIG_SAMA5_SSC0_TX_TKINPUT=y        : Receiver gets clock the RK0 input
+      CONFIG_SAMA5_SSC0_RX_RKINPUT=y        : Receiver gets clock the RK0 input
+      CONFIG_SAMA5_SSC0_RX_FSLEN=1          : Minimal frame sync length
       CONFIG_SAMA5_SSC0_TX=y                : Support a transmitter
-      CONFIG_SAMA5_SSC0_TX_TKINPUT=y        : Transmitter gets clock the TK0 input
+      CONFIG_SAMA5_SSC0_TX_RXCLK=y          : Transmitter gets clock the RCLCK
+      CONFIG_SAMA5_SSC0_TX_FSLEN=0          : Disable frame synch generation
+      CONFIG_SAMA5_SSC0_TX_TKOUTPUT_NONE=y  : No output
 
     Audio
       CONFIG_AUDIO=y                        : Audio support needed
@@ -2813,8 +2816,10 @@ I2S Audio Support
       CONFIG_SAMA5_SSC0_DATALEN=16     : 16-bit data
       CONFIG_SAMA5_SSC0_RX=y           : Support a receiver
       CONFIG_SAMA5_SSC0_RX_RKINPUT=y   : Receiver gets clock from RK input
+      CONFIG_SAMA5_SSC0_RX_FSLEN=2     : Pick some matching frame synch length
       CONFIG_SAMA5_SSC0_TX=y           : Support a transmitter
       CONFIG_SAMA5_SSC0_TX_MCKDIV=y    : Transmitter gets clock from MCK/2
+      CONFIG_SAMA5_SSC0_TX_FSLEN=2     : Pick some matching frame synch length
       CONFIG_SAMA5_SSC0_MCKDIV_SAMPLERATE=48000 : Sampling at 48K samples/sec
       CONFIG_SAMA5_SSC0_TX_TKOUTPUT_XFR=y  : Outputs clock on TK when transferring data
       CONFIG_SAMA5_SSC0_LOOPBACK=y     : Loopmode mode connects RD/TD and RK/TK
