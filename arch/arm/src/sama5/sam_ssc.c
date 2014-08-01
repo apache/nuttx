@@ -1182,7 +1182,8 @@ static int ssc_rxdma_setup(struct sam_ssc_s *priv)
 
       /* No data received yet */
 
-      apb->nbytes = 0;
+      apb->nbytes  = 0;
+      apb->curbyte = 0;
 
       /* Physical address of the SSC RHR register and of the buffer location
        * in RAM.
@@ -1551,9 +1552,11 @@ static int ssc_txdma_setup(struct sam_ssc_s *priv)
 {
   struct sam_buffer_s *bfcontainer;
   struct ap_buffer_s *apb;
+  uintptr_t samp;
   uintptr_t paddr;
   uintptr_t maddr;
   uint32_t timeout;
+  apb_samp_t nbytes;
   bool notimeout;
   int ret;
 
@@ -1592,17 +1595,21 @@ static int ssc_txdma_setup(struct sam_ssc_s *priv)
       apb = bfcontainer->apb;
       DEBUGASSERT(((uintptr_t)apb->samp & 3) == 0);
 
+      /* Get the transfer information, accounting for any data offset */
+
+      samp   = (uintptr_t)&apb->samp[apb->curbyte];
+      nbytes = apb->nbytes - apb->curbyte;
+
       /* Physical address of the SSC THR register and of the buffer location
-       * in
-       * RAM.
+       * in RAM.
        */
 
       paddr = ssc_physregaddr(priv, SAM_SSC_THR_OFFSET);
-      maddr = sam_physramaddr((uintptr_t)apb->samp);
+      maddr = sam_physramaddr(samp);
 
       /* Configure the TX DMA */
 
-      sam_dmatxsetup(priv->tx.dma, paddr, maddr, apb->nbytes);
+      sam_dmatxsetup(priv->tx.dma, paddr, maddr, nbytes);
 
       /* Increment the DMA timeout */
 
@@ -1623,9 +1630,7 @@ static int ssc_txdma_setup(struct sam_ssc_s *priv)
        * before starting the DMA.
        */
 
-      arch_clean_dcache((uintptr_t)apb->samp,
-                        (uintptr_t)apb->samp + apb->nbytes);
-
+      arch_clean_dcache(samp, samp + nbytes);
     }
 #if 1 /* REVISIT: Chained TX transfers */
   while (0);
