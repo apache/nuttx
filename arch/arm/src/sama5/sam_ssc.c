@@ -84,11 +84,15 @@
 #  error Work queue support is required (CONFIG_SCHED_WORKQUEUE)
 #endif
 
+#ifndef CONFIG_AUDIO
+#  error CONFIG_AUDIO required by this driver
+#endif
+
 #ifndef SAMA5_SSC_MAXINFLIGHT
 #  define SAMA5_SSC_MAXINFLIGHT 16
 #endif
 
-/* Assume no RX/TX support */
+/* Assume no RX/TX support until we learn better */
 
 #undef SSC_HAVE_RX
 #undef SSC_HAVE_TX
@@ -117,7 +121,7 @@
 
 /* Check for SSC0 RX support */
 
-#  if (defined(CONFIG_SAMA5_SSC0) && defined(CONFIG_SAMA5_SSC0_RX))
+#  if defined(CONFIG_SAMA5_SSC0_RX)
 #    define SSC_HAVE_RX 1
 
 #    ifndef CONFIG_SSC0_RX_FSLEN
@@ -127,11 +131,21 @@
 #    if CONFIG_SSC0_RX_FSLEN < 1 || CONFIG_SSC0_RX_FSLEN > 255
 #      error Invalid value for CONFIG_SSC0_RX_FSLEN
 #    endif
+
+#    ifndef CONFIG_SSC0_RX_STTDLY
+#      define CONFIG_SSC0_RX_STTDLY CONFIG_SSC0_RX_FSLEN
+#    endif
+
+#    if CONFIG_SSC0_RX_STTDLY < 0 || \
+        CONFIG_SSC0_RX_STTDLY < CONFIG_SSC0_RX_FSLEN || \
+        CONFIG_SSC0_RX_STTDLY > 255
+#      error Invalid value for CONFIG_SSC0_RX_STTDLY
+#    endif
 #  endif
 
 /* Check for SSC0 TX support */
 
-#  if (defined(CONFIG_SAMA5_SSC0) && defined(CONFIG_SAMA5_SSC0_TX))
+#  if defined(CONFIG_SAMA5_SSC0_TX)
 #    define SSC_HAVE_TX 1
 
 #    ifndef CONFIG_SSC0_TX_FSLEN
@@ -140,6 +154,20 @@
 
 #    if CONFIG_SSC0_TX_FSLEN < 0 || CONFIG_SSC0_TX_FSLEN > 255
 #      error Invalid value for CONFIG_SSC0_TX_FSLEN
+#    endif
+
+#    ifndef CONFIG_SSC0_TX_STTDLY
+#      if CONFIG_SSC0_TX_FSLEN > 0
+#        define CONFIG_SSC0_TX_STTDLY CONFIG_SSC0_TX_FSLEN
+#      else
+#        define CONFIG_SSC0_TX_STTDLY 0
+#      endif
+#    endif
+
+#    if CONFIG_SSC0_TX_STTDLY < 0 || \
+        CONFIG_SSC0_TX_STTDLY < CONFIG_SSC0_TX_FSLEN || \
+        CONFIG_SSC0_TX_STTDLY > 255
+#      error Invalid value for CONFIG_SSC0_TX_STTDLY
 #    endif
 #  endif
 
@@ -169,7 +197,7 @@
 
 /* Check for SSC1 RX support */
 
-#  if (defined(CONFIG_SAMA5_SSC1) && defined(CONFIG_SAMA5_SSC1_RX))
+#  if defined(CONFIG_SAMA5_SSC1_RX)
 #    define SSC_HAVE_RX 1
 
 #    ifndef CONFIG_SSC1_RX_FSLEN
@@ -179,11 +207,22 @@
 #    if CONFIG_SSC1_RX_FSLEN < 1 || CONFIG_SSC1_RX_FSLEN > 255
 #      error Invalid value for CONFIG_SSC1_RX_FSLEN
 #    endif
+
+#    ifndef CONFIG_SSC1_RX_STTDLY
+#      define CONFIG_SSC1_RX_STTDLY CONFIG_SSC1_RX_FSLEN
+#    endif
+
+#    if CONFIG_SSC1_RX_STTDLY < 0 || \
+        CONFIG_SSC1_RX_STTDLY < CONFIG_SSC1_RX_FSLEN || \
+        CONFIG_SSC1_RX_STTDLY > 255
+#      error Invalid value for CONFIG_SSC1_RX_STTDLY
+#    endif
+
 #  endif
 
-/* Check for SSC0 TX support */
+/* Check for SSC1 TX support */
 
-#  if (defined(CONFIG_SAMA5_SSC1) && defined(CONFIG_SAMA5_SSC1_TX))
+#  if defined(CONFIG_SAMA5_SSC1_TX)
 #    define SSC_HAVE_TX 1
 
 #    ifndef CONFIG_SSC1_TX_FSLEN
@@ -193,12 +232,22 @@
 #    if CONFIG_SSC1_TX_FSLEN < 0 || CONFIG_SSC1_TX_FSLEN > 255
 #      error Invalid value for CONFIG_SSC1_TX_FSLEN
 #    endif
+
+#    ifndef CONFIG_SSC1_TX_STTDLY
+#      if CONFIG_SSC1_TX_FSLEN > 0
+#        define CONFIG_SSC1_TX_STTDLY CONFIG_SSC1_TX_FSLEN
+#      else
+#        define CONFIG_SSC1_TX_STTDLY 0
+#      endif
+#    endif
+
+#    if CONFIG_SSC1_TX_STTDLY < 0 || \
+        CONFIG_SSC1_TX_STTDLY < CONFIG_SSC1_TX_FSLEN || \
+        CONFIG_SSC1_TX_STTDLY > 255
+#      error Invalid value for CONFIG_SSC1_TX_STTDLY
+#    endif
 #  endif
 
-#endif
-
-#ifndef CONFIG_AUDIO
-#  error CONFIG_AUDIO required by this driver
 #endif
 
 /* Check if we need to build RX and/or TX support */
@@ -244,7 +293,6 @@
  * REVISIT:  These will probably need to be configurable
  */
 
-#define SSC_STTDLY(f)   (f) /* Delay to data start in clocks (same as FSLEN) */
 #define SSC_DATNB       (1) /* Number words per per frame */
 #define SCC_PERIOD(s,d) ((s) + (d) * SSC_DATNB)
 
@@ -294,7 +342,7 @@
    DMACH_FLAG_PERIPHISPERIPH | DMACH_FLAG_PERIPHWIDTH_8BITS | \
    DMACH_FLAG_PERIPHCHUNKSIZE_1 | DMACH_FLAG_MEMPID_MAX | \
    DMACH_FLAG_MEM_IF | DMACH_FLAG_MEMWIDTH_16BITS | \
-   DMACH_FLAG_MEMINCREMENT | DMACH_FLAG_MEMCHUNKSIZE_4| \
+   DMACH_FLAG_MEMINCREMENT | DMACH_FLAG_MEMCHUNKSIZE_1| \
    DMACH_FLAG_MEMBURST_4)
 
 #define DMA16_FLAGS \
@@ -302,7 +350,7 @@
    DMACH_FLAG_PERIPHISPERIPH | DMACH_FLAG_PERIPHWIDTH_16BITS | \
    DMACH_FLAG_PERIPHCHUNKSIZE_1 | DMACH_FLAG_MEMPID_MAX | \
    DMACH_FLAG_MEM_IF | DMACH_FLAG_MEMWIDTH_16BITS | \
-   DMACH_FLAG_MEMINCREMENT | DMACH_FLAG_MEMCHUNKSIZE_4 | \
+   DMACH_FLAG_MEMINCREMENT | DMACH_FLAG_MEMCHUNKSIZE_1 | \
    DMACH_FLAG_MEMBURST_4)
 
 #define DMA32_FLAGS \
@@ -310,7 +358,7 @@
    DMACH_FLAG_PERIPHISPERIPH | DMACH_FLAG_PERIPHWIDTH_32BITS | \
    DMACH_FLAG_PERIPHCHUNKSIZE_1 | DMACH_FLAG_MEMPID_MAX | \
    DMACH_FLAG_MEM_IF | DMACH_FLAG_MEMWIDTH_32BITS | \
-   DMACH_FLAG_MEMINCREMENT | DMACH_FLAG_MEMCHUNKSIZE_4 | \
+   DMACH_FLAG_MEMINCREMENT | DMACH_FLAG_MEMCHUNKSIZE_1 | \
    DMACH_FLAG_MEMBURST_4)
 
 /* DMA timeout.  The value is not critical; we just don't want the system to
@@ -407,6 +455,8 @@ struct sam_ssc_s
   uint8_t pid;                 /* Peripheral ID */
   uint8_t rxfslen;             /* RX frame sync length */
   uint8_t txfslen;             /* TX frame sync length */
+  uint8_t rxsttdly;            /* RX start delay */
+  uint8_t txsttdly;            /* TX start delay */
   uint8_t rxenab:1;            /* True: RX transfers enabled */
   uint8_t txenab:1;            /* True: TX transfers enabled */
   uint8_t loopback:1;          /* True: Loopback mode */
@@ -2390,22 +2440,11 @@ static int ssc_rx_configure(struct sam_ssc_s *priv)
 #ifdef SSC_HAVE_RX
   uint32_t regval;
   uint32_t fslen;
-  uint32_t sttdly;
 
-  /* Get transfer waveform.  First get the RX sync time (in RX clocks) */
+  /* Get the RX sync time (in RX clocks) */
 
   DEBUGASSERT(priv->rxfslen > 0);
   fslen  = priv->rxfslen - 1;
-
-  /* Start delay extends to sometime after RX synch */
-
-  sttdly = SSC_STTDLY(fslen);
-  if (sttdly > 0)
-    {
-      /* Decrement as need by the register file */
-
-      sttdly--;
-    }
 
   /* RCMR settings */
   /* Configure the receiver input clock */
@@ -2470,7 +2509,7 @@ static int ssc_rx_configure(struct sam_ssc_s *priv)
    */
 
   regval |= (SSC_RCMR_CKI | SSC_RCMR_CKG_CONT | SSC_RCMR_START_EDGE |
-             SSC_RCMR_STTDLY(sttdly) | SSC_RCMR_PERIOD(0));
+             SSC_RCMR_STTDLY(priv->rxsttdly) | SSC_RCMR_PERIOD(0));
   ssc_putreg(priv, SAM_SSC_RCMR_OFFSET, regval);
 
   /* RFMR settings. Some of these settings will need to be configurable as well.
@@ -2521,26 +2560,16 @@ static int ssc_tx_configure(struct sam_ssc_s *priv)
   uint32_t regval;
   uint32_t fslen;
   uint32_t period;
-  uint32_t sttdly;
 
-  /* Get transfer waveform.  Get the TX synch in (in TX clocks) */
+  /* Get the TX synch in (in TX clocks) */
 
   fslen  = priv->txfslen > 0 ? priv->txfslen - 1 : 0;
 
-  /* Start delay extends to sometime after the TX synch */
+  /* From the start delay and the datalength , we can get the full
+   * period of the waveform.
+   */
 
-  sttdly = SSC_STTDLY(fslen);
-
-  /* From these, we can get the full period of the waveform */
-
-  period = SCC_PERIOD(sttdly, priv->datalen);
-
-  /* Decrement the start delay as required by the register field */
-
-  if (sttdly > 0)
-    {
-      sttdly--;
-    }
+  period = SCC_PERIOD(priv->txsttdly, priv->datalen);
 
   /* TCMR settings */
   /* Configure the transmitter input clock */
@@ -2612,12 +2641,12 @@ static int ssc_tx_configure(struct sam_ssc_s *priv)
   if (priv->txclk == SSC_CLKSRC_MCKDIV)
     {
       regval |= (SSC_TCMR_CKG_CONT | SSC_TCMR_START_CONT |
-                 SSC_TCMR_STTDLY(sttdly) | SSC_TCMR_PERIOD(period / 2 - 1));
+                 SSC_TCMR_STTDLY(priv->txsttdly) | SSC_TCMR_PERIOD(period / 2 - 1));
     }
   else
     {
       regval |= (SSC_TCMR_CKG_CONT | SSC_TCMR_START_EDGE |
-                 SSC_TCMR_STTDLY(sttdly) | SSC_TCMR_PERIOD(0));
+                 SSC_TCMR_STTDLY(priv->txsttdly) | SSC_TCMR_PERIOD(0));
     }
 
   ssc_putreg(priv, SAM_SSC_TCMR_OFFSET, regval);
@@ -2652,7 +2681,7 @@ static int ssc_tx_configure(struct sam_ssc_s *priv)
                 SSC_TFMR_MSBF | SSC_TFMR_DATNB(SSC_DATNB - 1) |
                 SSC_TFMR_FSOS_NONE);
     }
-dbg("##### TFMR BEFORE: datalen=%d regval=%08x txfslen=%02x\n", priv->datalen, regval, priv->txfslen);
+
   /* Is the TX frame synch enabled? */
 
   if (priv->txfslen > 0)
@@ -2662,7 +2691,6 @@ dbg("##### TFMR BEFORE: datalen=%d regval=%08x txfslen=%02x\n", priv->datalen, r
       regval |= (SSC_TFMR_FSDEN | SSC_TFMR_FSLEN(fslen & 0x0f) |
                  SSC_TFMR_FSLENEXT((fslen >> 4) & 0x0f));
     }
-dbg("##### TFMR AFTER: regval=%08x\n", regval);
 
   ssc_putreg(priv, SAM_SSC_TFMR_OFFSET, regval);
 
@@ -3038,9 +3066,10 @@ static void ssc0_configure(struct sam_ssc_s *priv)
 
 #endif
 
-  /* Remember the configured RX frame synch length */
+  /* Remember parameters of the configured waveform */
 
-  priv->rxfslen = CONFIG_SSC0_RX_FSLEN;
+  priv->rxfslen  = CONFIG_SSC0_RX_FSLEN;
+  priv->rxsttdly = CONFIG_SSC0_RX_STTDLY;
 
   /* Remember the configured RX clock output */
 
@@ -3108,9 +3137,10 @@ static void ssc0_configure(struct sam_ssc_s *priv)
 
 #endif /* CONFIG_SAMA5_SSC0_TX */
 
-  /* Remember the configured TX frame synch length */
+  /* Remember parameters of the configured waveform */
 
-  priv->txfslen = CONFIG_SSC0_TX_FSLEN;
+  priv->txfslen  = CONFIG_SSC0_TX_FSLEN;
+  priv->txsttdly = CONFIG_SSC0_TX_STTDLY;
 
   /* Set/clear loopback mode */
 
@@ -3174,9 +3204,10 @@ static void ssc1_configure(struct sam_ssc_s *priv)
 
 #endif
 
-  /* Remember the configured RX frame synch length */
+  /* Remember parameters of the configured waveform */
 
-  priv->rxfslen = CONFIG_SSC1_RX_FSLEN;
+  priv->rxfslen  = CONFIG_SSC1_RX_FSLEN;
+  priv->rxsttdly = CONFIG_SSC1_RX_STTDLY;
 
   /* Remember the configured RX clock output */
 
@@ -3244,9 +3275,10 @@ static void ssc1_configure(struct sam_ssc_s *priv)
 
 #endif /* CONFIG_SAMA5_SSC1_TX */
 
-  /* Remember the configured TX frame synch length */
+  /* Remember parameters of the configured waveform */
 
-  priv->txfslen = CONFIG_SSC1_TX_FSLEN;
+  priv->txfslen  = CONFIG_SSC1_TX_FSLEN;
+  priv->txsttdly = CONFIG_SSC1_TX_STTDLY;
 
   /* Set/clear loopback mode */
 

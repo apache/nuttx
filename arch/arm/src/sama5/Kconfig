@@ -2163,6 +2163,15 @@ config SAMA5_SSC0_RX_FSLEN
 		This setting determines the pulse length of the Receive Frame Sync
 		signal in units of receive clock periods.
 
+config SAMA5_SSC0_RX_STTDLY
+	int "Receive Start Delay Length"
+	default 0
+	range 0 255
+	---help---
+		This setting determines the pulse length to the start of data in
+		receive clock periods.  It must be greater than or equal to the RX
+		frame synch length.  Zero means no start delay.
+
 endif # SAMA5_SSC0_RX
 
 config SAMA5_SSC0_TX
@@ -2223,6 +2232,15 @@ config SAMA5_SSC0_TX_FSLEN
 		units of transmit clock periods.  A value of zero disables this
 		feature.  In that case the TD line is driven with the default value
 		during the Transmit Frame Sync signal.
+
+config SAMA5_SSC0_TX_STTDLY
+	int "Transmit Start Delay Length"
+	default 0
+	range 0 255
+	---help---
+		This setting determines the pulse length to the start of data in
+		transmit clock periods.  It must be greater than or equal to the RX
+		frame synch length.  Zero means no start delay.
 
 endif # SAMA5_SSC0_TX
 
@@ -2317,6 +2335,15 @@ config SAMA5_SSC1_RX_FSLEN
 		This setting determines the pulse length of the Receive Frame Sync
 		signal in units of receive clock periods.
 
+config SAMA5_SSC1_RX_STTDLY
+	int "Receive Start Delay Length"
+	default 0
+	range 0 255
+	---help---
+		This setting determines the pulse length to the start of data of
+		receive clock periods.  It must be greater than or equal to the RX
+		frame synch length.  Zero means no start delay.
+
 endif # SAMA5_SSC1_RX
 
 config SAMA5_SSC1_TX
@@ -2377,6 +2404,15 @@ config SAMA5_SSC1_TX_FSLEN
 		units of transmit clock periods.  A value of zero disables this
 		feature.  In that case the TD line is driven with the default value
 		during the Transmit Frame Sync signal.
+
+config SAMA5_SSC1_TX_STTDLY
+	int "Transmit Start Delay Length"
+	default 0
+	range 0 255
+	---help---
+		This setting determines the pulse length to the start of data in
+		transmit clock periods.  It must be greater than or equal to the RX
+		frame synch length.  Zero means no start delay.
 
 endif # SAMA5_SSC1_TX
 
