@@ -7931,5 +7931,7 @@
 	* arch/arm/src/sama5/sam_ssc.c:  Needs to account for data offset in
 	  audio buffer (2014-7-31).
 	* drivers/audio/wm8904.c:  Can't reset the WM8904 unless we also
-	  reinitiailize all registers.  Try to get a saner timeout based on
+	  reinitialize all registers.  Try to get a saner timeout based on
 	  sample rate, bits-per-sample, and buffer size (2014-7-31).
+	* arch/arm/src/sama5/Kconfig and sam_ssc.c:  SCC Frame Synch Delay and
+	  Start Delay are now configurable (2014-8-1).
