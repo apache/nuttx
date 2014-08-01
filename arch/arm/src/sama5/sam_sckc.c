@@ -100,7 +100,7 @@ void sam_sckc_enable(bool enable)
   regval |= SCKC_CR_OSC32EN;
   putreg32(regval, SAM_SCKC_CR);
 
-  /* Wait 5 slow clock cycles for clock stabilization */
+  /* Wait for 32,768 XTAL start-up time */
 
   up_udelay(5 * USEC_PER_SEC / BOARD_SLOWCLK_FREQUENCY);
 

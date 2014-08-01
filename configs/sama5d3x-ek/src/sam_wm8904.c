@@ -276,12 +276,12 @@ int sam_wm8904_initialize(int minor)
           goto errout_with_i2s;
         }
 
-      /* Configure the DAC master clock.  This clock is provided by PCK2 (PB10)
+      /* Configure the DAC master clock.  This clock is provided by PCK0 (PD30)
        * that is connected to the WM8904 MCLK.
        */
 
       sam_sckc_enable(true);
-      (void)sam_pck_configure(PCK2, PCKSRC_SCK, BOARD_SLOWCLK_FREQUENCY);
+      (void)sam_pck_configure(PCK0, PCKSRC_SCK, BOARD_SLOWCLK_FREQUENCY);
 
       /* Enable the DAC master clock */
 
