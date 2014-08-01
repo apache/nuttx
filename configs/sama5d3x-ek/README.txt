@@ -2735,9 +2735,11 @@ I2S Audio Support
       CONFIG_SAMA5_SSC0_RX=y                : Support a receiver (although it is not used!)
       CONFIG_SAMA5_SSC0_RX_RKINPUT=y        : Receiver gets clock the RK0 input
       CONFIG_SAMA5_SSC0_RX_FSLEN=1          : Minimal frame sync length
+      CONFIG_SAMA5_SSC0_RX_STTDLY=1         : Start delay
       CONFIG_SAMA5_SSC0_TX=y                : Support a transmitter
-      CONFIG_SAMA5_SSC0_TX_RXCLK=y          : Transmitter gets clock the RCLCK
+      CONFIG_SAMA5_SSC0_TX_RXCLK=y          : Transmitter gets clock the RXCLCK
       CONFIG_SAMA5_SSC0_TX_FSLEN=0          : Disable frame synch generation
+      CONFIG_SAMA5_SSC0_TX_STTDLY=1         : Start delay
       CONFIG_SAMA5_SSC0_TX_TKOUTPUT_NONE=y  : No output
 
     Audio
