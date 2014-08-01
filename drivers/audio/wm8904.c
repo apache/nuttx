@@ -108,12 +108,15 @@ struct wm8904_dev_s
   char                    mqname[16];       /* Our message queue name */
   pthread_t               threadid;         /* ID of our thread */
   sem_t                   pendsem;          /* Protect pendq */
+  uint16_t                samprate;         /* Configured samprate (sampeles/sec) */
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
 #ifndef CONFIG_AUDIO_EXCLUDE_BALANCE
   uint16_t                balance;          /* Current balance level (b16) */
 #endif  /* CONFIG_AUDIO_EXCLUDE_BALANCE */
   uint8_t                 volume;           /* Current volume level {0..63} */
 #endif  /* CONFIG_AUDIO_EXCLUDE_VOLUME */
+  uint8_t                 nchannels;        /* Number of channels (1 or 2) */
+  uint8_t                 bpshift;          /* Log2 of bits per sample (3 or 4) */
   volatile uint8_t        inflight;         /* Number of audio buffers in-flight */
   bool                    running;          /* True: Worker thread is running */
   bool                    paused;           /* True: Playing is paused */
@@ -154,7 +157,6 @@ static int      wm8904_configure(FAR struct audio_lowerhalf_s *dev,
 static int      wm8904_configure(FAR struct audio_lowerhalf_s *dev,
                   FAR const struct audio_caps_s *caps);
 #endif
-static int      wm8904_reset(FAR struct wm8904_dev_s *priv);
 static int      wm8904_shutdown(FAR struct audio_lowerhalf_s *dev);
 static void     wm8904_senddone(FAR struct i2s_dev_s *i2s,
                   FAR struct ap_buffer_s *apb, FAR void *arg, int result);
@@ -815,11 +817,48 @@ static int wm8904_configure(FAR struct audio_lowerhalf_s *dev,
         break;
 
     case AUDIO_TYPE_OUTPUT:
-      audvdbg("  AUDIO_TYPE_OUTPUT:\n");
-      audvdbg("    Number of channels: %u\n", caps->ac_channels);
-      audvdbg("    Sample rate:        %u\n", caps->ac_controls.hw[0]);
-      audvdbg("    Sample width:       %u\n", caps->ac_controls.b[2]);
+      {
+        uint8_t  bpshift;
+
+        audvdbg("  AUDIO_TYPE_OUTPUT:\n");
+        audvdbg("    Number of channels: %u\n", caps->ac_channels);
+        audvdbg("    Sample rate:        %u\n", caps->ac_controls.hw[0]);
+        audvdbg("    Sample width:       %u\n", caps->ac_controls.b[2]);
+
+        /* Verify that all of the requested values are supported */
+
+        ret = -ERANGE;
+        if (caps->ac_channels != 1 && caps->ac_channels != 2)
+          {
+            break;
+          }
+
+        if (caps->ac_controls.b[2] == 8)
+          {
+            bpshift = 3;
+          }
+        else if (caps->ac_controls.b[2] == 16)
+          {
+            bpshift = 4;
+          }
+        else
+          {
+            break;
+          }
+
+        /* Configure the hardware to accept an audio stream with these
+         * properties
+         */
+
 #warning Missing logic
+
+        /* Save the current stream configuration */
+
+        priv->nchannels = (uint8_t)caps->ac_channels;
+        priv->samprate  = caps->ac_controls.hw[0];
+        priv->bpshift   = bpshift;
+        ret             = OK;
+      }
       break;
 
     case AUDIO_TYPE_PROCESSING:
@@ -827,27 +866,6 @@ static int wm8904_configure(FAR struct audio_lowerhalf_s *dev,
     }
 
   return ret;
-}
-
-/****************************************************************************
- * Name: wm8904_reset
- *
- * Description:
- *   Performs a soft reset on the WM8904 chip by writing to the SWRST
- *   register.
- *
- ****************************************************************************/
-
-static int wm8904_reset(FAR struct wm8904_dev_s *priv)
-{
-  /* First disable interrupts */
-
-  WM8904_DISABLE(priv->lower);
-
-  /* Now issue a reset command */
-
-  wm8904_writereg(priv, WM8904_SWRST, 0);
-  return OK;
 }
 
 /****************************************************************************
@@ -863,7 +881,17 @@ static int wm8904_shutdown(FAR struct audio_lowerhalf_s *dev)
   FAR struct wm8904_dev_s *priv = (FAR struct wm8904_dev_s *)dev;
 
   DEBUGASSERT(priv);
-  wm8904_reset(priv);
+
+  /* First disable interrupts */
+
+  WM8904_DISABLE(priv->lower);
+
+  /* Now issue a software reset.  This puts all WM8904 registers back in
+   * their default state.
+   */
+  /* REVISIT:  But then the register configuration is lost. */
+  /* wm8904_writereg(priv, WM8904_SWRST, 0); */
+
   return OK;
 }
 
@@ -886,7 +914,7 @@ static void  wm8904_senddone(FAR struct i2s_dev_s *i2s,
   int ret;
 
   DEBUGASSERT(i2s && priv && priv->running && apb);
-  audvdbg("apb=%p inflight=%d\n", apb, priv->inflight);
+  audvdbg("apb=%p inflight=%d result=%d\n", apb, priv->inflight, result);
 
   /* We do not place any restriction on the context in which this function
    * is called.  It may be called from an interrupt handler.  Therefore, the
@@ -1007,6 +1035,7 @@ static int wm8904_sendbuffer(FAR struct wm8904_dev_s *priv)
 {
   FAR struct ap_buffer_s *apb;
   irqstate_t flags;
+  uint32_t timeout;
   int ret = OK;
 
   /* Loop while there are audio buffers to be sent and we have few than
@@ -1039,9 +1068,25 @@ static int wm8904_sendbuffer(FAR struct wm8904_dev_s *priv)
       priv->inflight++;
       irqrestore(flags);
 
-      /* Send the entire audio buffer via I2S */
+      /* Send the entire audio buffer via I2S.  What is a reasonable timeout
+       * to use?  This would depend on the bit rate and size of the buffer.
+       *
+       * Samples in the buffer:
+       *   = buffer_size * 8 / bpsamp                            samples
+       * Expected transfer time:
+       *   = samples / samprate                                  seconds
+       *   = (samples * 1000) / (samprate * msec_per_tick)       ticks
+       *   = (buffer_size * 8000) /(samprate * bpsamp * msec_per_tick)
+       *
+       * We will set the timeout about twice that.  Here is a reasonable
+       * approximation that saves a multiply:
+       *   = (buffer_size * 16384) /(samprate * bpsamp * msec_per_tick)
+       */
 
-      ret = I2S_SEND(priv->i2s, apb, wm8904_senddone, priv, 500 / MSEC_PER_TICK);
+      timeout = (((uint32_t)(apb->nbytes - apb->curbyte) << 14) /
+                 ((uint32_t)(priv->samprate * MSEC_PER_TICK) << priv->bpshift));
+
+      ret = I2S_SEND(priv->i2s, apb, wm8904_senddone, priv, timeout);
       if (ret < 0)
         {
           auddbg("ERROR: I2S_SEND failed: %d\n", ret);
@@ -1267,10 +1312,6 @@ static int wm8904_start(FAR struct audio_lowerhalf_s *dev)
   int ret;
 
   audvdbg("Entry\n");
-
-  /* Do a soft reset, just in case */
-
-  wm8904_reset(priv);
 
   /* Exit reduced power modes of operation */
   /* REVISIT */
@@ -1511,8 +1552,12 @@ static int wm8904_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
 
       case AUDIOIOC_HWRESET:
         {
+          /* REVISIT:  Should we completely re-initialize the chip?   We
+           * can't just issue a software reset; that would puts all WM8904
+           * registers back in their default state.
+           */
+
           audvdbg("AUDIOIOC_HWRESET:\n");
-          wm8904_reset((FAR struct wm8904_dev_s *)dev);
         }
         break;
 
@@ -1847,6 +1892,9 @@ FAR struct audio_lowerhalf_s *
       priv->lower      = lower;
       priv->i2c        = i2c;
       priv->i2s        = i2s;
+      priv->nchannels  = 2;                  /* REVISIT: Must match hardware config */
+      priv->samprate   = 40000;              /* ditto */
+      priv->bpshift    = 4;                  /* ditto */
 #if !defined(CONFIG_AUDIO_EXCLUDE_VOLUME) && !defined(CONFIG_AUDIO_EXCLUDE_BALANCE)
       priv->balance    = b16HALF;            /* Center balance */
 #endif
@@ -1861,7 +1909,9 @@ FAR struct audio_lowerhalf_s *
       I2C_SETFREQUENCY(i2c, lower->frequency);
       I2C_SETADDRESS(i2c, lower->address, 7);
 
-      /* Software reset */
+      /* Software reset.  This puts all WM8904 registers back in their
+       * default state.
+       */
 
       wm8904_writereg(priv, WM8904_SWRST, 0);
 
@@ -1881,10 +1931,6 @@ FAR struct audio_lowerhalf_s *
       /* Attach our ISR to this device */
 
       WM8904_ATTACH(lower, wm8904_interrupt, priv);
-
-      /* Put the driver in the 'shutdown' state */
-
-      wm8904_shutdown(&priv->dev);
       return &priv->dev;
     }
 
