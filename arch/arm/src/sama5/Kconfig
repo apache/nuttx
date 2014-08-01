@@ -2154,6 +2154,15 @@ config SAMA5_SSC0_RX_RKOUTPUT_XFR
 
 endchoice # Receiver output clock
 endif # !SAMA5_SSC0_RX_RKINPUT
+
+config SAMA5_SSC0_RX_FSLEN
+	int "Receive Frame Sync Length"
+	default 1
+	range 1 255
+	---help---
+		This setting determines the pulse length of the Receive Frame Sync
+		signal in units of receive clock periods.
+
 endif # SAMA5_SSC0_RX
 
 config SAMA5_SSC0_TX
@@ -2204,6 +2213,17 @@ config SAMA5_SSC0_TX_TKOUTPUT_XFR
 
 endchoice # Receiver output clock
 endif # !SAMA5_SSC0_TX_TKINPUT
+
+config SAMA5_SSC0_TX_FSLEN
+	int "Transmit Frame Sync Length"
+	default 1
+	range 0 255
+	---help---
+		This setting define the length of the Transmit Frame Sync signal in
+		units of transmit clock periods.  A value of zero disables this
+		feature.  In that case the TD line is driven with the default value
+		during the Transmit Frame Sync signal.
+
 endif # SAMA5_SSC0_TX
 
 config SAMA5_SSC0_MCKDIV_SAMPLERATE
@@ -2288,7 +2308,16 @@ config SAMA5_SSC1_RX_RKOUTPUT_XFR
 
 endchoice # Receiver output clock
 endif # !SAMA5_SSC1_RX_RKINPUT
-endif # SAMA5_SSC0_RX
+
+config SAMA5_SSC1_RX_FSLEN
+	int "Receive Frame Sync Length"
+	default 1
+	range 1 255
+	---help---
+		This setting determines the pulse length of the Receive Frame Sync
+		signal in units of receive clock periods.
+
+endif # SAMA5_SSC1_RX
 
 config SAMA5_SSC1_TX
 	bool "Enable I2C transmitter"
@@ -2338,6 +2367,17 @@ config SAMA5_SSC1_TX_TKOUTPUT_XFR
 
 endchoice # Receiver output clock
 endif # !SAMA5_SSC1_TX_TKINPUT
+
+config SAMA5_SSC1_TX_FSLEN
+	int "Receive Frame Sync Length"
+	default 1
+	range 0 255
+	---help---
+		This setting define the length of the Transmit Frame Sync signal in
+		units of transmit clock periods.  A value of zero disables this
+		feature.  In that case the TD line is driven with the default value
+		during the Transmit Frame Sync signal.
+
 endif # SAMA5_SSC1_TX
 
 config SAMA5_SSC1_MCKDIV_SAMPLERATE
