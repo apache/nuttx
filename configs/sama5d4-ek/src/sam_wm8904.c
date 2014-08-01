@@ -285,7 +285,7 @@ int sam_wm8904_initialize(int minor)
 
       /* Enable the DAC master clock */
 
-      sam_pck_enable(PCK0, true);
+      sam_pck_enable(PCK2, true);
 
       /* Configure WM8904 interrupts */
 
