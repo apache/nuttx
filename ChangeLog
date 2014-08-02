@@ -7937,4 +7937,10 @@
 	  Start Delay are now configurable (2014-8-1).
 	* drivers/audio/wm8904_debug.c:  Add logic to dump WM8904 registers
 	  (2014-8-1).
+	* drivers/audio/wm8904.c: Fix an error in write logic.  I am not sure
+	  why this fixes the problem (2014-8-1).
+	* include/nuttx/audio/wm8904.h (and implementers of the interface):
+	  the WM8904 driver needs to know the frequency of the MCLK in order
+	  to set up the FLL to generate the correct bitrate (2014-8-1).
+	* WM8904:  Add an option to control WM8904 register dumping (2014-8-2).
 
