@@ -72,7 +72,7 @@
 #include "wm8904.h"
 
 /****************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define WM8904_DUMMY                      0xff
@@ -132,7 +132,10 @@ struct wm8904_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static uint16_t wm8904_readreg(FAR struct wm8904_dev_s *priv,
+#ifndef CONFIG_DEBUG_AUDIO
+static
+#endif
+       uint16_t wm8904_readreg(FAR struct wm8904_dev_s *priv,
                   uint8_t regaddr);
 static void     wm8904_writereg(FAR struct wm8904_dev_s *priv,
                   uint8_t regaddr, uint16_t regval);
@@ -256,7 +259,10 @@ static const struct audio_ops_s g_audioops =
  *
  ****************************************************************************/
 
-static uint16_t wm8904_readreg(FAR struct wm8904_dev_s *priv, uint8_t regaddr)
+#ifndef CONFIG_DEBUG_AUDIO
+static
+#endif
+uint16_t wm8904_readreg(FAR struct wm8904_dev_s *priv, uint8_t regaddr)
 {
   int retries;
 
@@ -1914,6 +1920,7 @@ FAR struct audio_lowerhalf_s *
        */
 
       wm8904_writereg(priv, WM8904_SWRST, 0);
+      wm8904_dump_registers(&priv->dev, "After reset");
 
       /* Verify that WM8904 is present and available on this I2C */
 
@@ -1927,6 +1934,7 @@ FAR struct audio_lowerhalf_s *
       /* Configure the WM8904 hardware as an audio input device */
 
       wm8904_audio_output(priv);
+      wm8904_dump_registers(&priv->dev, "After configuration");
 
       /* Attach our ISR to this device */
 

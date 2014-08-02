@@ -212,6 +212,27 @@ FAR struct audio_lowerhalf_s *
   wm8904_initialize(FAR struct i2c_dev_s *i2c, FAR struct i2s_dev_s *i2s,
                     FAR const struct wm8904_lower_s *lower);
 
+/****************************************************************************
+ * Name: wm8904_dump_registers
+ *
+ * Description:
+ *   Dump the contents of all WM8904 registers to the syslog device
+ *
+ * Input Parameters:
+ *   dev - The device instance returned by wm8904_initialize
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_AUDIO
+void wm8904_dump_registers(FAR struct audio_lowerhalf_s *dev,
+                           FAR const char *msg);
+#else
+#  define wm8904_dump_registers(d)
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }

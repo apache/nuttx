@@ -983,5 +983,18 @@
  * Public Function Prototypes
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: wm8904_readreg
+ *
+ * Description
+ *    Read the specified 16-bit register from the WM8904 device.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_AUDIO
+struct wm8904_dev_s;
+uint16_t wm8904_readreg(FAR struct wm8904_dev_s *priv, uint8_t regaddr);
+#endif
+
 #endif /* CONFIG_AUDIO */
 #endif /* __DRIVERS_AUDIO_WM8904_H */
