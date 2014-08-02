@@ -120,6 +120,7 @@ static struct sama5d4ek_mwinfo_s g_mxtinfo =
   {
     .address   = WM8904_I2C_ADDRESS,
     .frequency = CONFIG_SAMA5D4EK_WM8904_I2CFREQUENCY,
+    .mclk      = BOARD_SLOWCLK_FREQUENCY,
 
     .attach    = wm8904_attach,
     .enable    = wm8904_enable,
