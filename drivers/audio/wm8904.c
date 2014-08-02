@@ -348,32 +348,20 @@ static void wm8904_writereg(FAR struct wm8904_dev_s *priv, uint8_t regaddr,
 
   for (retries = 1; retries <= 3; retries++)
     {
-      struct i2c_msg_s msg[2];
-      uint8_t data[2];
+      uint8_t data[3];
       int ret;
 
-      /* Set up to write the address */
+      /* Set up the data to write */
 
-      msg[0].addr   = priv->lower->address;
-      msg[0].flags  = 0;
-      msg[0].buffer = &regaddr;
-      msg[0].length = 1;
-
-      /* Followed by the read data */
-
-      data[0]       = regval >> 8;
-      data[1]       = regval & 0xff;
-
-      msg[1].addr   = priv->lower->address;
-      msg[1].flags  = I2C_M_NORESTART;
-      msg[1].buffer = data;
-      msg[1].length = 2;
+      data[0] = regaddr;
+      data[1] = regval >> 8;
+      data[2] = regval & 0xff;
 
       /* Read the register data.  The returned value is the number messages
        * completed.
        */
 
-      ret = I2C_TRANSFER(priv->i2c, msg, 2);
+      ret = I2C_WRITE(priv->i2c, data, 3);
       if (ret < 0)
         {
 #ifdef CONFIG_I2C_RESET
