@@ -111,12 +111,24 @@
 #    endif
 #  endif
 
+  /* The SSC can handle most any bit width from 2 to 32.  However, the DMA
+   * logic here is constrained to byte, half-word, and word sizes.
+   */
+
 #  ifndef CONFIG_SAMA5_SSC0_DATALEN
 #    define CONFIG_SAMA5_SSC0_DATALEN 16
 #  endif
 
-#  if CONFIG_SAMA5_SSC0_DATALEN < 2 || CONFIG_SAMA5_SSC0_DATALEN > 32
+#  if CONFIG_SAMA5_SSC0_DATALEN == 8
+#    define SAMA5_SSC0_DATAMASK  0
+#  elif CONFIG_SAMA5_SSC0_DATALEN == 16
+#    define SAMA5_SSC0_DATAMASK  1
+#  elif CONFIG_SAMA5_SSC0_DATALEN == 32
+#    define SAMA5_SSC0_DATAMASK  3
+#  elif  CONFIG_SAMA5_SSC0_DATALEN < 2 || CONFIG_SAMA5_SSC0_DATALEN > 32
 #    error Invalid value for CONFIG_SAMA5_SSC0_DATALEN
+#  else
+#    error Valid but supported value for CONFIG_SAMA5_SSC0_DATALEN
 #  endif
 
 /* Check for SSC0 RX support */
@@ -187,12 +199,24 @@
 #    endif
 #  endif
 
+  /* The SSC can handle most any bit width from 2 to 32.  However, the DMA
+   * logic here is constrained to byte, half-word, and word sizes.
+   */
+
 #  ifndef CONFIG_SAMA5_SSC1_DATALEN
 #    define CONFIG_SAMA5_SSC1_DATALEN 16
 #  endif
 
-#  if CONFIG_SAMA5_SSC1_DATALEN < 2 || CONFIG_SAMA5_SSC1_DATALEN > 32
+#  if CONFIG_SAMA5_SSC1_DATALEN == 8
+#    define SAMA5_SSC1_DATAMASK  0
+#  elif CONFIG_SAMA5_SSC1_DATALEN == 16
+#    define SAMA5_SSC1_DATAMASK  1
+#  elif CONFIG_SAMA5_SSC1_DATALEN == 32
+#    define SAMA5_SSC1_DATAMASK  3
+#  elif  CONFIG_SAMA5_SSC1_DATALEN < 2 || CONFIG_SAMA5_SSC1_DATALEN > 32
 #    error Invalid value for CONFIG_SAMA5_SSC1_DATALEN
+#  else
+#    error Valid but supported value for CONFIG_SAMA5_SSC1_DATALEN
 #  endif
 
 /* Check for SSC1 RX support */
@@ -451,7 +475,10 @@ struct sam_ssc_s
   struct i2s_dev_s dev;        /* Externally visible I2S interface */
   uintptr_t base;              /* SSC controller register base address */
   sem_t exclsem;               /* Assures mutually exclusive acess to SSC */
-  uint8_t datalen;             /* Data width (2-32) */
+  uint8_t datalen;             /* Data width (8, 16, or 32) */
+#ifdef CONFIG_DEBUG
+  uint8_t align;               /* Log2 of data width (0, 1, or 3) */
+#endif
   uint8_t pid;                 /* Peripheral ID */
   uint8_t rxfslen;             /* RX frame sync length */
   uint8_t txfslen;             /* TX frame sync length */
@@ -598,7 +625,9 @@ static void     ssc_tx_schedule(struct sam_ssc_s *priv, int result);
 static void     ssc_txdma_callback(DMA_HANDLE handle, void *arg, int result);
 #endif
 
-/* I2S methods */
+/* I2S methods (and close friends) */
+
+static int      ssc_checkwidth(struct sam_ssc_s *priv, int bits);
 
 static uint32_t ssc_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate);
 static uint32_t ssc_rxdatawidth(struct i2s_dev_s *dev, int bits);
@@ -1294,7 +1323,7 @@ static int ssc_rxdma_setup(struct sam_ssc_s *priv)
       DEBUGASSERT(bfcontainer && bfcontainer->apb);
 
       apb = bfcontainer->apb;
-      DEBUGASSERT(((uintptr_t)apb->samp & 3) == 0);
+      DEBUGASSERT(((uintptr_t)apb->samp % priv->align) == 0);
 
       /* No data received yet */
 
@@ -1714,7 +1743,7 @@ static int ssc_txdma_setup(struct sam_ssc_s *priv)
 
       samp   = (uintptr_t)&apb->samp[apb->curbyte];
       nbytes = apb->nbytes - apb->curbyte;
-      DEBUGASSERT((samp & 3) == 0 && (nbytes & 3) == 0); /* REVISIT */
+      DEBUGASSERT((samp & priv->align) == 0 && (nbytes & priv->align) == 0);
 
       /* Physical address of the SSC THR register and of the buffer location
        * in RAM.
@@ -2005,6 +2034,60 @@ static void ssc_txdma_callback(DMA_HANDLE handle, void *arg, int result)
 #endif
 
 /****************************************************************************
+ * Name: ssc_checkwidth
+ *
+ * Description:
+ *   Check for a valid bit width.  The SSC is capable of handling most any
+ *   bit width from 2 to 32, but the DMA logic in this driver is constrained
+ *   to 8-, 16-, and 32-bit data widths
+ *
+ * Input Parameters:
+ *   dev  - Device-specific state data
+ *   rate - The I2S sample rate in samples (not bits) per second
+ *
+ * Returned Value:
+ *   Returns the resulting bitrate
+ *
+ ****************************************************************************/
+
+static int ssc_checkwidth(struct sam_ssc_s *priv, int bits)
+{
+  /* The SSC can handle most any bit width from 2 to 32.  However, the DMA
+   * logic here is constrained to byte, half-word, and word sizes.
+   */
+
+  switch (bits)
+    {
+    case 8:
+#ifdef CONFIG_DEBUG
+      priv->align = 0;
+#endif
+      break;
+
+    case 16:
+#ifdef CONFIG_DEBUG
+      priv->align = 1;
+#endif
+      break;
+
+    case 32:
+#ifdef CONFIG_DEBUG
+      priv->align = 3;
+#endif
+      break;
+
+    default:
+      i2sdbg("ERROR: Unsupported or invalid data width: %d\n", bits);
+      return (bits < 2 || bits > 32) ? -EINVAL : -ENOSYS;
+    }
+
+  /* Save the new data width */
+
+  priv->datalen = bits;
+  return OK;
+}
+
+/****************************************************************************
  * Name: ssc_rxsamplerate
  *
  * Description:
@@ -2067,11 +2150,16 @@ static uint32_t ssc_rxdatawidth(struct i2s_dev_s *dev, int bits)
 
   DEBUGASSERT(priv && bits > 1);
 
-  /* Save the new data width */
+  /* Check if this is a bit width that we are configured to handle */
 
-  priv->datalen = bits;
+  ret = ssc_checkwidth(priv, bits);
+  if (ret < 0)
+    {
+      i2sdbg("ERROR: ssc_checkwidth failed: %d\n", ret);
+      return 0;
+    }
 
-  /* Upate the DMA flags */
+  /* Update the DMA flags */
 
   ret = ssc_dma_flags(priv, &dmaflags);
   if (ret < 0)
@@ -2145,7 +2233,7 @@ static int ssc_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   int ret;
 #endif
 
-  DEBUGASSERT(priv && apb && ((uintptr_t)apb->samp & 3) == 0);
+  DEBUGASSERT(priv && apb && ((uintptr_t)apb->samp & priv->align) == 0);
   i2svdbg("apb=%p nmaxbytes=%d arg=%p timeout=%d\n",
           apb, apb->nmaxbytes, arg, timeout);
 
@@ -2273,9 +2361,14 @@ static uint32_t ssc_txdatawidth(struct i2s_dev_s *dev, int bits)
 
   DEBUGASSERT(priv && bits > 1);
 
-  /* Save the new data width */
+  /* Check if this is a bit width that we are configured to handle */
 
-  priv->datalen = bits;
+  ret = ssc_checkwidth(priv, bits);
+  if (ret < 0)
+    {
+      i2sdbg("ERROR: ssc_checkwidth failed: %d\n", ret);
+      return 0;
+    }
 
   /* Upate the DMA flags */
 
@@ -2355,12 +2448,13 @@ static int ssc_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
    * alignment.
    */
 
-  DEBUGASSERT(priv && apb && ((uintptr_t)&apb->samp[apb->curbyte] & 3) == 0);
+  DEBUGASSERT(priv && apb);
   i2svdbg("apb=%p nbytes=%d arg=%p timeout=%d\n",
           apb, apb->nbytes - apb->curbyte, arg, timeout);
 
   ssc_dump_buffer("Sending", &apb->samp[apb->curbyte],
                   apb->nbytes - apb->curbyte);
+  DEBUGASSERT(((uintptr_t)&apb->samp[apb->curbyte] & priv->align) == 0);
 
 #ifdef SSC_HAVE_TX
   /* Allocate a buffer container in advance */
@@ -3163,6 +3257,9 @@ static void ssc0_configure(struct sam_ssc_s *priv)
 
   priv->base    = SAM_SSC0_VBASE;
   priv->datalen = CONFIG_SAMA5_SSC0_DATALEN;
+#ifdef CONFIG_DEBUG
+  priv->align   = SAMA5_SSC0_DATAMASK;
+#endif
   priv->pid     = SAM_PID_SSC0;
 }
 #endif
@@ -3301,6 +3398,9 @@ static void ssc1_configure(struct sam_ssc_s *priv)
 
   priv->base    = SAM_SSC1_VBASE;
   priv->datalen = CONFIG_SAMA5_SSC1_DATALEN;
+#ifdef CONFIG_DEBUG
+  priv->align   = SAMA5_SSC1_DATAMASK;
+#endif
   priv->pid     = SAM_PID_SSC1;
 }
 #endif
