@@ -814,6 +814,7 @@
 #  define WM8904_FLL_CTRL_RATE(n)    ((uint16_t)((n)-1) << WM8904_FLL_CTRL_RATE_SHIFT)
 #define WM8904_FLL_FRATIO_SHIFT      (0)      /* Bits 0-2: FVCO clock divider */
 #define WM8904_FLL_FRATIO_MASK       (7 << WM8904_FLL_FRATIO_SHIFT)
+#  define WM8904_FLL_FRATIO(n)       ((uint32_t)(n) << WM8904_FLL_FRATIO_SHIFT)
 #  define WM8904_FLL_FRATIO_DIV1     (0 << WM8904_FLL_FRATIO_SHIFT) /* Divide by 1 */
 #  define WM8904_FLL_FRATIO_DIV2     (1 << WM8904_FLL_FRATIO_SHIFT) /* Divide by 2 */
 #  define WM8904_FLL_FRATIO_DIV4     (2 << WM8904_FLL_FRATIO_SHIFT) /* Divide by 4 */

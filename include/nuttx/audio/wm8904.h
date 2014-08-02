@@ -161,7 +161,7 @@ struct wm8904_lower_s
    * the frequency of MCLK in order to generate the correct bitrates.
    */
 
-  uint32_t mcclk;      /* W8904 Master clock frequency */
+  uint32_t mclk;       /* W8904 Master clock frequency */
 
   /* IRQ/GPIO access callbacks.  These operations all hidden behind
    * callbacks to isolate the WM8904 driver from differences in GPIO
