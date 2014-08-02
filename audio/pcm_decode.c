@@ -785,6 +785,10 @@ static int pcm_shutdown(FAR struct audio_lowerhalf_s *dev)
 
   DEBUGASSERT(priv);
 
+  /* We are no longer streaming audio */
+
+  priv->streaming = false;
+
   /* Defer the operation to the lower device driver */
 
   lower = priv->lower;
@@ -850,6 +854,10 @@ static int pcm_stop(FAR struct audio_lowerhalf_s *dev)
   FAR struct audio_lowerhalf_s *lower;
 
   DEBUGASSERT(priv);
+
+  /* We are no longer streaming */
+
+  priv->streaming = false;
 
   /* Defer the operation to the lower device driver */
 
@@ -1026,6 +1034,14 @@ static int pcm_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
   if (priv->streaming)
     {
       /* Yes, we are streaming */
+      /* Check for the last audio buffer in the stream */
+
+      if ((apb->flags & AUDIO_APB_FINAL) != 0)
+        {
+          /* Yes.. then we are no longer streaming */
+
+          priv->streaming = false;
+        }
 
 #ifndef CONFIG_AUDIO_EXCLUDE_FFORWARD
       audvdbg("Received: apb=%p curbyte=%d nbytes=%d\n",
@@ -1062,9 +1078,15 @@ static int pcm_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
         {
           struct audio_caps_s caps;
 
-          /* Now we are streaming */
+          /* Now we are streaming.  Unless for some reason there is only one
+           * audio buffer in the audio stream.  In that case, this will be
+           * marked as the final buffer
+            */
 
-          priv->streaming = true;
+          if ((apb->flags & AUDIO_APB_FINAL) == 0)
+            {
+              priv->streaming = true;
+            }
 
           /* Configure the lower level for the number of channels, bitrate,
            * and sample bitwidth.
@@ -1110,6 +1132,18 @@ static int pcm_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
 
           return lower->ops->enqueuebuffer(lower, apb);
         }
+
+      /* Return the unhandled buffer to the previous level with an error
+       * indication.
+       */
+
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+      priv->export.upper(priv->export.priv, AUDIO_CALLBACK_DEQUEUE, apb,
+                         -EINVAL, NULL);
+#else
+      priv->export.upper(priv->export.priv, AUDIO_CALLBACK_DEQUEUE, apb,
+                         -EINVAL);
+#endif
     }
 
   /* This is not a WAV file! */
