@@ -238,7 +238,11 @@ FAR struct audio_lowerhalf_s *
 void wm8904_dump_registers(FAR struct audio_lowerhalf_s *dev,
                            FAR const char *msg);
 #else
-#  define wm8904_dump_registers(d)
+  /* This eliminates the need for any conditional compilation in the
+   * including file.
+   */
+
+#  define wm8904_dump_registers(d,m)
 #endif
 
 #undef EXTERN
