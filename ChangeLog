@@ -7935,3 +7935,6 @@
 	  sample rate, bits-per-sample, and buffer size (2014-7-31).
 	* arch/arm/src/sama5/Kconfig and sam_ssc.c:  SCC Frame Synch Delay and
 	  Start Delay are now configurable (2014-8-1).
+	* drivers/audio/wm8904_debug.c:  Add logic to dump WM8904 registers
+	  (2014-8-1).
+
