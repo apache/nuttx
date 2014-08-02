@@ -991,7 +991,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_AUDIO
+#ifdef CONFIG_WM8904_REGDUMP
 struct wm8904_dev_s;
 uint16_t wm8904_readreg(FAR struct wm8904_dev_s *priv, uint8_t regaddr);
 #endif

@@ -132,7 +132,7 @@ struct wm8904_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
-#ifndef CONFIG_DEBUG_AUDIO
+#ifndef CONFIG_WM8904_REGDUMP
 static
 #endif
        uint16_t wm8904_readreg(FAR struct wm8904_dev_s *priv,
@@ -259,7 +259,7 @@ static const struct audio_ops_s g_audioops =
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DEBUG_AUDIO
+#ifndef CONFIG_WM8904_REGDUMP
 static
 #endif
 uint16_t wm8904_readreg(FAR struct wm8904_dev_s *priv, uint8_t regaddr)

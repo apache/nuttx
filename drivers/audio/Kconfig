@@ -131,6 +131,12 @@ config WM8904_WORKER_STACKSIZE
 	int "WM8904 worker thread stack size"
 	default 768
 
+config WM8904_REGDUMP
+	bool "WM8904 register dump"
+	default n
+	---help---
+		Enable logic to dump the contents of all WM8904 registers.
+
 endif # AUDIO_WM8904
 
 config AUDIO_NULL

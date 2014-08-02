@@ -54,6 +54,8 @@
 
 #include "wm8904.h"
 
+#ifdef CONFIG_WM8904_REGDUMP
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -202,7 +204,6 @@ static const struct wm8904_debug_s g_wm8904_debug[] =
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_AUDIO
 void wm8904_dump_registers(FAR struct audio_lowerhalf_s *dev,
                            FAR const char *msg)
 {
@@ -217,4 +218,5 @@ void wm8904_dump_registers(FAR struct audio_lowerhalf_s *dev,
                             g_wm8904_debug[i].regaddr));
     }
 }
-#endif
+
+#endif /* CONFIG_WM8904_REGDUMP */

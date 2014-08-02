@@ -66,6 +66,8 @@
  * CONFIG_WM8904_NUM_BUFFERS - Preferred number of buffers
  * CONFIG_WM8904_WORKER_STACKSIZE - Stack size to use when creating the the
  *   WM8904 worker thread.
+ * CONFIG_WM8904_REGDUMP - Enable logic to dump all WM8904 registers to
+ *   the SYSLOG device.
  */
 
 /* Pre-requisites */
@@ -232,7 +234,7 @@ FAR struct audio_lowerhalf_s *
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_AUDIO
+#ifdef CONFIG_WM8904_REGDUMP
 void wm8904_dump_registers(FAR struct audio_lowerhalf_s *dev,
                            FAR const char *msg);
 #else
