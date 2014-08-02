@@ -2697,20 +2697,21 @@ I2S Audio Support
   WM8904 Audio CODEC Interface
   ----------------------------
 
-    ------------- ---------------- -----------------
-    WM8904        SAMA5D3          NuttX Pin Name
-    ------------- ---------------- -----------------
-     3 SDA        PA30 TWD0        PIO_TWI0_D
-     2 SCLK       PA31 TWCK0       PIO_TWI0_CK
-    28 MCLK       PD30 PCK0        PIO_PMC_PCK0
-    29 BCLK/GPIO4 PC16 TK          PIO_SSC0_TK
-    "" "        " PC19 RK          PIO_SSC0_RK
-    30 LRCLK      PC17 TF          PIO_SSC0_TF
-    "" "   "      PC20 RF          PIO_SSC0_RF
-    31 ADCDAT     PC21 RD          PIO_SSC0_RD
-    32 DACDAT     PC18 TD          PIO_SSC0_TD
-     1 IRQ/GPIO1  PD16 INT_AUDIO   N/A
-    ------------- ---------------- -----------------
+    ------------- ---------------- ----------------- ----------------------
+    WM8904        SAMA5D3          NuttX Pin Name    External Access
+    ------------- ---------------- ----------------- ----------------------
+     3 SDA        PA30 TWD0        PIO_TWI0_D        J1 Pin 34
+     2 SCLK       PA31 TWCK0       PIO_TWI0_CK       J1 Pin 36
+    28 MCLK       PD30 PCK0        PIO_PMC_PCK0      (Not available)
+    29 BCLK/GPIO4 PC16 TK          PIO_SSC0_TK       J2 Pin 6
+    "" "        " PC19 RK          PIO_SSC0_RK       J2 Pin 12
+    30 LRCLK      PC17 TF          PIO_SSC0_TF       J2 Pin 8
+    "" "   "      PC20 RF          PIO_SSC0_RF       J2 Pin 14
+    31 ADCDAT     PC21 RD          PIO_SSC0_RD       J2 Pin 16
+    32 DACDAT     PC18 TD          PIO_SSC0_TD       J2 Pin 10
+     1 IRQ/GPIO1  PD16 INT_AUDIO   N/A               (Not available)
+    ------------- ---------------- ----------------- ----------------------
+                                                     Ground at Pins 3,4,37,38
 
   WM8904 Configuration
   --------------------
