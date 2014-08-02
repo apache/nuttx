@@ -1585,7 +1585,12 @@ static void *wm8904_workerthread(pthread_addr_t pvarg)
   /* Disable the WM8904 interrupt */
 
   WM8904_DISABLE(priv->lower);
+
+  /* Mute the volume and disable the FLL output */
+
   wm8904_setvolume(priv, priv->volume, true);
+  wm8904_writereg(priv, WM8904_FLL_CTRL1, 0);
+  wm8904_writereg(priv, WM8904_DUMMY, 0x55aa);
 
   /* Return any pending buffers in our pending queue */
 
