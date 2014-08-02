@@ -150,10 +150,16 @@ typedef CODE int (*wm8904_handler_t)(FAR const struct wm8904_lower_s *lower,
 
 struct wm8904_lower_s
 {
-  /* Device characterization */
+  /* I2C characterization */
 
   uint32_t frequency;  /* Initial I2C frequency */
-  uint8_t address;     /* 7-bit I2C address (only bits 0-6 used) */
+  uint8_t  address;    /* 7-bit I2C address (only bits 0-6 used) */
+
+  /* Clocking is provided via MCLK.  The WM8904 driver will need to know
+   * the frequency of MCLK in order to generate the correct bitrates.
+   */
+
+  uint32_t mcclk;      /* W8904 Master clock frequency */
 
   /* IRQ/GPIO access callbacks.  These operations all hidden behind
    * callbacks to isolate the WM8904 driver from differences in GPIO
