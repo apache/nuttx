@@ -7945,4 +7945,15 @@
 	* WM8904:  Add an option to control WM8904 register dumping (2014-8-2).
 	* WM8904:  Add logic to program the FLL to achieve the bitrate
 	  (2014-8-1).
-
+	* arch/arm/src/sama5/sam_ssc.c:  Verify that the requested bit width
+	  is supported.  Correct some alignment tests that depend upon the data
+	  bit width (2014-8-2).
+	* audio/pcm_decode.c:  Correct the end of audio stream handling.  It was
+	  not being detected before so that logic was not examining the WAV
+	  header in the first buffer of the next audio file (2014-8-2).
+	* configs/sama5d3x-ek/nxplayer/defconfig:  Update with last WM8904
+	  settings (2014-8-2).
+	* drivers/audio/wm8904.c:  Disable the FFL at the end of playing
+	  (2014-8-2).
+	* include/nuttx/audio/wm8904.h:  Fix wm8904_dump_registers macro:
+	  Wrong number of parameters (2014-8-2).
