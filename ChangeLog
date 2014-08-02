@@ -7943,4 +7943,6 @@
 	  the WM8904 driver needs to know the frequency of the MCLK in order
 	  to set up the FLL to generate the correct bitrate (2014-8-1).
 	* WM8904:  Add an option to control WM8904 register dumping (2014-8-2).
+	* WM8904:  Add logic to program the FLL to achieve the bitrate
+	  (2014-8-1).
 
