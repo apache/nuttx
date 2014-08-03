@@ -117,6 +117,7 @@
 
 /* Resulting frequencies */
 
+#define BOARD_MAINCK_FREQUENCY     BOARD_MAINOSC_FREQUENCY
 #define BOARD_PLLA_FREQUENCY       (792000000) /* PLLACK:  66 * 12Mhz / 1 */
 #define BOARD_PCK_FREQUENCY        (396000000) /* CPU:     PLLACK / 2 / 1  */
 #define BOARD_MCK_FREQUENCY        (132000000) /* MCK:     PLLACK / 2 / 1 / 3 */
