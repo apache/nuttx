@@ -48,13 +48,14 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <assert.h>
+#include <fixedmath.h>
 #include <syslog.h>
 
 #include <nuttx/audio/audio.h>
+#include <nuttx/audio/wm8904.h>
 
 #include "wm8904.h"
-
-#ifdef CONFIG_WM8904_REGDUMP
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -64,11 +65,13 @@
  * Private Types
  ****************************************************************************/
 
-struct wm8904_debug_s
+#ifdef CONFIG_WM8904_REGDUMP
+struct wb8904_regdump_s
 {
   FAR const char *regname;
   uint8_t regaddr;
 };
+#endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -78,7 +81,8 @@ struct wm8904_debug_s
  * Private Data
  ****************************************************************************/
 
-static const struct wm8904_debug_s g_wm8904_debug[] =
+#ifdef CONFIG_WM8904_REGDUMP
+static const struct wb8904_regdump_s g_wm8904_debug[] =
 {
   {"ID",              WM8904_ID              },
   {"BIAS_CTRL",       WM8904_BIAS_CTRL       },
@@ -180,7 +184,8 @@ static const struct wm8904_debug_s g_wm8904_debug[] =
   {"FLL_NCO_TEST1",   WM8904_FLL_NCO_TEST1   }
 };
 
-#define WM8904_NREGISTERS (sizeof(g_wm8904_debug)/sizeof(struct wm8904_debug_s))
+#  define WM8904_NREGISTERS (sizeof(g_wm8904_debug)/sizeof(struct wb8904_regdump_s))
+#endif /* CONFIG_WM8904_REGDUMP */
 
 /****************************************************************************
  * Private Functions
@@ -204,6 +209,7 @@ static const struct wm8904_debug_s g_wm8904_debug[] =
  *
  ****************************************************************************/
 
+#ifdef CONFIG_WM8904_REGDUMP
 void wm8904_dump_registers(FAR struct audio_lowerhalf_s *dev,
                            FAR const char *msg)
 {
@@ -218,5 +224,210 @@ void wm8904_dump_registers(FAR struct audio_lowerhalf_s *dev,
                             g_wm8904_debug[i].regaddr));
     }
 }
-
 #endif /* CONFIG_WM8904_REGDUMP */
+
+/****************************************************************************
+ * Name: wm8904_clock_analysis
+ *
+ * Description:
+ *   Analyze the settings in the clock chain and dump to syslog.
+ *
+ * Input Parameters:
+ *   dev - The device instance returned by wm8904_initialize
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_WM8904_CLKDEBUG
+void wm8904_clock_analysis(FAR struct audio_lowerhalf_s *dev,
+                           FAR const char *msg)
+{
+  FAR struct wm8904_dev_s *priv = (FAR struct wm8904_dev_s *)dev;
+  uint32_t sysclk;
+  uint32_t bclk;
+  uint32_t lrclk;
+  uint16_t regval;
+  unsigned int tmp;
+  double ftmp;
+
+  syslog("WM8904 Clock Analysis: %s\n", msg);
+  DEBUGASSERT(priv && priv->lower);
+  syslog("  MCLK:            %lu Hz\n", (unsigned long)priv->lower->mclk);
+
+  /* Is the SYSCLK source the FLL?  Or MCK? */
+
+  regval = wm8904_readreg(priv, WM8904_CLKRATE2);
+  if ((regval & WM8904_SYSCLK_SRC) == WM8904_SYSCLK_SRCMCLK)
+    {
+      /* The SYSCLK divider bypasses the FLL and takes its input
+       * directly from MCLK.
+       */
+
+      sysclk = priv->lower->mclk;
+      syslog("  SYSCLK Source:   MCLK (%s)\n",
+             (regval & WM8904_MCLK_INV) != 0 ? "inverted" : "not inverted");
+    }
+  else
+    {
+      uint32_t fref;
+      uint32_t fvco;
+      uint32_t fout;
+      unsigned int outdiv;
+      unsigned int frndx;
+      unsigned int flln;
+      unsigned int fllk;
+      unsigned int fratio;
+      double nk;
+
+      /* Assume that the Fref input to the FLL is MCLK */
+
+      fref = priv->lower->mclk;
+
+      /* Now get the real FLL input source */
+
+      regval = wm8904_readreg(priv, WM8904_FLL_CTRL5);
+      switch (regval & WM8904_FLL_CLK_REF_SRC_MASK)
+        {
+          case WM8904_FLL_CLK_REF_SRC_MCLK:
+            syslog("  FLL Source:      MCLK\n");
+            break;
+
+          case WM8904_FLL_CLK_REF_SRC_BCLK:
+            syslog("  ERROR: FLL source is BCLK: %04x\n", regval);
+            break;
+
+          case WM8904_FLL_CLK_REF_SRC_LRCLK:
+            syslog("  ERROR: FLL source is LRCLK: %04x\n", regval);
+            break;
+
+          default:
+            syslog("  ERROR: Unrecognized FLL source: %04x\n", regval);
+        }
+
+      syslog("  Fref:            %lu Hz (before divider)\n", fref);
+      switch (regval & WM8904_FLL_CLK_REF_DIV_MASK)
+        {
+          case WM8904_FLL_CLK_REF_DIV1:
+            syslog("  FLL_CLK_REF_DIV: 1\n");
+            break;
+
+          case WM8904_FLL_CLK_REF_DIV2:
+            syslog("  FLL_CLK_REF_DIV: 2\n");
+            fref >>= 1;
+            break;
+
+          case WM8904_FLL_CLK_REF_DIV4:
+            syslog("  FLL_CLK_REF_DIV: 4\n");
+            fref >>= 2;
+            break;
+
+          case WM8904_FLL_CLK_REF_DIV8:
+            syslog("  FLL_CLK_REF_DIV: 8\n");
+            fref >>= 3;
+            break;
+        }
+
+      syslog("  Fref:            %lu Hz (after divider)\n", fref);
+
+      regval = wm8904_readreg(priv, WM8904_FLL_CTRL2);
+      frndx  = (regval & WM8904_FLL_FRATIO_MASK) >> WM8904_FLL_FRATIO_SHIFT;
+      tmp    = (regval & WM8904_FLL_CTRL_RATE_MASK) >> WM8904_FLL_CTRL_RATE_SHIFT;
+      outdiv = ((regval & WM8904_FLL_OUTDIV_MASK) >> WM8904_FLL_OUTDIV_SHIFT) + 1;
+
+      syslog("  FLL_CTRL_RATE:   Fvco / %u\n", tmp + 1);
+
+      regval = wm8904_readreg(priv, WM8904_FLL_CTRL4);
+      flln   = (regval & WM8904_FLL_N_MASK) >> WM8904_FLL_N_SHIFT;
+      tmp    = (regval & WM8904_FLL_GAIN_MASK) >> WM8904_FLL_GAIN_SHIFT;
+
+      syslog("  FLL_GAIN:        %u\n", (1 << tmp));
+
+      fllk   = wm8904_readreg(priv, WM8904_FLL_CTRL3);
+      nk     = (double)flln + ((double)fllk / 65536.0);
+      fratio = g_fllratio[frndx];
+
+      syslog("  FLL_FRATIO:      %u\n", fratio);
+      syslog("  FLL_OUTDIV:      %u\n", outdiv);
+      syslog("  FLL_N.K:         %u.%05u\n", flln, fllk);
+
+      ftmp = nk * (double)fref * (double)fratio;
+      fvco = (uint32_t)ftmp;
+
+      syslog("  Fvco:            %lu Hz\n", (unsigned long)fvco);
+
+      fout = fvco / outdiv;
+      syslog("  Fout:            %lu Hz\n", (unsigned long)fout);
+
+      regval = wm8904_readreg(priv, WM8904_FLL_CTRL1);
+
+      syslog("  FLL_FRACN_ENA:   %s\n",
+             (regval & WM8904_FLL_FRACN_ENA) != 0 ? "Enabled" : "Disabled");
+      syslog("  FLL_OSC_ENA:     %s\n",
+             (regval & WM8904_FLL_OSC_ENA) != 0 ? "Enabled" : "Disabled");
+      syslog("  FLL_ENA:         %s\n",
+             (regval & WM8904_FLL_ENA) != 0 ? "Enabled" : "Disabled");
+
+      if ((regval & WM8904_FLL_ENA) == 0)
+        {
+          syslog("  No SYSCLK\n");
+          return;
+        }
+
+      sysclk = fout;
+    }
+
+  syslog("  SYSCLK:          %lu Hz (before divider)\n", (unsigned long)sysclk);
+
+  regval = wm8904_readreg(priv, WM8904_CLKRATE0);
+  if ((regval & WM8904_MCLK_DIV) == WM8904_MCLK_DIV1)
+    {
+      syslog("  MCLK_DIV:        1\n");
+    }
+  else
+    {
+      syslog("  MCLK_DIV:        2\n");
+      sysclk >>=1;
+    }
+
+  syslog("  SYSCLK:          %lu (after divider)\n", (unsigned long)sysclk);
+
+  regval = wm8904_readreg(priv, WM8904_CLKRATE2);
+
+  syslog("  CLK_SYS_ENA:     %s\n",
+         (regval & WM8904_CLK_SYS_ENA) != 0 ? "Enabled" : "Disabled");
+
+  if ((regval & WM8904_CLK_SYS_ENA) == 0)
+    {
+      syslog("  No SYSCLK\n");
+      return;
+    }
+
+  regval = wm8904_readreg(priv, WM8904_AIF2);
+  tmp    = (regval & WM8904_BCLK_DIV_MASK) >> WM8904_BCLK_DIV_SHIFT;
+  tmp    = g_sysclk_scaleb1[tmp];
+  ftmp   = (double)tmp / 2.0;
+
+  syslog("  BCLK_DIV:        SYSCLK / %u.%01u\n",
+         (unsigned int)(tmp >> 1), (unsigned int)(5 * (tmp & 1)));
+
+  bclk = (uint32_t)(sysclk / ftmp);
+
+  syslog("  BCLK:            %lu Hz\n", (unsigned long)bclk);
+
+  regval = wm8904_readreg(priv, WM8904_AIF1);
+  syslog("  BCLK_DIR:        %s\n",
+         (regval & WM8904_BCLK_DIR) != 0 ? "Output" : "Input");
+
+  regval = wm8904_readreg(priv, WM8904_AIF3);
+  tmp = (regval & WM8904_LRCLK_RATE_MASK) >> WM8904_LRCLK_RATE_SHIFT;
+
+  lrclk = bclk / tmp;
+
+  syslog("  LRCLK_RATE:      BCLK / %lu\n", (unsigned long)tmp);
+  syslog("  LRCLK:           %lu\n", (unsigned long)lrclk);
+  syslog("  LRCLK_DIR:       %s\n",
+         (regval & WM8904_LRCLK_DIR) != 0 ? "Output" : "Input");
+}
+#endif /* CONFIG_WM8904_CLKDEBUG */

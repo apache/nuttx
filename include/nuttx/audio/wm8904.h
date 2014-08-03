@@ -245,6 +245,31 @@ void wm8904_dump_registers(FAR struct audio_lowerhalf_s *dev,
 #  define wm8904_dump_registers(d,m)
 #endif
 
+/****************************************************************************
+ * Name: wm8904_clock_analysis
+ *
+ * Description:
+ *   Analyze the settings in the clock chain and dump to syslog.
+ *
+ * Input Parameters:
+ *   dev - The device instance returned by wm8904_initialize
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_WM8904_CLKDEBUG
+void wm8904_clock_analysis(FAR struct audio_lowerhalf_s *dev,
+                           FAR const char *msg);
+#else
+  /* This eliminates the need for any conditional compilation in the
+   * including file.
+   */
+
+#  define wm8904_clock_analysis(d,m)
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }

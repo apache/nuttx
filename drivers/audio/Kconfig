@@ -137,6 +137,12 @@ config WM8904_REGDUMP
 	---help---
 		Enable logic to dump the contents of all WM8904 registers.
 
+config WM8904_CLKDEBUG
+	bool "WM8904 clock analysis"
+	default n
+	---help---
+		Enable logic to analyze WM8904 clock configuation.
+
 endif # AUDIO_WM8904
 
 config AUDIO_NULL

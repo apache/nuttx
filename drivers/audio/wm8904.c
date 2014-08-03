@@ -75,99 +75,15 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Dummy register address */
-
-#define WM8904_DUMMY              0xff
-
-/* Default FLL configuration */
-
-#define WM8904_DEFAULT_SAMPRATE   11025
-#define WM8904_DEFAULT_NCHANNELS  1
-#define WM8904_DEFAULT_BPSAMP     16
-
-#define WM8904_STARTBITS          2
-
-#define WM8904_NFLLRATIO_DIV1     0
-#define WM8904_NFLLRATIO_DIV2     1
-#define WM8904_NFLLRATIO_DIV4     2
-#define WM8904_NFLLRATIO_DIV8     3
-#define WM8904_NFLLRATIO_DIV16    4
-#define WM8904_NFLLRATIO          5
-
-#define WM8904_MINOUTDIV          4
-#define WM8904_MAXOUTDIV          64
-
-#define WM8904_BCLK_MAXDIV        20
-
-#define WM8904_FVCO_MIN           90000000
-#define WM8904_FVCO_MAX           100000000
-
-/* Commonly defined and redefined macros */
-
-#ifndef MIN
-#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
-#endif
-
-#ifndef MAX
-#  define MAX(a,b) (((a) > (b)) ? (a) : (b))
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-
-struct wm8904_dev_s
-{
-  /* We are an audio lower half driver (We are also the upper "half" of
-   * the WM8904 driver with respect to the board lower half driver).
-   *
-   * Terminology: Our "lower" half audio instances will be called dev for the
-   * publicly visible version and "priv" for the version that only this driver
-   * knows.  From the point of view of this driver, it is the board lower
-   * "half" that is referred to as "lower".
-   */
-
-  struct audio_lowerhalf_s dev;             /* WM8904 audio lower half (this device) */
-
-  /* Our specific driver data goes here */
-
-  const FAR struct wm8904_lower_s *lower;   /* Pointer to the board lower functions */
-  FAR struct i2c_dev_s   *i2c;              /* I2C driver to use */
-  FAR struct i2s_dev_s   *i2s;              /* I2S driver to use */
-  struct dq_queue_s       pendq;            /* Queue of pending buffers to be sent */
-  struct dq_queue_s       doneq;            /* Queue of sent buffers to be returned */
-  mqd_t                   mq;               /* Message queue for receiving messages */
-  char                    mqname[16];       /* Our message queue name */
-  pthread_t               threadid;         /* ID of our thread */
-  uint32_t                bitrate;          /* Actual programmed bit rate */
-  sem_t                   pendsem;          /* Protect pendq */
-  uint16_t                samprate;         /* Configured samprate (samples/sec) */
-#ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
-#ifndef CONFIG_AUDIO_EXCLUDE_BALANCE
-  uint16_t                balance;          /* Current balance level (b16) */
-#endif  /* CONFIG_AUDIO_EXCLUDE_BALANCE */
-  uint8_t                 volume;           /* Current volume level {0..63} */
-#endif  /* CONFIG_AUDIO_EXCLUDE_VOLUME */
-  uint8_t                 nchannels;        /* Number of channels (1 or 2) */
-  uint8_t                 bpsamp;           /* Bits per sample (8 or 16) */
-  volatile uint8_t        inflight;         /* Number of audio buffers in-flight */
-  bool                    running;          /* True: Worker thread is running */
-  bool                    paused;           /* True: Playing is paused */
-  bool                    mute;             /* True: Output is muted */
-#ifndef CONFIG_AUDIO_EXCLUDE_STOP
-  bool                    terminating;      /* True: Stop requested */
-#endif
-  bool                    reserved;         /* True: Device is reserved */
-  volatile int            result;           /* The result of the last transfer */
-};
-
-static const uint8_t g_fllratio[WM8904_NFLLRATIO] = {1, 2, 4, 8, 16};
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-#ifndef CONFIG_WM8904_REGDUMP
+#if !defined(CONFIG_WM8904_REGDUMP) && !defined(CONFIG_WM8904_CLKDEBUG)
 static
 #endif
        uint16_t wm8904_readreg(FAR struct wm8904_dev_s *priv,
@@ -289,12 +205,20 @@ static const struct audio_ops_s g_audioops =
   wm8904_release        /* release        */
 };
 
-static const uint8_t g_sysclk_scaleb1[WM8904_BCLK_MAXDIV+1] =
+#ifndef CONFIG_WM8904_CLKDEBUG
+static
+#endif
+const uint8_t g_sysclk_scaleb1[WM8904_BCLK_MAXDIV+1] =
 {
    2,  3,  4,  6,  8, 10, 11, /*  1,  1.5,  2,  3,  4,  5,  5.5 */
   12, 16, 20, 22, 24, 32, 40, /*  6,  8,   10, 11, 12, 16, 20   */
   44, 48, 50, 60, 64, 88, 96  /* 22, 24,   25, 30, 32, 44, 48   */
 };
+
+#ifndef CONFIG_WM8904_CLKDEBUG
+static
+#endif
+const uint8_t g_fllratio[WM8904_NFLLRATIO] = {1, 2, 4, 8, 16};
 
 /****************************************************************************
  * Private Functions
@@ -308,7 +232,7 @@ static const uint8_t g_sysclk_scaleb1[WM8904_BCLK_MAXDIV+1] =
  *
  ****************************************************************************/
 
-#ifndef CONFIG_WM8904_REGDUMP
+#if !defined(CONFIG_WM8904_REGDUMP) && !defined(CONFIG_WM8904_CLKDEBUG)
 static
 #endif
 uint16_t wm8904_readreg(FAR struct wm8904_dev_s *priv, uint8_t regaddr)
@@ -900,7 +824,7 @@ static void wm8904_setbitrate(FAR struct wm8904_dev_s *priv)
    *
    * Already set above
    */
- 
+
   /* Allow time for FLL lock.  Typical is 2 MSec.  Lock status is available
    * in the WM8904 interrupt status register.
    */
@@ -911,19 +835,6 @@ static void wm8904_setbitrate(FAR struct wm8904_dev_s *priv)
 
   regval = WM8904_FLL_FRACN_ENA | WM8904_FLL_ENA;
   wm8904_writereg(priv, WM8904_FLL_CTRL1, regval);
-
-  /* Dump all FLL registers */
-
-  audvdbg("FLL control 1[%02x]: %04x\n",
-          WM8904_FLL_CTRL1, wm8904_readreg(priv, WM8904_FLL_CTRL1));
-  audvdbg("FLL control 2[%02x]: %04x\n",
-          WM8904_FLL_CTRL2, wm8904_readreg(priv, WM8904_FLL_CTRL2));
-  audvdbg("FLL control 3[%02x]: %04x\n",
-          WM8904_FLL_CTRL3, wm8904_readreg(priv, WM8904_FLL_CTRL3));
-  audvdbg("FLL control 4[%02x]: %04x\n",
-          WM8904_FLL_CTRL4, wm8904_readreg(priv, WM8904_FLL_CTRL4));
-  audvdbg("FLL control 5[%02x]: %04x\n",
-          WM8904_FLL_CTRL5, wm8904_readreg(priv, WM8904_FLL_CTRL5));
 }
 
 /****************************************************************************
@@ -1260,6 +1171,8 @@ static int wm8904_configure(FAR struct audio_lowerhalf_s *dev,
         wm8904_setbitrate(priv);
         wm8904_setlrclock(priv);
         wm8904_writereg(priv, WM8904_DUMMY, 0x55aa);
+
+        wm8904_clock_analysis(&priv->dev, "AUDIO_TYPE_OUTPUT");
         ret = OK;
       }
       break;
@@ -2375,6 +2288,7 @@ FAR struct audio_lowerhalf_s *
 
       wm8904_audio_output(priv);
       wm8904_dump_registers(&priv->dev, "After configuration");
+      wm8904_clock_analysis(&priv->dev, "After configuration");
 
       /* Attach our ISR to this device */
 
