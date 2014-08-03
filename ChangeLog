@@ -7959,4 +7959,5 @@
 	  Wrong number of parameters (2014-8-2).
 	* arch/arm/src/sama5/sam_pck.* and all SAMA5D board header files:
 	  Add Main clock as an option for the PCK clock source (2014-8-3).
-
+	* configs/sama5d*-ek/Kconfig and src/sam_wm8904.c: Add option to
+	  use MAINCK as source fort he WM8904 MCLK (2015-8-3).
