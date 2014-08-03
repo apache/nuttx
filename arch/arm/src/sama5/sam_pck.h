@@ -64,6 +64,7 @@ enum pckid_e
 enum pckid_clksrc_e
 {
   PCKSRC_MCK = 0,  /* Source clock is the master clock (MCK) or PLLA output (PLLACK) */
+  PCKSRC_MAINCK,   /* Source clock is the main clock (probably the XTAL) */
   PCKSRC_SCK       /* Source clock is the slow clock (SCK) */
 };
 
