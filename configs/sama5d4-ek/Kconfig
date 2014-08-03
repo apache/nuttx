@@ -280,5 +280,16 @@ config SAMA5D4EK_WM8904_I2CFREQUENCY
 		the WM8904.  If you have problems communicating with the WM8904,
 		then you might want to try lowering this rate.
 
+choice
+	prompt "WM8904 MCLK source"
+	default SAMA5D4EK_WM8904_SRCMAIN
+
+config SAMA5D4EK_WM8904_SRCMAIN
+	bool "Main Clock (12MHz)"
+
+config SAMA5D4EK_WM8904_SRCSCK
+	bool "Slow XTAL (32.768KHz)"
+
+endchoice # WM8904 MCLK source
 endif # AUDIO_WM8904
 endif # ARCH_BOARD_SAMA5D4_EK
