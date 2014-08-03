@@ -331,6 +331,8 @@
 #define WM8904_TOCLK_RATE_DIV16      (1 << 14) /* Bit 14: TOCLK Rate Divider (/16) */
 #define WM8904_TOCLK_RATE_X4         (1 << 13) /* Bit 13: TOCLK Rate Multiplier */
 #define WM8904_MCLK_DIV              (1 << 0)  /* Bit 0:  Enables divide by 2 on MCLK */
+#  define WM8904_MCLK_DIV1           (0)       /*         0: SYSCLK = MCLK */
+#  define WM8904_MCLK_DIV2           (1 << 0)  /*         1: SYSCLK = MCLK/2*/
 
 /* 0x15 Clock Rates 1 */
 
@@ -359,6 +361,8 @@
 
 #define WM8904_MCLK_INV              (1 << 15) /* Bit 15: MCLK invert */
 #define WM8904_SYSCLK_SRC            (1 << 14) /* Bit 14: SYSCLK source select */
+#  define WM8904_SYSCLK_SRCMCLK      (0)       /*         0: MCLK */
+#  define WM8904_SYSCLK_SRCFLL       (1 << 14) /*         1: FLL Output */
 #define WM8904_TOCLK_RATE            (1 << 12) /* Bit 12: TOCLK rate divider (/2) */
 #define WM8904_OPCLK_ENA             (1 << 3)  /* Bit 3:  GPIO clock output enable */
 #define WM8904_CLK_SYS_ENA           (1 << 2)  /* Bit 2:  System clock enable */
@@ -422,6 +426,7 @@
 #  define WM8904_OPCLK_DIV16         (8 << WM8904_OPCLK_DIV_SHIFT) /* SYSCLK / 16 */
 #define WM8904_BCLK_DIV_SHIFT        (0)       /* Bits 0-4: BCLK Frequency (Master Mode) */
 #define WM8904_BCLK_DIV_MASK         (31 << WM8904_BCLK_DIV_SHIFT)
+#  define WM8904_BCLK_DIV(n)         ((uint16_t)(n) << WM8904_BCLK_DIV_SHIFT)
 #  define WM8904_BCLK_DIV1           (0 << WM8904_BCLK_DIV_SHIFT) /* SYSCLK */
 #  define WM8904_BCLK_DIV1p5         (1 << WM8904_BCLK_DIV_SHIFT) /* SYSCLK / 1.5 */
 #  define WM8904_BCLK_DIV2           (2 << WM8904_BCLK_DIV_SHIFT) /* SYSCLK / 2 */

@@ -83,13 +83,24 @@
 
 #define WM8904_DEFAULT_SAMPRATE   11025
 #define WM8904_DEFAULT_NCHANNELS  1
-#define WM8904_DEFAULT_NCHSHIFT   0
-#define WM8904_DEFUALT_BPSAMP     16
-#define WM8904_DEFAULT_BPSHIFT    4
+#define WM8904_DEFAULT_BPSAMP     16
 
+#define WM8904_STARTBITS          2
+
+#define WM8904_NFLLRATIO_DIV1     0
+#define WM8904_NFLLRATIO_DIV2     1
+#define WM8904_NFLLRATIO_DIV4     2
+#define WM8904_NFLLRATIO_DIV8     3
+#define WM8904_NFLLRATIO_DIV16    4
 #define WM8904_NFLLRATIO          5
+
 #define WM8904_MINOUTDIV          4
 #define WM8904_MAXOUTDIV          64
+
+#define WM8904_BCLK_MAXDIV        20
+
+#define WM8904_FVCO_MIN           90000000
+#define WM8904_FVCO_MAX           100000000
 
 /* Commonly defined and redefined macros */
 
@@ -128,16 +139,17 @@ struct wm8904_dev_s
   mqd_t                   mq;               /* Message queue for receiving messages */
   char                    mqname[16];       /* Our message queue name */
   pthread_t               threadid;         /* ID of our thread */
+  uint32_t                bitrate;          /* Actual programmed bit rate */
   sem_t                   pendsem;          /* Protect pendq */
-  uint16_t                samprate;         /* Configured samprate (sampeles/sec) */
+  uint16_t                samprate;         /* Configured samprate (samples/sec) */
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
 #ifndef CONFIG_AUDIO_EXCLUDE_BALANCE
   uint16_t                balance;          /* Current balance level (b16) */
 #endif  /* CONFIG_AUDIO_EXCLUDE_BALANCE */
   uint8_t                 volume;           /* Current volume level {0..63} */
 #endif  /* CONFIG_AUDIO_EXCLUDE_VOLUME */
-  uint8_t                 nchshift;         /* Log2 or number of channels (0 or 1) */
-  uint8_t                 bpshift;          /* Log2 of bits per sample (3 or 4) */
+  uint8_t                 nchannels;        /* Number of channels (1 or 2) */
+  uint8_t                 bpsamp;           /* Bits per sample (8 or 16) */
   volatile uint8_t        inflight;         /* Number of audio buffers in-flight */
   bool                    running;          /* True: Worker thread is running */
   bool                    paused;           /* True: Playing is paused */
@@ -147,15 +159,6 @@ struct wm8904_dev_s
 #endif
   bool                    reserved;         /* True: Device is reserved */
   volatile int            result;           /* The result of the last transfer */
-};
-
-/* Used in search for optimal FLL setting */
-
-struct wm8904_fll_s
-{
-  uint8_t outdiv;  /* FLL_OUTDIV, range {4..63} */
-  uint8_t fllndx;  /* Index into g_fllratio, range {0..(WM8904_NFLLRATIO-1) */
-  b16_t   nk;      /* Rational multiplier, < 2048.0 */
 };
 
 static const uint8_t g_fllratio[WM8904_NFLLRATIO] = {1, 2, 4, 8, 16};
@@ -183,7 +186,10 @@ static void     wm8904_setvolume(FAR struct wm8904_dev_s *priv,
 static void     wm8904_setbass(FAR struct wm8904_dev_s *priv, uint8_t bass);
 static void     wm8904_settreble(FAR struct wm8904_dev_s *priv, uint8_t treble);
 #endif
+
+static void     wm8904_setdatawidth(FAR struct wm8904_dev_s *priv);
 static void     wm8904_setbitrate(FAR struct wm8904_dev_s *priv);
+static void     wm8904_setlrclock(FAR struct wm8904_dev_s *priv);
 
 /* Audio lower half methods (and close friends) */
 
@@ -283,6 +289,13 @@ static const struct audio_ops_s g_audioops =
   wm8904_release        /* release        */
 };
 
+static const uint8_t g_sysclk_scaleb1[WM8904_BCLK_MAXDIV+1] =
+{
+   2,  3,  4,  6,  8, 10, 11, /*  1,  1.5,  2,  3,  4,  5,  5.5 */
+  12, 16, 20, 22, 24, 32, 40, /*  6,  8,   10, 11, 12, 16, 20   */
+  44, 48, 50, 60, 64, 88, 96  /* 22, 24,   25, 30, 32, 44, 48   */
+};
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -355,7 +368,7 @@ uint16_t wm8904_readreg(FAR struct wm8904_dev_s *priv, uint8_t regaddr)
            */
 
           regval = ((uint16_t)data[0] << 8) | (uint16_t)data[1];
-          audvdbg("READ: %02x -> %04x\n", regaddr, regval);
+          audvdbg("Read: %02x -> %04x\n", regaddr, regval);
           return regval;
         }
 
@@ -582,17 +595,55 @@ static void wm8904_settreble(FAR struct wm8904_dev_s *priv, uint8_t treble)
 #endif /* CONFIG_AUDIO_EXCLUDE_TONE */
 
 /****************************************************************************
+ * Name: wm8904_setdatawidth
+ *
+ * Description:
+ *   Set the 8- or 16-bit data modes
+ *
+ ****************************************************************************/
+
+static void wm8904_setdatawidth(FAR struct wm8904_dev_s *priv)
+{
+  uint16_t regval;
+
+  /* "8-bit mode is selected whenever DAC_COMP=1 or ADC_COMP=1. The use of
+   *  8-bit data allows samples to be passed using as few as 8 BCLK cycles
+   *  per LRCLK frame. When using DSP mode B, 8-bit data words may be
+   *  transferred consecutively every 8 BCLK cycles.
+   *
+   * "8-bit mode (without Companding) may be enabled by setting
+   *  DAC_COMPMODE=1 or ADC_COMPMODE=1, when DAC_COMP=0 and ADC_COMP=0.
+   */
+
+  if (priv->bpsamp == 16)
+    {
+      /* Reset default default setting */
+
+      regval = (WM8904_AIFADCR_SRC | WM8904_AIFDACR_SRC);
+      wm8904_writereg(priv, WM8904_AIF0, regval);
+    }
+  else
+    {
+      /* This should select 8-bit with no companding */
+
+      regval = (WM8904_AIFADCR_SRC  | WM8904_AIFDACR_SRC |
+                WM8904_ADC_COMPMODE | WM8904_DAC_COMPMODE);
+      wm8904_writereg(priv, WM8904_AIF0, regval);
+    }
+}
+
+/****************************************************************************
  * Name: wm8904_setbitrate
  *
  * Description:
- *   Program the FLL to achieve the requested bitrate.  Given:
+ *   Program the FLL to achieve the requested bitrate (fout).  Given:
  *
  *     samprate  - Samples per second
  *     nchannels - Number of channels of data
  *     bpsamp    - Bits per sample
  *
  *   Then
- *     bitrate = samprate * nchannels * bpsamp
+ *     fout = samprate * nchannels * bpsamp
  *
  *   For example:
  *     samplerate = 11,025 samples/sec
@@ -600,9 +651,16 @@ static void wm8904_settreble(FAR struct wm8904_dev_s *priv, uint8_t treble)
  *     bpsamp     = 16     bits
  *
  *   Then
- *     bitrate    = 11025 samples/sec * 1 * 16 bits/sample = 176.4 bits/sec
+ *     fout    = 11025 samples/sec * 1 * 16 bits/sample = 176.4 bits/sec
  *
- *   The FLL output frequency is generated at that bitrate by:
+ *   The clocking is configured like this:
+ *     MCLK   is the FLL source clock
+ *     Fref   is the scaled down version of MCLK
+ *     Fvco   is the output frequency from the FLL
+ *     Fout   is the final output from the FLL that drives the SYSCLK
+ *     SYSCLK can be divided down to generate the BCLK
+ *
+ *   The FLL output frequency is generated at that fout by:
  *
  *     Fout = (Fvco / FLL_OUTDIV)
  *
@@ -627,26 +685,25 @@ static void wm8904_settreble(FAR struct wm8904_dev_s *priv, uint8_t treble)
 
 static void wm8904_setbitrate(FAR struct wm8904_dev_s *priv)
 {
-  uint32_t bitrate;
+  uint64_t tmp64;
   uint32_t fref;
+  uint32_t fvco;
   uint32_t fout;
-  uint32_t error;
-  struct wm8904_fll_s best;
-  struct wm8904_fll_s current;
+  uint32_t minfout;
   uint16_t regval;
-  uint8_t fllmin;
-  uint8_t fllmax;
-  uint8_t fllndx;
+  b16_t nk;
+  unsigned int fllndx;
+  unsigned int divndx;
+  unsigned int outdiv;
 
   DEBUGASSERT(priv && priv->lower);
 
-  /* First calculate the desired bitrate */
+  /* First calculate the desired bitrate (fout) */
 
-  bitrate = (uint32_t)priv->samprate << (priv->nchshift + priv->bpshift);
+  fout = (uint32_t)priv->samprate * priv->nchannels * (priv->bpsamp + WM8904_STARTBITS);
 
-  audvdbg("sample rate=%u nchannels=%u bits-per-sample=%u bit rate=%lu\n",
-          priv->samprate, (1 << priv->nchshift), (1 << priv->bpshift),
-          (unsigned long)bitrate);
+  audvdbg("sample rate=%u nchannels=%u  bpsamp=%u fout=%lu\n",
+          priv->samprate, priv->nchannels, priv->bpsamp, (unsigned long)fout);
 
   /* "The FLL is enabled using the FLL_ENA register bit. Note that, when
    * changing FLL settings, it is recommended that the digital circuit be
@@ -656,154 +713,142 @@ static void wm8904_setbitrate(FAR struct wm8904_dev_s *priv)
 
   wm8904_writereg(priv, WM8904_FLL_CTRL1, 0);
 
-  /* Determine Fref.  The source frequency should be the MCLK */
+  /* Determine Fref.  The source refrence clock should be the MCLK */
 
   fref   = priv->lower->mclk;
-  regval = WM8904_FLL_CLK_REF_DIV1;
+  regval = (WM8904_FLL_CLK_REF_SRC_MCLK | WM8904_FLL_CLK_REF_DIV1);
 
   /* MCLK must be divided down so that fref <=13.5MHz */
 
   if (fref > 4*13500000)
     {
       fref >>= 3;
-      regval = WM8904_FLL_CLK_REF_DIV8;
+      regval = (WM8904_FLL_CLK_REF_SRC_MCLK | WM8904_FLL_CLK_REF_DIV8);
     }
   else if (fref > 2*13500000)
     {
       fref >>= 2;
-      regval = WM8904_FLL_CLK_REF_DIV4;
+      regval = (WM8904_FLL_CLK_REF_SRC_MCLK | WM8904_FLL_CLK_REF_DIV4);
     }
   else if (fref > 13500000)
     {
       fref >>= 1;
-      regval = WM8904_FLL_CLK_REF_DIV2;
+      regval = (WM8904_FLL_CLK_REF_SRC_MCLK | WM8904_FLL_CLK_REF_DIV2);
     }
 
   wm8904_writereg(priv, WM8904_FLL_CTRL5, regval);
 
-  /* Now we need to solve an equation with three unknowns:
+  /* Fvco must be between 90 and 100Mhz.  In order to meet this
+   * requirement, the value of FLL_OUTDIV should be selected according
+   * to the desired output Fout.  The divider, FLL_OUTDIV, must be set
+   * so that Fvco is in the range 90-100MHz.  The available divisions
+   * are integers from 4 to 64.
    *
-   *  FLL_OUTDIV {4..63}
-   *  FLL_RATIO  {1,2,4,8,16}
-   *  N.K        Rational value < 2048
+   *   Fout = Fvco /FLL_OUTDIV
    *
-   * Subject to constraints:
    *
-   *   Fout is is close to bitrate as possible
-   *   Fvco is between 90 and 100Mhz
+   * Is this Fout realizable?  This often happens for very low frequencies.
+   * If so, we can select a different final SYSCLK scaling frequency.
    */
 
-  /* The Fref divider of 16 is recommended if Fref < 64KHz and 1 if
-   * Fref > 1MHz.  And what about in between?  We use a divider of 4
-   * (we could probably optimize that to get a more accurate Fout).
-   */
+  minfout = WM8904_FVCO_MAX / WM8904_MAXOUTDIV;
+  divndx = 0;
 
-  if (fref < 64000)
+  for (;;)
     {
-      fllmin = (WM8904_NFLLRATIO - 1);
-      fllmax = (WM8904_NFLLRATIO - 1);
+      /* Calculate the new value of Fout that we would need to provide
+       * with this SYSCLK divider in place.
+       */
+
+      uint32_t newfout = (g_sysclk_scaleb1[divndx] * fout) >> 1;
+
+      /* Is this increased Fout realizable?  Or are we just just out of
+       * dividers?
+       */
+
+      if (newfout >= minfout || divndx == WM8904_BCLK_MAXDIV)
+        {
+          /* In either case, this is the Fout and divider that we will be
+           * using.
+           */
+
+          fout = newfout;
+          break;
+        }
+
+      /* We have more.. Try the next divider */
+
+      divndx++;
     }
-  else if (fref < 1000000)
+
+  /* When we get here, divndx holds the register value for the new SYSCLK
+   * divider.  Set the divider value in the Audio Interface 2 register.
+   */
+
+  regval = WM8904_OPCLK_DIV1 | WM8904_BCLK_DIV(divndx);
+  wm8904_writereg(priv, WM8904_AIF2, regval);
+
+  /* Now lets make our best guess for FLL_OUTDIV
+   *
+   *   FLL_OUTDIV = 95000000 / Fout
+   */
+
+  outdiv = ((WM8904_FVCO_MAX + WM8904_FVCO_MAX) >> 1) / fout;
+  if (outdiv < 4)
     {
-      fllmin = 0;
-      fllmax = 0;
+      outdiv = 4;
+    }
+  else if (outdiv > 64)
+    {
+      outdiv = 64;
+    }
+
+  /* The WM8904 suggests the selecting FLL_RATIO via the following
+   * range checks:
+   */
+
+  if (fref >= 1000000)
+    {
+      fllndx = WM8904_NFLLRATIO_DIV1;
+    }
+  else if (fref > 256000)
+    {
+      fllndx = WM8904_NFLLRATIO_DIV2;
+    }
+  else if (fref > 128000)
+    {
+      fllndx = WM8904_NFLLRATIO_DIV4;
+    }
+  else if (fref > 64000)
+    {
+      fllndx = WM8904_NFLLRATIO_DIV8;
     }
   else
     {
-      fllmin = 0;
-      fllmax = (WM8904_NFLLRATIO - 1);
+      fllndx = WM8904_NFLLRATIO_DIV16;
     }
 
-  /* Initialize only to prevent the compiler from complaining */
-
-  best.fllndx = 0;
-  best.outdiv = 0;
-  best.nk     = 0;
-
-  /* Set the initial error to the maximum error value.  Therefore, the
-   * first calculation will initialize the 'best' structure.
+  /* Finally, we need to determine the value of N.K
+   *
+   *   Fvco = (Fout * FLL_OUTDIV)
+   *   N.K  = Fvco / (FLL_FRATIO * FREF)
    */
 
-  error = UINT32_MAX;
+  fvco  = fout * outdiv;
+  tmp64 = ((uint64_t)fvco << 16) / (g_fllratio[fllndx] * fref);
+  nk    = (b16_t)tmp64;
 
-  /* Now, find the best solution for each possible value of FLL_RATIO */
+  audvdbg("mclk=%lu fref=%lu fvco=%lu fout=%lu divndx=%u\n",
+          (unsigned long)priv->lower->mclk, (unsigned long)fref,
+          (unsigned long)fvco, (unsigned long)fout, divndx);
+  audvdbg("N.K=%08lx outdiv=%u fllratio=%u\n",
+          (unsigned long)nk, outdiv, g_fllratio[fllndx]);
 
-  for (fllndx = fllmin; fllndx <= fllmax; fllndx++)
-    {
-      uint32_t maxnk;
-      uint32_t tmp;
-      b16_t tmpb16;
+  /* Save the actual bit rate that we are using.  This will be used by the
+   * LRCLCK calculations.
+   */
 
-      /* Pick the largest value of N.K for when a value divider is
-       * available and for which Fvco is within the maximum value,
-       * 100MHz.  We have a guess at FLL_RATIO still have solve:
-       *
-       *     Fout = (Fvco / FLL_OUTDIV)
-       *     Fvco = Fref * N.K * FLL_RATIO
-       * Or:
-       *     N.K  = (FLL_OUTDIV * Fout) / (Fref * FLL_RATIO)
-       *
-       * The upper value of N.K is subject to FVco < 100MHz
-       *
-       *     100,000,000 > Fref * N.K * FLL_RATIO
-       *     N.K < 100,000,000 / (Fref * FLL_RATIO)
-       */
-
-      maxnk = (100000000) / (fref * (uint32_t)g_fllratio[fllndx]);
-
-      /* And this is further subject to N.K < 2048 */
-
-      maxnk = MIN(maxnk, 2047);
-
-      /* Given the valid, upper value for N.K, this gives a upper value
-       * for FLL_OUTDIV:
-       *
-       *     maxnk > (FLL_OUTDIV * Fout) / (Fref * FLL_RATIO)
-       *     FLL_OUTDIV < (maxnk * Fref * FLL_RATIO) / Fout;
-       */
-
-      tmp = (maxnk * fref * (uint32_t)g_fllratio[fllndx]) / bitrate;
-
-      /* Subject to FLL_OUTDIV < 64 */
-
-      current.fllndx = (uint8_t)fllndx;
-      current.outdiv = (uint8_t)MIN(tmp, 64);
-
-      /* And we can calculate N.K and the resulting bitrate:
-       *
-       *   N.K  = (FLL_OUTDIV * Fout) / (Fref * FLL_RATIO)
-       */
-
-      tmpb16     = itob16((uint32_t)current.outdiv * bitrate);
-      current.nk = tmpb16 / (fref * (uint32_t)g_fllratio[fllndx]);
-
-      /* And the resulting bit rate
-       *   Fvco = Fref * N.K * FLL_RATIO
-       *   Fout = (Fvco / FLL_OUTDIV)
-       * Or
-       *   Fout = (Fref * N.K * FLL_RATIO) / FLL_OUTDIV
-       */
-
-      tmpb16 = b16muli(current.nk, fref * (uint32_t)g_fllratio[fllndx]);
-      fout   = b16toi(tmpb16) / current.outdiv;
-
-      /* Calculate the new error value */
-
-       tmp = (fout > bitrate) ? (bitrate - fout) : (fout - bitrate);
-       if (tmp < error)
-         {
-           /* We have a better solution */
-
-           best.fllndx = current.fllndx;
-           best.outdiv = current.outdiv;
-           best.nk     = current.nk;
-           error       = tmp;
-         }
-     }
-
-  audvdbg("Best: N.K=%08lx outdiv=%u fllratio=%u error=%lu\n",
-          (unsigned long)best.nk, best.outdiv, g_fllratio[best.fllndx],
-          (unsigned long)error);
+  priv->bitrate = fout;
 
   /* Now, Configure the FLL */
   /* FLL Control 1
@@ -829,8 +874,8 @@ static void wm8904_setbitrate(FAR struct wm8904_dev_s *priv)
    *                        : Determined by MCLK tests above
    */
 
-  regval = WM8904_FLL_OUTDIV(best.outdiv) | WM8904_FLL_CTRL_RATE(1) |
-           WM8904_FLL_FRATIO(best.fllndx);
+  regval = WM8904_FLL_OUTDIV(outdiv) | WM8904_FLL_CTRL_RATE(1) |
+           WM8904_FLL_FRATIO(fllndx);
   wm8904_writereg(priv, WM8904_FLL_CTRL2, regval);
 
   /* FLL Control 3
@@ -838,7 +883,7 @@ static void wm8904_setbitrate(FAR struct wm8904_dev_s *priv)
    * Fractional multiply for Fref
    */
 
-  wm8904_writereg(priv, WM8904_FLL_CTRL3, b16frac(best.nk));
+  wm8904_writereg(priv, WM8904_FLL_CTRL3, b16frac(nk));
 
   /* FLL Control 4
    *
@@ -846,7 +891,7 @@ static void wm8904_setbitrate(FAR struct wm8904_dev_s *priv)
    * FLL_GAIN               : Gain applied to error
    */
 
-  regval = WM8904_FLL_N(b16toi(best.nk)) | WM8904_FLL_GAIN_X1;
+  regval = WM8904_FLL_N(b16toi(nk)) | WM8904_FLL_GAIN_X1;
   wm8904_writereg(priv, WM8904_FLL_CTRL4, regval);
 
   /* FLL Control 5
@@ -855,6 +900,12 @@ static void wm8904_setbitrate(FAR struct wm8904_dev_s *priv)
    *
    * Already set above
    */
+ 
+  /* Allow time for FLL lock.  Typical is 2 MSec.  Lock status is available
+   * in the WM8904 interrupt status register.
+   */
+
+  usleep(5*5000);
 
   /* Enable the FLL */
 
@@ -873,6 +924,36 @@ static void wm8904_setbitrate(FAR struct wm8904_dev_s *priv)
           WM8904_FLL_CTRL4, wm8904_readreg(priv, WM8904_FLL_CTRL4));
   audvdbg("FLL control 5[%02x]: %04x\n",
           WM8904_FLL_CTRL5, wm8904_readreg(priv, WM8904_FLL_CTRL5));
+}
+
+/****************************************************************************
+ * Name: wm8904_setlrclock
+ *
+ * Description:
+ *   Program the LRLCK (left/right clock) to trigger each frame at the
+ *   correct rate.
+ *
+ ****************************************************************************/
+
+static void wm8904_setlrclock(FAR struct wm8904_dev_s *priv)
+{
+  unsigned int lrperiod;
+  uint16_t regval;
+
+  /* The number of bits in one sample depends on the number of bits in one
+   * word plus any extra start bits.
+   *
+   * The number of channels is not important.  However, I2C needs an edge
+   * on each frame of the following gives the number of BCLKS to achieve
+   * an LRCLK edge at each sample.
+   */
+
+  lrperiod = 2 * (unsigned int)(priv->bpsamp + WM8904_STARTBITS);
+
+  /* Set the new LRCLK clock frequency is the, divider */
+
+  regval = WM8904_LRCLK_DIR | WM8904_LRCLK_RATE(lrperiod);
+  wm8904_writereg(priv, WM8904_AIF3, regval);
 }
 
 /****************************************************************************
@@ -1143,9 +1224,6 @@ static int wm8904_configure(FAR struct audio_lowerhalf_s *dev,
 
     case AUDIO_TYPE_OUTPUT:
       {
-        uint8_t  nchshift;
-        uint8_t  bpshift;
-
         audvdbg("  AUDIO_TYPE_OUTPUT:\n");
         audvdbg("    Number of channels: %u\n", caps->ac_channels);
         audvdbg("    Sample rate:        %u\n", caps->ac_controls.hw[0]);
@@ -1154,43 +1232,33 @@ static int wm8904_configure(FAR struct audio_lowerhalf_s *dev,
         /* Verify that all of the requested values are supported */
 
         ret = -ERANGE;
-        if (caps->ac_channels == 1)
-          {
-            nchshift = 0;
-          }
-        else if (caps->ac_channels == 2)
-          {
-            nchshift = 1;
-          }
-        else
+        if (caps->ac_channels != 1 && caps->ac_channels != 2)
           {
             auddbg("ERROR: Unsupported number of channels: %d\n",
                    caps->ac_channels);
             break;
           }
 
-        if (caps->ac_controls.b[2] == 8)
+        if (caps->ac_controls.b[2] != 8 && caps->ac_controls.b[2] != 16)
           {
-            bpshift = 3;
-          }
-        else if (caps->ac_controls.b[2] == 16)
-          {
-            bpshift = 4;
-          }
-        else
-          {
+            auddbg("ERROR: Unsupported bits per sample: %d\n",
+                   caps->ac_controls.b[2]);
             break;
           }
 
         /* Save the current stream configuration */
 
         priv->samprate  = caps->ac_controls.hw[0];
-        priv->nchshift  = nchshift;
-        priv->bpshift   = bpshift;
+        priv->nchannels = caps->ac_channels;
+        priv->bpsamp    = caps->ac_controls.b[2];
 
-        /* Reconfigure the FLL to support the resulting bitrate */
+        /* Reconfigure the FLL to support the resulting number or channels,
+         * bits per sample, and bitrate.
+         */
 
+        wm8904_setdatawidth(priv);
         wm8904_setbitrate(priv);
+        wm8904_setlrclock(priv);
         wm8904_writereg(priv, WM8904_DUMMY, 0x55aa);
         ret = OK;
       }
@@ -1423,7 +1491,7 @@ static int wm8904_sendbuffer(FAR struct wm8904_dev_s *priv)
        */
 
       timeout = (((uint32_t)(apb->nbytes - apb->curbyte) << 14) /
-                 ((uint32_t)(priv->samprate * MSEC_PER_TICK) << priv->bpshift));
+                 ((uint32_t)priv->samprate * MSEC_PER_TICK * priv->bpsamp));
 
       ret = I2S_SEND(priv->i2s, apb, wm8904_senddone, priv, timeout);
       if (ret < 0)
@@ -2085,27 +2153,52 @@ static void wm8904_audio_output(FAR struct wm8904_dev_s *priv)
    *
    *   WM8904_MCLK_INV=0    : MCLK is not inverted
    *   WM8904_SYSCLK_SRC=1  : SYSCLK source is FLL
+   *   WM8904_TOCLK_RATE=0  :
+   *   WM8904_OPCLK_ENA=0   :
    *   WM8904_CLK_SYS_ENA=1 : SYSCLK is enabled
    *   WM8904_CLK_DSP_ENA=1 : DSP clock is enabled
+   *   WM8904_TOCLK_ENA=0   :
    */
 
-  regval = WM8904_SYSCLK_SRC | WM8904_CLK_SYS_ENA | WM8904_CLK_DSP_ENA;
+  regval = WM8904_SYSCLK_SRCFLL | WM8904_CLK_SYS_ENA | WM8904_CLK_DSP_ENA;
   wm8904_writereg(priv, WM8904_CLKRATE2, regval);
+
+  /* Audio Interface 0.
+   *
+   * Reset value is:
+   *   No DAC invert
+   *   No volume boost
+   *   No loopback
+   *   Left/Right ADC/DAC channels output on Left/Right
+   *   Companding options set by wm8904_setdatawidth()
+   */
+
+  wm8904_setdatawidth(priv);
 
   /* Audio Interface 1.
    *
    * This value sets AIFADC_TDM=0, AIFADC_TDM_CHAN=0, BCLK_DIR=1 while preserving
    * the state of some undocumented bits (see wm8904.h).
    *
-   * BCLK_DIR=1             : Makes BCLK an output (will clock I2S).
+   *   Digital audio interface format      : I2S
+   *   Digital audio interface word length : 24
+   *   AIF_LRCLK_INV=0                     : LRCLK not inverted
+   *   BCLK_DIR=1                          : BCLK is an output (will clock I2S).
+   *   AIF_BCLK_INV=0                      : BCLK not inverted
+   *   AIF_TRIS=0                          : Outputs not tri-stated
+   *   AIFADC_TDM_CHAN=0                   : ADCDAT outputs data on slot 0
+   *   AIFADC_TDM=0                        : Normal ADCDAT operation
+   *   AIFDAC_TDM_CHAN=0                   : DACDAT data input on slot 0
+   *   AIFDAC_TDM=0                        : Normal DACDAT operation
    */
 
-  wm8904_writereg(priv, WM8904_AIF1, WM8904_BCLK_DIR | 0x404a);
+  regval = WM8904_AIF_FMT_I2S | WM8904_AIF_WL_24BITS | WM8904_BCLK_DIR;
+  wm8904_writereg(priv, WM8904_AIF1, regval);
 
   /* Audio Interface 2.
    *
-   * Holds GPIO clock divider and the SYSCLK divider (only used when the
-   * SYSCLK is the source of the BCLK.
+   * Holds GPIO clock divider and the SYSCLK divider needed to generate BCLK.
+   * This will get initialized by wm8904_setbitrate().
    */
 
   /* Audio Interface 3
@@ -2160,6 +2253,7 @@ static void wm8904_audio_output(FAR struct wm8904_dev_s *priv)
   /* Configure the FLL */
 
   wm8904_setbitrate(priv);
+  wm8904_setlrclock(priv);
   wm8904_writereg(priv, WM8904_DUMMY, 0x55aa);
 }
 
@@ -2245,8 +2339,8 @@ FAR struct audio_lowerhalf_s *
       priv->i2c        = i2c;
       priv->i2s        = i2s;
       priv->samprate   = WM8904_DEFAULT_SAMPRATE;
-      priv->nchshift   = WM8904_DEFAULT_NCHSHIFT;
-      priv->bpshift    = WM8904_DEFAULT_BPSHIFT;
+      priv->nchannels  = WM8904_DEFAULT_NCHANNELS;
+      priv->bpsamp     = WM8904_DEFAULT_BPSAMP;
 #if !defined(CONFIG_AUDIO_EXCLUDE_VOLUME) && !defined(CONFIG_AUDIO_EXCLUDE_BALANCE)
       priv->balance    = b16HALF;            /* Center balance */
 #endif
