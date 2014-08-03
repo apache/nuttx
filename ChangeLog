@@ -7957,3 +7957,6 @@
 	  (2014-8-2).
 	* include/nuttx/audio/wm8904.h:  Fix wm8904_dump_registers macro:
 	  Wrong number of parameters (2014-8-2).
+	* arch/arm/src/sama5/sam_pck.* and all SAMA5D board header files:
+	  Add Main clock as an option for the PCK clock source (2014-8-3).
+
