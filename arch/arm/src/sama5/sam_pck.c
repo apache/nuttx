@@ -107,39 +107,49 @@ uint32_t sam_pck_configure(enum pckid_e pckid, enum pckid_clksrc_e clksrc,
   uint32_t clkin;
   uint32_t actual;
 
-  /* Pick a clock source.  Several are possible but only MCK, PLLA, of SCK is
-   * chosen here.
+  /* Pick a clock source.  Several are possible but only MCK, PLLA, the
+   * MAINCK,or SCK are supported here.
    */
 
-  if (clksrc == PCKSRC_SCK)
+   switch (clksrc)
     {
-      /* Pick the slow clock */
+    case PCKSRC_MCK: /* Source clock = MCK or PLLACK */
+      {
+        /* Pick either the MCK or the PLLACK, whichever will best realize
+         * the target frequency.
+         */
 
+        DEBUGASSERT(BOARD_MCK_FREQUENCY < BOARD_PLLA_FREQUENCY);
+
+        /* Pick the PLLACK if it seems like a better choice */
+
+        if (frequency <= BOARD_MCK_FREQUENCY ||
+            frequency < BOARD_PLLA_FREQUENCY / 64)
+          {
+            regval = PMC_PCK_CSS_MCK;
+            clkin  = BOARD_MCK_FREQUENCY;
+          }
+        else
+          {
+            regval = PMC_PCK_CSS_PLLA;
+            clkin  = BOARD_PLLA_FREQUENCY;
+          }
+      }
+      break;
+
+    case PCKSRC_MAINCK: /* Source clock = MAIN clock */
+      regval = PMC_PCK_CSS_MAIN;
+      clkin  = BOARD_MAINCK_FREQUENCY;
+      break;
+
+    case PCKSRC_SCK: /* Source clock = SCK */
       regval = PMC_PCK_CSS_SLOW;
       clkin  = BOARD_SLOWCLK_FREQUENCY;
-    }
+      break;
 
-  /* If the source is not the slow clock, then pick either the MCK or the
-   * PLLACK, whichever will best realize the target frequency.
-   */
-
-  else
-    {
-      DEBUGASSERT(BOARD_MCK_FREQUENCY < BOARD_PLLA_FREQUENCY);
-
-      /* Pick the PLLACK if it seems like a better choice */
-
-      if (frequency <= BOARD_MCK_FREQUENCY ||
-          frequency < BOARD_PLLA_FREQUENCY / 64)
-        {
-          regval = PMC_PCK_CSS_MCK;
-          clkin  = BOARD_MCK_FREQUENCY;
-        }
-      else
-        {
-          regval = PMC_PCK_CSS_PLLA;
-          clkin  = BOARD_PLLA_FREQUENCY;
-        }
+    default:
+      dbg("ERROR: Unknown clock source\n");
+      return 0;
     }
 
   /* The the larger smallest divisor that does not exceed the requested
