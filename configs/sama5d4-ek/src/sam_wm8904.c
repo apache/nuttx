@@ -120,7 +120,11 @@ static struct sama5d4ek_mwinfo_s g_mxtinfo =
   {
     .address   = WM8904_I2C_ADDRESS,
     .frequency = CONFIG_SAMA5D4EK_WM8904_I2CFREQUENCY,
+#ifdef CONFIG_SAMA5D4EK_WM8904_SRCSCK
     .mclk      = BOARD_SLOWCLK_FREQUENCY,
+#else
+    .mclk      = BOARD_MAINCK_FREQUENCY,
+#endif
 
     .attach    = wm8904_attach,
     .enable    = wm8904_enable,
@@ -281,8 +285,16 @@ int sam_wm8904_initialize(int minor)
        * that is connected to the WM8904 MCLK.
        */
 
+#ifdef CONFIG_SAMA5D4EK_WM8904_SRCSCK
+      /* Drive the DAC with the slow clock (32.768 KHz) */
+
       sam_sckc_enable(true);
       (void)sam_pck_configure(PCK2, PCKSRC_SCK, BOARD_SLOWCLK_FREQUENCY);
+#else
+      /* Drive the DAC with the main clock (12 MHz) */
+
+      (void)sam_pck_configure(PCK0, PCKSRC_MAINCK, BOARD_MAINCK_FREQUENCY);
+#endif
 
       /* Enable the DAC master clock */
 
