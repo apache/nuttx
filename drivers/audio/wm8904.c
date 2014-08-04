@@ -2119,9 +2119,10 @@ static void wm8904_audio_output(FAR struct wm8904_dev_s *priv)
    *   AIFADC_TDM=0                        : Normal ADCDAT operation
    *   AIFDAC_TDM_CHAN=0                   : DACDAT data input on slot 0
    *   AIFDAC_TDM=0                        : Normal DACDAT operation
+   *   Bit 14:                             : Undocumented
    */
 
-  regval = WM8904_AIF_FMT_I2S | WM8904_AIF_WL_24BITS | WM8904_BCLK_DIR;
+  regval = WM8904_AIF_FMT_I2S | WM8904_AIF_WL_24BITS | WM8904_BCLK_DIR | 0x4000;
   wm8904_writereg(priv, WM8904_AIF1, regval);
 
   /* Audio Interface 2.
