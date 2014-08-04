@@ -337,6 +337,11 @@
 #    undef HAVE_WM8904
 #  endif
 
+#  if !defined(CONFIG_SAMA5_PIOD_IRQ)
+#    warning CONFIG_SAMA5_PIOD_IRQ is required for audio support
+#    undef HAVE_HSMCI
+#  endif
+
 #  ifndef CONFIG_AUDIO_FORMAT_PCM
 #    warning CONFIG_AUDIO_FORMAT_PCM is required for audio support
 #    undef HAVE_WM8904
@@ -603,10 +608,13 @@
  *   ------------- ---------------- -----------------
  */
 
-/* Audio Interrupt */
+/* Audio Interrupt. All interrupts are default, active high level.  Pull down
+ * internally in the WM8904.  So we want no pull-up/downs and we want to
+ * interrupt on the high level.
+ */
 
-#define PIO_INT_WM8904 (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
-                        PIO_INT_BOTHEDGES | PIO_PORT_PIOD | PIO_PIN16)
+#define PIO_INT_WM8904 (PIO_INPUT | PIO_CFG_DEFAULT | PIO_CFG_DEGLITCH | \
+                        PIO_INT_HIGHLEVEL | PIO_PORT_PIOD | PIO_PIN16)
 #define IRQ_INT_WM8904 SAM_IRQ_PD16
 
 /* The MW8904 communicates on TWI0, I2C address 0x1a for control operations */
