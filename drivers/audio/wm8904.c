@@ -629,6 +629,15 @@ static void wm8904_setbitrate(FAR struct wm8904_dev_s *priv)
   audvdbg("sample rate=%u nchannels=%u  bpsamp=%u fout=%lu\n",
           priv->samprate, priv->nchannels, priv->bpsamp, (unsigned long)fout);
 
+  /* Disable the SYSCLK.
+   *
+   * "The SYSCLK signal is enabled by register bit CLK_SYS_ENA. This bit should be
+   *  set to 0 when reconfiguring clock sources. ... "
+   */
+
+  regval = WM8904_SYSCLK_SRCFLL | WM8904_CLK_DSP_ENA;
+  wm8904_writereg(priv, WM8904_CLKRATE2, regval);
+
   /* "The FLL is enabled using the FLL_ENA register bit. Note that, when
    * changing FLL settings, it is recommended that the digital circuit be
    * disabled via FLL_ENA and then re-enabled after the other register
@@ -781,7 +790,8 @@ static void wm8904_setbitrate(FAR struct wm8904_dev_s *priv)
    * FLL_OSC_EN=0           : FLL internal oscillator disabled
    * FLL_ENA=0              : The FLL is not enabled
    *
-   * "FLL_OSC_ENA must be enabled before enabling FLL_ENA."
+   * FLL_OSC_ENA must be enabled before enabling FLL_ENA (FLL_OSC_ENA is
+   * only required for free-running modes).
    */
 
   wm8904_writereg(priv, WM8904_FLL_CTRL1, 0);
@@ -825,16 +835,22 @@ static void wm8904_setbitrate(FAR struct wm8904_dev_s *priv)
    * Already set above
    */
 
-  /* Allow time for FLL lock.  Typical is 2 MSec.  Lock status is available
-   * in the WM8904 interrupt status register.
-   */
-
-  usleep(5*5000);
-
   /* Enable the FLL */
 
   regval = WM8904_FLL_FRACN_ENA | WM8904_FLL_ENA;
   wm8904_writereg(priv, WM8904_FLL_CTRL1, regval);
+
+  /* Allow time for FLL lock.  Typical is 2 MSec.  Lock status is available
+   * in the WM8904 interrupt status register.
+   * REVISIT: Probably not necessary.
+   */
+
+  usleep(5*5000);
+
+  /* Re-enable the SYSCLK. */
+
+  regval = WM8904_SYSCLK_SRCFLL | WM8904_CLK_SYS_ENA | WM8904_CLK_DSP_ENA;
+  wm8904_writereg(priv, WM8904_CLKRATE2, regval);
 }
 
 /****************************************************************************

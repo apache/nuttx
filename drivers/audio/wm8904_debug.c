@@ -426,7 +426,7 @@ void wm8904_clock_analysis(FAR struct audio_lowerhalf_s *dev,
   lrclk = bclk / tmp;
 
   syslog("  LRCLK_RATE:      BCLK / %lu\n", (unsigned long)tmp);
-  syslog("  LRCLK:           %lu\n", (unsigned long)lrclk);
+  syslog("  LRCLK:           %lu Hz\n", (unsigned long)lrclk);
   syslog("  LRCLK_DIR:       %s\n",
          (regval & WM8904_LRCLK_DIR) != 0 ? "Output" : "Input");
 }
