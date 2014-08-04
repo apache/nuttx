@@ -128,6 +128,7 @@
 #define WM8904_DETACH(s)         ((s)->attach(s,NULL,NULL))
 #define WM8904_ENABLE(s)         ((s)->enable(s,true))
 #define WM8904_DISABLE(s)        ((s)->enable(s,false))
+#define WM8904_RESTORE(s,e)      ((s)->enable(s,e))
 
 /****************************************************************************
  * Public Types
@@ -171,12 +172,13 @@ struct wm8904_lower_s
    *
    * attach  - Attach or detach the WM8904 interrupt handler to the GPIO
    *           interrupt
-   * enable  - Enable or disable the GPIO interrupt
+   * enable  - Enable or disable the GPIO interrupt.  Returns the
+   *           previous interrupt state.
    */
 
   CODE int  (*attach)(FAR const struct wm8904_lower_s *lower,
                       wm8904_handler_t isr, FAR void *arg);
-  CODE void (*enable)(FAR const struct wm8904_lower_s *lower, bool enable);
+  CODE bool (*enable)(FAR const struct wm8904_lower_s *lower, bool enable);
 };
 
 /****************************************************************************
