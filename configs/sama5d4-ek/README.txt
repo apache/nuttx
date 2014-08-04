@@ -2810,6 +2810,7 @@ Audio Support
 
     Board Selection
       CONFIG_SAMA5D4EK_WM8904_I2CFREQUENCY=400000
+      CONFIG_SAMA5D4EK_WM8904_SRCMAIN=y    : WM8904 MCLK is the SAMA5D Main Clock
 
     Library Routines
       CONFIG_SCHED_WORKQUEUE=y              : MW8904 driver needs work queue support
