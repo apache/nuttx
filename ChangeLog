@@ -7961,3 +7961,17 @@
 	  Add Main clock as an option for the PCK clock source (2014-8-3).
 	* configs/sama5d*-ek/Kconfig and src/sam_wm8904.c: Add option to
 	  use MAINCK as source fort he WM8904 MCLK (2015-8-3).
+	* include/nuttx/audio/wm8904.h, configs/sama5d3x-ek/src/sam_wm8904.cm,
+	  and sama5d4-ek/src/sam_wm8904.c: WM8904 interface enable method now
+	  returns the previous interrupt state (2014-8-4).
+	* configs/sama5d3x-ek/src/sama5d3x-ek.h and sama5d4-ek/src/sama5d4-ek.h:
+	  Correct the WM8904 interrupt configuration, active high level. Fix
+	  that and don't pull-up (2014-8-4).
+	* configs/sama5d3x-ek/src/sam_wm8904.cm, and sama5d4-ek/src/sam_wm8904.c:
+	  Correct ordering of some WM8904initialization: Need to provide MCLK
+	  before initializing the WM8904, not after (2014-8-4).
+	* drivers/audio/wm8904.c and .h: Correct calculation of bitrate (I am
+	  not sure why this is correct). LR clock divisor is now a constant 32-
+	  bits per frame. Conditioned out interrupt logic; it is not being used.
+	  Also added some FLL lock interrupt/poll logic (which was subsequently
+	  disabled) (2014-8-4).
