@@ -61,6 +61,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/clock.h>
+#include <nuttx/wqueue.h>
 #include <nuttx/i2c.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
@@ -105,7 +106,6 @@ static void     wm8904_settreble(FAR struct wm8904_dev_s *priv, uint8_t treble);
 
 static void     wm8904_setdatawidth(FAR struct wm8904_dev_s *priv);
 static void     wm8904_setbitrate(FAR struct wm8904_dev_s *priv);
-static void     wm8904_setlrclock(FAR struct wm8904_dev_s *priv);
 
 /* Audio lower half methods (and close friends) */
 
@@ -123,9 +123,7 @@ static void     wm8904_senddone(FAR struct i2s_dev_s *i2s,
                   FAR struct ap_buffer_s *apb, FAR void *arg, int result);
 static void     wm8904_returnbuffers(FAR struct wm8904_dev_s *priv);
 static int      wm8904_sendbuffer(FAR struct wm8904_dev_s *priv);
-static int      wm8904_interrupt(FAR const struct wm8904_lower_s *lower,
-                  FAR void *arg);
-static void    *wm8904_workerthread(pthread_addr_t pvarg);
+
 #ifdef CONFIG_AUDIO_MULTI_SESSION
 static int      wm8904_start(FAR struct audio_lowerhalf_s *dev,
                   FAR void *session);
@@ -169,6 +167,16 @@ static int      wm8904_release(FAR struct audio_lowerhalf_s *dev,
 #else
 static int      wm8904_release(FAR struct audio_lowerhalf_s *dev);
 #endif
+
+/* Interrupt handling an worker thread */
+
+#ifdef WM8904_USE_FFLOCK_INT
+static void     wm8904_interrupt_work(FAR void *arg);
+static int      wm8904_interrupt(FAR const struct wm8904_lower_s *lower,
+                  FAR void *arg);
+#endif
+
+static void    *wm8904_workerthread(pthread_addr_t pvarg);
 
 /* Initialization */
 
@@ -619,24 +627,49 @@ static void wm8904_setbitrate(FAR struct wm8904_dev_s *priv)
   unsigned int fllndx;
   unsigned int divndx;
   unsigned int outdiv;
+#ifdef WM8904_USE_FFLOCK_INT
+  bool enabled;
+  int retries;
+#endif
 
   DEBUGASSERT(priv && priv->lower);
 
   /* First calculate the desired bitrate (fout) */
 
-  fout = (uint32_t)priv->samprate * priv->nchannels * (priv->bpsamp + WM8904_STARTBITS);
+#if 0
+  /* This is the correct calculation.  However, the resulting bitrate is two
+   * times too fast???
+   */
+
+  fout = (uint32_t)priv->samprate * (uint32_t)priv->nchannels * (uint32_t)priv->bpsamp;
+#else
+  /* Ahhh.. much better */
+
+  fout = (uint32_t)priv->samprate * (uint32_t)priv->bpsamp;
+#endif
 
   audvdbg("sample rate=%u nchannels=%u  bpsamp=%u fout=%lu\n",
           priv->samprate, priv->nchannels, priv->bpsamp, (unsigned long)fout);
 
   /* Disable the SYSCLK.
    *
-   * "The SYSCLK signal is enabled by register bit CLK_SYS_ENA. This bit should be
-   *  set to 0 when reconfiguring clock sources. ... "
+   * "The SYSCLK signal is enabled by register bit CLK_SYS_ENA. This bit
+   * should be set to 0 when reconfiguring clock sources. ... "
+   *
+   * REVISIT:  This does not appear necessary if we are just reconfiguring
+   * the FLL.  Disabling the FLL will stop the SYSCLK input just fine.
    */
 
   regval = WM8904_SYSCLK_SRCFLL | WM8904_CLK_DSP_ENA;
   wm8904_writereg(priv, WM8904_CLKRATE2, regval);
+
+#if 0 /* Unnecessary */
+  /* Unlock forced oscillator control and switch it off */
+
+  wm8904_writereg(priv, WM8904_CTRLIF_TEST_1, WM8904_USER_KEY);
+  wm8904_writereg(priv, WM8904_FLL_NCO_TEST1, 0);
+  wm8904_writereg(priv, WM8904_CTRLIF_TEST_1, 0);
+#endif
 
   /* "The FLL is enabled using the FLL_ENA register bit. Note that, when
    * changing FLL settings, it is recommended that the digital circuit be
@@ -840,47 +873,67 @@ static void wm8904_setbitrate(FAR struct wm8904_dev_s *priv)
   regval = WM8904_FLL_FRACN_ENA | WM8904_FLL_ENA;
   wm8904_writereg(priv, WM8904_FLL_CTRL1, regval);
 
-  /* Allow time for FLL lock.  Typical is 2 MSec.  Lock status is available
-   * in the WM8904 interrupt status register.
+#if defined(WM8904_USE_FFLOCK_INT)
+  /* Make sure that interrupts are enabled */
+
+  enabled = WM8904_ENABLE(priv->lower);
+
+  /* Enable the FLL lock interrupt.  Here we can be sloppy since the FLL
+   * lock is the only interrupt every enabled.
+   */
+
+  priv->locked = false;
+  regval = WM8904_ALL_INTS & ~WM8904_FLL_LOCK_INT;
+  wm8904_writereg(priv, WM8904_INT_MASK, regval);
+
+  /* Allow time for FLL lock.  Typical is 2 MSec.  No exotic interlock
+   * here; we just poll a flag set by the interrupt handler.
    * REVISIT: Probably not necessary.
    */
 
-  usleep(5*5000);
+  retries = 5;
+  do
+    {
+      usleep(5*5000);
+    }
+  while (priv->locked == false && --retries > 0);
+
+  /* Make sure that the FLL lock interrupt is disabled and clear any pending
+   * interrupt status (again cutting* some corners).  NOTE: The interrupt
+   * handler will do these things if there is no timeout.
+   */
+
+  WM8904_DISABLE(priv->lower);
+  wm8904_writereg(priv, WM8904_INT_MASK, WM8904_ALL_INTS);
+  wm8904_writereg(priv, WM8904_INT_STATUS, WM8904_ALL_INTS);
+
+  /* Restore the interrupt state.  */
+
+  WM8904_RESTORE(priv->lower, enabled)
+
+#elif defined(WM8904_USE_FFLOCK_POLL)
+  /* Allow time for FLL lock.  Typical is 2 MSec. */
+
+  retries = 5;
+  do
+    {
+       usleep(5*5000);
+    }
+  while ((wm8904_readreg(priv, WM8904_INT_STATUS) & WM8904_FLL_LOCK_INT) != 0 ||
+          --retries > 0);
+
+  /* Clear all pending status bits by writing 1's into the interrupt status
+   * register.
+   */
+
+  wm8904_writereg(priv, WM8904_INT_STATUS, WM8904_ALL_INTS);
+
+#endif /* !WM8904_USE_FFLOCK_INT && !WM8904_USE_FFLOCK_POLL */
 
   /* Re-enable the SYSCLK. */
 
   regval = WM8904_SYSCLK_SRCFLL | WM8904_CLK_SYS_ENA | WM8904_CLK_DSP_ENA;
   wm8904_writereg(priv, WM8904_CLKRATE2, regval);
-}
-
-/****************************************************************************
- * Name: wm8904_setlrclock
- *
- * Description:
- *   Program the LRLCK (left/right clock) to trigger each frame at the
- *   correct rate.
- *
- ****************************************************************************/
-
-static void wm8904_setlrclock(FAR struct wm8904_dev_s *priv)
-{
-  unsigned int lrperiod;
-  uint16_t regval;
-
-  /* The number of bits in one sample depends on the number of bits in one
-   * word plus any extra start bits.
-   *
-   * The number of channels is not important.  However, I2C needs an edge
-   * on each frame of the following gives the number of BCLKS to achieve
-   * an LRCLK edge at each sample.
-   */
-
-  lrperiod = 2 * (unsigned int)(priv->bpsamp + WM8904_STARTBITS);
-
-  /* Set the new LRCLK clock frequency is the, divider */
-
-  regval = WM8904_LRCLK_DIR | WM8904_LRCLK_RATE(lrperiod);
-  wm8904_writereg(priv, WM8904_AIF3, regval);
 }
 
 /****************************************************************************
@@ -1185,7 +1238,6 @@ static int wm8904_configure(FAR struct audio_lowerhalf_s *dev,
 
         wm8904_setdatawidth(priv);
         wm8904_setbitrate(priv);
-        wm8904_setlrclock(priv);
         wm8904_writereg(priv, WM8904_DUMMY, 0x55aa);
 
         wm8904_clock_analysis(&priv->dev, "AUDIO_TYPE_OUTPUT");
@@ -1435,203 +1487,6 @@ static int wm8904_sendbuffer(FAR struct wm8904_dev_s *priv)
 }
 
 /****************************************************************************
- * Name: wm8904_interrupt
- *
- *  This is the ISR that services the WM8904 pin from the WM8904, which
- *  indicates the chip is ready to receive additional data.  We use it to
- *  send a message to our worker thread message queue so it knows to wake
- *  up and send more data.
- *
- ****************************************************************************/
-
-static int wm8904_interrupt(FAR const struct wm8904_lower_s *lower,
-                            FAR void *arg)
-{
-  FAR struct wm8904_dev_s *priv = (FAR struct wm8904_dev_s *)arg;
-  struct audio_msg_s msg;
-  int ret;
-
-  DEBUGASSERT(lower && priv);
-
-  /* Create a message and send it to the worker thread */
-  /* REVISIT this */
-
-  if (priv->running)
-    {
-      msg.msgId = AUDIO_MSG_DATA_REQUEST;
-      ret = mq_send(priv->mq, &msg, sizeof(msg), CONFIG_WM8904_MSG_PRIO);
-      if (ret < 0)
-        {
-          audlldbg("ERROR: mq_send failed: %d\n", errno);
-        }
-    }
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: wm8904_workerthread
- *
- *  This is the thread that feeds data to the chip and keeps the audio
- *  stream going.
- *
- ****************************************************************************/
-
-static void *wm8904_workerthread(pthread_addr_t pvarg)
-{
-  FAR struct wm8904_dev_s *priv = (struct wm8904_dev_s *) pvarg;
-  struct audio_msg_s msg;
-  FAR struct ap_buffer_s *apb;
-  int msglen;
-  int prio;
-
-  audvdbg("Entry\n");
-
-#ifndef CONFIG_AUDIO_EXCLUDE_STOP
-  priv->terminating = false;
-#endif
-
-  /* Mark ourself as running and make sure that WM8904 interrupts are
-   * enabled.
-   */
-
-  priv->running = true;
-  WM8904_ENABLE(priv->lower);
-  wm8904_setvolume(priv, priv->volume, false);
-
-  /* Loop as long as we are supposed to be running and as long as we have
-   * buffers in-flight.
-   */
-
-  while (priv->running || priv->inflight > 0)
-    {
-      /* Check if we have been asked to terminate.  We have to check if we
-       * still have buffers in-flight.  If we do, then we can't stop until
-       * birds come back to roost.
-       */
-
-      if (priv->terminating && priv->inflight <= 0)
-        {
-          /* We are IDLE.  Break out of the loop and exit. */
-
-          break;
-        }
-      else
-        {
-          /* Check if we can send more audio buffers to the WM8904 */
-
-          wm8904_sendbuffer(priv);
-        }
-
-      /* Wait for messages from our message queue */
-
-      msglen = mq_receive(priv->mq, &msg, sizeof(msg), &prio);
-
-      /* Handle the case when we return with no message */
-
-      if (msglen < sizeof(struct audio_msg_s))
-        {
-          auddbg("ERROR: Message too small: %d\n", msglen);
-          continue;
-        }
-
-      /* Process the message */
-
-      switch (msg.msgId)
-        {
-          /* The ISR has requested more data.  We will catch this case at
-           * the top of the loop.
-           */
-
-          case AUDIO_MSG_DATA_REQUEST:
-            audvdbg("AUDIO_MSG_DATA_REQUEST\n");
-            break;
-
-          /* Stop the playback */
-
-#ifndef CONFIG_AUDIO_EXCLUDE_STOP
-          case AUDIO_MSG_STOP:
-            /* Indicate that we are terminating */
-
-            audvdbg("AUDIO_MSG_STOP: Terminating\n");
-            priv->terminating = true;
-            break;
-#endif
-
-          /* We have a new buffer to send.  We will catch this case at
-           * the top of the loop.
-           */
-
-          case AUDIO_MSG_ENQUEUE:
-            audvdbg("AUDIO_MSG_ENQUEUE\n");
-            break;
-
-          /* We will wake up from the I2S callback with this message */
-
-          case AUDIO_MSG_COMPLETE:
-            audvdbg("AUDIO_MSG_COMPLETE\n");
-            wm8904_returnbuffers(priv);
-            break;
-
-          default:
-            auddbg("ERROR: Ignoring message ID %d\n", msg.msgId);
-            break;
-        }
-    }
-
-  /* Disable the WM8904 interrupt */
-
-  WM8904_DISABLE(priv->lower);
-
-  /* Mute the volume and disable the FLL output */
-
-  wm8904_setvolume(priv, priv->volume, true);
-  wm8904_writereg(priv, WM8904_FLL_CTRL1, 0);
-  wm8904_writereg(priv, WM8904_DUMMY, 0x55aa);
-
-  /* Return any pending buffers in our pending queue */
-
-  wm8904_takesem(&priv->pendsem);
-  while ((apb = (FAR struct ap_buffer_s *)dq_remfirst(&priv->pendq)) != NULL)
-    {
-      /* Release our reference to the buffer */
-
-      apb_free(apb);
-
-      /* Send the buffer back up to the previous level. */
-
-#ifdef CONFIG_AUDIO_MULTI_SESSION
-      priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_DEQUEUE, apb, OK, NULL);
-#else
-      priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_DEQUEUE, apb, OK);
-#endif
-    }
-
-  wm8904_givesem(&priv->pendsem);
-
-  /* Return any pending buffers in our done queue */
-
-  wm8904_returnbuffers(priv);
-
-  /* Close the message queue */
-
-  mq_close(priv->mq);
-  mq_unlink(priv->mqname);
-  priv->mq = NULL;
-
-  /* Send an AUDIO_MSG_COMPLETE message to the client */
-
-#ifdef CONFIG_AUDIO_MULTI_SESSION
-  priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_COMPLETE, NULL, OK, NULL);
-#else
-  priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_COMPLETE, NULL, OK);
-#endif
-
-  audvdbg("Exit\n");
-  return NULL;
-}
-
-/****************************************************************************
  * Name: wm8904_start
  *
  * Description:
@@ -1796,7 +1651,9 @@ static int wm8904_resume(FAR struct audio_lowerhalf_s *dev)
       /* Enable interrupts to allow sampling data */
 
       wm8904_sendbuffer(priv);
+#ifdef WM8904_USE_FFLOCK_INT
       WM8904_ENABLE(priv->lower);
+#endif
     }
 
   return OK;
@@ -2006,6 +1863,264 @@ static int wm8904_release(FAR struct audio_lowerhalf_s *dev)
 }
 
 /****************************************************************************
+ * Name: wm8904_interrupt_work
+ *
+ * Description:
+ *   WM8904 interrupt actions cannot be performed in the interrupt handler
+ *   because I2C access is not possible in that context.  Instead, all I2C
+ *   operations are deferred to the work queue.
+ *
+ * Assumptions:
+ *   WM8904 interrupts were disabled in the interrupt handler.
+ *
+ ****************************************************************************/
+
+#ifdef WM8904_USE_FFLOCK_INT
+static void wm8904_interrupt_work(FAR void *arg)
+{
+  FAR struct wm8904_dev_s *priv = (FAR struct wm8904_dev_s *)arg;
+  uint16_t regval;
+
+  DEBUGASSERT(priv && priv->lower);
+
+  /* Sample the interrupt status */
+
+  regval = wm8904_readreg(priv, WM8904_INT_STATUS);
+  audvdbg("INT_STATUS: %04x\n", regval);
+
+  /* Check for the FLL lock interrupt.  We are sloppy here since at
+   * present, only the FLL lock interrupt is used.
+   */
+
+  DEBUGASSERT((regval & WM8904_FLL_LOCK_INT) != 0 && !priv->locked);
+  UNUSED(regval);
+
+  priv->locked = true;
+
+  /* Clear all pending interrupts by write 1's to the interrupt status
+   * register.
+   *
+   * REVISIT: Since I2C is slow and not atomic with respect to WM8904 event,
+   * could this not cause the lost of interrupts?
+   */
+
+  wm8904_writereg(priv, WM8904_INT_STATUS, WM8904_ALL_INTS);
+
+  /* Disable further FLL lock interrupts.  We are sloppy here since at
+   * present, only the FLL lock interrupt is used.
+   */
+
+  wm8904_writereg(priv, WM8904_INT_MASK, WM8904_ALL_INTS);
+
+#ifdef WM8904_USE_FFLOCK_INT
+  /* Re-enable WM8904 interrupts */
+
+  WM8904_ENABLE(priv->lower);
+#endif
+}
+#endif
+
+/****************************************************************************
+ * Name: wm8904_interrupt
+ *
+ * Description:
+ *   This is the ISR that services the GPIO1/IRQ pin from the WM8904.  It
+ *   signals WM8904 events such FLL lock.
+ *
+ ****************************************************************************/
+
+#ifdef WM8904_USE_FFLOCK_INT
+static int wm8904_interrupt(FAR const struct wm8904_lower_s *lower,
+                            FAR void *arg)
+{
+  FAR struct wm8904_dev_s *priv = (FAR struct wm8904_dev_s *)arg;
+  int ret;
+
+  DEBUGASSERT(lower && priv);
+
+  /* Disable further interrupts and perform all interrupt related activities
+   * on the work thread.  There is nothing that we can do from the interrupt
+   * handler because we cannot perform I2C operations here.
+   */
+
+  WM8904_DISABLE(priv->lower);
+
+  DEBUGASSERT(work_available(&priv->work));
+  ret = work_queue(LPWORK, &priv->work, wm8904_interrupt_work, priv, 0);
+  if (ret < 0)
+    {
+      audlldbg("ERROR: Failed to schedule work\n");
+    }
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: wm8904_workerthread
+ *
+ *  This is the thread that feeds data to the chip and keeps the audio
+ *  stream going.
+ *
+ ****************************************************************************/
+
+static void *wm8904_workerthread(pthread_addr_t pvarg)
+{
+  FAR struct wm8904_dev_s *priv = (struct wm8904_dev_s *) pvarg;
+  struct audio_msg_s msg;
+  FAR struct ap_buffer_s *apb;
+  int msglen;
+  int prio;
+
+  audvdbg("Entry\n");
+
+#ifndef CONFIG_AUDIO_EXCLUDE_STOP
+  priv->terminating = false;
+#endif
+
+  /* Mark ourself as running and make sure that WM8904 interrupts are
+   * enabled.
+   */
+
+  priv->running = true;
+#ifdef WM8904_USE_FFLOCK_INT
+  WM8904_ENABLE(priv->lower);
+#endif
+  wm8904_setvolume(priv, priv->volume, false);
+
+  /* Loop as long as we are supposed to be running and as long as we have
+   * buffers in-flight.
+   */
+
+  while (priv->running || priv->inflight > 0)
+    {
+      /* Check if we have been asked to terminate.  We have to check if we
+       * still have buffers in-flight.  If we do, then we can't stop until
+       * birds come back to roost.
+       */
+
+      if (priv->terminating && priv->inflight <= 0)
+        {
+          /* We are IDLE.  Break out of the loop and exit. */
+
+          break;
+        }
+      else
+        {
+          /* Check if we can send more audio buffers to the WM8904 */
+
+          wm8904_sendbuffer(priv);
+        }
+
+      /* Wait for messages from our message queue */
+
+      msglen = mq_receive(priv->mq, &msg, sizeof(msg), &prio);
+
+      /* Handle the case when we return with no message */
+
+      if (msglen < sizeof(struct audio_msg_s))
+        {
+          auddbg("ERROR: Message too small: %d\n", msglen);
+          continue;
+        }
+
+      /* Process the message */
+
+      switch (msg.msgId)
+        {
+          /* The ISR has requested more data.  We will catch this case at
+           * the top of the loop.
+           */
+
+          case AUDIO_MSG_DATA_REQUEST:
+            audvdbg("AUDIO_MSG_DATA_REQUEST\n");
+            break;
+
+          /* Stop the playback */
+
+#ifndef CONFIG_AUDIO_EXCLUDE_STOP
+          case AUDIO_MSG_STOP:
+            /* Indicate that we are terminating */
+
+            audvdbg("AUDIO_MSG_STOP: Terminating\n");
+            priv->terminating = true;
+            break;
+#endif
+
+          /* We have a new buffer to send.  We will catch this case at
+           * the top of the loop.
+           */
+
+          case AUDIO_MSG_ENQUEUE:
+            audvdbg("AUDIO_MSG_ENQUEUE\n");
+            break;
+
+          /* We will wake up from the I2S callback with this message */
+
+          case AUDIO_MSG_COMPLETE:
+            audvdbg("AUDIO_MSG_COMPLETE\n");
+            wm8904_returnbuffers(priv);
+            break;
+
+          default:
+            auddbg("ERROR: Ignoring message ID %d\n", msg.msgId);
+            break;
+        }
+    }
+
+  /* Disable the WM8904 interrupt */
+
+  WM8904_DISABLE(priv->lower);
+
+  /* Mute the volume and disable the FLL output */
+
+  wm8904_setvolume(priv, priv->volume, true);
+  wm8904_writereg(priv, WM8904_FLL_CTRL1, 0);
+  wm8904_writereg(priv, WM8904_DUMMY, 0x55aa);
+
+  /* Return any pending buffers in our pending queue */
+
+  wm8904_takesem(&priv->pendsem);
+  while ((apb = (FAR struct ap_buffer_s *)dq_remfirst(&priv->pendq)) != NULL)
+    {
+      /* Release our reference to the buffer */
+
+      apb_free(apb);
+
+      /* Send the buffer back up to the previous level. */
+
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+      priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_DEQUEUE, apb, OK, NULL);
+#else
+      priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_DEQUEUE, apb, OK);
+#endif
+    }
+
+  wm8904_givesem(&priv->pendsem);
+
+  /* Return any pending buffers in our done queue */
+
+  wm8904_returnbuffers(priv);
+
+  /* Close the message queue */
+
+  mq_close(priv->mq);
+  mq_unlink(priv->mqname);
+  priv->mq = NULL;
+
+  /* Send an AUDIO_MSG_COMPLETE message to the client */
+
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+  priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_COMPLETE, NULL, OK, NULL);
+#else
+  priv->dev.upper(priv->dev.priv, AUDIO_CALLBACK_COMPLETE, NULL, OK);
+#endif
+
+  audvdbg("Exit\n");
+  return NULL;
+}
+
+/****************************************************************************
  * Name: wm8904_audio_output
  *
  * Description:
@@ -2133,7 +2248,10 @@ static void wm8904_audio_output(FAR struct wm8904_dev_s *priv)
 
   /* Audio Interface 3
    *
-   * Set LRCLK as an output with rate = BCLK / 64
+   * Set LRCLK as an output with rate = BCLK / 64.  This is a constant value
+   * used with audio.  Since I2S will send a word on each edge of LRCLK (after
+   * a delay), this essentially means that each audio frame is 32 bits in
+   * length;
    */
 
   regval = WM8904_LRCLK_DIR | WM8904_LRCLK_RATE(64);
@@ -2179,12 +2297,6 @@ static void wm8904_audio_output(FAR struct wm8904_dev_s *priv)
 
   regval = WM8904_CP_DYN_PWR | 0x0004;
   wm8904_writereg(priv, WM8904_CLASS_W0, regval);
-
-  /* Configure the FLL */
-
-  wm8904_setbitrate(priv);
-  wm8904_setlrclock(priv);
-  wm8904_writereg(priv, WM8904_DUMMY, 0x55aa);
 }
 
 /****************************************************************************
@@ -2192,7 +2304,8 @@ static void wm8904_audio_output(FAR struct wm8904_dev_s *priv)
  *
  * Description:
  *   Initialize and configure the WM8904 device as an audio output device
- *   (Right input only).
+ *   (Right input only).  wm8904_audio_output() must be called first, this
+ *   function then modifies the configuration to support audio input.
  *
  * Input Parameters:
  *   prive   - A reference to the driver state structure
@@ -2304,12 +2417,39 @@ FAR struct audio_lowerhalf_s *
       /* Configure the WM8904 hardware as an audio input device */
 
       wm8904_audio_output(priv);
-      wm8904_dump_registers(&priv->dev, "After configuration");
-      wm8904_clock_analysis(&priv->dev, "After configuration");
 
-      /* Attach our ISR to this device */
+#ifdef WM8904_USE_FFLOCK_INT
+      /* Configure GPIO1 as an IRQ
+       *
+       *   WM8904_GPIO1_PU=0               : No pull-up
+       *   WM8904_GPIO1_PD=1               : Pulled-down
+       *   WM8904_GPIO1_SEL_IRQ            : Configured as IRQ
+       */
+
+      regval = (WM8904_GPIO1_SEL_IRQ | WM8904_GPIO1_PD);
+      wm8904_writereg(priv, WM8904_GPIO_CTRL1, regval);
+
+      /* Attach our handler to the GPIO1/IRQ interrupt */
 
       WM8904_ATTACH(lower, wm8904_interrupt, priv);
+
+      /* Configure interrupts.  wm8904_setbitrate() depends on FLL interrupts. */
+
+      wm8904_writereg(priv, WM8904_INT_STATUS, WM8904_ALL_INTS);
+      wm8904_writereg(priv, WM8904_INT_MASK, WM8904_ALL_INTS);
+      wm8904_writereg(priv, WM8904_INT_POL, 0);
+      wm8904_writereg(priv, WM8904_INT_DEBOUNCE, WM8904_ALL_INTS);
+#endif
+
+      /* Configure the FLL and the LRCLK */
+
+      wm8904_setbitrate(priv);
+      wm8904_writereg(priv, WM8904_DUMMY, 0x55aa);
+
+      /* Dump some information and return the device instance */
+
+      wm8904_dump_registers(&priv->dev, "After configuration");
+      wm8904_clock_analysis(&priv->dev, "After configuration");
       return &priv->dev;
     }
 

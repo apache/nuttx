@@ -50,6 +50,7 @@
 #include <pthread.h>
 #include <mqueue.h>
 
+#include <nuttx/wqueue.h>
 #include <nuttx/fs/ioctl.h>
 
 #ifdef CONFIG_AUDIO
@@ -57,6 +58,15 @@
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
+/* So far, I have not been able to get FLL lock interrupts. Worse, I have
+ * been able to get the FLL to claim that it is locked at all even when
+ * polling.  What am I doing wrong?
+ *
+ * Hmmm.. seems unnecessary anyway
+ */
+
+#undef WM8904_USE_FFLOCK_INT
+#undef WM8904_USE_FFLOCK_POLL
 
 /* Registers Addresses ******************************************************/
 
@@ -156,7 +166,9 @@
 #define WM8904_EQ22                  0x9b /* EQ22 */
 #define WM8904_EQ23                  0x9c /* EQ23 */
 #define WM8904_EQ24                  0x9d /* EQ24 */
+#define WM8904_CTRLIF_TEST_1         0xa1 /* Control Interface Test 1 */
 #define WM8904_ADC_TEST              0xc6 /* ADC Test  */
+#define WM8904_ANA_OUT_BIAS_0        0xCC /* Analogue Output Bias 0 */
 #define WM8904_FLL_NCO_TEST0         0xf7 /* FLL NCO Test 0 */
 #define WM8904_FLL_NCO_TEST1         0xf8 /* FLL NCO Test 1 */
 
@@ -261,8 +273,10 @@
 #define WM8904_EQ22_DEFAULT            0x0564
 #define WM8904_EQ23_DEFAULT            0x0559
 #define WM8904_EQ24_DEFAULT            0x4000
-#define WM8904_ADC_TEST_DEFAULT        0x0000
+#define WM8904_CTRLIF_TEST_1_DEFAULT   0x0000
 #define WM8904_FLL_NCO_TEST0_DEFAULT   0x0000
+#define WM8904_ANA_OUT_BIAS_0_DEFAULT  0x0000
+#define WM8904_ADC_TEST_DEFAULT        0x0000
 #define WM8904_FLL_NCO_TEST1_DEFAULT   0x0019
 
 /* Register Bit Definitions *************************************************/
@@ -949,16 +963,18 @@
 /* 0x81 Interrupt Polarity */
 /* 0x82 Interrupt Debounce */
 
-#define WM8904_GPIO_BCLK_EINT        (1 << 9)  /* Bit 9:  GPIO4 interrupt */
-#define WM8904_WSEQ_EINT             (1 << 8)  /* Bit 8:  Write Sequence interrupt */
-#define WM8904_GPIO3_EINT            (1 << 7)  /* Bit 7:  GPIO3 interrupt */
-#define WM8904_GPIO2_EINT            (1 << 6)  /* Bit 6:  GPIO2 interrupt */
-#define WM8904_GPIO1_EINT            (1 << 5)  /* Bit 5:  GPIO1 interrupt */
-#define WM8904_GPI8_EINT             (1 << 4)  /* Bit 4:  GPI8 interrupt */
-#define WM8904_GPI7_EINT             (1 << 3)  /* Bit 3:  GPI7 interrupt */
-#define WM8904_FLL_LOCK_EINT         (1 << 2)  /* Bit 2:  FLL Lock interrupt */
-#define WM8904_MIC_SHRT_EINT         (1 << 1)  /* Bit 1:  MICBIAS short circuit interrupt */
-#define WM8904_MIC_DET_EINT          (1 << 0)  /* Bit 0:  MICBIAS short circuit interrupt */
+#define WM8904_GPIO_BCLK_INT         (1 << 9)  /* Bit 9:  GPIO4 interrupt */
+#define WM8904_WSEQ_INT              (1 << 8)  /* Bit 8:  Write Sequence interrupt */
+#define WM8904_GPIO3_INT             (1 << 7)  /* Bit 7:  GPIO3 interrupt */
+#define WM8904_GPIO2_INT             (1 << 6)  /* Bit 6:  GPIO2 interrupt */
+#define WM8904_GPIO1_INT             (1 << 5)  /* Bit 5:  GPIO1 interrupt */
+#define WM8904_GPI8_INT              (1 << 4)  /* Bit 4:  GPI8 interrupt */
+#define WM8904_GPI7_INT              (1 << 3)  /* Bit 3:  GPI7 interrupt */
+#define WM8904_FLL_LOCK_INT          (1 << 2)  /* Bit 2:  FLL Lock interrupt */
+#define WM8904_MIC_SHRT_INT          (1 << 1)  /* Bit 1:  MICBIAS short circuit interrupt */
+#define WM8904_MIC_DET_INT           (1 << 0)  /* Bit 0:  MICBIAS short circuit interrupt */
+
+#define WM8904_ALL_INTS              (0x03ff)
 
 /* 0x7f Interrupt Status (only) */
 
@@ -971,16 +987,30 @@
 /* 0x87-0x8b EQ2-EQ6:   5 bit equalizer value */
 /* 0x8c-0x9d EQ7-EQ24: 16-bit equalizer value */
 
+/* 0xa1 Control Interface Test 1 */
+
+#define WM8904_USER_KEY              0x0002
+
 /* 0xc6 ADC Test  */
 
 #define WM8904_ADC_128_OSR_TST_MODE  (1 << 2)  /* Bit 2:  ADC bias control (1) */
 #define WM8904_ADC_BIASX1P5          (1 << 0)  /* Bit 0:  ADC bias control (2) */
 
+/* 0xcc Analogue Output Bias 0 */
+
+#define WM8904_ANA_OUT_BIAS_SHIFT    (4)       /* Bits 4-6: */
+#define WM8904_ANA_OUT_BIAS_MASK     (7 << WM8904_ANA_OUT_BIAS_SHIFT)
+#  define WM8904_ANA_OUT_BIAS(n)     ((uint16_t)(n) << WM8904_ANA_OUT_BIAS_SHIFT)
+
 /* 0xf7 FLL NCO Test 0 */
 
 #define WM8904_FLL_FRC_NCO           (1 << 0)  /* Bit 0: FLL Forced control select  */
 
-/* 0xf8 FLL NCO Test 1 (16-bit FLL forced oscillator value */
+/* 0xf8 FLL NCO Test 1 */
+
+#define WM8904FLL_FRC_NCO_SHIFT      (0)       /* Bits 0-5: FLL forced oscillator value */
+#define WM8904FLL_FRC_NCO_MASK       (0x3f << WM8904FLL_FRC_NCO_SHIFT)
+#  define WM8904FLL_FRC_NCO_VAL(n)   ((uint16_t)(n) << WM8904FLL_FRC_NCO_SHIFT)
 
 /* FLL Configuration *********************************************************/
 /* Default FLL configuration */
@@ -988,8 +1018,6 @@
 #define WM8904_DEFAULT_SAMPRATE      11025
 #define WM8904_DEFAULT_NCHANNELS     1
 #define WM8904_DEFAULT_BPSAMP        16
-
-#define WM8904_STARTBITS             2
 
 #define WM8904_NFLLRATIO_DIV1        0
 #define WM8904_NFLLRATIO_DIV2        1
@@ -1045,6 +1073,9 @@ struct wm8904_dev_s
   pthread_t               threadid;         /* ID of our thread */
   uint32_t                bitrate;          /* Actual programmed bit rate */
   sem_t                   pendsem;          /* Protect pendq */
+#ifdef WM8904_USE_FFLOCK_INT
+  struct work_s           work;             /* Interrupt work */
+#endif
   uint16_t                samprate;         /* Configured samprate (samples/sec) */
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
 #ifndef CONFIG_AUDIO_EXCLUDE_BALANCE
@@ -1055,6 +1086,9 @@ struct wm8904_dev_s
   uint8_t                 nchannels;        /* Number of channels (1 or 2) */
   uint8_t                 bpsamp;           /* Bits per sample (8 or 16) */
   volatile uint8_t        inflight;         /* Number of audio buffers in-flight */
+#ifdef WM8904_USE_FFLOCK_INT
+  volatile bool           locked;           /* FLL is locked */
+#endif
   bool                    running;          /* True: Worker thread is running */
   bool                    paused;           /* True: Playing is paused */
   bool                    mute;             /* True: Output is muted */
