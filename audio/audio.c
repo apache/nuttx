@@ -716,7 +716,8 @@ static inline void audio_dequeuebuffer(FAR struct audio_upperhalf_s *upper,
       msg.session = session;
 #endif
       apb->flags |= AUDIO_APB_DEQUEUED;
-      mq_send(upper->usermq, &msg, sizeof(msg), CONFIG_AUDIO_BUFFER_DEQUEUE_PRIO);
+      mq_send(upper->usermq, &msg, sizeof(msg),
+              CONFIG_AUDIO_BUFFER_DEQUEUE_PRIO);
     }
 }
 
@@ -754,7 +755,7 @@ static inline void audio_complete(FAR struct audio_upperhalf_s *upper,
       msg.session = session;
 #endif
       mq_send(upper->usermq, &msg, sizeof(msg),
-          CONFIG_AUDIO_BUFFER_DEQUEUE_PRIO);
+              CONFIG_AUDIO_BUFFER_DEQUEUE_PRIO);
     }
 }
 

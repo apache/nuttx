@@ -1371,7 +1371,8 @@ static void wm8904_returnbuffers(FAR struct wm8904_dev_s *priv)
       apb = (FAR struct ap_buffer_s *)dq_remfirst(&priv->doneq);
       irqrestore(flags);
 
-      audvdbg("Returning apb=%p flags=%04x\n", apb, apb->flags);
+      audvdbg("Returning: apb=%p curbyte=%d nbytes=%d flags=%04x\n",
+              apb, apb->curbyte, apb->nbytes, apb->flags);
 
       /* Are we returning the final buffer in the stream? */
 
@@ -1679,7 +1680,8 @@ static int wm8904_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
   struct audio_msg_s  term_msg;
   int ret = -EAGAIN;
 
-  audvdbg("apb=%p\n", apb);
+  audvdbg("Enqueueing: apb=%p curbyte=%d nbytes=%d flags=%04x\n",
+          apb, apb->curbyte, apb->nbytes, apb->flags);
 
   /* Take a reference on the new audio buffer */
 
