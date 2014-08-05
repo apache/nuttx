@@ -6455,6 +6455,7 @@
 	  has never done anything (2014-1-15).
 	* All implementations of up_disable_irq() for all Cortex-M3 and M4
 	  architectures:  To enable an interrupt on the Cortex-M3/4 CPU, you
+	  need to set a bit in the ISER registet on the Cortex-M3/4 CPU, you
 	  need to set a bit in the ISER register.  To disable the interrupt, you
 	  need to set a bit in the ICER register.  Existing logic was trying to
 	  disable interrupts by clearing the bit in the ISER register.  That will
@@ -7981,3 +7982,7 @@
 	  in its initial state after playing each WAV file.  Base samles per
 	  second on frame length, not bits-per-sample.  Use a different frame
 	  length for 8-bit and 16-bit data (2014-8-4).
+	* arch/arm/src/sama5/sam_hsmci.c:  TX DMA is again disabled for the
+	  SAMA5D3 family.  Although it works with the SAMA5D4 (which has a
+	  different DMA subsystem), it does not work with the SAMA5D3 (2014-8-5,
+	  see 2014-7-30).
