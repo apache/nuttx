@@ -1015,24 +1015,27 @@
 /* FLL Configuration *********************************************************/
 /* Default FLL configuration */
 
-#define WM8904_DEFAULT_SAMPRATE      11025
-#define WM8904_DEFAULT_NCHANNELS     1
-#define WM8904_DEFAULT_BPSAMP        16
+#define WM8904_DEFAULT_SAMPRATE      11025     /* Initial sample rate */
+#define WM8904_DEFAULT_NCHANNELS     1         /* Initial number of channels */
+#define WM8904_DEFAULT_BPSAMP        16        /* Initial bits per sample */
 
-#define WM8904_NFLLRATIO_DIV1        0
+#define WM8904_NFLLRATIO_DIV1        0         /* Values of the FLL_RATIO field */
 #define WM8904_NFLLRATIO_DIV2        1
 #define WM8904_NFLLRATIO_DIV4        2
 #define WM8904_NFLLRATIO_DIV8        3
 #define WM8904_NFLLRATIO_DIV16       4
-#define WM8904_NFLLRATIO             5
+#define WM8904_NFLLRATIO             5          /* Number of FLL_RATIO values */
 
-#define WM8904_MINOUTDIV             4
-#define WM8904_MAXOUTDIV             64
+#define WM8904_MINOUTDIV             4          /* Minimum FLL_OUTDIV divider */
+#define WM8904_MAXOUTDIV             64         /* Maximum FLL_OUTDIV divider */
 
-#define WM8904_BCLK_MAXDIV           20
+#define WM8904_BCLK_MAXDIV           20         /* Maximum BCLK divider */
 
-#define WM8904_FVCO_MIN              90000000
-#define WM8904_FVCO_MAX              100000000
+#define WM8904_FVCO_MIN              90000000   /* Minimum value of Fvco */
+#define WM8904_FVCO_MAX              100000000  /* Maximum value of Fvco */
+
+#define WM8904_FRAMELEN8              14        /* Bits per frame for 8-bit data */
+#define WM8904_FRAMELEN16             32        /* Bits per frame for 16-bit data */
 
 /* Commonly defined and redefined macros */
 
