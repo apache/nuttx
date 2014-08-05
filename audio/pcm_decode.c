@@ -340,7 +340,9 @@ static inline bool pcm_validwav(FAR const struct wav_header_s *wav)
  * Name: pcm_parsewav
  *
  * Description:
- *   Parse and verify the WAV file header.
+ *   Parse and verify the WAV file header.  A WAV file is a particular
+ *   packaging of an audio file; on PCM encoded WAV files are accepted by
+ *   this driver.
  *
  ****************************************************************************/
 
@@ -374,7 +376,7 @@ static bool pcm_parsewav(FAR struct pcm_decode_s *priv, uint8_t *data)
 
   pcm_dump(&localwav);
 
-  /* Check if the file is a valid WAV header */
+  /* Check if the file is a valid PCM WAV header */
 
   ret = pcm_validwav(&localwav);
   if (ret)
@@ -1044,8 +1046,8 @@ static int pcm_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
         }
 
 #ifndef CONFIG_AUDIO_EXCLUDE_FFORWARD
-      audvdbg("Received: apb=%p curbyte=%d nbytes=%d\n",
-              apb, apb->curbyte, apb->nbytes);
+      audvdbg("Received: apb=%p curbyte=%d nbytes=%d flags=%04x\n",
+              apb, apb->curbyte, apb->nbytes, apb->flags);
 
       /* Perform any necessary sub-sampling operations */
 
@@ -1072,21 +1074,11 @@ static int pcm_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
 
   if (bytesleft >= sizeof(struct wav_header_s))
     {
-      /* Parse and verify the candidate WAV file header */
+      /* Parse and verify the candidate PCM WAV file header */
 
       if (pcm_parsewav(priv, &apb->samp[apb->curbyte]))
         {
           struct audio_caps_s caps;
-
-          /* Now we are streaming.  Unless for some reason there is only one
-           * audio buffer in the audio stream.  In that case, this will be
-           * marked as the final buffer
-            */
-
-          if ((apb->flags & AUDIO_APB_FINAL) == 0)
-            {
-              priv->streaming = true;
-            }
 
           /* Configure the lower level for the number of channels, bitrate,
            * and sample bitwidth.
@@ -1130,25 +1122,46 @@ static int pcm_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
           audvdbg("Pass to lower enqueuebuffer: apb=%p curbyte=%d nbytes=%d\n",
                   apb, apb->curbyte, apb->nbytes);
 
-          return lower->ops->enqueuebuffer(lower, apb);
+          ret = lower->ops->enqueuebuffer(lower, apb);
+          if (ret == OK)
+            {
+              /* Now we are streaming.  Unless for some reason there is only
+               * one audio buffer in the audio stream.  In that case, this
+               * will be marked as the final buffer
+               */
+
+              priv->streaming = ((apb->flags & AUDIO_APB_FINAL) == 0);
+              return OK;
+            }
         }
 
-      /* Return the unhandled buffer to the previous level with an error
-       * indication.
+      auddbg("ERROR: Invalid PCM WAV file\n");
+
+      /* The normal protocol for streaming errors is as follows:
+       *
+       * (1) Fail the enqueueing by returned a negated error value.  The
+       *     upper level then knows that this buffer was not queue.
+       * (2) Return all queued buffers to the caller using the
+       *     AUDIO_CALLBACK_DEQUEUE callback
+       * (3) Terminate playing using the AUDIO_CALLBACK_COMPLETE
+       *     callback.
+       *
+       * In this case we fail on the very first buffer and we need only
+       * do (1) and (3).
        */
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-      priv->export.upper(priv->export.priv, AUDIO_CALLBACK_DEQUEUE, apb,
-                         -EINVAL, NULL);
+      priv->export.upper(priv->export.priv, AUDIO_CALLBACK_COMPLETE,
+                         NULL, OK, NULL);
 #else
-      priv->export.upper(priv->export.priv, AUDIO_CALLBACK_DEQUEUE, apb,
-                         -EINVAL);
+      priv->export.upper(priv->export.priv, AUDIO_CALLBACK_COMPLETE,
+                         NULL, OK);
 #endif
     }
 
   /* This is not a WAV file! */
 
-  auddbg("ERROR: Invalid WAV file\n");
+  auddbg("ERROR: Invalid PCM WAV file\n");
   return -EINVAL;
 }
 
