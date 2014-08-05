@@ -2824,12 +2824,10 @@ To-Do List
    low priority to me but might be important to you if you are need very
    high performance SD card accesses.
 
-   The last time I used HSMCI with a SAMA5D3, I had to disable TX DMA
-   in the HSMCI driver.  Much has changed since then and I have reverified
-   that TX DMA transfers are functional using a SAMA5D4.  The SAMA5D4,
-   however, has a different DMA subsystem.  So... if you suspect issues
-   HSMCI writes, you might try disabling the TX DMA again in the
-   sam_hsmci.c driver.
+   HCMDI TX DMA is currently disabled for the SAMA5D3.  There is some
+   issue with the TX DMA setup (HSMCI TX DMA the same driver works with
+   the SAMA5D4 which has a different DMA subsystem).  This is a bug that
+   needs to be resolved.
 
 3) GMAC has only been tested on a 10/100Base-T network.  I don't have a
    1000Base-T network to support additional testing.

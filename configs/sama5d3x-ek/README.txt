@@ -3247,7 +3247,7 @@ Configurations
        card slots:  (1) a full size SD card slot (J7 labelled MCI0), and (2)
        a microSD memory card slot (J6 labelled MCI1).  The full size SD card
        slot connects via HSMCI0; the microSD connects vi HSMCI1.  Relevant
-       configuration settings can be found in the section entitle "HSMCI
+       configuration settings can be found in the section entitled "HSMCI
        Card Slots" above.
 
     9. Support the USB high-speed device (UDPHS) driver is enabled.  See the
@@ -3651,12 +3651,10 @@ To-Do List
    low priority to me but might be important to you if you are need very
    high performance SD card accesses.
 
-   The last time I used HSMCI with a SAMA5D3, I had to disable TX DMA
-   in the HSMCI driver.  Much has changed since then and I have reverified
-   that TX DMA transfers are functional using a SAMA5D4.  The SAMA5D4,
-   however, has a different DMA subsystem.  So... if you suspect issues
-   HSMCI writes, you might try disabling the TX DMA again in the
-   sam_hsmci.c driver.
+   HCMDI TX DMA is currently disabled for the SAMA5D3.  There is some
+   issue with the TX DMA setup (HSMCI TX DMA the same driver works with
+   the SAMA5D4 which has a different DMA subsystem).  This is a bug that
+   needs to be resolved.
 
 4) I believe that there is an issue when the internal AT25 FLASH is
    formatted by NuttX.  That format works fine with Linux, but does not

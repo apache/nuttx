@@ -181,10 +181,16 @@
 #  endif
 #endif
 
-/* These were once helpful.  Perhaps they will be so again some time. */
+/* There is some unresolved issue with the SAMA5D3 DMA.  TX DMA is currently
+ * disabled.
+ */
 
 #undef  HSCMI_NORXDMA            /* Define to disable RX DMA */
 #undef  HSCMI_NOTXDMA            /* Define to disable TX DMA */
+
+#ifdef ATSAMA5D3
+#  define HSCMI_NOTXDMA 1        /* Disabled */
+#endif
 
 /* Timing */
 
