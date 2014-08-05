@@ -110,12 +110,3 @@ Telnet access:
 ==============
 
 For better access to NSH, you can also Telnet to the target at address 10.0.0.2
-
-
-
-
-
-
-
-
-
