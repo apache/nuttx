@@ -7985,4 +7985,7 @@
 	* arch/arm/src/sama5/sam_hsmci.c:  TX DMA is again disabled for the
 	  SAMA5D3 family.  Although it works with the SAMA5D4 (which has a
 	  different DMA subsystem), it does not work with the SAMA5D3 (2014-8-5,
-	  see 2014-7-30).
+	  see also 2014-7-30).
+	* audio/pcm_decode.c: Handle errors in the PCM WAV file in a way that
+	  the Nxplayer can recover gracefully:  Send and Audio Complete message
+	  (2014-8-5).
