@@ -52,9 +52,13 @@ CMN_CSRCS += up_schedulesigaction.c up_unblocktask.c up_usestack.c
 
 CHIP_ASRCS  = qemu_saveusercontext.S qemu_fullcontextrestore.S qemu_vectors.S
 CHIP_CSRCS  = qemu_handlers.c qemu_idle.c qemu_lowputc.c qemu_lowsetup.c
-CHIP_CSRCS += qemu_serial.c qemu_timerisr.c
+CHIP_CSRCS += qemu_serial.c
 
 # Configuration-dependent QEMU files
+
+ifneq ($(CONFIG_SCHED_TICKLESS),y)
+CHIP_CSRCS += qemu_timerisr.c
+endif
 
 ifeq ($(CONFIG_QEMU_KEYPAD),y)
 CHIP_CSRCS += qemu_keypad.c

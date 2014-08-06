@@ -182,7 +182,7 @@ extern void up_puts(const char *str);
 
 /* Defined in up_timerisr.c */
 
-void up_timerinit(void);
+void up_timer_initialize(void);
 
 /* Defined in board/up_leds.c */
 

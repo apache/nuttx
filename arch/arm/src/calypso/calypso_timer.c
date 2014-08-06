@@ -180,7 +180,7 @@ int up_timerisr(int irq, uint32_t *regs)
 }
 
 /************************************************************
- * Function:  up_timerinit
+ * Function:  up_timer_initialize
  *
  * Description:
  *   Setup Calypso HW timer 2 to cause system ticks.
@@ -190,7 +190,7 @@ int up_timerisr(int irq, uint32_t *regs)
  *
  ************************************************************/
 
-void up_timerinit(void)
+void up_timer_initialize(void)
 {
   up_disable_irq(IRQ_SYSTIMER);
 

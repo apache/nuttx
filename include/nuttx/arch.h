@@ -128,8 +128,8 @@ extern "C"
 #endif
 
 /****************************************************************************
- * These are standard interfaces that must be exported to the
- * scheduler from architecture-specific code.
+ * These are standard interfaces that must be exported to the base RTOS
+ * logic from architecture-specific code.
  ****************************************************************************/
 
 /****************************************************************************
@@ -940,6 +940,173 @@ int up_prioritize_irq(int irq, int priority);
 #endif
 
 /****************************************************************************
+ * Tickless OS Support.
+ *
+ * When CONFIG_SCHED_TICKLESS is enabled, all support for timer interrupts
+ * is suppressed and the platform specific code is expected to provide the
+ * following custom functions.
+ *
+ *   void up_timer_initialize(void): Initializes the timer facilities.  Called
+ *     early in the intialization sequence (by up_intialize()).
+ *   int up_timer_gettime(FAR struct timespec *tp):  Returns the current
+ *     time from the platform specific time source.
+ *   int up_timer_cancel(void):  Cancels the interval timer.
+ *   int up_timer_start(FAR const struct timespec *tp): Start (or re-starts)
+ *     the interval timer.
+ *   int up_timer_resolution(FAR struct timespec *tp): Returns the
+ *     resolution of the interval timer.
+ *
+ * The RTOS will provide the following interfaces for use by the platform-
+ * specific interval timer implementation:
+ *
+ *   void sched_timer_expiration(void):  Called by the platform-specific
+ *     logic when the interval timer expires.
+ *
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_timer_initialize
+ *
+ * Description:
+ *   Initializes all platform-specific timer facilities.  This function is
+ *   called early in the initialization sequence by up_intialize().
+ *   On return, the current up-time should be available from
+ *   up_timer_gettime() and the interval timer is ready for use (but not
+ *   actively timing.
+ *
+ *   Provided by platform-specific code and called from the architecture-
+ *   specific logic.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called early in the initialization sequence before any special
+ *   concurrency protections are required.
+ *
+ ****************************************************************************/
+
+#if 0 /* Prototyped in up_internal.h in all cases. */
+void up_timer_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: up_timer_gettime
+ *
+ * Description:
+ *   Return the elapsed time since power-up (or, more correctly, since
+ *   up_timer_initialize() was called).  This function is functionally equivalent
+ *   to:
+ *
+ *      int clock_gettime(clockid_t clockid, FAR struct timespec *tp);
+ *
+ *   when clockid is CLOCK_MONOTONIC.
+ *
+ *   Provided by platform-specific code and called from the RTOS base code.
+ *
+ * Input Parameters:
+ *   tp - Provides the location in which to return the up-time.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ * Assumptions:
+ *   Called from the the normal tasking context.  The implementation must
+ *   provide whatever mutual exclusion is necessary for correct operation.
+ *   This can include disabling interrupts in order to assure atomic register
+ *   operations.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_TICKLESS
+int up_timer_gettime(FAR struct timespec *tp);
+#endif
+
+/****************************************************************************
+ * Name: up_timer_cancel
+ *
+ * Description:
+ *   Cancel the interval timer.  up_timer_expiration() will not be called.
+ *
+ *   Provided by platform-specific code and called from the RTOS base code.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ * Assumptions:
+ *   May be called from interrupt level handling or from the normal tasking
+ *   level.  Interrupts may need to be disabled internally to assure
+ *   non-reentrancy.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_TICKLESS
+int up_timer_cancel(void);
+#endif
+
+/****************************************************************************
+ * Name: up_timer_start
+ *
+ * Description:
+ *   Start the interval timer.  up_timer_expiration() will be called at the
+ *   completion of the timeout (unless up_timer_cancel is called to stop
+ *   the timing.
+ *
+ *   Provided by platform-specific code and called from the RTOS base code.
+ *
+ * Input Parameters:
+ *   tp - Provides the time interval until up_timer_expiration() is called.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ * Assumptions:
+ *   May be called from interrupt level handling or from the normal tasking
+ *   level.  Interrupts may need to be disabled internally to assure
+ *   non-reentrancy.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_TICKLESS
+int up_timer_start(FAR const struct timespec *tp);
+#endif
+
+/****************************************************************************
+ * Name: up_timer_resolution
+ *
+ * Description:
+ *   Returns the resolution of the interval timer.  This defines the minimal
+ *   time separation between two events and is used for scheduling and for
+ *   setting up timed events.
+ *
+ *   Provided by platform-specific code and called from the RTOS base code.
+ *
+ * Input Parameters:
+ *   tp - Provides the location in which to return the timer resolution.
+ *
+ * Returned Value:
+ *
+ * Assumptions:
+ *   May be called from interrupt level handling or from the normal tasking
+ *   level.  Interrupts may need to be disabled internally to assure
+ *   non-reentrancy.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_TICKLESS
+int up_timer_resolution(FAR struct timespec *tp);
+#endif
+
+/****************************************************************************
  * Name: up_romgetc
  *
  * Description:
@@ -1011,8 +1178,8 @@ void up_cxxinitialize(void);
 #endif
 
 /****************************************************************************
- * These are standard interfaces that are exported by the OS
- * for use by the architecture specific logic
+ * These are standard interfaces that are exported by the OS for use by the
+ * architecture specific logic
  ****************************************************************************/
 
 /****************************************************************************
@@ -1062,6 +1229,26 @@ void weak_function sched_process_cpuload(void);
  ***************************************************************************/
 
 void irq_dispatch(int irq, FAR void *context);
+
+/****************************************************************************
+ * Name:  sched_timer_expiration
+ *
+ * Description:
+ *   if CONFIG_SCHED_TICKLESS is defined, then this function is provided by
+ *   the RTOS base code and called from platform-specific code when the
+ *   interval timer used to implemented the tick-less OS expires.
+ *
+ * Input Parameters:
+ *
+ * Returned Value:
+ *   Base code implementation assumes that this function is called from
+ *   interrupt handling logic with interrupts disabled.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_TICKLESS
+void sched_timer_expiration(void);
+#endif
 
 /****************************************************************************
  * Name: up_check_stack and friends

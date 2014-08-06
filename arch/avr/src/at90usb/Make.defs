@@ -1,7 +1,7 @@
 ############################################################################
 # arch/avr/src/at90usb/Make.defs
 #
-#   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011, 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,12 +35,12 @@
 
 # The start-up, "head", file
 
-HEAD_ASRC	= at90usb_head.S
+HEAD_ASRC = at90usb_head.S
 
 # Common AVR files
 
-CMN_ASRCS	= up_switchcontext.S
-CMN_CSRCS	= up_allocateheap.c up_assert.c up_blocktask.c up_copystate.c \
+CMN_ASRCS = up_switchcontext.S
+CMN_CSRCS = up_allocateheap.c up_assert.c up_blocktask.c up_copystate.c \
 			  up_createstack.c up_doirq.c up_exit.c  up_idle.c up_initialize.c \
 			  up_initialstate.c up_interruptcontext.c up_irq.c up_lowputs.c \
 			  up_mdelay.c up_modifyreg8.c up_modifyreg16.c up_modifyreg32.c \
@@ -51,29 +51,33 @@ CMN_CSRCS	= up_allocateheap.c up_assert.c up_blocktask.c up_copystate.c \
 # Configuration-dependent common files
 
 ifeq ($(CONFIG_ARCH_STACKDUMP),y)
-CMN_CSRCS	+= up_dumpstate.c
+CMN_CSRCS += up_dumpstate.c
 endif
 
 ifeq ($(CONFIG_AVR_SPI),y)
-CMN_CSRCS	+= up_spi.c
+CMN_CSRCS += up_spi.c
 endif
 
 ifeq ($(CONFIG_DEBUG_STACK),y)
-CMN_CSRCS	+= up_checkstack.c
+CMN_CSRCS += up_checkstack.c
 endif
 
 ifeq ($(CONFIG_ARCH_ROMGETC),y)
-CMN_CSRCS	+= up_romgetc.c
+CMN_CSRCS += up_romgetc.c
 endif
 
 # Required AT90USB files
 
-CHIP_ASRCS	= at90usb_exceptions.S
-CHIP_CSRCS	= at90usb_lowconsole.c at90usb_lowinit.c at90usb_serial.c at90usb_timerisr.c
+CHIP_ASRCS = at90usb_exceptions.S
+CHIP_CSRCS = at90usb_lowconsole.c at90usb_lowinit.c at90usb_serial.c
 
 # Configuration-dependent aT90USB files
 
+ifneq ($(CONFIG_SCHED_TICKLESS),y)
+CHIP_CSRCS += at90usb_timerisr.c
+endif
+
 ifeq ($(CONFIG_AVR_USBDEV),y)
-CHIP_CSRCS      += at90usb_usbdev.c
+CHIP_CSRCS += at90usb_usbdev.c
 endif
 

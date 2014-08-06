@@ -82,9 +82,13 @@ endif
 
 CHIP_ASRCS  =
 CHIP_CSRCS  = sam_allocateheap.c sam_gpioirq.c sam_irq.c sam_lowputc.c
-CHIP_CSRCS += sam_serial.c sam_start.c sam_timerisr.c
+CHIP_CSRCS += sam_serial.c sam_start.c
 
 # Configuration-dependent SAM3/4 files
+
+ifneq ($(CONFIG_SCHED_TICKLESS),y)
+CHIP_CSRCS += sam_timerisr.c
+endif
 
 ifeq ($(CONFIG_CRYPTO_AES),y)
 CHIP_CSRCS += sam_aes.c

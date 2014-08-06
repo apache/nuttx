@@ -1,7 +1,7 @@
 ############################################################################
 # arch/arm/src/kinetis/Make.defs
 #
-#   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011, 2013-2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -83,10 +83,13 @@ CHIP_ASRCS  =
 CHIP_CSRCS  = kinetis_allocateheap.c kinetis_clockconfig.c
 CHIP_CSRCS += kinetis_clrpend.c kinetis_idle.c kinetis_irq.c
 CHIP_CSRCS += kinetis_lowputc.c kinetis_pin.c kinetis_pingpio.c
-CHIP_CSRCS += kinetis_serial.c kinetis_start.c kinetis_timerisr.c
-CHIP_CSRCS += kinetis_wdog.c
+CHIP_CSRCS += kinetis_serial.c kinetis_start.c kinetis_wdog.c
 
 # Configuration-dependent Kinetis files
+
+ifneq ($(CONFIG_SCHED_TICKLESS),y)
+CHIP_CSRCS += kinetis_timerisr.c
+endif
 
 ifeq ($(CONFIG_NUTTX_KERNEL),y)
 CHIP_CSRCS += kinetis_userspace.c kinetis_mpuinit.c

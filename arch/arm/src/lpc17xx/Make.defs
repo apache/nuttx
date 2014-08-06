@@ -101,9 +101,13 @@ CHIP_ASRCS  =
 
 CHIP_CSRCS  = lpc17_allocateheap.c lpc17_clockconfig.c lpc17_clrpend.c
 CHIP_CSRCS += lpc17_gpio.c lpc17_i2c.c lpc17_idle.c lpc17_irq.c lpc17_lowputc.c
-CHIP_CSRCS += lpc17_serial.c lpc17_spi.c lpc17_ssp.c lpc17_start.c lpc17_timerisr.c
+CHIP_CSRCS += lpc17_serial.c lpc17_spi.c lpc17_ssp.c lpc17_start.c
 
 # Configuration-dependent LPC17xx files
+
+ifneq ($(CONFIG_SCHED_TICKLESS),y)
+CHIP_CSRCS += lpc17_timerisr.c
+endif
 
 ifeq ($(CONFIG_ARMV7M_CMNVECTOR),y)
 CHIP_ASRCS += lpc17_vectors.S

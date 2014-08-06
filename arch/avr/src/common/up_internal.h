@@ -182,7 +182,7 @@ void lowconsole_init(void);
 
 /* Defined in chip/xxx_timerisr.c */
 
-extern void up_timerinit(void);
+extern void up_timer_initialize(void);
 
 /* Defined in configs/<board-name>/src/up_leds.c */
 

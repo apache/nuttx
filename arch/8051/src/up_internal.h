@@ -117,7 +117,7 @@ void up_restoreregisters(FAR uint8_t *regs) _naked;
 uint8_t up_savecontext(FAR struct xcptcontext *context) __naked;
 void up_saveregisters(FAR uint8_t *regs) _naked;
 void up_saveirqcontext(FAR struct xcptcontext *context);
-void up_timerinit(void);
+void up_timer_initialize(void);
 
 /* Defined in up_debug.c */
 

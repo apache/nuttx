@@ -158,7 +158,7 @@ int up_timerisr(int irq, uint32_t *regs)
 }
 
 /****************************************************************************
- * Function:  up_timerinit
+ * Function:  up_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize
@@ -166,7 +166,7 @@ int up_timerisr(int irq, uint32_t *regs)
  *
  ****************************************************************************/
 
-void up_timerinit(void)
+void up_timer_initialize(void)
 {
   /* Configure and enable TIMER1.  Used the computed TCKPS divider and timer
    * match valude.  The source will be either the internal PBCLOCK (TCS=0) or

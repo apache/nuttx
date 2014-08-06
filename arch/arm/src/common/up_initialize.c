@@ -183,7 +183,7 @@ void up_initialize(void)
 
 #if !defined(CONFIG_SUPPRESS_INTERRUPTS) && !defined(CONFIG_SUPPRESS_TIMER_INTS) && \
     !defined(CONFIG_SYSTEMTICK_EXTCLK)
-  up_timerinit();
+  up_timer_initialize();
 #endif
 
   /* Register devices */

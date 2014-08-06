@@ -1,7 +1,7 @@
 ############################################################################
 # arch/arm/a1x/Make.defs
 #
-#   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -101,4 +101,8 @@ CHIP_ASRCS  =
 
 # A1x-specific C source files
 
-CHIP_CSRCS  = a1x_boot.c a1x_irq.c a1x_pio.c a1x_timerisr.c a1x_lowputc.c a1x_serial.c
+CHIP_CSRCS  = a1x_boot.c a1x_irq.c a1x_pio.c a1x_lowputc.c a1x_serial.c
+
+ifneq ($(CONFIG_SCHED_TICKLESS),y)
+CHIP_CSRCS += a1x_timerisr.c
+endif

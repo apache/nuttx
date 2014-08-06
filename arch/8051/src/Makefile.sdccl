@@ -1,7 +1,7 @@
 ############################################################################
 # arch/8051/src/Makefile.sdccl
 #
-#   Copyright (C) 2007, 2008, 2011-2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007, 2008, 2011-2012, 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -63,8 +63,13 @@ AOBJS = $(ASRCS:$(ASMEXT)=$(OBJEXT))
 CSRCS = up_initialize.c up_idle.c up_interruptcontext.c up_initialstate.c \
         up_unblocktask.c up_blocktask.c up_releasepending.c \
         up_reprioritizertr.c up_exit.c up_assert.c up_allocateheap.c \
-        up_irq.c up_savecontext.c up_restorecontext.c up_timerisr.c up_putc.c \
+        up_irq.c up_savecontext.c up_restorecontext.c up_putc.c \
         up_debug.c up_delay.c
+
+ifneq ($(CONFIG_SCHED_TICKLESS),y)
+CSRCS += up_timerisr.c
+endif
+
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
 # All sources and objcts

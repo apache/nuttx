@@ -33,11 +33,11 @@
 #
 ############################################################################
 
-HEAD_ASRC	= up_head.S
+HEAD_ASRC = up_head.S
 
-CMN_ASRCS	= up_cache.S up_fullcontextrestore.S up_saveusercontext.S \
+CMN_ASRCS = up_cache.S up_fullcontextrestore.S up_saveusercontext.S \
 		  up_vectors.S up_vectoraddrexcptn.S up_vectortab.S vfork.S
-CMN_CSRCS	= up_assert.c up_blocktask.c up_copyfullstate.c up_createstack.c \
+CMN_CSRCS = up_assert.c up_blocktask.c up_copyfullstate.c up_createstack.c \
 		  up_dataabort.c up_mdelay.c up_udelay.c up_exit.c up_idle.c \
 		  up_initialize.c up_initialstate.c up_interruptcontext.c \
 		  up_prefetchabort.c up_releasepending.c up_releasestack.c \
@@ -53,10 +53,14 @@ ifeq ($(CONFIG_DEBUG_STACK),y)
 CMN_CSRCS += up_checkstack.c
 endif
 
-CHIP_ASRCS	= dm320_lowputc.S dm320_restart.S
-CHIP_CSRCS	= dm320_allocateheap.c dm320_boot.c dm320_decodeirq.c \
-		  dm320_irq.c dm320_serial.c dm320_timerisr.c dm320_framebuffer.c
+CHIP_ASRCS = dm320_lowputc.S dm320_restart.S
+CHIP_CSRCS = dm320_allocateheap.c dm320_boot.c dm320_decodeirq.c \
+		  dm320_irq.c dm320_serial.c dm320_framebuffer.c
+
+ifneq ($(CONFIG_SCHED_TICKLESS),y)
+CHIP_CSRCS += dm320_timerisr.c
+endif
 
 ifeq ($(CONFIG_USBDEV),y)
-CHIP_CSRCS	+= dm320_usbdev.c
+CHIP_CSRCS += dm320_usbdev.c
 endif

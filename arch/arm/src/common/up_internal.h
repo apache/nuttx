@@ -418,7 +418,7 @@ void up_restorefpu(const uint32_t *regs);
 
 /* System timer *************************************************************/
 
-void up_timerinit(void);
+void up_timer_initialize(void);
 int  up_timerisr(int irq, uint32_t *regs);
 
 /* Low level serial output **************************************************/
