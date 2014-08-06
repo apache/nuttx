@@ -7989,3 +7989,10 @@
 	* audio/pcm_decode.c: Handle errors in the PCM WAV file in a way that
 	  the Nxplayer can recover gracefully:  Send and Audio Complete message
 	  (2014-8-5).
+	* arch/*/src/*/*_timerisr.c, up_initialize.c, and up_internal.h: Re-name
+	  up_timerinit() to up_timer_intialaize() for compatibility with new
+	  tickless OS interface name (2014-8-6).
+	* arch/*/src/*/Make.def:  Don't build existing timer initialization
+	  logic if CONFIG_SCHED_TICKLESS is defined (2014-8-6).
+	* include/nuttx/arch.h:  First cut at platform-specific interfaces
+	  needed to support tickless OS option (2014-8-6).
