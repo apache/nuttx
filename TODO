@@ -2357,7 +2357,7 @@ o NuttShell (NSH) (apps/nshlib)
                  initialization was successful.
 
                - Furthermore, there is currently no support for detecting loss
-                 of network connection and recover of the connection (see the
+                 of network connection and recovery of the connection (see the
                  next issue).
   Status:      Open
   Priority:    Medium, but certainly high if you plan to use the generic
