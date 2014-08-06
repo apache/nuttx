@@ -696,7 +696,7 @@ Configurations
             CONFIG_EXAMPLES_NXLINES_CIRCLECOLOR=0xf7bb
             CONFIG_EXAMPLES_NXLINES_BPP=16
 
-       STATUS: Now working; reads 0x8999 as device ID.  This may perhaps
+       STATUS: Not working; reads 0x8999 as device ID.  This may perhaps
                be due to incorrect jumper settings
 
     6. This configuration has been used for verifying the touchscreen on

@@ -115,7 +115,7 @@ echo "EXTERN(up_vectoraddrexcptn)" >>ld-locked.inc
 #
 # Of course, this list must be extended as interrupt handlers are added.
 
-echo "EXTERN(up_timerinit)" >>ld-locked.inc
+echo "EXTERN(up_timer_initialize)" >>ld-locked.inc
 
 answer=$(checkconfig CONFIG_LPC31_UART)
 if [ $answer = y ]; then
