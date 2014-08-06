@@ -1386,6 +1386,21 @@ Networking
   a network.  On the order of a minute!  You will probably think that
   NuttX has crashed!
 
+  There is a configuration option enabled by CONFIG_NSH_NETINIT_THREAD
+  that will do the NSH network bring-up asynchronously in parallel on
+  a separate thread.  This eliminates the (visible) networking delay
+  altogether.  This current implementation, however, has some limitations:
+
+    - If no network is connected, the network bring-up will fail and
+      the network initialization thread will simply exit.  There are no
+      retries and no mechanism to know if the network initialization was
+      successful (it could perform a network Ioctl to see if the link is
+      up and it now, keep trying, but it does not do that now).
+
+    - Furthermore, there is currently no support for detecting loss of
+      network connection and recovery of the connection (similarly, this
+      thread could poll periodically for network status, but does not).
+
 AT25 Serial FLASH
 =================
 
@@ -3810,13 +3825,23 @@ Configurations
        10.0.0.1 in places.  You can reconfigure to enabled DHCPC or to
        change these addresses as you see fit.
 
-       Since networking is enabled, you will see some boot-up delays until
-       the network connection is established.  These delays can be quite
-       large if no network is attached (A production design would bring up
-       the network asynchronously to avoid these start up delays).
+       See also the "kludge" for EMAC that is documented in the To-Do list
+       at the end of this README file.
 
-       See the "kludge" for EMAC that is documented in the To-Do list at
-       the end of this README file.
+       The configuration option CONFIG_NSH_NETINIT_THREAD is enabled so
+       that NSH network bring-up asynchronously and in parallel on a
+       separate thread.  This eliminates the (visible) networking bring-up
+       delay.  This current implementation, however, has some limitations:
+
+        - If no network is connected, the network bring-up will fail and
+          the network initialization thread will simply exit.  There are no
+          retries and no mechanism to know if the network initialization was
+          successful (it could perform a network Ioctl to see if the link is
+          up and it now, keep trying, but it does not do that now).
+
+        - Furthermore, there is currently no support for detecting loss of
+          network connection and recovery of the connection (similarly, this
+          thread could poll periodically for network status, but does not).
 
    14. I2C Tool. This configuration enables TWI0 (only) as an I2C master
        device.  This configuration also supports the I2C tool at
@@ -3987,6 +4012,10 @@ Configurations
          windows.
        - Obviously, the nx and touchscreen built in applications cannot
          be supported.
+
+       Refer to the NOTES for the nsh configuration.  Those also apply
+       for the nxwm configuration (other than the differences noted
+       above).
 
     3. Here is the quick summary of the build steps.  These steps assume
        that you have the entire NuttX GIT in some directory ~/nuttx-git.
