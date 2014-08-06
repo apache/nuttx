@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated June 24, 2014)
+NuttX TODO List (Last updated August 6, 2014)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -49,7 +49,7 @@ nuttx/
 apps/
 
   (4)  Network Utilities (apps/netutils/)
-  (3)  NuttShell (NSH) (apps/nshlib)
+  (5)  NuttShell (NSH) (apps/nshlib)
   (1)  System libraries apps/system (apps/system)
   (5)  Other Applications & Tests (apps/examples/)
 
@@ -2324,10 +2324,65 @@ o NuttShell (NSH) (apps/nshlib)
   Priority:    Low (multiple network interfaces not fully supported yet anyway).
 
   Title:       ARP COMMAND
-  Description: Add an ARP command so that we can see the contents of the ARP table.
+  Description: Add an ARP command so that we can see and modify the contents of
+               the ARP table.
   Status:      Open
   Priority:    Low (enhancement)
 
+  Title:       NETWORK BRINGUP
+  Description: If the network is available on reset, then there is really
+               no problem.  Negotiating the link will take only a second or
+               so and the delay to the NSH prompt is normally acceptable.
+
+               But if there is no network connected, then the start-up delay
+               can be very long depending upon things like the PHY, timeout
+               delay times, and numbers of retries.  A failed negotiation
+               can take a very long time, perhaps as much as a minute...
+               Long enough that you would think that the board would never
+               come up.
+
+               The problem is that all of the initialization is sequential:
+               NSH does not run until each sequential initialization step is
+               completed.
+
+               There is an option enabled by CONFIG_NSH_NETINIT_THREAD that
+               will do the network bring-up asynchronously in parallel on
+               a separate thread.  This eliminates the networking delay
+               altogether.  The initial implementation, however, has some
+               limitations:
+
+               - If no network is connected, the network bring-up will fail
+                 and the network initialization thread will simply exit.
+                 There are no retries and no mechanism to know if the network
+                 initialization was successful.
+
+               - Furthermore, there is currently no support for detecting loss
+                 of network connection and recover of the connection (see the
+                 next issue).
+  Status:      Open
+  Priority:    Medium, but certainly high if you plan to use the generic
+               NSH in a product with a network.
+
+  Title:       LOSS OF CONNECTION
+  Description: There is no logic in place no to detect that the network
+               connection has been lost (if the cable has been unplugged,
+               for example).  And also no logic to bring the network back
+               up when the link can be re-established.
+
+               This is normally done by catching a GPIO interrupt from a
+               PHY.  This is logic outside of the Ethernet MAC driver
+               (although the Ethernet MAC driver would also have to
+               support the PHY operations to determine the link state).
+               So of the boards provide logic to connect to the PHY
+               interrupt.  Like:
+
+                 xcpt_t sam_phyirq(int intf, xcpt_t irqhandler);
+
+               But that interrupt is not used by anything now.
+  Status:      Open
+  Priority:    Medium.
+
+  Status:      Open
 o System libraries apps/system (apps/system)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
