@@ -33,10 +33,10 @@
 #
 ############################################################################
 
-HEAD_ASRC	= up_nommuhead.S
+HEAD_ASRC = up_nommuhead.S
 
-CMN_ASRCS	= up_saveusercontext.S up_fullcontextrestore.S vfork.S
-CMN_CSRCS	= up_allocateheap.c up_assert.c up_blocktask.c up_copyfullstate.c \
+CMN_ASRCS = up_saveusercontext.S up_fullcontextrestore.S vfork.S
+CMN_CSRCS = up_allocateheap.c up_assert.c up_blocktask.c up_copyfullstate.c \
 		  up_createstack.c up_dataabort.c up_mdelay.c up_udelay.c up_doirq.c \
 		  up_exit.c up_idle.c up_initialize.c up_initialstate.c \
 		  up_interruptcontext.c up_prefetchabort.c up_releasepending.c \
@@ -52,6 +52,9 @@ ifeq ($(CONFIG_DEBUG_STACK),y)
 CMN_CSRCS += up_checkstack.c
 endif
 
-CHIP_ASRCS	= c5471_lowputc.S c5471_vectors.S
-CHIP_CSRCS	= c5471_irq.c c5471_serial.c c5471_timerisr.c c5471_watchdog.c \
-		  c5471_ethernet.c
+CHIP_ASRCS = c5471_lowputc.S c5471_vectors.S
+CHIP_CSRCS = c5471_irq.c c5471_serial.c c5471_watchdog.c c5471_ethernet.c
+
+ifneq ($(CONFIG_SCHED_TICKLESS),y)
+CHIP_CSRCS += c5471_timerisr.c
+endif

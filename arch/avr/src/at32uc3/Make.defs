@@ -1,7 +1,7 @@
 ############################################################################
 # arch/avr/src/at32uc3/Make.defs
 #
-#   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2010, 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,12 +35,12 @@
 
 # The start-up, "head", file
 
-HEAD_ASRC	= up_nommuhead.S
+HEAD_ASRC = up_nommuhead.S
 
 # Common AVR/AVR32 files
 
-CMN_ASRCS	= up_exceptions.S up_fullcontextrestore.S up_switchcontext.S
-CMN_CSRCS	= up_assert.c up_allocateheap.c up_blocktask.c up_copystate.c \
+CMN_ASRCS = up_exceptions.S up_fullcontextrestore.S up_switchcontext.S
+CMN_CSRCS = up_assert.c up_allocateheap.c up_blocktask.c up_copystate.c \
 		  up_createstack.c up_mdelay.c up_udelay.c up_exit.c up_idle.c \
 		  up_initialize.c up_initialstate.c up_interruptcontext.c \
 		  up_modifyreg8.c up_modifyreg16.c up_modifyreg32.c \
@@ -51,20 +51,21 @@ CMN_CSRCS	= up_assert.c up_allocateheap.c up_blocktask.c up_copystate.c \
 # Configuration-dependent common files
 
 ifeq ($(CONFIG_ARCH_STACKDUMP),y)
-CMN_CSRCS	+= up_dumpstate.c
+CMN_CSRCS += up_dumpstate.c
 endif
 
 # Required AT32UC3 files
 
-CHIP_ASRCS	=
-CHIP_CSRCS	= at32uc3_clkinit.c at32uc3_gpio.c at32uc3_irq.c \
-		  at32uc3_lowconsole.c at32uc3_lowinit.c at32uc3_serial.c \
-		  at32uc3_timerisr.c
+CHIP_ASRCS =
+CHIP_CSRCS = at32uc3_clkinit.c at32uc3_gpio.c at32uc3_irq.c \
+		  at32uc3_lowconsole.c at32uc3_lowinit.c at32uc3_serial.c
 
 # Configuration-dependent AT32UC3 files
 
-ifeq ($(CONFIG_AVR32_GPIOIRQ),y)
-CHIP_CSRCS	+= at32uc3_gpioirq.c
+ifneq ($(CONFIG_SCHED_TICKLESS),y)
+CHIP_CSRCS += at32uc3_timerisr.c
 endif
 
-
+ifeq ($(CONFIG_AVR32_GPIOIRQ),y)
+CHIP_CSRCS += at32uc3_gpioirq.c
+endif

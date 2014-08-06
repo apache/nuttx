@@ -70,7 +70,11 @@ endif
 CHIP_ASRCS  =
 CHIP_CSRCS  = sam_clockconfig.c sam_idle.c sam_irq.c sam_lowputc.c
 CHIP_CSRCS += sam_port.c sam_sercom.c sam_serial.c sam_start.c
-CHIP_CSRCS += sam_timerisr.c sam_usart.c
+CHIP_CSRCS += sam_usart.c
+
+ifneq ($(CONFIG_SCHED_TICKLESS),y)
+CHIP_CSRCS += sam_timerisr.c
+endif
 
 ifeq ($(CONFIG_NUTTX_KERNEL),y)
 CHIP_CSRCS += sam_userspace.c

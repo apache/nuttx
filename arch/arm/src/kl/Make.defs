@@ -1,7 +1,7 @@
 ############################################################################
 # arch/arm/src/kl/Make.defs
 #
-#   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -69,7 +69,11 @@ endif
 
 CHIP_ASRCS  =
 CHIP_CSRCS  = kl_clockconfig.c kl_gpio.c kl_idle.c kl_irq.c kl_lowgetc.c
-CHIP_CSRCS += kl_lowputc.c kl_serial.c kl_start.c kl_timerisr.c kl_cfmconfig.c
+CHIP_CSRCS += kl_lowputc.c kl_serial.c kl_start.c kl_cfmconfig.c
+
+ifneq ($(CONFIG_SCHED_TICKLESS),y)
+CHIP_CSRCS += kl_timerisr.c
+endif
 
 ifeq ($(CONFIG_NUTTX_KERNEL),y)
 CHIP_CSRCS += kl_userspace.c

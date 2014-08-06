@@ -108,7 +108,7 @@ int up_timerisr(int irq, uint32_t *regs)
 }
 
 /****************************************************************************
- * Function:  up_timerinit
+ * Function:  up_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize
@@ -116,7 +116,7 @@ int up_timerisr(int irq, uint32_t *regs)
  *
  ****************************************************************************/
 
-void up_timerinit(void)
+void up_timer_initialize(void)
 {
   uint32_t regval;
 

@@ -181,7 +181,7 @@ extern void up_sigdeliver(void);
 
 /* System timer initialization */
 
-extern void up_timerinit(void);
+extern void up_timer_initialize(void);
 extern int  up_timerisr(int irq, uint32_t *regs);
 
 /* Debug output */

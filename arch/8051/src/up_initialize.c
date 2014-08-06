@@ -136,7 +136,7 @@ void up_initialize(void)
   /* Initialize the system timer interrupt */
 
 #ifndef CONFIG_ARCH_8051_SUPRESS_INTERRUPTS
-  up_timerinit();
+  up_timer_initialize();
 #endif
 
   board_led_on(LED_IRQSENABLED);

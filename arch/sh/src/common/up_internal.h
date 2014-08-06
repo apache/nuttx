@@ -206,7 +206,7 @@ extern void up_wdtinit(void);
 
 /* Defined in up_timerisr.c */
 
-extern void up_timerinit(void);
+extern void up_timer_initialize(void);
 
 /* Defined in chip-specific logic if CONFIG_ARCH_NOINTC is not set */
 

@@ -1,7 +1,7 @@
 ############################################################################
 # arch/arm/src/nuc1xx/Make.defs
 #
-#   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -69,7 +69,11 @@ endif
 
 CHIP_ASRCS  =
 CHIP_CSRCS  = nuc_clockconfig.c nuc_gpio.c nuc_idle.c nuc_irq.c nuc_lowputc.c
-CHIP_CSRCS += nuc_serial.c nuc_start.c nuc_timerisr.c
+CHIP_CSRCS += nuc_serial.c nuc_start.c
+
+ifneq ($(CONFIG_SCHED_TICKLESS),y)
+CHIP_CSRCS += nuc_timerisr.c
+endif
 
 ifeq ($(CONFIG_NUTTX_KERNEL),y)
 CHIP_CSRCS += nuc_userspace.c

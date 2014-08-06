@@ -264,7 +264,7 @@ extern void up_serialinit(void);
 
 /* System timer */
 
-extern void up_timerinit(void);
+extern void up_timer_initialize(void);
 
 /* Network */
 
