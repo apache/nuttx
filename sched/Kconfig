@@ -53,13 +53,36 @@ endif # DISABLE_OS_API
 
 menu "Clocks and Timers"
 
+config SCHED_TICKLESS
+	bool "Support tick-less OS"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		Be default, system time is driven by a periodic timer interrupt.  An
+		alternative configurations is a tick-less configuration in which
+		there is no periodic timer interrupt.  Instead and interval timer is
+		used to schedule the next OS time event.  This option selects that
+		tick-less OS option.  If the tick-less OS is selected, then there are
+		additional plaform specific interfaces that must be provided as
+		defined include/nuttx/arch.h
+
 config MSEC_PER_TICK
 	int "Milliseconds per system timer tick"
-	default 10
+	default 10 if !SCHED_TICKLESS
+	default 1 if SCHED_TICKLESS
 	---help---
 		The default system timer is 100Hz or MSEC_PER_TICK=10.  This setting
 		may be defined to inform NuttX that the processor hardware is providing
 		system timer interrupts at some interrupt interval other than 10 msec.
+
+		If SCHED_TICKLESS is selected, then there are no system timer
+		interrupts.  In this case, MSEC_PER_TICK does not control any timer
+		rates.  Rather, it only determines the resolution of time reported
+		by clock_systimer() and the resolution of times that can be set for
+		certain delays including watchdog timers and delayed work.  In these
+		cases it is better to have the MSEC_PER_TICK as low as possible.
+
+if !SCHED_TICKLESS
 
 config SYSTEMTICK_EXTCLK
 	bool "Use external clock"
@@ -71,6 +94,8 @@ config SYSTEMTICK_EXTCLK
 		sched_process_timer() or the functions called within. The purpose is
 		to move the scheduling off the processor clock to allow entering low
 		power states that would disable that clock.
+
+endif # !SCHED_TICKLESS
 
 config SYSTEM_TIME64
 	bool "64-bit system clock"
