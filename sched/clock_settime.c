@@ -122,7 +122,7 @@ int clock_settime(clockid_t clock_id, FAR const struct timespec *tp)
        * as appropriate.
        */
 
-      g_tickbias = g_system_timer;
+      g_tickbias = clock_systimer();
 
       /* Setup the RTC (lo- or high-res) */
 

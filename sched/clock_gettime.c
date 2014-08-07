@@ -124,7 +124,7 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
     {
       /* Get the time since power-on in seconds and milliseconds */
 
-      msecs = MSEC_PER_TICK * g_system_timer;
+      msecs = MSEC_PER_TICK * clock_systimer();
       secs  = msecs / MSEC_PER_SEC;
 
       /* Return the elapsed time in seconds and nanoseconds */
@@ -169,12 +169,12 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
 #endif
         {
           /* Get the elapsed time since the time-of-day was last set.
-           * g_system_timer provides the number of clock times since
+           * clock_systimer() provides the number of clock times since
            * power was applied; the bias value corresponds to the time
            * when the time-of-day was last set.
            */
 
-          msecs = MSEC_PER_TICK * (g_system_timer - g_tickbias);
+          msecs = MSEC_PER_TICK * (clock_systimer() - g_tickbias);
 
           sdbg("msecs = %d g_tickbias=%d\n",
                (int)msecs, (int)g_tickbias);
