@@ -1,7 +1,7 @@
 /****************************************************************************
  * up_idle.c
  *
- *   Copyright (C) 2007-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -94,11 +94,17 @@ extern void up_x11update(void);
 
 void up_idle(void)
 {
+#ifdef CONFIG_SCHED_TICKLESS
+  /* Driver the simulated interval timer */
+
+  up_timer_update();
+#else
   /* If the system is idle, then process "fake" timer interrupts.
    * Hopefully, something will wake up.
    */
 
   sched_process_timer();
+#endif
 
   /* Run the network if enabled */
 
