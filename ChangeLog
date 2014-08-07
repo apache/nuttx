@@ -8025,3 +8025,8 @@
 	  z180/ostest, 8051, sh1, z80, and z8).  The only real loss is probably
 	  to the kl25z/minsh configuration .  And with the addition of the
 	  tickless OS, I just wanted to make the pain go away (2014-8-7).
+	* Many files: Change CONFIG_MSEC_PER_TICK to CONFIG_USEC_PER_TICK.
+	  This gives more options for system timers in general, but more
+	  importantly, let's us realize higher resolution for the case of
+	  CONFIG_SCHED_TICKLESS=y -- of course, at the risk of some new
+	  integer overflow problems 2014-8-7).
