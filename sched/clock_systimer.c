@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/clock_systimer.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@
 
 #include <stdint.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/clock.h>
 
 #include "clock_internal.h"
@@ -76,10 +77,32 @@
 #if !defined(clock_systimer) /* See nuttx/clock.h */
 uint32_t clock_systimer(void)
 {
+#ifdef CONFIG_SCHED_TICKLESS
+  struct timespec ts;
+  uint64_t tmp;
+
+  /* Get the time from the platform specific hardware */
+
+  (void)up_timer_gettime(&ts);
+
+  /* Convert to a 64- then 32-bit value */
+
+  tmp = (1000 * (uint64_t)ts.tv_sec + (uint64_t)ts.tv_nsec / 1000000) /
+        MSEC_PER_TICK;
+  return (uint32_t)(tmp & 0x00000000ffffffff);
+
+#else
+
 #ifdef CONFIG_SYSTEM_TIME64
+  /* Return the current system time truncated to 32-bits */
+
   return (uint32_t)(g_system_timer & 0x00000000ffffffff);
 #else
+  /* Return the current system time */
+
   return g_system_timer;
+#endif
+
 #endif
 }
 #endif
@@ -104,7 +127,23 @@ uint32_t clock_systimer(void)
 #ifdef CONFIG_SYSTEM_TIME64
 uint64_t clock_systimer64(void)
 {
+#ifdef CONFIG_SCHED_TICKLESS
+  struct timespec ts;
+
+  /* Get the time from the platform specific hardware */
+
+  (void)up_timer_gettime(&ts);
+
+  /* Convert to a 64- then 32-bit value */
+
+  return (1000 * (uint64_t)ts.tv_sec + (uint64_t)ts.tv_nsec / 1000000) /
+         MSEC_PER_TICK;
+
+#else
+  /* Return the current system time */
+
   return g_system_timer;
+#endif
 }
 #endif
 #endif
