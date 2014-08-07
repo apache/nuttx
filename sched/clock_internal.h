@@ -1,7 +1,7 @@
 /********************************************************************************
  * sched/clock_internal.h
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -80,7 +80,9 @@ extern struct timespec g_basetime;
  ********************************************************************************/
 
 void weak_function clock_initialize(void);
+#ifndef CONFIG_SCHED_TICKLESS
 void weak_function clock_timer(void);
+#endif
 
 int    clock_abstime2ticks(clockid_t clockid,
                            FAR const struct timespec *abstime,
