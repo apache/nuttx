@@ -55,13 +55,13 @@
  * replaced with CLOCKS_PER_SEC.  Both are defined here.
  *
  * The default value is 100Hz, but this default setting can be overridden by
- * defining the clock interval in milliseconds as CONFIG_MSEC_PER_TICK in the
+ * defining the clock interval in microseconds as CONFIG_USEC_PER_TICK in the
  * board configuration file.
  */
 
-#ifdef CONFIG_MSEC_PER_TICK
-# define CLK_TCK           (1000/CONFIG_MSEC_PER_TICK)
-# define CLOCKS_PER_SEC    (1000/CONFIG_MSEC_PER_TICK)
+#ifdef CONFIG_USEC_PER_TICK
+# define CLK_TCK           (1000000/CONFIG_USEC_PER_TICK)
+# define CLOCKS_PER_SEC    (1000000/CONFIG_USEC_PER_TICK)
 #else
 # define CLK_TCK           (100)
 # define CLOCKS_PER_SEC    (100)

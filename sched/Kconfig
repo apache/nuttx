@@ -65,21 +65,33 @@ config SCHED_TICKLESS
 		additional plaform specific interfaces that must be provided as
 		defined include/nuttx/arch.h
 
-config MSEC_PER_TICK
+config USEC_PER_TICK
 	int "Milliseconds per system timer tick"
-	default 10 if !SCHED_TICKLESS
-	default 1 if SCHED_TICKLESS
+	default 10000 if !SCHED_TICKLESS
+	default 100 if SCHED_TICKLESS
 	---help---
-		The default system timer is 100Hz or MSEC_PER_TICK=10.  This setting
-		may be defined to inform NuttX that the processor hardware is providing
-		system timer interrupts at some interrupt interval other than 10 msec.
+		In the "normal" configuration where system time is provided by a
+		periodic timer interrupt, the default system timer is expected to
+		run at 100Hz or USEC_PER_TICK=10000.  This setting must be defined
+		to inform of NuttX the interval that the the processor hardware is
+		providing system timer interrupts to the OS.
 
 		If SCHED_TICKLESS is selected, then there are no system timer
-		interrupts.  In this case, MSEC_PER_TICK does not control any timer
+		interrupts.  In this case, USEC_PER_TICK does not control any timer
 		rates.  Rather, it only determines the resolution of time reported
 		by clock_systimer() and the resolution of times that can be set for
-		certain delays including watchdog timers and delayed work.  In these
-		cases it is better to have the MSEC_PER_TICK as low as possible.
+		certain delays including watchdog timers and delayed work.  In this
+		case there is a tradeoff:  It is better to have the USEC_PER_TICK as
+		low as possible for higher timing resolution.  However, the the time
+		is currently held in 'unsigned int' on some systems, this may be
+		16-bits but on most contemporary systems it will be 32-bits.  In
+		either case, smaller values of USEC_PER_TICK will reduce the range
+		of values that delays that can be represented.  So the tradeoff is
+		between range and resolution (you could also modify the code to use
+		a 64-bit value if you really want both).
+
+		The default, 100 microseconds, will provide for a range of delays
+		up to 120 hours.
 
 if !SCHED_TICKLESS
 
@@ -101,7 +113,7 @@ config SYSTEM_TIME64
 	default n
 	---help---
 		The system timer is incremented at the rate determined by
-		MSEC_PER_TICK, typically at 100Hz. The count at any given time is
+		USEC_PER_TICK, typically at 100Hz. The count at any given time is
 		then the "uptime" in units of system timer ticks.  By default, the
 		system time is 32-bits wide.  Those defaults provide a range of about
 		13.6 years which is probably a sufficient range for "uptime".

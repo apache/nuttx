@@ -1,7 +1,7 @@
 /********************************************************************************
  * include/limits.h
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -149,18 +149,19 @@
  *
  * _POSIX_TIMER_MAX is the per-process number of timers.
  *
- * _POSIX_CLOCKRES_MIN is the resolution of the CLOCK_REALTIME clock in nanoseconds.
- * CLOCK_REALTIME is controlled by the NuttX system time.  The default value is the
- * system timer which has a resolution of 10 milliseconds.  This default setting can
- * be overridden by defining the clock interval in milliseconds as CONFIG_MSEC_PER_TICK
- * in the board configuration file.
+ * _POSIX_CLOCKRES_MIN is the resolution of the CLOCK_REALTIME clock in
+ *    nanoseconds.  CLOCK_REALTIME is controlled by the NuttX system time.
+ *    The default value is the system timer which has a resolution of 1000
+ *    microseconds.  This default setting can be overridden by defining the
+ *    clock interval in microseconds as CONFIG_USEC_PER_TICK in the NuttX
+ *    configuration file.
  */
 
 #define _POSIX_DELAYTIMER_MAX 32
 #define _POSIX_TIMER_MAX      32
 
-#ifdef CONFIG_MSEC_PER_TICK
-# define _POSIX_CLOCKRES_MIN  ((CONFIG_MSEC_PER_TICK)*1000000)
+#ifdef CONFIG_USEC_PER_TICK
+# define _POSIX_CLOCKRES_MIN  ((CONFIG_USEC_PER_TICK)*1000)
 #else
 # define _POSIX_CLOCKRES_MIN  (10*1000000)
 #endif

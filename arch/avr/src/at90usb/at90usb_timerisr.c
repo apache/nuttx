@@ -56,7 +56,7 @@
  ****************************************************************************/
 
 /* The CPU frequency is given by BOARD_CPU_CLOCK (defined in board.h).  The
- * desired interrupt frequency is given by CONFIG_MSEC_PER_TICK.  An unscaled
+ * desired interrupt frequency is given by CONFIG_USEC_PER_TICK.  An unscaled
  * ideal match is given by:
  *
  *   CLOCK = CPU_CLOCK / DIVISOR                      # CPU clocks/sec

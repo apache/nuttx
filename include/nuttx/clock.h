@@ -93,8 +93,8 @@
  * of milliseconds between calls from the processor-specific logic to
  * sched_process_timer().  The default value of MSEC_PER_TICK is 10
  * milliseconds (100KHz).  However, this default setting can be overridden
- * by defining the interval in milliseconds as CONFIG_MSEC_PER_TICK in the
- * board configuration file.
+ * by defining the interval in microseconds as CONFIG_USEC_PER_TICK in the
+ * NuttX configuration file.
  *
  * The following calculations are only accurate when (1) there is no
  * truncation involved and (2) the underlying system timer is an even
@@ -102,28 +102,43 @@
  * to redefine all of the following.
  */
 
-#ifdef CONFIG_MSEC_PER_TICK
-# define MSEC_PER_TICK        (CONFIG_MSEC_PER_TICK)
+#ifdef CONFIG_USEC_PER_TICK
+# define USEC_PER_TICK        (CONFIG_USEC_PER_TICK)
 #else
-# define MSEC_PER_TICK        (10)
+# define USEC_PER_TICK        (10000)
 #endif
 
-#define TICK_PER_DSEC         (MSEC_PER_DSEC / MSEC_PER_TICK)            /* Truncates! */
-#define TICK_PER_SEC          (MSEC_PER_SEC / MSEC_PER_TICK)             /* Truncates! */
-#define NSEC_PER_TICK         (MSEC_PER_TICK * NSEC_PER_MSEC)            /* Exact */
-#define USEC_PER_TICK         (MSEC_PER_TICK * USEC_PER_MSEC)            /* Exact */
+/* MSEC_PER_TICK can be very inaccurate if CONFIG_USEC_PER_TICK is not an
+ * even multiple of milliseconds.  Calculations using USEC_PER_TICK are
+ * preferred for that reason (at the risk of overflow)
+ */
+
+#define TICK_PER_DSEC         (USEC_PER_DSEC / USEC_PER_TICK)            /* Truncates! */
+#define TICK_PER_SEC          (USEC_PER_SEC / USEC_PER_TICK)             /* Truncates! */
+#define MSEC_PER_TICK         (USEC_PER_MSEC / USEC_PER_TICK)            /* Truncates! */
+#define NSEC_PER_TICK         (USEC_PER_TICK * NSEC_PER_USEC)            /* Exact */
 
 #define NSEC2TICK(nsec)       (((nsec)+(NSEC_PER_TICK/2))/NSEC_PER_TICK) /* Rounds */
 #define USEC2TICK(usec)       (((usec)+(USEC_PER_TICK/2))/USEC_PER_TICK) /* Rounds */
-#define MSEC2TICK(msec)       (((msec)+(MSEC_PER_TICK/2))/MSEC_PER_TICK) /* Rounds */
-#define DSEC2TICK(dsec)       MSEC2TICK((dsec)*MSEC_PER_DSEC)
+#define DSEC2TICK(dsec)       MSEC2TICK((dsec)*MSEC_PER_DSEC)            /* Exact */
 #define SEC2TICK(sec)         MSEC2TICK((sec)*MSEC_PER_SEC)              /* Exact */
+
+#if (MSEC_PER_TICK * USEC_PER_MSEC) == USEC_PER_TICK
+#  define MSEC2TICK(msec)     (((msec)+(MSEC_PER_TICK/2))/MSEC_PER_TICK) /* Rounds */
+#else
+#  define MSEC2TICK(msec)     USEC2TICK(msec * 1000)                     /* Rounds */
+#endif
 
 #define TICK2NSEC(tick)       ((tick)*NSEC_PER_TICK)                     /* Exact */
 #define TICK2USEC(tick)       ((tick)*USEC_PER_TICK)                     /* Exact */
-#define TICK2MSEC(tick)       ((tick)*MSEC_PER_TICK)                     /* Exact */
 #define TICK2DSEC(tick)       (((tick)+(TICK_PER_DSEC/2))/TICK_PER_DSEC) /* Rounds */
 #define TICK2SEC(tick)        (((tick)+(TICK_PER_SEC/2))/TICK_PER_SEC)   /* Rounds */
+
+#if (MSEC_PER_TICK * USEC_PER_MSEC) == USEC_PER_TICK
+#define TICK2USEC(tick)       ((tick)*MSEC_PER_TICK)                     /* Exact */
+#else
+#  define TICK2MSEC(tick)     (((tick)*USEC_PER_TICK)/USEC_PER_MSEC)     /* Rounds */
+#endif
 
 /****************************************************************************
  * Public Types
