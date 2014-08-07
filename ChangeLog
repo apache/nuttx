@@ -7996,3 +7996,22 @@
 	  logic if CONFIG_SCHED_TICKLESS is defined (2014-8-6).
 	* include/nuttx/arch.h:  First cut at platform-specific interfaces
 	  needed to support tickless OS option (2014-8-6).
+	* sched/Kconfig: Add a new option CONFIG_SCHED_TICKLESS to enable the
+	  tickless OS.  This is a work in progress but should be relatively
+	  safe since the new features are only enabled by this option (Safer
+	  but not 100% safe since it does not protect from typos and other
+	  dumb errors) (2014-8-6).
+	* arch/sim/src/Makefile, up_idle.c, up_internal.h, and up_tickless.c:
+	  Add support for a simulated interval timer support verification of
+	  the tickless OS (2014-8-6).
+	* include/nuttx/arch.h: Added another tickless OS interface to get
+	  the timer remaining on the interval timer (2014-8-6).
+	* include/nuttx/clock.h, sched/clock_initialize.c and clock_internal.h:
+	  If CONFIG_SCHED_TICKLESS is defined, then the global variable
+	  g_system_timer does not exist (2014-8-6).
+	* sched/Makefile: Don't build in sched_processtimer.c if
+	  CONFIG_SCHED_TICKLESS is selected (2014-8-6).
+	* sched/clock_gettime.c and clock_settime.c: Use the clock_systimer()
+	  macro, do access the g_system_timer() global directly (2014-8-6).
+	* sched/clock_systimer.c: Uses interval timer interfaces to get the
+	  time if CONFIG_SCHED_TICKLESS is selected (2014-8-6).
