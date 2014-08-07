@@ -1,7 +1,7 @@
 ############################################################################
 # arch/sim/src/Makefile
 #
-#   Copyright (C) 2007, 2008, 2011-2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007, 2008, 2011-2012, 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,10 @@ CSRCS = up_initialize.c up_idle.c up_interruptcontext.c \
 		up_exit.c up_schedulesigaction.c up_allocateheap.c \
 		up_devconsole.c
 HOSTSRCS = up_stdio.c up_hostusleep.c
+
+ifeq ($(CONFIG_SCHED_TICKLESS),y)
+CSRCS += up_tickless.c
+endif
 
 ifeq ($(CONFIG_NX_LCDDRIVER),y)
   CSRCS += up_lcd.c
