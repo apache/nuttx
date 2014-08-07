@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/clock.h>
 #include <nuttx/arch.h>
 
 #include "os_internal.h"
@@ -132,7 +133,7 @@ int sched_unlock(void)
            */
 
           if ((rtcb->flags & TCB_FLAG_ROUND_ROBIN) != 0 &&
-              rctb->timeslice == 0)
+              rtcb->timeslice == 0)
             {
               /* Yes.. that is the situation.  But one more thing.  The call
                * to up_release_pending() above may have actually replaced

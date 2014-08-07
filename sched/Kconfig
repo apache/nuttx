@@ -66,7 +66,7 @@ config SCHED_TICKLESS
 		defined include/nuttx/arch.h
 
 config USEC_PER_TICK
-	int "Milliseconds per system timer tick"
+	int "System timer tick period (microseconds)"
 	default 10000 if !SCHED_TICKLESS
 	default 100 if SCHED_TICKLESS
 	---help---
@@ -81,12 +81,12 @@ config USEC_PER_TICK
 		rates.  Rather, it only determines the resolution of time reported
 		by clock_systimer() and the resolution of times that can be set for
 		certain delays including watchdog timers and delayed work.  In this
-		case there is a tradeoff:  It is better to have the USEC_PER_TICK as
+		case there is a trade-off:  It is better to have the USEC_PER_TICK as
 		low as possible for higher timing resolution.  However, the the time
 		is currently held in 'unsigned int' on some systems, this may be
 		16-bits but on most contemporary systems it will be 32-bits.  In
 		either case, smaller values of USEC_PER_TICK will reduce the range
-		of values that delays that can be represented.  So the tradeoff is
+		of values that delays that can be represented.  So the trade-off is
 		between range and resolution (you could also modify the code to use
 		a 64-bit value if you really want both).
 
