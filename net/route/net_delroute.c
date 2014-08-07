@@ -149,4 +149,4 @@ int net_delroute(net_ipaddr_t target, net_ipaddr_t netmask)
   return net_foreachroute(net_match, &match) ? OK : -ENOENT;
 }
 
-#endif /* CONFIG_NET && CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */
+#endif /* CONFIG_NET && CONFIG_NET_ROUTE  */

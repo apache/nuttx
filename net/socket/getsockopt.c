@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/getsockopt.c
  *
- *   Copyright (C) 2007-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -169,7 +169,6 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
 
       case SO_RCVTIMEO:
       case SO_SNDTIMEO:
-#ifndef CONFIG_DISABLE_CLOCK
         {
           socktimeo_t timeo;
 
@@ -202,7 +201,6 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
           *value_len   = sizeof(struct timeval);
         }
         break;
-#endif
 
       /* The following are not yet implemented */
 

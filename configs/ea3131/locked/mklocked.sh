@@ -2,7 +2,7 @@
 ###########################################################################
 # configs/ea3131/locked/mklocked.sh
 #
-#   Copyright (C) 2010-2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2010-2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -159,11 +159,7 @@ echo "EXTERN(up_allocate_heap)" >>ld-locked.inc
 echo "EXTERN(mm_initialize)" >>ld-locked.inc
 echo "EXTERN(irq_initialize)" >>ld-locked.inc
 echo "EXTERN(wd_initialize)" >>ld-locked.inc
-
-answer=$(checkconfig CONFIG_DISABLE_CLOCK)
-if [ $answer = n ]; then
-	echo "EXTERN(clock_initialize)" >>ld-locked.inc
-fi
+echo "EXTERN(clock_initialize)" >>ld-locked.inc
 
 answer=$(checkconfig CONFIG_DISABLE_POSIX_TIMERS)
 if [ $answer = n ]; then

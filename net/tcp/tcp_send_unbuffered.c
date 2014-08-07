@@ -90,7 +90,7 @@ struct send_s
   ssize_t                 snd_sent;    /* The number of bytes sent */
   uint32_t                snd_isn;     /* Initial sequence number */
   uint32_t                snd_acked;   /* The number of bytes acked */
-#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
+#ifdef CONFIG_NET_SOCKOPTS
   uint32_t                snd_time;    /* Last send time for determining timeout */
 #endif
 #if defined(CONFIG_NET_TCP_SPLIT)
@@ -119,8 +119,7 @@ struct send_s
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
-
+#ifdef CONFIG_NET_SOCKOPTS
 static inline int send_timeout(FAR struct send_s *pstate)
 {
   FAR struct socket *psock = 0;
@@ -141,7 +140,7 @@ static inline int send_timeout(FAR struct send_s *pstate)
 
   return FALSE;
 }
-#endif /* CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */
+#endif /* CONFIG_NET_SOCKOPTS */
 
 /****************************************************************************
  * Function: tcpsend_interrupt
@@ -181,7 +180,7 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
     {
       /* Update the timeout */
 
-#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
+#ifdef CONFIG_NET_SOCKOPTS
       pstate->snd_time = clock_systimer();
 #endif
 
@@ -406,11 +405,11 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
         }
     }
 
+#ifdef CONFIG_NET_SOCKOPTS
   /* All data has been sent and we are just waiting for ACK or re-transmit
    * indications to complete the send.  Check for a timeout.
    */
 
-#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
   if (send_timeout(pstate))
     {
       /* Yes.. report the timeout */
@@ -419,7 +418,7 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
       pstate->snd_sent = -ETIMEDOUT;
       goto end_wait;
     }
-#endif /* CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */
+#endif /* CONFIG_NET_SOCKOPTS */
 
   /* Continue waiting */
 
@@ -566,7 +565,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
 
           /* Set the initial time for calculating timeouts */
 
-#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
+#ifdef CONFIG_NET_SOCKOPTS
           state.snd_time        = clock_systimer();
 #endif
           /* Set up the callback in the connection */

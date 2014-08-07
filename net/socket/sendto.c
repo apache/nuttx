@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/sendto.c
  *
- *   Copyright (C) 2007-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -77,7 +77,7 @@
  * and a system clock.
  */
 
-#if !defined(CONFIG_NET_SOCKOPTS) || defined(CONFIG_DISABLE_CLOCK)
+#ifndef CONFIG_NET_SOCKOPTS
 #  undef CONFIG_NET_SENDTO_TIMEOUT
 #endif
 

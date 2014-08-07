@@ -132,7 +132,7 @@
 
 /* ICMP configuration options */
 
-#if !defined(CONFIG_NET_ICMP) || defined(CONFIG_DISABLE_CLOCK)
+#ifndef CONFIG_NET_ICMP
 #  undef CONFIG_NET_ICMP_PING
 #endif
 

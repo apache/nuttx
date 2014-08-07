@@ -40,15 +40,11 @@ ifeq ($(CONFIG_NET_ICMP),y)
 NET_CSRCS += icmp_input.c
 
 ifeq ($(CONFIG_NET_ICMP_PING),y)
-ifneq ($(CONFIG_DISABLE_CLOCK),y)
-
 NET_CSRCS += icmp_ping.c icmp_poll.c icmp_send.c
-
-endif
-endif
 endif
 
 # Include ICMP build support
 
 DEPPATH += --dep-path icmp
 VPATH += :icmp
+endif

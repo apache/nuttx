@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/socket/net_timeo.c
  *
- *   Copyright (C) 2007-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
+#if defined(CONFIG_NET) && defined(CONFIG_NET_SOCKOPTS)
 
 #include <stdint.h>
 #include <debug.h>
@@ -81,5 +81,5 @@ int net_timeo(uint32_t start_time, socktimeo_t timeo)
   return FALSE;
 }
 
-#endif /* CONFIG_NET && CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */
+#endif /* CONFIG_NET && CONFIG_NET_SOCKOPTS */
 

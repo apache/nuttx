@@ -81,9 +81,7 @@ struct tcp_close_s
   FAR struct socket       *cl_psock;  /* Reference to the TCP socket */
   sem_t                    cl_sem;    /* Signals disconnect completion */
   int                      cl_result; /* The result of the close */
-#ifndef CONFIG_DISABLE_CLOCK
   uint32_t                 cl_start;  /* Time close started (in ticks) */
-#endif
 #endif
 };
 #endif
@@ -109,8 +107,7 @@ struct tcp_close_s
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_TCP) && defined(CONFIG_NET_SOLINGER) && \
-   !defined(CONFIG_DISABLE_CLOCK)
+#if defined(CONFIG_NET_TCP) && defined(CONFIG_NET_SOLINGER)
 static inline int close_timeout(FAR struct tcp_close_s *pstate)
 {
   FAR struct socket *psock = 0;
@@ -136,7 +133,7 @@ static inline int close_timeout(FAR struct tcp_close_s *pstate)
 
   return FALSE;
 }
-#endif /* CONFIG_NET_SOCKOPTS && CONFIG_NET_SOLINGER && !CONFIG_DISABLE_CLOCK */
+#endif /* CONFIG_NET_SOCKOPTS && CONFIG_NET_SOLINGER */
 
 /****************************************************************************
  * Function: netclose_interrupt
@@ -206,7 +203,7 @@ static uint16_t netclose_interrupt(FAR struct net_driver_s *dev,
         }
     }
 
-#if defined(CONFIG_NET_SOLINGER) && !defined(CONFIG_DISABLE_CLOCK)
+#ifdef CONFIG_NET_SOLINGER
   /* Check for a timeout. */
 
   else if (pstate && close_timeout(pstate))
@@ -218,7 +215,7 @@ static uint16_t netclose_interrupt(FAR struct net_driver_s *dev,
       goto end_wait;
     }
 
-#endif /* CONFIG_NET_SOLINGER && !CONFIG_DISABLE_CLOCK */
+#endif /* CONFIG_NET_SOLINGER */
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   /* Check if all outstanding bytes have been ACKed */
@@ -341,11 +338,9 @@ static inline int netclose_disconnect(FAR struct socket *psock)
           state.cl_result    = -EBUSY;
           sem_init(&state.cl_sem, 0, 0);
 
-#ifndef CONFIG_DISABLE_CLOCK
           /* Record the time that we started the wait (in ticks) */
 
           state.cl_start = clock_systimer();
-#endif
         }
       else
 #endif /* CONFIG_NET_SOLINGER */

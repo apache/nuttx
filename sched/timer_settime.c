@@ -343,19 +343,12 @@ int timer_settime(timer_t timerid, int flags, FAR const struct itimerspec *value
 
   if ((flags & TIMER_ABSTIME) != 0)
     {
-#ifdef CONFIG_DISABLE_CLOCK
-      /* Absolute timing depends upon having access to clock functionality */
-
-      errno = ENOSYS;
-      return ERROR;
-#else
       /* Calculate a delay corresponding to the absolute time in 'value'.
        * NOTE:  We have internal knowledge the clock_abstime2ticks only
        * returns an error if clockid != CLOCK_REALTIME.
        */
 
       (void)clock_abstime2ticks(CLOCK_REALTIME, &value->it_value, &delay);
-#endif
     }
   else
     {

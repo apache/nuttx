@@ -2,7 +2,7 @@
  * include/sys/syscall.h
  * This file contains the system call numbers.
  *
- *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -173,16 +173,12 @@
  * NuttX configuration.
  */
 
-#ifndef CONFIG_DISABLE_CLOCK
-#  define SYS_clock_systimer           (__SYS_clock+0)
-#  define SYS_clock_getres             (__SYS_clock+1)
-#  define SYS_clock_gettime            (__SYS_clock+2)
-#  define SYS_clock_settime            (__SYS_clock+3)
-#  define SYS_gettimeofday             (__SYS_clock+4)
-#  define __SYS_timers                 (__SYS_clock+5)
-#else
-#  define __SYS_timers                 __SYS_clock
-#endif
+#define SYS_clock_systimer             (__SYS_clock+0)
+#define SYS_clock_getres               (__SYS_clock+1)
+#define SYS_clock_gettime              (__SYS_clock+2)
+#define SYS_clock_settime              (__SYS_clock+3)
+#define SYS_gettimeofday               (__SYS_clock+4)
+#define __SYS_timers                   (__SYS_clock+5)
 
 /* The following are defined only if POSIX timers are supported */
 

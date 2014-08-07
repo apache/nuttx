@@ -174,7 +174,7 @@ int psock_close(FAR struct socket *psock);
 
 /* sockopt support ***********************************************************/
 
-#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
+#ifdef CONFIG_NET_SOCKOPTS
 int net_timeo(uint32_t start_time, socktimeo_t timeo);
 #endif
 

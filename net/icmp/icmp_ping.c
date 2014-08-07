@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_ICMP) && \
-    defined(CONFIG_NET_ICMP_PING) && !defined(CONFIG_DISABLE_CLOCK)
+    defined(CONFIG_NET_ICMP_PING)
 
 #include <sys/types.h>
 #include <stdint.h>

@@ -23,10 +23,6 @@ menuconfig DISABLE_OS_API
 
 if DISABLE_OS_API
 
-config DISABLE_CLOCK
-	bool "Disable clock interfaces"
-	default n
-
 config DISABLE_POSIX_TIMERS
 	bool "Disable POSIX timers"
 	default y if DEFAULT_SMALL

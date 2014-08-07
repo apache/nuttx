@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/time/lib_time.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,8 +41,6 @@
 
 #include <sys/time.h>
 #include <time.h>
-
-#ifndef CONFIG_DISABLE_CLOCK
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -106,5 +104,3 @@ time_t time(time_t *tloc)
 
   return (time_t)ERROR;
 }
-
-#endif /* !CONFIG_DISABLE_CLOCK */

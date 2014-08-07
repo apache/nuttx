@@ -48,10 +48,7 @@ endif
 # Socket options
 
 ifeq ($(CONFIG_NET_SOCKOPTS),y)
-SOCK_CSRCS += setsockopt.c getsockopt.c
-ifneq ($(CONFIG_DISABLE_CLOCK),y)
-SOCK_CSRCS += net_timeo.c
-endif
+SOCK_CSRCS += setsockopt.c getsockopt.c net_timeo.c
 endif
 
 # Support for network access using streams

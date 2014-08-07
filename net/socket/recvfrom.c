@@ -85,7 +85,7 @@
 struct recvfrom_s
 {
   FAR struct socket       *rf_sock;      /* The parent socket structure */
-#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
+#ifdef CONFIG_NET_SOCKOPTS
   uint32_t                 rf_starttime; /* rcv start time for determining timeout */
 #endif
   FAR struct devif_callback_s *rf_cb;    /* Reference to callback instance */
@@ -406,7 +406,7 @@ static inline void recvfrom_readahead(struct recvfrom_s *pstate)
  ****************************************************************************/
 
 #if defined(CONFIG_NET_UDP) || defined(CONFIG_NET_TCP)
-#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
+#ifdef CONFIG_NET_SOCKOPTS
 static int recvfrom_timeout(struct recvfrom_s *pstate)
 {
   FAR struct socket *psock = 0;
@@ -459,7 +459,7 @@ static int recvfrom_timeout(struct recvfrom_s *pstate)
 
   return FALSE;
 }
-#endif /* CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */
+#endif /* CONFIG_NET_SOCKOPTS */
 #endif /* CONFIG_NET_UDP || CONFIG_NET_TCP */
 
 /****************************************************************************
@@ -681,11 +681,11 @@ static uint16_t recvfrom_tcpinterrupt(FAR struct net_driver_s *dev,
               sem_post(&pstate->rf_sem);
             }
 
+#ifdef CONFIG_NET_SOCKOPTS
             /* Reset the timeout.  We will want a short timeout to terminate
              * the TCP receive.
              */
 
-#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
             pstate->rf_starttime = clock_systimer();
 #endif
         }
@@ -748,11 +748,11 @@ static uint16_t recvfrom_tcpinterrupt(FAR struct net_driver_s *dev,
           sem_post(&pstate->rf_sem);
         }
 
+#ifdef CONFIG_NET_SOCKOPTS
       /* No data has been received -- this is some other event... probably a
        * poll -- check for a timeout.
        */
 
-#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
       else if (recvfrom_timeout(pstate))
         {
           /* Yes.. the timeout has elapsed... do not allow any further
@@ -786,7 +786,7 @@ static uint16_t recvfrom_tcpinterrupt(FAR struct net_driver_s *dev,
 
           sem_post(&pstate->rf_sem);
         }
-#endif /* CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */
+#endif /* CONFIG_NET_SOCKOPTS */
     }
 
   return flags;
@@ -900,11 +900,11 @@ static uint16_t recvfrom_udpinterrupt(struct net_driver_s *dev, void *pvconn,
           sem_post(&pstate->rf_sem);
         }
 
+#ifdef CONFIG_NET_SOCKOPTS
       /* No data has been received -- this is some other event... probably a
        * poll -- check for a timeout.
        */
 
-#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
       else if (recvfrom_timeout(pstate))
         {
           /* Yes.. the timeout has elapsed... do not allow any further
@@ -927,7 +927,7 @@ static uint16_t recvfrom_udpinterrupt(struct net_driver_s *dev, void *pvconn,
 
           sem_post(&pstate->rf_sem);
         }
-#endif /* CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */
+#endif /* CONFIG_NET_SOCKOPTS */
     }
 
   return flags;
@@ -973,7 +973,7 @@ static void recvfrom_init(FAR struct socket *psock, FAR void *buf, size_t len,
   /* Set up the start time for the timeout */
 
   pstate->rf_sock      = psock;
-#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
+#ifdef CONFIG_NET_SOCKOPTS
   pstate->rf_starttime = clock_systimer();
 #endif
 }

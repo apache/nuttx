@@ -142,8 +142,6 @@ struct cpuload_s
  * Public Data
  ****************************************************************************/
 
-#if !defined(CONFIG_DISABLE_CLOCK)
-
 /* Access to raw system clock ***********************************************/
 /* Direct access to the system timer/counter is supported only if (1) the
  * system timer counter is available (i.e., we are not configured to use
@@ -288,5 +286,4 @@ int clock_cpuload(int pid, FAR struct cpuload_s *cpuload);
 }
 #endif
 
-#endif /* !CONFIG_DISABLE_CLOCK */
 #endif /* _INCLUDE_NUTTX_CLOCK_H */

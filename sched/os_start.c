@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/os_start.c
  *
- *   Copyright (C) 2007-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -383,14 +383,12 @@ void os_start(void)
 
   /* Initialize the POSIX timer facility (if included in the link) */
 
-#ifndef CONFIG_DISABLE_CLOCK
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (clock_initialize != NULL)
 #endif
     {
       clock_initialize();
     }
-#endif
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS

@@ -1,7 +1,7 @@
 /****************************************************************************
  * syscall/syscall_lookup.h
  *
- *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -126,13 +126,11 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
  * NuttX configuration.
  */
 
-#ifndef CONFIG_DISABLE_CLOCK
   SYSCALL_LOOKUP(syscall_clock_systimer,  0, STUB_clock_systimer)
   SYSCALL_LOOKUP(clock_getres,            2, STUB_clock_getres)
   SYSCALL_LOOKUP(clock_gettime,           2, STUB_clock_gettime)
   SYSCALL_LOOKUP(clock_settime,           2, STUB_clock_settime)
   SYSCALL_LOOKUP(gettimeofday,            2, STUB_gettimeofday)
-#endif
 
 /* The following are defined only if POSIX timers are supported */
 

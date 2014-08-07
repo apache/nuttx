@@ -38,7 +38,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && !defined(CONFIG_DISABLE_CLOCK)
 
 #include <nuttx/clock.h>
 
@@ -69,5 +68,3 @@ unsigned int net_timeval2dsec(struct timeval *tv)
 {
   return (unsigned int)(tv->tv_sec * DSEC_PER_SEC + tv->tv_usec / USEC_PER_DSEC);
 }
-
-#endif /* CONFIG_NET && !CONFIG_DISABLE_CLOCK */
