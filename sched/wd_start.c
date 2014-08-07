@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/wd_start.c
  *
- *   Copyright (C) 2007-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@
 #include <wdog.h>
 #include <unistd.h>
 #include <sched.h>
+#include <assert.h>
 #include <errno.h>
 
 #include <nuttx/arch.h>
@@ -55,6 +56,14 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#ifndef MIN
+#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
+#endif
+
+#ifndef MAX
+#  define MAX(a,b) (((a) > (b)) ? (a) : (b))
+#endif
 
 /****************************************************************************
  * Private Type Declarations
@@ -87,6 +96,97 @@ typedef void (*wdentry4_t)(int argc, uint32_t arg1, uint32_t arg2,
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+/****************************************************************************
+ * Name: wd_expiration
+ *
+ * Description:
+ *   Check if the timer for the watchdog at the head of list is ready to
+ *   run.  If so, remove the watchdog from the list and execute it.
+ *
+ * Parameters:
+ *   None
+ *
+ * Return Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static inline void wd_expiration(void)
+{
+  FAR wdog_t *wdog;
+
+  /* Check if the watchdog at the head of the list is ready to run */
+
+  if (((FAR wdog_t*)g_wdactivelist.head)->lag <= 0)
+    {
+      /* Process the watchdog at the head of the list as well as any
+       * other watchdogs that became ready to run at this time
+       */
+
+      while (g_wdactivelist.head &&
+             ((FAR wdog_t*)g_wdactivelist.head)->lag <= 0)
+        {
+          /* Remove the watchdog from the head of the list */
+
+          wdog = (FAR wdog_t*)sq_remfirst(&g_wdactivelist);
+
+          /* If there is another watchdog behind this one, update its
+           * its lag (this shouldn't be necessary).
+           */
+
+          if (g_wdactivelist.head)
+            {
+              ((FAR wdog_t*)g_wdactivelist.head)->lag += wdog->lag;
+            }
+
+          /* Indicate that the watchdog is no longer active. */
+
+          wdog->active = false;
+
+          /* Execute the watchdog function */
+
+          up_setpicbase(wdog->picbase);
+          switch (wdog->argc)
+            {
+              default:
+                DEBUGPANIC();
+                break;
+
+              case 0:
+                (*((wdentry0_t)(wdog->func)))(0);
+                break;
+
+#if CONFIG_MAX_WDOGPARMS > 0
+              case 1:
+                (*((wdentry1_t)(wdog->func)))(1, wdog->parm[0]);
+                break;
+#endif
+#if CONFIG_MAX_WDOGPARMS > 1
+              case 2:
+                (*((wdentry2_t)(wdog->func)))(2,
+                                wdog->parm[0], wdog->parm[1]);
+                break;
+#endif
+#if CONFIG_MAX_WDOGPARMS > 2
+              case 3:
+                (*((wdentry3_t)(wdog->func)))(3,
+                                wdog->parm[0], wdog->parm[1],
+                                wdog->parm[2]);
+                break;
+#endif
+#if CONFIG_MAX_WDOGPARMS > 3
+              case 4:
+                (*((wdentry4_t)(wdog->func)))(4,
+                                wdog->parm[0], wdog->parm[1],
+                                wdog->parm[2] ,wdog->parm[3]);
+                break;
+#endif
+            }
+        }
+    }
+}
 
 /****************************************************************************
  * Public Functions
@@ -101,7 +201,7 @@ typedef void (*wdentry4_t)(int argc, uint32_t arg1, uint32_t arg2,
  *   specified number of ticks has elapsed. Watchdog timers may be started
  *   from the interrupt level.
  *
- *   Watchdog timers execute in the address enviroment that was in effect
+ *   Watchdog timers execute in the address environment that was in effect
  *   when wd_start() is called.
  *
  *   Watchdog timers execute only once.
@@ -133,6 +233,9 @@ int wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,  int argc, ...)
   FAR wdog_t *next;
   int32_t    now;
   irqstate_t saved_state;
+#ifdef CONFIG_SCHED_TICKLESS
+  bool       reassess = false;
+#endif
   int        i;
 
   /* Verify the wdog */
@@ -189,7 +292,17 @@ int wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,  int argc, ...)
 
   if (g_wdactivelist.head == NULL)
     {
+      /* Add the watchdog to the head of the queue. */
+
       sq_addlast((FAR sq_entry_t*)wdog,&g_wdactivelist);
+
+#ifdef CONFIG_SCHED_TICKLESS
+      /* Whenever the watchdog at the head of the queue changes, then we
+       * need to reassess the interval timer setting.
+       */
+
+      reassess = true;
+#endif
     }
 
   /* There are other active watchdogs in the timer queue */
@@ -232,12 +345,24 @@ int wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,  int argc, ...)
 
           if (curr == (FAR wdog_t*)g_wdactivelist.head)
             {
+              /* Insert the watchdog in mid- or end-of-queue */
+
               sq_addfirst((FAR sq_entry_t*)wdog, &g_wdactivelist);
             }
           else
             {
+              /* Insert the watchdog in mid- or end-of-queue */
+
               sq_addafter((FAR sq_entry_t*)prev, (FAR sq_entry_t*)wdog,
                           &g_wdactivelist);
+
+#ifdef CONFIG_SCHED_TICKLESS
+              /* If the watchdog at the head of the queue changes, then we
+               * need to reassess the interval timer setting.
+               */
+
+              reassess = true;
+#endif
             }
         }
 
@@ -265,8 +390,22 @@ int wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,  int argc, ...)
 
   /* Put the lag into the watchdog structure and mark it as active. */
 
-  wdog->lag = delay;
+  wdog->lag    = delay;
   wdog->active = true;
+
+#ifdef CONFIG_SCHED_TICKLESS
+  /* Reassess the interval timer that will generate the next interval event.
+   * In many cases, this will be unnecessary:  This is really only necessary
+   * when the watchdog timer at the head of the queue is change.  If the
+   * timer is inserted later in the queue then the timer at the head is
+   * unchanged.
+   */
+
+  if (reassess)
+    {
+      sched_timer_reassess();
+    }
+#endif
 
   irqrestore(saved_state);
   return OK;
@@ -278,22 +417,68 @@ int wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,  int argc, ...)
  * Description:
  *   This function is called from the timer interrupt handler to determine
  *   if it is time to execute a watchdog function.  If so, the watchdog
- *   function will be executed in the context of the timer interrupt handler.
+ *   function will be executed in the context of the timer interrupt
+ *   handler.
  *
  * Parameters:
- *   None
+ *   ticks - If CONFIG_SCHED_TICKLESS is defined then the number of ticks
+ *     in the the interval that just expired is provided.  Otherwise,
+ *     this function is called on each timer interrupt and a value of one
+ *     is implicit.
  *
  * Return Value:
- *   None
+ *   If CONFIG_SCHED_TICKLESS is defined then the number of ticks for the
+ *   next delay is provided (zero if no delay).  Otherwise, this function
+ *   has no returned value.
  *
  * Assumptions:
+ *   Called from interrupt handler logic with interrupts disabled.
  *
  ****************************************************************************/
 
-void wd_timer(void)
+#ifdef CONFIG_SCHED_TICKLESS
+unsigned int wd_timer(int ticks)
 {
   FAR wdog_t *wdog;
+  int decr;
 
+  /* Check if there are any active watchdogs to process */
+
+  while (g_wdactivelist.head && ticks > 0)
+    {
+      /* Get the watchdog at the head of the list */
+
+      wdog = (FAR wdog_t*)g_wdactivelist.head;
+
+      /* Decrement the lag for this watchdog.
+       *
+       * There is logic to handle the case where ticks is greater than
+       * the watchdog lag, but if the scheduling is working properly
+       * that should never happen.
+       */
+
+      DEBUGASSERT(ticks <= wdog->lag);
+      decr = MIN(wdog->lag, ticks);
+
+      /* There are.  Decrement the lag counter */
+
+      wdog->lag -= decr;
+      ticks     -= ticks;
+
+      /* Check if the watchdog at the head of the list is ready to run */
+
+      wd_expiration();
+    }
+
+  /* Return the delay for the next watchdog to expire */
+
+  return g_wdactivelist.head ?
+         ((FAR wdog_t*)g_wdactivelist.head)->lag : 0;
+}
+
+#else
+void wd_timer(void)
+{
   /* Check if there are any active watchdogs to process */
 
   if (g_wdactivelist.head)
@@ -304,72 +489,7 @@ void wd_timer(void)
 
       /* Check if the watchdog at the head of the list is ready to run */
 
-      if (((FAR wdog_t*)g_wdactivelist.head)->lag <= 0)
-        {
-          /* Process the watchdog at the head of the list as well as any
-           * other watchdogs that became ready to run at this time
-           */
-
-          while (g_wdactivelist.head &&
-                 ((FAR wdog_t*)g_wdactivelist.head)->lag <= 0)
-            {
-              /* Remove the watchdog from the head of the list */
-
-              wdog = (FAR wdog_t*)sq_remfirst(&g_wdactivelist);
-
-              /* If there is another watchdog behind this one, update its
-               * its lag (this shouldn't be necessary).
-               */
-
-              if (g_wdactivelist.head)
-                {
-                  ((FAR wdog_t*)g_wdactivelist.head)->lag += wdog->lag;
-                }
-
-              /* Indicate that the watchdog is no longer active. */
-
-              wdog->active = false;
-
-              /* Execute the watchdog function */
-
-              up_setpicbase(wdog->picbase);
-              switch (wdog->argc)
-                {
-                  default:
-#ifdef CONFIG_DEBUG
-                    PANIC();
-#endif
-                  case 0:
-                    (*((wdentry0_t)(wdog->func)))(0);
-                    break;
-
-#if CONFIG_MAX_WDOGPARMS > 0
-                  case 1:
-                    (*((wdentry1_t)(wdog->func)))(1, wdog->parm[0]);
-                    break;
-#endif
-#if CONFIG_MAX_WDOGPARMS > 1
-                  case 2:
-                    (*((wdentry2_t)(wdog->func)))(2,
-                                    wdog->parm[0], wdog->parm[1]);
-                    break;
-#endif
-#if CONFIG_MAX_WDOGPARMS > 2
-                  case 3:
-                    (*((wdentry3_t)(wdog->func)))(3,
-                                    wdog->parm[0], wdog->parm[1],
-                                    wdog->parm[2]);
-                    break;
-#endif
-#if CONFIG_MAX_WDOGPARMS > 3
-                  case 4:
-                    (*((wdentry4_t)(wdog->func)))(4,
-                                    wdog->parm[0], wdog->parm[1],
-                                    wdog->parm[2] ,wdog->parm[3]);
-                    break;
-#endif
-                }
-            }
-        }
+      wd_expiration();
     }
 }
+#endif /* CONFIG_SCHED_TICKLESS */

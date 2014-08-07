@@ -1,7 +1,7 @@
 /************************************************************************
  * sched/sched_unlock.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -86,7 +86,7 @@
 
 int sched_unlock(void)
 {
-  struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
 
   /* Check for some special cases:  (1) rtcb may be NULL only during
    * early boot-up phases, and (2) sched_unlock() should have no
@@ -118,10 +118,41 @@ int sched_unlock(void)
            * g_pendingtasks.
            */
 
-         if (g_pendingtasks.head)
-           {
-             up_release_pending();
-           }
+          if (g_pendingtasks.head)
+            {
+              up_release_pending();
+            }
+
+#if CONFIG_RR_INTERVAL > 0
+          /* If (1) the task that was running running supported round-robin
+           * scheduling and (2) if its time slice has already expired, but (3)
+           * it could not slice out because pre-emption was disabled, then
+           * we need to swap the task out now and reassess the interval timer
+           * for the next time slice.
+           */
+
+          if ((rtcb->flags & TCB_FLAG_ROUND_ROBIN) != 0 &&
+              rctb->timeslice == 0)
+            {
+              /* Yes.. that is the situation.  But one more thing.  The call
+               * to up_release_pending() above may have actually replaced
+               * the task at the head of the read-to-run list.  In that case,
+               * we need only to reset the timeslice value back to the
+               * maximum.
+               */
+
+              if (rtcb != (FAR struct tcb_s*)g_readytorun.head)
+                {
+                  rtcb->timeslice = CONFIG_RR_INTERVAL / MSEC_PER_TICK;
+                }
+#ifdef CONFIG_SCHED_TICKLESS
+              else
+               {
+                 sched_timer_reassess();
+               }
+#endif
+            }
+#endif
         }
 
       irqrestore(flags);

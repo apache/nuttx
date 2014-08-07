@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/wd_cancel.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -76,7 +76,7 @@
  *
  * Description:
  *   This function cancels a currently running watchdog timer. Watchdog
- *   timers may be canceled from the interrupt level.
+ *   timers may be cancelled from the interrupt level.
  *
  * Parameters:
  *   wdid - ID of the watchdog to cancel.
@@ -88,7 +88,7 @@
  *
  ****************************************************************************/
 
-int wd_cancel (WDOG_ID wdid)
+int wd_cancel(WDOG_ID wdid)
 {
   wdog_t    *curr;
   wdog_t    *prev;
@@ -101,7 +101,7 @@ int wd_cancel (WDOG_ID wdid)
 
   saved_state = irqsave();
 
-  /* Make sure that the watchdog is initialed (non-NULL) and is still active */
+  /* Make sure that the watchdog is initialized (non-NULL) and is still active */
 
   if (wdid && wdid->active)
     {
@@ -126,7 +126,7 @@ int wd_cancel (WDOG_ID wdid)
       ASSERT(curr);
 
       /* If there is a watchdog in the timer queue after the one that
-       * is being canceled, then it inherits the remaining ticks.
+       * is being cancelled, then it inherits the remaining ticks.
        */
 
       if (curr->next)
@@ -138,22 +138,31 @@ int wd_cancel (WDOG_ID wdid)
 
       if (prev)
         {
+          /* Remove the watchdog from mid- or end-of-queue */
+
           (void)sq_remafter((FAR sq_entry_t*)prev, &g_wdactivelist);
         }
       else
         {
+          /* Remove the watchdog at the head of the queue */
+
           (void)sq_remfirst(&g_wdactivelist);
+
+          /* Reassess the interval timer that will generate the next
+           * interval event.
+           */
+
+          sched_timer_reassess();
         }
 
-      wdid->next = NULL;
+      /* Mark the watchdog inactive */
+
+      wdid->next   = NULL;
+      wdid->active = false;
 
       /* Return success */
 
       ret = OK;
-
-      /* Mark the watchdog inactive */
-
-      wdid->active = false;
     }
 
   irqrestore(saved_state);

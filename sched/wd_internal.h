@@ -78,6 +78,14 @@ typedef struct wdog_s wdog_t;
  * Public Variables
  ************************************************************************/
 
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
 /* The g_wdfreelist data structure is a singly linked list of watchdogs
  * available to the system for delayed function use.
  */
@@ -101,16 +109,57 @@ extern sq_queue_t g_wdactivelist;
  * Public Function Prototypes
  ************************************************************************/
 
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
+/************************************************************************
+ * Name: wd_initialize
+ *
+ * Description:
+ * This function initializes the watchdog data structures
+ *
+ * Parameters:
+ *   None
+ *
+ * Return Value:
+ *   None
+ *
+ * Assumptions:
+ *   This function must be called early in the initialization sequence
+ *   before the timer interrupt is attached and before any watchdog
+ *   services are used.
+ *
+ ************************************************************************/
 
 void weak_function wd_initialize(void);
-void weak_function wd_timer(void);
+
+/****************************************************************************
+ * Name: wd_timer
+ *
+ * Description:
+ *   This function is called from the timer interrupt handler to determine
+ *   if it is time to execute a watchdog function.  If so, the watchdog
+ *   function will be executed in the context of the timer interrupt
+ *   handler.
+ *
+ * Parameters:
+ *   ticks - If CONFIG_SCHED_TICKLESS is defined then the number of ticks
+ *     in the the interval that just expired is provided.  Otherwise,
+ *     this function is called on each timer interrupt and a value of one
+ *     is implicit.
+ *
+ * Return Value:
+ *   If CONFIG_SCHED_TICKLESS is defined then the number of ticks for the
+ *   next delay is provided (zero if no delay).  Otherwise, this function
+ *   has no returned value.
+ *
+ * Assumptions:
+ *   Called from interrupt handler logic with interrupts disabled.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_TICKLESS
+unsigned int wd_timer(int ticks);
+#else
+void wd_timer(void);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

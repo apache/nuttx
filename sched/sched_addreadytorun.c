@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/sched_addreadytorun.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,7 +75,7 @@
  * Description:
  *   This function adds a TCB to the ready to run
  *   list.  If the currently active task has preemption disabled
- *   and the new TCB would cause this task to be preempted, the
+ *   and the new TCB would cause this task to be pre-empted, the
  *   new task is added to the g_pendingtasks list instead.  The
  *   pending tasks will be made ready-to-run when preemption
  *   is unlocked.
@@ -84,7 +84,7 @@
  *   btcb - Points to the blocked TCB that is ready-to-run
  *
  * Return Value:
- *   true if the currently active task (the head of the g_readytorun list)
+ *   true if the currently active task (the head of the ready-to-run list)
  *   has changed.
  *
  * Assumptions:
@@ -94,7 +94,7 @@
  * - The caller has already removed the input rtcb from
  *   whatever list it was in.
  * - The caller handles the condition that occurs if the
- *   the head of the g_readytorun list is changed.
+ *   the head of the ready-to-run list is changed.
  *
  ****************************************************************************/
 
@@ -105,7 +105,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
 
   /* Check if pre-emption is disabled for the current running task and if
    * the new ready-to-run task would cause the current running task to be
-   * preempted.
+   * pre-empted.
    */
 
   if (rtcb->lockcount && rtcb->sched_priority < btcb->sched_priority)
@@ -119,7 +119,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
       ret = false;
     }
 
-  /* Otherwise, add the new task to the g_readytorun task list */
+  /* Otherwise, add the new task to the ready-to-run task list */
 
   else if (sched_addprioritized(btcb, (FAR dq_queue_t*)&g_readytorun))
     {
@@ -127,7 +127,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
 
       sched_note_switch(rtcb, btcb);
 
-      /* The new btcb was added at the head of the g_readytorun list.  It
+      /* The new btcb was added at the head of the ready-to-run list.  It
        * is now to new active task!
        */
 
@@ -135,11 +135,19 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
 
       btcb->task_state = TSTATE_TASK_RUNNING;
       btcb->flink->task_state = TSTATE_TASK_READYTORUN;
+
+#if CONFIG_RR_INTERVAL > 0
+      /* Whenever the task at the head of the ready-to-run chances, we
+       * must reassess the interval time that controls time-slicing.
+       */
+
+      sched_timer_reassess();
+#endif
       ret = true;
     }
   else
     {
-      /* The new btcb was added in the middle of the g_readytorun list */
+      /* The new btcb was added in the middle of the ready-to-run list */
 
       btcb->task_state = TSTATE_TASK_READYTORUN;
       ret = false;

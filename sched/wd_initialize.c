@@ -92,7 +92,7 @@ sq_queue_t g_wdactivelist;
  * Name: wd_initialize
  *
  * Description:
- * This function initalized the watchdog data structures
+ * This function initializes the watchdog data structures
  *
  * Parameters:
  *   None

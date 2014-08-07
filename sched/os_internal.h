@@ -236,9 +236,10 @@ int  os_bringup(void);
 void weak_function task_initialize(void);
 #endif
 void task_start(void);
-int  task_schedsetup(FAR struct task_tcb_s *tcb, int priority, start_t start,
-                     main_t main, uint8_t ttype);
-int  task_argsetup(FAR struct task_tcb_s *tcb, FAR const char *name, FAR char * const argv[]);
+int  task_schedsetup(FAR struct task_tcb_s *tcb, int priority,
+       start_t start, main_t main, uint8_t ttype);
+int  task_argsetup(FAR struct task_tcb_s *tcb, FAR const char *name,
+       FAR char * const argv[]);
 int  task_exit(void);
 int  task_terminate(pid_t pid, bool nonblocking);
 void task_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking);
@@ -250,14 +251,24 @@ bool sched_mergepending(void);
 void sched_addblocked(FAR struct tcb_s *btcb, tstate_t task_state);
 void sched_removeblocked(FAR struct tcb_s *btcb);
 int  sched_setpriority(FAR struct tcb_s *tcb, int sched_priority);
+
 #ifdef CONFIG_PRIORITY_INHERITANCE
 int  sched_reprioritize(FAR struct tcb_s *tcb, int sched_priority);
 #else
-#  define sched_reprioritize(tcb,sched_priority) sched_setpriority(tcb,sched_priority)
+#  define sched_reprioritize(tcb,sched_priority) \
+     sched_setpriority(tcb,sched_priority)
 #endif
+
+#ifdef CONFIG_SCHED_TICKLESS
+void sched_timer_reassess(void);
+#else
+#  define sched_timer_reassess()
+#endif
+
 #if defined(CONFIG_SCHED_CPULOAD) && !defined(CONFIG_SCHED_CPULOAD_EXTCLK)
 void weak_function sched_process_cpuload(void);
 #endif
+
 bool sched_verifytcb(FAR struct tcb_s *tcb);
 int  sched_releasetcb(FAR struct tcb_s *tcb, uint8_t ttype);
 

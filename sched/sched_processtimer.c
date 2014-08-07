@@ -194,8 +194,8 @@ void sched_process_timer(void)
 #endif
 
 #if defined(CONFIG_SCHED_CPULOAD) && !defined(CONFIG_SCHED_CPULOAD_EXTCLK)
-  /* Perform CPU load measurements (before any timer-initiated context switches
-   * can occur)
+  /* Perform CPU load measurements (before any timer-initiated context
+   * switches can occur)
    */
 
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
@@ -206,14 +206,9 @@ void sched_process_timer(void)
     }
 #endif
 
-  /* Process watchdogs (if in the link) */
+  /* Process watchdogs */
 
-#ifdef CONFIG_HAVE_WEAKFUNCTIONS
-  if (wd_timer != NULL)
-#endif
-    {
-      wd_timer();
-    }
+  wd_timer();
 
   /* Check if the currently executing task has exceeded its
    * timeslice.

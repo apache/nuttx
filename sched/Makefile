@@ -119,7 +119,9 @@ ENV_SRCS += env_clearenv.c env_getenv.c env_putenv.c env_setenv.c env_unsetenv.c
 WDOG_SRCS = wd_initialize.c wd_create.c wd_start.c wd_cancel.c wd_delete.c
 WDOG_SRCS += wd_gettime.c
 
-ifneq ($(CONFIG_SCHED_TICKLESS),y)
+ifeq ($(CONFIG_SCHED_TICKLESS),y)
+TIME_SRCS += sched_timerexpiration.c
+else
 TIME_SRCS += sched_processtimer.c
 endif
 

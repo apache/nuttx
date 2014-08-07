@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated August 6, 2014)
+NuttX TODO List (Last updated August 7, 2014)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -8,7 +8,7 @@ board port.
 
 nuttx/
 
- (10)  Task/Scheduler (sched/)
+  (9)  Task/Scheduler (sched/)
   (1)  Memory Managment (mm/)
   (3)  Signals (sched/, arch/)
   (2)  pthreads (sched/)
@@ -18,7 +18,7 @@ nuttx/
  (13)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
  (10)  Libraries (libc/, )
- (12)  File system/Generic drivers (fs/, drivers/)
+ (13)  File system/Generic drivers (fs/, drivers/)
   (6)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
@@ -61,37 +61,6 @@ o Task/Scheduler (sched/)
                terminated?
   Status:      Closed.  No, this behavior will not be implemented.
   Priority:    Medium, required for good emulation of process/pthread model.
-
-  Title:       TICKLESS OS
-  Description: On a side note, I have thought about a tick-less timer for the OS
-               for a long time.  Basically we could replace the periodic system
-               timer interrupt with a one-shot interval timer programmed for the
-               next interesting event time.  That is one way to both reduce the
-               timer interrupt overhead and also to increase the accuracy of
-               delays.
-
-               Current timer processing is in sched/sched_processtimer.c:
-
-               1) Calls clock_timer() which just increments a counter (the system
-                  timer -- basically "up-time"). This is only used when code asks
-                  for the current time.  In a tickless OS, some substitute answer
-                  for the question "What time is it?" would need to be developed.
-                  You could use an RTC? Or maybe logic that gets the time until the
-                  next interval expiration and computes the current time. The
-                  solution is not too difficult, but depends on a hardware solution.
-
-               2) Calls wd_timer() which handles the link list of ordered events:
-                  Each timer event is saved with the delta time to the next event
-                  in the list. So an interval timer would be perfect to implement this.
-
-               3) sched_process_timeslice(). Then there is round-robin time-slicing.
-
-               The primary advantage of a tickless OS is that is would allow for
-               reduce power consumptions.  That is because timer interrupts will
-               usually awaken CPUs from reduced power consumption states.
-  Status:      Open.  There will probably be no tickless OS implementation unless
-               someone gets motivated and drives the change.
-  Priority:    Low
 
   Title:       pause() NON-COMPLIANCE
   Description: In the POSIX description of this function is the pause() function
@@ -1220,6 +1189,15 @@ o File system / Generic drivers (fs/, drivers/)
 
   Status:      Open
   Priority:    Low
+
+  Title:       FAT LONG FILENAME COMPATIBILTY
+  Description: Recently there have been reports that file with long file
+               names created by NuttX don't have long file names when viewed
+               on Windows.  The long file name support has been around for a
+               long time and I don't ever having seen this before so I am
+               suspecting that some evil has crept in.
+  Status:      Open
+  Priority:    Medium
 
 o Graphics subystem (graphics/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

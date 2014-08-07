@@ -53,10 +53,13 @@ endif # DISABLE_OS_API
 
 menu "Clocks and Timers"
 
+config ARCH_HAVE_TICKLESS
+	bool
+
 config SCHED_TICKLESS
 	bool "Support tick-less OS"
 	default n
-	depends on EXPERIMENTAL
+	depends on ARCH_HAVE_TICKLESS && EXPERIMENTAL
 	---help---
 		Be default, system time is driven by a periodic timer interrupt.  An
 		alternative configurations is a tick-less configuration in which
@@ -342,6 +345,7 @@ menu "Performance Monitoring"
 config SCHED_CPULOAD
 	bool "Enable CPU load monitoring"
 	default n
+	select SCHED_CPULOAD_EXTCLK if SCHED_TICKLESS
 	---help---
 		If this option is selected, the timer interrupt handler will monitor
 		if the system is IDLE or busy at the time of that the timer interrupt
