@@ -8019,3 +8019,9 @@
 	  sched_addreadytorun.c, sched_processtimer.c, sched_unlock.c,
 	  wd_cancel.c, wd_internal.h, and wd_start.c: Implements the
 	  tickless OS (2014-8-7).
+	* Many files: Remove CONFIG_DISABLE_CLOCK.  Why?  This option is not
+	  really very useful and was only selected in a few unusable, mostly
+	  unusable configurations anyway (m9s12/ostest, kl25z/minnsh,
+	  z180/ostest, 8051, sh1, z80, and z8).  The only real loss is probably
+	  to the kl25z/minsh configuration .  And with the addition of the
+	  tickless OS, I just wanted to make the pain go away (2014-8-7).
