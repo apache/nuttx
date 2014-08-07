@@ -1081,6 +1081,33 @@ int up_timer_start(FAR const struct timespec *tp);
 #endif
 
 /****************************************************************************
+ * Name: up_timer_remaining
+ *
+ * Description:
+ *   Return the time remaining until the next timer expiratino.
+ *
+ *   Provided by platform-specific code and called from the RTOS base code.
+ *
+ * Input Parameters:
+ *   tp - Location to return the remaining time.  Zero should be returned
+ *        if the timer is not active.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ * Assumptions:
+ *   May be called from interrupt level handling or from the normal tasking
+ *   level.  Interrupts may need to be disabled internally to assure
+ *   non-reentrancy.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_TICKLESS
+int up_timer_remaining(FAR struct timespec *tp);
+#endif
+
+/****************************************************************************
  * Name: up_timer_resolution
  *
  * Description:
@@ -1186,15 +1213,37 @@ void up_cxxinitialize(void);
  * Name: sched_process_timer
  *
  * Description:
- *   This function handles system timer events.
- *   The timer interrupt logic itself is implemented in the
- *   architecture specific code, but must call the following OS
- *   function periodically -- the calling interval must be
- *   MSEC_PER_TICK.
+ *   This function handles system timer events (only when
+ *   CONFIG_SCHED_TICKLESS is *not* defined).  The timer interrupt logic
+ *   itself is implemented in the architecture specific code, but must call
+ *   the following OS function periodically -- the calling interval must
+ *   be MSEC_PER_TICK.
  *
  ****************************************************************************/
 
+#ifndef CONFIG_SCHED_TICKLESS
 void sched_process_timer(void);
+#endif
+
+/****************************************************************************
+ * Name:  sched_timer_expiration
+ *
+ * Description:
+ *   if CONFIG_SCHED_TICKLESS is defined, then this function is provided by
+ *   the RTOS base code and called from platform-specific code when the
+ *   interval timer used to implemented the tick-less OS expires.
+ *
+ * Input Parameters:
+ *
+ * Returned Value:
+ *   Base code implementation assumes that this function is called from
+ *   interrupt handling logic with interrupts disabled.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_TICKLESS
+void sched_timer_expiration(void);
+#endif
 
 /************************************************************************
  * Name: sched_process_cpuload
@@ -1229,26 +1278,6 @@ void weak_function sched_process_cpuload(void);
  ***************************************************************************/
 
 void irq_dispatch(int irq, FAR void *context);
-
-/****************************************************************************
- * Name:  sched_timer_expiration
- *
- * Description:
- *   if CONFIG_SCHED_TICKLESS is defined, then this function is provided by
- *   the RTOS base code and called from platform-specific code when the
- *   interval timer used to implemented the tick-less OS expires.
- *
- * Input Parameters:
- *
- * Returned Value:
- *   Base code implementation assumes that this function is called from
- *   interrupt handling logic with interrupts disabled.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SCHED_TICKLESS
-void sched_timer_expiration(void);
-#endif
 
 /****************************************************************************
  * Name: up_check_stack and friends
