@@ -80,11 +80,17 @@
  * Public Variables
  ****************************************************************************/
 
+#ifndef CONFIG_SCHED_TICKLESS
 #ifdef CONFIG_SYSTEM_TIME64
 volatile uint64_t g_system_timer;
-uint64_t          g_tickbias;
 #else
 volatile uint32_t g_system_timer;
+#endif
+#endif
+
+#ifdef CONFIG_SYSTEM_TIME64
+uint64_t          g_tickbias;
+#else
 uint32_t          g_tickbias;
 #endif
 
@@ -182,7 +188,9 @@ static void clock_inittime(void)
   /* (Re-)initialize the time value to match the RTC */
 
   clock_basetime(&g_basetime);
+#ifndef CONFIG_SCHED_TICKLESS
   g_system_timer = 0;
+#endif
   g_tickbias     = 0;
 }
 
@@ -262,9 +270,11 @@ void clock_synchronize(void)
  *
  ****************************************************************************/
 
+#ifndef CONFIG_SCHED_TICKLESS
 void clock_timer(void)
 {
   /* Increment the per-tick system counter */
 
   g_system_timer++;
 }
+#endif

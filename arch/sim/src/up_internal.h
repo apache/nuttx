@@ -150,60 +150,66 @@ extern volatile int g_eventloop;
 
 /* up_setjmp.S ************************************************************/
 
-extern int  up_setjmp(int *jb);
-extern void up_longjmp(int *jb, int val) noreturn_function;
+int  up_setjmp(int *jb);
+void up_longjmp(int *jb, int val) noreturn_function;
+
+/* up_tickless.c **********************************************************/
+
+#ifdef CONFIG_SCHED_TICKLESS
+void up_timer_update(void);
+#endif
 
 /* up_devconsole.c ********************************************************/
 
-extern void up_devconsole(void);
-extern void up_registerblockdevice(void);
+void up_devconsole(void);
+void up_registerblockdevice(void);
 
 /* up_deviceimage.c *******************************************************/
 
-extern char *up_deviceimage(void);
+char *up_deviceimage(void);
 
 /* up_stdio.c *************************************************************/
 
-extern size_t up_hostread(void *buffer, size_t len);
-extern size_t up_hostwrite(const void *buffer, size_t len);
+size_t up_hostread(void *buffer, size_t len);
+size_t up_hostwrite(const void *buffer, size_t len);
 
 /* up_netdev.c ************************************************************/
 
 #ifdef CONFIG_NET
-extern unsigned long up_getwalltime( void );
+unsigned long up_getwalltime( void );
 #endif
 
 /* up_x11framebuffer.c ******************************************************/
 
 #ifdef CONFIG_SIM_X11FB
-extern int up_x11initialize(unsigned short width, unsigned short height,
-                            void **fbmem, unsigned int *fblen, unsigned char *bpp,
-                            unsigned short *stride);
+int up_x11initialize(unsigned short width, unsigned short height,
+                     void **fbmem, unsigned int *fblen, unsigned char *bpp,
+                     unsigned short *stride);
 #ifdef CONFIG_FB_CMAP
-extern int up_x11cmap(unsigned short first, unsigned short len,
-                      unsigned char *red, unsigned char *green,
-                      unsigned char *blue, unsigned char  *transp);
+int up_x11cmap(unsigned short first, unsigned short len,
+               unsigned char *red, unsigned char *green,
+               unsigned char *blue, unsigned char  *transp);
 #endif
 #endif
 
 /* up_eventloop.c ***********************************************************/
 
 #if defined(CONFIG_SIM_X11FB) && defined(CONFIG_SIM_TOUCHSCREEN)
-extern void up_x11events(void);
+void up_x11events(void);
 #endif
 
 /* up_eventloop.c ***********************************************************/
 
 #if defined(CONFIG_SIM_X11FB) && defined(CONFIG_SIM_TOUCHSCREEN)
-extern int up_buttonevent(int x, int y, int buttons);
+int up_buttonevent(int x, int y, int buttons);
 #endif
 
 /* up_tapdev.c ************************************************************/
 
 #if defined(CONFIG_NET) && !defined(__CYGWIN__)
-extern void tapdev_init(void);
-extern unsigned int tapdev_read(unsigned char *buf, unsigned int buflen);
-extern void tapdev_send(unsigned char *buf, unsigned int buflen);
+void tapdev_init(void);
+unsigned int tapdev_read(unsigned char *buf, unsigned int buflen);
+void tapdev_send(unsigned char *buf, unsigned int buflen);
 
 #define netdev_init()           tapdev_init()
 #define netdev_read(buf,buflen) tapdev_read(buf,buflen)
@@ -213,9 +219,9 @@ extern void tapdev_send(unsigned char *buf, unsigned int buflen);
 /* up_wpcap.c *************************************************************/
 
 #if defined(CONFIG_NET) && defined(__CYGWIN__)
-extern void wpcap_init(void);
-extern unsigned int wpcap_read(unsigned char *buf, unsigned int buflen);
-extern void wpcap_send(unsigned char *buf, unsigned int buflen);
+void wpcap_init(void);
+unsigned int wpcap_read(unsigned char *buf, unsigned int buflen);
+void wpcap_send(unsigned char *buf, unsigned int buflen);
 
 #define netdev_init()           wpcap_init()
 #define netdev_read(buf,buflen) wpcap_read(buf,buflen)
@@ -225,9 +231,9 @@ extern void wpcap_send(unsigned char *buf, unsigned int buflen);
 /* up_netdriver.c *********************************************************/
 
 #ifdef CONFIG_NET
-extern int netdriver_init(void);
-extern int netdriver_setmacaddr(unsigned char *macaddr);
-extern void netdriver_loop(void);
+int netdriver_init(void);
+int netdriver_setmacaddr(unsigned char *macaddr);
+void netdriver_loop(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

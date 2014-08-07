@@ -53,12 +53,15 @@
 /* Efficient, direct access to OS global timer variables will be supported
  * if the execution environment has direct access to kernel global data.
  * The code in this execution context can access the kernel global data
- * directly if:  (1) this is an un-protected, non-kernel build, or (2)
- * this code is being built for execution within the kernel.
+ * directly if:  (1) we are not running tick-less (in which case there is
+ * no global timer data), (2) this is an un-protected, non-kernel build, or
+ * (2) this is a protectd build, but this code is being built for execution
+ * within the kernel space.
  */
 
 #undef __HAVE_KERNEL_GLOBALS
-#if !defined(CONFIG_NUTTX_KERNEL) || defined(__KERNEL__)
+#if !defined(CONFIG_SCHED_TICKLESS) && \
+    (!defined(CONFIG_NUTTX_KERNEL) || defined(__KERNEL__))
 #  define __HAVE_KERNEL_GLOBALS 1
 #else
 #  define __HAVE_KERNEL_GLOBALS 0
@@ -85,12 +88,13 @@
 #define USEC_PER_MSEC               1000
 #define NSEC_PER_USEC               1000
 
-/* The interrupt interval of the system timer is given by MSEC_PER_TICK.
- * This is the expected number of milliseconds between calls from the
- * processor-specific logic to sched_process_timer().  The default value
- * of MSEC_PER_TICK is 10 milliseconds (100KHz).  However, this default
- * setting can be overridden by defining the interval in milliseconds as
- * CONFIG_MSEC_PER_TICK in the board configuration file.
+/* If CONFIG_SCHED_TICKLESS is not defined, then the interrupt interval of
+ * the system timer is given by MSEC_PER_TICK.  This is the expected number
+ * of milliseconds between calls from the processor-specific logic to
+ * sched_process_timer().  The default value of MSEC_PER_TICK is 10
+ * milliseconds (100KHz).  However, this default setting can be overridden
+ * by defining the interval in milliseconds as CONFIG_MSEC_PER_TICK in the
+ * board configuration file.
  *
  * The following calculations are only accurate when (1) there is no
  * truncation involved and (2) the underlying system timer is an even
