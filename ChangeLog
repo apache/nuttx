@@ -8015,3 +8015,7 @@
 	  macro, do access the g_system_timer() global directly (2014-8-6).
 	* sched/clock_systimer.c: Uses interval timer interfaces to get the
 	  time if CONFIG_SCHED_TICKLESS is selected (2014-8-6).
+	* sched/sched_timerexpiration.c, Makefile, os_internal.h,
+	  sched_addreadytorun.c, sched_processtimer.c, sched_unlock.c,
+	  wd_cancel.c, wd_internal.h, and wd_start.c: Implements the
+	  tickless OS (2014-8-7).
