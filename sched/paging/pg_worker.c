@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/pg_worker.c
+ * sched/paging/pg_worker.c
  * Page fill worker thread implementation.
  *
  *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
@@ -53,7 +53,7 @@
 #include <nuttx/clock.h>
 
 #include "os_internal.h"
-#include "pg_internal.h"
+#include "paging/paging.h"
 
 #ifdef CONFIG_PAGING
 

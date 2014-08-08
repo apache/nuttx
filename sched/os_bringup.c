@@ -55,7 +55,7 @@
 
 #include "os_internal.h"
 #ifdef CONFIG_PAGING
-# include "pg_internal.h"
+# include "paging/paging.h"
 #endif
 
 /****************************************************************************

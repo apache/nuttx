@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/pg_internal.h
+ * sched/paging/paging.h
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __SCHED_PG_INTERNAL_H
-#define __SCHED_PG_INTERNAL_H
+#ifndef __SCHED_PAGING_PAGING_H
+#define __SCHED_PAGING_PAGING_H
 
 /****************************************************************************
  * Included Files
@@ -123,4 +123,4 @@ int pg_worker(int argc, char *argv[]);
 
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_PAGING */
-#endif /* __SCHED_PG_INTERNAL_H */
+#endif /* __SCHED_PAGING_PAGING_H */

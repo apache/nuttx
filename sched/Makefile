@@ -110,11 +110,8 @@ ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 TIME_SRCS += nanosleep.c
 endif
 
-ifeq ($(CONFIG_PAGING),y)
-PGFILL_SRCS = pg_miss.c pg_worker.c
-endif
-
 include irq/Make.defs
+include paging/Make.defs
 include group/Make.defs
 include wdog/Make.defs
 include semaphore/Make.defs
@@ -125,9 +122,8 @@ include clock/Make.defs
 include timer/Make.defs
 include environ/Make.defs
 
-CSRCS  = $(MISC_SRCS) $(TSK_SRCS) $(SCHED_SRCS)
-CSRCS += $(TIME_SRCS) $(PGFILL_SRCS)
-CSRCS +=  $(IRQ_SRCS) $(GRP_SRCS) $(WDOG_SRCS) $(SEM_SRCS) $(SIGNAL_SRCS) $(PTHREAD_SRCS) $(MQUEUE_SRCS) $(CLOCK_SRCS) $(TIMER_SRCS) $(ENV_SRCS)
+CSRCS  = $(MISC_SRCS) $(TSK_SRCS) $(SCHED_SRCS) $(TIME_SRCS)
+CSRCS += $(IRQ_SRCS) $(PG_SRCS) $(GRP_SRCS) $(WDOG_SRCS) $(SEM_SRCS) $(SIGNAL_SRCS) $(PTHREAD_SRCS) $(MQUEUE_SRCS) $(CLOCK_SRCS) $(TIMER_SRCS) $(ENV_SRCS)
 
 COBJS = $(CSRCS:.c=$(OBJEXT))
 

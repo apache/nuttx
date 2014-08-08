@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/pg_miss.c
+ * sched/paging/pg_miss.c
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -49,7 +49,7 @@
 #ifdef CONFIG_PAGING
 
 #include "os_internal.h"
-#include "pg_internal.h"
+#include "paging/paging.h"
 
 /****************************************************************************
  * Global Functions
