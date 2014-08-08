@@ -38,43 +38,11 @@
 VPATH =
 DEPPATH = --dep-path .
 
-ASRCS =
-
-SCHED_SRCS  = sched_garbage.c sched_getfiles.c
-SCHED_SRCS += sched_addreadytorun.c sched_removereadytorun.c sched_addprioritized.c
-SCHED_SRCS += sched_mergepending.c sched_addblocked.c sched_removeblocked.c
-SCHED_SRCS += sched_free.c sched_gettcb.c sched_verifytcb.c sched_releasetcb.c
-SCHED_SRCS += sched_getsockets.c sched_getstreams.c
-SCHED_SRCS += sched_setparam.c sched_setpriority.c sched_getparam.c
-SCHED_SRCS += sched_setscheduler.c sched_getscheduler.c
-SCHED_SRCS += sched_yield.c sched_rrgetinterval.c sched_foreach.c
-SCHED_SRCS += sched_lock.c sched_unlock.c sched_lockcount.c sched_self.c
-
-ifeq ($(CONFIG_PRIORITY_INHERITANCE),y)
-SCHED_SRCS += sched_reprioritize.c
-endif
-
-ifeq ($(CONFIG_SCHED_WAITPID),y)
-SCHED_SRCS += sched_waitpid.c
-ifeq ($(CONFIG_SCHED_HAVE_PARENT),y)
-SCHED_SRCS += sched_waitid.c sched_wait.c
-endif
-endif
-
-ifeq ($(CONFIG_SCHED_CPULOAD),y)
-SCHED_SRCS += sched_cpuload.c
-endif
-
-ifeq ($(CONFIG_SCHED_TICKLESS),y)
-SCHED_SRCS += sched_timerexpiration.c
-else
-SCHED_SRCS += sched_processtimer.c
-endif
-
 include init/Make.defs
 include irq/Make.defs
 include paging/Make.defs
 include group/Make.defs
+include sched/Make.defs
 include task/Make.defs
 include errno/Make.defs
 include wdog/Make.defs
@@ -88,6 +56,8 @@ include environ/Make.defs
 
 # REVISIT
 TSK_SRCS += exit.c
+
+ASRCS =
 
 CSRCS  = $(INIT_SRCS) $(IRQ_SRCS) $(PG_SRCS) $(GRP_SRCS) $(SCHED_SRCS)
 CSRCS += $(TSK_SRCS) $(ERRNO_SRCS) $(WDOG_SRCS) $(SEM_SRCS)
