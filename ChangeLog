@@ -8048,3 +8048,12 @@
 	  sched/semaphore (2014-8-8).
 	* sched/environ: Move environment files from sched/ to sched/environ
 	  (2014-8-8).
+	* sched/group: Move group logic from sched/ to sched/group (2014-8-8).
+	* sched/wdog: Move watchdog functions from sched/ to sched/wdog
+	  (2014-8-8).
+	* sched/irq: Move interrupt dispatch logic from sched/ to sched/irq
+	  (2014-8-8).
+	* sched/clock: Move clock functions from sched/ to sched/clock
+	  (2014-8-8).
+	* sched/timer: Move POSIX timer files from sched/ to sched/timer
+	  (2014-8-8).
