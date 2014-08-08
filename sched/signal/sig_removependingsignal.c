@@ -1,7 +1,7 @@
 /************************************************************************
- * sched/sig_cleanup.c
+ * sched/sig_removependingsignal.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,10 +38,20 @@
  ************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <unistd.h>
+#include <signal.h>
+#include <time.h>
+#include <wdog.h>
+#include <assert.h>
+#include <debug.h>
+#include <sched.h>
+
+#include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
 
 #include "os_internal.h"
-#include "sig_internal.h"
+#include "signal/signal.h"
 
 /************************************************************************
  * Definitions
@@ -68,67 +78,41 @@
  ************************************************************************/
 
 /************************************************************************
- * Name: sig_cleanup
+ * Name: sig_removependingsignal
  *
  * Description:
- *   Deallocate all signal-related lists in a TCB.  This function is
- *   called only at task deletion time.  The caller is expected to have
- *   assured the critical section necessary to perform this action.
+ *   Remove the specified signal from the signal pending list
  *
  ************************************************************************/
 
-void sig_cleanup(FAR struct tcb_s *stcb)
+FAR sigpendq_t *sig_removependingsignal(FAR struct tcb_s *stcb, int signo)
 {
-  FAR sigactq_t  *sigact;
-  FAR sigq_t     *sigq;
+  FAR struct task_group_s *group = stcb->group;
+  FAR sigpendq_t *currsig;
+  FAR sigpendq_t *prevsig;
+  irqstate_t  saved_state;
 
-  /* Deallocate all entries in the list of signal actions */
+  DEBUGASSERT(group);
 
-  while ((sigact = (FAR sigactq_t*)sq_remfirst(&stcb->sigactionq)) != NULL)
+  saved_state = irqsave();
+
+  for (prevsig = NULL, currsig = (FAR sigpendq_t*)group->sigpendingq.head;
+       (currsig && currsig->info.si_signo != signo);
+       prevsig = currsig, currsig = currsig->flink);
+
+  if (currsig)
     {
-      sig_releaseaction(sigact);
+      if (prevsig)
+        {
+          sq_remafter((FAR sq_entry_t*)prevsig, &group->sigpendingq);
+        }
+      else
+        {
+          sq_remfirst(&group->sigpendingq);
+        }
     }
 
-  /* Deallocate all entries in the list of pending signal actions */
+  irqrestore(saved_state);
 
-  while ((sigq = (FAR sigq_t*)sq_remfirst(&stcb->sigpendactionq)) != NULL)
-    {
-      sig_releasependingsigaction(sigq);
-    }
-
-  /* Deallocate all entries in the list of posted signal actions */
-
-  while ((sigq = (FAR sigq_t*)sq_remfirst(&stcb->sigpostedq)) != NULL)
-    {
-      sig_releasependingsigaction(sigq);
-    }
-
-   /* Misc. signal-related clean-up */
-
-   stcb->sigprocmask  = ALL_SIGNAL_SET;
-   stcb->sigwaitmask  = NULL_SIGNAL_SET;
+  return currsig;
 }
-
-/************************************************************************
- * Name: sig_release
- *
- * Description:
- *   Deallocate all signal-related lists in a group.  This function is
- *   called only when the last thread leaves the group.  The caller is
- *   expected to have assured the critical section necessary to perform
- *   this action.
- *
- ************************************************************************/
-
-void sig_release(FAR struct task_group_s *group)
-{
-  FAR sigpendq_t *sigpend;
-
-  /* Deallocate all entries in the list of pending signals */
-
-  while ((sigpend = (FAR sigpendq_t*)sq_remfirst(&group->sigpendingq)) != NULL)
-    {
-      sig_releasependingsignal(sigpend);
-    }
-}
-

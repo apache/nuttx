@@ -1,5 +1,5 @@
 /************************************************************************
- * sched/sig_removependingsignal.c
+ * sched/sig_unmaskpendingsignal.c
  *
  *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,19 +39,10 @@
 
 #include <nuttx/config.h>
 
-#include <unistd.h>
-#include <signal.h>
-#include <time.h>
-#include <wdog.h>
-#include <assert.h>
-#include <debug.h>
 #include <sched.h>
 
-#include <nuttx/kmalloc.h>
-#include <nuttx/arch.h>
-
 #include "os_internal.h"
-#include "sig_internal.h"
+#include "signal/signal.h"
 
 /************************************************************************
  * Definitions
@@ -70,7 +61,7 @@
  ************************************************************************/
 
 /************************************************************************
- * Private Functions
+ * Private Function Prototypes
  ************************************************************************/
 
 /************************************************************************
@@ -78,41 +69,75 @@
  ************************************************************************/
 
 /************************************************************************
- * Name: sig_removependingsignal
+ * Name: sig_unmaskpendingsignal
  *
  * Description:
- *   Remove the specified signal from the signal pending list
+ *   Based upon the current setting of the sigprocmask, this function
+ *   unmasks and processes any pending signals.  This function should
+ *   be called whenever the sigprocmask is changed.
  *
  ************************************************************************/
 
-FAR sigpendq_t *sig_removependingsignal(FAR struct tcb_s *stcb, int signo)
+void sig_unmaskpendingsignal(void)
 {
-  FAR struct task_group_s *group = stcb->group;
-  FAR sigpendq_t *currsig;
-  FAR sigpendq_t *prevsig;
-  irqstate_t  saved_state;
+   FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+   sigset_t unmaskedset;
+   FAR sigpendq_t *pendingsig;
+   int signo;
 
-  DEBUGASSERT(group);
+   /* Prohibit any context switches until we are done with this.
+    * We may still be performing signal operations from interrupt
+    * handlers, however, none of the pending signals that we
+    * are concerned with here should be effected.
+    */
 
-  saved_state = irqsave();
+   sched_lock();
 
-  for (prevsig = NULL, currsig = (FAR sigpendq_t*)group->sigpendingq.head;
-       (currsig && currsig->info.si_signo != signo);
-       prevsig = currsig, currsig = currsig->flink);
+   /* Get the set of pending signals that were just unmasked.  The
+    * following operation should be safe because the sigprocmask
+    * can only be changed on this thread of execution.
+    */
 
-  if (currsig)
+   unmaskedset = ~(rtcb->sigprocmask) & sig_pendingset(rtcb);
+
+   /* Loop while there are unmasked pending signals to be processed. */
+
+   while (unmaskedset != NULL_SIGNAL_SET)
     {
-      if (prevsig)
+      /* Pending signals will be processed from lowest numbered signal
+       * to highest
+       */
+
+      signo = sig_lowest(&unmaskedset);
+      if (signo != ERROR)
         {
-          sq_remafter((FAR sq_entry_t*)prevsig, &group->sigpendingq);
-        }
-      else
-        {
-          sq_remfirst(&group->sigpendingq);
+          /* Remove the signal from the set of unmasked signals.  NOTE:
+           * this implicitly assumes that only one instance for a given
+           * signal number is pending.
+           */
+
+          sigdelset(&unmaskedset, signo);
+
+          /* Remove the pending signal from the list of pending signals */
+
+          if ((pendingsig = sig_removependingsignal(rtcb, signo)) != NULL)
+            {
+              /* If there is one, then process it like a normal signal.
+               * Since the signal was pending, then unblocked on this
+               * thread, we can skip the normal group signal dispatching
+               * rules; there can be no other recipient for the signal
+               * other than this thread.
+               */
+
+              sig_tcbdispatch(rtcb, &pendingsig->info);
+
+              /* Then remove it from the pending signal list */
+
+              sig_releasependingsignal(pendingsig);
+            }
         }
     }
 
-  irqrestore(saved_state);
-
-  return currsig;
+  sched_unlock();
 }
+

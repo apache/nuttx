@@ -1,5 +1,5 @@
 /************************************************************************
- * sched/sig_releasependingsigaction.c
+ * sched/sig_lowest.c
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,10 +39,9 @@
 
 #include <nuttx/config.h>
 
-#include <sched.h>
+#include <signal.h>
 
-#include "os_internal.h"
-#include "sig_internal.h"
+#include "signal/signal.h"
 
 /************************************************************************
  * Definitions
@@ -69,52 +68,24 @@
  ************************************************************************/
 
 /************************************************************************
- * Name: sig_releasependingsigaction
+ * Name: sig_lowest
  *
  * Description:
- *   Deallocate a pending signal action Q entry
+ *   Return the lowest signal number that is a member of a set of signals.
  *
  ************************************************************************/
 
-void sig_releasependingsigaction(FAR sigq_t *sigq)
+int sig_lowest(sigset_t *set)
 {
-  irqstate_t saved_state;
+  int signo;
 
-  /* If this is a generally available pre-allocated structyre,
-   * then just put it back in the free list.
-   */
-
-  if (sigq->type == SIG_ALLOC_FIXED)
+  for (signo = MIN_SIGNO; signo <= MAX_SIGNO; signo++)
     {
-      /* Make sure we avoid concurrent access to the free
-       * list from interrupt handlers. */
-
-      saved_state = irqsave();
-      sq_addlast((FAR sq_entry_t*)sigq, &g_sigpendingaction);
-      irqrestore(saved_state);
-   }
-
-  /* If this is a message pre-allocated for interrupts,
-   * then put it back in the correct  free list.
-   */
-
-  else if (sigq->type == SIG_ALLOC_IRQ)
-    {
-      /* Make sure we avoid concurrent access to the free
-       * list from interrupt handlers. */
-
-      saved_state = irqsave();
-      sq_addlast((FAR sq_entry_t*)sigq, &g_sigpendingirqaction);
-      irqrestore(saved_state);
+      if (sigismember(set, signo))
+        {
+          return signo;
+        }
     }
 
-  /* Otherwise, deallocate it.  Note:  interrupt handlers
-   * will never deallocate signals because they will not
-   * receive them.
-   */
-
-  else if (sigq->type == SIG_ALLOC_DYN)
-    {
-      sched_kfree(sigq);
-    }
+  return ERROR;
 }

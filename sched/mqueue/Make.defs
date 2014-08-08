@@ -44,7 +44,7 @@ ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 MQUEUE_SRCS += mq_waitirq.c mq_notify.c
 endif
 
-# Include mq build support
+# Include mqueue build support
 
 DEPPATH += --dep-path mqueue
 VPATH += :mqueue

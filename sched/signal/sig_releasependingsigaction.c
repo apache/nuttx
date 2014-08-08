@@ -1,5 +1,5 @@
 /************************************************************************
- * sched/sig_findaction.c
+ * sched/sig_releasependingsigaction.c
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -38,7 +38,11 @@
  ************************************************************************/
 
 #include <nuttx/config.h>
-#include "sig_internal.h"
+
+#include <sched.h>
+
+#include "os_internal.h"
+#include "signal/signal.h"
 
 /************************************************************************
  * Definitions
@@ -57,7 +61,7 @@
  ************************************************************************/
 
 /************************************************************************
- * Private Function Prototypes
+ * Private Functions
  ************************************************************************/
 
 /************************************************************************
@@ -65,36 +69,52 @@
  ************************************************************************/
 
 /************************************************************************
- * Name: sig_findaction
+ * Name: sig_releasependingsigaction
  *
  * Description:
- *   Allocate a new element for a signal queue
+ *   Deallocate a pending signal action Q entry
  *
  ************************************************************************/
 
-FAR sigactq_t *sig_findaction(FAR struct tcb_s *stcb, int signo)
+void sig_releasependingsigaction(FAR sigq_t *sigq)
 {
-  FAR sigactq_t *sigact = NULL;
+  irqstate_t saved_state;
 
-  /* Verify the caller's sanity */
+  /* If this is a generally available pre-allocated structyre,
+   * then just put it back in the free list.
+   */
 
-  if (stcb)
+  if (sigq->type == SIG_ALLOC_FIXED)
     {
-      /* Sigactions can only be assigned to the currently executing
-       * thread.  So, a simple lock ought to give us sufficient
-       * protection.
-       */
+      /* Make sure we avoid concurrent access to the free
+       * list from interrupt handlers. */
 
-      sched_lock();
+      saved_state = irqsave();
+      sq_addlast((FAR sq_entry_t*)sigq, &g_sigpendingaction);
+      irqrestore(saved_state);
+   }
 
-      /* Seach the list for a sigaction on this signal */
+  /* If this is a message pre-allocated for interrupts,
+   * then put it back in the correct  free list.
+   */
 
-      for (sigact = (FAR sigactq_t*)stcb->sigactionq.head;
-          ((sigact) && (sigact->signo != signo));
-          sigact = sigact->flink);
+  else if (sigq->type == SIG_ALLOC_IRQ)
+    {
+      /* Make sure we avoid concurrent access to the free
+       * list from interrupt handlers. */
 
-      sched_unlock();
+      saved_state = irqsave();
+      sq_addlast((FAR sq_entry_t*)sigq, &g_sigpendingirqaction);
+      irqrestore(saved_state);
     }
 
-  return sigact;
+  /* Otherwise, deallocate it.  Note:  interrupt handlers
+   * will never deallocate signals because they will not
+   * receive them.
+   */
+
+  else if (sigq->type == SIG_ALLOC_DYN)
+    {
+      sched_kfree(sigq);
+    }
 }

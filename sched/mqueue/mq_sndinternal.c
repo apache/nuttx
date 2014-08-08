@@ -53,7 +53,7 @@
 
 #include  "os_internal.h"
 #ifndef CONFIG_DISABLE_SIGNALS
-# include "sig_internal.h"
+# include "signal/signal.h"
 #endif
 #include  "mqueue/mqueue.h"
 

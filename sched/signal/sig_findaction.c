@@ -1,7 +1,7 @@
 /************************************************************************
- * sched/sig_kill.c
+ * sched/sig_findaction.c
  *
- *   Copyright (C) 2007, 2009, 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,103 +38,63 @@
  ************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <sys/types.h>
-#include <sched.h>
-#include <errno.h>
-#include <debug.h>
-
-#include "os_internal.h"
-#include "sig_internal.h"
+#include "signal/signal.h"
 
 /************************************************************************
- * Global Functions
+ * Definitions
  ************************************************************************/
 
 /************************************************************************
- * Name: kill
+ * Private Type Declarations
+ ************************************************************************/
+
+/************************************************************************
+ * Global Variables
+ ************************************************************************/
+
+/************************************************************************
+ * Private Variables
+ ************************************************************************/
+
+/************************************************************************
+ * Private Function Prototypes
+ ************************************************************************/
+
+/************************************************************************
+ * Public Functions
+ ************************************************************************/
+
+/************************************************************************
+ * Name: sig_findaction
  *
  * Description:
- *   The kill() system call can be used to send any signal to any task.
- *
- *   Limitation: Sending of signals to 'process groups' is not
- *   supported in NuttX
- *
- * Parameters:
- *   pid - The id of the task to receive the signal.  The POSIX kill
- *     specification encodes process group information as zero and
- *     negative pid values.  Only positive, non-zero values of pid are
- *     supported by this implementation.
- *   signo - The signal number to send.  If signo is zero, no signal is
- *     sent, but all error checking is performed.
- *
- * Returned Value:
- *    On success (at least one signal was sent), zero is returned.  On
- *    error, -1 is returned, and errno is set appropriately:
- *
- *    EINVAL An invalid signal was specified.
- *    EPERM  The process does not have permission to send the
- *           signal to any of the target processes.
- *    ESRCH  The pid or process group does not exist.
- *    ENOSYS Do not support sending signals to process groups.
- *
- * Assumptions:
+ *   Allocate a new element for a signal queue
  *
  ************************************************************************/
 
-int kill(pid_t pid, int signo)
+FAR sigactq_t *sig_findaction(FAR struct tcb_s *stcb, int signo)
 {
-#ifdef CONFIG_SCHED_HAVE_PARENT
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
-#endif
-  siginfo_t info;
-  int ret;
+  FAR sigactq_t *sigact = NULL;
 
-  /* We do not support sending signals to process groups */
+  /* Verify the caller's sanity */
 
-  if (pid <= 0)
+  if (stcb)
     {
-      ret = -ENOSYS;
-      goto errout;
+      /* Sigactions can only be assigned to the currently executing
+       * thread.  So, a simple lock ought to give us sufficient
+       * protection.
+       */
+
+      sched_lock();
+
+      /* Seach the list for a sigaction on this signal */
+
+      for (sigact = (FAR sigactq_t*)stcb->sigactionq.head;
+          ((sigact) && (sigact->signo != signo));
+          sigact = sigact->flink);
+
+      sched_unlock();
     }
 
-  /* Make sure that the signal is valid */
-
-  if (!GOOD_SIGNO(signo))
-    {
-      ret = -EINVAL;
-      goto errout;
-    }
-
-  /* Keep things stationary through the following */
-
-  sched_lock();
-
-  /* Create the siginfo structure */
-
-  info.si_signo           = signo;
-  info.si_code            = SI_USER;
-  info.si_value.sival_ptr = NULL;
-#ifdef CONFIG_SCHED_HAVE_PARENT
-  info.si_pid             = rtcb->pid;
-  info.si_status          = OK;
-#endif
-
-  /* Send the signal */
-
-  ret = sig_dispatch(pid, &info);
-  sched_unlock();
-
-  if (ret < 0)
-    {
-      goto errout;
-    }
-
-  return OK;
-
-errout:
-  set_errno(-ret);
-  return ERROR;
+  return sigact;
 }
-
-

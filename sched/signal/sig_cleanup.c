@@ -1,5 +1,5 @@
 /************************************************************************
- * sched/sig_releasependingsignal.c
+ * sched/sig_cleanup.c
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -38,20 +38,10 @@
  ************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <unistd.h>
-#include <signal.h>
-#include <time.h>
-#include <wdog.h>
-#include <assert.h>
-#include <debug.h>
-#include <sched.h>
-
-#include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
 
 #include "os_internal.h"
-#include "sig_internal.h"
+#include "signal/signal.h"
 
 /************************************************************************
  * Definitions
@@ -78,54 +68,67 @@
  ************************************************************************/
 
 /************************************************************************
- * Name: sig_releasependingsignal
+ * Name: sig_cleanup
  *
  * Description:
- *   Deallocate a pending signal list entry
+ *   Deallocate all signal-related lists in a TCB.  This function is
+ *   called only at task deletion time.  The caller is expected to have
+ *   assured the critical section necessary to perform this action.
  *
  ************************************************************************/
 
-void sig_releasependingsignal(FAR sigpendq_t *sigpend)
+void sig_cleanup(FAR struct tcb_s *stcb)
 {
-  irqstate_t saved_state;
+  FAR sigactq_t  *sigact;
+  FAR sigq_t     *sigq;
 
-  /* If this is a generally available pre-allocated structyre,
-   * then just put it back in the free list.
-   */
+  /* Deallocate all entries in the list of signal actions */
 
-  if (sigpend->type == SIG_ALLOC_FIXED)
+  while ((sigact = (FAR sigactq_t*)sq_remfirst(&stcb->sigactionq)) != NULL)
     {
-      /* Make sure we avoid concurrent access to the free
-       * list from interrupt handlers.
-       */
-
-      saved_state = irqsave();
-      sq_addlast((FAR sq_entry_t*)sigpend, &g_sigpendingsignal);
-      irqrestore(saved_state);
+      sig_releaseaction(sigact);
     }
 
-  /* If this is a message pre-allocated for interrupts,
-   * then put it back in the correct free list.
-   */
+  /* Deallocate all entries in the list of pending signal actions */
 
-  else if (sigpend->type == SIG_ALLOC_IRQ)
+  while ((sigq = (FAR sigq_t*)sq_remfirst(&stcb->sigpendactionq)) != NULL)
     {
-      /* Make sure we avoid concurrent access to the free
-       * list from interrupt handlers.
-       */
-
-      saved_state = irqsave();
-      sq_addlast((FAR sq_entry_t*)sigpend, &g_sigpendingirqsignal);
-      irqrestore(saved_state);
+      sig_releasependingsigaction(sigq);
     }
 
-  /* Otherwise, deallocate it.  Note:  interrupt handlers
-   * will never deallocate signals because they will not
-   * receive them.
-   */
+  /* Deallocate all entries in the list of posted signal actions */
 
-  else if (sigpend->type == SIG_ALLOC_DYN)
+  while ((sigq = (FAR sigq_t*)sq_remfirst(&stcb->sigpostedq)) != NULL)
     {
-      sched_kfree(sigpend);
+      sig_releasependingsigaction(sigq);
+    }
+
+   /* Misc. signal-related clean-up */
+
+   stcb->sigprocmask  = ALL_SIGNAL_SET;
+   stcb->sigwaitmask  = NULL_SIGNAL_SET;
+}
+
+/************************************************************************
+ * Name: sig_release
+ *
+ * Description:
+ *   Deallocate all signal-related lists in a group.  This function is
+ *   called only when the last thread leaves the group.  The caller is
+ *   expected to have assured the critical section necessary to perform
+ *   this action.
+ *
+ ************************************************************************/
+
+void sig_release(FAR struct task_group_s *group)
+{
+  FAR sigpendq_t *sigpend;
+
+  /* Deallocate all entries in the list of pending signals */
+
+  while ((sigpend = (FAR sigpendq_t*)sq_remfirst(&group->sigpendingq)) != NULL)
+    {
+      sig_releasependingsignal(sigpend);
     }
 }
+

@@ -1,7 +1,7 @@
 /************************************************************************
- * sched/sig_lowest.c
+ * sched/sig_kill.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,53 +39,102 @@
 
 #include <nuttx/config.h>
 
-#include <signal.h>
+#include <sys/types.h>
+#include <sched.h>
+#include <errno.h>
+#include <debug.h>
 
-#include "sig_internal.h"
+#include "os_internal.h"
+#include "signal/signal.h"
 
 /************************************************************************
- * Definitions
+ * Global Functions
  ************************************************************************/
 
 /************************************************************************
- * Private Type Declarations
- ************************************************************************/
-
-/************************************************************************
- * Global Variables
- ************************************************************************/
-
-/************************************************************************
- * Private Variables
- ************************************************************************/
-
-/************************************************************************
- * Private Functions
- ************************************************************************/
-
-/************************************************************************
- * Public Functions
- ************************************************************************/
-
-/************************************************************************
- * Name: sig_lowest
+ * Name: kill
  *
  * Description:
- *   Return the lowest signal number that is a member of a set of signals.
+ *   The kill() system call can be used to send any signal to any task.
+ *
+ *   Limitation: Sending of signals to 'process groups' is not
+ *   supported in NuttX
+ *
+ * Parameters:
+ *   pid - The id of the task to receive the signal.  The POSIX kill
+ *     specification encodes process group information as zero and
+ *     negative pid values.  Only positive, non-zero values of pid are
+ *     supported by this implementation.
+ *   signo - The signal number to send.  If signo is zero, no signal is
+ *     sent, but all error checking is performed.
+ *
+ * Returned Value:
+ *    On success (at least one signal was sent), zero is returned.  On
+ *    error, -1 is returned, and errno is set appropriately:
+ *
+ *    EINVAL An invalid signal was specified.
+ *    EPERM  The process does not have permission to send the
+ *           signal to any of the target processes.
+ *    ESRCH  The pid or process group does not exist.
+ *    ENOSYS Do not support sending signals to process groups.
+ *
+ * Assumptions:
  *
  ************************************************************************/
 
-int sig_lowest(sigset_t *set)
+int kill(pid_t pid, int signo)
 {
-  int signo;
+#ifdef CONFIG_SCHED_HAVE_PARENT
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
+#endif
+  siginfo_t info;
+  int ret;
 
-  for (signo = MIN_SIGNO; signo <= MAX_SIGNO; signo++)
+  /* We do not support sending signals to process groups */
+
+  if (pid <= 0)
     {
-      if (sigismember(set, signo))
-        {
-          return signo;
-        }
+      ret = -ENOSYS;
+      goto errout;
     }
 
+  /* Make sure that the signal is valid */
+
+  if (!GOOD_SIGNO(signo))
+    {
+      ret = -EINVAL;
+      goto errout;
+    }
+
+  /* Keep things stationary through the following */
+
+  sched_lock();
+
+  /* Create the siginfo structure */
+
+  info.si_signo           = signo;
+  info.si_code            = SI_USER;
+  info.si_value.sival_ptr = NULL;
+#ifdef CONFIG_SCHED_HAVE_PARENT
+  info.si_pid             = rtcb->pid;
+  info.si_status          = OK;
+#endif
+
+  /* Send the signal */
+
+  ret = sig_dispatch(pid, &info);
+  sched_unlock();
+
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+  return OK;
+
+errout:
+  set_errno(-ret);
   return ERROR;
 }
+
+

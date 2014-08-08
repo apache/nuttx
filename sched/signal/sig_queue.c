@@ -46,7 +46,7 @@
 #include <errno.h>
 
 #include "os_internal.h"
-#include "sig_internal.h"
+#include "signal/signal.h"
 
 /****************************************************************************
  * Definitions

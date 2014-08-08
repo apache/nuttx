@@ -46,7 +46,7 @@
 
 #include "os_internal.h"
 #include "clock_internal.h"
-#include "sig_internal.h"
+#include "signal/signal.h"
 #include "timer_internal.h"
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS

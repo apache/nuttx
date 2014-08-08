@@ -53,7 +53,7 @@
 #include "os_internal.h"
 #include "pthread_internal.h"
 #include "clock_internal.h"
-#include "sig_internal.h"
+#include "signal/signal.h"
 
 /****************************************************************************
  * Definitions

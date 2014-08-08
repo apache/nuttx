@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/sig_internal.h
+ * sched/signal/signal.h
  *
- *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __SCHED_SIG_INTERNAL_H
-#define __SCHED_SIG_INTERNAL_H
+#ifndef __SCHED_SIGNAL_SIGNAL_H
+#define __SCHED_SIGNAL_SIGNAL_H
 
 /****************************************************************************
  * Included Files
@@ -198,4 +198,4 @@ void               sig_releasependingsignal(FAR sigpendq_t *sigpend);
 FAR sigpendq_t    *sig_removependingsignal(FAR struct tcb_s *stcb, int signo);
 void               sig_unmaskpendingsignal(void);
 
-#endif /* __SCHED_SIG_INTERNAL_H */
+#endif /* __SCHED_SIGNAL_SIGNAL_H */

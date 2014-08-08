@@ -51,7 +51,7 @@
 #include "os_internal.h"
 #include "group_internal.h"
 #include "sem_internal.h"
-#include "sig_internal.h"
+#include "signal/signal.h"
 #include "mqueue/mqueue.h"
 
 /****************************************************************************

@@ -183,18 +183,15 @@ endif
 
 IRQ_SRCS = irq_initialize.c irq_attach.c irq_dispatch.c irq_unexpectedisr.c
 
+include signal/Make.defs
 include mqueue/Make.defs
 
 CSRCS  = $(MISC_SRCS) $(TSK_SRCS) $(GRP_SRCS) $(SCHED_SRCS) $(WDOG_SRCS)
 CSRCS += $(TIME_SRCS) $(SEM_SRCS) $(TIMER_SRCS) $(PGFILL_SRCS)
-CSRCS += $(IRQ_SRCS) $(CLOCK_SRCS) $(MQUEUE_SRCS)
+CSRCS += $(IRQ_SRCS) $(CLOCK_SRCS) $(MQUEUE_SRCS) $(SIGNAL_SRCS)
 
 ifneq ($(CONFIG_DISABLE_PTHREAD),y)
 CSRCS += $(PTHREAD_SRCS)
-endif
-
-ifneq ($(CONFIG_DISABLE_SIGNALS),y)
-CSRCS += $(SIGNAL_SRCS)
 endif
 
 ifneq ($(CONFIG_DISABLE_ENVIRON),y)

@@ -1,7 +1,7 @@
 /************************************************************************
- * sched/sig_unmaskpendingsignal.c
+ * sched/sig_allocatependingsigaction.c
  *
- *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,10 +39,12 @@
 
 #include <nuttx/config.h>
 
-#include <sched.h>
+#include <signal.h>
+#include <assert.h>
+#include <nuttx/arch.h>
 
 #include "os_internal.h"
-#include "sig_internal.h"
+#include "signal/signal.h"
 
 /************************************************************************
  * Definitions
@@ -69,75 +71,67 @@
  ************************************************************************/
 
 /************************************************************************
- * Name: sig_unmaskpendingsignal
+ * Name: sig_allocatependingsigaction
  *
  * Description:
- *   Based upon the current setting of the sigprocmask, this function
- *   unmasks and processes any pending signals.  This function should
- *   be called whenever the sigprocmask is changed.
+ *   Allocate a new element for the pending signal action queue
  *
  ************************************************************************/
 
-void sig_unmaskpendingsignal(void)
+FAR sigq_t *sig_allocatependingsigaction(void)
 {
-   FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
-   sigset_t unmaskedset;
-   FAR sigpendq_t *pendingsig;
-   int signo;
+  FAR sigq_t    *sigq;
+  irqstate_t saved_state;
 
-   /* Prohibit any context switches until we are done with this.
-    * We may still be performing signal operations from interrupt
-    * handlers, however, none of the pending signals that we
-    * are concerned with here should be effected.
-    */
+  /* Check if we were called from an interrupt handler. */
 
-   sched_lock();
-
-   /* Get the set of pending signals that were just unmasked.  The
-    * following operation should be safe because the sigprocmask
-    * can only be changed on this thread of execution.
-    */
-
-   unmaskedset = ~(rtcb->sigprocmask) & sig_pendingset(rtcb);
-
-   /* Loop while there are unmasked pending signals to be processed. */
-
-   while (unmaskedset != NULL_SIGNAL_SET)
+  if (up_interrupt_context())
     {
-      /* Pending signals will be processed from lowest numbered signal
-       * to highest
+      /* Try to get the pending signal action structure from the free list */
+
+      sigq = (FAR sigq_t*)sq_remfirst(&g_sigpendingaction);
+
+      /* If so, then try the special list of structures reserved for
+       * interrupt handlers
        */
 
-      signo = sig_lowest(&unmaskedset);
-      if (signo != ERROR)
+      if (!sigq)
         {
-          /* Remove the signal from the set of unmasked signals.  NOTE:
-           * this implicitly assumes that only one instance for a given
-           * signal number is pending.
-           */
+          sigq = (FAR sigq_t*)sq_remfirst(&g_sigpendingirqaction);
+        }
+    }
 
-          sigdelset(&unmaskedset, signo);
+  /* If we were not called from an interrupt handler, then we are
+   * free to allocate pending signal action structures if necessary. */
 
-          /* Remove the pending signal from the list of pending signals */
+  else
+    {
+      /* Try to get the pending signal action structure from the free list */
 
-          if ((pendingsig = sig_removependingsignal(rtcb, signo)) != NULL)
+      saved_state = irqsave();
+      sigq = (FAR sigq_t*)sq_remfirst(&g_sigpendingaction);
+      irqrestore(saved_state);
+
+      /* Check if we got one. */
+
+      if (!sigq)
+        {
+          /* No...Try the resource pool */
+
+          if (!sigq)
             {
-              /* If there is one, then process it like a normal signal.
-               * Since the signal was pending, then unblocked on this
-               * thread, we can skip the normal group signal dispatching
-               * rules; there can be no other recipient for the signal
-               * other than this thread.
-               */
+              sigq = (FAR sigq_t *)kmalloc((sizeof (sigq_t)));
+            }
 
-              sig_tcbdispatch(rtcb, &pendingsig->info);
+          /* Check if we got an allocated message */
 
-              /* Then remove it from the pending signal list */
-
-              sig_releasependingsignal(pendingsig);
+          if (sigq)
+            {
+              sigq->type = SIG_ALLOC_DYN;
             }
         }
     }
 
-  sched_unlock();
+  return sigq;
 }
 

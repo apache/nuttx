@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/sig_mqnotempty.c
+ * sched/sig_suspend.c
  *
  *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -38,15 +38,16 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
 
 #include <signal.h>
-#include <sched.h>
-#include <errno.h>
+#include <assert.h>
 #include <debug.h>
+#include <sched.h>
+
+#include <nuttx/arch.h>
 
 #include "os_internal.h"
-#include "sig_internal.h"
+#include "signal/signal.h"
 
 /****************************************************************************
  * Definitions
@@ -65,7 +66,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functionss
+ * Private Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -73,60 +74,104 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sig_mqnotempty
+ * Name: sigsuspend
  *
  * Description:
- *   This function is equivalent to sigqueue(), but supports the messaging
- *   system's requirement to signal a task when a message queue becomes
- *   non-empty.  It is identical to sigqueue(), except that it sets the
- *   si_code field in the siginfo structure to SI_MESGQ rather than SI_QUEUE.
+ *
+ *   The sigsuspend() function replaces the signal mask of the task with the
+ *   set of signals pointed to by the argument 'set' and then suspends the
+ *   process until delivery of a signal to the task.
+ *
+ *   If the effect of the set argument is to unblock a pending signal, then
+ *   no wait is performed.
+ *
+ *   The original signal mask is restored when this function returns.
+ *
+ *   Waiting for an empty signal set stops a task without freeing any
+ *   resources.
+ *
+ * Parameters:
+ *   set - signal mask to use while suspended.
+ *
+ * Return Value:
+ *   -1 (ERROR) always
+ *
+ * Assumptions:
+ *
+ * POSIX Compatibility:
+ *   int sigsuspend(const sigset_t *set);
+ *
+ *   POSIX states that sigsuspend() "suspends the process until delivery of
+ *   a signal whose action is either to execute a signal-catching function
+ *   or to terminate the process."  Only the deliver of a signal is required
+ *   in the present implementation (even if the signal is ignored).
  *
  ****************************************************************************/
 
-#ifdef CONFIG_CAN_PASS_STRUCTS
-int sig_mqnotempty(int pid, int signo, union sigval value)
-#else
-int sig_mqnotempty(int pid, int signo, void *sival_ptr)
-#endif
+int sigsuspend(FAR const sigset_t *set)
 {
-#ifdef CONFIG_SCHED_HAVE_PARENT
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
-#endif
-  siginfo_t info;
-  int ret;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  sigset_t intersection;
+  sigset_t saved_sigprocmask;
+  FAR sigpendq_t *sigpend;
+  irqstate_t saved_state;
+  int unblocksigno;
 
-#ifdef CONFIG_CAN_PASS_STRUCTS
-  sdbg("pid=%p signo=%d value=%d\n", pid, signo, value.sival_int);
-#else
-  sdbg("pid=%p signo=%d sival_ptr=%p\n", pid, signo, sival_ptr);
-#endif
+  /* Several operations must be performed below:  We must determine if any
+   * signal is pending and, if not, wait for the signal.  Since signals can
+   * be posted from the interrupt level, there is a race condition that
+   * can only be eliminated by disabling interrupts!
+   */
 
-  /* Verify that we can perform the signalling operation */
+  sched_lock();  /* Not necessary */
+  saved_state = irqsave();
 
-  if (!GOOD_SIGNO(signo))
+  /* Check if there is a pending signal corresponding to one of the
+   * signals that will be unblocked by the new sigprocmask.
+   */
+
+  intersection = ~(*set) & sig_pendingset(rtcb);
+  if (intersection != NULL_SIGNAL_SET)
     {
-      return -EINVAL;
+      /* One or more of the signals in intersections is sufficient to cause
+       * us to not wait.  Pick the lowest numbered signal and mark it not
+       * pending.
+       */
+
+      unblocksigno = sig_lowest(&intersection);
+      sigpend = sig_removependingsignal(rtcb, unblocksigno);
+      ASSERT(sigpend);
+
+      sig_releasependingsignal(sigpend);
+      irqrestore(saved_state);
+    }
+  else
+    {
+      /* Its time to wait. Save a copy of the old sigprocmask and install
+       * the new (temporary) sigprocmask
+       */
+
+      saved_sigprocmask = rtcb->sigprocmask;
+      rtcb->sigprocmask = *set;
+      rtcb->sigwaitmask = NULL_SIGNAL_SET;
+
+      /* And wait until one of the unblocked signals is posted */
+
+      up_block_task(rtcb, TSTATE_WAIT_SIG);
+
+      /* We are running again, restore the original sigprocmask */
+
+      rtcb->sigprocmask = saved_sigprocmask;
+      irqrestore(saved_state);
+
+      /* Now, handle the (rare?) case where (a) a blocked signal was received
+       * while the task was suspended but (b) restoring the original
+       * sigprocmask will unblock the signal.
+       */
+
+      sig_unmaskpendingsignal();
     }
 
-  /* Create the siginfo structure */
-
-  info.si_signo           = signo;
-  info.si_code            = SI_MESGQ;
-#ifdef CONFIG_CAN_PASS_STRUCTS
-  info.si_value           = value;
-#else
-  info.si_value.sival_ptr = sival_ptr;
-#endif
-#ifdef CONFIG_SCHED_HAVE_PARENT
-  info.si_pid             = rtcb->pid;
-  info.si_status          = OK;
-#endif
-
-  /* Process the receipt of the signal */
-
-  sched_lock();
-  ret = sig_dispatch(pid, &info);
   sched_unlock();
-
-  return ret;
+  return ERROR;
 }

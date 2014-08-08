@@ -1,5 +1,5 @@
 /************************************************************************
- * sched/sig_allocatependingsigaction.c
+ * sched/sig_releasependingsignal.c
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,12 +39,19 @@
 
 #include <nuttx/config.h>
 
+#include <unistd.h>
 #include <signal.h>
+#include <time.h>
+#include <wdog.h>
 #include <assert.h>
+#include <debug.h>
+#include <sched.h>
+
+#include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
 
 #include "os_internal.h"
-#include "sig_internal.h"
+#include "signal/signal.h"
 
 /************************************************************************
  * Definitions
@@ -63,7 +70,7 @@
  ************************************************************************/
 
 /************************************************************************
- * Private Function Prototypes
+ * Private Functions
  ************************************************************************/
 
 /************************************************************************
@@ -71,67 +78,54 @@
  ************************************************************************/
 
 /************************************************************************
- * Name: sig_allocatependingsigaction
+ * Name: sig_releasependingsignal
  *
  * Description:
- *   Allocate a new element for the pending signal action queue
+ *   Deallocate a pending signal list entry
  *
  ************************************************************************/
 
-FAR sigq_t *sig_allocatependingsigaction(void)
+void sig_releasependingsignal(FAR sigpendq_t *sigpend)
 {
-  FAR sigq_t    *sigq;
   irqstate_t saved_state;
 
-  /* Check if we were called from an interrupt handler. */
+  /* If this is a generally available pre-allocated structyre,
+   * then just put it back in the free list.
+   */
 
-  if (up_interrupt_context())
+  if (sigpend->type == SIG_ALLOC_FIXED)
     {
-      /* Try to get the pending signal action structure from the free list */
-
-      sigq = (FAR sigq_t*)sq_remfirst(&g_sigpendingaction);
-
-      /* If so, then try the special list of structures reserved for
-       * interrupt handlers
+      /* Make sure we avoid concurrent access to the free
+       * list from interrupt handlers.
        */
 
-      if (!sigq)
-        {
-          sigq = (FAR sigq_t*)sq_remfirst(&g_sigpendingirqaction);
-        }
+      saved_state = irqsave();
+      sq_addlast((FAR sq_entry_t*)sigpend, &g_sigpendingsignal);
+      irqrestore(saved_state);
     }
 
-  /* If we were not called from an interrupt handler, then we are
-   * free to allocate pending signal action structures if necessary. */
+  /* If this is a message pre-allocated for interrupts,
+   * then put it back in the correct free list.
+   */
 
-  else
+  else if (sigpend->type == SIG_ALLOC_IRQ)
     {
-      /* Try to get the pending signal action structure from the free list */
+      /* Make sure we avoid concurrent access to the free
+       * list from interrupt handlers.
+       */
 
       saved_state = irqsave();
-      sigq = (FAR sigq_t*)sq_remfirst(&g_sigpendingaction);
+      sq_addlast((FAR sq_entry_t*)sigpend, &g_sigpendingirqsignal);
       irqrestore(saved_state);
-
-      /* Check if we got one. */
-
-      if (!sigq)
-        {
-          /* No...Try the resource pool */
-
-          if (!sigq)
-            {
-              sigq = (FAR sigq_t *)kmalloc((sizeof (sigq_t)));
-            }
-
-          /* Check if we got an allocated message */
-
-          if (sigq)
-            {
-              sigq->type = SIG_ALLOC_DYN;
-            }
-        }
     }
 
-  return sigq;
-}
+  /* Otherwise, deallocate it.  Note:  interrupt handlers
+   * will never deallocate signals because they will not
+   * receive them.
+   */
 
+  else if (sigpend->type == SIG_ALLOC_DYN)
+    {
+      sched_kfree(sigpend);
+    }
+}
