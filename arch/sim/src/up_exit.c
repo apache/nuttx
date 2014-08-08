@@ -44,6 +44,7 @@
 
 #include <nuttx/arch.h>
 
+#include "task/task.h"
 #include "os_internal.h"
 #include "up_internal.h"
 
