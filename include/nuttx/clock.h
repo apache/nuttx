@@ -55,7 +55,7 @@
  * The code in this execution context can access the kernel global data
  * directly if:  (1) we are not running tick-less (in which case there is
  * no global timer data), (2) this is an un-protected, non-kernel build, or
- * (2) this is a protectd build, but this code is being built for execution
+ * (2) this is a protected build, but this code is being built for execution
  * within the kernel space.
  */
 
@@ -89,16 +89,16 @@
 #define NSEC_PER_USEC               1000
 
 /* If CONFIG_SCHED_TICKLESS is not defined, then the interrupt interval of
- * the system timer is given by MSEC_PER_TICK.  This is the expected number
- * of milliseconds between calls from the processor-specific logic to
- * sched_process_timer().  The default value of MSEC_PER_TICK is 10
- * milliseconds (100KHz).  However, this default setting can be overridden
+ * the system timer is given by USEC_PER_TICK.  This is the expected number
+ * of microseconds between calls from the processor-specific logic to
+ * sched_process_timer().  The default value of USEC_PER_TICK is 10000
+ * microseconds (100KHz).  However, this default setting can be overridden
  * by defining the interval in microseconds as CONFIG_USEC_PER_TICK in the
  * NuttX configuration file.
  *
  * The following calculations are only accurate when (1) there is no
  * truncation involved and (2) the underlying system timer is an even
- * multiple of milliseconds.  If (2) is not true, you will probably want
+ * multiple of microseconds.  If (2) is not true, you will probably want
  * to redefine all of the following.
  */
 
@@ -114,7 +114,7 @@
  */
 
 #define TICK_PER_DSEC         (USEC_PER_DSEC / USEC_PER_TICK)            /* Truncates! */
-#define TICK_PER_SEC          (USEC_PER_SEC / USEC_PER_TICK)             /* Truncates! */
+#define TICK_PER_SEC          (USEC_PER_SEC  / USEC_PER_TICK)            /* Truncates! */
 #define TICK_PER_MSEC         (USEC_PER_MSEC / USEC_PER_TICK)            /* Truncates! */
 #define MSEC_PER_TICK         (USEC_PER_TICK / USEC_PER_MSEC)            /* Truncates! */
 #define NSEC_PER_TICK         (USEC_PER_TICK * NSEC_PER_USEC)            /* Exact */
@@ -128,11 +128,11 @@
 #  define MSEC2TICK(msec)     USEC2TICK(msec * 1000)                     /* Rounds */
 #endif
 
-#define DSEC2TICK(dsec)       MSEC2TICK((dsec)*MSEC_PER_DSEC)            /* Exact */
-#define SEC2TICK(sec)         MSEC2TICK((sec)*MSEC_PER_SEC)              /* Exact */
+#define DSEC2TICK(dsec)       MSEC2TICK((dsec) * MSEC_PER_DSEC)          /* Rounds */
+#define SEC2TICK(sec)         MSEC2TICK((sec)  * MSEC_PER_SEC)           /* Rounds */
 
-#define TICK2NSEC(tick)       ((tick)*NSEC_PER_TICK)                     /* Exact */
-#define TICK2USEC(tick)       ((tick)*USEC_PER_TICK)                     /* Exact */
+#define TICK2NSEC(tick)       ((tick) * NSEC_PER_TICK)                   /* Exact */
+#define TICK2USEC(tick)       ((tick) * USEC_PER_TICK)                   /* Exact */
 
 #if (MSEC_PER_TICK * USEC_PER_MSEC) == USEC_PER_TICK
 #  define TICK2MSEC(tick)     ((tick)*MSEC_PER_TICK)                     /* Exact */

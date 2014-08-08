@@ -174,7 +174,7 @@ void apb_free(FAR struct ap_buffer_s *apb)
 
   if (refcount <= 1)
     {
-      auddbg("Freeing %p\n", apb);
+      audvdbg("Freeing %p\n", apb);
       lib_ufree(apb);
     }
 }

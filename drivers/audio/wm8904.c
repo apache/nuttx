@@ -1426,6 +1426,7 @@ static int wm8904_sendbuffer(FAR struct wm8904_dev_s *priv)
   FAR struct ap_buffer_s *apb;
   irqstate_t flags;
   uint32_t timeout;
+  int shift;
   int ret = OK;
 
   /* Loop while there are audio buffers to be sent and we have few than
@@ -1461,27 +1462,30 @@ static int wm8904_sendbuffer(FAR struct wm8904_dev_s *priv)
       /* Send the entire audio buffer via I2S.  What is a reasonable timeout
        * to use?  This would depend on the bit rate and size of the buffer.
        *
-       * Samples in the buffer:
-       *   = buffer_size * 8 / bpsamp                            samples
-       * Expected transfer time:
-       *   = samples / samprate                                  seconds
-       *   = (samples * 1000) / (samprate * msec_per_tick)       ticks
-       *   = (buffer_size * 8000) /(samprate * bpsamp * msec_per_tick)
+       * Samples in the buffer (samples):
+       *   = buffer_size * 8 / bpsamp                           samples
+       * Sample rate (samples/second):
+       *   = samplerate * nchannels
+       * Expected transfer time (seconds):
+       *   = (buffer_size * 8) / bpsamp / samplerate / nchannels
        *
-       * We will set the timeout about twice that.  Here is a reasonable
-       * approximation that saves a multiply:
-       *   = (buffer_size * 16384) /(samprate * bpsamp * msec_per_tick)
+       * We will set the timeout about twice that.
        *
-       * REVISIT:  Does this take into account the number channels?  Perhaps
-       * saving an reusing the bitrate would give a better and simpler
-       * calculation.
+       * NOTES:
+       * - The multiplier of 8 becomes 16000 for 2x and units of
+       *   milliseconds.
+       * - 16000 is a approximately 16384 (1 << 14), bpsamp is either
+       *   (1 << 3) or (1 << 4), and nchannels is either (1 << 0) or
+       *   (1 << 1).  So this can be simplifies to (milliseconds):
        *
-       * REVISIT:  Should not use MSEC_PER_TICK.  It can be inaccurate with
-       * microsecond resolution timer.
+       *   = (buffer_size << shift) / samplerate
        */
 
-      timeout = (((uint32_t)(apb->nbytes - apb->curbyte) << 14) /
-                 ((uint32_t)priv->samprate * MSEC_PER_TICK * priv->bpsamp));
+      shift  = (priv->bpsamp == 8) ? 14 - 3 : 14 - 4;
+      shift -= (priv->nchannels > 1) ? 1 : 0;
+
+      timeout = MSEC2TICK(((uint32_t)(apb->nbytes - apb->curbyte) << shift) /
+                           (uint32_t)priv->samprate);
 
       ret = I2S_SEND(priv->i2s, apb, wm8904_senddone, priv, timeout);
       if (ret < 0)
