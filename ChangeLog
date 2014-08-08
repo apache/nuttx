@@ -8030,3 +8030,11 @@
 	  importantly, let's us realize higher resolution for the case of
 	  CONFIG_SCHED_TICKLESS=y -- of course, at the risk of some new
 	  integer overflow problems 2014-8-7).
+	* Many files: Change all time conversions.  Yech.  New timer units
+	  in microseconds breaks all existing logic that used milliseconds
+	  in the conversions.  Something likely got broken doing this,
+	  probably because I confused a MSEC2TICK conversion with a TICK2MSEC
+	  conversion (2014-8-7).
+	* arch/sim/src/up_tickless.c and sched/sched_timerexpiration.c: The
+	  tickless OS now appears fully functional and passes the OS test
+	  on the simulator with no errors (2014-8-7).
