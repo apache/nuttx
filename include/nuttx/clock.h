@@ -135,7 +135,7 @@
 #define TICK2USEC(tick)       ((tick)*USEC_PER_TICK)                     /* Exact */
 
 #if (MSEC_PER_TICK * USEC_PER_MSEC) == USEC_PER_TICK
-#define TICK2USEC(tick)       ((tick)*MSEC_PER_TICK)                     /* Exact */
+#  define TICK2MSEC(tick)     ((tick)*MSEC_PER_TICK)                     /* Exact */
 #else
 #  define TICK2MSEC(tick)     (((tick)*USEC_PER_TICK)/USEC_PER_MSEC)     /* Rounds */
 #endif

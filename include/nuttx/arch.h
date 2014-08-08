@@ -970,7 +970,7 @@ int up_prioritize_irq(int irq, int priority);
  *   called early in the initialization sequence by up_intialize().
  *   On return, the current up-time should be available from
  *   up_timer_gettime() and the interval timer is ready for use (but not
- *   actively timing.
+ *   actively timing).
  *
  *   Provided by platform-specific code and called from the architecture-
  *   specific logic.
@@ -1004,7 +1004,7 @@ void up_timer_initialize(void);
  *   when clockid is CLOCK_MONOTONIC.
  *
  *   This function provides the basis for reporting the current time and
- *   also is used to eliminate error build-up from small erros in interval
+ *   also is used to eliminate error build-up from small errors in interval
  *   time calculations.
  *
  *   Provided by platform-specific code and called from the RTOS base code.

@@ -55,14 +55,14 @@ config ARCH_HAVE_TICKLESS
 config SCHED_TICKLESS
 	bool "Support tick-less OS"
 	default n
-	depends on ARCH_HAVE_TICKLESS && EXPERIMENTAL
+	depends on ARCH_HAVE_TICKLESS
 	---help---
 		Be default, system time is driven by a periodic timer interrupt.  An
 		alternative configurations is a tick-less configuration in which
 		there is no periodic timer interrupt.  Instead and interval timer is
 		used to schedule the next OS time event.  This option selects that
 		tick-less OS option.  If the tick-less OS is selected, then there are
-		additional plaform specific interfaces that must be provided as
+		additional platform specific interfaces that must be provided as
 		defined include/nuttx/arch.h
 
 config USEC_PER_TICK
