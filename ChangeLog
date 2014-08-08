@@ -8038,3 +8038,13 @@
 	* arch/sim/src/up_tickless.c and sched/sched_timerexpiration.c: The
 	  tickless OS now appears fully functional and passes the OS test
 	  on the simulator with no errors (2014-8-7).
+	* sched/mqueue: Move POSIX message queue files from sched/ to
+	  sched/mqueue (2014-8-8).
+	* sched/signal: Move signal-related files from sched/ to sched/signal
+	  (2014-8-8).
+	* sched/pthread: Move all pthread files from sched/ to sched/pthread
+	  (2014-8-8).
+	* sched/semaphore: Move POSIX counting semaphore files from sched/ to
+	  sched/semaphore (2014-8-8).
+	* sched/environ: Move environment files from sched/ to sched/environ
+	  (2014-8-8).
