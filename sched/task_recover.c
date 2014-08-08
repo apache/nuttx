@@ -45,7 +45,7 @@
 #include <nuttx/sched.h>
 
 #include "os_internal.h"
-#include "mq_internal.h"
+#include "mqueue/mqueue.h"
 
 /****************************************************************************
  * Definitions

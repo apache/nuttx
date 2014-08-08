@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/mq_send.c
+ *  sched/mqueue/mq_send.c
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -47,7 +47,7 @@
 #include  <nuttx/arch.h>
 
 #include  "os_internal.h"
-#include  "mq_internal.h"
+#include  "mqueue/mqueue.h"
 
 /****************************************************************************
  * Definitions

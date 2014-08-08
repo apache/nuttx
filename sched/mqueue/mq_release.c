@@ -1,5 +1,5 @@
 /************************************************************************
- * sched/mq_release.c
+ *  sched/mqueue/mq_release.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -41,7 +41,7 @@
 
 #include <string.h>
 
-#include "mq_internal.h"
+#include "mqueue/mqueue.h"
 
 /************************************************************************
  * Definitions

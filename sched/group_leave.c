@@ -51,7 +51,7 @@
 #include "env_internal.h"
 #include "sig_internal.h"
 #include "pthread_internal.h"
-#include "mq_internal.h"
+#include "mqueue/mqueue.h"
 #include "group_internal.h"
 
 #ifdef HAVE_TASK_GROUP

@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/mq_timedsend.c
+ *  sched/mqueue/mq_timedsend.c
  *
  *   Copyright (C) 2007-2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,7 +51,7 @@
 
 #include "clock_internal.h"
 #include "os_internal.h"
-#include "mq_internal.h"
+#include "mqueue/mqueue.h"
 
 /****************************************************************************
  * Pre-processor Definitions

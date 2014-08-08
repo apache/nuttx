@@ -56,7 +56,7 @@
 #include  "wd_internal.h"
 #include  "sem_internal.h"
 #ifndef CONFIG_DISABLE_MQUEUE
-# include "mq_internal.h"
+# include "mqueue/mqueue.h"
 #endif
 #ifndef CONFIG_DISABLE_PTHREAD
 # include "pthread_internal.h"

@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/mq_open.c
+ *  sched/mqueue/mq_open.c
  *
  *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -52,7 +52,7 @@
 #include <nuttx/kmalloc.h>
 
 #include "os_internal.h"
-#include "mq_internal.h"
+#include "mqueue/mqueue.h"
 
 /****************************************************************************
  * Definitions

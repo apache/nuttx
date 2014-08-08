@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/mq_descreate.c
+ *  sched/mqueue/mq_close.c
  *
- *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,22 +39,12 @@
 
 #include <nuttx/config.h>
 
-#include <stdarg.h>
-#include <unistd.h>
-#include <string.h>
-#include <assert.h>
 #include <mqueue.h>
 #include <sched.h>
-#include <queue.h>
-#include <debug.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/kmalloc.h>
+#include <assert.h>
 
 #include "os_internal.h"
-#include "sig_internal.h"
-
-#include "mq_internal.h"
+#include "mqueue/mqueue.h"
 
 /****************************************************************************
  * Definitions
@@ -77,86 +67,125 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mq_desalloc
+ * Name: mq_desfree
  *
  * Description:
- *   Allocate a message queue descriptor.
+ *   Deallocate a message queue descriptor but returning it to the free list
  *
  * Inputs:
- *   None
- *
- * Return Value:
- *   Reference to the allocated mq descriptor.
+ *   mqdes - message queue descriptor to free
  *
  ****************************************************************************/
 
-static mqd_t mq_desalloc(void)
-{
-  mqd_t mqdes;
-
-  /* Try to get the message descriptorfrom the free list */
-
-  mqdes = (mqd_t)sq_remfirst(&g_desfree);
-
-  /* Check if we got one. */
-
-  if (!mqdes)
-    {
-      /* Add another block of message descriptors to the list */
-
-      mq_desblockalloc();
-
-      /* And try again */
-
-      mqdes = (mqd_t)sq_remfirst(&g_desfree);
-    }
-
-  return mqdes;
-}
+#define mq_desfree(mqdes) sq_addlast((FAR sq_entry_t*)mqdes, &g_desfree)
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mq_descreate
+ * Name: mq_close
  *
  * Description:
- *   Create a message queue descriptor for the specified TCB
+ *   This function is used to indicate that the calling task is finished
+ *   with the specified message queued mqdes.  The mq_close() deallocates
+ *   any system resources allocated by the system for use by this task for
+ *   its message queue.
  *
- * Inputs:
- *   TCB - task that needs the descriptor.
- *   msgq - Named message queue containing the message
- *   oflags - access rights for the descriptor
+ *   If the calling task has attached a notification to the message queue
+ *   via this mqdes, this attachment will be removed and the message queue
+ *   is available for another process to attach a notification.
+ *
+ * Parameters:
+ *   mqdes - Message queue descriptor.
  *
  * Return Value:
- *   On success, the message queue descriptor is returned.  NULL is returned
- *   on a failure to allocate.
+ *   0 (OK) if the message queue is closed successfully,
+ *   otherwise, -1 (ERROR).
+ *
+ * Assumptions:
+ * - The behavior of a task that is blocked on either a mq_send() or
+ *   mq_receive() is undefined when mq_close() is called.
+ * - The results of using this message queue descriptor after a successful
+ *   return from mq_close() is undefined.
  *
  ****************************************************************************/
 
-mqd_t mq_descreate(FAR struct tcb_s* mtcb, FAR msgq_t* msgq, int oflags)
+int mq_close(mqd_t mqdes)
 {
-  FAR struct task_group_s *group = mtcb->group;
-  mqd_t mqdes;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct task_group_s *group = rtcb->group;
+  FAR msgq_t *msgq;
+  irqstate_t saved_state;
+  int ret = ERROR;
 
   DEBUGASSERT(group);
 
-  /* Create a message queue descriptor for the TCB */
+  /* Verify the inputs */
 
-  mqdes = mq_desalloc();
-  if (mqdes)
-    {
-      /* Initialize the MQ descriptor */
+   if (mqdes)
+     {
+       sched_lock();
 
-      memset(mqdes, 0, sizeof(struct mq_des));
-      mqdes->msgq   = msgq;
-      mqdes->oflags = oflags;
+       /* Remove the message descriptor from the current task's
+        * list of message descriptors.
+        */
 
-      /* And add it to the specified tasks's TCB */
+       sq_rem((FAR sq_entry_t*)mqdes, &group->tg_msgdesq);
 
-      sq_addlast((FAR sq_entry_t*)mqdes, &group->tg_msgdesq);
-    }
+       /* Find the message queue associated with the message descriptor */
 
-  return mqdes;
+       msgq = mqdes->msgq;
+
+       /* Check if the calling task has a notification attached to
+        * the message queue via this mqdes.
+        */
+
+#ifndef CONFIG_DISABLE_SIGNALS
+       if (msgq->ntmqdes == mqdes)
+         {
+           msgq->ntpid   = INVALID_PROCESS_ID;
+           msgq->ntsigno = 0;
+           msgq->ntvalue.sival_int = 0;
+           msgq->ntmqdes = NULL;
+         }
+#endif
+
+       /* Decrement the connection count on the message queue. */
+
+       if (msgq->nconnect)
+         {
+           msgq->nconnect--;
+         }
+
+       /* If it is no longer connected to any message descriptor and if the
+        * message queue has already been unlinked, then we can discard the
+        * message queue.
+        */
+
+       if (!msgq->nconnect && msgq->unlinked)
+         {
+           /* Remove the message queue from the list of all
+            * message queues
+            */
+
+           saved_state = irqsave();
+           (void)sq_rem((FAR sq_entry_t*)msgq, &g_msgqueues);
+           irqrestore(saved_state);
+
+           /* Then deallocate it (and any messages left in it) */
+
+           mq_msgqfree(msgq);
+         }
+
+       /* Deallocate the message descriptor */
+
+       mq_desfree(mqdes);
+
+       sched_unlock();
+       ret = OK;
+     }
+
+   return ret;
 }
+

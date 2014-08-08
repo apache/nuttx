@@ -1,5 +1,5 @@
 /************************************************************************
- * sched/mq_findnamed.c
+ *  sched/mqueue/mq_receive.c
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,12 +39,17 @@
 
 #include <nuttx/config.h>
 
-#include <string.h>
+#include <sys/types.h>
+#include <stdbool.h>
+#include <errno.h>
+#include <mqueue.h>
+#include <debug.h>
+#include <nuttx/arch.h>
 
-#include "mq_internal.h"
+#include "mqueue/mqueue.h"
 
 /************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************/
 
 /************************************************************************
@@ -68,38 +73,94 @@
  ************************************************************************/
 
 /************************************************************************
- * Name: mq_findnamed
+ * Name: mq_receive
  *
  * Description:
- *   This function finds the named message queue with the specified name
- *   in the list of message queues.
+ *   This function receives the oldest of the highest priority messages
+ *   from the message queue specified by "mqdes."  If the size of the
+ *   buffer in bytes (msglen) is less than the "mq_msgsize" attribute of
+ *   the message queue, mq_receive will return an error.  Otherwise, the
+ *   selected message is removed from the queue and copied to "msg."
  *
- * Inputs:
- *   mq_name - the name of the message queue to find
+ *   If the message queue is empty and O_NONBLOCK was not set,
+ *   mq_receive() will block until a message is added to the message
+ *   queue.  If more than one task is waiting to receive a message, only
+ *   the task with the highest priority that has waited the longest will
+ *   be unblocked.
+ *
+ *   If the queue is empty and O_NONBLOCK is set, ERROR will be returned.
+ *
+ * Parameters:
+ *   mqdes - Message Queue Descriptor
+ *   msg - Buffer to receive the message
+ *   msglen - Size of the buffer in bytes
+ *   prio - If not NULL, the location to store message priority.
  *
  * Return Value:
- *   A reference to the matching named message queue structure (or NULL
- *   if none was found).
+ *   One success, the length of the selected message in bytes is returned.
+ *   On failure, -1 (ERROR) is returned and the errno is set appropriately:
+ *
+ *   EAGAIN   The queue was empty, and the O_NONBLOCK flag was set
+ *            for the message queue description referred to by 'mqdes'.
+ *   EPERM    Message queue opened not opened for reading.
+ *   EMSGSIZE 'msglen' was less than the maxmsgsize attribute of the
+ *            message queue.
+ *   EINTR    The call was interrupted by a signal handler.
+ *   EINVAL   Invalid 'msg' or 'mqdes'
+ *
+ * Assumptions:
  *
  ************************************************************************/
 
-FAR msgq_t *mq_findnamed(const char *mq_name)
+ssize_t mq_receive(mqd_t mqdes, void *msg, size_t msglen, int *prio)
 {
-  FAR msgq_t *msgq;
+  FAR mqmsg_t *mqmsg;
+  irqstate_t   saved_state;
+  ssize_t      ret = ERROR;
 
-  /* Search the list of named message queues */
+  DEBUGASSERT(up_interrupt_context() == false);
 
-  for (msgq = (FAR msgq_t*)g_msgqueues.head; (msgq); msgq = msgq->flink)
+  /* Verify the input parameters and, in case of an error, set
+   * errno appropriately.
+   */
+
+  if (mq_verifyreceive(mqdes, msg, msglen) != OK)
     {
-      /* Break out of the lloop with a non-NULL msgq if the
-       * name matches.
-       */
-
-      if (!strcmp(mq_name, msgq->name))
-        {
-          break;
-        }
+      return ERROR;
     }
 
-  return msgq;
+  /* Get the next mesage from the message queue.  We will disable
+   * pre-emption until we have completed the message received.  This
+   * is not too bad because if the receipt takes a long time, it will
+   * be because we are blocked waiting for a message and pre-emption
+   * will be re-enabled while we are blocked
+   */
+
+  sched_lock();
+
+  /* Furthermore, mq_waitreceive() expects to have interrupts disabled
+   * because messages can be sent from interrupt level.
+   */
+
+  saved_state = irqsave();
+
+  /* Get the message from the message queue */
+
+  mqmsg = mq_waitreceive(mqdes);
+  irqrestore(saved_state);
+
+  /* Check if we got a message from the message queue.  We might
+   * not have a message if:
+   *
+   * - The message queue is empty and O_NONBLOCK is set in the mqdes
+   * - The wait was interrupted by a signal
+   */
+
+  if (mqmsg)
+    {
+      ret = mq_doreceive(mqdes, mqmsg, msg, prio);
+    }
+
+  sched_unlock();
+  return ret;
 }

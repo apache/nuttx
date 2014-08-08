@@ -52,7 +52,7 @@
 #include "group_internal.h"
 #include "sem_internal.h"
 #include "sig_internal.h"
-#include "mq_internal.h"
+#include "mqueue/mqueue.h"
 
 /****************************************************************************
  * Definitions

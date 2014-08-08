@@ -35,6 +35,9 @@
 
 -include $(TOPDIR)/Make.defs
 
+VPATH =
+DEPPATH = --dep-path .
+
 ASRCS =
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 
@@ -142,19 +145,6 @@ SIGNAL_SRCS += sig_removependingsignal.c sig_releasependingsignal.c sig_lowest.c
 SIGNAL_SRCS += sig_mqnotempty.c sig_cleanup.c sig_dispatch.c sig_deliver.c
 SIGNAL_SRCS += pause.c
 
-MQUEUE_SRCS  = mq_open.c mq_close.c mq_unlink.c mq_send.c mq_timedsend.c
-MQUEUE_SRCS += mq_sndinternal.c mq_receive.c mq_timedreceive.c mq_rcvinternal.c
-MQUEUE_SRCS += mq_initialize.c mq_descreate.c mq_findnamed.c mq_msgfree.c
-MQUEUE_SRCS += mq_msgqfree.c mq_release.c mq_recover.c
-
-ifneq ($(CONFIG_DISABLE_SIGNALS),y)
-MQUEUE_SRCS += mq_waitirq.c
-endif
-
-ifneq ($(CONFIG_DISABLE_SIGNALS),y)
-MQUEUE_SRCS += mq_notify.c
-endif
-
 PTHREAD_SRCS  = pthread_create.c pthread_exit.c pthread_join.c pthread_detach.c
 PTHREAD_SRCS += pthread_yield.c pthread_getschedparam.c pthread_setschedparam.c
 PTHREAD_SRCS += pthread_mutexinit.c pthread_mutexdestroy.c
@@ -193,9 +183,11 @@ endif
 
 IRQ_SRCS = irq_initialize.c irq_attach.c irq_dispatch.c irq_unexpectedisr.c
 
+include mqueue/Make.defs
+
 CSRCS  = $(MISC_SRCS) $(TSK_SRCS) $(GRP_SRCS) $(SCHED_SRCS) $(WDOG_SRCS)
 CSRCS += $(TIME_SRCS) $(SEM_SRCS) $(TIMER_SRCS) $(PGFILL_SRCS)
-CSRCS += $(IRQ_SRCS) $(CLOCK_SRCS)
+CSRCS += $(IRQ_SRCS) $(CLOCK_SRCS) $(MQUEUE_SRCS)
 
 ifneq ($(CONFIG_DISABLE_PTHREAD),y)
 CSRCS += $(PTHREAD_SRCS)
@@ -203,10 +195,6 @@ endif
 
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 CSRCS += $(SIGNAL_SRCS)
-endif
-
-ifneq ($(CONFIG_DISABLE_MQUEUE),y)
-CSRCS += $(MQUEUE_SRCS)
 endif
 
 ifneq ($(CONFIG_DISABLE_ENVIRON),y)
@@ -233,7 +221,7 @@ $(BIN): $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
 
 .depend: Makefile $(SRCS)
-	$(Q) $(MKDEP) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
+	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
 	$(Q) touch $@
 
 depend: .depend

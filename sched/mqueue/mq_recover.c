@@ -1,7 +1,7 @@
 /************************************************************************
- * sched.mq_unlink.c
+ *  sched/mqueue/mq_recover.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,15 +39,15 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
-#include <mqueue.h>
-#include <sched.h>
+#include <assert.h>
 
-#include "os_internal.h"
-#include "mq_internal.h"
+#include <nuttx/mqueue.h>
+#include <nuttx/sched.h>
+
+#include "mqueue/mqueue.h"
 
 /************************************************************************
- * Pre-processor Definitions
+ * Definitions
  ************************************************************************/
 
 /************************************************************************
@@ -71,76 +71,48 @@
  ************************************************************************/
 
 /************************************************************************
- * Name: mq_unlink
+ * Name: mq_recover
  *
  * Description:
- *   This function removes the message queue named by "mq_name." If one
- *   or more tasks have the message queue open when mq_unlink() is called,
- *   removal of the message queue is postponed until all references to the
- *   message queue have been closed.
+ *   This function is called when a task is deleted via task_deleted or
+ *   via pthread_cancel. I checks if the task was waiting for a message
+ *   queue event and adjusts counts appropriately.
  *
- * Parameters:
- *   mq_name - Name of the message queue
+ * Inputs:
+ *   tcb - The TCB of the terminated task or thread
  *
  * Return Value:
- *   None
+ *   None.
  *
  * Assumptions:
+ *   This function is called from task deletion logic in a safe context.
  *
  ************************************************************************/
 
-int mq_unlink(const char *mq_name)
+void mq_recover(FAR struct tcb_s *tcb)
 {
-  FAR msgq_t *msgq;
-  irqstate_t  saved_state;
-  int         ret = ERROR;
+  /* If were were waiting for a timed message queue event, then the
+   * timer was canceled and deleted in task_recover() before this
+   * function was called.
+   */
 
-  /* Verify the input values */
+  /* Was the task waiting for a message queue to become non-empty? */
 
-  if (mq_name)
+  if (tcb->task_state == TSTATE_WAIT_MQNOTEMPTY)
     {
-      sched_lock();
+      /* Decrement the count of waiters */
 
-      /* Find the named message queue */
-
-      msgq = mq_findnamed(mq_name);
-      if (msgq)
-        {
-          /* If it is no longer connected, then we can just
-           * discard the message queue now.
-           */
-
-          if (!msgq->nconnect)
-            {
-              /* Remove the message queue from the list of all
-               * message queues
-               */
-
-              saved_state = irqsave();
-              (void)sq_rem((FAR sq_entry_t*)msgq, &g_msgqueues);
-              irqrestore(saved_state);
-
-              /* Then deallocate it (and any messages left in it) */
-
-              mq_msgqfree(msgq);
-            }
-
-          /* If the message queue is still connected to a message descriptor,
-           * then mark it for deletion when the last message descriptor is
-           * closed
-           */
-
-          else
-            {
-              msgq->unlinked = true;
-            }
-
-          ret = OK;
-        }
-
-      sched_unlock();
+      DEBUGASSERT(tcb->msgwaitq && tcb->msgwaitq->nwaitnotempty > 0);
+      tcb->msgwaitq->nwaitnotempty--;
     }
 
-  return ret;
-}
+  /* Was the task waiting for a message queue to become non-full? */
 
+  else if (tcb->task_state == TSTATE_WAIT_MQNOTFULL)
+    {
+      /* Decrement the count of waiters */
+
+      DEBUGASSERT(tcb->msgwaitq && tcb->msgwaitq->nwaitnotfull > 0);
+      tcb->msgwaitq->nwaitnotfull--;
+    }
+}

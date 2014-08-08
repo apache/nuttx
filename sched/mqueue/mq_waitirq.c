@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/mq_waitirq.c
+ *  sched/mqueue/mq_waitirq.c
  *
  *   Copyright (C) 2007-2009, 2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -45,7 +45,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/mqueue.h>
 
-#include "mq_internal.h"
+#include "mqueue/mqueue.h"
 
 /****************************************************************************
  * Definitions

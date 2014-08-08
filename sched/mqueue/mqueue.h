@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/mq_internal.h
+ *  sched/mqueue/mqueue.h
  *
- *   Copyright (C) 2007, 2009, 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __SCHED_MQ_INTERNAL_H
-#define __SCHED_MQ_INTERNAL_H
+#ifndef __SCHED_MQUEUE_MQUEUE_H
+#define __SCHED_MQUEUE_MQUEUE_H
 
 /****************************************************************************
  * Included Files
@@ -187,5 +187,5 @@ void mq_recover(FAR struct tcb_s *tcb);
 #endif
 
 #endif /* CONFIG_MQ_MAXMSGSIZE > 0 */
-#endif /* __SCHED_MQ_INTERNAL_H */
+#endif /* __SCHED_MQUEUE_MQUEUE_H */
 

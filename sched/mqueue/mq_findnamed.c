@@ -1,7 +1,7 @@
 /************************************************************************
- * sched/mq_msgfree.c
+ *  sched/mqueue/mq_findnamed.c
  *
- *   Copyright (C) 2007, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,10 +39,9 @@
 
 #include <nuttx/config.h>
 
-#include <queue.h>
-#include <nuttx/arch.h>
-#include "os_internal.h"
-#include "mq_internal.h"
+#include <string.h>
+
+#include "mqueue/mqueue.h"
 
 /************************************************************************
  * Definitions
@@ -69,66 +68,38 @@
  ************************************************************************/
 
 /************************************************************************
- * Name: mq_msgfree
+ * Name: mq_findnamed
  *
  * Description:
- *   The mq_msgfree function will return a message to the free pool of
- *   messages if it was a pre-allocated message. If the message was
- *   allocated dynamically it will be deallocated.
+ *   This function finds the named message queue with the specified name
+ *   in the list of message queues.
  *
  * Inputs:
- *   mqmsg - message to free
+ *   mq_name - the name of the message queue to find
  *
  * Return Value:
- *   None
+ *   A reference to the matching named message queue structure (or NULL
+ *   if none was found).
  *
  ************************************************************************/
 
-void mq_msgfree(FAR mqmsg_t *mqmsg)
+FAR msgq_t *mq_findnamed(const char *mq_name)
 {
-  irqstate_t saved_state;
+  FAR msgq_t *msgq;
 
-  /* If this is a generally available pre-allocated message,
-   * then just put it back in the free list.
-   */
+  /* Search the list of named message queues */
 
-  if (mqmsg->type == MQ_ALLOC_FIXED)
+  for (msgq = (FAR msgq_t*)g_msgqueues.head; (msgq); msgq = msgq->flink)
     {
-      /* Make sure we avoid concurrent access to the free
-       * list from interrupt handlers.
+      /* Break out of the lloop with a non-NULL msgq if the
+       * name matches.
        */
 
-      saved_state = irqsave();
-      sq_addlast((FAR sq_entry_t*)mqmsg, &g_msgfree);
-      irqrestore(saved_state);
+      if (!strcmp(mq_name, msgq->name))
+        {
+          break;
+        }
     }
 
-  /* If this is a message pre-allocated for interrupts,
-   * then put it back in the correct  free list.
-   */
-
-  else if (mqmsg->type == MQ_ALLOC_IRQ)
-    {
-      /* Make sure we avoid concurrent access to the free
-       * list from interrupt handlers.
-       */
-
-      saved_state = irqsave();
-      sq_addlast((FAR sq_entry_t*)mqmsg, &g_msgfreeirq);
-      irqrestore(saved_state);
-    }
-
-  /* Otherwise, deallocate it.  Note:  interrupt handlers
-   * will never deallocate messages because they will not
-   * received them.
-   */
-
-  else if (mqmsg->type == MQ_ALLOC_DYN)
-    {
-      sched_kfree(mqmsg);
-    }
-  else
-    {
-      PANIC();
-    }
+  return msgq;
 }

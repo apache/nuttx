@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/mq_send.c
+ *  sched/mqueue/mq_send.c
  *
  *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -55,7 +55,7 @@
 #ifndef CONFIG_DISABLE_SIGNALS
 # include "sig_internal.h"
 #endif
-#include  "mq_internal.h"
+#include  "mqueue/mqueue.h"
 
 /****************************************************************************
  * Definitions

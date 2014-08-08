@@ -1,7 +1,7 @@
 /************************************************************************
- * sched/mq_receive.c
+ *  sched/mqueue/mq_msgfree.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,17 +39,13 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <stdbool.h>
-#include <errno.h>
-#include <mqueue.h>
-#include <debug.h>
+#include <queue.h>
 #include <nuttx/arch.h>
-
-#include "mq_internal.h"
+#include "os_internal.h"
+#include "mqueue/mqueue.h"
 
 /************************************************************************
- * Pre-processor Definitions
+ * Definitions
  ************************************************************************/
 
 /************************************************************************
@@ -73,94 +69,66 @@
  ************************************************************************/
 
 /************************************************************************
- * Name: mq_receive
+ * Name: mq_msgfree
  *
  * Description:
- *   This function receives the oldest of the highest priority messages
- *   from the message queue specified by "mqdes."  If the size of the
- *   buffer in bytes (msglen) is less than the "mq_msgsize" attribute of
- *   the message queue, mq_receive will return an error.  Otherwise, the
- *   selected message is removed from the queue and copied to "msg."
+ *   The mq_msgfree function will return a message to the free pool of
+ *   messages if it was a pre-allocated message. If the message was
+ *   allocated dynamically it will be deallocated.
  *
- *   If the message queue is empty and O_NONBLOCK was not set,
- *   mq_receive() will block until a message is added to the message
- *   queue.  If more than one task is waiting to receive a message, only
- *   the task with the highest priority that has waited the longest will
- *   be unblocked.
- *
- *   If the queue is empty and O_NONBLOCK is set, ERROR will be returned.
- *
- * Parameters:
- *   mqdes - Message Queue Descriptor
- *   msg - Buffer to receive the message
- *   msglen - Size of the buffer in bytes
- *   prio - If not NULL, the location to store message priority.
+ * Inputs:
+ *   mqmsg - message to free
  *
  * Return Value:
- *   One success, the length of the selected message in bytes is returned.
- *   On failure, -1 (ERROR) is returned and the errno is set appropriately:
- *
- *   EAGAIN   The queue was empty, and the O_NONBLOCK flag was set
- *            for the message queue description referred to by 'mqdes'.
- *   EPERM    Message queue opened not opened for reading.
- *   EMSGSIZE 'msglen' was less than the maxmsgsize attribute of the
- *            message queue.
- *   EINTR    The call was interrupted by a signal handler.
- *   EINVAL   Invalid 'msg' or 'mqdes'
- *
- * Assumptions:
+ *   None
  *
  ************************************************************************/
 
-ssize_t mq_receive(mqd_t mqdes, void *msg, size_t msglen, int *prio)
+void mq_msgfree(FAR mqmsg_t *mqmsg)
 {
-  FAR mqmsg_t *mqmsg;
-  irqstate_t   saved_state;
-  ssize_t      ret = ERROR;
+  irqstate_t saved_state;
 
-  DEBUGASSERT(up_interrupt_context() == false);
-
-  /* Verify the input parameters and, in case of an error, set
-   * errno appropriately.
+  /* If this is a generally available pre-allocated message,
+   * then just put it back in the free list.
    */
 
-  if (mq_verifyreceive(mqdes, msg, msglen) != OK)
+  if (mqmsg->type == MQ_ALLOC_FIXED)
     {
-      return ERROR;
+      /* Make sure we avoid concurrent access to the free
+       * list from interrupt handlers.
+       */
+
+      saved_state = irqsave();
+      sq_addlast((FAR sq_entry_t*)mqmsg, &g_msgfree);
+      irqrestore(saved_state);
     }
 
-  /* Get the next mesage from the message queue.  We will disable
-   * pre-emption until we have completed the message received.  This
-   * is not too bad because if the receipt takes a long time, it will
-   * be because we are blocked waiting for a message and pre-emption
-   * will be re-enabled while we are blocked
+  /* If this is a message pre-allocated for interrupts,
+   * then put it back in the correct  free list.
    */
 
-  sched_lock();
-
-  /* Furthermore, mq_waitreceive() expects to have interrupts disabled
-   * because messages can be sent from interrupt level.
-   */
-
-  saved_state = irqsave();
-
-  /* Get the message from the message queue */
-
-  mqmsg = mq_waitreceive(mqdes);
-  irqrestore(saved_state);
-
-  /* Check if we got a message from the message queue.  We might
-   * not have a message if:
-   *
-   * - The message queue is empty and O_NONBLOCK is set in the mqdes
-   * - The wait was interrupted by a signal
-   */
-
-  if (mqmsg)
+  else if (mqmsg->type == MQ_ALLOC_IRQ)
     {
-      ret = mq_doreceive(mqdes, mqmsg, msg, prio);
+      /* Make sure we avoid concurrent access to the free
+       * list from interrupt handlers.
+       */
+
+      saved_state = irqsave();
+      sq_addlast((FAR sq_entry_t*)mqmsg, &g_msgfreeirq);
+      irqrestore(saved_state);
     }
 
-  sched_unlock();
-  return ret;
+  /* Otherwise, deallocate it.  Note:  interrupt handlers
+   * will never deallocate messages because they will not
+   * received them.
+   */
+
+  else if (mqmsg->type == MQ_ALLOC_DYN)
+    {
+      sched_kfree(mqmsg);
+    }
+  else
+    {
+      PANIC();
+    }
 }

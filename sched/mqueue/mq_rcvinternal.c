@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/mq_rcvinternal.c
+ *  sched/mqueue/mq_rcvinternal.c
  *
  *   Copyright (C) 2007, 2008, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,7 +51,7 @@
 #include <nuttx/arch.h>
 
 #include "os_internal.h"
-#include "mq_internal.h"
+#include "mqueue/mqueue.h"
 
 /****************************************************************************
  * Definitions

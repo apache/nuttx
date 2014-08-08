@@ -1,5 +1,5 @@
 /************************************************************************
- * sched/mq_msgqfree.c
+ *  sched/mqueue/mq_msgqfree.c
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -41,7 +41,7 @@
 
 #include <debug.h>
 #include <nuttx/kmalloc.h>
-#include "mq_internal.h"
+#include "mqueue/mqueue.h"
 
 /************************************************************************
  * Definitions
