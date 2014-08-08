@@ -46,7 +46,7 @@
 #include <assert.h>
 #include <debug.h>
 
-#include "os_internal.h"
+#include "sched/sched.h"
 #include "group/group.h"
 #include "pthread/pthread.h"
 

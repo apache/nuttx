@@ -49,7 +49,7 @@
 
 #include <nuttx/arch.h>
 
-#include "os_internal.h"
+#include "sched/sched.h"
 #include "task/task.h"
 #include "pthread/pthread.h"
 

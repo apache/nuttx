@@ -43,7 +43,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include "os_internal.h"
+#include "sched/sched.h"
 #include "group/group.h"
 
 #if defined(CONFIG_SCHED_HAVE_PARENT) && defined(CONFIG_SCHED_CHILD_STATUS)

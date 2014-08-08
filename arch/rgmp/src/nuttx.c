@@ -54,7 +54,7 @@
 #include <arch/arch.h>
 
 #include "task/task.h"
-#include "os_internal.h"
+#include "sched/sched.h"
 
 struct tcb_s *current_task = NULL;
 

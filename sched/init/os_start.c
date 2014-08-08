@@ -51,7 +51,7 @@
 #include  <nuttx/kmalloc.h>
 #include  <nuttx/init.h>
 
-#include  "os_internal.h"
+#include  "sched/sched.h"
 #include  "signal/signal.h"
 #include  "wdog/wdog.h"
 #include  "semaphore/semaphore.h"

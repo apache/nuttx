@@ -45,7 +45,7 @@
 #include <assert.h>
 #include <nuttx/arch.h>
 
-#include "os_internal.h"
+#include "sched/sched.h"
 #include "semaphore/semaphore.h"
 
 /****************************************************************************

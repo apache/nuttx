@@ -47,7 +47,7 @@
 
 #include <nuttx/fs/fs.h>
 
-#include "os_internal.h"
+#include "sched/sched.h"
 #include "task/task.h"
 
 #ifdef CONFIG_SCHED_ATEXIT

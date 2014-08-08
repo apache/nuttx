@@ -44,7 +44,7 @@
 #include <spawn.h>
 #include <debug.h>
 
-#include "os_internal.h"
+#include "sched/sched.h"
 #include "group/group.h"
 #include "task/spawn.h"
 #include "task/task.h"

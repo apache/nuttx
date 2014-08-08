@@ -48,7 +48,7 @@
 
 #ifdef CONFIG_PAGING
 
-#include "os_internal.h"
+#include "sched/sched.h"
 #include "paging/paging.h"
 
 /****************************************************************************

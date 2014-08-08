@@ -41,7 +41,7 @@
 
 #include  <sched.h>
 
-#include  "os_internal.h"
+#include  "sched/sched.h"
 
 #ifndef CONFIG_DISABLE_SIGNALS
 # include "signal/signal.h"

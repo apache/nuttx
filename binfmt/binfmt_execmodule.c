@@ -50,7 +50,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/binfmt/binfmt.h>
 
-#include "os_internal.h"
+#include "sched/sched.h"
 #include "binfmt_internal.h"
 
 #ifndef CONFIG_BINFMT_DISABLE

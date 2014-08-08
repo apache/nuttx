@@ -43,7 +43,7 @@
 
 #include <sched.h>
 #include <stdlib.h>
-#include "os_internal.h"
+#include "sched/sched.h"
 
 #undef get_environ_ptr
 

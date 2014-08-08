@@ -50,7 +50,7 @@
 #include <wdog.h>
 #include <debug.h>
 
-#include "os_internal.h"
+#include "sched/sched.h"
 #include "pthread/pthread.h"
 #include "clock/clock.h"
 #include "signal/signal.h"

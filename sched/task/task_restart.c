@@ -45,7 +45,7 @@
 
 #include <nuttx/arch.h>
 
-#include "os_internal.h"
+#include "sched/sched.h"
 #include "group/group.h"
 #include "signal/signal.h"
 #include "task/task.h"

@@ -52,7 +52,7 @@
 #include <nuttx/page.h>
 #include <nuttx/clock.h>
 
-#include "os_internal.h"
+#include "sched/sched.h"
 #include "paging/paging.h"
 
 #ifdef CONFIG_PAGING

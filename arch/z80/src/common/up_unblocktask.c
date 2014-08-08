@@ -46,7 +46,7 @@
 
 #include "chip/chip.h"
 #include "chip/switch.h"
-#include "os_internal.h"
+#include "sched/sched.h"
 #include "clock/clock.h"
 #include "up_internal.h"
 

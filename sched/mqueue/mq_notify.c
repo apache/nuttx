@@ -44,7 +44,7 @@
 #include <sched.h>
 #include <errno.h>
 
-#include "os_internal.h"
+#include "sched/sched.h"
 #include "mqueue/mqueue.h"
 
 /************************************************************************

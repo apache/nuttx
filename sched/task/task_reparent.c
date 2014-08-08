@@ -41,7 +41,7 @@
 
 #include <errno.h>
 
-#include "os_internal.h"
+#include "sched/sched.h"
 #include "group/group.h"
 #include "task/task.h"
 

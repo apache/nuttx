@@ -47,7 +47,7 @@
 
 #include <nuttx/kmalloc.h>
 
-#include "os_internal.h"
+#include "sched/sched.h"
 #include "environ/environ.h"
 
 /****************************************************************************

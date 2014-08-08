@@ -47,7 +47,7 @@
 #include <nuttx/arch.h>
 
 #include "up_internal.h"
-#include "os_internal.h"
+#include "sched/sched.h"
 
 /****************************************************************************
  * Pre-processor Definitions

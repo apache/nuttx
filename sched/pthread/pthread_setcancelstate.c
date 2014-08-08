@@ -39,7 +39,7 @@
 
 #include <pthread.h>
 #include <errno.h>
-#include "os_internal.h"
+#include "sched/sched.h"
 
 /******************************************************************************************
  * Private Definitions

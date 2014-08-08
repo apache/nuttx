@@ -50,7 +50,7 @@
 #include <arch/irq.h>
 
 #include "up_vfork.h"
-#include "os_internal.h"
+#include "sched/sched.h"
 
 /****************************************************************************
  * Pre-processor Definitions

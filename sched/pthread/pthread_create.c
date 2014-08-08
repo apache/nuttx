@@ -52,7 +52,7 @@
 #include <nuttx/pthread.h>
 #include <nuttx/arch.h>
 
-#include "os_internal.h"
+#include "sched/sched.h"
 #include "group/group.h"
 #include "clock/clock.h"
 #include "pthread/pthread.h"

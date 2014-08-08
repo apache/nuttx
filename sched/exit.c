@@ -47,7 +47,7 @@
 #include <nuttx/fs/fs.h>
 
 #include "task/task.h"
-#include "os_internal.h"
+#include "sched/sched.h"
 
 /****************************************************************************
  * Pre-processor Definitions

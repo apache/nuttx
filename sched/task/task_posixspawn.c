@@ -45,7 +45,7 @@
 
 #include <nuttx/binfmt/binfmt.h>
 
-#include "os_internal.h"
+#include "sched/sched.h"
 #include "group/group.h"
 #include "task/spawn.h"
 #include "task/task.h"
