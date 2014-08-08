@@ -46,7 +46,7 @@
 #include <arch/board/board.h>
 
 #include "nvic.h"
-#include "clock_internal.h"
+#include "clock/clock.h"
 #include "up_internal.h"
 #include "up_arch.h"
 
