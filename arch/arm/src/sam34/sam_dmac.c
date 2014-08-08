@@ -52,7 +52,7 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
-#include "os_internal.h"
+#include "sched/sched.h"
 #include "chip.h"
 
 #include "sam_dmac.h"

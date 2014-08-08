@@ -47,7 +47,7 @@
 #include <arch/irq.h>
 
 #include "chip/switch.h"
-#include "os_internal.h"
+#include "sched/sched.h"
 #include "up_internal.h"
 
 #ifndef CONFIG_DISABLE_SIGNALS

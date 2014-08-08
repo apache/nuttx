@@ -44,7 +44,7 @@
 #include <nuttx/arch.h>
 
 #include "clock/clock.h"
-#include "os_internal.h"
+#include "sched/sched.h"
 #include "up_internal.h"
 
 /****************************************************************************

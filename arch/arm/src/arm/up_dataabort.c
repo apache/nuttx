@@ -44,7 +44,7 @@
 
 #include <nuttx/irq.h>
 
-#include "os_internal.h"
+#include "sched/sched.h"
 #include "up_internal.h"
 
 #ifdef CONFIG_PAGING

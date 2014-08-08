@@ -47,7 +47,7 @@
 #  include <nuttx/page.h>
 #endif
 
-#include "os_internal.h"
+#include "sched/sched.h"
 #include "up_internal.h"
 
 /****************************************************************************

@@ -51,7 +51,7 @@
 #include <nuttx/usb/usbdev_trace.h>
 
 #include "up_arch.h"
-#include "os_internal.h"
+#include "sched/sched.h"
 #include "up_internal.h"
 
 /****************************************************************************

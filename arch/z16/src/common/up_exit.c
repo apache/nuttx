@@ -50,7 +50,7 @@
 
 #include "chip/chip.h"
 #include "task/task.h"
-#include "os_internal.h"
+#include "sched/sched.h"
 #include "up_internal.h"
 
 /****************************************************************************

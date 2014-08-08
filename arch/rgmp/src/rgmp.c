@@ -52,7 +52,7 @@
 #include <queue.h>
 #include <stdlib.h>
 #include <arch/arch.h>
-#include <os_internal.h>
+#include <sched/sched.h>
 
 int nest_irq = 0;
 

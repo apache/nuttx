@@ -48,7 +48,7 @@
 
 #include <8052.h>
 
-#include "os_internal.h"
+#include "sched/sched.h"
 #include "up_internal.h"
 #include "up_mem.h"
 
