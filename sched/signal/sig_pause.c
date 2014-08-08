@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/pause.c
+ * sched/signal/sig_pause.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

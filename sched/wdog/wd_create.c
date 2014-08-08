@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/wd_delete.c
+ * sched/wdog/wd_create.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,16 +39,16 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <wdog.h>
 #include <queue.h>
-#include <errno.h>
 
 #include <nuttx/arch.h>
 
-#include "wd_internal.h"
+#include "wdog/wdog.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -72,56 +72,39 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: wd_delete
+ * Name: wd_create
  *
  * Description:
- *   The wd_delete function will deallocate a watchdog by returning it to
- *   the free pool of watchdogs.  The watchdog will be removed from the timer
- *   queue if has been started.
+ *   The wd_create function will create a watchdog by allocating it from the
+ *   list of free watchdogs.
  *
  * Parameters:
- *   wdId - The watchdog ID to delete.  This is actually a pointer to a
- *          watchdog structure.
+ *   None
  *
  * Return Value:
- *   Returns OK or ERROR
+ *   Pointer to watchdog (i.e., the watchdog ID), or NULL if insufficient
+ *   watchdogs are available.
  *
  * Assumptions:
- *   The caller has assured that the watchdog is no longer in use.
  *
  ****************************************************************************/
 
-int wd_delete(WDOG_ID wdId)
+WDOG_ID wd_create (void)
 {
+  FAR wdog_t *wdog;
   irqstate_t saved_state;
 
-  /* Verify that a valid watchdog was provided */
-
-  if (!wdId)
-    {
-      set_errno(EINVAL);
-      return ERROR;
-    }
-
-  /* The following steps are atomic... the watchdog must not be active when
-   * it is being deallocated.
-   */
-
   saved_state = irqsave();
-
-  /* Check if the watchdog has been started. */
-
-  if (wdId->active)
-    {
-      wd_cancel(wdId);
-    }
-
-  /* Put the watchdog back on the free list */
-
-  sq_addlast((FAR sq_entry_t*)wdId, &g_wdfreelist);
+  wdog = (FAR wdog_t*)sq_remfirst(&g_wdfreelist);
   irqrestore(saved_state);
 
-  /* Return success */
+  /* Indicate that the watchdog is not actively timing */
 
-  return OK;
+  if (wdog)
+    {
+      wdog->next = NULL;
+      wdog->active = false;
+    }
+
+  return (WDOG_ID)wdog;
 }

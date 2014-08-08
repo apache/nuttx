@@ -1,5 +1,5 @@
 /********************************************************************************
- * sched/pthread_barriedestroy.c
+ * sched/pthread/pthread_barriedestroy.c
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

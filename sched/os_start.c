@@ -53,7 +53,7 @@
 
 #include  "os_internal.h"
 #include  "signal/signal.h"
-#include  "wd_internal.h"
+#include  "wdog/wdog.h"
 #include  "semaphore/semaphore.h"
 #ifndef CONFIG_DISABLE_MQUEUE
 # include "mqueue/mqueue.h"

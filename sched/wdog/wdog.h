@@ -1,5 +1,5 @@
 /************************************************************************
- * sched/d_internal.h
+ * sched/wdog/wdog.h
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************/
 
-#ifndef __SCHED_WD_INTERNAL_H
-#define __SCHED_WD_INTERNAL_H
+#ifndef __SCHED_WDOG_WDOG_H
+#define __SCHED_WDOG_WDOG_H
 
 /************************************************************************
  * Included Files
@@ -166,4 +166,4 @@ void wd_timer(void);
 }
 #endif
 
-#endif /* __SCHED_WD_INTERNAL_H */
+#endif /* __SCHED_WDOG_WDOG_H */

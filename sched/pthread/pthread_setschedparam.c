@@ -1,5 +1,5 @@
 /****************************************************************************
- * pthread_setschedparam.c
+ * sched/pthread/pthread_setschedparam.c
  *
  *   Copyright (C) 2007, 2008, 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

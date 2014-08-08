@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/pthread_condsignal.c
+ * sched/pthread/pthread_condsignal.c
  *
  *   Copyright (C) 2007-2009, 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

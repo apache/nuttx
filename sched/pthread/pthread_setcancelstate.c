@@ -1,5 +1,5 @@
 /******************************************************************************************
- * pthread_setcancelstate.c
+ * sched/pthread/pthread_setcancelstate.c
  *
  *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

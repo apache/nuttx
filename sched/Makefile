@@ -100,9 +100,6 @@ ifeq ($(CONFIG_SCHED_CPULOAD),y)
 SCHED_SRCS += sched_cpuload.c
 endif
 
-WDOG_SRCS = wd_initialize.c wd_create.c wd_start.c wd_cancel.c wd_delete.c
-WDOG_SRCS += wd_gettime.c
-
 ifeq ($(CONFIG_SCHED_TICKLESS),y)
 TIME_SRCS += sched_timerexpiration.c
 else
@@ -129,16 +126,17 @@ endif
 IRQ_SRCS = irq_initialize.c irq_attach.c irq_dispatch.c irq_unexpectedisr.c
 
 include group/Make.defs
+include wdog/Make.defs
 include semaphore/Make.defs
 include signal/Make.defs
 include pthread/Make.defs
 include mqueue/Make.defs
 include environ/Make.defs
 
-CSRCS  = $(MISC_SRCS) $(TSK_SRCS) $(SCHED_SRCS) $(WDOG_SRCS)
+CSRCS  = $(MISC_SRCS) $(TSK_SRCS) $(SCHED_SRCS)
 CSRCS += $(TIME_SRCS)  $(TIMER_SRCS) $(PGFILL_SRCS)
 CSRCS += $(IRQ_SRCS) $(CLOCK_SRCS)
-CSRCS += $(GRP_SRCS) $(SEM_SRCS) $(SIGNAL_SRCS) $(PTHREAD_SRCS) $(MQUEUE_SRCS) $(ENV_SRCS)
+CSRCS += $(GRP_SRCS) $(WDOG_SRCS) $(SEM_SRCS) $(SIGNAL_SRCS) $(PTHREAD_SRCS) $(MQUEUE_SRCS) $(ENV_SRCS)
 
 COBJS = $(CSRCS:.c=$(OBJEXT))
 

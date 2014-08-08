@@ -1,5 +1,5 @@
 /************************************************************************
- * sched/pthread_completejoin.c
+ * sched/pthread/pthread_completejoin.c
  *
  *   Copyright (C) 2007, 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

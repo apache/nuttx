@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/pthread_initialize.c
+ * sched/pthread/pthread_initialize.c
  *
  *   Copyright (C) 2007-2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

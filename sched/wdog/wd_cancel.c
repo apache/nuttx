@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/wd_create.c
+ * sched/wdog/wd_cancel.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,12 +40,12 @@
 #include <nuttx/config.h>
 
 #include <stdbool.h>
+#include <assert.h>
 #include <wdog.h>
-#include <queue.h>
-
 #include <nuttx/arch.h>
 
-#include "wd_internal.h"
+#include "os_internal.h"
+#include "wdog/wdog.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -72,39 +72,99 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: wd_create
+ * Name: wd_cancel
  *
  * Description:
- *   The wd_create function will create a watchdog by allocating it from the
- *   list of free watchdogs.
+ *   This function cancels a currently running watchdog timer. Watchdog
+ *   timers may be cancelled from the interrupt level.
  *
  * Parameters:
- *   None
+ *   wdid - ID of the watchdog to cancel.
  *
  * Return Value:
- *   Pointer to watchdog (i.e., the watchdog ID), or NULL if insufficient
- *   watchdogs are available.
+ *   OK or ERROR
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-WDOG_ID wd_create (void)
+int wd_cancel(WDOG_ID wdid)
 {
-  FAR wdog_t *wdog;
+  wdog_t    *curr;
+  wdog_t    *prev;
   irqstate_t saved_state;
+  int        ret = ERROR;
+
+  /* Prohibit timer interactions with the timer queue until the
+   * cancellation is complete
+   */
 
   saved_state = irqsave();
-  wdog = (FAR wdog_t*)sq_remfirst(&g_wdfreelist);
-  irqrestore(saved_state);
 
-  /* Indicate that the watchdog is not actively timing */
+  /* Make sure that the watchdog is initialized (non-NULL) and is still active */
 
-  if (wdog)
+  if (wdid && wdid->active)
     {
-      wdog->next = NULL;
-      wdog->active = false;
+      /* Search the g_wdactivelist for the target FCB.  We can't use sq_rem
+       * to do this because there are additional operations that need to be
+       * done.
+       */
+
+      prev = NULL;
+      curr = (wdog_t*)g_wdactivelist.head;
+
+      while ((curr) && (curr != wdid))
+        {
+          prev = curr;
+          curr = curr->next;
+        }
+
+      /* Check if the watchdog was found in the list.  If not, then an OS
+       * error has occurred because the watchdog is marked active!
+       */
+
+      ASSERT(curr);
+
+      /* If there is a watchdog in the timer queue after the one that
+       * is being cancelled, then it inherits the remaining ticks.
+       */
+
+      if (curr->next)
+        {
+          curr->next->lag += curr->lag;
+        }
+
+      /* Now, remove the watchdog from the timer queue */
+
+      if (prev)
+        {
+          /* Remove the watchdog from mid- or end-of-queue */
+
+          (void)sq_remafter((FAR sq_entry_t*)prev, &g_wdactivelist);
+        }
+      else
+        {
+          /* Remove the watchdog at the head of the queue */
+
+          (void)sq_remfirst(&g_wdactivelist);
+
+          /* Reassess the interval timer that will generate the next
+           * interval event.
+           */
+
+          sched_timer_reassess();
+        }
+
+      /* Mark the watchdog inactive */
+
+      wdid->next   = NULL;
+      wdid->active = false;
+
+      /* Return success */
+
+      ret = OK;
     }
 
-  return (WDOG_ID)wdog;
+  irqrestore(saved_state);
+  return ret;
 }

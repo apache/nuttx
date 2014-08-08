@@ -1,5 +1,5 @@
 /************************************************************************
- * sched/pthread_release.c
+ * sched/pthread/pthread_release.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

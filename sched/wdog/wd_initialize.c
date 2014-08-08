@@ -1,5 +1,5 @@
 /************************************************************************
- * sched/wd_initialize.c
+ * sched/wdog/wd_initialize.c
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -43,7 +43,7 @@
 #include <nuttx/kmalloc.h>
 
 #include "os_internal.h"
-#include "wd_internal.h"
+#include "wdog/wdog.h"
 
 /************************************************************************
  * Definitions

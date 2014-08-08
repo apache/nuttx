@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/pthread_condtimedwait.c
+ * sched/pthread/pthread_condtimedwait.c
  *
  *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

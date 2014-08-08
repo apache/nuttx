@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/pthread_setspecific.c
+ * sched/pthread/pthread_setspecific.c
  *
  *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

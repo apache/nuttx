@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/pthread_keycreate.c
+ * sched/pthread/pthread_keycreate.c
  *
  *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

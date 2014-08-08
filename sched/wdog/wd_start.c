@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/wd_start.c
+ * sched/wdog/wd_start.c
  *
  *   Copyright (C) 2007-2009, 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,7 +51,7 @@
 #include <nuttx/arch.h>
 
 #include "os_internal.h"
-#include "wd_internal.h"
+#include "wdog/wdog.h"
 
 /****************************************************************************
  * Pre-processor Definitions

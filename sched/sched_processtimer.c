@@ -47,7 +47,7 @@
 #endif
 
 #include "os_internal.h"
-#include "wd_internal.h"
+#include "wdog/wdog.h"
 #include "clock_internal.h"
 
 /************************************************************************

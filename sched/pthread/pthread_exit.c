@@ -1,5 +1,5 @@
 /************************************************************************
- * sched/pthread_exit.c
+ * sched/pthread/pthread_exit.c
  *
  *   Copyright (C) 2007, 2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

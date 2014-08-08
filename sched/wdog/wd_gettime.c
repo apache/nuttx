@@ -1,5 +1,5 @@
 /********************************************************************************
- * sched/wd_gettime.c
+ * sched/wdog/wd_gettime.c
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -42,7 +42,7 @@
 #include <wdog.h>
 
 #include "os_internal.h"
-#include "wd_internal.h"
+#include "wdog/wdog.h"
 
 /********************************************************************************
  * Definitions

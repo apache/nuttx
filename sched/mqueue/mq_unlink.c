@@ -1,5 +1,5 @@
 /************************************************************************
- * sched.mq_unlink.c
+ * sched/mqueue/mq_unlink.c
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

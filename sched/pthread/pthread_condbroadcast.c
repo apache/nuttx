@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/pthread_condbroadcast.c
+ * sched/pthread/pthread_condbroadcast.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

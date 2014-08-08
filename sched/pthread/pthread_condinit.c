@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/pthread_condinit.c
+ * sched/pthread/pthread_condinit.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
