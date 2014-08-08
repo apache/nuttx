@@ -1,5 +1,5 @@
 /************************************************************************
- * sched/prctl.c
+ * sched/task/task_prctl.c
  *
  *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,6 +48,7 @@
 #include <nuttx/sched.h>
 
 #include "os_internal.h"
+#include "task/task.h"
 
 /************************************************************************
  * Private Functions

@@ -42,7 +42,7 @@ SIGNAL_SRCS += sig_findaction.c sig_allocatependingsigaction.c
 SIGNAL_SRCS += sig_releasependingsigaction.c sig_unmaskpendingsignal.c
 SIGNAL_SRCS += sig_removependingsignal.c sig_releasependingsignal.c sig_lowest.c
 SIGNAL_SRCS += sig_mqnotempty.c sig_cleanup.c sig_dispatch.c sig_deliver.c
-SIGNAL_SRCS += sig_pause.c
+SIGNAL_SRCS += sig_pause.c sig_nanosleep.c
 
 # Include signal build support
 

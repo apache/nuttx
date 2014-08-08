@@ -1,5 +1,5 @@
 /************************************************************************
- * sched/getpid.c
+ * sched/task/task_getpid.c
  *
  *   Copyright (C) 2007, 2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -42,6 +42,7 @@
 #include <sched.h>
 
 #include "os_internal.h"
+#include "task/task.h"
 
 /************************************************************************
  * Pre-processor Definitions

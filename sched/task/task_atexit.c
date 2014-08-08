@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/atexit.c
+ * sched/task/task_atexit.c
  *
  *   Copyright (C) 2007, 2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,6 +48,7 @@
 #include <nuttx/fs/fs.h>
 
 #include "os_internal.h"
+#include "task/task.h"
 
 #ifdef CONFIG_SCHED_ATEXIT
 

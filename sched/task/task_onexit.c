@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/on_exit.c
+ * sched/task/task_onexit.c
  *
  *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,6 +48,7 @@
 #include <nuttx/fs/fs.h>
 
 #include "os_internal.h"
+#include "task/task.h"
 
 #ifdef CONFIG_SCHED_ONEXIT
 

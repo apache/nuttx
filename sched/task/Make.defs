@@ -36,7 +36,7 @@
 TSK_SRCS  = task_create.c task_init.c task_setup.c task_activate.c
 TSK_SRCS += task_start.c task_delete.c task_exit.c task_exithook.c
 TSK_SRCS += task_recover.c task_restart.c task_spawn.c task_spawnparms.c
-TSK_SRCS += task_terminate.c task_getgroup.c 
+TSK_SRCS += task_terminate.c task_getgroup.c task_prctl.c task_getpid.c
 
 ifeq ($(CONFIG_ARCH_HAVE_VFORK),y)
 ifeq ($(CONFIG_SCHED_WAITPID),y)
@@ -52,6 +52,14 @@ endif
 
 ifeq ($(CONFIG_SCHED_STARTHOOK),y)
 TSK_SRCS += task_starthook.c
+endif
+
+ifeq ($(CONFIG_SCHED_ATEXIT),y)
+TSK_SRCS += task_atexit.c
+endif
+
+ifeq ($(CONFIG_SCHED_ONEXIT),y)
+TSK_SRCS += task_onexit.c
 endif
 
 # Include task build support

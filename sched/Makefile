@@ -50,14 +50,6 @@ SCHED_SRCS += sched_setscheduler.c sched_getscheduler.c
 SCHED_SRCS += sched_yield.c sched_rrgetinterval.c sched_foreach.c
 SCHED_SRCS += sched_lock.c sched_unlock.c sched_lockcount.c sched_self.c
 
-ifeq ($(CONFIG_SCHED_ATEXIT),y)
-SCHED_SRCS += atexit.c
-endif
-
-ifeq ($(CONFIG_SCHED_ONEXIT),y)
-SCHED_SRCS += on_exit.c
-endif
-
 ifeq ($(CONFIG_PRIORITY_INHERITANCE),y)
 SCHED_SRCS += sched_reprioritize.c
 endif
@@ -79,10 +71,6 @@ else
 SCHED_SRCS += sched_processtimer.c
 endif
 
-ifneq ($(CONFIG_DISABLE_SIGNALS),y)
-SCHED_SRCS += nanosleep.c
-endif
-
 include init/Make.defs
 include irq/Make.defs
 include paging/Make.defs
@@ -99,7 +87,7 @@ include timer/Make.defs
 include environ/Make.defs
 
 # REVISIT
-TSK_SRCS += prctl.c exit.c getpid.c
+TSK_SRCS += exit.c
 
 CSRCS  = $(INIT_SRCS) $(IRQ_SRCS) $(PG_SRCS) $(GRP_SRCS) $(SCHED_SRCS)
 CSRCS += $(TSK_SRCS) $(ERRNO_SRCS) $(WDOG_SRCS) $(SEM_SRCS)

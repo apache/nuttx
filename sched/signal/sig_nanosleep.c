@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/nanosleep.c
+ * sched/signal/sig/nanosleep.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
