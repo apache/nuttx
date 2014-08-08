@@ -1,5 +1,5 @@
 /********************************************************************************
- * sched/timer_settime.c
+ * sched/timer/timer_settime.c
  *
  *   Copyright (C) 2007-2010, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -47,7 +47,7 @@
 #include "os_internal.h"
 #include "clock/clock.h"
 #include "signal/signal.h"
-#include "timer_internal.h"
+#include "timer/timer.h"
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
 

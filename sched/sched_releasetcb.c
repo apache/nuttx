@@ -46,7 +46,7 @@
 
 #include "os_internal.h"
 #include "group/group.h"
-#include "timer_internal.h"
+#include "timer/timer.h"
 
 /************************************************************************
  * Private Functions

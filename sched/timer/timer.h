@@ -1,5 +1,5 @@
 /********************************************************************************
- * timer_internal.h
+ * sched/timer/timer.h
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ********************************************************************************/
 
-#ifndef __SCHED_TIMER_INTERNAL_H
-#define __SCHED_TIMER_INTERNAL_H
+#ifndef __SCHED_TIMER_TIMER_H
+#define __SCHED_TIMER_TIMER_H
 
 /********************************************************************************
  * Included Files
@@ -99,4 +99,4 @@ void weak_function timer_initialize(void);
 void weak_function timer_deleteall(pid_t pid);
 int  timer_release(FAR struct posix_timer_s *timer);
 
-#endif /* __SCHED_TIMER_INTERNAL_H */
+#endif /* __SCHED_TIMER_TIMER_H */

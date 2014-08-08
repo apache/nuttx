@@ -1,7 +1,7 @@
 /********************************************************************************
- * timer_delete.c
+ * sched/timer/timer_getoverrun.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,7 @@
 #include <time.h>
 #include <errno.h>
 
-#include "timer_internal.h"
+#include "timer/timer.h"
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
 
@@ -67,40 +67,45 @@
  ********************************************************************************/
 
 /********************************************************************************
- * Name: timer_delete
+ * Name: timer_getoverrun
  *
  * Description:
- *   The timer_delete() function deletes the specified timer, timerid, previously
- *   created by the timer_create() function. If the timer is armed when
- *   timer_delete() is called, the timer will be automatically disarmed before
- *   removal. The disposition of pending signals for the deleted timer is
- *   unspecified.
+ *   Only a single signal will be queued to the process for a given timer at any
+ *   point in time.  When a timer for which a signal is still pending expires, no
+ *   signal will be queued, and a timer overrun will occur. When a timer
+ *   expiration signal is delivered to or accepted by a process, if the
+ *   implementation  supports  the  Realtime Signals Extension, the
+ *   timer_getoverrun() function will return the timer expiration overrun count for
+ *   the specified timer. The overrun count returned contains the number of extra
+ *   timer expirations that occurred between the time the signal was generated
+ *   (queued) and when it was delivered or accepted, up to but not including an
+ *   implementation-defined  maximum of DELAYTIMER_MAX. If the number of such
+ *   extra expirations is greater than or equal to DELAYTIMER_MAX, then the
+ *   overrun count will be set to DELAYTIMER_MAX. The value returned by
+ *   timer_getoverrun() will apply to the most recent expiration signal delivery
+ *   or acceptance for the timer.  If no expiration signal has been delivered
+ *   for the timer, or if the Realtime Signals Extension is not supported, the
+ *   return value of timer_getoverrun() is unspecified.
  *
  * Parameters:
- *   timerid - The per-thread timer, previously created by the call to
- *   timer_create(), to be deleted.
+ *   timerid - The pre-thread timer, previously created by the call to
+ *   timer_create(), whose overrun count will be returned..
  *
  * Return Value:
- *   If the call succeeds, timer_create() will return 0 (OK).  Otherwise, the
- *   function will return a value of -1 (ERROR) and set errno to indicate the
- *   error.
+ *   If the timer_getoverrun() function succeeds, it will return the timer
+ *   expiration overrun count as explained above. timer_getoverrun() will fail if:
  *
- *   EINVAL - The timer specified timerid is not valid.
+ *   EINVAL - The timerid argument does not correspond to an ID returned by
+ *     timer_create() but not yet deleted by timer_delete().
  *
  * Assumptions:
  *
  ********************************************************************************/
 
-int timer_delete(timer_t timerid)
+int timer_getoverrun(timer_t timerid)
 {
-  int ret = timer_release((FAR struct posix_timer_s *)timerid);
-  if (ret < 0)
-    {
-      set_errno(-ret);
-      return ERROR;
-    }
-
-  return OK;
+  errno = ENOSYS;
+  return ERROR;
 }
 
 #endif /* CONFIG_DISABLE_POSIX_TIMERS */

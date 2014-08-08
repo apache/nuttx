@@ -110,11 +110,6 @@ ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 TIME_SRCS += nanosleep.c
 endif
 
-ifneq ($(CONFIG_DISABLE_POSIX_TIMERS),y)
-TIMER_SRCS += timer_initialize.c timer_create.c timer_delete.c timer_getoverrun.c
-TIMER_SRCS += timer_gettime.c timer_settime.c timer_release.c
-endif
-
 ifeq ($(CONFIG_PAGING),y)
 PGFILL_SRCS = pg_miss.c pg_worker.c
 endif
@@ -127,11 +122,12 @@ include signal/Make.defs
 include pthread/Make.defs
 include mqueue/Make.defs
 include clock/Make.defs
+include timer/Make.defs
 include environ/Make.defs
 
 CSRCS  = $(MISC_SRCS) $(TSK_SRCS) $(SCHED_SRCS)
-CSRCS += $(TIME_SRCS)  $(TIMER_SRCS) $(PGFILL_SRCS)
-CSRCS +=  $(IRQ_SRCS) $(GRP_SRCS) $(WDOG_SRCS) $(SEM_SRCS) $(SIGNAL_SRCS) $(PTHREAD_SRCS) $(MQUEUE_SRCS) $(CLOCK_SRCS) $(ENV_SRCS)
+CSRCS += $(TIME_SRCS) $(PGFILL_SRCS)
+CSRCS +=  $(IRQ_SRCS) $(GRP_SRCS) $(WDOG_SRCS) $(SEM_SRCS) $(SIGNAL_SRCS) $(PTHREAD_SRCS) $(MQUEUE_SRCS) $(CLOCK_SRCS) $(TIMER_SRCS) $(ENV_SRCS)
 
 COBJS = $(CSRCS:.c=$(OBJEXT))
 

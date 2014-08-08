@@ -62,7 +62,7 @@
 # include "pthread/pthread.h"
 #endif
 #include  "clock/clock.h"
-#include  "timer_internal.h"
+#include  "timer/timer.h"
 #include  "irq/irq.h"
 #ifdef HAVE_TASK_GROUP
 #include  "group/group.h"

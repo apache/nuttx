@@ -1,5 +1,5 @@
 /********************************************************************************
- * sched/timer_create.c
+ * sched/timer/timer_create.c
  *
  *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,7 +48,7 @@
 
 #include <nuttx/kmalloc.h>
 
-#include "timer_internal.h"
+#include "timer/timer.h"
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
 

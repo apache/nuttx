@@ -1,7 +1,7 @@
 /********************************************************************************
- * timer_getoverrun.c
+ * sched/timer/timer_release.c
  *
- *   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,10 +39,12 @@
 
 #include <nuttx/config.h>
 
-#include <time.h>
+#include <queue.h>
 #include <errno.h>
 
-#include "timer_internal.h"
+#include <nuttx/kmalloc.h>
+
+#include "timer/timer.h"
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
 
@@ -63,49 +65,95 @@
  ********************************************************************************/
 
 /********************************************************************************
+ * Name: timer_free
+ *
+ * Description:
+ *   Remove the timer from the allocated timer list and free it or return it to
+ *   the free list (depending on whether or not the timer is one of the
+ *   preallocated timers)
+ *
+ ********************************************************************************/
+
+static inline void timer_free(struct posix_timer_s *timer)
+{
+  irqstate_t flags;
+
+  /* Remove the timer from the allocated list */
+
+  flags = irqsave();
+  sq_rem((FAR sq_entry_t*)timer, (sq_queue_t*)&g_alloctimers);
+
+  /* Return it to the free list if it is one of the preallocated timers */
+
+#if CONFIG_PREALLOC_TIMERS > 0
+  if ((timer->pt_flags & PT_FLAGS_PREALLOCATED) != 0)
+    {
+      sq_addlast((FAR sq_entry_t*)timer, (FAR sq_queue_t*)&g_freetimers);
+      irqrestore(flags);
+    }
+  else
+#endif
+    {
+      /* Otherwise, return it to the heap */
+
+      irqrestore(flags);
+      sched_kfree(timer);
+    }
+}
+
+/********************************************************************************
  * Public Functions
  ********************************************************************************/
 
 /********************************************************************************
- * Name: timer_getoverrun
+ * Name: timer_release
  *
  * Description:
- *   Only a single signal will be queued to the process for a given timer at any
- *   point in time.  When a timer for which a signal is still pending expires, no
- *   signal will be queued, and a timer overrun will occur. When a timer
- *   expiration signal is delivered to or accepted by a process, if the
- *   implementation  supports  the  Realtime Signals Extension, the
- *   timer_getoverrun() function will return the timer expiration overrun count for
- *   the specified timer. The overrun count returned contains the number of extra
- *   timer expirations that occurred between the time the signal was generated
- *   (queued) and when it was delivered or accepted, up to but not including an
- *   implementation-defined  maximum of DELAYTIMER_MAX. If the number of such
- *   extra expirations is greater than or equal to DELAYTIMER_MAX, then the
- *   overrun count will be set to DELAYTIMER_MAX. The value returned by
- *   timer_getoverrun() will apply to the most recent expiration signal delivery
- *   or acceptance for the timer.  If no expiration signal has been delivered
- *   for the timer, or if the Realtime Signals Extension is not supported, the
- *   return value of timer_getoverrun() is unspecified.
+ *   timer_release implements the heart of timer_delete.  It is private to the
+ *   the OS internals and differs only in that return value of 1 means that the
+ *   timer was not actually deleted.
  *
  * Parameters:
- *   timerid - The pre-thread timer, previously created by the call to
- *   timer_create(), whose overrun count will be returned..
+ *   timer - The per-thread timer, previously created by the call to
+ *     timer_create(), to be deleted.
  *
  * Return Value:
- *   If the timer_getoverrun() function succeeds, it will return the timer
- *   expiration overrun count as explained above. timer_getoverrun() will fail if:
+ *   If the call succeeds, timer_release() will return 0 (OK) or 1 (meaning that
+ *   the timer is still valid).  Otherwise, the function will return a negated errno:
  *
- *   EINVAL - The timerid argument does not correspond to an ID returned by
- *     timer_create() but not yet deleted by timer_delete().
- *
- * Assumptions:
+ *   -EINVAL - The timer specified timerid is not valid.
  *
  ********************************************************************************/
 
-int timer_getoverrun(timer_t timerid)
+int timer_release(FAR struct posix_timer_s *timer)
 {
-  errno = ENOSYS;
-  return ERROR;
+  /* Some sanity checks */
+
+  if (!timer)
+    {
+      return -EINVAL;
+    }
+
+  /* Release one reference to timer.  Don't delete the timer until the count
+   * would decrement to zero.
+   */
+
+  if (timer->pt_crefs > 1)
+    {
+      timer->pt_crefs--;
+      return 1;
+    }
+
+  /* Free the underlying watchdog instance (the timer will be canceled by the
+   * watchdog logic before it is actually deleted)
+   */
+
+  (void)wd_delete(timer->pt_wdog);
+
+  /* Release the timer structure */
+
+  timer_free(timer);
+  return OK;
 }
 
 #endif /* CONFIG_DISABLE_POSIX_TIMERS */
