@@ -266,7 +266,7 @@ void clock_synchronize(void)
  * Description:
  *   This function must be called once every time the real time clock
  *   interrupt occurs.  The interval of this clock interrupt must be
- *   MSEC_PER_TICK
+ *   USEC_PER_TICK
  *
  ****************************************************************************/
 

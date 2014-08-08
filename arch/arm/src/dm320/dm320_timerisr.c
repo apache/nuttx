@@ -139,7 +139,7 @@ void up_timer_initialize(void)
   up_disable_irq(DM320_IRQ_SYSTIMER);
 
   /* Start timer0 running so that an interrupt is generated at
-   * the rate MSEC_PER_TICK.
+   * the rate USEC_PER_TICK.
    */
 
   putreg16(DM320_TMR0_PRSCL, DM320_TIMER0_TMPRSCL); /* Timer 0 Prescalar */

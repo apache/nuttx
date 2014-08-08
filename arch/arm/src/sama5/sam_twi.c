@@ -527,7 +527,7 @@ static int twi_wait(struct twi_dev_s *priv, unsigned int size)
    * There is no concern about arithmetic overflow for reasonable transfer sizes.
    */
 
-  timeout = (TWI_TIMEOUT_MSPB * size) / MSEC_PER_TICK;
+  timeout = MSEC2TICK(TWI_TIMEOUT_MSPB);
   if (timeout < 1)
     {
       timeout = 1;

@@ -254,7 +254,7 @@ int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
           DEBUGASSERT(timeout->tv_sec < UINT32_MAX / MSEC_PER_SEC);
           waitmsec = timeout->tv_sec * MSEC_PER_SEC +
                     (timeout->tv_nsec + NSEC_PER_MSEC - 1) / NSEC_PER_MSEC;
-          waitticks = (waitmsec + MSEC_PER_TICK - 1) / MSEC_PER_TICK;
+          waitticks = MSEC2TICK(waitmsec);
 #endif
 
           /* Create a watchdog */

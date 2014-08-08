@@ -66,6 +66,7 @@
 #include <time.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/clock.h>
 
 #ifdef CONFIG_SCHED_TICKLESS
 
@@ -74,12 +75,12 @@
  ****************************************************************************/
 
 #if defined(CONFIG_SIM_WALLTIME) || defined(CONFIG_SIM_X11FB)
-#  define TICK_USEC (1000000 / CLK_TCK)
-#  define TICK_SEC  (TICK_USEC / 1000000)
-#  define TICK_NSEC ((TICK_USEC % 1000) * 1000)
+#  define TICK_USEC (USEC_PER_SEC / CLK_TCK)
+#  define TICK_SEC  (TICK_USEC / USEC_PER_SEC)
+#  define TICK_NSEC ((TICK_USEC % NSEC_PER_USEC) * NSEC_PER_USEC)
 #else
-#  define TICK_SEC 0
-#  define TICK_NSEC (128 * 1000)
+#  define TICK_SEC  0
+#  define TICK_NSEC NSEC_PER_TICK
 #endif
 
 /****************************************************************************
@@ -209,8 +210,8 @@ int up_timer_cancel(FAR struct timespec *ts)
 
   if (g_timer_active)
     {
-      ts->tv_sec  = g_interval_delay.tv_nsec;
-      ts->tv_nsec = g_interval_delay.tv_sec;
+      ts->tv_sec  = g_interval_delay.tv_sec;
+      ts->tv_nsec = g_interval_delay.tv_nsec;
     }
   else
     {
@@ -220,8 +221,8 @@ int up_timer_cancel(FAR struct timespec *ts)
 
   /* Disable and reset the simulated timer */
 
-  g_interval_delay.tv_nsec = 0;
   g_interval_delay.tv_sec  = 0;
+  g_interval_delay.tv_nsec = 0;
   g_timer_active           = false;
 }
 #endif
@@ -253,8 +254,8 @@ int up_timer_cancel(FAR struct timespec *ts)
 #ifdef CONFIG_SCHED_TICKLESS
 int up_timer_start(FAR const struct timespec *ts)
 {
-  g_interval_delay.tv_nsec = ts->tv_nsec;
   g_interval_delay.tv_sec  = ts->tv_sec;
+  g_interval_delay.tv_nsec = ts->tv_nsec;
   g_timer_active           = true;
 }
 #endif
@@ -278,10 +279,10 @@ void up_timer_update(void)
   /* Increment the elapsed time */
 
   g_elapsed_time.tv_nsec += TICK_NSEC;
-  if (g_elapsed_time.tv_nsec >= 1000000000)
+  if (g_elapsed_time.tv_nsec >= NSEC_PER_SEC)
     {
-      g_elapsed_time.tv_nsec++;
-      g_elapsed_time.tv_sec -= 1000000000;
+      g_elapsed_time.tv_sec++;
+      g_elapsed_time.tv_nsec -= NSEC_PER_SEC;
     }
 
   g_elapsed_time.tv_sec += TICK_SEC;
@@ -307,7 +308,7 @@ void up_timer_update(void)
 
           /* Decrement nanoseconds */
 
-          if (g_interval_delay.tv_nsec > TICK_NSEC)
+          if (g_interval_delay.tv_nsec >= TICK_NSEC)
             {
               g_interval_delay.tv_nsec -= TICK_NSEC;
             }
@@ -316,14 +317,10 @@ void up_timer_update(void)
 
           else if (g_interval_delay.tv_sec > 0)
             {
-              if (g_interval_delay.tv_nsec >= TICK_NSEC)
-                {
-                  g_interval_delay.tv_nsec = 0;
-                }
-              else
-                {
-                  g_interval_delay.tv_sec--;
-                }
+              g_interval_delay.tv_nsec += NSEC_PER_SEC;
+              g_interval_delay.tv_sec--;
+
+              g_interval_delay.tv_nsec -= TICK_NSEC;
             }
 
           /* Otherwise the timer has expired */

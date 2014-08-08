@@ -93,6 +93,9 @@ config USEC_PER_TICK
 		The default, 100 microseconds, will provide for a range of delays
 		up to 120 hours.
 
+		This value should never be less than the underlying resolution of
+		the timer.  Error may ensue.
+
 if !SCHED_TICKLESS
 
 config SYSTEMTICK_EXTCLK

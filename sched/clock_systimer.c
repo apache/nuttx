@@ -87,8 +87,7 @@ uint32_t clock_systimer(void)
 
   /* Convert to a 64- then 32-bit value */
 
-  tmp = (1000 * (uint64_t)ts.tv_sec + (uint64_t)ts.tv_nsec / 1000000) /
-        MSEC_PER_TICK;
+  tmp = MSEC2TICK(1000 * (uint64_t)ts.tv_sec + (uint64_t)ts.tv_nsec / 1000000);
   return (uint32_t)(tmp & 0x00000000ffffffff);
 
 #else
@@ -136,8 +135,7 @@ uint64_t clock_systimer64(void)
 
   /* Convert to a 64- then 32-bit value */
 
-  return (1000 * (uint64_t)ts.tv_sec + (uint64_t)ts.tv_nsec / 1000000) /
-         MSEC_PER_TICK;
+  return MSEC2TICK(1000 * (uint64_t)ts.tv_sec + (uint64_t)ts.tv_nsec / 1000000);
 
 #else
   /* Return the current system time */

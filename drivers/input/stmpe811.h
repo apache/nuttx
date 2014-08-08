@@ -96,7 +96,7 @@
 
 /* Timeout to detect missing pen up events */
 
-#define STMPE811_PENUP_TICKS  ((100 + (MSEC_PER_TICK-1)) / MSEC_PER_TICK)
+#define STMPE811_PENUP_TICKS            MSEC2TICK(100)
 
 /********************************************************************************************
  * Public Types

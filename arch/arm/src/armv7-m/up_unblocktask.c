@@ -97,7 +97,7 @@ void up_unblock_task(struct tcb_s *tcb)
    */
 
 #if CONFIG_RR_INTERVAL > 0
-  tcb->timeslice = CONFIG_RR_INTERVAL / MSEC_PER_TICK;
+  tcb->timeslice = MSEC2TICK(CONFIG_RR_INTERVAL);
 #endif
 
   /* Add the task in the correct location in the prioritized

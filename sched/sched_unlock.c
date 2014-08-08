@@ -45,7 +45,7 @@
 #include "os_internal.h"
 
 /************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************/
 
 /************************************************************************
@@ -65,7 +65,7 @@
  ************************************************************************/
 
 /************************************************************************
- * Private Functionss
+ * Private Functions
  ************************************************************************/
 
 /************************************************************************
@@ -125,11 +125,11 @@ int sched_unlock(void)
             }
 
 #if CONFIG_RR_INTERVAL > 0
-          /* If (1) the task that was running running supported round-robin
-           * scheduling and (2) if its time slice has already expired, but (3)
-           * it could not slice out because pre-emption was disabled, then
-           * we need to swap the task out now and reassess the interval timer
-           * for the next time slice.
+          /* If (1) the task that was running supported round-robin
+           * scheduling and (2) if its time slice has already expired, but
+           * (3) it could not slice out because pre-emption was disabled,
+           * then we need to swap the task out now and reassess the interval
+           * timer for the next time slice.
            */
 
           if ((rtcb->flags & TCB_FLAG_ROUND_ROBIN) != 0 &&
@@ -144,7 +144,7 @@ int sched_unlock(void)
 
               if (rtcb != (FAR struct tcb_s*)g_readytorun.head)
                 {
-                  rtcb->timeslice = CONFIG_RR_INTERVAL / MSEC_PER_TICK;
+                  rtcb->timeslice = MSEC2TICK(CONFIG_RR_INTERVAL);
                 }
 #ifdef CONFIG_SCHED_TICKLESS
               else

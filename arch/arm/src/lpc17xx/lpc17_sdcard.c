@@ -2266,7 +2266,7 @@ static sdio_eventset_t lpc17_eventwait(FAR struct sdio_dev_s *dev,
 
       /* Start the watchdog timer */
 
-      delay = (timeout + (MSEC_PER_TICK-1)) / MSEC_PER_TICK;
+      delay = MSEC2TICK(timeout);
       ret   = wd_start(priv->waitwdog, delay, (wdentry_t)lpc17_eventtimeout,
                        1, (uint32_t)priv);
       if (ret != OK)

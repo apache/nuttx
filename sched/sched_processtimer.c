@@ -115,7 +115,7 @@ static inline void sched_process_timeslice(void)
             {
               /* Reset the timeslice in any case. */
 
-              rtcb->timeslice = CONFIG_RR_INTERVAL / MSEC_PER_TICK;
+              rtcb->timeslice = MSEC2TICK(CONFIG_RR_INTERVAL);
 
               /* We know we are at the head of the ready to run
                * prioritized list.  We must be the highest priority
@@ -170,7 +170,7 @@ static inline void sched_process_timeslice(void)
  *   The timer interrupt logic itself is implemented in the
  *   architecture specific code, but must call the following OS
  *   function periodically -- the calling interval must be
- *   MSEC_PER_TICK
+ *   USEC_PER_TICK
  *
  * Inputs:
  *   None

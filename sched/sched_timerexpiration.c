@@ -171,7 +171,7 @@ sched_process_timeslice(unsigned int ticks, bool noswitches)
             {
               /* Reset the timeslice. */
 
-              rtcb->timeslice = CONFIG_RR_INTERVAL / MSEC_PER_TICK;
+              rtcb->timeslice = MSEC2TICK(CONFIG_RR_INTERVAL);
               ret = rtcb->timeslice;
 
               /* We know we are at the head of the ready to run
@@ -287,7 +287,7 @@ static void sched_timer_process(unsigned int ticks, bool noswitches)
        * understand.
        */
 
-      msecs = MSEC_PER_TICK * nextime;
+      msecs = TICK2MSEC(nextime);
       secs  = msecs / MSEC_PER_SEC;
       nsecs = (msecs - (secs * MSEC_PER_SEC)) * NSEC_PER_MSEC;
 
@@ -327,7 +327,11 @@ static void sched_timer_process(unsigned int ticks, bool noswitches)
 
 void sched_timer_expiration(void)
 {
-  sched_timer_process(g_timer_interval, false);
+  unsigned int elapsed;
+
+  elapsed          = g_timer_interval;
+  g_timer_interval = 0;
+  sched_timer_process(elapsed, false);
 }
 
 /****************************************************************************
@@ -358,6 +362,7 @@ void sched_timer_reassess(void)
 {
   struct timespec ts;
   unsigned int ticks;
+  unsigned int elapsed;
 
   /* Get the time remaining on the interval timer and cancel the timer. */
 
@@ -367,13 +372,16 @@ void sched_timer_reassess(void)
 
   ticks  = SEC2TICK(ts.tv_sec);
   ticks += NSEC2TICK(ts.tv_nsec);
+  DEBUGASSERT(ticks <= g_timer_interval);
 
   /* Handle the partial timer.  This will reassess all timer conditions and
    * re-start the interval timer with the correct delay.  Context switches
    * are not permitted in this case because we are not certain of the
    * calling conditions.
    */
-  
-  sched_timer_process(g_timer_interval - ticks, true);
+
+  elapsed          = g_timer_interval - ticks;
+  g_timer_interval = 0;
+  sched_timer_process(elapsed, true);
 }
 #endif /* CONFIG_SCHED_TICKLESS */

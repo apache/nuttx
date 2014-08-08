@@ -88,7 +88,6 @@
 
 int clock_getres(clockid_t clock_id, struct timespec *res)
 {
-  uint32_t time_res;
   int      ret = OK;
 
   sdbg("clock_id=%d\n", clock_id);
@@ -103,18 +102,12 @@ int clock_getres(clockid_t clock_id, struct timespec *res)
     }
   else
     {
-      /* Get the clock resolution in nanoseconds */
-
-      time_res = MSEC_PER_TICK * NSEC_PER_MSEC;
-
-      /* And return this as a timespec. */
+      /* Form the timspec using clock resolution in nanoseconds */
 
       res->tv_sec  = 0;
-      res->tv_nsec = time_res;
+      res->tv_nsec = NSEC_PER_TICK;
 
-      sdbg("Returning res=(%d,%d) time_res=%d\n",
-           (int)res->tv_sec, (int)res->tv_nsec,
-           (int)time_res);
+      sdbg("Returning res=(%d,%d)\n", (int)res->tv_sec, (int)res->tv_nsec);
     }
 
   return ret;

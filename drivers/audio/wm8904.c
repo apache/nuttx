@@ -1475,6 +1475,9 @@ static int wm8904_sendbuffer(FAR struct wm8904_dev_s *priv)
        * REVISIT:  Does this take into account the number channels?  Perhaps
        * saving an reusing the bitrate would give a better and simpler
        * calculation.
+       *
+       * REVISIT:  Should not use MSEC_PER_TICK.  It can be inaccurate with
+       * microsecond resolution timer.
        */
 
       timeout = (((uint32_t)(apb->nbytes - apb->curbyte) << 14) /

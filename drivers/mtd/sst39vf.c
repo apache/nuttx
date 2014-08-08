@@ -435,7 +435,7 @@ static int sst39vf_chiperase(FAR struct sst39vf_dev_s *priv)
   wrinfo.data    = 0xffff;
 
   start = clock_systimer();
-  while (delay < SST39VF_TSCE_MSEC * MSEC_PER_TICK)
+  while (delay < MSEC2TICK(SST39VF_TSCE_MSEC))
     {
       /* Check if the erase is complete */
 
@@ -447,14 +447,14 @@ static int sst39vf_chiperase(FAR struct sst39vf_dev_s *priv)
       /* No, check if the timeout has elapsed */
 
       elapsed = clock_systimer() - start;
-      if (elapsed > SST39VF_TSCE_MSEC * MSEC_PER_TICK)
+      if (elapsed > MSEC2TICK(SST39VF_TSCE_MSEC))
         {
           return -ETIMEDOUT;
         }
 
       /* No, wait one system clock tick */
 
-      usleep(MSEC_PER_TICK * USEC_PER_MSEC);
+      usleep(USEC_PER_TICK);
     }
 #else
   /* Delay the maximum amount of time for the chip erase to complete. */
@@ -511,7 +511,7 @@ static int sst39vf_sectorerase(FAR struct sst39vf_dev_s *priv,
 
 #if 0
   start = clock_systimer();
-  while (delay < SST39VF_TSE_MSEC * MSEC_PER_TICK)
+  while (delay < MSEC2TICK(SST39VF_TSE_MSEC))
     {
       /* Check if the erase is complete */
 
@@ -523,14 +523,14 @@ static int sst39vf_sectorerase(FAR struct sst39vf_dev_s *priv,
       /* No, check if the timeout has elapsed */
 
       elapsed = clock_systimer() - start;
-      if (elapsed > SST39VF_TSE_MSEC * MSEC_PER_TICK)
+      if (elapsed > MSEC2TICK(SST39VF_TSE_MSEC))
         {
           return -ETIMEDOUT;
         }
 
       /* No, wait one system clock tick */
 
-      usleep(MSEC_PER_TICK * USEC_PER_MSEC);
+      usleep(USEC_PER_TICK);
     }
 #else
   /* Delay the maximum amount of time for the sector erase to complete. */

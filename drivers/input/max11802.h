@@ -90,7 +90,7 @@
 
 /* Poll the pen position while the pen is down at this rate (50MS): */
 
-#define MAX11802_WDOG_DELAY  ((50 + (MSEC_PER_TICK-1))/ MSEC_PER_TICK)
+#define MAX11802_WDOG_DELAY     MSEC2TICK(50)
 
 /********************************************************************************************
  * Public Types

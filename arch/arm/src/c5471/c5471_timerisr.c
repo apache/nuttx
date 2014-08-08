@@ -53,7 +53,7 @@
  ************************************************************/
 
 /* We want the general purpose timer running at the rate
- * MSEC_PER_TICK. The C5471 clock is 47.5MHz and we're using
+ * USEC_PER_TICK. The C5471 clock is 47.5MHz and we're using
  * a timer PTV value of 3 (3 == divide incoming frequency by
  * 16) which then yields a 16 bitCLKS_PER_INT value
  * of 29687.
@@ -114,7 +114,7 @@ void up_timer_initialize(void)
   up_disable_irq(C5471_IRQ_SYSTIMER);
 
   /* Start the general purpose timer running in auto-reload mode
-   * so that an interrupt is generated at the rate MSEC_PER_TICK.
+   * so that an interrupt is generated at the rate USEC_PER_TICK.
    */
 
   val = ((CLKS_PER_INT-1) << CLKS_PER_INT_SHIFT) | AR | ST | PTV;

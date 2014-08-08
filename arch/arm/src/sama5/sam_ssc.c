@@ -390,7 +390,7 @@
  */
 
 #define DMA_TIMEOUT_MS    (800)
-#define DMA_TIMEOUT_TICKS ((DMA_TIMEOUT_MS + (MSEC_PER_TICK-1)) / MSEC_PER_TICK)
+#define DMA_TIMEOUT_TICKS MSEC2TICK(DMA_TIMEOUT_MS)
 
 /* Debug *******************************************************************/
 /* Check if SSC debut is enabled (non-standard.. no support in

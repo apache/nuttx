@@ -157,7 +157,7 @@ int sched_setscheduler(pid_t pid, int policy,
       /* Set round robin scheduling */
 
       tcb->flags    |= TCB_FLAG_ROUND_ROBIN;
-      tcb->timeslice = CONFIG_RR_INTERVAL / MSEC_PER_TICK;
+      tcb->timeslice = MSEC2TICK(CONFIG_RR_INTERVAL);
     }
   else
     {

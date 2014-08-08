@@ -218,8 +218,8 @@ int sam_timerinitialize(void)
 
   /* Set the timeout */
 
-  tcvdbg("Interval = %d us.\n",  (unsigned long)MSEC_PER_TICK * 1000);
-  ret = ioctl(fd, TCIOC_SETTIMEOUT, (unsigned long)MSEC_PER_TICK * 1000);
+  tcvdbg("Interval = %d us.\n",  (unsigned long)USEC_PER_TICK);
+  ret = ioctl(fd, TCIOC_SETTIMEOUT, (unsigned long)USEC_PER_TICK);
   if (ret < 0)
     {
       tcdbg("ioctl(TCIOC_SETTIMEOUT) failed: %d\n", errno);
