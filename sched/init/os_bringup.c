@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/os_bringup.c
+ * sched/init/os_bringup.c
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -57,6 +57,7 @@
 #ifdef CONFIG_PAGING
 # include "paging/paging.h"
 #endif
+# include "init/init.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -125,6 +126,12 @@
  *   symbols:
  *
  *   - USER_ENTRYPOINT: This is the default user application entry point.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
  *
  ****************************************************************************/
 

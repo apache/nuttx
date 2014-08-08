@@ -69,14 +69,6 @@
 #define MAX_TASKS_MASK      (CONFIG_MAX_TASKS-1)
 #define PIDHASH(pid)        ((pid) & MAX_TASKS_MASK)
 
-/* A more efficient ways to access the errno */
-
-#define SET_ERRNO(e) \
-  { struct tcb_s *rtcb = struct tcb_s*)g_readytorun.head; rtcb->pterrno = (e); }
-
-#define _SET_TCB_ERRNO(t,e) \
-  { (t)->pterrno = (e); }
-
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -101,8 +93,6 @@ struct pidhash_s
 #endif
 };
 
-typedef struct pidhash_s  pidhash_t;
-
 /* This structure defines an element of the g_tasklisttable[].
  * This table is used to map a task_state enumeration to the
  * corresponding task list.
@@ -113,8 +103,6 @@ struct tasklist_s
   DSEG volatile dq_queue_t *list; /* Pointer to the task list */
   bool prioritized;               /* true if the list is prioritized */
 };
-
-typedef struct tasklist_s tasklist_t;
 
 /****************************************************************************
  * Global Variables
@@ -209,7 +197,7 @@ extern volatile pid_t g_lastpid;
  * of tasks to CONFIG_MAX_TASKS.
  */
 
-extern pidhash_t g_pidhash[CONFIG_MAX_TASKS];
+extern struct pidhash_s g_pidhash[CONFIG_MAX_TASKS];
 
 /* This is a table of task lists.  This table is indexed by the task state
  * enumeration type (tstate_t) and provides a pointer to the associated
@@ -217,7 +205,7 @@ extern pidhash_t g_pidhash[CONFIG_MAX_TASKS];
  * if the list is an ordered list or not.
  */
 
-extern const tasklist_t g_tasklisttable[NUM_TASK_STATES];
+extern const struct tasklist_s g_tasklisttable[NUM_TASK_STATES];
 
 #ifdef CONFIG_SCHED_CPULOAD
 /* This is the total number of clock tick counts.  Essentially the
@@ -231,7 +219,6 @@ extern volatile uint32_t g_cpuload_total;
  * Public Function Prototypes
  ****************************************************************************/
 
-int  os_bringup(void);
 #ifdef CONFIG_SCHED_CHILD_STATUS
 void weak_function task_initialize(void);
 #endif

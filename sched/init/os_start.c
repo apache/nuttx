@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/os_start.c
+ * sched/init/os_start.c
  *
  *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -67,6 +67,7 @@
 #ifdef HAVE_TASK_GROUP
 #include  "group/group.h"
 #endif
+#include  "init/init.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -168,7 +169,7 @@ volatile pid_t g_lastpid;
  * the number of tasks to CONFIG_MAX_TASKS.
  */
 
-pidhash_t g_pidhash[CONFIG_MAX_TASKS];
+struct pidhash_s g_pidhash[CONFIG_MAX_TASKS];
 
 /* This is a table of task lists.  This table is indexed by
  * the task state enumeration type (tstate_t) and provides
@@ -177,7 +178,7 @@ pidhash_t g_pidhash[CONFIG_MAX_TASKS];
  * is an ordered list or not.
  */
 
-const tasklist_t g_tasklisttable[NUM_TASK_STATES] =
+const struct tasklist_s g_tasklisttable[NUM_TASK_STATES] =
 {
   { NULL,                    false },  /* TSTATE_TASK_INVALID */
   { &g_pendingtasks,         true  },  /* TSTATE_TASK_PENDING */
@@ -228,7 +229,14 @@ static FAR const char g_idlename[] = "Idle Task";
  *
  * Description:
  *   This function is called to initialize the operating system and to spawn
- *   the user initization thread of execution
+ *   the user initialization thread of execution.  This is the initial entry
+ *   point into NuttX
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned value:
+ *   Does not return.
  *
  ****************************************************************************/
 

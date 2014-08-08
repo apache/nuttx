@@ -41,8 +41,8 @@ DEPPATH = --dep-path .
 ASRCS =
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 
-MISC_SRCS  = os_start.c os_bringup.c errno_getptr.c sched_garbage.c
-MISC_SRCS += sched_getfiles.c sched_getsockets.c sched_getstreams.c
+MISC_SRCS  = errno_getptr.c sched_garbage.c sched_getfiles.c
+MISC_SRCS += sched_getsockets.c sched_getstreams.c
 
 ifeq ($(CONFIG_NUTTX_KERNEL),y)
 MISC_SRCS += errno_get.c errno_set.c
@@ -110,6 +110,7 @@ ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 TIME_SRCS += nanosleep.c
 endif
 
+include init/Make.defs
 include irq/Make.defs
 include paging/Make.defs
 include group/Make.defs
@@ -123,7 +124,7 @@ include timer/Make.defs
 include environ/Make.defs
 
 CSRCS  = $(MISC_SRCS) $(TSK_SRCS) $(SCHED_SRCS) $(TIME_SRCS)
-CSRCS += $(IRQ_SRCS) $(PG_SRCS) $(GRP_SRCS) $(WDOG_SRCS) $(SEM_SRCS) $(SIGNAL_SRCS) $(PTHREAD_SRCS) $(MQUEUE_SRCS) $(CLOCK_SRCS) $(TIMER_SRCS) $(ENV_SRCS)
+CSRCS += $(INIT_SRCS) $(IRQ_SRCS) $(PG_SRCS) $(GRP_SRCS) $(WDOG_SRCS) $(SEM_SRCS) $(SIGNAL_SRCS) $(PTHREAD_SRCS) $(MQUEUE_SRCS) $(CLOCK_SRCS) $(TIMER_SRCS) $(ENV_SRCS)
 
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
