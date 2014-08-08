@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/errno_set.c
+ * sched/errno/errno_set.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -79,5 +79,3 @@ void set_errno(int errcode)
 {
   *get_errno_ptr() = errcode;
 }
-
-

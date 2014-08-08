@@ -39,14 +39,6 @@ VPATH =
 DEPPATH = --dep-path .
 
 ASRCS =
-AOBJS = $(ASRCS:.S=$(OBJEXT))
-
-MISC_SRCS  = errno_getptr.c sched_garbage.c sched_getfiles.c
-MISC_SRCS += sched_getsockets.c sched_getstreams.c
-
-ifeq ($(CONFIG_NUTTX_KERNEL),y)
-MISC_SRCS += errno_get.c errno_set.c
-endif
 
 TSK_SRCS  = prctl.c exit.c getpid.c
 TSK_SRCS += task_create.c task_init.c task_setup.c task_activate.c task_start.c
@@ -72,7 +64,9 @@ ifeq ($(CONFIG_SCHED_STARTHOOK),y)
 TSK_SRCS += task_starthook.c
 endif
 
-SCHED_SRCS = sched_setparam.c sched_setpriority.c sched_getparam.c
+SCHED_SRCS  = sched_garbage.c sched_getfiles.c
+SCHED_SRCS += sched_getsockets.c sched_getstreams.c
+SCHED_SRCS += sched_setparam.c sched_setpriority.c sched_getparam.c
 SCHED_SRCS += sched_setscheduler.c sched_getscheduler.c
 SCHED_SRCS += sched_yield.c sched_rrgetinterval.c sched_foreach.c
 SCHED_SRCS += sched_lock.c sched_unlock.c sched_lockcount.c sched_self.c
@@ -101,19 +95,20 @@ SCHED_SRCS += sched_cpuload.c
 endif
 
 ifeq ($(CONFIG_SCHED_TICKLESS),y)
-TIME_SRCS += sched_timerexpiration.c
+SCHED_SRCS += sched_timerexpiration.c
 else
-TIME_SRCS += sched_processtimer.c
+SCHED_SRCS += sched_processtimer.c
 endif
 
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
-TIME_SRCS += nanosleep.c
+SCHED_SRCS += nanosleep.c
 endif
 
 include init/Make.defs
 include irq/Make.defs
 include paging/Make.defs
 include group/Make.defs
+include errno/Make.defs
 include wdog/Make.defs
 include semaphore/Make.defs
 include signal/Make.defs
@@ -123,9 +118,12 @@ include clock/Make.defs
 include timer/Make.defs
 include environ/Make.defs
 
-CSRCS  = $(MISC_SRCS) $(TSK_SRCS) $(SCHED_SRCS) $(TIME_SRCS)
-CSRCS += $(INIT_SRCS) $(IRQ_SRCS) $(PG_SRCS) $(GRP_SRCS) $(WDOG_SRCS) $(SEM_SRCS) $(SIGNAL_SRCS) $(PTHREAD_SRCS) $(MQUEUE_SRCS) $(CLOCK_SRCS) $(TIMER_SRCS) $(ENV_SRCS)
+CSRCS  = $(INIT_SRCS) $(IRQ_SRCS) $(PG_SRCS) $(GRP_SRCS) $(TSK_SRCS)
+CSRCS += $(SCHED_SRCS) $(ERRNO_SRCS) $(WDOG_SRCS) $(SEM_SRCS)
+CSRCS += $(SIGNAL_SRCS) $(PTHREAD_SRCS) $(MQUEUE_SRCS) $(CLOCK_SRCS)
+CSRCS += $(TIMER_SRCS) $(ENV_SRCS)
 
+AOBJS = $(ASRCS:.S=$(OBJEXT))
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
 SRCS = $(ASRCS) $(CSRCS)

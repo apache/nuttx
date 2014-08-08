@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/errno_getptr.c
+ * sched/errno/errno_get.c
  *
- *   Copyright (C) 2007, 2008, 2011, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,88 +38,45 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sched.h>
+
 #include <errno.h>
-#include <nuttx/arch.h>
-#include "os_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 #undef get_errno_ptr
+#undef get_errno
 #undef errno
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/* This is a 'dummy' errno value to use in context where there is no valid
- * errno location to use.  For example, when running from an interrupt handler
- * or early in initialization when task structures have not yet been
- * initialized.
- */
-
-static int g_irqerrno;
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: get_errno_ptr
+ * Name: get_errno
  *
  * Description:
- *   Return a pointer to the thread specific errno.
+ *   Return the value of the thread specific errno.  This function is only
+ *   intended to provide a mechanism for user-mode programs to get the
+ *   thread-specific errno value.  It is #define'd to the symbol errno in
+ *   include/errno.h.
  *
  * Parameters:
  *   None
  *
  * Return Value:
- *   A pointer to the per-thread errno variable.
+ *   The current value of the thread specific errno.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-FAR int *get_errno_ptr(void)
+int get_errno(void)
 {
-  /* Check if this function was called from an interrupt handler.  In that
-   * case, we have to do things a little differently to prevent the interrupt
-   * handler from modifying the tasks errno value.
-   */
-
-  if (!up_interrupt_context())
-    {
-      /* We were called from the normal tasking context.  Verify that the
-       * task at the head of the ready-to-run list is actually running.  It
-       * may not be running during very brief times during context switching
-       * logic (see, for example, task_exit.c).
-       *
-       * There is also a corner case early in the initialization sequence:
-       * The ready to run list may not yet be initialized and g_readytorun.head
-       * may be NULL.
-       */
-
-      FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
-      if (rtcb && rtcb->task_state == TSTATE_TASK_RUNNING)
-        {
-          /* Yes.. the task is running normally.  Return a reference to the
-           * thread-private errno in the TCB of the running task.
-           */
-
-          return &rtcb->pterrno;
-        }
-    }
-
-  /* We were called either from (1) an interrupt handler or (2) from normally
-   * code but in an unhealthy state.  In either event, do not permit access to
-   * the errno in the TCB of the task at the head of the ready-to-run list.
-   * Instead, use a separate errno just for interrupt handlers.  Of course, this
-   * would have to change if we ever wanted to support nested interrupts or if
-   * we really cared about the stability of the errno during those "unhealthy
-   * states."
-   */
-
-  return &g_irqerrno;
+  return *get_errno_ptr();
 }
