@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: May 8, 2014</p>
+      <p>Last Updated: August 8, 2014</p>
     </td>
   </tr>
 </table>
@@ -95,22 +95,39 @@
       <a href="#upenableirq">4.2.18 <code>up_enable_irq()</code></a><br>
       <a href="#upprioritizeirq">4.2.19 <code>up_prioritize_irq()</code></a></br>
       <a href="#upputc">4.2.20 <code>up_putc()</code></a></br>
-      <a href="#systemtime">4.2.21 System Time and Clock</a><br>
-      <a href="#addrenv">4.2.22 Address Environments</a>
     </ul>
-    <a href="#exports">4.3 APIs Exported by NuttX to Architecture-Specific Logic</a>
+    <a href="#systemtime">4.3 System Time and Clock</a>
     <ul>
-      <a href="#osstart">4.3.1 <code>os_start()</code></a><br>
-      <a href="#listmgmt">4.3.2 OS List Management APIs</a><br>
-      <a href="#schedprocesstimer">4.3.3 <code>sched_process_timer()</code></a><br>
-      <a href="#irqdispatch">4.3.4 <code>irq_dispatch()</code></a>
+      <a href="#basictimer">4.3.1 Basic System Timer</a></br>
+      <a href="#timerhw">4.3.2 Hardware</a></br>
+      <a href="#systcktime">4.3.3 System Tick and Time</a></br>
+      <a href="#tickless">4.3.4 Tickless OS</a>
     </ul>
-    <a href="#demandpaging">4.4 On-Demand Paging</a><br>
-    <a href="#ledsupport">4.5 LED Support</a>
+    <a href="#addrenv">4.4 Address Environments</a>
     <ul>
-      <a href="#ledheaders">4.5.1 Header Files</a><br>
-      <a href="#leddefinitions">4.5.2 LED Definitions</a><br>
-      <a href="#ledapis">4.5.3 Common LED interfaces</a>
+      <a href="#up_addrenv_create">4.4.1 <code>up_addrenv_create()</code></a></br>
+      <a href="#up_addrenv_vaddr">4.4.2 <code>up_addrenv_vaddr()</code></a></br>
+      <a href="#up_addrenv_select">4.4.3 <code>up_addrenv_select()</code></a></br>
+      <a href="#up_addrenv_restore">4.4.4 <code>up_addrenv_restore()</code></a></br>
+      <a href="#up_addrenv_destroy">4.4.5 <code>up_addrenv_destroy()</code></a></br>
+      <a href="#up_addrenv_assign">4.4.6 <code>up_addrenv_assign()</code></a></br>
+      <a href="#up_addrenv_share">4.4.7 <code>up_addrenv_share()</code></a></br>
+      <a href="#up_addrenv_release">4.4.8 <code>up_addrenv_release()</code></a>
+    </ul>
+    <a href="#exports">4.5 APIs Exported by NuttX to Architecture-Specific Logic</a>
+    <ul>
+      <a href="#osstart">4.5.1 <code>os_start()</code></a><br>
+      <a href="#listmgmt">4.5.2 OS List Management APIs</a><br>
+      <a href="#schedprocesstimer">4.5.3 <code>sched_process_timer()</code></a><br>
+      <a href="#schedtimerexpiration">4.5.4 <code>sched_timer_expiration()</code></a></br>
+      <a href="#irqdispatch">4.5.5 <code>irq_dispatch()</code></a>
+    </ul>
+    <a href="#demandpaging">4.6 On-Demand Paging</a><br>
+    <a href="#ledsupport">4.7 LED Support</a>
+    <ul>
+      <a href="#ledheaders">4.7.1 Header Files</a><br>
+      <a href="#leddefinitions">4.7.2 LED Definitions</a><br>
+      <a href="#ledapis">4.7.3 Common LED interfaces</a>
     </ul>
   </ul>
   <a href="#NxFileSystem">5.0 NuttX File System</a><br>
@@ -779,7 +796,7 @@
   </li>
   <li>
     <p>
-      <code>setenv.sh</code>: This is a script that you can include that will be installed at
+      <code>setenv.sh</code>: This is a script that can be included that will be installed at
       the top level of the directory structure and can be sourced to set any
       necessary environment variables.
       You will most likely have to customize the default <code>setenv.sh</code> script in order
@@ -2214,9 +2231,9 @@ The system can be re-made subsequently by just typing <code>make</code>.
   Output one character on the console
 </p>
 
-<h3><a name="systemtime">4.2.21 System Time and Clock</a></h3>
+<h2><a name="systemtime">4.3 System Time and Clock</a></h2>
 
-<h4>4.2.21.1 Basic System Timer</h4>
+<h3><a name="basictimer">4.3.1 Basic System Timer</a></h3>
 
 <p><b>System Timer</b>
   In most implementations, system time is provided by a timer interrupt.
@@ -2299,7 +2316,7 @@ else
   In this way, the timer interval is controlled from interrupt-to-interrupt to produce an average frequency of exactly 100Hz.
 </p>
 
-<h4>4.2.21.2 Hardware</h4>
+<h3><a name="timerhw">4.3.2 Hardware</a></h3>
 <p>
   To enable hardware module use the following configuration options:
 <p>
@@ -2354,7 +2371,7 @@ else
   </li>
 </ul>
 
-<h4>4.2.21.3 System Tick and Time</h4>
+<h3><a name="systcktime">4.3.3 System Tick and Time</a></h3>
 <p>
   The system tick is represented by::
 </p>
@@ -2377,8 +2394,218 @@ else
   To retrieve that variable use:
 </p>
 
-<h3><a name="addrenv">4.2.22 Address Environments</a></h3>
+<h3><a name="tickless">4.3.4 Tickless OS</a></h3>
+<h4><a name="tickoverview">4.3.4.1 Tickless Overview</a></h4>
 
+<p>
+  <b>Default System Timer</b>.
+  By default, a NuttX configuration uses a periodic timer interrupt that drives all system timing. The timer is provided by architecture-specific code that calls into NuttX at a rate controlled by <code>CONFIG_USEC_PER_TICK</code>. The default value of <code>CONFIG_USEC_PER_TICK</code> is 10000 microseconds which corresponds to a timer interrupt rate of 100 Hz.
+</p>
+<p>
+  On each timer interrupt, NuttX does these things:
+<p>
+<ul>
+  <li>Increments a counter. This counter is the system time and has a resolution of <code>CONFIG_USEC_PER_TICK</code> microseconds.
+  <li>Checks if it is time to perform time-slice operations on tasks that have select round-robin scheduling.
+  <li>Checks for expiration of timed events.
+</ul>
+<p>
+  What is wrong with this default system timer? Nothing really. It is reliable and uses only a small fraction of the CPU band width. But we can do better. Some limitations of default system timer are, in increasing order of importance:
+</p>
+<ul>
+  <li>
+    <b>Overhead</b>:
+    Although the CPU usage of the system timer interrupt at 100Hz is really very low, it is still mostly wasted processing time. One most timer interrupts, there is really nothing that needs be done other than incrementing the counter.
+  </li>
+  <li>
+    <b>Resolution</b>:
+    Resolution of all system timing is also determined by <code>CONFIG_USEC_PER_TICK</code>. So nothing that be time with resolution finer than 10 milliseconds be default. To increase this resolution, <code>CONFIG_USEC_PER_TICK</code> an be reduced. However, then the system timer interrupts use more of the CPU bandwidth processing useless interrupts.
+  </li>
+  <li>
+    <b>Power Usage</b>:
+    But the biggest issue is power usage. When the system is IDLE, it enters a light, low-power mode (for ARMs, this mode is entered with the <code>wfi</code> or <code>wfe</code> instructions for example). But each interrupt awakens the system from this low power mode. Therefore, higher rates of interrupts cause greater power consumption.
+  </li>
+</ul>
+<p>
+  <b><i>Tickless OS</i></b>.
+  The so-called <i>Tickless OS</i> provides one solution to issue. The basic concept here is that the periodic, timer interrupt is eliminated and replaced with a one-shot, interval timer. It becomes event driven instead of polled: The default system timer is a polled design. On each interrupt, the NuttX logic checks if it needs to do anything and, if so, it does it.
+</p>
+<p>
+  Using an interval timer, one can anticipate when the next interesting OS event will occur, program the interval time and wait for it to fire. When the interval time fires, then the scheduled activity is performed.
+</p>
+
+<h4><a name="tickplatform">4.3.4.2 Tickless Platform Support</a></h4>
+
+In order to use the Tickless OS, one must provide special support from the platform-specific code. Just as with the default system timer, the platform-specific code must provide the timer resources to support the OS behavior.
+
+Currently these timer resources are only provided by the NuttX simulation. An example implementaion is for the simulation is at <code>nuttx/arch/sim/src/up_tickless.c</code>. These paragraphs will explain how to provide the Tickless OS support to any platform.
+
+<h4><a name="tickconfig">4.3.4.3 Tickless Configuration Options</a></h4>
+<ul>
+  <li>
+    <p>
+      <b><code>CONFIG_ARCH_HAVE_TICKLESS</code></b>:
+      If the platform provides support for the <i>Tickless OS</i>, then this setting should be selected in the <code>Kconfig</code> file for the board. Here is what the selection looks in the <code>arch/Kconfig</code> file for the simulated platform:
+    </p>
+<ul><pre>
+config ARCH_SIM
+   bool "Simulation"
+   select ARCH_HAVE_TICKLESS
+   ---help---
+       Linux/Cywgin user-mode simulation.
+</pre></ul>
+    <p>
+      When the simulation platform is selected, <code>ARCH_HAVE_TICKLESS</code> is automatically selected, informing the configuration system that <i>Tickless OS</i> options can be selected.
+    </p>
+  </li>
+  <li>
+    <p>
+    <b><code>CONFIG_SCHED_TICKLESS</code></b>:
+    If <code>CONFIG_ARCH_HAVE_TICKLESS</code> is selected, then it will enable the Tickless OS features in NuttX.
+    </p>
+  </li>
+  <li>
+    <p>
+      <b><code>CONFIG_USEC_PER_TICK</code></b>:
+      This option is not unique to <i>Tickless OS</i> operation, but changes its relevance when the <i>Tickless OS</i> is selected.
+      In the default configuration where system time is provided by a periodic timer interrupt, the default system timer is configure the timer for 100Hz or <code>CONFIG_USEC_PER_TICK=10000</code>. If <code>CONFIG_SCHED_TICKLESS</code> is selected, then there are no system timer interrupt. In this case, <code>CONFIG_USEC_PER_TICK</code> does not control any timer rates. Rather, it only determines the resolution of time reported by <code>clock_systimer()</code> and the resolution of times that can be set for certain delays including watchdog timers and delayed work.
+    </p>
+    <p>
+      In this case there is still a trade-off: It is better to have the <code>CONFIG_USEC_PER_TICK</code> as low as possible for higher timing resolution. However, the the time is currently held in <code>unsigned int</code>. On some systems, this may be 16-bits in width but on most contemporary systems it will be 32-bits. In either case, smaller values of <code>CONFIG_USEC_PER_TICK</code> will reduce the range of values that delays that can be represented. So the trade-off is between range and resolution (you could also modify the code to use a 64-bit value if you really want both).
+    </p>
+    <p>
+      The default, 100 microseconds, will provide for a range of delays up to 120 hours.
+    </p>
+    <p>
+      This value should never be less than the underlying resolution of the timer. Errors may ensue.
+    </p>
+  </li>
+</ul>
+
+<h4><a name="tickconfig">4.3.4.4 Tickless Imported Intefaces</a></h4>
+<p>
+  The interfaces that must be provided by the platform specified code are defined in <code>include/nuttx/arch.h</code>, listed below, and summarized in the following paragraphs:
+</p>
+<ul>
+  <li>
+    <a href="#uptimerinit"><code>up_timer_initialize()</code></a>:
+    Initializes the timer facilities.  Called early in the intialization sequence (by <code>up_intialize()</code>).
+  </li>
+  <li>
+    <a href="#uptimergettime"><code>up_timer_gettime()</code></a>:
+    Returns the current time from the platform specific time source.
+  </li>
+  <li>
+    <a href="#uptimercancel"><code>up_timer_cancel()</code></a>:
+    Cancels the interval timer.
+  </li>
+  <li>
+    <a href="#uptimerstart"><code>up_timer_start()</code></a>:
+    Starts (or re-starts) the interval timer.
+  </li>
+</ul>
+<p>
+  In addition, the RTOS will export the following interfaces for use by the platform-specific interval timer implementation:
+</p>
+<ul>
+  <li>
+    <a href="#schedtimerexpiration"><code>sched_timer_expiration()</code></a>
+  </li>
+</ul>
+
+<h5><a name="uptimerinit">4.3.4.4.1 <code>up_timer_initialize()</code></a></h5>
+<p><b>Prototype</b>:</p>
+<ul><pre>
+#include &lt;nuttx/arch.h&gt;
+void up_timer_initialize(void);
+</ul>
+<p><b>Description</b>:</p>
+<ul>
+  Initializes all platform-specific timer facilities. This function is called early in the initialization sequence by <code>up_intialize()</code>. On return, the current up-time should be available from <code>up_timer_gettime()</code> and the interval timer is ready for use (but not actively timing).
+</ul>
+<p><b>Input Parameters</b>:</p>
+<ul>
+  None
+</ul>
+<p><b>Returned Value</b>:</p>
+<ul>
+  Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
+</ul>
+<p><b>Assumptions</b>:</p>
+<ul>
+  Called early in the initialization sequence before any special concurrency protections are required.
+</ul>
+
+<h5><a name="uptimergettime">4.3.4.4.2 <code>up_timer_gettime()</code></a></h5>
+<p><b>Prototype</b>:<p>
+<ul><pre>
+#include &lt;nuttx/arch.h&gt;
+int up_timer_gettime(FAR struct timespec *ts);
+</ul>
+<p><b>Description</b>:</p>
+  Return the elapsed time since power-up (or, more correctly, since <code>up_timer_initialize()</code> was called). This function is functionally equivalent to <code>clock_gettime()</code> for the clock ID <code>CLOCK_MONOTONIC</code>. This function provides the basis for reporting the current time and also is used to eliminate error build-up from small errors in interval time calculations.
+<ul>
+</ul>
+<p><b>Input Parameters</b>:</p>
+<ul>
+  <li><code>ts</code>: Provides the location in which to return the up-time.</li>
+</ul>
+<p><b>Returned Value</b>:</p>
+<ul>
+  Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
+</ul>
+<p><b>Assumptions</b>:</p>
+<ul>
+  Called from the the normal tasking context. The implementation must provide whatever mutual exclusion is necessary for correct operation. This can include disabling interrupts in order to assure atomic register operations.
+</ul>
+
+<h5><a name="uptimercancel">4.3.4.4.3 <code>up_timer_cancel()</code></a></h5>
+<p><b>Prototype</b>:<p>
+<ul><pre>
+#include &lt;nuttx/arch.h&gt;
+int up_timer_cancel(FAR struct timespec *ts);
+</ul>
+<p><b>Description</b>:</p>
+  Cancel the interval timer and return the time remaining on the timer. These two steps need to be as nearly atomic as possible. <code>up_timer_expiration()</code> will not be called unless the timer is restarted with <code>up_timer_start()</code>. If, as a race condition, the timer has already expired when this function is called, then that pending interrupt must be cleared so that <code>up_timer_expiration()</code> is not called spuriously and the remaining time of zero should be returned.
+<ul>
+</ul>
+<p><b>Input Parameters</b>:</p>
+<ul>
+  <li><code>ts</code>: Location to return the remaining time. Zero should be returned if the timer is not active.</li>
+</ul>
+<p><b>Returned Value</b>:</p>
+<ul>
+  Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
+</ul>
+<p><b>Assumptions</b>:</p>
+<ul>
+  May be called from interrupt level handling or from the normal tasking level. iterrupts may need to be disabled internally to assure non-reentrancy.
+</ul>
+
+<h5><a name="uptimerstart">4.3.4.4.4 <code>up_timer_start()</code></a></h5>
+<p><b>Prototype</b>:<p>
+<ul><pre>
+#include &lt;nuttx/arch.h&gt;
+int up_timer_start(FAR const struct timespec *ts);
+</ul>
+<p><b>Description</b>:</p>
+  Start the interval timer. <code>up_timer_expiration()</code> will be called at the completion of the timeout (unless <code>up_timer_cancel()</code> is called to stop the timing).
+<ul>
+</ul>
+<p><b>Input Parameters</b>:</p>
+<ul>
+  <li><code>ts</code>: Provides the time interval until <code>up_timer_expiration()</code> is called.</li>
+</ul>
+<p><b>Returned Value</b>:</p>
+<ul>
+  Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
+</ul>
+<p><b>Assumptions</b>:</p>
+<ul>
+  May be called from interrupt level handling or from the normal tasking level. Interrupts may need to be disabled internally to assure non-reentrancy.
+</ul>
+
+<h2><a name="addrenv">4.4 Address Environments</a></h2>
 <p>
   CPUs that support memory management units (MMUs) may provide <i>address environments</i> within which tasks and their child threads execute.
   The configuration indicates the CPUs ability to support address environments by setting the configuration variable <code>CONFIG_ADDRENV=y</code>.
@@ -2401,27 +2628,27 @@ else
     </p>
     <ul>
       <li>
-        <a href="#up_addrenv_create">4.2.22.1 <code>up_addrenv_create()</code></a>:
+        <a href="#up_addrenv_create">4.4.1 <code>up_addrenv_create()</code></a>:
         Create an address environment.
       </li>
       <li>
-        <a href="#up_addrenv_vaddr">4.2.22.2 <code>up_addrenv_vaddr()</code></a>:
+        <a href="#up_addrenv_vaddr">4.4.2 <code>up_addrenv_vaddr()</code></a>:
         Returns the virtual base address of the address environment.
       </li>
       <li>
-        <a href="#up_addrenv_select">4.2.22.3 <code>up_addrenv_select()</code></a>:
+        <a href="#up_addrenv_select">4.4.3 <code>up_addrenv_select()</code></a>:
         Instantiate an address environment.
       </li>
       <li>
-        <a href="#up_addrenv_restore">4.2.22.4 <code>up_addrenv_restore()</code></a>:
+        <a href="#up_addrenv_restore">4.4.4 <code>up_addrenv_restore()</code></a>:
         Restore an address environment.
       </li>
       <li>
-        <a href="#up_addrenv_destroy">4.2.22.5 <code>up_addrenv_destroy()</code></a>:
+        <a href="#up_addrenv_destroy">4.4.5 <code>up_addrenv_destroy()</code></a>:
         Destroy an address environment.
       </li>
       <li>
-        <a href="#up_addrenv_assign">4.2.22.6 <code>up_addrenv_assign()</code></a>:
+        <a href="#up_addrenv_assign">4.4.6 <code>up_addrenv_assign()</code></a>:
         Assign an address environment to a TCB.
       </li>
     </ul>
@@ -2434,12 +2661,12 @@ else
     </p>
     <ul>
       <li>
-        <a href="#up_addrenv_share">4.2.22.7 <code>up_addrenv_share()</code></a>:
+        <a href="#up_addrenv_share">4.4.7 <code>up_addrenv_share()</code></a>:
         Clone the address environment assigned to one TCB to another.
         This operation is done when a pthread is created that share's the same address environment.
       </li>
       <li>
-        <a href="#up_addrenv_release">4.2.22.8 <code>up_addrenv_release()</code></a>:
+        <a href="#up_addrenv_release">4.4.8 <code>up_addrenv_release()</code></a>:
         Release the TCB's reference to an address environment when a task/thread exits.
       </li>
     </ul>
@@ -2447,7 +2674,7 @@ else
 </ol>
 
 
-<h4><a name="up_addrenv_create">4.2.22.1 <code>up_addrenv_create()</code></a></h4>
+<h3><a name="up_addrenv_create">4.4.1 <code>up_addrenv_create()</code></a></h3>
 <p><b>Prototype</b>:</p>
 <ul>
   <code>int up_addrenv_create(size_t envsize, FAR task_addrenv_t *addrenv);</code>
@@ -2467,7 +2694,7 @@ else
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h4><a name="up_addrenv_vaddr">4.2.22.2 <code>up_addrenv_vaddr()</code></a></h4>
+<h3><a name="up_addrenv_vaddr">4.4.2 <code>up_addrenv_vaddr()</code></a></h3>
 <p><b>Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_vaddr(FAR task_addrenv_t addrenv, FAR void **vaddr);</code>
@@ -2487,7 +2714,7 @@ else
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h4><a name="up_addrenv_select">4.2.22.3 <code>up_addrenv_select()</code></a></h4>
+<h3><a name="up_addrenv_select">4.4.3 <code>up_addrenv_select()</code></a></h3>
 <p><b>Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_select(task_addrenv_t addrenv, hw_addrenv_t *oldenv);</code>
@@ -2511,7 +2738,7 @@ else
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h4><a name="up_addrenv_restore">4.2.22.4 <code>up_addrenv_restore()</code></a></h4>
+<h3><a name="up_addrenv_restore">4.4.4 <code>up_addrenv_restore()</code></a></h3>
 <p><b>Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_restore(hw_addrenv_t oldenv);</code>
@@ -2530,7 +2757,7 @@ else
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h4><a name="up_addrenv_destroy">4.2.22.5 <code>up_addrenv_destroy()</code></a></h4>
+<h3><a name="up_addrenv_destroy">4.4.5 <code>up_addrenv_destroy()</code></a></h3>
 <p><b>Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_destroy(task_addrenv_t addrenv);</code>
@@ -2548,7 +2775,7 @@ else
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h4><a name="up_addrenv_assign">4.2.22.6 <code>up_addrenv_assign()</code></a></h4>
+<h3><a name="up_addrenv_assign">4.4.6 <code>up_addrenv_assign()</code></a></h3>
 <p><b>Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_assign(task_addrenv_t addrenv, FAR struct tcb_s *tcb);</code>
@@ -2567,7 +2794,7 @@ else
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h4><a name="up_addrenv_share">4.2.22.7 <code>up_addrenv_share()</code></a></h4>
+<h3><a name="up_addrenv_share">4.4.7 <code>up_addrenv_share()</code></a></h3>
 <p><b>Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_share(FAR const struct tcb_s *ptcb, FAR struct tcb_s *ctcb);</code>
@@ -2587,7 +2814,7 @@ else
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h4><a name="up_addrenv_release">4.2.22.8 <code>up_addrenv_release()</code></a></h4>
+<h3><a name="up_addrenv_release">4.4.8 <code>up_addrenv_release()</code></a></h3>
 <p><b>Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_release(FAR struct tcb_s *tcb);</code>
@@ -2607,23 +2834,23 @@ else
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h2><a name="exports">4.3 APIs Exported by NuttX to Architecture-Specific Logic</a></h2>
+<h2><a name="exports">4.5 APIs Exported by NuttX to Architecture-Specific Logic</a></h2>
 <p>
   These are standard interfaces that are exported by the OS
   for use by the architecture specific logic.
 </p>
 
-<h3><a name="osstart">4.3.1 <code>os_start()</code></a></h3>
+<h3><a name="osstart">4.5.1 <code>os_start()</code></a></h3>
 <p>
   <b><i>To be provided</i></b>
 </p>
 
-<h3><a name="listmgmt">4.3.2 OS List Management APIs</a></h3></h3>
+<h3><a name="listmgmt">4.5.2 OS List Management APIs</a></h3></h3>
 <p>
   <b><i>To be provided</i></b>
 </p>
 
-<h3><a name="schedprocesstimer">4.3.3 <code>sched_process_timer()</code></a></h3>
+<h3><a name="schedprocesstimer">4.5.3 <code>sched_process_timer()</code></a></h3>
 <p><b>Prototype</b>: <code>void sched_process_timer(void);</code></p>
 
 <p><b>Description</b>.
@@ -2634,7 +2861,30 @@ else
   <code>MSEC_PER_TICK</code>.
 </p>
 
-<h3><a name="irqdispatch">4.3.4 <code>irq_dispatch()</code></a></h3>
+<h3><a name="schedtimerexpiration">4.5.4 <code>sched_timer_expiration()</code></a></h3>
+<p><b>Prototype</b>:<p>
+<ul><pre>
+#include &lt;nuttx/arch.h&gt;
+void sched_timer_expiration(void);
+</ul>
+<p><b>Description</b>:</p>
+  Description: if <code>CONFIG_SCHED_TICKLESS</code> is defined, then this function is provided by the RTOS base code and called from platform-specific code when the interval timer used to implemented the tick-less OS expires.
+<ul>
+</ul>
+<p><b>Input Parameters</b>:</p>
+<ul>
+  None
+</ul>
+<p><b>Returned Value</b>:</p>
+<ul>
+  None
+</ul>
+<p><b>Assumptions</b>:</p>
+<ul>
+  Base code implementation assumes that this function is called from interrupt handling logic with interrupts disabled.
+</ul>
+
+<h3><a name="irqdispatch">4.5.5 <code>irq_dispatch()</code></a></h3>
 <p><b>Prototype</b>: <code>void irq_dispatch(int irq, FAR void *context);</code></p>
 
 <p><b>Description</b>.
@@ -2643,7 +2893,7 @@ else
   the appropriate, registered handling logic.
 </p>
 
-<h2><a name="demandpaging">4.4 On-Demand Paging</a></h2>
+<h2><a name="demandpaging">4.6 On-Demand Paging</a></h2>
 
 <p>
   The NuttX On-Demand Paging feature permits embedded MCUs with some limited RAM space to execute large programs from some non-random access media.
@@ -2653,7 +2903,7 @@ else
   Please see the <a href="NuttXDemandPaging.html">NuttX Demand Paging</a> design document for further information.
 </p>
 
-<h2><a name="ledsupport">4.5 LED Support</a></h2>
+<h2><a name="ledsupport">4.7 LED Support</a></h2>
 
 <p>
   A board architecture may or may not have LEDs.
@@ -2663,7 +2913,7 @@ else
   However, the support provided by each architecture is sufficiently similar that it can be documented here.
 </p>
 
-<h3><a name="ledheaders">4.5.1 Header Files</a></h3>
+<h3><a name="ledheaders">4.7.1 Header Files</a></h3>
 
 <p>
   LED-related definitions are provided in two header files:
@@ -2687,7 +2937,7 @@ else
   </ul>
 </p>
 
-<h3><a name="leddefinitions">4.5.2 LED Definitions</a></h3>
+<h3><a name="leddefinitions">4.7.2 LED Definitions</a></h3>
 
 <p>
    The implementation of LED support is very specific to a board architecture.
@@ -2751,7 +3001,7 @@ else
   </li>
 </ul>
 
-<h3><a name="ledapis">4.5.3 Common LED interfaces</a></h3>
+<h3><a name="ledapis">4.7.3 Common LED interfaces</a></h3>
 
 <p>
   The <code><i>&lt;arch-name&gt;</i>/src/common/up_internal.h</code> probably has definitions
