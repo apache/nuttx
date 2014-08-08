@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/group_killchildren.c
+ *  sched/group/group_foreachchild.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,73 +39,58 @@
 
 #include <nuttx/config.h>
 
-#include <sched.h>
+#include <nuttx/sched.h>
 
-#include "group_internal.h"
+#include "group/group.h"
 
-#if HAVE_GROUP_MEMBERS
+#ifdef HAVE_GROUP_MEMBERS
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/*****************************************************************************
- * Name: group_killchildren_handler
- *
- * Description:
- *   Callback from group_foreachchild that handles one member of the group.
- *
- * Parameters:
- *   pid - The ID of the group member that may be signalled.
- *   arg - The PID of the thread to be retained.
- *
- * Return Value:
- *   0 (OK) on success; a negated errno value on failure.
- *
- *****************************************************************************/
-
-static int group_killchildren_handler(pid_t pid, FAR void *arg)
-{
-  int ret = OK;
-
-  /* Is this the pthread that we are looking for? */
-
-  if (pid != (pid_t)((uintptr_t)arg))
-    {
-      /* Yes.. cancel it */
-
-      ret = pthread_cancel(pid);
-    }
-
- return ret;
-}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: group_killchildren
+ * Name: group_foreachchild
  *
  * Description:
- *   Delete all children of a task except for the specified task.  This is
- *   used by the task restart logic.  When the main task is restarted,
- *   all of its child pthreads must be terminated.
+ *   Execute a function for each child of a group.
  *
  * Parameters:
- *   tcb - TCB of the task to be retained.
+ *   group - The group containing the children
+ *   handler - The function to be called
+ *   arg - An additional argument to provide to the handler
  *
  * Return Value:
- *   None
+ *   Success (OK) is always returned unless the handler returns a non-zero
+ *   value (a negated errno on errors).  In that case, the traversal
+ *   terminates and that non-zero value is returned.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int group_killchildren(FAR struct task_tcb_s *tcb)
+int group_foreachchild(FAR struct task_group_s *group,
+                       foreachchild_t handler, FAR void *arg)
 {
-  return group_foreachchild(tcb->cmn.group, group_killchildren_handler,
-                           (FAR void *)((uintptr_t)tcb->cmn.pid));
+  int ret;
+  int i;
+
+  DEBUGASSERT(group);
+
+  for (i = 0; i < group->tg_nmembers; i++)
+    {
+       ret = handler(group->tg_members[i], arg);
+       if (ret != 0)
+         {
+           return ret;
+         }
+    }
+
+  return 0;
 }
 
 #endif /* HAVE_GROUP_MEMBERS */

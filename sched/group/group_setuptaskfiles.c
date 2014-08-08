@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/group_setuptaskfiles.c
+ *  sched/group/group_setuptaskfiles.c
  *
  *   Copyright (C) 2007-2008, 2010, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,7 +46,7 @@
 #include <nuttx/net/net.h>
 
 #include "os_internal.h"
-#include "group_internal.h"
+#include "group/group.h"
 
 #if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
 

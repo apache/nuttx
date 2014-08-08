@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/group_internal.h
+ * sched/group/group.h
  *
  *   Copyright (C) 2007-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __SCHED_GROUP_INERNAL_H
-#define __SCHED_GROUP_INERNAL_H
+#ifndef __SCHED_GROUP_GROUP_H
+#define __SCHED_GROUP_GROUP_H
 
 /****************************************************************************
  * Included Files
@@ -135,4 +135,4 @@ int  group_setupstreams(FAR struct task_tcb_s *tcb);
 #endif
 #endif
 
-#endif /* __SCHED_GROUP_INERNAL_H */
+#endif /* __SCHED_GROUP_GROUP_H */

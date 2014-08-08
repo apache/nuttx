@@ -41,7 +41,7 @@
 
 #include <sys/types.h>
 
-#include "group_internal.h"
+#include "group/group.h"
 #include "pthread/pthread.h"
 
 /************************************************************************

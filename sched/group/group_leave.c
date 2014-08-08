@@ -1,5 +1,5 @@
 /*****************************************************************************
- * sched/group_leave.c
+ *  sched/group/group_leave.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -52,7 +52,7 @@
 #include "signal/signal.h"
 #include "pthread/pthread.h"
 #include "mqueue/mqueue.h"
-#include "group_internal.h"
+#include "group/group.h"
 
 #ifdef HAVE_TASK_GROUP
 

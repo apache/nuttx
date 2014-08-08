@@ -49,7 +49,7 @@
 #include <nuttx/fs/fs.h>
 
 #include "os_internal.h"
-#include "group_internal.h"
+#include "group/group.h"
 #include "signal/signal.h"
 
 /****************************************************************************

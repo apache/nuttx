@@ -1,5 +1,5 @@
 /*****************************************************************************
- * sched/group_find.c
+ *  sched/group/group_find.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,7 +46,7 @@
 
 #include <nuttx/kmalloc.h>
 
-#include "group_internal.h"
+#include "group/group.h"
 #include "environ/environ.h"
 
 #ifdef HAVE_TASK_GROUP

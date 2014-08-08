@@ -47,7 +47,7 @@
 #include <nuttx/sched.h>
 
 #include "os_internal.h"
-#include "group_internal.h"
+#include "group/group.h"
 
 #ifdef CONFIG_SCHED_WAITPID
 

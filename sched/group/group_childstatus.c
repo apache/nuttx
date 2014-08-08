@@ -1,5 +1,5 @@
 /*****************************************************************************
- * sched/group_childstatus.c
+ *  sched/group/group_childstatus.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -44,7 +44,7 @@
 #include <debug.h>
 
 #include "os_internal.h"
-#include "group_internal.h"
+#include "group/group.h"
 
 #if defined(CONFIG_SCHED_HAVE_PARENT) && defined(CONFIG_SCHED_CHILD_STATUS)
 

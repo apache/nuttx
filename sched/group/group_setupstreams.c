@@ -46,7 +46,7 @@
 #include <nuttx/net/net.h>
 #include <nuttx/lib.h>
 
-#include "group_internal.h"
+#include "group/group.h"
 
 /* Make sure that there are file or socket descriptors in the system and
  * that some number of streams have been configured.

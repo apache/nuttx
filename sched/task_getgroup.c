@@ -42,7 +42,7 @@
 #include <sched.h>
 
 #include "os_internal.h"
-#include "group_internal.h"
+#include "group/group.h"
 
 #ifdef HAVE_TASK_GROUP
 

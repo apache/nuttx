@@ -46,7 +46,7 @@
 #include <nuttx/sched.h>
 
 #include "os_internal.h"
-#include "group_internal.h"
+#include "group/group.h"
 
 #if defined(CONFIG_SCHED_WAITPID) && defined(CONFIG_SCHED_HAVE_PARENT)
 

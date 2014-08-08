@@ -65,7 +65,7 @@
 #include  "timer_internal.h"
 #include  "irq_internal.h"
 #ifdef HAVE_TASK_GROUP
-#include  "group_internal.h"
+#include  "group/group.h"
 #endif
 
 /****************************************************************************

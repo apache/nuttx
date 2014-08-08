@@ -44,7 +44,7 @@
 #include <debug.h>
 
 #include "os_internal.h"
-#include "group_internal.h"
+#include "group/group.h"
 #include "pthread/pthread.h"
 
 /****************************************************************************

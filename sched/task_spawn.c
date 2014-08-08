@@ -45,7 +45,7 @@
 #include <debug.h>
 
 #include "os_internal.h"
-#include "group_internal.h"
+#include "group/group.h"
 #include "spawn_internal.h"
 
 /****************************************************************************

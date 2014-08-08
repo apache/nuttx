@@ -1,5 +1,5 @@
 /*****************************************************************************
- * sched/group_signal.c
+ *  sched/group/group_signal.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,7 +46,7 @@
 #include <debug.h>
 
 #include "os_internal.h"
-#include "group_internal.h"
+#include "group/group.h"
 #include "signal/signal.h"
 
 #if defined(HAVE_TASK_GROUP) && !defined(CONFIG_DISABLE_SIGNALS)

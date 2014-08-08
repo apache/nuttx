@@ -100,21 +100,6 @@ ifeq ($(CONFIG_SCHED_CPULOAD),y)
 SCHED_SRCS += sched_cpuload.c
 endif
 
-GRP_SRCS  = group_create.c group_join.c group_leave.c group_find.c
-GRP_SRCS += group_setupstreams.c group_setupidlefiles.c group_setuptaskfiles.c
-GRP_SRCS += task_getgroup.c group_foreachchild.c group_killchildren.c
-
-ifeq ($(CONFIG_SCHED_HAVE_PARENT),y)
-GRP_SRCS += task_reparent.c
-ifeq ($(CONFIG_SCHED_CHILD_STATUS),y)
-GRP_SRCS += group_childstatus.c
-endif
-endif
-
-ifneq ($(CONFIG_DISABLE_SIGNALS),y)
-GRP_SRCS += group_signal.c
-endif
-
 WDOG_SRCS = wd_initialize.c wd_create.c wd_start.c wd_cancel.c wd_delete.c
 WDOG_SRCS += wd_gettime.c
 
@@ -143,16 +128,17 @@ endif
 
 IRQ_SRCS = irq_initialize.c irq_attach.c irq_dispatch.c irq_unexpectedisr.c
 
+include group/Make.defs
 include semaphore/Make.defs
 include signal/Make.defs
 include pthread/Make.defs
 include mqueue/Make.defs
 include environ/Make.defs
 
-CSRCS  = $(MISC_SRCS) $(TSK_SRCS) $(GRP_SRCS) $(SCHED_SRCS) $(WDOG_SRCS)
+CSRCS  = $(MISC_SRCS) $(TSK_SRCS) $(SCHED_SRCS) $(WDOG_SRCS)
 CSRCS += $(TIME_SRCS)  $(TIMER_SRCS) $(PGFILL_SRCS)
 CSRCS += $(IRQ_SRCS) $(CLOCK_SRCS)
-CSRCS += $(SEM_SRCS) $(SIGNAL_SRCS) $(PTHREAD_SRCS) $(MQUEUE_SRCS) $(ENV_SRCS)
+CSRCS += $(GRP_SRCS) $(SEM_SRCS) $(SIGNAL_SRCS) $(PTHREAD_SRCS) $(MQUEUE_SRCS) $(ENV_SRCS)
 
 COBJS = $(CSRCS:.c=$(OBJEXT))
 

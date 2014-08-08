@@ -50,7 +50,7 @@
 
 #include "os_internal.h"
 #include "pthread/pthread.h"
-#include "group_internal.h"
+#include "group/group.h"
 
 /****************************************************************************
  * Definitions

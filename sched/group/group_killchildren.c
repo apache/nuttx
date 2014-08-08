@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/group_setupidlefiles.c
+ *  sched/group/group_killchildren.c
  *
- *   Copyright (C) 2007-2010, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,37 +39,61 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <unistd.h>
-#include <fcntl.h>
 #include <sched.h>
-#include <errno.h>
-#include <debug.h>
 
-#include <nuttx/fs/fs.h>
-#include <nuttx/net/net.h>
+#include "group/group.h"
 
-#include "os_internal.h"
-#include "group_internal.h"
-
-#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
+#if HAVE_GROUP_MEMBERS
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/*****************************************************************************
+ * Name: group_killchildren_handler
+ *
+ * Description:
+ *   Callback from group_foreachchild that handles one member of the group.
+ *
+ * Parameters:
+ *   pid - The ID of the group member that may be signalled.
+ *   arg - The PID of the thread to be retained.
+ *
+ * Return Value:
+ *   0 (OK) on success; a negated errno value on failure.
+ *
+ *****************************************************************************/
+
+static int group_killchildren_handler(pid_t pid, FAR void *arg)
+{
+  int ret = OK;
+
+  /* Is this the pthread that we are looking for? */
+
+  if (pid != (pid_t)((uintptr_t)arg))
+    {
+      /* Yes.. cancel it */
+
+      ret = pthread_cancel(pid);
+    }
+
+ return ret;
+}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: group_setupidlefiles
+ * Name: group_killchildren
  *
  * Description:
- *   Configure the idle thread's TCB.
+ *   Delete all children of a task except for the specified task.  This is
+ *   used by the task restart logic.  When the main task is restarted,
+ *   all of its child pthreads must be terminated.
  *
  * Parameters:
- *   tcb - tcb of the idle task.
+ *   tcb - TCB of the task to be retained.
  *
  * Return Value:
  *   None
@@ -78,71 +102,10 @@
  *
  ****************************************************************************/
 
-int group_setupidlefiles(FAR struct task_tcb_s *tcb)
+int group_killchildren(FAR struct task_tcb_s *tcb)
 {
-#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
-  FAR struct task_group_s *group = tcb->cmn.group;
-#endif
-#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_DEV_CONSOLE)
-  int fd;
-#endif
-
-#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
-  DEBUGASSERT(group);
-#endif
-
-#if CONFIG_NFILE_DESCRIPTORS > 0
-  /* Initialize file descriptors for the TCB */
-
-  files_initlist(&group->tg_filelist);
-#endif
-
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
-  /* Allocate socket descriptors for the TCB */
-
-  net_initlist(&group->tg_socketlist);
-#endif
-
-  /* Open stdin, dup to get stdout and stderr. This should always
-   * be the first file opened and, hence, should always get file
-   * descriptor 0.
-   */
-
-#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_DEV_CONSOLE)
-  fd = open("/dev/console", O_RDWR);
-  if (fd == 0)
-    {
-      /* Successfully opened /dev/console as stdin (fd == 0) */
-
-      (void)file_dup2(0, 1);
-      (void)file_dup2(0, 2);
-    }
-  else
-    {
-      /* We failed to open /dev/console OR for some reason, we opened
-       * it and got some file descriptor other than 0.
-       */
-
-      if (fd > 0)
-        {
-          slldbg("Open /dev/console fd: %d\n", fd);
-          (void)close(fd);
-        }
-      else
-        {
-          slldbg("Failed to open /dev/console: %d\n", errno);
-        }
-      return -ENFILE;
-    }
-#endif
-
-  /* Allocate file/socket streams for the TCB */
-
-#if CONFIG_NFILE_STREAMS > 0
-  return group_setupstreams(tcb);
-#else
-  return OK;
-#endif
+  return group_foreachchild(tcb->cmn.group, group_killchildren_handler,
+                           (FAR void *)((uintptr_t)tcb->cmn.pid));
 }
 
-#endif /* CONFIG_NFILE_DESCRIPTORS || CONFIG_NSOCKET_DESCRIPTORS */
+#endif /* HAVE_GROUP_MEMBERS */

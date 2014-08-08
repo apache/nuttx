@@ -47,7 +47,7 @@
 #include <nuttx/arch.h>
 
 #include "os_internal.h"
-#include "group_internal.h"
+#include "group/group.h"
 
 /****************************************************************************
  * Definitions

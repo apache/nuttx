@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/group_foreachchild.c
+ *  sched/group/group_setupidlefiles.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,11 +39,20 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/sched.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sched.h>
+#include <errno.h>
+#include <debug.h>
 
-#include "group_internal.h"
+#include <nuttx/fs/fs.h>
+#include <nuttx/net/net.h>
 
-#ifdef HAVE_GROUP_MEMBERS
+#include "os_internal.h"
+#include "group/group.h"
+
+#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
 
 /****************************************************************************
  * Private Functions
@@ -54,43 +63,86 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: group_foreachchild
+ * Name: group_setupidlefiles
  *
  * Description:
- *   Execute a function for each child of a group.
+ *   Configure the idle thread's TCB.
  *
  * Parameters:
- *   group - The group containing the children
- *   handler - The function to be called
- *   arg - An additional argument to provide to the handler
+ *   tcb - tcb of the idle task.
  *
  * Return Value:
- *   Success (OK) is always returned unless the handler returns a non-zero
- *   value (a negated errno on errors).  In that case, the traversal
- *   terminates and that non-zero value is returned.
+ *   None
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int group_foreachchild(FAR struct task_group_s *group,
-                       foreachchild_t handler, FAR void *arg)
+int group_setupidlefiles(FAR struct task_tcb_s *tcb)
 {
-  int ret;
-  int i;
+#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
+  FAR struct task_group_s *group = tcb->cmn.group;
+#endif
+#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_DEV_CONSOLE)
+  int fd;
+#endif
 
+#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
   DEBUGASSERT(group);
+#endif
 
-  for (i = 0; i < group->tg_nmembers; i++)
+#if CONFIG_NFILE_DESCRIPTORS > 0
+  /* Initialize file descriptors for the TCB */
+
+  files_initlist(&group->tg_filelist);
+#endif
+
+#if CONFIG_NSOCKET_DESCRIPTORS > 0
+  /* Allocate socket descriptors for the TCB */
+
+  net_initlist(&group->tg_socketlist);
+#endif
+
+  /* Open stdin, dup to get stdout and stderr. This should always
+   * be the first file opened and, hence, should always get file
+   * descriptor 0.
+   */
+
+#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_DEV_CONSOLE)
+  fd = open("/dev/console", O_RDWR);
+  if (fd == 0)
     {
-       ret = handler(group->tg_members[i], arg);
-       if (ret != 0)
-         {
-           return ret;
-         }
-    }
+      /* Successfully opened /dev/console as stdin (fd == 0) */
 
-  return 0;
+      (void)file_dup2(0, 1);
+      (void)file_dup2(0, 2);
+    }
+  else
+    {
+      /* We failed to open /dev/console OR for some reason, we opened
+       * it and got some file descriptor other than 0.
+       */
+
+      if (fd > 0)
+        {
+          slldbg("Open /dev/console fd: %d\n", fd);
+          (void)close(fd);
+        }
+      else
+        {
+          slldbg("Failed to open /dev/console: %d\n", errno);
+        }
+      return -ENFILE;
+    }
+#endif
+
+  /* Allocate file/socket streams for the TCB */
+
+#if CONFIG_NFILE_STREAMS > 0
+  return group_setupstreams(tcb);
+#else
+  return OK;
+#endif
 }
 
-#endif /* HAVE_GROUP_MEMBERS */
+#endif /* CONFIG_NFILE_DESCRIPTORS || CONFIG_NSOCKET_DESCRIPTORS */
