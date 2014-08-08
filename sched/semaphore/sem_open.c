@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/sem_open.c
+ * sched/semaphore/sem_open.c
  *
  *   Copyright (C) 2007, 2008, 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -50,7 +50,7 @@
 
 #include <nuttx/kmalloc.h>
 
-#include "sem_internal.h"
+#include "semaphore/semaphore.h"
 
 /****************************************************************************
  * Pre-processor Definitions

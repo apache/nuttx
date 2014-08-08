@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/sem_internal.h
+ * sched/environ/environ.h
  *
- *   Copyright (C) 2007, 2009-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,54 +33,32 @@
  *
  ****************************************************************************/
 
-#ifndef __SCHED_SEM_INTERNAL_H
-#define __SCHED_SEM_INTERNAL_H
+#ifndef __SCHED_ENVIRON_ENVIRON_H
+#define __SCHED_ENVIRON_ENVIRON_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
-
-#include <stdint.h>
-#include <stdbool.h>
-#include <semaphore.h>
-#include <sched.h>
-#include <queue.h>
+#include <nuttx/sched.h>
+#include "os_internal.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Definitions
  ****************************************************************************/
+
+#ifdef CONFIG_DISABLE_ENVIRON
+# define env_dup(group)     (0)
+# define env_release(group) (0)
+#else
 
 /****************************************************************************
  * Public Type Declarations
  ****************************************************************************/
 
-/* This is the named semaphore structure */
-
-struct nsem_s
-{
-  FAR struct nsem_s *flink;     /* Forward link */
-  FAR struct nsem_s *blink;     /* Backward link */
-  uint16_t           nconnect;  /* Number of connections to semaphore */
-  FAR char          *name;      /* Semaphore name (NULL if un-named) */
-  bool               unlinked;  /* true if the semaphore has been unlinked */
-  sem_t              sem;       /* The semaphore itself */
-};
-
-typedef struct nsem_s nsem_t;
-
 /****************************************************************************
  * Public Variables
- ****************************************************************************/
-
-/* This is a list of dyanamically allocated named semaphores */
-
-extern dq_queue_t g_nsems;
-
-/****************************************************************************
- * Public Function Prototypes
  ****************************************************************************/
 
 #ifdef __cplusplus
@@ -91,42 +69,25 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* Common semaphore logic */
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
-void weak_function sem_initialize(void);
-void sem_waitirq(FAR struct tcb_s *wtcb, int errcode);
-FAR nsem_t *sem_findnamed(const char *name);
+/* Functions used by the task/pthread creation and destruction logic */
 
-/* Special logic needed only by priority inheritance to manage collections of
- * holders of semaphores.
- */
+int env_dup(FAR struct task_group_s *group);
+void env_release(FAR struct task_group_s *group);
 
-#ifdef CONFIG_PRIORITY_INHERITANCE
-void sem_initholders(void);
-void sem_destroyholder(FAR sem_t *sem);
-void sem_addholder(FAR sem_t *sem);
-void sem_boostpriority(FAR sem_t *sem);
-void sem_releaseholder(FAR sem_t *sem);
-void sem_restorebaseprio(FAR struct tcb_s *stcb, FAR sem_t *sem);
-#  ifndef CONFIG_DISABLE_SIGNALS
-void sem_canceled(FAR struct tcb_s *stcb, FAR sem_t *sem);
-#  else
-#    define sem_canceled(stcb, sem)
-#  endif
-#else
-#  define sem_initholders()
-#  define sem_destroyholder(sem)
-#  define sem_addholder(sem)
-#  define sem_boostpriority(sem)
-#  define sem_releaseholder(sem)
-#  define sem_restorebaseprio(stcb,sem)
-#  define sem_canceled(stcb, sem)
-#endif
+/* Functions used internally by the environment handling logic */
+
+FAR char *env_findvar(FAR struct task_group_s *group, FAR const char *pname);
+int env_removevar(FAR struct task_group_s *group, FAR char *pvar);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __SCHED_SEM_INTERNAL_H */
+#endif /* !CONFIG_DISABLE_ENVIRON */
+#endif /* __SCHED_ENVIRON_ENVIRON_H */
 

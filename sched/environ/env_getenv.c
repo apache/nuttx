@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/env_setenv.c
+ * env_getenv.c
  *
- *   Copyright (C) 2007, 2009, 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,16 +41,13 @@
 
 #ifndef CONFIG_DISABLE_ENVIRON
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <sched.h>
 #include <string.h>
+#include <stdlib.h>
 #include <errno.h>
 
-#include <nuttx/kmalloc.h>
-
 #include "os_internal.h"
-#include "env_internal.h"
+#include "environ/environ.h"
 
 /****************************************************************************
  * Private Data
@@ -61,39 +58,32 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: setenv
+ * Name: getenv
  *
  * Description:
- *   The setenv() function adds the variable name to the environment with the
- *   specified 'value' if the varialbe 'name" does not exist. If the 'name'
- *   does exist in the environment, then its value is changed to 'value' if
- *   'overwrite' is non-zero; if 'overwrite' is zero, then the value of name
- *   unaltered.
+ *   The getenv() function searches the environment list for a string that
+ *   matches the string pointed to by name.
  *
  * Parameters:
- *   name - The name of the variable to change
- *   value - The new value of the variable
- *   overwrite - Replace any existing value if non-zero.
+ *   name - The name of the variable to find.
  *
  * Return Value:
- *   Zero on success
+ *   The value of the valiable (read-only) or NULL on failure
  *
  * Assumptions:
  *   Not called from an interrupt handler
  *
  ****************************************************************************/
 
-int setenv(FAR const char *name, FAR const char *value, int overwrite)
+FAR char *getenv(const char *name)
 {
   FAR struct tcb_s *rtcb;
   FAR struct task_group_s *group;
   FAR char *pvar;
-  FAR char *newenvp;
-  int newsize;
-  int varlen;
+  FAR char *pvalue = NULL;
   int ret = OK;
 
-  /* Verify input parameter */
+  /* Verify that a string was passed */
 
   if (!name)
     {
@@ -101,104 +91,42 @@ int setenv(FAR const char *name, FAR const char *value, int overwrite)
       goto errout;
     }
 
-  /* if no value is provided, then this is the same as unsetenv (unless
-   * overwrite is false)
-   */
-
-  if (!value || *value == '\0')
-    {
-      /* If overwite is set then this is the same as unsetenv */
-
-      if (overwrite)
-        {
-          return unsetenv(name);
-        }
-      else
-        {
-          /* Otherwise, it is a request to remove a variable without altering it? */
-
-          return OK;
-        }
-    }
-
   /* Get a reference to the thread-private environ in the TCB. */
 
   sched_lock();
-  rtcb  = (FAR struct tcb_s*)g_readytorun.head;
+  rtcb = (FAR struct tcb_s*)g_readytorun.head;
   group = rtcb->group;
-  DEBUGASSERT(group);
 
-  /* Check if the variable already exists */
+  /* Check if the variable exists */
 
-  if (group->tg_envp && (pvar = env_findvar(group, name)) != NULL)
+  if ( !group || (pvar = env_findvar(group, name)) == NULL)
     {
-      /* It does! Do we have permission to overwrite the existing value? */
-
-      if (!overwrite)
-        {
-          /* No.. then just return success */
-
-          sched_unlock();
-          return OK;
-        }
-
-      /* Yes.. just remove the name=value pair from the environment.  It will
-       * be added again below.  Note that we are responsible for reallocating
-       * the environment buffer; this will happen below.
-       */
-
-      (void)env_removevar(group, pvar);
+      ret = ENOENT;
+      goto errout_with_lock;
     }
 
-  /* Get the size of the new name=value string.  The +2 is for the '=' and for
-   * null terminator
-   */
+  /* It does!  Get the value sub-string from the name=value string */
 
-  varlen = strlen(name) + strlen(value) + 2;
-
-  /* Then allocate or reallocate the environment buffer */
-
-  if (group->tg_envp)
+  pvalue = strchr(pvar, '=');
+  if (!pvalue)
     {
-      newsize = group->tg_envsize + varlen;
-      newenvp = (FAR char *)kurealloc(group->tg_envp, newsize);
-      if (!newenvp)
-        {
-          ret = ENOMEM;
-          goto errout_with_lock;
-        }
+      /* The name=value string has no '='  This is a bug! */
 
-      pvar = &newenvp[group->tg_envsize];
-    }
-  else
-    {
-      newsize = varlen;
-      newenvp = (FAR char *)kumalloc(varlen);
-      if (!newenvp)
-        {
-          ret = ENOMEM;
-          goto errout_with_lock;
-        }
-
-      pvar = newenvp;
+      ret = EINVAL;
+      goto errout_with_lock;
     }
 
-  /* Save the new buffer and size */
+  /* Adjust the pointer so that it points to the value right after the '=' */
 
-  group->tg_envp    = newenvp;
-  group->tg_envsize = newsize;
-
-  /* Now, put the new name=value string into the environment buffer */
-
-  sprintf(pvar, "%s=%s", name, value);
+  pvalue++;
   sched_unlock();
-  return OK;
+  return pvalue;
 
 errout_with_lock:
   sched_unlock();
 errout:
-  errno = ret;
-  return ERROR;
+  set_errno(ret);
+  return NULL;
 }
 
 #endif /* CONFIG_DISABLE_ENVIRON */

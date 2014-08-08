@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/env_release.c
+ * sched/environ/env_dup.c
  *
- *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,10 +41,15 @@
 
 #ifndef CONFIG_DISABLE_ENVIRON
 
+#include <sys/types.h>
 #include <sched.h>
+#include <string.h>
 #include <errno.h>
+
+#include <nuttx/kmalloc.h>
+
 #include "os_internal.h"
-#include "env_internal.h"
+#include "environ/environ.h"
 
 /****************************************************************************
  * Private Data
@@ -55,45 +60,62 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: env_release
+ * Name: env_dup
  *
  * Description:
- *   env_release() is called only from group_leave() when the last member of
- *   a task group exits.  The env_release() function clears the environment
- *   of all name-value pairs and sets the value of the external variable
- *   environ to NULL.
+ *   Copy the internal environment structure of a task.  This is the action
+ *   that is performed when a new task is created: The new task has a private,
+ *   exact duplicate of the parent task's environment.
  *
  * Parameters:
- *   group Identifies the task group containing the environment structure
- *     to be released.
+ *   group The child task group to receive the newly allocated copy of the
+ *        parent task groups environment structure.
  *
  * Return Value:
- *   None
+ *   zero on success
  *
  * Assumptions:
- *   Not called from an interrupt handler
+ *   Not called from an interrupt handler.
  *
  ****************************************************************************/
 
-void env_release(FAR struct task_group_s *group)
+int env_dup(FAR struct task_group_s *group)
 {
-  DEBUGASSERT(group);
+  FAR struct tcb_s *ptcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR char *envp = NULL;
+  size_t envlen;
+  int ret = OK;
 
-  /* Free any allocate environment strings */
+  DEBUGASSERT(group && ptcb && ptcb->group);
 
-  if (group->tg_envp)
-    {
-      /* Free the environment */
-
-      sched_ufree(group->tg_envp);
-    }
-
-  /* In any event, make sure that all environment-related varialbles in the
-   * task group structure are reset to initial values.
+  /* Pre-emption must be disabled throughout the following because the
+   * environment may be shared.
    */
 
-  group->tg_envsize = 0;
-  group->tg_envp = NULL;
+  sched_lock();
+
+  /* Does the parent task have an environment? */
+
+  if (ptcb->group && ptcb->group->tg_envp)
+    {
+      /* Yes..The parent task has an environment, duplicate it */
+
+      envlen = ptcb->group->tg_envsize;
+      envp   = (FAR char *)kumalloc(envlen);
+      if (!envp)
+        {
+          ret = -ENOMEM;
+        }
+      else
+        {
+          group->tg_envsize = envlen;
+          group->tg_envp    = envp;
+          memcpy(envp, ptcb->group->tg_envp, envlen);
+        }
+    }
+
+  sched_unlock();
+  return ret;
 }
 
 #endif /* CONFIG_DISABLE_ENVIRON */

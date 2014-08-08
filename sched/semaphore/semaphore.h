@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/env_findvar.c
+ * sched/semaphore/semaphore.h
  *
- *   Copyright (C) 2007, 2009, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,94 +33,100 @@
  *
  ****************************************************************************/
 
+#ifndef __SCHED_SEMAPHORE_SEMAPHORE_H
+#define __SCHED_SEMAPHORE_SEMAPHORE_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
-#ifndef CONFIG_DISABLE_ENVIRON
-
+#include <stdint.h>
 #include <stdbool.h>
-#include <string.h>
+#include <semaphore.h>
 #include <sched.h>
-
-#include "env_internal.h"
+#include <queue.h>
 
 /****************************************************************************
- * Private Data
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functions
+ * Public Type Declarations
  ****************************************************************************/
 
-/****************************************************************************
- * Name: env_cmpname
- ****************************************************************************/
+/* This is the named semaphore structure */
 
-static bool env_cmpname(const char *pszname, const char *peqname)
+struct nsem_s
 {
-  /* Search until we find anything different in the two names */
+  FAR struct nsem_s *flink;     /* Forward link */
+  FAR struct nsem_s *blink;     /* Backward link */
+  uint16_t           nconnect;  /* Number of connections to semaphore */
+  FAR char          *name;      /* Semaphore name (NULL if un-named) */
+  bool               unlinked;  /* true if the semaphore has been unlinked */
+  sem_t              sem;       /* The semaphore itself */
+};
 
-  for (; *pszname == *peqname; pszname++, peqname++);
-
-  /* On sucess, pszname will end with '\0' and peqname with '=' */
-
-  if ( *pszname == '\0' && *peqname == '=' )
-    {
-      return true;
-    }
-
-  return false;
-}
+typedef struct nsem_s nsem_t;
 
 /****************************************************************************
- * Public Functions
+ * Public Variables
  ****************************************************************************/
+
+/* This is a list of dyanamically allocated named semaphores */
+
+extern dq_queue_t g_nsems;
 
 /****************************************************************************
- * Name: env_findvar
- *
- * Description:
- *   Search the provided environment structure for the variable of the
- *   specified name.
- *
- * Parameters:
- *   group The task group containging environment array to be searched.
- *   pname The variable name to find
- *
- * Return Value:
- *   A pointer to the name=value string in the environment
- *
- * Assumptions:
- *   - Not called from an interrupt handler
- *   - Pre-emptions is disabled by caller
- *
+ * Public Function Prototypes
  ****************************************************************************/
 
-FAR char *env_findvar(FAR struct task_group_s *group, const char *pname)
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
 {
-  char *ptr;
-  char *end;
+#else
+#define EXTERN extern
+#endif
 
-  /* Verify input parameters */
+/* Common semaphore logic */
 
-  DEBUGASSERT(group && pname);
+void weak_function sem_initialize(void);
+void sem_waitirq(FAR struct tcb_s *wtcb, int errcode);
+FAR nsem_t *sem_findnamed(const char *name);
 
-  /* Search for a name=value string with matching name */
+/* Special logic needed only by priority inheritance to manage collections of
+ * holders of semaphores.
+ */
 
-  end = &group->tg_envp[group->tg_envsize];
-  for (ptr = group->tg_envp;
-       ptr < end && !env_cmpname(pname, ptr);
-       ptr += (strlen(ptr) + 1));
+#ifdef CONFIG_PRIORITY_INHERITANCE
+void sem_initholders(void);
+void sem_destroyholder(FAR sem_t *sem);
+void sem_addholder(FAR sem_t *sem);
+void sem_boostpriority(FAR sem_t *sem);
+void sem_releaseholder(FAR sem_t *sem);
+void sem_restorebaseprio(FAR struct tcb_s *stcb, FAR sem_t *sem);
+#  ifndef CONFIG_DISABLE_SIGNALS
+void sem_canceled(FAR struct tcb_s *stcb, FAR sem_t *sem);
+#  else
+#    define sem_canceled(stcb, sem)
+#  endif
+#else
+#  define sem_initholders()
+#  define sem_destroyholder(sem)
+#  define sem_addholder(sem)
+#  define sem_boostpriority(sem)
+#  define sem_releaseholder(sem)
+#  define sem_restorebaseprio(stcb,sem)
+#  define sem_canceled(stcb, sem)
+#endif
 
-  /* Check for success */
-
-  return (ptr < end) ? ptr : NULL;
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
 
-#endif /* CONFIG_DISABLE_ENVIRON */
-
-
+#endif /* __SCHED_SEMAPHORE_SEMAPHORE_H */
 

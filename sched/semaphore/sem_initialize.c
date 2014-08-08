@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/env_putenv.c
+ * schec/sem_initialize.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,17 +39,32 @@
 
 #include <nuttx/config.h>
 
-#ifndef CONFIG_DISABLE_ENVIRON
+#include <queue.h>
 
-#include <stdlib.h>
-#include <sched.h>
-#include <string.h>
-#include <errno.h>
-
-#include <nuttx/kmalloc.h>
+#include "semaphore/semaphore.h"
 
 /****************************************************************************
- * Private Data
+ * Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Type Declarations
+ ****************************************************************************/
+
+/****************************************************************************
+ * Global Variables
+ ****************************************************************************/
+
+/* This is a list of dyanamically allocated named semaphores */
+
+dq_queue_t g_nsems;
+
+/****************************************************************************
+ * Private Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -57,67 +72,29 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: putenv
+ * Name: sem_initialize
  *
  * Description:
- *   The putenv() function adds or changes the value of environment variables.
- *   The argument string is of the form name=value. If name does not already
- *   exist in  the  environment, then string is added to the environment. If
- *   name does exist, then the value of name in the environment is changed to
- *   value.
+ *   The control structures for all semaphores may be initialized by calling
+ *   sem_initialize().  This should be done once at poweron.
  *
  * Parameters:
- *   name=value string describing the environment setting to add/modify
+ *   None
  *
  * Return Value:
- *   Zero on sucess
+ *   None
  *
  * Assumptions:
- *   Not called from an interrupt handler
  *
  ****************************************************************************/
 
-int putenv(FAR const char *string)
+void sem_initialize(void)
 {
-  char *pname;
-  char *pequal;
-  int ret = OK;
+  /* Initialize the queue of named semaphores */
 
-  /* Verify that a string was passed */
+  dq_init(&g_nsems);
 
-  if (!string)
-    {
-      ret = EINVAL;
-      goto errout;
-    }
+  /* Initialize holder structures needed to support priority inheritiance */
 
-  /* Parse the name=value string */
-
-  pname = strdup(string);
-  if (!pname)
-    {
-      ret = ENOMEM;
-      goto errout;
-    }
-
-  pequal = strchr( pname, '=');
-  if (pequal)
-    {
-      /* Then let setenv do all of the work */
-
-      *pequal = '\0';
-      ret = setenv(pname, pequal+1, TRUE);
-    }
-
-  kfree(pname);
-  return ret;
-
-errout:
-  errno = ret;
-  return ERROR;
+  sem_initholders();
 }
-
-#endif /* CONFIG_DISABLE_ENVIRON */
-
-
-

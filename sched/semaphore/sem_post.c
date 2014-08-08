@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/sem_wait.c
+ * sched/semaphore/sem_post.c
  *
- *   Copyright (C) 2007-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,17 +39,16 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
+#include <limits.h>
 #include <semaphore.h>
-#include <errno.h>
-#include <assert.h>
+#include <sched.h>
 #include <nuttx/arch.h>
 
 #include "os_internal.h"
-#include "sem_internal.h"
+#include "semaphore/semaphore.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -73,40 +72,41 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sem_wait
+ * Name: sem_post
  *
  * Description:
- *   This function attempts to lock the semaphore referenced by 'sem'.  If
- *   the semaphore value is (<=) zero, then the calling task will not return
- *   until it successfully acquires the lock.
+ *   When a task has finished with a semaphore, it will call sem_post().
+ *   This function unlocks the semaphore referenced by sem by performing the
+ *   semaphore unlock operation on that semaphore.
+ *
+ *   If the semaphore value resulting from this operation is positive, then
+ *   no tasks were blocked waiting for the semaphore to become unlocked; the
+ *   semaphore is simply incremented.
+ *
+ *   If the value of the semaphore resulting from this operation is zero,
+ *   then one of the tasks blocked waiting for the semaphore shall be
+ *   allowed to return successfully from its call to sem_wait().
  *
  * Parameters:
- *   sem - Semaphore descriptor.
+ *   sem - Semaphore descriptor
  *
  * Return Value:
- *   0 (OK), or -1 (ERROR) is unsuccessful
- *   If this function returns -1 (ERROR), then the cause of the failure will
- *   be reported in 'errno' as:
- *   - EINVAL:  Invalid attempt to get the semaphore
- *   - EINTR:   The wait was interrupted by the receipt of a signal.
+ *   0 (OK) or -1 (ERROR) if unsuccessful
  *
  * Assumptions:
+ *   This function cannot be called from an interrupt handler.
+ *   It assumes the currently executing task is the one that
+ *   is performing the unlock.
  *
  ****************************************************************************/
 
-int sem_wait(FAR sem_t *sem)
+int sem_post(FAR sem_t *sem)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *stcb = NULL;
   irqstate_t saved_state;
-  int ret  = ERROR;
+  int ret = ERROR;
 
-  /* This API should not be called from interrupt handlers */
-
-  DEBUGASSERT(up_interrupt_context() == false)
-
-  /* Assume any errors reported are due to invalid arguments. */
-
-  set_errno(EINVAL);
+  /* Make sure we were supplied with a valid semaphore. */
 
   if (sem)
     {
@@ -117,92 +117,61 @@ int sem_wait(FAR sem_t *sem)
 
       saved_state = irqsave();
 
-      /* Check if the lock is available */
+      /* Perform the semaphore unlock operation. */
 
-      if (sem->semcount > 0)
-        {
-          /* It is, let the task take the semaphore. */
+      ASSERT(sem->semcount < SEM_VALUE_MAX);
+      sem_releaseholder(sem);
+      sem->semcount++;
 
-          sem->semcount--;
-          sem_addholder(sem);
-          rtcb->waitsem = NULL;
-          ret = OK;
-        }
-
-      /* The semaphore is NOT available, We will have to block the
-       * current thread of execution.
+#ifdef CONFIG_PRIORITY_INHERITANCE
+      /* Don't let any unblocked tasks run until we complete any priority
+       * restoration steps.  Interrupts are disabled, but we do not want
+       * the head of the read-to-run list to be modified yet.
+       *
+       * NOTE: If this sched_lock is called from an interrupt handler, it
+       * will do nothing.
        */
 
-      else
+      sched_lock();
+#endif
+      /* If the result of of semaphore unlock is non-positive, then
+       * there must be some task waiting for the semaphore.
+       */
+
+      if (sem->semcount <= 0)
         {
-          /* First, verify that the task is not already waiting on a
-           * semaphore
+          /* Check if there are any tasks in the waiting for semaphore
+           * task list that are waiting for this semaphore. This is a
+           * prioritized list so the first one we encounter is the one
+           * that we want.
            */
 
-          ASSERT(rtcb->waitsem == NULL);
+          for (stcb = (FAR struct tcb_s*)g_waitingforsemaphore.head;
+               (stcb && stcb->waitsem != sem);
+               stcb = stcb->flink);
 
-          /* Handle the POSIX semaphore (but don't set the owner yet) */
-
-          sem->semcount--;
-
-          /* Save the waited on semaphore in the TCB */
-
-          rtcb->waitsem = sem;
-
-          /* If priority inheritance is enabled, then check the priority of
-           * the holder of the semaphore.
-           */
-
-#ifdef CONFIG_PRIORITY_INHERITANCE
-          /* Disable context switching.  The following operations must be
-           * atomic with regard to the scheduler.
-           */
-
-          sched_lock();
-
-          /* Boost the priority of any threads holding a count on the
-           * semaphore.
-           */
-
-          sem_boostpriority(sem);
-#endif
-          /* Add the TCB to the prioritized semaphore wait queue */
-
-          set_errno(0);
-          up_block_task(rtcb, TSTATE_WAIT_SEM);
-
-          /* When we resume at this point, either (1) the semaphore has been
-           * assigned to this thread of execution, or (2) the semaphore wait
-           * has been interrupted by a signal or a timeout.  We can detect these
-           * latter cases be examining the errno value.
-           *
-           * In the event that the semaphore wait was interrupted by a signal or
-           * a timeout, certain semaphore clean-up operations have already been
-           * performed (see sem_waitirq.c).  Specifically:
-           *
-           * - sem_canceled() was called to restore the priority of all threads
-           *   that hold a reference to the semaphore,
-           * - The semaphore count was decremented, and
-           * - tcb->waitsem was nullifed.
-           *
-           * It is necesaary to do these things in sem_waitirq.c because a long
-           * time may elapse between the time that the signal was issued and
-           * this thread is awakened and this leaves a door open to several
-           * race conditions.
-           */
-
-          if (get_errno() != EINTR && get_errno() != ETIMEDOUT)
+          if (stcb)
             {
-              /* Not awakened by a signal or a timeout... We hold the semaphore */
+              /* It is, let the task take the semaphore */
 
-              sem_addholder(sem);
-              ret = OK;
+              stcb->waitsem = NULL;
+
+              /* Restart the waiting task. */
+
+              up_unblock_task(stcb);
             }
+        }
+
+      /* Check if we need to drop the priority of any threads holding
+       * this semaphore.  The priority could have been boosted while they
+       * held the semaphore.
+       */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-          sched_unlock();
+      sem_restorebaseprio(stcb, sem);
+      sched_unlock();
 #endif
-        }
+      ret = OK;
 
       /* Interrupts may now be enabled. */
 

@@ -47,7 +47,7 @@
 #include <nuttx/kmalloc.h>
 
 #include "group_internal.h"
-#include "env_internal.h"
+#include "environ/environ.h"
 
 #ifdef HAVE_TASK_GROUP
 

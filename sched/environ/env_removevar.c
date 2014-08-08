@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/sem_close.c
+ * sched/environ/env_removevar.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,31 +39,15 @@
 
 #include <nuttx/config.h>
 
-#include <errno.h>
-#include <semaphore.h>
+#ifndef CONFIG_DISABLE_ENVIRON
+
+#include <string.h>
 #include <sched.h>
 
-#include "os_internal.h"
-#include "sem_internal.h"
+#include "environ/environ.h"
 
 /****************************************************************************
- * Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -71,70 +55,69 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  sem_close
+ * Name: env_removevar
  *
  * Description:
- *   This function is called to indicate that the calling task is finished
- *   with the specified named semaphore, 'sem'.  The sem_close() deallocates
- *   any system resources allocated by the system for this named semaphore.
- *
- *   If the semaphore has not been removed with a call to sem_unlink(), then
- *   sem_close() has no effect on the named semaphore.  However, when the
- *   named semaphore has been fully unlinked, the semaphore will vanish when
- *   the last task closes it.
+ *   Remove the referenced name=value pair from the environment
  *
  * Parameters:
- *  sem - semaphore descriptor
+ *   group The task group with the environment containing the name=value pair
+ *   pvar A pointer to the name=value pair in the restroom
  *
  * Return Value:
- *  0 (OK), or -1 (ERROR) if unsuccessful.
+ *   Zero on success
  *
  * Assumptions:
- *   - Care must be taken to avoid risking the deletion of a semaphore that
- *     another calling task has already locked.
- *   - sem_close must not be called for an un-named semaphore
+ *   - Not called from an interrupt handler
+ *   - Caller has pre-emptions disabled
+ *   - Caller will reallocate the environment structure to the correct size
  *
  ****************************************************************************/
 
-int sem_close(FAR sem_t *sem)
+int env_removevar(FAR struct task_group_s *group, FAR char *pvar)
 {
-  FAR nsem_t *psem;
+  FAR char *end;    /* Pointer to the end+1 of the environment */
+  int alloc;        /* Size of the allocated environment */
   int ret = ERROR;
 
-  /* Verify the inputs */
+  DEBUGASSERT(group && pvar);
 
-  if (sem)
+  /* Verify that the pointer lies within the environment region */
+
+  alloc = group->tg_envsize;          /* Size of the allocated environment */
+  end   = &group->tg_envp[alloc];     /* Pointer to the end+1 of the environment */
+
+  if (pvar >= group->tg_envp && pvar < end)
     {
-      sched_lock();
+      /* Set up for the removal */
 
-      /* Search the list of named semaphores */
+      int   len  = strlen(pvar) + 1;  /* Length of name=value string to remove */
+      char *src  = &pvar[len];        /* Address of name=value string after */
+      char *dest = pvar;              /* Location to move the next string */
+      int   count = end - src;        /* Number of bytes to move (might be zero) */
 
-      for (psem = (FAR nsem_t*)g_nsems.head;
-           ((psem) && (sem != &psem->sem));
-           psem = psem->flink);
+      /* Move all of the environment strings after the removed one 'down.'
+       * this is inefficient, but robably not high duty.
+       */
 
-      /* Check if we found it */
-
-      if (psem)
+      while (count-- > 0)
         {
-          /* Decrement the count of sem_open connections to this semaphore */
-
-          if (psem->nconnect) psem->nconnect--;
-
-          /* If the semaphore is no long connected to any processes AND the
-           * semaphore was previously unlinked, then deallocate it.
-           */
-
-          if (!psem->nconnect && psem->unlinked)
-            {
-              dq_rem((FAR dq_entry_t*)psem, &g_nsems);
-              sched_kfree(psem);
-            }
-          ret = OK;
+          *dest++ = *src++;
         }
 
-      sched_unlock();
+      /* Then set to the new allocation size.  The caller is expected to
+       * call realloc at some point but we don't do that here because the
+       * caller may add more stuff to the environment.
+       */
+
+      group->tg_envsize -= len;
+      ret = OK;
     }
 
   return ret;
 }
+
+#endif /* CONFIG_DISABLE_ENVIRON */
+
+
+

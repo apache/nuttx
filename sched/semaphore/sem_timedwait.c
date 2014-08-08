@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/sem_timedwait.c
+ * sched/semaphore/sem_timedwait.c
  *
  *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,7 +51,7 @@
 
 #include "os_internal.h"
 #include "clock_internal.h"
-#include "sem_internal.h"
+#include "semaphore/semaphore.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -219,7 +219,7 @@ int sem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime)
       return OK;
     }
 
-  /* We will have to wait for the semphore.  Make sure that we were provided
+  /* We will have to wait for the semaphore.  Make sure that we were provided
    * with a valid timeout.
    */
 

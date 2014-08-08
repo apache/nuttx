@@ -1,7 +1,7 @@
 /****************************************************************************
- * env_getenv.c
+ * sched/semaphore/sem_unlink.c
  *
- *   Copyright (C) 2007, 2008, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,18 +39,32 @@
 
 #include <nuttx/config.h>
 
-#ifndef CONFIG_DISABLE_ENVIRON
-
+#include <stdbool.h>
+#include <semaphore.h>
 #include <sched.h>
-#include <string.h>
-#include <stdlib.h>
-#include <errno.h>
+#include <queue.h>
 
 #include "os_internal.h"
-#include "env_internal.h"
+#include "semaphore/semaphore.h"
 
 /****************************************************************************
- * Private Data
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Type Declarations
+ ****************************************************************************/
+
+/****************************************************************************
+ * Global Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -58,76 +72,69 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: getenv
+ * Name: sem_unlink
  *
  * Description:
- *   The getenv() function searches the environment list for a string that
- *   matches the string pointed to by name.
+ *   This function removes the semaphore named by the input parameter 'name.'
+ *   If the semaphore named by 'name' is currently referenced by other task,
+ *   the sem_unlink() will have no effect on the state of the semaphore.  If
+ *   one or more processes have the semaphore open when sem_unlink() is
+ *   called, destruction of the semaphore will be postponed until all
+ *   references to the semaphore have been destroyed by calls of sem_close().
  *
  * Parameters:
- *   name - The name of the variable to find.
+ *   name - Semaphore name
  *
  * Return Value:
- *   The value of the valiable (read-only) or NULL on failure
+ *  0 (OK), or -1 (ERROR) if unsuccessful.
  *
  * Assumptions:
- *   Not called from an interrupt handler
  *
  ****************************************************************************/
 
-FAR char *getenv(const char *name)
+int sem_unlink(FAR const char *name)
 {
-  FAR struct tcb_s *rtcb;
-  FAR struct task_group_s *group;
-  FAR char *pvar;
-  FAR char *pvalue = NULL;
-  int ret = OK;
+  FAR nsem_t *psem;
+  int         ret = ERROR;
 
-  /* Verify that a string was passed */
+  /* Verify the input values */
 
-  if (!name)
+  if (name)
     {
-      ret = EINVAL;
-      goto errout;
+      sched_lock();
+
+      /* Find the named semaphore */
+
+      psem = sem_findnamed(name);
+
+      /* Check if the semaphore was found */
+
+      if (psem)
+        {
+          /* If the named semaphore was found and if there are no
+           * connects to it, then deallocate it
+           */
+
+          if (!psem->nconnect)
+            {
+              dq_rem((FAR dq_entry_t*)psem, &g_nsems);
+              sched_kfree(psem);
+            }
+
+          /* If one or more process still has the semaphore open,
+           * then just mark it as unlinked.  The unlinked semaphore will
+           * be deleted when the final process closes the semaphore.
+           */
+
+          else
+            {
+              psem->unlinked = true;
+            }
+          ret = OK;
+        }
+
+      sched_unlock();
     }
 
-  /* Get a reference to the thread-private environ in the TCB. */
-
-  sched_lock();
-  rtcb = (FAR struct tcb_s*)g_readytorun.head;
-  group = rtcb->group;
-
-  /* Check if the variable exists */
-
-  if ( !group || (pvar = env_findvar(group, name)) == NULL)
-    {
-      ret = ENOENT;
-      goto errout_with_lock;
-    }
-
-  /* It does!  Get the value sub-string from the name=value string */
-
-  pvalue = strchr(pvar, '=');
-  if (!pvalue)
-    {
-      /* The name=value string has no '='  This is a bug! */
-
-      ret = EINVAL;
-      goto errout_with_lock;
-    }
-
-  /* Adjust the pointer so that it points to the value right after the '=' */
-
-  pvalue++;
-  sched_unlock();
-  return pvalue;
-
-errout_with_lock:
-  sched_unlock();
-errout:
-  set_errno(ret);
-  return NULL;
+  return ret;
 }
-
-#endif /* CONFIG_DISABLE_ENVIRON */
-

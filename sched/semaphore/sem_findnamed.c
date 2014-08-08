@@ -41,7 +41,7 @@
 
 #include <string.h>
 
-#include "sem_internal.h"
+#include "semaphore/semaphore.h"
 
 /************************************************************************
  * Definitions

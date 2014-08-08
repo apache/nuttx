@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/sem_unlink.c
+ * sched/environ/env_findvar.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,28 +39,16 @@
 
 #include <nuttx/config.h>
 
+#ifndef CONFIG_DISABLE_ENVIRON
+
 #include <stdbool.h>
-#include <semaphore.h>
+#include <string.h>
 #include <sched.h>
-#include <queue.h>
 
-#include "os_internal.h"
-#include "sem_internal.h"
+#include "environ/environ.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -68,73 +56,71 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: env_cmpname
+ ****************************************************************************/
+
+static bool env_cmpname(const char *pszname, const char *peqname)
+{
+  /* Search until we find anything different in the two names */
+
+  for (; *pszname == *peqname; pszname++, peqname++);
+
+  /* On sucess, pszname will end with '\0' and peqname with '=' */
+
+  if ( *pszname == '\0' && *peqname == '=' )
+    {
+      return true;
+    }
+
+  return false;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sem_unlink
+ * Name: env_findvar
  *
  * Description:
- *   This function removes the semaphore named by the input parameter 'name.'
- *   If the semaphore named by 'name' is currently referenced by other task,
- *   the sem_unlink() will have no effect on the state of the semaphore.  If
- *   one or more processes have the semaphore open when sem_unlink() is
- *   called, destruction of the semaphore will be postponed until all
- *   references to the semaphore have been destroyed by calls of sem_close().
+ *   Search the provided environment structure for the variable of the
+ *   specified name.
  *
  * Parameters:
- *   name - Semaphore name
+ *   group The task group containging environment array to be searched.
+ *   pname The variable name to find
  *
  * Return Value:
- *  0 (OK), or -1 (ERROR) if unsuccessful.
+ *   A pointer to the name=value string in the environment
  *
  * Assumptions:
+ *   - Not called from an interrupt handler
+ *   - Pre-emptions is disabled by caller
  *
  ****************************************************************************/
 
-int sem_unlink(FAR const char *name)
+FAR char *env_findvar(FAR struct task_group_s *group, const char *pname)
 {
-  FAR nsem_t *psem;
-  int         ret = ERROR;
+  char *ptr;
+  char *end;
 
-  /* Verify the input values */
+  /* Verify input parameters */
 
-  if (name)
-    {
-      sched_lock();
+  DEBUGASSERT(group && pname);
 
-      /* Find the named semaphore */
+  /* Search for a name=value string with matching name */
 
-      psem = sem_findnamed(name);
+  end = &group->tg_envp[group->tg_envsize];
+  for (ptr = group->tg_envp;
+       ptr < end && !env_cmpname(pname, ptr);
+       ptr += (strlen(ptr) + 1));
 
-      /* Check if the semaphore was found */
+  /* Check for success */
 
-      if (psem)
-        {
-          /* If the named semaphore was found and if there are no
-           * connects to it, then deallocate it
-           */
-
-          if (!psem->nconnect)
-            {
-              dq_rem((FAR dq_entry_t*)psem, &g_nsems);
-              sched_kfree(psem);
-            }
-
-          /* If one or more process still has the semaphore open,
-           * then just mark it as unlinked.  The unlinked semaphore will
-           * be deleted when the final process closes the semaphore.
-           */
-
-          else
-            {
-              psem->unlinked = true;
-            }
-          ret = OK;
-        }
-
-      sched_unlock();
-    }
-
-  return ret;
+  return (ptr < end) ? ptr : NULL;
 }
+
+#endif /* CONFIG_DISABLE_ENVIRON */
+
+
+

@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/env_clearenv.c
+ * sched/environ/env_unsetenv.c
  *
- *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,9 +42,13 @@
 #ifndef CONFIG_DISABLE_ENVIRON
 
 #include <sched.h>
-#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+
+#include <nuttx/kmalloc.h>
+
 #include "os_internal.h"
-#include "env_internal.h"
+#include "environ/environ.h"
 
 /****************************************************************************
  * Private Data
@@ -55,31 +59,66 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: clearenv
+ * Name: unsetenv
  *
  * Description:
- *   The clearenv() function clears the environment of all name-value pairs
- *   and sets the value of the external variable environ to NULL.
+ *   The unsetenv() function deletes the variable name from the environment.
  *
  * Parameters:
- *   None
+ *   name - The name of the variable to delete
  *
  * Return Value:
- *   None
+ *   Zero on success
  *
  * Assumptions:
  *   Not called from an interrupt handler
  *
  ****************************************************************************/
 
-int clearenv(void)
+int unsetenv(FAR const char *name)
 {
-  FAR struct tcb_s *tcb = (FAR struct tcb_s*)g_readytorun.head;
-  DEBUGASSERT(tcb->group);
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct task_group_s *group = rtcb->group;
+  FAR char *pvar;
+  FAR char *newenvp;
+  int newsize;
+  int ret = OK;
 
-  env_release(tcb->group);
-  return OK;
+  DEBUGASSERT(name && group);
+
+  /* Check if the variable exists */
+
+  sched_lock();
+  if (group && (pvar = env_findvar(group, name)) != NULL)
+    {
+      /* It does!  Remove the name=value pair from the environment. */
+
+      (void)env_removevar(group, pvar);
+
+      /* Reallocate the new environment buffer */
+
+      newsize = group->tg_envsize;
+      newenvp = (FAR char *)kurealloc(group->tg_envp, newsize);
+      if (!newenvp)
+        {
+          set_errno(ENOMEM);
+          ret = ERROR;
+        }
+      else
+        {
+          /* Save the new environment pointer (it might have changed due to
+           * reallocation.
+           */
+
+          group->tg_envp = newenvp;
+        }
+    }
+
+  sched_unlock();
+  return ret;
 }
 
 #endif /* CONFIG_DISABLE_ENVIRON */
+
+
 

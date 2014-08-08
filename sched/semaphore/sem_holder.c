@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/sem_holder.c
+ * sched/semaphore/sem_holder.c
  *
  *   Copyright (C) 2009-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,7 +46,7 @@
 #include <nuttx/arch.h>
 
 #include "os_internal.h"
-#include "sem_internal.h"
+#include "semaphore/semaphore.h"
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
 
@@ -626,7 +626,7 @@ static inline void sem_restorebaseprio_irq(FAR struct tcb_s *stcb,
 {
   /* Perfom the following actions only if a new thread was given a count.
    * The thread that received the count should be the highest priority
-   * of all threads waiting for a count from the semphore.  So in that
+   * of all threads waiting for a count from the semaphore.  So in that
    * case, the priority of all holder threads should be dropped to the
    * next highest pending priority.
    */
@@ -689,7 +689,7 @@ static inline void sem_restorebaseprio_task(FAR struct tcb_s *stcb, FAR sem_t *s
 
   /* Perfom the following actions only if a new thread was given a count.
    * The thread that received the count should be the highest priority
-   * of all threads waiting for a count from the semphore.  So in that
+   * of all threads waiting for a count from the semaphore.  So in that
    * case, the priority of all holder threads should be dropped to the
    * next highest pending priority.
    */

@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/sem_post.c
+ * sched/semaphore/sem_close.c
  *
- *   Copyright (C) 2007-2009, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,13 +39,12 @@
 
 #include <nuttx/config.h>
 
-#include <limits.h>
+#include <errno.h>
 #include <semaphore.h>
 #include <sched.h>
-#include <nuttx/arch.h>
 
 #include "os_internal.h"
-#include "sem_internal.h"
+#include "semaphore/semaphore.h"
 
 /****************************************************************************
  * Definitions
@@ -72,110 +71,69 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sem_post
+ * Name:  sem_close
  *
  * Description:
- *   When a task has finished with a semaphore, it will call sem_post().
- *   This function unlocks the semaphore referenced by sem by performing the
- *   semaphore unlock operation on that semaphore.
+ *   This function is called to indicate that the calling task is finished
+ *   with the specified named semaphore, 'sem'.  The sem_close() deallocates
+ *   any system resources allocated by the system for this named semaphore.
  *
- *   If the semaphore value resulting from this operation is positive, then
- *   no tasks were blocked waiting for the semaphore to become unlocked; the
- *   semaphore is simply incremented.
- *
- *   If the value of the semaphore resulting from this operation is zero,
- *   then one of the tasks blocked waiting for the semaphore shall be
- *   allowed to return successfully from its call to sem_wait().
+ *   If the semaphore has not been removed with a call to sem_unlink(), then
+ *   sem_close() has no effect on the named semaphore.  However, when the
+ *   named semaphore has been fully unlinked, the semaphore will vanish when
+ *   the last task closes it.
  *
  * Parameters:
- *   sem - Semaphore descriptor
+ *  sem - semaphore descriptor
  *
  * Return Value:
- *   0 (OK) or -1 (ERROR) if unsuccessful
+ *  0 (OK), or -1 (ERROR) if unsuccessful.
  *
  * Assumptions:
- *   This function cannot be called from an interrupt handler.
- *   It assumes the currently executing task is the one that
- *   is performing the unlock.
+ *   - Care must be taken to avoid risking the deletion of a semaphore that
+ *     another calling task has already locked.
+ *   - sem_close must not be called for an un-named semaphore
  *
  ****************************************************************************/
 
-int sem_post(FAR sem_t *sem)
+int sem_close(FAR sem_t *sem)
 {
-  FAR struct tcb_s *stcb = NULL;
-  irqstate_t saved_state;
+  FAR nsem_t *psem;
   int ret = ERROR;
 
-  /* Make sure we were supplied with a valid semaphore. */
+  /* Verify the inputs */
 
   if (sem)
     {
-      /* The following operations must be performed with interrupts
-       * disabled because sem_post() may be called from an interrupt
-       * handler.
-       */
-
-      saved_state = irqsave();
-
-      /* Perform the semaphore unlock operation. */
-
-      ASSERT(sem->semcount < SEM_VALUE_MAX);
-      sem_releaseholder(sem);
-      sem->semcount++;
-
-#ifdef CONFIG_PRIORITY_INHERITANCE
-      /* Don't let any unblocked tasks run until we complete any priority
-       * restoration steps.  Interrupts are disabled, but we do not want
-       * the head of the read-to-run list to be modified yet.
-       *
-       * NOTE: If this sched_lock is called from an interrupt handler, it
-       * will do nothing.
-       */
-
       sched_lock();
-#endif
-      /* If the result of of semaphore unlock is non-positive, then
-       * there must be some task waiting for the semaphore.
-       */
 
-      if (sem->semcount <= 0)
+      /* Search the list of named semaphores */
+
+      for (psem = (FAR nsem_t*)g_nsems.head;
+           ((psem) && (sem != &psem->sem));
+           psem = psem->flink);
+
+      /* Check if we found it */
+
+      if (psem)
         {
-          /* Check if there are any tasks in the waiting for semaphore
-           * task list that are waiting for this semaphore. This is a
-           * prioritized list so the first one we encounter is the one
-           * that we want.
+          /* Decrement the count of sem_open connections to this semaphore */
+
+          if (psem->nconnect) psem->nconnect--;
+
+          /* If the semaphore is no long connected to any processes AND the
+           * semaphore was previously unlinked, then deallocate it.
            */
 
-          for (stcb = (FAR struct tcb_s*)g_waitingforsemaphore.head;
-               (stcb && stcb->waitsem != sem);
-               stcb = stcb->flink);
-
-          if (stcb)
+          if (!psem->nconnect && psem->unlinked)
             {
-              /* It is, let the task take the semaphore */
-
-              stcb->waitsem = NULL;
-
-              /* Restart the waiting task. */
-
-              up_unblock_task(stcb);
+              dq_rem((FAR dq_entry_t*)psem, &g_nsems);
+              sched_kfree(psem);
             }
+          ret = OK;
         }
 
-      /* Check if we need to drop the priority of any threads holding
-       * this semaphore.  The priority could have been boosted while they
-       * held the semaphore.
-       */
-
-#ifdef CONFIG_PRIORITY_INHERITANCE
-      sem_restorebaseprio(stcb, sem);
       sched_unlock();
-#endif
-      ret = OK;
-
-      /* Interrupts may now be enabled. */
-
-      irqrestore(saved_state);
     }
 
   return ret;

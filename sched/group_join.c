@@ -47,7 +47,7 @@
 #include <nuttx/kmalloc.h>
 
 #include "group_internal.h"
-#include "env_internal.h"
+#include "environ/environ.h"
 
 #if defined(HAVE_TASK_GROUP) && !defined(CONFIG_DISABLE_PTHREAD)
 

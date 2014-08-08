@@ -1,5 +1,5 @@
 /****************************************************************************
- * lib/semaphore/sem_destroy.c
+ * sched/environ/env_putenv.c
  *
  *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,29 +39,17 @@
 
 #include <nuttx/config.h>
 
-#include <semaphore.h>
+#ifndef CONFIG_DISABLE_ENVIRON
+
+#include <stdlib.h>
+#include <sched.h>
+#include <string.h>
 #include <errno.h>
 
-#include "sem_internal.h"
+#include <nuttx/kmalloc.h>
 
 /****************************************************************************
- * Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -69,58 +57,67 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sem_destroy
+ * Name: putenv
  *
  * Description:
- *   This function is used to destroy the un-named semaphore indicated by
- *   'sem'.  Only a semaphore that was created using sem_init() may be
- *   destroyed using sem_destroy(); the effect of calling sem_destroy() with
- *   a named semaphore is undefined.  The effect of subsequent use of the
- *   semaphore sem is undefined until sem is re-initialized by another call
- *   to sem_init().
- *
- *   The effect of destroying a semaphore upon which other processes are
- *   currently blocked is undefined.
+ *   The putenv() function adds or changes the value of environment variables.
+ *   The argument string is of the form name=value. If name does not already
+ *   exist in  the  environment, then string is added to the environment. If
+ *   name does exist, then the value of name in the environment is changed to
+ *   value.
  *
  * Parameters:
- *   sem - Semaphore to be destroyed.
+ *   name=value string describing the environment setting to add/modify
  *
  * Return Value:
- *   0 (OK), or -1 (ERROR) if unsuccessful.
+ *   Zero on sucess
  *
  * Assumptions:
+ *   Not called from an interrupt handler
  *
  ****************************************************************************/
 
-int sem_destroy (FAR sem_t *sem)
+int putenv(FAR const char *string)
 {
-  /* Assure a valid semaphore is specified */
+  char *pname;
+  char *pequal;
+  int ret = OK;
 
-  if (sem)
+  /* Verify that a string was passed */
+
+  if (!string)
     {
-      /* There is really no particular action that we need
-       * take to destroy a semaphore.  We will just reset
-       * the count to some reasonable value (1) and release
-       * ownership.
-       *
-       * Check if other threads are waiting on the semaphore.
-       * In this case, the behavior is undefined.  We will:
-       * leave the count unchanged but still return OK.
-       */
-
-      if (sem->semcount >= 0)
-        {
-          sem->semcount = 1;
-        }
-
-      /* Release holders of the semaphore */
-
-      sem_destroyholder(sem);
-      return OK;
+      ret = EINVAL;
+      goto errout;
     }
-  else
+
+  /* Parse the name=value string */
+
+  pname = strdup(string);
+  if (!pname)
     {
-      errno = -EINVAL;
-      return ERROR;
+      ret = ENOMEM;
+      goto errout;
     }
+
+  pequal = strchr( pname, '=');
+  if (pequal)
+    {
+      /* Then let setenv do all of the work */
+
+      *pequal = '\0';
+      ret = setenv(pname, pequal+1, TRUE);
+    }
+
+  kfree(pname);
+  return ret;
+
+errout:
+  errno = ret;
+  return ERROR;
 }
+
+#endif /* CONFIG_DISABLE_ENVIRON */
+
+
+

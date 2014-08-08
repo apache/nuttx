@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/sem_waitirq.c
+ * sched/semaphore/sem_trywait.c
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,14 +39,17 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
+#include <semaphore.h>
 #include <sched.h>
 #include <errno.h>
 #include <nuttx/arch.h>
 
-#include "sem_internal.h"
+#include "os_internal.h"
+#include "semaphore/semaphore.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -70,76 +73,70 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sem_waitirq
+ * Name: sem_trywait
  *
  * Description:
- *   This function is called when a signal is received by a task that is
- *   waiting on a semaphore.  According to the POSIX spec, "...the calling
- *   thread shall not return from the call to [sem_wait] until it either
- *   locks the semaphore or the call is interrupted by a signal."
+ *   This function locks the specified semaphore only if the semaphore is
+ *   currently not locked.  Otherwise, it locks the semaphore.  In either
+ *   case, the call returns without blocking.
  *
  * Parameters:
- *   wtcb    - A pointer to the TCB of the task that is waiting on a
- *             semphaphore, but has received a signal or timeout instead.
- *   errcode - EINTR if the semaphore wait was awakened by a signal;
- *             ETIMEDOUT if awakened by a timeout
+ *   sem - the semaphore descriptor
  *
  * Return Value:
- *   None
+ *   0 (OK) or -1 (ERROR) if unsuccessful. If this function returns -1
+ *   (ERROR),then the cause of the failure will be reported in "errno" as:
+ *
+ *     EINVAL:  Invalid attempt to get the semaphore
+ *     EAGAIN:  The semaphore is not available.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-void sem_waitirq(FAR struct tcb_s *wtcb, int errcode)
+int sem_trywait(FAR sem_t *sem)
 {
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
   irqstate_t saved_state;
+  int ret = ERROR;
 
-  /* Disable interrupts.  This is necessary (unfortunately) because an
-   * interrupt handler may attempt to post the semaphore while we are
-   * doing this.
-   */
+  /* This API should not be called from interrupt handlers */
 
-  saved_state = irqsave();
+  DEBUGASSERT(up_interrupt_context() == false)
 
-  /* It is possible that an interrupt/context switch beat us to the punch
-   * and already changed the task's state.
-   */
+  /* Assume any errors reported are due to invalid arguments. */
 
-  if (wtcb->task_state == TSTATE_WAIT_SEM)
+  set_errno(EINVAL);
+
+  if (sem)
     {
-      sem_t *sem = wtcb->waitsem;
-      DEBUGASSERT(sem != NULL && sem->semcount < 0);
-
-      /* Restore the correct priority of all threads that hold references
-       * to this semaphore.
+      /* The following operations must be performed with interrupts disabled
+       * because sem_post() may be called from an interrupt handler.
        */
 
-      sem_canceled(wtcb, sem);
+      saved_state = irqsave();
 
-      /* And increment the count on the semaphore.  This releases the count
-       * that was taken by sem_post().  This count decremented the semaphore
-       * count to negative and caused the thread to be blocked in the first
-       * place.
+      /* Any further errors could only occurr because the semaphore is not
+       * available.
        */
 
-      sem->semcount++;
+      set_errno(EAGAIN);
 
-      /* Indicate that the semaphore wait is over. */
+      /* If the semaphore is available, give it to the requesting task */
 
-      wtcb->waitsem = NULL;
+      if (sem->semcount > 0)
+        {
+          /* It is, let the task take the semaphore */
 
-      /* Mark the errno value for the thread. */
+          sem->semcount--;
+          rtcb->waitsem = NULL;
+          ret = OK;
+        }
 
-      wtcb->pterrno = errcode;
+      /* Interrupts may now be enabled. */
 
-      /* Restart the task. */
-
-      up_unblock_task(wtcb);
+      irqrestore(saved_state);
     }
 
-  /* Interrupts may now be enabled. */
-
-  irqrestore(saved_state);
+  return ret;
 }
-

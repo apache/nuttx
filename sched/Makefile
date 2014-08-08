@@ -115,10 +115,6 @@ ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 GRP_SRCS += group_signal.c
 endif
 
-ENV_SRCS  = env_getenvironptr.c env_dup.c env_release.c
-ENV_SRCS += env_findvar.c env_removevar.c
-ENV_SRCS += env_clearenv.c env_getenv.c env_putenv.c env_setenv.c env_unsetenv.c
-
 WDOG_SRCS = wd_initialize.c wd_create.c wd_start.c wd_cancel.c wd_delete.c
 WDOG_SRCS += wd_gettime.c
 
@@ -136,17 +132,6 @@ CLOCK_SRCS  = clock_initialize.c clock_settime.c clock_gettime.c clock_getres.c
 CLOCK_SRCS += clock_time2ticks.c clock_abstime2ticks.c clock_ticks2time.c
 CLOCK_SRCS += clock_gettimeofday.c clock_systimer.c
 
-SEM_SRCS  = sem_initialize.c sem_destroy.c sem_open.c sem_close.c sem_unlink.c
-SEM_SRCS += sem_wait.c sem_trywait.c sem_timedwait.c sem_post.c sem_findnamed.c
-
-ifneq ($(CONFIG_DISABLE_SIGNALS),y)
-SEM_SRCS += sem_waitirq.c
-endif
-
-ifeq ($(CONFIG_PRIORITY_INHERITANCE),y)
-SEM_SRCS += sem_holder.c
-endif
-
 ifneq ($(CONFIG_DISABLE_POSIX_TIMERS),y)
 TIMER_SRCS += timer_initialize.c timer_create.c timer_delete.c timer_getoverrun.c
 TIMER_SRCS += timer_gettime.c timer_settime.c timer_release.c
@@ -158,17 +143,16 @@ endif
 
 IRQ_SRCS = irq_initialize.c irq_attach.c irq_dispatch.c irq_unexpectedisr.c
 
+include semaphore/Make.defs
 include signal/Make.defs
 include pthread/Make.defs
 include mqueue/Make.defs
+include environ/Make.defs
 
 CSRCS  = $(MISC_SRCS) $(TSK_SRCS) $(GRP_SRCS) $(SCHED_SRCS) $(WDOG_SRCS)
-CSRCS += $(TIME_SRCS) $(SEM_SRCS) $(TIMER_SRCS) $(PGFILL_SRCS)
-CSRCS += $(IRQ_SRCS) $(CLOCK_SRCS) $(MQUEUE_SRCS) $(SIGNAL_SRCS) $(PTHREAD_SRCS)
-
-ifneq ($(CONFIG_DISABLE_ENVIRON),y)
-CSRCS += $(ENV_SRCS)
-endif
+CSRCS += $(TIME_SRCS)  $(TIMER_SRCS) $(PGFILL_SRCS)
+CSRCS += $(IRQ_SRCS) $(CLOCK_SRCS)
+CSRCS += $(SEM_SRCS) $(SIGNAL_SRCS) $(PTHREAD_SRCS) $(MQUEUE_SRCS) $(ENV_SRCS)
 
 COBJS = $(CSRCS:.c=$(OBJEXT))
 

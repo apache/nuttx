@@ -48,7 +48,7 @@
 #include <nuttx/net/net.h>
 #include <nuttx/lib.h>
 
-#include "env_internal.h"
+#include "environ/environ.h"
 #include "signal/signal.h"
 #include "pthread/pthread.h"
 #include "mqueue/mqueue.h"

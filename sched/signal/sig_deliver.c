@@ -48,7 +48,7 @@
 #include <nuttx/arch.h>
 
 #include "os_internal.h"
-#include "sem_internal.h"
+#include "semaphore/semaphore.h"
 #include "signal/signal.h"
 
 /****************************************************************************

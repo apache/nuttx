@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/env_removevar.c
+ * lib/semaphore/sem_destroy.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,15 +39,29 @@
 
 #include <nuttx/config.h>
 
-#ifndef CONFIG_DISABLE_ENVIRON
+#include <semaphore.h>
+#include <errno.h>
 
-#include <string.h>
-#include <sched.h>
-
-#include "env_internal.h"
+#include "semaphore/semaphore.h"
 
 /****************************************************************************
- * Private Data
+ * Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Type Declarations
+ ****************************************************************************/
+
+/****************************************************************************
+ * Global Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -55,69 +69,58 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: env_removevar
+ * Name: sem_destroy
  *
  * Description:
- *   Remove the referenced name=value pair from the environment
+ *   This function is used to destroy the un-named semaphore indicated by
+ *   'sem'.  Only a semaphore that was created using sem_init() may be
+ *   destroyed using sem_destroy(); the effect of calling sem_destroy() with
+ *   a named semaphore is undefined.  The effect of subsequent use of the
+ *   semaphore sem is undefined until sem is re-initialized by another call
+ *   to sem_init().
+ *
+ *   The effect of destroying a semaphore upon which other processes are
+ *   currently blocked is undefined.
  *
  * Parameters:
- *   group The task group with the environment containing the name=value pair
- *   pvar A pointer to the name=value pair in the restroom
+ *   sem - Semaphore to be destroyed.
  *
  * Return Value:
- *   Zero on success
+ *   0 (OK), or -1 (ERROR) if unsuccessful.
  *
  * Assumptions:
- *   - Not called from an interrupt handler
- *   - Caller has pre-emptions disabled
- *   - Caller will reallocate the environment structure to the correct size
  *
  ****************************************************************************/
 
-int env_removevar(FAR struct task_group_s *group, FAR char *pvar)
+int sem_destroy (FAR sem_t *sem)
 {
-  FAR char *end;    /* Pointer to the end+1 of the environment */
-  int alloc;        /* Size of the allocated environment */
-  int ret = ERROR;
+  /* Assure a valid semaphore is specified */
 
-  DEBUGASSERT(group && pvar);
-
-  /* Verify that the pointer lies within the environment region */
-
-  alloc = group->tg_envsize;          /* Size of the allocated environment */
-  end   = &group->tg_envp[alloc];     /* Pointer to the end+1 of the environment */
-
-  if (pvar >= group->tg_envp && pvar < end)
+  if (sem)
     {
-      /* Set up for the removal */
-
-      int   len  = strlen(pvar) + 1;  /* Length of name=value string to remove */
-      char *src  = &pvar[len];        /* Address of name=value string after */
-      char *dest = pvar;              /* Location to move the next string */
-      int   count = end - src;        /* Number of bytes to move (might be zero) */
-
-      /* Move all of the environment strings after the removed one 'down.'
-       * this is inefficient, but robably not high duty.
+      /* There is really no particular action that we need
+       * take to destroy a semaphore.  We will just reset
+       * the count to some reasonable value (1) and release
+       * ownership.
+       *
+       * Check if other threads are waiting on the semaphore.
+       * In this case, the behavior is undefined.  We will:
+       * leave the count unchanged but still return OK.
        */
 
-      while (count-- > 0)
+      if (sem->semcount >= 0)
         {
-          *dest++ = *src++;
+          sem->semcount = 1;
         }
 
-      /* Then set to the new allocation size.  The caller is expected to
-       * call realloc at some point but we don't do that here because the
-       * caller may add more stuff to the environment.
-       */
+      /* Release holders of the semaphore */
 
-      group->tg_envsize -= len;
-      ret = OK;
+      sem_destroyholder(sem);
+      return OK;
     }
-
-  return ret;
+  else
+    {
+      errno = -EINVAL;
+      return ERROR;
+    }
 }
-
-#endif /* CONFIG_DISABLE_ENVIRON */
-
-
-
