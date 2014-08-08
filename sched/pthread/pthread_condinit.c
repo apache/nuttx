@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/pthread_condsignal.c
+ * sched/pthread_condinit.c
  *
- *   Copyright (C) 2007-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,40 +40,20 @@
 #include <nuttx/config.h>
 
 #include <pthread.h>
-#include <errno.h>
 #include <debug.h>
+#include <errno.h>
 
-#include "pthread_internal.h"
+#include "pthread/pthread.h"
 
 /****************************************************************************
- * Definitions
+ * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: pthread_cond_signal
+ * Name: pthread_cond_init
  *
  * Description:
- *    A thread can signal on a condition variable.
+ *   A thread can create condition variables.
  *
  * Parameters:
  *   None
@@ -85,53 +65,29 @@
  *
  ****************************************************************************/
 
-int pthread_cond_signal(FAR pthread_cond_t *cond)
+int pthread_cond_init(FAR pthread_cond_t *cond, FAR pthread_condattr_t *attr)
 {
   int ret = OK;
-  int sval;
 
-  sdbg("cond=0x%p\n", cond);
+  sdbg("cond=0x%p attr=0x%p\n", cond, attr);
 
   if (!cond)
     {
       ret = EINVAL;
     }
-  else
+
+  /* Initialize the semaphore contained in the condition structure
+   * with initial count = 0
+   */
+
+  else if (sem_init((sem_t*)&cond->sem, 0, 0) != OK)
     {
-      /* Get the current value of the semaphore */
-
-      if (sem_getvalue((sem_t*)&cond->sem, &sval) != OK)
-        {
-          ret = EINVAL;
-        }
-
-      /* If the value is less than zero (meaning that one or more
-       * thread is waiting), then post the condition semaphore.
-       * Only the highest priority waiting thread will get to execute
-       */
-
-      else
-        {
-          /* One of my objectives in this design was to make pthread_cond_signal
-           * usable from interrupt handlers.  However, from interrupt handlers,
-           * you cannot take the associated mutex before signaling the condition.
-           * As a result, I think that there could be a race condition with
-           * the following logic which assumes that the if sval < 0 then the
-           * thread is waiting.  Without the mutex, there is no atomic, protected
-           * operation that will guarantee this to be so.
-           */
-
-          sdbg("sval=%d\n", sval);
-          if (sval < 0)
-            {
-              sdbg("Signalling...\n");
-              ret = pthread_givesemaphore((sem_t*)&cond->sem);
-            }
-        }
+      ret = EINVAL;
     }
 
   sdbg("Returning %d\n", ret);
   return ret;
 }
+
 
 

@@ -1,5 +1,5 @@
 /************************************************************************
- * sched/sig_initialize.c
+ * sched/signal/sig_initialize.c
  *
  *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

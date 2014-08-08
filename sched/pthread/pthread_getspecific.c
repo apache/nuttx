@@ -1,7 +1,7 @@
 /************************************************************************
- * sched/pthread_release.c
+ * sched/pthread_getspecific.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,10 +40,12 @@
 #include <nuttx/config.h>
 
 #include <sched.h>
+#include <errno.h>
+#include <assert.h>
 #include <debug.h>
 
 #include "os_internal.h"
-#include "pthread_internal.h"
+#include "pthread/pthread.h"
 
 /************************************************************************
  * Definitions
@@ -70,54 +72,57 @@
  ************************************************************************/
 
 /************************************************************************
- * Name: pthread_release
+ * Name: pthread_getspecific
  *
  * Description:
- *   Release pthread resources from the task group with the group
- *   terminated.
+ *   The pthread_getspecific() function returns the value currently
+ *   bound to the specified key on behalf of the calling thread.
+ *
+ *   The effect of calling pthread_getspecific() with with a key value
+ *   not obtained from pthread_create() or after a key has been deleted
+ *   with pthread_key_delete() is undefined.
  *
  * Parameters:
- *   group = The task group containing the pthread resources to be
- *           released.
+ *   key = The data key to get or set
  *
  * Return Value:
- *   None
+ *   The function pthread_getspecific() returns the thread-specific data
+ *   associated with the given key.  If no thread specific data is
+ *   associated with the key, then the value NULL is returned.
+ *
+ *      EINVAL - The key value is invalid.
  *
  * Assumptions:
  *
  * POSIX Compatibility:
+ *   - Both calling pthread_setspecific() and pthread_getspecific()
+ *     may be called from a thread-specific data destructor
+ *     function.
  *
  ************************************************************************/
 
-void pthread_release(FAR struct task_group_s *group)
+FAR void *pthread_getspecific(pthread_key_t key)
 {
-  FAR struct join_s *join;
+#if CONFIG_NPTHREAD_KEYS > 0
+  FAR struct pthread_tcb_s *rtcb = (FAR struct pthread_tcb_s*)g_readytorun.head;
+  FAR struct task_group_s *group = rtcb->cmn.group;
+  FAR void *ret = NULL;
 
-  sdbg("group=0x%p\n", group);
+  DEBUGASSERT(group &&
+              (rtcb->cmn.flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD);
 
-  /* Visit and delete each join structure still in the list.  Since we
-   * are last exiting thread of the group, no special protection should
-   * be required.
-   */
+  /* Check if the key is valid. */
 
-  while (group->tg_joinhead)
+  if (key < group->tg_nkeys)
     {
-      /* Remove the join from the head of the list. */
+      /* Return the stored value. */
 
-      join = group->tg_joinhead;
-      group->tg_joinhead = join->next;
-
-      /* Destroy the join semaphores */
-
-      (void)sem_destroy(&join->data_sem);
-      (void)sem_destroy(&join->exit_sem);
-
-      /* And deallocate the join structure */
-
-      sched_kfree(join);
+      ret = rtcb->pthread_data[key];
     }
 
-  /* Destroy the join list semaphore */
-
-  (void)sem_destroy(&group->tg_joinsem);
+  return ret;
+#else
+  return NULL;
+#endif
 }
+

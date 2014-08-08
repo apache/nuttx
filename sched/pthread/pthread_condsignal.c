@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/pthread_condwait.c
+ * sched/pthread_condsignal.c
  *
  *   Copyright (C) 2007-2009, 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,13 +39,11 @@
 
 #include <nuttx/config.h>
 
-#include <unistd.h>
 #include <pthread.h>
-#include <sched.h>
 #include <errno.h>
 #include <debug.h>
 
-#include "pthread_internal.h"
+#include "pthread/pthread.h"
 
 /****************************************************************************
  * Definitions
@@ -72,10 +70,10 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: int pthread_cond_wait
+ * Name: pthread_cond_signal
  *
  * Description:
- *   A thread can wait for a condition variable to be signalled or broadcast.
+ *    A thread can signal on a condition variable.
  *
  * Parameters:
  *   None
@@ -87,51 +85,53 @@
  *
  ****************************************************************************/
 
-int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
+int pthread_cond_signal(FAR pthread_cond_t *cond)
 {
-  int ret;
+  int ret = OK;
+  int sval;
 
-  sdbg("cond=0x%p mutex=0x%p\n", cond, mutex);
+  sdbg("cond=0x%p\n", cond);
 
-  /* Make sure that non-NULL references were provided. */
-
-  if (!cond || !mutex)
+  if (!cond)
     {
       ret = EINVAL;
     }
-
-  /* Make sure that the caller holds the mutex */
-
-  else if (mutex->pid != (int)getpid())
-    {
-      ret = EPERM;
-    }
   else
     {
-      /* Give up the mutex */
+      /* Get the current value of the semaphore */
 
-      sdbg("Give up mutex / take cond\n");
-
-      sched_lock();
-      mutex->pid = 0;
-      ret = pthread_givesemaphore((sem_t*)&mutex->sem);
-
-      /* Take the semaphore */
-
-      ret |= pthread_takesemaphore((sem_t*)&cond->sem);
-      sched_unlock();
-
-      /* Reacquire the mutex */
-
-      sdbg("Reacquire mutex...\n");
-      ret |= pthread_takesemaphore((sem_t*)&mutex->sem);
-      if (!ret)
+      if (sem_getvalue((sem_t*)&cond->sem, &sval) != OK)
         {
-          mutex->pid = getpid();;
+          ret = EINVAL;
+        }
+
+      /* If the value is less than zero (meaning that one or more
+       * thread is waiting), then post the condition semaphore.
+       * Only the highest priority waiting thread will get to execute
+       */
+
+      else
+        {
+          /* One of my objectives in this design was to make pthread_cond_signal
+           * usable from interrupt handlers.  However, from interrupt handlers,
+           * you cannot take the associated mutex before signaling the condition.
+           * As a result, I think that there could be a race condition with
+           * the following logic which assumes that the if sval < 0 then the
+           * thread is waiting.  Without the mutex, there is no atomic, protected
+           * operation that will guarantee this to be so.
+           */
+
+          sdbg("sval=%d\n", sval);
+          if (sval < 0)
+            {
+              sdbg("Signalling...\n");
+              ret = pthread_givesemaphore((sem_t*)&cond->sem);
+            }
         }
     }
 
   sdbg("Returning %d\n", ret);
   return ret;
 }
+
 

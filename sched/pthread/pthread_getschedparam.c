@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/pthread_mutextrylock.c
+ * pthread_getschedparam.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,16 +37,12 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <unistd.h>
+#include <sys/types.h>
 #include <pthread.h>
-#include <semaphore.h>
 #include <sched.h>
 #include <errno.h>
 #include <debug.h>
-
-#include "pthread_internal.h"
+#include "pthread/pthread.h"
 
 /****************************************************************************
  * Definitions
@@ -70,78 +66,74 @@
 
 /****************************************************************************
  * Public Functions
- ****************************************************************************/
+ *****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_mutex_trylock
+ * Name: pthread_getschedparam
  *
  * Description:
- *   The function pthread_mutex_trylock() is identical to pthread_mutex_lock()
- *   except that if the mutex object referenced by mutex is currently locked
- *   (by any thread, including the current thread), the call returns immediately
- *   with the errno EBUSY.
+ *   The pthread_getschedparam() functions will get the scheduling policy and
+ *   parameters of threads. For SCHED_FIFO and SCHED_RR, the only required
+ *   member of the sched_param structure is the priority sched_priority.
  *
- *   If a signal is delivered to a thread waiting for a mutex, upon return from
- *   the signal handler the thread resumes waiting for the mutex as if it was
- *   not interrupted.
+ *   The pthread_getschedparam() function will retrieve the scheduling
+ *   policy and scheduling parameters for the thread whose thread ID is
+ *   given by 'thread' and will store those values in 'policy' and 'param',
+ *   respectively. The priority value returned from pthread_getschedparam()
+ *   will be the value specified by the most recent pthread_setschedparam(),
+ *   pthread_setschedprio(), or pthread_create() call affecting the target
+ *   thread. It will not reflect any temporary adjustments to its priority
+ *   (such as might result of any priority inheritance, for example).
  *
+ *   The policy parameter may have the value SCHED_FIFO, or SCHED_RR
+ *   (SCHED_OTHER and SCHED_SPORADIC, in particular, are not supported).
+ *   The SCHED_FIFO and SCHED_RR policies will have a single scheduling
+ *   parameter, sched_priority.
+*
  * Parameters:
- *   mutex - A reference to the mutex to be locked.
+ *   thread - The ID of thread whose scheduling parameters will be queried.
+ *   policy - The location to store the thread's scheduling policy.
+ *   param  - The location to store the thread's priority.
  *
  * Return Value:
- *   0 on success or an errno value on failure.  Note that the errno EINTR
- *   is never returned by pthread_mutex_lock().
+ *   0 if successful.  Otherwise, the error code ESRCH if the value specified
+ *   by thread does not refer to an existing thread.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int pthread_mutex_trylock(FAR pthread_mutex_t *mutex)
+int pthread_getschedparam(pthread_t thread, FAR int *policy,
+                          FAR struct sched_param *param)
 {
-  int ret = OK;
+  int ret;
 
-  sdbg("mutex=0x%p\n", mutex);
+  sdbg("Thread ID=%d policy=0x%p param=0x%p\n", thread, policy, param);
 
-  if (!mutex)
+  if (!policy || !param)
     {
       ret = EINVAL;
     }
   else
     {
-      /* Make sure the semaphore is stable while we make the following
-       * checks.  This all needs to be one atomic action.
-       */
+      /* Get the schedparams of the thread. */
 
-      sched_lock();
-
-      /* Try to get the semaphore. */
-
-      if (sem_trywait((sem_t*)&mutex->sem) == OK)
-        {
-          /* If we succussfully obtained the semaphore, then indicate
-           * that we own it.
-           */
-
-          mutex->pid = (int)getpid();
-        }
-
-      /* Was it not available? */
-
-      else if (get_errno() == EAGAIN)
-        {
-          ret = EBUSY;
-        }
-      else
+      ret = sched_getparam((pid_t)thread, param);
+      if (ret != OK)
         {
           ret = EINVAL;
         }
 
-      sched_unlock();
+      /* Return the policy. */
+
+      *policy = sched_getscheduler((pid_t)thread);
+      if (*policy == ERROR)
+        {
+          ret = get_errno();
+        }
     }
 
   sdbg("Returning %d\n", ret);
   return ret;
 }
-
-
 

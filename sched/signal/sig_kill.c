@@ -1,5 +1,5 @@
 /************************************************************************
- * sched/sig_kill.c
+ * sched/signal/sig_kill.c
  *
  *   Copyright (C) 2007, 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

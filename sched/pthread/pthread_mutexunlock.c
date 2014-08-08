@@ -1,7 +1,7 @@
 /****************************************************************************
- * pthread_setschedparam.c
+ * sched/pthread_mutexunlock.c
  *
- *   Copyright (C) 2007, 2008, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,13 +37,15 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
+#include <nuttx/config.h>
+
+#include <unistd.h>
 #include <pthread.h>
 #include <sched.h>
 #include <errno.h>
 #include <debug.h>
 
-#include "pthread_internal.h"
+#include "pthread/pthread.h"
 
 /****************************************************************************
  * Definitions
@@ -70,73 +72,93 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_setschedparam
+ * Name: pthread_mutex_unlock
  *
  * Description:
- *   The pthread_setschedparam() functions will set the scheduling policy
- *   and parameters of threads. For SCHED_FIFO and SCHED_RR, the only
- *   required member of the sched_param structure is the priority
- *   sched_priority.
+ *   The pthread_mutex_unlock() function releases the mutex object referenced
+ *   by mutex. The manner in which a mutex is released is dependent upon the
+ *   mutex's type attribute. If there are threads blocked on the mutex object
+ *   referenced by mutex when pthread_mutex_unlock() is called, resulting in
+ *   the mutex becoming available, the scheduling policy is used to determine
+ *   which thread shall acquire the mutex. (In the case of PTHREAD_MUTEX_RECURSIVE
+ *   mutexes, the mutex becomes available when the count reaches zero and the
+ *   calling thread no longer has any locks on this mutex).
  *
- *   The pthread_setschedparam() function will set the scheduling policy
- *   and associated scheduling parameters for the thread whose thread ID
- *   is given by 'thread' to the policy and associated parameters provided
- *   in 'policy' and 'param', respectively.
- *
- *   The policy parameter may have the value SCHED_FIFO, or SCHED_RR
- *   (SCHED_OTHER and SCHED_SPORADIC, in particular, are not supported).
- *   The SCHED_FIFO and SCHED_RR policies will have a single scheduling
- *   parameter, sched_priority.
- *
- *   If the pthread_setschedparam() function fails, the scheduling parameters
- *   will not be changed for the target thread.
+ *   If a signal is delivered to a thread waiting for a mutex, upon return from
+ *   the signal handler the thread resumes waiting for the mutex as if it was
+ *   not interrupted.
  *
  * Parameters:
- *   thread - The ID of thread whose scheduling parameters will be modified.
- *   policy - The new scheduling policy of the thread.  Either SCHED_FIFO or
- *            SCHED_RR. SCHED_OTHER and SCHED_SPORADIC are not supported.
- *   param  - Provides the new priority of the thread.
+ *   None
  *
  * Return Value:
- *   0 if successful.  Otherwise, an error code identifying the cause of the
- *   failure:
- *
- *   EINVAL  The value specified by 'policy' or one of the scheduling
- *           parameters associated with the scheduling policy 'policy' is
- *           invalid.
- *   ENOTSUP An attempt was made to set the policy or scheduling parameters
- *           to an unsupported value (SCHED_OTHER and SCHED_SPORADIC in
- *           particular are not supported)
- *   EPERM   The caller does not have the appropriate permission to set either
- *           the scheduling parameters or the scheduling policy of the
- *           specified thread. Or, the implementation does not allow the
- *           application to modify one of the parameters to the value
- *           specified.
- *   ESRCH   The value specified by thread does not refer to a existing thread.
+ *   None
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int pthread_setschedparam(pthread_t thread, int policy, FAR const struct sched_param *param)
+int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
 {
-  int ret;
+  int ret = OK;
 
-  sdbg("thread ID=%d policy=%d param=0x%p\n", thread, policy, param);
+  sdbg("mutex=0x%p\n", mutex);
 
-  /* Set the errno to some non-zero value (failsafe) */
-
-  set_errno(EINVAL);
-
-  /* Let sched_setscheduler do all of the work */
-
-  ret = sched_setscheduler((pid_t)thread, policy, param);
-  if (ret != OK)
+  if (!mutex)
     {
-      /* If sched_setscheduler() fails, return the errno */
+      ret = EINVAL;
+    }
+  else
+    {
+      /* Make sure the semaphore is stable while we make the following
+       * checks.  This all needs to be one atomic action.
+       */
 
-      ret = get_errno();
+      sched_lock();
+
+      /* Does the calling thread own the semaphore? */
+
+      if (mutex->pid != (int)getpid())
+        {
+          /* No... return an error (default behavior is like PTHREAD_MUTEX_ERRORCHECK) */
+
+          sdbg("Holder=%d returning EPERM\n", mutex->pid);
+          ret = EPERM;
+        }
+
+
+      /* Yes, the caller owns the semaphore.. Is this a recursive mutex? */
+
+#ifdef CONFIG_MUTEX_TYPES
+      else if (mutex->type == PTHREAD_MUTEX_RECURSIVE && mutex->nlocks > 1)
+        {
+          /* This is a recursive mutex and we there are multiple locks held. Retain
+           * the mutex lock, just decrement the count of locks held, and return
+           * success.
+           */
+          mutex->nlocks--;
+        }
+#endif
+
+      /* This is either a non-recursive mutex or is the outermost unlock of
+       * a recursive mutex.
+       */
+
+      else
+        {
+          /* Nullify the pid and lock count then post the semaphore */
+
+          mutex->pid    = 0;
+#ifdef CONFIG_MUTEX_TYPES
+          mutex->nlocks = 0;
+#endif
+          ret = pthread_givesemaphore((sem_t*)&mutex->sem);
+        }
+      sched_unlock();
     }
 
+  sdbg("Returning %d\n", ret);
   return ret;
 }
+
+

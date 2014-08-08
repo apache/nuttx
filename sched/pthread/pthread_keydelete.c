@@ -1,7 +1,7 @@
 /************************************************************************
- * sched/pthread_exit.c
+ * sched/pthread_keydelete.c
  *
- *   Copyright (C) 2007, 2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,18 +39,11 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <signal.h>
-#include <pthread.h>
+#include <sched.h>
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/arch.h>
-
-#include "os_internal.h"
-#include "pthread_internal.h"
+#include "pthread/pthread.h"
 
 /************************************************************************
  * Definitions
@@ -77,64 +70,27 @@
  ************************************************************************/
 
 /************************************************************************
- * Name: pthread_exit
+ * Name: pthread_key_delete
  *
  * Description:
- *   Terminate execution of a thread started with pthread_create.
+ *   This POSIX function should delete a thread-specific data key
+ *   previously returned by pthread_key_create().  However, this function
+ *   does nothing in the present implementation.
  *
  * Parameters:
- *   exit_valie
+ *   key = the key to delete
  *
- * Returned Value:
- *   None
+ * Return Value:
+ *   Always returns ENOSYS.
  *
  * Assumptions:
  *
+ * POSIX Compatibility:
+ *
  ************************************************************************/
 
-void pthread_exit(FAR void *exit_value)
+int pthread_key_delete(pthread_key_t key)
 {
-  struct tcb_s *tcb = (struct tcb_s*)g_readytorun.head;
-  int status;
-
-  sdbg("exit_value=%p\n", exit_value);
-
-  /* Block any signal actions that would awaken us while were
-   * are performing the JOIN handshake.
-   */
-
-#ifndef CONFIG_DISABLE_SIGNALS
-  {
-    sigset_t set = ALL_SIGNAL_SET;
-    (void)sigprocmask(SIG_SETMASK, &set, NULL);
-  }
-#endif
-
-  /* Complete pending join operations */
-
-  status = pthread_completejoin(getpid(), exit_value);
-  if (status != OK)
-    {
-      /* Assume that the join completion failured because this
-       * not really a pthread.  Exit by calling exit().
-       */
-
-      exit(EXIT_FAILURE);
-    }
-
-  /* Perform common task termination logic.  This will get called again later
-   * through logic kicked off by _exit().  However, we need to call it before
-   * calling _exit() in order certain operations if this is the last thread
-   * of a task group:  (2) To handle atexit() and on_exit() callbacks and
-   * (2) so that we can flush buffered I/O (which may required suspending).
-   */
-
-  task_exithook(tcb, EXIT_SUCCESS, false);
-
-  /* Then just exit, retaining all file descriptors and without
-   * calling atexit() functions.
-   */
-
-  _exit(EXIT_SUCCESS);
+  return ENOSYS;
 }
 

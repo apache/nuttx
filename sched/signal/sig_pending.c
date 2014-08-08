@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/sig_pending.c
+ * sched/signal/sig_pending.c
  *
  *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

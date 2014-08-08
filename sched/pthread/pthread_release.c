@@ -1,7 +1,7 @@
 /************************************************************************
- * pthread_findjoininfo.c
+ * sched/pthread_release.c
  *
- *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,10 +39,11 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <sched.h>
+#include <debug.h>
 
-#include "group_internal.h"
-#include "pthread_internal.h"
+#include "os_internal.h"
+#include "pthread/pthread.h"
 
 /************************************************************************
  * Definitions
@@ -69,38 +70,54 @@
  ************************************************************************/
 
 /************************************************************************
- * Name: thread_findjoininfo
+ * Name: pthread_release
  *
  * Description:
- *   Find a join structure in a local data set.
+ *   Release pthread resources from the task group with the group
+ *   terminated.
  *
  * Parameters:
- *   group - The that the pid is (or was) a member of of
- *   pid - The ID of the pthread
+ *   group = The task group containing the pthread resources to be
+ *           released.
  *
  * Return Value:
- *   None or pointer to the found entry.
+ *   None
  *
  * Assumptions:
- *   The caller has provided protection from re-entrancy.
+ *
+ * POSIX Compatibility:
  *
  ************************************************************************/
 
-FAR struct join_s *pthread_findjoininfo(FAR struct task_group_s *group,
-                                        pid_t pid)
+void pthread_release(FAR struct task_group_s *group)
 {
-  FAR struct join_s *pjoin;
+  FAR struct join_s *join;
 
-  DEBUGASSERT(group);
+  sdbg("group=0x%p\n", group);
 
-  /* Find the entry with the matching pid */
+  /* Visit and delete each join structure still in the list.  Since we
+   * are last exiting thread of the group, no special protection should
+   * be required.
+   */
 
-  for (pjoin = group->tg_joinhead;
-       (pjoin && (pid_t)pjoin->thread != pid);
-       pjoin = pjoin->next);
+  while (group->tg_joinhead)
+    {
+      /* Remove the join from the head of the list. */
 
-  /* and return it */
+      join = group->tg_joinhead;
+      group->tg_joinhead = join->next;
 
-  return pjoin;
+      /* Destroy the join semaphores */
+
+      (void)sem_destroy(&join->data_sem);
+      (void)sem_destroy(&join->exit_sem);
+
+      /* And deallocate the join structure */
+
+      sched_kfree(join);
+    }
+
+  /* Destroy the join list semaphore */
+
+  (void)sem_destroy(&group->tg_joinsem);
 }
-

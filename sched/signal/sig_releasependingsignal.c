@@ -1,5 +1,5 @@
 /************************************************************************
- * sched/sig_releasependingsignal.c
+ * sched/signal/sig_releasependingsignal.c
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

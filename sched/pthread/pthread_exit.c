@@ -1,7 +1,7 @@
 /************************************************************************
- * sched/pthread_detach.c
+ * sched/pthread_exit.c
  *
- *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,19 +39,21 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <signal.h>
 #include <pthread.h>
 #include <errno.h>
-#include <assert.h>
 #include <debug.h>
 
+#include <nuttx/arch.h>
+
 #include "os_internal.h"
-#include "group_internal.h"
-#include "pthread_internal.h"
+#include "pthread/pthread.h"
 
 /************************************************************************
- * Pre-processor Definitions
+ * Definitions
  ************************************************************************/
 
 /************************************************************************
@@ -75,72 +77,64 @@
  ************************************************************************/
 
 /************************************************************************
- * Name: pthread_detach
+ * Name: pthread_exit
  *
  * Description:
- *    A thread object may be "detached" to specify that the return value
- *    and completion status will not be requested.
- *
- *    The caller's task/thread must belong to the same "task group" as the
- *    pthread is (or was) a member of.  The thread may or may not still
- *    be running.
+ *   Terminate execution of a thread started with pthread_create.
  *
  * Parameters:
- *   thread
+ *   exit_valie
  *
- * Return Value:
- *   0 if successful.  Otherwise, an error code.
+ * Returned Value:
+ *   None
  *
  * Assumptions:
  *
  ************************************************************************/
 
-int pthread_detach(pthread_t thread)
+void pthread_exit(FAR void *exit_value)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
-  FAR struct task_group_s *group = rtcb->group;
-  FAR struct join_s *pjoin;
-  int ret;
+  struct tcb_s *tcb = (struct tcb_s*)g_readytorun.head;
+  int status;
 
-  sdbg("Thread=%d group=%p\n", thread, group);
-  DEBUGASSERT(group);
+  sdbg("exit_value=%p\n", exit_value);
 
-  /* Find the entry associated with this pthread. */
+  /* Block any signal actions that would awaken us while were
+   * are performing the JOIN handshake.
+   */
 
-  (void)pthread_takesemaphore(&group->tg_joinsem);
-  pjoin = pthread_findjoininfo(group, (pid_t)thread);
-  if (!pjoin)
+#ifndef CONFIG_DISABLE_SIGNALS
+  {
+    sigset_t set = ALL_SIGNAL_SET;
+    (void)sigprocmask(SIG_SETMASK, &set, NULL);
+  }
+#endif
+
+  /* Complete pending join operations */
+
+  status = pthread_completejoin(getpid(), exit_value);
+  if (status != OK)
     {
-      sdbg("Could not find thread entry\n");
-      ret = EINVAL;
-    }
-  else
-    {
-      /* Has the thread already terminated? */
+      /* Assume that the join completion failured because this
+       * not really a pthread.  Exit by calling exit().
+       */
 
-      if (pjoin->terminated)
-        {
-          /* YES.. just remove the thread entry. */
-
-          pthread_destroyjoin(group, pjoin);
-        }
-      else
-        {
-          /* NO.. Just mark the thread as detached.  It
-           * will be removed and deallocated when the
-           * thread exits
-           */
-
-          pjoin->detached = true;
-        }
-
-      /* Either case is successful */
-
-      ret = OK;
+      exit(EXIT_FAILURE);
     }
 
-  (void)pthread_givesemaphore(&group->tg_joinsem);
+  /* Perform common task termination logic.  This will get called again later
+   * through logic kicked off by _exit().  However, we need to call it before
+   * calling _exit() in order certain operations if this is the last thread
+   * of a task group:  (2) To handle atexit() and on_exit() callbacks and
+   * (2) so that we can flush buffered I/O (which may required suspending).
+   */
 
-  sdbg("Returning %d\n", ret);
-  return ret;
+  task_exithook(tcb, EXIT_SUCCESS, false);
+
+  /* Then just exit, retaining all file descriptors and without
+   * calling atexit() functions.
+   */
+
+  _exit(EXIT_SUCCESS);
 }
+

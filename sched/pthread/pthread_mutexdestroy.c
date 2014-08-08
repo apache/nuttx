@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/pthread_condinit.c
+ * sched/pthread_mutexdestroy.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,20 +40,42 @@
 #include <nuttx/config.h>
 
 #include <pthread.h>
-#include <debug.h>
+#include <semaphore.h>
+#include <sched.h>
 #include <errno.h>
+#include <debug.h>
 
-#include "pthread_internal.h"
+#include "pthread/pthread.h"
 
 /****************************************************************************
- * Global Functions
+ * Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_cond_init
+ * Private Type Declarations
+ ****************************************************************************/
+
+/****************************************************************************
+ * Global Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: pthread_mutex_destroy
  *
  * Description:
- *   A thread can create condition variables.
+ *   Destroy a mutex.
  *
  * Parameters:
  *   None
@@ -65,29 +87,45 @@
  *
  ****************************************************************************/
 
-int pthread_cond_init(FAR pthread_cond_t *cond, FAR pthread_condattr_t *attr)
+int pthread_mutex_destroy(FAR pthread_mutex_t *mutex)
 {
   int ret = OK;
+  int status;
 
-  sdbg("cond=0x%p attr=0x%p\n", cond, attr);
+  sdbg("mutex=0x%p\n", mutex);
 
-  if (!cond)
+  if (!mutex)
     {
       ret = EINVAL;
     }
-
-  /* Initialize the semaphore contained in the condition structure
-   * with initial count = 0
-   */
-
-  else if (sem_init((sem_t*)&cond->sem, 0, 0) != OK)
+  else
     {
-      ret = EINVAL;
+      /* Make sure the semaphore is stable while we make the following
+       * checks
+       */
+
+      sched_lock();
+
+      /* Is the semaphore available? */
+
+      if (mutex->pid != 0)
+        {
+          ret = EBUSY;
+        }
+      else
+        {
+          /* Destroy the semaphore */
+
+          status = sem_destroy((sem_t*)&mutex->sem);
+          if (status != OK)
+            {
+              ret = EINVAL;
+            }
+        }
+
+      sched_unlock();
     }
 
   sdbg("Returning %d\n", ret);
   return ret;
 }
-
-
-

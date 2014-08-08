@@ -1,5 +1,5 @@
 /************************************************************************
- * sched/sig_removependingsignal.c
+ * sched/signal/sig_removependingsignal.c
  *
  *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

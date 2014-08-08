@@ -1,7 +1,7 @@
 /************************************************************************
- * sched/pthread_keydelete.c
+ * pthread_findjoininfo.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,11 +39,10 @@
 
 #include <nuttx/config.h>
 
-#include <sched.h>
-#include <errno.h>
-#include <debug.h>
+#include <sys/types.h>
 
-#include "pthread_internal.h"
+#include "group_internal.h"
+#include "pthread/pthread.h"
 
 /************************************************************************
  * Definitions
@@ -70,27 +69,38 @@
  ************************************************************************/
 
 /************************************************************************
- * Name: pthread_key_delete
+ * Name: thread_findjoininfo
  *
  * Description:
- *   This POSIX function should delete a thread-specific data key
- *   previously returned by pthread_key_create().  However, this function
- *   does nothing in the present implementation.
+ *   Find a join structure in a local data set.
  *
  * Parameters:
- *   key = the key to delete
+ *   group - The that the pid is (or was) a member of of
+ *   pid - The ID of the pthread
  *
  * Return Value:
- *   Always returns ENOSYS.
+ *   None or pointer to the found entry.
  *
  * Assumptions:
- *
- * POSIX Compatibility:
+ *   The caller has provided protection from re-entrancy.
  *
  ************************************************************************/
 
-int pthread_key_delete(pthread_key_t key)
+FAR struct join_s *pthread_findjoininfo(FAR struct task_group_s *group,
+                                        pid_t pid)
 {
-  return ENOSYS;
+  FAR struct join_s *pjoin;
+
+  DEBUGASSERT(group);
+
+  /* Find the entry with the matching pid */
+
+  for (pjoin = group->tg_joinhead;
+       (pjoin && (pid_t)pjoin->thread != pid);
+       pjoin = pjoin->next);
+
+  /* and return it */
+
+  return pjoin;
 }
 

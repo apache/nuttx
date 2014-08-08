@@ -49,7 +49,7 @@
 #include <nuttx/arch.h>
 
 #include "os_internal.h"
-#include "pthread_internal.h"
+#include "pthread/pthread.h"
 #include "group_internal.h"
 
 /****************************************************************************

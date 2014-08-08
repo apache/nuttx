@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/sig_suspend.c
+ * sched/signal/sig_suspend.c
  *
  *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

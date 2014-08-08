@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/pthread_mutexdestroy.c
+ * sched/pthread_keycreate.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,13 +39,13 @@
 
 #include <nuttx/config.h>
 
-#include <pthread.h>
-#include <semaphore.h>
 #include <sched.h>
 #include <errno.h>
+#include <assert.h>
 #include <debug.h>
 
-#include "pthread_internal.h"
+#include "os_internal.h"
+#include "pthread/pthread.h"
 
 /****************************************************************************
  * Definitions
@@ -72,60 +72,70 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_mutex_destroy
+ * Name: pthread_key_create
  *
  * Description:
- *   Destroy a mutex.
+ *   This function creates a thread-specific data key visible to all threads
+ *   in the system.  Although the same key value may be used by different
+ *   threads, the values bound to the key by pthread_setspecific() are
+ *   maintained on a per-thread basis and persist for the life of the calling
+ *   thread.
+ *
+ *   Upon key creation, the value NULL will be associated with the new key
+ *   in all active threads.  Upon thread creation, the value NULL will be
+ *   associated with all defined keys in the new thread.
  *
  * Parameters:
- *   None
+ *   key = A pointer to the key to create.
+ *   destructor = An optional destructor() function that may be associated
+ *      with each key that is invoked when a thread exits.  However, this
+ *      argument is ignored in the current implementation.
  *
  * Return Value:
- *   None
+ *   If successful, the pthread_key_create() function will store the newly
+ *   created key value at *key and return zero (OK).  Otherwise, an error
+ *   number will bereturned to indicate the error:
+ *
+ *      EAGAIN - The system lacked sufficient resources to create another
+ *         thread-specific data key, or the system-imposed limit on the total
+ *         number of keys pers process {PTHREAD_KEYS_MAX} has been exceeded
+ *      ENONMEM - Insufficient memory exists to create the key.
  *
  * Assumptions:
  *
+ * POSIX Compatibility:
+ *   - The present implementation ignores the destructor argument.
+ *
  ****************************************************************************/
 
-int pthread_mutex_destroy(FAR pthread_mutex_t *mutex)
+int pthread_key_create(FAR pthread_key_t *key, CODE void (*destructor)(void*))
 {
-  int ret = OK;
-  int status;
+#if CONFIG_NPTHREAD_KEYS > 0
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct task_group_s *group = rtcb->group;
+  int ret = EAGAIN;
 
-  sdbg("mutex=0x%p\n", mutex);
+  DEBUGASSERT(group);
 
-  if (!mutex)
+  /* Check if we have exceeded the system-defined number of keys. */
+
+  if (group->tg_nkeys < PTHREAD_KEYS_MAX)
     {
-      ret = EINVAL;
-    }
-  else
-    {
-      /* Make sure the semaphore is stable while we make the following
-       * checks
-       */
+      /* Return the key value */
 
-      sched_lock();
+      *key = group->tg_nkeys;
 
-      /* Is the semaphore available? */
+      /* Increment the count of global keys. */
 
-      if (mutex->pid != 0)
-        {
-          ret = EBUSY;
-        }
-      else
-        {
-          /* Destroy the semaphore */
+      group->tg_nkeys++;
 
-          status = sem_destroy((sem_t*)&mutex->sem);
-          if (status != OK)
-            {
-              ret = EINVAL;
-            }
-        }
+      /* Return success. */
 
-      sched_unlock();
+      ret = OK;
     }
 
-  sdbg("Returning %d\n", ret);
   return ret;
+#else
+  return ENOSYS;
+#endif
 }

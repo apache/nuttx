@@ -55,7 +55,7 @@
 #include "os_internal.h"
 #include "group_internal.h"
 #include "clock_internal.h"
-#include "pthread_internal.h"
+#include "pthread/pthread.h"
 
 /****************************************************************************
  * Pre-processor Definitions

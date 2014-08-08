@@ -45,7 +45,7 @@
 #include <errno.h>
 
 #include "os_internal.h"
-#include "pthread_internal.h"
+#include "pthread/pthread.h"
 
 /**************************************************************************
  * Private Definitions

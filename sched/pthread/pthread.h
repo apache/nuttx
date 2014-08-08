@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/pthread_internal.h
+ * sched/pthread/pthread.h
  *
- *   Copyright (C) 2007-2009, 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __SCHED_PTHREAD_INTERNAL_H
-#define __SCHED_PTHREAD_INTERNAL_H
+#ifndef __SCHED_PTHREAD_PTHREAD_H
+#define __SCHED_PTHREAD_PTHREAD_H
 
 /****************************************************************************
  * Included Files
@@ -118,5 +118,5 @@ int pthread_mutexattr_verifytype(int type);
 }
 #endif
 
-#endif /* __SCHED_PTHREAD_INTERNAL_H */
+#endif /* __SCHED_PTHREAD_PTHREAD_H */
 

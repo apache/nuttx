@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/sig_deliver.c
+ * sched/signal/sig_deliver.c
  *
  *   Copyright (C) 2007, 2008, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

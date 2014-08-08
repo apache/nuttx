@@ -290,7 +290,7 @@ struct dspace_s
 
 #ifndef CONFIG_DISABLE_PTHREAD
 struct join_s;                      /* Forward reference                        */
-                                    /* Defined in pthread_internal.h            */
+                                    /* Defined in sched/pthread/pthread.h       */
 #endif
 
 struct task_group_s

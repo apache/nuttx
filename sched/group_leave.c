@@ -50,7 +50,7 @@
 
 #include "env_internal.h"
 #include "signal/signal.h"
-#include "pthread_internal.h"
+#include "pthread/pthread.h"
 #include "mqueue/mqueue.h"
 #include "group_internal.h"
 

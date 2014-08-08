@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/pthread_keycreate.c
+ * sched/pthread_initialize.c
  *
- *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,13 +39,11 @@
 
 #include <nuttx/config.h>
 
-#include <sched.h>
+#include <stdint.h>
+#include <semaphore.h>
 #include <errno.h>
-#include <assert.h>
-#include <debug.h>
 
-#include "os_internal.h"
-#include "pthread_internal.h"
+#include "pthread/pthread.h"
 
 /****************************************************************************
  * Definitions
@@ -72,70 +70,101 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_key_create
+ * Name: pthread_initialize
  *
  * Description:
- *   This function creates a thread-specific data key visible to all threads
- *   in the system.  Although the same key value may be used by different
- *   threads, the values bound to the key by pthread_setspecific() are
- *   maintained on a per-thread basis and persist for the life of the calling
- *   thread.
- *
- *   Upon key creation, the value NULL will be associated with the new key
- *   in all active threads.  Upon thread creation, the value NULL will be
- *   associated with all defined keys in the new thread.
+ *   This is an internal OS function called only at power-up boot time.  It
+ *   no longer does anything since all of the pthread data structures have
+ *   been moved into the "task group"
  *
  * Parameters:
- *   key = A pointer to the key to create.
- *   destructor = An optional destructor() function that may be associated
- *      with each key that is invoked when a thread exits.  However, this
- *      argument is ignored in the current implementation.
+ *   None
  *
  * Return Value:
- *   If successful, the pthread_key_create() function will store the newly
- *   created key value at *key and return zero (OK).  Otherwise, an error
- *   number will bereturned to indicate the error:
- *
- *      EAGAIN - The system lacked sufficient resources to create another
- *         thread-specific data key, or the system-imposed limit on the total
- *         number of keys pers process {PTHREAD_KEYS_MAX} has been exceeded
- *      ENONMEM - Insufficient memory exists to create the key.
+ *   None
  *
  * Assumptions:
  *
- * POSIX Compatibility:
- *   - The present implementation ignores the destructor argument.
+ ****************************************************************************/
+
+void pthread_initialize(void)
+{
+}
+
+/****************************************************************************
+ * Name: pthread_takesemaphore and pthread_givesemaphore
+ *
+ * Description:
+ *   Support managed access to the private data sets.
+ *
+ * Parameters:
+ *   None
+ *
+ * Return Value:
+ *   0 on success or an ERROR on failure with errno value set to EINVAL.
+ *   Note that the errno EINTR is never returned by this function.
+ *
+ * Assumptions:
  *
  ****************************************************************************/
 
-int pthread_key_create(FAR pthread_key_t *key, CODE void (*destructor)(void*))
+int pthread_takesemaphore(sem_t *sem)
 {
-#if CONFIG_NPTHREAD_KEYS > 0
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
-  FAR struct task_group_s *group = rtcb->group;
-  int ret = EAGAIN;
+  /* Verify input parameters */
 
-  DEBUGASSERT(group);
-
-  /* Check if we have exceeded the system-defined number of keys. */
-
-  if (group->tg_nkeys < PTHREAD_KEYS_MAX)
+  if (sem)
     {
-      /* Return the key value */
+      /* Take the semaphore */
 
-      *key = group->tg_nkeys;
+      while (sem_wait(sem) != OK)
+        {
+          /* Handle the special case where the semaphore wait was
+           * awakened by the receipt of a signal.
+           */
 
-      /* Increment the count of global keys. */
-
-      group->tg_nkeys++;
-
-      /* Return success. */
-
-      ret = OK;
+          if (get_errno() != EINTR)
+            {
+              set_errno(EINVAL);
+              return ERROR;
+            }
+        }
+      return OK;
     }
+  else
+    {
+      /* NULL semaphore pointer! */
 
-  return ret;
-#else
-  return ENOSYS;
-#endif
+      set_errno(EINVAL);
+      return ERROR;
+    }
 }
+
+int pthread_givesemaphore(sem_t *sem)
+{
+  /* Verify input parameters */
+
+  if (sem)
+    {
+      /* Give the semaphore */
+
+      if (sem_post(sem) == OK)
+        {
+          return OK;
+        }
+      else
+        {
+          /* sem_post() reported an error */
+
+          set_errno(EINVAL);
+          return ERROR;
+        }
+    }
+  else
+    {
+      /* NULL semaphore pointer! */
+
+      set_errno(EINVAL);
+      return ERROR;
+    }
+}
+

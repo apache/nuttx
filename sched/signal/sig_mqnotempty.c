@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/sig_mqnotempty.c
+ * sched/signal/sig_mqnotempty.c
  *
  *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,5 @@
 /************************************************************************
- * sched/pthread_getspecific.c
+ * sched/pthread_detach.c
  *
  *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,16 +39,19 @@
 
 #include <nuttx/config.h>
 
-#include <sched.h>
+#include <sys/types.h>
+#include <stdbool.h>
+#include <pthread.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
 
 #include "os_internal.h"
-#include "pthread_internal.h"
+#include "group_internal.h"
+#include "pthread/pthread.h"
 
 /************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************/
 
 /************************************************************************
@@ -72,57 +75,72 @@
  ************************************************************************/
 
 /************************************************************************
- * Name: pthread_getspecific
+ * Name: pthread_detach
  *
  * Description:
- *   The pthread_getspecific() function returns the value currently
- *   bound to the specified key on behalf of the calling thread.
+ *    A thread object may be "detached" to specify that the return value
+ *    and completion status will not be requested.
  *
- *   The effect of calling pthread_getspecific() with with a key value
- *   not obtained from pthread_create() or after a key has been deleted
- *   with pthread_key_delete() is undefined.
+ *    The caller's task/thread must belong to the same "task group" as the
+ *    pthread is (or was) a member of.  The thread may or may not still
+ *    be running.
  *
  * Parameters:
- *   key = The data key to get or set
+ *   thread
  *
  * Return Value:
- *   The function pthread_getspecific() returns the thread-specific data
- *   associated with the given key.  If no thread specific data is
- *   associated with the key, then the value NULL is returned.
- *
- *      EINVAL - The key value is invalid.
+ *   0 if successful.  Otherwise, an error code.
  *
  * Assumptions:
  *
- * POSIX Compatibility:
- *   - Both calling pthread_setspecific() and pthread_getspecific()
- *     may be called from a thread-specific data destructor
- *     function.
- *
  ************************************************************************/
 
-FAR void *pthread_getspecific(pthread_key_t key)
+int pthread_detach(pthread_t thread)
 {
-#if CONFIG_NPTHREAD_KEYS > 0
-  FAR struct pthread_tcb_s *rtcb = (FAR struct pthread_tcb_s*)g_readytorun.head;
-  FAR struct task_group_s *group = rtcb->cmn.group;
-  FAR void *ret = NULL;
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
+  FAR struct task_group_s *group = rtcb->group;
+  FAR struct join_s *pjoin;
+  int ret;
 
-  DEBUGASSERT(group &&
-              (rtcb->cmn.flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD);
+  sdbg("Thread=%d group=%p\n", thread, group);
+  DEBUGASSERT(group);
 
-  /* Check if the key is valid. */
+  /* Find the entry associated with this pthread. */
 
-  if (key < group->tg_nkeys)
+  (void)pthread_takesemaphore(&group->tg_joinsem);
+  pjoin = pthread_findjoininfo(group, (pid_t)thread);
+  if (!pjoin)
     {
-      /* Return the stored value. */
+      sdbg("Could not find thread entry\n");
+      ret = EINVAL;
+    }
+  else
+    {
+      /* Has the thread already terminated? */
 
-      ret = rtcb->pthread_data[key];
+      if (pjoin->terminated)
+        {
+          /* YES.. just remove the thread entry. */
+
+          pthread_destroyjoin(group, pjoin);
+        }
+      else
+        {
+          /* NO.. Just mark the thread as detached.  It
+           * will be removed and deallocated when the
+           * thread exits
+           */
+
+          pjoin->detached = true;
+        }
+
+      /* Either case is successful */
+
+      ret = OK;
     }
 
-  return ret;
-#else
-  return NULL;
-#endif
-}
+  (void)pthread_givesemaphore(&group->tg_joinsem);
 
+  sdbg("Returning %d\n", ret);
+  return ret;
+}

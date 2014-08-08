@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/sig_procmask.c
+ * sched/signal/sig_procmask.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

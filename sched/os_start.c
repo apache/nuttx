@@ -59,7 +59,7 @@
 # include "mqueue/mqueue.h"
 #endif
 #ifndef CONFIG_DISABLE_PTHREAD
-# include "pthread_internal.h"
+# include "pthread/pthread.h"
 #endif
 #include  "clock_internal.h"
 #include  "timer_internal.h"

@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/sig_timedwait.c
+ * sched/signal/sig_timedwait.c
  *
  *   Copyright (C) 2007-2009, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

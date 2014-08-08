@@ -51,7 +51,7 @@
 #include <debug.h>
 
 #include "os_internal.h"
-#include "pthread_internal.h"
+#include "pthread/pthread.h"
 #include "clock_internal.h"
 #include "signal/signal.h"
 

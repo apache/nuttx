@@ -136,31 +136,6 @@ CLOCK_SRCS  = clock_initialize.c clock_settime.c clock_gettime.c clock_getres.c
 CLOCK_SRCS += clock_time2ticks.c clock_abstime2ticks.c clock_ticks2time.c
 CLOCK_SRCS += clock_gettimeofday.c clock_systimer.c
 
-SIGNAL_SRCS  = sig_initialize.c
-SIGNAL_SRCS += sig_action.c sig_procmask.c sig_pending.c sig_suspend.c
-SIGNAL_SRCS += sig_kill.c sig_queue.c sig_waitinfo.c sig_timedwait.c
-SIGNAL_SRCS += sig_findaction.c sig_allocatependingsigaction.c
-SIGNAL_SRCS += sig_releasependingsigaction.c sig_unmaskpendingsignal.c
-SIGNAL_SRCS += sig_removependingsignal.c sig_releasependingsignal.c sig_lowest.c
-SIGNAL_SRCS += sig_mqnotempty.c sig_cleanup.c sig_dispatch.c sig_deliver.c
-SIGNAL_SRCS += pause.c
-
-PTHREAD_SRCS  = pthread_create.c pthread_exit.c pthread_join.c pthread_detach.c
-PTHREAD_SRCS += pthread_yield.c pthread_getschedparam.c pthread_setschedparam.c
-PTHREAD_SRCS += pthread_mutexinit.c pthread_mutexdestroy.c
-PTHREAD_SRCS += pthread_mutexlock.c pthread_mutextrylock.c pthread_mutexunlock.c
-PTHREAD_SRCS += pthread_condinit.c pthread_conddestroy.c
-PTHREAD_SRCS += pthread_condwait.c pthread_condsignal.c pthread_condbroadcast.c
-PTHREAD_SRCS += pthread_barrierinit.c pthread_barrierdestroy.c pthread_barrierwait.c
-PTHREAD_SRCS += pthread_cancel.c pthread_setcancelstate.c
-PTHREAD_SRCS += pthread_keycreate.c pthread_setspecific.c pthread_getspecific.c pthread_keydelete.c
-PTHREAD_SRCS += pthread_initialize.c pthread_completejoin.c pthread_findjoininfo.c
-PTHREAD_SRCS += pthread_once.c pthread_release.c pthread_setschedprio.c
-
-ifneq ($(CONFIG_DISABLE_SIGNALS),y)
-PTHREAD_SRCS += pthread_condtimedwait.c pthread_kill.c pthread_sigmask.c
-endif
-
 SEM_SRCS  = sem_initialize.c sem_destroy.c sem_open.c sem_close.c sem_unlink.c
 SEM_SRCS += sem_wait.c sem_trywait.c sem_timedwait.c sem_post.c sem_findnamed.c
 
@@ -184,15 +159,12 @@ endif
 IRQ_SRCS = irq_initialize.c irq_attach.c irq_dispatch.c irq_unexpectedisr.c
 
 include signal/Make.defs
+include pthread/Make.defs
 include mqueue/Make.defs
 
 CSRCS  = $(MISC_SRCS) $(TSK_SRCS) $(GRP_SRCS) $(SCHED_SRCS) $(WDOG_SRCS)
 CSRCS += $(TIME_SRCS) $(SEM_SRCS) $(TIMER_SRCS) $(PGFILL_SRCS)
-CSRCS += $(IRQ_SRCS) $(CLOCK_SRCS) $(MQUEUE_SRCS) $(SIGNAL_SRCS)
-
-ifneq ($(CONFIG_DISABLE_PTHREAD),y)
-CSRCS += $(PTHREAD_SRCS)
-endif
+CSRCS += $(IRQ_SRCS) $(CLOCK_SRCS) $(MQUEUE_SRCS) $(SIGNAL_SRCS) $(PTHREAD_SRCS)
 
 ifneq ($(CONFIG_DISABLE_ENVIRON),y)
 CSRCS += $(ENV_SRCS)

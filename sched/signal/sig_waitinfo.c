@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/sig_waitinfo.c
+ * sched/signal/sig_waitinfo.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

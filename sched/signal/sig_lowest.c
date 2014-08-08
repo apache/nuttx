@@ -1,5 +1,5 @@
 /************************************************************************
- * sched/sig_lowest.c
+ * sched/signal/sig_lowest.c
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

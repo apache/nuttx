@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/pthread_conddestroy.c
+ * sched/pthread_condbroadcast.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,19 +40,41 @@
 #include <nuttx/config.h>
 
 #include <pthread.h>
-#include <debug.h>
+#include <sched.h>
 #include <errno.h>
-#include "pthread_internal.h"
+#include <debug.h>
+
+#include "pthread/pthread.h"
 
 /****************************************************************************
- * Global Functions
+ * Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_cond_destroy
+ * Private Type Declarations
+ ****************************************************************************/
+
+/****************************************************************************
+ * Global Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: pthread_cond_broadcast
  *
  * Description:
- *   A thread can delete condition variables.
+ *    A thread broadcast on a condition variable.
  *
  * Parameters:
  *   None
@@ -64,9 +86,10 @@
  *
  ****************************************************************************/
 
-int pthread_cond_destroy(FAR pthread_cond_t *cond)
+int pthread_cond_broadcast(FAR pthread_cond_t *cond)
 {
   int ret = OK;
+  int sval;
 
   sdbg("cond=0x%p\n", cond);
 
@@ -74,15 +97,49 @@ int pthread_cond_destroy(FAR pthread_cond_t *cond)
     {
       ret = EINVAL;
     }
-
-   /* Destroy the semaphore contained in the structure */
-
-  else if (sem_destroy((sem_t*)&cond->sem) != OK)
+  else
     {
-      ret = EINVAL;
+      /* Disable pre-emption until all of the waiting threads have been
+       * restarted. This is necessary to assure that the sval behaves as
+       * expected in the following while loop
+       */
+
+      sched_lock();
+
+      /* Get the current value of the semaphore */
+
+      if (sem_getvalue((sem_t*)&cond->sem, &sval) != OK)
+        {
+          ret = EINVAL;
+        }
+      else
+        {
+          /* Loop until all of the waiting threads have been restarted. */
+
+          while (sval < 0)
+            {
+              /* If the value is less than zero (meaning that one or more
+               * thread is waiting), then post the condition semaphore.
+               * Only the highest priority waiting thread will get to execute
+               */
+
+              ret = pthread_givesemaphore((sem_t*)&cond->sem);
+
+              /* Increment the semaphore count (as was done by the
+               * above post).
+               */
+
+              sval++;
+            }
+        }
+
+      /* Now we can let the restarted threads run */
+
+      sched_unlock();
     }
 
   sdbg("Returning %d\n", ret);
   return ret;
 }
+
 
