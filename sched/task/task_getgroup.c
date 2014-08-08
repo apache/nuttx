@@ -1,5 +1,5 @@
 /*****************************************************************************
- * sched/task_getgroup.c
+ * sched/task/task_getgroup.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -43,6 +43,7 @@
 
 #include "os_internal.h"
 #include "group/group.h"
+#include "task/task.h"
 
 #ifdef HAVE_TASK_GROUP
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/task_terminate.c
+ * sched/task/task_terminate.c
  *
  *   Copyright (C) 2007-2009, 2011-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,6 +51,7 @@
 #ifndef CONFIG_DISABLE_SIGNALS
 # include "signal/signal.h"
 #endif
+#include "task/task.h"
 
 /****************************************************************************
  * Definitions

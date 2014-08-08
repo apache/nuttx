@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/task_exithook.c
+ * sched/task/task_exithook.c
  *
  *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,6 +51,7 @@
 #include "os_internal.h"
 #include "group/group.h"
 #include "signal/signal.h"
+#include "task/task.h"
 
 /****************************************************************************
  * Pre-processor Definitions

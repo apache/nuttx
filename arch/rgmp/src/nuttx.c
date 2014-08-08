@@ -52,10 +52,11 @@
 #include <stdlib.h>
 #include <arch/irq.h>
 #include <arch/arch.h>
-#include <os_internal.h>
+
+#include "task/task.h"
+#include "os_internal.h"
 
 struct tcb_s *current_task = NULL;
-
 
 /**
  * This function is called in non-interrupt context

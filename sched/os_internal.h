@@ -219,18 +219,6 @@ extern volatile uint32_t g_cpuload_total;
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_CHILD_STATUS
-void weak_function task_initialize(void);
-#endif
-void task_start(void);
-int  task_schedsetup(FAR struct task_tcb_s *tcb, int priority,
-       start_t start, main_t main, uint8_t ttype);
-int  task_argsetup(FAR struct task_tcb_s *tcb, FAR const char *name,
-       FAR char * const argv[]);
-int  task_exit(void);
-int  task_terminate(pid_t pid, bool nonblocking);
-void task_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking);
-void task_recover(FAR struct tcb_s *tcb);
 bool sched_addreadytorun(FAR struct tcb_s *rtrtcb);
 bool sched_removereadytorun(FAR struct tcb_s *rtrtcb);
 bool sched_addprioritized(FAR struct tcb_s *newTcb, DSEG dq_queue_t *list);

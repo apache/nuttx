@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/task_create.c
+ * sched/task/task_create.c
  *
  *   Copyright (C) 2007-2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -50,6 +50,7 @@
 
 #include "os_internal.h"
 #include "group/group.h"
+#include "task/task.h"
 
 /****************************************************************************
  * Definitions

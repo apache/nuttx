@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/task_vfork
+ * sched/task/task_vfork
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -50,6 +50,7 @@
 
 #include "os_internal.h"
 #include "group/group.h"
+#include "task/task.h"
 
 /****************************************************************************
  * Pre-processor Definitions

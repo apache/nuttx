@@ -43,12 +43,13 @@
 #include <debug.h>
 #include <nuttx/arch.h>
 
-#include "os_internal.h"
-#include "up_internal.h"
-
 #ifdef CONFIG_DUMP_ON_EXIT
 #include <nuttx/fs/fs.h>
 #endif
+
+#include "task/task.h"
+#include "os_internal.h"
+#include "up_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions

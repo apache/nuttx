@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/task_spawnparms.c
+ * sched/task/task_spawnparms.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,7 +46,8 @@
 
 #include <nuttx/spawn.h>
 
-#include "spawn_internal.h"
+#include "task/spawn.h"
+#include "task/task.h"
 
 /****************************************************************************
  * Private Types

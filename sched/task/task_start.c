@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/task_restart.c
+ * sched/task/task_start.c
  *
- *   Copyright (C) 2007, 2009, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,18 +39,18 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdlib.h>
 #include <sched.h>
-#include <errno.h>
+#include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/sched.h>
 
 #include "os_internal.h"
-#include "group/group.h"
-#include "signal/signal.h"
+#include "task/task.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -78,131 +78,68 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: task_restart
+ * Name: task_start
  *
  * Description:
- *   This function "restarts" a task.  The task is first terminated and then
- *   reinitialized with same ID, priority, original entry point, stack size,
- *   and parameters it had when it was first started.
+ *   This function is the low level entry point into the main thread of
+ *   execution of a task.  It receives initial control when the task is
+ *   started and calls main entry point of the newly started task.
  *
  * Inputs:
- *   pid - The task ID of the task to delete.  An ID of zero signifies the
- *         calling task.
+ *   None
  *
- * Return Value:
- *   OK on sucess; ERROR on failure.
- *
- *   This function can fail if:
- *   (1) A pid of zero or the pid of the calling task is provided
- *      (functionality not implemented)
- *   (2) The pid is not associated with any task known to the system.
+ * Return:
+ *   None
  *
  ****************************************************************************/
 
-int task_restart(pid_t pid)
+void task_start(void)
 {
-  FAR struct tcb_s *rtcb;
-  FAR struct task_tcb_s *tcb;
-  irqstate_t state;
-  int status;
+  FAR struct task_tcb_s *tcb = (FAR struct task_tcb_s*)g_readytorun.head;
+  int exitcode;
+  int argc;
 
-  /* Make sure this task does not become ready-to-run while
-   * we are futzing with its TCB
+  DEBUGASSERT((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD);
+
+  /* Execute the start hook if one has been registered */
+
+#ifdef CONFIG_SCHED_STARTHOOK
+  if (tcb->starthook)
+    {
+      tcb->starthook(tcb->starthookarg);
+    }
+#endif
+
+  /* Count how many non-null arguments we are passing */
+
+  for (argc = 1; argc <= CONFIG_MAX_TASK_ARGS; argc++)
+    {
+      /* The first non-null argument terminates the list */
+
+      if (!tcb->argv[argc])
+        {
+          break;
+        }
+    }
+
+  /* Call the 'main' entry point passing argc and argv.  In the kernel build
+   * this has to be handled differently if we are starting a user-space task;
+   * we have to switch to user-mode before calling the task.
    */
 
-  sched_lock();
-
-  /* Check if the task to restart is the calling task */
-
-  rtcb = (FAR struct tcb_s *)g_readytorun.head;
-  if ((pid == 0) || (pid == rtcb->pid))
+#ifdef CONFIG_NUTTX_KERNEL
+  if ((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
     {
-      /* Not implemented */
-
-      set_errno(ENOSYS);
-      return ERROR;
+      up_task_start(tcb->cmn.entry.main, argc, tcb->argv);
+      exitcode = EXIT_FAILURE; /* Should not get here */
     }
-
-  /* We are restarting some other task than ourselves */
-
   else
+#endif
     {
-      /* Find for the TCB associated with matching pid  */
-
-      tcb = (FAR struct task_tcb_s *)sched_gettcb(pid);
-#ifndef CONFIG_DISABLE_PTHREAD
-      if (!tcb || (tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
-#else
-      if (!tcb)
-#endif
-        {
-          /* There is no TCB with this pid or, if there is, it is not a
-           * task.
-           */
-
-          set_errno(ESRCH);
-          return ERROR;
-        }
-
-      /* Try to recover from any bad states */
-
-      task_recover((FAR struct tcb_s *)tcb);
-
-      /* Kill any children of this thread */
-
-#if HAVE_GROUP_MEMBERS
-      (void)group_killchildren(tcb);
-#endif
-
-      /* Remove the TCB from whatever list it is in.  At this point, the
-       * TCB should no longer be accessible to the system
-       */
-
-      state = irqsave();
-      dq_rem((FAR dq_entry_t*)tcb,
-             (dq_queue_t*)g_tasklisttable[tcb->cmn.task_state].list);
-      tcb->cmn.task_state = TSTATE_TASK_INVALID;
-      irqrestore(state);
-
-      /* Deallocate anything left in the TCB's queues */
-
-      sig_cleanup((FAR struct tcb_s *)tcb); /* Deallocate Signal lists */
-
-      /* Reset the current task priority  */
-
-      tcb->cmn.sched_priority = tcb->init_priority;
-
-      /* Reset the base task priority and the number of pending reprioritizations */
-
-#ifdef CONFIG_PRIORITY_INHERITANCE
-      tcb->cmn.base_priority = tcb->init_priority;
-#  if CONFIG_SEM_NNESTPRIO > 0
-      tcb->cmn.npend_reprio = 0;
-#  endif
-#endif
-
-      /* Re-initialize the processor-specific portion of the TCB
-       * This will reset the entry point and the start-up parameters
-       */
-
-      up_initial_state((FAR struct tcb_s *)tcb);
-
-      /* Add the task to the inactive task list */
-
-      dq_addfirst((FAR dq_entry_t*)tcb, (dq_queue_t*)&g_inactivetasks);
-      tcb->cmn.task_state = TSTATE_TASK_INACTIVE;
-
-      /* Activate the task */
-
-      status = task_activate((FAR struct tcb_s *)tcb);
-      if (status != OK)
-        {
-          (void)task_delete(pid);
-          set_errno(-status);
-          return ERROR;
-        }
+      exitcode = tcb->cmn.entry.main(argc, tcb->argv);
     }
 
-  sched_unlock();
-  return OK;
+  /* Call exit() if/when the task returns */
+
+  exit(exitcode);
 }

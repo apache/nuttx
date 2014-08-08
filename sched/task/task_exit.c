@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/task_starthook.c
+ * sched/task/task_exit.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2012-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,11 +37,16 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include  <nuttx/config.h>
 
-#include <nuttx/sched.h>
+#include  <sched.h>
 
-#ifdef CONFIG_SCHED_STARTHOOK
+#include  "os_internal.h"
+
+#ifndef CONFIG_DISABLE_SIGNALS
+# include "signal/signal.h"
+#endif
+#include "task/task.h"
 
 /****************************************************************************
  * Definitions
@@ -72,40 +77,89 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: task_starthook
+ * Name: task_exit
  *
  * Description:
- *   Configure a start hook... a function that will be called on the thread
- *   of the new task before the new task's main entry point is called.
- *   The start hook is useful, for example, for setting up automatic
- *   configuration of C++ constructors.
+ *   This is a part of the logic used to implement _exit().  The full
+ *   implementation of _exit() is architecture-dependent. The _exit()
+ *   function also implements the bottom half of exit() and pthread_exit().
+ *
+ *   This function causes the currently running task (i.e., the task at the
+ *   head of the ready-to-run list) to cease to exist.  This function should
+ *   never be called from normal user code, but only from the architecture-
+ *   specific implementation of exit.
+ *
+ *   Threads/tasks could also be terminated via pthread_cancel, task_delete(),
+ *   and task_restart().  In the last two cases, the task will be terminated
+ *   as though exit() were called.
  *
  * Inputs:
- *   tcb - The new, unstarted task task that needs the start hook
- *   starthook - The pointer to the start hook function
- *   arg - The argument to pass to the start hook function.
- *
- * Return:
  *   None
+ *
+ * Return Value:
+ *   OK on success; or ERROR on failure
+ *
+ * Assumeptions:
+ *   Interrupts are disabled.
  *
  ****************************************************************************/
 
-void task_starthook(FAR struct task_tcb_s *tcb, starthook_t starthook,
-                    FAR void *arg)
+int task_exit(void)
 {
-  /* Only tasks can have starthooks.  The starthook will be called when the
-   * task is started (or restarted).
+  FAR struct tcb_s *dtcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *rtcb;
+  int ret;
+
+  /* Remove the TCB of the current task from the ready-to-run list.  A context
+   * switch will definitely be necessary -- that must be done by the
+   * architecture-specific logic.
+   *
+   * sched_removereadytorun will mark the task at the head of the ready-to-run
+   * with state == TSTATE_TASK_RUNNING
    */
 
-#ifndef CONFIG_DISABLE_PTHREAD
-  DEBUGASSERT(tcb &&
-             (tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD);
-#endif
+  (void)sched_removereadytorun(dtcb);
+  rtcb = (FAR struct tcb_s*)g_readytorun.head;
 
-  /* Set up the start hook */
+  /* We are now in a bad state -- the head of the ready to run task list
+   * does not correspond to the thread that is running.  Disabling pre-
+   * emption on this TCB and marking the new ready-to-run task as not
+   * running (see, for example, get_errno_ptr()).
+   *
+   * We disable pre-emption here by directly incrementing the lockcount
+   * (vs. calling sched_lock()).
+   */
 
-  tcb->starthook    = starthook;
-  tcb->starthookarg = arg;
+  rtcb->lockcount++;
+  rtcb->task_state = TSTATE_TASK_READYTORUN;
+
+  /* Move the TCB to the specified blocked task list and delete it.  Calling
+   * task_terminate with non-blocking true will suppress atexit() and on-exit()
+   * calls and will cause buffered I/O to fail to be flushed.  The former
+   * is required _exit() behavior; the latter is optional _exit() behavior.
+   */
+
+  sched_addblocked(dtcb, TSTATE_TASK_INACTIVE);
+  ret = task_terminate(dtcb->pid, true);
+  rtcb->task_state = TSTATE_TASK_RUNNING;
+
+  /* If there are any pending tasks, then add them to the ready-to-run
+   * task list now
+   */
+
+  if (g_pendingtasks.head)
+    {
+      (void)sched_mergepending();
+    }
+
+  /* We can't use sched_unlock() to decrement the lock count because the
+   * sched_mergepending() call above might have changed the task at the
+   * head of the ready-to-run list.  Furthermore, we should not need to
+   * perform the unlock action anyway because we know that the pending
+   * task list is empty.  So all we really need to do is to decrement
+   * the lockcount on rctb.
+   */
+
+  rtcb->lockcount--;
+  return ret;
 }
-
-#endif /* CONFIG_SCHED_STARTHOOK */

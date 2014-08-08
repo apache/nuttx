@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/task_activate.c
+ * sched/task/task_init.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,10 +39,16 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
+#include <stdint.h>
 #include <sched.h>
-#include <debug.h>
+#include <errno.h>
 
 #include <nuttx/arch.h>
+
+#include "os_internal.h"
+#include "group/group.h"
+#include "task/task.h"
 
 /****************************************************************************
  * Definitions
@@ -73,45 +79,120 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: task_activate
+ * Name: task_init
  *
  * Description:
- *   This function activates tasks initialized by task_schedsetup(). Without
- *   activation, a task is ineligible for execution by the scheduler.
+ *   This function initializes a Task Control Block (TCB) in preparation for
+ *   starting a new thread.  It performs a subset of the functionality of
+ *   task_create()
+ *
+ *   Unlike task_create():
+ *     1. Allocate the TCB.  The pre-allocated TCB is passed in the arguments.
+ *     2. Allocate the stack.  The pre-allocated stack is passed in the arguments.
+ *     3. Activate the task. This must be done by calling task_activate().
  *
  * Input Parameters:
- *   tcb - The TCB for the task for the task (same as the task_init argument).
+ *   tcb        - Address of the new task's TCB
+ *   name       - Name of the new task (not used)
+ *   priority   - Priority of the new task
+ *   stack      - Start of the pre-allocated stack
+ *   stack_size - Size (in bytes) of the stack allocated
+ *   entry      - Application start point of the new task
+ *   arg        - A pointer to an array of input parameters. Up to
+ *                CONFIG_MAX_TASK_ARG parameters may be provided.  If fewer
+ *                than CONFIG_MAX_TASK_ARG parameters are passed, the list
+ *                should be terminated with a NULL argv[] value. If no
+ *                parameters are required, argv may be NULL.
  *
  * Return Value:
- *   Always returns OK
+ *   OK on success; ERROR on failure with errno set appropriately.  (See
+ *   task_schedsetup() for possible failure conditions).  On failure, the
+ *   caller is responsible for freeing the stack memory and for calling
+ *   sched_releasetcb() to free the TCB (which could be in most any state).
  *
  ****************************************************************************/
 
-int task_activate(FAR struct tcb_s *tcb)
+#ifndef CONFIG_CUSTOM_STACK
+int task_init(FAR struct tcb_s *tcb, const char *name, int priority,
+              FAR uint32_t *stack, uint32_t stack_size,
+              main_t entry, FAR char * const argv[])
+#else
+int task_init(FAR struct tcb_s *tcb, const char *name, int priority,
+              main_t entry, FAR char * const argv[])
+#endif
 {
-  irqstate_t flags = irqsave();
+  FAR struct task_tcb_s *ttcb = (FAR struct task_tcb_s *)tcb;
+  int errcode;
+  int ret;
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION
+  /* Only tasks and kernel threads can be initialized in this way */
 
-  /* Check if this is really a re-start */
-
-  if (tcb->task_state != TSTATE_TASK_INACTIVE)
-    {
-      /* Inform the instrumentation layer that the task
-       * has stopped
-       */
-
-      sched_note_stop(tcb);
-    }
-
-  /* Inform the instrumentation layer that the task
-   * has started
-   */
-
-  sched_note_start(tcb);
+#ifndef CONFIG_DISABLE_PTHREAD
+  DEBUGASSERT(tcb &&
+             (tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD);
 #endif
 
-  up_unblock_task(tcb);
-  irqrestore(flags);
+  /* Create a new task group */
+
+#ifdef HAVE_TASK_GROUP
+  ret = group_allocate(ttcb);
+  if (ret < 0)
+    {
+      errcode = -ret;
+      goto errout;
+    }
+#endif
+
+ /* Associate file descriptors with the new task */
+
+#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
+  ret = group_setuptaskfiles(ttcb);
+  if (ret < 0)
+    {
+      errcode = -ret;
+      goto errout_with_group;
+    }
+#endif
+
+  /* Configure the user provided stack region */
+
+#ifndef CONFIG_CUSTOM_STACK
+  up_use_stack(tcb, stack, stack_size);
+#endif
+
+  /* Initialize the task control block */
+
+  ret = task_schedsetup(ttcb, priority, task_start, entry,
+                        TCB_FLAG_TTYPE_TASK);
+  if (ret < OK)
+    {
+      errcode = -ret;
+      goto errout_with_group;
+    }
+
+  /* Setup to pass parameters to the new task */
+
+  (void)task_argsetup(ttcb, name, argv);
+
+  /* Now we have enough in place that we can join the group */
+
+#ifdef HAVE_TASK_GROUP
+  ret = group_initialize(ttcb);
+  if (ret < 0)
+    {
+      errcode = -ret;
+      goto errout_with_group;
+    }
+#endif
   return OK;
+
+errout_with_group:
+#ifdef HAVE_TASK_GROUP
+  group_leave(tcb);
+
+errout:
+#endif
+  set_errno(errcode);
+  return ERROR;
 }
+

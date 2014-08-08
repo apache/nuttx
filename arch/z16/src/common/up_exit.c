@@ -44,13 +44,14 @@
 
 #include <nuttx/arch.h>
 
-#include "chip/chip.h"
-#include "os_internal.h"
-#include "up_internal.h"
-
 #ifdef CONFIG_DUMP_ON_EXIT
 #include <nuttx/fs/fs.h>
 #endif
+
+#include "chip/chip.h"
+#include "task/task.h"
+#include "os_internal.h"
+#include "up_internal.h"
 
 /****************************************************************************
  * Private Definitions

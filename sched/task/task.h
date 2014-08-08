@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/task_start.c
+ * sched/task/task.h
  *
- *   Copyright (C) 2007-2010, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,112 +33,45 @@
  *
  ****************************************************************************/
 
+#ifndef __SCHED_TASK_TASK_H
+#define __SCHED_TASK_TASK_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
-#include <stdlib.h>
-#include <sched.h>
-#include <debug.h>
+#include <sys/types.h>
+#include <stdbool.h>
 
-#include <nuttx/arch.h>
 #include <nuttx/sched.h>
-
-#include "os_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Type Declarations
+ * Public Type Definitions
  ****************************************************************************/
 
 /****************************************************************************
  * Global Variables
  ****************************************************************************/
-
 /****************************************************************************
- * Private Variables
+ * Public Function Prototypes
  ****************************************************************************/
 
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
+void task_start(void);
+int  task_schedsetup(FAR struct task_tcb_s *tcb, int priority,
+       start_t start, main_t main, uint8_t ttype);
+int  task_argsetup(FAR struct task_tcb_s *tcb, FAR const char *name,
+       FAR char * const argv[]);
+int  task_exit(void);
+int  task_terminate(pid_t pid, bool nonblocking);
+void task_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking);
+void task_recover(FAR struct tcb_s *tcb);
+bool sched_addreadytorun(FAR struct tcb_s *rtrtcb);
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: task_start
- *
- * Description:
- *   This function is the low level entry point into the main thread of
- *   execution of a task.  It receives initial control when the task is
- *   started and calls main entry point of the newly started task.
- *
- * Inputs:
- *   None
- *
- * Return:
- *   None
- *
- ****************************************************************************/
-
-void task_start(void)
-{
-  FAR struct task_tcb_s *tcb = (FAR struct task_tcb_s*)g_readytorun.head;
-  int exitcode;
-  int argc;
-
-  DEBUGASSERT((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD);
-
-  /* Execute the start hook if one has been registered */
-
-#ifdef CONFIG_SCHED_STARTHOOK
-  if (tcb->starthook)
-    {
-      tcb->starthook(tcb->starthookarg);
-    }
-#endif
-
-  /* Count how many non-null arguments we are passing */
-
-  for (argc = 1; argc <= CONFIG_MAX_TASK_ARGS; argc++)
-    {
-      /* The first non-null argument terminates the list */
-
-      if (!tcb->argv[argc])
-        {
-          break;
-        }
-    }
-
-  /* Call the 'main' entry point passing argc and argv.  In the kernel build
-   * this has to be handled differently if we are starting a user-space task;
-   * we have to switch to user-mode before calling the task.
-   */
-
-#ifdef CONFIG_NUTTX_KERNEL
-  if ((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
-    {
-      up_task_start(tcb->cmn.entry.main, argc, tcb->argv);
-      exitcode = EXIT_FAILURE; /* Should not get here */
-    }
-  else
-#endif
-    {
-      exitcode = tcb->cmn.entry.main(argc, tcb->argv);
-    }
-
-  /* Call exit() if/when the task returns */
-
-  exit(exitcode);
-}
+#endif /* __SCHED_TASK_TASK_H */

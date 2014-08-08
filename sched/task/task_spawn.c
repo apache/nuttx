@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/task_posixspawn.c
+ * sched/task/task_spawn.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,14 +40,18 @@
 #include <nuttx/config.h>
 
 #include <sys/wait.h>
+#include <sched.h>
 #include <spawn.h>
 #include <debug.h>
 
-#include <nuttx/binfmt/binfmt.h>
-
 #include "os_internal.h"
 #include "group/group.h"
-#include "spawn_internal.h"
+#include "task/spawn.h"
+#include "task/task.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /****************************************************************************
  * Private Types
@@ -66,7 +70,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: posix_spawn_exec
+ * Name: task_spawn_exec
  *
  * Description:
  *   Execute the task from the file system.
@@ -104,20 +108,14 @@
  *
  ****************************************************************************/
 
-static int posix_spawn_exec(FAR pid_t *pidp, FAR const char *path,
-                            FAR const posix_spawnattr_t *attr,
-                            FAR char * const argv[])
+static int task_spawn_exec(FAR pid_t *pidp, FAR const char *name,
+                           main_t entry, FAR const posix_spawnattr_t *attr,
+                           FAR char * const *argv)
 {
-  FAR const struct symtab_s *symtab;
-  int nsymbols;
+  size_t stacksize;
+  int priority;
   int pid;
   int ret = OK;
-
-  DEBUGASSERT(path);
-
-  /* Get the current symbol table selection */
-
-  exec_getsymtab(&symtab, &nsymbols);
 
   /* Disable pre-emption so that we can modify the task parameters after
    * we start the new task; the new task will not actually begin execution
@@ -126,13 +124,36 @@ static int posix_spawn_exec(FAR pid_t *pidp, FAR const char *path,
 
   sched_lock();
 
+  /* Use the default task priority and stack size if no attributes are provided */
+
+  if (attr)
+    {
+      priority  = attr->priority;
+      stacksize = attr->stacksize;
+    }
+  else
+    {
+      struct sched_param param;
+
+      /* Set the default priority to the same priority as this task */
+
+      ret = sched_getparam(0, &param);
+      if (ret < 0)
+        {
+          goto errout;
+        }
+
+      priority  = param.sched_priority;
+      stacksize = CONFIG_TASK_SPAWN_DEFAULT_STACKSIZE;
+    }
+
   /* Start the task */
 
-  pid = exec(path, (FAR char * const *)argv, symtab, nsymbols);
+  pid = TASK_CREATE(name, priority, stacksize, entry, argv);
   if (pid < 0)
     {
       ret = errno;
-      sdbg("ERROR: exec failed: %d\n", ret);
+      sdbg("ERROR: TASK_CREATE failed: %d\n", ret);
       goto errout;
     }
 
@@ -161,20 +182,27 @@ errout:
 }
 
 /****************************************************************************
- * Name: posix_spawn_proxy
+ * Name: task_spawn_proxy
  *
  * Description:
  *   Perform file_actions, then execute the task from the file system.
  *
- *   Do we really need this proxy task?  Isn't that wasteful?
+ *   Do we really need a proxy task in this case?  Isn't that wasteful?
+ *
+ *   Q: Why can we do what we need to do here and the just call the
+ *      new task's entry point.
+ *   A: This would require setting up the name, priority, and stacksize from
+ *      the task_spawn, but it do-able.  The only issue I can think of is
+ *      that NuttX supports task_restart(), and you would never be able to
+ *      restart a task from this point.
  *
  *   Q: Why not use a starthook so that there is callout from task_start()
- *      to perform these operations after the file is loaded from
- *      the file system?
- *   A: That existing task_starthook() implementation cannot be used in
- *      this context; any of task_starthook() will also conflict with
- *      binfmt's use of the start hook to call C++ static initializers.
- *      task_restart() would also be an issue.
+ *      to perform these operations?
+ *   A: Good idea, except that existing task_starthook() implementation
+ *      cannot be used here unless we get rid of task_create and, instead,
+ *      use task_init() and task_activate().  start_taskhook() could then
+ *      be called between task_init() and task)activate().  task_restart()
+ *      would still be an issue.
  *
  * Input Parameters:
  *   Standard task start-up parameters
@@ -184,12 +212,12 @@ errout:
  *
  ****************************************************************************/
 
-static int posix_spawn_proxy(int argc, FAR char *argv[])
+static int task_spawn_proxy(int argc, FAR char *argv[])
 {
-  int ret;
+ int ret;
 
   /* Perform file actions and/or set a custom signal mask.  We get here only
-   * if the file_actions parameter to posix_spawn[p] was non-NULL and/or the
+   * if the file_actions parameter to task_spawn[p] was non-NULL and/or the
    * option to change the signal mask was selected.
    */
 
@@ -208,8 +236,9 @@ static int posix_spawn_proxy(int argc, FAR char *argv[])
     {
       /* Start the task */
 
-      ret = posix_spawn_exec(g_spawn_parms.pid, g_spawn_parms.u.posix.path,
-                             g_spawn_parms.attr, g_spawn_parms.argv);
+      ret = task_spawn_exec(g_spawn_parms.pid, g_spawn_parms.u.task.name,
+                            g_spawn_parms.u.task.entry, g_spawn_parms.attr,
+                            g_spawn_parms.argv);
 
 #ifdef CONFIG_SCHED_HAVE_PARENT
       if (ret == OK)
@@ -243,30 +272,22 @@ static int posix_spawn_proxy(int argc, FAR char *argv[])
  ****************************************************************************/
 
 /****************************************************************************
- * Name: posix_spawn
+ * Name: task_spawn
  *
  * Description:
- *   The posix_spawn() and posix_spawnp() functions will create a new,
- *   child task, constructed from a regular executable file.
+ *   The task_spawn() function will create a new, child task, where the
+ *   entry point to the task is an address in memory.
  *
  * Input Parameters:
  *
- *   pid - Upon successful completion, posix_spawn() and posix_spawnp() will
- *     return the task ID of the child task to the parent task, in the
- *     variable pointed to by a non-NULL 'pid' argument.  If the 'pid'
- *     argument is a null pointer, the process ID of the child is not
- *     returned to the caller.
+ *   pid - Upon successful completion, task_spawn() will return the task ID
+ *     of the child task to the parent task, in the variable pointed to by
+ *     a non-NULL 'pid' argument.  If the 'pid' argument is a null pointer,
+ *     the process ID of the child is not returned to the caller.
  *
- *   path - The 'path' argument to posix_spawn() is the absolute path that
- *     identifies the file to execute.  The 'path' argument to posix_spawnp()
- *     may also be a relative path and will be used to construct a pathname
- *     that identifies the file to execute.  In the case of a relative path,
- *     the path prefix for the file will be obtained by a search of the
- *     directories passed as the environment variable PATH.
+ *   name - The name to assign to the child task.
  *
- *     NOTE: NuttX provides only one implementation:  If
- *     CONFIG_BINFMT_EXEPATH is defined, then only posix_spawnp() behavior
- *     is supported; otherwise, only posix_spawn behavior is supported.
+ *   entry - The child task's entry point (an address in memory)
  *
  *   file_actions - If 'file_actions' is a null pointer, then file
  *     descriptors open in the calling process will remain open in the
@@ -278,7 +299,7 @@ static int posix_spawn_proxy(int argc, FAR char *argv[])
  *   attr - If the value of the 'attr' parameter is NULL, the all default
  *     values for the POSIX spawn attributes will be used.  Otherwise, the
  *     attributes will be set according to the spawn flags.  The
- *     posix_spawnattr_t spawn attributes object type is defined in spawn.h.
+ *     task_spawnattr_t spawn attributes object type is defined in spawn.h.
  *     It will contains these attributes, not all of which are supported by
  *     NuttX:
  *
@@ -295,57 +316,30 @@ static int posix_spawn_proxy(int argc, FAR char *argv[])
  *     - POSIX_SPAWN_SETSIGDEF:  Resetting signal default actions is not
  *       supported.  NuttX does not support default signal actions.
  *
+ *     And the non-standard:
+ *
+ *     - TASK_SPAWN_SETSTACKSIZE:  Set the stack size for the new task.
+ *
  *   argv - argv[] is the argument list for the new task.  argv[] is an
  *     array of pointers to null-terminated strings. The list is terminated
  *     with a null pointer.
  *
- *   envp - The envp[] argument is not used by NuttX and may be NULL.  In
- *     standard implementations, envp[] is an array of character pointers to
- *     null-terminated strings that provide the environment for the new
- *     process image. The environment array is terminated by a null pointer.
- *     In NuttX, the envp[] argument is ignored and the new task will simply
- *     inherit the environment of the parent task.
+ *   envp - The envp[] argument is not used by NuttX and may be NULL.
  *
  * Returned Value:
- *   posix_spawn() and posix_spawnp() will return zero on success.
- *   Otherwise, an error number will be returned as the function return
- *   value to indicate the error:
+ *   task_spawn() will return zero on success. Otherwise, an error number
+ *   will be returned as the function return value to indicate the error:
  *
  *   - EINVAL: The value specified by 'file_actions' or 'attr' is invalid.
  *   - Any errors that might have been return if vfork() and excec[l|v]()
  *     had been called.
  *
- * Assumptions/Limitations:
- *   - NuttX provides only posix_spawn() or posix_spawnp() behavior
- *     depending upon the setting of CONFIG_BINFMT_EXEPATH: If
- *     CONFIG_BINFMT_EXEPATH is defined, then only posix_spawnp() behavior
- *     is supported; otherwise, only posix_spawn behavior is supported.
- *   - The 'envp' argument is not used and the 'environ' variable is not
- *     altered (NuttX does not support the 'environ' variable).
- *   - Process groups are not supported (POSIX_SPAWN_SETPGROUP).
- *   - Effective user IDs are not supported (POSIX_SPAWN_RESETIDS).
- *   - Signal default actions cannot be modified in the newly task executed
- *     because NuttX does not support default signal actions
- *     (POSIX_SPAWN_SETSIGDEF).
- *
- * POSIX Compatibility
- *   - The value of the argv[0] received by the child task is assigned by
- *     NuttX.  For the caller of posix_spawn(), the provided argv[0] will
- *     correspond to argv[1] received by the new task.
- *
  ****************************************************************************/
 
-#ifdef CONFIG_BINFMT_EXEPATH
-int posix_spawnp(FAR pid_t *pid, FAR const char *path,
-                 FAR const posix_spawn_file_actions_t *file_actions,
-                 FAR const posix_spawnattr_t *attr,
-                 FAR char *const argv[], FAR char *const envp[])
-#else
-int posix_spawn(FAR pid_t *pid, FAR const char *path,
-                FAR const posix_spawn_file_actions_t *file_actions,
-                FAR const posix_spawnattr_t *attr,
-                FAR char *const argv[], FAR char *const envp[])
-#endif
+int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
+      FAR const posix_spawn_file_actions_t *file_actions,
+      FAR const posix_spawnattr_t *attr,
+      FAR char *const argv[], FAR char *const envp[])
 {
   struct sched_param param;
   pid_t proxy;
@@ -354,10 +348,8 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
 #endif
   int ret;
 
-  DEBUGASSERT(path);
-
-  svdbg("pid=%p path=%s file_actions=%p attr=%p argv=%p\n",
-        pid, path, file_actions, attr, argv);
+  svdbg("pid=%p name=%s entry=%p file_actions=%p attr=%p argv=%p\n",
+        pid, name, entry, file_actions, attr, argv);
 
   /* If there are no file actions to be performed and there is no change to
    * the signal mask, then start the new child task directly from the parent task.
@@ -370,7 +362,7 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
   if (file_actions ==  NULL || *file_actions == NULL)
 #endif
     {
-      return posix_spawn_exec(pid, path, attr, argv);
+      return task_spawn_exec(pid, name, entry, attr, argv);
     }
 
   /* Otherwise, we will have to go through an intermediary/proxy task in order
@@ -395,7 +387,8 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
   g_spawn_parms.file_actions = file_actions ? *file_actions : NULL;
   g_spawn_parms.attr         = attr;
   g_spawn_parms.argv         = argv;
-  g_spawn_parms.u.posix.path = path;
+  g_spawn_parms.u.task.name  = name;
+  g_spawn_parms.u.task.entry = entry;
 
   /* Get the priority of this (parent) task */
 
@@ -410,7 +403,7 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
     }
 
   /* Disable pre-emption so that the proxy does not run until waitpid
-   * is called.  This is probably unnecessary since the posix_spawn_proxy has
+   * is called.  This is probably unnecessary since the task_spawn_proxy has
    * the same priority as this thread; it should be schedule behind this
    * task in the ready-to-run list.
    */
@@ -423,14 +416,14 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
    * task.
    */
 
-  proxy = TASK_CREATE("posix_spawn_proxy", param.sched_priority,
+  proxy = TASK_CREATE("task_spawn_proxy", param.sched_priority,
                       CONFIG_POSIX_SPAWN_PROXY_STACKSIZE,
-                      (main_t)posix_spawn_proxy,
-                      (FAR char * const *)NULL);
+                      (main_t)task_spawn_proxy,
+                      (FAR char * const*)NULL);
   if (proxy < 0)
     {
       ret = get_errno();
-      sdbg("ERROR: Failed to start posix_spawn_proxy: %d\n", ret);
+      sdbg("ERROR: Failed to start task_spawn_proxy: %d\n", ret);
 
       goto errout_with_lock;
     }

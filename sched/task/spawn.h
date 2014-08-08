@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/task_recover.c
+ * sched/task/spawn.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,91 +33,130 @@
  *
  ****************************************************************************/
 
+#ifndef __SCHED_TASK_SPAWN_H
+#define __SCHED_TASK_SPAWN_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <wdog.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/sched.h>
-
-#include "os_internal.h"
-#include "mqueue/mqueue.h"
+#include <spawn.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef CONFIG_POSIX_SPAWN_PROXY_STACKSIZE
+#  define CONFIG_POSIX_SPAWN_PROXY_STACKSIZE 1024
+#endif
+
+/****************************************************************************
+ * Public Type Definitions
+ ****************************************************************************/
+
+struct spawn_parms_s
+{
+  /* Common parameters */
+
+  int result;
+  FAR pid_t *pid;
+  FAR const posix_spawn_file_actions_t *file_actions;
+  FAR const posix_spawnattr_t *attr;
+  FAR char * const *argv;
+
+  /* Parameters that differ for posix_spawn[p] and task_spawn */
+
+  union
+  {
+    struct
+    {
+      FAR const char *path;
+    } posix;
+    struct
+    {
+      FAR const char *name;
+      main_t entry;
+    } task;
+  } u;
+};
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+extern sem_t g_spawn_parmsem;
+#ifndef CONFIG_SCHED_WAITPID
+extern sem_t g_spawn_execsem;
+#endif
+extern struct spawn_parms_s g_spawn_parms;
+
+/****************************************************************************
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: task_recover
+ * Name: spawn_semtake and spawn_semgive
  *
  * Description:
- *   This function is called when a task is deleted via task_deleted or
- *   via pthread_cancel. I checks if the task was waiting for a message
- *   queue event and adjusts counts appropriately.
+ *   Give and take semaphores
  *
- * Inputs:
- *   tcb - The TCB of the terminated task or thread
+ * Input Parameters:
  *
- * Return Value:
- *   None.
+ *   sem - The semaphore to act on.
  *
- * Assumptions:
- *   This function is called from task deletion logic in a safe context.
+ * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
-void task_recover(FAR struct tcb_s *tcb)
-{
-  irqstate_t flags;
+void spawn_semtake(FAR sem_t *sem);
+#define spawn_semgive(sem) sem_post(sem)
 
-  /* The task is being deleted.  If it is waiting for any timed event, then
-   * tcb->waitdog will be non-NULL.  Cancel the watchdog now so that no
-   * events occur after the watchdog expires.  Obviously there are lots of
-   * race conditions here so this will most certainly have to be revisited in
-   * the future.
-   */
+/****************************************************************************
+ * Name: spawn_execattrs
+ *
+ * Description:
+ *   Set attributes of the new child task after it has been spawned.
+ *
+ * Input Parameters:
+ *
+ *   pid - The pid of the new task.
+ *   attr - The attributes to use
+ *
+ * Returned Value:
+ *   Errors are not reported by this function.  This is because errors
+ *   cannot occur, but ratther that the new task has already been started
+ *   so there is no graceful way to handle errors detected in this context
+ *   (unless we delete the new task and recover).
+ *
+ * Assumptions:
+ *   That task has been started but has not yet executed because pre-
+ *   emption is disabled.
+ *
+ ****************************************************************************/
 
-  flags = irqsave();
-  if (tcb->waitdog)
-    {
-      (void)wd_cancel(tcb->waitdog);
-      (void)wd_delete(tcb->waitdog);
-      tcb->waitdog = NULL;
-    }
+int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr);
 
-  irqrestore(flags);
+/****************************************************************************
+ * Name: spawn_proxyattrs
+ *
+ * Description:
+ *   Set attributes of the proxy task before it has started the new child
+ *   task.
+ *
+ * Input Parameters:
+ *
+ *   pid - The pid of the new task.
+ *   attr - The attributes to use
+ *   file_actions - The attributes to use
+ *
+ * Returned Value:
+ *   0 (OK) on successed; A negated errno value is returned on failure.
+ *
+ ****************************************************************************/
 
-  /* Handle cases where the thread was waiting for a message queue event */
+int spawn_proxyattrs(FAR const posix_spawnattr_t *attr,
+                     FAR const posix_spawn_file_actions_t *file_actions);
 
-#ifndef CONFIG_DISABLE_MQUEUE
-  mq_recover(tcb);
-#endif
-}
+#endif /* __SCHED_TASK_SPAWN_H */

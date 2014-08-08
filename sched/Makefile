@@ -40,31 +40,10 @@ DEPPATH = --dep-path .
 
 ASRCS =
 
-TSK_SRCS  = prctl.c exit.c getpid.c
-TSK_SRCS += task_create.c task_init.c task_setup.c task_activate.c task_start.c
-TSK_SRCS += task_delete.c task_exit.c task_exithook.c task_recover.c
-TSK_SRCS += task_restart.c task_spawn.c task_spawnparms.c task_terminate.c
-TSK_SRCS += sched_addreadytorun.c sched_removereadytorun.c sched_addprioritized.c
-TSK_SRCS += sched_mergepending.c sched_addblocked.c sched_removeblocked.c
-TSK_SRCS += sched_free.c sched_gettcb.c sched_verifytcb.c sched_releasetcb.c
-
-ifeq ($(CONFIG_ARCH_HAVE_VFORK),y)
-ifeq ($(CONFIG_SCHED_WAITPID),y)
-TSK_SRCS += task_vfork.c
-endif
-endif
-
-ifneq ($(CONFIG_BINFMT_DISABLE),y)
-ifeq ($(CONFIG_LIBC_EXECFUNCS),y)
-TSK_SRCS += task_posixspawn.c
-endif
-endif
-
-ifeq ($(CONFIG_SCHED_STARTHOOK),y)
-TSK_SRCS += task_starthook.c
-endif
-
 SCHED_SRCS  = sched_garbage.c sched_getfiles.c
+SCHED_SRCS += sched_addreadytorun.c sched_removereadytorun.c sched_addprioritized.c
+SCHED_SRCS += sched_mergepending.c sched_addblocked.c sched_removeblocked.c
+SCHED_SRCS += sched_free.c sched_gettcb.c sched_verifytcb.c sched_releasetcb.c
 SCHED_SRCS += sched_getsockets.c sched_getstreams.c
 SCHED_SRCS += sched_setparam.c sched_setpriority.c sched_getparam.c
 SCHED_SRCS += sched_setscheduler.c sched_getscheduler.c
@@ -108,6 +87,7 @@ include init/Make.defs
 include irq/Make.defs
 include paging/Make.defs
 include group/Make.defs
+include task/Make.defs
 include errno/Make.defs
 include wdog/Make.defs
 include semaphore/Make.defs
@@ -118,8 +98,11 @@ include clock/Make.defs
 include timer/Make.defs
 include environ/Make.defs
 
-CSRCS  = $(INIT_SRCS) $(IRQ_SRCS) $(PG_SRCS) $(GRP_SRCS) $(TSK_SRCS)
-CSRCS += $(SCHED_SRCS) $(ERRNO_SRCS) $(WDOG_SRCS) $(SEM_SRCS)
+# REVISIT
+TSK_SRCS += prctl.c exit.c getpid.c
+
+CSRCS  = $(INIT_SRCS) $(IRQ_SRCS) $(PG_SRCS) $(GRP_SRCS) $(SCHED_SRCS)
+CSRCS += $(TSK_SRCS) $(ERRNO_SRCS) $(WDOG_SRCS) $(SEM_SRCS)
 CSRCS += $(SIGNAL_SRCS) $(PTHREAD_SRCS) $(MQUEUE_SRCS) $(CLOCK_SRCS)
 CSRCS += $(TIMER_SRCS) $(ENV_SRCS)
 

@@ -75,6 +75,11 @@ extern FAR struct task_group_s *g_grouphead;
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+#ifdef CONFIG_SCHED_CHILD_STATUS
+void weak_function task_initialize(void);
+#endif
+
 /* Task group data structure management */
 
 #ifdef HAVE_TASK_GROUP

@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/task_setup.c
+ * sched/task/task_setup.c
  *
  *   Copyright (C) 2007-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,9 +51,10 @@
 #include "os_internal.h"
 #include "pthread/pthread.h"
 #include "group/group.h"
+#include "task/task.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************

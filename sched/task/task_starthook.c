@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/task_delete.c
+ * sched/task/task_starthook.c
  *
- *   Copyright (C) 2007-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,11 +39,11 @@
 
 #include <nuttx/config.h>
 
-#include <stdlib.h>
-
 #include <nuttx/sched.h>
 
-#include "os_internal.h"
+#include "task/task.h"
+
+#ifdef CONFIG_SCHED_STARTHOOK
 
 /****************************************************************************
  * Definitions
@@ -74,59 +74,40 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: task_delete
+ * Name: task_starthook
  *
  * Description:
- *   This function causes a specified task to cease to exist. Its  stack and
- *   TCB will be deallocated.  This function is the companion to task_create().
- *   This is the version of the function exposed to the user; it is simply
- *   a wrapper around the internal, task_terminate function.
- *
- *   The logic in this function only deletes non-running tasks.  If the 'pid'
- *   parameter refers to to the currently runing task, then processing is
- *   redirected to exit().  This can only happen if a task calls task_delete()
- *   in order to delete itself.
- *
- *   In fact, this function (and task_terminate) are the final functions
- *   called all task termination sequences.  task_delete may be called
- *   from:
- *
- *   - task_restart(),
- *   - pthread_cancel(),
- *   - and directly from user code.
- *
- *   Other exit paths (exit(), _eixt(), and pthread_exit()) will go through
- *   task_terminate()
+ *   Configure a start hook... a function that will be called on the thread
+ *   of the new task before the new task's main entry point is called.
+ *   The start hook is useful, for example, for setting up automatic
+ *   configuration of C++ constructors.
  *
  * Inputs:
- *   pid - The task ID of the task to delete.  A pid of zero
- *         signifies the calling task.
+ *   tcb - The new, unstarted task task that needs the start hook
+ *   starthook - The pointer to the start hook function
+ *   arg - The argument to pass to the start hook function.
  *
- * Return Value:
- *   OK on success; or ERROR on failure
- *
- *   This function can fail if the provided pid does not correspond to a
- *   task (errno is not set)
+ * Return:
+ *   None
  *
  ****************************************************************************/
 
-int task_delete(pid_t pid)
+void task_starthook(FAR struct task_tcb_s *tcb, starthook_t starthook,
+                    FAR void *arg)
 {
-  FAR struct tcb_s *rtcb;
+  /* Only tasks can have starthooks.  The starthook will be called when the
+   * task is started (or restarted).
+   */
 
-  /* Check if the task to delete is the calling task */
+#ifndef CONFIG_DISABLE_PTHREAD
+  DEBUGASSERT(tcb &&
+             (tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD);
+#endif
 
-  rtcb = (FAR struct tcb_s*)g_readytorun.head;
-  if (pid == 0 || pid == rtcb->pid)
-    {
-      /* If it is, then what we really wanted to do was exit. Note that we
-       * don't bother to unlock the TCB since it will be going away.
-       */
+  /* Set up the start hook */
 
-      exit(EXIT_SUCCESS);
-    }
-
-  /* Then let task_terminate do the heavy lifting */
-
-  return task_terminate(pid, false);
+  tcb->starthook    = starthook;
+  tcb->starthookarg = arg;
 }
+
+#endif /* CONFIG_SCHED_STARTHOOK */
