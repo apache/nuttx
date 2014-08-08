@@ -1,5 +1,5 @@
 /********************************************************************************
- * clock_abstime2ticks.c
+ * sched/clock/clock_abstime2ticks.c
  *
  *   Copyright (C) 2007, 2008, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -42,10 +42,10 @@
 #include <time.h>
 #include <errno.h>
 #include <debug.h>
-#include "clock_internal.h"
+#include "clock/clock.h"
 
 /********************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ********************************************************************************/
 
 /********************************************************************************

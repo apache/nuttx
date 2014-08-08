@@ -46,7 +46,7 @@
 #include <nuttx/arch.h>
 
 #include "chip/chip.h"
-#include "clock_internal.h"
+#include "clock/clock.h"
 #include "up_internal.h"
 
 /***************************************************************************

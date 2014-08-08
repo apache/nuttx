@@ -1,5 +1,5 @@
 /********************************************************************************
- * sched/clock_time2ticks.c
+ * sched/clock/clock_time2ticks.c
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -42,7 +42,7 @@
 #include <stdint.h>
 #include <time.h>
 
-#include "clock_internal.h"
+#include "clock/clock.h"
 
 /********************************************************************************
  * Definitions

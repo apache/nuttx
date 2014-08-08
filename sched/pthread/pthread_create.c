@@ -54,7 +54,7 @@
 
 #include "os_internal.h"
 #include "group/group.h"
-#include "clock_internal.h"
+#include "clock/clock.h"
 #include "pthread/pthread.h"
 
 /****************************************************************************

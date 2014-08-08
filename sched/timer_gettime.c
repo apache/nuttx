@@ -42,7 +42,7 @@
 #include <time.h>
 #include <errno.h>
 
-#include "clock_internal.h"
+#include "clock/clock.h"
 #include "timer_internal.h"
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS

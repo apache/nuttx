@@ -54,7 +54,7 @@
 
 #include "os_internal.h"
 #include "signal/signal.h"
-#include "clock_internal.h"
+#include "clock/clock.h"
 
 /****************************************************************************
  * Pre-processor Definitions

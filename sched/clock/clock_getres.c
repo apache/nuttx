@@ -1,7 +1,7 @@
 /************************************************************************
- * sched/clock_settime.c
+ * sched/clock/clock_getres.c
  *
- *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,15 +38,13 @@
  ************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/rtc.h>
 
+#include <stdint.h>
 #include <time.h>
-#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
-#include <arch/irq.h>
-#include "clock_internal.h"
+#include "clock/clock.h"
 
 /************************************************************************
  * Definitions
@@ -81,68 +79,35 @@
  ************************************************************************/
 
 /************************************************************************
- * Name: clock_settime
+ * Name: clock_getres
  *
  * Description:
  *   Clock Functions based on POSIX APIs
  *
  ************************************************************************/
 
-int clock_settime(clockid_t clock_id, FAR const struct timespec *tp)
+int clock_getres(clockid_t clock_id, struct timespec *res)
 {
-  irqstate_t flags;
-  int ret = OK;
+  int      ret = OK;
 
   sdbg("clock_id=%d\n", clock_id);
-  DEBUGASSERT(tp != NULL);
 
-  /* CLOCK_REALTIME - POSIX demands this to be present. This is the wall
-   * time clock.
-   */
+  /* Only CLOCK_REALTIME is supported */
 
-#ifdef CONFIG_RTC
-  if (clock_id == CLOCK_REALTIME || clock_id == CLOCK_ACTIVETIME)
-#else
-  if (clock_id == CLOCK_REALTIME)
-#endif
-    {
-      /* Interrupts are disabled here so that the in-memory time
-       * representation and the RTC setting will be as close as
-       * possible.
-       */
-
-      flags = irqsave();
-
-      /* Save the new base time. */
-
-      g_basetime.tv_sec  = tp->tv_sec;
-      g_basetime.tv_nsec = tp->tv_nsec;
-
-      /* Get the elapsed time since power up (in milliseconds) biased
-       * as appropriate.
-       */
-
-      g_tickbias = clock_systimer();
-
-      /* Setup the RTC (lo- or high-res) */
-
-#ifdef CONFIG_RTC
-      if (g_rtc_enabled && clock_id != CLOCK_ACTIVETIME)
-        {
-          up_rtc_settime(tp);
-        }
-#endif
-      irqrestore(flags);
-
-      sdbg("basetime=(%d,%d) tickbias=%d\n",
-          (int)g_basetime.tv_sec, (int)g_basetime.tv_nsec,
-          (int)g_tickbias);
-    }
-  else
+  if (clock_id != CLOCK_REALTIME)
     {
       sdbg("Returning ERROR\n");
       set_errno(EINVAL);
       ret = ERROR;
+    }
+  else
+    {
+      /* Form the timspec using clock resolution in nanoseconds */
+
+      res->tv_sec  = 0;
+      res->tv_nsec = NSEC_PER_TICK;
+
+      sdbg("Returning res=(%d,%d)\n", (int)res->tv_sec, (int)res->tv_nsec);
     }
 
   return ret;

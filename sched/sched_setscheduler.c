@@ -47,7 +47,7 @@
 #include <nuttx/arch.h>
 
 #include "os_internal.h"
-#include "clock_internal.h"
+#include "clock/clock.h"
 
 /****************************************************************************
  * Definitions

@@ -1,7 +1,7 @@
 /********************************************************************************
- * sched/clock_internal.h
+ * sched/clock/clock_ticks2time.c
  *
- *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,61 +33,62 @@
  *
  ********************************************************************************/
 
-#ifndef __SCHED_CLOCK_INTERNAL_H
-#define __SCHED_CLOCK_INTERNAL_H
-
 /********************************************************************************
  * Included Files
  ********************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-
-#include <nuttx/clock.h>
-#include <nuttx/compiler.h>
+#include <time.h>
+#include "clock/clock.h"
 
 /********************************************************************************
- * Pre-processor Definitions
+ * Definitions
  ********************************************************************************/
-/* Configuration ************************************************************/
-/* If CONFIG_SYSTEM_TIME64 is selected and the CPU supports long long types,
- * then a 64-bit system time will be used.
- */
-
-#ifndef CONFIG_HAVE_LONG_LONG
-#  undef CONFIG_SYSTEM_TIME64
-#endif
 
 /********************************************************************************
- * Public Type Definitions
+ * Private Type Declarations
  ********************************************************************************/
 
 /********************************************************************************
  * Global Variables
  ********************************************************************************/
 
-#ifdef CONFIG_SYSTEM_TIME64
-extern uint64_t        g_tickbias;
-#else
-extern uint32_t        g_tickbias;
-#endif
-
-extern struct timespec g_basetime;
-
 /********************************************************************************
- * Public Function Prototypes
+ * Private Variables
  ********************************************************************************/
 
-void weak_function clock_initialize(void);
-#ifndef CONFIG_SCHED_TICKLESS
-void weak_function clock_timer(void);
-#endif
+/********************************************************************************
+ * Private Functions
+ ********************************************************************************/
 
-int    clock_abstime2ticks(clockid_t clockid,
-                           FAR const struct timespec *abstime,
-                           FAR int *ticks);
-int    clock_time2ticks(FAR const struct timespec *reltime, FAR int *ticks);
-int    clock_ticks2time(int ticks, FAR struct timespec *reltime);
+/********************************************************************************
+ * Public Functions
+ ********************************************************************************/
 
-#endif /* __SCHED_CLOCK_INTERNAL_H */
+/********************************************************************************
+ * Name: clock_ticks2time
+ *
+ * Description:
+ *   Convert the system time tick value to a relative time.
+ *
+ * Parameters:
+ *   ticks - The number of system time ticks to convert.
+ *   reltime - Return the converted system time here.
+ *
+ * Return Value:
+ *   Always returns OK
+ *
+ * Assumptions:
+ *
+ ********************************************************************************/
+
+int clock_ticks2time(int ticks, FAR struct timespec *reltime)
+{
+  int remainder;
+
+  reltime->tv_sec  = ticks / TICK_PER_SEC;
+  remainder        = ticks - TICK_PER_SEC * reltime->tv_sec;
+  reltime->tv_nsec = remainder * NSEC_PER_TICK;
+  return OK;
+}

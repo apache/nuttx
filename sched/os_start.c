@@ -61,7 +61,7 @@
 #ifndef CONFIG_DISABLE_PTHREAD
 # include "pthread/pthread.h"
 #endif
-#include  "clock_internal.h"
+#include  "clock/clock.h"
 #include  "timer_internal.h"
 #include  "irq/irq.h"
 #ifdef HAVE_TASK_GROUP

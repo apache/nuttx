@@ -48,7 +48,7 @@
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
-#include "clock_internal.h"
+#include "clock/clock.h"
 #include "internal.h"
 #include "up_arch.h"
 

@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/clock_gettimeofday.c
+ * sched/clock/clock_dow.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,75 +39,50 @@
 
 #include <nuttx/config.h>
 
-#include <sys/time.h>
-#include <errno.h>
-#include <debug.h>
+#include <stdint.h>
 
-#include "clock_internal.h"
+#include <nuttx/clock.h>
+
+#include "clock/clock.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Type Declarations
+ * Private Data
  ****************************************************************************/
 
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
+/* 23 * (month + 1) / 9, month = 0..11 */
 
-/**************************************************************************
- * Public Constant Data
- **************************************************************************/
-
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
-
-/**************************************************************************
- * Private Variables
- **************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+static const uint8_t g_lookup[12] = {2, 5, 7, 10, 12, 15, 17, 20, 23, 25, 28, 30};
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: gettimeofday
+ * Name: clock_dow
  *
  * Description:
- *  Get the current time
+ *   Calculate the day of week (DOW) from they year month and day.  Based on
+ *   an algorithm pubished in 1990 by Michael Keith and Tom Craver with some
+ *   tweaks to handle months in the range 0-11.
+ *
+ * Parameters:
+ *   year  - year (e.g., 1988)
+ *   month - 0 through 11
+ *   day   - 1 through 31
+ *
+ * Return Value:
+ *   The day of the week as days since Sunday: 0 = Sunday, 1 = Monday, etc.
+ *
+ * Assumptions:
  *
  ****************************************************************************/
 
-int gettimeofday(struct timeval *tp, void *tzp)
+int clock_dow(int year, int month, int day)
 {
-  struct timespec ts;
-  int ret;
-
-#ifdef CONFIG_DEBUG
-  if (!tp)
-    {
-      errno = EINVAL;
-      return ERROR;
-    }
-#endif
-
-  /* Let clock_gettime do most of the work */
-
-  ret = clock_gettime(CLOCK_REALTIME, &ts);
-  if (ret == OK)
-    {
-       /* Convert the struct timespec to a struct timeval */
-
-       tp->tv_sec  = ts.tv_sec;
-       tp->tv_usec = ts.tv_nsec / NSEC_PER_USEC;
-    }
-
-  return ret;
+  day += month < 2 ? year-- : year - 2;
+  return ((int)g_lookup[month] + day + 4 + year/4 - year/100 + year/400) % 7;
 }

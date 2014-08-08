@@ -45,7 +45,7 @@
 
 #include "chip.h"
 #include "up_arch.h"
-#include "clock_internal.h"
+#include "clock/clock.h"
 #include "up_internal.h"
 
 /************************************************************

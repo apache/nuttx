@@ -45,7 +45,7 @@
 #include <nuttx/arch.h>
 #include <8052.h>
 
-#include "clock_internal.h"
+#include "clock/clock.h"
 #include "up_internal.h"
 
 /************************************************************************

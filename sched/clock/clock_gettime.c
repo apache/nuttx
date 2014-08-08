@@ -1,5 +1,5 @@
 /************************************************************************
- * sched/clock_gettime.c
+ * sched/clock/clock_gettime.c
  *
  *   Copyright (C) 2007, 2009, 2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,7 +48,7 @@
 
 #include <arch/irq.h>
 
-#include "clock_internal.h"
+#include "clock/clock.h"
 
 /************************************************************************
  * Pre-processor Definitions

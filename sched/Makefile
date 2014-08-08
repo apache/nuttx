@@ -110,10 +110,6 @@ ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 TIME_SRCS += nanosleep.c
 endif
 
-CLOCK_SRCS  = clock_initialize.c clock_settime.c clock_gettime.c clock_getres.c
-CLOCK_SRCS += clock_time2ticks.c clock_abstime2ticks.c clock_ticks2time.c
-CLOCK_SRCS += clock_gettimeofday.c clock_systimer.c
-
 ifneq ($(CONFIG_DISABLE_POSIX_TIMERS),y)
 TIMER_SRCS += timer_initialize.c timer_create.c timer_delete.c timer_getoverrun.c
 TIMER_SRCS += timer_gettime.c timer_settime.c timer_release.c
@@ -130,11 +126,12 @@ include semaphore/Make.defs
 include signal/Make.defs
 include pthread/Make.defs
 include mqueue/Make.defs
+include clock/Make.defs
 include environ/Make.defs
 
 CSRCS  = $(MISC_SRCS) $(TSK_SRCS) $(SCHED_SRCS)
-CSRCS += $(TIME_SRCS)  $(TIMER_SRCS) $(PGFILL_SRCS) $(CLOCK_SRCS)
-CSRCS +=  $(IRQ_SRCS) $(GRP_SRCS) $(WDOG_SRCS) $(SEM_SRCS) $(SIGNAL_SRCS) $(PTHREAD_SRCS) $(MQUEUE_SRCS) $(ENV_SRCS)
+CSRCS += $(TIME_SRCS)  $(TIMER_SRCS) $(PGFILL_SRCS)
+CSRCS +=  $(IRQ_SRCS) $(GRP_SRCS) $(WDOG_SRCS) $(SEM_SRCS) $(SIGNAL_SRCS) $(PTHREAD_SRCS) $(MQUEUE_SRCS) $(CLOCK_SRCS) $(ENV_SRCS)
 
 COBJS = $(CSRCS:.c=$(OBJEXT))
 

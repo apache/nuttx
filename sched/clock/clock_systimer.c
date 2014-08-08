@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/clock_systimer.c
+ * sched/clock/clock_systimer.c
  *
  *   Copyright (C) 2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -44,7 +44,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 
-#include "clock_internal.h"
+#include "clock/clock.h"
 
 /****************************************************************************
  * Pre-processor Definitions

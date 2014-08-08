@@ -51,7 +51,7 @@
 
 #include "os_internal.h"
 #include "wdog/wdog.h"
-#include "clock_internal.h"
+#include "clock/clock.h"
 
 #ifdef CONFIG_SCHED_TICKLESS
 

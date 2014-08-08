@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/clock_initialize.c
+ * sched/clock/clock_initialize.c
  *
  *   Copyright (C) 2007, 2009, 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -53,7 +53,7 @@
 #include <nuttx/time.h>
 #include <nuttx/rtc.h>
 
-#include "clock_internal.h"
+#include "clock/clock.h"
 
 /****************************************************************************
  * Definitions
