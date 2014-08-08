@@ -2505,7 +2505,10 @@ config ARCH_SIM
   </li>
 </ul>
 <p>
-  In addition, the RTOS will export the following interfaces for use by the platform-specific interval timer implementation:
+  Note that a platform-specific implementation would probably require two hardware timers: (1) A interval timer to satisfy the requirements of <a href="#uptimerstart"><code>up_timer_start()</code></a> and <a href="#uptimercancel"><code>up_timer_cancel()</code></a>, and a (2) a counter to handle the requirement of <a href="#uptimergettime"><code>up_timer_gettime()</code></a>.  Ideally, both timers would run at the rate determined by <code>CONFIG_USEC_PER_TICK</code> (and certainly never slower than that rate).
+</p>
+<p>
+  In addition to these imported interfaces, the RTOS will export the following interfaces for use by the platform-specific interval timer implementation:
 </p>
 <ul>
   <li>
