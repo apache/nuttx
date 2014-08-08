@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/irq_internal.h
+ * sched/irq/irq_dispatch.c
  *
- *   Copyright (C) 2007, 2008, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,52 +33,73 @@
  *
  ****************************************************************************/
 
-#ifndef __SCHED_IRQ_INTERNAL_H
-#define __SCHED_IRQ_INTERNAL_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <debug.h>
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
-#include <nuttx/compiler.h>
+
+#include "irq/irq.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Type Declarations
- ****************************************************************************/
-
-extern FAR xcpt_t g_irqvector[NR_IRQS+1];
-
-/****************************************************************************
- * Public Variables
+ * Private Type Declarations
  ****************************************************************************/
 
 /****************************************************************************
- * Public Function Prototypes
+ * Global Variables
  ****************************************************************************/
 
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
+/****************************************************************************
+ * Private Variables
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: irq_dispatch
+ *
+ * Description:
+ *   This function must be called from the achitecture-specific logic in
+ *   order to dispatch an interrupt to the appropriate, registered handling
+ *   logic.
+ *
+ ***************************************************************************/
+
+void irq_dispatch(int irq, FAR void *context)
 {
+  xcpt_t vector;
+
+  /* Perform some sanity checks */
+
+#if NR_IRQS > 0
+  if ((unsigned)irq >= NR_IRQS || g_irqvector[irq] == NULL)
+    {
+      vector = irq_unexpected_isr;
+    }
+  else
+    {
+      vector = g_irqvector[irq];
+    }
 #else
-#define EXTERN extern
+  vector = irq_unexpected_isr;
 #endif
 
-void weak_function irq_initialize(void);
-int irq_unexpected_isr(int irq, FAR void *context);
+  /* Then dispatch to the interrupt handler */
 
-#undef EXTERN
-#ifdef __cplusplus
+  vector(irq, context);
 }
-#endif
-
-#endif /* __SCHED_IRQ_INTERNAL_H */
 

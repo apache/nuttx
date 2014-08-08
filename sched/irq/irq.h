@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/irq_unexpectedisr.c
+ * sched/irq/irq.h
  *
- *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,56 +33,52 @@
  *
  ****************************************************************************/
 
+#ifndef __SCHED_IRQ_IRQ_H
+#define __SCHED_IRQ_IRQ_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <debug.h>
-
+#include <nuttx/arch.h>
 #include <nuttx/irq.h>
-
-#include "os_internal.h"
-#include "irq_internal.h"
+#include <nuttx/compiler.h>
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Type Declarations
+ * Public Type Declarations
+ ****************************************************************************/
+
+extern FAR xcpt_t g_irqvector[NR_IRQS+1];
+
+/****************************************************************************
+ * Public Variables
  ****************************************************************************/
 
 /****************************************************************************
- * Global Variables
+ * Public Function Prototypes
  ****************************************************************************/
 
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: irq_unexpected_isr
- *
- * Description:
- *   An interrupt has been received for an IRQ that was never registered
- *   with the system.
- *
- ****************************************************************************/
-
-int irq_unexpected_isr(int irq, FAR void *context)
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
 {
-  (void)irqsave();
-  lldbg("irq: %d\n", irq);
-  PANIC();
-  return OK; /* Won't get here */
+#else
+#define EXTERN extern
+#endif
+
+void weak_function irq_initialize(void);
+int irq_unexpected_isr(int irq, FAR void *context);
+
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* __SCHED_IRQ_IRQ_H */
+

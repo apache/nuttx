@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/irq_attach.c
+ * sched/irq/irq_attach.c
  *
  *   Copyright (C) 2007-2008, 2010, 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -41,7 +41,7 @@
 
 #include <nuttx/irq.h>
 
-#include "irq_internal.h"
+#include "irq/irq.h"
 
 /****************************************************************************
  * Definitions

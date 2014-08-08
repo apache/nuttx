@@ -48,7 +48,7 @@
 
 #include "up_arch.h"
 #include "os_internal.h"
-#include "irq_internal.h"
+#include "irq/irq.h"
 
 #include "tiva_gpio.h"
 

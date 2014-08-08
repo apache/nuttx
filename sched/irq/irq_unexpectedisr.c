@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/irq_dispatch.c
+ * sched/irq/irq_unexpectedisr.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,10 +40,11 @@
 #include <nuttx/config.h>
 
 #include <debug.h>
-#include <nuttx/arch.h>
+
 #include <nuttx/irq.h>
 
-#include "irq_internal.h"
+#include "os_internal.h"
+#include "irq/irq.h"
 
 /****************************************************************************
  * Definitions
@@ -70,36 +71,18 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: irq_dispatch
+ * Name: irq_unexpected_isr
  *
  * Description:
- *   This function must be called from the achitecture-specific logic in
- *   order to dispatch an interrupt to the appropriate, registered handling
- *   logic.
+ *   An interrupt has been received for an IRQ that was never registered
+ *   with the system.
  *
- ***************************************************************************/
+ ****************************************************************************/
 
-void irq_dispatch(int irq, FAR void *context)
+int irq_unexpected_isr(int irq, FAR void *context)
 {
-  xcpt_t vector;
-
-  /* Perform some sanity checks */
-
-#if NR_IRQS > 0
-  if ((unsigned)irq >= NR_IRQS || g_irqvector[irq] == NULL)
-    {
-      vector = irq_unexpected_isr;
-    }
-  else
-    {
-      vector = g_irqvector[irq];
-    }
-#else
-  vector = irq_unexpected_isr;
-#endif
-
-  /* Then dispatch to the interrupt handler */
-
-  vector(irq, context);
+  (void)irqsave();
+  lldbg("irq: %d\n", irq);
+  PANIC();
+  return OK; /* Won't get here */
 }
-

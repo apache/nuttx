@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/irq_initialize.c
+ * sched/irq/irq_initialize.c
  *
  *   Copyright (C) 2007-2008, 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -41,7 +41,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 
-#include "irq_internal.h"
+#include "irq/irq.h"
 
 /****************************************************************************
  * Definitions

@@ -123,8 +123,7 @@ ifeq ($(CONFIG_PAGING),y)
 PGFILL_SRCS = pg_miss.c pg_worker.c
 endif
 
-IRQ_SRCS = irq_initialize.c irq_attach.c irq_dispatch.c irq_unexpectedisr.c
-
+include irq/Make.defs
 include group/Make.defs
 include wdog/Make.defs
 include semaphore/Make.defs
@@ -134,9 +133,8 @@ include mqueue/Make.defs
 include environ/Make.defs
 
 CSRCS  = $(MISC_SRCS) $(TSK_SRCS) $(SCHED_SRCS)
-CSRCS += $(TIME_SRCS)  $(TIMER_SRCS) $(PGFILL_SRCS)
-CSRCS += $(IRQ_SRCS) $(CLOCK_SRCS)
-CSRCS += $(GRP_SRCS) $(WDOG_SRCS) $(SEM_SRCS) $(SIGNAL_SRCS) $(PTHREAD_SRCS) $(MQUEUE_SRCS) $(ENV_SRCS)
+CSRCS += $(TIME_SRCS)  $(TIMER_SRCS) $(PGFILL_SRCS) $(CLOCK_SRCS)
+CSRCS +=  $(IRQ_SRCS) $(GRP_SRCS) $(WDOG_SRCS) $(SEM_SRCS) $(SIGNAL_SRCS) $(PTHREAD_SRCS) $(MQUEUE_SRCS) $(ENV_SRCS)
 
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
