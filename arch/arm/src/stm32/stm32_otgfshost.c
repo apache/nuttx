@@ -151,8 +151,8 @@
 
 #define STM32_READY_DELAY         200000 /* In loop counts */
 #define STM32_FLUSH_DELAY         200000 /* In loop counts */
-#define STM32_SETUP_DELAY         (5000 / MSEC_PER_TICK) /* 5 seconds in system ticks */
-#define STM32_DATANAK_DELAY       (5000 / MSEC_PER_TICK) /* 5 seconds in system ticks */
+#define STM32_SETUP_DELAY         SEC2TICK(5) /* 5 seconds in system ticks */
+#define STM32_DATANAK_DELAY       SEC2TICK(5) /* 5 seconds in system ticks */
 
 /* Ever-present MIN/MAX macros */
 
