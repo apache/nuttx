@@ -142,10 +142,10 @@
 /* Delays ***************************************************************************/
 /* All values will be increased by one system timer tick (probably 10MS). */
 
-#define TC_PENUP_POLL_TICKS   (100 / MSEC_PER_TICK) /* IDLE polling rate: 100 MSec */
-#define TC_PENDOWN_POLL_TICKS (60 / MSEC_PER_TICK)  /* Active polling rate: 60 MSec */
-#define TC_DEBOUNCE_TICKS     (30 / MSEC_PER_TICK)  /* Delay before re-sampling: 30 MSec */
-#define TC_SAMPLE_TICKS       (4 / MSEC_PER_TICK)   /* Delay for A/D sampling: 4 MSec */
+#define TC_PENUP_POLL_TICKS   MSEC2TICK(100) /* IDLE polling rate: 100 MSec */
+#define TC_PENDOWN_POLL_TICKS MSEC2TICK(60)  /* Active polling rate: 60 MSec */
+#define TC_DEBOUNCE_TICKS     MSEC2TICK(30)  /* Delay before re-sampling: 30 MSec */
+#define TC_SAMPLE_TICKS       MSEC2TICK(4)   /* Delay for A/D sampling: 4 MSec */
 #define TC_RESAMPLE_TICKS     TC_SAMPLE_TICKS
 
 /************************************************************************************
