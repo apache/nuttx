@@ -160,6 +160,21 @@ void sam_tc_free(TC_HANDLE handle);
 void sam_tc_start(TC_HANDLE handle);
 
 /****************************************************************************
+ * Name: sam_tc_stop
+ *
+ * Description:
+ *   Stop TC Channel.  Disables the timer clock, stopping the counting.
+ *
+ * Input Parameters:
+ *   handle Channel handle previously allocated by sam_tc_allocate()
+ *
+ * Returned Value:
+ *
+ ****************************************************************************/
+
+void sam_tc_stop(TC_HANDLE handle);
+
+/****************************************************************************
  * Name: sam_tc_attach/sam_tc_detach
  *
  * Description:
@@ -187,7 +202,7 @@ tc_handler_t sam_tc_attach(TC_HANDLE handle, tc_handler_t handler,
 #define sam_tc_detach(h)  sam_tc_attach(h, NULL, NULL, 0)
 
 /****************************************************************************
- * Name: sam_tc_pending
+ * Name: sam_tc_getpending
  *
  * Description:
  *   Return the current contents of the interrutp status register, clearing
@@ -201,22 +216,7 @@ tc_handler_t sam_tc_attach(TC_HANDLE handle, tc_handler_t handler,
  *
  ****************************************************************************/
 
-uint32_t sam_tc_pending(TC_HANDLE handle);
-
-/****************************************************************************
- * Name: sam_tc_stop
- *
- * Description:
- *   Stop TC Channel.  Disables the timer clock, stopping the counting.
- *
- * Input Parameters:
- *   handle Channel handle previously allocated by sam_tc_allocate()
- *
- * Returned Value:
- *
- ****************************************************************************/
-
-void sam_tc_stop(TC_HANDLE handle);
+uint32_t sam_tc_getpending(TC_HANDLE handle);
 
 /****************************************************************************
  * Name: sam_tc_setregister
