@@ -8076,3 +8076,6 @@
 	  header files under sched/.  There have been some sneak inclusion paths
 	  via os_internal.h, so expect a few compilation errors for some
 	  architectures (2014-8-8).
+	* Documentation/NuttxPortingGuide.html, arch/sim/src/up_tickless.c, and
+	  include/nuttx/arch.h: Fix errors in documentation and comments related
+	  to the Tickless OS.  From Vijay Kumar (2014-9-9).
