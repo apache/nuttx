@@ -178,8 +178,8 @@ int up_timer_gettime(FAR struct timespec *ts)
  * Description:
  *   Cancel the interval timer and return the time remaining on the timer.
  *   These two steps need to be as nearly atomic as possible.
- *   up_timer_expiration() will not be called unless the timer is restarted
- *   with up_timer_start().
+ *   sched_timer_expiration() will not be called unless the timer is
+ *   restarted with up_timer_start().
  *
  *   If, as a race condition, the timer has already expired when this
  *   function is called, then that pending interrupt must be cleared so
@@ -231,14 +231,15 @@ int up_timer_cancel(FAR struct timespec *ts)
  * Name: up_timer_start
  *
  * Description:
- *   Start the interval timer.  up_timer_expiration() will be called at the
- *   completion of the timeout (unless up_timer_cancel is called to stop
- *   the timing.
+ *   Start the interval timer.  sched_timer_expiration() will be
+ *   called at the completion of the timeout (unless up_timer_cancel
+ *   is called to stop the timing.
  *
  *   Provided by platform-specific code and called from the RTOS base code.
  *
  * Input Parameters:
- *   ts - Provides the time interval until up_timer_expiration() is called.
+ *   ts - Provides the time interval until sched_timer_expiration() is
+ *        called.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
