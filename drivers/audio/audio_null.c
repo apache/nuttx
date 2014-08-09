@@ -650,7 +650,7 @@ static int null_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
                                 FAR struct ap_buffer_s *apb)
 {
   FAR struct null_dev_s *priv = (FAR struct null_dev_s *)dev;
-  bool final;
+  bool done;
 
   audvdbg("apb=%p curbyte=%d nbytes=%d\n", apb, apb->curbyte, apb->nbytes);
 
