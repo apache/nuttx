@@ -54,9 +54,6 @@ include clock/Make.defs
 include timer/Make.defs
 include environ/Make.defs
 
-# REVISIT
-TSK_SRCS += exit.c
-
 ASRCS =
 
 CSRCS  = $(INIT_SRCS) $(IRQ_SRCS) $(PG_SRCS) $(GRP_SRCS) $(SCHED_SRCS)
