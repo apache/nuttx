@@ -8079,3 +8079,7 @@
 	* Documentation/NuttxPortingGuide.html, arch/sim/src/up_tickless.c, and
 	  include/nuttx/arch.h: Fix errors in documentation and comments related
 	  to the Tickless OS.  From Vijay Kumar (2014-9-9).
+	* arch/arm/src/sama5/sam_tc.c and .h: Can now handle non-constant
+	  BOARD_MCK_FREQUENCY. Also now supports methods to attach user
+	  interrupt handlers (2014-8-9).
+	* drivers/audio/audio_null.c: Fix an error in a variable name (2014-8-9).
