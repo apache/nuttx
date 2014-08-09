@@ -3564,16 +3564,16 @@ if SCHED_TICKLESS
 
 config SAMA5_TICKLESS_ONESHOT
 	int "Tickless one-shot timer channel"
-	range 0 8
 	default 0
+	range 0 8
 	---help---
 		If the Tickless OS feature is enabled, the one clock must be
 		assigned to provided the one-shot timer needed by the OS.
 
 config SAMA5_TICKLESS_FREERUN
 	int "Tickless free-running timer channel"
+	default 1
 	range 0 8
-	default 0
 	---help---
 		If the Tickless OS feature is enabled, the one clock must be
 		assigned to provided the free-running timer needed by the OS.

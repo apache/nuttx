@@ -134,6 +134,7 @@ config ARCH_CHIP_SAMA5
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_LOWVECTORS
 	select ARCH_HAVE_I2CRESET
+	select ARCH_HAVE_TICKLESS
 	---help---
 		Atmel SAMA5 (ARM Cortex-A5)
 
