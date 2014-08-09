@@ -2569,7 +2569,7 @@ int up_timer_gettime(FAR struct timespec *ts);
 int up_timer_cancel(FAR struct timespec *ts);
 </ul>
 <p><b>Description</b>:</p>
-  Cancel the interval timer and return the time remaining on the timer. These two steps need to be as nearly atomic as possible. <code>up_timer_expiration()</code> will not be called unless the timer is restarted with <code>up_timer_start()</code>. If, as a race condition, the timer has already expired when this function is called, then that pending interrupt must be cleared so that <code>up_timer_expiration()</code> is not called spuriously and the remaining time of zero should be returned.
+  Cancel the interval timer and return the time remaining on the timer. These two steps need to be as nearly atomic as possible. <code>sched_timer_expiration()</code> will not be called unless the timer is restarted with <code>up_timer_start()</code>. If, as a race condition, the timer has already expired when this function is called, then that pending interrupt must be cleared so that <code>sched_timer_expiration()</code> is not called spuriously and the remaining time of zero should be returned.
 <ul>
 </ul>
 <p><b>Input Parameters</b>:</p>
@@ -2592,12 +2592,12 @@ int up_timer_cancel(FAR struct timespec *ts);
 int up_timer_start(FAR const struct timespec *ts);
 </ul>
 <p><b>Description</b>:</p>
-  Start the interval timer. <code>up_timer_expiration()</code> will be called at the completion of the timeout (unless <code>up_timer_cancel()</code> is called to stop the timing).
+  Start the interval timer. <code>sched_timer_expiration()</code> will be called at the completion of the timeout (unless <code>up_timer_cancel()</code> is called to stop the timing).
 <ul>
 </ul>
 <p><b>Input Parameters</b>:</p>
 <ul>
-  <li><code>ts</code>: Provides the time interval until <code>up_timer_expiration()</code> is called.</li>
+  <li><code>ts</code>: Provides the time interval until <code>sched_timer_expiration()</code> is called.</li>
 </ul>
 <p><b>Returned Value</b>:</p>
 <ul>
