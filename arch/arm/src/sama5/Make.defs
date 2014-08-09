@@ -255,6 +255,9 @@ CHIP_CSRCS += sam_tc.c
 ifeq ($(CONFIG_SAMA5_ONESHOT),y)
 CHIP_CSRCS += sam_oneshot.c
 endif
+ifeq ($(CONFIG_SAMA5_FREERUN),y)
+CHIP_CSRCS += sam_freerun.c
+endif
 endif
 
 ifeq ($(CONFIG_SAMA5_EBICS0_NAND),y)
