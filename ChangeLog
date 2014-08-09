@@ -8088,3 +8088,6 @@
 	  .h, and sam_adc.c: Add support for a one-shot timer wrapper around
 	  the low-level timer/counter logic.  This also involved several changes
 	  that rippled into the ADC driver (untested) (2014-8-9).
+	* arch/arm/src/sama5/sam_freerun.c, .h, Kconfig, and Make.defs: Add
+	  support for a free-running timer wrapper around the low-level
+	  timer/counter logic (2014-8-9).
