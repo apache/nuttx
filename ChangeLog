@@ -8082,4 +8082,9 @@
 	* arch/arm/src/sama5/sam_tc.c and .h: Can now handle non-constant
 	  BOARD_MCK_FREQUENCY. Also now supports methods to attach user
 	  interrupt handlers (2014-8-9).
-	* drivers/audio/audio_null.c: Fix an error in a variable name (2014-8-9).
+	* drivers/audio/audio_null.c: Fix an error in a variable name
+	  (2014-8-9).
+	* arch/arm/src/sama5/sam_oneshot.c, .h, Kconfig, Make.defs, sam_tc.c,
+	  .h, and sam_adc.c: Add support for a one-shot timer wrapper around
+	  the low-level timer/counter logic.  This also involved several changes
+	  that rippled into the ADC driver (untested) (2014-8-9).
