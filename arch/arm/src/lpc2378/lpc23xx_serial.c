@@ -60,7 +60,6 @@
 
 #include "chip.h"
 #include "up_arch.h"
-#include "os_internal.h"
 
 #include "internal.h"
 #include "lpc23xx_scb.h"

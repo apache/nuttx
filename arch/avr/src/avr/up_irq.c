@@ -49,7 +49,6 @@
 #include <avr/io.h>
 
 #include "up_arch.h"
-#include "os_internal.h"
 #include "up_internal.h"
 
 /****************************************************************************

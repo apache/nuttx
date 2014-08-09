@@ -70,7 +70,6 @@
 #include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
-#include "os_internal.h"
 
 #include "lpc43_syscon.h"
 #include "lpc43_pinconn.h"

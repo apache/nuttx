@@ -45,7 +45,6 @@
 #include <nuttx/arch.h>
 
 #include "chip/chip.h"
-#include "os_internal.h"
 #include "up_internal.h"
 
 /***************************************************************************

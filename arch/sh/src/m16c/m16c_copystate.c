@@ -42,7 +42,8 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "os_internal.h"
+#include <arch/irq.h>
+
 #include "up_internal.h"
 
 /****************************************************************************

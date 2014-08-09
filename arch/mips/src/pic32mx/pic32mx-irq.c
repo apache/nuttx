@@ -51,7 +51,6 @@
 #include <arch/pic32mx/cp0.h>
 
 #include "up_arch.h"
-#include "os_internal.h"
 #include "up_internal.h"
 
 #include "pic32mx-int.h"

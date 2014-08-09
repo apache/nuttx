@@ -56,7 +56,6 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
-#include "os_internal.h"
 
 #include "kl_config.h"
 #include "kl_lowputc.h"

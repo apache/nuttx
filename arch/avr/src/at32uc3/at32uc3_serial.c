@@ -59,7 +59,6 @@
 #include "at32uc3_usart.h"
 #include "up_arch.h"
 #include "up_internal.h"
-#include "os_internal.h"
 #include "at32uc3_internal.h"
 
 /****************************************************************************

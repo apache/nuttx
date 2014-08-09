@@ -64,7 +64,6 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
-#include "os_internal.h"
 
 #include "chip.h"
 #include "chip/lpc17_syscon.h"

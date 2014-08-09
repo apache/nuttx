@@ -54,7 +54,6 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
-#include "os_internal.h"
 
 #include "chip.h"
 #include "stm32.h"
