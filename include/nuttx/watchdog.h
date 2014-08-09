@@ -197,7 +197,8 @@ struct watchdog_lowerhalf_s
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -235,8 +236,8 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN FAR void *watchdog_register(FAR const char *path,
-                                   FAR struct watchdog_lowerhalf_s *lower);
+FAR void *watchdog_register(FAR const char *path,
+                            FAR struct watchdog_lowerhalf_s *lower);
 
 /****************************************************************************
  * Name: watchdog_unregister
@@ -253,7 +254,7 @@ EXTERN FAR void *watchdog_register(FAR const char *path,
  *
  ****************************************************************************/
 
-EXTERN void watchdog_unregister(FAR void *handle);
+void watchdog_unregister(FAR void *handle);
 
 /****************************************************************************
  * Platform-Independent "Lower-Half" Watchdog Driver Interfaces
@@ -282,7 +283,7 @@ EXTERN void watchdog_unregister(FAR void *handle);
  *
  ****************************************************************************/
 
-EXTERN int up_wdginitialize(void);
+int up_wdginitialize(void);
 
 #undef EXTERN
 #ifdef __cplusplus

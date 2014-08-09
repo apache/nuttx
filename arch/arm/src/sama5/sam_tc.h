@@ -55,12 +55,15 @@
 
 /* The timer/counter and channel arguments to sam_tc_allocate() */
 
-#define TC_CHAN0     0
+#define TC_CHAN0     0  /* TC0 */
 #define TC_CHAN1     1
 #define TC_CHAN2     2
-#define TC_CHAN3     3
+#define TC_CHAN3     3  /* TC1 */
 #define TC_CHAN4     4
 #define TC_CHAN5     5
+#define TC_CHAN6     6  /* TC2 */
+#define TC_CHAN7     7
+#define TC_CHAN8     8
 
 /* Register identifier used with sam_tc_setregister */
 
@@ -71,8 +74,20 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+/* An opaque handle used to represent a timer channel */
 
 typedef void *TC_HANDLE;
+
+/* Timer interrupt callback.  When a timer interrup expires, the client will
+ * receive:
+ *
+ *   handle - The handle that represents the timer state
+ *   arg    - An opaque argument provided when the interrupt was registered
+ *   sr     - The value of the timer interrupt status register at the time
+ *            that the interrupt occurred.
+ */
+
+typedef void (*tc_handler_t)(TC_HANDLE handle, void *arg, uint32_t sr);
 
 /****************************************************************************
  * Public Data
@@ -145,6 +160,33 @@ void sam_tc_free(TC_HANDLE handle);
 void sam_tc_start(TC_HANDLE handle);
 
 /****************************************************************************
+ * Name: sam_tc_attach/sam_tc_detach
+ *
+ * Description:
+ *   Attach or detach an interrupt handler to the timer interrupt.  The
+ *   interrupt is detached if the handler argument is NULL.
+ *
+ * Input Parameters:
+ *   handle  The handle that represents the timer state
+ *   handler The interrupt handler that will be invoked when the interrupt
+ *           condition occurs
+ *   arg     An opaque argument that will be provided when the interrupt
+ *           handler callback is executed.  Ignored if handler is NULL.
+ *   mask    The value of the timer interrupt mask register that defines
+ *           which interrupts should be disabled.  Ignored if handler is
+ *           NULL.
+ *
+ * Returned Value:
+ *   The address of the previous handler, if any.
+ *
+ ****************************************************************************/
+
+tc_handler_t sam_tc_attach(TC_HANDLE handle, tc_handler_t handler,
+                           void *arg, uint32_t mask);
+
+#define sam_tc_detach(h)  sam_tc_attach(h, NULL, NULL, 0)
+
+/****************************************************************************
  * Name: sam_tc_stop
  *
  * Description:
@@ -166,7 +208,7 @@ void sam_tc_stop(TC_HANDLE handle);
  *    Set TC_RA, TC_RB, or TC_RB using the provided divisor.  The actual
  *    setting in the register will be the TC input frequency divided by
  *    the provided divider (which should derive from the divider returned
- *    by sam_tc_divider).
+ *    by sam_tc_divisor).
  *
  *
  * Input Parameters:
@@ -206,7 +248,7 @@ uint32_t sam_tc_frequency(void);
  *     (Ftc / (div * 65536)) <= freq <= (Ftc / dev)
  *
  *   where:
- *     freq - the desitred frequency
+ *     freq - the desired frequency
  *     Ftc  - The timer/counter input frequency
  *     div  - With DIV being the highest possible value.
  *
