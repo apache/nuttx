@@ -58,7 +58,6 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
-#include "os_internal.h"
 #include "atmega_internal.h"
 
 /****************************************************************************

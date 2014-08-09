@@ -140,7 +140,6 @@ void up_timer_initialize(void)
   tmr_putreg32(0, LPC214X_TMR_PR_OFFSET);
 
   /* Set timer match registger to get a TICK_PER_SEC rate
-   * See arch/board.h and sched/os_internal.h
    */
 
   tmr_putreg32(LPC214X_PCLKFREQ/TICK_PER_SEC, LPC214X_TMR_MR0_OFFSET);

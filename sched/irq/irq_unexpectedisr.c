@@ -43,7 +43,6 @@
 
 #include <nuttx/irq.h>
 
-#include "os_internal.h"
 #include "irq/irq.h"
 
 /****************************************************************************

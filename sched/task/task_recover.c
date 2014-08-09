@@ -44,7 +44,6 @@
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 
-#include "os_internal.h"
 #include "mqueue/mqueue.h"
 #include "task/task.h"
 

@@ -50,7 +50,6 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
 
-#include "os_internal.h"
 #include "signal/signal.h"
 
 /************************************************************************

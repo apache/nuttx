@@ -49,7 +49,6 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
 
-#include "os_internal.h"
 #include "group/group.h"
 
 #if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0

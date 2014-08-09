@@ -46,6 +46,7 @@
 
 #include <nuttx/kmalloc.h>
 
+#include "sched/sched.h"
 #include "group/group.h"
 #include "environ/environ.h"
 

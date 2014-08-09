@@ -42,7 +42,6 @@
 
 #include <arch/arch.h>
 #include <nuttx/sched.h>
-#include <os_internal.h>
 
 
 void nuttx_arch_init(void)

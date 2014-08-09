@@ -53,7 +53,6 @@
 
 #include "svcall.h"
 #include "exc_return.h"
-#include "os_internal.h"
 #include "up_internal.h"
 
 /****************************************************************************

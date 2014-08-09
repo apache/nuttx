@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 
-#include "os_internal.h"
 #include "signal/signal.h"
 
 /************************************************************************

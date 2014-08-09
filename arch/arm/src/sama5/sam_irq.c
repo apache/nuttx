@@ -47,7 +47,6 @@
 #include <arch/irq.h>
 
 #include "up_arch.h"
-#include "os_internal.h"
 #include "up_internal.h"
 
 #ifdef CONFIG_SAMA5_PIO_IRQ

@@ -41,7 +41,8 @@
 
 #include <stdint.h>
 
-#include "os_internal.h"
+#include <arch/irq.h>
+
 #include "up_internal.h"
 
 #ifdef CONFIG_ARCH_FPU

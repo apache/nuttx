@@ -44,7 +44,6 @@
 #include <string.h>
 #include <errno.h>
 
-#include "os_internal.h"
 #include "clock/clock.h"
 #include "signal/signal.h"
 #include "timer/timer.h"

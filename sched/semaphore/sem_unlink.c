@@ -44,7 +44,8 @@
 #include <sched.h>
 #include <queue.h>
 
-#include "os_internal.h"
+#include <nuttx/kmalloc.h>
+
 #include "semaphore/semaphore.h"
 
 /****************************************************************************

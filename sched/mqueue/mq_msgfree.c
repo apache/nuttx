@@ -40,8 +40,10 @@
 #include <nuttx/config.h>
 
 #include <queue.h>
+
 #include <nuttx/arch.h>
-#include "os_internal.h"
+#include <nuttx/kmalloc.h>
+
 #include "mqueue/mqueue.h"
 
 /************************************************************************

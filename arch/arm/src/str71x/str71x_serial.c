@@ -55,7 +55,6 @@
 #include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
-#include "os_internal.h"
 
 #include "str71x_internal.h"
 

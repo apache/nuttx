@@ -172,7 +172,6 @@ void up_timer_initialize(void)
   tmr_putreg32(0, TMR_PC_OFFSET);
 
   /* Set timer match register to get a TICK_PER_SEC rate See arch/board.h and
-   * sched/os_internal.h
    */
 
   tmr_putreg32(T0_TICKS_COUNT, TMR_MR0_OFFSET); /* 10ms Intterrupt */

@@ -43,7 +43,9 @@
 
 #include <sched.h>
 #include <errno.h>
-#include "os_internal.h"
+
+#include <nuttx/kmalloc.h>
+
 #include "environ/environ.h"
 
 /****************************************************************************

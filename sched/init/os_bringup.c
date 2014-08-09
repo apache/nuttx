@@ -53,7 +53,6 @@
 #include <nuttx/kthread.h>
 #include <nuttx/userspace.h>
 
-#include "os_internal.h"
 #ifdef CONFIG_PAGING
 # include "paging/paging.h"
 #endif

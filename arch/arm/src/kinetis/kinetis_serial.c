@@ -56,7 +56,6 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
-#include "os_internal.h"
 
 #include "kinetis_config.h"
 #include "chip.h"

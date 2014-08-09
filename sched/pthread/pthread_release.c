@@ -42,7 +42,8 @@
 #include <sched.h>
 #include <debug.h>
 
-#include "os_internal.h"
+#include <nuttx/kmalloc.h>
+
 #include "pthread/pthread.h"
 
 /************************************************************************

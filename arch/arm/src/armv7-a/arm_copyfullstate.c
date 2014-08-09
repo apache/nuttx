@@ -40,8 +40,8 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <arch/irq.h>
 
-#include "os_internal.h"
 #include "up_internal.h"
 
 /****************************************************************************

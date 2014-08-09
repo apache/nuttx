@@ -56,7 +56,6 @@
 #include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
-#include "os_internal.h"
 #include "m16c_uart.h"
 
 /* Is there any serial support?  This might be the case if the board does

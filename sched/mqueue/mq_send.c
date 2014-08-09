@@ -46,7 +46,6 @@
 
 #include  <nuttx/arch.h>
 
-#include  "os_internal.h"
 #include  "mqueue/mqueue.h"
 
 /****************************************************************************

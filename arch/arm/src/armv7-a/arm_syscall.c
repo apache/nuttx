@@ -42,8 +42,9 @@
 #include <stdint.h>
 #include <debug.h>
 
+#include <arch/irq.h>
+
 #include "up_arch.h"
-#include "os_internal.h"
 #include "up_internal.h"
 
 /****************************************************************************

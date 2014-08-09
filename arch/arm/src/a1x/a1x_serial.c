@@ -59,7 +59,6 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "os_internal.h"
 #include "up_internal.h"
 
 #include "chip.h"

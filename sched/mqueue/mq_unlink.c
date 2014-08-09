@@ -43,7 +43,6 @@
 #include <mqueue.h>
 #include <sched.h>
 
-#include "os_internal.h"
 #include "mqueue/mqueue.h"
 
 /************************************************************************

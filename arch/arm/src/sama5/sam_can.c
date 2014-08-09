@@ -65,7 +65,6 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
-#include "os_internal.h"
 
 #include "chip/sam_pinmap.h"
 #include "sam_periphclks.h"

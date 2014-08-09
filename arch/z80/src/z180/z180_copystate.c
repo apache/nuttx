@@ -42,7 +42,6 @@
 #include <arch/irq.h>
 
 #include "chip/switch.h"
-#include "os_internal.h"
 #include "up_internal.h"
 
 /****************************************************************************

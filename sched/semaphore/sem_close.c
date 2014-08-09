@@ -43,7 +43,8 @@
 #include <semaphore.h>
 #include <sched.h>
 
-#include "os_internal.h"
+#include <nuttx/kmalloc.h>
+
 #include "semaphore/semaphore.h"
 
 /****************************************************************************

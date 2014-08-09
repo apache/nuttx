@@ -42,7 +42,6 @@
 
 #include <nuttx/config.h>
 #include <nuttx/sched.h>
-#include "os_internal.h"
 
 /****************************************************************************
  * Definitions

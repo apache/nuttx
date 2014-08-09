@@ -48,7 +48,6 @@
 #include <arch/irq.h>
 
 #include "up_arch.h"
-#include "os_internal.h"
 #include "up_internal.h"
 #include "m9s12_internal.h"
 
