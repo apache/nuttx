@@ -8057,3 +8057,22 @@
 	  (2014-8-8).
 	* sched/timer: Move POSIX timer files from sched/ to sched/timer
 	  (2014-8-8).
+	* sched/paging: Move page fill sources from sched/ to sched/paging
+	  (2014-8-8).
+	* sched/init: Move initialization functions from sched/ to sched/init
+	  (2014-8-8).
+	* sched/errno: Move errno related files from sched/ to sched/errno
+	  (2014-8-8).
+	* sched/task: Move task control files from sched/ to sched/task
+	  (2014-8-8).
+	* sched/: Move a few files in sched/ that did not seem to have a home to
+	  sched/signal and sched/task (2014-8-8).
+	* sched/sched: Move scheduler files from sched/ to sched/sched
+	  (2014-8-8).
+	* (Many files): Replace os_internal.h with sched/sched.h in files that
+	  actually reference something in sched.h (2014-8-8).
+	* sched/task/exit.c: Move sched/exit.c to sched/task/exit.c (2014-8-8).
+	* (Many files): Remove os_internal.h it has been replace by several new
+	  header files under sched/.  There have been some sneak inclusion paths
+	  via os_internal.h, so expect a few compilation errors for some
+	  architectures (2014-8-8).
