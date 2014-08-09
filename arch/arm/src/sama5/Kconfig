@@ -89,6 +89,10 @@ config SAMA5_HAVE_SPI2
 	bool
 	default n
 
+config SAMA5_HAVE_TC
+	bool
+	default n
+
 config SAMA5_HAVE_TC1
 	bool
 	default n
@@ -369,16 +373,19 @@ config SAMA5_SPI2
 config SAMA5_TC0
 	bool "Timer Counter 0 (ch. 0, 1, 2) (TC0)"
 	default n
+	select SAMA5_HAVE_TC
 
 config SAMA5_TC1
 	bool "Timer Counter 1 (ch. 3, 4, 5) (TC1)"
-	depends on SAMA5_HAVE_TC1
 	default n
+	depends on SAMA5_HAVE_TC1
+	select SAMA5_HAVE_TC
 
 config SAMA5_TC2
 	bool "Timer Counter 2 (ch. 6, 7, 8) (TC2)"
-	depends on SAMA5_HAVE_TC2
 	default n
+	depends on SAMA5_HAVE_TC2
+	select SAMA5_HAVE_TC
 
 config SAMA5_PWM
 	bool "Pulse Width Modulation Controller (PWM)"
@@ -3237,7 +3244,7 @@ config SAMA5_ADC_ADTRG
 		A-to-D Conversion is initiated an event on the ADTRG pin.
 
 config SAMA5_ADC_TIOATRIG
-	bool "TC0 ouput A trigger"
+	bool "TC0 output A trigger"
 	depends on SAMA5_TC0
 	---help---
 		A-to-D Conversion is initiated the A output from one of
@@ -3340,140 +3347,6 @@ config SAMA5_ADC_REGDEBUG
 
 endmenu # ADC Configuration
 
-if SAMA5_TC0 || SAMA5_TC1 || SAMA5_TC2
-menu "Timer/counter Configuration"
-
-if SAMA5_TC0
-
-config SAMA5_TC0_CLK0
-	bool "Enable TC0 channel 0 clock input pin"
-	default n
-
-config SAMA5_TC0_TIOA0
-	bool "Enable TC0 channel 0 ouput A"
-	default n
-
-config SAMA5_TC0_TIOB0
-	bool "Enable TC0 channel 0 ouput B"
-	default n
-
-config SAMA5_TC0_CLK1
-	bool "Enable TC0 channel 1 clock input pin"
-	default n
-
-config SAMA5_TC0_TIOA1
-	bool "Enable TC0 channel 1 ouput A"
-	default n
-
-config SAMA5_TC0_TIOB1
-	bool "Enable TC0 channel 1 ouput B"
-	default n
-
-config SAMA5_TC0_CLK2
-	bool "Enable TC0 channel 2 clock input pin"
-	default n
-
-config SAMA5_TC0_TIOA2
-	bool "Enable TC0 channel 2 ouput A"
-	default n
-
-config SAMA5_TC0_TIOB2
-	bool "Enable TC0 channel 2 ouput B"
-	default n
-
-endif # SAMA5_TC0
-
-if SAMA5_TC1
-
-config SAMA5_TC1_CLK3
-	bool "Enable TC1 channel 3 clock input pin"
-	default n
-
-config SAMA5_TC1_TIOA3
-	bool "Enable TC1 channel 3 ouput A"
-	default n
-
-config SAMA5_TC1_TIOB3
-	bool "Enable TC1 channel 3 ouput B"
-	default n
-
-config SAMA5_TC1_CLK4
-	bool "Enable TC1 channel 4 clock input pin"
-	default n
-
-config SAMA5_TC1_TIOA4
-	bool "Enable TC1 channel 4 ouput A"
-	default n
-
-config SAMA5_TC1_TIOB4
-	bool "Enable TC1 channel 4 ouput B"
-	default n
-
-config SAMA5_TC1_CLK5
-	bool "Enable TC1 channel 5 clock input pin"
-	default n
-
-config SAMA5_TC1_TIOA5
-	bool "Enable TC1 channel 5 ouput A"
-	default n
-
-config SAMA5_TC1_TIOB5
-	bool "Enable TC1 channel 5 ouput B"
-	default n
-
-endif # SAMA5_TC1
-
-if SAMA5_TC2
-
-config SAMA5_TC2_CLK6
-	bool "Enable TC2 channel 6 clock input pin"
-	default n
-
-config SAMA5_TC2_TIOA6
-	bool "Enable TC2 channel 6 ouput A"
-	default n
-
-config SAMA5_TC2_TIOB6
-	bool "Enable TC2 channel 6 ouput B"
-	default n
-
-config SAMA5_TC2_CLK7
-	bool "Enable TC2 channel 7 clock input pin"
-	default n
-
-config SAMA5_TC2_TIOA7
-	bool "Enable TC2 channel 7 ouput A"
-	default n
-
-config SAMA5_TC2_TIOB7
-	bool "Enable TC2 channel 7 ouput B"
-	default n
-
-config SAMA5_TC2_CLK8
-	bool "Enable TC2 channel 8 clock input pin"
-	default n
-
-config SAMA5_TC2_TIOA8
-	bool "Enable TC2 channel 8 ouput A"
-	default n
-
-config SAMA5_TC2_TIOB8
-	bool "Enable TC2 channel 8 ouput B"
-	default n
-
-endif # SAMA5_TC2
-
-config SAMA5_TC_REGDEBUG
-	bool "TC Register level debug"
-	depends on DEBUG
-	default n
-	---help---
-		Output detailed register-level Timer/Counter device debug information.
-		Very invasive! Requires also DEBUG.
-
-endmenu # Timer/counter Configuration
-endif # SAMA5_TC0 || SAMA5_TC1 || SAM_TC2
-
 menu "Touchscreen configuration"
 
 config SAMA5_TSD
@@ -3547,6 +3420,156 @@ config SAMA5_TSD_NPOLLWAITERS
 endif # SAMA5_TSD
 endmenu # Touchscreen Configuration
 endif # SAMA5_ADC
+
+if SAMA5_HAVE_TC
+menu "Timer/counter Configuration"
+
+if SAMA5_TC0
+
+config SAMA5_TC0_CLK0
+	bool "Enable TC0 channel 0 clock input pin"
+	default n
+
+config SAMA5_TC0_TIOA0
+	bool "Enable TC0 channel 0 output A"
+	default n
+
+config SAMA5_TC0_TIOB0
+	bool "Enable TC0 channel 0 output B"
+	default n
+
+config SAMA5_TC0_CLK1
+	bool "Enable TC0 channel 1 clock input pin"
+	default n
+
+config SAMA5_TC0_TIOA1
+	bool "Enable TC0 channel 1 output A"
+	default n
+
+config SAMA5_TC0_TIOB1
+	bool "Enable TC0 channel 1 output B"
+	default n
+
+config SAMA5_TC0_CLK2
+	bool "Enable TC0 channel 2 clock input pin"
+	default n
+
+config SAMA5_TC0_TIOA2
+	bool "Enable TC0 channel 2 output A"
+	default n
+
+config SAMA5_TC0_TIOB2
+	bool "Enable TC0 channel 2 output B"
+	default n
+
+endif # SAMA5_TC0
+
+if SAMA5_TC1
+
+config SAMA5_TC1_CLK3
+	bool "Enable TC1 channel 3 clock input pin"
+	default n
+
+config SAMA5_TC1_TIOA3
+	bool "Enable TC1 channel 3 output A"
+	default n
+
+config SAMA5_TC1_TIOB3
+	bool "Enable TC1 channel 3 output B"
+	default n
+
+config SAMA5_TC1_CLK4
+	bool "Enable TC1 channel 4 clock input pin"
+	default n
+
+config SAMA5_TC1_TIOA4
+	bool "Enable TC1 channel 4 output A"
+	default n
+
+config SAMA5_TC1_TIOB4
+	bool "Enable TC1 channel 4 output B"
+	default n
+
+config SAMA5_TC1_CLK5
+	bool "Enable TC1 channel 5 clock input pin"
+	default n
+
+config SAMA5_TC1_TIOA5
+	bool "Enable TC1 channel 5 output A"
+	default n
+
+config SAMA5_TC1_TIOB5
+	bool "Enable TC1 channel 5 output B"
+	default n
+
+endif # SAMA5_TC1
+
+if SAMA5_TC2
+
+config SAMA5_TC2_CLK6
+	bool "Enable TC2 channel 6 clock input pin"
+	default n
+
+config SAMA5_TC2_TIOA6
+	bool "Enable TC2 channel 6 output A"
+	default n
+
+config SAMA5_TC2_TIOB6
+	bool "Enable TC2 channel 6 output B"
+	default n
+
+config SAMA5_TC2_CLK7
+	bool "Enable TC2 channel 7 clock input pin"
+	default n
+
+config SAMA5_TC2_TIOA7
+	bool "Enable TC2 channel 7 output A"
+	default n
+
+config SAMA5_TC2_TIOB7
+	bool "Enable TC2 channel 7 output B"
+	default n
+
+config SAMA5_TC2_CLK8
+	bool "Enable TC2 channel 8 clock input pin"
+	default n
+
+config SAMA5_TC2_TIOA8
+	bool "Enable TC2 channel 8 output A"
+	default n
+
+config SAMA5_TC2_TIOB8
+	bool "Enable TC2 channel 8 output B"
+	default n
+
+endif # SAMA5_TC2
+
+config SAMA5_ONESHOT
+	bool "TC one-shot wrapper"
+	default n if !SCHED_TICKLESS
+	default y if SCHED_TICKLESS
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support one-shot timer.
+
+config SAMA5_TC_DEBUG
+	bool "TC debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output high level Timer/Counter device debug information.
+		Requires also DEBUG.
+
+config SAMA5_TC_REGDEBUG
+	bool "TC register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level Timer/Counter device debug
+		information. Very invasive! Requires also DEBUG.
+
+endmenu # Timer/counter Configuration
+endif # SAMA5_HAVE_TC
 
 if SAMA5_PWM
 menu "PWM configuration"

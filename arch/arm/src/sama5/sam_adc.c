@@ -1229,10 +1229,12 @@ static int sam_adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
 static int sam_adc_settimer(struct sam_adc_s *priv, uint32_t frequency,
                             int channel)
 {
+  uint32_t ftc;
   uint32_t div;
   uint32_t tcclks;
   uint32_t mode;
   uint32_t fdiv;
+  uint32_t regval;
   int ret;
 
   avdbg("frequency=%ld channel=%d\n", (long)frequency, channel);
@@ -1267,7 +1269,7 @@ static int sam_adc_settimer(struct sam_adc_s *priv, uint32_t frequency,
     }
 
   /* The divider returned by sam_tc_divisor() is the reload value that will
-   * achieve a 1HZ rate.  We need to multiply this to get the desired
+   * achieve a 1Hz rate.  We need to multiply this to get the desired
    * frequency.  sam_tc_divisor() should have already assure that we can
    * do this without overflowing a 32-bit unsigned integer.
    */
@@ -1275,12 +1277,18 @@ static int sam_adc_settimer(struct sam_adc_s *priv, uint32_t frequency,
   fdiv = div * frequency;
   DEBUGASSERT(div > 0 && div <= fdiv); /* Will check for integer overflow */
 
+  /* Calculate the actual counter value from this divider and the tc input
+   * frequency.
+   */
+
+  regval = sam_tc_frequency() / fdiv;
+
   /* Set up TC_RA and TC_RC.  The frequency is determined by RA and RC:  TIOA is
    * cleared on RA match; TIOA is set on RC match.
    */
 
-  sam_tc_setregister(priv->tc, TC_REGA, fdiv << 1);
-  sam_tc_setregister(priv->tc, TC_REGC, fdiv);
+  sam_tc_setregister(priv->tc, TC_REGA, regval >> 1);
+  sam_tc_setregister(priv->tc, TC_REGC, regval);
 
   /* And start the timer */
 
