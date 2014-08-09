@@ -52,14 +52,11 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <string.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/arch.h>
-#include <arch/board/board.h>
+#include <arch/irq.h>
 
 #include "sam_oneshot.h"
 
@@ -176,8 +173,9 @@ int sam_oneshot_initialize(struct sam_oneshot_s *oneshot, int chan,
       return ret;
     }
 
-  tcvdbg("frequency=%lu, divisor=%u, cmr=%08lx\n",
-         (unsigned long)frequency, oneshot->divisor, (unsigned long)cmr);
+  tcvdbg("frequency=%lu, divisor=%lu, cmr=%08lx\n",
+         (unsigned long)frequency, (unsigned long)oneshot->divisor,
+         (unsigned long)cmr);
 
   /* Allocate the timer/counter and select its mode of operation
    *
@@ -190,7 +188,7 @@ int sam_oneshot_initialize(struct sam_oneshot_s *oneshot, int chan,
    *   TC_CMR_EEVT_TIOB    - ???? REVISIT
    *   TC_CMR_ENET=0       - External event trigger disabled
    *   TC_CMR_WAVSEL_UPRC  - TC_CV is incremented from 0 to the value of RC,
-   *                       then automatically reset on a RC Compare
+   *                         then automatically reset on a RC Compare
    *   TC_CMR_WAVE         - Waveform mode
    *   TC_CMR_ACPA_NONE    - RA compare has no effect on TIOA
    *   TC_CMR_ACPC_NONE    - RC compare has no effect on TIOA
@@ -254,7 +252,7 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot, oneshot_handler_t handler,
   uint64_t regval;
   irqstate_t flags;
 
-  tcvdbg("handler=%p arg=%p, ts=(%lu, %lu)\n", 
+  tcvdbg("handler=%p arg=%p, ts=(%lu, %lu)\n",
          handler, arg, (unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec);
   DEBUGASSERT(oneshot && handler && ts);
 
@@ -278,7 +276,7 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot, oneshot_handler_t handler,
 
   tcdbg("usec=%llu regval=%08llx\n", usec, regval);
   DEBUGASSERT(regval <= UINT32_MAX);
-  
+
   /* Set up to receive the callback when the interrupt occurs */
 
   (void)sam_tc_attach(oneshot->handle, sam_oneshot_handler, oneshot,
@@ -289,6 +287,10 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot, oneshot_handler_t handler,
    */
 
   sam_tc_setregister(oneshot->handle, TC_REGC, regval);
+
+  /* Start the counter */
+
+  sam_tc_start(oneshot->handle);
 
   /* Enable interrupts.  We should get the callback when the interrupt
    * occurs.
@@ -337,8 +339,14 @@ int sam_oneshot_cancel(struct sam_oneshot_s *oneshot, struct timespec *ts)
   count = sam_tc_getcounter(oneshot->handle);
   rc    = sam_tc_getregister(oneshot->handle, TC_REGC);
 
-  /* Now we can disable the interrupt and stop the clock */
+  /* Now we can disable the interrupt and stop the timer.
+   *
+   * REVISIT: The assertion is there because I do no not know if the
+   * counter will be reset when the RC match occurs.  The counter
+   * clock will be disabled, so I am hoping not.
+   */
 
+  DEBUGASSERT(count > 0 || (sam_tc_getpending(oneshot->handle) & TC_INT_CPCS) == 0);
   sam_tc_attach(oneshot->handle, NULL, NULL, 0);
   sam_tc_stop(oneshot->handle);
 
@@ -358,7 +366,7 @@ int sam_oneshot_cancel(struct sam_oneshot_s *oneshot, struct timespec *ts)
 
   sec         = usec / 1000000;
   ts->tv_sec  = sec;
-  ts->tv_nsec = ((usec) - (sec * 1000000)) / 1000;
+  ts->tv_nsec = ((usec) - (sec * 1000000)) * 1000;
 
   tcvdbg("remaining (%lu, %lu)\n",
          (unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec);

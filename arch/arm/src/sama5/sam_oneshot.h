@@ -119,7 +119,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int sam_oneshot_initialize(struct sam_oneshot_s *oneshot, int tc,
+int sam_oneshot_initialize(struct sam_oneshot_s *oneshot, int chan,
                            uint16_t resolution);
 
 /****************************************************************************
@@ -173,4 +173,3 @@ int sam_oneshot_cancel(struct sam_oneshot_s *oneshot, struct timespec *ts);
 
 #endif /* CONFIG_SAMA5_ONESHOT */
 #endif /* __ARCH_ARM_SRC_SAMA5_SAM_ONESHOT_H */
-

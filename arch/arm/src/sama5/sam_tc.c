@@ -1205,6 +1205,30 @@ void sam_tc_start(TC_HANDLE handle)
 }
 
 /****************************************************************************
+ * Name: sam_tc_stop
+ *
+ * Description:
+ *   Stop TC Channel.  Disables the timer clock, stopping the counting.
+ *
+ * Input Parameters:
+ *   handle Channel handle previously allocated by sam_tc_allocate()
+ *
+ * Returned Value:
+ *
+ ****************************************************************************/
+
+void sam_tc_stop(TC_HANDLE handle)
+{
+  struct sam_chan_s *chan = (struct sam_chan_s *)handle;
+
+  tcvdbg("Stopping channel %d inuse=%d\n", chan->chan, chan->inuse);
+  DEBUGASSERT(chan && chan->inuse);
+
+  sam_chan_putreg(chan, SAM_TC_CCR_OFFSET, TC_CCR_CLKDIS);
+  sam_regdump(chan, "Stopped");
+}
+
+/****************************************************************************
  * Name: sam_tc_attach
  *
  * Description:
@@ -1259,10 +1283,10 @@ tc_handler_t sam_tc_attach(TC_HANDLE handle, tc_handler_t handler,
 }
 
 /****************************************************************************
- * Name: sam_tc_pending
+ * Name: sam_tc_getpending
  *
  * Description:
- *   Return the current contents of the interrutp status register, clearing
+ *   Return the current contents of the interrupt status register, clearing
  *   all pending interrupts.
  *
  * Input Parameters:
@@ -1273,35 +1297,11 @@ tc_handler_t sam_tc_attach(TC_HANDLE handle, tc_handler_t handler,
  *
  ****************************************************************************/
 
-uint32_t sam_tc_pending(TC_HANDLE handle)
+uint32_t sam_tc_getpending(TC_HANDLE handle)
 {
   struct sam_chan_s *chan = (struct sam_chan_s *)handle;
   DEBUGASSERT(chan);
   return sam_chan_getreg(chan, SAM_TC_SR_OFFSET);
-}
-
-/****************************************************************************
- * Name: sam_tc_stop
- *
- * Description:
- *   Stop TC Channel.  Disables the timer clock, stopping the counting.
- *
- * Input Parameters:
- *   handle Channel handle previously allocated by sam_tc_allocate()
- *
- * Returned Value:
- *
- ****************************************************************************/
-
-void sam_tc_stop(TC_HANDLE handle)
-{
-  struct sam_chan_s *chan = (struct sam_chan_s *)handle;
-
-  tcvdbg("Stopping channel %d inuse=%d\n", chan->chan, chan->inuse);
-  DEBUGASSERT(chan && chan->inuse);
-
-  sam_chan_putreg(chan, SAM_TC_CCR_OFFSET, TC_CCR_CLKDIS);
-  sam_regdump(chan, "Stopped");
 }
 
 /****************************************************************************
