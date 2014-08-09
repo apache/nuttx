@@ -8091,3 +8091,6 @@
 	* arch/arm/src/sama5/sam_freerun.c, .h, Kconfig, and Make.defs: Add
 	  support for a free-running timer wrapper around the low-level
 	  timer/counter logic (2014-8-9).
+	* arch/arm/Kconfig, src/sama5/sam_tickless.c, Kconfig, Make.defs: Use
+	  the one-shot and free-running timers to implement tickless OS support
+	  for SAMA5 (2014-8-9).
