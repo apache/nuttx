@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/sama5/sam_adc.h
+ * arch/arm/src/sama5/sam_tc.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,7 @@
 #include "chip.h"
 #include "chip/sam_tc.h"
 
-#if defined(CONFIG_SAMA5_TC0) || defined(CONFIG_SAMA5_TC1)
+#if defined(CONFIG_SAMA5_TC0) || defined(CONFIG_SAMA5_TC1) || defined(CONFIG_SAMA5_TC2)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -78,7 +78,7 @@
 
 typedef void *TC_HANDLE;
 
-/* Timer interrupt callback.  When a timer interrup expires, the client will
+/* Timer interrupt callback.  When a timer interrupt expires, the client will
  * receive:
  *
  *   handle - The handle that represents the timer state
@@ -187,6 +187,23 @@ tc_handler_t sam_tc_attach(TC_HANDLE handle, tc_handler_t handler,
 #define sam_tc_detach(h)  sam_tc_attach(h, NULL, NULL, 0)
 
 /****************************************************************************
+ * Name: sam_tc_pending
+ *
+ * Description:
+ *   Return the current contents of the interrutp status register, clearing
+ *   all pending interrupts.
+ *
+ * Input Parameters:
+ *   handle  The handle that represents the timer state
+ *
+ * Returned Value:
+ *   The value of the channel interrupt status register.
+ *
+ ****************************************************************************/
+
+uint32_t sam_tc_pending(TC_HANDLE handle);
+
+/****************************************************************************
  * Name: sam_tc_stop
  *
  * Description:
@@ -205,21 +222,52 @@ void sam_tc_stop(TC_HANDLE handle);
  * Name: sam_tc_setregister
  *
  * Description:
- *    Set TC_RA, TC_RB, or TC_RB using the provided divisor.  The actual
- *    setting in the register will be the TC input frequency divided by
- *    the provided divider (which should derive from the divider returned
- *    by sam_tc_divisor).
- *
+ *    Set TC_REGA, TC_REGB, or TC_REGC register.
  *
  * Input Parameters:
  *   handle Channel handle previously allocated by sam_tc_allocate()
+ *   regid  One of {TC_REGA, TC_REGB, or TC_REGC}
+ *   regval Then value to set in the register
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void sam_tc_setregister(TC_HANDLE handle, int reg, unsigned int div);
+void sam_tc_setregister(TC_HANDLE handle, int regid, uint32_t regval);
+
+/****************************************************************************
+ * Name: sam_tc_getregister
+ *
+ * Description:
+ *    Get the current value of the TC_REGA, TC_REGB, or TC_REGC register.
+ *
+ * Input Parameters:
+ *   handle Channel handle previously allocated by sam_tc_allocate()
+ *   regid  One of {TC_REGA, TC_REGB, or TC_REGC}
+ *
+ * Returned Value:
+ *   The value of the specified register.
+ *
+ ****************************************************************************/
+
+uint32_t sam_tc_getregister(TC_HANDLE handle, int regid);
+
+/****************************************************************************
+ * Name: sam_tc_getcounter
+ *
+ * Description:
+ *   Return the current value of the timer counter register
+ *
+ * Input Parameters:
+ *   handle Channel handle previously allocated by sam_tc_allocate()
+ *
+ * Returned Value:
+ *  The current value of the timer counter register for this channel.
+ *
+ ****************************************************************************/
+
+uint32_t sam_tc_getcounter(TC_HANDLE handle);
 
 /****************************************************************************
  * Name: sam_tc_frequency
@@ -245,7 +293,7 @@ uint32_t sam_tc_frequency(void);
  *   Finds the best MCK divisor given the timer frequency and MCK.  The
  *   result is guaranteed to satisfy the following equation:
  *
- *     (Ftc / (div * 65536)) <= freq <= (Ftc / dev)
+ *     (Ftc / (div * 65536)) <= freq <= (Ftc / div)
  *
  *   where:
  *     freq - the desired frequency
@@ -270,6 +318,6 @@ int sam_tc_divisor(uint32_t frequency, uint32_t *div, uint32_t *tcclks);
 }
 #endif
 
-#endif /* CONFIG_SAMA5_TC0 || CONFIG_SAMA5_TC1 */
+#endif /* CONFIG_SAMA5_TC0 || CONFIG_SAMA5_TC1 || CONFIG_SAMA5_TC2 */
 #endif /* __ARCH_ARM_SRC_SAMA5_SAM_TC_H */
 

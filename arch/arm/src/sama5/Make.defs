@@ -250,11 +250,10 @@ ifeq ($(CONFIG_SAMA5_PWM),y)
 CHIP_CSRCS += sam_pwm.c
 endif
 
-ifeq ($(CONFIG_SAMA5_TC0),y)
+ifeq ($(CONFIG_SAMA5_HAVE_TC),y)
 CHIP_CSRCS += sam_tc.c
-else
-ifeq ($(CONFIG_SAMA5_TC1),y)
-CHIP_CSRCS += sam_tc.c
+ifeq ($(CONFIG_SAMA5_ONESHOT),y)
+CHIP_CSRCS += sam_oneshot.c
 endif
 endif
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_tc.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -82,12 +82,12 @@
 #  undef CONFIG_SAMA5_TC_REGDEBUG
 #endif
 
-#undef DEBUG_TC
+#undef CONFIG_SAMA5_TC_DEBUG
 #if defined(CONFIG_SAMA5_ADC) && defined(CONFIG_DEBUG_ANALOG)
-#  define DEBUG_TC 1
+#  define CONFIG_SAMA5_TC_DEBUG 1
 #endif
 
-#ifdef DEBUG_TC
+#ifdef CONFIG_SAMA5_TC_DEBUG
 #  define tcdbg    dbg
 #  define tcvdbg   vdbg
 #else
@@ -1167,8 +1167,11 @@ void sam_tc_free(TC_HANDLE handle)
   tcvdbg("Freeing %p channel=%d inuse=%d\n", chan, chan->chan, chan->inuse);
   DEBUGASSERT(chan && chan->inuse);
 
-  /* Make sure that the channel is stopped */
+  /* Make sure that interrupts are detached and disabled and that the channel
+   * is stopped and disabled.
+   */
 
+  sam_tc_attach(handle, NULL, NULL, 0);
   sam_tc_stop(handle);
 
   /* Mark the channel as available */
@@ -1256,6 +1259,28 @@ tc_handler_t sam_tc_attach(TC_HANDLE handle, tc_handler_t handler,
 }
 
 /****************************************************************************
+ * Name: sam_tc_pending
+ *
+ * Description:
+ *   Return the current contents of the interrutp status register, clearing
+ *   all pending interrupts.
+ *
+ * Input Parameters:
+ *   handle  The handle that represents the timer state
+ *
+ * Returned Value:
+ *   The value of the channel interrupt status register.
+ *
+ ****************************************************************************/
+
+uint32_t sam_tc_pending(TC_HANDLE handle)
+{
+  struct sam_chan_s *chan = (struct sam_chan_s *)handle;
+  DEBUGASSERT(chan);
+  return sam_chan_getreg(chan, SAM_TC_SR_OFFSET);
+}
+
+/****************************************************************************
  * Name: sam_tc_stop
  *
  * Description:
@@ -1283,34 +1308,72 @@ void sam_tc_stop(TC_HANDLE handle)
  * Name: sam_tc_setregister
  *
  * Description:
- *    Set TC_RA, TC_RB, or TC_RB using the provided divisor.  The actual
- *    setting in the register will be the TC input frequency (Ftc) divided by
- *    the provided divider (which should derive from the divider returned
- *    by sam_tc_divisor).
+ *    Set TC_REGA, TC_REGB, or TC_REGC register.
  *
  * Input Parameters:
  *   handle Channel handle previously allocated by sam_tc_allocate()
+ *   regid  One of {TC_REGA, TC_REGB, or TC_REGC}
+ *   regval Then value to set in the register
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void sam_tc_setregister(TC_HANDLE handle, int reg, unsigned int div)
+void sam_tc_setregister(TC_HANDLE handle, int regid, uint32_t regval)
 {
   struct sam_chan_s *chan = (struct sam_chan_s *)handle;
-  uint32_t frequency;
-  uint32_t regval;
 
-  DEBUGASSERT(reg < TC_NREGISTERS);
+  DEBUGASSERT(chan && regid < TC_NREGISTERS);
 
-  frequency = sam_tc_frequency();
-  regval    = frequency / div;
-  tcvdbg("Channel %d: Set register %d to %d / %d = %d\n",
-         chan->chan, reg, frequency, div, (unsigned int)regval);
+  tcvdbg("Channel %d: Set register RC%d to 0x08lx\n",
+         chan->chan, regid, (unsigned long)regval);
 
-  sam_chan_putreg(chan, g_regoffset[reg], regval);
+  sam_chan_putreg(chan, g_regoffset[regid], regval);
   sam_regdump(chan, "Set register");
+}
+
+/****************************************************************************
+ * Name: sam_tc_getregister
+ *
+ * Description:
+ *    Get the current value of the TC_REGA, TC_REGB, or TC_REGC register.
+ *
+ * Input Parameters:
+ *   handle Channel handle previously allocated by sam_tc_allocate()
+ *   regid  One of {TC_REGA, TC_REGB, or TC_REGC}
+ *
+ * Returned Value:
+ *   The value of the specified register.
+ *
+ ****************************************************************************/
+
+uint32_t sam_tc_getregister(TC_HANDLE handle, int regid)
+{
+  struct sam_chan_s *chan = (struct sam_chan_s *)handle;
+  DEBUGASSERT(chan);
+  return sam_chan_getreg(chan, g_regoffset[regid]);
+}
+
+/****************************************************************************
+ * Name: sam_tc_getcounter
+ *
+ * Description:
+ *   Return the current value of the timer counter register
+ *
+ * Input Parameters:
+ *   handle Channel handle previously allocated by sam_tc_allocate()
+ *
+ * Returned Value:
+ *  The current value of the timer counter register for this channel.
+ *
+ ****************************************************************************/
+
+uint32_t sam_tc_getcounter(TC_HANDLE handle)
+{
+  struct sam_chan_s *chan = (struct sam_chan_s *)handle;
+  DEBUGASSERT(chan);
+  return sam_chan_getreg(chan, SAM_TC_CV_OFFSET);
 }
 
 /****************************************************************************

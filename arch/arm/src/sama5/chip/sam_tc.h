@@ -428,7 +428,7 @@
 #  define TC_CMR_BURST_NONE      (0 << TC_CMR_BURST_SHIFT) /* Clock not gated by external signal */
 #  define TC_CMR_BURST_XC0       (1 << TC_CMR_BURST_SHIFT) /* XXC0 ANDed with clock */
 #  define TC_CMR_BURST_XC1       (2 << TC_CMR_BURST_SHIFT) /* XC1 ANDed with clock */
-#  define TC_CMR_BURST_XC2       (3 << TC_CMR_BURST_SHIFT) /* XC2  ANDed with clock */
+#  define TC_CMR_BURST_XC2       (3 << TC_CMR_BURST_SHIFT) /* XC2 ANDed with clock */
 
 /* Channel Mode Register -- Capture mode */
 
