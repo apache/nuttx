@@ -3552,6 +3552,34 @@ config SAMA5_ONESHOT
 		Enable a wrapper around the low level timer/counter functions to
 		support one-shot timer.
 
+config SAMA5_FREERUN
+	bool "TC free-running wrapper"
+	default n if !SCHED_TICKLESS
+	default y if SCHED_TICKLESS
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support a free-running timer.
+
+if SCHED_TICKLESS
+
+config SAMA5_TICKLESS_ONESHOT
+	int "Tickless one-shot timer channel"
+	range 0 8
+	default 0
+	---help---
+		If the Tickless OS feature is enabled, the one clock must be
+		assigned to provided the one-shot timer needed by the OS.
+
+config SAMA5_TICKLESS_FREERUN
+	int "Tickless free-running timer channel"
+	range 0 8
+	default 0
+	---help---
+		If the Tickless OS feature is enabled, the one clock must be
+		assigned to provided the free-running timer needed by the OS.
+
+endif
+
 config SAMA5_TC_DEBUG
 	bool "TC debug"
 	depends on DEBUG
