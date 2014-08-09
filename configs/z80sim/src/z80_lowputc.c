@@ -44,7 +44,6 @@
 #include <assert.h>
 #include <debug.h>
 
-#include "os_internal.h"
 #include "up_internal.h"
 
 /********************************************************************************

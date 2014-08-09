@@ -48,7 +48,6 @@
 #include <assert.h>
 #include <debug.h>
 
-#include "os_internal.h"
 #include "up_internal.h"
 
 /* Includes trs80-m3.h for assembler call addresses */
