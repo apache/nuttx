@@ -292,9 +292,9 @@ int wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,  int argc, ...)
 
   if (g_wdactivelist.head == NULL)
     {
-      /* Add the watchdog to the head of the queue. */
+      /* Add the watchdog to the head == tail of the queue. */
 
-      sq_addlast((FAR sq_entry_t*)wdog,&g_wdactivelist);
+      sq_addlast((FAR sq_entry_t*)wdog, &g_wdactivelist);
 
 #ifdef CONFIG_SCHED_TICKLESS
       /* Whenever the watchdog at the head of the queue changes, then we
@@ -345,16 +345,9 @@ int wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,  int argc, ...)
 
           if (curr == (FAR wdog_t*)g_wdactivelist.head)
             {
-              /* Insert the watchdog in mid- or end-of-queue */
+              /* Insert the watchdog at the head of the list */
 
               sq_addfirst((FAR sq_entry_t*)wdog, &g_wdactivelist);
-            }
-          else
-            {
-              /* Insert the watchdog in mid- or end-of-queue */
-
-              sq_addafter((FAR sq_entry_t*)prev, (FAR sq_entry_t*)wdog,
-                          &g_wdactivelist);
 
 #ifdef CONFIG_SCHED_TICKLESS
               /* If the watchdog at the head of the queue changes, then we
@@ -363,6 +356,14 @@ int wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,  int argc, ...)
 
               reassess = true;
 #endif
+            }
+          else
+            {
+              /* Insert the watchdog in mid- or end-of-queue */
+
+              sq_addafter((FAR sq_entry_t*)prev, (FAR sq_entry_t*)wdog,
+                          &g_wdactivelist);
+
             }
         }
 
