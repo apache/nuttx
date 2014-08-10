@@ -73,8 +73,8 @@ static void rawoutstream_putc(FAR struct lib_outstream_s *this, int ch)
         }
 
       /* The only expected error is EINTR, meaning that the write operation
-       * was awakened by a signal.  Zero would not be a valid return value
-       * from write().
+       * was awakened by a signal.  Zero or values > 1 would not be valid
+       * return values from write().
        */
 
       DEBUGASSERT(nwritten < 0);

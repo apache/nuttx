@@ -102,32 +102,44 @@
  *   level up.
  *
  * Input Parameters:
- *   handle - The handle that represents the timer state
- *   arg    - An opaque argument provided when the interrupt was registered
- *   sr     - The value of the timer interrupt status register at the time
- *            that the interrupt occurred.
+ *   tch - The handle that represents the timer state
+ *   arg - An opaque argument provided when the interrupt was registered
+ *   sr  - The value of the timer interrupt status register at the time
+ *         that the interrupt occurred.
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void sam_oneshot_handler(TC_HANDLE handle, void *arg, uint32_t sr)
+static void sam_oneshot_handler(TC_HANDLE tch, void *arg, uint32_t sr)
 {
   struct sam_oneshot_s *oneshot = (struct sam_oneshot_s *)arg;
+  oneshot_handler_t oneshot_handler;
+  void *oneshot_arg;
+
+  tcllvdbg("Expired...\n");
   DEBUGASSERT(oneshot && oneshot->handler);
 
   /* The clock was stopped, but not disabled when the RC match occurred.
    * Disable the TC now and disable any further interrupts.
    */
 
-  sam_tc_attach(oneshot->handler, NULL, NULL, 0);
-  sam_tc_stop(oneshot->handle);
+  sam_tc_attach(oneshot->tch, NULL, NULL, 0);
+  sam_tc_stop(oneshot->tch);
 
-  /* Forward the event */
+  /* The timer is no longer running */
 
   oneshot->running = false;
-  oneshot->handler(oneshot->arg);
+
+  /* Forward the event, clearing out any vestiges */
+
+  oneshot_handler  = oneshot->handler;
+  oneshot->handler = NULL;
+  oneshot_arg      = oneshot->arg;
+  oneshot->arg     = NULL;
+
+  oneshot_handler(oneshot_arg);
 }
 
 /****************************************************************************
@@ -210,8 +222,8 @@ int sam_oneshot_initialize(struct sam_oneshot_s *oneshot, int chan,
           TC_CMR_ASWTRG_NONE | TC_CMR_BCPB_NONE   |    TC_CMR_BCPC_NONE  |
           TC_CMR_BEEVT_NONE  | TC_CMR_BSWTRG_NONE);
 
-  oneshot->handle = sam_tc_allocate(chan, cmr);
-  if (!oneshot->handle)
+  oneshot->tch = sam_tc_allocate(chan, cmr);
+  if (!oneshot->tch)
     {
       tcdbg("ERROR: Failed to allocate timer channel %d\n", chan);
       return -EBUSY;
@@ -270,6 +282,11 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot, oneshot_handler_t handler,
       (void)sam_oneshot_cancel(oneshot, NULL);
     }
 
+  /* Save the new handler and its argument */
+
+  oneshot->handler = handler;
+  oneshot->arg     = arg;
+
   /* We configured the counter to run with an LSB of the specified
    * resolution.  We now must need need to set RC to the number
    * of resolution units corresponding to the requested delay.
@@ -278,23 +295,24 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot, oneshot_handler_t handler,
   usec   = (uint64_t)ts->tv_sec * 1000000 + (uint64_t)(ts->tv_nsec / 1000);
   regval = usec / oneshot->resolution;
 
-  tcdbg("usec=%llu regval=%08llx\n", usec, regval);
+  tcdbg("usec=%lu regval=%08lx\n",
+        (unsigned long)usec, (unsigned long)regval);
   DEBUGASSERT(regval <= UINT32_MAX);
 
   /* Set up to receive the callback when the interrupt occurs */
 
-  (void)sam_tc_attach(oneshot->handle, sam_oneshot_handler, oneshot,
+  (void)sam_tc_attach(oneshot->tch, sam_oneshot_handler, oneshot,
                       TC_INT_CPCS);
 
   /* Set RC so that an event will be triggered when TC_CV register counts
    * up to RC.
    */
 
-  sam_tc_setregister(oneshot->handle, TC_REGC, regval);
+  sam_tc_setregister(oneshot->tch, TC_REGC, (uint32_t)regval);
 
   /* Start the counter */
 
-  sam_tc_start(oneshot->handle);
+  sam_tc_start(oneshot->tch);
 
   /* Enable interrupts.  We should get the callback when the interrupt
    * occurs.
@@ -311,16 +329,21 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot, oneshot_handler_t handler,
  * Description:
  *   Cancel the oneshot timer and return the time remaining on the timer.
  *
+ *   NOTE: This function may execute at a high rate with no timer running (as
+ *   when pre-emption is enabled and disabled).
+ *
  * Input Parameters:
  *   oneshot Caller allocated instance of the oneshot state structure.  This
  *           structure must have been previously initialized via a call to
  *           sam_oneshot_initialize();
  *   ts      The location in which to return the time remaining on the
- *           oneshot timer.
+ *           oneshot timer.  A time of zero is returned if the timer is
+ *           not running.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned
- *   on failure.
+ *   Zero (OK) is returned on success.  A call to up_timer_cancel() when
+ *   the timer is not active should also return success; a negated errno
+ *   value is returned on any failure.
  *
  ****************************************************************************/
 
@@ -332,16 +355,35 @@ int sam_oneshot_cancel(struct sam_oneshot_s *oneshot, struct timespec *ts)
   uint32_t usec;
   uint32_t sec;
 
-  /* Get the timer counter and rc registers and stop the counter.  If the
-   * counter expires while we are doing this, the counter clock will be
-   * stopped, but the clock will not be disabled.
-   *
-   * REVISIT: Will the counter value be reset to zero?
-   */
+  /* Was the timer running? */
 
   flags = irqsave();
-  count = sam_tc_getcounter(oneshot->handle);
-  rc    = sam_tc_getregister(oneshot->handle, TC_REGC);
+  if (!oneshot->running)
+    {
+      /* No.. Just return zero timer remaining and successful cancellation.
+       * This function may execute at a high rate with no timer running
+       * (as when pre-emption is enabled and disabled).
+       */
+
+      ts->tv_sec  = 0;
+      ts->tv_nsec = 0;
+      irqrestore(flags);
+      return OK;
+    }
+
+  /* Yes.. Get the timer counter and rc registers and stop the counter.  If
+   * the counter expires while we are doing this, the counter clock will be
+   * stopped, but the clock will not be disabled.
+   *
+   * NOTE: This is not documented, but I have observed in this case that the
+   * counter register freezes at a value equal to the RC register.  The
+   * following logic depends on this fact.
+   */
+
+  tcvdbg("Canceling...\n");
+
+  count = sam_tc_getcounter(oneshot->tch);
+  rc    = sam_tc_getregister(oneshot->tch, TC_REGC);
 
   /* Now we can disable the interrupt and stop the timer.
    *
@@ -350,11 +392,13 @@ int sam_oneshot_cancel(struct sam_oneshot_s *oneshot, struct timespec *ts)
    * clock will be disabled, so I am hoping not.
    */
 
-  DEBUGASSERT(count > 0 || (sam_tc_getpending(oneshot->handle) & TC_INT_CPCS) == 0);
-  sam_tc_attach(oneshot->handle, NULL, NULL, 0);
-  sam_tc_stop(oneshot->handle);
+  DEBUGASSERT(count > 0 || (sam_tc_getpending(oneshot->tch) & TC_INT_CPCS) == 0);
+  sam_tc_attach(oneshot->tch, NULL, NULL, 0);
+  sam_tc_stop(oneshot->tch);
 
   oneshot->running = false;
+  oneshot->handler = NULL;
+  oneshot->arg     = NULL;
   irqrestore(flags);
 
   /* The total time remaining is the difference */

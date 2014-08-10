@@ -1042,6 +1042,9 @@ int up_timer_gettime(FAR struct timespec *ts);
  *   that up_timer_start() and the remaining time of zero should be
  *   returned.
  *
+ *   NOTE: This function may execute at a high rate with no timer running (as
+ *   when pre-emption is enabled and disabled).
+ *
  *   Provided by platform-specific code and called from the RTOS base code.
  *
  * Input Parameters:
@@ -1049,8 +1052,9 @@ int up_timer_gettime(FAR struct timespec *ts);
  *        if the timer is not active.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure.
+ *   Zero (OK) is returned on success.  A call to up_timer_cancel() when
+ *   the timer is not active should also return success; a negated errno
+ *   value is returned on any failure.
  *
  * Assumptions:
  *   May be called from interrupt level handling or from the normal tasking

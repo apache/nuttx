@@ -73,13 +73,15 @@ typedef void (*oneshot_handler_t)(void *arg);
 
 struct sam_oneshot_s
 {
-  uint8_t chan;              /* The timer/counter in use */
-  bool running;              /* True: the timer is running */
-  uint16_t resolution;       /* Timer resolution in microseconds */
-  uint32_t divisor;          /* TC divisor derived from resolution */
-  TC_HANDLE handle;          /* Handle returned by sam_tc_initialize() */
-  oneshot_handler_t handler; /* Oneshot expiration callback */
-  void *arg;                 /* The argument that will accompany the callback */
+  uint8_t chan;                       /* The timer/counter in use */
+  volatile bool running;              /* True: the timer is running */
+  uint16_t resolution;                /* Timer resolution in microseconds */
+  uint32_t divisor;                   /* TC divisor derived from resolution */
+  TC_HANDLE tch;                      /* Handle returned by
+                                       * sam_tc_initialize() */
+  volatile oneshot_handler_t handler; /* Oneshot expiration callback */
+  volatile void *arg;                 /* The argument that will accompany
+                                       * the callback */
 };
 
 /****************************************************************************
@@ -151,16 +153,21 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot, oneshot_handler_t handler,
  * Description:
  *   Cancel the oneshot timer and return the time remaining on the timer.
  *
+ *   NOTE: This function may execute at a high rate with no timer running (as
+ *   when pre-emption is enabled and disabled).
+ *
  * Input Parameters:
  *   oneshot Caller allocated instance of the oneshot state structure.  This
  *           structure must have been previously initialized via a call to
  *           sam_oneshot_initialize();
  *   ts      The location in which to return the time remaining on the
- *           oneshot timer.
+ *           oneshot timer.  A time of zero is returned if the timer is
+ *           not running.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned
- *   on failure.
+ *   Zero (OK) is returned on success.  A call to up_timer_cancel() when
+ *   the timer is not active should also return success; a negated errno
+ *   value is returned on any failure.
  *
  ****************************************************************************/
 

@@ -1264,8 +1264,8 @@ tc_handler_t sam_tc_attach(TC_HANDLE handle, tc_handler_t handler,
 
   /* Remember the old interrupt handler and set the new handler */
 
-  flags = irqsave();
-  oldhandler = handler;
+  flags         = irqsave();
+  oldhandler    = chan->handler;
   chan->handler = handler;
 
   /* Don't enable interrupt if we are detaching no matter what the caller
@@ -1277,6 +1277,8 @@ tc_handler_t sam_tc_attach(TC_HANDLE handle, tc_handler_t handler,
       arg  = NULL;
       mask = 0;
     }
+
+  chan->arg = arg;
 
   /* Now enable interrupt as requested */
 

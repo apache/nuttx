@@ -69,6 +69,8 @@
 #ifdef CONFIG_SAMA5_TC_DEBUG
 #  define tcdbg    dbg
 #  define tcvdbg   vdbg
+#  define tcdbg    lldbg
+#  define tcvdbg   llvdbg
 #  define tclldbg  lldbg
 #  define tcllvdbg llvdbg
 #else

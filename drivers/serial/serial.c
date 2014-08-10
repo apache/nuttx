@@ -435,8 +435,8 @@ static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer,
            *
            * OXTABS - primarily a full-screen terminal optimisation
            * ONOEOT - Unix interoperability hack
-           * OLCUC - Not specified by Posix
-           * ONOCR - low-speed interactive optimisation
+           * OLCUC  - Not specified by POSIX
+           * ONOCR  - low-speed interactive optimisation
            */
         }
 
@@ -447,7 +447,6 @@ static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer,
         {
           ret = uart_putxmitchar(dev, '\r', oktoblock);
         }
-
 #endif
 
       /* Put the character into the transmit buffer */
