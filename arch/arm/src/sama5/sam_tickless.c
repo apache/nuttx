@@ -63,7 +63,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <debug.h>
 
 #include <nuttx/arch.h>
 
@@ -146,20 +145,6 @@
 
 #if CONFIG_SAMA5_TICKLESS_FREERUN == CONFIG_SAMA5_TICKLESS_ONESHOT
 #  error CONFIG_SAMA5_TICKLESS_FREERUN is the same as CONFIG_SAMA5_TICKLESS_ONESHOT
-#endif
-
-#ifdef CONFIG_SAMA5_TC_DEBUG
-#  define tcdbg    dbg
-#  define tcvdbg   vdbg
-#  define tcdbg    lldbg
-#  define tcvdbg   llvdbg
-#  define tclldbg  lldbg
-#  define tcllvdbg llvdbg
-#else
-#  define tcdbg(x...)
-#  define tcvdbg(x...)
-#  define tclldbg(x...)
-#  define tcllvdbg(x...)
 #endif
 
 /****************************************************************************
@@ -325,7 +310,8 @@ int up_timer_gettime(FAR struct timespec *ts)
  *
  * Input Parameters:
  *   ts - Location to return the remaining time.  Zero should be returned
- *        if the timer is not active.
+ *        if the timer is not active.  ts may be zero in which case the
+ *        time remaining is not returned.
  *
  * Returned Value:
  *   Zero (OK) is returned on success.  A call to up_timer_cancel() when

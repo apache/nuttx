@@ -54,7 +54,6 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
 
 #include <arch/irq.h>
 
@@ -65,20 +64,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#ifdef CONFIG_SAMA5_TC_DEBUG
-#  define tcdbg    dbg
-#  define tcvdbg   vdbg
-#  define tcdbg    lldbg
-#  define tcvdbg   llvdbg
-#  define tclldbg  lldbg
-#  define tcllvdbg llvdbg
-#else
-#  define tcdbg(x...)
-#  define tcvdbg(x...)
-#  define tclldbg(x...)
-#  define tcllvdbg(x...)
-#endif
 
 /****************************************************************************
  * Private Types

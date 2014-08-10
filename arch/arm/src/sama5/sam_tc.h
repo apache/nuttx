@@ -43,6 +43,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <debug.h>
 
 #include "chip.h"
 #include "chip/sam_tc.h"
@@ -70,6 +71,32 @@
 #define TC_REGA      0
 #define TC_REGB      1
 #define TC_REGC      2
+
+/* Timer debug is enabled if any timer client is enabled */
+
+#ifndef CONFIG_DEBUG
+#  undef CONFIG_DEBUG_ANALOG
+#  undef CONFIG_SAMA5_TC_REGDEBUG
+#endif
+
+#undef CONFIG_SAMA5_TC_DEBUG
+#if defined(CONFIG_SAMA5_ADC) && defined(CONFIG_DEBUG_ANALOG)
+#  define CONFIG_SAMA5_TC_DEBUG 1
+#endif
+
+/* Timer/counter debug output */
+
+#ifdef CONFIG_SAMA5_TC_DEBUG
+#  define tcdbg    dbg
+#  define tcvdbg   vdbg
+#  define tclldbg  lldbg
+#  define tcllvdbg llvdbg
+#else
+#  define tcdbg(x...)
+#  define tcvdbg(x...)
+#  define tclldbg(x...)
+#  define tcllvdbg(x...)
+#endif
 
 /****************************************************************************
  * Public Types
