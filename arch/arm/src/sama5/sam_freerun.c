@@ -88,17 +88,17 @@
  *   this interrupt will occur.  We will just increment an overflow count.
  *
  * Input Parameters:
- *   handle - The handle that represents the timer state
- *   arg    - An opaque argument provided when the interrupt was registered
- *   sr     - The value of the timer interrupt status register at the time
- *            that the interrupt occurred.
+ *   tch - The handle that represents the timer state
+ *   arg - An opaque argument provided when the interrupt was registered
+ *   sr  - The value of the timer interrupt status register at the time
+ *         that the interrupt occurred.
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void sam_freerun_handler(TC_HANDLE handle, void *arg, uint32_t sr)
+static void sam_freerun_handler(TC_HANDLE tch, void *arg, uint32_t sr)
 {
   struct sam_freerun_s *freerun = (struct sam_freerun_s *)arg;
   DEBUGASSERT(freerun && freerun->overflow < UINT16_MAX);
@@ -185,8 +185,8 @@ int sam_freerun_initialize(struct sam_freerun_s *freerun, int chan,
           TC_CMR_BCPB_NONE   | TC_CMR_BCPC_NONE    | TC_CMR_BEEVT_NONE  |
           TC_CMR_BSWTRG_NONE);
 
-  freerun->handle = sam_tc_allocate(chan, cmr);
-  if (!freerun->handle)
+  freerun->tch = sam_tc_allocate(chan, cmr);
+  if (!freerun->tch)
     {
       tcdbg("ERROR: Failed to allocate timer channel %d\n", chan);
       return -EBUSY;
@@ -202,12 +202,12 @@ int sam_freerun_initialize(struct sam_freerun_s *freerun, int chan,
 
   /* Set up to receive the callback when the counter overflow occurs */
 
-  (void)sam_tc_attach(freerun->handle, sam_freerun_handler, freerun,
+  (void)sam_tc_attach(freerun->tch, sam_freerun_handler, freerun,
                       TC_INT_COVFS);
 
   /* Start the counter */
 
-  sam_tc_start(freerun->handle);
+  sam_tc_start(freerun->tch);
 
   return OK;
 }
@@ -241,13 +241,15 @@ int sam_freerun_counter(struct sam_freerun_s *freerun, struct timespec *ts)
   uint32_t sec;
   irqstate_t flags;
 
+  DEBUGASSERT(freerun && freerun->tch && ts);
+
   /* Temporarily disable the overflow counter */
 
   flags    = irqsave();
   overflow = freerun->overflow;
-  counter  = sam_tc_getcounter(freerun->handle);
-  sr       = sam_tc_getpending(freerun->handle);
-  verify   = sam_tc_getcounter(freerun->handle);
+  counter  = sam_tc_getcounter(freerun->tch);
+  sr       = sam_tc_getpending(freerun->tch);
+  verify   = sam_tc_getcounter(freerun->tch);
   irqrestore(flags);
 
   tcvdbg("counter=%lu (%lu) overflow=%lu, sr=%08lx\n",
@@ -307,14 +309,17 @@ int sam_freerun_counter(struct sam_freerun_s *freerun, struct timespec *ts)
 
 int sam_freerun_uninitialize(struct sam_freerun_s *freerun)
 {
+  DEBUGASSERT(freerun && freerun->tch);
+
   /* Now we can disable the timer interrupt and disable the timer. */
 
-  sam_tc_attach(freerun->handle, NULL, NULL, 0);
-  sam_tc_stop(freerun->handle);
+  sam_tc_attach(freerun->tch, NULL, NULL, 0);
+  sam_tc_stop(freerun->tch);
 
   /* Free the timer */
 
-  sam_tc_free(freerun->handle);
+  sam_tc_free(freerun->tch);
+  freerun->tch = NULL;
   return OK;
 }
 
