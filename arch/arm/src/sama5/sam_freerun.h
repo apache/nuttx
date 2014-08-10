@@ -69,7 +69,7 @@ struct sam_freerun_s
   bool running;              /* True: the timer is running */
   uint16_t resolution;       /* Timer resolution in microseconds */
   uint16_t overflow;         /* Timer counter overflow */
-  TC_HANDLE handle;          /* Handle returned by sam_tc_initialize() */
+  TC_HANDLE tch;             /* Handle returned by sam_tc_initialize() */
 };
 
 /****************************************************************************

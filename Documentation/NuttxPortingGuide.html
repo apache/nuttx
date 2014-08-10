@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: August 8, 2014</p>
+      <p>Last Updated: August 10, 2014</p>
     </td>
   </tr>
 </table>
@@ -2438,7 +2438,7 @@ else
 
 In order to use the Tickless OS, one must provide special support from the platform-specific code. Just as with the default system timer, the platform-specific code must provide the timer resources to support the OS behavior.
 
-Currently these timer resources are only provided by the NuttX simulation. An example implementaion is for the simulation is at <code>nuttx/arch/sim/src/up_tickless.c</code>. These paragraphs will explain how to provide the Tickless OS support to any platform.
+Currently these timer resources are only provided on a few platforms. An example implementation is for the simulation is at <code>nuttx/arch/sim/src/up_tickless.c</code>.  There is another example for the Atmel SAMA5 at <code>nuttx/arch/arm/src/sama5/sam_tickless.c</code>.  These paragraphs will explain how to provide the Tickless OS support to any platform.
 
 <h4><a name="tickconfig">4.3.4.3 Tickless Configuration Options</a></h4>
 <ul>
@@ -2506,6 +2506,10 @@ config ARCH_SIM
 </ul>
 <p>
   Note that a platform-specific implementation would probably require two hardware timers: (1) A interval timer to satisfy the requirements of <a href="#uptimerstart"><code>up_timer_start()</code></a> and <a href="#uptimercancel"><code>up_timer_cancel()</code></a>, and a (2) a counter to handle the requirement of <a href="#uptimergettime"><code>up_timer_gettime()</code></a>.  Ideally, both timers would run at the rate determined by <code>CONFIG_USEC_PER_TICK</code> (and certainly never slower than that rate).
+</p>
+<p>
+  Since timers are a limited resource, the use of two timers could be an issue on some systems.
+  The job could be done with a single timer if, for example, the single timer were kept in a free-running at all times.  Some timer/counters (such as the Atmel SAMA5's timer), for example, have the capability to generate a compare interrupt when the timer matches a comparison value but also to continue counting without stopping.  if your hardware supports such counters, one might be able to simply set the comparison count at the value of the free running timer <i>PLUS</i> the desired delay.  Then you could have both with a single timer:  An interval timer and a free-running counter with the same timer!
 </p>
 <p>
   In addition to these imported interfaces, the RTOS will export the following interfaces for use by the platform-specific interval timer implementation:

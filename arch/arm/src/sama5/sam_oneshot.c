@@ -80,6 +80,7 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Name: sam_oneshot_handler
  *
@@ -121,9 +122,9 @@ static void sam_oneshot_handler(TC_HANDLE tch, void *arg, uint32_t sr)
 
   /* Forward the event, clearing out any vestiges */
 
-  oneshot_handler  = oneshot->handler;
+  oneshot_handler  = (struct sam_oneshot_s *)oneshot->handler;
   oneshot->handler = NULL;
-  oneshot_arg      = oneshot->arg;
+  oneshot_arg      = (void *)oneshot->arg;
   oneshot->arg     = NULL;
 
   oneshot_handler(oneshot_arg);
@@ -368,7 +369,7 @@ int sam_oneshot_cancel(struct sam_oneshot_s *oneshot, struct timespec *ts)
    * following logic depends on this fact.
    */
 
-  tcvdbg("Canceling...\n");
+  tcvdbg("Cancelling...\n");
 
   count = sam_tc_getcounter(oneshot->tch);
   rc    = sam_tc_getregister(oneshot->tch, TC_REGC);
