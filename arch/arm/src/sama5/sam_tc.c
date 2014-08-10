@@ -90,9 +90,13 @@
 #ifdef CONFIG_SAMA5_TC_DEBUG
 #  define tcdbg    dbg
 #  define tcvdbg   vdbg
+#  define tclldbg  llbg
+#  define tcllvdbg llvdbg
 #else
 #  define tcdbg(x...)
 #  define tcvdbg(x...)
+#  define tclldbg(x...)
+#  define tcllvdbg(x...)
 #endif
 
 /****************************************************************************
@@ -1138,6 +1142,7 @@ TC_HANDLE sam_tc_allocate(int channel, int mode)
 
       sam_chan_putreg(chan, SAM_TC_CMR_OFFSET, mode);
       sam_regdump(chan, "Allocated");
+      sam_givesem(chan->tc);
     }
 
   /* Return an opaque reference to the channel */

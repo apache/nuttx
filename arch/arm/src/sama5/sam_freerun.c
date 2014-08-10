@@ -67,11 +67,15 @@
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_TC_DEBUG
-#  define tcdbg  dbg
-#  define tcvdbg vdbg
+#  define tcdbg    dbg
+#  define tcvdbg   vdbg
+#  define tclldbg  lldbg
+#  define tcllvdbg llvdbg
 #else
 #  define tcdbg(x...)
 #  define tcvdbg(x...)
+#  define tclldbg(x...)
+#  define tcllvdbg(x...)
 #endif
 
 /****************************************************************************
@@ -316,8 +320,6 @@ int sam_freerun_counter(struct sam_freerun_s *freerun, struct timespec *ts)
 
 int sam_freerun_uninitialize(struct sam_freerun_s *freerun)
 {
-  irqstate_t flags;
-
   /* Now we can disable the timer interrupt and disable the timer. */
 
   sam_tc_attach(freerun->handle, NULL, NULL, 0);
@@ -326,7 +328,6 @@ int sam_freerun_uninitialize(struct sam_freerun_s *freerun)
   /* Free the timer */
 
   sam_tc_free(freerun->handle);
-  irqrestore(flags);
   return OK;
 }
 

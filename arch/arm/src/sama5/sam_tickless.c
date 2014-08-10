@@ -149,11 +149,15 @@
 #endif
 
 #ifdef CONFIG_SAMA5_TC_DEBUG
-#  define tcdbg  dbg
-#  define tcvdbg vdbg
+#  define tcdbg    dbg
+#  define tcvdbg   vdbg
+#  define tclldbg  lldbg
+#  define tcllvdbg llvdbg
 #else
 #  define tcdbg(x...)
 #  define tcvdbg(x...)
+#  define tclldbg(x...)
+#  define tcllvdbg(x...)
 #endif
 
 /****************************************************************************
@@ -243,7 +247,7 @@ void up_timer_initialize(void)
                                CONFIG_USEC_PER_TICK);
   if (ret < 0)
     {
-      tcdbg("ERROR: sam_oneshot_initialize failed\n");
+      tclldbg("ERROR: sam_oneshot_initialize failed\n");
       PANIC();
     }
 
@@ -254,7 +258,7 @@ void up_timer_initialize(void)
                                CONFIG_USEC_PER_TICK);
   if (ret < 0)
     {
-      tcdbg("ERROR: sam_freerun_initialize failed\n");
+      tclldbg("ERROR: sam_freerun_initialize failed\n");
       PANIC();
     }
 }
