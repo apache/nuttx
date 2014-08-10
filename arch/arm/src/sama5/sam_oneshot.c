@@ -54,7 +54,6 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
 
 #include <arch/irq.h>
 
@@ -65,18 +64,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#ifdef CONFIG_SAMA5_TC_DEBUG
-#  define tcdbg    dbg
-#  define tcvdbg   vdbg
-#  define tclldbg  lldbg
-#  define tcllvdbg llvdbg
-#else
-#  define tcdbg(x...)
-#  define tcvdbg(x...)
-#  define tclldbg(x...)
-#  define tcllvdbg(x...)
-#endif
 
 /****************************************************************************
  * Private Types
@@ -295,8 +282,8 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot, oneshot_handler_t handler,
   usec   = (uint64_t)ts->tv_sec * 1000000 + (uint64_t)(ts->tv_nsec / 1000);
   regval = usec / oneshot->resolution;
 
-  tcdbg("usec=%lu regval=%08lx\n",
-        (unsigned long)usec, (unsigned long)regval);
+  tcvdbg("usec=%lu regval=%08lx\n",
+         (unsigned long)usec, (unsigned long)regval);
   DEBUGASSERT(regval <= UINT32_MAX);
 
   /* Set up to receive the callback when the interrupt occurs */
@@ -338,7 +325,8 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot, oneshot_handler_t handler,
  *           sam_oneshot_initialize();
  *   ts      The location in which to return the time remaining on the
  *           oneshot timer.  A time of zero is returned if the timer is
- *           not running.
+ *           not running.  ts may be zero in which case the time remaining
+ *           is not returned.
  *
  * Returned Value:
  *   Zero (OK) is returned on success.  A call to up_timer_cancel() when
@@ -404,20 +392,24 @@ int sam_oneshot_cancel(struct sam_oneshot_s *oneshot, struct timespec *ts)
   /* The total time remaining is the difference */
 
   DEBUGASSERT(rc >= count);
-  usec = (rc - count) * oneshot->resolution;
+  if (ts)
+    {
+      usec = (rc - count) * oneshot->resolution;
 
-  tcdbg("rc=%lu count=%lu resolution=%u usec=%lu\n",
-        (unsigned long)rc, (unsigned long)count, oneshot->resolution,
-        (unsigned long)usec);
+      tcvdbg("rc=%lu count=%lu resolution=%u usec=%lu\n",
+             (unsigned long)rc, (unsigned long)count, oneshot->resolution,
+             (unsigned long)usec);
 
-  /* Return the time remaining in the correct form */
+      /* Return the time remaining in the correct form */
 
-  sec         = usec / 1000000;
-  ts->tv_sec  = sec;
-  ts->tv_nsec = ((usec) - (sec * 1000000)) * 1000;
+      sec         = usec / 1000000;
+      ts->tv_sec  = sec;
+      ts->tv_nsec = ((usec) - (sec * 1000000)) * 1000;
 
-  tcvdbg("remaining (%lu, %lu)\n",
-         (unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec);
+      tcvdbg("remaining (%lu, %lu)\n",
+             (unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec);
+    }
+
   return OK;
 }
 
