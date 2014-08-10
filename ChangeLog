@@ -8097,3 +8097,5 @@
 	* arch/arm/src/sama5/sam_oneshot.c and sam_tc.c: Fix several bugs in
 	  timer/counter interrupt logic and one-shot timer logic.  Comments and
 	  debug output updated in additional files (2014-8-10).
+	* sched/wdog/wd_start.c: Correct a bug in Tickless OS support: logic to
+	  detect changes in head of timer list was wrong (2014-5-10).
