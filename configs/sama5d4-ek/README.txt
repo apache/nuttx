@@ -3112,6 +3112,8 @@ TM7000 LCD/Touchscreen
 Tickless OS
 ===========
 
+  Background
+  ----------
   By default, a NuttX configuration uses a periodic timer interrupt that
   drives all system timing. The timer is provided by architecture-specifi
   code that calls into NuttX at a rate controlled by CONFIG_USEC_PER_TICK.
@@ -3148,6 +3150,8 @@ Tickless OS
   OS event will occur, program the interval time and wait for it to fire.
   When the interval time fires, then the scheduled activity is performed.
 
+  Configuration
+  -------------
   The following configuration options will enable support for the Tickless
   OS for the SAMA5D platforms using TC0 channels 0-3 (other timers or
   timer channels could be used making the obvious substitutions):
@@ -3164,6 +3168,25 @@ Tickless OS
       CONFIG_SAMA5_TICKLESS_ONESHOT=0  : Selects TC0 channel 0 for the one-shot
       CONFIG_SAMA5_TICKLESS_FREERUN=1  : Selects TC0 channel 1 for the free-
                                        : running timer
+
+  SAMA5 Timer Usage
+  -----------------
+  This current implementation uses two timers:  A one-shot timer to
+  provide the timed events and a free running timer to provide the current
+  time.  Since timers are a limited resource, that could be an issue on
+  some systems.
+
+  We could do the job with a single timer if we were to keep the single
+  timer in a free-running at all times.  The SAMA5 timer/counters have
+  32-bit counters with the capability to generate a compare interrupt when
+  the timer matches a compare value but also to continue counting without
+  stopping (giving another, different interrupt when the timer rolls over
+  from 0xffffffff to zero).  So we could potentially just set the compare
+  at the number of ticks you want PLUS the current value of timer.  Then
+  you could have both with a single timer:  An interval timer and a free-
+  running counter with the same timer!
+
+  Patches are welcome!
 
 SAMA4D4-EK Configuration Options
 =================================
