@@ -77,6 +77,7 @@ Contents
   - RTC
   - Watchdog Timer
   - TRNG and /dev/random
+  - Tickless OS
   - I2S Audio Support
   - SAMA5D3-Xplained Configuration Options
   - Configurations
@@ -2327,6 +2328,62 @@ TRNG and /dev/random
       CONFIG_EXAMPLES_RANDOM=y            : Enable apps/examples/random
       CONFIG_EXAMPLES_MAXSAMPLES=64       : Default settings are probably OK
       CONFIG_EXAMPLES_NSAMPLES=8
+
+Tickless OS
+===========
+
+  By default, a NuttX configuration uses a periodic timer interrupt that
+  drives all system timing. The timer is provided by architecture-specifi
+  code that calls into NuttX at a rate controlled by CONFIG_USEC_PER_TICK.
+  The default value of CONFIG_USEC_PER_TICK is 10000 microseconds which
+  corresponds to a timer interrupt rate of 100 Hz.
+
+  An option is to configure NuttX to operation in a "tickless" mode. Some
+  limitations of default system timer are, in increasing order of
+  importance:
+
+  - Overhead: Although the CPU usage of the system timer interrupt at 100Hz
+    is really very low, it is still mostly wasted processing time. One most
+    timer interrupts, there is really nothing that needs be done other than
+    incrementing the counter.
+  - Resolution: Resolution of all system timing is also determined by
+    CONFIG_USEC_PER_TICK. So nothing that be time with resolution finer than
+    10 milliseconds be default. To increase this resolution,
+    CONFIG_USEC_PER_TICK an be reduced. However, then the system timer
+    interrupts use more of the CPU bandwidth processing useless interrupts.
+  - Power Usage: But the biggest issue is power usage. When the system is
+    IDLE, it enters a light, low-power mode (for ARMs, this mode is entered
+    with the wfi or wfe instructions for example). But each interrupt
+    awakens the system from this low power mode. Therefore, higher rates
+    of interrupts cause greater power consumption.
+
+  The so-called Tickless OS provides one solution to issue. The basic
+  concept here is that the periodic, timer interrupt is eliminated and
+  replaced with a one-shot, interval timer. It becomes event driven
+  instead of polled: The default system timer is a polled design. On
+  each interrupt, the NuttX logic checks if it needs to do anything
+  and, if so, it does it.
+
+  Using an interval timer, one can anticipate when the next interesting
+  OS event will occur, program the interval time and wait for it to fire.
+  When the interval time fires, then the scheduled activity is performed.
+
+  The following configuration options will enable support for the Tickless
+  OS for the SAMA5D platforms using TC0 channels 0-3 (other timers or
+  timer channels could be used making the obvious substitutions):
+
+    RTOS Features -> Clocks and Timers
+      CONFIG_SCHED_TICKLESS=y          : Configures the RTOS in tickless mode
+
+    System Type -> SAMA5 Peripheral Support
+      CONFIG_SAMA5_TC0=y               : Enable TC0 (TC channels 0-3
+
+    System Type -> Timer/counter Configuration
+      CONFIG_SAMA5_ONESHOT=y           : Enables one-shot timer wrapper
+      CONFIG_SAMA5_FREERUN=y           : Enabled free-running timer wrapper
+      CONFIG_SAMA5_TICKLESS_ONESHOT=0  : Selects TC0 channel 0 for the one-shot
+      CONFIG_SAMA5_TICKLESS_FREERUN=1  : Selects TC0 channel 1 for the free-
+                                       : running timer
 
 I2S Audio Support
 =================
