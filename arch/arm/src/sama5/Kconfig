@@ -3586,7 +3586,11 @@ config SAMA5_TC_DEBUG
 	default n
 	---help---
 		Output high level Timer/Counter device debug information.
-		Requires also DEBUG.
+		Requires also DEBUG.  If this option AND DEBUG_VERBOSE are
+		enabled, then the system will be overwhelmed the timer debug
+		output.  If DEBUG_VERBOSE is disabled, then debug output will
+		only indicate if/when timer-related errors occur.  This
+		latter mode is completely usable.
 
 config SAMA5_TC_REGDEBUG
 	bool "TC register level debug"
