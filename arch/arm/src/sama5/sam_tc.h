@@ -81,13 +81,13 @@ typedef void *TC_HANDLE;
 /* Timer interrupt callback.  When a timer interrupt expires, the client will
  * receive:
  *
- *   handle - The handle that represents the timer state
- *   arg    - An opaque argument provided when the interrupt was registered
- *   sr     - The value of the timer interrupt status register at the time
- *            that the interrupt occurred.
+ *   tch - The handle that represents the timer state
+ *   arg - An opaque argument provided when the interrupt was registered
+ *   sr  - The value of the timer interrupt status register at the time
+ *         that the interrupt occurred.
  */
 
-typedef void (*tc_handler_t)(TC_HANDLE handle, void *arg, uint32_t sr);
+typedef void (*tc_handler_t)(TC_HANDLE tch, void *arg, uint32_t sr);
 
 /****************************************************************************
  * Public Data
