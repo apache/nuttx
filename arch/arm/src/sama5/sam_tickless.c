@@ -54,6 +54,27 @@
  *     logic when the interval timer expires.
  *
  ****************************************************************************/
+/****************************************************************************
+ * SAMA5 Timer Usage
+ *
+ * This current implementation uses two timers:  A one-shot timer to provide
+ * the timed events and a free running timer to provide the current time.
+ * Since timers are a limited resource, that could be an issue on some
+ * systems.
+ *
+ * We could do the job with a single timer if we were to keep the single
+ * timer in a free-running at all times.  The SAMA5 timer/counters have
+ * 32-bit counters with the capability to generate a compare interrupt when
+ * the timer matches a compare value but also to continue counting without
+ * stopping (giving another, different interrupt when the timer rolls over
+ * from 0xffffffff to zero).  So we could potentially just set the compare
+ * at the number of ticks you want PLUS the current value of timer.  Then
+ * you could have both with a single timer:  An interval timer and a free-
+ * running counter with the same timer!
+ *
+ * Patches are welcome!
+ *
+ ****************************************************************************/
 
 /****************************************************************************
  * Included Files
