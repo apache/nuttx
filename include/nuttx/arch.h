@@ -1049,7 +1049,8 @@ int up_timer_gettime(FAR struct timespec *ts);
  *
  * Input Parameters:
  *   ts - Location to return the remaining time.  Zero should be returned
- *        if the timer is not active.
+ *        if the timer is not active.  ts may be zero in which case the
+ *        time remaining is not returned.
  *
  * Returned Value:
  *   Zero (OK) is returned on success.  A call to up_timer_cancel() when
