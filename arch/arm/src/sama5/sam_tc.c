@@ -56,7 +56,6 @@
 #include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
 
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
@@ -74,30 +73,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* Timer debug is enabled if any timer client is enabled */
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_ANALOG
-#  undef CONFIG_SAMA5_TC_REGDEBUG
-#endif
-
-#undef CONFIG_SAMA5_TC_DEBUG
-#if defined(CONFIG_SAMA5_ADC) && defined(CONFIG_DEBUG_ANALOG)
-#  define CONFIG_SAMA5_TC_DEBUG 1
-#endif
-
-#ifdef CONFIG_SAMA5_TC_DEBUG
-#  define tcdbg    dbg
-#  define tcvdbg   vdbg
-#  define tclldbg  llbg
-#  define tcllvdbg llvdbg
-#else
-#  define tcdbg(x...)
-#  define tcvdbg(x...)
-#  define tclldbg(x...)
-#  define tcllvdbg(x...)
-#endif
 
 /****************************************************************************
  * Private Types
