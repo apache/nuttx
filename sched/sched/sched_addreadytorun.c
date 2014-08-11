@@ -43,6 +43,8 @@
 #include <queue.h>
 #include <assert.h>
 
+#include <nuttx/clock.h>
+
 #include "sched/sched.h"
 
 /****************************************************************************
@@ -137,12 +139,23 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
       btcb->flink->task_state = TSTATE_TASK_READYTORUN;
 
 #if CONFIG_RR_INTERVAL > 0
+      /* Reset the round robin timeslice interval of both the old
+       * and the new head of the ready-to-run list.
+       */
+
+      rtcb->timeslice = MSEC2TICK(CONFIG_RR_INTERVAL);
+      btcb->timeslice = MSEC2TICK(CONFIG_RR_INTERVAL);
+
 #if 0 /* REVISIT: This can cause crashes in certain cases */
       /* Whenever the task at the head of the ready-to-run changes, we
        * must reassess the interval time that controls time-slicing.
        */
 
-      sched_timer_reassess();
+      if ((rtcb->flags & TCB_FLAG_ROUND_ROBIN) != 0 ||
+          (btcb->flags & TCB_FLAG_ROUND_ROBIN) != 0)
+        {
+          sched_timer_reassess();
+        }
 #endif
 #endif
       ret = true;

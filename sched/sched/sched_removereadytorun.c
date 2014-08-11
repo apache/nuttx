@@ -43,6 +43,8 @@
 #include <queue.h>
 #include <assert.h>
 
+#include <nuttx/clock.h>
+
 #include "sched/sched.h"
 
 /****************************************************************************
@@ -92,6 +94,7 @@
 
 bool sched_removereadytorun(FAR struct tcb_s *rtcb)
 {
+  FAR struct tcb_s *ntcb = NULL;
   bool ret = false;
 
   /* Check if the TCB to be removed is at the head of the ready to run list.
@@ -102,29 +105,49 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
     {
       /* There must always be at least one task in the list (the idle task) */
 
-      ASSERT(rtcb->flink != NULL);
+      ntcb = (FAR struct tcb_s *)rtcb->flink;
+      DEBUGASSERT(ntcb != NULL);
 
       /* Inform the instrumentation layer that we are switching tasks */
 
-      sched_note_switch(rtcb, rtcb->flink);
+      sched_note_switch(rtcb, ntcb);
+      ntcb->task_state = TSTATE_TASK_RUNNING;
 
-      rtcb->flink->task_state = TSTATE_TASK_RUNNING;
+      /* Remove the TCB from the head of the ready-to-run list */
+
+      (void)dq_remfirst((FAR dq_queue_t *)&g_readytorun);
 
 #if CONFIG_RR_INTERVAL > 0
+      /* Reset the round robin timeslice interval of the new head of the
+       * ready-to-run list.
+       */
+
+      ntcb->timeslice = MSEC2TICK(CONFIG_RR_INTERVAL);
+
 #if 0 /* REVISIT: This can cause crashes in certain cases */
       /* Whenever the task at the head of the ready-to-run changes, we
        * must reassess the interval time that controls time-slicing.
        */
 
-      sched_timer_reassess();
+      if ((rtcb->flags & TCB_FLAG_ROUND_ROBIN) != 0 ||
+          (ntcb->flags & TCB_FLAG_ROUND_ROBIN) != 0)
+        {
+          sched_timer_reassess();
+        }
 #endif
 #endif
+      /* Indicate that a context switch is occurring */
+
       ret = true;
     }
+  else
+    {
+      /* Remove the TCB from the ready-to-run list (not from the head) */
 
-  /* Remove the TCB from the ready-to-run list */
+      dq_rem((FAR dq_entry_t *)rtcb, (FAR dq_queue_t *)&g_readytorun);
+    }
 
-  dq_rem((FAR dq_entry_t*)rtcb, (dq_queue_t*)&g_readytorun);
+  /* Since the TCB is not in any list, it is now invalid */
 
   rtcb->task_state = TSTATE_TASK_INVALID;
   return ret;
