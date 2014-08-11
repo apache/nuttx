@@ -843,6 +843,11 @@ static int sam_tc_freqdiv_lookup(uint32_t ftcin, int ndx)
 
   if (ndx >= TC_NDIVIDERS)
     {
+      /* Not really a divider.  In this case, the board is actually driven
+       * by the 32.768KHz slow clock.  This returns a value that looks like
+       * correct divider if MCK were the input.
+       */
+
       return ftcin / BOARD_SLOWCLK_FREQUENCY;
     }
   else
@@ -1180,6 +1185,14 @@ void sam_tc_start(TC_HANDLE handle)
   tcvdbg("Starting channel %d inuse=%d\n", chan->chan, chan->inuse);
   DEBUGASSERT(chan && chan->inuse);
 
+  /* Read the SR to clear any pending interrupts on this channel */
+
+  (void)sam_chan_getreg(chan, SAM_TC_SR_OFFSET);
+
+  /* Then enable the timer (by setting the CLKEN bit).  Setting SWTRIG
+   * will also reset the timer counter and starting the timer.
+   */
+
   sam_chan_putreg(chan, SAM_TC_CCR_OFFSET, TC_CCR_CLKEN | TC_CCR_SWTRG);
   sam_regdump(chan, "Started");
 }
@@ -1308,7 +1321,7 @@ void sam_tc_setregister(TC_HANDLE handle, int regid, uint32_t regval)
 
   DEBUGASSERT(chan && regid < TC_NREGISTERS);
 
-  tcvdbg("Channel %d: Set register RC%d to 0x08lx\n",
+  tcvdbg("Channel %d: Set register RC%d to %08lx\n",
          chan->chan, regid, (unsigned long)regval);
 
   sam_chan_putreg(chan, g_regoffset[regid], regval);

@@ -56,6 +56,7 @@
 #include <errno.h>
 
 #include <arch/irq.h>
+#include <nuttx/clock.h>
 
 #include "sam_oneshot.h"
 
@@ -167,7 +168,7 @@ int sam_oneshot_initialize(struct sam_oneshot_s *oneshot, int chan,
 
   /* Get the TC frequency the corresponds to the requested resolution */
 
-  frequency = 1000000 / (uint32_t)resolution;
+  frequency = USEC_PER_SEC / (uint32_t)resolution;
 
   /* The pre-calculate values to use when we start the timer */
 
@@ -278,16 +279,16 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot, oneshot_handler_t handler,
 
   /* Express the delay in microseconds */
 
-  usec = (uint64_t)ts->tv_sec * 1000000 + (uint64_t)(ts->tv_nsec / 1000);
+  usec = (uint64_t)ts->tv_sec * USEC_PER_SEC + (uint64_t)(ts->tv_nsec / NSEC_PER_USEC);
 
   /* Get the timer counter frequency and determine the number of counts need to achieve the requested delay.
    *
    *   frequency = ticks / second
    *   ticks     = seconds * frequency
-   *             = (usecs * frequency) / 1000000;
+   *             = (usecs * frequency) / USEC_PER_SEC;
    */
 
-  regval = (usec * (uint64_t)sam_tc_divfreq(oneshot->tch)) / 1000000;
+  regval = (usec * (uint64_t)sam_tc_divfreq(oneshot->tch)) / USEC_PER_SEC;
 
   tcvdbg("usec=%lu regval=%08lx\n",
          (unsigned long)usec, (unsigned long)regval);
@@ -403,9 +404,8 @@ int sam_oneshot_cancel(struct sam_oneshot_s *oneshot, struct timespec *ts)
        * oneshot timer.
        */
 
-      tcvdbg("rc=%lu count=%lu resolution=%u usec=%lu\n",
-             (unsigned long)rc, (unsigned long)count, oneshot->resolution,
-             (unsigned long)usec);
+      tcvdbg("rc=%lu count=%lu usec=%lu\n",
+             (unsigned long)rc, (unsigned long)count, (unsigned long)usec);
 
       /* REVISIT: I am not certain why the timer counter value sometimes
        * exceeds RC.  Might be a bug, or perhaps the counter does not stop
@@ -426,16 +426,16 @@ int sam_oneshot_cancel(struct sam_oneshot_s *oneshot, struct timespec *ts)
            *
            *   frequency = ticks / second
            *   seconds   = ticks * frequency
-           *   usecs     = (ticks * 1000) / frequency;
+           *   usecs     = (ticks * USEC_PER_SEC) / frequency;
            */
 
-          usec        = (((uint64_t)(rc - count)) * 1000) /
+          usec        = (((uint64_t)(rc - count)) * USEC_PER_SEC) /
                         sam_tc_divfreq(oneshot->tch);
 
           /* Return the time remaining in the correct form */
 
-          sec         = usec / 1000000;
-          nsec        = ((usec) - (sec * 1000000)) * 1000;
+          sec         = usec / USEC_PER_SEC;
+          nsec        = ((usec) - (sec * USEC_PER_SEC)) * NSEC_PER_USEC;
 
           ts->tv_sec  = (time_t)sec;
           ts->tv_nsec = (unsigned long)nsec;
