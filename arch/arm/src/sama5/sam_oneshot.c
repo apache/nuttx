@@ -122,7 +122,7 @@ static void sam_oneshot_handler(TC_HANDLE tch, void *arg, uint32_t sr)
 
   /* Forward the event, clearing out any vestiges */
 
-  oneshot_handler  = (struct sam_oneshot_s *)oneshot->handler;
+  oneshot_handler  = (oneshot_handler_t)oneshot->handler;
   oneshot->handler = NULL;
   oneshot_arg      = (void *)oneshot->arg;
   oneshot->arg     = NULL;
@@ -158,6 +158,7 @@ int sam_oneshot_initialize(struct sam_oneshot_s *oneshot, int chan,
                            uint16_t resolution)
 {
   uint32_t frequency;
+  uint32_t divisor;
   uint32_t cmr;
   int ret;
 
@@ -170,7 +171,7 @@ int sam_oneshot_initialize(struct sam_oneshot_s *oneshot, int chan,
 
   /* The pre-calculate values to use when we start the timer */
 
-  ret = sam_tc_divisor(frequency, &oneshot->divisor, &cmr);
+  ret = sam_tc_divisor(frequency, &divisor, &cmr);
   if (ret < 0)
     {
       tcdbg("ERROR: sam_tc_divisor failed: %d\n", ret);
@@ -178,7 +179,7 @@ int sam_oneshot_initialize(struct sam_oneshot_s *oneshot, int chan,
     }
 
   tcvdbg("frequency=%lu, divisor=%lu, cmr=%08lx\n",
-         (unsigned long)frequency, (unsigned long)oneshot->divisor,
+         (unsigned long)frequency, (unsigned long)divisor,
          (unsigned long)cmr);
 
   /* Allocate the timer/counter and select its mode of operation
@@ -223,7 +224,6 @@ int sam_oneshot_initialize(struct sam_oneshot_s *oneshot, int chan,
 
   oneshot->chan       = chan;
   oneshot->running    = false;
-  oneshot->resolution = resolution;
   oneshot->handler    = NULL;
   oneshot->arg        = NULL;
   return OK;
@@ -275,13 +275,18 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot, oneshot_handler_t handler,
   oneshot->handler = handler;
   oneshot->arg     = arg;
 
-  /* We configured the counter to run with an LSB of the specified
-   * resolution.  We now must need need to set RC to the number
-   * of resolution units corresponding to the requested delay.
+  /* Express the delay in microseconds */
+
+  usec = (uint64_t)ts->tv_sec * 1000000 + (uint64_t)(ts->tv_nsec / 1000);
+
+  /* Get the timer counter frequency and determine the number of counts need to achieve the requested delay.
+   *
+   *   frequency = ticks / second
+   *   ticks     = seconds * frequency
+   *             = (usecs * frequency) / 1000000;
    */
 
-  usec   = (uint64_t)ts->tv_sec * 1000000 + (uint64_t)(ts->tv_nsec / 1000);
-  regval = usec / oneshot->resolution;
+  regval = (usec * (uint64_t)sam_tc_divfreq(oneshot->tch)) / 1000000;
 
   tcvdbg("usec=%lu regval=%08lx\n",
          (unsigned long)usec, (unsigned long)regval);
@@ -339,10 +344,11 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot, oneshot_handler_t handler,
 int sam_oneshot_cancel(struct sam_oneshot_s *oneshot, struct timespec *ts)
 {
   irqstate_t flags;
+  uint64_t usec;
+  uint64_t sec;
+  uint64_t nsec;
   uint32_t count;
   uint32_t rc;
-  uint32_t usec;
-  uint32_t sec;
 
   /* Was the timer running? */
 
@@ -364,9 +370,11 @@ int sam_oneshot_cancel(struct sam_oneshot_s *oneshot, struct timespec *ts)
    * the counter expires while we are doing this, the counter clock will be
    * stopped, but the clock will not be disabled.
    *
-   * NOTE: This is not documented, but I have observed in this case that the
-   * counter register freezes at a value equal to the RC register.  The
-   * following logic depends on this fact.
+   * The expected behavior is that the the counter register will freezes at
+   * a value equal to the RC register when the timer expires.  The counter
+   * should have values between 0 and RC in all other cased.
+   *
+   * REVISIT:  This does not appear to be the case.
    */
 
   tcvdbg("Cancelling...\n");
@@ -374,14 +382,8 @@ int sam_oneshot_cancel(struct sam_oneshot_s *oneshot, struct timespec *ts)
   count = sam_tc_getcounter(oneshot->tch);
   rc    = sam_tc_getregister(oneshot->tch, TC_REGC);
 
-  /* Now we can disable the interrupt and stop the timer.
-   *
-   * REVISIT: The assertion is there because I do no not know if the
-   * counter will be reset when the RC match occurs.  The counter
-   * clock will be disabled, so I am hoping not.
-   */
+  /* Now we can disable the interrupt and stop the timer. */
 
-  DEBUGASSERT(count > 0 || (sam_tc_getpending(oneshot->tch) & TC_INT_CPCS) == 0);
   sam_tc_attach(oneshot->tch, NULL, NULL, 0);
   sam_tc_stop(oneshot->tch);
 
@@ -390,22 +392,53 @@ int sam_oneshot_cancel(struct sam_oneshot_s *oneshot, struct timespec *ts)
   oneshot->arg     = NULL;
   irqrestore(flags);
 
-  /* The total time remaining is the difference */
+  /* Did the caller provide us with a location to return the time
+   * remaining?
+   */
 
-  DEBUGASSERT(rc >= count);
   if (ts)
     {
-      usec = (rc - count) * oneshot->resolution;
+      /* Yes.. then calculate and return the time remaining on the
+       * oneshot timer.
+       */
 
       tcvdbg("rc=%lu count=%lu resolution=%u usec=%lu\n",
              (unsigned long)rc, (unsigned long)count, oneshot->resolution,
              (unsigned long)usec);
 
-      /* Return the time remaining in the correct form */
+      /* REVISIT: I am not certain why the timer counter value sometimes
+       * exceeds RC.  Might be a bug, or perhaps the counter does not stop
+       * in all cases.
+       */
 
-      sec         = usec / 1000000;
-      ts->tv_sec  = sec;
-      ts->tv_nsec = ((usec) - (sec * 1000000)) * 1000;
+      if (count >= rc)
+        {
+          /* No time remaining (?) */
+
+          ts->tv_sec  = 0;
+          ts->tv_nsec = 0;
+        }
+      else
+        {
+          /* The total time remaining is the difference.  Convert the that
+           * to units of microseconds.
+           *
+           *   frequency = ticks / second
+           *   seconds   = ticks * frequency
+           *   usecs     = (ticks * 1000) / frequency;
+           */
+
+          usec        = (((uint64_t)(rc - count)) * 1000) /
+                        sam_tc_divfreq(oneshot->tch);
+
+          /* Return the time remaining in the correct form */
+
+          sec         = usec / 1000000;
+          nsec        = ((usec) - (sec * 1000000)) * 1000;
+
+          ts->tv_sec  = (time_t)sec;
+          ts->tv_nsec = (unsigned long)nsec;
+        }
 
       tcvdbg("remaining (%lu, %lu)\n",
              (unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec);
