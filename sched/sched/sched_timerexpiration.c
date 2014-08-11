@@ -290,8 +290,13 @@ static unsigned int sched_timer_process(unsigned int ticks, bool noswitches)
 
 static void sched_timer_start(unsigned int ticks)
 {
-  uint32_t msecs;
-  uint32_t secs;
+#ifdef CONFIG_HAVE_LONG_LONG
+  uint64_t usecs;
+  uint64_t secs;
+#else
+  uint64_t usecs;
+  uint64_t secs;
+#endif
   uint32_t nsecs;
   int ret;
 
@@ -308,11 +313,18 @@ static void sched_timer_start(unsigned int ticks)
 
       /* Convert ticks to a struct timespec that up_timer_start() can
        * understand.
+       *
+       * REVISIT: Calculations may not have acceptable ragne if uint64_t
+       * is not supported(?)
        */
 
-      msecs = TICK2MSEC(ticks);
-      secs  = msecs / MSEC_PER_SEC;
-      nsecs = (msecs - (secs * MSEC_PER_SEC)) * NSEC_PER_MSEC;
+#ifdef CONFIG_HAVE_LONG_LONG
+      usecs = TICK2USEC((uint64_t)ticks);
+#else
+      usecs = TICK2USEC((uint64_t)ticks);
+#endif
+      secs  = usecs / USEC_PER_SEC;
+      nsecs = (usecs - (secs * USEC_PER_SEC)) * NSEC_PER_MSEC;
 
       ts.tv_sec  = (time_t)secs;
       ts.tv_nsec = (long)nsecs;
