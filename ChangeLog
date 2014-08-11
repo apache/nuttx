@@ -8099,3 +8099,7 @@
 	  debug output updated in additional files (2014-8-10).
 	* sched/wdog/wd_start.c: Correct a bug in Tickless OS support: logic to
 	  detect changes in head of timer list was wrong (2014-5-10).
+	* sched/sched/sched_timerexperation.c, sched.h, and wdog/wd_start.c:  In
+	  tickless mode, need to stop the interval timer before inserted a new
+	  delay into the timer list.  Otherwise, the time is incorrect on the
+	  first entry of the list (2014-8-11).
