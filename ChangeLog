@@ -8103,3 +8103,9 @@
 	  tickless mode, need to stop the interval timer before inserted a new
 	  delay into the timer list.  Otherwise, the time is incorrect on the
 	  first entry of the list (2014-8-11).
+	* arch/arm/src/sama5/sam_freerun.c and sam_oneshot.c:  Correct bad time
+	  conversion, 1000000 not 1000 to convert seconds to microseconds
+	  (2014-8-11).
+	* sched/sched/sched_timerexpiration.c:  Fix inaccurate time conversion.
+	  Remove MSEC_PER_TICK from calculation and convert uint32_t to uin64_t
+	  (2014-8-11).
