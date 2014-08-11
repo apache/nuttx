@@ -20,6 +20,11 @@ config SAMA5D3XPLAINED_528MHZ
 
 endchoice # CPU Frequency
 
+config SAMA5D3XPLAINED_SLOWCLOCK
+	bool
+	default y if SCHED_TICKLESS
+	default n if !SCHED_TICKLESS
+
 choice
 	prompt "SAMA5D3-Xplained DRAM Type"
 	default SAMA5D3XPLAINED_MT47H128M16RT

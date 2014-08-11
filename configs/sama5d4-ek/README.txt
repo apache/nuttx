@@ -3172,7 +3172,14 @@ Tickless OS
   NOTE: In most cases, the slow clock will be used as the timer/counter
   input.  You should enable the 32.768KHz crystal for the slow clock by
   calling sam_sckc_enable().  Otherwise, you will be doing all system
-  timing using the RC clock!
+  timing using the RC clock!  UPDATE: This will now be selected by default
+  when you configure for TICKLESS support.
+
+  UPDATE: As of this writing (2014-8-11), the Tickless support is
+  functional.  However, the timing for all delays appears to be half the
+  duration that it should be.  I don't see anything wrong with the setup
+  and I am suspecting that there may be something I don't understand about
+  the counting frequency.
 
   SAMA5 Timer Usage
   -----------------
