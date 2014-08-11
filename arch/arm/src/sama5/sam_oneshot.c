@@ -267,6 +267,7 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot, oneshot_handler_t handler,
     {
       /* Yes.. then cancel it */
 
+      tcvdbg("Already running... cancelling\n");
       (void)sam_oneshot_cancel(oneshot, NULL);
     }
 

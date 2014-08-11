@@ -855,8 +855,8 @@ static int sam_tc_freqdiv_lookup(uint32_t ftcin, int ndx)
  * Name: sam_tc_divfreq_lookup
  *
  * Description:
- *  Given the TC input frequency (Ftcin) and a divider index, return the value of
- *  the divided frequency
+ *  Given the TC input frequency (Ftcin) and a divider index, return the
+ *  value of the divided frequency
  *
  * Input Parameters:
  *   ftcin - TC input frequency
