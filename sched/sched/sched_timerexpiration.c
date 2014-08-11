@@ -235,28 +235,28 @@ sched_process_timeslice(unsigned int ticks, bool noswitches)
  *   noswitches - True: Can't do context switches now.
  *
  * Returned Value:
- *   Base code implementation assumes that this function is called from
- *   interrupt handling logic with interrupts disabled.
+ *   The number of ticks to use when setting up the next timer.  Zero if
+ *   there is no interesting event to be timed.
  *
  ****************************************************************************/
 
-static void sched_timer_process(unsigned int ticks, bool noswitches)
+static unsigned int sched_timer_process(unsigned int ticks, bool noswitches)
 {
-  unsigned int nextime = UINT_MAX;
-  bool needtimer = false;
-  uint32_t msecs;
-  uint32_t secs;
-  uint32_t nsecs;
+#if CONFIG_RR_INTERVAL > 0
+  unsigned int cmptime = UINT_MAX;
+#endif
+  unsigned int rettime  = 0;
   unsigned int tmp;
-  int ret;
 
   /* Process watchdogs */
 
   tmp = wd_timer(ticks);
   if (tmp > 0)
     {
-      nextime   = tmp;
-      needtimer = true;
+#if CONFIG_RR_INTERVAL > 0
+      cmptime = tmp;
+#endif
+      rettime  = tmp;
     }
 
 #if CONFIG_RR_INTERVAL > 0
@@ -265,29 +265,52 @@ static void sched_timer_process(unsigned int ticks, bool noswitches)
    */
 
   tmp = sched_process_timeslice(ticks, noswitches);
-  if (tmp > 0 && tmp < nextime)
+  if (tmp > 0 && tmp < cmptime)
     {
-      nextime   = tmp;
-      needtimer = true;
+      rettime  = tmp;
     }
 #endif
+
+  return rettime;
+}
+
+/****************************************************************************
+ * Name:  sched_timer_start
+ *
+ * Description:
+ *   Start the interval timer.
+ *
+ * Input Parameters:
+ *   ticks - The number of ticks defining the timer interval to setup.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void sched_timer_start(unsigned int ticks)
+{
+  uint32_t msecs;
+  uint32_t secs;
+  uint32_t nsecs;
+  int ret;
 
   /* Set up the next timer interval (or not) */
 
   g_timer_interval = 0;
-  if (needtimer)
+  if (ticks > 0)
     {
       struct timespec ts;
 
       /* Save new timer interval */
 
-      g_timer_interval = nextime;
+      g_timer_interval = ticks;
 
       /* Convert ticks to a struct timespec that up_timer_start() can
        * understand.
        */
 
-      msecs = TICK2MSEC(nextime);
+      msecs = TICK2MSEC(ticks);
       secs  = msecs / MSEC_PER_SEC;
       nsecs = (msecs - (secs * MSEC_PER_SEC)) * NSEC_PER_MSEC;
 
@@ -328,10 +351,98 @@ static void sched_timer_process(unsigned int ticks, bool noswitches)
 void sched_timer_expiration(void)
 {
   unsigned int elapsed;
+  unsigned int nexttime;
+
+  /* Get the interval associated with las expiration */
 
   elapsed          = g_timer_interval;
   g_timer_interval = 0;
-  sched_timer_process(elapsed, false);
+
+  /* Process the timer ticks and set up the next interval (or not) */
+
+  nexttime = sched_timer_process(elapsed, false);
+  sched_timer_start(nexttime);
+}
+
+/****************************************************************************
+ * Name:  sched_timer_cancel
+ *
+ * Description:
+ *   Stop the current timing activity.  This is currently called just before
+ *   a new entry is inserted at the head of a timer list and also as part
+ *   of the processing of sched_timer_reassess().
+ *
+ *   This function(1) cancels the current timer, (2) determines how much of
+ *   the interval has elapsed, (3) completes any partially timed events
+ *   (including updating the delay of the timer at the head of the timer
+ *   list), and (2) returns the number of ticks that would be needed to
+ *   resume timing and complete this delay.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Number of timer ticks that would be needed to complete the delay (zero
+ *   if the timer was not active).
+ *
+ ****************************************************************************/
+
+unsigned int sched_timer_cancel(void)
+{
+  struct timespec ts;
+  unsigned int ticks;
+  unsigned int elapsed;
+
+  /* Get the time remaining on the interval timer and cancel the timer. */
+
+  (void)up_timer_cancel(&ts);
+
+  /* Convert to ticks */
+
+  ticks  = SEC2TICK(ts.tv_sec);
+  ticks += NSEC2TICK(ts.tv_nsec);
+  DEBUGASSERT(ticks <= g_timer_interval);
+
+  /* Handle the partial timer.  This will reassess all timer conditions and
+   * re-start the interval timer with the correct delay.  Context switches
+   * are not permitted in this case because we are not certain of the
+   * calling conditions.
+   */
+
+  elapsed          = g_timer_interval - ticks;
+  g_timer_interval = 0;
+
+  /* Process the timer ticks and return the next interval */
+
+  return sched_timer_process(elapsed, true);
+}
+
+/****************************************************************************
+ * Name:  sched_timer_resume
+ *
+ * Description:
+ *   Re-assess the next deadline and restart the interval timer.  This is
+ *   called from wd_start() after it has inserted a new delay into the
+ *   timer list.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void sched_timer_resume(void)
+{
+  unsigned int nexttime;
+
+  /* Reassess the next deadline (by simply processing a zero ticks expired)
+   * and set up the next interval (or not).
+   */
+
+  nexttime = sched_timer_process(0, true);
+  sched_timer_start(nexttime);
 }
 
 /****************************************************************************
@@ -360,28 +471,11 @@ void sched_timer_expiration(void)
 
 void sched_timer_reassess(void)
 {
-  struct timespec ts;
-  unsigned int ticks;
-  unsigned int elapsed;
+  unsigned int nexttime;
 
-  /* Get the time remaining on the interval timer and cancel the timer. */
+  /* Cancel and restart the timer */
 
-  (void)up_timer_cancel(&ts);
-
-  /* Convert to ticks */
-
-  ticks  = SEC2TICK(ts.tv_sec);
-  ticks += NSEC2TICK(ts.tv_nsec);
-  DEBUGASSERT(ticks <= g_timer_interval);
-
-  /* Handle the partial timer.  This will reassess all timer conditions and
-   * re-start the interval timer with the correct delay.  Context switches
-   * are not permitted in this case because we are not certain of the
-   * calling conditions.
-   */
-
-  elapsed          = g_timer_interval - ticks;
-  g_timer_interval = 0;
-  sched_timer_process(elapsed, true);
+  nexttime = sched_timer_cancel();
+  sched_timer_start(nexttime);
 }
 #endif /* CONFIG_SCHED_TICKLESS */

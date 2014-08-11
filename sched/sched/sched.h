@@ -234,9 +234,14 @@ int  sched_reprioritize(FAR struct tcb_s *tcb, int sched_priority);
      sched_setpriority(tcb,sched_priority)
 #endif
 
+
 #ifdef CONFIG_SCHED_TICKLESS
+unsigned int sched_timer_cancel(void);
+void sched_timer_resume(void);
 void sched_timer_reassess(void);
 #else
+#  define sched_timer_cancel() (0)
+#  define sched_timer_resume()
 #  define sched_timer_reassess()
 #endif
 
