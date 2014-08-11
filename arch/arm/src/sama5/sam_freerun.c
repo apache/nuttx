@@ -196,9 +196,9 @@ int sam_freerun_initialize(struct sam_freerun_s *freerun, int chan,
    * success.
    */
 
-  freerun->chan       = chan;
-  freerun->running    = false;
-  freerun->resolution = resolution;
+  freerun->chan     = chan;
+  freerun->running  = false;
+  freerun->overflow = 0;
 
   /* Set up to receive the callback when the counter overflow occurs */
 
@@ -208,7 +208,6 @@ int sam_freerun_initialize(struct sam_freerun_s *freerun, int chan,
   /* Start the counter */
 
   sam_tc_start(freerun->tch);
-
   return OK;
 }
 
@@ -273,10 +272,15 @@ int sam_freerun_counter(struct sam_freerun_s *freerun, struct timespec *ts)
              (unsigned long)counter, (unsigned long)overflow);
     }
 
-  /* Convert the whole thing to units of microseconds */
+  /* Convert the whole thing to units of microseconds.
+   *
+   *   frequency = ticks / second
+   *   seconds   = ticks * frequency
+   *   usecs     = (ticks * 1000) / frequency;
+   */
 
-  usec = (((uint64_t)overflow << 32) + (uint64_t)counter) *
-         freerun->resolution;
+  usec = ((((uint64_t)overflow << 32) + (uint64_t)counter) * 1000) /
+         sam_tc_divfreq(freerun->tch);
 
   /* And return the value of the timer */
 

@@ -297,7 +297,7 @@ uint32_t sam_tc_getregister(TC_HANDLE handle, int regid);
 uint32_t sam_tc_getcounter(TC_HANDLE handle);
 
 /****************************************************************************
- * Name: sam_tc_frequency
+ * Name: sam_tc_infreq
  *
  * Description:
  *   Return the timer input frequency, that is, the MCK frequency divided
@@ -311,7 +311,24 @@ uint32_t sam_tc_getcounter(TC_HANDLE handle);
  *
  ****************************************************************************/
 
-uint32_t sam_tc_frequency(void);
+uint32_t sam_tc_infreq(void);
+
+/****************************************************************************
+ * Name: sam_tc_divfreq
+ *
+ * Description:
+ *   Return the divided timer input frequency that is currently driving the
+ *   the timer counter.
+ *
+ * Input Parameters:
+ *   handle Channel handle previously allocated by sam_tc_allocate()
+ *
+ * Returned Value:
+ *  The timer counter frequency.
+ *
+ ****************************************************************************/
+
+uint32_t sam_tc_divfreq(TC_HANDLE handle);
 
 /****************************************************************************
  * Name: sam_tc_divisor
@@ -320,12 +337,12 @@ uint32_t sam_tc_frequency(void);
  *   Finds the best MCK divisor given the timer frequency and MCK.  The
  *   result is guaranteed to satisfy the following equation:
  *
- *     (Ftc / (div * 65536)) <= freq <= (Ftc / div)
+ *     (Ftcin / (div * 65536)) <= freq <= (Ftcin / div)
  *
  *   where:
- *     freq - the desired frequency
- *     Ftc  - The timer/counter input frequency
- *     div  - With DIV being the highest possible value.
+ *     freq  - the desired frequency
+ *     Ftcin - The timer/counter input frequency
+ *     div   - With DIV being the highest possible value.
  *
  * Input Parameters:
  *   frequency  Desired timer frequency.

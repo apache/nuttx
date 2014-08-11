@@ -414,6 +414,7 @@
 
 #define TC_CMR_TCCLKS_SHIFT      (0)       /* Bits 0-2: Clock Selection */
 #define TC_CMR_TCCLKS_MASK       (7 << TC_CMR_TCCLKS_SHIFT)
+#  define TC_CMR_TCCLKS(n)       ((uint32_t)(n) << TC_CMR_TCCLKS_SHIFT)
 #  define TC_CMR_TCCLKS_TCLK1    (0 << TC_CMR_TCCLKS_SHIFT) /* TIMER_CLOCK1 Clock selected */
 #  define TC_CMR_TCCLKS_TCLK2    (1 << TC_CMR_TCCLKS_SHIFT) /* TIMER_CLOCK2 Clock selected */
 #  define TC_CMR_TCCLKS_TCLK3    (2 << TC_CMR_TCCLKS_SHIFT) /* TIMER_CLOCK3 Clock selected */

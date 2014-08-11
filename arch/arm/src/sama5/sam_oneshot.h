@@ -75,8 +75,6 @@ struct sam_oneshot_s
 {
   uint8_t chan;                       /* The timer/counter in use */
   volatile bool running;              /* True: the timer is running */
-  uint16_t resolution;                /* Timer resolution in microseconds */
-  uint32_t divisor;                   /* TC divisor derived from resolution */
   TC_HANDLE tch;                      /* Handle returned by
                                        * sam_tc_initialize() */
   volatile oneshot_handler_t handler; /* Oneshot expiration callback */

@@ -1229,7 +1229,6 @@ static int sam_adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
 static int sam_adc_settimer(struct sam_adc_s *priv, uint32_t frequency,
                             int channel)
 {
-  uint32_t ftc;
   uint32_t div;
   uint32_t tcclks;
   uint32_t mode;
@@ -1281,7 +1280,7 @@ static int sam_adc_settimer(struct sam_adc_s *priv, uint32_t frequency,
    * frequency.
    */
 
-  regval = sam_tc_frequency() / fdiv;
+  regval = sam_tc_infreq() / fdiv;
 
   /* Set up TC_RA and TC_RC.  The frequency is determined by RA and RC:  TIOA is
    * cleared on RA match; TIOA is set on RC match.
