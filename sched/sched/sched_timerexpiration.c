@@ -314,17 +314,17 @@ static void sched_timer_start(unsigned int ticks)
       /* Convert ticks to a struct timespec that up_timer_start() can
        * understand.
        *
-       * REVISIT: Calculations may not have acceptable ragne if uint64_t
+       * REVISIT: Calculations may not have an acceptable range if uint64_t
        * is not supported(?)
        */
 
 #ifdef CONFIG_HAVE_LONG_LONG
       usecs = TICK2USEC((uint64_t)ticks);
 #else
-      usecs = TICK2USEC((uint64_t)ticks);
+      usecs = TICK2USEC(ticks);
 #endif
       secs  = usecs / USEC_PER_SEC;
-      nsecs = (usecs - (secs * USEC_PER_SEC)) * NSEC_PER_MSEC;
+      nsecs = (usecs - (secs * USEC_PER_SEC)) * NSEC_PER_USEC;
 
       ts.tv_sec  = (time_t)secs;
       ts.tv_nsec = (long)nsecs;

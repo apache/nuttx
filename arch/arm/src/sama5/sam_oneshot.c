@@ -290,8 +290,7 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot, oneshot_handler_t handler,
 
   regval = (usec * (uint64_t)sam_tc_divfreq(oneshot->tch)) / USEC_PER_SEC;
 
-  tcvdbg("usec=%lu regval=%08lx\n",
-         (unsigned long)usec, (unsigned long)regval);
+  tcvdbg("usec=%llu regval=%08llx\n", usec, regval);
   DEBUGASSERT(regval <= UINT32_MAX);
 
   /* Set up to receive the callback when the interrupt occurs */
