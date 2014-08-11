@@ -79,8 +79,7 @@
 #  undef CONFIG_SAMA5_TC_REGDEBUG
 #endif
 
-#undef CONFIG_SAMA5_TC_DEBUG
-#if defined(CONFIG_SAMA5_ADC) && defined(CONFIG_DEBUG_ANALOG)
+#if !defined(CONFIG_SAMA5_TC_DEBUG) && defined(CONFIG_SAMA5_ADC) && defined(CONFIG_DEBUG_ANALOG)
 #  define CONFIG_SAMA5_TC_DEBUG 1
 #endif
 

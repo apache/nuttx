@@ -56,6 +56,7 @@
 #include <errno.h>
 
 #include <arch/irq.h>
+#include <nuttx/clock.h>
 
 #include "sam_freerun.h"
 
@@ -142,7 +143,7 @@ int sam_freerun_initialize(struct sam_freerun_s *freerun, int chan,
 
   /* Get the TC frequency the corresponds to the requested resolution */
 
-  frequency = 1000000 / (uint32_t)resolution;
+  frequency = USEC_PER_SEC / (uint32_t)resolution;
 
   /* The pre-calculate values to use when we start the timer */
 
@@ -276,19 +277,19 @@ int sam_freerun_counter(struct sam_freerun_s *freerun, struct timespec *ts)
    *
    *   frequency = ticks / second
    *   seconds   = ticks * frequency
-   *   usecs     = (ticks * 1000) / frequency;
+   *   usecs     = (ticks * USEC_PER_SEC) / frequency;
    */
 
-  usec = ((((uint64_t)overflow << 32) + (uint64_t)counter) * 1000) /
+  usec = ((((uint64_t)overflow << 32) + (uint64_t)counter) * USEC_PER_SEC) /
          sam_tc_divfreq(freerun->tch);
 
   /* And return the value of the timer */
 
-  sec = (uint32_t)(usec / 1000000);
+  sec         = (uint32_t)(usec / USEC_PER_SEC);
   ts->tv_sec  = sec;
-  ts->tv_nsec = (usec - (sec * 1000000)) * 1000;
+  ts->tv_nsec = (usec - (sec * USEC_PER_SEC)) * NSEC_PER_USEC;
 
-  tcvdbg("usec=%016llx ts=(%lu, %lu)\n",
+  tcvdbg("usec=%llu ts=(%lu, %lu)\n",
           usec, (unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec);
 
   return OK;
