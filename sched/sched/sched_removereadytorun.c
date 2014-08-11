@@ -109,6 +109,16 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
       sched_note_switch(rtcb, rtcb->flink);
 
       rtcb->flink->task_state = TSTATE_TASK_RUNNING;
+
+#if CONFIG_RR_INTERVAL > 0
+#if 0 /* REVISIT: This can cause crashes in certain cases */
+      /* Whenever the task at the head of the ready-to-run changes, we
+       * must reassess the interval time that controls time-slicing.
+       */
+
+      sched_timer_reassess();
+#endif
+#endif
       ret = true;
     }
 

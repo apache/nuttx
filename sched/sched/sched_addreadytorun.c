@@ -137,11 +137,13 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
       btcb->flink->task_state = TSTATE_TASK_READYTORUN;
 
 #if CONFIG_RR_INTERVAL > 0
-      /* Whenever the task at the head of the ready-to-run chances, we
+#if 0 /* REVISIT: This can cause crashes in certain cases */
+      /* Whenever the task at the head of the ready-to-run changes, we
        * must reassess the interval time that controls time-slicing.
        */
 
       sched_timer_reassess();
+#endif
 #endif
       ret = true;
     }
