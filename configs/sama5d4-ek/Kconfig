@@ -268,6 +268,11 @@ config SAMA5D4EK_CHANNEL
 		Selects the PWM channel number that will be used to perform the PWM
 		test.  See apps/examples/pwm.
 
+config SAMA5D4EK_SLOWCLOCK
+	bool
+	default y if SCHED_TICKLESS
+	default n if !SCHED_TICKLESS
+
 if AUDIO_WM8904
 
 config SAMA5D4EK_WM8904_I2CFREQUENCY
@@ -289,6 +294,7 @@ config SAMA5D4EK_WM8904_SRCMAIN
 
 config SAMA5D4EK_WM8904_SRCSCK
 	bool "Slow XTAL (32.768KHz)"
+	select SAMA5D4EK_SLOWCLOCK
 
 endchoice # WM8904 MCLK source
 endif # AUDIO_WM8904

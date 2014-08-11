@@ -248,6 +248,11 @@ config SAMA5D3xEK_OV2640_DEMO
 
 endif # VIDEO_OV2640
 
+config SAMA5D3xEK_SLOWCLOCK
+	bool
+	default y if SCHED_TICKLESS
+	default n if !SCHED_TICKLESS
+
 if AUDIO_WM8904
 
 config SAMA5D3xEK_WM8904_I2CFREQUENCY
@@ -266,6 +271,7 @@ choice
 
 config SAMA5D3xEK_WM8904_SRCMAIN
 	bool "Main Clock (12MHz)"
+	select SAMA5D3xEK_SLOWCLOCK
 
 config SAMA5D3xEK_WM8904_SRCSCK
 	bool "Slow XTAL (32.768KHz)"

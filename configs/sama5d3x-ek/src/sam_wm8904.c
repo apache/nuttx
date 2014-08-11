@@ -56,7 +56,6 @@
 #include "sam_pio.h"
 #include "sam_twi.h"
 #include "sam_ssc.h"
-#include "sam_sckc.h"
 #include "sam_pck.h"
 
 #include "sama5d3x-ek.h"
@@ -293,9 +292,10 @@ int sam_wm8904_initialize(int minor)
        */
 
 #ifdef CONFIG_SAMA5D3xEK_WM8904_SRCSCK
-      /* Drive the DAC with the slow clock (32.768 KHz) */
+      /* Drive the DAC with the slow clock (32.768 KHz).  The slow clock was
+       * enabled in sam_boot.c if needed.
+       */
 
-      sam_sckc_enable(true);
       (void)sam_pck_configure(PCK0, PCKSRC_SCK, BOARD_SLOWCLK_FREQUENCY);
 #else
       /* Drive the DAC with the main clock (12 MHz) */
