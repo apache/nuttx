@@ -3169,6 +3169,11 @@ Tickless OS
       CONFIG_SAMA5_TICKLESS_FREERUN=1  : Selects TC0 channel 1 for the free-
                                        : running timer
 
+  NOTE: In most cases, the slow clock will be used as the timer/counter
+  input.  You should enable the 32.768KHz crystal for the slow clock by
+  calling sam_sckc_enable().  Otherwise, you will be doing all system
+  timing using the RC clock!
+
   SAMA5 Timer Usage
   -----------------
   This current implementation uses two timers:  A one-shot timer to
