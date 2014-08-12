@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated August 7, 2014)
+NuttX TODO List (Last updated August 11, 2014)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -9,7 +9,7 @@ board port.
 nuttx/
 
   (9)  Task/Scheduler (sched/)
-  (1)  Memory Managment (mm/)
+  (2)  Memory Managment (mm/)
   (3)  Signals (sched/, arch/)
   (2)  pthreads (sched/)
  (11)  Kernel Build
@@ -225,6 +225,12 @@ o Memory Managment (mm/)
   Status:      Open.  No changes are planned.
   Priority:    Medium/Low, a good feature to prevent memory leaks but would
                have negative impact on memory usage and code size.
+
+  Title:       KERNEL MODE PAGE ALLOCATOR
+  Description: The KERNEL mode build for platforms with an MMU really needs
+               a page-oriented allocator and support for sbrk() and brk()
+  Status:      Open
+  Priority:    Low
 
 o Signals (sched/, arch/)
   ^^^^^^^^^^^^^^^^^^^^^^^
