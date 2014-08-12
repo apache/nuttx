@@ -8109,3 +8109,6 @@
 	* sched/sched/sched_timerexpiration.c:  Fix inaccurate time conversion.
 	  Remove MSEC_PER_TICK from calculation and convert uint32_t to uin64_t
 	  (2014-8-11).
+	* libc/time/lib_localtime.c, private.h, tzfile.h and several header and
+	  make-related files:  Adds support for localtime.  From Max Neklyudov
+	  (2014-8-12)
