@@ -142,13 +142,14 @@ static const char * const g_monthname[12] =
  *
  ****************************************************************************/
 
-size_t strftime(char *s, size_t max, const char *format, const struct tm *tm)
+size_t strftime(FAR char *s, size_t max, FAR const char *format,
+                FAR const struct tm *tm)
 {
-  const char *str;
-  char       *dest   = s;
-  int         chleft = max;
-  int         value;
-  int         len;
+  FAR const char *str;
+  FAR char       *dest   = s;
+  int             chleft = max;
+  int             value;
+  int             len;
 
   while (*format && chleft > 0)
     {
@@ -342,12 +343,12 @@ size_t strftime(char *s, size_t max, const char *format, const struct tm *tm)
              break;
 
            /* %s: The number of seconds since the Epoch, that is, since 1970-01-01
-            * 00:00:00 UTC.
+            * 00:00:00 UTC.  Hmmm... mktime argume is not 'const'.
             */
 
            case 's':
              {
-               len = snprintf(dest, chleft, "%d", mktime(tm));
+               len = snprintf(dest, chleft, "%d", mktime((FAR struct tm *)tm));
              }
              break;
 
