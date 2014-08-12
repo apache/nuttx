@@ -2378,6 +2378,7 @@ Tickless OS
 
     RTOS Features -> Clocks and Timers
       CONFIG_SCHED_TICKLESS=y          : Configures the RTOS in tickless mode
+      CONFIG_SCHED_TICKLESS_ALARM=n    : (option not implemented)
 
     System Type -> SAMA5 Peripheral Support
       CONFIG_SAMA5_TC0=y               : Enable TC0 (TC channels 0-3
@@ -2410,7 +2411,8 @@ Tickless OS
   from 0xffffffff to zero).  So we could potentially just set the compare
   at the number of ticks you want PLUS the current value of timer.  Then
   you could have both with a single timer:  An interval timer and a free-
-  running counter with the same timer!
+  running counter with the same timer!  In this case, you would want to
+  to set CONFIG_SCHED_TICKLESS_ALARM in the NuttX configuration.
 
   Patches are welcome!
 
