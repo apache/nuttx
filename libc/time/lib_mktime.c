@@ -85,7 +85,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_GREGORIAN_TIME
-time_t mktime(const struct tm *tp)
+time_t mktime(FAR struct tm *tp)
 {
   time_t ret;
   time_t jdn;
@@ -113,7 +113,7 @@ time_t mktime(const struct tm *tp)
  * seconds, etc. apply.
  */
 
-time_t mktime(const struct tm *tp)
+time_t mktime(FAR struct tm *tp)
 {
   unsigned int days;
 

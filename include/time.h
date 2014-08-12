@@ -107,10 +107,12 @@
 
 #define TIMER_ABSTIME      1
 
+#ifndef CONFIG_LIBC_LOCALTIME
 /* Local time is the same as gmtime in this implementation */
 
 #define localtime(c)       gmtime(c)
 #define localtime_r(c,r)   gmtime_r(c,r)
+#endif
 
 /********************************************************************************
  * Public Types
@@ -140,7 +142,7 @@ struct tm
   int tm_mday;    /* day of the month (1-31) */
   int tm_mon;     /* month (0-11) */
   int tm_year;    /* years since 1900 */
-#if 0 /* not supported */
+#ifdef CONFIG_LIBC_LOCALTIME
   int tm_wday;    /* day of the week (0-6) */
   int tm_yday;    /* day of the year (0-365) */
   int tm_isdst;   /* non-0 if daylight savings time is in effect */
@@ -183,7 +185,7 @@ int clock_settime(clockid_t clockid, FAR const struct timespec *tp);
 int clock_gettime(clockid_t clockid, FAR struct timespec *tp);
 int clock_getres(clockid_t clockid, FAR struct timespec *res);
 
-time_t mktime(FAR const struct tm *tp);
+time_t mktime(FAR struct tm *tp);
 FAR struct tm *gmtime(FAR const time_t *timer);
 FAR struct tm *gmtime_r(FAR const time_t *timer, FAR struct tm *result);
 size_t strftime(char *s, size_t max, FAR const char *format,

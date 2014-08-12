@@ -56,6 +56,8 @@
 
 /* File System Definitions **************************************************/
 
+#define FILENAME_MAX _POSIX_NAME_MAX
+
 /* File system error values *************************************************/
 
 #define EOF        (-1)

@@ -186,6 +186,8 @@ FAR char **getoptargp(void); /* Optional argument following option */
 int       *getoptindp(void); /* Index into argv */
 int       *getoptoptp(void); /* unrecognized option character */
 
+#define access(...) (0)
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

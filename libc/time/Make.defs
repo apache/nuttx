@@ -1,7 +1,7 @@
 ############################################################################
 # libc/time/Make.defs
 #
-#   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011-2012, 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,8 +35,14 @@
 
 # Add the time C files to the build
 
-CSRCS += lib_mktime.c lib_gmtime.c lib_gmtimer.c lib_strftime.c \
-		  lib_calendar2utc.c lib_daysbeforemonth.c lib_isleapyear.c lib_time.c
+CSRCS += lib_strftime.c lib_calendar2utc.c lib_daysbeforemonth.c
+CSRCS += lib_isleapyear.c lib_time.c
+
+ifdef CONFIG_LIBC_LOCALTIME
+CSRCS += lib_localtime.c
+else
+CSRCS += lib_mktime.c lib_gmtime.c lib_gmtimer.c
+endif
 
 # Add the time directory to the build
 

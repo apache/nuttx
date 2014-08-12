@@ -186,6 +186,29 @@ config ARCH_LOWPUTC
 	---help---
 		architecture supports low-level, boot time console output
 
+config LIBC_LOCALTIME
+	bool "localtime API call support"
+	default "n"
+	depends on !DISABLE_ENVIRON
+	---help---
+		localtime API call support
+
+if LIBC_LOCALTIME
+
+config LIBC_TZ_MAX_TIMES
+	int "Maximum number of times in timezone"
+	default 8
+
+config LIBC_TZ_MAX_TYPES
+	int "Maximum number of TZ types"
+	default 8
+
+config LIBC_TZDIR
+	string "zoneinfo directory path"
+	default "/etc/zoneinfo"
+
+endif
+
 config LIB_SENDFILE_BUFSIZE
 	int "sendfile() buffer size"
 	default 512
