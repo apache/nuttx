@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: August 10, 2014</p>
+      <p>Last Updated: August 12, 2014</p>
     </td>
   </tr>
 </table>
@@ -2460,8 +2460,17 @@ config ARCH_SIM
   </li>
   <li>
     <p>
-    <b><code>CONFIG_SCHED_TICKLESS</code></b>:
-    If <code>CONFIG_ARCH_HAVE_TICKLESS</code> is selected, then it will enable the Tickless OS features in NuttX.
+      <b><code>CONFIG_SCHED_TICKLESS</code></b>:
+      If <code>CONFIG_ARCH_HAVE_TICKLESS</code> is selected, then it will enable the Tickless OS features in NuttX.
+    </p>
+  </li>
+  <li>
+    <p>
+      <b><code>CONFIG_SCHED_TICKLESS_ALARM</code></b>:
+      The tickless option can be supported either via a simple interval timer (plus elapsed time) or via an alarm.  The interval timer allows programming events to occur after an interval.  With the alarm, you can set a time in the future and get an event when that alarm goes off.  This option selects the use of an alarm.
+    </p>
+    <p>
+      The advantage of an alarm is that it avoids some small timing errors; the advantage of the use of the interval timer is that the hardware requirement may be less.
     </p>
   </li>
   <li>
@@ -2495,6 +2504,27 @@ config ARCH_SIM
     <a href="#uptimergettime"><code>up_timer_gettime()</code></a>:
     Returns the current time from the platform specific time source.
   </li>
+</ul>
+<p>
+  The tickless option can be supported either via a simple interval timer (plus elapsed time) or via an alarm.  The interval timer allows programming events to occur after an interval.  With the alarm, you can set a time in* the future and get an event when that alarm goes off.
+</p>
+<p>
+  If <code>CONFIG_SCHED_TICKLESS_ALARM</code> is defined, then the platform code must provide the following:
+<p>
+<ul>
+  <li>
+    <a href="#upalarmcancel"><code>up_alarm_cancel()</code></a>:
+    Cancels the alarm.
+  </li>
+  <li>
+    <a href="#upalarmstart"><code>up_alarm_start()</code></a>:
+    Enables (or re-enables) the alaram.
+  </li>
+</ul>
+<p>
+  If <code>CONFIG_SCHED_TICKLESS_ALARM</code> is <i>not</i>defined, then the platform code must provide the following verify similar functions:
+<p>
+<ul>
   <li>
     <a href="#uptimercancel"><code>up_timer_cancel()</code></a>:
     Cancels the interval timer.
@@ -2555,7 +2585,8 @@ int up_timer_gettime(FAR struct timespec *ts);
 </ul>
 <p><b>Input Parameters</b>:</p>
 <ul>
-  <li><code>ts</code>: Provides the location in which to return the up-time.</li>
+  <li><code>ts</code>: Provides the location in which to return the up-time..
+</li>
 </ul>
 <p><b>Returned Value</b>:</p>
 <ul>
@@ -2566,7 +2597,53 @@ int up_timer_gettime(FAR struct timespec *ts);
   Called from the the normal tasking context. The implementation must provide whatever mutual exclusion is necessary for correct operation. This can include disabling interrupts in order to assure atomic register operations.
 </ul>
 
-<h5><a name="uptimercancel">4.3.4.4.3 <code>up_timer_cancel()</code></a></h5>
+<h5><a name="upalarmcancel">4.3.4.4.3 <code>up_alarm_cancel()</code></a></h5>
+<p><b>Prototype</b>:<p>
+<ul><pre>
+#include &lt;nuttx/arch.h&gt;
+int up_alarm_cancel(FAR struct timespec *ts);
+</ul>
+<p><b>Description</b>:</p>
+  Cancel the alarm and return the time of cancellation of the alarm. These two steps need to be as nearly atomic as possible. <code>sched_timer_expiration()</code> will not be called unless the alarm is restarted with <code>up_alarm_start()</code>. If, as a race condition, the alarm has already expired when this function is called, then time returned is the current time.
+<ul>
+</ul>
+<p><b>Input Parameters</b>:</p>
+<ul>
+  <li><code>ts</code>: Location to return the expiration time.  The current time should be returned if the timer is not active.    <code>ts</code> may be <code>NULL</code> in which case the time is not returned</li>
+</ul>
+<p><b>Returned Value</b>:</p>
+<ul>
+  Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
+</ul>
+<p><b>Assumptions</b>:</p>
+<ul>
+  May be called from interrupt level handling or from the normal tasking level. iterrupts may need to be disabled internally to assure non-reentrancy.
+</ul>
+
+<h5><a name="upalarmstart">4.3.4.4.5 <code>up_alarm_start()</code></a></h5>
+<p><b>Prototype</b>:<p>
+<ul><pre>
+#include &lt;nuttx/arch.h&gt;
+int up_alarm_start(FAR const struct timespec *ts);
+</ul>
+<p><b>Description</b>:</p>
+  Start the alarm. <code>sched_timer_expiration()</code> will be called when the alarm occurs (unless <code>up_alaram_cancel</code> is called to stop it).
+<ul>
+</ul>
+<p><b>Input Parameters</b>:</p>
+<ul>
+  <li><code>ts</code>: The time in the future at the alarm is expected to occur.  When the alarm occurs the timer logic will call <code>sched_timer_expiration()</code>.</li>
+</ul>
+<p><b>Returned Value</b>:</p>
+<ul>
+  Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
+</ul>
+<p><b>Assumptions</b>:</p>
+<ul>
+  May be called from interrupt level handling or from the normal tasking level. Interrupts may need to be disabled internally to assure non-reentrancy.
+</ul>
+
+<h5><a name="uptimercancel">4.3.4.4.5 <code>up_timer_cancel()</code></a></h5>
 <p><b>Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -2589,7 +2666,7 @@ int up_timer_cancel(FAR struct timespec *ts);
   May be called from interrupt level handling or from the normal tasking level. iterrupts may need to be disabled internally to assure non-reentrancy.
 </ul>
 
-<h5><a name="uptimerstart">4.3.4.4.4 <code>up_timer_start()</code></a></h5>
+<h5><a name="uptimerstart">4.3.4.4.6 <code>up_timer_start()</code></a></h5>
 <p><b>Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
