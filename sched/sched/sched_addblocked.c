@@ -119,4 +119,3 @@ void sched_addblocked(FAR struct tcb_s *btcb, tstate_t task_state)
 
   btcb->task_state = task_state;
 }
-

@@ -58,6 +58,22 @@
 /************************************************************************
  * Pre-processor Definitions
  ************************************************************************/
+/* In the original design, it was planned that sched_timer_reasses() be
+ * called whenever there was a change at the head of the ready-to-run
+ * list.  That call was intended to establish a new time-slice or to
+ * stop an old time-slice timer.  However, it turns out that that
+ * solution is too fragile:  The system is too vulnerable at the time
+ * that the read-to-run list is modified in order to muck with timers.
+ *
+ * The kludge/work-around is simple to keep the timer running all of the
+ * time with an interval of no more than the timeslice interface.  If we
+ * this, then there is really no need to do anything when on context
+ * switches.
+ */
+
+#if CONFIG_RR_INTERVAL > 0
+#  define KEEP_ALIVE_HACK 1
+#endif
 
 #ifndef MIN
 #  define MIN(a,b) (((a) < (b)) ? (a) : (b))
@@ -212,7 +228,11 @@ static unsigned int
 sched_process_timeslice(unsigned int ticks, bool noswitches)
 {
   FAR struct tcb_s *rtcb  = (FAR struct tcb_s*)g_readytorun.head;
+#ifdef KEEP_ALIVE_HACK
+  unsigned int ret = MSEC2TICK(CONFIG_RR_INTERVAL);
+#else
   unsigned int ret = 0;
+#endif
   int decr;
 
   /* Check if the currently executing task uses round robin
@@ -293,13 +313,22 @@ sched_process_timeslice(unsigned int ticks, bool noswitches)
                    */
   
                   rtcb = (FAR struct tcb_s*)g_readytorun.head;
+
+                  /* Check if the new task at the head of the ready-to-run
+                   * supports round robin scheduling.
+                   */
+
                   if ((rtcb->flags & TCB_FLAG_ROUND_ROBIN) != 0)
                     {
                       /* The new task at the head of the ready to run
                        * list does not support round robin scheduling.
                        */
 
+#ifdef KEEP_ALIVE_HACK
+                      ret = MSEC2TICK(CONFIG_RR_INTERVAL);
+#else
                       ret = 0;
+#endif
                     }
                   else
                     {

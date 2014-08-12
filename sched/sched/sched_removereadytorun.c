@@ -43,8 +43,6 @@
 #include <queue.h>
 #include <assert.h>
 
-#include <nuttx/clock.h>
-
 #include "sched/sched.h"
 
 /****************************************************************************
@@ -112,40 +110,12 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
 
       sched_note_switch(rtcb, ntcb);
       ntcb->task_state = TSTATE_TASK_RUNNING;
-
-      /* Remove the TCB from the head of the ready-to-run list */
-
-      (void)dq_remfirst((FAR dq_queue_t *)&g_readytorun);
-
-#if CONFIG_RR_INTERVAL > 0
-      /* Reset the round robin timeslice interval of the new head of the
-       * ready-to-run list.
-       */
-
-      ntcb->timeslice = MSEC2TICK(CONFIG_RR_INTERVAL);
-
-#if 0 /* REVISIT: This can cause crashes in certain cases */
-      /* Whenever the task at the head of the ready-to-run changes, we
-       * must reassess the interval time that controls time-slicing.
-       */
-
-      if ((rtcb->flags & TCB_FLAG_ROUND_ROBIN) != 0 ||
-          (ntcb->flags & TCB_FLAG_ROUND_ROBIN) != 0)
-        {
-          sched_timer_reassess();
-        }
-#endif
-#endif
-      /* Indicate that a context switch is occurring */
-
       ret = true;
     }
-  else
-    {
-      /* Remove the TCB from the ready-to-run list (not from the head) */
 
-      dq_rem((FAR dq_entry_t *)rtcb, (FAR dq_queue_t *)&g_readytorun);
-    }
+  /* Remove the TCB from the ready-to-run list */
+
+  dq_rem((FAR dq_entry_t *)rtcb, (FAR dq_queue_t *)&g_readytorun);
 
   /* Since the TCB is not in any list, it is now invalid */
 
