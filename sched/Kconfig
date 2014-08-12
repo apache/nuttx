@@ -57,13 +57,30 @@ config SCHED_TICKLESS
 	default n
 	depends on ARCH_HAVE_TICKLESS
 	---help---
-		Be default, system time is driven by a periodic timer interrupt.  An
+		By default, system time is driven by a periodic timer interrupt.  An
 		alternative configurations is a tick-less configuration in which
 		there is no periodic timer interrupt.  Instead and interval timer is
 		used to schedule the next OS time event.  This option selects that
 		tick-less OS option.  If the tick-less OS is selected, then there are
 		additional platform specific interfaces that must be provided as
 		defined include/nuttx/arch.h
+
+if SCHED_TICKLESS
+conf SCHED_TICKLESS_ALARM
+	bool "Tickless alarm"
+	default n
+	---help---
+		The tickless option can be supported either via a simple interval
+		timer (plus elapsed time) or via an alarm.  The interval timer allows
+		programming events to occur after an interval.  With the alarm,
+		you can set a time in the future and get an event when that alarm
+		goes off.  This option selects the use of an alarm.
+
+		The advantage of an alarm is that it avoids some small timing
+		errors; the advantage of the use of the interval timer is that
+		the hardware requirement may be less.
+
+endif
 
 config USEC_PER_TICK
 	int "System timer tick period (microseconds)"
