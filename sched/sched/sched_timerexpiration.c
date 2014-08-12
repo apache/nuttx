@@ -66,7 +66,7 @@
  * that the read-to-run list is modified in order to muck with timers.
  *
  * The kludge/work-around is simple to keep the timer running all of the
- * time with an interval of no more than the timeslice interface.  If we
+ * time with an interval of no more than the timeslice interval.  If we
  * this, then there is really no need to do anything when on context
  * switches.
  */
@@ -684,11 +684,21 @@ void sched_timer_resume(void)
  *   - If the watchdog at the head of the expiration list changes (or if its
  *     delay changes.  This can occur as a consequence of the actions of
  *     wd_start() or wd_cancel().
- *   - Any context switch occurs, changing the task at the head of the
- *     ready-to-run list.  The task at the head of list may require
- *     different timeslice processing (or no timeslice at all).
  *   - When pre-emption is re-enabled.  A previous time slice may have
  *     expired while pre-emption was enabled and now needs to be executed.
+ *
+ *   In the original design, it was also planned that sched_timer_reasses()
+ *   be called whenever there was a change at the head of the ready-to-run
+ *   list.  That call was intended to establish a new time-slice for the
+ *   newly activated task or to stop the timer if time-slicing is no longer
+ *   needed.  However, it turns out that that solution is too fragile:  The
+ *   system is too vulnerable at the time that the read-to-run list is
+ *   modified in order to muck with timers.
+ *
+ *   The kludge/work-around is simple to keep the timer running all of the
+ *   time with an interval of no more than the timeslice interval.  If we
+ *   this, then there is really no need to do anything when on context
+ *   switches.
  *
  * Input Parameters:
  *   None
