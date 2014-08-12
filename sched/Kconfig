@@ -66,7 +66,7 @@ config SCHED_TICKLESS
 		defined include/nuttx/arch.h
 
 if SCHED_TICKLESS
-conf SCHED_TICKLESS_ALARM
+config SCHED_TICKLESS_ALARM
 	bool "Tickless alarm"
 	default n
 	---help---

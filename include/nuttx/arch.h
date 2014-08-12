@@ -956,7 +956,6 @@ int up_prioritize_irq(int irq, int priority);
  * events to occur after an interval.  With the alarm, you can set a time in
  * the future and get an event when that alarm goes off.
  *
- * #ifdef CONFIG_SCHED_TICKLESS_ALARM
  *   int up_alarm_cancel(void):  Cancel the alarm.
  *   int up_alarm_start(FAR const struct timespec *ts): Enable (or re-anable
  *     the alarm.
@@ -969,8 +968,13 @@ int up_prioritize_irq(int irq, int priority);
  * The RTOS will provide the following interfaces for use by the platform-
  * specific interval timer implementation:
  *
+ * #ifdef CONFIG_SCHED_TICKLESS_ALARM
+ *   void sched_alarm_expiration(FAR const struct timespec *ts):  Called
+ *     by the platform-specific logic when the alarm expires.
+ * #else
  *   void sched_timer_expiration(void):  Called by the platform-specific
  *     logic when the interval timer expires.
+ * #endif
  *
  ****************************************************************************/
 
@@ -1046,7 +1050,7 @@ int up_timer_gettime(FAR struct timespec *ts);
  * Description:
  *   Cancel the alarm and return the time of cancellation of the alarm.
  *   These two steps need to be as nearly atomic as possible.
- *   sched_timer_expiration() will not be called unless the alarm is
+ *   sched_alarm_expiration() will not be called unless the alarm is
  *   restarted with up_alarm_start().
  *
  *   If, as a race condition, the alarm has already expired when this
@@ -1082,14 +1086,14 @@ int up_alarm_cancel(FAR struct timespec *ts);
  * Name: up_alarm_start
  *
  * Description:
- *   Start the alarm.  sched_timer_expiration() will be called when the
+ *   Start the alarm.  sched_alarm_expiration() will be called when the
  *   alarm occurs (unless up_alaram_cancel is called to stop it).
  *
  *   Provided by platform-specific code and called from the RTOS base code.
  *
  * Input Parameters:
- *   ts - The time at the alarm is expected to occur.  When the alarm occurs
- *        the timer logic will call sched_timer_expiration().
+ *   ts - The time in the future at the alarm is expected to occur.  When
+ *        the alarm occurs the timer logic will call sched_alarm_expiration().
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -1273,7 +1277,7 @@ void sched_process_timer(void);
  * Description:
  *   if CONFIG_SCHED_TICKLESS is defined, then this function is provided by
  *   the RTOS base code and called from platform-specific code when the
- *   interval timer used to implemented the tick-less OS expires.
+ *   interval timer used to implement the tick-less OS expires.
  *
  * Input Parameters:
  *   None
@@ -1287,8 +1291,32 @@ void sched_process_timer(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_TICKLESS
+#if defined(CONFIG_SCHED_TICKLESS) && !defined(CONFIG_SCHED_TICKLESS_ALARM)
 void sched_timer_expiration(void);
+#endif
+
+/****************************************************************************
+ * Name:  sched_alarm_expiration
+ *
+ * Description:
+ *   if CONFIG_SCHED_TICKLESS is defined, then this function is provided by
+ *   the RTOS base code and called from platform-specific code when the
+ *   alarm used to implement the tick-less OS expires.
+ *
+ * Input Parameters:
+ *   ts - The time that the alarm expired
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions/Limitations:
+ *   Base code implementation assumes that this function is called from
+ *   interrupt handling logic with interrupts disabled.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SCHED_TICKLESS) && defined(CONFIG_SCHED_TICKLESS_ALARM)
+void sched_alarm_expiration(FAR const struct *ts);
 #endif
 
 /************************************************************************

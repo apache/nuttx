@@ -85,9 +85,104 @@
 
 static unsigned int g_timer_interval;
 
+#ifdef CONFIG_SCHED_TICKLESS_ALARM
+/* This is the time that the timer was stopped.  All future times are
+ * calculated against this time.  It must be valid at all times when
+ * the timer is not running.
+ */
+
+static struct timespec g_stop_time;
+#endif
+
 /************************************************************************
  * Private Functions
  ************************************************************************/
+/************************************************************************
+ * Name:  sched_timespec_add
+ *
+ * Description:
+ *   Add timespec ts1 to to2 and return the result in ts3
+ *
+ * Inputs:
+ *   ts1 and ts2: The two timespecs to be added
+ *   t23: The location to return the result (may be ts1 or ts2)
+ *
+ * Return Value:
+ *   None
+ *
+ ************************************************************************/
+
+#ifdef CONFIG_SCHED_TICKLESS_ALARM
+static void sched_timespec_add(FAR const struct timespec *ts1,
+                               FAR const struct timespec *ts2,
+                               FAR struct timespec ts3)
+{
+  time_t sec = ts1->tv_sec + ts2->tv_sec;
+  long nsec  = ts1->tv_nsec + ts2->tv_nsec;
+
+  if (nsec >= NSEC_PER_SEC)
+    {
+      nsec -= NSEC_PER_SEC
+      sec++;
+    }
+
+  ts3->tv_sec  = sec;
+  ts3->tv_nsec = nsec;
+}
+#endif
+
+/************************************************************************
+ * Name:  sched_timespec_subtract
+ *
+ * Description:
+ *   Subtract timespec ts2 from to1 and return the result in ts3.
+ *   Zero is returned if the time difference is negative.
+ *
+ * Inputs:
+ *   ts1 and ts2: The two timespecs to be subtracted (ts1 - ts2)
+ *   t23: The location to return the result (may be ts1 or ts2)
+ *
+ * Return Value:
+ *   None
+ *
+ ************************************************************************/
+
+#ifdef CONFIG_SCHED_TICKLESS_ALARM
+static void sched_timespec_subtract(FAR const struct timespec *ts1,
+                                    FAR const struct timespec *ts2,
+                                    FAR struct timespec ts3)
+{
+  time_t sec;
+  long nsec;
+
+  if (ts1->tv_sec < ts2->tv_sec)
+    {
+      sec  = 0;
+      nsec = 0;
+    }
+  else if (ts1->tv_sec == ts2->tv_sec && ts1->tv_nsec <= ts2->tv_nsec)
+    {
+      sec  = 0;
+      nsec = 0;
+    }
+  else
+    {
+      sec = ts1->tv_sec + ts2->tv_sec;
+      if (ts1->tv_nsec < ts2->tv_nsec)
+        {
+          nsec = (ts1->tv_nsec + NSEC_PER_SEC) - ts2->tv_nsec;
+          sec--;
+        }
+      else
+        {
+          nsec = ts1->tv_nsec - ts2->tv_nsec;
+        }
+    }
+
+  ts3->tv_sec = sec;
+  ts3->tv_nsec = sec;
+}
+#endif
 
 /************************************************************************
  * Name:  sched_process_timeslice
@@ -329,6 +424,14 @@ static void sched_timer_start(unsigned int ticks)
       ts.tv_sec  = (time_t)secs;
       ts.tv_nsec = (long)nsecs;
 
+#ifdef CONFIG_SCHED_TICKLESS_ALARM
+      /* Convert the delay to a time in the future (with respect
+       * to the time when last stopped the timer).
+       */
+
+      sched_timespec_add(&g_stop_time, &ts, &ts);
+#endif
+
       /* [Re-]start the interval timer */
 
       ret = up_timer_start(&ts);
@@ -345,27 +448,39 @@ static void sched_timer_start(unsigned int ticks)
  ************************************************************************/
 
 /****************************************************************************
- * Name: sched_timer_expiration
+ * Name:  sched_alarm_expiration
  *
  * Description:
  *   if CONFIG_SCHED_TICKLESS is defined, then this function is provided by
  *   the RTOS base code and called from platform-specific code when the
- *   interval timer used to implemented the tick-less OS expires.
+ *   alarm used to implement the tick-less OS expires.
  *
  * Input Parameters:
+ *   ts - The time that the alarm expired
  *
  * Returned Value:
+ *   None
+ *
+ * Assumptions/Limitations:
  *   Base code implementation assumes that this function is called from
  *   interrupt handling logic with interrupts disabled.
  *
  ****************************************************************************/
 
-void sched_timer_expiration(void)
+#ifdef CONFIG_SCHED_TICKLESS_ALARM
+void sched_alarm_expiration(FAR const struct *ts);
 {
   unsigned int elapsed;
   unsigned int nexttime;
 
-  /* Get the interval associated with las expiration */
+  DEBUGASSERT(ts);
+
+  /* Save the time that the alarm occurred */
+
+  g_stop_time.tv_sec  = ts->tv_sec;
+  g_stop_time.tv_nsec = ts->tv_nsec;
+
+  /* Get the interval associated with last expiration */
 
   elapsed          = g_timer_interval;
   g_timer_interval = 0;
@@ -375,6 +490,41 @@ void sched_timer_expiration(void)
   nexttime = sched_timer_process(elapsed, false);
   sched_timer_start(nexttime);
 }
+#endif
+
+/****************************************************************************
+ * Name: sched_timer_expiration
+ *
+ * Description:
+ *   if CONFIG_SCHED_TICKLESS is defined, then this function is provided by
+ *   the RTOS base code and called from platform-specific code when the
+ *   interval timer used to implement the tick-less OS expires.
+ *
+ * Input Parameters:
+ *
+ * Returned Value:
+ *   Base code implementation assumes that this function is called from
+ *   interrupt handling logic with interrupts disabled.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_SCHED_TICKLESS_ALARM
+void sched_timer_expiration(void)
+{
+  unsigned int elapsed;
+  unsigned int nexttime;
+
+  /* Get the interval associated with last expiration */
+
+  elapsed          = g_timer_interval;
+  g_timer_interval = 0;
+
+  /* Process the timer ticks and set up the next interval (or not) */
+
+  nexttime = sched_timer_process(elapsed, false);
+  sched_timer_start(nexttime);
+}
+#endif
 
 /****************************************************************************
  * Name:  sched_timer_cancel
@@ -399,6 +549,38 @@ void sched_timer_expiration(void)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SCHED_TICKLESS_ALARM
+unsigned int sched_timer_cancel(void)
+{
+  struct timespec ts;
+  unsigned int elapsed;
+
+  /* Cancel the alarm and and get the time that the alarm was cancelled.
+   * If the alarm was not enabled (or, perhaps, just expired since
+   * interrupts were disabled), up_timer_cancel() will return the
+   * current time.
+   */
+
+  ts.tv_sec        = g_stop_time.tv_sec;
+  ts.tv_nsec       = g_stop_time.tv_nsec;
+  g_timer_interval = 0;
+
+  (void)up_timer_cancel(&g_stop_time);
+
+  /* Convert this to the elapsed time */
+
+  sched_timespec_subtract(&g_stop_time, &ts, &ts);
+
+  /* Convert to ticks */
+
+  elapsed  = SEC2TICK(ts.tv_sec);
+  elapsed += NSEC2TICK(ts.tv_nsec);
+
+  /* Process the timer ticks and return the next interval */
+
+  return sched_timer_process(elapsed, true);
+}
+#else
 unsigned int sched_timer_cancel(void)
 {
   struct timespec ts;
@@ -428,6 +610,7 @@ unsigned int sched_timer_cancel(void)
 
   return sched_timer_process(elapsed, true);
 }
+#endif
 
 /****************************************************************************
  * Name:  sched_timer_resume
@@ -442,6 +625,11 @@ unsigned int sched_timer_cancel(void)
  *
  * Returned Value:
  *   None.
+ *
+ * Assumptions:
+ *   This function is called right after sched_timer_cancel().  If
+ *   CONFIG_SCHED_TICKLESS_ALARM=y, then g_stop_time must be the value time
+ *   when the timer was cancelled.
  *
  ****************************************************************************/
 

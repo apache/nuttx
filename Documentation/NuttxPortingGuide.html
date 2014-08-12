@@ -120,7 +120,8 @@
       <a href="#listmgmt">4.5.2 OS List Management APIs</a><br>
       <a href="#schedprocesstimer">4.5.3 <code>sched_process_timer()</code></a><br>
       <a href="#schedtimerexpiration">4.5.4 <code>sched_timer_expiration()</code></a></br>
-      <a href="#irqdispatch">4.5.5 <code>irq_dispatch()</code></a>
+      <a href="#schedalarmexpiration">4.5.5 <code>sched_alarm_expiration()</code></a></br>
+      <a href="#irqdispatch">4.5.6 <code>irq_dispatch()</code></a>
     </ul>
     <a href="#demandpaging">4.6 On-Demand Paging</a><br>
     <a href="#ledsupport">4.7 LED Support</a>
@@ -2539,14 +2540,17 @@ config ARCH_SIM
 </p>
 <p>
   Since timers are a limited resource, the use of two timers could be an issue on some systems.
-  The job could be done with a single timer if, for example, the single timer were kept in a free-running at all times.  Some timer/counters (such as the Atmel SAMA5's timer), for example, have the capability to generate a compare interrupt when the timer matches a comparison value but also to continue counting without stopping.  if your hardware supports such counters, one might be able to simply set the comparison count at the value of the free running timer <i>PLUS</i> the desired delay.  Then you could have both with a single timer:  An interval timer and a free-running counter with the same timer!
+  The job could be done with a single timer if, for example, the single timer were kept in a free-running at all times. Some timer/counters have the capability to generate a compare interrupt when the timer matches a comparison value but also to continue counting without stopping. If your hardware supports such counters, one might used the <code>CONFIG_SCHED_TICKLESS_ALARM</code> option and be able to simply set the comparison count at the value of the free running timer <i>PLUS</i> the desired delay. Then you could have both with a single timer: An alarm and a free-running counter with the same timer! 
 </p>
 <p>
   In addition to these imported interfaces, the RTOS will export the following interfaces for use by the platform-specific interval timer implementation:
 </p>
 <ul>
   <li>
-    <a href="#schedtimerexpiration"><code>sched_timer_expiration()</code></a>
+    <a href="#schedalarmexpiration"><code>sched_alarm_expiration()</code></a>. Called by the platform-specific logic when the alarm expires.
+  </li>
+  <li>
+    <a href="#schedtimerexpiration"><code>sched_timer_expiration()</code></a>. Called by the platform-specific logic when the interval time expires.
   </li>
 </ul>
 
@@ -2968,7 +2972,30 @@ void sched_timer_expiration(void);
   Base code implementation assumes that this function is called from interrupt handling logic with interrupts disabled.
 </ul>
 
-<h3><a name="irqdispatch">4.5.5 <code>irq_dispatch()</code></a></h3>
+<h3><a name="schedalarmexpiration">4.5.5 <code>sched_alaram_expiration()</code></a></h3>
+<p><b>Prototype</b>:<p>
+<ul><pre>
+#include &lt;nuttx/arch.h&gt;
+void sched_timer_expiration(void);
+</ul>
+<p><b>Description</b>:</p>
+  Description: if <code>CONFIG_SCHED_TICKLESS</code> is defined, then this function is provided by the RTOS base code and called from platform-specific code when the interval timer used to implemented the tick-less OS expires.
+<ul>
+</ul>
+<p><b>Input Parameters</b>:</p>
+<ul>
+  None
+</ul>
+<p><b>Returned Value</b>:</p>
+<ul>
+  None
+</ul>
+<p><b>Assumptions</b>:</p>
+<ul>
+  Base code implementation assumes that this function is called from interrupt handling logic with interrupts disabled.
+</ul>
+
+<h3><a name="irqdispatch">4.5.6 <code>irq_dispatch()</code></a></h3>
 <p><b>Prototype</b>: <code>void irq_dispatch(int irq, FAR void *context);</code></p>
 
 <p><b>Description</b>.
