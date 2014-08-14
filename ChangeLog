@@ -7521,7 +7521,7 @@
 	* arch/arm/src/sam34 and include/sam34:  Add support for the SAM4CM
 	  family.  From Max Neklyudov (2014-6-25).
 
-7.4 2014-xx-xx Gregory Nutt <gnutt@nuttx.org>
+7.4 2014-08-15 Gregory Nutt <gnutt@nuttx.org>
 
 	* arch/arm/src/stm32/stm32_i2c.c:  Fix missing configuration of
 	  GPIO pins in I2C driver.  Fix from Alex D. (2014-6-25).
@@ -7539,7 +7539,7 @@
 	  debug disabled (2014-6-26).
 	* configs/sama5d4-ek/dramboot and src/dram_main.c:  Add a boot loader that
 	  runs from ISRAM and loads an Intel HEX file into DRAM (2014-6-26).
-	* configs/sama5d4-ek/nsh and scripts/: Setup the SAMA5D4-EK NSHi
+	* configs/sama5d4-ek/nsh and scripts/: Setup the SAMA5D4-EK NSH
 	  configuration to use the DRAMBOOT loader by default (2014-6-26).
 	* binfmt: Various changes associated with symbol tables.  Most from Pelle
 	  Windestam (2014-6-27).
@@ -7923,7 +7923,7 @@
 	  inside the OS may not be supported in the future (2014-7-31).
 	* drivers/audio/audio_null.c, vs1053.c, wm8904.c, include/nuttx/audio/audio.h,
 	  libc/audio/lib_buffer.c: Change how the end of the audio stream is
-	  detected by the leaf audio component.  This used by be done by looking
+	  detected by the leaf audio component.  This used to be done by looking
 	  for the first partial buffer.  That does not work with the in-place
 	  sub-sampling performed by the PCM decoder:  That always reduces the
 	  size of the buffer so that all buffers only partially filled by the
@@ -7979,7 +7979,7 @@
 	* SAMA5D3x-EK and SAMA4D4-EK: Add/update usage documents for media
 	  players (2014-8-4).
 	* drivers/audio/wm8904.c and .h:  Add reset logic to put the part back
-	  in its initial state after playing each WAV file.  Base samles per
+	  in its initial state after playing each WAV file.  Base samples per
 	  second on frame length, not bits-per-sample.  Use a different frame
 	  length for 8-bit and 16-bit data (2014-8-4).
 	* arch/arm/src/sama5/sam_hsmci.c:  TX DMA is again disabled for the
@@ -8112,3 +8112,5 @@
 	* libc/time/lib_localtime.c, private.h, tzfile.h and several header and
 	  make-related files:  Adds support for localtime.  From Max Neklyudov
 	  (2014-8-12)
+
+7.5 2014-xx-xx Gregory Nutt <gnutt@nuttx.org>

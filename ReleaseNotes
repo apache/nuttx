@@ -6597,3 +6597,361 @@ Bugfixes.  Only the most critical bugfixes are listed here (see the ChangeLog fo
         Ryan VanSickle.
       - CLE was not returning the terminating newline character. But
         reported by Max kriegleder.
+
+NuttX-7.4
+---------
+
+The 103rd release of NuttX, Version 7.4, was made on August 15, 2014,
+and is available for download from the SourceForge website.  Note
+that release consists of two tarballs:  nuttx-7.4.tar.gz and
+apps-7.4.tar.gz.  Both may be needed (see the top-level nuttx/README.txt
+file for build information).
+
+Additional new features and extended functionality:
+
+    * Core OS:
+
+      - Beginnings of a crypto/ subsystem from Max Neklyudov
+      - Tickless operation:  NuttX now supports a mode with no periodic
+        timer interrupts.  Rather, timed events are handle via an interval
+        timer.  This (1) lowers the rate of interrupt processing to timer
+        events, (2) gives much high timing resolution, and (3) allows lower
+        power modes of operation where the CPU is not constantly being
+        interrupted by the timer.
+      - Restructured the OS files under sched/ to better support the already
+        modular nature of the RTOS.
+
+    * Networking
+
+      - Substantial directory and header file reorganization and renaming to
+        make the NuttX networking implementation more modular.
+      - Add network device ioctl to access PHY registers. From Daniel Lazlo
+        Sitzer
+
+    * Binary Loader:
+
+      - Various changes associated with symbol tables from Pelle Windestam.
+
+    * Graphics:
+
+      - colorcmp(): New utility to compare two colors.
+      - The initial background color is now configurable.  Includes logic to
+        eliminates multiple background updates to get the right color.
+      - Minor configuration changes to handle mouse X/Y and touchscreen
+        X/Y differently.
+
+    * File System/Block Drivers:
+
+      - SmartFS: Increase some variables from uint16_t to uint32_t to handle
+        larger device sizes.  From Ken Pettit.
+      - Add configurable AES encryption support to the block-to-character
+        (BCH) driver.  This allows any block device to be accessed as an
+        encrypted character device.  From  Max Nekludov
+      - Add an MTD layer that will add read-ahead or write buffering to any
+        MTD driver (incomplete).
+      - Automounter:  Add support for an auto-mounter that will automatically
+        mount and unmount a file system a media is inserted and removed
+
+    * Audio/Audio Drivers
+
+      - WM8904 audio CODEC driver.
+      - PCM .WAV file decoder. Fast forward implemented with sub-sampling
+        (currently no rewind support).
+      - Add a NULL audio device that can be used to simply unit-level testing
+        of audio decoders.
+      - Audio subsystem now supports interfaces for fast-forward and rewind
+        needed by CMediaPlayer; add hooks for equalizer settings needed by
+        the WM8904 CODEC.
+
+    * Other Common Drivers:
+
+      - MTD: Extend erase block size to 18-bits in order (decrease block
+        size to 14-bits) to handle parts with large erase blocks. From Kosma
+        Moczek
+      - maxTouch:  Add support for the Atmel maXTouch touchscreen controller.
+
+    * Host Simulation:
+
+      - Provides the timers needed to support the Tickless mode of operation.
+
+    * Atmel SAM4C:
+
+      - Add SAM4CM IPC register header file.  From Max Neklyudov
+      - Various fixes PMC and clock configuration for the SAM4CM port from
+        Max Neklyudov
+
+    * Atmel SAM4E/4S Drivers:
+
+      - SAM4 AES driver.  Contributed by Max Neklyudov
+
+    * Atmel SAMA5:
+
+      - Add logic to redirect all SAMA5D4 interrupts to the AIC
+      - Add a configuration option to reserve DRAM for a framebuffer when
+        executing out of DRAM.  This optional was available before when
+        executing out of NOR, but needs to work a little differently in
+        this case.
+      - Add SAMA5 slow (32.768KHz) clock support.
+      - Add support for the ARM L2CC-PL310 L2 cache.  The system runs with
+        L2CC cache enabled but there is some issues still with the LCD DMA;
+        I suspect that the memory timing configuration for L2CC needs to
+        be tuned.
+      - Provides the timers needed to support the Tickless mode of operation.
+
+    * Atmel SAMA5 Drivers:
+
+      - XDMAC-based HSCMI driver for the SAMA5D4
+      - Adapt the SAMA5D3 LCDC driver to work with the SAMA5D4 which has
+        no hardware cursor.
+      - PIO: Add a new interface sam_pio_forceclk() that can be used to
+        force PIO clocking on.  I am afraid I was too conservative with
+        PIO clocking in the initial design; this is the price.
+      - TWI:  Now supports the up_i2creset() method.
+      - TWI:  Use sam_pio_forceclk() so that we can read the current state
+        of an open-drain output in the TWI reset logic.
+      - SSC:  SCC Frame Synch Delay and Start Delay are now configurable.
+      - PCK:  Add the slow clock and the main clocks as options for the
+        PCK configuration.
+      - Timer/Counter: Can now handle non-constant BOARD_MCK_FREQUENCY. Also
+        now supports methods to attach client interrupt handlers
+      - One shot and free-running timers.  These are wrappers around the low
+        level timer/counter logic to provide one-shot and free-running
+        timers.  These were developed to support the Tickless operation, but
+        can be used for any purpose.
+
+    * Atmel SAMA5 Board Support:
+
+      - Add a boot loader that runs from ISRAM and loads an Intel HEX file
+        into DRAM.
+      - Add a configuration that will load a bootloader into AT25 Serial
+        FLASH
+      - SAMA5D4-EK NSH configuration supports many more features: RTC, HSCMI
+        card detection, maXTouch touchscreen, TM7000 LCD, the command line
+        media player (currently using the NULL audio device), automounter,
+        and others.
+      - SAMA5D4-EK:  Add an NxWM configuration using the TM7000 LCD with
+        the maXTouch multi-touch touchscreen.
+      - SAMA5D4-EK NxWM: Uses new, larger icons in configuration instead of
+        scaling.
+      - SAMA5D4-EK NxWM: The NxPlayer and audio system are now enabled in
+        the default configuration (but currently using the NULL audio
+        device).  The automounter is used to automatically mount media
+        on an SD card.
+      - SAMA5D3x-EK:  Add a configuration to support the command line
+        NxPlayer and to verify the WM8904 CODEC driver.
+
+    * STMicro STM32:
+
+      -  Add support for the STM32F103RC and RD.  From Kosma Moczek
+      -  Add a procfs entry to show the state of the CCM heap usage.
+         From Pelle Winderstam 
+
+    * STMicro STM32 Drivers:
+
+      - Unconfigure GPIO pins when closing a serial port to prevent back
+        effects from back-powering on the TX pin. From Kosma Moczek
+
+    * NXP LPC17xx Drivers:
+
+      - ADC:  Added burstmode ADC conversion mode, with CONFIG_ADC_BURSTMODE
+        option in Kconfig.  From Max
+      - Ethernet: Added option to use the kernel worker thread to do most of
+        the workload with CONFIG_NET_WORKER_THREAD option in Kconfig.  From Max
+      - Ethernet: Critical bufix: From time to time (after some hours) the
+        Ethernet receiver would lose one receive interrupt and the IP stack
+        never recover because there is no receive watchdog as the transmit
+        watchdog.  From Max
+
+    * NXP LPC17xx Boards:
+
+      - mbed: Port ADC, DAC, and PWM logic from the configs/zkit-arm-1769.
+        From Max
+      - mbed:  Eliminated a problem with PHY DP83848C : it doesn't need a
+        specific initialization on mbed.  From Max
+
+    * Library:
+
+      - Adds support for localtime.  From Max Neklyudov
+
+    * Configuration/Build System:
+
+      - Make variable definitions 'static const' when possible to save RAM
+        usage.  From Kosma Moczek
+
+    * Applications:
+
+      - sysem/mdio:  New PHY tool from Daniel Lazlo Sizter.
+      - NSH:  Networking logic modified to handler the case of SLIP
+        transport.  From Max Neklyudov.
+      - NSH:  Add a configuration to use a USB keyboard for the stdin
+        device.
+      - NSH:  Software assigned MAC address is now configurable. From Lazlo.
+      - NSH:  Also add an option to let platform-specific logic select the
+        MAC address.
+      - NSH:  There is now a configuration option that will bring up the
+        network on an separate thread.  Since the network bring-up is
+        asynchronous, there are no serial console start-up delays due
+        to the network negotiation time.
+      - NxPlayer: Changes to integrate with Ken's NxWM::CMediaPlayer.
+      - NxPlayer: Add interfaces for fast-forward and rewind needed by
+        CMediaPlayer; add interface for equalizer settings needed by the
+        WM8904.
+      - NxPlayer:  Supports new way of identifying the end of the audio
+        stream (see the Audio section above).
+      - Sudoku:  Add a sudoku game.
+
+Bugfixes.  Only the most critical bugfixes are listed here (see the ChangeLog for the complete list of bugfixes and for additional, more detailed bugfix information):
+
+    * Graphics:
+
+      - NxConsole: Fix scrolling for the case of the framebuffer device.  In
+        this case, the logic for clearing the vacated region at the bottom
+        was missing so garbage would scroll up from the last, uncleared
+        line.
+
+    * Networking:
+
+      - Important fix to the read-ahead buffer queue management: Consumed
+        bytes were being trimmed from the head of the queue, but the queue
+        head itself was not being updated.  From Rony XLN.
+      - Fix an error in SLIP escaping.  From Max Neklyudov
+
+    * Network Utilities:
+
+      - Fix an include file ordering problem when CONFIG_NET_STATISTICS=y.
+      - Move statistics from uip.h to new netstats.h  to remove a circular
+        inclusion problem
+      - Various fixes for networking and tiny webserver from Max
+      - webclient:  Fix to offset calculation from Rony Xln.  Prevents 0x0a
+        at the beginning of lines.
+      - webserver:  Fix some configuration usage issues.  From Max.
+      - webserver:  Missing logic to close sockets on loop termination.
+
+    * File System / Block Drivers:
+
+      - SmartFS:  Fix for a bug that would show up if CONFIG_MTD_BYTE_WRITE
+        was not selected and the SMART sector size was larger than the MTD
+        device's block size (like it would be if using SMARTFS on larger
+        flash devices).  From Ken Pettit.
+
+    * Audio:
+
+      - Change how the end of the audio stream is detected by the leaf audio
+        component.  This used to be done by looking for the first partial
+        buffer.  That does not work with the in-place sub-sampling performed
+        by the PCM decoder:  That always reduces the size of the buffer so
+        that all buffers only partially filled by the time they get to the
+        leaf.  Now, a flag is set in the audio buffer flags set to indicate
+        the final buffer in the stream.
+
+    * Common Drivers:
+
+      - RAMLOG putc() method needs to set the errno and return EOF on a
+        failure.
+      - Add missing configuration option to select the MAX11802 touchscreen
+        controller. From Petteri Aimonen
+
+    * Atmel SAMA5D3/4:
+
+      - Fix logic in conversion of physical and virtual DRAM addresses when
+        running out of DRAM.  This is an important bug fix for the SAMA5D3
+        and 4 when running out of DRAM .
+      - Critical SAMA5D3 and 4 bug fix:  PIO clocking must be enabled for
+        all input pins or else the value that is read never changes.
+
+    * Atmel SAMA5D3/4 Drivers:
+
+      - OHCI: Fix an error in a DEBUGASSERT statement.  Caused an
+        assertion to fire inappropriately when a low- or full-speed device
+        was removed and CONFIG_DEBUG=y
+      - OHCI: Pointers to allocated port values were not being
+        nullified after being deallocated.  This caused some assertions
+        to fire when debug was enabled
+      - SSC:  Needs to account for data offset in audio buffer
+
+    * ARMv7-M:
+
+      - Correct the initial value of the BASEPRI register.  This was
+        apparently never being initialized! From Max
+
+    * STMicro STM32 Drivers:
+
+      - I2C:  Fix missing configuration of GPIO pins in I2C driver.  Fix
+        from Alex D.
+      - STM32 OTGFS device:  Various changes to try to reduce that amount of
+        time in interrupts handles and with interrupts disabled.  From
+        Petteri Aimonen
+
+    * Atmel SAM3/4 Drivers:
+
+      - Ethernet: Wrong bits being cleared before OR-ing in new settings.
+      - Ethernet: Fix an error in the function that determines the number
+        of free TX descriptors.  This is an important bugfix on busy
+        networks.
+      - I2C: Test for read or write operation was reversed.  How could
+        this have worked before?
+
+    * Atmel SAM3/4 Boards:
+
+      - SAM4S Xplained-Pro:  Correct description of LEDs and usage. From
+        Kosma Moczek
+
+    * Atmel SAMA5:
+
+      - PIO: Fix definitions that could disable PIO interrupt support if only
+        PIOE interrupts were enabled
+      - PIO: Macro SAM_PION_VBASE is not define-able for the SAMA5D4 and must
+        be replaced with a table lookup.
+      - PIO: Fix a typo in Schmitt trigger configuration; Configure pin as a
+        vanilla input first so that final pin configuration is more read-able
+        (i.e., easier to debug)
+      - PIO: Logic for Schmitt trigger selection backward
+      - SAMA5D4:  Correct system timer frequency.  Input clock is MCK/2, not MCK.
+
+    * Atmel SAMA5 Drivers:
+
+      - Ethernet: Wrong bits being cleared before OR-ing in new settings.
+      - Ethernet: Fix an error in the function that determines the number
+        of free TX descriptors.  This is an important bugfix on busy
+        networks.
+      - HSMCI: The 8-byte SCR transfer was failing silently with the DMA
+        transfer, leaving the SD card in single bit mode.  Fixed by adding
+        a non-DMA read transfer mode.
+      - HSMCI: Fix a problem on card insertion/removal callback handling.
+        Interrupts were being disable so that the callbacks occurred with
+        interrupts disabled.  This resulted in loss of some interrupts and
+        some not-so-good behaviors.  The solution is to perform all
+        callbacks on the work thread unconditionally
+
+    * Atmel SAMA5 Boards:
+
+      - PIO: Fix some cloned errors in SAM GPIO interrupt setup
+
+    * NXP LPC17xx Drivers:
+
+      - Ethernet:  Comment out an assertion that is reported to fire
+        inappropriately.  From Max
+
+    * Library:
+
+      - stdint.h: Correct naming of [U]INT_LEASTn_{MAX|MIN} and
+        [U]INT_FASTn{MAX|MIN}. From Kosma Moczek
+      - unistd.h: POSIX definitions should be defined to a value. rom Kosma
+        Moczek
+      - Fixes associated with rint() and related interfaces in the math
+        library.
+
+    * Configuration/Build System:
+
+      - NAME_MAX not available on SunOS; use FILENAME_MAX or MAXNAMELEN.
+        Noted by Douglas Beattie
+
+    * Applications:
+
+      - NSH: if # appears on line, need to comment ignore additional
+        commands on the line
+      - NxPlayer:  Check for file read errors and end-of-file with zero
+        bytes read.  Other error handling corrected as well.
+      - NxPlayer:  NxPlayer needs to set curbyte field to zero before
+        enqueuing a buffer.  Otherwise, it looks like beginning of the
+        buffer has already been consumed.
