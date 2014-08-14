@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: June 25, 2014</p>
+      <p>Last Updated: August 15, 2014</p>
     </td>
   </tr>
 </table>
@@ -305,6 +305,14 @@
   <td><br></td>
   <td>
     <p>
+      <li>Tickless Operation</li>
+    </p>
+</tr>
+
+<tr>
+  <td><br></td>
+  <td>
+    <p>
       <li>POSIX/ANSI-like task controls, named message queues, counting semaphores, clocks/timers, signals, pthreads, environment variables, filesystem.</li>
     </p>
 </tr>
@@ -585,6 +593,14 @@
   <td>
     <p>
       <li>Audio subsystem: CODECs, audio input and output drivers.  Command line and graphic media player applications.</li>
+    </p>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <li>Cryptiographic subsystem</li>
     </p>
   </td>
 </tr>
@@ -1145,11 +1161,11 @@
 <h2>Released Versions</h2>
 <p>
   In addition to the ever-changing GIT repository, there are frozen released versions of NuttX available.
-  The current release is NuttX 7.3.
-  NuttX 7.3 is the 103<sup>rd</sup> release of NuttX.
-  It was released on June 25, 2014, and is available for download from the
+  The current release is NuttX 7.4.
+  NuttX 7.4 is the 104<sup>th</sup> release of NuttX.
+  It was released on August 15, 2014, and is available for download from the
   <a href="http://sourceforge.net/projects/nuttx/files/">SourceForge</a> website.
-  Note that the release consists of two tarballs:  <code>nuttx-7.3.tar.gz</code> and <code>apps-7.3.tar.gz</code>.
+  Note that the release consists of two tarballs:  <code>nuttx-7.4.tar.gz</code> and <code>apps-7.4.tar.gz</code>.
   Both may be needed (see the top-level <code>nuttx/README.txt</code> file for build information).
 </p>
 
@@ -1158,7 +1174,7 @@
 <ul>
   <li><b>nuttx</b>.
     <ul><p>
-      Release notes for NuttX 7.3 are available <a href="http://sourceforge.net/projects/nuttx/files/nuttx/nuttx-7.3/">here</a>;
+      Release notes for NuttX 7.4 are available <a href="http://sourceforge.net/projects/nuttx/files/nuttx/nuttx-7.4/">here</a>;
       release notes for all released versions on NuttX are available in the <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/ReleaseNotes">SourceForge GIT</a>
       The ChangeLog for all releases of NuttX is available in the ChangeLog file that can viewed in the <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/ChangeLog">SourceForge GIT</a>.
       The ChangeLog for the current release is at the bottom of that file.
@@ -1166,7 +1182,7 @@
   </li></ul>
   <li><b>apps</b>.
     <ul><p>
-      Release notes for NuttX 7.3 are available <a href="http://sourceforge.net/projects/nuttx/files/nuttx/nuttx-7.3/">here</a>;
+      Release notes for NuttX 7.4 are available <a href="http://sourceforge.net/projects/nuttx/files/nuttx/nuttx-7.4/">here</a>;
       release notes for all released versions on NuttX are available in the <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/ReleaseNotes">SourceForge GIT</a>
       The ChangeLog for the all releases of apps is available in the ChangeLog file that can viewed in the <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/apps/ChangeLog.txt">SourceForge GIT</a>.
       The ChangeLog for the current release is at the bottom of that file.
@@ -1858,6 +1874,9 @@
           DBGU support was added in NuttX-7.2 (primarily for the SAMA5D3 Xplained board).
         </p>
         <p>
+          NuttX-7.4 added support for the on-board WM8904 CODEC chip and for <i>Tickless</i> operation.
+        </p>
+        <p>
           Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/sama5d3x-ek/README.txt">README</a> file for further information.
         </p>
       </ul>
@@ -1898,14 +1917,18 @@
     <p>
     <ul>
       <li><p><b>Atmel SAMA5D4-EK/MB development boards</b>
-        This is the  port of NuttX to the Atmel SAMA5D4-MB development board (which should be compatible witht he SAMA5D4-EK).
+        This is the  port of NuttX to the Atmel SAMA5D4-MB Rev C. development board (which should be compatible with the SAMA5D4-EK).
         These boards feature the Atmel SAMA5D44 microprocessors with compatibility with most of the SAMA5D3 peripherals.
       </p>
       <p><b>STATUS</b>.
-        At the time of the release of NuttX-7.3, the basic port for the SAMA5D4-MB was complete and undergoing test.
-        The board has some basic functionality.
-        There are, however, too many outstanding issues to claim full availability in NuttX-7.3.
-        Look for a stable SAMA5D4-EK release in NuttX-7.4!
+        At the time of the release of NuttX-7.3, the basic port for the SAMA5D4-MB was complete.
+        The board had basic functionality.
+        But full functionality was not available until NuttX-7.4.
+        In NuttX-7.4 support was added for the L2 cache, many security features, XDMAC, HSMCI and Ethernet integrated with XDMAC, the LCDC, TWI, SSC, and most of the existing SAMA5 drivers.
+        Timers were added to support <i>Tickless</i> operation.
+        The TM7000 LCDC with the maXTouch multi-touch controller are also fully support in a special NxWM configuration for that larger display.
+        Support for a graphics media player is included (although there were issues with the WM8904 audio CODEC on my board).
+        An SRAM bootloader was also included.
         Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/sama5d4-ek/README.txt">README</a> file for current status.
       <p></li>
     </ul>
@@ -2661,7 +2684,7 @@ nsh>
       <a name="nxplpc176x"><b>NXP LPC1766, LPC1768, and LPC1769</b>.</a>
       Drivers are available for CAN, DAC, Ethernet, GPIO, GPIO interrupts, I2C, UARTs, SPI, SSP, USB host, and USB device.
       Additional drivers for the RTC, ADC, DAC, Timers, PWM and MCPWM were contributed by Max (himax) in NuttX-7.3.
-      Verified LPC17xx onfigurations are available for three boards.
+      Verified LPC17xx configurations are available for three boards.
       <ul>
         <li>
           The Nucleus 2G board from <a href="http://www.2g-eng.com/">2G Engineering</a> (LPC1768),
