@@ -6757,7 +6757,7 @@ Additional new features and extended functionality:
         option in Kconfig.  From Max
       - Ethernet: Added option to use the kernel worker thread to do most of
         the workload with CONFIG_NET_WORKER_THREAD option in Kconfig.  From Max
-      - Ethernet: Critical bufix: From time to time (after some hours) the
+      - Ethernet: Critical bugfix: From time to time (after some hours) the
         Ethernet receiver would lose one receive interrupt and the IP stack
         never recover because there is no receive watchdog as the transmit
         watchdog.  From Max
