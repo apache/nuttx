@@ -8114,3 +8114,11 @@
 	  (2014-8-12)
 
 7.5 2014-xx-xx Gregory Nutt <gnutt@nuttx.org>
+
+	* clock/clock_systimespec.c and sched/clock/clock_gettime.c:  When
+	  reading the system timer, don't read a struct timespec, convert it
+	  to a fake tick count, then back to a timespec (2014-8-15).
+	* sched/clock/Make.defs, clock_gettime.c, clock_settime.c, include/time.h,
+	  nuttx/clock.h, configs/vsn/src/sif.c: Remove CLOCK_ACTIVETIME. It is non-
+	  standard, unused, and gets in the way of maintaining clocks (2014-8-15).
+
