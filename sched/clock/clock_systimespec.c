@@ -78,63 +78,64 @@
 
 int clock_systimespec(FAR struct timespec *ts)
 {
- #ifdef CONFIG_RTC_HIRES
+#ifdef CONFIG_RTC_HIRES
   /* Do we have a high-resolution RTC that can provide us with the time? */
 
   if (g_rtc_enabled)
     {
       /* Get the hi-resolution time from the RTC */
 
-      ret = up_rtc_gettime(tp);
+      return up_rtc_gettime(tp);
     }
   else
 #endif
-
+    {
 #if defined(CONFIG_SCHED_TICKLESS)
-  {
-    /* Let the platform time do the work */
+      /* In tickless mode, all timing is controlled by platform-specific
+       * code.  Let the platform timer do the work.
+       */
 
-    return up_timer_gettime(ts);
-  }
+      return up_timer_gettime(ts);
 
-#elif defined(CONFIG_HAVE_LONG_LONG)
-  {
-    uint64_t usecs;
-    uint64_t secs;
-    uint64_t nsecs;
+#elif defined(CONFIG_HAVE_LONG_LONG) && (CONFIG_USEC_PER_TICK % 1000) != 0
+      /* 64-bit microsecond calculations should improve our accuracy. */
 
-    /* Get the time since power-on in seconds and milliseconds */
+      uint64_t usecs;
+      uint64_t secs;
+      uint64_t nsecs;
 
-    usecs = TICK2MSEC(clock_systimer());
-    secs  = usecs / USEC_PER_SEC;
+      /* Get the time since power-on in seconds and milliseconds */
 
-    /* Return the elapsed time in seconds and nanoseconds */
+      usecs = TICK2MSEC(clock_systimer());
+      secs  = usecs / USEC_PER_SEC;
 
-    nsecs = (usecs - (secs * USEC_PER_SEC)) * NSEC_PER_USEC;
+      /* Return the elapsed time in seconds and nanoseconds */
 
-    ts->tv_sec  = (time_t)secs;
-    ts->tv_nsec = (long)nsecs;
-    return OK;
-  }
+      nsecs = (usecs - (secs * USEC_PER_SEC)) * NSEC_PER_USEC;
+
+      ts->tv_sec  = (time_t)secs;
+      ts->tv_nsec = (long)nsecs;
+      return OK;
 
 #else
-  {
-    uint32_t msecs;
-    uint32_t secs;
-    uint32_t nsecs;
+      /* 32-bit millisecond calculations should be just fine. */
 
-    /* Get the time since power-on in seconds and milliseconds */
+      uint32_t msecs;
+      uint32_t secs;
+      uint32_t nsecs;
 
-    msecs = TICK2MSEC(clock_systimer());
-    secs  = msecs / MSEC_PER_SEC;
+      /* Get the time since power-on in seconds and milliseconds */
 
-    /* Return the elapsed time in seconds and nanoseconds */
+      msecs = TICK2MSEC(clock_systimer());
+      secs  = msecs / MSEC_PER_SEC;
 
-    nsecs = (msecs - (secs * MSEC_PER_SEC)) * NSEC_PER_MSEC;
+      /* Return the elapsed time in seconds and nanoseconds */
 
-    ts->tv_sec  = (time_t)secs;
-    ts->tv_nsec = (long)nsecs;
-    return OK;
-  }
+      nsecs = (msecs - (secs * MSEC_PER_SEC)) * NSEC_PER_MSEC;
+
+      ts->tv_sec  = (time_t)secs;
+      ts->tv_nsec = (long)nsecs;
+      return OK;
 #endif
+    }
 }
