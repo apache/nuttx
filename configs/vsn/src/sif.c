@@ -684,11 +684,7 @@ int sif_main(int argc, char *argv[])
 
     fprintf(stderr, "%s:\tinit\n\tgpio\tA B\n\tpwr\tval\n", argv[0]);
 
-    struct timespec t_active;
-    clock_gettime(CLOCK_ACTIVETIME, &t_active);
-
-    fprintf(stderr, "rtc time = %u, active = %u / %u, time / systick = %u / %u\n",
-        up_rtc_time(), t_active.tv_sec, t_active.tv_nsec,
-        time(NULL), clock_systimer());
+    fprintf(stderr, "rtc time = %u, time / systick = %u / %u\n",
+        up_rtc_time(), time(NULL), clock_systimer());
     return -1;
 }
