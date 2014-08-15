@@ -336,7 +336,7 @@ o Kernel Build
                syscalls), the single user mode cannot be supported.  In this
                built configuration, only the multiple user mode can be supported
                with the NX server residing inside of the kernel space.
-  Status:      Closed.  This is not a bug, this is just the things are.
+  Status:      Closed.  This is not a bug, this is just way the things are.
   Priority:    N/A.
 
   Title:       NSH PARTITIONING.
@@ -491,7 +491,7 @@ o Kernel Build
                and to interfacing with those core OS facilities through traps.
   Status:      Open
   Priority:    Low.  This is a good idea and certainly an architectural
-               improvement.  However, there is no strong motivivation now do
+               improvement.  However, there is no strong motivation now do
                do that partitioning work.
 
 o C++ Support
