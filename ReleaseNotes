@@ -6601,7 +6601,7 @@ Bugfixes.  Only the most critical bugfixes are listed here (see the ChangeLog fo
 NuttX-7.4
 ---------
 
-The 103rd release of NuttX, Version 7.4, was made on August 15, 2014,
+The 104th release of NuttX, Version 7.4, was made on August 15, 2014,
 and is available for download from the SourceForge website.  Note
 that release consists of two tarballs:  nuttx-7.4.tar.gz and
 apps-7.4.tar.gz.  Both may be needed (see the top-level nuttx/README.txt

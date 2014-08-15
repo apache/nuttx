@@ -437,14 +437,16 @@ unsigned int wd_timer(int ticks)
 
       wdog = (FAR wdog_t*)g_wdactivelist.head;
 
-      /* Decrement the lag for this watchdog.
-       *
-       * There is logic to handle the case where ticks is greater than
+#ifndef CONFIG_SCHED_TICKLESS_ALARM
+      /* There is logic to handle the case where ticks is greater than
        * the watchdog lag, but if the scheduling is working properly
        * that should never happen.
        */
 
       DEBUGASSERT(ticks <= wdog->lag);
+#endif
+      /* Decrement the lag for this watchdog. */
+
       decr = MIN(wdog->lag, ticks);
 
       /* There are.  Decrement the lag counter */
