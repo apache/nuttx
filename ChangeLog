@@ -8121,4 +8121,8 @@
 	* sched/clock/Make.defs, clock_gettime.c, clock_settime.c, include/time.h,
 	  nuttx/clock.h, configs/vsn/src/sif.c: Remove CLOCK_ACTIVETIME. It is non-
 	  standard, unused, and gets in the way of maintaining clocks (2014-8-15).
-
+	* libc/time/lib_localtime.c:  Modified to that the coding style is much
+	  closer to NuttX coding style.  The local header files private.h and
+	  tzfile.h were removed and incorporated into lib_localtime.c.  All
+	  conditional compilation within lib_localtime.c that unconditionally
+	  evaluated to FALSE was removed (2014-8-15).
