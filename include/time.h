@@ -80,19 +80,6 @@
 
 #define CLOCK_REALTIME     0
 
-/* If an RTC is supported, then the non-standard CLOCK_ACTIVETIME is also
- * supported to manage time based on the system timer interrupt separately
- * from the RTC.  This may be necessary, for example, in certain cases where
- * the system timer interrupt has been stopped in low power modes.
- *
- * CLOCK_ACTIVETIME is only recognized by clock_gettime() and clock_settime().
- */
-
-#ifdef CONFIG_RTC
-#  define CLOCK_ACTIVETIME 1
-#else
-#  define CLOCK_ACTIVETIME CLOCK_REALTIME
-#endif
 
 /* Clock that cannot be set and represents monotonic time since some
  * unspecified starting point. It is not affected by changes in the
@@ -100,7 +87,7 @@
  */
 
 #ifdef CONFIG_CLOCK_MONOTONIC
-#  define CLOCK_MONOTONIC  2
+#  define CLOCK_MONOTONIC  1
 #endif
 
 /* This is a flag that may be passed to the timer_settime() function */

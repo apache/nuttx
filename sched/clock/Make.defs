@@ -35,7 +35,7 @@
 
 CLOCK_SRCS  = clock_initialize.c clock_settime.c clock_gettime.c clock_getres.c
 CLOCK_SRCS += clock_time2ticks.c clock_abstime2ticks.c clock_ticks2time.c
-CLOCK_SRCS += clock_gettimeofday.c clock_systimer.c
+CLOCK_SRCS += clock_gettimeofday.c clock_systimer.c clock_systimespec.c
 
 # Include clock build support
 

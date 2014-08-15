@@ -92,15 +92,7 @@
 
 int clock_gettime(clockid_t clock_id, struct timespec *tp)
 {
-#ifdef CONFIG_SYSTEM_TIME64
-  uint64_t msecs;
-  uint64_t secs;
-  uint64_t nsecs;
-#else
-  uint32_t msecs;
-  uint32_t secs;
-  uint32_t nsecs;
-#endif
+  struct timespec ts;
   uint32_t carry;
   int ret = OK;
 
@@ -122,17 +114,11 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
 
   if (clock_id == CLOCK_MONOTONIC)
     {
-      /* Get the time since power-on in seconds and milliseconds */
+      /* The the time elapsed since the timer was initialized at power on
+       * reset.
+       */
 
-      msecs = TICK2MSEC(clock_systimer());
-      secs  = msecs / MSEC_PER_SEC;
-
-      /* Return the elapsed time in seconds and nanoseconds */
-
-      nsecs = (msecs - (secs * MSEC_PER_SEC)) * NSEC_PER_MSEC;
-
-      tp->tv_sec  = (time_t)secs;
-      tp->tv_nsec = (long)nsecs;
+      ret = clock_systimespec(tp);
     }
   else
 #endif
@@ -141,84 +127,59 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
    * represents the machine's best-guess as to the current wall-clock,
    * time-of-day time. This means that CLOCK_REALTIME can jump forward and
    * backward as the system time-of-day clock is changed.
-   *
-   * If an RTC is supported, then the non-standard CLOCK_ACTIVETIME is also
-   * supported to manage time based on the system timer interrupt separately
-   * from the RTC.  This may be necessary, for example, in certain cases where
-   * the system timer interrupt has been stopped in low power modes.
    */
 
-#ifdef CONFIG_RTC
-  if (clock_id == CLOCK_REALTIME || clock_id == CLOCK_ACTIVETIME)
-#else
   if (clock_id == CLOCK_REALTIME)
-#endif
     {
-      /* Do we have a high-resolution RTC that can provide us with the time? */
+      /* Get the elapsedcd s time since the time-of-day was last set.
+       * clock_systimespec() provides the time since power was applied;
+       * the bias value corresponds to the time when the time-of-day was
+       * last set.
+       */
 
-#ifdef CONFIG_RTC_HIRES
-      if (g_rtc_enabled && clock_id != CLOCK_ACTIVETIME)
+      ret = clock_systimespec(&ts);
+      if (ret == OK)
         {
-          /* Yes.. Get the hi-resolution time from the RTC unless the caller
-           * has specifically asked for the system timer (CLOCK_ACTIVETIME)
-           */
-
-          ret = up_rtc_gettime(tp);
-        }
-      else
-#endif
-        {
-          /* Get the elapsed time since the time-of-day was last set.
-           * clock_systimer() provides the number of clock times since
-           * power was applied; the bias value corresponds to the time
-           * when the time-of-day was last set.
-           */
-
-          msecs = TICK2MSEC((clock_systimer() - g_tickbias));
-
-          sdbg("msecs = %d g_tickbias=%d\n",
-               (int)msecs, (int)g_tickbias);
-
-          /* Get the elapsed time in seconds and nanoseconds. */
-
-          secs  = msecs / MSEC_PER_SEC;
-          nsecs = (msecs - (secs * MSEC_PER_SEC)) * NSEC_PER_MSEC;
-
-          sdbg("secs = %d + %d nsecs = %d + %d\n",
-               (int)msecs, (int)g_basetime.tv_sec,
-               (int)nsecs, (int)g_basetime.tv_nsec);
-
           /* Add the base time to this.  The base time is the time-of-day
            * setting.  When added to the elapsed time since the time-of-day
            * was last set, this gives us the current time.
            */
 
-          secs  += (uint32_t)g_basetime.tv_sec;
-          nsecs += (uint32_t)g_basetime.tv_nsec;
+          ts.tv_sec  += (uint32_t)g_basetime.tv_sec;
+          ts.tv_nsec += (uint32_t)g_basetime.tv_nsec;
 
           /* Handle carry to seconds. */
 
-          if (nsecs > NSEC_PER_SEC)
+          if (ts.tv_nsec  > NSEC_PER_SEC)
             {
-              carry  = nsecs / NSEC_PER_SEC;
-              secs  += carry;
-              nsecs -= (carry * NSEC_PER_SEC);
+              carry       = ts.tv_nsec / NSEC_PER_SEC;
+              ts.tv_sec  += carry;
+              ts.tv_nsec -= (carry * NSEC_PER_SEC);
             }
 
           /* And return the result to the caller. */
 
-          tp->tv_sec  = (time_t)secs;
-          tp->tv_nsec = (long)nsecs;
+          tp->tv_sec  = ts.tv_sec;
+          tp->tv_nsec = ts.tv_nsec;
         }
-
-      sdbg("Returning tp=(%d,%d)\n", (int)tp->tv_sec, (int)tp->tv_nsec);
     }
   else
     {
+      ret = -EINVAL;
+    }
+
+  /* Check for errors and set the errno value if necessary */
+
+  if (ret < 0)
+    {
       sdbg("Returning ERROR\n");
 
-      set_errno(EINVAL);
+      set_errno(-ret);
       ret = ERROR;
+    }
+  else
+    {
+      sdbg("Returning tp=(%d,%d)\n", (int)tp->tv_sec, (int)tp->tv_nsec);
     }
 
   return ret;

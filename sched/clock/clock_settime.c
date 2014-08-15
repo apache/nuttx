@@ -1,7 +1,7 @@
 /************************************************************************
  * sched/clock/clock_settime.c
  *
- *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -100,11 +100,7 @@ int clock_settime(clockid_t clock_id, FAR const struct timespec *tp)
    * time clock.
    */
 
-#ifdef CONFIG_RTC
-  if (clock_id == CLOCK_REALTIME || clock_id == CLOCK_ACTIVETIME)
-#else
   if (clock_id == CLOCK_REALTIME)
-#endif
     {
       /* Interrupts are disabled here so that the in-memory time
        * representation and the RTC setting will be as close as
@@ -127,7 +123,7 @@ int clock_settime(clockid_t clock_id, FAR const struct timespec *tp)
       /* Setup the RTC (lo- or high-res) */
 
 #ifdef CONFIG_RTC
-      if (g_rtc_enabled && clock_id != CLOCK_ACTIVETIME)
+      if (g_rtc_enabled)
         {
           up_rtc_settime(tp);
         }

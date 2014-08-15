@@ -277,6 +277,25 @@ uint64_t clock_systimer64(void);
 #endif
 
 /****************************************************************************
+ * Name: clock_systimespec
+ *
+ * Description:
+ *   Return the current value of the system timer counter as a struct
+ *   timespec.
+ *
+ * Parameters:
+ *   ts - Location to return the time
+ *
+ * Return Value:
+ *   Current version always returns OK
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+int clock_systimespec(FAR struct timespec *ts);
+
+/****************************************************************************
  * Function:  clock_cpuload
  *
  * Description:
