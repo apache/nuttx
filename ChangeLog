@@ -8126,3 +8126,8 @@
 	  tzfile.h were removed and incorporated into lib_localtime.c.  All
 	  conditional compilation within lib_localtime.c that unconditionally
 	  evaluated to FALSE was removed (2014-8-15).
+	* drivers/net/Kconfig and include/nuttx/arch.h: Standardize a PHY
+	  interrupt attachment interface (2014-8-16).
+	* configs/Kconfig, sama5d3-xplained, sama5d3x-ek, and sama5d4-ek:
+	  Convert existing board specific PHY interrupt interfaces to use newly
+	  defined standard interface (2014-8-16).
