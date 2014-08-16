@@ -562,7 +562,7 @@
   *   Speed Mode:100Mbps
   *   Nway Auto-Negotiation:Enable
   *
-  * The KSZ8051 PHY interrtup is available on PE30 INT_ETH1
+  * The KSZ8051 PHY interrupt is available on PE30 INT_ETH1
   */
 
 #define PIO_INT_ETH1 (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \

@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/sama5d3-xplained/src/sam_ethernet.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,11 @@
 
 #include <nuttx/config.h>
 
+#include <string.h>
+#include <assert.h>
+
 #include <nuttx/irq.h>
+#include <nuttx/arch.h>
 
 #include "sam_pio.h"
 #include "sam_ethernet.h"
@@ -49,6 +53,18 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
+#ifndef CONFIG_SAMA5_EMACA
+#  undef CONFIG_SAMA5_EMAC_ISETH0
+#endif
+
+#ifdef CONFIG_SAMA5_EMAC_ISETH0
+#  SAMA5_EMAC_DEVNAME "eth0"
+#  SAMA5_GMAC_DEVNAME "eth1"
+#else
+#  SAMA5_GMAC_DEVNAME "eth0"
+#  SAMA5_EMAC_DEVNAME "eth1"
+#endif
 
 /************************************************************************************
  * Private Data
@@ -121,17 +137,61 @@ void weak_function sam_netinitialize(void)
 #endif
 }
 
-/************************************************************************************
- * Name: sam_phyirq
+/****************************************************************************
+ * Name: arch_phy_irq
  *
  * Description:
- *   This function may be called to register an interrupt handler that will be
- *   called when an interrupt is received from a PHY.
+ *   This function may be called to register an interrupt handler that will
+ *   be called when a PHY interrupt occurs.  This function both attaches
+ *   the interrupt handler and enables the interrupt if 'handler' is non-
+ *   NULL.  If handler is NULL, then the interrupt is detached and disabled
+ *   instead.
  *
- ************************************************************************************/
+ *   This interrupt may or may not be available on a given platform depending
+ *   on how the network hardware architecture is implemented.  In a typical
+ *   case, the PHY interrupt is provided to board-level logic as a GPIO
+ *   interrupt (in which case this is a board-specific interface and really
+ *   should be called board_phy_irq()); In other cases, the PHY interrupt
+ *   may be cause by the chip's MAC logic (in which case arch_phy_irq()) is
+ *   an appropriate name.  Other other boards, there may be no PHY interrupts
+ *   available at all.  If client attachable PHY interrupts are available
+ *   from the board or from the chip, then CONFIG_ARCH_PHY_INTERRUPT should
+ *   be defined to indicate that fact.
+ *
+ *   Typical usage:
+ *   a. OS service logic (not application logic*) attaches to the PHY
+ *      PHY interrupt.
+ *   b. When the PHY interrupt occurs, work should be scheduled on the
+ *      worker thread (or perhaps a dedicated application thread).
+ *   c. That worker thread should use the SIOCGMIIPHY, SIOCGMIIREG,
+ *      and SIOCSMIIREG ioctl calls** to communicate with the PHY,
+ *      determine what network event took place (Link Up/Down?), and
+ *      take the appropriate actions.
+ *
+ *    * This is an OS internal interface and should not be used from
+ *      application space.
+ *   ** This interrupt is really of no use if the Ethernet MAC driver
+ *      does not support these ioctl calls.
+ *
+ * Input Parameters:
+ *   intf    - Identifies the network interface.  For example "eth0".  Only
+ *             useful on platforms that support multiple Ethernet interfaces
+ *             and, hence, multiple PHYs and PHY interrupts.
+ *   handler - The client interrupt handler to be invoked when the PHY
+ *             asserts an interrupt.  Must reside in OS space, but can
+ *             signal tasks in user space.  A value of NULL can be passed
+ *             in order to detach and disable the PHY interrupt.
+ *
+ * Returned Value:
+ *   The previous PHY interrupt handler address is returned.  This allows you
+ *   to temporarily replace an interrupt handler, then restore the original
+ *   interrupt handler.  NULL is returned if there is was not handler in
+ *   place when the call was made.
+ *
+ ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_PIOE_IRQ
-xcpt_t sam_phyirq(int intf, xcpt_t irqhandler)
+xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler);
 {
   irqstate_t flags;
   xcpt_t *handler;
@@ -139,8 +199,10 @@ xcpt_t sam_phyirq(int intf, xcpt_t irqhandler)
   pio_pinset_t pinset;
   int irq;
 
+  DEBUGASSERT(intf);
+
 #ifdef CONFIG_SAMA5_EMACA
-  if (intf == EMAC_INTF)
+  if (strcmp(intf, SAMA5_EMAC_DEVNAME) == 0)
     {
       handler = &g_emac_handler;
       pinset  = PIO_INT_ETH1;
@@ -149,7 +211,7 @@ xcpt_t sam_phyirq(int intf, xcpt_t irqhandler)
   else
 #endif
 #ifdef CONFIG_SAMA5_GMAC
-  if (intf == GMAC_INTF)
+  if (strcmp(intf, SAMA5_GMAC_DEVNAME) == 0)
     {
       handler = &g_gmac_handler;
       pinset  = PIO_INT_ETH0;
@@ -158,7 +220,7 @@ xcpt_t sam_phyirq(int intf, xcpt_t irqhandler)
   else
 #endif
     {
-      ndbg("Unsupported interface: %d\n", intf);
+      ndbg("Unsupported interface: %s\n", intf);
       return NULL;
     }
 
@@ -171,12 +233,12 @@ xcpt_t sam_phyirq(int intf, xcpt_t irqhandler)
   /* Get the old button interrupt handler and save the new one */
 
   oldhandler = *handler;
-  *handler = irqhandler;
+  *handler = handler;
 
   /* Configure the interrupt */
 
   sam_pioirq(pinset);
-  (void)irq_attach(irq, irqhandler);
+  (void)irq_attach(irq, handler);
   sam_pioirqenable(irq);
 
   /* Return the old button handler (so that it can be restored) */
