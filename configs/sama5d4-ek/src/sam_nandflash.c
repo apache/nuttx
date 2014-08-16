@@ -4,7 +4,7 @@
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * Most of this file derives from Atmel sample code for the SAMA4D4-EK
+ * Most of this file derives from Atmel sample code for the SAMA5D4-EK
  * board.  That sample code has licensing that is compatible with the NuttX
  * modified BSD license:
  *

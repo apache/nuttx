@@ -545,7 +545,7 @@
 
 /* Ethernet */
 
-#ifdef CONFIG_SAMA4_EMACA
+#ifdef CONFIG_SAMA5_EMACA
  /* ETH1: Ethernet 10/100 (EMAC A) Port
   *
   * The main board contains a MICREL PHY device (KSZ8051) operating at 10/100 Mbps.
@@ -571,7 +571,7 @@
 
 #endif
 
-#ifdef CONFIG_SAMA4_GMAC
+#ifdef CONFIG_SAMA5_GMAC
   /* ETH0: Tri-Speed Ethernet PHY
    *
    * The SAMA5D3 series-CM board is equipped with a MICREL PHY devices (MICREL

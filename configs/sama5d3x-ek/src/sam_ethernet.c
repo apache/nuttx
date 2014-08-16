@@ -41,12 +41,15 @@
 
 #include <string.h>
 #include <assert.h>
+#include <debug.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
 #include "sam_pio.h"
 #include "sam_ethernet.h"
+
+#include "sama5d3x-ek.h"
 
 #ifdef HAVE_NETWORK
 
@@ -59,11 +62,11 @@
 #endif
 
 #ifdef CONFIG_SAMA5_EMAC_ISETH0
-#  SAMA5_EMAC_DEVNAME "eth0"
-#  SAMA5_GMAC_DEVNAME "eth1"
+#  define SAMA5_EMAC_DEVNAME "eth0"
+#  define SAMA5_GMAC_DEVNAME "eth1"
 #else
-#  SAMA5_GMAC_DEVNAME "eth0"
-#  SAMA5_EMAC_DEVNAME "eth1"
+#  define SAMA5_GMAC_DEVNAME "eth0"
+#  define SAMA5_EMAC_DEVNAME "eth1"
 #endif
 
 /************************************************************************************
@@ -72,10 +75,10 @@
 
 #ifdef CONFIG_SAMA5_PIOE_IRQ
 #ifdef CONFIG_SAMA5_EMACA
-static xcpt g_emac_handler;
+static xcpt_t g_emac_handler;
 #endif
 #ifdef CONFIG_SAMA5_GMAC
-static xcpt g_gmac_handler;
+static xcpt_t g_gmac_handler;
 #endif
 #endif
 
@@ -97,7 +100,7 @@ static xcpt g_gmac_handler;
 
 void weak_function sam_netinitialize(void)
 {
-#ifdef CONFIG_SAMA4_EMACA
+#ifdef CONFIG_SAMA5_EMACA
   /* Ethernet 10/100 (EMAC A) Port
    *
    * The main board contains a MICREL PHY device (KSZ8051) operating at 10/100 Mbps.
@@ -120,7 +123,7 @@ void weak_function sam_netinitialize(void)
   sam_configpio(PIO_INT_ETH1);
 #endif
 
-#ifdef CONFIG_SAMA4_GMAC
+#ifdef CONFIG_SAMA5_GMAC
   /* Tri-Speed Ethernet PHY
    *
    * The SAMA5D3 series-CM board is equipped with a MICREL PHY devices (MICREL
@@ -191,10 +194,10 @@ void weak_function sam_netinitialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_PIOE_IRQ
-xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler);
+xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler)
 {
   irqstate_t flags;
-  xcpt_t *handler;
+  xcpt_t *phandler;
   xcpt_t oldhandler;
   pio_pinset_t pinset;
   int irq;
@@ -204,18 +207,18 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler);
 #ifdef CONFIG_SAMA5_EMACA
   if (strcmp(intf, SAMA5_EMAC_DEVNAME) == 0)
     {
-      handler = &g_emac_handler;
-      pinset  = PIO_INT_ETH1;
-      irq     = IRQ_INT_ETH1;
+      phandler = &g_emac_handler;
+      pinset   = PIO_INT_ETH1;
+      irq      = IRQ_INT_ETH1;
     }
   else
 #endif
 #ifdef CONFIG_SAMA5_GMAC
   if (strcmp(intf, SAMA5_GMAC_DEVNAME) == 0)
     {
-      handler = &g_gmac_handler;
-      pinset  = PIO_INT_ETH0;
-      irq     = IRQ_INT_ETH0;
+      phandler = &g_gmac_handler;
+      pinset   = PIO_INT_ETH0;
+      irq      = IRQ_INT_ETH0;
     }
   else
 #endif
@@ -232,8 +235,8 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler);
 
   /* Get the old button interrupt handler and save the new one */
 
-  oldhandler = *handler;
-  *handler = handler;
+  oldhandler = *phandler;
+  *phandler = handler;
 
   /* Configure the interrupt */
 
