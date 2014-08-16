@@ -8135,4 +8135,7 @@
 	  (2014-8-16).
 	* include/net/net.h and net/: Fix some missing function headers
 	  (2014-8-16).
-
+	* drivers/net/phy_notify.c, include/nuttxarch.h, net/phy.h, and
+	  ioctl.h: Add support for an ioctl that can be used to notify an
+	  application when there is a change in the network status signalled
+	  by a PHY interrupt (2014-8-16).
