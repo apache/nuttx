@@ -344,7 +344,7 @@ struct sam_emacattr_s
 {
   /* Basic hardware information */
 
-#ifdef CONFIG_NETDEV_PHY_IOCTL
+#if defined(CONFIG_ARCH_PHY_INTERRUPT) && defined(CONFIG_NETDEV_PHY_IOCTL)
   FAR const char      *intf;         /* Network interface name, e.g., "eth0" */
 #endif
   uint32_t             base;         /* EMAC Register base address */
@@ -497,7 +497,7 @@ static int  sam_addmac(struct net_driver_s *dev, const uint8_t *mac);
 static int  sam_rmmac(struct net_driver_s *dev, const uint8_t *mac);
 #endif
 #ifdef CONFIG_NETDEV_PHY_IOCTL
-static int  sam_ioctl(struct net_driver_s *dev, int cmd, void *arg);
+static int  sam_ioctl(struct net_driver_s *dev, int cmd, long arg);
 #endif
 
 /* PHY Initialization */
@@ -607,8 +607,8 @@ static const struct sam_emacattr_s g_emac0_attr =
 {
   /* Basic hardware information */
 
-#ifdef CONFIG_NETDEV_PHY_IOCTL
-  .intf         = SAMA5_EMAC0_DEVNAME;
+#if defined(CONFIG_ARCH_PHY_INTERRUPT) && defined(CONFIG_NETDEV_PHY_IOCTL)
+  .intf         = SAMA5_EMAC0_DEVNAME,
 #endif
   .base         = SAM_EMAC0_VBASE,
   .handler      = sam_emac0_interrupt,
@@ -678,8 +678,8 @@ static const struct sam_emacattr_s g_emac1_attr =
 {
   /* Basic hardware information */
 
-#ifdef CONFIG_NETDEV_PHY_IOCTL
-  .intf         = SAMA5_EMAC1_DEVNAME;
+#if defined(CONFIG_ARCH_PHY_INTERRUPT) && defined(CONFIG_NETDEV_PHY_IOCTL)
+  .intf         = SAMA5_EMAC1_DEVNAME,
 #endif
   .base         = SAM_EMAC1_VBASE,
   .handler      = sam_emac1_interrupt,
@@ -2234,8 +2234,9 @@ static int sam_rmmac(struct net_driver_s *dev, const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NETDEV_PHY_IOCTL
-static int sam_ioctl(struct net_driver_s *dev, int cmd, void *arg)
+static int sam_ioctl(struct net_driver_s *dev, int cmd, long arg)
 {
+  struct sam_emac_s *priv = (struct sam_emac_s *)dev->d_private;
   int ret;
 
   switch (cmd)
@@ -2244,7 +2245,7 @@ static int sam_ioctl(struct net_driver_s *dev, int cmd, void *arg)
   case SIOCMIINOTIFY: /* Set up for PHY event notifications */
     {
       struct mii_iotcl_notify_s *req = (struct mii_iotcl_notify_s *)((uintptr_t)arg);
-      ret = phy_notify_subscribe(dev0->intf, req->pid, req->signo, req->arg);
+      ret = phy_notify_subscribe(priv->attr->intf, req->pid, req->signo, req->arg);
     }
     break;
 #endif
