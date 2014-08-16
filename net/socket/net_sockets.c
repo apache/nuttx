@@ -87,6 +87,8 @@ static void _net_semtake(FAR struct socketlist *list)
     }
 }
 
+#define _net_semgive(list) sem_post(&list->sl_sem)
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
