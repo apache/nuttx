@@ -432,8 +432,8 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
           dev = netdev_ifrdev(req);
           if (dev && dev->d_ioctl)
             {
-              struct mii_ioctl_data *mii_data = &req->ifr_ifru.ifru_mii_data;
-              ret = dev->d_ioctl(cmd, mii_data);
+              struct mii_ioctl_data_s *mii_data = &req->ifr_ifru.ifru_mii_data;
+              ret = dev->d_ioctl(dev, cmd, ((long)(uintptr_t)mii_data);
             }
         }
         break;

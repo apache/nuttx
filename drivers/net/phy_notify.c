@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <unistd.h>
 #include <string.h>
 #include <semaphore.h>
 #include <signal.h>
@@ -311,7 +312,8 @@ static int phy_handler_3(int irq, FAR void *context)
  *   intf  - Provides the name of the network interface, for example, "eth0".
  *           The length of intf must not exceed 4 bytes (excluding NULL
  *           terminator).  Configurable with CONFIG_PHY_NOTIFICATION_MAXINTFLEN.
- *   pid   - Identifies the task to receive the signal.
+ *   pid   - Identifies the task to receive the signal.  The special value
+ *           of zero means to use the pid of the current task.
  *   signo - This is the signal number to use when notifying the task.
  *   arg   - An argument that will accompany the notification signal.
  *
@@ -333,6 +335,13 @@ int phy_notify_subscribe(FAR const char *intf, pid_t pid, int signo,
     {
       ndbg("ERROR: Failed to allocate a client entry\n");
       return -ENOMEM;
+    }
+
+  /* The special value pid == 0 means to use the pid of the current task. */
+
+  if (pid == 0)
+    {
+      pid = getpid();
     }
 
   /* Initialize the client entry */
@@ -388,7 +397,7 @@ int phy_notify_unsubscribe(FAR const char *intf, pid_t pid)
 
   /* Detach and disable the PHY interrupt */
 
-  phy_semtask();
+  phy_semtake();
   (void)arch_phy_irq(intf, NULL);
 
   /* Un-initialize the client entry */

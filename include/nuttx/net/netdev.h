@@ -179,18 +179,18 @@ struct net_driver_s
 
   /* Driver callbacks */
 
-  int (*d_ifup)(struct net_driver_s *dev);
-  int (*d_ifdown)(struct net_driver_s *dev);
-  int (*d_txavail)(struct net_driver_s *dev);
+  int (*d_ifup)(FAR struct net_driver_s *dev);
+  int (*d_ifdown)(FAR struct net_driver_s *dev);
+  int (*d_txavail)(FAR struct net_driver_s *dev);
 #ifdef CONFIG_NET_RXAVAIL
-  int (*d_rxavail)(struct net_driver_s *dev);
+  int (*d_rxavail)(FAR struct net_driver_s *dev);
 #endif
 #ifdef CONFIG_NET_IGMP
-  int (*d_addmac)(struct net_driver_s *dev, FAR const uint8_t *mac);
-  int (*d_rmmac)(struct net_driver_s *dev, FAR const uint8_t *mac);
+  int (*d_addmac)(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
+  int (*d_rmmac)(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
 #ifdef CONFIG_NETDEV_PHY_IOCTL
-  int (*d_ioctl)(int cmd, struct mii_ioctl_data *req);
+  int (*d_ioctl)(FAR struct net_driver_s *dev, int cmd, long arg);
 #endif
 
   /* Drivers may attached device-specific, private information */
@@ -198,7 +198,7 @@ struct net_driver_s
   void *d_private;
 };
 
-typedef int (*devif_poll_callback_t)(struct net_driver_s *dev);
+typedef int (*devif_poll_callback_t)(FAR struct net_driver_s *dev);
 
 /****************************************************************************
  * Public Variables
@@ -269,7 +269,7 @@ typedef int (*devif_poll_callback_t)(struct net_driver_s *dev);
  *
  ****************************************************************************/
 
-int devif_input(struct net_driver_s *dev);
+int devif_input(FAR struct net_driver_s *dev);
 
 /****************************************************************************
  * Polling of connections
@@ -292,7 +292,7 @@ int devif_input(struct net_driver_s *dev);
  * out the packet.
  *
  * Example:
- *   int driver_callback(struct net_driver_s *dev)
+ *   int driver_callback(FAR struct net_driver_s *dev)
  *   {
  *     if (dev->d_len > 0)
  *       {
@@ -310,7 +310,7 @@ int devif_input(struct net_driver_s *dev);
  * need to call the arp_out() function in the callback function
  * before sending the packet:
  *
- *   int driver_callback(struct net_driver_s *dev)
+ *   int driver_callback(FAR struct net_driver_s *dev)
  *   {
  *     if (dev->d_len > 0)
  *       {
@@ -324,8 +324,8 @@ int devif_input(struct net_driver_s *dev);
  *
  ****************************************************************************/
 
-int devif_poll(struct net_driver_s *dev, devif_poll_callback_t callback);
-int devif_timer(struct net_driver_s *dev, devif_poll_callback_t callback, int hsec);
+int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback);
+int devif_timer(FAR struct net_driver_s *dev, devif_poll_callback_t callback, int hsec);
 
 /****************************************************************************
  * Carrier detection

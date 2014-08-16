@@ -101,7 +101,8 @@ extern "C"
  *   intf  - Provides the name of the network interface, for example, "eth0".
  *           The length of intf must not exceed 4 bytes (excluding NULL
  *           terminator).  Configurable with CONFIG_PHY_NOTIFICATION_MAXINTFLEN.
- *   pid   - Identifies the task to receive the signal.
+ *   pid   - Identifies the task to receive the signal.  The special value
+ *           of zero means to use the pid of the current task.
  *   signo - This is the signal number to use when notifying the task.
  *   arg   - An argument that will accompany the notification signal.
  *
