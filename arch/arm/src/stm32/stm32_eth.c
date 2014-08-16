@@ -2519,7 +2519,7 @@ static int stm32_ioctl(struct net_driver_s *dev, int cmd, long arg)
   case SIOCMIINOTIFY: /* Set up for PHY event notifications */
     {
       struct mii_iotcl_notify_s *req = (struct mii_iotcl_notify_s *)((uintptr_t)arg);
-      ret = phy_notify_subscribe("eth0", req->pid, req->signo, req->arg);
+      ret = phy_notify_subscribe(dev->d_ifname, req->pid, req->signo, req->arg);
     }
     break;
 #endif

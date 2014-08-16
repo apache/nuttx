@@ -268,16 +268,6 @@
 #  endif
 #endif /* CONFIG_SAMA5_EMAC0 */
 
-/* Device name */
-
-#ifdef CONFIG_SAMA5_EMAC0_ISETH0
-#  define SAMA5_EMAC0_DEVNAME "eth0"
-#  define SAMA5_EMAC1_DEVNAME "eth1"
-#else
-#  define SAMA5_EMAC0_DEVNAME "eth1"
-#  define SAMA5_EMAC1_DEVNAME "eth0"
-#endif
-
 /* Common Configuration *****************************************************/
 
 #undef CONFIG_SAMA5_EMACB_NBC
@@ -344,9 +334,6 @@ struct sam_emacattr_s
 {
   /* Basic hardware information */
 
-#if defined(CONFIG_ARCH_PHY_INTERRUPT) && defined(CONFIG_NETDEV_PHY_IOCTL)
-  FAR const char      *intf;         /* Network interface name, e.g., "eth0" */
-#endif
   uint32_t             base;         /* EMAC Register base address */
   xcpt_t               handler;      /* EMAC interrupt handler */
   uint8_t              emac;         /* EMACn, n=0 or 1 */
@@ -607,9 +594,6 @@ static const struct sam_emacattr_s g_emac0_attr =
 {
   /* Basic hardware information */
 
-#if defined(CONFIG_ARCH_PHY_INTERRUPT) && defined(CONFIG_NETDEV_PHY_IOCTL)
-  .intf         = SAMA5_EMAC0_DEVNAME,
-#endif
   .base         = SAM_EMAC0_VBASE,
   .handler      = sam_emac0_interrupt,
   .emac         = 0,
@@ -678,9 +662,6 @@ static const struct sam_emacattr_s g_emac1_attr =
 {
   /* Basic hardware information */
 
-#if defined(CONFIG_ARCH_PHY_INTERRUPT) && defined(CONFIG_NETDEV_PHY_IOCTL)
-  .intf         = SAMA5_EMAC1_DEVNAME,
-#endif
   .base         = SAM_EMAC1_VBASE,
   .handler      = sam_emac1_interrupt,
   .emac         = 0,
@@ -2245,7 +2226,7 @@ static int sam_ioctl(struct net_driver_s *dev, int cmd, long arg)
   case SIOCMIINOTIFY: /* Set up for PHY event notifications */
     {
       struct mii_iotcl_notify_s *req = (struct mii_iotcl_notify_s *)((uintptr_t)arg);
-      ret = phy_notify_subscribe(priv->attr->intf, req->pid, req->signo, req->arg);
+      ret = phy_notify_subscribe(dev->d_ifname, req->pid, req->signo, req->arg);
     }
     break;
 #endif
