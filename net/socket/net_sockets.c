@@ -38,7 +38,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifdef CONFIG_NET
 
 #include <string.h>
 #include <semaphore.h>
@@ -51,6 +50,8 @@
 #include <nuttx/kmalloc.h>
 
 #include "socket/socket.h"
+
+#if CONFIG_NSOCKET_DESCRIPTORS > 0
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -72,7 +73,6 @@
  * Private Functions
  ****************************************************************************/
 
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
 static void _net_semtake(FAR struct socketlist *list)
 {
   /* Take the semaphore (perhaps waiting) */
@@ -87,16 +87,23 @@ static void _net_semtake(FAR struct socketlist *list)
     }
 }
 
-# define _net_semgive(list) sem_post(&list->sl_sem)
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
-
-/* Initialize a list of sockets for a new task */
+/****************************************************************************
+ * Name:
+ *
+ * Description:
+ *   Initialize a list of sockets for a new task
+ *
+ * Input Parameters:
+ *   list -- A reference to the pre-allocated socket list to be initialized.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
 
 void net_initlist(FAR struct socketlist *list)
 {
@@ -105,7 +112,19 @@ void net_initlist(FAR struct socketlist *list)
   (void)sem_init(&list->sl_sem, 0, 1);
 }
 
-/* Release release resources held by the socket list */
+/****************************************************************************
+ * Name: net_releaselist
+ *
+ * Description:
+ *   Release resources held by the socket list
+ *
+ * Input Parameters:
+ *   list -- A reference to the pre-allocated socket list to be un-initialized.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
 
 void net_releaselist(FAR struct socketlist *list)
 {
@@ -128,6 +147,21 @@ void net_releaselist(FAR struct socketlist *list)
 
   (void)sem_destroy(&list->sl_sem);
 }
+
+/****************************************************************************
+ * Name: sockfd_allocate
+ *
+ * Description:
+ *   Allocate a socket descriptor
+ *
+ * Input Parameters:
+ *   Lowest socket descripor index to be used.
+ *
+ * Returned Value:
+ *   On success, a socket desrciptor >= minsd is returned.  A negater errno
+ *   value is returned on failure.
+ *
+ ****************************************************************************/
 
 int sockfd_allocate(int minsd)
 {
@@ -158,11 +192,24 @@ int sockfd_allocate(int minsd)
                return i + __SOCKFD_OFFSET;
             }
         }
+
       _net_semgive(list);
     }
 
   return ERROR;
 }
+
+/****************************************************************************
+ * Name: sock_release
+ *
+ * Description:
+ *   Free a socket.
+ *
+ * Input Parameters:
+ *
+ * Returned Value:
+ *
+ ****************************************************************************/
 
 void sock_release(FAR struct socket *psock)
 {
@@ -192,10 +239,25 @@ void sock_release(FAR struct socket *psock)
 
               memset(psock, 0, sizeof(struct socket));
             }
+
           _net_semgive(list);
         }
     }
 }
+
+/****************************************************************************
+ * Name: sockfd_release
+ *
+ * Description:
+ *   Free the socket by its socket descriptor.
+ *
+ * Input Parameters:
+ *   sockfd - Socket descriptor identifies the socket to be released.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
 
 void sockfd_release(int sockfd)
 {
@@ -211,6 +273,21 @@ void sockfd_release(int sockfd)
     }
 }
 
+/****************************************************************************
+ * Name: sockfd_socket
+ *
+ * Description:
+ *   Given a socket descriptor, return the underlying socket structure.
+ *
+ * Input Parameters:
+ *   sockfd - The socket descriptor index o use.
+ *
+ * Returned Value:
+ *   On success, a reference to the socket structure associated with the
+ *   the socket descriptor is returned.  NULL is returned on any failure.
+ *
+ ****************************************************************************/
+
 FAR struct socket *sockfd_socket(int sockfd)
 {
   FAR struct socketlist *list;
@@ -224,8 +301,8 @@ FAR struct socket *sockfd_socket(int sockfd)
           return &list->sl_sockets[ndx];
         }
     }
+
   return NULL;
 }
 
-#endif /* CONFIG_NSOCKET_DESCRIPTORS */
-#endif /* CONFIG_NET */
+#endif /* CONFIG_NSOCKET_DESCRIPTORS > 0 */

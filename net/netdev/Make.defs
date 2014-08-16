@@ -35,7 +35,7 @@
 
 # Support for operations on network devices
 
-NETDEV_CSRCS += netdev_register.c netdev_ioctl.c net_poll.c netdev_txnotify.c
+NETDEV_CSRCS += netdev_register.c netdev_ioctl.c netdev_txnotify.c
 NETDEV_CSRCS += netdev_findbyname.c netdev_findbyaddr.c netdev_count.c
 NETDEV_CSRCS += netdev_foreach.c netdev_unregister.c netdev_sem.c
 NETDEV_CSRCS += netdev_carrier.c

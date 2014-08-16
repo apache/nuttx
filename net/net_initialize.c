@@ -80,7 +80,20 @@
  * Public Functions
  ****************************************************************************/
 
-/* This is called from the initialization logic to configure the socket layer */
+/****************************************************************************
+ * Name: net_initialize
+ *
+ * Description:
+ *   This is called from the OS initialization logic at power-up reset in
+ *   order to configure the networking subsystem.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
 
 void net_initialize(void)
 {

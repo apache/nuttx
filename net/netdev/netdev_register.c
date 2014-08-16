@@ -95,7 +95,7 @@ struct net_driver_s *g_netdevices = NULL;
  * Function: netdev_register
  *
  * Description:
- *   Register a network device driver and assign a name to it so tht it can
+ *   Register a network device driver and assign a name to it so that it can
  *   be found in subsequent network ioctl operations on the device.
  *
  * Parameters:

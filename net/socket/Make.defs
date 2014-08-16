@@ -37,7 +37,7 @@
 
 SOCK_CSRCS += bind.c connect.c getsockname.c recv.c recvfrom.c socket.c
 SOCK_CSRCS += sendto.c net_sockets.c net_close.c net_dup.c net_dup2.c
-SOCK_CSRCS += net_clone.c net_vfcntl.c
+SOCK_CSRCS += net_clone.c net_poll.c net_vfcntl.c
 
 # TCP/IP support
 

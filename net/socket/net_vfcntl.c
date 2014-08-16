@@ -56,7 +56,24 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Global Functions
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: net_vfcntl
+ *
+ * Description:
+ *   Performs fcntl operations on socket
+ *
+ * Input Parameters:
+ *   sockfd - Socket descriptor of the socket to operate on
+ *   cmd    - The fcntl command.
+ *   ap     - Command-specific arguments
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; -1 (ERROR) is returned on failure and
+ *   the errno value is set appropriately.
+ *
  ****************************************************************************/
 
 int net_vfcntl(int sockfd, int cmd, va_list ap)

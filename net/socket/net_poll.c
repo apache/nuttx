@@ -386,7 +386,7 @@ static inline int net_pollteardown(FAR struct socket *psock,
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_poll
+ * Function: psock_poll
  *
  * Description:
  *   The standard poll() operation redirects operations on socket descriptors
