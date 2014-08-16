@@ -1446,6 +1446,63 @@ uint8_t board_buttons(void);
 xcpt_t board_button_irq(int id, xcpt_t irqhandler);
 #endif
 
+/****************************************************************************
+ * Name: arch_phy_irq
+ *
+ * Description:
+ *   This function may be called to register an interrupt handler that will
+ *   be called when a PHY interrupt occurs.  This function both attaches
+ *   the interrupt handler and enables the interrupt if 'handler' is non-
+ *   NULL.  If handler is NULL, then the interrupt is detached and disabled
+ *   instead.
+ *
+ *   This interrupt may or may not be available on a given platform depending
+ *   on how the network hardware architecture is implemented.  In a typical
+ *   case, the PHY interrupt is provided to board-level logic as a GPIO
+ *   interrupt (in which case this is a board-specific interface and really
+ *   should be called board_phy_irq()); In other cases, the PHY interrupt
+ *   may be cause by the chip's MAC logic (in which case arch_phy_irq()) is
+ *   an appropriate name.  Other other boards, there may be no PHY interrupts
+ *   available at all.  If client attachable PHY interrupts are available
+ *   from the board or from the chip, then CONFIG_ARCH_PHY_INTERRUPT should
+ *   be defined to indicate that fact.
+ *
+ *   Typical usage:
+ *   a. OS service logic (not application logic*) attaches to the PHY
+ *      PHY interrupt.
+ *   b. When the PHY interrupt occurs, work should be scheduled on the
+ *      worker thread (or perhaps a dedicated application thread).
+ *   c. That worker thread should use the SIOCGMIIPHY, SIOCGMIIREG,
+ *      and SIOCSMIIREG ioctl calls** to communicate with the PHY,
+ *      determine what network event took place (Link Up/Down?), and
+ *      take the appropriate actions.
+ *
+ *    * This is an OS internal interface and should not be used from
+ *      application space.
+ *   ** This interrupt is really of no use if the Ethernet MAC driver
+ *      does not support these ioctl calls.
+ *
+ * Input Parameters:
+ *   intf    - Identifies the network interface.  For example "eth0".  Only
+ *             useful on platforms that support multiple Ethernet interfaces
+ *             and, hence, multiple PHYs and PHY interrupts.
+ *   handler - The client interrupt handler to be invoked when the PHY
+ *             asserts an interrupt.  Must reside in OS space, but can
+ *             signal tasks in user space.  A value of NULL can be passed
+ *             in order to detach and disable the PHY interrupt.
+ *
+ * Returned Value:
+ *   The previous PHY interrupt handler address is returned.  This allows you
+ *   to temporarily replace an interrupt handler, then restore the original
+ *   interrupt handler.  NULL is returned if there is was not handler in
+ *   place when the call was made.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_PHY_INTERRUPT
+xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler);
+#endif
+
 /************************************************************************************
  * Relay control functions
  *

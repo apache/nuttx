@@ -273,6 +273,10 @@ if ARCH_HAVE_PHY
 
 comment "External Ethernet PHY Device Support"
 
+config ARCH_PHY_INTERRUPT
+	bool
+	default n
+
 choice
 	prompt "Board PHY Selection (ETH0)"
 	default ETH0_PHY_NONE
