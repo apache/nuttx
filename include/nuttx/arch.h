@@ -1478,7 +1478,8 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler);
  *      take the appropriate actions.
  *
  *    * This is an OS internal interface and should not be used from
- *      application space.
+ *      application space.  Rather applications should use the SIOCMIISIG
+ *      ioctl to receive a signal when a PHY event occurs.
  *   ** This interrupt is really of no use if the Ethernet MAC driver
  *      does not support these ioctl calls.
  *

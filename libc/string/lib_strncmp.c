@@ -60,6 +60,7 @@ int strncmp(const char *cs, const char *ct, size_t nb)
           break;
         }
     }
+
   return result;
 }
 #endif
