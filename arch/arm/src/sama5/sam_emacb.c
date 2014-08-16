@@ -82,6 +82,7 @@
 #include <nuttx/net/mii.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/phy.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
@@ -267,6 +268,16 @@
 #  endif
 #endif /* CONFIG_SAMA5_EMAC0 */
 
+/* Device name */
+
+#ifdef CONFIG_SAMA5_EMAC0_ISETH0
+#  define SAMA5_EMAC0_DEVNAME "eth0"
+#  define SAMA5_EMAC1_DEVNAME "eth1"
+#else
+#  define SAMA5_EMAC0_DEVNAME "eth1"
+#  define SAMA5_EMAC1_DEVNAME "eth0"
+#endif
+
 /* Common Configuration *****************************************************/
 
 #undef CONFIG_SAMA5_EMACB_NBC
@@ -333,6 +344,9 @@ struct sam_emacattr_s
 {
   /* Basic hardware information */
 
+#ifdef CONFIG_NETDEV_PHY_IOCTL
+  FAR const char      *intf;         /* Network interface name, e.g., "eth0" */
+#endif
   uint32_t             base;         /* EMAC Register base address */
   xcpt_t               handler;      /* EMAC interrupt handler */
   uint8_t              emac;         /* EMACn, n=0 or 1 */
@@ -482,6 +496,9 @@ static int  sam_txavail(struct net_driver_s *dev);
 static int  sam_addmac(struct net_driver_s *dev, const uint8_t *mac);
 static int  sam_rmmac(struct net_driver_s *dev, const uint8_t *mac);
 #endif
+#ifdef CONFIG_NETDEV_PHY_IOCTL
+static int  sam_ioctl(struct net_driver_s *dev, int cmd, void *arg);
+#endif
 
 /* PHY Initialization */
 
@@ -590,6 +607,9 @@ static const struct sam_emacattr_s g_emac0_attr =
 {
   /* Basic hardware information */
 
+#ifdef CONFIG_NETDEV_PHY_IOCTL
+  .intf         = SAMA5_EMAC0_DEVNAME;
+#endif
   .base         = SAM_EMAC0_VBASE,
   .handler      = sam_emac0_interrupt,
   .emac         = 0,
@@ -658,6 +678,9 @@ static const struct sam_emacattr_s g_emac1_attr =
 {
   /* Basic hardware information */
 
+#ifdef CONFIG_NETDEV_PHY_IOCTL
+  .intf         = SAMA5_EMAC1_DEVNAME;
+#endif
   .base         = SAM_EMAC1_VBASE,
   .handler      = sam_emac1_interrupt,
   .emac         = 0,
@@ -2176,6 +2199,88 @@ static int sam_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 #endif
 
 /****************************************************************************
+ * Function: sam_ioctl
+ *
+ * Description:
+ *  Handles driver ioctl calls:
+ *
+ *  SIOCMIINOTIFY - Set up to received notifications from PHY interrupting
+ *    events.
+ *
+ *  SIOCGMIIPHY, SIOCGMIIREG, and SIOCSMIIREG:
+ *    Executes the SIOCxMIIxxx command and responds using the request struct
+ *    that must be provided as its 2nd parameter.
+ *
+ *    When called with SIOCGMIIPHY it will get the PHY address for the device
+ *    and write it to the req->phy_id field of the request struct.
+ *
+ *    When called with SIOCGMIIREG it will read a register of the PHY that is
+ *    specified using the req->reg_no struct field and then write its output
+ *    to the req->val_out field.
+ *
+ *    When called with SIOCSMIIREG it will write to a register of the PHY that
+ *    is specified using the req->reg_no struct field and use req->val_in as
+ *    its input.
+ *
+ * Parameters:
+ *   dev - Ethernet device structure
+ *   cmd - SIOCxMIIxxx command code
+ *   arg - Request structure also used to return values
+ *
+ * Returned Value: Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDEV_PHY_IOCTL
+static int sam_ioctl(struct net_driver_s *dev, int cmd, void *arg)
+{
+  int ret;
+
+  switch (cmd)
+  {
+#ifdef CONFIG_ARCH_PHY_INTERRUPT
+  case SIOCMIINOTIFY: /* Set up for PHY event notifications */
+    {
+      struct mii_iotcl_notify_s *req = (struct mii_iotcl_notify_s *)((uintptr_t)arg);
+      ret = phy_notify_subscribe(dev0->intf, req->pid, req->signo, req->arg);
+    }
+    break;
+#endif
+
+  case SIOCGMIIPHY: /* Get MII PHY address */
+    {
+      struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+      req->phy_id = priv->phyaddr;
+      ret = OK;
+    }
+    break;
+
+  case SIOCGMIIREG: /* Get register from MII PHY */
+    {
+      struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+      ret = sam_phyread(priv, req->phy_id, req->reg_num, &req->val_out);
+    }
+    break;
+
+  case SIOCSMIIREG: /* Set register in MII PHY */
+    {
+      struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+      ret = sam_phywrite(priv, req->phy_id, req->reg_num, req->val_in);
+    }
+    break;
+
+  default:
+    ret = -ENOTTY;
+    break;
+  }
+
+  return ret;
+}
+#endif /* CONFIG_NETDEV_PHY_IOCTL */
+
+/****************************************************************************
  * Function: sam_phydump
  *
  * Description:
@@ -3554,6 +3659,9 @@ int sam_emac_initialize(int intf)
 #ifdef CONFIG_NET_IGMP
   priv->dev.d_addmac  = sam_addmac;     /* Add multicast MAC address */
   priv->dev.d_rmmac   = sam_rmmac;      /* Remove multicast MAC address */
+#endif
+#ifdef CONFIG_NETDEV_PHY_IOCTL
+  priv->dev.d_ioctl   = sam_ioctl;      /* Support PHY ioctl() calls */
 #endif
   priv->dev.d_private = priv;           /* Used to recover private state from dev */
 
