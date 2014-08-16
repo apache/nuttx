@@ -658,6 +658,9 @@ static int  stm32_txavail(struct net_driver_s *dev);
 static int  stm32_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 static int  stm32_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
+#ifdef CONFIG_NETDEV_PHY_IOCTL
+static int  stm32_ioctl(struct net_driver_s *dev, int cmd, void *arg);
+#endif
 
 /* Descriptor Initialization */
 
@@ -666,9 +669,6 @@ static void stm32_rxdescinit(FAR struct stm32_ethmac_s *priv);
 
 /* PHY Initialization */
 
-#ifdef CONFIG_NETDEV_PHY_IOCTL
-static int  stm32_ioctl(int cmd, struct mii_ioctl_data *req);
-#endif
 static int  stm32_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *value);
 static int  stm32_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t value);
 #ifdef CONFIG_ETH0_PHY_DM9161
@@ -2498,8 +2498,9 @@ static void stm32_rxdescinit(FAR struct stm32_ethmac_s *priv)
  *  its input.
  *
  * Parameters:
+ *   dev - Ethernet device structure
  *   cmd - SIOCxMIIxxx command code
- *   req - request structure also used to return values
+ *   arg - Request structure also used to return values
  *
  * Returned Value: Negated errno on failure.
  *
@@ -2508,27 +2509,45 @@ static void stm32_rxdescinit(FAR struct stm32_ethmac_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_NETDEV_PHY_IOCTL
-static int stm32_ioctl(int cmd, struct mii_ioctl_data *req)
+static int stm32_ioctl(struct net_driver_s *dev, int cmd, void *arg)
 {
-  int ret = -ENOTTY;
+  int ret;
 
   switch (cmd)
   {
+#ifdef CONFIG_ARCH_PHY_INTERRUPT
+  case SIOCMIINOTIFY: /* Set up for PHY event notifications */
+    {
+      struct mii_iotcl_notify_s *req = (struct mii_iotcl_notify_s *)((uintptr_t)arg);
+      ret = phy_notify_subscribe("eth0", req->pid, req->signo, req->arg);
+    }
+    break;
+#endif
+
   case SIOCGMIIPHY: /* Get MII PHY address */
-    req->phy_id = CONFIG_STM32_PHYADDR;
-    ret = OK;
+    {
+      struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+      req->phy_id = CONFIG_STM32_PHYADDR;
+      ret = OK;
+    }
     break;
 
   case SIOCGMIIREG: /* Get register from MII PHY */
-    ret = stm32_phyread(req->phy_id, req->reg_num, &req->val_out);
+    {
+      struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+      ret = stm32_phyread(req->phy_id, req->reg_num, &req->val_out);
+    }
     break;
 
   case SIOCSMIIREG: /* Set register in MII PHY */
-    ret = stm32_phywrite(req->phy_id, req->reg_num, req->val_in);
+    {
+      struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+      ret = stm32_phywrite(req->phy_id, req->reg_num, req->val_in);
+    }
     break;
 
   default:
-    ret = -EINVAL;
+    ret = -ENOTTY;
     break;
   }
 
