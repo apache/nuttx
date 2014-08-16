@@ -1,9 +1,8 @@
 /****************************************************************************
- * include/nuttx/net/pkt.h
- * Definitions for use with AF_PACKET sockets
+ * include/nuttx/net/slip.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
- *   Author: Daniel Laszlo Sitzer <dlsitzer@gmail.com>
+ *   Author : Gregory Nutt <gnutt@nuttx.org>
  *
  * Includes some definitions that a compatible with the LGPL GNU C Library
  * header file of the same name.
@@ -37,8 +36,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_NET_PKT_H
-#define __INCLUDE_NUTTX_NET_PKT_H
+#ifndef __INCLUDE_NUTTX_NET_SLIP_H
+#define __INCLUDE_NUTTX_NET_SLIP_H
 
 /****************************************************************************
  * Included Files
@@ -46,7 +45,7 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/net/netconfig.h>
+#ifdef CONFIG_NET_SLIP
 
 /****************************************************************************
  * Public Type Definitions
@@ -56,15 +55,42 @@
  * Public Data
  ****************************************************************************/
 
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-/* This function provides the interface between Ethernet device drivers and
- * packet socket logic.  All frames that are received should be provided to
- * pkt_input() prior to other routing.
- */
 
-struct net_driver_s; /* Forward reference */
-int pkt_input(FAR struct net_driver_s *dev);
+/****************************************************************************
+ * Function: slip_initialize
+ *
+ * Description:
+ *   Instantiate a SLIP network interface.
+ *
+ * Parameters:
+ *   intf - In the case where there are multiple SLIP interfaces, this value
+ *          identifies which is to be initialized.  The network name will be,
+ *          for example, "/dev/slip5" for intf == 5
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
 
-#endif /* __INCLUDE_NUTTX_NET_PKT_H */
+int slip_initialize(int intf, FAR const char *devname);
+
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
+
+#endif /*  CONFIG_NET_SLIP */
+#endif /* __INCLUDE_NUTTX_NET_SLIP_H */
