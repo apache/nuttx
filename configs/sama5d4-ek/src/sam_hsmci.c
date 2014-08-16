@@ -33,7 +33,7 @@
  *
  ****************************************************************************/
 
-/* The SAMA4D4-EK provides a two SD memory card slots:  (1) a full size SD
+/* The SAMA5D4-EK provides a two SD memory card slots:  (1) a full size SD
  * card slot (J10), and (2) a microSD memory card slot (J11).
  *
  * The full size SD card slot connects via HSMCI0.  The card detect discrete

@@ -89,7 +89,7 @@
  * Name: sam_spiinitialize
  *
  * Description:
- *   Called to configure SPI chip select PIO pins for the SAMA4D4-EK board.
+ *   Called to configure SPI chip select PIO pins for the SAMA5D4-EK board.
  *
  ************************************************************************************/
 

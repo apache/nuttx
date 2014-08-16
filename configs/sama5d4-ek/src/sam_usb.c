@@ -197,7 +197,7 @@ static int ehci_waiter(int argc, char *argv[])
  *
  * Description:
  *   Called from sam_usbinitialize very early in inialization to setup USB-related
- *   GPIO pins for the SAMA4D4-EK board.
+ *   GPIO pins for the SAMA5D4-EK board.
  *
  * USB Ports
  *   The SAMA5D4 series-MB features three USB communication ports:

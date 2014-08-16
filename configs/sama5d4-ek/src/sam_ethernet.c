@@ -41,12 +41,15 @@
 
 #include <string.h>
 #include <assert.h>
+#include <debug.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
 #include "sam_pio.h"
 #include "sam_ethernet.h"
+
+#include "sama5d4-ek.h"
 
 #ifdef HAVE_NETWORK
 
@@ -59,11 +62,11 @@
 #endif
 
 #ifdef CONFIG_SAMA5_EMAC0_ISETH0
-#  SAMA5_EMAC0_DEVNAME "eth0"
-#  SAMA5_EMAC1_DEVNAME "eth1"
+#  define SAMA5_EMAC0_DEVNAME "eth0"
+#  define SAMA5_EMAC1_DEVNAME "eth1"
 #else
-#  SAMA5_EMAC0_DEVNAME "eth1"
-#  SAMA5_EMAC1_DEVNAME "eth0"
+#  define SAMA5_EMAC0_DEVNAME "eth1"
+#  define SAMA5_EMAC1_DEVNAME "eth0"
 #endif
 
 /************************************************************************************
@@ -72,10 +75,10 @@
 
 #ifdef CONFIG_SAMA5_PIOE_IRQ
 #ifdef CONFIG_SAMA5_EMAC0
-static xcpt g_emac0_handler;
+static xcpt_t g_emac0_handler;
 #endif
 #ifdef CONFIG_SAMA5_EMAC1
-static xcpt g_emac1_handler;
+static xcpt_t g_emac1_handler;
 #endif
 #endif
 
@@ -97,11 +100,11 @@ static xcpt g_emac1_handler;
 
 void weak_function sam_netinitialize(void)
 {
-#ifdef CONFIG_SAMA4_EMAC0
+#ifdef CONFIG_SAMA5_EMAC0
   sam_configpio(PIO_INT_ETH0);
 #endif
 
-#ifdef CONFIG_SAMA4_EMAC1
+#ifdef CONFIG_SAMA5_EMAC1
   sam_configpio(PIO_INT_ETH1);
 #endif
 }
@@ -160,10 +163,10 @@ void weak_function sam_netinitialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_PIOE_IRQ
-xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler);
+xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler)
 {
   irqstate_t flags;
-  xcpt_t *handler;
+  xcpt_t *phandler;
   xcpt_t oldhandler;
   pio_pinset_t pinset;
   int irq;
@@ -173,18 +176,18 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler);
 #ifdef CONFIG_SAMA5_EMAC0
   if (strcmp(intf, SAMA5_EMAC0_DEVNAME) == 0)
     {
-      handler = &g_emac0_handler;
-      pinset  = PIO_INT_ETH0;
-      irq     = IRQ_INT_ETH0;
+      phandler = &g_emac0_handler;
+      pinset   = PIO_INT_ETH0;
+      irq      = IRQ_INT_ETH0;
     }
   else
 #endif
 #ifdef CONFIG_SAMA5_EMAC1
   if (strcmp(intf, SAMA5_EMAC1_DEVNAME) == 0)
     {
-      handler = &g_emac1_handler;
-      pinset  = PIO_INT_ETH1;
-      irq     = IRQ_INT_ETH1;
+      phandler = &g_emac1_handler;
+      pinset   = PIO_INT_ETH1;
+      irq      = IRQ_INT_ETH1;
     }
   else
 #endif
@@ -201,8 +204,8 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler);
 
   /* Get the old button interrupt handler and save the new one */
 
-  oldhandler = *handler;
-  *handler = handler;
+  oldhandler = *phandler;
+  *phandler  = handler;
 
   /* Configure the interrupt */
 

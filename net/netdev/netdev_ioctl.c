@@ -425,6 +425,19 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
 #endif
 
 #ifdef CONFIG_NETDEV_PHY_IOCTL
+#ifdef CONFIG_ARCH_PHY_INTERRUPT
+      case SIOCMIINOTIFY: /* Set up for PHY event notifications */
+        {
+          dev = netdev_ifrdev(req);
+          if (dev && dev->d_ioctl)
+            {
+              struct mii_iotcl_notify_s *notify = &req->ifr_ifru.ifru_mii_notify;
+              ret = dev->d_ioctl(dev, cmd, ((long)(uintptr_t)notify));
+            }
+        }
+        break;
+#endif
+
       case SIOCGMIIPHY: /* Get address of MII PHY in use */
       case SIOCGMIIREG: /* Get MII register via MDIO */
       case SIOCSMIIREG: /* Set MII register via MDIO */
@@ -433,7 +446,7 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
           if (dev && dev->d_ioctl)
             {
               struct mii_ioctl_data_s *mii_data = &req->ifr_ifru.ifru_mii_data;
-              ret = dev->d_ioctl(dev, cmd, ((long)(uintptr_t)mii_data);
+              ret = dev->d_ioctl(dev, cmd, ((long)(uintptr_t)mii_data));
             }
         }
         break;

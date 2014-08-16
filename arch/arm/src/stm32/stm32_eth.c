@@ -659,7 +659,7 @@ static int  stm32_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 static int  stm32_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
 #ifdef CONFIG_NETDEV_PHY_IOCTL
-static int  stm32_ioctl(struct net_driver_s *dev, int cmd, void *arg);
+static int  stm32_ioctl(struct net_driver_s *dev, int cmd, long arg);
 #endif
 
 /* Descriptor Initialization */
@@ -2509,7 +2509,7 @@ static void stm32_rxdescinit(FAR struct stm32_ethmac_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_NETDEV_PHY_IOCTL
-static int stm32_ioctl(struct net_driver_s *dev, int cmd, void *arg)
+static int stm32_ioctl(struct net_driver_s *dev, int cmd, long arg)
 {
   int ret;
 

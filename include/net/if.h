@@ -138,7 +138,7 @@ struct ifreq
     int                       ifru_count;               /* Number of devices */
     int                       ifru_mtu;                 /* MTU size */
     uint8_t                   ifru_flags;               /* Interface flags */
-    struct mii_iotcl_notify_s llfru_mii_notify;         /* PHY event notification */
+    struct mii_iotcl_notify_s ifru_mii_notify;          /* PHY event notification */
     struct mii_ioctl_data_s   ifru_mii_data;            /* MII request data */
   } ifr_ifru;
 };
