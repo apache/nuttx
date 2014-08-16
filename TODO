@@ -2357,12 +2357,13 @@ o NuttShell (NSH) (apps/nshlib)
                PHY.  This is logic outside of the Ethernet MAC driver
                (although the Ethernet MAC driver would also have to
                support the PHY operations to determine the link state).
-               So of the boards provide logic to connect to the PHY
+               Some of the boards provide logic to connect to the PHY
                interrupt.  Like:
 
-                 xcpt_t sam_phyirq(int intf, xcpt_t irqhandler);
+                 xcpt_t arc_phy_irq(FAR const char *intf, xcpt_t irqhandler);
 
-               But that interrupt is not used by anything now.
+               (prototyped in include/nuttx/arch.h). But that interrupt is
+               not used by anything now.
   Status:      Open
   Priority:    Medium.
 
