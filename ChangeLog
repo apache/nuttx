@@ -8131,3 +8131,8 @@
 	* configs/Kconfig, sama5d3-xplained, sama5d3x-ek, and sama5d4-ek:
 	  Convert existing board specific PHY interrupt interfaces to use newly
 	  defined standard interface (2014-8-16).
+	* include/net/slip.h:  Move SLIP prototypes from net.h to slip.h
+	  (2014-8-16).
+	* include/net/net.h and net/: Fix some missing function headers
+	  (2014-8-16).
+
