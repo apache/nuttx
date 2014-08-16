@@ -170,14 +170,6 @@
 #  error EMAC PHY unrecognized
 #endif
 
-/* Device name */
-
-#ifdef CONFIG_SAMA5_EMAC_ISETH0
-#  define SAMA5_EMAC_DEVNAME "eth0"
-#else
-#  define SAMA5_EMAC_DEVNAME "eth1"
-#endif
-
 #ifdef CONFIG_SAMA5_EMAC_PHYSR_ALTCONFIG
 
 #  define PHYSR_MODE(sr)     ((sr) & CONFIG_SAMA5_EMAC_PHYSR_ALTMODE)
@@ -1859,7 +1851,7 @@ static int sam_ioctl(struct net_driver_s *dev, int cmd, long arg)
   case SIOCMIINOTIFY: /* Set up for PHY event notifications */
     {
       struct mii_iotcl_notify_s *req = (struct mii_iotcl_notify_s *)((uintptr_t)arg);
-      ret = phy_notify_subscribe(SAMA5_EMAC_DEVNAME, req->pid, req->signo, req->arg);
+      ret = phy_notify_subscribe(dev->d_ifname, req->pid, req->signo, req->arg);
     }
     break;
 #endif

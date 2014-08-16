@@ -114,14 +114,6 @@
 #  error Unknown PHY
 #endif
 
-/* Device name */
-
-#ifdef CONFIG_SAMA5_GMAC_ISETH0
-#  define SAMA5_GMAC_DEVNAME "eth0"
-#else
-#  define SAMA5_GMAC_DEVNAME "eth1"
-#endif
-
 /* GMAC buffer sizes, number of buffers, and number of descriptors.
  *
  * REVISIT: The CONFIG_NET_MULTIBUFFER might be useful.  It might be possible
@@ -1814,7 +1806,7 @@ static int sam_ioctl(struct net_driver_s *dev, int cmd, long arg)
   case SIOCMIINOTIFY: /* Set up for PHY event notifications */
     {
       struct mii_iotcl_notify_s *req = (struct mii_iotcl_notify_s *)((uintptr_t)arg);
-      ret = phy_notify_subscribe(SAMA5_GMAC_DEVNAME, req->pid, req->signo, req->arg);
+      ret = phy_notify_subscribe(dev->d_ifname, req->pid, req->signo, req->arg);
     }
     break;
 #endif
