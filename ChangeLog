@@ -8139,3 +8139,13 @@
 	  ioctl.h: Add support for an ioctl that can be used to notify an
 	  application when there is a change in the network status signalled
 	  by a PHY interrupt (2014-8-16).
+	* drivers/net/phy_notify.c, include/net/if.h, ioctl.h, netdev.h, phy.h,
+	  and net/netdev/netdev_ioctl.c: Finishes the ioctl definition to
+	  subscribe to PHY events. Revamp network ioctl signature to support
+	  arguments other than struct mii_ioctl_data (2014-8-16). 
+	* arch/arm/src/stm32/stm32_eth.c: Modified to support the change to the
+	  network ioctl signature changes.  Also add support for new ioctl to
+	  setup PHY event notifications (2014-8-16).
+	* arch/arm/src/sama5/sam_emaca.c, sam_emacb.c, and sam_gmac.c: Implement
+	  all network ioctls, including the new ioctl to setup PHY event
+	  notifications (2014-8-16).
