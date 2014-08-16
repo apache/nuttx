@@ -563,6 +563,7 @@ config ARCH_BOARD_SAMA5D3X_EK
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_PHY_INTERRUPT
 	---help---
 		The port of NuttX to the Atmel SAMA5D3x-EK development board (where x=1,3,4, or 5).
 
@@ -572,6 +573,7 @@ config ARCH_BOARD_SAMA5D3_XPLAINED
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_PHY_INTERRUPT
 	---help---
 		The port of NuttX to the Atmel SAMA5D3 Xplained development board.
 
@@ -581,6 +583,7 @@ config ARCH_BOARD_SAMA5D4_EK
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_PHY_INTERRUPT
 	---help---
 		The port of NuttX to the Atmel SAMA5D4-EK development board
 
