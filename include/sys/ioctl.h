@@ -66,14 +66,15 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
 /* ioctl() is a non-standard UNIX-like API */
 
-EXTERN int ioctl(int fd, int req, unsigned long arg);
+int ioctl(int fd, int req, unsigned long arg);
 
 #undef EXTERN
 #if defined(__cplusplus)
