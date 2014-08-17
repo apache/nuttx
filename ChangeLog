@@ -8149,3 +8149,5 @@
 	* arch/arm/src/sama5/sam_emaca.c, sam_emacb.c, and sam_gmac.c: Implement
 	  all network ioctls, including the new ioctl to setup PHY event
 	  notifications (2014-8-16).
+	* include/net/if.h:  Add some helper macros to make the code that uses
+	  the ioctls a little more compact (2014-8-17).
