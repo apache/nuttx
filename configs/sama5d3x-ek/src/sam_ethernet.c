@@ -109,6 +109,43 @@ static xcpt_t g_gmac_handler;
  ************************************************************************************/
 
 /************************************************************************************
+ * Name: sam_emac_phy_enable and sam_gmac_enable
+ ************************************************************************************/
+
+#ifdef CONFIG_SAMA5_PIOE_IRQ
+#ifdef CONFIG_SAMA5_EMACA
+static void sam_emac_phy_enable(bool enable)
+{
+  phydbg("IRQ%d: enable=%d\n", IRQ_INT_ETH1, enable);
+  if (enable)
+    {
+      sam_pioirqenable(IRQ_INT_ETH1);
+    }
+  else
+    {
+      sam_pioirqdisable(IRQ_INT_ETH1);
+    }
+}
+
+#endif
+
+#ifdef CONFIG_SAMA5_GMAC
+static void sam_gmac_phy_enable(bool enable)
+{
+  phydbg("IRQ%d: enable=%d\n", IRQ_INT_ETH0, enable);
+  if (enable)
+    {
+      sam_pioirqenable(IRQ_INT_ETH0);
+    }
+  else
+    {
+      sam_pioirqdisable(IRQ_INT_ETH0);
+    }
+}
+#endif
+#endif
+
+/************************************************************************************
  * Public Functions
  ************************************************************************************/
 
@@ -174,6 +211,10 @@ void weak_function sam_netinitialize(void)
  *   NULL.  If handler is NULL, then the interrupt is detached and disabled
  *   instead.
  *
+ *   The PHY interrupt is always disabled upon return.  The caller must
+ *   call back through the enable function point to control the state of
+ *   the interrupt.
+ *
  *   This interrupt may or may not be available on a given platform depending
  *   on how the network hardware architecture is implemented.  In a typical
  *   case, the PHY interrupt is provided to board-level logic as a GPIO
@@ -187,16 +228,20 @@ void weak_function sam_netinitialize(void)
  *
  *   Typical usage:
  *   a. OS service logic (not application logic*) attaches to the PHY
- *      PHY interrupt.
- *   b. When the PHY interrupt occurs, work should be scheduled on the
- *      worker thread (or perhaps a dedicated application thread).
+ *      PHY interrupt and enables the PHY interrupt.
+ *   b. When the PHY interrupt occurs:  (1) the interrupt should be
+ *      disabled and () work should be scheduled on the worker thread (or
+ *      perhaps a dedicated application thread).
  *   c. That worker thread should use the SIOCGMIIPHY, SIOCGMIIREG,
  *      and SIOCSMIIREG ioctl calls** to communicate with the PHY,
  *      determine what network event took place (Link Up/Down?), and
  *      take the appropriate actions.
+ *   d. It should then interact the the PHY to clear any pending
+ *      interrupts, then re-enable the PHY interrupt.
  *
  *    * This is an OS internal interface and should not be used from
- *      application space.
+ *      application space.  Rather applications should use the SIOCMIISIG
+ *      ioctl to receive a signal when a PHY event occurs.
  *   ** This interrupt is really of no use if the Ethernet MAC driver
  *      does not support these ioctl calls.
  *
@@ -208,6 +253,8 @@ void weak_function sam_netinitialize(void)
  *             asserts an interrupt.  Must reside in OS space, but can
  *             signal tasks in user space.  A value of NULL can be passed
  *             in order to detach and disable the PHY interrupt.
+ *   enable  - A function pointer that be unsed to enable or disable the
+ *             PHY interrupt.
  *
  * Returned Value:
  *   The previous PHY interrupt handler address is returned.  This allows you
@@ -218,12 +265,13 @@ void weak_function sam_netinitialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_PIOE_IRQ
-xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler)
+xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
 {
   irqstate_t flags;
   xcpt_t *phandler;
   xcpt_t oldhandler;
   pio_pinset_t pinset;
+  phy_enable_t enabler;
   int irq;
 
   DEBUGASSERT(intf);
@@ -243,6 +291,7 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler)
       phandler = &g_emac_handler;
       pinset   = PIO_INT_ETH1;
       irq      = IRQ_INT_ETH1;
+      enabler  = sam_emac_phy_enable;
     }
   else
 #endif
@@ -253,6 +302,7 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler)
       phandler = &g_gmac_handler;
       pinset   = PIO_INT_ETH0;
       irq      = IRQ_INT_ETH0;
+      enabler  = sam_gmac_phy_enable;
     }
   else
 #endif
@@ -279,15 +329,25 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler)
       phydbg("Configure pin: %08x\n", pinset);
       sam_pioirq(pinset);
 
-      phydbg("Enable IRQ: %d\n", irq);
+      phydbg("Attach IRQ%d\n", irq);
       (void)irq_attach(irq, handler);
-      sam_pioirqenable(irq);
     }
   else
     {
-      phydbg("Disable IRQ: %d\n", irq);
+      phydbg("Detach IRQ%d\n", irq);
       (void)irq_detach(irq);
-      sam_pioirqdisable(irq);
+      enabler = NULL;
+    }
+
+  /* Return with the interrupt disabled in either case */
+
+  sam_pioirqdisable(irq);
+
+  /* Return the enabling function pointer */
+
+  if (enable)
+    {
+      *enable = enabler;
     }
 
   /* Return the old button handler (so that it can be restored) */
