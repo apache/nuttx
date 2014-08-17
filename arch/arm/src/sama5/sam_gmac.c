@@ -1822,14 +1822,35 @@ static int sam_ioctl(struct net_driver_s *dev, int cmd, long arg)
   case SIOCGMIIREG: /* Get register from MII PHY */
     {
       struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+
+      /* Enable the management port */
+
+      sam_enablemdio(priv);
+
+      /* Read from the requested register */
+
       ret = sam_phyread(priv, req->phy_id, req->reg_num, &req->val_out);
+
+      /* Disable the management port */
+
+      sam_disablemdio(priv);
     }
     break;
 
   case SIOCSMIIREG: /* Set register in MII PHY */
     {
       struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+      /* Enable the management port */
+
+      sam_enablemdio(priv);
+
+      /* Write to the requested register */
+
       ret = sam_phywrite(priv, req->phy_id, req->reg_num, req->val_in);
+
+      /* Disable the management port */
+
+      sam_disablemdio(priv);
     }
     break;
 
