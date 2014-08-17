@@ -487,6 +487,26 @@
                                                /* Bits 5-15: Reserved */
 #define KSZ8081_DRCTRL_PLLOFF        (1 << 4)  /* Bit 4: Turn PLL off in EDPD mode */
                                                /* Bits 0-3: Reserved */
+/* KSZ8051/81 Register 0x1b: Interrupt control/status */
+
+#define MII_KSZ80x1_INT_JEN          (1 << 15) /* Jabber interrupt enable */
+#define MII_KSZ80x1_INT_REEN         (1 << 14) /* Receive error interrupt enable */
+#define MII_KSZ80x1_INT_PREN         (1 << 13) /* Page received interrupt enable */
+#define MII_KSZ80x1_INT_PDFEN        (1 << 12) /* Parallel detect fault interrupt enable */
+#define MII_KSZ80x1_INT_LPAEN        (1 << 11) /* Link partner acknowledge interrupt enable */
+#define MII_KSZ80x1_INT_LDEN         (1 << 10) /* Link down fault interrupt enable */
+#define MII_KSZ80x1_INT_RFEN         (1 << 9)  /* Remote fault interrupt enable */
+#define MII_KSZ80x1_INT_LUEN         (1 << 8)  /* Link up interrupt enable */
+
+#define MII_KSZ80x1_INT_J            (1 << 7)  /* Jabber interrupt */
+#define MII_KSZ80x1_INT_RE           (1 << 6)  /* Receive error interrupt */
+#define MII_KSZ80x1_INT_PR           (1 << 5)  /* Page received interrupt */
+#define MII_KSZ80x1_INT_PDF          (1 << 4)  /* Parallel detect fault interrupt */
+#define MII_KSZ80x1_INT_LPA          (1 << 3)  /* Link partner acknowledge interrupt */
+#define MII_KSZ80x1_INT_LD           (1 << 2)  /* Link down fault interrupt */
+#define MII_KSZ80x1_INT_RF           (1 << 1)  /* Remote fault interrupt */
+#define MII_KSZ80x1_INT_LU           (1 << 0)  /* Link up interrupt */
+
 /* KSZ8051/81 Register 0x1e: PHY Control 1 */
                                                /* Bits 10-15: Reserved */
 #define MII_PHYCTRL1_ENPAUSE         (1 << 9)  /* Bit 9: Enable pause */

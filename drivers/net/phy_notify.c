@@ -255,7 +255,7 @@ static int phy_handler(FAR struct phy_notify_s *client)
       int errcode = errno;
       DEBUGASSERT(errcode > 0);
 
-      ndbg("ERROR: sigqueue failed: %d\n", errcode);
+      nlldbg("ERROR: sigqueue failed: %d\n", errcode);
       UNUSED(errcode);
     }
 

@@ -383,6 +383,9 @@ static void sam_phydump(struct sam_emac_s *priv);
 #  define sam_phydump(priv)
 #endif
 
+#if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
+static int  sam_phyintenable(struct sam_emac_s *priv);
+#endif
 static int  sam_phywait(struct sam_emac_s *priv);
 static int  sam_phyreset(struct sam_emac_s *priv);
 static int  sam_phyfind(struct sam_emac_s *priv, uint8_t *phyaddr);
@@ -1810,7 +1813,14 @@ static int sam_ioctl(struct net_driver_s *dev, int cmd, long arg)
   case SIOCMIINOTIFY: /* Set up for PHY event notifications */
     {
       struct mii_iotcl_notify_s *req = (struct mii_iotcl_notify_s *)((uintptr_t)arg);
+
       ret = phy_notify_subscribe(dev->d_ifname, req->pid, req->signo, req->arg);
+      if (ret == OK)
+        {
+          /* Enable PHY link up/down interrupts */
+
+          ret = sam_phyintenable(priv);
+        }
     }
     break;
 #endif
@@ -1920,6 +1930,49 @@ static void sam_phydump(struct sam_emac_s *priv)
   regval  = sam_getreg(priv, SAM_EMAC_NCR);
   regval &= ~EMAC_NCR_MPE;
   sam_putreg(priv, SAM_EMAC_NCR, regval);
+}
+#endif
+
+/****************************************************************************
+ * Function: sam_phyintenable
+ *
+ * Description:
+ *  Enable link up/down PHY interrupts
+ *
+ * Parameters:
+ *   priv - A reference to the private driver state structure
+ *
+ * Returned Value:
+ *   OK on success; Negated errno (-ETIMEDOUT) on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
+static int sam_phyintenable(struct sam_emac_s *priv)
+{
+#if defined(CONFIG_ETH0_PHY_KSZ8051) ||  defined(CONFIG_ETH0_PHY_KSZ8081)
+  uint32_t regval;
+  int ret;
+
+  /* Enable management port */
+
+  regval = sam_getreg(priv, SAM_EMAC_NCR);
+  sam_putreg(priv, SAM_EMAC_NCR, regval | EMAC_NCR_MPE);
+
+  /* Enable link up/down interrupts */
+
+  ret = sam_phywrite(priv, priv->phyaddr, MII_KSZ8081_INT,
+                    (MII_KSZ80x1_INT_LDEN | MII_KSZ80x1_INT_LUEN));
+
+  /* Disable management port (probably) */
+
+  sam_putreg(priv, SAM_EMAC_NCR, regval);
+  return ret;
+
+#else
+#  warning Missing logic
+  return -ENOSYS;
+#endif
 }
 #endif
 

@@ -411,6 +411,9 @@ struct sam_emac_s
   /* Used to track transmit and receive descriptors */
 
   uint8_t               phyaddr;     /* PHY address (pre-defined by pins on reset) */
+#if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
+  uint8_t               phytype;     /* See SAMA5_EMAC0/1_PHY_TYPE definitions */
+#endif
   uint16_t              txhead;      /* Circular buffer head index */
   uint16_t              txtail;      /* Circular buffer tail index */
   uint16_t              rxndx;       /* RX index for current processing RX descriptor */
@@ -502,6 +505,9 @@ static bool sam_is100hdx(struct sam_emac_s *priv, uint16_t physr);
 static bool sam_is10fdx(struct sam_emac_s *priv, uint16_t physr);
 static bool sam_is100fdx(struct sam_emac_s *priv, uint16_t physr);
 
+#if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
+static int  sam_phyintenable(struct sam_emac_s *priv);
+#endif
 static int  sam_phywait(struct sam_emac_s *priv);
 static int  sam_phyreset(struct sam_emac_s *priv);
 static int  sam_phyfind(struct sam_emac_s *priv, uint8_t *phyaddr);
@@ -2226,7 +2232,14 @@ static int sam_ioctl(struct net_driver_s *dev, int cmd, long arg)
   case SIOCMIINOTIFY: /* Set up for PHY event notifications */
     {
       struct mii_iotcl_notify_s *req = (struct mii_iotcl_notify_s *)((uintptr_t)arg);
+
       ret = phy_notify_subscribe(dev->d_ifname, req->pid, req->signo, req->arg);
+      if (ret == OK)
+        {
+          /* Enable PHY link up/down interrupts */
+
+          ret = sam_phyintenable(priv);
+        }
     }
     break;
 #endif
@@ -2428,6 +2441,57 @@ static bool sam_is100fdx(struct sam_emac_s *priv, uint16_t physr)
 
   return (physr & mask) == match;
 }
+
+/****************************************************************************
+ * Function: sam_phyintenable
+ *
+ * Description:
+ *  Enable link up/down PHY interrupts
+ *
+ * Parameters:
+ *   priv - A reference to the private driver state structure
+ *
+ * Returned Value:
+ *   OK on success; Negated errno (-ETIMEDOUT) on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
+static int sam_phyintenable(struct sam_emac_s *priv)
+{
+#if defined(SAMA5_EMAC0_PHY_KSZ8051) ||  defined(SAMA5_EMAC0_PHY_KSZ8081) || \
+    defined(SAMA5_EMAC1_PHY_KSZ8051) ||  defined(SAMA5_EMAC1_PHY_KSZ8081)
+  uint32_t regval;
+  int ret;
+
+  /* Does this MAC support a KSZ80x1 PHY? */
+
+  if (priv->phytype == SAMA5_PHY_KSZ8051 || priv->phytype == SAMA5_PHY_KSZ8081)
+    {
+      /* Enable management port */
+
+      regval = sam_getreg(priv, SAM_EMAC_NCR_OFFSET);
+      sam_putreg(priv, SAM_EMAC_NCR_OFFSET, regval | EMAC_NCR_MPE);
+
+      /* Enable link up/down interrupts */
+
+      ret = sam_phywrite(priv, priv->phyaddr, MII_KSZ8081_INT,
+                        (MII_KSZ80x1_INT_LDEN | MII_KSZ80x1_INT_LUEN));
+
+      /* Disable management port (probably) */
+
+      sam_putreg(priv, SAM_EMAC_NCR_OFFSET, regval);
+    }
+  else
+#endif
+    {
+      ndbg("ERROR: Unsupported PHY type: %d\n", priv->phytype);
+      ret = -ENOSYS;
+    }
+
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Function: sam_phywait
@@ -3634,21 +3698,32 @@ int sam_emac_initialize(int intf)
 {
   struct sam_emac_s *priv;
   const struct sam_emacattr_s *attr;
+#if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
+  uint8_t phytype;
+#endif
   int ret;
 
 #if defined(CONFIG_SAMA5_EMAC0)
   if (intf == EMAC0_INTF)
     {
-      priv = &g_emac0;
-      attr = &g_emac0_attr;
+      priv    = &g_emac0;
+      attr    = &g_emac0_attr;
+
+#if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
+      phytype = SAMA5_EMAC0_PHY_TYPE;
+#endif
     }
   else
 #endif
 #if defined(CONFIG_SAMA5_EMAC1)
   if (intf == EMAC1_INTF)
     {
-      priv = &g_emac1;
-      attr = &g_emac1_attr;
+      priv    = &g_emac1;
+      attr    = &g_emac1_attr;
+
+#if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
+      phytype = SAMA5_EMAC1_PHY_TYPE;
+#endif
     }
   else
 #endif
@@ -3670,7 +3745,11 @@ int sam_emac_initialize(int intf)
 #endif
 #ifdef CONFIG_NETDEV_PHY_IOCTL
   priv->dev.d_ioctl   = sam_ioctl;      /* Support PHY ioctl() calls */
+#ifdef CONFIG_ARCH_PHY_INTERRUPT
+  priv->phytype       = phytype;        /* Type of PHY on port */
 #endif
+#endif
+
   priv->dev.d_private = priv;           /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmissions */

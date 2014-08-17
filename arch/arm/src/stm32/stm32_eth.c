@@ -669,6 +669,9 @@ static void stm32_rxdescinit(FAR struct stm32_ethmac_s *priv);
 
 /* PHY Initialization */
 
+#if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
+static int  stm32_phyintenable(FAR struct stm32_ethmac_s *priv);
+#endif
 static int  stm32_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *value);
 static int  stm32_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t value);
 #ifdef CONFIG_ETH0_PHY_DM9161
@@ -2511,6 +2514,9 @@ static void stm32_rxdescinit(FAR struct stm32_ethmac_s *priv)
 #ifdef CONFIG_NETDEV_PHY_IOCTL
 static int stm32_ioctl(struct net_driver_s *dev, int cmd, long arg)
 {
+#ifdef CONFIG_ARCH_PHY_INTERRUPT
+  FAR struct stm32_ethmac_s *priv = (FAR struct stm32_ethmac_s *)dev->d_private;
+#endif
   int ret;
 
   switch (cmd)
@@ -2519,7 +2525,14 @@ static int stm32_ioctl(struct net_driver_s *dev, int cmd, long arg)
   case SIOCMIINOTIFY: /* Set up for PHY event notifications */
     {
       struct mii_iotcl_notify_s *req = (struct mii_iotcl_notify_s *)((uintptr_t)arg);
+
       ret = phy_notify_subscribe(dev->d_ifname, req->pid, req->signo, req->arg);
+      if (ret == OK)
+        {
+          /* Enable PHY link up/down interrupts */
+
+          ret = stm32_phyintenable(priv);
+        }
     }
     break;
 #endif
@@ -2554,6 +2567,28 @@ static int stm32_ioctl(struct net_driver_s *dev, int cmd, long arg)
   return ret;
 }
 #endif /* CONFIG_NETDEV_PHY_IOCTL */
+
+/****************************************************************************
+ * Function: stm32_phyintenable
+ *
+ * Description:
+ *  Enable link up/down PHY interrupts
+ *
+ * Parameters:
+ *   priv - A reference to the private driver state structure
+ *
+ * Returned Value:
+ *   OK on success; Negated errno (-ETIMEDOUT) on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
+static int stm32_phyintenable(struct stm32_ethmac_s *priv)
+{
+#warning Missing logic
+  return -ENOSYS;
+}
+#endif
 
 /****************************************************************************
  * Function: stm32_phyread

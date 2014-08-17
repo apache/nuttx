@@ -73,7 +73,7 @@
 
 /* Extended Registers: Registers 16-31 may be used for vendor specific abilities */
 
-/* Micrel KSZ9021/31 Vendor Specific Register Addresses */
+/* Micrel KSZ9021/31 Vendor Specific Register Addresses **************************************/
 
 #define GMII_KSZ90x1_RLPBK            17              /* Remote loopback, LED mode */
 #define GMII_KSZ90x1_LINKMD           18              /* LinkMD(c) cable diagnostic */
@@ -268,6 +268,28 @@
 
 /* Extend Register - Data Write Register (16-bit data value) */
 /* Extend Register - Data Read Register (16-bit data value) */
+
+/* Micrel KSZ9021/31 Vendor Specific Register Bit Definitions ********************************/
+
+/* KSZ8021/31 Register 27: Interrupt control/status */
+
+#define GMII_KSZ90x1_INT_JEN          (1 << 15) /* Jabber interrupt enable */
+#define GMII_KSZ90x1_INT_REEN         (1 << 14) /* Receive error interrupt enable */
+#define GMII_KSZ90x1_INT_PREN         (1 << 13) /* Page received interrupt enable */
+#define GMII_KSZ90x1_INT_PDFEN        (1 << 12) /* Parallel detect fault interrupt enable */
+#define GMII_KSZ90x1_INT_LPAEN        (1 << 11) /* Link partner acknowledge interrupt enable */
+#define GMII_KSZ90x1_INT_LDEN         (1 << 10) /* Link down fault interrupt enable */
+#define GMII_KSZ90x1_INT_RFEN         (1 << 9)  /* Remote fault interrupt enable */
+#define GMII_KSZ90x1_INT_LUEN         (1 << 8)  /* Link up interrupt enable */
+
+#define GMII_KSZ90x1_INT_J            (1 << 7)  /* Jabber interrupt */
+#define GMII_KSZ90x1_INT_RE           (1 << 6)  /* Receive error interrupt */
+#define GMII_KSZ90x1_INT_PR           (1 << 5)  /* Page received interrupt */
+#define GMII_KSZ90x1_INT_PDF          (1 << 4)  /* Parallel detect fault interrupt */
+#define GMII_KSZ90x1_INT_LPA          (1 << 3)  /* Link partner acknowledge interrupt */
+#define GMII_KSZ90x1_INT_LD           (1 << 2)  /* Link down fault interrupt */
+#define GMII_KSZ90x1_INT_RF           (1 << 1)  /* Remote fault interrupt */
+#define GMII_KSZ90x1_INT_LU           (1 << 0)  /* Link up interrupt */
 
 /*********************************************************************************************
  * Type Definitions

@@ -313,6 +313,9 @@ static void sam_phydump(struct sam_gmac_s *priv);
 #  define sam_phydump(priv)
 #endif
 
+#if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
+static int  sam_phyintenable(struct sam_emac_s *priv);
+#endif
 static void sam_enablemdio(struct sam_gmac_s *priv);
 static void sam_disablemdio(struct sam_gmac_s *priv);
 static int  sam_phywait(struct sam_gmac_s *priv);
@@ -1806,7 +1809,14 @@ static int sam_ioctl(struct net_driver_s *dev, int cmd, long arg)
   case SIOCMIINOTIFY: /* Set up for PHY event notifications */
     {
       struct mii_iotcl_notify_s *req = (struct mii_iotcl_notify_s *)((uintptr_t)arg);
+
       ret = phy_notify_subscribe(dev->d_ifname, req->pid, req->signo, req->arg);
+      if (ret == OK)
+        {
+          /* Enable PHY link up/down interrupts */
+
+          ret = sam_phyintenable(priv);
+        }
     }
     break;
 #endif
@@ -1840,6 +1850,7 @@ static int sam_ioctl(struct net_driver_s *dev, int cmd, long arg)
   case SIOCSMIIREG: /* Set register in MII PHY */
     {
       struct mii_ioctl_data_s *req = (struct mii_ioctl_data_s *)((uintptr_t)arg);
+
       /* Enable the management port */
 
       sam_enablemdio(priv);
@@ -1905,6 +1916,49 @@ static void sam_phydump(struct sam_gmac_s *priv)
   /* Disable management port */
 
   sam_disablemdio(priv);
+}
+#endif
+
+/****************************************************************************
+ * Function: sam_phyintenable
+ *
+ * Description:
+ *  Enable link up/down PHY interrupts
+ *
+ * Parameters:
+ *   priv - A reference to the private driver state structure
+ *
+ * Returned Value:
+ *   OK on success; Negated errno (-ETIMEDOUT) on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
+static int sam_phyintenable(struct sam_emac_s *priv)
+{
+#if defined(SAMA5_GMAC_PHY_KSZ90x1)
+  int ret;
+
+  /* Enable the management port */
+
+  sam_enablemdio(priv);
+
+  /* Write to the requested register */
+
+  /* Enable link up/down interrupts */
+
+  ret = sam_phywrite(priv, priv->phyaddr, GMII_KSZ90x1_ICS,
+                    (GMII_KSZ90x1_INT_LDEN | GMII_KSZ90x1_INT_LUEN));
+
+  /* Disable the management port */
+
+  sam_disablemdio(priv);
+  return ret;
+
+#else
+#  warning Missing logic
+  return -ENOSYS;
+#endif
 }
 #endif
 
