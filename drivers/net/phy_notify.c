@@ -39,6 +39,15 @@
 
 #include <nuttx/config.h>
 
+/* Force verbose debug on in this file only to support unit-level testing. */
+
+#ifdef CONFIG_NETDEV_PHY_DEBUG
+#  undef  CONFIG_DEBUG_VERBOSE
+#  define CONFIG_DEBUG_VERBOSE 1
+#  undef  CONFIG_DEBUG_NET
+#  define CONFIG_DEBUG_NET 1
+#endif
+
 #include <unistd.h>
 #include <string.h>
 #include <semaphore.h>
@@ -64,6 +73,19 @@
 #  warning Fix me!! Support currently limited to 4 clients
 #  undef  CONFIG_PHY_NOTIFICATION_NCLIENTS
 #  define CONFIG_PHY_NOTIFICATION_NCLIENTS 4
+#endif
+
+/* Debug ********************************************************************/
+/* Extra, in-depth debug output that is only available if
+ * CONFIG_NETDEV_PHY_DEBUG us defined.
+ */
+
+#ifdef CONFIG_NETDEV_PHY_DEBUG
+#  define phydbg    dbg
+#  define phylldbg  lldbg
+#else
+#  define phydbg(x...)
+#  define phylldbg(x...)
 #endif
 
 /****************************************************************************
@@ -183,6 +205,7 @@ static FAR struct phy_notify_s *phy_find_unassigned(void)
           /* Return the client entry assigned to the caller */
 
           phy_semgive();
+          phydbg("Returning client %d\n", i);
           return client;
         }
     }
@@ -217,6 +240,7 @@ static FAR struct phy_notify_s *phy_find_assigned(FAR const char *intf,
           /* Return the matching client entry to the caller */
 
           phy_semgive();
+          phydbg("Returning client %d\n", i);
           return client;
         }
     }
@@ -240,10 +264,12 @@ static int phy_handler(FAR struct phy_notify_s *client)
   int ret;
 
   DEBUGASSERT(client && client->assigned);
+  phylldbg("Entry client %d, signalling PID=%d with signal %d\n",
+           client->index, client->pid, client->signo);
 
   /* Signal the client that the PHY has something interesting to say to us */
 
-#ifdef CONFIG_CAN_PASS_STRUCTS
+  #ifdef CONFIG_CAN_PASS_STRUCTS
   value.sival_ptr = client->arg;
   ret = sigqueue(client->pid, client->signo, value);
 #else
@@ -328,6 +354,8 @@ int phy_notify_subscribe(FAR const char *intf, pid_t pid, int signo,
   FAR struct phy_notify_s *client;
   DEBUGASSERT(intf);
 
+  nvdbg("%s: PID=%d signo=%d arg=%p\n", intf, pid, signo, arg);
+
   /* Find an unused slot in the client notification table */
 
   client = phy_find_unassigned();
@@ -342,6 +370,7 @@ int phy_notify_subscribe(FAR const char *intf, pid_t pid, int signo,
   if (pid == 0)
     {
       pid = getpid();
+      phydbg("Actual PID=%d\n", pid);
     }
 
   /* Initialize the client entry */
@@ -385,6 +414,8 @@ int phy_notify_subscribe(FAR const char *intf, pid_t pid, int signo,
 int phy_notify_unsubscribe(FAR const char *intf, pid_t pid)
 {
   FAR struct phy_notify_s *client;
+
+  nvdbg("%s: PID=%d\n", intf, pid);
 
   /* Find the client entry for this interface */
 
