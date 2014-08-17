@@ -39,6 +39,15 @@
 
 #include <nuttx/config.h>
 
+/* Force verbose debug on in this file only to support unit-level testing. */
+
+#ifdef CONFIG_NETDEV_PHY_DEBUG
+#  undef  CONFIG_DEBUG_VERBOSE
+#  define CONFIG_DEBUG_VERBOSE 1
+#  undef  CONFIG_DEBUG_NET
+#  define CONFIG_DEBUG_NET 1
+#endif
+
 #include <string.h>
 #include <assert.h>
 #include <debug.h>
@@ -67,6 +76,19 @@
 #else
 #  define SAMA5_EMAC0_DEVNAME "eth1"
 #  define SAMA5_EMAC1_DEVNAME "eth0"
+#endif
+
+/* Debug ********************************************************************/
+/* Extra, in-depth debug output that is only available if
+ * CONFIG_NETDEV_PHY_DEBUG us defined.
+ */
+
+#ifdef CONFIG_NETDEV_PHY_DEBUG
+#  define phydbg    dbg
+#  define phylldbg  lldbg
+#else
+#  define phydbg(x...)
+#  define phylldbg(x...)
 #endif
 
 /************************************************************************************
@@ -101,10 +123,12 @@ static xcpt_t g_emac1_handler;
 void weak_function sam_netinitialize(void)
 {
 #ifdef CONFIG_SAMA5_EMAC0
+  phydbg("Configuring %08x\n", PIO_INT_ETH0);
   sam_configpio(PIO_INT_ETH0);
 #endif
 
 #ifdef CONFIG_SAMA5_EMAC1
+  phydbg("Configuring %08x\n", PIO_INT_ETH1);
   sam_configpio(PIO_INT_ETH1);
 #endif
 }
@@ -173,9 +197,18 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler)
 
   DEBUGASSERT(intf);
 
+  nvdbg("%s: handler=%p\n", intf, handler);
+#ifdef CONFIG_SAMA5_EMAC0
+  phydbg("EMAC0: devname=%s\n", SAMA5_EMAC0_DEVNAME);
+#endif
+#ifdef CONFIG_SAMA5_EMAC0
+  phydbg("EMAC1: devname=%s\n", SAMA5_EMAC1_DEVNAME);
+#endif
+
 #ifdef CONFIG_SAMA5_EMAC0
   if (strcmp(intf, SAMA5_EMAC0_DEVNAME) == 0)
     {
+      phydbg("Select EMAC0\n");
       phandler = &g_emac0_handler;
       pinset   = PIO_INT_ETH0;
       irq      = IRQ_INT_ETH0;
@@ -185,6 +218,7 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler)
 #ifdef CONFIG_SAMA5_EMAC1
   if (strcmp(intf, SAMA5_EMAC1_DEVNAME) == 0)
     {
+      phydbg("Select EMAC1\n");
       phandler = &g_emac1_handler;
       pinset   = PIO_INT_ETH1;
       irq      = IRQ_INT_ETH1;
@@ -209,9 +243,21 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler)
 
   /* Configure the interrupt */
 
-  sam_pioirq(pinset);
-  (void)irq_attach(irq, handler);
-  sam_pioirqenable(irq);
+  if (handler)
+    {
+      phydbg("Configure pin: %08x\n", pinset);
+      sam_pioirq(pinset);
+
+      phydbg("Enable IRQ: %d\n", irq);
+      (void)irq_attach(irq, handler);
+      sam_pioirqenable(irq);
+    }
+  else
+    {
+      phydbg("Disable IRQ: %d\n", irq);
+      (void)irq_detach(irq);
+      sam_pioirqdisable(irq);
+    }
 
   /* Return the old button handler (so that it can be restored) */
 
