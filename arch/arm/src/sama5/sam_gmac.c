@@ -1923,7 +1923,12 @@ static void sam_phydump(struct sam_gmac_s *priv)
  * Function: sam_phyintenable
  *
  * Description:
- *  Enable link up/down PHY interrupts
+ *  Enable link up/down PHY interrupts.  The interrupt protocol is like this:
+ *
+ *  - Interrupt status is cleared when the interrupt is enabled.
+ *  - Interrupt occurs.  Interrupt is disabled (at the processor level) when
+ *    is received.
+ *  - Interrupt status is cleared when the interrupt is re-enabled.
  *
  * Parameters:
  *   priv - A reference to the private driver state structure
@@ -1937,18 +1942,25 @@ static void sam_phydump(struct sam_gmac_s *priv)
 static int sam_phyintenable(struct sam_emac_s *priv)
 {
 #if defined(SAMA5_GMAC_PHY_KSZ90x1)
+  uint16_t phyval;
   int ret;
 
   /* Enable the management port */
 
   sam_enablemdio(priv);
 
-  /* Write to the requested register */
+  /* Read the interrupt status register in order to clear any pending
+   * interrupts
+   */
 
-  /* Enable link up/down interrupts */
+  ret = sam_phyread(priv, priv->phyaddr, GMII_KSZ90x1_ICS, &phyval);
+  if (ret == OK)
+    {
+      /* Enable link up/down interrupts */
 
-  ret = sam_phywrite(priv, priv->phyaddr, GMII_KSZ90x1_ICS,
-                    (GMII_KSZ90x1_INT_LDEN | GMII_KSZ90x1_INT_LUEN));
+      ret = sam_phywrite(priv, priv->phyaddr, GMII_KSZ90x1_ICS,
+                        (GMII_KSZ90x1_INT_LDEN | GMII_KSZ90x1_INT_LUEN));
+    }
 
   /* Disable the management port */
 

@@ -105,7 +105,7 @@
 #include <arch/arch.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -113,6 +113,7 @@
  ****************************************************************************/
 
 typedef CODE void (*sig_deliver_t)(FAR struct tcb_s *tcb);
+typedef CODE void (*phy_enable_t)(bool enable);
 
 /****************************************************************************
  * Public Variables
@@ -1456,6 +1457,10 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler);
  *   NULL.  If handler is NULL, then the interrupt is detached and disabled
  *   instead.
  *
+ *   The PHY interrupt is always disabled upon return.  The caller must
+ *   call back through the enable function point to control the state of
+ *   the interrupt.
+ *
  *   This interrupt may or may not be available on a given platform depending
  *   on how the network hardware architecture is implemented.  In a typical
  *   case, the PHY interrupt is provided to board-level logic as a GPIO
@@ -1469,13 +1474,16 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler);
  *
  *   Typical usage:
  *   a. OS service logic (not application logic*) attaches to the PHY
- *      PHY interrupt.
- *   b. When the PHY interrupt occurs, work should be scheduled on the
- *      worker thread (or perhaps a dedicated application thread).
+ *      PHY interrupt and enables the PHY interrupt.
+ *   b. When the PHY interrupt occurs:  (1) the interrupt should be
+ *      disabled and () work should be scheduled on the worker thread (or
+ *      perhaps a dedicated application thread).
  *   c. That worker thread should use the SIOCGMIIPHY, SIOCGMIIREG,
  *      and SIOCSMIIREG ioctl calls** to communicate with the PHY,
  *      determine what network event took place (Link Up/Down?), and
  *      take the appropriate actions.
+ *   d. It should then interact the the PHY to clear any pending
+ *      interrupts, then re-enable the PHY interrupt.
  *
  *    * This is an OS internal interface and should not be used from
  *      application space.  Rather applications should use the SIOCMIISIG
@@ -1491,6 +1499,8 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler);
  *             asserts an interrupt.  Must reside in OS space, but can
  *             signal tasks in user space.  A value of NULL can be passed
  *             in order to detach and disable the PHY interrupt.
+ *   enable  - A function pointer that be unsed to enable or disable the
+ *             PHY interrupt.
  *
  * Returned Value:
  *   The previous PHY interrupt handler address is returned.  This allows you
@@ -1501,7 +1511,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_PHY_INTERRUPT
-xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler);
+xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable);
 #endif
 
 /************************************************************************************

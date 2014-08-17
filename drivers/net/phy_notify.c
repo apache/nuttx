@@ -107,6 +107,7 @@ struct phy_notify_s
 #endif
   pid_t pid;
   FAR void *arg;
+  phy_enable_t enable;
 };
 
 /****************************************************************************
@@ -201,6 +202,7 @@ static FAR struct phy_notify_s *phy_find_unassigned(void)
 #endif
           client->pid      = -1;
           client->arg      = NULL;
+          client->enable   = NULL;
 
           /* Return the client entry assigned to the caller */
 
@@ -247,7 +249,6 @@ static FAR struct phy_notify_s *phy_find_assigned(FAR const char *intf,
 
   /* Ooops... not found */
 
-  ndbg("ERROR: Client entry not found\n");
   phy_semgive();
   return NULL;
 }
@@ -263,9 +264,13 @@ static int phy_handler(FAR struct phy_notify_s *client)
 #endif
   int ret;
 
-  DEBUGASSERT(client && client->assigned);
+  DEBUGASSERT(client && client->assigned && client->enable);
   phylldbg("Entry client %d, signalling PID=%d with signal %d\n",
            client->index, client->pid, client->signo);
+
+  /* Disable further interrupts */
+
+  client->enable(false);
 
   /* Signal the client that the PHY has something interesting to say to us */
 
@@ -356,15 +361,6 @@ int phy_notify_subscribe(FAR const char *intf, pid_t pid, int signo,
 
   nvdbg("%s: PID=%d signo=%d arg=%p\n", intf, pid, signo, arg);
 
-  /* Find an unused slot in the client notification table */
-
-  client = phy_find_unassigned();
-  if (!client)
-    {
-      ndbg("ERROR: Failed to allocate a client entry\n");
-      return -ENOMEM;
-    }
-
   /* The special value pid == 0 means to use the pid of the current task. */
 
   if (pid == 0)
@@ -373,19 +369,46 @@ int phy_notify_subscribe(FAR const char *intf, pid_t pid, int signo,
       phydbg("Actual PID=%d\n", pid);
     }
 
-  /* Initialize the client entry */
+  /* Check if this client already exists */
 
-  client->signo = signo;
-  client->pid   = pid;
-  client->arg   = arg;
+  client = phy_find_assigned(intf, pid);
+  if (client)
+    {
+      /* Yes.. update the signal number and argument */
+
+      client->signo = signo;
+      client->arg   = arg;
+    }
+  else
+    {
+      /* No, allocate a new slot in the client notification table */
+
+      client = phy_find_unassigned();
+      if (!client)
+        {
+          ndbg("ERROR: Failed to allocate a client entry\n");
+          return -ENOMEM;
+        }
+
+      /* Initialize the new client entry */
+
+      client->signo = signo;
+      client->pid   = pid;
+      client->arg   = arg;
 #ifdef CONFIG_NETDEV_MULTINIC
-  snprintf(client->intf, CONFIG_PHY_NOTIFICATION_MAXINTFLEN+1, intf);
-  client->intf[CONFIG_PHY_NOTIFICATION_MAXINTFLEN] = '\0';
+      snprintf(client->intf, CONFIG_PHY_NOTIFICATION_MAXINTFLEN+1, intf);
+      client->intf[CONFIG_PHY_NOTIFICATION_MAXINTFLEN] = '\0';
 #endif
 
-  /* Attach and enable the PHY interrupt */
+      /* Attach/re-attach the PHY interrupt */
 
-  (void)arch_phy_irq(intf, g_notify_handler[client->index]);
+      (void)arch_phy_irq(intf, g_notify_handler[client->index], &client->enable);
+    }
+
+  /* Enable/re-enable the PH interrupt */
+
+  DEBUGASSERT(client->enable);
+  client->enable(true);
   return OK;
 }
 
@@ -429,7 +452,7 @@ int phy_notify_unsubscribe(FAR const char *intf, pid_t pid)
   /* Detach and disable the PHY interrupt */
 
   phy_semtake();
-  (void)arch_phy_irq(intf, NULL);
+  (void)arch_phy_irq(intf, NULL, NULL);
 
   /* Un-initialize the client entry */
 
