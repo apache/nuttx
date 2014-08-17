@@ -2572,7 +2572,12 @@ static int stm32_ioctl(struct net_driver_s *dev, int cmd, long arg)
  * Function: stm32_phyintenable
  *
  * Description:
- *  Enable link up/down PHY interrupts
+ *  Enable link up/down PHY interrupts.  The interrupt protocol is like this:
+ *
+ *  - Interrupt status is cleared when the interrupt is enabled.
+ *  - Interrupt occurs.  Interrupt is disabled (at the processor level) when
+ *    is received.
+ *  - Interrupt status is cleared when the interrupt is re-enabled.
  *
  * Parameters:
  *   priv - A reference to the private driver state structure

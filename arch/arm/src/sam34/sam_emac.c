@@ -1937,7 +1937,12 @@ static void sam_phydump(struct sam_emac_s *priv)
  * Function: sam_phyintenable
  *
  * Description:
- *  Enable link up/down PHY interrupts
+ *  Enable link up/down PHY interrupts.  The interrupt protocol is like this:
+ *
+ *  - Interrupt status is cleared when the interrupt is enabled.
+ *  - Interrupt occurs.  Interrupt is disabled (at the processor level) when
+ *    is received.
+ *  - Interrupt status is cleared when the interrupt is re-enabled.
  *
  * Parameters:
  *   priv - A reference to the private driver state structure
@@ -1952,6 +1957,7 @@ static int sam_phyintenable(struct sam_emac_s *priv)
 {
 #if defined(CONFIG_ETH0_PHY_KSZ8051) ||  defined(CONFIG_ETH0_PHY_KSZ8081)
   uint32_t regval;
+  uint16_t phyval;
   int ret;
 
   /* Enable management port */
@@ -1959,10 +1965,18 @@ static int sam_phyintenable(struct sam_emac_s *priv)
   regval = sam_getreg(priv, SAM_EMAC_NCR);
   sam_putreg(priv, SAM_EMAC_NCR, regval | EMAC_NCR_MPE);
 
-  /* Enable link up/down interrupts */
+  /* Read the interrupt status register in order to clear any pending
+   * interrupts
+   */
 
-  ret = sam_phywrite(priv, priv->phyaddr, MII_KSZ8081_INT,
-                    (MII_KSZ80x1_INT_LDEN | MII_KSZ80x1_INT_LUEN));
+  ret = sam_phyread(priv, priv->phyaddr, MII_KSZ8081_INT, &phyval);
+  if (ret == OK)
+    {
+      /* Enable link up/down interrupts */
+
+      ret = sam_phywrite(priv, priv->phyaddr, MII_KSZ8081_INT,
+                        (MII_KSZ80x1_INT_LDEN | MII_KSZ80x1_INT_LUEN));
+    }
 
   /* Disable management port (probably) */
 
