@@ -546,27 +546,28 @@
 /* Ethernet */
 
 #ifdef CONFIG_SAMA5_EMACA
- /* ETH1: Ethernet 10/100 (EMAC A) Port
-  *
-  * The main board contains a MICREL PHY device (KSZ8051) operating at 10/100 Mbps.
-  * The board supports MII and RMII interface modes.
-  *
-  * The two independent PHY devices embedded on CM and MB boards are connected to
-  * independent RJ-45 connectors with built-in magnetic and status LEDs.
-  *
-  * At the De-Assertion of Reset:
-  *   PHY ADD[2:0]:001
-  *   CONFIG[2:0]:001,Mode:RMII
-  *   Duplex Mode:Half Duplex
-  *   Isolate Mode:Disable
-  *   Speed Mode:100Mbps
-  *   Nway Auto-Negotiation:Enable
-  *
-  * The KSZ8051 PHY interrupt is available on PE30 INT_ETH1
-  */
+  /* ETH1: Ethernet 10/100 (EMAC A) Port
+   *
+   * The main board contains a MICREL PHY device (KSZ8051) operating at 10/100 Mbps.
+   * The board supports MII and RMII interface modes.
+   *
+   * The two independent PHY devices embedded on CM and MB boards are connected to
+   * independent RJ-45 connectors with built-in magnetic and status LEDs.
+   *
+   * At the De-Assertion of Reset:
+   *   PHY ADD[2:0]:001
+   *   CONFIG[2:0]:001,Mode:RMII
+   *   Duplex Mode:Half Duplex
+   *   Isolate Mode:Disable
+   *   Speed Mode:100Mbps
+   *   Nway Auto-Negotiation:Enable
+   *
+   * The KSZ8051 PHY interrupt is available on PE30 INT_ETH1.  The sense of
+   * the interrupt is configurable but is, by default, active low.
+   */
 
 #define PIO_INT_ETH1 (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
-                      PIO_INT_BOTHEDGES | PIO_PORT_PIOE | PIO_PIN30)
+                      PIO_INT_FALLING | PIO_PORT_PIOE | PIO_PIN30)
 #define IRQ_INT_ETH1 SAM_IRQ_PE30
 
 #endif
@@ -581,11 +582,12 @@
    * activity indicators. These signals can be used to connect to a 10/100/1000
    * BaseT RJ45 connector integrated on the main board.
    *
-   * The KSZ9021/31 interrupt is available on PB35 INT_GETH0
+   * The KSZ9021/31 interrupt is available on PB35 INT_GETH0.  The sense of
+   * the interrupt is configurable but is, by default, active low.
    */
 
 #define PIO_INT_ETH0 (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
-                      PIO_INT_BOTHEDGES | PIO_PORT_PIOB | PIO_PIN25)
+                      PIO_INT_FALLING | PIO_PORT_PIOB | PIO_PIN25)
 #define IRQ_INT_ETH0 SAM_IRQ_PB25
 
 #endif

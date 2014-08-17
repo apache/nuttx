@@ -744,18 +744,21 @@
  * enabled via LCD_ETH1_CONFIG when an LCD is detected:
  *
  * - LCD_ETH1_CONFIG = 0: LCD 5v disable
- * - LCD_ETH1_CONFIG = 1 & LCD_DETECT# =0: LCD 5v enable
+ * - LCD_ETH1_CONFIG = 1 & LCD_DETECT# =0: LCD 5v enable.
+ *
+ * The sense of KSZ8081 interrupt is configurable but is, by default, active
+ * low.
  */
 
 #ifdef CONFIG_SAMA5_EMAC0
 #  define PIO_INT_ETH0 (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
-                        PIO_INT_BOTHEDGES | PIO_PORT_PIOE | PIO_PIN1)
+                        PIO_INT_FALLING | PIO_PORT_PIOE | PIO_PIN1)
 #  define IRQ_INT_ETH0 SAM_IRQ_PE1
 #endif
 
 #ifdef CONFIG_SAMA5_EMAC1
 #  define PIO_INT_ETH1 (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
-                        PIO_INT_BOTHEDGES | PIO_PORT_PIOE | PIO_PIN2)
+                        PIO_INT_FALLING | PIO_PORT_PIOE | PIO_PIN2)
 #  define IRQ_INT_ETH1 SAM_IRQ_PE2
 #endif
 #endif
