@@ -49,6 +49,14 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+/* Understood PHY types */
+
+#define SAMA5_PHY_DM9161  0
+#define SAMA5_PHY_LAN8700 1
+#define SAMA5_PHY_KSZ8051 2
+#define SAMA5_PHY_KSZ8081 3
+#define SAMA5_PHY_KSZ90x1 4
+
 /* Definitions for use with sam_phy_boardinitialize */
 
 #if defined(CONFIG_SAMA5_HAVE_EMACA)
@@ -84,25 +92,39 @@
 
 #if defined(CONFIG_SAMA5_GMAC_ISETH0)
 #  if defined(CONFIG_ETH0_PHY_DM9161)
-#    define SAMA5_GMAC_PHY_DM9161 1
+#    define SAMA5_GMAC_PHY_DM9161  1
+#    define SAMA5_GMAC_PHY_TYPE    SAMA5_PHY_DM9161
 #  elif defined(CONFIG_ETH0_PHY_LAN8700)
 #    define SAMA5_GMAC_PHY_LAN8700 1
+#    define SAMA5_GMAC_PHY_TYPE    SAMA5_PHY_LAN8700
 #  elif defined(CONFIG_ETH0_PHY_KSZ8051)
 #    define SAMA5_GMAC_PHY_KSZ8051 1
+#    define SAMA5_GMAC_PHY_TYPE    SAMA5_PHY_KSZ8051
+#  elif defined(CONFIG_ETH0_PHY_KSZ8081)
+#    define SAMA5_GMAC_PHY_KSZ8081 1
+#    define SAMA5_GMAC_PHY_TYPE    SAMA5_PHY_KSZ8081
 #  elif defined(CONFIG_ETH0_PHY_KSZ90x1)
 #    define SAMA5_GMAC_PHY_KSZ90x1 1
+#    define SAMA5_GMAC_PHY_TYPE    SAMA5_PHY_KSZ90x1
 #  else
 #    error ETH0 PHY unrecognized
 #  endif
 #elif defined(CONFIG_SAMA5_GMAC)
 #  if defined(CONFIG_ETH1_PHY_DM9161)
-#    define SAMA5_GMAC_PHY_DM9161 1
+#    define SAMA5_GMAC_PHY_DM9161  1
+#    define SAMA5_GMAC_PHY_TYPE    SAMA5_PHY_DM9161
 #  elif defined(CONFIG_ETH1_PHY_LAN8700)
 #    define SAMA5_GMAC_PHY_LAN8700 1
+#    define SAMA5_GMAC_PHY_TYPE    SAMA5_PHY_LAN8700
 #  elif defined(CONFIG_ETH1_PHY_KSZ8051)
 #    define SAMA5_GMAC_PHY_KSZ8051 1
+#    define SAMA5_GMAC_PHY_TYPE    SAMA5_PHY_KSZ8051
+#  elif defined(CONFIG_ETH1_PHY_KSZ8081)
+#    define SAMA5_GMAC_PHY_KSZ8081 1
+#    define SAMA5_GMAC_PHY_TYPE    SAMA5_PHY_KSZ8081
 #  elif defined(CONFIG_ETH1_PHY_KSZ90x1)
 #    define SAMA5_GMAC_PHY_KSZ90x1 1
+#    define SAMA5_GMAC_PHY_TYPE    SAMA5_PHY_KSZ90x1
 #  else
 #    error ETH1 PHY unrecognized
 #  endif
@@ -110,29 +132,39 @@
 
 #if defined(CONFIG_SAMA5_EMAC_ISETH0)
 #  if defined(CONFIG_ETH0_PHY_DM9161)
-#    define SAMA5_EMAC_PHY_DM9161 1
+#    define SAMA5_EMAC_PHY_DM9161  1
+#    define SAMA5_EMAC_PHY_TYPE    SAMA5_PHY_DM9161
 #  elif defined(CONFIG_ETH0_PHY_LAN8700)
 #    define SAMA5_EMAC_PHY_LAN8700 1
+#    define SAMA5_EMAC_PHY_TYPE    SAMA5_PHY_LAN8700
 #  elif defined(CONFIG_ETH0_PHY_KSZ8051)
 #    define SAMA5_EMAC_PHY_KSZ8051 1
+#    define SAMA5_EMAC_PHY_TYPE    SAMA5_PHY_KSZ8051
 #  elif defined(CONFIG_ETH0_PHY_KSZ8081)
 #    define SAMA5_EMAC_PHY_KSZ8081 1
+#    define SAMA5_EMAC_PHY_TYPE    SAMA5_PHY_KSZ8081
 #  elif defined(CONFIG_ETH0_PHY_KSZ90x1)
 #    define SAMA5_EMAC_PHY_KSZ90x1 1
+#    define SAMA5_EMAC_PHY_TYPE    SAMA5_PHY_KSZ90x1
 #  else
 #    error ETH0 PHY unrecognized
 #  endif
 #elif defined(CONFIG_SAMA5_EMACA)
 #  if defined(CONFIG_ETH1_PHY_DM9161)
-#    define SAMA5_EMAC_PHY_DM9161 1
+#    define SAMA5_EMAC_PHY_DM9161  1
+#    define SAMA5_EMAC_PHY_TYPE    SAMA5_PHY_DM9161
 #  elif defined(CONFIG_ETH1_PHY_LAN8700)
 #    define SAMA5_EMAC_PHY_LAN8700 1
+#    define SAMA5_EMAC_PHY_TYPE    SAMA5_PHY_LAN8700
 #  elif defined(CONFIG_ETH1_PHY_KSZ8051)
 #    define SAMA5_EMAC_PHY_KSZ8051 1
+#    define SAMA5_EMAC_PHY_TYPE    SAMA5_PHY_KSZ8051
 #  elif defined(CONFIG_ETH1_PHY_KSZ8081)
 #    define SAMA5_EMAC_PHY_KSZ8081 1
+#    define SAMA5_EMAC_PHY_TYPE    SAMA5_PHY_KSZ8081
 #  elif defined(CONFIG_ETH1_PHY_KSZ90x1)
 #    define SAMA5_EMAC_PHY_KSZ90x1 1
+#    define SAMA5_EMAC_PHY_TYPE    SAMA5_PHY_KSZ90x1
 #  else
 #    error ETH1 PHY unrecognized
 #  endif
@@ -140,29 +172,39 @@
 
 #if defined(CONFIG_SAMA5_EMAC0_ISETH0)
 #  if defined(CONFIG_ETH0_PHY_DM9161)
-#    define SAMA5_EMAC0_PHY_DM9161 1
+#    define SAMA5_EMAC0_PHY_DM9161  1
+#    define SAMA5_EMAC0_PHY_TYPE    SAMA5_PHY_DM9161
 #  elif defined(CONFIG_ETH0_PHY_LAN8700)
 #    define SAMA5_EMAC0_PHY_LAN8700 1
+#    define SAMA5_EMAC0_PHY_TYPE    SAMA5_PHY_LAN8700
 #  elif defined(CONFIG_ETH0_PHY_KSZ8051)
 #    define SAMA5_EMAC0_PHY_KSZ8051 1
+#    define SAMA5_EMAC0_PHY_TYPE    SAMA5_PHY_KSZ8051
 #  elif defined(CONFIG_ETH0_PHY_KSZ8081)
 #    define SAMA5_EMAC0_PHY_KSZ8081 1
+#    define SAMA5_EMAC0_PHY_TYPE    SAMA5_PHY_KSZ8081
 #  elif defined(CONFIG_ETH0_PHY_KSZ90x1)
 #    define SAMA5_EMAC0_PHY_KSZ90x1 1
+#    define SAMA5_EMAC0_PHY_TYPE    SAMA5_PHY_KSZ90x1
 #  else
 #    error ETH0 PHY unrecognized
 #  endif
 #elif defined(CONFIG_SAMA5_EMAC0)
 #  if defined(CONFIG_ETH1_PHY_DM9161)
-#    define SAMA5_EMAC0_PHY_DM9161 1
+#    define SAMA5_EMAC0_PHY_DM9161  1
+#    define SAMA5_EMAC0_PHY_TYPE    SAMA5_PHY_DM9161
 #  elif defined(CONFIG_ETH1_PHY_LAN8700)
 #    define SAMA5_EMAC0_PHY_LAN8700 1
+#    define SAMA5_EMAC0_PHY_TYPE    SAMA5_PHY_LAN8700
 #  elif defined(CONFIG_ETH1_PHY_KSZ8051)
 #    define SAMA5_EMAC0_PHY_KSZ8051 1
+#    define SAMA5_EMAC0_PHY_TYPE    SAMA5_PHY_KSZ8051
 #  elif defined(CONFIG_ETH0_PHY_KSZ8081)
 #    define SAMA5_EMAC0_PHY_KSZ8081 1
+#    define SAMA5_EMAC0_PHY_TYPE    SAMA5_PHY_KSZ8081
 #  elif defined(CONFIG_ETH1_PHY_KSZ90x1)
 #    define SAMA5_EMAC0_PHY_KSZ90x1 1
+#    define SAMA5_EMAC0_PHY_TYPE    SAMA5_PHY_KSZ90x1
 #  else
 #    error ETH1 PHY unrecognized
 #  endif
@@ -170,29 +212,39 @@
 
 #if defined(CONFIG_SAMA5_EMAC1_ISETH0)
 #  if defined(CONFIG_ETH0_PHY_DM9161)
-#    define SAMA5_EMAC1_PHY_DM9161 1
+#    define SAMA5_EMAC1_PHY_DM9161  1
+#    define SAMA5_EMAC1_PHY_TYPE    SAMA5_PHY_DM9161
 #  elif defined(CONFIG_ETH0_PHY_LAN8700)
 #    define SAMA5_EMAC1_PHY_LAN8700 1
+#    define SAMA5_EMAC1_PHY_TYPE    SAMA5_PHY_LAN8700
 #  elif defined(CONFIG_ETH0_PHY_KSZ8051)
 #    define SAMA5_EMAC1_PHY_KSZ8051 1
+#    define SAMA5_EMAC1_PHY_TYPE    SAMA5_PHY_KSZ8051
 #  elif defined(CONFIG_ETH0_PHY_KSZ8081)
 #    define SAMA5_EMAC1_PHY_KSZ8081 1
+#    define SAMA5_EMAC1_PHY_TYPE    SAMA5_PHY_KSZ8081
 #  elif defined(CONFIG_ETH0_PHY_KSZ90x1)
 #    define SAMA5_EMAC1_PHY_KSZ90x1 1
+#    define SAMA5_EMAC1_PHY_TYPE    SAMA5_PHY_KSZ90x1
 #  else
 #    error ETH0 PHY unrecognized
 #  endif
 #elif defined(CONFIG_SAMA5_EMAC1)
 #  if defined(CONFIG_ETH1_PHY_DM9161)
-#    define SAMA5_EMAC1_PHY_DM9161 1
+#    define SAMA5_EMAC1_PHY_DM9161  1
+#    define SAMA5_EMAC1_PHY_TYPE    SAMA5_PHY_DM9161
 #  elif defined(CONFIG_ETH1_PHY_LAN8700)
 #    define SAMA5_EMAC1_PHY_LAN8700 1
+#    define SAMA5_EMAC1_PHY_TYPE    SAMA5_PHY_LAN8700
 #  elif defined(CONFIG_ETH1_PHY_KSZ8051)
 #    define SAMA5_EMAC1_PHY_KSZ8051 1
+#    define SAMA5_EMAC1_PHY_TYPE    SAMA5_PHY_KSZ8051
 #  elif defined(CONFIG_ETH0_PHY_KSZ8081)
 #    define SAMA5_EMAC1_PHY_KSZ8081 1
+#    define SAMA5_EMAC1_PHY_TYPE    SAMA5_PHY_KSZ8081
 #  elif defined(CONFIG_ETH1_PHY_KSZ90x1)
 #    define SAMA5_EMAC1_PHY_KSZ90x1 1
+#    define SAMA5_EMAC1_PHY_TYPE    SAMA5_PHY_KSZ90x1
 #  else
 #    error ETH1 PHY unrecognized
 #  endif
