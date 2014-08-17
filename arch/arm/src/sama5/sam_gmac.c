@@ -2940,6 +2940,26 @@ static void sam_rxreset(struct sam_gmac_s *priv)
 
 static void sam_gmac_reset(struct sam_gmac_s *priv)
 {
+#ifdef CONFIG_NETDEV_PHY_IOCTL
+  /* We are supporting PHY IOCTLs, then do not reset the MAC.  If we do,
+   * then we cannot communicate with the PHY.  So, instead, just disable
+   * interrupts, cancel timers, and disable TX and RX.
+   */
+
+  sam_putreg(priv, SAM_GMAC_IDR, GMAC_INT_ALL);
+
+  /* Reset RX and TX logic */
+
+  sam_rxreset(priv);
+  sam_txreset(priv);
+
+  /* Disable Rx and Tx, plus the statistics registers. */
+
+  regval  = sam_getreg(priv, SAM_GMAC_NCR);
+  regval &= ~(GMAC_NCR_RXEN | GMAC_NCR_TXEN | GMAC_NCR_WESTAT);
+  sam_putreg(priv, SAM_GMAC_NCR, regval);
+
+#else
   /* Disable all GMAC interrupts */
 
   sam_putreg(priv, SAM_GMAC_IDR, GMAC_INT_ALL);
@@ -2956,6 +2976,8 @@ static void sam_gmac_reset(struct sam_gmac_s *priv)
   /* Disable clocking to the GMAC peripheral */
 
   sam_gmac_disableclk();
+
+#endif
 }
 
 /****************************************************************************

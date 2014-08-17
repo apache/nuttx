@@ -524,7 +524,9 @@ static int  sam_phyinit(struct sam_emac_s *priv);
 static void sam_txreset(struct sam_emac_s *priv);
 static void sam_rxreset(struct sam_emac_s *priv);
 static void sam_emac_enableclk(struct sam_emac_s *priv);
+#ifndef CONFIG_NETDEV_PHY_IOCTL
 static void sam_emac_disableclk(struct sam_emac_s *priv);
+#endif
 static void sam_emac_reset(struct sam_emac_s *priv);
 static void sam_macaddress(struct sam_emac_s *priv);
 static int  sam_emac_configure(struct sam_emac_s *priv);
@@ -3498,6 +3500,7 @@ static void sam_emac_enableclk(struct sam_emac_s *priv)
  *
  ****************************************************************************/
 
+#ifndef CONFIG_NETDEV_PHY_IOCTL
 static void sam_emac_disableclk(struct sam_emac_s *priv)
 {
 #if defined(CONFIG_SAMA5_EMAC0) && defined(CONFIG_SAMA5_EMAC1)
@@ -3523,6 +3526,7 @@ static void sam_emac_disableclk(struct sam_emac_s *priv)
   sam_emac1_disableclk();
 #endif
 }
+#endif
 
 /****************************************************************************
  * Function: sam_emac_reset
@@ -3542,6 +3546,28 @@ static void sam_emac_disableclk(struct sam_emac_s *priv)
 
 static void sam_emac_reset(struct sam_emac_s *priv)
 {
+#ifdef CONFIG_NETDEV_PHY_IOCTL
+  uint32_t regval;
+
+  /* We are supporting PHY IOCTLs, then do not reset the MAC.  If we do,
+   * then we cannot communicate with the PHY.  So, instead, just disable
+   * interrupts, cancel timers, and disable TX and RX.
+   */
+
+  sam_putreg(priv, SAM_EMAC_IDR_OFFSET, EMAC_INT_ALL);
+
+  /* Reset RX and TX logic */
+
+  sam_rxreset(priv);
+  sam_txreset(priv);
+
+  /* Disable Rx and Tx, plus the statistics registers. */
+
+  regval  = sam_getreg(priv, SAM_EMAC_NCR_OFFSET);
+  regval &= ~(EMAC_NCR_RXEN | EMAC_NCR_TXEN | EMAC_NCR_WESTAT);
+  sam_putreg(priv, SAM_EMAC_NCR_OFFSET, regval);
+
+#else
   /* Disable all EMAC interrupts */
 
   sam_putreg(priv, SAM_EMAC_IDR_OFFSET, EMAC_INT_ALL);
@@ -3558,6 +3584,8 @@ static void sam_emac_reset(struct sam_emac_s *priv)
   /* Disable clocking to the EMAC peripheral */
 
   sam_emac_disableclk(priv);
+
+#endif
 }
 
 /****************************************************************************
