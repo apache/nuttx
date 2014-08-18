@@ -507,6 +507,32 @@ Networking Support
   a network because additional time will be required to fail with timeout
   errors.
 
+  This delay will be especially long if the board is not connected to
+  a network.  On the order of a minute!  You will probably think that
+  NuttX has crashed!  And then, when it finally does come up, the
+  network will not be available.
+
+  Network Initialization Thread
+  -----------------------------
+  There is a configuration option enabled by CONFIG_NSH_NETINIT_THREAD
+  that will do the NSH network bring-up asynchronously in parallel on
+  a separate thread.  This eliminates the (visible) networking delay
+  altogether.  This current implementation, however, has some limitations:
+
+    - If no network is connected, the network bring-up will fail and
+      the network initialization thread will simply exit.  There are no
+      retries and no mechanism to know if the network initialization was
+      successful (it could perform a network Ioctl to see if the link is
+      up and it now, keep trying, but it does not do that now).
+
+    - Furthermore, there is currently no support for detecting loss of
+      network connection and recovery of the connection (similarly, this
+      thread could poll periodically for network status, but does not).
+
+  Both of these shortcomings could be eliminated by enabling the network
+  monitor.  See the SAMA5 configurations for a description of what it would
+  take to incorporate the network monitor feature.
+
 AT25 Serial FLASH
 =================
 
