@@ -53,7 +53,11 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <semaphore.h>
+
 #include <netinet/in.h>
+
+#include <nuttx/net/netdev.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -80,6 +84,11 @@
 #define ARP_HWTYPE_ETH 1
 
 #define RASIZE         4  /* Size of ROUTER ALERT */
+
+/* Allocate a new ARP data callback */
+
+#define arp_callback_alloc(conn)   devif_callback_alloc(&(conn)->list)
+#define arp_callback_free(conn,cb) devif_callback_free(cb, &(conn)->list)
 
 /****************************************************************************
  * Public Types
@@ -116,6 +125,45 @@ struct arp_iphdr_s
   uint16_t eh_destipaddr[2]; /* 32-bit Destination IP address */
   uint16_t eh_ipoption[2];   /* (optional) */
 };
+
+#ifdef CONFIG_NET_ARP_SEND
+/* This structure holds the state of the send operation until it can be
+ * operated upon from the interrupt level.
+ */
+
+struct arp_send_s
+{
+  FAR struct devif_callback_s *snd_cb; /* Reference to callback instance */
+  sem_t     snd_sem;                   /* Used to wake up the waiting thread */
+  uint8_t   snd_retries;               /* Retry count */
+  volatile bool snd_sent;              /* True: if request sent */
+#ifdef CONFIG_NETDEV_MULTINIC
+  uint8_t   snd_ifname[IFNAMSIZ];      /* Interface name */
+#endif
+  in_addr_t snd_ipaddr;                /* The IP address to be queried */
+};
+#endif
+
+#ifdef CONFIG_NET_ARP_SEND
+/* For symmetry with other protocols, a "connection" structure is
+ * provided.  But it is a singleton for the case of ARP packet transfers.
+ */
+
+struct arp_conn_s
+{
+  FAR struct devif_callback_s *list;   /* ARP callbacks */
+};
+#endif
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_ARP_SEND
+/* This is the singleton "connection" structure */
+
+extern struct arp_conn_s g_arp_conn;
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -182,6 +230,56 @@ void arp_timer(void);
 
 struct net_driver_s; /* Forward reference */
 void arp_format(FAR struct net_driver_s *dev, in_addr_t ipaddr);
+
+/****************************************************************************
+ * Function: arp_send
+ *
+ * Description:
+ *   The arp_send() call may be to send an ARP request to resolve an IP
+ *   address.  This function first checks if the IP address is already in
+ *   ARP table.  If so, then it returns success immediately.
+ *
+ *   If the requested IP address in not in the ARP table, then this function
+ *   will send an ARP request, delay, then check if the IP address is now in
+ *   the ARP table.  It will repeat this sequence until either (1) the IP
+ *   address mapping is now in the ARP table, or (2) a configurable number
+ *   of timeouts occur without receiving the ARP replay.
+ *
+ * Parameters:
+ *   ipaddr   The IP address to be queried.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success and the IP address mapping can now be
+ *   found in the ARP table.  On error a negated errno value is returned:
+ *
+ *     -ETIMEDOUT:    The number or retry counts has been exceed.
+ *     -EHOSTUNREACH: Could not find a route to the host
+ *
+ * Assumptions:
+ *   This function is called from the normal tasking context.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_ARP_SEND
+int arp_send(in_addr_t ipaddr);
+#endif
+
+/****************************************************************************
+ * Function: arp_poll
+ *
+ * Description:
+ *   Poll all pending transfer for ARP requests to send.
+ *
+ * Assumptions:
+ *   This function is called from the MAC device driver indirectly through
+ *   devif_poll() and devif_timer() and may be called from the timer
+ *   interrupt/watchdog handler level.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_ARP_SEND
+int arp_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback);
+#endif
 
 /****************************************************************************
  * Name: arp_dump

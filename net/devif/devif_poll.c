@@ -46,6 +46,7 @@
 #include <nuttx/net/netdev.h>
 
 #include "devif/devif.h"
+#include "arp/arp.h"
 #include "tcp/tcp.h"
 #include "udp/udp.h"
 #include "pkt/pkt.h"
@@ -72,7 +73,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_PKT)
+#ifdef CONFIG_NET_PKT
 static int devif_poll_pkt_connections(FAR struct net_driver_s *dev,
                                       devif_poll_callback_t callback)
 {
@@ -298,44 +299,63 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
    * action.
    */
 
+#ifdef CONFIG_NET_ARP_SEND
+  /* Check for pending ARP requests */
+
+  bstop = arp_poll(dev, callback);
+  if (!bstop)
+#endif
 #ifdef CONFIG_NET_PKT
-  bstop = devif_poll_pkt_connections(dev, callback);
+    {
+      /* Check for pending packet socket transfer */
+
+      bstop = devif_poll_pkt_connections(dev, callback);
+    }
+
+  if (!bstop)
+#endif
+#ifdef CONFIG_NET_IGMP
+    {
+      /* Check for pending IGMP messages */
+
+      bstop = devif_poll_igmp(dev, callback);
+    }
+
+  if (!bstop)
+#endif
+#ifdef CONFIG_NET_TCP
+    {
+      /* Traverse all of the active TCP connections and perform the poll
+       * action.
+       */
+
+      bstop = devif_poll_tcp_connections(dev, callback);
+    }
+
+  if (!bstop)
+#endif
+#ifdef CONFIG_NET_UDP
+    {
+      /* Traverse all of the allocated UDP connections and perform
+       * the poll action
+       */
+
+      bstop = devif_poll_udp_connections(dev, callback);
+    }
+
+  if (!bstop)
+#endif
+#if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING)
+    {
+      /* Traverse all of the tasks waiting to send an ICMP ECHO request. */
+
+      bstop = devif_poll_icmp(dev, callback);
+    }
+
   if (!bstop)
 #endif
     {
-      /* Check for pendig IGMP messages */
-
-#ifdef CONFIG_NET_IGMP
-      bstop = devif_poll_igmp(dev, callback);
-      if (!bstop)
-#endif
-        {
-          /* Traverse all of the active TCP connections and perform the poll
-           * action.
-           */
-
-          bstop = devif_poll_tcp_connections(dev, callback);
-          if (!bstop)
-            {
-#ifdef CONFIG_NET_UDP
-              /* Traverse all of the allocated UDP connections and perform
-               * the poll action
-               */
-
-              bstop = devif_poll_udp_connections(dev, callback);
-              if (!bstop)
-#endif
-                {
-#if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING)
-                  /* Traverse all of the tasks waiting to send an ICMP ECHO
-                   * request.
-                   */
-
-                  bstop = devif_poll_icmp(dev, callback);
-#endif
-                }
-            }
-        }
+      /* Nothing more to do */
     }
 
   return bstop;
@@ -384,44 +404,63 @@ int devif_timer(FAR struct net_driver_s *dev, devif_poll_callback_t callback,
    * action.
    */
 
-#ifdef CONFIG_NET_PKT
-  bstop = devif_poll_pkt_connections(dev, callback);
+#ifdef CONFIG_NET_ARP_SEND
+  /* Check for pending ARP requests */
+
+  bstop = arp_poll(dev, callback);
   if (!bstop)
 #endif
+#ifdef CONFIG_NET_PKT
+    {
+      /* Check for pending packet socket transfer */
+
+      bstop = devif_poll_pkt_connections(dev, callback);
+    }
+
+  if (!bstop)
+#endif
+#ifdef CONFIG_NET_IGMP
     {
       /* Check for pending IGMP messages */
 
-#ifdef CONFIG_NET_IGMP
       bstop = devif_poll_igmp(dev, callback);
-      if (!bstop)
+    }
+
+  if (!bstop)
 #endif
-        {
-          /* Traverse all of the active TCP connections and perform the
-           * timer action.
-           */
+#ifdef CONFIG_NET_TCP
+    {
+      /* Traverse all of the active TCP connections and perform the
+       * timer action.
+       */
 
-          bstop = devif_poll_tcp_timer(dev, callback, hsec);
-          if (!bstop)
-            {
-              /* Traverse all of the allocated UDP connections and perform
-               * the poll action.
-               */
+      bstop = devif_poll_tcp_timer(dev, callback, hsec);
+    }
 
+  if (!bstop)
+#endif
 #ifdef CONFIG_NET_UDP
-              bstop = devif_poll_udp_connections(dev, callback);
-              if (!bstop)
-#endif
-                {
-#if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING)
-                  /* Traverse all of the tasks waiting to send an ICMP ECHO
-                   * request.
-                   */
+   {
+      /* Traverse all of the allocated UDP connections and perform
+       * the timer action.
+       */
 
-                  bstop = devif_poll_icmp(dev, callback);
+      bstop = devif_poll_udp_connections(dev, callback);
+    }
+
+  if (!bstop)
 #endif
-                }
-            }
-        }
+#if defined(CONFIG_NET_ICMP) && defined(CONFIG_NET_ICMP_PING)
+    {
+      /* Traverse all of the tasks waiting to send an ICMP ECHO request. */
+
+      bstop = devif_poll_icmp(dev, callback);
+    }
+
+  if (!bstop)
+#endif
+    {
+      /* Nothing to do */
     }
 
   return bstop;

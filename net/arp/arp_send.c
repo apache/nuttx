@@ -61,47 +61,13 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Allocate a new packet socket data callback */
-
-#define arp_callback_alloc(conn)   devif_callback_alloc(&(conn)->list)
-#define arp_callback_free(conn,cb) devif_callback_free(cb, &(conn)->list)
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-/* This structure holds the state of the send operation until it can be
- * operated upon from the interrupt level.
- */
-
-struct arp_send_s
-{
-  FAR struct devif_callback_s *snd_cb; /* Reference to callback instance */
-  sem_t     snd_sem;                   /* Used to wake up the waiting thread */
-  uint8_t   snd_retries;               /* Retry count */
-  volatile bool snd_sent;              /* True: if request sent */
-#ifdef CONFIG_NETDEV_MULTINIC
-  uint8_t   snd_ifname[IFNAMSIZ];      /* Interface name */
-#endif 
-  in_addr_t snd_ipaddr;                /* The IP address to be queried */
-};
-
-/* For compatibility with other protocols, a "connection" structure is
- * provided.  But it is a singleton for the case of ARP pack transfers.
- */
-
-struct arp_conn_s
-{
-  FAR struct devif_callback_s *list;   /* ARP callbacks */
-};
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
-/* This is the singleton "connection" structure */
-
-static struct arp_conn_s g_arp_conn;
 
 /****************************************************************************
  * Private Functions
@@ -161,7 +127,7 @@ static uint16_t arp_send_interrupt(FAR struct net_driver_s *dev,
        */
 
       dev->d_flags |= IFF_NOARP;
-  
+
       /* Don't allow any further call backs. */
 
       state->snd_sent         = true;
@@ -242,7 +208,7 @@ int arp_send(in_addr_t ipaddr)
     }
 
   /* Initialize the state structure. This is done with interrupts
-   * disabled 
+   * disabled
    */
 
   (void)sem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
@@ -259,7 +225,7 @@ int arp_send(in_addr_t ipaddr)
    */
 
   ret = -ETIMEDOUT; /* Assume a timeout failure */
-   
+
   while (state.snd_retries < CONFIG_ARP_SEND_MAXTRIES)
     {
       /* Check if the address mapping is present in the ARP table */
