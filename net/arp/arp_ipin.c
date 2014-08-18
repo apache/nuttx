@@ -1,6 +1,5 @@
 /****************************************************************************
- * net/arp/arp_inout.c
- * Implementation of the ARP Address Resolution Protocol.
+ * net/arp/arp_ipin.c
  *
  *   Copyright (C) 2007-2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -43,35 +42,22 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifdef CONFIG_NET
-
-#include <sys/ioctl.h>
-#include <stdint.h>
-#include <string.h>
-#include <debug.h>
 
 #include <netinet/in.h>
-#include <arpa/inet.h>
 
-#include <net/ethernet.h>
-#include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/arp.h>
-#include <nuttx/net/ip.h>
 
-#include "netdev/netdev.h"
-#include "route/route.h"
 #include "arp/arp.h"
 
-#ifdef CONFIG_NET_ARP
+#ifdef CONFIG_NET_ARP_IPIN
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ETHBUF        ((struct eth_hdr_s *)&dev->d_buf[0])
-#define ARPBUF        ((struct arp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN])
-#define IPBUF         ((struct arp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN])
+#define ETHBUF ((struct eth_hdr_s *)&dev->d_buf[0])
+#define IPBUF  ((struct arp_iphdr_s *)&dev->d_buf[NET_LL_HDRLEN])
 
 /****************************************************************************
  * Private Types
@@ -104,7 +90,6 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_ARP_IPIN
 void arp_ipin(FAR struct net_driver_s *dev)
 {
   in_addr_t srcipaddr;
@@ -119,94 +104,5 @@ void arp_ipin(FAR struct net_driver_s *dev)
       arp_update(IPBUF->eh_srcipaddr, ETHBUF->src);
     }
 }
+
 #endif /* CONFIG_NET_ARP_IPIN */
-
-/****************************************************************************
- * Name: arp_arpin
- *
- * Description:
- *   This function should be called by the Ethernet device driver when an ARP
- *   packet has been received.   The function will act differently
- *   depending on the ARP packet type: if it is a reply for a request
- *   that we previously sent out, the ARP cache will be filled in with
- *   the values from the ARP reply.  If the incoming ARP packet is an ARP
- *   request for our IP address, an ARP reply packet is created and put
- *   into the d_buf[] buffer.
- *
- *   On entry, this function expects that an ARP packet with a prepended
- *   Ethernet header is present in the d_buf[] buffer and that the length of
- *   the packet is set in the d_len field.
- *
- *   When the function returns, the value of the field d_len indicates whether
- *   the device driver should send out the ARP reply packet or not. If d_len
- *   is zero, no packet should be sent; If d_len is non-zero, it contains the
- *   length of the outbound packet that is present in the d_buf[] buffer.
- *
- ****************************************************************************/
-
-void arp_arpin(FAR struct net_driver_s *dev)
-{
-  FAR struct arp_hdr_s *parp = ARPBUF;
-  in_addr_t ipaddr;
-
-  if (dev->d_len < (sizeof(struct arp_hdr_s) + NET_LL_HDRLEN))
-    {
-      nlldbg("Too small\n");
-      dev->d_len = 0;
-      return;
-    }
-
-  dev->d_len = 0;
-
-  ipaddr = net_ip4addr_conv32(parp->ah_dipaddr);
-  switch(parp->ah_opcode)
-    {
-      case HTONS(ARP_REQUEST):
-        nllvdbg("ARP request for IP %04lx\n", (long)ipaddr);
-
-        /* ARP request. If it asked for our address, we send out a reply. */
-
-        if (net_ipaddr_cmp(ipaddr, dev->d_ipaddr))
-          {
-            struct eth_hdr_s *peth = ETHBUF;
-
-            /* First, we register the one who made the request in our ARP
-             * table, since it is likely that we will do more communication
-             * with this host in the future.
-             */
-
-            arp_update(parp->ah_sipaddr, parp->ah_shwaddr);
-
-            parp->ah_opcode = HTONS(ARP_REPLY);
-            memcpy(parp->ah_dhwaddr, parp->ah_shwaddr, ETHER_ADDR_LEN);
-            memcpy(parp->ah_shwaddr, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
-            memcpy(peth->src, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
-            memcpy(peth->dest, parp->ah_dhwaddr, ETHER_ADDR_LEN);
-
-            parp->ah_dipaddr[0] = parp->ah_sipaddr[0];
-            parp->ah_dipaddr[1] = parp->ah_sipaddr[1];
-            net_ipaddr_hdrcopy(parp->ah_sipaddr, &dev->d_ipaddr);
-            arp_dump(parp);
-
-            peth->type          = HTONS(ETHTYPE_ARP);
-            dev->d_len          = sizeof(struct arp_hdr_s) + NET_LL_HDRLEN;
-          }
-        break;
-
-      case HTONS(ARP_REPLY):
-        nllvdbg("ARP reply for IP %04lx\n", (long)ipaddr);
-
-        /* ARP reply. We insert or update the ARP table if it was meant
-         * for us.
-         */
-
-        if (net_ipaddr_cmp(ipaddr, dev->d_ipaddr))
-          {
-            arp_update(parp->ah_sipaddr, parp->ah_shwaddr);
-          }
-        break;
-    }
-}
-
-#endif /* CONFIG_NET_ARP */
-#endif /* CONFIG_NET */

@@ -1,6 +1,5 @@
 /****************************************************************************
  * net/arp/arp_out.c
- * Implementation of the ARP Address Resolution Protocol.
  *
  *   Copyright (C) 2007-2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
