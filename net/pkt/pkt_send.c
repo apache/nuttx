@@ -101,7 +101,7 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
 
   if (pstate)
     {
-      /* Check if the outgoing packet is available. If my have been claimed
+      /* Check if the outgoing packet is available. It may have been claimed
        * by a send interrupt serving a different thread -OR- if the output
        * buffer currently contains unprocessed incoming data. In these cases
        * we will just have to wait for the next polling cycle.
@@ -127,6 +127,12 @@ static uint16_t psock_send_interrupt(FAR struct net_driver_s *dev,
 
           devif_pkt_send(dev, pstate->snd_buffer, pstate->snd_buflen);
           pstate->snd_sent = pstate->snd_buflen;
+
+          /* Make sure no ARP request overwrites this ARP request.  This
+           * flag will be cleared in arp_out().
+           */
+
+          dev->d_flags |= IFF_NOARP;
         }
 
       /* Don't allow any further call backs. */
@@ -260,10 +266,6 @@ ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
 
           dev = netdev_findbyname("eth0");
 
-          /* Make sure no ARP frame is sent instead of the frame just written */
-
-          dev->d_flags |= IFF_NOARP;
-
           /* Notify the device driver that new TX data is available.
            * NOTES: This is in essence what netdev_txnotify() does, which
            * is not possible to call since it expects a net_ipaddr_t as
@@ -283,10 +285,6 @@ ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
           /* Make sure that no further interrupts are processed */
 
           pkt_callback_free(conn, state.snd_cb);
-
-          /* Clear the no-ARP bit in the device flags */
-
-          dev->d_flags &= ~IFF_NOARP;
         }
     }
 

@@ -138,13 +138,16 @@ void arp_out(FAR struct net_driver_s *dev)
   in_addr_t                   ipaddr;
   in_addr_t                   destipaddr;
 
-#ifdef CONFIG_NET_PKT
+#if defined(CONFIG_NET_PKT) || defined(CONFIG_NET_ARP_SEND)
   /* Skip sending ARP requests when the frame to be transmitted was
    * written into a packet socket.
    */
 
-  if ((dev->d_flags & IFF_NOARP) == IFF_NOARP)
+  if ((dev->d_flags & IFF_NOARP) != 0)
     {
+      /* Clear the indication and let the packet continue on its way. */
+
+      dev->d_flags &= ~IFF_NOARP;
       return;
     }
 #endif
