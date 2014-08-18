@@ -64,6 +64,14 @@
 #  undef CONFIG_NET_ARP_DUMP
 #endif
 
+#ifndef CONFIG_ARP_SEND_MAXTRIES
+#  define CONFIG_ARP_SEND_MAXTRIES 5
+#endif
+
+#ifndef CONFIG_ARP_SEND_DELAYMSEC
+#  define CONFIG_ARP_SEND_DELAYMSEC 20
+#endif
+
 /* ARP Definitions **********************************************************/
 
 #define ARP_REQUEST    1

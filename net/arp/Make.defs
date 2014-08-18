@@ -42,6 +42,10 @@ ifeq ($(CONFIG_NET_ARP_IPIN),y)
 NET_CSRCS += arp_ipin.c
 endif
 
+ifeq ($(CONFIG_NET_ARP_SEND),y)
+NET_CSRCS += arp_send.c
+endif
+
 ifeq ($(CONFIG_NET_ARP_DUMP),y)
 NET_CSRCS += arp_dump.c
 endif

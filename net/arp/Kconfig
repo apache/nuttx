@@ -34,6 +34,37 @@ config NET_ARP_IPIN
 		Harvest IP/MAC address mappings from the ARP table
 		from incoming IP packets.
 
+config NET_ARP_SEND
+	bool "ARP send"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		Enable logic to send ARP requests if the target IP address mapping
+		does not appear in the ARP table.
+
+if NET_ARP_SEND
+
+config ARP_SEND_MAXTRIES
+	int "ARP send retries"
+	default 5
+	---help---
+		Send the ARP request this number of times before giving up and
+		deciding that the target IP address is non reachable.
+
+config ARP_SEND_DELAYMSEC
+	int "ARP re-send delay"
+	default 20
+	---help---
+		Wait this number of milliseconds after sending the ARP request
+		before checking if the IP address mapping is present in the ARP
+		table.  This time should be related to the maximum round trip time
+		on the network since it is basically the time from when an ARP
+		request is sent until the response is received.
+
+#endif
+
+endif # NET_ARP_SEND
+
 config NET_ARP_DUMP
 	bool "Dump ARP packet header"
 	default n
