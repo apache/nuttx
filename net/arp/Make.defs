@@ -38,6 +38,10 @@
 ifneq ($(CONFIG_NET_SLIP),y)
 NET_CSRCS += arp_inout.c arp_table.c arp_timer.c
 
+ifeq ($(CONFIG_NET_ARP_DUMP),y)
+NET_CSRCS += arp_dump.c
+endif
+
 # Include arp build support
 
 DEPPATH += --dep-path arp

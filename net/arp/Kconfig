@@ -34,5 +34,12 @@ config NET_ARP_IPIN
 		Harvest IP/MAC address mappings from the ARP table
 		from incoming IP packets.
 
+config NET_ARP_DUMP
+	bool "Dump ARP packet header"
+	default n
+	depends on DEBUG
+	---help---
+		Dump ARP packets to the SYSLOG device.
+
 endif # NET_ARP
 endmenu # ARP Configuration
