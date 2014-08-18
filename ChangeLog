@@ -8151,3 +8151,9 @@
 	  notifications (2014-8-16).
 	* include/net/if.h:  Add some helper macros to make the code that uses
 	  the ioctls a little more compact (2014-8-17).
+	* libc/stdio/lib_sscanf.c: NuttX libc tried to guess how many characters
+	  to parse, extracted them into a buffer, then ran strtol() on that
+	  buffer. That guess is often wrong. A better approach would be to
+	  call strtol() directly on the input data, using the endptr return
+	  value to determine how many characters to skip after parsing.  From
+	  Kosma Moczek (2014-8-18).
