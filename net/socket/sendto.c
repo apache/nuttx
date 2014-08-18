@@ -55,6 +55,7 @@
 
 #include "netdev/netdev.h"
 #include "devif/devif.h"
+#include "arp/arp.h"
 #include "udp/udp.h"
 #include "socket/socket.h"
 
@@ -322,6 +323,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
 #ifdef CONFIG_NET_TCP
       return psock_send(psock, buf, len, flags);
 #else
+      ndbg("ERROR: No to address\n");
       err = EINVAL;
       goto errout;
 #endif
@@ -335,6 +337,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
   if (to->sa_family != AF_INET || tolen < sizeof(struct sockaddr_in))
 #endif
   {
+      ndbg("ERROR: Invalid address\n");
       err = EBADF;
       goto errout;
   }
@@ -343,6 +346,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
 
   if (!psock || psock->s_crefs <= 0)
     {
+      ndbg("ERROR: Invalid socket\n");
       err = EBADF;
       goto errout;
     }
@@ -351,9 +355,22 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
 
   if (psock->s_type != SOCK_DGRAM)
     {
+      ndbg("ERROR: Connected socket\n");
       err = EISCONN;
       goto errout;
     }
+
+  /* Make sure that the IP address mapping is in the ARP table */
+
+#ifdef CONFIG_NET_ARP_SEND
+  ret = arp_send(into->sin_addr.s_addr);
+  if (ret < 0)
+    {
+      ndbg("ERROR: Not reachable\n");
+      err = ENETUNREACH;
+      goto errout;
+    }
+#endif
 
   /* Perform the UDP sendto operation */
 

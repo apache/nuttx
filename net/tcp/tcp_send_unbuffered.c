@@ -59,6 +59,7 @@
 
 #include "netdev/netdev.h"
 #include "devif/devif.h"
+#include "arp/arp.h"
 #include "tcp/tcp.h"
 #include "socket/socket.h"
 
@@ -388,10 +389,14 @@ static uint16_t tcpsend_interrupt(FAR struct net_driver_s *dev,
            *
            * NOTE 2: If we are actually harvesting IP addresses on incoming IP
            * packets, then this check should not be necessary; the MAC mapping
-           * should already be in the ARP table.
+           * should already be in the ARP table in many cases.
+           *
+           * NOTE 3: If CONFIG_NET_ARP_SEND then we can be assured that the IP
+           * address mapping is already in the ARP table.
            */
 
-#if defined(CONFIG_NET_ETHERNET) && !defined(CONFIG_NET_ARP_IPIN)
+#if defined(CONFIG_NET_ETHERNET) && !defined(CONFIG_NET_ARP_IPIN) && \
+    !defined(CONFIG_NET_ARP_SEND)
          if (pstate->snd_sent != 0 || arp_find(conn->ripaddr) != NULL)
 #endif
             {
@@ -505,6 +510,7 @@ end_wait:
 ssize_t psock_tcp_send(FAR struct socket *psock,
                        FAR const void *buf, size_t len)
 {
+  FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)psock->s_conn;
   struct send_s state;
   net_lock_t save;
   int err;
@@ -514,6 +520,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
 
   if (!psock || psock->s_crefs <= 0)
     {
+      ndbg("ERROR: Invalid socket\n");
       err = EBADF;
       goto errout;
     }
@@ -522,9 +529,23 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
 
   if (psock->s_type != SOCK_STREAM || !_SS_ISCONNECTED(psock->s_flags))
     {
+      ndbg("ERROR: Not connected\n");
       err = ENOTCONN;
       goto errout;
     }
+
+  /* Make sure that the IP address mapping is in the ARP table */
+
+  conn = (FAR struct tcp_conn_s *)psock->s_conn;
+#ifdef CONFIG_NET_ARP_SEND
+  ret = arp_send(conn->ripaddr);
+  if (ret < 0)
+    {
+      ndbg("ERROR: Not reachable\n");
+      err = ENETUNREACH;
+      goto errout;
+    }
+#endif
 
   /* Set the socket state to sending */
 
@@ -546,8 +567,6 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
 
   if (len > 0)
     {
-      FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)psock->s_conn;
-
       /* Allocate resources to receive a callback */
 
       state.snd_cb = tcp_callback_alloc(conn);
