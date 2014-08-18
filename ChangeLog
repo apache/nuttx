@@ -8166,3 +8166,15 @@
 	  (2014-8-18).
 	* net/arp/arp_ipin.c: Rename arp_inout.c to arpipin.c because that is
 	  all that is left in the file (2014-8-18).
+	* net/arp/arp_format.c: Move the logic that formats an ARP packet into a
+	  separate file where it can be re-used.  (2014-8-18).
+	* net/arp/arp_out.c and net/pkt/pkt_send.c:  Change how the IFF_NOARP
+	  flag is handled.  This should be set only when data is moved into the
+	  buffer and cleared after tested by the ARP logic.  Setting it globally
+	  can cause packets to be sent with no valid MAC addresses (2014-8-18).
+	* net/arp/arp_send.c: Partial implementation of logic to send ARP
+	  requests to assure that an IP address mapping is present in the ARP
+	  table (2014-8-18).
+	* net/arp/arp_poll.c: Finished the implementation of logic to send ARP
+	  requests.  Complete, fully hooked into the networking logic, and ready
+	  for test (but still untested) (2014-8-18).
