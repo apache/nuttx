@@ -8157,3 +8157,12 @@
 	  call strtol() directly on the input data, using the endptr return
 	  value to determine how many characters to skip after parsing.  From
 	  Kosma Moczek (2014-8-18).
+	* net/arp/arp_dump.c:  Add missing configuration option to select
+	  dumping of ARP packet headers.  Move ARP dumping logic from
+	  arp_inout.c to its own file (2014-8-18).
+	* net/arp/arp_out.c: Move arp_out() from arp_inout.c to its own file
+	  (2014-8-18).
+	* net/arp/arp_arpin.c: Move arp_arpin() from arp_inout.c to its own file
+	  (2014-8-18).
+	* net/arp/arp_ipin.c: Rename arp_inout.c to arpipin.c because that is
+	  all that is left in the file (2014-8-18).
