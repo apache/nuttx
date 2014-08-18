@@ -8178,3 +8178,11 @@
 	* net/arp/arp_poll.c: Finished the implementation of logic to send ARP
 	  requests.  Complete, fully hooked into the networking logic, and ready
 	  for test (but still untested) (2014-8-18).
+	* net/icmp/icmp_ping.c, net/socket/net_sendfile.c, sendto.c,
+	  net/tcp/tcp_send_buffered.c, and tcp_send_unbuffered.c:  If
+	  CONFIG_NET_ARP_SEND is enabled, then all ICMP, TCP, and UDP send
+	  operations will call arp_send() before attempting the real send
+	  operation.  arp_send() will check if the the IP address mapping is in
+	  the ARP table and, if not send ARP requests periodically until it is.
+	  This eliminates losing the first outgoing message because there is not
+	  mapping in the ARP table (2014-8-18).
