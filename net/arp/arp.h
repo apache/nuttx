@@ -282,6 +282,65 @@ int arp_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback);
 #endif
 
 /****************************************************************************
+ * Name: arp_find
+ *
+ * Description:
+ *   Find the ARP entry corresponding to this IP address.
+ *
+ * Input parameters:
+ *   ipaddr - Refers to an IP address in network order
+ *
+ * Assumptions
+ *   Interrupts are disabled; Returned value will become unstable when
+ *   interrupts are re-enabled or if any other uIP APIs are called.
+ *
+ ****************************************************************************/
+
+FAR struct arp_entry *arp_find(in_addr_t ipaddr);
+
+/****************************************************************************
+ * Name: arp_delete
+ *
+ * Description:
+ *   Remove an IP association from the ARP table
+ *
+ * Input parameters:
+ *   ipaddr - Refers to an IP address in network order
+ *
+ * Assumptions
+ *   Interrupts are disabled to assure exclusive access to the ARP table
+ *   (and because arp_find() is called).
+ *
+ ****************************************************************************/
+
+#define arp_delete(ipaddr) \
+{ \
+  struct arp_entry *tabptr = arp_find(ipaddr); \
+  if (tabptr) \
+    { \
+      tabptr->at_ipaddr = 0; \
+    } \
+}
+
+/****************************************************************************
+ * Name: arp_update
+ *
+ * Description:
+ *   Add the IP/HW address mapping to the ARP table -OR- change the IP
+ *   address of an existing association.
+ *
+ * Input parameters:
+ *   pipaddr - Refers to an IP address uint16_t[2] in network order
+ *   ethaddr - Refers to a HW address uint8_t[IFHWADDRLEN]
+ *
+ * Assumptions
+ *   Interrupts are disabled to assure exclusive access to the ARP table.
+ *
+ ****************************************************************************/
+
+void arp_update(FAR uint16_t *pipaddr, FAR uint8_t *ethaddr);
+
+/****************************************************************************
  * Name: arp_dump
  *
  * Description:

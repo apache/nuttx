@@ -187,52 +187,18 @@ void arp_arpin(struct net_driver_s *dev);
 void arp_out(FAR struct net_driver_s *dev);
 
 /****************************************************************************
- * Name: arp_find
- *
- * Description:
- *   Find the ARP entry corresponding to this IP address.
- *
- * Input parameters:
- *   ipaddr - Refers to an IP address in network order
- *
- * Assumptions
- *   Interrupts are disabled; Returned value will become unstable when
- *   interrupts are re-enabled or if any other uIP APIs are called.
- *
- ****************************************************************************/
-
-FAR struct arp_entry *arp_find(in_addr_t ipaddr);
-
-/****************************************************************************
- * Name: arp_delete
- *
- * Description:
- *   Remove an IP association from the ARP table
- *
- * Input parameters:
- *   ipaddr - Refers to an IP address in network order
- *
- * Assumptions
- *   Interrupts are disabled to assure exclusive access to the ARP table
- *   (and because arp_find() is called).
- *
- ****************************************************************************/
-
-#define arp_delete(ipaddr) \
-{ \
-  struct arp_entry *tabptr = arp_find(ipaddr); \
-  if (tabptr) \
-    { \
-      tabptr->at_ipaddr = 0; \
-    } \
-}
-
-/****************************************************************************
  * Name: arp_update
  *
  * Description:
  *   Add the IP/HW address mapping to the ARP table -OR- change the IP
  *   address of an existing association.
+ *
+ *   NOTE: This is an internal interface withint the networking layer and
+ *   should not be used by application software.  This prototype is here
+ *   because there is already a violation of this structureing:  The
+ *   apps/netutils/dhcpd logic currently calls arp_update() directly.  That
+ *   is bad and needs to be replace with some ioctl interface perhaps hidden
+ *   somewhere in apps/netutils/netlib.
  *
  * Input parameters:
  *   pipaddr - Refers to an IP address uint16_t[2] in network order
