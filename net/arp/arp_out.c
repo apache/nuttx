@@ -133,7 +133,6 @@ static const uint8_t g_multicast_ethaddr[3] = {0x01, 0x00, 0x5e};
 void arp_out(FAR struct net_driver_s *dev)
 {
   FAR const struct arp_entry *tabptr = NULL;
-  FAR struct arp_hdr_s       *parp   = ARPBUF;
   FAR struct eth_hdr_s       *peth   = ETHBUF;
   FAR struct arp_iphdr_s     *pip    = IPBUF;
   in_addr_t                   ipaddr;
@@ -225,29 +224,14 @@ void arp_out(FAR struct net_driver_s *dev)
       tabptr = arp_find(ipaddr);
       if (!tabptr)
         {
-           nllvdbg("ARP request for IP %04lx\n", (long)ipaddr);
+           nllvdbg("ARP request for IP %08lx\n", (unsigned long)ipaddr);
 
           /* The destination address was not in our ARP table, so we
            * overwrite the IP packet with an ARP request.
            */
 
-          memset(peth->dest, 0xff, ETHER_ADDR_LEN);
-          memset(parp->ah_dhwaddr, 0x00, ETHER_ADDR_LEN);
-          memcpy(peth->src, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
-          memcpy(parp->ah_shwaddr, dev->d_mac.ether_addr_octet, ETHER_ADDR_LEN);
-
-          net_ipaddr_hdrcopy(parp->ah_dipaddr, &ipaddr);
-          net_ipaddr_hdrcopy(parp->ah_sipaddr, &dev->d_ipaddr);
-
-          parp->ah_opcode   = HTONS(ARP_REQUEST);
-          parp->ah_hwtype   = HTONS(ARP_HWTYPE_ETH);
-          parp->ah_protocol = HTONS(ETHTYPE_IP);
-          parp->ah_hwlen    = ETHER_ADDR_LEN;
-          parp->ah_protolen = 4;
-          arp_dump(parp);
-
-          peth->type        = HTONS(ETHTYPE_ARP);
-          dev->d_len        = sizeof(struct arp_hdr_s) + NET_LL_HDRLEN;
+          arp_format(dev, ipaddr);
+          arp_dump(ARPBUF);
           return;
         }
 

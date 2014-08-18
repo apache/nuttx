@@ -53,6 +53,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <netinet/in.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -155,6 +156,24 @@ void arp_timer_initialize(void);
  ****************************************************************************/
 
 void arp_timer(void);
+
+/****************************************************************************
+ * Name: arp_format
+ *
+ * Description:
+ *   Format an ARP packet.
+ *
+ * Input Parameters:
+ *   dev    - Device structure
+ *   ipaddr - Target IP address (32-bit)
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+struct net_driver_s; /* Forward reference */
+void arp_format(FAR struct net_driver_s *dev, in_addr_t ipaddr);
 
 /****************************************************************************
  * Name: arp_dump
