@@ -405,6 +405,10 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 
               if (*buf)
                 {
+                  FAR char *endptr;
+                  int       errsave;
+                  long      tmplong;
+
                   /* Skip over any white space before the integer string */
 
                   while (isspace(*buf))
@@ -459,35 +463,32 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                   lvdbg("vsscanf: tmp[]=\"%s\"\n", tmp);
 
                   /* Perform the integer conversion */
+                  /* Preserve the errno value */
 
-                  buf += width;
+                  errsave = get_errno();
+                  set_errno(0);
+                  if (sign)
+                    {
+                      tmplong = strtol(tmp, &endptr, base);
+                    }
+                  else
+                    {
+                      tmplong = strtoul(tmp, &endptr, base);
+                    }
+
+                  /* Check if the number was successfully converted */
+
+                  if (tmp == endptr || get_errno() == ERANGE)
+                    {
+                      return count;
+                    }
+
+                  /* Move by the actual number of characters converted */
+
+                  buf += (endptr - tmp);
+                  set_errno(errsave);
                   if (!noassign)
                     {
-                      FAR char *endptr;
-                      int       errsave;
-                      long      tmplong;
-
-                      /* Preserve the errno value */
-
-                      errsave = get_errno();
-                      set_errno(0);
-                      if (sign)
-                        {
-                          tmplong = strtol(tmp, &endptr, base);
-                        }
-                      else
-                        {
-                          tmplong = strtoul(tmp, &endptr, base);
-                        }
-
-                      /* Check if the number was successfully converted */
-
-                      if (tmp == endptr || get_errno() == ERANGE)
-                        {
-                          return count;
-                        }
-
-                      set_errno(errsave);
 
                       /* We have to check whether we need to return a long
                        * or an int.
