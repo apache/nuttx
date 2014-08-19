@@ -82,7 +82,7 @@
  *   21  PC11  RD
  *   22  PC8   WR
  *   23  PC19  RS
- *   24  PD18  CS        Via J8, pulled high.  Connects to NRST.
+ *   24  PD18  CS        Via J8, pulled high.
  *   25        RESET     Connects to NSRST
  *   26        IM0       Pulled high
  *   27        IM1       Grounded
