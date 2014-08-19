@@ -8189,3 +8189,5 @@
 	* net/arp/arp_notify.c, arp_send.c, arp_arpin.c, and arp.h:  Add
 	  signalling logic so that we do not have to wait so long with the
 	  network responses to ARP requests quickly (2014-8-19).
+	* include/nuttx/lcd/ili9341.h: \Add a register definition header file
+	  for the ILI9341 LCD (2014-8-19).
