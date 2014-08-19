@@ -1300,7 +1300,7 @@ Configurations
        configuration settings above in the section entitled "Networking").
 
        NOTE: In boot-up sequence is very simple in this example; all
-       initialization is done sequential (vs. in parallel) and so you will
+       initialization is done sequentially (vs. in parallel) and so you will
        not see the NSH prompt until all initialization is complete.  The
        network bring-up in particular will add some delay before the NSH
        prompt appears.  In a real application, you would probably want to
@@ -1309,7 +1309,7 @@ Configurations
 
        This delay will be especially long if the board is not connected to
        a network because additional time will be required to fail with
-       timeout errors.
+       timeout errors.  This delay can be eliminated, however, if you enable an NSH initialization option as described above in a paragraph entitled, "Network Initialization Thread."
 
        STATUS:
        2014-3-13: The basic NSH serial console is working.  Network support
@@ -1357,18 +1357,11 @@ Configurations
                   does not mount on either the Linux or Windows host.  This
                   needs to be retested.
 
-    8. This configuration can be used to verify the touchscreen on on the
-       SAM4E-EK LCD.  See the instructions above in the paragraph entitled
-       "Touchscreen".
-
-       STATUS:
-         2014-3-21:  The touchscreen has not yet been tested.
-
-    9. Enabling HSMCI support. The SAM3U-KE provides a an SD memory card
+    8. Enabling HSMCI support. The SAM3U-KE provides a an SD memory card
        slot.  Support for the SD slot can be enabled following the
        instructions provided above in the paragraph entitled "HSMCI."
 
-   11. This configuration has been used for verifying the touchscreen on
+    9. This configuration has been used for verifying the touchscreen on
        on the SAM4E-EK LCD module.
 
        The NSH configuration can be used to verify the ADS7843E touchscreen on
@@ -1415,7 +1408,7 @@ Configurations
          CONFIG_DEBUG_VERBOSE=y            : Enable verbose debug output
          CONFIG_DEBUG_INPUT=y              : Enable debug output from input devices
 
-   11. This configuration can be re-configured to test the on-board LCD
+   10. This configuration can be re-configured to test the on-board LCD
        module.
 
        System Type -> AT91SAM3/4 Configuration Options
@@ -1445,8 +1438,8 @@ Configurations
 
        Graphics Support -> Font Selections
          CONFIG_NXFONTS_CHARBITS=7
-         CONFIG_NXFONT_SANS22X29B=y
          CONFIG_NXFONT_SANS23X27=y
+         CONFIG_NXFONT_SANS22X29B=y
 
        Application Configuration -> Examples
          CONFIG_EXAMPLES_NXLINES=y

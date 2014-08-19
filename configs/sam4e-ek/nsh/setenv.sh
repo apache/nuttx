@@ -52,6 +52,7 @@ fi
 # this toolchain in any other location
 #export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/Atmel/Atmel Toolchain/ARM GCC/Native/4.7.3.99/arm-gnu-toolchain/bin"
 #export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/CodeSourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin"
+#export TOOLCHAIN_BIN="/cygdrive/c/Users/MyName/MentorGraphics/Sourcery_CodeBench_Lite_for_ARM_EABI/bin"
 
 # This is the Cygwin path to the location where I installed the CodeSourcery
 # toolchain under windows.  You will also have to edit this if you install
