@@ -963,7 +963,7 @@ ILI9325-Based LCD
      21  PC11  RD
      22  PC8   WR
      23  PC19  RS
-     24  PD18  CS        Via J8, pulled high.  Connects to NRST.
+     24  PD18  CS        Via J8, pulled high.
      25        RESET     Connects to NSRST
      26        IM0       Pulled high
      27        IM1       Grounded
@@ -1025,6 +1025,10 @@ ILI9325-Based LCD
   STATUS:
     2014-05-14:  Fully implemented.  There is still a bug in in the LCD
     communications.  The LCD ID is read as 0x0000 instead of 0x9325.
+
+    2014-8-19:  Updated.  The LCD ID is bad because the on-board LCD is
+    *not* an ILI9325.  It is an ILI9341.  The ID lies in a different
+    address and is 0x00009341. Need to write a new driver.
 
     The LCD backlight appears to be functional.
 
