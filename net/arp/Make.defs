@@ -43,7 +43,7 @@ NET_CSRCS += arp_ipin.c
 endif
 
 ifeq ($(CONFIG_NET_ARP_SEND),y)
-NET_CSRCS += arp_send.c arp_poll.c
+NET_CSRCS += arp_send.c arp_poll.c arp_notify.c
 endif
 
 ifeq ($(CONFIG_NET_ARP_DUMP),y)

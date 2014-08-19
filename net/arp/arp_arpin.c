@@ -159,7 +159,13 @@ void arp_arpin(FAR struct net_driver_s *dev)
 
         if (net_ipaddr_cmp(ipaddr, dev->d_ipaddr))
           {
+            /* Yes... Insert the address mapping in the ARP table */
+
             arp_update(parp->ah_sipaddr, parp->ah_shwaddr);
+
+            /* Then notify any logic waiting for the ARP result */
+
+            arp_notify(net_ip4addr_conv32(parp->ah_sipaddr));
           }
         break;
     }

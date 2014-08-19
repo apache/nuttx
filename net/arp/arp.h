@@ -155,6 +155,18 @@ struct arp_conn_s
 };
 #endif
 
+#ifdef CONFIG_NET_ARP_SEND
+/* Used to notify a thread waiting for a particular ARP response */
+
+struct arp_notify_s
+{
+  FAR struct arp_notify_s *nt_flink;   /* Supports singly linked list */
+  in_addr_t nt_ipaddr;                 /* Waited for IP address in the mapping */
+  sem_t     nt_sem;                    /* Will wake up the waiter */
+  int       nt_result;                 /* The result of the wait */
+};
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -262,6 +274,8 @@ void arp_format(FAR struct net_driver_s *dev, in_addr_t ipaddr);
 
 #ifdef CONFIG_NET_ARP_SEND
 int arp_send(in_addr_t ipaddr);
+#else
+#  define arp_send(i) (0)
 #endif
 
 /****************************************************************************
@@ -279,6 +293,87 @@ int arp_send(in_addr_t ipaddr);
 
 #ifdef CONFIG_NET_ARP_SEND
 int arp_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback);
+#else
+#  define arp_poll(d,c) (0)
+#endif
+
+/****************************************************************************
+ * Function: arp_wait_setup
+ *
+ * Description:
+ *   Called BEFORE an ARP request is sent.  This function sets up the ARP
+ *   response timeout before the the ARP request is sent so that there is
+ *   no race condition when arp_wait() is called.
+ *
+ * Assumptions:
+ *   This function is called from ARP send and executes in the normal
+ *   tasking environment.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_ARP_SEND
+void arp_wait_setup(in_addr_t ipaddr, FAR struct arp_notify_s *notify);
+#else
+#  define arp_wait_setup(i,n)
+#endif
+
+/****************************************************************************
+ * Function: arp_wait_cancel
+ *
+ * Description:
+ *   Cancel any wait set after arp_wait_setup is called but before arm_wait()
+ *   is called (arp_wait() will automatically cancel the wait).
+ *
+ * Assumptions:
+ *   This function may execute in the interrupt context when called from
+ *   arp_wait().
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_ARP_SEND
+int arp_wait_cancel(FAR struct arp_notify_s *notify);
+#else
+#  define arp_wait_cancel(n) (0)
+#endif
+
+/****************************************************************************
+ * Function: arp_wait
+ *
+ * Description:
+ *   Called each time that a ARP request is sent.  This function will sleep
+ *   until either: (1) the matching ARP response is received, or (2) a
+ *   timeout occurs.
+ *
+ * Assumptions:
+ *   This function is called from ARP send and executes in the normal
+ *   tasking environment.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_ARP_SEND
+struct timespec;
+int arp_wait(FAR struct arp_notify_s *notify, FAR struct timespec *timeout);
+#else
+#  define arp_wait(n,t) (0)
+#endif
+
+/****************************************************************************
+ * Function: arp_notify
+ *
+ * Description:
+ *   Called each time that a ARP response is received in order to wake-up
+ *   any threads that may be waiting for this particular ARP response.
+ *
+ * Assumptions:
+ *   This function is called from the MAC device driver indirectly through
+ *   arp_arpin() and may be execute from the interrupt level.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_ARP_SEND
+void arp_notify(in_addr_t ipaddr);
+#else
+#  define arp_notify(i)
 #endif
 
 /****************************************************************************
@@ -357,17 +452,27 @@ void arp_update(FAR uint16_t *pipaddr, FAR uint8_t *ethaddr);
 #ifdef CONFIG_NET_ARP_DUMP
 void arp_dump(FAR struct arp_hdr_s *arp);
 #else
-# define arp_dump(arp)
+#  define arp_dump(arp)
 #endif
 
 #else /* CONFIG_NET_ARP */
 
 /* If ARP is disabled, stub out all ARP interfaces */
 
-# define arp_reset()
-# define arp_timer_initialize(void)
-# define arp_timer()
-# define arp_dump(arp)
+#  define arp_reset()
+#  define arp_timer_initialize()
+#  define arp_timer()
+#  define arp_format(d,i);
+#  define arp_send(i) (0)
+#  define arp_poll(d,c) (0)
+#  define arp_wait_setup(i,n)
+#  define arp_wait_cancel(n) (0)
+#  define arp_wait(n,t) (0)
+#  define arp_notify(i)
+#  define arp_find(i) (NULL)
+#  define arp_delete(i)
+#  define arp_update(i,m);
+#  define arp_dump(arp)
 
 #endif /* CONFIG_NET_ARP */
 #endif /* __NET_ARP_ARP_H */

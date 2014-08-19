@@ -873,7 +873,8 @@ o Network (net/, drivers/net)
                Or should it remain in the backlog with a status indication so that accept()
                can fail when it encounteres the invalid connection?
   Status:      Open
-  Priority:    Medium.  Important on slow applications that will not accept connections promptly.
+  Priority:    Medium.  Important on slow applications that will not accept
+               connections promptly.
 
 o USB (drivers/usbdev, drivers/usbhost)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2275,9 +2276,12 @@ o Network Utilities (apps/netutils/)
   Title:       THE ARP ISSUES AGAIN
   Description: The first GET received by THTTPD is not responded to.  Refreshing the page
                from the browser solves the problem and THTTPD works fine after thatg.  I
-               believe that this is the duplicate of another bug: "Outgoing [uIP] packets are dropped
-               and overwritten by ARP packets if the destination IP has not been mapped to a MAC."
-  Status:      Open
+               believe that this is the duplicate of another bug: "Outgoing
+               [uIP] packets are dropped and overwritten by ARP packets if the
+               destination IP has not been mapped to a MAC."
+  Status:      Probably closed.  The basic ARP issue has been fixed (if
+               CONFIG_NET_ARP_SEND is enable), but this has not been verifie
+               with THTTPD.
   Priority:    Medium
 
   Title:       THTTPD WARNINGS

@@ -41,6 +41,7 @@
 
 #include <unistd.h>
 #include <semaphore.h>
+#include <time.h>
 #include <debug.h>
 
 #include <netinet/in.h>
@@ -60,6 +61,11 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#define CONFIG_ARP_SEND_DELAYSEC  \
+  (CONFIG_ARP_SEND_DELAYMSEC / 1000)
+#define CONFIG_ARP_SEND_DELAYNSEC \
+  ((CONFIG_ARP_SEND_DELAYMSEC - 1000*CONFIG_ARP_SEND_DELAYSEC) / 1000000)
 
 /****************************************************************************
  * Private Types
@@ -179,6 +185,8 @@ static uint16_t arp_send_interrupt(FAR struct net_driver_s *dev,
 int arp_send(in_addr_t ipaddr)
 {
   FAR struct net_driver_s *dev;
+  struct arp_notify_s notify;
+  struct timespec delay;
   struct arp_send_s state;
   net_lock_t save;
   int ret;
@@ -228,7 +236,12 @@ int arp_send(in_addr_t ipaddr)
 
   while (state.snd_retries < CONFIG_ARP_SEND_MAXTRIES)
     {
-      /* Check if the address mapping is present in the ARP table */
+      /* Check if the address mapping is present in the ARP table.  This
+       * is only really meaningful on the first time through the loop.
+       *
+       * NOTE: If the ARP table is large than this could be a performance
+       * issue.
+       */
 
       if (arp_find(ipaddr))
         {
@@ -238,46 +251,58 @@ int arp_send(in_addr_t ipaddr)
           break;
         }
 
+      /* Set up the ARP response wait BEFORE we send the ARP request */
+
+      arp_wait_setup(ipaddr, &notify);
+
       /* Arm/re-arm the callback */
 
-       state.snd_sent      = false;
-       state.snd_cb->flags = PKT_POLL;
-       state.snd_cb->priv  = (FAR void *)&state;
-       state.snd_cb->event = arp_send_interrupt;
+      state.snd_sent      = false;
+      state.snd_cb->flags = PKT_POLL;
+      state.snd_cb->priv  = (FAR void *)&state;
+      state.snd_cb->event = arp_send_interrupt;
 
-       /* Notify the device driver that new TX data is available.
-        * NOTES: This is in essence what netdev_txnotify() does, which
-        * is not possible to call since it expects a net_ipaddr_t as
-        * its single argument to lookup the network interface.
-        */
+      /* Notify the device driver that new TX data is available.
+       * NOTES: This is in essence what netdev_txnotify() does, which
+       * is not possible to call since it expects a net_ipaddr_t as
+       * its single argument to lookup the network interface.
+       */
 
-       dev->d_txavail(dev);
+      dev->d_txavail(dev);
 
-       /* Wait for the send to complete or an error to occur: NOTES: (1)
-        * net_lockedwait will also terminate if a signal is received, (2)
-        * interrupts may be disabled! They will be re-enabled while the
-        * task sleeps and automatically re-enabled when the task restarts.
-        */
+      /* Wait for the send to complete or an error to occur: NOTES: (1)
+       * net_lockedwait will also terminate if a signal is received, (2)
+       * interrupts may be disabled! They will be re-enabled while the
+       * task sleeps and automatically re-enabled when the task restarts.
+       */
 
-       do
-         {
-           (void)net_lockedwait(&state.snd_sem);
-         }
-       while (!state.snd_sent);
+      do
+        {
+          (void)net_lockedwait(&state.snd_sem);
+        }
+      while (!state.snd_sent);
 
-       /* Now wait for response to the ARP response to be received.  The
-        * optimal delay would be the work case round trip time.
-        *
-        * REVISIT:  We would get better performance if there were signalling
-        * from the arp_in() logic when the ARP response were received.  But
-        * this should be okay for testing purposes.
-        */
+      /* Now wait for response to the ARP response to be received.  The
+       * optimal delay would be the work case round trip time.
+       */
 
-       usleep(1000*CONFIG_ARP_SEND_DELAYMSEC);
+      delay.tv_sec  = CONFIG_ARP_SEND_DELAYSEC;
+      delay.tv_nsec = CONFIG_ARP_SEND_DELAYNSEC;
 
-       /* Increment the retry count */
+      ret = arp_wait(&notify, &delay);
 
-       state.snd_retries++;
+      /* arp_wait will return OK if and only if the matching ARP response
+       * is received.  Otherwise, it will return -ETIMEDOUT.
+       */
+
+      if (ret == OK)
+        {
+          break;
+        }
+
+      /* Increment the retry count */
+
+      state.snd_retries++;
     }
 
   sem_destroy(&state.snd_sem);
