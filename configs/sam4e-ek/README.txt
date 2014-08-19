@@ -231,7 +231,7 @@ Atmel Studio 6.1
 
   - Debugging the NuttX Object File:
 
-    1) Rename object file from nutt to nuttx.elf.  That is an extension that
+    1) Rename object file from nuttx to nuttx.elf.  That is an extension that
        will be recognized by the file menu.
 
     2) Select the project name, the full path to the NuttX object (called
