@@ -65,7 +65,7 @@
 #define CONFIG_ARP_SEND_DELAYSEC  \
   (CONFIG_ARP_SEND_DELAYMSEC / 1000)
 #define CONFIG_ARP_SEND_DELAYNSEC \
-  ((CONFIG_ARP_SEND_DELAYMSEC - 1000*CONFIG_ARP_SEND_DELAYSEC) / 1000000)
+  ((CONFIG_ARP_SEND_DELAYMSEC - 1000*CONFIG_ARP_SEND_DELAYSEC) * 1000000)
 
 /****************************************************************************
  * Private Types

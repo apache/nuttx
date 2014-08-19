@@ -196,6 +196,10 @@ int arp_wait(FAR struct arp_notify_s *notify, FAR struct timespec *timeout)
       abstime.tv_nsec -= 1000000000;
     }
 
+   /* REVISIT:  If sem_timedwait() is awakened with  signal, we will return
+    * the wrong error code.
+    */
+
   (void)sem_timedwait(&notify->nt_sem, &abstime);
   ret = notify->nt_result;
 
