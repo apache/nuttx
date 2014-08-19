@@ -2280,7 +2280,7 @@ o Network Utilities (apps/netutils/)
                [uIP] packets are dropped and overwritten by ARP packets if the
                destination IP has not been mapped to a MAC."
   Status:      Probably closed.  The basic ARP issue has been fixed (if
-               CONFIG_NET_ARP_SEND is enable), but this has not been verifie
+               CONFIG_NET_ARP_SEND is enable), but this has not been verified
                with THTTPD.
   Priority:    Medium
 

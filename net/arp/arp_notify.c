@@ -206,7 +206,7 @@ int arp_wait(FAR struct arp_notify_s *notify, FAR struct timespec *timeout)
   (void)arp_wait_cancel(notify);
 
   /* Re-enable interrupts and return the result of the wait */
-  
+
   irqrestore(flags);
   return ret;
 }

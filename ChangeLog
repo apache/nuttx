@@ -8186,3 +8186,6 @@
 	  the ARP table and, if not send ARP requests periodically until it is.
 	  This eliminates losing the first outgoing message because there is not
 	  mapping in the ARP table (2014-8-18).
+	* net/arp/arp_notify.c, arp_send.c, arp_arpin.c, and arp.h:  Add
+	  signalling logic so that we do not have to wait so long with the
+	  network responses to ARP requests quickly (2014-8-19).
