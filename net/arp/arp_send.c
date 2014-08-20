@@ -54,6 +54,7 @@
 
 #include "netdev/netdev.h"
 #include "devif/devif.h"
+#include "route/route.h"
 #include "arp/arp.h"
 
 #ifdef CONFIG_NET_ARP_SEND
@@ -168,7 +169,7 @@ static uint16_t arp_send_interrupt(FAR struct net_driver_s *dev,
  *   of timeouts occur without receiving the ARP replay.
  *
  * Parameters:
- *   ipaddr   The IP address to be queried.
+ *   ipaddr   The IP address to be queried (in network order).
  *
  * Returned Value:
  *   Zero (OK) is returned on success and the IP address mapping can now be
@@ -191,6 +192,33 @@ int arp_send(in_addr_t ipaddr)
   net_lock_t save;
   int ret;
 
+  /* First check if destination is a local broadcast. */
+
+  if (ipaddr == INADDR_BROADCAST)
+    {
+      /* We don't need to send the ARP request */
+
+      return OK;
+    }
+
+#if defined(CONFIG_NET_IGMP) && !defined(CONFIG_NET_IPv6)
+  /* Check if the destination address is a multicast address
+   *
+   * - IPv4: multicast addresses lie in the class D group -- The address range
+   *   224.0.0.0 to 239.255.255.255 (224.0.0.0/4)
+   *
+   * - IPv6 multicast addresses are have the high-order octet of the
+   *   addresses=0xff (ff00::/8.)
+   */
+
+ if (NTOHL(ipaddr) >= 0xe0000000 && NTOHL(ipaddr) <= 0xefffffff)
+    {
+      /* We don't need to send the ARP request */
+
+      return OK;
+    }
+#endif
+
   /* Get the device that can route this request */
 
   dev = netdev_findbyaddr(ipaddr);
@@ -199,6 +227,33 @@ int arp_send(in_addr_t ipaddr)
       ndbg("ERROR: Unreachable: %08lx\n", (unsigned long)ipaddr);
       ret = -EHOSTUNREACH;
       goto errout;
+    }
+
+  /* Check if the destination address is on the local network. */
+
+  if (!net_ipaddr_maskcmp(ipaddr, dev->d_ipaddr, dev->d_netmask))
+    {
+      net_ipaddr_t dripaddr;
+
+      /* Destination address is not on the local network */
+
+#ifdef CONFIG_NET_ROUTE
+
+      /* We have a routing table.. find the correct router to use in
+       * this case (or, as a fall-back, use the device's default router
+       * address).  We will use the router IP address instead of the
+       * destination address when determining the MAC address.
+       */
+
+      netdev_router(dev, ipaddr, &dripaddr);
+#else
+      /* Use the device's default router IP address instead of the
+       * destination address when determining the MAC address.
+       */
+
+      net_ipaddr_copy(dripaddr, dev->d_draddr);
+#endif
+      ipaddr = dripaddr;
     }
 
   /* Allocate resources to receive a callback.  This and the following
