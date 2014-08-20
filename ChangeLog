@@ -8199,3 +8199,5 @@
 	  (2014-8-20).
 	* configs/sam4e-ek/src/Kconfig and src/sam_ili9341.c: Add ILI9341-based
 	  LCD driver.  Fully functional (2014-8-20).
+	* configs/sam4e-ek/nxwm:  Add an NxWM configuration for the SAM4E-EK
+	  (2014-8-20).
