@@ -8191,3 +8191,9 @@
 	  network responses to ARP requests quickly (2014-8-19).
 	* include/nuttx/lcd/ili9341.h: \Add a register definition header file
 	  for the ILI9341 LCD (2014-8-19).
+	* net/arp/Kconfig: ARP request logic is no longer EXPERIMENTAL
+	  (2014-8-20).
+	* net/arp/arp_send.c: ARP request logic needs to do the right thing if
+	  (1) the address is a broadcast or multicast address, and (2) if the
+	  IP address lies outside of the network.  Problem noted by Manuel Stuehn
+	  (2014-8-20).
