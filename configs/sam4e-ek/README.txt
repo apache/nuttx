@@ -24,7 +24,7 @@ Contents
   - USB Full-Speed Device
   - HSMCI
   - Touchscreen
-  - ILI9325-Based LCD
+  - ILI9325/41-Based LCD
   - SAM4E-EK-specific Configuration Options
   - Configurations
 
@@ -917,17 +917,15 @@ Touchscreen
 
     STATUS: Verified 2014-05-14
 
-ILI9325-Based LCD
+ILI9325/41-Based LCD
 =================
 
   The SAM4E-EK carries a TFT transmissive LCD module with touch panel,
-  FTM280C34D. Its integrated driver IC is ILI9325. The LCD display area is
-  2.8 inches diagonally measured, with a native resolution of 240 x 320
+  FTM280C34D. Its integrated driver IC is either a ILI9325 ILI9342 (the
+  original schematics said ILI9325, but I learned the hard way that I had
+  an ILI9341-based LCD). The LCD display area is 2.8 inches diagonally
+  measured, with a native resolution of 240 x 320
   dots.
-
-  No driver has been developed for the SAM4E-EK LCD as of this writing.
-  Some technical information follows might be useful to anyone who is
-  inspired to develop that driver:
 
   Connectivity
   ------------
@@ -998,39 +996,34 @@ ILI9325-Based LCD
     brightness control) from a 32-level logarithmic scale. Four resistors
     R93/R94/R95/R96 are implemented for optional current limitation.
 
-  Resources
-  ---------
+  Configuration
+  -------------
 
-    If you want to implement LCD support, here are some references that may
-    help you:
+    This is the basic configuration that enables the ILI9341-based LCD.
+    Of course additional settings would be necessary to enable the graphic
+    capabilities to do anything with the LCD.
 
-    1. Atmel Sample Code (ASF).  There is no example for the SAM4E-EK, but
-       there is for the SAM4S-EK.  The LCD and its processor connectivity
-       appear to be equivalent to the SAM4E-EK so this sample code should be
-       a good place to begin.  NOTE that the clock frequencies may be
-       different and pin usage may be different.  So it may be necessary to
-       adjust the SAM configuration to use this example.
+       System Type -> AT91SAM3/4 Configuration Options
+         CONFIG_SAM34_SMC=y                : SMC support
 
-    2. There is an example of an LCD driver for the SAM3U at
-       configs/sam4u-ek/src/up_lcd.c.  That LCD driver is for an LCD with a
-       different LCD controller but should provide the NuttX SAM framework
-       for an LCD driver.
+       Device Drivers -> LCD Driver Support
+         CONFIG_LCD=y                      : Enable LCD support
+         CONFIG_LCD_MAXCONTRAST=1          : Value should not matter
+         CONFIG_LCD_MAXPOWER=64            : Must be > 16
+         CONFIG_LCD_LANDSCAPE=y            : Landscape orientation
 
-    3. There are other LCD drivers for different MCUs that do support the
-       ILI9325 LCD.  Look at configs/shenzhou/src/up_ili93xx.c,
-       configs/stm3220g-eval/src/up_lcd.c, and
-       configs/stm3240g-eval/src/up_lcd.c.  I believe that the Shenzhou
-       driver is the most recent.
+       Board Selection
+         CONFIG_SAM4EEK_LCD_ILI9341=y      : For the ILI9341-based LCD
+         CONFIG_SAM4EEK_LCD_RGB565=y       : Color resolution
+         CONFIG_SAM4EEK_LCD_BGCOLOR=0x00   : Initial background color
 
   STATUS:
-    2014-05-14:  Fully implemented.  There is still a bug in in the LCD
-    communications.  The LCD ID is read as 0x0000 instead of 0x9325.
 
-    2014-8-19:  Updated.  The LCD ID is bad because the on-board LCD is
-    *not* an ILI9325.  It is an ILI9341.  The ID lies in a different
-    address and is 0x00009341. Need to write a new driver.
+    2014-8-20:  Updated.  The ILI9341 LCD has some basic functionality.
+    Certainly it can transfer and display data fine.  But there are some
+    issues with the geometry of data that appears on the LCD..
 
-    The LCD backlight appears to be functional.
+    The LCD backlight is functional.
 
 SAM4E-EK-specific Configuration Options
 =======================================
@@ -1185,9 +1178,14 @@ SAM4E-EK-specific Configuration Options
   LCD Options.  Other than the standard LCD configuration options
   (see configs/README.txt), the SAM4E-EK driver also supports:
 
-    CONFIG_LCD_PORTRAIT - Present the display in the standard 240x320
-       "Portrait" orientation.  Default:  The display is rotated to
-       support a 320x240 "Landscape" orientation.
+    CONFIG_LCD_LANDSCAPE - Define for 320x240 display "landscape"
+      support. Default is this 320x240 "landscape" orientation
+    CONFIG_LCD_RLANDSCAPE - Define for 320x240 display "reverse
+      landscape" support.
+    CONFIG_LCD_PORTRAIT - Define for 240x320 display "portrait"
+      orientation support.
+    CONFIG_LCD_RPORTRAIT - Define for 240x320 display "reverse
+      portrait" orientation support.
 
 Configurations
 ==============
@@ -1425,6 +1423,7 @@ Configurations
          CONFIG_LCD_LANDSCAPE=y            : Landscape orientation
 
        Board Selection
+         CONFIG_SAM4EEK_LCD_ILI9341=y      : For the ILI9341-based LCD
          CONFIG_SAM4EEK_LCD_RGB565=y       : Color resolution
          CONFIG_SAM4EEK_LCD_BGCOLOR=0x00   : Initial background color
 
@@ -1469,9 +1468,9 @@ Configurations
 
          2014-05-14: The touchscreen interface was successfully verified.
 
-         2014-05-14: The LCD interface is fully implemented.  However,
-                     there is still a bug in in the LCD communications.  The
-                     LCD ID is read as 0x0000 instead of 0x9325.
+         2014-08-20: The LCD interface is fully implemented and data appears
+                     to be transferred okay.  However, there are errors in
+                     geometry that leave the LCD unusable still.
 
                      The LCD backlight appears to be functional.
 
