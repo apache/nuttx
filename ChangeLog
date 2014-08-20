@@ -8198,4 +8198,4 @@
 	  IP address lies outside of the network.  Problem noted by Manuel Stuehn
 	  (2014-8-20).
 	* configs/sam4e-ek/src/Kconfig and src/sam_ili9341.c: Add ILI9341-based
-	  LCD driver (2014-8-20).
+	  LCD driver.  Fully functional (2014-8-20).
