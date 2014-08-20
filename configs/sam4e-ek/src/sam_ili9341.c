@@ -215,12 +215,12 @@
 /* Display/Color Properties ***********************************************************/
 /* Display Resolution */
 
-#if defined(CONFIG_LCD_PORTAIT) || defined(CONFIG_LCD_RPORTAIT)
-#  define SAM_XRES            240
-#  define SAM_YRES            320
-#else
+#if defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_RLANDSCAPE)
 #  define SAM_XRES            320
 #  define SAM_YRES            240
+#else
+#  define SAM_XRES            240
+#  define SAM_YRES            320
 #endif
 
 /* Color depth and format */
@@ -502,20 +502,22 @@ static void sam_setwindow(sam_color_t row, sam_color_t col,
 {
   uint8_t buffer[4];
 
+  lcdvdbg("row=%d col=%d width=%d height=%d\n", row, col, width, height);
+
   /* Set Column Address Position */
 
-  buffer[0] = (row >> 8) & 0xff;
-  buffer[1] = row & 0xff;
-  buffer[2] = ((row + width - 1) >> 8) & 0xff;
-  buffer[3] = (row + width - 1) & 0xff;
+  buffer[0] = (col >> 8) & 0xff;
+  buffer[1] = col & 0xff;
+  buffer[2] = ((col + width - 1) >> 8) & 0xff;
+  buffer[3] = (col + width - 1) & 0xff;
   sam_putreg(ILI9341_COLUMN_ADDRESS_SET, buffer, 4);
 
   /* Set Page Address Position */
 
-  buffer[0] = (col >> 8) & 0xff;
-  buffer[1] = col & 0xff;
-  buffer[2] = ((col + height - 1) >> 8) & 0xff;
-  buffer[3] = (col + height - 1) & 0xff;
+  buffer[0] = (row >> 8) & 0xff;
+  buffer[1] = row & 0xff;
+  buffer[2] = ((row + height - 1) >> 8) & 0xff;
+  buffer[3] = (row + height - 1) & 0xff;
   sam_putreg(ILI9341_PAGE_ADDRESS_SET, buffer, 4);
 }
 
@@ -650,6 +652,8 @@ static void sam_set_backlight(unsigned int power)
   unsigned int level;
   int i;
 
+  lcdvdbg("power=%d\n", power);
+
   /* Scale the power setting to the range 1...BKL_LEVELS */
 
   DEBUGASSERT(power > 0 && power <= CONFIG_LCD_MAXPOWER);
@@ -690,9 +694,11 @@ static void sam_set_backlight(unsigned int power)
 
 static int sam_poweroff(FAR struct sam_dev_s *priv)
 {
+  lcdvdbg("OFF\n");
+
   /* Turn the display off */
 
-    sam_putreg(ILI9341_DISPLAY_OFF, NULL, 0);
+   sam_putreg(ILI9341_DISPLAY_OFF, NULL, 0);
 
   /* Disable the backlight */
 
@@ -743,7 +749,7 @@ static int sam_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
 
   /* Determine the refresh window area */
 
-  sam_setwindow(row, col, npixels+1, 2);
+  sam_setwindow(row, col, npixels, 1);
 
   /* Prepare to write in GRAM */
 
@@ -801,7 +807,7 @@ static int sam_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 
   /* Determine the refresh window area */
 
-  sam_setwindow(row, col, npixels+1, 2);
+  sam_setwindow(row, col, npixels, 1);
 
   /* Prepare to read GRAM data */
 
@@ -1063,7 +1069,7 @@ static void sam_lcd9341_initialize(void)
 
   /* Memory Access Control configuration */
 
-#if defined(CONFIG_LCD_PORTAIT)
+#if defined(CONFIG_LCD_LANDSCAPE)
   /* Horizontal refresh order (MH): 0
    * RGB/BGR order (BGR)          : 1
    * Vertical refresh order (ML)  : 0
@@ -1075,19 +1081,18 @@ static void sam_lcd9341_initialize(void)
   buffer[0] = ILI9341_MEMORY_ACCESS_CONTROL_BGR |
               ILI9341_MEMORY_ACCESS_CONTROL_MV;
 
-#elif defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_RPORTAIT)
+#elif defined(CONFIG_LCD_PORTRAIT)
   /* Horizontal refresh order (MH): 0
    * RGB/BGR order (BGR)          : 1
    * Vertical refresh order (ML)  : 0
    * Row/column exchange (MV)     : 0
-   * Column address order (MX)    : 1
+   * Column address order (MX)    : 0
    * Row address order (MY)       : 0
    */
 
-  buffer[0] = ILI9341_MEMORY_ACCESS_CONTROL_BGR |
-              ILI9341_MEMORY_ACCESS_CONTROL_MX;
+  buffer[0] = ILI9341_MEMORY_ACCESS_CONTROL_BGR;
 
-#elif defined(CONFIG_LCD_RPORTAIT)
+#elif defined(CONFIG_LCD_RLANDSCAPE)
   /* Horizontal refresh order (MH): 0
    * RGB/BGR order (BGR)          : 1
    * Vertical refresh order (ML)  : 0
@@ -1100,16 +1105,17 @@ static void sam_lcd9341_initialize(void)
               ILI9341_MEMORY_ACCESS_CONTROL_MV |
               ILI9341_MEMORY_ACCESS_CONTROL_MX;
 
-#else /* if defined(CONFIG_LCD_RLANDSCAPE) */
+#elif defined(CONFIG_LCD_RPORTRAIT)
   /* Horizontal refresh order (MH): 0
    * RGB/BGR order (BGR)          : 1
    * Vertical refresh order (ML)  : 0
-   * Row/column exchange (MV)     : 0
+   * Row/column exchange (MV)     : 1
    * Column address order (MX)    : 0
    * Row address order (MY)       : 1
    */
 
   buffer[0] = ILI9341_MEMORY_ACCESS_CONTROL_BGR |
+              ILI9341_MEMORY_ACCESS_CONTROL_MX |
               ILI9341_MEMORY_ACCESS_CONTROL_MY;
 
 #endif
