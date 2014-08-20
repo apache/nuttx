@@ -1554,3 +1554,76 @@ Configurations
         CONFIG_CDCACM_CONSOLE=n            : The CDC/ACM serial device is NOT the console
         CONFIG_PL2303=y                    : The Prolifics PL2303 emulation is enabled
         CONFIG_PL2303_CONSOLE=y            : The PL2303 serial device is the console
+
+  nxwm:
+
+    This is a special configuration setup for the NxWM window manager
+    UnitTest.  It integrates support for both the SAM4E-EK ILI9341 LCDC and
+    the SAM4E-EK ADS7843E touchscreen controller and provides a more
+    advanced graphics demo. It provides an interactive windowing experience.
+
+    The NxWM window manager is a tiny window manager tailored for use
+    with smaller LCDs.  It supports a task, a start window, and
+    multiple application windows with toolbars.  However, to make the best
+    use of the visible LCD space, only one application window is visible at
+    at time.
+
+    The NxWM window manager can be found here:
+
+      nuttx-git/NxWidgets/nxwm
+
+    The NxWM unit test can be found at:
+
+      nuttx-git/NxWidgets/UnitTests/nxwm
+
+    Documentation for installing the NxWM unit test can be found here:
+
+      nuttx-git/NxWidgets/UnitTests/README.txt
+
+    Here is the quick summary of the build steps.  These steps assume that
+    you have the entire NuttX GIT in some directory ~/nuttx-git.  You may
+    have these components installed elsewhere.  In that case, you will need
+    to adjust all of the paths in the following accordingly:
+
+    1. Install the nxwm configuration
+
+       $ cd ~/nuttx-git/nuttx/tools
+       $ ./configure.sh sam4e-ek/nxwm
+
+    2. Make the build context (only)
+
+       $ cd ..
+       $ . ./setenv.sh
+       $ make context
+       ...
+
+       NOTE: the use of the setenv.sh file is optional.  All that it will
+       do is to adjust your PATH variable so that the build system can find
+       your tools.  If you use it, you will most likely need to modify the
+       script so that it has the correct path to your tool binaries
+       directory.
+
+    3. Install the nxwm unit test
+
+       $ cd ~/nuttx-git/NxWidgets
+       $ tools/install.sh ~/nuttx-git/apps nxwm
+       Creating symbolic link
+        - To ~/nuttx-git/NxWidgets/UnitTests/nxwm
+        - At ~/nuttx-git/apps/external
+
+    4. Build the NxWidgets library
+
+       $ cd ~/nuttx-git/NxWidgets/libnxwidgets
+       $ make TOPDIR=~/nuttx-git/nuttx
+       ...
+
+    5. Build the NxWM library
+
+       $ cd ~/nuttx-git/NxWidgets/nxwm
+       $ make TOPDIR=~/nuttx-git/nuttx
+       ...
+
+    6. Built NuttX with the installed unit test as the application
+
+       $ cd ~/nuttx-git/nuttx
+       $ make
