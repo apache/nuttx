@@ -3683,10 +3683,10 @@ Configurations
     graphics demo. It provides an interactive windowing experience.
 
     The NxWM window manager is a tiny window manager tailored for use
-    with smaller LCDs.  It supports a toolchain, a start window, and
-    multiple application windows.  However, to make the best use of
-    the visible LCD space, only one application window is visible at
-    at time.
+    with smaller LCDs.  It supports a taskbar, a start window, and
+    multiple application windows with toolbars.  However, to make the
+    best use of the visible LCD space, only one application window is
+    visible at at time.
 
     The NxWM window manager can be found here:
 
