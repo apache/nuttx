@@ -90,10 +90,14 @@ Examples: /drivers/lcd/
 
 Re-usable LCD drivers reside in the drivers/lcd directory:
 
-  LEDs:
+  LCDs:
   ----
   mio283qt2.c. This is a driver for the MI0283QT-2 LCD from Multi-Inno
     Technology Co., Ltd.  This LCD is based on the Himax HX8347-D LCD
+    controller.
+
+  mio283qt9a.c.  This is a driver for the MI0283QT-9A LCD from Multi-Inno
+    Technology Co., Ltd.  This LCD is based on the Ilitek ILI9341 LCD
     controller.
 
   nokia6100.c.  Supports the Nokia 6100 display with either the Philips
@@ -202,7 +206,10 @@ that makes then less re-usable:
     configs/stm3220g-eval/src/up_lcd.c and configs/stm3240g-eval/src/up_lcd.c.
       AM-240320L8TNQW00H (LCD_ILI9320 or LCD_ILI9321) and
       AM-240320D5TOQW01H (LCD_ILI9325)
+
     configs/shenzhou/src/up_ili93xx.c. Another ILI93xx driver.
+    config/sam4e-ek/src/sam_ili9325.c. ILI9325 driver
+    config/sam4e-ek/src/sam_ili9341.c. ILI9341 driver
 
   R61505U
 
@@ -241,6 +248,12 @@ that makes then less re-usable:
       been verified and is working fine.
     configs/stm32ldiscovery/src/stm32_lcd.c.  1x6 segment LCD with bars
       using the segment LCD controller built-into the STM32L15X.
+
+  TFT Panel Drivers:
+
+    configs/open1788/src/lpc17_lcd.c and arch/arm/src/lpc17xx/lpc17_lcd.c
+    configs/sama5d3x-ek/src and configs/sama5d4-ek/src: Use
+      arch/arm/src/sama5/sam_lcd.c
 
 graphics/
 =========

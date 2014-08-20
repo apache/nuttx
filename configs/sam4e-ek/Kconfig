@@ -65,7 +65,19 @@ endchoice # AT25 serial FLASH configuration
 if LCD
 
 choice
-	prompt "ILI9325-based LCD Color Configuration"
+	prompt "LCD Type"
+	default SAM4EEK_LCD_ILI9341
+
+config SAM4EEK_LCD_ILI9325
+	bool "ILI9325 LCD controller"
+
+config SAM4EEK_LCD_ILI9341
+	bool "ILI9341 LCD controller"
+
+endchoice # LCD Type
+
+choice
+	prompt "LCD Color Configuration"
 	default SAM4EEK_LCD_RGB565
 
 config SAM4EEK_LCD_RGB565
@@ -77,7 +89,7 @@ config SAM4EEK_LCD_RGB24
 config SAM4EEK_LCD_RGB32
 	bool "RGB32"
 
-endchoice # ILI9325-based LCD Color Configuration
+endchoice # LCD Color Configuration
 
 config SAM4EEK_LCD_BGCOLOR
 	hex "Initial background color"

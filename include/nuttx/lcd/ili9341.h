@@ -47,7 +47,7 @@
  **************************************************************************************/
 /* ILI9341 ID code */
 
-#define ILI9341_DEVICE_CODE                    0x00009341
+#define ILI9341_DEVICE_CODE                    0x9341
 
 /* ILI9341 LCD Register Addresses *****************************************************/
 
@@ -143,22 +143,22 @@
 /* ILI9341 LCD Register Bit Definitions ***********************************************/
 /* Memory Access control */
 
-#define ILI9341_MEMORY_ACCESS_CONTROL_MY       (1 << 7)
-#define ILI9341_MEMORY_ACCESS_CONTROL_MX       (1 << 6)
-#define ILI9341_MEMORY_ACCESS_CONTROL_MV       (1 << 5)
-#define ILI9341_MEMORY_ACCESS_CONTROL_ML       (1 << 4)
-#define ILI9341_MEMORY_ACCESS_CONTROL_BGR      (1 << 3)
-#define ILI9341_MEMORY_ACCESS_CONTROL_MH       (1 << 2)
+#define ILI9341_MEMORY_ACCESS_CONTROL_MH       (1 << 2) /* Horizontal refresh order */
+#define ILI9341_MEMORY_ACCESS_CONTROL_BGR      (1 << 3) /* RGB/BGR order */
+#define ILI9341_MEMORY_ACCESS_CONTROL_ML       (1 << 4) /* Vertical refresh order */
+#define ILI9341_MEMORY_ACCESS_CONTROL_MV       (1 << 5) /* Row/column exchange */
+#define ILI9341_MEMORY_ACCESS_CONTROL_MX       (1 << 6) /* Column address order */
+#define ILI9341_MEMORY_ACCESS_CONTROL_MY       (1 << 7) /* Row address order */
 
 /* Display function control */
 
-#define ILI9341_DISP_FUNC_CTL_REV              (1 << 7)
-#define ILI9341_DISP_FUNC_CTL_GS               (1 << 6)
-#define ILI9341_DISP_FUNC_CTL_SS               (1 << 5)
-#define ILI9341_DISP_FUNC_CTL_SM               (1 << 4)
-#define ILI9341_DISP_FUNC_CTL_ISC_SHIFT        0
-#define ILI9341_DISP_FUNC_CTL_ISC_MASK         (15 << 0)
+#define ILI9341_DISP_FUNC_CTL_ISC_SHIFT        (0)
+#define ILI9341_DISP_FUNC_CTL_ISC_MASK         (15 << ILI9341_DISP_FUNC_CTL_ISC_SHIFT)
 #  define ILI9341_DISP_FUNC_CTL_ISC(n)         ((n) << ILI9341_DISP_FUNC_CTL_ISC_SHIFT))
+#define ILI9341_DISP_FUNC_CTL_SM               (1 << 4)
+#define ILI9341_DISP_FUNC_CTL_SS               (1 << 5)
+#define ILI9341_DISP_FUNC_CTL_GS               (1 << 6)
+#define ILI9341_DISP_FUNC_CTL_REV              (1 << 7)
 
 /**************************************************************************************
  * Public Types

@@ -55,7 +55,13 @@ CSRCS += sam_hsmci.c
 endif
 
 ifeq ($(CONFIG_LCD),y)
+ifeq ($(CONFIG_SAM4EEK_LCD_ILI9325),y)
 CSRCS += sam_ili9325.c
+else
+ifeq ($(CONFIG_SAM4EEK_LCD_ILI9341),y)
+CSRCS += sam_ili9341.c
+endif
+endif
 endif
 
 ifeq ($(CONFIG_INPUT_ADS7843E),y)
