@@ -13,7 +13,7 @@
       <h1><big><font color="#3c34ec"><i>NuttX Operating System<p>User's Manual</i></font></big></h1>
       <p><small>by</small></p>
       <p>Gregory Nutt<p>
-      <p>Last Updated: January 13, 2014</p>
+      <p>Last Updated: August 21, 2014</p>
     </td>
   </tr>
 </table>
@@ -57,13 +57,12 @@
       <li>Paragraph 2.3 <a href="#Task_Switch">Task Control Interfaces</a></li>
       <li>Paragraph 2.4 <a href="#Message_Queue">Named Message Queue Interfaces</a></li>
       <li>Paragraph 2.5 <a href="#Semaphores">Counting Semaphore Interfaces</a></li>
-      <li>Paragraph 2.6 <a href="#Watchdogs">Watchdog Timer Interfaces</a></li>
-      <li>Paragraph 2.7 <a href="#ClocksNTimers">Clocks and Timers</a></li>
-      <li>Paragraph 2.8 <a href="#Signals">Signal Interfaces</a></li>
-      <li>Paragraph 2.9 <a href="#Pthread">Pthread Interfaces</a></li>
-      <li>Paragraph 2.10 <a href="#Environ">Environment Variables</a></li>
-      <li>Paragraph 2.11 <a href="#FileSystem">File System Interfaces</a></li>
-      <li>Paragraph 2.12 <a href="#Network">Network Interfaces</a></li>
+      <li>Paragraph 2.6 <a href="#ClocksNTimers">Clocks and Timers</a></li>
+      <li>Paragraph 2.7 <a href="#Signals">Signal Interfaces</a></li>
+      <li>Paragraph 2.8 <a href="#Pthread">Pthread Interfaces</a></li>
+      <li>Paragraph 2.9 <a href="#Environ">Environment Variables</a></li>
+      <li>Paragraph 2.10 <a href="#FileSystem">File System Interfaces</a></li>
+      <li>Paragraph 2.11 <a href="#Network">Network Interfaces</a></li>
     </ul>
   </li>
   <li>
@@ -3872,251 +3871,29 @@ interface of the same name.
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="Watchdogs"><h2>2.6 Watchdog Timer Interfaces</h2></a>
-  </td>
-  </tr>
-</table>
-
-<p>
-  NuttX provides a general watchdog timer facility.
-  This facility allows the NuttX user to specify a watchdog timer function
-  that will run after a specified delay.
-  The watchdog timer function will run in the context of the timer interrupt handler.
-  Because of this, a limited number of NuttX interfaces are available to he watchdog timer function.
-  However, the watchdog timer function may use <code>mq_send()</code>, <code>sigqueue()</code>,
-  or <code>kill()</code> to communicate with NuttX tasks.
-</p>
-<ul>
-  <li><a href="#wdcreate">2.6.1 wd_create</a></li>
-  <li><a href="#wddelete">2.6.2 wd_delete</a></li>
-  <li><a href="#wdstart">2.6.3 wd_start</a></li>
-  <li><a href="#wdcancel">2.6.4 wd_cancel</a></li>
-  <li><a href="#wdgettime">2.6.5 wd_gettime</a></li>
-</ul>
-
-<H3><a name="wdcreate">2.6.1 wd_create</a></H3>
-
-<p>
-<b>Function Prototype:</b>
-<pre>
-    #include &lt;wdog.h&gt;
-    WDOG_ID wd_create(void);
-</pre>
-
-<p>
-<b>Description:</b> The wd_create function will create a watchdog
-by allocating the appropriate resources for the watchdog.
-<p>
-<b>Input Parameters:</b> None.
-<p>
-<b>Returned Value:</b>
-<ul>
-<li>Pointer to watchdog that may be used as a handle in subsequent
-NuttX calls (i.e., the watchdog ID), or NULL if insufficient resources
-are available to create the watchdogs.
-</ul>
-
-<p>
-<b>Assumptions/Limitations:</b>
-<p>
-<b>  POSIX  Compatibility:</b> This is a NON-POSIX interface.
-VxWorks provides the following comparable interface:
-<pre>
-    WDOG_ID wdCreate (void);
-</pre>
-
-<p>
-Differences from the VxWorks interface include:
-<ul>
-<li>The number of available watchdogs is fixed (configured at
-initialization time).
-</ul>
-
-<H3><a name="wddelete">2.6.2 wd_delete</a></H3>
-
-<p>
-<b>Function Prototype:</b>
-<pre>
-    #include &lt;wdog.h&gt;
-    int wd_delete(WDOG_ID wdog);
-</pre>
-
-<p>
-<b>Description:</b> The wd_delete function will deallocate a
-watchdog. The watchdog will be removed from the timer queue if
-has been started.
-<p>
-<b>Input Parameters:</b>
-<ul>
-<li><code>wdog</code>. The watchdog ID to delete. This is actually a
-pointer to a watchdog structure.
-</ul>
-
-<p>
-<b>Returned Value:</b>
-<ul>
-<li>OK or ERROR
-</ul>
-
-<p>
-<b>Assumptions/Limitations:</b> It is the responsibility of the
-caller to assure that the watchdog is inactive before deleting
-it.
-<p>
-<b>POSIX  Compatibility:</b> This is a NON-POSIX interface.
-VxWorks provides the following comparable interface:
-<pre>
-    STATUS wdDelete (WDOG_ID wdog);
-</pre>
-
-<p>
-Differences from the VxWorks interface include:
-<ul>
-<li>Does not make any checks to see if the watchdog is being used
-before deallocating it (i.e., never returns ERROR).
-</ul>
-
-<H3><a name="wdstart">2.6.3 wd_start</a></H3>
-
-<p>
-<b>Function Prototype:</b>
-<pre>
-    #include &lt;wdog.h&gt;
-    int wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,
-                 int argc, ....);
-</pre>
-
-<p>
-<b>Description:</b> This function adds a watchdog to the timer
-queue. The specified watchdog function will be called from the
-interrupt level after the specified number of ticks has elapsed.
-Watchdog timers may be started from the interrupt level.
-<p>
-Watchdog times execute in the context of the timer interrupt handler.
-<p>
-Watchdog timers execute only once.
-<p>
-To replace either the timeout delay or the function to be executed,
-call wd_start again with the same wdog; only the most recent
-wd_start() on a given watchdog ID has any effect.
-<p>
-<b>Input Parameters:</b>
-<ul>
-<li><code>wdog</code>. Watchdog ID
-<li><code>delay</code>. Delay count in clock ticks
-<li><code>wdentry</code>. Function to call on timeout
-<li><code>argc</code>.  The number of uint32_t parameters to pass to wdentry.
-<li><code>...</code>. uint32_t size parameters to pass to wdentry
-</ul>
-
-<p>
-<b>Returned Value:</b>
-<ul>
-<li>OK or ERROR
-</ul>
-
-<p>
-<b>Assumptions/Limitations:</b> The watchdog routine runs in the
-context of the timer interrupt handler and is subject to all ISR
-restrictions.
-<p>
-<b>POSIX  Compatibility:</b> This is a NON-POSIX interface.
-VxWorks provides the following comparable interface:
-<pre>
-    STATUS wdStart (WDOG_ID wdog, int delay, FUNCPTR wdentry, int parameter);
-</pre>
-
-<p>
-Differences from the VxWorks interface include:
-<ul>
-<li>The present implementation supports multiple parameters passed
-to wdentry; VxWorks supports only a single parameter.  The maximum
-number of parameters is determined by
-</ul>
-
-<H3><a name="wdcancel">2.6.4 wd_cancel</a></H3>
-<p>
-<b>Function Prototype:</b>
-<pre>
-    #include &lt;wdog.h&gt;
-    int wd_cancel(WDOG_ID wdog);
-</pre>
-
-<p>
-<b>Description:</b> This function cancels a currently running
-watchdog timer. Watchdog timers may be canceled from the interrupt
-level.
-<p>
-<b>Input Parameters:</b>
-<ul>
-<li><code>wdog</code>. ID of the watchdog to cancel.
-</ul>
-
-<p>
-<b>Returned Value:</b>
-<ul>
-<li>OK or ERROR
-</ul>
-
-<p>
-<b>Assumptions/Limitations:</b>
-<p>
-<b>POSIX  Compatibility:</b> This is a NON-POSIX interface.
-VxWorks provides the following comparable interface:
-<pre>
-    STATUS wdCancel (WDOG_ID wdog);
-</pre>
-
-<h3><a name="wdgettime">2.6.5 wd_gettime</a></h3>
-<p>
-  <b>Function Prototype:</b>
-</p>
-<pre>
-    #include &lt;wdog.h&gt;
-    Sint wd_gettime(WDOG_ID wdog);
-</pre>
-<p>
-  <b>Description:</b>
-   This function returns the time remaining before the specified watchdog expires.
-</p>
-<p>
-  <b>Input Parameters:</b>
-  <ul>
-    <li><code>wdog</code>. Identifies the watchdog that the request is for.</li>
-  </ul>
-</p>
-<p>
-  <b>Returned Value:</b>
-  The time in system ticks remaining until the watchdog time expires.  Zero
-  means either that wdog is not valid or that the wdog has already expired.
-</p>
-
-<table width ="100%">
-  <tr bgcolor="#e4e4e4">
-  <td>
-    <a name="ClocksNTimers"><h2>2.7 Clocks and Timers</h2></a>
+    <a name="ClocksNTimers"><h2>2.6 Clocks and Timers</h2></a>
   </td>
   </tr>
 </table>
 
 <ul>
-  <li><a href="#clocksettime">2.7.1 clock_settime</a></li>
-  <li><a href="#clockgettime">2.7.2 clock_gettime</a></li>
-  <li><a href="#clockgetres">2.7.3 clock_getres</a></li>
-  <li><a href="#mktime">2.7.4 mktime</a></li>
-  <li><a href="#gmtime">2.7.5 gmtime</a></li>
-  <li><a href="#localtime">2.7.6 localtime</a></li>
-  <li><a href="#gmtimer">2.7.7 gmtime_r</a></li>
-  <li><a href="#localtimer">2.7.8 localtime_r</a></li>
-  <li><a href="#timercreate">2.7.9 timer_create</a></li>
-  <li><a href="#timerdelete">2.7.10 timer_delete</a></li>
-  <li><a href="#timersettime">2.7.11 timer_settime</a></li>
-  <li><a href="#timergettime">2.7.12 timer_gettime</a></li>
-  <li><a href="#timergetoverrun">2.7.13 timer_getoverrun</a></li>
-  <li><a href="#gettimeofday">2.7.14 gettimeofday</a></li>
+  <li><a href="#clocksettime">2.6.1 clock_settime</a></li>
+  <li><a href="#clockgettime">2.6.2 clock_gettime</a></li>
+  <li><a href="#clockgetres">2.6.3 clock_getres</a></li>
+  <li><a href="#mktime">2.6.4 mktime</a></li>
+  <li><a href="#gmtime">2.6.5 gmtime</a></li>
+  <li><a href="#localtime">2.6.6 localtime</a></li>
+  <li><a href="#gmtimer">2.6.7 gmtime_r</a></li>
+  <li><a href="#localtimer">2.6.8 localtime_r</a></li>
+  <li><a href="#timercreate">2.6.9 timer_create</a></li>
+  <li><a href="#timerdelete">2.6.10 timer_delete</a></li>
+  <li><a href="#timersettime">2.6.11 timer_settime</a></li>
+  <li><a href="#timergettime">2.6.12 timer_gettime</a></li>
+  <li><a href="#timergetoverrun">2.6.13 timer_getoverrun</a></li>
+  <li><a href="#gettimeofday">2.6.14 gettimeofday</a></li>
 </ul>
 
-<H3><a name="clocksettime">2.7.1 clock_settime</a></H3>
+<H3><a name="clocksettime">2.6.1 clock_settime</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -4144,7 +3921,7 @@ VxWorks provides the following comparable interface:
   <li><code>To be provided</code>.</li>
 </ul>
 
-<H3><a name="clockgettime">2.7.2 clock_gettime</a></H3>
+<H3><a name="clockgettime">2.6.2 clock_gettime</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -4172,7 +3949,7 @@ VxWorks provides the following comparable interface:
   <li><code>To be provided</code>.</li>
 </ul>
 
-<H3><a name="clockgetres">2.7.3 clock_getres</a></H3>
+<H3><a name="clockgetres">2.6.3 clock_getres</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -4200,7 +3977,7 @@ VxWorks provides the following comparable interface:
   <li><code>To be provided</code>.</li>
 </ul>
 
-<H3><a name="mktime">2.7.4 mktime</a></H3>
+<H3><a name="mktime">2.6.4 mktime</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -4228,7 +4005,7 @@ VxWorks provides the following comparable interface:
   <li><code>To be provided</code>.</li>
 </ul>
 
-<H3><a name="gmtime">2.7.5 gmtime</a></H3>
+<H3><a name="gmtime">2.6.5 gmtime</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -4261,13 +4038,13 @@ VxWorks provides the following comparable interface:
   <li><code>To be provided</code>.</li>
 </ul>
 
-<H3><a name="localtime">2.7.6 localtime</a></H3>
+<H3><a name="localtime">2.6.6 localtime</a></H3>
 <pre>
     #include &lt;time.h&gt;
     #define localtime(c) gmtime(c)
 </pre>
 
-<H3><a name="gmtimer">2.7.7 gmtime_r</a></H3>
+<H3><a name="gmtimer">2.6.7 gmtime_r</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -4301,13 +4078,13 @@ VxWorks provides the following comparable interface:
   <li><code>To be provided</code>.</li>
 </ul>
 
-<H3><a name="localtimer">2.7.8 localtime_r</a></H3>
+<H3><a name="localtimer">2.6.8 localtime_r</a></H3>
 <pre>
     #include &lt;time.h&gt;
     #define localtime_r(c,r) gmtime_r(c,r)
 </pre>
 
-<H3><a name="timercreate">2.7.9 timer_create</a></H3>
+<H3><a name="timercreate">2.6.9 timer_create</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -4377,7 +4154,7 @@ VxWorks provides the following comparable interface:
   <li>Only <code>CLOCK_REALTIME</code> is supported for the <code>clockid</code> argument.</li>
 </ul>
 
-<H3><a name="timerdelete">2.7.10 timer_delete</a></H3>
+<H3><a name="timerdelete">2.6.10 timer_delete</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -4416,7 +4193,7 @@ VxWorks provides the following comparable interface:
   Comparable to the POSIX interface of the same name.
 </p>
 
-<H3><a name="timersettime">2.7.11 timer_settime</a></H3>
+<H3><a name="timersettime">2.6.11 timer_settime</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -4499,7 +4276,7 @@ VxWorks provides the following comparable interface:
   <li>The <code>ovalue</code> argument is ignored.</li>
 </ul>
 
-<H3><a name="timergettime">2.7.12 timer_gettime</a></H3>
+<H3><a name="timergettime">2.6.12 timer_gettime</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -4546,7 +4323,7 @@ VxWorks provides the following comparable interface:
   Comparable to the POSIX interface of the same name.
 </p>
 
-<H3><a name="timergetoverrun">2.7.13 timer_getoverrun</a></H3>
+<H3><a name="timergetoverrun">2.6.13 timer_getoverrun</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -4607,7 +4384,7 @@ VxWorks provides the following comparable interface:
 interface of the same name.
 </p>
 
-<h3><a name="gettimeofday">2.7.14 gettimeofday</a></h3>
+<h3><a name="gettimeofday">2.6.14 gettimeofday</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -4637,7 +4414,7 @@ interface of the same name.
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="Signals"><h2>2.8 Signal Interfaces</h2></a>
+    <a name="Signals"><h2>2.7 Signal Interfaces</h2></a>
   </td>
   </tr>
 </table>
@@ -4703,23 +4480,23 @@ interface of the same name.
   The following signal handling interfaces are provided by NuttX:
 </p>
 <ul>
-  <li><a href="#sigemptyset">2.8.1 sigemptyset</a></li>
-  <li><a href="#sigfillset">2.8.2 sigfillset</a></li>
-  <li><a href="#sigaddset">2.8.3 sigaddset</a></li>
-  <li><a href="#sigdelset">2.8.4 sigdelset</a></li>
-  <li><a href="#sigismember">2.8.5 sigismember</a></li>
-  <li><a href="#sigaction">2.8.6 sigaction</a></li>
-  <li><a href="#sigprocmask">2.8.7 sigprocmask</a></li>
-  <li><a href="#sigpending">2.8.8 sigpending</a></li>
-  <li><a href="#sigsuspend">2.8.9 sigsuspend</a></li>
-  <li><a href="#sigwaitinfo">2.8.10 sigwaitinfo</a></li>
-  <li><a href="#sigtimedwait">2.8.11 sigtimedwait</a></li>
-  <li><a href="#sigqueue">2.8.12 sigqueue</a></li>
-  <li><a href="#kill">2.8.13 kill</a></li>
-  <li><a href="#pause">2.8.14 pause</a></li>
+  <li><a href="#sigemptyset">2.7.1 sigemptyset</a></li>
+  <li><a href="#sigfillset">2.7.2 sigfillset</a></li>
+  <li><a href="#sigaddset">2.7.3 sigaddset</a></li>
+  <li><a href="#sigdelset">2.7.4 sigdelset</a></li>
+  <li><a href="#sigismember">2.7.5 sigismember</a></li>
+  <li><a href="#sigaction">2.7.6 sigaction</a></li>
+  <li><a href="#sigprocmask">2.7.7 sigprocmask</a></li>
+  <li><a href="#sigpending">2.7.8 sigpending</a></li>
+  <li><a href="#sigsuspend">2.7.9 sigsuspend</a></li>
+  <li><a href="#sigwaitinfo">2.7.10 sigwaitinfo</a></li>
+  <li><a href="#sigtimedwait">2.7.11 sigtimedwait</a></li>
+  <li><a href="#sigqueue">2.7.12 sigqueue</a></li>
+  <li><a href="#kill">2.7.13 kill</a></li>
+  <li><a href="#pause">2.7.14 pause</a></li>
 </ul>
 
-<H3><a name="sigemptyset">2.8.1 sigemptyset</a></H3>
+<H3><a name="sigemptyset">2.7.1 sigemptyset</a></H3>
 
 <p>
 <b>Function Prototype:</b>
@@ -4749,7 +4526,7 @@ by set such that all signals are excluded.
 <b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="sigfillset">2.8.2 sigfillset</a></H3>
+<H3><a name="sigfillset">2.7.2 sigfillset</a></H3>
 
 <p>
 <b>Function Prototype:</b>
@@ -4779,7 +4556,7 @@ by set such that all signals are included.
 <b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="sigaddset">2.8.3 sigaddset</a></H3>
+<H3><a name="sigaddset">2.7.3 sigaddset</a></H3>
 
 <p>
 <b>Function Prototype:</b>
@@ -4810,7 +4587,7 @@ signo to the signal set specified by set.
 <b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="sigdelset">2.8.4 sigdelset</a></H3>
+<H3><a name="sigdelset">2.7.4 sigdelset</a></H3>
 
 <p>
 <b>Function Prototype:</b>
@@ -4841,7 +4618,7 @@ by signo from the signal set specified by set.
 <b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="sigismember">2.8.5 sigismember</a></H3>
+<H3><a name="sigismember">2.7.5 sigismember</a></H3>
 
 <p>
 <b>Function Prototype:</b>
@@ -4874,7 +4651,7 @@ by signo is a member of the set specified by set.
 <b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="sigaction">2.8.6 sigaction</a></H3>
+<H3><a name="sigaction">2.7.6 sigaction</a></H3>
 
 <p>
 <b>Function Prototype:</b>
@@ -4951,7 +4728,7 @@ Differences from the POSIX implementation include:
   </li>
 </ul>
 
-<H3><a name="sigprocmask">2.8.7 sigprocmask</a></H3>
+<H3><a name="sigprocmask">2.7.7 sigprocmask</a></H3>
 
 <p>
 <b>Function Prototype:</b>
@@ -5001,7 +4778,7 @@ pointed to by the <code>set</code> input parameter.
 <b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="sigpending">2.8.8 sigpending</a></H3>
+<H3><a name="sigpending">2.7.8 sigpending</a></H3>
 
 <p>
 <b>Function Prototype:</b>
@@ -5039,7 +4816,7 @@ is delivered more than once.&quot;
 <b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="sigsuspend">2.8.9 sigsuspend</a></H3>
+<H3><a name="sigsuspend">2.7.9 sigsuspend</a></H3>
 
 <p>
 <b>Function Prototype:</b>
@@ -5087,7 +4864,7 @@ function or to terminate the task.&quot;  Only delivery of the signal
 is required in the present implementation (even if the signal is ignored).
 </ul>
 
-<H3><a name="sigwaitinfo">2.8.10 sigwaitinfo</a></H3>
+<H3><a name="sigwaitinfo">2.7.10 sigwaitinfo</a></H3>
 
 <p>
 <b>Function Prototype:</b>
@@ -5119,7 +4896,7 @@ with a NULL timeout parameter. (see below).
 <b>  POSIX  Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="sigtimedwait">2.8.11 sigtimedwait</a></H3>
+<H3><a name="sigtimedwait">2.7.11 sigtimedwait</a></H3>
 
 <p>
 <b>Function Prototype:</b>
@@ -5185,7 +4962,7 @@ that the unblocked signal be caught; the task will be resumed even if
 the unblocked signal is ignored.
 </ul>
 
-<H3><a name="sigqueue">2.8.12 sigqueue</a></H3>
+<H3><a name="sigqueue">2.7.12 sigqueue</a></H3>
 
 <p>
 <b>Function Prototype:</b>
@@ -5242,7 +5019,7 @@ There is no null signal in the present implementation; a zero signal will
 be sent.
 </ul>
 
-<H3><a name="kill">2.8.13 kill</a></H3>
+<H3><a name="kill">2.7.13 kill</a></H3>
 
 <p>
 <b>Function Prototype:</b>
@@ -5298,7 +5075,7 @@ be sent.
   <li>Sending of signals to 'process groups' is not supported in NuttX.</li>
 </ul>
 
-<H3><a name="pause">2.8.14 pause</a></H3>
+<H3><a name="pause">2.7.14 pause</a></H3>
 
 <p>
 <b>Function Prototype:</b>
@@ -5334,7 +5111,7 @@ be sent.
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="Pthread"><h2>2.9 Pthread Interfaces</h2></a>
+    <a name="Pthread"><h2>2.8 Pthread Interfaces</h2></a>
   </td>
   </tr>
 </table>
@@ -5361,27 +5138,27 @@ be sent.
     Interfaces that allow you to create and manage pthreads.
   </p>
   <ul>
-    <li><a href="#pthreadattrinit">2.9.1 pthread_attr_init</a></li>
-    <li><a href="#pthreadattrdestroy">2.9.2 pthread_attr_destroy</a></li>
-    <li><a href="#pthreadattrsetschedpolity">2.9.3 pthread_attr_setschedpolicy</a></li>
-    <li><a href="#pthreadattrgetschedpolicy">2.9.4 pthread_attr_getschedpolicy</a></li>
-    <li><a href="#pthreadattrsetschedparam">2.9.5 pthread_attr_setschedparam</a></li>
-    <li><a href="#pthreadattrgetschedparam">2.9.6 pthread_attr_getschedparam</a></li>
-    <li><a href="#pthreadattrsetinheritsched">2.9.7 pthread_attr_setinheritsched</a></li>
-    <li><a href="#pthreadattrgetinheritsched">2.9.8 pthread_attr_getinheritsched</a></li>
-    <li><a href="#pthreadattrsetstacksize">2.9.9 pthread_attr_setstacksize</a></li>
-    <li><a href="#pthreadattrgetstacksize">2.9.10 pthread_attr_getstacksize</a></li>
-    <li><a href="#pthreadcreate">2.9.11 pthread_create</a></li>
-    <li><a href="#pthreaddetach">2.9.12 pthread_detach</a></li>
-    <li><a href="#pthreadexit">2.9.13 pthread_exit</a></li>
-    <li><a href="#pthreadcancel">2.9.14 pthread_cancel</a></li>
-    <li><a href="#pthreadsetcancelstate">2.9.15 pthread_setcancelstate</a></li>
-    <li><a href="#pthreadtestcancelstate">2.9.16 pthread_testcancelstate</a></li>
-    <li><a href="#pthreadjoin">2.9.17 pthread_join</a></li>
-    <li><a href="#pthreadyield">2.9.18 pthread_yield</a></li>
-    <li><a href="#pthreadself">2.9.19 pthread_self</a></li>
-    <li><a href="#pthreadgetschedparam">2.9.20 pthread_getschedparam</a></li>
-    <li><a href="#pthreadsetschedparam">2.9.21 pthread_setschedparam</a></li>
+    <li><a href="#pthreadattrinit">2.8.1 pthread_attr_init</a></li>
+    <li><a href="#pthreadattrdestroy">2.8.2 pthread_attr_destroy</a></li>
+    <li><a href="#pthreadattrsetschedpolity">2.8.3 pthread_attr_setschedpolicy</a></li>
+    <li><a href="#pthreadattrgetschedpolicy">2.8.4 pthread_attr_getschedpolicy</a></li>
+    <li><a href="#pthreadattrsetschedparam">2.8.5 pthread_attr_setschedparam</a></li>
+    <li><a href="#pthreadattrgetschedparam">2.8.6 pthread_attr_getschedparam</a></li>
+    <li><a href="#pthreadattrsetinheritsched">2.8.7 pthread_attr_setinheritsched</a></li>
+    <li><a href="#pthreadattrgetinheritsched">2.8.8 pthread_attr_getinheritsched</a></li>
+    <li><a href="#pthreadattrsetstacksize">2.8.9 pthread_attr_setstacksize</a></li>
+    <li><a href="#pthreadattrgetstacksize">2.8.10 pthread_attr_getstacksize</a></li>
+    <li><a href="#pthreadcreate">2.8.11 pthread_create</a></li>
+    <li><a href="#pthreaddetach">2.8.12 pthread_detach</a></li>
+    <li><a href="#pthreadexit">2.8.13 pthread_exit</a></li>
+    <li><a href="#pthreadcancel">2.8.14 pthread_cancel</a></li>
+    <li><a href="#pthreadsetcancelstate">2.8.15 pthread_setcancelstate</a></li>
+    <li><a href="#pthreadtestcancelstate">2.8.16 pthread_testcancelstate</a></li>
+    <li><a href="#pthreadjoin">2.8.17 pthread_join</a></li>
+    <li><a href="#pthreadyield">2.8.18 pthread_yield</a></li>
+    <li><a href="#pthreadself">2.8.19 pthread_self</a></li>
+    <li><a href="#pthreadgetschedparam">2.8.20 pthread_getschedparam</a></li>
+    <li><a href="#pthreadsetschedparam">2.8.21 pthread_setschedparam</a></li>
   </ul>
   <p>
     <b>Thread Specific Data</b>.
@@ -5391,64 +5168,64 @@ be sent.
     (2) The main task thread does not had thread-specific data.
   </p>
   <ul>
-    <li><a href="#pthreadkeycreate">2.9.22 pthread_key_create</a></li>
-    <li><a href="#pthreadsetspecific">2.9.23 pthread_setspecific</a></li>
-    <li><a href="#pthreadgetspecific">2.9.24 pthread_getspecific</a></li>
-    <li><a href="#pthreadkeydelete">2.9.25 pthread_key_delete</a></li>
+    <li><a href="#pthreadkeycreate">2.8.22 pthread_key_create</a></li>
+    <li><a href="#pthreadsetspecific">2.8.23 pthread_setspecific</a></li>
+    <li><a href="#pthreadgetspecific">2.8.24 pthread_getspecific</a></li>
+    <li><a href="#pthreadkeydelete">2.8.25 pthread_key_delete</a></li>
   </ul>
   <p>
     <b>pthread Mutexes</b>.
   </p>
   <ul>
-    <li><a href="#pthreadmutexattrinit">2.9.26 pthread_mutexattr_init</a></li>
-    <li><a href="#pthreadmutexattrdestroy">2.9.27 pthread_mutexattr_destroy</a></li>
-    <li><a href="#pthreadmutexattrgetpshared">2.9.28 pthread_mutexattr_getpshared</a></li>
-    <li><a href="#pthreadmutexattrsetpshared">2.9.29 pthread_mutexattr_setpshared</a></li>
-    <li><a href="#pthreadmutexattrgettype">2.9.30 pthread_mutexattr_gettype</a></li>
-    <li><a href="#pthreadmutexattrsettype">2.9.31 pthread_mutexattr_settype</a></li>
-    <li><a href="#pthreadmutexinit">2.9.32 pthread_mutex_init</a></li>
-    <li><a href="#pthreadmutexdestrory">2.9.33 pthread_mutex_destroy</a></li>
-    <li><a href="#pthreadmutexlock">2.9.34 pthread_mutex_lock</a></li>
-    <li><a href="#pthreadmutextrylock">2.9.35 pthread_mutex_trylock</a></li>
-    <li><a href="#pthreadmutexunlock">2.9.36 pthread_mutex_unlock</a></li>
+    <li><a href="#pthreadmutexattrinit">2.8.26 pthread_mutexattr_init</a></li>
+    <li><a href="#pthreadmutexattrdestroy">2.8.27 pthread_mutexattr_destroy</a></li>
+    <li><a href="#pthreadmutexattrgetpshared">2.8.28 pthread_mutexattr_getpshared</a></li>
+    <li><a href="#pthreadmutexattrsetpshared">2.8.29 pthread_mutexattr_setpshared</a></li>
+    <li><a href="#pthreadmutexattrgettype">2.8.30 pthread_mutexattr_gettype</a></li>
+    <li><a href="#pthreadmutexattrsettype">2.8.31 pthread_mutexattr_settype</a></li>
+    <li><a href="#pthreadmutexinit">2.8.32 pthread_mutex_init</a></li>
+    <li><a href="#pthreadmutexdestrory">2.8.33 pthread_mutex_destroy</a></li>
+    <li><a href="#pthreadmutexlock">2.8.34 pthread_mutex_lock</a></li>
+    <li><a href="#pthreadmutextrylock">2.8.35 pthread_mutex_trylock</a></li>
+    <li><a href="#pthreadmutexunlock">2.8.36 pthread_mutex_unlock</a></li>
   </ul>
   <p>
     <b>Condition Variables</b>.
   </p>
   <ul>
-    <li><a href="#pthreadconaddrinit">2.9.37 pthread_condattr_init</a></li>
-    <li><a href="#pthreadocndattrdestroy">2.9.38 pthread_condattr_destroy</a></li>
-    <li><a href="#pthreadcondinit">2.9.39 pthread_cond_init</a></li>
-    <li><a href="#pthreadconddestroy">2.9.40 pthread_cond_destroy</a></li>
-    <li><a href="#pthreadcondbroadcast">2.9.41 pthread_cond_broadcast</a></li>
-    <li><a href="#pthreadcondsignal">2.9.42 pthread_cond_signal</a></li>
-    <li><a href="#pthreadcondwait">2.9.43 pthread_cond_wait</a></li>
-    <li><a href="#pthreadcondtimedwait">2.9.44 pthread_cond_timedwait</a></li>
+    <li><a href="#pthreadconaddrinit">2.8.37 pthread_condattr_init</a></li>
+    <li><a href="#pthreadocndattrdestroy">2.8.38 pthread_condattr_destroy</a></li>
+    <li><a href="#pthreadcondinit">2.8.39 pthread_cond_init</a></li>
+    <li><a href="#pthreadconddestroy">2.8.40 pthread_cond_destroy</a></li>
+    <li><a href="#pthreadcondbroadcast">2.8.41 pthread_cond_broadcast</a></li>
+    <li><a href="#pthreadcondsignal">2.8.42 pthread_cond_signal</a></li>
+    <li><a href="#pthreadcondwait">2.8.43 pthread_cond_wait</a></li>
+    <li><a href="#pthreadcondtimedwait">2.8.44 pthread_cond_timedwait</a></li>
   </ul>
   <p>
     <b>Barriers</b>.
   </p>
   <ul>
-    <li><a href="#pthreadbarrierattrinit">2.9.45 pthread_barrierattr_init</a></li>
-    <li><a href="#pthreadbarrierattrdestroy">2.9.46 pthread_barrierattr_destroy</a></li>
-    <li><a href="#pthreadbarrierattrsetpshared">2.9.47 pthread_barrierattr_setpshared</a></li>
-    <li><a href="#pthreadbarrierattrgetpshared">2.9.48 pthread_barrierattr_getpshared</a></li>
-    <li><a href="#pthreadbarrierinit">2.9.49 pthread_barrier_init</a></li>
-    <li><a href="#pthreadbarrierdestroy">2.9.50 pthread_barrier_destroy</a></li>
-    <li><a href="#pthreadbarrierwait">2.9.51 pthread_barrier_wait</a></li>
+    <li><a href="#pthreadbarrierattrinit">2.8.45 pthread_barrierattr_init</a></li>
+    <li><a href="#pthreadbarrierattrdestroy">2.8.46 pthread_barrierattr_destroy</a></li>
+    <li><a href="#pthreadbarrierattrsetpshared">2.8.47 pthread_barrierattr_setpshared</a></li>
+    <li><a href="#pthreadbarrierattrgetpshared">2.8.48 pthread_barrierattr_getpshared</a></li>
+    <li><a href="#pthreadbarrierinit">2.8.49 pthread_barrier_init</a></li>
+    <li><a href="#pthreadbarrierdestroy">2.8.50 pthread_barrier_destroy</a></li>
+    <li><a href="#pthreadbarrierwait">2.8.51 pthread_barrier_wait</a></li>
   </ul>
   <p>
     <b>Initialization</b>.
   </p>
   <ul>
-    <li><a href="#pthreadonce">2.9.52 pthread_once</a></li>
+    <li><a href="#pthreadonce">2.8.52 pthread_once</a></li>
   </ul>
   <p>
     <b>Signals</b>.
   </p>
   <ul>
-    <li><a href="#pthreadkill">2.9.53 pthread_kill</a></li>
-    <li><a href="#pthreadsigmask">2.9.54 pthread_sigmask</a></li>
+    <li><a href="#pthreadkill">2.8.53 pthread_kill</a></li>
+    <li><a href="#pthreadsigmask">2.8.54 pthread_sigmask</a></li>
   </ul>
 </ul>
 <p>
@@ -5505,7 +5282,7 @@ be sent.
   <li><code>pthread_testcancel</code>. set cancelability state.</li>
 </ul>
 
-<H3><a name="pthreadattrinit">2.9.1 pthread_attr_init</a></H3>
+<H3><a name="pthreadattrinit">2.8.1 pthread_attr_init</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -5538,7 +5315,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 <p>
-<H3><a name="pthreadattrdestroy">2.9.2 pthread_attr_destroy</a></H3>
+<H3><a name="pthreadattrdestroy">2.8.2 pthread_attr_destroy</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -5570,7 +5347,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 <p>
-<H3><a name="pthreadattrsetschedpolity">2.9.3 pthread_attr_setschedpolicy</a></H3>
+<H3><a name="pthreadattrsetschedpolity">2.8.3 pthread_attr_setschedpolicy</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -5601,7 +5378,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadattrgetschedpolicy">2.9.4 pthread_attr_getschedpolicy</a></H3>
+<H3><a name="pthreadattrgetschedpolicy">2.8.4 pthread_attr_getschedpolicy</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -5632,7 +5409,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadattrsetschedparam">2.9.5 pthread_attr_getschedpolicy</a></H3>
+<H3><a name="pthreadattrsetschedparam">2.8.5 pthread_attr_getschedpolicy</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -5664,7 +5441,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadattrgetschedparam">2.9.6 pthread_attr_getschedparam</a></H3>
+<H3><a name="pthreadattrgetschedparam">2.8.6 pthread_attr_getschedparam</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -5696,7 +5473,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadattrsetinheritsched">2.9.7 pthread_attr_setinheritsched</a></H3>
+<H3><a name="pthreadattrsetinheritsched">2.8.7 pthread_attr_setinheritsched</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -5728,7 +5505,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 <p>
-<H3><a name="pthreadattrgetinheritsched">2.9.8 pthread_attr_getinheritsched</a></H3>
+<H3><a name="pthreadattrgetinheritsched">2.8.8 pthread_attr_getinheritsched</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -5760,7 +5537,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadattrsetstacksize">2.9.9 pthread_attr_setstacksize</a></H3>
+<H3><a name="pthreadattrsetstacksize">2.8.9 pthread_attr_setstacksize</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -5791,7 +5568,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadattrgetstacksize">2.9.10 pthread_attr_getstacksize</a></H3>
+<H3><a name="pthreadattrgetstacksize">2.8.10 pthread_attr_getstacksize</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -5822,7 +5599,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcreate">2.9.11 pthread_create</a></H3>
+<H3><a name="pthreadcreate">2.8.11 pthread_create</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -5861,7 +5638,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreaddetach">2.9.12 pthread_detach</a></H3>
+<H3><a name="pthreaddetach">2.8.12 pthread_detach</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -5894,7 +5671,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadexit">2.9.13 pthread_exit</a></H3>
+<H3><a name="pthreadexit">2.8.13 pthread_exit</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -5926,7 +5703,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcancel">2.9.14 pthread_cancel</a></H3>
+<H3><a name="pthreadcancel">2.8.14 pthread_cancel</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -5982,7 +5759,7 @@ the time when cancellation is re-enabled.</li>
 <li>Thread cancellation at <i>cancellation points</i> is not supported.</li>
 </ul>
 
-<H3><a name="pthreadsetcancelstate">2.9.15 pthread_setcancelstate</a></H3>
+<H3><a name="pthreadsetcancelstate">2.8.15 pthread_setcancelstate</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6024,7 +5801,7 @@ No thread could be found corresponding to that specified by the given thread ID.
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadtestcancelstate">2.9.16 pthread_testcancelstate</a></H3>
+<H3><a name="pthreadtestcancelstate">2.8.16 pthread_testcancelstate</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6055,7 +5832,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadjoin">2.9.17 pthread_join</a></H3>
+<H3><a name="pthreadjoin">2.8.17 pthread_join</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6088,7 +5865,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadyield">2.9.18 pthread_yield</a></H3>
+<H3><a name="pthreadyield">2.8.18 pthread_yield</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6121,7 +5898,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadself">2.9.19 pthread_self</a></H3>
+<H3><a name="pthreadself">2.8.19 pthread_self</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6153,7 +5930,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadgetschedparam">2.9.20 pthread_getschedparam</a></H3>
+<H3><a name="pthreadgetschedparam">2.8.20 pthread_getschedparam</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -6219,7 +5996,7 @@ interface of the same name.
   Comparable to the POSIX interface of the same name.
 </p>
 
-<H3><a name="pthreadsetschedparam">2.9.21 pthread_setschedparam</a></H3>
+<H3><a name="pthreadsetschedparam">2.8.21 pthread_setschedparam</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -6311,7 +6088,7 @@ interface of the same name.
   Comparable to the POSIX interface of the same name.
 </p>
 
-<H3><a name="pthreadkeycreate">2.9.22 pthread_key_create</a></H3>
+<H3><a name="pthreadkeycreate">2.8.22 pthread_key_create</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6366,7 +6143,7 @@ interface of the same name.
 <li>The present implementation ignores the destructor argument.
 </ul>
 
-<H3><a name="pthreadsetspecific">2.9.23 pthread_setspecific</a></H3>
+<H3><a name="pthreadsetspecific">2.8.23 pthread_setspecific</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6416,7 +6193,7 @@ interface of the same name.
 destructor function.
 </ul>
 
-<H3><a name="pthreadgetspecific">2.9.24 pthread_getspecific</a></H3>
+<H3><a name="pthreadgetspecific">2.8.24 pthread_getspecific</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6457,7 +6234,7 @@ interface of the same name.
 destructor function.
 </ul>
 
-<H3><a name="pthreadkeydelete">2.9.25 pthread_key_delete</a></H3>
+<H3><a name="pthreadkeydelete">2.8.25 pthread_key_delete</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6489,7 +6266,7 @@ this function does nothing in the present implementation.
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexattrinit">2.9.26 pthread_mutexattr_init</a></H3>
+<H3><a name="pthreadmutexattrinit">2.8.26 pthread_mutexattr_init</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6520,7 +6297,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexattrdestroy">2.9.27 pthread_mutexattr_destroy</a></H3>
+<H3><a name="pthreadmutexattrdestroy">2.8.27 pthread_mutexattr_destroy</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6551,7 +6328,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexattrgetpshared">2.9.28 pthread_mutexattr_getpshared</a></H3>
+<H3><a name="pthreadmutexattrgetpshared">2.8.28 pthread_mutexattr_getpshared</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6583,7 +6360,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexattrsetpshared">2.9.29 pthread_mutexattr_setpshared</a></H3>
+<H3><a name="pthreadmutexattrsetpshared">2.8.29 pthread_mutexattr_setpshared</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6615,7 +6392,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<h3><a name="pthreadmutexattrgettype">2.9.30 pthread_mutexattr_gettype</a></h3>
+<h3><a name="pthreadmutexattrgettype">2.8.30 pthread_mutexattr_gettype</a></h3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6650,7 +6427,7 @@ returned to indicate the error:
 <p>
 <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 
-<h3><a name="pthreadmutexattrsettype">2.9.31 pthread_mutexattr_settype</a></h3>
+<h3><a name="pthreadmutexattrsettype">2.8.31 pthread_mutexattr_settype</a></h3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6704,7 +6481,7 @@ returned to indicate the error:
 <p>
 <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 
-<H3><a name="pthreadmutexinit">2.9.32 pthread_mutex_init</a></H3>
+<H3><a name="pthreadmutexinit">2.8.32 pthread_mutex_init</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6736,7 +6513,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexdestrory">2.9.33 pthread_mutex_destroy</a></H3>
+<H3><a name="pthreadmutexdestrory">2.8.33 pthread_mutex_destroy</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6767,7 +6544,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexlock">2.9.34 pthread_mutex_lock</a></H3>
+<H3><a name="pthreadmutexlock">2.8.34 pthread_mutex_lock</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6833,7 +6610,7 @@ Otherwise, an error number will be returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutextrylock">2.9.35 pthread_mutex_trylock</a></H3>
+<H3><a name="pthreadmutextrylock">2.8.35 pthread_mutex_trylock</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6873,7 +6650,7 @@ Otherwise, an error number will be returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadmutexunlock">2.9.36 pthread_mutex_unlock</a></H3>
+<H3><a name="pthreadmutexunlock">2.8.36 pthread_mutex_unlock</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6919,7 +6696,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadconaddrinit">2.9.37 pthread_condattr_init</a></H3>
+<H3><a name="pthreadconaddrinit">2.8.37 pthread_condattr_init</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6950,7 +6727,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadocndattrdestroy">2.9.38 pthread_condattr_destroy</a></H3>
+<H3><a name="pthreadocndattrdestroy">2.8.38 pthread_condattr_destroy</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -6981,7 +6758,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcondinit">2.9.39 pthread_cond_init</a></H3>
+<H3><a name="pthreadcondinit">2.8.39 pthread_cond_init</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -7012,7 +6789,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadconddestroy">2.9.40 pthread_cond_destroy</a></H3>
+<H3><a name="pthreadconddestroy">2.8.40 pthread_cond_destroy</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -7043,7 +6820,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcondbroadcast">2.9.41 pthread_cond_broadcast</a></H3>
+<H3><a name="pthreadcondbroadcast">2.8.41 pthread_cond_broadcast</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -7074,7 +6851,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcondsignal">2.9.42 pthread_cond_signal</a></H3>
+<H3><a name="pthreadcondsignal">2.8.42 pthread_cond_signal</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -7105,7 +6882,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcondwait">2.9.43 pthread_cond_wait</a></H3>
+<H3><a name="pthreadcondwait">2.8.43 pthread_cond_wait</a></H3>
 <p>
 <b>Function Prototype:</b>
 <p>
@@ -7136,7 +6913,7 @@ returned to indicate the error:
 <b>POSIX Compatibility:</b> Comparable to the POSIX
 interface of the same name.
 
-<H3><a name="pthreadcondtimedwait">2.9.44 pthread_cond_timedwait</a></H3>
+<H3><a name="pthreadcondtimedwait">2.8.44 pthread_cond_timedwait</a></H3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7173,7 +6950,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadbarrierattrinit">2.9.45 pthread_barrierattr_init</a></h3>
+<h3><a name="pthreadbarrierattrinit">2.8.45 pthread_barrierattr_init</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7206,7 +6983,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadbarrierattrdestroy">2.9.46 pthread_barrierattr_destroy</a></h3>
+<h3><a name="pthreadbarrierattrdestroy">2.8.46 pthread_barrierattr_destroy</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7238,7 +7015,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadbarrierattrsetpshared">2.9.47 pthread_barrierattr_setpshared</a></h3>
+<h3><a name="pthreadbarrierattrsetpshared">2.8.47 pthread_barrierattr_setpshared</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7276,7 +7053,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadbarrierattrgetpshared">2.9.48 pthread_barrierattr_getpshared</a></h3>
+<h3><a name="pthreadbarrierattrgetpshared">2.8.48 pthread_barrierattr_getpshared</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7308,7 +7085,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadbarrierinit">2.9.49 pthread_barrier_init</a></h3>
+<h3><a name="pthreadbarrierinit">2.8.49 pthread_barrier_init</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7378,7 +7155,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadbarrierdestroy">2.9.50 pthread_barrier_destroy</a></h3>
+<h3><a name="pthreadbarrierdestroy">2.8.50 pthread_barrier_destroy</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7422,7 +7199,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadbarrierwait">2.9.51 pthread_barrier_wait</a></h3>
+<h3><a name="pthreadbarrierwait">2.8.51 pthread_barrier_wait</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7482,7 +7259,7 @@ interface of the same name.
 </p>
 
 
-<h3><a name="pthreadonce">2.9.52 pthread_once</a></h3>
+<h3><a name="pthreadonce">2.8.52 pthread_once</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7526,7 +7303,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadkill">2.9.53 pthread_kill</a></h3>
+<h3><a name="pthreadkill">2.8.53 pthread_kill</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7588,7 +7365,7 @@ interface of the same name.
   <b>POSIX Compatibility:</b> Comparable to the POSIX interface of the same name.
 </p>
 
-<h3><a name="pthreadsigmask">2.9.54 pthread_sigmask</a></h3>
+<h3><a name="pthreadsigmask">2.8.54 pthread_sigmask</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7647,7 +7424,7 @@ interface of the same name.
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="Environ"><h2>2.10 Environment Variables</h2></a>
+    <a name="Environ"><h2>2.9 Environment Variables</h2></a>
   </td>
   </tr>
 </table>
@@ -7679,18 +7456,18 @@ interface of the same name.
   described in detail in the following paragraphs.
 </p>
 <ul>
-  <li><a href="#getenv">2.10.1 <code>getenv</code></a></li>
-  <li><a href="#putenv">2.10.2 <code>putenv</code></a></li>
-  <li><a href="#clearenv">2.10.3 <code>clearenv</code></a></li>
-  <li><a href="#setenv">2.10.4 <code>setenv</code></a></li>
-  <li><a href="#unsetenv">2.10.5 <code>unsetenv</code></a></li>
+  <li><a href="#getenv">2.9.1 <code>getenv</code></a></li>
+  <li><a href="#putenv">2.9.2 <code>putenv</code></a></li>
+  <li><a href="#clearenv">2.9.3 <code>clearenv</code></a></li>
+  <li><a href="#setenv">2.9.4 <code>setenv</code></a></li>
+  <li><a href="#unsetenv">2.9.5 <code>unsetenv</code></a></li>
 </ul>
 <p><b>Disabling Environment Variable Support</b>.
   All support for environment variables can be disabled by setting <code>CONFIG_DISABLE_ENVIRON</code>
   in the board configuration file.
 </p>
 
-<h3><a name="getenv">2.10.1 <code>getenv</code></a></h3>
+<h3><a name="getenv">2.9.1 <code>getenv</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7718,7 +7495,7 @@ interface of the same name.
    The value of the variable (read-only) or NULL on failure.
 </p>
 
-<h3><a name="putenv">2.10.2 <code>putenv</code></a></h3>
+<h3><a name="putenv">2.9.2 <code>putenv</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7749,7 +7526,7 @@ interface of the same name.
   Zero on success.
 </p>
 
-<h3><a name="clearenv">2.10.3 <code>clearenv</code></a></h3>
+<h3><a name="clearenv">2.9.3 <code>clearenv</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7771,7 +7548,7 @@ interface of the same name.
   Zero on success.
 </p>
 
-<h3><a name="setenv">2.10.4 <code>setenv</code></a></h3>
+<h3><a name="setenv">2.9.4 <code>setenv</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7809,7 +7586,7 @@ interface of the same name.
   Zero on success.
 </p>
 
-<h3><a name="unsetenv">2.10.5 <code>unsetenv</code></a></h3>
+<h3><a name="unsetenv">2.9.5 <code>unsetenv</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -7839,24 +7616,24 @@ interface of the same name.
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="FileSystem"><h2>2.11 File System Interfaces</h2></a>
+    <a name="FileSystem"><h2>2.10 File System Interfaces</h2></a>
   </td>
   </tr>
 </table>
 
 <ul>
-  <li><a href="#FileSystemOverview">2.11.1 NuttX File System Overview</a></li>
-  <li><a href="#driveroperations">2.11.2 Driver Operations</a></li>
-  <li><a href="#directoryoperations">2.11.3 Directory Operations</a></li>
-  <li><a href="#dirunistdops">2.11.4 UNIX Standard Operations</a></li>
-  <li><a href="#standardio">2.11.5 Standard I/O</a></li>
-  <li><a href="#stdstrings">2.11.6 Standard String Operations</a></li>
-  <li><a href="#PipesNFifos">2.11.7 Pipes and FIFOs</a></li>
-  <li><a href="#fatsupport">2.11.8 FAT File System Support</a></li>
-  <li><a href="#mmapxip">2.11.9 <code>mmap()</code> and eXecute In Place (XIP)</a></li>
+  <li><a href="#FileSystemOverview">2.10.1 NuttX File System Overview</a></li>
+  <li><a href="#driveroperations">2.10.2 Driver Operations</a></li>
+  <li><a href="#directoryoperations">2.10.3 Directory Operations</a></li>
+  <li><a href="#dirunistdops">2.10.4 UNIX Standard Operations</a></li>
+  <li><a href="#standardio">2.10.5 Standard I/O</a></li>
+  <li><a href="#stdstrings">2.10.6 Standard String Operations</a></li>
+  <li><a href="#PipesNFifos">2.10.7 Pipes and FIFOs</a></li>
+  <li><a href="#fatsupport">2.10.8 FAT File System Support</a></li>
+  <li><a href="#mmapxip">2.10.9 <code>mmap()</code> and eXecute In Place (XIP)</a></li>
 </ul>
 
-<h3><a name="FileSystemOverview">2.11.1 NuttX File System Overview</a></h3>
+<h3><a name="FileSystemOverview">2.10.1 NuttX File System Overview</a></h3>
 
 <p><b>Overview</b>.
   NuttX includes an optional, scalable file system.
@@ -7916,23 +7693,23 @@ interface of the same name.
   in a file-system-like name space.
 </p>
 
-<h3><a name="driveroperations">2.11.2 Driver Operations</a></h3>
+<h3><a name="driveroperations">2.10.2 Driver Operations</a></h3>
 <ul>
-  <li><a href="#drvrfcntlops">2.11.2.1 <code>fcntl.h</code></a></li>
-  <li><a href="#drvrunistdops">2.11.2.2 <code>unistd.h</code></a></li>
-  <li><a href="#drvrioctlops">2.11.2.3 <code>sys/ioctl.h</code></a></li>
-  <li><a href="#drvrpollops">2.11.2.4 <code>poll.h</code></a></li>
-  <li><a href="#drvselectops">2.11.2.5 <code>sys/select.h</code></a></li>
+  <li><a href="#drvrfcntlops">2.10.2.1 <code>fcntl.h</code></a></li>
+  <li><a href="#drvrunistdops">2.10.2.2 <code>unistd.h</code></a></li>
+  <li><a href="#drvrioctlops">2.10.2.3 <code>sys/ioctl.h</code></a></li>
+  <li><a href="#drvrpollops">2.10.2.4 <code>poll.h</code></a></li>
+  <li><a href="#drvselectops">2.10.2.5 <code>sys/select.h</code></a></li>
 </ul>
 
-<h4><a name="drvrfcntlops">2.11.2.1 fcntl.h</a></h4>
+<h4><a name="drvrfcntlops">2.10.2.1 fcntl.h</a></h4>
 
 <ul><pre>
   #include &lt;fcntl.h&gt;
   int open(const char *path, int oflag, ...);
 </pre></ul>
 
-<h4><a name="drvrunistdops">2.11.2.2 unistd.h</a></h4>
+<h4><a name="drvrunistdops">2.10.2.2 unistd.h</a></h4>
 
 <ul><pre>
   #include &lt;unistd.h&gt;
@@ -7945,16 +7722,16 @@ interface of the same name.
   ssize_t write(int fd, const void *buf, size_t nbytes);
 </pre></ul>
 
-<h4><a name="drvrioctlops">2.11.2.3 sys/ioctl.h</a></h4>
+<h4><a name="drvrioctlops">2.10.2.3 sys/ioctl.h</a></h4>
 
 <ul><pre>
   #include &lt;sys/ioctl.h&gt;
   int     ioctl(int fd, int req, unsigned long arg);
 </pre></ul>
 
-<h4><a name="drvrpollops">2.11.2.4 poll.h</a></h4>
+<h4><a name="drvrpollops">2.10.2.4 poll.h</a></h4>
 
-<h5><a name="poll">2.11.2.4.1 poll</a></H5>
+<h5><a name="poll">2.10.2.4.1 poll</a></H5>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -8024,9 +7801,9 @@ interface of the same name.
   <li><code>ENOSYS</code>. One or more of the drivers supporting the file descriptor does not support the poll method.</li>
 </ul>
 
-<h4><a name="drvselectops">2.11.2.5 sys/select.h</a></h4>
+<h4><a name="drvselectops">2.10.2.5 sys/select.h</a></h4>
 
-<h5><a name="select">2.11.2.5.1 select</a></H5>
+<h5><a name="select">2.10.2.5.1 select</a></H5>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -8070,7 +7847,7 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
     see <a href="#poll"><code>poll()</code></a>).</li>
 </ul>
 
-<h3><a name="directoryoperations">2.11.3 Directory Operations</a></h3>
+<h3><a name="directoryoperations">2.10.3 Directory Operations</a></h3>
 <a name="dirdirentops">
 <ul><pre>
 #include &lt;dirent.h&gt;
@@ -8085,7 +7862,7 @@ int        telldir(FAR DIR *dirp);
 </pre></ul>
 </a>
 
-<h3><a name="dirunistdops">2.11.4 UNIX Standard Operations</a></h3>
+<h3><a name="dirunistdops">2.10.4 UNIX Standard Operations</a></h3>
 <ul><pre>
 #include &lt;unistd.h&gt;
 
@@ -8121,7 +7898,7 @@ int     getopt(int argc, FAR char *const argv[], FAR const char *optstring);
 </pre></ul>
 </a>
 
-<h3><a name="standardio">2.11.5 Standard I/O</a></h3>
+<h3><a name="standardio">2.10.5 Standard I/O</a></h3>
 <ul><pre>
 #include &lt;stdio.h&gt;
 
@@ -8183,7 +7960,7 @@ int statfs(const char *path, struct statfs *buf);
 int fstatfs(int fd, struct statfs *buf);
 </pre></ul>
 
-<h3><a name="stdstrings">2.11.6 Standard String Operations</a></h3>
+<h3><a name="stdstrings">2.10.6 Standard String Operations</a></h3>
 <ul><pre>
 #include &lt;string.h&gt;
 
@@ -8217,9 +7994,9 @@ void  *memmove(void *dest, const void *src, size_t count);
 # define bzero(s,n) (void)memset(s,0,n)
 </pre></ul>
 
-<h3><a name="PipesNFifos">2.11.7 Pipes and FIFOs</a></h3>
+<h3><a name="PipesNFifos">2.10.7 Pipes and FIFOs</a></h3>
 
-<h3>2.11.7.1 <a name="pipe"><code>pipe</code></a></h3>
+<h3>2.10.7.1 <a name="pipe"><code>pipe</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -8253,7 +8030,7 @@ int pipe(int fd[2]);
   </ul>
 </p>
 
-<h3>2.11.7.2 <a name="mkfifo"><code>mkfifo</code></a></h3>
+<h3>2.10.7.2 <a name="mkfifo"><code>mkfifo</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -8300,8 +8077,8 @@ int mkfifo(FAR const char *pathname, mode_t mode);
   </ul>
 </p>
 
-<h3><a name="fatsupport">2.11.8 FAT File System Support</a></h3>
-<h3>2.11.8.1 <a name="mkfatfs"><code>mkfatfs</code></a></h3>
+<h3><a name="fatsupport">2.10.8 FAT File System Support</a></h3>
+<h3>2.10.8.1 <a name="mkfatfs"><code>mkfatfs</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -8378,7 +8155,7 @@ struct fat_format_s
   </ul>
 </p>
 
-<h3><a name="mmapxip">2.11.9 <code>mmap()</code> and eXecute In Place (XIP)</a></h3>
+<h3><a name="mmapxip">2.10.9 <code>mmap()</code> and eXecute In Place (XIP)</a></h3>
 <p>
   NuttX operates in a flat open address space and is focused on MCUs that do
   support Memory Management Units (MMUs).  Therefore, NuttX generally does not
@@ -8507,7 +8284,7 @@ struct fat_format_s
   </li>
 </ol>
 
-<h3><a name="mmap">2.11.9.1 <code>mmap</code></a></h3>
+<h3><a name="mmap">2.10.9.1 <code>mmap</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -8637,7 +8414,7 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags, int fd, off_
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="Network"><h2>2.12 Network Interfaces</h2></a>
+    <a name="Network"><h2>2.11 Network Interfaces</h2></a>
   </td>
   </tr>
 </table>
@@ -8650,20 +8427,20 @@ Those socket APIs are discussed in the following paragraphs.</p>
 <ul>
 <li>
 </li>
-<li><a href="#socket">2.12.1 socket</a></li>
-<li><a href="#bind">2.12.2 bind</a></li>
-<li><a href="#connect">2.12.3 connect</a></li>
-<li><a href="#listen">2.12.4 listen</a></li>
-<li><a href="#accept">2.12.5 accept</a></li>
-<li><a href="#send">2.12.6 send</a></li>
-<li><a href="#sendto">2.12.7 sendto</a></li>
-<li><a href="#recv">2.12.8 recv</a></li>
-<li><a href="#recvfrom">2.12.9 recvfrom</a></li>
-<li><a href="#setsockopt">2.12.10 setsockopt</a></li>
-<li><a href="#getsockopt">2.12.11 getsockopt</a></li>
+<li><a href="#socket">2.11.1 socket</a></li>
+<li><a href="#bind">2.11.2 bind</a></li>
+<li><a href="#connect">2.11.3 connect</a></li>
+<li><a href="#listen">2.11.4 listen</a></li>
+<li><a href="#accept">2.11.5 accept</a></li>
+<li><a href="#send">2.11.6 send</a></li>
+<li><a href="#sendto">2.11.7 sendto</a></li>
+<li><a href="#recv">2.11.8 recv</a></li>
+<li><a href="#recvfrom">2.11.9 recvfrom</a></li>
+<li><a href="#setsockopt">2.11.10 setsockopt</a></li>
+<li><a href="#getsockopt">2.11.11 getsockopt</a></li>
 </ul>
 
-<h3><a name="socket">2.12.1 <code>socket</code></a></h3>
+<h3><a name="socket">2.11.1 <code>socket</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -8705,7 +8482,7 @@ int socket(int domain, int type, int protocol);
     The protocol type or the specified protocol is not supported within this domain.</li>
 </ul>
 
-<h3><a name="bind">2.12.2 <code>bind</code></a></h3>
+<h3><a name="bind">2.11.2 <code>bind</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -8747,7 +8524,7 @@ int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
     <code>sockfd</code> is a descriptor for a file, not a socket.</li>
 </ul>
 
-<h3><a name="connect">2.12.3 <code>connect</code></a></h3>
+<h3><a name="connect">2.11.3 <code>connect</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -8826,7 +8603,7 @@ int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
     to accept new connections.</li>
 </ul>
 
-<h3><a name="listen">2.12.4 listen</a></h3>
+<h3><a name="listen">2.11.4 listen</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -8864,7 +8641,7 @@ int listen(int sockfd, int backlog);
   <li><code>EOPNOTSUPP</code>: The socket is not of a type that supports the listen operation.</li>
  </ul>
 
-<h3><a name="accept">2.12.5 accept</a></h3>
+<h3><a name="accept">2.11.5 accept</a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -8942,7 +8719,7 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
     Firewall rules forbid connection.</li>
 </ul>
 
-<h3><a name="send">2.12.6 <code>send</code></a></h3>
+<h3><a name="send">2.11.6 <code>send</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -8974,7 +8751,7 @@ ssize_t send(int sockfd, const void *buf, size_t len, int flags);
   See <a href="#sendto"><code>sendto()</code></a>.
 </p>
 
-<h3><a name="sendto">2.12.7 <code>sendto</code></a></h3>
+<h3><a name="sendto">2.11.7 <code>sendto</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -9047,7 +8824,7 @@ ssize_t send(int sockfd, const void *buf, size_t len, int flags);
     MSG_NOSIGNAL is set.
 </ul>
 
-<h3><a name="recv">2.12.8 <code>recv</code></a></h3>
+<h3><a name="recv">2.11.8 <code>recv</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -9077,7 +8854,7 @@ ssize_t recv(int sockfd, void *buf, size_t len, int flags);
   See <a href="#recvfrom"><code>recvfrom()</code></a>.
 </p>
 
-<h3><a name="recvfrom">2.12.9 <code>recvfrom</code></a></h3>
+<h3><a name="recvfrom">2.11.9 <code>recvfrom</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -9140,7 +8917,7 @@ ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags,
       The argument <code>sockfd</code> does not refer to a socket.
 </ul>
 
-<h3><a name="setsockopt">2.12.10 <code>setsockopt</code></a></h3>
+<h3><a name="setsockopt">2.11.10 <code>setsockopt</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -9200,7 +8977,7 @@ int setsockopt(int sockfd, int level, int option,
      Insufficient resources are available in the system to complete the call.
 </ul>
 
-<h3><a name="getsockopt">2.12.11 <code>getsockopt</code></a></h3>
+<h3><a name="getsockopt">2.11.11 <code>getsockopt</code></a></h3>
 <p>
   <b>Function Prototype:</b>
 </p>
@@ -9593,10 +9370,10 @@ notify a task when a message is available on a queue.
   <li><a href="#pipe">pipe</a></li>
   <li><a href="#poll">poll</a></li>
   <li><a href="#drvrpollops">poll.h</a></li>
-  <li><a href="#posix_spawn">posix_spawn</a></li>
-  <li><a href="#posix_spawn_file_actions_addclose">posix_spawn_file_actions_addclose</a></li>
 </td>
 <td valign="top" width="33%">
+  <li><a href="#posix_spawn">posix_spawn</a></li>
+  <li><a href="#posix_spawn_file_actions_addclose">posix_spawn_file_actions_addclose</a></li>
   <li><a href="#posix_spawn_file_actions_adddup2">posix_spawn_file_actions_adddup2</a></li>
   <li><a href="#posix_spawn_file_actions_addopen">posix_spawn_file_actions_addopen</a></li>
   <li><a href="#posix_spawn_file_actions_destroy">posix_spawn_file_actions_destroy</a></li>
@@ -9677,12 +9454,12 @@ notify a task when a message is available on a queue.
   <li><a href="#recv">recv</a></li>
   <li><a href="#recvfrom">recvfrom</a></li>
   <li><a href="#standardio">rename</a></li>
+</td>
+<td valign="top">
   <li><a href="#standardio">rmdir</a></li>
   <li><a href="#dirdirentops">rewinddir</a></li>
   <li><a href="#mmapxip">ROM disk driver</a></li>
   <li><a href="#mmapxip">ROMFS</a></li>
-</td>
-<td valign="top">
   <li><a href="#schedgetparam">sched_getparam</a></li>
   <li><a href="#schedgetprioritymax">sched_get_priority_max</a></li>
   <li><a href="#schedgetprioritymin">sched_get_priority_min</a></li>
@@ -9759,12 +9536,6 @@ notify a task when a message is available on a queue.
   <li><a href="#wait">wait</a></li>
   <li><a href="#waitid">waitid</a></li>
   <li><a href="#waitpid">waitpid</a>
-  <li><a href="#Watchdogs">Watchdog Timer Interfaces</a>
-  <li><a href="#wdcancel">wd_cancel</a></li>
-  <li><a href="#wdcreate">wd_create</a></li>
-  <li><a href="#wddelete">wd_delete</a></li>
-  <li><a href="#wdgettime">wd_gettime</a></li>
-  <li><a href="#wdstart">wd_start</a></li>
   <li><a href="#drvrunistdops">write</a></li>
   <li><a href="#mmapxip">XIP</a></li>
 </td>
