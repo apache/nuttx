@@ -1627,3 +1627,6 @@ Configurations
 
        $ cd ~/nuttx-git/nuttx
        $ make
+
+    STATUS:  2014-8-20. I have seen the demo work well but it is not
+    thoroughly exercised.
