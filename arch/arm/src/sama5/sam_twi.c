@@ -1,7 +1,7 @@
 /*******************************************************************************
  * arch/arm/src/sama5/sam_twi.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -52,10 +52,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <errno.h>
-#include <wdog.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/wdog.h>
 #include <nuttx/clock.h>
 #include <nuttx/i2c.h>
 

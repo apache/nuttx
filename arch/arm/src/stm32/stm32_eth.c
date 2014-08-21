@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_eth.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,14 +45,14 @@
 #include <time.h>
 #include <string.h>
 #include <debug.h>
-#include <wdog.h>
 #include <queue.h>
 #include <errno.h>
 
 #include <arpa/inet.h>
 
-#include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/irq.h>
+#include <nuttx/wdog.h>
 #include <nuttx/net/mii.h>
 
 #include <nuttx/net/arp.h>

@@ -53,10 +53,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <wdog.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/wdog.h>
 #include <nuttx/i2c.h>
 
 #include <arch/irq.h>

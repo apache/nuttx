@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_sdio.c
  *
- *   Copyright (C) 2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,11 +45,11 @@
 #include <string.h>
 #include <assert.h>
 #include <debug.h>
-#include <wdog.h>
 #include <errno.h>
 
-#include <nuttx/clock.h>
 #include <nuttx/arch.h>
+#include <nuttx/wdog.h>
+#include <nuttx/clock.h>
 #include <nuttx/sdio.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/mmcsd.h>

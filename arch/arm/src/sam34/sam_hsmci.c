@@ -45,11 +45,11 @@
 #include <string.h>
 #include <assert.h>
 #include <debug.h>
-#include <wdog.h>
 #include <errno.h>
 
-#include <nuttx/clock.h>
 #include <nuttx/arch.h>
+#include <nuttx/wdog.h>
+#include <nuttx/clock.h>
 #include <nuttx/sdio.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/mmcsd.h>

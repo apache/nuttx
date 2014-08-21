@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/mips/src/pic32mx/pic32mx_usbdev.c
  *
- *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -53,10 +53,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <wdog.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/wdog.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbdev.h>

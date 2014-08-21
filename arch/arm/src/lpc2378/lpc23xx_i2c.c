@@ -61,12 +61,12 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/wdog.h>
 #include <nuttx/i2c.h>
 
 #include <arch/irq.h>
 #include <arch/board/board.h>
 
-#include "wdog.h"
 #include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"

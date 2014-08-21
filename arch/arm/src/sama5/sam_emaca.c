@@ -56,7 +56,6 @@
 #include <time.h>
 #include <string.h>
 #include <debug.h>
-#include <wdog.h>
 #include <queue.h>
 #include <errno.h>
 
@@ -64,6 +63,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/wdog.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/net/mii.h>
 #include <nuttx/net/arp.h>

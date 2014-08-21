@@ -51,12 +51,12 @@
 #include <time.h>
 #include <string.h>
 #include <debug.h>
-#include <wdog.h>
 #include <errno.h>
 
 #include <arpa/inet.h>
 #include <net/ethernet.h>
 
+#include <nuttx/wdog.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/net/arp.h>

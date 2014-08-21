@@ -1,6 +1,5 @@
 /****************************************************************************
  * arch/arm/src/lpc17/lpc17_emc.c
- * arch/arm/src/chip/lpc17_emc.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
