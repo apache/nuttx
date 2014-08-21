@@ -157,10 +157,10 @@ index c78362f..207f9b9 100644
 +int nsh_output(FAR struct nsh_vtbl_s *vtbl, FAR const char *fmt, ...);
  
  #endif /* __APPS_NSHLIB_NSH_CONSOLE_H */
-diff --git a/nuttx/include/wdog.h b/nuttx/include/wdog.h
+diff --git a/nuttx/include/wdog.h b/nuttx/include/nuttx/wdog.h
 index 0aa3584..ac4a36a 100644
---- a/nuttx/include/wdog.h
-+++ b/nuttx/include/wdog.h
+--- a/nuttx/include/nuttx/wdog.h
++++ b/nuttx/include/nuttx/wdog.h
 @@ -74,7 +74,23 @@ typedef union wdparm_u wdparm_t;
   * watchdog function expires.  Up to four parameters may be passed.
   */
