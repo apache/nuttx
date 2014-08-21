@@ -8206,3 +8206,10 @@
 	  logic will allocate additional timers from the heap.  A reserve of
 	  pre-allocated watchdog timers is maintained so that there will always
 	  be timers available for interrupt handlers (2014-8-21).
+	* include/nuttx/wdog.h (and many affected files):  wdog.h does not
+	  contain any application interface, only internal OS interface.
+	  Further, it is non-standard.  Move wdog.h from include/ to
+	  include/nuttx (2014-8-21).
+	* Documentation/NuttxPortingGuide.h:  For the same reason as above, move
+	  the description of the watchdog timer interfaces from the Users Guide
+	  to the Porting Guide (2014-8-21).
