@@ -46,11 +46,11 @@
 #include <sys/mount.h>
 
 #include <stdbool.h>
-#include <wdog.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/wdog.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/fs/automount.h>

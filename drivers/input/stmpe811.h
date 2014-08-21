@@ -1,7 +1,7 @@
 /********************************************************************************************
  * drivers/input/stmpe811.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -46,9 +46,9 @@
 
 #include <nuttx/config.h>
 
-#include <wdog.h>
 #include <semaphore.h>
 
+#include <nuttx/wdog.h>
 #include <nuttx/clock.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/input/stmpe811.h>

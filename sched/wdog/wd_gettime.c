@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <wdog.h>
+#include <nuttx/wdog.h>
 
 #include "wdog/wdog.h"
 

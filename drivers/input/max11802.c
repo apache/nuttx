@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/input/max11802.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2014 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Petteri Aimonen <jpa@nx.mail.kapsi.fi>
  *
@@ -53,16 +53,16 @@
 #include <fcntl.h>
 #include <semaphore.h>
 #include <poll.h>
-#include <wdog.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
+#include <nuttx/wdog.h>
+#include <nuttx/kmalloc.h>
+#include <nuttx/wqueue.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/spi/spi.h>
-#include <nuttx/wqueue.h>
 
 #include <nuttx/input/touchscreen.h>
 #include <nuttx/input/max11802.h>

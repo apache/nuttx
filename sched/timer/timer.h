@@ -1,7 +1,7 @@
 /********************************************************************************
  * sched/timer/timer.h
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,9 +44,9 @@
 
 #include <sys/types.h>
 #include <stdint.h>
-#include <wdog.h>
 
 #include <nuttx/compiler.h>
+#include <nuttx/wdog.h>
 
 /********************************************************************************
  * Definitions

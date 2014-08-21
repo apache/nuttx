@@ -41,8 +41,9 @@
 
 #include <stdbool.h>
 #include <assert.h>
-#include <wdog.h>
+
 #include <nuttx/arch.h>
+#include <nuttx/wdog.h>
 
 #include "sched/sched.h"
 #include "wdog/wdog.h"

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/pic32mx/pic32mx_ethernet.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * This driver derives from the PIC32MX Ethernet Driver
@@ -47,14 +47,14 @@
 #include <time.h>
 #include <string.h>
 #include <debug.h>
-#include <wdog.h>
 #include <errno.h>
 #include <assert.h>
 
 #include <arpa/inet.h>
 
-#include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/irq.h>
+#include <nuttx/wdog.h>
 #include <nuttx/net/mii.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/arp.h>

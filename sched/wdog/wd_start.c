@@ -42,13 +42,13 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdarg.h>
-#include <wdog.h>
 #include <unistd.h>
 #include <sched.h>
 #include <assert.h>
 #include <errno.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/wdog.h>
 
 #include "sched/sched.h"
 #include "wdog/wdog.h"

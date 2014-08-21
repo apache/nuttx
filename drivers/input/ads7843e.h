@@ -1,7 +1,7 @@
 /********************************************************************************************
  * drivers/input/ads7843e.h
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -55,11 +55,11 @@
 #include <stdint.h>
 #include <semaphore.h>
 #include <poll.h>
-#include <wdog.h>
 #include <nuttx/wqueue.h>
 
-#include <nuttx/spi/spi.h>
+#include <nuttx/wdog.h>
 #include <nuttx/clock.h>
+#include <nuttx/spi/spi.h>
 #include <nuttx/input/ads7843e.h>
 
 /********************************************************************************************

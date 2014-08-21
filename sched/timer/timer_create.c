@@ -1,7 +1,7 @@
 /********************************************************************************
  * sched/timer/timer_create.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,9 +43,9 @@
 #include <unistd.h>
 #include <time.h>
 #include <string.h>
-#include <wdog.h>
 #include <errno.h>
 
+#include <nuttx/wdog.h>
 #include <nuttx/kmalloc.h>
 
 #include "timer/timer.h"

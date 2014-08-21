@@ -45,13 +45,13 @@
 #include <time.h>
 #include <string.h>
 #include <debug.h>
-#include <wdog.h>
 #include <errno.h>
 
 #include <arpa/inet.h>
 
-#include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/wdog.h>
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 #include <nuttx/net/arp.h>
 #include <nuttx/net/netdev.h>

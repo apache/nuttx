@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_spi.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * This derives from SAM3/4 SPI driver:
@@ -50,13 +50,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <semaphore.h>
-#include <wdog.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
 
 #include <arch/board/board.h>
+
 #include <nuttx/arch.h>
+#include <nuttx/wdog.h>
 #include <nuttx/clock.h>
 #include <nuttx/spi/spi.h>
 

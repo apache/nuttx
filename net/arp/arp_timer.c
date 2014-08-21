@@ -42,9 +42,9 @@
 
 #include <stdint.h>
 #include <time.h>
-#include <wdog.h>
 #include <debug.h>
 
+#include <nuttx/wdog.h>
 #include <nuttx/net/netconfig.h>
 
 #include <arp/arp.h>

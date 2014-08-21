@@ -1,7 +1,7 @@
 /****************************************************************************
- * include/wdog.h
+ * include/nuttx/wdog.h
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_WDOG_H
-#define __INCLUDE_WDOG_H
+#ifndef __INCLUDE_NUTTX_WDOG_H
+#define __INCLUDE_NUTTX_WDOG_H
 
 /****************************************************************************
  * Included Files
@@ -50,7 +50,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Global Type Declarations
+ * Public Type Declarations
  ****************************************************************************/
 
 /* The arguments are passed as uint32_t values.  For systems where the
@@ -81,11 +81,11 @@ typedef CODE void (*wdentry_t)(int argc, uint32_t arg1, ...);
 typedef FAR struct wdog_s *WDOG_ID;
 
 /****************************************************************************
- * Global Variables
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
- * Global Function Prototypes
+ * Pubic Function Prototypes
  ****************************************************************************/
 
 #ifdef __cplusplus

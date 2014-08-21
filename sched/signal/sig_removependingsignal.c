@@ -1,7 +1,7 @@
 /************************************************************************
  * sched/signal/sig_removependingsignal.c
  *
- *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,13 +42,13 @@
 #include <unistd.h>
 #include <signal.h>
 #include <time.h>
-#include <wdog.h>
 #include <assert.h>
 #include <debug.h>
 #include <sched.h>
 
-#include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
+#include <nuttx/wdog.h>
+#include <nuttx/kmalloc.h>
 
 #include "signal/signal.h"
 

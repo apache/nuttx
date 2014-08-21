@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/igmp/igmp_timer.c
  *
- *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * The NuttX implementation of IGMP was inspired by the IGMP add-on for the
@@ -44,10 +44,10 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
-#include <wdog.h>
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/wdog.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netstats.h>

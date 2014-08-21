@@ -45,7 +45,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <semaphore.h>
-#include <wdog.h>
 #include <errno.h>
 #include <assert.h>
 #include <queue.h>
@@ -55,6 +54,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/audio/audio.h>
 #include <nuttx/audio/i2s.h>

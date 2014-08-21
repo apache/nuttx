@@ -2,7 +2,7 @@
  * net/igmp/igmp_group.c
  * IGMP group data structure management logic
  *
- *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * The NuttX implementation of IGMP was inspired by the IGMP add-on for the
@@ -47,14 +47,14 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <wdog.h>
 #include <queue.h>
 #include <debug.h>
 
 #include <arch/irq.h>
-#include <nuttx/arch.h>
-#include <nuttx/kmalloc.h>
 
+#include <nuttx/arch.h>
+#include <nuttx/wdog.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/igmp.h>

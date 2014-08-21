@@ -57,12 +57,12 @@
 #include <semaphore.h>
 #include <fcntl.h>
 #include <poll.h>
-#include <wdog.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/clock.h>
 #include <nuttx/input/touchscreen.h>

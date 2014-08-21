@@ -40,10 +40,10 @@
 #include <nuttx/config.h>
 
 #include <stdbool.h>
-#include <wdog.h>
 #include <queue.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/wdog.h>
 #include <nuttx/kmalloc.h>
 
 #include "wdog/wdog.h"

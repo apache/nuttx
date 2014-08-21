@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/encx24j600.c
  *
- *   Copyright (C) 2013-1014 UVC Ingenieure. All rights reserved.
+ *   Copyright (C) 2013-2014 UVC Ingenieure. All rights reserved.
  *   Author: Max Holtzberg <mh@uvc.de>
  *
  * References:
@@ -56,14 +56,14 @@
 #include <time.h>
 #include <string.h>
 #include <debug.h>
-#include <wdog.h>
 #include <errno.h>
 #include <queue.h>
 
 #include <arpa/inet.h>
 
-#include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/irq.h>
+#include <nuttx/wdog.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/clock.h>

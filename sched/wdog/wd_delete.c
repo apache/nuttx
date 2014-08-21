@@ -39,12 +39,12 @@
 
 #include <nuttx/config.h>
 
-#include <wdog.h>
 #include <queue.h>
 #include <assert.h>
 #include <errno.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/wdog.h>
 #include <nuttx/kmalloc.h>
 
 #include "wdog/wdog.h"

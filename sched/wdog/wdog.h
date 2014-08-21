@@ -44,9 +44,9 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <wdog.h>
 
 #include <nuttx/compiler.h>
+#include <nuttx/wdog.h>
 
 /************************************************************************
  * Pre-processor Definitions

@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: August 12, 2014</p>
+      <p>Last Updated: August 21, 2014</p>
     </td>
   </tr>
 </table>
@@ -101,7 +101,8 @@
       <a href="#basictimer">4.3.1 Basic System Timer</a></br>
       <a href="#timerhw">4.3.2 Hardware</a></br>
       <a href="#systcktime">4.3.3 System Tick and Time</a></br>
-      <a href="#tickless">4.3.4 Tickless OS</a>
+      <a href="#tickless">4.3.4 Tickless OS</a><br>
+      <a href="#Watchdogs">4.3.5 Watchdog Timer Interfaces</a>
     </ul>
     <a href="#addrenv">4.4 Address Environments</a>
     <ul>
@@ -1734,7 +1735,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 <h2><a name="imports">4.2 APIs Exported by Architecture-Specific Logic to NuttX</a></h2>
 <h3><a name="upinitialize">4.2.1 <code>up_initialize()</code></a></h3>
 
-<p><b>Prototype</b>: <code>void up_initialize(void);</code></p>
+<p><b>Function Prototype</b>: <code>void up_initialize(void);</code></p>
 
 <p><b>Description</b>.
   <code>up_initialize()</code> will be called once during OS
@@ -1754,7 +1755,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 </p>
 
 <h3><a name="upidle">4.2.2 <code>up_idle()</code></a></h3>
-<p><b>Prototype</b>: <code>void up_idle(void);</code></p>
+<p><b>Function Prototype</b>: <code>void up_idle(void);</code></p>
 
 <p><b>Description</b>.
   <code>up_idle()</code> is the logic that will be executed
@@ -1768,7 +1769,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 </p>
 
 <h3><a name="upinitialstate">4.2.3 <code>up_initial_state()</code></a></h3>
-<p><b>Prototype</b>: <code>void up_initial_state(FAR struct tcb_s *tcb);</code></p>
+<p><b>Function Prototype</b>: <code>void up_initial_state(FAR struct tcb_s *tcb);</code></p>
 
 <p><b>Description</b>.
   A new thread is being started and a new TCB has been created.
@@ -1791,7 +1792,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 </p>
 
 <h3><a name="upcreatestack">4.2.4 <code>up_create_stack()</code></a></h3>
-<p><b>Prototype</b>: <code>STATUS up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype);</code></p>
+<p><b>Function Prototype</b>: <code>STATUS up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype);</code></p>
 
 <p><b>Description</b>.
   Allocate a stack for a new thread and setup up stack-related information in the TCB.
@@ -1843,7 +1844,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 </ul>
 
 <h3><a name="upusestack">4.2.5 <code>up_use_stack()</code></a></h3>
-<p><b>Prototype</b>:
+<p><b>Function Prototype</b>:
   <code>STATUS up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size);</code>
 </p>
 
@@ -1882,7 +1883,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 
 
 <h3><a name="upstackframe">4.2.6 <code>up_stack_frame()</code></a></h3>
-<p><b>Prototype</b>: <code>FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size);</code></p>
+<p><b>Function Prototype</b>: <code>FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size);</code></p>
 
 <p>
   <b>Description</b>.
@@ -1932,7 +1933,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 </p>
 
 <h3><a name="upreleasestack">4.2.7 <code>up_release_stack()</code></a></h3>
-<p><b>Prototype</b>: <code>void up_release_stack(FAR struct tcb_s *dtcb);</code></p>
+<p><b>Function Prototype</b>: <code>void up_release_stack(FAR struct tcb_s *dtcb);</code></p>
 
 <p><b>Description</b>.
   A task has been stopped.
@@ -1971,7 +1972,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 </ul>
 
 <h3><a name="upunblocktask">4.2.8 <code>up_unblock_task()</code></a></h3>
-<p><b>Prototype</b>: <code>void up_unblock_task(FAR struct tcb_s *tcb);</code></p>
+<p><b>Function Prototype</b>: <code>void up_unblock_task(FAR struct tcb_s *tcb);</code></p>
 
 <p><b>Description</b>.
   A task is currently in an inactive task list
@@ -1994,7 +1995,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 </ul>
 
 <h3><a name="upblocktask">4.2.9 <code>up_block_task()</code></a></h3>
-<p><b>Prototype</b>: <code>void up_block_task(FAR struct tcb_s *tcb, tstate_t task_state);</code></p>
+<p><b>Function Prototype</b>: <code>void up_block_task(FAR struct tcb_s *tcb, tstate_t task_state);</code></p>
 
 <p><b>Description</b>.
   The currently executing task at the head of
@@ -2020,7 +2021,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 </ul>
 
 <h3><a name="upreleasepending">4.2.10 <code>up_release_pending()</code></a></h3>
-<p><b>Prototype</b>: <code>void up_release_pending(void);</code></p>
+<p><b>Function Prototype</b>: <code>void up_release_pending(void);</code></p>
 
 <p><b>Description</b>.
   When tasks become ready-to-run but cannot run because pre-emption
@@ -2037,7 +2038,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 </p>
 
 <h3><a name="upreprioritizertr">4.2.11 <code>up_reprioritize_rtr()</code></a></h3>
-<p><b>Prototype</b>: <code>void up_reprioritize_rtr(FAR struct tcb_s *tcb, uint8_t priority);</code></p>
+<p><b>Function Prototype</b>: <code>void up_reprioritize_rtr(FAR struct tcb_s *tcb, uint8_t priority);</code></p>
 
 <p><b>Description</b>.
   Called when the priority of a running or
@@ -2072,7 +2073,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 </ul>
 
 <h3><a name="_exit">4.2.12 <code>_exit()</code></a></h3>
-<p><b>Prototype</b>: <code>void _exit(int status) noreturn_function;</code></p>
+<p><b>Function Prototype</b>: <code>void _exit(int status) noreturn_function;</code></p>
 
 <p><b>Description</b>.
   This function causes the currently executing task to cease
@@ -2086,7 +2087,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 </p>
 
 <h3><a name="upassert">4.2.13 <code>up_assert()</code></a></h3>
-<p><b>Prototype</b>:<br>
+<p><b>Function Prototype</b>:<br>
   <code>void up_assert(FAR const uint8_t *filename, int linenum);</code>
 </p>
 
@@ -2095,7 +2096,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 </p>
 
 <h3><a name="upschedulesigaction">4.2.14 <code>up_schedule_sigaction()</code></a></h3>
-<p><b>Prototype</b>:
+<p><b>Function Prototype</b>:
   <code>void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver);</code>
 </p>
 
@@ -2142,7 +2143,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 </p>
 
 <h3><a name="upallocateheap">4.2.15 <code>up_allocate_heap()</code></a></h3>
-<p><b>Prototype</b>: <code>void up_allocate_heap(FAR void **heap_start, size_t *heap_size);</code></p>
+<p><b>Function Prototype</b>: <code>void up_allocate_heap(FAR void **heap_start, size_t *heap_size);</code></p>
 
 <p><b>Description</b>.
   This function will be called to dynamically set aside the heap region.
@@ -2153,14 +2154,14 @@ The system can be re-made subsequently by just typing <code>make</code>.
 </p>
 
 <h3><a name="upinterruptcontext">4.2.16 <code>up_interrupt_context()</code></a></h3>
-<p><b>Prototype</b>: <code>bool up_interrupt_context(void)</code></p>
+<p><b>Function Prototype</b>: <code>bool up_interrupt_context(void)</code></p>
 
 <p><b>Description</b>.
   Return true if we are currently executing in the interrupt handler context.
 </p>
 
 <h3><a name="updisableirq">4.2.17 <code>up_disable_irq()</code></a></h3>
-<p><b>Prototype</b>:</p>
+<p><b>Function Prototype</b>:</p>
 <ul><pre>
 #ifndef CONFIG_ARCH_NOINTC
   void up_disable_irq(int irq);
@@ -2187,7 +2188,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 </p>
 
 <h3><a name="upenableirq">4.2.18 <code>up_enable_irq()</code></a></h3>
-<p><b>Prototype</b>:</p>
+<p><b>Function Prototype</b>:</p>
 <ul><pre>
 #ifndef CONFIG_ARCH_NOINTC
   void up_enable_irq(int irq);
@@ -2208,7 +2209,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 </p>
 
 <h3><a name="upprioritizeirq">4.2.19 <code>up_prioritize_irq()</code></a></h3>
-<p><b>Prototype</b>:</p>
+<p><b>Function Prototype</b>:</p>
 <ul><pre>
 #ifdef CONFIG_ARCH_IRQPRIO
   void up_enable_irq(int irq);
@@ -2226,7 +2227,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 
 <h3><a name="upputc">4.2.20 <code>up_putc()</code></a></h3>
 
-<p><b>Prototype</b>: <code>int up_putc(int ch);</code></p>
+<p><b>Function Prototype</b>: <code>int up_putc(int ch);</code></p>
 <p><b>Description</b>.
   This is a debug interface exported by the architecture-specific logic.
   Output one character on the console
@@ -2555,7 +2556,7 @@ config ARCH_SIM
 </ul>
 
 <h5><a name="uptimerinit">4.3.4.4.1 <code>up_timer_initialize()</code></a></h5>
-<p><b>Prototype</b>:</p>
+<p><b>Function Prototype</b>:</p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
 void up_timer_initialize(void);
@@ -2578,7 +2579,7 @@ void up_timer_initialize(void);
 </ul>
 
 <h5><a name="uptimergettime">4.3.4.4.2 <code>up_timer_gettime()</code></a></h5>
-<p><b>Prototype</b>:<p>
+<p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
 int up_timer_gettime(FAR struct timespec *ts);
@@ -2602,7 +2603,7 @@ int up_timer_gettime(FAR struct timespec *ts);
 </ul>
 
 <h5><a name="upalarmcancel">4.3.4.4.3 <code>up_alarm_cancel()</code></a></h5>
-<p><b>Prototype</b>:<p>
+<p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
 int up_alarm_cancel(FAR struct timespec *ts);
@@ -2625,7 +2626,7 @@ int up_alarm_cancel(FAR struct timespec *ts);
 </ul>
 
 <h5><a name="upalarmstart">4.3.4.4.5 <code>up_alarm_start()</code></a></h5>
-<p><b>Prototype</b>:<p>
+<p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
 int up_alarm_start(FAR const struct timespec *ts);
@@ -2648,7 +2649,7 @@ int up_alarm_start(FAR const struct timespec *ts);
 </ul>
 
 <h5><a name="uptimercancel">4.3.4.4.5 <code>up_timer_cancel()</code></a></h5>
-<p><b>Prototype</b>:<p>
+<p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
 int up_timer_cancel(FAR struct timespec *ts);
@@ -2671,7 +2672,7 @@ int up_timer_cancel(FAR struct timespec *ts);
 </ul>
 
 <h5><a name="uptimerstart">4.3.4.4.6 <code>up_timer_start()</code></a></h5>
-<p><b>Prototype</b>:<p>
+<p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
 int up_timer_start(FAR const struct timespec *ts);
@@ -2692,6 +2693,221 @@ int up_timer_start(FAR const struct timespec *ts);
 <ul>
   May be called from interrupt level handling or from the normal tasking level. Interrupts may need to be disabled internally to assure non-reentrancy.
 </ul>
+
+<h3><a name="Watchdogs">4.3.5 Watchdog Timer Interfaces</a></h3>
+<p>
+  NuttX provides a general watchdog timer facility.
+  This facility allows the NuttX user to specify a watchdog timer function
+  that will run after a specified delay.
+  The watchdog timer function will run in the context of the timer interrupt handler.
+  Because of this, a limited number of NuttX interfaces are available to he watchdog timer function.
+  However, the watchdog timer function may use <code>mq_send()</code>, <code>sigqueue()</code>,
+  or <code>kill()</code> to communicate with NuttX tasks.
+</p>
+<ul>
+  <li><a href="#wdcreate">4.3.5.1 wd_create</a></li>
+  <li><a href="#wddelete">4.3.5.2 wd_delete</a></li>
+  <li><a href="#wdstart">4.3.5.3 wd_start</a></li>
+  <li><a href="#wdcancel">4.3.5.4 wd_cancel</a></li>
+  <li><a href="#wdgettime">4.3.5.5 wd_gettime</a></li>
+</ul>
+
+<h4><a name="wdcreate">4.3.5.1 wd_create</a></h4>
+
+<p>
+<b>Function Prototype:</b>
+<pre>
+    #include &lt;nuttx/wdog.h&gt;
+    WDOG_ID wd_create(void);
+</pre>
+
+<p>
+<b>Description:</b> The wd_create function will create a watchdog
+by allocating the appropriate resources for the watchdog.
+<p>
+<b>Input Parameters:</b> None.
+<p>
+<b>Returned Value:</b>
+<ul>
+<li>Pointer to watchdog that may be used as a handle in subsequent
+NuttX calls (i.e., the watchdog ID), or NULL if insufficient resources
+are available to create the watchdogs.
+</ul>
+
+<p>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>  POSIX  Compatibility:</b> This is a NON-POSIX interface.
+VxWorks provides the following comparable interface:
+<pre>
+    WDOG_ID wdCreate (void);
+</pre>
+
+<p>
+Differences from the VxWorks interface include:
+<ul>
+<li>The number of available watchdogs is fixed (configured at
+initialization time).
+</ul>
+
+<h4><a name="wddelete">4.3.5.2 wd_delete</a></h4>
+
+<p>
+<b>Function Prototype:</b>
+<pre>
+    #include &lt;nuttx/wdog.h&gt;
+    int wd_delete(WDOG_ID wdog);
+</pre>
+
+<p>
+<b>Description:</b> The wd_delete function will deallocate a
+watchdog. The watchdog will be removed from the timer queue if
+has been started.
+<p>
+<b>Input Parameters:</b>
+<ul>
+<li><code>wdog</code>. The watchdog ID to delete. This is actually a
+pointer to a watchdog structure.
+</ul>
+
+<p>
+<b>Returned Value:</b>
+<ul>
+<li>OK or ERROR
+</ul>
+
+<p>
+<b>Assumptions/Limitations:</b> It is the responsibility of the
+caller to assure that the watchdog is inactive before deleting
+it.
+<p>
+<b>POSIX  Compatibility:</b> This is a NON-POSIX interface.
+VxWorks provides the following comparable interface:
+<pre>
+    STATUS wdDelete (WDOG_ID wdog);
+</pre>
+
+<p>
+Differences from the VxWorks interface include:
+<ul>
+<li>Does not make any checks to see if the watchdog is being used
+before deallocating it (i.e., never returns ERROR).
+</ul>
+
+<h4><a name="wdstart">4.3.5.3 wd_start</a></h4>
+
+<p>
+<b>Function Prototype:</b>
+<pre>
+    #include &lt;nuttx/wdog.h&gt;
+    int wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,
+                 int argc, ....);
+</pre>
+
+<p>
+<b>Description:</b> This function adds a watchdog to the timer
+queue. The specified watchdog function will be called from the
+interrupt level after the specified number of ticks has elapsed.
+Watchdog timers may be started from the interrupt level.
+<p>
+Watchdog times execute in the context of the timer interrupt handler.
+<p>
+Watchdog timers execute only once.
+<p>
+To replace either the timeout delay or the function to be executed,
+call wd_start again with the same wdog; only the most recent
+wd_start() on a given watchdog ID has any effect.
+<p>
+<b>Input Parameters:</b>
+<ul>
+<li><code>wdog</code>. Watchdog ID
+<li><code>delay</code>. Delay count in clock ticks
+<li><code>wdentry</code>. Function to call on timeout
+<li><code>argc</code>.  The number of uint32_t parameters to pass to wdentry.
+<li><code>...</code>. uint32_t size parameters to pass to wdentry
+</ul>
+
+<p>
+<b>Returned Value:</b>
+<ul>
+<li>OK or ERROR
+</ul>
+
+<p>
+<b>Assumptions/Limitations:</b> The watchdog routine runs in the
+context of the timer interrupt handler and is subject to all ISR
+restrictions.
+<p>
+<b>POSIX  Compatibility:</b> This is a NON-POSIX interface.
+VxWorks provides the following comparable interface:
+<pre>
+    STATUS wdStart (WDOG_ID wdog, int delay, FUNCPTR wdentry, int parameter);
+</pre>
+
+<p>
+Differences from the VxWorks interface include:
+<ul>
+<li>The present implementation supports multiple parameters passed
+to wdentry; VxWorks supports only a single parameter.  The maximum
+number of parameters is determined by
+</ul>
+
+<h4><a name="wdcancel">4.3.5.4 wd_cancel</a></h4>
+<p>
+<b>Function Prototype:</b>
+<pre>
+    #include &lt;nuttx/wdog.h&gt;
+    int wd_cancel(WDOG_ID wdog);
+</pre>
+
+<p>
+<b>Description:</b> This function cancels a currently running
+watchdog timer. Watchdog timers may be canceled from the interrupt
+level.
+<p>
+<b>Input Parameters:</b>
+<ul>
+<li><code>wdog</code>. ID of the watchdog to cancel.
+</ul>
+
+<p>
+<b>Returned Value:</b>
+<ul>
+<li>OK or ERROR
+</ul>
+
+<p>
+<b>Assumptions/Limitations:</b>
+<p>
+<b>POSIX  Compatibility:</b> This is a NON-POSIX interface.
+VxWorks provides the following comparable interface:
+<pre>
+    STATUS wdCancel (WDOG_ID wdog);
+</pre>
+
+<h3><a name="wdgettime">4.3.5.5 wd_gettime</a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<pre>
+    #include &lt;nuttx/wdog.h&gt;
+    Sint wd_gettime(WDOG_ID wdog);
+</pre>
+<p>
+  <b>Description:</b>
+   This function returns the time remaining before the specified watchdog expires.
+</p>
+<p>
+  <b>Input Parameters:</b>
+  <ul>
+    <li><code>wdog</code>. Identifies the watchdog that the request is for.</li>
+  </ul>
+</p>
+<p>
+  <b>Returned Value:</b>
+  The time in system ticks remaining until the watchdog time expires.  Zero
+  means either that wdog is not valid or that the wdog has already expired.
+</p>
 
 <h2><a name="addrenv">4.4 Address Environments</a></h2>
 <p>
@@ -2763,7 +2979,7 @@ int up_timer_start(FAR const struct timespec *ts);
 
 
 <h3><a name="up_addrenv_create">4.4.1 <code>up_addrenv_create()</code></a></h3>
-<p><b>Prototype</b>:</p>
+<p><b>Function Prototype</b>:</p>
 <ul>
   <code>int up_addrenv_create(size_t envsize, FAR task_addrenv_t *addrenv);</code>
 </ul>
@@ -2783,7 +2999,7 @@ int up_timer_start(FAR const struct timespec *ts);
 </ul>
 
 <h3><a name="up_addrenv_vaddr">4.4.2 <code>up_addrenv_vaddr()</code></a></h3>
-<p><b>Prototype</b>:<p>
+<p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_vaddr(FAR task_addrenv_t addrenv, FAR void **vaddr);</code>
 </ul>
@@ -2803,7 +3019,7 @@ int up_timer_start(FAR const struct timespec *ts);
 </ul>
 
 <h3><a name="up_addrenv_select">4.4.3 <code>up_addrenv_select()</code></a></h3>
-<p><b>Prototype</b>:<p>
+<p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_select(task_addrenv_t addrenv, hw_addrenv_t *oldenv);</code>
 </ul>
@@ -2827,7 +3043,7 @@ int up_timer_start(FAR const struct timespec *ts);
 </ul>
 
 <h3><a name="up_addrenv_restore">4.4.4 <code>up_addrenv_restore()</code></a></h3>
-<p><b>Prototype</b>:<p>
+<p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_restore(hw_addrenv_t oldenv);</code>
 </ul>
@@ -2846,7 +3062,7 @@ int up_timer_start(FAR const struct timespec *ts);
 </ul>
 
 <h3><a name="up_addrenv_destroy">4.4.5 <code>up_addrenv_destroy()</code></a></h3>
-<p><b>Prototype</b>:<p>
+<p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_destroy(task_addrenv_t addrenv);</code>
 </ul>
@@ -2864,7 +3080,7 @@ int up_timer_start(FAR const struct timespec *ts);
 </ul>
 
 <h3><a name="up_addrenv_assign">4.4.6 <code>up_addrenv_assign()</code></a></h3>
-<p><b>Prototype</b>:<p>
+<p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_assign(task_addrenv_t addrenv, FAR struct tcb_s *tcb);</code>
 </ul>
@@ -2883,7 +3099,7 @@ int up_timer_start(FAR const struct timespec *ts);
 </ul>
 
 <h3><a name="up_addrenv_share">4.4.7 <code>up_addrenv_share()</code></a></h3>
-<p><b>Prototype</b>:<p>
+<p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_share(FAR const struct tcb_s *ptcb, FAR struct tcb_s *ctcb);</code>
 </ul>
@@ -2903,7 +3119,7 @@ int up_timer_start(FAR const struct timespec *ts);
 </ul>
 
 <h3><a name="up_addrenv_release">4.4.8 <code>up_addrenv_release()</code></a></h3>
-<p><b>Prototype</b>:<p>
+<p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_release(FAR struct tcb_s *tcb);</code>
 </ul>
@@ -2939,7 +3155,7 @@ int up_timer_start(FAR const struct timespec *ts);
 </p>
 
 <h3><a name="schedprocesstimer">4.5.3 <code>sched_process_timer()</code></a></h3>
-<p><b>Prototype</b>: <code>void sched_process_timer(void);</code></p>
+<p><b>Function Prototype</b>: <code>void sched_process_timer(void);</code></p>
 
 <p><b>Description</b>.
   This function handles system timer events.
@@ -2950,7 +3166,7 @@ int up_timer_start(FAR const struct timespec *ts);
 </p>
 
 <h3><a name="schedtimerexpiration">4.5.4 <code>sched_timer_expiration()</code></a></h3>
-<p><b>Prototype</b>:<p>
+<p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
 void sched_timer_expiration(void);
@@ -2973,7 +3189,7 @@ void sched_timer_expiration(void);
 </ul>
 
 <h3><a name="schedalarmexpiration">4.5.5 <code>sched_alaram_expiration()</code></a></h3>
-<p><b>Prototype</b>:<p>
+<p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
 void sched_timer_expiration(void);
@@ -2996,7 +3212,7 @@ void sched_timer_expiration(void);
 </ul>
 
 <h3><a name="irqdispatch">4.5.6 <code>irq_dispatch()</code></a></h3>
-<p><b>Prototype</b>: <code>void irq_dispatch(int irq, FAR void *context);</code></p>
+<p><b>Function Prototype</b>: <code>void irq_dispatch(int irq, FAR void *context);</code></p>
 
 <p><b>Description</b>.
   This function must be called from the architecture-

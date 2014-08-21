@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_poll.c
  *
- *   Copyright (C) 2008-2009, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2012-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,14 +42,14 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <poll.h>
-#include <wdog.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/fs/fs.h>
+#include <nuttx/wdog.h>
 #include <nuttx/sched.h>
 #include <nuttx/clock.h>
+#include <nuttx/fs/fs.h>
 
 #include "fs_internal.h"
 

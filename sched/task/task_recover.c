@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/task/task_recover.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,9 +39,8 @@
 
 #include <nuttx/config.h>
 
-#include <wdog.h>
-
 #include <nuttx/arch.h>
+#include <nuttx/wdog.h>
 #include <nuttx/sched.h>
 
 #include "mqueue/mqueue.h"

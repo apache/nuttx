@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/semaphore/sem_timedwait.c
  *
- *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,10 +44,10 @@
 #include <semaphore.h>
 #include <time.h>
 #include <errno.h>
-#include <wdog.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/wdog.h>
 
 #include "sched/sched.h"
 #include "clock/clock.h"
