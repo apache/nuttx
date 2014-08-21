@@ -1,7 +1,7 @@
 /************************************************************************
  * sched/wdog/wd_initialize.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,12 +40,11 @@
 #include <nuttx/config.h>
 
 #include <queue.h>
-#include <nuttx/kmalloc.h>
 
 #include "wdog/wdog.h"
 
 /************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************/
 
 /************************************************************************
@@ -53,7 +52,7 @@
  ************************************************************************/
 
 /************************************************************************
- * Global Variables
+ * Public Variables
  ************************************************************************/
 
 /* The g_wdfreelist data structure is a singly linked list of watchdogs
@@ -62,12 +61,6 @@
 
 sq_queue_t g_wdfreelist;
 
-/* g_wdpool is a pointer to a list of pre-allocated watchdogs. The number
- * of watchdogs in the pool is a configuration item.
- */
-
-FAR wdog_t *g_wdpool;
-
 /* The g_wdactivelist data structure is a singly linked list ordered by
  * watchdog expiration time. When watchdog timers expire,the functions on
  * this linked list are removed and the function is called.
@@ -75,9 +68,22 @@ FAR wdog_t *g_wdpool;
 
 sq_queue_t g_wdactivelist;
 
+/* This is the number of free, pre-allocated watchdog structures in the
+ * g_wdfreelist.  This value is used to enforce a reserve for interrupt
+ * handlers.
+ */
+
+uint16_t g_wdnfree;
+
 /************************************************************************
- * Private Variables
+ * Private Data
  ************************************************************************/
+
+/* g_wdpool is a list of pre-allocated watchdogs. The number of watchdogs
+* in the pool is a configuration item.
+ */
+
+static FAR wdog_t g_wdpool[CONFIG_PREALLOC_WDOGS];
 
 /************************************************************************
  * Private Functions
@@ -108,27 +114,24 @@ sq_queue_t g_wdactivelist;
 
 void wd_initialize(void)
 {
-  /* Initialize the free watchdog list */
+  FAR wdog_t *wdog = g_wdpool;
+  int i;
+
+  /* Initialize watchdog lists */
 
   sq_init(&g_wdfreelist);
+  sq_init(&g_wdactivelist);
 
   /* The g_wdfreelist must be loaded at initialization time to hold the
    * configured number of watchdogs.
    */
 
-  g_wdpool = (FAR wdog_t*)kmalloc(sizeof(wdog_t) * CONFIG_PREALLOC_WDOGS);
-  if (g_wdpool)
+  for (i = 0; i < CONFIG_PREALLOC_WDOGS; i++)
     {
-      FAR wdog_t *wdog = g_wdpool;
-      int i;
-
-      for (i = 0; i < CONFIG_PREALLOC_WDOGS; i++)
-        {
-          sq_addlast((FAR sq_entry_t*)wdog++, &g_wdfreelist);
-        }
+      sq_addlast((FAR sq_entry_t*)wdog++, &g_wdfreelist);
     }
 
-  /* The g_wdactivelist queue must be reset at initialization time. */
+  /* All watchdogs are free */
 
-  sq_init(&g_wdactivelist);
+  g_wdnfree = CONFIG_PREALLOC_WDOGS;
 }

@@ -1,7 +1,7 @@
 /************************************************************************
  * sched/wdog/wdog.h
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,6 +51,40 @@
 /************************************************************************
  * Pre-processor Definitions
  ************************************************************************/
+/* Configuration ********************************************************/
+
+#ifndef CONFIG_PREALLOC_WDOGS
+#  define CONFIG_PREALLOC_WDOGS 32
+#endif
+
+#ifndef CONFIG_WDOG_INTRESERVE
+#  if CONFIG_PREALLOC_WDOGS > 16
+#    define CONFIG_WDOG_INTRESERVE 4
+#  elif  CONFIG_PREALLOC_WDOGS > 8
+#    define CONFIG_WDOG_INTRESERVE 2
+#  else
+#    define CONFIG_WDOG_INTRESERVE 1
+#  endif
+#endif
+
+#if CONFIG_WDOG_INTRESERVE >= CONFIG_PREALLOC_WDOGS
+#  error CONFIG_WDOG_INTRESERVE >= CONFIG_PREALLOC_WDOGS
+#endif
+
+/* Watchdog Definitions *************************************************/
+/* Flag bits for the flags field of struct wdog_s */
+
+#define WDOGF_ACTIVE       (1 << 0) /* Watchdog is actively timing */
+#define WDOGF_ALLOCED      (1 << 1) /* 0:Pre-allocated, 1:Allocated */
+
+#define WDOG_SETACTIVE(w)  do { (w)->flags |= WDOGF_ACTIVE; } while (0)
+#define WDOG_SETALLOCED(w) do { (w)->flags |= WDOGF_ALLOCED; } while (0)
+
+#define WDOG_CLRACTIVE(w)  do { (w)->flags &= ~WDOGF_ACTIVE; } while (0)
+#define WDOG_CLRALLOCED(w) do { (w)->flags &= ~WDOGF_ALLOCED; } while (0)
+
+#define WDOG_ISACTIVE(w)   (((w)->flags & WDOGF_ACTIVE) != 0)
+#define WDOG_ISALLOCED(w)  (((w)->flags & WDOGF_ALLOCED) != 0)
 
 /************************************************************************
  * Public Type Declarations
@@ -68,7 +102,7 @@ struct wdog_s
   FAR void          *picbase;    /* PIC base address */
 #endif
   int                lag;        /* Timer associated with the delay */
-  bool               active;     /* true if the watchdog is actively timing */
+  uint8_t            flags;      /* See WDOGF_* definitions above */
   uint8_t            argc;       /* The number of parameters to pass */
   uint32_t           parm[CONFIG_MAX_WDOGPARMS];
 };
@@ -92,18 +126,19 @@ extern "C"
 
 extern sq_queue_t g_wdfreelist;
 
-/* g_wdpool is a pointer to a list of pre-allocated watchdogs. The number
- * of watchdogs in the pool is a configuration item.
- */
-
-extern FAR wdog_t *g_wdpool;
-
 /* The g_wdactivelist data structure is a singly linked list ordered by
  * watchdog expiration time. When watchdog timers expire,the functions on
  * this linked list are removed and the function is called.
  */
 
 extern sq_queue_t g_wdactivelist;
+
+/* This is the number of free, pre-allocated watchdog structures in the
+ * g_wdfreelist.  This value is used to enforce a reserve for interrupt
+ * handlers.
+ */
+
+extern uint16_t g_wdnfree;
 
 /************************************************************************
  * Public Function Prototypes

@@ -1,7 +1,7 @@
 /********************************************************************************
  * sched/wdog/wd_gettime.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -92,7 +92,7 @@ int wd_gettime(WDOG_ID wdog)
   /* Verify the wdog */
 
   flags = irqsave();
-  if (wdog && wdog->active)
+  if (wdog && WDOG_ISACTIVE(wdog))
     {
       /* Traverse the watchdog list accumulating lag times until we find the wdog
        * that we are looking for

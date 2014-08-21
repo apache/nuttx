@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/wdog/wd_delete.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,9 +41,11 @@
 
 #include <wdog.h>
 #include <queue.h>
+#include <assert.h>
 #include <errno.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/kmalloc.h>
 
 #include "wdog/wdog.h"
 
@@ -80,7 +82,7 @@
  *   queue if has been started.
  *
  * Parameters:
- *   wdId - The watchdog ID to delete.  This is actually a pointer to a
+ *   wdog - The watchdog ID to delete.  This is actually a pointer to a
  *          watchdog structure.
  *
  * Return Value:
@@ -91,35 +93,58 @@
  *
  ****************************************************************************/
 
-int wd_delete(WDOG_ID wdId)
+int wd_delete(WDOG_ID wdog)
 {
-  irqstate_t saved_state;
+  irqstate_t state;
 
-  /* Verify that a valid watchdog was provided */
-
-  if (!wdId)
-    {
-      set_errno(EINVAL);
-      return ERROR;
-    }
+  DEBUGASSERT(wdog);
 
   /* The following steps are atomic... the watchdog must not be active when
    * it is being deallocated.
    */
 
-  saved_state = irqsave();
+  state = irqsave();
 
   /* Check if the watchdog has been started. */
 
-  if (wdId->active)
+  if (WDOG_ISACTIVE(wdog))
     {
-      wd_cancel(wdId);
+      /* Yes.. stop it */
+
+      wd_cancel(wdog);
     }
 
-  /* Put the watchdog back on the free list */
+  /* Did this watchdog come from the pool of pre-allocated timers?  Or, was
+   * it allocated from the heap?
+   */
 
-  sq_addlast((FAR sq_entry_t*)wdId, &g_wdfreelist);
-  irqrestore(saved_state);
+  if (WDOG_ISALLOCED(wdog))
+    {
+      /* It was allocated from the heap.  Use sched_kfree() to release the
+       * memory.  If the timer was released from an interrupt handler,
+       * sched_kfree() will defer the actual deallocation of the memory
+       * until a more appropriate time.
+       *
+       * We don't need interrupts disabled to do this.
+       */
+
+      irqrestore(state);
+      sched_kfree(wdog);
+    }
+
+  /* This was a pre-allocated timer. */
+
+  else
+    {
+      /* Put the timer back on the free list and increment the count of free
+       * timers, all with interrupts disabled.
+       */
+
+      sq_addlast((FAR sq_entry_t*)wdog, &g_wdfreelist);
+      g_wdnfree++;
+      DEBUGASSERT(g_wdnfree <= CONFIG_PREALLOC_WDOGS);
+      irqrestore(state);
+    }
 
   /* Return success */
 

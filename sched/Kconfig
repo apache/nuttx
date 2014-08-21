@@ -188,8 +188,23 @@ config PREALLOC_WDOGS
 	int "Number of pre-allocated watchdog timers"
 	default 32
 	---help---
-		The number of pre-allocated watchdog structures.  The system manages a
-		pool of preallocated watchdog structures to minimize dynamic allocations
+		The number of pre-allocated watchdog structures.  The system manages
+		a pool of preallocated watchdog structures to minimize dynamic
+		allocations.  Dynamic allocations will still be made if this pool is
+		exhausted.  You will, however, get better performance and memory
+		usage if this value is tuned to minimize such allocations.
+
+config WDOG_INTRESERVE
+	int "Watchdog structures reserved for interrupt handlers"
+	default 4
+	---help---
+		Watchdog structures may be allocated from normal task and also from
+		interrupt handlers.  Interrupt handlers, however, can only use pre-
+		allocated watchdog timer.  So, in order to keep normal task
+		allocations from exhausting all watchdog structures, a small number
+		of pre-allocated watchdog timers must be reserved for exclusive use
+		by interrupt handler.  This setting determines that number of
+		reserved watchdogs.
 
 config PREALLOC_TIMERS
 	int "Number of pre-allocated POSIX timers"

@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/wdog/wd_create.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@
 #include <queue.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/kmalloc.h>
 
 #include "wdog/wdog.h"
 
@@ -92,18 +93,63 @@
 WDOG_ID wd_create (void)
 {
   FAR wdog_t *wdog;
-  irqstate_t saved_state;
+  irqstate_t state;
 
-  saved_state = irqsave();
-  wdog = (FAR wdog_t*)sq_remfirst(&g_wdfreelist);
-  irqrestore(saved_state);
+  /* These actions must be atomic with respect to other tasks and also with
+   * respect to interrupt handlers that may be allocating or freeing watchdog
+   * timers.
+   */
 
-  /* Indicate that the watchdog is not actively timing */
+  state = irqsave();
 
-  if (wdog)
+  /* If we are in an interrupt handler -OR- if the number of pre-allocated
+   * timer structures exceeds the reserve, then take the the next timer from
+   * the head of the free list.
+   */
+
+  if (g_wdnfree > CONFIG_WDOG_INTRESERVE || !up_interrupt_context())
     {
-      wdog->next = NULL;
-      wdog->active = false;
+      /* Remove the watchdog timer from the free list and decrement the
+       * count of free timers all with interrupts disabled.
+       */
+
+      wdog = (FAR wdog_t*)sq_remfirst(&g_wdfreelist);
+      DEBUGASSERT(g_wdnfree > 0);
+      g_wdnfree--;
+      irqrestore(state);
+
+      /* Did we get one? */
+
+      if (wdog)
+        {
+          /* Yes.. Clear the forward link and all flags */
+
+          wdog->next = NULL;
+          wdog->flags = 0;
+        }
+    }
+
+  /* We are in a normal tasking context AND there are not enough unreserved,
+   * pre-allocated watchdog timers.  We need to allocate one from the kernel
+   * heap.
+   */
+
+  else
+    {
+      /* We do not require that interrupts be disabled to do this. */
+
+      irqrestore(state);
+      wdog = (FAR wdog_t *)kmalloc(sizeof(wdog_t));
+
+      /* Did we get one? */
+
+      if (wdog)
+        {
+          /* Yes.. Clear the forward link and set the allocated flag */
+
+          wdog->next  = NULL;
+          wdog->flags = WDOGF_ALLOCED;
+        }
     }
 
   return (WDOG_ID)wdog;

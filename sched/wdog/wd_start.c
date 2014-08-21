@@ -143,7 +143,7 @@ static inline void wd_expiration(void)
 
           /* Indicate that the watchdog is no longer active. */
 
-          wdog->active = false;
+          WDOG_CLRACTIVE(wdog);
 
           /* Execute the watchdog function */
 
@@ -250,7 +250,7 @@ int wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,  int argc, ...)
    */
 
   saved_state = irqsave();
-  if (wdog->active)
+  if (WDOG_ISACTIVE(wdog))
     {
       wd_cancel(wdog);
     }
@@ -382,8 +382,8 @@ int wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,  int argc, ...)
 
   /* Put the lag into the watchdog structure and mark it as active. */
 
-  wdog->lag    = delay;
-  wdog->active = true;
+  wdog->lag = delay;
+  WDOG_SETACTIVE(wdog);
 
 #ifdef CONFIG_SCHED_TICKLESS
   /* Resume the interval timer that will generate the next interval event.
