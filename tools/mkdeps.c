@@ -473,7 +473,7 @@ static void do_dependency(const char *file, char separator)
       dotptr  = strrchr(objname, '.');
       if (dotptr)
         {
-          dotptr = '\0';
+          *dotptr = '\0';
         }
 
       snprintf(tmp, NAME_MAX+6, " -MT %s" DELIM "%s%s ",
@@ -515,7 +515,7 @@ static void do_dependency(const char *file, char separator)
   g_command[cmdlen] = '\0';
 
   /* Make a copy of g_altpath. We need to do this because at least the version
-   * of strtok_r above does modifie it.
+   * of strtok_r above does modify it.
    */
 
   alloc = strdup(g_altpath);
@@ -597,6 +597,11 @@ static void do_dependency(const char *file, char separator)
        * compiler, system() will return -1;  Otherwise, the returned value
        * from the compiler is in WEXITSTATUS(ret).
        */
+
+      if (g_debug)
+        {
+          fprintf(stderr, "Executing: %s\n", g_command);
+        }
 
       ret = system(g_command);
 #ifdef WEXITSTATUS
@@ -687,7 +692,7 @@ static char *cywin2windows(const char *str, const char *append, enum slashmode_e
           drive = toupper(*str);
           if (drive < 'A' || drive > 'Z')
             {
-              fprintf(stderr, "ERROR: Drive charager: \"%s\"\n", str);
+              fprintf(stderr, "ERROR: Drive character: \"%s\"\n", str);
               exit(EXIT_FAILURE);
             }
 
