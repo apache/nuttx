@@ -2,7 +2,7 @@
 
 rem configs/p112/ostest/setenv.bat
 rem
-rem   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+rem   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
 rem   Author: Gregory Nutt <gnutt@nuttx.org>
 rem
 rem Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,8 @@ set PATH=C:\MinGW\bin;%PATH%
 
 rem This is the location where I installed the SDCC toolchain for windows.
 
-set PATH=C:\Program Files (x86)\SDCC/bin;%PATH%
+rem set PATH=C:\Program Files (x86)\SDCC/bin;%PATH%
+set PATH=C:\Program Files\SDCC/bin;%PATH%
 
 rem This is the location where I installed the GNUWin32 tools.  See
 rem http://gnuwin32.sourceforge.net/.

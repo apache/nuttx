@@ -1,7 +1,7 @@
 ############################################################################
 # configs/p112/ostest/Make.defs
 #
-#   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -81,7 +81,8 @@ AFLAGS = -x -a -l -o -s -g
 SDCCLIB = z180.lib
 
 ASMEXT = .asm
-OBJEXT = .o
+# OBJEXT = .o
+OBJEXT = .rel
 LIBEXT = .lib
 EXEEXT = .hex
 
@@ -122,7 +123,9 @@ endif
 # Windows native host tool definitions
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-  HOSTCC = mingw32-gcc.exe
+# You may need to customize the binary name:
+# HOSTCC = mingw32-gcc.exe
+  HOSTCC = x86_64-w64-mingw32-gcc.exe
   HOSTINCLUDES = -I.
   HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -g -pipe
   HOSTLDFLAGS =
@@ -130,7 +133,7 @@ ifeq ($(CONFIG_WINDOWS_NATIVE),y)
 
   # Windows-native host tools
 
-  MKDEP = $(TOPDIR)\tools\mkdeps.exe --winnative
+  MKDEP = $(TOPDIR)\tools\mkdeps.exe --winnative # --dep-debug
 
   # Use NTFS links or directory copies
 
