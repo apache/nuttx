@@ -8213,3 +8213,6 @@
 	* Documentation/NuttxPortingGuide.h:  For the same reason as above, move
 	  the description of the watchdog timer interfaces from the Users Guide
 	  to the Porting Guide (2014-8-21).
+	* arch/arm/src/stm32/stm32_uart.h: STM32 F401: Correct support for
+	  USART6 on this chip.  From Freddie Chopin (2014-8-22).
+
