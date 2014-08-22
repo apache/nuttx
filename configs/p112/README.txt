@@ -133,3 +133,15 @@ P112 Serial Console
 The UARTs are not used on the P112 board (the UART signals are avaiable off-board through P14).
 The serial console is provided by U7 LT1133, Advanced Low Power 5V RS232 Driver/Receiver
 that connects to the P112 via the Z85230 ESCC channel A.
+
+Status
+======
+
+2014-8-22:  After some time idling away, I tried rebuilding with Windows 8, the latest MinGW
+and the latest SDCC.  I fixed a few things but there a still a few issues.  The last "show
+stopper" before I gave up for now was during building dependencies:
+
+ASlink-Error-<cannot open> : "bin/mm_initialize.rel"
+
+Clearly there is something wrong with the command line options given to SDCC because it is
+trying to compile and link when we really only want dependencies.

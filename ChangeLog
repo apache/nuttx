@@ -8218,4 +8218,7 @@
 	* nuttx/sched/wdog and include/nuttx/wdog.h:  Add support for statically
 	  allocated watchdog timer (also eliminate some unconvential typing)
 	  (2014-8-22).
-
+	* configs/p112/ostest and tools/mkdeps.c:  Changes to try to get P112 to
+	  compile with laster SDCC (it still does not) (2014-8-22).
+	* sched/group/group_leave.c: Need to release the address environment when
+	  the task group is released (2014-8-22).
