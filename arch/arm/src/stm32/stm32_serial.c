@@ -986,11 +986,7 @@ static struct up_dev_s g_uart8priv =
 };
 #endif
 
-/* This table lets us iterate over the configured USARTs.
- *
- * REVISIT:  The following logic is not valid for the STM32F401 which
- * supports 3 USARTS:  USART1, USART2, and USART6.
- */
+/* This table lets us iterate over the configured USARTs */
 
 static struct up_dev_s *uart_devs[STM32_NUSART] =
 {
