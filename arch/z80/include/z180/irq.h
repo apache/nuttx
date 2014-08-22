@@ -173,7 +173,7 @@ typedef uint16_t chipreg_t;
 struct z180_cbr_s
 {
   uint8_t cbr;   /* The CBR value used by the thread */
-  uint8_t crefs; /* The number of threads sharing this CBR value */
+  uint8_t crefs; /* The number of task groups using this CBR value (0 or 1) */
   uint8_t pages; /* The number of 4KB pages of physical memory in the allocation */
 };
 
@@ -183,10 +183,6 @@ struct z180_cbr_s
 
 struct xcptcontext
 {
-  /* CBR allocation */
-
-  FAR struct z180_cbr_s *cbr;
-
   /* Register save area */
 
   chipreg_t regs[XCPTCONTEXT_REGS];

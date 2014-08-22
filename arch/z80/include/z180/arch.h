@@ -1,6 +1,5 @@
 /****************************************************************************
  * arch/z80/arch.h
- * arch/chip/arch.h
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -73,7 +72,7 @@ typedef uint8_t hw_addrenv_t;
  */
 
 struct z180_cbr_s;
-typedef FAR struct z180_cbr_s *task_addrenv_t;
+typedef FAR struct z180_cbr_s *group_addrenv_t;
 #endif
 
 /****************************************************************************

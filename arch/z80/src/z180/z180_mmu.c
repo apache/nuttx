@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/z180/z180_mmu.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -180,36 +180,37 @@ return g_physhandle ? OK : -ENOMEM;
  * Address Environment Interfaces
  *
  * Low-level interfaces used in binfmt/ to instantiate tasks with address
- * environments.  These interfaces all operate on task_addrenv_t which is an
- * abstract representation of the address environment and must be provided
- * by arch/arch.h is CONFIG_ADDRENV is defined.
+ * environments.  These interfaces all operate on type group_addrenv_t which
+ * is an abstract representation of a task group's address environment and
+ * must be defined in arch/arch.h if CONFIG_ADDRENV is defined.
  *
  *   up_addrenv_create  - Create an address environment
+ *   up_addrenv_destroy - Destroy an address environment.
  *   up_addrenv_vaddr   - Returns the virtual base address of the address
  *                        environment
  *   up_addrenv_select  - Instantiate an address environment
- *   up_addrenv_destroy - Destroy an address environment.
- *   up_addrenv_assign  - Assign an address environment to a TCB
+ *   up_addrenv_restore - Restore an address environment
+ *   up_addrenv_assign  - Assign an address environment to a group
  *
  * Higher-level interfaces used by the tasking logic.  These interfaces are
- * used by the functions in sched/ and all operate on the TCB which as been
- * assigned an address environment by up_addrenv_assign().
+ * used by the functions in sched/ and all operate on the thread which whose
+ * group been assigned an address environment by up_addrenv_assign().
  *
- *   up_addrenv_share   - Clone the address environment assigned to one TCB
+ *   up_addrenv_attach   - Clone the address environment assigned to one TCB
  *                        to another.  This operation is done when a pthread
  *                        is created that share's the same address
  *                        environment.
- *   up_addrenv_release - Release the TCBs reference to an address
- *                        environment when a task/thread exists.
+ *   up_addrenv_detach - Release the threads reference to an address
+ *                        environment when a task/thread exits.
  *
  ****************************************************************************/
 /****************************************************************************
  * Name: up_addrenv_create
  *
  * Description:
- *   This function is called from the binary loader logic when a new
- *   task is created in order to instantiate an address environment for the
- *   task.  up_addrenv_create is essentially the allocator of the physical
+ *   This function is called when a new task is created in order to
+ *   instantiate an address environment for the new task group.
+ *   up_addrenv_create() is essentially the allocator of the physical
  *   memory for the new task.
  *
  * Input Parameters:
@@ -223,7 +224,7 @@ return g_physhandle ? OK : -ENOMEM;
  *
  ****************************************************************************/
 
-int up_addrenv_create(size_t envsize, FAR task_addrenv_t *addrenv)
+int up_addrenv_create(size_t envsize, FAR group_addrenv_t *addrenv)
 {
   FAR struct z180_cbr_s *cbr;
   irqstate_t flags;
@@ -280,7 +281,7 @@ int up_addrenv_create(size_t envsize, FAR task_addrenv_t *addrenv)
 
   cbr->cbr     = (uint8_t)alloc;
   cbr->pages   = (uint8_t)npages;
-  *addrenv     = (task_addrenv_t)cbr;
+  *addrenv     = (group_addrenv_t)cbr;
 
   irqrestore(flags);
   return OK;
@@ -291,6 +292,42 @@ errout_with_cbr:
 errout_with_irq:
   irqrestore(flags);
   return ret;
+}
+
+/****************************************************************************
+ * Name: up_addrenv_destroy
+ *
+ * Description:
+ *   This function is called when a final thread leaves the task group and
+ *   the task group is destroyed.  This function then destroys the defunct
+ *   address environment, releasing the underlying physical memory.
+ *
+ * Input Parameters:
+ *   addrenv - The address environment to be destroyed.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int up_addrenv_destroy(group_addrenv_t addrenv)
+{
+  FAR struct z180_cbr_s *cbr = (FAR struct z180_cbr_s *)addrenv;
+
+  DEBUGASSERT(cbr);
+
+  /* Free the physical address space backing up the mapping */
+
+#ifdef CONFIG_GRAN_SINGLE
+  gran_free((FAR void *)cbr->cbr, cbr->pages);
+#else
+  gran_free(g_physhandle, (FAR void *)cbr->cbr, cbr->pages);
+#endif
+
+  /* And make the CBR structure available for re-use */
+
+  z180_mmu_freecbr(cbr);
+  return OK;
 }
 
 /****************************************************************************
@@ -311,7 +348,7 @@ errout_with_irq:
  *
  ****************************************************************************/
 
-int up_addrenv_vaddr(FAR task_addrenv_t addrenv, FAR void **vaddr)
+int up_addrenv_vaddr(FAR group_addrenv_t addrenv, FAR void **vaddr)
 {
   return CONFIG_Z180_COMMON1AREA_VIRTBASE;
 }
@@ -334,14 +371,14 @@ int up_addrenv_vaddr(FAR task_addrenv_t addrenv, FAR void **vaddr)
  *     This may be used with up_addrenv_restore() to restore the original
  *     address environment that was in place before up_addrenv_select() was
  *     called.  Note that this may be a task agnostic, hardware
- *     representation that is different from task_addrenv_t.
+ *     representation that is different from group_addrenv_t.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int up_addrenv_select(task_addrenv_t addrenv, hw_addrenv_t *oldenv)
+int up_addrenv_select(group_addrenv_t addrenv, hw_addrenv_t *oldenv)
 {
   FAR struct z180_cbr_s *cbr = (FAR struct z180_cbr_s *)addrenv;
   irqstate_t flags;
@@ -384,126 +421,75 @@ int up_addrenv_restore(hw_addrenv_t oldenv)
 }
 
 /****************************************************************************
- * Name: up_addrenv_destroy
- *
- * Description:
- *   Called from the binary loader loader during error handling to destroy
- *   the address environment previously created by up_addrenv_create().
- *
- * Input Parameters:
- *   addrenv - The representation of the task address environment previously
- *     returned by up_addrenv_create.
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-int up_addrenv_destroy(task_addrenv_t addrenv)
-{
-  FAR struct z180_cbr_s *cbr = (FAR struct z180_cbr_s *)addrenv;
-
-  DEBUGASSERT(cbr);
-
-  /* Free the physical address space backing up the mapping */
-
-#ifdef CONFIG_GRAN_SINGLE
-  gran_free((FAR void *)cbr->cbr, cbr->pages);
-#else
-  gran_free(g_physhandle, (FAR void *)cbr->cbr, cbr->pages);
-#endif
-
-  /* And make the CBR structure available for re-use */
-
-  z180_mmu_freecbr(cbr);
-  return OK;
-}
-
-/****************************************************************************
  * Name: up_addrenv_assign
  *
  * Description:
- *   Assign an address environment to a TCB.
+ *   Assign an address environment to a task group.
  *
  * Input Parameters:
  *   addrenv - The representation of the task address environment previously
- *     returned by up_addrenv_create.
- *   tcb - The TCB of the task to receive the address environment.
+ *     returned by up_addrenv_create().
+ *   group - The task group to receive the address environment.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int up_addrenv_assign(task_addrenv_t addrenv, FAR struct tcb_s *tcb)
+int up_addrenv_assign(group_addrenv_t addrenv, FAR struct task_group_s *group)
 {
-  FAR struct z180_cbr_s *cbr = (FAR struct z180_cbr_s *)addrenv;
-
   /* Make sure that there is no address environment in place on this TCB */
 
-  DEBUGASSERT(cbr && tcb->xcp.cbr == NULL);
+  DEBUGASSERT(addrenv && group->addrenv == NULL);
 
-  /* Save the CBR strucure in the TCB.  This is an atomic operation so no
+  /* Save the CBR structure in the group.  This is an atomic operation so no
    * special precautions should be needed.
    */
 
-  tcb->xcp.cbr = cbr;
+  group->addrenv = addrenv;
   return OK;
 }
 
 /****************************************************************************
- * Name: up_addrenv_share
+ * Name: up_addrenv_attach
  *
  * Description:
  *   This function is called from the core scheduler logic when a thread
- *   is created that needs to share the address ennvironment of its parent
- *   task.  In this case, the parent's address environment needs to be
- *   "cloned" for the child.
+ *   is created that needs to share the address environment of its task
+ *   group.
  *
  * Input Parameters:
- *   ptcb - The TCB of the parent task that has the address environment.
- *   ctcb - The TCB of the child thread needing the address environment.
+ *   group - The task group to which the new thread belongs.
+ *   tcb   - The tcb of the thread needing the address environment.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int up_addrenv_share(FAR const struct tcb_s *ptcb, FAR struct tcb_s *ctcb)
+int up_addrenv_attach(FAR struct task_group_s *group, FAR struct tcb_s *tcb)
 {
-  irqstate_t flags;
+  /* There is nothing that needs to be done */
 
-  /* Make sure that the child has no address environment.  It is okay if
-   * if the parent does not have one.
-   */
-
-  DEBUGASSERT(ctcb->xcp.cbr == NULL);
-
-  flags = irqsave();
-  if (ptcb->xcp.cbr)
-    {
-      /* Clone the CBR by incrementing the reference counting and saving a
-       * copy in the child thread's TCB.
-       */
-
-      ptcb->xcp.cbr->crefs++;
-      ctcb->xcp.cbr = ptcb->xcp.cbr;
-    }
-
-  irqrestore(flags);
   return OK;
 }
 
 /****************************************************************************
- * Name: up_addrenv_release
+ * Name: up_addrenv_detach
  *
  * Description:
  *   This function is called when a task or thread exits in order to release
- *   its reference to an address environment.  When there are no further
- *   references to an address environment, that address environment should
- *   be destroyed.
+ *   its reference to an address environment.  The address environment,
+ *   however, should persist until up_addrenv_destroy() is called when the
+ *   task group is itself destroyed.  Any resources unique to this thread
+ *   may be destroyed now.
+ *
+ *   NOTE: In some platforms, nothing will need to be done in this case.
+ *   Simply being a member of the group that has the address environment
+ *   may be sufficient.
  *
  * Input Parameters:
+ *   group - The group to which the thread belonged.
  *   tcb - The TCB of the task or thread whose the address environment will
  *     be released.
  *
@@ -512,39 +498,10 @@ int up_addrenv_share(FAR const struct tcb_s *ptcb, FAR struct tcb_s *ctcb)
  *
  ****************************************************************************/
 
-int up_addrenv_release(FAR struct tcb_s *tcb)
+int up_addrenv_detach(FAR struct task_group_s *group,
+                      FAR struct task_group_s *tcb);
 {
-  FAR struct z180_cbr_s *cbr;
-  irqstate_t flags;
+  /* There is nothing that needs to be done */
 
-  /* Check if the task has an address environment. */
-
-  flags = irqsave();
-  cbr   = tcb->xcp.cbr;
-  if (cbr)
-    {
-      /* Nullify the reference to the CBR structure and decrement the number
-       * of references on the CBR.
-       */
-
-      tcb->xcp.cbr = NULL;
-
-      /* If the reference count would decrement to zero, then free the CBR
-       * structure.
-       */
-
-      if (cbr->crefs <= 1)
-        {
-          up_addrenv_destroy(cbr);
-        }
-      else
-        {
-          /* Otherwise, just decrement the reference count */
-
-          cbr->crefs--;
-        }
-    }
-
-  irqrestore(flags);
   return OK;
 }
