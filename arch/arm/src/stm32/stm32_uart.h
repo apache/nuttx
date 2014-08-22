@@ -61,26 +61,26 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-/* Make sure that we have not enabled more U[S]ARTs than are support by
- * the device.
+/* Make sure that we have not enabled more U[S]ARTs than are supported by the
+ * device.
  */
 
-#if STM32_NUSART < 8 && !defined(CONFIG_STM32_HAVE_USART8)
+#if STM32_NUSART < 8 || !defined(CONFIG_STM32_HAVE_USART8)
 #  undef CONFIG_STM32_UART8
 #endif
-#if STM32_NUSART < 7 && !defined(CONFIG_STM32_HAVE_USART7)
+#if STM32_NUSART < 7 || !defined(CONFIG_STM32_HAVE_USART7)
 #  undef CONFIG_STM32_UART7
 #endif
-#if STM32_NUSART < 6 && !defined(CONFIG_STM32_HAVE_USART6)
+#if STM32_NUSART < 6 || !defined(CONFIG_STM32_HAVE_USART6)
 #  undef CONFIG_STM32_USART6
 #endif
-#if STM32_NUSART < 5 && !defined(CONFIG_STM32_HAVE_USART5)
+#if STM32_NUSART < 5 || !defined(CONFIG_STM32_HAVE_USART5)
 #  undef CONFIG_STM32_UART5
 #endif
-#if STM32_NUSART < 4 && !defined(CONFIG_STM32_HAVE_USART4)
+#if STM32_NUSART < 4 || !defined(CONFIG_STM32_HAVE_USART4)
 #  undef CONFIG_STM32_UART4
 #endif
-#if STM32_NUSART < 3 && !defined(CONFIG_STM32_HAVE_USART3)
+#if STM32_NUSART < 3 || !defined(CONFIG_STM32_HAVE_USART3)
 #  undef CONFIG_STM32_USART3
 #endif
 #if STM32_NUSART < 2
