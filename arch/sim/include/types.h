@@ -1,7 +1,7 @@
 /************************************************************************
  * arch/sim/include/types.h
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -76,10 +76,18 @@ typedef signed long long   _int64_t;
 typedef unsigned long long _uint64_t;
 #define __INT64_DEFINED
 
-/* A pointer is 4 bytes */
+#ifdef CONFIG_SIM_M32
+/* 32-bit build on 64-bit machine: A pointer is 8 bytes */
+
+typedef signed long long   _intptr_t;
+typedef unsigned long long _uintptr_t;
+
+#else
+/* 32-bit build on 32-bit machine: A pointer is 4 bytes */
 
 typedef signed int         _intptr_t;
 typedef unsigned int       _uintptr_t;
+#endif
 
 /* This is the size of the interrupt state save returned by
  * irqsave()
