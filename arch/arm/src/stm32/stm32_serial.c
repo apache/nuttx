@@ -988,7 +988,7 @@ static struct up_dev_s g_uart8priv =
 
 /* This table lets us iterate over the configured USARTs */
 
-static struct up_dev_s *uart_devs[STM32_NUSART] =
+static struct up_dev_s * const uart_devs[STM32_NUSART] =
 {
 #ifdef CONFIG_STM32_USART1
   [0] = &g_usart1priv,
