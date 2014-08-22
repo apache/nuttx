@@ -144,4 +144,6 @@ stopper" before I gave up for now was during building dependencies:
 ASlink-Error-<cannot open> : "bin/mm_initialize.rel"
 
 Clearly there is something wrong with the command line options given to SDCC because it is
-trying to compile and link when we really only want dependencies.
+trying to compile and link when we really only want dependencies.  I did not spend very much
+time trying to solve the problem; I assume that it is not too difficult.
+

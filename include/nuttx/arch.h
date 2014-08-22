@@ -879,8 +879,7 @@ int up_addrenv_attach(FAR struct task_group_s *group, FAR struct tcb_s *tcb);
  ****************************************************************************/
 
 #ifdef CONFIG_ADDRENV
-int up_addrenv_detach(FAR struct task_group_s *group,
-                      FAR struct task_group_s *tcb);
+int up_addrenv_detach(FAR struct task_group_s *group, FAR struct tcb_s *tcb);
 #endif
 
 /****************************************************************************

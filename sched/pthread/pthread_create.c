@@ -270,8 +270,8 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
 #ifdef CONFIG_ADDRENV
   /* Share the address environment of the parent task group. */
 
-  ret = up_addrenv_attach(ptcb->group,
-                          (FAR const struct tcb_s *)g_readytorun.head);
+  ret = up_addrenv_attach(ptcb->cmn.group,
+                          (FAR struct tcb_s *)g_readytorun.head);
   if (ret < 0)
     {
       errcode = -ret;
