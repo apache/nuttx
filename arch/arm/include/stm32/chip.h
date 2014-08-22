@@ -1215,7 +1215,7 @@
 #  define STM32_NDMA                     2   /* DMA1-2 with 8 streams each*/
 #  define STM32_NSPI                     4   /* SPI1-4 */
 #  define STM32_NI2S                     2   /* I2S1-2 (multiplexed with SPI2-3) */
-#  define STM32_NUSART                   3   /* USART1, 2 and 6 */
+#  define STM32_NUSART                   6   /* Actually only 3: USART1, 2 and 6 */
 #  define STM32_NI2C                     3   /* I2C1-3 */
 #  define STM32_NCAN                     0   /* No CAN */
 #  define STM32_NSDIO                    1   /* One SDIO interface */
