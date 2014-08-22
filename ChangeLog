@@ -8215,4 +8215,7 @@
 	  to the Porting Guide (2014-8-21).
 	* arch/arm/src/stm32/stm32_uart.h: STM32 F401: Correct support for
 	  USART6 on this chip.  From Freddie Chopin (2014-8-22).
+	* nuttx/sched/wdog and include/nuttx/wdog.h:  Add support for statically
+	  allocated watchdog timer (also eliminate some unconvential typing)
+	  (2014-8-22).
 
