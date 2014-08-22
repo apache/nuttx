@@ -48,11 +48,59 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Configuration ********************************************************/
+
+#ifndef CONFIG_PREALLOC_WDOGS
+#  define CONFIG_PREALLOC_WDOGS 32
+#endif
+
+#ifndef CONFIG_WDOG_INTRESERVE
+#  if CONFIG_PREALLOC_WDOGS > 16
+#    define CONFIG_WDOG_INTRESERVE 4
+#  elif  CONFIG_PREALLOC_WDOGS > 8
+#    define CONFIG_WDOG_INTRESERVE 2
+#  else
+#    define CONFIG_WDOG_INTRESERVE 1
+#  endif
+#endif
+
+#if CONFIG_WDOG_INTRESERVE >= CONFIG_PREALLOC_WDOGS
+#  error CONFIG_WDOG_INTRESERVE >= CONFIG_PREALLOC_WDOGS
+#endif
+
+/* Watchdog Definitions *************************************************/
+/* Flag bits for the flags field of struct wdog_s */
+
+#define WDOGF_ACTIVE       (1 << 0) /* Bit 0: 1=Watchdog is actively timing */
+#define WDOGF_ALLOCED      (1 << 1) /* Bit 1: 0=Pre-allocated, 1=Allocated */
+#define WDOGF_STATIC       (1 << 2) /* Bit 2: 0=[Pre-]allocated, 1=Static */
+
+#define WDOG_SETACTIVE(w)  do { (w)->flags |= WDOGF_ACTIVE; } while (0)
+#define WDOG_SETALLOCED(w) do { (w)->flags |= WDOGF_ALLOCED; } while (0)
+#define WDOG_SETSTATIC(w)  do { (w)->flags |= WDOGF_STATIC; } while (0)
+
+#define WDOG_CLRACTIVE(w)  do { (w)->flags &= ~WDOGF_ACTIVE; } while (0)
+#define WDOG_CLRALLOCED(w) do { (w)->flags &= ~WDOGF_ALLOCED; } while (0)
+#define WDOG_CLRSTATIC(w)  do { (w)->flags &= ~WDOGF_STATIC; } while (0)
+
+#define WDOG_ISACTIVE(w)   (((w)->flags & WDOGF_ACTIVE) != 0)
+#define WDOG_ISALLOCED(w)  (((w)->flags & WDOGF_ALLOCED) != 0)
+#define WDOG_ISSTATIC(w)   (((w)->flags & WDOGF_STATIC) != 0)
+
+/* Initialization of statically allocated timers ****************************/
+
+#define wd_static(w) \
+  do { (w)->next = NULL; (w)->flags = WDOGF_STATIC; } while (0)
+
+#ifdef CONFIG_PIC
+#  define WDOG_INITIAILIZER { NULL, NULL, NULL, 0, WDOGF_STATIC, 0 }
+#else
+#  define WDOG_INITIAILIZER { NULL, NULL, 0, WDOGF_STATIC, 0 }
+#endif
 
 /****************************************************************************
  * Public Type Declarations
  ****************************************************************************/
-
 /* The arguments are passed as uint32_t values.  For systems where the
  * sizeof(pointer) < sizeof(uint32_t), the following union defines the
  * alignment of the pointer within the uint32_t.  For example, the SDCC
@@ -75,6 +123,23 @@ typedef union wdparm_u wdparm_t;
  */
 
 typedef CODE void (*wdentry_t)(int argc, uint32_t arg1, ...);
+
+/* This is the internal representation of the watchdog timer structure.  The
+ * WDOG_ID is a pointer to a watchdog structure.
+ */
+
+struct wdog_s
+{
+  FAR struct wdog_s *next;       /* Support for singly linked lists. */
+  wdentry_t          func;       /* Function to execute when delay expires */
+#ifdef CONFIG_PIC
+  FAR void          *picbase;    /* PIC base address */
+#endif
+  int                lag;        /* Timer associated with the delay */
+  uint8_t            flags;      /* See WDOGF_* definitions above */
+  uint8_t            argc;       /* The number of parameters to pass */
+  uint32_t           parm[CONFIG_MAX_WDOGPARMS];
+};
 
 /* Watchdog 'handle' */
 

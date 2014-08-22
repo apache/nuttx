@@ -98,10 +98,10 @@ int wd_gettime(WDOG_ID wdog)
        * that we are looking for
        */
 
-      wdog_t *curr;
+      FAR struct wdog_s *curr;
       int delay = 0;
 
-      for (curr = (wdog_t*)g_wdactivelist.head; curr; curr = curr->next)
+      for (curr = (FAR struct wdog_s *)g_wdactivelist.head; curr; curr = curr->next)
         {
           delay += curr->lag;
           if (curr == wdog)

@@ -115,22 +115,22 @@ typedef void (*wdentry4_t)(int argc, uint32_t arg1, uint32_t arg2,
 
 static inline void wd_expiration(void)
 {
-  FAR wdog_t *wdog;
+  FAR struct wdog_s *wdog;
 
   /* Check if the watchdog at the head of the list is ready to run */
 
-  if (((FAR wdog_t*)g_wdactivelist.head)->lag <= 0)
+  if (((FAR struct wdog_s *)g_wdactivelist.head)->lag <= 0)
     {
       /* Process the watchdog at the head of the list as well as any
        * other watchdogs that became ready to run at this time
        */
 
       while (g_wdactivelist.head &&
-             ((FAR wdog_t*)g_wdactivelist.head)->lag <= 0)
+             ((FAR struct wdog_s *)g_wdactivelist.head)->lag <= 0)
         {
           /* Remove the watchdog from the head of the list */
 
-          wdog = (FAR wdog_t*)sq_remfirst(&g_wdactivelist);
+          wdog = (FAR struct wdog_s *)sq_remfirst(&g_wdactivelist);
 
           /* If there is another watchdog behind this one, update its
            * its lag (this shouldn't be necessary).
@@ -138,7 +138,7 @@ static inline void wd_expiration(void)
 
           if (g_wdactivelist.head)
             {
-              ((FAR wdog_t*)g_wdactivelist.head)->lag += wdog->lag;
+              ((FAR struct wdog_s *)g_wdactivelist.head)->lag += wdog->lag;
             }
 
           /* Indicate that the watchdog is no longer active. */
@@ -227,13 +227,13 @@ static inline void wd_expiration(void)
 
 int wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,  int argc, ...)
 {
-  va_list    ap;
-  FAR wdog_t *curr;
-  FAR wdog_t *prev;
-  FAR wdog_t *next;
-  int32_t    now;
-  irqstate_t saved_state;
-  int        i;
+  va_list ap;
+  FAR struct wdog_s *curr;
+  FAR struct wdog_s *prev;
+  FAR struct wdog_s *next;
+  int32_t now;
+  irqstate_t state;
+  int i;
 
   /* Verify the wdog */
 
@@ -249,7 +249,7 @@ int wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,  int argc, ...)
    * the critical section is established.
    */
 
-  saved_state = irqsave();
+  state = irqsave();
   if (WDOG_ISACTIVE(wdog))
     {
       wd_cancel(wdog);
@@ -309,7 +309,7 @@ int wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,  int argc, ...)
   else
     {
       now = 0;
-      prev = curr = (FAR wdog_t*)g_wdactivelist.head;
+      prev = curr = (FAR struct wdog_s *)g_wdactivelist.head;
 
       /* Advance to positive time */
 
@@ -342,17 +342,17 @@ int wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,  int argc, ...)
 
           /* Insert the new watchdog in the list */
 
-          if (curr == (FAR wdog_t*)g_wdactivelist.head)
+          if (curr == (FAR struct wdog_s *)g_wdactivelist.head)
             {
               /* Insert the watchdog at the head of the list */
 
-              sq_addfirst((FAR sq_entry_t*)wdog, &g_wdactivelist);
+              sq_addfirst((FAR sq_entry_t *)wdog, &g_wdactivelist);
             }
           else
             {
               /* Insert the watchdog in mid- or end-of-queue */
 
-              sq_addafter((FAR sq_entry_t*)prev, (FAR sq_entry_t*)wdog,
+              sq_addafter((FAR sq_entry_t *)prev, (FAR sq_entry_t *)wdog,
                           &g_wdactivelist);
 
             }
@@ -394,7 +394,7 @@ int wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,  int argc, ...)
   sched_timer_resume();
 #endif
 
-  irqrestore(saved_state);
+  irqrestore(state);
   return OK;
 }
 
@@ -426,7 +426,7 @@ int wd_start(WDOG_ID wdog, int delay, wdentry_t wdentry,  int argc, ...)
 #ifdef CONFIG_SCHED_TICKLESS
 unsigned int wd_timer(int ticks)
 {
-  FAR wdog_t *wdog;
+  FAR struct wdog_s *wdog;
   int decr;
 
   /* Check if there are any active watchdogs to process */
@@ -435,7 +435,7 @@ unsigned int wd_timer(int ticks)
     {
       /* Get the watchdog at the head of the list */
 
-      wdog = (FAR wdog_t*)g_wdactivelist.head;
+      wdog = (FAR struct wdog_s *)g_wdactivelist.head;
 
 #ifndef CONFIG_SCHED_TICKLESS_ALARM
       /* There is logic to handle the case where ticks is greater than
@@ -462,7 +462,7 @@ unsigned int wd_timer(int ticks)
   /* Return the delay for the next watchdog to expire */
 
   return g_wdactivelist.head ?
-         ((FAR wdog_t*)g_wdactivelist.head)->lag : 0;
+         ((FAR struct wdog_s *)g_wdactivelist.head)->lag : 0;
 }
 
 #else
@@ -474,7 +474,7 @@ void wd_timer(void)
     {
       /* There are.  Decrement the lag counter */
 
-      --(((FAR wdog_t*)g_wdactivelist.head)->lag);
+      --(((FAR struct wdog_s *)g_wdactivelist.head)->lag);
 
       /* Check if the watchdog at the head of the list is ready to run */
 

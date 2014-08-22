@@ -91,16 +91,16 @@
 
 int wd_cancel(WDOG_ID wdog)
 {
-  wdog_t    *curr;
-  wdog_t    *prev;
-  irqstate_t saved_state;
-  int        ret = ERROR;
+  FAR struct wdog_s *curr;
+  FAR struct wdog_s *prev;
+  irqstate_t state;
+  int ret = ERROR;
 
   /* Prohibit timer interactions with the timer queue until the
    * cancellation is complete
    */
 
-  saved_state = irqsave();
+  state = irqsave();
 
   /* Make sure that the watchdog is initialized (non-NULL) and is still
    * active.
@@ -114,7 +114,7 @@ int wd_cancel(WDOG_ID wdog)
        */
 
       prev = NULL;
-      curr = (wdog_t*)g_wdactivelist.head;
+      curr = (FAR struct wdog_s *)g_wdactivelist.head;
 
       while ((curr) && (curr != wdog))
         {
@@ -168,6 +168,6 @@ int wd_cancel(WDOG_ID wdog)
       ret = OK;
     }
 
-  irqrestore(saved_state);
+  irqrestore(state);
   return ret;
 }

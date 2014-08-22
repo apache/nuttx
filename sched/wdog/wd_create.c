@@ -92,7 +92,7 @@
 
 WDOG_ID wd_create (void)
 {
-  FAR wdog_t *wdog;
+  FAR struct wdog_s *wdog;
   irqstate_t state;
 
   /* These actions must be atomic with respect to other tasks and also with
@@ -113,7 +113,7 @@ WDOG_ID wd_create (void)
        * count of free timers all with interrupts disabled.
        */
 
-      wdog = (FAR wdog_t*)sq_remfirst(&g_wdfreelist);
+      wdog = (FAR struct wdog_s *)sq_remfirst(&g_wdfreelist);
       DEBUGASSERT(g_wdnfree > 0);
       g_wdnfree--;
       irqrestore(state);
@@ -139,7 +139,7 @@ WDOG_ID wd_create (void)
       /* We do not require that interrupts be disabled to do this. */
 
       irqrestore(state);
-      wdog = (FAR wdog_t *)kmalloc(sizeof(wdog_t));
+      wdog = (FAR struct wdog_s *)kmalloc(sizeof(struct wdog_s));
 
       /* Did we get one? */
 

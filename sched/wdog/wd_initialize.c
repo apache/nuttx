@@ -83,7 +83,7 @@ uint16_t g_wdnfree;
 * in the pool is a configuration item.
  */
 
-static FAR wdog_t g_wdpool[CONFIG_PREALLOC_WDOGS];
+static struct wdog_s g_wdpool[CONFIG_PREALLOC_WDOGS];
 
 /************************************************************************
  * Private Functions
@@ -114,7 +114,7 @@ static FAR wdog_t g_wdpool[CONFIG_PREALLOC_WDOGS];
 
 void wd_initialize(void)
 {
-  FAR wdog_t *wdog = g_wdpool;
+  FAR struct wdog_s *wdog = g_wdpool;
   int i;
 
   /* Initialize watchdog lists */

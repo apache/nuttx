@@ -132,9 +132,11 @@ int wd_delete(WDOG_ID wdog)
       sched_kfree(wdog);
     }
 
-  /* This was a pre-allocated timer. */
+  /* This was a pre-allocated timer.  This function should not be called for
+   * statically allocated timers.
+   */
 
-  else
+  else if (!WDOG_ISSTATIC(wdog))
     {
       /* Put the timer back on the free list and increment the count of free
        * timers, all with interrupts disabled.
