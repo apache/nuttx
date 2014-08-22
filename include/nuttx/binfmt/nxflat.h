@@ -103,13 +103,13 @@ struct nxflat_loadinfo_s
    */
 
 #ifdef CONFIG_ADDRENV
-  task_addrenv_t addrenv;  /* Task address environment */
-  hw_addrenv_t   oldenv;   /* Saved hardware address environment */
+  group_addrenv_t addrenv; /* Task group address environment */
+  hw_addrenv_t oldenv;     /* Saved hardware address environment */
 #endif
 
   /* File descriptors */
 
-  int    filfd;            /* Descriptor for the file being loaded */
+  int filfd;               /* Descriptor for the file being loaded */
 
   /* This is a copy of the NXFLAT header (still in network order) */
 

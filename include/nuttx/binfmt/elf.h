@@ -131,8 +131,8 @@ struct elf_loadinfo_s
    */
 
 #ifdef CONFIG_ADDRENV
-  task_addrenv_t addrenv;  /* Task address environment */
-  hw_addrenv_t   oldenv;   /* Saved hardware address environment */
+  group_addrenv_t    addrenv;    /* Task group address environment */
+  hw_addrenv_t       oldenv;     /* Saved hardware address environment */
 #endif
 
   uint16_t           symtabidx;  /* Symbol table section index */

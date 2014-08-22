@@ -669,27 +669,27 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size);
  * Address Environment Interfaces
  *
  * Low-level interfaces used in binfmt/ to instantiate tasks with address
- * environments.  These interfaces all operate on type task_addrenv_t which
- * is an abstract representation of a task's address environment and must be
- * defined in arch/arch.h if CONFIG_ADDRENV is defined.
+ * environments.  These interfaces all operate on type group_addrenv_t which
+ * is an abstract representation of a task group's address environment and
+ * must be defined in arch/arch.h if CONFIG_ADDRENV is defined.
  *
  *   up_addrenv_create  - Create an address environment
+ *   up_addrenv_destroy - Destroy an address environment.
  *   up_addrenv_vaddr   - Returns the virtual base address of the address
  *                        environment
  *   up_addrenv_select  - Instantiate an address environment
  *   up_addrenv_restore - Restore an address environment
- *   up_addrenv_destroy - Destroy an address environment.
- *   up_addrenv_assign  - Assign an address environment to a TCB
+ *   up_addrenv_assign  - Assign an address environment to a group
  *
  * Higher-level interfaces used by the tasking logic.  These interfaces are
- * used by the functions in sched/ and all operate on the TCB which as been
- * assigned an address environment by up_addrenv_assign().
+ * used by the functions in sched/ and all operate on the thread which whose
+ * group been assigned an address environment by up_addrenv_assign().
  *
- *   up_addrenv_share   - Clone the address environment assigned to one TCB
+ *   up_addrenv_attach  - Clone the address environment assigned to one TCB
  *                        to another.  This operation is done when a pthread
  *                        is created that share's the same address
  *                        environment.
- *   up_addrenv_release - Release the TCBs reference to an address
+ *   up_addrenv_detach  - Release the threads reference to an address
  *                        environment when a task/thread exits.
  *
  ****************************************************************************/
@@ -697,9 +697,9 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size);
  * Name: up_addrenv_create
  *
  * Description:
- *   This function is called from the binary loader logic when a new
- *   task is created in order to instantiate an address environment for the
- *   task.  up_addrenv_create is essentially the allocator of the physical
+ *   This function is called when a new task is created in order to
+ *   instantiate an address environment for the new task group. 
+ *   up_addrenv_create() is essentially the allocator of the physical
  *   memory for the new task.
  *
  * Input Parameters:
@@ -714,7 +714,27 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size);
  ****************************************************************************/
 
 #ifdef CONFIG_ADDRENV
-int up_addrenv_create(size_t envsize, FAR task_addrenv_t *addrenv);
+int up_addrenv_create(size_t envsize, FAR group_addrenv_t *addrenv);
+#endif
+
+/****************************************************************************
+ * Name: up_addrenv_destroy
+ *
+ * Description:
+ *   This function is called when a final thread leaves the task group and
+ *   the task group is destroyed.  This function then destroys the defunct
+ *   address environment, releasing the underlying physical memory.
+ *
+ * Input Parameters:
+ *   addrenv - The address environment to be destroyed.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ADDRENV
+int up_addrenv_destroy(group_addrenv_t addrenv);
 #endif
 
 /****************************************************************************
@@ -736,17 +756,17 @@ int up_addrenv_create(size_t envsize, FAR task_addrenv_t *addrenv);
  ****************************************************************************/
 
 #ifdef CONFIG_ADDRENV
-int up_addrenv_vaddr(FAR task_addrenv_t addrenv, FAR void **vaddr);
+int up_addrenv_vaddr(FAR group_addrenv_t addrenv, FAR void **vaddr);
 #endif
 
 /****************************************************************************
  * Name: up_addrenv_select
  *
  * Description:
- *   After an address environment has been established for a task (via
+ *   After an address environment has been established for a task group (via
  *   up_addrenv_create().  This function may be called to to instantiate
  *   that address environment in the virtual address space.  this might be
- *   necessary, for example, to load the code for the task from a file or
+ *   necessary, for example, to load the code for the task group from a file or
  *   to access address environment private data.
  *
  * Input Parameters:
@@ -757,7 +777,7 @@ int up_addrenv_vaddr(FAR task_addrenv_t addrenv, FAR void **vaddr);
  *     This may be used with up_addrenv_restore() to restore the original
  *     address environment that was in place before up_addrenv_select() was
  *     called.  Note that this may be a task agnostic, hardware
- *     representation that is different from task_addrenv_t.
+ *     representation that is different from group_addrenv_t.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
@@ -765,15 +785,15 @@ int up_addrenv_vaddr(FAR task_addrenv_t addrenv, FAR void **vaddr);
  ****************************************************************************/
 
 #ifdef CONFIG_ADDRENV
-int up_addrenv_select(task_addrenv_t addrenv, hw_addrenv_t *oldenv);
+int up_addrenv_select(group_addrenv_t addrenv, hw_addrenv_t *oldenv);
 #endif
 
 /****************************************************************************
  * Name: up_addrenv_restore
  *
  * Description:
- *   After an address environment has been temporarilty instantiated by
- *   up_addrenv_select, this function may be called to to restore the
+ *   After an address environment has been temporarily instantiated by
+ *   up_addrenv_select(), this function may be called to to restore the
  *   original address environment.
  *
  * Input Parameters:
@@ -790,35 +810,15 @@ int up_addrenv_restore(hw_addrenv_t oldenv);
 #endif
 
 /****************************************************************************
- * Name: up_addrenv_destroy
- *
- * Description:
- *   Called from the binary loader loader during error handling to destroy
- *   the address environment previously created by up_addrenv_create().
- *
- * Input Parameters:
- *   addrenv - The representation of the task address environment previously
- *     returned by up_addrenv_create.
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ADDRENV
-int up_addrenv_destroy(task_addrenv_t addrenv);
-#endif
-
-/****************************************************************************
  * Name: up_addrenv_assign
  *
  * Description:
- *   Assign an address environment to a TCB.
+ *   Assign an address environment to a new task group.
  *
  * Input Parameters:
  *   addrenv - The representation of the task address environment previously
- *     returned by up_addrenv_create.
- *   tcb - The TCB of the task to receive the address environment.
+ *     returned by up_addrenv_create().
+ *   group - The new task group to receive the address environment.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
@@ -826,21 +826,24 @@ int up_addrenv_destroy(task_addrenv_t addrenv);
  ****************************************************************************/
 
 #ifdef CONFIG_ADDRENV
-int up_addrenv_assign(task_addrenv_t addrenv, FAR struct tcb_s *tcb);
+int up_addrenv_assign(group_addrenv_t addrenv, FAR struct task_group_s *group);
 #endif
 
 /****************************************************************************
- * Name: up_addrenv_share
+ * Name: up_addrenv_attach
  *
  * Description:
  *   This function is called from the core scheduler logic when a thread
- *   is created that needs to share the address ennvironment of its parent
- *   task.  In this case, the parent's address environment needs to be
- *   "cloned" for the child.
+ *   is created that needs to share the address environment of its task
+ *   group.
+ *
+ *   NOTE: In some platforms, nothing will need to be done in this case.
+ *   Simply being a member of the group that has the address environment
+ *   may be sufficient.
  *
  * Input Parameters:
- *   ptcb - The TCB of the parent task that has the address environment.
- *   ctcb - The TCB of the child thread needing the address environment.
+ *   group - The task group to which the new thread belongs.
+ *   tcb   - The TCB of the thread needing the address environment.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
@@ -848,19 +851,25 @@ int up_addrenv_assign(task_addrenv_t addrenv, FAR struct tcb_s *tcb);
  ****************************************************************************/
 
 #ifdef CONFIG_ADDRENV
-int up_addrenv_share(FAR const struct tcb_s *ptcb, FAR struct tcb_s *ctcb);
+int up_addrenv_attach(FAR struct task_group_s *group, FAR struct tcb_s *tcb);
 #endif
 
 /****************************************************************************
- * Name: up_addrenv_release
+ * Name: up_addrenv_detach
  *
  * Description:
  *   This function is called when a task or thread exits in order to release
- *   its reference to an address environment.  When there are no further
- *   references to an address environment, that address environment should
- *   be destroyed.
+ *   its reference to an address environment.  The address environment,
+ *   however, should persist until up_addrenv_destroy() is called when the
+ *   task group is itself destroyed.  Any resources unique to this thread
+ *   may be destroyed now.
+ *
+ *   NOTE: In some platforms, nothing will need to be done in this case.
+ *   Simply being a member of the group that has the address environment
+ *   may be sufficient.
  *
  * Input Parameters:
+ *   group - The group to which the thread belonged.
  *   tcb - The TCB of the task or thread whose the address environment will
  *     be released.
  *
@@ -870,7 +879,8 @@ int up_addrenv_share(FAR const struct tcb_s *ptcb, FAR struct tcb_s *ctcb);
  ****************************************************************************/
 
 #ifdef CONFIG_ADDRENV
-int up_addrenv_release(FAR struct tcb_s *tcb);
+int up_addrenv_detach(FAR struct task_group_s *group,
+                      FAR struct task_group_s *tcb);
 #endif
 
 /****************************************************************************

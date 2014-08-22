@@ -125,7 +125,7 @@ struct binary_s
    */
 
 #ifdef CONFIG_ADDRENV
-  task_addrenv_t addrenv;              /* Task address environment */
+  group_addrenv_t addrenv;             /* Task group address environment */
 #endif
 
   size_t mapsize;                      /* Size of the mapped address region (needed for munmap) */

@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: August 21, 2014</p>
+      <p>Last Updated: August 22, 2014</p>
     </td>
   </tr>
 </table>
@@ -107,13 +107,13 @@
     <a href="#addrenv">4.4 Address Environments</a>
     <ul>
       <a href="#up_addrenv_create">4.4.1 <code>up_addrenv_create()</code></a></br>
-      <a href="#up_addrenv_vaddr">4.4.2 <code>up_addrenv_vaddr()</code></a></br>
-      <a href="#up_addrenv_select">4.4.3 <code>up_addrenv_select()</code></a></br>
-      <a href="#up_addrenv_restore">4.4.4 <code>up_addrenv_restore()</code></a></br>
-      <a href="#up_addrenv_destroy">4.4.5 <code>up_addrenv_destroy()</code></a></br>
+      <a href="#up_addrenv_destroy">4.4.2 <code>up_addrenv_destroy()</code></a></br>
+      <a href="#up_addrenv_vaddr">4.4.3 <code>up_addrenv_vaddr()</code></a></br>
+      <a href="#up_addrenv_select">4.4.4 <code>up_addrenv_select()</code></a></br>
+      <a href="#up_addrenv_restore">4.4.5 <code>up_addrenv_restore()</code></a></br>
       <a href="#up_addrenv_assign">4.4.6 <code>up_addrenv_assign()</code></a></br>
-      <a href="#up_addrenv_share">4.4.7 <code>up_addrenv_share()</code></a></br>
-      <a href="#up_addrenv_release">4.4.8 <code>up_addrenv_release()</code></a>
+      <a href="#up_addrenv_attach">4.4.7 <code>up_addrenv_attach()</code></a></br>
+      <a href="#up_addrenv_detach">4.4.8 <code>up_addrenv_detach()</code></a>
     </ul>
     <a href="#exports">4.5 APIs Exported by NuttX to Architecture-Specific Logic</a>
     <ul>
@@ -2625,7 +2625,7 @@ int up_alarm_cancel(FAR struct timespec *ts);
   May be called from interrupt level handling or from the normal tasking level. iterrupts may need to be disabled internally to assure non-reentrancy.
 </ul>
 
-<h5><a name="upalarmstart">4.3.4.4.5 <code>up_alarm_start()</code></a></h5>
+<h5><a name="upalarmstart">4.3.4.4.4 <code>up_alarm_start()</code></a></h5>
 <p><b>Function Prototype</b>:<p>
 <ul><pre>
 #include &lt;nuttx/arch.h&gt;
@@ -2930,8 +2930,7 @@ VxWorks provides the following comparable interface:
     <p>
       <b>Binary Loader Support</b>.
       These are low-level interfaces used in <code>binfmt/</code> to instantiate tasks with address environments.
-      These interfaces all operate on type <code>task_addrenv_t</code> which is an abstract representation of a asks's address environment and must be defined in arch/arch.h if <code>CONFIG_ADDRENV</code> is defined.
-      These low-level interfaces include:
+      These interfaces all operate on type <code>group_addrenv_t</code> which is an abstract representation of a task group's address environment and the type must be defined in<code>arch/arch.h</code> if <code>CONFIG_ADDRENV</code> is defined. These low-level interfaces include:
     </p>
     <ul>
       <li>
@@ -2939,24 +2938,24 @@ VxWorks provides the following comparable interface:
         Create an address environment.
       </li>
       <li>
-        <a href="#up_addrenv_vaddr">4.4.2 <code>up_addrenv_vaddr()</code></a>:
-        Returns the virtual base address of the address environment.
-      </li>
-      <li>
-        <a href="#up_addrenv_select">4.4.3 <code>up_addrenv_select()</code></a>:
-        Instantiate an address environment.
-      </li>
-      <li>
-        <a href="#up_addrenv_restore">4.4.4 <code>up_addrenv_restore()</code></a>:
-        Restore an address environment.
-      </li>
-      <li>
-        <a href="#up_addrenv_destroy">4.4.5 <code>up_addrenv_destroy()</code></a>:
+        <a href="#up_addrenv_destroy">4.4.2 <code>up_addrenv_destroy()</code></a>:
         Destroy an address environment.
       </li>
       <li>
+        <a href="#up_addrenv_vaddr">4.4.3 <code>up_addrenv_vaddr()</code></a>:
+        Returns the virtual base address of the address environment.
+      </li>
+      <li>
+        <a href="#up_addrenv_select">4.4.4 <code>up_addrenv_select()</code></a>:
+        Instantiate an address environment.
+      </li>
+      <li>
+        <a href="#up_addrenv_restore">4.4.5 <code>up_addrenv_restore()</code></a>:
+        Restore an address environment.
+      </li>
+      <li>
         <a href="#up_addrenv_assign">4.4.6 <code>up_addrenv_assign()</code></a>:
-        Assign an address environment to a TCB.
+        Assign an address environment to a thread.
       </li>
     </ul>
   </li>
@@ -2964,31 +2963,30 @@ VxWorks provides the following comparable interface:
     <p>
       <b>Tasking Support</b>.
       Other interfaces must be provided to support higher-level interfaces used by the NuttX tasking logic.
-      These interfaces are* used by the functions in <code>sched/</code> and all operate on the TCB which as been assigned an address environment by <code>up_addrenv_assign()</code>.
+      These interfaces are* used by the functions in <code>sched/</code> and all operate on the task group which as been assigned an address environment by <code>up_addrenv_assign()</code>.
     </p>
     <ul>
       <li>
-        <a href="#up_addrenv_share">4.4.7 <code>up_addrenv_share()</code></a>:
-        Clone the address environment assigned to one TCB to another.
+        <a href="#up_addrenv_attach">4.4.7 <code>up_addrenv_attach()</code></a>:
+        Clone the group address environment assigned to a new thread.
         This operation is done when a pthread is created that share's the same address environment.
       </li>
       <li>
-        <a href="#up_addrenv_release">4.4.8 <code>up_addrenv_release()</code></a>:
-        Release the TCB's reference to an address environment when a task/thread exits.
+        <a href="#up_addrenv_detach">4.4.8 <code>up_addrenv_detach()</code></a>:
+        Release the thread's reference to a group address environment when a task/thread exits.
       </li>
     </ul>
   </li>
 </ol>
 
-
 <h3><a name="up_addrenv_create">4.4.1 <code>up_addrenv_create()</code></a></h3>
 <p><b>Function Prototype</b>:</p>
 <ul>
-  <code>int up_addrenv_create(size_t envsize, FAR task_addrenv_t *addrenv);</code>
+  <code>int up_addrenv_create(size_t envsize, FAR group_addrenv_t *addrenv);</code>
 </ul>
 <p><b>Description</b>:</p>
 <ul>
-  This function is called from the binary loader logic when a new task is created in order to instantiate an address environment for the task.
+  This function is called when a new task is created in order to instantiate an address environment for the new task group.
   <code>up_addrenv_create()</code> is essentially the allocator of the physical memory for the new task.
 </ul>
 <p><b>Input Parameters</b>:</p>
@@ -3001,10 +2999,28 @@ VxWorks provides the following comparable interface:
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_vaddr">4.4.2 <code>up_addrenv_vaddr()</code></a></h3>
+<h3><a name="up_addrenv_destroy">4.4.2 <code>up_addrenv_destroy()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
-  <code>int up_addrenv_vaddr(FAR task_addrenv_t addrenv, FAR void **vaddr);</code>
+  <code>int up_addrenv_destroy(group_addrenv_t addrenv);</code>
+</ul>
+<p><b>Description</b>:</p>
+<ul>
+  This function is called when a final thread leaves the task group and the task group is destroyed.  This function then destroys the defunct address environment, releasing the underlying physical memory allocated by <code>up_addrenv_create()</code>.
+</ul>
+<p><b>Input Parameters</b>:</p>
+<ul>
+  <li><code>addrenv</code>: The representation of the task address environment previously returned by up_addrenv_create.</li>
+</ul>
+<p><b>Returned Value</b>:</p>
+<ul>
+  Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
+</ul>
+
+<h3><a name="up_addrenv_vaddr">4.4.3 <code>up_addrenv_vaddr()</code></a></h3>
+<p><b>Function Prototype</b>:<p>
+<ul>
+  <code>int up_addrenv_vaddr(FAR group_addrenv_t addrenv, FAR void **vaddr);</code>
 </ul>
 <p><b>Description</b>:</p>
 <ul>
@@ -3021,10 +3037,10 @@ VxWorks provides the following comparable interface:
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_select">4.4.3 <code>up_addrenv_select()</code></a></h3>
+<h3><a name="up_addrenv_select">4.4.4 <code>up_addrenv_select()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
-  <code>int up_addrenv_select(task_addrenv_t addrenv, hw_addrenv_t *oldenv);</code>
+  <code>int up_addrenv_select(group_addrenv_t addrenv, hw_addrenv_t *oldenv);</code>
 </ul>
 <p><b>Description</b>:</p>
 <ul>
@@ -3037,7 +3053,7 @@ VxWorks provides the following comparable interface:
   <li><code>oldenv</code>:
     The address environment that was in place before <code>up_addrenv_select()</code> was called.
     This may be used with <code>up_addrenv_restore()</code> to restore the original  address environment that was in place before <code>up_addrenv_select()</code> was called.
-    Note that this may be a task agnostic, hardware representation that is different from <code>task_addrenv_t</code>.
+    Note that this may be a task agnostic, hardware representation that is different from <code>group_addrenv_t</code>.
   </li>
 </ul>
 <p><b>Returned Value</b>:</p>
@@ -3045,7 +3061,7 @@ VxWorks provides the following comparable interface:
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_restore">4.4.4 <code>up_addrenv_restore()</code></a></h3>
+<h3><a name="up_addrenv_restore">4.4.5 <code>up_addrenv_restore()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_restore(hw_addrenv_t oldenv);</code>
@@ -3064,76 +3080,63 @@ VxWorks provides the following comparable interface:
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_destroy">4.4.5 <code>up_addrenv_destroy()</code></a></h3>
-<p><b>Function Prototype</b>:<p>
-<ul>
-  <code>int up_addrenv_destroy(task_addrenv_t addrenv);</code>
-</ul>
-<p><b>Description</b>:</p>
-<ul>
-  Called from the binary loader loader during error handling to destroy the address environment previously created by <code>up_addrenv_create()</code>.
-</ul>
-<p><b>Input Parameters</b>:</p>
-<ul>
-  <li><code>addrenv</code>: The representation of the task address environment previously returned by up_addrenv_create.</li>
-</ul>
-<p><b>Returned Value</b>:</p>
-<ul>
-  Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
-</ul>
-
 <h3><a name="up_addrenv_assign">4.4.6 <code>up_addrenv_assign()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
-  <code>int up_addrenv_assign(task_addrenv_t addrenv, FAR struct tcb_s *tcb);</code>
+  <code>int up_addrenv_assign(group_addrenv_t addrenv, FAR struct task_group_s *group);</code>
 </ul>
 <p><b>Description</b>:</p>
 <ul>
-  Assign an address environment to a TCB.
+  Assign an address environment to a new task group.
 </ul>
 <p><b>Input Parameters</b>:</p>
 <ul>
-  <li><code>addrenv</code>: The representation of the task address environment previously returned by up_addrenv_create.</li>
-  <li><code>tcb</code>: The TCB of the task to receive the address environment.</li>
+  <li><code>addrenv</code>: The representation of the group address environment previously returned by <code>up_addrenv_create</code>.</li>
+  <li><code>group</code>: The new task group to receive the address environment.</li>
 </ul>
 <p><b>Returned Value</b>:</p>
 <ul>
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_share">4.4.7 <code>up_addrenv_share()</code></a></h3>
+<h3><a name="up_addrenv_attach">4.4.7 <code>up_addrenv_attach()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
-  <code>int up_addrenv_share(FAR const struct tcb_s *ptcb, FAR struct tcb_s *ctcb);</code>
+  <code>int up_addrenv_attach(FAR struct task_group_s *group, FAR struct tcb_s *tcb);</code>
 </ul>
 <p><b>Description</b>:</p>
 <ul>
-  This function is called from the core scheduler logic when a thread is created that needs to share the address environment of its parent task.
-  In this case, the parent's address environment needs to be &quot;cloned&quot; for the child thread.
+  <p>
+  This function is called from the core scheduler logic when a thread is created that needs to share the address environment of its task group.
+  In this case, the group's address environment may need to be &quot;cloned&quot; for the child thread.
+  </p>
+  <p>
+  NOTE: In most platforms, nothing will need to be done in this case.
+  Simply being a member of the group that has the address environment may be sufficient.
+  </p>
 </ul>
 <p><b>Input Parameters</b>:</p>
 <ul>
-  <li><code>ptcb</code>: The TCB of the parent task that has the address environment.</li>
-  <li><code>ctcb</code>: The TCB of the child thread needing the address environment.</li>
+  <li><code>group</code>: The task group to which the new thread belongs.</li>
+  <li><code>ctcb</code>: The TCB of the thread needing the address environment.</li>
 </ul>
 <p><b>Returned Value</b>:</p>
 <ul>
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_release">4.4.8 <code>up_addrenv_release()</code></a></h3>
+<h3><a name="up_addrenv_detach">4.4.8 <code>up_addrenv_detach()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
-  <code>int up_addrenv_release(FAR struct tcb_s *tcb);</code>
+  <code>int up_addrenv_detach(FAR struct task_group_s *group, FAR struct task_group_s *tcb);</code>
 </ul>
 <p><b>Description</b>:</p>
 <ul>
-  This function is called when a task or thread exits in order to release its reference to an address environment.
-  When there are no further references to an address environment, that address environment should
-  be destroyed.
+  This function is called when a task or thread exits in order to release its reference to an address environment.  The address environment, however, should persist until up_addrenv_destroy() is called when the task group is itself destroyed.  Any resources unique to this thread  may be destroyed now.
 </ul>
 <p><b>Input Parameters</b>:</p>
 <ul>
+  <li><code>group</code>: The group to which the thread belonged.</li>
   <li><code>tcb</code>: The TCB of the task or thread whose the address environment will be released.</li>
 </ul>
 <p><b>Returned Value</b>:</p>

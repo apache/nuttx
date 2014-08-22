@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/pthread/pthread_create.c
  *
- *   Copyright (C) 2007-2009, 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -254,11 +254,11 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
       return ENOMEM;
     }
 
+#ifdef HAVE_TASK_GROUP
   /* Bind the parent's group to the new TCB (we have not yet joined the
    * group).
    */
 
-#ifdef HAVE_TASK_GROUP
   ret = group_bind(ptcb);
   if (ret < 0)
     {
@@ -267,14 +267,11 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
     }
 #endif
 
-  /* Share the address environment of the parent task.  NOTE:  Only tasks
-   * created throught the nuttx/binfmt loaders may have an address
-   * environment.
-   */
-
 #ifdef CONFIG_ADDRENV
-  ret = up_addrenv_share((FAR const struct tcb_s *)g_readytorun.head,
-                         (FAR struct tcb_s *)ptcb);
+  /* Share the address environment of the parent task group. */
+
+  ret = up_addrenv_attach(ptcb->group,
+                          (FAR const struct tcb_s *)g_readytorun.head);
   if (ret < 0)
     {
       errcode = -ret;
@@ -323,9 +320,9 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
           priority = SCHED_FIFO;
         }
 
+#if CONFIG_RR_INTERVAL > 0
       /* Get the scheduler policy for this thread */
 
-#if CONFIG_RR_INTERVAL > 0
       policy = sched_getscheduler(0);
       if (policy == ERROR)
         {
@@ -358,9 +355,9 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
 
   pthread_argsetup(ptcb, arg);
 
+#ifdef HAVE_TASK_GROUP
   /* Join the parent's task group */
 
-#ifdef HAVE_TASK_GROUP
   ret = group_join(ptcb);
   if (ret < 0)
     {
@@ -373,11 +370,11 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
 
   ptcb->joininfo = (FAR void *)pjoin;
 
+#if CONFIG_RR_INTERVAL > 0
   /* If round robin scheduling is selected, set the appropriate flag
    * in the TCB.
    */
 
-#if CONFIG_RR_INTERVAL > 0
   if (policy == SCHED_RR)
     {
       ptcb->cmn.flags    |= TCB_FLAG_ROUND_ROBIN;

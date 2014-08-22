@@ -1,7 +1,7 @@
 /****************************************************************************
  * binfmt/binfmt_execmodule.c
  *
- *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -205,10 +205,10 @@ int exec_module(FAR const struct binary_s *binp)
   up_initial_state(&tcb->cmn);
 #endif
 
-  /* Assign the address environment to the task */
+  /* Assign the address environment to the new task group */
 
 #ifdef CONFIG_ADDRENV
-  ret = up_addrenv_assign(binp->addrenv, &tcb->cmn);
+  ret = up_addrenv_assign(binp->addrenv, tcb->group);
   if (ret < 0)
     {
       err = -ret;

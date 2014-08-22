@@ -193,10 +193,10 @@ int sched_releasetcb(FAR struct tcb_s *tcb, uint8_t ttype)
       /* Release this thread's reference to the address environment */
 
 #ifdef CONFIG_ADDRENV
-      ret = up_addrenv_release(tcb);
+      ret = up_addrenv_detach(tcp->group, tcb);
 #endif
 
-      /* Leave the group (if we did not already leady in task_exithook.c) */
+      /* Leave the group (if we did not already leave in task_exithook.c) */
 
 #ifdef HAVE_TASK_GROUP
       group_leave(tcb);

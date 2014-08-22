@@ -1,7 +1,7 @@
 /********************************************************************************
  * include/nuttx/sched.h
  *
- *   Copyright (C) 2007-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -99,6 +99,8 @@
 #    define HAVE_TASK_GROUP   1          /* Sockets */
 #  elif !defined(CONFIG_DISABLE_MQUEUE)
 #    define HAVE_TASK_GROUP   1          /* Message queues */
+#  elif defined(CONFIG_ADDRENV)
+#    define HAVE_TASK_GROUP   1          /* Address environment */
 #  endif
 #endif
 
@@ -264,25 +266,24 @@ struct dspace_s
 
 /* struct task_group_s ***********************************************************/
 /* All threads created by pthread_create belong in the same task group (along with
- * the thread of the original task).  struct task_group_s is a shared, "breakaway"
- * structure referenced by each TCB.
+ * the thread of the original task).  struct task_group_s is a shared structure
+ * referenced by the TCB of each thread that is a member of the task group.
  *
  * This structure should contain *all* resources shared by tasks and threads that
  * belong to the same task group:
  *
  *   Child exit status
- *   Environment varibles
+ *   Environment variables
  *   PIC data space and address environments
  *   File descriptors
  *   FILE streams
  *   Sockets
- *
- * Currenty, however, this implementation only applies to child exit status.
+ *   Address environments.
  *
  * Each instance of struct task_group_s is reference counted. Each instance is
- * created with a reference count of one.  The reference incremeneted when each
+ * created with a reference count of one.  The reference incremented when each
  * thread joins the group and decremented when each thread exits, leaving the
- * group.  When the refernce count decrements to zero, the struc task_group_s
+ * group.  When the reference count decrements to zero, the struct task_group_s
  * is free.
  */
 
@@ -313,9 +314,9 @@ struct task_group_s
   FAR pid_t *tg_members;            /* Members of the group                     */
 #endif
 
-  /* atexit/on_exit support ****************************************************/
-
 #if defined(CONFIG_SCHED_ATEXIT) && !defined(CONFIG_SCHED_ONEXIT)
+  /* atexit support ************************************************************/
+
 # if defined(CONFIG_SCHED_ATEXIT_MAX) && CONFIG_SCHED_ATEXIT_MAX > 1
   atexitfunc_t tg_atexitfunc[CONFIG_SCHED_ATEXIT_MAX];
 # else
@@ -324,6 +325,8 @@ struct task_group_s
 #endif
 
 #ifdef CONFIG_SCHED_ONEXIT
+  /* on_exit support ***********************************************************/
+
 # if defined(CONFIG_SCHED_ONEXIT_MAX) && CONFIG_SCHED_ONEXIT_MAX > 1
   onexitfunc_t tg_onexitfunc[CONFIG_SCHED_ONEXIT_MAX];
   FAR void *tg_onexitarg[CONFIG_SCHED_ONEXIT_MAX];
@@ -333,23 +336,22 @@ struct task_group_s
 # endif
 #endif
 
+#if defined(CONFIG_SCHED_HAVE_PARENT) && defined(CONFIG_SCHED_CHILD_STATUS)
   /* Child exit status **********************************************************/
 
-#if defined(CONFIG_SCHED_HAVE_PARENT) && defined(CONFIG_SCHED_CHILD_STATUS)
   FAR struct child_status_s *tg_children; /* Head of a list of child status     */
 #endif
 
+#if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
   /* waitpid support ************************************************************/
   /* Simple mechanism used only when there is no support for SIGCHLD            */
 
-#if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
   sem_t tg_exitsem;                 /* Support for waitpid                      */
   int *tg_statloc;                  /* Location to return exit status           */
 #endif
 
-  /* Pthreads *******************************************************************/
-
 #ifndef CONFIG_DISABLE_PTHREAD
+  /* Pthreads *******************************************************************/
                                     /* Pthread join Info:                       */
   sem_t tg_joinsem;                 /*   Mutually exclusive access to join data */
   FAR struct join_s *tg_joinhead;   /*   Head of a list of join data            */
@@ -357,15 +359,15 @@ struct task_group_s
   uint8_t tg_nkeys;                 /* Number pthread keys allocated            */
 #endif
 
+#ifndef CONFIG_DISABLE_SIGNALS
   /* POSIX Signal Control Fields ************************************************/
 
-#ifndef CONFIG_DISABLE_SIGNALS
   sq_queue_t sigpendingq;           /* List of pending signals                  */
 #endif
 
+#ifndef CONFIG_DISABLE_ENVIRON
   /* Environment variables ******************************************************/
 
-#ifndef CONFIG_DISABLE_ENVIRON
   size_t     tg_envsize;            /* Size of environment string allocation    */
   FAR char  *tg_envp;               /* Allocated environment strings            */
 #endif
@@ -376,19 +378,19 @@ struct task_group_s
    * life of the PIC data is managed.
    */
 
+#if CONFIG_NFILE_DESCRIPTORS > 0
   /* File descriptors ***********************************************************/
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
   struct filelist tg_filelist;      /* Maps file descriptor to file             */
 #endif
 
+#if CONFIG_NFILE_STREAMS > 0
   /* FILE streams ***************************************************************/
   /* In a flat, single-heap build.  The stream list is allocated with this
    * structure.  But kernel mode with a kernel allocator, it must be separately
    * allocated using a user-space allocator.
    */
 
-#if CONFIG_NFILE_STREAMS > 0
 #if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
   FAR struct streamlist *tg_streamlist;
 #else
@@ -396,15 +398,23 @@ struct task_group_s
 #endif
 #endif
 
+#if CONFIG_NSOCKET_DESCRIPTORS > 0
   /* Sockets ********************************************************************/
 
-#if CONFIG_NSOCKET_DESCRIPTORS > 0
   struct socketlist tg_socketlist;  /* Maps socket descriptor to socket         */
 #endif
-  /* POSIX Named Message Queue Fields *******************************************/
 
 #ifndef CONFIG_DISABLE_MQUEUE
+  /* POSIX Named Message Queue Fields *******************************************/
+
   sq_queue_t tg_msgdesq;            /* List of opened message queues           */
+#endif
+
+#ifdef CONFIG_ADDRENV
+  /* POSIX Named Message Queue Fields *******************************************/
+  /* POSIX Named Message Queue Fields *******************************************/
+
+  group_addrenv_t addrenv;          /* Task group address environment           */
 #endif
 };
 #endif
@@ -508,7 +518,7 @@ struct tcb_s
   int pterrno;                           /* Current per-thread errno            */
 
   /* State save areas ***********************************************************/
-  /* The form and content of these fields are processor-specific.               */
+  /* The form and content of these fields are platform-specific.                */
 
   struct xcptcontext xcp;                /* Interrupt register save area        */
 
