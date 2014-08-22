@@ -1,7 +1,7 @@
 /*****************************************************************************
  *  sched/group/group_leave.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -169,11 +169,11 @@ static inline void group_release(FAR struct task_group_s *group)
   pthread_release(group);
 #endif
 
+#if CONFIG_NFILE_DESCRIPTORS > 0
   /* Free all file-related resources now.  We really need to close files as
    * soon as possible while we still have a functioning task.
    */
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
   /* Free resources held by the file descriptor list */
 
   files_releaselist(&group->tg_filelist);
@@ -196,16 +196,22 @@ static inline void group_release(FAR struct task_group_s *group)
   net_releaselist(&group->tg_socketlist);
 #endif /* CONFIG_NSOCKET_DESCRIPTORS */
 
+#ifndef CONFIG_DISABLE_ENVIRON
   /* Release all shared environment variables */
 
-#ifndef CONFIG_DISABLE_ENVIRON
   env_release(group);
 #endif
 
+#ifndef CONFIG_DISABLE_MQUEUE
   /* Close message queues opened by members of the group */
 
-#ifndef CONFIG_DISABLE_MQUEUE
   mq_release(group);
+#endif
+
+#ifdef CONFIG_ADDRENV
+  /* Destroy the group address environment */
+
+  (void)up_addrenv_destroy(group->addrenv);
 #endif
 
 #ifdef HAVE_GROUP_MEMBERS
