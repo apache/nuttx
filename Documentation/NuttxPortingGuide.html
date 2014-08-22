@@ -2705,33 +2705,35 @@ int up_timer_start(FAR const struct timespec *ts);
   or <code>kill()</code> to communicate with NuttX tasks.
 </p>
 <ul>
-  <li><a href="#wdcreate">4.3.5.1 wd_create</a></li>
+  <li><a href="#wdcreate">4.3.5.1 wd_create/wd_static</a></li>
   <li><a href="#wddelete">4.3.5.2 wd_delete</a></li>
   <li><a href="#wdstart">4.3.5.3 wd_start</a></li>
   <li><a href="#wdcancel">4.3.5.4 wd_cancel</a></li>
   <li><a href="#wdgettime">4.3.5.5 wd_gettime</a></li>
 </ul>
 
-<h4><a name="wdcreate">4.3.5.1 wd_create</a></h4>
+<h4><a name="wdcreate">4.3.5.1 wd_create/wd_static</a></h4>
 
 <p>
 <b>Function Prototype:</b>
 <pre>
     #include &lt;nuttx/wdog.h&gt;
     WDOG_ID wd_create(void);
+    void wd_static(FAR struct wdog_s *wdog);
 </pre>
 
 <p>
-<b>Description:</b> The wd_create function will create a watchdog
-by allocating the appropriate resources for the watchdog.
+<b>Description:</b> The <code>wd_create()</code> function will create a timer by allocating the appropriate resources for the watchdog.  The <code>wd_create()</code> function returns a pointer to a fully initialized, dynamically allocated <code>struct wdog_s</code> instance (which is <code>typedef</code>'ed as <code>WDOG_ID</code>);
+</p>
+<p>
+<code>wd_static()</code> performs the equivalent initialization of a statically allocated <code>struct wdog_s</code> instance.  No allocation is performed in this case.  The initializer definition, <code>WDOG_INITIALIZER</code> is also available for initialization of static instances of <code>struct wdog_s</code>.  NOTE: <code>wd_static()</code> is also implemented as a macro definition.
+</p>
 <p>
 <b>Input Parameters:</b> None.
 <p>
 <b>Returned Value:</b>
 <ul>
-<li>Pointer to watchdog that may be used as a handle in subsequent
-NuttX calls (i.e., the watchdog ID), or NULL if insufficient resources
-are available to create the watchdogs.
+<li>Pointer to watchdog that may be used as a handle in subsequent NuttX calls (i.e., the watchdog ID), or NULL if insufficient resources are available to create the watchdogs.
 </ul>
 
 <p>
@@ -2760,10 +2762,11 @@ initialization time).
 </pre>
 
 <p>
-<b>Description:</b> The wd_delete function will deallocate a
-watchdog. The watchdog will be removed from the timer queue if
-has been started.
+<b>Description:</b> The wd_delete function will deallocate a watchdog timer previously allocated via <code>wd_create()</code>. The watchdog timer will be removed from the timer queue if has been started.
 <p>
+<p>
+This function need not be called for statically allocated timers (but it is not harmful to do so).
+</p>
 <b>Input Parameters:</b>
 <ul>
 <li><code>wdog</code>. The watchdog ID to delete. This is actually a
