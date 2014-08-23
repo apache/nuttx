@@ -93,7 +93,7 @@ static inline void gran_common_reserve(FAR struct gran_s *priv,
       start &= ~mask;
       end = (end + mask) & ~mask;
 
-      /* Calculate the new size in granuales */
+      /* Calculate the new size in granules */
 
       ngranules = ((end - start) >> priv->log2gran) + 1;
 

@@ -102,7 +102,7 @@ gran_common_initialize(FAR void *heapstart, size_t heapsize, uint8_t log2gran,
   unsigned int       alignedsize;
   unsigned int       ngranules;
 
-  /* Check parameters if debug is on.  Note the size of a granual is
+  /* Check parameters if debug is on.  Note the size of a granule is
    * limited to 2**31 bytes and that the size of the granule must be greater
    * than the alignment size.
    */
@@ -159,16 +159,17 @@ gran_common_initialize(FAR void *heapstart, size_t heapsize, uint8_t log2gran,
  *   granule size (log2gran). Larger granules will give better performance
  *   and less overhead but more losses of memory due to quantization waste.
  *   Additional memory waste can occur from alignment; log2align should be
- *   set to 0 unless you are using the granule allocator to manage DMA memory
- *   and your hardware has specific memory alignment requirements.
+ *   set to 0 unless you are using the granule allocator to manage DMA
+ *   or page-aligned memory and your hardware has specific memory alignment
+ *   requirements.
  *
- *   Geneneral Usage Summary.  This is an example using the GCC section
+ *   General Usage Summary.  This is an example using the GCC section
  *   attribute to position a DMA heap in memory (logic in the linker script
  *   would assign the section .dmaheap to the DMA memory.
  *
  *     FAR uint32_t g_dmaheap[DMAHEAP_SIZE] __attribute__((section(.dmaheap)));
  *
- *   The heap is created by calling gran_initialize().  Here the granual size
+ *   The heap is created by calling gran_initialize().  Here the granule size
  *   is set to 64 bytes (2**6) and the alignment to 16 bytes (2**4):
  *
  *     GRAN_HANDLE handle = gran_initialize(g_dmaheap, DMAHEAP_SIZE, 6, 4);
@@ -189,9 +190,9 @@ gran_common_initialize(FAR void *heapstart, size_t heapsize, uint8_t log2gran,
  *   heapstart - Start of the granule allocation heap
  *   heapsize  - Size of heap in bytes
  *   log2gran  - Log base 2 of the size of one granule.  0->1 byte,
- *               1->2 bytes, 2->4 bytes, 3-> 8 bytes, etc.
+ *               1->2 bytes, 2->4 bytes, 3->8 bytes, etc.
  *   log2align - Log base 2 of required alignment.  0->1 byte,
- *               1->2 bytes, 2->4 bytes, 3-> 8 bytes, etc.  Note that
+ *               1->2 bytes, 2->4 bytes, 3->8 bytes, etc.  Note that
  *               log2gran must be greater than or equal to log2align
  *               so that all contiguous granules in memory will meet
  *               the minimum alignment requirement. A value of zero
@@ -199,7 +200,7 @@ gran_common_initialize(FAR void *heapstart, size_t heapsize, uint8_t log2gran,
  *
  * Returned Value:
  *   On success, a non-NULL handle is returned that may be used with other
- *   granual allocator interfaces.
+ *   granule allocator interfaces.
  *
  ****************************************************************************/
 

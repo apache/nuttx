@@ -101,7 +101,7 @@ config GRAN
 	bool "Enable Granule Allocator"
 	default n
 	---help---
-		Enable granual allocator support.  Allocations will be aligned to the
+		Enable granule allocator support.  Allocations will be aligned to the
 		granule size; allocations will be in units of the granule size.
 		Larger granules will give better performance and less overhead but
 		more losses of memory due to alignment and quantization waste.
@@ -136,5 +136,46 @@ config DEBUG_GRAN
 	default n
 	depends on GRAN && DEBUG
 	---help---
-		Just like DEBUG_MM, but only generates ouput from the gran
+		Just like DEBUG_MM, but only generates output from the gran
 		allocation logic.
+
+config MM_PGALLOC
+	bool "Enable Page Allocator"
+	default n
+	depends on ARCH_HAVE_MMU
+	select GRAN
+	---help---
+		Enable support for a MMU physical page allocator based on the
+		granule allocator.
+
+if MM_PGALLOC
+
+config MM_PGSIZE
+	int "Page Size"
+	default 4096
+	--help---
+		The MMU page size.  Must be one of {1024, 2048, 4096, 8192, or
+		16384}.  This is easily extensible, but only those values are
+		currently support.
+
+config MM_PGPOOL_PADDR
+	hex "Page Memory Pool Start"
+	---help---
+		Physical address of the start of the page memory pool.  This
+		will be aligned to the page size if it is not already aligned.
+
+config MM_PGPOOL_SIZE
+	int "Page Memory Pool Size"
+	---help---
+		The size of the page memory pool in bytes.  This will be aligned
+		if it is not already aligned.
+
+config DEBUG_PGALLOC
+	bool "Page Allocator Debug"
+	default n
+	depends on DEBUG
+	---help---
+		Just like DEBUG_MM, but only generates output from the page
+		allocation logic.
+
+endif # MM_PGALLOC

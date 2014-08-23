@@ -69,6 +69,12 @@ endif
 ifeq ($(CONFIG_GRAN),y)
 CSRCS += mm_graninit.c mm_granreserve.c mm_granalloc.c mm_granmark.c
 CSRCS += mm_granfree.c mm_grancritical.c
+
+# A page allocator based on the granule allocator
+
+ifeq ($(CONFIG_MM_PGALLOC),y)
+CSRCS += mm_pgalloc.c
+endif
 endif
 
 BINDIR ?= bin

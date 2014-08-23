@@ -235,7 +235,7 @@ static inline FAR void *gran_common_alloc(FAR struct gran_s *priv, size_t size)
                 }
 
               /* Set up for the next time through the loop.  Perform a 64
-               * bit shift to move to the next gram position andi ncrement
+               * bit shift to move to the next gran position andi ncrement
                * to the next candidate allocation address.
                */
 

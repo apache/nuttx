@@ -63,19 +63,19 @@
 
 #ifdef CONFIG_CPP_HAVE_VARARGS
 #  ifdef CONFIG_DEBUG_GRAM
-#    define gramdbg(format, ...)       dbg(format, ##__VA_ARGS__)
-#    define gramvdbg(format, ...)      vdbg(format, ##__VA_ARGS__)
+#    define grandbg(format, ...)       dbg(format, ##__VA_ARGS__)
+#    define granvdbg(format, ...)      vdbg(format, ##__VA_ARGS__)
 #  else
-#    define gramdbg(format, ...)       mdbg(format, ##__VA_ARGS__)
-#    define gramvdbg(format, ...)      mvdbg(format, ##__VA_ARGS__)
+#    define grandbg(format, ...)       mdbg(format, ##__VA_ARGS__)
+#    define granvdbg(format, ...)      mvdbg(format, ##__VA_ARGS__)
 #  endif
 #else
 #  ifdef CONFIG_DEBUG_GRAM
-#    define gramdbg                    dbg
-#    define gramvdbg                   vdbg
+#    define grandbg                    dbg
+#    define granvdbg                   vdbg
 #  else
-#    define gramdbg                    (void)
-#    define gramvdbg                   (void)
+#    define grandbg                    (void)
+#    define granvdbg                   (void)
 #  endif
 #endif
 
