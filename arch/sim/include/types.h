@@ -76,7 +76,7 @@ typedef signed long long   _int64_t;
 typedef unsigned long long _uint64_t;
 #define __INT64_DEFINED
 
-#ifdef CONFIG_SIM_M32
+#ifdef CONFIG_HOST_X86_64
 /* 32-bit build on 64-bit machine: A pointer is 8 bytes */
 
 typedef signed long long   _intptr_t;
