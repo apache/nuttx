@@ -1,7 +1,7 @@
 /****************************************************************************
- * mm/mm_gran.h
+ * mm/mm_granmark.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,101 +33,31 @@
  *
  ****************************************************************************/
 
-#ifndef __MM_MM_GRAN_H
-#define __MM_MM_GRAN_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <semaphore.h>
+#include <assert.h>
 
-#include <arch/types.h>
 #include <nuttx/gran.h>
+
+#include "mm_gran.h"
+
+#ifdef CONFIG_GRAN
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Sizes of things */
-
-#define SIZEOF_GAT(n) \
-  ((n + 31) >> 5)
-#define SIZEOF_GRAN_S(n) \
-  (sizeof(struct gran_s) + sizeof(uint32_t) * (SIZEOF_GAT(n) - 1))
-
-/* Debug */
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_DEBUG_GRAM
-#    define gramdbg(format, ...)       dbg(format, ##__VA_ARGS__)
-#    define gramvdbg(format, ...)      vdbg(format, ##__VA_ARGS__)
-#  else
-#    define gramdbg(format, ...)       mdbg(format, ##__VA_ARGS__)
-#    define gramvdbg(format, ...)      mvdbg(format, ##__VA_ARGS__)
-#  endif
-#else
-#  ifdef CONFIG_DEBUG_GRAM
-#    define gramdbg                    dbg
-#    define gramvdbg                   vdbg
-#  else
-#    define gramdbg                    (void)
-#    define gramvdbg                   (void)
-#  endif
-#endif
-
 /****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/* This structure represents the state of on granule allocation */
-
-struct gran_s
-{
-  uint8_t    log2gran;  /* Log base 2 of the size of one granule */
-  uint16_t   ngranules; /* The total number of (aligned) granules in the heap */
-#ifdef CONFIG_GRAN_INTR
-  irqstate_t irqstate;  /* For exclusive access to the GAT */
-#else
-  sem_t      exclsem;   /* For exclusive access to the GAT */
-#endif
-  uintptr_t  heapstart; /* The aligned start of the granule heap */
-  uint32_t   gat[1];    /* Start of the granule allocation table */
-};
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* State of the single GRAN allocator */
-
-#ifdef CONFIG_GRAN_SINGLE
-extern FAR struct gran_s *g_graninfo;
-#endif
-
-/****************************************************************************
- * Public Function Prototypes
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: gran_enter_critical and gran_leave_critical
- *
- * Description:
- *   Critical section management for the granule allocator.
- *
- * Input Parameters:
- *   priv - Pointer to the gran state
- *
- * Returned Value:
- *   None
- *
+ * Public Functions
  ****************************************************************************/
-
-void gran_enter_critical(FAR struct gran_s *priv);
-void gran_leave_critical(FAR struct gran_s *priv);
 
 /****************************************************************************
  * Name: gran_mark_allocated
@@ -146,6 +76,57 @@ void gran_leave_critical(FAR struct gran_s *priv);
  ****************************************************************************/
 
 void gran_mark_allocated(FAR struct gran_s *priv, uintptr_t alloc,
-                         unsigned int ngranules);
+                         unsigned int ngranules)
+{
+  unsigned int granno;
+  unsigned int gatidx;
+  unsigned int gatbit;
+  unsigned int avail;
+  uint32_t     gatmask;
 
-#endif /* __MM_MM_GRAN_H */
+  /* Determine the granule number of the allocation */
+
+  granno = (alloc - priv->heapstart) >> priv->log2gran;
+
+  /* Determine the GAT table index associated with the allocation */
+
+  gatidx = granno >> 5;
+  gatbit = granno & 31;
+
+  /* Mark bits in the GAT entry or entries */
+
+  avail = 32 - gatbit;
+  if (ngranules > avail)
+    {
+      /* Mark bits in the first GAT entry */
+
+      gatmask =0xffffffff << gatbit;
+      DEBUGASSERT((priv->gat[gatidx] & gatmask) == 0);
+
+      priv->gat[gatidx] |= gatmask;
+      ngranules -= avail;
+
+      /* Mark bits in the second GAT entry */
+
+      gatmask = 0xffffffff >> (32 - ngranules);
+      DEBUGASSERT((priv->gat[gatidx+1] & gatmask) == 0);
+
+      priv->gat[gatidx+1] |= gatmask;
+    }
+
+  /* Handle the case where where all of the granules come from one entry */
+
+  else
+    {
+      /* Mark bits in a single GAT entry */
+
+      gatmask   = 0xffffffff >> (32 - ngranules);
+      gatmask <<= gatbit;
+      DEBUGASSERT((priv->gat[gatidx] & gatmask) == 0);
+
+      priv->gat[gatidx] |= gatmask;
+      return;
+    }
+}
+
+#endif /* CONFIG_GRAN */

@@ -1,7 +1,7 @@
 /****************************************************************************
- * mm/mm_gran.h
+ * mm/mm_granreserve.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,119 +33,112 @@
  *
  ****************************************************************************/
 
-#ifndef __MM_MM_GRAN_H
-#define __MM_MM_GRAN_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <semaphore.h>
+#include <assert.h>
 
-#include <arch/types.h>
 #include <nuttx/gran.h>
+
+#include "mm_gran.h"
+
+#ifdef CONFIG_GRAN
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Sizes of things */
-
-#define SIZEOF_GAT(n) \
-  ((n + 31) >> 5)
-#define SIZEOF_GRAN_S(n) \
-  (sizeof(struct gran_s) + sizeof(uint32_t) * (SIZEOF_GAT(n) - 1))
-
-/* Debug */
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_DEBUG_GRAM
-#    define gramdbg(format, ...)       dbg(format, ##__VA_ARGS__)
-#    define gramvdbg(format, ...)      vdbg(format, ##__VA_ARGS__)
-#  else
-#    define gramdbg(format, ...)       mdbg(format, ##__VA_ARGS__)
-#    define gramvdbg(format, ...)      mvdbg(format, ##__VA_ARGS__)
-#  endif
-#else
-#  ifdef CONFIG_DEBUG_GRAM
-#    define gramdbg                    dbg
-#    define gramvdbg                   vdbg
-#  else
-#    define gramdbg                    (void)
-#    define gramvdbg                   (void)
-#  endif
-#endif
-
 /****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/* This structure represents the state of on granule allocation */
-
-struct gran_s
-{
-  uint8_t    log2gran;  /* Log base 2 of the size of one granule */
-  uint16_t   ngranules; /* The total number of (aligned) granules in the heap */
-#ifdef CONFIG_GRAN_INTR
-  irqstate_t irqstate;  /* For exclusive access to the GAT */
-#else
-  sem_t      exclsem;   /* For exclusive access to the GAT */
-#endif
-  uintptr_t  heapstart; /* The aligned start of the granule heap */
-  uint32_t   gat[1];    /* Start of the granule allocation table */
-};
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* State of the single GRAN allocator */
-
-#ifdef CONFIG_GRAN_SINGLE
-extern FAR struct gran_s *g_graninfo;
-#endif
-
-/****************************************************************************
- * Public Function Prototypes
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: gran_enter_critical and gran_leave_critical
+ * Name: gran_common_reserve
  *
  * Description:
- *   Critical section management for the granule allocator.
+ *   Reserve memory in the granule heap.  This will reserve the granules
+ *   that contain the start and end addresses plus all of the granules
+ *   in between.  This should be done early in the initialization sequence
+ *   before any other allocations are made.
  *
- * Input Parameters:
- *   priv - Pointer to the gran state
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void gran_enter_critical(FAR struct gran_s *priv);
-void gran_leave_critical(FAR struct gran_s *priv);
-
-/****************************************************************************
- * Name: gran_mark_allocated
- *
- * Description:
- *   Mark a range of granules as allocated.
+ *   Reserved memory can never be allocated (it can be freed however which
+ *   essentially unreserves the memory).
  *
  * Input Parameters:
  *   priv  - The granule heap state structure.
- *   alloc - The address of the allocation.
- *   ngranules - The number of granules allocated
+ *   start - The address of the beginning of the region to be reserved.
+ *   size  - The size of the region to be reserved
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void gran_mark_allocated(FAR struct gran_s *priv, uintptr_t alloc,
-                         unsigned int ngranules);
+static inline void gran_common_reserve(FAR struct gran_s *priv,
+                                       uintptr_t start, size_t size)
+{
+  if (size > 0)
+    {
+      uintptr_t mask = (1 << priv->log2gran) - 1;
+      uintptr_t end  = start + size - 1;
+      unsigned int ngranules;
 
-#endif /* __MM_MM_GRAN_H */
+      /* Get the aligned (down) start address and the aligned (up) end
+       * address
+       */
+
+      start &= ~mask;
+      end = (end + mask) & ~mask;
+
+      /* Calculate the new size in granuales */
+
+      ngranules = ((end - start) >> priv->log2gran) + 1;
+
+      /* And reserve the granules */
+
+      gran_mark_allocated(priv, start, ngranules);
+    }
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: gran_reserve
+ *
+ * Description:
+ *   Reserve memory in the granule heap.  This will reserve the granules
+ *   that contain the start and end addresses plus all of the granules
+ *   in between.  This should be done early in the initialization sequence
+ *   before any other allocations are made.
+ *
+ *   Reserved memory can never be allocated (it can be freed however which
+ *   essentially unreserves the memory).
+ *
+ * Input Parameters:
+ *   handle - The handle previously returned by gran_initialize
+ *   start  - The address of the beginning of the region to be reserved.
+ *   size   - The size of the region to be reserved
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_GRAN_SINGLE
+void gran_reserve(uintptr_t start, size_t size)
+{
+  return gran_common_reserve(g_graninfo, start, size);
+}
+#else
+void gran_reserve(GRAN_HANDLE handle, uintptr_t start, size_t size)
+{
+  return gran_common_reserve((FAR struct gran_s *)handle, start, size);
+}
+#endif
+
+#endif /* CONFIG_GRAN */

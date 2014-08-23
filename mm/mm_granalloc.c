@@ -52,76 +52,8 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: gran_common_alloc
- *
- * Description:
- *   Allocate memory from the granule heap.
- *
- * Input Parameters:
- *   priv  - The granule heap state structure.
- *   alloc - The adress of the allocation.
- *   ngranules - The number of granules allocated
- *
- * Returned Value:
- *   None
- *
+ * Private Functions
  ****************************************************************************/
-
-static inline void gran_mark_allocated(FAR struct gran_s *priv,
-                                       uintptr_t alloc,
-                                       unsigned int ngranules)
-{
-  unsigned int granno;
-  unsigned int gatidx;
-  unsigned int gatbit;
-  unsigned int avail;
-  uint32_t     gatmask;
-
-  /* Determine the granule number of the allocation */
-
-  granno = (alloc - priv->heapstart) >> priv->log2gran;
-
-  /* Determine the GAT table index associated with the allocation */
-
-  gatidx = granno >> 5;
-  gatbit = granno & 31;
-
-  /* Mark bits in the GAT entry or entries */
-
-  avail = 32 - gatbit;
-  if (ngranules > avail)
-    {
-      /* Mark bits in the first GAT entry */
-
-      gatmask =0xffffffff << gatbit;
-      DEBUGASSERT((priv->gat[gatidx] & gatmask) == 0);
-
-      priv->gat[gatidx] |= gatmask;
-      ngranules -= avail;
-
-      /* Mark bits in the second GAT entry */
-
-      gatmask = 0xffffffff >> (32 - ngranules);
-      DEBUGASSERT((priv->gat[gatidx+1] & gatmask) == 0);
-
-      priv->gat[gatidx+1] |= gatmask;
-    }
-
-  /* Handle the case where where all of the granules come from one entry */
-
-  else
-    {
-      /* Mark bits in a single GAT entry */
-
-      gatmask   = 0xffffffff >> (32 - ngranules);
-      gatmask <<= gatbit;
-      DEBUGASSERT((priv->gat[gatidx] & gatmask) == 0);
-
-      priv->gat[gatidx] |= gatmask;
-      return;
-    }
-
-}
 
 /****************************************************************************
  * Name: gran_common_alloc

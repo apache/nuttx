@@ -2,7 +2,7 @@
  * include/nuttx/gran.h
  * General purpose granule memory allocator.
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -134,16 +134,44 @@ extern "C" {
  *
  * Returned Value:
  *   On success, a non-NULL handle is returned that may be used with other
- *   granual allocator interfaces.
+ *   granule allocator interfaces.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_GRAN_SINGLE
-EXTERN int gran_initialize(FAR void *heapstart, size_t heapsize,
-                           uint8_t log2gran, uint8_t log2align);
+int gran_initialize(FAR void *heapstart, size_t heapsize, uint8_t log2gran,
+                    uint8_t log2align);
 #else
-EXTERN GRAN_HANDLE gran_initialize(FAR void *heapstart, size_t heapsize,
-                                   uint8_t log2gran, uint8_t log2align);
+GRAN_HANDLE gran_initialize(FAR void *heapstart, size_t heapsize,
+                            uint8_t log2gran, uint8_t log2align);
+#endif
+
+/****************************************************************************
+ * Name: gran_reserve
+ *
+ * Description:
+ *   Reserve memory in the granule heap.  This will reserve the granules
+ *   that contain the start and end addresses plus all of the granules
+ *   in between.  This should be done early in the initialization sequence
+ *   before any other allocations are made.
+ *
+ *   Reserved memory can never be allocated (it can be freed however which
+ *   essentially unreserves the memory).
+ *
+ * Input Parameters:
+ *   handle - The handle previously returned by gran_initialize
+ *   start  - The address of the beginning of the region to be reserved.
+ *   size   - The size of the region to be reserved
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_GRAN_SINGLE
+void gran_reserve(uintptr_t start, size_t size);
+#else
+void gran_reserve(GRAN_HANDLE handle, uintptr_t start, size_t size);
 #endif
 
 /****************************************************************************
@@ -167,9 +195,9 @@ EXTERN GRAN_HANDLE gran_initialize(FAR void *heapstart, size_t heapsize,
  ****************************************************************************/
 
 #ifdef CONFIG_GRAN_SINGLE
-EXTERN FAR void *gran_alloc(size_t size);
+FAR void *gran_alloc(size_t size);
 #else
-EXTERN FAR void *gran_alloc(GRAN_HANDLE handle, size_t size);
+FAR void *gran_alloc(GRAN_HANDLE handle, size_t size);
 #endif
 
 /****************************************************************************
@@ -180,7 +208,7 @@ EXTERN FAR void *gran_alloc(GRAN_HANDLE handle, size_t size);
  *
  * Input Parameters:
  *   handle - The handle previously returned by gran_initialize
- *   memory - A pointer to memory previoiusly allocated by gran_alloc.
+ *   memory - A pointer to memory previously allocated by gran_alloc.
  *
  * Returned Value:
  *   None
@@ -188,9 +216,9 @@ EXTERN FAR void *gran_alloc(GRAN_HANDLE handle, size_t size);
  ****************************************************************************/
 
 #ifdef CONFIG_GRAN_SINGLE
-EXTERN void gran_free(FAR void *memory, size_t size);
+void gran_free(FAR void *memory, size_t size);
 #else
-EXTERN void gran_free(GRAN_HANDLE handle, FAR void *memory, size_t size);
+void gran_free(GRAN_HANDLE handle, FAR void *memory, size_t size);
 #endif
 
 #undef EXTERN

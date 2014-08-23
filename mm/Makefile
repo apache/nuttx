@@ -67,7 +67,8 @@ endif
 # An optional granule allocator
 
 ifeq ($(CONFIG_GRAN),y)
-CSRCS += mm_graninit.c mm_granalloc.c mm_granfree.c mm_grancritical.c
+CSRCS += mm_graninit.c mm_granreserve.c mm_granalloc.c mm_granmark.c
+CSRCS += mm_granfree.c mm_grancritical.c
 endif
 
 BINDIR ?= bin
