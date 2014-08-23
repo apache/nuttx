@@ -8222,3 +8222,6 @@
 	  compile with laster SDCC (it still does not) (2014-8-22).
 	* sched/group/group_leave.c: Need to release the address environment when
 	  the task group is released (2014-8-22).
+	* mm/mm_granreserve.c and and mm_granmark.c: gran_reserve():  Add a
+	  new function to reserve unallocatable regions in the granule heap
+ 	  (2014-8-23).
