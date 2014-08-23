@@ -8224,4 +8224,9 @@
 	  the task group is released (2014-8-22).
 	* mm/mm_granreserve.c and and mm_granmark.c: gran_reserve():  Add a
 	  new function to reserve unallocatable regions in the granule heap
- 	  (2014-8-23).
+	  (2014-8-23).
+	* include/nuttx/pgalloc.h and mm/mm_pgalloc.c:  Add a simple page
+	  allocator based on the existing NuttX granule allocator.  I am not
+	  certain if the granule allocator is sufficiently deterministic for
+	  long range use, but it gets get a page allocator in place for testing
+	  very quickly (2014-8-23).
