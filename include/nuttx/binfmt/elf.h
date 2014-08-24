@@ -315,22 +315,25 @@ int arch_relocateadd(FAR const Elf32_Rela *rel,
                      FAR const Elf32_Sym *sym, uintptr_t addr);
 
 /****************************************************************************
- * Name: arch_flushicache
+ * Name: arch_coherent_dcache
  *
  * Description:
- *   Flush the instruction cache.
+ *   Ensure that the I and D caches are coherent within specified region
+ *   by cleaning the D cache (i.e., flushing the D cache contents to memory
+ *   and invalidating the I cache. This is typically used when code has been
+ *   written to a memory region, and will be executed.
  *
  * Input Parameters:
- *   addr - Start address to flush
- *   len  - Number of bytes to flush
+ *   addr - virtual start address of region
+ *   len  - Size of the address region in bytes
  *
  * Returned Value:
- *   True if the architecture supports this ELF file.
+ *   None
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ELF_ICACHE
-bool arch_flushicache(FAR void *addr, size_t len);
+#ifdef CONFIG_ARCH_HAVE_COHERENT_DCACHE
+void arch_coherent_dcache(uintptr_t addr, size_t len);
 #endif
 
 #undef EXTERN
