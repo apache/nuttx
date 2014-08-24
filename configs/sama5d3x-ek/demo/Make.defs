@@ -109,9 +109,23 @@ CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
 CPPFLAGS = $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES)
 AFLAGS = $(CFLAGS) -D__ASSEMBLY__
 
+# NXFLAT module definitions
+
 NXFLATLDFLAGS1 = -r -d -warn-common
 NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)$(DELIM)binfmt$(DELIM)libnxflat$(DELIM)gnu-nxflat-pcrel.ld -no-check-sections
 LDNXFLATFLAGS = -e main -s 2048
+
+# ELF module definitions
+
+CELFFLAGS = $(CFLAGS) -mlong-calls # --target1-abs
+CXXELFFLAGS = $(CXXFLAGS) -mlong-calls # --target1-abs
+
+LDELFFLAGS = -r -e main
+ifeq ($(WINTOOL),y)
+  LDELFFLAGS += -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/gnu-elf.ld}"
+else
+  LDELFFLAGS += -T $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/gnu-elf.ld
+endif
 
 OBJEXT = .o
 LIBEXT = .a
