@@ -8232,3 +8232,6 @@
 	  very quickly (2014-8-23).
 	* ARMv7-A: Add skeleton implementation and build support for process
 	  address environments (2014-8-23).
+	* Many files: Change CONFIG_ADDRENV to CONFIG_ARCH_ADDRENV; change how
+	  it is selected -- the architecture must first declare support
+	  (2014-8-24).
