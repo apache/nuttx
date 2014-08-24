@@ -87,7 +87,7 @@ CMN_CSRCS += arm_addrenv.c
 endif
 
 ifeq ($(CONFIG_ELF),y)
-CMN_CSRCS += arm_elf.c
+CMN_CSRCS += arm_elf.c arch_coherent_dcache.c
 endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)

@@ -130,6 +130,10 @@ config ARCH_L2CACHE
 	bool
 	default n
 
+config ARCH_HAVE_COHERENT_DCACHE
+	bool
+	default n
+
 config CUSTOM_STACK
 	bool
 	default n

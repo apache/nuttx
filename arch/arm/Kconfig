@@ -212,12 +212,14 @@ config ARCH_CORTEXA5
 	default n
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_MMU
+	select ARCH_HAVE_COHERENT_DCACHE if ELF
 
 config ARCH_CORTEXA8
 	bool
 	default n
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_MMU
+	select ARCH_HAVE_COHERENT_DCACHE if ELF
 
 config ARCH_FAMILY
 	string
