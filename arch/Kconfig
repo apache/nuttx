@@ -138,6 +138,10 @@ config ARCH_HAVE_ADDRENV
 	bool
 	default n
 
+config ARCH_NEED_ADDRENV_MAPPING
+	bool
+	default n
+
 config ARCH_HAVE_VFORK
 	bool
 	default n
@@ -162,7 +166,7 @@ menuconfig ARCH_ADDRENV
 		Support per-task address environments using the MMU... i.e., support
 		"processes"
 
-if ARCH_ADDRENV && ARCH_HAVE_MMU
+if ARCH_ADDRENV && ARCH_NEED_ADDRENV_MAPPING
 
 config ARCH_TEXT_VBASE
 	hex "Virtual .text base"
