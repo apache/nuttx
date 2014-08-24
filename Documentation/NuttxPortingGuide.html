@@ -2541,7 +2541,7 @@ config ARCH_SIM
 </p>
 <p>
   Since timers are a limited resource, the use of two timers could be an issue on some systems.
-  The job could be done with a single timer if, for example, the single timer were kept in a free-running at all times. Some timer/counters have the capability to generate a compare interrupt when the timer matches a comparison value but also to continue counting without stopping. If your hardware supports such counters, one might used the <code>CONFIG_SCHED_TICKLESS_ALARM</code> option and be able to simply set the comparison count at the value of the free running timer <i>PLUS</i> the desired delay. Then you could have both with a single timer: An alarm and a free-running counter with the same timer! 
+  The job could be done with a single timer if, for example, the single timer were kept in a free-running at all times. Some timer/counters have the capability to generate a compare interrupt when the timer matches a comparison value but also to continue counting without stopping. If your hardware supports such counters, one might used the <code>CONFIG_SCHED_TICKLESS_ALARM</code> option and be able to simply set the comparison count at the value of the free running timer <i>PLUS</i> the desired delay. Then you could have both with a single timer: An alarm and a free-running counter with the same timer!
 </p>
 <p>
   In addition to these imported interfaces, the RTOS will export the following interfaces for use by the platform-specific interval timer implementation:
@@ -3041,7 +3041,7 @@ VxWorks provides the following comparable interface:
 <h3><a name="up_addrenv_select">4.4.4 <code>up_addrenv_select()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
-  <code>int up_addrenv_select(group_addrenv_t addrenv, hw_addrenv_t *oldenv);</code>
+  <code>int up_addrenv_select(group_addrenv_t addrenv, save_addrenv_t *oldenv);</code>
 </ul>
 <p><b>Description</b>:</p>
 <ul>
@@ -3054,7 +3054,7 @@ VxWorks provides the following comparable interface:
   <li><code>oldenv</code>:
     The address environment that was in place before <code>up_addrenv_select()</code> was called.
     This may be used with <code>up_addrenv_restore()</code> to restore the original  address environment that was in place before <code>up_addrenv_select()</code> was called.
-    Note that this may be a task agnostic, hardware representation that is different from <code>group_addrenv_t</code>.
+    Note that this may be a task agnostic, platform-specific representation that may or may not be different from <code>group_addrenv_t</code>.
   </li>
 </ul>
 <p><b>Returned Value</b>:</p>
@@ -3065,7 +3065,7 @@ VxWorks provides the following comparable interface:
 <h3><a name="up_addrenv_restore">4.4.5 <code>up_addrenv_restore()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
-  <code>int up_addrenv_restore(hw_addrenv_t oldenv);</code>
+  <code>int up_addrenv_restore(save_addrenv_t oldenv);</code>
 </ul>
 <p><b>Description</b>:</p>
 <ul>
@@ -3074,7 +3074,7 @@ VxWorks provides the following comparable interface:
 </ul>
 <p><b>Input Parameters</b>:</p>
 <ul>
-  <li><code>oldenv</code>: The hardware representation of the address environment previously returned by <code>up_addrenv_select()</code>.</li>
+  <li><code>oldenv</code>: The platform-specific representation of the address environment previously returned by <code>up_addrenv_select()</code>.</li>
 </ul>
 <p><b>Returned Value</b>:</p>
 <ul>
