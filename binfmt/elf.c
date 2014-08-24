@@ -112,8 +112,10 @@ static void elf_dumploadinfo(FAR struct elf_loadinfo_s *loadinfo)
   int i;
 
   bdbg("LOAD_INFO:\n");
-  bdbg("  elfalloc:     %08lx\n", (long)loadinfo->elfalloc);
-  bdbg("  elfsize:      %ld\n",   (long)loadinfo->elfsize);
+  bdbg("  textalloc:    %08lx\n", (long)loadinfo->textalloc);
+  bdbg("  dataalloc:    %08lx\n", (long)loadinfo->dataalloc);
+  bdbg("  textsize:     %ld\n",   (long)loadinfo->textsize);
+  bdbg("  datasize:     %ld\n",   (long)loadinfo->datasize);
   bdbg("  filelen:      %ld\n",   (long)loadinfo->filelen);
 #ifdef CONFIG_BINFMT_CONSTRUCTORS
   bdbg("  ctoralloc:    %08lx\n", (long)loadinfo->ctoralloc);
@@ -215,7 +217,7 @@ static int elf_loadbinary(struct binary_s *binp)
 
   /* Return the load information */
 
-  binp->entrypt   = (main_t)(loadinfo.elfalloc + loadinfo.ehdr.e_entry);
+  binp->entrypt   = (main_t)(loadinfo.textalloc + loadinfo.ehdr.e_entry);
   binp->stacksize = CONFIG_ELF_STACKSIZE;
 
   /* Add the ELF allocation to the alloc[] only if there is no address
@@ -229,11 +231,11 @@ static int elf_loadbinary(struct binary_s *binp)
 #ifdef CONFIG_ARCH_ADDRENV
 #  warning "REVISIT"
 #else
-  binp->alloc[0]  = (FAR void *)loadinfo.elfalloc;
+  binp->alloc[0]  = (FAR void *)loadinfo.textalloc;
 #endif
 
 #ifdef CONFIG_BINFMT_CONSTRUCTORS
-  /* Save information about constructors.  NOTE:  desctructors are not
+  /* Save information about constructors.  NOTE:  destructors are not
    * yet supported.
    */
 

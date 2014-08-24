@@ -177,25 +177,25 @@ static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
           continue;
         }
 
+      /* SHF_WRITE indicates that the section address space is write-
+       * able
+       */
+
+      if ((shdr->sh_flags & SHF_WRITE) != 0)
+        {
+          pptr = &data;
+        }
+      else
+        {
+          pptr = &text;
+        }
+
       /* SHT_NOBITS indicates that there is no data in the file for the
        * section.
        */
 
       if (shdr->sh_type != SHT_NOBITS)
         {
-          /* SHF_WRITE indicates that the section address space is write-
-           * able
-           */
-
-          if ((shdr->sh_flags & SHF_WRITE) != 0)
-            {
-              pptr = &data;
-            }
-          else
-            {
-              pptr = &text;
-            }
-
           /* If CONFIG_ARCH_ADDRENV=y, then 'text' lies in a virtual address
            * space that may not be in place now.  elf_addrenv_select() will
            * temporarily instantiate that address space.
