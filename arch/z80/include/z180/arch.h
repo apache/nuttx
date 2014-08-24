@@ -64,7 +64,7 @@
  * of the base address are implicitly zero (hence the 4KB boundary alignment).
  */
 
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
 typedef uint8_t hw_addrenv_t;
 
 /* At the task-level, the z180 address environment is represented as struct

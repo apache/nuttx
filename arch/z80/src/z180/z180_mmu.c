@@ -57,8 +57,8 @@
  ****************************************************************************/
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_ADDRENV
-#  warning "OS address environment support is required (CONFIG_ADDRENV)"
+#ifndef CONFIG_ARCH_ADDRENV
+#  warning "OS address environment support is required (CONFIG_ARCH_ADDRENV)"
 #endif
 
 #ifndef CONFIG_GRAN
@@ -182,7 +182,7 @@ return g_physhandle ? OK : -ENOMEM;
  * Low-level interfaces used in binfmt/ to instantiate tasks with address
  * environments.  These interfaces all operate on type group_addrenv_t which
  * is an abstract representation of a task group's address environment and
- * must be defined in arch/arch.h if CONFIG_ADDRENV is defined.
+ * must be defined in arch/arch.h if CONFIG_ARCH_ADDRENV is defined.
  *
  *   up_addrenv_create  - Create an address environment
  *   up_addrenv_destroy - Destroy an address environment.

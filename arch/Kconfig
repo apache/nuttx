@@ -134,7 +134,7 @@ config CUSTOM_STACK
 	bool
 	default n
 
-config ADDRENV
+config ARCH_HAVE_ADDRENV
 	bool
 	default n
 
@@ -153,6 +153,14 @@ config ARCH_NAND_HWECC
 config ARCH_HAVE_EXTCLK
 	bool
 	default n
+
+config ARCH_ADDRENV
+	bool "Address environments"
+	default n
+	depends on ARCH_HAVE_ADDRENV
+	---help---
+		Support per-task address environments using the MMU... i.e., support
+		"processes"
 
 menuconfig PAGING
 	bool "On-demand paging"

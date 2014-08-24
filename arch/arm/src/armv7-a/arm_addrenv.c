@@ -38,7 +38,7 @@
  * Low-level interfaces used in binfmt/ to instantiate tasks with address
  * environments.  These interfaces all operate on type group_addrenv_t which
  * is an abstract representation of a task group's address environment and
- * must be defined in arch/arch.h if CONFIG_ADDRENV is defined.
+ * must be defined in arch/arch.h if CONFIG_ARCH_ADDRENV is defined.
  *
  *   up_addrenv_create  - Create an address environment
  *   up_addrenv_destroy - Destroy an address environment.
@@ -72,7 +72,7 @@
 #include <nuttx/arch.h>
 #include <arch/arch.h>
 
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -295,4 +295,4 @@ int up_addrenv_detach(FAR struct task_group_s *group, FAR struct tcb_s *tcb)
   return -ENOSYS;
 }
 
-#endif /* CONFIG_ADDRENV */
+#endif /* CONFIG_ARCH_ADDRENV */
