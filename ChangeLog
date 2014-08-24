@@ -8235,3 +8235,7 @@
 	* Many files: Change CONFIG_ADDRENV to CONFIG_ARCH_ADDRENV; change how
 	  it is selected -- the architecture must first declare support
 	  (2014-8-24).
+	* include/nuttx/addrenv.h, arch/arm/include/arch.h, armv7-a/irq.h, and
+	  other files:  Add addrenv.h; First cut at Cortex-A address environment
+	  structures; Add configuration options to setup address environment
+	  (2014-8-24).
