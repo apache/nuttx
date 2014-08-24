@@ -8244,3 +8244,9 @@
 	  (read/execute vs read/write).  And, as a consequence, up_addrenv_vaddr()
 	  needs to be split into up_addrenv_vtext() and up_addrenv_vdata().
 	  Affects several files (2014-8-24).
+	* arch/arm/src/armv7-a/arch_coherent_cache.c:  New file.  These cache
+	  operations are called from the ELF loader in order to flush D-cache
+	  and invalidate I-cache after an ELF module has been loaded into memory.
+	  With this change, ELF modules work correcttly on the SAMA5/Cortex-A
+	  platform (2014-8-24).
+
