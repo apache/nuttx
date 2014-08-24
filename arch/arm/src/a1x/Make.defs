@@ -82,6 +82,10 @@ CMN_CSRCS += arm_allocpage.c arm_checkmapping.c arm_pginitialize.c
 CMN_CSRCS += arm_va2pte.c
 endif
 
+ifeq ($(CONFIG_ADDRENV),y)
+CMN_CSRCS += arm_addrenv.c
+endif
+
 ifeq ($(CONFIG_ELF),y)
 CMN_CSRCS += arm_elf.c
 endif
