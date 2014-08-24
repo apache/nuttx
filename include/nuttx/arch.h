@@ -671,7 +671,7 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size);
  * Low-level interfaces used in binfmt/ to instantiate tasks with address
  * environments.  These interfaces all operate on type group_addrenv_t which
  * is an abstract representation of a task group's address environment and
- * must be defined in arch/arch.h if CONFIG_ADDRENV is defined.
+ * must be defined in arch/arch.h if CONFIG_ARCH_ADDRENV is defined.
  *
  *   up_addrenv_create  - Create an address environment
  *   up_addrenv_destroy - Destroy an address environment.
@@ -713,7 +713,7 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
 int up_addrenv_create(size_t envsize, FAR group_addrenv_t *addrenv);
 #endif
 
@@ -733,7 +733,7 @@ int up_addrenv_create(size_t envsize, FAR group_addrenv_t *addrenv);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
 int up_addrenv_destroy(group_addrenv_t addrenv);
 #endif
 
@@ -755,7 +755,7 @@ int up_addrenv_destroy(group_addrenv_t addrenv);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
 int up_addrenv_vaddr(FAR group_addrenv_t addrenv, FAR void **vaddr);
 #endif
 
@@ -784,7 +784,7 @@ int up_addrenv_vaddr(FAR group_addrenv_t addrenv, FAR void **vaddr);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
 int up_addrenv_select(group_addrenv_t addrenv, hw_addrenv_t *oldenv);
 #endif
 
@@ -805,7 +805,7 @@ int up_addrenv_select(group_addrenv_t addrenv, hw_addrenv_t *oldenv);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
 int up_addrenv_restore(hw_addrenv_t oldenv);
 #endif
 
@@ -825,7 +825,7 @@ int up_addrenv_restore(hw_addrenv_t oldenv);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
 int up_addrenv_assign(group_addrenv_t addrenv, FAR struct task_group_s *group);
 #endif
 
@@ -850,7 +850,7 @@ int up_addrenv_assign(group_addrenv_t addrenv, FAR struct task_group_s *group);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
 int up_addrenv_attach(FAR struct task_group_s *group, FAR struct tcb_s *tcb);
 #endif
 
@@ -878,7 +878,7 @@ int up_addrenv_attach(FAR struct task_group_s *group, FAR struct tcb_s *tcb);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
 int up_addrenv_detach(FAR struct task_group_s *group, FAR struct tcb_s *tcb);
 #endif
 

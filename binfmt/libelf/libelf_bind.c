@@ -195,12 +195,12 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
 
       addr = dstsec->sh_addr + rel.r_offset;
 
-      /* If CONFIG_ADDRENV=y, then 'addr' lies in a virtual address space that
+      /* If CONFIG_ARCH_ADDRENV=y, then 'addr' lies in a virtual address space that
        * may not be in place now.  elf_addrenv_select() will temporarily
        * instantiate that address space.
        */
 
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
       ret = elf_addrenv_select(loadinfo);
       if (ret < 0)
         {
@@ -214,7 +214,7 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
       ret = arch_relocate(&rel, &sym, addr);
       if (ret < 0)
         {
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
           (void)elf_addrenv_restore(loadinfo);
 #endif
           bdbg("ERROR: Section %d reloc %d: Relocation failed: %d\n", ret);
@@ -223,7 +223,7 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
 
       /* Restore the original address environment */
 
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
       ret = elf_addrenv_restore(loadinfo);
       if (ret < 0)
         {

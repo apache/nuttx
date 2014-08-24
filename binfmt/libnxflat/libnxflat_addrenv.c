@@ -68,8 +68,8 @@
  * Name: nxflat_addrenv_alloc
  *
  * Description:
- *   Allocate memory for the ELF image (elfalloc). If CONFIG_ADDRENV=n,
- *   elfalloc will be allocated using kuzalloc().  If CONFIG_ADDRENV-y, then
+ *   Allocate memory for the ELF image (elfalloc). If CONFIG_ARCH_ADDRENV=n,
+ *   elfalloc will be allocated using kuzalloc().  If CONFIG_ARCH_ADDRENV-y, then
  *   elfalloc will be allocated using up_addrenv_create().  In either case,
  *   there will be a unique instance of elfalloc (and stack) for each
  *   instance of a process.
@@ -87,7 +87,7 @@
 int nxflat_addrenv_alloc(FAR struct nxflat_loadinfo_s *loadinfo, size_t envsize)
 {
   FAR struct dspace_s *dspace;
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
   FAR void *vaddr;
   hw_addrenv_t oldenv;
   int ret;
@@ -104,7 +104,7 @@ int nxflat_addrenv_alloc(FAR struct nxflat_loadinfo_s *loadinfo, size_t envsize)
       return -ENOMEM;
     }
 
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
   /* Create a D-Space address environment for the new NXFLAT task */
 
   ret = up_addrenv_create(envsize, &loadinfo->addrenv);
@@ -198,7 +198,7 @@ errout_with_dspace:
 void nxflat_addrenv_free(FAR struct nxflat_loadinfo_s *loadinfo)
 {
   FAR struct dspace_s *dspace;
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
   int ret;
 #endif
 
@@ -207,7 +207,7 @@ void nxflat_addrenv_free(FAR struct nxflat_loadinfo_s *loadinfo)
 
   if (dspace)
     {
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
       /* Destroy the address environment */
 
       ret = up_addrenv_destroy(loadinfo->addrenv);

@@ -101,7 +101,7 @@
 #    define HAVE_TASK_GROUP   1          /* Sockets */
 #  elif !defined(CONFIG_DISABLE_MQUEUE)
 #    define HAVE_TASK_GROUP   1          /* Message queues */
-#  elif defined(CONFIG_ADDRENV)
+#  elif defined(CONFIG_ARCH_ADDRENV)
 #    define HAVE_TASK_GROUP   1          /* Address environment */
 #  endif
 #endif
@@ -259,7 +259,7 @@ struct dspace_s
 
   /* This is the allocated D-Space memory region.  This may be a physical
    * address allocated with kmalloc(), or it may be virtual address associated
-   * with an address environment (if CONFIG_ADDRENV=y).
+   * with an address environment (if CONFIG_ARCH_ADDRENV=y).
    */
 
   FAR uint8_t *region;
@@ -412,7 +412,7 @@ struct task_group_s
   sq_queue_t tg_msgdesq;            /* List of opened message queues           */
 #endif
 
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
   /* POSIX Named Message Queue Fields *******************************************/
   /* POSIX Named Message Queue Fields *******************************************/
 

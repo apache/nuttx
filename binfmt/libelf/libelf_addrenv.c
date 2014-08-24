@@ -67,8 +67,8 @@
  * Name: elf_addrenv_alloc
  *
  * Description:
- *   Allocate memory for the ELF image (elfalloc). If CONFIG_ADDRENV=n,
- *   elfalloc will be allocated using kuzalloc().  If CONFIG_ADDRENV-y, then
+ *   Allocate memory for the ELF image (elfalloc). If CONFIG_ARCH_ADDRENV=n,
+ *   elfalloc will be allocated using kuzalloc().  If CONFIG_ARCH_ADDRENV-y, then
  *   elfalloc will be allocated using up_addrenv_create().  In either case,
  *   there will be a unique instance of elfalloc (and stack) for each
  *   instance of a process.
@@ -85,7 +85,7 @@
 
 int elf_addrenv_alloc(FAR struct elf_loadinfo_s *loadinfo, size_t envsize)
 {
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
   FAR void *vaddr;
   int ret;
 
@@ -146,7 +146,7 @@ int elf_addrenv_alloc(FAR struct elf_loadinfo_s *loadinfo, size_t envsize)
 
 void elf_addrenv_free(FAR struct elf_loadinfo_s *loadinfo)
 {
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
   int ret;
 
   /* Free the address environemnt */

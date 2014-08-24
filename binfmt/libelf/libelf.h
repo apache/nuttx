@@ -79,7 +79,7 @@ int elf_verifyheader(FAR const Elf32_Ehdr *header);
  *   read into 'buffer.' If 'buffer' is part of the ELF address environment,
  *   then the caller is responsibile for assuring that that address
  *   environment is in place before calling this function (i.e., that
- *   elf_addrenv_select() has been called if CONFIG_ADDRENV=y).
+ *   elf_addrenv_select() has been called if CONFIG_ARCH_ADDRENV=y).
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
@@ -264,8 +264,8 @@ int elf_loaddtors(FAR struct elf_loadinfo_s *loadinfo);
  * Name: elf_addrenv_alloc
  *
  * Description:
- *   Allocate memory for the ELF image (elfalloc). If CONFIG_ADDRENV=n,
- *   elfalloc will be allocated using kzalloc().  If CONFIG_ADDRENV-y, then
+ *   Allocate memory for the ELF image (elfalloc). If CONFIG_ARCH_ADDRENV=n,
+ *   elfalloc will be allocated using kzalloc().  If CONFIG_ARCH_ADDRENV-y, then
  *   elfalloc will be allocated using up_addrenv_create().  In either case,
  *   there will be a unique instance of elfalloc (and stack) for each
  *   instance of a process.
@@ -296,7 +296,7 @@ int elf_addrenv_alloc(FAR struct elf_loadinfo_s *loadinfo, size_t envsize);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
 #  define elf_addrenv_select(l) up_addrenv_select((l)->addrenv, &(l)->oldenv)
 #endif
 
@@ -314,7 +314,7 @@ int elf_addrenv_alloc(FAR struct elf_loadinfo_s *loadinfo, size_t envsize);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
 #  define elf_addrenv_restore(l) up_addrenv_restore((l)->oldenv)
 #endif
 

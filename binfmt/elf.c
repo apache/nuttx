@@ -226,7 +226,7 @@ static int elf_loadbinary(struct binary_s *binp)
    * a memory leak?
    */
 
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
 #  warning "REVISIT"
 #else
   binp->alloc[0]  = (FAR void *)loadinfo.elfalloc;
@@ -246,7 +246,7 @@ static int elf_loadbinary(struct binary_s *binp)
   binp->ndtors    = loadinfo.ndtors;
 #endif
 
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
   /* Save the address environment.  This will be needed when the module is
    * executed for the up_addrenv_assign() call.
    */

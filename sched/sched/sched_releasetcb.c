@@ -192,7 +192,7 @@ int sched_releasetcb(FAR struct tcb_s *tcb, uint8_t ttype)
 
       /* Release this thread's reference to the address environment */
 
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
       ret = up_addrenv_detach(tcb->group, tcb);
 #endif
 

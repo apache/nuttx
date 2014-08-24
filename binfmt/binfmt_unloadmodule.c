@@ -87,7 +87,7 @@
 static inline int exec_dtors(FAR struct binary_s *binp)
 {
   binfmt_dtor_t *dtor = binp->dtors;
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
   hw_addrenv_t oldenv;
   int ret;
 #endif
@@ -95,7 +95,7 @@ static inline int exec_dtors(FAR struct binary_s *binp)
 
   /* Instantiate the address enviroment containing the destructors */
 
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
   ret = up_addrenv_select(binp->addrenv, &oldenv);
   if (ret < 0)
     {
@@ -116,7 +116,7 @@ static inline int exec_dtors(FAR struct binary_s *binp)
 
   /* Restore the address enviroment */
 
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
   return up_addrenv_restore(oldenv);
 #else
   return OK;

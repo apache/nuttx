@@ -165,12 +165,12 @@ static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
 
       if (shdr->sh_type != SHT_NOBITS)
         {
-          /* If CONFIG_ADDRENV=y, then 'dest' lies in a virtual address space
+          /* If CONFIG_ARCH_ADDRENV=y, then 'dest' lies in a virtual address space
            * that may not be in place now.  elf_addrenv_select() will
            * temporarily instantiate that address space.
            */
 
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
           ret = elf_addrenv_select(loadinfo);
           if (ret < 0)
             {
@@ -190,7 +190,7 @@ static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
 
           /* Restore the original address environment */
 
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
           ret = elf_addrenv_restore(loadinfo);
           if (ret < 0)
             {

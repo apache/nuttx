@@ -96,7 +96,7 @@ int dump_module(FAR const struct binary_s *bin)
       bdbg("  ctors:     %p nctors=%d\n", bin->ctors, bin->nctors);
       bdbg("  dtors:     %p ndtors=%d\n", bin->dtors, bin->ndtors);
 #endif
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
       bdbg("  addrenv:   %p\n", bin->addrenv);
 #endif
       bdbg("  stacksize: %d\n", bin->stacksize);

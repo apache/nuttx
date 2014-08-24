@@ -138,7 +138,7 @@ void up_initialize(void)
    * needs to be done before any tasks are created).
    */
 
-#if CONFIG_ADDRENV
+#if CONFIG_ARCH_ADDRENV
   (void)up_mmuinit();
 #endif
 

@@ -267,7 +267,7 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
     }
 #endif
 
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
   /* Share the address environment of the parent task group. */
 
   ret = up_addrenv_attach(ptcb->cmn.group,

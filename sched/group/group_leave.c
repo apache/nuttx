@@ -208,7 +208,7 @@ static inline void group_release(FAR struct task_group_s *group)
   mq_release(group);
 #endif
 
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
   /* Destroy the group address environment */
 
   (void)up_addrenv_destroy(group->addrenv);

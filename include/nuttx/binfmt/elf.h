@@ -95,8 +95,8 @@ struct elf_loadinfo_s
   /* elfalloc is the base address of the memory that is allocated to hold the
    * ELF program image.
    *
-   * If CONFIG_ADDRENV=n, elfalloc will be allocated using kmalloc() (or
-   * kzalloc()).  If CONFIG_ADDRENV-y, then elfalloc will be allocated using
+   * If CONFIG_ARCH_ADDRENV=n, elfalloc will be allocated using kmalloc() (or
+   * kzalloc()).  If CONFIG_ARCH_ADDRENV-y, then elfalloc will be allocated using
    * up_addrenv_create().  In either case, there will be a unique instance
    * of elfalloc (and stack) for each instance of a process.
    *
@@ -130,7 +130,7 @@ struct elf_loadinfo_s
    *   used to restore the current hardware address environment.
    */
 
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
   group_addrenv_t    addrenv;    /* Task group address environment */
   hw_addrenv_t       oldenv;     /* Saved hardware address environment */
 #endif

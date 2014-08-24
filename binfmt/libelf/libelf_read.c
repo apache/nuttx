@@ -102,7 +102,7 @@ static inline void elf_dumpreaddata(char *buffer, int buflen)
  *   read into 'buffer.' If 'buffer' is part of the ELF address environment,
  *   then the caller is responsibile for assuring that that address
  *   environment is in place before calling this function (i.e., that
- *   elf_addrenv_select() has been called if CONFIG_ADDRENV=y).
+ *   elf_addrenv_select() has been called if CONFIG_ARCH_ADDRENV=y).
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on

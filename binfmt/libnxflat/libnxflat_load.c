@@ -170,13 +170,13 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
   bvdbg("Allocated DSpace (%d bytes) at %p\n",
         loadinfo->dsize, loadinfo->dspace->region);
 
-  /* If CONFIG_ADDRENV=y, then the D-Space allocation lies in an address
+  /* If CONFIG_ARCH_ADDRENV=y, then the D-Space allocation lies in an address
    * environment that may not be in place.  So, in that case, we must call
    * nxflat_addrenv_select to temporarily instantiate that address space
    * it can be initialized.
    */
 
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
   ret = nxflat_addrenv_select(loadinfo);
   if (ret < 0)
     {
@@ -201,7 +201,7 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
 
   /* Restore the original address environment */
 
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
   ret = nxflat_addrenv_restore(loadinfo);
   if (ret < 0)
     {
@@ -213,7 +213,7 @@ int nxflat_load(struct nxflat_loadinfo_s *loadinfo)
   return OK;
 
 errout:
-#ifdef CONFIG_ADDRENV
+#ifdef CONFIG_ARCH_ADDRENV
   (void)nxflat_addrenv_restore(loadinfo);
 #endif
   (void)nxflat_unload(loadinfo);
