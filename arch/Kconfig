@@ -154,13 +154,69 @@ config ARCH_HAVE_EXTCLK
 	bool
 	default n
 
-config ARCH_ADDRENV
+menuconfig ARCH_ADDRENV
 	bool "Address environments"
 	default n
 	depends on ARCH_HAVE_ADDRENV
 	---help---
 		Support per-task address environments using the MMU... i.e., support
 		"processes"
+
+if ARCH_ADDRENV && ARCH_HAVE_MMU
+
+config ARCH_TEXT_VBASE
+	hex "Virtual .text base"
+	---help---
+		The virtual address of the beginning the .text region
+
+config ARCH_DATA_VBASE
+	hex "Virtual .bss/.data base"
+	---help---
+		The virtual address of the beginning of the .bss/.data region.
+
+config ARCH_HEAP_VBASE
+	hex "Virtual heap base"
+	---help---
+		The virtual address of the beginning of the heap region.
+
+config ARCH_STACK_VBASE
+	hex "Virtual stack base"
+	---help---
+		The virtual address of the beginning the stack region
+
+config ARCH_TEXT_NPAGES
+	int "Max .text pages"
+	default 1
+	---help---
+		The maximum number of pages that can allocated for the .text region.
+		This, along with knowledge of the page size, determines the size of
+		the .text virtual address space. Default is 1.
+
+config ARCH_DATA_NPAGES
+	int "Max .bss/.data pages"
+	default 1
+	---help---
+		The maximum number of pages that can allocated for the .bss/.data
+		region. This, along with knowledge of the page size, determines the
+		size of the .bss/.data virtual address space. Default is 1.
+
+config ARCH_HEAP_NPAGES
+	int "Max heap pages"
+	default 1
+	---help---
+		The maximum number of pages that can allocated for the heap region.
+		This, along with knowledge of the page size, determines the size of
+		the heap virtual address space. Default is 1.
+
+config ARCH_STACK_NPAGES
+	int "Max. stack pages"
+	default 1
+	---help---
+		The maximum number of pages that can allocated for the stack region.
+		This, along with knowledge of the page size, determines the size of
+		the stack virtual address space. Default is 1.
+
+endif # ARCH_ADDRENV && ARCH_HAVE_MMU
 
 menuconfig PAGING
 	bool "On-demand paging"

@@ -50,7 +50,7 @@
 #endif
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #ifdef CONFIG_PIC
@@ -98,6 +98,36 @@ do { \
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+#ifdef CONFIG_ARCH_ADDRENV
+/* The task group resources are retained in a single structure, task_group_s
+ * that is defined in the header file nuttx/include/nuttx/sched.h. The type
+ * group_addrenv_t must be defined by platform specific logic in
+ * nuttx/arch/<architecture>/include/arch.h.
+ *
+ * These tables would hold the physical address of the level 2 page tables.
+ * All would be initially NULL and would not be backed up with physical memory
+ * until mappings in the level 2 page table are required.
+ */
+
+struct group_addrenv_s
+{
+  FAR uint32_t *text[CONFIG_ARCH_TEXT_NPAGES];
+  FAR uint32_t *data[CONFIG_ARCH_DATA_NPAGES];
+  FAR uint32_t *heap[CONFIG_ARCH_HEAP_NPAGES];
+};
+
+typedef struct group_addrenv_s group_addrenv_t;
+
+/* This type is used when the OS needs to temporarily instantiate a
+ * different address environment.  Used in the implementation of
+ *
+ *   int up_addrenv_select(group_addrenv_t addrenv, save_addrenv_t *oldenv);
+ *   int up_addrenv_restore(save_addrenv_t oldenv);
+ */
+
+typedef group_addrenv_t *save_addrenv_t;
+#endif
 
 /****************************************************************************
  * Public Variables

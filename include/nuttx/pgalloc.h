@@ -66,7 +66,7 @@
  *
  * Dependencies:  CONFIG_ARCH_HAVE_MMU and CONFIG_GRAN
  */
- 
+
 #ifndef CONFIG_MM_PGALLOC_PGSIZE
 #  define CONFIG_MM_PGALLOC_PGSIZE 4096
 #endif

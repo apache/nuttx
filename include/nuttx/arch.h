@@ -698,7 +698,7 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size);
  *
  * Description:
  *   This function is called when a new task is created in order to
- *   instantiate an address environment for the new task group. 
+ *   instantiate an address environment for the new task group.
  *   up_addrenv_create() is essentially the allocator of the physical
  *   memory for the new task.
  *
@@ -776,8 +776,8 @@ int up_addrenv_vaddr(FAR group_addrenv_t addrenv, FAR void **vaddr);
  *     The address environment that was in place before up_addrenv_select().
  *     This may be used with up_addrenv_restore() to restore the original
  *     address environment that was in place before up_addrenv_select() was
- *     called.  Note that this may be a task agnostic, hardware
- *     representation that is different from group_addrenv_t.
+ *     called.  Note that this may be a task agnostic, platform-specific
+ *     representation that may or may not be different from group_addrenv_t.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
@@ -785,7 +785,7 @@ int up_addrenv_vaddr(FAR group_addrenv_t addrenv, FAR void **vaddr);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_ADDRENV
-int up_addrenv_select(group_addrenv_t addrenv, hw_addrenv_t *oldenv);
+int up_addrenv_select(group_addrenv_t addrenv, save_addrenv_t *oldenv);
 #endif
 
 /****************************************************************************
@@ -797,7 +797,7 @@ int up_addrenv_select(group_addrenv_t addrenv, hw_addrenv_t *oldenv);
  *   original address environment.
  *
  * Input Parameters:
- *   oldenv - The hardware representation of the address environment
+ *   oldenv - The platform-specific representation of the address environment
  *     previously returned by up_addrenv_select.
  *
  * Returned Value:
@@ -806,7 +806,7 @@ int up_addrenv_select(group_addrenv_t addrenv, hw_addrenv_t *oldenv);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_ADDRENV
-int up_addrenv_restore(hw_addrenv_t oldenv);
+int up_addrenv_restore(save_addrenv_t oldenv);
 #endif
 
 /****************************************************************************

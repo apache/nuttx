@@ -88,7 +88,7 @@ static inline int exec_dtors(FAR struct binary_s *binp)
 {
   binfmt_dtor_t *dtor = binp->dtors;
 #ifdef CONFIG_ARCH_ADDRENV
-  hw_addrenv_t oldenv;
+  save_addrenv_t oldenv;
   int ret;
 #endif
   int i;
