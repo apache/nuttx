@@ -2915,11 +2915,12 @@ VxWorks provides the following comparable interface:
 <h2><a name="addrenv">4.4 Address Environments</a></h2>
 <p>
   CPUs that support memory management units (MMUs) may provide <i>address environments</i> within which tasks and their child threads execute.
-  The configuration indicates the CPUs ability to support address environments by setting the configuration variable <code>CONFIG_ADDRENV=y</code>.
+  The configuration indicates the CPUs ability to support address environments by setting the configuration variable <code>CONFIG_ARCH_HAVE_ADDRENV=y</code>.
+  That will enable the selection of the actual address evironment support which is indicated by the selection of the configuration variable  <code>CONFIG_ARCH_ADDRENV=y</code>.
   These address environments are created only when tasks are created via <code>exec()</code> or <code>exec_module()</code> (see <code>include/nuttx/binfmt/binfmt.h</code>).
 </p>
 <p>
-  When <code>CONFIG_ADDRENV=y</code> is set in the board configuration, the CPU-specific logic must provide a set of interfaces as defined in the header file <code>include/nuttx/arch.h</code>.
+  When <code>CONFIG_ARCH_ADDRENV=y</code> is set in the board configuration, the CPU-specific logic must provide a set of interfaces as defined in the header file <code>include/nuttx/arch.h</code>.
   These interfaces are listed below and described in detail in the following paragraphs.
 </p>
 <p>
@@ -2930,7 +2931,7 @@ VxWorks provides the following comparable interface:
     <p>
       <b>Binary Loader Support</b>.
       These are low-level interfaces used in <code>binfmt/</code> to instantiate tasks with address environments.
-      These interfaces all operate on type <code>group_addrenv_t</code> which is an abstract representation of a task group's address environment and the type must be defined in<code>arch/arch.h</code> if <code>CONFIG_ADDRENV</code> is defined. These low-level interfaces include:
+      These interfaces all operate on type <code>group_addrenv_t</code> which is an abstract representation of a task group's address environment and the type must be defined in<code>arch/arch.h</code> if <code>CONFIG_ARCH_ADDRENV</code> is defined. These low-level interfaces include:
     </p>
     <ul>
       <li>
