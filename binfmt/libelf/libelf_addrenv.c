@@ -67,31 +67,36 @@
  * Name: elf_addrenv_alloc
  *
  * Description:
- *   Allocate memory for the ELF image (elfalloc). If CONFIG_ARCH_ADDRENV=n,
- *   elfalloc will be allocated using kuzalloc().  If CONFIG_ARCH_ADDRENV-y, then
- *   elfalloc will be allocated using up_addrenv_create().  In either case,
- *   there will be a unique instance of elfalloc (and stack) for each
- *   instance of a process.
+ *   Allocate memory for the ELF image (textalloc and dataalloc). If
+ *   CONFIG_ARCH_ADDRENV=n, textalloc will be allocated using kzalloc() and
+ *   dataalloc will be a offset from textalloc.  If CONFIG_ARCH_ADDRENV-y, then
+ *   textalloc and dataalloc will be allocated using up_addrenv_create().  In
+ *   either case, there will be a unique instance of textalloc and dataalloc
+ *   (and stack) for each instance of a process.
  *
  * Input Parameters:
  *   loadinfo - Load state information
- *   envsize - The size (in bytes) of the address environment needed for the
- *     ELF image.
+ *   textsize - The size (in bytes) of the .text address environment needed
+ *     for the ELF image (read/execute).
+ *   datasize - The size (in bytes) of the .bss/.data address environment
+ *     needed for the ELF image (read/write).
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int elf_addrenv_alloc(FAR struct elf_loadinfo_s *loadinfo, size_t envsize)
+int elf_addrenv_alloc(FAR struct elf_loadinfo_s *loadinfo, size_t textsize,
+                      size_t datasize)
 {
 #ifdef CONFIG_ARCH_ADDRENV
-  FAR void *vaddr;
+  FAR void *vtext;
+  FAR void *vdata;
   int ret;
 
   /* Create an address environment for the new ELF task */
 
-  ret = up_addrenv_create(envsize, &loadinfo->addrenv);
+  ret = up_addrenv_create(textsize, datasize, &loadinfo->addrenv);
   if (ret < 0)
     {
       bdbg("ERROR: up_addrenv_create failed: %d\n", ret);
@@ -104,24 +109,33 @@ int elf_addrenv_alloc(FAR struct elf_loadinfo_s *loadinfo, size_t envsize)
    * selected.
    */
 
-  ret = up_addrenv_vaddr(loadinfo->addrenv, &vaddr);
+  ret = up_addrenv_vtext(loadinfo->addrenv, &vtext);
   if (ret < 0)
     {
-      bdbg("ERROR: up_addrenv_vaddr failed: %d\n", ret);
+      bdbg("ERROR: up_addrenv_vtext failed: %d\n", ret);
       return ret;
     }
 
-  loadinfo->elfalloc = (uintptr_t)vaddr;
+  ret = up_addrenv_vdata(loadinfo->addrenv, textsize, &vdata);
+  if (ret < 0)
+    {
+      bdbg("ERROR: up_adup_addrenv_vdatadrenv_vtext failed: %d\n", ret);
+      return ret;
+    }
+
+  loadinfo->textalloc = (uintptr_t)vaddr;
+  loadinfo->dataalloc = (uintptr_t)vdata;
   return OK;
 #else
   /* Allocate memory to hold the ELF image */
 
-  loadinfo->elfalloc = (uintptr_t)kuzalloc(envsize);
-  if (!loadinfo->elfalloc)
+  loadinfo->textalloc = (uintptr_t)kuzalloc(textsize + datasize);
+  if (!loadinfo->textalloc)
     {
       return -ENOMEM;
     }
 
+  loadinfo->dataalloc = loadinfo->textalloc + textsize;
   return OK;
 #endif
 }
@@ -159,18 +173,22 @@ void elf_addrenv_free(FAR struct elf_loadinfo_s *loadinfo)
 
   /* Clear out all indications of the allocated address environment */
 
-  loadinfo->elfalloc = 0;
-  loadinfo->elfsize  = 0;
-  loadinfo->addrenv  = 0;
+  loadinfo->textalloc = 0;
+  loadinfo->dataalloc = 0;
+  loadinfo->textsize  = 0;
+  loadinfo->datasize  = 0;
+  loadinfo->addrenv   = 0;
 #else
   /* If there is an allocation for the ELF image, free it */
 
-  if (loadinfo->elfalloc != 0)
+  if (loadinfo->textalloc != 0)
     {
-      kufree((FAR void *)loadinfo->elfalloc);
-      loadinfo->elfalloc = 0;
+      kufree((FAR void *)loadinfo->textalloc);
     }
 
-   loadinfo->elfsize = 0;
+   loadinfo->textalloc = 0;
+   loadinfo->dataalloc = 0;
+   loadinfo->textsize  = 0;
+   loadinfo->datasize  = 0;
 #endif
 }

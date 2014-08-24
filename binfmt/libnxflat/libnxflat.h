@@ -59,11 +59,9 @@
  * Name: nxflat_addrenv_alloc
  *
  * Description:
- *   Allocate memory for the ELF image (elfalloc). If CONFIG_ARCH_ADDRENV=n,
- *   elfalloc will be allocated using kzalloc().  If CONFIG_ARCH_ADDRENV-y, then
- *   elfalloc will be allocated using up_addrenv_create().  In either case,
- *   there will be a unique instance of elfalloc (and stack) for each
- *   instance of a process.
+ *   Allocate data memory for the NXFLAT image. If CONFIG_ARCH_ADDRENV=n,
+ *   memory will be allocated using kzalloc().  If CONFIG_ARCH_ADDRENV-y,
+ *   then memory will be allocated using up_addrenv_create().
  *
  * Input Parameters:
  *   loadinfo - Load state information

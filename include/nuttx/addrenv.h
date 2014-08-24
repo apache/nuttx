@@ -152,8 +152,10 @@
  *
  *   up_addrenv_create  - Create an address environment
  *   up_addrenv_destroy - Destroy an address environment.
- *   up_addrenv_vaddr   - Returns the virtual base address of the address
- *                        environment
+ *   up_addrenv_vtext   - Returns the virtual base address of the .text
+ *                        address environment
+ *   up_addrenv_vdata   - Returns the virtual base address of the .bss/.data
+ *                        address environment
  *   up_addrenv_select  - Instantiate an address environment
  *   up_addrenv_restore - Restore an address environment
  *   up_addrenv_assign  - Assign an address environment to a group

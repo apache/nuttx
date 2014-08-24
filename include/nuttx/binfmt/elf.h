@@ -104,8 +104,10 @@ struct elf_loadinfo_s
    * the ELF module has been loaded.
    */
 
-  uintptr_t         elfalloc;    /* Memory allocated when ELF file was loaded */
-  size_t            elfsize;     /* Size of the ELF memory allocation */
+  uintptr_t         textalloc;   /* .text memory allocated when ELF file was loaded */
+  uintptr_t         dataalloc;   /* .bss/.data memory allocated when ELF file was loaded */
+  size_t            textsize;    /* Size of the ELF .text memory allocation */
+  size_t            datasize;    /* Size of the ELF .bss/.data memory allocation */
   off_t             filelen;     /* Length of the entire ELF file */
   Elf32_Ehdr        ehdr;        /* Buffered ELF file header */
   FAR Elf32_Shdr    *shdr;       /* Buffered ELF section headers */
@@ -127,12 +129,12 @@ struct elf_loadinfo_s
    * addrenv - This is the handle created by up_addrenv_create() that can be
    *   used to manage the tasks address space.
    * oldenv  - This is a value returned by up_addrenv_select() that must be
-   *   used to restore the current hardware address environment.
+   *   used to restore the current address environment.
    */
 
 #ifdef CONFIG_ARCH_ADDRENV
   group_addrenv_t    addrenv;    /* Task group address environment */
-  save_addrenv_t     oldenv;     /* Saved hardware address environment */
+  save_addrenv_t     oldenv;     /* Saved address environment */
 #endif
 
   uint16_t           symtabidx;  /* Symbol table section index */

@@ -186,8 +186,10 @@ return g_physhandle ? OK : -ENOMEM;
  *
  *   up_addrenv_create  - Create an address environment
  *   up_addrenv_destroy - Destroy an address environment.
- *   up_addrenv_vaddr   - Returns the virtual base address of the address
- *                        environment
+ *   up_addrenv_vtext   - Returns the virtual base address of the .text
+ *                        address environment
+ *   up_addrenv_vdata   - Returns the virtual base address of the .bss/.data
+ *                        address environment
  *   up_addrenv_select  - Instantiate an address environment
  *   up_addrenv_restore - Restore an address environment
  *   up_addrenv_assign  - Assign an address environment to a group
@@ -214,8 +216,10 @@ return g_physhandle ? OK : -ENOMEM;
  *   memory for the new task.
  *
  * Input Parameters:
- *   envsize - The size (in bytes) of the address environment needed by the
- *     task.
+ *   textsize - The size (in bytes) of the .text address environment needed
+ *     by the task.  This region may be read/execute only.
+ *   datasize - The size (in bytes) of the .data/.bss address environment
+ *     needed by the task.  This region may be read/write only.
  *   addrenv - The location to return the representation of the task address
  *     environment.
  *
@@ -224,17 +228,20 @@ return g_physhandle ? OK : -ENOMEM;
  *
  ****************************************************************************/
 
-int up_addrenv_create(size_t envsize, FAR group_addrenv_t *addrenv)
+int up_addrenv_create(size_t textsize, size_t datasize,
+                      FAR group_addrenv_t *addrenv)
 {
   FAR struct z180_cbr_s *cbr;
   irqstate_t flags;
+  size_t envsize;
   uintptr_t alloc;
   unsigned int npages;
   int ret;
 
   /* Convert the size from bytes to numbers of pages */
 
-  npages = PHYS_ALIGNUP(envsize);
+  envsize = textsize + datasize;
+  npages  = PHYS_ALIGNUP(envsize);
   if (npages < 1)
     {
       /* No address environment... but I suppose that is not an error */
@@ -331,26 +338,54 @@ int up_addrenv_destroy(group_addrenv_t addrenv)
 }
 
 /****************************************************************************
- * Name: up_addrenv_vaddr
+ * Name: up_addrenv_vtext
  *
  * Description:
- *   Return the virtual address associated with the newly create address
- *   environment.  This function is used by the binary loaders in order
- *   get an address that can be used to initialize the new task..
+ *   Return the virtual address associated with the newly create .text
+ *   address environment.  This function is used by the binary loaders in
+ *   order get an address that can be used to initialize the new task.
  *
  * Input Parameters:
  *   addrenv - The representation of the task address environment previously
  *      returned by up_addrenv_create.
- *   vaddr - The location to return the virtual address.
+ *   vtext - The location to return the virtual address.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int up_addrenv_vaddr(FAR group_addrenv_t addrenv, FAR void **vaddr)
+int up_addrenv_vtext(FAR group_addrenv_t addrenv, FAR void **vtext)
 {
   return CONFIG_Z180_COMMON1AREA_VIRTBASE;
+}
+
+/****************************************************************************
+ * Name: up_addrenv_vdata
+ *
+ * Description:
+ *   Return the virtual address associated with the newly create .text
+ *   address environment.  This function is used by the binary loaders in
+ *   order get an address that can be used to initialize the new task.
+ *
+ * Input Parameters:
+ *   addrenv - The representation of the task address environment previously
+ *      returned by up_addrenv_create.
+ *   textsize - For some implementations, the text and data will be saved
+ *      in the same memory region (read/write/execute) and, in this case,
+ *      the virtual address of the data just lies at this offset into the
+ *      common region.
+ *   vdata - The location to return the virtual address.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int up_addrenv_vdata(FAR group_addrenv_t addrenv, uintptr_t textsize,
+                     FAR void **vdata)
+{
+  return CONFIG_Z180_COMMON1AREA_VIRTBASE + textsize;
 }
 
 /****************************************************************************
@@ -436,7 +471,8 @@ int up_addrenv_restore(save_addrenv_t oldenv)
  *
  ****************************************************************************/
 
-int up_addrenv_assign(group_addrenv_t addrenv, FAR struct task_group_s *group)
+int up_addrenv_assign(FAR const group_addrenv_t *addrenv,
+                      FAR struct task_group_s *group)
 {
   /* Make sure that there is no address environment in place on this TCB */
 
@@ -446,7 +482,7 @@ int up_addrenv_assign(group_addrenv_t addrenv, FAR struct task_group_s *group)
    * special precautions should be needed.
    */
 
-  group->addrenv = addrenv;
+  group->addrenv = *addrenv;
   return OK;
 }
 

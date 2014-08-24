@@ -88,12 +88,15 @@
 
 static void elf_elfsize(struct elf_loadinfo_s *loadinfo)
 {
-  size_t elfsize;
+  size_t textsize;
+  size_t datasize;
   int i;
 
   /* Accumulate the size each section into memory that is marked SHF_ALLOC */
 
-  elfsize = 0;
+  textsize = 0;
+  datasize = 0;
+
   for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
     {
       FAR Elf32_Shdr *shdr = &loadinfo->shdr[i];
@@ -104,13 +107,25 @@ static void elf_elfsize(struct elf_loadinfo_s *loadinfo)
 
       if ((shdr->sh_flags & SHF_ALLOC) != 0)
         {
-          elfsize += ELF_ALIGNUP(shdr->sh_size);
+          /* SHF_WRITE indicates that the section address space is write-
+           * able
+           */
+
+          if ((shdr->sh_flags & SHF_WRITE) != 0)
+            {
+              datasize += ELF_ALIGNUP(shdr->sh_size);
+            }
+          else
+            {
+              textsize += ELF_ALIGNUP(shdr->sh_size);
+            }
         }
     }
 
   /* Save the allocation size */
 
-  loadinfo->elfsize = elfsize;
+  loadinfo->textsize = textsize;
+  loadinfo->datasize = datasize;
 }
 
 /****************************************************************************
@@ -129,13 +144,15 @@ static void elf_elfsize(struct elf_loadinfo_s *loadinfo)
 
 static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
 {
-  FAR uint8_t *dest;
+  FAR uint8_t *text;
+  FAR uint8_t *data;
+  FAR uint8_t **pptr;
   int ret;
   int i;
 
   /* Allocate (and zero) memory for the ELF file. */
 
-  ret = elf_addrenv_alloc(loadinfo, loadinfo->elfsize);
+  ret = elf_addrenv_alloc(loadinfo, loadinfo->textsize, loadinfo->datasize);
   if (ret < 0)
     {
       bdbg("ERROR: elf_addrenv_alloc() failed: %d\n", ret);
@@ -145,7 +162,8 @@ static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
   /* Read each section into memory that is marked SHF_ALLOC + SHT_NOBITS */
 
   bvdbg("Loaded sections:\n");
-  dest = (FAR uint8_t*)loadinfo->elfalloc;
+  text = (FAR uint8_t*)loadinfo->textalloc;
+  data = (FAR uint8_t*)loadinfo->dataalloc;
 
   for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
     {
@@ -165,8 +183,21 @@ static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
 
       if (shdr->sh_type != SHT_NOBITS)
         {
-          /* If CONFIG_ARCH_ADDRENV=y, then 'dest' lies in a virtual address space
-           * that may not be in place now.  elf_addrenv_select() will
+          /* SHF_WRITE indicates that the section address space is write-
+           * able
+           */
+
+          if ((shdr->sh_flags & SHF_WRITE) != 0)
+            {
+              pptr = &data;
+            }
+          else
+            {
+              pptr = &text;
+            }
+
+          /* If CONFIG_ARCH_ADDRENV=y, then 'text' lies in a virtual address
+           * space that may not be in place now.  elf_addrenv_select() will
            * temporarily instantiate that address space.
            */
 
@@ -179,9 +210,9 @@ static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
             }
 #endif
 
-          /* Read the section data from sh_offset to dest */
+          /* Read the section data from sh_offset to the memory region */
 
-          ret = elf_read(loadinfo, dest, shdr->sh_size, shdr->sh_offset);
+          ret = elf_read(loadinfo, *pptr, shdr->sh_size, shdr->sh_offset);
           if (ret < 0)
             {
               bdbg("Failed to read section %d: %d\n", i, ret);
@@ -202,12 +233,14 @@ static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
 
       /* Update sh_addr to point to copy in memory */
 
-      bvdbg("%d. %08x->%08x\n", i, (long)shdr->sh_addr, (long)dest);
-      shdr->sh_addr = (uintptr_t)dest;
+      bvdbg("%d. %08lx->%08lx\n", i,
+            (unsigned long)shdr->sh_addr, (unsigned long)*pptr);
+
+      shdr->sh_addr = (uintptr_t)*pptr;
 
       /* Setup the memory pointer for the next time through the loop */
 
-      dest += ELF_ALIGNUP(shdr->sh_size);
+      *pptr += ELF_ALIGNUP(shdr->sh_size);
     }
 
   return OK;

@@ -208,11 +208,11 @@ int exec_module(FAR const struct binary_s *binp)
   /* Assign the address environment to the new task group */
 
 #ifdef CONFIG_ARCH_ADDRENV
-  ret = up_addrenv_assign(binp->addrenv, tcb->cmn.group);
+  ret = up_addrenv_assign(&binp->addrenv, tcb->cmn.group);
   if (ret < 0)
     {
       err = -ret;
-      bdbg("up_addrenv_assign() failed: %d\n", ret);
+      bdbg("ERROR: up_addrenv_assign() failed: %d\n", ret);
       goto errout_with_stack;
     }
 #endif

@@ -1,7 +1,7 @@
 /****************************************************************************
  * binfmt/libelf/libelf.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -264,23 +264,27 @@ int elf_loaddtors(FAR struct elf_loadinfo_s *loadinfo);
  * Name: elf_addrenv_alloc
  *
  * Description:
- *   Allocate memory for the ELF image (elfalloc). If CONFIG_ARCH_ADDRENV=n,
- *   elfalloc will be allocated using kzalloc().  If CONFIG_ARCH_ADDRENV-y, then
- *   elfalloc will be allocated using up_addrenv_create().  In either case,
- *   there will be a unique instance of elfalloc (and stack) for each
- *   instance of a process.
+ *   Allocate memory for the ELF image (textalloc and dataalloc). If
+ *   CONFIG_ARCH_ADDRENV=n, textalloc will be allocated using kzalloc() and
+ *   dataalloc will be a offset from textalloc.  If CONFIG_ARCH_ADDRENV-y, then
+ *   textalloc and dataalloc will be allocated using up_addrenv_create().  In
+ *   either case, there will be a unique instance of textalloc and dataalloc
+ *   (and stack) for each instance of a process.
  *
  * Input Parameters:
  *   loadinfo - Load state information
- *   envsize - The size (in bytes) of the address environment needed for the
- *     ELF image.
+ *   textsize - The size (in bytes) of the .text address environment needed
+ *     for the ELF image (read/execute).
+ *   datasize - The size (in bytes) of the .bss/.data address environment
+ *     needed for the ELF image (read/write).
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int elf_addrenv_alloc(FAR struct elf_loadinfo_s *loadinfo, size_t envsize);
+int elf_addrenv_alloc(FAR struct elf_loadinfo_s *loadinfo, size_t textsize,
+                      size_t datasize);
 
 /****************************************************************************
  * Name: elf_addrenv_select

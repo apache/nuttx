@@ -675,8 +675,10 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size);
  *
  *   up_addrenv_create  - Create an address environment
  *   up_addrenv_destroy - Destroy an address environment.
- *   up_addrenv_vaddr   - Returns the virtual base address of the address
- *                        environment
+ *   up_addrenv_vtext   - Returns the virtual base address of the .text
+ *                        address environment
+ *   up_addrenv_vdata   - Returns the virtual base address of the .bss/.data
+ *                        address environment
  *   up_addrenv_select  - Instantiate an address environment
  *   up_addrenv_restore - Restore an address environment
  *   up_addrenv_assign  - Assign an address environment to a group
@@ -703,8 +705,10 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size);
  *   memory for the new task.
  *
  * Input Parameters:
- *   envsize - The size (in bytes) of the address environment needed by the
- *     task.
+ *   textsize - The size (in bytes) of the .text address environment needed
+ *     by the task.  This region may be read/execute only.
+ *   datasize - The size (in bytes) of the .data/.bss address environment
+ *     needed by the task.  This region may be read/write only.
  *   addrenv - The location to return the representation of the task address
  *     environment.
  *
@@ -714,7 +718,8 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_ADDRENV
-int up_addrenv_create(size_t envsize, FAR group_addrenv_t *addrenv);
+int up_addrenv_create(size_t textsize, size_t datasize,
+                      FAR group_addrenv_t *addrenv);
 #endif
 
 /****************************************************************************
@@ -738,17 +743,17 @@ int up_addrenv_destroy(group_addrenv_t addrenv);
 #endif
 
 /****************************************************************************
- * Name: up_addrenv_vaddr
+ * Name: up_addrenv_vtext
  *
  * Description:
- *   Return the virtual address associated with the newly create address
- *   environment.  This function is used by the binary loaders in order
- *   get an address that can be used to initialize the new task.
+ *   Return the virtual address associated with the newly create .text
+ *   address environment.  This function is used by the binary loaders in
+ *   order get an address that can be used to initialize the new task.
  *
  * Input Parameters:
  *   addrenv - The representation of the task address environment previously
  *      returned by up_addrenv_create.
- *   vaddr - The location to return the virtual address.
+ *   vtext - The location to return the virtual address.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
@@ -756,7 +761,34 @@ int up_addrenv_destroy(group_addrenv_t addrenv);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_ADDRENV
-int up_addrenv_vaddr(FAR group_addrenv_t addrenv, FAR void **vaddr);
+int up_addrenv_vtext(FAR group_addrenv_t addrenv, FAR void **vtext);
+#endif
+
+/****************************************************************************
+ * Name: up_addrenv_vdata
+ *
+ * Description:
+ *   Return the virtual address associated with the newly create .text
+ *   address environment.  This function is used by the binary loaders in
+ *   order get an address that can be used to initialize the new task.
+ *
+ * Input Parameters:
+ *   addrenv - The representation of the task address environment previously
+ *      returned by up_addrenv_create.
+ *   textsize - For some implementations, the text and data will be saved
+ *      in the same memory region (read/write/execute) and, in this case,
+ *      the virtual address of the data just lies at this offset into the
+ *      common region.
+ *   vdata - The location to return the virtual address.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_ADDRENV
+int up_addrenv_vdata(FAR group_addrenv_t addrenv, uintptr_t textsize,
+                     FAR void **vdata);
 #endif
 
 /****************************************************************************
@@ -826,7 +858,8 @@ int up_addrenv_restore(save_addrenv_t oldenv);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_ADDRENV
-int up_addrenv_assign(group_addrenv_t addrenv, FAR struct task_group_s *group);
+int up_addrenv_assign(FAR const group_addrenv_t *addrenv,
+                      FAR struct task_group_s *group);
 #endif
 
 /****************************************************************************
