@@ -378,7 +378,7 @@ int up_addrenv_vaddr(FAR group_addrenv_t addrenv, FAR void **vaddr)
  *
  ****************************************************************************/
 
-int up_addrenv_select(group_addrenv_t addrenv, hw_addrenv_t *oldenv)
+int up_addrenv_select(group_addrenv_t addrenv, save_addrenv_t *oldenv)
 {
   FAR struct z180_cbr_s *cbr = (FAR struct z180_cbr_s *)addrenv;
   irqstate_t flags;
@@ -388,7 +388,7 @@ int up_addrenv_select(group_addrenv_t addrenv, hw_addrenv_t *oldenv)
   /* Return the current CBR value from the CBR register */
 
   flags = irqsave();
-  *oldenv = (hw_addrenv_t)inp(Z180_MMU_CBR);
+  *oldenv = (save_addrenv_t)inp(Z180_MMU_CBR);
 
   /* Write the new CBR value into CBR register */
 
@@ -414,7 +414,7 @@ int up_addrenv_select(group_addrenv_t addrenv, hw_addrenv_t *oldenv)
  *
  ****************************************************************************/
 
-int up_addrenv_restore(hw_addrenv_t oldenv)
+int up_addrenv_restore(save_addrenv_t oldenv)
 {
   outp(Z180_MMU_CBR, (uint8_t)oldenv);
   return OK;

@@ -70,6 +70,7 @@
 #include <errno.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/addrenv.h>
 #include <arch/arch.h>
 
 #ifdef CONFIG_ARCH_ADDRENV
@@ -77,6 +78,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
 
 /****************************************************************************
  * Private Data
@@ -95,7 +97,7 @@
  *
  * Description:
  *   This function is called when a new task is created in order to
- *   instantiate an address environment for the new task group. 
+ *   instantiate an address environment for the new task group.
  *   up_addrenv_create() is essentially the allocator of the physical
  *   memory for the new task.
  *
@@ -187,7 +189,7 @@ int up_addrenv_vaddr(FAR group_addrenv_t addrenv, FAR void **vaddr)
  *
  ****************************************************************************/
 
-int up_addrenv_select(group_addrenv_t addrenv, hw_addrenv_t *oldenv)
+int up_addrenv_select(group_addrenv_t addrenv, save_addrenv_t *oldenv)
 {
 #warning Missing logic
   return -ENOSYS;
@@ -210,7 +212,7 @@ int up_addrenv_select(group_addrenv_t addrenv, hw_addrenv_t *oldenv)
  *
  ****************************************************************************/
 
-int up_addrenv_restore(hw_addrenv_t oldenv)
+int up_addrenv_restore(save_addrenv_t oldenv)
 {
 #warning Missing logic
   return -ENOSYS;
