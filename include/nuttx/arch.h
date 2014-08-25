@@ -650,6 +650,21 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size);
 #endif
 
 /****************************************************************************
+ * Name: up_allocate_pgheap
+ *
+ * Description:
+ *   If there is a page allocator in the configuration, then this function
+ *   must be provided by the platform-specific code.  The OS initialization
+ *   logic will call this function early in the initialization sequence to
+ *   get the page heap information needed to configure the page allocator.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MM_PGALLOC
+void up_allocate_pgheap(FAR void **heap_start, size_t *heap_size);
+#endif
+
+/****************************************************************************
  * Name: up_setpicbase, up_getpicbase
  *
  * Description:

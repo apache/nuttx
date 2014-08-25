@@ -158,18 +158,6 @@ config MM_PGSIZE
 		16384}.  This is easily extensible, but only those values are
 		currently support.
 
-config MM_PGPOOL_PADDR
-	hex "Page Memory Pool Start"
-	---help---
-		Physical address of the start of the page memory pool.  This
-		will be aligned to the page size if it is not already aligned.
-
-config MM_PGPOOL_SIZE
-	int "Page Memory Pool Size"
-	---help---
-		The size of the page memory pool in bytes.  This will be aligned
-		if it is not already aligned.
-
 config DEBUG_PGALLOC
 	bool "Page Allocator Debug"
 	default n

@@ -56,11 +56,6 @@
  * CONFIG_MM_PGSIZE - The page size.  Must be one of {1024, 2048,
  *   4096, 8192, or 16384}.  This is easily extensible, but only those
  *   values are currently support.
- * CONFIG_MM_PGPOOL_PADDR - Physical address of the start of the page
- *   memory pool.  This will be aligned to the page size if it is not
- *   already aligned.
- * CONFIG_MM_PGPOOL_SIZE - The size of the page memory pool in bytes.  This
- *   will be aligned if it is not already aligned.
  * CONFIG_DEBUG_PGALLOC - Just like CONFIG_DEBUG_MM, but only generates
  *   output from the page allocation logic.
  *
@@ -71,34 +66,30 @@
 #  define CONFIG_MM_PGALLOC_PGSIZE 4096
 #endif
 
-#ifndef CONFIG_MM_PGPOOL_PADDR
-#  error CONFIG_MM_PGPOOL_PADDR must be defined
-#endif
-
-#ifndef CONFIG_MM_PGPOOL_SIZE
-#  error CONFIG_MM_PGPOOL_SIZE must be defined
-#endif
-
 #if CONFIG_MM_PGSIZE == 1024
-#  define MM_PGSIZE  1024
-#  define MM_PGSHIFT 10
+#  define MM_PGSIZE       1024
+#  define MM_PGSHIFT      10
 #elif CONFIG_MM_PGSIZE == 2048
-#  define MM_PGSIZE  2048
-#  define MM_PGSHIFT 11
+#  define MM_PGSIZE       2048
+#  define MM_PGSHIFT      11
 #elif CONFIG_MM_PGSIZE == 4096
-#  define MM_PGSIZE  4096
-#  define MM_PGSHIFT 12
+#  define MM_PGSIZE       4096
+#  define MM_PGSHIFT      12
 #elif CONFIG_MM_PGSIZE == 8192
-#  define MM_PGSIZE  8192
-#  define MM_PGSHIFT 13
+#  define MM_PGSIZE       8192
+#  define MM_PGSHIFT      13
 #elif CONFIG_MM_PGSIZE == 16384
-#  define MM_PGSIZE  16384
-#  define MM_PGSHIFT 14
+#  define MM_PGSIZE       16384
+#  define MM_PGSHIFT      14
 #else
 #  error CONFIG_MM_PGSIZE not supported
 #endif
 
-#define MM_PGMASK    (MM_PGSIZE - 1)
+#define MM_PGMASK         (MM_PGSIZE - 1)
+#define MM_PGALIGNDOWN(a) ((uintptr_t)(a) & ~MM_PGMASK)
+#define MM_PGALIGNUP(a)   (((uintptr_t)(a) + MM_PGMASK) & ~MM_PGMASK)
+#define MM_NPAGES(s)      (((uintptr_t)(a) + MM_PGMASK) >> MM_PGSHIFT)
+#define MM_ISALIGNED(a)   (((uintptr_t)(a) & MM_PGMASK) == 0)
 
 /****************************************************************************
  * Public Types
@@ -123,14 +114,17 @@ extern "C"
  *   Initialize the page allocator.
  *
  * Input Parameters:
- *   None
+ *   heap_start - The physical address of the start of memory region that
+ *                will be used for the page allocator heap
+ *   heap_size  - The size (in bytes) of the memory region that will be used
+ *                for the page allocator heap.
  *
  * Returned Value:
- *   Mpme
+ *   None
  *
  ****************************************************************************/
 
-void mm_pginitialize(void);
+void mm_pginitialize(FAR void *heap_start, size_t heap_size);
 
 /****************************************************************************
  * Name: mm_pgreserve

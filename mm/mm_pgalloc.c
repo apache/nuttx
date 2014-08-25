@@ -56,11 +56,6 @@
  * CONFIG_MM_PGSIZE - The page size.  Must be one of {1024, 2048,
  *   4096, 8192, or 16384}.  This is easily extensible, but only those
  *   values are currently support.
- * CONFIG_MM_PGPOOL_PADDR - Physical address of the start of the page
- *   memory pool.  This will be aligned to the page size if it is not
- *   already aligned.
- * CONFIG_MM_PGPOOL_SIZE - The size of the page memory pool in bytes.  This
- *   will be aligned if it is not already aligned.
  * CONFIG_DEBUG_PGALLOC - Just like CONFIG_DEBUG_MM, but only generates
  *   output from the page allocation logic.
  *
@@ -112,28 +107,27 @@ static GRAN_HANDLE g_pgalloc;
  *   Initialize the page allocator.
  *
  * Input Parameters:
- *   None
+ *   heap_start - The physical address of the start of memory region that
+ *                will be used for the page allocator heap
+ *   heap_size  - The size (in bytes) of the memory region that will be used
+ *                for the page allocator heap.
  *
  * Returned Value:
- *   Mpme
+ *   None
  *
  ****************************************************************************/
 
-void mm_pginitialize(void)
+void mm_pginitialize(FAR void *heap_start, size_t heap_size)
 {
 #ifdef CONFIG_GRAN_SINGLE
   int ret;
 
-  ret = gran_initialize((FAR void *)CONFIG_MM_PGPOOL_PADDR,
-                        CONFIG_MM_PGPOOL_SIZE,
-                        MM_PGSHIFT, MM_PGSHIFT);
+  ret = gran_initialize(heap_start, heap_size, MM_PGSHIFT, MM_PGSHIFT);
   DEBUGASSERT(ret == OK);
   UNUSED(ret);
 
 #else
-  g_pgalloc = gran_initialize((FAR void *)CONFIG_MM_PGPOOL_PADDR,
-                              CONFIG_MM_PGPOOL_SIZE,
-                              MM_PGSHIFT, MM_PGSHIFT);
+  g_pgalloc = gran_initialize(heap_start, heap_size, MM_PGSHIFT, MM_PGSHIFT);
   DEBUGASSERT(pg_alloc != NULL);
 
 #endif

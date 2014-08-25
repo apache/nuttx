@@ -358,6 +358,16 @@ void os_start(void)
     up_allocate_kheap(&heap_start, &heap_size);
     kmm_initialize(heap_start, heap_size);
 #endif
+
+#ifdef CONFIG_MM_PGALLOC
+    /* If there is a page allocator in the configuration, then get the page
+     * heap information from the platform-specific code and configure the
+     * page allocator.
+     */
+
+    up_allocate_pgheap(&heap_start, &heap_size);
+    mm_pginitialize(heap_start, heap_size);
+#endif
   }
 
   /* Initialize tasking data structures */

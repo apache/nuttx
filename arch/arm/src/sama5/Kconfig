@@ -4475,7 +4475,7 @@ config SAMA5_DDRCS_HEAP
 	default y
 	depends on SAMA5_DDRCS && !SAMA5_BOOT_SDRAM
 	---help---
-		Include the DDR-SDRAM memory in the heap.
+		Include a portion of DDR-SDRAM memory in the heap.
 
 		NOTE:  MM_REGIONS must also be set to indicate the total number of
 		memory regions to be added to the heap.
@@ -4487,19 +4487,29 @@ config SAMA5_DDRCS_HEAP
 if SAMA5_DDRCS_HEAP
 
 config SAMA5_DDRCS_HEAP_OFFSET
-	int "DDR-SDRAM offset"
+	int "DDR-SDRAM heap offset"
 	default 0
 	---help---
 		Preserve this number of bytes at the beginning of SDRAM.  The
 		portion of DRAM beginning at this offset from the DDRCS base will
 		be added to the heap.
 
+		NOTE:  If you are using a page cache in DRAM (via SAMA5_DDRCS_PGHEAP),
+		then the memory regions defined by SAMA5_DDRCS_HEAP_OFFSET and
+		SAMA5_DDRCS_HEAP_SIZE must not overlap the memory region defined by
+		SAMA5_DDRCS_PGHEAP_OFFSET and SAMA5_DDRCS_PGHEAP_SIZE.
+
 config SAMA5_DDRCS_HEAP_SIZE
-	int "DDR-SDRAM size"
+	int "DDR-SDRAM heap size"
 	default 0
 	---help---
 		Add the region of DDR-SDRAM beginning at SAMA5_DDRCS_HEAP_OFFSET
 		and of size SAMA5_DDRCS_HEAP_SIZE to the heap.
+
+		NOTE:  If you are using a page cache in DRAM (via SAMA5_DDRCS_PGHEAP),
+		then the memory regions defined by SAMA5_DDRCS_HEAP_OFFSET and
+		SAMA5_DDRCS_HEAP_SIZE must not overlap the memory region defined by
+		SAMA5_DDRCS_PGHEAP_OFFSET and SAMA5_DDRCS_PGHEAP_SIZE.
 
 endif # SAMA5_DDRCS_HEAP
 
@@ -4513,10 +4523,10 @@ config SAMA5_DDRCS_RESERVE
 		program through the end of DRAM (RAM_START + RAM_END) is
 		automatically added to the heap.  However, there are certain cases
 		where you may want to reserve a block of DRAM for other purposes
-		such a large DMA buffer or an LCD framebuffer.  In those cases, you
-		can select this option to specify the end of the DRAM memory to add
-		to the heap; DRAM after this address will not be part of the heap
-		and so will be available for other purposes.
+		such a large DMA buffer or an LCD framebuffer or a page cache.  In
+		those cases, you can select this option to specify the end of the
+		DRAM memory to add to the heap; DRAM after this address will not
+		be part of the heap and so will be available for other purposes.
 
 		NOTE:  There is way to reserve memory before the start of the
 		program in DRAM using this mechanism.  That configuration is
@@ -4533,7 +4543,60 @@ config SAMA5_DDRCS_HEAP_END
 		address (minus one).  This will reserve the memory starting at
 		this address through RAM_SIZE + RAM_END for other purposes.
 
+		NOTE:  If you are using a page cache in DRAM (via SAMA5_DDRCS_PGHEAP),
+		then the memory regions below by SAMA5_DDRCS_HEAP_END must not
+		overlap the memory region defined by SAMA5_DDRCS_PGHEAP_OFFSET and
+		SAMA5_DDRCS_PGHEAP_SIZE.
+
 endif # SAMA5_DDRCS_RESERVE
+
+config SAMA5_DDRCS_PGHEAP
+	bool "Include DDR-SDRAM in page cache"
+	default y
+	depends on SAMA5_DDRCS && ARCH_ADDRENV
+	---help---
+		Include a portion of DDR-SDRAM memory in the page cache.
+
+if SAMA5_DDRCS_PGHEAP
+
+config SAMA5_DDRCS_PGHEAP_OFFSET
+	int "DDR-SDRAM heap offset"
+	default 0
+	---help---
+		Preserve this number of bytes at the beginning of SDRAM.  The
+		portion of DRAM beginning at this offset from the DDRCS base will
+		be added to the heap.
+
+		If you are executing from DRAM, then you must have already reserved
+		this region with SAMA5_DDRCS_RESERVE, setting SAMA5_DDRCS_HEAP_END
+		so that this page cache region defined by SAMA5_DDRCS_PGHEAP_OFFSET
+		and SAMA5_DDRCS_PGHEAP_SIZE does not overlap the the region of DRAM
+		that is added to the heap.  If you are not executing from DRAM, then
+		you must have excluding this page cache region from the heap ether
+		by (1) not selecting SAMA5_DDRCS_HEAP, or (2) selecting
+		SAMA5_DDRCS_HEAP_OFFSET and SAMA5_DDRCS_HEAP_SIZE so that the page
+		cache region does not overlapy the region of DRAM that is added to
+		the heap.
+
+config SAMA5_DDRCS_PGHEAP_SIZE
+	int "DDR-SDRAM heap size"
+	default 0
+	---help---
+		Add the region of DDR-SDRAM beginning at SAMA5_DDRCS_PGHEAP_OFFSET
+		and of size SAMA5_DDRCS_PGHEAP_SIZE to the heap.
+
+		If you are executing from DRAM, then you must have already reserved
+		this region with SAMA5_DDRCS_RESERVE, setting SAMA5_DDRCS_HEAP_END
+		so that this page cache region defined by SAMA5_DDRCS_PGHEAP_OFFSET
+		and SAMA5_DDRCS_PGHEAP_SIZE does not overlap the the region of DRAM
+		that is added to the heap.  If you are not executing from DRAM, then
+		you must have excluding this page cache region from the heap ether
+		by (1) not selecting SAMA5_DDRCS_HEAP, or (2) selecting
+		SAMA5_DDRCS_HEAP_OFFSET and SAMA5_DDRCS_HEAP_SIZE so that the page
+		cache region does not overlapy the region of DRAM that is added to
+		the heap.
+
+endif # SAMA5_DDRCS_PGHEAP
 
 config SAMA5_EBICS0_HEAP
 	bool "Include EBICS0 SRAM/PSRAM in heap"

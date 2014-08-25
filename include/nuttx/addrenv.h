@@ -130,6 +130,10 @@
 
 #define CONFIG_ARCH_STACK_SIZE (CONFIG_ARCH_STACK_NPAGES * CONFIG_MM_PGSIZE)
 
+/* A single page scratch region used for temporary mappings */
+
+#define ARCH_SCRATCH_VADDR (CONFIG_ARCH_STACK_VBASE + CONFIG_ARCH_STACK_SIZE)
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
