@@ -8253,3 +8253,8 @@
 	  because there is no x86 relocation logic support (2014-8-25).
 	* configs/sim: Update some sim/ defconfig files.  This now automatically
 	  switches them to x86_64 builds (2014-8-25).
+	* arch/arm/include/arch.h, armv7-a/irq.h, src/armv7-a/arm_addrenv.c,
+	  armv7-a/arm_mmu.c/.h, sama5/Kconfig, Make.defs, sam_pgalloc.c,
+	  include/nuttx/addrenv.h, arch.h, pgalloc.h, mm/Kconfig, mm_pgalloc.c,
+	  sched/init/os_start.c: Cortex-A/SAMA5 address environment support is
+	  code complete (untested) (2014-8-25).
