@@ -405,6 +405,7 @@
 #define PTE_LARGE_TEX_SHIFT  (12)         /* Bits 12-14: Memory region attribute bits */
 #define PTE_LARGE_TEX_MASK   (7 << PTE_LARGE_TEX_SHIFT)
 #define PTE_LARGE_XN         (1 << 15)    /* Bit 15: Execute-never bit */
+#define PTE_LARGE_FLAG_MASK  (0x0000f03f) /* Bits 0-15: MMU flags (mostly) */
 #define PTE_LARGE_PADDR_MASK (0xffff0000) /* Bits 16-31: Large page base address, PA[31:16] */
 
 /* Small page -- 4Kb */
@@ -413,6 +414,7 @@
                                           /* Bit 2:  Bufferable bit */
                                           /* Bit 3:  Cacheable bit */
                                           /* Bits 4-5: Access Permissions bits AP[0:1] */
+#define PTE_SMALL_FLAG_MASK  (0x0000003f) /* Bits 0-11: MMU flags (mostly) */
 #define PTE_SMALL_PADDR_MASK (0xfffff000) /* Bits 12-31: Small page base address, PA[31:12] */
 
 /* Level 2 Translation Table Access Permissions:
@@ -1334,6 +1336,39 @@ extern "C" {
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
 void mmu_l1_setentry(uint32_t paddr, uint32_t vaddr, uint32_t mmuflags);
+#endif
+
+/****************************************************************************
+ * Name: mmu_l1_restore
+ *
+ * Description:
+ *   Restore one L1 table entry previously returned by mmu_l1_getentry() (or
+ *   any other encoded L1 page table value).
+ *
+ * Input Parameters:
+ *   vaddr - A virtual address to be mapped
+ *   l1entry - The value to write into the page table entry
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_ARCH_ROMPGTABLE) && defined(CONFIG_ARCH_ADDRENV)
+void mmu_l1_restore(uint32ptr_t vaddr, uint32_t l1entry);
+#endif
+
+/************************************************************************************
+ * Name: mmu_l1_clrentry(uint32ptr_t vaddr);
+ *
+ * Description:
+ *   Unmap one L1 region by writing zero into the L1 page table entry and by
+ *   flushing caches and TLBs appropriately.
+ *
+ * Input Parameters:
+ *   vaddr - A virtual address within the L1 address region to be unmapped.
+ *
+ ************************************************************************************/
+
+#if !defined (CONFIG_ARCH_ROMPGTABLE) && defined(CONFIG_ARCH_ADDRENV)
+#  define mmu_l1_clrentry(v) mmu_l1_restore(v,0)
 #endif
 
 /************************************************************************************

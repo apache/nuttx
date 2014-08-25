@@ -81,7 +81,11 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ************************************************************/
+/* Using a 4KiB page size, each 1MiB section maps to a PTE containing
+ * 256*2KiB entries
+ */
+
+#define ENTRIES_PER_L2TABLE 256
 
 /****************************************************************************
  * Private Data
@@ -90,6 +94,47 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: set_l2_entry
+ *
+ * Description:
+ *   Set the L2 table entry as part of the initialization of the L2 Page
+ *   table.
+ *
+ ****************************************************************************/
+
+static void set_l2_entry(FAR uint32_t *l2table, uintptr_t paddr,
+                         uintptr_t vaddr, uint32_t mmuflags)
+{
+  uint32_t index;
+
+  /* The table divides a 1Mb address space up into 256 entries, each
+   * corresponding to 4Kb of address space.  The page table index is
+   * related to the offset from the beginning of 1Mb region.
+   */
+
+  index = (vaddr & 0x000ff000) >> 12;
+
+  /* Save the table entry */
+
+  l2table[index] = (paddr | mmuflags);
+}
+
+/****************************************************************************
+ * Name: set_l1_entry
+ *
+ * Description:
+ *   Set an L1 page table entry to refer to a specific L2 page table.
+ *
+ ****************************************************************************/
+
+static inline void set_l1_entry(uintptr_t l2vaddr, uintptr_t l2paddr)
+{
+  mmu_l1_setentry(l2paddr & PMD_PTE_PADDR_MASK,
+                  l2vaddr & PMD_PTE_PADDR_MASK,
+                  MMU_L1_PGTABFLAGS);
+}
 
 /****************************************************************************
  * Public Functions
@@ -120,8 +165,135 @@
 int up_addrenv_create(size_t textsize, size_t datasize,
                       FAR group_addrenv_t *addrenv)
 {
-#warning Missing logic
-  return -ENOSYS;
+  irqstate_t flags;
+  uintptr_t vaddr;
+  uintptr_t paddr;
+  FAR uint32_t *l2table;
+  uint32_t l1save;
+  size_t nmapped;
+  unsigned int ntextpages;
+  unsigned int ndatapages;
+  unsigned int i;
+  unsigned int j;
+  int ret;
+
+  DEBUGASSERT(addrenv);
+
+  /* Initialize the address environment structure to all zeroes */
+
+  memset(addrenv, 0, sizeof(group_addrenv_t));
+
+  /* Verify that we are configured with enough virtual address space to
+   * support this address environment.
+   */
+
+  ntextpages = MM_NPAGES(textsize);
+  ndatapages = MM_NPAGES(datasize);
+
+  if (ntextpages > CONFIG_ARCH_TEXT_NPAGES ||
+      ndatapages > CONFIG_ARCH_DATA_NPAGES)
+    {
+      return -E2BIG;
+    }
+
+  /* Back the allocation up with physical pages and set up the level mapping
+   * (which of course does nothing until the L2 page table is hooked into
+   * the L1 page table).
+   */
+
+  /* Allocate .text space pages */
+
+  vaddr  = CONFIG_ARCH_TEXT_VADDR;
+  mapped = 0;
+
+  for (i = 0; i < ntextpages; i++)
+    {
+      /* Allocate one physical page */
+
+      paddr = mm_pgalloc(1);
+      if (!paddr)
+        {
+          ret = -ENOMEM;
+          goto errout;
+        }
+      
+      DEBUGASSERT(MM_ISALIGNED(paddr));
+      addrenv->text[i] = (FAR uint32_t *)paddr;
+
+      /* Temporarily map the page into the virtual address space */
+
+      flags = irqsave();
+      l1save = mmu_l1_getentry(vaddr);
+      set_l1_entry(ARCH_SCRATCH_VADDR, paddr);
+      l2table = (FAR uint32_t *)ARCH_SCRATCH_VADDR;
+
+      /* Initialize the page table */
+
+      memset(l2table, 0, ENTRIES_PER_L2TABLE * sizeof(uint32_t));
+      for (j = 0; j < ENTRIES_PER_L2TABLE && nmapped < ntextsize; j++)
+        {
+          set_l2_entry(l2table, paddr, vaddr, MMU_ROMFLAGS);
+          nmapped += MM_PGSIZE;
+          paddr   += MM_PGSIZE;
+          vaddr   += MM_PGSIZE;
+        }
+
+      /* Restore the original L1 page table entry */
+
+      mmu_l1_restore(ARCH_SCRATCH_VADDR, l1save);
+      irqrestore();
+    }
+
+  /* Allocate .bss/.data space pages */
+
+  vaddr  = CONFIG_ARCH_DATA_VADDR;
+  mapped = 0;
+
+  for (i = 0; i < ndatapages; i++)
+    {
+      /* Allocate one physical page */
+
+      paddr = mm_pgalloc(1);
+      if (!paddr)
+        {
+          ret = -ENOMEM;
+          goto errout;
+        }
+      
+      DEBUGASSERT(MM_ISALIGNED(paddr));
+      addrenv->data[i] = (FAR uint32_t *)paddr;
+
+      /* Temporarily map the page into the virtual address space */
+
+      flags = irqsave();
+      l1save = mmu_l1_getentry(vaddr);
+      set_l1_entry(ARCH_SCRATCH_VADDR, paddr);
+      l2table = (FAR uint32_t *)ARCH_SCRATCH_VADDR;
+
+      /* Initialize the page table */
+
+      memset(l2table, 0, ENTRIES_PER_L2TABLE * sizeof(uint32_t));
+      for (j = 0; j < ENTRIES_PER_L2TABLE && nmapped < ndatasize; j++)
+        {
+          set_l2_entry(l2table, paddr, vaddr, MMU_MEMFLAGS);
+          nmapped += MM_PGSIZE;
+          paddr   += MM_PGSIZE;
+          vaddr   += MM_PGSIZE;
+        }
+
+      /* Restore the original L1 page table entry */
+
+      mmu_l1_restore(ARCH_SCRATCH_VADDR, l1save);
+      irqrestore();
+    }
+
+  /* Notice that no pages are yet allocated for the heap */
+
+  return OK;
+
+errout:
+  up_addrenv_destroy(addrenv);
+  return ret;
 }
 
 /****************************************************************************
@@ -142,8 +314,48 @@ int up_addrenv_create(size_t textsize, size_t datasize,
 
 int up_addrenv_destroy(group_addrenv_t addrenv)
 {
-#warning Missing logic
-  return -ENOSYS;
+  uintptr_t vaddr;
+  int i;
+
+  DEBUGASSERT(addrenv);
+
+  for (vaddr = CONFIG_ARCH_TEXT_VADDR, i = 0;
+       i < CONFIG_ARCH_TEXT_NPAGES;
+       vaddr += MM_PGSIZE, i++)
+    {
+      mmu_l1_clrentry(vaddr);
+      if (addrenv->text[i])
+        {
+          mm_pgfree((uintptr_t)addrenv->text[i], 1);
+        }
+    }
+
+  for (vaddr = CONFIG_ARCH_DATA_VADDR, i = 0;
+       i < CONFIG_ARCH_DATA_NPAGES;
+       vaddr += MM_PGSIZE, i++)
+    {
+      mmu_l1_clrentry(vaddr);
+      if (addrenv->data[i])
+        {
+          mm_pgfree((uintptr_t)addrenv->data[i], 1);
+        }
+    }
+
+#if 0 /* Not yet implemented */
+  for (vaddr = CONFIG_ARCH_HEAP_VADDR, i = 0;
+       i < CONFIG_ARCH_HEAP_NPAGES;
+       vaddr += MM_PGSIZE, i++)
+    {
+      mmu_l1_clrentry(vaddr);
+      if (addrenv->heap[i])
+        {
+          mm_pgfree((uintptr_t)addrenv->heap[i], 1);
+        }
+    }
+#endif
+
+  memset(addrenv, 0, sizeof(group_addrenv_t));
+  return OK;
 }
 
 /****************************************************************************
@@ -232,8 +444,88 @@ int up_addrenv_vdata(FAR group_addrenv_t addrenv, uintptr_t textsize,
 
 int up_addrenv_select(group_addrenv_t addrenv, save_addrenv_t *oldenv)
 {
-#warning Missing logic
-  return -ENOSYS;
+  uintptr_t vaddr;
+  uintptr_t paddr;
+  int i;
+
+  DEBUGASSERT(addrenv);
+
+  for (vaddr = CONFIG_ARCH_TEXT_VADDR, i = 0;
+       i < CONFIG_ARCH_TEXT_NPAGES;
+       vaddr += MM_PGSIZE, i++)
+    {
+      /* Save the old L1 page table entry */
+
+      if (oldenv)
+        {
+          oldenv->text[i] = mmu_l1_getentry(vaddr);
+        }
+
+      /* Set (or clear) the new page table entry */
+
+      paddr = (uintptr_t)addrenv->text[i]
+      if (paddr)
+        {
+          set_l1_entry(vaddr, paddr);
+        }
+      else
+        {
+          mmu_l1_clrentry(vaddr);
+        }
+    }
+
+  for (vaddr = CONFIG_ARCH_DATA_VADDR, i = 0;
+       i < CONFIG_ARCH_DATA_NPAGES;
+       vaddr += MM_PGSIZE, i++)
+    {
+      /* Save the old L1 page table entry */
+
+      if (oldenv)
+        {
+          oldenv->data[i] = mmu_l1_getentry(vaddr);
+        }
+
+      /* Set (or clear) the new page table entry */
+
+      paddr = (uintptr_t)addrenv->data[i]
+      if (paddr)
+        {
+          set_l1_entry(vaddr, paddr);
+        }
+      else
+        {
+          mmu_l1_clrentry(vaddr);
+        }
+    }
+
+#if 0 /* Not yet implemented */
+  for (vaddr = CONFIG_ARCH_HEAP_VADDR, i = 0;
+       i < CONFIG_ARCH_HEAP_NPAGES;
+       vaddr += MM_PGSIZE, i++)
+    {
+      /* Save the old L1 page table entry */
+
+      if (oldenv)
+        {
+          oldenv->heap[i] = mmu_l1_getentry(vaddr);
+        }
+
+      /* Set (or clear) the new page table entry */
+
+      paddr = (uintptr_t)addrenv->heap[i]
+      if (paddr)
+        {
+          set_l1_entry(vaddr, paddr);
+        }
+      else
+        {
+          mmu_l1_clrentry(vaddr);
+        }
+    }
+#endif
+
+  memset(addrenv, 0, sizeof(group_addrenv_t));
+  return OK;
 }
 
 /****************************************************************************
@@ -255,8 +547,43 @@ int up_addrenv_select(group_addrenv_t addrenv, save_addrenv_t *oldenv)
 
 int up_addrenv_restore(save_addrenv_t oldenv)
 {
-#warning Missing logic
-  return -ENOSYS;
+  uintptr_t vaddr;
+  uintptr_t paddr;
+  int i;
+
+  DEBUGASSERT(addrenv);
+
+  for (vaddr = CONFIG_ARCH_TEXT_VADDR, i = 0;
+       i < CONFIG_ARCH_TEXT_NPAGES;
+       vaddr += MM_PGSIZE, i++)
+    {
+      /* Restore the L1 page table entry */
+
+      mmu_l1_restore(vaddr, oldenv->text[i]);
+    }
+
+  for (vaddr = CONFIG_ARCH_DATA_VADDR, i = 0;
+       i < CONFIG_ARCH_DATA_NPAGES;
+       vaddr += MM_PGSIZE, i++)
+    {
+      /* Restore the L1 page table entry */
+
+      mmu_l1_restore(vaddr, oldenv->data[i]);
+    }
+
+#if 0 /* Not yet implemented */
+  for (vaddr = CONFIG_ARCH_HEAP_VADDR, i = 0;
+       i < CONFIG_ARCH_HEAP_NPAGES;
+       vaddr += MM_PGSIZE, i++)
+    {
+      /* Restore the L1 page table entry */
+
+      mmu_l1_restore(vaddr, oldenv->heap[i]);
+    }
+#endif
+
+  memset(addrenv, 0, sizeof(group_addrenv_t));
+  return OK;
 }
 
 /****************************************************************************
@@ -280,7 +607,7 @@ int up_addrenv_assign(FAR const group_addrenv_t *addrenv,
 {
   DEBUGASSERT(addrenv && group);
 
-  /* Just copy the addess environment into the group */
+  /* Just copy the address environment into the group */
 
   memcpy(&group->addrenv, addrenv, sizeof(group_addrenv_t));
   return OK;

@@ -248,7 +248,9 @@ struct xcptcontext
    * handling to support dynamically sized stacks for each thread.
    */
 
+#if 0 /* Not yet implemented */
   FAR uint32_t *stack[CONFIG_ARCH_STACK_NPAGES];
+#endif
 #endif
 };
 #endif

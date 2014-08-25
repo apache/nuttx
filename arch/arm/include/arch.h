@@ -114,7 +114,9 @@ struct group_addrenv_s
 {
   FAR uint32_t *text[CONFIG_ARCH_TEXT_NPAGES];
   FAR uint32_t *data[CONFIG_ARCH_DATA_NPAGES];
+#if 0 /* Not yet implemented */
   FAR uint32_t *heap[CONFIG_ARCH_HEAP_NPAGES];
+#endif
 };
 
 typedef struct group_addrenv_s group_addrenv_t;
@@ -124,9 +126,20 @@ typedef struct group_addrenv_s group_addrenv_t;
  *
  *   int up_addrenv_select(group_addrenv_t addrenv, save_addrenv_t *oldenv);
  *   int up_addrenv_restore(save_addrenv_t oldenv);
+ *
+ * In this case, the saved valued in the L1 page table are returned
  */
 
-typedef group_addrenv_t *save_addrenv_t;
+struct save_addrenv_s
+{
+  FAR uint32_t text[CONFIG_ARCH_TEXT_NPAGES];
+  FAR uint32_t data[CONFIG_ARCH_DATA_NPAGES];
+#if 0 /* Not yet implemented */
+  FAR uint32_t heap[CONFIG_ARCH_HEAP_NPAGES];
+#endif
+};
+
+typedef struct save_addrenv_s save_addrenv_t;
 #endif
 
 /****************************************************************************
