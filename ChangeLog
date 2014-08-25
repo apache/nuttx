@@ -8244,3 +8244,7 @@
 	  (read/execute vs read/write).  And, as a consequence, up_addrenv_vaddr()
 	  needs to be split into up_addrenv_vtext() and up_addrenv_vdata().
 	  Affects several files (2014-8-24).
+	* configs/sim: Add build support for ELF modules.  Useless at the moment
+	  because there is no x86 relocation logic support (2014-8-25).
+	* configs/sim: Update some sim/ defconfig files.  This now automatically
+	  switches them to x86_64 builds (2014-8-25).
