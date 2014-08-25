@@ -45,6 +45,8 @@
 #include <nuttx/arch.h>
 #include <nuttx/pgalloc.h>
 
+#include "chip.h"
+
 #ifdef CONFIG_MM_PGALLOC
 
 /****************************************************************************

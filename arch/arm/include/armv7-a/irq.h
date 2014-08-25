@@ -49,6 +49,7 @@
 
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
+#  include <arch/arch.h>
 #endif
 
 /****************************************************************************
@@ -249,7 +250,7 @@ struct xcptcontext
    */
 
 #if 0 /* Not yet implemented */
-  FAR uint32_t *stack[CONFIG_ARCH_STACK_NPAGES];
+  FAR uint32_t *stack[ARCH_STACK_NSECTS];
 #endif
 #endif
 };

@@ -317,9 +317,9 @@ errout_with_irq:
  *
  ****************************************************************************/
 
-int up_addrenv_destroy(group_addrenv_t addrenv)
+int up_addrenv_destroy(FAR group_addrenv_t *addrenv)
 {
-  FAR struct z180_cbr_s *cbr = (FAR struct z180_cbr_s *)addrenv;
+  FAR struct z180_cbr_s *cbr = (FAR struct z180_cbr_s *)*addrenv;
 
   DEBUGASSERT(cbr);
 
@@ -355,7 +355,7 @@ int up_addrenv_destroy(group_addrenv_t addrenv)
  *
  ****************************************************************************/
 
-int up_addrenv_vtext(FAR group_addrenv_t addrenv, FAR void **vtext)
+int up_addrenv_vtext(FAR group_addrenv_t *addrenv, FAR void **vtext)
 {
   return CONFIG_Z180_COMMON1AREA_VIRTBASE;
 }
@@ -382,7 +382,7 @@ int up_addrenv_vtext(FAR group_addrenv_t addrenv, FAR void **vtext)
  *
  ****************************************************************************/
 
-int up_addrenv_vdata(FAR group_addrenv_t addrenv, uintptr_t textsize,
+int up_addrenv_vdata(FAR group_addrenv_t *addrenv, uintptr_t textsize,
                      FAR void **vdata)
 {
   return CONFIG_Z180_COMMON1AREA_VIRTBASE + textsize;
@@ -413,7 +413,8 @@ int up_addrenv_vdata(FAR group_addrenv_t addrenv, uintptr_t textsize,
  *
  ****************************************************************************/
 
-int up_addrenv_select(group_addrenv_t addrenv, save_addrenv_t *oldenv)
+int up_addrenv_select(FAR const group_addrenv_t *addrenv,
+                      FAR save_addrenv_t *oldenv)
 {
   FAR struct z180_cbr_s *cbr = (FAR struct z180_cbr_s *)addrenv;
   irqstate_t flags;
@@ -449,9 +450,9 @@ int up_addrenv_select(group_addrenv_t addrenv, save_addrenv_t *oldenv)
  *
  ****************************************************************************/
 
-int up_addrenv_restore(save_addrenv_t oldenv)
+int up_addrenv_restore(FAR const save_addrenv_t *oldenv)
 {
-  outp(Z180_MMU_CBR, (uint8_t)oldenv);
+  outp(Z180_MMU_CBR, (uint8_t)*oldenv);
   return OK;
 }
 
