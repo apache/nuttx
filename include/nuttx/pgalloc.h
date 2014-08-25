@@ -88,7 +88,7 @@
 #define MM_PGMASK         (MM_PGSIZE - 1)
 #define MM_PGALIGNDOWN(a) ((uintptr_t)(a) & ~MM_PGMASK)
 #define MM_PGALIGNUP(a)   (((uintptr_t)(a) + MM_PGMASK) & ~MM_PGMASK)
-#define MM_NPAGES(s)      (((uintptr_t)(a) + MM_PGMASK) >> MM_PGSHIFT)
+#define MM_NPAGES(s)      (((uintptr_t)(s) + MM_PGMASK) >> MM_PGSHIFT)
 #define MM_ISALIGNED(a)   (((uintptr_t)(a) & MM_PGMASK) == 0)
 
 /****************************************************************************

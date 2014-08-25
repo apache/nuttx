@@ -211,7 +211,7 @@ static inline void group_release(FAR struct task_group_s *group)
 #ifdef CONFIG_ARCH_ADDRENV
   /* Destroy the group address environment */
 
-  (void)up_addrenv_destroy(group->addrenv);
+  (void)up_addrenv_destroy(&group->addrenv);
 #endif
 
 #ifdef HAVE_GROUP_MEMBERS

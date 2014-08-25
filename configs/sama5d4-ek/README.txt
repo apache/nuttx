@@ -3684,6 +3684,20 @@ Configurations
        the warning in the section "Information Common to All Configurations"
        for further information.
 
+    3. This configuration currently has Cortex-A address environments selected for testing.  With this option, the MMU is used to create a custom address environment for each ELF program.  This option can be disabled in which case the ELF programs will simply execute out normal memory allocated from the heap.  To disable this feature:
+
+      System Type -> Architecture Options
+        CONFIG_ARCH_ADDRENV=n                  : Disable address environment support
+
+      Memory Management
+        CONFIG_GRAN=n                          : Disable the granule allocator 
+        CONFIG_MM_PGALLOC=n                    : Disable the page allocator
+
+    STATUS:
+      2014-8024: This configuration works with the address environment
+                 option disable.
+      2014-8-25: But still does not even build successfully with the
+                 address environment option enabled.
   nsh:
 
     This configuration directory provide the NuttShell (NSH).  This is a

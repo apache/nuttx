@@ -109,21 +109,21 @@ int elf_addrenv_alloc(FAR struct elf_loadinfo_s *loadinfo, size_t textsize,
    * selected.
    */
 
-  ret = up_addrenv_vtext(loadinfo->addrenv, &vtext);
+  ret = up_addrenv_vtext(&loadinfo->addrenv, &vtext);
   if (ret < 0)
     {
       bdbg("ERROR: up_addrenv_vtext failed: %d\n", ret);
       return ret;
     }
 
-  ret = up_addrenv_vdata(loadinfo->addrenv, textsize, &vdata);
+  ret = up_addrenv_vdata(&loadinfo->addrenv, textsize, &vdata);
   if (ret < 0)
     {
       bdbg("ERROR: up_adup_addrenv_vdatadrenv_vtext failed: %d\n", ret);
       return ret;
     }
 
-  loadinfo->textalloc = (uintptr_t)vaddr;
+  loadinfo->textalloc = (uintptr_t)vtext;
   loadinfo->dataalloc = (uintptr_t)vdata;
   return OK;
 #else
@@ -163,21 +163,13 @@ void elf_addrenv_free(FAR struct elf_loadinfo_s *loadinfo)
 #ifdef CONFIG_ARCH_ADDRENV
   int ret;
 
-  /* Free the address environemnt */
+  /* Free the address environment */
 
-  ret = up_addrenv_destroy(loadinfo->addrenv);
+  ret = up_addrenv_destroy(&loadinfo->addrenv);
   if (ret < 0)
     {
       bdbg("ERROR: up_addrenv_destroy failed: %d\n", ret);
     }
-
-  /* Clear out all indications of the allocated address environment */
-
-  loadinfo->textalloc = 0;
-  loadinfo->dataalloc = 0;
-  loadinfo->textsize  = 0;
-  loadinfo->datasize  = 0;
-  loadinfo->addrenv   = 0;
 #else
   /* If there is an allocation for the ELF image, free it */
 
@@ -185,10 +177,12 @@ void elf_addrenv_free(FAR struct elf_loadinfo_s *loadinfo)
     {
       kufree((FAR void *)loadinfo->textalloc);
     }
-
-   loadinfo->textalloc = 0;
-   loadinfo->dataalloc = 0;
-   loadinfo->textsize  = 0;
-   loadinfo->datasize  = 0;
 #endif
+
+  /* Clear out all indications of the allocated address environment */
+
+  loadinfo->textalloc = 0;
+  loadinfo->dataalloc = 0;
+  loadinfo->textsize  = 0;
+  loadinfo->datasize  = 0;
 }

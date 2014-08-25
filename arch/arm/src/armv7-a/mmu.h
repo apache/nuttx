@@ -62,14 +62,14 @@
  ************************************************************************************/
 /* Configuration ********************************************************************/
 
-#ifdef CONFIG_PAGING
+#if defined(CONFIG_PAGING) || defined(CONFIG_ARCH_ADDRENV)
 
 /* Sanity check -- we cannot be using a ROM page table and supporting on-
  * demand paging.
  */
 
 #ifdef CONFIG_ARCH_ROMPGTABLE
-#  error "Cannot support both CONFIG_PAGING and CONFIG_ARCH_ROMPGTABLE"
+#  error "Cannot support both CONFIG_PAGING/CONFIG_ARCH_ADDRENV and CONFIG_ARCH_ROMPGTABLE"
 #endif
 #endif /* CONFIG_PAGING */
 
@@ -270,8 +270,8 @@
 #define PMD_PTE_NS           (1 << 3)     /* Bit 3:  Non-secure bit */
                                           /* Bit 4:  Should be zero (SBZ) */
 #define PMD_PTE_DOM_SHIFT    (5)          /* Bits 5-8: Domain */
-#define PMD_PTE_DOM_MASK     (15 << PMD_PTE_DOMAIN_SHIFT)
-#  define PMD_PTE_DOM(n)     ((n) << PMD_PTE_DOMAIN_SHIFT)
+#define PMD_PTE_DOM_MASK     (15 << PMD_PTE_DOM_SHIFT)
+#  define PMD_PTE_DOM(n)     ((n) << PMD_PTE_DOM_SHIFT)
                                           /* Bit 9:  Not implemented */
 #define PMD_PTE_PADDR_MASK   (0xfffffc00) /* Bits 10-31: Page table base address */
 
@@ -525,7 +525,7 @@
 #define PTE_WRITE_THROUGH    (PTE_C)
 #define PTE_WRITE_BACK       (PTE_B | PTE_C)
 
-/* Default MMU flags for RAM memory, IO, vector region
+/* Default MMU flags for RAM memory, IO, vector sections (level 1)
  *
  * REVISIT:  Here we expect all threads to be running at PL1
  */
@@ -540,8 +540,24 @@
                               PMD_STRONGLY_ORDERED | PMD_SECT_DOM(0) | \
                               PMD_SECT_XN)
 
-#define MMU_L1_VECTORFLAGS   (PMD_TYPE_PTE | PMD_PTE_PXN | PMD_PTE_DOM(0))
-#define MMU_L2_VECTORFLAGS   (PTE_TYPE_SMALL | PTE_WRITE_THROUGH | PTE_AP_RW1)
+/* MMU Flags for each type memory region (level 1 and 2) */
+
+#define MMU_L1_TEXTFLAGS      (PMD_TYPE_PTE | PMD_PTE_DOM(0))
+#define MMU_L2_TEXTFLAGS      (PTE_TYPE_SMALL | PTE_WRITE_THROUGH | PTE_AP_R1)
+
+#define MMU_L1_DATAFLAGS      (PMD_TYPE_PTE | PMD_PTE_PXN | PMD_PTE_DOM(0))
+#define MMU_L2_DATAFLAGS      (PTE_TYPE_SMALL | PTE_WRITE_BACK | PTE_AP_RW1)
+#define MMU_L2_ALLOCFLAGS     (PTE_TYPE_SMALL | PTE_WRITE_BACK | PTE_AP_RW1)
+
+#define MMU_L1_PGTABFLAGS     (PMD_TYPE_PTE | PMD_PTE_PXN | PTE_WRITE_THROUGH | \
+                               PMD_PTE_DOM(0))
+#define MMU_L2_PGTABFLAGS     (PTE_TYPE_SMALL | PTE_WRITE_THROUGH | PTE_AP_RW1)
+
+#define MMU_L1_VECTORFLAGS    (PMD_TYPE_PTE | PMD_PTE_PXN | PMD_PTE_DOM(0))
+
+#define MMU_L2_VECTRWFLAGS    (PTE_TYPE_SMALL | PTE_WRITE_THROUGH | PTE_AP_RW1)
+#define MMU_L2_VECTROFLAGS    (PTE_TYPE_SMALL | PTE_WRITE_THROUGH | PTE_AP_R1)
+#define MMU_L2_VECTORFLAGS    MMU_L2_VECTRWFLAGS
 
 /* Mapped section size */
 
@@ -579,7 +595,7 @@
 #  undef  PGTABLE_L2_VBASE
 #  define PGTABLE_L2_VBASE (PGTABLE_BASE_VADDR+PGTABLE_L2_OFFSET)
 
-#endif /* CONFIG_PAGING */
+#endif /* PGTABLE_BASE_VADDR */
 
 /* MMU flags ************************************************************************/
 
@@ -602,20 +618,6 @@
 /* Mask to get the page table physical address from an L1 entry */
 
 #define PG_L1_PADDRMASK       PMD_SECT_PADDR_MASK
-
-/* MMU Flags for each type memory region. */
-
-#define MMU_L1_TEXTFLAGS      (PMD_TYPE_PTE | PMD_PTE_DOM(0))
-#define MMU_L2_TEXTFLAGS      (PTE_TYPE_SMALL | PTE_WRITE_THROUGH | PTE_AP_R1)
-#define MMU_L1_DATAFLAGS      (PMD_TYPE_PTE | PMD_PTE_PXN | PMD_PTE_DOM(0))
-#define MMU_L2_DATAFLAGS      (PTE_TYPE_SMALL | PTE_WRITE_BACK | PTE_AP_RW1)
-#define MMU_L2_ALLOCFLAGS     (PTE_TYPE_SMALL | PTE_WRITE_BACK | PTE_AP_RW1)
-#define MMU_L1_PGTABFLAGS     (PMD_TYPE_PTE | PMD_PTE_PXN | PTE_WRITE_THROUGH | \
-                               PMD_PTE_DOM(0))
-#define MMU_L2_PGTABFLAGS     (PTE_TYPE_SMALL | PTE_WRITE_THROUGH | PTE_AP_RW1)
-
-#define MMU_L2_VECTRWFLAGS    (PTE_TYPE_SMALL | PTE_WRITE_THROUGH | PTE_AP_RW1)
-#define MMU_L2_VECTROFLAGS    (PTE_TYPE_SMALL | PTE_WRITE_THROUGH | PTE_AP_R1)
 
 /* Addresses of Memory Regions ******************************************************/
 
@@ -1030,7 +1032,7 @@ struct section_mapping_s
  *	ldr	r1, =PG_L2_PGTABLE_PADDR	<-- Physical address of L2 page table
  *	ldr	r2, =PG_PGTABLE_NPAGES		<-- Total number of pages
  *	ldr	r3, =PG_PGTABLE_NPAGE1		<-- Number of pages in the first PTE
- *      ldr	r4, =MMU_L1_PGTABFLAGS		<-- L1 MMU flags
+ *	ldr	r4, =MMU_L1_PGTABFLAGS		<-- L1 MMU flags
  *	pg_l1span r0, r1, r2, r3, r4, r4
  *
  * Inputs (unmodified unless noted):
@@ -1352,11 +1354,11 @@ void mmu_l1_setentry(uint32_t paddr, uint32_t vaddr, uint32_t mmuflags);
  ****************************************************************************/
 
 #if !defined(CONFIG_ARCH_ROMPGTABLE) && defined(CONFIG_ARCH_ADDRENV)
-void mmu_l1_restore(uint32ptr_t vaddr, uint32_t l1entry);
+void mmu_l1_restore(uintptr_t vaddr, uint32_t l1entry);
 #endif
 
 /************************************************************************************
- * Name: mmu_l1_clrentry(uint32ptr_t vaddr);
+ * Name: mmu_l1_clrentry
  *
  * Description:
  *   Unmap one L1 region by writing zero into the L1 page table entry and by

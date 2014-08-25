@@ -113,7 +113,7 @@ CHIP_CSRCS += sam_sckc.c sam_serial.c
 
 # Configuration dependent C and assembly language files
 
-ifneq ($(CONFIG_MM_PGALLOC),y)
+ifeq ($(CONFIG_MM_PGALLOC),y)
 CHIP_CSRCS += sam_pgalloc.c
 endif
 

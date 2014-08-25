@@ -132,7 +132,7 @@
 
 /* A single page scratch region used for temporary mappings */
 
-#define ARCH_SCRATCH_VADDR (CONFIG_ARCH_STACK_VBASE + CONFIG_ARCH_STACK_SIZE)
+#define ARCH_SCRATCH_VBASE (CONFIG_ARCH_STACK_VBASE + CONFIG_ARCH_STACK_SIZE)
 
 /****************************************************************************
  * Private Data

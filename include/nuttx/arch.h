@@ -754,7 +754,7 @@ int up_addrenv_create(size_t textsize, size_t datasize,
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_ADDRENV
-int up_addrenv_destroy(group_addrenv_t addrenv);
+int up_addrenv_destroy(FAR group_addrenv_t *addrenv);
 #endif
 
 /****************************************************************************
@@ -776,7 +776,7 @@ int up_addrenv_destroy(group_addrenv_t addrenv);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_ADDRENV
-int up_addrenv_vtext(FAR group_addrenv_t addrenv, FAR void **vtext);
+int up_addrenv_vtext(FAR group_addrenv_t *addrenv, FAR void **vtext);
 #endif
 
 /****************************************************************************
@@ -802,7 +802,7 @@ int up_addrenv_vtext(FAR group_addrenv_t addrenv, FAR void **vtext);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_ADDRENV
-int up_addrenv_vdata(FAR group_addrenv_t addrenv, uintptr_t textsize,
+int up_addrenv_vdata(FAR group_addrenv_t *addrenv, uintptr_t textsize,
                      FAR void **vdata);
 #endif
 
@@ -832,7 +832,8 @@ int up_addrenv_vdata(FAR group_addrenv_t addrenv, uintptr_t textsize,
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_ADDRENV
-int up_addrenv_select(group_addrenv_t addrenv, save_addrenv_t *oldenv);
+int up_addrenv_select(FAR const group_addrenv_t *addrenv,
+                      FAR save_addrenv_t *oldenv);
 #endif
 
 /****************************************************************************
@@ -853,7 +854,7 @@ int up_addrenv_select(group_addrenv_t addrenv, save_addrenv_t *oldenv);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_ADDRENV
-int up_addrenv_restore(save_addrenv_t oldenv);
+int up_addrenv_restore(FAR const save_addrenv_t *oldenv);
 #endif
 
 /****************************************************************************

@@ -47,6 +47,7 @@
 #include <nuttx/config.h>
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
+#  include <nuttx/pgalloc.h>
 #endif
 
 /****************************************************************************
@@ -91,6 +92,26 @@ do { \
 
 #endif
 
+#ifdef CONFIG_ARCH_ADDRENV
+#if CONFIG_MM_PGSIZE != 4096
+#  error Only pages sizes of 4096 are currently supported (CONFIG_ARCH_ADDRENV)
+#endif
+
+/* Convert 4KiB pages to 1MiB sections */
+
+#  define __PG2SECT_SHIFT   (20 - MM_PGSHIFT)
+#  define __PG2SECT_MASK    ((1 << __PG2SECT_SHIFT) - 1)
+
+#  define ARCH_PG2SECT(p)   (((p) + __PG2SECT_MASK) >> __PG2SECT_SHIFT)
+#  define ARCH_SECT2PG(s)   ((s) << __PG2SECT_SHIFT)
+
+#  define ARCH_TEXT_NSECTS  ARCH_PG2SECT(CONFIG_ARCH_TEXT_NPAGES)
+#  define ARCH_DATA_NSECTS  ARCH_PG2SECT(CONFIG_ARCH_DATA_NPAGES)
+#  define ARCH_HEAP_NSECTS  ARCH_PG2SECT(CONFIG_ARCH_HEAP_NPAGES)
+#  define ARCH_STACK_NSECTS ARCH_PG2SECT(CONFIG_ARCH_STACK_NPAGES)
+
+#endif
+
 /****************************************************************************
  * Inline functions
  ****************************************************************************/
@@ -112,10 +133,10 @@ do { \
 
 struct group_addrenv_s
 {
-  FAR uint32_t *text[CONFIG_ARCH_TEXT_NPAGES];
-  FAR uint32_t *data[CONFIG_ARCH_DATA_NPAGES];
+  FAR uint32_t *text[ARCH_TEXT_NSECTS];
+  FAR uint32_t *data[ARCH_DATA_NSECTS];
 #if 0 /* Not yet implemented */
-  FAR uint32_t *heap[CONFIG_ARCH_HEAP_NPAGES];
+  FAR uint32_t *heap[ARCH_HEAP_NSECTS];
 #endif
 };
 
@@ -132,10 +153,10 @@ typedef struct group_addrenv_s group_addrenv_t;
 
 struct save_addrenv_s
 {
-  FAR uint32_t text[CONFIG_ARCH_TEXT_NPAGES];
-  FAR uint32_t data[CONFIG_ARCH_DATA_NPAGES];
+  FAR uint32_t text[ARCH_TEXT_NSECTS];
+  FAR uint32_t data[ARCH_DATA_NSECTS];
 #if 0 /* Not yet implemented */
-  FAR uint32_t heap[CONFIG_ARCH_HEAP_NPAGES];
+  FAR uint32_t heap[ARCH_HEAP_NSECTS];
 #endif
 };
 

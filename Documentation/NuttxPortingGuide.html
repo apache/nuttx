@@ -3009,7 +3009,7 @@ VxWorks provides the following comparable interface:
 <h3><a name="up_addrenv_destroy">4.4.2 <code>up_addrenv_destroy()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
-  <code>int up_addrenv_destroy(group_addrenv_t addrenv);</code>
+  <code>int up_addrenv_destroy(group_addrenv_t *addrenv);</code>
 </ul>
 <p><b>Description</b>:</p>
 <ul>
@@ -3047,7 +3047,7 @@ VxWorks provides the following comparable interface:
 <h3><a name="up_addrenv_vdata">4.4.4 <code>up_addrenv_vdata()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
-  <code>int up_addrenv_vdata(FAR group_addrenv_t addrenv, size_t textsize, FAR void **vdata);</code>
+  <code>int up_addrenv_vdata(FAR group_addrenv_t *addrenv, size_t textsize, FAR void **vdata);</code>
 </ul>
 <p><b>Description</b>:</p>
 <ul>
@@ -3068,7 +3068,7 @@ VxWorks provides the following comparable interface:
 <h3><a name="up_addrenv_select">4.4.5 <code>up_addrenv_select()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
-  <code>int up_addrenv_select(group_addrenv_t addrenv, save_addrenv_t *oldenv);</code>
+  <code>int up_addrenv_select(group_addrenv_t *addrenv, save_addrenv_t *oldenv);</code>
 </ul>
 <p><b>Description</b>:</p>
 <ul>

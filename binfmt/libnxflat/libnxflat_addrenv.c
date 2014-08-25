@@ -118,7 +118,7 @@ int nxflat_addrenv_alloc(FAR struct nxflat_loadinfo_s *loadinfo, size_t envsize)
    * selected.
    */
 
-  ret = up_addrenv_vdata(loadinfo->addrenv, 0, &vdata);
+  ret = up_addrenv_vdata(&loadinfo->addrenv, 0, &vdata);
   if (ret < 0)
     {
       bdbg("ERROR: up_addrenv_vdata failed: %d\n", ret);
@@ -153,7 +153,7 @@ int nxflat_addrenv_alloc(FAR struct nxflat_loadinfo_s *loadinfo, size_t envsize)
   return OK;
 
 errout_with_addrenv:
-  (void)up_addrenv_destroy(loadinfo->addrenv);
+  (void)up_addrenv_destroy(&loadinfo->addrenv);
   loadinfo->addrenv = 0;
 
 errout_with_dspace:

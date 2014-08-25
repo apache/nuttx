@@ -301,7 +301,7 @@ int elf_addrenv_alloc(FAR struct elf_loadinfo_s *loadinfo, size_t textsize,
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_ADDRENV
-#  define elf_addrenv_select(l) up_addrenv_select((l)->addrenv, &(l)->oldenv)
+#  define elf_addrenv_select(l) up_addrenv_select(&(l)->addrenv, &(l)->oldenv)
 #endif
 
 /****************************************************************************
@@ -319,7 +319,7 @@ int elf_addrenv_alloc(FAR struct elf_loadinfo_s *loadinfo, size_t textsize,
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_ADDRENV
-#  define elf_addrenv_restore(l) up_addrenv_restore((l)->oldenv)
+#  define elf_addrenv_restore(l) up_addrenv_restore(&(l)->oldenv)
 #endif
 
 /****************************************************************************

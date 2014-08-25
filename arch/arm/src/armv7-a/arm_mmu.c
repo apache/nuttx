@@ -112,7 +112,7 @@ void mmu_l1_setentry(uint32_t paddr, uint32_t vaddr, uint32_t mmuflags)
  ****************************************************************************/
 
 #if !defined(CONFIG_ARCH_ROMPGTABLE) && defined(CONFIG_ARCH_ADDRENV)
-void mmu_l1_restore(uint32ptr_t vaddr, uint32_t l1entry)
+void mmu_l1_restore(uintptr_t vaddr, uint32_t l1entry)
 {
   uint32_t *l1table = (uint32_t*)PGTABLE_BASE_VADDR;
   uint32_t  index   = vaddr >> 20;
