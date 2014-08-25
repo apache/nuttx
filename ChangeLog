@@ -8249,4 +8249,7 @@
 	  and invalidate I-cache after an ELF module has been loaded into memory.
 	  With this change, ELF modules work correcttly on the SAMA5/Cortex-A
 	  platform (2014-8-24).
-
+	* configs/sim: Add build support for ELF modules.  Useless at the moment
+	  because there is no x86 relocation logic support (2014-8-25).
+	* configs/sim: Update some sim/ defconfig files.  This now automatically
+	  switches them to x86_64 builds (2014-8-25).
