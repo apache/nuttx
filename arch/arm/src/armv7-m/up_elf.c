@@ -65,7 +65,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arch_checkarch
+ * Name: up_checkarch
  *
  * Description:
  *   Given the ELF header in 'hdr', verify that the ELF file is appropriate
@@ -80,7 +80,7 @@
  *
  ****************************************************************************/
 
-bool arch_checkarch(FAR const Elf32_Ehdr *ehdr)
+bool up_checkarch(FAR const Elf32_Ehdr *ehdr)
 {
   /* Make sure it's an ARM executable */
 
@@ -115,7 +115,7 @@ bool arch_checkarch(FAR const Elf32_Ehdr *ehdr)
 }
 
 /****************************************************************************
- * Name: arch_relocate and arch_relocateadd
+ * Name: up_relocate and up_relocateadd
  *
  * Description:
  *   Perform on architecture-specific ELF relocation.  Every architecture
@@ -132,8 +132,8 @@ bool arch_checkarch(FAR const Elf32_Ehdr *ehdr)
  *
  ****************************************************************************/
 
-int arch_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
-                  uintptr_t addr)
+int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
+                uintptr_t addr)
 {
   int32_t offset;
   uint32_t upper_insn;
@@ -441,8 +441,8 @@ int arch_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
   return OK;
 }
 
-int arch_relocateadd(FAR const Elf32_Rela *rel, FAR const Elf32_Sym *sym,
-                     uintptr_t addr)
+int up_relocateadd(FAR const Elf32_Rela *rel, FAR const Elf32_Sym *sym,
+                   uintptr_t addr)
 {
   bdbg("RELA relocation not supported\n");
   return -ENOSYS;
