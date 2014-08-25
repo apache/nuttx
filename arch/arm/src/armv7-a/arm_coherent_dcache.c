@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7/arch_undefinedinsn.c
+ * arch/arm/src/armv7/up_coherent_dcache.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -63,7 +63,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arch_coherent_dcache
+ * Name: up_coherent_dcache
  *
  * Description:
  *   Ensure that the I and D caches are coherent within specified region
@@ -80,7 +80,7 @@
  *
  ****************************************************************************/
 
-void arch_coherent_dcache(uintptr_t addr, size_t len)
+void up_coherent_dcache(uintptr_t addr, size_t len)
 {
   /* Perform the operation on the L1 cache */
 

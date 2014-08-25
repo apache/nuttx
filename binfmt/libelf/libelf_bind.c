@@ -211,7 +211,7 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
 
       /* Now perform the architecture-specific relocation */
 
-      ret = arch_relocate(&rel, &sym, addr);
+      ret = up_relocate(&rel, &sym, addr);
       if (ret < 0)
         {
 #ifdef CONFIG_ARCH_ADDRENV
@@ -329,7 +329,7 @@ int elf_bind(FAR struct elf_loadinfo_s *loadinfo,
    * contents to memory and invalidating the I cache.
    */
 
-  arch_coherent_dcache(loadinfo->textalloc, loadinfo->textsize);
+  up_coherent_dcache(loadinfo->textalloc, loadinfo->textsize);
 #endif
 
   return ret;
