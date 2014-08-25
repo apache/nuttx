@@ -419,12 +419,12 @@
 
 /* Level 2 Translation Table Access Permissions:
  *
- * WR    - Read/write addess allowed
+ * WR    - Read/write access allowed
  * R     - Read-only access allowed
  * 0,1,2 - At PL0, PL1, and/or PL2
  *
  * PL0   - User privilege level
- * PL1   - Privilieged mode
+ * PL1   - Privileged mode
  * PL2   - Software executing in Hyp mode
  */
 
@@ -543,7 +543,7 @@
 /* MMU Flags for each type memory region (level 1 and 2) */
 
 #define MMU_L1_TEXTFLAGS      (PMD_TYPE_PTE | PMD_PTE_DOM(0))
-#define MMU_L2_TEXTFLAGS      (PTE_TYPE_SMALL | PTE_WRITE_THROUGH | PTE_AP_R1)
+#define MMU_L2_TEXTFLAGS      (PTE_TYPE_SMALL | PTE_WRITE_BACK | PTE_AP_R1)
 
 #define MMU_L1_DATAFLAGS      (PMD_TYPE_PTE | PMD_PTE_PXN | PMD_PTE_DOM(0))
 #define MMU_L2_DATAFLAGS      (PTE_TYPE_SMALL | PTE_WRITE_BACK | PTE_AP_RW1)
