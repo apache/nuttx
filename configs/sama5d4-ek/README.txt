@@ -3689,6 +3689,10 @@ Configurations
       System Type -> Architecture Options
         CONFIG_ARCH_ADDRENV=n                  : Disable address environment support
 
+      System Type -> Heap Configuration
+        CONFIG_SAMA5_DDRCS_RESERVE=n           : Don't reserve any page cache memory
+        CONFIG_SAMA5_DDRCS_PGHEAP=n            : Don't try to set up the page allocator
+
       Memory Management
         CONFIG_GRAN=n                          : Disable the granule allocator 
         CONFIG_MM_PGALLOC=n                    : Disable the page allocator

@@ -4553,15 +4553,15 @@ endif # SAMA5_DDRCS_RESERVE
 config SAMA5_DDRCS_PGHEAP
 	bool "Include DDR-SDRAM in page cache"
 	default y
-	depends on SAMA5_DDRCS && ARCH_ADDRENV
+	depends on (SAMA5_DDRCS || SAMA5_BOOT_SDRAM) && ARCH_ADDRENV
 	---help---
 		Include a portion of DDR-SDRAM memory in the page cache.
 
 if SAMA5_DDRCS_PGHEAP
 
 config SAMA5_DDRCS_PGHEAP_OFFSET
-	int "DDR-SDRAM heap offset"
-	default 0
+	hex "DDR-SDRAM heap offset"
+	default 0x0
 	---help---
 		Preserve this number of bytes at the beginning of SDRAM.  The
 		portion of DRAM beginning at this offset from the DDRCS base will

@@ -57,11 +57,11 @@
  * handle any other possibility.
  */
 
-#ifdef CONFIG_SAMA5_DDRCS_PGHEAP
+#ifndef CONFIG_SAMA5_DDRCS_PGHEAP
 #  error CONFIG_SAMA5_DDRCS_PGHEAP must be selected
 #endif
 
-#ifdef CONFIG_SAMA5_DDRCS_PGHEAP_OFFSET
+#ifndef CONFIG_SAMA5_DDRCS_PGHEAP_OFFSET
 #  error CONFIG_SAMA5_DDRCS_PGHEAP_OFFSET must be specified
 #endif
 
@@ -69,7 +69,7 @@
 #  warning CONFIG_SAMA5_DDRCS_PGHEAP_OFFSET is not aligned to a page boundary
 #endif
 
-#ifdef CONFIG_SAMA5_DDRCS_PGHEAP_SIZE
+#ifndef CONFIG_SAMA5_DDRCS_PGHEAP_SIZE
 #  error CONFIG_SAMA5_DDRCS_PGHEAP_SIZE must be specified
 #endif
 
