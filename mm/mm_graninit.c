@@ -104,12 +104,12 @@ gran_common_initialize(FAR void *heapstart, size_t heapsize, uint8_t log2gran,
 
   /* Check parameters if debug is on.  Note the size of a granule is
    * limited to 2**31 bytes and that the size of the granule must be greater
-   * than the alignment size.
+   * than or equal to the alignment size.
    */
 
   DEBUGASSERT(heapstart && heapsize > 0 &&
               log2gran > 0 && log2gran < 32 &&
-              log2gran > log2align);
+              log2gran >= log2align);
 
   /* Get the aligned start of the heap */
 
