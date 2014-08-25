@@ -213,7 +213,7 @@ int up_addrenv_create(size_t textsize, size_t datasize,
     {
       /* Allocate one physical page */
 
-      paddr = mm_pgalloc(ARCH_SECT2PG(1));
+      paddr = mm_pgalloc(1);
       if (!paddr)
         {
           ret = -ENOMEM;
@@ -226,7 +226,7 @@ int up_addrenv_create(size_t textsize, size_t datasize,
       /* Temporarily map the page into the virtual address space */
 
       flags = irqsave();
-      l1save = mmu_l1_getentry(vaddr);
+      l1save = mmu_l1_getentry(ARCH_SCRATCH_VBASE);
       set_l1_entry(ARCH_SCRATCH_VBASE, paddr);
       l2table = (FAR uint32_t *)ARCH_SCRATCH_VBASE;
 
@@ -256,7 +256,7 @@ int up_addrenv_create(size_t textsize, size_t datasize,
     {
       /* Allocate one physical page */
 
-      paddr = mm_pgalloc(ARCH_SECT2PG(1));
+      paddr = mm_pgalloc(1);
       if (!paddr)
         {
           ret = -ENOMEM;
@@ -269,7 +269,7 @@ int up_addrenv_create(size_t textsize, size_t datasize,
       /* Temporarily map the page into the virtual address space */
 
       flags = irqsave();
-      l1save = mmu_l1_getentry(vaddr);
+      l1save = mmu_l1_getentry(ARCH_SCRATCH_VBASE);
       set_l1_entry(ARCH_SCRATCH_VBASE, paddr);
       l2table = (FAR uint32_t *)ARCH_SCRATCH_VBASE;
 
