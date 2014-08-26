@@ -71,6 +71,7 @@
 
 #include <string.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/addrenv.h>
@@ -183,6 +184,9 @@ int up_addrenv_create(size_t textsize, size_t datasize,
   unsigned int i;
   unsigned int j;
   int ret;
+
+  bvdbg("addrenv=%p textsize=%lu datasize=%lu\n",
+        addrenv, (unsigned long)textsize, (unsigned long)datasize);
 
   DEBUGASSERT(addrenv);
 
@@ -323,6 +327,7 @@ int up_addrenv_destroy(FAR group_addrenv_t *addrenv)
   uintptr_t vaddr;
   int i;
 
+  bvdbg("addrenv=%p\n", addrenv);
   DEBUGASSERT(addrenv);
 
   for (vaddr = CONFIG_ARCH_TEXT_VBASE, i = 0;
@@ -384,6 +389,8 @@ int up_addrenv_destroy(FAR group_addrenv_t *addrenv)
 
 int up_addrenv_vtext(FAR group_addrenv_t *addrenv, FAR void **vtext)
 {
+  bvdbg("return=%p\n", (FAR void *)CONFIG_ARCH_TEXT_VBASE);
+
   /* Not much to do in this case */
 
   DEBUGASSERT(addrenv && vtext);
@@ -416,6 +423,7 @@ int up_addrenv_vtext(FAR group_addrenv_t *addrenv, FAR void **vtext)
 int up_addrenv_vdata(FAR group_addrenv_t *addrenv, uintptr_t textsize,
                      FAR void **vdata)
 {
+  bvdbg("return=%p\n", (FAR void *)CONFIG_ARCH_DATA_VBASE);
   /* Not much to do in this case */
 
   DEBUGASSERT(addrenv && vdata);
@@ -455,6 +463,7 @@ int up_addrenv_select(FAR const group_addrenv_t *addrenv,
   uintptr_t paddr;
   int i;
 
+  bvdbg("addrenv=%p oldenv=%p\n", addrenv, oldenv);
   DEBUGASSERT(addrenv);
 
   for (vaddr = CONFIG_ARCH_TEXT_VBASE, i = 0;
@@ -556,6 +565,7 @@ int up_addrenv_restore(FAR const save_addrenv_t *oldenv)
   uintptr_t vaddr;
   int i;
 
+  bvdbg("oldenv=%p\n", oldenv);
   DEBUGASSERT(oldenv);
 
   for (vaddr = CONFIG_ARCH_TEXT_VBASE, i = 0;
@@ -610,6 +620,7 @@ int up_addrenv_assign(FAR const group_addrenv_t *addrenv,
                       FAR struct task_group_s *group)
 {
   DEBUGASSERT(addrenv && group);
+  bvdbg("addrenv=%p group->addrenv=%p\n", addrenv, &group->addrenv);
 
   /* Just copy the address environment into the group */
 
@@ -640,6 +651,8 @@ int up_addrenv_assign(FAR const group_addrenv_t *addrenv,
 
 int up_addrenv_attach(FAR struct task_group_s *group, FAR struct tcb_s *tcb)
 {
+  bvdbg("group=%p tcb=%p\n", group, tcb);
+
   /* Nothing needs to be done in this implementation */
 
   return OK;
@@ -671,6 +684,8 @@ int up_addrenv_attach(FAR struct task_group_s *group, FAR struct tcb_s *tcb)
 
 int up_addrenv_detach(FAR struct task_group_s *group, FAR struct tcb_s *tcb)
 {
+  bvdbg("group=%p tcb=%p\n", group, tcb);
+
   /* Nothing needs to be done in this implementation */
 
   return OK;
