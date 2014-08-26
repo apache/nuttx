@@ -47,9 +47,8 @@
 #include <stdio.h>
 
 #include <arch/board/board.h>
+#include <arch/board/cc3200_utils.h>
 #include <apps/nsh.h>
-
-#include <cc3200_utils.h>
 
 /************************************************************************************
  * Pre-processor Definitions
