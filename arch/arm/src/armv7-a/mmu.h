@@ -562,6 +562,7 @@
 /* Mapped section size */
 
 #define SECTION_SIZE          (1 << 20)   /* 1Mb */
+#define SECTION_MASK          (SECTION_SIZE - 1)
 
 /* The Cortex-A5 supports two translation table base address registers.  In
  * this, implementation, only Translation Table Base Register 0 (TTBR0) is
