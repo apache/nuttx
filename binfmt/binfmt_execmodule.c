@@ -163,9 +163,9 @@ int exec_module(FAR const struct binary_s *binp)
       goto errout;
     }
 
+#ifndef CONFIG_CUSTOM_STACK
   /* Allocate the stack for the new task (always from the user heap) */
 
-#ifndef CONFIG_CUSTOM_STACK
   stack = (FAR uint32_t*)kumalloc(binp->stacksize);
   if (!tcb)
     {
@@ -193,11 +193,11 @@ int exec_module(FAR const struct binary_s *binp)
   /* Note that tcb->flags are not modified.  0=normal task */
   /* tcb->flags |= TCB_FLAG_TTYPE_TASK; */
 
+#ifdef CONFIG_PIC
   /* Add the D-Space address as the PIC base address.  By convention, this
    * must be the first allocated address space.
    */
 
-#ifdef CONFIG_PIC
   tcb->cmn.dspace = binp->alloc[0];
 
   /* Re-initialize the task's initial state to account for the new PIC base */
@@ -205,24 +205,24 @@ int exec_module(FAR const struct binary_s *binp)
   up_initial_state(&tcb->cmn);
 #endif
 
+#ifdef CONFIG_ARCH_ADDRENV
   /* Assign the address environment to the new task group */
 
-#ifdef CONFIG_ARCH_ADDRENV
-  ret = up_addrenv_assign(&binp->addrenv, tcb->cmn.group);
+  ret = up_addrenv_clone(&binp->addrenv, &tcb->cmn.group->addrenv);
   if (ret < 0)
     {
       err = -ret;
-      bdbg("ERROR: up_addrenv_assign() failed: %d\n", ret);
+      bdbg("ERROR: up_addrenv_clone() failed: %d\n", ret);
       goto errout_with_stack;
     }
 #endif
 
+#ifdef CONFIG_BINFMT_CONSTRUCTORS
   /* Setup a start hook that will execute all of the C++ static constructors
    * on the newly created thread.  The struct binary_s must persist at least
    * until the new task has been started.
    */
 
-#ifdef CONFIG_BINFMT_CONSTRUCTORS
   task_starthook(tcb, exec_ctors, (FAR void *)binp);
 #endif
 
@@ -261,4 +261,3 @@ errout:
 }
 
 #endif /* CONFIG_BINFMT_DISABLE */
-

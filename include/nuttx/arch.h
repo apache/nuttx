@@ -696,11 +696,12 @@ void up_allocate_pgheap(FAR void **heap_start, size_t *heap_size);
  *                        address environment
  *   up_addrenv_select  - Instantiate an address environment
  *   up_addrenv_restore - Restore an address environment
- *   up_addrenv_assign  - Assign an address environment to a group
+ *   up_addrenv_clone   - Copy an address environment from one location to
+ *                        another.
  *
  * Higher-level interfaces used by the tasking logic.  These interfaces are
  * used by the functions in sched/ and all operate on the thread which whose
- * group been assigned an address environment by up_addrenv_assign().
+ * group been assigned an address environment by up_addrenv_clone().
  *
  *   up_addrenv_attach  - Clone the address environment assigned to one TCB
  *                        to another.  This operation is done when a pthread
@@ -858,15 +859,16 @@ int up_addrenv_restore(FAR const save_addrenv_t *oldenv);
 #endif
 
 /****************************************************************************
- * Name: up_addrenv_assign
+ * Name: up_addrenv_clone
  *
  * Description:
- *   Assign an address environment to a new task group.
+ *   Duplicate an address environment.  This does not copy the underlying
+ *   memory, only the representation that can be used to instantiate that
+ *   memory as an address environment.
  *
  * Input Parameters:
- *   addrenv - The representation of the task address environment previously
- *     returned by up_addrenv_create().
- *   group - The new task group to receive the address environment.
+ *   src - The address environment to be copied.
+ *   dest - The location to receive the copied address environment.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
@@ -874,8 +876,8 @@ int up_addrenv_restore(FAR const save_addrenv_t *oldenv);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_ADDRENV
-int up_addrenv_assign(FAR const group_addrenv_t *addrenv,
-                      FAR struct task_group_s *group);
+int up_addrenv_clone(FAR const group_addrenv_t *src,
+                     FAR group_addrenv_t *dest);
 #endif
 
 /****************************************************************************

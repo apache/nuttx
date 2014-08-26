@@ -1,7 +1,7 @@
 /****************************************************************************
  * binfmt/elf.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -294,11 +294,11 @@ static int elf_loadbinary(FAR struct binary_s *binp)
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV
-  /* Save the address environment.  This will be needed when the module is
-   * executed for the up_addrenv_assign() call.
+  /* Save the address environment in the binfmt structure.  This will be
+   * needed when the module is executed.
    */
 
-  binp->addrenv   = loadinfo.addrenv;
+  up_addrenv_clone(&loadinfo.addrenv, &binp->addrenv);
 #endif
 
   elf_dumpentrypt(binp, &loadinfo);

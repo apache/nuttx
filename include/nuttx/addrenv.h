@@ -162,11 +162,12 @@
  *                        address environment
  *   up_addrenv_select  - Instantiate an address environment
  *   up_addrenv_restore - Restore an address environment
- *   up_addrenv_assign  - Assign an address environment to a group
+ *   up_addrenv_clone   - Copy an address environment from one location to
+ *                        another.
  *
  * Higher-level interfaces used by the tasking logic.  These interfaces are
  * used by the functions in sched/ and all operate on the thread which whose
- * group been assigned an address environment by up_addrenv_assign().
+ * group been assigned an address environment by up_addrenv_clone().
  *
  *   up_addrenv_attach  - Clone the address environment assigned to one TCB
  *                        to another.  This operation is done when a pthread
