@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/tiva/tiva_start.c
+ * arch/arm/src/tiva/tiva_start.h
  *
- *   Copyright (C) 2009, 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,33 +33,21 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_TIVA_TIVA_START_H
+#define __ARCH_ARM_SRC_TIVA_TIVA_START_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <assert.h>
-#include <debug.h>
-
-#include <nuttx/init.h>
-#include <arch/board/board.h>
-
-#include "up_arch.h"
-#include "up_internal.h"
-
-#include "tiva_lowputc.h"
-#include "tiva_syscontrol.h"
-#include "tiva_userspace.h"
-#include "tiva_start.h"
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Data
+ * Public Types
  ****************************************************************************/
 
 /****************************************************************************
@@ -67,106 +55,22 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: showprogress
- *
- * Description:
- *   Print a character on the UART to show boot status.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_DEBUG
-#  define showprogress(c) up_lowputc(c)
-#else
-#  define showprogress(c)
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _start
+ * Name: board_earlyinit
  *
  * Description:
- *   This is the reset entry point.
+ *   If CONFIG_TIVA_BOARD_EARLYINIT, then board-specific logic must provide
+ *   the function board_earlyinit() to provide very customized lower-level
+ *   board bringup.  board_earlyinit() will be called by the start-up logic
+ *   instead of up_clockconfig() and up_lowsetup().
  *
  ****************************************************************************/
 
-void __start(void)
-{
-#ifdef CONFIG_BOOT_RUNFROMFLASH
-  const uint32_t *src;
-#endif
-  uint32_t *dest;
-
-  /* Configure the UART so that we can get debug output as soon as possible */
-
 #ifdef CONFIG_TIVA_BOARD_EARLYINIT
-  board_earlyinit();
-#else
-  up_clockconfig();
-  up_lowsetup();
-#endif
-  showprogress('A');
-
-  /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
-   * certain that there are no issues with the state of global variables.
-   */
-
-  for (dest = &_sbss; dest < &_ebss; )
-    {
-      *dest++ = 0;
-    }
-  showprogress('B');
-
-#ifdef CONFIG_BOOT_RUNFROMFLASH
-  /* Move the initialized data section from his temporary holding spot in
-   * FLASH into the correct place in SRAM.  The correct place in SRAM is
-   * give by _sdata and _edata.  The temporary location is in FLASH at the
-   * end of all of the other read-only data (.text, .rodata) at _eronly.
-   */
-
-  for (src = &_eronly, dest = &_sdata; dest < &_edata; )
-    {
-      *dest++ = *src++;
-    }
-  showprogress('C');
+void board_earlyinit(void);
 #endif
 
-  /* Perform early serial initialization */
-
-#ifdef USE_EARLYSERIALINIT
-  up_earlyserialinit();
-#endif
-  showprogress('D');
-
-  /* For the case of the separate user-/kernel-space build, perform whatever
-   * platform specific initialization of the user memory is required.
-   * Normally this just means initializing the user space .data and .bss
-   * segments.
-   */
-
-#ifdef CONFIG_NUTTX_KERNEL
-  tiva_userspace();
-  showprogress('E');
-#endif
-
-  /* Initialize onboard resources */
-
-  tiva_boardinitialize();
-  showprogress('F');
-
-  /* Then start NuttX */
-
-  showprogress('\r');
-  showprogress('\n');
-  os_start();
-
-  /* Shouldn't get here */
-
-  for (;;);
-}
+#endif /* __ARCH_ARM_SRC_TIVA_TIVA_START_H */
