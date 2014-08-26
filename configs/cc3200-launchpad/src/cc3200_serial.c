@@ -46,9 +46,20 @@
 #include <arch/board/cc3200_utils.h>
 
 #include "chip/cc3200_memorymap.h"
+#include "tiva_start.h"
 #include "up_internal.h"
 
+#include "cc3200_launchpad.h"
+
 #if !defined(HAVE_SERIALCONSOLE)
+
+/************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
+
+#ifndef CONFIG_TIVA_BOARD_EARLYINIT
+#  error CONFIG_TIVA_BOARD_EARLYINIT is required
+#endif
 
 /************************************************************************************
  * Private Data
@@ -57,7 +68,8 @@
 /************************************************************************************
  * Private Functions
  ************************************************************************************/
-void cc3200_uart0_init(void)
+
+static void cc3200_uart0_init(void)
 {
   HWREG(0x44025048) |= 0x01;
 
@@ -84,7 +96,7 @@ void cc3200_uart0_init(void)
  ************************************************************************************/
 
 /************************************************************************************
- * Name: up_earlyconsoleinit
+ * Name: board_earlyinit
  *
  * Description:
  *   Performs the low level UART initialization early in  debug so that the serial
@@ -93,20 +105,18 @@ void cc3200_uart0_init(void)
  *
  ************************************************************************************/
 
-#ifdef USE_EARLYSERIALINIT
-void up_earlyconsoleinit(void)
+void board_earlyinit(void)
 {
   cc3200_init();
   cc3200_uart0_init();
 }
-#endif
 
 /************************************************************************************
  * Name: up_consoleinit
  *
  * Description:
  *   Register serial console and serial ports.  This assumes that
- *   up_earlyconsoleinit was called previously.
+ *   board_earlyinit was called previously.
  *
  ************************************************************************************/
 
@@ -118,6 +128,10 @@ void up_consoleinit(void)
   lowconsole_init();
 }
 #endif
+
+/************************************************************************************
+ * Name: cc3200_uart_init
+ ************************************************************************************/
 
 void cc3200_uart_init(void)
 {
