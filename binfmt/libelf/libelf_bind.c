@@ -195,42 +195,14 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
 
       addr = dstsec->sh_addr + rel.r_offset;
 
-      /* If CONFIG_ARCH_ADDRENV=y, then 'addr' lies in a virtual address space that
-       * may not be in place now.  elf_addrenv_select() will temporarily
-       * instantiate that address space.
-       */
-
-#ifdef CONFIG_ARCH_ADDRENV
-      ret = elf_addrenv_select(loadinfo);
-      if (ret < 0)
-        {
-          bdbg("ERROR: elf_addrenv_select() failed: %d\n", ret);
-          return ret;
-        }
-#endif
-
       /* Now perform the architecture-specific relocation */
 
       ret = up_relocate(&rel, &sym, addr);
       if (ret < 0)
         {
-#ifdef CONFIG_ARCH_ADDRENV
-          (void)elf_addrenv_restore(loadinfo);
-#endif
           bdbg("ERROR: Section %d reloc %d: Relocation failed: %d\n", ret);
           return ret;
         }
-
-      /* Restore the original address environment */
-
-#ifdef CONFIG_ARCH_ADDRENV
-      ret = elf_addrenv_restore(loadinfo);
-      if (ret < 0)
-        {
-          bdbg("ERROR: elf_addrenv_restore() failed: %d\n", ret);
-          return ret;
-        }
-#endif
     }
 
   return OK;
@@ -263,6 +235,9 @@ static int elf_relocateadd(FAR struct elf_loadinfo_s *loadinfo, int relidx,
 int elf_bind(FAR struct elf_loadinfo_s *loadinfo,
              FAR const struct symtab_s *exports, int nexports)
 {
+#ifdef CONFIG_ARCH_ADDRENV
+  int status;
+#endif
   int ret;
   int i;
 
@@ -284,6 +259,20 @@ int elf_bind(FAR struct elf_loadinfo_s *loadinfo,
       bdbg("elf_allocbuffer failed: %d\n", ret);
       return -ENOMEM;
     }
+
+#ifdef CONFIG_ARCH_ADDRENV
+  /* If CONFIG_ARCH_ADDRENV=y, then the loaded ELF lies in a virtual address
+   * space that may not be in place now.  elf_addrenv_select() will
+   * temporarily instantiate that address space.
+   */
+
+  ret = elf_addrenv_select(loadinfo);
+  if (ret < 0)
+    {
+      bdbg("ERROR: elf_addrenv_select() failed: %d\n", ret);
+      return ret;
+    }
+#endif
 
   /* Process relocations in every allocated section */
 
@@ -330,6 +319,20 @@ int elf_bind(FAR struct elf_loadinfo_s *loadinfo,
    */
 
   up_coherent_dcache(loadinfo->textalloc, loadinfo->textsize);
+#endif
+
+#ifdef CONFIG_ARCH_ADDRENV
+  /* Restore the original address environment */
+
+  status = elf_addrenv_restore(loadinfo);
+  if (status < 0)
+    {
+      bdbg("ERROR: elf_addrenv_restore() failed: %d\n", status);
+      if (ret == OK)
+        {
+          ret = status;
+        }
+    }
 #endif
 
   return ret;

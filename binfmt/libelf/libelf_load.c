@@ -132,9 +132,8 @@ static void elf_elfsize(struct elf_loadinfo_s *loadinfo)
  * Name: elf_loadfile
  *
  * Description:
- *   Allocate memory for the file and read the section data into the
- *   allocated memory.  Section addresses in the shdr[] are updated to point
- *   to the corresponding position in the allocated memory.
+ *   Read the section data into memory. Section addresses in the shdr[] are
+ *   updated to point to the corresponding position in the memory.
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
@@ -149,15 +148,6 @@ static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
   FAR uint8_t **pptr;
   int ret;
   int i;
-
-  /* Allocate (and zero) memory for the ELF file. */
-
-  ret = elf_addrenv_alloc(loadinfo, loadinfo->textsize, loadinfo->datasize);
-  if (ret < 0)
-    {
-      bdbg("ERROR: elf_addrenv_alloc() failed: %d\n", ret);
-      return ret;
-    }
 
   /* Read each section into memory that is marked SHF_ALLOC + SHT_NOBITS */
 
@@ -196,39 +186,14 @@ static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
 
       if (shdr->sh_type != SHT_NOBITS)
         {
-          /* If CONFIG_ARCH_ADDRENV=y, then 'text' lies in a virtual address
-           * space that may not be in place now.  elf_addrenv_select() will
-           * temporarily instantiate that address space.
-           */
-
-#ifdef CONFIG_ARCH_ADDRENV
-          ret = elf_addrenv_select(loadinfo);
-          if (ret < 0)
-            {
-              bdbg("ERROR: elf_addrenv_select() failed: %d\n", ret);
-              return ret;
-            }
-#endif
-
           /* Read the section data from sh_offset to the memory region */
 
           ret = elf_read(loadinfo, *pptr, shdr->sh_size, shdr->sh_offset);
           if (ret < 0)
             {
-              bdbg("Failed to read section %d: %d\n", i, ret);
+              bdbg("ERROR: Failed to read section %d: %d\n", i, ret);
               return ret;
             }
-
-          /* Restore the original address environment */
-
-#ifdef CONFIG_ARCH_ADDRENV
-          ret = elf_addrenv_restore(loadinfo);
-          if (ret < 0)
-            {
-              bdbg("ERROR: elf_addrenv_restore() failed: %d\n", ret);
-             return ret;
-            }
-#endif
         }
 
       /* Update sh_addr to point to copy in memory */
@@ -275,7 +240,7 @@ int elf_load(FAR struct elf_loadinfo_s *loadinfo)
   ret = elf_loadshdrs(loadinfo);
   if (ret < 0)
     {
-      bdbg("elf_loadshdrs failed: %d\n", ret);
+      bdbg("ERROR: elf_loadshdrs failed: %d\n", ret);
       goto errout_with_buffers;
     }
 
@@ -283,13 +248,36 @@ int elf_load(FAR struct elf_loadinfo_s *loadinfo)
 
   elf_elfsize(loadinfo);
 
-  /* Allocate memory and load sections into memory */
+  /* Allocate (and zero) memory for the ELF file. */
+
+  ret = elf_addrenv_alloc(loadinfo, loadinfo->textsize, loadinfo->datasize);
+  if (ret < 0)
+    {
+      bdbg("ERROR: elf_addrenv_alloc() failed: %d\n", ret);
+      goto errout_with_buffers;
+    }
+
+#ifdef CONFIG_ARCH_ADDRENV
+  /* If CONFIG_ARCH_ADDRENV=y, then the loaded ELF lies in a virtual address
+   * space that may not be in place now.  elf_addrenv_select() will
+   * temporarily instantiate that address space.
+   */
+
+  ret = elf_addrenv_select(loadinfo);
+  if (ret < 0)
+    {
+      bdbg("ERROR: elf_addrenv_select() failed: %d\n", ret);
+      goto errout_with_buffers;
+    }
+#endif
+
+  /* Load ELF section data into memory */
 
   ret = elf_loadfile(loadinfo);
   if (ret < 0)
     {
-      bdbg("elf_loadfile failed: %d\n", ret);
-      goto errout_with_buffers;
+      bdbg("ERROR: elf_loadfile failed: %d\n", ret);
+      goto errout_with_addrenv;
     }
 
   /* Load static constructors and destructors. */
@@ -298,14 +286,25 @@ int elf_load(FAR struct elf_loadinfo_s *loadinfo)
   ret = elf_loadctors(loadinfo);
   if (ret < 0)
     {
-      bdbg("elf_loadctors failed: %d\n", ret);
-      goto errout_with_buffers;
+      bdbg("ERROR: elf_loadctors failed: %d\n", ret);
+      goto errout_with_addrenv;
     }
 
   ret = elf_loaddtors(loadinfo);
   if (ret < 0)
     {
-      bdbg("elf_loaddtors failed: %d\n", ret);
+      bdbg("ERROR: elf_loaddtors failed: %d\n", ret);
+      goto errout_with_addrenv;
+    }
+#endif
+
+#ifdef CONFIG_ARCH_ADDRENV
+  /* Restore the original address environment */
+
+  ret = elf_addrenv_restore(loadinfo);
+  if (ret < 0)
+    {
+      bdbg("ERROR: elf_addrenv_restore() failed: %d\n", ret);
       goto errout_with_buffers;
     }
 #endif
@@ -313,6 +312,11 @@ int elf_load(FAR struct elf_loadinfo_s *loadinfo)
   return OK;
 
   /* Error exits */
+
+errout_with_addrenv:
+#ifdef CONFIG_ARCH_ADDRENV
+  (void)elf_addrenv_restore(loadinfo);
+#endif
 
 errout_with_buffers:
   elf_unload(loadinfo);
