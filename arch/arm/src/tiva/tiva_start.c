@@ -65,8 +65,6 @@
  * Public Data
  ****************************************************************************/
 
-extern void _vectors(void);
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -106,8 +104,12 @@ void __start(void)
 
   /* Configure the uart so that we can get debug output as soon as possible */
 
+#ifdef CONFIG_ARCH_BOARD_CC3200_LAUNCHPAD
+  up_earlyconsoleinit();
+#else
   up_clockconfig();
   up_lowsetup();
+#endif
   showprogress('A');
 
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
@@ -163,7 +165,7 @@ void __start(void)
   showprogress('\n');
   os_start();
 
-  /* Shoulnd't get here */
+  /* Shouldn't get here */
 
   for (;;);
 }

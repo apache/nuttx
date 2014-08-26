@@ -103,6 +103,8 @@
 #  include <arch/tiva/lm4f_irq.h>
 #elif defined(CONFIG_ARCH_CHIP_TM4C)
 #  include <arch/tiva/tm4c_irq.h>
+#elif defined(CONFIG_ARCH_CHIP_CC3200)
+#  include <arch/tiva/cc3200_irq.h>
 #else
 #  error "Unsupported Stellaris IRQ file"
 #endif

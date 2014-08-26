@@ -45,6 +45,8 @@
 #  include "chip/lm4f_vectors.h"
 #elif defined(CONFIG_ARCH_CHIP_TM4C)
 #  include "chip/tm4c_vectors.h"
+#elif defined(CONFIG_ARCH_CHIP_CC3200)
+#  include "chip/cc3200_vectors.h"
 #else
 #  error "Unsupported Tiva/Stellaris vector file"
 #endif

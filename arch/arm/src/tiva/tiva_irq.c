@@ -323,6 +323,11 @@ void up_irqinitialize(void)
   up_ramvec_initialize();
 #endif
 
+#ifdef CONFIG_ARCH_CHIP_CC3200
+  putreg32((uint32_t)CONFIG_RAM_START, NVIC_VECTAB);
+#endif
+
+
   /* Set all interrupts (and exceptions) to the default priority */
 
   putreg32(DEFPRIORITY32, NVIC_SYSH4_7_PRIORITY);
