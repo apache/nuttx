@@ -99,7 +99,7 @@
  *
  *****************************************************************************/
 
-#ifdef HAVE_GROUP_MEMBERS
+#if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
 FAR struct task_group_s *group_findbygid(gid_t gid)
 {
   FAR struct task_group_s *group;
@@ -123,7 +123,7 @@ FAR struct task_group_s *group_findbygid(gid_t gid)
 #endif
 
 /*****************************************************************************
- * Name: group_findbygid
+ * Name: group_findbypid
  *
  * Description:
  *   Given a task ID, find the group task structure with was started by that

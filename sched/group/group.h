@@ -66,10 +66,22 @@ typedef int (*foreachchild_t)(pid_t pid, FAR void *arg);
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+
+#if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
 /* This is the head of a list of all group members */
 
-#ifdef HAVE_GROUP_MEMBERS
 extern FAR struct task_group_s *g_grouphead;
+#endif
+
+#ifdef CONFIG_ARCH_ADDRENV
+/* This variable holds the group ID of the current task group.  This ID is
+ * zero if the current task is a kernel thread that has no address
+ * environment (other than the kernel context).
+ *
+ * This must only be accessed with interrupts disabled.
+ */
+
+extern gid_t g_gid_current;
 #endif
 
 /****************************************************************************
@@ -91,12 +103,21 @@ int  group_join(FAR struct pthread_tcb_s *tcb);
 #endif
 void group_leave(FAR struct tcb_s *tcb);
 
-#ifdef HAVE_GROUP_MEMBERS
+#if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
 FAR struct task_group_s *group_findbygid(gid_t gid);
+#endif
+
+#ifdef HAVE_GROUP_MEMBERS
 FAR struct task_group_s *group_findbypid(pid_t pid);
 int group_foreachchild(FAR struct task_group_s *group,
                        foreachchild_t handler, FAR void *arg);
 int group_killchildren(FAR struct task_tcb_s *tcb);
+#endif
+
+#ifdef CONFIG_ARCH_ADDRENV
+/* Group address environment management */
+
+int group_addrenv(FAR struct tcb_s *tcb);
 #endif
 
 /* Convenience functions */

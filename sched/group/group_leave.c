@@ -90,8 +90,8 @@
  *
  *****************************************************************************/
 
-#ifdef HAVE_GROUP_MEMBERS
-void group_remove(FAR struct task_group_s *group)
+#if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
+static void group_remove(FAR struct task_group_s *group)
 {
   FAR struct task_group_s *curr;
   FAR struct task_group_s *prev;
@@ -214,11 +214,13 @@ static inline void group_release(FAR struct task_group_s *group)
   (void)up_addrenv_destroy(&group->addrenv);
 #endif
 
-#ifdef HAVE_GROUP_MEMBERS
+#if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
   /* Remove the group from the list of groups */
 
   group_remove(group);
+#endif
 
+#ifdef HAVE_GROUP_MEMBERS
   /* Release the members array */
 
   if (group->tg_members)

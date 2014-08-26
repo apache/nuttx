@@ -298,9 +298,11 @@ struct join_s;                      /* Forward reference                        
 
 struct task_group_s
 {
-#ifdef HAVE_GROUP_MEMBERS
+#if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
   struct task_group_s *flink;       /* Supports a singly linked list            */
   gid_t tg_gid;                     /* The ID of this task group                */
+#endif
+#ifdef HAVE_GROUP_MEMBERS
   gid_t tg_pgid;                    /* The ID of the parent task group          */
 #endif
 #if !defined(CONFIG_DISABLE_PTHREAD) && defined(CONFIG_SCHED_HAVE_PARENT)

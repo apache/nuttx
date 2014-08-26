@@ -44,6 +44,10 @@ GRP_SRCS += group_childstatus.c
 endif
 endif
 
+ifeq ($(CONFIG_ARCH_ADDRENV),y)
+GRP_SRCS += group_addrenv.c
+endif
+
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 GRP_SRCS += group_signal.c
 endif

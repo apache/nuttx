@@ -67,16 +67,17 @@
  *****************************************************************************/
 /* This is counter that is used to generate unique task group IDs */
 
-#ifdef HAVE_GROUP_MEMBERS
+#if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
 static gid_t g_gidcounter;
 #endif
 
 /*****************************************************************************
  * Public Data
  *****************************************************************************/
+
+#if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
 /* This is the head of a list of all group members */
 
-#ifdef HAVE_GROUP_MEMBERS
 FAR struct task_group_s *g_grouphead;
 #endif
 
@@ -102,8 +103,8 @@ FAR struct task_group_s *g_grouphead;
  *
  *****************************************************************************/
 
-#ifdef HAVE_GROUP_MEMBERS
-void group_assigngid(FAR struct task_group_s *group)
+#if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
+static void group_assigngid(FAR struct task_group_s *group)
 {
   irqstate_t flags;
   gid_t gid;
@@ -116,7 +117,7 @@ void group_assigngid(FAR struct task_group_s *group)
 
   for (;;)
     {
-      /* Increment the ID counter.  This is global data so be extra paraoid. */
+      /* Increment the ID counter.  This is global data so be extra paranoid. */
 
       flags = irqsave();
       gid = ++g_gidcounter;
@@ -212,15 +213,15 @@ int group_allocate(FAR struct task_tcb_s *tcb)
 
   tcb->cmn.group = group;
 
+#if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
   /* Assign the group a unique ID.  If g_gidcounter were to wrap before we
    * finish with task creation, that would be a problem.
    */
 
-#ifdef HAVE_GROUP_MEMBERS
   group_assigngid(group);
 #endif
 
-  /* Duplicate the parent tasks envionment */
+  /* Duplicate the parent tasks environment */
 
   ret = env_dup(group);
   if (ret < 0)
@@ -267,7 +268,7 @@ int group_allocate(FAR struct task_tcb_s *tcb)
 int group_initialize(FAR struct task_tcb_s *tcb)
 {
   FAR struct task_group_s *group;
-#ifdef HAVE_GROUP_MEMBERS
+#if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
   irqstate_t flags;
 #endif
 
@@ -294,6 +295,9 @@ int group_initialize(FAR struct task_tcb_s *tcb)
 
   group->tg_mxmembers  = GROUP_INITIAL_MEMBERS; /* Number of members in allocation */
 
+#endif
+
+#if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
   /* Add the initialized entry to the list of groups */
 
   flags = irqsave();
