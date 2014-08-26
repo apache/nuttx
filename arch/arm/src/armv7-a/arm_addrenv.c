@@ -85,6 +85,24 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Configuration */
+
+#if (CONFIG_ARCH_TEXT_VBASE & SECTION_MASK) != 0
+#  error CONFIG_ARCH_TEXT_VBASE not aligned to section boundary
+#endif
+
+#if (CONFIG_ARCH_DATA_VBASE & SECTION_MASK) != 0
+#  error CONFIG_ARCH_DATA_VBASE not aligned to section boundary
+#endif
+
+#if (CONFIG_ARCH_HEAP_VBASE & SECTION_MASK) != 0
+#  error CONFIG_ARCH_HEAP_VBASE not aligned to section boundary
+#endif
+
+#if (CONFIG_ARCH_STACK_VBASE & SECTION_MASK) != 0
+#  error CONFIG_ARCH_STACK_VBASE not aligned to section boundary
+#endif
+
 /* Using a 4KiB page size, each 1MiB section maps to a PTE containing
  * 256*2KiB entries
  */
@@ -123,21 +141,6 @@ static void set_l2_entry(FAR uint32_t *l2table, uintptr_t paddr,
   /* Save the table entry */
 
   l2table[index] = (paddr | mmuflags);
-}
-
-/****************************************************************************
- * Name: set_l1_entry
- *
- * Description:
- *   Set an L1 page table entry to refer to a specific L2 page table.
- *
- ****************************************************************************/
-
-static inline void set_l1_entry(uintptr_t l2vaddr, uintptr_t l2paddr)
-{
-  mmu_l1_setentry(l2paddr & PMD_PTE_PADDR_MASK,
-                  l2vaddr & PMD_PTE_PADDR_MASK,
-                  MMU_L1_PGTABFLAGS);
 }
 
 /****************************************************************************
@@ -227,7 +230,7 @@ int up_addrenv_create(size_t textsize, size_t datasize,
 
       flags = irqsave();
       l1save = mmu_l1_getentry(ARCH_SCRATCH_VBASE);
-      set_l1_entry(ARCH_SCRATCH_VBASE, paddr);
+      mmu_l1_setentry(paddr, ARCH_SCRATCH_VBASE, MMU_MEMFLAGS);
       l2table = (FAR uint32_t *)ARCH_SCRATCH_VBASE;
 
       /* Initialize the page table */
@@ -270,7 +273,7 @@ int up_addrenv_create(size_t textsize, size_t datasize,
 
       flags = irqsave();
       l1save = mmu_l1_getentry(ARCH_SCRATCH_VBASE);
-      set_l1_entry(ARCH_SCRATCH_VBASE, paddr);
+      mmu_l1_setentry(paddr, ARCH_SCRATCH_VBASE, MMU_MEMFLAGS);
       l2table = (FAR uint32_t *)ARCH_SCRATCH_VBASE;
 
       /* Initialize the page table */
@@ -324,7 +327,7 @@ int up_addrenv_destroy(FAR group_addrenv_t *addrenv)
 
   for (vaddr = CONFIG_ARCH_TEXT_VBASE, i = 0;
        i < ARCH_TEXT_NSECTS;
-       vaddr += MM_PGSIZE, i++)
+       vaddr += SECTION_SIZE, i++)
     {
       mmu_l1_clrentry(vaddr);
       if (addrenv->text[i])
@@ -335,7 +338,7 @@ int up_addrenv_destroy(FAR group_addrenv_t *addrenv)
 
   for (vaddr = CONFIG_ARCH_DATA_VBASE, i = 0;
        i < ARCH_DATA_NSECTS;
-       vaddr += MM_PGSIZE, i++)
+       vaddr += SECTION_SIZE, i++)
     {
       mmu_l1_clrentry(vaddr);
       if (addrenv->data[i])
@@ -347,7 +350,7 @@ int up_addrenv_destroy(FAR group_addrenv_t *addrenv)
 #if 0 /* Not yet implemented */
   for (vaddr = CONFIG_ARCH_HEAP_VBASE, i = 0;
        i < ARCH_HEAP_NSECTS;
-       vaddr += MM_PGSIZE, i++)
+       vaddr += SECTION_SIZE, i++)
     {
       mmu_l1_clrentry(vaddr);
       if (addrenv->heap[i])
@@ -456,7 +459,7 @@ int up_addrenv_select(FAR const group_addrenv_t *addrenv,
 
   for (vaddr = CONFIG_ARCH_TEXT_VBASE, i = 0;
        i < ARCH_TEXT_NSECTS;
-       vaddr += MM_PGSIZE, i++)
+       vaddr += SECTION_SIZE, i++)
     {
       /* Save the old L1 page table entry */
 
@@ -470,7 +473,7 @@ int up_addrenv_select(FAR const group_addrenv_t *addrenv,
       paddr = (uintptr_t)addrenv->text[i];
       if (paddr)
         {
-          set_l1_entry(vaddr, paddr);
+          mmu_l1_setentry(paddr, vaddr, MMU_L1_PGTABFLAGS);
         }
       else
         {
@@ -480,7 +483,7 @@ int up_addrenv_select(FAR const group_addrenv_t *addrenv,
 
   for (vaddr = CONFIG_ARCH_DATA_VBASE, i = 0;
        i < ARCH_DATA_NSECTS;
-       vaddr += MM_PGSIZE, i++)
+       vaddr += SECTION_SIZE, i++)
     {
       /* Save the old L1 page table entry */
 
@@ -494,7 +497,7 @@ int up_addrenv_select(FAR const group_addrenv_t *addrenv,
       paddr = (uintptr_t)addrenv->data[i];
       if (paddr)
         {
-          set_l1_entry(vaddr, paddr);
+          mmu_l1_setentry(paddr, vaddr, MMU_L1_PGTABFLAGS);
         }
       else
         {
@@ -505,7 +508,7 @@ int up_addrenv_select(FAR const group_addrenv_t *addrenv,
 #if 0 /* Not yet implemented */
   for (vaddr = CONFIG_ARCH_HEAP_VBASE, i = 0;
        i < ARCH_HEAP_NSECTS;
-       vaddr += MM_PGSIZE, i++)
+       vaddr += SECTION_SIZE, i++)
     {
       /* Save the old L1 page table entry */
 
@@ -519,7 +522,7 @@ int up_addrenv_select(FAR const group_addrenv_t *addrenv,
       paddr = (uintptr_t)addrenv->heap[i];
       if (paddr)
         {
-          set_l1_entry(vaddr, paddr);
+          mmu_l1_setentry(paddr, vaddr, MMU_L1_PGTABFLAGS);
         }
       else
         {
@@ -557,7 +560,7 @@ int up_addrenv_restore(FAR const save_addrenv_t *oldenv)
 
   for (vaddr = CONFIG_ARCH_TEXT_VBASE, i = 0;
        i < ARCH_TEXT_NSECTS;
-       vaddr += MM_PGSIZE, i++)
+       vaddr += SECTION_SIZE, i++)
     {
       /* Restore the L1 page table entry */
 
@@ -566,7 +569,7 @@ int up_addrenv_restore(FAR const save_addrenv_t *oldenv)
 
   for (vaddr = CONFIG_ARCH_DATA_VBASE, i = 0;
        i < ARCH_DATA_NSECTS;
-       vaddr += MM_PGSIZE, i++)
+       vaddr += SECTION_SIZE, i++)
     {
       /* Restore the L1 page table entry */
 
@@ -576,7 +579,7 @@ int up_addrenv_restore(FAR const save_addrenv_t *oldenv)
 #if 0 /* Not yet implemented */
   for (vaddr = CONFIG_ARCH_HEAP_VBASE, i = 0;
        i < ARCH_HEAP_NSECTS;
-       vaddr += MM_PGSIZE, i++)
+       vaddr += SECTION_SIZE, i++)
     {
       /* Restore the L1 page table entry */
 

@@ -326,7 +326,7 @@ int elf_bind(FAR struct elf_loadinfo_s *loadinfo,
 #ifdef CONFIG_ARCH_HAVE_COHERENT_DCACHE
   /* Ensure that the I and D caches are coherent before starting the newly
    * loaded module by cleaning the D cache (i.e., flushing the D cache
-   * contents to memory and invalidating the I cache.
+   * contents to memory and invalidating the I cache).
    */
 
   up_coherent_dcache(loadinfo->textalloc, loadinfo->textsize);
@@ -334,4 +334,3 @@ int elf_bind(FAR struct elf_loadinfo_s *loadinfo,
 
   return ret;
 }
-
