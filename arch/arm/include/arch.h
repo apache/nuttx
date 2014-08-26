@@ -133,10 +133,10 @@ do { \
 
 struct group_addrenv_s
 {
-  FAR uint32_t *text[ARCH_TEXT_NSECTS];
-  FAR uint32_t *data[ARCH_DATA_NSECTS];
+  FAR uintptr_t *text[ARCH_TEXT_NSECTS];
+  FAR uintptr_t *data[ARCH_DATA_NSECTS];
 #if 0 /* Not yet implemented */
-  FAR uint32_t *heap[ARCH_HEAP_NSECTS];
+  FAR uintptr_t *heap[ARCH_HEAP_NSECTS];
 #endif
 };
 
