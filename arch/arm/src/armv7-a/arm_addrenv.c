@@ -79,6 +79,7 @@
 #include <arch/arch.h>
 #include <arch/irq.h>
 
+#include "cache.h"
 #include "mmu.h"
 
 #ifdef CONFIG_ARCH_ADDRENV
@@ -145,6 +146,172 @@ static void set_l2_entry(FAR uint32_t *l2table, uintptr_t paddr,
 }
 
 /****************************************************************************
+ * Name: up_addrenv_create_region
+ *
+ * Description:
+ *   Destroy one memory region.
+ *
+ ****************************************************************************/
+
+int up_addrenv_create_region(FAR uintptr_t **list, unsigned int listlen,
+                             uintptr_t vaddr, size_t regionsize,
+                             uint32_t mmuflags)
+{
+  irqstate_t flags;
+  uintptr_t paddr;
+  FAR uint32_t *l2table;
+  uint32_t l1save;
+  size_t nmapped;
+  unsigned int npages;
+  unsigned int i;
+  unsigned int j;
+
+  bvdbg("listlen=%d vaddr=%08lx regionsize=%ld, mmuflags=%08x\n",
+        listlen, (unsigned long)vaddr, (unsigned long)regionsize,
+        (unsigned int)mmuflags);
+
+  /* Verify that we are configured with enough virtual address space to
+   * support this memory region.
+   */
+
+  npages = MM_NPAGES(regionsize);
+  if (npages > listlen)
+    {
+      bdbg("ERROR: npages=%u listlen=%u\n", npages, listlen);
+      return -E2BIG;
+    }
+
+  /* Back the allocation up with physical pages and set up the level mapping
+   * (which of course does nothing until the L2 page table is hooked into
+   * the L1 page table).
+   */
+
+  nmapped = 0;
+  for (i = 0; i < npages; i++)
+    {
+      /* Allocate one physical page for the L2 page table */
+
+      paddr = mm_pgalloc(1);
+      if (!paddr)
+        {
+          return -ENOMEM;
+        }
+
+      DEBUGASSERT(MM_ISALIGNED(paddr));
+      list[i] = (FAR uint32_t *)paddr;
+
+      /* Temporarily map the page into the virtual address space */
+
+      flags = irqsave();
+      l1save = mmu_l1_getentry(ARCH_SCRATCH_VBASE);
+      mmu_l1_setentry(paddr & ~SECTION_MASK, ARCH_SCRATCH_VBASE, MMU_MEMFLAGS);
+      l2table = (FAR uint32_t *)(ARCH_SCRATCH_VBASE | (paddr & SECTION_MASK));
+
+      /* Initialize the page table */
+
+      memset(l2table, 0, ENTRIES_PER_L2TABLE * sizeof(uint32_t));
+
+      /* Back up L2 entries with physical memory */
+
+      for (j = 0; j < ENTRIES_PER_L2TABLE && nmapped < regionsize; j++)
+        {
+          /* Allocate one physical page for region data */
+
+          paddr = mm_pgalloc(1);
+          if (!paddr)
+            {
+              mmu_l1_restore(ARCH_SCRATCH_VBASE, l1save);
+              irqrestore(flags);
+              return -ENOMEM;
+            }
+
+          /* Map the .text region virtual address to this physical address */
+
+          set_l2_entry(l2table, paddr, vaddr, mmuflags);
+          nmapped += MM_PGSIZE;
+          vaddr   += MM_PGSIZE;
+        }
+
+      /* Make sure that the initialized L2 table is flushed to physical
+       * memory.
+       */
+
+      arch_flush_dcache((uintptr_t)l2table,
+                        (uintptr_t)l2table +
+                        ENTRIES_PER_L2TABLE * sizeof(uint32_t));
+
+      /* Restore the original L1 page table entry */
+
+      mmu_l1_restore(ARCH_SCRATCH_VBASE, l1save);
+      irqrestore(flags);
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: up_addrenv_destroy_region
+ *
+ * Description:
+ *   Destroy one memory region.
+ *
+ ****************************************************************************/
+
+void up_addrenv_destroy_region(FAR uintptr_t **list, unsigned int listlen,
+                               uintptr_t vaddr)
+{
+  irqstate_t flags;
+  uintptr_t paddr;
+  FAR uint32_t *l2table;
+  uint32_t l1save;
+  int i;
+  int j;
+
+  bvdbg("listlen=%d vaddr=%08lx\n", listlen, (unsigned long)vaddr);
+
+  for (i = 0; i < listlen; vaddr += SECTION_SIZE, list++, i++)
+    {
+      /* Unhook the L2 page table from the L1 page table */
+
+      mmu_l1_clrentry(vaddr);
+
+      /* Has this page table been allocated? */
+
+      paddr = (uintptr_t)list[i];
+      if (paddr != 0)
+        {
+          /* Temporarily map the page into the virtual address space */
+
+          flags = irqsave();
+          l1save = mmu_l1_getentry(ARCH_SCRATCH_VBASE);
+          mmu_l1_setentry(paddr & ~SECTION_MASK, ARCH_SCRATCH_VBASE, MMU_MEMFLAGS);
+          l2table = (FAR uint32_t *)(ARCH_SCRATCH_VBASE | (paddr & SECTION_MASK));
+
+          /* Return the allocated pages to the page allocator */
+
+          for (j = 0; j < ENTRIES_PER_L2TABLE; j++)
+            {
+              paddr = *l2table++;
+              if (paddr != 0)
+                {
+                  paddr &= PTE_SMALL_PADDR_MASK;
+                  mm_pgfree(paddr, 1);
+                }
+            }
+
+          /* Restore the original L1 page table entry */
+
+          mmu_l1_restore(ARCH_SCRATCH_VBASE, l1save);
+          irqrestore(flags);
+
+          /* And free the L2 page table itself */
+
+          mm_pgfree((uintptr_t)list[i], 1);
+        }
+    }
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -173,16 +340,6 @@ static void set_l2_entry(FAR uint32_t *l2table, uintptr_t paddr,
 int up_addrenv_create(size_t textsize, size_t datasize,
                       FAR group_addrenv_t *addrenv)
 {
-  irqstate_t flags;
-  uintptr_t vaddr;
-  uintptr_t paddr;
-  FAR uint32_t *l2table;
-  uint32_t l1save;
-  size_t nmapped;
-  unsigned int ntextpages;
-  unsigned int ndatapages;
-  unsigned int i;
-  unsigned int j;
   int ret;
 
   bvdbg("addrenv=%p textsize=%lu datasize=%lu\n",
@@ -194,18 +351,6 @@ int up_addrenv_create(size_t textsize, size_t datasize,
 
   memset(addrenv, 0, sizeof(group_addrenv_t));
 
-  /* Verify that we are configured with enough virtual address space to
-   * support this address environment.
-   */
-
-  ntextpages = MM_NPAGES(textsize);
-  ndatapages = MM_NPAGES(datasize);
-
-  if (ntextpages > ARCH_TEXT_NSECTS || ndatapages > ARCH_DATA_NSECTS)
-    {
-      return -E2BIG;
-    }
-
   /* Back the allocation up with physical pages and set up the level mapping
    * (which of course does nothing until the L2 page table is hooked into
    * the L1 page table).
@@ -213,88 +358,24 @@ int up_addrenv_create(size_t textsize, size_t datasize,
 
   /* Allocate .text space pages */
 
-  vaddr   = CONFIG_ARCH_TEXT_VBASE;
-  nmapped = 0;
-
-  for (i = 0; i < ntextpages; i++)
+  ret = up_addrenv_create_region(addrenv->text, ARCH_TEXT_NSECTS,
+                                 CONFIG_ARCH_TEXT_VBASE, textsize,
+                                 MMU_L2_TEXTFLAGS);
+  if (ret < 0)
     {
-      /* Allocate one physical page */
-
-      paddr = mm_pgalloc(1);
-      if (!paddr)
-        {
-          ret = -ENOMEM;
-          goto errout;
-        }
-      
-      DEBUGASSERT(MM_ISALIGNED(paddr));
-      addrenv->text[i] = (FAR uint32_t *)paddr;
-
-      /* Temporarily map the page into the virtual address space */
-
-      flags = irqsave();
-      l1save = mmu_l1_getentry(ARCH_SCRATCH_VBASE);
-      mmu_l1_setentry(paddr, ARCH_SCRATCH_VBASE, MMU_MEMFLAGS);
-      l2table = (FAR uint32_t *)ARCH_SCRATCH_VBASE;
-
-      /* Initialize the page table */
-
-      memset(l2table, 0, ENTRIES_PER_L2TABLE * sizeof(uint32_t));
-      for (j = 0; j < ENTRIES_PER_L2TABLE && nmapped < textsize; j++)
-        {
-          set_l2_entry(l2table, paddr, vaddr, MMU_L2_TEXTFLAGS);
-          nmapped += MM_PGSIZE;
-          paddr   += MM_PGSIZE;
-          vaddr   += MM_PGSIZE;
-        }
-
-      /* Restore the original L1 page table entry */
-
-      mmu_l1_restore(ARCH_SCRATCH_VBASE, l1save);
-      irqrestore(flags);
+      bdbg("ERROR: Failed to create .text region: %d\n", ret);
+      goto errout;
     }
 
   /* Allocate .bss/.data space pages */
 
-  vaddr   = CONFIG_ARCH_DATA_VBASE;
-  nmapped = 0;
-
-  for (i = 0; i < ndatapages; i++)
+  ret = up_addrenv_create_region(addrenv->data, ARCH_DATA_NSECTS,
+                                 CONFIG_ARCH_DATA_VBASE, datasize,
+                                 MMU_L2_DATAFLAGS);
+  if (ret < 0)
     {
-      /* Allocate one physical page */
-
-      paddr = mm_pgalloc(1);
-      if (!paddr)
-        {
-          ret = -ENOMEM;
-          goto errout;
-        }
-      
-      DEBUGASSERT(MM_ISALIGNED(paddr));
-      addrenv->data[i] = (FAR uint32_t *)paddr;
-
-      /* Temporarily map the page into the virtual address space */
-
-      flags = irqsave();
-      l1save = mmu_l1_getentry(ARCH_SCRATCH_VBASE);
-      mmu_l1_setentry(paddr, ARCH_SCRATCH_VBASE, MMU_MEMFLAGS);
-      l2table = (FAR uint32_t *)ARCH_SCRATCH_VBASE;
-
-      /* Initialize the page table */
-
-      memset(l2table, 0, ENTRIES_PER_L2TABLE * sizeof(uint32_t));
-      for (j = 0; j < ENTRIES_PER_L2TABLE && nmapped < datasize; j++)
-        {
-          set_l2_entry(l2table, paddr, vaddr, MMU_L2_DATAFLAGS);
-          nmapped += MM_PGSIZE;
-          paddr   += MM_PGSIZE;
-          vaddr   += MM_PGSIZE;
-        }
-
-      /* Restore the original L1 page table entry */
-
-      mmu_l1_restore(ARCH_SCRATCH_VBASE, l1save);
-      irqrestore(flags);
+      bdbg("ERROR: Failed to create .bss/.data region: %d\n", ret);
+      goto errout;
     }
 
   /* Notice that no pages are yet allocated for the heap */
@@ -324,45 +405,24 @@ errout:
 
 int up_addrenv_destroy(FAR group_addrenv_t *addrenv)
 {
-  uintptr_t vaddr;
-  int i;
-
   bvdbg("addrenv=%p\n", addrenv);
   DEBUGASSERT(addrenv);
 
-  for (vaddr = CONFIG_ARCH_TEXT_VBASE, i = 0;
-       i < ARCH_TEXT_NSECTS;
-       vaddr += SECTION_SIZE, i++)
-    {
-      mmu_l1_clrentry(vaddr);
-      if (addrenv->text[i])
-        {
-          mm_pgfree((uintptr_t)addrenv->text[i], ARCH_SECT2PG(1));
-        }
-    }
+  /* Destroy the .text region */
 
-  for (vaddr = CONFIG_ARCH_DATA_VBASE, i = 0;
-       i < ARCH_DATA_NSECTS;
-       vaddr += SECTION_SIZE, i++)
-    {
-      mmu_l1_clrentry(vaddr);
-      if (addrenv->data[i])
-        {
-          mm_pgfree((uintptr_t)addrenv->data[i], ARCH_SECT2PG(1));
-        }
-    }
+  up_addrenv_destroy_region(addrenv->text, ARCH_TEXT_NSECTS,
+                            CONFIG_ARCH_TEXT_VBASE);
+
+  /* Destroy the .bss/.data region */
+
+  up_addrenv_destroy_region(addrenv->data, ARCH_DATA_NSECTS,
+                            CONFIG_ARCH_DATA_VBASE);
 
 #if 0 /* Not yet implemented */
-  for (vaddr = CONFIG_ARCH_HEAP_VBASE, i = 0;
-       i < ARCH_HEAP_NSECTS;
-       vaddr += SECTION_SIZE, i++)
-    {
-      mmu_l1_clrentry(vaddr);
-      if (addrenv->heap[i])
-        {
-          mm_pgfree((uintptr_t)addrenv->heap[i], ARCH_SECT2PG(1));
-        }
-    }
+  /* Destroy the heap region */
+
+  up_addrenv_destroy_region(addrenv->heap, ARCH_HEAP_NSECTS,
+                            CONFIG_ARCH_HEAP_VBASE);
 #endif
 
   memset(addrenv, 0, sizeof(group_addrenv_t));
