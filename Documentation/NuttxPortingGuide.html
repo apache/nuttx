@@ -112,7 +112,7 @@
       <a href="#up_addrenv_vdata">4.4.4 <code>up_addrenv_vdata()</code></a></br>
       <a href="#up_addrenv_select">4.4.5 <code>up_addrenv_select()</code></a></br>
       <a href="#up_addrenv_restore">4.4.6 <code>up_addrenv_restore()</code></a></br>
-      <a href="#up_addrenv_assign">4.4.7 <code>up_addrenv_assign()</code></a></br>
+      <a href="#up_addrenv_clone">4.4.7 <code>up_addrenv_clone()</code></a></br>
       <a href="#up_addrenv_attach">4.4.8 <code>up_addrenv_attach()</code></a></br>
       <a href="#up_addrenv_detach">4.4.9 <code>up_addrenv_detach()</code></a>
     </ul>
@@ -2960,8 +2960,8 @@ VxWorks provides the following comparable interface:
         Restore an address environment.
       </li>
       <li>
-        <a href="#up_addrenv_assign">4.4.7 <code>up_addrenv_assign()</code></a>:
-        Assign an address environment to a thread.
+        <a href="#up_addrenv_clone">4.4.7 <code>up_addrenv_clone()</code></a>:
+        Copy an address environment from one location to another.
       </li>
     </ul>
   </li>
@@ -2969,7 +2969,7 @@ VxWorks provides the following comparable interface:
     <p>
       <b>Tasking Support</b>.
       Other interfaces must be provided to support higher-level interfaces used by the NuttX tasking logic.
-      These interfaces are* used by the functions in <code>sched/</code> and all operate on the task group which as been assigned an address environment by <code>up_addrenv_assign()</code>.
+      These interfaces are* used by the functions in <code>sched/</code> and all operate on the task group which as been assigned an address environment by <code>up_addrenv_clone()</code>.
     </p>
     <ul>
       <li>
@@ -3108,19 +3108,19 @@ VxWorks provides the following comparable interface:
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_assign">4.4.7 <code>up_addrenv_assign()</code></a></h3>
+<h3><a name="up_addrenv_clone">4.4.7 <code>up_addrenv_clone()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
-  <code>int up_addrenv_assign(FAR const group_addrenv_t *addrenv, FAR struct task_group_s *group);</code>
+  <code>int up_addrenv_clone(FAR const task_group_s *src, FAR struct task_group_s *dest);</code>
 </ul>
 <p><b>Description</b>:</p>
 <ul>
-  Assign an address environment to a new task group.
+  Duplicate an address environment.  This does not copy the underlying memory, only the representation that can be used to instantiate that memory as an address environment.
 </ul>
 <p><b>Input Parameters</b>:</p>
 <ul>
-  <li><code>addrenv</code>: The representation of the group address environment previously returned by <code>up_addrenv_create</code>.</li>
-  <li><code>group</code>: The new task group to receive the address environment.</li>
+  <li><code>src</code>: The address environment to be copied.</li>
+  <li><code>dest</code>: The location to receive the copied address environment.</li>
 </ul>
 <p><b>Returned Value</b>:</p>
 <ul>
