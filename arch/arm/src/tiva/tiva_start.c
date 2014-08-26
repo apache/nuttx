@@ -52,6 +52,7 @@
 #include "tiva_lowputc.h"
 #include "tiva_syscontrol.h"
 #include "tiva_userspace.h"
+#include "tiva_start.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -102,10 +103,10 @@ void __start(void)
 #endif
   uint32_t *dest;
 
-  /* Configure the uart so that we can get debug output as soon as possible */
+  /* Configure the UART so that we can get debug output as soon as possible */
 
-#ifdef CONFIG_ARCH_BOARD_CC3200_LAUNCHPAD
-  up_earlyconsoleinit();
+#ifdef CONFIG_TIVA_BOARD_EARLYINIT
+  board_earlyinit();
 #else
   up_clockconfig();
   up_lowsetup();

@@ -32,7 +32,7 @@
  *
  ************************************************************************************/
 
-#ifdef  __CONFIGS_CC3200_INCLUDE_UTILS_H
+#ifndef __CONFIGS_CC3200_INCLUDE_UTILS_H
 #define __CONFIGS_CC3200_INCLUDE_UTILS_H 1
 
 /************************************************************************************
@@ -143,7 +143,5 @@ void cc3200_print(char* str);
 void cc3200_pin_config_set(uint32_t pin, uint32_t pin_strength, uint32_t pin_type);
 void cc3200_pin_mode_set(uint32_t pin, uint32_t pin_mode);
 void cc3200_pin_type_uart(uint32_t pin, uint32_t pin_mode);
-void cc3200_init(void);
-void cc3200_uart_init(void);
 
 #endif /* __CONFIGS_CC3200_INCLUDE_UTILS_H */

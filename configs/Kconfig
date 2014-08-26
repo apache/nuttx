@@ -814,6 +814,7 @@ config ARCH_BOARD_CC3200_LAUNCHPAD
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select TIVA_BOARD_EARLYINIT
 	---help---
 		Tiva CC3200 Launchpad.
 

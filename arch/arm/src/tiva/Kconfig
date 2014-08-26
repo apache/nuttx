@@ -91,6 +91,10 @@ config LM_REVA2
 		Some early silicon returned an increase LDO voltage or 2.75V to work
 		around a PLL bug
 
+config TIVA_BOARD_EARLYINIT
+	bool
+	default n
+
 menu "Tiva/Stellaris Peripheral Support"
 
 config TIVA_UART0
