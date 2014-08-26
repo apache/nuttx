@@ -82,13 +82,16 @@
 
 void up_coherent_dcache(uintptr_t addr, size_t len)
 {
-  /* Perform the operation on the L1 cache */
+  if (len > 0)
+    {
+      /* Perform the operation on the L1 cache */
 
-  cp15_coherent_dcache(addr, addr+len);
+      cp15_coherent_dcache(addr, addr + len - 1);
 
 #ifdef CONFIG_ARCH_L2CACHE
-  /* If we have an L2 cache, then there more things that need to done */
+      /* If we have an L2 cache, then there more things that need to done */
 
 #  warning This is insufficient
 #endif
+    }
 }
