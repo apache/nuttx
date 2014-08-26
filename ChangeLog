@@ -8258,3 +8258,7 @@
 	  include/nuttx/addrenv.h, arch.h, pgalloc.h, mm/Kconfig, mm_pgalloc.c,
 	  sched/init/os_start.c: Cortex-A/SAMA5 address environment support is
 	  code complete (untested) (2014-8-25).
+	* arch/arm/include/tiva and src/tive:  Add support for the TI CC3200.
+	  From Jim Ewing (2014-8-26).
+	* configs/cc3200-launchpad:  Add support for the TI CC3200 Launchpad.
+	  From Jim Ewing (2014-8-26).
