@@ -47,8 +47,12 @@
 #include <errno.h>
 
 #include <arpa/inet.h>
+
+#include <nuttx/arch.h>
 #include <nuttx/binfmt/binfmt.h>
 #include <nuttx/binfmt/elf.h>
+
+#include "libelf/libelf.h"
 
 #ifdef CONFIG_ELF
 
@@ -171,6 +175,47 @@ static void elf_dumploadinfo(FAR struct elf_loadinfo_s *loadinfo)
 #endif
 
 /****************************************************************************
+ * Name: elf_dumpentrypt
+ ****************************************************************************/
+
+#ifdef CONFIG_ELF_DUMPBUFFER
+static void elf_dumpentrypt(FAR struct binary_s *binp,
+                            FAR struct elf_loadinfo_s *loadinfo)
+{
+#ifdef CONFIG_ARCH_ADDRENV
+  int ret;
+
+  /* If CONFIG_ARCH_ADDRENV=y, then the loaded ELF lies in a virtual address
+   * space that may not be in place now.  elf_addrenv_select() will
+   * temporarily instantiate that address space.
+   */
+
+  ret = elf_addrenv_select(loadinfo);
+  if (ret < 0)
+    {
+      bdbg("ERROR: elf_addrenv_select() failed: %d\n", ret);
+      return;
+    }
+#endif
+
+  elf_dumpbuffer("Entry code", (FAR const uint8_t*)binp->entrypt,
+                 MIN(loadinfo->textsize - loadinfo->ehdr.e_entry, 512));
+
+#ifdef CONFIG_ARCH_ADDRENV
+  /* Restore the original address environment */
+
+  ret = elf_addrenv_restore(loadinfo);
+  if (ret < 0)
+    {
+      bdbg("ERROR: elf_addrenv_restore() failed: %d\n", ret);
+    }
+#endif
+}
+#else
+# define elf_dumpentrypt(b,l)
+#endif
+
+/****************************************************************************
  * Name: elf_loadbinary
  *
  * Description:
@@ -179,7 +224,7 @@ static void elf_dumploadinfo(FAR struct elf_loadinfo_s *loadinfo)
  *
  ****************************************************************************/
 
-static int elf_loadbinary(struct binary_s *binp)
+static int elf_loadbinary(FAR struct binary_s *binp)
 {
   struct elf_loadinfo_s loadinfo;  /* Contains globals for libelf */
   int                   ret;
@@ -256,9 +301,7 @@ static int elf_loadbinary(struct binary_s *binp)
   binp->addrenv   = loadinfo.addrenv;
 #endif
 
-  elf_dumpbuffer("Entry code", (FAR const uint8_t*)binp->entrypt,
-                 MIN(loadinfo.textsize - loadinfo.ehdr.e_entry, 512));
-
+  elf_dumpentrypt(binp, &loadinfo);
   elf_uninit(&loadinfo);
   return OK;
 
