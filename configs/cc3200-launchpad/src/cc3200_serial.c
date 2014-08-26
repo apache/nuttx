@@ -40,8 +40,11 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <nuttx/arch.h>
-#include <cc3200_utils.h>
+
+#include <arch/board/cc3200_utils.h>
+
 #include "chip/cc3200_memorymap.h"
 #include "up_internal.h"
 
