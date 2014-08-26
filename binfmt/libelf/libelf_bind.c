@@ -312,16 +312,19 @@ int elf_bind(FAR struct elf_loadinfo_s *loadinfo,
         }
     }
 
-#ifdef CONFIG_ARCH_HAVE_COHERENT_DCACHE
+#if defined(CONFIG_ARCH_ADDRENV)
   /* Ensure that the I and D caches are coherent before starting the newly
    * loaded module by cleaning the D cache (i.e., flushing the D cache
    * contents to memory and invalidating the I cache).
    */
 
+#if 0 /* REVISIT... has some problems */
+  (void)up_addrenv_coherent(&loadinfo->addrenv);
+#else
   up_coherent_dcache(loadinfo->textalloc, loadinfo->textsize);
+  up_coherent_dcache(loadinfo->dataalloc, loadinfo->datasize);
 #endif
 
-#ifdef CONFIG_ARCH_ADDRENV
   /* Restore the original address environment */
 
   status = elf_addrenv_restore(loadinfo);
@@ -333,6 +336,16 @@ int elf_bind(FAR struct elf_loadinfo_s *loadinfo,
           ret = status;
         }
     }
+
+#elif defined(CONFIG_ARCH_HAVE_COHERENT_DCACHE)
+  /* Ensure that the I and D caches are coherent before starting the newly
+   * loaded module by cleaning the D cache (i.e., flushing the D cache
+   * contents to memory and invalidating the I cache).
+   */
+
+  up_coherent_dcache(loadinfo->textalloc, loadinfo->textsize);
+  up_coherent_dcache(loadinfo->dataalloc, loadinfo->datasize);
+
 #endif
 
   return ret;

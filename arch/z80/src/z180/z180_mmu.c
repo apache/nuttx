@@ -458,6 +458,29 @@ int up_addrenv_restore(FAR const save_addrenv_t *oldenv)
 }
 
 /****************************************************************************
+ * Name: up_addrenv_coherent
+ *
+ * Description:
+ *   Flush D-Cache and invalidate I-Cache in preparation for a change in
+ *   address environments.  This should immediately precede a call to
+ *   up_addrenv_select();
+ *
+ * Input Parameters:
+ *   addrenv - Describes the address environment to be made coherent.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int up_addrenv_coherent(FAR const group_addrenv_t *addrenv)
+{
+  /* There are no caches */
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: up_addrenv_clone
  *
  * Description:

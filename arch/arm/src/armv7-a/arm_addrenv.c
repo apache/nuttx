@@ -662,6 +662,56 @@ int up_addrenv_restore(FAR const save_addrenv_t *oldenv)
 }
 
 /****************************************************************************
+ * Name: up_addrenv_coherent
+ *
+ * Description:
+ *   Flush D-Cache and invalidate I-Cache in preparation for a change in
+ *   address environments.  This should immediately precede a call to
+ *   up_addrenv_select();
+ *
+ * Input Parameters:
+ *   addrenv - Describes the address environment to be made coherent.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int up_addrenv_coherent(FAR const group_addrenv_t *addrenv)
+{
+  uintptr_t vaddr;
+  int i;
+
+  bvdbg("addrenv=%p\n", addrenv);
+  DEBUGASSERT(addrenv);
+
+  /* Invalidate I-Cache */
+
+  cp15_invalidate_icache();
+
+  /* Clean D-Cache in each region. */
+
+#warning REVISIT... causes crashes
+#if 0
+  arch_clean_dcache(CONFIG_ARCH_TEXT_VBASE,
+                    CONFIG_ARCH_TEXT_VBASE +
+                    CONFIG_ARCH_TEXT_NPAGES * MM_PGSIZE - 1);
+
+  arch_clean_dcache(CONFIG_ARCH_DATA_VBASE,
+                    CONFIG_ARCH_DATA_VBASE +
+                    CONFIG_ARCH_DATA_NPAGES * MM_PGSIZE - 1);
+
+#if 0 /* Not yet implemented */
+  arch_clean_dcache(CONFIG_ARCH_HEAP_VBASE,
+                    CONFIG_ARCH_HEAP_VBASE +
+                    CONFIG_ARCH_HEAP_NPAGES * MM_PGSIZE - 1);
+#endif
+#endif
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: up_addrenv_clone
  *
  * Description:
