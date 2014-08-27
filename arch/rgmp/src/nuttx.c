@@ -453,6 +453,16 @@ void _exit(int status)
 
     tcb = (struct tcb_s*)g_readytorun.head;
 
+#ifdef CONFIG_ARCH_ADDRENV
+    /* Make sure that the address environment for the previously running
+     * task is closed down gracefully (data caches dump, MMU flushed) and
+     * set up the address environment for the new thread at the head of
+     * the ready-to-run list.
+     */
+
+    (void)group_addrenv(tcb);
+#endif
+
     /* Then switch contexts */
 
     up_switchcontext(NULL, tcb);
