@@ -524,7 +524,6 @@ int up_addrenv_select(FAR const group_addrenv_t *addrenv,
   uintptr_t paddr;
   int i;
 
-  bvdbg("addrenv=%p oldenv=%p\n", addrenv, oldenv);
   DEBUGASSERT(addrenv);
 
   for (vaddr = CONFIG_ARCH_TEXT_VBASE, i = 0;
@@ -682,7 +681,6 @@ int up_addrenv_coherent(FAR const group_addrenv_t *addrenv)
   uintptr_t vaddr;
   int i;
 
-  bvdbg("addrenv=%p\n", addrenv);
   DEBUGASSERT(addrenv);
 
   /* Invalidate I-Cache */
