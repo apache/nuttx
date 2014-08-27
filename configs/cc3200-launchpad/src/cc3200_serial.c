@@ -71,7 +71,7 @@
 
 static void cc3200_uart0_init(void)
 {
-  HWREG(0x44025048) |= 0x01;
+  HWREG(0x44025080) |= 0x01;
 
   cc3200_pin_type_uart(PIN_55, PIN_MODE_3);
   cc3200_pin_type_uart(PIN_57, PIN_MODE_3);
