@@ -124,7 +124,7 @@
 "stat","sys/stat.h","CONFIG_NFILE_DESCRIPTORS > 0","int","const char*","FAR struct stat*"
 #"statfs","stdio.h","","int","FAR const char*","FAR struct statfs*"
 "statfs","sys/statfs.h","CONFIG_NFILE_DESCRIPTORS > 0","int","const char*","struct statfs*"
-"task_create","sched.h","","int","const char*","int","int","main_t","FAR char * const []|FAR char * const *"
+"task_create","sched.h","!defined(CONFIG_ARCH_ADDRENV)","int","FAR const char*","int","int","main_t","FAR char * const []|FAR char * const *"
 #"task_create","sched.h","","int","const char*","int","main_t","FAR char * const []|FAR char * const *"
 "task_delete","sched.h","","int","pid_t"
 "task_restart","sched.h","","int","pid_t"

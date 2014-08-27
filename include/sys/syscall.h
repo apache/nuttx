@@ -91,11 +91,19 @@
 #define SYS_sem_unlink                 (CONFIG_SYS_RESERVED+19)
 #define SYS_sem_wait                   (CONFIG_SYS_RESERVED+20)
 #define SYS_set_errno                  (CONFIG_SYS_RESERVED+21)
-#define SYS_task_create                (CONFIG_SYS_RESERVED+22)
-#define SYS_task_delete                (CONFIG_SYS_RESERVED+23)
-#define SYS_task_restart               (CONFIG_SYS_RESERVED+24)
-#define SYS_up_assert                  (CONFIG_SYS_RESERVED+25)
-#define __SYS_vfork                    (CONFIG_SYS_RESERVED+26)
+
+#ifndef CONFIG_ARCH_ADDRENV
+#  define SYS_task_create              (CONFIG_SYS_RESERVED+22)
+#  define SYS_task_delete              (CONFIG_SYS_RESERVED+23)
+#  define SYS_task_restart             (CONFIG_SYS_RESERVED+24)
+#  define SYS_up_assert                (CONFIG_SYS_RESERVED+25)
+#  define __SYS_vfork                  (CONFIG_SYS_RESERVED+26)
+#else
+#  define SYS_task_delete              (CONFIG_SYS_RESERVED+22)
+#  define SYS_task_restart             (CONFIG_SYS_RESERVED+23)
+#  define SYS_up_assert                (CONFIG_SYS_RESERVED+24)
+#  define __SYS_vfork                  (CONFIG_SYS_RESERVED+25)
+#endif
 
 /* The following can be individually enabled */
 
