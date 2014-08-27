@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/common/up_blocktask.c
  *
- *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@
 
 #include "chip/switch.h"
 #include "sched/sched.h"
+#include "group/group.h"
 #include "up_internal.h"
 
 /****************************************************************************
@@ -145,6 +146,16 @@ void up_block_task(FAR struct tcb_s *tcb, tstate_t task_state)
            */
 
           SET_IRQCONTEXT(rtcb);
+
+#ifdef CONFIG_ARCH_ADDRENV
+         /* Make sure that the address environment for the previously
+          * running task is closed down gracefully (data caches dump,
+          * MMU flushed) and set up the address environment for the new
+          * thread at the head of the ready-to-run list.
+          */
+
+         (void)group_addrenv(rtcb);
+#endif
         }
 
       /* Copy the user C context into the TCB at the (old) head of the
@@ -159,8 +170,16 @@ void up_block_task(FAR struct tcb_s *tcb, tstate_t task_state)
            */
 
           rtcb = (FAR struct tcb_s*)g_readytorun.head;
-          /* dbg("New Active Task TCB=%p\n", rtcb); */
 
+#ifdef CONFIG_ARCH_ADDRENV
+         /* Make sure that the address environment for the previously
+          * running task is closed down gracefully (data caches dump,
+          * MMU flushed) and set up the address environment for the new
+          * thread at the head of the ready-to-run list.
+          */
+
+         (void)group_addrenv(rtcb);
+#endif
           /* Then switch contexts */
 
           RESTORE_USERCONTEXT(rtcb);

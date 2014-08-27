@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/mips/src/mips32/up_blocktask.c
  *
- *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@
 #include <nuttx/arch.h>
 
 #include "sched/sched.h"
+#include "group/group.h"
 #include "up_internal.h"
 
 /****************************************************************************
@@ -140,17 +141,39 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
           /* Then switch contexts */
 
           up_restorestate(rtcb->xcp.regs);
+
+#ifdef CONFIG_ARCH_ADDRENV
+         /* Make sure that the address environment for the previously
+          * running task is closed down gracefully (data caches dump,
+          * MMU flushed) and set up the address environment for the new
+          * thread at the head of the ready-to-run list.
+          */
+
+         (void)group_addrenv(rtcb);
+#endif
         }
 
       /* No, then we will need to perform the user context switch */
 
       else
         {
-          /* Switch context to the context of the task at the head of the
-           * ready to run list.
+          /* Get the context of the task at the head of the ready to
+           * run list.
            */
 
           struct tcb_s *nexttcb = (struct tcb_s*)g_readytorun.head;
+
+#ifdef CONFIG_ARCH_ADDRENV
+         /* Make sure that the address environment for the previously
+          * running task is closed down gracefully (data caches dump,
+          * MMU flushed) and set up the address environment for the new
+          * thread at the head of the ready-to-run list.
+          */
+
+         (void)group_addrenv(nexttcb);
+#endif
+          /* Then switch contexts */
+
           up_switchcontext(rtcb->xcp.regs, nexttcb->xcp.regs);
 
           /* up_switchcontext forces a context switch to the task at the
