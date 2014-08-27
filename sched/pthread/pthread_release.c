@@ -93,8 +93,7 @@
 void pthread_release(FAR struct task_group_s *group)
 {
   FAR struct join_s *join;
-
-  sdbg("group=0x%p\n", group);
+  DEBUGASSERT(group);
 
   /* Visit and delete each join structure still in the list.  Since we
    * are last exiting thread of the group, no special protection should
