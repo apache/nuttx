@@ -215,6 +215,10 @@ int exec_module(FAR const struct binary_s *binp)
       bdbg("ERROR: up_addrenv_clone() failed: %d\n", ret);
       goto errout_with_stack;
     }
+
+  /* Mark that this group has an address environment */
+
+  tcb->cmn.group->tg_flags |= GROUP_FLAG_ADDRENV;
 #endif
 
 #ifdef CONFIG_BINFMT_CONSTRUCTORS

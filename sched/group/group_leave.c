@@ -212,6 +212,10 @@ static inline void group_release(FAR struct task_group_s *group)
   /* Destroy the group address environment */
 
   (void)up_addrenv_destroy(&group->addrenv);
+
+  /* Mark no address environment */
+
+  g_gid_current = 0;
 #endif
 
 #if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)

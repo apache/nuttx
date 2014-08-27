@@ -110,15 +110,21 @@ int group_addrenv(FAR struct tcb_s *tcb)
   DEBUGASSERT(tcb && tcb->group);
   group = tcb->group;
 
-  /* What is the ID of the group of the new thread to run?  Use zero if the
-   * group is a kernel thread.
-   */
+  /* Does the group have an address environment? */
 
-  gid = 0;
-  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
+  if ((group->tg_flags & GROUP_FLAG_ADDRENV) == 0)
     {
-      gid = group->tg_gid;
+      /* No... just return perhaps leaving a different address environment
+       * intact.
+       */
+
+      return OK;
     }
+
+  /* Get the ID of the group that needs the address environment */
+
+  gid = group->tg_gid;
+  DEBUGASSERT(gid != 0);
 
   /* Are we going to change address environments? */
 
@@ -129,10 +135,11 @@ int group_addrenv(FAR struct tcb_s *tcb)
 
       if (g_gid_current != 0)
         {
-          /* Find the old group this this ID */
+          /* Find the old group with this ID. */
 
           oldgroup = group_findbygid(g_gid_current);
-          DEBUGASSERT(oldgroup);
+          DEBUGASSERT(oldgroup &&
+                     (oldgroup->tg_flags & GROUP_FLAG_ADDRENV) != 0);
 
           if (oldgroup)
             {
