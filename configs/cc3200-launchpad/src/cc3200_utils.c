@@ -140,18 +140,25 @@ void cc3200_pin_type_uart(uint32_t pin, uint32_t pin_mode)
 
 void cc3200_init(void)
 {
+  uint8_t x=16;
+
   HWREG(0x4402F064) |= 0x800000;
   HWREG(0x4402F800  + 0x00000418) |= (1<<4);
   HWREG(0x4402E16C) |= 0x3C;
+  HWREG(0x44025000 + 0x00000048) |= 0x00000001;
+  while(--x)
+    ;
+  HWREG(0x44025000 + 0x00000048) &= ~0x00000001;
   HWREG(0x4402F804) = 0x0;
-  HWREG(0x4402F804) = 0x0;
+  HWREG(0x4402F804) = 0x1;
 
   if (((HWREG(0x4402F0C8) & 0xFF) == 0x2))
     {
       HWREG(0x4402E110) = ((HWREG(0x4402E110) & ~0xC0F) | 0x2);
       HWREG(0x4402E114) = ((HWREG(0x4402E110) & ~0xC0F) | 0x2);
-      HWREG(0x4402E184) |= 0x2;
     }
+
+  HWREG(0x4402E184) |= 0x2;
 
   if ((HWREG(0x4402E0A4) & 0xF) == 0x1)
     {
