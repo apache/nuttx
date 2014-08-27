@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/common/up_unblocktask.c
  *
- *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@
 #include "chip/chip.h"
 #include "chip/switch.h"
 #include "sched/sched.h"
+#include "group/group.h"
 #include "clock/clock.h"
 #include "up_internal.h"
 
@@ -78,7 +79,7 @@
  *   tcb: Refers to the tcb to be unblocked.  This tcb is
  *     in one of the waiting tasks lists.  It must be moved to
  *     the ready-to-run list and, if it is the highest priority
- *     ready to run taks, executed.
+ *     ready to run task, executed.
  *
  ****************************************************************************/
 
@@ -130,13 +131,22 @@ void up_unblock_task(FAR struct tcb_s *tcb)
            */
 
           rtcb = (FAR struct tcb_s*)g_readytorun.head;
-          /* dbg("New Active Task TCB=%p\n", rtcb); */
 
           /* Then setup so that the context will be performed on exit
            * from the interrupt.
            */
 
           SET_IRQCONTEXT(rtcb);
+
+#ifdef CONFIG_ARCH_ADDRENV
+         /* Make sure that the address environment for the previously
+          * running task is closed down gracefully (data caches dump,
+          * MMU flushed) and set up the address environment for the new
+          * thread at the head of the ready-to-run list.
+          */
+
+         (void)group_addrenv(rtcb);
+#endif
         }
 
       /* We are not in an interrupt handler.  Copy the user C context
@@ -153,8 +163,16 @@ void up_unblock_task(FAR struct tcb_s *tcb)
            */
 
           rtcb = (FAR struct tcb_s*)g_readytorun.head;
-          /* dbg("New Active Task TCB=%p\n", rtcb); */
 
+#ifdef CONFIG_ARCH_ADDRENV
+         /* Make sure that the address environment for the previously
+          * running task is closed down gracefully (data caches dump,
+          * MMU flushed) and set up the address environment for the new
+          * thread at the head of the ready-to-run list.
+          */
+
+         (void)group_addrenv(rtcb);
+#endif
           /* Then switch contexts */
 
           RESTORE_USERCONTEXT(rtcb);
