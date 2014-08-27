@@ -6,7 +6,7 @@
  *
  * This file is a part of NuttX:
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2014 Gregory Nutt. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -55,6 +55,7 @@
 
 #include "task/task.h"
 #include "sched/sched.h"
+#include "group/group.h"
 
 struct tcb_s *current_task = NULL;
 
@@ -288,6 +289,15 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
                 sched_mergepending();
             }
             nexttcb = (struct tcb_s*)g_readytorun.head;
+
+#ifdef CONFIG_ARCH_ADDRENV
+            // Make sure that the address environment for the previously
+            // running task is closed down gracefully (data caches dump,
+            // MMU flushed) and set up the address environment for the new
+            // thread at the head of the ready-to-run list.
+
+            (void)group_addrenv(nexttcb);
+#endif
             // context switch
             up_switchcontext(rtcb, nexttcb);
         }
