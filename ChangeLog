@@ -8262,3 +8262,7 @@
 	  From Jim Ewing (2014-8-26).
 	* configs/cc3200-launchpad:  Add support for the TI CC3200 Launchpad.
 	  From Jim Ewing (2014-8-26).
+	* arch/*/*_blocktask.c, arch/*/*_unblocktask.c, and arch/*/*_exit.c:
+	  Add address environment support to all implementation of up_block_task(),
+	  up_unblock_task(), and _exit() (2014-8-31).
+
