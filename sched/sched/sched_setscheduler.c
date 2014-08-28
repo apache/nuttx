@@ -122,7 +122,7 @@ int sched_setscheduler(pid_t pid, int policy,
   if (policy != SCHED_FIFO)
 #endif
     {
-      errno = EINVAL;
+      set_errno(EINVAL);
       return ERROR;
     }
 
@@ -138,7 +138,7 @@ int sched_setscheduler(pid_t pid, int policy,
   tcb = sched_gettcb(pid);
   if (!tcb)
     {
-      errno = ESRCH;
+      set_errno(ESRCH);
       return ERROR;
     }
 

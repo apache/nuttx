@@ -184,7 +184,7 @@ int timer_create(clockid_t clockid, FAR struct sigevent *evp, FAR timer_t *timer
 
   if (!timerid || clockid != CLOCK_REALTIME)
     {
-      errno = EINVAL;
+      set_errno(EINVAL);
       return ERROR;
     }
 
@@ -193,7 +193,7 @@ int timer_create(clockid_t clockid, FAR struct sigevent *evp, FAR timer_t *timer
   wdog = wd_create();
   if (!wdog)
     {
-      errno = EAGAIN;
+      set_errno(EAGAIN);
       return ERROR;
     }
 
@@ -202,7 +202,7 @@ int timer_create(clockid_t clockid, FAR struct sigevent *evp, FAR timer_t *timer
   ret = timer_allocate();
   if (!ret)
     {
-      errno = EAGAIN;
+      set_errno(EAGAIN);
       return ERROR;
     }
 

@@ -104,7 +104,7 @@
 
 int timer_getoverrun(timer_t timerid)
 {
-  errno = ENOSYS;
+  set_errno(ENOSYS);
   return ERROR;
 }
 

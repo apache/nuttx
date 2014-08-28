@@ -108,7 +108,7 @@ static inline int spawn_dup2(FAR struct spawn_dup2_file_action_s *action)
   ret = dup2(action->fd1, action->fd2);
   if (ret < 0)
     {
-      int errcode = errno;
+      int errcode = get_errno();
 
       sdbg("ERROR: dup2 failed: %d\n", errcode);
       return errcode;
@@ -130,7 +130,7 @@ static inline int spawn_open(FAR struct spawn_open_file_action_s *action)
   fd = open(action->path, action->oflags, action->mode);
   if (fd < 0)
     {
-      ret = errno;
+      ret = get_errno();
       sdbg("ERROR: open failed: %d\n", ret);
     }
 
@@ -147,7 +147,7 @@ static inline int spawn_open(FAR struct spawn_open_file_action_s *action)
       ret = dup2(fd, action->fd);
       if (ret < 0)
         {
-          ret = errno;
+          ret = get_errno();
           sdbg("ERROR: dup2 failed: %d\n", ret);
         }
 
@@ -184,7 +184,7 @@ void spawn_semtake(FAR sem_t *sem)
   do
     {
       ret = sem_wait(sem);
-      ASSERT(ret == 0 || errno == EINTR);
+      ASSERT(ret == 0 || get_errno() == EINTR);
     }
   while (ret != 0);
 }

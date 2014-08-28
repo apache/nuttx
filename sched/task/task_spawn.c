@@ -152,7 +152,7 @@ static int task_spawn_exec(FAR pid_t *pidp, FAR const char *name,
   pid = TASK_CREATE(name, priority, stacksize, entry, argv);
   if (pid < 0)
     {
-      ret = errno;
+      ret = get_errno();
       sdbg("ERROR: TASK_CREATE failed: %d\n", ret);
       goto errout;
     }
@@ -395,7 +395,7 @@ int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
   ret = sched_getparam(0, &param);
   if (ret < 0)
     {
-      int errcode = errno;
+      int errcode = get_errno();
 
       sdbg("ERROR: sched_getparam failed: %d\n", errcode);
       spawn_semgive(&g_spawn_parmsem);

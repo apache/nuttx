@@ -93,7 +93,7 @@ int gettimeofday(struct timeval *tp, void *tzp)
 #ifdef CONFIG_DEBUG
   if (!tp)
     {
-      errno = EINVAL;
+      set_errno(EINVAL);
       return ERROR;
     }
 #endif

@@ -115,7 +115,7 @@ int sched_setparam(pid_t pid, const struct sched_param *param)
 
   if (!param)
     {
-      errno = EINVAL;
+      set_errno(EINVAL);
       return ERROR;
     }
 
@@ -142,7 +142,7 @@ int sched_setparam(pid_t pid, const struct sched_param *param)
         {
           /* No task with this pid was found */
 
-          errno = ESRCH;
+          set_errno(ESRCH);
           sched_unlock();
           return ERROR;
         }

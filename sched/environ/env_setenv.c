@@ -197,7 +197,7 @@ int setenv(FAR const char *name, FAR const char *value, int overwrite)
 errout_with_lock:
   sched_unlock();
 errout:
-  errno = ret;
+  set_errno(ret);
   return ERROR;
 }
 

@@ -120,7 +120,7 @@ int sem_destroy (FAR sem_t *sem)
     }
   else
     {
-      errno = -EINVAL;
+      set_errno(EINVAL);
       return ERROR;
     }
 }

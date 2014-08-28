@@ -113,7 +113,7 @@ int putenv(FAR const char *string)
   return ret;
 
 errout:
-  errno = ret;
+  set_errno(ret);
   return ERROR;
 }
 

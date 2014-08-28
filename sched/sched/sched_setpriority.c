@@ -112,7 +112,7 @@ int sched_setpriority(FAR struct tcb_s *tcb, int sched_priority)
   if (sched_priority < SCHED_PRIORITY_MIN ||
       sched_priority > SCHED_PRIORITY_MAX)
     {
-      errno = EINVAL;
+      set_errno(EINVAL);
       return ERROR;
     }
 

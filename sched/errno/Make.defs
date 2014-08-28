@@ -35,7 +35,7 @@
 
 ERRNO_SRCS = errno_getptr.c
 
-ifeq ($(CONFIG_NUTTX_KERNEL),y)
+ifeq ($(CONFIG_LIB_SYSCALL),y)
 ERRNO_SRCS += errno_get.c errno_set.c
 endif
 

@@ -304,7 +304,7 @@ int timer_settime(timer_t timerid, int flags, FAR const struct itimerspec *value
 
   if (!timer || !value)
     {
-      errno = EINVAL;
+      set_errno(EINVAL);
       return ERROR;
     }
 
