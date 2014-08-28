@@ -53,18 +53,44 @@
 /* Efficient, direct access to OS global timer variables will be supported
  * if the execution environment has direct access to kernel global data.
  * The code in this execution context can access the kernel global data
- * directly if:  (1) we are not running tick-less (in which case there is
- * no global timer data), (2) this is an un-protected, non-kernel build, or
- * (2) this is a protected build, but this code is being built for execution
- * within the kernel space.
+ * directly if:
+ *
+ * 1. We are not running tick-less (in which case there is no global timer
+ *    data),
+ * 2. This is an un-protected, non-kernel build,
+ * 3. This is a protected build, but this code is being built for execution
+ *    within the kernel space.
+ * 4. It we are building with SYSCALLs enabled, but not in a kernel build,
+ *    then we can't know a priori whether the code has access to the
+ *    global variables or not.  In that case we have to assume not.
  */
 
 #undef __HAVE_KERNEL_GLOBALS
-#if !defined(CONFIG_SCHED_TICKLESS) && \
-    (!defined(CONFIG_NUTTX_KERNEL) || defined(__KERNEL__))
-#  define __HAVE_KERNEL_GLOBALS 1
-#else
+#if defined(CONFIG_SCHED_TICKLESS)
+   /* Case 1: There is no global timer data */
+
 #  define __HAVE_KERNEL_GLOBALS 0
+
+#elif defined(CONFIG_NUTTX_KERNEL)
+#  if defined(__KERNEL__)
+     /* Case 3: Kernel mode of protected kernel build */
+
+#    define __HAVE_KERNEL_GLOBALS 1
+#  else
+     /* User mode of protected kernel build */
+
+#    define __HAVE_KERNEL_GLOBALS 0
+#  endif
+
+#elif defined(CONFIG_LIB_SYSCALL)
+   /* Case 4: Building with SYSCALLs enabled, but not part of a kernel build */
+
+#  define __HAVE_KERNEL_GLOBALS 0
+
+#else
+   /* Case 2: Un-protected, non-kernel build */
+
+#    define __HAVE_KERNEL_GLOBALS 1
 #endif
 
 /* If CONFIG_SYSTEM_TIME64 is selected and the CPU supports long long types,
