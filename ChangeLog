@@ -8269,3 +8269,7 @@
 	  include/nuttx/progmem.h, and configs/vsn/src/sif.c: STM32 FLASH fixes:
 	  use size_t instead of uint16_t, make interface more generic.  From
 	  Freddie Chopin (2014-8-28).
+	* Kconfig, Makefile.unix, Makefile.win, syscall/Kconfig,
+	  arch/arm/src/armv6-m/svcall.h, up_svcall.c, armv7-m/svcall.h, and
+	  up_svcall.c: The system call library can now be built with
+	  CONFIG_NUTTX_KERNEL.  New selection: CONFIG_LIB_SYSCALL (2014-8-28).
