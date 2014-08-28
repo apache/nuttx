@@ -678,9 +678,6 @@ int up_addrenv_restore(FAR const save_addrenv_t *oldenv)
 
 int up_addrenv_coherent(FAR const group_addrenv_t *addrenv)
 {
-  uintptr_t vaddr;
-  int i;
-
   DEBUGASSERT(addrenv);
 
   /* Invalidate I-Cache */
