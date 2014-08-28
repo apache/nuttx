@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/armv7-m/svcall.h
  *
- *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_LIB_SYSCALL
 #  include <syscall.h>
 #endif
 
@@ -55,11 +55,19 @@
  * syscall return.  The first four syscall values must be reserved.
  */
 
-#ifdef CONFIG_NUTTX_KERNEL
-#  ifndef CONFIG_SYS_RESERVED
-#    error "CONFIG_SYS_RESERVED must be defined to have the value 8"
-#  elif CONFIG_SYS_RESERVED != 8
-#    error "CONFIG_SYS_RESERVED must have the value 8"
+#ifdef CONFIG_LIB_SYSCALL
+#  ifdef CONFIG_NUTTX_KERNEL
+#    ifndef CONFIG_SYS_RESERVED
+#      error "CONFIG_SYS_RESERVED must be defined to have the value 8"
+#    elif CONFIG_SYS_RESERVED != 8
+#      error "CONFIG_SYS_RESERVED must have the value 8"
+#    endif
+#  else
+#    ifndef CONFIG_SYS_RESERVED
+#      error "CONFIG_SYS_RESERVED must be defined to have the value 3"
+#    elif CONFIG_SYS_RESERVED != 3
+#      error "CONFIG_SYS_RESERVED must have the value 3"
+#    endif
 #  endif
 #endif
 

@@ -3,9 +3,31 @@
 # see misc/tools/kconfig-language.txt.
 #
 
-if NUTTX_KERNEL
+menuconfig LIB_SYSCALL
+	bool "System call support"
+	default n
+	---help---
+		Build in support for "system calls".  System calls are used to
+		implement a call gate mechanism that can be be used to call from
+		user code into the kernel.  This is only useful for user code that
+		likes outside of the kernel such as when the NUTTX_KERNEL build is
+		selected.
 
-comment "System call configuration"
+		This permits calls from user-mode code into kernel mode; the call
+		gate will change the mode of operation from user to supervisor mode,
+		then call into the OS code on behalf of the user-mode application.
+
+		If if there are no privilege issues preventing the call, system
+		calls may also be of value because it can eliminate the need for
+		symbol tables when linking external modules to the NuttX base code.
+		The selection will build libsyscall.  External modules can then link
+		with libsyscall when they are built and they can call into the OS
+		with no knowledge of the actual address in the OS.  In this case,
+		they call into a proxy that is link with the external code; that
+		proxy then marshals the call parameter and invokes the system call
+		to accomplish the interface.
+
+if LIB_SYSCALL
 
 config SYS_RESERVED
 	int "Number of reserved system calls"
@@ -34,4 +56,4 @@ config SYS_NNEST
 		space memory.  So it is expected that the maximum nesting level will
 		be only 2.
 
-endif
+endif # LIB_SYSCALL

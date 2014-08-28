@@ -112,9 +112,7 @@ OTHERDIRS = lib
 
 ifeq ($(CONFIG_NUTTX_KERNEL),y)
 
-NONFSDIRS += syscall
-CONTEXTDIRS += syscall
-USERDIRS += syscall libc mm $(USER_ADDONS)
+USERDIRS += libc mm $(USER_ADDONS)
 ifeq ($(CONFIG_HAVE_CXX),y)
 USERDIRS += libxx
 endif
@@ -122,13 +120,21 @@ endif
 else
 
 NONFSDIRS += libc mm
-OTHERDIRS += syscall $(USER_ADDONS)
+OTHERDIRS += $(USER_ADDONS)
 ifeq ($(CONFIG_HAVE_CXX),y)
 NONFSDIRS += libxx
 else
 OTHERDIRS += libxx
 endif
 
+endif
+
+ifeq ($(CONFIG_LIB_SYSCALL),y)
+NONFSDIRS += syscall
+CONTEXTDIRS += syscall
+USERDIRS += syscall
+else
+OTHERDIRS += syscall
 endif
 
 ifeq ($(CONFIG_NX),y)

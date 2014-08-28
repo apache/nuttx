@@ -186,6 +186,7 @@ config PASS1_OBJECT
 config NUTTX_KERNEL
 	bool "NuttX kernel build"
 	default n
+	select LIB_SYSCALL
 	---help---
 		Builds NuttX as a separately compiled kernel.
 
@@ -681,9 +682,7 @@ endmenu
 
 menu "RTOS Features"
 source sched/Kconfig
-if NUTTX_KERNEL
 source syscall/Kconfig
-endif
 endmenu
 
 menu "Device Drivers"
