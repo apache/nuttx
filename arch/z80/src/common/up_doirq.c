@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/common/up_doirq.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,8 +49,10 @@
 #include "chip/switch.h"
 #include "up_internal.h"
 
+#include "group/group.h"
+
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -81,25 +83,49 @@ FAR chipreg_t *up_doirq(uint8_t irq, FAR chipreg_t *regs)
   return NULL; /* Won't get here */
 
 #else
+#ifdef CONFIG_ARCH_ADDRENV
+  FAR chipreg_t *newregs;
+#endif
+
   if (irq < NR_IRQS)
     {
-       DECL_SAVESTATE();
+      DECL_SAVESTATE();
 
-       /* Indicate that we have entered IRQ processing logic */
+      /* Indicate that we have entered IRQ processing logic */
 
-       IRQ_ENTER(irq, regs);
+      IRQ_ENTER(irq, regs);
 
-       /* Deliver the IRQ */
+      /* Deliver the IRQ */
 
-       irq_dispatch(irq, regs);
+      irq_dispatch(irq, regs);
 
-       /* If a context switch occurred, 'regs' will hold the new context */
+#ifdef CONFIG_ARCH_ADDRENV
+      /* If a context switch occurred, 'newregs' will hold the new context */
 
-       regs = IRQ_STATE();
+      newregs = IRQ_STATE();
 
-       /* Indicate that we are no longer in interrupt processing logic */
+      if (newregs != regs)
+        {
+          /* Make sure that the address environment for the previously
+           * running task is closed down gracefully and set up the
+           * address environment for the new thread at the head of the
+           * ready-to-run list.
+           */
 
-       IRQ_LEAVE(irq);
+          (void)group_addrenv(rtcb);
+        }
+
+      regs = newregs;
+
+#else
+      /* If a context switch occurred, 'regs' will hold the new context */
+
+      regs = IRQ_STATE();
+#endif
+
+      /* Indicate that we are no longer in interrupt processing logic */
+
+      IRQ_LEAVE(irq);
     }
 
   board_led_off(LED_INIRQ);
