@@ -51,7 +51,7 @@
 #endif
 
 /****************************************************************************
- * Pro-processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* This is the value used as the argument to the SVC instruction.  It is not
