@@ -113,7 +113,7 @@ uint8_t *up_doirq(int irq, uint8_t *regs)
        * thread at the head of the ready-to-run list.
        */
 
-      (void)group_addrenv(rtcb);
+      (void)group_addrenv(NULL);
 #endif
     }
 #endif

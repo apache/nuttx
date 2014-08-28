@@ -112,7 +112,7 @@ FAR chipreg_t *up_doirq(uint8_t irq, FAR chipreg_t *regs)
            * ready-to-run list.
            */
 
-          (void)group_addrenv(rtcb);
+          (void)group_addrenv(NULL);
         }
 
       regs = newregs;

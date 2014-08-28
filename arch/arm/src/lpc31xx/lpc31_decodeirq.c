@@ -1,6 +1,5 @@
 /********************************************************************************
  * arch/arm/src/lpc31xx/lpc31_decodeirq.c
- * arch/arm/src/chip/lpc31_decodeirq.c
  *
  *   Copyright (C) 2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -142,7 +141,7 @@ void up_decodeirq(uint32_t *regs)
                * thread at the head of the ready-to-run list.
                */
 
-              (void)group_addrenv(rtcb);
+              (void)group_addrenv(NULL);
 #endif
             }
 #endif

@@ -170,7 +170,7 @@ uint32_t *pic32mx_decodeirq(uint32_t *regs)
        * thread at the head of the ready-to-run list.
        */
 
-      (void)group_addrenv(rtcb);
+      (void)group_addrenv(NULL);
 #endif
     }
 #endif

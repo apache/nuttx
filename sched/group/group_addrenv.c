@@ -43,6 +43,7 @@
 
 #include <nuttx/sched.h>
 
+#include "sched/sched.h"
 #include "group/group.h"
 
 #ifdef CONFIG_ARCH_ADDRENV
@@ -106,6 +107,15 @@ int group_addrenv(FAR struct tcb_s *tcb)
   irqstate_t flags;
   gid_t gid;
   int ret;
+
+  /* NULL for the tcb means to use the TCB of the task at the head of the
+   * ready to run list.
+   */
+
+  if (!tcb)
+    {
+      tcb = (FAR struct tcb_s *)g_readytorun.head;
+    }
 
   DEBUGASSERT(tcb && tcb->group);
   group = tcb->group;
