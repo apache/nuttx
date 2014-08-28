@@ -272,7 +272,7 @@ int up_svcall(int irq, FAR void *context)
        * unprivileged thread mode.
        */
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_LIB_SYSCALL
       case SYS_syscall_return:
         {
           struct tcb_s *rtcb = sched_self();
@@ -487,11 +487,15 @@ int up_svcall(int irq, FAR void *context)
     {
       svcdbg("SVCall Return:\n");
       svcdbg("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-             current_regs[REG_R0],  current_regs[REG_R1],  current_regs[REG_R2],  current_regs[REG_R3],
-             current_regs[REG_R4],  current_regs[REG_R5],  current_regs[REG_R6],  current_regs[REG_R7]);
+             current_regs[REG_R0],  current_regs[REG_R1],
+             current_regs[REG_R2],  current_regs[REG_R3],
+             current_regs[REG_R4],  current_regs[REG_R5],
+             current_regs[REG_R6],  current_regs[REG_R7]);
       svcdbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-             current_regs[REG_R8],  current_regs[REG_R9],  current_regs[REG_R10], current_regs[REG_R11],
-             current_regs[REG_R12], current_regs[REG_R13], current_regs[REG_R14], current_regs[REG_R15]);
+             current_regs[REG_R8],  current_regs[REG_R9],
+             current_regs[REG_R10], current_regs[REG_R11],
+             current_regs[REG_R12], current_regs[REG_R13],
+             current_regs[REG_R14], current_regs[REG_R15]);
 # ifdef REG_EXC_RETURN
       svcdbg(" PSR: %08x EXC_RETURN: %08x\n",
              current_regs[REG_XPSR], current_regs[REG_EXC_RETURN]);
