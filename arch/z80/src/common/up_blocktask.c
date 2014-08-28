@@ -142,20 +142,11 @@ void up_block_task(FAR struct tcb_s *tcb, tstate_t task_state)
           /* dbg("New Active Task TCB=%p\n", rtcb); */
 
           /* Then setup so that the context will be performed on exit
-           * from the interrupt.
+           * from the interrupt.  Any necessary address environment
+           * changes will be made when the interrupt returns.
            */
 
           SET_IRQCONTEXT(rtcb);
-
-#ifdef CONFIG_ARCH_ADDRENV
-         /* Make sure that the address environment for the previously
-          * running task is closed down gracefully (data caches dump,
-          * MMU flushed) and set up the address environment for the new
-          * thread at the head of the ready-to-run list.
-          */
-
-         (void)group_addrenv(rtcb);
-#endif
         }
 
       /* Copy the user C context into the TCB at the (old) head of the
