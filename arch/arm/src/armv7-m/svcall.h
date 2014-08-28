@@ -52,7 +52,8 @@
 
 /* Configuration ********************************************************************/
 /* This logic uses three system calls {0,1,2} for context switching and one for the
- * syscall return.  The first four syscall values must be reserved.
+ * syscall return.  So a minimum of four syscall values must be reserved.  If
+ * CONFIG_NUTTX_KERNEL is defined, then four more syscall values must be reserved.
  */
 
 #ifdef CONFIG_LIB_SYSCALL
@@ -64,9 +65,9 @@
 #    endif
 #  else
 #    ifndef CONFIG_SYS_RESERVED
-#      error "CONFIG_SYS_RESERVED must be defined to have the value 3"
-#    elif CONFIG_SYS_RESERVED != 3
-#      error "CONFIG_SYS_RESERVED must have the value 3"
+#      error "CONFIG_SYS_RESERVED must be defined to have the value 4"
+#    elif CONFIG_SYS_RESERVED != 4
+#      error "CONFIG_SYS_RESERVED must have the value 4"
 #    endif
 #  endif
 #endif
@@ -94,7 +95,7 @@
 
 #define SYS_switch_context        (2)
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_LIB_SYSCALL
 /* SYS call 3:
  *
  * void up_syscall_return(void);
@@ -102,6 +103,7 @@
 
 #define SYS_syscall_return        (3)
 
+#ifdef CONFIG_NUTTX_KERNEL
 /* SYS call 4:
  *
  * void up_task_start(main_t taskentry, int argc, FAR char *argv[])
@@ -132,7 +134,9 @@
  */
 
 #define SYS_signal_handler_return (7)
-#endif
+
+#endif /* CONFIG_NUTTX_KERNEL */
+#endif /* CONFIG_LIB_SYSCALL */
 
 /************************************************************************************
  * Inline Functions
