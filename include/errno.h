@@ -52,7 +52,7 @@
  * from all code using a simple pointer.
  */
 
-#ifndef CONFIG_NUTTX_KERNEL
+#ifndef CONFIG_LIB_SYSCALL
 
 #  define errno *get_errno_ptr()
 #  define set_errno(e) do { errno = (int)(e); } while (0)
@@ -62,22 +62,29 @@
 
 /* We doing separate user-/kernel-mode builds, then the errno has to be
  * a little differently. In kernel-mode, the TCB errno value can still be
- * read and written using a pointer.
+ * read and written using a pointer from code executing within the
+ * kernel.
  */
 
-#ifdef __KERNEL__
+#if defined(CONFIG_NUTTX_KERNEL) && defined(__KERNEL__)
 #  define errno *get_errno_ptr()
+#  define set_errno(e) do { errno = (int)(e); } while (0)
+#  define get_errno(e) errno
 #else
 
 /* But in user-mode, the errno can only be read using the name 'errno'.
- * The non-standard API set_errno() must be explicity be used from user-
+ * The non-standard API set_errno() must explicitly be used from user-
  * mode code in order to set the errno value.
+ *
+ * The same is true of the case where we have syscalls enabled but this
+ * is not a kernel build, then we really have no option but to use the
+ * set_errno() accessor function explicitly, even from OS logic!
  */
 
 #  define errno get_errno()
 
 #endif /* __KERNEL__ */
-#endif /* CONFIG_NUTTX_KERNEL */
+#endif /* CONFIG_LIB_SYSCALL */
 
 /* Definitions of error numbers and the string that would be
  * returned by strerror().
@@ -357,7 +364,7 @@ extern "C"
 
 FAR int *get_errno_ptr(void);
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_LIB_SYSCALL
 void set_errno(int errcode);
 int  get_errno(void);
 #endif
