@@ -57,7 +57,7 @@
 
 /* Only for the STM32F10xx family for now */
 
-#ifdef CONFIG_STM32_STM32F10XX
+#if defined(CONFIG_STM32_STM32F10XX) || defined (CONFIG_STM32_STM32F40XX)
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -65,6 +65,14 @@
 
 #define FLASH_KEY1      0x45670123
 #define FLASH_KEY2      0xCDEF89AB
+
+#if defined(CONFIG_STM32_STM32F10XX)
+#define FLASH_CR_PAGE_ERASE              FLASH_CR_PER
+#define FLASH_SR_WRITE_PROTECTION_ERROR  FLASH_SR_WRPRT_ERR
+#elif defined(CONFIG_STM32_STM32F40XX)
+#define FLASH_CR_PAGE_ERASE              FLASH_CR_SER
+#define FLASH_SR_WRITE_PROTECTION_ERROR  FLASH_SR_WRPERR
+#endif
 
 /************************************************************************************
  * Private Functions
@@ -88,29 +96,21 @@ void stm32_flash_unlock(void)
 
 void stm32_flash_lock(void)
 {
-  modifyreg16(STM32_FLASH_CR, 0, FLASH_CR_LOCK);
+  modifyreg32(STM32_FLASH_CR, 0, FLASH_CR_LOCK);
 }
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
-uint16_t up_progmem_npages(void)
-{
-  return STM32_FLASH_NPAGES;
-}
+#ifdef CONFIG_STM32_STM32F10XX
 
-bool up_progmem_isuniform(void)
-{
-  return true;
-}
-
-uint16_t up_progmem_pagesize(uint16_t page)
+size_t up_progmem_pagesize(size_t page)
 {
   return STM32_FLASH_PAGESIZE;
 }
 
-int up_progmem_getpage(uint32_t addr)
+ssize_t up_progmem_getpage(size_t addr)
 {
   if (addr >= STM32_FLASH_BASE)
     {
@@ -125,10 +125,110 @@ int up_progmem_getpage(uint32_t addr)
   return addr / STM32_FLASH_PAGESIZE;
 }
 
-int up_progmem_erasepage(uint16_t page)
+size_t up_progmem_getaddress(size_t page)
 {
-  uint32_t addr;
-  uint16_t count;
+  if (page >= STM32_FLASH_NPAGES)
+    {
+      return SIZE_MAX;
+    }
+
+  return page * STM32_FLASH_PAGESIZE + STM32_FLASH_BASE;
+}
+
+#endif /* def CONFIG_STM32_STM32F10XX */
+
+#ifdef CONFIG_STM32_STM32F40XX
+
+size_t up_progmem_pagesize(size_t page)
+{
+  static const size_t page_sizes[STM32_FLASH_NPAGES] =
+    {
+      16 * 1024,
+      16 * 1024,
+      16 * 1024,
+      16 * 1024,
+      64 * 1024,
+      128 * 1024,
+      128 * 1024,
+      128 * 1024,
+    };
+
+  if (page >= sizeof(page_sizes) / sizeof(*page_sizes))
+    {
+      return 0;
+    }
+  else
+    {
+      return page_sizes[page];
+    }
+}
+
+ssize_t up_progmem_getpage(size_t addr)
+{
+  size_t page_end = 0;
+  size_t i;
+
+  if (addr >= STM32_FLASH_BASE)
+    {
+      addr -= STM32_FLASH_BASE;
+    }
+
+  if (addr >= STM32_FLASH_SIZE)
+    {
+      return -EFAULT;
+    }
+
+  for (i = 0; i < STM32_FLASH_NPAGES; ++i)
+    {
+      page_end += up_progmem_pagesize(i);
+      if (page_end > addr)
+        {
+          return i;
+        }
+    }
+
+  return -EFAULT;
+}
+
+size_t up_progmem_getaddress(size_t page)
+{
+  size_t base_address = STM32_FLASH_BASE;
+  size_t i;
+
+  if (page >= STM32_FLASH_NPAGES)
+    {
+      return SIZE_MAX;
+    }
+
+  for (i = 0; i < page; ++i)
+    {
+      base_address += up_progmem_pagesize(i);
+    }
+
+  return base_address;
+}
+
+#endif /* def CONFIG_STM32_STM32F40XX */
+
+size_t up_progmem_npages(void)
+{
+  return STM32_FLASH_NPAGES;
+}
+
+bool up_progmem_isuniform(void)
+{
+#ifdef STM32_FLASH_PAGESIZE
+  return true;
+#else
+  return false;
+#endif /* def STM32_FLASH_PAGESIZE */
+}
+
+ssize_t up_progmem_erasepage(size_t page)
+{
+#ifdef CONFIG_STM32_STM32F10XX
+  size_t page_address;
+#endif /* def CONFIG_STM32_STM32F10XX */
 
   if (page >= STM32_FLASH_NPAGES)
     {
@@ -144,33 +244,38 @@ int up_progmem_erasepage(uint16_t page)
 
   stm32_flash_unlock();
 
-  modifyreg32(STM32_FLASH_CR, 0, FLASH_CR_PER);
-  putreg32(page * STM32_FLASH_PAGESIZE, STM32_FLASH_AR);
+  modifyreg32(STM32_FLASH_CR, 0, FLASH_CR_PAGE_ERASE);
+
+#if defined(CONFIG_STM32_STM32F10XX)
+  /* must be valid - page index checked above */
+  page_address = up_progmem_getaddress(page);
+  putreg32(page_address, STM32_FLASH_AR);
+#elif defined(CONFIG_STM32_STM32F40XX)
+  modifyreg32(STM32_FLASH_CR, FLASH_CR_SNB_MASK, FLASH_CR_SNB(page));
+#endif
+
   modifyreg32(STM32_FLASH_CR, 0, FLASH_CR_STRT);
 
   while (getreg32(STM32_FLASH_SR) & FLASH_SR_BSY) up_waste();
 
-  modifyreg32(STM32_FLASH_CR, FLASH_CR_PER, 0);
+  modifyreg32(STM32_FLASH_CR, FLASH_CR_PAGE_ERASE, 0);
 
   /* Verify */
-
-  for (addr = page * STM32_FLASH_PAGESIZE + STM32_FLASH_BASE, count = STM32_FLASH_PAGESIZE;
-       count; count-=4, addr += 4)
+  if (up_progmem_ispageerased(page) == 0)
     {
-      if (getreg32(addr) != 0xffffffff)
-        {
-          return -EIO;
-        }
+      return up_progmem_pagesize(page); /* success */
     }
-
-  return STM32_FLASH_PAGESIZE;
+  else
+    {
+      return -EIO; /* failure */
+    }
 }
 
-int up_progmem_ispageerased(uint16_t page)
+ssize_t up_progmem_ispageerased(size_t page)
 {
-  uint32_t addr;
-  uint16_t count;
-  uint16_t bwritten = 0;
+  size_t addr;
+  size_t count;
+  size_t bwritten = 0;
 
   if (page >= STM32_FLASH_NPAGES)
     {
@@ -179,7 +284,7 @@ int up_progmem_ispageerased(uint16_t page)
 
   /* Verify */
 
-  for (addr = page * STM32_FLASH_PAGESIZE + STM32_FLASH_BASE, count = STM32_FLASH_PAGESIZE;
+  for (addr = up_progmem_getaddress(page), count = up_progmem_pagesize(page);
        count; count--, addr++)
     {
       if (getreg8(addr) != 0xff)
@@ -191,7 +296,7 @@ int up_progmem_ispageerased(uint16_t page)
   return bwritten;
 }
 
-int up_progmem_write(uint32_t addr, const void *buf, size_t count)
+ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
 {
   uint16_t *hword = (uint16_t *)buf;
   size_t written = count;
@@ -226,6 +331,11 @@ int up_progmem_write(uint32_t addr, const void *buf, size_t count)
 
   modifyreg32(STM32_FLASH_CR, 0, FLASH_CR_PG);
 
+#if defined(CONFIG_STM32_STM32F40XX)
+  /* TODO: implement up_progmem_write() to support other sizes than 16-bits */
+  modifyreg32(STM32_FLASH_CR, FLASH_CR_PSIZE_MASK, FLASH_CR_PSIZE_X16);
+#endif
+
   for (addr += STM32_FLASH_BASE; count; count-=2, hword++, addr+=2)
     {
       /* Write half-word and wait to complete */
@@ -236,7 +346,7 @@ int up_progmem_write(uint32_t addr, const void *buf, size_t count)
 
       /* Verify */
 
-      if (getreg32(STM32_FLASH_SR) & FLASH_SR_WRPRT_ERR)
+      if (getreg32(STM32_FLASH_SR) & FLASH_SR_WRITE_PROTECTION_ERROR)
         {
           modifyreg32(STM32_FLASH_CR, FLASH_CR_PG, 0);
           return -EROFS;
@@ -253,4 +363,4 @@ int up_progmem_write(uint32_t addr, const void *buf, size_t count)
   return written;
 }
 
-#endif /* CONFIG_STM32_STM32F10XX */
+#endif /* defined(CONFIG_STM32_STM32F10XX) || defined (CONFIG_STM32_STM32F40XX) */
