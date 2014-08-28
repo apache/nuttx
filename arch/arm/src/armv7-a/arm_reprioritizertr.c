@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/arm/src/armv7-a/arm_reprioritizertr.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,7 @@
 #include <nuttx/arch.h>
 
 #include "sched/sched.h"
+#include "group/group.h"
 #include "up_internal.h"
 
 /****************************************************************************
@@ -159,7 +160,9 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
               rtcb = (struct tcb_s*)g_readytorun.head;
               slldbg("New Active Task TCB=%p\n", rtcb);
 
-              /* Then switch contexts */
+              /* Then switch contexts.  Any necessary address environment
+               * changes will be made when the interrupt returns.
+               */
 
               up_restorestate(rtcb->xcp.regs);
             }
@@ -178,6 +181,15 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
               rtcb = (struct tcb_s*)g_readytorun.head;
               slldbg("New Active Task TCB=%p\n", rtcb);
 
+#ifdef CONFIG_ARCH_ADDRENV
+              /* Make sure that the address environment for the previously
+               * running task is closed down gracefully (data caches dump,
+               * MMU flushed) and set up the address environment for the new
+               * thread at the head of the ready-to-run list.
+               */
+
+              (void)group_addrenv(rtcb);
+#endif
               /* Then switch contexts */
 
               up_fullcontextrestore(rtcb->xcp.regs);
