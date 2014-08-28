@@ -8275,3 +8275,6 @@
 	  CONFIG_NUTTX_KERNEL.  New selection: CONFIG_LIB_SYSCALL (2014-8-28).
 	* arch/arm/src/armv7-a/syscall.h: "Add an ARMv7-A system call definition
 	  header file (2014-8-28).
+	* arch/arm/include/armv7-a/irq.h, arm_syscall.c, syscall/Kconfig,
+	  syscall_funclookup.c, syscall_nparms.c, and syscall_stublookup.c:
+	  ARMv7-A:  Add SYSCALL handling logic (2014-8-28).
