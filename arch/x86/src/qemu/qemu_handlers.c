@@ -125,7 +125,7 @@ static uint32_t *common_handler(int irq, uint32_t *regs)
        * thread at the head of the ready-to-run list.
        */
 
-      (void)group_addrenv(rtcb);
+      (void)group_addrenv(NULL);
 #endif
     }
 #endif
