@@ -566,8 +566,8 @@ int sif_main(int argc, char *argv[])
             clock_settime(CLOCK_REALTIME, &t_set);
         }
         else if (!strcmp(argv[1], "free")) {
-            uint16_t page = 0, stpage = 0xFFFF;
-            int status;
+            size_t  page = 0, stpage = 0xFFFF;
+            ssize_t status;
             do {
                 status = up_progmem_ispageerased(page++);
 
@@ -586,13 +586,13 @@ int sif_main(int argc, char *argv[])
             return 0;
         }
         else if (!strcmp(argv[1], "erase") && argc == 3) {
-            int page = atoi(argv[2]);
+            size_t page = atoi(argv[2]);
             printf("Erase result: %d\n", up_progmem_erasepage(page));
             return 0;
         }
         else if (!strcmp(argv[1], "flash") && argc == 3) {
-            uint16_t page = atoi(argv[2]);
-            uint32_t addr = page * up_progmem_pagesize(page);
+            size_t page = atoi(argv[2]);
+            size_t addr = page * up_progmem_pagesize(page);
 
             printf("Write result: %d (writing to address %xh)\n",
                 up_progmem_write(addr, "Test", 4), addr);
