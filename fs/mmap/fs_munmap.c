@@ -205,7 +205,7 @@ int munmap(FAR void *start, size_t length)
 
 errout_with_semaphore:
   sem_post(&g_rammaps.exclsem);
-  errno = err;
+  set_errno(err);
   return ERROR;
 }
 

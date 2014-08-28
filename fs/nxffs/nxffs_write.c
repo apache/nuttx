@@ -474,7 +474,7 @@ ssize_t nxffs_write(FAR struct file *filep, FAR const char *buffer, size_t bufle
   ret = sem_wait(&volume->exclsem);
   if (ret != OK)
     {
-      ret = -errno;
+      ret = -get_errno();
       fdbg("ERROR: sem_wait failed: %d\n", ret);
       goto errout;
     }

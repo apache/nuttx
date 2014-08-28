@@ -103,7 +103,7 @@ int nxffs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   ret = sem_wait(&volume->exclsem);
   if (ret != OK)
     {
-      ret = -errno;
+      ret = -get_errno();
       fdbg("ERROR: sem_wait failed: %d\n", ret);
       goto errout;
     }

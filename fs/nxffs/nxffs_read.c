@@ -184,7 +184,7 @@ ssize_t nxffs_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
   ret = sem_wait(&volume->exclsem);
   if (ret != OK)
     {
-      ret = -errno;
+      ret = -get_errno();
       fdbg("ERROR: sem_wait failed: %d\n", ret);
       goto errout;
     }

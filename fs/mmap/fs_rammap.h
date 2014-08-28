@@ -117,7 +117,7 @@ extern struct fs_allmaps_s g_rammaps;
  *
  ****************************************************************************/
 
-extern void rammap_initialize(void);
+void rammap_initialize(void);
 
 /****************************************************************************
  * Name: rammmap
@@ -144,7 +144,7 @@ extern void rammap_initialize(void);
  *
  ****************************************************************************/
 
-extern FAR void *rammap(int fd, size_t length, off_t offset);
+FAR void *rammap(int fd, size_t length, off_t offset);
 
 #endif /* CONFIG_FS_RAMMAP */
 #endif /* __FS_MMAP_RAMMAP_H */

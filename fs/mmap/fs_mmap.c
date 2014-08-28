@@ -136,14 +136,14 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
       (flags & (MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS|MAP_DENYWRITE)) != 0)
     {
       fdbg("Unsupported options, prot=%x flags=%04x\n", prot, flags);
-      errno = ENOSYS;
+      set_errno(ENOSYS);
       return MAP_FAILED;
     }
 
   if (length == 0 || (flags & MAP_SHARED) == 0)
     {
       fdbg("Invalid options, lengt=%d flags=%04x\n", length, flags);
-      errno = EINVAL;
+      set_errno(EINVAL);
       return MAP_FAILED;
     }
 #endif
@@ -163,7 +163,7 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
 #ifdef CONFIG_FS_RAMMAP
       return rammap(fd, length, offset);
 #else
-      fdbg("ioctl(FIOC_MMAP) failed: %d\n", errno);
+      fdbg("ioctl(FIOC_MMAP) failed: %d\n", get_errno());
       return MAP_FAILED;
 #endif
     }

@@ -183,7 +183,7 @@ errout:
 
   if (ret < 0)
     {
-      errno = -ret;
+      set_errno(-ret);
       return ERROR;
     }
 

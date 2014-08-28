@@ -404,7 +404,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
   if (ret != OK)
     {
       fdbg("ERROR: sem_wait failed: %d\n", ret);
-      ret = -errno;
+      ret = -get_errno();
       goto errout;
     }
 
@@ -417,7 +417,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
   if (ret != OK)
     {
       fdbg("ERROR: sem_wait failed: %d\n", ret);
-      ret = -errno;
+      ret = -get_errno();
       goto errout_with_wrsem;
     }
 
@@ -715,7 +715,7 @@ static inline int nxffs_rdopen(FAR struct nxffs_volume_s *volume,
   if (ret != OK)
     {
       fdbg("ERROR: sem_wait failed: %d\n", ret);
-      ret = -errno;
+      ret = -get_errno();
       goto errout;
     }
 
@@ -1160,7 +1160,7 @@ int nxffs_close(FAR struct file *filep)
   ret = sem_wait(&volume->exclsem);
   if (ret != OK)
     {
-      ret = -errno;
+      ret = -get_errno();
       fdbg("ERROR: sem_wait failed: %d\n", ret);
       goto errout;
     }
