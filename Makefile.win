@@ -220,7 +220,8 @@ USERLIBS  += lib\libuarch$(LIBEXT)
 else
 NUTTXLIBS += lib\libc$(LIBEXT) lib\libmm$(LIBEXT) lib\libarch$(LIBEXT)
 ifeq ($(CONFIG_LIB_SYSCALL),y)
-NUTTXLIBS += lib/libstubs$(LIBEXT) lib/libproxies$(LIBEXT)
+NUTTXLIBS += lib/libstubs$(LIBEXT)
+USERLIBS  += lib/libproxies$(LIBEXT)
 endif
 endif
 
