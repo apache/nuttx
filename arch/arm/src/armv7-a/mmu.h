@@ -343,7 +343,15 @@
  */
 
 #ifdef CONFIG_AFE_ENABLE
-/* AP[2:1] access permissions model.  AP[0] is used as an access flag: */
+/* AP[2:1] access permissions model.  AP[0] is used as an access flag:
+ *
+ * AP[2] AP[1]   PL1        PL0        Description
+ * ----- ----- ----------- ---------- --------------------------------
+ *   0     0   Read/write  No access  Access only at PL1
+ *   0     1   Read/write  Read/write Full access
+ *   1     0   Read-only   No access  Read-only for PL1
+ *   1     1   Read-only   Read-only  Read-only at any privilege level
+ */
 
 #  define PMD_SECT_AP_RW1     (0)
 #  define PMD_SECT_AP_RW01    (PMD_SECT_AP1)
@@ -351,7 +359,19 @@
 #  define PMD_SECT_AP_R01     (PMD_SECT_AP1 | PMD_SECT_AP2)
 
 #else
-/* AP[2:0] access permissions control, Short-descriptor format only */
+/* AP[2:0] access permissions control, Short-descriptor format only:
+ *
+ * AP[2] AP[1] AP[0]  PL1/2       PL0        Description
+ * ----- ----- ----- ----------- ---------- --------------------------------
+ *   0     0     0   No access   No access  All accesses generate faults
+ *   0     0     1   Read/write  No access  Access only at PL1 and higher
+ *   0     1     0   Read/write  Read-only  Writes at PL0 generate faults
+ *   0     1     1   Read/write  Read/write Full access
+ *   1     0     0     ----        ---      Reserved
+ *   1     0     1   Read-only   No access  Read-only for PL1 and higher
+ *   1     1     0   Read-only   Read-only  (deprecated)
+ *   1     1     1   Read-only   Read-only  Read-only at any privilege level
+ */
 
 #  define PMD_SECT_AP_NONE    (0)
 #  define PMD_SECT_AP_RW12    (PMD_SECT_AP0)
@@ -429,7 +449,15 @@
  */
 
 #ifdef CONFIG_AFE_ENABLE
-/* AP[2:1] access permissions model.  AP[0] is used as an access flag: */
+/* AP[2:1] access permissions model.  AP[0] is used as an access flag:
+ *
+ * AP[2] AP[1]   PL1        PL0        Description
+ * ----- ----- ----------- ---------- --------------------------------
+ *   0     0   Read/write  No access  Access only at PL1
+ *   0     1   Read/write  Read/write Full access
+ *   1     0   Read-only   No access  Read-only for PL1
+ *   1     1   Read-only   Read-only  Read-only at any privilege level
+ */
 
 #  define PTE_AP_RW1         (0)
 #  define PTE_AP_RW01        (PTE_AP1)
@@ -437,7 +465,19 @@
 #  define PTE_AP_R01         (PTE_AP1 | PTE_AP2)
 
 #else
-/* AP[2:0] access permissions control, Short-descriptor format only */
+/* AP[2:0] access permissions control, Short-descriptor format only:
+ *
+ * AP[2] AP[1] AP[0]  PL1/2       PL0        Description
+ * ----- ----- ----- ----------- ---------- --------------------------------
+ *   0     0     0   No access   No access  All accesses generate faults
+ *   0     0     1   Read/write  No access  Access only at PL1 and higher
+ *   0     1     0   Read/write  Read-only  Writes at PL0 generate faults
+ *   0     1     1   Read/write  Read/write Full access
+ *   1     0     0     ----        ---      Reserved
+ *   1     0     1   Read-only   No access  Read-only for PL1 and higher
+ *   1     1     0   Read-only   Read-only  (deprecated)
+ *   1     1     1   Read-only   Read-only  Read-only at any privilege level
+ */
 
 #  define PTE_AP_NONE        (0)
 #  define PTE_AP_RW12        (PTE_AP0)
@@ -543,11 +583,19 @@
 /* MMU Flags for each type memory region (level 1 and 2) */
 
 #define MMU_L1_TEXTFLAGS      (PMD_TYPE_PTE | PMD_PTE_DOM(0))
-#define MMU_L2_TEXTFLAGS      (PTE_TYPE_SMALL | PTE_WRITE_BACK | PTE_AP_R1)
+
+#define MMU_L2_KTEXTFLAGS     (PTE_TYPE_SMALL | PTE_WRITE_BACK | PTE_AP_R1)
+#ifdef CONFIG_AFE_ENABLE
+#  define MMU_L2_UTEXTFLAGS   (PTE_TYPE_SMALL | PTE_WRITE_BACK | PTE_AP_RW01)
+#else
+#  define MMU_L2_UTEXTFLAGS   (PTE_TYPE_SMALL | PTE_WRITE_BACK | PTE_AP_RW12_R0)
+#endif
 
 #define MMU_L1_DATAFLAGS      (PMD_TYPE_PTE | PMD_PTE_PXN | PMD_PTE_DOM(0))
-#define MMU_L2_DATAFLAGS      (PTE_TYPE_SMALL | PTE_WRITE_BACK | PTE_AP_RW1)
-#define MMU_L2_ALLOCFLAGS     (PTE_TYPE_SMALL | PTE_WRITE_BACK | PTE_AP_RW1)
+#define MMU_L2_UDATAFLAGS     (PTE_TYPE_SMALL | PTE_WRITE_BACK | PTE_AP_RW01)
+#define MMU_L2_KDATAFLAGS     (PTE_TYPE_SMALL | PTE_WRITE_BACK | PTE_AP_RW1)
+#define MMU_L2_UALLOCFLAGS    (PTE_TYPE_SMALL | PTE_WRITE_BACK | PTE_AP_RW01)
+#define MMU_L2_KALLOCFLAGS    (PTE_TYPE_SMALL | PTE_WRITE_BACK | PTE_AP_RW1)
 
 #define MMU_L1_PGTABFLAGS     (PMD_TYPE_PTE | PMD_PTE_PXN | PTE_WRITE_THROUGH | \
                                PMD_PTE_DOM(0))

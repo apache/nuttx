@@ -361,7 +361,7 @@ int up_addrenv_create(size_t textsize, size_t datasize,
 
   ret = up_addrenv_create_region(addrenv->text, ARCH_TEXT_NSECTS,
                                  CONFIG_ARCH_TEXT_VBASE, textsize,
-                                 MMU_L2_TEXTFLAGS);
+                                 MMU_L2_UTEXTFLAGS);
   if (ret < 0)
     {
       bdbg("ERROR: Failed to create .text region: %d\n", ret);
@@ -372,7 +372,7 @@ int up_addrenv_create(size_t textsize, size_t datasize,
 
   ret = up_addrenv_create_region(addrenv->data, ARCH_DATA_NSECTS,
                                  CONFIG_ARCH_DATA_VBASE, datasize,
-                                 MMU_L2_DATAFLAGS);
+                                 MMU_L2_UDATAFLAGS);
   if (ret < 0)
     {
       bdbg("ERROR: Failed to create .bss/.data region: %d\n", ret);
