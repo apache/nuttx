@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sh/src/common/up_doirq.c
  *
- *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,8 +48,10 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
+#include "group/group.h"
+
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -76,56 +78,74 @@ uint32_t *up_doirq(int irq, uint32_t* regs)
 #else
   if ((unsigned)irq < NR_IRQS)
     {
-       uint32_t *savestate;
+      /* Current regs non-zero indicates that we are processing
+       * an interrupt; current_regs is also used to manage
+       * interrupt level context switches.
+       *
+       * Nested interrupts are not supported.
+       */
 
-       /* Nested interrupts are not supported in this implementation.  If
-        * you want to implement nested interrupts, you would have to (1)
-        * change the way that current_regs is handled and (2) the design
-        * associated with CONFIG_ARCH_INTERRUPTSTACK.  The savestate
-        * variable will not work for that purpose as implemented here
-        * because only the outermost nested interrupt can result in a
-        * context switch (it can probably be deleted).
-        */
+      DEBUGASSERT(current_regs == NULL);
+      current_regs = regs;
 
-       /* Current regs non-zero indicates that we are processing
-        * an interrupt; current_regs is also used to manage
-        * interrupt level context switches.
-        */
-
-       savestate    = (uint32_t*)current_regs;
-       current_regs = regs;
-
-       /* Mask and acknowledge the interrupt (if supported by the chip) */
+      /* Mask and acknowledge the interrupt (if supported by the chip) */
 
 #ifndef CONFIG_ARCH_NOINTC
-       up_maskack_irq(irq);
+      up_maskack_irq(irq);
 #endif
 
-       /* Deliver the IRQ */
+      /* Deliver the IRQ */
 
-       irq_dispatch(irq, regs);
+      irq_dispatch(irq, regs);
 
-       /* Get the current value of regs... it may have changed because
-        * of a context switch performed during interrupt processing.
-        */
+#if defined(CONFIG_ARCH_FPU) || defined(CONFIG_ARCH_ADDRENV)
+      /* Check for a context switch.  If a context switch occurred, then
+       * current_regs will have a different value than it did on entry.  If an
+       * interrupt level context switch has occurred, then restore the floating
+       * point state and the establish the correct address environment before
+       * returning from the interrupt.
+       */
 
-       regs = current_regs;
+      if (regs != current_regs)
+        {
+#ifdef CONFIG_ARCH_FPU
+          /* Restore floating point registers */
 
-       /* Restore the previous value of current_regs.  NULL would indicate that
-        * we are no longer in an interrupt handler.  It will be non-NULL if we
-        * are returning from a nested interrupt.
-        */
+          up_restorefpu((uint32_t*)current_regs);
+#endif
 
-       current_regs = savestate;
+#ifdef CONFIG_ARCH_ADDRENV
+          /* Make sure that the address environment for the previously
+           * running task is closed down gracefully (data caches dump,
+           * MMU flushed) and set up the address environment for the new
+           * thread at the head of the ready-to-run list.
+           */
 
-       /* Unmask the last interrupt (global interrupts are still
-        * disabled.
-        */
+          (void)group_addrenv(rtcb);
+#endif
+        }
+#endif
+      /* Get the current value of regs... it may have changed because
+       * of a context switch performed during interrupt processing.
+       */
+
+      regs = current_regs;
+
+      /* Set current_regs to NULL to indicate that we are no longer in an
+       * interrupt handler.
+       */
+
+      current_regs = NULL;
+
+      /* Unmask the last interrupt (global interrupts are still
+       * disabled.
+       */
 
 #ifndef CONFIG_ARCH_NOINTC
-       up_enable_irq(irq);
+      up_enable_irq(irq);
 #endif
     }
+
   board_led_off(LED_INIRQ);
 #endif
   return regs;
