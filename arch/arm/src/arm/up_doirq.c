@@ -95,6 +95,7 @@ void up_doirq(int irq, uint32_t *regs)
 
   irq_dispatch(irq, regs);
 
+#if defined(CONFIG_ARCH_FPU) || defined(CONFIG_ARCH_ADDRENV)
   /* Check for a context switch.  If a context switch occurred, then
    * current_regs will have a different value than it did on entry.  If an
    * interrupt level context switch has occurred, then restore the floating
@@ -102,7 +103,6 @@ void up_doirq(int irq, uint32_t *regs)
    * returning from the interrupt.
    */
 
-#if defined(CONFIG_ARCH_FPU) || defined(CONFIG_ARCH_ADDRENV)
   if (regs != current_regs)
     {
 #ifdef CONFIG_ARCH_FPU
