@@ -226,6 +226,9 @@ USERLIBS  += lib/libproxies$(LIBEXT) lib/libuc$(LIBEXT) lib/libumm$(LIBEXT)
 USERLIBS  += lib/libuarch$(LIBEXT)
 else
 NUTTXLIBS += lib/libc$(LIBEXT) lib/libmm$(LIBEXT) lib/libarch$(LIBEXT)
+ifeq ($(CONFIG_LIB_SYSCALL),y)
+NUTTXLIBS += lib/libstubs$(LIBEXT) lib/libproxies$(LIBEXT)
+endif
 endif
 
 # Add libraries for C++ support.  CXX, CXXFLAGS, and COMPILEXX must
