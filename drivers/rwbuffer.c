@@ -100,7 +100,7 @@ static void rwb_semtake(sem_t *sem)
        * the wait was awakened by a signal.
        */
 
-      ASSERT(errno == EINTR);
+      ASSERT(get_errno() == EINTR);
     }
 }
 

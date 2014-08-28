@@ -279,7 +279,7 @@ errout_with_dev:
 errout_with_pipe:
   pipe_free(pipeno);
 errout:
-  errno = err;
+  set_errno(err);
   return ERROR;
 }
 

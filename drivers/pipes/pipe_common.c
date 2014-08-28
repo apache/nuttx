@@ -106,7 +106,7 @@ static void pipecommon_semtake(sem_t *sem)
        * awakened by a signal.
        */
 
-      ASSERT(errno == EINTR);
+      ASSERT(get_errno() == EINTR);
     }
 }
 
@@ -203,9 +203,9 @@ int pipecommon_open(FAR struct file *filep)
   ret = sem_wait(&dev->d_bfsem);
   if (ret != OK)
     {
-      fdbg("sem_wait failed: %d\n", errno);
-      DEBUGASSERT(errno > 0);
-      return -errno;
+      fdbg("sem_wait failed: %d\n", get_errno());
+      DEBUGASSERT(get_errno() > 0);
+      return -get_errno();
     }
 
   /* If this the first reference on the device, then allocate the buffer */
@@ -265,9 +265,9 @@ int pipecommon_open(FAR struct file *filep)
            * a signal.
            */
 
-          fdbg("sem_wait failed: %d\n", errno);
-          DEBUGASSERT(errno > 0);
-          ret = -errno;
+          fdbg("sem_wait failed: %d\n", get_errno());
+          DEBUGASSERT(get_errno() > 0);
+          ret = -get_errno();
 
           /* Immediately close the pipe that we just opened */
 

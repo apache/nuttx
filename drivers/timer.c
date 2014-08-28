@@ -148,7 +148,7 @@ static int timer_open(FAR struct file *filep)
   ret = 1; //sem_wait(&upper->exclsem);
   if (ret < 0)
     {
-      ret = -errno;
+      ret = -get_errno();
       goto errout;
     }
 
@@ -199,7 +199,7 @@ static int timer_close(FAR struct file *filep)
   ret = 1; //sem_wait(&upper->exclsem);
   if (ret < 0)
     {
-      ret = -errno;
+      ret = -get_errno();
       goto errout;
     }
 

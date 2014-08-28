@@ -147,7 +147,7 @@ static int wdog_open(FAR struct file *filep)
   ret = sem_wait(&upper->exclsem);
   if (ret < 0)
     {
-      ret = -errno;
+      ret = -get_errno();
       goto errout;
     }
 
@@ -198,7 +198,7 @@ static int wdog_close(FAR struct file *filep)
   ret = sem_wait(&upper->exclsem);
   if (ret < 0)
     {
-      ret = -errno;
+      ret = -get_errno();
       goto errout;
     }
 

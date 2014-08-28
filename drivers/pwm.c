@@ -157,7 +157,7 @@ static int pwm_open(FAR struct file *filep)
   ret = sem_wait(&upper->exclsem);
   if (ret < 0)
     {
-      ret = -errno;
+      ret = -get_errno();
       goto errout;
     }
 
@@ -226,7 +226,7 @@ static int pwm_close(FAR struct file *filep)
   ret = sem_wait(&upper->exclsem);
   if (ret < 0)
     {
-      ret = -errno;
+      ret = -get_errno();
       goto errout;
     }
 
@@ -348,7 +348,7 @@ static int pwm_start(FAR struct pwm_upperhalf_s *upper, unsigned int oflags)
                */
 
               int tmp = sem_wait(&upper->waitsem);
-              DEBUGASSERT(tmp == OK || errno == EINTR);
+              DEBUGASSERT(tmp == OK || get_errno() == EINTR);
             }
         }
       else

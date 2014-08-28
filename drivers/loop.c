@@ -134,7 +134,7 @@ static void loop_semtake(FAR struct loop_struct_s *dev)
        * the wait was awakened by a signal.
        */
 
-      ASSERT(errno == EINTR);
+      ASSERT(get_errno() == EINTR);
     }
 }
 
@@ -234,7 +234,7 @@ static ssize_t loop_read(FAR struct inode *inode, unsigned char *buffer,
   ret = lseek(dev->fd, offset, SEEK_SET);
   if (ret == (off_t)-1)
     {
-      dbg("Seek failed for offset=%d: %d\n", (int)offset, errno);
+      dbg("Seek failed for offset=%d: %d\n", (int)offset, get_errno());
       return -EIO;
     }
 
@@ -243,10 +243,10 @@ static ssize_t loop_read(FAR struct inode *inode, unsigned char *buffer,
   do
     {
       nbytesread = read(dev->fd, buffer, nsectors * dev->sectsize);
-      if (nbytesread < 0 && errno != EINTR)
+      if (nbytesread < 0 && get_errno() != EINTR)
         {
-          dbg("Read failed: %d\n", errno);
-          return -errno;
+          dbg("Read failed: %d\n", get_errno());
+          return -get_errno();
         }
     }
   while (nbytesread < 0);
@@ -281,7 +281,7 @@ static ssize_t loop_write(FAR struct inode *inode, const unsigned char *buffer,
   ret = lseek(dev->fd, offset, SEEK_SET);
   if (ret == (off_t)-1)
     {
-      dbg("Seek failed for offset=%d: %d\n", (int)offset, errno);
+      dbg("Seek failed for offset=%d: %d\n", (int)offset, get_errno());
     }
 
   /* Then write the requested number of sectors to that position */
@@ -289,10 +289,10 @@ static ssize_t loop_write(FAR struct inode *inode, const unsigned char *buffer,
   do
     {
       nbyteswritten = write(dev->fd, buffer, nsectors * dev->sectsize);
-      if (nbyteswritten < 0 && errno != EINTR)
+      if (nbyteswritten < 0 && get_errno() != EINTR)
         {
-          dbg("Write failed: %d\n", errno);
-          return -errno;
+          dbg("Write failed: %d\n", get_errno());
+          return -get_errno();
         }
     }
   while (nbyteswritten < 0);
@@ -367,8 +367,8 @@ int losetup(const char *devname, const char *filename, uint16_t sectsize,
   ret = stat(filename, &sb);
   if (ret < 0)
     {
-      dbg("Failed to stat %s: %d\n", filename, errno);
-      return -errno;
+      dbg("Failed to stat %s: %d\n", filename, get_errno());
+      return -get_errno();
     }
 
   /* Check if the file system is big enough for one block */
@@ -421,8 +421,8 @@ int losetup(const char *devname, const char *filename, uint16_t sectsize,
       dev->fd = open(filename, O_RDWR);
       if (dev->fd < 0)
         {
-          dbg("Failed to open %s: %d\n", filename, errno);
-          ret = -errno;
+          dbg("Failed to open %s: %d\n", filename, get_errno());
+          ret = -get_errno();
           goto errout_with_dev;
         }
     }
