@@ -1,7 +1,7 @@
 /****************************************************************************
  * syscall/syscall_stublookup.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,9 +40,7 @@
 #include <nuttx/config.h>
 #include <syscall.h>
 
-/* The content of this file is only meaning for the case of a kernel build. */
-
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_LIB_SYSCALL
 
 /****************************************************************************
  * Pre-processor definitions
@@ -74,4 +72,4 @@ const uint8_t g_funcnparms[SYS_nsyscalls] =
  * Public Functions
  ****************************************************************************/
 
- #endif /* CONFIG_NUTTX_KERNEL */
+ #endif /* CONFIG_LIB_SYSCALL */

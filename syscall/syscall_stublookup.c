@@ -46,7 +46,7 @@
  * a kernel build.
  */
 
-#if defined(CONFIG_NUTTX_KERNEL) && defined(__KERNEL__)
+#if defined(CONFIG_LIB_SYSCALL) && defined(__KERNEL__)
 
 /****************************************************************************
  * Pre-processor definitions
@@ -341,5 +341,4 @@ const uintptr_t g_stublookup[SYS_nsyscalls] =
  * Public Functions
  ****************************************************************************/
 
-#endif /* CONFIG_NUTTX_KERNEL && __KERNEL__ */
-
+#endif /* CONFIG_LIB_SYSCALL && __KERNEL__ */
