@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/armv7-m/up_svcall.c
  *
- *   Copyright (C) 2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,7 @@
 #include <arch/irq.h>
 #include <nuttx/sched.h>
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_LIB_SYSCALL
 #  include <syscall.h>
 #endif
 
@@ -116,7 +116,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_LIB_SYSCALL
 static void dispatch_syscall(void) naked_function;
 static void dispatch_syscall(void)
 {
@@ -443,7 +443,7 @@ int up_svcall(int irq, FAR void *context)
 
       default:
         {
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_LIB_SYSCALL
           FAR struct tcb_s *rtcb = sched_self();
           int index = rtcb->xcp.nsyscalls;
 
