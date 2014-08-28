@@ -47,9 +47,7 @@
 #  include <stdint.h>
 #endif
 
-/* The content of this file is only meaningful for the case of a kernel build. */
-
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_LIB_SYSCALL
 
 /****************************************************************************
  * Pre-processor Definitions
