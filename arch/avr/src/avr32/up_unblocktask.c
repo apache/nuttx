@@ -127,19 +127,12 @@ void up_unblock_task(struct tcb_s *tcb)
 
           rtcb = (struct tcb_s*)g_readytorun.head;
 
-          /* Then switch contexts */
+          /* Then switch contexts.  Any new address environment needed by
+           * the new thread will be instantiated before the return from
+           * interrupt.
+           */
 
           up_restorestate(rtcb->xcp.regs);
-
-#ifdef CONFIG_ARCH_ADDRENV
-         /* Make sure that the address environment for the previously
-          * running task is closed down gracefully (data caches dump,
-          * MMU flushed) and set up the address environment for the new
-          * thread at the head of the ready-to-run list.
-          */
-
-         (void)group_addrenv(rtcb);
-#endif
         }
 
       /* No, then we will need to perform the user context switch */
