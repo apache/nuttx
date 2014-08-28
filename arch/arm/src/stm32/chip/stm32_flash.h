@@ -72,11 +72,15 @@
 
 #elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
 #  define STM32_FLASH_NPAGES        8
-#  define STM32_FLASH_PAGESIZE      (128*1024)
- /* XXX this is wrong for 427, and not really right for 40x due to mixed page sizes */
+/* STM32F4 has mixed page size */
+#  undef STM32_FLASH_PAGESIZE
+/* TODO: add proper sizes for each chip in the family - maybe in chip.h? */
+#  define STM32_FLASH_SIZE          (8 * 128 * 1024)
 #endif
 
-#define STM32_FLASH_SIZE            (STM32_FLASH_NPAGES * STM32_FLASH_PAGESIZE)
+#ifdef STM32_FLASH_PAGESIZE
+#  define STM32_FLASH_SIZE            (STM32_FLASH_NPAGES * STM32_FLASH_PAGESIZE)
+#endif /* def STM32_FLASH_PAGESIZE */
 
 /* Register Offsets *****************************************************************/
 
@@ -204,6 +208,7 @@
 #    define FLASH_CR_PSIZE_X16      (1 << FLASH_CR_PSIZE_SHIFT) /* 01 program x16 */
 #    define FLASH_CR_PSIZE_X32      (2 << FLASH_CR_PSIZE_SHIFT) /* 10 program x32 */
 #    define FLASH_CR_PSIZE_X64      (3 << FLASH_CR_PSIZE_SHIFT) /* 11 program x64 */
+#  define FLASH_CR_STRT             (1 << 16)               /* Bit 16: Start Erase */
 #  define FLASH_CR_EOPIE            (1 << 24)               /* Bit 24: End of operation interrupt enable */
 #  define FLASH_CR_ERRIE            (1 << 25)               /* Bit 25: Error interrupt enable */
 #  define FLASH_CR_LOCK             (1 << 31)               /* Bit 31: Lock */
