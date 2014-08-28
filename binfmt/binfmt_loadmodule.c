@@ -91,7 +91,7 @@ static int load_default_priority(FAR struct binary_s *bin)
   ret = sched_getparam(0, &param);
   if (ret < 0)
     {
-      bdbg("ERROR: sched_getparam failed: %d\n", errno);
+      bdbg("ERROR: sched_getparam failed: %d\n", get_errno());
       return ERROR;
     }
 
@@ -263,7 +263,7 @@ int load_module(FAR struct binary_s *bin)
   if (ret < 0)
     {
       bdbg("Returning errno %d\n", -ret);
-      errno = -ret;
+      set_errno(-ret);
       return ERROR;
     }
 

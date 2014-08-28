@@ -102,7 +102,7 @@ static int builtin_loadbinary(struct binary_s *binp)
   fd = open(binp->filename, O_RDONLY);
   if (fd < 0)
     {
-      int errval = errno;
+      int errval = get_errno();
       bdbg("ERROR: Failed to open binary %s: %d\n", binp->filename, errval);
       return -errval;
     }
@@ -114,7 +114,7 @@ static int builtin_loadbinary(struct binary_s *binp)
   ret = ioctl(fd, FIOC_FILENAME, (unsigned long)((uintptr_t)&filename));
   if (ret < 0)
     {
-      int errval = errno;
+      int errval = get_errno();
       bdbg("ERROR: FIOC_FILENAME ioctl failed: %d\n", errval);
       return -errval;
     }
@@ -126,7 +126,7 @@ static int builtin_loadbinary(struct binary_s *binp)
   index = builtin_isavail(filename);
   if (index < 0)
     {
-      int errval = errno;
+      int errval = get_errno();
       bdbg("ERROR: %s is not a builtin application\n", filename);
       return -errval;
 

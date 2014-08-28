@@ -185,7 +185,7 @@ int exec_module(FAR const struct binary_s *binp)
 #endif
   if (ret < 0)
     {
-      err = errno;
+      err = get_errno();
       bdbg("task_init() failed: %d\n", err);
       goto errout_with_stack;
     }
@@ -239,7 +239,7 @@ int exec_module(FAR const struct binary_s *binp)
   ret = task_activate((FAR struct tcb_s *)tcb);
   if (ret < 0)
     {
-      err = errno;
+      err = get_errno();
       bdbg("task_activate() failed: %d\n", err);
       goto errout_with_stack;
     }
@@ -259,7 +259,7 @@ errout_with_stack:
 errout_with_tcb:
   kfree(tcb);
 errout:
-  errno = err;
+  set_errno(err);
   bdbg("returning errno: %d\n", err);
   return ERROR;
 }

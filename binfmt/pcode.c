@@ -187,7 +187,7 @@ static int pcode_mount_testfs(void)
               "romfs", MS_RDONLY, NULL);
   if (ret < 0)
     {
-      int errval = errno;
+      int errval = get_errno();
       DEBUGASSERT(errval > 0);
 
       bdbg("ERROR: mount(%s,%s,romfs) failed: %d\n",
@@ -265,7 +265,7 @@ static int pcode_proxy(int argc, char **argv)
   ret = on_exit(pcode_onexit, binp);
   if (ret < 0)
     {
-      bdbg("ERROR: on_exit failed: %d\n", errno);
+      bdbg("ERROR: on_exit failed: %d\n", get_errno());
       kfree(fullpath);
       return EXIT_FAILURE;
     }
@@ -316,7 +316,7 @@ static int pcode_load(struct binary_s *binp)
   fd = open(binp->filename, O_RDONLY);
   if (fd < 0)
     {
-      int errval = errno;
+      int errval = get_errno();
       bdbg("ERROR: Failed to open binary %s: %d\n", binp->filename, errval);
       return -errval;
     }
@@ -335,7 +335,7 @@ static int pcode_load(struct binary_s *binp)
            * simply interrupted by a signal.
            */
 
-          int errval = errno;
+          int errval = get_errno();
           DEBUGASSERT(errval > 0);
 
           if (errval != EINTR)
@@ -383,7 +383,7 @@ static int pcode_load(struct binary_s *binp)
   do
     {
       ret = sem_wait(&g_pcode_handoff.exclsem);
-      DEBUGASSERT(ret == OK || errno == EINTR);
+      DEBUGASSERT(ret == OK || get_errno() == EINTR);
     }
   while (ret < 0);
 
@@ -508,7 +508,7 @@ void pcode_uninitialize(void)
   ret = unregister_binfmt(&g_pcode_binfmt);
   if (ret < 0)
     {
-      int errval = errno;
+      int errval = get_errno();
       DEBUGASSERT(errval > 0);
 
       bdbg("ERROR: unregister_binfmt() failed: %d\n", errval);
@@ -519,7 +519,7 @@ void pcode_uninitialize(void)
   ret = umount(CONFIG_PCODE_TEST_MOUNTPOINT);
   if (ret < 0)
     {
-      int errval = errno;
+      int errval = get_errno();
       DEBUGASSERT(errval > 0);
 
       bdbg("ERROR: umount(%s) failed: %d\n", CONFIG_PCODE_TEST_MOUNTPOINT, errval);
