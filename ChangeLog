@@ -8278,3 +8278,12 @@
 	* arch/arm/include/armv7-a/irq.h, arm_syscall.c, syscall/Kconfig,
 	  syscall_funclookup.c, syscall_nparms.c, and syscall_stublookup.c:
 	  ARMv7-A:  Add SYSCALL handling logic (2014-8-28).
+	* nuttx/fs/, drivers/, and sched/:  Remove explicit references to errno.
+	  That is a problem from within the kernel for certain configurations
+	  (there are still more references to be fixed) (2014-8-28).
+	* sched/clock/clock.h: In some configurations, g_system_tmer must be
+	  extern'ed as a private variable in the OS (2014-8-28).
+	* include/errno.h and nuttx/clock.h:  errno and g_system_timer must be
+	  handled in a special way if there are external modules (2014-8-28).
+	* include/sys/syscall.h: System definitions should depend on
+	  CONFIG_LIB_SYSCALL not CONFIG_NUTTX_KERNEL (2014-8-28).
