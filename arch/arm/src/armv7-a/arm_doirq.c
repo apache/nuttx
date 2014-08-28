@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/armv7-a/arm_doirq.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,8 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
+#include "group/group.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -93,18 +95,31 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
 
   irq_dispatch(irq, regs);
 
-  /* Check for a context switch.  If a context switch occured, then
+  /* Check for a context switch.  If a context switch occurred, then
    * current_regs will have a different value than it did on entry.  If an
    * interrupt level context switch has occurred, then restore the floating
-   * point state before returning from the interrupt.
+   * point state and the establish the correct address environment before
+   * returning from the interrupt.
    */
 
-#ifdef CONFIG_ARCH_FPU
+#if defined(CONFIG_ARCH_FPU) || defined(CONFIG_ARCH_ADDRENV)
   if (regs != current_regs)
     {
+#ifdef CONFIG_ARCH_FPU
       /* Restore floating point registers */
 
       up_restorefpu((uint32_t*)current_regs);
+#endif
+
+#ifdef CONFIG_ARCH_ADDRENV
+      /* Make sure that the address environment for the previously
+       * running task is closed down gracefully (data caches dump,
+       * MMU flushed) and set up the address environment for the new
+       * thread at the head of the ready-to-run list.
+       */
+
+      (void)group_addrenv(rtcb);
+#endif
     }
 #endif
 

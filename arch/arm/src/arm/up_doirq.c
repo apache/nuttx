@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/arm/up_doirq.c
  *
- *   Copyright (C) 2007-2009, 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,8 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
+#include "group/group.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -75,21 +77,14 @@ void up_doirq(int irq, uint32_t *regs)
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   PANIC();
 #else
-  uint32_t *savestate;
+  /* Nested interrupts are not supported */
 
-  /* Nested interrupts are not supported in this implementation.  If you want
-   * to implement nested interrupts, you would have to (1) change the way that
-   * current_regs is handled and (2) implement design changes associated with
-   * CONFIG_ARCH_INTERRUPTSTACK.  The savestate variable will not work for
-   * that purpose as implemented here because only the outermost nested
-   * interrupt can result in a context switch (it can probably be deleted).
-   */
+  DEBUGASSERT(current_regs == NULL);
 
   /* Current regs non-zero indicates that we are processing an interrupt;
    * current_regs is also used to manage interrupt level context switches.
    */
 
-  savestate    = (uint32_t*)current_regs;
   current_regs = regs;
 
   /* Mask and acknowledge the interrupt */
@@ -100,12 +95,39 @@ void up_doirq(int irq, uint32_t *regs)
 
   irq_dispatch(irq, regs);
 
-  /* Restore the previous value of current_regs.  NULL would indicate that
-   * we are no longer in an interrupt handler.  It will be non-NULL if we
-   * are returning from a nested interrupt.
+  /* Check for a context switch.  If a context switch occurred, then
+   * current_regs will have a different value than it did on entry.  If an
+   * interrupt level context switch has occurred, then restore the floating
+   * point state and the establish the correct address environment before
+   * returning from the interrupt.
    */
 
-  current_regs = savestate;
+#if defined(CONFIG_ARCH_FPU) || defined(CONFIG_ARCH_ADDRENV)
+  if (regs != current_regs)
+    {
+#ifdef CONFIG_ARCH_FPU
+      /* Restore floating point registers */
+
+      up_restorefpu((uint32_t*)current_regs);
+#endif
+
+#ifdef CONFIG_ARCH_ADDRENV
+      /* Make sure that the address environment for the previously
+       * running task is closed down gracefully (data caches dump,
+       * MMU flushed) and set up the address environment for the new
+       * thread at the head of the ready-to-run list.
+       */
+
+      (void)group_addrenv(rtcb);
+#endif
+    }
+#endif
+
+  /* Set current_regs to NULL to indicate that we are no longer in an
+   * interrupt handler.
+   */
+
+  current_regs = NULL;
 
   /* Unmask the last interrupt (global interrupts are still disabled) */
 
