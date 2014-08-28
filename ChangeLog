@@ -8265,4 +8265,7 @@
 	* arch/*/*_blocktask.c, arch/*/*_unblocktask.c, and arch/*/*_exit.c:
 	  Add address environment support to all implementation of up_block_task(),
 	  up_unblock_task(), and _exit() (2014-8-31).
-
+	* arch/arm/src/stm32/stm32_flash.c and chip/stm32_flash.h,
+	  include/nuttx/progmem.h, and configs/vsn/src/sif.c: STM32 FLASH fixes:
+	  use size_t instead of uint16_t, make interface more generic.  From
+	  Freddie Chopin (2014-8-28).
