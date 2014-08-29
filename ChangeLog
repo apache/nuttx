@@ -8290,3 +8290,12 @@
 	* arch/arm/src/armv7-a: Rename syscall.h to svcall.h to work around
 	  some include path name collisions; fix some compilation errors in
 	  SYSCALL logic when debug is enabled (2014-8-29).
+	* arch/arm/include/arm/syscall.h and armv7-a/syscall.h: Fix ARM7/9
+	  and Cortex-A SYSCALLs:  For threads in SVC mode, the SVC instructions
+	  clobbers R14.  This must be taken account in the inline assembly
+	  (2014-8029).
+	* arch/arm/src/armv7-a/arm_syscall.c: Fix hard coded values in
+	  dispatch_syscall() inline assembly. Back out/corect part of last
+	  change; that was going the wrong direction.  With this change, the
+	  apps/examples/elf test works with address environments and call
+	  gates! (2014-8029).
