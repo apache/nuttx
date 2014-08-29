@@ -441,7 +441,7 @@ config DEBUG_SCHED
 config DEBUG_SYSCALL
 	bool "SYSCALL Debug Output"
 	default n
-	depends on NUTTX_KERNEL
+	depends on LIB_SYSCALL
 	---help---
 		Enable very low level output related to system calls.  This gives
 		you basically a poor man's version of strace.
