@@ -8299,3 +8299,9 @@
 	  change; that was going the wrong direction.  With this change, the
 	  apps/examples/elf test works with address environments and call
 	  gates! (2014-8029).
+	* Many, many files:  Renamed CONFIG_NUTTX_KERNEL to CONFIG_BUILD_PROTECTED.
+	  Added configuration CONFIG_BUILD_KERNEL that will be used to generate
+	  a kernel (only) with full process support and will execut programs
+	  only from a file system.  This new configuration is defined but only
+	  partially integrated (2014-8-29).
+
