@@ -117,13 +117,13 @@ static void dispatch_syscall(void)
     " str r6, [sp, #8]\n"          /* Move parameter 6 (if any) into position */
     " str lr, [sp, #12]\n"         /* Save lr in the stack frame */
     " ldr ip, =g_stublookup\n"     /* R12=The base of the stub lookup table */
-    " ldr ip, [ip, r0, lsl #2]\n"  /* R12=The address of the stub for this syscall */
+    " ldr ip, [ip, r0, lsl #2]\n"  /* R12=The address of the stub for this SYSCALL */
     " blx ip\n"                    /* Call the stub (modifies lr)*/
     " ldr lr, [sp, #12]\n"         /* Restore lr */
     " add sp, sp, #16\n"           /* Destroy the stack frame */
     " mov r2, r0\n"                /* R2=Save return value in R2 */
     " mov r0, #3\n"                /* R0=SYS_syscall_return */
-    " svc 0"                       /* Return from the syscall */
+    " svc 0"                       /* Return from the SYSCALL */
   );
 }
 #endif
@@ -156,7 +156,18 @@ uint32_t *arm_syscall(uint32_t *regs)
   uint32_t cpsr;
 #endif
 
-  DEBUGASSERT(regs && regs == current_regs);
+  /* Nested interrupts are not supported */
+
+  DEBUGASSERT(regs && current_regs == NULL);
+
+  /* Current regs non-zero indicates that we are processing an interrupt;
+   * current_regs is also used to manage interrupt level context switches.
+   */
+
+  current_regs = regs;
+
+  /* The SYSCALL command is in R0 on entry.  Parameters follow in R1..R7 */
+
   cmd = regs[REG_R0];
 
   /* The SVCall software interrupt is called with R0 = system call command
@@ -178,7 +189,7 @@ uint32_t *arm_syscall(uint32_t *regs)
 
   switch (cmd)
     {
-      /* R0=SYS_syscall_return:  This a syscall return command:
+      /* R0=SYS_syscall_return:  This a SYSCALL return command:
        *
        *   void up_syscall_return(void);
        *
@@ -190,22 +201,23 @@ uint32_t *arm_syscall(uint32_t *regs)
        * unprivileged thread mode.
        */
 
-#ifdef CONFIG_NUTTX_KERNEL
       case SYS_syscall_return:
         {
           struct tcb_s *rtcb = sched_self();
           int index = (int)rtcb->xcp.nsyscalls - 1;
 
-          /* Make sure that there is a saved syscall return address. */
+          /* Make sure that there is a saved SYSCALL return address. */
 
           DEBUGASSERT(index >= 0);
 
-          /* Setup to return to the saved syscall return address in
+          /* Setup to return to the saved SYSCALL return address in
            * the original mode.
            */
 
           regs[REG_PC]        = rtcb->xcp.syscall[index].sysreturn;
+#ifdef CONFIG_NUTTX_KERNEL
           regs[REG_CPSR]      = rtcb->xcp.syscall[index].cpsr;
+#endif
           rtcb->xcp.nsyscalls = index;
 
           /* The return value must be in R0-R1.  dispatch_syscall() temporarily
@@ -215,7 +227,6 @@ uint32_t *arm_syscall(uint32_t *regs)
           regs[REG_R0]         = regs[REG_R2];
         }
         break;
-#endif
 
       /* R0=SYS_task_start:  This a user task start
        *
@@ -373,7 +384,7 @@ uint32_t *arm_syscall(uint32_t *regs)
 
           DEBUGASSERT(cmd >= CONFIG_SYS_RESERVED && cmd < SYS_maxsyscall);
 
-          /* Make sure that there is a no saved syscall return address.  We
+          /* Make sure that there is a no saved SYSCALL return address.  We
            * cannot yet handle nested system calls.
            */
 
@@ -426,7 +437,18 @@ uint32_t *arm_syscall(uint32_t *regs)
     }
 #endif
 
-  return OK;
+  /* Set current_regs to NULL to indicate that we are no longer in an
+   * interrupt handler.
+   */
+
+  regs         = (uint32_t *)current_regs;
+  current_regs = NULL;
+
+  /* Return the last value of curent_regs.  This will determine if any
+   * context switch will be performed on the return from the exception.
+   */
+
+  return regs;
 }
 
 #else
