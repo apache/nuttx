@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/armv7-a/syscall.h
+ * arch/arm/src/armv7-a/svcall.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_COMMON_CORTEXM_SVCALL_H
-#define __ARCH_ARM_SRC_COMMON_CORTEXM_SVCALL_H
+#ifndef __ARCH_ARM_SRC_ARMV7_A_SVCALL_H
+#define __ARCH_ARM_SRC_ARMV7_A_SVCALL_H
 
 /************************************************************************************
  * Included Files
@@ -120,4 +120,4 @@
  ************************************************************************************/
 
 #endif /* CONFIG_LIB_SYSCALL */
-#endif  /* __ARCH_ARM_SRC_COMMON_CORTEXM_SVCALL_H */
+#endif  /* __ARCH_ARM_SRC_ARMV7_A_SVCALL_H */

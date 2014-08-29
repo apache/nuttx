@@ -36,30 +36,35 @@
 /****************************************************************************
  * Included Files
  ****************************************************************************/
+
 #include <nuttx/config.h>
 
 #include <stdint.h>
 #include <string.h>
+#include <syscall.h>
 #include <assert.h>
 #include <debug.h>
 
 #include <arch/irq.h>
 #include <nuttx/sched.h>
 
-#ifdef CONFIG_LIB_SYSCALL
-#  include <syscall.h>
-#endif
-
-#include "syscall.h"
+#include "svcall.h"
 #include "up_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Debug ********************************************************************/
 
 /* Output debug info if stack dump is selected -- even if
  * debug is not selected.
  */
+
+#if defined(CONFIG_DEBUG_SYSCALL) || defined(CONFIG_DEBUG_SVCALL)
+# define svcdbg(format, ...) lldbg(format, ##__VA_ARGS__)
+#else
+# define svcdbg(x...)
+#endif
 
 #ifdef CONFIG_ARCH_STACKDUMP
 # undef  lldbg
@@ -391,7 +396,7 @@ uint32_t *arm_syscall(uint32_t *regs)
 
           regs[REG_R0] -= CONFIG_SYS_RESERVED;
 #else
-          slldbg("ERROR: Bad SYS call: %d\n", regs[REG_R0]);
+          svcdbg("ERROR: Bad SYS call: %d\n", regs[REG_R0]);
 #endif
         }
         break;
@@ -428,7 +433,7 @@ uint32_t *arm_syscall(uint32_t *regs)
 
 uint32_t *arm_syscall(uint32_t *regs)
 {
-  lldbg("Syscall from 0x%x\n", regs[REG_PC]);
+  lldbg("SYSCALL from 0x%x\n", regs[REG_PC]);
   current_regs = regs;
   PANIC();
 }
