@@ -295,8 +295,7 @@ config ARCH_FPU
 
 config ARMV7M_MPU
 	bool "MPU support"
-	default n if !ARCH_USE_MPU
-	default y if ARCH_USE_MPU
+	default n
 	depends on ARCH_HAVE_MPU
 	select ARCH_USE_MPU
 	---help---

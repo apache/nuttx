@@ -115,14 +115,12 @@
   /* The kernel only build is equivalent to the kernel part of the protected
    * build.
    */
+
 #else
   /* User-space worker threads are not built in a flat build
    * (CONFIG_BUILD_PROTECTED=n && CONFIG_BUILD_KERNEL=n)
-   */
-
-#else
-
-  /* To preserve legacy behavior, CONFIG_SCHED_HPWORK is assumed to be true
+   *
+   * To preserve legacy behavior, CONFIG_SCHED_HPWORK is assumed to be true
    * in a flat build (CONFIG_SCHED_KERNEL=n) but must be defined in kernel
    * mode in order to build the high priority work queue.
    *
