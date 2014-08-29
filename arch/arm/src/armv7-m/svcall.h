@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_COMMON_CORTEXM_SVCALL_H
-#define __ARCH_ARM_SRC_COMMON_CORTEXM_SVCALL_H
+#ifndef __ARCH_ARM_SRC_ARMV7_M_SVCALL_H
+#define __ARCH_ARM_SRC_ARMV7_M_SVCALL_H
 
 /************************************************************************************
  * Included Files
@@ -142,5 +142,5 @@
  * Inline Functions
  ************************************************************************************/
 
-#endif  /* __ARCH_ARM_SRC_COMMON_CORTEXM_SVCALL_H */
+#endif  /* __ARCH_ARM_SRC_ARMV7_M_SVCALL_H */
 
