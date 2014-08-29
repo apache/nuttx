@@ -76,6 +76,9 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: dispatch_syscall
+ *
+ * Description:
  *   Call the stub function corresponding to the system call.  NOTE the non-
  *   standard parameter passing:
  *
@@ -89,6 +92,8 @@
  *
  *   The values of R4-R5 may be preserved in the proxy called by the user
  *   code if they are used (but otherwise will not be).
+ *
+ *   WARNING: There are hard-coded values in this logic!
  *
  *   Register usage:
  *
@@ -122,8 +127,8 @@ static void dispatch_syscall(void)
     " ldr lr, [sp, #12]\n"         /* Restore lr */
     " add sp, sp, #16\n"           /* Destroy the stack frame */
     " mov r2, r0\n"                /* R2=Save return value in R2 */
-    " mov r0, #3\n"                /* R0=SYS_syscall_return */
-    " svc 0"                       /* Return from the SYSCALL */
+    " mov r0, #0\n"                /* R0=SYS_syscall_return */
+    " svc #0x900001"               /* Return from the SYSCALL */
   );
 }
 #endif
@@ -158,13 +163,7 @@ uint32_t *arm_syscall(uint32_t *regs)
 
   /* Nested interrupts are not supported */
 
-  DEBUGASSERT(regs && current_regs == NULL);
-
-  /* Current regs non-zero indicates that we are processing an interrupt;
-   * current_regs is also used to manage interrupt level context switches.
-   */
-
-  current_regs = regs;
+  DEBUGASSERT(regs);
 
   /* The SYSCALL command is in R0 on entry.  Parameters follow in R1..R7 */
 
@@ -311,7 +310,7 @@ uint32_t *arm_syscall(uint32_t *regs)
 #if defined(CONFIG_NUTTX_KERNEL) && !defined(CONFIG_DISABLE_SIGNALS)
       case SYS_signal_handler:
         {
-          struct tcb_s *rtcb   = sched_self();
+          struct tcb_s *rtcb = sched_self();
 
           /* Remember the caller's return address */
 
@@ -355,7 +354,7 @@ uint32_t *arm_syscall(uint32_t *regs)
 #if defined(CONFIG_NUTTX_KERNEL) && !defined(CONFIG_DISABLE_SIGNALS)
       case SYS_signal_handler_return:
         {
-          struct tcb_s *rtcb   = sched_self();
+          struct tcb_s *rtcb = sched_self();
 
           /* Set up to return to the kernel-mode signal dispatching logic. */
 
@@ -413,39 +412,13 @@ uint32_t *arm_syscall(uint32_t *regs)
         break;
     }
 
-  /* Report what happened.  That might difficult in the case of a context switch */
+  /* Report what happened */
 
-#if defined(CONFIG_DEBUG_SYSCALL)
-  if (regs != current_regs)
-    {
-      svcdbg("SYSCALL Return: current_regs: %p\n", current_regs);
-      svcdbg("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-             current_regs[REG_R0],  current_regs[REG_R1],
-             current_regs[REG_R2],  current_regs[REG_R3],
-             current_regs[REG_R4],  current_regs[REG_R5],
-             current_regs[REG_R6],  current_regs[REG_R7]);
-      svcdbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-             current_regs[REG_R8],  current_regs[REG_R9],
-             current_regs[REG_R10], current_regs[REG_R11],
-             current_regs[REG_R12], current_regs[REG_R13],
-             current_regs[REG_R14], current_regs[REG_R15]);
-      svcdbg("CPSR: %08x\n", current_regs[REG_CPSR]);
-    }
-  else
-    {
-      svcdbg("SYSCALL Return: %d\n", regs[REG_R0]);
-    }
-#endif
+  svcdbg("SYSCALL Return: %d \n", regs[REG_R0]);
 
-  /* Set current_regs to NULL to indicate that we are no longer in an
-   * interrupt handler.
-   */
-
-  regs         = (uint32_t *)current_regs;
-  current_regs = NULL;
-
-  /* Return the last value of curent_regs.  This will determine if any
-   * context switch will be performed on the return from the exception.
+  /* Return the last value of curent_regs.  This supports context switchs
+   * on return from the exception.  That capability is not used here,
+   * however.
    */
 
   return regs;
