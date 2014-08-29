@@ -8287,3 +8287,6 @@
 	  handled in a special way if there are external modules (2014-8-28).
 	* include/sys/syscall.h: System definitions should depend on
 	  CONFIG_LIB_SYSCALL not CONFIG_NUTTX_KERNEL (2014-8-28).
+	* arch/arm/src/armv7-a: Rename syscall.h to svcall.h to work around
+	  some include path name collisions; fix some compilation errors in
+	  SYSCALL logic when debug is enabled (2014-8-29).
