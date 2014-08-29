@@ -90,8 +90,23 @@
 uint32_t syscall_clock_systimer(void);
 
 /****************************************************************************
- * Pre-processor definitions
+ * Pre-processor Definitions
  ****************************************************************************/
+
+/* Errno access is awkward. We need to generate get_errno() and set_errno()
+ * interfaces to support the system calls, even though we don't use them
+ * ourself.
+ *
+ * The "normal" protoypes for these functions is in errno.h.  The following
+ * must agree exactly.
+ */
+
+#ifdef __DIRECT_ERRNO_ACCESS
+#  undef set_errno
+#  undef get_errno
+void set_errno(int errcode);
+int  get_errno(void);
+#endif
 
 /****************************************************************************
  * Public Data

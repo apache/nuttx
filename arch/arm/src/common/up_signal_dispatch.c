@@ -43,9 +43,8 @@
 #include "svcall.h"
 #include "up_internal.h"
 
-#if ((defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__) || \
-      defined(defined(CONFIG_BUILD_KERNEL)) && \
-     !defined(CONFIG_DISABLE_SIGNALS)
+#if ((defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)) || \
+      defined(CONFIG_BUILD_KERNEL)) && !defined(CONFIG_DISABLE_SIGNALS)
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -617,8 +617,8 @@ void up_signal_dispatch(_sa_sigaction_t sighand, int signo,
  *
  ****************************************************************************/
 
-#if (defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)) || \
-     defined(CONFIG_BUILD_KERNEL) && !defined(CONFIG_DISABLE_SIGNALS)
+#if (defined(CONFIG_BUILD_PROTECTED) && !defined(__KERNEL__)) && \
+    !defined(CONFIG_DISABLE_SIGNALS)
 void up_signal_handler(_sa_sigaction_t sighand, int signo,
                        FAR siginfo_t *info, FAR void *ucontext)
        noreturn_function;

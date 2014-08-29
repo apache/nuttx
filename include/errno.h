@@ -43,8 +43,31 @@
 #include <nuttx/compiler.h>
 
 /************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************/
+/* How can we access the errno variable? */
+
+#undef __DIRECT_ERRNO_ACCESS
+#if !defined(CONFIG_LIB_SYSCALL)
+   /* No system calls?  Then there can only be direct access */
+
+#  define __DIRECT_ERRNO_ACCESS 1
+
+#elif !defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)
+   /* Flat build... complete access */
+
+#  define __DIRECT_ERRNO_ACCESS 1
+
+#elif defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)
+   /* Kernel portion of protected build.  The Kernel has access */
+
+#  define __DIRECT_ERRNO_ACCESS 1
+
+#elif defined(CONFIG_BUILD_KERNEL)
+   /* Kernel only build.  The kernel has access */
+
+#  define __DIRECT_ERRNO_ACCESS 1
+#endif
 
 /* Convenience/compatibility definition.
  *
@@ -52,7 +75,7 @@
  * from all code using a simple pointer.
  */
 
-#ifndef CONFIG_LIB_SYSCALL
+#ifdef __DIRECT_ERRNO_ACCESS
 
 #  define errno *get_errno_ptr()
 #  define set_errno(e) do { errno = (int)(e); } while (0)
@@ -64,16 +87,8 @@
  * a little differently. In kernel-mode, the TCB errno value can still be
  * read and written using a pointer from code executing within the
  * kernel.
- */
-
-#if (defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)) || \
-     defined(CONFIG_BUILD_KERNEL) 
-#  define errno *get_errno_ptr()
-#  define set_errno(e) do { errno = (int)(e); } while (0)
-#  define get_errno(e) errno
-#else
-
-/* But in user-mode, the errno can only be read using the name 'errno'.
+ *
+ * But in user-mode, the errno can only be read using the name 'errno'.
  * The non-standard API set_errno() must explicitly be used from user-
  * mode code in order to set the errno value.
  *
@@ -84,8 +99,7 @@
 
 #  define errno get_errno()
 
-#endif /* __KERNEL__ */
-#endif /* CONFIG_LIB_SYSCALL */
+#endif /* __DIRECT_ERRNO_ACCESS */
 
 /* Definitions of error numbers and the string that would be
  * returned by strerror().
@@ -365,7 +379,7 @@ extern "C"
 
 FAR int *get_errno_ptr(void);
 
-#ifdef CONFIG_LIB_SYSCALL
+#ifndef __DIRECT_ERRNO_ACCESS
 void set_errno(int errcode);
 int  get_errno(void);
 #endif
