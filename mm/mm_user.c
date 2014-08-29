@@ -41,7 +41,7 @@
 #include <assert.h>
 #include <nuttx/mm.h>
 
-#if !defined(CONFIG_NUTTX_KERNEL) || !defined(__KERNEL__)
+#if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
 
 /************************************************************************
  * Pre-processor definition
@@ -153,4 +153,4 @@ void umm_givesemaphore(void)
   mm_givesemaphore(&g_mmheap);
 }
 
-#endif /* !CONFIG_NUTTX_KERNEL || !__KERNEL__ */
+#endif /* !CONFIG_BUILD_PROTECTED || !__KERNEL__ */

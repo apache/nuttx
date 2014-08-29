@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/common/up_task_start.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@
 #include "svcall.h"
 #include "up_internal.h"
 
-#ifdef CONFIG_NUTTX_KERNEL
+#if defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -94,4 +94,4 @@ void up_task_start(main_t taskentry, int argc, FAR char *argv[])
             (uintptr_t)argv);
 }
 
-#endif /* CONFIG_NUTTX_KERNEL */
+#endif /* CONFIG_BUILD_PROTECTED || CONFIG_BUILD_KERNEL */

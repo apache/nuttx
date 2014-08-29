@@ -71,7 +71,7 @@
 
 #  define __HAVE_KERNEL_GLOBALS 0
 
-#elif defined(CONFIG_NUTTX_KERNEL)
+#elif defined(CONFIG_BUILD_PROTECTED)
 #  if defined(__KERNEL__)
      /* Case 3: Kernel mode of protected kernel build */
 
@@ -81,6 +81,11 @@
 
 #    define __HAVE_KERNEL_GLOBALS 0
 #  endif
+
+#elif defined(CONFIG_BUILD_KERNEL)
+     /* Case 3: Kernel only build */
+
+#    define __HAVE_KERNEL_GLOBALS 1
 
 #elif defined(CONFIG_LIB_SYSCALL)
    /* Case 4: Building with SYSCALLs enabled, but not part of a kernel build */

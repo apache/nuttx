@@ -70,7 +70,7 @@ ifeq ($(CONFIG_ARCH_MEMCPY),y)
 CMN_ASRCS += up_memcpy.S
 endif
 
-ifeq ($(CONFIG_NUTTX_KERNEL),y)
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CMN_CSRCS += up_mpu.c up_task_start.c up_pthread_start.c up_stackframe.c
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 CMN_CSRCS += up_signal_dispatch.c
@@ -113,7 +113,7 @@ ifeq ($(CONFIG_ARMV7M_CMNVECTOR),y)
 CHIP_ASRCS += lpc17_vectors.S
 endif
 
-ifeq ($(CONFIG_NUTTX_KERNEL),y)
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += lpc17_userspace.c lpc17_mpuinit.c
 endif
 

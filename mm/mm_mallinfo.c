@@ -151,7 +151,7 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_NUTTX_KERNEL) || !defined(__KERNEL__)
+#if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
 #  ifdef CONFIG_CAN_PASS_STRUCTS
 
 struct mallinfo mallinfo(void)
@@ -170,4 +170,4 @@ int mallinfo(struct mallinfo *info)
 }
 
 #endif
-#endif /* !CONFIG_NUTTX_KERNEL || !__KERNEL__ */
+#endif /* !CONFIG_BUILD_PROTECTED || !__KERNEL__ */

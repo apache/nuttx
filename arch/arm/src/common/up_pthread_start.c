@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/common/up_pthread_start.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,9 @@
 #include "svcall.h"
 #include "up_internal.h"
 
-#if defined(CONFIG_NUTTX_KERNEL) && defined(__KERNEL__) && !defined(CONFIG_DISABLE_PTHREAD)
+#if ((defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__) || \
+      defined(defined(CONFIG_BUILD_KERNEL)) && \
+     !defined(CONFIG_DISABLE_PTHREAD)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -93,4 +95,4 @@ void up_pthread_start(pthread_startroutine_t entrypt, pthread_addr_t arg)
   sys_call2(SYS_pthread_start, (uintptr_t)entrypt, (uintptr_t)arg);
 }
 
-#endif /* CONFIG_NUTTX_KERNEL &&& __KERNEL__ && !CONFIG_DISABLE_PTHREAD */
+#endif /* (CONFIG_BUILD_PROTECTED || CONFIG_BUILD_KERNEL) && !CONFIG_DISABLE_PTHREAD */

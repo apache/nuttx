@@ -47,7 +47,7 @@
 #include "lpc17_mpuinit.h"
 #include "lpc17_userspace.h"
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -115,5 +115,5 @@ void lpc17_userspace(void)
   lpc17_mpuinitialize();
 }
 
-#endif /* CONFIG_NUTTX_KERNEL */
+#endif /* CONFIG_BUILD_PROTECTED */
 

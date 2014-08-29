@@ -63,7 +63,7 @@
  * reserved (0 is not used).
  */
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_KERNEL
 #  ifndef CONFIG_SYS_RESERVED
 #    error "CONFIG_SYS_RESERVED must be defined to the value 4"
 #  elif CONFIG_SYS_RESERVED != 4
@@ -170,7 +170,7 @@
 #define up_switchcontext(saveregs, restoreregs) \
   (void)sys_call2(SYS_switch_context, (uintptr_t)saveregs, (uintptr_t)restoreregs)
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_KERNEL
 /* SYS call 3:
  *
  * void up_syscall_return(void);

@@ -92,7 +92,7 @@ extern "C"
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 void sam_userspace(void);
 #endif
 

@@ -50,7 +50,7 @@ ifeq ($(CONFIG_MUTEX_TYPES),y)
 CSRCS += pthread_mutexattrsettype.c pthread_mutexattrgettype.c
 endif
 
-ifeq ($(CONFIG_NUTTX_KERNEL),y)
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CSRCS += pthread_startup.c
 endif
 

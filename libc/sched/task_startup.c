@@ -44,7 +44,7 @@
 
 #include <nuttx/userspace.h>
 
-#if defined(CONFIG_NUTTX_KERNEL) && !defined(__KERNEL__)
+#if defined(CONFIG_BUILD_PROTECTED) && !defined(__KERNEL__)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -101,4 +101,4 @@ void task_startup(main_t entrypt, int argc, FAR char *argv[])
   exit(entrypt(argc, argv));
 }
 
-#endif /* CONFIG_NUTTX_KERNEL && !__KERNEL__ */
+#endif /* CONFIG_BUILD_PROTECTED && !__KERNEL__ */

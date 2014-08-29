@@ -10,8 +10,8 @@ menuconfig LIB_SYSCALL
 		Build in support for "system calls".  System calls are used to
 		implement a call gate mechanism that can be be used to call from
 		user code into the kernel.  This is only useful for user code that
-		lies outside of the kernel such as when the NUTTX_KERNEL build is
-		selected.
+		lies outside of the kernel such as when the BUILD_PROTECTED or
+		BUILD_KERNEL builds are selected.
 
 		This permits calls from user-mode code into kernel mode; the call
 		gate will change the mode of operation from user to supervisor mode,

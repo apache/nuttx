@@ -231,10 +231,11 @@ void up_initial_state(FAR struct tcb_s *tcb);
  *     however, there are certain contexts where the TCB may not be fully
  *     initialized when up_create_stack is called.
  *
- *     If CONFIG_NUTTX_KERNEL is defined, then this thread type may affect
- *     how the stack is allocated.  For example, kernel thread stacks should
- *     be allocated from protected kernel memory.  Stacks for user tasks and
- *     threads must come from memory that is accessible to user code.
+ *     If CONFIG_BUILD_PROTECTED or CONFIG_BUILD_KERNEL are is defined, then
+ *     this thread type may affect how the stack is allocated.  For example,
+ *     kernel thread stacks should be allocated from protected kernel memory.
+ *     Stacks for user tasks and threads must come from memory that is
+ *     accessible to user code.
  *
  ****************************************************************************/
 
@@ -307,7 +308,8 @@ int up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size);
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_CUSTOM_STACK) && defined(CONFIG_NUTTX_KERNEL)
+#if !defined(CONFIG_CUSTOM_STACK) && (defined(CONFIG_BUILD_PROTECTED) || \
+     defined(CONFIG_BUILD_KERNEL))
 FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size);
 #endif
 
@@ -331,11 +333,11 @@ FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size);
  *     however, there are certain error recovery contexts where the TCB may
  *     not be fully initialized when up_release_stack is called.
  *
- *     If CONFIG_NUTTX_KERNEL is defined, then this thread type may affect
- *     how the stack is freed.  For example, kernel thread stacks may have
- *     been allocated from protected kernel memory.  Stacks for user tasks
- *     and threads must have come from memory that is accessible to user
- *     code.
+ *     If CONFIG_BUILD_PROTECTED or CONFIG_BUILD_KERNEL are defined, then
+ *     this thread type may affect how the stack is freed.  For example,
+ *     kernel thread stacks may have been allocated from protected kernel
+ *     memory.  Stacks for user tasks and threads must have come from memory
+ *     that is accessible to user code.
  *
  * Returned Value:
  *   None
@@ -526,7 +528,8 @@ void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NUTTX_KERNEL) && defined(__KERNEL__)
+#if (defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)) || \
+     defined(CONFIG_BUILD_KERNEL)
 void up_task_start(main_t taskentry, int argc, FAR char *argv[])
        noreturn_function;
 #endif
@@ -555,7 +558,8 @@ void up_task_start(main_t taskentry, int argc, FAR char *argv[])
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NUTTX_KERNEL) && defined(__KERNEL__) && !defined(CONFIG_DISABLE_PTHREAD)
+#if (defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)) || \
+     defined(CONFIG_BUILD_KERNEL) && !defined(CONFIG_DISABLE_PTHREAD)
 void up_pthread_start(pthread_startroutine_t entrypt, pthread_addr_t arg)
        noreturn_function;
 #endif
@@ -588,7 +592,8 @@ void up_pthread_start(pthread_startroutine_t entrypt, pthread_addr_t arg)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NUTTX_KERNEL) && defined(__KERNEL__) && !defined(CONFIG_DISABLE_SIGNALS)
+#if (defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)) || \
+     defined(CONFIG_BUILD_KERNEL) && !defined(CONFIG_DISABLE_SIGNALS)
 void up_signal_dispatch(_sa_sigaction_t sighand, int signo,
                         FAR siginfo_t *info, FAR void *ucontext);
 #endif
@@ -612,7 +617,8 @@ void up_signal_dispatch(_sa_sigaction_t sighand, int signo,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NUTTX_KERNEL) && !defined(__KERNEL__) && !defined(CONFIG_DISABLE_SIGNALS)
+#if (defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)) || \
+     defined(CONFIG_BUILD_KERNEL) && !defined(CONFIG_DISABLE_SIGNALS)
 void up_signal_handler(_sa_sigaction_t sighand, int signo,
                        FAR siginfo_t *info, FAR void *ucontext)
        noreturn_function;
@@ -624,7 +630,7 @@ void up_signal_handler(_sa_sigaction_t sighand, int signo,
  * Description:
  *   This function will be called to dynamically set aside the heap region.
  *
- *   For the kernel build (CONFIG_NUTTX_KERNEL=y) with both kernel- and
+ *   For the kernel build (CONFIG_BUILD_PROTECTED=y) with both kernel- and
  *   user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function provides the
  *   size of the unprotected, user-space heap.
  *
@@ -639,13 +645,13 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size);
  * Name: up_allocate_kheap
  *
  * Description:
- *   For the kernel build (CONFIG_NUTTX_KERNEL=y) with both kernel- and
+ *   For the kernel build (CONFIG_BUILD_PROTECTED=y) with both kernel- and
  *   user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function allocates
  *   (and protects) the kernel-space heap.
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
 void up_allocate_kheap(FAR void **heap_start, size_t *heap_size);
 #endif
 

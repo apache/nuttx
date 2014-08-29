@@ -40,7 +40,7 @@ DELIM := $(strip /)
 
 # CFLAGS
 
-ifeq ($(CONFIG_NUTTX_KERNEL),y)
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   KDEFINE = ${shell $(TOPDIR)\tools\define.bat "$(CC)" __KERNEL__}
 else
@@ -58,9 +58,15 @@ CSRCS += mm_memalign.c mm_free.c mm_mallinfo.c
 # Allocator instances
 
 CSRCS += mm_user.c
-ifeq ($(CONFIG_NUTTX_KERNEL),y)
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
 ifeq ($(CONFIG_MM_KERNEL_HEAP),y)
 CSRCS += mm_kernel.c
+endif
+else
+ifeq ($(CONFIG_BUILD_KERNEL),y)
+ifeq ($(CONFIG_MM_KERNEL_HEAP),y)
+CSRCS += mm_kernel.c
+endif
 endif
 endif
 
@@ -122,7 +128,7 @@ endif
 # Dependencies
 
 .depend: Makefile $(SRCS)
-ifeq ($(CONFIG_NUTTX_KERNEL),y)
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
 	$(Q) $(MKDEP) --obj-path ubin --obj-suffix $(OBJEXT) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make_ubin.dep
 	$(Q) $(MKDEP) --obj-path kbin --obj-suffix $(OBJEXT) "$(CC)" -- $(CFLAGS) $(KDEFINE) -- $(SRCS) >Make_kbin.dep
 else

@@ -558,7 +558,8 @@ static inline void task_flushstreams(FAR struct tcb_s *tcb)
 
   if (group && group->tg_nmembers == 1)
     {
-#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+#if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
+     defined(CONFIG_MM_KERNEL_HEAP)
       (void)lib_flushall(tcb->group->tg_streamlist);
 #else
       (void)lib_flushall(&tcb->group->tg_streamlist);

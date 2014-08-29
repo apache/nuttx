@@ -37,7 +37,7 @@
 
 CSRCS += sched_getprioritymax.c sched_getprioritymin.c
 
-ifeq ($(CONFIG_NUTTX_KERNEL),y)
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CSRCS += task_startup.c
 endif
 

@@ -47,7 +47,7 @@
 #include "kinetis_mpuinit.h"
 #include "kinetis_userspace.h"
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -115,5 +115,5 @@ void kinetis_userspace(void)
   kinetis_mpuinitialize();
 }
 
-#endif /* CONFIG_NUTTX_KERNEL */
+#endif /* CONFIG_BUILD_PROTECTED */
 

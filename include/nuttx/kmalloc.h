@@ -49,7 +49,7 @@
 #include <nuttx/mm.h>
 #include <nuttx/userspace.h>
 
-#if !defined(CONFIG_NUTTX_KERNEL) || defined(__KERNEL__)
+#if !defined(CONFIG_BUILD_PROTECTED) || defined(__KERNEL__)
 
 /****************************************************************************
  * Public Types
@@ -89,7 +89,7 @@ extern "C"
 #define kumm_trysemaphore()      umm_trysemaphore()
 #define kumm_givesemaphore()     umm_givesemaphore()
 
-#ifndef CONFIG_NUTTX_KERNEL
+#ifndef CONFIG_BUILD_PROTECTED
 /* In the flat build, the following are declared in stdlib.h and are
  * directly callable.
  */
@@ -116,7 +116,7 @@ extern "C"
 
 /* This family of allocators is used to manage kernel protected memory */
 
-#if !defined(CONFIG_NUTTX_KERNEL)
+#if !defined(CONFIG_BUILD_PROTECTED)
 /* If this is not a kernel build, then these map to the same interfaces
  * as were used for the user-mode function.
  */
@@ -180,7 +180,7 @@ bool kmm_heapmember(FAR void *mem);
 
 void sched_ufree(FAR void *address);
 
-#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
 void sched_kfree(FAR void *address);
 #else
 #  define sched_kfree(a) sched_ufree(a)
@@ -201,5 +201,5 @@ void sched_garbagecollection(void);
 }
 #endif
 
-#endif /* !CONFIG_NUTTX_KERNEL || __KERNEL__ */
+#endif /* !CONFIG_BUILD_PROTECTED || __KERNEL__ */
 #endif /* __INCLUDE_NUTTX_KMALLOC_H */

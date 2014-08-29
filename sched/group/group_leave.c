@@ -181,7 +181,8 @@ static inline void group_release(FAR struct task_group_s *group)
 #if CONFIG_NFILE_STREAMS > 0
   /* Free resource held by the stream list */
 
-#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+#if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
+     defined(CONFIG_MM_KERNEL_HEAP)
   lib_releaselist(group->tg_streamlist);
 #else
   lib_releaselist(&group->tg_streamlist);
@@ -234,8 +235,8 @@ static inline void group_release(FAR struct task_group_s *group)
     }
 #endif
 
-#if CONFIG_NFILE_STREAMS > 0 && defined(CONFIG_NUTTX_KERNEL) && \
-    defined(CONFIG_MM_KERNEL_HEAP)
+#if CONFIG_NFILE_STREAMS > 0 && (defined(CONFIG_BUILD_PROTECTED) || \
+    defined(CONFIG_BUILD_KERNEL)) && defined(CONFIG_MM_KERNEL_HEAP)
 
   /* In a flat, single-heap build.  The stream list is part of the
    * group structure.  But in a kernel build with a kernel allocator, it

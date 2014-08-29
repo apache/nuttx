@@ -380,7 +380,7 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
      * case direct callbacks from kernel space into user space is forbidden.
      */
 
-#ifndef CONFIG_NUTTX_KERNEL
+#if !defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)
     case TCIOC_SETHANDLER:
       {
         FAR struct timer_sethandler_s *sethandler;

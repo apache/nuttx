@@ -396,7 +396,8 @@ struct task_group_s
    * allocated using a user-space allocator.
    */
 
-#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+#if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
+     defined(CONFIG_MM_KERNEL_HEAP)
   FAR struct streamlist *tg_streamlist;
 #else
   struct streamlist tg_streamlist;  /* Holds C buffered I/O info                */
@@ -559,7 +560,8 @@ struct task_tcb_s
 
   uint8_t  init_priority;                /* Initial priority of the task        */
 
-#if !defined(CONFIG_CUSTOM_STACK) && defined(CONFIG_NUTTX_KERNEL)
+#if !defined(CONFIG_CUSTOM_STACK) && (defined(CONFIG_BUILD_PROTECTED) || \
+     defined(CONFIG_BUILD_KERNEL))
   /* In the kernel mode build, the arguments are saved on the task's stack      */
 
   FAR char **argv;                       /* Name+start-up parameters            */

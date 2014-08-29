@@ -85,7 +85,7 @@ extern "C"
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 void sam_mpuinitialize(void);
 #else
 #  define sam_mpuinitialize()
@@ -99,7 +99,7 @@ void sam_mpuinitialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 void sam_mpu_uheap(uintptr_t start, size_t size);
 #else
 #  define sam_mpu_uheap(start,size)

@@ -65,6 +65,12 @@
 #  define CONFIG_MM_SMALL 1
 #endif
 
+#undef HAVE_USER_HEAP
+#if (!defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)) && \
+     !defined(CONFIG_BUILD_KERNEL)
+#  define HAVE_USER_HEAP
+#endif
+
 /* Chunk Header Definitions *************************************************/
 /* These definitions define the characteristics of allocator
  *
@@ -220,7 +226,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#if !defined(CONFIG_NUTTX_KERNEL) || !defined(__KERNEL__)
+#ifdef HAVE_USER_HEAP
 /* This is the user heap */
 
 EXTERN struct mm_heap_s g_mmheap;
@@ -240,13 +246,13 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
 
 /* Functions contained in umm_initialize.c **********************************/
 
-#if !defined(CONFIG_NUTTX_KERNEL) || !defined(__KERNEL__)
+#ifdef HAVE_USER_HEAP
 void umm_initialize(FAR void *heap_start, size_t heap_size);
 #endif
 
 /* Functions contained in umm_addregion.c ***********************************/
 
-#if !defined(CONFIG_NUTTX_KERNEL) || !defined(__KERNEL__)
+#ifdef HAVE_USER_HEAP
 void umm_addregion(FAR void *heapstart, size_t heapsize);
 #endif
 
@@ -259,7 +265,7 @@ void mm_givesemaphore(FAR struct mm_heap_s *heap);
 
 /* Functions contained in umm_semaphore.c ***********************************/
 
-#if !defined(CONFIG_NUTTX_KERNEL) || !defined(__KERNEL__)
+#ifdef HAVE_USER_HEAP
 int  umm_trysemaphore(void);
 void umm_givesemaphore(void);
 #endif

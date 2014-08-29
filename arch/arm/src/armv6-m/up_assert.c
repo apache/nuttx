@@ -160,7 +160,7 @@ static inline void up_registerdump(void)
             current_regs[REG_R10], current_regs[REG_R11],
             current_regs[REG_R12], current_regs[REG_R13],
             current_regs[REG_R14], current_regs[REG_R15]);
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
       lldbg("xPSR: %08x PRIMASK: %08x EXEC_RETURN: %08x\n",
             current_regs[REG_XPSR], current_regs[REG_PRIMASK],
             current_regs[REG_EXC_RETURN]);

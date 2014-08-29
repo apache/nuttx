@@ -47,7 +47,7 @@
 #include "sam_mpuinit.h"
 #include "sam_userspace.h"
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 
 /****************************************************************************
  * Private Definitions
@@ -115,5 +115,5 @@ void sam_userspace(void)
   sam_mpuinitialize();
 }
 
-#endif /* CONFIG_NUTTX_KERNEL */
+#endif /* CONFIG_BUILD_PROTECTED */
 

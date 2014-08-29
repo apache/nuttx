@@ -92,7 +92,7 @@ exception_common:
 	 * the context is on the MSP or PSP.
 	 */
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 	mov		r0, r14					/* Copy high register to low register */
 	lsl		r0, #(31 - EXC_RETURN_PROCESS_BITNO)	/* Move to bit 31 */
 	bmi		1f						/* Test bit 31 */
@@ -129,7 +129,7 @@ exception_common:
 	mov		r3, r9
 	mov		r4, r10
 	mov		r5, r11
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 	mov		r6, r14
 	stmia	r0!, {r2-r6}			/* Save the high registers r8-r11 and r14 */
 #else
@@ -200,7 +200,7 @@ exception_common:
 
 	mov		r2, #(4*REG_R8)			/* R2=Offset to R8 storage */
 	add		r0, r1, r2				/* R0=Address of R8 storage */
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 	ldmia	r0!, {r2-r6}			/* Recover R8-R11 and R14 (5 registers)*/
 	mov		r8, r2					/* Move to position in high registers */
 	mov		r9, r3
@@ -227,7 +227,7 @@ exception_common:
 	 * context is on the MSP or PSP.
 	 */
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 	mov		r0, r14					/* Copy high register to low register */
 	lsl		r0, #(31 - EXC_RETURN_PROCESS_BITNO)	/* Move to bit 31 */
 	bmi		5f						/* Test bit 31 */

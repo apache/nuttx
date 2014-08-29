@@ -228,7 +228,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_NUTTX_KERNEL) || !defined(__KERNEL__)
+#if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
 FAR void *malloc(size_t size)
 {
   return mm_malloc(&g_mmheap, size);

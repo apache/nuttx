@@ -66,7 +66,8 @@
  * kernel.
  */
 
-#if defined(CONFIG_NUTTX_KERNEL) && defined(__KERNEL__)
+#if (defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)) || \
+     defined(CONFIG_BUILD_KERNEL) 
 #  define errno *get_errno_ptr()
 #  define set_errno(e) do { errno = (int)(e); } while (0)
 #  define get_errno(e) errno

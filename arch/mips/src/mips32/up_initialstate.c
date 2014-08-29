@@ -116,7 +116,7 @@ void up_initial_state(struct tcb_s *tcb)
    * privileged thread mode.
    */
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_KERNEL
 #  warning "Missing logic"
 #endif
 

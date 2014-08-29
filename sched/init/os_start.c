@@ -151,7 +151,8 @@ volatile dq_queue_t g_inactivetasks;
 
 volatile sq_queue_t g_delayed_kufree;
 
-#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+#if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
+     defined(CONFIG_MM_KERNEL_HEAP)
 volatile sq_queue_t g_delayed_kfree;
 #endif
 
@@ -264,7 +265,8 @@ void os_start(void)
 #endif
   dq_init(&g_inactivetasks);
   sq_init(&g_delayed_kufree);
-#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+#if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
+     defined(CONFIG_MM_KERNEL_HEAP)
   sq_init(&g_delayed_kfree);
 #endif
 
@@ -308,13 +310,14 @@ void os_start(void)
    * and there is no support that yet.
    */
 
-#if defined(CONFIG_CUSTOM_STACK) || !defined(CONFIG_NUTTX_KERNEL)
+#if defined(CONFIG_CUSTOM_STACK) || (!defined(CONFIG_BUILD_PROTECTED) && \
+   !defined(CONFIG_BUILD_KERNEL))
 #if CONFIG_TASK_NAME_SIZE > 0
   g_idletcb.argv[0] = g_idletcb.cmn.name;
 #else
   g_idletcb.argv[0] = (char*)g_idlename;
 #endif /* CONFIG_TASK_NAME_SIZE */
-#endif /* CONFIG_CUSTOM_STACK || !CONFIG_NUTTX_KERNEL */
+#endif /* CONFIG_CUSTOM_STACK || (!CONFIG_BUILD_PROTECTED && !CONFIG_BUILD_KERNEL) */
 
   /* Then add the idle task's TCB to the head of the ready to run list */
 
@@ -350,7 +353,8 @@ void os_start(void)
     up_allocate_heap(&heap_start, &heap_size);
     kumm_initialize(heap_start, heap_size);
 
-#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+#if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
+     defined(CONFIG_MM_KERNEL_HEAP)
     /* Get the kernel-mode heap from the platform specific code and configure
      * the kernel-mode memory allocator.
      */

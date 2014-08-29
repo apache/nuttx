@@ -43,7 +43,8 @@
 
 #include <nuttx/kmalloc.h>
 
-#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP) && defined(__KERNEL__)
+#if ((defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)) || \
+      defined(CONFIG_BUILD_KERNEL))  && defined(CONFIG_MM_KERNEL_HEAP)
 
 /************************************************************************
  * Pre-processor definition
@@ -304,4 +305,4 @@ bool kmm_heapmember(FAR void *mem)
 }
 #endif
 
-#endif /* CONFIG_NUTTX_KERNEL && CONFIG_MM_KERNEL_HEAP && __KERNEL__ */
+#endif /* ((CONFIG_BUILD_PROTECTED && __KERNEL__) || CONFIG_BUILD_KERNEL)  && CONFIG_MM_KERNEL_HEAP*/

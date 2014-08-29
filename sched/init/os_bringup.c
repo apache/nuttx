@@ -197,7 +197,7 @@ int os_bringup(void)
 #endif /* CONFIG_SCHED_LPWORK */
 #endif /* CONFIG_SCHED_HPWORK */
 
-#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_SCHED_USRWORK)
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_SCHED_USRWORK)
   /* Start the user-space work queue */
 
   DEBUGASSERT(USERSPACE->work_usrstart != NULL);
@@ -228,7 +228,7 @@ int os_bringup(void)
    * header at the beginning of the user-space blob.
    */
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
   DEBUGASSERT(USERSPACE->us_entrypoint != NULL);
   taskid = TASK_CREATE("init", SCHED_PRIORITY_DEFAULT,
                        CONFIG_USERMAIN_STACKSIZE, USERSPACE->us_entrypoint,

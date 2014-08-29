@@ -111,37 +111,79 @@ config APPS_DIR
 			`-application
 			|
 			`- Makefile
-		
+
 		Then you would set APPS_DIR=../application.
 
 		The application direction must contain Makefile and this make
 		file must support the following targets:
-		
+
 		1)libapps$(LIBEXT) (usually libapps.a). libapps.a is a static
 		library ( an archive) that contains all of application object
 		files.
-		
+
 		2)clean. Do whatever is appropriate to clean the application
 		directories for a fresh build.
-		
+
 		3)distclean. Clean everything -- auto-generated files, symbolic
 		links etc. -- so that the directory contents are the same as
 		the contents in your configuration management system.
 		This is only done when you change the NuttX configuration.
-		
+
 		4)depend. Make or update the application build dependencies.
-		
+
 		When this application is invoked it will receive the setting TOPDIR like:
-		
+
 		$(MAKE) -C $(CONFIG_APPS_DIR) TOPDIR="$(TOPDIR)" <target>
-		
+
 		TOPDIR is the full path to the NuttX directory. It can be used, for
 		example, to include makefile fragments (e.g., .config or Make.defs)
 		or to set up include file paths.
 
+choice
+	prompt "Memory organization"
+	default BUILD_FLAT
+
+config BUILD_FLAT
+	bool "Flat address space"
+	---help---
+		Build NuttX as one large, executable "blob".  All of the code
+		within the blob can interrupt with all of the other code within
+		the blob.  There are no special privileges, protections, or
+		restraints.
+
+config BUILD_PROTECTED
+	bool "NuttX protected build"
+	default n
+	depends on ARCH_USE_MPU
+	select LIB_SYSCALL
+	select BUILD_2PASS
+	---help---
+		Builds NuttX and selected applications as two "blobs":  A protected, privileged kernel blob and a separate unprivileged, user blob.  This require sue of the two pass build with each blob being build on each pass.
+
+		NOTE:  This build configuration requires that the platform support
+		a memory protection unit (MPU).  Support, however, may not be
+		implemented on all platforms.
+
+config BUILD_KERNEL
+	bool "NuttX kernel build"
+	default n
+	depends on ARCH_USE_MMU && ARCH_ADDRENV && EXPERIMENTAL
+	select LIB_SYSCALL
+	---help---
+		Builds NuttX as a separately compiled kernel.  No applications are
+		built.  All user applications must reside in a file system where
+		they can be loaded into memory for execution.
+
+		NOTE:  This build configuration requires that the platform support
+		a memory management unit (MPU) and address environments.  Support,
+		however, may not be implemented on all platforms.
+
+endchoice # Build configuration
+
 config BUILD_2PASS
 	bool "Two pass build"
 	default n
+	depends on !BUILD_KERNEL
 	---help---
 		Enables the two pass build options.
 
@@ -183,17 +225,10 @@ config PASS1_OBJECT
 		from the PASS1_TARGET.  It may be available at link time
 		in the arch/<architecture>/src directory.
 
-config NUTTX_KERNEL
-	bool "NuttX kernel build"
-	default n
-	select LIB_SYSCALL
-	---help---
-		Builds NuttX as a separately compiled kernel.
-
 config NUTTX_USERSPACE
 	hex "Beginning of user-space blob"
 	default 0x0
-	depends on NUTTX_KERNEL
+	depends on BUILD_PROTECTED
 	---help---
 		In the kernel build, the NuttX kernel and the user-space blob are
 		built separately linked objects.  NUTTX_USERSPACE provides the

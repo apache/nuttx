@@ -87,9 +87,9 @@
  *   priority worker thread.  Default: CONFIG_IDLETHREAD_STACKSIZE.
  */
 
-/* Is this a kernel build (CONFIG_NUTTX_KERNEL=y) */
+/* Is this a protected build (CONFIG_BUILD_PROTECTED=y) */
 
-#ifdef CONFIG_NUTTX_KERNEL
+#if defined(CONFIG_BUILD_PROTECTED)
 
   /* Yes.. kernel worker threads are not built in a kernel build when we are
    * building the user-space libraries.
@@ -111,8 +111,13 @@
 
 #  endif
 
+#elif defined(CONFIG_BUILD_KERNEL)
+  /* The kernel only build is equivalent to the kernel part of the protected
+   * build.
+   */
+#else
   /* User-space worker threads are not built in a flat build
-   * (CONFIG_NUTTX_KERNEL=n)
+   * (CONFIG_BUILD_PROTECTED=n && CONFIG_BUILD_KERNEL=n)
    */
 
 #else
@@ -220,14 +225,14 @@
  *   User Work Queue:  Will be available if CONFIG_SCHED_USRWORK is defined
  */
 
-#if defined(CONFIG_NUTTX_KERNEL) && !defined(__KERNEL__)
+#if defined(CONFIG_BUILD_PROTECTED) && !defined(__KERNEL__)
 #  ifdef CONFIG_SCHED_USRWORK
 #    define NWORKERS 1
 #    define USRWORK 0
 #  endif
 #else
 
-  /* In a flat build (CONFIG_NUTTX_KERNEL=n) or during the kernel phase of
+  /* In a flat build (CONFIG_BUILD_PROTECTED=n) or during the kernel phase of
    * the kernel build, there may be 0, 1, or 2 work queues.
    *
    * Work queue IDs (indices):
@@ -256,11 +261,11 @@
 #    define NWORKERS 1
 #  endif
 
-#  ifndef CONFIG_NUTTX_KERNEL
+#  if !defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)
 #    define USRWORK LPWORK
 #  endif
 
-#endif /* CONFIG_NUTTX_KERNEL && !__KERNEL__ */
+#endif /* CONFIG_BUILD_PROTECTED && !__KERNEL__ */
 
 /****************************************************************************
  * Public Types
@@ -314,7 +319,7 @@ extern "C"
  * logic.
  */
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 
   /* Play some games in the kernel mode build to assure that different
    * naming is used for the global work queue data structures.  This may
@@ -329,11 +334,11 @@ EXTERN struct wqueue_s g_usrwork[NWORKERS];
 #    define g_work g_usrwork
 #  endif
 
-#else /* CONFIG_NUTTX_KERNEL */
+#else /* CONFIG_BUILD_PROTECTED */
 
 EXTERN struct wqueue_s g_work[NWORKERS];
 
-#endif /* CONFIG_NUTTX_KERNEL */
+#endif /* CONFIG_BUILD_PROTECTED */
 
 /****************************************************************************
  * Public Function Prototypes

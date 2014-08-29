@@ -399,7 +399,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_NUTTX_KERNEL) || !defined(__KERNEL__)
+#if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
 
 FAR void *realloc(FAR void *oldmem, size_t size)
 {

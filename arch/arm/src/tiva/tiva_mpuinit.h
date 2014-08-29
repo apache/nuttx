@@ -67,7 +67,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 void tiva_mpuinitialize(void);
 #else
 #  define tiva_mpuinitialize()
@@ -81,7 +81,7 @@ void tiva_mpuinitialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 void tiva_mpu_uheap(uintptr_t start, size_t size);
 #else
 #  define tiva_mpu_uheap(start,size)

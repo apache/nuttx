@@ -84,7 +84,7 @@ APPDIR := ${shell if exist "$(CONFIG_APPS_DIR)\Makefile" echo $(CONFIG_APPS_DIR)
 NUTTX_ADDONS :=
 USER_ADDONS :=
 
-ifeq ($(CONFIG_NUTTX_KERNEL),y)
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
 USER_ADDONS += $(APPDIR)
 else
 NUTTX_ADDONS += $(APPDIR)
@@ -110,7 +110,7 @@ CONTEXTDIRS = $(APPDIR)
 USERDIRS =
 OTHERDIRS = lib
 
-ifeq ($(CONFIG_NUTTX_KERNEL),y)
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
 
 USERDIRS += libc mm $(USER_ADDONS)
 ifeq ($(CONFIG_HAVE_CXX),y)
@@ -153,9 +153,9 @@ endif
 # CLEANDIRS are the directories that will clean in.  These are
 #   all directories that we know about.
 # KERNDEPDIRS are the directories in which we will build target dependencies.
-#   If NuttX and applications are built separately (CONFIG_NUTTX_KERNEL),
+#   If NuttX and applications are built separately (CONFIG_BUILD_PROTECTED),
 #   then this holds only the directories containing kernel files.
-# USERDEPDIRS. If NuttX and applications are built separately (CONFIG_NUTTX_KERNEL),
+# USERDEPDIRS. If NuttX and applications are built separately (CONFIG_BUILD_PROTECTED),
 #   then this holds only the directories containing user files.
 
 CLEANDIRS = $(NONFSDIRS) $(FSDIRS) $(USERDIRS) $(OTHERDIRS)
@@ -212,7 +212,7 @@ USERLIBS =
 # both the kernel- and user-space builds.  For now, the memory manager (mm)
 # is placed in user space (only).
 
-ifeq ($(CONFIG_NUTTX_KERNEL),y)
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
 NUTTXLIBS += lib\libstubs$(LIBEXT) lib\libkc$(LIBEXT) lib\libkmm$(LIBEXT)
 NUTTXLIBS += lib\libkarch$(LIBEXT)
 USERLIBS  += lib\libproxies$(LIBEXT) lib\libuc$(LIBEXT) lib\libumm$(LIBEXT)
@@ -229,7 +229,7 @@ endif
 # be defined in Make.defs for this to work!
 
 ifeq ($(CONFIG_HAVE_CXX),y)
-ifeq ($(CONFIG_NUTTX_KERNEL),y)
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
 USERLIBS += lib\libcxx$(LIBEXT)
 else
 NUTTXLIBS += lib\libcxx$(LIBEXT)
@@ -239,7 +239,7 @@ endif
 # Add library for application support.
 
 ifneq ($(APPDIR),)
-ifeq ($(CONFIG_NUTTX_KERNEL),y)
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
 USERLIBS += lib\libapps$(LIBEXT)
 else
 NUTTXLIBS += lib\libapps$(LIBEXT)
@@ -275,7 +275,7 @@ endif
 
 ifeq ($(CONFIG_NX),y)
 NUTTXLIBS += lib\libgraphics$(LIBEXT)
-ifeq ($(CONFIG_NUTTX_KERNEL),y)
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
 NUTTXLIBS += lib\libknx$(LIBEXT)
 USERLIBS  += lib\libunx$(LIBEXT)
 else

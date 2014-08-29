@@ -67,7 +67,7 @@
 
 /* The state of each work queue. */
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 
   /* Play some games in the kernel mode build to assure that different
    * naming is used for the global work queue data structures.  This may
@@ -83,11 +83,11 @@ struct wqueue_s g_kernelwork[NWORKERS];
 struct wqueue_s g_usrwork[NWORKERS];
 #  endif
 
-#else /* CONFIG_NUTTX_KERNEL */
+#else /* CONFIG_BUILD_PROTECTED */
 
 struct wqueue_s g_work[NWORKERS];
 
-#endif /* CONFIG_NUTTX_KERNEL */
+#endif /* CONFIG_BUILD_PROTECTED */
 
 /****************************************************************************
  * Private Variables

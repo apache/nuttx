@@ -99,7 +99,7 @@ int up_hardfault(int irq, FAR void *context)
    * REVISIT:  What if the PC lies in "unknown" external memory?
    */
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
   /* In the kernel build, SVCalls are expected in either the base, kernel
    * FLASH region or in the user FLASH region.
    */

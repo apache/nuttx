@@ -49,7 +49,8 @@
 
 #include "lib_internal.h"
 
-#if !defined(CONFIG_NUTTX_KERNEL) || defined(__KERNEL__)
+#if !defined(CONFIG_BUILD_PROTECTED) || defined(__KERNEL__) || \
+     defined(CONFIG_BUILD_KERNEL)
 
 /************************************************************
  * Pre-processor Definitions
@@ -150,5 +151,5 @@ void lib_releaselist(FAR struct streamlist *list)
 #endif
 }
 
-#endif /* !CONFIG_NUTTX_KERNEL || __KERNEL__ */
+#endif /* !CONFIG_BUILD_PROTECTED || __KERNEL__ || CONFIG_BUILD_KERNEL */
 #endif /* CONFIG_NFILE_STREAMS */

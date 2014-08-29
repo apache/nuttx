@@ -57,7 +57,7 @@
  */
 
 #undef MIPS32_SAVE_GP
-#if defined(CONFIG_NUTTX_KERNEL) || defined(CONFIG_NXFLAT)
+#if defined(CONFIG_BUILD_KERNEL) || defined(CONFIG_NXFLAT)
 #  define MIPS32_SAVE_GP 1
 #endif
 
@@ -316,7 +316,7 @@
 
 /* This structure represents the return state from a system call */
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_KERNEL
 struct xcpt_syscall_s
 {
   uint32_t sysreturn;   /* The return PC */
@@ -343,7 +343,7 @@ struct xcptcontext
   uint32_t saved_epc;    /* Trampoline PC */
   uint32_t saved_status; /* Status with interrupts disabled. */
 
-# ifdef CONFIG_NUTTX_KERNEL
+# ifdef CONFIG_BUILD_KERNEL
   /* This is the saved address to use when returning from a user-space
    * signal handler.
    */
@@ -353,7 +353,7 @@ struct xcptcontext
 # endif
 #endif
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_KERNEL
   /* The following array holds information needed to return from each nested
    * system call.
    */

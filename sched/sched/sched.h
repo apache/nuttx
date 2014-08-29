@@ -179,7 +179,8 @@ extern volatile dq_queue_t g_inactivetasks;
 
 extern volatile sq_queue_t g_delayed_kufree;
 
-#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+#if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
+     defined(CONFIG_MM_KERNEL_HEAP)
 extern volatile sq_queue_t g_delayed_kfree;
 #endif
 

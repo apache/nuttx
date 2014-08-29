@@ -18,7 +18,7 @@ config MM_MULTIHEAP
 config MM_KERNEL_HEAP
 	bool "Support a protected, kernel heap"
 	default y
-	depends on NUTTX_KERNEL && MM_MULTIHEAP
+	depends on (BUILD_PROTECTED || BUILD_KERNEL) && MM_MULTIHEAP
 	---help---
 		Partition heap memory into two parts:  (1) a protected, kernel-mode
 		heap accessible only by the NuttX kernel, and (2) an unprotected
@@ -142,7 +142,7 @@ config DEBUG_GRAN
 config MM_PGALLOC
 	bool "Enable Page Allocator"
 	default n
-	depends on ARCH_HAVE_MMU
+	depends on ARCH_USE_MMU
 	select GRAN
 	---help---
 		Enable support for a MMU physical page allocator based on the

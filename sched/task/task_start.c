@@ -127,7 +127,7 @@ void task_start(void)
    * we have to switch to user-mode before calling the task.
    */
 
-#ifdef CONFIG_NUTTX_KERNEL
+#if defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)
   if ((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
     {
       up_task_start(tcb->cmn.entry.main, argc, tcb->argv);

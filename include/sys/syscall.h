@@ -439,6 +439,6 @@ EXTERN const uint8_t g_funcnparms[SYS_nsyscalls];
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* CONFIG_NUTTX_KERNEL */
+#endif /* CONFIG_LIB_SYSCALL */
 #endif /* __INCLUDE_SYS_SYSCALL_H */
 

@@ -126,7 +126,7 @@ int up_create_stack(struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
     /* Allocate the memory for the stack */
 
-#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
     /* Use the kernel allocator if this is a kernel thread */
 
     if (ttype == TCB_FLAG_TTYPE_KERNEL) {
@@ -170,7 +170,7 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
     return OK;
 }
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_KERNEL
 FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size)
 {
   uintptr_t topaddr;
@@ -206,7 +206,7 @@ void up_release_stack(struct tcb_s *dtcb, uint8_t ttype)
   /* Is there a stack allocated? */
 
   if (dtcb->stack_alloc_ptr) {
-#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
       /* Use the kernel allocator if this is a kernel thread */
 
       if (ttype == TCB_FLAG_TTYPE_KERNEL) {

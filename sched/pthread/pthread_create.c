@@ -190,7 +190,7 @@ static void pthread_start(void)
    * to switch to user-mode before calling into the pthread.
    */
 
-#ifdef CONFIG_NUTTX_KERNEL
+#if defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)
   up_pthread_start(ptcb->cmn.entry.pthread, ptcb->arg);
   exit_status = NULL;
 #else

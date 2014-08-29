@@ -74,7 +74,8 @@ FAR struct streamlist *sched_getstreams(void)
 
   DEBUGASSERT(group);
 
-#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+#if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
+     defined(CONFIG_MM_KERNEL_HEAP)
   return group->tg_streamlist;
 #else
   return &group->tg_streamlist;

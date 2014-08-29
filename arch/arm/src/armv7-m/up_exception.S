@@ -66,7 +66,7 @@
    * no privileged task has run.
    */
 
-#  if defined(CONFIG_NUTTX_KERNEL) && CONFIG_ARCH_INTERRUPTSTACK < 4
+#  if defined(CONFIG_BUILD_PROTECTED) && CONFIG_ARCH_INTERRUPTSTACK < 4
 #    error Interrupt stack must be used with high priority interrupts in kernel mode
 #  endif
 
@@ -259,7 +259,7 @@ exception_common:
 	/* The EXC_RETURN value tells us whether we are returning on the MSP or PSP
 	 */
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 	/* The EXC_RETURN value will be 0xfffffff9 (privileged thread) or 0xfffffff1
 	 * (handler mode) if the stack is on the MSP.  It can only be on the PSP if
 	 * EXC_RETURN is 0xfffffffd (unprivileged thread)

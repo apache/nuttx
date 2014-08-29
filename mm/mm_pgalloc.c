@@ -59,7 +59,7 @@
  * CONFIG_DEBUG_PGALLOC - Just like CONFIG_DEBUG_MM, but only generates
  *   output from the page allocation logic.
  *
- * Dependencies:  CONFIG_ARCH_HAVE_MMU and CONFIG_GRAN
+ * Dependencies:  CONFIG_ARCH_USE_MMU and CONFIG_GRAN
  */
  
 /* Debug */

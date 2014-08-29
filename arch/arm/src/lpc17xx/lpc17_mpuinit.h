@@ -67,7 +67,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 void lpc17_mpuinitialize(void);
 #else
 #  define lpc17_mpuinitialize()
@@ -81,7 +81,7 @@ void lpc17_mpuinitialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 void lpc17_mpu_uheap(uintptr_t start, size_t size);
 #else
 #  define lpc17_mpu_uheap(start,size)

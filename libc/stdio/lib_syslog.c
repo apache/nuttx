@@ -50,7 +50,7 @@
 
 /* Some output destinations are only available from within the kernel */
 
-#if defined(CONFIG_NUTTX_KERNEL) && !defined(__KERNEL__)
+#if defined(CONFIG_BUILD_PROTECTED) && !defined(__KERNEL__)
 #  undef CONFIG_SYSLOG
 #  undef CONFIG_ARCH_LOWPUTC
 #endif

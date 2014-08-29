@@ -54,11 +54,11 @@
 
 /* Configuration ********************************************************************/
 /* This logic uses one system call for the syscall return.  So a minimum of one
- * syscall values must be reserved.  If CONFIG_NUTTX_KERNEL is defined, then four
+ * syscall values must be reserved.  If CONFIG_BUILD_KERNEL is defined, then four
  * more syscall values must be reserved.
  */
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_KERNEL
 #  ifndef CONFIG_SYS_RESERVED
 #    error "CONFIG_SYS_RESERVED must be defined to have the value 5"
 #  elif CONFIG_SYS_RESERVED != 5
@@ -81,7 +81,7 @@
 
 #define SYS_syscall_return        (0)
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_KERNEL
 /* SYS call 1:
  *
  * void up_task_start(main_t taskentry, int argc, FAR char *argv[])
@@ -113,7 +113,7 @@
 
 #define SYS_signal_handler_return (4)
 
-#endif /* CONFIG_NUTTX_KERNEL */
+#endif /* CONFIG_BUILD_KERNEL */
 
 /************************************************************************************
  * Inline Functions

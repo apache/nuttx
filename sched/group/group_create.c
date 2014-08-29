@@ -190,8 +190,8 @@ int group_allocate(FAR struct task_tcb_s *tcb)
       return -ENOMEM;
     }
 
-#if CONFIG_NFILE_STREAMS > 0 && defined(CONFIG_NUTTX_KERNEL) && \
-    defined(CONFIG_MM_KERNEL_HEAP)
+#if CONFIG_NFILE_STREAMS > 0 && (defined(CONFIG_BUILD_PROTECTED) || \
+    defined(CONFIG_BUILD_KERNEL)) && defined(CONFIG_MM_KERNEL_HEAP)
 
   /* In a flat, single-heap build.  The stream list is allocated with the
    * group structure.  But in a kernel build with a kernel allocator, it
@@ -226,8 +226,8 @@ int group_allocate(FAR struct task_tcb_s *tcb)
   ret = env_dup(group);
   if (ret < 0)
     {
-#if CONFIG_NFILE_STREAMS > 0 && defined(CONFIG_NUTTX_KERNEL) && \
-    defined(CONFIG_MM_KERNEL_HEAP)
+#if CONFIG_NFILE_STREAMS > 0 && (defined(CONFIG_BUILD_PROTECTED) || \
+    defined(CONFIG_BUILD_KERNEL)) && defined(CONFIG_MM_KERNEL_HEAP)
       kufree(group->tg_streamlist);
 #endif
       kfree(group);

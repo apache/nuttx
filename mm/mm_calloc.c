@@ -81,7 +81,7 @@ FAR void *mm_calloc(FAR struct mm_heap_s *heap, size_t n, size_t elem_size)
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_NUTTX_KERNEL) || !defined(__KERNEL__)
+#if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
 FAR void *calloc(size_t n, size_t elem_size)
 {
 #ifdef CONFIG_MM_MULTIHEAP

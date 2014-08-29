@@ -46,7 +46,6 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/userspace.h>
 
 #include <arch/board/board.h>
 
@@ -219,7 +218,7 @@
  * Description:
  *   This function will be called to dynamically set aside the heap region.
  *
- *   For the kernel build (CONFIG_NUTTX_KERNEL=y) with both kernel- and
+ *   For the kernel build (CONFIG_BUILD_KERNEL=y) with both kernel- and
  *   user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function provides the
  *   size of the unprotected, user-space heap.
  *
@@ -249,7 +248,7 @@
 
 void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
-#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
   /* Get the unaligned size and position of the user-space heap.
    * This heap begins after the user-space .bss section at an offset
    * of CONFIG_MM_KERNEL_HEAPSIZE (subject to alignment).
@@ -291,14 +290,14 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
  * Name: up_allocate_kheap
  *
  * Description:
- *   For the kernel build (CONFIG_NUTTX_KERNEL=y) with both kernel- and
+ *   For the kernel build (CONFIG_BUILD_KERNEL=y) with both kernel- and
  *   user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function allocates
  *   the kernel-space heap.  A custom version of this function is need if
  *   memory protection of the kernel heap is required.
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
 void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
 {
   /* Get the unaligned size and position of the user-space heap.
@@ -341,7 +340,7 @@ void up_addregion(void)
   vaddr = (uintptr_t)SAM_ISRAM0_VADDR
   size  = SAM_ISRAM0_SIZE + SAM_ISRAM1_SIZE;
 
-#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
   /* Allow user-mode access to the ISRAM heap */
 
   sam_uheap(vaddr, size);
@@ -360,7 +359,7 @@ void up_addregion(void)
       vaddr = (uintptr_t)SAM_DDRCS_VSECTION + SAMA5_DDRCS_HEAP_OFFSET;
       size  = SAMA5_DDRCS_HEAP_SIZE;
 
-#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
       /* Allow user-mode access to the DDR-SDRAM heap */
 
       sam_uheap(vaddr, size);
@@ -385,7 +384,7 @@ void up_addregion(void)
       vaddr = (uintptr_t)SAM_EBICS0_VSECTION + SAMA5_EBICS0_HEAP_OFFSET;
       size  = SAMA5_EBICS0_HEAP_SIZE;
 
-#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
       /* Allow user-mode access to the EBICS0 heap */
 
       sam_uheap(vaddr, size);
@@ -410,7 +409,7 @@ void up_addregion(void)
       vaddr = (uintptr_t)SAM_EBICS1_VSECTION + SAMA5_EBICS1_HEAP_OFFSET;
       size  = SAMA5_EBICS1_HEAP_SIZE;
 
-#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
       /* Allow user-mode access to the EBICS1 heap */
 
       sam_uheap(vaddr, size);
@@ -435,7 +434,7 @@ void up_addregion(void)
       vaddr = (uintptr_t)SAM_EBICS2_VSECTION + SAMA5_EBICS2_HEAP_OFFSET;
       size  = SAMA5_EBICS2_HEAP_SIZE;
 
-#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
       /* Allow user-mode access to the EBICS2 heap */
 
       sam_uheap(vaddr, size);
@@ -460,7 +459,7 @@ void up_addregion(void)
       vaddr = (uintptr_t)SAM_EBICS3_VSECTION + SAMA5_EBICS3_HEAP_OFFSET;
       size  = SAMA5_EBICS3_HEAP_SIZE;
 
-#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
       /* Allow user-mode access to the EBICS3 heap */
 
       sam_uheap(vaddr, size);

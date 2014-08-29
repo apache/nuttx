@@ -356,16 +356,6 @@ void up_boot(void)
   up_earlyserialinit();
 #endif
 
-#ifdef CONFIG_NUTTX_KERNEL
-  /* For the case of the separate user-/kernel-space build, perform whatever
-   * platform specific initialization of the user memory is required.
-   * Normally this just means initializing the user space .data and .bss
-   * segments.
-   */
-
-  a1x_userspace();
-#endif
-
   /* Perform board-specific initialization,  This must include:
    *
    * - Initialization of board-specific memory resources (e.g., SDRAM)

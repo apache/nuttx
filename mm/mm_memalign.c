@@ -240,7 +240,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_NUTTX_KERNEL) || !defined(__KERNEL__)
+#if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
 
 FAR void *memalign(size_t alignment, size_t size)
 {

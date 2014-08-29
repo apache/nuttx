@@ -126,9 +126,9 @@ void up_initial_state(struct tcb_s *tcb)
 #endif
 #endif /* CONFIG_PIC */
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
   /* All tasks start via a stub function in kernel space.  So all
-   * tasks must start in privileged thread mode.  If CONFIG_NUTTX_KERNEL
+   * tasks must start in privileged thread mode.  If CONFIG_BUILD_PROTECTED
    * is defined, then that stub function will switch to unprivileged
    * mode before transferring control to the user task.
    */

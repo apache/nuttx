@@ -11,12 +11,15 @@ mode.  In that model, there is no real architectural distinction between
 what is a kernel-mode program and what is a user-mode program; the system is
 more like on multi-threaded program that all runs in kernel-mode.
 
-But if the CONFIG_NUTTX_KERNEL option is selected, NuttX will be built into
-distinct user-mode and kernel-mode sections.  In that case, most of the
+But if the CONFIG_BUILD_PROTECTED option is selected, NuttX will be built
+into distinct user-mode and kernel-mode sections.  In that case, most of the
 code in the nuttx/ directory will run in kernel-mode with with exceptions
 of (1) the user-mode "proxies" found in syscall/proxies, and (2) the
 standard C library functions found in this directory.  In this build model,
 it is critical to separate the user-mode OS interfaces in this way.
+
+If CONFIG_BUILD_KERNEL is selected, then only a NuttX kernel will be built
+with no applications.
 
 Sub-Directories
 ===============

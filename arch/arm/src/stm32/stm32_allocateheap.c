@@ -426,7 +426,7 @@ static inline void up_heap_color(FAR void *start, size_t size)
  * Description:
  *   This function will be called to dynamically set aside the heap region.
  *
- *   For the kernel build (CONFIG_NUTTX_KERNEL=y) with both kernel- and
+ *   For the kernel build (CONFIG_BUILD_PROTECTED=y) with both kernel- and
  *   user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function provides the
  *   size of the unprotected, user-space heap.
  *
@@ -455,7 +455,7 @@ static inline void up_heap_color(FAR void *start, size_t size)
 
 void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
-#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
   /* Get the unaligned size and position of the user-space heap.
    * This heap begins after the user-space .bss section at an offset
    * of CONFIG_MM_KERNEL_HEAPSIZE (subject to alignment).
@@ -509,13 +509,13 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
  * Name: up_allocate_kheap
  *
  * Description:
- *   For the kernel build (CONFIG_NUTTX_KERNEL=y) with both kernel- and
+ *   For the kernel build (CONFIG_BUILD_PROTECTED=y) with both kernel- and
  *   user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function allocates
  *   (and protects) the kernel-space heap.
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
 void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
 {
   /* Get the unaligned size and position of the user-space heap.
@@ -562,7 +562,7 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
 void up_addregion(void)
 {
 #ifndef CONFIG_STM32_CCMEXCLUDE
-#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
 
   /* Allow user-mode access to the STM32F20xxx/STM32F40xxx CCM SRAM heap */
 
@@ -580,7 +580,7 @@ void up_addregion(void)
 #endif
 
 #ifdef CONFIG_STM32_FSMC_SRAM
-#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
 
   /* Allow user-mode access to the FSMC SRAM user heap memory */
 

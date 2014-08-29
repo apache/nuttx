@@ -115,8 +115,8 @@ void up_initial_state(struct tcb_s *tcb)
    * supervisor-mode.
    */
 
-#ifdef CONFIG_NUTTX_KERNEL
-#  error "Missing logic for the CONFIG_NUTTX_KERNEL build"
+#ifdef CONFIG_BUILD_KERNEL
+#  error "Missing logic for the CONFIG_BUILD_KERNEL build"
 #endif
 
   /* Enable or disable interrupts, based on user configuration */

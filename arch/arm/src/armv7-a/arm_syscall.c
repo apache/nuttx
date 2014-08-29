@@ -157,7 +157,7 @@ static void dispatch_syscall(void)
 uint32_t *arm_syscall(uint32_t *regs)
 {
   uint32_t cmd;
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_KERNEL
   uint32_t cpsr;
 #endif
 
@@ -214,7 +214,7 @@ uint32_t *arm_syscall(uint32_t *regs)
            */
 
           regs[REG_PC]        = rtcb->xcp.syscall[index].sysreturn;
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_KERNEL
           regs[REG_CPSR]      = rtcb->xcp.syscall[index].cpsr;
 #endif
           rtcb->xcp.nsyscalls = index;
@@ -239,7 +239,7 @@ uint32_t *arm_syscall(uint32_t *regs)
        *   R3 = argv
        */
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_KERNEL
       case SYS_task_start:
         {
           /* Set up to return to the user-space task start-up function in
@@ -272,7 +272,7 @@ uint32_t *arm_syscall(uint32_t *regs)
        *   R2 = arg
        */
 
-#if defined(CONFIG_NUTTX_KERNEL) && !defined(CONFIG_DISABLE_PTHREAD)
+#if defined(CONFIG_BUILD_KERNEL) && !defined(CONFIG_DISABLE_PTHREAD)
       case SYS_pthread_start:
         {
           /* Set up to return to the user-space pthread start-up function in
@@ -307,7 +307,7 @@ uint32_t *arm_syscall(uint32_t *regs)
        *        ucontext (on the stack)
        */
 
-#if defined(CONFIG_NUTTX_KERNEL) && !defined(CONFIG_DISABLE_SIGNALS)
+#if defined(CONFIG_BUILD_KERNEL) && !defined(CONFIG_DISABLE_SIGNALS)
       case SYS_signal_handler:
         {
           struct tcb_s *rtcb = sched_self();
@@ -351,7 +351,7 @@ uint32_t *arm_syscall(uint32_t *regs)
        *   R0 = SYS_signal_handler_return
        */
 
-#if defined(CONFIG_NUTTX_KERNEL) && !defined(CONFIG_DISABLE_SIGNALS)
+#if defined(CONFIG_BUILD_KERNEL) && !defined(CONFIG_DISABLE_SIGNALS)
       case SYS_signal_handler_return:
         {
           struct tcb_s *rtcb = sched_self();
@@ -392,13 +392,13 @@ uint32_t *arm_syscall(uint32_t *regs)
           /* Setup to return to dispatch_syscall in privileged mode. */
 
           rtcb->xcp.syscall[index].sysreturn = regs[REG_PC];
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_KERNEL
           rtcb->xcp.syscall[index].cpsr      = regs[REG_CPSR];
 #endif
           rtcb->xcp.nsyscalls                = index + 1;
 
           regs[REG_PC]   = (uint32_t)dispatch_syscall;
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_KERNEL
           regval         = regs[REG_CPSR] & ~PSR_MODE_MASK;
           regs[REG_CPSR] = regval | PSR_MODE_SVC;
 #endif

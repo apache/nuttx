@@ -460,7 +460,7 @@ config SCHED_LPWORKSTACKSIZE
 endif # SCHED_LPWORK
 endif # SCHED_HPWORK
 
-if NUTTX_KERNEL
+if BUILD_PROTECTED
 
 config SCHED_USRWORK
 	bool "User mode worker thread"
@@ -490,7 +490,7 @@ config SCHED_LPWORKSTACKSIZE
 		The stack size allocated for the lower priority worker thread.  Default: 2K.
 
 endif # SCHED_USRWORK
-endif # NUTTX_KERNEL
+endif # BUILD_PROTECTED
 endif # SCHED_WORKQUEUE
 
 config LIB_KBDCODEC

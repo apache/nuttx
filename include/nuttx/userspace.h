@@ -49,13 +49,13 @@
 
 #include <nuttx/arch.h>
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
-/* If CONFIG_NUTTX_KERNEL, then CONFIG_NUTTX_USERSPACE must be defined to
+/* If CONFIG_BUILD_PROTECTED, then CONFIG_NUTTX_USERSPACE must be defined to
  * provide the address where the user-space header can be found in memory.
  */
 
@@ -83,7 +83,7 @@
  * they can be called through the userspace structure.
  */
 
-#if defined(CONFIG_NUTTX_KERNEL) && defined(__KERNEL__)
+#if defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)
 #  define umm_initialize(b,s) USERSPACE->mm_initialize(b,s)
 #  define umm_addregion(b,s)  USERSPACE->mm_addregion(b,s)
 #  define umm_trysemaphore()  USERSPACE->mm_trysemaphore()
@@ -186,7 +186,7 @@ extern "C"
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NUTTX_KERNEL) && !defined(__KERNEL__)
+#if defined(CONFIG_BUILD_PROTECTED) && !defined(__KERNEL__)
 void task_startup(main_t entrypt, int argc, FAR char *argv[]) noreturn_function;
 #endif
 
@@ -206,7 +206,7 @@ void task_startup(main_t entrypt, int argc, FAR char *argv[]) noreturn_function;
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NUTTX_KERNEL) && !defined(__KERNEL__) && !defined(CONFIG_DISABLE_PTHREAD)
+#if defined(CONFIG_BUILD_PROTECTED) && !defined(__KERNEL__) && !defined(CONFIG_DISABLE_PTHREAD)
 void pthread_startup(pthread_startroutine_t entrypt, pthread_addr_t arg);
 #endif
 
@@ -215,5 +215,5 @@ void pthread_startup(pthread_startroutine_t entrypt, pthread_addr_t arg);
 }
 #endif
 
-#endif /* CONFIG_NUTTX_KERNEL */
+#endif /* CONFIG_BUILD_PROTECTED */
 #endif /* __INCLUDE_NUTTX_USERSPACE_H */

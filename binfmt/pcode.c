@@ -218,7 +218,7 @@ static int pcode_mount_testfs(void)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_NUTTX_KERNEL
+#if !defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)
 static void pcode_onexit(int exitcode, FAR void *arg)
 {
   FAR struct binary_s *binp = (FAR struct binary_s *)arg;
@@ -236,12 +236,13 @@ static void pcode_onexit(int exitcode, FAR void *arg)
  * Description:
  *   This is the proxy program that runs and starts the P-Code interpreter.
  *
- * REVISIT:  There are issues here when CONFIG_NUTTX_KERNEL is selected.  Also
- * This implementation is too highly couple to logic in the apps/ directory.
+ * REVISIT:  There are issues here when CONFIG_BUILD_PROTECTED or
+ * CONFIG_BUILD_KERNEL are selected.  Also this implementation is too highly
+ * couple to logic in the apps/ directory.
  *
  ****************************************************************************/
 
-#ifndef CONFIG_NUTTX_KERNEL
+#if !defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)
 static int pcode_proxy(int argc, char **argv)
 {
   FAR struct binary_s *binp;
@@ -289,7 +290,7 @@ static int pcode_proxy(int argc, char **argv)
   return EXIT_SUCCESS;
 }
 #else
-#  error Missing logic for the case of CONFIG_NUTTX_KERNEL
+#  error Missing logic for the case of CONFIG_BUILD_PROTECTED/KERNEL
 #endif
 
 /****************************************************************************
@@ -371,7 +372,8 @@ static int pcode_load(struct binary_s *binp)
     }
 
   /* Return the load information.
-   * REVISIT:  There are issues here when CONFIG_NUTTX_KERNEL is selected.
+   * REVISIT:  There are issues here when CONFIG_BUILD_PROTECTED or
+   * CONFIG_BUILD_KERNEL are selected.
    */
 
   binp->entrypt   = pcode_proxy;
