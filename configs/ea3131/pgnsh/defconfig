@@ -25,7 +25,7 @@ CONFIG_BUILD_2PASS=y
 CONFIG_PASS1_TARGET="all"
 CONFIG_PASS1_BUILDIR="configs/ea3131/locked"
 CONFIG_PASS1_OBJECT="locked.r"
-# CONFIG_NUTTX_KERNEL is not set
+# CONFIG_BUILD_PROTECTED is not set
 
 #
 # Binary Output Formats

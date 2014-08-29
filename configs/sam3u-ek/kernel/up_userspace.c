@@ -45,7 +45,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/mm.h>
 
-#if defined(CONFIG_NUTTX_KERNEL) && !defined(__KERNEL__)
+#if defined(CONFIG_BUILD_PROTECTED) && !defined(__KERNEL__)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -139,4 +139,4 @@ const struct userspace_s userspace __attribute__ ((section (".userspace"))) =
  * Public Functions
  ****************************************************************************/
 
-#endif /* CONFIG_NUTTX_KERNEL && !__KERNEL__ */
+#endif /* CONFIG_BUILD_PROTECTED && !__KERNEL__ */

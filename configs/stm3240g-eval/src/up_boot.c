@@ -51,7 +51,7 @@
  * if nx_start() is available (CONFIG_NX_NXSTART=y) and if the NxWidget::CNxServer
  * class expects the RTOS to do the NX initialization (CONFIG_NXWIDGET_SERVERINIT=n).
  * This combination of settings is normally only used in the kernel build mode
- * (CONFIG_NUTTX_KERNEL) when NxWidgets is unable to initialize NX from user-space.
+ * (CONFIG_BUILD_PROTECTED) when NxWidgets is unable to initialize NX from user-space.
  */
 
 #undef HAVE_NXSTART
@@ -67,7 +67,7 @@
 #      include <nuttx/nx/nx.h>
 #    endif
 #  else
-#    if !defined(CONFIG_NXWIDGET_SERVERINIT) && defined(CONFIG_NUTTX_KERNEL)
+#    if !defined(CONFIG_NXWIDGET_SERVERINIT) && defined(CONFIG_BUILD_PROTECTED)
 #      error CONFIG_NX_NXSTART=y is needed
 #    endif
 #  endif
@@ -78,7 +78,7 @@
  * touchscreen (CONFIG_NXWM_TOUCHSCREEN=y), and if we were asked to
  * initialize the touchscreen for NxWM (NXWM_TOUCHSCREEN_DEVINIT=n). This
  * combination of settings is normally only used in the kernel build mode
- * (CONFIG_NUTTX_KERNEL) when NxWidgets is unable to initialize NX from
+ * (CONFIG_BUILD_PROTECTED) when NxWidgets is unable to initialize NX from
  * user-space.
  */
 
@@ -93,7 +93,7 @@
 #      include <nuttx/input/touchscreen.h>
 #    endif
 #  else
-#    if !defined(CONFIG_NXWM_TOUCHSCREEN_DEVINIT) && defined(CONFIG_NUTTX_KERNEL)
+#    if !defined(CONFIG_NXWM_TOUCHSCREEN_DEVINIT) && defined(CONFIG_BUILD_PROTECTED)
 #      error CONFIG_INPUT_STMPE811=y is needed
 #    endif
 #  endif

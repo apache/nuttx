@@ -48,7 +48,7 @@ index 3cc6323..ad42790 100644
 @@ -353,6 +359,7 @@ void up_boot(void)
     */
  
- #ifdef CONFIG_NUTTX_KERNEL
+ #ifdef CONFIG_BUILD_PROTECTED
 +lowsyslog("Calling a1x_userspace\n"); // REMOVE ME
    a1x_userspace();
  #endif
