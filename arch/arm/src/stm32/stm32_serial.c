@@ -177,7 +177,7 @@
 /* The DMA buffer size when using RX DMA to emulate a FIFO.
  *
  * When streaming data, the generic serial layer will be called
- * everytime the FIFO receives half this number of bytes.
+ * every time the FIFO receives half this number of bytes.
  */
 
 #  define RXDMA_BUFFER_SIZE   32
@@ -2426,8 +2426,6 @@ static void up_dma_rxcallback(DMA_HANDLE handle, uint8_t status, void *arg)
 }
 #endif
 
-#endif /* HAVE UART */
-
 /****************************************************************************
  * Name: up_pm_notify
  *
@@ -2532,10 +2530,13 @@ static int up_pm_prepare(struct pm_callback_s *cb, enum pm_state_e pmstate)
   return OK;
 }
 #endif
+#endif /* USE_SERIALDRIVER */
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+#ifdef USE_SERIALDRIVER
 
 /****************************************************************************
  * Name: up_earlyserialinit
@@ -2733,8 +2734,6 @@ void stm32_serial_dma_poll(void)
  *   Provide priority, low-level access to support OS debug  writes
  *
  ****************************************************************************/
-
-#ifdef USE_SERIALDRIVER
 
 int up_putc(int ch)
 {
