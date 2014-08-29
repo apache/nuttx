@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: August 24, 2014</p>
+      <p>Last Updated: August 29, 2014</p>
     </td>
   </tr>
 </table>
@@ -486,7 +486,7 @@
     kernel-mode NuttX functions.
     This directory must always be provided to prevent compilation errors.
     However, it need only contain valid function declarations if the architecture
-    supports the <code>CONFIG_NUTTX_KERNEL</code> configuration.
+    supports the <code>CONFIG_BUILD_PROTECTED</code> or <code>CONFIG_BUILD_KERNEL</code>configurations.
     <ul>
       <li>
         <code>uintptr_t sys_call0(unsigned int nbr)</code>:
@@ -1329,7 +1329,7 @@ include/
 </p>
 <p>
   Normally the logic in this file builds to a single library (<code>libc.a</code>).
-  However, if NuttX is built as a separately compiled kernel (with <code>CONFIG_NUTTX_KERNEL=y</code>), then the contents of this directory are built as two libraries:
+  However, if NuttX is built as a separately compiled kernel (with <code>CONFIG_BUILD_PROTECTED=y</code> or <code>CONFIG_BUILD_KERNEL=y</code>), then the contents of this directory are built as two libraries:
   One for use by user programs (<code>libuc.a</code>) and one for use only within the &lt;kernel&gt; space (<code>libkc.a</code>).
 </p>
 <p>
@@ -1393,7 +1393,7 @@ libc/
 
 <h2>2.14 <a name="DirStructSyscall">nuttx/syscall</a></h2>
 <p>
-  If NuttX is built as a separately compiled kernel (with <code>CONFIG_NUTTX_KERNEL=y</code>),
+  If NuttX is built as a separately compiled kernel (with <code>CONFIG_BUILD_PROTECTED=y</code> or <code>CONFIG_BUILD_KERNEL=y</code>),
   then the contents of this directory are built.
   This directory holds a syscall interface that can be used for communication
   between user-mode applications and the kernel-mode RTOS.
@@ -1783,13 +1783,10 @@ The system can be re-made subsequently by just typing <code>make</code>.
 <p>
   This function may also need to set up processor registers so that the new thread executes
   with the correct privileges.
-  If <code>CONFIG_NUTTX_KERNEL</code> has been selected in the NuttX configuration,
-  then special initialization may need to be performed depending on the task type specified
-  in the TCB's flags field:
+  If <code>CONFIG_BUILD_PROTECTED</code> or <code>CONFIG_BUILD_KERNEL</code> have been selected in the NuttX configuration, then special initialization may need to be performed depending on the task type specified in the TCB's flags field:
   Kernel threads will require kernel-mode privileges;
   User tasks and pthreads should have only user-mode privileges.
-  If <code>CONFIG_NUTTX_KERNEL</code> has <i>not</i> been selected,
-  then all threads should have kernel-mode privileges.
+  If neither <code>CONFIG_BUILD_PROTECTED</code> nor <code>CONFIG_BUILD_KERNEL</code> have been selected, then all threads should have kernel-mode privileges.
 </p>
 
 <h3><a name="upcreatestack">4.2.4 <code>up_create_stack()</code></a></h3>
@@ -1839,7 +1836,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
       This thread type is normally available in the flags field of the TCB, however, there are certain contexts where the TCB may not be fully initialized when up_create_stack is called.
     </p>
     <p>
-      If <code>CONFIG_NUTTX_KERNEL</code> is defined, then this thread type may affect how the stack is allocated.  For example, kernel thread stacks should be allocated from protected kernel memory.  Stacks for user tasks and threads must come from memory that is accessible to user code.
+      If <code>CONFIG_BUILD_PROTECTED</code> or <code>CONFIG_BUILD_KERNEL</code> are defined, then this thread type may affect how the stack is allocated.  For example, kernel thread stacks should be allocated from protected kernel memory.  Stacks for user tasks and threads must come from memory that is accessible to user code.
     </p>
   </li>
 </ul>
@@ -1909,7 +1906,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   </li>
 </ul>
 <p>
-  This API is <i>NOT</i> required if <code>CONFIG_NUTTX_KERNEL</code> is undefined or if <code>CONFIG_CUSTOM_STACK</code> is defined.
+  This API is <i>NOT</i> required if <code>CONFIG_BUILD_PROTECTED</code> and <code>CONFIG_BUILD_KERNEL</code> are undefined or if <code>CONFIG_CUSTOM_STACK</code> is defined.
 </p>
 <p><b>Input Parameters:</b></p>
 <ul>
@@ -1965,7 +1962,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
       This thread type is normally available in the flags field of the TCB, however, there are certain error recovery contexts where the TCB may not be fully initialized when up_release_stack is called.
     </p>
     <p>
-      If <code>CONFIG_NUTTX_KERNEL</code> is defined, then this thread type may affect how the stack is freed.
+      If <code>CONFIG_BUILD_PROTECTED</code> or <code>CONFIG_BUILD_KERNEL</code> are defined, then this thread type may affect how the stack is freed.
       For example, kernel thread stacks may have been allocated from protected kernel memory.
       Stacks for user tasks and threads must have come from memory that is accessible to user
     </p>
@@ -2150,7 +2147,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   This function will be called to dynamically set aside the heap region.
 </p>
 <p>
-  For the kernel build (<code>CONFIG_NUTTX_KERNEL</code>=y) with both kernel- and user-space heaps (<code>CONFIG_MM_KERNEL_HEAP</code>=y), this function provides the size of the unprotected, user-space heap.
+  For the kernel build (<code>CONFIG_BUILD_PROTECTED=y</code> or <code>CONFIG_BUILD_KERNEL=y</code>) with both kernel- and user-space heaps (<code>CONFIG_MM_KERNEL_HEAP=y</code>), this function provides the size of the unprotected, user-space heap.
   If a protected kernel-space heap is provided, the kernel heap must be allocated (and protected) by an analogous <code>up_allocate_kheap()</code>.
 </p>
 
