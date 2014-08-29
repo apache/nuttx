@@ -67,7 +67,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 void kinetis_mpuinitialize(void);
 #else
 #  define kinetis_mpuinitialize()
@@ -81,7 +81,7 @@ void kinetis_mpuinitialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 void kinetis_mpu_uheap(uintptr_t start, size_t size);
 #else
 #  define kinetis_mpu_uheap(start,size)

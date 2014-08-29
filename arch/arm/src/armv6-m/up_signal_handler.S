@@ -41,7 +41,7 @@
 
 #include <arch/syscall.h>
 
-#if defined(CONFIG_NUTTX_KERNEL) && !defined(__KERNEL__)
+#if defined(CONFIG_BUILD_PROTECTED) && !defined(__KERNEL__)
 
 /****************************************************************************
  * File info
@@ -112,4 +112,4 @@ up_signal_handler:
 	.size	up_signal_handler, .-up_signal_handler
 	.end
 
-#endif /* CONFIG_NUTTX_KERNEL && !__KERNEL__ */
+#endif /* CONFIG_BUILD_PROTECTED && !__KERNEL__ */

@@ -114,7 +114,7 @@ void up_initial_state(struct tcb_s *tcb)
    * what kind of thread is being started.  Disable FIQs in any event
    */
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_KERNEL
   if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
     {
       /* It is a kernel thread.. set supervisor mode */

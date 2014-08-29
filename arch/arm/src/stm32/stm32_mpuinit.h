@@ -67,7 +67,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 void stm32_mpuinitialize(void);
 #else
 #  define stm32_mpuinitialize()
@@ -81,7 +81,7 @@ void stm32_mpuinitialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 void stm32_mpu_uheap(uintptr_t start, size_t size);
 #else
 #  define stm32_mpu_uheap(start,size)

@@ -200,7 +200,7 @@
 #ifdef CONFIG_LIB_SYSCALL
 struct xcpt_syscall_s
 {
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_KERNEL
   uint32_t cpsr;        /* The CPSR value */
 #endif
   uint32_t sysreturn;   /* The return PC */

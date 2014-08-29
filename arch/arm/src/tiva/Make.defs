@@ -58,7 +58,7 @@ ifeq ($(CONFIG_DEBUG_STACK),y)
 CMN_CSRCS += up_checkstack.c
 endif
 
-ifeq ($(CONFIG_NUTTX_KERNEL),y)
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CMN_CSRCS += up_mpu.c up_task_start.c up_pthread_start.c up_stackframe.c
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 CMN_CSRCS += up_signal_dispatch.c
@@ -81,7 +81,7 @@ ifneq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += tiva_timerisr.c
 endif
 
-ifeq ($(CONFIG_NUTTX_KERNEL),y)
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += tiva_userspace.c tiva_mpuinit.c
 endif
 

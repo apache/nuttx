@@ -62,7 +62,7 @@ ifeq ($(CONFIG_ARCH_MEMCPY),y)
 CMN_ASRCS += up_memcpy.S
 endif
 
-ifeq ($(CONFIG_NUTTX_KERNEL),y)
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CMN_CSRCS += up_mpu.c up_task_start.c up_pthread_start.c up_stackframe.c
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 CMN_CSRCS += up_signal_dispatch.c
@@ -104,7 +104,7 @@ else
 CHIP_CSRCS += sam_clockconfig.c sam_gpio.c
 endif
 
-ifeq ($(CONFIG_NUTTX_KERNEL),y)
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += sam_userspace.c sam_mpuinit.c
 endif
 

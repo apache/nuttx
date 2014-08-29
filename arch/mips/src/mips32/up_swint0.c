@@ -122,7 +122,7 @@ static void up_registerdump(const uint32_t *regs)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_KERNEL
 static void dispatch_syscall(void) naked_function;
 static void dispatch_syscall(void)
 {
@@ -234,7 +234,7 @@ int up_swint0(int irq, FAR void *context)
        * unprivileged thread mode.
        */
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_KERNEL
       case SYS_syscall_return:
         {
           struct tcb_s *rtcb = sched_self();
@@ -262,7 +262,7 @@ int up_swint0(int irq, FAR void *context)
 
       default:
         {
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_KERNEL
           FAR struct tcb_s *rtcb = sched_self();
           int index = rtcb->xcp.nsyscalls;
 

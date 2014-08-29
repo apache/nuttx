@@ -108,7 +108,7 @@ void up_sigdeliver(void)
   regs[REG_PRIMASK]    = rtcb->xcp.saved_primask;
 #endif
   regs[REG_XPSR]       = rtcb->xcp.saved_xpsr;
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
   regs[REG_LR]         = rtcb->xcp.saved_lr;
 #endif
 

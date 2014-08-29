@@ -181,7 +181,7 @@ int up_svcall(int irq, FAR void *context)
       svcdbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
              regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
              regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
-# ifdef CONFIG_NUTTX_KERNEL
+# ifdef CONFIG_BUILD_PROTECTED
       svcdbg(" PSR: %08x PRIMASK: %08x EXC_RETURN: %08x\n",
              regs[REG_XPSR], regs[REG_PRIMASK], regs[REG_EXC_RETURN]);
 # else
@@ -312,7 +312,7 @@ int up_svcall(int irq, FAR void *context)
        *   R3 = argv
        */
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
       case SYS_task_start:
         {
           /* Set up to return to the user-space task start-up function in
@@ -344,7 +344,7 @@ int up_svcall(int irq, FAR void *context)
        *   R2 = arg
        */
 
-#if defined(CONFIG_NUTTX_KERNEL) && !defined(CONFIG_DISABLE_PTHREAD)
+#if defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_DISABLE_PTHREAD)
       case SYS_pthread_start:
         {
           /* Set up to return to the user-space pthread start-up function in
@@ -378,7 +378,7 @@ int up_svcall(int irq, FAR void *context)
        *        ucontext (on the stack)
        */
 
-#if defined(CONFIG_NUTTX_KERNEL) && !defined(CONFIG_DISABLE_SIGNALS)
+#if defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_DISABLE_SIGNALS)
       case SYS_signal_handler:
         {
           struct tcb_s *rtcb   = sched_self();
@@ -421,7 +421,7 @@ int up_svcall(int irq, FAR void *context)
        *   R0 = SYS_signal_handler_return
        */
 
-#if defined(CONFIG_NUTTX_KERNEL) && !defined(CONFIG_DISABLE_SIGNALS)
+#if defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_DISABLE_SIGNALS)
       case SYS_signal_handler_return:
         {
           struct tcb_s *rtcb   = sched_self();
@@ -497,7 +497,7 @@ int up_svcall(int irq, FAR void *context)
              current_regs[REG_R10], current_regs[REG_R11],
              current_regs[REG_R12], current_regs[REG_R13],
              current_regs[REG_R14], current_regs[REG_R15]);
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
       svcdbg(" PSR: %08x PRIMASK: %08x EXC_RETURN: %08x\n",
              current_regs[REG_XPSR], current_regs[REG_PRIMASK],
              current_regs[REG_EXC_RETURN]);

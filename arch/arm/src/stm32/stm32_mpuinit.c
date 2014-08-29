@@ -46,7 +46,7 @@
 #include "mpu.h"
 #include "stm32_mpuinit.h"
 
-#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_ARMV7M_MPU)
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_ARMV7M_MPU)
 
 /****************************************************************************
  * Private Definitions
@@ -120,5 +120,5 @@ void stm32_mpu_uheap(uintptr_t start, size_t size)
   mpu_userintsram(start, size);
 }
 
-#endif /* CONFIG_NUTTX_KERNEL && CONFIG_ARMV7M_MPU */
+#endif /* CONFIG_BUILD_PROTECTED && CONFIG_ARMV7M_MPU */
 

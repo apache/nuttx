@@ -47,7 +47,7 @@
 #include "lpc43_mpuinit.h"
 #include "lpc43_userspace.h"
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -115,5 +115,5 @@ void lpc43_userspace(void)
   lpc43_mpuinitialize();
 }
 
-#endif /* CONFIG_NUTTX_KERNEL */
+#endif /* CONFIG_BUILD_PROTECTED */
 

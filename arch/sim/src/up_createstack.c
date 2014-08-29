@@ -93,11 +93,6 @@
  *     however, there are certain contexts where the TCB may not be fully
  *     initialized when up_create_stack is called.
  *
- *     If CONFIG_NUTTX_KERNEL is defined, then this thread type may affect
- *     how the stack is allocated.  For example, kernel thread stacks should
- *     be allocated from protected kernel memory.  Stacks for user tasks and
- *     threads must come from memory that is accessible to user code.
- *
  ****************************************************************************/
 
 int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
@@ -112,18 +107,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
   /* Allocate the memory for the stack */
 
-#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
-  /* Use the kernel allocator if this is a kernel thread */
-
-  if (ttype == TCB_FLAG_TTYPE_KERNEL)
-    {
-      stack_alloc_ptr = (uint32_t *)kmalloc(stack_size);
-    }
-  else
-#endif
-    {
-      stack_alloc_ptr = (uint32_t*)kumalloc(adj_stack_size);
-    }
+  stack_alloc_ptr = (uint32_t*)kumalloc(adj_stack_size);
 
   /* Was the allocation successful? */
 

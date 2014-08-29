@@ -69,7 +69,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 void tiva_userspace(void);
 #endif
 

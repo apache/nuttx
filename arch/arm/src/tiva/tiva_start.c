@@ -150,7 +150,7 @@ void __start(void)
    * segments.
    */
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
   tiva_userspace();
   showprogress('E');
 #endif

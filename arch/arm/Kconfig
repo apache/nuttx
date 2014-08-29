@@ -15,11 +15,12 @@ config ARCH_CHIP_A1X
 	select ARCH_CORTEXA8
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_MMU
+	select ARCH_USE_MMU
 	select ARCH_HAVE_LOWVECTORS
 	select ARCH_HAVE_SDRAM
 	select BOOT_RUNFROMSDRAM
-	select ARCH_HAVE_ADDRENV if EXPERIMENTAL
-	select ARCH_NEED_ADDRENV_MAPPING if EXPERIMENTAL
+	select ARCH_HAVE_ADDRENV
+	select ARCH_NEED_ADDRENV_MAPPING
 	---help---
 		Allwinner A1X family: A10, A10S (A12), A13 (ARM Cortex-A8)
 
@@ -137,8 +138,8 @@ config ARCH_CHIP_SAMA5
 	select ARCH_HAVE_LOWVECTORS
 	select ARCH_HAVE_I2CRESET
 	select ARCH_HAVE_TICKLESS
-	select ARCH_HAVE_ADDRENV if EXPERIMENTAL
-	select ARCH_NEED_ADDRENV_MAPPING if EXPERIMENTAL
+	select ARCH_HAVE_ADDRENV
+	select ARCH_NEED_ADDRENV_MAPPING
 	---help---
 		Atmel SAMA5 (ARM Cortex-A5)
 
@@ -182,11 +183,13 @@ config ARCH_ARM926EJS
 	bool
 	default n
 	select ARCH_HAVE_MMU
+	select ARCH_USE_MMU
 
 config ARCH_ARM920T
 	bool
 	default n
 	select ARCH_HAVE_MMU
+	select ARCH_USE_MMU
 
 config ARCH_CORTEXM0
 	bool
@@ -212,6 +215,7 @@ config ARCH_CORTEXA5
 	default n
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_MMU
+	select ARCH_USE_MMU
 	select ARCH_HAVE_COHERENT_DCACHE if ELF
 
 config ARCH_CORTEXA8
@@ -219,6 +223,7 @@ config ARCH_CORTEXA8
 	default n
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_MMU
+	select ARCH_USE_MMU
 	select ARCH_HAVE_COHERENT_DCACHE if ELF
 
 config ARCH_FAMILY
@@ -288,14 +293,12 @@ config ARCH_FPU
 		Build in support for the ARM Cortex-M4 Floating Point Unit (FPU).
 		Check your chip specifications first; not all Cortex-M4 chips support the FPU.
 
-config ARCH_HAVE_MPU
-	bool
-	default n
-
 config ARMV7M_MPU
 	bool "MPU support"
-	default n
+	default n if !ARCH_USE_MPU
+	default y if ARCH_USE_MPU
 	depends on ARCH_HAVE_MPU
+	select ARCH_USE_MPU
 	---help---
 		Build in support for the ARM Cortex-M3/4 Memory Protection Unit (MPU).
 		Check your chip specifications first; not all Cortex-M3/4 chips support the MPU.
@@ -305,7 +308,7 @@ config ARMV7M_MPU_NREGIONS
 	default 8
 	depends on ARMV7M_MPU
 	---help---
-	This is the number of protection regions supported by the MPU.
+		This is the number of protection regions supported by the MPU.
 
 config ARCH_HAVE_LOWVECTORS
 	bool
@@ -320,7 +323,7 @@ config ARCH_LOWVECTORS
 config ARCH_ROMPGTABLE
 	bool "ROM page table"
 	default n
-	depends on ARCH_HAVE_MMU
+	depends on ARCH_USE_MMU
 	---help---
 		Support a fixed memory mapping use a (read-only) page table in ROM/FLASH.
 

@@ -140,11 +140,11 @@ struct xcptcontext
   uint32_t saved_primask;
 #endif
   uint32_t saved_xpsr;
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
   uint32_t saved_lr;
 #endif
 
-# ifdef CONFIG_NUTTX_KERNEL
+# ifdef CONFIG_BUILD_PROTECTED
   /* This is the saved address to use when returning from a user-space
    * signal handler.
    */

@@ -69,7 +69,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NUTTX_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
 void lpc17_userspace(void);
 #endif
 
