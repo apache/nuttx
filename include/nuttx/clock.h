@@ -69,8 +69,6 @@
 #if defined(CONFIG_SCHED_TICKLESS)
    /* Case 1: There is no global timer data */
 
-#  define __HAVE_KERNEL_GLOBALS 0
-
 #elif defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)
      /* Case 3: Kernel mode of protected kernel build */
 
@@ -83,8 +81,6 @@
 
 #elif defined(CONFIG_LIB_SYSCALL)
    /* Case 4: Building with SYSCALLs enabled, but not part of a kernel build */
-
-#  define __HAVE_KERNEL_GLOBALS 0
 
 #else
    /* Case 2: Un-protected, non-kernel build */
@@ -192,7 +188,7 @@ struct cpuload_s
  * access to kernel global data
  */
 
-#if __HAVE_KERNEL_GLOBALS
+#ifdef __HAVE_KERNEL_GLOBALS
 #  ifdef CONFIG_SYSTEM_TIME64
 
 extern volatile uint64_t g_system_timer;
@@ -270,7 +266,7 @@ void clock_synchronize(void);
  *
  ****************************************************************************/
 
-#if !__HAVE_KERNEL_GLOBALS
+#ifndef __HAVE_KERNEL_GLOBALS
 #  ifdef CONFIG_SYSTEM_TIME64
 #    define clock_systimer()  (uint32_t)(clock_systimer64() & 0x00000000ffffffff)
 #  else
@@ -297,7 +293,7 @@ uint32_t clock_systimer(void);
  *
  ****************************************************************************/
 
-#if !__HAVE_KERNEL_GLOBALS && defined(CONFIG_SYSTEM_TIME64)
+#if !defined(__HAVE_KERNEL_GLOBALS) && defined(CONFIG_SYSTEM_TIME64)
 uint64_t clock_systimer64(void);
 #endif
 
