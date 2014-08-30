@@ -8315,4 +8315,8 @@
 	  into Directories.mk; add support for kernel build.  Move library
 	  selection logic in common *.mk files, one each for flat-, protected-,
 	  and kernel- mode builds (2014-8-30).
-
+	* include/nuttx/syscall.h syscall/syscall.csv: clock_systimer needs the
+	  same fix as for get/set_errno when used with system calls (2014-8-30).
+	* sched/Kconfig sched/init/os_bringup.c tools/cfgdefine.c: Add
+	  configuration options to start the system from a program on a file
+	  system (2014-8-30).
