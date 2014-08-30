@@ -70,9 +70,6 @@ else
   BOARD_DIR = configs/$(CONFIG_ARCH_BOARD)
 endif
 
-# Add-on directories.  These may or may not be in place in the
-# NuttX source tree (they must be specifically installed)
-#
 # CONFIG_APPS_DIR can be over-ridden from the command line or in the .config file.
 # The default value of CONFIG_APPS_DIR is ../apps.  Ultimately, the application
 # will be built if APPDIR is defined.  APPDIR will be defined if a directory containing
@@ -83,21 +80,12 @@ CONFIG_APPS_DIR = ../apps
 endif
 APPDIR := ${shell if [ -r $(CONFIG_APPS_DIR)/Makefile ]; then echo "$(CONFIG_APPS_DIR)"; fi}
 
-# All add-on directories.
+# Add-on directories.  These may or may not be in place in the
+# NuttX source tree (they must be specifically installed)
 #
 # NUTTX_ADDONS is the list of directories built into the NuttX kernel.
-# USER_ADDONS is the list of directories that will be built into the user application
-
-NUTTX_ADDONS :=
-USER_ADDONS :=
-
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
-USER_ADDONS += $(APPDIR)
-else
-NUTTX_ADDONS += $(APPDIR)
-endif
-
-# Lists of build directories.
+# USER_ADDONS is the list of directories that will be built into the user
+#   application
 #
 # FSDIRS depend on file descriptor support; NONFSDIRS do not (except for parts
 #   of FSDIRS).  We will exclude FSDIRS from the build if file descriptor
@@ -110,89 +98,18 @@ endif
 # OTHERDIRS - These are directories that are not built but probably should
 #   be cleaned to prevent garbage from collecting in them when changing
 #   configurations.
-
-NONFSDIRS = sched $(ARCH_SRC) $(NUTTX_ADDONS)
-FSDIRS = fs drivers binfmt
-CONTEXTDIRS = $(APPDIR)
-USERDIRS =
-OTHERDIRS = lib
-
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
-
-USERDIRS += libc mm $(USER_ADDONS)
-ifeq ($(CONFIG_HAVE_CXX),y)
-USERDIRS += libxx
-endif
-
-else
-
-NONFSDIRS += libc mm
-OTHERDIRS += $(USER_ADDONS)
-ifeq ($(CONFIG_HAVE_CXX),y)
-NONFSDIRS += libxx
-else
-OTHERDIRS += libxx
-endif
-
-endif
-
-ifeq ($(CONFIG_LIB_SYSCALL),y)
-NONFSDIRS += syscall
-CONTEXTDIRS += syscall
-USERDIRS += syscall
-else
-OTHERDIRS += syscall
-endif
-
-ifeq ($(CONFIG_NX),y)
-NONFSDIRS += graphics libnx
-CONTEXTDIRS += graphics libnx
-else
-OTHERDIRS += graphics libnx
-endif
-
-ifeq ($(CONFIG_AUDIO),y)
-NONFSDIRS += audio
-else
-OTHERDIRS += audio
-endif
-
+#
 # CLEANDIRS are the directories that will clean in.  These are
 #   all directories that we know about.
 # KERNDEPDIRS are the directories in which we will build target dependencies.
-#   If NuttX and applications are built separately (CONFIG_BUILD_PROTECTED),
-#   then this holds only the directories containing kernel files.
+#   If NuttX and applications are built separately (CONFIG_BUILD_PROTECTED or
+#   CONFIG_BUILD_KERNEL), then this holds only the directories containing
+#   kernel files.
 # USERDEPDIRS. If NuttX and applications are built separately (CONFIG_BUILD_PROTECTED),
-#   then this holds only the directories containing user files.
+#   then this holds only the directories containing user files. If
+#   CONFIG_BUILD_KERNEL is selected, then applications are not build at all.
 
-CLEANDIRS = $(NONFSDIRS) $(FSDIRS) $(USERDIRS) $(OTHERDIRS)
-KERNDEPDIRS = $(NONFSDIRS)
-USERDEPDIRS = $(USERDIRS)
-
-# Add file system directories to KERNDEPDIRS (they are already in CLEANDIRS)
-
-ifeq ($(CONFIG_NFILE_DESCRIPTORS),0)
-ifeq ($(CONFIG_NET),y)
-ifneq ($(CONFIG_NSOCKET_DESCRIPTORS),0)
-KERNDEPDIRS += fs
-endif
-KERNDEPDIRS += drivers
-endif
-else
-KERNDEPDIRS += $(FSDIRS)
-endif
-
-# Add networking directories to KERNDEPDIRS and CLEANDIRS
-
-ifeq ($(CONFIG_NET),y)
-KERNDEPDIRS += net
-endif
-CLEANDIRS += net
-
-ifeq ($(CONFIG_CRYPTO),y)
-KERNDEPDIRS += crypto
-endif
-CLEANDIRS += crypto
+include Directories.mk
 
 #
 # Extra objects used in the final link.
