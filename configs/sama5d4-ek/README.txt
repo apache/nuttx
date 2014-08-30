@@ -4195,6 +4195,11 @@ Configurations
    STATUS:
        See the To-Do list below
 
+   (2014-8-30): Retesting today I am seeing a strange behavior:  Serial
+       output is coming out in chunks with delays between the chunks.  It
+       appears that something is not good in the serial port configuration.
+       I see no such chunky behavior in, for example, grahics output.
+
   nxwm:
 
     This is a special configuration setup for the NxWM window manager
