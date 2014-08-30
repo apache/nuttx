@@ -8310,3 +8310,9 @@
 	  are none, however) (2014-8-30).
 	* include/nuttx/errno.h syscall/syscall.csv and syscall_funclookup.c:
 	  Yet more issues with errno access via syscalls fixed (2014-8-30).
+	* Makefile.unix, Makefile.win, Directories.mk, FlatLibs.mk, ProtectedLibs.mk,
+	  and KernelLibs.mk:  Separate the common directory selection logic
+	  into Directories.mk; add support for kernel build.  Move library
+	  selection logic in common *.mk files, one each for flat-, protected-,
+	  and kernel- mode builds (2014-8-30).
+
