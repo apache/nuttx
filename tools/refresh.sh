@@ -32,17 +32,13 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-USAGE="USAGE: $0 [--dry-run|--debug|--help] <board>/<config>"
+USAGE="USAGE: $0 [--debug|--help] <board>/<config>"
 ADVICE="Try '$0 --help' for more information"
 
 unset CONFIG
-DRYRUN=n
 
 while [ ! -z "$1" ]; do
     case $1 in
-    --dry-run )
-        DRYRUN=y
-        ;;
     --debug )
         set -x
         ;;
@@ -52,8 +48,6 @@ while [ ! -z "$1" ]; do
         echo $USAGE
         echo ""
         echo "Where:"
-        echo "  --dry-run"
-        echo "     Do no change the defconfig file"
         echo "  --debug"
         echo "     Enable script debug"
         echo "  --help"
@@ -169,15 +163,22 @@ make oldconfig
 
 # Show differences
 
+sed -i -e "s/^CONFIG_APPS_DIR/# CONFIG_APPS_DIR/g" .config
 $CMPCONFIG $DEFCONFIG .config
 
-if [ "X$DRYRUN" = "Xn" ]; then
+# Save the refreshed configuration
+
+read -p "Save the new configuration (y/n)?" -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
   echo "Saving the new configuration file"
-  sed -i -e "s/^CONFIG_APPS_DIR/# CONFIG_APPS_DIR/g" .config
   mv .config $DEFCONFIG || \
       { echo "ERROR: Failed to move .config to $DEFCONFIG"; exit 1; }
   chmod 644 $DEFCONFIG
 fi
+
+# Restore any previous .config file
 
 if [ -e SAVEconfig ]; then
   mv SAVEconfig .config || \

@@ -564,9 +564,16 @@ refresh.sh
      two configuration files is often not useful.  But tools/cmpconfig
      will show only the meaningful differences between the two
      configuration files.
+  4. It will edit the .config file to comment out the setting
+     of the CONFIG_APPS_DIR= setting.  This setting should not
+     be in checked-in defconfig files because the actually must
+     be determined at the next time that the configuration is
+     installed.
   5. Finally, the refreshed defconfig file is copied back in
      place where it can be committed with the next set of
-     difference (unless you add --dry-run) to the command line.
+     difference to the command line.  refresh.sh will prompt
+     you first to avoid overwriting the defconfig file with
+     changes that you do not want.
 `
 zipme.sh
 --------
