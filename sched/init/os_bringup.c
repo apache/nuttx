@@ -63,8 +63,8 @@
  ****************************************************************************/
 
 /* If NuttX is built as a separately compiled module, then the config.h header
- * file should contain the address of the user module entry point.  If not
- * then the default entry point is user_start.
+ * file should contain the address of the entry point (or path to the file)
+ * that will perform the application-level initialization.
  */
 
 /* Customize some strings */

@@ -1635,7 +1635,7 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
    * memory resources, primarily for the dedicated stack (CONFIG_HIDMOUSE_STACKSIZE).
    */
 
-  uvdbg("user_start: Start poll task\n");
+  uvdbg("Start poll task\n");
 
   /* The inputs to a task started by task_create() are very awkward for this
    * purpose.  They are really designed for command line tasks (argc/argv). So

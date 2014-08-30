@@ -207,8 +207,8 @@ const struct tasklist_s g_tasklisttable[NUM_TASK_STATES] =
  ****************************************************************************/
 /* This is the task control block for this thread of execution. This thread
  * of execution is the IDLE task.  NOTE:  the system boots into the IDLE
- * task.  The IDLE task spawns the user initialization task (user_start) and
- * that user init task is responsible for bringing up the rest of the system
+ * task.  The IDLE task spawns the user initialization task and that user
+ * initialization task is responsible for bringing up the rest of the system.
  */
 
 static FAR struct task_tcb_s g_idletcb;

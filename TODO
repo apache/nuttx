@@ -519,13 +519,13 @@ o C++ Support
                this will provide the model for all solutions.  Basically, if
                CONFIG_HAVE_CXXINITIALIZE=y is defined in the configuration, then
                board-specific code must provide the interface up_cxxinitialize().
-               up_cxxinitialize() is called from user_start() to initialize
+               up_cxxinitialize() is called from aplication logic to initialize
                all static class instances.  This TODO item probably has to stay
                open because this solution is only available on STM32 F4.
   Status:      Open
   Priority:    Low, depends on toolchain.  Call to gcc's built-in static
                constructor logic will probably have to be performed by
-               user logic in user_start().
+               user logic in the application.
 
   Title:       STATIC CONSTRUCTORS AND MULTITASKING
   Description: The logic that calls static constructors operates on the main

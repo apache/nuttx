@@ -276,7 +276,7 @@ int main(int argc, char **argv, char **envp)
   printf(" * with existing code, for builds which do not define CONFIG_USER_ENTRYPOINT.\n");
   printf(" */\n\n");
   printf("#ifndef CONFIG_USER_ENTRYPOINT\n");
-  printf("# define CONFIG_USER_ENTRYPOINT user_start\n");
+  printf("# define CONFIG_USER_ENTRYPOINT main\n");
   printf("#endif\n\n");
   printf("#endif /* __INCLUDE_NUTTX_CONFIG_H */\n");
   fclose(stream);

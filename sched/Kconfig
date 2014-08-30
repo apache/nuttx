@@ -220,11 +220,11 @@ menu "Tasks and Scheduling"
 
 config USER_ENTRYPOINT
 	string "Application entry point"
-	default "user_start"
+	default "main"
 	---help---
 		The name of the entry point for user applications.  For the example
 		applications this is of the form 'app_main' where 'app' is the application
-		name. If not defined, USER_ENTRYPOINT defaults to "user_start."
+		name. If not defined, USER_ENTRYPOINT defaults to "main".
 
 config RR_INTERVAL
 	int "Round robin timeslice (MSEC)"
@@ -716,16 +716,16 @@ config IDLETHREAD_STACKSIZE
 	default 1024
 	---help---
 		The size of the initial stack used by the IDLE thread.  The IDLE thread
-		is the thread that (1) performs the inital boot of the system up to the
-		point where user_start() is spawned, and (2) there after is the IDLE
-		thread that executes only when there is no other thread ready to run.
+		is the thread that (1) performs the initial boot of the system up to the
+		point where start-up appliation is spawned, and (2) there after is the
+		IDLE thread that executes only when there is no other thread ready to run.
 
 config USERMAIN_STACKSIZE
 	int "Main thread stack size"
 	default 2048
 	---help---
-		The size of the stack to allocate for the main user thread that begins at
-		the user_start() entry point.
+		The size of the stack to allocate for the user initialization thread
+		that is started as soon as the OS completes its initialization.
 
 config PTHREAD_STACK_MIN
 	int "Minimum pthread stack size"
