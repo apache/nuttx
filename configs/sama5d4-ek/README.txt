@@ -3701,15 +3701,27 @@ Configurations
         CONFIG_GRAN=n                          : Disable the granule allocator 
         CONFIG_MM_PGALLOC=n                    : Disable the page allocator
 
+    4. A system call interface is enabled and the ELF test programs interface with the base RTOS code system calls.  This eliminates the need for symbol tables to link with the base RTOS (symbol tables are still used, however, to interface with the common C library instaniation).  Relevant configuration settings:
+
+    RTOS Features -> System call support
+      CONFIG_LIB_SYSCALL=y                      : Enable system call support
+      CONFIG_SYS_NNEST=2                        : Max number of nested system calls
+      CONFIG_SYS_RESERVED=1                     : SYStem call 0 is reserved on this platform
+
+    Application Configurations -> Examples -> ELF Loader Example
+      CONFIG_EXAMPLES_ELF_SYSCALL=y             : Link apps with the SYStem call library
+
     STATUS:
       2014-8-24: This configuration works with the address environment
-                 option disable.
+                 and system call options disabled.
       2014-8-28: Now this option works well well with address environments
                  enabled.  There is a potential issue with the use of
                  task_create() as it is used in the ELF test, but the code
                  seems to survive it. See:
 
                  http://www.nuttx.org/doku.php?id=wiki:nxinternal:memconfigs#task_create
+
+      2014-8-29: System call interface verified.
 
   nsh:
 
