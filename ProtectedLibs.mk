@@ -1,5 +1,5 @@
 ############################################################################
-# FlatLibs.mk
+# ProtectedLibs.mk
 #
 #   Copyright (C) 2007-2012, 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -43,26 +43,26 @@
 NUTTXLIBS = lib$(DELIM)libsched$(LIBEXT)
 USERLIBS =
 
-# Add libraries for syscall support.
+# Add libraries for syscall support.  The C library will be needed by
+# both the kernel- and user-space builds.  For now, the memory manager (mm)
+# is placed in user space (only).
 
-NUTTXLIBS += lib$(DELIM)libc$(LIBEXT) lib$(DELIM)libmm$(LIBEXT)
-NUTTXLIBS += lib$(DELIM)libarch$(LIBEXT)
-ifeq ($(CONFIG_LIB_SYSCALL),y)
-NUTTXLIBS += lib$(DELIM)libstubs$(LIBEXT)
-USERLIBS  += lib$(DELIM)libproxies$(LIBEXT)
-endif
+NUTTXLIBS += lib$(DELIM)libstubs$(LIBEXT) lib$(DELIM)libkc$(LIBEXT)
+NUTTXLIBS += lib$(DELIM)libkmm$(LIBEXT) lib$(DELIM)libkarch$(LIBEXT)
+USERLIBS  += lib$(DELIM)libproxies$(LIBEXT) lib$(DELIM)libuc$(LIBEXT)
+USERLIBS  += lib$(DELIM)libumm$(LIBEXT) lib$(DELIM)libuarch$(LIBEXT)
 
 # Add libraries for C++ support.  CXX, CXXFLAGS, and COMPILEXX must
 # be defined in Make.defs for this to work!
 
 ifeq ($(CONFIG_HAVE_CXX),y)
-NUTTXLIBS += lib$(DELIM)libcxx$(LIBEXT)
+USERLIBS += lib$(DELIM)libcxx$(LIBEXT)
 endif
 
 # Add library for application support.
 
 ifneq ($(APPDIR),)
-NUTTXLIBS += lib$(DELIM)libapps$(LIBEXT)
+USERLIBS += lib$(DELIM)libapps$(LIBEXT)
 endif
 
 # Add libraries for network support
@@ -94,7 +94,12 @@ endif
 
 ifeq ($(CONFIG_NX),y)
 NUTTXLIBS += lib$(DELIM)libgraphics$(LIBEXT)
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+NUTTXLIBS += lib$(DELIM)libknx$(LIBEXT)
+USERLIBS  += lib$(DELIM)libunx$(LIBEXT)
+else
 NUTTXLIBS += lib$(DELIM)libnx$(LIBEXT)
+endif
 endif
 
 # Add libraries for the Audio sub-system
