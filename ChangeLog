@@ -8306,4 +8306,7 @@
 	  partially integrated (2014-8-29).
 	* tools/refresh.sh: Add a tool to make refreshing configurations easier
 	  when you wnat to do a lot of them (2014-8-29).
-
+	* tools/mksyscall.c: Build syscalls that do not need header files (there
+	  are none, however) (2014-8-30).
+	* include/nuttx/errno.h syscall/syscall.csv and syscall_funclookup.c:
+	  Yet more issues with errno access via syscalls fixed (2014-8-30).
