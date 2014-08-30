@@ -95,10 +95,12 @@ APPDIR := ${shell if exist "$(CONFIG_APPS_DIR)\Makefile" echo $(CONFIG_APPS_DIR)
 # CLEANDIRS are the directories that will clean in.  These are
 #   all directories that we know about.
 # KERNDEPDIRS are the directories in which we will build target dependencies.
-#   If NuttX and applications are built separately (CONFIG_BUILD_PROTECTED),
-#   then this holds only the directories containing kernel files.
+#   If NuttX and applications are built separately (CONFIG_BUILD_PROTECTED or
+#   CONFIG_BUILD_KERNEL), then this holds only the directories containing
+#   kernel files.
 # USERDEPDIRS. If NuttX and applications are built separately (CONFIG_BUILD_PROTECTED),
-#   then this holds only the directories containing user files.
+#   then this holds only the directories containing user files. If
+#   CONFIG_BUILD_KERNEL is selected, then applications are not build at all.
 
 include Directories.mk
 
@@ -113,98 +115,12 @@ ifeq ($(CONFIG_BUILD_2PASS),y)
 EXTRA_OBJS += $(CONFIG_PASS1_OBJECT)
 endif
 
-# NUTTXLIBS is the list of NuttX libraries that is passed to the
-#   processor-specific Makefile to build the final NuttX target.
-#   Libraries in FSDIRS are excluded if file descriptor support
-#   is disabled.
-# USERLIBS is the list of libraries used to build the final user-space
-#   application
+# Library build selections
 
-NUTTXLIBS = lib\libsched$(LIBEXT)
-USERLIBS =
+include FlatLibs.mk
 
-# Add libraries for syscall support.  The C library will be needed by
-# both the kernel- and user-space builds.  For now, the memory manager (mm)
-# is placed in user space (only).
-
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
-NUTTXLIBS += lib\libstubs$(LIBEXT) lib\libkc$(LIBEXT) lib\libkmm$(LIBEXT)
-NUTTXLIBS += lib\libkarch$(LIBEXT)
-USERLIBS  += lib\libproxies$(LIBEXT) lib\libuc$(LIBEXT) lib\libumm$(LIBEXT)
-USERLIBS  += lib\libuarch$(LIBEXT)
-else
-NUTTXLIBS += lib\libc$(LIBEXT) lib\libmm$(LIBEXT) lib\libarch$(LIBEXT)
-ifeq ($(CONFIG_LIB_SYSCALL),y)
-NUTTXLIBS += lib/libstubs$(LIBEXT)
-USERLIBS  += lib/libproxies$(LIBEXT)
-endif
-endif
-
-# Add libraries for C++ support.  CXX, CXXFLAGS, and COMPILEXX must
-# be defined in Make.defs for this to work!
-
-ifeq ($(CONFIG_HAVE_CXX),y)
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
-USERLIBS += lib\libcxx$(LIBEXT)
-else
-NUTTXLIBS += lib\libcxx$(LIBEXT)
-endif
-endif
-
-# Add library for application support.
-
-ifneq ($(APPDIR),)
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
-USERLIBS += lib\libapps$(LIBEXT)
-else
-NUTTXLIBS += lib\libapps$(LIBEXT)
-endif
-endif
-
-# Add libraries for network support
-
-ifeq ($(CONFIG_NET),y)
-NUTTXLIBS += lib\libnet$(LIBEXT)
-endif
-
-# Add libraries for Crypto API support
-
-ifeq ($(CONFIG_CRYPTO),y)
-NUTTXLIBS += lib\libcrypto$(LIBEXT)
-endif
-
-# Add libraries for file system support
-
-ifeq ($(CONFIG_NFILE_DESCRIPTORS),0)
-ifneq ($(CONFIG_NSOCKET_DESCRIPTORS),0)
-NUTTXLIBS += lib\libfs$(LIBEXT)
-endif
-ifeq ($(CONFIG_NET),y)
-NUTTXLIBS += lib\libdrivers$(LIBEXT)
-endif
-else
-NUTTXLIBS += lib\libfs$(LIBEXT) lib\libdrivers$(LIBEXT) lib\libbinfmt$(LIBEXT)
-endif
-
-# Add libraries for the NX graphics sub-system
-
-ifeq ($(CONFIG_NX),y)
-NUTTXLIBS += lib\libgraphics$(LIBEXT)
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
-NUTTXLIBS += lib\libknx$(LIBEXT)
-USERLIBS  += lib\libunx$(LIBEXT)
-else
-NUTTXLIBS += lib\libnx$(LIBEXT)
-endif
-endif
-
-# Add libraries for the Audio sub-system
-
-ifeq ($(CONFIG_AUDIO),y)
-NUTTXLIBS += lib\libaudio$(LIBEXT)
-endif
-
-# LINKLIBS derives from NUTTXLIBS and is simply the same list with the subdirectory removed
+# LINKLIBS derives from NUTTXLIBS and is simply the same list with the
+# subdirectory removed
 
 LINKLIBS = $(patsubst lib\\%,%,$(NUTTXLIBS))
 
