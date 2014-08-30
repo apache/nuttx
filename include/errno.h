@@ -63,7 +63,7 @@
 
 #  define __DIRECT_ERRNO_ACCESS 1
 
-#elif defined(CONFIG_BUILD_KERNEL)
+#elif defined(CONFIG_BUILD_KERNEL) && defined(__KERNEL__)
    /* Kernel only build.  The kernel has access */
 
 #  define __DIRECT_ERRNO_ACCESS 1

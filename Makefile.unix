@@ -409,8 +409,10 @@ audio/libaudio$(LIBEXT): context
 lib/libaudio$(LIBEXT): audio/libaudio$(LIBEXT)
 	$(Q) install audio/libaudio$(LIBEXT) lib/libaudio$(LIBEXT)
 
+# Special case
+
 syscall/libstubs$(LIBEXT): context
-	$(Q) $(MAKE) -C syscall TOPDIR="$(TOPDIR)" libstubs$(LIBEXT) EXTRADEFINES=$(KDEFINE)
+	$(Q) $(MAKE) -C syscall TOPDIR="$(TOPDIR)" libstubs$(LIBEXT) # EXTRADEFINES=$(KDEFINE)
 
 lib/libstubs$(LIBEXT): syscall/libstubs$(LIBEXT)
 	$(Q) install syscall/libstubs$(LIBEXT) lib/libstubs$(LIBEXT)

@@ -71,18 +71,12 @@
 
 #  define __HAVE_KERNEL_GLOBALS 0
 
-#elif defined(CONFIG_BUILD_PROTECTED)
-#  if defined(__KERNEL__)
+#elif defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)
      /* Case 3: Kernel mode of protected kernel build */
 
 #    define __HAVE_KERNEL_GLOBALS 1
-#  else
-     /* User mode of protected kernel build */
 
-#    define __HAVE_KERNEL_GLOBALS 0
-#  endif
-
-#elif defined(CONFIG_BUILD_KERNEL)
+#elif defined(CONFIG_BUILD_KERNEL) && defined(__KERNEL__)
      /* Case 3: Kernel only build */
 
 #    define __HAVE_KERNEL_GLOBALS 1

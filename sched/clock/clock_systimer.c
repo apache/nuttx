@@ -49,7 +49,10 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* See nuttx/clock.h */
 
+#undef clock_systimer
+ 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -74,7 +77,6 @@
  *
  ****************************************************************************/
 
-#if !defined(clock_systimer) /* See nuttx/clock.h */
 uint32_t clock_systimer(void)
 {
 #ifdef CONFIG_SCHED_TICKLESS
@@ -104,7 +106,6 @@ uint32_t clock_systimer(void)
 
 #endif
 }
-#endif
 
 /****************************************************************************
  * Name: clock_systimer64
@@ -122,7 +123,6 @@ uint32_t clock_systimer(void)
  *
  ****************************************************************************/
 
-#if !defined(clock_systimer) /* See nuttx/clock.h */
 #ifdef CONFIG_SYSTEM_TIME64
 uint64_t clock_systimer64(void)
 {
@@ -143,5 +143,4 @@ uint64_t clock_systimer64(void)
   return g_system_timer;
 #endif
 }
-#endif
 #endif
