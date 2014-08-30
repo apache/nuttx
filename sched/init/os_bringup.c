@@ -52,6 +52,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/kthread.h>
 #include <nuttx/userspace.h>
+#include <nuttx/binfmt/binfmt.h>
 
 #ifdef CONFIG_PAGING
 # include "paging/paging.h"
@@ -61,6 +62,59 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Configuration */
+
+#if defined(CONFIG_INIT_NONE)
+  /* Kconfig logic will set CONFIG_INIT_NONE if dependencies are not met */
+
+#  error No initialization mechanism selected (CONFIG_INIT_NONE)
+
+#else
+#  if !defined(CONFIG_INIT_ENTRYPOINT) && !defined(CONFIG_INIT_FILEPATH)
+  /* For backward compatibility with older defconfig files when this was
+   * the way things were done.
+   */
+
+#    define CONFIG_INIT_ENTRYPOINT 1
+#  endif
+
+#  if defined(CONFIG_INIT_ENTRYPOINT)
+  /* Initialize by starting a task at an entry point */
+
+#    ifndef CONFIG_USER_ENTRYPOINT
+  /* Entry point name must have been provided */
+
+#      error CONFIG_USER_ENTRYPOINT must be defined
+#    endif
+
+#  elif defined(CONFIG_INIT_FILEPATH)
+  /* Initialize by running an initialization program in the file system.
+   * Presumably the user has configured a board initialization function
+   * that will mount the file system containing the initialization
+   * program.
+   */
+
+#    ifndef CONFIG_BOARD_INITIALIZE
+#      warning You probably need CONFIG_BOARD_INITIALIZE to mount the file system
+#    endif
+
+#    ifndef CONFIG_USER_INITPATH
+  /* Path to the initialization program must have been provided */
+
+#      error CONFIG_USER_INITPATH must be defined
+#    endif
+
+#    if !defined(CONFIG_INIT_SYMTAB) || !defined(CONFIG_INIT_NEXPORTS)
+  /* No symbol information... assume no symbol table is available */
+
+#      undef CONFIG_INIT_SYMTAB
+#      undef CONFIG_INIT_NEXPORTS
+#      define CONFIG_INIT_SYMTAB NULL
+#      define CONFIG_INIT_NEXPORTS 0
+#    endif
+#  endif
+#endif
 
 /* If NuttX is built as a separately compiled module, then the config.h header
  * file should contain the address of the entry point (or path to the file)
@@ -103,6 +157,170 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: os_pgworker
+ *
+ * Description:
+ *   Start the page fill worker kernel thread that will resolve page faults.
+ *   This should always be the first thread started because it may have to
+ *   resolve page faults in other threads
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PAGING
+static inline void os_pgworker(void)
+{
+  /* Start the page fill worker kernel thread that will resolve page faults.
+   * This should always be the first thread started because it may have to
+   * resolve page faults in other threads
+   */
+
+  svdbg("Starting paging thread\n");
+
+  g_pgworker = KERNEL_THREAD("pgfill", CONFIG_PAGING_DEFPRIO,
+                             CONFIG_PAGING_STACKSIZE,
+                             (main_t)pg_worker, (FAR char * const *)NULL);
+  DEBUGASSERT(g_pgworker > 0);
+}
+
+#else /* CONFIG_PAGING */
+#  define os_pgworker()
+
+#endif /* CONFIG_PAGING */
+
+/****************************************************************************
+ * Name: os_workqueues
+ *
+ * Description:
+ *   Start the worker threads that service the work queues.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_WORKQUEUE
+static inline void os_workqueues(void)
+{
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_SCHED_USRWORK)
+  int taskid;
+#endif
+
+#ifdef CONFIG_SCHED_HPWORK
+#ifdef CONFIG_SCHED_LPWORK
+  svdbg("Starting high-priority kernel worker thread\n");
+#else
+  svdbg("Starting kernel worker thread\n");
+#endif
+
+  g_work[HPWORK].pid = KERNEL_THREAD(HPWORKNAME, CONFIG_SCHED_WORKPRIORITY,
+                                     CONFIG_SCHED_WORKSTACKSIZE,
+                                     (main_t)work_hpthread,
+                                     (FAR char * const *)NULL);
+  DEBUGASSERT(g_work[HPWORK].pid > 0);
+
+  /* Start a lower priority worker thread for other, non-critical continuation
+   * tasks
+   */
+
+#ifdef CONFIG_SCHED_LPWORK
+
+  svdbg("Starting low-priority kernel worker thread\n");
+
+  g_work[LPWORK].pid = KERNEL_THREAD(LPWORKNAME, CONFIG_SCHED_LPWORKPRIORITY,
+                                     CONFIG_SCHED_LPWORKSTACKSIZE,
+                                     (main_t)work_lpthread,
+                                     (FAR char * const *)NULL);
+  DEBUGASSERT(g_work[LPWORK].pid > 0);
+
+#endif /* CONFIG_SCHED_LPWORK */
+#endif /* CONFIG_SCHED_HPWORK */
+
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_SCHED_USRWORK)
+  /* Start the user-space work queue */
+
+  DEBUGASSERT(USERSPACE->work_usrstart != NULL);
+  taskid = USERSPACE->work_usrstart();
+  DEBUGASSERT(taskid > 0);
+  UNUSED(taskid);
+#endif
+}
+
+#else /* CONFIG_SCHED_WORKQUEUE */
+#  define os_workqueues()
+
+#endif /* CONFIG_SCHED_WORKQUEUE */
+
+/****************************************************************************
+ * Name: os_init_thread
+ *
+ * Description:
+ *   Start the application initialization thread.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_INIT_ENTRYPOINT)
+static inline void os_init_thread(void)
+{
+  int taskid;
+
+  svdbg("Starting init thread\n");
+
+  /* Start the application initialization ask.  In a flat build, this is
+   * entrypoint is given by the definitions, CONFIG_USER_ENTRYPOINT.  In
+   * the protected build, however, we must get the address of the
+   * entrypoint from the header at the beginning of the user-space blob.
+   */
+
+#ifdef CONFIG_BUILD_PROTECTED
+  DEBUGASSERT(USERSPACE->us_entrypoint != NULL);
+  taskid = TASK_CREATE("init", SCHED_PRIORITY_DEFAULT,
+                       CONFIG_USERMAIN_STACKSIZE, USERSPACE->us_entrypoint,
+                       (FAR char * const *)NULL);
+#else
+  taskid = TASK_CREATE("init", SCHED_PRIORITY_DEFAULT,
+                       CONFIG_USERMAIN_STACKSIZE,
+                       (main_t)CONFIG_USER_ENTRYPOINT,
+                       (FAR char * const *)NULL);
+#endif
+  ASSERT(taskid > 0);
+}
+
+#elif defined(CONFIG_INIT_FILEPATH)
+static inline void os_init_thread(void)
+{
+  int ret;
+
+  svdbg("Starting init task: %s\n", CONFIG_USER_INITPATH);
+
+  ret = exec(CONFIG_USER_INITPATH, NULL, CONFIG_INIT_SYMTAB,
+             CONFIG_INIT_NEXPORTS);
+  ASSERT(ret >= 0);
+}
+
+#elif defined(CONFIG_INIT_NONE)
+#  define os_init_thread()
+
+#else
+#  error "Cannot start initialization thread"
+
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -122,9 +340,15 @@
  *                  drivers.
  *
  *   And the main application entry point:
- *   symbols:
+ *   symbols, either:
  *
- *   - USER_ENTRYPOINT: This is the default user application entry point.
+ *   - CONFIG_USER_ENTRYPOINT: This is the default user application entry
+ *                 point, or
+ *   - CONFIG_USER_INITPATH: The full path to the location in a mounted
+ *                 file system where we can expect to find the
+ *                 initialization program.  Presumably, this file system
+ *                 was mounted by board-specific logic when
+ *                 board_initialize() was called.
  *
  * Input Parameters:
  *   None
@@ -136,8 +360,6 @@
 
 int os_bringup(void)
 {
-  int taskid;
-
   /* Setup up the initial environment for the idle task.  At present, this
    * may consist of only the initial PATH variable.  The PATH variable is
    * (probably) not used by the IDLE task.  However, the environment
@@ -154,65 +376,13 @@ int os_bringup(void)
    * resolve page faults in other threads
    */
 
-#ifdef CONFIG_PAGING
-  svdbg("Starting paging thread\n");
-
-  g_pgworker = KERNEL_THREAD("pgfill", CONFIG_PAGING_DEFPRIO,
-                             CONFIG_PAGING_STACKSIZE,
-                             (main_t)pg_worker, (FAR char * const *)NULL);
-  DEBUGASSERT(g_pgworker > 0);
-#endif
+  os_pgworker();
 
   /* Start the worker thread that will serve as the device driver "bottom-
    * half" and will perform misc garbage clean-up.
    */
 
-#ifdef CONFIG_SCHED_WORKQUEUE
-#ifdef CONFIG_SCHED_HPWORK
-
-#ifdef CONFIG_SCHED_LPWORK
-  svdbg("Starting high-priority kernel worker thread\n");
-#else
-  svdbg("Starting kernel worker thread\n");
-#endif
-
-  g_work[HPWORK].pid = KERNEL_THREAD(HPWORKNAME, CONFIG_SCHED_WORKPRIORITY,
-                                     CONFIG_SCHED_WORKSTACKSIZE,
-                                     (main_t)work_hpthread, (FAR char * const *)NULL);
-  DEBUGASSERT(g_work[HPWORK].pid > 0);
-
-  /* Start a lower priority worker thread for other, non-critical continuation
-   * tasks
-   */
-
-#ifdef CONFIG_SCHED_LPWORK
-
-  svdbg("Starting low-priority kernel worker thread\n");
-
-  g_work[LPWORK].pid = KERNEL_THREAD(LPWORKNAME, CONFIG_SCHED_LPWORKPRIORITY,
-                                     CONFIG_SCHED_LPWORKSTACKSIZE,
-                                     (main_t)work_lpthread, (FAR char * const *)NULL);
-  DEBUGASSERT(g_work[LPWORK].pid > 0);
-
-#endif /* CONFIG_SCHED_LPWORK */
-#endif /* CONFIG_SCHED_HPWORK */
-
-#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_SCHED_USRWORK)
-  /* Start the user-space work queue */
-
-  DEBUGASSERT(USERSPACE->work_usrstart != NULL);
-  taskid = USERSPACE->work_usrstart();
-  DEBUGASSERT(taskid > 0);
-#endif
-
-#endif /* CONFIG_SCHED_WORKQUEUE */
-
-  /* Once the operating system has been initialized, the system must be
-   * started by spawning the user init thread of execution.  This is the
-   * first user-mode thead.
-   */
-
-  svdbg("Starting init thread\n");
+  os_workqueues();
 
   /* Perform any last-minute, board-specific initialization, if so
    * configured.
@@ -222,24 +392,12 @@ int os_bringup(void)
   board_initialize();
 #endif
 
-  /* Start the default application.  In a flat build, this is entrypoint
-   * is given by the definitions, CONFIG_USER_ENTRYPOINT.  In the kernel
-   * build, however, we must get the address of the entrypoint from the
-   * header at the beginning of the user-space blob.
+  /* Once the operating system has been initialized, the system must be
+   * started by spawning the user initialization thread of execution.  This
+   * is the first user-mode thread.
    */
 
-#ifdef CONFIG_BUILD_PROTECTED
-  DEBUGASSERT(USERSPACE->us_entrypoint != NULL);
-  taskid = TASK_CREATE("init", SCHED_PRIORITY_DEFAULT,
-                       CONFIG_USERMAIN_STACKSIZE, USERSPACE->us_entrypoint,
-                       (FAR char * const *)NULL);
-#else
-  taskid = TASK_CREATE("init", SCHED_PRIORITY_DEFAULT,
-                       CONFIG_USERMAIN_STACKSIZE,
-                       (main_t)CONFIG_USER_ENTRYPOINT,
-                       (FAR char * const *)NULL);
-#endif
-  ASSERT(taskid > 0);
+  os_init_thread();
 
   /* We an save a few bytes by discarding the IDLE thread's environment. */
 

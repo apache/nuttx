@@ -218,6 +218,26 @@ endmenu # Clocks and Timers
 
 menu "Tasks and Scheduling"
 
+choice
+	prompt "Initialization Task"
+	default INIT_ENTRYPOINT if !BUILD_KERNEL
+	default INIT_FILEPATH if BUILD_KERNEL && !BINFMT_DISABLE
+	default INIT_NONE if BUILD_KERNEL && BINFMT_DISABLE
+
+config INIT_NONE
+	bool
+
+config INIT_ENTRYPOINT
+	bool "Via application entry point"
+	depends on !BUILD_KERNEL
+
+config INIT_FILEPATH
+	bool "Via executable file"
+	depends on !BINFMT_DISABLE
+
+endchoice # Initialization task
+
+if INIT_ENTRYPOINT
 config USER_ENTRYPOINT
 	string "Application entry point"
 	default "main"
@@ -225,6 +245,38 @@ config USER_ENTRYPOINT
 		The name of the entry point for user applications.  For the example
 		applications this is of the form 'app_main' where 'app' is the application
 		name. If not defined, USER_ENTRYPOINT defaults to "main".
+
+endif # INIT_ENTRYPOINT
+
+if INIT_FILEPATH
+
+config USER_INITPATH
+	string "Application initialization path"
+	default "/bin/init"
+	---help---
+		The name of the entry point for user applications.  For the example
+		applications this is of the form 'app_main' where 'app' is the application
+		name. If not defined, USER_ENTRYPOINT defaults to "main".
+
+config INIT_SYMTAB
+	string "Symbol table"
+	default "NULL"
+	---help---
+		The name of othe global array that holds the exported symbol table.
+		The special string "NULL" may be provided if there is no symbol
+		table.  Quotation marks will be stripped when config.h is generated.
+
+config INIT_NEXPORTS
+	string "Symbol table size"
+	default "0"
+	---help---
+		The size of the symbol table.  NOTE that is is logically a numeric
+		value but is represent by a string.  That allows you to put
+		sizeof(something) or a macro or a global variable name for the
+		symbol table size.  Quotation marks will be stripped when config.h
+		is generated.
+
+endif # INIT_FILEPATH
 
 config RR_INTERVAL
 	int "Round robin timeslice (MSEC)"
