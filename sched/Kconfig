@@ -261,20 +261,30 @@ config USER_INITPATH
 config INIT_SYMTAB
 	string "Symbol table"
 	default "NULL"
+	depends on !BUILD_PROTECTED && !BUILD_KERNEL
 	---help---
 		The name of othe global array that holds the exported symbol table.
 		The special string "NULL" may be provided if there is no symbol
 		table.  Quotation marks will be stripped when config.h is generated.
 
+		NOTE: This setting cannot be used in protected or kernel builds.
+		Any kernel mode symbols tables would not be usable for resolving
+		symbols in user mode executables.
+
 config INIT_NEXPORTS
 	string "Symbol table size"
 	default "0"
+	depends on !BUILD_PROTECTED && !BUILD_KERNEL
 	---help---
 		The size of the symbol table.  NOTE that is is logically a numeric
 		value but is represent by a string.  That allows you to put
 		sizeof(something) or a macro or a global variable name for the
 		symbol table size.  Quotation marks will be stripped when config.h
 		is generated.
+
+		NOTE: This setting cannot be used in protected or kernel builds.
+		Any kernel mode symbols tables would not be usable for resolving
+		symbols in user mode executables.
 
 endif # INIT_FILEPATH
 

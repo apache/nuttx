@@ -84,6 +84,10 @@ CMN_CSRCS += arm_allocpage.c arm_checkmapping.c arm_pginitialize.c
 CMN_CSRCS += arm_va2pte.c
 endif
 
+ifeq ($(CONFIG_BUILD_KERNEL),y)
+CMN_CSRCS += up_task_start.c up_pthread_start.c up_stackframe.c
+endif
+
 ifeq ($(CONFIG_ARCH_ADDRENV),y)
 CMN_CSRCS += arm_addrenv.c
 endif
