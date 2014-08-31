@@ -3324,7 +3324,7 @@ static struct usbdev_req_s *pic32mx_epallocreq(struct usbdev_ep_s *ep)
 #endif
   usbtrace(TRACE_EPALLOCREQ, USB_EPNO(ep->eplog));
 
-  privreq = (struct pic32mx_req_s *)kmalloc(sizeof(struct pic32mx_req_s));
+  privreq = (struct pic32mx_req_s *)kmm_malloc(sizeof(struct pic32mx_req_s));
   if (!privreq)
     {
       usbtrace(TRACE_DEVERROR(PIC32MX_TRACEERR_ALLOCFAIL), 0);

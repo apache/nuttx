@@ -920,7 +920,7 @@ FAR struct i2c_dev_s *up_i2cinitialize(int port)
 
   /* Now, allocate an I2C instance for this caller */
 
-  i2c = (FAR struct ez80_i2cdev_s *)kmalloc(sizeof(FAR struct ez80_i2cdev_s));
+  i2c = (FAR struct ez80_i2cdev_s *)kmm_malloc(sizeof(FAR struct ez80_i2cdev_s));
   if (i2c)
     {
       /* Initialize the allocated instance */

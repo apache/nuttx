@@ -2598,7 +2598,7 @@ config SAMA5_UDPHS_PREALLOCATE
 	---help---
 		If this option is selected then DMA transfer descriptors will be
 		pre-allocated in .bss.  Otherwise, the descriptors will be allocated
-		at start-up time with kmalloc().  This might be important if a larger
+		at start-up time with kmm_malloc().  This might be important if a larger
 		memory pool is available after startup.
 
 config SAMA5_UDPHS_REGDEBUG

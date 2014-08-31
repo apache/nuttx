@@ -130,7 +130,7 @@ int up_create_stack(struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
     /* Use the kernel allocator if this is a kernel thread */
 
     if (ttype == TCB_FLAG_TTYPE_KERNEL) {
-        stack_alloc_ptr = (uint32_t *)kmalloc(stack_size);
+        stack_alloc_ptr = (uint32_t *)kmm_malloc(stack_size);
     } else
 #endif
     {
