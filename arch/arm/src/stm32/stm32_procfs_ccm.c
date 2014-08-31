@@ -193,7 +193,7 @@ static int ccm_close(FAR struct file *filep)
 
   /* Release the file attributes structure */
 
-  kfree(priv);
+  kmm_free(priv);
   filep->f_priv = NULL;
   return OK;
 }

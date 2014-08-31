@@ -152,7 +152,7 @@ int nxbe_colormap(FAR NX_DRIVERTYPE *dev)
 
   ret = dev->putcmap(dev, &cmap);
 
-  kfree(alloc);
+  kmm_free(alloc);
   return ret;
 }
 #endif

@@ -1011,7 +1011,7 @@ static int proc_close(FAR struct file *filep)
 
   /* Release the file container structure */
 
-  kfree(procfile);
+  kmm_free(procfile);
   filep->f_priv = NULL;
   return OK;
 }
@@ -1221,7 +1221,7 @@ static int proc_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
       if (!node)
         {
           fdbg("ERROR: Invalid path \"%s\"\n", relpath);
-          kfree(procdir);
+          kmm_free(procdir);
           return -ENOENT;
         }
 
@@ -1230,7 +1230,7 @@ static int proc_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
       if (node->dtype != DTYPE_DIRECTORY)
         {
           fdbg("ERROR: Path \"%s\" is not a directory\n", relpath);
-          kfree(procdir);
+          kmm_free(procdir);
           return -ENOTDIR;
         }
 
@@ -1270,7 +1270,7 @@ static int proc_closedir(FAR struct fs_dirent_s *dir)
 
   if (priv)
     {
-      kfree(priv);
+      kmm_free(priv);
     }
 
   dir->u.procfs = NULL;

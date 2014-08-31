@@ -130,7 +130,7 @@ extern "C"
 # define kzalloc(s)             zalloc(s)
 # define kmm_realloc(p,s)       realloc(p,s)
 # define kmm_memalign(a,s)      memalign(a,s)
-# define kfree(p)               free(p)
+# define kmm_free(p)            free(p)
 
 #elif !defined(CONFIG_MM_KERNEL_HEAP)
 /* If this the kernel phase of a kernel build, and there are only user-space
@@ -147,7 +147,7 @@ extern "C"
 # define kzalloc(s)             umm_zalloc(s)
 # define kmm_realloc(p,s)       umm_realloc(p,s)
 # define kmm_memalign(a,s)      umm_memalign(a,s)
-# define kfree(p)               umm_free(p)
+# define kmm_free(p)            umm_free(p)
 
 #else
 /* Otherwise, the kernel-space allocators are declared in include/nuttx/mm.h
@@ -156,12 +156,11 @@ extern "C"
 
 FAR void *kmalloc(size_t size);
 FAR void *kzalloc(size_t size);
-void kfree(FAR void *mem);
 #endif
 
 /* Functions defined in sched/sched_kfree.c **********************************/
 
-/* Handles memory freed from an interrupt handler.  In that context, kfree()
+/* Handles memory freed from an interrupt handler.  In that context, kmm_free()
  * (or kumm_free()) cannot be called.  Instead, the allocations are saved in a
  * list of delayed allocations that will be periodically cleaned up by
  * sched_garbagecollection().
@@ -180,7 +179,7 @@ void sched_kfree(FAR void *address);
 /* Functions defined in sched/sched_garbage *********************************/
 
 /* Must be called periodically to clean up deallocations delayed by
- * sched_kfree().  This may be done from either the IDLE thread or from a
+ * sched_kmm_free().  This may be done from either the IDLE thread or from a
  * worker thread.  The IDLE thread has very low priority and could starve
  * the system for memory in some context.
  */

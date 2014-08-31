@@ -520,7 +520,7 @@ struct cc1101_dev_s * cc1101_init(struct spi_dev_s * spi, uint8_t isrpin,
 
   if (cc1101_reset(dev) < 0)
     {
-      kfree(dev);
+      kmm_free(dev);
       errno = EFAULT;
       return NULL;
     }
@@ -529,7 +529,7 @@ struct cc1101_dev_s * cc1101_init(struct spi_dev_s * spi, uint8_t isrpin,
 
   if (cc1101_checkpart(dev) < 0)
     {
-      kfree(dev);
+      kmm_free(dev);
       errno = ENODEV;
       return NULL;
     }
@@ -579,7 +579,7 @@ int cc1101_deinit(struct cc1101_dev_s * dev)
 
   /* Release external interrupt line */
 
-  kfree(dev);
+  kmm_free(dev);
   return 0;
 }
 

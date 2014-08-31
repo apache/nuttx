@@ -59,8 +59,8 @@
 
 #ifdef VFAT_STANDALONE
 # define sdbg(format, ...) printf(format, ##__VA_ARGS__)
-# define kmalloc(size)     malloc(size)
-# define kfree(mem)        free(mem)
+# define kmm_malloc(size)   malloc(size)
+# define kmm_free(mem)     free(mem)
 #endif
 
 /****************************************************************************
@@ -231,7 +231,7 @@ char *up_deviceimage(void)
      * to reallocate this a few times to get the size right.
      */
 
-    pbuffer = (char*)kmalloc(bufsize);
+    pbuffer = (char*)kmm_malloc(bufsize);
 
     /* Set up the input buffer */
 
@@ -260,7 +260,7 @@ char *up_deviceimage(void)
             case Z_STREAM_ERROR:
                 sdbg("inflate FAILED: ret=%d msg=\"%s\"\n", ret, strm.msg ? strm.msg : "No message" );
                 (void)inflateEnd(&strm);
-                kfree(pbuffer);
+                kmm_free(pbuffer);
                 return NULL;
           }
 
@@ -275,7 +275,7 @@ char *up_deviceimage(void)
             char *newbuffer = kmm_realloc(pbuffer, newbufsize);
             if (!newbuffer)
               {
-                kfree(pbuffer);
+                kmm_free(pbuffer);
                 return NULL;
               }
             else
@@ -295,7 +295,7 @@ char *up_deviceimage(void)
              char *newbuffer = kmm_realloc(pbuffer, newbufsize);
              if (!newbuffer)
                {
-                kfree(pbuffer);
+                kmm_free(pbuffer);
                 return NULL;
               }
             else
@@ -351,7 +351,7 @@ int main(int argc, char **argv, char **envp)
     if (deviceimage)
     {
         printf("Inflate SUCCEEDED\n");
-        kfree(deviceimage);
+        kmm_free(deviceimage);
         return 0;
     }
     else

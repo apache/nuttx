@@ -267,7 +267,7 @@ static int pcode_proxy(int argc, char **argv)
   if (ret < 0)
     {
       bdbg("ERROR: on_exit failed: %d\n", get_errno());
-      kfree(fullpath);
+      kmm_free(fullpath);
       return EXIT_FAILURE;
     }
 
@@ -277,7 +277,7 @@ static int pcode_proxy(int argc, char **argv)
 
   /* We no longer need the fullpath */
 
-  kfree(fullpath);
+  kmm_free(fullpath);
 
   /* Check the result of the interpretation */
 

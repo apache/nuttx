@@ -671,7 +671,7 @@ int ramlog_register(FAR const char *devpath, FAR char *buffer, size_t buflen)
       ret = register_driver(devpath, &g_ramlogfops, 0666, priv);
       if (ret < 0)
         {
-          kfree(priv);
+          kmm_free(priv);
         }
     }
 

@@ -226,7 +226,7 @@ int load_module(FAR struct binary_s *bin)
 
                   /* Free the allocated fullpath */
 
-                  kfree(fullpath);
+                  kmm_free(fullpath);
 
                   /* Break out of the loop with ret == OK on success */
 

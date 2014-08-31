@@ -155,6 +155,6 @@ FAR struct nxcon_state_s *
   return (NXCONSOLE)priv;
 
 errout:
-  kfree(priv);
+  kmm_free(priv);
   return NULL;
 }

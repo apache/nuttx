@@ -2310,7 +2310,7 @@ int cdcacm_classobject(int minor, FAR struct usbdevclass_driver_s **classdev)
   return OK;
 
 errout_with_class:
-  kfree(alloc);
+  kmm_free(alloc);
   return ret;
 }
 
@@ -2415,7 +2415,7 @@ void cdcacm_uninitialize(FAR void *handle)
        * free the memory resources.
        */
 
-      kfree(priv);
+      kmm_free(priv);
       return;
     }
 #endif
@@ -2445,7 +2445,7 @@ void cdcacm_uninitialize(FAR void *handle)
 
   /* And free the driver structure */
 
-  kfree(priv);
+  kmm_free(priv);
 
 #else
   /* For the case of the composite driver, there is a two pass

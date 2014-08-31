@@ -159,7 +159,7 @@ void sched_kfree(FAR void *address)
     {
       /* No.. just deallocate the memory now. */
 
-      kfree(address);
+      kmm_free(address);
       kmm_givesemaphore();
     }
 }

@@ -68,11 +68,11 @@
 
    /* Domain-specific allocations */
 
-#  define lib_malloc(s)     kmalloc(s)
-#  define lib_zalloc(s)     kzalloc(s)
+#  define lib_malloc(s)     kmm_malloc(s)
+#  define lib_zalloc(s)     kmm_zalloc(s)
 #  define lib_realloc(p,s)  kmm_realloc(p,s)
 #  define lib_memalign(p,s) kmm_memalign(p,s)
-#  define lib_free(p)       kfree(p)
+#  define lib_free(p)       kmm_free(p)
 
    /* User-accessible allocations */
 

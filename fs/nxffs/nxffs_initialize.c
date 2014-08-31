@@ -313,12 +313,12 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
   fdbg("ERROR: Failed to calculate file system limits: %d\n", -ret);
 
 errout_with_buffer:
-  kfree(volume->pack);
+  kmm_free(volume->pack);
 errout_with_cache:
-  kfree(volume->cache);
+  kmm_free(volume->cache);
 errout_with_volume:
 #ifndef CONFIG_NXFFS_PREALLOCATED
-  kfree(volume);
+  kmm_free(volume);
 #endif
   return ret;
 }

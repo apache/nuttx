@@ -405,7 +405,7 @@ FAR struct mtd_dev_s *mtd_rwb_initialize(FAR struct mtd_dev_s *mtd)
       if (ret < 0)
         {
           fdbg("ERROR: rwb_initialize failed: %d\n", ret);
-          kfree(priv);
+          kmm_free(priv);
           return NULL;
         }
     }

@@ -1315,7 +1315,7 @@ int max11802_register(FAR struct spi_dev_s *spi,
 errout_with_priv:
   sem_destroy(&priv->devsem);
 #ifdef CONFIG_MAX11802_MULTIPLE
-  kfree(priv);
+  kmm_free(priv);
 #endif
   return ret;
 }

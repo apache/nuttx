@@ -111,13 +111,13 @@ int elf_freebuffers(struct elf_loadinfo_s *loadinfo)
 
   if (loadinfo->shdr)
     {
-      kfree((FAR void *)loadinfo->shdr);
+      kmm_free((FAR void *)loadinfo->shdr);
       loadinfo->shdr      = NULL;
     }
 
   if (loadinfo->iobuffer)
     {
-      kfree((FAR void *)loadinfo->iobuffer);
+      kmm_free((FAR void *)loadinfo->iobuffer);
       loadinfo->iobuffer  = NULL;
       loadinfo->buflen    = 0;
     }

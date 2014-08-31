@@ -3190,7 +3190,7 @@ static void mmcsd_hwuninitialize(FAR struct mmcsd_state_s *priv)
     {
       mmcsd_removed(priv);
       SDIO_RESET(priv->dev);
-      kfree(priv);
+      kmm_free(priv);
     }
 }
 
@@ -3311,7 +3311,7 @@ errout_with_hwinit:
   return ret;
 
 errout_with_alloc:
-  kfree(priv);
+  kmm_free(priv);
   return ret;
 }
 

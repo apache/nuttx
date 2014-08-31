@@ -335,7 +335,7 @@ int romdisk_register(int minor, uint8_t *buffer, uint32_t nsectors,
       if (ret < 0)
         {
           fdbg("register_blockdriver failed: %d\n", -ret);
-          kfree(dev);
+          kmm_free(dev);
         }
     }
 

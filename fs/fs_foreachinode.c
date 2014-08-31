@@ -208,7 +208,7 @@ int foreach_inode(foreach_inode_t handler, FAR void *arg)
 
   /* Free the info structure and return the result */
 
-  kfree(info);
+  kmm_free(info);
   return ret;
 
 #else

@@ -1330,7 +1330,7 @@ int tsc2007_register(FAR struct i2c_dev_s *dev,
 errout_with_priv:
   sem_destroy(&priv->devsem);
 #ifdef CONFIG_TSC2007_MULTIPLE
-  kfree(priv);
+  kmm_free(priv);
 #endif
   return ret;
 }

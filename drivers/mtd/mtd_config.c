@@ -688,7 +688,7 @@ static off_t  mtdconfig_ramconsolidate(FAR struct mtdconfig_struct_s *dev)
     }
 
 errout:
-  kfree(pBuf);
+  kmm_free(pBuf);
   return dst_offset;
 }
 
@@ -894,7 +894,7 @@ retry_relocate:
     }
 
 errout:
-  kfree(pBuf);
+  kmm_free(pBuf);
   return 0;
 }
 #endif /* CONFIG_MTD_CONFIG_RAM_CONSOLIDATE */
@@ -1203,7 +1203,7 @@ errout:
 
   /* Free the buffer */
 
-  kfree(dev->buffer);
+  kmm_free(dev->buffer);
   return ret;
 }
 
@@ -1263,7 +1263,7 @@ static int mtdconfig_getconfig(FAR struct mtdconfig_struct_s *dev,
 errout:
   /* Free the buffer */
 
-  kfree(dev->buffer);
+  kmm_free(dev->buffer);
   return ret;
 }
 
@@ -1356,7 +1356,7 @@ int mtdconfig_register(FAR struct mtd_dev_s *mtd)
       if (ret < 0)
         {
           fdbg("MTD ioctl(MTDIOC_GEOMETRY) failed: %d\n", ret);
-          kfree(dev);
+          kmm_free(dev);
           goto errout;
         }
 

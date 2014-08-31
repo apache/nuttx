@@ -262,7 +262,7 @@ void nxbe_clipper(FAR struct nxbe_window_s *wnd,
 
   if (stack.stack)
     {
-      kfree(stack.stack);
+      kmm_free(stack.stack);
     }
 }
 

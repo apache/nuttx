@@ -656,7 +656,7 @@ static int nfs_open(FAR struct file *filep, FAR const char *relpath,
 errout_with_semaphore:
   if (np)
     {
-      kfree(np);
+      kmm_free(np);
     }
 
   nfs_semgive(nmp);
@@ -745,7 +745,7 @@ static int nfs_close(FAR struct file *filep)
 
               /* Then deallocate the file structure and return success */
 
-              kfree(np);
+              kmm_free(np);
               ret = OK;
               break;
             }
@@ -1840,15 +1840,15 @@ bad:
       sem_destroy(&nmp->nm_sem);
       if (nmp->nm_so)
         {
-          kfree(nmp->nm_so);
+          kmm_free(nmp->nm_so);
         }
 
       if (nmp->nm_rpcclnt)
         {
-          kfree(nmp->nm_rpcclnt);
+          kmm_free(nmp->nm_rpcclnt);
         }
 
-      kfree(nmp);
+      kmm_free(nmp);
     }
 
   return error;
@@ -1905,9 +1905,9 @@ int nfs_unbind(FAR void *handle, FAR struct inode **blkdriver)
   /* And free any allocated resources */
 
   sem_destroy(&nmp->nm_sem);
-  kfree(nmp->nm_so);
-  kfree(nmp->nm_rpcclnt);
-  kfree(nmp);
+  kmm_free(nmp->nm_so);
+  kmm_free(nmp->nm_rpcclnt);
+  kmm_free(nmp);
 
   return -error;
 

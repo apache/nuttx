@@ -339,7 +339,7 @@ STMPE811_HANDLE stmpe811_instantiate(FAR struct i2c_dev_s *dev,
   if (ret < 0)
     {
 #ifdef CONFIG_STMPE811_MULTIPLE
-      kfree(priv);
+      kmm_free(priv);
 #endif
       return NULL;
     }

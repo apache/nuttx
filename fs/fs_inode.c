@@ -400,7 +400,7 @@ void inode_free(FAR struct inode *node)
     {
       inode_free(node->i_peer);
       inode_free(node->i_child);
-      kfree(node);
+      kmm_free(node);
     }
 }
 

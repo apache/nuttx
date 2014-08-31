@@ -633,5 +633,5 @@ void automount_uninitialize(FAR void *handle)
 
   /* And free the state structure */
 
-  kfree(priv);
+  kmm_free(priv);
 }

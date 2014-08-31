@@ -1306,7 +1306,7 @@ int ads7843e_register(FAR struct spi_dev_s *spi,
 errout_with_priv:
   sem_destroy(&priv->devsem);
 #ifdef CONFIG_ADS7843E_MULTIPLE
-  kfree(priv);
+  kmm_free(priv);
 #endif
   return ret;
 }

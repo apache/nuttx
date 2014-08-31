@@ -203,7 +203,7 @@ int group_allocate(FAR struct task_tcb_s *tcb)
 
   if (!group->tg_streamlist)
     {
-      kfree(group);
+      kmm_free(group);
       return -ENOMEM;
     }
 
@@ -230,7 +230,7 @@ int group_allocate(FAR struct task_tcb_s *tcb)
     defined(CONFIG_BUILD_KERNEL)) && defined(CONFIG_MM_KERNEL_HEAP)
       kumm_free(group->tg_streamlist);
 #endif
-      kfree(group);
+      kmm_free(group);
       tcb->cmn.group = NULL;
       return ret;
     }
@@ -281,7 +281,7 @@ int group_initialize(FAR struct task_tcb_s *tcb)
   group->tg_members = (FAR pid_t *)kmalloc(GROUP_INITIAL_MEMBERS*sizeof(pid_t));
   if (!group->tg_members)
     {
-      kfree(group);
+      kmm_free(group);
       return -ENOMEM;
     }
 

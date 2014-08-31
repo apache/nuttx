@@ -108,7 +108,7 @@ int usbmsc_archinitialize(void)
     {
       printf("create_ramdisk: Failed to register ramdisk at %s: %d\n",
              g_source, -ret);
-      kfree(pbuffer);
+      kmm_free(pbuffer);
       return ret;
     }
 
@@ -119,7 +119,7 @@ int usbmsc_archinitialize(void)
     {
       printf("create_ramdisk: Failed to create FAT filesystem on ramdisk at %s\n",
              g_source);
-      /* kfree(pbuffer); -- RAM disk is registered */
+      /* kmm_free(pbuffer); -- RAM disk is registered */
       return ret;
     }
 

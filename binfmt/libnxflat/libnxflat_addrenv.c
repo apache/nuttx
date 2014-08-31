@@ -157,7 +157,7 @@ errout_with_addrenv:
   loadinfo->addrenv = 0;
 
 errout_with_dspace:
-  kfree(dspace);
+  kmm_free(dspace);
   return ret;
 #else
   /* Allocate (and zero) memory to hold the ELF image */
@@ -165,7 +165,7 @@ errout_with_dspace:
   dspace->region = (FAR uint8_t *)kumm_zalloc(envsize);
   if (!dspace->region)
     {
-      kfree(dspace);
+      kmm_free(dspace);
       return -ENOMEM;
     }
 
@@ -227,7 +227,7 @@ void nxflat_addrenv_free(FAR struct nxflat_loadinfo_s *loadinfo)
       /* Now destroy the D-Space container */
 
       DEBUGASSERT(dspace->crefs == 1);
-      kfree(dspace);
+      kmm_free(dspace);
       loadinfo->dspace = NULL;
     }
 }

@@ -328,11 +328,11 @@ errout_with_buffer:
     {
       /* Free the space for the name too */
 
-      kfree(sf->entry.name);
+      kmm_free(sf->entry.name);
       sf->entry.name = NULL;
     }
 
-  kfree(sf);
+  kmm_free(sf);
 
 errout_with_semaphore:
   smartfs_semgive(fs);
@@ -423,10 +423,10 @@ static int smartfs_close(FAR struct file *filep)
     {
       /* Free the space for the name too */
 
-      kfree(sf->entry.name);
+      kmm_free(sf->entry.name);
       sf->entry.name = NULL;
     }
-  kfree(sf);
+  kmm_free(sf);
 
 okout:
   smartfs_semgive(fs);
@@ -1143,7 +1143,7 @@ errout_with_semaphore:
 
   if (entry.name != NULL)
     {
-        kfree(entry.name);
+        kmm_free(entry.name);
         entry.name = NULL;
     }
 
@@ -1372,7 +1372,7 @@ static int smartfs_bind(FAR struct inode *blkdriver, const void *data,
   ret = smartfs_mount(fs, true);
   if (ret != 0)
     {
-      kfree(fs);
+      kmm_free(fs);
       smartfs_semgive(fs);
       return ret;
     }
@@ -1420,7 +1420,7 @@ static int smartfs_unbind(void *handle, FAR struct inode **blkdriver)
     }
 
   smartfs_semgive(fs);
-  kfree(fs);
+  kmm_free(fs);
 
   return ret;
 }
@@ -1604,7 +1604,7 @@ errout_with_semaphore:
     {
       /* Free the filename space allocation */
 
-      kfree(entry.name);
+      kmm_free(entry.name);
       entry.name = NULL;
     }
 
@@ -1885,13 +1885,13 @@ int smartfs_rename(struct inode *mountpt, const char *oldrelpath,
 errout_with_semaphore:
   if (oldentry.name != NULL)
     {
-      kfree(oldentry.name);
+      kmm_free(oldentry.name);
       oldentry.name = NULL;
     }
 
   if (newentry.name != NULL)
     {
-      kfree(newentry.name);
+      kmm_free(newentry.name);
       newentry.name = NULL;
     }
 
@@ -1967,7 +1967,7 @@ static int smartfs_stat(struct inode *mountpt, const char *relpath, struct stat 
 errout_with_semaphore:
   if (entry.name != NULL)
     {
-      kfree(entry.name);
+      kmm_free(entry.name);
       entry.name = NULL;
     }
 

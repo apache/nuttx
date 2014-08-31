@@ -324,7 +324,7 @@ void usbhost_devaddr_destroy(FAR struct usbhost_devaddr_s *hcd, uint8_t devaddr)
 
           /* And release the entry */
 
-          kfree(hentry);
+          kmm_free(hentry);
           break;
         }
     }

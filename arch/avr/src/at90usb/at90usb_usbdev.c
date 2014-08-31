@@ -2320,7 +2320,7 @@ static void avr_epfreereq(FAR struct usbdev_ep_s *ep,
 #endif
 
   usbtrace(TRACE_EPFREEREQ, ((FAR struct avr_ep_s *)ep)->ep.eplog);
-  kfree(privreq);
+  kmm_free(privreq);
 }
 
 /*******************************************************************************
@@ -2360,7 +2360,7 @@ static void avr_epfreebuffer(FAR struct usbdev_ep_s *ep, FAR void *buf)
 #ifdef CONFIG_USBDEV_DMAMEMORY
   usbdev_dma_free(buf);
 #else
-  kfree(buf);
+  kmm_free(buf);
 #endif
 }
 #endif

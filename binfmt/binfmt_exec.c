@@ -124,7 +124,7 @@ int exec(FAR const char *filename, FAR char * const *argv,
   if (ret < 0)
     {
       bdbg("ERROR: Failed to load program '%s'\n", filename);
-      kfree(bin);
+      kmm_free(bin);
       return ERROR;
     }
 
@@ -143,7 +143,7 @@ int exec(FAR const char *filename, FAR char * const *argv,
       bdbg("ERROR: Failed to execute program '%s'\n", filename);
       sched_unlock();
       unload_module(bin);
-      kfree(bin);
+      kmm_free(bin);
       return ERROR;
     }
 

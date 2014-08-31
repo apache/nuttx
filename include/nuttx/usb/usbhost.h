@@ -351,7 +351,7 @@
  *   Some hardware supports special memory in which request and descriptor data can
  *   be accessed more efficiently.  This method provides a mechanism to free that
  *   request/descriptor memory.  If the underlying hardware does not support
- *   such "special" memory, this functions may simply map to kfree().
+ *   such "special" memory, this functions may simply map to kmm_free().
  *
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
@@ -405,7 +405,7 @@
  *   Some hardware supports special memory in which IO data can  be accessed more
  *   efficiently.  This method provides a mechanism to free that IO buffer
  *   memory.  If the underlying hardware does not support such "special" memory,
- *   this functions may simply map to kfree().
+ *   this functions may simply map to kmm_free().
  *
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
@@ -676,7 +676,7 @@ struct usbhost_driver_s
    * be accessed more efficiently.  The following methods provide a mechanism
    * to allocate and free the transfer descriptor memory.  If the underlying
    * hardware does not support such "special" memory, these functions may
-   * simply map to kmalloc and kfree.
+   * simply map to kmalloc and kmm_free.
    *
    * This interface was optimized under a particular assumption.  It was assumed
    * that the driver maintains a pool of small, pre-allocated buffers for descriptor

@@ -102,7 +102,7 @@ static void nxcon_freeglyph(FAR struct nxcon_glyph_s *glyph)
 {
   if (glyph->bitmap)
     {
-      kfree(glyph->bitmap);
+      kmm_free(glyph->bitmap);
     }
   memset(glyph, 0, sizeof(struct nxcon_glyph_s));
 }

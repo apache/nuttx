@@ -319,7 +319,7 @@ errout:
 
   if (var.fv_sect)
     {
-      kfree(var.fv_sect);
+      kmm_free(var.fv_sect);
     }
 
   /* Return any reported errors */

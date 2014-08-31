@@ -70,7 +70,7 @@ static int do_test_aes(FAR struct cipher_testvec* test, int mode, int encrypt)
       res = memcmp(out, test->result, test->rlen);
     }
 
-  kfree(out);
+  kmm_free(out);
   return res;
 }
 

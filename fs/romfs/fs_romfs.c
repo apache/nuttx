@@ -318,12 +318,12 @@ static int romfs_close(FAR struct file *filep)
 
   if (!rm->rm_xipbase && rf->rf_buffer)
     {
-      kfree(rf->rf_buffer);
+      kmm_free(rf->rf_buffer);
     }
 
   /* Then free the file structure itself. */
 
-  kfree(rf);
+  kmm_free(rf);
   filep->f_priv = NULL;
   return ret;
 }
@@ -960,12 +960,12 @@ static int romfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 errout_with_buffer:
   if (!rm->rm_xipbase)
     {
-      kfree(rm->rm_buffer);
+      kmm_free(rm->rm_buffer);
     }
 
 errout_with_sem:
   sem_destroy(&rm->rm_sem);
-  kfree(rm);
+  kmm_free(rm);
   return ret;
 }
 
@@ -1032,11 +1032,11 @@ static int romfs_unbind(FAR void *handle, FAR struct inode **blkdriver)
 
       if (!rm->rm_xipbase && rm->rm_buffer)
         {
-          kfree(rm->rm_buffer);
+          kmm_free(rm->rm_buffer);
         }
 
       sem_destroy(&rm->rm_sem);
-      kfree(rm);
+      kmm_free(rm);
       return OK;
     }
 

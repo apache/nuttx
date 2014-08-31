@@ -59,7 +59,7 @@
  ****************************************************************************/
 
 /************************************************************************
- * Name: kfree
+ * Name: kmm_free
  *
  * Description:
  *   Returns a chunk of kernel memory to the list of free nodes, merging
@@ -73,7 +73,7 @@
  *
  ************************************************************************/
 
-void kfree(FAR void *mem)
+void kmm_free(FAR void *mem)
 {
   DEBUGASSERT(kmm_heapmember(mem));
   mm_free(&g_kmmheap, mem);

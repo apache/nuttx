@@ -174,7 +174,7 @@ void pipecommon_freedev(FAR struct pipe_dev_s *dev)
    sem_destroy(&dev->d_bfsem);
    sem_destroy(&dev->d_rdsem);
    sem_destroy(&dev->d_wrsem);
-   kfree(dev);
+   kmm_free(dev);
 }
 
 /****************************************************************************
@@ -333,7 +333,7 @@ int pipecommon_close(FAR struct file *filep)
     {
       /* Yes... deallocate the buffer */
 
-      kfree(dev->d_buffer);
+      kmm_free(dev->d_buffer);
       dev->d_buffer = NULL;
 
       /* And reset all counts and indices */

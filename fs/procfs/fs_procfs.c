@@ -337,7 +337,7 @@ static int procfs_close(FAR struct file *filep)
 
   /* Release the file attributes structure */
 
-  kfree(attr);
+  kmm_free(attr);
   filep->f_priv = NULL;
   return OK;
 }
@@ -557,7 +557,7 @@ static int procfs_closedir(FAR struct inode *mountpt,
 
   if (priv)
     {
-      kfree(priv);
+      kmm_free(priv);
     }
 
   dir->u.procfs = NULL;

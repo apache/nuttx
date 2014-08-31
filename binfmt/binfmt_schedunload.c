@@ -188,7 +188,7 @@ static FAR struct binary_s *unload_list_remove(pid_t pid)
  *   If CONFIG_SCHED_HAVE_PARENT is defined, this function may be called to
  *   automatically unload the module when task exits.  It assumes that
  *   bin was allocated with kmalloc() or friends and will also automatically
- *   free the structure with kfree() when the task exists.
+ *   free the structure with kmm_free() when the task exists.
  *
  * Input Parameter:
  *   pid - The ID of the task that just exited
@@ -231,7 +231,7 @@ static void unload_callback(int signo, siginfo_t *info, void *ucontext)
 
   /* Free the load structure */
 
-  kfree(bin);
+  kmm_free(bin);
 }
 
 /****************************************************************************
@@ -246,7 +246,7 @@ static void unload_callback(int signo, siginfo_t *info, void *ucontext)
  *   the parent of the newly created task to automatically unload the
  *   module when the task exits.  This assumes that (1) the caller is the
  *   parent of the created task, (2) that bin was allocated with kmalloc()
- *   or friends.  It will also automatically free the structure with kfree()
+ *   or friends.  It will also automatically free the structure with kmm_free()
  *   after unloading the module.
  *
  * Input Parameter:

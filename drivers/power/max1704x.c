@@ -553,7 +553,7 @@ FAR struct battery_dev_s *max1704x_initialize(FAR struct i2c_dev_s *i2c,
       if (ret < 0)
         {
           batdbg("Failed to reset the MAX1704x: %d\n", ret);
-          kfree(priv);
+          kmm_free(priv);
           return NULL;
         }
 #endif

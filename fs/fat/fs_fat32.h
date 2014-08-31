@@ -701,8 +701,8 @@
 #  define fat_io_alloc(s)  fat_dma_alloc(s)
 #  define fat_io_free(m,s) fat_dma_free(m,s)
 #else
-#  define fat_io_alloc(s)  kmalloc(s)
-#  define fat_io_free(m,s) kfree(m)
+#  define fat_io_alloc(s)  kmm_malloc(s)
+#  define fat_io_free(m,s) kmm_free(m)
 #endif
 
 /****************************************************************************

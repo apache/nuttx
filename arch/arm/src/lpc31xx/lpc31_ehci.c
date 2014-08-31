@@ -3679,7 +3679,7 @@ static int lpc31_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
   /* Free the container */
 
-  kfree(epinfo);
+  kmm_free(epinfo);
   return OK;
 }
 
@@ -3740,7 +3740,7 @@ static int lpc31_alloc(FAR struct usbhost_driver_s *drvr,
  *   Some hardware supports special memory in which request and descriptor data
  *   can be accessed more efficiently.  This method provides a mechanism to
  *   free that request/descriptor memory.  If the underlying hardware does not
- *   support such "special" memory, this functions may simply map to kfree().
+ *   support such "special" memory, this functions may simply map to kmm_free().
  *
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call
@@ -3762,7 +3762,7 @@ static int lpc31_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
 
   /* No special action is require to free the transfer/descriptor buffer memory */
 
-  kfree(buffer);
+  kmm_free(buffer);
   return OK;
 }
 
@@ -4279,7 +4279,7 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
   if (!g_qtdpool)
     {
       usbhost_trace1(EHCI_TRACE1_QTDPOOLALLOC_FAILED, 0);
-      kfree(g_qhpool);
+      kmm_free(g_qhpool);
       return NULL;
     }
 #endif
@@ -4292,8 +4292,8 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
   if (!g_framelist)
     {
       usbhost_trace1(EHCI_TRACE1_PERFLALLOC_FAILED, 0);
-      kfree(g_qhpool);
-      kfree(g_qtdpool);
+      kmm_free(g_qhpool);
+      kmm_free(g_qtdpool);
       return NULL;
     }
 #endif

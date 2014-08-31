@@ -194,7 +194,7 @@ static int cpuload_close(FAR struct file *filep)
 
   /* Release the file attributes structure */
 
-  kfree(attr);
+  kmm_free(attr);
   filep->f_priv = NULL;
   return OK;
 }

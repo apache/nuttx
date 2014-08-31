@@ -713,7 +713,7 @@ void rwb_uninitialize(FAR struct rwbuffer_s *rwb)
       sem_destroy(&rwb->wrsem);
       if (rwb->wrbuffer)
         {
-          kfree(rwb->wrbuffer);
+          kmm_free(rwb->wrbuffer);
         }
     }
 #endif
@@ -724,7 +724,7 @@ void rwb_uninitialize(FAR struct rwbuffer_s *rwb)
       sem_destroy(&rwb->rhsem);
       if (rwb->rhbuffer)
         {
-          kfree(rwb->rhbuffer);
+          kmm_free(rwb->rhbuffer);
         }
     }
 #endif

@@ -1198,9 +1198,9 @@ static int nrf24l01_unregister(FAR struct nrf24l01_dev_s *dev)
 
   /* Free memory */
 #ifdef CONFIG_WL_NRF24L01_RXSUPPORT
-  kfree(dev->rx_fifo);
+  kmm_free(dev->rx_fifo);
 #endif
-  kfree(dev);
+  kmm_free(dev);
 
   return OK;
 }
@@ -1244,7 +1244,7 @@ int nrf24l01_register(FAR struct spi_dev_s *spi, FAR struct nrf24l01_config_s *c
 #ifdef CONFIG_WL_NRF24L01_RXSUPPORT
   if ((rx_fifo = kmalloc(CONFIG_WL_NRF24L01_RXFIFO_LEN)) == NULL)
     {
-      kfree(dev);
+      kmm_free(dev);
       return -ENOMEM;
     }
 

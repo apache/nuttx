@@ -363,7 +363,7 @@ static int fat_open(FAR struct file *filep, const char *relpath,
       off_t offset = fat_seek(filep, ff->ff_size, SEEK_SET);
       if (offset < 0)
         {
-          kfree(ff);
+          kmm_free(ff);
           return (int)offset;
         }
     }
@@ -375,7 +375,7 @@ static int fat_open(FAR struct file *filep, const char *relpath,
    */
 
 errout_with_struct:
-  kfree(ff);
+  kmm_free(ff);
 
 errout_with_semaphore:
   fat_semgive(fs);
@@ -425,7 +425,7 @@ static int fat_close(FAR struct file *filep)
 
   /* Then free the file structure itself. */
 
-  kfree(ff);
+  kmm_free(ff);
   filep->f_priv = NULL;
   return ret;
 }
@@ -1417,7 +1417,7 @@ static int fat_dup(FAR const struct file *oldp, FAR struct file *newp)
    */
 
 errout_with_struct:
-  kfree(newff);
+  kmm_free(newff);
 
 errout_with_semaphore:
   fat_semgive(fs);
@@ -1778,7 +1778,7 @@ static int fat_bind(FAR struct inode *blkdriver, const void *data,
   if (ret != 0)
     {
       sem_destroy(&fs->fs_sem);
-      kfree(fs);
+      kmm_free(fs);
       return ret;
     }
 
@@ -1849,7 +1849,7 @@ static int fat_unbind(void *handle, FAR struct inode **blkdriver)
           fat_io_free(fs->fs_buffer, fs->fs_hwsectorsize);
         }
 
-      kfree(fs);
+      kmm_free(fs);
     }
 
   fat_semgive(fs);

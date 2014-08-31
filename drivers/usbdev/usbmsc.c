@@ -1771,7 +1771,7 @@ void usbmsc_uninitialize(FAR void *handle)
        * free the memory resources.
        */
 
-      kfree(priv);
+      kmm_free(priv);
       return;
     }
 #endif
@@ -1818,13 +1818,13 @@ void usbmsc_uninitialize(FAR void *handle)
       usbmsc_lununinitialize(&priv->luntab[i]);
     }
 
-  kfree(priv->luntab);
+  kmm_free(priv->luntab);
 
   /* Release the I/O buffer */
 
   if (priv->iobuffer)
     {
-      kfree(priv->iobuffer);
+      kmm_free(priv->iobuffer);
     }
 
   /* Uninitialize and release the driver structure */
@@ -1840,6 +1840,6 @@ void usbmsc_uninitialize(FAR void *handle)
    * second pass because of priv->thpid == 0)
    */
 
-  kfree(priv);
+  kmm_free(priv);
 #endif
 }

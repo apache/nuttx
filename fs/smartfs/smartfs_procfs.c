@@ -210,7 +210,7 @@ static int smartfs_close(FAR struct file *filep)
 
   /* Release the file attributes structure */
 
-  kfree(priv);
+  kmm_free(priv);
   filep->f_priv = NULL;
   return OK;
 }
@@ -342,7 +342,7 @@ static int smartfs_closedir(FAR struct fs_dirent_s *dir)
 
   if (priv)
     {
-      kfree(priv);
+      kmm_free(priv);
     }
 
   dir->u.procfs = NULL;

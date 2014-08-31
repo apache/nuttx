@@ -410,7 +410,7 @@ FAR char *exepath_next(EXEPATH_HANDLE handle, FAR const char *relpath);
   </p>
   <p>
     NOTE: The string pointer return in the success case points to allocated memory.
-    This memory must be freed by the called by calling <code>kfree()</code>.
+    This memory must be freed by the called by calling <code>kmm_free()</code>.
   </p>
   <p>
     <code>NULL</code is returned if no path is found to any file with the provided <code>relpath</colde> from any absolute path in the <code>PATH</code> variable.

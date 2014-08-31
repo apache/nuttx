@@ -103,11 +103,11 @@ int bchlib_teardown(FAR void *handle)
 
   if (bch->buffer)
     {
-      kfree(bch->buffer);
+      kmm_free(bch->buffer);
     }
 
   sem_destroy(&bch->sem);
-  kfree(bch);
+  kmm_free(bch);
   return OK;
 }
 

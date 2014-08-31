@@ -161,7 +161,7 @@ EXEPATH_HANDLE exepath_init(void)
  *   is marked executable).
  *
  *   NOTE: The string pointer return in the success case points to allocated
- *   memory.  This memory must be freed by the called by calling kfree().
+ *   memory.  This memory must be freed by the called by calling kmm_free().
  *
  *   NULL is returned if no path is found to any file with the provided
  *   'relpath' from any absolute path in the PATH variable.  In this case,
@@ -254,7 +254,7 @@ FAR char *exepath_next(EXEPATH_HANDLE handle, FAR const char *relpath)
        * continue to try the next path.
        */
 
-       kfree(fullpath);
+       kmm_free(fullpath);
     }
 
   /* We will not get here */
@@ -279,7 +279,7 @@ FAR char *exepath_next(EXEPATH_HANDLE handle, FAR const char *relpath)
 
 void exepath_release(EXEPATH_HANDLE handle)
 {
-  kfree(handle);
+  kmm_free(handle);
 }
 
 #endif /* !CONFIG_BINFMT_DISABLE && CONFIG_BINFMT_EXEPATH */

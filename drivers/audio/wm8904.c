@@ -2518,6 +2518,6 @@ FAR struct audio_lowerhalf_s *
 
 errout_with_dev:
   sem_destroy(&priv->pendsem);
-  kfree(priv);
+  kmm_free(priv);
   return NULL;
 }

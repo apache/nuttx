@@ -1229,7 +1229,7 @@ FAR struct mtd_dev_s *sst25_initialize(FAR struct spi_dev_s *dev)
           /* Unrecognized! Discard all of that work we just did and return NULL */
 
           fdbg("Unrecognized\n");
-          kfree(priv);
+          kmm_free(priv);
           priv = NULL;
         }
       else
@@ -1249,7 +1249,7 @@ FAR struct mtd_dev_s *sst25_initialize(FAR struct spi_dev_s *dev)
               /* Allocation failed! Discard all of that work we just did and return NULL */
 
               fdbg("Allocation failed\n");
-              kfree(priv);
+              kmm_free(priv);
               priv = NULL;
             }
 #endif

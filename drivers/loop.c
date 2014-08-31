@@ -441,7 +441,7 @@ int losetup(const char *devname, const char *filename, uint16_t sectsize,
 errout_with_fd:
   close(dev->fd);
 errout_with_dev:
-  kfree(dev);
+  kmm_free(dev);
   return ret;
 }
 
@@ -504,6 +504,6 @@ int loteardown(const char *devname)
       (void)close(dev->fd);
     }
 
-  kfree(dev);
+  kmm_free(dev);
   return ret;
 }

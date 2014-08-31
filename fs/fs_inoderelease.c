@@ -95,7 +95,7 @@ void inode_release(FAR struct inode *node)
         {
           inode_semgive();
           inode_free(node->i_child);
-          kfree(node);
+          kmm_free(node);
         }
       else
         {

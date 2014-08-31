@@ -170,7 +170,7 @@ int inode_remove(FAR const char *path)
           /* And delete it now -- recursively to delete all of its children */
 
           inode_free(node->i_child);
-          kfree(node);
+          kmm_free(node);
           return OK;
         }
     }

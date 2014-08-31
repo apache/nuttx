@@ -262,7 +262,7 @@ int exec_module(FAR const struct binary_s *bin);
  *   the parent of the newly created task to automatically unload the
  *   module when the task exits.  This assumes that (1) the caller is the
  *   parent of the created task, (2) that bin was allocated with kmalloc()
- *   or friends.  It will also automatically free the structure with kfree()
+ *   or friends.  It will also automatically free the structure with kmm_free()
  *   after unloading the module.
  *
  * Input Parameter:
@@ -359,7 +359,7 @@ EXEPATH_HANDLE exepath_init(void);
  *   is marked executable).
  *
  *   NOTE: The string pointer return in the success case points to allocated
- *   memory.  This memory must be freed by the called by calling kfree().
+ *   memory.  This memory must be freed by the called by calling kmm_free().
  *
  *   NULL is returned if no path is found to any file with the provided
  *   'relpath' from any absolute path in the PATH variable.  In this case,

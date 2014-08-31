@@ -678,10 +678,10 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
   return OK;
 
 errout_with_name:
-  kfree(wrfile->ofile.entry.name);
+  kmm_free(wrfile->ofile.entry.name);
 errout_with_ofile:
 #ifndef CONFIG_NXFFS_PREALLOCATED
-  kfree(wrfile);
+  kmm_free(wrfile);
 #endif
 
 errout_with_exclsem:
@@ -785,7 +785,7 @@ static inline int nxffs_rdopen(FAR struct nxffs_volume_s *volume,
   return OK;
 
 errout_with_ofile:
-  kfree(ofile);
+  kmm_free(ofile);
 errout_with_exclsem:
   sem_post(&volume->exclsem);
 errout:
@@ -856,7 +856,7 @@ static inline void nxffs_freeofile(FAR struct nxffs_volume_s *volume,
   if ((FAR struct nxffs_wrfile_s*)ofile != &g_wrfile)
 #endif
     {
-      kfree(ofile);
+      kmm_free(ofile);
     }
 }
 

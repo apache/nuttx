@@ -851,7 +851,7 @@ FAR void *composite_initialize(void)
   return (FAR void *)alloc;
 
 errout_with_alloc:
-  kfree(alloc);
+  kmm_free(alloc);
   return NULL;
 }
 
@@ -901,7 +901,7 @@ void composite_uninitialize(FAR void *handle)
 
   /* Then free the composite driver state structure itself */
 
-  kfree(priv);
+  kmm_free(priv);
 }
 
 /****************************************************************************

@@ -276,12 +276,12 @@ static inline void usbhost_freeclass(FAR struct usbhost_state_s *class)
 {
   DEBUGASSERT(class != NULL);
 
-  /* Free the class instance (perhaps calling sched_kfree() in case we are
+  /* Free the class instance (perhaps calling sched_kmm_free() in case we are
    * executing from an interrupt handler.
    */
 
   uvdbg("Freeing: %p\n", class);;
-  kfree(class);
+  kmm_free(class);
 }
 
 /****************************************************************************

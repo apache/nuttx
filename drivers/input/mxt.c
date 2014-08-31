@@ -1819,7 +1819,7 @@ static int mxt_hwinitialize(FAR struct mxt_dev_s *priv)
   /* Error exits */
 
 errout_with_objtab:
-  kfree(priv->objtab);
+  kmm_free(priv->objtab);
   priv->objtab = NULL;
 
   return ret;
@@ -1923,13 +1923,13 @@ int mxt_register(FAR struct i2c_dev_s *i2c,
   /* Error clean-up exits */
 
 errout_with_hwinit:
-  kfree(priv->objtab);
-  kfree(priv->sample);
+  kmm_free(priv->objtab);
+  kmm_free(priv->sample);
 errout_with_irq:
   MXT_DETACH(lower);
 errout_with_priv:
   sem_destroy(&priv->devsem);
   sem_destroy(&priv->waitsem);
-  kfree(priv);
+  kmm_free(priv);
   return ret;
 }

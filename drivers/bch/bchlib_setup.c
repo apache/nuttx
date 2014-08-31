@@ -154,6 +154,6 @@ int bchlib_setup(const char *blkdev, bool readonly, FAR void **handle)
   return OK;
 
 errout_with_bch:
-  kfree(bch);
+  kmm_free(bch);
   return ret;
 }

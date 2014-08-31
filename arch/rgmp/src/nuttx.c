@@ -210,7 +210,7 @@ void up_release_stack(struct tcb_s *dtcb, uint8_t ttype)
       /* Use the kernel allocator if this is a kernel thread */
 
       if (ttype == TCB_FLAG_TTYPE_KERNEL) {
-          kfree(dtcb->stack_alloc_ptr);
+          kmm_free(dtcb->stack_alloc_ptr);
       } else
 #endif
       {

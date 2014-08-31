@@ -257,7 +257,7 @@ errout_with_stack:
   goto errout;
 
 errout_with_tcb:
-  kfree(tcb);
+  kmm_free(tcb);
 errout:
   set_errno(err);
   bdbg("returning errno: %d\n", err);

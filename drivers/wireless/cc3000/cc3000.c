@@ -983,7 +983,7 @@ static int cc3000_close(FAR struct file *filep)
       mq_close(priv->queue);
       priv->queue = 0;
 
-      kfree(priv->rx_buffer.pbuffer);
+      kmm_free(priv->rx_buffer.pbuffer);
       priv->rx_buffer.pbuffer = 0;
 
     }
@@ -1598,7 +1598,7 @@ errout_with_priv:
 #endif
 
 #ifdef CONFIG_CC3000_MULTIPLE
-  kfree(priv);
+  kmm_free(priv);
 #endif
   return ret;
 }

@@ -531,7 +531,7 @@ int lm75_register(FAR const char *devpath, FAR struct i2c_dev_s *i2c, uint8_t ad
   if (ret < 0)
     {
       lm75dbg("Failed to register driver: %d\n", ret);
-      kfree(priv);
+      kmm_free(priv);
     }
 
   return ret;

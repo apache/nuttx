@@ -539,7 +539,7 @@ int ftl_initialize(int minor, FAR struct mtd_dev_s *mtd)
       if (ret < 0)
         {
           fdbg("MTD ioctl(MTDIOC_GEOMETRY) failed: %d\n", ret);
-          kfree(dev);
+          kmm_free(dev);
           return ret;
         }
 
@@ -550,7 +550,7 @@ int ftl_initialize(int minor, FAR struct mtd_dev_s *mtd)
       if (!dev->eblock)
         {
           fdbg("Failed to allocate an erase block buffer\n");
-          kfree(dev);
+          kmm_free(dev);
           return -ENOMEM;
         }
 #endif
@@ -581,7 +581,7 @@ int ftl_initialize(int minor, FAR struct mtd_dev_s *mtd)
       if (ret < 0)
         {
           fdbg("rwb_initialize failed: %d\n", ret);
-          kfree(dev);
+          kmm_free(dev);
           return ret;
         }
 #endif
@@ -596,7 +596,7 @@ int ftl_initialize(int minor, FAR struct mtd_dev_s *mtd)
       if (ret < 0)
         {
           fdbg("register_blockdriver failed: %d\n", -ret);
-          kfree(dev);
+          kmm_free(dev);
         }
     }
   return ret;

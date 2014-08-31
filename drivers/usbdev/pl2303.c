@@ -2368,6 +2368,6 @@ int usbdev_serialinitialize(int minor)
 errout_with_class:
   usbdev_unregister(&drvr->drvr);
 errout_with_alloc:
-  kfree(alloc);
+  kmm_free(alloc);
   return ret;
 }

@@ -340,8 +340,8 @@ int smartfs_unmount(struct smartfs_mountpt_s *fs)
 
       /* Free the buffers */
 
-      kfree(fs->fs_rwbuffer);
-      kfree(fs->fs_workbuffer);
+      kmm_free(fs->fs_rwbuffer);
+      kmm_free(fs->fs_workbuffer);
 
       /* Set the buffer's to invalid value to catch program bugs */
 
@@ -378,8 +378,8 @@ int smartfs_unmount(struct smartfs_mountpt_s *fs)
 
   /* Release the mountpoint private data */
 
-  kfree(fs->fs_rwbuffer);
-  kfree(fs->fs_workbuffer);
+  kmm_free(fs->fs_rwbuffer);
+  kmm_free(fs->fs_workbuffer);
 #endif
 
   return ret;

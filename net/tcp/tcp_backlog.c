@@ -205,7 +205,7 @@ int tcp_backlogdestroy(FAR struct tcp_conn_s *conn)
 
        /* Then free the entire backlog structure */
 
-       kfree(blg);
+       kmm_free(blg);
     }
 
   return OK;

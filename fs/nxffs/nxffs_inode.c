@@ -222,7 +222,7 @@ errout:
  *   to dispose of that memory when the inode entry is no longer needed.
  *
  *   Note that the nxffs_entry_s containing structure is not freed.  The
- *   caller may call kfree upon return of this function if necessary to
+ *   caller may call kmm_free upon return of this function if necessary to
  *   free the entry container.
  *
  * Input parameters:
@@ -237,7 +237,7 @@ void nxffs_freeentry(FAR struct nxffs_entry_s *entry)
 {
   if (entry->name)
     {
-      kfree(entry->name);
+      kmm_free(entry->name);
       entry->name = NULL;
     }
 }

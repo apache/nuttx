@@ -902,6 +902,6 @@ FAR struct mtd_dev_s *at45db_initialize(FAR struct spi_dev_s *spi)
 
 errout:
   at45db_unlock(priv);
-  kfree(priv);
+  kmm_free(priv);
   return NULL;
 }

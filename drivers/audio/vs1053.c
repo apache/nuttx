@@ -1890,7 +1890,7 @@ struct audio_lowerhalf_s *vs1053_initialize(FAR struct spi_dev_s *spi,
       if (id != VS1053_VER_VS1053)
         {
           auddbg("Unexpected VER bits: 0x%0X\n", id);
-          kfree(dev);
+          kmm_free(dev);
           return NULL;
         }
       else

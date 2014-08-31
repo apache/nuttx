@@ -151,7 +151,7 @@ static inline void sched_kcleanup(void)
         {
           /* Return the memory to the kernel heap */
 
-          kfree(address);
+          kmm_free(address);
         }
     }
 }

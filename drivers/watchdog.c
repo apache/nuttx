@@ -518,11 +518,11 @@ FAR void *watchdog_register(FAR const char *path,
   return (FAR void *)upper;
 
 errout_with_path:
-  kfree(upper->path);
+  kmm_free(upper->path);
 
 errout_with_upper:
   sem_destroy(&upper->exclsem);
-  kfree(upper);
+  kmm_free(upper);
 
 errout:
   return NULL;
@@ -567,9 +567,9 @@ void watchdog_unregister(FAR void *handle)
 
   /* Then free all of the driver resources */
 
-  kfree(upper->path);
+  kmm_free(upper->path);
   sem_destroy(&upper->exclsem);
-  kfree(upper);
+  kmm_free(upper);
 }
 
 #endif /* CONFIG_WATCHDOG */

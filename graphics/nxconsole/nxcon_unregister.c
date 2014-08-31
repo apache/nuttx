@@ -108,7 +108,7 @@ void nxcon_unregister(NXCONSOLE handle)
       FAR struct nxcon_glyph_s *glyph = &priv->glyph[i];
       if (glyph->bitmap)
         {
-          kfree(glyph->bitmap);
+          kmm_free(glyph->bitmap);
         }
     }
 
@@ -119,5 +119,5 @@ void nxcon_unregister(NXCONSOLE handle)
 
   /* Free the private data structure */
 
-  kfree(handle);
+  kmm_free(handle);
 }

@@ -989,25 +989,25 @@ static void sam_buffer_free(struct sam_emac_s *priv)
 
   if (priv->txdesc)
     {
-      kfree(priv->txdesc);
+      kmm_free(priv->txdesc);
       priv->txdesc = NULL;
     }
 
   if (priv->rxdesc)
     {
-      kfree(priv->rxdesc);
+      kmm_free(priv->rxdesc);
       priv->rxdesc = NULL;
     }
 
   if (priv->txbuffer)
     {
-      kfree(priv->txbuffer);
+      kmm_free(priv->txbuffer);
       priv->txbuffer = NULL;
     }
 
   if (priv->rxbuffer)
     {
-      kfree(priv->rxbuffer);
+      kmm_free(priv->rxbuffer);
       priv->rxbuffer = NULL;
     }
 #endif
