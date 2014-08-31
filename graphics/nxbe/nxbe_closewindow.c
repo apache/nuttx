@@ -137,5 +137,5 @@ void nxbe_closewindow(struct nxbe_window_s *wnd)
    * allocator was used.
    */
 
-  kufree(wnd);
+  kumm_free(wnd);
 }

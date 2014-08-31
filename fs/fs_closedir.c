@@ -146,13 +146,13 @@ int closedir(FAR DIR *dirp)
 
   /* Then release the container */
 
-  kufree(idir);
+  kumm_free(idir);
   return OK;
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
 errout_with_inode:
   inode_release(inode);
-  kufree(idir);
+  kumm_free(idir);
 #endif
 
 errout:

@@ -228,7 +228,7 @@ int group_allocate(FAR struct task_tcb_s *tcb)
     {
 #if CONFIG_NFILE_STREAMS > 0 && (defined(CONFIG_BUILD_PROTECTED) || \
     defined(CONFIG_BUILD_KERNEL)) && defined(CONFIG_MM_KERNEL_HEAP)
-      kufree(group->tg_streamlist);
+      kumm_free(group->tg_streamlist);
 #endif
       kfree(group);
       tcb->cmn.group = NULL;

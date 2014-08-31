@@ -103,7 +103,7 @@ static inline void sched_kucleanup(void)
         {
           /* Return the memory to the user heap */
 
-          kufree(address);
+          kumm_free(address);
         }
     }
 }

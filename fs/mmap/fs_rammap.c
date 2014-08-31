@@ -232,13 +232,13 @@ FAR void *rammap(int fd, size_t length, off_t offset)
   return map->addr;
 
 errout_with_region:
-  kufree(alloc);
+  kumm_free(alloc);
 errout:
   set_errno(err);
   return MAP_FAILED;
 
 errout_with_errno:
-  kufree(alloc);
+  kumm_free(alloc);
   return MAP_FAILED;
 }
 

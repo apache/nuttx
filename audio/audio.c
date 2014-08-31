@@ -553,7 +553,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             }
           else
             {
-              /* Perform a simple kufree operation */
+              /* Perform a simple apb_free operation */
 
               DEBUGASSERT(bufdesc->u.pBuffer != NULL);
               apb_free(bufdesc->u.pBuffer);

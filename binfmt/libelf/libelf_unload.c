@@ -92,7 +92,7 @@ int elf_unload(struct elf_loadinfo_s *loadinfo)
 #ifdef CONFIG_BINFMT_CONSTRUCTORS
   if (loadinfo->ctoralloc != 0)
     {
-      kufree(loadinfo->ctoralloc);
+      kumm_free(loadinfo->ctoralloc);
       loadinfo->ctoralloc = NULL;
     }
 
@@ -101,7 +101,7 @@ int elf_unload(struct elf_loadinfo_s *loadinfo)
 
   if (loadinfo->dtoralloc != 0)
     {
-      kufree(loadinfo->dtoralloc);
+      kumm_free(loadinfo->dtoralloc);
       loadinfo->dtoralloc = NULL;
     }
 

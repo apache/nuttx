@@ -175,7 +175,7 @@ void elf_addrenv_free(FAR struct elf_loadinfo_s *loadinfo)
 
   if (loadinfo->textalloc != 0)
     {
-      kufree((FAR void *)loadinfo->textalloc);
+      kumm_free((FAR void *)loadinfo->textalloc);
     }
 #endif
 

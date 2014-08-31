@@ -354,7 +354,7 @@ FAR DIR *opendir(FAR const char *path)
   /* Nasty goto's make error handling simpler */
 
 errout_with_direntry:
-  kufree(dir);
+  kumm_free(dir);
 
 errout_with_semaphore:
   inode_semgive();

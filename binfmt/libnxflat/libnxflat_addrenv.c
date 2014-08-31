@@ -220,7 +220,7 @@ void nxflat_addrenv_free(FAR struct nxflat_loadinfo_s *loadinfo)
 
       if (dspace->region)
         {
-          kufree(dspace->region);
+          kumm_free(dspace->region);
         }
 #endif
 

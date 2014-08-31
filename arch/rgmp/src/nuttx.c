@@ -216,7 +216,7 @@ void up_release_stack(struct tcb_s *dtcb, uint8_t ttype)
       {
         /* Use the user-space allocator if this is a task or pthread */
 
-        kufree(dtcb->stack_alloc_ptr);
+        kumm_free(dtcb->stack_alloc_ptr);
       }
   }
 

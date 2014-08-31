@@ -3813,7 +3813,7 @@ static int lpc31_ioalloc(FAR struct usbhost_driver_s *drvr, FAR uint8_t **buffer
  *   Some hardware supports special memory in which IO data can  be accessed more
  *   efficiently.  This method provides a mechanism to free that IO buffer
  *   memory.  If the underlying hardware does not support such "special" memory,
- *   this functions may simply map to kufree().
+ *   this functions may simply map to kumm_free().
  *
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
@@ -3835,7 +3835,7 @@ static int lpc31_iofree(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
 
   /* No special action is require to free the I/O buffer memory */
 
-  kufree(buffer);
+  kumm_free(buffer);
   return OK;
 }
 

@@ -250,7 +250,7 @@ errout_with_stack:
 #ifndef CONFIG_CUSTOM_STACK
   tcb->cmn.stack_alloc_ptr = NULL;
   sched_releasetcb(&tcb->cmn, TCB_FLAG_TTYPE_TASK);
-  kufree(stack);
+  kumm_free(stack);
 #else
   sched_releasetcb(&tcb->cmn, TCB_FLAG_TTYPE_TASK);
 #endif

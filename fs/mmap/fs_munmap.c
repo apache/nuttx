@@ -151,7 +151,7 @@ int munmap(FAR void *start, size_t length)
   /* Get the offset from the beginning of the region and the actual number
    * of bytes to "unmap".  All mappings must extend to the end of the region.
    * There is no support for free a block of memory but leaving a block of
-   * memory at the end.  This is a consequence of using umm_realloc() to
+   * memory at the end.  This is a consequence of using kumm_realloc() to
    * simulate the unmapping.
    */
 
@@ -186,7 +186,7 @@ int munmap(FAR void *start, size_t length)
 
       /* Then free the region */
 
-      kufree(curr);
+      kumm_free(curr);
     }
 
   /* No.. We have been asked to "unmap' only a portion of the memory
@@ -195,7 +195,7 @@ int munmap(FAR void *start, size_t length)
 
   else
     {
-      newaddr = umm_realloc(curr->addr, sizeof(struct fs_rammap_s) + length);
+      newaddr = kumm_realloc(curr->addr, sizeof(struct fs_rammap_s) + length);
       DEBUGASSERT(newaddr == (FAR void*)(curr->addr));
       curr->length = length;
     }

@@ -78,8 +78,8 @@
 
 #  define lib_umalloc(s)    kumalloc(s)
 #  define lib_uzalloc(s)    kuzalloc(s)
-#  define lib_urealloc(p,s) umm_realloc(p,s)
-#  define lib_ufree(p)      kufree(p)
+#  define lib_urealloc(p,s) kumm_realloc(p,s)
+#  define lib_ufree(p)      kumm_free(p)
 
 #else
 #  include <stdlib.h>

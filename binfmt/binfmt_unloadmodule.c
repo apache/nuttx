@@ -195,7 +195,7 @@ int unload_module(FAR struct binary_s *binp)
           if (binp->alloc[i])
             {
               bvdbg("Freeing alloc[%d]: %p\n", i, binp->alloc[i]);
-              kufree((FAR void *)binp->alloc[i]);
+              kumm_free((FAR void *)binp->alloc[i]);
             }
         }
 

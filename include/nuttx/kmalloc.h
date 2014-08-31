@@ -96,19 +96,21 @@ extern "C"
 
 # define kumalloc(s)             malloc(s)
 # define kuzalloc(s)             zalloc(s)
-# define umm_realloc(p,s)        realloc(p,s)
-# define umm_memalign(a,s)       memalign(a,s)
-# define kufree(p)               free(p)
+# define kumm_realloc(p,s)       realloc(p,s)
+# define kumm_memalign(a,s)      memalign(a,s)
+# define kumm_free(p)            free(p)
 
 #else
-/* In the kernel-phase of the protected build, the same macros are defined
- * in userspace.h as macros.  Those versions call into user-space via a
- * header at the beginning of the user-space blob.
+/* In the kernel-phase of the protected build, the these macros are defined
+ * in userspace.h.  These macros versions call into user-space via a header
+ * at the beginning of the user-space blob.
  */
 
 # define kumalloc(s)             umm_malloc(s)
 # define kuzalloc(s)             umm_zalloc(s)
-# define kufree(p)               umm_free(p)
+# define kumm_realloc(p,s)       umm_realloc(p,s)
+# define kumm_memalign(a,s)      umm_memalign(a,s)
+# define kumm_free(p)            umm_free(p)
 
 #endif
 
@@ -160,7 +162,7 @@ void kfree(FAR void *mem);
 /* Functions defined in sched/sched_kfree.c **********************************/
 
 /* Handles memory freed from an interrupt handler.  In that context, kfree()
- * (or kufree()) cannot be called.  Instead, the allocations are saved in a
+ * (or kumm_free()) cannot be called.  Instead, the allocations are saved in a
  * list of delayed allocations that will be periodically cleaned up by
  * sched_garbagecollection().
  */
