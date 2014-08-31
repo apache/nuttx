@@ -94,8 +94,8 @@ extern "C"
  * directly callable.
  */
 
-# define kumalloc(s)             malloc(s)
-# define kuzalloc(s)             zalloc(s)
+# define kumm_malloc(s)          malloc(s)
+# define kumm_zalloc(s)          zalloc(s)
 # define kumm_realloc(p,s)       realloc(p,s)
 # define kumm_memalign(a,s)      memalign(a,s)
 # define kumm_free(p)            free(p)
@@ -106,8 +106,8 @@ extern "C"
  * at the beginning of the user-space blob.
  */
 
-# define kumalloc(s)             umm_malloc(s)
-# define kuzalloc(s)             umm_zalloc(s)
+# define kumm_malloc(s)          umm_malloc(s)
+# define kumm_zalloc(s)          umm_zalloc(s)
 # define kumm_realloc(p,s)       umm_realloc(p,s)
 # define kumm_memalign(a,s)      umm_memalign(a,s)
 # define kumm_free(p)            umm_free(p)

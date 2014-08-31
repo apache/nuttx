@@ -129,7 +129,7 @@ int elf_addrenv_alloc(FAR struct elf_loadinfo_s *loadinfo, size_t textsize,
 #else
   /* Allocate memory to hold the ELF image */
 
-  loadinfo->textalloc = (uintptr_t)kuzalloc(textsize + datasize);
+  loadinfo->textalloc = (uintptr_t)kumm_zalloc(textsize + datasize);
   if (!loadinfo->textalloc)
     {
       return -ENOMEM;

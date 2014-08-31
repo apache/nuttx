@@ -94,8 +94,8 @@
 
    /* User-accessible allocations */
 
-#  define lib_umalloc(s)    kumalloc(s)
-#  define lib_uzalloc(s)    kuzalloc(s)
+#  define lib_umalloc(s)    kumm_malloc(s)
+#  define lib_uzalloc(s)    kumm_zalloc(s)
 #  define lib_urealloc(p,s) kumm_realloc(p,s)
 #  define lib_ufree(p)      kumm_free(p)
 

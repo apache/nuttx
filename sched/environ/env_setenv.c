@@ -173,7 +173,7 @@ int setenv(FAR const char *name, FAR const char *value, int overwrite)
   else
     {
       newsize = varlen;
-      newenvp = (FAR char *)kumalloc(varlen);
+      newenvp = (FAR char *)kumm_malloc(varlen);
       if (!newenvp)
         {
           ret = ENOMEM;

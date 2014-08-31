@@ -166,7 +166,7 @@ int exec_module(FAR const struct binary_s *binp)
 #ifndef CONFIG_CUSTOM_STACK
   /* Allocate the stack for the new task (always from the user heap) */
 
-  stack = (FAR uint32_t*)kumalloc(binp->stacksize);
+  stack = (FAR uint32_t*)kumm_malloc(binp->stacksize);
   if (!tcb)
     {
       err = ENOMEM;

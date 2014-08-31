@@ -101,7 +101,7 @@ int env_dup(FAR struct task_group_s *group)
       /* Yes..The parent task has an environment, duplicate it */
 
       envlen = ptcb->group->tg_envsize;
-      envp   = (FAR char *)kumalloc(envlen);
+      envp   = (FAR char *)kumm_malloc(envlen);
       if (!envp)
         {
           ret = -ENOMEM;

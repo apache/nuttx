@@ -949,7 +949,7 @@ static int pcm_resume(FAR struct audio_lowerhalf_s *dev)
  *   lower-half driver with the opportunity to perform special buffer
  *   allocation if needed, such as allocating from a specific memory
  *   region (DMA-able, etc.).  If not supplied, then the top-half
- *   driver will perform a standard kumalloc using normal user-space
+ *   driver will perform a standard kumm_malloc using normal user-space
  *   memory region.
  *
  ****************************************************************************/

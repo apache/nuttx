@@ -180,7 +180,7 @@ static inline void open_emptydir(FAR struct fs_dirent_s *dir)
    * at the end of the list.
    */
 
-#if 0 /* Already nullified by kuzalloc */
+#if 0 /* Already nullified by kumm_zalloc */
   dir->fd_root          = NULL; /* Save the inode where we start */
   dir->u.pseudo.fd_next = NULL; /* We are at the end of the list */
 #endif
@@ -270,7 +270,7 @@ FAR DIR *opendir(FAR const char *path)
    * container.
    */
 
-  dir = (FAR struct fs_dirent_s *)kuzalloc(sizeof(struct fs_dirent_s));
+  dir = (FAR struct fs_dirent_s *)kumm_zalloc(sizeof(struct fs_dirent_s));
   if (!dir)
     {
       /* Insufficient memory to complete the operation.*/

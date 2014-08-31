@@ -199,7 +199,7 @@ int group_allocate(FAR struct task_tcb_s *tcb)
    */
 
   group->tg_streamlist = (FAR struct streamlist *)
-    kuzalloc(sizeof(struct streamlist));
+    kumm_zalloc(sizeof(struct streamlist));
 
   if (!group->tg_streamlist)
     {

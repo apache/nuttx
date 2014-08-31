@@ -107,7 +107,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
   /* Allocate the memory for the stack */
 
-  stack_alloc_ptr = (uint32_t*)kumalloc(adj_stack_size);
+  stack_alloc_ptr = (uint32_t*)kumm_malloc(adj_stack_size);
 
   /* Was the allocation successful? */
 

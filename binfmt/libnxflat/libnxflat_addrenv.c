@@ -162,7 +162,7 @@ errout_with_dspace:
 #else
   /* Allocate (and zero) memory to hold the ELF image */
 
-  dspace->region = (FAR uint8_t *)kuzalloc(envsize);
+  dspace->region = (FAR uint8_t *)kumm_zalloc(envsize);
   if (!dspace->region)
     {
       kfree(dspace);
