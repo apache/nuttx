@@ -8334,3 +8334,6 @@
 	  and sbrk() (2014-8-31).
 	* Rename krealloc(0 to kmm_realloc() and kmemalign to kmm_memalign() for
 	  consistency with the rest of the naming conventions (2014-8-31).
+	* Rename kurealloc(0 to kumm_realloc(), kumemalign to kumm_memalign(),
+	  and kufree to kumm_free for consistency with the rest of the naming
+	  conventions (2014-8-31).
