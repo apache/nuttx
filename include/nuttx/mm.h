@@ -337,6 +337,39 @@ FAR void *mm_zalloc(FAR struct mm_heap_s *heap, size_t size);
 FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
                       size_t size);
 
+/* Functions contained in mm_brkaddr.c **************************************/
+
+FAR void *mm_brkaddr(FAR struct mm_heap_s *heap, int region);
+
+/* Functions contained in umm_brkaddr.c *************************************/
+
+#ifdef CONFIG_MM_USER_HEAP
+FAR void *umm_brkaddr(int region);
+#endif
+
+/* Functions contained in kmm_brkaddr.c *************************************/
+
+#ifdef CONFIG_MM_KERNEL_HEAP
+FAR void *umm_brkaddr(int region);
+#endif
+
+/* Functions contained in mm_extend.c ***************************************/
+
+void mm_extend(FAR struct mm_heap_s *heap, FAR void *mem, size_t size,
+               int region);
+
+/* Functions contained in umm_extend.c **************************************/
+
+#ifdef CONFIG_MM_USER_HEAP
+void umm_extend(FAR void *mem, size_t size, int region);
+#endif
+
+/* Functions contained in kmm_extend.c **************************************/
+
+#ifdef CONFIG_MM_KERNEL_HEAP
+void kmm_extend(FAR void *mem, size_t size, int region);
+#endif
+
 /* Functions contained in mm_mallinfo.c *************************************/
 
 struct mallinfo; /* Forward reference */
