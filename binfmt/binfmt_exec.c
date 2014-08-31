@@ -106,7 +106,7 @@ int exec(FAR const char *filename, FAR char * const *argv,
 
   /* Allocate the load information */
 
-  bin = (FAR struct binary_s *)kzalloc(sizeof(struct binary_s));
+  bin = (FAR struct binary_s *)kmm_zalloc(sizeof(struct binary_s));
   if (!bin)
     {
       set_errno(ENOMEM);

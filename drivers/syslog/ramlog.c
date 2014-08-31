@@ -654,7 +654,7 @@ int ramlog_register(FAR const char *devpath, FAR char *buffer, size_t buflen)
 
   /* Allocate a RAM logging device structure */
 
-  priv = (struct ramlog_dev_s *)kzalloc(sizeof(struct ramlog_dev_s));
+  priv = (struct ramlog_dev_s *)kmm_zalloc(sizeof(struct ramlog_dev_s));
   if (priv)
     {
       /* Initialize the non-zero values in the RAM logging device structure */

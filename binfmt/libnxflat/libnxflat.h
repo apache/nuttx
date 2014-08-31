@@ -60,7 +60,7 @@
  *
  * Description:
  *   Allocate data memory for the NXFLAT image. If CONFIG_ARCH_ADDRENV=n,
- *   memory will be allocated using kzalloc().  If CONFIG_ARCH_ADDRENV-y,
+ *   memory will be allocated using kmm_zalloc().  If CONFIG_ARCH_ADDRENV-y,
  *   then memory will be allocated using up_addrenv_create().
  *
  * Input Parameters:

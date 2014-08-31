@@ -226,7 +226,7 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
    * file.
    */
 
-  rf = (FAR struct romfs_file_s *)kzalloc(sizeof(struct romfs_file_s));
+  rf = (FAR struct romfs_file_s *)kmm_zalloc(sizeof(struct romfs_file_s));
   if (!rf)
     {
       fdbg("Failed to allocate private data\n", ret);
@@ -916,7 +916,7 @@ static int romfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
   /* Create an instance of the mountpt state structure */
 
-  rm = (FAR struct romfs_mountpt_s *)kzalloc(sizeof(struct romfs_mountpt_s));
+  rm = (FAR struct romfs_mountpt_s *)kmm_zalloc(sizeof(struct romfs_mountpt_s));
   if (!rm)
     {
       fdbg("Failed to allocate mountpoint structure\n");

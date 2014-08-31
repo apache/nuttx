@@ -68,7 +68,7 @@
  *
  * Description:
  *   Allocate memory for the ELF image (textalloc and dataalloc). If
- *   CONFIG_ARCH_ADDRENV=n, textalloc will be allocated using kzalloc() and
+ *   CONFIG_ARCH_ADDRENV=n, textalloc will be allocated using kmm_zalloc() and
  *   dataalloc will be a offset from textalloc.  If CONFIG_ARCH_ADDRENV-y, then
  *   textalloc and dataalloc will be allocated using up_addrenv_create().  In
  *   either case, there will be a unique instance of textalloc and dataalloc

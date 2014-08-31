@@ -147,7 +147,7 @@ static FAR sq_queue_t g_freelist;
 
 static inline FAR struct igmp_group_s *igmp_grpheapalloc(void)
 {
-  return (FAR struct igmp_group_s *)kzalloc(sizeof(struct igmp_group_s));
+  return (FAR struct igmp_group_s *)kmm_zalloc(sizeof(struct igmp_group_s));
 }
 
 /****************************************************************************

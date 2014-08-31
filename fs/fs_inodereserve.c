@@ -91,7 +91,7 @@ static void inode_namecpy(char *dest, const char *src)
 static FAR struct inode *inode_alloc(FAR const char *name)
 {
   int namelen = inode_namelen(name);
-  FAR struct inode *node = (FAR struct inode*)kzalloc(FSNODE_SIZE(namelen));
+  FAR struct inode *node = (FAR struct inode*)kmm_zalloc(FSNODE_SIZE(namelen));
   if (node)
     {
       inode_namecpy(node->i_name, name);

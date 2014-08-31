@@ -435,7 +435,7 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
        */
 
       level0 = (FAR struct procfs_level0_s *)
-         kzalloc(sizeof(struct procfs_level0_s));
+         kmm_zalloc(sizeof(struct procfs_level0_s));
 
       if (!level0)
         {
@@ -514,7 +514,7 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
                */
 
               level1 = (FAR struct procfs_level1_s *)
-                 kzalloc(sizeof(struct procfs_level1_s));
+                 kmm_zalloc(sizeof(struct procfs_level1_s));
 
               if (!level1)
                 {

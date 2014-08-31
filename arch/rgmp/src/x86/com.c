@@ -174,11 +174,11 @@ static uart_dev_t *up_alloc_com(unsigned int base, int irq)
     uart_dev_t *dev;
     struct up_dev_s *priv;
 
-    priv = kzalloc(sizeof(struct up_dev_s));
+    priv = kmm_zalloc(sizeof(struct up_dev_s));
     if (priv == NULL)
         goto err0;
 
-    dev = kzalloc(sizeof(uart_dev_t));
+    dev = kmm_zalloc(sizeof(uart_dev_t));
     if (dev == NULL)
         goto err1;
 

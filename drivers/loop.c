@@ -381,7 +381,7 @@ int losetup(const char *devname, const char *filename, uint16_t sectsize,
 
   /* Allocate a loop device structure */
 
-  dev = (FAR struct loop_struct_s *)kzalloc(sizeof(struct loop_struct_s));
+  dev = (FAR struct loop_struct_s *)kmm_zalloc(sizeof(struct loop_struct_s));
   if (!dev)
     {
       return -ENOMEM;

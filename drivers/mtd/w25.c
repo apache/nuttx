@@ -1135,11 +1135,11 @@ FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *spi)
    * to be extended to handle multiple FLASH parts on the same SPI bus.
    */
 
-  priv = (FAR struct w25_dev_s *)kzalloc(sizeof(struct w25_dev_s));
+  priv = (FAR struct w25_dev_s *)kmm_zalloc(sizeof(struct w25_dev_s));
   if (priv)
     {
       /* Initialize the allocated structure (unsupported methods were
-       * nullified by kzalloc).
+       * nullified by kmm_zalloc).
        */
 
       priv->mtd.erase  = w25_erase;

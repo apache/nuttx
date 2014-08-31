@@ -588,14 +588,14 @@ int pwm_register(FAR const char *path, FAR struct pwm_lowerhalf_s *dev)
 
   /* Allocate the upper-half data structure */
 
-  upper = (FAR struct pwm_upperhalf_s *)kzalloc(sizeof(struct pwm_upperhalf_s));
+  upper = (FAR struct pwm_upperhalf_s *)kmm_zalloc(sizeof(struct pwm_upperhalf_s));
   if (!upper)
     {
       pwmdbg("Allocation failed\n");
       return -ENOMEM;
     }
 
-  /* Initialize the PWM device structure (it was already zeroed by kzalloc()) */
+  /* Initialize the PWM device structure (it was already zeroed by kmm_zalloc()) */
 
   sem_init(&upper->exclsem, 0, 1);
 #ifdef CONFIG_PWM_PULSECOUNT

@@ -175,7 +175,7 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
 
   /* Allocate a NXFFS volume structure */
 
-  volume = (FAR struct nxffs_volume_s *)kzalloc(sizeof(struct nxffs_volume_s));
+  volume = (FAR struct nxffs_volume_s *)kmm_zalloc(sizeof(struct nxffs_volume_s));
   if (!volume)
     {
       return -ENOMEM;

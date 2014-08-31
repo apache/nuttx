@@ -546,7 +546,7 @@ FAR void *automount_initialize(FAR const struct automount_lower_s *lower)
   /* Allocate an auto-mounter state structure */
 
   priv = (FAR struct automounter_state_s *)
-    kzalloc(sizeof(struct automounter_state_s));
+    kmm_zalloc(sizeof(struct automounter_state_s));
 
   if (!priv)
     {

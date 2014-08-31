@@ -1337,7 +1337,7 @@ static int smartfs_bind(FAR struct inode *blkdriver, const void *data,
 
   /* Create an instance of the mountpt state structure */
 
-  fs = (struct smartfs_mountpt_s *)kzalloc(sizeof(struct smartfs_mountpt_s));
+  fs = (struct smartfs_mountpt_s *)kmm_zalloc(sizeof(struct smartfs_mountpt_s));
   if (!fs)
     {
       return -ENOMEM;

@@ -882,14 +882,14 @@ int audio_register(FAR const char *name, FAR struct audio_lowerhalf_s *dev)
 
   /* Allocate the upper-half data structure */
 
-  upper = (FAR struct audio_upperhalf_s *)kzalloc(sizeof(struct audio_upperhalf_s));
+  upper = (FAR struct audio_upperhalf_s *)kmm_zalloc(sizeof(struct audio_upperhalf_s));
   if (!upper)
     {
       auddbg("Allocation failed\n");
       return -ENOMEM;
     }
 
-  /* Initialize the Audio device structure (it was already zeroed by kzalloc()) */
+  /* Initialize the Audio device structure (it was already zeroed by kmm_zalloc()) */
 
   sem_init(&upper->exclsem, 0, 1);
   upper->dev = dev;

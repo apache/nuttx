@@ -2470,10 +2470,10 @@ FAR struct audio_lowerhalf_s *
 
   /* Allocate a WM8904 device structure */
 
-  priv = (FAR struct wm8904_dev_s *)kzalloc(sizeof(struct wm8904_dev_s));
+  priv = (FAR struct wm8904_dev_s *)kmm_zalloc(sizeof(struct wm8904_dev_s));
   if (priv)
     {
-      /* Initialize the WM8904 device structure.  Since we used kzalloc,
+      /* Initialize the WM8904 device structure.  Since we used kmm_zalloc,
        * only the non-zero elements of the structure need to be initialized.
        */
 

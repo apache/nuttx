@@ -382,14 +382,14 @@ int qe_register(FAR const char *devpath, FAR struct qe_lowerhalf_s *lower)
 
   /* Allocate the upper-half data structure */
 
-  upper = (FAR struct qe_upperhalf_s *)kzalloc(sizeof(struct qe_upperhalf_s));
+  upper = (FAR struct qe_upperhalf_s *)kmm_zalloc(sizeof(struct qe_upperhalf_s));
   if (!upper)
     {
       qedbg("Allocation failed\n");
       return -ENOMEM;
     }
 
-  /* Initialize the PWM device structure (it was already zeroed by kzalloc()) */
+  /* Initialize the PWM device structure (it was already zeroed by kmm_zalloc()) */
 
   sem_init(&upper->exclsem, 0, 1);
   upper->lower = lower;

@@ -481,7 +481,7 @@ FAR void *timer_register(FAR const char *path,
   /* Allocate the upper-half data structure */
 
   upper = (FAR struct timer_upperhalf_s *)
-    kzalloc(sizeof(struct timer_upperhalf_s));
+    kmm_zalloc(sizeof(struct timer_upperhalf_s));
   if (!upper)
     {
       tmrdbg("Upper half allocation failed\n");
@@ -489,7 +489,7 @@ FAR void *timer_register(FAR const char *path,
     }
 
   /* Initialize the timer device structure (it was already zeroed
-   * by kzalloc()).
+   * by kmm_zalloc()).
    */
 
   //sem_init(&upper->exclsem, 0, 1);

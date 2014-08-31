@@ -52,7 +52,7 @@
  ****************************************************************************/
 
 /************************************************************************
- * Name: kzalloc
+ * Name: kmm_zalloc
  *
  * Description:
  *   Allocate and zero memory from the kernel heap.
@@ -65,7 +65,7 @@
  *
  ************************************************************************/
 
-FAR void *kzalloc(size_t size)
+FAR void *kmm_zalloc(size_t size)
 {
   return mm_zalloc(&g_kmmheap, size);
 }

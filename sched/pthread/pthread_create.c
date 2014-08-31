@@ -247,7 +247,7 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
 
   /* Allocate a TCB for the new task. */
 
-  ptcb = (FAR struct pthread_tcb_s *)kzalloc(sizeof(struct pthread_tcb_s));
+  ptcb = (FAR struct pthread_tcb_s *)kmm_zalloc(sizeof(struct pthread_tcb_s));
   if (!ptcb)
     {
       sdbg("ERROR: Failed to allocate TCB\n");
@@ -281,7 +281,7 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
 
   /* Allocate a detachable structure to support pthread_join logic */
 
-  pjoin = (FAR struct join_s*)kzalloc(sizeof(struct join_s));
+  pjoin = (FAR struct join_s*)kmm_zalloc(sizeof(struct join_s));
   if (!pjoin)
     {
       sdbg("ERROR: Failed to allocate join\n");

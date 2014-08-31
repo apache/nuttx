@@ -156,7 +156,7 @@ mqd_t mq_open(const char *mq_name, int oflags, ...)
                * of the message queue name+1.
                */
 
-              msgq = (FAR msgq_t*)kzalloc(SIZEOF_MQ_HEADER + namelen + 1);
+              msgq = (FAR msgq_t*)kmm_zalloc(SIZEOF_MQ_HEADER + namelen + 1);
               if (msgq)
                 {
                   /* Create a message queue descriptor for the TCB */

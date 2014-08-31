@@ -179,7 +179,7 @@ static int smartfs_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Allocate a container to hold the task and attribute selection */
 
-  priv = (FAR struct smartfs_file_s *)kzalloc(sizeof(struct smartfs_file_s));
+  priv = (FAR struct smartfs_file_s *)kmm_zalloc(sizeof(struct smartfs_file_s));
   if (!priv)
     {
       fdbg("ERROR: Failed to allocate file attributes\n");
@@ -268,7 +268,7 @@ static int smartfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   /* Allocate a new container to hold the task and attribute selection */
 
-  newpriv = (FAR struct smartfs_file_s *)kzalloc(sizeof(struct smartfs_file_s));
+  newpriv = (FAR struct smartfs_file_s *)kmm_zalloc(sizeof(struct smartfs_file_s));
   if (!newpriv)
     {
       fdbg("ERROR: Failed to allocate file attributes\n");
@@ -305,7 +305,7 @@ static int smartfs_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
    */
 
   level1 = (FAR struct smartfs_level1_s *)
-     kzalloc(sizeof(struct smartfs_level1_s));
+     kmm_zalloc(sizeof(struct smartfs_level1_s));
 
   if (!level1)
     {

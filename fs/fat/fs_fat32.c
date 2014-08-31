@@ -306,7 +306,7 @@ static int fat_open(FAR struct file *filep, const char *relpath,
    * file.
    */
 
-  ff = (struct fat_file_s *)kzalloc(sizeof(struct fat_file_s));
+  ff = (struct fat_file_s *)kmm_zalloc(sizeof(struct fat_file_s));
   if (!ff)
     {
       ret = -ENOMEM;
@@ -1756,7 +1756,7 @@ static int fat_bind(FAR struct inode *blkdriver, const void *data,
 
   /* Create an instance of the mountpt state structure */
 
-  fs = (struct fat_mountpt_s *)kzalloc(sizeof(struct fat_mountpt_s));
+  fs = (struct fat_mountpt_s *)kmm_zalloc(sizeof(struct fat_mountpt_s));
   if (!fs)
     {
       return -ENOMEM;

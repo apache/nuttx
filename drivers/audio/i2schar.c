@@ -413,7 +413,7 @@ int i2schar_register(FAR struct i2s_dev_s *i2s, int minor)
 
   /* Allocate a I2S character device structure */
 
-  priv = (FAR struct i2schar_dev_s *)kzalloc(sizeof(struct i2schar_dev_s));
+  priv = (FAR struct i2schar_dev_s *)kmm_zalloc(sizeof(struct i2schar_dev_s));
   if (priv)
     {
       /* Initialize the I2S character device structure */

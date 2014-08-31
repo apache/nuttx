@@ -495,7 +495,7 @@ static int part_procfs_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Allocate a container to hold the task and attribute selection */
 
-  attr = (FAR struct part_procfs_file_s *)kzalloc(sizeof(struct part_procfs_file_s));
+  attr = (FAR struct part_procfs_file_s *)kmm_zalloc(sizeof(struct part_procfs_file_s));
   if (!attr)
     {
       fdbg("ERROR: Failed to allocate file attributes\n");
@@ -711,7 +711,7 @@ static int part_procfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   /* Allocate a new container to hold the task and attribute selection */
 
-  newattr = (FAR struct part_procfs_file_s *)kzalloc(sizeof(struct part_procfs_file_s));
+  newattr = (FAR struct part_procfs_file_s *)kmm_zalloc(sizeof(struct part_procfs_file_s));
   if (!newattr)
     {
       fdbg("ERROR: Failed to allocate file attributes\n");
@@ -833,7 +833,7 @@ FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd, off_t firstblock,
 
   /* Allocate a partition device structure */
 
-  part = (FAR struct mtd_partition_s *)kzalloc(sizeof(struct mtd_partition_s));
+  part = (FAR struct mtd_partition_s *)kmm_zalloc(sizeof(struct mtd_partition_s));
   if (!part)
     {
       fdbg("ERROR: Failed to allocate memory for the partition device\n");
@@ -841,7 +841,7 @@ FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd, off_t firstblock,
     }
 
   /* Initialize the partition device structure. (unsupported methods were
-   * nullified by kzalloc).
+   * nullified by kmm_zalloc).
    */
 
   part->child.erase  = part_erase;

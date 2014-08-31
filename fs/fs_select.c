@@ -129,7 +129,7 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
 
   /* Allocate the descriptor list for poll() */
 
-  pollset = (struct pollfd *)kzalloc(npfds * sizeof(struct pollfd));
+  pollset = (struct pollfd *)kmm_zalloc(npfds * sizeof(struct pollfd));
   if (!pollset)
     {
       set_errno(ENOMEM);

@@ -93,7 +93,7 @@ int bchlib_setup(const char *blkdev, bool readonly, FAR void **handle)
 
   /* Allocate the BCH state structure */
 
-  bch = (FAR struct bchlib_s*)kzalloc(sizeof(struct bchlib_s));
+  bch = (FAR struct bchlib_s*)kmm_zalloc(sizeof(struct bchlib_s));
   if (!bch)
     {
       fdbg("Failed to allocate BCH structure\n");

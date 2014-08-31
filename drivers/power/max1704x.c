@@ -531,7 +531,7 @@ FAR struct battery_dev_s *max1704x_initialize(FAR struct i2c_dev_s *i2c,
 
   /* Initialize the MAX1704x device structure */
 
-  priv = (FAR struct max1704x_dev_s *)kzalloc(sizeof(struct max1704x_dev_s));
+  priv = (FAR struct max1704x_dev_s *)kmm_zalloc(sizeof(struct max1704x_dev_s));
   if (priv)
     {
       /* Initialize the MAX1704x device structure */

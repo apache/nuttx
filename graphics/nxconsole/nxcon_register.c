@@ -84,7 +84,7 @@ FAR struct nxcon_state_s *
 
   /* Allocate the driver structure */
 
-  priv = (FAR struct nxcon_state_s *)kzalloc(sizeof(struct nxcon_state_s));
+  priv = (FAR struct nxcon_state_s *)kmm_zalloc(sizeof(struct nxcon_state_s));
   if (!priv)
     {
       gdbg("Failed to allocate the NX driver structure\n");

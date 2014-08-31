@@ -982,7 +982,7 @@ static int e1000_probe(uint16_t addr, pci_id_t id)
 
   /* alloc e1000_dev memory */
 
-  if ((dev = kzalloc(sizeof(struct e1000_dev))) == NULL)
+  if ((dev = kmm_zalloc(sizeof(struct e1000_dev))) == NULL)
     {
       return -1;
     }

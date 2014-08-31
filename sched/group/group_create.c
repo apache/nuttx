@@ -184,7 +184,7 @@ int group_allocate(FAR struct task_tcb_s *tcb)
 
   /* Allocate the group structure and assign it to the TCB */
 
-  group = (FAR struct task_group_s *)kzalloc(sizeof(struct task_group_s));
+  group = (FAR struct task_group_s *)kmm_zalloc(sizeof(struct task_group_s));
   if (!group)
     {
       return -ENOMEM;

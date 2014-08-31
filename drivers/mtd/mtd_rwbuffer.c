@@ -356,11 +356,11 @@ FAR struct mtd_dev_s *mtd_rwb_initialize(FAR struct mtd_dev_s *mtd)
    * to be extended to handle multiple FLASH parts on the same SPI bus.
    */
 
-  priv = (FAR struct mtd_rwbuffer_s *)kzalloc(sizeof(struct mtd_rwbuffer_s));
+  priv = (FAR struct mtd_rwbuffer_s *)kmm_zalloc(sizeof(struct mtd_rwbuffer_s));
   if (priv)
     {
       /* Initialize the allocated structure. (unsupported methods/fields
-       * were already nullified by kzalloc).
+       * were already nullified by kmm_zalloc).
        */
 
       priv->mtd.erase    = mtd_erase;  /* Our MTD erase method */

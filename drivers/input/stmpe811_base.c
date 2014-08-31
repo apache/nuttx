@@ -297,7 +297,7 @@ STMPE811_HANDLE stmpe811_instantiate(FAR struct i2c_dev_s *dev,
   /* Allocate the device state structure */
 
 #ifdef CONFIG_STMPE811_MULTIPLE
-  priv = (FAR struct stmpe811_dev_s *)kzalloc(sizeof(struct stmpe811_dev_s));
+  priv = (FAR struct stmpe811_dev_s *)kmm_zalloc(sizeof(struct stmpe811_dev_s));
   if (!priv)
     {
       return NULL;

@@ -165,7 +165,7 @@ static int ccm_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Allocate a container to hold the task and attribute selection */
 
-  priv = (FAR struct ccm_file_s *)kzalloc(sizeof(struct ccm_file_s));
+  priv = (FAR struct ccm_file_s *)kmm_zalloc(sizeof(struct ccm_file_s));
   if (!priv)
     {
       fdbg("ERROR: Failed to allocate file attributes\n");
@@ -282,7 +282,7 @@ static int ccm_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   /* Allocate a new container to hold the task and attribute selection */
 
-  newpriv = (FAR struct ccm_file_s *)kzalloc(sizeof(struct ccm_file_s));
+  newpriv = (FAR struct ccm_file_s *)kmm_zalloc(sizeof(struct ccm_file_s));
   if (!newpriv)
     {
       fdbg("ERROR: Failed to allocate file attributes\n");

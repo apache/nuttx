@@ -831,10 +831,10 @@ FAR struct audio_lowerhalf_s *audio_null_initialize(void)
 
   /* Allocate the null audio device structure */
 
-  priv = (FAR struct null_dev_s *)kzalloc(sizeof(struct null_dev_s));
+  priv = (FAR struct null_dev_s *)kmm_zalloc(sizeof(struct null_dev_s));
   if (priv)
     {
-      /* Initialize the null audio device structure.  Since we used kzalloc,
+      /* Initialize the null audio device structure.  Since we used kmm_zalloc,
        * only the non-zero elements of the structure need to be initialized.
        */
 

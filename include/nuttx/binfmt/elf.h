@@ -96,7 +96,7 @@ struct elf_loadinfo_s
    * ELF program image.
    *
    * If CONFIG_ARCH_ADDRENV=n, elfalloc will be allocated using kmm_malloc() (or
-   * kzalloc()).  If CONFIG_ARCH_ADDRENV-y, then elfalloc will be allocated using
+   * kmm_zalloc()).  If CONFIG_ARCH_ADDRENV-y, then elfalloc will be allocated using
    * up_addrenv_create().  In either case, there will be a unique instance
    * of elfalloc (and stack) for each instance of a process.
    *

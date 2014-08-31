@@ -396,7 +396,7 @@ int rpcclnt_connect(struct rpcclnt *rpc)
 
   /* Create an instance of the socket state structure */
 
-  so = (struct socket *)kzalloc(sizeof(struct socket));
+  so = (struct socket *)kmm_zalloc(sizeof(struct socket));
   if (!so)
     {
       fdbg("ERROR: Failed to allocate socket structure\n");

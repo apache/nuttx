@@ -166,7 +166,7 @@ static int cpuload_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Allocate a container to hold the file attributes */
 
-  attr = (FAR struct cpuload_file_s *)kzalloc(sizeof(struct cpuload_file_s));
+  attr = (FAR struct cpuload_file_s *)kmm_zalloc(sizeof(struct cpuload_file_s));
   if (!attr)
     {
       fdbg("ERROR: Failed to allocate file attributes\n");
