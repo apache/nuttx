@@ -48,8 +48,8 @@
 #include <arch/irq.h>
 #include <nuttx/sched.h>
 
+#include "arm.h"
 #include "svcall.h"
-#include "up_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -242,21 +242,21 @@ uint32_t *arm_syscall(uint32_t *regs)
 #ifdef CONFIG_BUILD_KERNEL
       case SYS_task_start:
         {
-          /* Set up to return to the user-space task start-up function in
-           * unprivileged mode.
+          /* Set up to return to the user-space _start function in
+           * unprivileged mode.  We need:
+           *
+           *   R0   = argc
+           *   R1   = argv
+           *   PC   = taskentry
+           *   CSPR = user mode
            */
 
-          regs[REG_PC]   = (uint32_t)USERSPACE->task_startup;
-          regval         = regs[REG_CPSR] & ~PSR_MODE_MASK;
-          regs[REG_CPSR] = regval | PSR_MODE_USR;
+          regs[REG_PC]   = regs[REG_R1];
+          regs[REG_R0]   = regs[REG_R2];
+          regs[REG_R1]   = regs[REG_R3];
 
-          /* Change the parameter ordering to match the expectation of struct
-           * userpace_s task_startup:
-           */
-
-          regs[REG_R0]   = regs[REG_R1]; /* Task entry */
-          regs[REG_R1]   = regs[REG_R2]; /* argc */
-          regs[REG_R2]   = regs[REG_R3]; /* argv */
+          cpsr           = regs[REG_CPSR] & ~PSR_MODE_MASK;
+          regs[REG_CPSR] = cpsr | PSR_MODE_USR;
         }
         break;
 #endif
@@ -276,19 +276,19 @@ uint32_t *arm_syscall(uint32_t *regs)
       case SYS_pthread_start:
         {
           /* Set up to return to the user-space pthread start-up function in
-           * unprivileged mode.
+           * unprivileged mode. We need:
+           *
+           *   R0   = arg
+           *   PC   = entrypt
+           *   CSPR = user mode
            */
 
-          regs[REG_PC]   = (uint32_t)USERSPACE->pthread_startup;
-          regval         = regs[REG_CPSR] & ~PSR_MODE_MASK;
-          regs[REG_CPSR] = regval | PSR_MODE_USR;
 
-          /* Change the parameter ordering to match the expectation of struct
-           * userpace_s pthread_startup:
-           */
+          regs[REG_PC]   = regs[REG_R1];
+          regs[REG_R0]   = regs[REG_R2];
 
-          regs[REG_R0]   = regs[REG_R1]; /* pthread entry */
-          regs[REG_R1]   = regs[REG_R2]; /* arg */
+          cpsr           = regs[REG_CPSR] & ~PSR_MODE_MASK;
+          regs[REG_CPSR] = cpsr | PSR_MODE_USR;
         }
         break;
 #endif
@@ -310,6 +310,8 @@ uint32_t *arm_syscall(uint32_t *regs)
 #if defined(CONFIG_BUILD_KERNEL) && !defined(CONFIG_DISABLE_SIGNALS)
       case SYS_signal_handler:
         {
+#warning Missing logic
+#if 0
           struct tcb_s *rtcb = sched_self();
 
           /* Remember the caller's return address */
@@ -322,8 +324,8 @@ uint32_t *arm_syscall(uint32_t *regs)
            */
 
           regs[REG_PC]   = (uint32_t)USERSPACE->signal_handler;
-          regval         = regs[REG_CPSR] & ~PSR_MODE_MASK;
-          regs[REG_CPSR] = regval | PSR_MODE_USR;
+          cpsr           = regs[REG_CPSR] & ~PSR_MODE_MASK;
+          regs[REG_CPSR] = cpsr | PSR_MODE_USR;
 
           /* Change the parameter ordering to match the expectation of struct
            * userpace_s signal_handler.
@@ -338,6 +340,7 @@ uint32_t *arm_syscall(uint32_t *regs)
            */
 
           regs[REG_R3]   = *(uint32_t*)(regs[REG_SP+4]);
+#endif
         }
         break;
 #endif
@@ -354,6 +357,8 @@ uint32_t *arm_syscall(uint32_t *regs)
 #if defined(CONFIG_BUILD_KERNEL) && !defined(CONFIG_DISABLE_SIGNALS)
       case SYS_signal_handler_return:
         {
+#warning Missing logic
+#if 0
           struct tcb_s *rtcb = sched_self();
 
           /* Set up to return to the kernel-mode signal dispatching logic. */
@@ -361,9 +366,10 @@ uint32_t *arm_syscall(uint32_t *regs)
           DEBUGASSERT(rtcb->xcp.sigreturn != 0);
 
           regs[REG_PC]         = rtcb->xcp.sigreturn;
-          regval               = regs[REG_CPSR] & ~PSR_MODE_MASK;
-          regs[REG_CPSR]       = regval | PSR_MODE_SVC;
+          cpsr                 = regs[REG_CPSR] & ~PSR_MODE_MASK;
+          regs[REG_CPSR]       = cpsr | PSR_MODE_SVC;
           rtcb->xcp.sigreturn  = 0;
+#endif
         }
         break;
 #endif
@@ -399,8 +405,8 @@ uint32_t *arm_syscall(uint32_t *regs)
 
           regs[REG_PC]   = (uint32_t)dispatch_syscall;
 #ifdef CONFIG_BUILD_KERNEL
-          regval         = regs[REG_CPSR] & ~PSR_MODE_MASK;
-          regs[REG_CPSR] = regval | PSR_MODE_SVC;
+          cpsr           = regs[REG_CPSR] & ~PSR_MODE_MASK;
+          regs[REG_CPSR] = cpsr | PSR_MODE_SVC;
 #endif
           /* Offset R0 to account for the reserved values */
 
