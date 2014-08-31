@@ -8332,10 +8332,12 @@
 	* mm/*mm_brkaddr.c, *mm_extend.c, Makefile, and include/nuttx/mm.h: Add
 	  low-level memory management hooks that will be needed to support brk()
 	  and sbrk() (2014-8-31).
-	* Rename krealloc(0 to kmm_realloc() and kmemalign to kmm_memalign() for
+	* Rename krealloc() to kmm_realloc() and kmemalign to kmm_memalign() for
 	  consistency with the rest of the naming (2014-8-31).
-	* Rename kurealloc(0 to kumm_realloc(), kumemalign to kumm_memalign(),
+	* Rename kurealloc() to kumm_realloc(), kumemalign to kumm_memalign(),
 	  and kufree to kumm_free for consistency with the rest of the naming
 	  (2014-8-31).
-	* Rename kumalloc(0 to kumm_malloc() and kuzalloc to kumm_zalloc() for
+	* Rename kumalloc() to kumm_malloc() and kuzalloc to kumm_zalloc() for
+	  consistency with the rest of the naming (2014-8-31).
+	* Rename kfree() to kmm_free() and kuzalloc to kumm_zalloc() for
 	  consistency with the rest of the naming (2014-8-31).
