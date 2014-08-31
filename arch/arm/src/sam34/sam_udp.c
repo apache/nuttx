@@ -3052,7 +3052,7 @@ static void sam_ep_freebuffer(struct usbdev_ep_s *ep, void *buf)
 {
   /* There is not special buffer allocation requirement */
 
-  kufree(buf);
+  kumm_free(buf);
 }
 #endif
 

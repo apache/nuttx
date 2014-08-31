@@ -2715,7 +2715,7 @@ static int sam_ioalloc(FAR struct usbhost_driver_s *drvr, FAR uint8_t **buffer,
  *   Some hardware supports special memory in which IO data can  be accessed more
  *   efficiently.  This method provides a mechanism to free that IO buffer
  *   memory.  If the underlying hardware does not support such "special" memory,
- *   this functions may simply map to kufree().
+ *   this functions may simply map to kumm_free().
  *
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
@@ -2735,9 +2735,9 @@ static int sam_iofree(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
 {
   DEBUGASSERT(drvr && buffer);
 
-  /* kufree is all that is required */
+  /* kumm_free is all that is required */
 
-  kufree(buffer);
+  kumm_free(buffer);
   return OK;
 }
 
