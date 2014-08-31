@@ -1529,10 +1529,10 @@ int arch_tcinitialize(int minor)
 #ifndef CONFIG_TOUCHSCREEN_MULTIPLE
   priv = &g_touchscreen;
 #else
-  priv = (FAR struct tc_dev_s *)kmalloc(sizeof(struct tc_dev_s));
+  priv = (FAR struct tc_dev_s *)kmm_malloc(sizeof(struct tc_dev_s));
   if (!priv)
     {
-      idbg("kmalloc(%d) failed\n", sizeof(struct tc_dev_s));
+      idbg("kmm_malloc(%d) failed\n", sizeof(struct tc_dev_s));
       return -ENOMEM;
     }
 #endif

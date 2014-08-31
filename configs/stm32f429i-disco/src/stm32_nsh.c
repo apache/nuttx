@@ -293,7 +293,7 @@ int nsh_archinitialize(void)
 
 #if defined(CONFIG_RAMMTD) && defined(CONFIG_STM32F429I_DISCO_RAMMTD)
   {
-    uint8_t *start = (uint8_t *) kmalloc(CONFIG_STM32F429I_DISCO_RAMMTD_SIZE * 1024);
+    uint8_t *start = (uint8_t *) kmm_malloc(CONFIG_STM32F429I_DISCO_RAMMTD_SIZE * 1024);
     mtd = rammtd_initialize(start, CONFIG_STM32F429I_DISCO_RAMMTD_SIZE * 1024);
     mtd->ioctl(mtd, MTDIOC_BULKERASE, 0);
 
