@@ -8320,3 +8320,7 @@
 	* sched/Kconfig sched/init/os_bringup.c tools/cfgdefine.c: Add
 	  configuration options to start the system from a program on a file
 	  system (2014-8-30).
+	* mm/ and include/nuttx/mm.h: Remove CONFIG_MM_MULTIHEAP.  Non-multiheap
+	  operation is no longer supported (2014-8-31).
+	* configs/sama5d4-ek/kernel: Add a configuration for testing the
+	  kernel build configuration (still a work in progress) (2014-8-31).
