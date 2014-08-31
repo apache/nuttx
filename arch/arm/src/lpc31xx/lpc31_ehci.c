@@ -1,7 +1,7 @@
 /*******************************************************************************
  * arch/arm/src/lpc31xx/lpc31_ehci.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -4254,7 +4254,7 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
   /* Allocate a pool of free Queue Head (QH) structures */
 
   g_qhpool = (struct lpc31_qh_s *)
-    kmemalign(32, CONFIG_LPC31_EHCI_NQHS * sizeof(struct lpc31_qh_s));
+    kmm_memalign(32, CONFIG_LPC31_EHCI_NQHS * sizeof(struct lpc31_qh_s));
   if (!g_qhpool)
     {
       usbhost_trace1(EHCI_TRACE1_QHPOOLALLOC_FAILED, 0);
@@ -4275,7 +4275,7 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
   /* Allocate a pool of free  Transfer Descriptor (qTD) structures */
 
   g_qtdpool = (struct lpc31_qtd_s *)
-    kmemalign(32, CONFIG_LPC31_EHCI_NQTDS * sizeof(struct lpc31_qtd_s));
+    kmm_memalign(32, CONFIG_LPC31_EHCI_NQTDS * sizeof(struct lpc31_qtd_s));
   if (!g_qtdpool)
     {
       usbhost_trace1(EHCI_TRACE1_QTDPOOLALLOC_FAILED, 0);
@@ -4288,7 +4288,7 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
   /* Allocate the periodic framelist  */
 
   g_framelist = (uint32_t *)
-    kmemalign(4096, FRAME_LIST_SIZE * sizeof(uint32_t));
+    kmm_memalign(4096, FRAME_LIST_SIZE * sizeof(uint32_t));
   if (!g_framelist)
     {
       usbhost_trace1(EHCI_TRACE1_PERFLALLOC_FAILED, 0);

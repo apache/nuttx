@@ -588,7 +588,7 @@ static int sam_buffer_initialize(struct sam_emac_s *priv)
   /* Allocate buffers */
 
   allocsize = CONFIG_SAM34_EMAC_NTXBUFFERS * sizeof(struct emac_txdesc_s);
-  priv->txdesc = (struct emac_txdesc_s *)kmemalign(8, allocsize);
+  priv->txdesc = (struct emac_txdesc_s *)kmm_memalign(8, allocsize);
   if (!priv->txdesc)
     {
       nlldbg("ERROR: Failed to allocate TX descriptors\n");
@@ -598,7 +598,7 @@ static int sam_buffer_initialize(struct sam_emac_s *priv)
   memset(priv->txdesc, 0, allocsize);
 
   allocsize = CONFIG_SAM34_EMAC_NRXBUFFERS * sizeof(struct emac_rxdesc_s);
-  priv->rxdesc = (struct emac_rxdesc_s *)kmemalign(8, allocsize);
+  priv->rxdesc = (struct emac_rxdesc_s *)kmm_memalign(8, allocsize);
   if (!priv->rxdesc)
     {
       nlldbg("ERROR: Failed to allocate RX descriptors\n");
@@ -609,7 +609,7 @@ static int sam_buffer_initialize(struct sam_emac_s *priv)
   memset(priv->rxdesc, 0, allocsize);
 
   allocsize = CONFIG_SAM34_EMAC_NTXBUFFERS * EMAC_TX_UNITSIZE;
-  priv->txbuffer = (uint8_t *)kmemalign(8, allocsize);
+  priv->txbuffer = (uint8_t *)kmm_memalign(8, allocsize);
   if (!priv->txbuffer)
     {
       nlldbg("ERROR: Failed to allocate TX buffer\n");
@@ -618,7 +618,7 @@ static int sam_buffer_initialize(struct sam_emac_s *priv)
     }
 
   allocsize = CONFIG_SAM34_EMAC_NRXBUFFERS * EMAC_RX_UNITSIZE;
-  priv->rxbuffer = (uint8_t *)kmemalign(8, allocsize);
+  priv->rxbuffer = (uint8_t *)kmm_memalign(8, allocsize);
   if (!priv->rxbuffer)
     {
       nlldbg("ERROR: Failed to allocate RX buffer\n");

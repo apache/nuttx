@@ -4152,7 +4152,7 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
   /* Allocate a pool of free Queue Head (QH) structures */
 
   g_qhpool = (struct sam_qh_s *)
-    kmemalign(32, CONFIG_SAMA5_EHCI_NQHS * sizeof(struct sam_qh_s));
+    kmm_memalign(32, CONFIG_SAMA5_EHCI_NQHS * sizeof(struct sam_qh_s));
   if (!g_qhpool)
     {
       usbhost_trace1(EHCI_TRACE1_QHPOOLALLOC_FAILED, 0);
@@ -4173,7 +4173,7 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
   /* Allocate a pool of free  Transfer Descriptor (qTD) structures */
 
   g_qtdpool = (struct sam_qtd_s *)
-    kmemalign(32, CONFIG_SAMA5_EHCI_NQTDS * sizeof(struct sam_qtd_s));
+    kmm_memalign(32, CONFIG_SAMA5_EHCI_NQTDS * sizeof(struct sam_qtd_s));
   if (!g_qtdpool)
     {
       usbhost_trace1(EHCI_TRACE1_QTDPOOLALLOC_FAILED, 0);
@@ -4186,7 +4186,7 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
   /* Allocate the periodic framelist  */
 
   g_framelist = (uint32_t *)
-    kmemalign(4096, FRAME_LIST_SIZE * sizeof(uint32_t));
+    kmm_memalign(4096, FRAME_LIST_SIZE * sizeof(uint32_t));
   if (!g_framelist)
     {
       usbhost_trace1(EHCI_TRACE1_PERFLALLOC_FAILED, 0);
