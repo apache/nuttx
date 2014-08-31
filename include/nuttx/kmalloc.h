@@ -116,7 +116,7 @@ extern "C"
 
 /* This family of allocators is used to manage kernel protected memory */
 
-#if !defined(CONFIG_BUILD_PROTECTED)
+#if !defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_MM_KERNEL_HEAP)
 /* If this is not a kernel build, then these map to the same interfaces
  * as were used for the user-mode function.
  */

@@ -521,7 +521,6 @@ CONFIG_USBDEV_TRACE_NRECORDS=32
 #
 # Memory Management
 #
-# CONFIG_MM_MULTIHEAP is not set
 # CONFIG_MM_SMALL is not set
 CONFIG_MM_REGIONS=1
 # CONFIG_GRAN is not set

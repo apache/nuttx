@@ -39,7 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <stdlib.h>
 #include <assert.h>
 #include <debug.h>
 
@@ -70,6 +69,10 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: mm_malloc
  *
  * Description:
@@ -80,9 +83,6 @@
  *
  ****************************************************************************/
 
-#ifndef CONFIG_MM_MULTIHEAP
-static inline
-#endif
 FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 {
   FAR struct mm_freenode_s *node;
@@ -212,26 +212,3 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 
   return ret;
 }
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: malloc
- *
- * Description:
- *  Find the smallest chunk that satisfies the request. Take the memory from
- *  that chunk, save the remaining, smaller chunk (if any).
- *
- *  8-byte alignment of the allocated data is assured.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_MM_USER_HEAP
-FAR void *malloc(size_t size)
-{
-  return mm_malloc(&g_mmheap, size);
-}
-#endif
-

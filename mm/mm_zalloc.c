@@ -39,7 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <stdlib.h>
 #include <string.h>
 
 #include <nuttx/mm.h>
@@ -60,7 +59,6 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_MM_MULTIHEAP
 FAR void *mm_zalloc(FAR struct mm_heap_s *heap, size_t size)
 {
   FAR void *alloc = mm_malloc(heap, size);
@@ -71,29 +69,3 @@ FAR void *mm_zalloc(FAR struct mm_heap_s *heap, size_t size)
 
   return alloc;
 }
-#endif
-
-/****************************************************************************
- * Name: zalloc
- *
- * Description:
- *   zalloc calls malloc, then zeroes out the allocated chunk.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_MM_USER_HEAP
-FAR void *zalloc(size_t size)
-{
-#ifdef CONFIG_MM_MULTIHEAP
-  return mm_zalloc(&g_mmheap, size);
-#else
-  FAR void *alloc = malloc(size);
-  if (alloc)
-    {
-       memset(alloc, 0, size);
-    }
-
-  return alloc;
-#endif
-}
-#endif

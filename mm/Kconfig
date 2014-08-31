@@ -3,22 +3,10 @@
 # see misc/tools/kconfig-language.txt.
 #
 
-config MM_MULTIHEAP
-	bool "Build support for multiple heaps"
-	default n
-	---help---
-		Build interfaces to support multiple heaps.  This should not be
-		confused with memory regions.  One heap may be composed of multiple,
-		non-contiguous memory regions.  The fact that the heap is composed
-		of such multiple regions is invisible to the end-user (other than
-		the heap comes pre-fragmented).  Multiple heaps, on the other hand,
-		supports a separate set of allocators that operate on a separate set
-		of memory regions.
-
 config MM_KERNEL_HEAP
 	bool "Support a protected, kernel heap"
 	default y
-	depends on (BUILD_PROTECTED && MM_MULTIHEAP) || BUILD_KERNEL
+	depends on BUILD_PROTECTED || BUILD_KERNEL
 	---help---
 		Partition heap memory into two parts:  (1) a protected, kernel-mode
 		heap accessible only by the NuttX kernel, and (2) an unprotected
@@ -62,9 +50,6 @@ config MM_SMALL
 		only 4-byte alignment.  This may be important on some platforms where
 		64-bit data is in allocated structures and 8-byte alignment is required.
 
-		NOTE: If MM_MULTIHEAP is selected, then this selection applies to all
-		heaps.
-
 config MM_REGIONS
 	int "Number of memory regions"
 	default 1
@@ -73,9 +58,6 @@ config MM_REGIONS
 		memory to allocate from, this specifies the number of memory regions
 		that the memory manager must handle and enables the API
 		mm_addregion(heap, start, end);
-
-		NOTE: If MM_MULTIHEAP is selected, then this maximum number of regions
-		applies to all heaps.
 
 config ARCH_HAVE_HEAP2
 	bool

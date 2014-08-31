@@ -58,6 +58,10 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: mm_mallinfo
  *
  * Description:
@@ -65,9 +69,6 @@
  *
  ****************************************************************************/
 
-#ifndef CONFIG_MM_MULTIHEAP
-static inline
-#endif
 int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
 {
   struct mm_allocnode_s *node;
@@ -137,37 +138,3 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
   info->fordblks = fordblks;
   return OK;
 }
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: kmallinfo and mallinfo
- *
- * Description:
- *   mallinfo returns a copy of updated current heap information for either
- *   the user heap (mallinfo) or the kernel heap (kmallinfo).
- *
- ****************************************************************************/
-
-#ifdef CONFIG_MM_USER_HEAP
-#  ifdef CONFIG_CAN_PASS_STRUCTS
-
-struct mallinfo mallinfo(void)
-{
-  struct mallinfo info;
-
-  mm_mallinfo(&g_mmheap, &info);
-  return info;
-}
-
-#  else
-
-int mallinfo(struct mallinfo *info)
-{
-  return mm_mallinfo(&g_mmheap, info);
-}
-
-#endif
-#endif /* CONFIG_MM_USER_HEAP */

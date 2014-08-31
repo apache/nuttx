@@ -39,7 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <stdlib.h>
 #include <assert.h>
 #include <debug.h>
 
@@ -54,6 +53,10 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: mm_free
  *
  * Description:
@@ -62,9 +65,6 @@
  *
  ****************************************************************************/
 
-#ifndef CONFIG_MM_MULTIHEAP
-static inline
-#endif
 void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
 {
   FAR struct mm_freenode_s *node;
@@ -153,23 +153,3 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
   mm_addfreechunk(heap, node);
   mm_givesemaphore(heap);
 }
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: free
- *
- * Description:
- *   Returns a chunk of memory to the list of free nodes,  merging with
- *   adjacent free chunks if possible.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_MM_USER_HEAP
-void free(FAR void *mem)
-{
-  mm_free(&g_mmheap, mem);
-}
-#endif

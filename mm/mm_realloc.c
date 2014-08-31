@@ -49,22 +49,13 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* If multiple heaps are used, then the heap must be passed as a parameter to
- * mm_malloc() and mm_free().  In the single heap case, mm_malloc() and
- * mm_free() are not available and we have to use malloc() and free() (which,
- * internally, will use the same heap).
- */
-
-#ifdef CONFIG_MM_MULTIHEAP
-#  define MM_MALLOC(h,s) mm_malloc(h,s)
-#  define MM_FREE(h,m)   mm_free(h,m)
-#else
-#  define MM_MALLOC(h,s) malloc(s)
-#  define MM_FREE(h,m)   free(m)
-#endif
 
 /****************************************************************************
  * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -90,9 +81,6 @@
  *
  ****************************************************************************/
 
-#ifndef CONFIG_MM_MULTIHEAP
-static inline
-#endif
 FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
                      size_t size)
 {
@@ -108,14 +96,14 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 
   if (!oldmem)
     {
-      return MM_MALLOC(heap, size);
+      return mm_malloc(heap, size);
     }
 
   /* If size is zero, then realloc is equivalent to free */
 
   if (size <= 0)
     {
-      MM_FREE(heap, oldmem);
+      mm_free(heap, oldmem);
       return NULL;
     }
 
@@ -361,47 +349,13 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
        */
 
       mm_givesemaphore(heap);
-      newmem = (FAR void*)MM_MALLOC(heap, size);
+      newmem = (FAR void*)mm_malloc(heap, size);
       if (newmem)
         {
           memcpy(newmem, oldmem, oldsize);
-          MM_FREE(heap, oldmem);
+          mm_free(heap, oldmem);
         }
 
       return newmem;
     }
 }
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: realloc
- *
- * Description:
- *   If the reallocation is for less space, then:
- *
- *     (1) the current allocation is reduced in size
- *     (2) the remainder at the end of the allocation is returned to the
- *         free list.
- *
- *  If the request is for more space and the current allocation can be
- *  extended, it will be extended by:
- *
- *     (1) Taking the additional space from the following free chunk, or
- *     (2) Taking the additional space from the preceding free chunk.
- *     (3) Or both
- *
- *  If the request is for more space but the current chunk cannot be
- *  extended, then malloc a new buffer, copy the data into the new buffer,
- *  and free the old buffer.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_MM_USER_HEAP
-FAR void *realloc(FAR void *oldmem, size_t size)
-{
-  return mm_realloc(&g_mmheap, oldmem, size);
-}
-#endif

@@ -39,7 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <stdlib.h>
 #include <assert.h>
 
 #include <nuttx/mm.h>
@@ -47,19 +46,13 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* If multiple heaps are used, then the heap must be passed as a parameter to
- * mm_malloc().  In the single heap case, mm_malloc() is not available and
- * we have to use malloc() (which, internally, will use the same heap).
- */
-
-#ifdef CONFIG_MM_MULTIHEAP
-#  define MM_MALLOC(h,s) mm_malloc(h,s)
-#else
-#  define MM_MALLOC(h,s) malloc(s)
-#endif
 
 /****************************************************************************
  * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -75,9 +68,6 @@
  *
  ****************************************************************************/
 
-#ifndef CONFIG_MM_MULTIHEAP
-static inline
-#endif
 FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
                       size_t size)
 {
@@ -87,13 +77,13 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
   size_t mask = (size_t)(alignment - 1);
   size_t allocsize;
 
-  /* If this requested alignement less than or equal to the natural alignment
+  /* If this requested alinement's less than or equal to the natural alignment
    * of malloc, then just let malloc do the work.
    */
 
   if (alignment <= MM_MIN_CHUNK)
     {
-      return MM_MALLOC(heap, size);
+      return mm_malloc(heap, size);
     }
 
   /* Adjust the size to account for (1) the size of the allocated node, (2)
@@ -113,7 +103,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
 
   /* Then malloc that size */
 
-  rawchunk = (size_t)MM_MALLOC(heap, allocsize);
+  rawchunk = (size_t)mm_malloc(heap, allocsize);
   if (rawchunk == 0)
     {
       return NULL;
@@ -222,27 +212,3 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
   mm_givesemaphore(heap);
   return (FAR void*)alignedchunk;
 }
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: memalign
- *
- * Description:
- *   memalign requests more than enough space from malloc, finds a region
- *   within that chunk that meets the alignment request and then frees any
- *   leading or trailing space.
- *
- *   The alignment argument must be a power of two (not checked).  8-byte
- *   alignment is guaranteed by normal malloc calls.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_MM_USER_HEAP
-FAR void *memalign(size_t alignment, size_t size)
-{
-  return mm_memalign(&g_mmheap, alignment, size);
-}
-#endif

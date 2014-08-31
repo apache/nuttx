@@ -230,7 +230,12 @@ extern "C"
 /* This is the user heap */
 
 EXTERN struct mm_heap_s g_mmheap;
+#endif
 
+#ifdef CONFIG_MM_KERNEL_HEAP
+/* This is the kernel heap */
+
+EXTERN struct mm_heap_s g_kmmheap;
 #endif
 
 /****************************************************************************
@@ -272,47 +277,50 @@ void umm_givesemaphore(void);
 
 /* Functions contained in mm_malloc.c ***************************************/
 
-#ifdef CONFIG_MM_MULTIHEAP
 FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size);
-#endif
 
 /* Functions contained in mm_free.c *****************************************/
 
-#ifdef CONFIG_MM_MULTIHEAP
 void mm_free(FAR struct mm_heap_s *heap, FAR void *mem);
-#endif
 
 /* Functions contained in mm_realloc.c **************************************/
 
-#ifdef CONFIG_MM_MULTIHEAP
 FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
                      size_t size);
-#endif
 
 /* Functions contained in mm_calloc.c ***************************************/
 
-#ifdef CONFIG_MM_MULTIHEAP
 FAR void *mm_calloc(FAR struct mm_heap_s *heap, size_t n, size_t elem_size);
+
+/* Functions contained in kmm_calloc.c **************************************/
+
+#ifdef CONFIG_MM_KERNEL_HEAP
+FAR void *kmm_calloc(size_t n, size_t elem_size);
 #endif
 
 /* Functions contained in mm_zalloc.c ***************************************/
 
-#ifdef CONFIG_MM_MULTIHEAP
 FAR void *mm_zalloc(FAR struct mm_heap_s *heap, size_t size);
-#endif
 
 /* Functions contained in mm_memalign.c *************************************/
 
-#ifdef CONFIG_MM_MULTIHEAP
 FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
                       size_t size);
-#endif
 
 /* Functions contained in mm_mallinfo.c *************************************/
 
-#ifdef CONFIG_MM_MULTIHEAP
-int  mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info);
+struct mallinfo; /* Forward reference */
+int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info);
+
+/* Functions contained in kmm_mallinfo.c ************************************/
+
+#ifdef CONFIG_MM_KERNEL_HEAP
+#ifdef CONFIG_CAN_PASS_STRUCTS
+struct mallinfo kmm_mallinfo(void);
+#else
+int kmm_mallinfo(struct mallinfo *info);
 #endif
+#endif /* CONFIG_CAN_PASS_STRUCTS */
 
 /* Functions contained in mm_shrinkchunk.c **********************************/
 

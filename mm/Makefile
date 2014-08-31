@@ -51,23 +51,23 @@ endif
 # Core allocator logic
 
 ASRCS  =
-CSRCS  = mm_initialize.c mm_sem.c  mm_addfreechunk.c mm_size2ndx.c
-CSRCS += mm_shrinkchunk.c mm_malloc.c mm_zalloc.c mm_calloc.c mm_realloc.c
-CSRCS += mm_memalign.c mm_free.c mm_mallinfo.c
+CSRCS  = mm_initialize.c mm_sem.c mm_addfreechunk.c mm_size2ndx.c
+CSRCS += mm_shrinkchunk.c
+CSRCS += mm_calloc.c mm_free.c mm_mallinfo.c mm_malloc.c mm_memalign.c
+CSRCS += mm_realloc.c mm_zalloc.c
 
-# Allocator instances
+# User allocator
 
 CSRCS += mm_user.c
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
+CSRCS += umm_calloc.c umm_free.c umm_mallinfo.c umm_malloc.c
+CSRCS += umm_memalign.c umm_realloc.c umm_zalloc.c
+
+# Kernel allocator
+
 ifeq ($(CONFIG_MM_KERNEL_HEAP),y)
 CSRCS += mm_kernel.c
-endif
-else
-ifeq ($(CONFIG_BUILD_KERNEL),y)
-ifeq ($(CONFIG_MM_KERNEL_HEAP),y)
-CSRCS += mm_kernel.c
-endif
-endif
+CSRCS += kmm_calloc.c kmm_free.c kmm_mallinfo.c kmm_malloc.c
+CSRCS += kmm_memalign.c kmm_realloc.c kmm_zalloc.c
 endif
 
 # An optional granule allocator
