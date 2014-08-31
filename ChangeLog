@@ -8301,7 +8301,7 @@
 	  gates! (2014-8029).
 	* Many, many files:  Renamed CONFIG_NUTTX_KERNEL to CONFIG_BUILD_PROTECTED.
 	  Added configuration CONFIG_BUILD_KERNEL that will be used to generate
-	  a kernel (only) with full process support and will execut programs
+	  a kernel (only) with full process support and will execute programs
 	  only from a file system.  This new configuration is defined but only
 	  partially integrated (2014-8-29).
 	* tools/refresh.sh: Add a tool to make refreshing configurations easier
@@ -8329,3 +8329,6 @@
 	  up some kernel build heap allocation issues.  The Cortex-A kernel
 	  build now compiles without errors (but cannot link until brk() and
 	  sbrk() are implemented) (2014-8-31).
+	* mm/*mm_brkaddr.c, *mm_extend.c, Makefile, and include/nuttx/mm.h: Add
+	  low-level memory management hooks that will be needed to support brk()
+	  and sbrk() (2014-8-31).
