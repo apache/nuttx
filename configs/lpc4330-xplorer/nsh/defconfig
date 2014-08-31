@@ -439,7 +439,6 @@ CONFIG_FAT_MAXFNAME=32
 #
 # Memory Management
 #
-# CONFIG_MM_MULTIHEAP is not set
 # CONFIG_MM_SMALL is not set
 CONFIG_MM_REGIONS=2
 # CONFIG_ARCH_HAVE_HEAP2 is not set
