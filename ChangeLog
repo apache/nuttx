@@ -8339,5 +8339,6 @@
 	  (2014-8-31).
 	* Rename kumalloc() to kumm_malloc() and kuzalloc to kumm_zalloc() for
 	  consistency with the rest of the naming (2014-8-31).
-	* Rename kfree() to kmm_free() and kuzalloc to kumm_zalloc() for
-	  consistency with the rest of the naming (2014-8-31).
+	* Rename kmalloc() to kmm_malloc(), kzalloc() to kmm_zalloc(), and
+	  kfree() to kmm_free() and kuzalloc to kumm_zalloc() for consistency
+	  with the rest of the naming (2014-8-31).
