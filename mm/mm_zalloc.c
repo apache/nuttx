@@ -1,7 +1,7 @@
 /****************************************************************************
  * mm/mm_zalloc.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -81,7 +81,7 @@ FAR void *mm_zalloc(FAR struct mm_heap_s *heap, size_t size)
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
+#ifdef CONFIG_MM_USER_HEAP
 FAR void *zalloc(size_t size)
 {
 #ifdef CONFIG_MM_MULTIHEAP

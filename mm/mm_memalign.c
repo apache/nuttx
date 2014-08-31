@@ -1,7 +1,7 @@
 /****************************************************************************
  * mm/mm_memalign.c
  *
- *   Copyright (C) 2007, 2009, 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -240,11 +240,9 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
-
+#ifdef CONFIG_MM_USER_HEAP
 FAR void *memalign(size_t alignment, size_t size)
 {
   return mm_memalign(&g_mmheap, alignment, size);
 }
-
 #endif

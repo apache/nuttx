@@ -1,7 +1,7 @@
 /****************************************************************************
  * mm/mm_realloc.c
  *
- *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -399,12 +399,9 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
-
+#ifdef CONFIG_MM_USER_HEAP
 FAR void *realloc(FAR void *oldmem, size_t size)
 {
   return mm_realloc(&g_mmheap, oldmem, size);
 }
-
 #endif
-

@@ -44,7 +44,7 @@
 #include <nuttx/kmalloc.h>
 
 #if ((defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)) || \
-      defined(CONFIG_BUILD_KERNEL))  && defined(CONFIG_MM_KERNEL_HEAP)
+      defined(CONFIG_BUILD_KERNEL)) && defined(CONFIG_MM_KERNEL_HEAP)
 
 /************************************************************************
  * Pre-processor definition

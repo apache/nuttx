@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/mm.h
  *
- *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,10 +65,10 @@
 #  define CONFIG_MM_SMALL 1
 #endif
 
-#undef HAVE_USER_HEAP
+#undef CONFIG_MM_USER_HEAP
 #if (!defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)) && \
      !defined(CONFIG_BUILD_KERNEL)
-#  define HAVE_USER_HEAP
+#  define CONFIG_MM_USER_HEAP
 #endif
 
 /* Chunk Header Definitions *************************************************/
@@ -226,7 +226,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#ifdef HAVE_USER_HEAP
+#ifdef CONFIG_MM_USER_HEAP
 /* This is the user heap */
 
 EXTERN struct mm_heap_s g_mmheap;
@@ -246,13 +246,13 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
 
 /* Functions contained in umm_initialize.c **********************************/
 
-#ifdef HAVE_USER_HEAP
+#ifdef CONFIG_MM_USER_HEAP
 void umm_initialize(FAR void *heap_start, size_t heap_size);
 #endif
 
 /* Functions contained in umm_addregion.c ***********************************/
 
-#ifdef HAVE_USER_HEAP
+#ifdef CONFIG_MM_USER_HEAP
 void umm_addregion(FAR void *heapstart, size_t heapsize);
 #endif
 
@@ -265,7 +265,7 @@ void mm_givesemaphore(FAR struct mm_heap_s *heap);
 
 /* Functions contained in umm_semaphore.c ***********************************/
 
-#ifdef HAVE_USER_HEAP
+#ifdef CONFIG_MM_USER_HEAP
 int  umm_trysemaphore(void);
 void umm_givesemaphore(void);
 #endif

@@ -1,7 +1,7 @@
 /****************************************************************************
  * mm/mm_mallinfo.c
  *
- *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -151,7 +151,7 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
+#ifdef CONFIG_MM_USER_HEAP
 #  ifdef CONFIG_CAN_PASS_STRUCTS
 
 struct mallinfo mallinfo(void)
@@ -170,4 +170,4 @@ int mallinfo(struct mallinfo *info)
 }
 
 #endif
-#endif /* !CONFIG_BUILD_PROTECTED || !__KERNEL__ */
+#endif /* CONFIG_MM_USER_HEAP */

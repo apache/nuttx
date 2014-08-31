@@ -1,7 +1,7 @@
 /****************************************************************************
  * mm/mm_calloc.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -81,7 +81,7 @@ FAR void *mm_calloc(FAR struct mm_heap_s *heap, size_t n, size_t elem_size)
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
+#ifdef CONFIG_MM_USER_HEAP
 FAR void *calloc(size_t n, size_t elem_size)
 {
 #ifdef CONFIG_MM_MULTIHEAP

@@ -1,7 +1,7 @@
 /****************************************************************************
  * mm/mm_free.c
  *
- *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -167,7 +167,7 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
+#ifdef CONFIG_MM_USER_HEAP
 void free(FAR void *mem)
 {
   mm_free(&g_mmheap, mem);

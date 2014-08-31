@@ -1,7 +1,7 @@
 /****************************************************************************
  * mm/mm_malloc.c
  *
- *   Copyright (C) 2007, 2009, 2013  Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013-2014  Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -228,7 +228,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
+#ifdef CONFIG_MM_USER_HEAP
 FAR void *malloc(size_t size)
 {
   return mm_malloc(&g_mmheap, size);

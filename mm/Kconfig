@@ -18,7 +18,7 @@ config MM_MULTIHEAP
 config MM_KERNEL_HEAP
 	bool "Support a protected, kernel heap"
 	default y
-	depends on (BUILD_PROTECTED || BUILD_KERNEL) && MM_MULTIHEAP
+	depends on (BUILD_PROTECTED && MM_MULTIHEAP) || BUILD_KERNEL
 	---help---
 		Partition heap memory into two parts:  (1) a protected, kernel-mode
 		heap accessible only by the NuttX kernel, and (2) an unprotected
