@@ -3231,7 +3231,7 @@ int mmcsd_slotinitialize(int minor, FAR struct sdio_dev_s *dev)
 
   /* Allocate a MMC/SD state structure */
 
-  priv = (FAR struct mmcsd_state_s *)kmalloc(sizeof(struct mmcsd_state_s));
+  priv = (FAR struct mmcsd_state_s *)kmm_malloc(sizeof(struct mmcsd_state_s));
   if (priv)
     {
       /* Initialize the MMC/SD state structure */

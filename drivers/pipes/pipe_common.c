@@ -151,7 +151,7 @@ FAR struct pipe_dev_s *pipecommon_allocdev(void)
 
   /* Allocate a private structure to manage the pipe */
 
-  dev = (struct pipe_dev_s *)kmalloc(sizeof(struct pipe_dev_s));
+  dev = (struct pipe_dev_s *)kmm_malloc(sizeof(struct pipe_dev_s));
   if (dev)
     {
       /* Initialize the private structure */
@@ -212,7 +212,7 @@ int pipecommon_open(FAR struct file *filep)
 
   if (dev->d_refs == 0)
     {
-      dev->d_buffer = (uint8_t*)kmalloc(CONFIG_DEV_PIPE_SIZE);
+      dev->d_buffer = (uint8_t*)kmm_malloc(CONFIG_DEV_PIPE_SIZE);
       if (!dev->d_buffer)
         {
           (void)sem_post(&dev->d_bfsem);

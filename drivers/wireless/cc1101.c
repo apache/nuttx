@@ -502,7 +502,7 @@ struct cc1101_dev_s * cc1101_init(struct spi_dev_s * spi, uint8_t isrpin,
 
   ASSERT(spi);
 
-  if ((dev = kmalloc(sizeof(struct cc1101_dev_s))) == NULL)
+  if ((dev = kmm_malloc(sizeof(struct cc1101_dev_s))) == NULL)
     {
       errno = ENOMEM;
       return NULL;

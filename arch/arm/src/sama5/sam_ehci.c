@@ -3530,7 +3530,7 @@ static int sam_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
  *   Some hardware supports special memory in which request and descriptor data
  *   can be accessed more efficiently.  This method provides a mechanism to
  *   allocate the request/descriptor memory.  If the underlying hardware does
- *   not support such "special" memory, this functions may simply map to kmalloc.
+ *   not support such "special" memory, this functions may simply map to kmm_malloc.
  *
  *   This interface was optimized under a particular assumption.  It was
  *   assumed that the driver maintains a pool of small, pre-allocated buffers
@@ -3563,7 +3563,7 @@ static int sam_alloc(FAR struct usbhost_driver_s *drvr,
 
   /* There is no special requirements for transfer/descriptor buffers. */
 
-  *buffer = (FAR uint8_t *)kmalloc(CONFIG_SAMA5_EHCI_BUFSIZE);
+  *buffer = (FAR uint8_t *)kmm_malloc(CONFIG_SAMA5_EHCI_BUFSIZE);
   if (*buffer)
     {
       *maxlen = CONFIG_SAMA5_EHCI_BUFSIZE;

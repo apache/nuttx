@@ -1175,7 +1175,7 @@ FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *spi)
 #ifdef CONFIG_W25_SECTOR512        /* Simulate a 512 byte sector */
           /* Allocate a buffer for the erase block cache */
 
-          priv->sector = (FAR uint8_t *)kmalloc(W25_SECTOR_SIZE);
+          priv->sector = (FAR uint8_t *)kmm_malloc(W25_SECTOR_SIZE);
           if (!priv->sector)
             {
               /* Allocation failed! Discard all of that work we just did and return NULL */

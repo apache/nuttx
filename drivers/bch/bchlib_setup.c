@@ -142,7 +142,7 @@ int bchlib_setup(const char *blkdev, bool readonly, FAR void **handle)
 
   /* Allocate the sector I/O buffer */
 
-  bch->buffer = (FAR uint8_t *)kmalloc(bch->sectsize);
+  bch->buffer = (FAR uint8_t *)kmm_malloc(bch->sectsize);
   if (!bch->buffer)
     {
       fdbg("Failed to allocate sector buffer\n");

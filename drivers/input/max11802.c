@@ -1193,10 +1193,10 @@ int max11802_register(FAR struct spi_dev_s *spi,
 #ifndef CONFIG_MAX11802_MULTIPLE
   priv = &g_max11802;
 #else
-  priv = (FAR struct max11802_dev_s *)kmalloc(sizeof(struct max11802_dev_s));
+  priv = (FAR struct max11802_dev_s *)kmm_malloc(sizeof(struct max11802_dev_s));
   if (!priv)
     {
-      idbg("kmalloc(%d) failed\n", sizeof(struct max11802_dev_s));
+      idbg("kmm_malloc(%d) failed\n", sizeof(struct max11802_dev_s));
       return -ENOMEM;
     }
 #endif

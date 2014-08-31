@@ -133,7 +133,7 @@ static mqmsg_t *mq_msgblockalloc(sq_queue_t *queue, uint16_t nmsgs,
    * configured number of messages.
    */
 
-  mqmsgblock = (mqmsg_t*)kmalloc(sizeof(mqmsg_t) * nmsgs);
+  mqmsgblock = (mqmsg_t*)kmm_malloc(sizeof(mqmsg_t) * nmsgs);
   if (mqmsgblock)
     {
       mqmsg_t *mqmsg = mqmsgblock;
@@ -221,7 +221,7 @@ void mq_desblockalloc(void)
 
   /* Allocate a block of message descriptors */
 
-  mqdesblock = (FAR struct mq_des_block_s *)kmalloc(sizeof(struct mq_des_block_s));
+  mqdesblock = (FAR struct mq_des_block_s *)kmm_malloc(sizeof(struct mq_des_block_s));
   if (mqdesblock)
     {
       int i;

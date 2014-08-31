@@ -318,7 +318,7 @@
  *   Some hardware supports special memory in which request and descriptor data can
  *   be accessed more efficiently.  This method provides a mechanism to allocate
  *   the request/descriptor memory.  If the underlying hardware does not support
- *   such "special" memory, this functions may simply map to kmalloc.
+ *   such "special" memory, this functions may simply map to kmm_malloc.
  *
  *   This interface was optimized under a particular assumption.  It was assumed
  *   that the driver maintains a pool of small, pre-allocated buffers for descriptor
@@ -376,7 +376,7 @@
  *   Some hardware supports special memory in which larger IO buffers can
  *   be accessed more efficiently.  This method provides a mechanism to allocate
  *   the request/descriptor memory.  If the underlying hardware does not support
- *   such "special" memory, this functions may simply map to kmalloc.
+ *   such "special" memory, this functions may simply map to kmm_malloc.
  *
  *   This interface differs from DRVR_ALLOC in that the buffers are variable-sized.
  *
@@ -676,7 +676,7 @@ struct usbhost_driver_s
    * be accessed more efficiently.  The following methods provide a mechanism
    * to allocate and free the transfer descriptor memory.  If the underlying
    * hardware does not support such "special" memory, these functions may
-   * simply map to kmalloc and kmm_free.
+   * simply map to kmm_malloc and kmm_free.
    *
    * This interface was optimized under a particular assumption.  It was assumed
    * that the driver maintains a pool of small, pre-allocated buffers for descriptor
@@ -691,7 +691,7 @@ struct usbhost_driver_s
   /*   Some hardware supports special memory in which larger IO buffers can
    *   be accessed more efficiently.  This method provides a mechanism to allocate
    *   the request/descriptor memory.  If the underlying hardware does not support
-   *   such "special" memory, this functions may simply map to kmalloc.
+   *   such "special" memory, this functions may simply map to kmm_malloc.
    *
    *   This interface differs from DRVR_ALLOC in that the buffers are variable-sized.
    */

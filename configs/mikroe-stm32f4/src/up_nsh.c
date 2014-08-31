@@ -291,7 +291,7 @@ int nsh_archinitialize(void)
 
 #if defined(CONFIG_RAMMTD) && defined(CONFIG_MIKROE_RAMMTD)
   {
-    uint8_t *start = (uint8_t *) kmalloc(CONFIG_MIKROE_RAMMTD_SIZE * 1024);
+    uint8_t *start = (uint8_t *) kmm_malloc(CONFIG_MIKROE_RAMMTD_SIZE * 1024);
     mtd = rammtd_initialize(start, CONFIG_MIKROE_RAMMTD_SIZE * 1024);
     mtd->ioctl(mtd, MTDIOC_BULKERASE, 0);
 

@@ -189,7 +189,7 @@ static int smartfs_open(FAR struct file *filep, const char *relpath,
 
   /* Locate the directory entry for this path */
 
-  sf = (struct smartfs_ofile_s *) kmalloc(sizeof *sf);
+  sf = (struct smartfs_ofile_s *) kmm_malloc(sizeof *sf);
   if (sf == NULL)
     {
       ret = -ENOMEM;

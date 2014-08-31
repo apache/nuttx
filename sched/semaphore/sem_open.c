@@ -173,7 +173,7 @@ FAR sem_t *sem_open (FAR const char *name, int oflag, ...)
                 {
                   /* Allocate memory for the new semaphore */
 
-                  psem = (FAR nsem_t*)kmalloc((sizeof(nsem_t) + namelen + 1));
+                  psem = (FAR nsem_t*)kmm_malloc((sizeof(nsem_t) + namelen + 1));
                   if (psem)
                     {
                       /* Initialize the named semaphore */

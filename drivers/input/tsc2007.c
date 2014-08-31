@@ -1234,10 +1234,10 @@ int tsc2007_register(FAR struct i2c_dev_s *dev,
 #ifndef CONFIG_TSC2007_MULTIPLE
   priv = &g_tsc2007;
 #else
-  priv = (FAR struct tsc2007_dev_s *)kmalloc(sizeof(struct tsc2007_dev_s));
+  priv = (FAR struct tsc2007_dev_s *)kmm_malloc(sizeof(struct tsc2007_dev_s));
   if (!priv)
     {
-      idbg("kmalloc(%d) failed\n", sizeof(struct tsc2007_dev_s));
+      idbg("kmm_malloc(%d) failed\n", sizeof(struct tsc2007_dev_s));
       return -ENOMEM;
     }
 #endif

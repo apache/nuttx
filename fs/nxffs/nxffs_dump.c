@@ -439,7 +439,7 @@ int nxffs_dump(FAR struct mtd_dev_s *mtd, bool verbose)
 
   /* Allocate a buffer to hold one block */
 
-  blkinfo.buffer = (FAR uint8_t *)kmalloc(blkinfo.geo.blocksize);
+  blkinfo.buffer = (FAR uint8_t *)kmm_malloc(blkinfo.geo.blocksize);
   if (!blkinfo.buffer)
     {
       fdbg("ERROR: Failed to allocate block cache\n");

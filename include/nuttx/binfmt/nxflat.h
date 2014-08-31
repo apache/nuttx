@@ -77,7 +77,7 @@ struct nxflat_loadinfo_s
   /* Data Space (DSpace): This region contains all information that is
    * referenced as data (other than the stack which is separately allocated).
    *
-   * If CONFIG_ARCH_ADDRENV=n, DSpace will be allocated using kmalloc() (or
+   * If CONFIG_ARCH_ADDRENV=n, DSpace will be allocated using kmm_malloc() (or
    * kzalloc()).  If CONFIG_ARCH_ADDRENV-y, then DSpace will be allocated using
    * up_addrenv_create().  In either case, there will be a unique instance
    * of DSpace (and stack) for each instance of a process.

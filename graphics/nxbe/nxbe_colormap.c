@@ -102,7 +102,7 @@ int nxbe_colormap(FAR NX_DRIVERTYPE *dev)
    */
 
   size  = 3 * CONFIG_NX_NCOLORS * sizeof(uint8_t);
-  alloc = (uint8_t*)kmalloc(size);
+  alloc = (uint8_t*)kmm_malloc(size);
   if (alloc == NULL)
     {
       return -ENOMEM;

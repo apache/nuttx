@@ -244,7 +244,7 @@ nxcon_renderglyph(FAR struct nxcon_state_s *priv,
   /* Allocate memory to hold the glyph with its offsets */
 
   bmsize        =  glyph->stride * glyph->height;
-  glyph->bitmap = (FAR uint8_t *)kmalloc(bmsize);
+  glyph->bitmap = (FAR uint8_t *)kmm_malloc(bmsize);
 
   if (glyph->bitmap)
     {

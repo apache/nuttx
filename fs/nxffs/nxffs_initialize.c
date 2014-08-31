@@ -203,7 +203,7 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
 
   /* Allocate one I/O block buffer to general files system access */
 
-  volume->cache = (FAR uint8_t *)kmalloc(volume->geo.blocksize);
+  volume->cache = (FAR uint8_t *)kmm_malloc(volume->geo.blocksize);
   if (!volume->cache)
     {
       fdbg("ERROR: Failed to allocate an erase block buffer\n");
@@ -216,7 +216,7 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
    * often, but is best to have pre-allocated and in-place.
    */
 
-  volume->pack = (FAR uint8_t *)kmalloc(volume->geo.erasesize);
+  volume->pack = (FAR uint8_t *)kmm_malloc(volume->geo.erasesize);
   if (!volume->pack)
     {
       fdbg("ERROR: Failed to allocate an I/O block buffer\n");

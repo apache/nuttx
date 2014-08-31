@@ -83,7 +83,7 @@ struct symtab_s;
 struct binary_s
 {
   /* If CONFIG_SCHED_HAVE_PARENT is defined then schedul_unload() will
-   * manage instances of struct binary_s allocated with kmalloc.  It
+   * manage instances of struct binary_s allocated with kmm_malloc.  It
    * will keep the binary data in a link list and when SIGCHLD is received
    * (meaning that the task has exit'ed, schedul_unload() will find the
    * data, unload the module, and free the structure.
@@ -261,13 +261,13 @@ int exec_module(FAR const struct binary_s *bin);
  *   If CONFIG_SCHED_HAVE_PARENT is defined, this function may be called by
  *   the parent of the newly created task to automatically unload the
  *   module when the task exits.  This assumes that (1) the caller is the
- *   parent of the created task, (2) that bin was allocated with kmalloc()
+ *   parent of the created task, (2) that bin was allocated with kmm_malloc()
  *   or friends.  It will also automatically free the structure with kmm_free()
  *   after unloading the module.
  *
  * Input Parameter:
  *   pid - The task ID of the child task
- *   bin - This structure must have been allocated with kmalloc() and must
+ *   bin - This structure must have been allocated with kmm_malloc() and must
  *         persist until the task unloads
  *
  * Returned Value:

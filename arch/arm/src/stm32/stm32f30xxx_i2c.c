@@ -2013,7 +2013,7 @@ FAR struct i2c_dev_s *up_i2cinitialize(int port)
 
   /* Allocate instance */
 
-  if (!(inst = kmalloc( sizeof(struct stm32_i2c_inst_s))))
+  if (!(inst = kmm_malloc( sizeof(struct stm32_i2c_inst_s))))
     {
       return NULL;
     }

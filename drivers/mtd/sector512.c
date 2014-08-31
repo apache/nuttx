@@ -624,7 +624,7 @@ FAR struct mtd_dev_s *s512_initialize(FAR struct mtd_dev_s *mtd)
 
       /* Allocate a buffer for the erase block cache */
 
-      priv->eblock = (FAR uint8_t *)kmalloc(priv->eblocksize);
+      priv->eblock = (FAR uint8_t *)kmm_malloc(priv->eblocksize);
       if (!priv->eblock)
         {
           /* Allocation failed! Discard all of that work we just did and return NULL */

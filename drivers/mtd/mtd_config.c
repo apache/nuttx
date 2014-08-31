@@ -561,7 +561,7 @@ static off_t  mtdconfig_ramconsolidate(FAR struct mtdconfig_struct_s *dev)
 
   /* Allocate a consolidation buffer */
 
-  pBuf = (uint8_t *)kmalloc(dev->erasesize);
+  pBuf = (uint8_t *)kmm_malloc(dev->erasesize);
   if (pBuf == NULL)
     {
       /* Unable to allocate buffer, can't consolidate! */
@@ -730,7 +730,7 @@ static off_t  mtdconfig_consolidate(FAR struct mtdconfig_struct_s *dev)
 
   /* Allocate a small buffer for moving data */
 
-  pBuf = (uint8_t *)kmalloc(dev->blocksize);
+  pBuf = (uint8_t *)kmm_malloc(dev->blocksize);
   if (pBuf == NULL)
     {
       return 0;
@@ -1036,7 +1036,7 @@ static int mtdconfig_setconfig(FAR struct mtdconfig_struct_s *dev,
 
   /* Allocate a temp block buffer */
 
-  dev->buffer = (FAR uint8_t *) kmalloc(dev->blocksize);
+  dev->buffer = (FAR uint8_t *) kmm_malloc(dev->blocksize);
 
   /* Read and vaidate the signature bytes */
 
@@ -1220,7 +1220,7 @@ static int mtdconfig_getconfig(FAR struct mtdconfig_struct_s *dev,
 
   /* Allocate a temp block buffer */
 
-  dev->buffer = (FAR uint8_t *)kmalloc(dev->blocksize);
+  dev->buffer = (FAR uint8_t *)kmm_malloc(dev->blocksize);
   if (dev->buffer == NULL)
     {
       return -ENOMEM;
@@ -1339,7 +1339,7 @@ int mtdconfig_register(FAR struct mtd_dev_s *mtd)
   struct mtdconfig_struct_s *dev;
   struct mtd_geometry_s geo;      /* Device geometry */
 
-  dev = (struct mtdconfig_struct_s *)kmalloc(sizeof(struct mtdconfig_struct_s));
+  dev = (struct mtdconfig_struct_s *)kmm_malloc(sizeof(struct mtdconfig_struct_s));
   if (dev)
     {
       /* Initialize the mtdconfig device structure */

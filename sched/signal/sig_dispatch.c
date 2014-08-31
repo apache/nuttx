@@ -183,7 +183,7 @@ static FAR sigpendq_t *sig_allocatependingsignal(void)
 
           if (!sigpend)
             {
-              sigpend = (FAR sigpendq_t *)kmalloc((sizeof (sigpendq_t)));
+              sigpend = (FAR sigpendq_t *)kmm_malloc((sizeof (sigpendq_t)));
             }
 
           /* Check if we got an allocated message */

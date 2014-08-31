@@ -74,7 +74,7 @@
 #endif
 
 /* If the create() method is called by the USB host device driver from an
- * interrupt handler, then it will be unable to call kmalloc() in order to
+ * interrupt handler, then it will be unable to call kmm_malloc() in order to
  * allocate a new class instance.  If the create() method is called from the
  * interrupt level, then class instances must be pre-allocated.
  */
@@ -388,11 +388,11 @@ static inline FAR struct usbhost_state_s *usbhost_allocclass(void)
   FAR struct usbhost_state_s *priv;
 
   /* We are not executing from an interrupt handler so we can just call
-   * kmalloc() to get memory for the class instance.
+   * kmm_malloc() to get memory for the class instance.
    */
 
   DEBUGASSERT(!up_interrupt_context());
-  priv = (FAR struct usbhost_state_s *)kmalloc(sizeof(struct usbhost_state_s));
+  priv = (FAR struct usbhost_state_s *)kmm_malloc(sizeof(struct usbhost_state_s));
   uvdbg("Allocated: %p\n", priv);;
   return priv;
 }

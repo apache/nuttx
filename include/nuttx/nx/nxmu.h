@@ -483,7 +483,7 @@ extern "C"
  *   inheritance:  The caller's window structure may include extensions that
  *   are not visible to NX.
  *
- *   NOTE:  wnd must have been allocated using kmalloc() (or related allocators)
+ *   NOTE:  wnd must have been allocated using kmm_malloc() (or related allocators)
  *   Once provided to nxfe_constructwindow() that memory is owned and managed
  *   by NX.  On certain error conditions or when the window is closed, NX will
  *   free the window.

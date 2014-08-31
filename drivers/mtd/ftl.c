@@ -523,7 +523,7 @@ int ftl_initialize(int minor, FAR struct mtd_dev_s *mtd)
 
   /* Allocate a FTL device structure */
 
-  dev = (struct ftl_struct_s *)kmalloc(sizeof(struct ftl_struct_s));
+  dev = (struct ftl_struct_s *)kmm_malloc(sizeof(struct ftl_struct_s));
   if (dev)
     {
       /* Initialize the FTL device structure */
@@ -546,7 +546,7 @@ int ftl_initialize(int minor, FAR struct mtd_dev_s *mtd)
       /* Allocate one, in-memory erase block buffer */
 
 #ifdef CONFIG_FS_WRITABLE
-      dev->eblock  = (FAR uint8_t *)kmalloc(dev->geo.erasesize);
+      dev->eblock  = (FAR uint8_t *)kmm_malloc(dev->geo.erasesize);
       if (!dev->eblock)
         {
           fdbg("Failed to allocate an erase block buffer\n");

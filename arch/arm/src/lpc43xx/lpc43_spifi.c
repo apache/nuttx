@@ -1193,7 +1193,7 @@ FAR struct mtd_dev_s *lpc43_spifi_initialize(void)
 
   /* Allocate a buffer for the erase block cache */
 
-  priv->cache = (FAR uint8_t *)kmalloc(SPIFI_BLKSIZE);
+  priv->cache = (FAR uint8_t *)kmm_malloc(SPIFI_BLKSIZE);
   if (!priv->cache)
     {
       /* Allocation failed! Discard all of that work we just did and return NULL */

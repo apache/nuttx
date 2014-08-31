@@ -315,6 +315,12 @@ void kmm_givesemaphore(void);
 
 FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size);
 
+/* Functions contained in kmm_malloc.c **************************************/
+
+#ifdef CONFIG_MM_KERNEL_HEAP
+FAR void *kmm_malloc(size_t size);
+#endif
+
 /* Functions contained in mm_free.c *****************************************/
 
 void mm_free(FAR struct mm_heap_s *heap, FAR void *mem);
@@ -349,6 +355,12 @@ FAR void *kmm_calloc(size_t n, size_t elem_size);
 /* Functions contained in mm_zalloc.c ***************************************/
 
 FAR void *mm_zalloc(FAR struct mm_heap_s *heap, size_t size);
+
+/* Functions contained in kmm_zalloc.c **************************************/
+
+#ifdef CONFIG_MM_KERNEL_HEAP
+FAR void *kmm_zalloc(size_t size);
+#endif
 
 /* Functions contained in mm_memalign.c *************************************/
 

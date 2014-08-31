@@ -199,7 +199,7 @@ FAR mqmsg_t *mq_msgalloc(void)
 
       if (!mqmsg)
         {
-          mqmsg = (FAR mqmsg_t *)kmalloc((sizeof (mqmsg_t)));
+          mqmsg = (FAR mqmsg_t *)kmm_malloc((sizeof (mqmsg_t)));
 
           /* Check if we got an allocated message */
 

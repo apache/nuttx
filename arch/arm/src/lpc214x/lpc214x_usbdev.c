@@ -2623,7 +2623,7 @@ static FAR struct usbdev_req_s *lpc214x_epallocreq(FAR struct usbdev_ep_s *ep)
 #endif
   usbtrace(TRACE_EPALLOCREQ, ((FAR struct lpc214x_ep_s *)ep)->epphy);
 
-  privreq = (FAR struct lpc214x_req_s *)kmalloc(sizeof(struct lpc214x_req_s));
+  privreq = (FAR struct lpc214x_req_s *)kmm_malloc(sizeof(struct lpc214x_req_s));
   if (!privreq)
     {
       usbtrace(TRACE_DEVERROR(LPC214X_TRACEERR_ALLOCFAIL), 0);
@@ -2693,7 +2693,7 @@ static FAR void *lpc214x_epallocbuffer(FAR struct usbdev_ep_s *ep, uint16_t nbyt
 #else
 
   usbtrace(TRACE_EPALLOCBUFFER, privep->epphy);
-  return kmalloc(bytes);
+  return kmm_malloc(bytes);
 
 #endif
 }

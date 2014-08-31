@@ -95,7 +95,7 @@ int nxflat_addrenv_alloc(FAR struct nxflat_loadinfo_s *loadinfo, size_t envsize)
 
   /* Allocate the struct dspace_s container for the D-Space allocation */
 
-  dspace = (FAR struct dspace_s *)kmalloc(sizeof(struct dspace_s));
+  dspace = (FAR struct dspace_s *)kmm_malloc(sizeof(struct dspace_s));
   if (dspace == 0)
     {
       bdbg("ERROR: Failed to allocate DSpace\n");

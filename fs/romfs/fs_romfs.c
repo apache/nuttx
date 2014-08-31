@@ -637,7 +637,7 @@ static int romfs_dup(FAR const struct file *oldp, FAR struct file *newp)
    * dup'ed file.
    */
 
-  newrf = (FAR struct romfs_file_s *)kmalloc(sizeof(struct romfs_file_s));
+  newrf = (FAR struct romfs_file_s *)kmm_malloc(sizeof(struct romfs_file_s));
   if (!newrf)
     {
       fdbg("Failed to allocate private data\n", ret);

@@ -124,7 +124,7 @@ EXEPATH_HANDLE exepath_init(void)
 
   /* Allocate a container for the PATH variable contents */
 
-  exepath = (FAR struct exepath_s *)kmalloc(SIZEOF_EXEPATH_S(strlen(path) + 1));
+  exepath = (FAR struct exepath_s *)kmm_malloc(SIZEOF_EXEPATH_S(strlen(path) + 1));
   if (!exepath)
     {
       /* Ooops.. we are out of memory */
@@ -230,7 +230,7 @@ FAR char *exepath_next(EXEPATH_HANDLE handle, FAR const char *relpath)
         }
 
       pathlen  = strlen(path) + strlen(relpath) + 2;
-      fullpath = (FAR char *)kmalloc(pathlen);
+      fullpath = (FAR char *)kmm_malloc(pathlen);
       if (!fullpath)
         {
           /* Failed to allocate memory */

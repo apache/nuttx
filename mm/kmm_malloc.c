@@ -68,7 +68,7 @@
  ****************************************************************************/
 
 /************************************************************************
- * Name: kmalloc
+ * Name: kmm_malloc
  *
  * Description:
  *   Allocate memory from the kernel heap.
@@ -81,7 +81,7 @@
  *
  ************************************************************************/
 
-FAR void *kmalloc(size_t size)
+FAR void *kmm_malloc(size_t size)
 {
   return mm_malloc(&g_kmmheap, size);
 }

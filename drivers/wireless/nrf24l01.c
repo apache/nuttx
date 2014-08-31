@@ -1220,7 +1220,7 @@ int nrf24l01_register(FAR struct spi_dev_s *spi, FAR struct nrf24l01_config_s *c
 
   ASSERT((spi != NULL) & (cfg != NULL));
 
-  if ((dev = kmalloc(sizeof(struct nrf24l01_dev_s))) == NULL)
+  if ((dev = kmm_malloc(sizeof(struct nrf24l01_dev_s))) == NULL)
     {
       return -ENOMEM;
     }
@@ -1242,7 +1242,7 @@ int nrf24l01_register(FAR struct spi_dev_s *spi, FAR struct nrf24l01_config_s *c
   sem_init(&(dev->sem_tx), 0, 0);
 
 #ifdef CONFIG_WL_NRF24L01_RXSUPPORT
-  if ((rx_fifo = kmalloc(CONFIG_WL_NRF24L01_RXFIFO_LEN)) == NULL)
+  if ((rx_fifo = kmm_malloc(CONFIG_WL_NRF24L01_RXFIFO_LEN)) == NULL)
     {
       kmm_free(dev);
       return -ENOMEM;

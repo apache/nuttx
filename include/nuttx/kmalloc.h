@@ -126,8 +126,8 @@ extern "C"
 # define kmm_trysemaphore()     umm_trysemaphore()
 # define kmm_givesemaphore()    umm_givesemaphore()
 
-# define kmalloc(s)             malloc(s)
-# define kzalloc(s)             zalloc(s)
+# define kmm_malloc(s)          malloc(s)
+# define kmm_zalloc(s)          zalloc(s)
 # define kmm_realloc(p,s)       realloc(p,s)
 # define kmm_memalign(a,s)      memalign(a,s)
 # define kmm_free(p)            free(p)
@@ -143,8 +143,8 @@ extern "C"
 # define kmm_trysemaphore()     umm_trysemaphore()
 # define kmm_givesemaphore()    umm_givesemaphore()
 
-# define kmalloc(s)             umm_malloc(s)
-# define kzalloc(s)             umm_zalloc(s)
+# define kmm_malloc(s)          umm_malloc(s)
+# define kmm_zalloc(s)          umm_zalloc(s)
 # define kmm_realloc(p,s)       umm_realloc(p,s)
 # define kmm_memalign(a,s)      umm_memalign(a,s)
 # define kmm_free(p)            umm_free(p)
@@ -154,8 +154,6 @@ extern "C"
  * and we can call them directly.
  */
 
-FAR void *kmalloc(size_t size);
-FAR void *kzalloc(size_t size);
 #endif
 
 /* Functions defined in sched/sched_kfree.c **********************************/

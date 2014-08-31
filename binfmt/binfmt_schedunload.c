@@ -73,7 +73,7 @@ FAR struct binary_s *g_unloadhead;
  *
  * Description:
  *   If CONFIG_SCHED_HAVE_PARENT is defined then schedul_unload() will
- *   manage instances of struct binary_s allocated with kmalloc.  It
+ *   manage instances of struct binary_s allocated with kmm_malloc.  It
  *   will keep the binary data in a link list and when SIGCHLD is received
  *   (meaning that the task has exit'ed, schedul_unload() will find the
  *   data, unload the module, and free the structure.
@@ -82,7 +82,7 @@ FAR struct binary_s *g_unloadhead;
  *
  * Input Parameter:
  *   pid - The task ID of the child task
- *   bin - This structure must have been allocated with kmalloc() and must
+ *   bin - This structure must have been allocated with kmm_malloc() and must
  *         persist until the task unloads
 
  *
@@ -116,7 +116,7 @@ static void unload_list_add(pid_t pid, FAR struct binary_s *bin)
  *
  * Description:
  *   If CONFIG_SCHED_HAVE_PARENT is defined then schedul_unload() will
- *   manage instances of struct binary_s allocated with kmalloc.  It
+ *   manage instances of struct binary_s allocated with kmm_malloc.  It
  *   will keep the binary data in a link list and when SIGCHLD is received
  *   (meaning that the task has exit'ed, schedul_unload() will find the
  *   data, unload the module, and free the structure.
@@ -187,7 +187,7 @@ static FAR struct binary_s *unload_list_remove(pid_t pid)
  * Description:
  *   If CONFIG_SCHED_HAVE_PARENT is defined, this function may be called to
  *   automatically unload the module when task exits.  It assumes that
- *   bin was allocated with kmalloc() or friends and will also automatically
+ *   bin was allocated with kmm_malloc() or friends and will also automatically
  *   free the structure with kmm_free() when the task exists.
  *
  * Input Parameter:
@@ -245,13 +245,13 @@ static void unload_callback(int signo, siginfo_t *info, void *ucontext)
  *   If CONFIG_SCHED_HAVE_PARENT is defined, this function may be called by
  *   the parent of the newly created task to automatically unload the
  *   module when the task exits.  This assumes that (1) the caller is the
- *   parent of the created task, (2) that bin was allocated with kmalloc()
+ *   parent of the created task, (2) that bin was allocated with kmm_malloc()
  *   or friends.  It will also automatically free the structure with kmm_free()
  *   after unloading the module.
  *
  * Input Parameter:
  *   pid - The task ID of the child task
- *   bin - This structure must have been allocated with kmalloc() and must
+ *   bin - This structure must have been allocated with kmm_malloc() and must
  *         persist until the task unloads
  *
  * Returned Value:

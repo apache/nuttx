@@ -675,10 +675,10 @@ static int dm320_allocvideomemory(void)
 {
 #ifndef CONFIG_DM320_VID0_DISABLE
 #ifndef CONFIG_DM320_DISABLE_PINGPONG
-  g_vid0base   = (FAR void *)kmalloc(2 * DM320_VID0_FBLEN);
+  g_vid0base   = (FAR void *)kmm_malloc(2 * DM320_VID0_FBLEN);
   g_vid0ppbase = (FAR char*)g_vid0base + DM320_VID0_FBLEN;
 #else
-  g_vid0base   = (FAR void *)kmalloc(DM320_VID0_FBLEN);
+  g_vid0base   = (FAR void *)kmm_malloc(DM320_VID0_FBLEN);
 #endif
   if (!g_vid0base)
     {
@@ -687,7 +687,7 @@ static int dm320_allocvideomemory(void)
 #endif
 
 #ifndef CONFIG_DM320_VID1_DISABLE
-  g_vid1base = (FAR void *)kmalloc(DM320_VID1_FBLEN);
+  g_vid1base = (FAR void *)kmm_malloc(DM320_VID1_FBLEN);
   if (!g_vid1base)
     {
       goto errout;
@@ -695,7 +695,7 @@ static int dm320_allocvideomemory(void)
 #endif
 
 #ifndef CONFIG_DM320_OSD0_DISABLE
-  g_osd0base = (FAR void *)kmalloc(DM320_OSD0_FBLEN);
+  g_osd0base = (FAR void *)kmm_malloc(DM320_OSD0_FBLEN);
   if (!g_osd0base)
     {
       goto errout;
@@ -703,7 +703,7 @@ static int dm320_allocvideomemory(void)
 #endif
 
 #ifndef CONFIG_DM320_OSD1_DISABLE
-  g_osd1base = (FAR void *)kmalloc(DM320_OSD1_FBLEN);
+  g_osd1base = (FAR void *)kmm_malloc(DM320_OSD1_FBLEN);
   if (!g_osd1base)
     {
       goto errout;

@@ -1350,7 +1350,7 @@ static int fat_dup(FAR const struct file *oldp, FAR struct file *newp)
    * dup'ed file.
    */
 
-  newff = (struct fat_file_s *)kmalloc(sizeof(struct fat_file_s));
+  newff = (struct fat_file_s *)kmm_malloc(sizeof(struct fat_file_s));
   if (!newff)
     {
       ret = -ENOMEM;

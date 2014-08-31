@@ -100,7 +100,7 @@ static struct posix_timer_s *timer_allocate(void)
     {
       /* Allocate a new timer from the heap */
 
-      ret      = (struct posix_timer_s*)kmalloc(sizeof(struct posix_timer_s));
+      ret      = (struct posix_timer_s*)kmm_malloc(sizeof(struct posix_timer_s));
       pt_flags = 0;
     }
 

@@ -797,7 +797,7 @@ FAR void *composite_initialize(void)
 
   /* Allocate the structures needed */
 
-  alloc = (FAR struct composite_alloc_s*)kmalloc(sizeof(struct composite_alloc_s));
+  alloc = (FAR struct composite_alloc_s*)kmm_malloc(sizeof(struct composite_alloc_s));
   if (!alloc)
     {
       usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_ALLOCDEVSTRUCT), 0);

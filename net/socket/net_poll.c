@@ -200,7 +200,7 @@ static inline int net_pollsetup(FAR struct socket *psock,
 
   /* Allocate a container to hold the poll information */
 
-  info = (FAR struct net_poll_s *)kmalloc(sizeof(struct net_poll_s));
+  info = (FAR struct net_poll_s *)kmm_malloc(sizeof(struct net_poll_s));
   if (!info)
     {
       return -ENOMEM;

@@ -196,7 +196,7 @@ int usbhost_devaddr_create(FAR struct usbhost_devaddr_s *hcd,
 
   /* Allocate a hash table entry */
 
-  hentry = (FAR struct usbhost_devhash_s *)kmalloc(sizeof(struct usbhost_devhash_s));
+  hentry = (FAR struct usbhost_devhash_s *)kmm_malloc(sizeof(struct usbhost_devhash_s));
   if (!hentry)
     {
       udbg("ERROR: Failed to allocate a hash table entry\n");

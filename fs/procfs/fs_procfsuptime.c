@@ -327,7 +327,7 @@ static int uptime_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   /* Allocate a new container to hold the task and attribute selection */
 
-  newattr = (FAR struct uptime_file_s *)kmalloc(sizeof(struct uptime_file_s));
+  newattr = (FAR struct uptime_file_s *)kmm_malloc(sizeof(struct uptime_file_s));
   if (!newattr)
     {
       fdbg("ERROR: Failed to allocate file attributes\n");

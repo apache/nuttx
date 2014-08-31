@@ -223,7 +223,7 @@ FAR struct lis331dl_dev_s *lis331dl_init(FAR struct i2c_dev_s *i2c,
   ASSERT(i2c);
   ASSERT(address);
 
-  dev = kmalloc(sizeof(struct lis331dl_dev_s));
+  dev = kmm_malloc(sizeof(struct lis331dl_dev_s));
   if (dev == NULL)
     {
       errno = ENOMEM;

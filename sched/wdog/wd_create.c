@@ -139,7 +139,7 @@ WDOG_ID wd_create (void)
       /* We do not require that interrupts be disabled to do this. */
 
       irqrestore(state);
-      wdog = (FAR struct wdog_s *)kmalloc(sizeof(struct wdog_s));
+      wdog = (FAR struct wdog_s *)kmm_malloc(sizeof(struct wdog_s));
 
       /* Did we get one? */
 

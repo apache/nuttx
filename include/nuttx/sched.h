@@ -259,7 +259,7 @@ struct dspace_s
   uint16_t crefs;
 
   /* This is the allocated D-Space memory region.  This may be a physical
-   * address allocated with kmalloc(), or it may be virtual address associated
+   * address allocated with kmm_malloc(), or it may be virtual address associated
    * with an address environment (if CONFIG_ARCH_ADDRENV=y).
    */
 

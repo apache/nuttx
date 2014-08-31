@@ -1115,7 +1115,7 @@ static int proc_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   /* Allocate a new container to hold the task and node selection */
 
-  newfile = (FAR struct proc_file_s *)kmalloc(sizeof(struct proc_file_s));
+  newfile = (FAR struct proc_file_s *)kmm_malloc(sizeof(struct proc_file_s));
   if (!newfile)
     {
       fdbg("ERROR: Failed to allocate file container\n");

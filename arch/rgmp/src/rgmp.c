@@ -80,7 +80,7 @@ void rtos_free_page(void *page)
 
 void *rtos_kmalloc(int size)
 {
-	return kmalloc(size);
+	return kmm_malloc(size);
 }
 
 void rtos_kfree(void *addr)
@@ -130,7 +130,7 @@ void rtos_timer_isr(void *data)
  */
 int rtos_sem_init(struct semaphore *sem, int val)
 {
-	if ((sem->sem = kmalloc(sizeof(sem_t))) == NULL)
+	if ((sem->sem = kmm_malloc(sizeof(sem_t))) == NULL)
 		return -1;
     return sem_init(sem->sem, 0, val);
 }

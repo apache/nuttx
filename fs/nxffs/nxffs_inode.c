@@ -134,7 +134,7 @@ static int nxffs_rdentry(FAR struct nxffs_volume_s *volume, off_t offset,
   /* Allocate memory to hold the variable-length file name */
 
   namlen = inode.namlen;
-  entry->name = (FAR char *)kmalloc(namlen + 1);
+  entry->name = (FAR char *)kmm_malloc(namlen + 1);
   if (!entry->name)
     {
       fdbg("ERROR: Failed to allocate name, namlen: %d\n", namlen);

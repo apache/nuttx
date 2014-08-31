@@ -894,7 +894,7 @@ static int cc3000_open(FAR struct file *filep)
 
       /* Do late allocation with hopes of realloc not fragmenting */
 
-      priv->rx_buffer.pbuffer =  kmalloc(priv->rx_buffer_max_len);
+      priv->rx_buffer.pbuffer =  kmm_malloc(priv->rx_buffer_max_len);
       DEBUGASSERT(priv->rx_buffer.pbuffer);
       if (!priv->rx_buffer.pbuffer)
         {
@@ -1501,10 +1501,10 @@ int cc3000_register(FAR struct spi_dev_s *spi,
 #ifndef CONFIG_CC3000_MULTIPLE
   priv = &g_cc3000;
 #else
-  priv = (FAR struct cc3000_dev_s *)kmalloc(sizeof(struct cc3000_dev_s));
+  priv = (FAR struct cc3000_dev_s *)kmm_malloc(sizeof(struct cc3000_dev_s));
   if (!priv)
     {
-      ndbg("kmalloc(%d) failed\n", sizeof(struct cc3000_dev_s));
+      ndbg("kmm_malloc(%d) failed\n", sizeof(struct cc3000_dev_s));
       return -ENOMEM;
     }
 #endif

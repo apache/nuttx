@@ -278,7 +278,7 @@ int group_initialize(FAR struct task_tcb_s *tcb)
 #ifdef HAVE_GROUP_MEMBERS
   /* Allocate space to hold GROUP_INITIAL_MEMBERS members of the group */
 
-  group->tg_members = (FAR pid_t *)kmalloc(GROUP_INITIAL_MEMBERS*sizeof(pid_t));
+  group->tg_members = (FAR pid_t *)kmm_malloc(GROUP_INITIAL_MEMBERS*sizeof(pid_t));
   if (!group->tg_members)
     {
       kmm_free(group);
