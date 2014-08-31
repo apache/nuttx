@@ -57,6 +57,30 @@
 /****************************************************************************
  * Private Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
+/* Terminology.  In the flat build (CONFIG_BUILD_FLAT=y), there is only a
+ * single heap access with the standard allocations (malloc/free).  This
+ * heap is referred to as the user heap.  In the protected build
+ * (CONFIG_BUILD_PROTECTED=y) where an MPU is used to protect a region of
+ * otherwise flat memory, there will be two allocators:  One that allocates
+ * protected (kernel) memory and one that allocates unprotected (user)
+ * memory.  These are referred to as the kernel and user heaps,
+ * respectively.
+ *
+ * The ARMv7 has no MPU but does have an MMU.  With this MMU, it can support
+ * the kernel build (CONFIG_BUILD_KERNEL=y).  In this configuration, there
+ * is again only one heap but, retaining the terminology, this is the kernel
+ * heap.
+ */
+
+#if defined(CONFIG_MM_USER_HEAP) && defined(CONFIG_MM_KERNEL_HEAP)
+#  error "Cannot support both user and kernel heaps"
+#elif defined(CONFIG_MM_KERNEL_HEAP)
+#  define MM_ADDREGION kmm_addregion
+#else
+#  define MM_ADDREGION umm_addregion
+#endif
+
 /* The Primary Heap *********************************************************/
 /* The physical address of the primary heap is defined by CONFIG_RAM_START,
  * CONFIG_RAM_SIZE, and CONFIG_RAM_END where:
@@ -213,60 +237,23 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_allocate_heap
+ * Name: up_allocate_heap/up_allocate_kheap
  *
  * Description:
  *   This function will be called to dynamically set aside the heap region.
- *
- *   For the kernel build (CONFIG_BUILD_KERNEL=y) with both kernel- and
- *   user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function provides the
- *   size of the unprotected, user-space heap.
- *
- *   If a protected kernel-space heap is provided, the kernel heap must be
- *   allocated by an analogous up_allocate_kheap(). A custom version of this
- *   file is needed if memory protection of the kernel heap is required.
- *
- *   The following memory map is assumed for the flat build:
- *
- *     .data region.  Size determined at link time.
- *     .bss  region  Size determined at link time.
- *     IDLE thread stack.  Size determined by CONFIG_IDLETHREAD_STACKSIZE.
- *     Heap.  Extends to the end of SRAM.
- *
- *   The following memory map is assumed for the kernel build:
- *
- *     Kernel .data region.  Size determined at link time.
- *     Kernel .bss  region  Size determined at link time.
- *     Kernel IDLE thread stack.  Size determined by CONFIG_IDLETHREAD_STACKSIZE.
- *     Padding for alignment
- *     User .data region.  Size determined at link time.
- *     User .bss region  Size determined at link time.
- *     Kernel heap.  Size determined by CONFIG_MM_KERNEL_HEAPSIZE.
- *     User heap.  Extends to the end of SRAM.
+ *   For the flat build, this heap is referred to as the user heap (for
+ *   compatibility with other platforms).  For the kernel build
+ *   (CONFIG_BUILD_KERNEL=y) this is referred to a the kernel heap.
  *
  ****************************************************************************/
 
+#if defined(CONFIG_MM_USER_HEAP)
 void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
+#elif defined(CONFIG_MM_KERNEL_HEAP)
+void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
+#endif
 {
-#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
-  /* Get the unaligned size and position of the user-space heap.
-   * This heap begins after the user-space .bss section at an offset
-   * of CONFIG_MM_KERNEL_HEAPSIZE (subject to alignment).
-   */
-
-  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend + CONFIG_MM_KERNEL_HEAPSIZE;
-  size_t    usize = SAMA5_PRIMARY_HEAP_END - ubase;
-  int       log2;
-
-  DEBUGASSERT(ubase < (uintptr_t)SAMA5_PRIMARY_HEAP_END);
-
-  /* Return the user-space heap settings */
-
-  board_led_on(LED_HEAPALLOCATE);
-  *heap_start = (FAR void*)ubase;
-  *heap_size  = usize;
-
-#elif defined(CONFIG_BOOT_SDRAM_DATA)
+#if defined(CONFIG_BOOT_SDRAM_DATA)
   /* In this case, the IDLE stack is in ISRAM, but data is in SDRAM.  The
    * heap is at the end of BSS through the configured end of SDRAM.
    */
@@ -285,40 +272,6 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
   *heap_size  = SAMA5_PRIMARY_HEAP_END - g_idle_topstack;
 #endif
 }
-
-/****************************************************************************
- * Name: up_allocate_kheap
- *
- * Description:
- *   For the kernel build (CONFIG_BUILD_KERNEL=y) with both kernel- and
- *   user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function allocates
- *   the kernel-space heap.  A custom version of this function is need if
- *   memory protection of the kernel heap is required.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
-void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
-{
-  /* Get the unaligned size and position of the user-space heap.
-   * This heap begins after the user-space .bss section at an offset
-   * of CONFIG_MM_KERNEL_HEAPSIZE (subject to alignment).
-   */
-
-  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend + CONFIG_MM_KERNEL_HEAPSIZE;
-  size_t    usize = SAMA5_PRIMARY_HEAP_END - ubase;
-  int       log2;
-
-  DEBUGASSERT(ubase < (uintptr_t)SAMA5_PRIMARY_HEAP_END);
-
-  /* Return the kernel heap settings (i.e., the part of the heap region
-   * that was not dedicated to the user heap).
-   */
-
-  *heap_start = (FAR void*)USERSPACE->us_bssend;
-  *heap_size  = ubase - (uintptr_t)USERSPACE->us_bssend;
-}
-#endif
 
 /****************************************************************************
  * Name: up_addregion
@@ -340,16 +293,9 @@ void up_addregion(void)
   vaddr = (uintptr_t)SAM_ISRAM0_VADDR
   size  = SAM_ISRAM0_SIZE + SAM_ISRAM1_SIZE;
 
-#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
-  /* Allow user-mode access to the ISRAM heap */
-
-  sam_uheap(vaddr, size);
-
-#endif
-
   /* Add the ISRAM user heap region. */
 
-  kumm_addregion((void *)vaddr, size);
+  MM_ADDREGION((void *)vaddr, size);
   nregions--;
 #endif
 
@@ -359,15 +305,9 @@ void up_addregion(void)
       vaddr = (uintptr_t)SAM_DDRCS_VSECTION + SAMA5_DDRCS_HEAP_OFFSET;
       size  = SAMA5_DDRCS_HEAP_SIZE;
 
-#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
-      /* Allow user-mode access to the DDR-SDRAM heap */
-
-      sam_uheap(vaddr, size);
-#endif
-
       /* Add the DDR-SDRAM user heap region. */
 
-      kumm_addregion((void *)vaddr, size);
+      MM_ADDREGION((void *)vaddr, size);
       nregions--;
     }
   else
@@ -384,15 +324,9 @@ void up_addregion(void)
       vaddr = (uintptr_t)SAM_EBICS0_VSECTION + SAMA5_EBICS0_HEAP_OFFSET;
       size  = SAMA5_EBICS0_HEAP_SIZE;
 
-#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
-      /* Allow user-mode access to the EBICS0 heap */
-
-      sam_uheap(vaddr, size);
-#endif
-
       /* Add the EBICS0 user heap region. */
 
-      kumm_addregion((void *)vaddr, size);
+      MM_ADDREGION((void *)vaddr, size);
       nregions--;
     }
   else
@@ -409,15 +343,9 @@ void up_addregion(void)
       vaddr = (uintptr_t)SAM_EBICS1_VSECTION + SAMA5_EBICS1_HEAP_OFFSET;
       size  = SAMA5_EBICS1_HEAP_SIZE;
 
-#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
-      /* Allow user-mode access to the EBICS1 heap */
-
-      sam_uheap(vaddr, size);
-#endif
-
       /* Add the EBICS1 user heap region. */
 
-      kumm_addregion((void *)vaddr, size);
+      MM_ADDREGION((void *)vaddr, size);
       nregions--;
     }
   else
@@ -434,15 +362,9 @@ void up_addregion(void)
       vaddr = (uintptr_t)SAM_EBICS2_VSECTION + SAMA5_EBICS2_HEAP_OFFSET;
       size  = SAMA5_EBICS2_HEAP_SIZE;
 
-#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
-      /* Allow user-mode access to the EBICS2 heap */
-
-      sam_uheap(vaddr, size);
-#endif
-
       /* Add the EBICS2 user heap region. */
 
-      kumm_addregion((void *)vaddr, size);
+      MM_ADDREGION((void *)vaddr, size);
       nregions--;
     }
   else
@@ -459,15 +381,9 @@ void up_addregion(void)
       vaddr = (uintptr_t)SAM_EBICS3_VSECTION + SAMA5_EBICS3_HEAP_OFFSET;
       size  = SAMA5_EBICS3_HEAP_SIZE;
 
-#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
-      /* Allow user-mode access to the EBICS3 heap */
-
-      sam_uheap(vaddr, size);
-#endif
-
       /* Add the EBICS3 user heap region. */
 
-      kumm_addregion(vaddr, size);
+      MM_ADDREGION(vaddr, size);
       nregions--;
     }
   else
