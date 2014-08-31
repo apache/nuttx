@@ -255,6 +255,12 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
 void umm_initialize(FAR void *heap_start, size_t heap_size);
 #endif
 
+/* Functions contained in kmm_initialize.c **********************************/
+
+#ifdef CONFIG_MM_KERNEL_HEAP
+void kmm_initialize(FAR void *heap_start, size_t heap_size);
+#endif
+
 /* Functions contained in umm_addregion.c ***********************************/
 
 #ifdef CONFIG_MM_USER_HEAP
@@ -268,11 +274,18 @@ void mm_takesemaphore(FAR struct mm_heap_s *heap);
 int  mm_trysemaphore(FAR struct mm_heap_s *heap);
 void mm_givesemaphore(FAR struct mm_heap_s *heap);
 
-/* Functions contained in umm_semaphore.c ***********************************/
+/* Functions contained in umm_sem.c ****************************************/
 
 #ifdef CONFIG_MM_USER_HEAP
 int  umm_trysemaphore(void);
 void umm_givesemaphore(void);
+#endif
+
+/* Functions contained in kmm_sem.c ****************************************/
+
+#ifdef CONFIG_MM_KERNEL_HEAP
+int  kmm_trysemaphore(void);
+void kmm_givesemaphore(void);
 #endif
 
 /* Functions contained in mm_malloc.c ***************************************/

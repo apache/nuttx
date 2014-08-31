@@ -1,7 +1,7 @@
 /************************************************************************
- * mm/mm_kernel.c
+ * mm/kmm_heapmember.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,12 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <assert.h>
-
-#include <nuttx/kmalloc.h>
-
-#if ((defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)) || \
-      defined(CONFIG_BUILD_KERNEL)) && defined(CONFIG_MM_KERNEL_HEAP)
+#if defined(CONFIG_MM_KERNEL_HEAP) && defined(CONFIG_DEBUG)
 
 /************************************************************************
  * Pre-processor definition
@@ -58,10 +53,6 @@
  * Public Data
  ************************************************************************/
 
-/* This is the kernel heap */
-
-struct mm_heap_s g_kmmheap;
-
 /************************************************************************
  * Private Functions
  ************************************************************************/
@@ -69,85 +60,6 @@ struct mm_heap_s g_kmmheap;
 /************************************************************************
  * Public Functions
  ************************************************************************/
-
-/************************************************************************
- * Name: kmm_initialize
- *
- * Description:
- *   Initialize the kernel heap data structures, providing the initial
- *   heap region.
- *
- * Parameters:
- *   heap_start - Address of the beginning of the (initial) memory region
- *   heap_size  - The size (in bytes) if the (initial) memory region.
- *
- * Return Value:
- *   None
- *
- ************************************************************************/
-
-void kmm_initialize(FAR void *heap_start, size_t heap_size)
-{
-  return mm_initialize(&g_kmmheap, heap_start, heap_size);
-}
-
-/************************************************************************
- * Name: kmm_addregion
- *
- * Description:
- *   This function adds a region of contiguous memory to the kernel heap.
- *
- * Parameters:
- *   heap_start - Address of the beginning of the memory region
- *   heap_size  - The size (in bytes) if the memory region.
- *
- * Return Value:
- *   None
- *
- ************************************************************************/
-
-void kmm_addregion(FAR void *heap_start, size_t heap_size)
-{
-  return mm_addregion(&g_kmmheap, heap_start, heap_size);
-}
-
-/************************************************************************
- * Name: kmm_trysemaphore
- *
- * Description:
- *   Try to take the kernel heap semaphore.
- *
- * Parameters:
- *   None
- *
- * Return Value:
- *   OK on success; a negated errno on failure
- *
- ************************************************************************/
-
-int kmm_trysemaphore(void)
-{
-  return mm_trysemaphore(&g_kmmheap);
-}
-
-/************************************************************************
- * Name: kmm_givesemaphore
- *
- * Description:
- *   Give the kernel heap semaphore.
- *
- * Parameters:
- *   None
- *
- * Return Value:
- *   OK on success; a negated errno on failure
- *
- ************************************************************************/
-
-void kmm_givesemaphore(void)
-{
-  return mm_givesemaphore(&g_kmmheap);
-}
 
 /************************************************************************
  * Name: kmm_heapmember
@@ -165,7 +77,6 @@ void kmm_givesemaphore(void)
  *
  ************************************************************************/
 
-#ifdef CONFIG_DEBUG
 bool kmm_heapmember(FAR void *mem)
 {
 #if CONFIG_MM_REGIONS > 1
@@ -205,6 +116,5 @@ bool kmm_heapmember(FAR void *mem)
 
 #endif
 }
-#endif
 
-#endif /* ((CONFIG_BUILD_PROTECTED && __KERNEL__) || CONFIG_BUILD_KERNEL)  && CONFIG_MM_KERNEL_HEAP*/
+#endif /* CONFIG_MM_KERNEL_HEAP && CONFIG_DEBUG */

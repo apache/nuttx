@@ -58,16 +58,19 @@ CSRCS += mm_realloc.c mm_zalloc.c
 
 # User allocator
 
-CSRCS += mm_user.c
+CSRCS += umm_initialize.c umm_addregion.c umm_sem.c
 CSRCS += umm_calloc.c umm_free.c umm_mallinfo.c umm_malloc.c
 CSRCS += umm_memalign.c umm_realloc.c umm_zalloc.c
 
 # Kernel allocator
 
 ifeq ($(CONFIG_MM_KERNEL_HEAP),y)
-CSRCS += mm_kernel.c
+CSRCS += kmm_initialize.c kmm_addregion.c kmm_sem.c
 CSRCS += kmm_calloc.c kmm_free.c kmm_mallinfo.c kmm_malloc.c
 CSRCS += kmm_memalign.c kmm_realloc.c kmm_zalloc.c
+ifeq ($(CONFIG_DEBUG),y)
+CSRCS += kmm_heapmember.c
+endif
 endif
 
 # An optional granule allocator
