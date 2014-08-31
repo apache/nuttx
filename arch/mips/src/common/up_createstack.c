@@ -159,9 +159,9 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
           /* Use the user-space allocator if this is a task or pthread */
 
 #if defined(CONFIG_DEBUG) && !defined(CONFIG_DEBUG_STACK)
-          tcb->stack_alloc_ptr = (uint32_t *)kuzalloc(stack_size);
+          tcb->stack_alloc_ptr = (uint32_t *)kumm_zalloc(stack_size);
 #else
-          tcb->stack_alloc_ptr = (uint32_t *)kumalloc(stack_size);
+          tcb->stack_alloc_ptr = (uint32_t *)kumm_malloc(stack_size);
 #endif
         }
 
