@@ -8324,3 +8324,8 @@
 	  operation is no longer supported (2014-8-31).
 	* configs/sama5d4-ek/kernel: Add a configuration for testing the
 	  kernel build configuration (still a work in progress) (2014-8-31).
+	* include/nuttx/arch.h, kmalloc.h, mm.h, sched/init/os_start.c,
+	  sched/sched_free.c, and arch/arm/src/sama5/sam_allocateheap.c: Clean
+	  up some kernel build heap allocation issues.  The Cortex-A kernel
+	  build now compiles without errors (but cannot link until brk() and
+	  sbrk() are implemented) (2014-8-31).
