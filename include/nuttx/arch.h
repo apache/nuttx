@@ -645,13 +645,14 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size);
  * Name: up_allocate_kheap
  *
  * Description:
- *   For the kernel build (CONFIG_BUILD_PROTECTED=y) with both kernel- and
- *   user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function allocates
- *   (and protects) the kernel-space heap.
+ *   For the kernel builds (CONFIG_BUILD_PROTECTED=y or
+ *   CONFIG_BUILD_KERNEL=y) there may be both kernel- and user-space heaps
+ *   as determined by CONFIG_MM_KERNEL_HEAP=y.  This function allocates (and
+ *   protects) the kernel-space heap.
  *
  ****************************************************************************/
 
-#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
+#ifdef CONFIG_MM_KERNEL_HEAP
 void up_allocate_kheap(FAR void **heap_start, size_t *heap_size);
 #endif
 

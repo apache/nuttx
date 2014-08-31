@@ -135,7 +135,7 @@ extern "C"
 #elif !defined(CONFIG_MM_KERNEL_HEAP)
 /* If this the kernel phase of a kernel build, and there are only user-space
  * allocators, then the following are defined in userspace.h as macros that
- * call into user-space via a header at the begining of the user-space blob.
+ * call into user-space via a header at the beginning of the user-space blob.
  */
 
 # define kmm_initialize(h,s)    /* Initialization done by kumm_initialize */
@@ -178,9 +178,11 @@ bool kmm_heapmember(FAR void *mem);
  * sched_garbagecollection().
  */
 
+#ifdef CONFIG_MM_USER_HEAP
 void sched_ufree(FAR void *address);
+#endif
 
-#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
+#if defined(CONFIG_MM_KERNEL_HEAP) && defined(__KERNEL__)
 void sched_kfree(FAR void *address);
 #else
 #  define sched_kfree(a) sched_ufree(a)

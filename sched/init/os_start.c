@@ -48,6 +48,7 @@
 #include  <nuttx/fs/fs.h>
 #include  <nuttx/net/net.h>
 #include  <nuttx/lib.h>
+#include  <nuttx/mm.h>
 #include  <nuttx/kmalloc.h>
 #include  <nuttx/init.h>
 
@@ -346,15 +347,16 @@ void os_start(void)
     FAR void *heap_start;
     size_t heap_size;
 
+#ifdef CONFIG_MM_USER_HEAP
     /* Get the user-mode heap from the platform specific code and configure
      * the user-mode memory allocator.
      */
 
     up_allocate_heap(&heap_start, &heap_size);
     kumm_initialize(heap_start, heap_size);
+#endif
 
-#if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
-     defined(CONFIG_MM_KERNEL_HEAP)
+#ifdef CONFIG_MM_KERNEL_HEAP
     /* Get the kernel-mode heap from the platform specific code and configure
      * the kernel-mode memory allocator.
      */

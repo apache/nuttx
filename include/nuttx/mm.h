@@ -65,10 +65,27 @@
 #  define CONFIG_MM_SMALL 1
 #endif
 
+/* Decide if there is a user heap.  CONFIG_MM_USER_HEAP=n does not not
+ * really that there is no user heap but, rather, that there is no
+ * user heap available from within the kernel.  The user heap is
+ * Available if:
+ *
+ *   1. The code is begin build for kernel space and this is a FLAT build
+ *      (CONFIG_BUILD_FLAT=y),
+ *   2. The code is begin build for kernel space and this is a protected
+ *      build (CONFIG_BUILD_PROTECTED=y), OR
+ *   3. The code is begin build for user space.
+ */
+
 #undef CONFIG_MM_USER_HEAP
-#if (!defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)) && \
-     !defined(CONFIG_BUILD_KERNEL)
-#  define CONFIG_MM_USER_HEAP
+#if !defined(CONFIG_BUILD_KERNEL) || !defined(__KERNEL__)
+#  define CONFIG_MM_USER_HEAP 1
+#endif
+
+/* The kernel heap is never accessible from user code */
+
+#ifndef __KERNEL__
+#  undef CONFIG_MM_KERNEL_HEAP
 #endif
 
 /* Chunk Header Definitions *************************************************/
