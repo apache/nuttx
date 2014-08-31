@@ -4291,7 +4291,7 @@ static void sam_sw_setup(struct sam_usbdev_s *priv)
   /* Allocate a pool of free DMA transfer descriptors */
 
   priv->dtdpool = (struct sam_dtd_s *)
-    kmemalign(16, CONFIG_SAMA5_UDPHS_NDTDS * sizeof(struct sam_dtd_s));
+    kmm_memalign(16, CONFIG_SAMA5_UDPHS_NDTDS * sizeof(struct sam_dtd_s));
   if (!priv->dtdpool)
      {
       udbg("ERROR: Failed to allocate the DMA transfer descriptor pool\n");

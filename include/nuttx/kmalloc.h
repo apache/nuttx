@@ -129,7 +129,7 @@ extern "C"
 # define kmalloc(s)             malloc(s)
 # define kzalloc(s)             zalloc(s)
 # define krealloc(p,s)          realloc(p,s)
-# define kmemalign(a,s)         memalign(a,s)
+# define kmm_memalign(a,s)      memalign(a,s)
 # define kfree(p)               free(p)
 
 #elif !defined(CONFIG_MM_KERNEL_HEAP)
@@ -146,12 +146,12 @@ extern "C"
 # define kmalloc(s)             umm_malloc(s)
 # define kzalloc(s)             umm_zalloc(s)
 # define krealloc(p,s)          umm_realloc(p,s)
-# define kmemalign(a,s)         umm_memalign(a,s)
+# define kmm_memalign(a,s)      umm_memalign(a,s)
 # define kfree(p)               umm_free(p)
 
 #else
-/* Otherwise, the kernel-space allocators are declared here and we can call
- * them directly.
+/* Otherwise, the kernel-space allocators are declared in include/nuttx/mm.h
+ * and we can call them directly.
  */
 
 void kmm_initialize(FAR void *heap_start, size_t heap_size);
@@ -162,7 +162,6 @@ void kmm_givesemaphore(void);
 FAR void *kmalloc(size_t size);
 FAR void *kzalloc(size_t size);
 FAR void *krealloc(FAR void *oldmem, size_t newsize);
-FAR void *kmemalign(size_t alignment, size_t size);
 void kfree(FAR void *mem);
 
 #ifdef CONFIG_DEBUG

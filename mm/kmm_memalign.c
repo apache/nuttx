@@ -58,7 +58,7 @@
  ****************************************************************************/
 
 /************************************************************************
- * Name: kmemalign
+ * Name: kmm_memalign
  *
  * Description:
  *   Allocate aligned memory in the kernel heap.
@@ -72,7 +72,7 @@
  *
  ************************************************************************/
 
-FAR void *kmemalign(size_t alignment, size_t size)
+FAR void *kmm_memalign(size_t alignment, size_t size)
 {
   return mm_memalign(&g_kmmheap, alignment, size);
 }

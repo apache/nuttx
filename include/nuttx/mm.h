@@ -337,6 +337,12 @@ FAR void *mm_zalloc(FAR struct mm_heap_s *heap, size_t size);
 FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
                       size_t size);
 
+/* Functions contained in kmm_memalign.c ************************************/
+
+#ifdef CONFIG_MM_KERNEL_HEAP
+FAR void *kmm_memalign(size_t alignment, size_t size);
+#endif
+
 /* Functions contained in mm_brkaddr.c **************************************/
 
 FAR void *mm_brkaddr(FAR struct mm_heap_s *heap, int region);

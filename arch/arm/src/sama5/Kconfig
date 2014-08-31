@@ -2684,7 +2684,7 @@ config SAMA5_EHCI_PREALLOCATE
 	---help---
 		Select this option to pre-allocate EHCI queue and descriptor
 		structure pools in .bss.  Otherwise, these pools will be
-		dynamically allocated using kmemalign().
+		dynamically allocated using kmm_memalign().
 
 config SAMA5_EHCI_REGDEBUG
 	bool "Enable low-level EHCI register debug"
