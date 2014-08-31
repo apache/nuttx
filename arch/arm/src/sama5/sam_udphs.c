@@ -3508,7 +3508,7 @@ static void sam_ep_freereq(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 #endif
   usbtrace(TRACE_EPFREEREQ, USB_EPNO(ep->eplog));
 
-  kfree(privreq);
+  kmm_free(privreq);
 }
 
 /****************************************************************************

@@ -125,7 +125,7 @@ int rtos_bridge_init(struct rgmp_bridge *b)
 	return 0;
 
 err1:
-	kfree(bridge);
+	kmm_free(bridge);
 err0:
 	return -1;
 }

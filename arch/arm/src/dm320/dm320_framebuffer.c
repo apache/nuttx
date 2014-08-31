@@ -726,7 +726,7 @@ static void dm320_freevideomemory(void)
 #ifndef CONFIG_DM320_VID0_DISABLE
   if (g_vid0base)
     {
-      kfree(g_vid0base);
+      kmm_free(g_vid0base);
       g_vid0base = NULL;
 #ifndef CONFIG_DM320_DISABLE_PINGPONG
       g_vid0ppbase = NULL;
@@ -737,7 +737,7 @@ static void dm320_freevideomemory(void)
 #ifndef CONFIG_DM320_VID1_DISABLE
   if (g_vid1base != 0)
     {
-      kfree(g_vid1base);
+      kmm_free(g_vid1base);
       g_vid1base = NULL;
     }
 #endif
@@ -745,7 +745,7 @@ static void dm320_freevideomemory(void)
 #ifndef CONFIG_DM320_OSD0_DISABLE
   if (g_osd0base != 0)
     {
-      kfree(g_osd0base);
+      kmm_free(g_osd0base);
       g_osd0base = NULL;
     }
 #endif
@@ -753,7 +753,7 @@ static void dm320_freevideomemory(void)
 #ifndef CONFIG_DM320_OSD1_DISABLE
   if (g_osd1base != 0)
     {
-      kfree(g_osd1base);
+      kmm_free(g_osd1base);
       g_osd1base = NULL;
     }
 #endif

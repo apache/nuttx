@@ -3524,7 +3524,7 @@ errout_with_clocking:
 
 errout_with_alloc:
   sem_destroy(&priv->exclsem);
-  kfree(priv);
+  kmm_free(priv);
   return NULL;
 }
 

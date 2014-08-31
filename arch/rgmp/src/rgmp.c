@@ -85,7 +85,7 @@ void *rtos_kmalloc(int size)
 
 void rtos_kfree(void *addr)
 {
-	kfree(addr);
+	kmm_free(addr);
 }
 
 /**

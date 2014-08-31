@@ -2500,7 +2500,7 @@ errout_with_ed:
   sam_edfree(ed);
 errout_with_semaphore:
   sam_givesem(&g_ohci.exclsem);
-  kfree(eplist);
+  kmm_free(eplist);
 errout:
   return ret;
 }
@@ -2577,7 +2577,7 @@ static int sam_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   /* And free the container */
 
   sem_destroy(&eplist->wdhsem);
-  kfree(eplist);
+  kmm_free(eplist);
   sam_givesem(&g_ohci.exclsem);
   return ret;
 }
@@ -2642,7 +2642,7 @@ static int sam_alloc(FAR struct usbhost_driver_s *drvr,
  *   Some hardware supports special memory in which request and descriptor data
  *   can be accessed more efficiently.  This method provides a mechanism to
  *   free that request/descriptor memory.  If the underlying hardware does not
- *   support such "special" memory, this functions may simply map to kfree().
+ *   support such "special" memory, this functions may simply map to kmm_free().
  *
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call

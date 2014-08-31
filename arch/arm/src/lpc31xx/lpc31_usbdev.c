@@ -1982,7 +1982,7 @@ static void lpc31_epfreereq(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s 
 #endif
 
   usbtrace(TRACE_EPFREEREQ, ((FAR struct lpc31_ep_s *)ep)->epphy);
-  kfree(privreq);
+  kmm_free(privreq);
 }
 
 /*******************************************************************************
@@ -2022,7 +2022,7 @@ static void lpc31_epfreebuffer(FAR struct usbdev_ep_s *ep, FAR void *buf)
 #ifdef CONFIG_USBDEV_DMAMEMORY
   usbdev_dma_free(buf);
 #else
-  kfree(buf);
+  kmm_free(buf);
 #endif
 }
 #endif

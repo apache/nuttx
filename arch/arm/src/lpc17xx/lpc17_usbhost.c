@@ -2003,7 +2003,7 @@ static int lpc17_alloc(FAR struct usbhost_driver_s *drvr,
  *   Some hardware supports special memory in which request and descriptor data can
  *   be accessed more efficiently.  This method provides a mechanism to free that
  *   request/descriptor memory.  If the underlying hardware does not support
- *   such "special" memory, this functions may simply map to kfree().
+ *   such "special" memory, this functions may simply map to kmm_free().
  *
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
@@ -2087,7 +2087,7 @@ static int lpc17_ioalloc(FAR struct usbhost_driver_s *drvr,
  *   Some hardware supports special memory in which IO data can  be accessed more
  *   efficiently.  This method provides a mechanism to free that IO buffer
  *   memory.  If the underlying hardware does not support such "special" memory,
- *   this functions may simply map to kfree().
+ *   this functions may simply map to kmm_free().
  *
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
