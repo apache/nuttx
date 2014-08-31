@@ -57,7 +57,7 @@
 #  include <nuttx/kmalloc.h>
 #  define lib_malloc(s)    kmalloc(s)
 #  define lib_zalloc(s)    kzalloc(s)
-#  define lib_realloc(p,s) krealloc(p,s)
+#  define lib_realloc(p,s) kmm_realloc(p,s)
 #  define lib_free(p)      kfree(p)
 #else
 #  include <cstdlib>

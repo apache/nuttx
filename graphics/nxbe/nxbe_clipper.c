@@ -115,7 +115,8 @@ static inline void nxbe_pushrectangle(FAR struct nxbe_clipstack_s *stack,
       int mxrects = stack->mxrects ? 2 * stack->mxrects : NX_INITIAL_STACKSIZE;
       struct nxbe_cliprect_s *newstack;
 
-      newstack = krealloc(stack->stack, sizeof(struct nxbe_cliprect_s) * mxrects);
+      newstack = kmm_realloc(stack->stack,
+                             sizeof(struct nxbe_cliprect_s) * mxrects);
       if (!newstack)
         {
           gdbg("Failed to reallocate stack\n");

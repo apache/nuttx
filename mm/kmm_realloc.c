@@ -56,7 +56,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: krealloc
+ * Name: kmm_realloc
  *
  * Description:
  *   Re-allocate memory in the kernel heap.
@@ -70,7 +70,7 @@
  *
  ****************************************************************************/
 
-FAR void *krealloc(FAR void *oldmem, size_t newsize)
+FAR void *kmm_realloc(FAR void *oldmem, size_t newsize)
 {
   return mm_realloc(&g_kmmheap, oldmem, newsize);
 }

@@ -1343,7 +1343,7 @@ static int cc3000_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           rv = priv->rx_buffer_max_len;
           flags = irqsave();
           priv->rx_buffer_max_len = *psize;
-          priv->rx_buffer.pbuffer = krealloc(priv->rx_buffer.pbuffer,*psize);
+          priv->rx_buffer.pbuffer = kmm_realloc(priv->rx_buffer.pbuffer,*psize);
           irqrestore(flags);
           DEBUGASSERT(priv->rx_buffer.pbuffer);
           *psize = rv;

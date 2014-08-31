@@ -113,7 +113,7 @@ static inline int group_addmember(FAR struct task_group_s *group, pid_t pid)
         }
 
       newmembers = (FAR pid_t *)
-        krealloc(group->tg_members, sizeof(pid_t) * newmax);
+        kmm_realloc(group->tg_members, sizeof(pid_t) * newmax);
 
       if (!newmembers)
         {

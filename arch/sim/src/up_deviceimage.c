@@ -1,7 +1,7 @@
 /****************************************************************************
  * up_deviceimage.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -272,7 +272,7 @@ char *up_deviceimage(void)
         if (strm.avail_out == 0)
           {
             int newbufsize = bufsize + 128*1024;
-            char *newbuffer = krealloc(pbuffer, newbufsize);
+            char *newbuffer = kmm_realloc(pbuffer, newbufsize);
             if (!newbuffer)
               {
                 kfree(pbuffer);
@@ -292,7 +292,7 @@ char *up_deviceimage(void)
               */
 
              int newbufsize = bufsize - strm.avail_out;
-             char *newbuffer = krealloc(pbuffer, newbufsize);
+             char *newbuffer = kmm_realloc(pbuffer, newbufsize);
              if (!newbuffer)
                {
                 kfree(pbuffer);

@@ -96,20 +96,18 @@ extern "C"
 
 # define kumalloc(s)             malloc(s)
 # define kuzalloc(s)             zalloc(s)
-# define kurealloc(p,s)          realloc(p,s)
-# define kumemalign(a,s)         memalign(a,s)
+# define umm_realloc(p,s)        realloc(p,s)
+# define umm_memalign(a,s)       memalign(a,s)
 # define kufree(p)               free(p)
 
 #else
-/* In the kernel-phase of the kernel build, the following are defined
- * in userspace.h as macros that call into user-space via a header at
- * the begining of the user-space blob.
+/* In the kernel-phase of the protected build, the same macros are defined
+ * in userspace.h as macros.  Those versions call into user-space via a
+ * header at the beginning of the user-space blob.
  */
 
 # define kumalloc(s)             umm_malloc(s)
 # define kuzalloc(s)             umm_zalloc(s)
-# define kurealloc(p,s)          umm_realloc(p,s)
-# define kumemalign(a,s)         umm_memalign(a,s)
 # define kufree(p)               umm_free(p)
 
 #endif
@@ -128,7 +126,7 @@ extern "C"
 
 # define kmalloc(s)             malloc(s)
 # define kzalloc(s)             zalloc(s)
-# define krealloc(p,s)          realloc(p,s)
+# define kmm_realloc(p,s)       realloc(p,s)
 # define kmm_memalign(a,s)      memalign(a,s)
 # define kfree(p)               free(p)
 
@@ -145,7 +143,7 @@ extern "C"
 
 # define kmalloc(s)             umm_malloc(s)
 # define kzalloc(s)             umm_zalloc(s)
-# define krealloc(p,s)          umm_realloc(p,s)
+# define kmm_realloc(p,s)       umm_realloc(p,s)
 # define kmm_memalign(a,s)      umm_memalign(a,s)
 # define kfree(p)               umm_free(p)
 
@@ -154,19 +152,9 @@ extern "C"
  * and we can call them directly.
  */
 
-void kmm_initialize(FAR void *heap_start, size_t heap_size);
-void kmm_addregion(FAR void *heapstart, size_t heapsize);
-int  kmm_trysemaphore(void);
-void kmm_givesemaphore(void);
-
 FAR void *kmalloc(size_t size);
 FAR void *kzalloc(size_t size);
-FAR void *krealloc(FAR void *oldmem, size_t newsize);
 void kfree(FAR void *mem);
-
-#ifdef CONFIG_DEBUG
-bool kmm_heapmember(FAR void *mem);
-#endif
 #endif
 
 /* Functions defined in sched/sched_kfree.c **********************************/

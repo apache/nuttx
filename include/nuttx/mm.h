@@ -284,6 +284,12 @@ void kmm_initialize(FAR void *heap_start, size_t heap_size);
 void umm_addregion(FAR void *heapstart, size_t heapsize);
 #endif
 
+/* Functions contained in kmm_addregion.c ***********************************/
+
+#ifdef CONFIG_MM_USER_HEAP
+void kmm_addregion(FAR void *heapstart, size_t heapsize);
+#endif
+
 /* Functions contained in mm_sem.c ******************************************/
 
 void mm_seminitialize(FAR struct mm_heap_s *heap);
@@ -318,6 +324,12 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem);
 FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
                      size_t size);
 
+/* Functions contained in kmm_realloc.c *************************************/
+
+#ifdef CONFIG_MM_KERNEL_HEAP
+FAR void *kmm_realloc(FAR void *oldmem, size_t newsize);
+#endif
+
 /* Functions contained in mm_calloc.c ***************************************/
 
 FAR void *mm_calloc(FAR struct mm_heap_s *heap, size_t n, size_t elem_size);
@@ -341,6 +353,12 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
 
 #ifdef CONFIG_MM_KERNEL_HEAP
 FAR void *kmm_memalign(size_t alignment, size_t size);
+#endif
+
+/* Functions contained in kmm_heapmember.c **********************************/
+
+#if defined(CONFIG_MM_KERNEL_HEAP) && defined(CONFIG_DEBUG)
+bool kmm_heapmember(FAR void *mem);
 #endif
 
 /* Functions contained in mm_brkaddr.c **************************************/

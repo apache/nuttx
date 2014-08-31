@@ -70,15 +70,15 @@
 
 #  define lib_malloc(s)     kmalloc(s)
 #  define lib_zalloc(s)     kzalloc(s)
-#  define lib_realloc(p,s)  krealloc(p,s)
-#  define lib_memalign(p,s) krealloc(p,s)
+#  define lib_realloc(p,s)  kmm_realloc(p,s)
+#  define lib_memalign(p,s) kmm_memalign(p,s)
 #  define lib_free(p)       kfree(p)
 
    /* User-accessible allocations */
 
 #  define lib_umalloc(s)    kumalloc(s)
 #  define lib_uzalloc(s)    kuzalloc(s)
-#  define lib_urealloc(p,s) kurealloc(p,s)
+#  define lib_urealloc(p,s) umm_realloc(p,s)
 #  define lib_ufree(p)      kufree(p)
 
 #else

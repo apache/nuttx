@@ -98,7 +98,7 @@ int unsetenv(FAR const char *name)
       /* Reallocate the new environment buffer */
 
       newsize = group->tg_envsize;
-      newenvp = (FAR char *)kurealloc(group->tg_envp, newsize);
+      newenvp = (FAR char *)umm_realloc(group->tg_envp, newsize);
       if (!newenvp)
         {
           set_errno(ENOMEM);
