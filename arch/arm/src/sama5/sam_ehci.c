@@ -3457,7 +3457,7 @@ static int sam_epalloc(FAR struct usbhost_driver_s *drvr,
 
   /* Allocate a endpoint information structure */
 
-  epinfo = (struct sam_epinfo_s *)kzalloc(sizeof(struct sam_epinfo_s));
+  epinfo = (struct sam_epinfo_s *)kmm_zalloc(sizeof(struct sam_epinfo_s));
   if (!epinfo)
     {
       usbhost_trace1(EHCI_TRACE1_EPALLOC_FAILED, 0);
