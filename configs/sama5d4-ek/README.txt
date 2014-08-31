@@ -3526,6 +3526,8 @@ Configurations
       the description below and the section above entitled "Creating and
       Using DRAMBOOT" for more information
     elf:  Demonstrates execution of ELF file from a file system.
+    kernel: A configuration used to test the SAMA5D kenel build
+      configuration.
     nsh:  This is an NuttShell (NSH) configuration that supports extensive
       functionality as possible (unlike the minimal ramtest configuration).
       See the detailed description below for a summary of the feature
@@ -3722,6 +3724,27 @@ Configurations
                  http://www.nuttx.org/doku.php?id=wiki:nxinternal:memconfigs#task_create
 
       2014-8-29: System call interface verified.
+
+  kernel:
+    A configuration used to test the SAMA5D kenel build configuration.  This configuration is based on the elf configuration.  Primary differences in
+    the two configurations are noted below:
+
+    Build Setup -> Build Configuration -> Memory Organization
+      CONFIG_BUILD_KERNEL=y                     : Kernel build enabled
+
+    RTOS Features -> Tasks and Scheduling
+      CONFIG_INIT_FILEPATH=y                    : Start-up is via an ELF file
+      CONFIG_USER_INITPATH="/bin/init"          : The location of the startup
+
+    RTOS Features -> System call support
+      CONFIG_SYS_RESERVED=5                     : More reserved SYSCALLs
+
+    Memory Management
+      CONFIG_MM_KERNEL_HEAP=y                   : Enable a kernel heap
+      CONFIG_MM_KERNEL_HEAPSIZE=8192            : (temporary.. will change)
+
+    More to come... this is still a work in progress as of this writing.
+    Since this configuration is based on the ELF configuration, all of the notes for that configuration apply.
 
   nsh:
 
