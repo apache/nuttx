@@ -1578,7 +1578,7 @@ int arch_tcinitialize(int minor)
 errout_with_priv:
   sem_destroy(&priv->devsem);
 #ifdef CONFIG_TOUCHSCREEN_MULTIPLE
-  kfree(priv);
+  kmm_free(priv);
 #endif
   return ret;
 }
