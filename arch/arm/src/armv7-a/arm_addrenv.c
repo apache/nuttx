@@ -150,13 +150,13 @@ static void set_l2_entry(FAR uint32_t *l2table, uintptr_t paddr,
  * Name: up_addrenv_create_region
  *
  * Description:
- *   Destroy one memory region.
+ *   Create one memory region.
  *
  ****************************************************************************/
 
-int up_addrenv_create_region(FAR uintptr_t **list, unsigned int listlen,
-                             uintptr_t vaddr, size_t regionsize,
-                             uint32_t mmuflags)
+static int up_addrenv_create_region(FAR uintptr_t **list,
+                                    unsigned int listlen, uintptr_t vaddr,
+                                    size_t regionsize, uint32_t mmuflags)
 {
   irqstate_t flags;
   uintptr_t paddr;
@@ -258,8 +258,8 @@ int up_addrenv_create_region(FAR uintptr_t **list, unsigned int listlen,
  *
  ****************************************************************************/
 
-void up_addrenv_destroy_region(FAR uintptr_t **list, unsigned int listlen,
-                               uintptr_t vaddr)
+static void up_addrenv_destroy_region(FAR uintptr_t **list,
+                                      unsigned int listlen, uintptr_t vaddr)
 {
   irqstate_t flags;
   uintptr_t paddr;

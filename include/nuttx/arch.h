@@ -676,10 +676,10 @@ void up_allocate_pgheap(FAR void **heap_start, size_t *heap_size);
  *
  * Description:
  *   If there is a page allocator in the configuration and if and MMU is
- *   available to map physcal addresses to virtual address, then function
+ *   available to map physical addresses to virtual address, then function
  *   must be provided by the platform-specific code.  This is part of the
  *   implementation of sbrk().  This function will allocate the requested
- *   number of pages using the page allocator and map them into consecuive
+ *   number of pages using the page allocator and map them into consecutive
  *   virtual addresses beginning with 'brkaddr'
  *
  *   NOTE:  This function does not use the up_ naming standard because it
