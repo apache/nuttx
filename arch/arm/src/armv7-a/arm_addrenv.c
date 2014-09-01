@@ -199,7 +199,7 @@ static int up_addrenv_create_region(FAR uintptr_t **list,
         }
 
       DEBUGASSERT(MM_ISALIGNED(paddr));
-      list[i] = (FAR uint32_t *)paddr;
+      list[i] = (FAR uintptr_t *)paddr;
 
       /* Temporarily map the page into the virtual address space */
 
@@ -241,7 +241,7 @@ static int up_addrenv_create_region(FAR uintptr_t **list,
                         (uintptr_t)l2table +
                         ENTRIES_PER_L2TABLE * sizeof(uint32_t));
 
-      /* Restore the original L1 page table entry */
+      /* Restore the scratch section L1 page table entry */
 
       mmu_l1_restore(ARCH_SCRATCH_VBASE, l1save);
       irqrestore(flags);
@@ -300,7 +300,7 @@ static void up_addrenv_destroy_region(FAR uintptr_t **list,
                 }
             }
 
-          /* Restore the original L1 page table entry */
+          /* Restore the scratch section L1 page table entry */
 
           mmu_l1_restore(ARCH_SCRATCH_VBASE, l1save);
           irqrestore(flags);

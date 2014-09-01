@@ -689,7 +689,7 @@ void up_allocate_pgheap(FAR void **heap_start, size_t *heap_size);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_MM_PGALLOC) && defined(CONFIG_ARCH_USE_MMU)
+#ifdef CONFIG_ARCH_ADDRENV
 int pgalloc(uintptr_t vaddr, unsigned int npages);
 #endif
 

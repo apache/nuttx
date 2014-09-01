@@ -47,7 +47,7 @@
 #include <nuttx/mm.h>
 #include <nuttx/pgalloc.h>
 
-#if defined(CONFIG_MM_PGALLOC) && defined(CONFIG_ARCH_USE_MMU)
+#ifdef CONFIG_ARCH_ADDRENV
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -115,7 +115,7 @@ FAR void *mm_sbrk(FAR struct mm_heap_s *heap, intptr_t incr,
 
       /* Check if this increment would exceed the maximum break value */
 
-      if ((maxbreak - brkaddr) < (pgincr << MM_PGSHIFT))
+      if ((brkaddr > 0) && ((maxbreak - brkaddr) < (pgincr << MM_PGSHIFT)))
         {
           err = ENOMEM;
           goto errout;
@@ -143,4 +143,4 @@ errout:
   set_errno(err);
   return (FAR void *)-1;
 }
-#endif /* CONFIG_MM_PGALLOC && CONFIG_ARCH_USE_MMU */
+#endif /* CONFIG_ARCH_ADDRENV */

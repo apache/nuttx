@@ -89,7 +89,7 @@ CMN_CSRCS += up_task_start.c up_pthread_start.c up_stackframe.c
 endif
 
 ifeq ($(CONFIG_ARCH_ADDRENV),y)
-CMN_CSRCS += arm_addrenv.c
+CMN_CSRCS += arm_addrenv.c arm_pgalloc.c
 endif
 
 ifeq ($(CONFIG_ELF),y)

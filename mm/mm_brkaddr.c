@@ -55,7 +55,8 @@
  * Name: mm_brkaddr
  *
  * Description:
- *   Return the break address of a heap region
+ *   Return the break address of a heap region.  Zero is returned if the
+ *   memory region is not initialized.
  *
  ****************************************************************************/
 
@@ -65,5 +66,5 @@ FAR void *mm_brkaddr(FAR struct mm_heap_s *heap, int region)
   DEBUGASSERT(heap && region < heap->mm_nregions);
 
   brkaddr = (uintptr_t)heap->mm_heapend[region];
-  return (FAR void *)(brkaddr + SIZEOF_MM_ALLOCNODE);
+  return brkaddr ? (FAR void *)(brkaddr + SIZEOF_MM_ALLOCNODE) : 0;
 }

@@ -135,9 +135,7 @@ struct group_addrenv_s
 {
   FAR uintptr_t *text[ARCH_TEXT_NSECTS];
   FAR uintptr_t *data[ARCH_DATA_NSECTS];
-#if 0 /* Not yet implemented */
   FAR uintptr_t *heap[ARCH_HEAP_NSECTS];
-#endif
 };
 
 typedef struct group_addrenv_s group_addrenv_t;

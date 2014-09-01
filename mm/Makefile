@@ -56,10 +56,8 @@ CSRCS += mm_shrinkchunk.c
 CSRCS += mm_brkaddr.c mm_calloc.c mm_extend.c mm_free.c mm_mallinfo.c
 CSRCS += mm_malloc.c mm_memalign.c mm_realloc.c mm_zalloc.c
 
-ifeq ($(CONFIG_MM_PGALLOC),y)
-ifeq ($(CONFIG_ARCH_USE_MMU),y)
+ifeq ($(CONFIG_ARCH_ADDRENV),y)
 CSRCS += mm_sbrk.c
-endif
 endif
 
 # User allocator
@@ -68,10 +66,8 @@ CSRCS += umm_initialize.c umm_addregion.c umm_sem.c
 CSRCS += umm_brkaddr.c umm_calloc.c umm_extend.c umm_free.c umm_mallinfo.c
 CSRCS += umm_malloc.c umm_memalign.c umm_realloc.c umm_zalloc.c
 
-ifeq ($(CONFIG_MM_PGALLOC),y)
-ifeq ($(CONFIG_ARCH_USE_MMU),y)
+ifeq ($(CONFIG_ARCH_ADDRENV),y)
 CSRCS += umm_sbrk.c
-endif
 endif
 
 # Kernel allocator
@@ -81,10 +77,8 @@ CSRCS += kmm_initialize.c kmm_addregion.c kmm_sem.c
 CSRCS += kmm_brkaddr.c kmm_calloc.c kmm_extend.c kmm_free.c kmm_mallinfo.c
 CSRCS += kmm_malloc.c kmm_memalign.c kmm_realloc.c kmm_zalloc.c
 
-ifeq ($(CONFIG_MM_PGALLOC),y)
-ifeq ($(CONFIG_ARCH_USE_MMU),y)
+ifeq ($(CONFIG_ARCH_ADDRENV),y)
 CSRCS += kmm_sbrk.c
-endif
 endif
 
 ifeq ($(CONFIG_DEBUG),y)

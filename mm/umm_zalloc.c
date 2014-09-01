@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdlib.h>
+#include <string.h>
 
 #include <nuttx/mm.h>
 
@@ -69,7 +70,22 @@
 
 FAR void *zalloc(size_t size)
 {
+#ifdef CONFIG_ARCH_ADDRENV
+  /* Use malloc() because it implements the sbrk() logic */
+
+  FAR void *alloc = malloc(size);
+  if (alloc)
+    {
+       memset(alloc, 0, size);
+    }
+
+  return alloc;
+
+#else
+  /* Use mm_zalloc() becuase it implements the clear */
+
   return mm_zalloc(&g_mmheap, size);
+#endif
 }
 
 #endif /* CONFIG_MM_USER_HEAP */

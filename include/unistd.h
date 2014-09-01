@@ -47,7 +47,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* The number of functions that may be registerd to be called
+/* The number of functions that may be registered to be called
  * at program exit.
  */
 
@@ -149,7 +149,7 @@ ssize_t write(int fd, FAR const void *buf, size_t nbytes);
 
 /* Memory management */
 
-#if defined(CONFIG_MM_PGALLOC) && defined(CONFIG_ARCH_USE_MMU)
+#ifdef CONFIG_ARCH_ADDRENV
 FAR void *sbrk(intptr_t incr);
 #endif
 

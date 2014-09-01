@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdlib.h>
+#include <unistd.h>
 
 #include <nuttx/mm.h>
 
@@ -85,7 +86,39 @@
 
 FAR void *malloc(size_t size)
 {
+#ifdef CONFIG_ARCH_ADDRENV
+  FAR void *brkaddr;
+  FAR void *mem;
+
+  /* Loop until we successfully allocate the memory or until an error
+   * occurs. If we fail to allocate memory on the first pass, then call
+   * sbrk to extend the heap by one page.  This may require several
+   * passes if more the size of the allocation is more than one page.
+   *
+   * An alternative would be to increase the size of the heap by the
+   * full requested allocation in sbrk().  Then the loop should never
+   * execute more than twice (but more memory than we need may be
+   * allocated).
+   */
+
+  do
+    {
+      mem = mm_malloc(&g_mmheap, size);
+      if (!mem)
+        {
+          brkaddr = sbrk(size);
+          if (brkaddr == (FAR void *)-1)
+            {
+              return NULL;
+            }
+        }
+    }
+  while (mem == NULL);
+
+  return mem;
+#else
   return mm_malloc(&g_mmheap, size);
+#endif
 }
 
 #endif /* CONFIG_MM_USER_HEAP */

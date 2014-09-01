@@ -397,14 +397,14 @@ FAR void *kmm_brkaddr(int region);
 
 /* Functions contained in mm_sbrk.c *****************************************/
 
-#if defined(CONFIG_MM_PGALLOC) && defined(CONFIG_ARCH_USE_MMU)
+#ifdef CONFIG_ARCH_ADDRENV
 FAR void *mm_sbrk(FAR struct mm_heap_s *heap, intptr_t incr,
                   uintptr_t maxbreak);
 #endif
 
 /* Functions contained in kmm_sbrk.c ****************************************/
 
-#if defined(CONFIG_MM_PGALLOC) && defined(CONFIG_ARCH_USE_MMU)
+#ifdef CONFIG_ARCH_ADDRENV
 FAR void *kmm_sbrk(intptr_t incr);
 #endif
 
