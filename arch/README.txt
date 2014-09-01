@@ -287,9 +287,6 @@ arch/sh - SuperH and related Hitachi/Renesas microcontrollers
     arch/sh/include/shs and arch/sh/src/sh1
         Support for the SH-1 processor.
 
-arch/8051 - 8051/52 microcontrollers
-    8051 Microcontroller.  This port is not quite ready for prime time.
-
 arch/x86 - Intel x86 architectures
     This directory holds related, 32- and 64-bit architectures from Intel.
     At present, this includes the following subdirectories:
