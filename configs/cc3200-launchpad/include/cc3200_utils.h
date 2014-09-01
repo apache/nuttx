@@ -39,8 +39,6 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-#define HWREG(x)            (*((volatile unsigned long *)(x)))
-
 #define CONSOLE_BAUD_RATE   115200
 
 #define PAD_CONFIG_BASE     0x4402E0A0
@@ -137,8 +135,6 @@ static const unsigned long g_cc3200_pinmap[64] =
  * Public Functions
  ************************************************************************************/
 
-void cc3200_putc(char c);
-char cc3200_getc(void);
 void cc3200_print(char* str);
 void cc3200_pin_config_set(uint32_t pin, uint32_t pin_strength, uint32_t pin_type);
 void cc3200_pin_mode_set(uint32_t pin, uint32_t pin_mode);

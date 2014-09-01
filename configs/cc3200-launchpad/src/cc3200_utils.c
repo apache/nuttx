@@ -39,39 +39,14 @@
 #include <sys/types.h>
 #include <arch/board/cc3200_utils.h>
 
+#include "nuttx/arch.h"
+#include "up_arch.h"
+
 #include "cc3200_launchpad.h"
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
-
-/************************************************************************************
- * Name: cc3200_putc
- ************************************************************************************/
-
-void cc3200_putc(char c)
-{
-  while(HWREG(0x4000C000 + 0x00000018) & 0x00000020)
-    ;
-
-  HWREG(0x4000C000) = c;
-}
-
-/************************************************************************************
- * Name: cc3200_getc
- ************************************************************************************/
-
-char cc3200_getc(void)
-{
-  if (!(HWREG(0x4000C000 + 0x00000018) & 0x00000010))
-    {
-      return HWREG(0x4000C000);
-    }
-  else
-    {
-      return -1;
-    }
-}
 
 /************************************************************************************
  * Name: cc3200_print
@@ -81,7 +56,7 @@ void cc3200_print(char* str)
 {
   while (str && *str != '\0')
     {
-      cc3200_putc(*str++);
+      up_putc(*str++);
     }
 }
 
@@ -98,15 +73,15 @@ void cc3200_pin_config_set(uint32_t pin, uint32_t pin_strength, uint32_t pin_typ
   switch (pin_type)
     {
     case PIN_TYPE_ANALOG:
-      HWREG(0x4402E144) |= ((0x80 << pad) & (0x1E << 8));
+      putreg32(getreg32(0x4402E144) | ((0x80 << pad) & (0x1E << 8)), 0x4402E144);
       pad = ((pad << 2) + PAD_CONFIG_BASE);
-      HWREG(pad) |= 0xC00;
+      putreg32(getreg32(pad) | 0xC00, pad);
       break;
 
     default:
-      HWREG(0x4402E144) &= ~((0x80 << pad) & (0x1E << 8));
+      putreg32(getreg32(0x4402E144) & ~((0x80 << pad) & (0x1E << 8)), 0x4402E144);
       pad = ((pad << 2) + PAD_CONFIG_BASE);
-      HWREG(pad) = ((HWREG(pad) & ~(PAD_STRENGTH_MASK | PAD_TYPE_MASK)) | (pin_strength | pin_type ));
+      putreg32(((getreg32(pad) & ~(PAD_STRENGTH_MASK | PAD_TYPE_MASK)) | (pin_strength | pin_type )), pad);
       break;
     }
 }
@@ -121,7 +96,7 @@ void cc3200_pin_mode_set(uint32_t pin, uint32_t pin_mode)
 
   pad = g_cc3200_pinmap[pin & 0x3F];
   pad = ((pad << 2) + PAD_CONFIG_BASE);
-  HWREG(pad) = (((HWREG(pad) & ~PAD_MODE_MASK) |  pin_mode) & ~(3<<10));
+  putreg32( (((getreg32(pad) & ~PAD_MODE_MASK) |  pin_mode) & ~(3<<10)), pad);
 }
 
 /************************************************************************************
@@ -142,40 +117,40 @@ void cc3200_init(void)
 {
   uint8_t x=16;
 
-  HWREG(0x4402F064) |= 0x800000;
-  HWREG(0x4402F800  + 0x00000418) |= (1<<4);
-  HWREG(0x4402E16C) |= 0x3C;
-  HWREG(0x44025000 + 0x00000048) |= 0x00000001;
+  putreg32(getreg32(0x4402F064) | 0x800000,0x4402F064);
+  putreg32(getreg32(0x4402F800  + 0x00000418) | (1<<4), 0x4402F800  + 0x00000418);
+  putreg32(getreg32(0x4402E16C) | 0x3C, 0x4402E16C);
+  putreg32(getreg32(0x44025000 + 0x00000048) | 0x00000001, 0x44025000 + 0x00000048);
   while(--x)
     ;
-  HWREG(0x44025000 + 0x00000048) &= ~0x00000001;
-  HWREG(0x4402F804) = 0x0;
-  HWREG(0x4402F804) = 0x1;
+  putreg32(getreg32(0x44025000 + 0x00000048) & ~0x00000001, 0x44025000 + 0x00000048);
+  putreg32(0x0, 0x4402F804);
+  putreg32(0x1, 0x4402F804);
 
-  if (((HWREG(0x4402F0C8) & 0xFF) == 0x2))
+  if (((getreg32(0x4402F0C8) & 0xFF) == 0x2))
     {
-      HWREG(0x4402E110) = ((HWREG(0x4402E110) & ~0xC0F) | 0x2);
-      HWREG(0x4402E114) = ((HWREG(0x4402E110) & ~0xC0F) | 0x2);
+      putreg32((getreg32(0x4402E110) & ~0xC0F) | 0x2, 0x4402E110);
+      putreg32((getreg32(0x4402E114) & ~0xC0F) | 0x2, 0x4402E114);
     }
 
-  HWREG(0x4402E184) |= 0x2;
+  putreg32(getreg32(0x4402E184) | 0x2, 0x4402E184);
 
-  if ((HWREG(0x4402E0A4) & 0xF) == 0x1)
+  if ((getreg32(0x4402E0A4) & 0xF) == 0x1)
     {
-      HWREG(0x4402E0A4) = ((HWREG(0x4402E0A4) & ~0xF));
+      putreg32(getreg32(0x4402E0A4) & ~0xF, 0x4402E0A4);
     }
 
-  if ((HWREG(0x4402E0A8) & 0xF) == 0x1)
+  if ((getreg32(0x4402E0A8) & 0xF) == 0x1)
     {
-      HWREG(0x4402E0A8) = ((HWREG(0x4402E0A8) & ~0xF));
+      putreg32(getreg32(0x4402E0A8) & ~0xF, 0x4402E0A8);
     }
 
-  if (((HWREG(0x4402DC78) >> 22) & 0xF) == 0xE)
+  if (((getreg32(0x4402DC78) >> 22) & 0xF) == 0xE)
     {
-      HWREG(0x4402F0B0) = ((HWREG(0x4402F0B0) & ~(0x00FC0000))|(0x32 << 18));
+      putreg32((getreg32(0x4402F0B0) & ~(0x00FC0000)) | (0x32 << 18), 0x4402F0B0);
     }
   else
     {
-      HWREG(0x4402F0B0) = ((HWREG(0x4402F0B0) & ~(0x00FC0000))|(0x29 << 18));
+      putreg32((getreg32(0x4402F0B0) & ~(0x00FC0000)) | (0x29 << 18), 0x4402F0B0);
     }
 }
