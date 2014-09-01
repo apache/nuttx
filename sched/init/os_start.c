@@ -218,6 +218,10 @@ static FAR struct task_tcb_s g_idletcb;
 
 static FAR const char g_idlename[] = "Idle Task";
 
+/* This the IDLE idle threads argument list. */
+
+static char *g_idleargv[2];
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -311,13 +315,13 @@ void os_start(void)
    * and there is no support that yet.
    */
 
-#if !defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)
 #if CONFIG_TASK_NAME_SIZE > 0
-  g_idletcb.argv[0] = g_idletcb.cmn.name;
+  g_idleargv[0]  = g_idletcb.cmn.name;
 #else
-  g_idletcb.argv[0] = (char*)g_idlename;
+  g_idleargv[0]  = (FAR char *)g_idlename;
 #endif /* CONFIG_TASK_NAME_SIZE */
-#endif /* !CONFIG_BUILD_PROTECTED && !CONFIG_BUILD_KERNEL */
+  g_idleargv[1]  = NULL;
+  g_idletcb.argv = &g_idleargv;
 
   /* Then add the idle task's TCB to the head of the ready to run list */
 
