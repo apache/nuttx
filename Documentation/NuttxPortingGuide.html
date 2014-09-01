@@ -1870,7 +1870,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 <p>
   <b>Description</b>.
   Allocate a stack frame in the TCB's stack to hold thread-specific data.
-  This function may be called anytime after <code>up_create_stack()</code> or <code>up_use_stack()</code> have been called but before the task has been started.
+  This function may be called any time after <code>up_create_stack()</code> or <code>up_use_stack()</code> have been called but before the task has been started.
 </p>
 <p>
   Thread data may be kept in the stack (instead of in the TCB) if it is accessed by the user code directly.
@@ -1889,9 +1889,6 @@ The system can be re-made subsequently by just typing <code>make</code>.
     This will still be the initial value of the stack pointer when the task is started.
   </li>
 </ul>
-<p>
-  This API is <i>NOT</i> required if <code>CONFIG_BUILD_PROTECTED</code> and <code>CONFIG_BUILD_KERNEL</code> are undefined.
-</p>
 <p><b>Input Parameters:</b></p>
 <ul>
   <li>
