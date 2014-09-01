@@ -8346,3 +8346,6 @@
 	* implementation of sbrk() (2014-9-1).
 	* arch/arm/src/armv7-a/arm_pgalloc.c, mm/umm_malloc.c, and mm_zalloc.c:
 	  Completes the implementation of sbrk() (untested) (2014-9-1).
+	* configs/cc3200-launchpad:  Updates to the CC3200-Launchpad configuration
+	  for better compatibility.  From Jim Ewing (2014-9-1).
+
