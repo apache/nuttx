@@ -47,6 +47,7 @@
 
 #include "chip/cc3200_memorymap.h"
 #include "tiva_start.h"
+#include "up_arch.h"
 #include "up_internal.h"
 
 #include "cc3200_launchpad.h"
@@ -71,24 +72,24 @@
 
 static void cc3200_uart0_init(void)
 {
-  HWREG(0x44025080) |= 0x01;
+  putreg32(getreg32(0x44025080) | 0x01, 0x44025080);
 
   cc3200_pin_type_uart(PIN_55, PIN_MODE_3);
   cc3200_pin_type_uart(PIN_57, PIN_MODE_3);
 
-  while(HWREG(0x4000C018) & 0x08)
+  while(getreg32(0x4000C018) & 0x08)
     {
     }
 
-  HWREG(0x4000C02C) &= ~(0x00000010);
-  HWREG(0x4000C030) &= ~(0x01 | 0x100 | 0x200);
-  HWREG(0x4000C030) &= ~(0x20);
+  putreg32(getreg32(0x4000C02C) & ~(0x00000010), 0x4000C02C);
+  putreg32(getreg32(0x4000C030) & ~(0x01 | 0x100 | 0x200), 0x4000C030);
+  putreg32(getreg32(0x4000C030) & ~(0x20), 0x4000C030);
 
-  HWREG(0x4000C024)  = ((((80000000 * 8) / 115200) + 1) / 2) / 64;
-  HWREG(0x4000C028)  = ((((80000000 * 8) / 115200) + 1) / 2) % 64;
+  putreg32(((((80000000 * 8) / 115200) + 1) / 2) / 64, 0x4000C024);
+  putreg32(((((80000000 * 8) / 115200) + 1) / 2) % 64, 0x4000C028);
 
-  HWREG(0x4000C02C)  = (0x60 | 0x82 | 0x10);
-  HWREG(0x4000C030) |= (0x01 | 0x100 | 0x200);
+  putreg32((0x60 | 0x82 | 0x10), 0x4000C02C);
+  putreg32(getreg32(0x4000C030) | (0x01 | 0x100 | 0x200), 0x4000C030);
 }
 
 /************************************************************************************
