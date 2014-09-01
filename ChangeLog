@@ -8359,3 +8359,8 @@
 	  was started.   Now, there is only one way, way (1).  Way (2) might be
 	  slightly more compact, but this is not worth carry the complexity of
 	  two different ways of doing the same thing (2014-9-1).
+	* sched/init/os_start.c: Fix error in initialize of IDLE TCB due to last
+	  change.  The argument list is no long in the TCB, but in the stack.
+	  But not for the IDLE task.  It needs its own mini-argv[] list so that
+	  it looks more like other threads (2014-9-1).
+
