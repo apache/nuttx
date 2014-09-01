@@ -43,8 +43,9 @@ CMN_CSRCS += up_createstack.c up_mdelay.c up_udelay.c up_exit.c
 CMN_CSRCS += up_initialize.c up_initialstate.c up_interruptcontext.c
 CMN_CSRCS += up_memfault.c up_modifyreg8.c up_modifyreg16.c up_modifyreg32.c
 CMN_CSRCS += up_releasepending.c up_releasestack.c up_reprioritizertr.c
-CMN_CSRCS += up_schedulesigaction.c up_sigdeliver.c up_unblocktask.c
-CMN_CSRCS += up_usestack.c up_doirq.c up_hardfault.c up_svcall.c up_vfork.c
+CMN_CSRCS += up_schedulesigaction.c up_sigdeliver.c up_stackframe.c
+CMN_CSRCS += up_unblocktask.c up_usestack.c up_doirq.c up_hardfault.c
+CMN_CSRCS += up_svcall.c up_vfork.c
 
 ifeq ($(CONFIG_ARMV7M_CMNVECTOR),y)
 CMN_ASRCS += up_exception.S
@@ -60,7 +61,7 @@ CMN_ASRCS += up_memcpy.S
 endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CMN_CSRCS += up_mpu.c up_task_start.c up_pthread_start.c up_stackframe.c
+CMN_CSRCS += up_mpu.c up_task_start.c up_pthread_start.c
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 CMN_CSRCS += up_signal_dispatch.c
 CMN_UASRCS += up_signal_handler.S

@@ -35,12 +35,12 @@
 
 HEAD_SSRC = z8_head.S
 
-CMN_SSRCS =
-CMN_CSRCS = up_initialize.c up_allocateheap.c up_createstack.c \
-		  up_releasestack.c up_interruptcontext.c up_blocktask.c \
-		  up_unblocktask.c up_exit.c up_releasepending.c \
-		  up_reprioritizertr.c up_idle.c up_assert.c up_doirq.c \
-		  up_mdelay.c up_udelay.c up_usestack.c
+CMN_SSRCS  =
+CMN_CSRCS  = up_initialize.c up_allocateheap.c up_createstack.c
+CMN_CSRCS += up_releasestack.c up_interruptcontext.c up_blocktask.c
+CMN_CSRCS += up_unblocktask.c up_exit.c up_releasepending.c
+CMN_CSRCS += up_reprioritizertr.c up_idle.c up_assert.c up_doirq.c
+CMN_CSRCS += up_mdelay.c up_stackframe.c up_udelay.c up_usestack.c
 
 CHIP_SSRCS  = z8_vector.S z8_saveusercontext.S z8_restorecontext.S
 CHIP_CSRCS  = z8_initialstate.c z8_irq.c z8_saveirqcontext.c

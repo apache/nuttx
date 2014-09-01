@@ -40,14 +40,15 @@
 
 HEAD_ASRC = lpc23xx_head.S
 
-CMN_ASRCS = up_saveusercontext.S up_fullcontextrestore.S up_vectors.S \
-   vfork.S
-CMN_CSRCS = up_allocateheap.c up_assert.c up_blocktask.c up_copyfullstate.c \
-   up_createstack.c up_dataabort.c up_mdelay.c up_udelay.c \
-   up_exit.c up_idle.c up_initialize.c up_initialstate.c \
-   up_interruptcontext.c up_prefetchabort.c up_releasepending.c \
-   up_releasestack.c up_reprioritizertr.c up_syscall.c up_unblocktask.c \
-   up_undefinedinsn.c up_usestack.c up_lowputs.c up_vfork.c
+CMN_ASRCS  = up_saveusercontext.S up_fullcontextrestore.S up_vectors.S
+CMN_ASRCS += vfork.S
+CMN_CSRCS  = up_allocateheap.c up_assert.c up_blocktask.c up_copyfullstate.c
+CMN_CSRCS += up_createstack.c up_dataabort.c up_mdelay.c up_udelay.c
+CMN_CSRCS += up_exit.c up_idle.c up_initialize.c up_initialstate.c
+CMN_CSRCS += up_interruptcontext.c up_prefetchabort.c up_releasepending.c
+CMN_CSRCS += up_releasestack.c up_reprioritizertr.c up_stackframe.c
+CMN_CSRCS += up_syscall.c up_unblocktask.c up_undefinedinsn.c
+CMN_CSRCS += up_usestack.c up_lowputs.c up_vfork.c
 
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 CMN_CSRCS += up_schedulesigaction.c up_sigdeliver.c
@@ -61,9 +62,9 @@ ifeq ($(CONFIG_DEBUG_STACK),y)
 CMN_CSRCS += up_checkstack.c
 endif
 
-CHIP_ASRCS = lpc23xx_lowputc.S
-CHIP_CSRCS = lpc23xx_pllsetup.c  lpc23xx_decodeirq.c lpc23xx_irq.c \
-   lpc23xx_serial.c lpc23xx_io.c
+CHIP_ASRCS  = lpc23xx_lowputc.S
+CHIP_CSRCS += lpc23xx_pllsetup.c  lpc23xx_decodeirq.c lpc23xx_irq.c
+CHIP_CSRCS += lpc23xx_serial.c lpc23xx_io.c
 
 ifneq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += lpc23xx_timerisr.c
@@ -80,4 +81,3 @@ endif
 ifeq ($(CONFIG_USBDEV),y)
 #CHIP_CSRCS += lpc23xx_usbdev.c
 endif
-
