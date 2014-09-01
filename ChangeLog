@@ -8351,4 +8351,11 @@
 	* Removed all support from the 8051 from the NuttX source tree.  The
 	  obsoleted code along with the removal patch can now be found at
 	  misc/Obsoleted/ (2014-9-1).
-
+	* sched/sched/sched_releasetcb.c and task_setup.c, include/nuttx/arch.h
+	  and sched.h, and arch/*/*/*/Make.defs:  There used to be two ways to
+	  pass parameters to new tasks, depending upon the configuration:  Either
+	  (1) argv[] as created as an array with each string strdup'ed.  Or (1)
+	  argv[] array and strings were created on the stack before the new tas
+	  was started.   Now, there is only one way, way (1).  Way (2) might be
+	  slightly more compact, but this is not worth carry the complexity of
+	  two different ways of doing the same thing (2014-9-1).
