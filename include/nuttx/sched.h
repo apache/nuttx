@@ -482,7 +482,6 @@ struct tcb_s
 
   /* Stack-Related Fields *******************************************************/
 
-#ifndef CONFIG_CUSTOM_STACK
   size_t    adj_stack_size;              /* Stack size after adjustment         */
                                          /* for hardware, processor, etc.       */
                                          /* (for debug purposes only)           */
@@ -490,7 +489,6 @@ struct tcb_s
                                          /* Need to deallocate stack            */
   FAR void *adj_stack_ptr;               /* Adjusted stack_alloc_ptr for HW     */
                                          /* The initial stack pointer value     */
-#endif
 
   /* External Module Support ****************************************************/
 
@@ -560,8 +558,7 @@ struct task_tcb_s
 
   uint8_t  init_priority;                /* Initial priority of the task        */
 
-#if !defined(CONFIG_CUSTOM_STACK) && (defined(CONFIG_BUILD_PROTECTED) || \
-     defined(CONFIG_BUILD_KERNEL))
+#if defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)
   /* In the kernel mode build, the arguments are saved on the task's stack      */
 
   FAR char **argv;                       /* Name+start-up parameters            */

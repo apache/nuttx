@@ -7,12 +7,6 @@ choice
 	prompt "CPU Architecture"
 	default ARCH_ARM
 
-config ARCH_8051
-	bool "8051"
-	select CUSTOM_STACK
-	---help---
-		Intel 8051 architectures and derivatives
-
 config ARCH_ARM
 	bool "ARM"
 	select ARCH_HAVE_INTERRUPTSTACK
@@ -84,7 +78,6 @@ endchoice
 
 config ARCH
 	string
-	default "8051"	if ARCH_8051
 	default "arm"	if ARCH_ARM
 	default "avr"	if ARCH_AVR
 	default "hc"	if ARCH_HC
@@ -96,7 +89,6 @@ config ARCH
 	default "z16"	if ARCH_Z16
 	default "z80"	if ARCH_Z80
 
-source arch/8051/Kconfig
 source arch/arm/Kconfig
 source arch/avr/Kconfig
 source arch/hc/Kconfig
@@ -131,10 +123,6 @@ config ARCH_L2CACHE
 	default n
 
 config ARCH_HAVE_COHERENT_DCACHE
-	bool
-	default n
-
-config CUSTOM_STACK
 	bool
 	default n
 

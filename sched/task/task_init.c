@@ -112,14 +112,9 @@
  *
  ****************************************************************************/
 
-#ifndef CONFIG_CUSTOM_STACK
 int task_init(FAR struct tcb_s *tcb, const char *name, int priority,
               FAR uint32_t *stack, uint32_t stack_size,
               main_t entry, FAR char * const argv[])
-#else
-int task_init(FAR struct tcb_s *tcb, const char *name, int priority,
-              main_t entry, FAR char * const argv[])
-#endif
 {
   FAR struct task_tcb_s *ttcb = (FAR struct task_tcb_s *)tcb;
   int errcode;
@@ -156,9 +151,7 @@ int task_init(FAR struct tcb_s *tcb, const char *name, int priority,
 
   /* Configure the user provided stack region */
 
-#ifndef CONFIG_CUSTOM_STACK
   up_use_stack(tcb, stack, stack_size);
-#endif
 
   /* Initialize the task control block */
 

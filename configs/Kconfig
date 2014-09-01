@@ -509,14 +509,6 @@ config ARCH_BOARD_PIRELLI_DPL10
 		This directory contains the board support for Pirelli dpl10 phones.  The
 		additions were made by Craig Comstock (with help form Alan Carvalho de Assis).
 
-config ARCH_BOARD_PJRC_87C52
-	bool "PJRC 87C52 development system"
-	depends on ARCH_CHIP_8052
-	select ARCH_HAVE_LEDS
-	---help---
-		8051 Microcontroller.  This port uses the PJRC 87C52 development system
-		and the SDCC toolchain.   This port is not quite ready for prime time.
-
 config ARCH_BOARD_PX4FMU_V2
 	bool "PX4FMU v2"
 	depends on ARCH_CHIP_STM32F427V
@@ -1015,7 +1007,6 @@ config ARCH_BOARD
 	default "pic32-starterkit"    if ARCH_BOARD_PIC32_STARTERKIT
 	default "pic32mx7mmb"         if ARCH_BOARD_PIC32MX7MMB
 	default "pirelli_dpl10"       if ARCH_BOARD_PIRELLI_DPL10
-	default "pjrc-8051"           if ARCH_BOARD_PJRC_87C52
 	default "px4fmu-v2_upstream"  if ARCH_BOARD_PX4FMU_V2
 	default "nucleo-f401re"       if ARCH_BOARD_NUCLEO_F401RE
 	default "qemu-i486"           if ARCH_BOARD_QEMU_I486
@@ -1262,9 +1253,6 @@ source "configs/pic32mx7mmb/Kconfig"
 endif
 if ARCH_BOARD_PIRELLI_DPL10
 source "configs/pirelli_dpl10/Kconfig"
-endif
-if ARCH_BOARD_PJRC_87C52
-source "configs/pjrc-8051/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_F401RE
 source "configs/nucleo-f401re/Kconfig"

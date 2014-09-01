@@ -194,7 +194,7 @@ int stm32_usbhost_initialize(void)
 
       uvdbg("Start usbhost_waiter\n");
 
-      pid = TASK_CREATE("usbhost", CONFIG_USBHOST_DEFPRIO,
+      pid = task_create("usbhost", CONFIG_USBHOST_DEFPRIO,
                         CONFIG_USBHOST_STACKSIZE,
                         (main_t)usbhost_waiter, (FAR char * const *)NULL);
       return pid < 0 ? -ENOEXEC : OK;

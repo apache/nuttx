@@ -1577,14 +1577,9 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
   usbhost_takesem(&g_exclsem);
   g_priv = priv;
 
-#ifndef CONFIG_CUSTOM_STACK
   priv->pollpid = task_create("kbdpoll", CONFIG_HIDKBD_DEFPRIO,
                               CONFIG_HIDKBD_STACKSIZE,
                               (main_t)usbhost_kbdpoll, (FAR char * const *)NULL);
-#else
-  priv->pollpid = task_create("kbdpoll", CONFIG_HIDKBD_DEFPRIO,
-                              (main_t)usbhost_kbdpoll, (FAR char * const *)NULL);
-#endif
   if (priv->pollpid == ERROR)
     {
       /* Failed to started the poll thread... probably due to memory resources */

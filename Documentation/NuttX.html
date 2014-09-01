@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: August 15, 2014</p>
+      <p>Last Updated: September 1, 2014</p>
     </td>
   </tr>
 </table>
@@ -1254,7 +1254,7 @@
   </li>
   <li>Intel
     <ul>
-      <li><a href="#80x52">Intel 80x52 Microcontroller</a> (1)</li>
+      <li><a href="#80x52">Intel 80x52 Microcontroller</a> (1) (<i>obsoleted</i>)</li>
       <li><a href="#80x86">Intel 80x86</a> (2)</li>
     </ul>
   </li>
@@ -1330,7 +1330,7 @@
   </li>
   <li>Intel
     <ul>
-      <li><a href="#80x52">Intel 80x52</a></li>
+      <li><a href="#80x52">Intel 80x52</a> (<i>obsoleted</i>)</li>
       <li><a href="#80x86">Intel 80x86</a></li>
     </ul>
   </li>
@@ -3622,8 +3622,7 @@ Mem:         29232       5920      23312      23312
   <td>
     <p>
       <b>PJRC 87C52 Development Board</b>.
-      This port uses the <a href="http://www.pjrc.com/">PJRC</a> 87C52 development system
-      and the <a href="http://sdcc.sourceforge.net/">SDCC</a> toolchain under Linux or Cygwin.
+      This port uses the <a href="http://www.pjrc.com/">PJRC</a> 87C52 development system and the <a href="http://sdcc.sourceforge.net/">SDCC</a> toolchain under Linux or Cygwin.
     </p>
     <ul>
       <p>
@@ -3633,7 +3632,13 @@ Mem:         29232       5920      23312      23312
         address space during interrupt handling.
         This architecture has not been built in some time will likely have some compilation
         problems because of SDCC compiler differences.
-        Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/pjrc-8051/README.txt">README</a> file for further information.
+        Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/misc/Obsoleted/configs/pjrc-8051/README.txt">README</a> file for further information.
+      </p>
+      <p>
+        <b>Obsoleted</b>.
+        This architecture has been obsoleted.
+        The code has been moved out of the source tree an can now be found in <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/misc/Obsoleted/">Obsoleted</a> directory.
+        This support was obsoleted because (1) the architecture limitations of the 8051 family make ongoing support too difficult, and (2) although the basic port was marginally functional, it has never really been demonstrated convincingly in any application.
       </p>
     </ul>
   </td>

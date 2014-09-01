@@ -448,8 +448,7 @@ static void task_namesetup(FAR struct task_tcb_s *tcb, FAR const char *name)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_CUSTOM_STACK) || (!defined(CONFIG_BUILD_PROTECTED) && \
-   !defined(CONFIG_BUILD_KERNEL))
+#if !defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)
 static int task_tcbargsetup(FAR struct task_tcb_s *tcb,
                             FAR char * const argv[])
 {
@@ -489,7 +488,7 @@ static int task_tcbargsetup(FAR struct task_tcb_s *tcb,
 
   return OK;
 }
-#endif /* CONFIG_CUSTOM_STACK || (!CONFIG_BUILD_PROTECTED && !CONFIG_BUILD_KERNEL) */
+#endif /* !CONFIG_BUILD_PROTECTED && !CONFIG_BUILD_KERNEL */
 
 /****************************************************************************
  * Name: task_stackargsetup
@@ -516,8 +515,7 @@ static int task_tcbargsetup(FAR struct task_tcb_s *tcb,
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_CUSTOM_STACK) && (defined(CONFIG_BUILD_PROTECTED) || \
-     defined(CONFIG_BUILD_KERNEL))
+#if defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)
 static int task_stackargsetup(FAR struct task_tcb_s *tcb,
                               FAR char * const argv[])
 {
@@ -619,7 +617,7 @@ static int task_stackargsetup(FAR struct task_tcb_s *tcb,
 
   return OK;
 }
-#endif /* !CONFIG_CUSTOM_STACK && (CONFIG_BUILD_PROTECTED || CONFIG_BUILD_KERNEL) */
+#endif /* CONFIG_BUILD_PROTECTED || CONFIG_BUILD_KERNEL */
 
 /****************************************************************************
  * Public Functions
@@ -744,8 +742,7 @@ int task_argsetup(FAR struct task_tcb_s *tcb, FAR const char *name,
 
   task_namesetup(tcb, name);
 
-#if !defined(CONFIG_CUSTOM_STACK) && (defined(CONFIG_BUILD_PROTECTED) || \
-     defined(CONFIG_BUILD_KERNEL))
+#if defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)
   /*   In the kernel build case, the argv[] array and all strings are copied
    *   to the task's stack.  This is done because the TCB (and kernel allocated
    *   strings) are only accessible in kernel-mode.  Data on the stack, on the
@@ -762,7 +759,7 @@ int task_argsetup(FAR struct task_tcb_s *tcb, FAR const char *name,
 
   ret = task_tcbargsetup(tcb, argv);
 
-#endif /* !CONFIG_CUSTOM_STACK && (CONFIG_BUILD_PROTECTED || CONFIG_BUILD_KERNEL) */
+#endif /* CONFIG_BUILD_PROTECTED || CONFIG_BUILD_KERNEL */
 
   return ret;
 }

@@ -38,7 +38,6 @@ nuttx/
   (5)  ARM/STM32 (arch/arm/src/stm32/)
   (3)  AVR (arch/avr)
   (0)  Intel x86 (arch/x86)
-  (5)  8051 / MCS51 (arch/8051/)
   (3)  MIPS/PIC32 (arch/mips)
   (1)  Hitachi/Renesas SH-1 (arch/sh/src/sh1)
   (4)  Renesas M16C/26 (arch/sh/src/m16c)
@@ -1839,58 +1838,6 @@ o AVR (arch/avr)
 o Intel x86 (arch/x86)
   ^^^^^^^^^^^^^^^^^^^^
 
-o 8051 / MCS51 (arch/8051/)
-  ^^^^^^^^^^^^^^^^^^^^^^^^^
-
-  Title:       STACK OVERFLOWS DURING INTERRUPT HANDLING
-  Description: Current status:
-               - Basic OS task management seems OK
-               - Fails when interrupts enabled.  The stack pointer is around
-                 0x6e before the failure occurs.  It looks like some issue
-                 when the stack pointer moves from the directly to indirectly
-                 addressable region (0x80 boundary).
-               - Work on the 8052 is temporarily on hold
-  Status:      Open
-  Priority:    Low, 8051 is a tough platform because of the tiny stack.
-
-  Title:       TIMER 0 AS SYSTEM TIMER
-  Description: Use timer 0 as system timer.  Timer 2 is needed for second UART.
-               Logic is implemented, but there needs to be a system
-               configuration to change the ticks-per-second value to match the
-               timer interrupt rate
-  Status:      Open
-  Priority:    Low
-
-  Title:       OVERFLOWS DURING BUILD
-  Description: During build, there are several integer overflows reported:
-               sched/gmtime_r.c aroud lines 184 and 185
-               sched/clock_initialize.c at line 107
-               sched/pthread_create.c at 330
-               apps/examples/ostest/barrier.c around lines 53 and 74
-               apps/examples/ostest/sighand.c at 225 and 244
-               driver/serial.c in usleep calls around 347 and 354
-  Status:      Open.  Update:  These were reviewed during the hcs12 port.  The
-               hcs12 also has 16-bit integer types (if -mshort is in the CFLAGS).
-               I believe that the warnings in most of the above have been fixed
-               but this has not been verified on this platform).
-  Priority:    Medium
-
-  Title:       DATA INITIALIZATION
-  Description  Global data is not being initialized.  Logic like that of SDCCs
-               crt0*.s needs to be incorporated into the system boot logic
-  Status:      Open
-  Priority:    Low -- only because there as so many other issues with 8051
-
-  Title:       8051 BUILD BROKEN
-  Description: The last time I tried to build the pjrc-8051 configuration using
-               the SDCC 3.2.1 toolchain (for Windows).  I got compilation
-               errors in sched/os_bringup.c.  It complained about type
-               mis-matches.  What I gather from Googling, this is a problem
-               with the --stack-auto option.  At any rate, this problem will
-               need to be fixed if you want to resurrect the 8051 NuttX port.
- Status:       Open
- Priority:     Low -- I don't think anyone uses the 8051 port.
-
 o MIPS/PIC32(arch/mips)
   ^^^^^^^^^^^^^^^^^^^^^
 
@@ -2032,11 +1979,11 @@ o z80/z8/ez80/z180 (arch/z80)
 
   Title:       SDCC INTEGER OVERFLOWS
   Description: The SDCC version the same problems with integer overflow during
-               compilation as described for pjrc-8051.  At typical cause is code like
+               compilation for certain 8-bit platform.  At typical cause is code like
                usleep(500*1000) which exceeds the range of a 16-bit integer.
-  Status:      See pjrc-8051.  These have probably been fixed but have not yet
-               been verified on these platforms.
-  Priority:    See pjrc-8051
+  Status:      These have probably been fixed but have not yet been verified on thes
+               affected platforms.
+  Priority:    Low for now
 
   Title:       Z80 SIMULATED CONSOLE
   Description: The simulated Z80 serial console (configs/z80sim/src/z80_serial.c +

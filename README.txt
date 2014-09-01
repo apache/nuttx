@@ -1030,8 +1030,6 @@ nuttx
  |   |   `- README.txt
  |   |- pirelli_dpl10/
  |   |   `- README.txt
- |   |- pjrc-8051/
- |   |   `- README.txt
  |   |- qemu-i486/
  |   |   `- README.txt
  |   |- rgmp/

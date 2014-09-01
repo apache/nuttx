@@ -135,9 +135,7 @@ static void exec_ctors(FAR void *arg)
 int exec_module(FAR const struct binary_s *binp)
 {
   FAR struct task_tcb_s *tcb;
-#ifndef CONFIG_CUSTOM_STACK
   FAR uint32_t *stack;
-#endif
   pid_t pid;
   int err;
   int ret;
@@ -163,7 +161,6 @@ int exec_module(FAR const struct binary_s *binp)
       goto errout;
     }
 
-#ifndef CONFIG_CUSTOM_STACK
   /* Allocate the stack for the new task (always from the user heap) */
 
   stack = (FAR uint32_t*)kumm_malloc(binp->stacksize);
@@ -177,12 +174,6 @@ int exec_module(FAR const struct binary_s *binp)
 
   ret = task_init((FAR struct tcb_s *)tcb, binp->filename, binp->priority,
                   stack, binp->stacksize, binp->entrypt, binp->argv);
-#else
-  /* Initialize the task */
-
-  ret = task_init((FAR struct tcb_s *)tcb, binp->filename, binp->priority,
-                  stack, binp->entrypt, binp->argv);
-#endif
   if (ret < 0)
     {
       err = get_errno();
@@ -247,13 +238,9 @@ int exec_module(FAR const struct binary_s *binp)
   return (int)pid;
 
 errout_with_stack:
-#ifndef CONFIG_CUSTOM_STACK
   tcb->cmn.stack_alloc_ptr = NULL;
   sched_releasetcb(&tcb->cmn, TCB_FLAG_TTYPE_TASK);
   kumm_free(stack);
-#else
-  sched_releasetcb(&tcb->cmn, TCB_FLAG_TTYPE_TASK);
-#endif
   goto errout;
 
 errout_with_tcb:

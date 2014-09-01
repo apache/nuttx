@@ -182,7 +182,7 @@ static inline void os_pgworker(void)
 
   svdbg("Starting paging thread\n");
 
-  g_pgworker = KERNEL_THREAD("pgfill", CONFIG_PAGING_DEFPRIO,
+  g_pgworker = kernel_thread("pgfill", CONFIG_PAGING_DEFPRIO,
                              CONFIG_PAGING_STACKSIZE,
                              (main_t)pg_worker, (FAR char * const *)NULL);
   DEBUGASSERT(g_pgworker > 0);
@@ -221,7 +221,7 @@ static inline void os_workqueues(void)
   svdbg("Starting kernel worker thread\n");
 #endif
 
-  g_work[HPWORK].pid = KERNEL_THREAD(HPWORKNAME, CONFIG_SCHED_WORKPRIORITY,
+  g_work[HPWORK].pid = kernel_thread(HPWORKNAME, CONFIG_SCHED_WORKPRIORITY,
                                      CONFIG_SCHED_WORKSTACKSIZE,
                                      (main_t)work_hpthread,
                                      (FAR char * const *)NULL);
@@ -235,7 +235,7 @@ static inline void os_workqueues(void)
 
   svdbg("Starting low-priority kernel worker thread\n");
 
-  g_work[LPWORK].pid = KERNEL_THREAD(LPWORKNAME, CONFIG_SCHED_LPWORKPRIORITY,
+  g_work[LPWORK].pid = kernel_thread(LPWORKNAME, CONFIG_SCHED_LPWORKPRIORITY,
                                      CONFIG_SCHED_LPWORKSTACKSIZE,
                                      (main_t)work_lpthread,
                                      (FAR char * const *)NULL);
@@ -288,11 +288,11 @@ static inline void os_init_thread(void)
 
 #ifdef CONFIG_BUILD_PROTECTED
   DEBUGASSERT(USERSPACE->us_entrypoint != NULL);
-  taskid = TASK_CREATE("init", SCHED_PRIORITY_DEFAULT,
+  taskid = task_create("init", SCHED_PRIORITY_DEFAULT,
                        CONFIG_USERMAIN_STACKSIZE, USERSPACE->us_entrypoint,
                        (FAR char * const *)NULL);
 #else
-  taskid = TASK_CREATE("init", SCHED_PRIORITY_DEFAULT,
+  taskid = task_create("init", SCHED_PRIORITY_DEFAULT,
                        CONFIG_USERMAIN_STACKSIZE,
                        (main_t)CONFIG_USER_ENTRYPOINT,
                        (FAR char * const *)NULL);

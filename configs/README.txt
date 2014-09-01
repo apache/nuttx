@@ -436,10 +436,6 @@ configs/pirelli_dpl10
   It is a variant of the compal_e88 config with the small changes for the
   differences in the board.
 
-configs/pjrc-8051
-  8051 Microcontroller.  This port uses the PJRC 87C52 development system
-  and the SDCC toolchain.   This port is not quite ready for prime time.
-
 config/px4fmu-v2_upstream
   This is a minimal configuration that supports low-level test of the
   PX4FMU v2 in the NuttX source tree.  If you are using PX4, you probably

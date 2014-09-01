@@ -1646,7 +1646,7 @@ int usbmsc_exportluns(FAR void *handle)
   g_usbmsc_handoff = priv;
 
   uvdbg("Starting SCSI worker thread\n");
-  priv->thpid = KERNEL_THREAD("scsid", CONFIG_USBMSC_SCSI_PRIO,
+  priv->thpid = kernel_thread("scsid", CONFIG_USBMSC_SCSI_PRIO,
                               CONFIG_USBMSC_SCSI_STACKSIZE,
                               usbmsc_scsi_main, NULL);
   if (priv->thpid <= 0)

@@ -239,9 +239,7 @@ void up_initial_state(FAR struct tcb_s *tcb);
  *
  ****************************************************************************/
 
-#ifndef CONFIG_CUSTOM_STACK
 int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype);
-#endif
 
 /****************************************************************************
  * Name: up_use_stack
@@ -272,9 +270,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype);
  *
  ****************************************************************************/
 
-#ifndef CONFIG_CUSTOM_STACK
 int up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size);
-#endif
 
 /****************************************************************************
  * Name: up_stack_frame
@@ -308,8 +304,7 @@ int up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size);
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_CUSTOM_STACK) && (defined(CONFIG_BUILD_PROTECTED) || \
-     defined(CONFIG_BUILD_KERNEL))
+#if defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)
 FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size);
 #endif
 
@@ -344,9 +339,7 @@ FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size);
  *
  ****************************************************************************/
 
-#ifndef CONFIG_CUSTOM_STACK
 void up_release_stack(FAR struct tcb_s *dtcb, uint8_t ttype);
-#endif
 
 /****************************************************************************
  * Name: up_unblock_task

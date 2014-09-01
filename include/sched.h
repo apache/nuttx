@@ -63,21 +63,6 @@
 
 #define PTHREAD_KEYS_MAX CONFIG_NPTHREAD_KEYS
 
-/* Non-standard Helper **********************************************************/
-/* One processor family supported by NuttX has a single, fixed hardware stack.
- * That is the 8051 family.  So for that family only, there is a variant form
- * of task_create() that does not take a stack size parameter.  The following
- * helper macros are provided to work around the ugliness of that exception.
- */
-
-#ifndef CONFIG_CUSTOM_STACK
-#  define TASK_INIT(t,n,p,m,s,e,a) task_init(t,n,p,m,s,e,a)
-#  define TASK_CREATE(n,p,s,e,a)   task_create(n,p,s,e,a)
-#else
-#  define TASK_INIT(t,n,p,m,s,e,a) task_init(t,n,p,e,a)
-#  define TASK_CREATE(n,p,s,e,a)   task_create(n,p,e,a)
-#endif
-
 /********************************************************************************
  * Public Type Definitions
  ********************************************************************************/
@@ -109,22 +94,12 @@ extern "C"
 
 /* Task Control Interfaces (non-standard) */
 
-#ifndef CONFIG_CUSTOM_STACK
 int    task_init(FAR struct tcb_s *tcb, const char *name, int priority,
                  FAR uint32_t *stack, uint32_t stack_size, main_t entry,
                  FAR char * const argv[]);
-#else
-int    task_init(FAR struct tcb_s *tcb, const char *name, int priority,
-                 main_t entry, FAR char * const argv[]);
-#endif
 int    task_activate(FAR struct tcb_s *tcb);
-#ifndef CONFIG_CUSTOM_STACK
 int    task_create(FAR const char *name, int priority, int stack_size,
                    main_t entry, FAR char * const argv[]);
-#else
-int    task_create(FAR const char *name, int priority, main_t entry,
-                   FAR char * const argv[]);
-#endif
 int    task_delete(pid_t pid);
 int    task_restart(pid_t pid);
 

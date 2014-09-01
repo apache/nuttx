@@ -188,7 +188,7 @@ int nx_start(void)
   /* Start the server kernel thread */
 
   gvdbg("Starting server task\n");
-  server = KERNEL_THREAD("NX Server", CONFIG_NXSTART_SERVERPRIO,
+  server = kernel_thread("NX Server", CONFIG_NXSTART_SERVERPRIO,
                          CONFIG_NXSTART_SERVERSTACK, nx_server, NULL);
   if (server < 0)
     {

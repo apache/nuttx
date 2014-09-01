@@ -93,7 +93,7 @@ int work_usrstart(void)
 
   svdbg("Starting user-mode worker thread\n");
 
-  g_usrwork[USRWORK].pid = TASK_CREATE("usrwork",
+  g_usrwork[USRWORK].pid = task_create("usrwork",
                                        CONFIG_SCHED_USRWORKPRIORITY,
                                        CONFIG_SCHED_USRWORKSTACKSIZE,
                                        (main_t)work_usrthread,

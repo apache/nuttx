@@ -607,10 +607,6 @@
     This is a work in progress.
   </li>
 
-  <li><code>arch/8051</code>:
-    8051 Microcontroller.  This port is not quite ready for prime time.
-  </li>
-
   <li><code>arch/z16f</code>:
     Zilog z16f Microcontroller.
     This port uses the Zilog z16f2800100zcog Development Kit.
@@ -948,12 +944,6 @@
     MCU plus voltage regulation, debug interface, and an OTG connector.
     STATUS:  Code complete but testing has been stalled due to tool related problems
     (PICkit 2 does not work with the PIC32).
-  </li>
-
-  <li><code>configs/pjrc-8051</code>:
-    8051 Microcontroller.  This port uses the PJRC 87C52 development system
-    and the <a href="http://sdcc.sourceforge.net/">SDCC</a> toolchain under Linux or Cygwin.
-    This port is not quite ready for prime time.
   </li>
 
   <li><code>configs/qemu-i486</code>:
@@ -1806,9 +1796,6 @@ The system can be re-made subsequently by just typing <code>make</code>.
   <li><code>adj_stack_ptr</code>: Adjusted <code>stack_alloc_ptr</code> for HW.  The
     initial value of the stack pointer.
 </ul>
-<p>
-  This API is <i>NOT</i> required if <code>CONFIG_CUSTOM_STACK</code> is defined.
-</p>
 
 <p><b>Input Parameters</b>:</p>
 <ul>
@@ -1861,9 +1848,6 @@ The system can be re-made subsequently by just typing <code>make</code>.
   <li><code>adj_stack_ptr</code>: Adjusted <code>stack_alloc_ptr</code> for HW.  The
     initial value of the stack pointer.
 </ul>
-<p>
-  This API is <i>NOT</i> required if <code>CONFIG_CUSTOM_STACK</code> is defined.
-</p>
 
 <p><b>Input Parameters:</b></p>
 <ul>
@@ -1906,7 +1890,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   </li>
 </ul>
 <p>
-  This API is <i>NOT</i> required if <code>CONFIG_BUILD_PROTECTED</code> and <code>CONFIG_BUILD_KERNEL</code> are undefined or if <code>CONFIG_CUSTOM_STACK</code> is defined.
+  This API is <i>NOT</i> required if <code>CONFIG_BUILD_PROTECTED</code> and <code>CONFIG_BUILD_KERNEL</code> are undefined.
 </p>
 <p><b>Input Parameters:</b></p>
 <ul>
@@ -1936,9 +1920,6 @@ The system can be re-made subsequently by just typing <code>make</code>.
 <p><b>Description</b>.
   A task has been stopped.
   Free all stack related resources retained int the defunct TCB.
-</p>
-<p>
-  This API is <i>NOT</i> required if <code>CONFIG_CUSTOM_STACK</code> is defined.
 </p>
 <p><b>Input Parameters:</b></p>
 <ul>
