@@ -672,6 +672,28 @@ void up_allocate_pgheap(FAR void **heap_start, size_t *heap_size);
 #endif
 
 /****************************************************************************
+ * Name: pgalloc
+ *
+ * Description:
+ *   If there is a page allocator in the configuration and if and MMU is
+ *   available to map physcal addresses to virtual address, then function
+ *   must be provided by the platform-specific code.  This is part of the
+ *   implementation of sbrk().  This function will allocate the requested
+ *   number of pages using the page allocator and map them into consecuive
+ *   virtual addresses beginning with 'brkaddr'
+ *
+ *   NOTE:  This function does not use the up_ naming standard because it
+ *   is indirectly callable from user-space code via a system trap.
+ *   Therefore, it is a system interface and follows a different naming
+ *   convention.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_MM_PGALLOC) && defined(CONFIG_ARCH_USE_MMU)
+int pgalloc(uintptr_t vaddr, unsigned int npages);
+#endif
+
+/****************************************************************************
  * Name: up_setpicbase, up_getpicbase
  *
  * Description:

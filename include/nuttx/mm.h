@@ -392,7 +392,20 @@ FAR void *umm_brkaddr(int region);
 /* Functions contained in kmm_brkaddr.c *************************************/
 
 #ifdef CONFIG_MM_KERNEL_HEAP
-FAR void *umm_brkaddr(int region);
+FAR void *kmm_brkaddr(int region);
+#endif
+
+/* Functions contained in mm_sbrk.c *****************************************/
+
+#if defined(CONFIG_MM_PGALLOC) && defined(CONFIG_ARCH_USE_MMU)
+FAR void *mm_sbrk(FAR struct mm_heap_s *heap, intptr_t incr,
+                  uintptr_t maxbreak);
+#endif
+
+/* Functions contained in kmm_sbrk.c ****************************************/
+
+#if defined(CONFIG_MM_PGALLOC) && defined(CONFIG_ARCH_USE_MMU)
+FAR void *kmm_sbrk(intptr_t incr);
 #endif
 
 /* Functions contained in mm_extend.c ***************************************/
