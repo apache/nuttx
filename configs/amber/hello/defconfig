@@ -54,7 +54,6 @@ CONFIG_DEBUG_FULLOPT=y
 #
 # System Type
 #
-# CONFIG_ARCH_8051 is not set
 # CONFIG_ARCH_ARM is not set
 CONFIG_ARCH_AVR=y
 # CONFIG_ARCH_HC is not set
@@ -96,7 +95,6 @@ CONFIG_ARCH_NOINTC=y
 # CONFIG_ARCH_VECNOTIRQ is not set
 # CONFIG_ARCH_DMA is not set
 # CONFIG_ARCH_HAVE_IRQPRIO is not set
-# CONFIG_CUSTOM_STACK is not set
 # CONFIG_ARCH_ADDRENV is not set
 # CONFIG_ARCH_HAVE_VFORK is not set
 # CONFIG_ARCH_HAVE_MMU is not set

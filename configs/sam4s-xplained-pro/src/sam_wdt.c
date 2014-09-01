@@ -219,7 +219,7 @@ int up_wdginitialize(void)
 #if defined(CONFIG_WDT_THREAD)
   sched_lock();
 
-  int taskid = KERNEL_THREAD(CONFIG_WDT_THREAD_NAME,
+  int taskid = kernel_thread(CONFIG_WDT_THREAD_NAME,
                              CONFIG_WDT_THREAD_PRIORITY,
                              CONFIG_WDT_THREAD_STACKSIZE,
                              (main_t)wdog_daemon, (FAR char * const *)NULL);

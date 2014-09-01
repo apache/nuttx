@@ -52,7 +52,6 @@ CONFIG_DEBUG_NOOPT=y
 #
 # System Type
 #
-# CONFIG_ARCH_8051 is not set
 # CONFIG_ARCH_ARM is not set
 # CONFIG_ARCH_AVR is not set
 # CONFIG_ARCH_HC is not set
@@ -82,7 +81,6 @@ CONFIG_HOST_X86_64=y
 # CONFIG_ARCH_HAVE_IRQPRIO is not set
 # CONFIG_ARCH_L2CACHE is not set
 # CONFIG_ARCH_HAVE_COHERENT_DCACHE is not set
-# CONFIG_CUSTOM_STACK is not set
 # CONFIG_ARCH_HAVE_ADDRENV is not set
 # CONFIG_ARCH_NEED_ADDRENV_MAPPING is not set
 # CONFIG_ARCH_HAVE_VFORK is not set

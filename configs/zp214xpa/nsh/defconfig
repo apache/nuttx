@@ -43,7 +43,6 @@ CONFIG_RAW_BINARY=y
 #
 # System Type
 #
-# CONFIG_ARCH_8051 is not set
 CONFIG_ARCH_ARM=y
 # CONFIG_ARCH_AVR is not set
 # CONFIG_ARCH_HC is not set
@@ -124,7 +123,6 @@ CONFIG_LPC214X_UART1=y
 # CONFIG_ARCH_NOINTC is not set
 # CONFIG_ARCH_DMA is not set
 # CONFIG_ARCH_IRQPRIO is not set
-# CONFIG_CUSTOM_STACK is not set
 # CONFIG_ARCH_ADDRENV is not set
 CONFIG_ARCH_STACKDUMP=y
 # CONFIG_ENDIAN_BIG is not set
