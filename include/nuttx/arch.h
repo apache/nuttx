@@ -277,7 +277,7 @@ int up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size);
  *
  * Description:
  *   Allocate a stack frame in the TCB's stack to hold thread-specific data.
- *   This function may be called anytime after up_create_stack() or
+ *   This function may be called any time after up_create_stack() or
  *   up_use_stack() have been called but before the task has been started.
  *
  *   Thread data may be kept in the stack (instead of in the TCB) if it is
@@ -304,9 +304,7 @@ int up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)
 FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size);
-#endif
 
 /****************************************************************************
  * Name: up_release_stack

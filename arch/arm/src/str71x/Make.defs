@@ -35,14 +35,16 @@
 
 HEAD_ASRC = str71x_head.S
 
-CMN_ASRCS = up_saveusercontext.S up_fullcontextrestore.S up_vectors.S \
-			  vfork.S
-CMN_CSRCS = up_allocateheap.c up_assert.c up_blocktask.c up_copyfullstate.c \
-			  up_createstack.c up_dataabort.c up_mdelay.c up_udelay.c \
-			  up_exit.c up_idle.c up_initialize.c up_initialstate.c \
-			  up_interruptcontext.c up_prefetchabort.c up_releasepending.c \
-			  up_releasestack.c up_reprioritizertr.c up_syscall.c up_unblocktask.c \
-			  up_undefinedinsn.c up_usestack.c up_lowputs.c up_vfork.c
+CMN_ASRCS  = up_saveusercontext.S up_fullcontextrestore.S up_vectors.S
+CMN_ASRCS += vfork.S
+
+CMN_CSRCS  = up_allocateheap.c up_assert.c up_blocktask.c up_copyfullstate.c
+CMN_CSRCS += up_createstack.c up_dataabort.c up_mdelay.c up_udelay.c
+CMN_CSRCS += up_exit.c up_idle.c up_initialize.c up_initialstate.c
+CMN_CSRCS += up_interruptcontext.c up_prefetchabort.c up_releasepending.c
+CMN_CSRCS += up_releasestack.c up_reprioritizertr.c up_stackframe.c
+CMN_CSRCS += up_syscall.c up_unblocktask.c up_undefinedinsn.c up_usestack.c
+CMN_CSRCS += up_lowputs.c up_vfork.c
 
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 CMN_CSRCS += up_schedulesigaction.c up_sigdeliver.c
@@ -56,19 +58,19 @@ ifeq ($(CONFIG_DEBUG_STACK),y)
 CMN_CSRCS += up_checkstack.c
 endif
 
-CHIP_ASRCS =
-CHIP_CSRCS = str71x_prccu.c str71x_lowputc.c str71x_decodeirq.c str71x_irq.c \
-		   str71x_serial.c
+CHIP_ASRCS  =
+CHIP_CSRCS  = str71x_prccu.c str71x_lowputc.c str71x_decodeirq.c str71x_irq.c
+CHIP_CSRCS += str71x_serial.c
 
 ifneq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += str71x_timerisr.c
 endif
 
 ifeq ($(CONFIG_USBDEV),y)
-CHIP_CSRCS	+= str71x_usbdev.c
+CHIP_CSRCS+= str71x_usbdev.c
 endif
 
 ifeq ($(CONFIG_STR71X_XTI),y)
-CHIP_CSRCS	+= str71x_xti.c
+CHIP_CSRCS+= str71x_xti.c
 endif
 

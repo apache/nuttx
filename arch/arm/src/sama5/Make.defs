@@ -64,7 +64,7 @@ endif
 
 CMN_CSRCS  = up_initialize.c up_idle.c up_interruptcontext.c up_exit.c
 CMN_CSRCS += up_createstack.c up_releasestack.c up_usestack.c up_vfork.c
-CMN_CSRCS += up_puts.c up_mdelay.c up_udelay.c
+CMN_CSRCS += up_puts.c up_mdelay.c up_stackframe.c up_udelay.c
 CMN_CSRCS += up_modifyreg8.c up_modifyreg16.c up_modifyreg32.c
 
 CMN_CSRCS += arm_assert.c arm_blocktask.c arm_copyfullstate.c arm_dataabort.c
@@ -85,7 +85,7 @@ CMN_CSRCS += arm_va2pte.c
 endif
 
 ifeq ($(CONFIG_BUILD_KERNEL),y)
-CMN_CSRCS += up_task_start.c up_pthread_start.c up_stackframe.c
+CMN_CSRCS += up_task_start.c up_pthread_start.c
 endif
 
 ifeq ($(CONFIG_ARCH_ADDRENV),y)

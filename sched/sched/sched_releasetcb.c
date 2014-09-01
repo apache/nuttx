@@ -111,9 +111,6 @@ static void sched_releasepid(pid_t pid)
 int sched_releasetcb(FAR struct tcb_s *tcb, uint8_t ttype)
 {
   int ret = OK;
-#if !defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)
-  int i;
-#endif
 
   if (tcb)
     {
@@ -150,7 +147,7 @@ int sched_releasetcb(FAR struct tcb_s *tcb, uint8_t ttype)
           up_release_stack(tcb, ttype);
         }
 
-      /* Delete the tasks's allocated DSpace region (external modules only) */
+      /* Delete the task's allocated DSpace region (external modules only) */
 
 #ifdef CONFIG_PIC
       if (tcb->dspace)
@@ -165,28 +162,6 @@ int sched_releasetcb(FAR struct tcb_s *tcb, uint8_t ttype)
             }
         }
 #endif
-
-#if !defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)
-      /* Release command line arguments that were allocated for task
-       * start/re-start.
-       *
-       * NOTE: In the kernel mode build, the arguments were saved on
-       * the task's stack and will be cleaned up when the stack memory
-       * is released.  Nothing need be done here in that case.
-       */
-
-#ifndef CONFIG_DISABLE_PTHREAD
-      if (ttype != TCB_FLAG_TTYPE_PTHREAD)
-#endif
-        {
-          FAR struct task_tcb_s *ttcb = (FAR struct task_tcb_s *)tcb;
-          for (i = 1; i < CONFIG_MAX_TASK_ARGS+1 && ttcb->argv[i]; i++)
-            {
-              sched_kfree((FAR void*)ttcb->argv[i]);
-            }
-        }
-
-#endif /* !CONFIG_BUILD_PROTECTED && !CONFIG_BUILD_KERNEL */
 
       /* Release this thread's reference to the address environment */
 

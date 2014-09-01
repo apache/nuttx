@@ -39,14 +39,14 @@ HEAD_ASRC = atmega_head.S
 
 # Common AVR files
 
-CMN_ASRCS = up_switchcontext.S
-CMN_CSRCS = up_allocateheap.c up_assert.c up_blocktask.c up_copystate.c \
-			  up_createstack.c up_doirq.c up_exit.c  up_idle.c up_initialize.c \
-			  up_initialstate.c up_interruptcontext.c up_irq.c up_lowputs.c \
-			  up_mdelay.c up_modifyreg8.c up_modifyreg16.c up_modifyreg32.c \
-			  up_puts.c up_releasepending.c up_releasestack.c \
-			  up_reprioritizertr.c up_schedulesigaction.c up_sigdeliver.c \
-			  up_udelay.c up_unblocktask.c up_usestack.c
+CMN_ASRCS  = up_switchcontext.S
+CMN_CSRCS  = up_allocateheap.c up_assert.c up_blocktask.c up_copystate.c
+CMN_CSRCS += up_createstack.c up_doirq.c up_exit.c  up_idle.c up_initialize.c
+CMN_CSRCS += up_initialstate.c up_interruptcontext.c up_irq.c up_lowputs.c
+CMN_CSRCS += up_mdelay.c up_modifyreg8.c up_modifyreg16.c up_modifyreg32.c
+CMN_CSRCS += up_puts.c up_releasepending.c up_releasestack.c
+CMN_CSRCS += up_reprioritizertr.c up_schedulesigaction.c up_sigdeliver.c
+CMN_CSRCS += up_stackframe.c up_udelay.c up_unblocktask.c up_usestack.c
 
 # Configuration-dependent common files
 
@@ -78,5 +78,5 @@ endif
 # Configuration-dependent ATMEGA files
 
 ifeq ($(CONFIG_AVR_GPIOIRQ),y)
-CHIP_CSRCS	+=
+CHIP_CSRCS +=
 endif

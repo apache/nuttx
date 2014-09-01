@@ -170,7 +170,6 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
     return OK;
 }
 
-#ifdef CONFIG_BUILD_KERNEL
 FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size)
 {
   uintptr_t topaddr;
@@ -199,7 +198,6 @@ FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size)
 
   return (FAR void *)(topaddr + sizeof(uint32_t));
 }
-#endif
 
 void up_release_stack(struct tcb_s *dtcb, uint8_t ttype)
 {

@@ -36,15 +36,16 @@
 HEAD_ASRC = ez80_vectors.asm
 HEAD_SSRC =
 
-CMN_SSRCS =
-CMN_CSRCS = up_initialize.c up_allocateheap.c up_createstack.c \
-		  up_releasestack.c up_interruptcontext.c up_blocktask.c \
-		  up_unblocktask.c up_exit.c up_releasepending.c \
-		  up_reprioritizertr.c up_idle.c up_assert.c up_doirq.c \
-		  up_mdelay.c up_udelay.c up_usestack.c up_puts.c
+CMN_SSRCS  =
+CMN_CSRCS  = up_initialize.c up_allocateheap.c up_createstack.c
+CMN_CSRCS += up_releasestack.c up_interruptcontext.c up_blocktask.c
+CMN_CSRCS += up_unblocktask.c up_exit.c up_releasepending.c
+CMN_CSRCS += up_reprioritizertr.c up_idle.c up_assert.c up_doirq.c
+CMN_CSRCS += up_mdelay.c up_stackframe.c up_udelay.c up_usestack.c
+CMN_CSRCS += up_puts.c
 
-CHIP_ASRCS = ez80_startup.asm ez80_io.asm ez80_irqsave.asm \
-		  ez80_saveusercontext.asm ez80_restorecontext.asm
+CHIP_ASRCS = ez80_startup.asm ez80_io.asm ez80_irqsave.asm
+  ez80_saveusercontext.asm ez80_restorecontext.asm
 ifeq ($(CONFIG_ARCH_CHIP_EZ80F91),y)
 CHIP_ASRCS += ez80f91_init.asm
 endif
