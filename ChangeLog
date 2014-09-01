@@ -8344,3 +8344,5 @@
 	  with the rest of the naming (2014-8-31).
 	* mm/mm_sbrk.c, kmm_sbrk.c, umm_sbrk.c, and include/unistd.h: Initial
 	* implementation of sbrk() (2014-9-1).
+	* arch/arm/src/armv7-a/arm_pgalloc.c, mm/umm_malloc.c, and mm_zalloc.c:
+	  Completes the implementation of sbrk() (untested) (2014-9-1).
