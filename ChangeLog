@@ -8348,4 +8348,7 @@
 	  Completes the implementation of sbrk() (untested) (2014-9-1).
 	* configs/cc3200-launchpad:  Updates to the CC3200-Launchpad configuration
 	  for better compatibility.  From Jim Ewing (2014-9-1).
+	* Removed all support from the 8051 from the NuttX source tree.  The
+	  obsoleted code along with the removal patch can now be found at
+	  misc/Obsoleted/ (2014-9-1).
 
