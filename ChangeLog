@@ -8342,3 +8342,5 @@
 	* Rename kmalloc() to kmm_malloc(), kzalloc() to kmm_zalloc(), and
 	  kfree() to kmm_free() and kuzalloc to kumm_zalloc() for consistency
 	  with the rest of the naming (2014-8-31).
+	* mm/mm_sbrk.c, kmm_sbrk.c, umm_sbrk.c, and include/unistd.h: Initial
+	* implementation of sbrk() (2014-9-1).
