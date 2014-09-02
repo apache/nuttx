@@ -43,6 +43,7 @@
 "nanosleep","time.h","!defined(CONFIG_DISABLE_SIGNALS)","int","FAR const struct timespec *", "FAR struct timespec*"
 "open","fcntl.h","CONFIG_NFILE_DESCRIPTORS > 0","int","const char*","int","..."
 "opendir","dirent.h","CONFIG_NFILE_DESCRIPTORS > 0","FAR DIR*","FAR const char*"
+"pgalloc", "nuttx/arch.h", "defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_MM_PGALLOC) && defined(CONFIG_ARCH_USE_MMU)", "uintptr_t", "uintptr_t", "unsigned int"
 "pipe","unistd.h","CONFIG_NFILE_DESCRIPTORS > 0","int","int [2]|int*"
 "poll","poll.h","!defined(CONFIG_DISABLE_POLL) && (CONFIG_NSOCKET_DESCRIPTORS > 0 || CONFIG_NFILE_DESCRIPTORS > 0)","int","FAR struct pollfd*","nfds_t","int"
 "prctl","sys/prctl.h", "CONFIG_TASK_NAME_SIZE > 0","int","int","..."

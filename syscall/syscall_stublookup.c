@@ -85,6 +85,7 @@ uintptr_t STUB_sem_trywait(int nbr, uintptr_t parm1);
 uintptr_t STUB_sem_unlink(int nbr, uintptr_t parm1);
 uintptr_t STUB_sem_wait(int nbr, uintptr_t parm1);
 uintptr_t STUB_set_errno(int nbr, uintptr_t parm1);
+uintptr_t STUB_pgalloc(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_task_create(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3, uintptr_t parm4, uintptr_t parm5);
 uintptr_t STUB_task_delete(int nbr, uintptr_t parm1);

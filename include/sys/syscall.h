@@ -90,18 +90,29 @@
 #define SYS_sem_wait                   (CONFIG_SYS_RESERVED+20)
 #define SYS_set_errno                  (CONFIG_SYS_RESERVED+21)
 
+/* Task creation APIs based on global entry points cannot be use with
+ * address environments.
+ */
+
 #ifndef CONFIG_ARCH_ADDRENV
 #  define SYS_task_create              (CONFIG_SYS_RESERVED+22)
-#  define SYS_task_delete              (CONFIG_SYS_RESERVED+23)
-#  define SYS_task_restart             (CONFIG_SYS_RESERVED+24)
-#  define SYS_up_assert                (CONFIG_SYS_RESERVED+25)
-#  define __SYS_vfork                  (CONFIG_SYS_RESERVED+26)
+#  define __SYS_task_delete            (CONFIG_SYS_RESERVED+23)
+
+/* pgalloc() is only available with address environments with the page
+ * allocator selected.  MMU support from the CPU is also required.
+ */
+
+#elif defined(CONFIG_MM_PGALLOC) && defined(CONFIG_ARCH_USE_MMU)
+#  define SYS_pgalloc                  (CONFIG_SYS_RESERVED+22)
+#  define __SYS_task_delete            (CONFIG_SYS_RESERVED+23)
 #else
-#  define SYS_task_delete              (CONFIG_SYS_RESERVED+22)
-#  define SYS_task_restart             (CONFIG_SYS_RESERVED+23)
-#  define SYS_up_assert                (CONFIG_SYS_RESERVED+24)
-#  define __SYS_vfork                  (CONFIG_SYS_RESERVED+25)
+#  define __SYS_task_delete            (CONFIG_SYS_RESERVED+22)
 #endif
+
+#  define SYS_task_delete              __SYS_task_delete
+#  define SYS_task_restart             (__SYS_task_delete+1)
+#  define SYS_up_assert                (__SYS_task_delete+2)
+#  define __SYS_vfork                  (__SYS_task_delete+3)
 
 /* The following can be individually enabled */
 
