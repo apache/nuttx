@@ -93,9 +93,10 @@ FAR void *mm_sbrk(FAR struct mm_heap_s *heap, intptr_t incr,
                   uintptr_t maxbreak)
 {
   uintptr_t brkaddr;
+  uintptr_t allocbase;
   unsigned int pgincr;
+  size_t bytesize;
   int err;
-  int ret;
 
   DEBUGASSERT(incr >= 0);
   if (incr < 0)
@@ -104,7 +105,10 @@ FAR void *mm_sbrk(FAR struct mm_heap_s *heap, intptr_t incr,
       goto errout;
     }
 
-  /* Get the current break address (NOTE: assumes region 0) */
+  /* Get the current break address (NOTE: assumes region 0).  If
+   * the memory manager is uninitialized, mm_brkaddr() will return
+   * zero.
+   */
 
   brkaddr = (uintptr_t)mm_brkaddr(heap, 0);
   if (incr > 0)
@@ -122,19 +126,35 @@ FAR void *mm_sbrk(FAR struct mm_heap_s *heap, intptr_t incr,
         }
 
       /* Allocate the requested number of pages and map them to the
-       * break address.
+       * break address.  If we provide a zero brkaddr to pgalloc(),  it
+       * will create the first block in the correct virtual address
+       * space and return the start address of that block.
        */
 
-      ret = pgalloc(brkaddr, pgincr);
-      if (ret < 0)
+      allocbase = pgalloc(brkaddr, pgincr);
+      if (allocbase == 0)
         {
-          err = -ret;
+          err = EAGAIN;
           goto errout;
         }
 
-      /* Extend the heap (region 0) */
+      /* Has the been been initialized?  brkaddr will be zero if the
+       * memory manager has not yet been initialized.
+       */
 
-      mm_extend(heap, (FAR void *)brkaddr, pgincr << MM_PGSHIFT, 0);
+      bytesize = pgincr << MM_PGSHIFT;
+      if (brkaddr != 0)
+        {
+          /* No... then initialize it now */
+
+          mm_initialize(heap, (FAR void *)allocbase, bytesize);
+        }
+      else
+        {
+          /* Extend the heap (region 0) */
+
+          mm_extend(heap, (FAR void *)allocbase, bytesize, 0);
+        }
     }
 
   return (FAR void *)brkaddr;

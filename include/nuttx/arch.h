@@ -678,10 +678,25 @@ void up_allocate_pgheap(FAR void **heap_start, size_t *heap_size);
  *   Therefore, it is a system interface and follows a different naming
  *   convention.
  *
+ * Input Parameters:
+ *   brkaddr - The heap break address.  The next page will be allocated and
+ *     mapped to this address.  Must be page aligned.  If the memory manager
+ *     has not yet been initialized and this is the first block requested for
+ *     the heap, then brkaddr should be zero.  pgalloc will then assigned the
+ *     well-known virtual address of the beginning of the heap.
+ *   npages - The number of pages to allocate and map.  Mapping of pages
+ *     will be contiguous beginning beginning at 'brkaddr'
+ *
+ * Returned Value:
+ *   The (virtual) base address of the mapped page will returned on success.
+ *   Normally this will be the same as the 'brkaddr' input. However, if
+ *   the 'brkaddr' input was zero, this will be the virtual address of the
+ *   beginning of the heap.  Zero is returned on any failure.
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_ADDRENV
-int pgalloc(uintptr_t vaddr, unsigned int npages);
+uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages);
 #endif
 
 /****************************************************************************
