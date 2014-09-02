@@ -332,7 +332,7 @@ static void up_addrenv_destroy_region(FAR uintptr_t **list,
  *     needed by the task.  This region may be read/write only.  NOTE: The
  *     actual size of the data region that is allocated will include a
  *     OS private reserved region at the beginning.  The size of the
- *     private, reserved region is give by ARCH_DATA_RESERVE.
+ *     private, reserved region is give by ARCH_DATA_RESERVE_SIZE.
  *   addrenv - The location to return the representation of the task address
  *     environment.
  *
@@ -378,7 +378,7 @@ int up_addrenv_create(size_t textsize, size_t datasize,
 
   ret = up_addrenv_create_region(addrenv->data, ARCH_DATA_NSECTS,
                                  CONFIG_ARCH_DATA_VBASE,
-                                 datasize + ARCH_DATA_RESERVE,
+                                 datasize + ARCH_DATA_RESERVE_SIZE,
                                  MMU_L2_UDATAFLAGS);
   if (ret < 0)
     {
@@ -495,7 +495,7 @@ int up_addrenv_vdata(FAR group_addrenv_t *addrenv, uintptr_t textsize,
   /* Not much to do in this case */
 
   DEBUGASSERT(addrenv && vdata);
-  *vdata = (FAR void *)(CONFIG_ARCH_DATA_VBASE + ARCH_DATA_RESERVE);
+  *vdata = (FAR void *)(CONFIG_ARCH_DATA_VBASE + ARCH_DATA_RESERVE_SIZE);
   return OK;
 }
 

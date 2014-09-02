@@ -47,6 +47,7 @@
 
 #include <arch/irq.h>
 #include <nuttx/sched.h>
+#include <nuttx/addrenv.h>
 
 #include "arm.h"
 #include "svcall.h"
@@ -128,7 +129,7 @@ static void dispatch_syscall(void)
     " add sp, sp, #16\n"           /* Destroy the stack frame */
     " mov r2, r0\n"                /* R2=Save return value in R2 */
     " mov r0, #0\n"                /* R0=SYS_syscall_return */
-    " svc #0x900001"               /* Return from the SYSCALL */
+    " svc #0x900001\n"             /* Return from the SYSCALL */
   );
 }
 #endif
@@ -202,7 +203,7 @@ uint32_t *arm_syscall(uint32_t *regs)
 
       case SYS_syscall_return:
         {
-          struct tcb_s *rtcb = sched_self();
+          FAR struct tcb_s *rtcb = sched_self();
           int index = (int)rtcb->xcp.nsyscalls - 1;
 
           /* Make sure that there is a saved SYSCALL return address. */
@@ -293,6 +294,7 @@ uint32_t *arm_syscall(uint32_t *regs)
         break;
 #endif
 
+#if defined(CONFIG_BUILD_KERNEL) && !defined(CONFIG_DISABLE_SIGNALS)
       /* R0=SYS_signal_handler:  This a user signal handler callback
        *
        * void signal_handler(_sa_sigaction_t sighand, int signo,
@@ -307,12 +309,9 @@ uint32_t *arm_syscall(uint32_t *regs)
        *        ucontext (on the stack)
        */
 
-#if defined(CONFIG_BUILD_KERNEL) && !defined(CONFIG_DISABLE_SIGNALS)
       case SYS_signal_handler:
         {
-#warning Missing logic
-#if 0
-          struct tcb_s *rtcb = sched_self();
+          FAR struct tcb_s *rtcb = sched_self();
 
           /* Remember the caller's return address */
 
@@ -323,7 +322,7 @@ uint32_t *arm_syscall(uint32_t *regs)
            * unprivileged mode.
            */
 
-          regs[REG_PC]   = (uint32_t)USERSPACE->signal_handler;
+          regs[REG_PC]   = (uint32_t)ARCH_DATA_RESERVE->ar_sigtramp;
           cpsr           = regs[REG_CPSR] & ~PSR_MODE_MASK;
           regs[REG_CPSR] = cpsr | PSR_MODE_USR;
 
@@ -340,11 +339,11 @@ uint32_t *arm_syscall(uint32_t *regs)
            */
 
           regs[REG_R3]   = *(uint32_t*)(regs[REG_SP+4]);
-#endif
         }
         break;
 #endif
 
+#if defined(CONFIG_BUILD_KERNEL) && !defined(CONFIG_DISABLE_SIGNALS)
       /* R0=SYS_signal_handler_return:  This a user signal handler callback
        *
        *   void signal_handler_return(void);
@@ -354,12 +353,9 @@ uint32_t *arm_syscall(uint32_t *regs)
        *   R0 = SYS_signal_handler_return
        */
 
-#if defined(CONFIG_BUILD_KERNEL) && !defined(CONFIG_DISABLE_SIGNALS)
       case SYS_signal_handler_return:
         {
-#warning Missing logic
-#if 0
-          struct tcb_s *rtcb = sched_self();
+          FAR struct tcb_s *rtcb = sched_self();
 
           /* Set up to return to the kernel-mode signal dispatching logic. */
 
@@ -369,7 +365,6 @@ uint32_t *arm_syscall(uint32_t *regs)
           cpsr                 = regs[REG_CPSR] & ~PSR_MODE_MASK;
           regs[REG_CPSR]       = cpsr | PSR_MODE_SVC;
           rtcb->xcp.sigreturn  = 0;
-#endif
         }
         break;
 #endif

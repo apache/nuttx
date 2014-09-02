@@ -240,6 +240,15 @@ struct xcptcontext
 
   uint32_t saved_pc;
   uint32_t saved_cpsr;
+
+# ifdef CONFIG_BUILD_KERNEL
+  /* This is the saved address to use when returning from a user-space
+   * signal handler.
+   */
+
+  uint32_t sigreturn;
+
+# endif
 #endif
 
   /* Register save area */

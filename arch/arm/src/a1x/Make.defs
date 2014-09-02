@@ -83,7 +83,7 @@ CMN_CSRCS += arm_va2pte.c
 endif
 
 ifeq ($(CONFIG_BUILD_KERNEL),y)
-CMN_CSRCS += up_task_start.c up_pthread_start.c
+CMN_CSRCS += up_task_start.c up_pthread_start.c up_signal_dispatch.c
 endif
 
 ifeq ($(CONFIG_ARCH_ADDRENV),y)
