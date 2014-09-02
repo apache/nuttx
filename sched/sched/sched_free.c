@@ -82,7 +82,6 @@
  *
  ************************************************************************/
 
-#ifdef CONFIG_MM_USER_HEAP
 void sched_ufree(FAR void *address)
 {
   irqstate_t flags;
@@ -123,7 +122,6 @@ void sched_ufree(FAR void *address)
       kumm_givesemaphore();
     }
 }
-#endif
 
 #ifdef CONFIG_MM_KERNEL_HEAP
 void sched_kfree(FAR void *address)

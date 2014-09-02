@@ -760,7 +760,10 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages);
  *   textsize - The size (in bytes) of the .text address environment needed
  *     by the task.  This region may be read/execute only.
  *   datasize - The size (in bytes) of the .data/.bss address environment
- *     needed by the task.  This region may be read/write only.
+ *     needed by the task.  This region may be read/write only.  NOTE: The
+ *     actual size of the data region that is allocated will include a
+ *     OS private reserved region at the beginning.  The size of the
+ *     private, reserved region is give by ARCH_DATA_RESERVE.
  *   addrenv - The location to return the representation of the task address
  *     environment.
  *
@@ -831,7 +834,11 @@ int up_addrenv_vtext(FAR group_addrenv_t *addrenv, FAR void **vtext);
  *      in the same memory region (read/write/execute) and, in this case,
  *      the virtual address of the data just lies at this offset into the
  *      common region.
- *   vdata - The location to return the virtual address.
+ *   vdata - The location to return the virtual address.  NOTE that the
+ *      beginning of the data region is reserved for use by the OS.  The
+ *      returned address will be at a offset from the actual allocated base
+ *      address to account for the OS private region.  The size of that
+ *      offset is given by ARCH_DATA_RESERVE
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.

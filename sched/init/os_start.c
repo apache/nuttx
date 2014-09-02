@@ -350,7 +350,7 @@ void os_start(void)
     FAR void *heap_start;
     size_t heap_size;
 
-#ifdef CONFIG_MM_USER_HEAP
+#ifdef MM_KERNEL_USRHEAP_INIT
     /* Get the user-mode heap from the platform specific code and configure
      * the user-mode memory allocator.
      */

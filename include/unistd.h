@@ -149,7 +149,8 @@ ssize_t write(int fd, FAR const void *buf, size_t nbytes);
 
 /* Memory management */
 
-#ifdef CONFIG_ARCH_ADDRENV
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_MM_PGALLOC) && \
+    defined(CONFIG_ARCH_USE_MMU)
 FAR void *sbrk(intptr_t incr);
 #endif
 

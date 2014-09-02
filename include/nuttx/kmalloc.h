@@ -89,8 +89,21 @@ extern "C"
 #define kumm_trysemaphore()      umm_trysemaphore()
 #define kumm_givesemaphore()     umm_givesemaphore()
 
-#ifndef CONFIG_BUILD_PROTECTED
-/* In the flat build, the following are declared in stdlib.h and are
+#ifdef CONFIG_BUILD_PROTECTED
+/* In the kernel-phase of the protected build, the these macros are defined
+ * in userspace.h.  These macros version call into user-space via a header
+ * at the beginning of the user-space blob.
+ */
+
+#  define kumm_malloc(s)         umm_malloc(s)
+#  define kumm_zalloc(s)         umm_zalloc(s)
+#  define kumm_realloc(p,s)      umm_realloc(p,s)
+#  define kumm_memalign(a,s)     umm_memalign(a,s)
+#  define kumm_free(p)           umm_free(p)
+
+#else
+/* In the flat build (CONFIG_BUILD_FLAT) and in the kernel build
+ * (CONFIG_BUILD_KERNEL), the following are declared in stdlib.h and are
  * directly callable.
  */
 
@@ -99,18 +112,6 @@ extern "C"
 # define kumm_realloc(p,s)       realloc(p,s)
 # define kumm_memalign(a,s)      memalign(a,s)
 # define kumm_free(p)            free(p)
-
-#else
-/* In the kernel-phase of the protected build, the these macros are defined
- * in userspace.h.  These macros versions call into user-space via a header
- * at the beginning of the user-space blob.
- */
-
-# define kumm_malloc(s)          umm_malloc(s)
-# define kumm_zalloc(s)          umm_zalloc(s)
-# define kumm_realloc(p,s)       umm_realloc(p,s)
-# define kumm_memalign(a,s)      umm_memalign(a,s)
-# define kumm_free(p)            umm_free(p)
 
 #endif
 
@@ -164,9 +165,7 @@ extern "C"
  * sched_garbagecollection().
  */
 
-#ifdef CONFIG_MM_USER_HEAP
 void sched_ufree(FAR void *address);
-#endif
 
 #if defined(CONFIG_MM_KERNEL_HEAP) && defined(__KERNEL__)
 void sched_kfree(FAR void *address);

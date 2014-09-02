@@ -65,21 +65,40 @@
 #  define CONFIG_MM_SMALL 1
 #endif
 
-/* Decide if there is a user heap.  CONFIG_MM_USER_HEAP=n does not not
- * really that there is no user heap but, rather, that there is no
- * user heap available from within the kernel.  The user heap is
- * Available if:
+/* Terminology:
  *
- *   1. The code is begin build for kernel space and this is a FLAT build
- *      (CONFIG_BUILD_FLAT=y),
- *   2. The code is begin build for kernel space and this is a protected
- *      build (CONFIG_BUILD_PROTECTED=y), OR
- *   3. The code is begin build for user space.
+ * - Flat Build: In the flat build (CONFIG_BUILD_FLAT=y), there is only a
+ *   single heap access with the standard allocations (malloc/free).  This
+ *   heap is referred to as the user heap.  The kernel logic must
+ *   initialize this single heap at boot time.
+ * - Protected build: In the protected build (CONFIG_BUILD_PROTECTED=y)
+ *   where an MPU is used to protect a region of otherwise flat memory,
+ *   there will be two allocators:  One that allocates protected (kernel)
+ *   memory and one that allocates unprotected (user) memory.  These are
+ *   referred to as the kernel and user heaps, respectively.  Both must be
+ *   initialized by the kernel logic at boot time.
+ * - Kernel Build: If the architecture has an MMU, then it may support the
+ *   kernel build (CONFIG_BUILD_KERNEL=y).  In this configuration, there
+ *   is one kernel heap but multiple user heaps:  One per task group.
+ *   However, in this case, the kernel need only be concerned about
+ *   initializing the single kernel heap here.  User heaps will be created
+ *   as tasks are created.
+ *
+ * These special definitions are provided:
+ *
+ *   MM_KERNEL_USRHEAP_INIT
+ *     Special kernel interfaces to the kernel user-heap are required
+ *     for heap initialization.
+ *   CONFIG_MM_KERNEL_HEAP
+ *     The configuration requires a kernel heap that must initialized
+ *     at boot-up.
  */
 
-#undef CONFIG_MM_USER_HEAP
-#if !defined(CONFIG_BUILD_KERNEL) || !defined(__KERNEL__)
-#  define CONFIG_MM_USER_HEAP 1
+#undef MM_KERNEL_USRHEAP_INIT
+#if defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)
+#  define MM_KERNEL_USRHEAP_INIT 1
+#elif !defined(CONFIG_BUILD_KERNEL)
+#  define MM_KERNEL_USRHEAP_INIT 1
 #endif
 
 /* The kernel heap is never accessible from user code */
@@ -243,8 +262,18 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#ifdef CONFIG_MM_USER_HEAP
-/* This is the user heap */
+#if (!defined(CONFIG_ARCH_ADDRENV) || !defined(CONFIG_BUILD_KERNEL)) && \
+    (defined(CONFIG_BUILD_KERNEL) && !defined(__KERNEL__))
+/* User heap structure:
+ *
+ * - Flat build:  In the FLAT build, the user heap structure is a globally
+ *   accessible variable.
+ * - Protected build:  The user heap structure is directly available only
+ *   in user space.
+ * - Kernel build: There are multiple heaps, one per process.  The heap
+ *   structure is associated with the address environment and there is
+ *    no global user heap structure.
+ */
 
 EXTERN struct mm_heap_s g_mmheap;
 #endif
@@ -268,7 +297,7 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
 
 /* Functions contained in umm_initialize.c **********************************/
 
-#ifdef CONFIG_MM_USER_HEAP
+#ifdef MM_KERNEL_USRHEAP_INIT
 void umm_initialize(FAR void *heap_start, size_t heap_size);
 #endif
 
@@ -280,13 +309,13 @@ void kmm_initialize(FAR void *heap_start, size_t heap_size);
 
 /* Functions contained in umm_addregion.c ***********************************/
 
-#ifdef CONFIG_MM_USER_HEAP
+#ifdef MM_KERNEL_USRHEAP_INIT
 void umm_addregion(FAR void *heapstart, size_t heapsize);
 #endif
 
 /* Functions contained in kmm_addregion.c ***********************************/
 
-#ifdef CONFIG_MM_USER_HEAP
+#ifdef CONFIG_MM_KERNEL_HEAP
 void kmm_addregion(FAR void *heapstart, size_t heapsize);
 #endif
 
@@ -299,7 +328,7 @@ void mm_givesemaphore(FAR struct mm_heap_s *heap);
 
 /* Functions contained in umm_sem.c ****************************************/
 
-#ifdef CONFIG_MM_USER_HEAP
+#ifdef MM_KERNEL_USRHEAP_INIT
 int  umm_trysemaphore(void);
 void umm_givesemaphore(void);
 #endif
@@ -385,9 +414,7 @@ FAR void *mm_brkaddr(FAR struct mm_heap_s *heap, int region);
 
 /* Functions contained in umm_brkaddr.c *************************************/
 
-#ifdef CONFIG_MM_USER_HEAP
 FAR void *umm_brkaddr(int region);
-#endif
 
 /* Functions contained in kmm_brkaddr.c *************************************/
 
@@ -397,14 +424,16 @@ FAR void *kmm_brkaddr(int region);
 
 /* Functions contained in mm_sbrk.c *****************************************/
 
-#ifdef CONFIG_ARCH_ADDRENV
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_MM_PGALLOC) && \
+    defined(CONFIG_ARCH_USE_MMU)
 FAR void *mm_sbrk(FAR struct mm_heap_s *heap, intptr_t incr,
                   uintptr_t maxbreak);
 #endif
 
 /* Functions contained in kmm_sbrk.c ****************************************/
 
-#ifdef CONFIG_ARCH_ADDRENV
+#if defined(CONFIG_MM_KERNEL_HEAP) && defined(CONFIG_ARCH_ADDRENV) && \
+    defined(CONFIG_MM_PGALLOC) && defined(CONFIG_ARCH_USE_MMU)
 FAR void *kmm_sbrk(intptr_t incr);
 #endif
 
@@ -415,9 +444,7 @@ void mm_extend(FAR struct mm_heap_s *heap, FAR void *mem, size_t size,
 
 /* Functions contained in umm_extend.c **************************************/
 
-#ifdef CONFIG_MM_USER_HEAP
 void umm_extend(FAR void *mem, size_t size, int region);
-#endif
 
 /* Functions contained in kmm_extend.c **************************************/
 

@@ -67,8 +67,9 @@
  *
  * The ARMv7 has no MPU but does have an MMU.  With this MMU, it can support
  * the kernel build (CONFIG_BUILD_KERNEL=y).  In this configuration, there
- * is again only one heap but, retaining the terminology, this is the kernel
- * heap.
+ * is one kernel heap but multiple user heaps:  One per task group.  However,
+ * in this case, we need only be concerned about initializing the single
+ * kernel heap here.
  */
 
 /****************************************************************************
