@@ -8363,4 +8363,14 @@
 	  change.  The argument list is no long in the TCB, but in the stack.
 	  But not for the IDLE task.  It needs its own mini-argv[] list so that
 	  it looks more like other threads (2014-9-1).
+	* arch/arm/src/armv7-a/arm_addrenv.c, include/nuttx/addrenv.h, and
+	  mm/umm_*.c: Space at the beginning of the process data space is now
+	  reserved for user heap management structures.  In the kernel build
+	  mode, these heap structures are shared between the kernel and use
+	  code in order to allocate user-specific data (2014-9-2).
+	* include/unistd.h, nuttx/mm.h, and kmalloc.h, sched/init/os_start.c
+	  and sched/sched/sched_free.c, mm/kmm_sbrk.c and mm_sbrk.c, and
+	  arch/arm/src/sama5/sam_allocateheap.c:  Restructuring of build to
+	  allow use of use-space allocators by kernel logic in the kernel
+	  build (2014-9-2).
 
