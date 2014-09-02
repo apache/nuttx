@@ -69,13 +69,12 @@
  *
  * The ARMv7 has no MPU but does have an MMU.  With this MMU, it can support
  * the kernel build (CONFIG_BUILD_KERNEL=y).  In this configuration, there
- * is again only one heap but, retaining the terminology, this is the kernel
- * heap.
+ * is one kernel heap but multiple user heaps:  One per task group.  However,
+ * in this case, we need only be concerned about initializing the single
+ * kernel heap here.
  */
 
-#if defined(CONFIG_MM_USER_HEAP) && defined(CONFIG_MM_KERNEL_HEAP)
-#  error "Cannot support both user and kernel heaps"
-#elif defined(CONFIG_MM_KERNEL_HEAP)
+#if defined(CONFIG_BUILD_KERNEL)
 #  define MM_ADDREGION kmm_addregion
 #else
 #  define MM_ADDREGION umm_addregion
@@ -247,10 +246,10 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_MM_USER_HEAP)
-void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
-#elif defined(CONFIG_MM_KERNEL_HEAP)
+#if defined(CONFIG_BUILD_KERNEL)
 void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
+#else
+void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 #endif
 {
 #if defined(CONFIG_BOOT_SDRAM_DATA)
