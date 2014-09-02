@@ -41,6 +41,8 @@
 
 #include <sys/types.h>
 
+#include <nuttx/addrenv.h>
+
 #ifdef CONFIG_BUILD_KERNEL
 
 /****************************************************************************
@@ -60,6 +62,48 @@ extern main_t main;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_signal_handler
+ *
+ * Description:
+ *   This function is the user-space, signal handler trampoline function.  It
+ *   is called from up_signal_dispatch() in user-mode.
+ *
+ *     R0-R3, R11 - volatile registers need not be preserved.
+ *     R4-R10 - static registers must be preserved
+ *     R12-R14 - LR and SP must be preserved
+ *
+ * Inputs:
+ *   R0 = sighand
+ *     The address user-space signal handling function
+ *   R1-R3 = signo, info, and ucontext
+ *     Standard arguments to be passed to the signal handling function.
+ *
+ * Return:
+ *   None.  This function does not return in the normal sense.  It returns
+ *   via the SYS_signal_handler_return (see svcall.h)
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_SIGNALS
+static void sig_trampoline(void) naked_function;
+static void sig_trampoline(void)
+{
+  __asm__ __volatile__
+  (
+    " push {lr}\n"       /* Save LR on the stack */
+    " mov  ip, r0\n"     /* IP=sighand */
+    " mov  r0, r1\n"     /* R0=signo */
+    " mov  r1, r2\n"     /* R1=info */
+    " mov  r2, r3\n"     /* R2=ucontext */
+    " blx  ip\n"         /* Call the signal handler */
+    " pop  {r2}\n"       /* Recover LR in R2 */
+    " mov  lr, r2\n"     /* Restore LR */
+    " mov  r0, #4\n"     /* SYS_signal_handler_return
+    " svc #0x900001\n"   /* Return from the signal handler */
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -88,6 +132,14 @@ extern main_t main;
 void _start(int argc, FAR char *argv[])
 {
   int ret;
+
+#ifndef CONFIG_DISABLE_SIGNALS
+  /* Initialize the reserved area at the beginning of the .bss/.data region
+   * that is visible to the RTOS.
+   */
+
+  ADDRENV_DATA_RESERVE->ar_sigtramp = (addrenv_sigtramp_t)sig_trampoline;
+#endif
 
   /* Call C++ constructors */
   /* Setup so that C++ destructors called on task exit */

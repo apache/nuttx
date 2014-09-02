@@ -328,10 +328,8 @@ void mm_givesemaphore(FAR struct mm_heap_s *heap);
 
 /* Functions contained in umm_sem.c ****************************************/
 
-#ifdef MM_KERNEL_USRHEAP_INIT
 int  umm_trysemaphore(void);
 void umm_givesemaphore(void);
-#endif
 
 /* Functions contained in kmm_sem.c ****************************************/
 

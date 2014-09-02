@@ -763,7 +763,7 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages);
  *     needed by the task.  This region may be read/write only.  NOTE: The
  *     actual size of the data region that is allocated will include a
  *     OS private reserved region at the beginning.  The size of the
- *     private, reserved region is give by ARCH_DATA_RESERVE.
+ *     private, reserved region is give by ARCH_DATA_RESERVE_SIZE.
  *   addrenv - The location to return the representation of the task address
  *     environment.
  *
@@ -838,7 +838,7 @@ int up_addrenv_vtext(FAR group_addrenv_t *addrenv, FAR void **vtext);
  *      beginning of the data region is reserved for use by the OS.  The
  *      returned address will be at a offset from the actual allocated base
  *      address to account for the OS private region.  The size of that
- *      offset is given by ARCH_DATA_RESERVE
+ *      offset is given by ARCH_DATA_RESERVE_SIZE
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.

@@ -42,6 +42,11 @@
 
 #include <nuttx/config.h>
 
+#ifdef CONFIG_BUILD_KERNEL
+#  include <signal.h>
+#  include <nuttx/mm.h>
+#endif
+
 #ifdef CONFIG_ARCH_ADDRENV
 
 /****************************************************************************
@@ -98,18 +103,20 @@
 
 /* Reserved .bss/.data region.  In the kernel build (CONFIG_BUILD_KERNEL),
  * the region at the beginning of the .bss/.data region is reserved for use
- * by the OS.  This reserved region contains only the task group's heap
- * memory management data structures.
+ * by the OS.  This reserved region contains support for:
  *
- * We don't use sizeof(struct mm_heap_s) but, instead, a nice even number
- * that we must be assure is greater than or equal to
- * sizeof(struct mm_heap_s)
+ *   1. The task group's heap memory management data structures and
+ *   2. Support for delivery of signals.
+ *
+ * We don't use sizeof(struct addrenv_reserve_s) but, instead, a nice
+ * even number that we must be assure is greater than or equal to
+ * sizeof(struct addrenv_reserve_s)
  */
 
 #ifdef CONFIG_BUILD_KERNEL
-#  define ARCH_DATA_RESERVE 512
+#  define ARCH_DATA_RESERVE_SIZE 512
 #else
-#  define ARCH_DATA_RESERVE 0
+#  define ARCH_DATA_RESERVE_SIZE 0
 #endif
 
 /* Heap region */
@@ -155,11 +162,50 @@
 #define ARCH_SCRATCH_VBASE (CONFIG_ARCH_STACK_VBASE + ARCH_STACK_SIZE)
 
 /****************************************************************************
- * Private Data
+ * Public Types
  ****************************************************************************/
 
+/* Reserved .bss/.data region.  In the kernel build (CONFIG_BUILD_KERNEL),
+ * the region at the beginning of the .bss/.data region is reserved for use
+ * by the OS.  This reserved region contains support for:
+ *
+ *   1. The task group's heap memory management data structures and
+ *   2. Support for delivery of signals.
+ */
+
+#ifdef CONFIG_BUILD_KERNEL
+#ifndef CONFIG_DISABLE_SIGNALS
+/* This is the type of the signal handler trampoline routine.  This
+ * trampoline is called directly from kernel logic.  It simply forwards the
+ * signal information to the real signal handler.  When the signal handler
+ * returns, this function issues a system call in order to return in kernel
+ * mode.
+ */
+
+typedef void (*addrenv_sigtramp_t)(_sa_sigaction_t sighand, int signo,
+                                   FAR siginfo_t *info, FAR void *ucontext);
+#endif
+
+/* This structure describes the format of the .bss/.data reserved area */
+
+struct addrenv_reserve_s
+{
+#ifndef CONFIG_DISABLE_SIGNALS
+  addrenv_sigtramp_t ar_sigtramp;  /* Signal trampoline */
+#endif
+  struct mm_heap_s   ar_usrheap;   /* User space heap structure */
+};
+
+/* Each instance of this structure resides at the beginning of the user-
+ * space .bss/.data region.  This macro is provided to simplify access:
+ */
+
+#define ARCH_DATA_RESERVE \
+  ((FAR struct addrenv_reserve_s *)CONFIG_ARCH_TEXT_VBASE)
+#endif
+
 /****************************************************************************
- * Private Functions
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************

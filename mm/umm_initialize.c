@@ -60,11 +60,11 @@
  * group.  In this build configuration, the user heap structure lies
  * in a reserved region at the beginning of the .bss/.data address
  * space (CONFIG_ARCH_DATA_VBASE).  The size of that region is given by
- * ARCH_DATA_RESERVE
+ * ARCH_DATA_RESERVE_SIZE
  */
 
 #  include <nuttx/addrenv.h>
-#  define USR_HEAP ((FAR struct mm_heap_s *)CONFIG_ARCH_DATA_VBASE)
+#  define USR_HEAP (&ARCH_DATA_RESERVE->ar_usrheap)
 
 #else
 /* Otherwise, the user heap data structures are in common .bss */
@@ -100,7 +100,7 @@ struct mm_heap_s g_mmheap;
 
 void umm_initialize(FAR void *heap_start, size_t heap_size)
 {
-  DEBUGASSERT(ARCH_DATA_RESERVE >= sizeof(struct mm_heap_s));
+  DEBUGASSERT(ARCH_DATA_RESERVE_SIZE >= sizeof(struct addrenv_reserve_s));
   mm_initialize(USR_HEAP, heap_start, heap_size);
 }
 
