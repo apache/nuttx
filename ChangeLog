@@ -8373,4 +8373,6 @@
 	  arch/arm/src/sama5/sam_allocateheap.c:  Restructuring of build to
 	  allow use of use-space allocators by kernel logic in the kernel
 	  build (2014-9-2).
-
+	* arch/arm/include/armv7-a/irq.h, arm_syscall.c, crt0.c,
+	  include/nuttx/addrenv.h, and mm/umm_*.c:  Add support for delivery
+	  of use-mode signals in the kernel build (2014-9-2).
