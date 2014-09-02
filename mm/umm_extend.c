@@ -41,11 +41,26 @@
 
 #include <nuttx/mm.h>
 
-#ifdef CONFIG_MM_USER_HEAP
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
+/* In the kernel build, there a multiple user heaps; one for each task
+ * group.  In this build configuration, the user heap structure lies
+ * in a reserved region at the beginning of the .bss/.data address
+ * space (CONFIG_ARCH_DATA_VBASE).  The size of that region is given by
+ * ARCH_DATA_RESERVE
+ */
+
+#  include <nuttx/addrenv.h>
+#  define USR_HEAP ((FAR struct mm_heap_s *)CONFIG_ARCH_DATA_VBASE)
+
+#else
+/* Otherwise, the user heap data structures are in common .bss */
+
+#  define USR_HEAP &g_mmheap;
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -62,7 +77,5 @@
 
 void umm_extend(FAR void *mem, size_t size, int region)
 {
-  mm_extend(&g_mmheap, mem, size, region);
+  mm_extend(USR_HEAP, mem, size, region);
 }
-
-#endif /* CONFIG_MM_USER_HEAP */

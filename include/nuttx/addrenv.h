@@ -96,6 +96,22 @@
 #define ARCH_DATA_SIZE  (CONFIG_ARCH_DATA_NPAGES * CONFIG_MM_PGSIZE)
 #define ARCH_DATA_VEND  (CONFIG_ARCH_DATA_VBASE + ARCH_DATA_SIZE)
 
+/* Reserved .bss/.data region.  In the kernel build (CONFIG_BUILD_KERNEL),
+ * the region at the beginning of the .bss/.data region is reserved for use
+ * by the OS.  This reserved region contains only the task group's heap
+ * memory management data structures.
+ *
+ * We don't use sizeof(struct mm_heap_s) but, instead, a nice even number
+ * that we must be assure is greater than or equal to
+ * sizeof(struct mm_heap_s)
+ */
+
+#ifdef CONFIG_BUILD_KERNEL
+#  define ARCH_DATA_RESERVE 512
+#else
+#  define ARCH_DATA_RESERVE 0
+#endif
+
 /* Heap region */
 
 #ifndef CONFIG_ARCH_HEAP_VBASE
