@@ -186,9 +186,24 @@ static int get_pgtable(FAR group_addrenv_t *addrenv, uintptr_t vaddr)
  *   Therefore, it is a system interface and follows a different naming
  *   convention.
  *
+ * Input Parameters:
+ *   brkaddr - The heap break address.  The next page will be allocated and
+ *     mapped to this address.  Must be page aligned.  If the memory manager
+ *     has not yet been initialized and this is the first block requested for
+ *     the heap, then brkaddr should be zero.  pgalloc will then assigned the
+ *     well-known virtual address of the beginning of the heap.
+ *   npages - The number of pages to allocate and map.  Mapping of pages
+ *     will be contiguous beginning beginning at 'brkaddr'
+ *
+ * Returned Value:
+ *   The (virtual) base address of the mapped page will returned on success.
+ *   Normally this will be the same as the 'brkaddr' input. However, if
+ *   the 'brkaddr' input was zero, this will be the virtual address of the
+ *   beginning of the heap.  Zero is returned on any failure.
+ *
  ****************************************************************************/
 
-int pgalloc(uintptr_t vaddr, unsigned int npages)
+uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages)
 {
   FAR struct tcb_s *tcb = sched_self();
   FAR struct task_group_s *group;
@@ -209,24 +224,24 @@ int pgalloc(uintptr_t vaddr, unsigned int npages)
 
   DEBUGASSERT((group->flags & GROUP_FLAG_ADDRENV) != 0);
 
-  /* vaddr = 0 means that no heap has yet been allocated */
+  /* brkaddr = 0 means that no heap has yet been allocated */
 
-  if (vaddr == 0)
+  if (brkaddr == 0)
     {
-      vaddr = CONFIG_ARCH_HEAP_VBASE;
+      brkaddr = CONFIG_ARCH_HEAP_VBASE;
     }
 
-  DEBUGASSERT(vadddr >= CONFIG_ARCH_HEAP_VBASE && vaddr < ARCH_HEAP_VEND);
-  DEBUGASSERT(MM_ISALIGNED(vaddr));
+  DEBUGASSERT(vadddr >= CONFIG_ARCH_HEAP_VBASE && brkaddr < ARCH_HEAP_VEND);
+  DEBUGASSERT(MM_ISALIGNED(brkaddr));
 
   for (; npages > 0; npages--)
     {
       /* Get the physical address of the level 2 page table */
 
-      paddr = get_pgtable(&group->addrenv, vaddr);
+      paddr = get_pgtable(&group->addrenv, brkaddr);
       if (paddr == 0)
         {
-          return -ENOMEM; /* ENOMEM might have correct meaning for sbrk? */
+          return 0;
         }
 
       /* Temporarily map the level 2 page table into the "scratch" virtual
@@ -245,7 +260,7 @@ int pgalloc(uintptr_t vaddr, unsigned int npages)
         {
           mmu_l1_restore(ARCH_SCRATCH_VBASE, l1save);
           irqrestore(flags);
-          return -EAGAIN; /* ENOMEM has different meaning for sbrk */
+          return 0;
         }
 
       /* The table divides a 1Mb address space up into 256 entries, each
@@ -253,13 +268,13 @@ int pgalloc(uintptr_t vaddr, unsigned int npages)
        * related to the offset from the beginning of 1Mb region.
        */
 
-      index = (vaddr & 0x000ff000) >> 12;
+      index = (brkaddr & 0x000ff000) >> 12;
 
        /* Map the .text region virtual address to this physical address */
 
       DEBUGASSERT(l2table[index] == 0);
       l2table[index] = paddr | MMU_L2_UDATAFLAGS;
-      vaddr += MM_PGSIZE;
+      brkaddr += MM_PGSIZE;
 
       /* Make sure that the modified L2 table is flushed to physical
        * memory.
@@ -274,7 +289,7 @@ int pgalloc(uintptr_t vaddr, unsigned int npages)
       irqrestore(flags);
     }
 
-  return OK;
+  return brkaddr;
 }
 
 #endif /* CONFIG_MM_PGALLOC && CONFIG_ARCH_USE_MMU */
