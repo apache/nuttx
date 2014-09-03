@@ -43,7 +43,7 @@
 
 #include <nuttx/mm.h>
 
-#ifdef MM_KERNEL_USRHEAP_INIT
+#if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
 
 /************************************************************************
  * Pre-processor definition
@@ -109,4 +109,4 @@ void umm_initialize(FAR void *heap_start, size_t heap_size)
   mm_initialize(USR_HEAP, heap_start, heap_size);
 }
 
-#endif /* MM_KERNEL_USRHEAP_INIT */
+#endif /* !CONFIG_BUILD_PROTECTED || !__KERNEL__ */

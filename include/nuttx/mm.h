@@ -43,6 +43,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdbool.h>
 #include <semaphore.h>
 
 /****************************************************************************
@@ -262,8 +263,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#if (!defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)) || \
-    (defined(CONFIG_BUILD_PROTECTED) && !defined(__KERNEL__))
+#if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
 /* User heap structure:
  *
  * - Flat build:  In the FLAT build, the user heap structure is a globally
@@ -297,7 +297,7 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
 
 /* Functions contained in umm_initialize.c **********************************/
 
-#ifdef MM_KERNEL_USRHEAP_INIT
+#if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
 void umm_initialize(FAR void *heap_start, size_t heap_size);
 #endif
 
@@ -309,7 +309,7 @@ void kmm_initialize(FAR void *heap_start, size_t heap_size);
 
 /* Functions contained in umm_addregion.c ***********************************/
 
-#ifdef MM_KERNEL_USRHEAP_INIT
+#if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
 void umm_addregion(FAR void *heapstart, size_t heapsize);
 #endif
 
@@ -328,8 +328,10 @@ void mm_givesemaphore(FAR struct mm_heap_s *heap);
 
 /* Functions contained in umm_sem.c ****************************************/
 
+#if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
 int  umm_trysemaphore(void);
 void umm_givesemaphore(void);
+#endif
 
 /* Functions contained in kmm_sem.c ****************************************/
 
@@ -412,7 +414,9 @@ FAR void *mm_brkaddr(FAR struct mm_heap_s *heap, int region);
 
 /* Functions contained in umm_brkaddr.c *************************************/
 
+#if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
 FAR void *umm_brkaddr(int region);
+#endif
 
 /* Functions contained in kmm_brkaddr.c *************************************/
 
@@ -442,7 +446,9 @@ void mm_extend(FAR struct mm_heap_s *heap, FAR void *mem, size_t size,
 
 /* Functions contained in umm_extend.c **************************************/
 
+#if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
 void umm_extend(FAR void *mem, size_t size, int region);
+#endif
 
 /* Functions contained in kmm_extend.c **************************************/
 

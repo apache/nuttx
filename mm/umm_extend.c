@@ -41,6 +41,8 @@
 
 #include <nuttx/mm.h>
 
+#if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -79,3 +81,5 @@ void umm_extend(FAR void *mem, size_t size, int region)
 {
   mm_extend(USR_HEAP, mem, size, region);
 }
+
+#endif /* !CONFIG_BUILD_PROTECTED || !__KERNEL__ */

@@ -43,6 +43,8 @@
 
 #include <nuttx/mm.h>
 
+#if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -85,3 +87,5 @@ void free(FAR void *mem)
 {
   mm_free(USR_HEAP, mem);
 }
+
+#endif /* !CONFIG_BUILD_PROTECTED || !__KERNEL__ */

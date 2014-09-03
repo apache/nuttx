@@ -44,6 +44,8 @@
 
 #include <nuttx/mm.h>
 
+#if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -102,3 +104,5 @@ FAR void *zalloc(size_t size)
   return mm_zalloc(USR_HEAP, size);
 #endif
 }
+
+#endif /* !CONFIG_BUILD_PROTECTED || !__KERNEL__ */

@@ -43,6 +43,8 @@
 
 #include <nuttx/mm.h>
 
+#if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -89,3 +91,5 @@ FAR void *memalign(size_t alignment, size_t size)
 {
   return mm_memalign(USR_HEAP, alignment, size);
 }
+
+#endif /* !CONFIG_BUILD_PROTECTED || !__KERNEL__ */

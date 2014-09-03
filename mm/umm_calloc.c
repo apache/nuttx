@@ -43,6 +43,8 @@
 
 #include <nuttx/mm.h>
 
+#if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -80,3 +82,5 @@ FAR void *calloc(size_t n, size_t elem_size)
 {
   return mm_calloc(USR_HEAP, n, elem_size);
 }
+
+#endif /* !CONFIG_BUILD_PROTECTED || !__KERNEL__ */

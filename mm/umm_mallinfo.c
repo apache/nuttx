@@ -43,6 +43,8 @@
 
 #include <nuttx/mm.h>
 
+#if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -102,3 +104,4 @@ int mallinfo(struct mallinfo *info)
 }
 
 #endif /* CONFIG_CAN_PASS_STRUCTS */
+#endif /* !CONFIG_BUILD_PROTECTED || !__KERNEL__ */

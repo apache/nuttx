@@ -45,7 +45,8 @@
 #include <nuttx/pgalloc.h>
 
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_MM_PGALLOC) && \
-    defined(CONFIG_ARCH_USE_MMU)
+    defined(CONFIG_ARCH_USE_MMU) && (!defined(CONFIG_BUILD_PROTECTED) || \
+    !defined(__KERNEL__))
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -109,4 +110,4 @@ FAR void *sbrk(intptr_t incr)
   return mm_sbrk(USR_HEAP, incr, CONFIG_ARCH_STACK_NPAGES << MM_PGSHIFT);
 }
 
-#endif /* CONFIG_ARCH_ADDRENV && CONFIG_MM_PGALLOC && CONFIG_ARCH_USE_MMU */
+#endif /* CONFIG_ARCH_ADDRENV && CONFIG_MM_PGALLOC && ... */

@@ -41,6 +41,8 @@
 
 #include <nuttx/mm.h>
 
+#if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
+
 /************************************************************************
  * Pre-processor definition
  ************************************************************************/
@@ -119,3 +121,5 @@ void umm_givesemaphore(void)
 {
   mm_givesemaphore(USR_HEAP);
 }
+
+#endif /* !CONFIG_BUILD_PROTECTED || !__KERNEL__ */

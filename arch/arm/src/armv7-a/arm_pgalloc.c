@@ -133,7 +133,7 @@ static int get_pgtable(FAR group_addrenv_t *addrenv, uintptr_t vaddr)
    * region as part of the implementation of user sbrk().
    */
 
-  DEBUGASSERT(vadddr >= CONFIG_ARCH_HEAP_VBASE && vaddr < ARCH_HEAP_VEND);
+  DEBUGASSERT(vaddr >= CONFIG_ARCH_HEAP_VBASE && vaddr < ARCH_HEAP_VEND);
 
   /* Get the current level 1 entry corresponding to this vaddr */
 
@@ -222,7 +222,7 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages)
    * space and (2) extending the kernel memory regions as well.
    */
 
-  DEBUGASSERT((group->flags & GROUP_FLAG_ADDRENV) != 0);
+  DEBUGASSERT((group->tg_flags & GROUP_FLAG_ADDRENV) != 0);
 
   /* brkaddr = 0 means that no heap has yet been allocated */
 
@@ -231,7 +231,7 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages)
       brkaddr = CONFIG_ARCH_HEAP_VBASE;
     }
 
-  DEBUGASSERT(vadddr >= CONFIG_ARCH_HEAP_VBASE && brkaddr < ARCH_HEAP_VEND);
+  DEBUGASSERT(brkaddr >= CONFIG_ARCH_HEAP_VBASE && brkaddr < ARCH_HEAP_VEND);
   DEBUGASSERT(MM_ISALIGNED(brkaddr));
 
   for (; npages > 0; npages--)

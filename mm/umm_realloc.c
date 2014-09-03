@@ -43,6 +43,8 @@
 
 #include <nuttx/mm.h>
 
+#if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -91,3 +93,5 @@ FAR void *realloc(FAR void *oldmem, size_t size)
 {
   return mm_realloc(USR_HEAP, oldmem, size);
 }
+
+#endif /* !CONFIG_BUILD_PROTECTED || !__KERNEL__ */
