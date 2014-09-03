@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/task/task_create.c
  *
- *   Copyright (C) 2007-2010, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,7 +78,7 @@
  * Description:
  *   This function creates and activates a new thread of the specified type
  *   with a specified priority and returns its system-assigned ID.  It is the
- *   internal, commn implementation of task_create() and kernel_thread().
+ *   internal, common implementation of task_create() and kernel_thread().
  *   See comments with task_create() for further information.
  *
  * Input Parameters:
@@ -118,10 +118,12 @@ static int thread_create(FAR const char *name, uint8_t ttype, int priority,
       goto errout;
     }
 
-  /* Allocate a new task group */
+  /* Allocate a new task group with privileges appropriate for the parent
+   * thread type.
+   */
 
 #ifdef HAVE_TASK_GROUP
-  ret = group_allocate(tcb);
+  ret = group_allocate(tcb, ttype);
   if (ret < 0)
     {
       errcode = -ret;

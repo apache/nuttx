@@ -39,6 +39,8 @@
 
 #include <sys/types.h>
 
+#include <assert.h>
+
 #include <nuttx/sched.h>
 #include <nuttx/kmalloc.h>
 
@@ -76,8 +78,8 @@
  *
  * Description:
  *   Allocate memory appropriate for the group type.  If the memory is
- *   part of a privileged, then it should be allocated so that it is
- *   only accessed by privileged code;  Otherwise, it is a user mode
+ *   part of a privileged group, then it should be allocated so that it
+ *   is only accessible by privileged code;  Otherwise, it is a user mode
  *   group and must be allocated so that it accessible by unprivileged
  *   code.
  *
@@ -85,6 +87,8 @@
 
 FAR void *group_malloc(FAR struct task_group_s *group, size_t nbytes)
 {
+  DEBUGASSERT(group);
+
   /* Check the group type */
 
   if ((group->tg_flags & GROUP_FLAG_PRIVILEGED) != 0)

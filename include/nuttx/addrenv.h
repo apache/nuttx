@@ -201,7 +201,7 @@ struct addrenv_reserve_s
  */
 
 #define ARCH_DATA_RESERVE \
-  ((FAR struct addrenv_reserve_s *)CONFIG_ARCH_TEXT_VBASE)
+  ((FAR struct addrenv_reserve_s *)CONFIG_ARCH_DATA_VBASE)
 #endif
 
 /****************************************************************************

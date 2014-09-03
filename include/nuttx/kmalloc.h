@@ -81,7 +81,7 @@ extern "C"
  * from the kernel.  In the flat build, the following are declared in
  * stdlib.h and are directly callable.  In the kernel-phase of the kernel
  * build, the following are defined in userspace.h as macros that call
- * into user-space via a header at the begining of the user-space blob.
+ * into user-space via a header at the beginning of the user-space blob.
  */
 
 #define kumm_initialize(h,s)     umm_initialize(h,s)
@@ -154,6 +154,41 @@ extern "C"
 /* Otherwise, the kernel-space allocators are declared in include/nuttx/mm.h
  * and we can call them directly.
  */
+
+#endif
+
+#if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
+     defined(CONFIG_MM_KERNEL_HEAP)
+/****************************************************************************
+ * Group memory management
+ *
+ *   Manage memory allocations appropriately for the group type.  If the
+ *   memory is part of a privileged group, then it should be allocated so
+ *   that it is only accessible by privileged code;  Otherwise, it is a
+ *   user mode group and must be allocated so that it accessible by
+ *   unprivileged code.
+ *
+ ****************************************************************************/
+/* Functions defined in group/group_malloc.c ********************************/
+
+FAR void *group_malloc(FAR struct task_group_s *group, size_t nbytes);
+
+/* Functions defined in group/group_zalloc.c ********************************/
+
+FAR void *group_zalloc(FAR struct task_group_s *group, size_t nbytes);
+
+/* Functions defined in group/group_free.c **********************************/
+
+void group_free(FAR struct task_group_s *group, FAR void *mem);
+
+#else
+  /* In the flat build, there is only one memory allocator and no distinction
+   * in privileges.
+   */
+
+#  define group_malloc(g,n) kumm_malloc(size)
+#  define group_zalloc(g,n) kumm_zalloc(size)
+#  define group_free(g,m)   kumm_free(size)
 
 #endif
 

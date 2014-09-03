@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/task/task_init.c
  *
- *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -130,7 +130,7 @@ int task_init(FAR struct tcb_s *tcb, const char *name, int priority,
   /* Create a new task group */
 
 #ifdef HAVE_TASK_GROUP
-  ret = group_allocate(ttcb);
+  ret = group_allocate(ttcb, tcb->flags);
   if (ret < 0)
     {
       errcode = -ret;

@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/task/task_vfork
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -144,10 +144,10 @@ FAR struct task_tcb_s *task_vforksetup(start_t retaddr)
       return NULL;
     }
 
-  /* Allocate a new task group */
+  /* Allocate a new task group with the same privileges as the parent */
 
 #ifdef HAVE_TASK_GROUP
-  ret = group_allocate(child);
+  ret = group_allocate(child, parent->flags);
   if (ret < 0)
     {
       goto errout_with_tcb;

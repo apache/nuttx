@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_fdopen.c
  *
- *   Copyright (C) 2007-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -226,9 +226,13 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb)
 
           (void)sem_init(&stream->fs_sem, 0, 1);
 
-          /* Allocate the IO buffer */
+          /* Allocate the IO buffer at the appropriate privilege level for
+           * the group.
+           */
 
-          stream->fs_bufstart = kumm_malloc(CONFIG_STDIO_BUFFER_SIZE);
+          stream->fs_bufstart =
+            group_malloc(tcb->group, CONFIG_STDIO_BUFFER_SIZE);
+
           if (!stream->fs_bufstart)
             {
               err = ENOMEM;

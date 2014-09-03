@@ -39,6 +39,8 @@
 
 #include <sys/types.h>
 
+#include <assert.h>
+
 #include <nuttx/sched.h>
 #include <nuttx/kmalloc.h>
 
@@ -82,6 +84,8 @@
 
 void group_free(FAR struct task_group_s *group, FAR void *mem)
 {
+  DEBUGASSERT(group && mem);
+
   /* Check the group is privileged */
 
   if ((group->tg_flags & GROUP_FLAG_PRIVILEGED) != 0)

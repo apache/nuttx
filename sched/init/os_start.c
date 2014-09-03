@@ -380,9 +380,9 @@ void os_start(void)
 #endif
   }
 
+#if defined(CONFIG_SCHED_HAVE_PARENT) && defined(CONFIG_SCHED_CHILD_STATUS)
   /* Initialize tasking data structures */
 
-#if defined(CONFIG_SCHED_HAVE_PARENT) && defined(CONFIG_SCHED_CHILD_STATUS)
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (task_initialize != NULL)
 #endif
@@ -427,9 +427,9 @@ void os_start(void)
     }
 #endif
 
+#ifndef CONFIG_DISABLE_SIGNALS
   /* Initialize the signal facility (if in link) */
 
-#ifndef CONFIG_DISABLE_SIGNALS
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (sig_initialize != NULL)
 #endif
@@ -438,9 +438,9 @@ void os_start(void)
     }
 #endif
 
+#ifndef CONFIG_DISABLE_MQUEUE
   /* Initialize the named message queue facility (if in link) */
 
-#ifndef CONFIG_DISABLE_MQUEUE
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (mq_initialize != NULL)
 #endif
@@ -449,9 +449,9 @@ void os_start(void)
     }
 #endif
 
+#ifndef CONFIG_DISABLE_PTHREAD
   /* Initialize the thread-specific data facility (if in link) */
 
-#ifndef CONFIG_DISABLE_PTHREAD
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (pthread_initialize != NULL)
 #endif
@@ -460,9 +460,9 @@ void os_start(void)
     }
 #endif
 
+#if CONFIG_NFILE_DESCRIPTORS > 0
   /* Initialize the file system (needed to support device drivers) */
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (fs_initialize != NULL)
 #endif
@@ -471,9 +471,9 @@ void os_start(void)
     }
 #endif
 
+#ifdef CONFIG_NET
   /* Initialize the network system */
 
-#ifdef CONFIG_NET
   net_initialize();
 #endif
 
@@ -497,25 +497,25 @@ void os_start(void)
     }
 
   /* IDLE Group Initialization **********************************************/
-  /* Allocate the IDLE group and suppress child status. */
-
 #ifdef HAVE_TASK_GROUP
-  DEBUGVERIFY(group_allocate(&g_idletcb));
+  /* Allocate the IDLE group */
+
+  DEBUGVERIFY(group_allocate(&g_idletcb, g_idletcb.cmn.flags));
 #endif
 
+#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
   /* Create stdout, stderr, stdin on the IDLE task.  These will be
    * inherited by all of the threads created by the IDLE task.
    */
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
   DEBUGVERIFY(group_setupidlefiles(&g_idletcb));
 #endif
 
+#ifdef HAVE_TASK_GROUP
   /* Complete initialization of the IDLE group.  Suppress retention
    * of child status in the IDLE group.
    */
 
-#ifdef HAVE_TASK_GROUP
   DEBUGVERIFY(group_initialize(&g_idletcb));
   g_idletcb.cmn.group->tg_flags = GROUP_FLAG_NOCLDWAIT;
 #endif

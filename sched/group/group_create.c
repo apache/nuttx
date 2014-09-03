@@ -46,8 +46,8 @@
 
 #include <nuttx/kmalloc.h>
 
-#include "group/group.h"
 #include "environ/environ.h"
+#include "group/group.h"
 
 #ifdef HAVE_TASK_GROUP
 
@@ -164,7 +164,8 @@ static void group_assigngid(FAR struct task_group_s *group)
  *   group membership.
  *
  * Parameters:
- *   tcb - The tcb in need of the task group.
+ *   tcb   - The tcb in need of the task group.
+ *   ttype - Type of the thread that is the parent of the group
  *
  * Return Value:
  *   0 (OK) on success; a negated errno value on failure.
@@ -175,7 +176,7 @@ static void group_assigngid(FAR struct task_group_s *group)
  *
  *****************************************************************************/
 
-int group_allocate(FAR struct task_tcb_s *tcb)
+int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
 {
   FAR struct task_group_s *group;
   int ret;
@@ -196,7 +197,7 @@ int group_allocate(FAR struct task_tcb_s *tcb)
    * of the group must be created for privileged access.
    */
 
-  if ((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
+  if ((ttype & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
     {
       group->tg_flags |= GROUP_FLAG_PRIVILEGED;
     }
