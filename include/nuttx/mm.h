@@ -263,7 +263,7 @@ extern "C"
 #endif
 
 #if (!defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)) || \
-    (defined(CONFIG_BUILD_DEFINED) && !defined(__KERNEL__))
+    (defined(CONFIG_BUILD_PROTECTED) && !defined(__KERNEL__))
 /* User heap structure:
  *
  * - Flat build:  In the FLAT build, the user heap structure is a globally
