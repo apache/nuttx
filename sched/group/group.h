@@ -114,6 +114,25 @@ int group_foreachchild(FAR struct task_group_s *group,
 int group_killchildren(FAR struct task_tcb_s *tcb);
 #endif
 
+/* Group memory management */
+
+#if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
+     defined(CONFIG_MM_KERNEL_HEAP)
+  /* Functions to pick the correct allocator based on group privileges */
+
+FAR void *group_malloc(FAR struct task_group_s *group, size_t nbytes);
+FAR void *group_zalloc(FAR struct task_group_s *group, size_t nbytes);
+void group_free(FAR struct task_group_s *group, FAR void *mem);
+
+#else
+  /* There is only one allocator */
+
+#  define group_malloc(g,n) kumm_malloc(size)
+#  define group_zalloc(g,n) kumm_zalloc(size)
+#  define group_free(g,m)   kumm_free(size)
+
+#endif
+
 #ifdef CONFIG_ARCH_ADDRENV
 /* Group address environment management */
 

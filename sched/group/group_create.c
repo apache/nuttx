@@ -157,7 +157,7 @@ static void group_assigngid(FAR struct task_group_s *group)
  * Description:
  *   Create and a new task group structure for the specified TCB. This
  *   function is called as part of the task creation sequence.  The structure
- *   allocated and zered, but otherwise uninitialized.  The full creation
+ *   allocated and zeroed, but otherwise uninitialized.  The full creation
  *   of the group of a two step process:  (1) First, this function allocates
  *   group structure early in the task creation sequence in order to provide a
  *   group container, then (2) group_initialize() is called to set up the
@@ -192,6 +192,14 @@ int group_allocate(FAR struct task_tcb_s *tcb)
 
 #if CONFIG_NFILE_STREAMS > 0 && (defined(CONFIG_BUILD_PROTECTED) || \
     defined(CONFIG_BUILD_KERNEL)) && defined(CONFIG_MM_KERNEL_HEAP)
+  /* If this group is being created for a privileged thread, then all elements
+   * of the group must be created for privileged access.
+   */
+
+  if ((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
+    {
+      group->tg_flags |= GROUP_FLAG_PRIVILEGED;
+    }
 
   /* In a flat, single-heap build.  The stream list is allocated with the
    * group structure.  But in a kernel build with a kernel allocator, it
@@ -199,7 +207,7 @@ int group_allocate(FAR struct task_tcb_s *tcb)
    */
 
   group->tg_streamlist = (FAR struct streamlist *)
-    kumm_zalloc(sizeof(struct streamlist));
+    group_zalloc(group, sizeof(struct streamlist));
 
   if (!group->tg_streamlist)
     {
@@ -228,7 +236,7 @@ int group_allocate(FAR struct task_tcb_s *tcb)
     {
 #if CONFIG_NFILE_STREAMS > 0 && (defined(CONFIG_BUILD_PROTECTED) || \
     defined(CONFIG_BUILD_KERNEL)) && defined(CONFIG_MM_KERNEL_HEAP)
-      kumm_free(group->tg_streamlist);
+      group_free(group, group->tg_streamlist);
 #endif
       kmm_free(group);
       tcb->cmn.group = NULL;

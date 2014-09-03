@@ -52,6 +52,14 @@ ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 GRP_SRCS += group_signal.c
 endif
 
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+GRP_SRCS += group_malloc.c group_zalloc.c group_free.c
+else
+ifeq ($(CONFIG_BUILD_KERNEL),y)
+GRP_SRCS += group_malloc.c group_zalloc.c group_free.c
+endif
+endif
+
 # Include group build support
 
 DEPPATH += --dep-path group
