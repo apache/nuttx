@@ -121,7 +121,12 @@ CSRCS += sam_maxtouch.c
 endif
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += sam_nsh.c
+CSRCS += sam_nsh.c sam_bringup.c
+else
+ifeq ($(CONFIG_BOARD_INITIALIZE),y)
+CSRCS += sam_bringup.c
+endif
+
 endif
 
 ifeq ($(CONFIG_ADC),y)
