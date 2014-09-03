@@ -8376,3 +8376,14 @@
 	* arch/arm/include/armv7-a/irq.h, arm_syscall.c, crt0.c,
 	  include/nuttx/addrenv.h, and mm/umm_*.c:  Add support for delivery
 	  of use-mode signals in the kernel build (2014-9-2).
+	* mm/mm_graninit.c: Granule allocator initialization uses wrong
+	  allocator to setting aside kernel memory (2014-903).
+	* sched/init/os_start.c: IDLE TCB setup needs to indicate the the
+	  IDLE thread is a privileged, kernel thread (2014-903).
+	* include/nuttx/sched.h: Add a flag to group structure:  If the group
+	  is created by a kernel thread, then all resources in the group must
+	  be privileged (2014-903).
+	* sched/group/group_malloc.c, group_zalloc.c, group_free.c,
+	  group_create.c, group.h: Group creation logic must use new group flag
+	  when allocating resources so that the privileges on the resource are
+	  set correctly (2014-903).
