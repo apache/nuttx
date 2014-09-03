@@ -134,6 +134,7 @@
 
 #define GROUP_FLAG_NOCLDWAIT       (1 << 0) /* Bit 0: Do not retain child exit status */
 #define GROUP_FLAG_ADDRENV         (1 << 1) /* Bit 1: Group has an address environment */
+#define GROUP_FLAG_PRIVILEGED      (1 << 2) /* Bit 2: Group is privileged */
 
 /* Values for struct child_status_s ch_flags */
 
