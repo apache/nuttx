@@ -39,11 +39,11 @@
 
 #include <nuttx/config.h>
 
-#include <stdlib.h>
 #include <assert.h>
 #include <errno.h>
 
 #include <nuttx/gran.h>
+#include <nuttx/kmalloc.h>
 
 #include "mm_gran.h"
 
@@ -127,7 +127,7 @@ gran_common_initialize(FAR void *heapstart, size_t heapsize, uint8_t log2gran,
    * correct size.
    */
 
-  priv = ( FAR struct gran_s *)zalloc(SIZEOF_GRAN_S(ngranules));
+  priv = ( FAR struct gran_s *)kmm_zalloc(SIZEOF_GRAN_S(ngranules));
   if (priv)
     {
       /* Initialize non-zero elements of the granules heap info structure */
