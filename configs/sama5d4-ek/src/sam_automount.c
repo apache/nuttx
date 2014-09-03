@@ -149,16 +149,18 @@ static const struct sam_automount_config_s g_hsmci1config =
  ************************************************************************************/
 
 /************************************************************************************
- * Name:  sam_automount_initialize
+ * Name:  sam_attach
  *
  * Description:
- *   Configure auto-mounters for each enable and so configured HSMCI
+ *   Attach a new HSMCI event handler
  *
  * Input Parameters:
- *   None
+ *   lower - An instance of the auto-mounter lower half state structure
+ *   isr   - The new event handler to be attach
+ *   arg   - Client data to be provided when the event handler is invoked.
  *
  *  Returned Value:
- *    None
+ *    Always returns OK
  *
  ************************************************************************************/
 
@@ -176,7 +178,7 @@ static int sam_attach(FAR const struct automount_lower_s *lower,
   state = config->state;
 
   /* Save the new handler info (clearing the handler first to eliminate race
-   * conditions.
+   * conditions).
    */
 
   state->handler = NULL;
@@ -187,13 +189,14 @@ static int sam_attach(FAR const struct automount_lower_s *lower,
 }
 
 /************************************************************************************
- * Name:  sam_automount_initialize
+ * Name:  sam_enable
  *
  * Description:
- *   Configure auto-mounters for each enable and so configured HSMCI
+ *   Enable card insertion/removal event detection
  *
  * Input Parameters:
- *   None
+ *   lower - An instance of the auto-mounter lower half state structure
+ *   enable - True: enable event detection; False: disable
  *
  *  Returned Value:
  *    None
@@ -237,16 +240,16 @@ static void sam_enable(FAR const struct automount_lower_s *lower, bool enable)
 }
 
 /************************************************************************************
- * Name: sam_automount_initialize
+ * Name: sam_inserted
  *
  * Description:
- *   Configure auto-mounters for each enable and so configured HSMCI
+ *   Check if a card is inserted into the slot.
  *
  * Input Parameters:
- *   None
+ *   lower - An instance of the auto-mounter lower half state structure
  *
  *  Returned Value:
- *    None
+ *    True if the card is inserted; False otherwise
  *
  ************************************************************************************/
 
