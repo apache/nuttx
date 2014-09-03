@@ -63,15 +63,23 @@
  * Public Function Prototypes
  ****************************************************************************/
 
+/* Task start-up */
+
 void task_start(void);
 int  task_schedsetup(FAR struct task_tcb_s *tcb, int priority,
        start_t start, main_t main, uint8_t ttype);
 int  task_argsetup(FAR struct task_tcb_s *tcb, FAR const char *name,
        FAR char * const argv[]);
+
+/* Task exit */
+
 int  task_exit(void);
 int  task_terminate(pid_t pid, bool nonblocking);
 void task_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking);
 void task_recover(FAR struct tcb_s *tcb);
+
+/* Misc. */
+
 bool sched_addreadytorun(FAR struct tcb_s *rtrtcb);
 
 #endif /* __SCHED_TASK_TASK_H */
