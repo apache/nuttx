@@ -262,8 +262,8 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#if (!defined(CONFIG_ARCH_ADDRENV) || !defined(CONFIG_BUILD_KERNEL)) && \
-    (defined(CONFIG_BUILD_KERNEL) && !defined(__KERNEL__))
+#if (!defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)) || \
+    (defined(CONFIG_BUILD_DEFINED) && !defined(__KERNEL__))
 /* User heap structure:
  *
  * - Flat build:  In the FLAT build, the user heap structure is a globally
@@ -272,7 +272,7 @@ extern "C"
  *   in user space.
  * - Kernel build: There are multiple heaps, one per process.  The heap
  *   structure is associated with the address environment and there is
- *    no global user heap structure.
+ *   no global user heap structure.
  */
 
 EXTERN struct mm_heap_s g_mmheap;

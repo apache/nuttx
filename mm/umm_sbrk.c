@@ -65,7 +65,7 @@
 #else
 /* Otherwise, the user heap data structures are in common .bss */
 
-#  define USR_HEAP &g_mmheap;
+#  define USR_HEAP &g_mmheap
 #endif
 
 /****************************************************************************

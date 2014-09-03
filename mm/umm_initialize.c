@@ -39,9 +39,11 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
+
 #include <nuttx/mm.h>
 
-#ifdef MM_KERNEL_USRHEAP_INTF
+#ifdef MM_KERNEL_USRHEAP_INIT
 
 /************************************************************************
  * Pre-processor definition
@@ -70,7 +72,7 @@
 /* Otherwise, the user heap data structures are in common .bss */
 
 struct mm_heap_s g_mmheap;
-#define USR_HEAP &g_mmheap;
+#define USR_HEAP &g_mmheap
 #endif
 
 /************************************************************************
@@ -100,8 +102,11 @@ struct mm_heap_s g_mmheap;
 
 void umm_initialize(FAR void *heap_start, size_t heap_size)
 {
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   DEBUGASSERT(ARCH_DATA_RESERVE_SIZE >= sizeof(struct addrenv_reserve_s));
+#endif
+
   mm_initialize(USR_HEAP, heap_start, heap_size);
 }
 
-#endif /* MM_KERNEL_USRHEAP_INTF */
+#endif /* MM_KERNEL_USRHEAP_INIT */
