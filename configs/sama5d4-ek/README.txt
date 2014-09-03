@@ -1611,7 +1611,8 @@ HSMCI Card Slots
       CONFIG_SCHED_WORKQUEUE=y              : Driver needs work queue support
 
     Application Configuration -> NSH Library
-      CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
+      CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization, OR
+      CONFIG_BOARD_INITIALIZE=y
 
     Using the SD card
     -----------------
@@ -3726,25 +3727,63 @@ Configurations
       2014-8-29: System call interface verified.
 
   kernel:
-    A configuration used to test the SAMA5D kenel build configuration.  This configuration is based on the elf configuration.  Primary differences in
-    the two configurations are noted below:
-
-    Build Setup -> Build Configuration -> Memory Organization
-      CONFIG_BUILD_KERNEL=y                     : Kernel build enabled
-
-    RTOS Features -> Tasks and Scheduling
-      CONFIG_INIT_FILEPATH=y                    : Start-up is via an ELF file
-      CONFIG_USER_INITPATH="/bin/init"          : The location of the startup
-
-    RTOS Features -> System call support
-      CONFIG_SYS_RESERVED=5                     : More reserved SYSCALLs
-
-    Memory Management
-      CONFIG_MM_KERNEL_HEAP=y                   : Enable a kernel heap
-      CONFIG_MM_KERNEL_HEAPSIZE=8192            : (temporary.. will change)
-
+    A configuration used to test the SAMA5D kenel build configuration.
     More to come... this is still a work in progress as of this writing.
-    Since this configuration is based on the ELF configuration, all of the notes for that configuration apply.
+
+    NOTES:
+
+    Since this configuration is based on the ELF configuration, all of
+    the notes for that configuration also apply.
+
+    1. This configuration is based on the elf configuration.  Primary
+       differences between the two configurations are noted below:
+
+       Build Setup -> Build Configuration -> Memory Organization
+         CONFIG_BUILD_KERNEL=y                  : Kernel build enabled
+
+       RTOS Features -> Tasks and Scheduling
+         CONFIG_INIT_FILEPATH=y                 : Start-up is via an ELF file
+         CONFIG_USER_INITPATH="/bin/init"       : The location of the startup
+
+       RTOS Features -> System call support
+         CONFIG_SYS_RESERVED=5                  : More reserved SYSCALLs
+
+       Memory Management
+        CONFIG_MM_KERNEL_HEAP=y                : Enable a kernel heap
+        CONFIG_MM_KERNEL_HEAPSIZE=8192         : (temporary.. will change)
+
+    2. Board initialization is performed performed before the application
+       is started:
+
+       RTOS Features -> RTOS Hooks
+         CONFIG_BOARD_INITITIALIZE=y
+
+       The board initialization will mount the FAT filesystem on an SD card
+       inserted int the HSMCI0 slot (full size).  The SAMA4D4-EK provides
+       two SD memory card slots:  (1) a full size SD card slot (J10), and
+       (2) a microSD memory card slot (J11).  The full size SD card slot
+       connects via HSMCI0; the microSD connects vi HSMCI1.  See the relevant
+       configuration settings above in the paragraph entitled "HSMCI Card
+       Slots" above.
+
+       The SD card is mounted at /bin by this board initialization logic.
+       NuttX will boot from the SD card so there are some special operational
+       requirements to use this configuration:
+
+       a. The SD card must contain a NuttX executable called 'init'
+       b. The SD card must be in the HSCMCI slot when NuttX boots and must
+          not be removed while NuttX is running.
+
+       The NuttX automounter is *not* enabled.  It cannot be used it would
+       mount the boot file system with a delay.  In this configuration.  The
+       file system must be mounted immediately at boot up.  To accomplish
+       this, the board logic supports these special configurations:
+
+       Board Selection ->
+         CONFIG_SAMA5D4EK_HSMCI0_AMOUNT=y
+         CONFIG_SAMA5D4EK_HSMCI0_MOUNT_BLKDEV="/dev/mmcsd0"
+         CONFIG_SAMA5D4EK_HSMCI0_MOUNT_FSTYPE="vfat"
+         CONFIG_SAMA5D4EK_HSMCI0_MOUNT_MOUNTPOINT="/bin"
 
   nsh:
 

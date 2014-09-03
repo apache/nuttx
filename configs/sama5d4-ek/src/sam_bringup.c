@@ -114,6 +114,24 @@ int sam_bringup(void)
       message("ERROR: sam_hsmci_initialize(%d,%d) failed: %d\n",
               HSMCI0_SLOTNO, HSMCI0_MINOR, ret);
     }
+
+#ifdef CONFIG_SAMA5D4EK_HSMCI0_MOUNT
+  else
+    {
+      /* Mount the volume on HSMCI0 */
+
+      ret = mount(CONFIG_SAMA5D4EK_HSMCI0_MOUNT_BLKDEV,
+                  CONFIG_SAMA5D4EK_HSMCI0_MOUNT_MOUNTPOINT,
+                  CONFIG_SAMA5D4EK_HSMCI0_MOUNT_FSTYPE,
+                  0, NULL);
+
+      if (ret < 0)
+        {
+          message("ERROR: Failed to mount %s: %d\n",
+                  CONFIG_SAMA5D4EK_HSMCI0_MOUNT_MOUNTPOINT, errno);
+        }
+    }
+#endif
 #endif
 
 #ifdef CONFIG_SAMA5_HSMCI1
@@ -125,6 +143,24 @@ int sam_bringup(void)
       message("ERROR: sam_hsmci_initialize(%d,%d) failed: %d\n",
               HSMCI1_SLOTNO, HSMCI1_MINOR, ret);
     }
+
+#ifdef CONFIG_SAMA5D4EK_HSMCI1_MOUNT
+  else
+    {
+      /* Mount the volume on HSMCI1 */
+
+      ret = mount(CONFIG_SAMA5D4EK_HSMCI1_MOUNT_BLKDEV,
+                  CONFIG_SAMA5D4EK_HSMCI1_MOUNT_MOUNTPOINT,
+                  CONFIG_SAMA5D4EK_HSMCI1_MOUNT_FSTYPE,
+                  0, NULL);
+
+      if (ret < 0)
+        {
+          message("ERROR: Failed to mount %s: %d\n",
+                  CONFIG_SAMA5D4EK_HSMCI1_MOUNT_MOUNTPOINT, errno);
+        }
+    }
+#endif
 #endif
 #endif
 

@@ -244,6 +244,48 @@ config SAMA5D4EK_HSMCI1_AUTOMOUNT_UDELAY
 endif # SAMA5D4EK_HSMCI1_AUTOMOUNT
 endif # FS_AUTOMOUNTER
 
+config SAMA5D4EK_HSMCI0_MOUNT
+	bool "HSMCI0 boot mount"
+	default n
+	depends on SAMA5_HSMCI0 && !SAMA5D4EK_HSMCI0_AUTOMOUNT
+
+if SAMA5D4EK_HSMCI0_MOUNT
+
+config SAMA5D4EK_HSMCI0_MOUNT_FSTYPE
+	string "HSMCI0 file system type"
+	default "vfat"
+
+config SAMA5D4EK_HSMCI0_MOUNT_BLKDEV
+	string "HSMCI0 block device"
+	default "/dev/mmcsd0"
+
+config SAMA5D4EK_HSMCI0_MOUNT_MOUNTPOINT
+	string "HSMCI0 mount point"
+	default "/bin"
+
+endif # SAMA5D4EK_HSMCI0_MOUNT
+
+config SAMA5D4EK_HSMCI1_MOUNT
+	bool "HSMCI1 boot mount"
+	default n
+	depends on SAMA5_HSMCI1 && !SAMA5D4EK_HSMCI1_AUTOMOUNT
+
+if SAMA5D4EK_HSMCI1_MOUNT
+
+config SAMA5D4EK_HSMCI1_MOUNT_FSTYPE
+	string "HSMCI1 file system type"
+	default "vfat"
+
+config SAMA5D4EK_HSMCI1_MOUNT_BLKDEV
+	string "HSMCI1 block device"
+	default "/dev/mmcsd1"
+
+config SAMA5D4EK_HSMCI1_MOUNT_MOUNTPOINT
+	string "HSMCI1 mount point"
+	default "/bin"
+
+endif # SAMA5D4EK_HSMCI1_MOUNT
+
 if INPUT_MXT
 
 config SAMA5D4EK_MXT_I2CFREQUENCY
