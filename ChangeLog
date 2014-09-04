@@ -8397,3 +8397,7 @@
 	* Makefile.unix, Makefile.win, and tools/mkexport.sh: In 'make export',
 	  do not copy internal header files or build scripts if this is a
 	  kernel or protected build (014-9-4).
+	* tools/mkexport.sh, arch/*/src/Makefile, arm/src/a1x/Make.defs,
+	  sama5/Make.defs, armv7-a/crt0.c:  The 'make export' target needs to
+	  bundle up the user C startup file (crt0), not the kernel head object
+	  for the kernel and protected builds (2014-9-4).
