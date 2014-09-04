@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdlib.h>
 
 #include <nuttx/addrenv.h>
 
@@ -57,7 +58,7 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-extern main_t main;
+int main(int argc, char *argv[]);
 
 /****************************************************************************
  * Private Functions
@@ -100,8 +101,9 @@ static void sig_trampoline(void)
     " blx  ip\n"         /* Call the signal handler */
     " pop  {r2}\n"       /* Recover LR in R2 */
     " mov  lr, r2\n"     /* Restore LR */
-    " mov  r0, #4\n"     /* SYS_signal_handler_return
+    " mov  r0, #4\n"     /* SYS_signal_handler_return */
     " svc #0x900001\n"   /* Return from the signal handler */
+  );
 }
 #endif
 
@@ -138,7 +140,7 @@ void _start(int argc, FAR char *argv[])
    * that is visible to the RTOS.
    */
 
-  ADDRENV_DATA_RESERVE->ar_sigtramp = (addrenv_sigtramp_t)sig_trampoline;
+  ARCH_DATA_RESERVE->ar_sigtramp = (addrenv_sigtramp_t)sig_trampoline;
 #endif
 
   /* Call C++ constructors */
@@ -147,7 +149,7 @@ void _start(int argc, FAR char *argv[])
 
   /* Call the main() entry point passing argc and argv. */
 
-  ret = main(argc, argc);
+  ret = main(argc, argv);
 
   /* Call exit() if/when the main() returns */
 

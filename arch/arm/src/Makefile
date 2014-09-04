@@ -1,7 +1,7 @@
 ############################################################################
 # arch/arm/src/Makefile
 #
-#   Copyright (C) 2007-2009, 2011-2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2009, 2011-2012, 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -85,6 +85,7 @@ endif
 # The "head" object
 
 HEAD_OBJ = $(HEAD_ASRC:.S=$(OBJEXT))
+STARTUP_OBJS ?= $(HEAD_OBJ)
 
 # Flat build or kernel-mode objects
 
@@ -188,10 +189,10 @@ endif
 # Note that there may not be a head object if layout is handled
 # by the linker configuration.
 
-export_head: board/libboard$(LIBEXT) $(HEAD_OBJ)
-ifneq ($(HEAD_OBJ),)
+export_startup: board/libboard$(LIBEXT) $(STARTUP_OBJS)
+ifneq ($(STARTUP_OBJS),)
 	$(Q) if [ -d "$(EXPORT_DIR)/startup" ]; then \
-		cp -f $(HEAD_OBJ) "$(EXPORT_DIR)/startup"; \
+		cp -f $(STARTUP_OBJS) "$(EXPORT_DIR)/startup/."; \
 	 else \
 		echo "$(EXPORT_DIR)/startup does not exist"; \
 	exit 1; \
