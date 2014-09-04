@@ -203,7 +203,7 @@ define DELFILE
 endef
 endif
 
-# DELDIR - Delect one directory
+# DELDIR - Delete one directory
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
 define DELDIR
