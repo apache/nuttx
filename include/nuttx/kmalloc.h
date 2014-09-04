@@ -186,9 +186,9 @@ void group_free(FAR struct task_group_s *group, FAR void *mem);
    * in privileges.
    */
 
-#  define group_malloc(g,n) kumm_malloc(size)
-#  define group_zalloc(g,n) kumm_zalloc(size)
-#  define group_free(g,m)   kumm_free(size)
+#  define group_malloc(g,n) kumm_malloc(n)
+#  define group_zalloc(g,n) kumm_zalloc(n)
+#  define group_free(g,m)   kumm_free(m)
 
 #endif
 
