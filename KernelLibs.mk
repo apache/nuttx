@@ -39,6 +39,8 @@
 #   is disabled.
 # USERLIBS is the list of libraries used to build the final user-space
 #   application
+# EXPORTLIBS is the list of libraries that should be exported by
+#   'make export' is
 
 NUTTXLIBS = lib$(DELIM)libsched$(LIBEXT)
 USERLIBS =
@@ -97,3 +99,7 @@ endif
 ifeq ($(CONFIG_AUDIO),y)
 NUTTXLIBS += lib$(DELIM)libaudio$(LIBEXT)
 endif
+
+# Export only the user libraries
+
+EXPORTLIBS = $(USERLIBS)

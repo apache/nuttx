@@ -116,6 +116,15 @@ EXTRA_OBJS += $(CONFIG_PASS1_OBJECT)
 endif
 
 # Library build selections
+#
+# NUTTXLIBS is the list of NuttX libraries that is passed to the
+#   processor-specific Makefile to build the final NuttX target.
+#   Libraries in FSDIRS are excluded if file descriptor support
+#   is disabled.
+# USERLIBS is the list of libraries used to build the final user-space
+#   application
+# EXPORTLIBS is the list of libraries that should be exported by
+#   'make export' is
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 include ProtectedLibs.mk
@@ -128,7 +137,7 @@ endif
 endif
 
 # LINKLIBS derives from NUTTXLIBS and is simply the same list with the
-# subdirectory removed
+#   subdirectory removed
 
 LINKLIBS = $(patsubst lib\\%,%,$(NUTTXLIBS))
 
@@ -613,7 +622,7 @@ menuconfig: configenv
 # that the archiver is 'ar'
 
 export: pass2deps
-	$(Q) tools\mkexport.sh -w$(WINTOOL) -t "$(TOPDIR)" -l "$(NUTTXLIBS)"
+	$(Q) tools\mkexport.sh -w$(WINTOOL) -t "$(TOPDIR)" -l "$(EXPORTLIBS)"
 
 # General housekeeping targets:  dependencies, cleaning, etc.
 #
