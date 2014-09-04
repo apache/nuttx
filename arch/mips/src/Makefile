@@ -1,7 +1,7 @@
 ############################################################################
 # arch/mips/src/Makefile
 #
-#   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011-2012, 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -65,6 +65,7 @@ endif
 endif
 
 HEAD_OBJ = $(HEAD_ASRC:.S=$(OBJEXT))
+STARTUP_OBJS ?= $(HEAD_OBJ)
 
 ASRCS = $(CHIP_ASRCS) $(CMN_ASRCS)
 AOBJS = $(ASRCS:.S=$(OBJEXT))
@@ -140,9 +141,9 @@ endif
 
 # This is part of the top-level export target
 
-export_head: board/libboard$(LIBEXT) $(HEAD_OBJ)
+export_startup: board/libboard$(LIBEXT) $(STARTUP_OBJS)
 	$(Q) if [ -d "$(EXPORT_DIR)/startup" ]; then \
-		cp -f $(HEAD_OBJ) "$(EXPORT_DIR)/startup"; \
+		cp -f $(STARTUP_OBJS) "$(EXPORT_DIR)/startup"; \
 	 else \
 		echo "$(EXPORT_DIR)/startup does not exist"; \
 		exit 1; \

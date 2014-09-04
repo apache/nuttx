@@ -1,7 +1,7 @@
 ############################################################################
 # arch/z80/src/Makefile.zdsiil
 #
-#   Copyright (C) 2008, 2011-2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008, 2011-2012, 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -51,12 +51,15 @@ LDFLAGS  += @nuttx.linkcmd
 
 ############################################################################
 # Files and directories
+
 ifneq ($(HEAD_SSRC),)
 HEAD_GENSRC = $(HEAD_SSRC:.S=$(ASMEXT))
 HEAD_OBJ = $(HEAD_SSRC:.S=$(OBJEXT))
 else
 HEAD_OBJ = $(HEAD_ASRC:$(ASMEXT)=$(OBJEXT))
 endif
+
+STARTUP_OBJS ?= $(HEAD_OBJ)
 
 SSRCS = $(CHIP_SSRCS) $(CMN_SSRCS)
 ASRCS = $(CHIP_ASRCS) $(CMN_ASRCS)
@@ -140,9 +143,9 @@ nuttx$(EXEEXT): $(HEAD_OBJ) board$(DELIM)libboard$(LIBEXT) nuttx.linkcmd
 
 # This is part of the top-level export target
 
-export_head: board$(DELIM)libboard$(LIBEXT) $(HEAD_OBJ)
+export_startup: board$(DELIM)libboard$(LIBEXT) $(STARTUP_OBJS)
 	$(Q) if [ -d "$(EXPORT_DIR)$(DELIM)startup" ]; then \
-		cp -f $(HEAD_OBJ) "$(EXPORT_DIR)$(DELIM)startup"; \
+		cp -f $(STARTUP_OBJS) "$(EXPORT_DIR)$(DELIM)startup"; \
 	 else \
 		echo "$(EXPORT_DIR)$(DELIM)startup does not exist"; \
 		exit 1; \

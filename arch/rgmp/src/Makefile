@@ -1,7 +1,7 @@
 ############################################################################
 # arch/rgmp/src/Makefile
 #
-#   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011-2012, 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -85,7 +85,7 @@ nuttx$(EXEEXT): $(LINKOBJS)
 
 # This is part of the top-level export target
 
-export_head:
+expport_startup:
 
 # Dependencies
 

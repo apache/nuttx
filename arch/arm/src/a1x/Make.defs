@@ -38,6 +38,10 @@
 
 HEAD_ASRC  = arm_vectortab.S
 
+ifeq ($(CONFIG_BUILD_KERNEL),y)
+STARTUP_OBJS = crt0$(OBJEXT)
+endif
+
 # Force the start-up logic to be at the beginning of the .text to simplify
 # debug.
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 # tools/mkexport.sh
 #
-#   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011-2012, 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -194,7 +194,7 @@ cp -LR -p "${TOPDIR}/include" "${EXPORTDIR}/." || \
 
 # Copy the startup object file(s)
 
-make -C ${ARCHDIR} export_head TOPDIR=${TOPDIR} EXPORT_DIR="${EXPORTDIR}"
+make -C ${ARCHDIR} export_startup TOPDIR=${TOPDIR} EXPORT_DIR="${EXPORTDIR}"
 
 # Copy architecture-specific header files into the arch export sub-directory.
 # This is tricky because each architecture does things in a little different
