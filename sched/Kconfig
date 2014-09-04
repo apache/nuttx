@@ -651,6 +651,40 @@ config BOARD_INITIALIZE
 		phase may be used, for example, to initialize board-specific
 		device drivers.
 
+if BOARD_INITIALIZE
+
+config BOARD_INITTHREAD
+	bool "Board initialization thread"
+	default n
+	---help---
+		Some initialization operations cannot be performed on the start-up,
+		initialization thread.  That is because the initialization thread
+		cannot wait for event.  If waiting is required as part of the board
+		initialization then this option must be selected.  Waiting may be
+		required, for example, to mount a file system or or initialize a
+		device such as an SD card.
+
+if BOARD_INITTHREAD
+
+config BOARD_INITTHREAD_STACKSIZE
+	int "Board initialization thread stack size"
+	default 2048
+	---help---
+		The size of the stack to allocate when starting the board
+		initialization thread.
+
+config BOARD_INITTHREAD_PRIORITY
+	int "Board initialization thread priority"
+	default 240
+	---help---
+		The priority of the board initialization thread.  This priority is
+		not a critical setting.  No other application threads will be
+		started until the board initialization is completed.  Hence, there
+		is very little competition for the CPU.
+
+endif # BOARD_INITTHREAD
+endif # BOARD_INITIALIZE
+
 config SCHED_STARTHOOK
 	bool "Enable startup hook"
 	default n

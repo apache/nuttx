@@ -260,10 +260,11 @@ static inline void os_workqueues(void)
 #endif /* CONFIG_SCHED_WORKQUEUE */
 
 /****************************************************************************
- * Name: os_init_thread
+ * Name: os_start_application
  *
  * Description:
- *   Start the application initialization thread.
+ *   Execute the board initialization function (if so configured) and start
+ *   the application initialization thread.
  *
  * Input Parameters:
  *   None
@@ -274,17 +275,25 @@ static inline void os_workqueues(void)
  ****************************************************************************/
 
 #if defined(CONFIG_INIT_ENTRYPOINT)
-static inline void os_init_thread(void)
+static inline void os_do_appstart(void)
 {
   int taskid;
 
-  svdbg("Starting init thread\n");
+#ifdef CONFIG_BOARD_INITIALIZE
+  /* Perform any last-minute, board-specific initialization, if so
+   * configured.
+   */
 
-  /* Start the application initialization ask.  In a flat build, this is
+  board_initialize();
+#endif
+
+  /* Start the application initialization task.  In a flat build, this is
    * entrypoint is given by the definitions, CONFIG_USER_ENTRYPOINT.  In
    * the protected build, however, we must get the address of the
    * entrypoint from the header at the beginning of the user-space blob.
    */
+
+  svdbg("Starting init thread\n");
 
 #ifdef CONFIG_BUILD_PROTECTED
   DEBUGASSERT(USERSPACE->us_entrypoint != NULL);
@@ -301,9 +310,22 @@ static inline void os_init_thread(void)
 }
 
 #elif defined(CONFIG_INIT_FILEPATH)
-static inline void os_init_thread(void)
+static inline void os_do_appstart(void)
 {
   int ret;
+
+#ifdef CONFIG_BOARD_INITIALIZE
+  /* Perform any last-minute, board-specific initialization, if so
+   * configured.
+   */
+
+  board_initialize();
+#endif
+
+  /* Start the application initialization program from a program in a
+   * mounted file system.  Presumably the file system was mounted as part
+   * of the board_initialize() operation.
+   */
 
   svdbg("Starting init task: %s\n", CONFIG_USER_INITPATH);
 
@@ -313,12 +335,77 @@ static inline void os_init_thread(void)
 }
 
 #elif defined(CONFIG_INIT_NONE)
-#  define os_init_thread()
+#  define os_do_appstart()
 
 #else
 #  error "Cannot start initialization thread"
 
 #endif
+
+/****************************************************************************
+ * Name: os_start_task
+ *
+ * Description:
+ *   This is the framework for a short duration worker thread.  It off-loads
+ *   the board initialization and application start-up from the limited
+ *   start-up, initialization thread to a more robust kernel thread.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARD_INITTHREAD
+static int os_start_task(int argc, FAR char **argv)
+{
+  /* Do the board/application initialization and exit */
+
+  os_do_appstart();
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: os_start_application
+ *
+ * Description:
+ *   Execute the board initialization function (if so configured) and start
+ *   the application initialization thread.  This will be done either on the
+ *   thread of execution of the caller or on a separate thread of execution
+ *   if so configured.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void os_start_application(void)
+{
+#ifdef CONFIG_BOARD_INITTHREAD
+  int taskid;
+
+  /* Do the board/application initialization on a separate thread of
+   * execution.
+   */
+
+  taskid = kernel_thread("AppBringUp", CONFIG_BOARD_INITTHREAD_PRIORITY,
+                         CONFIG_BOARD_INITTHREAD_STACKSIZE,
+                         (main_t)os_start_task, (FAR char * const *)NULL);
+  ASSERT(taskid > 0);
+
+#else
+  /* Do the board/application initialization on this thread of execution. */
+
+  os_do_appstart();
+
+#endif
+}
 
 /****************************************************************************
  * Public Functions
@@ -384,20 +471,12 @@ int os_bringup(void)
 
   os_workqueues();
 
-  /* Perform any last-minute, board-specific initialization, if so
-   * configured.
-   */
-
-#ifdef CONFIG_BOARD_INITIALIZE
-  board_initialize();
-#endif
-
   /* Once the operating system has been initialized, the system must be
    * started by spawning the user initialization thread of execution.  This
-   * is the first user-mode thread.
+   * will be the first user-mode thread.
    */
 
-  os_init_thread();
+  os_start_application();
 
   /* We an save a few bytes by discarding the IDLE thread's environment. */
 
