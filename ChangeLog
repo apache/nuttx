@@ -8389,3 +8389,8 @@
 	  set correctly (2014-903).
 	* sched/Kconfig and sched/init/os_bringup.c: Add capability to perform
 	  initial board initialization on a separate worker thread (2014-9-3).
+	* tools/mkexport.sh: Fix 'make export'.  Adding subdirectories to the
+	  sched/ directory broke the header file collection logic (2014-9-4).
+	* Makefile.unix, Makefile.win, FlatLibs.mk, KernelLibs.mk, and
+	  ProtectedLibs.mk: In the kernel build, only the user libraries should
+	  be exported (2014-9-4).
