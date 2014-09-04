@@ -8387,3 +8387,5 @@
 	  group_create.c, group.h: Group creation logic must use new group flag
 	  when allocating resources so that the privileges on the resource are
 	  set correctly (2014-903).
+	* sched/Kconfig and sched/init/os_bringup.c: Add capability to perform
+	  initial board initialization on a separate worker thread (2014-9-3).
