@@ -32,13 +32,6 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-# TODO:
-# 1. This script assumes the host archiver ar may not be appropriate for
-#    non-GCC toolchains
-# 2. For the kernel build, the user libriars should be built into some
-#    libuser.a.  The list of user libraries would have to accepted with
-#    some new argument, perhaps -u.
-
 # Get the input parameter list
 
 USAGE="USAGE: $0 [-d] [-z] [-w|wy|wn] -t <top-dir> [-x <lib-ext>] -l \"lib1 [lib2 [lib3 ...]]\""
@@ -246,8 +239,15 @@ done
 # specific header files.
 
 mkdir "${EXPORTDIR}/arch/os" || \
-	{ echo "MK: 'mkdir ${EXPORTDIR}/arch/${hdir}/chip' failed"; exit 1; }
-cp -f "${TOPDIR}"/sched/*.h "${EXPORTDIR}"/arch/os/. 2>/dev/null
+	{ echo "MK: 'mkdir ${EXPORTDIR}/arch/os' failed"; exit 1; }
+
+OSDIRS="clock environ errno group init irq mqueue paging pthread sched semaphore signal task timer wdog"
+
+for dir in ${OSDIRS}; do
+	mkdir "${EXPORTDIR}/arch/os/${dir}" || \
+		{ echo "MK: 'mkdir ${EXPORTDIR}/arch/os/${dir}' failed"; exit 1; }
+	cp -f "${TOPDIR}"/sched/${dir}/*.h "${EXPORTDIR}"/arch/os/${dir}/. 2>/dev/null
+done
 
 # Add the board library to the list of libraries
 
