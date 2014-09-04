@@ -34,19 +34,20 @@
 
 # Get the input parameter list
 
-USAGE="USAGE: $0 [-d] [-z] [-w|wy|wn] -t <top-dir> [-x <lib-ext>] -l \"lib1 [lib2 [lib3 ...]]\""
+USAGE="USAGE: $0 [-d] [-z] [-u] [-w|wy|wn] -t <top-dir> [-x <lib-ext>] -l \"lib1 [lib2 [lib3 ...]]\""
 unset TOPDIR
 unset LIBLIST
 unset TGZ
+USRONLY=n
 WINTOOL=n
 LIBEXT=.a
 
 while [ ! -z "$1" ]; do
 	case $1 in
- 		-d )
+		-d )
 			set -x
 			;;
- 		-l )
+		-l )
 			shift
 			LIBLIST=$1
 			;;
@@ -60,11 +61,14 @@ while [ ! -z "$1" ]; do
 			shift
 			TOPDIR=$1
 			;;
- 		-x )
+		-u )
+			USRONLY=y
+			;;
+		-x )
 			shift
 			LIBEXT=$1
 			;;
- 		-z )
+		-z )
 			TGZ=y
 			;;
 		-h )
@@ -129,7 +133,10 @@ mkdir "${EXPORTDIR}" || { echo "MK: 'mkdir ${EXPORTDIR}' failed"; exit 1; }
 mkdir "${EXPORTDIR}/startup" || { echo "MK: 'mkdir ${EXPORTDIR}/startup' failed"; exit 1; }
 mkdir "${EXPORTDIR}/libs" || { echo "MK: 'mkdir ${EXPORTDIR}/libs' failed"; exit 1; }
 mkdir "${EXPORTDIR}/build" || { echo "MK: 'mkdir ${EXPORTDIR}/build' failed"; exit 1; }
-mkdir "${EXPORTDIR}/arch" || { echo "MK: 'mkdir ${EXPORTDIR}/arch' failed"; exit 1; }
+
+if [ "X${USRONLY}" != "Xy" ]; then
+  mkdir "${EXPORTDIR}/arch" || { echo "MK: 'mkdir ${EXPORTDIR}/arch' failed"; exit 1; }
+fi
 
 # Verify that we have a Make.defs file.
 
@@ -202,57 +209,59 @@ cp -f "${ARCHDIR}"/*.h "${EXPORTDIR}"/arch/. 2>/dev/null
 # as symbolic links to directories, then copy the header files from
 # those directories into the EXPORTDIR
 
-ARCH_HDRDIRS="arm armv7-m avr avr32 board common chip mips32"
-for hdir in $ARCH_HDRDIRS; do
+if [ "X${USRONLY}" != "Xy" ]; then
+	ARCH_HDRDIRS="arm armv7-m avr avr32 board common chip mips32"
+	for hdir in $ARCH_HDRDIRS; do
 
-	# Does the directory (or symbolic link) exist?
+		# Does the directory (or symbolic link) exist?
 
-	if [ -d "${ARCHDIR}/${hdir}" -o -h "${ARCHDIR}/${hdir}" ]; then
-
-		# Yes.. create a export sub-directory of the same name
-
-		mkdir "${EXPORTDIR}/arch/${hdir}" || \
-			{ echo "MK: 'mkdir ${EXPORTDIR}/arch/${hdir}' failed"; exit 1; }
-
-		# Then copy the header files (only) into the new directory
-
-		cp -f "${ARCHDIR}"/${hdir}/*.h "${EXPORTDIR}"/arch/${hdir}/. 2>/dev/null
-
-		# One architecture has low directory called "chip" that holds the
-		# header files
-
-		if [ -d "${ARCHDIR}/${hdir}/chip" ]; then
+		if [ -d "${ARCHDIR}/${hdir}" -o -h "${ARCHDIR}/${hdir}" ]; then
 
 			# Yes.. create a export sub-directory of the same name
 
-			mkdir "${EXPORTDIR}/arch/${hdir}/chip" || \
-				{ echo "MK: 'mkdir ${EXPORTDIR}/arch/${hdir}/chip' failed"; exit 1; }
+			mkdir "${EXPORTDIR}/arch/${hdir}" || \
+				{ echo "MK: 'mkdir ${EXPORTDIR}/arch/${hdir}' failed"; exit 1; }
 
 			# Then copy the header files (only) into the new directory
 
-			cp -f "${ARCHDIR}"/${hdir}/chip/*.h "${EXPORTDIR}"/arch/${hdir}/chip/. 2>/dev/null
+			cp -f "${ARCHDIR}"/${hdir}/*.h "${EXPORTDIR}"/arch/${hdir}/. 2>/dev/null
+
+			# One architecture has low directory called "chip" that holds the
+			# header files
+
+			if [ -d "${ARCHDIR}/${hdir}/chip" ]; then
+
+				# Yes.. create a export sub-directory of the same name
+
+				mkdir "${EXPORTDIR}/arch/${hdir}/chip" || \
+					{ echo "MK: 'mkdir ${EXPORTDIR}/arch/${hdir}/chip' failed"; exit 1; }
+
+				# Then copy the header files (only) into the new directory
+
+				cp -f "${ARCHDIR}"/${hdir}/chip/*.h "${EXPORTDIR}"/arch/${hdir}/chip/. 2>/dev/null
+			fi
 		fi
+	done
+
+	# Copy OS internal header files as well.  They are used by some architecture-
+	# specific header files.
+
+	mkdir "${EXPORTDIR}/arch/os" || \
+		{ echo "MK: 'mkdir ${EXPORTDIR}/arch/os' failed"; exit 1; }
+
+	OSDIRS="clock environ errno group init irq mqueue paging pthread sched semaphore signal task timer wdog"
+
+	for dir in ${OSDIRS}; do
+		mkdir "${EXPORTDIR}/arch/os/${dir}" || \
+			{ echo "MK: 'mkdir ${EXPORTDIR}/arch/os/${dir}' failed"; exit 1; }
+		cp -f "${TOPDIR}"/sched/${dir}/*.h "${EXPORTDIR}"/arch/os/${dir}/. 2>/dev/null
+	done
+
+	# Add the board library to the list of libraries
+
+	if [ -f "${ARCHDIR}/board/libboard${LIBEXT}" ]; then
+		LIBLIST="${LIBLIST} ${ARCHSUBDIR}/board/libboard${LIBEXT}"
 	fi
-done
-
-# Copy OS internal header files as well.  They are used by some architecture-
-# specific header files.
-
-mkdir "${EXPORTDIR}/arch/os" || \
-	{ echo "MK: 'mkdir ${EXPORTDIR}/arch/os' failed"; exit 1; }
-
-OSDIRS="clock environ errno group init irq mqueue paging pthread sched semaphore signal task timer wdog"
-
-for dir in ${OSDIRS}; do
-	mkdir "${EXPORTDIR}/arch/os/${dir}" || \
-		{ echo "MK: 'mkdir ${EXPORTDIR}/arch/os/${dir}' failed"; exit 1; }
-	cp -f "${TOPDIR}"/sched/${dir}/*.h "${EXPORTDIR}"/arch/os/${dir}/. 2>/dev/null
-done
-
-# Add the board library to the list of libraries
-
-if [ -f "${ARCHDIR}/board/libboard${LIBEXT}" ]; then
-	LIBLIST="${LIBLIST} ${ARCHSUBDIR}/board/libboard${LIBEXT}"
 fi
 
 # Then process each library

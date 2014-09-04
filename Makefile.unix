@@ -148,6 +148,23 @@ endif
 
 LINKLIBS = $(patsubst lib/%,%,$(NUTTXLIBS))
 
+# Export tool definitions
+
+MKEXPORT= tools/mkexport.sh
+MKEXPORT_ARGS = -w$(WINTOOL) -t "$(TOPDIR)"
+
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+MKEXPORT_ARGS += -u
+else
+ifeq ($(CONFIG_BUILD_KERNEL),y)
+MKEXPORT_ARGS += -u
+endif
+endif
+
+ifeq ($(V),1)
+MKEXPORT_ARGS += -d
+endif
+
 # This is the name of the final target (relative to the top level directorty)
 
 BIN = nuttx$(EXEEXT)
@@ -625,7 +642,7 @@ gconfig:
 # that the archiver is 'ar'
 
 export: pass2deps
-	$(Q) tools/mkexport.sh -w$(WINTOOL) -t "$(TOPDIR)" -l "$(EXPORTLIBS)"
+	$(Q) $(MKEXPORT) $(MKEXPORT_ARGS) -l "$(EXPORTLIBS)"
 
 # General housekeeping targets:  dependencies, cleaning, etc.
 #
