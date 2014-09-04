@@ -54,8 +54,9 @@
 static void rawoutstream_putc(FAR struct lib_outstream_s *this, int ch)
 {
   FAR struct lib_rawoutstream_s *rthis = (FAR struct lib_rawoutstream_s *)this;
-  int nwritten;
   char buffer = ch;
+  int nwritten;
+  int errcode;
 
   DEBUGASSERT(this && rthis->fd >= 0);
 
@@ -77,9 +78,10 @@ static void rawoutstream_putc(FAR struct lib_outstream_s *this, int ch)
        * return values from write().
        */
 
+      errcode = get_errno();
       DEBUGASSERT(nwritten < 0);
     }
-  while (get_errno() == EINTR);
+  while (errcode == EINTR);
 }
 
 /****************************************************************************

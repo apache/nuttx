@@ -427,6 +427,7 @@ static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer,
               ret = uart_putxmitchar(dev, '\r', oktoblock);
               if (ret < 0)
                 {
+                  nwritten = ret;
                   break;
                 }
             }
