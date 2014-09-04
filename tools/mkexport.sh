@@ -165,19 +165,21 @@ fi
 
 # Is there a linker script in this configuration?
 
-if [ ! -z "${LDPATH}" ]; then
+if [ "X${USRONLY}" != "Xy" ]; then
+	if [ ! -z "${LDPATH}" ]; then
 
-	# Apparently so.  Verify that the script exists
+		# Apparently so.  Verify that the script exists
 
-	if [ ! -f "${LDPATH}" ]; then
-		echo "MK: File ${LDPATH} does not exist"
-		exit 1
+		if [ ! -f "${LDPATH}" ]; then
+			echo "MK: File ${LDPATH} does not exist"
+			exit 1
+		fi
+
+		# Copy the linker script
+
+		cp -p "${LDPATH}" "${EXPORTDIR}/build/." || \
+			{ echo "MK: cp ${LDPATH} failed"; exit 1; }
 	fi
-
-	# Copy the linker script
-
-	cp -p "${LDPATH}" "${EXPORTDIR}/build/." || \
-		{ echo "MK: cp ${LDPATH} failed"; exit 1; }
 fi
 
 # Save the compilation options

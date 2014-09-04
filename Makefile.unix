@@ -39,11 +39,18 @@ include $(TOPDIR)/tools/Config.mk
 -include $(TOPDIR)/Make.defs
 
 # Control build verbosity
+#
+#  V=1,2: Enable echo of commands
+#  V=2:   Enable bug/verbose options in tools and scripts
 
 ifeq ($(V),1)
 export Q :=
 else
+ifeq ($(V),2)
+export Q :=
+else
 export Q := @
+endif
 endif
 
 # Default tools
@@ -161,7 +168,7 @@ MKEXPORT_ARGS += -u
 endif
 endif
 
-ifeq ($(V),1)
+ifeq ($(V),2)
 MKEXPORT_ARGS += -d
 endif
 
