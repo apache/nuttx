@@ -1,7 +1,7 @@
 ############################################################################
 # Makefile.export
 #
-#   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011, 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -37,10 +37,10 @@ include $(TOPDIR)/.config
 include $(EXPORTDIR)/Make.defs
 
 ifdef ARCHSCRIPT
-#
+
 # ARCHSCRIPT may contain a leading -T; it must not be followed by a space
 # for this to work.
-#
+
 ifeq ($(WINTOOL),y)
 LDPATH = $(shell cygpath -u $(patsubst -T%,%,$(ARCHSCRIPT)))
 else
@@ -70,7 +70,32 @@ ifdef ARCHSCRIPT
 endif
 	@echo "ARCHCFLAGS=\"$(ARCHCFLAGS) $(ARCHCPUFLAGS)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "ARCHCXXFLAGS=\"$(ARCHCXXFLAGS) $(ARCHCPUFLAGS)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "ARCHPICFLAGS=\"$(ARCHPICFLAGS)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "ARCHWARNINGS=\"$(ARCHWARNINGS)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "ARCHWARNINGSXX=\"$(ARCHWARNINGSXX)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "ARCHOPTIMIZATION=\"$(ARCHOPTIMIZATION)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "CROSSDEV=\"$(CROSSDEV)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "CC=\"$(CC)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "CXX=\"$(CXX)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "CPP=\"$(CPP)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "LD=\"$(LD)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "AR=\"$(AR)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "NM=\"$(NM)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "OBJCOPY=\"$(OBJCOPY)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "OBJDUMP=\"$(OBJDUMP)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "NXFLATLDFLAGS1=\"$(NXFLATLDFLAGS1)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "NXFLATLDFLAGS2=\"$(NXFLATLDFLAGS2)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "OBJEXT=\"$(OBJEXT)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "LIBEXT=\"$(LIBEXT)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "EXEEXT=\"$(EXEEXT)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "HOSTCC=\"$(HOSTCC)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "HOSTINCLUDES=\"$(HOSTINCLUDES)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "HOSTCFLAGS=\"$(HOSTCFLAGS)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "HOSTLDFLAGS=\"$(HOSTLDFLAGS)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "HOSTEXEEXT=\"$(HOSTEXEEXT)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "DIRLINK=\"$(DIRLINK)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "DIRUNLINK=\"$(DIRUNLINK)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "MKDEP=\"$(MKDEP)\"" >> $(EXPORTDIR)/makeinfo.sh
 	$(Q) chmod 755 $(EXPORTDIR)/makeinfo.sh
 
 clean:
