@@ -43,8 +43,8 @@
 /****************************************************************************
  * Definitions
  ****************************************************************************/
-/* The 16Z board has a 20MHz crystal.  The ZNEO clocking will be configured
- * to use this crystal frequency directly as the clock source
+/* The Z16F2800100ZCOG board has a 20MHz crystal.  The ZNEO clocking will be
+ * configured to use this crystal frequency directly as the clock source
  */
 
 #define BOARD_XTAL_FREQUENCY   20000000 /* 20MHz */
