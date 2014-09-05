@@ -8409,3 +8409,5 @@
 	* tools/Makefile.export and mkexport.sh: The apps/ import build requires
 	  that we extract more information from the platform Make.defs file
 	  (2014-9-5).
+	* tools/Makefile.export and mkexport.sh: Need to export the setting of
+	  WINTOOL as well (2014-9-5).
