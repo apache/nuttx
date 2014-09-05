@@ -8402,3 +8402,8 @@
 	  bundle up the user C startup file (crt0), not the kernel head object
 	  for the kernel and protected builds (2014-9-4).
 	* tools/mkexport.sh: Add .config file to export package (2014-9-5).
+	* configs/16z:  Support for this board has been removed from the NuttX
+	  source tree (but still can be found in the misc/Obsoleted directory).
+	  This port is not ready for usage but may return to the NuttX tree
+	  at some point in the future (2014-9-5).
+

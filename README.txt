@@ -918,8 +918,6 @@ nuttx
  |   `-libpcode/
  |       `-README.txt
  |- configs/
- |   |- 16z/
- |   |   `- README.txt
  |   |- amber/
  |   |   `- README.txt
  |   |- arduino-due/
