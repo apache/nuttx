@@ -8406,4 +8406,6 @@
 	  source tree (but still can be found in the misc/Obsoleted directory).
 	  This port is not ready for usage but may return to the NuttX tree
 	  at some point in the future (2014-9-5).
-
+	* tools/Makefile.export and mkexport.sh: The apps/ import build requires
+	  that we extract more information from the platform Make.defs file
+	  (2014-9-5).
