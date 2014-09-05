@@ -74,6 +74,7 @@ endif
 	@echo "ARCHWARNINGS=\"$(ARCHWARNINGS)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "ARCHWARNINGSXX=\"$(ARCHWARNINGSXX)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "ARCHOPTIMIZATION=\"$(ARCHOPTIMIZATION)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "WINTOOL=\"$(WINTOOL)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "CROSSDEV=\"$(CROSSDEV)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "CC=\"$(CC)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "CXX=\"$(CXX)\"" >> $(EXPORTDIR)/makeinfo.sh

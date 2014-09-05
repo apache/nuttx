@@ -202,6 +202,7 @@ if [ "X${USRONLY}" == "Xy" ]; then
 	echo "ARCHWARNINGS     = ${ARCHWARNINGS}" >>"${EXPORTDIR}/build/Make.defs"
 	echo "ARCHWARNINGSXX   = ${ARCHWARNINGSXX}" >>"${EXPORTDIR}/build/Make.defs"
 	echo "ARCHOPTIMIZATION = ${ARCHOPTIMIZATION}" >>"${EXPORTDIR}/build/Make.defs"
+	echo "WINTOOL          = ${WINTOOL}" >>"${EXPORTDIR}/build/Make.defs"
 	echo "CROSSDEV         = ${CROSSDEV}" >>"${EXPORTDIR}/build/Make.defs"
 	echo "CC               = ${CC}" >>"${EXPORTDIR}/build/Make.defs"
 	echo "CXX              = ${CXX}" >>"${EXPORTDIR}/build/Make.defs"
