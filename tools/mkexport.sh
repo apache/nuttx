@@ -97,12 +97,25 @@ if [ ! -d "${TOPDIR}" ]; then
 	exit 1
 fi
 
-# Get the version string
+# Check configuration
+# Verify that we have Make.defs, .config, and .version files.
+
+if [ ! -f "${TOPDIR}/Make.defs" ]; then
+	echo "MK: Directory ${TOPDIR}/Make.defs does not exist"
+	exit 1
+fi
+
+if [ ! -f "${TOPDIR}/.config" ]; then
+	echo "MK: Directory ${TOPDIR}/.config does not exist"
+	exit 1
+fi
 
 if [ ! -f "${TOPDIR}/.version" ]; then
 	echo "MK: File ${TOPDIR}/.version does not exist"
 	exit 1
 fi
+
+# Get the version string
 
 source "${TOPDIR}/.version"
 if [ ! -z "${CONFIG_VERSION_STRING}" -a "${CONFIG_VERSION_STRING}" != "0.0" ]; then
@@ -138,12 +151,10 @@ if [ "X${USRONLY}" != "Xy" ]; then
   mkdir "${EXPORTDIR}/arch" || { echo "MK: 'mkdir ${EXPORTDIR}/arch' failed"; exit 1; }
 fi
 
-# Verify that we have a Make.defs file.
+# Copy the .config file
 
-if [ ! -f "${TOPDIR}/Make.defs" ]; then
-	echo "MK: Directory ${TOPDIR}/Make.defs does not exist"
-	exit 1
-fi
+cp -a "${TOPDIR}/.config" "${EXPORTDIR}/.config" ||
+  { echo "MK: Failed to copy ${TOPDIR}/.config to ${EXPORTDIR}/.config"; exit 1; }
 
 # Copy the Make.defs files, but disable windows path conversions
 
