@@ -3733,8 +3733,6 @@ Configurations
 
     NOTES:
 
-    NOTES:
-
     1. This configuration uses the the USART3 for the serial console
        which is available at the "DBGU" RS-232 connector (J24).  That
        is easily changed by reconfiguring to (1) enable a different
@@ -3765,9 +3763,14 @@ Configurations
        RTOS Features -> Tasks and Scheduling
          CONFIG_INIT_FILEPATH=y                 : Start-up is via an ELF file
          CONFIG_USER_INITPATH="/bin/init"       : The location of the startup
+         CONFIG_SCHED_HAVE_PARENT=y             : Needed to handle task exit
 
        RTOS Features -> System call support
          CONFIG_SYS_RESERVED=5                  : More reserved SYSCALLs
+
+       RTOS Features -> RTOS hooks
+         CONFIG_SCHED_ONEXIT=y                 : Needed to handle task exit
+         CONFIG_SCHED_ONEXIT_MAX=2
 
        Memory Management
         CONFIG_MM_KERNEL_HEAP=y                : Enable a kernel heap
