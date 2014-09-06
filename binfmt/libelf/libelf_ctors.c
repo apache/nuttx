@@ -192,10 +192,10 @@ int elf_loadctors(FAR struct elf_loadinfo_s *loadinfo)
               FAR uintptr_t *ptr = (uintptr_t *)((FAR void *)(&loadinfo->ctors)[i]);
 
               bvdbg("ctor %d: %08lx + %08lx = %08lx\n",
-                    i, *ptr, (unsigned long)loadinfo->txtalloc,
-                    (unsigned long)(*ptr + loadinfo->txtalloc));
+                    i, *ptr, (unsigned long)loadinfo->textalloc,
+                    (unsigned long)(*ptr + loadinfo->textalloc));
 
-              *ptr += loadinfo->txtalloc;
+              *ptr += loadinfo->textalloc;
             }
         }
       else
