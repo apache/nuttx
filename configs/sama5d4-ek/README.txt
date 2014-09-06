@@ -3527,8 +3527,9 @@ Configurations
       the description below and the section above entitled "Creating and
       Using DRAMBOOT" for more information
     elf:  Demonstrates execution of ELF file from a file system.
-    kernel: A configuration used to test the SAMA5D kenel build
-      configuration.
+    kernel: A configuration used to test the SAMA5D kernel build
+      configuration.  Uses a tiny NSH configuration that runs at
+      start time from a mounted file system.
     nsh:  This is an NuttShell (NSH) configuration that supports extensive
       functionality as possible (unlike the minimal ramtest configuration).
       See the detailed description below for a summary of the feature
@@ -3732,11 +3733,31 @@ Configurations
 
     NOTES:
 
-    Since this configuration is based on the ELF configuration, all of
-    the notes for that configuration also apply.
+    NOTES:
 
-    1. This configuration is based on the elf configuration.  Primary
-       differences between the two configurations are noted below:
+    1. This configuration uses the the USART3 for the serial console
+       which is available at the "DBGU" RS-232 connector (J24).  That
+       is easily changed by reconfiguring to (1) enable a different
+       serial peripheral, and (2) selecting that serial peripheral as
+       the console device.
+
+    2. By default, this configuration is set up to build on Windows
+       under either a Cygwin or MSYS environment using a recent, Windows-
+       native, generic ARM EABI GCC toolchain (such as the CodeSourcery
+       toolchain).  Both the build environment and the toolchain
+       selection can easily be changed by reconfiguring:
+
+       CONFIG_HOST_WINDOWS=y                   : Windows operating system
+       CONFIG_WINDOWS_CYGWIN=y                 : POSIX environment under windows
+       CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
+
+       If you are running on Linux, make *certain* that you have
+       CONFIG_HOST_LINUX=y *before* the first make or you will create a
+       corrupt configuration that may not be easy to recover from. See
+       the warning in the section "Information Common to All Configurations"
+       for further information.
+
+    3. Some key setup configuration values for this configuration:
 
        Build Setup -> Build Configuration -> Memory Organization
          CONFIG_BUILD_KERNEL=y                  : Kernel build enabled
@@ -3752,7 +3773,7 @@ Configurations
         CONFIG_MM_KERNEL_HEAP=y                : Enable a kernel heap
         CONFIG_MM_KERNEL_HEAPSIZE=8192         : (temporary.. will change)
 
-    2. Board initialization is performed performed before the application
+    4. Board initialization is performed performed before the application
        is started:
 
        RTOS Features -> RTOS Hooks
@@ -3784,6 +3805,26 @@ Configurations
          CONFIG_SAMA5D4EK_HSMCI0_MOUNT_BLKDEV="/dev/mmcsd0"
          CONFIG_SAMA5D4EK_HSMCI0_MOUNT_FSTYPE="vfat"
          CONFIG_SAMA5D4EK_HSMCI0_MOUNT_MOUNTPOINT="/bin"
+
+    5. General build directions:
+
+       $ cd nuttx/tools                    : Go to the tools sub-directory
+       $ ./configure.sh sama5d4-ek/kernel  : Establish this configuration
+       $ cd ..                             : Back to the NuttX build directory
+                                           : Edit setenv.sh to use the correct path
+       $ . ./setenv.sh                     : Set up the PATH variable
+       $ make                              : Build the kernel
+                                           : This should create the nuttx ELF
+       $ make export                       : Create the kernel export package
+                                           : You should have a file like nuttx-export-*.zip
+       $ cd apps/                          : Go to the apps/ directory
+       $ tools/mkimport.sh -x <zip-file>   : Use the full path to nuttx-export-*.zip
+       $ make import                       : This will build the file system
+       
+    STATUS:
+    2014-9-4: The kernel works up to the point where the nsh 'init'
+       is started from the file system then fails.  This is good,
+       however, because I do not yet have the file system in place yet.
 
   nsh:
 
