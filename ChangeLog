@@ -8411,3 +8411,6 @@
 	  (2014-9-5).
 	* tools/Makefile.export and mkexport.sh: Need to export the setting of
 	  WINTOOL as well (2014-9-5).
+	* SAMA5D4-EK kernel configuration now builds NSH instead of examples/elf
+	  (2014-9-6).
+
