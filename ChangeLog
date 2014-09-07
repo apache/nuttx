@@ -8422,3 +8422,5 @@
 	* configs/sama5d4-ek/src/sam_bringup.c and sama5d4-ek.h:  Need to call
 	  elf_initialize() on bring-up before attempting to load ELF modules
 	  (2014-9-7).
+	* arch/arm/src/armv7-a/arm_addrenv.c: Fix loop counter... was overrunning
+	  a table on larger ELF files (2104-9-7).
