@@ -102,6 +102,7 @@ int exec(FAR const char *filename, FAR char * const *argv,
 #if defined(CONFIG_SCHED_ONEXIT) && defined(CONFIG_SCHED_HAVE_PARENT)
   FAR struct binary_s *bin;
   int pid;
+  int err;
   int ret;
 
   /* Allocate the load information */
@@ -109,8 +110,9 @@ int exec(FAR const char *filename, FAR char * const *argv,
   bin = (FAR struct binary_s *)kmm_zalloc(sizeof(struct binary_s));
   if (!bin)
     {
-      set_errno(ENOMEM);
-      return ERROR;
+      bdbg("ERROR: Failed to allocate binary_s\n");
+      err = ENOMEM;
+      goto errout;
     }
 
   /* Load the module into memory */
@@ -123,9 +125,9 @@ int exec(FAR const char *filename, FAR char * const *argv,
   ret = load_module(bin);
   if (ret < 0)
     {
-      bdbg("ERROR: Failed to load program '%s'\n", filename);
-      kmm_free(bin);
-      return ERROR;
+      err = get_errno();
+      bdbg("ERROR: Failed to load program '%s': %d\n", filename, err);
+      goto errout_with_bin;
     }
 
   /* Disable pre-emption so that the executed module does
@@ -140,11 +142,9 @@ int exec(FAR const char *filename, FAR char * const *argv,
   pid = exec_module(bin);
   if (pid < 0)
     {
-      bdbg("ERROR: Failed to execute program '%s'\n", filename);
-      sched_unlock();
-      unload_module(bin);
-      kmm_free(bin);
-      return ERROR;
+      err = get_errno();
+      bdbg("ERROR: Failed to execute program '%s': %d\n", filename, err);
+      goto errout_with_lock;
     }
 
   /* Set up to unload the module (and free the binary_s structure)
@@ -154,13 +154,25 @@ int exec(FAR const char *filename, FAR char * const *argv,
   ret = schedule_unload(pid, bin);
   if (ret < 0)
     {
-      bdbg("ERROR: Failed to schedul unload '%s'\n", filename);
+      err = get_errno();
+      bdbg("ERROR: Failed to schedule unload '%s': %d\n", filename, err);
     }
 
   sched_unlock();
   return pid;
+
+errout_with_lock:
+  sched_unlock();
+  unload_module(bin);
+errout_with_bin:
+  kmm_free(bin);
+errout:
+  set_errno(err);
+  return ERROR;
+
 #else
   struct binary_s bin;
+  int err;
   int ret;
 
   /* Load the module into memory */
@@ -173,8 +185,9 @@ int exec(FAR const char *filename, FAR char * const *argv,
   ret = load_module(&bin);
   if (ret < 0)
     {
-      bdbg("ERROR: Failed to load program '%s'\n", filename);
-      return ERROR;
+      err = get_errno();
+      bdbg("ERROR: Failed to load program '%s': %d\n", filename, err);
+      goto errout;
     }
 
   /* Then start the module */
@@ -182,14 +195,20 @@ int exec(FAR const char *filename, FAR char * const *argv,
   ret = exec_module(&bin);
   if (ret < 0)
     {
-      bdbg("ERROR: Failed to execute program '%s'\n", filename);
-      unload_module(&bin);
-      return ERROR;
+      err = get_errno();
+      bdbg("ERROR: Failed to execute program '%s': %d\n", filename, err);
+      goto errout_with_module;
     }
 
   /* TODO:  How does the module get unloaded in this case? */
 
   return ret;
+
+errout_with_module:
+  unload_module(&bin);
+errout:
+  set_errno(err);
+  return ERROR;
 #endif
 }
 

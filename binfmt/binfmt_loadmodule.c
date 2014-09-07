@@ -120,7 +120,7 @@ static int load_absmodule(FAR struct binary_s *bin)
   FAR struct binfmt_s *binfmt;
   int ret = -ENOENT;
 
-  bdbg("Loading %s\n", bin->filename);
+  bvdbg("Loading %s\n", bin->filename);
 
   /* Disabling pre-emption should be sufficient protection while accessing
    * the list of registered binary format handlers.
@@ -262,7 +262,7 @@ int load_module(FAR struct binary_s *bin)
 
   if (ret < 0)
     {
-      bdbg("Returning errno %d\n", -ret);
+      bdbg("ERROR: Returning errno %d\n", -ret);
       set_errno(-ret);
       return ERROR;
     }
@@ -271,4 +271,3 @@ int load_module(FAR struct binary_s *bin)
 }
 
 #endif /* CONFIG_BINFMT_DISABLE */
-
