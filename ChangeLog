@@ -8413,4 +8413,7 @@
 	  WINTOOL as well (2014-9-5).
 	* SAMA5D4-EK kernel configuration now builds NSH instead of examples/elf
 	  (2014-9-6).
-
+	* libc/pthread/pthread_attrinit.c, sched/pthread/pthread_create.c, and
+	  include/nuttx/pthread.h:  Fix some conditional compilation in kernel
+	  build mode.  And, while we are touching this logic, make
+	  g_default_pthread_attr const (2014-9-7).
