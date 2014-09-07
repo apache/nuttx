@@ -58,15 +58,15 @@
  * Global Variables
  ****************************************************************************/
 
-/* Default pthread attributes (see included/nuttx/pthread.h).  When configured
+/* Default pthread attributes (see include/nuttx/pthread.h).  When configured
  * to build separate kernel- and user-address spaces, this global is
  * duplicated in each address spaced.  This copy can only be shared within
  * the user address space.
  */
 
-#if (defined(CONFIG_BUILD_PROTECTED) && !defined(__KERNEL__)) && \
-    !defined(CONFIG_BUILD_KERNEL)
-pthread_attr_t g_default_pthread_attr = PTHREAD_ATTR_INITIALIZER;
+#if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
+    !defined(__KERNEL__)
+const pthread_attr_t g_default_pthread_attr = PTHREAD_ATTR_INITIALIZER;
 #endif
 
 /****************************************************************************

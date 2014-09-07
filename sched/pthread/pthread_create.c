@@ -68,10 +68,13 @@
 /****************************************************************************
  * Global Variables
  ****************************************************************************/
+/* Default pthread attributes (see include/nuttx/pthread.h).  When configured
+ * to build separate kernel- and user-address spaces, this global is
+ * duplicated in each address spaced.  This copy can only be shared within
+ * the kernel address space.
+ */
 
-/* Default pthread attributes */
-
-pthread_attr_t g_default_pthread_attr = PTHREAD_ATTR_INITIALIZER;
+const pthread_attr_t g_default_pthread_attr = PTHREAD_ATTR_INITIALIZER;
 
 /****************************************************************************
  * Private Variables
@@ -242,7 +245,7 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
 
   if (!attr)
     {
-      attr = &g_default_pthread_attr;
+      attr = (FAR pthread_attr_t *)&g_default_pthread_attr;
     }
 
   /* Allocate a TCB for the new task. */
