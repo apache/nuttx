@@ -191,7 +191,7 @@ static int up_addrenv_create_region(FAR uintptr_t **list,
    */
 
   nmapped = 0;
-  for (i = 0; i < npages; i++)
+  for (i = 0; i < npages; i += ENTRIES_PER_L2TABLE)
     {
       /* Allocate one physical page for the L2 page table */
 
