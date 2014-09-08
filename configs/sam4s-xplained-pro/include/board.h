@@ -60,13 +60,13 @@
  * definitions will configure clocking with MCK = 120MHz, PLLA = 240, and CPU=120MHz.
  */
 
-/* Main oscillator register settings */
-
-#define BOARD_CKGR_MOR_MOSCXTST     (63 << PMC_CKGR_MOR_MOSCXTST_SHIFT) /* Start-up Time */
-
 #define BOARD_32KOSC_FREQUENCY      (32768)
 #define BOARD_SCLK_FREQUENCY        (BOARD_32KOSC_FREQUENCY)
 #define BOARD_MAINOSC_FREQUENCY     (12000000)
+
+/* Main oscillator register settings */
+
+#define BOARD_CKGR_MOR_MOSCXTST     (63 << PMC_CKGR_MOR_MOSCXTST_SHIFT) /* Start-up Time */
 
 #ifdef CONFIG_SAM34_UDP
 /* PLLA configuration:
