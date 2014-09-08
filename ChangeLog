@@ -8424,3 +8424,6 @@
 	  (2014-9-7).
 	* arch/arm/src/armv7-a/arm_addrenv.c: Fix loop counter... was overrunning
 	  a table on larger ELF files (2104-9-7).
+	* arch/arm/src/sama5/sam_memories.c, sam_pgalloc.c, and sam_pgalloc.h: In
+	  kernel build with address environment, need logic to map user virtual
+	  addresses to physical addresses, and vice versa (2104-9-7).
