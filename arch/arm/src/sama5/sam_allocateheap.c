@@ -195,7 +195,7 @@
 #endif
 
 /* The heap space in the primary memory region is added automatically when
- * up_allocate heap is called.  So if the memory region is the primary region,
+ * up_allocate_heap is called.  So if the memory region is the primary region,
  * it should not be added to the heap (again).
  */
 

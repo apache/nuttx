@@ -43,7 +43,10 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/addrenv.h>
+
 #include "chip.h"
+#include "sam_pgalloc.h"
 #include "sam_memories.h"
 
 /****************************************************************************
@@ -901,6 +904,21 @@ uintptr_t sam_physramaddr(uintptr_t virtramaddr)
     }
 #endif
 
+#ifdef CONFIG_ARCH_ADDRENV
+  /* Check if the virtual address lies in the user data area and, if so
+   * get the mapping to the physical address in the page pool.
+   */
+
+  else
+    {
+      uintptr_t paddr = sam_physpgaddr(virtramaddr);
+      if (paddr != 0)
+        {
+          return paddr;
+        }
+    }
+#endif
+
   /* We will not get here unless we are called with an invalid or
    * unsupported RAM address.  Special case the NULL address.
    */
@@ -1016,6 +1034,21 @@ uintptr_t sam_virtramaddr(uintptr_t physramaddr)
            physramaddr < (SAM_EBICS3_PSECTION + SAMA5_EBICS3_SIZE))
     {
       return ebics3_virtramaddr(physramaddr);
+    }
+#endif
+
+#ifdef CONFIG_ARCH_ADDRENV
+  /* Check if the physical address lies in the page pool and, if so
+   * get the mapping to the virtual address in the user data area.
+   */
+
+  else
+    {
+      uintptr_t vaddr = sam_virtpgaddr(physramaddr);
+      if (vaddr != 0)
+        {
+          return vaddr;
+        }
     }
 #endif
 
