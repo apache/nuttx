@@ -61,11 +61,11 @@
  * 32768 kHz).
  */
 
-#ifndef BOARD_SLCK_FREQUENCY
-#  define BOARD_SLCK_FREQUENCY 32768
+#ifndef BOARD_SCLK_FREQUENCY
+#  define BOARD_SCLK_FREQUENCY 32768
 #endif
 
-#define WDT_FREQUENCY (BOARD_SLCK_FREQUENCY / 128)
+#define WDT_FREQUENCY (BOARD_SCLK_FREQUENCY / 128)
 
 /* At 32768Hz, the maximum timeout value will be:
  *

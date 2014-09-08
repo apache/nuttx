@@ -66,7 +66,7 @@
 
 /* TODO: Allow selection of any of the input clocks */
 
-#define TC_FCLK        (BOARD_SLCK_FREQUENCY)
+#define TC_FCLK        (BOARD_SCLK_FREQUENCY)
 #define TC_MAXTIMEOUT  ((1000000ULL * (1ULL + TC_RVALUE_MASK)) / TC_FCLK)
 
 /* Configuration ************************************************************/
