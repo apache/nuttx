@@ -1,5 +1,5 @@
 #!/bin/bash
-# configs/sama5d4-ek/kernel/setenv.sh
+# configs/sama5d4-ek/knsh/setenv.sh
 #
 #   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
