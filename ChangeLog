@@ -8431,3 +8431,4 @@
 	  definitions to board.h header file.  From Fabien Comte (2014-9-8).
 	* Several pthread interfaces: A ddconst storage class to to phthread
 	  parameters.  From Freddie Chopin (2014-9-8).
+	* libc/math: Corrected atan2 implementations from Denis Arnst (2014-9-8).
