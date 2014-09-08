@@ -1016,9 +1016,9 @@ static off_t fat_seek(FAR struct file *filep, off_t offset, int whence)
 
   if (position > ff->ff_size && (ff->ff_oflags & O_WROK) == 0)
     {
-        /* Otherwise, the position is limited to the file size */
+      /* Otherwise, the position is limited to the file size */
 
-        position = ff->ff_size;
+      position = ff->ff_size;
     }
 
   /* Set file position to the beginning of the file (first cluster,
@@ -1159,8 +1159,8 @@ static off_t fat_seek(FAR struct file *filep, off_t offset, int whence)
 
   if ((ff->ff_oflags & O_WROK) != 0 &&  filep->f_pos > ff->ff_size)
     {
-        ff->ff_size    = filep->f_pos;
-        ff->ff_bflags |= FFBUFF_MODIFIED;
+      ff->ff_size    = filep->f_pos;
+      ff->ff_bflags |= FFBUFF_MODIFIED;
     }
 
   fat_semgive(fs);
