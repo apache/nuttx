@@ -85,7 +85,7 @@
  *
  ****************************************************************************/
 
-int pthread_attr_getschedparam(FAR pthread_attr_t *attr,
+int pthread_attr_getschedparam(FAR const pthread_attr_t *attr,
                                FAR struct sched_param *param)
 {
   int ret;

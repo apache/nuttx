@@ -228,7 +228,7 @@ static void pthread_start(void)
  *
  ****************************************************************************/
 
-int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
+int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
                    pthread_startroutine_t start_routine, pthread_addr_t arg)
 {
   FAR struct pthread_tcb_s *ptcb;
@@ -245,7 +245,7 @@ int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
 
   if (!attr)
     {
-      attr = (FAR pthread_attr_t *)&g_default_pthread_attr;
+      attr = &g_default_pthread_attr;
     }
 
   /* Allocate a TCB for the new task. */

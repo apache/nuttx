@@ -86,7 +86,7 @@
  *
  ****************************************************************************/
 
-int pthread_mutex_init(FAR pthread_mutex_t *mutex, FAR pthread_mutexattr_t *attr)
+int pthread_mutex_init(FAR pthread_mutex_t *mutex, FAR const pthread_mutexattr_t *attr)
 {
   int pshared = 0;
 #ifdef CONFIG_MUTEX_TYPES

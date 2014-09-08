@@ -65,7 +65,7 @@
  *
  ****************************************************************************/
 
-int pthread_cond_init(FAR pthread_cond_t *cond, FAR pthread_condattr_t *attr)
+int pthread_cond_init(FAR pthread_cond_t *cond, FAR const pthread_condattr_t *attr)
 {
   int ret = OK;
 

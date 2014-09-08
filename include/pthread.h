@@ -255,10 +255,10 @@ int pthread_attr_destroy(pthread_attr_t *attr);
 /* Set or obtain the default scheduling algorithm */
 
 int pthread_attr_setschedpolicy(FAR pthread_attr_t *attr, int policy);
-int pthread_attr_getschedpolicy(FAR pthread_attr_t *attr, int *policy);
+int pthread_attr_getschedpolicy(FAR const pthread_attr_t *attr, int *policy);
 int pthread_attr_setschedparam(FAR pthread_attr_t *attr,
                                FAR const struct sched_param *param);
-int pthread_attr_getschedparam(FAR pthread_attr_t *attr,
+int pthread_attr_getschedparam(FAR const pthread_attr_t *attr,
                                FAR struct sched_param *param);
 int pthread_attr_setinheritsched(FAR pthread_attr_t *attr,
                                  int inheritsched);
@@ -268,7 +268,7 @@ int pthread_attr_getinheritsched(FAR const pthread_attr_t *attr,
 /* Set or obtain the default stack size */
 
 int pthread_attr_setstacksize(FAR pthread_attr_t *attr, long stacksize);
-int pthread_attr_getstacksize(FAR pthread_attr_t *attr, long *stackaddr);
+int pthread_attr_getstacksize(FAR const pthread_attr_t *attr, long *stackaddr);
 
 /* To create a thread object and runnable thread, a routine must be specified
  * as the new thread's start routine.  An argument may be passed to this
@@ -277,7 +277,7 @@ int pthread_attr_getstacksize(FAR pthread_attr_t *attr, long *stackaddr);
  * about the kind of thread being created.
  */
 
-int pthread_create(FAR pthread_t *thread, FAR pthread_attr_t *attr,
+int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
                    pthread_startroutine_t startroutine, pthread_addr_t arg);
 
 /* A thread object may be "detached" to specify that the return value and
@@ -325,7 +325,7 @@ int pthread_setschedprio(pthread_t thread, int prio);
 
 int pthread_key_create(FAR pthread_key_t *key,
                        CODE void (*destructor)(FAR void*));
-int pthread_setspecific(pthread_key_t key, FAR void *value);
+int pthread_setspecific(pthread_key_t key, FAR const void *value);
 FAR void *pthread_getspecific(pthread_key_t key);
 int pthread_key_delete(pthread_key_t key);
 
@@ -333,7 +333,7 @@ int pthread_key_delete(pthread_key_t key);
 
 int pthread_mutexattr_init(FAR pthread_mutexattr_t *attr);
 int pthread_mutexattr_destroy(FAR pthread_mutexattr_t *attr);
-int pthread_mutexattr_getpshared(FAR pthread_mutexattr_t *attr,
+int pthread_mutexattr_getpshared(FAR const pthread_mutexattr_t *attr,
                                  FAR int *pshared);
 int pthread_mutexattr_setpshared(FAR pthread_mutexattr_t *attr,
                                  int pshared);
@@ -345,7 +345,7 @@ int pthread_mutexattr_settype(pthread_mutexattr_t *attr, int type);
 /* The following routines create, delete, lock and unlock mutexes. */
 
 int pthread_mutex_init(FAR pthread_mutex_t *mutex,
-                       FAR pthread_mutexattr_t *attr);
+                       FAR const pthread_mutexattr_t *attr);
 int pthread_mutex_destroy(FAR pthread_mutex_t *mutex);
 int pthread_mutex_lock(FAR pthread_mutex_t *mutex);
 int pthread_mutex_trylock(FAR pthread_mutex_t *mutex);
@@ -358,7 +358,7 @@ int pthread_condattr_destroy(FAR pthread_condattr_t *attr);
 
 /* A thread can create and delete condition variables. */
 
-int pthread_cond_init(FAR pthread_cond_t *cond, FAR pthread_condattr_t *attr);
+int pthread_cond_init(FAR pthread_cond_t *cond, FAR const pthread_condattr_t *attr);
 int pthread_cond_destroy(FAR pthread_cond_t *cond);
 
 /* A thread can signal to and broadcast on a condition variable. */

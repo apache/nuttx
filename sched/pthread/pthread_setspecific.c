@@ -112,7 +112,7 @@
  *
  ****************************************************************************/
 
-int pthread_setspecific(pthread_key_t key, FAR void *value)
+int pthread_setspecific(pthread_key_t key, FAR const void *value)
 {
 #if CONFIG_NPTHREAD_KEYS > 0
   FAR struct pthread_tcb_s *rtcb = (FAR struct pthread_tcb_s*)g_readytorun.head;
@@ -128,7 +128,7 @@ int pthread_setspecific(pthread_key_t key, FAR void *value)
     {
       /* Store the data in the TCB. */
 
-      rtcb->pthread_data[key] = value;
+      rtcb->pthread_data[key] = (FAR void*)value;
 
       /* Return success. */
 

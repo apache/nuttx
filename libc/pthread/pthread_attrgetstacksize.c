@@ -83,7 +83,7 @@
  *
  ****************************************************************************/
 
-int pthread_attr_getstacksize(FAR pthread_attr_t *attr, FAR long *stacksize)
+int pthread_attr_getstacksize(FAR const pthread_attr_t *attr, FAR long *stacksize)
 {
   int ret;
 
