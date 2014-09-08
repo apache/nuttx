@@ -71,7 +71,7 @@
  *   1000 * 64 / Fmin = 49.93 msec
  */
 
-#define WDT_FCLK        (BOARD_SLCK_FREQUENCY / 128)
+#define WDT_FCLK        (BOARD_SCLK_FREQUENCY / 128)
 #define WDT_MAXTIMEOUT  ((1000 * (WDT_MR_WDV_MAX+1)) / WDT_FCLK)
 
 /* Configuration ************************************************************/

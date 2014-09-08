@@ -67,7 +67,7 @@
 #  define RTT_PRES      1
 #endif
 
-#define RTT_FCLK        (BOARD_SLCK_FREQUENCY/RTT_PRES)
+#define RTT_FCLK        (BOARD_SCLK_FREQUENCY/RTT_PRES)
 #define RTT_MAXTIMEOUT  ((1000000ULL * (0x100000000ULL)) / RTT_FCLK)
 
 /* Configuration ************************************************************/
