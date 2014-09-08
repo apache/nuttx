@@ -609,7 +609,8 @@
 
 /* Mapped section size */
 
-#define SECTION_SIZE          (1 << 20)   /* 1Mb */
+#define SECTION_SHIFT         (20)
+#define SECTION_SIZE          (1 << SECTION_SHIFT)   /* 1Mb */
 #define SECTION_MASK          (SECTION_SIZE - 1)
 
 /* The Cortex-A5 supports two translation table base address registers.  In

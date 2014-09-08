@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/sama5/sam_memories.h
+ * arch/arm/src/sama5/sam_pgalloc.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,28 +33,21 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMA5_SAM_MEMORIES_H
-#define __ARCH_ARM_SRC_SAMA5_SAM_MEMORIES_H
+#ifndef __ARCH_ARM_SRC_SAMA5_SAM_PGALLOC_H
+#define __ARCH_ARM_SRC_SAMA5_SAM_PGALLOC_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <stdint.h>
+
+#ifdef CONFIG_MM_PGALLOC
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Inline Functions
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
 
 /****************************************************************************
  * Public Data
@@ -74,42 +67,31 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_physregaddr
+ * Name: sam_physpgaddr
  *
  * Description:
- *   Give the virtual address of a register, return the physical address of
- *   the register
+ *   Check if the virtual address lies in the user data area and, if so
+ *   get the mapping to the physical address in the page pool.
  *
  ****************************************************************************/
 
-uintptr_t sam_physregaddr(uintptr_t virtregaddr);
+uintptr_t sam_physpgaddr(uintptr_t vaddr);
 
 /****************************************************************************
- * Name: sam_physramaddr
+ * Name: sam_virtpgaddr
  *
  * Description:
- *   Give the virtual address of a RAM memory location, return the physical
- *   address of that location.
+ *   Check if the physical address lies in the page pool and, if so
+ *   get the mapping to the virtual address in the user data area.
  *
  ****************************************************************************/
 
-uintptr_t sam_physramaddr(uintptr_t vramaddr);
-
-/****************************************************************************
- * Name: sam_virtramaddr
- *
- * Description:
- *   Give the physical address of a RAM memory location, return the virtual
- *   address of that location.
- *
- ****************************************************************************/
-
-uintptr_t sam_virtramaddr(uintptr_t physramaddr);
+uintptr_t sam_virtpgaddr(uintptr_t paddr);
 
 #undef EXTERN
-#if defined(__cplusplus)
+#ifdef __cplusplus
 }
 #endif
 
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_SAMA5_SAM_MEMORIES_H */
+#endif /* CONFIG_MM_PGALLOC */
+#endif /* __ARCH_ARM_SRC_SAMA5_SAM_PGALLOC_H */
