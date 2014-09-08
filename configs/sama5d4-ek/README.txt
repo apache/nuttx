@@ -3527,7 +3527,7 @@ Configurations
       the description below and the section above entitled "Creating and
       Using DRAMBOOT" for more information
     elf:  Demonstrates execution of ELF file from a file system.
-    kernel: A configuration used to test the SAMA5D kernel build
+    knsh: An NSH configuration used to test the SAMA5D kernel build
       configuration.  Uses a tiny NSH configuration that runs at
       start time from a mounted file system.
     nsh:  This is an NuttShell (NSH) configuration that supports extensive
@@ -3727,8 +3727,8 @@ Configurations
 
       2014-8-29: System call interface verified.
 
-  kernel:
-    A configuration used to test the SAMA5D kenel build configuration.
+  knsh:
+    An NSH configuration used to test the SAMA5D kenel build configuration.
     More to come... this is still a work in progress as of this writing.
 
     NOTES:
@@ -3828,6 +3828,11 @@ Configurations
     2014-9-4: The kernel works up to the point where the nsh 'init'
        is started from the file system then fails.  This is good,
        however, because I do not yet have the file system in place yet.
+    2014-9-4: I am seeing HSMCI read() failures while loading the ELF image
+       from the SD card.  This seems odd since I have never seen other read()
+       failures with HSMCI (and, hence, this may be some issue unique to this
+       configuration).  In any a event, this has stopped testing for the
+       moment.
 
   nsh:
 
