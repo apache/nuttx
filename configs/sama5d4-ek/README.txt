@@ -3825,14 +3825,21 @@ Configurations
        $ make import                       : This will build the file system
        
     STATUS:
+
     2014-9-4: The kernel works up to the point where the nsh 'init'
        is started from the file system then fails.  This is good,
        however, because I do not yet have the file system in place yet.
-    2014-9-4: I am seeing HSMCI read() failures while loading the ELF image
+
+    2014-9-8: I am seeing HSMCI read() failures while loading the ELF image
        from the SD card.  This seems odd since I have never seen other read()
        failures with HSMCI (and, hence, this may be some issue unique to this
        configuration).  In any a event, this has stopped testing for the
        moment.
+
+       Also, the mount() in configs/sama5d4x-ek/src/sam_bringup.c will fail
+       unless you add a delay between the HSMCI initialization and the mount.
+       No idea why (and there they is now delay in the baseline code... one
+       has to be added).
 
   nsh:
 
