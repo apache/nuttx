@@ -8427,3 +8427,7 @@
 	* arch/arm/src/sama5/sam_memories.c, sam_pgalloc.c, and sam_pgalloc.h: In
 	  kernel build with address environment, need logic to map user virtual
 	  addresses to physical addresses, and vice versa (2104-9-7).
+	* SAM3X/Arduino Due: Fix typo in sam3x_periphclks.h; add SCLK
+	  definitions to board.h header file.  From Fabien Comte (2014-9-8).
+	* Several pthread interfaces: A ddconst storage class to to phthread
+	  parameters.  From Freddie Chopin (2014-9-8).
