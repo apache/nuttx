@@ -124,6 +124,7 @@ int sam_bringup(void)
 #ifdef CONFIG_SAMA5D4EK_HSMCI0_MOUNT
   else
     {
+      /* REVISIT:  A delay seems to be required here or the mount will fail. */
       /* Mount the volume on HSMCI0 */
 
       ret = mount(CONFIG_SAMA5D4EK_HSMCI0_MOUNT_BLKDEV,
@@ -153,6 +154,7 @@ int sam_bringup(void)
 #ifdef CONFIG_SAMA5D4EK_HSMCI1_MOUNT
   else
     {
+      /* REVISIT:  A delay seems to be required here or the mount will fail. */
       /* Mount the volume on HSMCI1 */
 
       ret = mount(CONFIG_SAMA5D4EK_HSMCI1_MOUNT_BLKDEV,
