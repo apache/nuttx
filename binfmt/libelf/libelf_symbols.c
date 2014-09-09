@@ -1,7 +1,7 @@
 /****************************************************************************
  * binfmt/libelf/libelf_symbols.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -76,6 +76,10 @@
  *   0 (OK) is returned on success and a negated errno is returned on
  *   failure.
  *
+ *   EINVAL - There is something inconsistent in the symbol table (should only
+ *            happen if the file is corrupted).
+ *   ESRCH - Symbol has no name
+ *
  ****************************************************************************/
 
 static int elf_symname(FAR struct elf_loadinfo_s *loadinfo,
@@ -94,7 +98,7 @@ static int elf_symname(FAR struct elf_loadinfo_s *loadinfo,
   if (sym->st_name == 0)
     {
       bdbg("Symbol has no name\n");
-      return -ENOENT;
+      return -ESRCH;
     }
 
   offset = loadinfo->shdr[loadinfo->strtabidx].sh_offset + sym->st_name;
@@ -253,6 +257,12 @@ int elf_readsym(FAR struct elf_loadinfo_s *loadinfo, int index,
  *   0 (OK) is returned on success and a negated errno is returned on
  *   failure.
  *
+ *   EINVAL - There is something inconsistent in the symbol table (should only
+ *            happen if the file is corrupted).
+ *   ENOSYS - Symbol lies in common
+ *   ESRCH  - Symbol has no name
+ *   ENOENT - Symbol undefined and not provided via a symbol table
+ *
  ****************************************************************************/
 
 int elf_symvalue(FAR struct elf_loadinfo_s *loadinfo, FAR Elf32_Sym *sym,
@@ -269,7 +279,7 @@ int elf_symvalue(FAR struct elf_loadinfo_s *loadinfo, FAR Elf32_Sym *sym,
         /* NuttX ELF modules should be compiled with -fno-common. */
 
         bdbg("SHN_COMMON: Re-compile with -fno-common\n");
-        return -EINVAL;
+        return -ENOSYS;
       }
 
     case SHN_ABS:
@@ -287,6 +297,12 @@ int elf_symvalue(FAR struct elf_loadinfo_s *loadinfo, FAR Elf32_Sym *sym,
         ret = elf_symname(loadinfo, sym);
         if (ret < 0)
           {
+            /* There are a few relocations for a few architectures that do
+             * no depend upon a named symbol.  We don't know if that is the
+             * case here, but return and special error to the caller to
+             * indicate the nameless symbol.
+             */
+
             bdbg("SHN_UNDEF: Failed to get symbol name: %d\n", ret);
             return ret;
           }

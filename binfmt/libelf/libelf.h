@@ -174,6 +174,12 @@ int elf_readsym(FAR struct elf_loadinfo_s *loadinfo, int index,
  *   0 (OK) is returned on success and a negated errno is returned on
  *   failure.
  *
+ *   EINVAL - There is something inconsistent in the symbol table (should only
+ *            happen if the file is corrupted)
+ *   ENOSYS - Symbol lies in common
+ *   ESRCH  - Symbol has no name
+ *   ENOENT - Symbol undefined and not provided via a symbol table
+ *
  ****************************************************************************/
 
 int elf_symvalue(FAR struct elf_loadinfo_s *loadinfo, FAR Elf32_Sym *sym,

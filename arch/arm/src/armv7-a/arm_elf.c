@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/armv-7a/arm_elf.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -132,6 +132,10 @@ bool up_checkarch(FAR const Elf32_Ehdr *ehdr)
  * Input Parameters:
  *   rel - The relocation type
  *   sym - The ELF symbol structure containing the fully resolved value.
+ *         There are a few relocation types for a few architectures that do
+ *         not require symbol information.  For those, this value will be
+ *         NULL.  Implementations of these functions must be able to handle
+ *         that case.
  *   addr - The address that requires the relocation.
  *
  * Returned Value:
@@ -144,8 +148,21 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
                 uintptr_t addr)
 {
   int32_t offset;
+  unsigned int relotype;
 
-  switch (ELF32_R_TYPE(rel->r_info))
+  /* All relocations except R_ARM_V4BX depend upon having valid symbol
+   * information.
+   */
+
+  relotype = ELF32_R_TYPE(rel->r_info);
+  if (sym == NULL && relotype != R_ARM_NONE && relotype != R_ARM_V4BX)
+    {
+      return -EINVAL;
+    }
+
+  /* Handle the relocation by relocation type */
+
+  switch (relotype)
     {
     case R_ARM_NONE:
       {
@@ -254,4 +271,3 @@ int up_relocateadd(FAR const Elf32_Rela *rel, FAR const Elf32_Sym *sym,
   bdbg("RELA relocation not supported\n");
   return -ENOSYS;
 }
-

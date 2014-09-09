@@ -136,6 +136,7 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
   FAR Elf32_Shdr *dstsec = &loadinfo->shdr[relsec->sh_info];
   Elf32_Rel       rel;
   Elf32_Sym       sym;
+  FAR Elf32_Sym  *psym;
   uintptr_t       addr;
   int             symidx;
   int             ret;
@@ -148,6 +149,8 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
 
   for (i = 0; i < relsec->sh_size / sizeof(Elf32_Rel); i++)
     {
+      psym = &sym;
+
       /* Read the relocation entry into memory */
 
       ret = elf_readrel(loadinfo, relsec, i, &rel);
@@ -179,9 +182,28 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
       ret = elf_symvalue(loadinfo, &sym, exports, nexports);
       if (ret < 0)
         {
-          bdbg("Section %d reloc %d: Failed to get value of symbol[%d]: %d\n",
-               relidx, i, symidx, ret);
-          return ret;
+          /* The special error -ESRCH is returned only in one condition:  The
+           * symbol has no name.
+           *
+           * There are a few relocations for a few architectures that do
+           * no depend upon a named symbol.  We don't know if that is the
+           * case here, but we will use a NULL symbol pointer to indicate
+           * that case to up_relocate().  That function can then do what
+           * is best.
+           */
+
+          if (ret == -ESRCH)
+            {
+              bdbg("Section %d reloc %d: Undefined symbol[%d] has no name: %d\n",
+                  relidx, i, symidx, ret);
+              psym = NULL;
+            }
+          else
+            {
+              bdbg("Section %d reloc %d: Failed to get value of symbol[%d]: %d\n",
+                  relidx, i, symidx, ret);
+              return ret;
+            }
         }
 
       /* Calculate the relocation address. */
@@ -197,7 +219,7 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
 
       /* Now perform the architecture-specific relocation */
 
-      ret = up_relocate(&rel, &sym, addr);
+      ret = up_relocate(&rel, psym, addr);
       if (ret < 0)
         {
           bdbg("ERROR: Section %d reloc %d: Relocation failed: %d\n", ret);
