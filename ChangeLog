@@ -8442,4 +8442,7 @@
 	* LibTargets.mk, Makefile.unix, and Makefile.win: Move commit library
 	  targets out of Makefile.unix and Makeifle.win into a new LibTargets.mk
 	  (2014-9-9).
-
+	* LibTargets.mk and configs/sama5d4-ek/knsh/Make.defs: Add logic that will
+	  permit us to build user libraries with different CFLAGS than kernel
+	  code.  This is needed because we need the -fno-common option when
+	  building ELF code to prevent SHN_COMMON relocations (2014-9-8).
