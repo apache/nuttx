@@ -8450,3 +8450,6 @@
 	  of up_relocate(): ELF relocations.  Some relocation types do not have
 	  a named symbol associated with them.  The design did not account for
 	  that case (2014-9-9).
+	* binfmt/binfmt_execmodule.c: When allocating a stack for a new process
+	  using the user-sapce allocator, need to select the address environment
+	  first (2014-9-9).
