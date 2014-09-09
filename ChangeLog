@@ -8429,7 +8429,7 @@
 	  addresses to physical addresses, and vice versa (2104-9-7).
 	* SAM3X/Arduino Due: Fix typo in sam3x_periphclks.h; add SCLK
 	  definitions to board.h header file.  From Fabien Comte (2014-9-8).
-	* Several pthread interfaces: A ddconst storage class to to phthread
+	* Several pthread interfaces: Add const storage class to to phthread
 	  parameters.  From Freddie Chopin (2014-9-8).
 	* libc/math: Corrected atan2 implementations from Denis Arnst (2014-9-8).
 	* sama5d4-ek/knsh:  Rename the kernel configuration to knsh to better
@@ -8446,3 +8446,7 @@
 	  permit us to build user libraries with different CFLAGS than kernel
 	  code.  This is needed because we need the -fno-common option when
 	  building ELF code to prevent SHN_COMMON relocations (2014-9-8).
+	* binfmt/libelf/libelf_symbols.c, libelf_bind.c, and all implementations
+	  of up_relocate(): ELF relocations.  Some relocation types do not have
+	  a named symbol associated with them.  The design did not account for
+	  that case (2014-9-9).
