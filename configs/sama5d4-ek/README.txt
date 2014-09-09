@@ -3702,7 +3702,7 @@ Configurations
         CONFIG_SAMA5_DDRCS_PGHEAP=n            : Don't try to set up the page allocator
 
       Memory Management
-        CONFIG_GRAN=n                          : Disable the granule allocator 
+        CONFIG_GRAN=n                          : Disable the granule allocator
         CONFIG_MM_PGALLOC=n                    : Disable the page allocator
 
     4. A system call interface is enabled and the ELF test programs interface with the base RTOS code system calls.  This eliminates the need for symbol tables to link with the base RTOS (symbol tables are still used, however, to interface with the common C library instaniation).  Relevant configuration settings:
@@ -3776,17 +3776,69 @@ Configurations
         CONFIG_MM_KERNEL_HEAP=y                : Enable a kernel heap
         CONFIG_MM_KERNEL_HEAPSIZE=8192         : (temporary.. will change)
 
-    4. Board initialization is performed performed before the application
+    4. By default, this configuration is setup to boot from an SD card.
+       Unfortunately, there some issues when using the SD card that prevent
+       this from working properly (see STATUS below).  And alternative is to
+       use a built-in ROMFS file system that does not suffer from the
+       (assumed) HSMCI bug.
+
+       So why isn't this the default configuration?  Because it does not
+       build out-of-the-box.  You have to take special steps in the build
+       process as described below.
+
+       Assuming that you will want to reconfigure to use the ROMFS (rather than debugging HSCMI), you will need to disable all of these settings:
+
+       System Type->ATSAMA5 Peripheral Support
+         CONFIG_SAMA5_HSMCI0=n           : Disable HSMCI0 support
+         CONFIG_SAMA5_XDMAC0=n           : XDMAC0 is no longer needed
+
+       System Type
+         CONFIG_SAMA5_PIO_IRQ=n          : PIO interrupts are no longer needed
+
+       Device Drivers -> MMC/SD Driver Support
+         CONFIG_MMCSD=n                  : Disable MMC/SD support
+
+       File System
+         CONFIG_FS_FAT=n                 : FAT file system no longer needed
+
+       Board Selection
+         CONFIG_SAMA5D4EK_HSMCI0_MOUNT=y : Don't mount HSMCI0 at boot
+
+       And then enable these features in order to use the ROMFS boot file
+       system:
+
+       File System
+         CONFIG_FS_ROMFS=y               : Enable the ROMFS file system
+
+       Board Selection
+         CONFIG_SAMA5D4EK_ROMFS_MOUNT=y  : Mount the ROMFS file system at boot
+         CONFIG_SAMA5D4EK_ROMFS_MOUNT_MOUNTPOINT="/bin"
+         CONFIG_SAMA5D4EK_ROMFS_ROMDISK_DEVNAME="/dev/ram0"
+         CONFIG_SAMA5D4EK_ROMFS_ROMDISK_MINOR=0
+         CONFIG_SAMA5D4EK_ROMFS_ROMDISK_SECTSIZE=512
+
+       Then you will need to follow some special build instructions below
+       in order to build and install the ROMFS file system image.
+
+       UPDATE: The ROMFS configuration is pre-configured in the the
+       file nuttx/configs/sama5d4-ek/knsh/defconfig.ROMFS
+
+    5. Board initialization is performed performed before the application
        is started:
 
        RTOS Features -> RTOS Hooks
          CONFIG_BOARD_INITITIALIZE=y
 
-       The board initialization will mount the FAT filesystem on an SD card
-       inserted int the HSMCI0 slot (full size).  The SAMA4D4-EK provides
-       two SD memory card slots:  (1) a full size SD card slot (J10), and
-       (2) a microSD memory card slot (J11).  The full size SD card slot
-       connects via HSMCI0; the microSD connects vi HSMCI1.  See the relevant
+       In the special ROMFS boot configuration, you need to do nothing
+       additional: The board initialization will mount the ROMFS file
+       system at boot time.
+
+       In the default configuration, however, the board initialization
+       will instead mount the FAT filesystem on an SD card inserted in
+       the HSMCI0 slot (full size).  The SAMA4D4-EK provides two SD
+       memory card slots:  (1) a full size SD card slot (J10), and (2) a
+       microSD memory card slot (J11).  The full size SD card slot connects
+       via HSMCI0; the microSD connects vi HSMCI1.  See the relevant
        configuration settings above in the paragraph entitled "HSMCI Card
        Slots" above.
 
@@ -3809,21 +3861,46 @@ Configurations
          CONFIG_SAMA5D4EK_HSMCI0_MOUNT_FSTYPE="vfat"
          CONFIG_SAMA5D4EK_HSMCI0_MOUNT_MOUNTPOINT="/bin"
 
-    5. General build directions:
+    6a. General build directions (boot from SD card):
 
-       $ cd nuttx/tools                    : Go to the tools sub-directory
-       $ ./configure.sh sama5d4-ek/kernel  : Establish this configuration
-       $ cd ..                             : Back to the NuttX build directory
-                                           : Edit setenv.sh to use the correct path
-       $ . ./setenv.sh                     : Set up the PATH variable
-       $ make                              : Build the kernel
-                                           : This should create the nuttx ELF
-       $ make export                       : Create the kernel export package
-                                           : You should have a file like nuttx-export-*.zip
-       $ cd apps/                          : Go to the apps/ directory
-       $ tools/mkimport.sh -x <zip-file>   : Use the full path to nuttx-export-*.zip
-       $ make import                       : This will build the file system
-       
+        $ cd nuttx/tools                    : Go to the tools sub-directory
+        $ ./configure.sh sama5d4-ek/kernel  : Establish this configuration
+        $ cd ..                             : Back to the NuttX build directory
+                                            : Edit setenv.sh to use the correct path
+        $ . ./setenv.sh                     : Set up the PATH variable
+        $ make                              : Build the kerne with a dummy ROMFS image
+                                            : This should create the nuttx ELF
+        $ make export                       : Create the kernel export package
+                                            : You should have a file like
+                                            : nuttx-export-*.zip
+        $ cd apps/                          : Go to the apps/ directory
+        $ tools/mkimport.sh -x <zip-file>   : Use the full path to nuttx-export-*.zip
+        $ make import                       : This will build the file system.
+
+      You will then need to copy the files from apps/bin to an SD card to
+      create the the bootable SD card.
+
+    6b. General build directions (boot from ROMFS image):
+
+        $ cd nuttx/tools                    : Go to the tools sub-directory
+        $ ./configure.sh sama5d4-ek/kernel  : Establish this configuration
+        $ cd ..                             : Back to the NuttX build directory
+                                            : Edit setenv.sh to use the correct path
+        $ . ./setenv.sh                     : Set up the PATH variable
+        $ touch configs/sama5d4-ek/include/boot_romfsimg.h
+        $ make                              : Build the kernel with a dummy ROMFS image
+                                            : This should create the nuttx ELF
+        $ make export                       : Create the kernel export package
+                                            : You should have a file like
+                                            : nuttx-export-*.zip
+        $ cd apps/                          : Go to the apps/ directory
+        $ tools/mkimport.sh -x <zip-file>   : Use the full path to nuttx-export-*.zip
+        $ make import                       : This will build the file system
+        $ tools/mkromfsimg.sh               : Create the real ROMFS image
+        $ mv boot_romfsimg.h ../nuttx/configs/sama5d4-ek/include/boot_romfsimg.h
+        $ cd nuttx/                         : Rebuild the system with the correct
+        $ make clean_context all            : ROMFS file system
+
     STATUS:
 
     2014-9-4: The kernel works up to the point where the nsh 'init'
