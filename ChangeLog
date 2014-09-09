@@ -8436,4 +8436,6 @@
 	  match the naming used with other platforms (2014-9-8).
 	* configs/cc3200-launchpad/README.txt: Add README file for the CC3200
 	  Launchpad (2014-9-9).
-
+	* configs/sama5d4-ek/README.txt, Kconfig, knsh/defconfig.ROMFS,
+	  src/sam_bringup.c, and sama5d4-ek.h: SAMA5D4-EK kernel config can now
+	  boot from a ROMFS file system (2014-9-9).
