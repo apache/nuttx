@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/x86/src/up_elf.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -100,6 +100,10 @@ bool up_checkarch(FAR const Elf32_Ehdr *hdr)
  * Input Parameters:
  *   rel - The relocation type
  *   sym - The ELF symbol structure containing the fully resolved value.
+ *         There are a few relocation types for a few architectures that do
+ *         not require symbol information.  For those, this value will be
+ *         NULL.  Implementations of these functions must be able to handle
+ *         that case.
  *   addr - The address that requires the relocation.
  *
  * Returned Value:
@@ -113,6 +117,15 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
 {
   FAR uint32_t *ptr = (FAR uint32_t *)addr;
 
+  /* All relocations depend upon having valid symbol information. */
+
+  if (sym == NULL)
+    {
+      return -EINVAL;
+    }
+
+  /* Handle the relocation by relocation type */
+
   switch (ELF32_R_TYPE(rel->r_info))
     {
      case R_386_32:
@@ -124,7 +137,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
        break;
 
      default:
-        return -EINVAL;
+       return -EINVAL;
     }
 
   return OK;
