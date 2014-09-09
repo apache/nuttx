@@ -8439,3 +8439,7 @@
 	* configs/sama5d4-ek/README.txt, Kconfig, knsh/defconfig.ROMFS,
 	  src/sam_bringup.c, and sama5d4-ek.h: SAMA5D4-EK kernel config can now
 	  boot from a ROMFS file system (2014-9-9).
+	* LibTargets.mk, Makefile.unix, and Makefile.win: Move commit library
+	  targets out of Makefile.unix and Makeifle.win into a new LibTargets.mk
+	  (2014-9-9).
+
