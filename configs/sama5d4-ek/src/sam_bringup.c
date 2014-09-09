@@ -50,13 +50,22 @@
 #  include <apps/usbmonitor.h>
 #endif
 
+#include <nuttx/fs/ramdisk.h>
 #include <nuttx/binfmt/elf.h>
 
 #include "sama5d4-ek.h"
 
+#ifdef HAVE_ROMFS
+#  include <arch/board/boot_romfsimg.h>
+#endif
+
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
+
+#define NSECTORS(n) \
+  (((n)+CONFIG_SAMA5D4EK_ROMFS_ROMDISK_SECTSIZE-1) / \
+   CONFIG_SAMA5D4EK_ROMFS_ROMDISK_SECTSIZE)
 
 /* Debug ********************************************************************/
 
@@ -86,7 +95,7 @@ int sam_bringup(void)
 {
 #if defined(HAVE_NAND) || defined(HAVE_AT25) || defined(HAVE_HSMCI)  || \
     defined(HAVE_USBHOST) || defined(HAVE_USBMONITOR) || defined(HAVE_WM8904) || \
-    defined(HAVE_AUTOMOUNTER) || defined(HAVE_ELF)
+    defined(HAVE_AUTOMOUNTER) || defined(HAVE_ELF) || defined(HAVE_ROMFS)
   int ret;
 #endif
 
@@ -176,6 +185,32 @@ int sam_bringup(void)
   /* Initialize the auto-mounter */
 
   sam_automount_initialize();
+#endif
+
+#ifdef HAVE_ROMFS
+  /* Create a ROM disk for the /etc filesystem */
+
+  ret = romdisk_register(CONFIG_SAMA5D4EK_ROMFS_ROMDISK_MINOR, romfs_img,
+                         NSECTORS(romfs_img_len),
+                         CONFIG_SAMA5D4EK_ROMFS_ROMDISK_SECTSIZE);
+  if (ret < 0)
+    {
+      message("ERROR: romdisk_register failed: %d\n", -ret);
+    }
+  else
+    {
+      /* Mount the file system */
+
+      ret = mount(CONFIG_SAMA5D4EK_ROMFS_ROMDISK_DEVNAME,
+                  CONFIG_SAMA5D4EK_ROMFS_MOUNT_MOUNTPOINT,
+                  "romfs", MS_RDONLY, NULL);
+      if (ret < 0)
+        {
+          message("ERROR: mount(%s,%s,romfs) failed: %d\n",
+                  CONFIG_SAMA5D4EK_ROMFS_ROMDISK_DEVNAME,
+                  CONFIG_SAMA5D4EK_ROMFS_MOUNT_MOUNTPOINT, errno);
+        }
+    }
 #endif
 
 #ifdef HAVE_USBHOST
