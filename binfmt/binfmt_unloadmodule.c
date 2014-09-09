@@ -93,13 +93,13 @@ static inline int exec_dtors(FAR struct binary_s *binp)
 #endif
   int i;
 
-  /* Instantiate the address enviroment containing the destructors */
+  /* Instantiate the address environment containing the destructors */
 
 #ifdef CONFIG_ARCH_ADDRENV
-  ret = up_addrenv_select(binp->addrenv, &oldenv);
+  ret = up_addrenv_select(&binp->addrenv, &oldenv);
   if (ret < 0)
     {
-      bdbg("up_addrenv_select() failed: %d\n", ret);
+      bdbg("ERROR: up_addrenv_select() failed: %d\n", ret);
       return ret;
     }
 #endif
@@ -114,10 +114,10 @@ static inline int exec_dtors(FAR struct binary_s *binp)
       dtor++;
     }
 
-  /* Restore the address enviroment */
+  /* Restore the address environment */
 
 #ifdef CONFIG_ARCH_ADDRENV
-  return up_addrenv_restore(oldenv);
+  return up_addrenv_restore(&oldenv);
 #else
   return OK;
 #endif
