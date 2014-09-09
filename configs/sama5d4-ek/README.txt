@@ -3918,6 +3918,9 @@ Configurations
        No idea why (and there they is now delay in the baseline code... one
        has to be added).
 
+       Update: I don't believe that this HSMCI error occurs if file system
+       debug output is enabled.
+
   nsh:
 
     This configuration directory provide the NuttShell (NSH).  This is a
