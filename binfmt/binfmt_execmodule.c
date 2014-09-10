@@ -48,6 +48,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/mm.h>
 #include <nuttx/binfmt/binfmt.h>
 
 #include "sched/sched.h"
@@ -164,9 +165,9 @@ int exec_module(FAR const struct binary_s *binp)
       goto errout;
     }
 
-  /* Instantiate the address environment containing the destructors */
-
 #ifdef CONFIG_ARCH_ADDRENV
+  /* Instantiate the address environment containing the user heap */
+
   ret = up_addrenv_select(&binp->addrenv, &oldenv);
   if (ret < 0)
     {
@@ -174,9 +175,18 @@ int exec_module(FAR const struct binary_s *binp)
       err = -ret;
       goto errout_with_tcb;
     }
+
+  /* Initialize the user heap */
+
+  umm_initialize((FAR void *)CONFIG_ARCH_HEAP_VBASE,
+                 up_addrenv_heapsize(&binp->addrenv));
 #endif
 
-  /* Allocate the stack for the new task (always from the user heap) */
+  /* Allocate the stack for the new task.
+   *
+   * REVISIT:  This allocation is currently always from the user heap.  That
+   * will need to change if/when we want to support dynamic stack allocation.
+   */
 
   stack = (FAR uint32_t*)kumm_malloc(binp->stacksize);
   if (!stack)
@@ -184,18 +194,6 @@ int exec_module(FAR const struct binary_s *binp)
       err = ENOMEM;
       goto errout_with_addrenv;
     }
-
-  /* Restore the address environment */
-
-#ifdef CONFIG_ARCH_ADDRENV
-  ret = up_addrenv_restore(&oldenv);
-  if (ret < 0)
-    {
-      bdbg("ERROR: up_addrenv_select() failed: %d\n", ret);
-      err = -ret;
-      goto errout_with_stack;
-    }
-#endif
 
   /* Initialize the task */
 
@@ -261,6 +259,18 @@ int exec_module(FAR const struct binary_s *binp)
       bdbg("task_activate() failed: %d\n", err);
       goto errout_with_stack;
     }
+
+#ifdef CONFIG_ARCH_ADDRENV
+  /* Restore the address environment of the caller */
+
+  ret = up_addrenv_restore(&oldenv);
+  if (ret < 0)
+    {
+      bdbg("ERROR: up_addrenv_select() failed: %d\n", ret);
+      err = -ret;
+      goto errout_with_stack;
+    }
+#endif
 
   return (int)pid;
 

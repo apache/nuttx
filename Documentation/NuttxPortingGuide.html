@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: August 29, 2014</p>
+      <p>Last Updated: September 10, 2014</p>
     </td>
   </tr>
 </table>
@@ -110,11 +110,12 @@
       <a href="#up_addrenv_destroy">4.4.2 <code>up_addrenv_destroy()</code></a></br>
       <a href="#up_addrenv_vtext">4.4.3 <code>up_addrenv_vtext()</code></a></br>
       <a href="#up_addrenv_vdata">4.4.4 <code>up_addrenv_vdata()</code></a></br>
-      <a href="#up_addrenv_select">4.4.5 <code>up_addrenv_select()</code></a></br>
-      <a href="#up_addrenv_restore">4.4.6 <code>up_addrenv_restore()</code></a></br>
-      <a href="#up_addrenv_clone">4.4.7 <code>up_addrenv_clone()</code></a></br>
-      <a href="#up_addrenv_attach">4.4.8 <code>up_addrenv_attach()</code></a></br>
-      <a href="#up_addrenv_detach">4.4.9 <code>up_addrenv_detach()</code></a>
+      <a href="#up_addrenv_heapsize">4.4.5 <code>up_addrenv_heapsize()</code></a></br>
+      <a href="#up_addrenv_select">4.4.6 <code>up_addrenv_select()</code></a></br>
+      <a href="#up_addrenv_restore">4.4.7 <code>up_addrenv_restore()</code></a></br>
+      <a href="#up_addrenv_clone">4.4.8 <code>up_addrenv_clone()</code></a></br>
+      <a href="#up_addrenv_attach">4.4.9 <code>up_addrenv_attach()</code></a></br>
+      <a href="#up_addrenv_detach">4.4.10 <code>up_addrenv_detach()</code></a>
     </ul>
     <a href="#exports">4.5 APIs Exported by NuttX to Architecture-Specific Logic</a>
     <ul>
@@ -2927,15 +2928,19 @@ VxWorks provides the following comparable interface:
         Returns the virtual base address of the <code>.bss</code>/<code>.data</code> address environment.
       </li>
       <li>
-        <a href="#up_addrenv_select">4.4.5 <code>up_addrenv_select()</code></a>:
+        <a href="#up_addrenv_heapsize">4.4.5 <code>up_addrenv_heapsize()</code></a>:
+       Return the initial heap size.
+      </li>
+      <li>
+        <a href="#up_addrenv_select">4.4.6 <code>up_addrenv_select()</code></a>:
         Instantiate an address environment.
       </li>
       <li>
-        <a href="#up_addrenv_restore">4.4.6 <code>up_addrenv_restore()</code></a>:
+        <a href="#up_addrenv_restore">4.4.7 <code>up_addrenv_restore()</code></a>:
         Restore an address environment.
       </li>
       <li>
-        <a href="#up_addrenv_clone">4.4.7 <code>up_addrenv_clone()</code></a>:
+        <a href="#up_addrenv_clone">4.4.8 <code>up_addrenv_clone()</code></a>:
         Copy an address environment from one location to another.
       </li>
     </ul>
@@ -2948,12 +2953,12 @@ VxWorks provides the following comparable interface:
     </p>
     <ul>
       <li>
-        <a href="#up_addrenv_attach">4.4.8 <code>up_addrenv_attach()</code></a>:
+        <a href="#up_addrenv_attach">4.4.9 <code>up_addrenv_attach()</code></a>:
         Clone the group address environment assigned to a new thread.
         This operation is done when a pthread is created that share's the same address environment.
       </li>
       <li>
-        <a href="#up_addrenv_detach">4.4.9 <code>up_addrenv_detach()</code></a>:
+        <a href="#up_addrenv_detach">4.4.10 <code>up_addrenv_detach()</code></a>:
         Release the thread's reference to a group address environment when a task/thread exits.
       </li>
     </ul>
@@ -2963,7 +2968,7 @@ VxWorks provides the following comparable interface:
 <h3><a name="up_addrenv_create">4.4.1 <code>up_addrenv_create()</code></a></h3>
 <p><b>Function Prototype</b>:</p>
 <ul>
-  <code>int up_addrenv_create(size_t textsize, size_t datasize, FAR group_addrenv_t *addrenv);</code>
+  <code>int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize, FAR group_addrenv_t *addrenv);</code>
 </ul>
 <p><b>Description</b>:</p>
 <ul>
@@ -2974,6 +2979,7 @@ VxWorks provides the following comparable interface:
 <ul>
   <li><code>textsize</code>: The size (in bytes) of the <code>.text</code> address environment needed by the task.  This region may be read/execute only.</li>
   <li><code>datasize</code>: The size (in bytes) of the <code>.bss/.data</code> address environment needed by the task.   This region may be read/write only.</li>
+  <li><code>heapsize</code>: The initial size (in bytes) of the heap address environment needed by the task.  This region may be read/write only.</li>
   <li><code>addrenv</code>: The location to return the representation of the task address environment.</li>
 </ul>
 <p><b>Returned Value</b>:</p>
@@ -2992,7 +2998,7 @@ VxWorks provides the following comparable interface:
 </ul>
 <p><b>Input Parameters</b>:</p>
 <ul>
-  <li><code>addrenv</code>: The representation of the task address environment previously returned by up_addrenv_create.</li>
+  <li><code>addrenv</code>: The representation of the task address environment previously returned by <code>up_addrenv_create()</code>.</li>
 </ul>
 <p><b>Returned Value</b>:</p>
 <ul>
@@ -3011,7 +3017,7 @@ VxWorks provides the following comparable interface:
 </ul>
 <p><b>Input Parameters</b>:</p>
 <ul>
-  <li><code>addrenv</code>: The representation of the task address environment previously returned by up_addrenv_create.</li>
+  <li><code>addrenv</code>: The representation of the task address environment previously returned by <code>up_addrenv_create()</code>.</li>
   <li><code>vtext</code>: The location to return the virtual address.</li>
 </ul>
 <p><b>Returned Value</b>:</p>
@@ -3031,7 +3037,7 @@ VxWorks provides the following comparable interface:
 </ul>
 <p><b>Input Parameters</b>:</p>
 <ul>
-  <li><code>addrenv</code>: The representation of the task address environment previously returned by up_addrenv_create.</li>
+  <li><code>addrenv</code>: The representation of the task address environment previously returned by <code>up_addrenv_create()</code>.</li>
   <li><code>textsize</code>: For some implementations, the text and data will be saved in the same memory region (read/write/execute) and, in this case, the virtual address of the data just lies at this offset into the common region.</li>
   <li><code>vdata</code>: The location to return the virtual address.</li>
 </ul>
@@ -3040,7 +3046,27 @@ VxWorks provides the following comparable interface:
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_select">4.4.5 <code>up_addrenv_select()</code></a></h3>
+<h3><a name="up_addrenv_heapsize">4.4.5 <code>up_addrenv_heapsize()</code></a></h3>
+<p><b>Function Prototype</b>:<p>
+<ul>
+  <code>ssize_t up_addrenv_heapsize(FAR const group_addrenv_t *addrenv);</code>
+</ul>
+<p><b>Description</b>:</p>
+<ul>
+  Return the initial heap allocation size.
+  That is the amount of memory allocated by <code>up_addrenv_create()</code> when the heap memory region was first created.
+  This may or may not differ from the <code>heapsize</code> parameter that was passed to <code>up_addrenv_create()</code>.
+</ul>
+<p><b>Input Parameters</b>:</p>
+<ul>
+  <li><code>addrenv</code>: The representation of the task address environment previously returned by <code>up_addrenv_create()</code>.</li>
+</ul>
+<p><b>Returned Value</b>:</p>
+<ul>
+  The initial heap size allocated is returned on success; a negated <code>errno</code> value on failure.
+</ul>
+
+<h3><a name="up_addrenv_select">4.4.6 <code>up_addrenv_select()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_select(group_addrenv_t *addrenv, save_addrenv_t *oldenv);</code>
@@ -3052,7 +3078,7 @@ VxWorks provides the following comparable interface:
 </ul>
 <p><b>Input Parameters</b>:</p>
 <ul>
-  <li><code>addrenv</code>: The representation of the task address environment previously returned by up_addrenv_create.</li>
+  <li><code>addrenv</code>: The representation of the task address environment previously returned by <code>up_addrenv_create()</code>.</li>
   <li><code>oldenv</code>:
     The address environment that was in place before <code>up_addrenv_select()</code> was called.
     This may be used with <code>up_addrenv_restore()</code> to restore the original  address environment that was in place before <code>up_addrenv_select()</code> was called.
@@ -3064,7 +3090,7 @@ VxWorks provides the following comparable interface:
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_restore">4.4.6 <code>up_addrenv_restore()</code></a></h3>
+<h3><a name="up_addrenv_restore">4.4.7 <code>up_addrenv_restore()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_restore(save_addrenv_t oldenv);</code>
@@ -3083,7 +3109,7 @@ VxWorks provides the following comparable interface:
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_clone">4.4.7 <code>up_addrenv_clone()</code></a></h3>
+<h3><a name="up_addrenv_clone">4.4.8 <code>up_addrenv_clone()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_clone(FAR const task_group_s *src, FAR struct task_group_s *dest);</code>
@@ -3102,7 +3128,7 @@ VxWorks provides the following comparable interface:
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_attach">4.4.8 <code>up_addrenv_attach()</code></a></h3>
+<h3><a name="up_addrenv_attach">4.4.9 <code>up_addrenv_attach()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_attach(FAR struct task_group_s *group, FAR struct tcb_s *tcb);</code>
@@ -3128,7 +3154,7 @@ VxWorks provides the following comparable interface:
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_detach">4.4.9 <code>up_addrenv_detach()</code></a></h3>
+<h3><a name="up_addrenv_detach">4.4.10 <code>up_addrenv_detach()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_detach(FAR struct task_group_s *group, FAR struct task_group_s *tcb);</code>

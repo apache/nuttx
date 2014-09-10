@@ -116,7 +116,7 @@ int nxflat_addrenv_alloc(FAR struct nxflat_loadinfo_s *loadinfo, size_t envsize)
  *
  * Description:
  *   Release the address environment previously created by
- *   nxflat_addrenv_create().  This function  is called only under certain
+ *   nxflat_addrenv_alloc().  This function  is called only under certain
  *   error conditions after the module has been loaded but not yet
  *   started. After the module has been started, the address environment
  *   will automatically be freed when the module exits.

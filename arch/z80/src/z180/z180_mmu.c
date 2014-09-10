@@ -184,15 +184,16 @@ return g_physhandle ? OK : -ENOMEM;
  * is an abstract representation of a task group's address environment and
  * must be defined in arch/arch.h if CONFIG_ARCH_ADDRENV is defined.
  *
- *   up_addrenv_create  - Create an address environment
- *   up_addrenv_destroy - Destroy an address environment.
- *   up_addrenv_vtext   - Returns the virtual base address of the .text
- *                        address environment
- *   up_addrenv_vdata   - Returns the virtual base address of the .bss/.data
- *                        address environment
- *   up_addrenv_select  - Instantiate an address environment
- *   up_addrenv_restore - Restore an address environment
- *   up_addrenv_clone   - Copy an address environment from one location to
+ *   up_addrenv_create   - Create an address environment
+ *   up_addrenv_destroy  - Destroy an address environment.
+ *   up_addrenv_vtext    - Returns the virtual base address of the .text
+ *                         address environment
+ *   up_addrenv_vdata    - Returns the virtual base address of the .bss/.data
+ *                         address environment
+ *   up_addrenv_heapsize - Returns the size of the initial heap allocation.
+ *   up_addrenv_select   - Instantiate an address environment
+ *   up_addrenv_restore  - Restore an address environment
+ *   up_addrenv_clone    - Copy an address environment from one location to
  *                        another.
  *
  * Higher-level interfaces used by the tasking logic.  These interfaces are
@@ -200,11 +201,11 @@ return g_physhandle ? OK : -ENOMEM;
  * group been assigned an address environment by up_addrenv_clone().
  *
  *   up_addrenv_attach   - Clone the address environment assigned to one TCB
- *                        to another.  This operation is done when a pthread
- *                        is created that share's the same address
- *                        environment.
- *   up_addrenv_detach - Release the threads reference to an address
- *                        environment when a task/thread exits.
+ *                         to another.  This operation is done when a pthread
+ *                         is created that share's the same address
+ *                         environment.
+ *   up_addrenv_detach   - Release the threads reference to an address
+ *                         environment when a task/thread exits.
  *
  ****************************************************************************/
 /****************************************************************************
@@ -220,6 +221,11 @@ return g_physhandle ? OK : -ENOMEM;
  *   textsize - The size (in bytes) of the .text address environment needed
  *     by the task.  This region may be read/execute only.
  *   datasize - The size (in bytes) of the .data/.bss address environment
+ *     needed by the task.  This region may be read/write only.  NOTE: The
+ *     actual size of the data region that is allocated will include a
+ *     OS private reserved region at the beginning.  The size of the
+ *     private, reserved region is give by ARCH_DATA_RESERVE_SIZE.
+ *   heapsize - The initial size (in bytes) of the heap address environment
  *     needed by the task.  This region may be read/write only.
  *   addrenv - The location to return the representation of the task address
  *     environment.
@@ -229,7 +235,7 @@ return g_physhandle ? OK : -ENOMEM;
  *
  ****************************************************************************/
 
-int up_addrenv_create(size_t textsize, size_t datasize,
+int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
                       FAR group_addrenv_t *addrenv)
 {
   FAR struct z180_cbr_s *cbr;
@@ -241,7 +247,7 @@ int up_addrenv_create(size_t textsize, size_t datasize,
 
   /* Convert the size from bytes to numbers of pages */
 
-  envsize = textsize + datasize;
+  envsize = textsize + datasize + heapsize;
   npages  = PHYS_ALIGNUP(envsize);
   if (npages < 1)
     {
@@ -387,6 +393,32 @@ int up_addrenv_vdata(FAR group_addrenv_t *addrenv, uintptr_t textsize,
                      FAR void **vdata)
 {
   return CONFIG_Z180_COMMON1AREA_VIRTBASE + textsize;
+}
+
+/****************************************************************************
+ * Name: up_addrenv_heapsize
+ *
+ * Description:
+ *   Return the initial heap allocation size.  That is the amount of memory
+ *   allocated by up_addrenv_create() when the heap memory region was first
+ *   created.  This may or may not differ from the heapsize parameter that
+ *   was passed to up_addrenv_create()
+ *
+ * Input Parameters:
+ *   addrenv - The representation of the task address environment previously
+ *     returned by up_addrenv_create.
+ *
+ * Returned Value:
+ *   The initial heap size allocated is returned on success; a negated
+ *   errno value on failure.
+ *
+ ****************************************************************************/
+
+ssize_t up_addrenv_heapsize(FAR const group_addrenv_t *addrenv)
+{
+  /* Not implemented */
+
+  return (ssize_t)-ENOSYS;
 }
 
 /****************************************************************************

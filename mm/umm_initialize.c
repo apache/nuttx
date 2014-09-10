@@ -88,8 +88,36 @@ struct mm_heap_s g_mmheap;
  *
  * Description:
  *   This is a simple wrapper for the mm_initialize() function.  This
- *   function is exported from the user-space blob so that the kernel
- *   can initialize the user-mode allocator.
+ *   function will initialize the user heap.
+ *
+ *   CONFIG_BUILD_FLAT:
+ *     There is only kernel mode "blob" containing both containing both
+ *     kernel and application code.  There is only one heap that use is
+ *     used by both the kernel and application logic.
+ *
+ *     In this configuration, this function is called early in os_start()
+ *     to initialize the common heap.
+ *
+ *   CONFIG_BUILD_PROTECTED
+ *     In this configuration, there are two "blobs", one containing
+ *     protected kernel logic and one containing unprotected application
+ *     logic.  Depending upon the setting of CONFIG_MM_KERNEL_HEAP there
+ *     may be only a signal shared heap, much as with CONFIG_BUILD_FLAT.
+ *     Or there may be separate protected/kernel and unprotected/user
+ *     heaps.
+ *
+ *     In either case, this function is still called early in os_start()
+ *     to initialize the user heap.
+ *
+ *   CONFIG_BUILD_KERNEL
+ *     In this configuration there are multiple user heaps, one for each
+ *     user process.  Furthermore, each heap is initially empty; memory
+ *     is added to each heap dynamically via sbrk().  The heap data
+ *     structure was set to zero when the address environment was created.
+ *     Otherwise, the heap is uninitialized.
+ *
+ *     This function is not called at all.  Rather, this function is called
+ *     when each user process is created before the first allocation is made.
  *
  * Parameters:
  *   heap_start - Address of the beginning of the (initial) memory region
@@ -102,10 +130,6 @@ struct mm_heap_s g_mmheap;
 
 void umm_initialize(FAR void *heap_start, size_t heap_size)
 {
-#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
-  DEBUGASSERT(ARCH_DATA_RESERVE_SIZE >= sizeof(struct addrenv_reserve_s));
-#endif
-
   mm_initialize(USR_HEAP, heap_start, heap_size);
 }
 

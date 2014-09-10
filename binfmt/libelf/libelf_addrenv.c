@@ -80,6 +80,8 @@
  *     for the ELF image (read/execute).
  *   datasize - The size (in bytes) of the .bss/.data address environment
  *     needed for the ELF image (read/write).
+ *   heapsize - The initial size (in bytes) of the heap address environment
+ *     needed by the task.  This region may be read/write only.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
@@ -87,7 +89,7 @@
  ****************************************************************************/
 
 int elf_addrenv_alloc(FAR struct elf_loadinfo_s *loadinfo, size_t textsize,
-                      size_t datasize)
+                      size_t datasize, size_t heapsize)
 {
 #ifdef CONFIG_ARCH_ADDRENV
   FAR void *vtext;
@@ -96,7 +98,7 @@ int elf_addrenv_alloc(FAR struct elf_loadinfo_s *loadinfo, size_t textsize,
 
   /* Create an address environment for the new ELF task */
 
-  ret = up_addrenv_create(textsize, datasize, &loadinfo->addrenv);
+  ret = up_addrenv_create(textsize, datasize, heapsize, &loadinfo->addrenv);
   if (ret < 0)
     {
       bdbg("ERROR: up_addrenv_create failed: %d\n", ret);
@@ -145,7 +147,7 @@ int elf_addrenv_alloc(FAR struct elf_loadinfo_s *loadinfo, size_t textsize,
  *
  * Description:
  *   Release the address environment previously created by
- *   elf_addrenv_create().  This function  is called only under certain error
+ *   elf_addrenv_alloc().  This function  is called only under certain error
  *   conditions after the module has been loaded but not yet started.
  *   After the module has been started, the address environment will
  *   automatically be freed when the module exits.

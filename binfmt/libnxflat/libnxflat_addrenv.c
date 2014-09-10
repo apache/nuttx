@@ -52,6 +52,10 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 
+#ifndef MIN
+#  define MIN(x,y) ((x) < (y) ? (x) : (y))
+#endif
+
 /****************************************************************************
  * Private Constant Data
  ****************************************************************************/
@@ -88,6 +92,7 @@ int nxflat_addrenv_alloc(FAR struct nxflat_loadinfo_s *loadinfo, size_t envsize)
 #ifdef CONFIG_ARCH_ADDRENV
   FAR void *vdata;
   save_addrenv_t oldenv;
+  size_t heapsize;
   int ret;
 #endif
 
@@ -103,9 +108,17 @@ int nxflat_addrenv_alloc(FAR struct nxflat_loadinfo_s *loadinfo, size_t envsize)
     }
 
 #ifdef CONFIG_ARCH_ADDRENV
+  /* Determine the heapsize to allocate */
+
+#ifdef CONFIG_ARCH_STACK_DYNAMIC
+  heapsize = ARCH_HEAP_SIZE;
+#else
+  heapsize = MIN(loadinfo->stacksize, ARCH_HEAP_SIZE);
+#endif
+
   /* Create a D-Space address environment for the new NXFLAT task */
 
-  ret = up_addrenv_create(envsize, &loadinfo->addrenv);
+  ret = up_addrenv_create(0, envsize, heapsize, &loadinfo->addrenv);
   if (ret < 0)
     {
       bdbg("ERROR: up_addrenv_create failed: %d\n", ret);

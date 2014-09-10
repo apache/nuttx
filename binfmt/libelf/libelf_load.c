@@ -49,6 +49,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/addrenv.h>
 #include <nuttx/binfmt/elf.h>
 
 #include "libelf.h"
@@ -62,7 +63,11 @@
 #define ELF_ALIGNDOWN(a) ((unsigned long)(a) & ~ELF_ALIGN_MASK)
 
 #ifndef MAX
-#define MAX(x,y) ((x) > (y) ? (x) : (y))
+#  define MAX(x,y) ((x) > (y) ? (x) : (y))
+#endif
+
+#ifndef MIN
+#  define MIN(x,y) ((x) < (y) ? (x) : (y))
 #endif
 
 /****************************************************************************
@@ -229,6 +234,7 @@ static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
 
 int elf_load(FAR struct elf_loadinfo_s *loadinfo)
 {
+  size_t heapsize;
   int ret;
 
   bvdbg("loadinfo: %p\n", loadinfo);
@@ -247,9 +253,17 @@ int elf_load(FAR struct elf_loadinfo_s *loadinfo)
 
   elf_elfsize(loadinfo);
 
+  /* Determine the heapsize to allocate */
+
+#ifdef CONFIG_ARCH_STACK_DYNAMIC
+  heapsize = ARCH_HEAP_SIZE;
+#else
+  heapsize = MIN(ARCH_HEAP_SIZE, CONFIG_ELF_STACKSIZE);
+#endif
+
   /* Allocate (and zero) memory for the ELF file. */
 
-  ret = elf_addrenv_alloc(loadinfo, loadinfo->textsize, loadinfo->datasize);
+  ret = elf_addrenv_alloc(loadinfo, loadinfo->textsize, loadinfo->datasize, heapsize);
   if (ret < 0)
     {
       bdbg("ERROR: elf_addrenv_alloc() failed: %d\n", ret);
