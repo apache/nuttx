@@ -8462,3 +8462,8 @@
 	  (2014-9-10).
 	* configs/sama5d4-ek/elf and knsh: These configurations now use the
 	  fixed DRAM mapping for manipulating the page memory pool (2014-9-10).
+	* arch/arm/include/arch.h and src/armv7-a/arm_addrenv.c,
+	  nuttx/binfmt/binfmt_execmodule.c, libelf/libelf_addrenv.c,
+	  libelf_load.c, libnxflat/libnxflat_addrenv.c, include/nuttx/arch.h, and
+ 	  mm/umm_initialize.c:  Add logic to initialize the per-process user
+	  heap when each user process is started (2014-9-10).
