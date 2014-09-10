@@ -51,6 +51,7 @@
 
 #include "arm.h"
 #include "svcall.h"
+#include "up_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
