@@ -236,6 +236,44 @@ config ARCH_STACK_NPAGES
 		This, along with knowledge of the page size, determines the size of
 		the stack virtual address space. Default is 1.
 
+config ARCH_PGPOOL_MAPPING
+	bool "Have page pool mapping"
+	default n
+	---help---
+		If there is a MMU mapping in place for the page pool memory, then
+		this mapping can be utilized to simplify some page table operations.
+		Otherwise, a temporary mapping will have to be established each time
+		it is necessary to modify the contents of a page.
+
+if ARCH_PGPOOL_MAPPING
+
+config ARCH_PGPOOL_PBASE
+	hex "Page pool physical address"
+	default 0x0
+	---help---
+		The physical address of the start of the page pool memory.  This
+		setting is probably equivalent to other platform specific definitions
+		but is required again in order to modularize the common address
+		environment logic.
+
+config ARCH_PGPOOL_VBASE
+	hex "Page pool virtual address"
+	default 0x0
+	---help---
+		The virtual address of the start of the page pool memory.  This
+		setting is probably equivalent to other platform specific definitions
+		but is required again in order to modularize the common address
+		environment logic.
+
+config ARCH_PGPOOL_SIZE
+	int "Page pool size (byes)"
+	default 0
+	---help---
+		The size of the page pool memory in bytes.  This setting is probably
+		equivalent  to other platform specific definitions but is required again
+		in order to modularize the common address environment logic.
+
+endif # ARCH_PGPOOL_MAPPING
 endif # ARCH_ADDRENV && ARCH_NEED_ADDRENV_MAPPING
 
 menuconfig PAGING

@@ -82,6 +82,7 @@
 
 #include "cache.h"
 #include "mmu.h"
+#include "pginline.h"
 
 #ifdef CONFIG_ARCH_ADDRENV
 
@@ -161,7 +162,9 @@ static int up_addrenv_create_region(FAR uintptr_t **list,
   irqstate_t flags;
   uintptr_t paddr;
   FAR uint32_t *l2table;
+#ifndef CONFIG_ARCH_PGPOOL_MAPPING
   uint32_t l1save;
+#endif
   size_t nmapped;
   unsigned int npages;
   unsigned int i;
@@ -204,12 +207,19 @@ static int up_addrenv_create_region(FAR uintptr_t **list,
       DEBUGASSERT(MM_ISALIGNED(paddr));
       list[i] = (FAR uintptr_t *)paddr;
 
+      flags = irqsave();
+
+#ifdef CONFIG_ARCH_PGPOOL_MAPPING
+      /* Get the virtual address corresponding to the physical page address */
+
+      l2table = (FAR uint32_t *)arm_pgvaddr(paddr);
+#else
       /* Temporarily map the page into the virtual address space */
 
-      flags = irqsave();
       l1save = mmu_l1_getentry(ARCH_SCRATCH_VBASE);
       mmu_l1_setentry(paddr & ~SECTION_MASK, ARCH_SCRATCH_VBASE, MMU_MEMFLAGS);
       l2table = (FAR uint32_t *)(ARCH_SCRATCH_VBASE | (paddr & SECTION_MASK));
+#endif
 
       /* Initialize the page table */
 
@@ -224,7 +234,9 @@ static int up_addrenv_create_region(FAR uintptr_t **list,
           paddr = mm_pgalloc(1);
           if (!paddr)
             {
+#ifndef CONFIG_ARCH_PGPOOL_MAPPING
               mmu_l1_restore(ARCH_SCRATCH_VBASE, l1save);
+#endif
               irqrestore(flags);
               return -ENOMEM;
             }
@@ -244,14 +256,92 @@ static int up_addrenv_create_region(FAR uintptr_t **list,
                         (uintptr_t)l2table +
                         ENTRIES_PER_L2TABLE * sizeof(uint32_t));
 
+#ifndef CONFIG_ARCH_PGPOOL_MAPPING
       /* Restore the scratch section L1 page table entry */
 
       mmu_l1_restore(ARCH_SCRATCH_VBASE, l1save);
+#endif
       irqrestore(flags);
     }
 
   return OK;
 }
+
+/****************************************************************************
+ * Name: up_addrenv_initdata
+ *
+ * Description:
+ *   Initialize the region of memory at the the beginning of the .bss/.data
+ *   region that is shared between the user process and the kernel.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BUILD_KERNEL
+static int up_addrenv_initdata(uintptr_t l2table)
+{
+  irqstate_t flags;
+  FAR uint32_t *virtptr;
+  uintptr_t paddr;
+#ifndef CONFIG_ARCH_PGPOOL_MAPPING
+  uint32_t l1save;
+#endif
+
+  DEBUGASSERT(l2table);
+  flags = irqsave();
+
+#ifdef CONFIG_ARCH_PGPOOL_MAPPING
+  /* Get the virtual address corresponding to the physical page table address */
+
+  virtptr = (FAR uint32_t *)arm_pgvaddr(l2table);
+#else
+  /* Temporarily map the page into the virtual address space */
+
+  l1save = mmu_l1_getentry(ARCH_SCRATCH_VBASE);
+  mmu_l1_setentry(l2table & ~SECTION_MASK, ARCH_SCRATCH_VBASE, MMU_MEMFLAGS);
+  virtptr = (FAR uint32_t *)(ARCH_SCRATCH_VBASE | (l2table & SECTION_MASK));
+#endif
+
+  /* Invalidate D-Cache so that we read from the physical memory */
+
+  arch_invalidate_dcache((uintptr_t)virtptr,
+                         (uintptr_t)virtptr + sizeof(uint32_t));
+
+  /* Get the physical address of the first page of of .bss/.data */
+
+  paddr = (uintptr_t)(*virtptr) & PTE_SMALL_PADDR_MASK;
+  DEBUGASSERT(paddr);
+
+#ifdef CONFIG_ARCH_PGPOOL_MAPPING
+  /* Get the virtual address corresponding to the physical page address */
+
+  virtptr = (FAR uint32_t *)arm_pgvaddr(paddr);
+#else
+  /* Temporarily map the page into the virtual address space */
+
+  mmu_l1_setentry(paddr & ~SECTION_MASK, ARCH_SCRATCH_VBASE, MMU_MEMFLAGS);
+  virtptr = (FAR uint32_t *)(ARCH_SCRATCH_VBASE | (paddr & SECTION_MASK));
+#endif
+
+  /* Finally, after of all of that, we can initialize the tiny region at
+   * the beginning of .bss/.data by setting it to zero.
+   */
+
+  memset(virtptr, 0, ARCH_DATA_RESERVE_SIZE);
+
+  /* Make sure that the initialized data is flushed to physical memory. */
+
+  arch_flush_dcache((uintptr_t)virtptr,
+                    (uintptr_t)virtptr + ARCH_DATA_RESERVE_SIZE);
+
+#ifndef CONFIG_ARCH_PGPOOL_MAPPING
+  /* Restore the scratch section L1 page table entry */
+
+  mmu_l1_restore(ARCH_SCRATCH_VBASE, l1save);
+#endif
+  irqrestore(flags);
+  return OK;
+}
+#endif /* CONFIG_BUILD_KERNEL */
 
 /****************************************************************************
  * Name: up_addrenv_destroy_region
@@ -267,7 +357,9 @@ static void up_addrenv_destroy_region(FAR uintptr_t **list,
   irqstate_t flags;
   uintptr_t paddr;
   FAR uint32_t *l2table;
+#ifndef CONFIG_ARCH_PGPOOL_MAPPING
   uint32_t l1save;
+#endif
   int i;
   int j;
 
@@ -284,12 +376,19 @@ static void up_addrenv_destroy_region(FAR uintptr_t **list,
       paddr = (uintptr_t)list[i];
       if (paddr != 0)
         {
+          flags = irqsave();
+
+#ifdef CONFIG_ARCH_PGPOOL_MAPPING
+          /* Get the virtual address corresponding to the physical page address */
+
+          l2table = (FAR uint32_t *)arm_pgvaddr(paddr);
+#else
           /* Temporarily map the page into the virtual address space */
 
-          flags = irqsave();
           l1save = mmu_l1_getentry(ARCH_SCRATCH_VBASE);
           mmu_l1_setentry(paddr & ~SECTION_MASK, ARCH_SCRATCH_VBASE, MMU_MEMFLAGS);
           l2table = (FAR uint32_t *)(ARCH_SCRATCH_VBASE | (paddr & SECTION_MASK));
+#endif
 
           /* Return the allocated pages to the page allocator */
 
@@ -303,9 +402,11 @@ static void up_addrenv_destroy_region(FAR uintptr_t **list,
                 }
             }
 
+#ifndef CONFIG_ARCH_PGPOOL_MAPPING
           /* Restore the scratch section L1 page table entry */
 
           mmu_l1_restore(ARCH_SCRATCH_VBASE, l1save);
+#endif
           irqrestore(flags);
 
           /* And free the L2 page table itself */
@@ -388,6 +489,19 @@ int up_addrenv_create(size_t textsize, size_t datasize,
       bdbg("ERROR: Failed to create .bss/.data region: %d\n", ret);
       goto errout;
     }
+
+#ifdef CONFIG_BUILD_KERNEL
+  /* Initialize the shared data are at the beginning of the .bss/.data
+   * region.
+   */
+
+  ret = up_addrenv_initdata((uintptr_t)addrenv->data[0] & PMD_PTE_PADDR_MASK);
+  if (ret < 0)
+    {
+      bdbg("ERROR: Failed to initialize .bss/.data region: %d\n", ret);
+      goto errout;
+    }
+#endif
 
   /* Notice that no pages are yet allocated for the heap */
 
