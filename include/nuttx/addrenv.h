@@ -161,6 +161,31 @@
 
 #define ARCH_SCRATCH_VBASE (CONFIG_ARCH_STACK_VBASE + ARCH_STACK_SIZE)
 
+/* There is no need to use the scratch memory region if the page pool memory
+ * is statically mapped.
+ */
+
+#ifdef CONFIG_ARCH_PGPOOL_MAPPING
+
+#  ifndef CONFIG_ARCH_PGPOOL_PBASE
+#    error CONFIG_ARCH_PGPOOL_PBASE not defined
+#  endif
+
+#  ifndef CONFIG_ARCH_PGPOOL_VBASE
+#    error CONFIG_ARCH_PGPOOL_VBASE not defined
+#  endif
+
+#  ifndef CONFIG_ARCH_PGPOOL_SIZE
+#    error CONFIG_ARCH_PGPOOL_SIZE not defined
+#  endif
+
+#  define CONFIG_ARCH_PGPOOL_PEND \
+     (CONFIG_ARCH_PGPOOL_PBASE + CONFIG_ARCH_PGPOOL_SIZE)
+#  define CONFIG_ARCH_PGPOOL_VEND \
+     (CONFIG_ARCH_PGPOOL_VBASE + CONFIG_ARCH_PGPOOL_SIZE)
+
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

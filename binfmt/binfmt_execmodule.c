@@ -179,10 +179,10 @@ int exec_module(FAR const struct binary_s *binp)
   /* Allocate the stack for the new task (always from the user heap) */
 
   stack = (FAR uint32_t*)kumm_malloc(binp->stacksize);
-  if (!tcb)
+  if (!stack)
     {
       err = ENOMEM;
-      goto errout_with_tcb;
+      goto errout_with_addrenv;
     }
 
   /* Restore the address environment */
@@ -196,6 +196,7 @@ int exec_module(FAR const struct binary_s *binp)
       goto errout_with_stack;
     }
 #endif
+
   /* Initialize the task */
 
   ret = task_init((FAR struct tcb_s *)tcb, binp->filename, binp->priority,
@@ -269,6 +270,10 @@ errout_with_stack:
   kumm_free(stack);
   goto errout;
 
+errout_with_addrenv:
+#ifdef CONFIG_ARCH_ADDRENV
+  (void)up_addrenv_restore(&oldenv);
+#endif
 errout_with_tcb:
   kmm_free(tcb);
 errout:
