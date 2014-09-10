@@ -8453,3 +8453,12 @@
 	* binfmt/binfmt_execmodule.c: When allocating a stack for a new process
 	  using the user-sapce allocator, need to select the address environment
 	  first (2014-9-9).
+	* arch/Kconfig, arm/src/armv7-a/pginline.h, arm_addrenv.c, and
+	  arm_pgalloc.c and include/nuttx/addrenv.h: Add configuration to use
+	  the fixed DRAM mapping for the page pool (if available) instead of
+	  remapping dynamically to access L2 page tables and page data.  Also,
+	  add logic in address environment creation to initialize the shared
+	  data at the beginning of the .bss/.data process memory region
+	  (2014-9-10).
+	* configs/sama5d4-ek/elf and knsh: These configurations now use the
+	  fixed DRAM mapping for manipulating the page memory pool (2014-9-10).
