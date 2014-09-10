@@ -150,7 +150,7 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
 
           /* Handle carry to seconds. */
 
-          if (ts.tv_nsec  > NSEC_PER_SEC)
+          if (ts.tv_nsec >= NSEC_PER_SEC)
             {
               carry       = ts.tv_nsec / NSEC_PER_SEC;
               ts.tv_sec  += carry;
