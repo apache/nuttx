@@ -78,12 +78,6 @@ extern volatile uint32_t g_system_timer;
 #  endif
 #endif
 
-#ifdef CONFIG_SYSTEM_TIME64
-extern uint64_t          g_tickbias;
-#else
-extern uint32_t          g_tickbias;
-#endif
-
 extern struct timespec   g_basetime;
 
 /********************************************************************************

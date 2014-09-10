@@ -90,6 +90,7 @@
 
 int clock_settime(clockid_t clock_id, FAR const struct timespec *tp)
 {
+  struct timespec bias;
   irqstate_t flags;
   int ret = OK;
 
@@ -114,11 +115,27 @@ int clock_settime(clockid_t clock_id, FAR const struct timespec *tp)
       g_basetime.tv_sec  = tp->tv_sec;
       g_basetime.tv_nsec = tp->tv_nsec;
 
-      /* Get the elapsed time since power up (in milliseconds) biased
-       * as appropriate.
+      /* Get the elapsed time since power up (in milliseconds).  This is a
+       * bias value that we need to use to correct the base time.
        */
 
-      g_tickbias = clock_systimer();
+      (void)clock_systimespec(&bias);
+
+      /* Subtract that bias from the basetime so that when the system
+       * timer is again added to the base time, the result is the current
+       * time relative to basetime.
+       */
+
+      if (g_basetime.tv_nsec < bias.tv_nsec)
+        {
+          g_basetime.tv_nsec += NSEC_PER_SEC;
+          g_basetime.tv_sec--;
+        }
+
+      /* Result could be negative seconds */
+
+      g_basetime.tv_nsec -= bias.tv_nsec;
+      g_basetime.tv_sec  -= bias.tv_sec;
 
       /* Setup the RTC (lo- or high-res) */
 
@@ -130,9 +147,9 @@ int clock_settime(clockid_t clock_id, FAR const struct timespec *tp)
 #endif
       irqrestore(flags);
 
-      sdbg("basetime=(%d,%d) tickbias=%d\n",
-          (int)g_basetime.tv_sec, (int)g_basetime.tv_nsec,
-          (int)g_tickbias);
+      sdbg("basetime=(%ld,%lu) bias=(%ld,%lu)\n",
+          (long)g_basetime.tv_sec, (unsigned long)g_basetime.tv_nsec,
+          (long)bias.tv_sec, (unsigned long)bias.tv_nsec);
     }
   else
     {

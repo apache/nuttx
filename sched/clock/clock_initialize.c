@@ -88,12 +88,6 @@ volatile uint32_t g_system_timer;
 #endif
 #endif
 
-#ifdef CONFIG_SYSTEM_TIME64
-uint64_t          g_tickbias;
-#else
-uint32_t          g_tickbias;
-#endif
-
 struct timespec   g_basetime;
 
 /**************************************************************************
@@ -191,7 +185,6 @@ static void clock_inittime(void)
 #ifndef CONFIG_SCHED_TICKLESS
   g_system_timer = 0;
 #endif
-  g_tickbias     = 0;
 }
 
 /****************************************************************************
