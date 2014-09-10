@@ -8467,3 +8467,5 @@
 	  libelf_load.c, libnxflat/libnxflat_addrenv.c, include/nuttx/arch.h, and
  	  mm/umm_initialize.c:  Add logic to initialize the per-process user
 	  heap when each user process is started (2014-9-10).
+	* sched/clock/clock.h, clock_initialize.c, and clock_settime.c: Remove
+	  vestiges of g_tickbias; apply bias instead to g_basetime (2014-9-10).
