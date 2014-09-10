@@ -133,9 +133,19 @@ do { \
 
 struct group_addrenv_s
 {
+  /* Level 1 page table entries for each group section */
+
   FAR uintptr_t *text[ARCH_TEXT_NSECTS];
   FAR uintptr_t *data[ARCH_DATA_NSECTS];
   FAR uintptr_t *heap[ARCH_HEAP_NSECTS];
+
+  /* Initial heap allocation (in bytes).  This exists only provide an
+   * indirect path for passing the size of the initial heap to the heap
+   * initialization logic.  These operations are separated in time and
+   * architecture.  REVISIT:  I would like a better way to do this.
+   */
+
+  size_t heapsize;
 };
 
 typedef struct group_addrenv_s group_addrenv_t;
@@ -153,9 +163,7 @@ struct save_addrenv_s
 {
   FAR uint32_t text[ARCH_TEXT_NSECTS];
   FAR uint32_t data[ARCH_DATA_NSECTS];
-#if 0 /* Not yet implemented */
   FAR uint32_t heap[ARCH_HEAP_NSECTS];
-#endif
 };
 
 typedef struct save_addrenv_s save_addrenv_t;

@@ -40,27 +40,28 @@
  * is an abstract representation of a task group's address environment and
  * must be defined in arch/arch.h if CONFIG_ARCH_ADDRENV is defined.
  *
- *   up_addrenv_create  - Create an address environment
- *   up_addrenv_destroy - Destroy an address environment.
- *   up_addrenv_vtext   - Returns the virtual base address of the .text
- *                        address environment
- *   up_addrenv_vdata   - Returns the virtual base address of the .bss/.data
- *                        address environment
- *   up_addrenv_select  - Instantiate an address environment
- *   up_addrenv_restore - Restore an address environment
- *   up_addrenv_clone   - Copy an address environment from one location to
- *                        another.
+ *   up_addrenv_create   - Create an address environment
+ *   up_addrenv_destroy  - Destroy an address environment.
+ *   up_addrenv_vtext    - Returns the virtual base address of the .text
+ *                         address environment
+ *   up_addrenv_vdata    - Returns the virtual base address of the .bss/.data
+ *                         address environment
+ *   up_addrenv_heapsize - Returns the size of the initial heap allocation.
+ *   up_addrenv_select   - Instantiate an address environment
+ *   up_addrenv_restore  - Restore an address environment
+ *   up_addrenv_clone    - Copy an address environment from one location to
+ *                         another.
  *
  * Higher-level interfaces used by the tasking logic.  These interfaces are
  * used by the functions in sched/ and all operate on the thread which whose
  * group been assigned an address environment by up_addrenv_clone().
  *
- *   up_addrenv_attach  - Clone the address environment assigned to one TCB
- *                        to another.  This operation is done when a pthread
- *                        is created that share's the same address
- *                        environment.
- *   up_addrenv_detach  - Release the threads reference to an address
- *                        environment when a task/thread exits.
+ *   up_addrenv_attach   - Clone the address environment assigned to one TCB
+ *                         to another.  This operation is done when a pthread
+ *                         is created that share's the same address
+ *                         environment.
+ *   up_addrenv_detach   - Release the threads reference to an address
+ *                         environment when a task/thread exits.
  *
  ****************************************************************************/
 
@@ -152,6 +153,10 @@ static void set_l2_entry(FAR uint32_t *l2table, uintptr_t paddr,
  *
  * Description:
  *   Create one memory region.
+ *
+ * Returned Value:
+ *   On success, the number of pages allocated is returned.  Otherwise, a
+ *   negated errno value is returned.
  *
  ****************************************************************************/
 
@@ -264,7 +269,7 @@ static int up_addrenv_create_region(FAR uintptr_t **list,
       irqrestore(flags);
     }
 
-  return OK;
+  return npages;
 }
 
 /****************************************************************************
@@ -437,6 +442,8 @@ static void up_addrenv_destroy_region(FAR uintptr_t **list,
  *     actual size of the data region that is allocated will include a
  *     OS private reserved region at the beginning.  The size of the
  *     private, reserved region is give by ARCH_DATA_RESERVE_SIZE.
+ *   heapsize - The initial size (in bytes) of the heap address environment
+ *     needed by the task.  This region may be read/write only.
  *   addrenv - The location to return the representation of the task address
  *     environment.
  *
@@ -445,7 +452,7 @@ static void up_addrenv_destroy_region(FAR uintptr_t **list,
  *
  ****************************************************************************/
 
-int up_addrenv_create(size_t textsize, size_t datasize,
+int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
                       FAR group_addrenv_t *addrenv)
 {
   int ret;
@@ -503,8 +510,22 @@ int up_addrenv_create(size_t textsize, size_t datasize,
     }
 #endif
 
-  /* Notice that no pages are yet allocated for the heap */
+  /* Allocate heap space pages */
 
+  ret = up_addrenv_create_region(addrenv->heap, ARCH_HEAP_NSECTS,
+                                 CONFIG_ARCH_HEAP_VBASE, heapsize,
+                                 MMU_L2_UDATAFLAGS);
+  if (ret < 0)
+    {
+      bdbg("ERROR: Failed to create heap region: %d\n", ret);
+      goto errout;
+    }
+
+  /* Save the initial heap size allocated.  This will be needed when
+   * the heap data structures are initialized.
+   */
+
+  addrenv->heapsize = (size_t)ret << MM_PGSHIFT;
   return OK;
 
 errout:
@@ -543,12 +564,10 @@ int up_addrenv_destroy(FAR group_addrenv_t *addrenv)
   up_addrenv_destroy_region(addrenv->data, ARCH_DATA_NSECTS,
                             CONFIG_ARCH_DATA_VBASE);
 
-#if 0 /* Not yet implemented */
   /* Destroy the heap region */
 
   up_addrenv_destroy_region(addrenv->heap, ARCH_HEAP_NSECTS,
                             CONFIG_ARCH_HEAP_VBASE);
-#endif
 
   memset(addrenv, 0, sizeof(group_addrenv_t));
   return OK;
@@ -614,6 +633,31 @@ int up_addrenv_vdata(FAR group_addrenv_t *addrenv, uintptr_t textsize,
   DEBUGASSERT(addrenv && vdata);
   *vdata = (FAR void *)(CONFIG_ARCH_DATA_VBASE + ARCH_DATA_RESERVE_SIZE);
   return OK;
+}
+
+/****************************************************************************
+ * Name: up_addrenv_heapsize
+ *
+ * Description:
+ *   Return the initial heap allocation size.  That is the amount of memory
+ *   allocated by up_addrenv_create() when the heap memory region was first
+ *   created.  This may or may not differ from the heapsize parameter that
+ *   was passed to up_addrenv_create()
+ *
+ * Input Parameters:
+ *   addrenv - The representation of the task address environment previously
+ *     returned by up_addrenv_create.
+ *
+ * Returned Value:
+ *   The initial heap size allocated is returned on success; a negated
+ *   errno value on failure.
+ *
+ ****************************************************************************/
+
+ssize_t up_addrenv_heapsize(FAR const group_addrenv_t *addrenv)
+{
+  DEBUGASSERT(addrenv);
+  return (ssize_t)addrenv->heapsize;
 }
 
 /****************************************************************************
@@ -698,7 +742,6 @@ int up_addrenv_select(FAR const group_addrenv_t *addrenv,
         }
     }
 
-#if 0 /* Not yet implemented */
   for (vaddr = CONFIG_ARCH_HEAP_VBASE, i = 0;
        i < ARCH_HEAP_NSECTS;
        vaddr += SECTION_SIZE, i++)
@@ -722,7 +765,6 @@ int up_addrenv_select(FAR const group_addrenv_t *addrenv,
           mmu_l1_clrentry(vaddr);
         }
     }
-#endif
 
   return OK;
 }
@@ -770,7 +812,6 @@ int up_addrenv_restore(FAR const save_addrenv_t *oldenv)
       mmu_l1_restore(vaddr, oldenv->data[i]);
     }
 
-#if 0 /* Not yet implemented */
   for (vaddr = CONFIG_ARCH_HEAP_VBASE, i = 0;
        i < ARCH_HEAP_NSECTS;
        vaddr += SECTION_SIZE, i++)
@@ -779,7 +820,6 @@ int up_addrenv_restore(FAR const save_addrenv_t *oldenv)
 
       mmu_l1_restore(vaddr, oldenv->heap[i]);
     }
-#endif
 
   return OK;
 }

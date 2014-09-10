@@ -274,16 +274,14 @@ struct xcptcontext
   struct xcpt_syscall_s syscall[CONFIG_SYS_NNEST];
 #endif
 
-#ifdef CONFIG_ARCH_ADDRENV
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_ARCH_STACK_DYNAMIC)
   /* This table holds the physical address of the level 2 page table used
    * to map the thread's stack memory.  This array will be initially of
    * zeroed and would be back-up up with pages during page fault exception
    * handling to support dynamically sized stacks for each thread.
    */
 
-#if 0 /* Not yet implemented */
   FAR uintptr_t *stack[ARCH_STACK_NSECTS];
-#endif
 #endif
 };
 #endif
