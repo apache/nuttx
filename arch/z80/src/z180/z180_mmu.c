@@ -247,7 +247,12 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
 
   /* Convert the size from bytes to numbers of pages */
 
+#ifdef CONFIG_BUILD_KERNEL
   envsize = textsize + datasize + heapsize;
+#else
+  envsize = textsize + datasize;
+#endif
+
   npages  = PHYS_ALIGNUP(envsize);
   if (npages < 1)
     {
@@ -414,12 +419,14 @@ int up_addrenv_vdata(FAR group_addrenv_t *addrenv, uintptr_t textsize,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_BUILD_KERNEL
 ssize_t up_addrenv_heapsize(FAR const group_addrenv_t *addrenv)
 {
   /* Not implemented */
 
   return (ssize_t)-ENOSYS;
 }
+#endif
 
 /****************************************************************************
  * Name: up_addrenv_select
