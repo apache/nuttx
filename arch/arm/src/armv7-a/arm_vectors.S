@@ -57,11 +57,6 @@
 g_irqtmp:
 	.word	0		/* Saved lr */
 	.word	0		/* Saved spsr */
-#ifdef CONFIG_BUILD_KERNEL
-g_svctmp:
-	.word	0		/* User R13 */
-	.word	0		/* User R14 */
-#endif
 g_undeftmp:
 	.word	0		/* Saved lr */
 	.word	0		/* Saved spsr */
@@ -135,7 +130,7 @@ arm_vectorirq:
 
 #ifdef CONFIG_BUILD_KERNEL
 	/* Did we enter from user mode?  If so then we need get the values of
-	 * USER mode r13(sp) and r14(lr) in r1 and r2.
+	 * USER mode r13(sp) and r14(lr).
 	 */
 
 	and		r1, r4, #PSR_MODE_MASK	/* Interrupted mode */
@@ -146,8 +141,10 @@ arm_vectorirq:
 	 * is not in the register list).
 	 */
 
-	stmia	r0, {r13, r14}^			/* Get user mode R13/R14 into scratch area */
-	ldmia	r0, {r1, r2}			/* Then reload into R1 and R2 */
+	add		r0, sp, #(4*REG_SP)		/* Offset to sp/lr storage */
+	stmia	r0, {r13, r14}^			/* Save user mode r13(sp) and r14(lr) */
+	add		r0, sp, #(4*REG_R15)	/* Offset to pc/cpsr storage */
+	stmia	r0, {r3, r4}			/* Save r15(pc), and the CPSR */
 	b		.Lirqcontinue
 
 .Lirqentersvc:
@@ -158,6 +155,11 @@ arm_vectorirq:
 	add		r1, sp, #XCPTCONTEXT_SIZE
 	mov		r2, r14
 
+	/* Save r13(sp), r14(lr), r15(pc), and the CPSR */
+
+	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
+	stmia	r0, {r1-r4}
+
 .Lirqcontinue:
 
 #else
@@ -165,12 +167,12 @@ arm_vectorirq:
 
 	add		r1, sp, #XCPTCONTEXT_SIZE
 	mov		r2, r14
-#endif
 
 	/* Save r13(sp), r14(lr), r15(pc), and the CPSR */
 
 	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
 	stmia	r0, {r1-r4}
+#endif
 
 	/* Then call the IRQ handler with interrupts disabled. */
 
@@ -203,8 +205,8 @@ arm_vectorirq:
 	msr		spsr, r1				/* Establish the return mode SPSR */
 
 #ifdef CONFIG_BUILD_KERNEL
-	/* Did we enter from user mode?  If so then we need get the values of
-	 * USER mode r13(sp) and r14(lr) in r1 and r2.
+	/* Did we enter from user mode?  If so then we need to restore the
+	 * values of USER mode r13(sp) and r14(lr).
 	 */
 
 	and		r2, r1, #PSR_MODE_MASK	/* Interrupted mode */
@@ -262,7 +264,7 @@ arm_vectorsvc:
 
 #ifdef CONFIG_BUILD_KERNEL
 	/* Did we enter from user mode?  If so then we need get the values of
-	 * USER mode r13(sp) and r14(lr) in r1 and r2.
+	 * USER mode r13(sp) and r14(lr).
 	 */
 
 	and		r1, r4, #PSR_MODE_MASK	/* Interrupted mode */
@@ -273,9 +275,10 @@ arm_vectorsvc:
 	 * is not in the register list).
 	 */
 
-	ldr		r0, .Lsvctmp			/* Points to temp storage */
-	stmia	r0, {r13, r14}^			/* Get user mode R13/R14 into temp storage */
-	ldmia	r0, {r1, r2}			/* Then reload into R1 and R2 */
+	add		r0, sp, #(4*REG_SP)		/* Offset to sp/lr storage */
+	stmia	r0, {r13, r14}^			/* Save user mode r13(sp) and r14(lr) */
+	add		r0, sp, #(4*REG_R15)	/* Offset to pc/cpsr storage */
+	stmia	r0, {r3, r4}			/* Save r15(pc), and the CPSR */
 	b		.Lsvccontinue
 
 .Lsvcentersvc:
@@ -286,6 +289,11 @@ arm_vectorsvc:
 	add		r1, sp, #XCPTCONTEXT_SIZE
 	mov		r2, r14
 
+	/* Save r13(sp), r14(lr), r15(pc), and the CPSR */
+
+	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
+	stmia	r0, {r1-r4}
+
 .Lsvccontinue:
 
 #else
@@ -293,12 +301,12 @@ arm_vectorsvc:
 
 	add		r1, sp, #XCPTCONTEXT_SIZE
 	mov		r2, r14
-#endif
 
 	/* Save r13(sp), r14(lr), r15(pc), and the CPSR */
 
 	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
 	stmia	r0, {r1-r4}
+#endif
 
 	/* Then call the SVC handler with interrupts disabled.
 	 * void arm_syscall(struct xcptcontext *xcp)
@@ -323,8 +331,8 @@ arm_vectorsvc:
 	msr		spsr, r1				/* Establish the return mode SPSR */
 
 #ifdef CONFIG_BUILD_KERNEL
-	/* Did we enter from user mode?  If so then we need get the values of
-	 * USER mode r13(sp) and r14(lr) in r1 and r2.
+	/* Did we enter from user mode?  If so then we need to restore the
+	 * values of USER mode r13(sp) and r14(lr).
 	 */
 
 	and		r2, r1, #PSR_MODE_MASK	/* Interrupted mode */
@@ -345,10 +353,6 @@ arm_vectorsvc:
 
 	ldmia	r0, {r0-r15}^			/* Return */
 
-#ifdef CONFIG_BUILD_KERNEL
-.Lsvctmp:
-	.word	g_svctmp
-#endif
 	.size	arm_vectorsvc, . - arm_vectorsvc
 
 	.align	5
@@ -399,7 +403,7 @@ arm_vectordata:
 
 #ifdef CONFIG_BUILD_KERNEL
 	/* Did we enter from user mode?  If so then we need get the values of
-	 * USER mode r13(sp) and r14(lr) in r1 and r2.
+	 * USER mode r13(sp) and r14(lr).
 	 */
 
 	and		r1, r4, #PSR_MODE_MASK	/* Interrupted mode */
@@ -410,8 +414,10 @@ arm_vectordata:
 	 * is not in the register list).
 	 */
 
-	stmia	r0, {r13, r14}^			/* Get user mode R13/R14 into scratch area */
-	ldmia	r0, {r1, r2}			/* Then reload into R1 and R2 */
+	add		r0, sp, #(4*REG_SP)		/* Offset to sp/lr storage */
+	stmia	r0, {r13, r14}^			/* Save user mode r13(sp) and r14(lr) */
+	add		r0, sp, #(4*REG_R15)	/* Offset to pc/cpsr storage */
+	stmia	r0, {r3, r4}			/* Save r15(pc), and the CPSR */
 	b		.Ldabtcontinue
 
 .Ldabtentersvc:
@@ -422,6 +428,11 @@ arm_vectordata:
 	add		r1, sp, #XCPTCONTEXT_SIZE
 	mov		r2, r14
 
+	/* Save r13(sp), r14(lr), r15(pc), and the CPSR */
+
+	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
+	stmia	r0, {r1-r4}
+
 .Ldabtcontinue:
 
 #else
@@ -429,12 +440,12 @@ arm_vectordata:
 
 	add		r1, sp, #XCPTCONTEXT_SIZE
 	mov		r2, r14
-#endif
 
 	/* Save r13(sp), r14(lr), r15(pc), and the CPSR */
 
 	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
 	stmia	r0, {r1-r4}
+#endif
 
 	/* Then call the data abort handler with interrupts disabled.
 	 * void arm_dataabort(struct xcptcontext *xcp)
@@ -461,8 +472,8 @@ arm_vectordata:
 	msr		spsr_cxsf, r1			/* Establish the return mode SPSR */
 
 #ifdef CONFIG_BUILD_KERNEL
-	/* Did we enter from user mode?  If so then we need get the values of
-	 * USER mode r13(sp) and r14(lr) in r1 and r2.
+	/* Did we enter from user mode?  If so then we need to restore the
+	 * values of USER mode r13(sp) and r14(lr).
 	 */
 
 	and		r2, r1, #PSR_MODE_MASK	/* Interrupted mode */
@@ -535,7 +546,7 @@ arm_vectorprefetch:
 
 #ifdef CONFIG_BUILD_KERNEL
 	/* Did we enter from user mode?  If so then we need get the values of
-	 * USER mode r13(sp) and r14(lr) in r1 and r2.
+	 * USER mode r13(sp) and r14(lr).
 	 */
 
 	and		r1, r4, #PSR_MODE_MASK	/* Interrupted mode */
@@ -546,8 +557,10 @@ arm_vectorprefetch:
 	 * is not in the register list).
 	 */
 
-	stmia	r0, {r13, r14}^			/* Get user mode R13/R14 into scratch area */
-	ldmia	r0, {r1, r2}			/* Then reload into R1 and R2 */
+	add		r0, sp, #(4*REG_SP)		/* Offset to sp/lr storage */
+	stmia	r0, {r13, r14}^			/* Save user mode r13(sp) and r14(lr) */
+	add		r0, sp, #(4*REG_R15)	/* Offset to pc/cpsr storage */
+	stmia	r0, {r3, r4}			/* Save r15(pc), and the CPSR */
 	b		.Lpabtcontinue
 
 .Lpabtentersvc:
@@ -558,6 +571,11 @@ arm_vectorprefetch:
 	add		r1, sp, #XCPTCONTEXT_SIZE
 	mov		r2, r14
 
+	/* Save r13(sp), r14(lr), r15(pc), and the CPSR */
+
+	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
+	stmia	r0, {r1-r4}
+
 .Lpabtcontinue:
 
 #else
@@ -565,12 +583,12 @@ arm_vectorprefetch:
 
 	add		r1, sp, #XCPTCONTEXT_SIZE
 	mov		r2, r14
-#endif
 
 	/* Save r13(sp), r14(lr), r15(pc), and the CPSR */
 
 	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
 	stmia	r0, {r1-r4}
+#endif
 
 	/* Then call the prefetch abort handler with interrupts disabled.
 	 * void arm_prefetchabort(struct xcptcontext *xcp)
@@ -597,8 +615,8 @@ arm_vectorprefetch:
 	msr		spsr_cxsf, r1			/* Establish the return mode SPSR */
 
 #ifdef CONFIG_BUILD_KERNEL
-	/* Did we enter from user mode?  If so then we need get the values of
-	 * USER mode r13(sp) and r14(lr) in r1 and r2.
+	/* Did we enter from user mode?  If so then we need to restore the
+	 * values of USER mode r13(sp) and r14(lr).
 	 */
 
 	and		r2, r1, #PSR_MODE_MASK	/* Interrupted mode */
@@ -668,7 +686,7 @@ arm_vectorundefinsn:
 
 #ifdef CONFIG_BUILD_KERNEL
 	/* Did we enter from user mode?  If so then we need get the values of
-	 * USER mode r13(sp) and r14(lr) in r1 and r2.
+	 * USER mode r13(sp) and r14(lr).
 	 */
 
 	and		r1, r4, #PSR_MODE_MASK	/* Interrupted mode */
@@ -679,8 +697,10 @@ arm_vectorundefinsn:
 	 * is not in the register list).
 	 */
 
-	stmia	r0, {r13, r14}^			/* Get user mode R13/R14 into scratch area */
-	ldmia	r0, {r1, r2}			/* Then reload into R1 and R2 */
+	add		r0, sp, #(4*REG_SP)		/* Offset to sp/lr storage */
+	stmia	r0, {r13, r14}^			/* Save user mode r13(sp) and r14(lr) */
+	add		r0, sp, #(4*REG_R15)	/* Offset to pc/cpsr storage */
+	stmia	r0, {r3, r4}			/* Save r15(pc), and the CPSR */
 	b		.Lundefcontinue
 
 .Lundefentersvc:
@@ -691,6 +711,11 @@ arm_vectorundefinsn:
 	add		r1, sp, #XCPTCONTEXT_SIZE
 	mov		r2, r14
 
+	/* Save r13(sp), r14(lr), r15(pc), and the CPSR */
+
+	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
+	stmia	r0, {r1-r4}
+
 .Lundefcontinue:
 
 #else
@@ -698,12 +723,12 @@ arm_vectorundefinsn:
 
 	add		r1, sp, #XCPTCONTEXT_SIZE
 	mov		r2, r14
-#endif
 
 	/* Save r13(sp), r14(lr), r15(pc), and the CPSR */
 
 	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
 	stmia	r0, {r1-r4}
+#endif
 
 	/* Then call the undef insn handler with interrupts disabled.
 	 * void arm_undefinedinsn(struct xcptcontext *xcp)
@@ -728,8 +753,8 @@ arm_vectorundefinsn:
 	msr		spsr_cxsf, r1			/* Establish the return mode SPSR */
 
 #ifdef CONFIG_BUILD_KERNEL
-	/* Did we enter from user mode?  If so then we need get the values of
-	 * USER mode r13(sp) and r14(lr) in r1 and r2.
+	/* Did we enter from user mode?  If so then we need to restore the
+	 * values of USER mode r13(sp) and r14(lr).
 	 */
 
 	and		r2, r1, #PSR_MODE_MASK	/* Interrupted mode */
@@ -801,7 +826,7 @@ arm_vectorfiq:
 
 #ifdef CONFIG_BUILD_KERNEL
 	/* Did we enter from user mode?  If so then we need get the values of
-	 * USER mode r13(sp) and r14(lr) in r1 and r2.
+	 * USER mode r13(sp) and r14(lr).
 	 */
 
 	and		r1, r4, #PSR_MODE_MASK	/* Interrupted mode */
@@ -812,8 +837,10 @@ arm_vectorfiq:
 	 * is not in the register list).
 	 */
 
-	stmia	r0, {r13, r14}^			/* Get user mode R13/R14 into scratch area */
-	ldmia	r0, {r1, r2}			/* Then reload into R1 and R2 */
+	add		r0, sp, #(4*REG_SP)		/* Offset to sp/lr storage */
+	stmia	r0, {r13, r14}^			/* Save user mode r13(sp) and r14(lr) */
+	add		r0, sp, #(4*REG_R15)	/* Offset to pc/cpsr storage */
+	stmia	r0, {r3, r4}			/* Save r15(pc), and the CPSR */
 	b		.Lfiqcontinue
 
 .Lfiqentersvc:
@@ -824,6 +851,11 @@ arm_vectorfiq:
 	add		r1, sp, #XCPTCONTEXT_SIZE
 	mov		r2, r14
 
+	/* Save r13(sp), r14(lr), r15(pc), and the CPSR */
+
+	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
+	stmia	r0, {r1-r4}
+
 .Lfiqcontinue:
 
 #else
@@ -831,12 +863,12 @@ arm_vectorfiq:
 
 	add		r1, sp, #XCPTCONTEXT_SIZE
 	mov		r2, r14
-#endif
 
 	/* Save r13(sp), r14(lr), r15(pc), and the CPSR */
 
 	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
 	stmia	r0, {r1-r4}
+#endif
 
 	/* Then call the IRQ handler with interrupts disabled. */
 
@@ -869,8 +901,8 @@ arm_vectorfiq:
 	msr		spsr, r1				/* Establish the return mode SPSR */
 
 #ifdef CONFIG_BUILD_KERNEL
-	/* Did we enter from user mode?  If so then we need get the values of
-	 * USER mode r13(sp) and r14(lr) in r1 and r2.
+	/* Did we enter from user mode?  If so then we need to restore the
+	 * values of USER mode r13(sp) and r14(lr).
 	 */
 
 	and		r2, r1, #PSR_MODE_MASK	/* Interrupted mode */
