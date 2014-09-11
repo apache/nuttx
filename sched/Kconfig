@@ -225,7 +225,7 @@ choice
 	default INIT_NONE if BUILD_KERNEL && BINFMT_DISABLE
 
 config INIT_NONE
-	bool
+	bool "None"
 
 config INIT_ENTRYPOINT
 	bool "Via application entry point"
