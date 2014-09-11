@@ -1439,7 +1439,7 @@ o ARM (arch/arm/)
   Priority:    Low
 
   Title:       CORTEX-M3 STACK OVERFLOW
-  Description: There is bit bit logic inf up_fullcontextrestore() that executes on
+  Description: There is bit bit logic in up_fullcontextrestore() that executes on
                return from interrupts (and other context switches) that looks like:
 
                  ldr r1, [r0, #(4*REG_CPSR)] /* Fetch the stored CPSR value */
