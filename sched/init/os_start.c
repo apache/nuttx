@@ -485,16 +485,11 @@ void os_start(void)
 
   up_initialize();
 
-  /* Initialize the C libraries (if included in the link).  This
-   * is done last because the libraries may depend on the above.
+  /* Initialize the C libraries.  This is done last because the libraries
+   * may depend on the above.
    */
 
-#ifdef CONFIG_HAVE_WEAKFUNCTIONS
-  if (lib_initialize != NULL)
-#endif
-    {
-      lib_initialize();
-    }
+  lib_initialize();
 
   /* IDLE Group Initialization **********************************************/
 #ifdef HAVE_TASK_GROUP

@@ -70,18 +70,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_initialize
- *
- * Description:
- *   General library initialization hook
- *
- ****************************************************************************/
-
-void weak_const_function lib_initialize(void)
-{
-}
-
-/****************************************************************************
  * Name: lib_stream_initialize
  *
  * Description:
@@ -174,7 +162,24 @@ void lib_stream_release(FAR struct task_group_s *group)
 
       if (list->sl_streams[i].fs_bufstart)
         {
+#ifndef CONFIG_ARCH_ADDRENV
+          /* Release memory from the user heap */
+
           sched_ufree(list->sl_streams[i].fs_bufstart);
+#else
+          /* If the exiting group is unprivileged, then it has an address
+           * environment.  Don't bother to release the memory in this case...
+           * There is no point sense the memory lies in the user heap which
+           * will be destroyed anyway.  But if this is a privileged group,
+           * when we still have to release the memory using the kernel
+           * allocator.
+           */
+
+          if ((group->tg_flags & GROUP_FLAG_PRIVILEGED) != 0)
+            {
+              sched_ufree(list->sl_streams[i].fs_bufstart);
+            }
+#endif
         }
     }
 #endif

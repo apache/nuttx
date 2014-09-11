@@ -65,10 +65,11 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+/* Hook for library initialization.  No is needed now, however */
 
-/* Functions contained in lib_init.c ****************************************/
+#define lib_initialize()
 
-void weak_function lib_initialize(void);
+/* Functions contained in lib_streams.c *************************************/
 
 #if CONFIG_NFILE_STREAMS > 0
 struct task_group_s;
