@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/include/arch.h
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -137,6 +137,7 @@ struct group_addrenv_s
 
   FAR uintptr_t *text[ARCH_TEXT_NSECTS];
   FAR uintptr_t *data[ARCH_DATA_NSECTS];
+#ifdef CONFIG_BUILD_KERNEL
   FAR uintptr_t *heap[ARCH_HEAP_NSECTS];
 
   /* Initial heap allocation (in bytes).  This exists only provide an
@@ -146,6 +147,7 @@ struct group_addrenv_s
    */
 
   size_t heapsize;
+#endif
 };
 
 typedef struct group_addrenv_s group_addrenv_t;

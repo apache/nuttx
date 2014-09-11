@@ -510,6 +510,7 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
     }
 #endif
 
+#ifdef CONFIG_BUILD_KERNEL
   /* Allocate heap space pages */
 
   ret = up_addrenv_create_region(addrenv->heap, ARCH_HEAP_NSECTS,
@@ -526,6 +527,7 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
    */
 
   addrenv->heapsize = (size_t)ret << MM_PGSHIFT;
+#endif
   return OK;
 
 errout:
@@ -564,12 +566,14 @@ int up_addrenv_destroy(FAR group_addrenv_t *addrenv)
   up_addrenv_destroy_region(addrenv->data, ARCH_DATA_NSECTS,
                             CONFIG_ARCH_DATA_VBASE);
 
+#ifdef CONFIG_BUILD_KERNEL
   /* Destroy the heap region */
 
   up_addrenv_destroy_region(addrenv->heap, ARCH_HEAP_NSECTS,
                             CONFIG_ARCH_HEAP_VBASE);
 
   memset(addrenv, 0, sizeof(group_addrenv_t));
+#endif
   return OK;
 }
 
@@ -654,11 +658,13 @@ int up_addrenv_vdata(FAR group_addrenv_t *addrenv, uintptr_t textsize,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_BUILD_KERNEL
 ssize_t up_addrenv_heapsize(FAR const group_addrenv_t *addrenv)
 {
   DEBUGASSERT(addrenv);
   return (ssize_t)addrenv->heapsize;
 }
+#endif
 
 /****************************************************************************
  * Name: up_addrenv_select
@@ -742,6 +748,7 @@ int up_addrenv_select(FAR const group_addrenv_t *addrenv,
         }
     }
 
+#ifdef CONFIG_BUILD_KERNEL
   for (vaddr = CONFIG_ARCH_HEAP_VBASE, i = 0;
        i < ARCH_HEAP_NSECTS;
        vaddr += SECTION_SIZE, i++)
@@ -765,6 +772,7 @@ int up_addrenv_select(FAR const group_addrenv_t *addrenv,
           mmu_l1_clrentry(vaddr);
         }
     }
+#endif
 
   return OK;
 }
@@ -812,6 +820,7 @@ int up_addrenv_restore(FAR const save_addrenv_t *oldenv)
       mmu_l1_restore(vaddr, oldenv->data[i]);
     }
 
+#ifdef CONFIG_BUILD_KERNEL
   for (vaddr = CONFIG_ARCH_HEAP_VBASE, i = 0;
        i < ARCH_HEAP_NSECTS;
        vaddr += SECTION_SIZE, i++)
@@ -820,6 +829,7 @@ int up_addrenv_restore(FAR const save_addrenv_t *oldenv)
 
       mmu_l1_restore(vaddr, oldenv->heap[i]);
     }
+#endif
 
   return OK;
 }

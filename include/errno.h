@@ -47,26 +47,50 @@
  ************************************************************************/
 /* How can we access the errno variable? */
 
-#undef __DIRECT_ERRNO_ACCESS
-#if !defined(CONFIG_LIB_SYSCALL)
-   /* No system calls?  Then there can only be direct access */
+#if !defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)
+   /* Flat build */
 
-#  define __DIRECT_ERRNO_ACCESS 1
+#  if defined(CONFIG_LIB_SYSCALL) && !defined(__KERNEL__)
+   /* We still might be using system calls in user code.  If so, then
+    * user code will have no direct access to the errno variable.
+    */
 
-#elif !defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)
-   /* Flat build... complete access */
+#    undef __DIRECT_ERRNO_ACCESS
 
-#  define __DIRECT_ERRNO_ACCESS 1
+#   else
+   /* Flat build with no system calls OR internal kernel logic... There
+    * is direct access.
+    */
 
-#elif defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)
-   /* Kernel portion of protected build.  The Kernel has access */
+#    define __DIRECT_ERRNO_ACCESS 1
+#  endif
 
-#  define __DIRECT_ERRNO_ACCESS 1
+#elif defined(CONFIG_BUILD_PROTECTED)
+#  if defined(__KERNEL__)
+   /* Kernel portion of protected build.  Kernel code has direct access */
 
-#elif defined(CONFIG_BUILD_KERNEL) && defined(__KERNEL__)
-   /* Kernel only build.  The kernel has access */
+#    define __DIRECT_ERRNO_ACCESS 1
 
-#  define __DIRECT_ERRNO_ACCESS 1
+#  else
+   /* User portion of protected build.  Application code has only indirect
+    * access
+    */
+
+#    undef __DIRECT_ERRNO_ACCESS
+#  endif
+
+#elif defined(CONFIG_BUILD_KERNEL) && !defined(__KERNEL__)
+#  if defined(__KERNEL__)
+   /* Kernel build.  Kernel code has direct access */
+
+#    define __DIRECT_ERRNO_ACCESS 1
+
+#  else
+   /* User libraries for the kernel.  Only indirect access from user
+    * libraries */
+
+#    undef __DIRECT_ERRNO_ACCESS
+#  endif
 #endif
 
 /* Convenience/compatibility definition.

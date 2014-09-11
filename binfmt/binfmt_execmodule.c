@@ -136,7 +136,7 @@ static void exec_ctors(FAR void *arg)
 int exec_module(FAR const struct binary_s *binp)
 {
   FAR struct task_tcb_s *tcb;
-#ifdef CONFIG_ARCH_ADDRENV
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   save_addrenv_t oldenv;
 #endif
   FAR uint32_t *stack;
@@ -165,7 +165,7 @@ int exec_module(FAR const struct binary_s *binp)
       goto errout;
     }
 
-#ifdef CONFIG_ARCH_ADDRENV
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   /* Instantiate the address environment containing the user heap */
 
   ret = up_addrenv_select(&binp->addrenv, &oldenv);
@@ -260,7 +260,7 @@ int exec_module(FAR const struct binary_s *binp)
       goto errout_with_stack;
     }
 
-#ifdef CONFIG_ARCH_ADDRENV
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   /* Restore the address environment of the caller */
 
   ret = up_addrenv_restore(&oldenv);
@@ -281,10 +281,10 @@ errout_with_stack:
   goto errout;
 
 errout_with_addrenv:
-#ifdef CONFIG_ARCH_ADDRENV
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   (void)up_addrenv_restore(&oldenv);
-#endif
 errout_with_tcb:
+#endif
   kmm_free(tcb);
 errout:
   set_errno(err);
