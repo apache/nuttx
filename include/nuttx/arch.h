@@ -872,7 +872,7 @@ int up_addrenv_vdata(FAR group_addrenv_t *addrenv, uintptr_t textsize,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_ADDRENV
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
 ssize_t up_addrenv_heapsize(FAR const group_addrenv_t *addrenv);
 #endif
 
