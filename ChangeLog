@@ -8478,3 +8478,7 @@
 	  address environment is torn down (2014-9-11).
 	* arch/arm/src/stm32/stm32_serial.c and chip/stm32f20xxx_rcc.h: Fix for
 	  UART7 and UART8 on STM32 clock enable from Aton (2014-9-11).
+	* arch/arm/src/armv7-a/arm_vectors.S: ARMv7-A: Exception register
+	  save/restore needs to work a little differently if we support useri
+	  mode processes (2014-9-11).
+
