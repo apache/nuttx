@@ -1,7 +1,7 @@
-/************************************************************
- * libc/misc/lib_init.c
+/****************************************************************************
+ * libc/misc/lib_stream.c
  *
- *   Copyright (C) 2007, 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2011, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -44,52 +44,66 @@
 #include <errno.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/sched.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/lib.h>
 
 #include "lib_internal.h"
 
-#if !defined(CONFIG_BUILD_PROTECTED) || defined(__KERNEL__) || \
-     defined(CONFIG_BUILD_KERNEL)
+#if (!defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)) || \
+      defined(__KERNEL__)
 
-/************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Variables
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************/
+ ****************************************************************************/
 
-/************************************************************
+/****************************************************************************
  * Name: lib_initialize
- ************************************************************/
-
-/* General library initialization hook */
+ *
+ * Description:
+ *   General library initialization hook
+ *
+ ****************************************************************************/
 
 void weak_const_function lib_initialize(void)
 {
 }
 
-/************************************************************
- * Name: lib_streaminit
- ************************************************************/
+/****************************************************************************
+ * Name: lib_stream_initialize
+ *
+ * Description:
+ *   This function is called when a new task is allocated.  It initializes
+ *   the streamlist instance that is stored in the task group.
+ *
+ ****************************************************************************/
 
 #if CONFIG_NFILE_STREAMS > 0
-/* The following function is called when a new task is allocated.  It
- * initializees the streamlist instance that is stored in the task group.
- */
-
-void lib_streaminit(FAR struct streamlist *list)
+void lib_stream_initialize(FAR struct task_group_s *group)
 {
+  FAR struct streamlist *list;
   int i;
+
+#if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
+     defined(CONFIG_MM_KERNEL_HEAP)
+  DEBUGASSERT(group && group->tg_streamlist);
+  list = group->tg_streamlist;
+#else
+  DEBUGASSERT(group);
+  list = &group->tg_streamlist;
+#endif
 
   /* Initialize the list access mutex */
 
@@ -114,19 +128,34 @@ void lib_streaminit(FAR struct streamlist *list)
       lib_sem_initialize(&list->sl_streams[i]);
     }
 }
+#endif /* CONFIG_NFILE_STREAMS > 0 */
 
-/* This function is called when a TCB is destroyed.  Note that is
- * does not close the files by releasing the inode.  This happens
- * separately when the file descriptor list is freed.
- */
+/****************************************************************************
+ * Name: lib_stream_init
+ *
+ * Description:
+ *   This function is called when a TCB is destroyed.  Note that it does not
+ *   close the files by releasing the inode.  That happens separately when
+ *   the file descriptor list is freed.
+ *
+ ****************************************************************************/
 
-void lib_releaselist(FAR struct streamlist *list)
+#if CONFIG_NFILE_STREAMS > 0
+void lib_stream_release(FAR struct task_group_s *group)
 {
+  FAR struct streamlist *list;
 #if CONFIG_STDIO_BUFFER_SIZE > 0
   int i;
 #endif
 
-  DEBUGASSERT(list);
+#if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
+     defined(CONFIG_MM_KERNEL_HEAP)
+  DEBUGASSERT(group && group->tg_streamlist);
+  list = group->tg_streamlist;
+#else
+  DEBUGASSERT(group);
+  list = &group->tg_streamlist;
+#endif
 
   /* Destroy the semaphore and release the filelist */
 
@@ -150,6 +179,6 @@ void lib_releaselist(FAR struct streamlist *list)
     }
 #endif
 }
+#endif /* CONFIG_NFILE_STREAMS > 0 */
 
-#endif /* !CONFIG_BUILD_PROTECTED || __KERNEL__ || CONFIG_BUILD_KERNEL */
-#endif /* CONFIG_NFILE_STREAMS */
+#endif /* (!CONFIG_BUILD_PROTECTED &&7 !CONFIG_BUILD_KERNEL) || __KERNEL__ */
