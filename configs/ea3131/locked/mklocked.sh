@@ -194,7 +194,6 @@ if [ $answer = y ]; then
 fi
 
 echo "EXTERN(up_initialize)" >>ld-locked.inc
-echo "EXTERN(lib_initialize)" >>ld-locked.inc
 echo "EXTERN(sched_setupidlefiles)" >>ld-locked.inc
 echo "EXTERN(task_create)" >>ld-locked.inc
 
