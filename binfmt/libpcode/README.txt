@@ -128,12 +128,12 @@ Issues
    and the apps/ directory.  That should not be the case; the nuttx/ logic
    should be completely independent of apps/ logic (but not vice versa).
 
-2. The current implementation will not work in the CONFIG_KERNEL_BUILD.
-   This is because of the little proxy logic (function pcode_proxy() in the
-   file pcode.c).  (a) That logic would attempt to link with P-code logic
-   that resides in user space.  That will not work.  And (2) that proxy
-   would be started in user mode but in the kernel address space which will
-   certainly crash immediately.
+2. The current implementation will not work in the CONFIG_BUILD_PROTECTED or
+   CONFIG_BUILD_KERNEL configurations.  That is because of the little proxy
+   logic (function pcode_proxy() in the file pcode.c).  (a) That logic would
+   attempt to link with P-code logic that resides in user space.  That will
+   not work.  And (2) that proxy would be started in user mode but in the
+   kernel address space which will certainly crash immediately.
 
 The general idea to fix both of these problems is as follows:
 
