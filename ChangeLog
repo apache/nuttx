@@ -8469,3 +8469,10 @@
 	  heap when each user process is started (2014-9-10).
 	* sched/clock/clock.h, clock_initialize.c, and clock_settime.c: Remove
 	  vestiges of g_tickbias; apply bias instead to g_basetime (2014-9-10).
+	* include/nuttx/lib.h, sched/init/os_start.c, and
+	  configs/ea3131/locked/mklocked.sh: Replace the empty lib_initialize()
+	  function with a pre-processor macro (2014-9-11).
+	* libc/misc/lib_stream.c: When a privileged thread exits, we have to use
+	  the kernel alloctor to free memory; when an unprivileged thread exits,
+	  we don't have to do anything... heap memory will be cleaned up when the
+	  address environment is torn down (2014-9-11).
