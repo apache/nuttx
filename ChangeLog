@@ -8481,4 +8481,6 @@
 	* arch/arm/src/armv7-a/arm_vectors.S: ARMv7-A: Exception register
 	  save/restore needs to work a little differently if we support useri
 	  mode processes (2014-9-11).
+	* configs/cc3200-launchpad/src/cc3200_leds.c and other board files: Add
+	  LED support for the CC3200 Launchpad.  From Jim Ewing (2014-9-11).
 
