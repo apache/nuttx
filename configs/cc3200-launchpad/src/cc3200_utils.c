@@ -38,15 +38,70 @@
 
 #include <sys/types.h>
 #include <arch/board/cc3200_utils.h>
+#include <chip/cc3200_memorymap.h>
 
 #include "nuttx/arch.h"
 #include "up_arch.h"
 
-#include "cc3200_launchpad.h"
+#include "cc3200_utils.h"
+
+/************************************************************************************
+ * Private Data
+ ************************************************************************************/
+
+static const unsigned long g_cc3200_pinmap[64] =
+{
+  10, 11, 12, 13, 14, 15, 16, 17, 255, 255, 18,
+  19, 20, 21, 22, 23, 24, 40, 28, 29, 25, 255,
+  255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+  255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+  31, 255, 255, 255, 255, 0, 255, 32, 30, 255, 1,
+  255, 2, 3, 4, 5, 6, 7, 8, 9
+};
+
+static const unsigned long gpio_reg[]=
+{
+  TIVA_GPIOA_BASE,
+  TIVA_GPIOB_BASE,
+  TIVA_GPIOC_BASE,
+  TIVA_GPIOD_BASE
+};
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
+
+/************************************************************************************
+ * Name: cc3200_get_gpio_port_pin
+ ************************************************************************************/
+
+void cc3200_get_gpio_port_pin(uint8_t pin, uint32_t *gpio_port, uint8_t *gpio_pin)
+{
+  *gpio_pin = 1 << (pin % 8);
+  *gpio_port = (pin / 8);
+  *gpio_port = gpio_reg[*gpio_port];
+}
+
+/************************************************************************************
+ * Name: cc3200_set_gpio
+ ************************************************************************************/
+
+void cc3200_set_gpio(uint8_t pin, uint32_t gpio_port, uint8_t gpio_pin,
+                     uint8_t gpio_val)
+{
+  gpio_val = gpio_val << (pin % 8);
+  putreg32(gpio_val, gpio_port + (gpio_pin << 2));
+}
+
+/************************************************************************************
+ * Name: cc3200_set_gpio_dir
+ ************************************************************************************/
+
+void cc3200_set_gpio_dir(uint32_t port, uint8_t pins, uint32_t pin_io)
+{
+  putreg32(((pin_io & 1) ? (getreg32(port + GPIO_O_GPIO_DIR) | pins) :
+           (getreg32(port + GPIO_O_GPIO_DIR) & ~(pins))), port + GPIO_O_GPIO_DIR);
+}
 
 /************************************************************************************
  * Name: cc3200_print
@@ -110,6 +165,24 @@ void cc3200_pin_type_uart(uint32_t pin, uint32_t pin_mode)
 }
 
 /************************************************************************************
+ * Name: cc3200_pin_type_gpio
+ ************************************************************************************/
+
+void cc3200_pin_type_gpio(uint32_t pin, uint32_t pin_mode, uint32_t open_drain)
+{
+  if(open_drain)
+  {
+    cc3200_pin_config_set(pin, PIN_STRENGTH_2MA, PIN_TYPE_OD);
+  }
+  else
+  {
+    cc3200_pin_config_set(pin, PIN_STRENGTH_2MA, PIN_TYPE_STD);
+  }
+
+  cc3200_pin_mode_set(pin, pin_mode);
+}
+
+/************************************************************************************
  * Name: cc3200_init
  ************************************************************************************/
 
@@ -117,7 +190,7 @@ void cc3200_init(void)
 {
   uint8_t x=16;
 
-  putreg32(getreg32(0x4402F064) | 0x800000,0x4402F064);
+  putreg32(getreg32(0x4402F064) | 0x800000, 0x4402F064);
   putreg32(getreg32(0x4402F800  + 0x00000418) | (1<<4), 0x4402F800  + 0x00000418);
   putreg32(getreg32(0x4402E16C) | 0x3C, 0x4402E16C);
   putreg32(getreg32(0x44025000 + 0x00000048) | 0x00000001, 0x44025000 + 0x00000048);

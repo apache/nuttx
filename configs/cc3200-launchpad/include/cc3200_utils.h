@@ -117,19 +117,11 @@
 #define PIN_63              0x0000003E
 #define PIN_64              0x0000003F
 
-/************************************************************************************
- * Private Data
- ************************************************************************************/
+#define GPIO_O_GPIO_DATA    0x00000000
+#define GPIO_O_GPIO_DIR     0x00000400
 
-static const unsigned long g_cc3200_pinmap[64] =
-{
-  10, 11, 12, 13, 14, 15, 16, 17, 255, 255, 18,
-  19, 20, 21, 22, 23, 24, 40, 28, 29, 25, 255,
-  255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-  255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-  31, 255, 255, 255, 255, 0, 255, 32, 30, 255, 1,
-  255, 2, 3, 4, 5, 6, 7, 8, 9
-};
+#define GPIO_DIR_MODE_OUT   0x00000001
+#define GPIO_DIR_MODE_IN    0x00000000
 
 /************************************************************************************
  * Public Functions
@@ -139,5 +131,9 @@ void cc3200_print(char* str);
 void cc3200_pin_config_set(uint32_t pin, uint32_t pin_strength, uint32_t pin_type);
 void cc3200_pin_mode_set(uint32_t pin, uint32_t pin_mode);
 void cc3200_pin_type_uart(uint32_t pin, uint32_t pin_mode);
+void cc3200_get_gpio_port_pin(uint8_t pin, uint32_t *gpio_port, uint8_t *gpio_pin);
+void cc3200_set_gpio(uint8_t pin, uint32_t gpio_port, uint8_t gpio_pin, uint8_t gpio_val);
+void cc3200_set_gpio_dir(uint32_t port, uint8_t pins, uint32_t pin_io);
+void cc3200_pin_type_gpio(uint32_t pin, uint32_t pin_mode, uint32_t open_drain);
 
 #endif /* __CONFIGS_CC3200_INCLUDE_UTILS_H */

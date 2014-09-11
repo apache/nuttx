@@ -103,7 +103,7 @@ void tiva_boardinitialize(void)
 
   cc3200_print("\r\nCC3200 init\r\n");
 
-//   cc3200_ledinit();
+  cc3200_ledinit();
 }
 
 /************************************************************************
