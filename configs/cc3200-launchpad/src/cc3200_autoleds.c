@@ -72,10 +72,10 @@
  *   briefly while the assertion is handled.  You will probably never see this.
  *
  * Flashing RED:
- * - In the event of a fatal crash, the BLUE and GREEN components will be
+ * - In the event of a fatal crash, the YELLOW and GREEN components will be
  *   extinguished and the RED component will FLASH at a 2Hz rate.
  *
- *                          RED  GREEN BLUE
+ *                          RED  YELLOW BLUE
  * LED_STARTED       0      OFF  OFF   OFF
  * LED_HEAPALLOCATE  0      OFF  OFF   OFF
  * LED_IRQSENABLED   0      OFF  OFF   OFF
@@ -135,7 +135,38 @@
 
 void board_led_on(int led)
 {
-//   cc3200_ledon(led);
+  switch (led)
+    {
+      /* All components stay off until the file initialization step */
+
+      default:
+      case 0:
+        break;
+
+      /* The GREEN component is illuminated at the final initialization step */
+
+      case 1:
+        cc3200_ledon(1);
+        break;
+
+      /* These will illuminate the YELLOW component with on effect no RED and GREEN */
+
+      case 2:
+        cc3200_ledon(2);
+        break;
+
+      /* This will turn off YELLOW and GREEN and turn RED on */
+
+      case 4:
+        cc3200_ledoff(1);
+        cc3200_ledoff(2);
+
+      /* This will illuminate the RED component with no effect on YELLOW and GREEN */
+
+      case 3:
+        cc3200_ledon(3);
+        break;
+    }
 }
 
 /****************************************************************************
@@ -144,7 +175,28 @@ void board_led_on(int led)
 
 void board_led_off(int led)
 {
-//   cc3200_ledoff(led);
+  switch (led)
+    {
+      /* These should not happen and are ignored */
+
+      default:
+      case 0:
+      case 1:
+        break;
+
+      /* These will extinguish the YELLOW component with no effect on RED and GREEN */
+
+      case 2:
+        cc3200_ledoff(2);
+        break;
+
+      /* These will extinguish the RED component with on effect on RED and GREEN */
+
+      case 3:
+      case 4:
+        cc3200_ledoff(3);
+        break;
+    }
 }
 
 #endif /* CONFIG_ARCH_LEDS */

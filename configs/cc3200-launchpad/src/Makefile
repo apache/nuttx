@@ -40,8 +40,7 @@ CFLAGS += -I$(TOPDIR)/sched -I../include
 
 ASRCS =
 AOBJS = $(ASRCS:.S=$(OBJEXT))
-CSRCS = cc3200_boot.c cc3200_serial.c cc3200_utils.c
-#cc3200_leds.c
+CSRCS = cc3200_boot.c cc3200_serial.c cc3200_utils.c cc3200_leds.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += cc3200_autoleds.c
