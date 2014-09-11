@@ -70,6 +70,15 @@
 
 /****************************************************************************
  * Name: up_fullcontextrestore
+ *
+ * Description:
+ *   Restore the specified task context. Full prototype is:
+ *
+ *     void up_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
+ *
+ * Return:
+ *   None
+ *
  ****************************************************************************/
 
 	.globl	up_fullcontextrestore
@@ -83,7 +92,7 @@ up_fullcontextrestore:
 
 #ifdef CONFIG_ARCH_FPU
 	/* First, restore the floating point registers.  Lets do this before we
-	 * restore the arm registers so that we have plentry of registers to
+	 * restore the ARM registers so that we have plenty of registers to
 	 * work with.
 	 */
 
