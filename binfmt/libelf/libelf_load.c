@@ -43,6 +43,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <elf32.h>
 #include <assert.h>
@@ -198,6 +199,15 @@ static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
               bdbg("ERROR: Failed to read section %d: %d\n", i, ret);
               return ret;
             }
+        }
+
+      /* If there is no data in an allocated section, then the allocated
+       * section must be cleared.
+       */
+
+      else
+        {
+          memset(*pptr, 0, shdr->sh_size);
         }
 
       /* Update sh_addr to point to copy in memory */
