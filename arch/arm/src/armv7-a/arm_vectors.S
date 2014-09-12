@@ -201,11 +201,11 @@ arm_vectorirq:
 
 	/* Restore the CPSR, SVC mode registers and return */
 
-	ldr		r1, [r0, #(4*REG_CPSR)]	/* Setup the return SPSR */
-	msr		spsr, r1				/* Establish the return mode SPSR */
+	ldr		r1, [r0, #(4*REG_CPSR)]	/* Fetch the return SPSR */
+	msr		spsr, r1				/* Set the return mode SPSR */
 
 #ifdef CONFIG_BUILD_KERNEL
-	/* Did we enter from user mode?  If so then we need to restore the
+	/* Are we leaving in user mode?  If so then we need to restore the
 	 * values of USER mode r13(sp) and r14(lr).
 	 */
 
@@ -217,9 +217,12 @@ arm_vectorirq:
 	 * is not in the register list).
 	 */
 
-	add		r1, r0, #(4*REG_R13)	/* R1=address of R13/R14 storage */
-	ldmia	r1, {r13, r14}^			/* Restore to user mode USER R13/R14 */
-	ldmia	r0, {r0-R12,r15}^		/* Return */
+	mov		r13, r0					/* (SVC) R13=Register storage area */
+	ldmia	r13, {r0-R12}			/* Restore common R0-R12 */
+	add		r14, r13, #(4*REG_R13)	/* (SVC) R14=address of R13/R14 storage */
+	ldmia	r14, {r13, r14}^		/* Restore user mode R13/R14 */
+	add		r14, r13, #(4*REG_R15)	/* (SVC) R14=address of R15 storage */
+	ldmia	r14, {r15}^				/* Return */
 
 .Lirqleavesvc:
 #endif
@@ -327,11 +330,11 @@ arm_vectorsvc:
 
 	/* Restore the CPSR, SVC mode registers and return */
 
-	ldr		r1, [r0, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
-	msr		spsr, r1				/* Establish the return mode SPSR */
+	ldr		r1, [r0, #(4*REG_CPSR)]	/* Fetch the return SPSR */
+	msr		spsr, r1				/* Set the return mode SPSR */
 
 #ifdef CONFIG_BUILD_KERNEL
-	/* Did we enter from user mode?  If so then we need to restore the
+	/* Are we leaving in user mode?  If so then we need to restore the
 	 * values of USER mode r13(sp) and r14(lr).
 	 */
 
@@ -343,9 +346,12 @@ arm_vectorsvc:
 	 * is not in the register list).
 	 */
 
-	add		r1, r0, #(4*REG_R13)	/* R1=address of R13/R14 storage */
-	ldmia	r1, {r13, r14}^			/* Restore to user mode USER R13/R14 */
-	ldmia	r0, {r0-R12,r15}^		/* Return */
+	mov		r13, r0					/* (SVC) R13=Register storage area */
+	ldmia	r13, {r0-R12}			/* Restore common R0-R12 */
+	add		r14, r13, #(4*REG_R13)	/* (SVC) R14=address of R13/R14 storage */
+	ldmia	r14, {r13, r14}^		/* Restore user mode R13/R14 */
+	add		r14, r13, #(4*REG_R15)	/* (SVC) R14=address of R15 storage */
+	ldmia	r14, {r15}^				/* Return */
 
 .Lleavesvcsvc:
 #endif
@@ -468,11 +474,11 @@ arm_vectordata:
 
 	/* Restore the CPSR, SVC mode registers and return */
 
-	ldr		r1, [r0, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
-	msr		spsr_cxsf, r1			/* Establish the return mode SPSR */
+	ldr		r1, [r0, #(4*REG_CPSR)]	/* Fetch the return SPSR */
+	msr		spsr_cxsf, r1			/* Set the return mode SPSR */
 
 #ifdef CONFIG_BUILD_KERNEL
-	/* Did we enter from user mode?  If so then we need to restore the
+	/* Are we leaving in user mode?  If so then we need to restore the
 	 * values of USER mode r13(sp) and r14(lr).
 	 */
 
@@ -484,9 +490,12 @@ arm_vectordata:
 	 * is not in the register list).
 	 */
 
-	add		r1, r0, #(4*REG_R13)	/* R1=address of R13/R14 storage */
-	ldmia	r1, {r13, r14}^			/* Restore to user mode USER R13/R14 */
-	ldmia	r0, {r0-R12,r15}^		/* Return */
+	mov		r13, r0					/* (SVC) R13=Register storage area */
+	ldmia	r13, {r0-R12}			/* Restore common R0-R12 */
+	add		r14, r13, #(4*REG_R13)	/* (SVC) R14=address of R13/R14 storage */
+	ldmia	r14, {r13, r14}^		/* Restore user mode R13/R14 */
+	add		r14, r13, #(4*REG_R15)	/* (SVC) R14=address of R15 storage */
+	ldmia	r14, {r15}^				/* Return */
 
 .Ldabtleavesvc:
 #endif
@@ -611,11 +620,11 @@ arm_vectorprefetch:
 
 	/* Restore the CPSR, SVC mode registers and return */
 
-	ldr		r1, [r0, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
-	msr		spsr_cxsf, r1			/* Establish the return mode SPSR */
+	ldr		r1, [r0, #(4*REG_CPSR)]	/* Fetch the return SPSR */
+	msr		spsr_cxsf, r1			/* Set the return mode SPSR */
 
 #ifdef CONFIG_BUILD_KERNEL
-	/* Did we enter from user mode?  If so then we need to restore the
+	/* Are we leaving in user mode?  If so then we need to restore the
 	 * values of USER mode r13(sp) and r14(lr).
 	 */
 
@@ -627,9 +636,12 @@ arm_vectorprefetch:
 	 * is not in the register list).
 	 */
 
-	add		r1, r0, #(4*REG_R13)	/* R1=address of R13/R14 storage */
-	ldmia	r1, {r13, r14}^			/* Restore to user mode USER R13/R14 */
-	ldmia	r0, {r0-R12,r15}^		/* Return */
+	mov		r13, r0					/* (SVC) R13=Register storage area */
+	ldmia	r13, {r0-R12}			/* Restore common R0-R12 */
+	add		r14, r13, #(4*REG_R13)	/* (SVC) R14=address of R13/R14 storage */
+	ldmia	r14, {r13, r14}^		/* Restore user mode R13/R14 */
+	add		r14, r13, #(4*REG_R15)	/* (SVC) R14=address of R15 storage */
+	ldmia	r14, {r15}^				/* Return */
 
 .Lpabtleavesvc:
 #endif
@@ -749,11 +761,11 @@ arm_vectorundefinsn:
 
 	/* Restore the CPSR, SVC mode registers and return */
 
-	ldr		r1, [r0, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
-	msr		spsr_cxsf, r1			/* Establish the return mode SPSR */
+	ldr		r1, [r0, #(4*REG_CPSR)]	/* Fetch the return SPSR */
+	msr		spsr_cxsf, r1			/* Set the return mode SPSR */
 
 #ifdef CONFIG_BUILD_KERNEL
-	/* Did we enter from user mode?  If so then we need to restore the
+	/* Are we leaving in user mode?  If so then we need to restore the
 	 * values of USER mode r13(sp) and r14(lr).
 	 */
 
@@ -765,9 +777,12 @@ arm_vectorundefinsn:
 	 * is not in the register list).
 	 */
 
-	add		r1, r0, #(4*REG_R13)	/* R1=address of R13/R14 storage */
-	ldmia	r1, {r13, r14}^			/* Restore to user mode USER R13/R14 */
-	ldmia	r0, {r0-R12,r15}^		/* Return */
+	mov		r13, r0					/* (SVC) R13=Register storage area */
+	ldmia	r13, {r0-R12}			/* Restore common R0-R12 */
+	add		r14, r13, #(4*REG_R13)	/* (SVC) R14=address of R13/R14 storage */
+	ldmia	r14, {r13, r14}^		/* Restore user mode R13/R14 */
+	add		r14, r13, #(4*REG_R15)	/* (SVC) R14=address of R15 storage */
+	ldmia	r14, {r15}^				/* Return */
 
 .Lundefleavesvc:
 #endif
@@ -826,7 +841,7 @@ arm_vectorfiq:
 
 #ifdef CONFIG_BUILD_KERNEL
 	/* Did we enter from user mode?  If so then we need get the values of
-	 * USER mode r13(sp) and r14(lr).
+	 * USER mode rr13(sp) and r14(lr).
 	 */
 
 	and		r1, r4, #PSR_MODE_MASK	/* Interrupted mode */
@@ -897,11 +912,11 @@ arm_vectorfiq:
 
 	/* Restore the CPSR, SVC mode registers and return */
 
-	ldr		r1, [r0, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
-	msr		spsr, r1				/* Establish the return mode SPSR */
+	ldr		r1, [r0, #(4*REG_CPSR)]	/* Fetch the return SPSR */
+	msr		spsr, r1				/* Set the return mode SPSR */
 
 #ifdef CONFIG_BUILD_KERNEL
-	/* Did we enter from user mode?  If so then we need to restore the
+	/* Are we leaving in user mode?  If so then we need to restore the
 	 * values of USER mode r13(sp) and r14(lr).
 	 */
 
@@ -913,9 +928,12 @@ arm_vectorfiq:
 	 * is not in the register list).
 	 */
 
-	add		r1, r0, #(4*REG_R13)	/* R1=address of R13/R14 storage */
-	ldmia	r1, {r13, r14}^			/* Restore to user mode USER R13/R14 */
-	ldmia	r0, {r0-R12,r15}^		/* Return */
+	mov		r13, r0					/* (SVC) R13=Register storage area */
+	ldmia	r13, {r0-R12}			/* Restore common R0-R12 */
+	add		r14, r13, #(4*REG_R13)	/* (SVC) R14=address of R13/R14 storage */
+	ldmia	r14, {r13, r14}^		/* Restore user mode R13/R14 */
+	add		r14, r13, #(4*REG_R15)	/* (SVC) R14=address of R15 storage */
+	ldmia	r14, {r15}^				/* Return */
 
 .Lfiqleavesvc:
 #endif
