@@ -100,11 +100,11 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
  * programs from a file system.
  */
 
-#if defined(CONFIG_BINFMT_DISABLE) && defined(CONFIG_LIBC_EXECFUNCS)
+#if !defined(CONFIG_BINFMT_DISABLE) && defined(CONFIG_LIBC_EXECFUNCS)
 #  ifdef CONFIG_BINFMT_EXEPATH
-  SYSCALL_LOOKUP(posix_spawnp,            6, SYS_posixspawnp)
+  SYSCALL_LOOKUP(posix_spawnp,            6, SYS_posix_spawnp)
 #  else
-  SYSCALL_LOOKUP(posix_spawn,             6, SYS_posixspawn)
+  SYSCALL_LOOKUP(posix_spawn,             6, SYS_posix_spawn)
 #  endif
   SYSCALL_LOOKUP(execv,                   2, SYS_execv)
   SYSCALL_LOOKUP(execl,                   6, SYS_execl)
