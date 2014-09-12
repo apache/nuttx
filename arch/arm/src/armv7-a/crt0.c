@@ -101,7 +101,7 @@ static void sig_trampoline(void)
     " blx  ip\n"         /* Call the signal handler */
     " pop  {r2}\n"       /* Recover LR in R2 */
     " mov  lr, r2\n"     /* Restore LR */
-    " mov  r0, #4\n"     /* SYS_signal_handler_return */
+    " mov  r0, #5\n"     /* SYS_signal_handler_return */
     " svc #0x900001\n"   /* Return from the signal handler */
   );
 }
