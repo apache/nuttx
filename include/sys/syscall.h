@@ -142,29 +142,29 @@
 #  ifdef CONFIG_SCHED_HAVE_PARENT
 #    define SYS_wait                   (__SYS_waitpid+1)
 #    define SYS_waitid                 (__SYS_waitpid+2)
-#    define __SYS_posixspawn           (__SYS_waitpid+3)
+#    define __SYS_posix_spawn          (__SYS_waitpid+3)
 #  else
-#    define __SYS_posixspawn           (__SYS_waitpid+1)
+#    define __SYS_posix_spawn          (__SYS_waitpid+1)
 #endif
 #else
-#  define __SYS_posixspawn             __SYS_waitpid
+#  define __SYS_posix_spawn            __SYS_waitpid
 #endif
 
 /* The following can only be defined if we are configured to execute
  * programs from a file system.
  */
 
-#if defined(CONFIG_BINFMT_DISABLE) && defined(CONFIG_LIBC_EXECFUNCS)
+#if !defined(CONFIG_BINFMT_DISABLE) && defined(CONFIG_LIBC_EXECFUNCS)
 #  ifdef CONFIG_BINFMT_EXEPATH
-#    define SYS_posixspawnp            __SYS_posixspawn
+#    define SYS_posix_spawnp           __SYS_posix_spawn
 #  else
-#    define SYS_posixspawn             __SYS_posixspawn
+#    define SYS_posix_spawn            __SYS_posix_spawn
 #  endif
-#  define SYS_execv                    (__SYS_posixspawn+1)
-#  define SYS_execl                    (__SYS_posixspawn+2)
-#  define __SYS_signals                (__SYS_posixspawn+3)
+#  define SYS_execv                    (__SYS_posix_spawn+1)
+#  define SYS_execl                    (__SYS_posix_spawn+2)
+#  define __SYS_signals                (__SYS_posix_spawn+3)
 #else
-#  define __SYS_signals                __SYS_posixspawn
+#  define __SYS_signals                __SYS_posix_spawn
 #endif
 
 /* The following are only defined is signals are supported in the NuttX
