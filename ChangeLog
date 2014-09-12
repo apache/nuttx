@@ -8483,4 +8483,9 @@
 	  mode processes (2014-9-11).
 	* configs/cc3200-launchpad/src/cc3200_leds.c and other board files: Add
 	  LED support for the CC3200 Launchpad.  From Jim Ewing (2014-9-11).
-
+	* arch/arm/src/armv7-a/arm_initialstate.c:  All tasks, even user mode
+	  tasks, must start in supervisor mode until they get past the start-up
+	  trampoline (2014-9-11).
+	* arch/arm/src/armv7-a/arm_vectors.S: Fix logic for returning from
+	  exceptions to user-mode contexts.  NuttX processes are now functional
+	  on the Cortex-A (2014-9-11).
