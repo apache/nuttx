@@ -631,7 +631,9 @@ int up_addrenv_vtext(FAR group_addrenv_t *addrenv, FAR void **vtext)
 int up_addrenv_vdata(FAR group_addrenv_t *addrenv, uintptr_t textsize,
                      FAR void **vdata)
 {
-  bvdbg("return=%p\n", (FAR void *)CONFIG_ARCH_DATA_VBASE);
+  bvdbg("return=%p\n",
+        (FAR void *)(CONFIG_ARCH_DATA_VBASE + ARCH_DATA_RESERVE_SIZE));
+
   /* Not much to do in this case */
 
   DEBUGASSERT(addrenv && vdata);

@@ -116,7 +116,7 @@ up_fullcontextrestore:
 
 #ifdef CONFIG_BUILD_KERNEL
 	/* For the kernel build, we need to be able to transition gracefully
-	 * between kernel- and user-mode tasks.  We have to do that with a system
+	 * between kernel- and user-mode tasks.  Here we do that with a system
 	 * call; the system call will execute in kernel mode and but can return
 	 * to either user or kernel mode.
 	 */
