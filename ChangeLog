@@ -8500,3 +8500,12 @@
 	  more efficient, but I never tried it (2014-9-12).
 	* binfmt/libelf/libelf_load.c: ELF: Critical bugfix.. BSS was not being
 	  cleared (2014-9-12).
+	* configs/sama5d4-ek/knsh/defconfig and defconfig.ROMFS: Enable NSH
+	  file applications in these configurations (2014-9-12).
+	* libc/Kconfig, unistd/lib_execsymtab.c, configs/sim/nsh/defconfig, and
+	  stm32f4discovery/posix_spawn/defconfig: Having a symbol table is an
+	  option.  There are no symbol tables with CONFIG_BUILD_KERNEL, for
+	  example (2014-9-12).
+	* syscall/syscall.csv and include/sys/syscall.h: exevc, execvl,
+	  posix_spawn, and posix_spawnp were not properly integrated as system
+	  calls (2014-9-12).
