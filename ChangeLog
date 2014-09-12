@@ -8509,3 +8509,6 @@
 	* syscall/syscall.csv and include/sys/syscall.h: exevc, execvl,
 	  posix_spawn, and posix_spawnp were not properly integrated as system
 	  calls (2014-9-12).
+	* syscall/syscall_lookup.h: Fix typos in the stub lookup table
+	  (2014-9-12).
+
