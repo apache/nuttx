@@ -110,30 +110,14 @@ void up_initial_state(struct tcb_s *tcb)
     }
 #endif
 
-  /* Set supervisor- or user-mode, depending on how NuttX is configured and
-   * what kind of thread is being started.  Disable FIQs in any event
-   */
-
-#ifdef CONFIG_BUILD_KERNEL
-  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
-    {
-      /* It is a kernel thread.. set supervisor mode */
-
-      cpsr = PSR_MODE_SVC;
-    }
-  else
-    {
-      /* It is a normal task or a pthread.  Set user mode */
-
-      cpsr = PSR_MODE_USR;
-    }
-#else
-  /* If the kernel build is not selected, then all threads run in
-   * supervisor-mode.
+  /* Set supervisor-mode and disable FIQs, regardless of how NuttX is
+   * configured and of what kind of thread is being started.  That is
+   * because all threads, even user-mode threads will start in kernel
+   * trampoline at task_start() or pthread_start().  The thread's
+   * privileges will be dropped before transitioning to user code.
    */
 
   cpsr = PSR_MODE_SVC;
-#endif
 
   /* Enable or disable interrupts, based on user configuration */
 
@@ -154,4 +138,3 @@ void up_initial_state(struct tcb_s *tcb)
 
   xcp->regs[REG_CPSR] = cpsr;
 }
-
