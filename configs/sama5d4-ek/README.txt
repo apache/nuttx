@@ -3926,6 +3926,10 @@ Configurations
        Update: I don't believe that this HSMCI error occurs if file system
        debug output is enabled.
 
+    2014-9-11: Everything seems to be working quite nicely witn the ROMFS
+       file system.  A considerable amount of testing has been done and
+       there are no known defects as of this writing.
+
   nsh:
 
     This configuration directory provide the NuttShell (NSH).  This is a

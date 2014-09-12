@@ -53,16 +53,18 @@
  * following must also be defined:
  */
 
-/* Symbol table used by exec[l|v] */
+#ifdef CONFIG_EXECFUNCS_HAVE_SYMTAB
+  /* Symbol table used by exec[l|v] */
 
-#ifndef CONFIG_EXECFUNCS_SYMTAB
-#  error "CONFIG_EXECFUNCS_SYMTAB must be defined"
-#endif
+#  ifndef CONFIG_EXECFUNCS_SYMTAB
+#    error "CONFIG_EXECFUNCS_SYMTAB must be defined"
+#  endif
 
-/* Number of Symbols in the Table */
+  /* Number of Symbols in the Table */
 
-#ifndef CONFIG_EXECFUNCS_NSYMBOLS
-#  error "CONFIG_EXECFUNCS_NSYMBOLS must be defined"
+#  ifndef CONFIG_EXECFUNCS_NSYMBOLS
+#    error "CONFIG_EXECFUNCS_NSYMBOLS must be defined"
+#  endif
 #endif
 
 /****************************************************************************
