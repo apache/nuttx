@@ -77,7 +77,7 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
 /* The following can be individually enabled */
 
 #ifdef CONFIG_ARCH_HAVE_VFORK
-  SYSCALL_LOOKUP(vfork,                   0, SYS_vfork)
+  SYSCALL_LOOKUP(vfork,                   0, STUB_vfork)
 #endif
 
 #ifdef CONFIG_SCHED_ATEXIT
@@ -102,12 +102,12 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
 
 #if !defined(CONFIG_BINFMT_DISABLE) && defined(CONFIG_LIBC_EXECFUNCS)
 #  ifdef CONFIG_BINFMT_EXEPATH
-  SYSCALL_LOOKUP(posix_spawnp,            6, SYS_posix_spawnp)
+  SYSCALL_LOOKUP(posix_spawnp,            6, STUB_posix_spawnp)
 #  else
-  SYSCALL_LOOKUP(posix_spawn,             6, SYS_posix_spawn)
+  SYSCALL_LOOKUP(posix_spawn,             6, STUB_posix_spawn)
 #  endif
-  SYSCALL_LOOKUP(execv,                   2, SYS_execv)
-  SYSCALL_LOOKUP(execl,                   6, SYS_execl)
+  SYSCALL_LOOKUP(execv,                   2, STUB_execv)
+  SYSCALL_LOOKUP(execl,                   6, STUB_execl)
 #endif
 
 /* The following are only defined is signals are supported in the NuttX
@@ -291,5 +291,3 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-
