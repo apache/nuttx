@@ -58,15 +58,15 @@
  ****************************************************************************/
 /* Debug ********************************************************************/
 
-/* Output debug info if stack dump is selected -- even if
- * debug is not selected.
- */
-
-#if defined(CONFIG_DEBUG_SYSCALL) || defined(CONFIG_DEBUG_SVCALL)
+#if defined(CONFIG_DEBUG_SYSCALL)
 # define svcdbg(format, ...) lldbg(format, ##__VA_ARGS__)
 #else
 # define svcdbg(x...)
 #endif
+
+/* Output debug info if stack dump is selected -- even if debug is not
+ * selected.
+ */
 
 #ifdef CONFIG_ARCH_STACKDUMP
 # undef  lldbg
@@ -228,6 +228,30 @@ uint32_t *arm_syscall(uint32_t *regs)
           regs[REG_R0]         = regs[REG_R2];
         }
         break;
+
+      /* R0=SYS_context_restore:  Restore task context
+       *
+       * void up_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   R0 = SYS_context_restore
+       *   R1 = restoreregs
+       */
+
+#ifdef CONFIG_BUILD_KERNEL
+      case SYS_context_restore:
+        {
+          /* Replace 'regs' with the pointer to the register set in
+           * regs[REG_R1].  On return from the system call, that register
+           * set will determine the restored context.
+           */
+
+          regs = (uint32_t *)regs[REG_R1];
+          DEBUGASSERT(regs);
+        }
+        break;
+#endif
 
       /* R0=SYS_task_start:  This a user task start
        *
@@ -427,9 +451,9 @@ uint32_t *arm_syscall(uint32_t *regs)
   svcdbg("CPSR: %08x\n", regs[REG_CPSR]);
 #endif
 
-  /* Return the last value of curent_regs.  This supports context switchs
-   * on return from the exception.  That capability is not used here,
-   * however.
+  /* Return the last value of curent_regs.  This supports context switches
+   * on return from the exception.  That capability is only used with the
+   * SYS_context_switch system call.
    */
 
   return regs;
