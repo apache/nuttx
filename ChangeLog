@@ -8489,3 +8489,12 @@
 	* arch/arm/src/armv7-a/arm_vectors.S: Fix logic for returning from
 	  exceptions to user-mode contexts.  NuttX processes are now functional
 	  on the Cortex-A (2014-9-11).
+	* arch/arm/src/armv7-a/arm_fullcontextrestore.S, arm_syscall.c, crt0.c,
+	  and svcall.h: Modify up_fullcontextrestore() for CONFIG_BUILD_KERNEL.
+	  It changed CPSR while in kernel.  That will crash if the new CPSR is
+	  user mode while executing in kernel space.  Fixed by adding a
+	  SYS_context_restore system call.  There is an alternative, simpler
+	  modification to up_fullcontextrestore() that could have been done:  It
+	  might have been possible to use the SPSR instead of the CPRSR and then
+	  do an exception return from up_fullcontextrestore().  That would be
+	  more efficient, but I never tried it (2014-9-12).
