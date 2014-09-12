@@ -8498,3 +8498,5 @@
 	  might have been possible to use the SPSR instead of the CPRSR and then
 	  do an exception return from up_fullcontextrestore().  That would be
 	  more efficient, but I never tried it (2014-9-12).
+	* binfmt/libelf/libelf_load.c: ELF: Critical bugfix.. BSS was not being
+	  cleared (2014-9-12).
