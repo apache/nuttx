@@ -107,6 +107,16 @@ config LIBC_EXECFUNCS
 
 if LIBC_EXECFUNCS
 
+config EXECFUNCS_HAVE_SYMTAB
+	bool "Have symbol table"
+	default n if BUILD_KERNEL
+	default y if !BUILD_KERNEL
+	---help---
+		If you have a system symbol table, then you must select this
+		option in order to use it.  Symbol tables are required in most
+		cases in order to like executable programs to the base code.
+
+if EXECFUNCS_HAVE_SYMTAB
 config EXECFUNCS_SYMTAB
 	string "Symbol table used by exec[l|v]"
 	default "g_symtab"
@@ -129,6 +139,7 @@ config EXECFUNCS_NSYMBOLS
 		symbols in that table.  This selection provides the number of
 		symbols in the symbol table.
 
+endif # EXECFUNCS_HAVE_SYMTAB
 endif # LIBC_EXECFUNCS
 
 config POSIX_SPAWN_PROXY_STACKSIZE

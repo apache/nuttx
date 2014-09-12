@@ -69,14 +69,21 @@
  * Public Variables
  ****************************************************************************/
 
+#ifdef CONFIG_EXECFUNCS_HAVE_SYMTAB
 extern const struct symtab_s CONFIG_EXECFUNCS_SYMTAB;
+#endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
+#ifdef CONFIG_EXECFUNCS_HAVE_SYMTAB
 static FAR const struct symtab_s *g_exec_symtab = &CONFIG_EXECFUNCS_SYMTAB;
 static int g_exec_nsymbols = CONFIG_EXECFUNCS_NSYMBOLS;
+#else
+static FAR const struct symtab_s *g_exec_symtab;
+static int g_exec_nsymbols;
+#endif
 
 /****************************************************************************
  * Public Functions
