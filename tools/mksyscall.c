@@ -94,6 +94,7 @@ static const char *check_funcptr(const char *type)
     {
       return str + 2;
     }
+
   return NULL;
 }
 
@@ -104,6 +105,7 @@ static const char *check_array(const char *type)
     {
       return str;
     }
+
   return NULL;
 }
 
@@ -114,7 +116,8 @@ static void print_formalparm(FILE *stream, const char *argtype, int parmno)
 
   /* Function pointers and array formal parameter types are a little more work */
 
-  if ((part2 = check_funcptr(argtype)) != NULL || (part2 = check_array(argtype)) != NULL)
+  if ((part2 = check_funcptr(argtype)) != NULL ||
+      (part2 = check_array(argtype)) != NULL)
     {
       len = part2 - argtype;
       (void)fwrite(argtype, 1, len, stream);
@@ -280,6 +283,7 @@ static void generate_proxy(int nparms)
             {
               fprintf(stream, ", ");
             }
+
           print_formalparm(stream, formal, i+1);
         }
     }

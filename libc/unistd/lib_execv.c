@@ -91,9 +91,10 @@
  *   (2) the number of symbols in that table.  This information is currently
  *   provided to 'exec()' from 'exec[l|v]()' via NuttX configuration settings:
  *
- *     CONFIG_LIBC_EXECFUNCS     : Enable exec[l|v] support
- *     CONFIG_EXECFUNCS_SYMTAB   : Symbol table used by exec[l|v]
- *     CONFIG_EXECFUNCS_NSYMBOLS : Number of symbols in the table
+ *     CONFIG_LIBC_EXECFUNCS        : Enable exec[l|v] support
+ *     CONFIG_EXECFUNCS_HAVE_SYMTAB : Defined if there is a symbol table
+ *       CONFIG_EXECFUNCS_SYMTAB    : Symbol table used by exec[l|v]
+ *       CONFIG_EXECFUNCS_NSYMBOLS  : Number of symbols in the table
  *
  *   As a result of the above, the current implementations of 'execl()' and
  *   'execv()' suffer from some incompatibilities that may or may not be
