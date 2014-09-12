@@ -414,9 +414,18 @@ uint32_t *arm_syscall(uint32_t *regs)
         break;
     }
 
+#if defined(CONFIG_DEBUG_SYSCALL)
   /* Report what happened */
 
-  svcdbg("SYSCALL Return: %d \n", regs[REG_R0]);
+  svcdbg("SYSCALL Exit: regs: %p: %d\n", regs);
+  svcdbg("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+         regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
+         regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
+  svcdbg("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+         regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
+         regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
+  svcdbg("CPSR: %08x\n", regs[REG_CPSR]);
+#endif
 
   /* Return the last value of curent_regs.  This supports context switchs
    * on return from the exception.  That capability is not used here,
