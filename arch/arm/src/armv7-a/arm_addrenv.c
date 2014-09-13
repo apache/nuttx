@@ -255,7 +255,7 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
 
   memset(addrenv, 0, sizeof(group_addrenv_t));
 
-  /* Back the allocation up with physical pages and set up the level mapping
+  /* Back the allocation up with physical pages and set up the level 2 mapping
    * (which of course does nothing until the L2 page table is hooked into
    * the L1 page table).
    */
@@ -360,9 +360,9 @@ int up_addrenv_destroy(FAR group_addrenv_t *addrenv)
 
   arm_addrenv_destroy_region(addrenv->heap, ARCH_HEAP_NSECTS,
                              CONFIG_ARCH_HEAP_VBASE);
+#endif
 
   memset(addrenv, 0, sizeof(group_addrenv_t));
-#endif
   return OK;
 }
 

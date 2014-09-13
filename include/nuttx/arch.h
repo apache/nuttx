@@ -1044,6 +1044,94 @@ int up_addrenv_detach(FAR struct task_group_s *group, FAR struct tcb_s *tcb);
 #endif
 
 /****************************************************************************
+ * Name: up_addrenv_stackalloc
+ *
+ * Description:
+ *   This function is called when a new thread is created in order to
+ *   instantiate an address environment for the new thread's stack.
+ *   up_addrenv_stackalloc() is essentially the allocator of the physical
+ *   memory for the new task's stack.
+ *
+ * Input Parameters:
+ *   tcb - The TCB of the thread that requires the stack address environment.
+ *   stacksize - The size (in bytes) of the initial stack address
+ *     environment needed by the task.  This region may be read/write only.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_ARCH_STACK_DYNAMIC)
+int up_addrenv_stackalloc(FAR struct tcb_s *tcb, size_t stacksize);
+#endif
+
+/****************************************************************************
+ * Name: up_addrenv_stackfree
+ *
+ * Description:
+ *   This function is called when any thread exits.  This function then
+ *   destroys the defunct address environment for the thread's stack,
+ *   releasing the underlying physical memory.
+ *
+ * Input Parameters:
+ *   tcb - The TCB of the thread that no longer requires the stack address
+ *     environment.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_ARCH_STACK_DYNAMIC)
+int up_addrenv_stackfree(FAR struct tcb_s *tcb);
+#endif
+
+/****************************************************************************
+ * Name: up_addrenv_vstack
+ *
+ * Description:
+ *   Return the virtual address associated with the newly create stack
+ *   address environment.
+ *
+ * Input Parameters:
+ *   tcb - The TCB of the thread with the stack address environment of
+ *     interest.
+ *   vstack - The location to return the stack virtual base address.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_ARCH_STACK_DYNAMIC)
+int up_addrenv_vstack(FAR const struct tcb_s *tcb, FAR void **vstack);
+#endif
+
+/****************************************************************************
+ * Name: up_addrenv_stackselect
+ *
+ * Description:
+ *   After an address environment has been established for a task's stack
+ *   (via up_addrenv_stackalloc().  This function may be called to instantiate
+ *   that address environment in the virtual address space.  This is a
+ *   necessary step before each context switch to the newly created thread
+ *   (including the initial thread startup).
+ *
+ * Input Parameters:
+ *   tcb - The TCB of the thread with the stack address environment to be
+ *     instantiated.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_ARCH_STACK_DYNAMIC)
+int up_addrenv_stackselect(FAR const struct tcb_s *tcb);
+#endif
+
+/****************************************************************************
  * Name: up_interrupt_context
  *
  * Description:
