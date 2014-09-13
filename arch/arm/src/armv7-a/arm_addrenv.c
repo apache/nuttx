@@ -104,10 +104,6 @@
 #  error CONFIG_ARCH_HEAP_VBASE not aligned to section boundary
 #endif
 
-#if (CONFIG_ARCH_STACK_VBASE & SECTION_MASK) != 0
-#  error CONFIG_ARCH_STACK_VBASE not aligned to section boundary
-#endif
-
 /* Using a 4KiB page size, each 1MiB section maps to a PTE containing
  * 256*2KiB entries
  */

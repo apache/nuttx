@@ -137,8 +137,11 @@ uintptr_t sam_physpgaddr(uintptr_t vaddr)
 
   if ((vaddr >= CONFIG_ARCH_TEXT_VBASE && vaddr < ARCH_TEXT_VEND) ||
       (vaddr >= CONFIG_ARCH_DATA_VBASE && vaddr < ARCH_DATA_VEND) ||
-      (vaddr >= CONFIG_ARCH_HEAP_VBASE && vaddr < ARCH_HEAP_VEND) ||
-      (vaddr >= CONFIG_ARCH_STACK_VBASE && vaddr < ARCH_STACK_VEND))
+      (vaddr >= CONFIG_ARCH_HEAP_VBASE && vaddr < ARCH_HEAP_VEND)
+#ifdef CONFIG_ARCH_STACK_DYNAMIC
+      || (vaddr >= CONFIG_ARCH_STACK_VBASE && vaddr < ARCH_STACK_VEND)
+#endif
+      )
     {
       /* Yes.. Get Level 1 page table entry corresponding to this virtual
        * address.

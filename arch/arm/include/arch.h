@@ -99,17 +99,19 @@ do { \
 
 /* Convert 4KiB pages to 1MiB sections */
 
-#  define __PG2SECT_SHIFT   (20 - MM_PGSHIFT)
-#  define __PG2SECT_MASK    ((1 << __PG2SECT_SHIFT) - 1)
+#  define __PG2SECT_SHIFT     (20 - MM_PGSHIFT)
+#  define __PG2SECT_MASK      ((1 << __PG2SECT_SHIFT) - 1)
 
-#  define ARCH_PG2SECT(p)   (((p) + __PG2SECT_MASK) >> __PG2SECT_SHIFT)
-#  define ARCH_SECT2PG(s)   ((s) << __PG2SECT_SHIFT)
+#  define ARCH_PG2SECT(p)     (((p) + __PG2SECT_MASK) >> __PG2SECT_SHIFT)
+#  define ARCH_SECT2PG(s)     ((s) << __PG2SECT_SHIFT)
 
-#  define ARCH_TEXT_NSECTS  ARCH_PG2SECT(CONFIG_ARCH_TEXT_NPAGES)
-#  define ARCH_DATA_NSECTS  ARCH_PG2SECT(CONFIG_ARCH_DATA_NPAGES)
-#  define ARCH_HEAP_NSECTS  ARCH_PG2SECT(CONFIG_ARCH_HEAP_NPAGES)
-#  define ARCH_STACK_NSECTS ARCH_PG2SECT(CONFIG_ARCH_STACK_NPAGES)
+#  define ARCH_TEXT_NSECTS    ARCH_PG2SECT(CONFIG_ARCH_TEXT_NPAGES)
+#  define ARCH_DATA_NSECTS    ARCH_PG2SECT(CONFIG_ARCH_DATA_NPAGES)
+#  define ARCH_HEAP_NSECTS    ARCH_PG2SECT(CONFIG_ARCH_HEAP_NPAGES)
 
+#  ifdef CONFIG_ARCH_STACK_DYNAMIC
+#    define ARCH_STACK_NSECTS ARCH_PG2SECT(CONFIG_ARCH_STACK_NPAGES)
+#  endif
 #endif
 
 /****************************************************************************
