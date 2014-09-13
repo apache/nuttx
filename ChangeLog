@@ -8511,4 +8511,7 @@
 	  calls (2014-9-12).
 	* syscall/syscall_lookup.h: Fix typos in the stub lookup table
 	  (2014-9-12).
-
+	* configs/stm32f4discovery/netnsh, Kconfig, README.txt, and
+	  include/board.h: Add the network enabled NSH configuration for the
+	  STM32F4Discovery board with the STM32F4DIS-BB base board installed
+	  (2014-9-13).
