@@ -31,6 +31,7 @@ Contents
   - UARTs
   - Timer Inputs/Outputs
   - FPU
+  - STM32F4DIS-BB
   - FSMC SRAM
   - SSD1289
   - UG-2864AMBAG01 / UG-2864HSWEG01
@@ -500,6 +501,53 @@ in order to successfully build NuttX using the Atollic toolchain WITH FPU suppor
 See the section above on Toolchains, NOTE 2, for explanations for some of
 the configuration settings.  Some of the usual settings are just not supported
 by the "Lite" version of the Atollic toolchain.
+
+STM32F4DIS-BB
+=============
+
+On-board PIO usage:
+
+  ---------- ------------- ------------------------------
+  PIO        SIGNAL        FUNCTION
+  ---------- ------------- ------------------------------
+  PB11       TXEN          LAN8720
+  PB12       TXD0
+  PB13       TXD1
+  PC4        RXD0/MODE0
+  PC5        RXD1/MODE1
+  PA7        RXDR/PHYAD0
+  PA2        MDIO
+  PC1        MDC
+  PA1        NINT/REFCLK0
+  PE2        NRST
+  ---------- ------------- ------------------------------
+  PC6        D2            DCMI
+  PC7        D3
+  PE0        D4
+  PE1        D5
+  PE4        D6
+  PB6        D7
+  PE5        D8
+  PE6        D9
+  PA6        PCLK
+  PA4        HS
+  PB7        VS
+  PD6        PWR_EN
+  PD12       RST
+  PB9        SDA
+  PB8        SCL
+  ---------- ------------- ------------------------------
+  USART6_TX  T1IN          SP3232EEY-L
+  USART6_RX  T2OUT
+  ---------- ------------- ------------------------------
+  PB15       NCD           MicroSD
+  PC9        DAT1
+  PC8        DAT0
+  PC12       CLK
+  PD2        CMD
+  PC11       CD/DAT3
+  PC10       DAT2
+  ---------- ------------- ------------------------------
 
 FSMC SRAM
 =========
