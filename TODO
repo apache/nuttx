@@ -478,13 +478,23 @@ o Kernel/Protected Build
                address environment must be instantiated in memory to load the
                .text and .data and to allocate the initial user space components
                from the new user heap.
+
                However, the previous program's stack currently resides in its
                heap.  So when a process tries to run another program, its heap
                is unmapped and the system crashes.
+
                The fix is to add a separate stack in a separate memory region
                that does not get unmapped when creating new processes.  There
                are hooks in place to do this; I just need to get time to get
                that done.
+
+               UPDATE: I don't think it is that simple.  Startup logic will need
+               to access the new stack in its correct location to do things like
+               setup task arguments.  So I don't think that there is anyway to
+               do that without losing the current stack.
+
+               I may have to do the Linux solution:  Two stacks for each thread:
+               The main user stack, and a tiny kernel mode stack.
   Status:      Open
   Priority:    Pretty high... the kernel build is useless without this
                capability.

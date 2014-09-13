@@ -3944,6 +3944,10 @@ Configurations
        processes.  There are hooks in place to do this; I just need to get
        time to get that done.
 
+       To see the bug in action:
+
+         nsh> /bin/hello
+
   nsh:
 
     This configuration directory provide the NuttShell (NSH).  This is a
@@ -4416,7 +4420,7 @@ Configurations
    STATUS:
        See the To-Do list below
 
-   (2014-8-30): Retesting today I am seeing a strange behavior:  Serial
+   2014-8-30: Retesting today I am seeing a strange behavior:  Serial
        output is coming out in chunks with delays between the chunks.  It
        appears that something is not good in the serial port configuration.
        I see no such chunky behavior in, for example, grahics output.
