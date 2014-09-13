@@ -8515,3 +8515,11 @@
 	  include/board.h: Add the network enabled NSH configuration for the
 	  STM32F4Discovery board with the STM32F4DIS-BB base board installed
 	  (2014-9-13).
+	* nuttx/mm/umm_sbrk.c: Fix a typo in use of a configuration setting
+	  (2014-9-13).
+	* configs/stm32f4discovery/README.txt: Add STM32F4DIS-BB GPIO pin
+	  usage (2014-9-13).
+	* arch/Kconfig, arch/arm/include/arch.h, src/armv7-a/arm_addrenv.c,
+	  sama5/sam_pgalloc.c, and include/nuttx/addrenv.h: Add a configuration
+	  option for dynamic stack management (stack management not yet
+	  implemented) (2014-9-13).
