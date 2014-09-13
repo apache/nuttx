@@ -1195,6 +1195,24 @@ Where <subdir> is one of the following:
        you do this a lot, you will probably want to invest a little time
        to develop a tool to automate these steps.
 
+  netnsh:
+  ------
+    This is a special version of the NuttShell (nsh) configuration that is
+    tailored to work with the STM32F4DIS-BB base board.  This version
+    derives from nsh configuration so all of the notes apply there except as
+    noted below.
+
+    NOTES:
+
+    1. This example uses USART6 for the serial console.  The STM32F4DIS-BB
+       provides RS-232 drivers for USART6 and allows access via the DB9
+       connector on the base board.  USART6 is, therefore, the more
+       convenient UART to use for the serial console.
+
+    2. Networking is enabled.  The STM32F4DIS-BB has an SMC LAN2870 PHY
+       and RJ5 network connector.  Support is enabled for ICMP, TCP/IP,
+       UDP, and ARP.
+
   nsh:
   ---
     Configures the NuttShell (nsh) located at apps/examples/nsh.  The
