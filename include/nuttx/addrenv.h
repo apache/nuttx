@@ -274,6 +274,27 @@ struct addrenv_reserve_s
  *   up_addrenv_detach   - Release the thread's reference to an address
  *                         environment when a task/thread exits.
  *
+ * CONFIG_ARCH_STACK_DYNAMIC=y indicates that the user process stack resides
+ * in its own address space.  This options is also *required* if
+ * CONFIG_BUILD_KERNEL and CONFIG_LIBC_EXECFUNCS are selected.  Why?
+ * Because the caller's stack must be preserved in its own address space
+ * when we instantiate the environment of the new process in order to
+ * initialize it.
+ *
+ * NOTE: The naming of the CONFIG_ARCH_STACK_DYNAMIC selection implies that
+ * dynamic stack allocation is supported.  Certainly this option must be set
+ * if dynamic stack allocation is supported by a platform.  But the more
+ * general meaning of this configuration environment is simply that the
+ * stack has its own address space.
+ *
+ * If CONFIG_ARCH_STACK_DYNAMIC=y is selected then the platform specific
+ * code must export these additional interfaces:
+ *
+ *   up_addrenv_stackalloc  - Create a stack address environment
+ *   up_addrenv_stackfree   - Destroy a stack address environment.
+ *   up_addrenv_vstack      - Returns the virtual base address of the stack
+ *   up_addrenv_stackselect - Instantiate a stack address environment
+ *
  ****************************************************************************/
 
 /* Prototyped in include/nuttx/arch.h as part of the OS/platform interface */
