@@ -8528,3 +8528,7 @@
 	  include/nuttx/addrenv.h and arch.h: Move static helper routines from
 	  arm_addrenv.c and may them global so that they can be shared by
 	  forthcoming stack address environment logic (2014-9-13).
+	* arch/arm/src/armv7-a/arm_addrenv_stack.c, arm_addrenv.c,
+	  a1x/Make.defs, sama5/Make.defs, and include/nuttx/arch.h: Add logic
+	  needed to manage a virtualized stack.  Not yet incorporated into
+	  base OS logic (2014-9.13).
