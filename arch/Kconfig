@@ -235,7 +235,7 @@ config ARCH_STACK_DYNAMIC
 		general meaning of this configuration environment is simply that the
 		stack has its own address space.
 
-		NOTE:  This options is also *required* if BUILD_KERNEL and
+		NOTE:  This option is also *required* if BUILD_KERNEL and
 		LIBC_EXECFUNCS are selected.  Why?  Because the caller's stack must
 		be preserved in its own address space when we instantiate the
 		environment of the new process in order to initialize it.
