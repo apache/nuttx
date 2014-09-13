@@ -73,8 +73,10 @@
  *    program break is returned by sbrk(0). 
  *
  * Input Parameters:
+ *    heap - A reference to the data structure that defines this heap.
  *    incr - Specifies the number of bytes to add or to remove from the
  *      space allocated for the process.
+      maxbreak - The maximum permissible break address.
  *
  * Returned Value:
  *    Upon successful completion, sbrk() returns the prior break value.
