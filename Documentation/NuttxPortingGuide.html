@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: September 10, 2014</p>
+      <p>Last Updated: September 13, 2014</p>
     </td>
   </tr>
 </table>
@@ -115,7 +115,11 @@
       <a href="#up_addrenv_restore">4.4.7 <code>up_addrenv_restore()</code></a></br>
       <a href="#up_addrenv_clone">4.4.8 <code>up_addrenv_clone()</code></a></br>
       <a href="#up_addrenv_attach">4.4.9 <code>up_addrenv_attach()</code></a></br>
-      <a href="#up_addrenv_detach">4.4.10 <code>up_addrenv_detach()</code></a>
+      <a href="#up_addrenv_detach">4.4.10 <code>up_addrenv_detach()</code></a></br>
+      <a href="#up_addrenv_stackalloc">4.4.11 <code>up_addrenv_stackalloc()</code></a></br>
+      <a href="#up_addrenv_stackfree">4.4.12 <code>up_addrenv_stackfree()</code></a></br>
+      <a href="#up_addrenv_vstack">4.4.13 <code>up_addrenv_vstack()</code></a></br>
+      <a href="#up_addrenv_stackselect">4.4.14 <code>up_addrenv_stackselect()</code></a>
     </ul>
     <a href="#exports">4.5 APIs Exported by NuttX to Architecture-Specific Logic</a>
     <ul>
@@ -2963,6 +2967,37 @@ VxWorks provides the following comparable interface:
       </li>
     </ul>
   </li>
+  <li>
+    <p>
+      <b>Dynamic Stack Support</b>.
+      <code>CONFIG_ARCH_STACK_DYNAMIC=y</code> indicates that the user process stack resides in its own address space.
+      This options is also <i>required</i> if <code> CONFIG_BUILD_KERNEL</code> and <code>CONFIG_LIBC_EXECFUNCS</code> are selected.
+      Why?
+      Because the caller's stack must be preserved in its own address space when we instantiate the environment of the new process in order to initialize it.
+    </p>
+    <p>
+      <b>NOTE:</b> The naming of the <code>CONFIG_ARCH_STACK_DYNAMIC</code> selection implies that dynamic stack allocation is supported.
+      Certainly this option must be set if dynamic stack allocation is supported by a platform.
+      But the more general meaning of this configuration environment is simply that the stack has its own address space.
+    </p>
+    <p>
+      If <code>CONFIG_ARCH_STACK_DYNAMIC=y</code> is selected then the platform specific code must export these additional interfaces:
+    </p>
+    <ul>
+      <li>
+        <a href="#up_addrenv_stackalloc">4.4.11 <code>up_addrenv_stackalloc()</code></a>:
+        Create a stack address environment
+      <li>
+        <a href="#up_addrenv_stackfree">4.4.12 <code>up_addrenv_stackfree()</code></a>:
+        Destroy a stack address environment.
+      <li>
+        <a href="#up_addrenv_vstack">4.4.13 <code>up_addrenv_vstack()</code></a>:
+        Returns the virtual base address of the stack
+      <li>
+        <a href="#up_addrenv_stackselect">4.4.14 <code>up_addrenv_stackselect()</code></a>:
+        Instantiate a stack address environment
+    </ul>
+  </li>
 </ol>
 
 <h3><a name="up_addrenv_create">4.4.1 <code>up_addrenv_create()</code></a></h3>
@@ -3167,6 +3202,92 @@ VxWorks provides the following comparable interface:
 <ul>
   <li><code>group</code>: The group to which the thread belonged.</li>
   <li><code>tcb</code>: The TCB of the task or thread whose the address environment will be released.</li>
+</ul>
+<p><b>Returned Value</b>:</p>
+<ul>
+  Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
+</ul>
+
+<h3><a name="up_addrenv_stackalloc">4.4.11 <code>up_addrenv_stackalloc()</code></a></h3>
+<p><b>Function Prototype</b>:<p>
+<ul>
+  <code>int up_addrenv_stackalloc(FAR struct tcb_s *tcb, size_t stacksize);</code>
+</ul>
+<p><b>Description</b>:</p>
+<ul>
+<p>
+  This function is called when a new thread is created in order to instantiate an address environment for the new thread's stack.
+  <code>up_addrenv_stackalloc()</code> is essentially the allocator of the physical memory for the new task's stack.
+</p>
+</ul>
+<p><b>Input Parameters</b>:</p>
+<ul>
+  <li><code>tcb</code>: The TCB of the thread that requires the stack address environment.</li>
+  <li><code>stacksize</code>: The size (in bytes) of the initial stack address environment needed by the task.  This region may be read/write only.</li>
+</ul>
+<p><b>Returned Value</b>:</p>
+<ul>
+  Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
+</ul>
+
+<h3><a name="up_addrenv_up_addrenv_stackfreeattach">4.4.12 <code>up_addrenv_stackfree()</code></a></h3>
+<p><b>Function Prototype</b>:<p>
+<ul>
+  <code>int up_addrenv_stackfree(FAR struct tcb_s *tcb);</code>
+</ul>
+<p><b>Description</b>:</p>
+<ul>
+  <p>
+    This function is called when any thread exits.
+    This function then destroys the defunct address environment for the thread's stack, releasing the underlying physical memory.
+  </p>
+</ul>
+<p><b>Input Parameters</b>:</p>
+<ul>
+  <li><code>tcb</code>: The TCB of the thread that no longer requires the stack address environment.</li>
+</ul>
+<p><b>Returned Value</b>:</p>
+<ul>
+  Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
+</ul>
+
+<h3><a name="up_addrenv_vstack">4.4.13 <code>up_addrenv_vstack()</code></a></h3>
+<p><b>Function Prototype</b>:<p>
+<ul>
+  <code>int up_addrenv_vstack(FAR const struct tcb_s *tcb, FAR void **vstack);</code>
+</ul>
+<p><b>Description</b>:</p>
+<ul>
+  <p>
+    Return the virtual address associated with the newly create stack address environment.
+  </p>
+</ul>
+<p><b>Input Parameters</b>:</p>
+<ul>
+  <li><code>tcb</code>:The TCB of the thread with the stack address environment of interest. </li>
+  <li><code>vstack</code>: The location to return the stack virtual base address.</li>
+</ul>
+<p><b>Returned Value</b>:</p>
+<ul>
+  Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
+</ul>
+
+<h3><a name="up_addrenv_stackselect">4.4.14 <code>up_addrenv_stackselect()</code></a></h3>
+<p><b>Function Prototype</b>:<p>
+<ul>
+  <code>int up_addrenv_stackselect(FAR const struct tcb_s *tcb);</code>
+</ul>
+<p><b>Description</b>:</p>
+<ul>
+  <P>
+    After an address environment has been established for a task's stack (via <code>up_addrenv_stackalloc()</code>.
+    This function may be called to instantiate that address environment in the virtual address space.
+    This is a necessary step before each context switch to the newly created thread (including the initial thread startup).
+  </p>
+</ul>
+<p><b>Input Parameters</b>:</p>
+<ul>
+  <li><code>tcb</code>: The TCB of the thread with the stack address environment to be instantiated.</li>
 </ul>
 <p><b>Returned Value</b>:</p>
 <ul>
