@@ -5,8 +5,15 @@
 
 if ARCH_BOARD_STM32F4_DISCOVERY
 
+config STM32F4DISBB
+	bool "STM32F4DIS-BB base board"
+	default n
+	---help---
+		Select if you are using the STM32F4DIS-BB base board with the
+		STM32F4Discovery.
+
 config PM_BUTTONS
-	bool "PM Button support"
+	bool "PM button support"
 	default n
 	depends on PM && ARCH_IRQBUTTONS
 	---help---
@@ -17,21 +24,24 @@ config PM_BUTTON_ACTIVITY
 	default 10
 	depends on PM_BUTTONS
 	---help---
-		The activity weight to report to the power management subsystem when a button is pressed.
+		The activity weight to report to the power management subsystem when
+		a button is pressed.
 
 config PM_ALARM_SEC
 	int "PM_STANDBY delay (seconds)"
 	default 15
 	depends on PM && RTC_ALARM
 	---help---
-		Number of seconds to wait in PM_STANDBY before going to PM_STANDBY mode.
+		Number of seconds to wait in PM_STANDBY before going to PM_STANDBY
+		mode.
 
 config PM_ALARM_NSEC
 	int "PM_STANDBY delay (nanoseconds)"
 	default 0
 	depends on PM && RTC_ALARM
 	---help---
-		Number of additional nanoseconds to wait in PM_STANDBY before going to PM_STANDBY mode.
+		Number of additional nanoseconds to wait in PM_STANDBY before going
+		to PM_STANDBY mode.
 
 config PM_SLEEP_WAKEUP
 	bool "PM_SLEEP wake-up alarm"
@@ -52,6 +62,7 @@ config PM_SLEEP_WAKEUP_NSEC
 	default 0
 	depends on PM && RTC_ALARM
 	---help---
-		Number of additional nanoseconds to wait in PM_SLEEP before going to PM_STANDBY mode.
+		Number of additional nanoseconds to wait in PM_SLEEP before going to
+		PM_STANDBY mode.
 
 endif
