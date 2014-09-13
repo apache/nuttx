@@ -8523,3 +8523,8 @@
 	  sama5/sam_pgalloc.c, and include/nuttx/addrenv.h: Add a configuration
 	  option for dynamic stack management (stack management not yet
 	  implemented) (2014-9-13).
+	* arch/Kconfigm arm/src/armv7-a/addrenv.h, arm_addrenv.c, and
+	  arm_addrenv_utils.c, a1x/Make.defs, and sama5/Make.defs,
+	  include/nuttx/addrenv.h and arch.h: Move static helper routines from
+	  arm_addrenv.c and may them global so that they can be shared by
+	  forthcoming stack address environment logic (2014-9-13).
