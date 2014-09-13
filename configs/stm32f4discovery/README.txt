@@ -356,8 +356,13 @@ USART6
 Default USART/UART Configuration
 --------------------------------
 
-USART2 is enabled in all configurations (see */defconfig).  RX and TX are
+USART2 is enabled in most configurations (see */defconfig).  RX and TX are
 configured on pins PA3 and PA2, respectively (see include/board.h).
+
+These pins selections, however, conflict with Ethernet pin usage on the
+STM32F4DIS-BB base board.  The STM32F4DIS-BB base board provides RS-232
+drivers and a DB9 connector for USART6.  USART6 is the preferred serial
+console for use with the STM32F4DIS-BB.
 
 Timer Inputs/Outputs
 ====================
