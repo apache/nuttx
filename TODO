@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated August 18, 2014)
+NuttX TODO List (Last updated September 13, 2014)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -12,7 +12,7 @@ nuttx/
   (2)  Memory Managment (mm/)
   (3)  Signals (sched/, arch/)
   (2)  pthreads (sched/)
- (11)  Kernel Build
+  (9)  Kernel/Protected Builds
   (4)  C++ Support
   (6)  Binary loaders (binfmt/)
  (13)  Network (net/, drivers/net)
@@ -326,26 +326,17 @@ o pthreads (sched/)
                solution. So I discarded a few hours of programming. Not a
                big loss from the experience I gained."
 
-o Kernel Build
-  ^^^^^^^^^^^^
-
-  Title:       GRAPHICS PARTITIONING.
-  Description: In the kernel build mode (where NuttX is built as a monolithic
-               kernel and user code must trap into the protected kernel via
-               syscalls), the single user mode cannot be supported.  In this
-               built configuration, only the multiple user mode can be supported
-               with the NX server residing inside of the kernel space.
-  Status:      Closed.  This is not a bug, this is just way the things are.
-  Priority:    N/A.
+o Kernel/Protected Build
+  ^^^^^^^^^^^^^^^^^^^^^^
 
   Title:       NSH PARTITIONING.
   Description: There are issues with several NSH commands in the NuttX kernel
-               build mode (where NuttX is built as a monolithic kernel and
-               user code must trap into the protected kernel via syscalls).
-               The current NSH implementation has several commands that call
-               directly into kernel internel functions for whicht there is
-               no syscall available.  The commands cause link failures in
-               the kernel build mode and must currently be disabled.
+               and protected build modes (where NuttX is built as a monolithic
+               kernel and user code must trap into the protected kernel via
+               syscalls). The current NSH implementation has several commands
+               that call  directly into kernel internal functions for which
+               there is no syscall available.  The commands cause link failures
+               in the kernel/protected build mode and must currently be disabled.
                Here are known problems that must be fixed:
 
                COMMAND  KERNEL INTERFACE(s)
@@ -374,9 +365,9 @@ o Kernel Build
 
   Title:       TELNETD PARTITIONING.
   Description: Telnetd is implemented as a driver that resides in the apps/
-               directory.  In the kernel build, mode, the driver logic must
-               be moved into the kernel part of the build (nuttx/, although
-               the application level interfaces must stay in apps/).
+               directory.  In the kernel/protected build modes, the driver
+               logic must be moved into the kernel part of the build (nuttx/,
+               although the application level interfaces must stay in apps/).
   Status:      Open
   Priority:    Medium
 
@@ -389,16 +380,9 @@ o Kernel Build
   Status:      Open
   Priority:    Medium
 
-  Title:       LOAD-ABLE MODULE SUPPORT UNVERIFIED
-  Description: It has not been verified if NXFLAT and ELF modules work correctly
-               in the kernel build.  They should load into user-space memory.
-  Status:      Open
-  Priority:    Medium.  There is no configuration that uses NXFLAT or ELF with
-               a kernel build now.
-
-  Title:       C++ CONSTRUCTORS HAVE TOO MANY PRIVILEGES
+  Title:       C++ CONSTRUCTORS HAVE TOO MANY PRIVILEGES (PROTECTED MODE)
   Description: When a C++ ELF module is loaded, its C++ constructors are called
-               via sched/task_starthook.c logic.  This logic runs in kernel mode.
+               via sched/task_starthook.c logic.  This logic runs in protected mode.
                The is a security hole because the user code runs with kernel-
                privileges when the constructor executes.
 
@@ -445,24 +429,18 @@ o Kernel Build
                "This one would be easy: Just a change to include/nuttx/userspace.h,
                 configs/*/kernel/up_userspace.c, libc/, sched/sched_addreadytorun.c, and
                 sched/sched_removereadytorun.c. That would eliminate 59% of the syscalls."
+
+               Update:
+               This is probably also just a symptom of the OS test that does mostly
+               console output.  The requests for the pid() are part of the
+               implementation of the I/O's re-entrant semaphore implementation and
+               would not be an issue in the more general case.
   Status:      Open
   Priority:    Low-Medium.  Right now, I do not know if these syscalls are a
                real performance issue or not.  The above statistics were collected
                from a an atypical application (the OS test), and does an excessive
                amount of console output.  There is probably no issue with more typical
                embedded applications.
-
-  Title:       ARMv6/7-M SYSCALL PERFORMANCE IMPROVEMENT
-  Description: Currently the code issues an SVCall to go from user- to kernel-mode
-               and another go return to user-mode.  The second is unnecessary:
-               If there were a stub in user-space that just set the unprivileged
-               mode in the CONTROL register and returned, then the dispatch_syscall()
-               function could just jump to the stub instead of using second SVCall.
-               Hmmm... would this expose a security whole by executing in user-space
-               with privileges?  That already happens when the userspace memory
-               allocators are called.
-  Status:      Open
-  Priority:    Low (unless performance becomes an issue).
 
   Title:       SECURITY ISSUES
   Description: In the current designed, the kernel code calls into the user-space
@@ -492,6 +470,24 @@ o Kernel Build
   Priority:    Low.  This is a good idea and certainly an architectural
                improvement.  However, there is no strong motivation now do
                do that partitioning work.
+
+  Title:       ARMVv7-A STACK ISSUE
+  Description: Currently a program running as a process in the kernel build mode
+               cannot run other programs that reside on the file system.  Why?
+               Because in order to run those other programs, the new program's
+               address environment must be instantiated in memory to load the
+               .text and .data and to allocate the initial user space components
+               from the new user heap.
+               However, the previous program's stack currently resides in its
+               heap.  So when a process tries to run another program, its heap
+               is unmapped and the system crashes.
+               The fix is to add a separate stack in a separate memory region
+               that does not get unmapped when creating new processes.  There
+               are hooks in place to do this; I just need to get time to get
+               that done.
+  Status:      Open
+  Priority:    Pretty high... the kernel build is useless without this
+               capability.
 
 o C++ Support
   ^^^^^^^^^^^
