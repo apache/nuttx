@@ -199,11 +199,6 @@ config ARCH_HEAP_VBASE
 	---help---
 		The virtual address of the beginning of the heap region.
 
-config ARCH_STACK_VBASE
-	hex "Virtual stack base"
-	---help---
-		The virtual address of the beginning the stack region
-
 config ARCH_TEXT_NPAGES
 	int "Max .text pages"
 	default 1
@@ -228,6 +223,30 @@ config ARCH_HEAP_NPAGES
 		This, along with knowledge of the page size, determines the size of
 		the heap virtual address space. Default is 1.
 
+config ARCH_STACK_DYNAMIC
+	bool "Dynamic stack"
+	default n if !BUILD_KERNEL || !LIBC_EXECFUNCS
+	default y if BUILD_KERNEL && LIBC_EXECFUNCS
+	---help---
+		Select this option if the user process stack resides in its own
+		address space.  The naming of this selection implies that dynamic
+		stack allocation is supported.  Certainly this option must be set if
+		dynamic stack allocation is supported by a platform.  But the more
+		general meaning of this configuration environment is simply that the
+		stack has its own address space.
+
+		NOTE:  This options is also *required* if BUILD_KERNEL and
+		LIBC_EXECFUNCS are selected.  Why?  Because the caller's stack must
+		be preserved in its own address space when we instantiate the
+		environment of the new process in order to initialize it.
+
+if ARCH_STACK_DYNAMIC
+
+config ARCH_STACK_VBASE
+	hex "Virtual stack base"
+	---help---
+		The virtual address of the beginning the stack region
+
 config ARCH_STACK_NPAGES
 	int "Max. stack pages"
 	default 1
@@ -235,6 +254,8 @@ config ARCH_STACK_NPAGES
 		The maximum number of pages that can allocated for the stack region.
 		This, along with knowledge of the page size, determines the size of
 		the stack virtual address space. Default is 1.
+
+endif # ARCH_STACK_DYNAMIC
 
 config ARCH_PGPOOL_MAPPING
 	bool "Have page pool mapping"

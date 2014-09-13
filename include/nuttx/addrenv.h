@@ -86,7 +86,7 @@
 
 #ifndef CONFIG_ARCH_DATA_VBASE
 #  error CONFIG_ARCH_DATA_VBASE not defined
-#  define CONFIG_ARCH_DATA_VBASE (CONFIG_ARCH_TEXT_VBASE + ARCH_TEXT_SIZE)
+#  define CONFIG_ARCH_DATA_VBASE ARCH_TEXT_VEND
 #endif
 
 #if (CONFIG_ARCH_DATA_VBASE & CONFIG_MM_MASK) != 0
@@ -123,7 +123,7 @@
 
 #ifndef CONFIG_ARCH_HEAP_VBASE
 #  error CONFIG_ARCH_HEAP_VBASE not defined
-#  define CONFIG_ARCH_HEAP_VBASE (CONFIG_ARCH_DATA_VBASE + ARCH_DATA_SIZE)
+#  define CONFIG_ARCH_HEAP_VBASE ARCH_DATA_VEND
 #endif
 
 #if (CONFIG_ARCH_HEAP_VBASE & CONFIG_MM_MASK) != 0
@@ -138,28 +138,34 @@
 #define ARCH_HEAP_SIZE  (CONFIG_ARCH_HEAP_NPAGES * CONFIG_MM_PGSIZE)
 #define ARCH_HEAP_VEND  (CONFIG_ARCH_HEAP_VBASE + ARCH_HEAP_SIZE)
 
-/* Stack region */
+#ifdef CONFIG_ARCH_STACK_DYNAMIC
+  /* Stack region */
 
-#ifndef CONFIG_ARCH_STACK_VBASE
-#  error CONFIG_ARCH_STACK_VBASE not defined
-#  define CONFIG_ARCH_STACK_VBASE (CONFIG_ARCH_HEAP_VBASE + ARCH_HEAP_SIZE)
+#  ifndef CONFIG_ARCH_STACK_VBASE
+#    error CONFIG_ARCH_STACK_VBASE not defined
+#    define CONFIG_ARCH_STACK_VBASE ARCH_HEAP_VEND
+#  endif
+
+#  if (CONFIG_ARCH_STACK_VBASE & CONFIG_MM_MASK) != 0
+#    error CONFIG_ARCH_STACK_VBASE not aligned to page boundary
+#  endif
+
+#  ifndef CONFIG_ARCH_STACK_NPAGES
+#    warning CONFIG_ARCH_STACK_NPAGES not defined
+#    define CONFIG_ARCH_STACK_NPAGES 1
+#  endif
+
+#  define ARCH_STACK_SIZE (CONFIG_ARCH_STACK_NPAGES * CONFIG_MM_PGSIZE)
+#  define ARCH_STACK_VEND (CONFIG_ARCH_STACK_VBASE + ARCH_STACK_SIZE)
+
+  /* A single page scratch region used for temporary mappings */
+
+#  define ARCH_SCRATCH_VBASE ARCH_STACK_VEND
+#else
+  /* A single page scratch region used for temporary mappings */
+
+#  define ARCH_SCRATCH_VBASE ARCH_HEAP_VEND
 #endif
-
-#if (CONFIG_ARCH_STACK_VBASE & CONFIG_MM_MASK) != 0
-#  error CONFIG_ARCH_STACK_VBASE not aligned to page boundary
-#endif
-
-#ifndef CONFIG_ARCH_STACK_NPAGES
-#  warning CONFIG_ARCH_STACK_NPAGES not defined
-#  define CONFIG_ARCH_STACK_NPAGES 1
-#endif
-
-#define ARCH_STACK_SIZE (CONFIG_ARCH_STACK_NPAGES * CONFIG_MM_PGSIZE)
-#define ARCH_STACK_VEND (CONFIG_ARCH_STACK_VBASE + ARCH_STACK_SIZE)
-
-/* A single page scratch region used for temporary mappings */
-
-#define ARCH_SCRATCH_VBASE (CONFIG_ARCH_STACK_VBASE + ARCH_STACK_SIZE)
 
 /* There is no need to use the scratch memory region if the page pool memory
  * is statically mapped.
@@ -263,9 +269,9 @@ struct addrenv_reserve_s
  *
  *   up_addrenv_attach   - Clone the address environment assigned to one TCB
  *                         to another.  This operation is done when a pthread
- *                         is created that share's the same address
+ *                         is created that share's the same group address
  *                         environment.
- *   up_addrenv_detach   - Release the threads reference to an address
+ *   up_addrenv_detach   - Release the thread's reference to an address
  *                         environment when a task/thread exits.
  *
  ****************************************************************************/
