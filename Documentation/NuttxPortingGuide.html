@@ -116,10 +116,10 @@
       <a href="#up_addrenv_clone">4.4.8 <code>up_addrenv_clone()</code></a></br>
       <a href="#up_addrenv_attach">4.4.9 <code>up_addrenv_attach()</code></a></br>
       <a href="#up_addrenv_detach">4.4.10 <code>up_addrenv_detach()</code></a></br>
-      <a href="#up_addrenv_stackalloc">4.4.11 <code>up_addrenv_stackalloc()</code></a></br>
-      <a href="#up_addrenv_stackfree">4.4.12 <code>up_addrenv_stackfree()</code></a></br>
-      <a href="#up_addrenv_vstack">4.4.13 <code>up_addrenv_vstack()</code></a></br>
-      <a href="#up_addrenv_stackselect">4.4.14 <code>up_addrenv_stackselect()</code></a>
+      <a href="#up_addrenv_ustackalloc">4.4.11 <code>up_addrenv_ustackalloc()</code></a></br>
+      <a href="#up_addrenv_ustackfree">4.4.12 <code>up_addrenv_ustackfree()</code></a></br>
+      <a href="#up_addrenv_vustack">4.4.13 <code>up_addrenv_vustack()</code></a></br>
+      <a href="#up_addrenv_ustackselect">4.4.14 <code>up_addrenv_ustackselect()</code></a>
     </ul>
     <a href="#exports">4.5 APIs Exported by NuttX to Architecture-Specific Logic</a>
     <ul>
@@ -2985,16 +2985,16 @@ VxWorks provides the following comparable interface:
     </p>
     <ul>
       <li>
-        <a href="#up_addrenv_stackalloc">4.4.11 <code>up_addrenv_stackalloc()</code></a>:
+        <a href="#up_addrenv_ustackalloc">4.4.11 <code>up_addrenv_ustackalloc()</code></a>:
         Create a stack address environment
       <li>
-        <a href="#up_addrenv_stackfree">4.4.12 <code>up_addrenv_stackfree()</code></a>:
+        <a href="#up_addrenv_ustackfree">4.4.12 <code>up_addrenv_ustackfree()</code></a>:
         Destroy a stack address environment.
       <li>
-        <a href="#up_addrenv_vstack">4.4.13 <code>up_addrenv_vstack()</code></a>:
+        <a href="#up_addrenv_vustack">4.4.13 <code>up_addrenv_vustack()</code></a>:
         Returns the virtual base address of the stack
       <li>
-        <a href="#up_addrenv_stackselect">4.4.14 <code>up_addrenv_stackselect()</code></a>:
+        <a href="#up_addrenv_ustackselect">4.4.14 <code>up_addrenv_ustackselect()</code></a>:
         Instantiate a stack address environment
     </ul>
   </li>
@@ -3208,16 +3208,16 @@ VxWorks provides the following comparable interface:
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_stackalloc">4.4.11 <code>up_addrenv_stackalloc()</code></a></h3>
+<h3><a name="up_addrenv_ustackalloc">4.4.11 <code>up_addrenv_ustackalloc()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
-  <code>int up_addrenv_stackalloc(FAR struct tcb_s *tcb, size_t stacksize);</code>
+  <code>int up_addrenv_ustackalloc(FAR struct tcb_s *tcb, size_t stacksize);</code>
 </ul>
 <p><b>Description</b>:</p>
 <ul>
 <p>
   This function is called when a new thread is created in order to instantiate an address environment for the new thread's stack.
-  <code>up_addrenv_stackalloc()</code> is essentially the allocator of the physical memory for the new task's stack.
+  <code>up_addrenv_ustackalloc()</code> is essentially the allocator of the physical memory for the new task's stack.
 </p>
 </ul>
 <p><b>Input Parameters</b>:</p>
@@ -3230,10 +3230,10 @@ VxWorks provides the following comparable interface:
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_up_addrenv_stackfreeattach">4.4.12 <code>up_addrenv_stackfree()</code></a></h3>
+<h3><a name="up_addrenv_up_addrenv_ustackfreeattach">4.4.12 <code>up_addrenv_ustackfree()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
-  <code>int up_addrenv_stackfree(FAR struct tcb_s *tcb);</code>
+  <code>int up_addrenv_ustackfree(FAR struct tcb_s *tcb);</code>
 </ul>
 <p><b>Description</b>:</p>
 <ul>
@@ -3251,10 +3251,10 @@ VxWorks provides the following comparable interface:
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_vstack">4.4.13 <code>up_addrenv_vstack()</code></a></h3>
+<h3><a name="up_addrenv_vustack">4.4.13 <code>up_addrenv_vustack()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
-  <code>int up_addrenv_vstack(FAR const struct tcb_s *tcb, FAR void **vstack);</code>
+  <code>int up_addrenv_vustack(FAR const struct tcb_s *tcb, FAR void **vstack);</code>
 </ul>
 <p><b>Description</b>:</p>
 <ul>
@@ -3272,15 +3272,15 @@ VxWorks provides the following comparable interface:
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h3><a name="up_addrenv_stackselect">4.4.14 <code>up_addrenv_stackselect()</code></a></h3>
+<h3><a name="up_addrenv_ustackselect">4.4.14 <code>up_addrenv_ustackselect()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
-  <code>int up_addrenv_stackselect(FAR const struct tcb_s *tcb);</code>
+  <code>int up_addrenv_ustackselect(FAR const struct tcb_s *tcb);</code>
 </ul>
 <p><b>Description</b>:</p>
 <ul>
   <P>
-    After an address environment has been established for a task's stack (via <code>up_addrenv_stackalloc()</code>.
+    After an address environment has been established for a task's stack (via <code>up_addrenv_ustackalloc()</code>.
     This function may be called to instantiate that address environment in the virtual address space.
     This is a necessary step before each context switch to the newly created thread (including the initial thread startup).
   </p>
