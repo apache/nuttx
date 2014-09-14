@@ -165,8 +165,7 @@ int exec_module(FAR const struct binary_s *binp)
       goto errout;
     }
 
-#ifdef CONFIG_ARCH_ADDRENV
-#ifdef CONFIG_BUILD_KERNEL
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   /* Instantiate the address environment containing the user heap */
 
   ret = up_addrenv_select(&binp->addrenv, &oldenv);
@@ -181,19 +180,6 @@ int exec_module(FAR const struct binary_s *binp)
 
   umm_initialize((FAR void *)CONFIG_ARCH_HEAP_VBASE,
                  up_addrenv_heapsize(&binp->addrenv));
-#endif
-
-#ifdef CONFIG_ARCH_KERNEL_STACK
-  /* Allocate the kernel stack */
-
-  ret = up_addrenv_kstackalloc(&tcb->cmn);
-  if (ret < 0)
-    {
-      bdbg("ERROR: up_addrenv_select() failed: %d\n", ret);
-      err = -ret;
-      goto errout_with_addrenv;
-    }
-#endif
 #endif
 
   /* Allocate the stack for the new task.
@@ -222,6 +208,18 @@ int exec_module(FAR const struct binary_s *binp)
 
   /* Note that tcb->flags are not modified.  0=normal task */
   /* tcb->flags |= TCB_FLAG_TTYPE_TASK; */
+
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
+  /* Allocate the kernel stack */
+
+  ret = up_addrenv_kstackalloc(&tcb->cmn);
+  if (ret < 0)
+    {
+      bdbg("ERROR: up_addrenv_select() failed: %d\n", ret);
+      err = -ret;
+      goto errout_with_addrenv;
+    }
+#endif
 
 #ifdef CONFIG_PIC
   /* Add the D-Space address as the PIC base address.  By convention, this
