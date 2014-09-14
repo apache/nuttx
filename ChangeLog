@@ -8539,3 +8539,7 @@
 	  sched/task/Make.defs, task_create.c, and task_spawn.c: Don't build
 	  task_create() or task_spawn() interfaces if there is an address
 	  environment (2014-9-14).
+	* arch/arm/src/armv7-a/arm_addrenv_ustack.c, include/nuttx/addrenv.h,
+	  arch.h, and other files: Rename everything associated with the dynamic
+	  process stack to ustack to make room in the name space for a kstack
+	  (2014-9-14).
