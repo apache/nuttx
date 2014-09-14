@@ -274,14 +274,27 @@ struct xcptcontext
   struct xcpt_syscall_s syscall[CONFIG_SYS_NNEST];
 #endif
 
-#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_ARCH_STACK_DYNAMIC)
+#ifdef CONFIG_ARCH_ADDRENV
+#ifdef CONFIG_ARCH_STACK_DYNAMIC
   /* This table holds the physical address of the level 2 page table used
    * to map the thread's stack memory.  This array will be initially of
    * zeroed and would be back-up up with pages during page fault exception
    * handling to support dynamically sized stacks for each thread.
    */
 
-  FAR uintptr_t *stack[ARCH_STACK_NSECTS];
+  FAR uintptr_t *ustack[ARCH_STACK_NSECTS];
+#endif
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  /* In this configuration, all syscalls execute from an internal kernel
+   * stack.  Why?  Because when we instantiate and initialize the address
+   * environment of the new user process, we will temporarily lose the
+   * address environment of the old user process, including its stack
+   * contents.  The kernel C logic will crash immediately with no valid
+   * stack in place.
+   */
+
+  FAR uintptr_t *kstack;
+#endif
 #endif
 };
 #endif

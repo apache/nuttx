@@ -79,10 +79,10 @@
  * If CONFIG_ARCH_STACK_DYNAMIC=y is selected then the platform specific
  * code must export these additional interfaces:
  *
- *   up_addrenv_stackalloc  - Create a stack address environment
- *   up_addrenv_stackfree   - Destroy a stack address environment.
- *   up_addrenv_vstack      - Returns the virtual base address of the stack
- *   up_addrenv_stackselect - Instantiate a stack address environment
+ *   up_addrenv_ustackalloc  - Create a stack address environment
+ *   up_addrenv_ustackfree   - Destroy a stack address environment.
+ *   up_addrenv_vustack      - Returns the virtual base address of the stack
+ *   up_addrenv_ustackselect - Instantiate a stack address environment
  *
  ****************************************************************************/
 

@@ -224,10 +224,9 @@ config ARCH_HEAP_NPAGES
 		the heap virtual address space. Default is 1.
 
 config ARCH_STACK_DYNAMIC
-	bool "Dynamic stack"
-	default n if !BUILD_KERNEL || !LIBC_EXECFUNCS
-	default y if BUILD_KERNEL && LIBC_EXECFUNCS
-	depends on EXPERIMENTAL
+	bool "Dynamic user stack"
+	default n
+	depends on BUILD_KERNEL && EXPERIMENTAL
 	---help---
 		Select this option if the user process stack resides in its own
 		address space.  The naming of this selection implies that dynamic
@@ -236,10 +235,9 @@ config ARCH_STACK_DYNAMIC
 		general meaning of this configuration environment is simply that the
 		stack has its own address space.
 
-		NOTE:  This option is also *required* if BUILD_KERNEL and
-		LIBC_EXECFUNCS are selected.  Why?  Because the caller's stack must
-		be preserved in its own address space when we instantiate the
-		environment of the new process in order to initialize it.
+		NOTE:  This option not yet fully implemented in the code base.
+		Hence, it is marked EXPERIMENTAL:  Do not enable it unless you plan
+		finish the implementation.
 
 if ARCH_STACK_DYNAMIC
 
@@ -257,6 +255,39 @@ config ARCH_STACK_NPAGES
 		the stack virtual address space. Default is 1.
 
 endif # ARCH_STACK_DYNAMIC
+
+config ARCH_KERNEL_STACK
+	bool "Kernel process stack"
+	default n if !LIBC_EXECFUNCS
+	default y if LIBC_EXECFUNCS
+	depends on BUILD_KERNEL
+	---help---
+		It this option is selected, then every user process will have two
+		stacks:  A large, potentially dynamically sized user stack and small
+		kernel stack that is used during system call process.
+
+		If this option is not selected, then kernel system calls will simply
+		use the caller's user stack.  So, in most cases, this option is not
+		required.  However, this option is *required* if both BUILD_KERNEL
+		and LIBC_EXECFUNCS are selected.  Why?  Because when we instantiate
+		and initialize the address environment of the new user process, we
+		will temporarily lose the address environment of the old user
+		process, including its stack contents.  The kernel C logic will
+		crash immediately with no valid stack in place.
+
+		When this option is selected, the smaller kernel stack stays in
+		place during system call processing event though the original user
+		stack may or may not be accessible.
+
+if ARCH_KERNEL_STACK
+
+config ARCH_KERNEL_STACKSIZE
+	int "Kernel stack size"
+	default 1568
+	---help---
+		The common size of each process' kernel stack
+
+endif # ARCH_KERNEL_STACK
 
 config ARCH_PGPOOL_MAPPING
 	bool "Have page pool mapping"

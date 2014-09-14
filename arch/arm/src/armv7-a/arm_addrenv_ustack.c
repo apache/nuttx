@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7/arm_addrenv_stack.c
+ * arch/arm/src/armv7/arm_addrenv_ustack.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -79,10 +79,10 @@
  * If CONFIG_ARCH_STACK_DYNAMIC=y is selected then the platform specific
  * code must export these additional interfaces:
  *
- *   up_addrenv_stackalloc  - Create a stack address environment
- *   up_addrenv_stackfree   - Destroy a stack address environment.
- *   up_addrenv_vstack      - Returns the virtual base address of the stack
- *   up_addrenv_stackselect - Instantiate a stack address environment
+ *   up_addrenv_ustackalloc  - Create a stack address environment
+ *   up_addrenv_ustackfree   - Destroy a stack address environment.
+ *   up_addrenv_vustack      - Returns the virtual base address of the stack
+ *   up_addrenv_ustackselect - Instantiate a stack address environment
  *
  ****************************************************************************/
 
@@ -129,12 +129,12 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_addrenv_stackalloc
+ * Name: up_addrenv_ustackalloc
  *
  * Description:
  *   This function is called when a new thread is created in order to
  *   instantiate an address environment for the new thread's stack.
- *   up_addrenv_stackalloc() is essentially the allocator of the physical
+ *   up_addrenv_ustackalloc() is essentially the allocator of the physical
  *   memory for the new task's stack.
  *
  * Input Parameters:
@@ -147,7 +147,7 @@
  *
  ****************************************************************************/
 
-int up_addrenv_stackalloc(FAR struct tcb_s *tcb, size_t stacksize)
+int up_addrenv_ustackalloc(FAR struct tcb_s *tcb, size_t stacksize)
 {
   int ret;
 
@@ -157,7 +157,7 @@ int up_addrenv_stackalloc(FAR struct tcb_s *tcb, size_t stacksize)
 
   /* Initialize the address environment list to all zeroes */
 
-  memset(tcb->xcp.stack, 0, ARCH_STACK_NSECTS * sizeof(uintptr_t *));
+  memset(tcb->xcp.ustack, 0, ARCH_STACK_NSECTS * sizeof(uintptr_t *));
 
   /* Back the allocation up with physical pages and set up the level 2 mapping
    * (which of course does nothing until the L2 page table is hooked into
@@ -166,13 +166,13 @@ int up_addrenv_stackalloc(FAR struct tcb_s *tcb, size_t stacksize)
 
   /* Allocate .text space pages */
 
-  ret = arm_addrenv_create_region(tcb->xcp.stack, ARCH_STACK_NSECTS,
+  ret = arm_addrenv_create_region(tcb->xcp.ustack, ARCH_STACK_NSECTS,
                                   CONFIG_ARCH_STACK_VBASE, stacksize,
                                   MMU_L2_UDATAFLAGS);
   if (ret < 0)
     {
       bdbg("ERROR: Failed to create stack region: %d\n", ret);
-      up_addrenv_stackfree(tcb);
+      up_addrenv_ustackfree(tcb);
       return ret;
     }
 
@@ -180,7 +180,7 @@ int up_addrenv_stackalloc(FAR struct tcb_s *tcb, size_t stacksize)
 }
 
 /****************************************************************************
- * Name: up_addrenv_stackfree
+ * Name: up_addrenv_ustackfree
  *
  * Description:
  *   This function is called when any thread exits.  This function then
@@ -196,22 +196,22 @@ int up_addrenv_stackalloc(FAR struct tcb_s *tcb, size_t stacksize)
  *
  ****************************************************************************/
 
-int up_addrenv_stackfree(FAR struct tcb_s *tcb)
+int up_addrenv_ustackfree(FAR struct tcb_s *tcb)
 {
   bvdbg("tcb=%p\n", tcb);
   DEBUGASSERT(tcb);
 
   /* Destroy the stack region */
 
-  arm_addrenv_destroy_region(tcb->xcp.stack, ARCH_STACK_NSECTS,
+  arm_addrenv_destroy_region(tcb->xcp.ustack, ARCH_STACK_NSECTS,
                              CONFIG_ARCH_STACK_VBASE);
 
-  memset(tcb->xcp.stack, 0, ARCH_STACK_NSECTS * sizeof(uintptr_t *));
+  memset(tcb->xcp.ustack, 0, ARCH_STACK_NSECTS * sizeof(uintptr_t *));
   return OK;
 }
 
 /****************************************************************************
- * Name: up_addrenv_vstack
+ * Name: up_addrenv_vustack
  *
  * Description:
  *   Return the virtual address associated with the newly create stack
@@ -227,7 +227,7 @@ int up_addrenv_stackfree(FAR struct tcb_s *tcb)
  *
  ****************************************************************************/
 
-int up_addrenv_vstack(FAR const struct tcb_s *tcb, FAR void **vstack)
+int up_addrenv_vustack(FAR const struct tcb_s *tcb, FAR void **vstack)
 {
   bvdbg("Return=%p\n", (FAR void *)CONFIG_ARCH_STACK_VBASE);
 
@@ -239,11 +239,11 @@ int up_addrenv_vstack(FAR const struct tcb_s *tcb, FAR void **vstack)
 }
 
 /****************************************************************************
- * Name: up_addrenv_stackselect
+ * Name: up_addrenv_ustackselect
  *
  * Description:
  *   After an address environment has been established for a task's stack
- *   (via up_addrenv_stackalloc().  This function may be called to instantiate
+ *   (via up_addrenv_ustackalloc().  This function may be called to instantiate
  *   that address environment in the virtual address space.  This is a
  *   necessary step before each context switch to the newly created thread
  *   (including the initial thread startup).
@@ -257,7 +257,7 @@ int up_addrenv_vstack(FAR const struct tcb_s *tcb, FAR void **vstack)
  *
  ****************************************************************************/
 
-int up_addrenv_stackselect(FAR const struct tcb_s *tcb)
+int up_addrenv_ustackselect(FAR const struct tcb_s *tcb)
 {
   uintptr_t vaddr;
   uintptr_t paddr;
@@ -271,7 +271,7 @@ int up_addrenv_stackselect(FAR const struct tcb_s *tcb)
     {
       /* Set (or clear) the new page table entry */
 
-      paddr = (uintptr_t)tcb->xcp.stack[i];
+      paddr = (uintptr_t)tcb->xcp.ustack[i];
       if (paddr)
         {
           mmu_l1_setentry(paddr, vaddr, MMU_L1_PGTABFLAGS);

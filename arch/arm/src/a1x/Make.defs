@@ -93,7 +93,10 @@ endif
 ifeq ($(CONFIG_ARCH_ADDRENV),y)
 CMN_CSRCS += arm_addrenv.c arm_addrenv_utils.c arm_pgalloc.c
 ifeq ($(CONFIG_ARCH_STACK_DYNAMIC),y)
-CMN_CSRCS += arm_addrenv_stack.c
+CMN_CSRCS += arm_addrenv_ustack.c
+endif
+ifeq ($(CONFIG_ARCH_KERNEL_STACK),y)
+CMN_CSRCS += arm_addrenv_kstack.c
 endif
 endif
 
