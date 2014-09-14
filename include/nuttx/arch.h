@@ -768,6 +768,21 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages);
  *   up_addrenv_vustack      - Returns the virtual base address of the stack
  *   up_addrenv_ustackselect - Instantiate a stack address environment
  *
+ * If CONFIG_ARCH_KERNEL_STACK is selected, then each user process will have
+ * two stacks:  (1) a large (and possibly dynamic) user stack and (2) a
+ * smaller kernel stack.  However, this option is *required* if both
+ * CONFIG_BUILD_KERNEL and CONFIG_LIBC_EXECFUNCS are selected.  Why?  Because
+ * when we instantiate and initialize the address environment of the new
+ * user process, we will temporarily lose the address environment of the old
+ * user process, including its stack contents.  The kernel C logic will crash
+ * immediately with no valid stack in place.
+ *
+ * If CONFIG_ARCH_KERNEL_STACK=y is selected then the platform specific
+ * code must export these additional interfaces:
+ *
+ *   up_addrenv_kstackalloc  - Create a stack in the kernel address environment
+ *   up_addrenv_kstackfree   - Destroy the kernel stack.
+ *
  ****************************************************************************/
 /****************************************************************************
  * Name: up_addrenv_create
@@ -1129,6 +1144,46 @@ int up_addrenv_vustack(FAR const struct tcb_s *tcb, FAR void **vstack);
 
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_ARCH_STACK_DYNAMIC)
 int up_addrenv_ustackselect(FAR const struct tcb_s *tcb);
+#endif
+
+/****************************************************************************
+ * Name: up_addrenv_kstackalloc
+ *
+ * Description:
+ *   This function is called when a new thread is created to allocate
+ *   the new thread's kernel stack.
+ *
+ * Input Parameters:
+ *   tcb - The TCB of the thread that requires the kernel stack.
+ *   stacksize - The size (in bytes) of the kernel stack needed by the
+ *     thread.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_ARCH_KERNEL_STACK)
+int up_addrenv_kstackalloc(FAR struct tcb_s *tcb, size_t stacksize);
+#endif
+
+/****************************************************************************
+ * Name: up_addrenv_kstackfree
+ *
+ * Description:
+ *   This function is called when any thread exits.  This function frees
+ *   the kernel stack.
+ *
+ * Input Parameters:
+ *   tcb - The TCB of the thread that no longer requires the kernel stack.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_ARCH_KERNEL_STACK)
+int up_addrenv_kstackfree(FAR struct tcb_s *tcb);
 #endif
 
 /****************************************************************************
