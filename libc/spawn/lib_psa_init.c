@@ -100,8 +100,10 @@ int posix_spawnattr_init(posix_spawnattr_t *attr)
   attr->sigmask = 0;
 #endif
 
+#ifndef CONFIG_ARCH_ADDRENV
   /* Default stack size */
 
   attr->stacksize = CONFIG_TASK_SPAWN_DEFAULT_STACKSIZE;
+#endif
   return OK;
 }

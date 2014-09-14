@@ -154,6 +154,7 @@ config POSIX_SPAWN_PROXY_STACKSIZE
 config TASK_SPAWN_DEFAULT_STACKSIZE
 	int "Default task_spawn Stack Size"
 	default 2048
+	depends on !ARCH_ADDRENV
 	---help---
 		The actual size to use for the child task's stack can be set with
 		task_spawnattr_setstacksize().  This value specifies the default

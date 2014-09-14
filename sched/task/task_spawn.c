@@ -49,6 +49,8 @@
 #include "task/spawn.h"
 #include "task/task.h"
 
+#ifndef CONFIG_ARCH_ADDRENV
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -452,3 +454,5 @@ errout_with_lock:
   spawn_semgive(&g_spawn_parmsem);
   return ret;
 }
+
+#endif /* CONFIG_ARCH_ADDRENV */
