@@ -3320,18 +3320,19 @@ VxWorks provides the following comparable interface:
 <h3><a name="up_addrenv_kstackalloc">4.4.15 <code>up_addrenv_kstackalloc()</code></a></h3>
 <p><b>Function Prototype</b>:<p>
 <ul>
-  <code>int up_addrenv_kstackalloc(FAR struct tcb_s *tcb, size_t stacksize);</code>
+  <code>int up_addrenv_kstackalloc(FAR struct tcb_s *tcb);</code>
 </ul>
 <p><b>Description</b>:</p>
 <ul>
   <p>
     This function is called when a new thread is created to allocate the new thread's kernel stack.
+    This function may be called for certain terminating threads which have no kernel stack.
+    It must be tolerant of that case.
   </p>
 </ul>
 <p><b>Input Parameters</b>:</p>
 <ul>
   <li><code>tcb</code>: The TCB of the thread that requires the kernel stack.</li>
-  <li><code>stacksize</code>: The size (in bytes) of the kernel stack needed by the thread.</li>
 </ul>
 <p><b>Returned Value</b>:</p>
 <ul>
