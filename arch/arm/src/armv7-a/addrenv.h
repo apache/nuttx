@@ -51,6 +51,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Aligned size of the kernel stack */
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+#  define ARCH_KERNEL_STACKSIZE ((CONFIG_ARCH_KERNEL_STACKSIZE + 7) & ~7)
+#endif
+
 /* Using a 4KiB page size, each 1MiB section maps to a PTE containing
  * 256*2KiB entries
  */

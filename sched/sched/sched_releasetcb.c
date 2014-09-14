@@ -114,13 +114,13 @@ int sched_releasetcb(FAR struct tcb_s *tcb, uint8_t ttype)
 
   if (tcb)
     {
-      /* Relase any timers that the task might hold.  We do this
+#ifndef CONFIG_DISABLE_POSIX_TIMERS
+      /* Release any timers that the task might hold.  We do this
        * before release the PID because it may still be trying to
        * deliver signals (although interrupts are should be
        * disabled here).
        */
 
-#ifndef CONFIG_DISABLE_POSIX_TIMERS
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
      if (timer_deleteall != NULL)
 #endif
@@ -147,9 +147,9 @@ int sched_releasetcb(FAR struct tcb_s *tcb, uint8_t ttype)
           up_release_stack(tcb, ttype);
         }
 
+#ifdef CONFIG_PIC
       /* Delete the task's allocated DSpace region (external modules only) */
 
-#ifdef CONFIG_PIC
       if (tcb->dspace)
         {
           if (tcb->dspace->crefs <= 1)
@@ -161,6 +161,12 @@ int sched_releasetcb(FAR struct tcb_s *tcb, uint8_t ttype)
               tcb->dspace->crefs--;
             }
         }
+#endif
+
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_ARCH_KERNEL_STACK)
+      /* Release the kernel stack */
+
+      (void)up_addrenv_kstackfree(tcb);
 #endif
 
       /* Release this thread's reference to the address environment */

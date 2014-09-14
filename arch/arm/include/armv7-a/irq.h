@@ -276,7 +276,7 @@ struct xcptcontext
 
 #ifdef CONFIG_ARCH_ADDRENV
 #ifdef CONFIG_ARCH_STACK_DYNAMIC
-  /* This table holds the physical address of the level 2 page table used
+  /* This array holds the physical address of the level 2 page table used
    * to map the thread's stack memory.  This array will be initially of
    * zeroed and would be back-up up with pages during page fault exception
    * handling to support dynamically sized stacks for each thread.
@@ -284,6 +284,7 @@ struct xcptcontext
 
   FAR uintptr_t *ustack[ARCH_STACK_NSECTS];
 #endif
+
 #ifdef CONFIG_ARCH_KERNEL_STACK
   /* In this configuration, all syscalls execute from an internal kernel
    * stack.  Why?  Because when we instantiate and initialize the address
@@ -293,7 +294,8 @@ struct xcptcontext
    * stack in place.
    */
 
-  FAR uint32_t *kstack;
+  FAR uint32_t *ustkptr;  /* Saved user stack pointer */
+  FAR uint32_t *kstack;   /* Allocate base of the (aligned) kernel stack */
 #endif
 #endif
 };

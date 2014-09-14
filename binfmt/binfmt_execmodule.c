@@ -165,7 +165,8 @@ int exec_module(FAR const struct binary_s *binp)
       goto errout;
     }
 
-#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
+#ifdef CONFIG_ARCH_ADDRENV
+#ifdef CONFIG_BUILD_KERNEL
   /* Instantiate the address environment containing the user heap */
 
   ret = up_addrenv_select(&binp->addrenv, &oldenv);
@@ -182,6 +183,19 @@ int exec_module(FAR const struct binary_s *binp)
                  up_addrenv_heapsize(&binp->addrenv));
 #endif
 
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  /* Allocate the kernel stack */
+
+  ret = up_addrenv_kstackalloc(&tcb->cmn);
+  if (ret < 0)
+    {
+      bdbg("ERROR: up_addrenv_select() failed: %d\n", ret);
+      err = -ret;
+      goto errout_with_addrenv;
+    }
+#endif
+#endif
+
   /* Allocate the stack for the new task.
    *
    * REVISIT:  This allocation is currently always from the user heap.  That
@@ -192,7 +206,7 @@ int exec_module(FAR const struct binary_s *binp)
   if (!stack)
     {
       err = ENOMEM;
-      goto errout_with_addrenv;
+      goto errout_with_kstack;
     }
 
   /* Initialize the task */
@@ -203,7 +217,7 @@ int exec_module(FAR const struct binary_s *binp)
     {
       err = get_errno();
       bdbg("task_init() failed: %d\n", err);
-      goto errout_with_stack;
+      goto errout_with_kstack;
     }
 
   /* Note that tcb->flags are not modified.  0=normal task */
@@ -229,7 +243,7 @@ int exec_module(FAR const struct binary_s *binp)
     {
       err = -ret;
       bdbg("ERROR: up_addrenv_clone() failed: %d\n", ret);
-      goto errout_with_stack;
+      goto errout_with_tcbinit;
     }
 
   /* Mark that this group has an address environment */
@@ -257,7 +271,7 @@ int exec_module(FAR const struct binary_s *binp)
     {
       err = get_errno();
       bdbg("task_activate() failed: %d\n", err);
-      goto errout_with_stack;
+      goto errout_with_tcbinit;
     }
 
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
@@ -268,24 +282,31 @@ int exec_module(FAR const struct binary_s *binp)
     {
       bdbg("ERROR: up_addrenv_select() failed: %d\n", ret);
       err = -ret;
-      goto errout_with_stack;
+      goto errout_with_tcbinit;
     }
 #endif
 
   return (int)pid;
 
-errout_with_stack:
+errout_with_tcbinit:
   tcb->cmn.stack_alloc_ptr = NULL;
   sched_releasetcb(&tcb->cmn, TCB_FLAG_TTYPE_TASK);
   kumm_free(stack);
   goto errout;
 
+errout_with_kstack:
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
+  (void)up_addrenv_kstackfree(tcb);
+
 errout_with_addrenv:
+#endif
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   (void)up_addrenv_restore(&oldenv);
+
 errout_with_tcb:
 #endif
   kmm_free(tcb);
+
 errout:
   set_errno(err);
   bdbg("returning errno: %d\n", err);

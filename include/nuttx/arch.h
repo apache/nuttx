@@ -1151,7 +1151,9 @@ int up_addrenv_ustackselect(FAR const struct tcb_s *tcb);
  *
  * Description:
  *   This function is called when a new thread is created to allocate
- *   the new thread's kernel stack.
+ *   the new thread's kernel stack.   This function may be called for certain
+ *   terminating threads which have no kernel stack.  It must be tolerant of
+ *   that case.
  *
  * Input Parameters:
  *   tcb - The TCB of the thread that requires the kernel stack.
@@ -1164,7 +1166,7 @@ int up_addrenv_ustackselect(FAR const struct tcb_s *tcb);
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_ARCH_KERNEL_STACK)
-int up_addrenv_kstackalloc(FAR struct tcb_s *tcb, size_t stacksize);
+int up_addrenv_kstackalloc(FAR struct tcb_s *tcb);
 #endif
 
 /****************************************************************************
