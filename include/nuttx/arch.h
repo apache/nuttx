@@ -763,10 +763,10 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages);
  * If CONFIG_ARCH_STACK_DYNAMIC=y is selected then the platform specific
  * code must export these additional interfaces:
  *
- *   up_addrenv_stackalloc  - Create a stack address environment
- *   up_addrenv_stackfree   - Destroy a stack address environment.
- *   up_addrenv_vstack      - Returns the virtual base address of the stack
- *   up_addrenv_stackselect - Instantiate a stack address environment
+ *   up_addrenv_ustackalloc  - Create a stack address environment
+ *   up_addrenv_ustackfree   - Destroy a stack address environment.
+ *   up_addrenv_vustack      - Returns the virtual base address of the stack
+ *   up_addrenv_ustackselect - Instantiate a stack address environment
  *
  ****************************************************************************/
 /****************************************************************************
@@ -1044,12 +1044,12 @@ int up_addrenv_detach(FAR struct task_group_s *group, FAR struct tcb_s *tcb);
 #endif
 
 /****************************************************************************
- * Name: up_addrenv_stackalloc
+ * Name: up_addrenv_ustackalloc
  *
  * Description:
  *   This function is called when a new thread is created in order to
  *   instantiate an address environment for the new thread's stack.
- *   up_addrenv_stackalloc() is essentially the allocator of the physical
+ *   up_addrenv_ustackalloc() is essentially the allocator of the physical
  *   memory for the new task's stack.
  *
  * Input Parameters:
@@ -1063,11 +1063,11 @@ int up_addrenv_detach(FAR struct task_group_s *group, FAR struct tcb_s *tcb);
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_ARCH_STACK_DYNAMIC)
-int up_addrenv_stackalloc(FAR struct tcb_s *tcb, size_t stacksize);
+int up_addrenv_ustackalloc(FAR struct tcb_s *tcb, size_t stacksize);
 #endif
 
 /****************************************************************************
- * Name: up_addrenv_stackfree
+ * Name: up_addrenv_ustackfree
  *
  * Description:
  *   This function is called when any thread exits.  This function then
@@ -1084,11 +1084,11 @@ int up_addrenv_stackalloc(FAR struct tcb_s *tcb, size_t stacksize);
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_ARCH_STACK_DYNAMIC)
-int up_addrenv_stackfree(FAR struct tcb_s *tcb);
+int up_addrenv_ustackfree(FAR struct tcb_s *tcb);
 #endif
 
 /****************************************************************************
- * Name: up_addrenv_vstack
+ * Name: up_addrenv_vustack
  *
  * Description:
  *   Return the virtual address associated with the newly create stack
@@ -1105,15 +1105,15 @@ int up_addrenv_stackfree(FAR struct tcb_s *tcb);
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_ARCH_STACK_DYNAMIC)
-int up_addrenv_vstack(FAR const struct tcb_s *tcb, FAR void **vstack);
+int up_addrenv_vustack(FAR const struct tcb_s *tcb, FAR void **vstack);
 #endif
 
 /****************************************************************************
- * Name: up_addrenv_stackselect
+ * Name: up_addrenv_ustackselect
  *
  * Description:
  *   After an address environment has been established for a task's stack
- *   (via up_addrenv_stackalloc().  This function may be called to instantiate
+ *   (via up_addrenv_ustackalloc().  This function may be called to instantiate
  *   that address environment in the virtual address space.  This is a
  *   necessary step before each context switch to the newly created thread
  *   (including the initial thread startup).
@@ -1128,7 +1128,7 @@ int up_addrenv_vstack(FAR const struct tcb_s *tcb, FAR void **vstack);
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_ARCH_STACK_DYNAMIC)
-int up_addrenv_stackselect(FAR const struct tcb_s *tcb);
+int up_addrenv_ustackselect(FAR const struct tcb_s *tcb);
 #endif
 
 /****************************************************************************

@@ -139,7 +139,7 @@
 #define ARCH_HEAP_VEND  (CONFIG_ARCH_HEAP_VBASE + ARCH_HEAP_SIZE)
 
 #ifdef CONFIG_ARCH_STACK_DYNAMIC
-  /* Stack region */
+  /* User stack region */
 
 #  ifndef CONFIG_ARCH_STACK_VBASE
 #    error CONFIG_ARCH_STACK_VBASE not defined
@@ -157,6 +157,14 @@
 
 #  define ARCH_STACK_SIZE (CONFIG_ARCH_STACK_NPAGES * CONFIG_MM_PGSIZE)
 #  define ARCH_STACK_VEND (CONFIG_ARCH_STACK_VBASE + ARCH_STACK_SIZE)
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+/* Kernel stack */
+
+#  ifndef CONFIG_ARCH_KERNEL_STACKSIZE
+#    define CONFIG_ARCH_KERNEL_STACKSIZE 1568
+#  endif
+#endif
 
   /* A single page scratch region used for temporary mappings */
 
@@ -290,10 +298,10 @@ struct addrenv_reserve_s
  * If CONFIG_ARCH_STACK_DYNAMIC=y is selected then the platform specific
  * code must export these additional interfaces:
  *
- *   up_addrenv_stackalloc  - Create a stack address environment
- *   up_addrenv_stackfree   - Destroy a stack address environment.
- *   up_addrenv_vstack      - Returns the virtual base address of the stack
- *   up_addrenv_stackselect - Instantiate a stack address environment
+ *   up_addrenv_ustackalloc  - Create a stack address environment
+ *   up_addrenv_ustackfree   - Destroy a stack address environment.
+ *   up_addrenv_vustack      - Returns the virtual base address of the stack
+ *   up_addrenv_ustackselect - Instantiate a stack address environment
  *
  ****************************************************************************/
 
