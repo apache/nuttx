@@ -8543,3 +8543,7 @@
 	  arch.h, and other files: Rename everything associated with the dynamic
 	  process stack to ustack to make room in the name space for a kstack
 	  (2014-9-14).
+	* arch/arm/src/armv7-a/arm_addrenv_kstack.c, include/nuttx/addrenv.h,
+	  arch.h, and othr files:  Add the initial implementation of the process
+	  kernel stack logic.  Not yet integrated into the main OS logic nor
+	  tested (2014-9-14).
