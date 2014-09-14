@@ -51,6 +51,7 @@
 
 #include "arm.h"
 #include "svcall.h"
+#include "addrenv.h"
 #include "up_internal.h"
 
 /****************************************************************************
@@ -219,13 +220,27 @@ uint32_t *arm_syscall(uint32_t *regs)
 #ifdef CONFIG_BUILD_KERNEL
           regs[REG_CPSR]      = rtcb->xcp.syscall[index].cpsr;
 #endif
-          rtcb->xcp.nsyscalls = index;
-
           /* The return value must be in R0-R1.  dispatch_syscall() temporarily
            * moved the value for R0 into R2.
            */
 
           regs[REG_R0]         = regs[REG_R2];
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+          /* If this is the outermost SYSCALL and if there is a saved user stack
+           * pointer, then restore the user stack pointer on this final return to
+           * user code.
+           */
+
+          if (index == 0 && rtcb->xcp.ustkptr != NULL)
+            {
+              regs[REG_SP]      = (uint32_t)rtcb->xcp.ustkptr;
+              rtcb->xcp.ustkptr = NULL;
+            }
+#endif
+          /* Save the new SYSCALL nesting level */
+
+          rtcb->xcp.nsyscalls = index;
         }
         break;
 
@@ -421,7 +436,6 @@ uint32_t *arm_syscall(uint32_t *regs)
 #ifdef CONFIG_BUILD_KERNEL
           rtcb->xcp.syscall[index].cpsr      = regs[REG_CPSR];
 #endif
-          rtcb->xcp.nsyscalls                = index + 1;
 
           regs[REG_PC]   = (uint32_t)dispatch_syscall;
 #ifdef CONFIG_BUILD_KERNEL
@@ -434,6 +448,21 @@ uint32_t *arm_syscall(uint32_t *regs)
 #else
           svcdbg("ERROR: Bad SYS call: %d\n", regs[REG_R0]);
 #endif
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+          /* If this is the first SYSCALL and if there is an allocated
+           * kernel stack, then switch to the kernel stack.
+           */
+
+          if (index == 0 && rtcb->xcp.kstack != NULL)
+            {
+              rtcb->xcp.ustkptr = (FAR uint32_t *)regs[REG_SP];
+              regs[REG_SP]      = (uint32_t)rtcb->xcp.kstack + ARCH_KERNEL_STACKSIZE;
+            }
+#endif
+          /* Save the new SYSCALL nesting level */
+
+          rtcb->xcp.nsyscalls   = index + 1;
         }
         break;
     }

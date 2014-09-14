@@ -117,6 +117,8 @@
 #include <nuttx/addrenv.h>
 #include <nuttx/arch.h>
 
+#include "addrenv.h"
+
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_ARCH_KERNEL_STACK)
 
 /****************************************************************************
@@ -140,27 +142,27 @@
  *
  * Description:
  *   This function is called when a new thread is created to allocate
- *   the new thread's kernel stack.
+ *   the new thread's kernel stack.   This function may be called for certain
+ *   terminating threads which have no kernel stack.  It must be tolerant of
+ *   that case.
  *
  * Input Parameters:
  *   tcb - The TCB of the thread that requires the kernel stack.
- *   stacksize - The size (in bytes) of the kernel stack needed by the
- *     thread.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int up_addrenv_kstackalloc(FAR struct tcb_s *tcb, size_t stacksize)
+int up_addrenv_kstackalloc(FAR struct tcb_s *tcb)
 {
-  bvdbg("tcb=%p stacksize=%lu\n", tcb, (unsigned long)stacksize);
+  bvdbg("tcb=%p stacksize=%u\n", tcb, ARCH_KERNEL_STACKSIZE);
 
-  DEBUGASSERT(tcb && tcb->xcp.kstack == 0 && stackize > 0);
+  DEBUGASSERT(tcb && tcb->xcp.kstack == 0);
 
   /* Allocate the kernel stack */
 
-  tcb->xcp.kstack = (FAR uint32_t *)kmm_memalign(8, stacksize);
+  tcb->xcp.kstack = (FAR uint32_t *)kmm_memalign(8, ARCH_KERNEL_STACKSIZE);
   if (!tcb->xcp.kstack)
     {
       bdbg("ERROR: Failed to allocate the kernel stack\n");
@@ -188,12 +190,18 @@ int up_addrenv_kstackalloc(FAR struct tcb_s *tcb, size_t stacksize)
 int up_addrenv_kstackfree(FAR struct tcb_s *tcb)
 {
   bvdbg("tcb=%p\n", tcb);
-  DEBUGASSERT(tcb && tcb->xcp.kstack);
+  DEBUGASSERT(tcb);
 
-  /* Free the kernel stack */
+  /* Does the exiting thread have a kernel stack? */
 
-  kmm_free(tcb->xcp.kstack);
-  tcb->xcp.kstack = NULL;
+  if (tcb->xcp.kstack)
+    {
+      /* Yes.. Free the kernel stack */
+
+      kmm_free(tcb->xcp.kstack);
+      tcb->xcp.kstack = NULL;
+    }
+
   return OK;
 }
 
