@@ -55,7 +55,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -71,12 +72,44 @@ EXTERN FAR struct binfmt_s *g_binfmts;
  * Public Function Prototypes
  ***********************************************************************/
 
-/* Dump the contents of struct binary_s */
+/****************************************************************************
+ * Name: dump_module
+ *
+ * Description:
+ *   Dump the contents of struct binary_s.
+ *
+ * Input Parameter:
+ *   bin      - Load structure
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negater errno value on failure
+ *
+ ****************************************************************************/
 
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_BINFMT)
-EXTERN int dump_module(FAR const struct binary_s *bin);
+int dump_module(FAR const struct binary_s *bin);
 #else
 #  define dump_module(bin)
+#endif
+
+/****************************************************************************
+ * Name: binfmt_freeargv
+ *
+ * Description:
+ *   Release the copied argv[] list.
+ *
+ * Input Parameter:
+ *   bin      - Load structure
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
+void binfmt_freeargv(FAR struct binary_s *bin);
+#else
+#  define binfmt_freeargv(bin)
 #endif
 
 #undef EXTERN

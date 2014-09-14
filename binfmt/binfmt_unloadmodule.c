@@ -179,6 +179,10 @@ int unload_module(FAR struct binary_s *binp)
         }
 #endif
 
+      /* Free any allocated argv[] strings */
+
+      binfmt_freeargv(binp);
+
       /* Unmap mapped address spaces */
 
       if (binp->mapped)
@@ -206,6 +210,33 @@ int unload_module(FAR struct binary_s *binp)
 
   return OK;
 }
+
+/****************************************************************************
+ * Name: binfmt_freeargv
+ *
+ * Description:
+ *   Release the copied argv[] list.
+ *
+ * Input Parameter:
+ *   binp - Load structure
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
+void binfmt_freeargv(FAR struct binary_s *binp)
+{
+  if (binp->argbuffer)
+    {
+      /* Free the argument buffer */
+
+      kmm_free(binp->argbuffer);
+      binp->argbuffer = NULL;
+    }
+}
+#endif
 
 #endif /* CONFIG_BINFMT_DISABLE */
 

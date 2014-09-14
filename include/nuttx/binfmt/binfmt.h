@@ -97,7 +97,12 @@ struct binary_s
   /* Information provided to the loader to load and bind a module */
 
   FAR const char *filename;            /* Full path to the binary to be loaded (See NOTE 1 above) */
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
+  FAR char *argbuffer;                 /* Allocated argument list */
+  FAR char *argv[CONFIG_MAX_TASK_ARGS+1]; /* Copy of argument list */
+#else
   FAR char * const *argv;              /* Argument list */
+#endif
   FAR const struct symtab_s *exports;  /* Table of exported symbols */
   int nexports;                        /* The number of symbols in exports[] */
 

@@ -192,7 +192,7 @@ int exec_module(FAR const struct binary_s *binp)
   if (!stack)
     {
       err = ENOMEM;
-      goto errout_with_kstack;
+      goto errout_with_addrenv;
     }
 
   /* Initialize the task */
@@ -203,8 +203,12 @@ int exec_module(FAR const struct binary_s *binp)
     {
       err = get_errno();
       bdbg("task_init() failed: %d\n", err);
-      goto errout_with_kstack;
+      goto errout_with_addrenv;
     }
+
+  /* We can free the argument buffer now */
+
+  binfmt_freeargv(binp);
 
   /* Note that tcb->flags are not modified.  0=normal task */
   /* tcb->flags |= TCB_FLAG_TTYPE_TASK; */
@@ -217,7 +221,7 @@ int exec_module(FAR const struct binary_s *binp)
     {
       bdbg("ERROR: up_addrenv_select() failed: %d\n", ret);
       err = -ret;
-      goto errout_with_addrenv;
+      goto errout_with_tcbinit;
     }
 #endif
 
@@ -292,12 +296,7 @@ errout_with_tcbinit:
   kumm_free(stack);
   goto errout;
 
-errout_with_kstack:
-#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
-  (void)up_addrenv_kstackfree(tcb);
-
 errout_with_addrenv:
-#endif
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   (void)up_addrenv_restore(&oldenv);
 

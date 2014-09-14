@@ -59,6 +59,89 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: binfmt_copyargv
+ *
+ * Description:
+ *   In the kernel build, the argv list will likely lie in the caller's
+ *   address environment and, hence, by inaccessible when we swith to the
+ *   address environment of the new process address environment.  So we
+ *   do not have any real option other than to copy the callers argv[] list.
+ *
+ * Input Parameter:
+ *   bin      - Load structure
+ *   argv     - Argument list
+ *
+ * Returned Value:
+ *   Zero (OK) on sucess; a negater erro value on failure.
+ *
+ ****************************************************************************/
+
+static inline int binfmt_copyargv(FAR struct binary_s *bin, FAR char * const *argv)
+{
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
+  FAR char *ptr;
+  size_t argsize;
+  int i;
+
+  /* Get the size of the argument list */
+
+  bin->argbuffer = (FAR char *)NULL;
+  i = 0;
+
+  if (argv)
+    {
+      argsize = 0;
+      for (i = 0; i < CONFIG_MAX_TASK_ARGS && argv[i]; i++)
+        {
+          argsize += (strlen(argv[i]) + 1);
+        }
+
+      bvdbg("args=%d argsize=%lu\n", i, (unsigned long)argsize);
+
+      /* Allocate a temporary argument buffer */
+
+      i = 0;
+
+      if (argsize > 0)
+        {
+          bin->argbuffer = (FAR char *)kmm_malloc(argsize);
+          if (!bin->argbuffer)
+            {
+              bdbg("ERROR: Failed to allocate the argument buffer\n");
+              return -ENOMEM;
+            }
+
+          /* Copy the argv list */
+
+          ptr = bin->argbuffer;
+          for (; i < CONFIG_MAX_TASK_ARGS && argv[i]; i++)
+            {
+              bin->argv[i] = ptr;
+              argsize      = strlen(argv[i]) + 1;
+              memcpy(ptr, argv[i], argsize);
+              ptr         += argsize;
+            }
+        }
+    }
+
+  /* Nullify the remainder of the list */
+
+  for (; i <= CONFIG_MAX_TASK_ARGS; i++)
+    {
+      bin->argv[i] = NULL;
+    }
+
+  return OK;
+
+#else
+  /* Just save the caller's argv pointer */
+
+  bin->argv = argv;
+  return OK;
+#endif
+}
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -115,19 +198,30 @@ int exec(FAR const char *filename, FAR char * const *argv,
       goto errout;
     }
 
-  /* Load the module into memory */
+  /* Initialize the binary structure */
 
   bin->filename = filename;
-  bin->argv     = argv;
   bin->exports  = exports;
   bin->nexports = nexports;
+
+  /* Copy the argv[] list */
+
+  ret = binfmt_copyargv(bin, argv);
+  if (ret < 0)
+    {
+      err = -ret;
+      bdbg("ERROR: Failed to copy argv[]: %d\n", err);
+      goto errout_with_bin;
+    }
+
+  /* Load the module into memory */
 
   ret = load_module(bin);
   if (ret < 0)
     {
       err = get_errno();
       bdbg("ERROR: Failed to load program '%s': %d\n", filename, err);
-      goto errout_with_bin;
+      goto errout_with_argv;
     }
 
   /* Disable pre-emption so that the executed module does
@@ -164,6 +258,8 @@ int exec(FAR const char *filename, FAR char * const *argv,
 errout_with_lock:
   sched_unlock();
   unload_module(bin);
+errout_with_argv:
+  binfmt_freeargv(bin);
 errout_with_bin:
   kmm_free(bin);
 errout:
