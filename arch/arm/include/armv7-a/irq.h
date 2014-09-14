@@ -293,7 +293,7 @@ struct xcptcontext
    * stack in place.
    */
 
-  FAR uintptr_t *kstack;
+  FAR uint32_t *kstack;
 #endif
 #endif
 };

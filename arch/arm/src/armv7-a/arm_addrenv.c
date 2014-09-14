@@ -58,9 +58,9 @@
  *
  *   up_addrenv_attach   - Clone the address environment assigned to one TCB
  *                         to another.  This operation is done when a pthread
- *                         is created that share's the same address
+ *                         is created that share's the same group address
  *                         environment.
- *   up_addrenv_detach   - Release the threads reference to an address
+ *   up_addrenv_detach   - Release the thread's reference to an address
  *                         environment when a task/thread exits.
  *
  * CONFIG_ARCH_STACK_DYNAMIC=y indicates that the user process stack resides
@@ -83,6 +83,21 @@
  *   up_addrenv_ustackfree   - Destroy a stack address environment.
  *   up_addrenv_vustack      - Returns the virtual base address of the stack
  *   up_addrenv_ustackselect - Instantiate a stack address environment
+ *
+ * If CONFIG_ARCH_KERNEL_STACK is selected, then each user process will have
+ * two stacks:  (1) a large (and possibly dynamic) user stack and (2) a
+ * smaller kernel stack.  However, this option is *required* if both
+ * CONFIG_BUILD_KERNEL and CONFIG_LIBC_EXECFUNCS are selected.  Why?  Because
+ * when we instantiate and initialize the address environment of the new
+ * user process, we will temporarily lose the address environment of the old
+ * user process, including its stack contents.  The kernel C logic will crash
+ * immediately with no valid stack in place.
+ *
+ * If CONFIG_ARCH_KERNEL_STACK=y is selected then the platform specific
+ * code must export these additional interfaces:
+ *
+ *   up_addrenv_kstackalloc  - Create a stack in the kernel address environment
+ *   up_addrenv_kstackfree   - Destroy the kernel stack.
  *
  ****************************************************************************/
 
