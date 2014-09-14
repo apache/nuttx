@@ -8531,4 +8531,11 @@
 	* arch/arm/src/armv7-a/arm_addrenv_stack.c, arm_addrenv.c,
 	  a1x/Make.defs, sama5/Make.defs, and include/nuttx/arch.h: Add logic
 	  needed to manage a virtualized stack.  Not yet incorporated into
-	  base OS logic (2014-9.13).
+	  base OS logic (2014-9-13).
+	* sched/task/task_posixspawn.c: Kernel proxy thread should be a kernel
+	  thread, not a user task (2014-9-14).
+	* include/sched.h and spawn.h, libc/Kconfig, spawn/Make.defs,
+	  lib_psa_getstacksize.c, lib_psa_init.c, and lib_psa_setstacksize.c,
+	  sched/task/Make.defs, task_create.c, and task_spawn.c: Don't build
+	  task_create() or task_spawn() interfaces if there is an address
+	  environment (2014-9-14).
