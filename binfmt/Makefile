@@ -1,7 +1,7 @@
 ############################################################################
 # nxflat/Makefile
 #
-#   Copyright (C) 2007-2009, 2012-2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2009, 2012-2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -60,6 +60,10 @@ endif
 
 BINFMT_CSRCS += symtab_findbyname.c symtab_findbyvalue.c
 BINFMT_CSRCS += symtab_findorderedbyname.c symtab_findorderedbyvalue.c
+
+ifeq ($(CONFIG_LIBC_EXECFUNCS),y)
+BINFMT_CSRCS += binfmt_execsymtab.c
+endif
 
 # Add configured binary modules
 

@@ -51,7 +51,7 @@ endif
 
 ifneq ($(CONFIG_BINFMT_DISABLE),y)
 ifeq ($(CONFIG_LIBC_EXECFUNCS),y)
-TSK_SRCS += task_posixspawn.c
+TSK_SRCS += task_execv.c task_posixspawn.c
 endif
 endif
 

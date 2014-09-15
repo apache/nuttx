@@ -77,10 +77,45 @@ struct symtab_s
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
+
+/****************************************************************************
+ * Name: exec_getsymtab
+ *
+ * Description:
+ *   Get the current symbol table selection as an atomic operation.
+ *
+ * Input Parameters:
+ *   symtab - The location to store the symbol table.
+ *   nsymbols - The location to store the number of symbols in the symbol table.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void exec_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols);
+
+/****************************************************************************
+ * Name: exec_setsymtab
+ *
+ * Description:
+ *   Select a new symbol table selection as an atomic operation.
+ *
+ * Input Parameters:
+ *   symtab - The new symbol table.
+ *   nsymbols - The number of symbols in the symbol table.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void exec_setsymtab(FAR const struct symtab_s *symtab, int nsymbols);
 
 /****************************************************************************
  * Name: symtab_findbyname
@@ -96,7 +131,7 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN FAR const struct symtab_s *
+FAR const struct symtab_s *
 symtab_findbyname(FAR const struct symtab_s *symtab,
                   FAR const char *name, int nsyms);
 
@@ -113,7 +148,7 @@ symtab_findbyname(FAR const struct symtab_s *symtab,
  *
  ****************************************************************************/
 
-EXTERN FAR const struct symtab_s *
+FAR const struct symtab_s *
 symtab_findorderedbyname(FAR const struct symtab_s *symtab,
                          FAR const char *name, int nsyms);
 
@@ -132,7 +167,7 @@ symtab_findorderedbyname(FAR const struct symtab_s *symtab,
  *
  ****************************************************************************/
 
-EXTERN FAR const struct symtab_s *
+FAR const struct symtab_s *
 symtab_findbyvalue(FAR const struct symtab_s *symtab,
                    FAR void *value, int nsyms);
 
@@ -150,7 +185,7 @@ symtab_findbyvalue(FAR const struct symtab_s *symtab,
  *
  ****************************************************************************/
 
-EXTERN FAR const struct symtab_s *
+FAR const struct symtab_s *
 symtab_findorderedbyvalue(FAR const struct symtab_s *symtab,
                           FAR void *value, int nsyms);
 

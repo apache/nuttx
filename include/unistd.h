@@ -173,12 +173,6 @@ int     rmdir(FAR const char *pathname);
 #ifdef CONFIG_LIBC_EXECFUNCS
 int     execl(FAR const char *path, ...);
 int     execv(FAR const char *path, FAR char *const argv[]);
-
-/* Non-standard functions to manage symbol tables */
-
-struct symtab_s; /* See include/nuttx/binfmt/symtab.h */
-void exec_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols);
-void exec_setsymtab(FAR const struct symtab_s *symtab, int nsymbols);
 #endif
 
 /* Other */
