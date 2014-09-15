@@ -144,7 +144,22 @@ int sched_releasetcb(FAR struct tcb_s *tcb, uint8_t ttype)
 
       if (tcb->stack_alloc_ptr)
         {
-          up_release_stack(tcb, ttype);
+#ifdef CONFIG_BUILD_KERNEL
+          /* If the exiting thread is not a kernel thread, then it has an
+           * address environment.  Don't bother to release the stack memory
+           * in this case... There is no point since the memory lies in the
+           * user memory region that will be destroyed anyway (and the
+           * address environment has probably already been destroyed at
+           * this point.. so we would crash if we even tried it).  But if
+           * this is a privileged group, when we still have to release the
+           * memory using the kernel allocator.
+           */
+
+          if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
+#endif
+            {
+              up_release_stack(tcb, ttype);
+            }
         }
 
 #ifdef CONFIG_PIC
@@ -169,17 +184,18 @@ int sched_releasetcb(FAR struct tcb_s *tcb, uint8_t ttype)
       (void)up_addrenv_kstackfree(tcb);
 #endif
 
+#ifdef CONFIG_ARCH_ADDRENV
       /* Release this thread's reference to the address environment */
 
-#ifdef CONFIG_ARCH_ADDRENV
       ret = up_addrenv_detach(tcb->group, tcb);
 #endif
 
+#ifdef HAVE_TASK_GROUP
       /* Leave the group (if we did not already leave in task_exithook.c) */
 
-#ifdef HAVE_TASK_GROUP
       group_leave(tcb);
 #endif
+
       /* And, finally, release the TCB itself */
 
       sched_kfree(tcb);

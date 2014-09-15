@@ -613,6 +613,7 @@ void task_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking)
       return;
     }
 
+#if defined(CONFIG_SCHED_ATEXIT) || defined(CONFIG_SCHED_ONEXIT)
   /* If exit function(s) were registered, call them now before we do any un-
    * initialization.
    *
@@ -628,7 +629,6 @@ void task_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking)
    *    the exit functions *not* be called.
    */
 
-#if defined(CONFIG_SCHED_ATEXIT) || defined(CONFIG_SCHED_ONEXIT)
   if (!nonblocking)
     {
       task_atexit(tcb);
@@ -669,17 +669,17 @@ void task_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking)
       task_flushstreams(tcb);
     }
 
+#ifdef HAVE_TASK_GROUP
   /* Leave the task group.  Perhaps discarding any un-reaped child
    * status (no zombies here!)
    */
 
-#ifdef HAVE_TASK_GROUP
   group_leave(tcb);
 #endif
 
+#ifndef CONFIG_DISABLE_SIGNALS
   /* Deallocate anything left in the TCB's queues */
 
-#ifndef CONFIG_DISABLE_SIGNALS
   sig_cleanup(tcb); /* Deallocate Signal lists */
 #endif
 
