@@ -664,7 +664,11 @@ int up_addrenv_coherent(FAR const group_addrenv_t *addrenv)
 
   cp15_invalidate_icache();
 
-  /* Clean D-Cache in each region. */
+  /* Clean D-Cache in each region.
+   * REVISIT:  Cause crashes when trying to clean unmapped memory.  In order
+   * for this to work, we need to know the exact size of each region (as we
+   * do now for the heap region).
+   */
 
 #warning REVISIT... causes crashes
 #if 0
@@ -675,12 +679,11 @@ int up_addrenv_coherent(FAR const group_addrenv_t *addrenv)
   arch_clean_dcache(CONFIG_ARCH_DATA_VBASE,
                     CONFIG_ARCH_DATA_VBASE +
                     CONFIG_ARCH_DATA_NPAGES * MM_PGSIZE - 1);
-
-#if 0 /* Not yet implemented */
-  arch_clean_dcache(CONFIG_ARCH_HEAP_VBASE,
-                    CONFIG_ARCH_HEAP_VBASE +
-                    CONFIG_ARCH_HEAP_NPAGES * MM_PGSIZE - 1);
 #endif
+
+#ifdef CONFIG_BUILD_KERNEL
+  arch_clean_dcache(CONFIG_ARCH_HEAP_VBASE,
+                    CONFIG_ARCH_HEAP_VBASE + addrenv->heapsize);
 #endif
 
   return OK;
