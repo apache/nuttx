@@ -512,7 +512,7 @@ uint32_t *arm_syscall(uint32_t *regs)
 #if defined(CONFIG_DEBUG_SYSCALL)
   /* Report what happened */
 
-  svcdbg("SYSCALL Exit: regs: %p: %d\n", regs);
+  svcdbg("SYSCALL Exit: regs: %p\n", regs);
   svcdbg("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
          regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
          regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
