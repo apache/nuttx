@@ -296,6 +296,9 @@ struct xcptcontext
 
   FAR uint32_t *ustkptr;  /* Saved user stack pointer */
   FAR uint32_t *kstack;   /* Allocate base of the (aligned) kernel stack */
+#ifndef CONFIG_DISABLE_SIGNALS
+  FAR uint32_t *kstkptr;  /* Saved kernel stack pointer */
+#endif
 #endif
 #endif
 };

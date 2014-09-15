@@ -352,6 +352,9 @@ uint32_t *arm_syscall(uint32_t *regs)
       case SYS_signal_handler:
         {
           FAR struct tcb_s *rtcb = sched_self();
+#ifdef CONFIG_ARCH_KERNEL_STACK
+          int depth;
+#endif
 
           /* Remember the caller's return address */
 
@@ -379,6 +382,24 @@ uint32_t *arm_syscall(uint32_t *regs)
            */
 
           regs[REG_R3]   = *(uint32_t*)(regs[REG_SP]+4);
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+          /* If this is a nested SYSCALL and if there is an allocated kernel
+           * stack, then we must be operating on the kernal stack now.  We
+           * need to switch back to the user stack before dispatching the
+           * signal handler to the user code.
+           */
+
+          depth = rtcb->xcp.nsyscalls;
+          if (depth > 0 && rtcb->xcp.kstack != NULL)
+            {
+              DEBUGASSERT(rtcb->xcp.kstkptr == NULL &&
+                          rtcb->xcp.ustkptr[depth - 1] != 0);
+
+              rtcb->xcp.kstkptr = (FAR uint32_t *)regs[REG_SP];
+              regs[REG_SP]      = (uint32_t)rtcb->xcp.ustkptr[depth - 1];
+            }
+#endif
         }
         break;
 #endif
@@ -396,6 +417,9 @@ uint32_t *arm_syscall(uint32_t *regs)
       case SYS_signal_handler_return:
         {
           FAR struct tcb_s *rtcb = sched_self();
+#ifdef CONFIG_ARCH_KERNEL_STACK
+          int depth;
+#endif
 
           /* Set up to return to the kernel-mode signal dispatching logic. */
 
@@ -405,6 +429,24 @@ uint32_t *arm_syscall(uint32_t *regs)
           cpsr                 = regs[REG_CPSR] & ~PSR_MODE_MASK;
           regs[REG_CPSR]       = cpsr | PSR_MODE_SVC;
           rtcb->xcp.sigreturn  = 0;
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+          /* If this is a nested SYSCALL and if there is an allocated kernel
+           * stack, we must be using the user stack to dispatch to the signal
+           * handler.  We need to switch to back to the kernel user stack
+           * before returning to the kernel mode signal trampoline.
+           */
+
+          depth = rtcb->xcp.nsyscalls;
+          if (depth > 0 && rtcb->xcp.kstack != NULL)
+            {
+              DEBUGASSERT(rtcb->xcp.kstkptr != NULL &&
+                          (uint32_t)rtcb->xcp.ustkptr[depth - 1] == regs[REG_SP]);
+
+              regs[REG_SP]      = (uint32_t)rtcb->xcp.kstkptr;
+              rtcb->xcp.kstkptr = NULL;
+            }
+#endif
         }
         break;
 #endif
