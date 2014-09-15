@@ -8547,3 +8547,13 @@
 	  arch.h, and othr files:  Add the initial implementation of the process
 	  kernel stack logic.  Not yet integrated into the main OS logic nor
 	  tested (2014-9-14).
+	* binfmt/binfmt_execsymtab.c and Makefile, sched/task/task_execv.c,
+	  task_posixspawn.c, and Make.defs, include/unistd.h,
+	  include/nuttx/binfmt/symtab.h, and libc/unistd/Make.defs: execv() is
+	  a basic system interface.  It should not be in libc/ but rather in
+	  sched/task.  Its symboltable helper logic also belongs in the kernel
+	  but belongs in binfmt/ with the other symbol table logic (2014-9-15).
+	* include/sys/syscall.h, syscall/syscall.csv, syscall_lookup.h, and
+	  syscall_stublookup.c:  execl() is not a system interface.  It belongs
+	  in libc and should not have a system call associated with it
+	  (2014-9-15).
