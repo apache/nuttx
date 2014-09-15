@@ -45,6 +45,7 @@
 
 #include <nuttx/kthread.h>
 #include <nuttx/binfmt/binfmt.h>
+#include <nuttx/binfmt/symtab.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
