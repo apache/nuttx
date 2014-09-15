@@ -161,8 +161,7 @@
 #    define SYS_posix_spawn            __SYS_posix_spawn
 #  endif
 #  define SYS_execv                    (__SYS_posix_spawn+1)
-#  define SYS_execl                    (__SYS_posix_spawn+2)
-#  define __SYS_signals                (__SYS_posix_spawn+3)
+#  define __SYS_signals                (__SYS_posix_spawn+2)
 #else
 #  define __SYS_signals                __SYS_posix_spawn
 #endif

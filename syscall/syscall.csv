@@ -12,7 +12,6 @@
 "connect","sys/socket.h","CONFIG_NSOCKET_DESCRIPTORS > 0 && defined(CONFIG_NET)","int","int","FAR const struct sockaddr*","socklen_t"
 "dup","unistd.h","CONFIG_NFILE_DESCRIPTORS > 0","int","int"
 "dup2","unistd.h","CONFIG_NFILE_DESCRIPTORS > 0","int","int","int"
-"execl","unistd.h","!defined(CONFIG_BINFMT_DISABLE) && defined(CONFIG_LIBC_EXECFUNCS)","int","FAR const char *","..."
 "execv","unistd.h","!defined(CONFIG_BINFMT_DISABLE) && defined(CONFIG_LIBC_EXECFUNCS)","int","FAR const char *","FAR char *const []|FAR char *const *"
 "exit","stdlib.h","","void","int"
 "fcntl","fcntl.h","CONFIG_NFILE_DESCRIPTORS > 0","int","int","int","..."

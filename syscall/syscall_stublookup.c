@@ -114,9 +114,6 @@ uintptr_t STUB_posix_spawnp(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3, uintptr_t parm4, uintptr_t parm5,
             uintptr_t parm6);
 uintptr_t STUB_execv(int nbr, uintptr_t parm1, uintptr_t parm2);
-uintptr_t STUB_execl(int nbr, uintptr_t parm1, uintptr_t parm2,
-            uintptr_t parm3, uintptr_t parm4, uintptr_t parm5,
-            uintptr_t parm6);
 
 /* The following are only defined is signals are supported in the NuttX
  * configuration.

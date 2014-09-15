@@ -107,7 +107,6 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
   SYSCALL_LOOKUP(posix_spawn,             6, STUB_posix_spawn)
 #  endif
   SYSCALL_LOOKUP(execv,                   2, STUB_execv)
-  SYSCALL_LOOKUP(execl,                   6, STUB_execl)
 #endif
 
 /* The following are only defined is signals are supported in the NuttX
