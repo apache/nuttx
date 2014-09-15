@@ -206,9 +206,13 @@ int exec_module(FAR const struct binary_s *binp)
       goto errout_with_addrenv;
     }
 
-  /* We can free the argument buffer now */
+  /* We can free the argument buffer now.
+   * REVISIT:  It is good to free up memory as soon as possible, but
+   * unfortunately here 'binp' is 'const'.  So to do this properly, we will
+   * have to make some more extensive changes.
+   */
 
-  binfmt_freeargv(binp);
+  binfmt_freeargv((FAR struct binary_s *)binp);
 
   /* Note that tcb->flags are not modified.  0=normal task */
   /* tcb->flags |= TCB_FLAG_TTYPE_TASK; */
