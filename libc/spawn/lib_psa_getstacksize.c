@@ -75,4 +75,4 @@ int task_spawnattr_getstacksize(FAR const posix_spawnattr_t *attr,
   return OK;
 }
 
-#endif /* CONFIG_ARCH_ADDRENV */
+#endif /* !CONFIG_ARCH_ADDRENV */
