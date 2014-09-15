@@ -8560,3 +8560,10 @@
 	* arch/arm/include/armv7-a/irq.h and src/armv7-a/arm_syscall.c: If we
 	  are configured to use a kernel stack while in SYSCALL handling, then
 	  we need to switch back to the user stack to deliver a signal (2014-9-15).
+	* arch/arm/src/armv6-m/up_svcall.c, armv7-a/arm_syscall.c, and
+	  armv7-m/up_svcall.c: Fix a typo in system call when fetching parameter
+	  from the stack:  regs[REG_PC]+4 is the address, not regs[REG_PC+4]
+	  (2014-9-15).
+	* sched/sched/sched_releasetcb.c: Don't release user stack in kernel
+	  build.  Already destroyed with all of the address environment
+	  (2014-9-15).
