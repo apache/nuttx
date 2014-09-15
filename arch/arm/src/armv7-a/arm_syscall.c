@@ -378,7 +378,7 @@ uint32_t *arm_syscall(uint32_t *regs)
            * parameter will reside at an offset of 4 from the stack pointer.
            */
 
-          regs[REG_R3]   = *(uint32_t*)(regs[REG_SP+4]);
+          regs[REG_R3]   = *(uint32_t*)(regs[REG_SP]+4);
         }
         break;
 #endif

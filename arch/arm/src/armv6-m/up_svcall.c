@@ -407,7 +407,7 @@ int up_svcall(int irq, FAR void *context)
            * parameter will reside at an offset of 4 from the stack pointer.
            */
 
-          regs[REG_R3]         = *(uint32_t*)(regs[REG_SP+4]);
+          regs[REG_R3]         = *(uint32_t*)(regs[REG_SP]+4);
         }
         break;
 #endif
