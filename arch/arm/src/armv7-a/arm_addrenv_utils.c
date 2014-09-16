@@ -48,7 +48,7 @@
 
 #include "cache.h"
 #include "mmu.h"
-#include "pginline.h"
+#include "pgalloc.h"
 #include "addrenv.h"
 
 #ifdef CONFIG_ARCH_ADDRENV
