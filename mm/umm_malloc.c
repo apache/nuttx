@@ -50,7 +50,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
+#ifdef CONFIG_BUILD_KERNEL
 /* In the kernel build, there a multiple user heaps; one for each task
  * group.  In this build configuration, the user heap structure lies
  * in a reserved region at the beginning of the .bss/.data address
@@ -103,7 +103,7 @@
 
 FAR void *malloc(size_t size)
 {
-#ifdef CONFIG_ARCH_ADDRENV
+#ifdef CONFIG_BUILD_KERNEL
   FAR void *brkaddr;
   FAR void *mem;
 

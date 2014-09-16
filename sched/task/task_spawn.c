@@ -49,7 +49,7 @@
 #include "task/spawn.h"
 #include "task/task.h"
 
-#ifndef CONFIG_ARCH_ADDRENV
+#ifndef CONFIG_BUILD_KERNEL
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -455,4 +455,4 @@ errout_with_lock:
   return ret;
 }
 
-#endif /* CONFIG_ARCH_ADDRENV */
+#endif /* CONFIG_BUILD_KERNEL */

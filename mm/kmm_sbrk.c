@@ -41,8 +41,7 @@
 
 #include <nuttx/mm.h>
 
-#if defined(CONFIG_MM_KERNEL_HEAP) && defined(CONFIG_ARCH_ADDRENV) && \
-    defined(CONFIG_MM_PGALLOC) && defined(CONFIG_ARCH_USE_MMU)
+#if defined(CONFIG_BUILD_KERNEL) && defined(__KERNEL__)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -89,4 +88,4 @@ FAR void *kmm_sbrk(intptr_t incr)
   return mm_sbrk(&g_kmmheap, incr, UINTPTR_MAX);
 }
 
-#endif /* CONFIG_MM_KERNEL_HEAP && CONFIG_ARCH_ADDRENV && ... */
+#endif /* CONFIG_BUILD_KERNEL && __KERNEL__ */

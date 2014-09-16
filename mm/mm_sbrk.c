@@ -47,8 +47,7 @@
 #include <nuttx/mm.h>
 #include <nuttx/pgalloc.h>
 
-#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_MM_PGALLOC) && \
-    defined(CONFIG_ARCH_USE_MMU)
+#ifdef CONFIG_BUILD_KERNEL
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -166,4 +165,4 @@ errout:
   set_errno(err);
   return (FAR void *)-1;
 }
-#endif /* CONFIG_ARCH_ADDRENV && CONFIG_MM_PGALLOC && CONFIG_ARCH_USE_MMU */
+#endif /* CONFIG_BUILD_KERNEL */

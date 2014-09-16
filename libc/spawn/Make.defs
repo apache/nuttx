@@ -50,7 +50,7 @@ ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 CSRCS += lib_psa_getsigmask.c lib_psa_setsigmask.c
 endif
 
-ifneq ($(CONFIG_ARCH_ADDRENV),y)
+ifneq ($(CONFIG_BUILD_KERNEL),y)
 CSRCS += lib_psa_getstacksize.c lib_psa_setstacksize.c
 endif
 

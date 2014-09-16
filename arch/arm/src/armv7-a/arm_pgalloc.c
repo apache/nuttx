@@ -51,7 +51,7 @@
 #include "mmu.h"
 #include "pgalloc.h"
 
-#if defined(CONFIG_MM_PGALLOC) && defined(CONFIG_ARCH_USE_MMU)
+#ifdef CONFIG_BUILD_KERNEL
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -317,4 +317,4 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages)
   return brkaddr;
 }
 
-#endif /* CONFIG_MM_PGALLOC && CONFIG_ARCH_USE_MMU */
+#endif /* CONFIG_BUILD_KERNEL */

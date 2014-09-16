@@ -94,7 +94,7 @@
  * address environments.
  */
 
-#ifndef CONFIG_ARCH_ADDRENV
+#ifndef CONFIG_BUILD_KERNEL
 #  define SYS_task_create              (CONFIG_SYS_RESERVED+22)
 #  define __SYS_task_delete            (CONFIG_SYS_RESERVED+23)
 
@@ -102,11 +102,9 @@
  * allocator selected.  MMU support from the CPU is also required.
  */
 
-#elif defined(CONFIG_MM_PGALLOC) && defined(CONFIG_ARCH_USE_MMU)
+#else
 #  define SYS_pgalloc                  (CONFIG_SYS_RESERVED+22)
 #  define __SYS_task_delete            (CONFIG_SYS_RESERVED+23)
-#else
-#  define __SYS_task_delete            (CONFIG_SYS_RESERVED+22)
 #endif
 
 #  define SYS_task_delete              __SYS_task_delete

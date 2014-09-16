@@ -99,7 +99,7 @@ int    task_init(FAR struct tcb_s *tcb, const char *name, int priority,
                  FAR char * const argv[]);
 int    task_activate(FAR struct tcb_s *tcb);
 
-#ifndef CONFIG_ARCH_ADDRENV
+#ifndef CONFIG_BUILD_KERNEL
 int    task_create(FAR const char *name, int priority, int stack_size,
                    main_t entry, FAR char * const argv[]);
 #endif

@@ -65,9 +65,9 @@ SYSCALL_LOOKUP(sem_trywait,               1, STUB_sem_trywait)
 SYSCALL_LOOKUP(sem_unlink,                1, STUB_sem_unlink)
 SYSCALL_LOOKUP(sem_wait,                  1, STUB_sem_wait)
 SYSCALL_LOOKUP(set_errno,                 1, STUB_set_errno)
-#ifndef CONFIG_ARCH_ADDRENV
+#ifndef CONFIG_BUILD_KERNEL
 SYSCALL_LOOKUP(task_create,               5, STUB_task_create)
-#elif defined(CONFIG_MM_PGALLOC) && defined(CONFIG_ARCH_USE_MMU)
+#else
 SYSCALL_LOOKUP(pgalloc,                   2, STUB_pgalloc)
 #endif
 SYSCALL_LOOKUP(task_delete,               1, STUB_task_delete)

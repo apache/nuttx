@@ -42,17 +42,15 @@
 #include <unistd.h>
 
 #include <nuttx/mm.h>
+#include <nuttx/addrenv.h>
 #include <nuttx/pgalloc.h>
 
-#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_MM_PGALLOC) && \
-    defined(CONFIG_ARCH_USE_MMU) && (!defined(CONFIG_BUILD_PROTECTED) || \
-    !defined(__KERNEL__))
+#if defined(CONFIG_BUILD_KERNEL) && !defined(__KERNEL__)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
 /* In the kernel build, there a multiple user heaps; one for each task
  * group.  In this build configuration, the user heap structure lies
  * in a reserved region at the beginning of the .bss/.data address
@@ -60,14 +58,7 @@
  * ARCH_DATA_RESERVE_SIZE
  */
 
-#  include <nuttx/addrenv.h>
-#  define USR_HEAP (&ARCH_DATA_RESERVE->ar_usrheap)
-
-#else
-/* Otherwise, the user heap data structures are in common .bss */
-
-#  define USR_HEAP &g_mmheap
-#endif
+#define USR_HEAP (&ARCH_DATA_RESERVE->ar_usrheap)
 
 /****************************************************************************
  * Public Functions
@@ -110,4 +101,4 @@ FAR void *sbrk(intptr_t incr)
   return mm_sbrk(USR_HEAP, incr, CONFIG_ARCH_HEAP_NPAGES << MM_PGSHIFT);
 }
 
-#endif /* CONFIG_ARCH_ADDRENV && CONFIG_MM_PGALLOC && ... */
+#endif /* CONFIG_BUILD_KERNEL && !__KERNEL__ */

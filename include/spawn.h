@@ -89,7 +89,7 @@ struct posix_spawnattr_s
   sigset_t sigmask;              /* Signals to be masked */
 #endif
 
-#ifndef CONFIG_ARCH_ADDRENV
+#ifndef CONFIG_BUILD_KERNEL
   /* Used only by task_spawn (non-standard) */
 
   size_t   stacksize;            /* Task stack size */
@@ -141,7 +141,7 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
       posix_spawn(pid,path,file_actions,attr,argv,envp)
 #endif
 
-#ifndef CONFIG_ARCH_ADDRENV
+#ifndef CONFIG_BUILD_KERNEL
 /* Non-standard task_spawn interface.  This function uses the same
  * semantics to execute a file in memory at 'entry', giving it the name
  * 'name'.
