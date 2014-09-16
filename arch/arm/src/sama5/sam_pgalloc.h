@@ -43,6 +43,8 @@
 #include <nuttx/config.h>
 #include <stdint.h>
 
+#include "pgalloc.h"
+
 #ifdef CONFIG_MM_PGALLOC
 
 /****************************************************************************
@@ -75,7 +77,7 @@ extern "C"
  *
  ****************************************************************************/
 
-uintptr_t sam_physpgaddr(uintptr_t vaddr);
+#define sam_physpgaddr(vaddr) arm_physpgaddr(vaddr)
 
 /****************************************************************************
  * Name: sam_virtpgaddr

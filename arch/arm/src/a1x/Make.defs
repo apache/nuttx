@@ -87,7 +87,7 @@ CMN_CSRCS += arm_va2pte.c
 endif
 
 ifeq ($(CONFIG_BUILD_KERNEL),y)
-CMN_CSRCS += up_task_start.c up_pthread_start.c up_signal_dispatch.c
+CMN_CSRCS += up_task_start.c up_pthread_start.c arm_signal_dispatch.c
 endif
 
 ifeq ($(CONFIG_ARCH_ADDRENV),y)
@@ -98,6 +98,10 @@ endif
 ifeq ($(CONFIG_ARCH_KERNEL_STACK),y)
 CMN_CSRCS += arm_addrenv_kstack.c
 endif
+endif
+
+ifeq ($(CONFIG_MM_PGALLOC),y)
+CMN_CSRCS += arm_physpgaddr.c
 endif
 
 ifeq ($(CONFIG_ELF),y)
