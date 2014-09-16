@@ -3726,11 +3726,8 @@ Configurations
                  http://www.nuttx.org/doku.php?id=wiki:nxinternal:memconfigs#task_create
 
       2014-8-29: System call interface verified.
-      2014-9-11: There has been some breakage due to changes for the knsh
-                 configuration.  This test now hangs after running the first
-                 ELF program.  With GDB I can see that the IDLE loop is running
-                 but apparently either ELF main program is deadlocked. Need to
-                 revisit.
+      2014-9-16: Reverified after fixing changes for the knsh configuration
+                 that broke this on.  All seems to be well now.
 
   knsh:
     An NSH configuration used to test the SAMA5D kenel build configuration.
