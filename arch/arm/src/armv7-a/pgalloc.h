@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/sama5/sam_pgalloc.c
+ * arch/arm/src/armv7-a/pgalloc.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,118 +33,126 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_ARMV7_A_PGALLOC_H
+#define __ARCH_ARM_SRC_ARMV7_A_PGALLOC_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <assert.h>
-#include <debug.h>
+#include <stdint.h>
 
-#include <nuttx/arch.h>
 #include <nuttx/addrenv.h>
-#include <nuttx/pgalloc.h>
 
-#include "chip.h"
 #include "mmu.h"
-#include "cache.h"
-
-#include "sam_pgalloc.h"
 
 #ifdef CONFIG_MM_PGALLOC
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Currently, page cache memory must be allocated in DRAM.  There are other
- * possibilities, but the logic in this file will have to extended in order
- * handle any other possibility.
- */
-
-#ifndef CONFIG_SAMA5_DDRCS_PGHEAP
-#  error CONFIG_SAMA5_DDRCS_PGHEAP must be selected
-#endif
-
-#ifndef CONFIG_SAMA5_DDRCS_PGHEAP_OFFSET
-#  error CONFIG_SAMA5_DDRCS_PGHEAP_OFFSET must be specified
-#endif
-
-#if (CONFIG_SAMA5_DDRCS_PGHEAP_OFFSET & MM_PGMASK) != 0
-#  warning CONFIG_SAMA5_DDRCS_PGHEAP_OFFSET is not aligned to a page boundary
-#endif
-
-#ifndef CONFIG_SAMA5_DDRCS_PGHEAP_SIZE
-#  error CONFIG_SAMA5_DDRCS_PGHEAP_SIZE must be specified
-#endif
-
-#if (CONFIG_SAMA5_DDRCS_PGHEAP_SIZE & MM_PGMASK) != 0
-#  warning CONFIG_SAMA5_DDRCS_PGHEAP_SIZE is not aligned to a page boundary
-#endif
 
 /****************************************************************************
- * Private Data
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functions
+ * Inline Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: arm_pgmap
+ *
+ * Description:
+ *   Map one page to a temporary, scratch virtual memory address
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_ARCH_PGPOOL_MAPPING) && defined(CONFIG_ARCH_USE_MMU)
+static inline uintptr_t arm_tmpmap(uintptr_t paddr, FAR uint32_t *l1save)
+{
+  *l1save = mmu_l1_getentry(ARCH_SCRATCH_VBASE);
+  mmu_l1_setentry(paddr & ~SECTION_MASK, ARCH_SCRATCH_VBASE, MMU_MEMFLAGS);
+  return ((uintptr_t)ARCH_SCRATCH_VBASE | (paddr & SECTION_MASK));
+}
+#endif
+
+/****************************************************************************
+ * Name: arm_pgrestore
+ *
+ * Description:
+ *  Restore any previous L1 page table mapping that was in place when
+ *  arm_tmpmap() was called
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_ARCH_PGPOOL_MAPPING) && defined(CONFIG_ARCH_USE_MMU)
+static inline void arm_tmprestore(uint32_t l1save)
+{
+  mmu_l1_restore(ARCH_SCRATCH_VBASE, l1save);
+}
+#endif
+
+/****************************************************************************
+ * Name: arm_pgvaddr
+ *
+ * Description:
+ *   If the page memory pool is statically mapped, then we do not have to
+ *   go through the the temporary mapping.  We simply have to perform a
+ *   physical to virtual memory address mapping.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_PGPOOL_MAPPING
+static inline uintptr_t arm_pgvaddr(uintptr_t paddr)
+{
+  DEBUGASSERT(paddr >= CONFIG_ARCH_PGPOOL_PBASE &&
+              paddr < CONFIG_ARCH_PGPOOL_PEND);
+
+  return paddr - CONFIG_ARCH_PGPOOL_PBASE + CONFIG_ARCH_PGPOOL_VBASE;
+}
+#endif
+
+/****************************************************************************
+ * Name: arm_uservaddr
+ *
+ * Description:
+ *   Return true if the virtual address, vaddr, lies in the user address
+ *   space.
+ *
+ ****************************************************************************/
+
+static inline bool arm_uservaddr(uintptr_t vaddr)
+{
+  /* Check if this address is within the range of the virtualized .bss/.data,
+   * heap, or stack regions.
+   */
+
+  return ((vaddr >= CONFIG_ARCH_TEXT_VBASE && vaddr < ARCH_TEXT_VEND) ||
+          (vaddr >= CONFIG_ARCH_DATA_VBASE && vaddr < ARCH_DATA_VEND) ||
+          (vaddr >= CONFIG_ARCH_HEAP_VBASE && vaddr < ARCH_HEAP_VEND)
+#ifdef CONFIG_ARCH_STACK_DYNAMIC
+       || (vaddr >= CONFIG_ARCH_STACK_VBASE && vaddr < ARCH_STACK_VEND)
+#endif
+      );
+}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_allocate_pgheap
+ * Name: arm_physpgaddr
  *
  * Description:
- *   If there is a page allocator in the configuration, then this function
- *   must be provided by the platform-specific code.  The OS initialization
- *   logic will call this function early in the initialization sequence to
- *   get the page heap information needed to configure the page allocator.
+ *   Check if the virtual address lies in the user data area and, if so
+ *   get the mapping to the physical address in the page pool.
  *
  ****************************************************************************/
 
-void up_allocate_pgheap(FAR void **heap_start, size_t *heap_size)
-{
-  DEBUGASSERT(heap_start && heap_size);
-
-  *heap_start = (FAR void *)((uintptr_t)SAM_DDRCS_PSECTION +
-                             CONFIG_SAMA5_DDRCS_PGHEAP_OFFSET);
-  *heap_size  = CONFIG_SAMA5_DDRCS_PGHEAP_SIZE;
-}
-
-/****************************************************************************
- * Name: sam_virtpgaddr
- *
- * Description:
- *   Check if the physical address lies in the page pool and, if so
- *   get the mapping to the virtual address in the user data area.
- *
- ****************************************************************************/
-
-uintptr_t sam_virtpgaddr(uintptr_t paddr)
-{
-  uintptr_t poolstart;
-  uintptr_t poolend;
-
-  /* REVISIT: Not implemented correctly.  The reverse lookup from physical
-   * to virtual.  This will return a kernel accessible virtual address, but
-   * not an address usable by the user code.
-   *
-   * The correct solutions is complex and, perhaps, will never be needed.
-   */
-
-  poolstart = ((uintptr_t)SAM_DDRCS_PSECTION + CONFIG_SAMA5_DDRCS_PGHEAP_OFFSET);
-  poolend   = poolstart + CONFIG_SAMA5_DDRCS_PGHEAP_SIZE;
-
-  if (paddr >= poolstart && paddr < poolend)
-    {
-      return paddr - SAM_DDRCS_PSECTION + SAM_DDRCS_VSECTION;
-    }
-
-  return 0;
-}
+uintptr_t arm_physpgaddr(uintptr_t vaddr);
 
 #endif /* CONFIG_MM_PGALLOC */
+#endif /* __ARCH_ARM_SRC_ARMV7_A_PGALLOC_H */

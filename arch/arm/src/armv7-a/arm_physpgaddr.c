@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/sama5/sam_pgalloc.c
+ * arch/arm/src/armv7-a/arm_phypgaddr.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,38 +51,13 @@
 #include "mmu.h"
 #include "cache.h"
 
-#include "sam_pgalloc.h"
+#include "pgalloc.h"
 
 #ifdef CONFIG_MM_PGALLOC
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Currently, page cache memory must be allocated in DRAM.  There are other
- * possibilities, but the logic in this file will have to extended in order
- * handle any other possibility.
- */
-
-#ifndef CONFIG_SAMA5_DDRCS_PGHEAP
-#  error CONFIG_SAMA5_DDRCS_PGHEAP must be selected
-#endif
-
-#ifndef CONFIG_SAMA5_DDRCS_PGHEAP_OFFSET
-#  error CONFIG_SAMA5_DDRCS_PGHEAP_OFFSET must be specified
-#endif
-
-#if (CONFIG_SAMA5_DDRCS_PGHEAP_OFFSET & MM_PGMASK) != 0
-#  warning CONFIG_SAMA5_DDRCS_PGHEAP_OFFSET is not aligned to a page boundary
-#endif
-
-#ifndef CONFIG_SAMA5_DDRCS_PGHEAP_SIZE
-#  error CONFIG_SAMA5_DDRCS_PGHEAP_SIZE must be specified
-#endif
-
-#if (CONFIG_SAMA5_DDRCS_PGHEAP_SIZE & MM_PGMASK) != 0
-#  warning CONFIG_SAMA5_DDRCS_PGHEAP_SIZE is not aligned to a page boundary
-#endif
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -96,53 +71,87 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_allocate_pgheap
+ * Name: arm_physpgaddr
  *
  * Description:
- *   If there is a page allocator in the configuration, then this function
- *   must be provided by the platform-specific code.  The OS initialization
- *   logic will call this function early in the initialization sequence to
- *   get the page heap information needed to configure the page allocator.
+ *   Check if the virtual address lies in the user data area and, if so
+ *   get the mapping to the physical address in the page pool.
  *
  ****************************************************************************/
 
-void up_allocate_pgheap(FAR void **heap_start, size_t *heap_size)
+uintptr_t arm_physpgaddr(uintptr_t vaddr)
 {
-  DEBUGASSERT(heap_start && heap_size);
+  FAR uint32_t *l2table;
+  uintptr_t paddr;
+  uint32_t l1entry;
+#ifndef CONFIG_ARCH_PGPOOL_MAPPING
+  uint32_t l1save;
+#endif
+  int index;
 
-  *heap_start = (FAR void *)((uintptr_t)SAM_DDRCS_PSECTION +
-                             CONFIG_SAMA5_DDRCS_PGHEAP_OFFSET);
-  *heap_size  = CONFIG_SAMA5_DDRCS_PGHEAP_SIZE;
-}
-
-/****************************************************************************
- * Name: sam_virtpgaddr
- *
- * Description:
- *   Check if the physical address lies in the page pool and, if so
- *   get the mapping to the virtual address in the user data area.
- *
- ****************************************************************************/
-
-uintptr_t sam_virtpgaddr(uintptr_t paddr)
-{
-  uintptr_t poolstart;
-  uintptr_t poolend;
-
-  /* REVISIT: Not implemented correctly.  The reverse lookup from physical
-   * to virtual.  This will return a kernel accessible virtual address, but
-   * not an address usable by the user code.
-   *
-   * The correct solutions is complex and, perhaps, will never be needed.
+  /* Check if this address is within the range of one of the virtualized user
+   * address regions.
    */
 
-  poolstart = ((uintptr_t)SAM_DDRCS_PSECTION + CONFIG_SAMA5_DDRCS_PGHEAP_OFFSET);
-  poolend   = poolstart + CONFIG_SAMA5_DDRCS_PGHEAP_SIZE;
-
-  if (paddr >= poolstart && paddr < poolend)
+  if (arm_uservaddr(vaddr))
     {
-      return paddr - SAM_DDRCS_PSECTION + SAM_DDRCS_VSECTION;
+      /* Yes.. Get Level 1 page table entry corresponding to this virtual
+       * address.
+       */
+
+      l1entry = mmu_l1_getentry(vaddr);
+      if ((l1entry & PMD_TYPE_MASK) == PMD_TYPE_PTE)
+        {
+          /* Get the physical address of the level 2 page table from the
+           * level 1 page table entry.
+           */
+
+          paddr = ((uintptr_t)l1entry & PMD_PTE_PADDR_MASK);
+
+#ifdef CONFIG_ARCH_PGPOOL_MAPPING
+          /* Get the virtual address of the base of level 2 page table */
+
+          l2table = (FAR uint32_t *)arm_pgvaddr(paddr);
+#else
+          /* Temporarily map the page into the virtual address space */
+
+          l1save = mmu_l1_getentry(ARCH_SCRATCH_VBASE);
+          mmu_l1_setentry(paddr & ~SECTION_MASK, ARCH_SCRATCH_VBASE, MMU_MEMFLAGS);
+          l2table = (FAR uint32_t *)(ARCH_SCRATCH_VBASE | (paddr & SECTION_MASK));
+#endif
+          if (l2table)
+            {
+              /* Invalidate D-Cache line containing this virtual address so that
+               * we re-read from physical memory
+               */
+
+              index = (vaddr & SECTION_MASK) >> MM_PGSHIFT;
+              arch_invalidate_dcache((uintptr_t)&l2table[index],
+                                     (uintptr_t)&l2table[index] + sizeof(uint32_t));
+
+              /* Get the Level 2 page table entry corresponding to this virtual
+               * address.  Extract the physical address of the page containing
+               * the mapping of the virtual address.
+               */
+
+              paddr = ((uintptr_t)l2table[index] & PTE_SMALL_PADDR_MASK);
+
+#ifndef CONFIG_ARCH_PGPOOL_MAPPING
+              /* Restore the scratch section L1 page table entry */
+
+              mmu_l1_restore(ARCH_SCRATCH_VBASE, l1save);
+#endif
+
+              /* Add the correct offset and return the physical address
+               * corresponding to the virtual address.
+               */
+
+              return paddr + (vaddr & MM_PGMASK);
+            }
+        }
     }
+
+  /* No mapping available */
 
   return 0;
 }
