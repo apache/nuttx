@@ -8567,3 +8567,14 @@
 	* sched/sched/sched_releasetcb.c: Don't release user stack in kernel
 	  build.  Already destroyed with all of the address environment
 	  (2014-9-15).
+	* arch/arm/src/armv6-m/up_signal_dispatch.c, src/armv7-a/arm_signal_dispatch.c,
+	  and arch/arm/src/armv7-m/up_signal_dispatch.c:  Move
+	  common/up_signal_dispatch.c to armv6-m, armv7-m, and armv7-a.  The
+	  armv7-a version needs to be different to handle the case where we
+	  are dispatch kernel mode signals when running under a user mode group
+	  (2014-9-16).
+	* arch/arm/src/armv7-a/arm_syscall.c: Correct stack handling is signal
+	  deliver to user processes (2014-9-16).
+	* arch/arm/src/armv7-a/arm_physpgaddr.c, pgalloc.h, sama5/sam_pgalloc.c,
+	  and sam_pgalloc.h: Move some share-able logic from sama5/sam_pgalloc.c
+	  to armv7-a/arm_physpgaddr.c (2014-9-16).
