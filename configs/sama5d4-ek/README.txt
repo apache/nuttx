@@ -3930,23 +3930,10 @@ Configurations
        file system.  A considerable amount of testing has been done and
        there are no known defects as of this writing.
 
-    2014-9-13: Currently a program running as a process in the kernel build
-       mode cannot run other programs that reside on the file system.  Why?
-       Because in order to run those other programs, the new program's
-       address environment must be instantiated in memory to load the .text
-       and .data and to allocate the initial user space components from the
-       new user heap.
-
-       However, the previous program's stack currently resides in its heap.
-       So when a process tries to run another program, its heap is unmapped
-       and the system crashes.  The fix is to add a separate stack in a
-       separate memory region that does not get unmapped when creating new
-       processes.  There are hooks in place to do this; I just need to get
-       time to get that done.
-
-       To see the bug in action:
-
-         nsh> /bin/hello
+    2014-9-16: After some substantial effort, I think I may have resolved
+       the last of the mainstream bugs that prevented from executing other
+       user processes from a user processes.  Long story but I am glad to
+       haave that done.
 
   nsh:
 
