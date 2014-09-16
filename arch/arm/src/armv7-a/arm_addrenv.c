@@ -117,7 +117,7 @@
 #include <nuttx/pgalloc.h>
 #include <arch/irq.h>
 
-#include "pginline.h"
+#include "pgalloc.h"
 #include "cache.h"
 #include "mmu.h"
 #include "addrenv.h"
