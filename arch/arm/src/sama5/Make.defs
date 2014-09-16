@@ -104,6 +104,9 @@ endif
 
 ifeq ($(CONFIG_MM_PGALLOC),y)
 CMN_CSRCS += arm_physpgaddr.c
+ifeq ($(CONFIG_ARCH_PGPOOL_MAPPING),y)
+CMN_CSRCS += arm_virtpgaddr.c
+endif
 endif
 
 ifeq ($(CONFIG_ELF),y)

@@ -88,7 +88,11 @@ extern "C"
  *
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_PGPOOL_MAPPING
+#  define sam_virtpgaddr(vaddr) arm_virtpgaddr(vaddr)
+#else
 uintptr_t sam_virtpgaddr(uintptr_t paddr);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

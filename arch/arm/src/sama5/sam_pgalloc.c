@@ -124,6 +124,7 @@ void up_allocate_pgheap(FAR void **heap_start, size_t *heap_size)
  *
  ****************************************************************************/
 
+#ifndef CONFIG_ARCH_PGPOOL_MAPPING
 uintptr_t sam_virtpgaddr(uintptr_t paddr)
 {
   uintptr_t poolstart;
@@ -146,5 +147,6 @@ uintptr_t sam_virtpgaddr(uintptr_t paddr)
 
   return 0;
 }
+#endif /* !CONFIG_ARCH_PGPOOL_MAPPING */
 
 #endif /* CONFIG_MM_PGALLOC */
