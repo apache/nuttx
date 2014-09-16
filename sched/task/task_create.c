@@ -55,7 +55,7 @@
 #ifndef CONFIG_BUILD_KERNEL
 
 /****************************************************************************
- * Definitions
+ * Preprocessor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -242,7 +242,7 @@ errout:
  *
  ****************************************************************************/
 
-#ifndef CONFIG_ARCH_ADDRENV
+#ifndef CONFIG_BUILD_KERNEL
 int task_create(FAR const char *name, int priority,
                 int stack_size, main_t entry, FAR char * const argv[])
 {
