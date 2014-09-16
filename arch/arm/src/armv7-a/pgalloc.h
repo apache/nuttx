@@ -43,6 +43,8 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdbool.h>
+#include <assert.h>
 
 #include <nuttx/addrenv.h>
 
@@ -153,6 +155,19 @@ static inline bool arm_uservaddr(uintptr_t vaddr)
  ****************************************************************************/
 
 uintptr_t arm_physpgaddr(uintptr_t vaddr);
+
+/****************************************************************************
+ * Name: arm_virtpgaddr
+ *
+ * Description:
+ *   Check if the physical address lies in the page pool and, if so
+ *   get the mapping to the virtual address in the user data area.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_PGPOOL_MAPPING
+uintptr_t arm_virtpgaddr(uintptr_t paddr);
+#endif
 
 #endif /* CONFIG_MM_PGALLOC */
 #endif /* __ARCH_ARM_SRC_ARMV7_A_PGALLOC_H */
