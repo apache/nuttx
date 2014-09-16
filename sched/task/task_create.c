@@ -52,8 +52,6 @@
 #include "group/group.h"
 #include "task/task.h"
 
-#ifndef CONFIG_BUILD_KERNEL
-
 /****************************************************************************
  * Preprocessor Definitions
  ****************************************************************************/
@@ -271,5 +269,3 @@ int kernel_thread(FAR const char *name, int priority,
 {
   return thread_create(name, TCB_FLAG_TTYPE_KERNEL, priority, stack_size, entry, argv);
 }
-
-#endif /* CONFIG_BUILD_KERNEL */

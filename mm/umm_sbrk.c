@@ -45,7 +45,7 @@
 #include <nuttx/addrenv.h>
 #include <nuttx/pgalloc.h>
 
-#if defined(CONFIG_BUILD_KERNEL) && !defined(__KERNEL__)
+#if defined(CONFIG_BUILD_KERNEL)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -101,4 +101,4 @@ FAR void *sbrk(intptr_t incr)
   return mm_sbrk(USR_HEAP, incr, CONFIG_ARCH_HEAP_NPAGES << MM_PGSHIFT);
 }
 
-#endif /* CONFIG_BUILD_KERNEL && !__KERNEL__ */
+#endif /* CONFIG_BUILD_KERNEL */
