@@ -49,7 +49,7 @@
 
 #include "cache.h"
 #include "mmu.h"
-#include "pginline.h"
+#include "pgalloc.h"
 
 #if defined(CONFIG_MM_PGALLOC) && defined(CONFIG_ARCH_USE_MMU)
 
