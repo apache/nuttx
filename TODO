@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated September 13, 2014)
+NuttX TODO List (Last updated September 16, 2014)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -12,7 +12,7 @@ nuttx/
   (2)  Memory Managment (mm/)
   (3)  Signals (sched/, arch/)
   (2)  pthreads (sched/)
-  (9)  Kernel/Protected Builds
+  (8)  Kernel/Protected Builds
   (4)  C++ Support
   (6)  Binary loaders (binfmt/)
  (13)  Network (net/, drivers/net)
@@ -470,34 +470,6 @@ o Kernel/Protected Build
   Priority:    Low.  This is a good idea and certainly an architectural
                improvement.  However, there is no strong motivation now do
                do that partitioning work.
-
-  Title:       ARMVv7-A STACK ISSUE
-  Description: Currently a program running as a process in the kernel build mode
-               cannot run other programs that reside on the file system.  Why?
-               Because in order to run those other programs, the new program's
-               address environment must be instantiated in memory to load the
-               .text and .data and to allocate the initial user space components
-               from the new user heap.
-
-               However, the previous program's stack currently resides in its
-               heap.  So when a process tries to run another program, its heap
-               is unmapped and the system crashes.
-
-               The fix is to add a separate stack in a separate memory region
-               that does not get unmapped when creating new processes.  There
-               are hooks in place to do this; I just need to get time to get
-               that done.
-
-               UPDATE: I don't think it is that simple.  Startup logic will need
-               to access the new stack in its correct location to do things like
-               setup task arguments.  So I don't think that there is anyway to
-               do that without losing the current stack.
-
-               I may have to do the Linux solution:  Two stacks for each thread:
-               The main user stack, and a tiny kernel mode stack.
-  Status:      Open
-  Priority:    Pretty high... the kernel build is useless without this
-               capability.
 
 o C++ Support
   ^^^^^^^^^^^
