@@ -147,3 +147,7 @@ Clearly there is something wrong with the command line options given to SDCC bec
 trying to compile and link when we really only want dependencies.  I did not spend very much
 time trying to solve the problem; I assume that it is not too difficult.
 
+2014-9-15: There has been a lot of change to the address environment APIs with the inegration
+of address environments on the Cortex-A.  It is likely that there is some breakage due to
+incompatibilities with the Z180's mini-MMU.
+
