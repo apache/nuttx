@@ -1235,19 +1235,6 @@ static int can_txinterrupt(int irq, void *context)
         }
     }
 
-  /* Were all transmissions complete in all mailboxes when we entered this
-   * handler?
-   */
-
-  if ((regval & CAN_ALL_MAILBOXES) == CAN_ALL_MAILBOXES)
-    {
-      /* Yes.. disable further TX interrupts */
-
-      regval  = can_getreg(priv, STM32_CAN_IER_OFFSET);
-      regval &= ~CAN_IER_TMEIE;
-      can_putreg(priv, STM32_CAN_IER_OFFSET, regval);
-    }
-
   return OK;
 }
 
