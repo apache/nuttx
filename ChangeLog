@@ -8593,3 +8593,7 @@
 	  -EIO if there are no new packets, and second the information of the
 	  waiters is about the last transferred packet.  From  Daniel Lazlo
 	  Sitzer (2103-9-17).
+	* SAMA5D4-EK:  Add documentation/support for Rev E. board. Refresh NSH
+	  configuration.  Fix some build errors/warnings introduced with recent
+	  work with the knsh configuration (2014-9-17).
+
