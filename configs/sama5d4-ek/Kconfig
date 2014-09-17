@@ -10,7 +10,10 @@ choice
 	default SAMA5D4_MB_REVC
 
 config SAMA5D4_MB_REVC
-	bool "SAMA5D4-MB Rev. C"
+	bool "SAMA5D44-MB Rev. C"
+
+config SAMA5D4_MB_REVE
+	bool "SAMA5D44-MB Rev. E"
 
 endchoice # SAMA5D4-EK Board Version
 

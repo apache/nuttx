@@ -64,7 +64,9 @@ int nsh_archinitialize(void)
 #ifndef CONFIG_BOARD_INITIALIZE
   /* Perform board initialization */
 
-  (void)sam_bringup();
+  return sam_bringup();
+#else
+  return OK;
 #endif
 }
 
