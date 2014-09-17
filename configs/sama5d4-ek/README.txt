@@ -74,7 +74,8 @@ Contents
   - Creating and Using DRAMBOOT
   - Creating and Using AT25BOOT
   - Running NuttX from SDRAM
-  - PIO Usage
+  - SAMA4D44-MB RevC PIO Usage
+  - Board Revisions
   - Buttons and LEDs
   - Serial Console
   - Networking
@@ -853,8 +854,9 @@ Running NuttX from SDRAM
   STATUS:
     2014-3-30:  These instructions were adapted from the Linux4SAM website
                 but have not yet been used.
-PIO Usage
-=========
+
+SAMA4D44-MB RevC PIO Usage
+==========================
 
   Rev. B. 0111A
   ------------------------------ ------------------- -------------------------
@@ -1020,6 +1022,68 @@ PIO Usage
   PE31/ADTRG                     USBA_VBUS_PE31      USBA_VBUS_PE31
   ------------------------------ ------------------- -------------------------
 
+Board Revisions
+===============
+
+  PIO Usage
+  ---------
+  Most of this work was developed on a SAMA5D4-MB Rev C. board.  Here is a
+  pin-for-pin comparison between the Rev C and Rev E boards.  This is a
+  comparison of signal naming only; some differences are simply due to
+  differences in naming and any functional differences with no signal name
+  change would no be noted.
+
+    ---------- --------------------- ---------------------
+    PINS       SAMA5D44-MB Rev C.    SAMA5D44-MB Rev E.
+    ---------- --------------------- ---------------------
+    PA0-PA31:  Identical
+    ---------- --------------------- ---------------------
+    PB0-PB13:  Identical
+    PB14       ZIG_SPI2_NPCS1        XPRO_SPI2_NPCS1
+    PB15-PB31: Identical
+    ---------- --------------------- ---------------------
+    PC0-PC1:   Identical
+    PC2        A-SPCK/ISI_D10/PWMH3  SPCK/ISI_D10/PWMH3
+    PC3        A-NCPS0/ISI_D11/PWML3 NCPS0/ISI_D11/PWML3
+    PC4-PC31:  Identical
+    ---------- --------------------- ---------------------
+    PD0-PD9:   Identical
+    PD10       ZIG_CTS0              XPRO_CTS0
+    PD11       ZIG_SPI2_MISO_RTS0    XPRO_MISO_RTS0
+    PD12       ZIG_RXD0              XPRO_RXD0
+    PD13       ZIG_SPI2_MOSI_TXD0    XPRO_MOSI_TXD0
+    PD14       ZIG_CTS1              XPRO_CTS1
+    PD15       ZIG_SPI2_SPCK_RTS1    XPRO_SPCK_RTS1
+    PD16       ZIG_RXD1_PD16         XPRO_RXD1_PD16
+    PD17       ZIG_SPI2_NPCS0_TXD    XPRO_NPCS0_TXD1
+    PD18       SENSE0                NC
+    PD19       SENSE1                NC
+    PD20       SENSE2                NC
+    PD21       SENSE3                NC
+    PD22       NSENSE4C              NC
+    PD23-PD27: Identical
+    PD28       PD28                  SCK0
+    PD29       SENSE_DISCH           SCK1
+    PD30-PD31: Identical
+    ---------- --------------------- ---------------------
+    PE0-PE13:  Identical
+    PE14       MCI1_CD               EXP
+    PE15-PE30: Identical
+    PE31       USBA_VBUS_PE31        USBA_VBUS/ADTRG
+    ---------- --------------------- ---------------------
+
+  Jumpers
+  -------
+    ---------- --------------------- ---------------------
+    Jumpers    SAMA5D44-MB Rev C.    SAMA5D44-MB Rev E.
+    ---------- --------------------- ---------------------
+    JP2-J3     Identical function
+    JP4        Force power on        Not present on Rev E.
+               function selection
+    JP5-J22    Identical function
+    JP23       AUDIO_TWD0_PA30       Not present on Rev E.
+    JP24       Not present on Rev. C For CTS,RTS usage
+
 Buttons and LEDs
 ================
 
@@ -1118,8 +1182,8 @@ Serial Console
   provide the serial output over a USB virtual COM port.  In other other
   jumper position, UART3 will connect the RS-232 port labelled DBGU (J24).
 
-  I personally prefer the RS-2323 port because my terminal software does not
-  lose the USB Virtual COM everytime I reset or power-cycle the board.
+  I personally prefer the RS-232 port because my terminal software does not
+  lose the USB Virtual COM every time I reset or power-cycle the board.
 
   USART4 TTL-Level
   ------------------------------ ------------------- -------------------------
@@ -1567,7 +1631,7 @@ HSMCI Card Slots
   ------------------------------ ------------------- -------------------------
   SAMA5D4 PIO                    SIGNAL              USAGE
   ------------------------------ ------------------- -------------------------
-  PE14/A14/TCLK1/PWMH3           MCI1_CD_PE14        MCI1_CD               ???
+  PE14/A14/TCLK1/PWMH3           MCI1_CD_PE14        MCI1_CD        Rev C. ???
   PE15/A15/SCK3/TIOA0            MCI1_PWR_PE15       MCI1_PWR
   PE18/A18/TIOA5/MCI1_CK         PE18                MCI1_CK, EXP
   PE19/A19/TIOB5/MCI1_CDA        PE19                MCI1_CDA, EXP
@@ -2847,12 +2911,13 @@ Audio Support
       CONFIG_SAMA5_SSCO=y                   : Enable SSC0 driver support
 
     System Type -> SSC0 Configuration
+      CONFIG_SAMA5D4_MB_REVE=y              : No WM8904 for Rev C version of the board
       CONFIG_SAMA5_SSC_MAXINFLIGHT=16
       CONFIG_SAMA5_SSC0_DATALEN=16
 
     Device Drivers -> I2C Driver Support
       CONFIG_I2C=y                          : Enable I2C support
-      CONFIG_I2C_EXCHANGE=y                 : Support the exchange method
+      CONFIG_I2C_TRANSFER=y                 : Support the transfer method
       CONFIG_I2C_RESET=n                    : (Maybe y, if you have bus problems)
 
     System Type -> SSC Configuration
@@ -2868,7 +2933,7 @@ Audio Support
       CONFIG_SAMA5_SSC0_TX_STTDLY=1         : Start delay
       CONFIG_SAMA5_SSC0_TX_TKOUTPUT_NONE=y  : No output
 
-    Audio
+    Audio Support
       CONFIG_AUDIO=y                        : Audio support needed
       CONFIG_AUDIO_FORMAT_PCM=y             : Only PCM files are supported
       CONFIG_AUDIO_NUM_BUFFERS=8            : Number of audio buffers
@@ -4358,12 +4423,14 @@ Configurations
 
    19. NxPlayer
 
-       This configuration has the command line NxPlayer enabled.
+       This configuration has the command line NxPlayer enabled.  Support
+       for the WM8904 CODEC is built in.
 
-       At present, the the WM8904 driver is not included in the
-       configuration.  Instead the "NULL" audio device in built in to
-       support higher level testing (there are also some unresolved I2C
-       communication issues the the current WM8904 driver).
+         NOTE:  The WM8904 driver should not be included in the
+         configuration if you are using the Rev C version of the board
+         (there were some I2C communication issues for the WM8904 interface
+         on Rev C of the board).  Instead the "NULL" audio device in built
+         in to support higher level testing.
 
        This configuration depends on media files in the default mountpoint
        at /mnt/sdard.  You will need to mount the media before running
@@ -4566,14 +4633,14 @@ Configurations
 
     6. Media Player
 
-       This configuration has the media player application enabled.  That
-       player is still a work in progress and is only partially integrated
-       with the NxPlayer as of this writing.
+       This configuration has the media player application enabled. Support
+       for the WM8904 CODEC is built in.
 
-       At present, the the WM8904 driver is not included in the
-       configuration.  Instead the "NULL" audio device in built in to
-       support higher level testing (there are also some unresolved I2C
-       communication issues the the current WM8904 driver).
+         NOTE:  The WM8904 driver should not be included in the
+         configuration if you are using the Rev C version of the board
+         (there were some I2C communication issues for the WM8904 interface
+         on Rev C of the board).  Instead the "NULL" audio device in built
+         in to support higher level testing.
 
        This configuration depends on media files in the default mountpoint
        at /mnt/sdard (configurable).  If you see the message "Media volume
@@ -4740,7 +4807,3 @@ To-Do List
    for the PWM and the Timer/Counter drivers.  These drivers use the
    BOARD_MCK_FREQUENCY definition in more complex ways and will require some
    minor redesign and re-testing before they can be available.
-
-5) Board-related I2C issues have prevented integration of the WM8904 audio
-   decoder.  So the NxPlayer and NxWM Media Player demo cannot produce
-   sounds.

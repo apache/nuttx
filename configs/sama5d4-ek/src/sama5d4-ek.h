@@ -44,6 +44,7 @@
 #include <nuttx/compiler.h>
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include <arch/irq.h>
 #include <nuttx/irq.h>
@@ -398,6 +399,10 @@
 #endif
 
 #ifdef HAVE_WM8904
+#  ifdef CONFIG_SAMA5D4_MB_REVC
+#    warning WM8904 should not be used with the Rev C. board
+#  endif
+
 #  ifndef CONFIG_SAMA5_TWI0
 #    warning CONFIG_SAMA5_TWI0 is required for audio support
 #    undef HAVE_WM8904
@@ -466,6 +471,10 @@
 /* ROMFS */
 
 #ifndef CONFIG_FS_ROMFS
+#  undef HAVE_ROMFS
+#endif
+
+#ifndef CONFIG_SAMA5D4EK_ROMFS_MOUNT
 #  undef HAVE_ROMFS
 #endif
 
