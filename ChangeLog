@@ -8580,4 +8580,16 @@
 	  to armv7-a/arm_physpgaddr.c (2014-9-16).
 	* arch/arm/src/sam34/sam_rtt.c: Only SAM4 family has RTTDIS bit in the
 	  MR register. SourceForge bug #33 from Fabien Comte (2014-9-17).
-
+	* arch/arm/src/stm32/stm32_can.c: At the end of the interrupt handler,
+	  the interrupts were being disabled, if all packets have been
+	  transferred when the interrupt handler was invoked. This is
+	  problematic, because the interrupt handler calls can_txdone of the
+	  upper half which can enqueue new packets to send. Removed the block
+	  altogether, because can_txdone calls can_xmit which disables
+	  interrupts if there are no new packets to send.  From  Daniel Lazlo
+	  Sitzer (2103-9-17).
+	* drivers/can.c: In can_txdone, waiters on the semaphore should be
+	  informed regardless of the return value of can_xmit. First it returns
+	  -EIO if there are no new packets, and second the information of the
+	  waiters is about the last transferred packet.  From  Daniel Lazlo
+	  Sitzer (2103-9-17).
