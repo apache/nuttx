@@ -440,7 +440,9 @@ static int sam34_stop(FAR struct timer_lowerhalf_s *lower)
     }
 
 #if !(defined(CONFIG_RTC_HIRES) && defined (CONFIG_SAM34_RTC))
+#if defined(RTT_MR_RTTDIS)
   sam34_putreg(RTT_MR_RTTDIS, SAM_RTT_MR);    /* Disable RTT */
+#endif
   sam_rtt_disableclk();                       /* Disable peripheral clock */
 #endif
 
