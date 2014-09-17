@@ -8578,3 +8578,6 @@
 	* arch/arm/src/armv7-a/arm_physpgaddr.c, pgalloc.h, sama5/sam_pgalloc.c,
 	  and sam_pgalloc.h: Move some share-able logic from sama5/sam_pgalloc.c
 	  to armv7-a/arm_physpgaddr.c (2014-9-16).
+	* arch/arm/src/sam34/sam_rtt.c: Only SAM4 family has RTTDIS bit in the
+	  MR register. SourceForge bug #33 from Fabien Comte (2014-9-17).
+
