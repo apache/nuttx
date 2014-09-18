@@ -2890,7 +2890,7 @@ Audio Support
   ---- ------------------ ---------------- ------------- ---------------------------------------
   PIO  USAGE              BOARD SIGNAL     WM8904 PIN    NOTE
   ---- ------------------ ---------------- ------------- ---------------------------------------
-  PA30 TWD0               AUDIO_TWD0_PA30  3  SDA        Pulled up, See J23 note below
+  PA30 TWD0               AUDIO_TWD0_PA30  3  SDA        Pulled up, See JP23 note below
   PA31 TWCK0              AUDIO_TWCK0_PA31 2  SCLK       Pulled up
   PB10 AUDIO_PCK2/EXP     AUDIO_PCK2_PB10  28 MCLK
   PB27 AUDIO/HDMI_TK0/EXP AUDIO_TK0_PB27   29 BCLK/GPIO4 Note TK0 and RK0 are mutually exclusive
@@ -2901,7 +2901,7 @@ Audio Support
   PB28 AUDIO/HDMI_TD0/EXP AUDIO_TD0_PB28   32 ACDAT
   PE4  AUDIO_IRQ          AUDIO_IRQ_PE4    1  IRQ/GPIO1  Audio interrupt
   ---- ------------------ ---------------- ------------- ---------------------------------------
-  Note that jumper J23 must be closed to connect AUDIO_TWD0_PA30
+  Note that jumper JP23 must be closed to connect AUDIO_TWD0_PA30 (Rev C. only)
 
   WM8904 Configuration
   --------------------
@@ -4429,8 +4429,9 @@ Configurations
          NOTE:  The WM8904 driver should not be included in the
          configuration if you are using the Rev C version of the board
          (there were some I2C communication issues for the WM8904 interface
-         on Rev C of the board).  Instead the "NULL" audio device in built
-         in to support higher level testing.
+         on Rev C of the board):
+
+           CONFIG_SYSTEM_NXPLAYER=n
 
        This configuration depends on media files in the default mountpoint
        at /mnt/sdard.  You will need to mount the media before running
@@ -4474,7 +4475,12 @@ Configurations
    2014-8-30: Retesting today I am seeing a strange behavior:  Serial
        output is coming out in chunks with delays between the chunks.  It
        appears that something is not good in the serial port configuration.
-       I see no such chunky behavior in, for example, grahics output.
+       I see no such chunky behavior in, for example, graphics output.
+   2014-9-17: I do not see that chunked output behavior.  However, I do
+       notice that the serial output is sluggish if there is not network
+       cable connected.  When the network connected the serial output is
+       responsive:  Something must be keeping the system too busy when
+       there is not network (probably the network monitor).
 
   nxwm:
 
@@ -4639,8 +4645,10 @@ Configurations
          NOTE:  The WM8904 driver should not be included in the
          configuration if you are using the Rev C version of the board
          (there were some I2C communication issues for the WM8904 interface
-         on Rev C of the board).  Instead the "NULL" audio device in built
-         in to support higher level testing.
+         on Rev C of the board).  You may either (1) Disable audio support
+         and disable the Media Player GUI, or (2) configure the "NULL" audio
+         device so that the GUI will function correctly (with no sound,
+         of course).
 
        This configuration depends on media files in the default mountpoint
        at /mnt/sdard (configurable).  If you see the message "Media volume

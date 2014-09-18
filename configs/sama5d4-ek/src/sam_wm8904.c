@@ -300,7 +300,7 @@ int sam_wm8904_initialize(int minor)
 #else
       /* Drive the DAC with the main clock (12 MHz) */
 
-      (void)sam_pck_configure(PCK0, PCKSRC_MAINCK, BOARD_MAINCK_FREQUENCY);
+      (void)sam_pck_configure(PCK2, PCKSRC_MAINCK, BOARD_MAINCK_FREQUENCY);
 #endif
 
       /* Enable the DAC master clock */
