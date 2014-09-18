@@ -103,7 +103,7 @@
 
 #  if defined(CONFIG_SAMA5_HAVE_XDMA)
 #    if !defined(CONFIG_SAMA5_XDMAC0) && !defined(CONFIG_SAMA5_XDMAC1)
-#      error CONFIG_SAMA5_XDMAC1 (or XDMAC0) required by SSC0
+#      error CONFIG_SAMA5_XDMAC0 or XDMAC1 required by SSC0
 #    endif
 #  else
 #    if !defined(CONFIG_SAMA5_DMAC0)
