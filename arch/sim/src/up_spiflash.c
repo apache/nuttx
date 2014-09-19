@@ -220,8 +220,8 @@ static void        spiflash_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuf
                                  size_t nwords);
 #endif
 
-void spiflash_writeword(FAR struct sim_spiflashdev_s *priv, uint16_t data);
-uint16_t spiflash_readword(FAR struct sim_spiflashdev_s *priv);
+static void spiflash_writeword(FAR struct sim_spiflashdev_s *priv, uint16_t data);
+static uint16_t spiflash_readword(FAR struct sim_spiflashdev_s *priv);
 
 /************************************************************************************
  * Private Data
@@ -580,7 +580,7 @@ static void spiflash_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer,
  *
  ************************************************************************************/
 
-stataic void spiflash_sectorerase(FAR struct sim_spiflashdev_s *priv)
+static void spiflash_sectorerase(FAR struct sim_spiflashdev_s *priv)
 {
   uint32_t  address;
   uint32_t  len;
