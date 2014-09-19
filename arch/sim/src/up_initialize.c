@@ -43,6 +43,8 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/fs/ioctl.h>
+#include <nuttx/mtd/mtd.h>
 #include <nuttx/syslog/ramlog.h>
 
 #include "up_internal.h"
@@ -58,6 +60,32 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_init_smartfs
+ *
+ * Description:
+ *   Initialize a simulated SPI FLASH block device m25p MTD driver and bind
+ *   it to a SMART Flash block device.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_FS_SMARTFS) && defined(CONFIG_SIM_SPIFLASH)
+static void up_init_smartfs(void)
+{
+  FAR struct mtd_dev_s *mtd;
+  FAR struct spi_dev_s *spi;
+
+  /* Initialize a simulated SPI FLASH block device m25p MTD driver */
+
+  spi = up_spiflashinitialize();
+  mtd = m25p_initialize(spi);
+
+  /* Now initialize a SMART Flash block device and bind it to the MTD device */
+
+  smart_initialize(0, mtd, NULL);
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -129,5 +157,9 @@ void up_initialize(void)
 
 #ifdef CONFIG_NET
   netdriver_init();         /* Our "real" network driver */
+#endif
+
+#if defined(CONFIG_FS_SMARTFS) && defined(CONFIG_SIM_SPIFLASH)
+  up_init_smartfs();
 #endif
 }
