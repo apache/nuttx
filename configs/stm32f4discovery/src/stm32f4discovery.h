@@ -144,6 +144,25 @@
 #  define GPIO_OLED_DC    GPIO_OLED_A0
 #endif
 
+/* STM32F4DIS-BB MicroSD
+ *
+ * ---------- ------------- ------------------------------
+ * PIO        SIGNAL        Comments
+ * ---------- ------------- ------------------------------
+ * PB15       NCD           Pulled up externally
+ * PC9        DAT1          Configured by driver
+ * PC8        DAT0          "        " "" "    "
+ * PC12       CLK           "        " "" "    "
+ * PD2        CMD           "        " "" "    "
+ * PC11       CD/DAT3       "        " "" "    "
+ * PC10       DAT2          "        " "" "    "
+ * ---------- ------------- ------------------------------
+ */
+
+#if defined(CONFIG_STM32F4DISBB) && defined(CONFIG_STM32_SDIO)
+#  define GPIO_SDIO_NCD (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTB|GPIO_PIN15)
+#endif
+
 /****************************************************************************************************
  * Public Types
  ****************************************************************************************************/
@@ -300,4 +319,3 @@ int nsh_archinitialize(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_STM32F4DISCOVERY_SRC_STM32F4DISCOVERY_H */
-

@@ -44,11 +44,6 @@
 #include <debug.h>
 #include <errno.h>
 
-#ifdef CONFIG_STM32_SDIO
-#  include <nuttx/sdio.h>
-#  include <nuttx/mmcsd.h>
-#endif
-
 #ifdef CONFIG_SYSTEM_USBMONITOR
 #  include <apps/usbmonitor.h>
 #endif
