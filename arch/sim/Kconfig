@@ -178,7 +178,7 @@ config SIM_SPIFLASH_SUBSECTORSIZE
 		FLASH emulation
 
 config SIM_SPIFLASH_PAGESIZE
-	int "FLASH Write / Program Page Size
+	int "FLASH Write / Program Page Size"
 	default 256
 	depends on SIM_SPIFLASH
 	---help---
