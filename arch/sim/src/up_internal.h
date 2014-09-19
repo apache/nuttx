@@ -236,5 +236,9 @@ int netdriver_setmacaddr(unsigned char *macaddr);
 void netdriver_loop(void);
 #endif
 
+#ifdef CONFIG_SIM_SPIFLASH
+struct spi_dev_s *up_spiflashinitialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_UP_INTERNAL_H */

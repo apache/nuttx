@@ -114,4 +114,79 @@ config SIM_TCNWAITERS
 		The maximum number of threads that can be waiting on poll() for a touchscreen event.
 		Default: 4
 
+config SIM_SPIFLASH
+	bool "Simulated SPI FLASH with SMARTFS"
+	default n
+	select FS_SMARTFS
+	select MTD_SMART
+	---help---
+		Adds a simulated SPI FLASH that responds to standard M25 style
+		commands on the SPI bus.
+
+choice
+	prompt "Simulated SPI FLASH Size"
+	default SIM_SPIFLASH_1M
+	depends on SIM_SPIFLASH
+
+config SIM_SPIFLASH_1M
+	bool "1 MBit (128K Byte)"
+
+config SIM_SPIFLASH_8M
+	bool "8 MBit (1M Byte)"
+
+config SIM_SPIFLASH_32M
+	bool "32 MBit (4M Byte)"
+
+config SIM_SPIFLASH_64M
+	bool "64 MBit (8M Byte)"
+
+config SIM_SPIFLASH_128M
+	bool "128 MBit (16M Byte)"
+
+endchoice
+
+config SIM_SPIFLASH_MANUFACTURER
+	hex "Hex ID of the FLASH manufacturer code"
+	default 0x20
+	depends on SIM_SPIFLASH
+	---help---
+		Allows the simulated FLASH Manufacturer ID to be set.
+
+config SIM_SPIFLASH_MEMORY_TYPE
+	hex "Hex ID of the FLASH Memory Type code"
+	default 0x20
+	depends on SIM_SPIFLASH
+	---help---
+		Allows the simulated FLASH Memory Type code to be set.
+
+config SIM_SPIFLASH_SECTORSIZE
+	int "FLASH Sector Erase Size"
+	default 65536
+	depends on SIM_SPIFLASH
+	---help---
+		Sets the large sector erase size that the part simulates.
+		This driver simulates SPI devices that have both a large
+		sector erase as well as a "sub-sector" (per the datasheet)
+		erase size (typically 4K bytes).
+
+config SIM_SPIFLASH_SUBSECTORSIZE
+	int "FLASH Sub-Sector Erase Size"
+	default 4096
+	depends on SIM_SPIFLASH
+	---help---
+		Sets the smaller sub-sector erase size supported by the
+		FLASH emulation
+
+config SIM_SPIFLASH_PAGESIZE
+	int "FLASH Write / Program Page Size
+	default 256
+	depends on SIM_SPIFLASH
+	---help---
+		Sets the size of a page program operation.  The page size
+		represents the maximum number of bytes that can be sent
+		for a program operation.  If more bytes than this are
+		sent on a single Page Program, then the address will
+		"wrap" causing the initial data sent to be overwritten.
+		This is consistent with standard SPI FLASH operation.
+
 endif
