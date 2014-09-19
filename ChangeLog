@@ -8596,4 +8596,6 @@
 	* SAMA5D4-EK:  Add documentation/support for Rev E. board. Refresh NSH
 	  configuration.  Fix some build errors/warnings introduced with recent
 	  work with the knsh configuration (2014-9-17).
-
+	* arch/sim/Kconfig, src/up_spiflash.c, Makefile, up_initialize.c, and
+	  up_internal.h: Emulated SPI FLASH driver for the sim target from Ken
+	  Pettit (2014-9-19).
