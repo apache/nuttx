@@ -995,11 +995,11 @@ Where <subdir> is one of the following:
        CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery under Windows
        CONFIG_CXX_NEWLONG=n                    : size_t is unsigned int (maybe?)
 
-    3. In addition to the the kernel mode build, this NxWM configuration
+    3. In addition to the protected mode build, this NxWM configuration
        differences from the nxwm configuration in that:
 
        a. Networking is disabled.  There are issues with some of the network-
-          related NSH commands and with Telnet in the kernel build (see the
+          related NSH commands and with Telnet in the protected build (see the
           top-level TODO file).  Without these NSH commands, there is no use
           for networking in this configuration.
 
