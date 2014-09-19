@@ -226,8 +226,8 @@
  */
 
 #ifdef CONFIG_STM32F4DISBB
-#  define GPIO_USART6_RX GPIO_USART6_RX_1 
-#  define GPIO_USART6_TX GPIO_USART6_TX_1 
+#  define GPIO_USART6_RX GPIO_USART6_RX_1
+#  define GPIO_USART6_TX GPIO_USART6_TX_1
 #endif
 
 /* PWM
@@ -254,7 +254,6 @@
 
 /* Ethernet *************************************************************************/
 
-
 #if defined(CONFIG_STM32F4DISBB) && defined(CONFIG_STM32_ETHMAC)
   /* RMII interface to the LAN8720 PHY */
 
@@ -270,10 +269,10 @@
 
   /* Pin disambiguation */
 
-#  define GPIO_ETH_RMII_TX_EN GPIO_ETH_RMII_TX_EN_1 
-#  define GPIO_ETH_RMII_TXD0  GPIO_ETH_RMII_TXD0_1 
-#  define GPIO_ETH_RMII_TXD1  GPIO_ETH_RMII_TXD1_1 
-#  define GPIO_ETH_PPS_OUT    GPIO_ETH_PPS_OUT_1 
+#  define GPIO_ETH_RMII_TX_EN GPIO_ETH_RMII_TX_EN_1
+#  define GPIO_ETH_RMII_TXD0  GPIO_ETH_RMII_TXD0_1
+#  define GPIO_ETH_RMII_TXD1  GPIO_ETH_RMII_TXD1_1
+#  define GPIO_ETH_PPS_OUT    GPIO_ETH_PPS_OUT_1
 
 #endif
 
