@@ -3782,6 +3782,9 @@ Configurations
 
     Bottom line:  Not ready for prime time.
 
+    2014-9-20:  Trying to verify the build today, there are now compilation
+    errors in the ADC/Touchscreen driver.  See STATUS at the end of this file
+
   ov2640:
 
     A test of the SAMA5 ISI using an OV2640 camera.
@@ -3850,3 +3853,35 @@ To-Do List
    for the PWM and the Timer/Counter drivers.  These drivers use the
    BOARD_MCK_FREQUENCY definition in more complex ways and will require some
    minor redesign and re-testing before they can be available.
+
+10) 2014-9-20: Failed to build the NxWM configuration:
+
+   CC:  chip/sam_adc.c
+   chip/sam_adc.c: In function 'sam_adc_interrupt':
+   chip/sam_adc.c:886:21: warning: unused variable 'priv' [-Wunused-variable]
+      struct sam_adc_s *priv = &g_adcpriv;
+                        ^
+   chip/sam_adc.c: In function 'sam_adc_initialize':
+   chip/sam_adc.c:1977:7: error: 'g_adcdev' undeclared (first use in this function)
+          g_adcdev.ad_ops  = &g_adcops;
+          ^
+   chip/sam_adc.c:1977:7: note: each undeclared identifier is reported only once for each function it appears in
+   chip/sam_adc.c:1977:27: error: 'g_adcops' undeclared (first use in this function)
+          g_adcdev.ad_ops  = &g_adcops;
+                              ^
+   chip/sam_adc.c:1983:11: error: 'struct sam_adc_s' has no member named 'dev'
+          priv->dev = &g_adcdev;
+              ^
+   chip/sam_adc.c:2090:1: warning: control reaches end of non-void function [-Wreturn-type]
+    }
+    ^
+
+   The failure occurs because there are no ADC channels configured (as there
+   should not be) so SAMA5_ADC_HAVE_CHANNELS is not defined (as it should
+   not be).  However, if there are no configured ADC channel, then
+   sam_adc_initialize() does not compile correctly -- and it should not
+   given nature the logic that is in place there now.
+
+   A quick glance at the history of these files does not reveal what the
+   obvious solution is so I will need to come back and revisit this in the
+   future.
