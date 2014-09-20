@@ -45,7 +45,7 @@
         <i>1.3.3 <a href="#nxtk1">NX Tool Kit (<code>NXTK</code>)</a></i><br>
         <i>1.3.4 <a href="#nxfonts1">NX Fonts Support (<code>NXFONTS</code>)</a></i><br>
         <i>1.3.5 <a href="#nxwidgets1">NX Widgets (<code>NxWidgets</code>)</a></i><br>
-        <i>1.3.6 <a href="#nxconsole1">NX Console Driver (<code>NxConsole</code>)</a></i>
+        <i>1.3.6 <a href="#nxterm1">NX Terminal Driver (<code>NxTerm</code>)</a></i>
       </ul>
     </p>
   </ul>
@@ -191,7 +191,7 @@
       <i><b>B.4</b> <a href="#nxmuconfig">NX Multi-User (Only) Configuration Settings</a></i><br>
       <i><b>B.5</b> <a href="#nxtkconfig">NXTK Configuration Settings</a></i><br>
       <i><b>B.6</b> <a href="#nxfpmtsconfig">NXFONTS Configuration Settings</a></i><br>
-      <i><b>B.7</b> <a href="#nxconsoleconfig">NxConsole Configuration Settings</a></i>
+      <i><b>B.7</b> <a href="#nxtermconfig">NxTerm Configuration Settings</a></i>
     </ul>
   </p>
   <p>
@@ -403,12 +403,12 @@
   NxWidgets is built on top of the core NuttX graphics subsystem, but is not a part of the core graphics subystems.
 </p>
 
-<h3>1.3.6 <a name="nxconsole1">NX Console Driver (<code>NxConsole</code>)</a></h3>
+<h3>1.3.6 <a name="nxterm1">NX Terminal Driver (<code>NxTerm</code>)</a></h3>
 
 <p>
-  NxConsole is a write-only character device (not shown) that is built on top of an NX window.
+  NxTerm is a write-only character device (not shown) that is built on top of an NX window.
   This character device can be used to provide <code>stdout</code> and <code>stderr</code> and, hence, can provide the output side of NuttX console.
-  NxConsole is only available when the multi-user NX implementation is selected (<code>CONFIG_NX_MULTIUSER</code>).
+  NxTerm is only available when the multi-user NX implementation is selected (<code>CONFIG_NX_MULTIUSER</code>).
 </p>
 
 <table width ="100%">
@@ -3204,9 +3204,9 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
     <dt><code>nuttx/../nxwidgets</code>
       <dd>The <a href="NxWidgets.html">NxWidgets</a> code is provided as a separate package located outside of the NuttX source tree (probably at this location).
 
-    <dt><code>graphics/nxconsole</code>
-      <dd>The NxConsole driver is built on top of NX and works with either the single-user or multi-user NX version.
-      See <code>include/nuttx/nx/nxconsole.h</code>.
+    <dt><code>graphics/nxterm</code>
+      <dd>The NxTerm driver is built on top of NX and works with either the single-user or multi-user NX version.
+      See <code>include/nuttx/nx/nxterm.h</code>.
   </dl>
   <p><small>
     <sup>1<up>There is no nxsu sub-directory in nuttx/libnx.
@@ -3370,32 +3370,32 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
   </dl>
 </ul>
 
-<h2>B.7 <a name="nxconsoleconfig">NxConsole Configuration Settings</a></h2>
+<h2>B.7 <a name="nxtermconfig">NxTerm Configuration Settings</a></h2>
 
-<p>General NxConsole settings.</p>
+<p>General NxTerm settings.</p>
 <ul>
   <dl>
     <dt><code>CONFIG_NXTERM</code>:
-      <dd>Enables building of the NxConsole driver.
+      <dd>Enables building of the NxTerm driver.
   </dl>
 </ul>
 
-<p>NxConsole output text/graphics options:</p>
+<p>NxTerm output text/graphics options:</p>
 <ul>
   <dl>
     <dt><code>CONFIG_NXTERM_BPP</code>:
-      <dd>Currently, NxConsole supports only a single pixel depth.
+      <dd>Currently, NxTerm supports only a single pixel depth.
       This configuration setting must be provided to support that single pixel depth.
       Default: The smallest enabled pixel depth. (see <code>CONFIG_NX_DISABLE_*BPP</code>)
     <dt><code>CONFIG_NXTERM_CURSORCHAR</code>:
       <dd>The bitmap code to use as the cursor.  Default '_'
     <dt><code>CONFIG_NXTERM_MXCHARS</code>:
-      <dd>NxConsole needs to remember every character written to the console so that it can redraw the window.
+      <dd>NxTerm needs to remember every character written to the console so that it can redraw the window.
       This setting determines the size of some internal memory allocations used to hold the character data.
       Default: 128.
     <dt><code>CONFIG_NXTERM_CACHESIZE</code>:
       <dd>
-      NxConsole supports caching of rendered fonts.
+      NxTerm supports caching of rendered fonts.
       This font caching is required for two reasons:
       (1) First, it improves text performance, but more importantly
       (2) it preserves the font memory.
@@ -3405,11 +3405,11 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
       Only that number of the most recently used glyphs will be retained.
       Default: 16.
       <blockquote>
-        NOTE: There can still be a race condition between the NxConsole driver and the
+        NOTE: There can still be a race condition between the NxTerm driver and the
         NX task.  If you every see character corruption (especially when printing
         a lot of data or scrolling), then increasing the value of <code>CONFIG_NXTERM_CACHESIZE</code>
         is something that you should try.
-        Alternatively, you can reduce the size of <code>CONFIG_MQ_MAXMSGSIZE</code> which will force NxConsole task to pace the server task.
+        Alternatively, you can reduce the size of <code>CONFIG_MQ_MAXMSGSIZE</code> which will force NxTerm task to pace the server task.
         <code>CONFIG_NXTERM_CACHESIZE</code> should be larger than <code>CONFIG_MQ_MAXMSGSIZE</code> in any event.
       </blockquote>
     <dt><code>CONFIG_NXTERM_LINESEPARATION</code>:
@@ -3420,7 +3420,7 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
   </dl>
 </ul>
 
-<p>NxConsole input options:</p>
+<p>NxTerm input options:</p>
 <ul>
   <dl>
     <dt><code>CONFIG_NXTERM_NXKBDIN</code>:
@@ -3428,7 +3428,7 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
       By default, keyboard input is taken from stdin (<code>/dev/console</code>).
       If this option is set, then the interface<code>nxcon_kdbin()</code> is enabled.
       That interface may be driven by window callback functions so that keyboard input <i>only</i> goes to the top window.
-    <dt><code>CONFIG__NXCONSOLE_KBDBUFSIZE</code>:
+    <dt><code>CONFIG__NXTERM_KBDBUFSIZE</code>:
       <dd>If <code>CONFIG_NXTERM_NXKBDIN</code> is enabled, then this value may be used to
       define the size of the per-window keyboard input buffer.  Default: 16
     <dt><code>CONFIG_NXTERM_NPOLLWAITERS</code>:
