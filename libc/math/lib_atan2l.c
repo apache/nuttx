@@ -64,7 +64,7 @@ long double atan2l(long double y, long double x)
     {
       return M_PI_2;
     }
-  else if (y == 0 && x == 0) /* Undefined but returns normally 0 */
+  else /* if (y == 0 && x == 0) Undefined but returns normally 0 */
     {
       return 0;
     }

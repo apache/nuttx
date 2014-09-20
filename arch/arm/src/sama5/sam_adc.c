@@ -1906,7 +1906,7 @@ static void sam_adc_channels(struct sam_adc_s *priv)
  *   Initialize the adc
  *
  * Returned Value:
- *   Valid can device structure reference on succcess; a NULL on failure
+ *   Valid can device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 
@@ -1917,7 +1917,7 @@ struct adc_dev_s *sam_adc_initialize(void)
   uint32_t mck;
   int ret;
 
-  /* Have we already been initialzed?  If yes, than just hand out the
+  /* Have we already been initialized?  If yes, than just hand out the
    * interface one more time.
    */
 

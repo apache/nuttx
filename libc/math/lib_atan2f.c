@@ -60,7 +60,7 @@ float atan2f(float y, float x)
     {
       return M_PI_2;
     }
-  else if (y == 0 && x == 0) /* Undefined but returns normally 0 */
+  else /* if (y == 0 && x == 0) Undefined but returns normally 0 */
     {
       return 0;
     }
