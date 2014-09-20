@@ -926,7 +926,7 @@ Where <subdir> is one of the following:
        The following definition in the defconfig file to enables the NxConsole
        driver:
 
-         CONFIG_NXCONSOLE=y
+         CONFIG_NXTERM=y
 
        And this selects apps/examples/nxconsole instead of apps/examples/nsh:
 
