@@ -103,7 +103,7 @@ FAR struct nxcon_state_s *
   priv->holder  = NO_HOLDER;
 #endif
 
-#ifdef CONFIG_NXCONSOLE_NXKBDIN
+#ifdef CONFIG_NXTERM_NXKBDIN
   sem_init(&priv->waitsem, 0, 0);
 #endif
 
@@ -129,11 +129,11 @@ FAR struct nxcon_state_s *
 
   /* Set up the text cache */
 
-  priv->maxchars  = CONFIG_NXCONSOLE_MXCHARS;
+  priv->maxchars  = CONFIG_NXTERM_MXCHARS;
 
   /* Set up the font glyph bitmap cache */
 
-  priv->maxglyphs = CONFIG_NXCONSOLE_CACHESIZE;
+  priv->maxglyphs = CONFIG_NXTERM_CACHESIZE;
 
   /* Set the initial display position */
 
@@ -141,7 +141,7 @@ FAR struct nxcon_state_s *
 
   /* Show the cursor */
 
-  priv->cursor.code = CONFIG_NXCONSOLE_CURSORCHAR;
+  priv->cursor.code = CONFIG_NXTERM_CURSORCHAR;
   nxcon_showcursor(priv);
 
   /* Register the driver */

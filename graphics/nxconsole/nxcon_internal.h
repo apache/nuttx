@@ -166,21 +166,21 @@ struct nxcon_state_s
   /* Font cache data storage */
 
   struct nxcon_bitmap_s cursor;
-  struct nxcon_bitmap_s bm[CONFIG_NXCONSOLE_MXCHARS];
+  struct nxcon_bitmap_s bm[CONFIG_NXTERM_MXCHARS];
 
   /* Glyph cache data storage */
 
-  struct nxcon_glyph_s  glyph[CONFIG_NXCONSOLE_CACHESIZE];
+  struct nxcon_glyph_s  glyph[CONFIG_NXTERM_CACHESIZE];
 
   /* Keyboard input support */
 
-#ifdef CONFIG_NXCONSOLE_NXKBDIN
+#ifdef CONFIG_NXTERM_NXKBDIN
   sem_t waitsem;                            /* Supports waiting for input data */
   uint8_t nwaiters;                         /* Number of threads waiting for data */
   uint8_t head;                             /* rxbuffer head/input index */
   uint8_t tail;                             /* rxbuffer tail/output index */
 
-  uint8_t rxbuffer[CONFIG_NXCONSOLE_KBDBUFSIZE];
+  uint8_t rxbuffer[CONFIG_NXTERM_KBDBUFSIZE];
 
   /* The following is a list if poll structures of threads waiting for
    * driver events. The 'struct pollfd' reference for each open is also
@@ -188,9 +188,9 @@ struct nxcon_state_s
    */
 
 #ifndef CONFIG_DISABLE_POLL
-  struct pollfd *fds[CONFIG_NXCONSOLE_NPOLLWAITERS];
+  struct pollfd *fds[CONFIG_NXTERM_NPOLLWAITERS];
 #endif
-#endif /* CONFIG_NXCONSOLE_NXKBDIN */
+#endif /* CONFIG_NXTERM_NXKBDIN */
 };
 
 /****************************************************************************
@@ -220,7 +220,7 @@ FAR struct nxcon_state_s *nxcon_register(NXCONSOLE handle,
     FAR struct nxcon_window_s *wndo, FAR const struct nxcon_operations_s *ops,
     int minor);
 
-#ifdef CONFIG_NXCONSOLE_NXKBDIN
+#ifdef CONFIG_NXTERM_NXKBDIN
 ssize_t nxcon_read(FAR struct file *filep, FAR char *buffer, size_t len);
 #ifndef CONFIG_DISABLE_POLL
 int nxcon_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup);

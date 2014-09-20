@@ -357,17 +357,17 @@ config NXFONT_SERIF38X49B
 
 endmenu
 
-menuconfig NXCONSOLE
+menuconfig NXTERM
 	bool "NxConsole"
 	default n
 	---help---
 		Enables building of the NxConsole driver.
 
-if NXCONSOLE
+if NXTERM
 
 comment "NxConsole Output Text/Graphics Options"
 
-config NXCONSOLE_BPP
+config NXTERM_BPP
 	int "NxConsole BPP"
 	default 1 if !NX_DISABLE_1BPP
 	default 2 if !NX_DISABLE_2BPP
@@ -381,13 +381,13 @@ config NXCONSOLE_BPP
 		configuration setting must be provided to support that single pixel depth.
 		Default: The smallest enabled pixel depth. (see NX_DISABLE_*BPP)
 
-config NXCONSOLE_CURSORCHAR
+config NXTERM_CURSORCHAR
 	int "Character code to use as the cursor"
 	default 137
 	---help---
 		The bitmap code to use as the cursor.  Default '_' (137)
 
-config NXCONSOLE_MXCHARS
+config NXTERM_MXCHARS
 	int "Max Characters on Display"
 	default 128
 	---help---
@@ -395,7 +395,7 @@ config NXCONSOLE_MXCHARS
 		that it can redraw the window. This setting determines the size of some
 		internal memory allocations used to hold the character data. Default: 128.
 
-config NXCONSOLE_CACHESIZE
+config NXTERM_CACHESIZE
 	int "Font Cache Size"
 	default 16
 	---help---
@@ -404,23 +404,23 @@ config NXCONSOLE_CACHESIZE
 		importantly (2) it preserves the font memory. Since the NX server runs on
 		a separate server thread, it requires that the rendered font memory persist
 		until the server has a chance to render the font. Unfortunately, the font
-		cache would be quite large if all fonts were saved. The NXCONSOLE_CACHESIZE
+		cache would be quite large if all fonts were saved. The NXTERM_CACHESIZE
 		setting will control the size of the font cache (in number of glyphs). Only that
 		number of the most recently used glyphs will be retained. Default: 16.
 		NOTE: There can still be a race condition between the NxConsole driver and the
 		NX task.  If you every see character corruption (especially when printing
-		a lot of data or scrolling), then increasing the value of NXCONSOLE_CACHESIZE
+		a lot of data or scrolling), then increasing the value of NXTERM_CACHESIZE
 		is something that you should try.  Alternatively, you can reduce the size of
 		MQ_MAXMSGSIZE which will force NxConsole task to pace the server task.
-		NXCONSOLE_CACHESIZE should be larger than MQ_MAXMSGSIZE in any event.
+		NXTERM_CACHESIZE should be larger than MQ_MAXMSGSIZE in any event.
 
-config NXCONSOLE_LINESEPARATION
+config NXTERM_LINESEPARATION
 	int "Line Separation"
 	default 0
 	---help---
 		This the space (in rows) between each row of test.  Default: 0
 
-config NXCONSOLE_NOWRAP
+config NXTERM_NOWRAP
 	bool "No wrap"
 	default n
 	---help---
@@ -430,7 +430,7 @@ config NXCONSOLE_NOWRAP
 
 comment "NxConsole Input options"
 
-config NXCONSOLE_NXKBDIN
+config NXTERM_NXKBDIN
 	bool "NX KBD input"
 	default n
 	---help---
@@ -440,21 +440,21 @@ config NXCONSOLE_NXKBDIN
 		by window callback functions so that keyboard input *only* goes to the
 		top window.
 
-config NXCONSOLE_KBDBUFSIZE
+config NXTERM_KBDBUFSIZE
 	int "Keyboard Input Buffer Size"
 	default 16
 	---help---
-		If NXCONSOLE_NXKBDIN is enabled, then this value may be used to
+		If NXTERM_NXKBDIN is enabled, then this value may be used to
 		define the size of the per-window keyboard input buffer.  Default: 16
 
-config NXCONSOLE_NPOLLWAITERS
+config NXTERM_NPOLLWAITERS
 	int "Number of Poll Waiters"
 	default 4
 	---help---
 		The number of threads that can be waiting for read data available.
 		Default: 4
 
-endif # NXCONSOLE
+endif # NXTERM
 
 comment "NX Multi-user only options"
 

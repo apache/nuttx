@@ -106,7 +106,7 @@ static inline void nxcon_movedisplay(FAR struct nxcon_state_s *priv,
   rect.pt1.x = 0;
   rect.pt2.x = priv->wndo.wsize.w - 1;
 
-  for (row = CONFIG_NXCONSOLE_LINESEPARATION; row < bottom; row += scrollheight)
+  for (row = CONFIG_NXTERM_LINESEPARATION; row < bottom; row += scrollheight)
     {
       /* Create a bounding box the size of one row of characters */
 
@@ -154,7 +154,7 @@ static inline void nxcon_movedisplay(FAR struct nxcon_state_s *priv,
 
   /* Add the line separation value to the scroll height */
 
-  scrollheight += CONFIG_NXCONSOLE_LINESEPARATION;
+  scrollheight += CONFIG_NXTERM_LINESEPARATION;
 
   /* Move the display in the range of 0-height up one scrollheight.  The
    * line at the bottom will be reset to the background color automatically.
@@ -213,7 +213,7 @@ void nxcon_scroll(FAR struct nxcon_state_s *priv, int scrollheight)
 
       /* Has any part of this character scrolled off the screen? */
 
-      if (bm->pos.y < scrollheight + CONFIG_NXCONSOLE_LINESEPARATION)
+      if (bm->pos.y < scrollheight + CONFIG_NXTERM_LINESEPARATION)
         {
           /* Yes... Delete the character by moving all of the data */
 

@@ -1228,7 +1228,7 @@ o Graphics subystem (graphics/)
 
   Title:       IMPROVED NXCONSOLE FONT CACHING
   Description: Now each NxConsole instance has its own private font cache
-               whose size is determined by CONFIG_NXCONSOLE_MXCHARS.  If there
+               whose size is determined by CONFIG_NXTERM_MXCHARS.  If there
                are multiple NxConsole instances using the same font, each will
                have a separate font cache.  This is inefficient and wasteful
                of memory:  Each NxConsole instance should share a common font

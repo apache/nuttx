@@ -354,55 +354,55 @@ CONFIG_NXFONT_SERIF38X49B
 NxConsole Configuration Settings
 --------------------------------
 
-CONFIG_NXCONSOLE
+CONFIG_NXTERM
   Enables building of the NxConsole driver.
 
 NxConsole output text/graphics options:
 
-CONFIG_NXCONSOLE_BPP
+CONFIG_NXTERM_BPP
   Currently, NxConsole supports only a single pixel depth. This
   configuration setting must be provided to support that single pixel depth.
   Default: The smallest enabled pixel depth. (see CONFIG_NX_DISABLE_*BPP)
-CONFIG_NXCONSOLE_CURSORCHAR
+CONFIG_NXTERM_CURSORCHAR
   The bitmap code to use as the cursor.  Default '_'
-CONFIG_NXCONSOLE_MXCHARS
+CONFIG_NXTERM_MXCHARS
   NxConsole needs to remember every character written to the console so
   that it can redraw the window. This setting determines the size of some
   internal memory allocations used to hold the character data. Default: 128.
-CONFIG_NXCONSOLE_CACHESIZE
+CONFIG_NXTERM_CACHESIZE
   NxConsole supports caching of rendered fonts. This font caching is required
   for two reasons: (1) First, it improves text performance, but more
   importantly (2) it preserves the font memory. Since the NX server runs on
   a separate server thread, it requires that the rendered font memory persist
   until the server has a chance to render the font. Unfortunately, the font
-  cache would be quite large if all fonts were saved. The CONFIG_NXCONSOLE_CACHESIZE
+  cache would be quite large if all fonts were saved. The CONFIG_NXTERM_CACHESIZE
   setting will control the size of the font cache (in number of glyphs). Only that
   number of the most recently used glyphs will be retained. Default: 16.
   NOTE: There can still be a race condition between the NxConsole driver and the
   NX task.  If you every see character corruption (especially when printing
-  a lot of data or scrolling), then increasing the value of CONFIG_NXCONSOLE_CACHESIZE
+  a lot of data or scrolling), then increasing the value of CONFIG_NXTERM_CACHESIZE
   is something that you should try.  Alternatively, you can reduce the size of
   CONFIG_MQ_MAXMSGSIZE which will force NxConsole task to pace the server task.
-  CONFIG_NXCONSOLE_CACHESIZE should be larger than CONFIG_MQ_MAXMSGSIZE in any event.
-CONFIG_NXCONSOLE_LINESEPARATION
+  CONFIG_NXTERM_CACHESIZE should be larger than CONFIG_MQ_MAXMSGSIZE in any event.
+CONFIG_NXTERM_LINESEPARATION
   This the space (in rows) between each row of test.  Default: 0
-CONFIG_NXCONSOLE_NOWRAP
+CONFIG_NXTERM_NOWRAP
   By default, lines will wrap when the test reaches the right hand side
   of the window. This setting can be defining to change this behavior so
   that the text is simply truncated until a new line is  encountered.
 
 NxConsole Input options
 
-CONFIG_NXCONSOLE_NXKBDIN
+CONFIG_NXTERM_NXKBDIN
   Take input from the NX keyboard input callback.  By default, keyboard
   input is taken from stdin (/dev/console).  If this option is set, then
   the interface nxcon_kdbin() is enabled.  That interface may be driven
   by window callback functions so that keyboard input *only* goes to the
   top window.
 CONFIG__NXCONSOLE_KBDBUFSIZE
-  If CONFIG_NXCONSOLE_NXKBDIN is enabled, then this value may be used to
+  If CONFIG_NXTERM_NXKBDIN is enabled, then this value may be used to
   define the size of the per-window keyboard input buffer.  Default: 16
-CONFIG_NXCONSOLE_NPOLLWAITERS
+CONFIG_NXTERM_NPOLLWAITERS
   The number of threads that can be waiting for read data available.
   Default: 4
 

@@ -99,7 +99,7 @@ void nxcon_putc(FAR struct nxcon_state_s *priv, uint8_t ch)
 
   if (priv->fpos.x + priv->fwidth > priv->wndo.wsize.w)
     {
-#ifndef CONFIG_NXCONSOLE_NOWRAP
+#ifndef CONFIG_NXTERM_NOWRAP
       /* No.. move to the next line */
 
       nxcon_newline(priv);
@@ -132,7 +132,7 @@ void nxcon_putc(FAR struct nxcon_state_s *priv, uint8_t ch)
 
   /* Check if we need to scroll up */
 
-  lineheight = (priv->fheight + CONFIG_NXCONSOLE_LINESEPARATION);
+  lineheight = (priv->fheight + CONFIG_NXTERM_LINESEPARATION);
   while (priv->fpos.y >= priv->wndo.wsize.h - lineheight)
     {
       nxcon_scroll(priv, lineheight);
@@ -165,7 +165,7 @@ void nxcon_showcursor(FAR struct nxcon_state_s *priv)
 
   if (priv->fpos.x + priv->fwidth > priv->wndo.wsize.w)
     {
-#ifndef CONFIG_NXCONSOLE_NOWRAP
+#ifndef CONFIG_NXTERM_NOWRAP
       /* No.. move to the next line */
 
       nxcon_newline(priv);
@@ -176,7 +176,7 @@ void nxcon_showcursor(FAR struct nxcon_state_s *priv)
 
   /* Check if we need to scroll up */
 
-  lineheight = (priv->fheight + CONFIG_NXCONSOLE_LINESEPARATION);
+  lineheight = (priv->fheight + CONFIG_NXTERM_LINESEPARATION);
   while (priv->fpos.y >= priv->wndo.wsize.h - lineheight)
     {
       nxcon_scroll(priv, lineheight);

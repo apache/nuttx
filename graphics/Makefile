@@ -59,7 +59,7 @@ DEPPATH		+= --dep-path nxsu
 CFLAGS		+= ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)/graphics/nxsu}
 endif
 
-ifeq ($(CONFIG_NXCONSOLE),y)
+ifeq ($(CONFIG_NXTERM),y)
 include nxconsole/Make.defs
 DEPPATH		+= --dep-path nxconsole
 CFLAGS		+= ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)/graphics/nxconsole}

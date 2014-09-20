@@ -459,8 +459,8 @@ nx11
       First, select Multi-User mode as described above.  Then add the
       following definitions to the defconfig file:
 
-       -CONFIG_NXCONSOLE=n
-       +CONFIG_NXCONSOLE=y
+       -CONFIG_NXTERM=n
+       +CONFIG_NXTERM=y
 
        -CONFIG_NX_MULTIUSER=n
        +CONFIG_NX_MULTIUSER=y

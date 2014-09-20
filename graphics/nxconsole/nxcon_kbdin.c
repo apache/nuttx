@@ -48,7 +48,7 @@
 
 #include "nxcon_internal.h"
 
-#ifdef CONFIG_NXCONSOLE_NXKBDIN
+#ifdef CONFIG_NXTERM_NXKBDIN
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -79,7 +79,7 @@ static void nxcon_pollnotify(FAR struct nxcon_state_s *priv, pollevent_t eventse
 
   /* This function may be called from an interrupt handler */
 
-  for (i = 0; i < CONFIG_NXCONSOLE_NPOLLWAITERS; i++)
+  for (i = 0; i < CONFIG_NXTERM_NPOLLWAITERS; i++)
     {
       flags = irqsave();
       fds   = priv->fds[i];
@@ -231,7 +231,7 @@ ssize_t nxcon_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
           /* Increment the tail index and re-enable interrupts */
 
-          if (++priv->tail >= CONFIG_NXCONSOLE_KBDBUFSIZE)
+          if (++priv->tail >= CONFIG_NXTERM_KBDBUFSIZE)
             {
               priv->tail = 0;
             }
@@ -298,7 +298,7 @@ int nxcon_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
        * slot for the poll structure reference
        */
 
-      for (i = 0; i < CONFIG_NXCONSOLE_NPOLLWAITERS; i++)
+      for (i = 0; i < CONFIG_NXTERM_NPOLLWAITERS; i++)
         {
           /* Find an available slot */
 
@@ -312,7 +312,7 @@ int nxcon_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
             }
         }
 
-      if (i >= CONFIG_NXCONSOLE_NPOLLWAITERS)
+      if (i >= CONFIG_NXTERM_NPOLLWAITERS)
         {
           gdbg("ERROR: Too many poll waiters\n");
 
@@ -378,10 +378,10 @@ errout:
  *  this function.  This function will buffer the keyboard data and makE
  *  it available to the NxConsole as stdin.
  *
- *  If CONFIG_NXCONSOLE_NXKBDIN is not selected, then the NxConsole will
+ *  If CONFIG_NXTERM_NXKBDIN is not selected, then the NxConsole will
  *  receive its input from stdin (/dev/console).  This works great but
  *  cannot be shared between different windows.  Chaos will ensue if you
- *  try to support multiple NxConsole windows without CONFIG_NXCONSOLE_NXKBDIN
+ *  try to support multiple NxConsole windows without CONFIG_NXTERM_NXKBDIN
  *
  * Input Parameters:
  *   handle - A handle previously returned by nx_register, nxtk_register, or
@@ -438,7 +438,7 @@ void nxcon_kbdin(NXCONSOLE handle, FAR const uint8_t *buffer, uint8_t buflen)
        */
 
       nexthead = priv->head + 1;
-      if (nexthead >= CONFIG_NXCONSOLE_KBDBUFSIZE)
+      if (nexthead >= CONFIG_NXTERM_KBDBUFSIZE)
         {
           nexthead = 0;
         }
@@ -486,4 +486,4 @@ void nxcon_kbdin(NXCONSOLE handle, FAR const uint8_t *buffer, uint8_t buflen)
   nxcon_sempost(priv);
 }
 
-#endif /* CONFIG_NXCONSOLE_NXKBDIN */
+#endif /* CONFIG_NXTERM_NXKBDIN */

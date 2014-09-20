@@ -45,7 +45,7 @@
 #include <nuttx/nx/nx.h>
 #include <nuttx/nx/nxtk.h>
 
-#ifdef CONFIG_NXCONSOLE
+#ifdef CONFIG_NXTERM
 
 /****************************************************************************
  * Pre-processor definitions
@@ -63,91 +63,91 @@
 
 /* Nx Console configuration options:
  *
- * CONFIG_NXCONSOLE
+ * CONFIG_NXTERM
  *   Enables building of the NxConsole driver.
  *
  * Output text/graphics options:
  *
- * CONFIG_NXCONSOLE_BPP
+ * CONFIG_NXTERM_BPP
  *   Currently, NxConsole supports only a single pixel depth. This
  *   configuration setting must be provided to support that single pixel depth.
  *   Default: The smallest enabled pixel depth. (see CONFIG_NX_DISABLE_*BPP)
- * CONFIG_NXCONSOLE_CURSORCHAR
+ * CONFIG_NXTERM_CURSORCHAR
  *   The bitmap code to use as the cursor.  Default '_'
- * CONFIG_NXCONSOLE_MXCHARS
+ * CONFIG_NXTERM_MXCHARS
  *   NxConsole needs to remember every character written to the console so
  *   that it can redraw the window. This setting determines the size of some
  *   internal memory allocations used to hold the character data. Default: 128.
- * CONFIG_NXCONSOLE_CACHESIZE
+ * CONFIG_NXTERM_CACHESIZE
  *   NxConsole supports caching of rendered fonts. This font caching is required
  *   for two reasons: (1) First, it improves text performance, but more
  *   importantly (2) it preserves the font memory. Since the NX server runs on
  *   a separate server thread, it requires that the rendered font memory persist
  *   until the server has a chance to render the font. (NOTE: There is still
  *   inherently a race condition in this!). Unfortunately, the font cache would
- *   be quite large if all fonts were saved. The CONFIG_NXCONSOLE_CACHESIZE setting
+ *   be quite large if all fonts were saved. The CONFIG_NXTERM_CACHESIZE setting
  *   will control the size of the font cache (in number of glyphs). Only that
  *   number of the most recently used glyphs will be retained. Default: 16.
- * CONFIG_NXCONSOLE_LINESEPARATION
+ * CONFIG_NXTERM_LINESEPARATION
  *   This the space (in rows) between each row of test.  Default: 0
- * CONFIG_NXCONSOLE_NOWRAP
+ * CONFIG_NXTERM_NOWRAP
  *   By default, lines will wrap when the test reaches the right hand side
  *   of the window. This setting can be defining to change this behavior so
  *   that the text is simply truncated until a new line is  encountered.
  *
  * Input options:
  *
- * CONFIG_NXCONSOLE_NXKBDIN
+ * CONFIG_NXTERM_NXKBDIN
  *   Take input from the NX keyboard input callback.  By default, keyboard
  *   input is taken from stdin (/dev/console).  If this option is set, then
  *   the interface nxcon_kbdin() is enabled.  That interface may be driven
  *   by window callback functions so that keyboard input *only* goes to the
  *   top window.
- * CONFIG_NXCONSOLE_KBDBUFSIZE
- *   If CONFIG_NXCONSOLE_NXKBDIN is enabled, then this value may be used to
+ * CONFIG_NXTERM_KBDBUFSIZE
+ *   If CONFIG_NXTERM_NXKBDIN is enabled, then this value may be used to
  *   define the size of the per-window keyboard input buffer.  Default: 16
- * CONFIG_NXCONSOLE_NPOLLWAITERS
+ * CONFIG_NXTERM_NPOLLWAITERS
  *   The number of threads that can be waiting for read data available.
  *   Default: 4
  */
 
 /* Cursor character */
 
-#ifndef CONFIG_NXCONSOLE_CURSORCHAR
-#  define CONFIG_NXCONSOLE_CURSORCHAR '_'
+#ifndef CONFIG_NXTERM_CURSORCHAR
+#  define CONFIG_NXTERM_CURSORCHAR '_'
 #endif
 
 /* The maximum number of characters that can be remembered */
 
-#ifndef CONFIG_NXCONSOLE_MXCHARS
-#  define CONFIG_NXCONSOLE_MXCHARS 128
+#ifndef CONFIG_NXTERM_MXCHARS
+#  define CONFIG_NXTERM_MXCHARS 128
 #endif
 
 /* Font cache -- this is the number or pre-rendered font glyphs that can be
  * remembered.
  */
 
-#ifndef CONFIG_NXCONSOLE_CACHESIZE
-#  define CONFIG_NXCONSOLE_CACHESIZE 16
+#ifndef CONFIG_NXTERM_CACHESIZE
+#  define CONFIG_NXTERM_CACHESIZE 16
 #endif
 
 /* Pixel depth */
 
-#ifndef CONFIG_NXCONSOLE_BPP
+#ifndef CONFIG_NXTERM_BPP
 #  if !defined(CONFIG_NX_DISABLE_1BPP)
-#    define CONFIG_NXCONSOLE_BPP 1
+#    define CONFIG_NXTERM_BPP 1
 #  elif !defined(CONFIG_NX_DISABLE_2BPP)
-#    define CONFIG_NXCONSOLE_BPP 2
+#    define CONFIG_NXTERM_BPP 2
 #  elif !defined(CONFIG_NX_DISABLE_4BPP)
-#    define CONFIG_NXCONSOLE_BPP 4
+#    define CONFIG_NXTERM_BPP 4
 #  elif !defined(CONFIG_NX_DISABLE_8BPP)
-#    define CONFIG_NXCONSOLE_BPP 8
+#    define CONFIG_NXTERM_BPP 8
 #  elif !defined(CONFIG_NX_DISABLE_16BPP)
-#    define CONFIG_NXCONSOLE_BPP 16
+#    define CONFIG_NXTERM_BPP 16
 //#elif !defined(CONFIG_NX_DISABLE_24BPP)
-//#    define CONFIG_NXCONSOLE_BPP 24
+//#    define CONFIG_NXTERM_BPP 24
 #  elif !defined(CONFIG_NX_DISABLE_32BPP)
-#    define CONFIG_NXCONSOLE_BPP 32
+#    define CONFIG_NXTERM_BPP 32
 #  else
 #    error "No pixel depth provided"
 #  endif
@@ -155,32 +155,32 @@
 
 /* Space (in rows) between lines */
 
-#ifndef CONFIG_NXCONSOLE_LINESEPARATION
-#  define CONFIG_NXCONSOLE_LINESEPARATION 0
+#ifndef CONFIG_NXTERM_LINESEPARATION
+#  define CONFIG_NXTERM_LINESEPARATION 0
 #endif
 
 /* Input options */
 
 #ifndef CONFIG_NX_KBD
-#  undef CONFIG_NXCONSOLE_NXKBDIN
+#  undef CONFIG_NXTERM_NXKBDIN
 #endif
 
-#ifdef CONFIG_NXCONSOLE_NXKBDIN
+#ifdef CONFIG_NXTERM_NXKBDIN
 
-#  ifndef CONFIG_NXCONSOLE_KBDBUFSIZE
-#    define CONFIG_NXCONSOLE_KBDBUFSIZE 16
-#  elif (CONFIG_NXCONSOLE_KBDBUFSIZE < 1) || (CONFIG_NXCONSOLE_KBDBUFSIZE > 255)
-#    error "CONFIG_NXCONSOLE_KBDBUFSIZE is out of range (1-255)"
+#  ifndef CONFIG_NXTERM_KBDBUFSIZE
+#    define CONFIG_NXTERM_KBDBUFSIZE 16
+#  elif (CONFIG_NXTERM_KBDBUFSIZE < 1) || (CONFIG_NXTERM_KBDBUFSIZE > 255)
+#    error "CONFIG_NXTERM_KBDBUFSIZE is out of range (1-255)"
 #  endif
 
-#  ifndef CONFIG_NXCONSOLE_NPOLLWAITERS
-#    define CONFIG_NXCONSOLE_NPOLLWAITERS 4
+#  ifndef CONFIG_NXTERM_NPOLLWAITERS
+#    define CONFIG_NXTERM_NPOLLWAITERS 4
 #  endif
 
 #else
-#  undef CONFIG_NXCONSOLE_KBDBUFSIZE
-#  define CONFIG_NXCONSOLE_KBDBUFSIZE 0
-#  define CONFIG_NXCONSOLE_NPOLLWAITERS 0
+#  undef CONFIG_NXTERM_KBDBUFSIZE
+#  define CONFIG_NXTERM_KBDBUFSIZE 0
+#  define CONFIG_NXTERM_NPOLLWAITERS 0
 #endif
 
 /****************************************************************************
@@ -337,10 +337,10 @@ EXTERN void nxcon_redraw(NXCONSOLE handle, FAR const struct nxgl_rect_s *rect,
  *  this function.  This function will buffer the keyboard data and make
  *  it available to the NxConsole as stdin.
  *
- *  If CONFIG_NXCONSOLE_NXKBDIN is not selected, then the NxConsole will
+ *  If CONFIG_NXTERM_NXKBDIN is not selected, then the NxConsole will
  *  receive its input from stdin (/dev/console).  This works great but
  *  cannot be shared between different windows.  Chaos will ensue if you
- *  try to support multiple NxConsole windows without CONFIG_NXCONSOLE_NXKBDIN
+ *  try to support multiple NxConsole windows without CONFIG_NXTERM_NXKBDIN
  *
  * Input Parameters:
  *   handle - A handle previously returned by nx_register, nxtk_register, or
@@ -353,7 +353,7 @@ EXTERN void nxcon_redraw(NXCONSOLE handle, FAR const struct nxgl_rect_s *rect,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NXCONSOLE_NXKBDIN
+#ifdef CONFIG_NXTERM_NXKBDIN
 EXTERN void nxcon_kbdin(NXCONSOLE handle, FAR const uint8_t *buffer,
                         uint8_t buflen);
 #endif
@@ -363,5 +363,5 @@ EXTERN void nxcon_kbdin(NXCONSOLE handle, FAR const uint8_t *buffer,
 }
 #endif
 
-#endif /* CONFIG_NXCONSOLE */
+#endif /* CONFIG_NXTERM */
 #endif /* __INCLUDE_NUTTX_NX_NXCONSOLE_H */

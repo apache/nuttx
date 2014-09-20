@@ -56,22 +56,22 @@
  * pixel depths that are not directly addressable (1,2,4, and 24).
  */
 
-#if CONFIG_NXCONSOLE_BPP == 1
+#if CONFIG_NXTERM_BPP == 1
 #  define RENDERER nxf_convert_1bpp
-#elif CONFIG_NXCONSOLE_BPP == 2
+#elif CONFIG_NXTERM_BPP == 2
 #  define RENDERER nxf_convert_2bpp
-#elif CONFIG_NXCONSOLE_BPP == 4
+#elif CONFIG_NXTERM_BPP == 4
 #  define RENDERER nxf_convert_4bpp
-#elif CONFIG_NXCONSOLE_BPP == 8
+#elif CONFIG_NXTERM_BPP == 8
 #  define RENDERER nxf_convert_8bpp
-#elif CONFIG_NXCONSOLE_BPP == 16
+#elif CONFIG_NXTERM_BPP == 16
 #  define RENDERER nxf_convert_16bpp
-#elif CONFIG_NXCONSOLE_BPP == 24
+#elif CONFIG_NXTERM_BPP == 24
 #  define RENDERER nxf_convert_24bpp
-#elif  CONFIG_NXCONSOLE_BPP == 32
+#elif  CONFIG_NXTERM_BPP == 32
 #  define RENDERER nxf_convert_32bpp
 #else
-#  error "Unsupported CONFIG_NXCONSOLE_BPP"
+#  error "Unsupported CONFIG_NXTERM_BPP"
 #endif
 
 /****************************************************************************
@@ -219,7 +219,7 @@ nxcon_renderglyph(FAR struct nxcon_state_s *priv,
 {
   FAR struct nxcon_glyph_s *glyph = NULL;
   FAR nxgl_mxpixel_t *ptr;
-#if CONFIG_NXCONSOLE_BPP < 8
+#if CONFIG_NXTERM_BPP < 8
   nxgl_mxpixel_t pixel;
 #endif
   int bmsize;
@@ -239,7 +239,7 @@ nxcon_renderglyph(FAR struct nxcon_state_s *priv,
 
   /* Get the physical width of the glyph in bytes */
 
-  glyph->stride = (glyph->width * CONFIG_NXCONSOLE_BPP + 7) / 8;
+  glyph->stride = (glyph->width * CONFIG_NXTERM_BPP + 7) / 8;
 
   /* Allocate memory to hold the glyph with its offsets */
 
@@ -256,10 +256,10 @@ nxcon_renderglyph(FAR struct nxcon_state_s *priv,
        * differing BPP's as well.
        */
 
-#if CONFIG_NXCONSOLE_BPP < 8
+#if CONFIG_NXTERM_BPP < 8
       pixel  = priv->wndo.wcolor[0];
 
-#  if CONFIG_NXCONSOLE_BPP == 1
+#  if CONFIG_NXTERM_BPP == 1
 
       /* Pack 1-bit pixels into a 2-bits */
 
@@ -267,7 +267,7 @@ nxcon_renderglyph(FAR struct nxcon_state_s *priv,
       pixel  = (pixel) << 1 | pixel;
 
 #  endif
-#  if CONFIG_NXCONSOLE_BPP < 4
+#  if CONFIG_NXTERM_BPP < 4
 
       /* Pack 2-bit pixels into a nibble */
 
@@ -292,10 +292,10 @@ nxcon_renderglyph(FAR struct nxcon_state_s *priv,
             }
         }
 
-#elif CONFIG_NXCONSOLE_BPP == 24
+#elif CONFIG_NXTERM_BPP == 24
 # error "Additional logic is needed here for 24bpp support"
 
-#else /* CONFIG_NXCONSOLE_BPP = {8,16,32} */
+#else /* CONFIG_NXTERM_BPP = {8,16,32} */
 
       ptr = (FAR nxgl_mxpixel_t *)glyph->bitmap;
       for (row = 0; row < glyph->height; row++)
@@ -538,9 +538,9 @@ void nxcon_home(FAR struct nxcon_state_s *priv)
 
   priv->fpos.x = priv->spwidth;
 
-  /* And CONFIG_NXCONSOLE_LINESEPARATION lines from the top */
+  /* And CONFIG_NXTERM_LINESEPARATION lines from the top */
 
-  priv->fpos.y = CONFIG_NXCONSOLE_LINESEPARATION;
+  priv->fpos.y = CONFIG_NXTERM_LINESEPARATION;
 }
 
 /****************************************************************************
@@ -557,9 +557,9 @@ void nxcon_newline(FAR struct nxcon_state_s *priv)
 
   priv->fpos.x = priv->spwidth;
 
-  /* Linefeed: Down the max font height + CONFIG_NXCONSOLE_LINESEPARATION */
+  /* Linefeed: Down the max font height + CONFIG_NXTERM_LINESEPARATION */
 
-  priv->fpos.y += (priv->fheight + CONFIG_NXCONSOLE_LINESEPARATION);
+  priv->fpos.y += (priv->fheight + CONFIG_NXTERM_LINESEPARATION);
 }
 
 /****************************************************************************

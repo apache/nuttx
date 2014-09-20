@@ -64,7 +64,7 @@ static ssize_t nxcon_write(FAR struct file *filep, FAR const char *buffer,
  ****************************************************************************/
 /* This is the common NX driver file operations */
 
-#ifdef CONFIG_NXCONSOLE_NXKBDIN
+#ifdef CONFIG_NXTERM_NXKBDIN
 
 const struct file_operations g_nxcon_drvrops =
 {
@@ -80,7 +80,7 @@ const struct file_operations g_nxcon_drvrops =
 #endif
 };
 
-#else /* CONFIG_NXCONSOLE_NXKBDIN */
+#else /* CONFIG_NXTERM_NXKBDIN */
 
 const struct file_operations g_nxcon_drvrops =
 {
@@ -96,7 +96,7 @@ const struct file_operations g_nxcon_drvrops =
 #endif
 };
 
-#endif /* CONFIG_NXCONSOLE_NXKBDIN */
+#endif /* CONFIG_NXTERM_NXKBDIN */
 
 /****************************************************************************
  * Private Data
@@ -125,7 +125,7 @@ static int nxcon_open(FAR struct file *filep)
 
   /* Verify that the driver is opened for write-only access */
 
-#ifndef CONFIG_NXCONSOLE_NXKBDIN
+#ifndef CONFIG_NXTERM_NXKBDIN
   if ((filep->f_oflags & O_RDOK) != 0)
     {
       gdbg("ERROR: Attempted open with read access\n");
