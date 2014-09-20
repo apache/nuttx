@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/stm32f4discovery/src/stm32_nsh.c
+ * config/stm32f4discovery/src/stm32_bringup.c
  *
  *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,36 +39,81 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
+#include <stdio.h>
+#include <debug.h>
+#include <errno.h>
+
+#ifdef CONFIG_SYSTEM_USBMONITOR
+#  include <apps/usbmonitor.h>
+#endif
+
+#ifdef CONFIG_STM32_OTGFS
+#  include "stm32_usbhost.h"
+#endif
+
+#include "stm32.h"
 #include "stm32f4discovery.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
 
-#ifndef OK
-#  define OK 0
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
+ * Name: stm32_bringup
  *
  * Description:
- *   Perform architecture-specific initialization (if this was not already
- *   done by board_initialize();
+ *   Perform architecture-specific initialization
+ *
+ *   CONFIG_BOARD_INITIALIZE=y :
+ *     Called from board_initialize().
+ *
+ *   CONFIG_BOARD_INITIALIZE=n && CONFIG_NSH_ARCHINIT=y :
+ *     Called from the NSH library
  *
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+int stm32_bringup(void)
 {
-#ifndef CONFIG_BOARD_INITIALIZE
-  /* Perform board-specific initialization */
+  int ret = OK;
 
-  (void)stm32_bringup();
+#ifdef HAVE_SDIO
+  /* Initialize the SDIO block driver */
+
+  ret = stm32_sdio_initialize();
+  if (ret != OK)
+    {
+      fdbg("Failed to initialize MMC/SD driver: %d\n", ret);
+      return ret;
+    }
 #endif
 
-  return OK;
+#ifdef HAVE_USBHOST
+  /* Initialize USB host operation.  stm32_usbhost_initialize() starts a thread
+   * will monitor for USB connection and disconnection events.
+   */
+
+  ret = stm32_usbhost_initialize();
+  if (ret != OK)
+    {
+      udbg("Failed to initialize USB host: %d\n", ret);
+      return ret;
+    }
+#endif
+
+#ifdef HAVE_USBMONITOR
+  /* Start the USB Monitor */
+
+  ret = usbmonitor_start(0, NULL);
+  if (ret != OK)
+    {
+      udbg("Start USB monitor: %d\n", ret);
+    }
+#endif
+
+  return ret;
 }

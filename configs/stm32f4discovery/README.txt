@@ -1261,6 +1261,34 @@ Where <subdir> is one of the following:
        and RJ5 network connector.  Support is enabled for ICMP, TCP/IP,
        UDP, and ARP.
 
+    3. SD card support is enabled.  The STM32F4DIS-BB has an on-board
+       microSD slot that should be automatically registered as the block
+       device /dev/mmcsd0 when an SD card is present.  The SD card can
+       then be mounted by the NSH command:
+
+       nsh> mount -t /dev/mmcsd0 /mnt/sdcard
+
+    4. CCM memory is not included in the heap in this configuration.  That
+       is because the SD card uses DMA and if DMA memory is allocated from
+       the CCM memory, the DMA will failure.  This is an STM32 hardware
+       limitation.
+
+       If you want to get the CCM memory back in the heap, then you can
+
+         a) Disable microSD support (and DMAC2 which is then no longer
+            needed).  If you reduce the clocking by a huge amount, it might
+            be possible to use microSD without DMA.  This, however, may
+            not be possible.
+         b) Develop a strategy to manage CCM memory and DMA memory.  Look
+            at this discussion on the NuttX Wiki:
+            http://www.nuttx.org/doku.php?id=wiki:howtos:stm32-ccm-alloc
+
+       To put the CCM memory back into the heap you would need to change
+       the following in the NuttX configuration:
+
+         CONFIG_STM32_CCMEXCLUDE=n  : Don't exclude CCM memory from the heap
+         CONFIG_MM_REGIONS=2        : With CCM, there will be two memory regions
+
   nsh:
   ---
     Configures the NuttShell (nsh) located at apps/examples/nsh.  The
