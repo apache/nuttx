@@ -85,16 +85,17 @@ static inline void putreg16(uint16_t val, unsigned int addr)
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
 /* Atomic modification of registers */
 
-EXTERN void modifyreg8(unsigned int addr, uint8_t clearbits, uint8_t setbits);
-EXTERN void modifyreg16(unsigned int addr, uint16_t clearbits, uint16_t setbits);
-EXTERN void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
+void modifyreg8(unsigned int addr, uint8_t clearbits, uint8_t setbits);
+void modifyreg16(unsigned int addr, uint16_t clearbits, uint16_t setbits);
+void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
 
 #undef EXTERN
 #if defined(__cplusplus)
