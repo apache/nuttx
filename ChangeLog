@@ -8604,3 +8604,5 @@
 	  stm32_bringup.c, and stm32f4discovery.h: STM32F4Discovery:  Add
 	  support for the microSD card slot on the STM32F4DIS-BB base board
 	  (2014-9-20).
+	* Change all occurrences of NxConsole to NxTerm (2014-9-20).
+
