@@ -1106,7 +1106,7 @@ CONFIG_NXWM_STARTWINDOW_PRIO=100
 CONFIG_NXWM_STARTWINDOW_STACKSIZE=2048
 
 #
-# NxConsole Window Settings
+# NxTerm Window Settings
 #
 # CONFIG_NXWM_NXTERM is not set
 

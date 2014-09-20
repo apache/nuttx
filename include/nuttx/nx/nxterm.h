@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/nx/nxconsole.h
+ * include/nuttx/nx/nxterm.h
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_NX_NXCONSOLE_H
-#define __INCLUDE_NUTTX_NX_NXCONSOLE_H
+#ifndef __INCLUDE_NUTTX_NX_NXTERM_H
+#define __INCLUDE_NUTTX_NX_NXTERM_H
 
 /****************************************************************************
  * Included Files
@@ -64,22 +64,22 @@
 /* Nx Console configuration options:
  *
  * CONFIG_NXTERM
- *   Enables building of the NxConsole driver.
+ *   Enables building of the NxTerm driver.
  *
  * Output text/graphics options:
  *
  * CONFIG_NXTERM_BPP
- *   Currently, NxConsole supports only a single pixel depth. This
+ *   Currently, NxTerm supports only a single pixel depth. This
  *   configuration setting must be provided to support that single pixel depth.
  *   Default: The smallest enabled pixel depth. (see CONFIG_NX_DISABLE_*BPP)
  * CONFIG_NXTERM_CURSORCHAR
  *   The bitmap code to use as the cursor.  Default '_'
  * CONFIG_NXTERM_MXCHARS
- *   NxConsole needs to remember every character written to the console so
+ *   NxTerm needs to remember every character written to the console so
  *   that it can redraw the window. This setting determines the size of some
  *   internal memory allocations used to hold the character data. Default: 128.
  * CONFIG_NXTERM_CACHESIZE
- *   NxConsole supports caching of rendered fonts. This font caching is required
+ *   NxTerm supports caching of rendered fonts. This font caching is required
  *   for two reasons: (1) First, it improves text performance, but more
  *   importantly (2) it preserves the font memory. Since the NX server runs on
  *   a separate server thread, it requires that the rendered font memory persist
@@ -189,7 +189,7 @@
 
 /* This is the handle that can be used to access the consoles */
 
-typedef FAR void *NXCONSOLE;
+typedef FAR void *NXTERM;
 
 /* This structure describes the window and font characteristics */
 
@@ -237,7 +237,7 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN NXCONSOLE nx_register(NXWINDOW hwnd, FAR struct nxcon_window_s *wndo,
+EXTERN NXTERM nx_register(NXWINDOW hwnd, FAR struct nxcon_window_s *wndo,
                              int minor);
 
 /****************************************************************************
@@ -260,7 +260,7 @@ EXTERN NXCONSOLE nx_register(NXWINDOW hwnd, FAR struct nxcon_window_s *wndo,
  *
  ****************************************************************************/
 
-EXTERN NXCONSOLE nxtk_register(NXTKWINDOW hfwnd,
+EXTERN NXTERM nxtk_register(NXTKWINDOW hfwnd,
                                FAR struct nxcon_window_s *wndo, int minor);
 
 /****************************************************************************
@@ -285,7 +285,7 @@ EXTERN NXCONSOLE nxtk_register(NXTKWINDOW hfwnd,
  *
  ****************************************************************************/
 
-EXTERN NXCONSOLE nxtool_register(NXTKWINDOW hfwnd,
+EXTERN NXTERM nxtool_register(NXTKWINDOW hfwnd,
                                  FAR struct nxcon_window_s *wndo, int minor);
 
 /****************************************************************************
@@ -303,7 +303,7 @@ EXTERN NXCONSOLE nxtool_register(NXTKWINDOW hfwnd,
  *
  ****************************************************************************/
 
-EXTERN void nxcon_unregister(NXCONSOLE handle);
+EXTERN void nxcon_unregister(NXTERM handle);
 
 /****************************************************************************
  * Name: nxcon_redraw
@@ -324,7 +324,7 @@ EXTERN void nxcon_unregister(NXCONSOLE handle);
  *
  ****************************************************************************/
 
-EXTERN void nxcon_redraw(NXCONSOLE handle, FAR const struct nxgl_rect_s *rect,
+EXTERN void nxcon_redraw(NXTERM handle, FAR const struct nxgl_rect_s *rect,
                          bool more);
 
 /****************************************************************************
@@ -332,15 +332,15 @@ EXTERN void nxcon_redraw(NXCONSOLE handle, FAR const struct nxgl_rect_s *rect,
  *
  * Description:
  *  This function should be driven by the window kbdin callback function
- *  (see nx.h).  When the NxConsole is the top window and keyboard input is
+ *  (see nx.h).  When the NxTerm is the top window and keyboard input is
  *  received on the top window, that window callback should be directed to
  *  this function.  This function will buffer the keyboard data and make
- *  it available to the NxConsole as stdin.
+ *  it available to the NxTerm as stdin.
  *
- *  If CONFIG_NXTERM_NXKBDIN is not selected, then the NxConsole will
+ *  If CONFIG_NXTERM_NXKBDIN is not selected, then the NxTerm will
  *  receive its input from stdin (/dev/console).  This works great but
  *  cannot be shared between different windows.  Chaos will ensue if you
- *  try to support multiple NxConsole windows without CONFIG_NXTERM_NXKBDIN
+ *  try to support multiple NxTerm windows without CONFIG_NXTERM_NXKBDIN
  *
  * Input Parameters:
  *   handle - A handle previously returned by nx_register, nxtk_register, or
@@ -354,7 +354,7 @@ EXTERN void nxcon_redraw(NXCONSOLE handle, FAR const struct nxgl_rect_s *rect,
  ****************************************************************************/
 
 #ifdef CONFIG_NXTERM_NXKBDIN
-EXTERN void nxcon_kbdin(NXCONSOLE handle, FAR const uint8_t *buffer,
+EXTERN void nxcon_kbdin(NXTERM handle, FAR const uint8_t *buffer,
                         uint8_t buflen);
 #endif
 
@@ -364,4 +364,4 @@ EXTERN void nxcon_kbdin(NXCONSOLE handle, FAR const uint8_t *buffer,
 #endif
 
 #endif /* CONFIG_NXTERM */
-#endif /* __INCLUDE_NUTTX_NX_NXCONSOLE_H */
+#endif /* __INCLUDE_NUTTX_NX_NXTERM_H */

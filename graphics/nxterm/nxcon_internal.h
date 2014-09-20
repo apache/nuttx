@@ -1,5 +1,5 @@
 /****************************************************************************
- * nuttx/graphics/nxconsole/nxcon_internal.h
+ * nuttx/graphics/nxterm/nxcon_internal.h
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __GRAPHICS_NXCONSOLE_NXCON_INTERNAL_H
-#define __GRAPHICS_NXCONSOLE_NXCON_INTERNAL_H
+#ifndef __GRAPHICS_NXTERM_NXCON_INTERNAL_H
+#define __GRAPHICS_NXTERM_NXCON_INTERNAL_H
 
 /****************************************************************************
  * Included Files
@@ -50,12 +50,12 @@
 #include <nuttx/nx/nx.h>
 #include <nuttx/nx/nxtk.h>
 #include <nuttx/nx/nxfonts.h>
-#include <nuttx/nx/nxconsole.h>
+#include <nuttx/nx/nxterm.h>
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
-/* NxConsole Definitions ****************************************************/
+/* NxTerm Definitions ****************************************************/
 /* Bitmap flags */
 
 #define BMFLAGS_NOGLYPH    (1 << 0) /* No glyph available, use space */
@@ -216,7 +216,7 @@ int nxcon_sempost(FAR struct nxcon_state_s *priv);
 
 /* Common device registration */
 
-FAR struct nxcon_state_s *nxcon_register(NXCONSOLE handle,
+FAR struct nxcon_state_s *nxcon_register(NXTERM handle,
     FAR struct nxcon_window_s *wndo, FAR const struct nxcon_operations_s *ops,
     int minor);
 
@@ -251,4 +251,4 @@ void nxcon_hidecursor(FAR struct nxcon_state_s *priv);
 
 void nxcon_scroll(FAR struct nxcon_state_s *priv, int scrollheight);
 
-#endif /* __GRAPHICS_NXCONSOLE_NXCON_INTERNAL_H */
+#endif /* __GRAPHICS_NXTERM_NXCON_INTERNAL_H */

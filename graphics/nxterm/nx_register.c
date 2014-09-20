@@ -1,5 +1,5 @@
 /****************************************************************************
- * nuttx/graphics/nxconsole/nxtool_register.c
+ * nuttx/graphics/nxterm/nx_register.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,8 +39,8 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/nx/nxtk.h>
-#include <nuttx/nx/nxconsole.h>
+#include <nuttx/nx/nx.h>
+#include <nuttx/nx/nxterm.h>
 
 #include "nxcon_internal.h"
 
@@ -52,31 +52,31 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int nxtool_fill(FAR struct nxcon_state_s *priv,
-                       FAR const struct nxgl_rect_s *rect,
-                       nxgl_mxpixel_t wcolor[CONFIG_NX_NPLANES]);
+static int nxcon_fill(FAR struct nxcon_state_s *priv,
+                      FAR const struct nxgl_rect_s *rect,
+                      nxgl_mxpixel_t wcolor[CONFIG_NX_NPLANES]);
 #ifndef CONFIG_NX_WRITEONLY
-static int nxtool_move(FAR struct nxcon_state_s *priv,
-                       FAR const struct nxgl_rect_s *rect,
-                       FAR const struct nxgl_point_s *offset);
+static int nxcon_move(FAR struct nxcon_state_s *priv,
+                      FAR const struct nxgl_rect_s *rect,
+                      FAR const struct nxgl_point_s *offset);
 #endif
-static int nxtool_bitmap(FAR struct nxcon_state_s *priv,
-                         FAR const struct nxgl_rect_s *dest,
-                         FAR const void *src[CONFIG_NX_NPLANES],
-                         FAR const struct nxgl_point_s *origin,
-                         unsigned int stride);
+static int nxcon_bitmap(FAR struct nxcon_state_s *priv,
+                        FAR const struct nxgl_rect_s *dest,
+                        FAR const void *src[CONFIG_NX_NPLANES],
+                        FAR const struct nxgl_point_s *origin,
+                        unsigned int stride);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const struct nxcon_operations_s g_nxtoolops =
+static const struct nxcon_operations_s g_nxops =
 {
-  nxtool_fill,
+  nxcon_fill,
 #ifndef CONFIG_NX_WRITEONLY
-  nxtool_move,
+  nxcon_move,
 #endif
-  nxtool_bitmap
+  nxcon_bitmap
 };
 
 /****************************************************************************
@@ -84,7 +84,7 @@ static const struct nxcon_operations_s g_nxtoolops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxtool_fill
+ * Name: nxcon_fill
  *
  * Description:
  *  Fill the specified rectangle in the window with the specified color
@@ -99,15 +99,15 @@ static const struct nxcon_operations_s g_nxtoolops =
  *
  ****************************************************************************/
 
-static int nxtool_fill(FAR struct nxcon_state_s *priv,
-                       FAR const struct nxgl_rect_s *rect,
-                       nxgl_mxpixel_t wcolor[CONFIG_NX_NPLANES])
+static int nxcon_fill(FAR struct nxcon_state_s *priv,
+                      FAR const struct nxgl_rect_s *rect,
+                      nxgl_mxpixel_t wcolor[CONFIG_NX_NPLANES])
 {
-  return nxtk_filltoolbar((NXTKWINDOW)priv->handle, rect, wcolor);
+  return nx_fill((NXWINDOW)priv->handle, rect, wcolor);
 }
 
 /****************************************************************************
- * Name: nxtool_move
+ * Name: nxcon_move
  *
  * Description:
  *   Move a rectangular region within the window
@@ -124,16 +124,16 @@ static int nxtool_fill(FAR struct nxcon_state_s *priv,
  ****************************************************************************/
 
 #ifndef CONFIG_NX_WRITEONLY
-static int nxtool_move(FAR struct nxcon_state_s *priv,
-                       FAR const struct nxgl_rect_s *rect,
-                       FAR const struct nxgl_point_s *offset)
+static int nxcon_move(FAR struct nxcon_state_s *priv,
+              FAR const struct nxgl_rect_s *rect,
+              FAR const struct nxgl_point_s *offset)
 {
-  return nxtk_movetoolbar((NXTKWINDOW)priv->handle, rect, offset);
+  return nx_move((NXWINDOW)priv->handle, rect, offset);
 }
 #endif
 
 /****************************************************************************
- * Name: nxtool_bitmap
+ * Name: nxcon_bitmap
  *
  * Description:
  *   Copy a rectangular region of a larger image into the rectangle in the
@@ -155,13 +155,13 @@ static int nxtool_move(FAR struct nxcon_state_s *priv,
  *
  ****************************************************************************/
 
-static int nxtool_bitmap(FAR struct nxcon_state_s *priv,
-                         FAR const struct nxgl_rect_s *dest,
-                         FAR const void *src[CONFIG_NX_NPLANES],
-                         FAR const struct nxgl_point_s *origin,
-                         unsigned int stride)
+static int nxcon_bitmap(FAR struct nxcon_state_s *priv,
+                        FAR const struct nxgl_rect_s *dest,
+                        FAR const void *src[CONFIG_NX_NPLANES],
+                        FAR const struct nxgl_point_s *origin,
+                        unsigned int stride)
 {
-  return nxtk_bitmaptoolbar((NXTKWINDOW)priv->handle, dest, src, origin, stride);
+  return nx_bitmap((NXWINDOW)priv->handle, dest, src, origin, stride);
 }
 
 /****************************************************************************
@@ -169,17 +169,15 @@ static int nxtool_bitmap(FAR struct nxcon_state_s *priv,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxtool_register
+ * Name: nx_register
  *
  * Description:
- *   Register a console device on a toolbar of a framed NX window.  The
- *   device will be registered at /dev/nxtoolN where N is the provided minor
- *   number.
+ *   Register a console device on a raw NX window.  The device will be
+ *   registered at /dev/nxconN where N is the provided minor number.
  *
  * Input Parameters:
- *   hfwnd - A handle that will be used to access the toolbar.  The toolbar
- *     must persist and this handle must be valid for the life of the NX
- *     console.
+ *   hwnd - A handle that will be used to access the window.  The window must
+ *     persist and this handle must be valid for the life of the NX console.
  *   wndo - Describes the window and font to be used
  *   minor - The device minor number
  *
@@ -188,8 +186,8 @@ static int nxtool_bitmap(FAR struct nxcon_state_s *priv,
  *
  ****************************************************************************/
 
-NXCONSOLE nxtool_register(NXTKWINDOW hfwnd, FAR struct nxcon_window_s *wndo, int minor)
+NXTERM nx_register(NXWINDOW hwnd, FAR struct nxcon_window_s *wndo, int minor)
 {
-  return nxcon_register((NXCONSOLE)hfwnd, wndo, &g_nxtoolops, minor);
+  return nxcon_register((NXTERM)hwnd, wndo, &g_nxops, minor);
 }
 

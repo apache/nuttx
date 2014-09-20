@@ -34,10 +34,10 @@ at the present, but here is the longer term roadmap:
               and without NXTOOLKIT for raw access to window memory.
   NXGLIB    - Low level graphics utilities and direct framebuffer rendering logic.
               NX is built on top of NXGLIB.
-  NxConsole - NxConsole is a write-only character device that is built on top of
+  NxTerm - NxTerm is a write-only character device that is built on top of
               an NX window.  This character device can be used to provide stdout
               and stderr and, hence, can provide the output side of NuttX console.
-              NxConsole is only available when the multi-user NX implementation is
+              NxTerm is only available when the multi-user NX implementation is
               selected (CONFIG_NX_MULTIUSERs).
 
 
@@ -351,26 +351,26 @@ CONFIG_NXFONT_SERIF38X49B
   This option enables support for a large, 38x49 bold font (with serifs)
   (font ID FONTID_SERIF38X49B == 13).
 
-NxConsole Configuration Settings
+NxTerm Configuration Settings
 --------------------------------
 
 CONFIG_NXTERM
-  Enables building of the NxConsole driver.
+  Enables building of the NxTerm driver.
 
-NxConsole output text/graphics options:
+NxTerm output text/graphics options:
 
 CONFIG_NXTERM_BPP
-  Currently, NxConsole supports only a single pixel depth. This
+  Currently, NxTerm supports only a single pixel depth. This
   configuration setting must be provided to support that single pixel depth.
   Default: The smallest enabled pixel depth. (see CONFIG_NX_DISABLE_*BPP)
 CONFIG_NXTERM_CURSORCHAR
   The bitmap code to use as the cursor.  Default '_'
 CONFIG_NXTERM_MXCHARS
-  NxConsole needs to remember every character written to the console so
+  NxTerm needs to remember every character written to the console so
   that it can redraw the window. This setting determines the size of some
   internal memory allocations used to hold the character data. Default: 128.
 CONFIG_NXTERM_CACHESIZE
-  NxConsole supports caching of rendered fonts. This font caching is required
+  NxTerm supports caching of rendered fonts. This font caching is required
   for two reasons: (1) First, it improves text performance, but more
   importantly (2) it preserves the font memory. Since the NX server runs on
   a separate server thread, it requires that the rendered font memory persist
@@ -378,11 +378,11 @@ CONFIG_NXTERM_CACHESIZE
   cache would be quite large if all fonts were saved. The CONFIG_NXTERM_CACHESIZE
   setting will control the size of the font cache (in number of glyphs). Only that
   number of the most recently used glyphs will be retained. Default: 16.
-  NOTE: There can still be a race condition between the NxConsole driver and the
+  NOTE: There can still be a race condition between the NxTerm driver and the
   NX task.  If you every see character corruption (especially when printing
   a lot of data or scrolling), then increasing the value of CONFIG_NXTERM_CACHESIZE
   is something that you should try.  Alternatively, you can reduce the size of
-  CONFIG_MQ_MAXMSGSIZE which will force NxConsole task to pace the server task.
+  CONFIG_MQ_MAXMSGSIZE which will force NxTerm task to pace the server task.
   CONFIG_NXTERM_CACHESIZE should be larger than CONFIG_MQ_MAXMSGSIZE in any event.
 CONFIG_NXTERM_LINESEPARATION
   This the space (in rows) between each row of test.  Default: 0
@@ -391,7 +391,7 @@ CONFIG_NXTERM_NOWRAP
   of the window. This setting can be defining to change this behavior so
   that the text is simply truncated until a new line is  encountered.
 
-NxConsole Input options
+NxTerm Input options
 
 CONFIG_NXTERM_NXKBDIN
   Take input from the NX keyboard input callback.  By default, keyboard
@@ -399,7 +399,7 @@ CONFIG_NXTERM_NXKBDIN
   the interface nxcon_kdbin() is enabled.  That interface may be driven
   by window callback functions so that keyboard input *only* goes to the
   top window.
-CONFIG__NXCONSOLE_KBDBUFSIZE
+CONFIG__NXTERM_KBDBUFSIZE
   If CONFIG_NXTERM_NXKBDIN is enabled, then this value may be used to
   define the size of the per-window keyboard input buffer.  Default: 16
 CONFIG_NXTERM_NPOLLWAITERS

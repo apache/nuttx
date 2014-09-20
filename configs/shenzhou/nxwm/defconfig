@@ -737,7 +737,7 @@ CONFIG_NXFONT_SANS22X29B=y
 CONFIG_NXTERM=y
 
 #
-# NxConsole Output Text/Graphics Options
+# NxTerm Output Text/Graphics Options
 #
 CONFIG_NXTERM_BPP=16
 CONFIG_NXTERM_CURSORCHAR=137
@@ -747,7 +747,7 @@ CONFIG_NXTERM_LINESEPARATION=0
 # CONFIG_NXTERM_NOWRAP is not set
 
 #
-# NxConsole Input options
+# NxTerm Input options
 #
 CONFIG_NXTERM_NXKBDIN=y
 CONFIG_NXTERM_KBDBUFSIZE=16

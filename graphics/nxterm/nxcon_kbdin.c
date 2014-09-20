@@ -1,5 +1,5 @@
 /****************************************************************************
- * nuttx/graphics/nxconsole/nxcon_kbdin.c
+ * nuttx/graphics/nxterm/nxcon_kbdin.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -106,7 +106,7 @@ static void nxcon_pollnotify(FAR struct nxcon_state_s *priv, pollevent_t eventse
  * Name: nxcon_read
  *
  * Description:
- *   The optional NxConsole read method
+ *   The optional NxTerm read method
  *
  ****************************************************************************/
 
@@ -373,15 +373,15 @@ errout:
  *
  * Description:
  *  This function should be driven by the window kbdin callback function
- *  (see nx.h).  When the NxConsole is the top window and keyboard input is
+ *  (see nx.h).  When the NxTerm is the top window and keyboard input is
  *  received on the top window, that window callback should be directed to
  *  this function.  This function will buffer the keyboard data and makE
- *  it available to the NxConsole as stdin.
+ *  it available to the NxTerm as stdin.
  *
- *  If CONFIG_NXTERM_NXKBDIN is not selected, then the NxConsole will
+ *  If CONFIG_NXTERM_NXKBDIN is not selected, then the NxTerm will
  *  receive its input from stdin (/dev/console).  This works great but
  *  cannot be shared between different windows.  Chaos will ensue if you
- *  try to support multiple NxConsole windows without CONFIG_NXTERM_NXKBDIN
+ *  try to support multiple NxTerm windows without CONFIG_NXTERM_NXKBDIN
  *
  * Input Parameters:
  *   handle - A handle previously returned by nx_register, nxtk_register, or
@@ -394,7 +394,7 @@ errout:
  *
  ****************************************************************************/
 
-void nxcon_kbdin(NXCONSOLE handle, FAR const uint8_t *buffer, uint8_t buflen)
+void nxcon_kbdin(NXTERM handle, FAR const uint8_t *buffer, uint8_t buflen)
 {
   FAR struct nxcon_state_s *priv;
   ssize_t nwritten;

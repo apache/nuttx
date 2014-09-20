@@ -1,5 +1,5 @@
 /****************************************************************************
- * nuttx/graphics/nxconsole/nxtk_register.c
+ * nuttx/graphics/nxterm/nxtk_register.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,7 +40,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/nx/nxtk.h>
-#include <nuttx/nx/nxconsole.h>
+#include <nuttx/nx/nxterm.h>
 
 #include "nxcon_internal.h"
 
@@ -186,7 +186,7 @@ static int nxtkcon_bitmap(FAR struct nxcon_state_s *priv,
  *
  ****************************************************************************/
 
-NXCONSOLE nxtk_register(NXTKWINDOW hfwnd, FAR struct nxcon_window_s *wndo, int minor)
+NXTERM nxtk_register(NXTKWINDOW hfwnd, FAR struct nxcon_window_s *wndo, int minor)
 {
-  return nxcon_register((NXCONSOLE)hfwnd, wndo, &g_nxtkops, minor);
+  return nxcon_register((NXTERM)hfwnd, wndo, &g_nxtkops, minor);
 }

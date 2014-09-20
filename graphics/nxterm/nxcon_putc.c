@@ -1,5 +1,5 @@
 /****************************************************************************
- * nuttx/graphics/nxconsole/nxcon_bkgd.c
+ * nuttx/graphics/nxterm/nxcon_putc.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,15 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <semaphore.h>
-#include <assert.h>
-#include <errno.h>
-#include <debug.h>
-
-#include <nuttx/nx/nx.h>
-#include <nuttx/nx/nxglib.h>
+#include <nuttx/ascii.h>
 
 #include "nxcon_internal.h"
 
@@ -76,78 +68,136 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: nxcon_redraw
+ * Name: nxcon_putc
  *
  * Description:
- *   Re-draw a portion of the NX console.  This function should be called
- *   from the appropriate window callback logic.
- *
- * Input Parameters:
- *   handle - A handle previously returned by nx_register, nxtk_register, or
- *     nxtool_register.
- *   rect - The rectangle that needs to be re-drawn (in window relative
- *          coordinates)
- *   more - true:  More re-draw requests will follow
- *
- * Returned Value:
- *   None
+ *   Render the specified character at the current display position.
  *
  ****************************************************************************/
 
-void nxcon_redraw(NXCONSOLE handle, FAR const struct nxgl_rect_s *rect, bool more)
+void nxcon_putc(FAR struct nxcon_state_s *priv, uint8_t ch)
 {
-  FAR struct nxcon_state_s *priv;
-  int ret;
-  int i;
+  FAR const struct nxcon_bitmap_s *bm;
+  int lineheight;
 
-  DEBUGASSERT(handle && rect);
-  gvdbg("rect={(%d,%d),(%d,%d)} more=%s\n",
-        rect->pt1.x, rect->pt1.y, rect->pt2.x, rect->pt2.y,
-        more ? "true" : "false");
+  /* Ignore carriage returns */
 
-  /* Recover our private state structure */
-
-  priv = (FAR struct nxcon_state_s *)handle;
-
-  /* Get exclusive access to the state structure */
-
-  do
+  if (ch == '\r')
     {
-      ret = nxcon_semwait(priv);
+      return;
+    }
 
-      /* Check for errors */
+  /* Handle backspace (treating both BS and DEL as backspace) */
 
-      if (ret < 0)
+  if (ch == ASCII_BS || ch == ASCII_DEL)
+    {
+      nxcon_backspace(priv);
+      return;
+    }
+
+  /* Will another character fit on this line? */
+
+  if (priv->fpos.x + priv->fwidth > priv->wndo.wsize.w)
+    {
+#ifndef CONFIG_NXTERM_NOWRAP
+      /* No.. move to the next line */
+
+      nxcon_newline(priv);
+
+      /* If we were about to output a newline character, then don't */
+
+      if (ch == '\n')
         {
-          /* The only expected error is if the wait failed because of it
-           * was interrupted by a signal.
-           */
-
-          DEBUGASSERT(errno == EINTR);
+          return;
         }
+#else
+      /* No.. Ignore all further characters until a newline is encountered */
+
+      if (ch != '\n')
+        {
+          return;
+        }
+#endif
     }
-  while (ret < 0);
 
-  /* Fill the rectangular region with the window background color */
-
-  ret = priv->ops->fill(priv, rect, priv->wndo.wcolor);
-  if (ret < 0)
-    {
-      gdbg("fill failed: %d\n", errno);
-    }
-
-  /* Then redraw each character on the display (Only the characters within
-   * the rectangle will actually be redrawn).
+  /* If it is a newline character, then just perform the logical newline
+   * operation.
    */
 
-  for (i = 0; i < priv->nchars; i++)
+  if (ch == '\n')
     {
-      nxcon_fillchar(priv, rect, &priv->bm[i]);
+      nxcon_newline(priv);
+      return;
     }
 
-  (void)nxcon_sempost(priv);
+  /* Check if we need to scroll up */
+
+  lineheight = (priv->fheight + CONFIG_NXTERM_LINESEPARATION);
+  while (priv->fpos.y >= priv->wndo.wsize.h - lineheight)
+    {
+      nxcon_scroll(priv, lineheight);
+    }
+
+  /* Find the glyph associated with the character and render it onto the
+   * display.
+   */
+
+  bm = nxcon_addchar(priv->font, priv, ch);
+  if (bm)
+    {
+      nxcon_fillchar(priv, NULL, bm);
+    }
+}
+
+/****************************************************************************
+ * Name: nxcon_showcursor
+ *
+ * Description:
+ *   Render the cursor character at the current display position.
+ *
+ ****************************************************************************/
+
+void nxcon_showcursor(FAR struct nxcon_state_s *priv)
+{
+  int lineheight;
+
+  /* Will another character fit on this line? */
+
+  if (priv->fpos.x + priv->fwidth > priv->wndo.wsize.w)
+    {
+#ifndef CONFIG_NXTERM_NOWRAP
+      /* No.. move to the next line */
+
+      nxcon_newline(priv);
+#else
+      return;
+#endif
+    }
+
+  /* Check if we need to scroll up */
+
+  lineheight = (priv->fheight + CONFIG_NXTERM_LINESEPARATION);
+  while (priv->fpos.y >= priv->wndo.wsize.h - lineheight)
+    {
+      nxcon_scroll(priv, lineheight);
+    }
+
+  /* Render the cursor glyph onto the display. */
+
+  priv->cursor.pos.x = priv->fpos.x;
+  priv->cursor.pos.y = priv->fpos.y;
+  nxcon_fillchar(priv, NULL, &priv->cursor);
+}
+
+/****************************************************************************
+ * Name: nxcon_hidecursor
+ *
+ * Description:
+ *   Render the cursor cursor character from the display.
+ *
+ ****************************************************************************/
+
+void nxcon_hidecursor(FAR struct nxcon_state_s *priv)
+{
+  (void)nxcon_hidechar(priv, &priv->cursor);
 }

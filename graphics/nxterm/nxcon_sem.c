@@ -1,5 +1,5 @@
 /****************************************************************************
- * nuttx/graphics/nxconsole/nxcon_unregister.c
+ * nuttx/graphics/nxterm/nxcon_sem.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,16 +39,14 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <string.h>
+#include <unistd.h>
+#include <semaphore.h>
+#include <assert.h>
 #include <errno.h>
 
-#include <nuttx/kmalloc.h>
-#include <nuttx/nx/nxconsole.h>
-
 #include "nxcon_internal.h"
+
+#ifdef CONFIG_DEBUG
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -71,53 +69,61 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxcon_unregister
+ * Name: nxcon_semwait and nxcon_sempost
  *
  * Description:
- *   Un-register to NX console device.
+ *   If debug is on, then lower level code may attempt console output while
+ *   we are doing console output!  In this case, we will toss the nested
+ *   output to avoid deadlocks and infinite loops.
  *
  * Input Parameters:
- *   handle - A handle previously returned by nx_register, nxtk_register, or
- *     nxtool_register.
+ *   priv - Driver data structure
  *
  * Returned Value:
- *   None
+ *
  *
  ****************************************************************************/
 
-void nxcon_unregister(NXCONSOLE handle)
+int nxcon_semwait(FAR struct nxcon_state_s *priv)
 {
-  FAR struct nxcon_state_s *priv;
-  char devname[NX_DEVNAME_SIZE];
-  int i;
+  pid_t me;
+  int ret;
 
-  DEBUGASSERT(handle);
+  /* Does I already hold the semaphore */
 
-  /* Get the reference to the driver structure from the handle */
-
-  priv = (FAR struct nxcon_state_s *)handle;
-  sem_destroy(&priv->exclsem);
-#ifdef CONFIG_NXTERM_NXKBDIN
-  sem_destroy(&priv->waitsem);
-#endif
-
-  /* Free all allocated glyph bitmap */
-
-  for (i = 0; i < CONFIG_NXTERM_CACHESIZE; i++)
+  me = getpid();
+  if (priv->holder != me)
     {
-      FAR struct nxcon_glyph_s *glyph = &priv->glyph[i];
-      if (glyph->bitmap)
+      /* No.. then wait until the thread that does hold it is finished with it */
+
+      ret = sem_wait(&priv->exclsem);
+      if (ret == OK)
         {
-          kmm_free(glyph->bitmap);
+          /* No I hold the semaphore */
+
+          priv->holder = me;
         }
+      return ret;
     }
 
-  /* Unregister the driver */
+  /* Abort, abort, abort!  I have been re-entered */
 
-  snprintf(devname, NX_DEVNAME_SIZE, NX_DEVNAME_FORMAT, priv->minor);
-  (void)unregister_driver(devname);
-
-  /* Free the private data structure */
-
-  kmm_free(handle);
+  set_errno(EBUSY);
+  return ERROR;
 }
+
+int nxcon_sempost(FAR struct nxcon_state_s *priv)
+{
+  pid_t me = getpid();
+
+  /* Make sure that I really hold the semaphore */
+
+  ASSERT(priv->holder == me);
+
+  /* Then let go of it */
+
+  priv->holder = NO_HOLDER;
+  return sem_post(&priv->exclsem);
+}
+
+#endif /* CONFIG_DEBUG */

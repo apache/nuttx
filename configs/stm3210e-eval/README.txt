@@ -898,10 +898,10 @@ Where <subdir> is one of the following:
         c. Others could be similar configured:  apps/examples/nxhello,
             nximage, ...
 
-  nxconsole:
+  nxterm:
   ----------
     This is yet another NSH configuration.  This NSH configuration differs
-    from the other, however, in that it uses the NxConsole driver to host
+    from the other, however, in that it uses the NxTerm driver to host
     the NSH shell.
 
     NOTES:
@@ -923,12 +923,12 @@ Where <subdir> is one of the following:
          CONFG_NX_MULTIUSER=y
          CONFIG_DISABLE_MQUEUE=n
 
-       The following definition in the defconfig file to enables the NxConsole
+       The following definition in the defconfig file to enables the NxTerm
        driver:
 
          CONFIG_NXTERM=y
 
-       And this selects apps/examples/nxconsole instead of apps/examples/nsh:
+       And this selects apps/examples/nxterm instead of apps/examples/nsh:
 
          CONFIG_EXAMPLES_NXTERM=y
 

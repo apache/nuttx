@@ -60,9 +60,9 @@ CFLAGS		+= ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)/graphics/nxsu}
 endif
 
 ifeq ($(CONFIG_NXTERM),y)
-include nxconsole/Make.defs
-DEPPATH		+= --dep-path nxconsole
-CFLAGS		+= ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)/graphics/nxconsole}
+include nxterm/Make.defs
+DEPPATH		+= --dep-path nxterm
+CFLAGS		+= ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)/graphics/nxterm}
 endif
 
 ASRCS		= $(NXGLIB_ASRCS) $(NXBE_ASRCS) $(NX_ASRCS) $(NXTK_ASRCS) $(NXCON_ASRCS)
@@ -77,9 +77,9 @@ OBJS		= $(AOBJS) $(COBJS)
 BIN		= libgraphics$(LIBEXT)
 
 ifeq ($(CONFIG_NX_MULTIUSER),y)
-VPATH		= nxglib:nxbe:nxmu:nxconsole
+VPATH		= nxglib:nxbe:nxmu:nxterm
 else
-VPATH		= nxglib:nxbe:nxsu:nxconsole
+VPATH		= nxglib:nxbe:nxsu:nxterm
 endif
 
 all:	mklibgraphics

@@ -371,11 +371,11 @@ o Kernel/Protected Build
   Status:      Open
   Priority:    Medium
 
-  Title:       NxCONSOLE PARTITIONING.
-  Description: NxConsole is implemented (correctly) as a driver that resides
+  Title:       NxTERM PARTITIONING.
+  Description: NxTerm is implemented (correctly) as a driver that resides
                in the nuttx/ directory.  However, the user interfaces must be
                moved into a NuttX library or into apps/.  Currently
-               applications calls to the NxConsole user interfaces are
+               applications calls to the NxTerm user interfaces are
                undefined.
   Status:      Open
   Priority:    Medium
@@ -1226,20 +1226,20 @@ o Graphics subystem (graphics/)
   Status:      Open
   Priority:    Medium low
 
-  Title:       IMPROVED NXCONSOLE FONT CACHING
-  Description: Now each NxConsole instance has its own private font cache
+  Title:       IMPROVED NxTERM FONT CACHING
+  Description: Now each NxTerm instance has its own private font cache
                whose size is determined by CONFIG_NXTERM_MXCHARS.  If there
-               are multiple NxConsole instances using the same font, each will
+               are multiple NxTerm instances using the same font, each will
                have a separate font cache.  This is inefficient and wasteful
-               of memory:  Each NxConsole instance should share a common font
+               of memory:  Each NxTerm instance should share a common font
                cache.
   Status:      Open
   Priority:    Medium.  Not important for day-to-day testing but would be
-               a critical improvement if NxConsole were to be used in a
+               a critical improvement if NxTerm were to be used in a
                product.
 
-  Title:       NXCONSOLE VT100 SUPPORT
-  Description: If the NxConsole will be used with the Emacs-like command line
+  Title:       NxTERM VT100 SUPPORT
+  Description: If the NxTerm will be used with the Emacs-like command line
                editor (CLE), then it will need to support VT100 cursor control
                commands.
   Status:      Open

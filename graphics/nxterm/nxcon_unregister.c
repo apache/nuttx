@@ -1,5 +1,5 @@
 /****************************************************************************
- * nuttx/graphics/nxconsole/nxcon_register.c
+ * nuttx/graphics/nxterm/nxcon_unregister.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -43,14 +43,16 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
 #include <errno.h>
-#include <debug.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/fs/fs.h>
+#include <nuttx/nx/nxterm.h>
 
 #include "nxcon_internal.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /****************************************************************************
  * Private Function Prototypes
@@ -69,92 +71,53 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxcon_allocate
+ * Name: nxcon_unregister
+ *
+ * Description:
+ *   Un-register to NX console device.
+ *
+ * Input Parameters:
+ *   handle - A handle previously returned by nx_register, nxtk_register, or
+ *     nxtool_register.
+ *
+ * Returned Value:
+ *   None
+ *
  ****************************************************************************/
 
-FAR struct nxcon_state_s *
-  nxcon_register(NXCONSOLE handle, FAR struct nxcon_window_s *wndo,
-                 FAR const struct nxcon_operations_s *ops, int minor)
+void nxcon_unregister(NXTERM handle)
 {
   FAR struct nxcon_state_s *priv;
   char devname[NX_DEVNAME_SIZE];
-  int ret;
+  int i;
 
-  DEBUGASSERT(handle && wndo && ops && (unsigned)minor < 256);
+  DEBUGASSERT(handle);
 
-  /* Allocate the driver structure */
+  /* Get the reference to the driver structure from the handle */
 
-  priv = (FAR struct nxcon_state_s *)kmm_zalloc(sizeof(struct nxcon_state_s));
-  if (!priv)
-    {
-      gdbg("Failed to allocate the NX driver structure\n");
-      return NULL;
-    }
-
-  /* Initialize the driver structure */
-
-  priv->ops     = ops;
-  priv->handle  = handle;
-  priv->minor   = minor;
-  memcpy(&priv->wndo, wndo, sizeof( struct nxcon_window_s));
-
-  sem_init(&priv->exclsem, 0, 1);
-#ifdef CONFIG_DEBUG
-  priv->holder  = NO_HOLDER;
-#endif
-
+  priv = (FAR struct nxcon_state_s *)handle;
+  sem_destroy(&priv->exclsem);
 #ifdef CONFIG_NXTERM_NXKBDIN
-  sem_init(&priv->waitsem, 0, 0);
+  sem_destroy(&priv->waitsem);
 #endif
 
-  /* Select the font */
+  /* Free all allocated glyph bitmap */
 
-  priv->font = nxf_getfonthandle(wndo->fontid);
-  if (!priv->font)
+  for (i = 0; i < CONFIG_NXTERM_CACHESIZE; i++)
     {
-      gdbg("Failed to get font ID %d: %d\n", wndo->fontid, errno);
-      goto errout;
+      FAR struct nxcon_glyph_s *glyph = &priv->glyph[i];
+      if (glyph->bitmap)
+        {
+          kmm_free(glyph->bitmap);
+        }
     }
 
-  FAR const struct nx_font_s *fontset;
+  /* Unregister the driver */
 
-  /* Get information about the font set being used and save this in the
-   * state structure
-   */
+  snprintf(devname, NX_DEVNAME_SIZE, NX_DEVNAME_FORMAT, priv->minor);
+  (void)unregister_driver(devname);
 
-  fontset         = nxf_getfontset(priv->font);
-  priv->fheight   = fontset->mxheight;
-  priv->fwidth    = fontset->mxwidth;
-  priv->spwidth   = fontset->spwidth;
+  /* Free the private data structure */
 
-  /* Set up the text cache */
-
-  priv->maxchars  = CONFIG_NXTERM_MXCHARS;
-
-  /* Set up the font glyph bitmap cache */
-
-  priv->maxglyphs = CONFIG_NXTERM_CACHESIZE;
-
-  /* Set the initial display position */
-
-  nxcon_home(priv);
-
-  /* Show the cursor */
-
-  priv->cursor.code = CONFIG_NXTERM_CURSORCHAR;
-  nxcon_showcursor(priv);
-
-  /* Register the driver */
-
-  snprintf(devname, NX_DEVNAME_SIZE, NX_DEVNAME_FORMAT, minor);
-  ret = register_driver(devname, &g_nxcon_drvrops, 0666, priv);
-  if (ret < 0)
-    {
-      gdbg("Failed to register %s\n", devname);
-    }
-  return (NXCONSOLE)priv;
-
-errout:
-  kmm_free(priv);
-  return NULL;
+  kmm_free(handle);
 }

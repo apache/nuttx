@@ -358,17 +358,17 @@ config NXFONT_SERIF38X49B
 endmenu
 
 menuconfig NXTERM
-	bool "NxConsole"
+	bool "NxTerm"
 	default n
 	---help---
-		Enables building of the NxConsole driver.
+		Enables building of the NxTerm driver.
 
 if NXTERM
 
-comment "NxConsole Output Text/Graphics Options"
+comment "NxTerm Output Text/Graphics Options"
 
 config NXTERM_BPP
-	int "NxConsole BPP"
+	int "NxTerm BPP"
 	default 1 if !NX_DISABLE_1BPP
 	default 2 if !NX_DISABLE_2BPP
 	default 4 if !NX_DISABLE_4BPP
@@ -377,7 +377,7 @@ config NXTERM_BPP
 	default 24 if !NX_DISABLE_24BPP
 	default 32 if !NX_DISABLE_32BPP
 	---help---
-		Currently, NxConsole supports only a single pixel depth. This
+		Currently, NxTerm supports only a single pixel depth. This
 		configuration setting must be provided to support that single pixel depth.
 		Default: The smallest enabled pixel depth. (see NX_DISABLE_*BPP)
 
@@ -391,7 +391,7 @@ config NXTERM_MXCHARS
 	int "Max Characters on Display"
 	default 128
 	---help---
-		NxConsole needs to remember every character written to the console so
+		NxTerm needs to remember every character written to the console so
 		that it can redraw the window. This setting determines the size of some
 		internal memory allocations used to hold the character data. Default: 128.
 
@@ -399,7 +399,7 @@ config NXTERM_CACHESIZE
 	int "Font Cache Size"
 	default 16
 	---help---
-		NxConsole supports caching of rendered fonts. This font caching is required
+		NxTerm supports caching of rendered fonts. This font caching is required
 		for two reasons: (1) First, it improves text performance, but more
 		importantly (2) it preserves the font memory. Since the NX server runs on
 		a separate server thread, it requires that the rendered font memory persist
@@ -407,11 +407,11 @@ config NXTERM_CACHESIZE
 		cache would be quite large if all fonts were saved. The NXTERM_CACHESIZE
 		setting will control the size of the font cache (in number of glyphs). Only that
 		number of the most recently used glyphs will be retained. Default: 16.
-		NOTE: There can still be a race condition between the NxConsole driver and the
+		NOTE: There can still be a race condition between the NxTerm driver and the
 		NX task.  If you every see character corruption (especially when printing
 		a lot of data or scrolling), then increasing the value of NXTERM_CACHESIZE
 		is something that you should try.  Alternatively, you can reduce the size of
-		MQ_MAXMSGSIZE which will force NxConsole task to pace the server task.
+		MQ_MAXMSGSIZE which will force NxTerm task to pace the server task.
 		NXTERM_CACHESIZE should be larger than MQ_MAXMSGSIZE in any event.
 
 config NXTERM_LINESEPARATION
@@ -428,7 +428,7 @@ config NXTERM_NOWRAP
 		of the window. This setting can be defining to change this behavior so
 		that the text is simply truncated until a new line is  encountered.
 
-comment "NxConsole Input options"
+comment "NxTerm Input options"
 
 config NXTERM_NXKBDIN
 	bool "NX KBD input"
