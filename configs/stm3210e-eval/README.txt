@@ -930,7 +930,7 @@ Where <subdir> is one of the following:
 
        And this selects apps/examples/nxconsole instead of apps/examples/nsh:
 
-         CONFIG_EXAMPLES_NXCONSOLE=y
+         CONFIG_EXAMPLES_NXTERM=y
 
        Other configuration settings of interest:
 

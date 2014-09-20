@@ -1428,7 +1428,7 @@ Where <subdir> is one of the following:
 
        And this selects examples/nxconsole instead of examples/nsh:
 
-         CONFIG_EXAMPLES_NXCONSOLE=y
+         CONFIG_EXAMPLES_NXTERM=y
 
        LCD Orientation:
 

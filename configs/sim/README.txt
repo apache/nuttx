@@ -468,8 +468,8 @@ nx11
        -CONFIG_EXAMPLES_NX=y
        +CONFIG_EXAMPLES_NX=n
 
-       -CONFIG_EXAMPLES_NXCONSOLE=n
-       +CONFIG_EXAMPLES_NXCONSOLE=y
+       -CONFIG_EXAMPLES_NXTERM=n
+       +CONFIG_EXAMPLES_NXTERM=y
 
      See apps/examples/README.txt for further details.
 
