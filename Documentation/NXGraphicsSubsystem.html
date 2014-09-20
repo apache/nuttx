@@ -3375,7 +3375,7 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
 <p>General NxConsole settings.</p>
 <ul>
   <dl>
-    <dt><code>CONFIG_NXCONSOLE</code>:
+    <dt><code>CONFIG_NXTERM</code>:
       <dd>Enables building of the NxConsole driver.
   </dl>
 </ul>
@@ -3383,17 +3383,17 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
 <p>NxConsole output text/graphics options:</p>
 <ul>
   <dl>
-    <dt><code>CONFIG_NXCONSOLE_BPP</code>:
+    <dt><code>CONFIG_NXTERM_BPP</code>:
       <dd>Currently, NxConsole supports only a single pixel depth.
       This configuration setting must be provided to support that single pixel depth.
       Default: The smallest enabled pixel depth. (see <code>CONFIG_NX_DISABLE_*BPP</code>)
-    <dt><code>CONFIG_NXCONSOLE_CURSORCHAR</code>:
+    <dt><code>CONFIG_NXTERM_CURSORCHAR</code>:
       <dd>The bitmap code to use as the cursor.  Default '_'
-    <dt><code>CONFIG_NXCONSOLE_MXCHARS</code>:
+    <dt><code>CONFIG_NXTERM_MXCHARS</code>:
       <dd>NxConsole needs to remember every character written to the console so that it can redraw the window.
       This setting determines the size of some internal memory allocations used to hold the character data.
       Default: 128.
-    <dt><code>CONFIG_NXCONSOLE_CACHESIZE</code>:
+    <dt><code>CONFIG_NXTERM_CACHESIZE</code>:
       <dd>
       NxConsole supports caching of rendered fonts.
       This font caching is required for two reasons:
@@ -3401,20 +3401,20 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
       (2) it preserves the font memory.
       Since the NX server runs on a separate server thread, it requires that the rendered font memory persist until the server has a chance to render the font.
       Unfortunately, the font cache would be quite large if all fonts were saved.
-      The <code>CONFIG_NXCONSOLE_CACHESIZE</code> setting will control the size of the font cache (in number of glyphs).
+      The <code>CONFIG_NXTERM_CACHESIZE</code> setting will control the size of the font cache (in number of glyphs).
       Only that number of the most recently used glyphs will be retained.
       Default: 16.
       <blockquote>
         NOTE: There can still be a race condition between the NxConsole driver and the
         NX task.  If you every see character corruption (especially when printing
-        a lot of data or scrolling), then increasing the value of <code>CONFIG_NXCONSOLE_CACHESIZE</code>
+        a lot of data or scrolling), then increasing the value of <code>CONFIG_NXTERM_CACHESIZE</code>
         is something that you should try.
         Alternatively, you can reduce the size of <code>CONFIG_MQ_MAXMSGSIZE</code> which will force NxConsole task to pace the server task.
-        <code>CONFIG_NXCONSOLE_CACHESIZE</code> should be larger than <code>CONFIG_MQ_MAXMSGSIZE</code> in any event.
+        <code>CONFIG_NXTERM_CACHESIZE</code> should be larger than <code>CONFIG_MQ_MAXMSGSIZE</code> in any event.
       </blockquote>
-    <dt><code>CONFIG_NXCONSOLE_LINESEPARATION</code>:
+    <dt><code>CONFIG_NXTERM_LINESEPARATION</code>:
       <dd>This the space (in rows) between each row of test.  Default: 0
-    <dt><code>CONFIG_NXCONSOLE_NOWRAP</code>:
+    <dt><code>CONFIG_NXTERM_NOWRAP</code>:
       <dd>By default, lines will wrap when the test reaches the right hand side of the window.
       This setting can be defining to change this behavior so that the text is simply truncated until a new line is  encountered.
   </dl>
@@ -3423,15 +3423,15 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
 <p>NxConsole input options:</p>
 <ul>
   <dl>
-    <dt><code>CONFIG_NXCONSOLE_NXKBDIN</code>:
+    <dt><code>CONFIG_NXTERM_NXKBDIN</code>:
       <dd>Take input from the NX keyboard input callback.
       By default, keyboard input is taken from stdin (<code>/dev/console</code>).
       If this option is set, then the interface<code>nxcon_kdbin()</code> is enabled.
       That interface may be driven by window callback functions so that keyboard input <i>only</i> goes to the top window.
     <dt><code>CONFIG__NXCONSOLE_KBDBUFSIZE</code>:
-      <dd>If <code>CONFIG_NXCONSOLE_NXKBDIN</code> is enabled, then this value may be used to
+      <dd>If <code>CONFIG_NXTERM_NXKBDIN</code> is enabled, then this value may be used to
       define the size of the per-window keyboard input buffer.  Default: 16
-    <dt><code>CONFIG_NXCONSOLE_NPOLLWAITERS</code>:
+    <dt><code>CONFIG_NXTERM_NPOLLWAITERS</code>:
       <dd>The number of threads that can be waiting for read data available.
       Default: 4
   </dl>
