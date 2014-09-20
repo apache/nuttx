@@ -649,7 +649,7 @@ CONFIG_EXAMPLES_NSH=y
 #
 # NxConsole Example
 #
-# CONFIG_EXAMPLES_NXCONSOLE is not set
+# CONFIG_EXAMPLES_NXTERM is not set
 
 #
 # NXFFS File System Example

@@ -921,7 +921,7 @@ CONFIG_CXX_NEWLONG=y
 # CONFIG_EXAMPLES_NSH is not set
 # CONFIG_EXAMPLES_NULL is not set
 # CONFIG_EXAMPLES_NX is not set
-# CONFIG_EXAMPLES_NXCONSOLE is not set
+# CONFIG_EXAMPLES_NXTERM is not set
 # CONFIG_EXAMPLES_NXFFS is not set
 # CONFIG_EXAMPLES_NXFLAT is not set
 # CONFIG_EXAMPLES_NXHELLO is not set
@@ -1108,7 +1108,7 @@ CONFIG_NXWM_STARTWINDOW_STACKSIZE=2048
 #
 # NxConsole Window Settings
 #
-# CONFIG_NXWM_NXCONSOLE is not set
+# CONFIG_NXWM_NXTERM is not set
 
 #
 # NxWM Touchscreen Configuration
