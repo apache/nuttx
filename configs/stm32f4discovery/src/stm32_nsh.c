@@ -64,11 +64,13 @@
 
 int nsh_archinitialize(void)
 {
-#ifndef CONFIG_BOARD_INITIALIZE
-  /* Perform board-specific initialization */
-
-  (void)stm32_bringup();
-#endif
+#ifdef CONFIG_BOARD_INITIALIZE
+  /* Board initialization already performed by board_initialize() */
 
   return OK;
+#else
+  /* Perform board-specific initialization */
+
+  return stm32_bringup();
+#endif
 }
