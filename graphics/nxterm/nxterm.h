@@ -1,7 +1,7 @@
 /****************************************************************************
- * nuttx/graphics/nxterm/nxcon_internal.h
+ * nuttx/graphics/nxterm/nxterm.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __GRAPHICS_NXTERM_NXCON_INTERNAL_H
-#define __GRAPHICS_NXTERM_NXCON_INTERNAL_H
+#ifndef __GRAPHICS_NXTERM_NXTERM_INTERNAL_H
+#define __GRAPHICS_NXTERM_NXTERM_INTERNAL_H
 
 /****************************************************************************
  * Included Files
@@ -67,7 +67,7 @@
 
 /* Device path formats */
 
-#define NX_DEVNAME_FORMAT  "/dev/nxcon%d"
+#define NX_DEVNAME_FORMAT  "/dev/nxterm%d"
 #define NX_DEVNAME_SIZE    16
 
 /* Semaphore protection */
@@ -83,7 +83,7 @@
  ****************************************************************************/
 /* Identifies the state of the VT100 escape sequence processing */
 
-enum nxcon_vt100state_e
+enum nxterm_vt100state_e
 {
   VT100_NOT_CONSUMED = 0, /* Character is not part of a VT100 escape sequence */
   VT100_CONSUMED,         /* Character was consumed as part of the VT100 escape processing */
@@ -93,18 +93,18 @@ enum nxcon_vt100state_e
 
 /* Describes on set of console window callbacks */
 
-struct nxcon_state_s;
-struct nxcon_operations_s
+struct nxterm_state_s;
+struct nxterm_operations_s
 {
-  int (*fill)(FAR struct nxcon_state_s *priv,
+  int (*fill)(FAR struct nxterm_state_s *priv,
               FAR const struct nxgl_rect_s *rect,
               nxgl_mxpixel_t wcolor[CONFIG_NX_NPLANES]);
 #ifndef CONFIG_NX_WRITEONLY
-  int (*move)(FAR struct nxcon_state_s *priv,
+  int (*move)(FAR struct nxterm_state_s *priv,
               FAR const struct nxgl_rect_s *rect,
               FAR const struct nxgl_point_s *offset);
 #endif
-  int (*bitmap)(FAR struct nxcon_state_s *priv,
+  int (*bitmap)(FAR struct nxterm_state_s *priv,
                 FAR const struct nxgl_rect_s *dest,
                 FAR const void *src[CONFIG_NX_NPLANES],
                 FAR const struct nxgl_point_s *origin,
@@ -113,7 +113,7 @@ struct nxcon_operations_s
 
 /* Describes one cached glyph bitmap */
 
-struct nxcon_glyph_s
+struct nxterm_glyph_s
 {
   uint8_t code;                        /* Character code */
   uint8_t height;                      /* Height of this glyph (in rows) */
@@ -125,7 +125,7 @@ struct nxcon_glyph_s
 
 /* Describes on character on the display */
 
-struct nxcon_bitmap_s
+struct nxterm_bitmap_s
 {
   uint8_t code;                        /* Character code */
   uint8_t flags;                       /* See BMFLAGS_* */
@@ -134,11 +134,11 @@ struct nxcon_bitmap_s
 
 /* Describes the state of one NX console driver*/
 
-struct nxcon_state_s
+struct nxterm_state_s
 {
-  FAR const struct nxcon_operations_s *ops; /* Window operations */
+  FAR const struct nxterm_operations_s *ops; /* Window operations */
   FAR void *handle;                         /* The window handle */
-  FAR struct nxcon_window_s wndo;           /* Describes the window and font */
+  FAR struct nxterm_window_s wndo;           /* Describes the window and font */
   NXHANDLE font;                            /* The current font handle */
   sem_t exclsem;                            /* Forces mutually exclusive access */
 #ifdef CONFIG_DEBUG
@@ -165,12 +165,12 @@ struct nxcon_state_s
 
   /* Font cache data storage */
 
-  struct nxcon_bitmap_s cursor;
-  struct nxcon_bitmap_s bm[CONFIG_NXTERM_MXCHARS];
+  struct nxterm_bitmap_s cursor;
+  struct nxterm_bitmap_s bm[CONFIG_NXTERM_MXCHARS];
 
   /* Glyph cache data storage */
 
-  struct nxcon_glyph_s  glyph[CONFIG_NXTERM_CACHESIZE];
+  struct nxterm_glyph_s  glyph[CONFIG_NXTERM_CACHESIZE];
 
   /* Keyboard input support */
 
@@ -199,7 +199,7 @@ struct nxcon_state_s
 
 /* This is the common NX driver file operations */
 
-extern const struct file_operations g_nxcon_drvrops;
+extern const struct file_operations g_nxterm_drvrops;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -207,48 +207,48 @@ extern const struct file_operations g_nxcon_drvrops;
 /* Semaphore helpers */
 
 #ifdef CONFIG_DEBUG
-int nxcon_semwait(FAR struct nxcon_state_s *priv);
-int nxcon_sempost(FAR struct nxcon_state_s *priv);
+int nxterm_semwait(FAR struct nxterm_state_s *priv);
+int nxterm_sempost(FAR struct nxterm_state_s *priv);
 #else
-#  define nxcon_semwait(p) sem_wait(&p->exclsem)
-#  define nxcon_sempost(p) sem_post(&p->exclsem)
+#  define nxterm_semwait(p) sem_wait(&p->exclsem)
+#  define nxterm_sempost(p) sem_post(&p->exclsem)
 #endif
 
 /* Common device registration */
 
-FAR struct nxcon_state_s *nxcon_register(NXTERM handle,
-    FAR struct nxcon_window_s *wndo, FAR const struct nxcon_operations_s *ops,
+FAR struct nxterm_state_s *nxterm_register(NXTERM handle,
+    FAR struct nxterm_window_s *wndo, FAR const struct nxterm_operations_s *ops,
     int minor);
 
 #ifdef CONFIG_NXTERM_NXKBDIN
-ssize_t nxcon_read(FAR struct file *filep, FAR char *buffer, size_t len);
+ssize_t nxterm_read(FAR struct file *filep, FAR char *buffer, size_t len);
 #ifndef CONFIG_DISABLE_POLL
-int nxcon_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup);
+int nxterm_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup);
 #endif
 #endif
 
 /* VT100 Terminal emulation */
 
-enum nxcon_vt100state_e nxcon_vt100(FAR struct nxcon_state_s *priv, char ch);
+enum nxterm_vt100state_e nxterm_vt100(FAR struct nxterm_state_s *priv, char ch);
 
 /* Generic text display helpers */
 
-void nxcon_home(FAR struct nxcon_state_s *priv);
-void nxcon_newline(FAR struct nxcon_state_s *priv);
-FAR const struct nxcon_bitmap_s *nxcon_addchar(NXHANDLE hfont,
-    FAR struct nxcon_state_s *priv, uint8_t ch);
-int nxcon_hidechar(FAR struct nxcon_state_s *priv,
-    FAR const struct nxcon_bitmap_s *bm);
-int nxcon_backspace(FAR struct nxcon_state_s *priv);
-void nxcon_fillchar(FAR struct nxcon_state_s *priv,
-    FAR const struct nxgl_rect_s *rect, FAR const struct nxcon_bitmap_s *bm);
+void nxterm_home(FAR struct nxterm_state_s *priv);
+void nxterm_newline(FAR struct nxterm_state_s *priv);
+FAR const struct nxterm_bitmap_s *nxterm_addchar(NXHANDLE hfont,
+    FAR struct nxterm_state_s *priv, uint8_t ch);
+int nxterm_hidechar(FAR struct nxterm_state_s *priv,
+    FAR const struct nxterm_bitmap_s *bm);
+int nxterm_backspace(FAR struct nxterm_state_s *priv);
+void nxterm_fillchar(FAR struct nxterm_state_s *priv,
+    FAR const struct nxgl_rect_s *rect, FAR const struct nxterm_bitmap_s *bm);
 
-void nxcon_putc(FAR struct nxcon_state_s *priv, uint8_t ch);
-void nxcon_showcursor(FAR struct nxcon_state_s *priv);
-void nxcon_hidecursor(FAR struct nxcon_state_s *priv);
+void nxterm_putc(FAR struct nxterm_state_s *priv, uint8_t ch);
+void nxterm_showcursor(FAR struct nxterm_state_s *priv);
+void nxterm_hidecursor(FAR struct nxterm_state_s *priv);
 
 /* Scrolling support */
 
-void nxcon_scroll(FAR struct nxcon_state_s *priv, int scrollheight);
+void nxterm_scroll(FAR struct nxterm_state_s *priv, int scrollheight);
 
-#endif /* __GRAPHICS_NXTERM_NXCON_INTERNAL_H */
+#endif /* __GRAPHICS_NXTERM_NXTERM_INTERNAL_H */

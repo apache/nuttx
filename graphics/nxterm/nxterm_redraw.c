@@ -1,5 +1,5 @@
 /****************************************************************************
- * nuttx/graphics/nxterm/nxcon_unregister.c
+ * nuttx/graphics/nxterm/nxterm_bkgd.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,19 +39,24 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <stdbool.h>
-#include <stdio.h>
-#include <string.h>
+#include <semaphore.h>
+#include <assert.h>
 #include <errno.h>
+#include <debug.h>
 
-#include <nuttx/kmalloc.h>
-#include <nuttx/nx/nxterm.h>
+#include <nuttx/nx/nx.h>
+#include <nuttx/nx/nxglib.h>
 
-#include "nxcon_internal.h"
+#include "nxterm.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Types
  ****************************************************************************/
 
 /****************************************************************************
@@ -63,6 +68,10 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -71,53 +80,74 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxcon_unregister
+ * Name: nxterm_redraw
  *
  * Description:
- *   Un-register to NX console device.
+ *   Re-draw a portion of the NX console.  This function should be called
+ *   from the appropriate window callback logic.
  *
  * Input Parameters:
  *   handle - A handle previously returned by nx_register, nxtk_register, or
  *     nxtool_register.
+ *   rect - The rectangle that needs to be re-drawn (in window relative
+ *          coordinates)
+ *   more - true:  More re-draw requests will follow
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void nxcon_unregister(NXTERM handle)
+void nxterm_redraw(NXTERM handle, FAR const struct nxgl_rect_s *rect, bool more)
 {
-  FAR struct nxcon_state_s *priv;
-  char devname[NX_DEVNAME_SIZE];
+  FAR struct nxterm_state_s *priv;
+  int ret;
   int i;
 
-  DEBUGASSERT(handle);
+  DEBUGASSERT(handle && rect);
+  gvdbg("rect={(%d,%d),(%d,%d)} more=%s\n",
+        rect->pt1.x, rect->pt1.y, rect->pt2.x, rect->pt2.y,
+        more ? "true" : "false");
 
-  /* Get the reference to the driver structure from the handle */
+  /* Recover our private state structure */
 
-  priv = (FAR struct nxcon_state_s *)handle;
-  sem_destroy(&priv->exclsem);
-#ifdef CONFIG_NXTERM_NXKBDIN
-  sem_destroy(&priv->waitsem);
-#endif
+  priv = (FAR struct nxterm_state_s *)handle;
 
-  /* Free all allocated glyph bitmap */
+  /* Get exclusive access to the state structure */
 
-  for (i = 0; i < CONFIG_NXTERM_CACHESIZE; i++)
+  do
     {
-      FAR struct nxcon_glyph_s *glyph = &priv->glyph[i];
-      if (glyph->bitmap)
+      ret = nxterm_semwait(priv);
+
+      /* Check for errors */
+
+      if (ret < 0)
         {
-          kmm_free(glyph->bitmap);
+          /* The only expected error is if the wait failed because of it
+           * was interrupted by a signal.
+           */
+
+          DEBUGASSERT(errno == EINTR);
         }
     }
+  while (ret < 0);
 
-  /* Unregister the driver */
+  /* Fill the rectangular region with the window background color */
 
-  snprintf(devname, NX_DEVNAME_SIZE, NX_DEVNAME_FORMAT, priv->minor);
-  (void)unregister_driver(devname);
+  ret = priv->ops->fill(priv, rect, priv->wndo.wcolor);
+  if (ret < 0)
+    {
+      gdbg("fill failed: %d\n", errno);
+    }
 
-  /* Free the private data structure */
+  /* Then redraw each character on the display (Only the characters within
+   * the rectangle will actually be redrawn).
+   */
 
-  kmm_free(handle);
+  for (i = 0; i < priv->nchars; i++)
+    {
+      nxterm_fillchar(priv, rect, &priv->bm[i]);
+    }
+
+  (void)nxterm_sempost(priv);
 }

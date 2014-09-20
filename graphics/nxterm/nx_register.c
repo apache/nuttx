@@ -42,7 +42,7 @@
 #include <nuttx/nx/nx.h>
 #include <nuttx/nx/nxterm.h>
 
-#include "nxcon_internal.h"
+#include "nxterm.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -52,15 +52,15 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int nxcon_fill(FAR struct nxcon_state_s *priv,
+static int nxterm_fill(FAR struct nxterm_state_s *priv,
                       FAR const struct nxgl_rect_s *rect,
                       nxgl_mxpixel_t wcolor[CONFIG_NX_NPLANES]);
 #ifndef CONFIG_NX_WRITEONLY
-static int nxcon_move(FAR struct nxcon_state_s *priv,
+static int nxterm_move(FAR struct nxterm_state_s *priv,
                       FAR const struct nxgl_rect_s *rect,
                       FAR const struct nxgl_point_s *offset);
 #endif
-static int nxcon_bitmap(FAR struct nxcon_state_s *priv,
+static int nxterm_bitmap(FAR struct nxterm_state_s *priv,
                         FAR const struct nxgl_rect_s *dest,
                         FAR const void *src[CONFIG_NX_NPLANES],
                         FAR const struct nxgl_point_s *origin,
@@ -70,13 +70,13 @@ static int nxcon_bitmap(FAR struct nxcon_state_s *priv,
  * Private Data
  ****************************************************************************/
 
-static const struct nxcon_operations_s g_nxops =
+static const struct nxterm_operations_s g_nxops =
 {
-  nxcon_fill,
+  nxterm_fill,
 #ifndef CONFIG_NX_WRITEONLY
-  nxcon_move,
+  nxterm_move,
 #endif
-  nxcon_bitmap
+  nxterm_bitmap
 };
 
 /****************************************************************************
@@ -84,7 +84,7 @@ static const struct nxcon_operations_s g_nxops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxcon_fill
+ * Name: nxterm_fill
  *
  * Description:
  *  Fill the specified rectangle in the window with the specified color
@@ -99,7 +99,7 @@ static const struct nxcon_operations_s g_nxops =
  *
  ****************************************************************************/
 
-static int nxcon_fill(FAR struct nxcon_state_s *priv,
+static int nxterm_fill(FAR struct nxterm_state_s *priv,
                       FAR const struct nxgl_rect_s *rect,
                       nxgl_mxpixel_t wcolor[CONFIG_NX_NPLANES])
 {
@@ -107,7 +107,7 @@ static int nxcon_fill(FAR struct nxcon_state_s *priv,
 }
 
 /****************************************************************************
- * Name: nxcon_move
+ * Name: nxterm_move
  *
  * Description:
  *   Move a rectangular region within the window
@@ -124,7 +124,7 @@ static int nxcon_fill(FAR struct nxcon_state_s *priv,
  ****************************************************************************/
 
 #ifndef CONFIG_NX_WRITEONLY
-static int nxcon_move(FAR struct nxcon_state_s *priv,
+static int nxterm_move(FAR struct nxterm_state_s *priv,
               FAR const struct nxgl_rect_s *rect,
               FAR const struct nxgl_point_s *offset)
 {
@@ -133,7 +133,7 @@ static int nxcon_move(FAR struct nxcon_state_s *priv,
 #endif
 
 /****************************************************************************
- * Name: nxcon_bitmap
+ * Name: nxterm_bitmap
  *
  * Description:
  *   Copy a rectangular region of a larger image into the rectangle in the
@@ -155,7 +155,7 @@ static int nxcon_move(FAR struct nxcon_state_s *priv,
  *
  ****************************************************************************/
 
-static int nxcon_bitmap(FAR struct nxcon_state_s *priv,
+static int nxterm_bitmap(FAR struct nxterm_state_s *priv,
                         FAR const struct nxgl_rect_s *dest,
                         FAR const void *src[CONFIG_NX_NPLANES],
                         FAR const struct nxgl_point_s *origin,
@@ -173,7 +173,7 @@ static int nxcon_bitmap(FAR struct nxcon_state_s *priv,
  *
  * Description:
  *   Register a console device on a raw NX window.  The device will be
- *   registered at /dev/nxconN where N is the provided minor number.
+ *   registered at /dev/nxtermN where N is the provided minor number.
  *
  * Input Parameters:
  *   hwnd - A handle that will be used to access the window.  The window must
@@ -186,8 +186,8 @@ static int nxcon_bitmap(FAR struct nxcon_state_s *priv,
  *
  ****************************************************************************/
 
-NXTERM nx_register(NXWINDOW hwnd, FAR struct nxcon_window_s *wndo, int minor)
+NXTERM nx_register(NXWINDOW hwnd, FAR struct nxterm_window_s *wndo, int minor)
 {
-  return nxcon_register((NXTERM)hwnd, wndo, &g_nxops, minor);
+  return nxterm_register((NXTERM)hwnd, wndo, &g_nxops, minor);
 }
 

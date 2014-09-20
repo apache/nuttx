@@ -1,5 +1,5 @@
 /****************************************************************************
- * nuttx/graphics/nxterm/nxcon_driver.c
+ * nuttx/graphics/nxterm/nxterm_driver.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -49,14 +49,14 @@
 
 #include <nuttx/fs/fs.h>
 
-#include "nxcon_internal.h"
+#include "nxterm.h"
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     nxcon_open(FAR struct file *filep);
-static ssize_t nxcon_write(FAR struct file *filep, FAR const char *buffer,
+static int     nxterm_open(FAR struct file *filep);
+static ssize_t nxterm_write(FAR struct file *filep, FAR const char *buffer,
                  size_t buflen);
 
 /****************************************************************************
@@ -66,28 +66,28 @@ static ssize_t nxcon_write(FAR struct file *filep, FAR const char *buffer,
 
 #ifdef CONFIG_NXTERM_NXKBDIN
 
-const struct file_operations g_nxcon_drvrops =
+const struct file_operations g_nxterm_drvrops =
 {
-  nxcon_open,  /* open */
+  nxterm_open,  /* open */
   0,           /* close */
-  nxcon_read,  /* read */
-  nxcon_write, /* write */
+  nxterm_read,  /* read */
+  nxterm_write, /* write */
   0,           /* seek */
   0            /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
   ,
-  nxcon_poll   /* poll */
+  nxterm_poll   /* poll */
 #endif
 };
 
 #else /* CONFIG_NXTERM_NXKBDIN */
 
-const struct file_operations g_nxcon_drvrops =
+const struct file_operations g_nxterm_drvrops =
 {
-  nxcon_open,  /* open */
+  nxterm_open,  /* open */
   0,           /* close */
   0,           /* read */
-  nxcon_write, /* write */
+  nxterm_write, /* write */
   0,           /* seek */
   0            /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
@@ -107,20 +107,20 @@ const struct file_operations g_nxcon_drvrops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxcon_open
+ * Name: nxterm_open
  ****************************************************************************/
 
-static int nxcon_open(FAR struct file *filep)
+static int nxterm_open(FAR struct file *filep)
 {
   FAR struct inode         *inode = filep->f_inode;
-  FAR struct nxcon_state_s *priv  = inode->i_private;
+  FAR struct nxterm_state_s *priv  = inode->i_private;
 
   DEBUGASSERT(filep && filep->f_inode);
 
   /* Get the driver structure from the inode */
 
   inode = filep->f_inode;
-  priv  = (FAR struct nxcon_state_s *)inode->i_private;
+  priv  = (FAR struct nxterm_state_s *)inode->i_private;
   DEBUGASSERT(priv);
 
   /* Verify that the driver is opened for write-only access */
@@ -140,14 +140,14 @@ static int nxcon_open(FAR struct file *filep)
 }
 
 /****************************************************************************
- * Name: nxcon_write
+ * Name: nxterm_write
  ****************************************************************************/
 
-static ssize_t nxcon_write(FAR struct file *filep, FAR const char *buffer,
+static ssize_t nxterm_write(FAR struct file *filep, FAR const char *buffer,
                            size_t buflen)
 {
-  FAR struct nxcon_state_s *priv;
-  enum nxcon_vt100state_e state;
+  FAR struct nxterm_state_s *priv;
+  enum nxterm_vt100state_e state;
   ssize_t remaining;
   char ch;
   int ret;
@@ -155,11 +155,11 @@ static ssize_t nxcon_write(FAR struct file *filep, FAR const char *buffer,
   /* Recover our private state structure */
 
   DEBUGASSERT(filep && filep->f_priv);
-  priv = (FAR struct nxcon_state_s *)filep->f_priv;
+  priv = (FAR struct nxterm_state_s *)filep->f_priv;
 
   /* Get exclusive access */
 
-  ret = nxcon_semwait(priv);
+  ret = nxterm_semwait(priv);
   if (ret < 0)
     {
       return ret;
@@ -167,7 +167,7 @@ static ssize_t nxcon_write(FAR struct file *filep, FAR const char *buffer,
 
   /* Hide the cursor while we update the display */
 
-  nxcon_hidecursor(priv);
+  nxterm_hidecursor(priv);
 
   /* Loop writing each character to the display */
 
@@ -183,7 +183,7 @@ static ssize_t nxcon_write(FAR struct file *filep, FAR const char *buffer,
         {
           /* Is the character part of a VT100 escape sequnce? */
 
-          state = nxcon_vt100(priv, ch);
+          state = nxterm_vt100(priv, ch);
           switch (state)
             {
               /* Character is not part of a VT100 escape sequence (and no
@@ -195,7 +195,7 @@ static ssize_t nxcon_write(FAR struct file *filep, FAR const char *buffer,
                 {
                   /* We can output the character to the window */
 
-                  nxcon_putc(priv, (uint8_t)ch);
+                  nxterm_putc(priv, (uint8_t)ch);
                 }
               break;
 
@@ -223,7 +223,7 @@ static ssize_t nxcon_write(FAR struct file *filep, FAR const char *buffer,
 
                 /* Add the first unhandled character to the window */
 
-                nxcon_putc(priv, (uint8_t)priv->seq[0]);
+                nxterm_putc(priv, (uint8_t)priv->seq[0]);
 
                 /* Move all buffer characters down one */
 
@@ -246,8 +246,8 @@ static ssize_t nxcon_write(FAR struct file *filep, FAR const char *buffer,
 
   /* Show the cursor at its new position */
 
-  nxcon_showcursor(priv);
-  nxcon_sempost(priv);
+  nxterm_showcursor(priv);
+  nxterm_sempost(priv);
   return (ssize_t)buflen;
 }
 

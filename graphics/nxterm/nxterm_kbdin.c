@@ -1,5 +1,5 @@
 /****************************************************************************
- * nuttx/graphics/nxterm/nxcon_kbdin.c
+ * nuttx/graphics/nxterm/nxterm_kbdin.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,7 +46,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include "nxcon_internal.h"
+#include "nxterm.h"
 
 #ifdef CONFIG_NXTERM_NXKBDIN
 
@@ -67,11 +67,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxcon_pollnotify
+ * Name: nxterm_pollnotify
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_POLL
-static void nxcon_pollnotify(FAR struct nxcon_state_s *priv, pollevent_t eventset)
+static void nxterm_pollnotify(FAR struct nxterm_state_s *priv, pollevent_t eventset)
 {
   FAR struct pollfd *fds;
   irqstate_t flags;
@@ -95,7 +95,7 @@ static void nxcon_pollnotify(FAR struct nxcon_state_s *priv, pollevent_t eventse
     }
 }
 #else
-#  define nxcon_pollnotify(priv,event)
+#  define nxterm_pollnotify(priv,event)
 #endif
 
 /****************************************************************************
@@ -103,16 +103,16 @@ static void nxcon_pollnotify(FAR struct nxcon_state_s *priv, pollevent_t eventse
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxcon_read
+ * Name: nxterm_read
  *
  * Description:
  *   The optional NxTerm read method
  *
  ****************************************************************************/
 
-ssize_t nxcon_read(FAR struct file *filep, FAR char *buffer, size_t len)
+ssize_t nxterm_read(FAR struct file *filep, FAR char *buffer, size_t len)
 {
-  FAR struct nxcon_state_s *priv;
+  FAR struct nxterm_state_s *priv;
   ssize_t nread;
   char ch;
   int ret;
@@ -120,14 +120,14 @@ ssize_t nxcon_read(FAR struct file *filep, FAR char *buffer, size_t len)
   /* Recover our private state structure */
 
   DEBUGASSERT(filep && filep->f_priv);
-  priv = (FAR struct nxcon_state_s *)filep->f_priv;
+  priv = (FAR struct nxterm_state_s *)filep->f_priv;
 
   /* Get exclusive access to the driver structure */
 
-  ret = nxcon_semwait(priv);
+  ret = nxterm_semwait(priv);
   if (ret < 0)
     {
-      gdbg("ERROR: nxcon_semwait failed\n");
+      gdbg("ERROR: nxterm_semwait failed\n");
       return ret;
     }
 
@@ -159,13 +159,13 @@ ssize_t nxcon_read(FAR struct file *filep, FAR char *buffer, size_t len)
             }
 
           /* Otherwise, wait for something to be written to the circular
-           * buffer. Increment the number of waiters so that the nxcon_write()
+           * buffer. Increment the number of waiters so that the nxterm_write()
            * will not that it needs to post the semaphore to wake us up.
            */
 
           sched_lock();
           priv->nwaiters++;
-          nxcon_sempost(priv);
+          nxterm_sempost(priv);
 
           /* We may now be pre-empted!  But that should be okay because we
            * have already incremented nwaiters.  Pre-emption is disabled
@@ -187,7 +187,7 @@ ssize_t nxcon_read(FAR struct file *filep, FAR char *buffer, size_t len)
             {
               /* Yes... then retake the mutual exclusion semaphore */
 
-              ret = nxcon_semwait(priv);
+              ret = nxterm_semwait(priv);
             }
 
           /* Was the semaphore wait successful? Did we successful re-take the
@@ -200,7 +200,7 @@ ssize_t nxcon_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
               int errval = errno;
 
-              gdbg("ERROR: nxcon_semwait failed\n");
+              gdbg("ERROR: nxterm_semwait failed\n");
 
               /* Were we awakened by a signal?  Did we read anything before
                * we received the signal?
@@ -245,7 +245,7 @@ ssize_t nxcon_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
   /* Relinquish the mutual exclusion semaphore */
 
-  nxcon_sempost(priv);
+  nxterm_sempost(priv);
 
   /* Notify all poll/select waiters that they can write to the FIFO */
 
@@ -254,7 +254,7 @@ errout_without_sem:
 #ifndef CONFIG_DISABLE_POLL
   if (nread > 0)
     {
-      nxcon_pollnotify(priv, POLLOUT);
+      nxterm_pollnotify(priv, POLLOUT);
     }
 #endif
 
@@ -264,14 +264,14 @@ errout_without_sem:
 }
 
 /****************************************************************************
- * Name: nxcon_poll
+ * Name: nxterm_poll
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_POLL
-int nxcon_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
+int nxterm_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 {
   FAR struct inode *inode = filep->f_inode;
-  FAR struct nxcon_state_s *priv;
+  FAR struct nxterm_state_s *priv;
   pollevent_t eventset;
   int ret;
   int i;
@@ -283,10 +283,10 @@ int nxcon_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 
   /* Get exclusive access to the driver structure */
 
-  ret = nxcon_semwait(priv);
+  ret = nxterm_semwait(priv);
   if (ret < 0)
     {
-      gdbg("ERROR: nxcon_semwait failed\n");
+      gdbg("ERROR: nxterm_semwait failed\n");
       return ret;
     }
 
@@ -336,7 +336,7 @@ int nxcon_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 
       if (eventset)
         {
-          nxcon_pollnotify(priv, eventset);
+          nxterm_pollnotify(priv, eventset);
         }
 
     }
@@ -363,13 +363,13 @@ int nxcon_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
     }
 
 errout:
-  nxcon_sempost(priv);
+  nxterm_sempost(priv);
   return ret;
 }
 #endif
 
 /****************************************************************************
- * Name: nxcon_kbdin
+ * Name: nxterm_kbdin
  *
  * Description:
  *  This function should be driven by the window kbdin callback function
@@ -394,9 +394,9 @@ errout:
  *
  ****************************************************************************/
 
-void nxcon_kbdin(NXTERM handle, FAR const uint8_t *buffer, uint8_t buflen)
+void nxterm_kbdin(NXTERM handle, FAR const uint8_t *buffer, uint8_t buflen)
 {
-  FAR struct nxcon_state_s *priv;
+  FAR struct nxterm_state_s *priv;
   ssize_t nwritten;
   int nexthead;
   char ch;
@@ -407,14 +407,14 @@ void nxcon_kbdin(NXTERM handle, FAR const uint8_t *buffer, uint8_t buflen)
 
   /* Get the reference to the driver structure from the handle */
 
-  priv = (FAR struct nxcon_state_s *)handle;
+  priv = (FAR struct nxterm_state_s *)handle;
 
   /* Get exclusive access to the driver structure */
 
-  ret = nxcon_semwait(priv);
+  ret = nxterm_semwait(priv);
   if (ret < 0)
     {
-      gdbg("ERROR: nxcon_semwait failed\n");
+      gdbg("ERROR: nxterm_semwait failed\n");
       return;
     }
 
@@ -478,12 +478,12 @@ void nxcon_kbdin(NXTERM handle, FAR const uint8_t *buffer, uint8_t buflen)
       /* Notify all poll/select waiters that they can write to the FIFO */
 
 #ifndef CONFIG_DISABLE_POLL
-      nxcon_pollnotify(priv, POLLIN);
+      nxterm_pollnotify(priv, POLLIN);
 #endif
       sched_unlock();
     }
 
-  nxcon_sempost(priv);
+  nxterm_sempost(priv);
 }
 
 #endif /* CONFIG_NXTERM_NXKBDIN */

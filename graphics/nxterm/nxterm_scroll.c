@@ -1,5 +1,5 @@
 /****************************************************************************
- * nuttx/graphics/nxterm/nxcon_scroll.c
+ * nuttx/graphics/nxterm/nxterm_scroll.c
  *
  *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,7 +51,7 @@
 #include <nuttx/nx/nx.h>
 #include <nuttx/nx/nxfonts.h>
 
-#include "nxcon_internal.h"
+#include "nxterm.h"
 
 /****************************************************************************
  * Definitions
@@ -78,7 +78,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxcon_movedisplay
+ * Name: nxterm_movedisplay
  *
  * Description:
  *   This function implements the data movement for the scroll operation.  If
@@ -88,17 +88,17 @@
  ****************************************************************************/
 
 #ifdef CONFIG_NX_WRITEONLY
-static inline void nxcon_movedisplay(FAR struct nxcon_state_s *priv,
+static inline void nxterm_movedisplay(FAR struct nxterm_state_s *priv,
                                      int bottom, int scrollheight)
 {
-  FAR struct nxcon_bitmap_s *bm;
+  FAR struct nxterm_bitmap_s *bm;
   struct nxgl_rect_s rect;
   nxgl_coord_t row;
   int ret;
   int i;
 
   /* Move each row, one at a time.  They could all be moved at once (by calling
-   * nxcon_redraw), but the since the region is cleared, then re-written, the
+   * nxterm_redraw), but the since the region is cleared, then re-written, the
    * effect would not be good.  Below the region is also cleared and re-written,
    * however, in much smaller chunks.
    */
@@ -128,7 +128,7 @@ static inline void nxcon_movedisplay(FAR struct nxcon_state_s *priv,
           bm = &priv->bm[i];
           if (bm->pos.y <= rect.pt2.y && bm->pos.y + priv->fheight >= rect.pt1.y)
             {
-              nxcon_fillchar(priv, &rect, bm);
+              nxterm_fillchar(priv, &rect, bm);
             }
         }
     }
@@ -145,7 +145,7 @@ static inline void nxcon_movedisplay(FAR struct nxcon_state_s *priv,
     }
 }
 #else
-static inline void nxcon_movedisplay(FAR struct nxcon_state_s *priv,
+static inline void nxterm_movedisplay(FAR struct nxterm_state_s *priv,
                                      int bottom, int scrollheight)
 {
   struct nxgl_rect_s rect;
@@ -197,10 +197,10 @@ static inline void nxcon_movedisplay(FAR struct nxcon_state_s *priv,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxcon_scroll
+ * Name: nxterm_scroll
  ****************************************************************************/
 
-void nxcon_scroll(FAR struct nxcon_state_s *priv, int scrollheight)
+void nxterm_scroll(FAR struct nxterm_state_s *priv, int scrollheight)
 {
   int i;
   int j;
@@ -209,7 +209,7 @@ void nxcon_scroll(FAR struct nxcon_state_s *priv, int scrollheight)
 
   for (i = 0; i < priv->nchars; )
     {
-      FAR struct nxcon_bitmap_s *bm = &priv->bm[i];
+      FAR struct nxterm_bitmap_s *bm = &priv->bm[i];
 
       /* Has any part of this character scrolled off the screen? */
 
@@ -219,7 +219,7 @@ void nxcon_scroll(FAR struct nxcon_state_s *priv, int scrollheight)
 
           for (j = i; j < priv->nchars-1; j++)
             {
-              memcpy(&priv->bm[j], &priv->bm[j+1], sizeof(struct nxcon_bitmap_s));
+              memcpy(&priv->bm[j], &priv->bm[j+1], sizeof(struct nxterm_bitmap_s));
             }
 
           /* Decrement the number of cached characters ('i' is not incremented
@@ -249,5 +249,5 @@ void nxcon_scroll(FAR struct nxcon_state_s *priv, int scrollheight)
 
   /* Move the display in the range of 0-height up one scrollheight. */
 
-  nxcon_movedisplay(priv, priv->fpos.y, scrollheight);
+  nxterm_movedisplay(priv, priv->fpos.y, scrollheight);
 }

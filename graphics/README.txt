@@ -396,7 +396,7 @@ NxTerm Input options
 CONFIG_NXTERM_NXKBDIN
   Take input from the NX keyboard input callback.  By default, keyboard
   input is taken from stdin (/dev/console).  If this option is set, then
-  the interface nxcon_kdbin() is enabled.  That interface may be driven
+  the interface nxterm_kdbin() is enabled.  That interface may be driven
   by window callback functions so that keyboard input *only* goes to the
   top window.
 CONFIG__NXTERM_KBDBUFSIZE

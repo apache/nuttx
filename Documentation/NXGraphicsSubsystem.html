@@ -3426,7 +3426,7 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
     <dt><code>CONFIG_NXTERM_NXKBDIN</code>:
       <dd>Take input from the NX keyboard input callback.
       By default, keyboard input is taken from stdin (<code>/dev/console</code>).
-      If this option is set, then the interface<code>nxcon_kdbin()</code> is enabled.
+      If this option is set, then the interface<code>nxterm_kdbin()</code> is enabled.
       That interface may be driven by window callback functions so that keyboard input <i>only</i> goes to the top window.
     <dt><code>CONFIG__NXTERM_KBDBUFSIZE</code>:
       <dd>If <code>CONFIG_NXTERM_NXKBDIN</code> is enabled, then this value may be used to

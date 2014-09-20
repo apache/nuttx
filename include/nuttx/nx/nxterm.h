@@ -100,7 +100,7 @@
  * CONFIG_NXTERM_NXKBDIN
  *   Take input from the NX keyboard input callback.  By default, keyboard
  *   input is taken from stdin (/dev/console).  If this option is set, then
- *   the interface nxcon_kbdin() is enabled.  That interface may be driven
+ *   the interface nxterm_kbdin() is enabled.  That interface may be driven
  *   by window callback functions so that keyboard input *only* goes to the
  *   top window.
  * CONFIG_NXTERM_KBDBUFSIZE
@@ -193,7 +193,7 @@ typedef FAR void *NXTERM;
 
 /* This structure describes the window and font characteristics */
 
-struct nxcon_window_s
+struct nxterm_window_s
 {
   nxgl_mxpixel_t wcolor[CONFIG_NX_NPLANES]; /* Window background color */
   nxgl_mxpixel_t fcolor[CONFIG_NX_NPLANES]; /* Font color */
@@ -208,7 +208,8 @@ struct nxcon_window_s
 #undef EXTERN
 #if defined(__cplusplus)
 # define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 # define EXTERN extern
 #endif
@@ -222,7 +223,7 @@ extern "C" {
  *
  * Description:
  *   Register a console device on a raw NX window.  The device will be
- *   registered at /dev/nxconN where N is the provided minor number.
+ *   registered at /dev/nxtermN where N is the provided minor number.
  *
  * Input Parameters:
  *   hwnd - A handle that will be used to access the window.  The window must
@@ -237,15 +238,15 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN NXTERM nx_register(NXWINDOW hwnd, FAR struct nxcon_window_s *wndo,
-                             int minor);
+NXTERM nx_register(NXWINDOW hwnd, FAR struct nxterm_window_s *wndo,
+                   int minor);
 
 /****************************************************************************
  * Name: nxtk_register
  *
  * Description:
  *   Register a console device on a framed NX window.  The device will be
- *   registered at /dev/nxconN where N is the provided minor number.
+ *   registered at /dev/nxtermN where N is the provided minor number.
  *
  * Input Parameters:
  *   hfwnd - A handle that will be used to access the window.  The window must
@@ -260,15 +261,15 @@ EXTERN NXTERM nx_register(NXWINDOW hwnd, FAR struct nxcon_window_s *wndo,
  *
  ****************************************************************************/
 
-EXTERN NXTERM nxtk_register(NXTKWINDOW hfwnd,
-                               FAR struct nxcon_window_s *wndo, int minor);
+NXTERM nxtk_register(NXTKWINDOW hfwnd, FAR struct nxterm_window_s *wndo,
+                     int minor);
 
 /****************************************************************************
  * Name: nxtool_register
  *
  * Description:
  *   Register a console device on a toolbar of a framed NX window.  The
- *   device will be registered at /dev/nxconN where N is the provided minor
+ *   device will be registered at /dev/nxtermN where N is the provided minor
  *   number.
  *
  * Input Parameters:
@@ -285,11 +286,11 @@ EXTERN NXTERM nxtk_register(NXTKWINDOW hfwnd,
  *
  ****************************************************************************/
 
-EXTERN NXTERM nxtool_register(NXTKWINDOW hfwnd,
-                                 FAR struct nxcon_window_s *wndo, int minor);
+NXTERM nxtool_register(NXTKWINDOW hfwnd, FAR struct nxterm_window_s *wndo,
+                       int minor);
 
 /****************************************************************************
- * Name: nxcon_unregister
+ * Name: nxterm_unregister
  *
  * Description:
  *   Un-register to NX console device.
@@ -303,10 +304,10 @@ EXTERN NXTERM nxtool_register(NXTKWINDOW hfwnd,
  *
  ****************************************************************************/
 
-EXTERN void nxcon_unregister(NXTERM handle);
+void nxterm_unregister(NXTERM handle);
 
 /****************************************************************************
- * Name: nxcon_redraw
+ * Name: nxterm_redraw
  *
  * Description:
  *   Re-draw a portion of the NX console.  This function should be called
@@ -324,11 +325,11 @@ EXTERN void nxcon_unregister(NXTERM handle);
  *
  ****************************************************************************/
 
-EXTERN void nxcon_redraw(NXTERM handle, FAR const struct nxgl_rect_s *rect,
-                         bool more);
+void nxterm_redraw(NXTERM handle, FAR const struct nxgl_rect_s *rect,
+                   bool more);
 
 /****************************************************************************
- * Name: nxcon_kbdin
+ * Name: nxterm_kbdin
  *
  * Description:
  *  This function should be driven by the window kbdin callback function
@@ -354,8 +355,7 @@ EXTERN void nxcon_redraw(NXTERM handle, FAR const struct nxgl_rect_s *rect,
  ****************************************************************************/
 
 #ifdef CONFIG_NXTERM_NXKBDIN
-EXTERN void nxcon_kbdin(NXTERM handle, FAR const uint8_t *buffer,
-                        uint8_t buflen);
+void nxterm_kbdin(NXTERM handle, FAR const uint8_t *buffer, uint8_t buflen);
 #endif
 
 #undef EXTERN

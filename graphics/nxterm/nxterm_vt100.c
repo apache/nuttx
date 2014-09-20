@@ -1,5 +1,5 @@
 /****************************************************************************
- * nuttx/graphics/nxterm/nxcon_vt100.c
+ * nuttx/graphics/nxterm/nxterm_vt100.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -44,7 +44,7 @@
 
 #include <nuttx/vt100.h>
 
-#include "nxcon_internal.h"
+#include "nxterm.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -54,7 +54,7 @@
  * Private Types
  ****************************************************************************/
 
-typedef int (*seqhandler_t)(FAR struct nxcon_state_s *priv);
+typedef int (*seqhandler_t)(FAR struct nxterm_state_s *priv);
 
 struct vt100_sequence_s
 {
@@ -67,7 +67,7 @@ struct vt100_sequence_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int nxcon_erasetoeol(FAR struct nxcon_state_s *priv);
+static int nxterm_erasetoeol(FAR struct nxterm_state_s *priv);
 
 /****************************************************************************
  * Private Data
@@ -85,7 +85,7 @@ static const char g_erasetoeol[] = VT100_CLEAREOL;
 
 static const struct vt100_sequence_s g_vt100sequences[] =
 {
-  {g_erasetoeol, nxcon_erasetoeol, sizeof(g_erasetoeol)},
+  {g_erasetoeol, nxterm_erasetoeol, sizeof(g_erasetoeol)},
   {NULL, NULL, 0}
 };
 
@@ -94,7 +94,7 @@ static const struct vt100_sequence_s g_vt100sequences[] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxcon_erasetoeol
+ * Name: nxterm_erasetoeol
  *
  * Description:
  *   Handle the erase-to-eol VT100 escapte sequence
@@ -107,7 +107,7 @@ static const struct vt100_sequence_s g_vt100sequences[] =
  *
  ****************************************************************************/
 
-static int nxcon_erasetoeol(FAR struct nxcon_state_s *priv)
+static int nxterm_erasetoeol(FAR struct nxterm_state_s *priv)
 {
   /* Does nothing yet (other than consume the sequence) */
 
@@ -115,7 +115,7 @@ static int nxcon_erasetoeol(FAR struct nxcon_state_s *priv)
 }
 
 /****************************************************************************
- * Name: nxcon_vt100part
+ * Name: nxterm_vt100part
  *
  * Description:
  *   Return the next entry that is a partial match to the sequence.
@@ -131,7 +131,7 @@ static int nxcon_erasetoeol(FAR struct nxcon_state_s *priv)
  ****************************************************************************/
 
 FAR const struct vt100_sequence_s *
-nxcon_vt100part(FAR struct nxcon_state_s *priv, int seqsize)
+nxterm_vt100part(FAR struct nxterm_state_s *priv, int seqsize)
 {
   FAR const struct vt100_sequence_s *seq;
   int ndx;
@@ -159,7 +159,7 @@ nxcon_vt100part(FAR struct nxcon_state_s *priv, int seqsize)
 }
 
 /****************************************************************************
- * Name: nxcon_vt100seq
+ * Name: nxterm_vt100seq
  *
  * Description:
  *   Determine if the new sequence is a part of a supported VT100 escape
@@ -170,21 +170,21 @@ nxcon_vt100part(FAR struct nxcon_state_s *priv, int seqsize)
  *   seqsize - The number of bytes in the sequence
  *
  * Returned Value:
- *   state - See enum nxcon_vt100state_e;
+ *   state - See enum nxterm_vt100state_e;
  *
  ****************************************************************************/
 
-static enum nxcon_vt100state_e nxcon_vt100seq(FAR struct nxcon_state_s *priv,
+static enum nxterm_vt100state_e nxterm_vt100seq(FAR struct nxterm_state_s *priv,
                                               int seqsize)
 {
   FAR const struct vt100_sequence_s *seq;
-  enum nxcon_vt100state_e ret;
+  enum nxterm_vt100state_e ret;
 
   /* Is there any VT100 escape sequence that matches what we have
    * buffered so far?
    */
 
-  seq = nxcon_vt100part(priv, seqsize);
+  seq = nxterm_vt100part(priv, seqsize);
   if (seq)
     {
       /* Yes.. if the size of that escape sequence is the same as what we
@@ -223,7 +223,7 @@ static enum nxcon_vt100state_e nxcon_vt100seq(FAR struct nxcon_state_s *priv,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxcon_vt100
+ * Name: nxterm_vt100
  *
  * Description:
  *   Test if the newly received byte is part of a VT100 escape sequence
@@ -233,13 +233,13 @@ static enum nxcon_vt100state_e nxcon_vt100seq(FAR struct nxcon_state_s *priv,
  *   ch - The newly received character
  *
  * Returned Value:
- *   state - See enum nxcon_vt100state_e;
+ *   state - See enum nxterm_vt100state_e;
  *
  ****************************************************************************/
 
-enum nxcon_vt100state_e nxcon_vt100(FAR struct nxcon_state_s *priv, char ch)
+enum nxterm_vt100state_e nxterm_vt100(FAR struct nxterm_state_s *priv, char ch)
 {
-  enum nxcon_vt100state_e ret;
+  enum nxterm_vt100state_e ret;
   int seqsize;
 
   DEBUGASSERT(priv && priv->nseq < VT100_MAX_SEQUENCE);
@@ -276,7 +276,7 @@ enum nxcon_vt100state_e nxcon_vt100(FAR struct nxcon_state_s *priv, char ch)
   /* Then check if this sequence is part of an a valid escape sequence */
 
   seqsize++;
-  ret = nxcon_vt100seq(priv, seqsize);
+  ret = nxterm_vt100seq(priv, seqsize);
   if (ret == VT100_CONSUMED)
     {
       /* The newly added character is indeed part of a VT100 escape sequence

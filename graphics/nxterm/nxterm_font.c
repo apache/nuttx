@@ -1,5 +1,5 @@
 /****************************************************************************
- * nuttx/graphics/nxterm/nxcon_font.c
+ * nuttx/graphics/nxterm/nxterm_font.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,7 +46,7 @@
 
 #include <nuttx/kmalloc.h>
 
-#include "nxcon_internal.h"
+#include "nxterm.h"
 
 /****************************************************************************
  * Definitions
@@ -95,27 +95,27 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxcon_freeglyph
+ * Name: nxterm_freeglyph
  ****************************************************************************/
 
-static void nxcon_freeglyph(FAR struct nxcon_glyph_s *glyph)
+static void nxterm_freeglyph(FAR struct nxterm_glyph_s *glyph)
 {
   if (glyph->bitmap)
     {
       kmm_free(glyph->bitmap);
     }
-  memset(glyph, 0, sizeof(struct nxcon_glyph_s));
+  memset(glyph, 0, sizeof(struct nxterm_glyph_s));
 }
 
 /****************************************************************************
- * Name: nxcon_allocglyph
+ * Name: nxterm_allocglyph
  ****************************************************************************/
 
-static inline FAR struct nxcon_glyph_s *
-nxcon_allocglyph(FAR struct nxcon_state_s *priv)
+static inline FAR struct nxterm_glyph_s *
+nxterm_allocglyph(FAR struct nxterm_state_s *priv)
 {
-  FAR struct nxcon_glyph_s *glyph = NULL;
-  FAR struct nxcon_glyph_s *luglyph = NULL;
+  FAR struct nxterm_glyph_s *glyph = NULL;
+  FAR struct nxterm_glyph_s *luglyph = NULL;
   uint8_t luusecnt;
   int i;
 
@@ -150,7 +150,7 @@ nxcon_allocglyph(FAR struct nxcon_state_s *priv)
    */
 
   luusecnt = luglyph->usecnt;
-  nxcon_freeglyph(luglyph);
+  nxterm_freeglyph(luglyph);
 
   /* But lets decrement all of the usecnts so that the new one one be so
    * far behind in the counts as the older ones.
@@ -179,11 +179,11 @@ nxcon_allocglyph(FAR struct nxcon_state_s *priv)
 }
 
 /****************************************************************************
- * Name: nxcon_findglyph
+ * Name: nxterm_findglyph
  ****************************************************************************/
 
-static FAR struct nxcon_glyph_s *
-nxcon_findglyph(FAR struct nxcon_state_s *priv, uint8_t ch)
+static FAR struct nxterm_glyph_s *
+nxterm_findglyph(FAR struct nxterm_state_s *priv, uint8_t ch)
 {
   int i;
 
@@ -191,7 +191,7 @@ nxcon_findglyph(FAR struct nxcon_state_s *priv, uint8_t ch)
 
    for (i = 0; i < priv->maxglyphs; i++)
     {
-      FAR struct nxcon_glyph_s *glyph = &priv->glyph[i];
+      FAR struct nxterm_glyph_s *glyph = &priv->glyph[i];
       if (glyph->usecnt > 0 && glyph->code == ch)
         {
           /* Increment the use count (unless it is already at the max) */
@@ -210,14 +210,14 @@ nxcon_findglyph(FAR struct nxcon_state_s *priv, uint8_t ch)
 }
 
 /****************************************************************************
- * Name: nxcon_renderglyph
+ * Name: nxterm_renderglyph
  ****************************************************************************/
 
-static inline FAR struct nxcon_glyph_s *
-nxcon_renderglyph(FAR struct nxcon_state_s *priv,
+static inline FAR struct nxterm_glyph_s *
+nxterm_renderglyph(FAR struct nxterm_state_s *priv,
                    FAR const struct nx_fontbitmap_s *fbm, uint8_t ch)
 {
-  FAR struct nxcon_glyph_s *glyph = NULL;
+  FAR struct nxterm_glyph_s *glyph = NULL;
   FAR nxgl_mxpixel_t *ptr;
 #if CONFIG_NXTERM_BPP < 8
   nxgl_mxpixel_t pixel;
@@ -229,7 +229,7 @@ nxcon_renderglyph(FAR struct nxcon_state_s *priv,
 
   /* Allocate the glyph (always succeeds) */
 
-  glyph         = nxcon_allocglyph(priv);
+  glyph         = nxterm_allocglyph(priv);
   glyph->code   = ch;
 
   /* Get the dimensions of the glyph */
@@ -318,8 +318,8 @@ nxcon_renderglyph(FAR struct nxcon_state_s *priv,
         {
           /* Actually, the RENDERER never returns a failure */
 
-          gdbg("nxcon_renderglyph: RENDERER failed\n");
-          nxcon_freeglyph(glyph);
+          gdbg("nxterm_renderglyph: RENDERER failed\n");
+          nxterm_freeglyph(glyph);
           glyph = NULL;
         }
     }
@@ -328,10 +328,10 @@ nxcon_renderglyph(FAR struct nxcon_state_s *priv,
 }
 
 /****************************************************************************
- * Name: nxcon_fontsize
+ * Name: nxterm_fontsize
  ****************************************************************************/
 
-static int nxcon_fontsize(NXHANDLE hfont, uint8_t ch, FAR struct nxgl_size_s *size)
+static int nxterm_fontsize(NXHANDLE hfont, uint8_t ch, FAR struct nxgl_size_s *size)
 {
   FAR const struct nx_fontbitmap_s *fbm;
 
@@ -351,18 +351,18 @@ static int nxcon_fontsize(NXHANDLE hfont, uint8_t ch, FAR struct nxgl_size_s *si
 }
 
 /****************************************************************************
- * Name: nxcon_getglyph
+ * Name: nxterm_getglyph
  ****************************************************************************/
 
-static FAR struct nxcon_glyph_s *
-nxcon_getglyph(NXHANDLE hfont, FAR struct nxcon_state_s *priv, uint8_t ch)
+static FAR struct nxterm_glyph_s *
+nxterm_getglyph(NXHANDLE hfont, FAR struct nxterm_state_s *priv, uint8_t ch)
 {
-  FAR struct nxcon_glyph_s *glyph;
+  FAR struct nxterm_glyph_s *glyph;
   FAR const struct nx_fontbitmap_s *fbm;
 
   /* First, try to find the glyph in the cache of pre-rendered glyphs */
 
-  glyph = nxcon_findglyph(priv, ch);
+  glyph = nxterm_findglyph(priv, ch);
   if (glyph)
     {
       /* We found it in the cache .. return the cached glyph */
@@ -377,7 +377,7 @@ nxcon_getglyph(NXHANDLE hfont, FAR struct nxcon_state_s *priv, uint8_t ch)
     {
       /* Yes.. render the glyph */
 
-      glyph = nxcon_renderglyph(priv, fbm, ch);
+      glyph = nxterm_renderglyph(priv, fbm, ch);
     }
 
   return glyph;
@@ -388,19 +388,19 @@ nxcon_getglyph(NXHANDLE hfont, FAR struct nxcon_state_s *priv, uint8_t ch)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxcon_addchar
+ * Name: nxterm_addchar
  *
  * Description:
- *   This is part of the nxcon_putc logic.  It creates and positions a
+ *   This is part of the nxterm_putc logic.  It creates and positions a
  *   the character and renders (or re-uses) a glyph for font.
  *
  ****************************************************************************/
 
-FAR const struct nxcon_bitmap_s *
-nxcon_addchar(NXHANDLE hfont, FAR struct nxcon_state_s *priv, uint8_t ch)
+FAR const struct nxterm_bitmap_s *
+nxterm_addchar(NXHANDLE hfont, FAR struct nxterm_state_s *priv, uint8_t ch)
 {
-  FAR struct nxcon_bitmap_s *bm = NULL;
-  FAR struct nxcon_glyph_s *glyph;
+  FAR struct nxterm_bitmap_s *bm = NULL;
+  FAR struct nxterm_glyph_s *glyph;
 
   /* Is there space for another character on the display? */
 
@@ -416,7 +416,7 @@ nxcon_addchar(NXHANDLE hfont, FAR struct nxcon_state_s *priv, uint8_t ch)
 
       /* Find (or create) the matching glyph */
 
-      glyph = nxcon_getglyph(hfont, priv, ch);
+      glyph = nxterm_getglyph(hfont, priv, ch);
       if (!glyph)
         {
           /* No, there is no font for this code.  Just mark this as a space. */
@@ -443,25 +443,25 @@ nxcon_addchar(NXHANDLE hfont, FAR struct nxcon_state_s *priv, uint8_t ch)
 }
 
 /****************************************************************************
- * Name: nxcon_hidechar
+ * Name: nxterm_hidechar
  *
  * Description:
  *   Erase a character from the window.
  *
  ****************************************************************************/
-int nxcon_hidechar(FAR struct nxcon_state_s *priv,
-                   FAR const struct nxcon_bitmap_s *bm)
+int nxterm_hidechar(FAR struct nxterm_state_s *priv,
+                   FAR const struct nxterm_bitmap_s *bm)
 {
   struct nxgl_rect_s bounds;
   struct nxgl_size_s fsize;
   int ret;
 
-  /* Get the size of the font glyph.  If nxcon_fontsize, then the
+  /* Get the size of the font glyph.  If nxterm_fontsize, then the
    * character will have been rendered as a space, and no display
    * modification is required (not an error).
    */
 
-  ret = nxcon_fontsize(priv->font, bm->code, &fsize);
+  ret = nxterm_fontsize(priv->font, bm->code, &fsize);
   if (ret < 0)
     {
       /* It was rendered as a space. */
@@ -485,16 +485,16 @@ int nxcon_hidechar(FAR struct nxcon_state_s *priv,
 }
 
 /****************************************************************************
- * Name: nxcon_backspace
+ * Name: nxterm_backspace
  *
  * Description:
  *   Remove the last character from the window.
  *
  ****************************************************************************/
 
-int nxcon_backspace(FAR struct nxcon_state_s *priv)
+int nxterm_backspace(FAR struct nxterm_state_s *priv)
 {
-  FAR struct nxcon_bitmap_s *bm;
+  FAR struct nxterm_bitmap_s *bm;
   int ndx;
   int ret = -ENOENT;
 
@@ -509,7 +509,7 @@ int nxcon_backspace(FAR struct nxcon_state_s *priv)
 
       /* Erase the character from the display */
 
-      ret = nxcon_hidechar(priv, bm);
+      ret = nxterm_hidechar(priv, bm);
 
       /* The current position to the location where the last character was */
 
@@ -525,14 +525,14 @@ int nxcon_backspace(FAR struct nxcon_state_s *priv)
 }
 
 /****************************************************************************
- * Name: nxcon_home
+ * Name: nxterm_home
  *
  * Description:
  *   Set the next character position to the top-left corner of the display.
  *
  ****************************************************************************/
 
-void nxcon_home(FAR struct nxcon_state_s *priv)
+void nxterm_home(FAR struct nxterm_state_s *priv)
 {
   /* The first character is one space from the left */
 
@@ -544,14 +544,14 @@ void nxcon_home(FAR struct nxcon_state_s *priv)
 }
 
 /****************************************************************************
- * Name: nxcon_newline
+ * Name: nxterm_newline
  *
  * Description:
  *   Set the next character position to the beginning of the next line.
  *
  ****************************************************************************/
 
-void nxcon_newline(FAR struct nxcon_state_s *priv)
+void nxterm_newline(FAR struct nxterm_state_s *priv)
 {
   /* Carriage return: The first character is one space from the left */
 
@@ -563,19 +563,19 @@ void nxcon_newline(FAR struct nxcon_state_s *priv)
 }
 
 /****************************************************************************
- * Name: nxcon_fillchar
+ * Name: nxterm_fillchar
  *
  * Description:
- *   This implements the character display.  It is part of the nxcon_putc
+ *   This implements the character display.  It is part of the nxterm_putc
  *   operation but may also be used when redrawing an existing display.
  *
  ****************************************************************************/
 
-void nxcon_fillchar(FAR struct nxcon_state_s *priv,
+void nxterm_fillchar(FAR struct nxterm_state_s *priv,
                     FAR const struct nxgl_rect_s *rect,
-                    FAR const struct nxcon_bitmap_s *bm)
+                    FAR const struct nxterm_bitmap_s *bm)
 {
-  FAR struct nxcon_glyph_s *glyph;
+  FAR struct nxterm_glyph_s *glyph;
   struct nxgl_rect_s bounds;
   struct nxgl_rect_s intersection;
   struct nxgl_size_s fsize;
@@ -590,7 +590,7 @@ void nxcon_fillchar(FAR struct nxcon_state_s *priv,
 
   /* Get the size of the font glyph (which may not have been created yet) */
 
-  ret = nxcon_fontsize(priv->font, bm->code, &fsize);
+  ret = nxterm_fontsize(priv->font, bm->code, &fsize);
   if (ret < 0)
     {
       /* This would mean that there is no bitmap for the character code and
@@ -632,7 +632,7 @@ void nxcon_fillchar(FAR struct nxcon_state_s *priv,
 
       /* Find (or create) the glyph that goes with this font */
 
-      glyph = nxcon_getglyph(priv->font, priv, bm->code);
+      glyph = nxterm_getglyph(priv->font, priv, bm->code);
       if (!glyph)
         {
           /* Shouldn't happen */

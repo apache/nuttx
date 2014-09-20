@@ -1,5 +1,5 @@
 /****************************************************************************
- * nuttx/graphics/nxterm/nxcon_sem.c
+ * nuttx/graphics/nxterm/nxterm_register.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,18 +39,18 @@
 
 #include <nuttx/config.h>
 
-#include <unistd.h>
-#include <semaphore.h>
+#include <sys/types.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
 #include <assert.h>
 #include <errno.h>
+#include <debug.h>
 
-#include "nxcon_internal.h"
+#include <nuttx/kmalloc.h>
+#include <nuttx/fs/fs.h>
 
-#ifdef CONFIG_DEBUG
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#include "nxterm.h"
 
 /****************************************************************************
  * Private Function Prototypes
@@ -69,61 +69,92 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxcon_semwait and nxcon_sempost
- *
- * Description:
- *   If debug is on, then lower level code may attempt console output while
- *   we are doing console output!  In this case, we will toss the nested
- *   output to avoid deadlocks and infinite loops.
- *
- * Input Parameters:
- *   priv - Driver data structure
- *
- * Returned Value:
- *
- *
+ * Name: nxterm_allocate
  ****************************************************************************/
 
-int nxcon_semwait(FAR struct nxcon_state_s *priv)
+FAR struct nxterm_state_s *
+  nxterm_register(NXTERM handle, FAR struct nxterm_window_s *wndo,
+                 FAR const struct nxterm_operations_s *ops, int minor)
 {
-  pid_t me;
+  FAR struct nxterm_state_s *priv;
+  char devname[NX_DEVNAME_SIZE];
   int ret;
 
-  /* Does I already hold the semaphore */
+  DEBUGASSERT(handle && wndo && ops && (unsigned)minor < 256);
 
-  me = getpid();
-  if (priv->holder != me)
+  /* Allocate the driver structure */
+
+  priv = (FAR struct nxterm_state_s *)kmm_zalloc(sizeof(struct nxterm_state_s));
+  if (!priv)
     {
-      /* No.. then wait until the thread that does hold it is finished with it */
-
-      ret = sem_wait(&priv->exclsem);
-      if (ret == OK)
-        {
-          /* No I hold the semaphore */
-
-          priv->holder = me;
-        }
-      return ret;
+      gdbg("Failed to allocate the NX driver structure\n");
+      return NULL;
     }
 
-  /* Abort, abort, abort!  I have been re-entered */
+  /* Initialize the driver structure */
 
-  set_errno(EBUSY);
-  return ERROR;
+  priv->ops     = ops;
+  priv->handle  = handle;
+  priv->minor   = minor;
+  memcpy(&priv->wndo, wndo, sizeof( struct nxterm_window_s));
+
+  sem_init(&priv->exclsem, 0, 1);
+#ifdef CONFIG_DEBUG
+  priv->holder  = NO_HOLDER;
+#endif
+
+#ifdef CONFIG_NXTERM_NXKBDIN
+  sem_init(&priv->waitsem, 0, 0);
+#endif
+
+  /* Select the font */
+
+  priv->font = nxf_getfonthandle(wndo->fontid);
+  if (!priv->font)
+    {
+      gdbg("Failed to get font ID %d: %d\n", wndo->fontid, errno);
+      goto errout;
+    }
+
+  FAR const struct nx_font_s *fontset;
+
+  /* Get information about the font set being used and save this in the
+   * state structure
+   */
+
+  fontset         = nxf_getfontset(priv->font);
+  priv->fheight   = fontset->mxheight;
+  priv->fwidth    = fontset->mxwidth;
+  priv->spwidth   = fontset->spwidth;
+
+  /* Set up the text cache */
+
+  priv->maxchars  = CONFIG_NXTERM_MXCHARS;
+
+  /* Set up the font glyph bitmap cache */
+
+  priv->maxglyphs = CONFIG_NXTERM_CACHESIZE;
+
+  /* Set the initial display position */
+
+  nxterm_home(priv);
+
+  /* Show the cursor */
+
+  priv->cursor.code = CONFIG_NXTERM_CURSORCHAR;
+  nxterm_showcursor(priv);
+
+  /* Register the driver */
+
+  snprintf(devname, NX_DEVNAME_SIZE, NX_DEVNAME_FORMAT, minor);
+  ret = register_driver(devname, &g_nxterm_drvrops, 0666, priv);
+  if (ret < 0)
+    {
+      gdbg("Failed to register %s\n", devname);
+    }
+  return (NXTERM)priv;
+
+errout:
+  kmm_free(priv);
+  return NULL;
 }
-
-int nxcon_sempost(FAR struct nxcon_state_s *priv)
-{
-  pid_t me = getpid();
-
-  /* Make sure that I really hold the semaphore */
-
-  ASSERT(priv->holder == me);
-
-  /* Then let go of it */
-
-  priv->holder = NO_HOLDER;
-  return sem_post(&priv->exclsem);
-}
-
-#endif /* CONFIG_DEBUG */

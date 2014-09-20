@@ -33,16 +33,16 @@
 #
 ############################################################################
 
-NXCON_ASRCS  =
-NXCON_CSRCS  = nx_register.c nxcon_driver.c nxcon_font.c nxcon_putc.c
-NXCON_CSRCS += nxcon_redraw.c nxcon_register.c nxcon_scroll.c
-NXCON_CSRCS += nxcon_vt100.c nxcon_unregister.c nxtk_register.c
-NXCON_CSRCS += nxtool_register.c
+NXTERM_ASRCS  =
+NXTERM_CSRCS  = nx_register.c nxterm_driver.c nxterm_font.c nxterm_putc.c
+NXTERM_CSRCS += nxterm_redraw.c nxterm_register.c nxterm_scroll.c
+NXTERM_CSRCS += nxterm_vt100.c nxterm_unregister.c nxtk_register.c
+NXTERM_CSRCS += nxtool_register.c
 
 ifeq ($(CONFIG_NXTERM_NXKBDIN),y)
-NXCON_CSRCS += nxcon_kbdin.c
+NXTERM_CSRCS += nxterm_kbdin.c
 endif
 
 ifeq ($(CONFIG_DEBUG),y)
-NXCON_CSRCS += nxcon_sem.c
+NXTERM_CSRCS += nxterm_sem.c
 endif

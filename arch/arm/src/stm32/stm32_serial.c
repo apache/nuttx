@@ -68,7 +68,7 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Preprocessor Definitions
  ****************************************************************************/
 /* Some sanity checks *******************************************************/
 /* DMA configuration */
@@ -1308,8 +1308,6 @@ static void up_set_format(struct uart_dev_s *dev)
 #endif
 
   up_serialout(priv, STM32_USART_CR3_OFFSET, regval);
-
-#endif
 }
 #endif /* CONFIG_SUPPRESS_UART_CONFIG */
 
@@ -1327,7 +1325,7 @@ static void up_set_format(struct uart_dev_s *dev)
 
 static void up_set_apb_clock(struct uart_dev_s *dev, bool on)
 {
-  struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   uint32_t rcc_en;
   uint32_t regaddr;
 
@@ -2331,7 +2329,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
  * Name: up_txready
  *
  * Description:
- *   Return true if the tranmsit data register is empty
+ *   Return true if the transmit data register is empty
  *
  ****************************************************************************/
 
@@ -2530,6 +2528,7 @@ static int up_pm_prepare(struct pm_callback_s *cb, enum pm_state_e pmstate)
   return OK;
 }
 #endif
+#endif /* HAVE_UART */
 #endif /* USE_SERIALDRIVER */
 
 /****************************************************************************
