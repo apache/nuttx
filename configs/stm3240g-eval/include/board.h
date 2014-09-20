@@ -1,4 +1,4 @@
-/************************************************************************************
+
  * configs/stm3240g-eval/include/board.h
  * include/arch/board/board.h
  *
@@ -444,7 +444,7 @@
 
 /* DMA Channl/Stream Selections *****************************************************/
 /* Stream selections are arbitrary for now but might become important in the future
- * is we set aside more DMA channels/streams.
+ * if we set aside more DMA channels/streams.
  *
  * SDIO DMA
  *   DMAMAP_SDIO_1 = Channel 4, Stream 3
