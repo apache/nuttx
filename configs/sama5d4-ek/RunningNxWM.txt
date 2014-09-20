@@ -92,7 +92,7 @@ the following icons will be visible:
 
 1. Scales: This will perform touchscreen calibration again.
 
-2. NxConsole.  This is will bring up a graphics terminal running the
+2. NxTerm.  This is will bring up a graphics terminal running the
    NuttShell (NSH).  You interact with NSH using the attached USB
    keyboard.
 

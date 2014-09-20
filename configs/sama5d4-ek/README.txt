@@ -4518,7 +4518,7 @@ Configurations
 
        - It boots into a graphic, window manage environment instead of
          the serial console command line.
-       - The console command line is still available within NxConsole
+       - The console command line is still available within NxTerm
          windows.
        - Obviously, the nx and touchscreen built in applications cannot
          be supported.
@@ -4584,11 +4584,11 @@ Configurations
 
        Access to the NSH console is available in two ways:
 
-       a. The NxWM provides a graphics-based terminals (called NxConsoles);
-          The console command line is still available within NxConsole
+       a. The NxWM provides a graphics-based terminals (called NxTerms);
+          The console command line is still available within NxTerm
           windows once NxWM is up and running.  The console input (stdin) is
           provided via a USB HID keyboard, but console output will go to the
-          NxConsole terminal.  See below for more information about the USB
+          NxTerm terminal.  See below for more information about the USB
           HID keyboard input,
 
 |      b. Telnet NSH sessions are still supported and this is, in general,
@@ -4596,7 +4596,7 @@ Configurations
 
        As with the NSH configuration, debug output will still go to the
        circular RAMLOG buffer but cannot be accessed from a serial console.
-       Instead, you will need use the dmesg command from an NxConsole or
+       Instead, you will need use the dmesg command from an NxTerm or
        from a Telnet session to see the debug output
 
     5. USB HID Keyboard Input
@@ -4611,19 +4611,19 @@ Configurations
 
        The USB keyboard is configured to replace the NSH stdin device some
        that NSH will take input from the USB keyboard.  This has to be
-       done a little differently for the case of NxWM::CNxConsoles than
+       done a little differently for the case of NxWM::CNxTerms than
        in the standard NSH configuration.  Here the relevant configuration
        options are:
 
          CONFIG_NXWM_KEYBOARD_USBHOST=y
          CONFIG_NXWM_KEYBOARD_DEVPATH="/dev/kbda"
 
-       NSH will then automatically start when the NxConsole is started:
+       NSH will then automatically start when the NxTerm is started:
 
          NuttShell (NSH) NuttX-7.3
          nsh>
 
-       When the NxConsole comes up, it will attempt to use /dev/kbda device
+       When the NxTerm comes up, it will attempt to use /dev/kbda device
        for input.  Obviously, you cannot enter text if there is no keyboard
        but otherwise you will not see any indication whether a keyboard is
        connected or not.

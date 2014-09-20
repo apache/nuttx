@@ -647,7 +647,7 @@ CONFIG_EXAMPLES_NSH=y
 # CONFIG_EXAMPLES_NX is not set
 
 #
-# NxConsole Example
+# NxTerm Example
 #
 # CONFIG_EXAMPLES_NXTERM is not set
 

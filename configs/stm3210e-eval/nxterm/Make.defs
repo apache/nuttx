@@ -1,5 +1,5 @@
 ############################################################################
-# configs/stm3210e-eval/nxconsole/Make.defs
+# configs/stm3210e-eval/nxterm/Make.defs
 #
 #   Copyright (C) 2012 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

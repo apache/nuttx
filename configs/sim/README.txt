@@ -452,9 +452,9 @@ nx11
        CONFG_NX_MULTIUSER=y
        CONFIG_DISABLE_MQUEUE=n
 
-   6. apps/examples/nxconsole
+   6. apps/examples/nxterm
 
-      This configuration is also set up to use the apps/examples/nxconsole
+      This configuration is also set up to use the apps/examples/nxterm
       test instead of apps/examples/nx.  To enable this configuration,
       First, select Multi-User mode as described above.  Then add the
       following definitions to the defconfig file:
@@ -501,7 +501,7 @@ nxwm
 
   1. There is an issue with running this example under the
      simulation.  In the default configuration, this example will
-     run the NxConsole example which waits on readline() for console
+     run the NxTerm example which waits on readline() for console
      input.  When it calls readline(), the whole system blocks
      waiting from input from the host OS.  So, in order to get
      this example to run, you must comment out the readline call in

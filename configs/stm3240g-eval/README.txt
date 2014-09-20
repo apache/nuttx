@@ -1003,8 +1003,8 @@ Where <subdir> is one of the following:
           top-level TODO file).  Without these NSH commands, there is no use
           for networking in this configuration.
 
-       b. The NxConsole windows are disabled. There are also issues with the
-          NxConsole build now (see the top-level TODO file).
+       b. The NxTerm windows are disabled. There are also issues with the
+          NxTerm build now (see the top-level TODO file).
 
        c. The initialization sequence is quite different:  NX and the
           touchscreen are initialized in kernel mode by logic in this src/
@@ -1396,10 +1396,10 @@ Where <subdir> is one of the following:
 
        There is nothing in the DMA driver to prevent this now.
 
-  nxconsole:
+  nxterm:
   ----------
     This is yet another NSH configuration.  This NSH configuration differs
-    from the others, however, in that it uses the NxConsole driver to host
+    from the others, however, in that it uses the NxTerm driver to host
     the NSH shell.
 
     NOTES:
@@ -1421,12 +1421,12 @@ Where <subdir> is one of the following:
          CONFG_NX_MULTIUSER=y
          CONFIG_DISABLE_MQUEUE=n
 
-       The following definition in the defconfig file to enables the NxConsole
+       The following definition in the defconfig file to enables the NxTerm
        driver:
 
          CONFIG_NXTERM=y
 
-       And this selects examples/nxconsole instead of examples/nsh:
+       And this selects examples/nxterm instead of examples/nsh:
 
          CONFIG_EXAMPLES_NXTERM=y
 
