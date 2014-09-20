@@ -8599,3 +8599,8 @@
 	* arch/sim/Kconfig, src/up_spiflash.c, Makefile, up_initialize.c, and
 	  up_internal.h: Emulated SPI FLASH driver for the sim target from Ken
 	  Pettit (2014-9-19).
+	* configs/stm32f4discovery/include/board.h, netnsh/defconfig,
+	  src/Makefile, stm32_sdio.c, stm32_boot.c, stm32_nsh.c,
+	  stm32_bringup.c, and stm32f4discovery.h: STM32F4Discovery:  Add
+	  support for the microSD card slot on the STM32F4DIS-BB base board
+	  (2014-9-20).
