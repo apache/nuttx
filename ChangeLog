@@ -8605,4 +8605,6 @@
 	  support for the microSD card slot on the STM32F4DIS-BB base board
 	  (2014-9-20).
 	* Change all occurrences of NxConsole to NxTerm (2014-9-20).
+	* include/sys/ipc.h, shm.h, mman.h, and types.h: Add shared memory
+	  definitions, types, prototypes (2014-9-22).
 
