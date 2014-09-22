@@ -1,5 +1,5 @@
 /************************************************************************
- * mm/umm_addregion.c
+ * mm/umm_heap/umm_initialize.c
  *
  *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,12 +39,22 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
+
 #include <nuttx/mm.h>
 
 #if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
 
 /************************************************************************
  * Pre-processor definition
+ ************************************************************************/
+
+/************************************************************************
+ * Private Types
+ ************************************************************************/
+
+/************************************************************************
+ * Public Data
  ************************************************************************/
 
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
@@ -61,16 +71,9 @@
 #else
 /* Otherwise, the user heap data structures are in common .bss */
 
-#  define USR_HEAP &g_mmheap
+struct mm_heap_s g_mmheap;
+#define USR_HEAP &g_mmheap
 #endif
-
-/************************************************************************
- * Private Types
- ************************************************************************/
-
-/************************************************************************
- * Public Data
- ************************************************************************/
 
 /************************************************************************
  * Private Functions
@@ -81,25 +84,53 @@
  ************************************************************************/
 
 /************************************************************************
- * Name: umm_addregion
+ * Name: umm_initialize
  *
  * Description:
- *   This is a simple wrapper for the mm_addregion() function.  This
- *   function is exported from the user-space blob so that the kernel
- *   can initialize the user-mode allocator.
+ *   This is a simple wrapper for the mm_initialize() function.  This
+ *   function will initialize the user heap.
+ *
+ *   CONFIG_BUILD_FLAT:
+ *     There is only kernel mode "blob" containing both containing both
+ *     kernel and application code.  There is only one heap that use is
+ *     used by both the kernel and application logic.
+ *
+ *     In this configuration, this function is called early in os_start()
+ *     to initialize the common heap.
+ *
+ *   CONFIG_BUILD_PROTECTED
+ *     In this configuration, there are two "blobs", one containing
+ *     protected kernel logic and one containing unprotected application
+ *     logic.  Depending upon the setting of CONFIG_MM_KERNEL_HEAP there
+ *     may be only a signal shared heap, much as with CONFIG_BUILD_FLAT.
+ *     Or there may be separate protected/kernel and unprotected/user
+ *     heaps.
+ *
+ *     In either case, this function is still called early in os_start()
+ *     to initialize the user heap.
+ *
+ *   CONFIG_BUILD_KERNEL
+ *     In this configuration there are multiple user heaps, one for each
+ *     user process.  Furthermore, each heap is initially empty; memory
+ *     is added to each heap dynamically via sbrk().  The heap data
+ *     structure was set to zero when the address environment was created.
+ *     Otherwise, the heap is uninitialized.
+ *
+ *     This function is not called at all.  Rather, this function is called
+ *     when each user process is created before the first allocation is made.
  *
  * Parameters:
- *   heap_start - Address of the beginning of the memory region
- *   heap_size  - The size (in bytes) if the memory region.
+ *   heap_start - Address of the beginning of the (initial) memory region
+ *   heap_size  - The size (in bytes) if the (initial) memory region.
  *
  * Return Value:
  *   None
  *
  ************************************************************************/
 
-void umm_addregion(FAR void *heap_start, size_t heap_size)
+void umm_initialize(FAR void *heap_start, size_t heap_size)
 {
-  mm_addregion(USR_HEAP, heap_start, heap_size);
+  mm_initialize(USR_HEAP, heap_start, heap_size);
 }
 
 #endif /* !CONFIG_BUILD_PROTECTED || !__KERNEL__ */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * mm/umm_mallinfo.c
+ * mm/umm_heap/umm_realloc.c
  *
  *   Copyright (C) 2007, 2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -67,10 +67,6 @@
 #endif
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -79,29 +75,23 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mallinfo
+ * Name: realloc
  *
  * Description:
- *   mallinfo returns a copy of updated current heap information for the
- *   user heap.
+ *   Re-allocate memory in the user heap.
+ *
+ * Parameters:
+ *   oldmem  - The old memory allocated
+ *   newsize - Size (in bytes) of the new memory region to be re-allocated.
+ *
+ * Return Value:
+ *   The address of the re-allocated memory (NULL on failure to re-allocate)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_CAN_PASS_STRUCTS
-
-struct mallinfo mallinfo(void)
+FAR void *realloc(FAR void *oldmem, size_t size)
 {
-  struct mallinfo info;
-  mm_mallinfo(USR_HEAP, &info);
-  return info;
+  return mm_realloc(USR_HEAP, oldmem, size);
 }
 
-#else
-
-int mallinfo(struct mallinfo *info)
-{
-  return mm_mallinfo(USR_HEAP, info);
-}
-
-#endif /* CONFIG_CAN_PASS_STRUCTS */
 #endif /* !CONFIG_BUILD_PROTECTED || !__KERNEL__ */

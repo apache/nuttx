@@ -1,5 +1,5 @@
 /****************************************************************************
- * mm/umm_extend.c
+ * mm/umm_heap/umm_breakaddr.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,6 +39,8 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
+
 #include <nuttx/mm.h>
 
 #if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
@@ -69,17 +71,16 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: umm_extend
+ * Name: umm_brkaddr
  *
  * Description:
- *   Extend a region in the user heap by add a block of (virtually)
- *   contiguous memory to the end of the heap.
+ *   Return the break address of a region in the user heap
  *
  ****************************************************************************/
 
-void umm_extend(FAR void *mem, size_t size, int region)
+FAR void *umm_brkaddr(int region)
 {
-  mm_extend(USR_HEAP, mem, size, region);
+  return mm_brkaddr(USR_HEAP, region);
 }
 
 #endif /* !CONFIG_BUILD_PROTECTED || !__KERNEL__ */

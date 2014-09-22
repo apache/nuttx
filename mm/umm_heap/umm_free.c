@@ -1,7 +1,7 @@
 /****************************************************************************
- * mm/umm_breakaddr.c
+ * mm/umm_heap/umm_free.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <assert.h>
+#include <stdlib.h>
 
 #include <nuttx/mm.h>
 
@@ -67,20 +67,25 @@
 #endif
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: umm_brkaddr
+ * Name: free
  *
  * Description:
- *   Return the break address of a region in the user heap
+ *   Returns a chunk of user memory to the list of free nodes,  merging with
+ *   adjacent free chunks if possible.
  *
  ****************************************************************************/
 
-FAR void *umm_brkaddr(int region)
+void free(FAR void *mem)
 {
-  return mm_brkaddr(USR_HEAP, region);
+  mm_free(USR_HEAP, mem);
 }
 
 #endif /* !CONFIG_BUILD_PROTECTED || !__KERNEL__ */

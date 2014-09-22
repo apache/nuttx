@@ -1,5 +1,5 @@
 /************************************************************************
- * mm/umm_sem.c
+ * mm/umm_heap/umm_sem.c
  *
  *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

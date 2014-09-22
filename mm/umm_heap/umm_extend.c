@@ -1,7 +1,7 @@
 /****************************************************************************
- * mm/mm_realloc.c
+ * mm/umm_heap/umm_extend.c
  *
- *   Copyright (C) 2007, 2009, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <stdlib.h>
-
 #include <nuttx/mm.h>
 
 #if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
@@ -67,31 +65,21 @@
 #endif
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: realloc
+ * Name: umm_extend
  *
  * Description:
- *   Re-allocate memory in the user heap.
- *
- * Parameters:
- *   oldmem  - The old memory allocated
- *   newsize - Size (in bytes) of the new memory region to be re-allocated.
- *
- * Return Value:
- *   The address of the re-allocated memory (NULL on failure to re-allocate)
+ *   Extend a region in the user heap by add a block of (virtually)
+ *   contiguous memory to the end of the heap.
  *
  ****************************************************************************/
 
-FAR void *realloc(FAR void *oldmem, size_t size)
+void umm_extend(FAR void *mem, size_t size, int region)
 {
-  return mm_realloc(USR_HEAP, oldmem, size);
+  mm_extend(USR_HEAP, mem, size, region);
 }
 
 #endif /* !CONFIG_BUILD_PROTECTED || !__KERNEL__ */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * mm/umm_calloc.c
+ * mm/umm/umm_zalloc.c
  *
  *   Copyright (C) 2007, 2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdlib.h>
+#include <string.h>
 
 #include <nuttx/mm.h>
 
@@ -70,17 +71,38 @@
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: calloc
+/************************************************************************
+ * Name: zalloc
  *
  * Description:
- *   calloc is a thin wrapper for mm_calloc()
+ *   Allocate and zero memory from the user heap.
  *
- ****************************************************************************/
+ * Parameters:
+ *   size - Size (in bytes) of the memory region to be allocated.
+ *
+ * Return Value:
+ *   The address of the allocated memory (NULL on failure to allocate)
+ *
+ ************************************************************************/
 
-FAR void *calloc(size_t n, size_t elem_size)
+FAR void *zalloc(size_t size)
 {
-  return mm_calloc(USR_HEAP, n, elem_size);
+#ifdef CONFIG_ARCH_ADDRENV
+  /* Use malloc() because it implements the sbrk() logic */
+
+  FAR void *alloc = malloc(size);
+  if (alloc)
+    {
+       memset(alloc, 0, size);
+    }
+
+  return alloc;
+
+#else
+  /* Use mm_zalloc() becuase it implements the clear */
+
+  return mm_zalloc(USR_HEAP, size);
+#endif
 }
 
 #endif /* !CONFIG_BUILD_PROTECTED || !__KERNEL__ */

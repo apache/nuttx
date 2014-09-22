@@ -1,7 +1,7 @@
 /****************************************************************************
- * mm/umm_free.c
+ * mm/umm_heap/umm_memalign.c
  *
- *   Copyright (C) 2007, 2009, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,17 +75,21 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: free
+ * Name: memalign
  *
  * Description:
- *   Returns a chunk of user memory to the list of free nodes,  merging with
- *   adjacent free chunks if possible.
+ *   memalign requests more than enough space from malloc, finds a region
+ *   within that chunk that meets the alignment request and then frees any
+ *   leading or trailing space.
+ *
+ *   The alignment argument must be a power of two (not checked).  8-byte
+ *   alignment is guaranteed by normal malloc calls.
  *
  ****************************************************************************/
 
-void free(FAR void *mem)
+FAR void *memalign(size_t alignment, size_t size)
 {
-  mm_free(USR_HEAP, mem);
+  return mm_memalign(USR_HEAP, alignment, size);
 }
 
 #endif /* !CONFIG_BUILD_PROTECTED || !__KERNEL__ */

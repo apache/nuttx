@@ -67,16 +67,7 @@ ifeq ($(CONFIG_BUILD_KERNEL),y)
 CSRCS += mm_sbrk.c
 endif
 
-# User allocator
-
-CSRCS += umm_initialize.c umm_addregion.c umm_sem.c
-CSRCS += umm_brkaddr.c umm_calloc.c umm_extend.c umm_free.c umm_mallinfo.c
-CSRCS += umm_malloc.c umm_memalign.c umm_realloc.c umm_zalloc.c
-
-ifeq ($(CONFIG_BUILD_KERNEL),y)
-CSRCS += umm_sbrk.c
-endif
-
+include umm_heap/Make.defs
 include kmm_heap/Make.defs
 include mm_gran/Make.defs
 

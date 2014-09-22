@@ -1,5 +1,5 @@
 ############################################################################
-# mm/kmm_heap/Make.defs
+# mm/umm_heap/Make.defs
 #
 #   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,23 +33,17 @@
 #
 ############################################################################
 
-# Kernel heap allocator
+# User heap allocator
 
-ifeq ($(CONFIG_MM_KERNEL_HEAP),y)
-CSRCS += kmm_initialize.c kmm_addregion.c kmm_sem.c
-CSRCS += kmm_brkaddr.c kmm_calloc.c kmm_extend.c kmm_free.c kmm_mallinfo.c
-CSRCS += kmm_malloc.c kmm_memalign.c kmm_realloc.c kmm_zalloc.c
+CSRCS += umm_initialize.c umm_addregion.c umm_sem.c
+CSRCS += umm_brkaddr.c umm_calloc.c umm_extend.c umm_free.c umm_mallinfo.c
+CSRCS += umm_malloc.c umm_memalign.c umm_realloc.c umm_zalloc.c
 
 ifeq ($(CONFIG_BUILD_KERNEL),y)
-CSRCS += kmm_sbrk.c
+CSRCS += umm_sbrk.c
 endif
 
-ifeq ($(CONFIG_DEBUG),y)
-CSRCS += kmm_heapmember.c
-endif
+# Add the user heap directory to the build
 
-# Add the kernel heap directory to the build
-
-DEPPATH += --dep-path kmm_heap
-VPATH += :kmm_heap
-endif
+DEPPATH += --dep-path umm_heap
+VPATH += :umm_heap

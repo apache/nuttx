@@ -1,7 +1,7 @@
 /****************************************************************************
- * mm/umm_sbrk.c
+ * mm/umm_heap/umm_malloc.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013-2014  Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,18 +39,18 @@
 
 #include <nuttx/config.h>
 
+#include <stdlib.h>
 #include <unistd.h>
 
 #include <nuttx/mm.h>
-#include <nuttx/addrenv.h>
-#include <nuttx/pgalloc.h>
 
-#if defined(CONFIG_BUILD_KERNEL)
+#if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifdef CONFIG_BUILD_KERNEL
 /* In the kernel build, there a multiple user heaps; one for each task
  * group.  In this build configuration, the user heap structure lies
  * in a reserved region at the beginning of the .bss/.data address
@@ -58,47 +58,84 @@
  * ARCH_DATA_RESERVE_SIZE
  */
 
-#define USR_HEAP (&ARCH_DATA_RESERVE->ar_usrheap)
+#  include <nuttx/addrenv.h>
+#  define USR_HEAP (&ARCH_DATA_RESERVE->ar_usrheap)
+
+#else
+/* Otherwise, the user heap data structures are in common .bss */
+
+#  define USR_HEAP &g_mmheap
+#endif
+
+/****************************************************************************
+ * Type Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: sbrk
+/************************************************************************
+ * Name: malloc
  *
  * Description:
- *    The sbrk() function is used to change the amount of space allocated
- *    for the calling process. The change is made by resetting the process'
- *    break value and allocating the appropriate amount of space.  The amount
- *    of allocated space increases as the break value increases.
+ *   Allocate memory from the user heap.
  *
- *    The sbrk() function adds 'incr' bytes to the break value and changes
- *    the allocated space accordingly. If incr is negative, the amount of
- *    allocated space is decreased by incr bytes. The current value of the
- *    program break is returned by sbrk(0). 
+ * Parameters:
+ *   size - Size (in bytes) of the memory region to be allocated.
  *
- * Input Parameters:
- *    incr - Specifies the number of bytes to add or to remove from the
- *      space allocated for the process.
+ * Return Value:
+ *   The address of the allocated memory (NULL on failure to allocate)
  *
- * Returned Value:
- *    Upon successful completion, sbrk() returns the prior break value.
- *    Otherwise, it returns (void *)-1 and sets errno to indicate the
- *    error:
- *
- *      ENOMEM - The requested change would allocate more space than
- *        allowed under system limits.
- *      EAGAIN - The total amount of system memory available for allocation
- *        to this process is temporarily insufficient. This may occur even
- *        though the space requested was less than the maximum data segment
- *        size.
- *
- ****************************************************************************/
+ ************************************************************************/
 
-FAR void *sbrk(intptr_t incr)
+FAR void *malloc(size_t size)
 {
-  return mm_sbrk(USR_HEAP, incr, CONFIG_ARCH_HEAP_NPAGES << MM_PGSHIFT);
+#ifdef CONFIG_BUILD_KERNEL
+  FAR void *brkaddr;
+  FAR void *mem;
+
+  /* Loop until we successfully allocate the memory or until an error
+   * occurs. If we fail to allocate memory on the first pass, then call
+   * sbrk to extend the heap by one page.  This may require several
+   * passes if more the size of the allocation is more than one page.
+   *
+   * An alternative would be to increase the size of the heap by the
+   * full requested allocation in sbrk().  Then the loop should never
+   * execute more than twice (but more memory than we need may be
+   * allocated).
+   */
+
+  do
+    {
+      mem = mm_malloc(USR_HEAP, size);
+      if (!mem)
+        {
+          brkaddr = sbrk(size);
+          if (brkaddr == (FAR void *)-1)
+            {
+              return NULL;
+            }
+        }
+    }
+  while (mem == NULL);
+
+  return mem;
+#else
+  return mm_malloc(USR_HEAP, size);
+#endif
 }
 
-#endif /* CONFIG_BUILD_KERNEL */
+#endif /* !CONFIG_BUILD_PROTECTED || !__KERNEL__ */

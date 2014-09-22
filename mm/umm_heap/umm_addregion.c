@@ -1,7 +1,7 @@
-/****************************************************************************
- * mm/umm_memalign.c
+/************************************************************************
+ * mm/umm_heap/umm_addregion.c
  *
- *   Copyright (C) 2007, 2009, 2011, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,23 +31,21 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
+ ************************************************************************/
 
-/****************************************************************************
+/************************************************************************
  * Included Files
- ****************************************************************************/
+ ************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <stdlib.h>
 
 #include <nuttx/mm.h>
 
 #if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+/************************************************************************
+ * Pre-processor definition
+ ************************************************************************/
 
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
 /* In the kernel build, there a multiple user heaps; one for each task
@@ -66,30 +64,42 @@
 #  define USR_HEAP &g_mmheap
 #endif
 
-/****************************************************************************
+/************************************************************************
+ * Private Types
+ ************************************************************************/
+
+/************************************************************************
+ * Public Data
+ ************************************************************************/
+
+/************************************************************************
  * Private Functions
- ****************************************************************************/
+ ************************************************************************/
 
-/****************************************************************************
+/************************************************************************
  * Public Functions
- ****************************************************************************/
+ ************************************************************************/
 
-/****************************************************************************
- * Name: memalign
+/************************************************************************
+ * Name: umm_addregion
  *
  * Description:
- *   memalign requests more than enough space from malloc, finds a region
- *   within that chunk that meets the alignment request and then frees any
- *   leading or trailing space.
+ *   This is a simple wrapper for the mm_addregion() function.  This
+ *   function is exported from the user-space blob so that the kernel
+ *   can initialize the user-mode allocator.
  *
- *   The alignment argument must be a power of two (not checked).  8-byte
- *   alignment is guaranteed by normal malloc calls.
+ * Parameters:
+ *   heap_start - Address of the beginning of the memory region
+ *   heap_size  - The size (in bytes) if the memory region.
  *
- ****************************************************************************/
+ * Return Value:
+ *   None
+ *
+ ************************************************************************/
 
-FAR void *memalign(size_t alignment, size_t size)
+void umm_addregion(FAR void *heap_start, size_t heap_size)
 {
-  return mm_memalign(USR_HEAP, alignment, size);
+  mm_addregion(USR_HEAP, heap_start, heap_size);
 }
 
 #endif /* !CONFIG_BUILD_PROTECTED || !__KERNEL__ */
