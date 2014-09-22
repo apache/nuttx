@@ -8607,4 +8607,6 @@
 	* Change all occurrences of NxConsole to NxTerm (2014-9-20).
 	* include/sys/ipc.h, shm.h, mman.h, and types.h: Add shared memory
 	  definitions, types, prototypes (2014-9-22).
+	* fs/smartfs/smartfs_smart.c: SMART FS update from Ken Pettit
+	  (2014-9-22).
 
