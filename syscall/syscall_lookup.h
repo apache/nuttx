@@ -200,6 +200,15 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
 #  endif
 #endif
 
+/* Shared memory interfaces */
+
+#ifdef CONFIG_MM_SHM
+  SYSCALL_LOOKUP(shmget,                  3, STUB_shmget)
+  SYSCALL_LOOKUP(shmat,                   3, STUB_shmat)
+  SYSCALL_LOOKUP(shmctl,                  3, STUB_shmctl)
+  SYSCALL_LOOKUP(shmdt,                   1, STUB_shmdt)
+#endif
+
 /* The following are defined if pthreads are enabled */
 
 #ifndef CONFIG_DISABLE_PTHREAD

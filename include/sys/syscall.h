@@ -275,13 +275,25 @@
 #    define SYS_rmdir                  (__SYS_mountpoint+4)
 #    define SYS_umount                 (__SYS_mountpoint+5)
 #    define SYS_unlink                 (__SYS_mountpoint+6)
-#    define __SYS_pthread              (__SYS_mountpoint+7)
+#    define __SYS_shm                  (__SYS_mountpoint+7)
 #  else
-#    define __SYS_pthread              __SYS_mountpoint
+#    define __SYS_shm                  __SYS_mountpoint
 #  endif
 
 #else
-#  define __SYS_pthread                __SYS_filedesc
+#  define __SYS_shm                    __SYS_filedesc
+#endif
+
+/* Shared memory interfaces */
+
+#ifdef CONFIG_MM_SHM
+#    define SYS_shmget                 (__SYS_shm+0)
+#    define SYS_shmat                  (__SYS_shm+1)
+#    define SYS_shmctl                 (__SYS_shm+2)
+#    define SYS_shmdt                  (__SYS_shm+3)
+#    define __SYS_pthread              (__SYS_shm+4)
+#else
+#  define __SYS_pthread                __SYS_shm
 #endif
 
 /* The following are defined if pthreads are enabled */

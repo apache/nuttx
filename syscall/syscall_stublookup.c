@@ -210,6 +210,16 @@ uintptr_t STUB_rmdir(int nbr, uintptr_t parm1);
 uintptr_t STUB_umount(int nbr, uintptr_t parm1);
 uintptr_t STUB_unlink(int nbr, uintptr_t parm1);
 
+/* Shared memory interfaces */
+
+uintptr_t STUB_shmget(int nbr, uintptr_t parm1, uintptr_t parm2,
+            uintptr_t parm3);
+uintptr_t STUB_shmat(int nbr, uintptr_t parm1, uintptr_t parm2,
+            uintptr_t parm3);
+uintptr_t STUB_shmctl(int nbr, uintptr_t parm1, uintptr_t parm2,
+            uintptr_t parm3);
+uintptr_t STUB_shmdt(int nbr, uintptr_t parm1);
+
 /* The following are defined if pthreads are enabled */
 
 uintptr_t STUB_pthread_barrier_destroy(int nbr, uintptr_t parm1);
