@@ -8613,3 +8613,5 @@
 	  mm/mm_gran/. (2014-9-22).
 	* mm/kmm_heap/:  Move kernel heap allocator and page allocator from mm/.
 	  to mm/kmm_heap/. (2014-9-22).
+	* mm/umm_heap/:  Move user heap allocator and page allocator from mm/.
+	  to mm/umm_heap/. (2014-9-22).
