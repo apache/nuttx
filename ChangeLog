@@ -8632,3 +8632,6 @@
 	  Documentation/NuttxUserGuide.html: Add the documentation, build
 	  framework, and skeleton files for the shared memory feature (no logic
 	  yet provided) (2014-9-22).
+	* include/sys/syscall.h, syscall/syscall.csv, syscall_lookup.h, and
+	  syscall_stublookup.c: Add system calls for shared memory interfaces
+	  (2014-9-22).
