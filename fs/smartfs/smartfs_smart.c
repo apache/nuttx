@@ -710,19 +710,22 @@ static ssize_t smartfs_write(FAR struct file *filep, const char *buffer,
 
       /* Now perform the write. */
 
-      ret = FS_IOCTL(fs, BIOC_WRITESECT, (unsigned long) &readwrite);
-      if (ret < 0)
+      if (readwrite.count > 0)
         {
-          fdbg("Error %d writing sector %d data\n", ret, sf->currsector);
-          goto errout_with_semaphore;
+          ret = FS_IOCTL(fs, BIOC_WRITESECT, (unsigned long) &readwrite);
+          if (ret < 0)
+            {
+              fdbg("Error %d writing sector %d data\n", ret, sf->currsector);
+              goto errout_with_semaphore;
+            }
+
+          /* Update our control variables */
+
+          sf->filepos += readwrite.count;
+          sf->curroffset += readwrite.count;
+          buflen -= readwrite.count;
+          byteswritten += readwrite.count;
         }
-
-      /* Update our control variables */
-
-      sf->filepos += readwrite.count;
-      sf->curroffset += readwrite.count;
-      buflen -= readwrite.count;
-      byteswritten += readwrite.count;
 
       /* Test if we wrote to the end of the current sector */
 
@@ -771,21 +774,24 @@ static ssize_t smartfs_write(FAR struct file *filep, const char *buffer,
 
       /* Perform the write */
 
-      ret = FS_IOCTL(fs, BIOC_WRITESECT, (unsigned long) &readwrite);
-      if (ret < 0)
+      if (readwrite.count > 0)
         {
-          fdbg("Error %d writing sector %d data\n", ret, sf->currsector);
-          goto errout_with_semaphore;
+          ret = FS_IOCTL(fs, BIOC_WRITESECT, (unsigned long) &readwrite);
+          if (ret < 0)
+            {
+              fdbg("Error %d writing sector %d data\n", ret, sf->currsector);
+              goto errout_with_semaphore;
+            }
+
+          /* Update our control variables */
+
+          sf->entry.datlen += readwrite.count;
+          sf->byteswritten += readwrite.count;
+          sf->filepos += readwrite.count;
+          sf->curroffset += readwrite.count;
+          buflen -= readwrite.count;
+          byteswritten += readwrite.count;
         }
-
-      /* Update our control variables */
-
-      sf->entry.datlen += readwrite.count;
-      sf->byteswritten += readwrite.count;
-      sf->filepos += readwrite.count;
-      sf->curroffset += readwrite.count;
-      buflen -= readwrite.count;
-      byteswritten += readwrite.count;
 
       /* Test if we wrote a full sector of data */
 
