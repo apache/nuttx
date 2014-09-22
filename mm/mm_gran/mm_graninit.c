@@ -1,5 +1,5 @@
 /****************************************************************************
- * mm/mm_graninit.c
+ * mm/mm_gran/mm_graninit.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -45,7 +45,7 @@
 #include <nuttx/gran.h>
 #include <nuttx/kmalloc.h>
 
-#include "mm_gran.h"
+#include "mm_gran/mm_gran.h"
 
 #ifdef CONFIG_GRAN
 

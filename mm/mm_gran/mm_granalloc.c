@@ -1,5 +1,5 @@
 /****************************************************************************
- * mm/mm_granalloc.c
+ * mm/mm_gran/mm_granalloc.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -43,7 +43,7 @@
 
 #include <nuttx/gran.h>
 
-#include "mm_gran.h"
+#include "mm_gran/mm_gran.h"
 
 #ifdef CONFIG_GRAN
 

@@ -1,7 +1,7 @@
 /****************************************************************************
- * mm/mm_granmark.c
+ * mm/mm_gran/mm_granfree.c
  *
- *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@
 
 #include <nuttx/gran.h>
 
-#include "mm_gran.h"
+#include "mm_gran/mm_gran.h"
 
 #ifdef CONFIG_GRAN
 
@@ -52,81 +52,119 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: gran_mark_allocated
+ * Name: gran_common_free
  *
  * Description:
- *   Mark a range of granules as allocated.
+ *   Return memory to the granule heap.
  *
  * Input Parameters:
- *   priv  - The granule heap state structure.
- *   alloc - The address of the allocation.
- *   ngranules - The number of granules allocated
+ *   handle - The handle previously returned by gran_initialize
+ *   memory - A pointer to memory previoiusly allocated by gran_alloc.
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void gran_mark_allocated(FAR struct gran_s *priv, uintptr_t alloc,
-                         unsigned int ngranules)
+static inline void gran_common_free(FAR struct gran_s *priv,
+                                    FAR void *memory, size_t size)
 {
   unsigned int granno;
   unsigned int gatidx;
   unsigned int gatbit;
+  unsigned int granmask;
+  unsigned int ngranules;
   unsigned int avail;
   uint32_t     gatmask;
 
-  /* Determine the granule number of the allocation */
+  DEBUGASSERT(priv && memory && size <= 32 * (1 << priv->log2gran));
 
-  granno = (alloc - priv->heapstart) >> priv->log2gran;
+  /* Get exclusive access to the GAT */
 
-  /* Determine the GAT table index associated with the allocation */
+  gran_enter_critical(priv);
+
+  /* Determine the granule number of the first granule in the allocation */
+
+  granno = ((uintptr_t)memory - priv->heapstart) >> priv->log2gran;
+
+  /* Determine the GAT table index and bit number associated with the
+   * allocation.
+   */
 
   gatidx = granno >> 5;
   gatbit = granno & 31;
 
-  /* Mark bits in the GAT entry or entries */
+  /* Determine the number of granules in the allocation */
+
+  granmask =  (1 << priv->log2gran) - 1;
+  ngranules = (size + granmask) >> priv->log2gran;
+
+  /* Clear bits in the GAT entry or entries */
 
   avail = 32 - gatbit;
   if (ngranules > avail)
     {
-      /* Mark bits in the first GAT entry */
+      /* Clear bits in the first GAT entry */
 
-      gatmask =0xffffffff << gatbit;
-      DEBUGASSERT((priv->gat[gatidx] & gatmask) == 0);
+      gatmask = (0xffffffff << gatbit);
+      DEBUGASSERT((priv->gat[gatidx] & gatmask) == gatmask);
 
-      priv->gat[gatidx] |= gatmask;
+      priv->gat[gatidx] &= ~gatmask;
       ngranules -= avail;
 
-      /* Mark bits in the second GAT entry */
+      /* Clear bits in the second GAT entry */
 
       gatmask = 0xffffffff >> (32 - ngranules);
-      DEBUGASSERT((priv->gat[gatidx+1] & gatmask) == 0);
+      DEBUGASSERT((priv->gat[gatidx+1] & gatmask) == gatmask);
 
-      priv->gat[gatidx+1] |= gatmask;
+      priv->gat[gatidx+1] &= ~gatmask;
     }
 
-  /* Handle the case where where all of the granules come from one entry */
+  /* Handle the case where where all of the granules came from one entry */
 
   else
     {
-      /* Mark bits in a single GAT entry */
+      /* Clear bits in a single GAT entry */
 
       gatmask   = 0xffffffff >> (32 - ngranules);
       gatmask <<= gatbit;
-      DEBUGASSERT((priv->gat[gatidx] & gatmask) == 0);
+      DEBUGASSERT((priv->gat[gatidx] & gatmask) == gatmask);
 
-      priv->gat[gatidx] |= gatmask;
-      return;
+      priv->gat[gatidx] &= ~gatmask;
     }
+
+  gran_leave_critical(priv);
 }
+
+/****************************************************************************
+ * Global Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: gran_free
+ *
+ * Description:
+ *   Return memory to the granule heap.
+ *
+ * Input Parameters:
+ *   handle - The handle previously returned by gran_initialize
+ *   memory - A pointer to memory previoiusly allocated by gran_alloc.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_GRAN_SINGLE
+void gran_free(FAR void *memory, size_t size)
+{
+  return gran_common_free(g_graninfo, memory, size);
+}
+#else
+void gran_free(GRAN_HANDLE handle, FAR void *memory, size_t size)
+{
+  return gran_common_free((FAR struct gran_s *)handle, memory, size);
+}
+#endif
 
 #endif /* CONFIG_GRAN */

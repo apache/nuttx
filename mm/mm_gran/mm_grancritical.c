@@ -1,5 +1,5 @@
 /****************************************************************************
- * mm/mm_grancritical.c
+ * mm/mm_gran/mm_grancritical.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,7 +46,7 @@
 #include <arch/irq.h>
 #include <nuttx/gran.h>
 
-#include "mm_gran.h"
+#include "mm_gran/mm_gran.h"
 
 #ifdef CONFIG_GRAN
 

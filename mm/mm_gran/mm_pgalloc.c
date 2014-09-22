@@ -1,5 +1,5 @@
 /****************************************************************************
- * mm/mm_pgalloc.c
+ * mm/mm_gran/mm_pgalloc.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -44,7 +44,7 @@
 #include <nuttx/gran.h>
 #include <nuttx/pgalloc.h>
 
-#include "mm_gran.h"
+#include "mm_gran/mm_gran.h"
 
 #ifdef CONFIG_MM_PGALLOC
 

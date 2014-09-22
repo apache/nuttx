@@ -1,5 +1,5 @@
 /****************************************************************************
- * mm/mm_gran.h
+ * mm/mm_gran/mm_gran.h
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __MM_MM_GRAN_H
-#define __MM_MM_GRAN_H
+#ifndef __MM_MM_GRAN_MM_GRAHN_H
+#define __MM_MM_GRAN_MM_GRAHN_H
 
 /****************************************************************************
  * Included Files
@@ -148,4 +148,4 @@ void gran_leave_critical(FAR struct gran_s *priv);
 void gran_mark_allocated(FAR struct gran_s *priv, uintptr_t alloc,
                          unsigned int ngranules);
 
-#endif /* __MM_MM_GRAN_H */
+#endif /* __MM_MM_GRAN_MM_GRAHN_H */

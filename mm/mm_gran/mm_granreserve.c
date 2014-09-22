@@ -1,7 +1,7 @@
 /****************************************************************************
- * mm/mm_granfree.c
+ * mm/mm_gran/mm_granreserve.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@
 
 #include <nuttx/gran.h>
 
-#include "mm_gran.h"
+#include "mm_gran/mm_gran.h"
 
 #ifdef CONFIG_GRAN
 
@@ -52,103 +52,77 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: gran_common_free
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: gran_common_reserve
  *
  * Description:
- *   Return memory to the granule heap.
+ *   Reserve memory in the granule heap.  This will reserve the granules
+ *   that contain the start and end addresses plus all of the granules
+ *   in between.  This should be done early in the initialization sequence
+ *   before any other allocations are made.
+ *
+ *   Reserved memory can never be allocated (it can be freed however which
+ *   essentially unreserves the memory).
  *
  * Input Parameters:
- *   handle - The handle previously returned by gran_initialize
- *   memory - A pointer to memory previoiusly allocated by gran_alloc.
+ *   priv  - The granule heap state structure.
+ *   start - The address of the beginning of the region to be reserved.
+ *   size  - The size of the region to be reserved
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static inline void gran_common_free(FAR struct gran_s *priv,
-                                    FAR void *memory, size_t size)
+static inline void gran_common_reserve(FAR struct gran_s *priv,
+                                       uintptr_t start, size_t size)
 {
-  unsigned int granno;
-  unsigned int gatidx;
-  unsigned int gatbit;
-  unsigned int granmask;
-  unsigned int ngranules;
-  unsigned int avail;
-  uint32_t     gatmask;
-
-  DEBUGASSERT(priv && memory && size <= 32 * (1 << priv->log2gran));
-
-  /* Get exclusive access to the GAT */
-
-  gran_enter_critical(priv);
-
-  /* Determine the granule number of the first granule in the allocation */
-
-  granno = ((uintptr_t)memory - priv->heapstart) >> priv->log2gran;
-
-  /* Determine the GAT table index and bit number associated with the
-   * allocation.
-   */
-
-  gatidx = granno >> 5;
-  gatbit = granno & 31;
-
-  /* Determine the number of granules in the allocation */
-
-  granmask =  (1 << priv->log2gran) - 1;
-  ngranules = (size + granmask) >> priv->log2gran;
-
-  /* Clear bits in the GAT entry or entries */
-
-  avail = 32 - gatbit;
-  if (ngranules > avail)
+  if (size > 0)
     {
-      /* Clear bits in the first GAT entry */
+      uintptr_t mask = (1 << priv->log2gran) - 1;
+      uintptr_t end  = start + size - 1;
+      unsigned int ngranules;
 
-      gatmask = (0xffffffff << gatbit);
-      DEBUGASSERT((priv->gat[gatidx] & gatmask) == gatmask);
+      /* Get the aligned (down) start address and the aligned (up) end
+       * address
+       */
 
-      priv->gat[gatidx] &= ~gatmask;
-      ngranules -= avail;
+      start &= ~mask;
+      end = (end + mask) & ~mask;
 
-      /* Clear bits in the second GAT entry */
+      /* Calculate the new size in granules */
 
-      gatmask = 0xffffffff >> (32 - ngranules);
-      DEBUGASSERT((priv->gat[gatidx+1] & gatmask) == gatmask);
+      ngranules = ((end - start) >> priv->log2gran) + 1;
 
-      priv->gat[gatidx+1] &= ~gatmask;
+      /* And reserve the granules */
+
+      gran_mark_allocated(priv, start, ngranules);
     }
-
-  /* Handle the case where where all of the granules came from one entry */
-
-  else
-    {
-      /* Clear bits in a single GAT entry */
-
-      gatmask   = 0xffffffff >> (32 - ngranules);
-      gatmask <<= gatbit;
-      DEBUGASSERT((priv->gat[gatidx] & gatmask) == gatmask);
-
-      priv->gat[gatidx] &= ~gatmask;
-    }
-
-  gran_leave_critical(priv);
 }
 
 /****************************************************************************
- * Global Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: gran_free
+ * Name: gran_reserve
  *
  * Description:
- *   Return memory to the granule heap.
+ *   Reserve memory in the granule heap.  This will reserve the granules
+ *   that contain the start and end addresses plus all of the granules
+ *   in between.  This should be done early in the initialization sequence
+ *   before any other allocations are made.
+ *
+ *   Reserved memory can never be allocated (it can be freed however which
+ *   essentially unreserves the memory).
  *
  * Input Parameters:
  *   handle - The handle previously returned by gran_initialize
- *   memory - A pointer to memory previoiusly allocated by gran_alloc.
+ *   start  - The address of the beginning of the region to be reserved.
+ *   size   - The size of the region to be reserved
  *
  * Returned Value:
  *   None
@@ -156,14 +130,14 @@ static inline void gran_common_free(FAR struct gran_s *priv,
  ****************************************************************************/
 
 #ifdef CONFIG_GRAN_SINGLE
-void gran_free(FAR void *memory, size_t size)
+void gran_reserve(uintptr_t start, size_t size)
 {
-  return gran_common_free(g_graninfo, memory, size);
+  return gran_common_reserve(g_graninfo, start, size);
 }
 #else
-void gran_free(GRAN_HANDLE handle, FAR void *memory, size_t size)
+void gran_reserve(GRAN_HANDLE handle, uintptr_t start, size_t size)
 {
-  return gran_common_free((FAR struct gran_s *)handle, memory, size);
+  return gran_common_reserve((FAR struct gran_s *)handle, start, size);
 }
 #endif
 

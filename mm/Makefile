@@ -48,10 +48,17 @@ else
 endif
 endif
 
-# Core allocator logic
+# Sources and paths
 
 ASRCS  =
-CSRCS  = mm_initialize.c mm_sem.c mm_addfreechunk.c mm_size2ndx.c
+CSRCS  =
+
+DEPPATH = --dep-path .
+VPATH = .
+
+# Core allocator logic
+
+CSRCS += mm_initialize.c mm_sem.c mm_addfreechunk.c mm_size2ndx.c
 CSRCS += mm_shrinkchunk.c
 CSRCS += mm_brkaddr.c mm_calloc.c mm_extend.c mm_free.c mm_mallinfo.c
 CSRCS += mm_malloc.c mm_memalign.c mm_realloc.c mm_zalloc.c
@@ -88,16 +95,7 @@ endif
 
 # An optional granule allocator
 
-ifeq ($(CONFIG_GRAN),y)
-CSRCS += mm_graninit.c mm_granreserve.c mm_granalloc.c mm_granmark.c
-CSRCS += mm_granfree.c mm_grancritical.c
-
-# A page allocator based on the granule allocator
-
-ifeq ($(CONFIG_MM_PGALLOC),y)
-CSRCS += mm_pgalloc.c
-endif
-endif
+include mm_gran/Make.defs
 
 BINDIR ?= bin
 
@@ -145,10 +143,10 @@ endif
 
 .depend: Makefile $(SRCS)
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
-	$(Q) $(MKDEP) --obj-path ubin --obj-suffix $(OBJEXT) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make_ubin.dep
-	$(Q) $(MKDEP) --obj-path kbin --obj-suffix $(OBJEXT) "$(CC)" -- $(CFLAGS) $(KDEFINE) -- $(SRCS) >Make_kbin.dep
+	$(Q) $(MKDEP) --obj-path ubin --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make_ubin.dep
+	$(Q) $(MKDEP) --obj-path kbin --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(CFLAGS) $(KDEFINE) -- $(SRCS) >Make_kbin.dep
 else
-	$(Q) $(MKDEP) --obj-path bin --obj-suffix $(OBJEXT) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make_bin.dep
+	$(Q) $(MKDEP) --obj-path bin --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make_bin.dep
 endif
 	$(Q) touch $@
 
