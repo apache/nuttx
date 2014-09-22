@@ -8611,7 +8611,11 @@
 	  (2014-9-22).
 	* mm/mm_gran/:  Move granule allocator and page allocator from mm/. to
 	  mm/mm_gran/. (2014-9-22).
-	* mm/kmm_heap/:  Move kernel heap allocator and page allocator from mm/.
-	  to mm/kmm_heap/. (2014-9-22).
-	* mm/umm_heap/:  Move user heap allocator and page allocator from mm/.
-	  to mm/umm_heap/. (2014-9-22).
+	* mm/kmm_heap/:  Move kernel heap allocator from mm/. to mm/kmm_heap/.
+	  (2014-9-22).
+	* mm/umm_heap/:  Move user heap allocator from mm/. to mm/umm_heap/.
+	  (2014-9-22).
+	* mm/mm_heap/:  Move common heap logic from mm/. to mm/mm_heap/.
+	  (2014-9-22).
+	* mm/shm/:  Create a home for forthcoming shared memory logic (2014-9-22).
+
