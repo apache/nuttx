@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/sys/ipc.h
+ * mm/shm/shmdt.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,78 +33,67 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_SYS_IPC_H
-#define __INCLUDE_SYS_IPC_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <sys/shm.h>
+#include <errno.h>
+
+#ifdef CONFIG_MM_SHM
 
 /****************************************************************************
- * Pre-Processor Definitions
- ****************************************************************************/
-
-/* Mode bits: */
-
-#define IPC_CREAT   0x01  /* Create entry if key does not exist */
-#define IPC_EXCL    0x02  /* Fail if key exists */
-#define IPC_NOWAIT  0x04  /* Error if request must wait */
-
-/* Keys: */
-
-#define IPC_PRIVATE 0     /* Private key */
-
-/* Control commands: */
-
-#define IPC_RMID    0    /* Remove identifier */
-#define IPC_SET     1    /* Set options */
-#define IPC_STAT    2    /* Get options */
-
-/****************************************************************************
- * Public Type Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Private Types
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: shmdt
+ *
+ * Description:
+ *   The shmdt() function detaches the shared memory segment located at the
+ *   address specified by shmaddr from the address space of the calling
+ *   process.
+ *
+ * Input Parameters:
+ *   shmid - Shared memory identifier
+ *
+ * Returned Value:
+ *   Upon successful completion, shmdt() will decrement the value of
+ *   shm_nattch in the data structure associated with the shared memory ID
+ *   of the attached shared memory segment and return 0.
+ *
+ *   Otherwise, the shared memory segment will not be detached, shmdt()
+ &   will return -1, and errno will be set to indicate the error.
+ *
+ *   - EINVAL
+ *     The value of shmaddr is not the data segment start address of a
+ *     shared memory segment.
+ *
+ ****************************************************************************/
+
+int shmdt(FAR const void *shmaddr)
 {
-#else
-#define EXTERN extern
-#endif
-
-/* The ipc_perm structure is used by three mechanisms for XSI interprocess
- * communication (IPC): messages, semaphores, and shared memory. All use a
- * common structure type, ipc_perm, to pass information used in determining
- * permission to perform an IPC operation.
- */
-
-struct ipc_perm
-{
-  uid_t  uid;    /* Owner's user ID */
-  gid_t  gid;    /* Owner's group ID */
-  uid_t  cuid;   /* Creator's user ID */
-  gid_t  cgid;   /* Creator's group ID */
-  mode_t mode;   /* Read/write permission */
-};
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-key_t ftok(FAR const char *path, int id);
-
-#undef EXTERN
-#if defined(__cplusplus)
+#warning Not implemented
+  set_errno(ENOSYS);
+  return ERROR;
 }
-#endif
 
-#endif /* __INCLUDE_SYS_IPC_H */
+#endif /* CONFIG_MM_SHM */

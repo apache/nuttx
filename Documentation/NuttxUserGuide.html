@@ -13,7 +13,7 @@
       <h1><big><font color="#3c34ec"><i>NuttX Operating System<p>User's Manual</i></font></big></h1>
       <p><small>by</small></p>
       <p>Gregory Nutt<p>
-      <p>Last Updated: August 21, 2014</p>
+      <p>Last Updated: September 22, 2014</p>
     </td>
   </tr>
 </table>
@@ -63,6 +63,7 @@
       <li>Paragraph 2.9 <a href="#Environ">Environment Variables</a></li>
       <li>Paragraph 2.10 <a href="#FileSystem">File System Interfaces</a></li>
       <li>Paragraph 2.11 <a href="#Network">Network Interfaces</a></li>
+      <li>Paragraph 2.12 <a href="#SharedMemory">Shared Memory Interfaces</a></li>
     </ul>
   </li>
   <li>
@@ -8419,25 +8420,24 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags, int fd, off_
   </tr>
 </table>
 
-<p>NuttX includes a simple interface layer based on uIP (see <a href="http://www.sics.se/~adam/uip/index.php/Main_Page">http://www.sics.se</a>).
-NuttX supports subset of a standard socket interface to uIP.
-These network feature can be enabled by settings in the architecture
-<a href="NuttXConfigVariables.html">configuration file</a>.
-Those socket APIs are discussed in the following paragraphs.</p>
+<p>
+  NuttX includes a simple interface layer based on uIP (see <a href="http://www.sics.se/~adam/uip/index.php/Main_Page">http://www.sics.se</a>).
+  NuttX supports subset of a standard socket interface to uIP.
+  These network feature can be enabled by settings in the architecture <a href="NuttXConfigVariables.html">configuration file</a>.
+  Those socket APIs are discussed in the following paragraphs.
+</p>
 <ul>
-<li>
-</li>
-<li><a href="#socket">2.11.1 socket</a></li>
-<li><a href="#bind">2.11.2 bind</a></li>
-<li><a href="#connect">2.11.3 connect</a></li>
-<li><a href="#listen">2.11.4 listen</a></li>
-<li><a href="#accept">2.11.5 accept</a></li>
-<li><a href="#send">2.11.6 send</a></li>
-<li><a href="#sendto">2.11.7 sendto</a></li>
-<li><a href="#recv">2.11.8 recv</a></li>
-<li><a href="#recvfrom">2.11.9 recvfrom</a></li>
-<li><a href="#setsockopt">2.11.10 setsockopt</a></li>
-<li><a href="#getsockopt">2.11.11 getsockopt</a></li>
+  <li><a href="#socket">2.11.1 socket</a></li>
+  <li><a href="#bind">2.11.2 bind</a></li>
+  <li><a href="#connect">2.11.3 connect</a></li>
+  <li><a href="#listen">2.11.4 listen</a></li>
+  <li><a href="#accept">2.11.5 accept</a></li>
+  <li><a href="#send">2.11.6 send</a></li>
+  <li><a href="#sendto">2.11.7 sendto</a></li>
+  <li><a href="#recv">2.11.8 recv</a></li>
+  <li><a href="#recvfrom">2.11.9 recvfrom</a></li>
+  <li><a href="#setsockopt">2.11.10 setsockopt</a></li>
+  <li><a href="#getsockopt">2.11.11 getsockopt</a></li>
 </ul>
 
 <h3><a name="socket">2.11.1 <code>socket</code></a></h3>
@@ -8983,8 +8983,7 @@ int setsockopt(int sockfd, int level, int option,
 </p>
 <ul><pre>
 #include &lt;sys/socket.h&gt;
-int getsockopt(int sockfd, int level, int option,
-               void *value, socklen_t *value_len);
+int getsockopt(int sockfd, int level, int option, void *value, socklen_t *value_len);
 </pre></ul>
 <p>
   <b>Description:</b>
@@ -9030,6 +9029,309 @@ int getsockopt(int sockfd, int level, int option,
     The <code>sockfd</code> argument does not refer to a socket.</li>
   <li><code>NOBUFS</code>.
     Insufficient resources are available in the system to complete the call.</li>
+</ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="SharedMemory"><h2>2.12 Shared Memory Interfaces</h2></a>
+  </td>
+  </tr>
+</table>
+<p>
+  Shared memory interfaces are only available with the NuttX kernel build (<code>CONFIG_BUILD_KERNEL=y</code>).
+  These interfaces support user memory regions that can be shared between multiple user processes.
+  Shared memory interfaces:
+</p>
+<ul>
+  <li><a href="#shmget">2.12.1 shmget</a></li>
+  <li><a href="#shmat">2.12.2 shmat</a></li>
+  <li><a href="#shmctl">2.12.3 shmctl</a></li>
+  <li><a href="#shmdt">2.12.4 shmdt</a></li>
+</ul>
+<p>
+  <b>NOTE</b>:  This is advance documentation.  These interfaces are not yet available as of this writing.  If you are reading this note, then double check; since these interfaces are under development now, I may have simply failed to remove it.
+</p>
+
+<h3><a name="shmget">2.12.1 <code>shmget</code></a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<ul><pre>
+#include &lt;sys/shm.h&gt;
+#include &lt;sys/ipc.h&gt;
+int shmget(key_t key, size_t size, int shmflg);
+</pre></ul>
+<p>
+  <b>Description:</b>
+  The <code>shmget()</code> function will return the shared memory identifier associated with <code>key</code>.
+</p>
+<p>
+  A shared memory identifier, associated data structure, and shared memory segment of at least size bytes is created for <code>key</code> if one of the following is true:
+</p>
+<ul>
+  <li>
+    <p>
+      The argument <code>key</code> is equal to <code>IPC_PRIVATE</code>.
+    </p>
+  </li>
+  <li>
+    <p>
+      The argument <code>key</code> does not already have a shared memory identifier associated with it and <code>(shmflg & IPC_CREAT)</code> is non-zero.
+    </p>
+  </li>
+</ul>
+</p>
+  Upon creation, the data structure associated with the new shared memory identifier will be initialized as follows:
+</p>
+<ul>
+  <li>
+    <p>
+      The values of <code>shm_perm.cuid</code>, <code>shm_perm.uid</code>, <code>shm_perm.cgid</code>, and <code>shm_perm.gid</code> are set equal to the effective user ID and effective group ID, respectively, of the calling process.
+    </p>
+  </li>
+  <li>
+    <p>
+      The low-order nine bits of <code>shm_perm.mode</code> are set equal to the low-order nine bits of <code>shmflg</code>.
+    </p>
+  </li>
+  <li>
+    <p>
+      The value of <code>shm_segsz</code> is set equal to the value of size.
+    </p>
+  </li>
+  <li>
+    <p>
+      The values of <code>shm_lpid</code>, <code>shm_nattch</code>, <code>shm_atime</code>, and <code>shm_dtime</code> are set equal to 0.
+    </p>
+  </li>
+  <li>
+    <p>
+      The value of <code>shm_ctime</code> is set equal to the current time.
+    </p>
+  </li>
+</ul>
+<p>
+  When the shared memory segment is created, it will be initialized with all zero values.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+  <li>
+    <code>key</code>: The key that is used to access the unique shared memory identifier.
+  </li>
+  <li>
+    <code>size</code>: The shared memory region that is created will be at least this size in bytes.
+  </li>
+  <li>
+    <code>shmflg</code>:  See <code>IPC_*</code> definitions in <code>sys/ipc.h</code>.  Only the values <code>IPC_PRIVATE</code> or <code>IPC_CREAT</code> are supported.
+  </li>
+</ul>
+<p>
+  <b>Returned Value:</b>
+  Upon successful completion, <code>shmget()</code> will return a non-negative integer, namely a shared memory identifier; otherwise, it will return -1 and set <code>errno</code> to indicate the error.
+</p>
+<ul>
+  <li>
+    <code>EACCES</code>.
+      A shared memory identifier exists for key but operation permission as specified by the low-order nine bits of <code>shmflg</code> would not be granted.
+  </li>
+  <li>
+    <code>EEXIST</code>.
+      A shared memory identifier exists for the argument key but <code>(shmflg & IPC_CREAT) && (shmflg & IPC_EXCL)</code> are non-zero.
+  </li>
+  <li>
+    <code>EINVAL</code>.
+      A shared memory segment is to be created and the value of size is less than the system-imposed minimum or greater than the system-imposed maximum.
+  </li>
+  <li>
+    <code>EINVAL</code>.
+      No shared memory segment is to be created and a shared memory segment exists for key but the size of the segment associated with it is less than size and size is not 0.
+  </li>
+  <li>
+    <code>ENOENT</code>.
+      A shared memory identifier does not exist for the argument key and <code>(shmflg & IPC_CREAT)</code> is 0.
+  </li>
+  <li>
+    <code>ENOMEM</code>.
+      A shared memory identifier and associated shared memory segment will be created, but the amount of available physical memory is not sufficient to fill the request.
+  </li>
+  <li>
+    <code>ENOSPC</code>.
+      A shared memory identifier is to be created, but the system-imposed limit on the maximum number of allowed shared memory identifiers system-wide would be exceeded.
+  </li>
+</ul>
+
+<h3><a name="shmat">2.12.2 <code>shmat</code></a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<ul><pre>
+#include &lt;sys/shm.h&gt;
+void *shmat(int shmid, FAR const void *shmaddr, int shmflg);
+</pre></ul>
+<p>
+  <b>Description:</b>
+  The <code>shmat()</code> function attaches the shared memory segment associated with the shared memory identifier specified by <code>shmid</code> to the address space of the calling process. The segment is attached at the address specified by one of the following criteria:
+</p>
+<ul>
+  <li>
+    <p>
+      If <code>shmaddr</code> is a null pointer, the segment is attached at the first available address as selected by the system.
+    </p>
+  </li>
+  <li>
+    <p>
+      If <code>shmaddr</code> is not a null pointer and <code>(shmflg & SHM_RND)</code> is non-zero, the segment is attached at the address given by <code>(shmaddr - ((uintptr_t)shmaddr % SHMLBA))</code>.
+    </p>
+  </li>
+  <li>
+    <p>
+      If <code>shmaddr</code> is not a null pointer and <code>(shmflg & SHM_RND)</code> is 0, the segment is attached at the address given by <code>shmaddr</code>.
+    </p>
+  </li>
+  <li>
+    <p>
+      The segment is attached for reading if <code>(shmflg & SHM_RDONLY)</code> is non-zero and the calling process has read permission; otherwise, if it is 0 and the calling process has read and write permission, the segment is attached for reading and writing.
+    </p>
+  </li>
+</ul>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+  <li><code>shmid</code>: Shared memory identifier</li>
+  <li><code>smaddr</code>: Determines mapping of the shared memory region</li>
+  <li><code>shmflg</code>: See <code>SHM_*</code> definitions in <code>include/sys/shm.h</code>.  Only <code>SHM_RDONLY</code> and <code>SHM_RND</code> are supported.</li>
+</ul>
+<p>
+  <b>Returned Value:</b>
+  Upon successful completion, <code>shmat()</code> will increment the value of <code>shm_nattch</code> in the data structure associated with the shared memory ID of the attached shared memory segment and return the segment's start address.
+
+  Otherwise, the shared memory segment will not be attached, <code>shmat()</code> will return -1, and <code>errno</code> will be set to indicate the error.
+</p>
+<ul>
+  <li>
+    <code>EACCES</code>.
+    Operation permission is denied to the calling process
+  </li>
+  <li>
+    <code>EINVAL</code>.
+    The value of <code>shmid</code> is not a valid shared memory identifier, the <code>shmaddr</code> is not a null pointer, and the value of <code>(shmaddr -((uintptr_t)shmaddr % SHMLBA))</code> is an illegal address for attaching shared memory; or the <code>shmaddr</code> is not a null pointer, <code>(shmflg & SHM_RND)</code> is 0, and the value of <code>shmaddr</code> is an illegal address for attaching shared memory.
+  </li>
+  <li>
+    <code>EMFILE</code>.
+    The number of shared memory segments attached to the calling process would exceed the system-imposed limit.
+  </li>
+  <li>
+    <code>ENOMEM</code>.
+    The available data space is not large enough to accommodate the shared memory segment.
+  </li>
+</ul>
+
+<h3><a name="shmctl">2.12.3 <code>shmctl</code></a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<ul><pre>
+#include &lt;sys/shm.h&gt;
+#include &lt;sys/ipc.h&gt;
+int shmctl(int shmid, int cmd, FAR struct shmid_ds *buf);
+</pre></ul>
+<p>
+  <b>Description:</b>
+  The <code>shmctl()</code> function provides a variety of shared memory control operations as specified by <code>cmd</code>. The following values for <code>cmd</code> are available:
+</p>
+<ul>
+  <li>
+    <p>
+      <code>IPC_STAT</code>.
+      Place the current value of each member of the <code>shmid_ds</code> data structure associated with <code>shmid</code> into the structure pointed to by <code>buf</code>.
+    </p>
+  </li>
+  <li>
+    <p>
+      <code>IPC_SET</code>.
+      Set the value of the following members of the <code>shmid_ds</code> data structure associated with <code>shmid</code> to the corresponding value found in the structure pointed to by <code>buf</code>:
+    </p>
+      <ul>
+        <code>shm_perm.uid</code><br>
+        <code>shm_perm.gid</code><br>
+        <code>shm_perm.mode</code> (Low-order nine bits).
+      </ul>
+    <p>
+      <code>IPC_SET</code> can only be executed by a process that has an effective user ID equal to either that of a process with appropriate privileges or to the value of <code>shm_perm.cuid</code> or <code>shm_perm.uid</code> in the <code>shmid_ds</code> data structure associated with <code>shmid</code>.
+    </p>
+  </li>
+  <li>
+    <p>
+      <code>IPC_RMID</code>.
+       Remove the shared memory identifier specified by <code>shmid</code> from the system and destroy the shared memory segment and <code>shmid_ds</code> data structure associated with it. <code>IPC_RMID</code> can only be executed by a process that has an effective user ID equal to either that of a process with appropriate privileges or to the value of <code>shm_perm.cuid</code> or <code>shm_perm.uid</code> in the <code>shmid_ds</code> data structure associated with <code>shmid</code>.
+    </p>
+  </li>
+</ul>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+  <li><code>shmid</code>: Shared memory identifier</li>
+  <li><code>cmd</code>: <code>shmctl()</code> command</li>
+  <li><code>buf</code>: Data associated with the <code>shmctl()</code> command</li>
+</ul>
+<p>
+  <b>Returned Value:</b>
+  Upon successful completion, <code>shmctl()</code> will return 0; otherwise, it will return -1 and set <code>errno</code> to indicate the error.
+</p>
+<ul>
+  <li>
+    <code>EACCES</code>.
+    The argument <code>cmd</code> is equal to <code>IPC_STAT</code> and the calling process does not have read permission.
+  </li>
+  <li>
+    <code>EINVAL</code>.
+    The value of <code>shmid</code> is not a valid shared memory identifier, or the value of <code>cmd </code>is not a valid command.
+  </li>
+  <li>
+    <code>EPERM</code>.
+    The argument <code>cmd</code> is equal to <code>IPC_RMID</code> or <code>IPC_SET</code> and the effective user ID of the calling process is not equal to that of a process with appropriate privileges and it is not equal to the value of <code>shm_perm.cuid</code> or <code>shm_perm.uid</code> in the data structure associated with <code>shmid</code>.
+  </li>
+  <li>
+    <code>EOVERFLOW</code>.
+    The <code>cmd</code> argument is <code>IPC_STAT</code> and the <code>gid</code> or <code>uid</code> value is too large to be stored in the structure pointed to by the <code>buf</code> argument.
+  </li>
+</ul>
+
+<h3><a name="shmdt">2.12.4 <code>shmdt</code></a></h3>
+<p>
+  <b>Function Prototype:</b>
+</p>
+<ul><pre>
+#include &lt;sys/shm.h&gt;
+int shmdt(FAR const void *shmaddr);
+</pre></ul>
+<p>
+  <b>Description:</b>
+  The <code>shmdt()</code> function detaches the shared memory segment located at the address specified by <code>shmaddr</code> from the address space of the calling process.
+</p>
+<p>
+  <b>Input Parameters:</b>
+</p>
+<ul>
+  <li><code>shmid</code>: Shared memory identifier</li>
+</ul>
+<p>
+  <b>Returned Value:</b>
+  Upon successful completion, <code>shmdt()</code> will decrement the value of <code>shm_nattch</code> in the data structure associated with the shared memory ID of the attached shared memory segment and return 0.
+</p>
+<p>
+  Otherwise, the shared memory segment will not be detached, <code>shmdt()</code> will return -1, and <code>errno</code> will be set to indicate the error.
+</p>
+<ul>
+  <li>
+    <code>EINVAL</code>.
+    The value of <code>shmaddr</code> is not the data segment start address of a shared memory segment.
+  </li>
 </ul>
 
 <table width ="100%">

@@ -79,6 +79,15 @@ config HEAP2_SIZE
 
 endif # ARCH_HAVE_HEAP2
 
+
+config MM_SHM
+	bool "Shared memory support"
+	default n
+	depends on BUILD_KERNEL && EXPERIMENTAL
+	---help---
+		Build in support for the shared memory interfaces shmget(), shmat(),
+		shmctl(), and shmdt().
+
 config GRAN
 	bool "Enable Granule Allocator"
 	default n

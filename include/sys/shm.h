@@ -51,7 +51,7 @@
  ****************************************************************************/
 
 #define SHM_RDONLY 0x01 /* Attach read-only (else read-write) */
-#defube SHM_RND    0x02 /* Round attach address to SHMLBA */
+#define SHM_RND    0x02 /* Round attach address to SHMLBA */
 
 /* Segment low boundary address multiple */
 

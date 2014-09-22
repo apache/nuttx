@@ -36,6 +36,7 @@
 # Shared memory allocator
 
 ifeq ($(CONFIG_MM_SHM),y)
+CSRCS += shmat.c shmctl.c shmdt.c shmget.c
 
 # Add the shared memory directory to the build
 
