@@ -8628,3 +8628,7 @@
 	* configs/mikroe-stm32f4: Fix a few compile bugs and minor corrections
 	  to the mikroe-stm32f4 configuration source.  From Ken Pettit
 	  (2014-9-22).
+	* mm/Kconfig, shm/Make.defs, shmat.c, shmctl.c, shmdt.c, shmget.c, and
+	  Documentation/NuttxUserGuide.html: Add the documentation, build
+	  framework, and skeleton files for the shared memory feature (no logic
+	  yet provided) (2014-9-22).
