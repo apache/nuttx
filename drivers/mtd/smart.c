@@ -3,7 +3,7 @@
  *
  * Sector Mapped Allocation for Really Tiny (SMART) Flash block driver.
  *
- *   Copyright (C) 2013 Ken Pettit. All rights reserved.
+ *   Copyright (C) 2013-2014 Ken Pettit. All rights reserved.
  *   Author: Ken Pettit <pettitkd@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,6 +56,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/mtd/mtd.h>
+#include <nuttx/mtd/smart.h>
 #include <nuttx/fs/smart.h>
 
 /****************************************************************************
@@ -1976,6 +1977,8 @@ static int smart_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 {
   struct smart_struct_s *dev ;
   int ret;
+  uint32_t sector;
+  struct mtd_smart_procfs_data_s * procfs_data;
 
   fvdbg("Entry\n");
   DEBUGASSERT(inode && inode->i_private);
@@ -2059,9 +2062,46 @@ static int smart_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
       goto ok_out;
 #endif /* CONFIG_FS_WRITABLE */
 
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_SMARTFS)
+    case BIOC_GETPROCFSD:
+
+      /* Get ProcFS data */
+
+      procfs_data = (FAR struct mtd_smart_procfs_data_s *) arg;
+      procfs_data->totalsectors = dev->totalsectors;
+      procfs_data->sectorsize = dev->sectorsize;
+      procfs_data->freesectors = dev->freesectors;
+      procfs_data->releasesectors = 0;
+      for (sector = 0; sector < dev->neraseblocks; sector++)
+        {
+          procfs_data->releasesectors += dev->releasecount[sector];
+        }
+
+      procfs_data->namelen = dev->namesize;
+      procfs_data->formatversion = dev->formatversion;
+      procfs_data->unusedsectors = 0;
+      procfs_data->blockerases = 0;
+      procfs_data->sectorsperblk = dev->sectorsPerBlk;
+
+#ifndef CONFIG_MTD_SMART_MINIMIZE_RAM
+      procfs_data->formatsector = dev->sMap[0];
+      procfs_data->dirsector = dev->sMap[3];
+#endif
+
+#ifdef CONFIG_MTD_SMART_SECTOR_ERASE_DEBUG
+      procfs_data->neraseblocks = dev->geo.neraseblocks;
+      procfs_data->erasecounts = dev->erasecounts;
+#endif
+#ifdef CONFIG_MTD_SMART_ALLOC_DEBUG
+      procfs_data->allocs = dev->alloc;
+      procfs_data->alloccount = SMART_MAX_ALLOCS;
+#endif
+      ret = OK;
+      goto ok_out;
+#endif
     }
 
-  /* No other block driver ioctl commmands are not recognized by this
+  /* No other block driver ioctl commands are not recognized by this
    * driver.  Other possible MTD driver ioctl commands are passed through
    * to the MTD driver (unchanged).
    */

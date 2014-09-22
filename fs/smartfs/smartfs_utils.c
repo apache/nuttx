@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/smartfs/smartfs_utils.c
  *
- *   Copyright (C) 2013 Ken Pettit. All rights reserved.
+ *   Copyright (C) 2013-2014 Ken Pettit. All rights reserved.
  *   Author: Ken Pettit <pettitkd@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -72,7 +72,8 @@
  * Private Variables
  ****************************************************************************/
 
-#ifdef CONFIG_SMARTFS_MULTI_ROOT_DIRS
+#if defined(CONFIG_SMARTFS_MULTI_ROOT_DIRS) || \
+  (defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_SMARTFS))
 static struct smartfs_mountpt_s* g_mounthead = NULL;
 #endif
 
@@ -226,11 +227,18 @@ int smartfs_mount(struct smartfs_mountpt_s *fs, bool writeable)
 
   fs->fs_rootsector = SMARTFS_ROOT_DIR_SECTOR + fs->fs_llformat.rootdirnum;
 
-#else
+#else  /* CONFIG_SMARTFS_MULTI_ROOT_DIRS */
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_SMARTFS)
+  /* Now add ourselves to the linked list of SMART mounts */
+
+  fs->fs_next = g_mounthead;
+  g_mounthead = fs;
+#endif
+
   fs->fs_rwbuffer = (char *) kmm_malloc(fs->fs_llformat.availbytes);
   fs->fs_workbuffer = (char *) kmm_malloc(256);
   fs->fs_rootsector = SMARTFS_ROOT_DIR_SECTOR;
-#endif
+#endif /* CONFIG_SMARTFS_MULTI_ROOT_DIRS */
 
   /* We did it! */
 
@@ -267,14 +275,16 @@ int smartfs_unmount(struct smartfs_mountpt_s *fs)
 {
   int           ret = OK;
   struct inode *inode;
-#ifdef CONFIG_SMARTFS_MULTI_ROOT_DIRS
+#if defined(CONFIG_SMARTFS_MULTI_ROOT_DIRS) || \
+  (defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_SMARTFS))
   struct smartfs_mountpt_s *nextfs;
   struct smartfs_mountpt_s *prevfs;
   int           count = 0;
   int           found = FALSE;
 #endif
 
-#ifdef CONFIG_SMARTFS_MULTI_ROOT_DIRS
+#if defined(CONFIG_SMARTFS_MULTI_ROOT_DIRS) || \
+  (defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_SMARTFS))
   /* Start at the head of the mounts and search for our entry.  Also
    * count the number of entries that match our blkdriver.
    */
@@ -392,7 +402,7 @@ int smartfs_unmount(struct smartfs_mountpt_s *fs)
  *              If found, the direntry will be populated with information
  *              for accessing the entry.
  *
- *              If the final directory segement of relpath just before the
+ *              If the final directory segment of relpath just before the
  *              last segment (the target file/dir) is valid, then the
  *              parentdirsector will indicate the logical sector number of
  *              the parent directory where a new entry should be created,
@@ -582,7 +592,7 @@ int smartfs_finddirentry(struct smartfs_mountpt_s *fs,
                           direntry->datlen = 0;
 
                           /* Scan the file's sectors to calculate the length and perform
-                           * a rudamentary check.
+                           * a rudimentary check.
                            */
 
                           if ((entry->flags & SMARTFS_DIRENT_TYPE) == SMARTFS_DIRENT_TYPE_FILE)
@@ -954,8 +964,8 @@ int smartfs_deleteentry(struct smartfs_mountpt_s *fs,
 
    * TODO:  We really should walk the list backward to avoid lost
    *        sectors in the event we lose power. However this requires
-   *        allocting a buffer to build the sector list since we don't
-   *        store a doubly-linked list of sectors on the deivce.  We
+   *        allocating a buffer to build the sector list since we don't
+   *        store a doubly-linked list of sectors on the device.  We
    *        could test if the sector data buffer is big enough and
    *        just use that, and only allocate a new buffer if the
    *        sector buffer isn't big enough.  Do do this, however, we
@@ -1294,3 +1304,17 @@ int smartfs_truncatefile(struct smartfs_mountpt_s *fs,
 errout:
   return ret;
 }
+
+/****************************************************************************
+ * Name: smartfs_get_first_mount
+ *
+ * Description: Returns a pointer to the first mounted smartfs volume.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_SMARTFS)
+struct smartfs_mountpt_s* smartfs_get_first_mount(void)
+{
+  return g_mounthead;
+}
+#endif

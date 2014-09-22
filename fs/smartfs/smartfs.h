@@ -1,10 +1,8 @@
 /****************************************************************************
  * fs/smartfs/smartfs.h
  *
- *   Copyright (C) 2013 Ken Pettit. All rights reserved.
+ *   Copyright (C) 2013-2014 Ken Pettit. All rights reserved.
  *   Author: Ken Pettit <pettitkd@gmail.com>
- *
- * References: Linux/Documentation/filesystems/romfs.txt
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -289,7 +287,7 @@ struct smartfs_ofile_s
 
 struct smartfs_mountpt_s
 {
-#ifdef CONFIG_SMARTFS_MULTI_ROOT_DIRS
+#if defined(CONFIG_SMARTFS_MULTI_ROOT_DIRS) || defined(CONFIG_FS_PROCFS)
   struct smartfs_mountpt_s   *fs_next;      /* Pointer to next SMART filesystem */
 #endif
   FAR struct inode           *fs_blkdriver; /* Our underlying block device */
@@ -343,6 +341,10 @@ int smartfs_countdirentries(struct smartfs_mountpt_s *fs,
 
 int smartfs_truncatefile(struct smartfs_mountpt_s *fs,
         struct smartfs_entry_s *entry);
+
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_SMARTFS)
+struct smartfs_mountpt_s* smartfs_get_first_mount(void);
+#endif
 
 struct file;        /* Forward references */
 struct inode;
