@@ -160,7 +160,7 @@
 #define TC_PENDOWN_POLL_TICKS MSEC2TICK(40)  /* Active polling rate: 40 MSec */
 #define TC_DEBOUNCE_TICKS     MSEC2TICK(16)  /* Delay before re-sampling: 16 MSec */
 #define TC_SAMPLE_TICKS       MSEC2TICK(4)   /* Delay for A/D sampling: 4 MSec */
-#define TC_SETTLE_TICKS       MSECT2TICK(10) /* Delay for A/D settling: 10 MSec */
+#define TC_SETTLE_TICKS       MSEC2TICK(10)  /* Delay for A/D settling: 10 MSec */
 #define TC_RESAMPLE_TICKS     TC_SAMPLE_TICKS
 
 /************************************************************************************
