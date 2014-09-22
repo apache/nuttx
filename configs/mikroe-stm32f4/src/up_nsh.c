@@ -277,14 +277,14 @@ int nsh_archinitialize(void)
 
             partno++;
           }
+      }
 #else /* CONFIG_MIKROE_FLASH_PART */
 
-        /* Configure the device with no partition support */
+    /* Configure the device with no partition support */
 
-        smart_initialize(CONFIG_MIKROE_FLASH_MINOR, mtd, NULL);
+    smart_initialize(CONFIG_MIKROE_FLASH_MINOR, mtd, NULL);
 
 #endif /* CONFIG_MIKROE_FLASH_PART */
-      }
     }
 
   /* Create a RAM MTD device if configured */
