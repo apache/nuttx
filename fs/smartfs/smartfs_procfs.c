@@ -734,6 +734,7 @@ static size_t smartfs_status_read(FAR struct file *filep, FAR char *buffer,
           if (procfs_data.blockerases == 0)
             {
               utilization = 100;
+            }
           else
             {
               utilization = 100 * (procfs_data.blockerases * procfs_data.sectorsperblk -
