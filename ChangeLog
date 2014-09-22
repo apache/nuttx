@@ -8617,5 +8617,14 @@
 	  (2014-9-22).
 	* mm/mm_heap/:  Move common heap logic from mm/. to mm/mm_heap/.
 	  (2014-9-22).
-	* mm/shm/:  Create a home for forthcoming shared memory logic (2014-9-22).
-
+	* mm/shm/:  Create a home for forthcoming shared memory logic
+	  (2014-9-22).
+	* fs/procfs/fs_procfs.c: Fix some procfs breakage introduced by
+	  reorganizing some un-reorganizable data structures.  From Ken
+	  Pettit (2014-9-22).
+	* drivers/mtd/smart.c, fs/smartfs/smartfs.h, smartfs_procfs.c, and
+	  smartfs_utils.c, include/nuttx/fs/ioctl.h, and mtd/smart.h: Updated
+	  SMART FS procfs support.  From Ken Pettit
+	* configs/mikroe-stm32f4: Fix a few compile bugs and minor corrections
+	  to the mikroe-stm32f4 configuration source.  From Ken Pettit
+	  (2014-9-22).
