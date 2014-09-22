@@ -1,5 +1,5 @@
 /****************************************************************************
- * mm/kmm_calloc.c
+ * mm/kmm_heap/kmm_realloc.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,20 +48,31 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: kmm_calloc
+ * Name: kmm_realloc
  *
  * Description:
- *   kmm_calloc is a thin wrapper for mm_calloc()
+ *   Re-allocate memory in the kernel heap.
+ *
+ * Parameters:
+ *   oldmem  - The old memory allocated
+ *   newsize - Size (in bytes) of the new memory region to be re-allocated.
+ *
+ * Return Value:
+ *   The address of the re-allocated memory (NULL on failure to re-allocate)
  *
  ****************************************************************************/
 
-FAR void *kmm_calloc(size_t n, size_t elem_size)
+FAR void *kmm_realloc(FAR void *oldmem, size_t newsize)
 {
-  return mm_calloc(&g_kmmheap, n, elem_size);
+  return mm_realloc(&g_kmmheap, oldmem, newsize);
 }
 
 #endif /* CONFIG_MM_KERNEL_HEAP */

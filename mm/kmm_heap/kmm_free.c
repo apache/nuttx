@@ -1,7 +1,7 @@
 /****************************************************************************
- * mm/kmm_breakaddr.c
+ * mm/kmm_heap/kmm_free.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <assert.h>
+#include <debug.h>
 
 #include <nuttx/mm.h>
 
@@ -50,20 +51,32 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: kmm_brkaddr
- *
- * Description:
- *   Return the break address of a region in the user heap
- *
+ * Public Functions
  ****************************************************************************/
 
-FAR void *kmm_brkaddr(int region)
+/************************************************************************
+ * Name: kmm_free
+ *
+ * Description:
+ *   Returns a chunk of kernel memory to the list of free nodes, merging
+ *   with adjacent free chunks if possible.
+ *
+ * Parameters:
+ *   None
+ *
+ * Return Value:
+ *   None
+ *
+ ************************************************************************/
+
+void kmm_free(FAR void *mem)
 {
-  return mm_brkaddr(&g_kmmheap, region);
+  DEBUGASSERT(kmm_heapmember(mem));
+  mm_free(&g_kmmheap, mem);
 }
 
 #endif /* CONFIG_MM_KERNEL_HEAP */

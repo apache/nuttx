@@ -1,5 +1,5 @@
 /****************************************************************************
- * mm/kmm_mallinfo.c
+ * mm/kmm_heap/kmm_extend.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,8 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <stdlib.h>
-
 #include <nuttx/mm.h>
 
 #ifdef CONFIG_MM_KERNEL_HEAP
@@ -50,41 +48,21 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: kmm_mallinfo
+ * Name: kmm_extend
  *
  * Description:
- *   kmm_mallinfo returns a copy of updated current heap information for the
- *   kernel heap
+ *   Extend a region in the kernel heap by add a block of (virtually)
+ *   contiguous memory to the end of the heap.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_CAN_PASS_STRUCTS
-
-struct mallinfo kmm_mallinfo(void)
+void kmm_extend(FAR void *mem, size_t size, int region)
 {
-  struct mallinfo info;
-  mm_mallinfo(&g_kmmheap, &info);
-  return info;
+  mm_extend(&g_kmmheap, mem, size, region);
 }
 
-#else
-
-int kmm_mallinfo(struct mallinfo *info)
-{
-  return mm_mallinfo(&g_kmmheap, info);
-}
-
-#endif /* CONFIG_CAN_PASS_STRUCTS */
 #endif /* CONFIG_MM_KERNEL_HEAP */

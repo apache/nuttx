@@ -1,7 +1,7 @@
 /************************************************************************
- * mm/kmm_sem.c
+ * mm/kmm_heap/kmm_kernel.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,9 +39,12 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/mm.h>
+#include <assert.h>
 
-#ifdef CONFIG_MM_KERNEL_HEAP
+#include <nuttx/kmalloc.h>
+
+#if ((defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)) || \
+      defined(CONFIG_BUILD_KERNEL)) && defined(CONFIG_MM_KERNEL_HEAP)
 
 /************************************************************************
  * Pre-processor definition
@@ -64,41 +67,61 @@
  ************************************************************************/
 
 /************************************************************************
- * Name: kmm_trysemaphore
+ * Name: kmm_heapmember
  *
  * Description:
- *   Try to take the kernel heap semaphore.
+ *   Check if an address lies in the kernel heap.
  *
  * Parameters:
- *   None
+ *   mem - The address to check
  *
  * Return Value:
- *   OK on success; a negated errno on failure
+ *   true if the address is a member of the kernel heap.  false if not
+ *   not.  If the address is not a member of the kernel heap, then it
+ *   must be a member of the user-space heap (unchecked)
  *
  ************************************************************************/
 
-int kmm_trysemaphore(void)
+#ifdef CONFIG_DEBUG
+bool kmm_heapmember(FAR void *mem)
 {
-  return mm_trysemaphore(&g_kmmheap);
+#if CONFIG_MM_REGIONS > 1
+  int i;
+
+  /* A valid address from the kernel heap for this region would have to lie
+   * between the region's two guard nodes.
+   */
+
+  for (i = 0; i < g_kmmheap.mm_nregions; i++)
+    {
+      if (mem > (FAR void *)g_kmmheap.mm_heapstart[i] &&
+          mem < (FAR void *)g_kmmheap.mm_heapend[i])
+        {
+          return true;
+        }
+    }
+
+  /* The address does not like any any region assigned to kernel heap */
+
+  return false;
+
+#else
+  /* A valid address from the kernel heap would have to lie between the
+   * two guard nodes.
+   */
+
+  if (mem > (FAR void *)g_kmmheap.mm_heapstart[0] &&
+      mem < (FAR void *)g_kmmheap.mm_heapend[0])
+    {
+      return true;
+    }
+
+  /* Otherwise, the address does not lie in the kernel heap */
+
+  return false;
+
+#endif
 }
+#endif
 
-/************************************************************************
- * Name: kmm_givesemaphore
- *
- * Description:
- *   Give the kernel heap semaphore.
- *
- * Parameters:
- *   None
- *
- * Return Value:
- *   OK on success; a negated errno on failure
- *
- ************************************************************************/
-
-void kmm_givesemaphore(void)
-{
-  return mm_givesemaphore(&g_kmmheap);
-}
-
-#endif /* CONFIG_MM_KERNEL_HEAP */
+#endif /* ((CONFIG_BUILD_PROTECTED && __KERNEL__) || CONFIG_BUILD_KERNEL)  && CONFIG_MM_KERNEL_HEAP*/

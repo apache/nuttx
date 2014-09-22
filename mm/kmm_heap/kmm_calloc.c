@@ -1,5 +1,5 @@
 /****************************************************************************
- * mm/kmm_extend.c
+ * mm/kmm_heap/kmm_calloc.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -52,17 +52,16 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: kmm_extend
+ * Name: kmm_calloc
  *
  * Description:
- *   Extend a region in the kernel heap by add a block of (virtually)
- *   contiguous memory to the end of the heap.
+ *   kmm_calloc is a thin wrapper for mm_calloc()
  *
  ****************************************************************************/
 
-void kmm_extend(FAR void *mem, size_t size, int region)
+FAR void *kmm_calloc(size_t n, size_t elem_size)
 {
-  mm_extend(&g_kmmheap, mem, size, region);
+  return mm_calloc(&g_kmmheap, n, elem_size);
 }
 
 #endif /* CONFIG_MM_KERNEL_HEAP */

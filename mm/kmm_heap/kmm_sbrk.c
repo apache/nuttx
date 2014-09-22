@@ -1,5 +1,5 @@
 /****************************************************************************
- * mm/kmm_memalign.c
+ * mm/kmm_heap/kmm_sbrk.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,42 +39,53 @@
 
 #include <nuttx/config.h>
 
-#include <stdlib.h>
-
 #include <nuttx/mm.h>
 
-#ifdef CONFIG_MM_KERNEL_HEAP
+#if defined(CONFIG_BUILD_KERNEL) && defined(__KERNEL__)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/************************************************************************
- * Name: kmm_memalign
+/****************************************************************************
+ * Name: kmm_sbrk
  *
  * Description:
- *   Allocate aligned memory in the kernel heap.
+ *    The sbrk() function is used to change the amount of space allocated
+ *    for the calling process. The change is made by resetting the process'
+ *    break value and allocating the appropriate amount of space.  The amount
+ *    of allocated space increases as the break value increases.
  *
- * Parameters:
- *   alignment - Log2 byte alignment
- *   size - Size (in bytes) of the new memory region to be allocated.
+ *    The sbrk() function adds 'incr' bytes to the break value and changes
+ *    the allocated space accordingly. If incr is negative, the amount of
+ *    allocated space is decreased by incr bytes. The current value of the
+ *    program break is returned by sbrk(0). 
  *
- * Return Value:
- *   The address of the re-allocated memory (NULL on failure to allocate)
+ * Input Parameters:
+ *    incr - Specifies the number of bytes to add or to remove from the
+ *      space allocated for the process.
  *
- ************************************************************************/
+ * Returned Value:
+ *    Upon successful completion, sbrk() returns the prior break value.
+ *    Otherwise, it returns (void *)-1 and sets errno to indicate the
+ *    error:
+ *
+ *      ENOMEM - The requested change would allocate more space than
+ *        allowed under system limits.
+ *      EAGAIN - The total amount of system memory available for allocation
+ *        to this process is temporarily insufficient. This may occur even
+ *        though the space requested was less than the maximum data segment
+ *        size.
+ *
+ ****************************************************************************/
 
-FAR void *kmm_memalign(size_t alignment, size_t size)
+FAR void *kmm_sbrk(intptr_t incr)
 {
-  return mm_memalign(&g_kmmheap, alignment, size);
+  return mm_sbrk(&g_kmmheap, incr, UINTPTR_MAX);
 }
 
-#endif /* CONFIG_MM_KERNEL_HEAP */
+#endif /* CONFIG_BUILD_KERNEL && __KERNEL__ */

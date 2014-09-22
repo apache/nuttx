@@ -1,5 +1,5 @@
 /****************************************************************************
- * mm/kmm_sbrk.c
+ * mm/kmm_heap/kmm_mallinfo.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,12 +39,22 @@
 
 #include <nuttx/config.h>
 
+#include <stdlib.h>
+
 #include <nuttx/mm.h>
 
-#if defined(CONFIG_BUILD_KERNEL) && defined(__KERNEL__)
+#ifdef CONFIG_MM_KERNEL_HEAP
 
 /****************************************************************************
  * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -52,40 +62,29 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: kmm_sbrk
+ * Name: kmm_mallinfo
  *
  * Description:
- *    The sbrk() function is used to change the amount of space allocated
- *    for the calling process. The change is made by resetting the process'
- *    break value and allocating the appropriate amount of space.  The amount
- *    of allocated space increases as the break value increases.
- *
- *    The sbrk() function adds 'incr' bytes to the break value and changes
- *    the allocated space accordingly. If incr is negative, the amount of
- *    allocated space is decreased by incr bytes. The current value of the
- *    program break is returned by sbrk(0). 
- *
- * Input Parameters:
- *    incr - Specifies the number of bytes to add or to remove from the
- *      space allocated for the process.
- *
- * Returned Value:
- *    Upon successful completion, sbrk() returns the prior break value.
- *    Otherwise, it returns (void *)-1 and sets errno to indicate the
- *    error:
- *
- *      ENOMEM - The requested change would allocate more space than
- *        allowed under system limits.
- *      EAGAIN - The total amount of system memory available for allocation
- *        to this process is temporarily insufficient. This may occur even
- *        though the space requested was less than the maximum data segment
- *        size.
+ *   kmm_mallinfo returns a copy of updated current heap information for the
+ *   kernel heap
  *
  ****************************************************************************/
 
-FAR void *kmm_sbrk(intptr_t incr)
+#ifdef CONFIG_CAN_PASS_STRUCTS
+
+struct mallinfo kmm_mallinfo(void)
 {
-  return mm_sbrk(&g_kmmheap, incr, UINTPTR_MAX);
+  struct mallinfo info;
+  mm_mallinfo(&g_kmmheap, &info);
+  return info;
 }
 
-#endif /* CONFIG_BUILD_KERNEL && __KERNEL__ */
+#else
+
+int kmm_mallinfo(struct mallinfo *info)
+{
+  return mm_mallinfo(&g_kmmheap, info);
+}
+
+#endif /* CONFIG_CAN_PASS_STRUCTS */
+#endif /* CONFIG_MM_KERNEL_HEAP */

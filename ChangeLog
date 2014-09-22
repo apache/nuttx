@@ -8609,5 +8609,5 @@
 	  definitions, types, prototypes (2014-9-22).
 	* fs/smartfs/smartfs_smart.c: SMART FS update from Ken Pettit
 	  (2014-9-22).
-	* mm/mm_gran/:  Move granuale allocator and page allocator from mm/. to
+	* mm/mm_gran/:  Move granule allocator and page allocator from mm/. to
 	  mm/mm_gran/. (2014-9-22).

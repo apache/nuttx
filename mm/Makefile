@@ -77,24 +77,7 @@ ifeq ($(CONFIG_BUILD_KERNEL),y)
 CSRCS += umm_sbrk.c
 endif
 
-# Kernel allocator
-
-ifeq ($(CONFIG_MM_KERNEL_HEAP),y)
-CSRCS += kmm_initialize.c kmm_addregion.c kmm_sem.c
-CSRCS += kmm_brkaddr.c kmm_calloc.c kmm_extend.c kmm_free.c kmm_mallinfo.c
-CSRCS += kmm_malloc.c kmm_memalign.c kmm_realloc.c kmm_zalloc.c
-
-ifeq ($(CONFIG_BUILD_KERNEL),y)
-CSRCS += kmm_sbrk.c
-endif
-
-ifeq ($(CONFIG_DEBUG),y)
-CSRCS += kmm_heapmember.c
-endif
-endif
-
-# An optional granule allocator
-
+include kmm_heap/Make.defs
 include mm_gran/Make.defs
 
 BINDIR ?= bin

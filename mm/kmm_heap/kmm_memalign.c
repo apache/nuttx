@@ -1,5 +1,5 @@
 /****************************************************************************
- * mm/kmm_zalloc.c
+ * mm/kmm_heap/kmm_memalign.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,6 +39,8 @@
 
 #include <nuttx/config.h>
 
+#include <stdlib.h>
+
 #include <nuttx/mm.h>
 
 #ifdef CONFIG_MM_KERNEL_HEAP
@@ -48,26 +50,31 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /************************************************************************
- * Name: kmm_zalloc
+ * Name: kmm_memalign
  *
  * Description:
- *   Allocate and zero memory from the kernel heap.
+ *   Allocate aligned memory in the kernel heap.
  *
  * Parameters:
- *   size - Size (in bytes) of the memory region to be allocated.
+ *   alignment - Log2 byte alignment
+ *   size - Size (in bytes) of the new memory region to be allocated.
  *
  * Return Value:
- *   The address of the allocated memory (NULL on failure to allocate)
+ *   The address of the re-allocated memory (NULL on failure to allocate)
  *
  ************************************************************************/
 
-FAR void *kmm_zalloc(size_t size)
+FAR void *kmm_memalign(size_t alignment, size_t size)
 {
-  return mm_zalloc(&g_kmmheap, size);
+  return mm_memalign(&g_kmmheap, alignment, size);
 }
 
 #endif /* CONFIG_MM_KERNEL_HEAP */

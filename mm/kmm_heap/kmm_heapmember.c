@@ -1,5 +1,5 @@
 /************************************************************************
- * mm/kmm_initialize.c
+ * mm/kmm_heap/kmm_heapmember.c
  *
  *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,9 +39,11 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
+
 #include <nuttx/mm.h>
 
-#ifdef CONFIG_MM_KERNEL_HEAP
+#if defined(CONFIG_MM_KERNEL_HEAP) && defined(CONFIG_DEBUG)
 
 /************************************************************************
  * Pre-processor definition
@@ -55,10 +57,6 @@
  * Public Data
  ************************************************************************/
 
-/* This is the kernel heap */
-
-struct mm_heap_s g_kmmheap;
-
 /************************************************************************
  * Private Functions
  ************************************************************************/
@@ -68,24 +66,59 @@ struct mm_heap_s g_kmmheap;
  ************************************************************************/
 
 /************************************************************************
- * Name: kmm_initialize
+ * Name: kmm_heapmember
  *
  * Description:
- *   Initialize the kernel heap data structures, providing the initial
- *   heap region.
+ *   Check if an address lies in the kernel heap.
  *
  * Parameters:
- *   heap_start - Address of the beginning of the (initial) memory region
- *   heap_size  - The size (in bytes) if the (initial) memory region.
+ *   mem - The address to check
  *
  * Return Value:
- *   None
+ *   true if the address is a member of the kernel heap.  false if not
+ *   not.  If the address is not a member of the kernel heap, then it
+ *   must be a member of the user-space heap (unchecked)
  *
  ************************************************************************/
 
-void kmm_initialize(FAR void *heap_start, size_t heap_size)
+bool kmm_heapmember(FAR void *mem)
 {
-  return mm_initialize(&g_kmmheap, heap_start, heap_size);
+#if CONFIG_MM_REGIONS > 1
+  int i;
+
+  /* A valid address from the kernel heap for this region would have to lie
+   * between the region's two guard nodes.
+   */
+
+  for (i = 0; i < g_kmmheap.mm_nregions; i++)
+    {
+      if (mem > (FAR void *)g_kmmheap.mm_heapstart[i] &&
+          mem < (FAR void *)g_kmmheap.mm_heapend[i])
+        {
+          return true;
+        }
+    }
+
+  /* The address does not like any any region assigned to kernel heap */
+
+  return false;
+
+#else
+  /* A valid address from the kernel heap would have to lie between the
+   * two guard nodes.
+   */
+
+  if (mem > (FAR void *)g_kmmheap.mm_heapstart[0] &&
+      mem < (FAR void *)g_kmmheap.mm_heapend[0])
+    {
+      return true;
+    }
+
+  /* Otherwise, the address does not lie in the kernel heap */
+
+  return false;
+
+#endif
 }
 
-#endif /* CONFIG_MM_KERNEL_HEAP */
+#endif /* CONFIG_MM_KERNEL_HEAP && CONFIG_DEBUG */

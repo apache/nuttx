@@ -1,7 +1,7 @@
 /****************************************************************************
- * mm/kmm_malloc.c
+ * mm/kmm_heap/kmm_breakaddr.c
  *
- *   Copyright (C) 2014  Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,8 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
+
 #include <nuttx/mm.h>
 
 #ifdef CONFIG_MM_KERNEL_HEAP
@@ -48,42 +50,20 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Type Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/************************************************************************
- * Name: kmm_malloc
+/****************************************************************************
+ * Name: kmm_brkaddr
  *
  * Description:
- *   Allocate memory from the kernel heap.
+ *   Return the break address of a region in the user heap
  *
- * Parameters:
- *   size - Size (in bytes) of the memory region to be allocated.
- *
- * Return Value:
- *   The address of the allocated memory (NULL on failure to allocate)
- *
- ************************************************************************/
+ ****************************************************************************/
 
-FAR void *kmm_malloc(size_t size)
+FAR void *kmm_brkaddr(int region)
 {
-  return mm_malloc(&g_kmmheap, size);
+  return mm_brkaddr(&g_kmmheap, region);
 }
 
 #endif /* CONFIG_MM_KERNEL_HEAP */

@@ -1,7 +1,7 @@
-/****************************************************************************
- * mm/kmm_realloc.c
+/************************************************************************
+ * mm/kmm_heap/kmm_initialize.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
+ ************************************************************************/
 
-/****************************************************************************
+/************************************************************************
  * Included Files
- ****************************************************************************/
+ ************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -43,36 +43,49 @@
 
 #ifdef CONFIG_MM_KERNEL_HEAP
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+/************************************************************************
+ * Pre-processor definition
+ ************************************************************************/
 
-/****************************************************************************
+/************************************************************************
+ * Private Types
+ ************************************************************************/
+
+/************************************************************************
+ * Public Data
+ ************************************************************************/
+
+/* This is the kernel heap */
+
+struct mm_heap_s g_kmmheap;
+
+/************************************************************************
  * Private Functions
- ****************************************************************************/
+ ************************************************************************/
 
-/****************************************************************************
+/************************************************************************
  * Public Functions
- ****************************************************************************/
+ ************************************************************************/
 
-/****************************************************************************
- * Name: kmm_realloc
+/************************************************************************
+ * Name: kmm_initialize
  *
  * Description:
- *   Re-allocate memory in the kernel heap.
+ *   Initialize the kernel heap data structures, providing the initial
+ *   heap region.
  *
  * Parameters:
- *   oldmem  - The old memory allocated
- *   newsize - Size (in bytes) of the new memory region to be re-allocated.
+ *   heap_start - Address of the beginning of the (initial) memory region
+ *   heap_size  - The size (in bytes) if the (initial) memory region.
  *
  * Return Value:
- *   The address of the re-allocated memory (NULL on failure to re-allocate)
+ *   None
  *
- ****************************************************************************/
+ ************************************************************************/
 
-FAR void *kmm_realloc(FAR void *oldmem, size_t newsize)
+void kmm_initialize(FAR void *heap_start, size_t heap_size)
 {
-  return mm_realloc(&g_kmmheap, oldmem, newsize);
+  return mm_initialize(&g_kmmheap, heap_start, heap_size);
 }
 
 #endif /* CONFIG_MM_KERNEL_HEAP */
