@@ -1,5 +1,5 @@
 /****************************************************************************
- * mm/mm_shrinkchunk.c
+ * mm/mm_heap/mm_shrinkchunk.c
  *
  *   Copyright (C) 2007, 2009, 1013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

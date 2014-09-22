@@ -1,5 +1,5 @@
 /****************************************************************************
- * mm/mm_sem.c
+ * mm/mm_heap/mm_sem.c
  *
  *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

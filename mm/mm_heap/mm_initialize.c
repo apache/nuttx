@@ -1,5 +1,5 @@
 /****************************************************************************
- * mm/mm_initialize.c
+ * mm/mm_heap/mm_initialize.c
  *
  *   Copyright (C) 2007, 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

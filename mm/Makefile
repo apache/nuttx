@@ -56,17 +56,7 @@ CSRCS  =
 DEPPATH = --dep-path .
 VPATH = .
 
-# Core allocator logic
-
-CSRCS += mm_initialize.c mm_sem.c mm_addfreechunk.c mm_size2ndx.c
-CSRCS += mm_shrinkchunk.c
-CSRCS += mm_brkaddr.c mm_calloc.c mm_extend.c mm_free.c mm_mallinfo.c
-CSRCS += mm_malloc.c mm_memalign.c mm_realloc.c mm_zalloc.c
-
-ifeq ($(CONFIG_BUILD_KERNEL),y)
-CSRCS += mm_sbrk.c
-endif
-
+include mm_heap/Make.defs
 include umm_heap/Make.defs
 include kmm_heap/Make.defs
 include mm_gran/Make.defs

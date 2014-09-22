@@ -1,7 +1,7 @@
 /****************************************************************************
- * mm/mm_size2ndx.c
+ * mm/mm_heap/mm_zalloc.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,8 @@
 
 #include <nuttx/config.h>
 
+#include <string.h>
+
 #include <nuttx/mm.h>
 
 /****************************************************************************
@@ -50,28 +52,20 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mm_size2ndx
+ * Name: mm_zalloc
  *
  * Description:
- *    Convert the size to a nodelist index.
+ *   mm_zalloc calls mm_malloc, then zeroes out the allocated chunk.
  *
  ****************************************************************************/
 
-int mm_size2ndx(size_t size)
+FAR void *mm_zalloc(FAR struct mm_heap_s *heap, size_t size)
 {
-  int ndx = 0;
-
-  if (size >= MM_MAX_CHUNK)
+  FAR void *alloc = mm_malloc(heap, size);
+  if (alloc)
     {
-       return MM_NNODES-1;
+       memset(alloc, 0, size);
     }
 
-  size >>= MM_MIN_SHIFT;
-  while (size > 1)
-    {
-      ndx++;
-      size >>= 1;
-    }
-
-  return ndx;
+  return alloc;
 }

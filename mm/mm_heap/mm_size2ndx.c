@@ -1,7 +1,7 @@
 /****************************************************************************
- * mm/mm_addfreechunk.c
+ * mm/mm_heap/mm_size2ndx.c
  *
- *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,47 +46,32 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Global Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: mm_addfreechunk
+ * Name: mm_size2ndx
  *
  * Description:
- *   Add a free chunk to the node next.  It is assumed that the caller holds
- *   the mm semaphore
+ *    Convert the size to a nodelist index.
  *
  ****************************************************************************/
 
-void mm_addfreechunk(FAR struct mm_heap_s *heap, FAR struct mm_freenode_s *node)
+int mm_size2ndx(size_t size)
 {
-  FAR struct mm_freenode_s *next;
-  FAR struct mm_freenode_s *prev;
+  int ndx = 0;
 
-  /* Convert the size to a nodelist index */
-
-  int ndx = mm_size2ndx(node->size);
-
-  /* Now put the new node int the next */
-
-  for (prev = &heap->mm_nodelist[ndx], next = heap->mm_nodelist[ndx].flink;
-       next && next->size && next->size < node->size;
-       prev = next, next = next->flink);
-
-  /* Does it go in mid next or at the end? */
-
-  prev->flink = node;
-  node->blink = prev;
-  node->flink = next;
-
-  if (next)
+  if (size >= MM_MAX_CHUNK)
     {
-      /* The new node goes between prev and next */
-
-      next->blink = node;
+       return MM_NNODES-1;
     }
+
+  size >>= MM_MIN_SHIFT;
+  while (size > 1)
+    {
+      ndx++;
+      size >>= 1;
+    }
+
+  return ndx;
 }

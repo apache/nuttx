@@ -1,7 +1,7 @@
 /****************************************************************************
- * mm/mm_free.c
+ * mm/mm_heap/mm_addfreechunk.c
  *
- *   Copyright (C) 2007, 2009, 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,9 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <assert.h>
-#include <debug.h>
-
 #include <nuttx/mm.h>
 
 /****************************************************************************
@@ -53,103 +50,43 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mm_free
+ * Name: mm_addfreechunk
  *
  * Description:
- *   Returns a chunk of memory to the list of free nodes,  merging with
- *   adjacent free chunks if possible.
+ *   Add a free chunk to the node next.  It is assumed that the caller holds
+ *   the mm semaphore
  *
  ****************************************************************************/
 
-void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
+void mm_addfreechunk(FAR struct mm_heap_s *heap, FAR struct mm_freenode_s *node)
 {
-  FAR struct mm_freenode_s *node;
-  FAR struct mm_freenode_s *prev;
   FAR struct mm_freenode_s *next;
+  FAR struct mm_freenode_s *prev;
 
-  mvdbg("Freeing %p\n", mem);
+  /* Convert the size to a nodelist index */
 
-  /* Protect against attempts to free a NULL reference */
+  int ndx = mm_size2ndx(node->size);
 
-  if (!mem)
+  /* Now put the new node int the next */
+
+  for (prev = &heap->mm_nodelist[ndx], next = heap->mm_nodelist[ndx].flink;
+       next && next->size && next->size < node->size;
+       prev = next, next = next->flink);
+
+  /* Does it go in mid next or at the end? */
+
+  prev->flink = node;
+  node->blink = prev;
+  node->flink = next;
+
+  if (next)
     {
-      return;
+      /* The new node goes between prev and next */
+
+      next->blink = node;
     }
-
-  /* We need to hold the MM semaphore while we muck with the
-   * nodelist.
-   */
-
-  mm_takesemaphore(heap);
-
-  /* Map the memory chunk into a free node */
-
-  node = (FAR struct mm_freenode_s *)((char*)mem - SIZEOF_MM_ALLOCNODE);
-  node->preceding &= ~MM_ALLOC_BIT;
-
-  /* Check if the following node is free and, if so, merge it */
-
-  next = (FAR struct mm_freenode_s *)((char*)node + node->size);
-  if ((next->preceding & MM_ALLOC_BIT) == 0)
-    {
-      FAR struct mm_allocnode_s *andbeyond;
-
-      /* Get the node following the next node (which will
-       * become the new next node). We know that we can never
-       * index past the tail chunk because it is always allocated.
-       */
-
-      andbeyond = (FAR struct mm_allocnode_s*)((char*)next + next->size);
-
-      /* Remove the next node.  There must be a predecessor,
-       * but there may not be a successor node.
-       */
-
-      DEBUGASSERT(next->blink);
-      next->blink->flink = next->flink;
-      if (next->flink)
-        {
-          next->flink->blink = next->blink;
-        }
-
-      /* Then merge the two chunks */
-
-      node->size          += next->size;
-      andbeyond->preceding =  node->size | (andbeyond->preceding & MM_ALLOC_BIT);
-      next                 = (FAR struct mm_freenode_s *)andbeyond;
-    }
-
-  /* Check if the preceding node is also free and, if so, merge
-   * it with this node
-   */
-
-  prev = (FAR struct mm_freenode_s *)((char*)node - node->preceding);
-  if ((prev->preceding & MM_ALLOC_BIT) == 0)
-    {
-      /* Remove the node.  There must be a predecessor, but there may
-       * not be a successor node.
-       */
-
-      DEBUGASSERT(prev->blink);
-      prev->blink->flink = prev->flink;
-      if (prev->flink)
-        {
-          prev->flink->blink = prev->blink;
-        }
-
-      /* Then merge the two chunks */
-
-      prev->size     += node->size;
-      next->preceding = prev->size | (next->preceding & MM_ALLOC_BIT);
-      node            = prev;
-    }
-
-  /* Add the merged node to the nodelist */
-
-  mm_addfreechunk(heap, node);
-  mm_givesemaphore(heap);
 }

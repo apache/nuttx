@@ -1,5 +1,5 @@
 /****************************************************************************
- * mm/mm_brkaddr.c
+ * mm/mm_heap/mm_brkaddr.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

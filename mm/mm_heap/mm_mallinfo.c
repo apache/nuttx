@@ -1,5 +1,5 @@
 /****************************************************************************
- * mm/mm_mallinfo.c
+ * mm/mm_heap/mm_mallinfo.c
  *
  *   Copyright (C) 2007, 2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

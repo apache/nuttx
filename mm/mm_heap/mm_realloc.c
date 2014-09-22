@@ -1,5 +1,5 @@
 /****************************************************************************
- * mm/mm_realloc.c
+ * mm/mm_heap/mm_realloc.c
  *
  *   Copyright (C) 2007, 2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
