@@ -132,12 +132,17 @@
       <a href="#schedalarmexpiration">4.5.5 <code>sched_alarm_expiration()</code></a></br>
       <a href="#irqdispatch">4.5.6 <code>irq_dispatch()</code></a>
     </ul>
-    <a href="#demandpaging">4.6 On-Demand Paging</a><br>
-    <a href="#ledsupport">4.7 LED Support</a>
+    <a href="#shm">4.6 Shared Memory</a>
     <ul>
-      <a href="#ledheaders">4.7.1 Header Files</a><br>
-      <a href="#leddefinitions">4.7.2 LED Definitions</a><br>
-      <a href="#ledapis">4.7.3 Common LED interfaces</a>
+      <a href="#upshmat">4.6.1 <code>up_shmat()</code></a><br>
+      <a href="#upshmdt">4.6.2 <code>up_shmdt()</code></a><br>
+    </ul>
+    <a href="#demandpaging">4.7 On-Demand Paging</a><br>
+    <a href="#ledsupport">4.8 LED Support</a>
+    <ul>
+      <a href="#ledheaders">4.8.1 Header Files</a><br>
+      <a href="#leddefinitions">4.8.2 LED Definitions</a><br>
+      <a href="#ledapis">4.8.3 Common LED interfaces</a>
     </ul>
   </ul>
   <a href="#NxFileSystem">5.0 NuttX File System</a><br>
@@ -3352,7 +3357,9 @@ VxWorks provides the following comparable interface:
 </ul>
 <p><b>Input Parameters</b>:</p>
 <ul>
-  <li><code>tcb</code>: The TCB of the thread that no longer requires the kernel stack.</li>
+  <li>
+    <code>tcb</code>: The TCB of the thread that no longer requires the kernel stack.
+  </li>
 </ul>
 <p><b>Returned Value</b>:</p>
 <ul>
@@ -3441,8 +3448,71 @@ void sched_timer_expiration(void);
   the appropriate, registered handling logic.
 </p>
 
-<h2><a name="demandpaging">4.6 On-Demand Paging</a></h2>
+<h2><a name="shm">4.6 Shared Memory</a></h2>
+<p>
+  Shared memory interfaces are only available with the NuttX kernel build (<code>CONFIG_BUILD_KERNEL=y</code>).
+  These interfaces support user memory regions that can be shared between multiple user processes.
+  The user interfaces are provided in the standard header file <code>include/sys/shm.h></code>.
+  All logic to support shared memory is implemented within the NuttX kernel with the exception of two low-level functions that are require to configure the platform-specific MMU resources.
+  Those interfaces are described below:
+</p>
 
+<h3><a name="upshmat">4.6.1 <code>up_shmat()</code></a></h3>
+<p><b>Function Prototype</b>:<p>
+<ul><pre>
+#include &lt;nuttx/arch.h&gt;
+#ifdef CONFIG_MM_SHM
+int up_shmat(FAR uintptr_t *pages, unsigned int npages, uintptr_t vaddr);
+#endif
+</ul>
+<p><b>Description</b>:</p>
+<ul>
+  Attach, i.e, map, on shared memory region to a user virtual address.
+</ul>
+<p><b>Input Parameters</b>:</p>
+<ul>
+  <li>
+    <code>pages</code>: A pointer to the first element in a array of physical address, each corresponding to one page of memory.
+  </li>
+  <li>
+    <code>npages</code>: The number of pages in the list of physical pages to be mapped.
+  </li>
+  <li>
+    <code>vaddr</code>: The virtual address corresponding to the beginning of the (contiguous) virtual address region.
+  </li>
+</ul>
+<p><b>Returned Value</b>:</p>
+<ul>
+  Zero (<code>OK</code>) is returned on success; a negated <code>errno</code> value is returned on failure.
+</ul>
+
+<h3><a name="upshmdt">4.6.2 <code>up_shmdt()</code></a></h3>
+<p><b>Function Prototype</b>:<p>
+<ul><pre>
+#include &lt;nuttx/arch.h&gt;
+#ifdef CONFIG_MM_SHM
+int up_shmdt(uintptr_t vaddr, unsigned int npages);
+#endif
+</ul>
+<p><b>Description</b>:</p>
+<ul>
+  Detach, i.e, unmap, on shared memory region from a user virtual address.
+</ul>
+<p><b>Input Parameters</b>:</p>
+<ul>
+  <li>
+    <code>vaddr</code>: The virtual address corresponding to the beginning of the (contiguous) virtual address region.
+  </li>
+  <li>
+    <code>npages</code>: T The number of pages to be unmapped.
+  </li>
+</ul>
+<p><b>Returned Value</b>:</p>
+<ul>
+  Zero (<code>OK</code>) is returned on success; a negated <code>errno</code> value is returned on failure.
+</ul>
+
+<h2><a name="demandpaging">4.7 On-Demand Paging</a></h2>
 <p>
   The NuttX On-Demand Paging feature permits embedded MCUs with some limited RAM space to execute large programs from some non-random access media.
   If the platform meets certain requirements, then NuttX can provide on-demand paging:
@@ -3451,7 +3521,7 @@ void sched_timer_expiration(void);
   Please see the <a href="NuttXDemandPaging.html">NuttX Demand Paging</a> design document for further information.
 </p>
 
-<h2><a name="ledsupport">4.7 LED Support</a></h2>
+<h2><a name="ledsupport">4.8 LED Support</a></h2>
 
 <p>
   A board architecture may or may not have LEDs.
@@ -3461,7 +3531,7 @@ void sched_timer_expiration(void);
   However, the support provided by each architecture is sufficiently similar that it can be documented here.
 </p>
 
-<h3><a name="ledheaders">4.7.1 Header Files</a></h3>
+<h3><a name="ledheaders">4.8.1 Header Files</a></h3>
 
 <p>
   LED-related definitions are provided in two header files:
@@ -3485,7 +3555,7 @@ void sched_timer_expiration(void);
   </ul>
 </p>
 
-<h3><a name="leddefinitions">4.7.2 LED Definitions</a></h3>
+<h3><a name="leddefinitions">4.8.2 LED Definitions</a></h3>
 
 <p>
    The implementation of LED support is very specific to a board architecture.
@@ -3549,7 +3619,7 @@ void sched_timer_expiration(void);
   </li>
 </ul>
 
-<h3><a name="ledapis">4.7.3 Common LED interfaces</a></h3>
+<h3><a name="ledapis">4.8.3 Common LED interfaces</a></h3>
 
 <p>
   The <code><i>&lt;arch-name&gt;</i>/src/common/up_internal.h</code> probably has definitions

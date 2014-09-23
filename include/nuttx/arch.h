@@ -1189,6 +1189,50 @@ int up_addrenv_kstackfree(FAR struct tcb_s *tcb);
 #endif
 
 /****************************************************************************
+ * Name: up_shmat
+ *
+ * Description:
+ *   Attach, i.e, map, on shared memory region to a user virtual address
+ *
+ * Input Parameters:
+ *   pages - A pointer to the first element in a array of physical address,
+ *     each corresponding to one page of memory.
+ *   npages - The number of pages in the list of physical pages to be mapped.
+ *   vaddr - The virtual address corresponding to the beginning of the
+ *     (contiguous) virtual address region.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MM_SHM
+int up_shmat(FAR uintptr_t *pages, unsigned int npages, uintptr_t vaddr);
+#endif
+
+/****************************************************************************
+ * Name: up_shmdt
+ *
+ * Description:
+ *   Detach, i.e, unmap, on shared memory region from a user virtual address
+ *
+ * Input Parameters:
+ *   vaddr - The virtual address corresponding to the beginning of the
+ *     (contiguous) virtual address region.
+ *   npages - The number of pages to be unmapped
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MM_SHM
+int up_shmdt(uintptr_t vaddr, unsigned int npages);
+#endif
+
+/****************************************************************************
  * Name: up_interrupt_context
  *
  * Description:
