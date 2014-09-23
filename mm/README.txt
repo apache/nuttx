@@ -5,6 +5,8 @@ This directory contains the NuttX memory management logic.  This include:
 
 1) Standard Memory Management Functions:
 
+   Standard Functions:
+
      The standard memory management functions as prototyped in stdlib.h as
      specified in the  Base definitions volume of IEEE Std 1003.1-2001.  This
      include the files:
@@ -61,6 +63,17 @@ This directory contains the NuttX memory management logic.  This include:
      In fact, the standard malloc(), realloc(), free() use this same mechanism,
      but with a global heap structure called g_mmheap.
 
+   User/Kernel Heaps
+
+     This multiple heap capability is exploited in some of the more complex NuttX
+     build configurations to provide separate kernel-mode and user-mode heaps.
+
+   Sub-Directories:
+
+     mm/mm_heap  - Holds the common base logic for all heap allocators
+     mm/umm_heap - Holds the user-mode memory allocation interfaces
+     mm/kmm_heap - Holds the kernel-mode memory allocation interfaces
+
 2) Granule Allocator.
 
      A non-standard granule allocator is also available in this directory  The
@@ -110,3 +123,33 @@ This directory contains the NuttX memory management logic.  This include:
 
      The actual memory allocates will be 64 byte (wasting 17 bytes) and
      will be aligned at least to (1 << log2align).
+
+   Sub-Directories:
+
+     mm/mm_gran - Holds the granule allocation logic
+
+3) Page Allocator
+
+   The page allocator is an application of the granule allocator.  It is a
+   special purpose memory allocator intended to allocate physical memory
+   pages for use with systems that have a memory management unit (MMU).
+
+   Sub-Directories:
+
+     mm/mm_gran - The page allocator cohabits the same directory as the
+       granule allocator.
+
+4) Shared Memory Management
+
+   When NuttX is build in kernel mode with a separate, privileged, kernel-
+   mode address space and multiple, unprivileged, user-mode address spaces,
+   then shared memory regions must also be managed.  Shared memory regions
+   are user-accessible memory regions that can be attached into the user
+   process address space for sharing between user process.
+
+   Sub-Directories:
+
+     mm/shm - The shared memory logic
+
+   The shared memory management logic has its own README file that can be
+   found at nuttx/mm/shm/README.txt.

@@ -168,11 +168,42 @@
 
   /* A single page scratch region used for temporary mappings */
 
-#  define ARCH_SCRATCH_VBASE ARCH_STACK_VEND
+#  define __ARCH_SHM_VBASE ARCH_STACK_VEND
 #else
   /* A single page scratch region used for temporary mappings */
 
-#  define ARCH_SCRATCH_VBASE ARCH_HEAP_VEND
+#  define __ARCH_SHM_VBASE ARCH_HEAP_VEND
+#endif
+
+/* Shared memory regions */
+
+#ifdef CONFIG_MM_SHM
+#  ifndef CONFIG_ARCH_SHM_VBASE
+#    error CONFIG_ARCH_SHM_VBASE not defined
+#    define CONFIG_ARCH_SHM_VBASE __ARCH_SHM_VBASE
+#  endif
+
+#  if (CONFIG_ARCH_SHM_VBASE & CONFIG_MM_MASK) != 0
+#    error CONFIG_ARCH_SHM_VBASE not aligned to page boundary
+#  endif
+
+#  ifndef CONFIG_ARCH_SHM_MAXREGIONS
+#    warning CONFIG_ARCH_SHM_MAXREGIONS not defined
+#    define CONFIG_ARCH_SHM_MAXREGIONS 1
+#  endif
+
+#  ifndef CONFIG_ARCH_SHM_NPAGES
+#    warning CONFIG_ARCH_SHM_NPAGES not defined
+#    define CONFIG_ARCH_SHM_NPAGES 1
+#  endif
+
+#  define ARCH_SHM_REGIONSIZE (CONFIG_ARCH_SHM_NPAGES * CONFIG_MM_PGSIZE)
+#  define ARCH_SHM_SIZE       (CONFIG_ARCH_SHM_MAXREGIONS * ARCH_SHM_REGIONSIZE)
+#  define ARCH_SHM_VEND       (CONFIG_ARCH_SHM_VBASE + ARCH_SHM_SIZE)
+
+#  define ARCH_SCRATCH_VBASE   ARCH_SHM_VEND
+#else
+#  define ARCH_SCRATCH_VBASE   __ARCH_SHM_VBASE
 #endif
 
 /* There is no need to use the scratch memory region if the page pool memory

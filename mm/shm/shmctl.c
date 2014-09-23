@@ -75,7 +75,8 @@
  *
  *     - IPC_STAT
  *       Place the current value of each member of the shmid_ds data
- *       structure associated with shmid into the structure pointed to by buf.
+ *       structure associated with shmid into the structure pointed to by
+ *       buf.
  *     - IPC_SET
  *       Set the value of the following members of the shmid_ds data
  *       structure associated with shmid to the corresponding value found

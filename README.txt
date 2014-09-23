@@ -1149,6 +1149,8 @@ nuttx
  |- libxx/
  |   `- README.txt
  |- mm/
+ |   |- shm/
+ |   |   `- README.txt
  |   `- README.txt
  |- net/
  |   `- README.txt
