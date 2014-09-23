@@ -149,6 +149,27 @@ GRAN_HANDLE gran_initialize(FAR void *heapstart, size_t heapsize,
 #endif
 
 /****************************************************************************
+ * Name: gran_release
+ *
+ * Description:
+ *   Uninitialize a gram memory allocator and release resources held by the
+ *   allocator.
+ *
+ * Input Parameters:
+ *   handle - The handle previously returned by gran_initialize
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_GRAN_SINGLE
+void gran_release(void);
+#else
+void gran_release(GRAN_HANDLE handle);
+#endif
+
+/****************************************************************************
  * Name: gran_reserve
  *
  * Description:
