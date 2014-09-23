@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/sys/ipc.h
+ * include/nuttx/shm.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_SYS_IPC_H
-#define __INCLUDE_SYS_IPC_H
+#ifndef __INCLUDE_NUTTX_SHM_H
+#define __INCLUDE_NUTTX_SHM_H
 
 /****************************************************************************
  * Included Files
@@ -42,71 +42,82 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <debug.h>
+
+#ifdef CONFIG_MM_SHM
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
 
-/* Mode bits: */
+#ifndef CONFIG_ARCH_ADDRENV
+#  error CONFIG_ARCH_ADDRENV must be selected with CONFIG_MM_SHM
+#endif
 
-#define IPC_CREAT   0x01  /* Create entry if key does not exist */
-#define IPC_EXCL    0x02  /* Fail if key exists */
-#define IPC_NOWAIT  0x04  /* Error if request must wait */
+#ifndef CONFIG_BUILD_KERNEL
+#  error CONFIG_BUILD_KERNEL must be selected with CONFIG_MM_SHM
+#endif
 
-/* Keys: */
+#ifndef CONFIG_GRAN
+#  error CONFIG_GRAN must be selected with CONFIG_MM_SHM
+#endif
 
-#define IPC_PRIVATE 0     /* Private key */
+#ifdef CONFIG_GRAN_SINGLE
+#  error CONFIG_GRAN_SINGLE must NOT be selected with CONFIG_MM_SHM
+#endif
 
-/* Control commands: */
+#ifndef CONFIG_MM_PGALLOC
+#  error CONFIG_MM_PGALLOC must be selected with CONFIG_MM_SHM
+#endif
 
-#define IPC_RMID    0    /* Remove identifier */
-#define IPC_SET     1    /* Set options */
-#define IPC_STAT    2    /* Get options */
+/* Debug */
+
+#ifdef CONFIG_CPP_HAVE_VARARGS
+#  ifdef CONFIG_DEBUG_SHM
+#    define shmdbg(format, ...)       dbg(format, ##__VA_ARGS__)
+#    define shmvdbg(format, ...)      vdbg(format, ##__VA_ARGS__)
+#  else
+#    define shmdbg(format, ...)       mdbg(format, ##__VA_ARGS__)
+#    define shmvdbg(format, ...)      mvdbg(format, ##__VA_ARGS__)
+#  endif
+#else
+#  ifdef CONFIG_DEBUG_SHM
+#    define shmdbg                    dbg
+#    define shmvdbg                   vdbg
+#  else
+#    define shmdbg                    (void)
+#    define shmvdbg                   (void)
+#  endif
+#endif
 
 /****************************************************************************
- * Public Type Definitions
+ * Public Types
  ****************************************************************************/
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/* The ipc_perm structure is used by three mechanisms for XSI interprocess
- * communication (IPC): messages, semaphores, and shared memory. All use a
- * common structure type, ipc_perm, to pass information used in determining
- * permission to perform an IPC operation.
- */
-
-struct ipc_perm
-{
-#if 0 /* User and group IDs not yet supported by NuttX */
-  uid_t  uid;    /* Owner's user ID */
-  gid_t  gid;    /* Owner's group ID */
-  uid_t  cuid;   /* Creator's user ID */
-  gid_t  cgid;   /* Creator's group ID */
-#endif
-  mode_t mode;   /* Read/write permission */
-};
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-key_t ftok(FAR const char *path, int id);
+/****************************************************************************
+ * Name: shm_initialize
+ *
+ * Description:
+ *   Perform one time, start-up initialization of the shared memor logic.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
+void shm_initialize(void);
 
-#endif /* __INCLUDE_SYS_IPC_H */
+#endif /* CONFIG_MM_SHM */
+#endif /* __INCLUDE_NUTTX_SHM_H */

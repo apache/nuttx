@@ -83,9 +83,6 @@
  *   Upon creation, the data structure associated with the new shared memory
  *   identifier will be initialized as follows:
  *
- *     - The values of shm_perm.cuid, shm_perm.uid, shm_perm.cgid, and
- *       shm_perm.gid are set equal to the effective user ID and effective
- *       group ID, respectively, of the calling process.
  *     - The low-order nine bits of shm_perm.mode are set equal to the low-
  *       order nine bits of shmflg.
  *     - The value of shm_segsz is set equal to the value of size.
@@ -135,6 +132,13 @@
  *       A shared memory identifier is to be created, but the system-imposed
  *       limit on the maximum number of allowed shared memory identifiers
  *       system-wide would be exceeded.
+ *
+ * POSIX Deviations:
+ *     - The values of shm_perm.cuid, shm_perm.uid, shm_perm.cgid, and
+ *       shm_perm.gid should be set equal to the effective user ID and
+ *       effective group ID, respectively, of the calling process. 
+ *       The NuttX ipc_perm structure, however, does not support these
+ *       fields because user and group IDs are not yet supported by NuttX.
  *
  ****************************************************************************/
 

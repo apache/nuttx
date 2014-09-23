@@ -49,6 +49,7 @@
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
+/* Definitions required by POSIX */
 
 #define SHM_RDONLY 0x01 /* Attach read-only (else read-write) */
 #define SHM_RND    0x02 /* Round attach address to SHMLBA */

@@ -49,6 +49,7 @@
 #include  <nuttx/net/net.h>
 #include  <nuttx/lib.h>
 #include  <nuttx/mm.h>
+#include  <nuttx/shm.h>
 #include  <nuttx/kmalloc.h>
 #include  <nuttx/init.h>
 
@@ -484,6 +485,12 @@ void os_start(void)
    */
 
   up_initialize();
+
+#ifdef CONFIG_MM_SHM
+  /* Initialize shared memory support */
+
+  shm_initialize();
+#endif
 
   /* Initialize the C libraries.  This is done last because the libraries
    * may depend on the above.

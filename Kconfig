@@ -458,6 +458,13 @@ config DEBUG_MM
 	---help---
 		Enable memory management debug SYSLOG output (disabled by default)
 
+config DEBUG_SHM
+	bool "Shared Memory Debug Output"
+	default n
+	depends on MM_SHM
+	---help---
+		Enable shared memory management debug SYSLOG output (disabled by default)
+
 config DEBUG_NET
 	bool "Network Debug Output"
 	default n

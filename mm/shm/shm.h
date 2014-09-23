@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/sys/ipc.h
+ * mm/shm/shm.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_SYS_IPC_H
-#define __INCLUDE_SYS_IPC_H
+#ifndef __MM_SHM_SHM_H
+#define __MM_SHM_SHM_H
 
 /****************************************************************************
  * Included Files
@@ -42,71 +42,65 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <stdint.h>
+#include <semaphore.h>
+
+#include <nuttx/addrenv.h>
+
+#ifdef CONFIG_MM_SHM
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-/* Mode bits: */
+/* IPC_PRIVATE is the only value for the the SHM key that is guaranteed to
+ * be invalid.
+ */
 
-#define IPC_CREAT   0x01  /* Create entry if key does not exist */
-#define IPC_EXCL    0x02  /* Fail if key exists */
-#define IPC_NOWAIT  0x04  /* Error if request must wait */
-
-/* Keys: */
-
-#define IPC_PRIVATE 0     /* Private key */
-
-/* Control commands: */
-
-#define IPC_RMID    0    /* Remove identifier */
-#define IPC_SET     1    /* Set options */
-#define IPC_STAT    2    /* Get options */
+#define SHM_INVALID_KEY IPC_PRIVATE
 
 /****************************************************************************
- * Public Type Definitions
+ * Public Types
  ****************************************************************************/
+
+/* This structure represents the state of one shared memory region
+ * allocation.  Cast compatible with struct shmid_ds.
+ */
+
+struct shm_region_s
+{
+  struct shmid_ds sr_ds; /* Region info */
+  key_t sr_key;          /* Lookup key.  IPC_PRIVATE means unused */
+  sem_t sr_sem;          /* Manages exclusive access to this region */
+
+  /* List of physical pages allocated for this memory region */
+
+  uintptr_t sr_pages[CONFIG_ARCH_SHM_NPAGES];
+};
+
+/* This structure represents the set of all shared memory regions.
+ * Access to the region 
+ */
+
+struct shm_info_s
+{
+  sem_t si_sem;         /* Manages exclusive access to the region list */
+  struct shm_region_s si_region[CONFIG_ARCH_SHM_MAXREGIONS];
+};
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
+/* State of the all shared memory */
 
-/* The ipc_perm structure is used by three mechanisms for XSI interprocess
- * communication (IPC): messages, semaphores, and shared memory. All use a
- * common structure type, ipc_perm, to pass information used in determining
- * permission to perform an IPC operation.
- */
-
-struct ipc_perm
-{
-#if 0 /* User and group IDs not yet supported by NuttX */
-  uid_t  uid;    /* Owner's user ID */
-  gid_t  gid;    /* Owner's group ID */
-  uid_t  cuid;   /* Creator's user ID */
-  gid_t  cgid;   /* Creator's group ID */
-#endif
-  mode_t mode;   /* Read/write permission */
-};
+extern struct shm_info_s g_shminfo;
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-key_t ftok(FAR const char *path, int id);
-
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
-
-#endif /* __INCLUDE_SYS_IPC_H */
+#endif /* CONFIG_MM_SHM */
+#endif /* __MM_SHM_SHM_H */

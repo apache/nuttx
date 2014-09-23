@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __MM_MM_GRAN_MM_GRAHN_H
-#define __MM_MM_GRAN_MM_GRAHN_H
+#ifndef __MM_MM_GRAN_MM_GRAN_H
+#define __MM_MM_GRAN_MM_GRAN_H
 
 /****************************************************************************
  * Included Files
@@ -83,7 +83,7 @@
  * Public Types
  ****************************************************************************/
 
-/* This structure represents the state of on granule allocation */
+/* This structure represents the state of one granule allocation */
 
 struct gran_s
 {
@@ -148,4 +148,4 @@ void gran_leave_critical(FAR struct gran_s *priv);
 void gran_mark_allocated(FAR struct gran_s *priv, uintptr_t alloc,
                          unsigned int ngranules);
 
-#endif /* __MM_MM_GRAN_MM_GRAHN_H */
+#endif /* __MM_MM_GRAN_MM_GRAN_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/sys/ipc.h
+ * mm/shm/shm_initialize.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,80 +33,79 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_SYS_IPC_H
-#define __INCLUDE_SYS_IPC_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include "shm/shm.h"
+
+#ifdef CONFIG_MM_SHM
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-/* Mode bits: */
-
-#define IPC_CREAT   0x01  /* Create entry if key does not exist */
-#define IPC_EXCL    0x02  /* Fail if key exists */
-#define IPC_NOWAIT  0x04  /* Error if request must wait */
-
-/* Keys: */
-
-#define IPC_PRIVATE 0     /* Private key */
-
-/* Control commands: */
-
-#define IPC_RMID    0    /* Remove identifier */
-#define IPC_SET     1    /* Set options */
-#define IPC_STAT    2    /* Get options */
-
 /****************************************************************************
- * Public Type Definitions
+ * Private Types
  ****************************************************************************/
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
+/* State of the all shared memory */
 
-/* The ipc_perm structure is used by three mechanisms for XSI interprocess
- * communication (IPC): messages, semaphores, and shared memory. All use a
- * common structure type, ipc_perm, to pass information used in determining
- * permission to perform an IPC operation.
- */
-
-struct ipc_perm
-{
-#if 0 /* User and group IDs not yet supported by NuttX */
-  uid_t  uid;    /* Owner's user ID */
-  gid_t  gid;    /* Owner's group ID */
-  uid_t  cuid;   /* Creator's user ID */
-  gid_t  cgid;   /* Creator's group ID */
-#endif
-  mode_t mode;   /* Read/write permission */
-};
+struct shm_info_s g_shminfo;
 
 /****************************************************************************
- * Public Function Prototypes
+ * Private Functions
  ****************************************************************************/
 
-key_t ftok(FAR const char *path, int id);
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-}
+/****************************************************************************
+ * Name: shm_initialize
+ *
+ * Description:
+ *   Perform one time, start-up initialization of the shared memor logic.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void shm_initialize(void)
+{
+#if SHM_INVALID_KEY != 0
+  FAR struct shm_region_s *region;
+  int i;
 #endif
 
-#endif /* __INCLUDE_SYS_IPC_H */
+  /* Initialize the shared memory region list */
+
+  sem_init(&g_shminfo.si_sem, 0, 1);
+
+#if SHM_INVALID_KEY != 0
+  /* Initialize each shared memory region */
+
+  for (i = 0; i < CONFIG_ARCH_SHM_NPAGES; i++)
+    {
+      region = &g_shminfo.si_region[i];
+
+      /* Markk the key invalid for each region.  The invalid key is an
+       * indication that the region is not in use.
+       */
+
+      region->sr_key = SHM_INVALID_KEY;
+    }
+#endif
+}
+
+#endif /* CONFIG_MM_SHM */
