@@ -8640,3 +8640,6 @@
 	* include/nuttx/arch.h, Documentation/NuttxPortingGuide.html, and
 	  NuttxUserGuide.html: Add platform-specific interface definitions
 	  needed to support the shared memory feature (2014-9-23).
+	* arch/arm/include/arch.h, src/armv7-a/addrenv.h, arm_addrenv.c,
+	  arm_addrenv_ustack.c, and arm_addrenv_utils.c: Add logic necessary
+	  to handler remapping of shared memory on contex switches (2014-9-23).
