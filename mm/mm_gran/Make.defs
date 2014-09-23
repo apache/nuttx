@@ -36,8 +36,8 @@
 # An optional granule allocator
 
 ifeq ($(CONFIG_GRAN),y)
-CSRCS += mm_graninit.c mm_granreserve.c mm_granalloc.c mm_granmark.c
-CSRCS += mm_granfree.c mm_grancritical.c
+CSRCS += mm_graninit.c mm_granrelease.c mm_granreserve.c mm_granalloc.c
+CSRCS += mm_granmark.c mm_granfree.c mm_grancritical.c
 
 # A page allocator based on the granule allocator
 
