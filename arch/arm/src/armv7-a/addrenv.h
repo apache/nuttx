@@ -125,7 +125,7 @@ int arm_addrenv_create_region(FAR uintptr_t **list, unsigned int listlen,
  ****************************************************************************/
 
 void arm_addrenv_destroy_region(FAR uintptr_t **list, unsigned int listlen,
-                                uintptr_t vaddr);
+                                uintptr_t vaddr, bool keep);
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -363,18 +363,26 @@ int up_addrenv_destroy(FAR group_addrenv_t *addrenv)
   /* Destroy the .text region */
 
   arm_addrenv_destroy_region(addrenv->text, ARCH_TEXT_NSECTS,
-                             CONFIG_ARCH_TEXT_VBASE);
+                             CONFIG_ARCH_TEXT_VBASE, false);
 
   /* Destroy the .bss/.data region */
 
   arm_addrenv_destroy_region(addrenv->data, ARCH_DATA_NSECTS,
-                             CONFIG_ARCH_DATA_VBASE);
+                             CONFIG_ARCH_DATA_VBASE, false);
 
 #ifdef CONFIG_BUILD_KERNEL
   /* Destroy the heap region */
 
   arm_addrenv_destroy_region(addrenv->heap, ARCH_HEAP_NSECTS,
-                             CONFIG_ARCH_HEAP_VBASE);
+                             CONFIG_ARCH_HEAP_VBASE, false);
+#ifdef CONFIG_MM_SHM
+  /* Destroy the shared memory region (without freeing the physical page
+   * data).
+   */
+
+  arm_addrenv_destroy_region(addrenv->heap, ARCH_SHM_NSECTS,
+                             CONFIG_ARCH_SHM_VBASE, true);
+#endif
 #endif
 
   memset(addrenv, 0, sizeof(group_addrenv_t));
@@ -578,6 +586,33 @@ int up_addrenv_select(FAR const group_addrenv_t *addrenv,
           mmu_l1_clrentry(vaddr);
         }
     }
+
+#ifdef CONFIG_MM_SHM
+  for (vaddr = CONFIG_ARCH_SHM_VBASE, i = 0;
+       i < ARCH_SHM_NSECTS;
+       vaddr += SECTION_SIZE, i++)
+    {
+      /* Save the old L1 page table entry */
+
+      if (oldenv)
+        {
+          oldenv->shm[i] = mmu_l1_getentry(vaddr);
+        }
+
+      /* Set (or clear) the new page table entry */
+
+      paddr = (uintptr_t)addrenv->shm[i];
+      if (paddr)
+        {
+          mmu_l1_setentry(paddr, vaddr, MMU_L1_PGTABFLAGS);
+        }
+      else
+        {
+          mmu_l1_clrentry(vaddr);
+        }
+    }
+
+#endif
 #endif
 
   return OK;
@@ -635,6 +670,18 @@ int up_addrenv_restore(FAR const save_addrenv_t *oldenv)
 
       mmu_l1_restore(vaddr, oldenv->heap[i]);
     }
+
+#ifdef CONFIG_MM_SHM
+  for (vaddr = CONFIG_ARCH_SHM_VBASE, i = 0;
+       i < ARCH_SHM_NSECTS;
+       vaddr += SECTION_SIZE, i++)
+    {
+      /* Restore the L1 page table entry */
+
+      mmu_l1_restore(vaddr, oldenv->shm[i]);
+    }
+
+#endif
 #endif
 
   return OK;

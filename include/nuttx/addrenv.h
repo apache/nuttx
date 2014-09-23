@@ -197,6 +197,7 @@
 #    define CONFIG_ARCH_SHM_NPAGES 1
 #  endif
 
+#  define ARCH_SHM_MAXPAGES   (CONFIG_ARCH_SHM_NPAGES * CONFIG_ARCH_SHM_MAXREGIONS)
 #  define ARCH_SHM_REGIONSIZE (CONFIG_ARCH_SHM_NPAGES * CONFIG_MM_PGSIZE)
 #  define ARCH_SHM_SIZE       (CONFIG_ARCH_SHM_MAXREGIONS * ARCH_SHM_REGIONSIZE)
 #  define ARCH_SHM_VEND       (CONFIG_ARCH_SHM_VBASE + ARCH_SHM_SIZE)
@@ -234,6 +235,8 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+#ifndef __ASSEMBLY__
 
 /* Reserved .bss/.data region.  In the kernel build (CONFIG_BUILD_KERNEL),
  * the region at the beginning of the .bss/.data region is reserved for use
@@ -353,5 +356,6 @@ struct addrenv_reserve_s
 
 /* Prototyped in include/nuttx/arch.h as part of the OS/platform interface */
 
+#endif /* __ASSEMBLY__ */
 #endif /* CONFIG_ARCH_ADDRENV */
 #endif /* __INCLUDE_NUTTX_ADDRENV_H */

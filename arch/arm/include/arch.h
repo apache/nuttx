@@ -48,6 +48,7 @@
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #  include <nuttx/pgalloc.h>
+#  include <nuttx/addrenv.h>
 #endif
 
 /****************************************************************************
@@ -90,7 +91,7 @@ do { \
   ); \
 } while (0)
 
-#endif
+#endif /* CONFIG_PIC */
 
 #ifdef CONFIG_ARCH_ADDRENV
 #if CONFIG_MM_PGSIZE != 4096
@@ -109,10 +110,14 @@ do { \
 #  define ARCH_DATA_NSECTS    ARCH_PG2SECT(CONFIG_ARCH_DATA_NPAGES)
 #  define ARCH_HEAP_NSECTS    ARCH_PG2SECT(CONFIG_ARCH_HEAP_NPAGES)
 
+#  ifdef CONFIG_MM_SHM
+#    define ARCH_SHM_NSECTS   ARCH_PG2SECT(ARCH_SHM_MAXPAGES)
+#  endif
+
 #  ifdef CONFIG_ARCH_STACK_DYNAMIC
 #    define ARCH_STACK_NSECTS ARCH_PG2SECT(CONFIG_ARCH_STACK_NPAGES)
 #  endif
-#endif
+#endif /* CONFIG_ARCH_ADDRENV */
 
 /****************************************************************************
  * Inline functions
@@ -141,6 +146,9 @@ struct group_addrenv_s
   FAR uintptr_t *data[ARCH_DATA_NSECTS];
 #ifdef CONFIG_BUILD_KERNEL
   FAR uintptr_t *heap[ARCH_HEAP_NSECTS];
+#ifdef CONFIG_MM_SHM
+  FAR uintptr_t *shm[ARCH_SHM_NSECTS];
+#endif
 
   /* Initial heap allocation (in bytes).  This exists only provide an
    * indirect path for passing the size of the initial heap to the heap
@@ -167,7 +175,12 @@ struct save_addrenv_s
 {
   FAR uint32_t text[ARCH_TEXT_NSECTS];
   FAR uint32_t data[ARCH_DATA_NSECTS];
+#ifdef CONFIG_BUILD_KERNEL
   FAR uint32_t heap[ARCH_HEAP_NSECTS];
+#ifdef CONFIG_MM_SHM
+  FAR uint32_t shm[ARCH_SHM_NSECTS];
+#endif
+#endif
 };
 
 typedef struct save_addrenv_s save_addrenv_t;
