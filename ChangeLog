@@ -8635,3 +8635,5 @@
 	* include/sys/syscall.h, syscall/syscall.csv, syscall_lookup.h, and
 	  syscall_stublookup.c: Add system calls for shared memory interfaces
 	  (2014-9-22).
+	* include/nuttx/shm.h, mm/shm/shm.h, and shm_initialize.c: Add shared
+	  memory initialization logic (2014-9-23).
