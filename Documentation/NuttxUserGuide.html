@@ -9087,11 +9087,6 @@ int shmget(key_t key, size_t size, int shmflg);
 <ul>
   <li>
     <p>
-      The values of <code>shm_perm.cuid</code>, <code>shm_perm.uid</code>, <code>shm_perm.cgid</code>, and <code>shm_perm.gid</code> are set equal to the effective user ID and effective group ID, respectively, of the calling process.
-    </p>
-  </li>
-  <li>
-    <p>
       The low-order nine bits of <code>shm_perm.mode</code> are set equal to the low-order nine bits of <code>shmflg</code>.
     </p>
   </li>
@@ -9160,6 +9155,17 @@ int shmget(key_t key, size_t size, int shmflg);
   <li>
     <code>ENOSPC</code>.
       A shared memory identifier is to be created, but the system-imposed limit on the maximum number of allowed shared memory identifiers system-wide would be exceeded.
+  </li>
+</ul>
+<p>
+  <b>POSIX Deviations</b>
+<p>
+<ul>
+  <li>
+    <p>
+      The values of <code>shm_perm.cuid</code>, <code>shm_perm.uid</code>, <code>shm_perm.cgid</code>, and <code>shm_perm.gid</code> should be set equal to the effective user ID and effective group ID, respectively, of the calling process.
+      The NuttX <code>ipc_perm</code> structure, however, does not support these fields because user and group IDs are not yet supported by NuttX.
+    </p>
   </li>
 </ul>
 
