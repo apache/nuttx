@@ -252,7 +252,7 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages)
     {
       /* Get the physical address of the level 2 page table */
 
-      paddr = get_pgtable(&group->addrenv, brkaddr);
+      paddr = get_pgtable(&group->tg_addrenv, brkaddr);
       if (paddr == 0)
         {
           return 0;

@@ -157,7 +157,7 @@ int group_addrenv(FAR struct tcb_s *tcb)
                * the group whose environment is disappearing.
                */
 
-              up_addrenv_coherent(&oldgroup->addrenv);
+              up_addrenv_coherent(&oldgroup->tg_addrenv);
             }
         }
 
@@ -167,7 +167,7 @@ int group_addrenv(FAR struct tcb_s *tcb)
        * instantiated.
        */
 
-      ret = up_addrenv_select(&group->addrenv, NULL);
+      ret = up_addrenv_select(&group->tg_addrenv, NULL);
       if (ret < 0)
         {
           bdbg("ERROR: up_addrenv_select failed: %d\n", ret);
