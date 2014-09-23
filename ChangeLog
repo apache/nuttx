@@ -8637,3 +8637,6 @@
 	  (2014-9-22).
 	* include/nuttx/shm.h, mm/shm/shm.h, and shm_initialize.c: Add shared
 	  memory initialization logic (2014-9-23).
+	* include/nuttx/arch.h, Documentation/NuttxPortingGuide.html, and
+	  NuttxUserGuide.html: Add platform-specific interface definitions
+	  needed to support the shared memory feature (2014-9-23).
