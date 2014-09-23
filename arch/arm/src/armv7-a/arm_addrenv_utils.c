@@ -228,7 +228,7 @@ int arm_addrenv_create_region(FAR uintptr_t **list, unsigned int listlen,
  ****************************************************************************/
 
 void arm_addrenv_destroy_region(FAR uintptr_t **list, unsigned int listlen,
-                                uintptr_t vaddr)
+                                uintptr_t vaddr, bool keep)
 {
   irqstate_t flags;
   uintptr_t paddr;
@@ -266,15 +266,23 @@ void arm_addrenv_destroy_region(FAR uintptr_t **list, unsigned int listlen,
           l2table = (FAR uint32_t *)(ARCH_SCRATCH_VBASE | (paddr & SECTION_MASK));
 #endif
 
-          /* Return the allocated pages to the page allocator */
+          /* Return the allocated pages to the page allocator unless we were
+           * asked to keep the page data.  We keep the page data only for
+           * the case of shared memory.  In that case, we need to tear down
+           * the mapping and page table entries, but keep the raw page data
+           * will still may be mapped by other user processes.
+           */
 
-          for (j = 0; j < ENTRIES_PER_L2TABLE; j++)
+          if (!keep)
             {
-              paddr = *l2table++;
-              if (paddr != 0)
+              for (j = 0; j < ENTRIES_PER_L2TABLE; j++)
                 {
-                  paddr &= PTE_SMALL_PADDR_MASK;
-                  mm_pgfree(paddr, 1);
+                  paddr = *l2table++;
+                  if (paddr != 0)
+                    {
+                      paddr &= PTE_SMALL_PADDR_MASK;
+                      mm_pgfree(paddr, 1);
+                    }
                 }
             }
 

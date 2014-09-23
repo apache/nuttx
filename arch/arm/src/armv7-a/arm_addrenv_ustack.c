@@ -204,7 +204,7 @@ int up_addrenv_ustackfree(FAR struct tcb_s *tcb)
   /* Destroy the stack region */
 
   arm_addrenv_destroy_region(tcb->xcp.ustack, ARCH_STACK_NSECTS,
-                             CONFIG_ARCH_STACK_VBASE);
+                             CONFIG_ARCH_STACK_VBASE, false);
 
   memset(tcb->xcp.ustack, 0, ARCH_STACK_NSECTS * sizeof(uintptr_t *));
   return OK;
