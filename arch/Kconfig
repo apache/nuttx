@@ -200,7 +200,7 @@ config ARCH_HEAP_VBASE
 		The virtual address of the beginning of the heap region.
 
 config ARCH_SHM_VBASE
-	hex "Virtual heap base"
+	hex "Shared memory base"
 	depends on MM_SHM
 	---help---
 		The virtual address of the beginning of the shared memory region.
