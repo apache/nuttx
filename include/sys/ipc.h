@@ -48,11 +48,12 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 
-/* Mode bits: */
+/* Mode bits:  The lower order 9-bit bits are the standard mode bits */
 
-#define IPC_CREAT   0x01  /* Create entry if key does not exist */
-#define IPC_EXCL    0x02  /* Fail if key exists */
-#define IPC_NOWAIT  0x04  /* Error if request must wait */
+#define IPC_MODE    0x01ff     /* Mode bit mask */
+#define IPC_CREAT   (1 << 10)  /* Create entry if key does not exist */
+#define IPC_EXCL    (1 << 11)  /* Fail if key exists */
+#define IPC_NOWAIT  (1 << 12)  /* Error if request must wait */
 
 /* Keys: */
 

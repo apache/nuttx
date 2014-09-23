@@ -54,12 +54,11 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Bit definitions for the struct shm_region_s sr_flags field */
 
-/* IPC_PRIVATE is the only value for the the SHM key that is guaranteed to
- * be invalid.
- */
-
-#define SHM_INVALID_KEY IPC_PRIVATE
+#define SRFLAG_AVAILABLE 0        /* Available if no flag bits set */
+#define SRFLAG_INUSE     (1 << 0) /* Bit 0: Region is in use */
+#define SRFLAG_UNLINKED  (1 << 1) /* Bit 1: Region perists while references */
 
 /****************************************************************************
  * Public Types
@@ -72,7 +71,8 @@
 struct shm_region_s
 {
   struct shmid_ds sr_ds; /* Region info */
-  key_t sr_key;          /* Lookup key.  IPC_PRIVATE means unused */
+  bool  sr_flags;        /* See SRFLAGS_* definitions */
+  key_t sr_key;          /* Lookup key */
   sem_t sr_sem;          /* Manages exclusive access to this region */
 
   /* List of physical pages allocated for this memory region */
