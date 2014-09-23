@@ -204,10 +204,16 @@ static inline void group_release(FAR struct task_group_s *group)
   mq_release(group);
 #endif
 
+#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_MM_SHM)
+  /* Release any resource held by shared memory virtual page allocator */
+
+  (void)shm_group_release(group);
+#endif
+
 #ifdef CONFIG_ARCH_ADDRENV
   /* Destroy the group address environment */
 
-  (void)up_addrenv_destroy(&group->addrenv);
+  (void)up_addrenv_destroy(&group->tg_addrenv);
 
   /* Mark no address environment */
 

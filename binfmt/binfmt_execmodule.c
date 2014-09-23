@@ -49,6 +49,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mm.h>
+#include <nuttx/shm.h>
 #include <nuttx/binfmt/binfmt.h>
 
 #include "sched/sched.h"
@@ -229,6 +230,18 @@ int exec_module(FAR const struct binary_s *binp)
     }
 #endif
 
+#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_MM_SHM)
+  /* Initialize the shared memory virtual page allocator */
+
+  ret = shm_group_initialize(&tcb->cmn.group);
+  if (ret < 0)
+    {
+      bdbg("ERROR: shm_group_initialize() failed: %d\n", ret);
+      err = -ret;
+      goto errout_with_tcbinit;
+    }
+#endif
+
 #ifdef CONFIG_PIC
   /* Add the D-Space address as the PIC base address.  By convention, this
    * must be the first allocated address space.
@@ -244,7 +257,7 @@ int exec_module(FAR const struct binary_s *binp)
 #ifdef CONFIG_ARCH_ADDRENV
   /* Assign the address environment to the new task group */
 
-  ret = up_addrenv_clone(&binp->addrenv, &tcb->cmn.group->addrenv);
+  ret = up_addrenv_clone(&binp->addrenv, &tcb->cmn.group->tg_addrenv);
   if (ret < 0)
     {
       err = -ret;

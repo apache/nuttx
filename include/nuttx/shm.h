@@ -44,6 +44,8 @@
 
 #include <debug.h>
 
+#include <nuttx/gran.h>
+
 #ifdef CONFIG_MM_SHM
 
 /****************************************************************************
@@ -95,6 +97,26 @@
  * Public Types
  ****************************************************************************/
 
+/* This structure describes the virtual page allocator that is use to manage
+ * the mapping of shared memory into the group/process address space.
+ */
+
+struct group_shm_s
+{
+  /* Handle returned by gran_initialize() when the virtual page allocator
+   * was created.
+   */
+
+  GRAN_HANDLE gs_handle;
+
+  /* This array is used to do a reverse lookup:  Give the virtual address
+   * of a shared memory region, find the region index that performs that
+   * mapping.
+   */
+
+  uintptr_t gs_vaddr[CONFIG_ARCH_SHM_MAXREGIONS];
+};
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -118,6 +140,42 @@
  ****************************************************************************/
 
 void shm_initialize(void);
+
+/****************************************************************************
+ * Name: shm_group_initialize
+ *
+ * Description:
+ *   Initialize the group shared memory data structures when a new task
+ *   group is initialized.
+ *
+ * Input Parameters:
+ *   group - A reference to the new group structure to be initialized.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+struct task_group_s; /* Forward reference */
+int shm_group_initialize(FAR struct task_group_s *group);
+
+/****************************************************************************
+ * Name: shm_group_release
+ *
+ * Description:
+ *   Release resources used by the group shared memory logic.  This function
+ *   is called at the time at the group is destroyed.
+ *
+ * Input Parameters:
+ *   group - A reference to the group structure to be un-initialized.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+struct task_group_s; /* Forward reference */
+void shm_group_release(FAR struct task_group_s *group);
 
 #endif /* CONFIG_MM_SHM */
 #endif /* __INCLUDE_NUTTX_SHM_H */

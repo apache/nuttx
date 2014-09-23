@@ -52,6 +52,7 @@
 #include <time.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/shm.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
 
@@ -103,6 +104,8 @@
 #    define HAVE_TASK_GROUP   1          /* Message queues */
 #  elif defined(CONFIG_ARCH_ADDRENV)
 #    define HAVE_TASK_GROUP   1          /* Address environment */
+#  elif defined(CONFIG_MM_SHM)
+#    define HAVE_TASK_GROUP   1          /* Shared memory */
 #  endif
 #endif
 
@@ -418,10 +421,15 @@ struct task_group_s
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV
-  /* POSIX Named Message Queue Fields *******************************************/
-  /* POSIX Named Message Queue Fields *******************************************/
+  /* Address Environment ********************************************************/
 
-  group_addrenv_t addrenv;          /* Task group address environment           */
+  group_addrenv_t tg_addrenv;       /* Task group address environment           */
+#endif
+
+#ifdef CONFIG_MM_SHM
+  /* Shared Memory **************************************************************/
+
+  struct group_shm_s tg_shm;        /* Task shared memory logic                 */
 #endif
 };
 #endif

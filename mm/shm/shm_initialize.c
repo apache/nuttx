@@ -39,6 +39,15 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
+#include <errno.h>
+
+#include <nuttx/addrenv.h>
+#include <nuttx/sched.h>
+#include <nuttx/gran.h>
+#include <nuttx/pgalloc.h>
+#include <nuttx/shm.h>
+
 #include "shm/shm.h"
 
 #ifdef CONFIG_MM_SHM
@@ -102,6 +111,66 @@ void shm_initialize(void)
       /* Nothing to be done */
     }
 #endif
+}
+
+/****************************************************************************
+ * Name: shm_group_initialize
+ *
+ * Description:
+ *   Initialize the group shared memory data structures when a new task
+ *   group is initialized.
+ *
+ * Input Parameters:
+ *   group - A reference to the new group structure to be initialized.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int shm_group_initialize(FAR struct task_group_s *group)
+{
+  DEBUGASSERT(group && !group->tg_shm.gs_handle);
+
+  group->tg_shm.gs_handle =
+    gran_initialize((FAR void *)CONFIG_ARCH_SHM_VBASE,
+                    ARCH_SHM_MAXPAGES << MM_PGSHIFT,
+                    MM_PGSHIFT, MM_PGSHIFT);
+
+  if (!group->tg_shm.gs_handle)
+    {
+      shmdbg("gran_initialize() failed\n");
+      return -ENOMEM;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: shm_group_release
+ *
+ * Description:
+ *   Release resources used by the group shared memory logic.  This function
+ *   is called at the time at the group is destroyed.
+ *
+ * Input Parameters:
+ *   group - A reference to the group structure to be un-initialized.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void shm_group_release(FAR struct task_group_s *group)
+{
+  GRAN_HANDLE handle;
+  DEBUGASSERT(group)
+
+  handle = group->tg_shm.gs_handle;
+  if (handle)
+    {
+      gran_release(handle);
+    }
 }
 
 #endif /* CONFIG_MM_SHM */
