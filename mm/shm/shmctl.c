@@ -41,7 +41,17 @@
 
 #include <sys/shm.h>
 #include <sys/ipc.h>
+#include <unistd.h>
+#include <string.h>
+#include <semaphore.h>
+#include <time.h>
 #include <errno.h>
+#include <assert.h>
+
+#include <nuttx/shm.h>
+#include <nuttx/pgalloc.h>
+
+#include "shm/shm.h"
 
 #ifdef CONFIG_MM_SHM
 
@@ -78,26 +88,13 @@
  *       structure associated with shmid into the structure pointed to by
  *       buf.
  *     - IPC_SET
- *       Set the value of the following members of the shmid_ds data
+ *       Set the value of the shm_perm.mode member of the shmid_ds data
  *       structure associated with shmid to the corresponding value found
- *       in the structure pointed to by buf:
- *
- *         shm_perm.uid
- *         shm_perm.gid
- *         shm_perm.mode    Low-order nine bits.
- *
- *       IPC_SET can only be executed by a process that has an effective
- *       user ID equal to either that of a process with appropriate
- *       privileges or to the value of shm_perm.cuid or shm_perm.uid in the
- *       shmid_ds data structure associated with shmid.
+ *       in the structure pointed to by buf.
  *     - IPC_RMID
  *       Remove the shared memory identifier specified by shmid from the
  *       system and destroy the shared memory segment and shmid_ds data
- *       structure associated with it. IPC_RMID can only be executed by a
- *       process that has an effective user ID equal to either that of a
- *       process with appropriate privileges or to the value of
- *       shm_perm.cuid or shm_perm.uid in the shmid_ds data structure
- *       associated with shmid.
+ *       structure associated with it.
  *
  * Input Parameters:
  *   shmid - Shared memory identifier
@@ -124,13 +121,157 @@
  *       The cmd argument is IPC_STAT and the gid or uid value is too large
  *       to be stored in the structure pointed to by the buf argument.
  *
+ * POSIX Deviations:
+ *     - IPC_SET.  Does not set the the shm_perm.uid or shm_perm.gid
+ *       members of the shmid_ds data structure associated with shmid
+ *       because user and group IDs are not yet supported by NuttX
+ *     - IPC_SET.  Does not restrict the operation to processes with
+ *       appropriate privileges or matching user IDs in shmid_ds data
+ *       structure associated with shmid.  Again because user IDs and
+ *       user/group privileges are are not yet supported by NuttX
+ *     - IPC_RMID.  Does not restrict the operation to processes with
+ *       appropriate privileges or matching user IDs in shmid_ds data
+ *       structure associated with shmid.  Again because user IDs and
+ *       user/group privileges are are not yet supported by NuttX
+ *
  ****************************************************************************/
 
 int shmctl(int shmid, int cmd, struct shmid_ds *buf)
 {
-#warning Not implemented
-  set_errno(ENOSYS);
+  FAR struct shm_region_s *region;
+  int ret;
+
+  DEBUGASSERT(shmid >= 0 && shmid < CONFIG_ARCH_SHM_MAXREGIONS);
+  region =  &g_shminfo.si_region[shmid];
+  DEBUGASSERT((region->sr_flags & SRFLAG_INUSE) != 0);
+
+  /* Get exclusive access to the region data structure */
+
+  ret = sem_wait(&region->sr_sem);
+  if (ret < 0)
+    {
+      shmdbg("sem_wait failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Handle the request according to the received cmd */
+
+  switch (cmd)
+    {
+      case IPC_STAT:
+        {
+          /* Place the current value of each member of the shmid_ds data
+           * structure associated with shmid into the structure pointed to
+           * by buf.
+           */
+
+          DEBUGASSERT(buf);
+          memcpy(buf, &region->sr_ds, sizeof(struct shmid_ds));
+        }
+        break;
+
+      case IPC_SET:
+        {
+          /* Set the value of the shm_perm.mode member of the shmid_ds
+           * data structure associated with shmid to the corresponding
+           * value found in the structure pointed to by buf.
+           */
+
+          region->sr_ds.shm_perm.mode = buf->shm_perm.mode;
+        }
+        break;
+
+      case IPC_RMID:
+        {
+          /* Are any processes attached to the region? */
+
+          if (region->sr_ds.shm_nattch > 0)
+            {
+              /* Yes.. just set the UNLINKED flag.  The region will be removed when there are no longer any processes attached to it.
+               */
+
+               region->sr_flags |= SRFLAG_UNLINKED;
+            }
+          else
+            {
+              /* No.. free the entry now */
+
+              shm_destroy(shmid);
+
+              /* Don't try anything further on the deleted region */
+
+              return OK;
+            }
+        }
+        break;
+
+      default:
+        shmdbg("Unrecognized command: %d\n", cmd);
+        ret = -EINVAL;
+        goto errout_with_semaphore;
+    }
+
+  /* Save the process ID of the the last operation */
+
+  region = &g_shminfo.si_region[shmid];
+  region->sr_ds.shm_lpid = getpid();
+
+  /* Save the time of the last shmctl() */
+
+  region->sr_ds.shm_ctime = time(NULL);
+
+  /* Release our lock on the entry */
+
+  sem_post(&region->sr_sem);
+  return ret;
+
+errout_with_semaphore:
+  sem_post(&region->sr_sem);
+  set_errno(-ret);
   return ERROR;
+}
+
+/****************************************************************************
+ * Name: shm_destroy
+ *
+ * Description:
+ *   Destroy a memory region.  This function is called:
+ *
+ *   - On certain conditions when shmget() is not successful in instantiating
+ *     the full memory region and we need to clean up and free a table entry.
+ *   - When shmctl() is called with cmd == IPC_RMID and there are no
+ *     processes attached to the memory region.
+ *   - When shmdt() is called after the last process detaches from memory
+ *     region after it was previously marked for deletion by shmctl().
+ *
+ * Input Parameters:
+ *   shmid - Shared memory identifier
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumption:
+ *   The caller holds either the region table semaphore or else the
+ *   semaphore on the particular entry being deleted.
+ *
+ ****************************************************************************/
+
+void shm_destroy(int shmid)
+{
+  FAR struct shm_region_s *region =  &g_shminfo.si_region[shmid];
+  int i;
+
+  /* Free all of the allocated physical pages */
+
+  for (i = 0; i < CONFIG_ARCH_SHM_NPAGES && region->sr_pages[i] != 0; i++)
+    {
+      mm_pgfree(region->sr_pages[i], 1);
+    }
+
+  /* Reset the region entry to its initial state */
+
+  sem_destroy(&region->sr_sem);
+  memset(region, 0, sizeof(struct shm_region_s));
 }
 
 #endif /* CONFIG_MM_SHM */

@@ -9259,21 +9259,13 @@ int shmctl(int shmid, int cmd, FAR struct shmid_ds *buf);
   <li>
     <p>
       <code>IPC_SET</code>.
-      Set the value of the following members of the <code>shmid_ds</code> data structure associated with <code>shmid</code> to the corresponding value found in the structure pointed to by <code>buf</code>:
-    </p>
-      <ul>
-        <code>shm_perm.uid</code><br>
-        <code>shm_perm.gid</code><br>
-        <code>shm_perm.mode</code> (Low-order nine bits).
-      </ul>
-    <p>
-      <code>IPC_SET</code> can only be executed by a process that has an effective user ID equal to either that of a process with appropriate privileges or to the value of <code>shm_perm.cuid</code> or <code>shm_perm.uid</code> in the <code>shmid_ds</code> data structure associated with <code>shmid</code>.
+      Set the value of the <code>shm_perm.mode</code> member of the <code>shmid_ds</code> data structure associated with <code>shmid</code> to the corresponding value found in the structure pointed to by <code>buf</code>.
     </p>
   </li>
   <li>
     <p>
       <code>IPC_RMID</code>.
-       Remove the shared memory identifier specified by <code>shmid</code> from the system and destroy the shared memory segment and <code>shmid_ds</code> data structure associated with it. <code>IPC_RMID</code> can only be executed by a process that has an effective user ID equal to either that of a process with appropriate privileges or to the value of <code>shm_perm.cuid</code> or <code>shm_perm.uid</code> in the <code>shmid_ds</code> data structure associated with <code>shmid</code>.
+       Remove the shared memory identifier specified by <code>shmid</code> from the system and destroy the shared memory segment and <code>shmid_ds</code> data structure associated with it.
     </p>
   </li>
 </ul>
@@ -9305,6 +9297,23 @@ int shmctl(int shmid, int cmd, FAR struct shmid_ds *buf);
   <li>
     <code>EOVERFLOW</code>.
     The <code>cmd</code> argument is <code>IPC_STAT</code> and the <code>gid</code> or <code>uid</code> value is too large to be stored in the structure pointed to by the <code>buf</code> argument.
+  </li>
+</ul>
+<p>
+  <b>POSIX Deviations</b>
+<p>
+<ul>
+  <li>
+    <code>IPC_SET</code>.
+    Does not set the the <code>shm_perm.uid</code> or <code>shm_perm.gid</code>members of the <code>shmid_ds</code> data structure associated with <code>shmid</code> because user and group IDs are not yet supported by NuttX
+  </li>
+  <li>
+    <code>IPC_SET</code>.
+    Does not restrict the operation to processes with appropriate privileges or matching user IDs in <code>shmid_ds</code> data structure associated with <code>shmid</code>.  Again because user IDs and user/group privileges are are not yet supported by NuttX
+  </li>
+  <li>
+    <code>IPC_RMID</code>.
+    Does not restrict the operation to processes with appropriate privileges or matching user IDs in <code>shmid_ds</code> data structure associated with <code>shmid</code>.  Again because user IDs and user/group privileges are are not yet supported by NuttX
   </li>
 </ul>
 

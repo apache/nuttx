@@ -102,5 +102,32 @@ extern struct shm_info_s g_shminfo;
  * Public Function Prototypes
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: shm_destroy
+ *
+ * Description:
+ *   Destroy a memory region.  This function is called:
+ *
+ *   - On certain conditions when shmget() is not successful in instantiating
+ *     the full memory region and we need to clean up and free a table entry.
+ *   - When shmctl() is called with cmd == IPC_RMID and there are no
+ *     processes attached to the memory region.
+ *   - When shmdt() is called after the last process detaches from memory
+ *     region after it was previously marked for deletion by shmctl().
+ *
+ * Input Parameters:
+ *   shmid - Shared memory identifier
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumption:
+ *   The caller holds either the region table semaphore or else the
+ *   semaphore on the particular entry being deleted.
+ *
+ ****************************************************************************/
+
+void shm_destroy(int shmid);
+
 #endif /* CONFIG_MM_SHM */
 #endif /* __MM_SHM_SHM_H */

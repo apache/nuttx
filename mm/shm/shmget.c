@@ -41,6 +41,7 @@
 
 #include <sys/shm.h>
 #include <sys/ipc.h>
+#include <unistd.h>
 #include <semaphore.h>
 #include <string.h>
 #include <errno.h>
@@ -251,6 +252,7 @@ static int shm_extend(int shmid, size_t size)
 
 static int shm_create(key_t key, size_t size, int shmflg)
 {
+  FAR struct shm_region_s *region;
   int shmid;
   int ret;
 
@@ -275,10 +277,15 @@ static int shm_create(key_t key, size_t size, int shmflg)
   if (ret < 0)
     {
       /* Free any partial allocations and unreserve the region */
-#warning "Missing logic"
 
+      shm_destroy(shmid);
       return ret;
     }
+
+  /* Save the process ID of the creator */
+
+  region = &g_shminfo.si_region[shmid];
+  region->sr_ds.shm_cpid = getpid();
 
   /* Return the shared memory ID */
 
@@ -431,7 +438,7 @@ int shmget(key_t key, size_t size, int shmflg)
 
           /* Is the region big enough for the request? */
 
-          region =  &g_shminfo.si_region[shmid];
+          region = &g_shminfo.si_region[shmid];
           if (region->sr_ds.shm_segsz < size)
             {
               /* We we asked to create the region?  If so we can just
@@ -460,6 +467,14 @@ int shmget(key_t key, size_t size, int shmflg)
                   goto errout_with_semaphore;
                 }
             }
+
+          /* The region is already big enough or else we successfully
+           * extended the size of the region.  If the region was previously
+           * deleted, but waiting for processes to detach from the region,
+           * then it is no longer deleted.
+           */
+
+          region->sr_flags = SRFLAG_INUSE;
         }
 
       /* Release our lock on the shared memory region list */
@@ -477,4 +492,3 @@ errout:
 }
 
 #endif /* CONFIG_MM_SHM */
-
