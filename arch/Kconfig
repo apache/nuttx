@@ -199,6 +199,12 @@ config ARCH_HEAP_VBASE
 	---help---
 		The virtual address of the beginning of the heap region.
 
+config ARCH_SHM_VBASE
+	hex "Virtual heap base"
+	depends on MM_SHM
+	---help---
+		The virtual address of the beginning of the shared memory region.
+
 config ARCH_TEXT_NPAGES
 	int "Max .text pages"
 	default 1
@@ -222,6 +228,36 @@ config ARCH_HEAP_NPAGES
 		The maximum number of pages that can allocated for the heap region.
 		This, along with knowledge of the page size, determines the size of
 		the heap virtual address space. Default is 1.
+
+if MM_SHM
+
+config ARCH_SHM_MAXREGIONS
+	int "Max shared memory regions"
+	default 1
+	---help---
+		The maximum number of regions that can allocated for the shared
+		memory space.  This hard-coded value permits static allocation of
+		the shared memory data structures and serves no other purpose.
+		Default is 1.
+
+		The size of the virtual shared memory address space is then
+		determined by the product of the maximum number of regions, the
+		maximum number of pages per region, and the configured size of
+		each page.
+
+config ARCH_SHM_NPAGES
+	int "Max shared memory pages"
+	default 1
+	---help---
+		The maximum number of pages that can allocated per region for the shared memory
+		region. Default is 1.
+
+		The size of the virtual shared memory address space is then
+		determined by the product of the maximum number of regions, the
+		maximum number of pages per region, and the configured size of
+		each page.
+
+endif # MM_SHM
 
 config ARCH_STACK_DYNAMIC
 	bool "Dynamic user stack"
