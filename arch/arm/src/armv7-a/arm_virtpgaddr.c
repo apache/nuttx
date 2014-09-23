@@ -39,20 +39,6 @@
 
 #include <nuttx/config.h>
 
-#if 0
-#include <sys/types.h>
-#include <assert.h>
-#include <debug.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/addrenv.h>
-#include <nuttx/pgalloc.h>
-
-#include "chip.h"
-#include "mmu.h"
-#include "cache.h"
-#endif
-
 #include "pgalloc.h"
 
 #if defined(CONFIG_MM_PGALLOC) && defined(CONFIG_ARCH_PGPOOL_MAPPING)

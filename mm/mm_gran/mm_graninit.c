@@ -71,7 +71,7 @@ FAR struct gran_s *g_graninfo;
  * Name: gran_common_initialize
  *
  * Description:
- *   Perfrom common GRAN initialization.
+ *   Perform common GRAN initialization.
  *
  * Input Parameters:
  *   heapstart - Start of the granule allocation heap
