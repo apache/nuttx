@@ -820,15 +820,15 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   /* Select one empty transmit mailbox */
 
   regval = can_getreg(priv, STM32_CAN_TSR_OFFSET);
-  if ((regval & CAN_TSR_TME0) != 0)
+  if ((regval & CAN_TSR_TME0) != 0 && (regval & CAN_TSR_RQCP0) == 0)
     {
       txmb = 0;
     }
-  else if ((regval & CAN_TSR_TME1) != 0)
+  else if ((regval & CAN_TSR_TME1) != 0 && (regval & CAN_TSR_RQCP1) == 0)
     {
       txmb = 1;
     }
-  else if ((regval & CAN_TSR_TME2) != 0)
+  else if ((regval & CAN_TSR_TME2) != 0 && (regval & CAN_TSR_RQCP2) == 0)
     {
       txmb = 2;
     }
