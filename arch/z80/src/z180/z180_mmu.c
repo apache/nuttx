@@ -44,7 +44,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/gran.h>
+#include <nuttx/mm/gran.h>
 
 #include <arch/irq.h>
 #include <arch/io.h>

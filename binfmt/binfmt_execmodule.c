@@ -233,7 +233,7 @@ int exec_module(FAR const struct binary_s *binp)
 #if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_MM_SHM)
   /* Initialize the shared memory virtual page allocator */
 
-  ret = shm_group_initialize(&tcb->cmn.group);
+  ret = shm_group_initialize(tcb->cmn.group);
   if (ret < 0)
     {
       bdbg("ERROR: shm_group_initialize() failed: %d\n", ret);

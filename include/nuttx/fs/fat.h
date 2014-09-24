@@ -105,7 +105,7 @@ EXTERN int fat_setattrib(const char *path, fat_attrib_t setbits, fat_attrib_t cl
  *   capable memory.
  *
  *   This functions may be simple wrappers around gran_alloc() and gran_free()
- *   (See nuttx/gran.h).
+ *   (See nuttx/mm/gran.h).
  *
  ****************************************************************************/
 

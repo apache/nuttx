@@ -80,7 +80,7 @@ This directory contains the NuttX memory management logic.  This include:
      granule allocator allocates memory in units of a fixed sized block ("granule").
      Allocations may be aligned to a user-provided address boundary.
 
-     The granule allocator interfaces are defined in nuttx/include/nuttx/gran.h.
+     The granule allocator interfaces are defined in nuttx/include/nuttx/mm/gran.h.
      The granule allocator consists of these files in this directory:
 
        mm_gran.h, mm_granalloc.c, mm_grancritical.c, mm_granfree.c

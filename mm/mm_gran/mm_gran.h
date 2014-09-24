@@ -46,7 +46,7 @@
 #include <semaphore.h>
 
 #include <arch/types.h>
-#include <nuttx/gran.h>
+#include <nuttx/mm/gran.h>
 
 /****************************************************************************
  * Pre-processor Definitions

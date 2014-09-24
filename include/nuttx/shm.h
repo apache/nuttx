@@ -44,7 +44,7 @@
 
 #include <debug.h>
 
-#include <nuttx/gran.h>
+#include <nuttx/mm/gran.h>
 
 #ifdef CONFIG_MM_SHM
 

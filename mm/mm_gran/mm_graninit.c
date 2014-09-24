@@ -42,7 +42,7 @@
 #include <assert.h>
 #include <errno.h>
 
-#include <nuttx/gran.h>
+#include <nuttx/mm/gran.h>
 #include <nuttx/kmalloc.h>
 
 #include "mm_gran/mm_gran.h"

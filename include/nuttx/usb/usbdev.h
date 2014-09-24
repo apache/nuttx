@@ -378,7 +378,7 @@ int usbdev_unregister(FAR struct usbdevclass_driver_s *driver);
  *   called to free the DMA-capable memory.
  *
  *   This functions may be simple wrappers around gran_alloc() and
- *   gran_free() (See nuttx/gran.h).  Note that the gran_free() function
+ *   gran_free() (See nuttx/mm/gran.h).  Note that the gran_free() function
  *   does require the size of the allocation to be freed; that would need
  *   to be managed in the board-specific logic.
  *

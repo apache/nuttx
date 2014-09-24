@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/gran.h
+ * include/nuttx/mm/gran.h
  * General purpose granule memory allocator.
  *
  *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_GRAN_H
-#define __INCLUDE_NUTTX_GRAN_H
+#ifndef __INCLUDE_NUTTX_MM_GRAN_H
+#define __INCLUDE_NUTTX_MM_GRAN_H
 
 /****************************************************************************
  * Included Files
@@ -250,4 +250,4 @@ void gran_free(GRAN_HANDLE handle, FAR void *memory, size_t size);
 #endif
 
 #endif /* CONFIG_GRAN */
-#endif /* __INCLUDE_NUTTX_GRAN_H */
+#endif /* __INCLUDE_NUTTX_MM_GRAN_H */
