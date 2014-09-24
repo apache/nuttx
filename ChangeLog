@@ -8653,12 +8653,14 @@
 	* include/nuttx/shm.h, sched.h, mm/shm/shm_initialize.c,
 	  binfmt/binfmt_execmodule.c, sched/group/group_leave.c: Add support
 	  for a per-process virtual page allocator.  This is a new member of
-	  the task_group_s structure.  The allocaor must be initialized when a
+	  the task_group_s structure.  The allocator must be initialized when a
 	  new user process is started and uninitialize when the process group
 	  is finally destroyed.  It is used by shmat() and shmdt() to pick the
 	  virtual address onto which to map the shared physical memory
 	  (2014-9-23).
-	* mm/shm/shmat.c and shmdt.c: Completes the implemenation of the core
+	* mm/shm/shmat.c and shmdt.c: Completes the implementation of the core
 	  shared memory logic:  shmget(), shmctl(), shmat(), and shmdt().  This
-	  is still some unfinish platform-specific code that needs to be done
+	  is still some unfinished platform-specific code that needs to be done
 	  before we can begin testing (2014-9-23).
+	* include/nuttx/mm:  Move mm.h, gran.h, and shm.h from include/nuttx to
+	  include/nuttx/mm (2014-9-24).
