@@ -42,7 +42,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include <nuttx/mm.h>
+#include <nuttx/mm/mm.h>
 
 #if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
 

@@ -46,7 +46,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#include <nuttx/mm.h>
+#include <nuttx/mm/mm.h>
 #include <nuttx/userspace.h>
 
 #if !defined(CONFIG_BUILD_PROTECTED) || defined(__KERNEL__)
@@ -151,7 +151,7 @@ extern "C"
 # define kmm_free(p)            umm_free(p)
 
 #else
-/* Otherwise, the kernel-space allocators are declared in include/nuttx/mm.h
+/* Otherwise, the kernel-space allocators are declared in include/nuttx/mm/mm.h
  * and we can call them directly.
  */
 

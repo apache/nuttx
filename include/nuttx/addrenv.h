@@ -44,7 +44,7 @@
 
 #ifdef CONFIG_BUILD_KERNEL
 #  include <signal.h>
-#  include <nuttx/mm.h>
+#  include <nuttx/mm/mm.h>
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV

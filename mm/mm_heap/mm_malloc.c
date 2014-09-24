@@ -42,7 +42,7 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/mm.h>
+#include <nuttx/mm/mm.h>
 
 /****************************************************************************
  * Pre-processor Definitions

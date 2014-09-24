@@ -41,7 +41,7 @@
 
 #include <unistd.h>
 
-#include <nuttx/mm.h>
+#include <nuttx/mm/mm.h>
 #include <nuttx/addrenv.h>
 #include <nuttx/pgalloc.h>
 

@@ -41,7 +41,7 @@
 
 #include <stdbool.h>
 
-#include <nuttx/mm.h>
+#include <nuttx/mm/mm.h>
 
 #if defined(CONFIG_MM_KERNEL_HEAP) && defined(CONFIG_DEBUG)
 

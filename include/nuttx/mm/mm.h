@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/mm.h
+ * include/nuttx/mm/mm.h
  *
  *   Copyright (C) 2007-2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_MM_H
-#define __INCLUDE_NUTTX_MM_H
+#ifndef __INCLUDE_NUTTX_MM_MM_H
+#define __INCLUDE_NUTTX_MM_MM_H
 
 /****************************************************************************
  * Included Files
@@ -488,4 +488,4 @@ int mm_size2ndx(size_t size);
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_MM_H */
+#endif /* __INCLUDE_NUTTX_MM_MM_H */

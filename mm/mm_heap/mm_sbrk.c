@@ -44,7 +44,7 @@
 #include <errno.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/mm.h>
+#include <nuttx/mm/mm.h>
 #include <nuttx/pgalloc.h>
 
 #ifdef CONFIG_BUILD_KERNEL
