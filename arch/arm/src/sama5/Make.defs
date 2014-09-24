@@ -1,4 +1,5 @@
 ############################################################################
+############################################################################
 # arch/arm/sama5/Make.defs
 #
 #   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
@@ -99,6 +100,9 @@ CMN_CSRCS += arm_addrenv_ustack.c
 endif
 ifeq ($(CONFIG_ARCH_KERNEL_STACK),y)
 CMN_CSRCS += arm_addrenv_kstack.c
+endif
+ifeq ($(CONFIG_MM_SHM),y)
+CMN_CSRCS += arm_addrenv_shm.c
 endif
 endif
 
