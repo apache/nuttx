@@ -48,7 +48,7 @@
 #include <errno.h>
 #include <assert.h>
 
-#include <nuttx/shm.h>
+#include <nuttx/mm/shm.h>
 #include <nuttx/pgalloc.h>
 
 #include "shm/shm.h"

@@ -49,7 +49,7 @@
 #include  <nuttx/net/net.h>
 #include  <nuttx/lib.h>
 #include  <nuttx/mm.h>
-#include  <nuttx/shm.h>
+#include  <nuttx/mm/shm.h>
 #include  <nuttx/kmalloc.h>
 #include  <nuttx/init.h>
 

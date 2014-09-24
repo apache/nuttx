@@ -49,7 +49,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mm.h>
-#include <nuttx/shm.h>
+#include <nuttx/mm/shm.h>
 #include <nuttx/binfmt/binfmt.h>
 
 #include "sched/sched.h"

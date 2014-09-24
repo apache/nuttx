@@ -52,7 +52,7 @@
 #include <time.h>
 
 #include <nuttx/irq.h>
-#include <nuttx/shm.h>
+#include <nuttx/mm/shm.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
 

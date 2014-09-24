@@ -46,7 +46,7 @@
 #include <nuttx/sched.h>
 #include <nuttx/mm/gran.h>
 #include <nuttx/pgalloc.h>
-#include <nuttx/shm.h>
+#include <nuttx/mm/shm.h>
 
 #include "shm/shm.h"
 

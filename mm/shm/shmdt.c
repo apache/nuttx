@@ -44,7 +44,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
-#include <nuttx/shm.h>
+#include <nuttx/mm/shm.h>
 
 #include "shm/shm.h"
 

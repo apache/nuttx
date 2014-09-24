@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/shm.h
+ * include/nuttx/mm/shm.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_SHM_H
-#define __INCLUDE_NUTTX_SHM_H
+#ifndef __INCLUDE_NUTTX_MM_SHM_H
+#define __INCLUDE_NUTTX_MM_SHM_H
 
 /****************************************************************************
  * Included Files
@@ -178,4 +178,4 @@ struct task_group_s; /* Forward reference */
 void shm_group_release(FAR struct task_group_s *group);
 
 #endif /* CONFIG_MM_SHM */
-#endif /* __INCLUDE_NUTTX_SHM_H */
+#endif /* __INCLUDE_NUTTX_MM_SHM_H */
