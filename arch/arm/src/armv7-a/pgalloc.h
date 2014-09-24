@@ -145,6 +145,81 @@ static inline bool arm_uservaddr(uintptr_t vaddr)
 }
 
 /****************************************************************************
+ * Name: set_l2_entry
+ *
+ * Description:
+ *   Set the L2 table entry as part of the initialization of the L2 Page
+ *   table.
+ *
+ ****************************************************************************/
+
+static inline void set_l2_entry(FAR uint32_t *l2table, uintptr_t paddr,
+                                uintptr_t vaddr, uint32_t mmuflags)
+{
+  uint32_t index;
+
+  /* The table divides a 1Mb address space up into 256 entries, each
+   * corresponding to 4Kb of address space.  The page table index is
+   * related to the offset from the beginning of 1Mb region.
+   */
+
+  index = (vaddr & 0x000ff000) >> 12;
+
+  /* Save the level 2 page table entry */
+
+  l2table[index] = (paddr | mmuflags);
+}
+
+/****************************************************************************
+ * Name: clr_l2_entry
+ *
+ * Description:
+ *   Claear the L2 table entry.
+ *
+ ****************************************************************************/
+
+static inline void clr_l2_entry(FAR uint32_t *l2table, uintptr_t vaddr)
+{
+  uint32_t index;
+
+  /* The table divides a 1Mb address space up into 256 entries, each
+   * corresponding to 4Kb of address space.  The page table index is
+   * related to the offset from the beginning of 1Mb region.
+   */
+
+  index = (vaddr & 0x000ff000) >> 12;
+
+  /* Save the level 2 page table entry */
+
+  l2table[index] = 0;
+}
+
+/****************************************************************************
+ * Name: get_l2_entry
+ *
+ * Description:
+ *   Set the L2 table entry as part of the initialization of the L2 Page
+ *   table.
+ *
+ ****************************************************************************/
+
+static inline uintptr_t get_l2_entry(FAR uint32_t *l2table, uintptr_t vaddr)
+{
+  uint32_t index;
+
+  /* The table divides a 1Mb address space up into 256 entries, each
+   * corresponding to 4Kb of address space.  The page table index is
+   * related to the offset from the beginning of 1Mb region.
+   */
+
+  index = (vaddr & 0x000ff000) >> 12;
+
+  /* Return the level 2 page table entry */
+
+  return l2table[index];
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
