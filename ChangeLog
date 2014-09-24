@@ -8666,3 +8666,6 @@
 	  include/nuttx/mm (2014-9-24).
 	* arch/arm/src/stm32/stm32_can.c: STM32 CAN correction suggested by Max
 	  Holtzberg (2014-9-24).
+	* arch/arm/src/armv7-a/addrenv.h, arm_addrenv_shm.c,
+	  arm_addrenv_utils.c, and pgalloc.h: This completes the implementation
+	  of shared memory support for the Cortex-A platforms (2014-9-24).
