@@ -89,18 +89,6 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: set_l2_entry
- *
- * Description:
- *   Set the L2 table entry as part of the initialization of the L2 Page
- *   table.
- *
- ****************************************************************************/
-
-void set_l2_entry(FAR uint32_t *l2table, uintptr_t paddr, uintptr_t vaddr,
-                  uint32_t mmuflags);
-
-/****************************************************************************
  * Name: arm_addrenv_create_region
  *
  * Description:

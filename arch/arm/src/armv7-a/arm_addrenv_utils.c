@@ -70,32 +70,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: set_l2_entry
- *
- * Description:
- *   Set the L2 table entry as part of the initialization of the L2 Page
- *   table.
- *
- ****************************************************************************/
-
-void set_l2_entry(FAR uint32_t *l2table, uintptr_t paddr, uintptr_t vaddr,
-                  uint32_t mmuflags)
-{
-  uint32_t index;
-
-  /* The table divides a 1Mb address space up into 256 entries, each
-   * corresponding to 4Kb of address space.  The page table index is
-   * related to the offset from the beginning of 1Mb region.
-   */
-
-  index = (vaddr & 0x000ff000) >> 12;
-
-  /* Save the table entry */
-
-  l2table[index] = (paddr | mmuflags);
-}
-
-/****************************************************************************
  * Name: arm_addrenv_create_region
  *
  * Description:
@@ -129,7 +103,7 @@ int arm_addrenv_create_region(FAR uintptr_t **list, unsigned int listlen,
   /* Verify that we are configured with enough virtual address space to
    * support this memory region.
    *
-   *   npages pages correspondes to (npages << MM_PGSHIFT) bytes
+   *   npages pages corresponds to (npages << MM_PGSHIFT) bytes
    *   listlen sections corresponds to (listlen << 20) bytes
    */
 
@@ -193,7 +167,7 @@ int arm_addrenv_create_region(FAR uintptr_t **list, unsigned int listlen,
               return -ENOMEM;
             }
 
-          /* Map the .text region virtual address to this physical address */
+          /* Map the virtual address to this physical address */
 
           set_l2_entry(l2table, paddr, vaddr, mmuflags);
           nmapped += MM_PGSIZE;
