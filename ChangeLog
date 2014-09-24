@@ -8664,3 +8664,5 @@
 	  before we can begin testing (2014-9-23).
 	* include/nuttx/mm:  Move mm.h, gran.h, and shm.h from include/nuttx to
 	  include/nuttx/mm (2014-9-24).
+	* arch/arm/src/stm32/stm32_can.c: STM32 CAN correction suggested by Max
+	  Holtzberg (2014-9-24).
