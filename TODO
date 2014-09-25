@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated September 16, 2014)
+NuttX TODO List (Last updated September 25, 2014)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -18,7 +18,7 @@ nuttx/
  (13)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
  (10)  Libraries (libc/, )
- (13)  File system/Generic drivers (fs/, drivers/)
+ (12)  File system/Generic drivers (fs/, drivers/)
   (6)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
@@ -1102,12 +1102,6 @@ o File system / Generic drivers (fs/, drivers/)
                yet handle multiple block transfers.
   Status:      Open
   Priority:    Medium-Low
-
-  Title:       READ-AHEAD/WRITE BUFFER UNTESTED
-  Description: Block driver read-ahead buffer and write buffer support is
-               implemented but not yet tested.
-  Status:      Open
-  Priority:    Low
 
   Title:       SDIO-BASED SD READ-AHEAD/WRITE BUFFERING INCOMPLETE
   Description: The drivers/mmcsd/mmcsd_sdio.c driver has hooks in place to
