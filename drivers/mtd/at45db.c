@@ -2,7 +2,7 @@
  * drivers/mtd/at45db.c
  * Driver for SPI-based AT45DB161D (16Mbit)
  *
- *   Copyright (C) 2010-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -210,14 +210,14 @@ struct at45db_dev_s
 
 /* Lock and per-transaction configuration */
 
-static void at45db_lock(struct at45db_dev_s *priv);
-static inline void at45db_unlock(struct at45db_dev_s *priv);
+static void at45db_lock(FAR struct at45db_dev_s *priv);
+static inline void at45db_unlock(FAR struct at45db_dev_s *priv);
 
 /* Power management */
 
 #ifdef CONFIG_AT45DB_PWRSAVE
-static void at45db_pwrdown(struct at45db_dev_s *priv);
-static void at45db_resume(struct at45db_dev_s *priv);
+static void at45db_pwrdown(FAR struct at45db_dev_s *priv);
+static void at45db_resume(FAR struct at45db_dev_s *priv);
 #else
 #  define  at45db_pwrdown(priv)
 #  define  at45db_resume(priv)
@@ -225,23 +225,23 @@ static void at45db_resume(struct at45db_dev_s *priv);
 
 /* Low-level AT45DB Helpers */
 
-static inline int at45db_rdid(struct at45db_dev_s *priv);
-static inline uint8_t at45db_rdsr(struct at45db_dev_s *priv);
-static uint8_t at45db_waitbusy(struct at45db_dev_s *priv);
-static inline void at45db_pgerase(struct at45db_dev_s *priv, off_t offset);
-static inline int  at32db_chiperase(struct at45db_dev_s *priv);
-static inline void at45db_pgwrite(struct at45db_dev_s *priv, FAR const uint8_t *buffer,
-                                  off_t offset);
+static inline int at45db_rdid(FAR struct at45db_dev_s *priv);
+static inline uint8_t at45db_rdsr(FAR struct at45db_dev_s *priv);
+static uint8_t at45db_waitbusy(FAR struct at45db_dev_s *priv);
+static inline void at45db_pgerase(FAR struct at45db_dev_s *priv, off_t offset);
+static inline int  at32db_chiperase(FAR struct at45db_dev_s *priv);
+static inline void at45db_pgwrite(FAR struct at45db_dev_s *priv,
+                                  FAR const uint8_t *buffer, off_t offset);
 
 /* MTD driver methods */
 
 static int at45db_erase(FAR struct mtd_dev_s *mtd, off_t startblock, size_t nblocks);
 static ssize_t at45db_bread(FAR struct mtd_dev_s *mtd, off_t startblock,
-                          size_t nblocks, FAR uint8_t *buf);
+                            size_t nblocks, FAR uint8_t *buf);
 static ssize_t at45db_bwrite(FAR struct mtd_dev_s *mtd, off_t startblock,
-                           size_t nblocks, FAR const uint8_t *buf);
+                             size_t nblocks, FAR const uint8_t *buf);
 static ssize_t at45db_read(FAR struct mtd_dev_s *mtd, off_t offset, size_t nbytes,
-                         FAR uint8_t *buffer);
+                           FAR uint8_t *buffer);
 static int at45db_ioctl(FAR struct mtd_dev_s *mtd, int cmd, unsigned long arg);
 
 /************************************************************************************
@@ -266,21 +266,21 @@ static const uint8_t g_binpgsize[BINPGSIZE_SIZE] = {0x3d, 0x2a, 0x80, 0xa6};
  * Name: at45db_lock
  ************************************************************************************/
 
-static void at45db_lock(struct at45db_dev_s *priv)
+static void at45db_lock(FAR struct at45db_dev_s *priv)
 {
-  /* On SPI busses where there are multiple devices, it will be necessary to
-   * lock SPI to have exclusive access to the busses for a sequence of
-   * transfers.  The bus should be locked before the chip is selected.
+  /* On SPI buses where there are multiple devices, it will be necessary to lock SPI
+   * to have exclusive access to the buses for a sequence of transfers.  The bus
+   & should be locked before the chip is selected.
    *
-   * This is a blocking call and will not return until we have exclusiv access to
-   * the SPI buss.  We will retain that exclusive access until the bus is unlocked.
+   * This is a blocking call and will not return until we have exclusive access to
+   * the SPI bus.  We will retain that exclusive access until the bus is unlocked.
    */
 
   (void)SPI_LOCK(priv->spi, true);
 
   /* After locking the SPI bus, the we also need call the setfrequency, setbits, and
    * setmode methods to make sure that the SPI is properly configured for the device.
-   * If the SPI buss is being shared, then it may have been left in an incompatible
+   * If the SPI bus is being shared, then it may have been left in an incompatible
    * state.
    */
 
@@ -293,7 +293,7 @@ static void at45db_lock(struct at45db_dev_s *priv)
  * Name: at45db_unlock
  ************************************************************************************/
 
-static inline void at45db_unlock(struct at45db_dev_s *priv)
+static inline void at45db_unlock(FAR struct at45db_dev_s *priv)
 {
   (void)SPI_LOCK(priv->spi, false);
 }
@@ -303,7 +303,7 @@ static inline void at45db_unlock(struct at45db_dev_s *priv)
  ************************************************************************************/
 
 #ifdef CONFIG_AT45DB_PWRSAVE
-static void at45db_pwrdown(struct at45db_dev_s *priv)
+static void at45db_pwrdown(FAR struct at45db_dev_s *priv)
 {
   SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
   SPI_SEND(priv->spi, AT45DB_PWRDOWN);
@@ -316,7 +316,7 @@ static void at45db_pwrdown(struct at45db_dev_s *priv)
  ************************************************************************************/
 
 #ifdef CONFIG_AT45DB_PWRSAVE
-static void at45db_resume(struct at45db_dev_s *priv)
+static void at45db_resume(FAR struct at45db_dev_s *priv)
 {
   SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
   SPI_SEND(priv->spi, AT45DB_RESUME);
@@ -329,15 +329,15 @@ static void at45db_resume(struct at45db_dev_s *priv)
  * Name: at45db_rdid
  ************************************************************************************/
 
-static inline int at45db_rdid(struct at45db_dev_s *priv)
+static inline int at45db_rdid(FAR struct at45db_dev_s *priv)
 {
   uint8_t capacity;
   uint8_t devid[3];
 
   fvdbg("priv: %p\n", priv);
 
-  /* Configure the bus, and select this FLASH part. (The caller should alread have
-   * loced the bus for exclusive access)
+  /* Configure the bus, and select this FLASH part. (The caller should already have
+   * locked the bus for exclusive access)
    */
 
   SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
@@ -427,7 +427,7 @@ static inline int at45db_rdid(struct at45db_dev_s *priv)
  * Name: at45db_rdsr
  ************************************************************************************/
 
-static inline uint8_t at45db_rdsr(struct at45db_dev_s *priv)
+static inline uint8_t at45db_rdsr(FAR struct at45db_dev_s *priv)
 {
   uint8_t retval;
 
@@ -442,18 +442,19 @@ static inline uint8_t at45db_rdsr(struct at45db_dev_s *priv)
  * Name: at45db_waitbusy
  ************************************************************************************/
 
-static uint8_t at45db_waitbusy(struct at45db_dev_s *priv)
+static uint8_t at45db_waitbusy(FAR struct at45db_dev_s *priv)
 {
   uint8_t sr;
 
   /* Poll the device, waiting for it to report that it is ready */
 
   do
-  {
-    up_udelay(10);
-    sr = (uint8_t)at45db_rdsr(priv);
-  }
+    {
+      up_udelay(10);
+      sr = (uint8_t)at45db_rdsr(priv);
+    }
   while ((sr & AT45DB_SR_RDY) == 0);
+
   return sr;
 }
 
@@ -461,7 +462,7 @@ static uint8_t at45db_waitbusy(struct at45db_dev_s *priv)
  * Name:  at45db_pgerase
  ************************************************************************************/
 
-static inline void at45db_pgerase(struct at45db_dev_s *priv, off_t sector)
+static inline void at45db_pgerase(FAR struct at45db_dev_s *priv, off_t sector)
 {
   uint8_t erasecmd[4];
   off_t offset = sector << priv->pageshift;
@@ -470,9 +471,9 @@ static inline void at45db_pgerase(struct at45db_dev_s *priv, off_t sector)
 
   /* Higher performance write logic:  We leave the chip busy after write and erase
    * operations.  This improves write and erase performance because we do not have
-   * to wait as long between transactions (other processing can occur while the chip
-   * is busy) but means that the chip must stay powered and that we must check if
-   * the chip is still busy on each entry point.
+   * to wait as long between transactions (other processing can occur while the
+   * chip is busy) but means that the chip must stay powered and that we must check
+   * if the chip is still busy on each entry point.
    */
 
 #ifdef CONFIG_AT45DB_PREWAIT
@@ -480,15 +481,15 @@ static inline void at45db_pgerase(struct at45db_dev_s *priv, off_t sector)
 #endif
 
   /* "The Page Erase command can be used to individually erase any page in the main
-   *  memory array allowing the Buffer to Main Memory Page Program to be utilized at a
-   *  later time. ... To perform a page erase in the binary page size ..., the
-   *  opcode 81H must be loaded into the device, followed by three address bytes
-   *  ... When a low-to-high transition occurs on the CS pin, the part will erase the
-   *  selected page (the erased state is a logical 1). ... the status register and the
-   *  RDY/BUSY pin will indicate that the part is busy."
+   *  memory array allowing the Buffer to Main Memory Page Program to be utilized
+   *  at a  later time. ... To perform a page erase in the binary page size ...,
+   *  the  opcode 81H must be loaded into the device, followed by three address
+   *  bytes ... When a low-to-high transition occurs on the CS pin, the part will
+   *  erase the  selected page (the erased state is a logical 1). ... the status
+   *  register and the  RDY/BUSY pin will indicate that the part is busy."
    */
 
-  erasecmd[0] = AT45DB_PGERASE;   /* Page erase command */
+  erasecmd[0] = AT45DB_PGERASE;        /* Page erase command */
   erasecmd[1] = (offset >> 16) & 0xff; /* 24-bit offset MS bytes */
   erasecmd[2] = (offset >>  8) & 0xff; /* 24-bit offset middle bytes */
   erasecmd[3] =  offset        & 0xff; /* 24-bit offset LS bytes */
@@ -513,15 +514,15 @@ static inline void at45db_pgerase(struct at45db_dev_s *priv, off_t sector)
  * Name:  at32db_chiperase
  ************************************************************************************/
 
-static inline int at32db_chiperase(struct at45db_dev_s *priv)
+static inline int at32db_chiperase(FAR struct at45db_dev_s *priv)
 {
   fvdbg("priv: %p\n", priv);
 
   /* Higher performance write logic:  We leave the chip busy after write and erase
    * operations.  This improves write and erase performance because we do not have
-   * to wait as long between transactions (other processing can occur while the chip
-   * is busy) but means that the chip must stay powered and that we must check if
-   * the chip is still busy on each entry point.
+   * to wait as long between transactions (other processing can occur while the
+   * chip is busy) but means that the chip must stay powered and that we must check
+   * if the chip is still busy on each entry point.
    */
 
 #ifdef CONFIG_AT45DB_PREWAIT
@@ -530,10 +531,11 @@ static inline int at32db_chiperase(struct at45db_dev_s *priv)
 
   /* "The entire main memory can be erased at one time by using the Chip Erase
    * command. To execute the Chip Erase command, a 4-byte command sequence C7H, 94H,
-   * 80H and 9AH must be clocked into the device. ... After the last bit of the opcode
-   * sequence has been clocked in, the CS pin can be deasserted to start the erase
-   * process. ... the Status Register will indicate that the device is busy. The Chip
-   * Erase command will not affect sectors that are protected or locked down...
+   * 80H and 9AH must be clocked into the device. ... After the last bit of the
+   * opcode sequence has been clocked in, the CS pin can be deasserted to start the
+   * erase process. ... the Status Register will indicate that the device is busy.
+   * The Chip Erase command will not affect sectors that are protected or locked
+   * down...
    */
 
   SPI_SELECT(priv->spi, SPIDEV_FLASH, true);
@@ -554,8 +556,8 @@ static inline int at32db_chiperase(struct at45db_dev_s *priv)
  * Name:  at45db_pgwrite
  ************************************************************************************/
 
-static inline void at45db_pgwrite(struct at45db_dev_s *priv, FAR const uint8_t *buffer,
-                                  off_t page)
+static inline void at45db_pgwrite(FAR struct at45db_dev_s *priv,
+                                  FAR const uint8_t *buffer, off_t page)
 {
   uint8_t wrcmd [4];
   off_t offset = page << priv->pageshift;
@@ -571,9 +573,9 @@ static inline void at45db_pgwrite(struct at45db_dev_s *priv, FAR const uint8_t *
 
   /* Higher performance write logic:  We leave the chip busy after write and erase
    * operations.  This improves write and erase performance because we do not have
-   * to wait as long between transactions (other processing can occur while the chip
-   * is busy) but means that the chip must stay powered and that we must check if
-   * the chip is still busy on each entry point.
+   * to wait as long between transactions (other processing can occur while the
+   * chip is busy) but means that the chip must stay powered and that we must check
+   * if the chip is still busy on each entry point.
    */
 
 #ifdef CONFIG_AT45DB_PREWAIT
@@ -632,19 +634,21 @@ static int at45db_erase(FAR struct mtd_dev_s *mtd, off_t startblock, size_t nblo
  * Name: at45db_bread
  ************************************************************************************/
 
-static ssize_t at45db_bread(FAR struct mtd_dev_s *mtd, off_t startblock, size_t nblocks,
-                            FAR uint8_t *buffer)
+static ssize_t at45db_bread(FAR struct mtd_dev_s *mtd, off_t startblock,
+                            size_t nblocks, FAR uint8_t *buffer)
 {
   FAR struct at45db_dev_s *priv = (FAR struct at45db_dev_s *)mtd;
   ssize_t nbytes;
 
  /* On this device, we can handle the block read just like the byte-oriented read */
 
-  nbytes = at45db_read(mtd, startblock << priv->pageshift, nblocks << priv->pageshift, buffer);
+  nbytes = at45db_read(mtd, startblock << priv->pageshift,
+                       nblocks << priv->pageshift, buffer);
   if (nbytes > 0)
     {
       return nbytes >> priv->pageshift;
     }
+
   return nbytes;
 }
 
@@ -652,8 +656,8 @@ static ssize_t at45db_bread(FAR struct mtd_dev_s *mtd, off_t startblock, size_t 
  * Name: at45db_bwrite
  ************************************************************************************/
 
-static ssize_t at45db_bwrite(FAR struct mtd_dev_s *mtd, off_t startblock, size_t nblocks,
-                           FAR const uint8_t *buffer)
+static ssize_t at45db_bwrite(FAR struct mtd_dev_s *mtd, off_t startblock,
+                             size_t nblocks, FAR const uint8_t *buffer)
 {
   FAR struct at45db_dev_s *priv = (FAR struct at45db_dev_s *)mtd;
   size_t pgsleft = nblocks;
@@ -673,6 +677,7 @@ static ssize_t at45db_bwrite(FAR struct mtd_dev_s *mtd, off_t startblock, size_t
     {
       at45db_pgwrite(priv, buffer, startblock);
       startblock++;
+      buffer += (1 << priv->pageshift);
    }
 
   at45db_pwrdown(priv);
@@ -686,7 +691,7 @@ static ssize_t at45db_bwrite(FAR struct mtd_dev_s *mtd, off_t startblock, size_t
  ************************************************************************************/
 
 static ssize_t at45db_read(FAR struct mtd_dev_s *mtd, off_t offset, size_t nbytes,
-                         FAR uint8_t *buffer)
+                           FAR uint8_t *buffer)
 {
   FAR struct at45db_dev_s *priv = (FAR struct at45db_dev_s *)mtd;
   uint8_t rdcmd [5];
@@ -710,9 +715,9 @@ static ssize_t at45db_read(FAR struct mtd_dev_s *mtd, off_t offset, size_t nbyte
 
   /* Higher performance write logic:  We leave the chip busy after write and erase
    * operations.  This improves write and erase performance because we do not have
-   * to wait as long between transactions (other processing can occur while the chip
-   * is busy) but means that the chip must stay powered and that we must check if
-   * the chip is still busy on each entry point.
+   * to wait as long between transactions (other processing can occur while the
+   * chip is busy) but means that the chip must stay powered and that we must check
+   * if the chip is still busy on each entry point.
    */
 
 #ifdef CONFIG_AT45DB_PREWAIT
@@ -820,11 +825,11 @@ FAR struct mtd_dev_s *at45db_initialize(FAR struct spi_dev_s *spi)
 
   fvdbg("spi: %p\n", spi);
 
-  /* Allocate a state structure (we allocate the structure instead of using
-   * a fixed, static allocation so that we can handle multiple FLASH devices.
-   * The current implementation would handle only one FLASH part per SPI
-   * device (only because of the SPIDEV_FLASH definition) and so would have
-   * to be extended to handle multiple FLASH parts on the same SPI bus.
+  /* Allocate a state structure (we allocate the structure instead of using a fixed,
+   * static allocation so that we can handle multiple FLASH devices.  The current
+   * implementation would handle only one FLASH part per SPI device (only because
+   * of the SPIDEV_FLASH definition) and so would have to be extended to handle
+   * multiple FLASH parts on the same SPI bus.
    */
 
   priv = (FAR struct at45db_dev_s *)kmm_zalloc(sizeof(struct at45db_dev_s));
@@ -865,7 +870,9 @@ FAR struct mtd_dev_s *at45db_initialize(FAR struct spi_dev_s *spi)
 
       sr = at45db_waitbusy(priv);
 
-      /* Check if the device is configured as 256, 512 or 1024 bytes-per-page device */
+      /* Check if the device is configured as 256, 512 or 1024 bytes-per-page
+       * device.
+       */
 
       if ((sr & AT45DB_SR_PGSIZE) == 0)
         {
@@ -895,10 +902,10 @@ FAR struct mtd_dev_s *at45db_initialize(FAR struct spi_dev_s *spi)
   fvdbg("Return %p\n", priv);
   return (FAR struct mtd_dev_s *)priv;
 
-/* On any failure, we need free memory allocations and release the lock that
- * we hold on the SPI bus.  On failures, assume that we cannot talk to the
- * device to do any more.
- */
+  /* On any failure, we need free memory allocations and release the lock that
+   * we hold on the SPI bus.  On failures, assume that we cannot talk to the
+   * device to do any more.
+   */
 
 errout:
   at45db_unlock(priv);
