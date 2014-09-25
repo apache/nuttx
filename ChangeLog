@@ -8675,3 +8675,5 @@
 	  before starting the delay.  From Johannes Hampel (2014-9-25).
 	* drivers/mtd/at45db.c: In at45db_bwrite , the buffer is not increased
 	  when writing more than 1 page.  Sourceforge bug #34 (2014-9-25).
+	* crypto/cryptodev.c: Path segments reversed in include file path.
+	  Noted by Brennan Ashton (2014-9-25).
