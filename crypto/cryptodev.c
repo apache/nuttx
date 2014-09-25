@@ -47,8 +47,8 @@
 
 #include <nuttx/fs/fs.h>
 
-#include <crypto/nuttx/crypto.h>
-#include <crypto/nuttx/cryptodev.h>
+#include <nuttx/crypto/crypto.h>
+#include <nuttx/crypto/cryptodev.h>
 
 /****************************************************************************
  * Private Function Prototypes
