@@ -8677,3 +8677,6 @@
 	  when writing more than 1 page.  Sourceforge bug #34 (2014-9-25).
 	* crypto/cryptodev.c: Path segments reversed in include file path.
 	  Noted by Brennan Ashton (2014-9-25).
+	* drivers/mtd/mtd_rwbuffer.c:  The MTD Read-ahead/Write buffer layer
+	  appears to be functional (2014-9-25).
+
