@@ -192,6 +192,39 @@ static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds, sem_t *sem)
 #endif
 
 /****************************************************************************
+ * Name: poll_peek
+ *
+ * Description:
+ *   Peek into each file descriptor whether poll events are already available.
+ *
+ *   Return values:
+ *   TRUE : Poll events available.
+ *   FALSE: No poll events available.
+ *
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
+static inline int poll_peek(FAR struct pollfd *fds, nfds_t nfds)
+{
+  int i = 0;
+
+  /* Process each descriptor in the list */
+
+  for (i = 0; i < nfds; i++)
+    {
+      /* Peek if any events are currently posted */
+
+      if (fds[i].revents != 0)
+        {
+          return TRUE;
+        }
+    }
+
+  return FALSE;
+}
+#endif
+
+/****************************************************************************
  * Name: poll_teardown
  *
  * Description:
@@ -278,7 +311,7 @@ static void poll_timeout(int argc, uint32_t isem, ...)
  *     timeout.
  *
  * Return:
- *   On success, the number of structures that have nonzero revents fields.
+ *   On success, the number of structures that have non-zero revents fields.
  *   A value of 0 indicates that the call timed out and no file descriptors
  *   were ready.  On error, -1 is returned, and errno is set appropriately:
  *
@@ -303,21 +336,38 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
   ret = poll_setup(fds, nfds, &sem);
   if (ret >= 0)
     {
-      if (timeout >= 0)
+      if (timeout == 0)
         {
-          /* Wait for the poll event with a timeout.  Note that the
-           * millisecond timeout has to be converted to system clock
-           * ticks for wd_start
+          /* Poll returns immediately whether we have a poll event or not.
+           *
+           * ATTENTION: This branch is explicitly necessary to avoid the
+           * blocking behavior of the watchdog implementation which results
+           * in an event jittering until the current time-slice has been
+           * finished because watchdog events are only evaluated during the
+           * execution of the Timer-ISR (SysTick/Time-Slice = 10ms -->
+           * Jitter up to 10ms).
+           */
+        }
+      else if (timeout > 0)
+        {
+          /* Either wait for poll event(s) with specified timeout if no
+           * events are currently available or return immediately.  Note
+           * that the millisecond timeout has to be converted to system
+           * clock ticks for wd_start
            */
 
-          wdog = wd_create();
-          wd_start(wdog,  MSEC2TICK(timeout), poll_timeout, 1, (uint32_t)&sem);
-          poll_semtake(&sem);
-          wd_delete(wdog);
+          if (poll_peek(fds, nfds) == FALSE)
+            {
+              wdog = wd_create();
+              wd_start(wdog,  MSEC2TICK(timeout), poll_timeout, 1,
+                       (uint32_t)&sem);
+              poll_semtake(&sem);
+              wd_delete(wdog);
+            }
         }
       else
         {
-          /* Wait for the poll event with no timeout */
+          /* Wait for the poll event with no timeout (blocking indefinitely) */
 
           poll_semtake(&sem);
         }
