@@ -168,6 +168,7 @@ static ssize_t ftl_reload(FAR void *priv, FAR uint8_t *buffer,
       fdbg("Read %d blocks starting at block %d failed: %d\n",
             nblocks, startblock, nread);
     }
+
   return nread;
 }
 
@@ -431,6 +432,7 @@ static int ftl_geometry(FAR struct inode *inode, struct geometry *geometry)
 
       return OK;
     }
+
   return -EINVAL;
 }
 
@@ -599,5 +601,6 @@ int ftl_initialize(int minor, FAR struct mtd_dev_s *mtd)
           kmm_free(dev);
         }
     }
+
   return ret;
 }

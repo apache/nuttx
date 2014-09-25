@@ -150,6 +150,10 @@ static inline void rwb_resetwrbuffer(struct rwbuffer_s *rwb)
 
 /****************************************************************************
  * Name: rwb_wrflush
+ *
+ * Assumptions:
+ *   The caller holds the wrsem semaphore.
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_DRVR_WRITEBUFFER
@@ -159,7 +163,6 @@ static void rwb_wrflush(struct rwbuffer_s *rwb)
 
   fvdbg("Timeout!\n");
 
-  rwb_semtake(&rwb->wrsem);
   if (rwb->wrnblocks > 0)
     {
       fvdbg("Flushing: blockstart=0x%08lx nblocks=%d from buffer=%p\n",
@@ -179,7 +182,6 @@ static void rwb_wrflush(struct rwbuffer_s *rwb)
       rwb_resetwrbuffer(rwb);
     }
 
-  rwb_semgive(&rwb->wrsem);
 }
 #endif
 
@@ -199,7 +201,9 @@ static void rwb_wrtimeout(FAR void *arg)
    * worker thread.
    */
 
+  rwb_semtake(&rwb->wrsem);
   rwb_wrflush(rwb);
+  rwb_semgive(&rwb->wrsem);
 }
 
 /****************************************************************************
@@ -341,17 +345,22 @@ rwb_bufferread(struct rwbuffer_s *rwb,  off_t startblock,
 #ifdef CONFIG_DRVR_READAHEAD
 static int rwb_rhreload(struct rwbuffer_s *rwb, off_t startblock)
 {
+  off_t  endblock;
+  size_t nblocks;
+  int    ret;
+
+  /* Check for attempts to read beyond the end of the media */
+
+  if (startblock >= rwb->nblocks)
+    {
+      return -ESPIPE;
+    }
+
   /* Get the block number +1 of the last block that will fit in the
    * read-ahead buffer
    */
 
-  off_t  endblock  = startblock + rwb->rhmaxblocks;
-  size_t nblocks;
-  int    ret;
-
-  /* Reset the read buffer */
-
-  rwb_resetrhbuffer(rwb);
+  endblock = startblock + rwb->rhmaxblocks;
 
   /* Make sure that we don't read past the end of the device */
 
@@ -361,6 +370,10 @@ static int rwb_rhreload(struct rwbuffer_s *rwb, off_t startblock)
     }
 
   nblocks = endblock - startblock;
+
+  /* Reset the read buffer */
+
+  rwb_resetrhbuffer(rwb);
 
   /* Now perform the read */
 
@@ -471,13 +484,13 @@ int rwb_invalidate_writebuffer(FAR struct rwbuffer_s *rwb,
 
       /* 4. We invalidate a portion at the beginning of the write buffer */
 
-      else /* if (rwb->wrblockstart >= startblock && wrbend < invend) */
+      else /* if (rwb->wrblockstart >= startblock && wrbend > invend) */
         {
           uint8_t *src;
           size_t   ninval;
           size_t   nkeep;
 
-          DEBUGASSERT(rwb->wrblockstart >= startblock && wrbend < invend);
+          DEBUGASSERT(rwb->wrblockstart >= startblock && wrbend > invend);
 
           /* Copy the data from the uninvalidated region to the beginning
            * of the write buffer.
@@ -548,7 +561,7 @@ int rwb_invalidate_readahead(FAR struct rwbuffer_s *rwb,
       rhbend = rwb->rhblockstart + rwb->rhnblocks;
       invend = startblock + blockcount;
 
-      if (rwb->rhblockstart > invend || rhbend < startblock)
+      if (rhbend <= startblock || rwb->rhblockstart >= invend )
         {
           ret = OK;
         }
@@ -564,7 +577,7 @@ int rwb_invalidate_readahead(FAR struct rwbuffer_s *rwb,
       /* We are going to invalidate a subset of the read-ahead buffer.
        * Three more cases to consider:
        *
-       * 2. We invalidate a portion in the middle of the write buffer
+       * 2. We invalidate a portion in the middle of the read-ahead buffer
        */
 
       else if (rwb->rhblockstart < startblock && rhbend > invend)
@@ -587,14 +600,14 @@ int rwb_invalidate_readahead(FAR struct rwbuffer_s *rwb,
 
       /* 4. We invalidate a portion at the beginning of the write buffer */
 
-      else /* if (rwb->rhblockstart >= startblock && rhbend < invend) */
+      else /* if (rwb->rhblockstart >= startblock && rhbend > invend) */
         {
           /* Let's just force the whole read-ahead buffer to be reloaded.
            * That might cost s small amount of performance, but well worth
            * the lower complexity.
            */
 
-          DEBUGASSERT(rwb->rhblockstart >= startblock && rhbend < invend);
+          DEBUGASSERT(rwb->rhblockstart >= startblock && rhbend > invend);
           rwb->rhnblocks = 0;
           ret = OK;
         }
@@ -778,34 +791,25 @@ int rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock, uint32_t nblocks,
 
           if (rwb->rhnblocks > 0)
             {
-              off_t  block = startblock;
-              size_t nbufblocks = 0;
               off_t  bufferend;
 
-              /* Loop for each block we find in the read-head buffer.  Count
-               * the number of buffers that we can read from read-ahead
-               * buffer.
-               */
+              /* How many blocks are available in this buffer? */
 
               bufferend = rwb->rhblockstart + rwb->rhnblocks;
-
-              while (block >= rwb->rhblockstart && block < bufferend && remaining > 0)
+              if (startblock >= rwb->rhblockstart && startblock < bufferend)
                 {
-                  /* This is one more that we will read from the read ahead
-                   * buffer.
-                   */
+                  size_t rdblocks = bufferend - startblock;
+                  if (rdblocks > remaining)
+                    {
+                      rdblocks = remaining;
+                    }
 
-                  nbufblocks++;
+                  /* Then read the data from the read-ahead buffer */
 
-                  /* And one less that we will read from the media */
-
-                  startblock++;
-                  remaining--;
+                  rwb_bufferread(rwb, startblock, rdblocks, &rdbuffer);
+                  startblock += rdblocks;
+                  remaining  -= rdblocks;
                 }
-
-              /* Then read the data from the read-ahead buffer */
-
-             rwb_bufferread(rwb, startblock, nbufblocks, &rdbuffer);
             }
 
           /* If we did not get all of the data from the buffer, then we have
@@ -918,6 +922,32 @@ int rwb_write(FAR struct rwbuffer_s *rwb, off_t startblock,
 
   return ret;
 }
+
+/****************************************************************************
+ * Name: rwb_readbytes
+ *
+ * Description:
+ *   Character-oriented read
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DRVR_READBYTES
+ssize_t rwb_readbytes(FAR struct rwbuffer_s *dev, off_t offset,
+                      size_t nbytes, FAR uint8_t *buffer)
+{
+  /* Loop while there are bytes still be be read */
+  /* Make sure that the sector containing the next bytes to transfer is in
+   * memory.
+   */
+  /* How many bytes can be transfer from the in-memory data? */
+  /* Transfer the bytes */
+  /* Adjust counts and offsets for the next time through the loop */
+
+#warning Not Implemented
+  return -ENOSYS;
+}
+#endif
+
 
 /****************************************************************************
  * Name: rwb_mediaremoved

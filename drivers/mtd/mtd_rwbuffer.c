@@ -272,8 +272,8 @@ static int mtd_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
                */
 
               geo->blocksize    = priv->rwb.blocksize;
-              geo->erasesize    = priv->rwb.blocksize* priv->spb;
-              geo->neraseblocks = priv->rwb.nblocks * priv->spb;
+              geo->erasesize    = priv->rwb.blocksize * priv->spb;
+              geo->neraseblocks = priv->rwb.nblocks / priv->spb;
               ret               = OK;
 
               fvdbg("blocksize: %d erasesize: %d neraseblocks: %d\n",

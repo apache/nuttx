@@ -124,8 +124,8 @@ static int bch_open(FAR struct file *filep)
     {
       bch->refs++;
     }
-  bchlib_semgive(bch);
 
+  bchlib_semgive(bch);
   return OK;
 }
 
@@ -162,8 +162,8 @@ static int bch_close(FAR struct file *filep)
     {
       bch->refs--;
     }
-  bchlib_semgive(bch);
 
+  bchlib_semgive(bch);
   return ret;
 }
 
@@ -212,6 +212,7 @@ static ssize_t bch_write(FAR struct file *filep, FAR const char *buffer, size_t 
         {
           filep->f_pos += len;
         }
+
       bchlib_semgive(bch);
     }
 
@@ -248,6 +249,7 @@ static int bch_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           bch->refs++;
           *bchr = bch;
         }
+
       bchlib_semgive(bch);
     }
 #if defined(CONFIG_BCH_ENCRYPTION)
