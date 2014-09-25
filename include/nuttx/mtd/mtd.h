@@ -224,6 +224,24 @@ FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd,
 int mtd_setpartitionname(FAR struct mtd_dev_s *mtd, FAR const char *name);
 #endif
 
+/************************************************************************************
+ * Name: mtd_rwb_initialize
+ *
+ * Description:
+ *   Create an initialized MTD device instance.  This MTD driver contains another
+ *   MTD driver and converts a larger sector size to a standard 512 byte sector
+ *   size.
+ *
+ *   MTD devices are not registered in the file system, but are created as instances
+ *   that can be bound to other functions (such as a block or character driver front
+ *   end).
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_MTD_WRBUFFER) || defined(CONFIG_MTD_READAHEAD)
+FAR struct mtd_dev_s *mtd_rwb_initialize(FAR struct mtd_dev_s *mtd);
+#endif
+
 /****************************************************************************
  * Name: ftl_initialize
  *
