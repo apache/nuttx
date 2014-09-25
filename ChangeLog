@@ -8669,3 +8669,9 @@
 	* arch/arm/src/armv7-a/addrenv.h, arm_addrenv_shm.c,
 	  arm_addrenv_utils.c, and pgalloc.h: This completes the implementation
 	  of shared memory support for the Cortex-A platforms (2014-9-24).
+	* fs/fs_poll.c: Fix unnecessary delays and timing jitter in the
+	  implementation of poll(): No delay if timeout is zero; If timeout is
+	  greater than zero, first check if events are already pending events
+	  before starting the delay.  From Johannes Hampel (2014-9-25).
+	* drivers/mtd/at45db.c: In at45db_bwrite , the buffer is not increased
+	  when writing more than 1 page.  Sourceforge bug #34 (2014-9-25).
