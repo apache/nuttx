@@ -376,7 +376,7 @@ FAR struct mtd_dev_s *mtd_rwb_initialize(FAR struct mtd_dev_s *mtd)
        */
 
       priv->spb          = geo.erasesize / geo.blocksize;
-      DEBUGASSERT((size_t)priv->spb * geo_blocksize = geo.erasesize);
+      DEBUGASSERT((size_t)priv->spb * geo.blocksize == geo.erasesize);
 
       /* Values must be provided to rwb_initialize() */
       /* Supported geometry */
