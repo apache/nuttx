@@ -74,10 +74,10 @@ ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
 
 ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
   CSRCS += ramdisk.c
-ifneq ($(CONFIG_DRVR_WRITEBUFFER),y)
+ifeq ($(CONFIG_DRVR_WRITEBUFFER),y)
   CSRCS += rwbuffer.c
 else
-ifneq ($(CONFIG_DRVR_READAHEAD),y)
+ifeq ($(CONFIG_DRVR_READAHEAD),y)
   CSRCS += rwbuffer.c
 endif
 endif

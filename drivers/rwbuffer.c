@@ -395,7 +395,7 @@ int rwb_invalidate_writebuffer(FAR struct rwbuffer_s *rwb,
 {
   int ret;
 
-  if (rwb->wrmaxblocks > 0 && wrnblocks > 0)
+  if (rwb->wrmaxblocks > 0 && rwb->wrnblocks > 0)
     {
       off_t wrbend;
       off_t invend;
@@ -445,7 +445,7 @@ int rwb_invalidate_writebuffer(FAR struct rwbuffer_s *rwb,
           offset  = block - rwb->wrblockstart;
           src     = rwb->wrbuffer + offset * rwb->blocksize;
 
-          ret = rwb->wrflush(rwb->dev, block, nblocks, src);
+          ret = rwb->wrflush(rwb->dev, src, block, nblocks);
           if (ret < 0)
             {
               fdbg("ERROR: wrflush failed: %d\n", ret);
@@ -531,7 +531,7 @@ int rwb_invalidate_readahead(FAR struct rwbuffer_s *rwb,
 {
   int ret;
 
-  if (rwb->rhmaxblocks > 0 && rhnblocks > 0)
+  if (rwb->rhmaxblocks > 0 && rwb->rhnblocks > 0)
     {
       off_t rhbend;
       off_t invend;
@@ -667,7 +667,7 @@ int rwb_initialize(FAR struct rwbuffer_s *rwb)
 #endif /* CONFIG_DRVR_WRITEBUFFER */
 
 #ifdef CONFIG_DRVR_READAHEAD
-  if (rhmaxblocks > 0)
+  if (rwb->rhmaxblocks > 0)
     {
       fvdbg("Initialize the read-ahead buffer\n");
 
@@ -719,7 +719,7 @@ void rwb_uninitialize(FAR struct rwbuffer_s *rwb)
 #endif
 
 #ifdef CONFIG_DRVR_READAHEAD
-  if (rhmaxblocks > 0)
+  if (rwb->rhmaxblocks > 0)
     {
       sem_destroy(&rwb->rhsem);
       if (rwb->rhbuffer)
@@ -738,6 +738,7 @@ int rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock, uint32_t nblocks,
              FAR uint8_t *rdbuffer)
 {
   uint32_t remaining;
+  int ret = OK;
 
   fvdbg("startblock=%ld nblocks=%ld rdbuffer=%p\n",
         (long)startblock, (long)nblocks, rdbuffer);
@@ -766,7 +767,7 @@ int rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock, uint32_t nblocks,
 #endif
 
 #ifdef CONFIG_DRVR_READAHEAD
-  if (rhmaxblocks > 0)
+  if (rwb->rhmaxblocks > 0)
     {
       /* Loop until we have read all of the requested blocks */
 
@@ -777,7 +778,7 @@ int rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock, uint32_t nblocks,
 
           if (rwb->rhnblocks > 0)
             {
-              off_t  startblock = startblock;
+              off_t  block = startblock;
               size_t nbufblocks = 0;
               off_t  bufferend;
 
@@ -788,9 +789,7 @@ int rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock, uint32_t nblocks,
 
               bufferend = rwb->rhblockstart + rwb->rhnblocks;
 
-              while ((startblock >= rwb->rhblockstart) &&
-                     (startblock < bufferend) &&
-                     (remaining > 0))
+              while (block >= rwb->rhblockstart && block < bufferend && remaining > 0)
                 {
                   /* This is one more that we will read from the read ahead
                    * buffer.
@@ -815,7 +814,7 @@ int rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock, uint32_t nblocks,
 
           if (remaining > 0)
             {
-              int ret = rwb_rhreload(rwb, startblock);
+              ret = rwb_rhreload(rwb, startblock);
               if (ret < 0)
                 {
                   fdbg("ERROR: Failed to fill the read-ahead buffer: %d\n", ret);
@@ -853,10 +852,10 @@ int rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock, uint32_t nblocks,
 int rwb_write(FAR struct rwbuffer_s *rwb, off_t startblock,
               size_t nblocks, FAR const uint8_t *wrbuffer)
 {
-  int ret;
+  int ret = OK;
 
 #ifdef CONFIG_DRVR_READAHEAD
-  if (rhmaxblocks > 0)
+  if (rwb->rhmaxblocks > 0)
     {
       /* If the new write data overlaps any part of the read buffer, then
        * flush the data from the read buffer.  We could attempt some more
@@ -891,7 +890,7 @@ int rwb_write(FAR struct rwbuffer_s *rwb, off_t startblock,
 
           /* Then transfer the data directly to the media */
 
-          ret = rwb->wrflush(rwb->dev, startblock, nblocks, wrbuffer);
+          ret = rwb->wrflush(rwb->dev, wrbuffer, startblock, nblocks);
         }
       else
         {
@@ -912,7 +911,7 @@ int rwb_write(FAR struct rwbuffer_s *rwb, off_t startblock,
        * flush callback.
        */
 
-      ret = rwb->wrflush(rwb->dev, startblock, nblocks, wrbuffer);
+      ret = rwb->wrflush(rwb->dev, wrbuffer, startblock, nblocks);
     }
 
 #endif
