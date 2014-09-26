@@ -8681,3 +8681,6 @@
 	  appears to be functional (2014-9-25).
 	* libc/stdio/lib_libdtoa.c: Change to lib_dtoa() to fix precision error
 	  from trailing zeroes.  From Bob Doiron (2014-9-26)
+	* fs/fs_poll.c:  Re-implemented poll() delay using sem_timedwait()
+	  (2014-9-26).
+
