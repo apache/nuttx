@@ -46,10 +46,11 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/wdog.h>
 #include <nuttx/sched.h>
 #include <nuttx/clock.h>
 #include <nuttx/fs/fs.h>
+
+#include <arch/irq.h>
 
 #include "fs_internal.h"
 
@@ -192,39 +193,6 @@ static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds, sem_t *sem)
 #endif
 
 /****************************************************************************
- * Name: poll_peek
- *
- * Description:
- *   Peek into each file descriptor whether poll events are already available.
- *
- *   Return values:
- *   TRUE : Poll events available.
- *   FALSE: No poll events available.
- *
- ****************************************************************************/
-
-#if CONFIG_NFILE_DESCRIPTORS > 0
-static inline int poll_peek(FAR struct pollfd *fds, nfds_t nfds)
-{
-  int i = 0;
-
-  /* Process each descriptor in the list */
-
-  for (i = 0; i < nfds; i++)
-    {
-      /* Peek if any events are currently posted */
-
-      if (fds[i].revents != 0)
-        {
-          return TRUE;
-        }
-    }
-
-  return FALSE;
-}
-#endif
-
-/****************************************************************************
  * Name: poll_teardown
  *
  * Description:
@@ -327,7 +295,8 @@ static void poll_timeout(int argc, uint32_t isem, ...)
 
 int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
 {
-  WDOG_ID wdog;
+  struct timespec abstime;
+  irqstate_t flags;
   sem_t sem;
   int count = 0;
   int ret;
@@ -338,36 +307,47 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
     {
       if (timeout == 0)
         {
-          /* Poll returns immediately whether we have a poll event or not.
-           *
-           * ATTENTION: This branch is explicitly necessary to avoid the
-           * blocking behavior of the watchdog implementation which results
-           * in an event jittering until the current time-slice has been
-           * finished because watchdog events are only evaluated during the
-           * execution of the Timer-ISR (SysTick/Time-Slice = 10ms -->
-           * Jitter up to 10ms).
-           */
+          /* Poll returns immediately whether we have a poll event or not. */
+
+          ret = sem_trywait(&sem);
         }
       else if (timeout > 0)
         {
-          /* Either wait for poll event(s) with specified timeout if no
-           * events are currently available or return immediately.  Note
-           * that the millisecond timeout has to be converted to system
-           * clock ticks for wd_start
+          time_t    sec;
+          uint32-_t nsec;
+
+          /* Either wait for either a poll event(s) to occur or for the
+           * specified timeout to elapse with no event.
+           *
+           * NOTE: If a poll event is pending (i.e., the semaphore has already
+           * been incremented), sem_timedwait() will not wait, but will return
+           * immediately.
            */
 
-          if (poll_peek(fds, nfds) == FALSE)
-            {
-              wdog = wd_create();
-              wd_start(wdog,  MSEC2TICK(timeout), poll_timeout, 1,
-                       (uint32_t)&sem);
-              poll_semtake(&sem);
-              wd_delete(wdog);
-            }
+           sec  = timeout / MSEC_PER_SEC;
+           nsec = (timout - MSEC_PER_SEC * sec) * NSEC_PER_MSEC;
+
+           /* Make sure that the following are atomic by disabling interrupts.
+            * Interrupts will be re-enabled while we are waiting.
+            */
+
+           flags = irqsave();
+           (void)clock_gettime(CLOCK_REALTIME, &abstime);
+
+           abstime.tv_sec  += sec;
+           abstime.tv_nsec += nsec;
+           if (abstime.tv_nsec > NSEC_PER_SEC)
+             {
+               abstime.tv_sec++;
+               abstime.tv_nsec -= NSEC_PER_SEC;
+             }
+
+           ret = sem_timedwai&sem, &abstime);
+           irqrestore(flags);
         }
       else
         {
-          /* Wait for the poll event with no timeout (blocking indefinitely) */
+          /* Wait for the poll event with no timeout */
 
           poll_semtake(&sem);
         }
