@@ -267,9 +267,9 @@ static inline int poll_teardown(FAR struct pollfd *fds, nfds_t nfds, int *count)
  *   A value of 0 indicates that the call timed out and no file descriptors
  *   were ready.  On error, -1 is returned, and errno is set appropriately:
  *
- *   EBADF - An invalid file descriptor was given in one of the sets.
+ *   EBADF  - An invalid file descriptor was given in one of the sets.
  *   EFAULT - The fds address is invalid
- *   EINTR - A signal occurred before any requested event.
+ *   EINTR  - A signal occurred before any requested event.
  *   EINVAL - The nfds value exceeds a system limit.
  *   ENOMEM - There was no space to allocate internal data structures.
  *   ENOSYS - One or more of the drivers supporting the file descriptor
@@ -292,8 +292,6 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
       if (timeout == 0)
         {
           /* Poll returns immediately whether we have a poll event or not. */
-
-          ret = sem_trywait(&sem);
         }
       else if (timeout > 0)
         {
@@ -326,7 +324,7 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
                abstime.tv_nsec -= NSEC_PER_SEC;
              }
 
-           ret = sem_timedwait(&sem, &abstime);
+           (void)sem_timedwait(&sem, &abstime);
            irqrestore(flags);
         }
       else
@@ -336,7 +334,9 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
           poll_semtake(&sem);
         }
 
-      /* Teardown the poll operation and get the count of events */
+      /* Teardown the poll operation and get the count of events.  Zero will be
+       * returned in the case of a timeout.
+       */
 
       ret = poll_teardown(fds, nfds, &count);
     }
