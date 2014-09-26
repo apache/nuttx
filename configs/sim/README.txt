@@ -262,6 +262,11 @@ mtdpart
   This is the apps/examples/mtdpart test using a MTD RAM driver to
   simulate the FLASH part.
 
+mtdrwb
+
+  This is the apps/examples/mtdrwb test using a MTD RAM driver to
+  simulate the FLASH part.
+
 nettest
 
   Configures to use apps/examples/nettest.  This configuration
