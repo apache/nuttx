@@ -314,8 +314,8 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
         }
       else if (timeout > 0)
         {
-          time_t    sec;
-          uint32-_t nsec;
+          time_t   sec;
+          uint32_t nsec;
 
           /* Either wait for either a poll event(s) to occur or for the
            * specified timeout to elapse with no event.
