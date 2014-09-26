@@ -1,7 +1,7 @@
 /****************************************************************************
  * binfmt/libelf/libelf_read.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -128,7 +128,8 @@ int elf_read(FAR struct elf_loadinfo_s *loadinfo, FAR uint8_t *buffer,
       if (rpos != offset)
         {
           int errval = errno;
-          bdbg("Failed to seek to position %ld: %d\n", (long)offset, errval);
+          bdbg("Failed to seek to position %lu: %d\n",
+               (unsigned long)offset, errval);
           return -errval;
         }
 
@@ -143,7 +144,8 @@ int elf_read(FAR struct elf_loadinfo_s *loadinfo, FAR uint8_t *buffer,
 
            if (errval != EINTR)
              {
-               bdbg("Read of .data failed: %d\n", errval);
+               bdbg("Read from offset %lu failed: %d\n",
+                    (unsigned long)offset, errval);
                return -errval;
              }
          }

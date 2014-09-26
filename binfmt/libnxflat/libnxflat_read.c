@@ -142,7 +142,7 @@ int nxflat_read(struct nxflat_loadinfo_s *loadinfo, char *buffer, int readsize, 
            int errval = errno;
            if (errval != EINTR)
              {
-               bdbg("Read of .data failed: %d\n", errval);
+               bdbg("Read from offset %d failed: %d\n", offset, errval);
                return -errval;
              }
          }
