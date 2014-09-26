@@ -41,7 +41,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <time.h>
 #include <poll.h>
 #include <errno.h>
 #include <assert.h>
@@ -244,22 +243,6 @@ static inline int poll_teardown(FAR struct pollfd *fds, nfds_t nfds, int *count)
 #endif
 
 /****************************************************************************
- * Name: poll_timeout
- *
- * Description:
- *   The wdog expired before any other events were received.
- *
- ****************************************************************************/
-
-static void poll_timeout(int argc, uint32_t isem, ...)
-{
-  /* Wake up the poller */
-
-  FAR sem_t *sem = (FAR sem_t *)isem;
-  poll_semgive(sem);
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -326,7 +309,7 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
            */
 
            sec  = timeout / MSEC_PER_SEC;
-           nsec = (timout - MSEC_PER_SEC * sec) * NSEC_PER_MSEC;
+           nsec = (timeout - MSEC_PER_SEC * sec) * NSEC_PER_MSEC;
 
            /* Make sure that the following are atomic by disabling interrupts.
             * Interrupts will be re-enabled while we are waiting.
@@ -343,7 +326,7 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
                abstime.tv_nsec -= NSEC_PER_SEC;
              }
 
-           ret = sem_timedwai&sem, &abstime);
+           ret = sem_timedwait(&sem, &abstime);
            irqrestore(flags);
         }
       else
