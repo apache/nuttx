@@ -189,6 +189,10 @@ static void lib_dtoa(FAR struct lib_outstream_s *obj, int fmt, int prec,
   digits   = __dtoa(value, 3, prec, &expt, &dsgn, &rve);
   numlen   = rve - digits;
 
+  /* Avoid precision error from missing trailing zeroes */
+
+  numlen = MAX(expt, numlen);
+
   if (IS_NEGATE(flags))
     {
       obj->put(obj, '-');
