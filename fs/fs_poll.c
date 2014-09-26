@@ -41,6 +41,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <time.h>
 #include <poll.h>
 #include <errno.h>
 #include <assert.h>
