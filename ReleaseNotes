@@ -7010,7 +7010,7 @@ Additional new features and extended functionality:
       - Remove CONFIG_MM_MULTIHEAP.  Non-multiheap operation is no longer
         supported.
       - sbrk():  sbrk() is now supported in the kernel build to permit
-        dyanmically sized, per-process heaps.
+        dynamically sized, per-process heaps.
       - Per-Process Heaps:  Space at the beginning of the process data space
         is now reserved for user heap management structures.  In the kernel
         build mode, these heap structures are shared between the kernel and
