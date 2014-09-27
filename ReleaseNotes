@@ -4621,7 +4621,7 @@ Additional new features and extended functionality:
         Contributed by Andrew Tridgell (via Lorenz Meier).
 
 Efforts In Progress.  The following are features that are partially
-implemented but present in this release.  They are not likely be be
+implemented but present in this release.  They are not likely to be
 completed soon.
 
     * Audio System:
@@ -4807,7 +4807,7 @@ Additional new features and extended functionality:
         it can be used with USB device or host trace data.
 
 Efforts In Progress.  The following are features that are partially
-implemented but present in this release.  They are not likely be be
+implemented but present in this release.  They are not likely to be
 completed soon.
 
     * CC3000 Networking
@@ -5114,7 +5114,7 @@ Additional new features and extended functionality:
         object file path.
 
 Efforts In Progress.  The following are features that are partially
-implemented but present in this release.  They are not likely be be
+implemented but present in this release.  They are not likely to be
 completed soon.
 
     * kconfig-fronted Configuration:
@@ -5441,7 +5441,7 @@ Additional new features and extended functionality:
       - tools/mkctags.sh:  A script for creating ctags from Ken Pettit.
 
 Efforts In Progress.  The following are features that are partially
-implemented but present in this release.  They are not likely be be
+implemented but present in this release.  They are not likely to be
 completed soon.
 
     * kconfig-fronted Configuration:
@@ -5710,7 +5710,7 @@ Additional new features and extended functionality:
         that using VT100 commands.
 
 Efforts In Progress.  The following are features that are partially
-implemented but present in this release.  They are not likely be be
+implemented but present in this release.  They are not likely to be
 completed soon.
 
     * kconfig-fronted Configuration:
@@ -7053,7 +7053,7 @@ Additional new features and extended functionality:
         signalled by a PHY interrupt.
       - Improved Send Logic:  In the past, the first packet send to a new
         network peer would fail; there would be no entry in the ARP table
-        for the peer and so an ARP request qould replace that first packet.
+        for the peer and so an ARP request could replace that first packet.
         Now as an option if CONFIG_NET_ARP_SEND=y, all send logic will (1)
         check if the peer MAC address is in the ARP table and, if not, (2)
         send ARP requests periodically to get the mapping and (3) wait for
@@ -7225,7 +7225,7 @@ Additional new features and extended functionality:
       - See above for new apps/tools scripts.
 
 Efforts In Progress.  The following are features that are partially
-implemented but present in this release.  They are not likely be be
+implemented but present in this release.  They are not likely to be
 completed soon.
 
     * Processes.  Much of the work in this release is focused on the
@@ -7248,7 +7248,7 @@ Bugfixes.  Only the most critical bugfixes are listed here (see the ChangeLog fo
         task_create() or task_spawn() interfaces if there is an address
         environment.  (3) posix_spawn() kernel proxy thread should be a
         kernel thread, not a user task.
-      - Several pthread interfaces: Add const storage class to to phthread
+      - Several pthread interfaces: Add const storage class to phthread
         parameters.  From Freddie Chopin.
       - sched/clock: Remove vestiges of g_tickbias;  need, instead, to apply
         time bias to g_basetime in order to provide the correct system time.
