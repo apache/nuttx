@@ -961,7 +961,9 @@ nuttx
  |   |   `- README.txt
  |   |-  freedom-kl25z/
  |   |   `- README.txt
- |   |-  hymini-stm32v/
+ |   |- galileo/
+ |   |   `- README.txt
+ |   |- hymini-stm32v/
  |   |   `- README.txt
  |   |- kwikstik-k40/
  |   |   `- README.txt
@@ -988,6 +990,8 @@ nuttx
  |   |- mikroe-stm32f/
  |   |   `- README.txt
  |   |- mirtoo/
+ |   |   `- README.txt
+ |   |- mt-db-x3/
  |   |   `- README.txt
  |   |- mx1ads/
  |   |   `- README.txt
