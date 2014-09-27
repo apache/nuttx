@@ -8113,7 +8113,7 @@
 	  make-related files:  Adds support for localtime.  From Max Neklyudov
 	  (2014-8-12)
 
-7.5 2014-xx-xx Gregory Nutt <gnutt@nuttx.org>
+7.5 2014-09-28 Gregory Nutt <gnutt@nuttx.org>
 
 	* clock/clock_systimespec.c and sched/clock/clock_gettime.c:  When
 	  reading the system timer, don't read a struct timespec, convert it
@@ -8683,4 +8683,6 @@
 	  from trailing zeroes.  From Bob Doiron (2014-9-26)
 	* fs/fs_poll.c:  Re-implemented poll() delay using sem_timedwait()
 	  (2014-9-26).
+
+7.6 2014-xx-xx Gregory Nutt <gnutt@nuttx.org>
 
