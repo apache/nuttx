@@ -135,7 +135,7 @@ if MM_PGALLOC
 config MM_PGSIZE
 	int "Page Size"
 	default 4096
-	--help---
+	---help---
 		The MMU page size.  Must be one of {1024, 2048, 4096, 8192, or
 		16384}.  This is easily extensible, but only those values are
 		currently support.
