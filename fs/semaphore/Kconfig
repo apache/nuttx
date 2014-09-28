@@ -13,7 +13,7 @@ if FS_NAMED_SEMAPHORES
 
 config FS_NAMED_SEMPATH
 	string "Path to semaphore storage"
-	default "/var/sem"
+	default "/var/lock"
 	---help---
 		The path to where named semaphores will exist in the VFS namespace.
     

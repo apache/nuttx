@@ -59,7 +59,34 @@ static inline int statpseudo(FAR struct inode *inode, FAR struct stat *buf)
   /* Most of the stat entries just do not apply */
 
   memset(buf, 0, sizeof(struct stat) );
-  if (inode->u.i_ops)
+
+  if (INODE_IS_SPECIAL(inode))
+    {
+#if defined(CONFIG_FS_NAMED_SEMAPHORES)
+      if (INODE_IS_NAMEDSEM(inode))
+        {
+          buf->st_mode = S_IFSEM;
+        }
+      else
+#endif
+#if !defined(CONFIG_DISABLE_MQUEUE)
+      if (INODE_IS_MQUEUE(inode))
+        {
+          buf->st_mode = S_IFMQ;
+        }
+      else
+#endif
+#if defined(CONFIG_FS_SHM)
+       if (INODE_IS_SHM(inode)) */
+        {
+          buf->st_mode | S_IFSHM;
+        }
+      else
+#endif
+       {
+       }
+    }
+  else if (inode->u.i_ops)
     {
       if (inode->u.i_ops->read)
         {
@@ -81,7 +108,7 @@ static inline int statpseudo(FAR struct inode *inode, FAR struct stat *buf)
 
           buf->st_mode |= S_IFBLK;
         }
-      else
+      else /* if (INODE_IS_DRIVER(inode)) */
         {
           /* What is it if it also has child inodes? */
 

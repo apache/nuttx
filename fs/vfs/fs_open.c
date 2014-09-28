@@ -135,8 +135,9 @@ int open(const char *path, int oflags, ...)
       goto errout;
     }
 
-  /* Verify that the inode is valid and either a "normal" or a mountpoint.  We
-   * specifically exclude block drivers.
+  /* Verify that the inode is valid and either a "normal" character driver or a
+   * mountpoint.  We specifically exclude block drivers and and "special"
+   * inodes (semaphores, message queues, shared memory).
    */
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT

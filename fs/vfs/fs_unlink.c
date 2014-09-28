@@ -140,7 +140,7 @@ int unlink(FAR const char *pathname)
    * should remove the node.
    */
 
-  if (inode->u.i_ops)
+  if (!INODE_IS_SPECIAL(inode) && inode->u.i_ops)
     {
       /* If this is a pseudo-file node (i.e., it has no operations)
        * then rmdir should remove the node.
@@ -183,12 +183,12 @@ int unlink(FAR const char *pathname)
           goto errout_with_inode;
         }
     }
-#else
+  else
+#endif
     {
       errcode = ENXIO;
       goto errout_with_inode;
     }
-#endif
 
   /* Successfully unlinked */
 
