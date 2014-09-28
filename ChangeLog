@@ -8686,3 +8686,4 @@
 
 7.6 2014-xx-xx Gregory Nutt <gnutt@nuttx.org>
 
+	* fs/fs.h and other files:  Rename fs/fs_internal.h to fs/fs.h (2014-9-28).
