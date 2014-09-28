@@ -49,6 +49,10 @@ include driver/Make.defs
 include dirent/Make.defs
 include mmap/Make.defs
 
+# OS resources
+
+include semaphore/Make.defs
+
 # Additional files required is mount-able file systems are supported
 
 ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)

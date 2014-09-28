@@ -209,20 +209,8 @@ struct mountpt_operations
  *   - Shared memory:        shm_open() and shm_unlink();
  *
  * These are a special case in that they do not follow quite the same
- * pattern as the other file system types in that they have no read or
- * write methods.
- *
- * Each inode type carries a payload specific to the OS resource;
- * Only the contents of struct special_operations is visible to the VFS.
+ * pattern as the other file system types in that they have operations.
  */
-
-struct inode;
-struct special_operations
-{
-  int     (*open)(FAR struct inode *inode);
-  int     (*close)(FAR struct inode *inode);
-  int     (*unlink)(FAR struct inode *inode, FAR const char *relpath);
-};
 
 /* These are the various kinds of operations that can be associated with
  * an inode.
@@ -235,9 +223,8 @@ union inode_ops_u
   FAR const struct block_operations     *i_bops; /* Block driver operations */
   FAR const struct mountpt_operations   *i_mops; /* Operations on a mountpoint */
 #endif
-  FAR const struct special_operations   *i_xops; /* Generic operations on OS resources */
 #ifdef CONFIG_FS_NAMED_SEMAPHORES
-  FAR const struct semaphore_operations *i_sops; /* Operations for named semaphores */
+  FAR struct nsem_inode_s               *i_nsem; /* Named semaphore */
 #endif
 };
 

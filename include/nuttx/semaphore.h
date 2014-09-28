@@ -57,15 +57,8 @@
 #ifdef CONFIG_FS_NAMED_SEMAPHORES
 /* This is the named semaphore inode */
 
-struct inode; /* Forward reference */
-struct semaphore_operations
+struct nsem_inode_s
 {
-  /* Common inode operations */
-
-  int     (*open)(FAR struct inode *inode);
-  int     (*close)(FAR struct inode *inode);
-  int     (*unlink)(FAR struct inode *inode, FAR const char *relpath);
-
   /* Payload unique to named semaphores */
 
   uint16_t ns_refs;                 /* Number of open references semaphore */

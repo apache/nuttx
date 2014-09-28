@@ -37,6 +37,8 @@
 
 ifneq ($(CONFIG_FS_NAMED_SEMAPHORES),0)
 
+CSRCS += sem_open.c
+
 # Include named semaphore build support
 
 DEPPATH += --dep-path semaphore
