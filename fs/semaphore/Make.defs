@@ -35,7 +35,7 @@
 
 # Include named semaphore support
 
-ifneq ($(CONFIG_FS_NAMED_SEMAPHORES),0)
+ifeq ($(CONFIG_FS_NAMED_SEMAPHORES),y)
 
 CSRCS += sem_open.c sem_close.c sem_unlink.c
 
