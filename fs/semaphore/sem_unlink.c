@@ -44,6 +44,7 @@
 #include <sched.h>
 #include <queue.h>
 #include <errno.h>
+#include <assert.h>
 
 #include <nuttx/kmalloc.h>
 
@@ -138,20 +139,19 @@ int sem_unlink(FAR const char *name)
       goto errout_with_semaphore;
     }
 
-  /* Mark the inode as deleted */
-
-  inode->i_flags |= FSNODEFLAG_DELETED;
-
   /* Remove the old inode from the tree.  Because we hold a reference count
-   * on the inode, it will not be deleted now.
+   * on the inode, it will not be deleted now.  This will set the
+   * FSNODEFLAG_DELETED bit in the inode flags.
    */
 
   ret = inode_remove(fullpath);
-  if (ret < 0)
-    {
-      errcode = -ret;
-      goto errout_with_semaphore;
-    }
+
+  /* inode_remove() should always fail with -EBUSY because we hae a reference
+   * on the inode.  -EBUSY means taht the inode was, indeed, unlinked but
+   * thatis could not be freed because there are refrences.
+   */
+
+  DEBUGASSERT(ret >= 0 || ret == -EBUSY);
 
   /* Now we do not release the reference count in the normal way (by calling
    * inode release.  Rather, we call sem_close().  sem_close will decrement
@@ -160,7 +160,8 @@ int sem_unlink(FAR const char *name)
    * that can only occur if the semaphore is not in-use.
    */
 
-  return sem_close((FAR sem_t *)&inode->u.i_nsem);
+  inode_semgive();
+  return sem_close((FAR sem_t *)inode->u.i_nsem);
 
 errout_with_semaphore:
   inode_semgive();
