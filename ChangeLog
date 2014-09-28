@@ -8696,4 +8696,6 @@
 	* fs/mount: Move mount-related files from fs/. to fs/mount/. (2014-9-23).
 	* fs/vfs: Move renaming files in fs/. to fs/vfs/. (Don't all belong there)
 	  (2014-9-23).
+	* fs/semaphore: Create a build structure that will (eventually) support
+	  using the VFS to manage named semaphores (2014-9-23).
 
