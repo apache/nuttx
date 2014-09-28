@@ -8687,3 +8687,7 @@
 7.6 2014-xx-xx Gregory Nutt <gnutt@nuttx.org>
 
 	* fs/fs.h and other files:  Rename fs/fs_internal.h to fs/fs.h (2014-9-28).
+	* include/nuttx/semaphore.h and fs/fs.h:  Add data structures that will
+	  allow us to move name semaphore support out of the OS and into the
+	  VFS (not complete) (2014-9-28).
+
