@@ -48,8 +48,10 @@
 #include <stdbool.h>
 #include <semaphore.h>
 
+#include <nuttx/semaphore.h>
+
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Stream flags for the fs_flags field of in struct file_struct */
 
@@ -57,7 +59,7 @@
 #define __FS_FLAG_ERROR (1 << 1) /* Error detected by any operation */
 
 /****************************************************************************
- * Type Definitions
+ * Public Type Definitions
  ****************************************************************************/
 
 /* This structure is provided by devices when they are registered with the
@@ -66,7 +68,6 @@
 
 struct file;
 struct pollfd;
-
 struct file_operations
 {
   /* The device driver open method differs from the mountpoint open method */
@@ -114,9 +115,9 @@ struct block_operations
   int     (*open)(FAR struct inode *inode);
   int     (*close)(FAR struct inode *inode);
   ssize_t (*read)(FAR struct inode *inode, FAR unsigned char *buffer,
-                  size_t start_sector, unsigned int nsectors);
+            size_t start_sector, unsigned int nsectors);
   ssize_t (*write)(FAR struct inode *inode, FAR const unsigned char *buffer,
-                   size_t start_sector, unsigned int nsectors);
+            size_t start_sector, unsigned int nsectors);
   int     (*geometry)(FAR struct inode *inode, FAR struct geometry *geometry);
   int     (*ioctl)(FAR struct inode *inode, int cmd, unsigned long arg);
 };
@@ -140,16 +141,17 @@ struct mountpt_operations
    */
 
   int     (*open)(FAR struct file *filep, FAR const char *relpath,
-                  int oflags, mode_t mode);
+            int oflags, mode_t mode);
 
-  /* The following methods must be identical in signature and position because
-   * the struct file_operations and struct mountp_operations are treated like
-   * unions.
+  /* The following methods must be identical in signature and position
+   * because the struct file_operations and struct mountp_operations are
+   * treated like unions.
    */
 
   int     (*close)(FAR struct file *filep);
   ssize_t (*read)(FAR struct file *filep, FAR char *buffer, size_t buflen);
-  ssize_t (*write)(FAR struct file *filep, FAR const char *buffer, size_t buflen);
+  ssize_t (*write)(FAR struct file *filep, FAR const char *buffer,
+            size_t buflen);
   off_t   (*seek)(FAR struct file *filep, off_t offset, int whence);
   int     (*ioctl)(FAR struct file *filep, int cmd, unsigned long arg);
 
@@ -165,31 +167,60 @@ struct mountpt_operations
 
   /* Directory operations */
 
-  int     (*opendir)(FAR struct inode *mountpt, FAR const char *relpath, FAR struct fs_dirent_s *dir);
-  int     (*closedir)(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir);
-  int     (*readdir)(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir);
-  int     (*rewinddir)(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir);
+  int     (*opendir)(FAR struct inode *mountpt, FAR const char *relpath,
+            FAR struct fs_dirent_s *dir);
+  int     (*closedir)(FAR struct inode *mountpt,
+            FAR struct fs_dirent_s *dir);
+  int     (*readdir)(FAR struct inode *mountpt,
+            FAR struct fs_dirent_s *dir);
+  int     (*rewinddir)(FAR struct inode *mountpt,
+            FAR struct fs_dirent_s *dir);
 
   /* General volume-related mountpoint operations: */
 
-  int     (*bind)(FAR struct inode *blkdriver, FAR const void *data, FAR void **handle);
+  int     (*bind)(FAR struct inode *blkdriver, FAR const void *data,
+            FAR void **handle);
   int     (*unbind)(FAR void *handle, FAR struct inode **blkdriver);
-
   int     (*statfs)(FAR struct inode *mountpt, FAR struct statfs *buf);
 
   /* Operations on paths */
 
   int     (*unlink)(FAR struct inode *mountpt, FAR const char *relpath);
-  int     (*mkdir)(FAR struct inode *mountpt, FAR const char *relpath, mode_t mode);
+  int     (*mkdir)(FAR struct inode *mountpt, FAR const char *relpath,
+            mode_t mode);
   int     (*rmdir)(FAR struct inode *mountpt, FAR const char *relpath);
-  int     (*rename)(FAR struct inode *mountpt, FAR const char *oldrelpath, FAR const char *newrelpath);
-  int     (*stat)(FAR struct inode *mountpt, FAR const char *relpath, FAR struct stat *buf);
+  int     (*rename)(FAR struct inode *mountpt, FAR const char *oldrelpath,
+            FAR const char *newrelpath);
+  int     (*stat)(FAR struct inode *mountpt, FAR const char *relpath,
+            FAR struct stat *buf);
 
-  /* NOTE:  More operations will be needed here to support:  disk usage stats
-   * file stat(), file attributes, file truncation, etc.
+  /* NOTE:  More operations will be needed here to support:  disk usage
+   * stats file stat(), file attributes, file truncation, etc.
    */
 };
 #endif /* CONFIG_DISABLE_MOUNTPOUNT */
+
+/* Named OS resources are also maintained by the VFS.  This includes:
+ *
+ *   - Named semaphores:     sem_open(), sem_close(), and sem_unlink()
+ *   - POSIX Message Queues: mq_open() and mq_close()
+ *   - Shared memory:        shm_open() and shm_unlink();
+ *
+ * These are a special case in that they do not follow quite the same
+ * pattern as the other file system types in that they have no read or
+ * write methods.
+ *
+ * Each inode type carries a payload specific to the OS resource;
+ * Only the contents of struct special_operations is visible to the VFS.
+ */
+
+struct inode;
+struct special_operations
+{
+  int     (*open)(FAR struct inode *inode);
+  int     (*close)(FAR struct inode *inode);
+  int     (*unlink)(FAR struct inode *inode, FAR const char *relpath);
+};
 
 /* These are the various kinds of operations that can be associated with
  * an inode.
@@ -197,11 +228,13 @@ struct mountpt_operations
 
 union inode_ops_u
 {
-  FAR const struct file_operations    *i_ops;  /* Driver operations for inode */
+  FAR const struct file_operations      *i_ops;  /* Driver operations for inode */
 #ifndef CONFIG_DISABLE_MOUNTPOUNT
-  FAR const struct block_operations   *i_bops; /* Block driver operations */
-  FAR const struct mountpt_operations *i_mops; /* Operations on a mountpoint */
+  FAR const struct block_operations     *i_bops; /* Block driver operations */
+  FAR const struct mountpt_operations   *i_mops; /* Operations on a mountpoint */
 #endif
+  FAR const struct special_operations   *i_xops; /* Generic operations on OS resources */
+  FAR const struct semaphore_operations *i_sops; /* Operations for named semaphores */
 };
 
 /* This structure represents one inode in the Nuttx pseudo-file system */

@@ -48,7 +48,7 @@
 #include <queue.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* CONFIG_SCHED_WORKQUEUE.  Create a dedicated "worker" thread to

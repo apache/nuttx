@@ -46,7 +46,7 @@
 #include <stdint.h>
 
 /********************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ********************************************************************************/
 
 /* open flag settings for open() (and related APIs) */

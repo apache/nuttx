@@ -46,7 +46,7 @@
 #include <stdint.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* The C standard specifies two constants, EXIT_SUCCESS and

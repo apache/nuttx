@@ -44,7 +44,7 @@
 #include <nuttx/fs/fs.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* If the erased state of FLASH memory is anything other than 0xff, then this

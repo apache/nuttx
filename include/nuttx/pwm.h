@@ -64,7 +64,7 @@
 #ifdef CONFIG_PWM
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* CONFIG_PWM - Enables because PWM driver support

@@ -49,7 +49,7 @@
 #ifdef CONFIG_MM_PGALLOC
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* CONFIG_MM_PGALLOC - Enable page allocator support

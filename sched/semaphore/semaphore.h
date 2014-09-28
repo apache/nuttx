@@ -75,7 +75,7 @@ typedef struct nsem_s nsem_t;
  * Public Variables
  ****************************************************************************/
 
-/* This is a list of dyanamically allocated named semaphores */
+/* This is a list of dynamically allocated named semaphores */
 
 extern dq_queue_t g_nsems;
 

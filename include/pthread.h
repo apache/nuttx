@@ -54,7 +54,7 @@
 #include <time.h>           /* Needed for struct timespec */
 
 /********************************************************************************
- * Compilation Switches
+ * Pre-processor Definitions
  ********************************************************************************/
 
 /* Standard POSIX switches */
@@ -66,10 +66,6 @@
 #ifndef _POSIX_THREAD_ATTR_STACKSIZE
 #  define _POSIX_THREAD_ATTR_STACKSIZE
 #endif
-
-/********************************************************************************
- * Definitions
- ********************************************************************************/
 
 /* Values for the process shared (pshared) attribute */
 

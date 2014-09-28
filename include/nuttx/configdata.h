@@ -55,7 +55,7 @@
 #ifdef CONFIG_PLATFORM_CONFIGDATA
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
 /* CONFIG_AUDIO - Enables Audio driver support

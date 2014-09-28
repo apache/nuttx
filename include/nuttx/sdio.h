@@ -49,7 +49,7 @@
 #include <nuttx/wqueue.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* SDIO events needed by the driver

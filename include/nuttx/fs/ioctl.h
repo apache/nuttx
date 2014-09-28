@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* General ioctl definitions ************************************************/
 /* Each NuttX ioctl commands are uint16_t's consisting of an 8-bit type

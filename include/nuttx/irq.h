@@ -45,7 +45,7 @@
 #endif
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* IRQ detach is a convenience definition.  Detaching an interrupt handler
  * is equivalent to setting a NULL interrupt handler.

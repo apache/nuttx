@@ -46,7 +46,7 @@
 #include <sched.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Default pthread attribute initializer */

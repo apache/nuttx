@@ -46,7 +46,7 @@
 #include <time.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* If Gregorian time is not supported, then neither is Julian */
