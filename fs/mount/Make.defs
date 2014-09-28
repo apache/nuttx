@@ -1,5 +1,5 @@
 ############################################################################
-# fs/dirent/Make.defs
+# fs/mount/Make.defs
 #
 #   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -36,12 +36,18 @@
 # Don't build anything if there are no file descriptors
 
 ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
+ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
 
-CSRCS += fs_closedir.c fs_opendir.c fs_readdir.c fs_rewinddir.c fs_seekdir.c
+CSRCS += fs_fsync.c fs_mount.c fs_umount.c fs_foreachmountpoint.c
 
-# Include dirent build support
+ifeq ($(CONFIG_FS_AUTOMOUNTER),y)
+CSRCS += fs_automount.c
+endif
 
-DEPPATH += --dep-path dirent
-VPATH += :dirent
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)fs$(DELIM)dirent}
+# Include mount build support
+
+DEPPATH += --dep-path mount
+VPATH += :mount
+CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)fs$(DELIM)mount}
+endif
 endif

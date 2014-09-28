@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/fs_umount.c
+ * fs/mount/fs_umount.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

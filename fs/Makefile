@@ -63,14 +63,15 @@ else
 
 CSRCS += fs_close.c fs_dup.c fs_dup2.c fs_fcntl.c fs_filedup.c fs_filedup2.c
 CSRCS += fs_ioctl.c fs_lseek.c fs_mkdir.c fs_open.c fs_poll.c fs_read.c
-CSRCS += fs_rename.c fs_rmdir.c fs_seekdir.c fs_stat.c fs_statfs.c
-CSRCS += fs_select.c fs_unlink.c fs_write.c
+CSRCS += fs_rename.c fs_rmdir.c fs_stat.c fs_statfs.c fs_select.c
+CSRCS += fs_unlink.c fs_write.c
 
 DEPPATH = --dep-path .
 VPATH = .
 
 include inode/Make.defs
 include driver/Make.defs
+include dirent/Make.defs
 include mmap/Make.defs
 
 # Stream support
@@ -89,12 +90,7 @@ endif
 
 ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
 
-CSRCS += fs_fsync.c fs_mount.c fs_umount.c fs_foreachmountpoint.c
-
-ifeq ($(CONFIG_FS_AUTOMOUNTER),y)
-CSRCS += fs_automount.c
-endif
-
+include mount/Make.defs
 include fat/Make.defs
 include romfs/Make.defs
 include nxffs/Make.defs

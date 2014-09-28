@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/fs_foreachmountpoint.c
+ * fs/mount/fs_foreachmountpoint.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

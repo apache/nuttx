@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/fs_automount.c
+ * fs/mount/fs_automount.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
