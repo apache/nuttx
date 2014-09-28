@@ -56,15 +56,24 @@ SYSCALL_LOOKUP(sched_setparam,            2, STUB_sched_setparam)
 SYSCALL_LOOKUP(sched_setscheduler,        3, STUB_sched_setscheduler)
 SYSCALL_LOOKUP(sched_unlock,              0, STUB_sched_unlock)
 SYSCALL_LOOKUP(sched_yield,               0, STUB_sched_yield)
-SYSCALL_LOOKUP(sem_close,                 1, STUB_sem_close)
+SYSCALL_LOOKUP(set_errno,                 1, STUB_set_errno)
+
+/* Semaphores */
+
 SYSCALL_LOOKUP(sem_destroy,               2, STUB_sem_destroy)
-SYSCALL_LOOKUP(sem_open,                  6, STUB_sem_open)
 SYSCALL_LOOKUP(sem_post,                  1, STUB_sem_post)
 SYSCALL_LOOKUP(sem_timedwait,             2, STUB_sem_timedwait)
 SYSCALL_LOOKUP(sem_trywait,               1, STUB_sem_trywait)
-SYSCALL_LOOKUP(sem_unlink,                1, STUB_sem_unlink)
 SYSCALL_LOOKUP(sem_wait,                  1, STUB_sem_wait)
-SYSCALL_LOOKUP(set_errno,                 1, STUB_set_errno)
+
+/* Named semaphores */
+
+#ifdef defined(CONFIG_FS_NAMED_SEMAPHORES)
+SYSCALL_LOOKUP(sem_open,                  6, STUB_sem_open)
+SYSCALL_LOOKUP(sem_close,                 1, STUB_sem_close)
+SYSCALL_LOOKUP(sem_unlink,                1, STUB_sem_unlink)
+#endif
+
 #ifndef CONFIG_BUILD_KERNEL
 SYSCALL_LOOKUP(task_create,               5, STUB_task_create)
 #else

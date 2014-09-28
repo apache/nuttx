@@ -1,0 +1,20 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+config FS_NAMED_SEMAPHORES
+	bool "Named semaphore support"
+	default n
+	---help---
+		Include support for named semaphores.
+
+if FS_NAMED_SEMAPHORES
+
+config FS_NAMED_SEMPATH
+	string "Path to semaphore storage"
+	default "/var/sem"
+	---help---
+		The path to where named semaphores will exist in the VFS namespace.
+    
+endif # FS_NAMED_SEMAPHORES

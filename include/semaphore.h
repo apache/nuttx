@@ -129,14 +129,17 @@ struct timespec; /* Defined in time.h */
 
 int        sem_init(FAR sem_t *sem, int pshared, unsigned int value);
 int        sem_destroy(FAR sem_t *sem);
-FAR sem_t *sem_open(FAR const char *name, int oflag, ...);
-int        sem_close(FAR sem_t *sem);
-int        sem_unlink(FAR const char *name);
 int        sem_wait(FAR sem_t *sem);
 int        sem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime);
 int        sem_trywait(FAR sem_t *sem);
 int        sem_post(FAR sem_t *sem);
 int        sem_getvalue(FAR sem_t *sem, FAR int *sval);
+
+#ifdef CONFIG_FS_NAMED_SEMAPHORES
+FAR sem_t *sem_open(FAR const char *name, int oflag, ...);
+int        sem_close(FAR sem_t *sem);
+int        sem_unlink(FAR const char *name);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus
