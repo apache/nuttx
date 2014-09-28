@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/fs_opendir.c
+ * fs/dirent/fs_opendir.c
  *
  *   Copyright (C) 2007-2009, 2011, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

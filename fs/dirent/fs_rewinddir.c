@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/fs_rewinddir.c
+ * fs/dirent/fs_rewinddir.c
  *
  *   Copyright (C) 2007-2009, 2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

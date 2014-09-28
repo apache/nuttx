@@ -61,11 +61,10 @@ else
 
 # Common file/socket descriptor support
 
-CSRCS += fs_close.c fs_closedir.c fs_dup.c fs_dup2.c fs_fcntl.c
-CSRCS += fs_filedup.c fs_filedup2.c fs_ioctl.c fs_lseek.c fs_mkdir.c
-CSRCS += fs_open.c fs_opendir.c fs_poll.c fs_read.c fs_readdir.c
-CSRCS += fs_rename.c fs_rewinddir.c fs_rmdir.c fs_seekdir.c fs_stat.c
-CSRCS += fs_statfs.c fs_select.c fs_unlink.c fs_write.c
+CSRCS += fs_close.c fs_dup.c fs_dup2.c fs_fcntl.c fs_filedup.c fs_filedup2.c
+CSRCS += fs_ioctl.c fs_lseek.c fs_mkdir.c fs_open.c fs_poll.c fs_read.c
+CSRCS += fs_rename.c fs_rmdir.c fs_seekdir.c fs_stat.c fs_statfs.c
+CSRCS += fs_select.c fs_unlink.c fs_write.c
 
 DEPPATH = --dep-path .
 VPATH = .
@@ -84,14 +83,6 @@ endif
 
 ifeq ($(CONFIG_NET_SENDFILE),y)
 CSRCS += fs_sendfile.c
-endif
-
-# System logging to a character device (or file)
-
-ifeq ($(CONFIG_SYSLOG),y)
-ifeq ($(CONFIG_SYSLOG_CHAR),y)
-CSRCS += fs_syslog.c
-endif
 endif
 
 # Additional files required is mount-able file systems are supported
