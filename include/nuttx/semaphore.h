@@ -57,12 +57,14 @@
 #ifdef CONFIG_FS_NAMED_SEMAPHORES
 /* This is the named semaphore inode */
 
+struct inode;
 struct nsem_inode_s
 {
-  /* Payload unique to named semaphores */
+  /* Inode payload unique to named semaphores */
 
-  uint16_t ns_refs;                 /* Number of open references semaphore */
-  sem_t ns_sem;                     /* The semaphore itself */
+  sem_t ns_sem;                     /* The semaphore */
+  FAR struct inode *ns_inode;       /* Containing inode */
+
 };
 #endif
 

@@ -48,6 +48,5 @@ CSRCS += rpc_clnt.c nfs_util.c nfs_vfsops.c
 
 DEPPATH += --dep-path nfs
 VPATH += :nfs
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)fs$(DELIM)nfs}
 
 endif

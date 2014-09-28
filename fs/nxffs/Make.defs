@@ -44,6 +44,5 @@ CSRCS += nxffs_block.c nxffs_blockstats.c nxffs_cache.c nxffs_dirent.c \
 
 DEPPATH += --dep-path nxffs
 VPATH += :nxffs
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)fs$(DELIM)nxffs}
 
 endif

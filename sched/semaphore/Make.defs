@@ -33,9 +33,8 @@
 #
 ############################################################################
 
-SEM_SRCS  = sem_initialize.c sem_destroy.c sem_open.c sem_close.c
-SEM_SRCS += sem_unlink.c sem_wait.c sem_trywait.c sem_timedwait.c
-SEM_SRCS += sem_post.c sem_findnamed.c
+SEM_SRCS  = sem_initialize.c sem_destroy.c sem_wait.c sem_trywait.c
+SEM_SRCS += sem_timedwait.c sem_post.c
 
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 SEM_SRCS += sem_waitirq.c

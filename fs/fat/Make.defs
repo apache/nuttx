@@ -48,6 +48,5 @@ CSRCS += fs_mkfatfs.c fs_configfat.c fs_writefat.c
 
 DEPPATH += --dep-path fat
 VPATH += :fat
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)fs$(DELIM)fat}
 
 endif

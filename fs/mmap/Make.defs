@@ -44,5 +44,4 @@ endif
 
 DEPPATH += --dep-path mmap
 VPATH += :mmap
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)fs$(DELIM)mmap}
 

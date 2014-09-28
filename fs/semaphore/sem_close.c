@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/semaphore/sem_unlink.c
+ * fs/semaphore/sem_close.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,14 +39,17 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
 #include <semaphore.h>
 #include <sched.h>
-#include <queue.h>
+#include <errno.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/semaphore.h>
+#include <nuttx/fs/fs.h>
 
-#include "semaphore/semaphore.h"
+#include "fs.h"
+
+#ifdef CONFIG_FS_NAMED_SEMAPHORES
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -73,69 +76,74 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sem_unlink
+ * Name:  sem_close
  *
  * Description:
- *   This function removes the semaphore named by the input parameter 'name.'
- *   If the semaphore named by 'name' is currently referenced by other task,
- *   the sem_unlink() will have no effect on the state of the semaphore.  If
- *   one or more processes have the semaphore open when sem_unlink() is
- *   called, destruction of the semaphore will be postponed until all
- *   references to the semaphore have been destroyed by calls of sem_close().
+ *   This function is called to indicate that the calling task is finished
+ *   with the specified named semaphore, 'sem'.  The sem_close() deallocates
+ *   any system resources allocated by the system for this named semaphore.
+ *
+ *   If the semaphore has not been removed with a call to sem_unlink(), then
+ *   sem_close() has no effect on the named semaphore.  However, when the
+ *   named semaphore has been fully unlinked, the semaphore will vanish when
+ *   the last task closes it.
  *
  * Parameters:
- *   name - Semaphore name
+ *  sem - semaphore descriptor
  *
  * Return Value:
  *  0 (OK), or -1 (ERROR) if unsuccessful.
  *
  * Assumptions:
+ *   - Care must be taken to avoid risking the deletion of a semaphore that
+ *     another calling task has already locked.
+ *   - sem_close must not be called for an un-named semaphore
  *
  ****************************************************************************/
 
-int sem_unlink(FAR const char *name)
+int sem_close(FAR sem_t *sem)
 {
-  FAR nsem_t *psem;
-  int         ret = ERROR;
+  FAR struct nsem_inode_s *nsem;
+  struct inode *inode ;
 
-  /* Verify the input values */
+  DEBUGASSERT(sem);
 
-  if (name)
+  /* Upcast to get back to out internal representation */
+
+  nsem = (FAR struct nsem_inode_s *)sem;
+  DEBUGASSERT(nsem->ns_inode);
+  inode = nsem->ns_inode;
+
+  /* Decrement the reference count on the inode */
+
+  inode_semtake();
+  if (inode->i_crefs)
     {
-      sched_lock();
-
-      /* Find the named semaphore */
-
-      psem = sem_findnamed(name);
-
-      /* Check if the semaphore was found */
-
-      if (psem)
-        {
-          /* If the named semaphore was found and if there are no
-           * connects to it, then deallocate it
-           */
-
-          if (!psem->nconnect)
-            {
-              dq_rem((FAR dq_entry_t*)psem, &g_nsems);
-              sched_kfree(psem);
-            }
-
-          /* If one or more process still has the semaphore open,
-           * then just mark it as unlinked.  The unlinked semaphore will
-           * be deleted when the final process closes the semaphore.
-           */
-
-          else
-            {
-              psem->unlinked = true;
-            }
-          ret = OK;
-        }
-
-      sched_unlock();
+      inode->i_crefs--;
     }
 
-  return ret;
+  /* If the semaphore was previously unlinked and the reference count has
+   * decremented to zero, then release the semaphore and delete the inode
+   * now.
+   */
+
+   if (inode->i_crefs <= 0 && (inode->i_flags & FSNODEFLAG_DELETED) != 0)
+     {
+       /* Destroy the semaphore and free the container */
+
+       sem_destroy(&nsem->ns_sem);
+       group_free(NULL, nsem);
+
+       /* Release and free the inode */
+
+       inode_semgive();
+       inode_free(inode->i_child);
+       kmm_free(inode);
+       return OK;
+     }
+
+  inode_semgive();
+  return OK;
 }
+
+#endif /* CONFIG_FS_NAMED_SEMAPHORES */

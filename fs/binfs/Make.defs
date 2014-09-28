@@ -43,6 +43,5 @@ CSRCS += fs_binfs.c
 
 DEPPATH += --dep-path binfs
 VPATH += :binfs
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)fs$(DELIM)binfs}
 
 endif

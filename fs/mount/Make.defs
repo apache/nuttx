@@ -48,6 +48,5 @@ endif
 
 DEPPATH += --dep-path mount
 VPATH += :mount
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)fs$(DELIM)mount}
 endif
 endif

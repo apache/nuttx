@@ -59,7 +59,6 @@ endif
 
 DEPPATH += --dep-path vfs
 VPATH += :vfs
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)fs$(DELIM)vfs}
 endif
 
 else
@@ -87,5 +86,4 @@ endif
 
 DEPPATH += --dep-path vfs
 VPATH += :vfs
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)fs$(DELIM)vfs}
 endif

@@ -45,5 +45,4 @@ CSRCS += fs_inoderemove.c fs_inodereserve.c
 
 DEPPATH += --dep-path inode
 VPATH += :inode
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)fs$(DELIM)inode}
 endif

@@ -53,5 +53,4 @@ endif
 
 DEPPATH += --dep-path driver
 VPATH += :driver
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)fs$(DELIM)driver}
 endif

@@ -53,14 +53,13 @@
 #include <nuttx/fs/fs.h>
 
 #include "fs.h"
+#include "semaphore/semaphore.h"
 
 #ifdef CONFIG_FS_NAMED_SEMAPHORES
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#define MAX_SEMPATH 64
 
 /****************************************************************************
  * Private Type Declarations
@@ -122,7 +121,6 @@
 
 FAR sem_t *sem_open (FAR const char *name, int oflags, ...)
 {
-  FAR struct filelist *list;
   FAR struct inode *inode;
   FAR const char *relpath = NULL;
   mode_t mode;
@@ -150,12 +148,7 @@ FAR sem_t *sem_open (FAR const char *name, int oflags, ...)
 
       snprintf(fullpath, MAX_SEMPATH, CONFIG_FS_NAMED_SEMPATH "/%s", name);
 
-      /* Get the thread-specific file list */
-
-      list = sched_getfiles();
-      DEBUGASSERT(list);
-
-      /* Get the inode for this file.  This should succeed if the semaphore
+      /* Get the inode for this semaphore.  This should succeed if the semaphore
        * has already been created.
        */
 
@@ -180,11 +173,11 @@ FAR sem_t *sem_open (FAR const char *name, int oflags, ...)
               goto errout_with_inode;
             }
 
-          /* Allow a new connection to the semaphore */
+          /* Return a reference to the semaphore, retaining the reference
+           * count on the inode.
+           */
 
-          nsem = inode->u.i_nsem;
-          nsem->ns_refs++;
-          sem  = &nsem->ns_sem;
+          sem = &inode->u.i_nsem->ns_sem;
 
         }
       else
@@ -244,11 +237,23 @@ FAR sem_t *sem_open (FAR const char *name, int oflags, ...)
               goto errout_with_lock;
             }
 
-          /* Initialize the semaphore */
+          /* Link to the inode */
 
           inode->u.i_nsem = nsem;
-          nsem->ns_refs   = 1;
-          sem             = &nsem->ns_sem;
+          nsem->ns_inode  = inode;
+
+          /* Initialize the inode */
+
+          INODE_SET_NAMEDSEM(inode);
+          inode->i_crefs = 1;
+
+          /* Initialize the semaphore */
+
+          sem_init(&nsem->ns_sem, 0, value);
+
+          /* Return a reference to the semaphore */
+
+          sem = &nsem->ns_sem;
         }
     }
 

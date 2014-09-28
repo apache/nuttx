@@ -57,27 +57,9 @@
  * Public Type Declarations
  ****************************************************************************/
 
-/* This is the named semaphore structure */
-
-struct nsem_s
-{
-  FAR struct nsem_s *flink;     /* Forward link */
-  FAR struct nsem_s *blink;     /* Backward link */
-  uint16_t           nconnect;  /* Number of connections to semaphore */
-  FAR char          *name;      /* Semaphore name (NULL if un-named) */
-  bool               unlinked;  /* true if the semaphore has been unlinked */
-  sem_t              sem;       /* The semaphore itself */
-};
-
-typedef struct nsem_s nsem_t;
-
 /****************************************************************************
  * Public Variables
  ****************************************************************************/
-
-/* This is a list of dynamically allocated named semaphores */
-
-extern dq_queue_t g_nsems;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -95,7 +77,6 @@ extern "C"
 
 void weak_function sem_initialize(void);
 void sem_waitirq(FAR struct tcb_s *wtcb, int errcode);
-FAR nsem_t *sem_findnamed(const char *name);
 
 /* Special logic needed only by priority inheritance to manage collections of
  * holders of semaphores.
@@ -129,4 +110,3 @@ void sem_canceled(FAR struct tcb_s *stcb, FAR sem_t *sem);
 #endif
 
 #endif /* __SCHED_SEMAPHORE_SEMAPHORE_H */
-

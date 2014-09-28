@@ -44,6 +44,5 @@ CSRCS += fs_procfscpuload.c
 
 DEPPATH += --dep-path procfs
 VPATH += :procfs
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)fs$(DELIM)procfs}
 
 endif

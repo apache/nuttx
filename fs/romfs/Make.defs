@@ -43,6 +43,5 @@ CSRCS += fs_romfs.c fs_romfsutil.c
 
 DEPPATH += --dep-path romfs
 VPATH += :romfs
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)fs$(DELIM)romfs}
 
 endif

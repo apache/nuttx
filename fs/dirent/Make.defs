@@ -43,5 +43,4 @@ CSRCS += fs_closedir.c fs_opendir.c fs_readdir.c fs_rewinddir.c fs_seekdir.c
 
 DEPPATH += --dep-path dirent
 VPATH += :dirent
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)fs$(DELIM)dirent}
 endif

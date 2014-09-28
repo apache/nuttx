@@ -37,11 +37,10 @@
 
 ifneq ($(CONFIG_FS_NAMED_SEMAPHORES),0)
 
-CSRCS += sem_open.c
+CSRCS += sem_open.c sem_close.c sem_unlink.c
 
 # Include named semaphore build support
 
 DEPPATH += --dep-path semaphore
 VPATH += :semaphore
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)fs$(DELIM)semaphore}
 endif

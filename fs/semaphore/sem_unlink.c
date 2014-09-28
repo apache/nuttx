@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/semaphore/sem_close.c
+ * fs/semaphore/sem_unlink.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,16 +39,19 @@
 
 #include <nuttx/config.h>
 
-#include <errno.h>
+#include <stdio.h>
 #include <semaphore.h>
 #include <sched.h>
+#include <queue.h>
+#include <errno.h>
 
 #include <nuttx/kmalloc.h>
 
+#include "fs.h"
 #include "semaphore/semaphore.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -72,70 +75,98 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  sem_close
+ * Name: sem_unlink
  *
  * Description:
- *   This function is called to indicate that the calling task is finished
- *   with the specified named semaphore, 'sem'.  The sem_close() deallocates
- *   any system resources allocated by the system for this named semaphore.
- *
- *   If the semaphore has not been removed with a call to sem_unlink(), then
- *   sem_close() has no effect on the named semaphore.  However, when the
- *   named semaphore has been fully unlinked, the semaphore will vanish when
- *   the last task closes it.
+ *   This function removes the semaphore named by the input parameter 'name.'
+ *   If the semaphore named by 'name' is currently referenced by other task,
+ *   the sem_unlink() will have no effect on the state of the semaphore.  If
+ *   one or more processes have the semaphore open when sem_unlink() is
+ *   called, destruction of the semaphore will be postponed until all
+ *   references to the semaphore have been destroyed by calls of sem_close().
  *
  * Parameters:
- *  sem - semaphore descriptor
+ *   name - Semaphore name
  *
  * Return Value:
  *  0 (OK), or -1 (ERROR) if unsuccessful.
  *
  * Assumptions:
- *   - Care must be taken to avoid risking the deletion of a semaphore that
- *     another calling task has already locked.
- *   - sem_close must not be called for an un-named semaphore
  *
  ****************************************************************************/
 
-int sem_close(FAR sem_t *sem)
+int sem_unlink(FAR const char *name)
 {
-  FAR nsem_t *psem;
-  int ret = ERROR;
+  FAR struct inode *inode;
+  FAR const char  *relpath = NULL;
+  char fullpath[MAX_SEMPATH];
+  int errcode;
+  int ret;
 
-  /* Verify the inputs */
+  /* Get the full path to the semaphore */
 
-  if (sem)
+  snprintf(fullpath, MAX_SEMPATH, CONFIG_FS_NAMED_SEMPATH "/%s", name);
+
+  /* Get the inode for this semaphore. */
+
+  sched_lock();
+  inode = inode_find(fullpath, &relpath);
+  if (!inode)
     {
-      sched_lock();
+      /* There is no inode that includes in this path */
 
-      /* Search the list of named semaphores */
-
-      for (psem = (FAR nsem_t*)g_nsems.head;
-           ((psem) && (sem != &psem->sem));
-           psem = psem->flink);
-
-      /* Check if we found it */
-
-      if (psem)
-        {
-          /* Decrement the count of sem_open connections to this semaphore */
-
-          if (psem->nconnect) psem->nconnect--;
-
-          /* If the semaphore is no long connected to any processes AND the
-           * semaphore was previously unlinked, then deallocate it.
-           */
-
-          if (!psem->nconnect && psem->unlinked)
-            {
-              dq_rem((FAR dq_entry_t*)psem, &g_nsems);
-              sched_kfree(psem);
-            }
-          ret = OK;
-        }
-
-      sched_unlock();
+      errcode = ENOENT;
+      goto errout;
     }
 
-  return ret;
+  /* Verify that what we found is, indeed, a semaphore */
+
+  if (!INODE_IS_NAMEDSEM(inode))
+    {
+      errcode = ENXIO;
+      goto errout_with_inode;
+    }
+
+  /* Refuse to unlink the inode if it has children.  I.e., if it is
+   * functioning as a directory and the directory is not empty.
+   */
+
+  inode_semtake();
+  if (inode->i_child != NULL)
+    {
+      errcode = ENOTEMPTY;
+      goto errout_with_semaphore;
+    }
+
+  /* Mark the inode as deleted */
+
+  inode->i_flags |= FSNODEFLAG_DELETED;
+
+  /* Remove the old inode from the tree.  Because we hold a reference count
+   * on the inode, it will not be deleted now.
+   */
+
+  ret = inode_remove(fullpath);
+  if (ret < 0)
+    {
+      errcode = -ret;
+      goto errout_with_semaphore;
+    }
+
+  /* Now we do not release the reference count in the normal way (by calling
+   * inode release.  Rather, we call sem_close().  sem_close will decrement
+   * the reference count on the inode.  But it will also free the semaphore
+   * if that reference count decrements to zero.  Since we hold one reference,
+   * that can only occur if the semaphore is not in-use.
+   */
+
+  return sem_close((FAR sem_t *)&inode->u.i_nsem);
+
+errout_with_semaphore:
+  inode_semgive();
+errout_with_inode:
+  inode_release(inode);
+errout:
+  set_errno(errcode);
+  return ERROR;
 }
