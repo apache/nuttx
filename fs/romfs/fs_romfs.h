@@ -49,10 +49,10 @@
 
 #include <nuttx/fs/dirent.h>
 
-#include "../fs_internal.h"
+#include "../fs.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Volume header (multi-byte values are big-endian) */

@@ -43,7 +43,7 @@
 #include <sched.h>
 #include <errno.h>
 
-#include "fs_internal.h"
+#include "fs.h"
 
 /* This logic in this applies only when both socket and file descriptors are
  * in that case, this function descriminates which type of dup2 is being

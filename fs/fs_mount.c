@@ -47,7 +47,7 @@
 
 #include <nuttx/fs/fs.h>
 
-#include "fs_internal.h"
+#include "fs.h"
 
 /* At least one filesystem must be defined, or this file will not compile.
  * It may be desire-able to make filesystems dynamically registered at

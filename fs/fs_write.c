@@ -49,7 +49,7 @@
 # include <sys/socket.h>
 #endif
 
-#include "fs_internal.h"
+#include "fs.h"
 
 /****************************************************************************
  * Private Functions

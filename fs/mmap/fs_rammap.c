@@ -49,7 +49,7 @@
 
 #include <nuttx/kmalloc.h>
 
-#include "fs_internal.h"
+#include "fs.h"
 #include "fs_rammap.h"
 
 #ifdef CONFIG_FS_RAMMAP

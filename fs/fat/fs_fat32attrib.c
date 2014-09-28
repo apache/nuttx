@@ -45,7 +45,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/fat.h>
 
-#include "fs_internal.h"
+#include "fs.h"
 #include "fs_fat32.h"
 
 /****************************************************************************

@@ -45,7 +45,7 @@
 #include <sched.h>
 #include <errno.h>
 
-#include "fs_internal.h"
+#include "fs.h"
 
 /****************************************************************************
  * Private Functions

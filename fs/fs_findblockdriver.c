@@ -44,7 +44,7 @@
 #include <errno.h>
 #include <nuttx/fs/fs.h>
 
-#include "fs_internal.h"
+#include "fs.h"
 
 /****************************************************************************
  * Private Functions

@@ -48,7 +48,7 @@
 #include <nuttx/net/net.h>
 #include <nuttx/sched.h>
 
-#include "fs_internal.h"
+#include "fs.h"
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -45,7 +45,7 @@
 #include <errno.h>
 #include <assert.h>
 
-#include "fs_internal.h"
+#include "fs.h"
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
 

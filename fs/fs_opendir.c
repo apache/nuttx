@@ -49,7 +49,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/dirent.h>
 
-#include "fs_internal.h"
+#include "fs.h"
 
 /****************************************************************************
  * Private Functions

@@ -55,7 +55,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/fs/automount.h>
 
-#include "fs_internal.h"
+#include "fs.h"
 
 /****************************************************************************
  * Pre-processor Definitions

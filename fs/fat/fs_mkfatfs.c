@@ -50,7 +50,7 @@
 #include <nuttx/fs/fat.h>
 #include <nuttx/fs/mkfatfs.h>
 
-#include "fs_internal.h"
+#include "fs.h"
 #include "fs_fat32.h"
 #include "fs_mkfatfs.h"
 

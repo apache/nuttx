@@ -41,7 +41,7 @@
 
 #include <nuttx/fs/fs.h>
 
-#include "fs_internal.h"
+#include "fs.h"
 
 /****************************************************************************
  * Pre-processor Definitions
