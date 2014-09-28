@@ -8690,4 +8690,5 @@
 	* include/nuttx/semaphore.h and fs/fs.h:  Add data structures that will
 	  allow us to move name semaphore support out of the OS and into the
 	  VFS (not complete) (2014-9-28).
+	* fs/inode: Move inode and VFS utils from fs/. to fs/inode/. (2014-9-28).
 
