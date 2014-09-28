@@ -8694,4 +8694,6 @@
 	* fs/driver: Move driver logic from fs/. to fs/driver/. (2014-9-28).
 	* fs/dirent: Move directory operations from fs/. to fs/dirent/. (2014-9-23).
 	* fs/mount: Move mount-related files from fs/. to fs/mount/. (2014-9-23).
+	* fs/vfs: Move renaming files in fs/. to fs/vfs/. (Don't all belong there)
+	  (2014-9-23).
 
