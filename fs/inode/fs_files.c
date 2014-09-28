@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/fs_files.c
+ * fs/inode/fs_files.c
  *
  *   Copyright (C) 2007-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

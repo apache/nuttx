@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/fs_inodefind.c
+ * fs/inode/fs_inodefind.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

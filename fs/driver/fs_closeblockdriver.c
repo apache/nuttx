@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/fs_closeblockdriver.c
+ * fs/driver/fs_closeblockdriver.c
  *
  *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

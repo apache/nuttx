@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/fs_basename.c
+ * fs/inode/fs_basename.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

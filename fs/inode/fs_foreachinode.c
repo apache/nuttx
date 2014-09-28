@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/fs_foreachinode.c
+ * fs/inode/fs_foreachinode.c
  *
  *   Copyright (C) 2012-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

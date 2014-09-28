@@ -1,7 +1,7 @@
 /****************************************************************************
- * fs/fs_unregisterblockdriver.c
+ * fs/driver/fs_registerblockdriver.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,16 +39,15 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
+#include <errno.h>
+
 #include <nuttx/fs/fs.h>
 
 #include "fs.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
+ * Pre-processor oDefinitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -68,19 +67,58 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: unregister_blockdriver
+ * Name: register_blockdriver
  *
  * Description:
- *   Remove the block driver inode at 'path' from the pseudo-file system
+ *   Register a block driver inode the pseudo file system.
+ *
+ * Input parameters:
+ *   path - The path to the inode to create
+ *   bops - The block driver operations structure
+ *   mode - inmode priviledges (not used)
+ *   priv - Private, user data that will be associated with the inode.
+ *
+ * Returned Value:
+ *   Zero on success (with the inode point in 'inode'); A negated errno
+ *   value is returned on a failure (all error values returned by
+ *   inode_reserve):
+ *
+ *   EINVAL - 'path' is invalid for this operation
+ *   EEXIST - An inode already exists at 'path'
+ *   ENOMEM - Failed to allocate in-memory resources for the operation
  *
  ****************************************************************************/
 
-int unregister_blockdriver(const char *path)
+int register_blockdriver(FAR const char *path,
+                         FAR const struct block_operations *bops,
+                         mode_t mode, FAR void *priv)
 {
+  FAR struct inode *node;
   int ret;
 
+  /* Insert an inode for the device driver -- we need to hold the inode
+   * semaphore to prevent access to the tree while we this.  This is because
+   * we will have a momentarily bad true until we populate the inode with
+   * valid data.
+   */
+
   inode_semtake();
-  ret = inode_remove(path);
+  ret = inode_reserve(path, &node);
+  if (ret >= 0)
+    {
+      /* We have it, now populate it with block driver specific information. */
+
+      INODE_SET_BLOCK(node);
+
+      node->u.i_bops  = bops;
+#ifdef CONFIG_FILE_MODE
+      node->i_mode    = mode;
+#endif
+      node->i_private = priv;
+      ret             = OK;
+    }
+
   inode_semgive();
   return ret;
 }
+

@@ -67,14 +67,11 @@ CSRCS += fs_open.c fs_opendir.c fs_poll.c fs_read.c fs_readdir.c
 CSRCS += fs_rename.c fs_rewinddir.c fs_rmdir.c fs_seekdir.c fs_stat.c
 CSRCS += fs_statfs.c fs_select.c fs_unlink.c fs_write.c
 
-CSRCS += fs_registerdriver.c fs_unregisterdriver.c
-CSRCS += fs_registerblockdriver.c fs_unregisterblockdriver.c
-CSRCS += fs_findblockdriver.c fs_openblockdriver.c fs_closeblockdriver.c
-
 DEPPATH = --dep-path .
 VPATH = .
 
 include inode/Make.defs
+include driver/Make.defs
 include mmap/Make.defs
 
 # Stream support

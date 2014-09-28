@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs_inoderelease.c
+ * fs/inode/fs_inoderelease.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

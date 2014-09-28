@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/fs_registerblockdriver.c
+ * fs/driver/fs_registerdriver.c
  *
  *   Copyright (C) 2007-2009, 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -47,7 +47,7 @@
 #include "fs.h"
 
 /****************************************************************************
- * Pre-processor oDefinitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -67,14 +67,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: register_blockdriver
+ * Name: register_driver
  *
  * Description:
- *   Register a block driver inode the pseudo file system.
+ *   Register a character driver inode the pseudo file system.
  *
  * Input parameters:
  *   path - The path to the inode to create
- *   bops - The block driver operations structure
+ *   fops - The file operations structure
  *   mode - inmode priviledges (not used)
  *   priv - Private, user data that will be associated with the inode.
  *
@@ -89,28 +89,25 @@
  *
  ****************************************************************************/
 
-int register_blockdriver(FAR const char *path,
-                         FAR const struct block_operations *bops,
-                         mode_t mode, FAR void *priv)
+int register_driver(FAR const char *path, FAR const struct file_operations *fops,
+                    mode_t mode, FAR void *priv)
 {
   FAR struct inode *node;
   int ret;
 
-  /* Insert an inode for the device driver -- we need to hold the inode
-   * semaphore to prevent access to the tree while we this.  This is because
-   * we will have a momentarily bad true until we populate the inode with
-   * valid data.
+  /* Insert a dummy node -- we need to hold the inode semaphore because we
+   * will have a momentarily bad structure.
    */
 
   inode_semtake();
   ret = inode_reserve(path, &node);
   if (ret >= 0)
     {
-      /* We have it, now populate it with block driver specific information. */
+      /* We have it, now populate it with driver specific information. */
 
-      INODE_SET_BLOCK(node);
+      INODE_SET_DRIVER(node);
 
-      node->u.i_bops  = bops;
+      node->u.i_ops   = fops;
 #ifdef CONFIG_FILE_MODE
       node->i_mode    = mode;
 #endif
@@ -121,4 +118,3 @@ int register_blockdriver(FAR const char *path,
   inode_semgive();
   return ret;
 }
-
