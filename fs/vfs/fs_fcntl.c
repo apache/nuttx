@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/fs_fcntl.c
+ * fs/vfs/fs_fcntl.c
  *
  *   Copyright (C) 2009, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

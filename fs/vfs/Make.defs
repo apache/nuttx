@@ -1,7 +1,7 @@
 ############################################################################
-# fs/Makefile
+# fs/vfs/Make.defs
 #
-#   Copyright (C) 2007, 2008, 2011-2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,71 +33,59 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
+# If there are no file descriptors configured, then a small part of the
+# logic in this directory may still apply to socket descriptors
 
-ASRCS =
-AOBJS = $(ASRCS:.S=$(OBJEXT))
+ifeq ($(CONFIG_NFILE_DESCRIPTORS),0)
+ifneq ($(CONFIG_NSOCKET_DESCRIPTORS),0)
 
-CSRCS =
+# Socket descriptor support
 
-DEPPATH = --dep-path .
-VPATH = .
+CSRCS += fs_close.c fs_read.c fs_write.c fs_ioctl.c fs_poll.c fs_select.c
 
-include inode/Make.defs
-include vfs/Make.defs
-include driver/Make.defs
-include dirent/Make.defs
-include mmap/Make.defs
+# Support for network access using streams
 
-# Additional files required is mount-able file systems are supported
-
-ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
-ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
-
-include mount/Make.defs
-include fat/Make.defs
-include romfs/Make.defs
-include nxffs/Make.defs
-include nfs/Make.defs
-include smartfs/Make.defs
-include binfs/Make.defs
-include procfs/Make.defs
-
-endif
+ifneq ($(CONFIG_NFILE_STREAMS),0)
+CSRCS += fs_fdopen.c
 endif
 
-COBJS = $(CSRCS:.c=$(OBJEXT))
+# Support for sendfile()
 
-SRCS = $(ASRCS) $(CSRCS)
-OBJS = $(AOBJS) $(COBJS)
+ifeq ($(CONFIG_NET_SENDFILE),y)
+CSRCS += fs_sendfile.c
+endif
 
-BIN = libfs$(LIBEXT)
+# Include vfs build support
 
-SUBDIRS = mmap fat romfs nxffs nfs binfs procfs
+DEPPATH += --dep-path vfs
+VPATH += :vfs
+CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)fs$(DELIM)vfs}
+endif
 
-all: $(BIN)
+else
 
-$(AOBJS): %$(OBJEXT): %.S
-	$(call ASSEMBLE, $<, $@)
+# Common file/socket descriptor support
 
-$(COBJS): %$(OBJEXT): %.c
-	$(call COMPILE, $<, $@)
+CSRCS += fs_close.c fs_dup.c fs_dup2.c fs_fcntl.c fs_filedup.c fs_filedup2.c
+CSRCS += fs_ioctl.c fs_lseek.c fs_mkdir.c fs_open.c fs_poll.c fs_read.c
+CSRCS += fs_rename.c fs_rmdir.c fs_stat.c fs_statfs.c fs_select.c
+CSRCS += fs_unlink.c fs_write.c
 
-$(BIN):	$(OBJS)
-	$(call ARCHIVE, $@, $(OBJS))
+# Stream support
 
-.depend: Makefile $(SRCS)
-	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
-	$(Q) touch $@
+ifneq ($(CONFIG_NFILE_STREAMS),0)
+CSRCS += fs_fdopen.c
+endif
 
-depend: .depend
+# Support for sendfile()
 
-clean:
-	$(call DELFILE, $(BIN))
-	$(call CLEAN)
+ifeq ($(CONFIG_NET_SENDFILE),y)
+CSRCS += fs_sendfile.c
+endif
 
-distclean: clean
-	$(call DELFILE, Make.dep)
-	$(call DELFILE, .depend)
+# Include vfs build support
 
--include Make.dep
+DEPPATH += --dep-path vfs
+VPATH += :vfs
+CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)fs$(DELIM)vfs}
+endif

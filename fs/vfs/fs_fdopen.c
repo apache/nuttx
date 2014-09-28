@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/fs_fdopen.c
+ * fs/vfs/fs_fdopen.c
  *
  *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

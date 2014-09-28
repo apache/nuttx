@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/fs_ioctl.c
+ * fs/vfs/fs_ioctl.c
  *
  *   Copyright (C) 2007-2010, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

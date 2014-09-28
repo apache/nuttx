@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/fs_write.c
+ * fs/vfs/fs_write.c
  *
  *   Copyright (C) 2007-2009, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

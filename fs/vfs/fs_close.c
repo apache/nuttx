@@ -1,7 +1,7 @@
 /****************************************************************************
- * fs/fs_fsync.c
+ * fs/vfs/fs_close.c
  *
- *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,97 +40,94 @@
 #include <nuttx/config.h>
 
 #include <unistd.h>
-#include <fcntl.h>
+#include <sched.h>
 #include <errno.h>
-#include <assert.h>
-
 #include <nuttx/fs/fs.h>
-#include <nuttx/sched.h>
+
+#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+# include <nuttx/net/net.h>
+#endif
 
 #include "fs.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: fsync
+ * Name: close
  *
  * Description:
- *   This func simply binds inode sync methods to the sync system call.
+ *   close() closes a file descriptor, so that it no longer refers to any
+ *   file and may be reused. Any record locks (see fcntl(2)) held on the file
+ *   it was associated with, and owned by the process, are removed (regardless
+ *   of the file descriptor that was used to obtain the lock).
+ *
+ *   If fd is the last copy of a particular file descriptor the resources
+ *   associated with it are freed; if the descriptor was the last reference
+ *   to a file which has been removed using unlink(2) the file is deleted.
+ *
+ * Parameters:
+ *   fd   file descriptor to close
+ *
+ * Returned Value:
+ *   0 on success; -1 on error with errno set appropriately.
+ *
+ * Assumptions:
  *
  ****************************************************************************/
 
-int fsync(int fd)
+int close(int fd)
 {
-  FAR struct filelist *list;
-  FAR struct file     *filep;
-  struct inode        *inode;
-  int                  ret;
-
-  /* Get the thread-specific file list */
-
-  list = sched_getfiles();
-  DEBUGASSERT(list);
+  int err;
+#if CONFIG_NFILE_DESCRIPTORS > 0
+  int ret;
 
   /* Did we get a valid file descriptor? */
 
   if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
+#endif
     {
-      ret = EBADF;
-      goto errout;
+      /* Close a socket descriptor */
+
+#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+      if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
+        {
+          return net_close(fd);
+        }
+      else
+#endif
+        {
+          err = EBADF;
+          goto errout;
+        }
     }
 
-  /* Was this file opened for write access? */
-
-  filep = &list->fl_files[fd];
-  if ((filep->f_oflags & O_WROK) == 0)
-    {
-      ret = EBADF;
-      goto errout;
-    }
-
-  /* Is this inode a registered mountpoint? Does it support the
-   * sync operations may be relevant to device drivers but only
-   * the mountpoint operations vtable contains a sync method.
+#if CONFIG_NFILE_DESCRIPTORS > 0
+  /* Close the driver or mountpoint.  NOTES: (1) there is no
+   * exclusion mechanism here , the driver or mountpoint must be
+   * able to handle concurrent operations internally, (2) The driver
+   * may have been opened numerous times (for different file
+   * descriptors) and must also handle being closed numerous times.
+   * (3) for the case of the mountpoint, we depend on the close
+   * methods bing identical in signature and position in the operations
+   * vtable.
    */
 
-  inode = filep->f_inode;
-  if (!inode || !INODE_IS_MOUNTPT(inode) ||
-      !inode->u.i_mops || !inode->u.i_mops->sync)
+  ret = files_close(fd);
+  if (ret < 0)
     {
-      ret = EINVAL;
+      /* An error occurred while closing the driver */
+
+      err = -ret;
       goto errout;
     }
+  return OK;
 
-  /* Yes, then tell the mountpoint to sync this file */
-
-  ret = inode->u.i_mops->sync(filep);
-  if (ret >= 0)
-    {
-      return OK;
-    }
-
-  ret = -ret;
+#endif
 
 errout:
-  set_errno(ret);
+  set_errno(err);
   return ERROR;
 }
 

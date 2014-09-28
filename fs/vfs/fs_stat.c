@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/fs_statfs.c
+ * fs/vfs/fs_stat.c
  *
  *   Copyright (C) 2007-2009, 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,9 +39,8 @@
 
 #include <nuttx/config.h>
 
-#include <sys/statfs.h>
+#include <sys/stat.h>
 #include <string.h>
-#include <limits.h>
 #include <sched.h>
 #include <errno.h>
 
@@ -55,22 +54,76 @@
  * Name: statpseudo
  ****************************************************************************/
 
-static inline int statpseudofs(FAR struct inode *inode, FAR struct statfs *buf)
+static inline int statpseudo(FAR struct inode *inode, FAR struct stat *buf)
 {
-  memset(buf, 0, sizeof(struct statfs));
-  buf->f_type    = PROC_SUPER_MAGIC;
-  buf->f_namelen = NAME_MAX;
+  /* Most of the stat entries just do not apply */
+
+  memset(buf, 0, sizeof(struct stat) );
+  if (inode->u.i_ops)
+    {
+      if (inode->u.i_ops->read)
+        {
+          buf->st_mode = S_IROTH|S_IRGRP|S_IRUSR;
+        }
+
+      if (inode->u.i_ops->write)
+        {
+          buf->st_mode |= S_IWOTH|S_IWGRP|S_IWUSR;
+        }
+
+      if (INODE_IS_MOUNTPT(inode))
+        {
+          buf->st_mode |= S_IFDIR;
+        }
+      else if (INODE_IS_BLOCK(inode))
+        {
+          /* What is it also has child inodes? */
+
+          buf->st_mode |= S_IFBLK;
+        }
+      else
+        {
+          /* What is it if it also has child inodes? */
+
+          buf->st_mode |= S_IFCHR;
+        }
+    }
+  else
+    {
+      /* If it has no operations, then it must just be a intermediate
+       * node in the inode tree.  It is something like a directory.
+       * We'll say that all pseudo-directories are read-able but not
+       * write-able.
+       */
+
+      buf->st_mode |= S_IFDIR|S_IROTH|S_IRGRP|S_IRUSR;
+    }
+
   return OK;
 }
 
 /****************************************************************************
- * Public Functions
+ * Name: statroot
+ ****************************************************************************/
+
+static inline int statroot(FAR struct stat *buf)
+{
+  /* There is no inode associated with the fake root directory */
+
+  memset(buf, 0, sizeof(struct stat) );
+  buf->st_mode = S_IFDIR|S_IROTH|S_IRGRP|S_IRUSR;
+  return OK;
+}
+
+/****************************************************************************
+ * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
  * Name: stat
  *
- * Return: Zero on success; -1 on failure with errno set:
+ * Returned Value:
+ *   Zero on success; -1 on failure with errno set:
  *
  *   EACCES  Search permission is denied for one of the directories in the
  *           path prefix of path.
@@ -79,14 +132,13 @@ static inline int statpseudofs(FAR struct inode *inode, FAR struct statfs *buf)
  *           empty string.
  *   ENOMEM  Out of memory
  *   ENOTDIR A component of the path is not a directory.
- *   ENOSYS  The file system does not support this call.
  *
  ****************************************************************************/
 
-int statfs(FAR const char *path, FAR struct statfs *buf)
+int stat(FAR const char *path, FAR struct stat *buf)
 {
   FAR struct inode *inode;
-  FAR const char   *relpath = NULL;
+  const char       *relpath = NULL;
   int               ret     = OK;
 
   /* Sanity checks */
@@ -103,6 +155,13 @@ int statfs(FAR const char *path, FAR struct statfs *buf)
       goto errout;
     }
 
+  /* Check for the fake root directory (which has no inode) */
+
+  if (strcmp(path, "/") == 0)
+    {
+      return statroot(buf);
+    }
+
   /* Get an inode for this file */
 
   inode = inode_find(path, &relpath);
@@ -116,7 +175,7 @@ int statfs(FAR const char *path, FAR struct statfs *buf)
       goto errout;
     }
 
-  /* The way we handle the statfs depends on the type of inode that we
+  /* The way we handle the stat depends on the type of inode that we
    * are dealing with.
    */
 
@@ -124,14 +183,14 @@ int statfs(FAR const char *path, FAR struct statfs *buf)
   if (INODE_IS_MOUNTPT(inode))
     {
       /* The node is a file system mointpoint. Verify that the mountpoint
-       * supports the statfs() method
+       * supports the stat() method
        */
 
-      if (inode->u.i_mops && inode->u.i_mops->statfs)
+      if (inode->u.i_mops && inode->u.i_mops->stat)
         {
-          /* Perform the statfs() operation */
+          /* Perform the stat() operation */
 
-          ret = inode->u.i_mops->statfs(inode, buf);
+          ret = inode->u.i_mops->stat(inode, relpath, buf);
         }
     }
   else
@@ -139,10 +198,10 @@ int statfs(FAR const char *path, FAR struct statfs *buf)
     {
       /* The node is part of the root pseudo file system */
 
-      ret = statpseudofs(inode, buf);
+      ret = statpseudo(inode, buf);
     }
 
-  /* Check if the statfs operation was successful */
+  /* Check if the stat operation was successful */
 
   if (ret < 0)
     {
@@ -150,7 +209,7 @@ int statfs(FAR const char *path, FAR struct statfs *buf)
       goto errout_with_inode;
     }
 
-  /* Successfully statfs'ed the file */
+  /* Successfully stat'ed the file */
 
   inode_release(inode);
   return OK;

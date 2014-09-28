@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/fs_rmdir.c
+ * fs/vfs/fs_rmdir.c
  *
  *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

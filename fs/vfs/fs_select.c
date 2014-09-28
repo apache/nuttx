@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/fs_select.c
+ * fs/vfs/fs_select.c
  *
  *   Copyright (C) 2008-2009, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

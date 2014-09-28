@@ -1,7 +1,7 @@
 /****************************************************************************
- * fs/fs_rename.c
+ * fs/vfs/fs_unlink.c
  *
- *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
+#include <unistd.h>
 #include <errno.h>
 #include <nuttx/fs/fs.h>
 
@@ -60,12 +60,12 @@
 #  define FS_HAVE_PSEUDOFS_OPERATIONS 1
 #endif
 
-#undef FS_HAVE_RENAME
+#undef FS_HAVE_UNLINK
 #if defined(FS_HAVE_WRITABLE_MOUNTPOINT) || defined(FS_HAVE_PSEUDOFS_OPERATIONS)
-#  define FS_HAVE_RENAME 1
+#  define FS_HAVE_UNLINK 1
 #endif
 
-#ifdef FS_HAVE_RENAME
+#ifdef FS_HAVE_UNLINK
 
 /****************************************************************************
  * Private Variables
@@ -84,37 +84,23 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: rename
+ * Name: unlink
  *
  * Description:  Remove a file managed a mountpoint
  *
  ****************************************************************************/
 
-int rename(FAR const char *oldpath, FAR const char *newpath)
+int unlink(FAR const char *pathname)
 {
-  FAR struct inode *oldinode;
-  FAR struct inode *newinode;
-  const char       *oldrelpath = NULL;
-#ifndef CONFIG_DISABLE_MOUNTPOINT
-  const char       *newrelpath = NULL;
-#endif
+  FAR struct inode *inode;
+  const char       *relpath = NULL;
   int               errcode;
   int               ret;
 
-  /* Ignore paths that are interpreted as the root directory which has no name
-   * and cannot be moved
-   */
+  /* Get an inode for this file */
 
-  if (!oldpath || *oldpath == '\0' || oldpath[0] != '/' ||
-      !newpath || *newpath == '\0' || newpath[0] != '/')
-    {
-      return -EINVAL;
-    }
-
-  /* Get an inode that includes the oldpath */
-
-  oldinode = inode_find(oldpath, &oldrelpath);
-  if (!oldinode)
+  inode = inode_find(pathname, &relpath);
+  if (!inode)
     {
       /* There is no inode that includes in this path */
 
@@ -123,133 +109,97 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
     }
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
-  /* Verify that the old inode is a valid mountpoint. */
+  /* Check if the inode is a valid mountpoint. */
 
-  if (INODE_IS_MOUNTPT(oldinode) && oldinode->u.i_mops)
+  if (INODE_IS_MOUNTPT(inode) && inode->u.i_mops)
     {
-      /* Get an inode for the new relpath -- it should like on the same
-       * mountpoint
+      /* Perform the unlink operation using the relative path at the
+       * mountpoint.
        */
 
-      newinode = inode_find(newpath, &newrelpath);
-      if (!newinode)
+      if (inode->u.i_mops->unlink)
         {
-          /* There is no mountpoint that includes in this path */
-
-          errcode = ENOENT;
-          goto errout_with_oldinode;
-        }
-
-      /* Verify that the two paths lie on the same mountpoint inode */
-
-      if (oldinode != newinode)
-        {
-          errcode = EXDEV;
-          goto errout_with_newinode;
-        }
-
-      /* Perform the rename operation using the relative paths
-       * at the common mountpoint.
-       */
-
-      if (oldinode->u.i_mops->rename)
-        {
-          ret = oldinode->u.i_mops->rename(oldinode, oldrelpath, newrelpath);
+          ret = inode->u.i_mops->unlink(inode, relpath);
           if (ret < 0)
             {
               errcode = -ret;
-              goto errout_with_newinode;
+              goto errout_with_inode;
             }
         }
       else
         {
           errcode = ENOSYS;
-          goto errout_with_newinode;
+          goto errout_with_inode;
         }
-
-      /* Successfully renamed */
-
-      inode_release(newinode);
     }
   else
 #endif
+
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  /* If this is a "dangling" pseudo-file node (i.e., it has operations) then rm
+   * should remove the node.
+   */
+
+  if (inode->u.i_ops)
     {
-      /* Create a new, empty inode at the destination location */
-
-      inode_semtake();
-      ret = inode_reserve(newpath, &newinode);
-      if (ret < 0)
-        {
-          /* It is an error if a node at newpath already exists in the tree
-           * OR if we fail to allocate memory for the new inode (and possibly
-           * any new intermediate path segments).
-           */
-
-          inode_semgive();
-          errcode = EEXIST;
-          goto errout_with_oldinode;
-        }
-
-      /* Copy the inode state from the old inode to the newly allocated inode */
-
-      newinode->i_child   = oldinode->i_child;   /* Link to lower level inode */
-      newinode->i_flags   = oldinode->i_flags;   /* Flags for inode */
-      newinode->u.i_ops   = oldinode->u.i_ops;   /* Inode operations */
-#ifdef CONFIG_FILE_MODE
-      newinode->i_mode    = oldinode->i_mode;    /* Access mode flags */
-#endif
-      newinode->i_private = oldinode->i_private; /* Per inode driver private data */
-
-      /* We now have two copies of the inode.  One with a reference count of
-       * zero (the new one), and one that may have multiple references
-       * including one by this logic (the old one)
-       *
-       * Remove the old inode.  Because we hold a reference count on the
-       * inode, it will not be deleted now.  It will be deleted when all of
-       * the references to to the inode have been released (perhaps when
-       * inode_release() is called below).  inode_remove() should return
-       * -EBUSY to indicate that the inode was not deleted now.
+      /* If this is a pseudo-file node (i.e., it has no operations)
+       * then rmdir should remove the node.
        */
 
-      ret = inode_remove(oldpath);
-      if (ret < 0 && ret != -EBUSY)
+      if (inode->u.i_ops)
         {
-          /* Remove the new node we just recreated */
+          inode_semtake();
 
-          (void)inode_remove(newpath);
+          /* Refuse to unlink the inode if it has children.  I.e., if it is
+           * functioning as a directory and the directory is not empty.
+           */
+
+          if (inode->i_child != NULL)
+            {
+              errcode = ENOTEMPTY;
+              inode_semgive();
+              goto errout_with_inode;
+            }
+
+          /* Remove the old inode.  Because we hold a reference count on the
+           * inode, it will not be deleted now.  It will be deleted when all
+           * of the references to to the inode have been released (perhaps
+           * when inode_release() is called below).  inode_remove() will
+           * return -EBUSY to indicate that the inode was not deleted now.
+           */
+
+          ret = inode_remove(pathname);
           inode_semgive();
 
-          errcode = -ret;
-          goto errout_with_oldinode;
+          if (ret < 0 && ret != -EBUSY)
+            {
+              errcode = -ret;
+              goto errout_with_inode;
+            }
         }
-
-      /* Remove all of the children from the unlinked inode */
-
-      oldinode->i_child = NULL;
-      inode_semgive();
+      else
+        {
+          errcode = EISDIR;
+          goto errout_with_inode;
+        }
     }
 #else
     {
       errcode = ENXIO;
-      goto errout;
+      goto errout_with_inode;
     }
 #endif
 
-  /* Successfully renamed */
+  /* Successfully unlinked */
 
-  inode_release(oldinode);
+  inode_release(inode);
   return OK;
 
-#ifndef CONFIG_DISABLE_MOUNTPOINT
- errout_with_newinode:
-  inode_release(newinode);
-#endif
- errout_with_oldinode:
-  inode_release(oldinode);
+ errout_with_inode:
+  inode_release(inode);
  errout:
   set_errno(errcode);
   return ERROR;
 }
 
-#endif /* FS_HAVE_RENAME */
+#endif /* FS_HAVE_UNLINK */

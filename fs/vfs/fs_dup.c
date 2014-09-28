@@ -1,7 +1,7 @@
 /****************************************************************************
- * fs/fs_dup2.c
+ * fs/vfs/fs_dup.c
  *
- *   Copyright (C) 2007-2009, 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,14 +43,8 @@
 #include <sched.h>
 #include <errno.h>
 
+#include <nuttx/fs/fs.h>
 #include "fs.h"
-
-/* This logic in this applies only when both socket and file descriptors are
- * in that case, this function descriminates which type of dup2 is being
- * performed.
- */
-
-#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -65,45 +59,49 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: dup2
+ * Name: dup
  *
  * Description:
- *   Clone a file descriptor or socket descriptor to a specific descriptor
- *   number
+ *   Clone a file or socket descriptor to an arbitray descriptor number
  *
  ****************************************************************************/
 
-int dup2(int fd1, int fd2)
+int dup(int fd)
 {
+ int ret = OK;
+
   /* Check the range of the descriptor to see if we got a file or a socket
-   * descriptor.
-   */
+   * descriptor. */
 
-  if ((unsigned int)fd1 >= CONFIG_NFILE_DESCRIPTORS)
+#if CONFIG_NFILE_DESCRIPTORS > 0
+  if ((unsigned int)fd < CONFIG_NFILE_DESCRIPTORS)
     {
-      /* Not a valid file descriptor.  Did we get a valid socket descriptor? */
+      /* Its a valid file descriptor.. dup the file descriptor using any
+       * other file descriptor*/
 
-      if ((unsigned int)fd1 < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
+      ret = file_dup(fd, 0);
+    }
+  else
+#endif
+    {
+      /* Not a vailid file descriptor.  Did we get a valid socket descriptor? */
+
+#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+      if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
         {
           /* Yes.. dup the socket descriptor */
 
-          return net_dup2(fd1, fd2);
+          ret = net_dup(fd, CONFIG_NFILE_DESCRIPTORS);
         }
       else
+#endif
         {
           /* No.. then it is a bad descriptor number */
 
           set_errno(EBADF);
-          return ERROR;
+          ret = ERROR;
         }
     }
-  else
-    {
-      /* Its a valid file descriptor.. dup the file descriptor */
 
-      return file_dup2(fd1, fd2);
-    }
+  return ret;
 }
-
-#endif /* CONFIG_NFILE_DESCRIPTORS > 0 ... */
-

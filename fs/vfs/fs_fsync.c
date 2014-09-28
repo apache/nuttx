@@ -1,7 +1,7 @@
 /****************************************************************************
- * fs/fs_mkdir.c
+ * fs/vfs/fs_fsync.c
  *
- *   Copyright (C) 2007, 2008, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,34 +38,20 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+
+#include <unistd.h>
+#include <fcntl.h>
 #include <errno.h>
+#include <assert.h>
+
 #include <nuttx/fs/fs.h>
+#include <nuttx/sched.h>
 
 #include "fs.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#undef FS_HAVE_WRITABLE_MOUNTPOINT
-#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_WRITABLE) && \
-    CONFIG_NFILE_STREAMS > 0
-#  define FS_HAVE_WRITABLE_MOUNTPOINT 1
-#endif
-
-#undef FS_HAVE_PSEUDOFS_OPERATIONS
-#if !defined(CONFIG_DISABLE_PSEUDOFS_OPERATIONS) && CONFIG_NFILE_STREAMS > 0
-#  define FS_HAVE_PSEUDOFS_OPERATIONS 1
-#endif
-
-#undef FS_HAVE_MKDIR
-#if defined(FS_HAVE_WRITABLE_MOUNTPOINT) || defined(FS_HAVE_PSEUDOFS_OPERATIONS)
-#  define FS_HAVE_MKDIR 1
-#endif
-
-#ifdef FS_HAVE_MKDIR
 
 /****************************************************************************
  * Private Variables
@@ -84,105 +70,67 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mkdir
+ * Name: fsync
  *
- * Description:  Create a directory
+ * Description:
+ *   This func simply binds inode sync methods to the sync system call.
  *
  ****************************************************************************/
 
-int mkdir(const char *pathname, mode_t mode)
+int fsync(int fd)
 {
-  FAR struct inode *inode;
-  const char       *relpath = NULL;
-  int               errcode;
-  int               ret;
+  FAR struct filelist *list;
+  FAR struct file     *filep;
+  struct inode        *inode;
+  int                  ret;
 
-  /* Find the inode that includes this path */
+  /* Get the thread-specific file list */
 
-  inode = inode_find(pathname, &relpath);
-  if (inode)
+  list = sched_getfiles();
+  DEBUGASSERT(list);
+
+  /* Did we get a valid file descriptor? */
+
+  if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
     {
-      /* An inode was found that includes this path and possibly refers to a
-       * mountpoint.
-       */
-
-#ifndef CONFIG_DISABLE_MOUNTPOINT
-      /* Check if the inode is a valid mountpoint. */
-
-      if (!INODE_IS_MOUNTPT(inode) || !inode->u.i_mops)
-        {
-          /* The inode is not a mountpoint */
-
-          errcode = ENXIO;
-          goto errout_with_inode;
-        }
-
-      /* Perform the mkdir operation using the relative path
-       * at the mountpoint.
-       */
-
-      if (inode->u.i_mops->mkdir)
-        {
-          ret = inode->u.i_mops->mkdir(inode, relpath, mode);
-          if (ret < 0)
-            {
-              errcode = -ret;
-              goto errout_with_inode;
-            }
-        }
-      else
-        {
-          errcode = ENOSYS;
-          goto errout_with_inode;
-        }
-
-      /* Release our reference on the inode */
-
-      inode_release(inode);
-#else
-      /* But mountpoints are not supported in this configuration */
-
-      errcode = EEXIST;
-      goto errout_with_inode;
-#endif
-    }
-
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  /* No inode exists that contains this path.  Create a new inode in the
-   * pseudo-filesystem at this location.
-   */
-
-  else
-    {
-      /* Create an inode in the pseudo-filesystem at this path */
-
-      inode_semtake();
-      ret = inode_reserve(pathname, &inode);
-      inode_semgive();
-
-      if (ret < 0)
-        {
-          errcode = -ret;
-          goto errout;
-        }
-    }
-#else
-  else
-    {
-      errcode = ENXIO;
+      ret = EBADF;
       goto errout;
     }
-#endif
 
-  /* Directory successfully created */
+  /* Was this file opened for write access? */
 
-  return OK;
+  filep = &list->fl_files[fd];
+  if ((filep->f_oflags & O_WROK) == 0)
+    {
+      ret = EBADF;
+      goto errout;
+    }
 
- errout_with_inode:
-  inode_release(inode);
- errout:
-  set_errno(errcode);
+  /* Is this inode a registered mountpoint? Does it support the
+   * sync operations may be relevant to device drivers but only
+   * the mountpoint operations vtable contains a sync method.
+   */
+
+  inode = filep->f_inode;
+  if (!inode || !INODE_IS_MOUNTPT(inode) ||
+      !inode->u.i_mops || !inode->u.i_mops->sync)
+    {
+      ret = EINVAL;
+      goto errout;
+    }
+
+  /* Yes, then tell the mountpoint to sync this file */
+
+  ret = inode->u.i_mops->sync(filep);
+  if (ret >= 0)
+    {
+      return OK;
+    }
+
+  ret = -ret;
+
+errout:
+  set_errno(ret);
   return ERROR;
 }
 
-#endif /* FS_HAVE_MKDIR */

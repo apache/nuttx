@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/fs_filedup.c
+ * fs/vfs/fs_filedup2.c
  *
  *   Copyright (C) 2007-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,11 +39,9 @@
 
 #include <nuttx/config.h>
 
+#include <unistd.h>
 #include <sched.h>
 #include <errno.h>
-#include <assert.h>
-
-#include <nuttx/fs/fs.h>
 
 #include "fs.h"
 
@@ -66,53 +64,57 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: file_dup OR dup
+ * Name: file_dup2 OR dup2
  *
  * Description:
- *   Clone a file descriptor 'fd' to an arbitray descriptor number (any value
- *   greater than or equal to 'minfd'). If socket descriptors are
- *   implemented, then this is called by dup() for the case of file
- *   descriptors.  If socket descriptors are not implemented, then this
- *   function IS dup().
+ *   Clone a file descriptor to a specific descriptor number. If socket
+ *   descriptors are implemented, then this is called by dup2() for the
+ *   case of file descriptors.  If socket descriptors are not implemented,
+ *   then this function IS dup2().
  *
  ****************************************************************************/
 
-int file_dup(int fd, int minfd)
+#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
+int file_dup2(int fd1, int fd2)
+#else
+int dup2(int fd1, int fd2)
+#endif
 {
   FAR struct filelist *list;
-  int fd2;
 
   /* Get the thread-specific file list */
 
   list = sched_getfiles();
-  DEBUGASSERT(list);
+  if (!list)
+    {
+      set_errno(EMFILE);
+      return ERROR;
+    }
 
   /* Verify that fd is a valid, open file descriptor */
 
-  if (!DUP_ISOPEN(fd, list))
+  if (!DUP_ISOPEN(fd1, list))
     {
       set_errno(EBADF);
       return ERROR;
     }
 
-  /* Increment the reference count on the contained inode */
+  /* Handle a special case */
 
-  inode_addref(list->fl_files[fd].f_inode);
-
-  /* Then allocate a new file descriptor for the inode */
-
-  fd2 = files_allocate(list->fl_files[fd].f_inode,
-                       list->fl_files[fd].f_oflags,
-                       list->fl_files[fd].f_pos,
-                       minfd);
-  if (fd2 < 0)
+  if (fd1 == fd2)
     {
-      set_errno(EMFILE);
-      inode_release(list->fl_files[fd].f_inode);
+      return fd1;
+    }
+
+  /* Verify fd2 */
+
+  if ((unsigned int)fd2 >= CONFIG_NFILE_DESCRIPTORS)
+    {
+      set_errno(EBADF);
       return ERROR;
     }
 
-  return fd2;
+  return files_dup(&list->fl_files[fd1], &list->fl_files[fd2]);
 }
 
 #endif /* CONFIG_NFILE_DESCRIPTORS > 0 */

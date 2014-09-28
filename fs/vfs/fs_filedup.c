@@ -1,7 +1,7 @@
 /****************************************************************************
- * fs/fs_dup.c
+ * fs/vfs/fs_filedup.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,16 +39,23 @@
 
 #include <nuttx/config.h>
 
-#include <unistd.h>
 #include <sched.h>
 #include <errno.h>
+#include <assert.h>
 
 #include <nuttx/fs/fs.h>
+
 #include "fs.h"
+
+#if CONFIG_NFILE_DESCRIPTORS > 0
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#define DUP_ISOPEN(fd, list) \
+  ((unsigned int)fd < CONFIG_NFILE_DESCRIPTORS && \
+   list->fl_files[fd].f_inode != NULL)
 
 /****************************************************************************
  * Private Functions
@@ -59,49 +66,54 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: dup
+ * Name: file_dup OR dup
  *
  * Description:
- *   Clone a file or socket descriptor to an arbitray descriptor number
+ *   Clone a file descriptor 'fd' to an arbitray descriptor number (any value
+ *   greater than or equal to 'minfd'). If socket descriptors are
+ *   implemented, then this is called by dup() for the case of file
+ *   descriptors.  If socket descriptors are not implemented, then this
+ *   function IS dup().
  *
  ****************************************************************************/
 
-int dup(int fd)
+int file_dup(int fd, int minfd)
 {
- int ret = OK;
+  FAR struct filelist *list;
+  int fd2;
 
-  /* Check the range of the descriptor to see if we got a file or a socket
-   * descriptor. */
+  /* Get the thread-specific file list */
 
-#if CONFIG_NFILE_DESCRIPTORS > 0
-  if ((unsigned int)fd < CONFIG_NFILE_DESCRIPTORS)
+  list = sched_getfiles();
+  DEBUGASSERT(list);
+
+  /* Verify that fd is a valid, open file descriptor */
+
+  if (!DUP_ISOPEN(fd, list))
     {
-      /* Its a valid file descriptor.. dup the file descriptor using any
-       * other file descriptor*/
-
-      ret = file_dup(fd, 0);
-    }
-  else
-#endif
-    {
-      /* Not a vailid file descriptor.  Did we get a valid socket descriptor? */
-
-#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-      if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
-        {
-          /* Yes.. dup the socket descriptor */
-
-          ret = net_dup(fd, CONFIG_NFILE_DESCRIPTORS);
-        }
-      else
-#endif
-        {
-          /* No.. then it is a bad descriptor number */
-
-          set_errno(EBADF);
-          ret = ERROR;
-        }
+      set_errno(EBADF);
+      return ERROR;
     }
 
-  return ret;
+  /* Increment the reference count on the contained inode */
+
+  inode_addref(list->fl_files[fd].f_inode);
+
+  /* Then allocate a new file descriptor for the inode */
+
+  fd2 = files_allocate(list->fl_files[fd].f_inode,
+                       list->fl_files[fd].f_oflags,
+                       list->fl_files[fd].f_pos,
+                       minfd);
+  if (fd2 < 0)
+    {
+      set_errno(EMFILE);
+      inode_release(list->fl_files[fd].f_inode);
+      return ERROR;
+    }
+
+  return fd2;
 }
+
+#endif /* CONFIG_NFILE_DESCRIPTORS > 0 */
+

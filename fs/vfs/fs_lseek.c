@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/fs_lseek.c
+ * fs/vfs/fs_lseek.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

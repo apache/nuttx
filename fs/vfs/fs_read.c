@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/fs_read.c
+ * fs/vfs/fs_read.c
  *
  *   Copyright (C) 2007-2009, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

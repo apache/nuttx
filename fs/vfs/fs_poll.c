@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/fs_poll.c
+ * fs/vfs/fs_poll.c
  *
  *   Copyright (C) 2008-2009, 2012-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

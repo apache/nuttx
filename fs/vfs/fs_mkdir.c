@@ -1,7 +1,7 @@
 /****************************************************************************
- * fs_unlink.c
+ * fs/vfs/fs_mkdir.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,8 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <errno.h>
 #include <nuttx/fs/fs.h>
 
@@ -60,12 +60,12 @@
 #  define FS_HAVE_PSEUDOFS_OPERATIONS 1
 #endif
 
-#undef FS_HAVE_UNLINK
+#undef FS_HAVE_MKDIR
 #if defined(FS_HAVE_WRITABLE_MOUNTPOINT) || defined(FS_HAVE_PSEUDOFS_OPERATIONS)
-#  define FS_HAVE_UNLINK 1
+#  define FS_HAVE_MKDIR 1
 #endif
 
-#ifdef FS_HAVE_UNLINK
+#ifdef FS_HAVE_MKDIR
 
 /****************************************************************************
  * Private Variables
@@ -84,42 +84,46 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: unlink
+ * Name: mkdir
  *
- * Description:  Remove a file managed a mountpoint
+ * Description:  Create a directory
  *
  ****************************************************************************/
 
-int unlink(FAR const char *pathname)
+int mkdir(const char *pathname, mode_t mode)
 {
   FAR struct inode *inode;
   const char       *relpath = NULL;
   int               errcode;
   int               ret;
 
-  /* Get an inode for this file */
+  /* Find the inode that includes this path */
 
   inode = inode_find(pathname, &relpath);
-  if (!inode)
+  if (inode)
     {
-      /* There is no inode that includes in this path */
-
-      errcode = ENOENT;
-      goto errout;
-    }
-
-#ifndef CONFIG_DISABLE_MOUNTPOINT
-  /* Check if the inode is a valid mountpoint. */
-
-  if (INODE_IS_MOUNTPT(inode) && inode->u.i_mops)
-    {
-      /* Perform the unlink operation using the relative path at the
+      /* An inode was found that includes this path and possibly refers to a
        * mountpoint.
        */
 
-      if (inode->u.i_mops->unlink)
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+      /* Check if the inode is a valid mountpoint. */
+
+      if (!INODE_IS_MOUNTPT(inode) || !inode->u.i_mops)
         {
-          ret = inode->u.i_mops->unlink(inode, relpath);
+          /* The inode is not a mountpoint */
+
+          errcode = ENXIO;
+          goto errout_with_inode;
+        }
+
+      /* Perform the mkdir operation using the relative path
+       * at the mountpoint.
+       */
+
+      if (inode->u.i_mops->mkdir)
+        {
+          ret = inode->u.i_mops->mkdir(inode, relpath, mode);
           if (ret < 0)
             {
               errcode = -ret;
@@ -131,68 +135,47 @@ int unlink(FAR const char *pathname)
           errcode = ENOSYS;
           goto errout_with_inode;
         }
-    }
-  else
+
+      /* Release our reference on the inode */
+
+      inode_release(inode);
+#else
+      /* But mountpoints are not supported in this configuration */
+
+      errcode = EEXIST;
+      goto errout_with_inode;
 #endif
+    }
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  /* If this is a "dangling" pseudo-file node (i.e., it has operations) then rm
-   * should remove the node.
+  /* No inode exists that contains this path.  Create a new inode in the
+   * pseudo-filesystem at this location.
    */
 
-  if (inode->u.i_ops)
+  else
     {
-      /* If this is a pseudo-file node (i.e., it has no operations)
-       * then rmdir should remove the node.
-       */
+      /* Create an inode in the pseudo-filesystem at this path */
 
-      if (inode->u.i_ops)
+      inode_semtake();
+      ret = inode_reserve(pathname, &inode);
+      inode_semgive();
+
+      if (ret < 0)
         {
-          inode_semtake();
-
-          /* Refuse to unlink the inode if it has children.  I.e., if it is
-           * functioning as a directory and the directory is not empty.
-           */
-
-          if (inode->i_child != NULL)
-            {
-              errcode = ENOTEMPTY;
-              inode_semgive();
-              goto errout_with_inode;
-            }
-
-          /* Remove the old inode.  Because we hold a reference count on the
-           * inode, it will not be deleted now.  It will be deleted when all
-           * of the references to to the inode have been released (perhaps
-           * when inode_release() is called below).  inode_remove() will
-           * return -EBUSY to indicate that the inode was not deleted now.
-           */
-
-          ret = inode_remove(pathname);
-          inode_semgive();
-
-          if (ret < 0 && ret != -EBUSY)
-            {
-              errcode = -ret;
-              goto errout_with_inode;
-            }
-        }
-      else
-        {
-          errcode = EISDIR;
-          goto errout_with_inode;
+          errcode = -ret;
+          goto errout;
         }
     }
 #else
+  else
     {
       errcode = ENXIO;
-      goto errout_with_inode;
+      goto errout;
     }
 #endif
 
-  /* Successfully unlinked */
+  /* Directory successfully created */
 
-  inode_release(inode);
   return OK;
 
  errout_with_inode:
@@ -202,4 +185,4 @@ int unlink(FAR const char *pathname)
   return ERROR;
 }
 
-#endif /* FS_HAVE_UNLINK */
+#endif /* FS_HAVE_MKDIR */
