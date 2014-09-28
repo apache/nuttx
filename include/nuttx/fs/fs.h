@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/fs/fs.h
  *
- *   Copyright (C) 2007-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -203,24 +203,27 @@ struct mountpt_operations
 /* Named OS resources are also maintained by the VFS.  This includes:
  *
  *   - Named semaphores:     sem_open(), sem_close(), and sem_unlink()
- *   - POSIX Message Queues: mq_open() and mq_close()
+ *   - POSIX Message Queues: mq_open(),  mq_close(), and mq_unlink()
  *   - Shared memory:        shm_open() and shm_unlink();
  *
- * These are a special case in that they do not follow quite the same
- * pattern as the other file system types in that they have no read or
- * write methods.
+ * These are a special case in that they do not follow the same pattern
+ * as the other inode system types:
  *
- * Each inode type carries a payload specific to the OS resource;
- * Only the contents of struct special_operations is visible to the VFS.
+ *   - All of these resources have their own open() and unlink()  interfaces.
+ *     All require special, additional operations at open() and unlink()
+ *     time
+ *   - None of the standard VFS operations can be used with semaphores
+ *     or named messages queues.  These OS resources have their own
+ *     own open() and close methods that do not use file descriptors.
+ *   - Only ftruncate() and close() make sense with the file descriptor
+ *     returned by shm_open()
+ *
+ * Inode types are not defined here, but rather in:
+ *
+ *   - include/nuttx/semaphore.h
+ *   - include/nuttx/mqueue.h, and
+ *   - include/nuttx/shm.h
  */
-
-struct inode;
-struct special_operations
-{
-  int     (*open)(FAR struct inode *inode);
-  int     (*close)(FAR struct inode *inode);
-  int     (*unlink)(FAR struct inode *inode, FAR const char *relpath);
-};
 
 /* These are the various kinds of operations that can be associated with
  * an inode.
@@ -233,7 +236,6 @@ union inode_ops_u
   FAR const struct block_operations     *i_bops; /* Block driver operations */
   FAR const struct mountpt_operations   *i_mops; /* Operations on a mountpoint */
 #endif
-  FAR const struct special_operations   *i_xops; /* Generic operations on OS resources */
   FAR const struct semaphore_operations *i_sops; /* Operations for named semaphores */
 };
 
