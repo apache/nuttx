@@ -234,7 +234,7 @@ FAR sem_t *sem_open (FAR const char *name, int oflags, ...)
           if (!nsem)
             {
               errcode = ENOMEM;
-              goto errout_with_lock;
+              goto errout_with_inode;
             }
 
           /* Link to the inode */

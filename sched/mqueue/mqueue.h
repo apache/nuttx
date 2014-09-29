@@ -141,8 +141,6 @@ EXTERN sq_queue_t  g_desfree;
 void weak_function mq_initialize(void);
 void mq_desblockalloc(void);
 
-mqd_t mq_descreate(FAR struct tcb_s* mtcb, FAR struct mqueue_inode_s* msgq,
-                   int oflags);
 FAR struct mqueue_inode_s *mq_findnamed(FAR const char *mq_name);
 void mq_msgfree(FAR struct mqueue_msg_s *mqmsg);
 

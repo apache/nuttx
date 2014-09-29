@@ -1,7 +1,7 @@
 /****************************************************************************
- *  sched/mqueue/mq_descreate.c
+ *  sched/mqueue/mq_msgqalloc.c
  *
- *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,25 +39,17 @@
 
 #include <nuttx/config.h>
 
-#include <stdarg.h>
-#include <unistd.h>
-#include <string.h>
-#include <assert.h>
 #include <mqueue.h>
-#include <sched.h>
-#include <queue.h>
-#include <debug.h>
 
-#include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/sched.h>
 #include <nuttx/mqueue.h>
 
-#include "signal/signal.h"
-
+#include "sched/sched.h"
 #include "mqueue/mqueue.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-procesor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -77,97 +69,63 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mq_desalloc
- *
- * Description:
- *   Allocate a message queue descriptor.
- *
- * Inputs:
- *   None
- *
- * Return Value:
- *   Reference to the allocated mq descriptor.
- *
- ****************************************************************************/
-
-static mqd_t mq_desalloc(void)
-{
-  mqd_t mqdes;
-
-  /* Try to get the message descriptorfrom the free list */
-
-  mqdes = (mqd_t)sq_remfirst(&g_desfree);
-
-  /* Check if we got one. */
-
-  if (!mqdes)
-    {
-      /* Add another block of message descriptors to the list */
-
-      mq_desblockalloc();
-
-      /* And try again */
-
-      mqdes = (mqd_t)sq_remfirst(&g_desfree);
-    }
-
-  return mqdes;
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mq_descreate
+ * Name: mq_msgqalloc
  *
  * Description:
- *   Create a message queue descriptor for the specified TCB
+ *   This function implements a part of the POSIX message queue open logic.
+ *   It allocates and initializes a structu mqueue_inode_s structure.
  *
- * Inputs:
- *   mtcb   - task that needs the descriptor.
- *   msgq   - Named message queue containing the message
- *   oflags - access rights for the descriptor
+ * Parameters:
+ *   mode   - mode_t value is ignored
+ *   attr   - The mq_maxmsg attribute is used at the time that the message
+ *            queue is created to determine the maximum number of
+ *             messages that may be placed in the message queue.
  *
  * Return Value:
- *   On success, the message queue descriptor is returned.  NULL is returned
- *   on a failure to allocate.
+ *   The allocated and initalized message queue structure or NULL in the
+ *   event of a failure.
  *
  ****************************************************************************/
 
-mqd_t mq_descreate(FAR struct tcb_s *mtcb, FAR struct mqueue_inode_s *msgq,
-                   int oflags)
+FAR struct mqueue_inode_s *mq_msgqalloc(mode_t mode,
+                                        FAR struct mq_attr *attr)
 {
-  FAR struct task_group_s *group;
-  mqd_t mqdes;
+  FAR struct mqueue_inode_s *msgq;
 
-  /* A NULL TCB pointer means to use the TCB of the currently executing
-   * task/thread.
-   */
+  /* Allocate memory for the new message queue. */
 
-  if (!mtcb)
+  msgq = (FAR struct mqueue_inode_s*)kmm_zalloc(sizeof(struct mqueue_inode_s));
+  if (msgq)
     {
-      mtcb = sched_self();
+      /* Initialize the new named message queue */
+
+      sq_init(&msgq->msglist);
+      if (attr)
+        {
+          msgq->maxmsgs = (int16_t)attr->mq_maxmsg;
+          if (attr->mq_msgsize <= MQ_MAX_BYTES)
+            {
+              msgq->maxmsgsize = (int16_t)attr->mq_msgsize;
+            }
+          else
+            {
+              msgq->maxmsgsize = MQ_MAX_BYTES;
+            }
+        }
+      else
+        {
+          msgq->maxmsgs    = MQ_MAX_MSGS;
+          msgq->maxmsgsize = MQ_MAX_BYTES;
+        }
+
+#ifndef CONFIG_DISABLE_SIGNALS
+      msgq->ntpid = INVALID_PROCESS_ID;
+#endif
     }
 
-  group = mtcb->group;
-  DEBUGASSERT(group);
-
-  /* Create a message queue descriptor for the TCB */
-
-  mqdes = mq_desalloc();
-  if (mqdes)
-    {
-      /* Initialize the message queue descriptor */
-
-      memset(mqdes, 0, sizeof(struct mq_des));
-      mqdes->msgq   = msgq;
-      mqdes->oflags = oflags;
-
-      /* And add it to the specified task's TCB */
-
-      sq_addlast((FAR sq_entry_t*)mqdes, &group->tg_msgdesq);
-    }
-
-  return mqdes;
+  return msgq;
 }

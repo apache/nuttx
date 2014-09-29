@@ -139,7 +139,6 @@ void mq_msgqfree(FAR struct mqueue_inode_s *msgq);
  *   It allocates and initializes a structu mqueue_inode_s structure.
  *
  * Parameters:
- *   oflags - open flags
  *   mode   - mode_t value is ignored
  *   attr   - The mq_maxmsg attribute is used at the time that the message
  *            queue is created to determine the maximum number of
@@ -151,8 +150,30 @@ void mq_msgqfree(FAR struct mqueue_inode_s *msgq);
  *
  ****************************************************************************/
 
-FAR struct mqueue_inode_s *mq_msgqalloc(int oflags, mode_t mode,
+struct mq_attr;
+FAR struct mqueue_inode_s *mq_msgqalloc(mode_t mode,
                                         FAR struct mq_attr *attr);
+
+/****************************************************************************
+ * Name: mq_descreate
+ *
+ * Description:
+ *   Create a message queue descriptor for the specified TCB
+ *
+ * Inputs:
+ *   TCB - task that needs the descriptor.
+ *   msgq - Named message queue containing the message
+ *   oflags - access rights for the descriptor
+ *
+ * Return Value:
+ *   On success, the message queue descriptor is returned.  NULL is returned
+ *   on a failure to allocate.
+ *
+ ****************************************************************************/
+
+struct tcb_s;
+mqd_t mq_descreate(FAR struct tcb_s* mtcb, FAR struct mqueue_inode_s* msgq,
+                   int oflags);
 
 #undef EXTERN
 #ifdef __cplusplus
