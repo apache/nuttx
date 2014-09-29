@@ -487,7 +487,7 @@ xcpt_t sam_setup_overcurrent(xcpt_t handler)
 
   flags = irqsave();
 
-  /* Get the old button interrupt handler and save the new one */
+  /* Get the old interrupt handler and save the new one */
 
   oldhandler  = g_ochandler;
   g_ochandler = handler;
@@ -498,7 +498,7 @@ xcpt_t sam_setup_overcurrent(xcpt_t handler)
   (void)irq_attach(IRQ_USBBC_VBUS_OVERCURRENT, handler);
   sam_pioirqenable(IRQ_USBBC_VBUS_OVERCURRENT);
 
-  /* Return the old button handler (so that it can be restored) */
+  /* Return the old handler (so that it can be restored) */
 
   irqrestore(flags);
   return oldhandler;

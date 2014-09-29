@@ -286,7 +286,7 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
 
   flags = irqsave();
 
-  /* Get the old button interrupt handler and save the new one */
+  /* Get the old interrupt handler and save the new one */
 
   oldhandler = *phandler;
   *phandler  = handler;
@@ -319,7 +319,7 @@ xcpt_t arch_phy_irq(FAR const char *intf, xcpt_t handler, phy_enable_t *enable)
       *enable = enabler;
     }
 
-  /* Return the old button handler (so that it can be restored) */
+  /* Return the old handler (so that it can be restored) */
 
   irqrestore(flags);
   return oldhandler;
