@@ -48,7 +48,7 @@
 
 #include <nuttx/kmalloc.h>
 
-#include "fs.h"
+#include "inode/inode.h"
 #include "semaphore/semaphore.h"
 
 /****************************************************************************

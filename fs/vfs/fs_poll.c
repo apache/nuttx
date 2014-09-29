@@ -52,7 +52,7 @@
 
 #include <arch/irq.h>
 
-#include "fs.h"
+#include "inode/inode.h"
 
 #ifndef CONFIG_DISABLE_POLL
 

@@ -53,7 +53,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/syslog/syslog.h>
 
-#include "fs.h"
+#include "inode/inode.h"
 
 #if defined(CONFIG_SYSLOG) && defined(CONFIG_SYSLOG_CHAR)
 

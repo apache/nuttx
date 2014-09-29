@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include "fs.h"
+#include "inode/inode.h"
 
 /****************************************************************************
  * Pre-processor Definitions

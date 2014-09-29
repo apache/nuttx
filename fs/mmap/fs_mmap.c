@@ -46,7 +46,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include "fs.h"
+#include "inode/inode.h"
 #include "fs_rammap.h"
 
 /****************************************************************************

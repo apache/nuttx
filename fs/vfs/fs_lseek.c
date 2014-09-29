@@ -45,7 +45,7 @@
 #include <errno.h>
 #include <assert.h>
 
-#include "fs.h"
+#include "inode/inode.h"
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
 

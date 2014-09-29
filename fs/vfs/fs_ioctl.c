@@ -50,7 +50,7 @@
 # include <nuttx/net/net.h>
 #endif
 
-#include "fs.h"
+#include "inode/inode.h"
 
 /****************************************************************************
  * Global Functions

@@ -43,7 +43,7 @@
 #include <sched.h>
 #include <errno.h>
 
-#include "fs.h"
+#include "inode/inode.h"
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
 

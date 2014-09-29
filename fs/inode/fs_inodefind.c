@@ -42,7 +42,7 @@
 #include <errno.h>
 #include <nuttx/fs/fs.h>
 
-#include "fs.h"
+#include "inode/inode.h"
 
 /****************************************************************************
  * Pre-processor Definitions

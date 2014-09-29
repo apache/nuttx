@@ -47,7 +47,8 @@
 
 #include <nuttx/fs/fs.h>
 
-#include "fs.h"
+#include "inode/inode.h"
+#include "driver/driver.h"
 
 /* At least one filesystem must be defined, or this file will not compile.
  * It may be desire-able to make filesystems dynamically registered at

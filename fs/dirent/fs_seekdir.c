@@ -46,7 +46,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/dirent.h>
 
-#include "fs.h"
+#include "inode/inode.h"
 
 /****************************************************************************
  * Private Functions

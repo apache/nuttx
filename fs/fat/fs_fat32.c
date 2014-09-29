@@ -63,7 +63,7 @@
 #include <nuttx/fs/fat.h>
 #include <nuttx/fs/dirent.h>
 
-#include "fs.h"
+#include "inode/inode.h"
 #include "fs_fat32.h"
 
 /****************************************************************************

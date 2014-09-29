@@ -49,7 +49,7 @@
 # include <sys/socket.h>
 #endif
 
-#include "fs.h"
+#include "inode/inode.h"
 
 /****************************************************************************
  * Private Functions

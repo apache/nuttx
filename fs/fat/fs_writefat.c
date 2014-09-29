@@ -48,7 +48,7 @@
 #include <nuttx/fs/fat.h>
 #include <nuttx/fs/mkfatfs.h>
 
-#include "fs.h"
+#include "inode/inode.h"
 #include "fs_fat32.h"
 #include "fs_mkfatfs.h"
 

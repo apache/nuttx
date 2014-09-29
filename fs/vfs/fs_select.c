@@ -51,7 +51,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 
-#include "fs.h"
+#include "inode/inode.h"
 
 #ifndef CONFIG_DISABLE_POLL
 

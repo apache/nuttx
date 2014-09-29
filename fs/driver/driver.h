@@ -1,7 +1,7 @@
 /****************************************************************************
- * fs/driver/fs_unregisterblockdriver.c
+ * fs/driver/driver.h
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,54 +33,70 @@
  *
  ****************************************************************************/
 
+#ifndef __FS_DRIVER_DRIVER_H
+#define __FS_DRIVER_DRIVER_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
+#include <nuttx/compiler.h>
 #include <nuttx/fs/fs.h>
-
-#include "inode/inode.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Private Types
+ /****************************************************************************
+ * Global Variables
  ****************************************************************************/
 
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+extern FAR struct inode *root_inode;
 
 /****************************************************************************
- * Public Variables
+ * Public Function Prototypes
  ****************************************************************************/
 
+/* fs_findblockdriver.c *****************************************************/
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: unregister_blockdriver
+ * Name: find_blockdriver
  *
  * Description:
- *   Remove the block driver inode at 'path' from the pseudo-file system
+ *   Return the inode of the block driver specified by 'pathname'
+ *
+ * Inputs:
+ *   pathname - the full path to the block driver to be located
+ *   mountflags - if MS_RDONLY is not set, then driver must support write
+ *     operations (see include/sys/mount.h)
+ *   ppinode - address of the location to return the inode reference
+ *
+ * Return:
+ *   Returns zero on success or a negated errno on failure:
+ *
+ *   EINVAL  - pathname or pinode is NULL
+ *   ENOENT  - No block driver of this name is registered
+ *   ENOTBLK - The inode associated with the pathname is not a block driver
+ *   EACCESS - The MS_RDONLY option was not set but this driver does not
+ *     support write access
  *
  ****************************************************************************/
 
-int unregister_blockdriver(const char *path)
-{
-  int ret;
+int find_blockdriver(FAR const char *pathname, int mountflags,
+                     FAR struct inode **ppinode);
 
-  inode_semtake();
-  ret = inode_remove(path);
-  inode_semgive();
-  return ret;
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
+
+#endif /* __FS_DRIVER_DRIVER_H */

@@ -41,7 +41,7 @@
 #include <stdbool.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
-#include "fs.h"
+#include "inode/inode.h"
 #include <queue.h>
 #include <arch/irq.h>
 #include <rgmp/rtos.h>

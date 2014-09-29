@@ -52,7 +52,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 
-#include "fs.h"
+#include "inode/inode.h"
 #include "semaphore/semaphore.h"
 
 #ifdef CONFIG_FS_NAMED_SEMAPHORES

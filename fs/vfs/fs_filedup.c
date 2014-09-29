@@ -45,7 +45,7 @@
 
 #include <nuttx/fs/fs.h>
 
-#include "fs.h"
+#include "inode/inode.h"
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
 

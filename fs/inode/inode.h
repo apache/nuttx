@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/fs.h
+ * fs/inode/inode.h
  *
  *   Copyright (C) 2007, 2009, 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef _FS_FS_H
-#define _FS_FS_H
+#ifndef __FS_INODE_H
+#define __FS_INODE_H
 
 /****************************************************************************
  * Included Files
@@ -114,20 +114,20 @@ typedef int (*foreach_inode_t)(FAR struct inode *node,
  * Global Variables
  ****************************************************************************/
 
-extern FAR struct inode *root_inode;
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
+EXTERN FAR struct inode *root_inode;
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 /* fs_inode.c ***************************************************************/
 /****************************************************************************
  * Name: inode_semtake
@@ -329,36 +329,9 @@ int files_close(int fd);
 
 void files_release(int fd);
 
-/* fs_findblockdriver.c *****************************************************/
-/****************************************************************************
- * Name: find_blockdriver
- *
- * Description:
- *   Return the inode of the block driver specified by 'pathname'
- *
- * Inputs:
- *   pathname - the full path to the block driver to be located
- *   mountflags - if MS_RDONLY is not set, then driver must support write
- *     operations (see include/sys/mount.h)
- *   ppinode - address of the location to return the inode reference
- *
- * Return:
- *   Returns zero on success or a negated errno on failure:
- *
- *   EINVAL  - pathname or pinode is NULL
- *   ENOENT  - No block driver of this name is registered
- *   ENOTBLK - The inode associated with the pathname is not a block driver
- *   EACCESS - The MS_RDONLY option was not set but this driver does not
- *     support write access
- *
- ****************************************************************************/
-
-int find_blockdriver(FAR const char *pathname, int mountflags,
-                     FAR struct inode **ppinode);
-
 #undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
 
-#endif /* _FS_FS_H */
+#endif /* __FS_INODE_H */
