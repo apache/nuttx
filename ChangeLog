@@ -8705,3 +8705,5 @@
 	  priority inheritance is enabled (2014-9-29).
 	* fs/Makefile and mqueue/: Add build support for messages queues as part
 	  of the VFS (only build logic, no C files yet) (2014-9-29).
+	* fs/inode/inode.h and fs/driver/driver.h:  Move fs/fs.h to fs/inode/inode.h
+	  and some to fs/driver/driver.h (2014-9-29).
