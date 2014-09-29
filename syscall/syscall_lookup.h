@@ -68,7 +68,7 @@ SYSCALL_LOOKUP(sem_wait,                  1, STUB_sem_wait)
 
 /* Named semaphores */
 
-#ifdef defined(CONFIG_FS_NAMED_SEMAPHORES)
+#ifdef CONFIG_FS_NAMED_SEMAPHORES
 SYSCALL_LOOKUP(sem_open,                  6, STUB_sem_open)
 SYSCALL_LOOKUP(sem_close,                 1, STUB_sem_close)
 SYSCALL_LOOKUP(sem_unlink,                1, STUB_sem_unlink)
