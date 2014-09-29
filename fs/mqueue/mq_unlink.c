@@ -160,6 +160,7 @@ int mq_unlink(FAR const char *mq_name)
 
   inode_semgive();
   mq_inode_release(inode);
+  sched_unlock();
   return OK;
 
 errout_with_semaphore:
@@ -168,5 +169,6 @@ errout_with_inode:
   inode_release(inode);
 errout:
   set_errno(errcode);
+  sched_unlock();
   return ERROR;
 }

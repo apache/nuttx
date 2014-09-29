@@ -255,16 +255,17 @@ FAR sem_t *sem_open (FAR const char *name, int oflags, ...)
 
           sem = &nsem->ns_sem;
         }
+
+      sched_unlock();
     }
 
-  sched_unlock();
   return sem;
 
  errout_with_inode:
   inode_release(inode);
  errout_with_lock:
-  sched_unlock();
   set_errno(errcode);
+  sched_unlock();
   return (FAR sem_t *)ERROR;
 }
 

@@ -235,9 +235,10 @@ mqd_t mq_open(const char *mq_name, int oflags, ...)
           inode->u.i_mqueue = msgq;
           msgq->inode       = inode;
         }
+
+      sched_unlock();
     }
 
-  sched_unlock();
   return mqdes;
 
 errout_with_msgq:

@@ -162,7 +162,9 @@ int sem_unlink(FAR const char *name)
    */
 
   inode_semgive();
-  return sem_close((FAR sem_t *)inode->u.i_nsem);
+  ret = sem_close((FAR sem_t *)inode->u.i_nsem);
+  sched_unlock();
+  return ret;
 
 errout_with_semaphore:
   inode_semgive();
@@ -170,5 +172,6 @@ errout_with_inode:
   inode_release(inode);
 errout:
   set_errno(errcode);
+  sched_unlock();
   return ERROR;
 }

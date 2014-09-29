@@ -150,6 +150,7 @@ int mq_close(mqd_t mqdes)
        /* Decrement the reference count on the inode */
 
        mq_inode_release(inode);
+       sched_unlock();
      }
 
   return OK;
