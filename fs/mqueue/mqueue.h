@@ -89,7 +89,7 @@ extern "C"
  *
  ****************************************************************************/
 
-void mq_release(FAR struct inode *inode);
+void mq_inode_release(FAR struct inode *inode);
 
 #undef EXTERN
 #ifdef __cplusplus

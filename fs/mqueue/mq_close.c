@@ -149,7 +149,7 @@ int mq_close(mqd_t mqdes)
 
        /* Decrement the reference count on the inode */
 
-       mq_release(inode);
+       mq_inode_release(inode);
      }
 
   return OK;
@@ -169,7 +169,7 @@ int mq_close(mqd_t mqdes)
  *
  ****************************************************************************/
 
-void mq_release(FAR struct inode *inode)
+void mq_inode_release(FAR struct inode *inode)
 {
   /* Decrement the reference count on the inode */
 

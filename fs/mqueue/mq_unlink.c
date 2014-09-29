@@ -151,14 +151,15 @@ int mq_unlink(FAR const char *mq_name)
   UNUSED(ret);
 
   /* Now we do not release the reference count in the normal way (by calling
-   * inode release.  Rather, we call sem_close().  sem_close will decrement
-   * the reference count on the inode.  But it will also free the message queue
-   * if that reference count decrements to zero.  Since we hold one reference,
-   * that can only occur if the message queue is not in-use.
+   * inode release.  Rather, we call mq_inode_release().  mq_inode_release
+   * will decrement the reference count on the inode.  But it will also free
+   * the message queue if that reference count decrements to zero.  Since we
+   * hold one reference, that can only occur if the message queue is not
+   * in-use.
    */
 
   inode_semgive();
-  mq_release(inode);
+  mq_inode_release(inode);
   return OK;
 
 errout_with_semaphore:

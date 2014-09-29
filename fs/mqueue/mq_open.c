@@ -231,6 +231,7 @@ mqd_t mq_open(const char *mq_name, int oflags, ...)
 
           /* Bind the message queue and the inode structure */
 
+          INODE_SET_MQUEUE(inode);
           inode->u.i_mqueue = msgq;
           msgq->inode       = inode;
         }
