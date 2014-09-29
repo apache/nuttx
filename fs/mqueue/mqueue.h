@@ -45,6 +45,13 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
+
+#ifndef CONFIG_FS_MQUEUE_MPATH
+#  define CONFIG_FS_MQUEUE_MPATH "/var/mqueue"
+#endif
+
+/* Sizes of things */
 
 #define MAX_MQUEUE_PATH 64
 
@@ -67,6 +74,22 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: mq_close
+ *
+ * Description:
+ *   Release a reference count on a message queue inode.
+ *
+ * Parameters:
+ *   inode - The message queue inode
+ *
+ * Return Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void mq_release(FAR struct inode *inode);
 
 #undef EXTERN
 #ifdef __cplusplus

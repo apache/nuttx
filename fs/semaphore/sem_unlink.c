@@ -99,7 +99,7 @@
 int sem_unlink(FAR const char *name)
 {
   FAR struct inode *inode;
-  FAR const char  *relpath = NULL;
+  FAR const char *relpath = NULL;
   char fullpath[MAX_SEMPATH];
   int errcode;
   int ret;

@@ -1,7 +1,7 @@
 /************************************************************************
- * sched/mqueue/mq_unlink.c
+ * fs/mqueue/mq_unlink.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,10 +39,14 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
+#include <stdio.h>
 #include <mqueue.h>
-#include <sched.h>
+#include <assert.h>
+#include <errno.h>
 
+#include <nuttx/mqueue.h>
+
+#include "inode/inode.h"
 #include "mqueue/mqueue.h"
 
 /************************************************************************
@@ -88,58 +92,80 @@
  *
  ************************************************************************/
 
-int mq_unlink(const char *mq_name)
+int mq_unlink(FAR const char *mq_name)
 {
-  FAR struct mqueue_inode_s *msgq;
-  irqstate_t saved_state;
-  int ret = ERROR;
+  FAR struct inode *inode;
+  FAR const char *relpath = NULL;
+  char fullpath[MAX_MQUEUE_PATH];
+  int errcode;
+  int ret;
 
-  /* Verify the input values */
+  /* Get the full path to the message queue */
 
-  if (mq_name)
+  snprintf(fullpath, MAX_MQUEUE_PATH, CONFIG_FS_MQUEUE_MPATH "/%s", mq_name);
+
+  /* Get the inode for this message queue. */
+
+  sched_lock();
+  inode = inode_find(fullpath, &relpath);
+  if (!inode)
     {
-      sched_lock();
+      /* There is no inode that includes in this path */
 
-      /* Find the named message queue */
-
-      msgq = mq_findnamed(mq_name);
-      if (msgq)
-        {
-          /* If it is no longer connected, then we can just
-           * discard the message queue now.
-           */
-
-          if (!msgq->nconnect)
-            {
-              /* Remove the message queue from the list of all
-               * message queues
-               */
-
-              saved_state = irqsave();
-              (void)sq_rem((FAR sq_entry_t*)msgq, &g_msgqueues);
-              irqrestore(saved_state);
-
-              /* Then deallocate it (and any messages left in it) */
-
-              mq_msgqfree(msgq);
-            }
-
-          /* If the message queue is still connected to a message descriptor,
-           * then mark it for deletion when the last message descriptor is
-           * closed
-           */
-
-          else
-            {
-              msgq->unlinked = true;
-            }
-
-          ret = OK;
-        }
-
-      sched_unlock();
+      errcode = ENOENT;
+      goto errout;
     }
 
-  return ret;
-}
+  /* Verify that what we found is, indeed, a message queue */
 
+  if (!INODE_IS_MQUEUE(inode))
+    {
+      errcode = ENXIO;
+      goto errout_with_inode;
+    }
+
+  /* Refuse to unlink the inode if it has children.  I.e., if it is
+   * functioning as a directory and the directory is not empty.
+   */
+
+  inode_semtake();
+  if (inode->i_child != NULL)
+    {
+      errcode = ENOTEMPTY;
+      goto errout_with_semaphore;
+    }
+
+  /* Remove the old inode from the tree.  Because we hold a reference count
+   * on the inode, it will not be deleted now.  This will set the
+   * FSNODEFLAG_DELETED bit in the inode flags.
+   */
+
+  ret = inode_remove(fullpath);
+
+  /* inode_remove() should always fail with -EBUSY because we hae a reference
+   * on the inode.  -EBUSY means taht the inode was, indeed, unlinked but
+   * thatis could not be freed because there are refrences.
+   */
+
+  DEBUGASSERT(ret >= 0 || ret == -EBUSY);
+  UNUSED(ret);
+
+  /* Now we do not release the reference count in the normal way (by calling
+   * inode release.  Rather, we call sem_close().  sem_close will decrement
+   * the reference count on the inode.  But it will also free the message queue
+   * if that reference count decrements to zero.  Since we hold one reference,
+   * that can only occur if the message queue is not in-use.
+   */
+
+  inode_semgive();
+  mq_release(inode);
+  return OK;
+
+errout_with_semaphore:
+  inode_semgive();
+errout_with_inode:
+  inode_release(inode);
+errout:
+  set_errno(errcode);
+  return ERROR;
+}

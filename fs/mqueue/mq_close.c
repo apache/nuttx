@@ -1,7 +1,7 @@
 /****************************************************************************
- *  sched/mqueue/mq_close.c
+ *  fs/mqueue/mq_close.c
  *
- *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -107,7 +107,7 @@ int mq_close(mqd_t mqdes)
   FAR struct tcb_s *rtcb = sched_self();
   FAR struct task_group_s *group = rtcb->group;
   FAR struct mqueue_inode_s *msgq;
-  struct inode *inode ;
+  FAR struct inode *inode;
 
   DEBUGASSERT(group);
 
@@ -128,11 +128,6 @@ int mq_close(mqd_t mqdes)
        msgq = mqdes->msgq;
        DEBUGASSERT(msgq && msgq->inode);
 
-       /* Get the inode from the message queue structure */
-
-       inode = msgq->inode;
-       DEBUGASSERT(inode->u.i_mqueue == msgq);
-
        /* Check if the calling task has a notification attached to
         * the message queue via this mqdes.
         */
@@ -147,40 +142,65 @@ int mq_close(mqd_t mqdes)
          }
 #endif
 
+       /* Get the inode from the message queue structure */
+
+       inode = msgq->inode;
+       DEBUGASSERT(inode->u.i_mqueue == msgq);
+
        /* Decrement the reference count on the inode */
 
-       inode_semtake();
-       if (inode->i_crefs > 0)
-         {
-           inode->i_crefs--;
-         }
-
-      /* If the message queue was previously unlinked and the reference
-       * count has decremented to zero, then release the message queue and
-       * delete the inode now.
-        */
-
-       if (inode->i_crefs <= 0 && (inode->i_flags & FSNODEFLAG_DELETED) != 0)
-         {
-           /* Free the message queue (and any messages left in it) */
-
-           mq_msgqfree(msgq);
-
-           /* Release and free the inode container */
-
-           inode_semgive();
-           inode_free(inode->i_child);
-           kmm_free(inode);
-           return OK;
-        }
-
-       /* Deallocate the message descriptor */
-
-       mq_desfree(mqdes);
-
-       sched_unlock();
-       inode_semgive();
+       mq_release(inode);
      }
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: mq_close
+ *
+ * Description:
+ *   Release a reference count on a message queue inode.
+ *
+ * Parameters:
+ *   inode - The message queue inode
+ *
+ * Return Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void mq_release(FAR struct inode *inode)
+{
+  /* Decrement the reference count on the inode */
+
+  inode_semtake();
+  if (inode->i_crefs > 0)
+    {
+      inode->i_crefs--;
+    }
+
+  /* If the message queue was previously unlinked and the reference count
+   * has decremented to zero, then release the message queue and delete
+   * the inode now.
+   */
+
+   if (inode->i_crefs <= 0 && (inode->i_flags & FSNODEFLAG_DELETED) != 0)
+     {
+       FAR struct mqueue_inode_s *msgq = inode->u.i_mqueue;
+       DEBUGASSERT(msgq);
+
+       /* Free the message queue (and any messages left in it) */
+
+       mq_msgqfree(msgq);
+       inode->u.i_mqueue = NULL;
+
+       /* Release and free the inode container */
+
+       inode_semgive();
+       inode_free(inode->i_child);
+       kmm_free(inode);
+       return;
+    }
+
+  inode_semgive();
 }

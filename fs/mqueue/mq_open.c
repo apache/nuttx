@@ -1,5 +1,5 @@
 /****************************************************************************
- *  sched/mqueue/mq_open.c
+ *  fs/mqueue/mq_open.c
  *
  *   Copyright (C) 2007-2009, 2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -64,11 +64,6 @@
 /****************************************************************************
  * Pre-procesor Definitions
  ****************************************************************************/
-/* Configuration ************************************************************/
-
-#ifndef CONFIG_FS_MQUEUE_MPATH
-#  define CONFIG_FS_MQUEUE_MPATH "/var/mqueue"
-#endif
 
 /****************************************************************************
  * Private Type Declarations
