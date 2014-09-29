@@ -8698,4 +8698,8 @@
 	  (2014-9-23).
 	* fs/semaphore: Create a build structure that will (eventually) support
 	  using the VFS to manage named semaphores (2014-9-23).
-
+	* configs/stm32f4discovery/include/board.h: STM32F4-Discovery: Fix some
+	  backward conditional compilation"(2104-9-29).
+	* nuttx/sched/init/os_start.c, semaphore/Make.defs, sem_initialize.c,
+	  and semaphore.h: Semaphore initialization is now only required if
+	  priority inheritance is enabled (2014-9-29).
