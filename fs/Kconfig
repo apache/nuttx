@@ -49,6 +49,8 @@ config FS_WRITABLE
 	default n
 
 source fs/semaphore/Kconfig
+source fs/mqueue/Kconfig
+source fs/shm/Kconfig
 source fs/mmap/Kconfig
 source fs/fat/Kconfig
 source fs/nfs/Kconfig
