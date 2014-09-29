@@ -183,7 +183,7 @@ ssize_t mq_timedreceive(mqd_t mqdes, void *msg, size_t msglen,
                         int *prio, const struct timespec *abstime)
 {
   FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
-  FAR mqmsg_t *mqmsg;
+  FAR struct mqueue_msg_s *mqmsg;
   irqstate_t saved_state;
   int ret = ERROR;
 

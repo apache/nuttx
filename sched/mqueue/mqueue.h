@@ -88,7 +88,7 @@ enum mqalloc_e
 
 /* This structure describes one buffered POSIX message. */
 
-struct mqmsg
+struct mqueue_msg_s
 {
   FAR struct mqmsg  *next;    /* Forward link to next message */
   uint8_t      type;          /* (Used to manage allocations) */
@@ -100,8 +100,6 @@ struct mqmsg
 #endif
   uint8_t      mail[MQ_MAX_BYTES]; /* Message data            */
 };
-
-typedef struct mqmsg mqmsg_t;
 
 /****************************************************************************
  * Global Variables
@@ -145,7 +143,7 @@ void mq_desblockalloc(void);
 
 mqd_t mq_descreate(FAR struct tcb_s* mtcb, FAR msgq_t* msgq, int oflags);
 FAR msgq_t  *mq_findnamed(const char *mq_name);
-void mq_msgfree(FAR mqmsg_t *mqmsg);
+void mq_msgfree(FAR struct mqueue_msg_s *mqmsg);
 void mq_msgqfree(FAR msgq_t *msgq);
 
 /* mq_waitirq.c ************************************************************/
@@ -155,15 +153,16 @@ void mq_waitirq(FAR struct tcb_s *wtcb, int errcode);
 /* mq_rcvinternal.c ********************************************************/
 
 int mq_verifyreceive(mqd_t mqdes, void *msg, size_t msglen);
-FAR mqmsg_t *mq_waitreceive(mqd_t mqdes);
-ssize_t mq_doreceive(mqd_t mqdes, mqmsg_t *mqmsg, void *ubuffer, int *prio);
+FAR struct mqueue_msg_s *mq_waitreceive(mqd_t mqdes);
+ssize_t mq_doreceive(mqd_t mqdes, struct mqueue_msg_s *mqmsg, void *ubuffer,
+                     int *prio);
 
 /* mq_sndinternal.c ********************************************************/
 
 int mq_verifysend(mqd_t mqdes, const void *msg, size_t msglen, int prio);
-FAR mqmsg_t *mq_msgalloc(void);
+FAR struct mqueue_msg_s *mq_msgalloc(void);
 int mq_waitsend(mqd_t mqdes);
-int mq_dosend(mqd_t mqdes, FAR mqmsg_t *mqmsg, const void *msg,
+int mq_dosend(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg, const void *msg,
               size_t msglen, int prio);
 
 /* mq_release.c ************************************************************/

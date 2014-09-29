@@ -154,11 +154,11 @@ int mq_verifyreceive(mqd_t mqdes, void *msg, size_t msglen)
  *
  ****************************************************************************/
 
-FAR mqmsg_t *mq_waitreceive(mqd_t mqdes)
+FAR struct mqueue_msg_s *mq_waitreceive(mqd_t mqdes)
 {
   FAR struct tcb_s *rtcb;
   FAR struct mqueue_inode_s *msgq;
-  FAR mqmsg_t *rcvmsg;
+  FAR struct mqueue_msg_s *rcvmsg;
 
   /* Get a pointer to the message queue */
 
@@ -166,7 +166,7 @@ FAR mqmsg_t *mq_waitreceive(mqd_t mqdes)
 
   /* Get the message from the head of the queue */
 
-  while ((rcvmsg = (FAR mqmsg_t*)sq_remfirst(&msgq->msglist)) == NULL)
+  while ((rcvmsg = (FAR struct mqueue_msg_s*)sq_remfirst(&msgq->msglist)) == NULL)
     {
       /* The queue is empty!  Should we block until there the above condition
        * has been satisfied?
@@ -245,7 +245,8 @@ FAR mqmsg_t *mq_waitreceive(mqd_t mqdes)
  *
  ****************************************************************************/
 
-ssize_t mq_doreceive(mqd_t mqdes, mqmsg_t *mqmsg, void *ubuffer, int *prio)
+ssize_t mq_doreceive(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
+                     FAR void *ubuffer, int *prio)
 {
   FAR struct tcb_s *btcb;
   irqstate_t saved_state;

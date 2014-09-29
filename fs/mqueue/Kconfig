@@ -4,4 +4,11 @@
 #
 
 if !DISABLE_MQUEUE
+
+config FS_MQUEUE_MPATH
+    string "Path to message queuee"
+    default "/var/mqueue"
+    ---help---
+        The path to where POSIX message queues will exist in the VFS namespace.
+    
 endif # !DISABLE_MQUEUE

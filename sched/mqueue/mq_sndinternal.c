@@ -160,10 +160,10 @@ int mq_verifysend(mqd_t mqdes, const void *msg, size_t msglen, int prio)
  *
  ****************************************************************************/
 
-FAR mqmsg_t *mq_msgalloc(void)
+FAR struct mqueue_msg_s *mq_msgalloc(void)
 {
-  FAR mqmsg_t *mqmsg;
-  irqstate_t   saved_state;
+  FAR struct mqueue_msg_s *mqmsg;
+  irqstate_t saved_state;
 
   /* If we were called from an interrupt handler, then try to get the message
    * from generally available list of messages. If this fails, then try the
@@ -174,12 +174,12 @@ FAR mqmsg_t *mq_msgalloc(void)
     {
       /* Try the general free list */
 
-      mqmsg = (FAR mqmsg_t*)sq_remfirst(&g_msgfree);
+      mqmsg = (FAR struct mqueue_msg_s*)sq_remfirst(&g_msgfree);
       if (!mqmsg)
         {
           /* Try the free list reserved for interrupt handlers */
 
-          mqmsg = (FAR mqmsg_t*)sq_remfirst(&g_msgfreeirq);
+          mqmsg = (FAR struct mqueue_msg_s*)sq_remfirst(&g_msgfreeirq);
         }
     }
 
@@ -192,14 +192,14 @@ FAR mqmsg_t *mq_msgalloc(void)
        */
 
       saved_state = irqsave();
-      mqmsg = (FAR mqmsg_t*)sq_remfirst(&g_msgfree);
+      mqmsg = (FAR struct mqueue_msg_s*)sq_remfirst(&g_msgfree);
       irqrestore(saved_state);
 
       /* If we cannot a message from the free list, then we will have to allocate one. */
 
       if (!mqmsg)
         {
-          mqmsg = (FAR mqmsg_t *)kmm_malloc((sizeof (mqmsg_t)));
+          mqmsg = (FAR struct mqueue_msg_s *)kmm_malloc((sizeof (struct mqueue_msg_s)));
 
           /* Check if we got an allocated message */
 
@@ -324,12 +324,13 @@ int mq_waitsend(mqd_t mqdes)
  *
  ****************************************************************************/
 
-int mq_dosend(mqd_t mqdes, FAR mqmsg_t *mqmsg, const void *msg, size_t msglen, int prio)
+int mq_dosend(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg, FAR const void *msg,
+              size_t msglen, int prio)
 {
   FAR struct tcb_s *btcb;
   FAR struct mqueue_inode_s *msgq;
-  FAR mqmsg_t *next;
-  FAR mqmsg_t *prev;
+  FAR struct mqueue_msg_s *next;
+  FAR struct mqueue_msg_s *prev;
   irqstate_t saved_state;
 
   /* Get a pointer to the message queue */
@@ -354,7 +355,7 @@ int mq_dosend(mqd_t mqdes, FAR mqmsg_t *mqmsg, const void *msg, size_t msglen, i
    * message. Each is list is maintained in ascending priority order.
    */
 
-  for (prev = NULL, next = (FAR mqmsg_t*)msgq->msglist.head;
+  for (prev = NULL, next = (FAR struct mqueue_msg_s*)msgq->msglist.head;
        next && prio <= next->priority;
        prev = next, next = next->next);
 

@@ -86,7 +86,7 @@
  *
  ************************************************************************/
 
-void mq_msgfree(FAR mqmsg_t *mqmsg)
+void mq_msgfree(FAR struct mqueue_msg_s *mqmsg)
 {
   irqstate_t saved_state;
 
