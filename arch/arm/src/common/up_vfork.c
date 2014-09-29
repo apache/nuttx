@@ -102,7 +102,7 @@
  *      - Allocation of the child task's TCB.
  *      - Initialization of file descriptors and streams
  *      - Configuration of environment variables
- *      - Setup the intput parameters for the task.
+ *      - Setup the input parameters for the task.
  *      - Initialization of the TCB (including call to up_initial_state()
  *   4) up_vfork() provides any additional operating context. up_vfork must:
  *      - Allocate and initialize the stack
@@ -113,7 +113,7 @@
  *
  * task_vforkabort() may be called if an error occurs between steps 3 and 6.
  *
- * Input Paremeters:
+ * Input Parameters:
  *   context - Caller context information saved by vfork()
  *
  * Return:
@@ -147,15 +147,15 @@ pid_t up_vfork(const struct vfork_s *context)
   child = task_vforksetup((start_t)(context->lr & ~1));
   if (!child)
     {
-      sdbg("task_vforksetup failed\n");
+      sdbg("ERROR: task_vforksetup failed\n");
       return (pid_t)ERROR;
     }
 
-  svdbg("Parent=%p Child=%p\n", parent, child);
+  svdbg("TCBs: Parent=%p Child=%p\n", parent, child);
 
   /* Get the size of the parent task's stack.  Due to alignment operations,
    * the adjusted stack size may be smaller than the stack size originally
-   * requrested.
+   * requested.
    */
 
   stacksize = parent->adj_stack_size + CONFIG_STACK_ALIGNMENT - 1;
@@ -166,7 +166,7 @@ pid_t up_vfork(const struct vfork_s *context)
                         parent->flags & TCB_FLAG_TTYPE_MASK);
   if (ret != OK)
     {
-      sdbg("up_create_stack failed: %d\n", ret);
+      sdbg("ERROR: up_create_stack failed: %d\n", ret);
       task_vforkabort(child, -ret);
       return (pid_t)ERROR;
     }
@@ -180,9 +180,9 @@ pid_t up_vfork(const struct vfork_s *context)
   DEBUGASSERT((uint32_t)parent->adj_stack_ptr > context->sp);
   stackutil = (uint32_t)parent->adj_stack_ptr - context->sp;
 
-  svdbg("stacksize:%d stackutil:%d\n", stacksize, stackutil);
+  svdbg("Parent: stacksize:%d stackutil:%d\n", stacksize, stackutil);
 
-  /* Make some feeble effort to perserve the stack contents.  This is
+  /* Make some feeble effort to preserve the stack contents.  This is
    * feeble because the stack surely contains invalid pointers and other
    * content that will not work in the child context.  However, if the
    * user follows all of the caveats of vfork() usage, even this feeble
@@ -205,9 +205,9 @@ pid_t up_vfork(const struct vfork_s *context)
       newfp = context->fp;
     }
 
-  svdbg("Old stack base:%08x SP:%08x FP:%08x\n",
+  svdbg("Parent: stack base:%08x SP:%08x FP:%08x\n",
         parent->adj_stack_ptr, context->sp, context->fp);
-  svdbg("New stack base:%08x SP:%08x FP:%08x\n",
+  svdbg("Child:  stack base:%08x SP:%08x FP:%08x\n",
         child->cmn.adj_stack_ptr, newsp, newfp);
 
  /* Update the stack pointer, frame pointer, and volatile registers.  When
