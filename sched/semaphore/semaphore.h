@@ -75,8 +75,15 @@ extern "C"
 
 /* Common semaphore logic */
 
-void weak_function sem_initialize(void);
+#ifdef CONFIG_PRIORITY_INHERITANCE
+void sem_initialize(void);
+#else
+#  define sem_initialize()
+#endif
+
+#ifndef CONFIG_DISABLE_SIGNALS
 void sem_waitirq(FAR struct tcb_s *wtcb, int errcode);
+#endif
 
 /* Special logic needed only by priority inheritance to manage collections of
  * holders of semaphores.

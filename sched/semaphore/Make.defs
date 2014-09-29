@@ -33,15 +33,15 @@
 #
 ############################################################################
 
-SEM_SRCS  = sem_initialize.c sem_destroy.c sem_wait.c sem_trywait.c
-SEM_SRCS += sem_timedwait.c sem_post.c
+SEM_SRCS  = sem_destroy.c sem_wait.c sem_trywait.c sem_timedwait.c
+SEM_SRCS += sem_post.c
 
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
 SEM_SRCS += sem_waitirq.c
 endif
 
 ifeq ($(CONFIG_PRIORITY_INHERITANCE),y)
-SEM_SRCS += sem_holder.c
+SEM_SRCS += sem_initialize.c sem_holder.c
 endif
 
 # Include semaphore build support

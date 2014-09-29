@@ -334,17 +334,11 @@ void os_start(void)
   up_initial_state(&g_idletcb.cmn);
 
   /* Initialize RTOS facilities *********************************************/
-  /* Initialize the semaphore facility(if in link).  This has to be done
-   * very early because many subsystems depend upon fully functional
-   * semaphores.
+  /* Initialize the semaphore facility.  This has to be done very early
+   * because many subsystems depend upon fully functional semaphores.
    */
 
-#ifdef CONFIG_HAVE_WEAKFUNCTIONS
-  if (sem_initialize != NULL)
-#endif
-    {
-      sem_initialize();
-    }
+  sem_initialize();
 
   /* Initialize the memory manager */
 
