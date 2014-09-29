@@ -116,6 +116,10 @@
 #endif
 
 /* Task Management Definitions **************************************************/
+/* Special task IDS.  Any negative PID is invalid. */
+
+#define NULL_TASK_PROCESS_ID      (pid_t)0
+#define INVALID_PROCESS_ID        (pid_t)-1
 
 /* This is the maximum number of times that a lock can be set */
 

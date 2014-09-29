@@ -44,6 +44,8 @@
 #include <sched.h>
 #include <errno.h>
 
+#include <nuttx/sched.h>
+
 #include "sched/sched.h"
 #include "mqueue/mqueue.h"
 

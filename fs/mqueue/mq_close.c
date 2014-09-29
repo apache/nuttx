@@ -39,11 +39,15 @@
 
 #include <nuttx/config.h>
 
-#include <mqueue.h>
 #include <sched.h>
+#include <mqueue.h>
 #include <assert.h>
 
-#include "sched/sched.h"
+#include <nuttx/kmalloc.h>
+#include <nuttx/sched.h>
+#include <nuttx/mqueue.h>
+
+#include "inode/inode.h"
 #include "mqueue/mqueue.h"
 
 /****************************************************************************
@@ -65,19 +69,6 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: mq_desfree
- *
- * Description:
- *   Deallocate a message queue descriptor but returning it to the free list
- *
- * Inputs:
- *   mqdes - message queue descriptor to free
- *
- ****************************************************************************/
-
-#define mq_desfree(mqdes) sq_addlast((FAR sq_entry_t*)mqdes, &g_desfree)
 
 /****************************************************************************
  * Public Functions
@@ -113,11 +104,10 @@
 
 int mq_close(mqd_t mqdes)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
+  FAR struct tcb_s *rtcb = sched_self();
   FAR struct task_group_s *group = rtcb->group;
   FAR struct mqueue_inode_s *msgq;
-  irqstate_t saved_state;
-  int ret = ERROR;
+  struct inode *inode ;
 
   DEBUGASSERT(group);
 
@@ -136,6 +126,12 @@ int mq_close(mqd_t mqdes)
        /* Find the message queue associated with the message descriptor */
 
        msgq = mqdes->msgq;
+       DEBUGASSERT(msgq && msgq->inode);
+
+       /* Get the inode from the message queue structure */
+
+       inode = msgq->inode;
+       DEBUGASSERT(inode->u.i_mqueue == msgq);
 
        /* Check if the calling task has a notification attached to
         * the message queue via this mqdes.
@@ -151,41 +147,40 @@ int mq_close(mqd_t mqdes)
          }
 #endif
 
-       /* Decrement the connection count on the message queue. */
+       /* Decrement the reference count on the inode */
 
-       if (msgq->nconnect)
+       inode_semtake();
+       if (inode->i_crefs > 0)
          {
-           msgq->nconnect--;
+           inode->i_crefs--;
          }
 
-       /* If it is no longer connected to any message descriptor and if the
-        * message queue has already been unlinked, then we can discard the
-        * message queue.
+      /* If the message queue was previously unlinked and the reference
+       * count has decremented to zero, then release the message queue and
+       * delete the inode now.
         */
 
-       if (!msgq->nconnect && msgq->unlinked)
+       if (inode->i_crefs <= 0 && (inode->i_flags & FSNODEFLAG_DELETED) != 0)
          {
-           /* Remove the message queue from the list of all
-            * message queues
-            */
-
-           saved_state = irqsave();
-           (void)sq_rem((FAR sq_entry_t*)msgq, &g_msgqueues);
-           irqrestore(saved_state);
-
-           /* Then deallocate it (and any messages left in it) */
+           /* Free the message queue (and any messages left in it) */
 
            mq_msgqfree(msgq);
-         }
+
+           /* Release and free the inode container */
+
+           inode_semgive();
+           inode_free(inode->i_child);
+           kmm_free(inode);
+           return OK;
+        }
 
        /* Deallocate the message descriptor */
 
        mq_desfree(mqdes);
 
        sched_unlock();
-       ret = OK;
+       inode_semgive();
      }
 
-   return ret;
+  return OK;
 }
-

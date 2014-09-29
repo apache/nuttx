@@ -117,7 +117,7 @@ int sem_close(FAR sem_t *sem)
   /* Decrement the reference count on the inode */
 
   inode_semtake();
-  if (inode->i_crefs)
+  if (inode->i_crefs > 0)
     {
       inode->i_crefs--;
     }

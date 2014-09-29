@@ -37,25 +37,25 @@
  * Included Files
  ****************************************************************************/
 
-#include  <nuttx/config.h>
+#include <nuttx/config.h>
 
-#include  <sys/types.h>
-#include  <stdint.h>
-#include  <fcntl.h>
-#include  <mqueue.h>
-#include  <string.h>
-#include  <errno.h>
-#include  <sched.h>
-#include  <debug.h>
+#include <sys/types.h>
+#include <stdint.h>
+#include <fcntl.h>
+#include <mqueue.h>
+#include <string.h>
+#include <errno.h>
+#include <sched.h>
+#include <debug.h>
 
-#include  <nuttx/kmalloc.h>
-#include  <nuttx/arch.h>
-
-#include  "sched/sched.h"
+#include <nuttx/kmalloc.h>
+#include <nuttx/arch.h>
+#include <nuttx/sched.h>
+#include "sched/sched.h"
 #ifndef CONFIG_DISABLE_SIGNALS
 # include "signal/signal.h"
 #endif
-#include  "mqueue/mqueue.h"
+#include "mqueue/mqueue.h"
 
 /****************************************************************************
  * Definitions

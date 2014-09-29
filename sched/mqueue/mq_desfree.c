@@ -1,7 +1,7 @@
 /****************************************************************************
- * include/nuttx/semaphore.h
+ *  sched/mqueue/mq_desfree.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,63 +33,50 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_SEMAPHORE_H
-#define __INCLUDE_NUTTX_SEMAPHORE_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <semaphore.h>
+#include <queue.h>
 
-#include <nuttx/fs/fs.h>
+#include <nuttx/mqueue.h>
+
+#include "mqueue/mqueue.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Private Type Declarations
  ****************************************************************************/
-
-#ifdef CONFIG_FS_NAMED_SEMAPHORES
-/* This is the named semaphore inode */
-
-struct inode;
-struct nsem_inode_s
-{
-  /* Inode payload unique to named semaphores */
-
-  FAR struct inode *ns_inode;       /* Containing inode */
-  sem_t ns_sem;                     /* The semaphore */
-
-};
-#endif
 
 /****************************************************************************
- * Public Data
+ * Public Variables
  ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
 
 /****************************************************************************
- * Public Function Prototypes
+ * Private Variables
  ****************************************************************************/
 
-#undef EXTERN
-#ifdef __cplusplus
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: mq_desfree
+ *
+ * Description:
+ *   Deallocate a message queue descriptor but returning it to the free list
+ *
+ * Inputs:
+ *   mqdes - message queue descriptor to free
+ *
+ ****************************************************************************/
+
+void mq_desfree(mqd_t mqdes)
+{
+  sq_addlast((FAR sq_entry_t*)mqdes, &g_desfree);
 }
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif /* __INCLUDE_NUTTX_SEMAPHORE_H */

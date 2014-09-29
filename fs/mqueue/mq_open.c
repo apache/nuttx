@@ -234,9 +234,10 @@ mqd_t mq_open(const char *mq_name, int oflags, ...)
                goto errout_with_msgq;
              }
 
-          /* Save the message queue in the inode structure */
+          /* Bind the message queue and the inode structure */
 
           inode->u.i_mqueue = msgq;
+          msgq->inode       = inode;
         }
     }
 
