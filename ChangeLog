@@ -8711,3 +8711,7 @@
 	  the stack, the way that arguments are passed from parent to child in
 	  vfork() must change.  This bug has always been present, but was not
 	  visible with the old strdup() way of passing arguments (2014-9-29).
+	* arch/arm/src/common/up_vfork.c: Another vfork() problem: If we get to
+	  vfork() via system call, then we need to clone some system call
+	  information so that the return form the cloned system call works
+	  correctly (2014-9-29).
