@@ -108,13 +108,13 @@
  *        messages that may be placed in the message queue.
  *
  * Return Value:
- *   A message queue descriptor or -1 (ERROR)
+ *   A message queue descriptor or (mqd_t)-1 (ERROR)
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-mqd_t mq_open(const char *mq_name, int oflags, ...)
+mqd_t mq_open(FAR const char *mq_name, int oflags, ...)
 {
   FAR struct inode *inode;
   FAR const char *relpath = NULL;
@@ -129,116 +129,119 @@ mqd_t mq_open(const char *mq_name, int oflags, ...)
 
   /* Make sure that a non-NULL name is supplied */
 
-  if (mq_name)
+  if (!mq_name)
     {
-      /* Make sure that the check for the existence of the message queue
-       * and the creation of the message queue are atomic with respect to
-       * other processes executing mq_open().  A simple sched_lock() should
-       * be sufficientt.
-       */
-
-      sched_lock();
-
-      /* Get the full path to the message queue */
-
-      snprintf(fullpath, MAX_MQUEUE_PATH, CONFIG_FS_MQUEUE_MPATH "/%s", mq_name);
-
-      /* Get the inode for this mqueue.  This should succeed if the message
-       * queue has already been created.
-       */
-
-      inode = inode_find(fullpath, &relpath);
-      if (inode)
-        {
-          /* It exists.  Verify that the inode is a message queue */
-
-          if (!INODE_IS_MQUEUE(inode))
-            {
-              errcode = ENXIO;
-              goto errout_with_inode;
-            }
-
-          /* It exists and is a message queue.  Check if the caller wanted to
-           * create a new mqueue with this name.
-           */
-
-          if ((oflags & (O_CREAT|O_EXCL)) == (O_CREAT|O_EXCL))
-            {
-              errcode = EEXIST;
-              goto errout_with_inode;
-            }
-
-          /* Create a message queue descriptor for the current thread */
-
-          msgq  = inode->u.i_mqueue;
-          mqdes = mq_descreate(NULL, msgq, oflags);
-          if (!mqdes)
-            {
-              errcode = ENOMEM;
-              goto errout_with_inode;
-            }
-        }
-      else
-        {
-          /* The mqueue does not exists.  Were we asked to create it? */
-
-          if ((oflags & O_CREAT) == 0)
-            {
-              /* The mqueue does not exist and O_CREAT is not set */
-
-              errcode = ENOENT;
-              goto errout_with_lock;
-            }
-
-         /* Create the mqueue.  First we have to extract the additional
-          * parameters from the variable argument list.
-          */
-
-          va_start(ap, oflags);
-          mode = va_arg(ap, mode_t);
-          attr = va_arg(ap, FAR struct mq_attr*);
-          va_end(ap);
-
-          /* Create an inode in the pseudo-filesystem at this path */
-
-          inode_semtake();
-          ret = inode_reserve(fullpath, &inode);
-          inode_semgive();
-
-          if (ret < 0)
-            {
-              errcode = -ret;
-              goto errout_with_lock;
-            }
-
-          /* Allocate memory for the new message queue. */
-
-          msgq = (FAR struct mqueue_inode_s*)mq_msgqalloc(mode, attr);
-          if (!msgq)
-            {
-              errcode = ENOMEM;
-              goto errout_with_inode;
-            }
-
-          /* Create a message queue descriptor for the TCB */
-
-           mqdes = mq_descreate(NULL, msgq, oflags);
-           if (!mqdes)
-             {
-               errcode = ENOMEM;
-               goto errout_with_msgq;
-             }
-
-          /* Bind the message queue and the inode structure */
-
-          INODE_SET_MQUEUE(inode);
-          inode->u.i_mqueue = msgq;
-          msgq->inode       = inode;
-        }
-
-      sched_unlock();
+      errcode = EINVAL;
+      goto errout;
     }
 
+  /* Get the full path to the message queue */
+
+  snprintf(fullpath, MAX_MQUEUE_PATH, CONFIG_FS_MQUEUE_MPATH "/%s", mq_name);
+
+  /* Make sure that the check for the existence of the message queue
+   * and the creation of the message queue are atomic with respect to
+   * other processes executing mq_open().  A simple sched_lock() should
+   * be sufficient.
+   */
+
+  sched_lock();
+
+  /* Get the inode for this mqueue.  This should succeed if the message
+   * queue has already been created.
+   */
+
+  inode = inode_find(fullpath, &relpath);
+  if (inode)
+    {
+      /* It exists.  Verify that the inode is a message queue */
+
+      if (!INODE_IS_MQUEUE(inode))
+        {
+          errcode = ENXIO;
+          goto errout_with_inode;
+        }
+
+      /* It exists and is a message queue.  Check if the caller wanted to
+       * create a new mqueue with this name.
+       */
+
+      if ((oflags & (O_CREAT|O_EXCL)) == (O_CREAT|O_EXCL))
+        {
+          errcode = EEXIST;
+          goto errout_with_inode;
+        }
+
+      /* Create a message queue descriptor for the current thread */
+
+      msgq  = inode->u.i_mqueue;
+      mqdes = mq_descreate(NULL, msgq, oflags);
+      if (!mqdes)
+        {
+          errcode = ENOMEM;
+          goto errout_with_inode;
+        }
+    }
+  else
+    {
+      /* The mqueue does not exists.  Were we asked to create it? */
+
+      if ((oflags & O_CREAT) == 0)
+        {
+          /* The mqueue does not exist and O_CREAT is not set */
+
+          errcode = ENOENT;
+          goto errout_with_lock;
+        }
+
+     /* Create the mqueue.  First we have to extract the additional
+      * parameters from the variable argument list.
+      */
+
+      va_start(ap, oflags);
+      mode = va_arg(ap, mode_t);
+      attr = va_arg(ap, FAR struct mq_attr*);
+      va_end(ap);
+
+      /* Create an inode in the pseudo-filesystem at this path */
+
+      inode_semtake();
+      ret = inode_reserve(fullpath, &inode);
+      inode_semgive();
+
+      if (ret < 0)
+        {
+          errcode = -ret;
+          goto errout_with_lock;
+        }
+
+      /* Allocate memory for the new message queue. */
+
+      msgq = (FAR struct mqueue_inode_s*)mq_msgqalloc(mode, attr);
+      if (!msgq)
+        {
+          errcode = ENOMEM;
+          goto errout_with_inode;
+        }
+
+      /* Create a message queue descriptor for the TCB */
+
+       mqdes = mq_descreate(NULL, msgq, oflags);
+       if (!mqdes)
+         {
+           errcode = ENOMEM;
+           goto errout_with_msgq;
+         }
+
+      /* Bind the message queue and the inode structure */
+
+      INODE_SET_MQUEUE(inode);
+      inode->u.i_mqueue = msgq;
+      msgq->inode       = inode;
+
+    }
+
+  sched_unlock();
   return mqdes;
 
 errout_with_msgq:
@@ -248,6 +251,7 @@ errout_with_inode:
   inode_release(inode);
 errout_with_lock:
   sched_unlock();
+errout:
   set_errno(errcode);
   return (mqd_t)ERROR;
 }
