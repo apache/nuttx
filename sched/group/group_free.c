@@ -44,6 +44,7 @@
 #include <nuttx/sched.h>
 #include <nuttx/kmalloc.h>
 
+#include "sched/sched.h"
 #include "group/group.h"
 
 #if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
