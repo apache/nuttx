@@ -152,6 +152,7 @@ int sem_unlink(FAR const char *name)
    */
 
   DEBUGASSERT(ret >= 0 || ret == -EBUSY);
+  UNUSED(ret);
 
   /* Now we do not release the reference count in the normal way (by calling
    * inode release.  Rather, we call sem_close().  sem_close will decrement
