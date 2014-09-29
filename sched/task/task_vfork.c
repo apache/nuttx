@@ -79,12 +79,12 @@
  ****************************************************************************/
 
 #if CONFIG_TASK_NAME_SIZE > 0
-static inline void vfork_namesetup(FAR struct task_tcb_s *parent,
+static inline void vfork_namesetup(FAR struct tcb_s *parent,
                                    FAR struct task_tcb_s *child)
 {
   /* Copy the name from the parent into the child TCB */
 
-  strncpy(child->cmn.name, parent->cmn.name, CONFIG_TASK_NAME_SIZE);
+  strncpy(child->cmn.name, parent->name, CONFIG_TASK_NAME_SIZE);
 }
 #else
 #  define vfork_namesetup(p,c)
@@ -106,27 +106,40 @@ static inline void vfork_namesetup(FAR struct task_tcb_s *parent,
  *
  ****************************************************************************/
 
-static inline void vfork_stackargsetup(FAR struct task_tcb_s *parent,
+static inline void vfork_stackargsetup(FAR struct tcb_s *parent,
                                        FAR struct task_tcb_s *child)
 {
-  uintptr_t offset;
-  int i;
+  /* Is the parent a task? or a pthread? */
 
-  /* Get the address correction */
-
-  offset = child->cmn.xcp.regs[REG_SP] - parent->cmn.xcp.regs[REG_SP];
-
-  /* Copy the adjusted address for each argument */
-
-  for (i = 0; i < CONFIG_MAX_TASK_ARGS && parent->argv[i]; i++)
+  child->argv = NULL;
+  if ((parent->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
     {
-      uintptr_t newaddr = (uintptr_t)parent->argv[i] + offset;
-      child->argv[i] = (FAR char *)newaddr;
+      FAR struct task_tcb_s *ptcb = (FAR struct task_tcb_s *)parent;
+      uintptr_t offset;
+      int i;
+
+      /* Get the address correction */
+
+      offset = child->cmn.xcp.regs[REG_SP] - parent->xcp.regs[REG_SP];
+
+      /* Change the child argv[] to point into its stack (instead of its
+       * parent's stack).
+       */
+
+      child->argv = (FAR char **)((uintptr_t)ptcb->argv + offset);
+
+      /* Copy the adjusted address for each argument */
+
+      for (i = 0; i < CONFIG_MAX_TASK_ARGS && ptcb->argv[i]; i++)
+        {
+          uintptr_t newaddr = (uintptr_t)ptcb->argv[i] + offset;
+          child->argv[i] = (FAR char *)newaddr;
+        }
+
+      /* Put a terminator entry at the end of the child argv[] array. */
+
+      child->argv[i] = NULL;
     }
-
-  /* Put a terminator entry at the end of the child argv[] array. */
-
-  child->argv[i] = NULL;
 }
 
 /****************************************************************************
@@ -144,7 +157,7 @@ static inline void vfork_stackargsetup(FAR struct task_tcb_s *parent,
  *
  ****************************************************************************/
 
-static inline void vfork_argsetup(FAR struct task_tcb_s *parent,
+static inline void vfork_argsetup(FAR struct tcb_s *parent,
                                   FAR struct task_tcb_s *child)
 {
   /* Clone the task name */
