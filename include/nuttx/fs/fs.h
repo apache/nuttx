@@ -52,6 +52,10 @@
 #  include <nuttx/semaphore.h>
 #endif
 
+#ifndef CONFIG_DISABLE_MQUEUE
+#  include <nuttx/mqueue.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -218,14 +222,18 @@ struct mountpt_operations
 
 union inode_ops_u
 {
-  FAR const struct file_operations      *i_ops;  /* Driver operations for inode */
+  FAR const struct file_operations      *i_ops;    /* Driver operations for inode */
 #ifndef CONFIG_DISABLE_MOUNTPOUNT
-  FAR const struct block_operations     *i_bops; /* Block driver operations */
-  FAR const struct mountpt_operations   *i_mops; /* Operations on a mountpoint */
+  FAR const struct block_operations     *i_bops;   /* Block driver operations */
+  FAR const struct mountpt_operations   *i_mops;   /* Operations on a mountpoint */
 #endif
 #ifdef CONFIG_FS_NAMED_SEMAPHORES
-  FAR struct nsem_inode_s               *i_nsem; /* Named semaphore */
+  FAR struct nsem_inode_s               *i_nsem;   /* Named semaphore */
 #endif
+#ifndef CONFIG_DISABLE_MQUEUE
+  FAR struct mqueue_inode_s             *i_mqueue; /* POSIX message queue */
+#endif
+
 };
 
 /* This structure represents one inode in the Nuttx pseudo-file system */

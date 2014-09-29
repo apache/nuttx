@@ -55,7 +55,7 @@
 #include "mqueue/mqueue.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-procesor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -63,7 +63,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Global Variables
+ * Public Variables
  ****************************************************************************/
 
 /****************************************************************************
@@ -112,9 +112,10 @@ mqd_t mq_open(const char *mq_name, int oflags, ...)
   FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
   FAR struct mqueue_inode_s *msgq;
   mqd_t mqdes = NULL;
-  va_list arg;                  /* Points to each un-named argument */
-  struct mq_attr *attr;         /* MQ creation attributes */
-  int namelen;                  /* Length of MQ name */
+  va_list arg;
+  struct mq_attr *attr;
+  mode_t mode;
+  int namelen;
 
   /* Make sure that a non-NULL name is supplied */
 
@@ -151,73 +152,28 @@ mqd_t mq_open(const char *mq_name, int oflags, ...)
 
           else if ((oflags & O_CREAT) != 0)
             {
+              /* Yes.. Get the optional arguments needed to create a message
+               * queue.
+               */
+
+              va_start(arg, oflags);
+              mode = va_arg(arg, mode_t);
+              attr = va_arg(arg, struct mq_attr*);
+
               /* Allocate memory for the new message queue.  The size to
                * allocate is the size of the struct mqueue_inode_s header
                * plus the size of the message queue name+1.
                */
 
-              msgq = (FAR struct mqueue_inode_s*)kmm_zalloc(SIZEOF_MQ_HEADER + namelen + 1);
+              msgq = (FAR struct mqueue_inode_s*)mq_msgqalloc(oflags, mode, attr);
               if (msgq)
                 {
-                  /* Create a message queue descriptor for the TCB */
-
-                  mqdes = mq_descreate(rtcb, msgq, oflags);
-                  if (mqdes)
-                    {
-                      /* Set up to get the optional arguments needed to create
-                       * a message queue.
-                       */
-
-                      va_start(arg, oflags);
-                      (void)va_arg(arg, mode_t); /* MQ creation mode parameter (ignored) */
-                      attr = va_arg(arg, struct mq_attr*);
-
-                      /* Initialize the new named message queue */
-
-                      sq_init(&msgq->msglist);
-                      if (attr)
-                        {
-                          msgq->maxmsgs = (int16_t)attr->mq_maxmsg;
-                          if (attr->mq_msgsize <= MQ_MAX_BYTES)
-                            {
-                              msgq->maxmsgsize = (int16_t)attr->mq_msgsize;
-                            }
-                          else
-                            {
-                              msgq->maxmsgsize = MQ_MAX_BYTES;
-                            }
-                        }
-                      else
-                        {
-                          msgq->maxmsgs = MQ_MAX_MSGS;
-                          msgq->maxmsgsize = MQ_MAX_BYTES;
-                        }
-
-                      msgq->nconnect = 1;
-#ifndef CONFIG_DISABLE_SIGNALS
-                      msgq->ntpid    = INVALID_PROCESS_ID;
-#endif
-                      strcpy(msgq->name, mq_name);
-
-                      /* Add the new message queue to the list of
-                       * message queues
-                       */
-
-                      sq_addlast((FAR sq_entry_t*)msgq, &g_msgqueues);
-
-                      /* Clean-up variable argument stuff */
-
-                      va_end(arg);
-                    }
-                  else
-                    {
-                      /* Deallocate the msgq structure.  Since it is
-                       * uninitialized, mq_deallocate() is not used.
-                       */
-
-                      sched_kfree(msgq);
-                    }
+#warning Missing logic
                 }
+
+              /* Clean-up variable argument stuff */
+
+              va_end(arg);
             }
         }
 

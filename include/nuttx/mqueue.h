@@ -84,8 +84,6 @@ struct mqueue_inode_s
 #endif
 };
 
-#define SIZEOF_MQ_HEADER ((int)(((struct mqueue_inode_s*)NULL)->name))
-
 /* This describes the message queue descriptor that is held in the
  * task's TCB
  */
@@ -107,10 +105,54 @@ struct mq_des
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
+
+/************************************************************************
+ * Name: mq_msgqfree
+ *
+ * Description:
+ *   This function deallocates an initialized message queue structure.
+ *   First, it deallocates all of the queued messages in the message
+ *   queue.  It is assumed that this message is fully unlinked and
+ *   closed so that no thread will attempt access it while it is being
+ *   deleted.
+ *
+ * Inputs:
+ *   msgq - Named essage queue to be freed
+ *
+ * Return Value:
+ *   None
+ *
+ ************************************************************************/
+
+void mq_msgqfree(FAR struct mqueue_inode_s *msgq);
+
+/****************************************************************************
+ * Name: mq_msgqalloc
+ *
+ * Description:
+ *   This function implements a part of the POSIX message queue open logic.
+ *   It allocates and initializes a structu mqueue_inode_s structure.
+ *
+ * Parameters:
+ *   oflags - open flags
+ *   mode   - mode_t value is ignored
+ *   attr   - The mq_maxmsg attribute is used at the time that the message
+ *            queue is created to determine the maximum number of
+ *             messages that may be placed in the message queue.
+ *
+ * Return Value:
+ *   The allocated and initalized message queue structure or NULL in the
+ *   event of a failure.
+ *
+ ****************************************************************************/
+
+FAR struct mqueue_inode_s *mq_msgqalloc(int oflags, mode_t mode,
+                                        FAR struct mq_attr *attr);
 
 #undef EXTERN
 #ifdef __cplusplus
