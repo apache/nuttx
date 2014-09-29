@@ -227,6 +227,26 @@ pid_t up_vfork(const struct vfork_s *context)
   child->cmn.xcp.regs[REG_FP]  = newfp;        /* Frame pointer */
   child->cmn.xcp.regs[REG_SP]  = newsp;        /* Stack pointer */
 
+#ifdef CONFIG_LIB_SYSCALL
+  /* If we got here via a syscall, then we are going to have to setup some
+   * syscall return information as well.
+   */
+
+  if (parent->xcp.nsyscalls > 0)
+    {
+      int index;
+      for (index = 0; index < parent->xcp.nsyscalls; index++)
+        {
+          child->cmn.xcp.syscall[index].sysreturn =
+            parent->xcp.syscall[index].sysreturn;
+          child->cmn.xcp.syscall[index].excreturn =
+            parent->xcp.syscall[index].excreturn;
+        }
+
+      child->cmn.xcp.nsyscalls = parent->xcp.nsyscalls;
+    }
+#endif
+
   /* And, finally, start the child task.  On a failure, task_vforkstart()
    * will discard the TCB by calling task_vforkabort().
    */
