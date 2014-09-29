@@ -85,7 +85,7 @@
  *
  ************************************************************************/
 
-void mq_msgqfree(FAR msgq_t *msgq)
+void mq_msgqfree(FAR struct mqueue_inode_s *msgq)
 {
   FAR mqmsg_t *curr;
   FAR mqmsg_t *next;

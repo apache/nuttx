@@ -115,7 +115,7 @@ int mq_close(mqd_t mqdes)
 {
   FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
   FAR struct task_group_s *group = rtcb->group;
-  FAR msgq_t *msgq;
+  FAR struct mqueue_inode_s *msgq;
   irqstate_t saved_state;
   int ret = ERROR;
 

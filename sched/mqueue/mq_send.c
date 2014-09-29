@@ -117,7 +117,7 @@
 
 int mq_send(mqd_t mqdes, const void *msg, size_t msglen, int prio)
 {
-  FAR msgq_t  *msgq;
+  FAR struct mqueue_inode_s  *msgq;
   FAR mqmsg_t *mqmsg = NULL;
   irqstate_t   saved_state;
   int          ret = ERROR;

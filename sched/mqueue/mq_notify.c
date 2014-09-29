@@ -127,7 +127,7 @@
 int mq_notify(mqd_t mqdes, const struct sigevent *notification)
 {
   struct tcb_s *rtcb;
-  msgq_t *msgq;
+  struct mqueue_inode_s *msgq;
   int errval;
 
   /* Was a valid message queue descriptor provided? */

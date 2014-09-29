@@ -92,7 +92,7 @@
 
 void mq_waitirq(FAR struct tcb_s *wtcb, int errcode)
 {
-  FAR msgq_t *msgq;
+  FAR struct mqueue_inode_s *msgq;
   irqstate_t saved_state;
 
   /* Disable interrupts.  This is necessary because an interrupt handler may

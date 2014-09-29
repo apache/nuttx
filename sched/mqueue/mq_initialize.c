@@ -65,10 +65,6 @@ struct mq_des_block_s
  * Global Variables
  ************************************************************************/
 
-/* This is a list of all opened message queues */
-
-sq_queue_t  g_msgqueues;
-
 /* The g_msgfree is a list of messages that are available for general
  * use.  The number of messages in this list is a system configuration
  * item.
@@ -171,10 +167,6 @@ static mqmsg_t *mq_msgblockalloc(sq_queue_t *queue, uint16_t nmsgs,
 
 void mq_initialize(void)
 {
-  /* Initialize the list of message queues */
-
-  sq_init(&g_msgqueues);
-
   /* Initialize the message free lists */
 
   sq_init(&g_msgfree);

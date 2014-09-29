@@ -240,7 +240,7 @@ FAR mqmsg_t *mq_msgalloc(void)
 int mq_waitsend(mqd_t mqdes)
 {
   FAR struct tcb_s *rtcb;
-  FAR msgq_t *msgq;
+  FAR struct mqueue_inode_s *msgq;
 
   /* Get a pointer to the message queue */
 
@@ -327,7 +327,7 @@ int mq_waitsend(mqd_t mqdes)
 int mq_dosend(mqd_t mqdes, FAR mqmsg_t *mqmsg, const void *msg, size_t msglen, int prio)
 {
   FAR struct tcb_s *btcb;
-  FAR msgq_t *msgq;
+  FAR struct mqueue_inode_s *msgq;
   FAR mqmsg_t *next;
   FAR mqmsg_t *prev;
   irqstate_t saved_state;

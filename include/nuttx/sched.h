@@ -224,10 +224,6 @@ typedef CODE void (*atexitfunc_t)(void);
 typedef CODE void (*onexitfunc_t)(int exitcode, FAR void *arg);
 #endif
 
-/* POSIX Message queue */
-
-typedef struct msgq_s msgq_t;
-
 /* struct child_status_s *********************************************************/
 /* This structure is used to maintin information about child tasks.
  * pthreads work differently, they have join information.  This is
@@ -523,7 +519,7 @@ struct tcb_s
   /* POSIX Named Message Queue Fields *******************************************/
 
 #ifndef CONFIG_DISABLE_MQUEUE
-  FAR msgq_t *msgwaitq;                  /* Waiting for this message queue      */
+  FAR struct mqueue_inode_s *msgwaitq;   /* Waiting for this message queue      */
 #endif
 
   /* Library related fields *****************************************************/

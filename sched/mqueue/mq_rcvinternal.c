@@ -157,7 +157,7 @@ int mq_verifyreceive(mqd_t mqdes, void *msg, size_t msglen)
 FAR mqmsg_t *mq_waitreceive(mqd_t mqdes)
 {
   FAR struct tcb_s *rtcb;
-  FAR msgq_t *msgq;
+  FAR struct mqueue_inode_s *msgq;
   FAR mqmsg_t *rcvmsg;
 
   /* Get a pointer to the message queue */
@@ -249,7 +249,7 @@ ssize_t mq_doreceive(mqd_t mqdes, mqmsg_t *mqmsg, void *ubuffer, int *prio)
 {
   FAR struct tcb_s *btcb;
   irqstate_t saved_state;
-  FAR msgq_t *msgq;
+  FAR struct mqueue_inode_s *msgq;
   ssize_t rcvmsglen;
 
   /* Get the length of the message (also the return value) */

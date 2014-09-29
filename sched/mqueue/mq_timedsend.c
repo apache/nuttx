@@ -184,7 +184,7 @@ int mq_timedsend(mqd_t mqdes, const char *msg, size_t msglen, int prio,
                  const struct timespec *abstime)
 {
   FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_readytorun.head;
-  FAR msgq_t *msgq;
+  FAR struct mqueue_inode_s *msgq;
   FAR mqmsg_t *mqmsg = NULL;
   irqstate_t saved_state;
   int ret = ERROR;

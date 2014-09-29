@@ -56,7 +56,7 @@
 #if CONFIG_MQ_MAXMSGSIZE > 0
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define MQ_MAX_BYTES   CONFIG_MQ_MAXMSGSIZE
@@ -86,8 +86,6 @@ enum mqalloc_e
   MQ_ALLOC_IRQ         /* Preallocated, reserved for interrupt handling */
 };
 
-typedef enum mqalloc_e mqalloc_t;
-
 /* This structure describes one buffered POSIX message. */
 
 struct mqmsg
@@ -116,10 +114,6 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
-
-/* This is a list of all opened message queues */
-
-EXTERN sq_queue_t  g_msgqueues;
 
 /* The g_msgfree is a list of messages that are available for general use.
  * The number of messages in this list is a system configuration item.

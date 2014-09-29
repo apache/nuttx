@@ -90,9 +90,9 @@
 
 int mq_unlink(const char *mq_name)
 {
-  FAR msgq_t *msgq;
-  irqstate_t  saved_state;
-  int         ret = ERROR;
+  FAR struct mqueue_inode_s *msgq;
+  irqstate_t saved_state;
+  int ret = ERROR;
 
   /* Verify the input values */
 

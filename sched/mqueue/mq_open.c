@@ -110,7 +110,7 @@
 mqd_t mq_open(const char *mq_name, int oflags, ...)
 {
   FAR struct tcb_s *rtcb = (FAR struct tcb_s*)g_readytorun.head;
-  FAR msgq_t *msgq;
+  FAR struct mqueue_inode_s *msgq;
   mqd_t mqdes = NULL;
   va_list arg;                  /* Points to each un-named argument */
   struct mq_attr *attr;         /* MQ creation attributes */
@@ -152,11 +152,11 @@ mqd_t mq_open(const char *mq_name, int oflags, ...)
           else if ((oflags & O_CREAT) != 0)
             {
               /* Allocate memory for the new message queue.  The size to
-               * allocate is the size of the msgq_t header plus the size
-               * of the message queue name+1.
+               * allocate is the size of the struct mqueue_inode_s header
+               * plus the size of the message queue name+1.
                */
 
-              msgq = (FAR msgq_t*)kmm_zalloc(SIZEOF_MQ_HEADER + namelen + 1);
+              msgq = (FAR struct mqueue_inode_s*)kmm_zalloc(SIZEOF_MQ_HEADER + namelen + 1);
               if (msgq)
                 {
                   /* Create a message queue descriptor for the TCB */
