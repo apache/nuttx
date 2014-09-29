@@ -1,0 +1,22 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+config FS_SHM
+	bool "Shared memory support"
+	default n
+	depends on MM_SHM && EXPERIMENTAL
+	---help---
+		Include support for shm_open() and shm_close.
+
+if FS_SHM
+
+config FS_SHMPATH
+	string "Path to shared memory object storage"
+	default "/var/shm"
+	---help---
+		The path to where shared memory objects will exist in the VFS
+		namespace.
+    
+endif # FS_SHM
