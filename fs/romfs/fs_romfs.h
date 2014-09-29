@@ -49,7 +49,7 @@
 
 #include <nuttx/fs/dirent.h>
 
-#include "../fs.h"
+#include "inode/inode.h"
 
 /****************************************************************************
  * Pre-processor Definitions
