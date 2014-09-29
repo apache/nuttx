@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated September 25, 2014)
+NuttX TODO List (Last updated September 29, 2014)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -18,7 +18,7 @@ nuttx/
  (13)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
  (10)  Libraries (libc/, )
- (12)  File system/Generic drivers (fs/, drivers/)
+ (11)  File system/Generic drivers (fs/, drivers/)
   (6)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
@@ -1122,14 +1122,6 @@ o File system / Generic drivers (fs/, drivers/)
                may be an assertion that is occurring before we have a console.
   Status:      Open
   Priority:    Medium
-
-  Title :      USE VFS TO MANAGE NAMED MESSAGE QUEUES AND NAMED SEMAPHORES
-  Description: Currently redundant namespace management logic is use for named
-               message queues and semaphores.  Named semaphore management should
-               be consolidated in the VFS.  Perhaps in /ipc/mqueue and /ipc/sem.
-  Status:      Open
-  Priority:    Low.  Nothing is broken.  This is an enhancement that would
-               improve the OS design and possibly reduce some FLASH usage
 
   Title:       UNIFIED DESCRIPTOR REPRESENTATION
   Descripton:  There are two separate ranges of descriptors for file and
