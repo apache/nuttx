@@ -76,7 +76,7 @@
 #define NUM_INTERRUPT_MSGS   8
 
 /****************************************************************************
- * Global Type Declarations
+ * Public Type Definitions
  ****************************************************************************/
 
 enum mqalloc_e
@@ -102,7 +102,7 @@ struct mqueue_msg_s
 };
 
 /****************************************************************************
- * Global Variables
+ * Public Variables
  ****************************************************************************/
 
 #ifdef __cplusplus
@@ -133,7 +133,7 @@ EXTERN sq_queue_t  g_msgfreeirq;
 EXTERN sq_queue_t  g_desfree;
 
 /****************************************************************************
- * Global Function Prototypes
+ * Public Function Prototypes
  ****************************************************************************/
 
 /* Functions defined in mq_initialize.c ************************************/
