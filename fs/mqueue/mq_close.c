@@ -106,8 +106,6 @@ int mq_close(mqd_t mqdes)
   FAR struct mqueue_inode_s *msgq;
   FAR struct inode *inode;
 
-  DEBUGASSERT(group);
-
   /* Verify the inputs */
 
    if (mqdes)
