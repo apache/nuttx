@@ -47,7 +47,7 @@
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/syslog/ramlog.h>
 
-#include "sim.h"
+#include "up_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions

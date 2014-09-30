@@ -39,7 +39,7 @@
 
 #include <semaphore.h>
 
-#include "sim.h"
+#include "up_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions

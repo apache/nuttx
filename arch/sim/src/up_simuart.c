@@ -46,7 +46,7 @@
  ****************************************************************************/
 
 /* Simulated console UART input buffer size */
-/* Must match the defintion in sim.h */
+/* Must match the defintion in up_internal.h */
 
 #define SIMUART_BUFSIZE 256
 

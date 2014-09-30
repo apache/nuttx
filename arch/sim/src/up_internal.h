@@ -1,7 +1,7 @@
 /**************************************************************************
- * arch/sim/src/sim.h
+ * arch/sim/src/up_internal.h
  *
- *   Copyright (C) 2007, 2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011-2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  **************************************************************************/
 
-#ifndef __ARCH_SIM_SRC_SIM_H
-#define __ARCH_SIM_SRC_SIM_H
+#ifndef __ARCH_SIM_SRC_UP_INTERNAL_H
+#define __ARCH_SIM_SRC_UP_INTERNAL_H
 
 /**************************************************************************
  * Included Files
@@ -248,4 +248,4 @@ struct spi_dev_s *up_spiflashinitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_SIM_SRC_SIM_H */
+#endif /* __ARCH_SIM_SRC_UP_INTERNAL_H */

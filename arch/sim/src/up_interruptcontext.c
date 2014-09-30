@@ -41,7 +41,7 @@
 
 #include <stdbool.h>
 #include <nuttx/arch.h>
-#include "sim.h"
+#include "up_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
