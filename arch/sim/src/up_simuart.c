@@ -150,6 +150,14 @@ static void *simuart_thread(void *arg)
                 }
             }
 
+          /* REVISIT:  This is very weird and scary here.  When sched_unlock()
+           * is called, we may do a lonjmp() style context switch meaning
+           * that the logic will be run running on this thread! (but with a
+           * different stack).  So we do not get back here until the task
+           * sleeps again.  I can't help but believe that that is going to
+           * be a problem someday.
+           */
+
           sched_unlock();
         }
     }
