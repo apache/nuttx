@@ -37,7 +37,7 @@ ifneq ($(CONFIG_DISABLE_MQUEUE),y)
 
 MQUEUE_SRCS  = mq_send.c mq_timedsend.c mq_sndinternal.c mq_receive.c
 MQUEUE_SRCS += mq_timedreceive.c mq_rcvinternal.c mq_initialize.c
-MQUEUE_SRCS += mq_descreate.c mq_desfree.c mq_msgfree.c mq_msgqalloc.c
+MQUEUE_SRCS += mq_descreate.c mq_desclose.c mq_msgfree.c mq_msgqalloc.c
 MQUEUE_SRCS += mq_msgqfree.c mq_release.c mq_recover.c
 
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)

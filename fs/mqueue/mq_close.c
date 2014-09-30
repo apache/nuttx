@@ -44,7 +44,6 @@
 #include <assert.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/sched.h>
 #include <nuttx/mqueue.h>
 
 #include "inode/inode.h"
@@ -79,7 +78,7 @@
  *
  * Description:
  *   This function is used to indicate that the calling task is finished
- *   with the specified message queued mqdes.  The mq_close() deallocates
+ *   with the specified message queue mqdes.  The mq_close() deallocates
  *   any system resources allocated by the system for use by this task for
  *   its message queue.
  *
@@ -104,8 +103,6 @@
 
 int mq_close(mqd_t mqdes)
 {
-  FAR struct tcb_s *rtcb = sched_self();
-  FAR struct task_group_s *group = rtcb->group;
   FAR struct mqueue_inode_s *msgq;
   FAR struct inode *inode;
 
@@ -117,37 +114,21 @@ int mq_close(mqd_t mqdes)
      {
        sched_lock();
 
-       /* Remove the message descriptor from the current task's
-        * list of message descriptors.
-        */
-
-       sq_rem((FAR sq_entry_t*)mqdes, &group->tg_msgdesq);
-
        /* Find the message queue associated with the message descriptor */
 
        msgq = mqdes->msgq;
        DEBUGASSERT(msgq && msgq->inode);
 
-       /* Check if the calling task has a notification attached to
-        * the message queue via this mqdes.
-        */
+       /* Close/free the message descriptor */
 
-#ifndef CONFIG_DISABLE_SIGNALS
-       if (msgq->ntmqdes == mqdes)
-         {
-           msgq->ntpid   = INVALID_PROCESS_ID;
-           msgq->ntsigno = 0;
-           msgq->ntvalue.sival_int = 0;
-           msgq->ntmqdes = NULL;
-         }
-#endif
+       mq_desclose(mqdes);
 
        /* Get the inode from the message queue structure */
 
        inode = msgq->inode;
        DEBUGASSERT(inode->u.i_mqueue == msgq);
 
-       /* Decrement the reference count on the inode */
+       /* Decrement the reference count on the inode, possibly freeing it */
 
        mq_inode_release(inode);
        sched_unlock();

@@ -177,17 +177,24 @@ mqd_t mq_descreate(FAR struct tcb_s* mtcb, FAR struct mqueue_inode_s* msgq,
                    int oflags);
 
 /****************************************************************************
- * Name: mq_desfree
+ * Name: mq_desclose
  *
  * Description:
- *   Deallocate a message queue descriptor but returning it to the free list
+ *   This function performs the portion of the mq_close operation related
+ *   to freeing resource used by the message queue descriptor itself.
  *
- * Inputs:
- *   mqdes - message queue descriptor to free
+ * Parameters:
+ *   mqdes - Message queue descriptor.
+ *
+ * Return Value:
+ *   None
+ *
+ * Assumptions:
+ * - Called only from mq_close() with the scheduler locked.
  *
  ****************************************************************************/
 
-void mq_desfree(mqd_t mqdes);
+void mq_desclose(mqd_t mqdes);
 
 #undef EXTERN
 #ifdef __cplusplus
