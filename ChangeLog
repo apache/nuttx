@@ -8719,4 +8719,9 @@
 	  sched/mqueue to fs/mqueue.  Convert the logic so that it uses the VFS to
 	  managed the message queue namespace (instead of custom logic).  By
 	  default, now message queues can be seen in /var/mqueue (2014-9-29).
+	* arch/sim/src/up_simuart.c, up_uartwait.c:  Removed old, strange
+	  up_stdio.c and implemented a simulated UART driver to provide the
+	  console input.  Starts a separate, Linux domain pthread to read
+	  the console input in raw mode and provides the incoming data to
+	  NuttX via standard NuttX domain IPCs (2014-9-30).
 
