@@ -47,7 +47,7 @@
 #include <nuttx/arch.h>
 #include <arch/irq.h>
 
-#include "up_internal.h"
+#include "sim.h"
 
 /****************************************************************************
  * Pre-processor Macros

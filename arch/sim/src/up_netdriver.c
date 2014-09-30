@@ -56,10 +56,10 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/arp.h>
 
-#include "up_internal.h"
+#include "sim.h"
 
 /****************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define BUF ((struct ether_header*)g_sim_dev.d_buf)

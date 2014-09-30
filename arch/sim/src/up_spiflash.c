@@ -50,12 +50,12 @@
 #include <nuttx/arch.h>
 #include <nuttx/spi/spi.h>
 
-#include "up_internal.h"
+#include "sim.h"
 
 #if defined(CONFIG_SIM_SPIFLASH)
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 /* Configuration ********************************************************************/
 

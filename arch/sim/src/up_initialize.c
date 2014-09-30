@@ -1,5 +1,5 @@
 /****************************************************************************
- * up_initialize.c
+ * arch/sim/src/up_initialize.c
  *
  *   Copyright (C) 2007-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -47,10 +47,10 @@
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/syslog/ramlog.h>
 
-#include "up_internal.h"
+#include "sim.h"
 
 /****************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
