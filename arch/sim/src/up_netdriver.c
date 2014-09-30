@@ -56,7 +56,7 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/arp.h>
 
-#include "sim.h"
+#include "up_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions

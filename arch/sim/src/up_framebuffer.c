@@ -45,7 +45,7 @@
 #include <debug.h>
 
 #include <nuttx/video/fb.h>
-#include "sim.h"
+#include "up_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -44,7 +44,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/power/pm.h>
 
-#include "sim.h"
+#include "up_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions

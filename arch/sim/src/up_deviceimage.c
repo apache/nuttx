@@ -50,7 +50,7 @@
 
 # include <nuttx/kmalloc.h>
 
-# include "sim.h"
+# include "up_internal.h"
 #endif
 
 /****************************************************************************
