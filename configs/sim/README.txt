@@ -12,7 +12,6 @@ Contents
     - 64-bit Issues
     - Compiler differences
     - Stack Size Issues
-    - Buffered I/O Issues
     - Networking Issues
     - X11 Issues
   o Configurations
@@ -152,13 +151,6 @@ steps for increasing the stack size in that case:
   vi builtin_list.h     # Edit this file and increase the stack size of the add-on
   rm .built *.o         # This will force the builtin apps logic to rebuild
 
-Buffered I/O Issues
--------------------
-The simulated serial driver has some odd behavior.  It will stall for a long time
-on reads when the C stdio buffers are being refilled. This only effects the behavior
-of things like fgetc().  Workaround: Set CONFIG_STDIO_BUFFER_SIZE=0, suppressing
-all C buffered I/O.
-
 Networking Issues
 -----------------
 I never did get networking to work on the sim target.  It tries to use the tap device
@@ -275,13 +267,13 @@ nettest
   NOTES:
 
   1. The NuttX network is not, however, functional on the Linux TAP
-    device yet.
+     device yet.
 
-    UPDATE:  The TAP device does apparently work according to a NuttX
-    user (provided that it is not used with NSH: NSH waits on readline()
-    for console input.  When it calls readline(), the whole system blocks
-    waiting from input from the host OS).  My failure to get the TAP
-    device working appears to have been a cockpit error.
+     UPDATE:  The TAP device does apparently work according to a NuttX
+     user (provided that it is not used with NSH: NSH waits on readline()
+     for console input.  When it calls readline(), the whole system blocks
+     waiting from input from the host OS).  My failure to get the TAP
+     device working appears to have been a cockpit error.
 
   2. As of NuttX-5.18, when built on Windows, this test does not try
      to use the TAP device (which is not available on Cygwin anyway),
@@ -544,6 +536,12 @@ nxwm
           }
 
         /* Clean up */
+
+     UPDATE:  I recently implemented a good UART simulation to driver
+     the serial console.  So I do not believe that problem exists and
+     I think that the above workaround should no longer be necessary.
+     However, I will leave the above text in place until I get then
+     oppotunity to verify that the new UART simulation fixes the problem.
 
 ostest
 
