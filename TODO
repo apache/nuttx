@@ -23,7 +23,7 @@ nuttx/
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
   (3)  Build system / Toolchains
-  (5)  Linux/Cywgin simulation (arch/sim)
+  (4)  Linux/Cywgin simulation (arch/sim)
   (4)  ARM (arch/arm/)
   (1)  ARM/C5471 (arch/arm/src/c5471/)
   (3)  ARM/DM320 (arch/arm/src/dm320/)
@@ -1299,15 +1299,6 @@ o Build system
 
 o Linux/Cywgin simulation (arch/sim)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-  Title:       SIMULATED SERIAL DRIVER
-  Description: The simulated serial driver has some odd behavior.  It
-               will stall for a long time on reads when the C stdio buffers are
-               being refilled. This only effects the behavior of things like
-               fgetc().  Workaround: Set CONFIG_STDIO_BUFFER_SIZE=0, suppressing
-               all C buffered I/O.
-  Status:      Open
-  Priority:    Low (because the simulator is only a test/development platform)
 
   Title:       SIMULATOR NETWORKING SUPPORT
   Description: I never did get networking to work on the sim Linux target.  On Linux,
