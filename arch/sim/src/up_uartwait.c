@@ -64,31 +64,30 @@ static sem_t g_uartavail;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uart_wait_initialize
+ * Name: simuart_initialize
  ****************************************************************************/
 
-void uart_wait_initialize(void)
+void simuart_initialize(void)
 {
   sem_init(&g_uartavail, 0, 0);
 }
 
 /****************************************************************************
- * Name: up_simuart_post
+ * Name: simuart_post
  ****************************************************************************/
 
-void up_simuart_post(void)
+void simuart_post(void)
 {
   sem_post(&g_uartavail);
 }
 
 /****************************************************************************
- * Name: up_simuart_wait
+ * Name: simuart_wait
  ****************************************************************************/
 
-void up_simuart_wait(void)
+void simuart_wait(void)
 {
-  while (g_uarthead == g_uarttail)
-    {
-      (void)sem_wait(&g_uartavail);
-    }
+  /* Should only fail if interrupted by a signal */
+
+  while (sem_wait(&g_uartavail) < 0);
 }

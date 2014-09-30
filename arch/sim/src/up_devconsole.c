@@ -41,6 +41,7 @@
 
 #include <sys/types.h>
 #include <stdbool.h>
+#include <errno.h>
 
 #include <nuttx/fs/fs.h>
 
@@ -78,15 +79,59 @@ static const struct file_operations devconsole_fops =
  * Private Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: devconsole_read
+ ****************************************************************************/
+
 static ssize_t devconsole_read(struct file *filep, char *buffer, size_t len)
 {
-  return up_hostread(buffer, len);
+  size_t remaining = len;
+  int ch;
+
+  /* Loop until all requested bytes have been read.  No error checking */
+
+  for (remaining = len; remaining > 0; remaining--)
+    {
+      ch = simuart_getc();
+      if (ch < 0)
+        {
+          set_errno(EIO);
+          return ERROR;
+        }
+
+      *buffer++ = ch;
+    }
+
+  return len;
 }
+
+/****************************************************************************
+ * Name: devconsole_write
+ ****************************************************************************/
 
 static ssize_t devconsole_write(struct file *filep, const char *buffer, size_t len)
 {
-  return up_hostwrite(buffer, len);
+  int remaining;
+  int ret = OK;
+
+  for (remaining = len; remaining > 0 && ret >= 0; remaining--)
+    {
+      unsigned char ch = *buffer++;
+      ret = simuart_putc((int)ch);
+    }
+
+  if (ret < 0)
+    {
+      set_errno(EIO);
+      return ERROR;
+    }
+
+  return len;
 }
+
+/****************************************************************************
+ * Name: devconsole_poll
+ ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_POLL
 static int devconsole_poll(FAR struct file *filep, FAR struct pollfd *fds,
@@ -100,7 +145,23 @@ static int devconsole_poll(FAR struct file *filep, FAR struct pollfd *fds,
  * Public Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: up_devconsole
+ ****************************************************************************/
+
 void up_devconsole(void)
 {
   (void)register_driver("/dev/console", &devconsole_fops, 0666, NULL);
 }
+
+/****************************************************************************
+ * Name: up_putc
+ ****************************************************************************/
+
+int up_putc(int ch)
+{
+  /* Just map to the host simuart_putc routine */
+
+  return simuart_putc(ch);
+}
+

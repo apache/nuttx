@@ -1,5 +1,5 @@
 /**************************************************************************
- * sim.h
+ * arch/sim/src/sim.h
  *
  *   Copyright (C) 2007, 2009, 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -77,12 +77,6 @@
 #  endif
 #endif
 
-/* Simulated console UART input buffer size */
-
-#ifndef CONFIG_SIM_UART_BUFSIZE
-# define CONFIG_SIM_UART_BUFSIZE 256
-#endif
-
 /* Determine which device to use as the system logging device */
 
 #ifndef CONFIG_SYSLOG
@@ -150,12 +144,6 @@ extern volatile int g_eventloop;
 #endif
 #endif
 
-/* up_simuart.c ***********************************************************/
-
-extern char g_uartbuffer[CONFIG_SIM_UART_BUFSIZE];
-extern volatile int  g_uarthead;
-extern volatile int  g_uarttail;
-
 /**************************************************************************
  * Public Function Prototypes
  **************************************************************************/
@@ -178,22 +166,19 @@ void up_registerblockdevice(void);
 
 /* up_simuart.c ***********************************************************/
 
-void *up_simuart(void *arg);
+void simuart_start(void);
+int simuart_putc(int ch);
+int simuart_getc(void);
 
 /* up_uartwait.c **********************************************************/
 
-void uart_wait_initialize(void);
-void up_simuart_post(void);
-void up_simuart_wait(void);
+void simuart_initialize(void);
+void simuart_post(void);
+void simuart_wait(void);
 
 /* up_deviceimage.c *******************************************************/
 
 char *up_deviceimage(void);
-
-/* up_stdio.c *************************************************************/
-
-size_t up_hostread(void *buffer, size_t len);
-size_t up_hostwrite(const void *buffer, size_t len);
 
 /* up_netdev.c ************************************************************/
 
@@ -201,7 +186,7 @@ size_t up_hostwrite(const void *buffer, size_t len);
 unsigned long up_getwalltime( void );
 #endif
 
-/* up_x11framebuffer.c ******************************************************/
+/* up_x11framebuffer.c ****************************************************/
 
 #ifdef CONFIG_SIM_X11FB
 int up_x11initialize(unsigned short width, unsigned short height,
@@ -214,13 +199,13 @@ int up_x11cmap(unsigned short first, unsigned short len,
 #endif
 #endif
 
-/* up_eventloop.c ***********************************************************/
+/* up_eventloop.c *********************************************************/
 
 #if defined(CONFIG_SIM_X11FB) && defined(CONFIG_SIM_TOUCHSCREEN)
 void up_x11events(void);
 #endif
 
-/* up_eventloop.c ***********************************************************/
+/* up_eventloop.c *********************************************************/
 
 #if defined(CONFIG_SIM_X11FB) && defined(CONFIG_SIM_TOUCHSCREEN)
 int up_buttonevent(int x, int y, int buttons);

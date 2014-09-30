@@ -46,7 +46,7 @@ CSRCS += up_unblocktask.c up_blocktask.c up_releasepending.c
 CSRCS += up_reprioritizertr.c up_exit.c up_schedulesigaction.c up_spiflash.c
 CSRCS += up_allocateheap.c up_devconsole.c up_uartwait.c
 
-HOSTSRCS = up_stdio.c up_hostusleep.c up_simuart.c
+HOSTSRCS = up_hostusleep.c up_simuart.c
 
 ifeq ($(CONFIG_SCHED_TICKLESS),y)
 CSRCS += up_tickless.c
@@ -100,9 +100,6 @@ OBJS = $(AOBJS) $(COBJS) $(HOSTOBJS)
 
 ifeq ($(CONFIG_SIM_X11FB),y)
   STDLIBS += -lX11 -lXext
-ifeq ($(CONFIG_SIM_TOUCHSCREEN),y)
-  STDLIBS += -lpthread
-endif
 endif
 
 EXTRA_LIBS ?=
@@ -113,6 +110,7 @@ STDLIBS += -lz
 endif
 
 STDLIBS += -lc
+STDLIBS += -lpthread
 
 # Determine which objects are required in the link.  The
 # up_head object normally draws in all that is needed, but
@@ -120,11 +118,11 @@ STDLIBS += -lc
 # are called only from the host OS-specific logic (HOSTOBJS)
 
 LINKOBJS = up_head$(OBJEXT)
-REQUIREDOBJS = $(LINKOBJS)
+REQUIREDOBJS = $(LINKOBJS) up_uartwait$(OBJEXT)
 
 ifeq ($(CONFIG_SIM_X11FB),y)
 ifeq ($(CONFIG_SIM_TOUCHSCREEN),y)
-  REQUIREDOBJS += up_touchscreen.o
+  REQUIREDOBJS += up_touchscreen$(OBJEXT)
 endif
 endif
 
