@@ -232,30 +232,37 @@ int simuart_getc(void)
   int index;
   int ch;
 
+  /* Locking the scheduler should eliminate the race conditions in the
+   * unlikely case of mutliple reading threads.
+   */
+
+  sched_lock();
   for (;;)
     {
       /* Wait for a byte to become available */
 
-      simuart_wait();
-
-      /* The UART buffer show be non-empty... check anyway */
-
-      if (g_uarthead != g_uarttail)
+      while (g_uarthead == g_uarttail)
         {
-          /* Take the next byte from the tail of the buffer */
-
-          index = g_uarttail;
-          ch    = (int)g_uartbuffer[index];
-
-          /* Increment the tai index (with wrapping) */
-
-          if (++index >= SIMUART_BUFSIZE)
-            {
-              index = 0;
-            }
-
-          g_uarttail = index;
-          return ch;
+          simuart_wait();
         }
+
+
+      /* The UART buffer is non-empty...  Take the next byte from the tail
+       * of the buffer.
+       */
+
+      index = g_uarttail;
+      ch    = (int)g_uartbuffer[index];
+
+      /* Increment the tai index (with wrapping) */
+
+      if (++index >= SIMUART_BUFSIZE)
+        {
+          index = 0;
+        }
+
+      g_uarttail = index;
+      sched_unlock();
+      return ch;
     }
 }
