@@ -41,8 +41,6 @@
 #include <termios.h>
 #include <pthread.h>
 
-#include "host.h"
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -59,6 +57,17 @@
 static char g_uartbuffer[SIMUART_BUFSIZE];
 static volatile int  g_uarthead;
 static volatile int  g_uarttail;
+
+/****************************************************************************
+ * NuttX Domain Public Function Prototypes
+ ****************************************************************************/
+
+void sched_lock(void);
+void sched_unlock(void);
+
+void simuart_initialize(void);
+void simuart_post(void);
+void simuart_wait(void);
 
 /****************************************************************************
  * Private Functions
@@ -91,10 +100,8 @@ static void *simuart_thread(void *arg)
 {
   unsigned char ch;
   ssize_t nread;
-
-  /* Put stdin into raw mode */
-
-  setrawmode();
+  int next;
+  int prev;
 
   /* Now loop, collecting a buffering data from stdin forever */
 
@@ -108,9 +115,12 @@ static void *simuart_thread(void *arg)
 
       if (nread == 1)
         {
+          sched_lock();
+
           /* Get the index to the next slot in the UART buffer */
 
-          int next = g_uarthead + 1;
+          prev = g_uarthead;
+          next = prev + 1;
           if (next >= SIMUART_BUFSIZE)
             {
               next = 0;
@@ -122,11 +132,15 @@ static void *simuart_thread(void *arg)
             {
               /* No.. Add the character to the UART buffer */
 
-              g_uartbuffer[g_uarthead] = ch;
+              g_uartbuffer[prev] = ch;
+
+              /* Update the head index (BEFORE posting) */
+
+              g_uarthead = next;
 
               /* Was the buffer previously empty? */
 
-              if (g_uarthead == g_uarttail)
+              if (prev == g_uarttail)
                 {
                   /* Yes.. signal any (NuttX) threads waiting for serial
                    * input.
@@ -134,11 +148,9 @@ static void *simuart_thread(void *arg)
 
                   simuart_post();
                 }
-
-              /* Update the head index */
-
-              g_uarthead = next;
             }
+
+          sched_unlock();
         }
     }
 
@@ -178,6 +190,10 @@ void simuart_start(void)
   /* Perform the NuttX domain initialization */
 
   simuart_initialize();
+
+  /* Put stdin into raw mode */
+
+  setrawmode();
 
   /* Start the simulated UART thread -- all default settings; no error
    * checking.
@@ -224,7 +240,7 @@ int simuart_getc(void)
 
       /* The UART buffer show be non-empty... check anyway */
 
-      if (g_uarthead == g_uarttail)
+      if (g_uarthead != g_uarttail)
         {
           /* Take the next byte from the tail of the buffer */
 
