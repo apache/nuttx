@@ -1,5 +1,5 @@
 /**************************************************************************
- * up_setjmp.S
+ * arch/sim/src/up_setjmp.S
  *
  *   Copyright (C) 2007, 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -37,10 +37,10 @@
  * Included Files
  **************************************************************************/
 
-#include "up_internal.h"
+#include "sim.h"
 
 /**************************************************************************
- * Pr-processor Definitions
+ * Pre-processor Definitions
  **************************************************************************/
 
 #ifdef __CYGWIN__

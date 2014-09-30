@@ -44,9 +44,9 @@ CSRCS  = up_initialize.c up_idle.c up_interruptcontext.c up_initialstate.c
 CSRCS += up_createstack.c up_usestack.c up_releasestack.c up_stackframe.c
 CSRCS += up_unblocktask.c up_blocktask.c up_releasepending.c
 CSRCS += up_reprioritizertr.c up_exit.c up_schedulesigaction.c up_spiflash.c
-CSRCS += up_allocateheap.c up_devconsole.c
+CSRCS += up_allocateheap.c up_devconsole.c up_uartwait.c
 
-HOSTSRCS = up_stdio.c up_hostusleep.c
+HOSTSRCS = up_stdio.c up_hostusleep.c up_simuart.c
 
 ifeq ($(CONFIG_SCHED_TICKLESS),y)
 CSRCS += up_tickless.c

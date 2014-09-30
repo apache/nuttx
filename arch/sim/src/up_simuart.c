@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/sim/src/up_tapdev.c
+ * arch/sim/src/up_hostusleep.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,23 +37,13 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
-#include <sys/time.h>
+#include <unistd.h>
+#include <termios.h>
+
+#include "sim.h"
 
 /****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef NULL
-#  define NULL (void*)0
-#endif
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -61,16 +51,103 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+char g_uartbuffer[CONFIG_SIM_UART_BUFSIZE];
+volatile int  g_uarthead;
+volatile int  g_uarttail;
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: setrawmode
+ ****************************************************************************/
+
+static void setrawmode(void)
+{
+  struct termios term;
+
+  (void)tcgetattr(0, &term);
+
+  term.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON);
+  term.c_oflag &= ~OPOST;
+  term.c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
+  term.c_cflag &= ~(CSIZE | PARENB);
+  term.c_cflag |= CS8;
+
+  (void)tcsetattr(0, TCSANOW, &term);
+}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-unsigned long up_getwalltime( void )
+/****************************************************************************
+ * Name: up_simuart
+ ****************************************************************************/
+
+void *up_simuart(void *arg)
 {
-  struct timeval tm;
-  (void)gettimeofday(&tm, NULL);
-  return tm.tv_sec*1000 + tm.tv_usec/1000;
+  unsigned char ch;
+  ssize_t nread;
+
+  /* This thread runs in the host domain */
+  /* Initialize the NuttX domain semaphore */
+
+  uart_wait_initialize();
+
+  /* Put stdin into raw mode */
+
+  setrawmode();
+
+  /* Now loop, collecting a buffering data from stdin forever */
+
+  for (;;)
+    {
+      /* Read one character from stdin */
+
+      nread = read(0, ch, 1);
+
+      /* Check for failures (but don't do anything) */
+
+      if (nread == 1)
+        {
+          /* Get the index to the next slot in the UART buffer */
+
+          int next = g_uarthead + 1;
+          if (next >= CONFIG_SIM_UART_BUFSIZE)
+            {
+              next = 0;
+            }
+
+          /* Would adding this character cause an overflow? */
+
+          if (next != g_uarttail)
+            {
+              /* No.. Add the character to the UART buffer */
+
+              g_uartbuffer[g_uarthead] = ch;
+
+              /* Was the buffer previously empty? */
+
+              if (g_uarthead == g_uarttail)
+                {
+                  /* Yes.. signal any (NuttX) threads waiting for serial
+                   * input.
+                   */
+
+                  up_simuart_post();
+                }
+
+              /* Update the head index */
+
+              g_uarthead = next;
+            }
+        }
+    }
+
+  return NULL;
 }

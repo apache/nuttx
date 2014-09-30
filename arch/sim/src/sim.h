@@ -1,5 +1,5 @@
 /**************************************************************************
- * up_internal.h
+ * sim.h
  *
  *   Copyright (C) 2007, 2009, 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  **************************************************************************/
 
-#ifndef __ARCH_UP_INTERNAL_H
-#define __ARCH_UP_INTERNAL_H
+#ifndef __ARCH_SIM_SRC_SIM_H
+#define __ARCH_SIM_SRC_SIM_H
 
 /**************************************************************************
  * Included Files
@@ -75,6 +75,12 @@
 #  else
 #    define USE_DEVCONSOLE 1
 #  endif
+#endif
+
+/* Simulated console UART input buffer size */
+
+#ifndef CONFIG_SIM_UART_BUFSIZE
+# define CONFIG_SIM_UART_BUFSIZE 256
 #endif
 
 /* Determine which device to use as the system logging device */
@@ -144,6 +150,12 @@ extern volatile int g_eventloop;
 #endif
 #endif
 
+/* up_simuart.c ***********************************************************/
+
+extern char g_uartbuffer[CONFIG_SIM_UART_BUFSIZE];
+extern volatile int  g_uarthead;
+extern volatile int  g_uarttail;
+
 /**************************************************************************
  * Public Function Prototypes
  **************************************************************************/
@@ -163,6 +175,16 @@ void up_timer_update(void);
 
 void up_devconsole(void);
 void up_registerblockdevice(void);
+
+/* up_simuart.c ***********************************************************/
+
+void *up_simuart(void *arg);
+
+/* up_uartwait.c **********************************************************/
+
+void uart_wait_initialize(void);
+void up_simuart_post(void);
+void up_simuart_wait(void);
 
 /* up_deviceimage.c *******************************************************/
 
@@ -241,4 +263,4 @@ struct spi_dev_s *up_spiflashinitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_UP_INTERNAL_H */
+#endif /* __ARCH_SIM_SRC_SIM_H */

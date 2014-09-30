@@ -1,5 +1,5 @@
 /****************************************************************************
- * up_releasestack.c
+ * arch/sim/src/up_releasestack.c
  *
  *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -44,10 +44,10 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 
-#include "up_internal.h"
+#include "sim.h"
 
 /****************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************

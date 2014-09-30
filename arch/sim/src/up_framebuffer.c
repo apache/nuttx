@@ -45,10 +45,10 @@
 #include <debug.h>
 
 #include <nuttx/video/fb.h>
-#include "up_internal.h"
+#include "sim.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #ifndef CONFIG_SIM_FBWIDTH

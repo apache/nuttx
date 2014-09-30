@@ -1,5 +1,5 @@
 /****************************************************************************
- * up_deviceimage.c
+ * arch/sim/src/up_deviceimage.c
  *
  *   Copyright (C) 2007, 2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -50,11 +50,11 @@
 
 # include <nuttx/kmalloc.h>
 
-# include "up_internal.h"
+# include "sim.h"
 #endif
 
 /****************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #ifdef VFAT_STANDALONE

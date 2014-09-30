@@ -1,5 +1,5 @@
 /****************************************************************************
- * up_tapdev.c
+ * arch/sim/src/up_tapdev.c
  *
  *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -65,7 +65,7 @@ extern int syslog(const char *format, ...);
 extern int netdriver_setmacaddr(unsigned char *macaddr);
 
 /****************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define TAPDEV_DEBUG    1

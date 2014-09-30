@@ -59,7 +59,7 @@
 
 #include <nuttx/input/touchscreen.h>
 
-#include "up_internal.h"
+#include "sim.h"
 
 /****************************************************************************
  * Pre-processor Definitions

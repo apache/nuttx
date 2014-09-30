@@ -1,5 +1,5 @@
 /****************************************************************************
- * up_blockdevice.c
+ * arch/sim/src/up_blockdevice.c
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,10 +46,10 @@
 
 #include <nuttx/fs/ramdisk.h>
 
-#include "up_internal.h"
+#include "sim.h"
 
 /****************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define NSECTORS            2048

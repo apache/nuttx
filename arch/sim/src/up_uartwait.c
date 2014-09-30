@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/sim/src/up_head.c
+ * arch/sim/src/up_uartwait.c
  *
- *   Copyright (C) 2007-2009, 2011-2113 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 20014Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,49 +37,58 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <semaphore.h>
 
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <setjmp.h>
-#include <assert.h>
+#include "sim.h"
 
-#include <nuttx/init.h>
-#include <nuttx/arch.h>
-#include <nuttx/power/pm.h>
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static jmp_buf sim_abort;
+static sem_t g_uartavail;
 
 /****************************************************************************
- * Global Functions
+ * Public Data
  ****************************************************************************/
 
-int main(int argc, char **argv, char **envp)
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: uart_wait_initialize
+ ****************************************************************************/
+
+void uart_wait_initialize(void)
 {
-  /* Power management should be initialized early in the (simulated) boot
-   * sequence.
-   */
-
-#ifdef CONFIG_PM
-  pm_initialize();
-#endif
-
-  /* Then start NuttX */
-
-  if (setjmp(sim_abort) == 0)
-    {
-      os_start();
-    }
-  return 0;
+  sem_init(&g_uartavail, 0, 0);
 }
 
-void up_assert(const uint8_t *filename, int line)
+/****************************************************************************
+ * Name: up_simuart_post
+ ****************************************************************************/
+
+void up_simuart_post(void)
 {
-  fprintf(stderr, "Assertion failed at file:%s line: %d\n", filename, line);
-  longjmp(sim_abort, 1);
+  sem_post(&g_uartavail);
+}
+
+/****************************************************************************
+ * Name: up_simuart_wait
+ ****************************************************************************/
+
+void up_simuart_wait(void)
+{
+  while (g_uarthead == g_uarttail)
+    {
+      (void)sem_wait(&g_uartavail);
+    }
 }
