@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/sim/src/up_hostusleep.c
+ * arch/sim/src/up_simuart.c
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,24 +39,26 @@
 
 #include <unistd.h>
 #include <termios.h>
+#include <pthread.h>
 
-#include "sim.h"
+#include "host.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Simulated console UART input buffer size */
+/* Must match the defintion in sim.h */
+
+#define SIMUART_BUFSIZE 256
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-char g_uartbuffer[CONFIG_SIM_UART_BUFSIZE];
-volatile int  g_uarthead;
-volatile int  g_uarttail;
+static char g_uartbuffer[SIMUART_BUFSIZE];
+static volatile int  g_uarthead;
+static volatile int  g_uarttail;
 
 /****************************************************************************
  * Private Functions
@@ -82,22 +84,13 @@ static void setrawmode(void)
 }
 
 /****************************************************************************
- * Public Functions
+ * Name: simuart_thread
  ****************************************************************************/
 
-/****************************************************************************
- * Name: up_simuart
- ****************************************************************************/
-
-void *up_simuart(void *arg)
+static void *simuart_thread(void *arg)
 {
   unsigned char ch;
   ssize_t nread;
-
-  /* This thread runs in the host domain */
-  /* Initialize the NuttX domain semaphore */
-
-  uart_wait_initialize();
 
   /* Put stdin into raw mode */
 
@@ -109,7 +102,7 @@ void *up_simuart(void *arg)
     {
       /* Read one character from stdin */
 
-      nread = read(0, ch, 1);
+      nread = read(0, &ch, 1);
 
       /* Check for failures (but don't do anything) */
 
@@ -118,7 +111,7 @@ void *up_simuart(void *arg)
           /* Get the index to the next slot in the UART buffer */
 
           int next = g_uarthead + 1;
-          if (next >= CONFIG_SIM_UART_BUFSIZE)
+          if (next >= SIMUART_BUFSIZE)
             {
               next = 0;
             }
@@ -139,7 +132,7 @@ void *up_simuart(void *arg)
                    * input.
                    */
 
-                  up_simuart_post();
+                  simuart_post();
                 }
 
               /* Update the head index */
@@ -150,4 +143,103 @@ void *up_simuart(void *arg)
     }
 
   return NULL;
+}
+
+/****************************************************************************
+ * Name: simuart_putraw
+ ****************************************************************************/
+
+int simuart_putraw(int ch)
+{
+  ssize_t nwritten;
+
+  nwritten = write(1, &ch, 1);
+  if (nwritten != 1)
+    {
+      return -1;
+    }
+
+  return ch;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: simuart_start
+ ****************************************************************************/
+
+void simuart_start(void)
+{
+  pthread_t tid;
+
+  /* This thread runs in the host domain */
+  /* Perform the NuttX domain initialization */
+
+  simuart_initialize();
+
+  /* Start the simulated UART thread -- all default settings; no error
+   * checking.
+   */
+
+  (void)pthread_create(&tid, NULL, simuart_thread, NULL);
+}
+
+/****************************************************************************
+ * Name: simuart_putc
+ ****************************************************************************/
+
+int simuart_putc(int ch)
+{
+  int ret = ch;
+
+  if (ch == '\n')
+    {
+      ret = simuart_putraw('\r');
+    }
+
+  if (ret >= 0)
+    {
+      ret = simuart_putraw(ch);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: simuart_getc
+ ****************************************************************************/
+
+int simuart_getc(void)
+{
+  int index;
+  int ch;
+
+  for (;;)
+    {
+      /* Wait for a byte to become available */
+
+      simuart_wait();
+
+      /* The UART buffer show be non-empty... check anyway */
+
+      if (g_uarthead == g_uarttail)
+        {
+          /* Take the next byte from the tail of the buffer */
+
+          index = g_uarttail;
+          ch    = (int)g_uartbuffer[index];
+
+          /* Increment the tai index (with wrapping) */
+
+          if (++index >= SIMUART_BUFSIZE)
+            {
+              index = 0;
+            }
+
+          g_uarttail = index;
+          return ch;
+        }
+    }
 }

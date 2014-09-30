@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/sim/src/up_initialize.c
  *
- *   Copyright (C) 2007-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -122,9 +122,8 @@ void up_initialize(void)
   syslog("SIM: Initializing");
 #endif
 
-  /* Register devices */
-
 #if CONFIG_NFILE_DESCRIPTORS > 0
+  /* Register devices */
 
 #if defined(CONFIG_DEV_NULL)
   devnull_register();   /* Standard /dev/null */
@@ -136,9 +135,13 @@ void up_initialize(void)
 
 #endif /* CONFIG_NFILE_DESCRIPTORS */
 
+#if defined(USE_DEVCONSOLE)
+  /* Start the sumulated UART device */
+
+  simuart_start();
+
   /* Register a console (or not) */
 
-#if defined(USE_DEVCONSOLE)
   up_devconsole();          /* Our private /dev/console */
 #elif defined(CONFIG_RAMLOG_CONSOLE)
   ramlog_consoleinit();
