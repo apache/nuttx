@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated September 29, 2014)
+NuttX TODO List (Last updated September 30, 2014)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -9,7 +9,7 @@ board port.
 nuttx/
 
   (9)  Task/Scheduler (sched/)
-  (2)  Memory Managment (mm/)
+  (1)  Memory Managment (mm/)
   (3)  Signals (sched/, arch/)
   (2)  pthreads (sched/)
   (8)  Kernel/Protected Builds
@@ -22,7 +22,7 @@ nuttx/
   (6)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
-  (5)  Build system / Toolchains
+  (3)  Build system / Toolchains
   (5)  Linux/Cywgin simulation (arch/sim)
   (4)  ARM (arch/arm/)
   (1)  ARM/C5471 (arch/arm/src/c5471/)
@@ -48,9 +48,9 @@ nuttx/
 apps/
 
   (4)  Network Utilities (apps/netutils/)
-  (3)  NuttShell (NSH) (apps/nshlib)
+  (2)  NuttShell (NSH) (apps/nshlib)
   (1)  System libraries apps/system (apps/system)
-  (5)  Other Applications & Tests (apps/examples/)
+  (4)  Other Applications & Tests (apps/examples/)
 
 o Task/Scheduler (sched/)
   ^^^^^^^^^^^^^^^^^^^^^^^
@@ -225,12 +225,6 @@ o Memory Managment (mm/)
   Priority:    Medium/Low, a good feature to prevent memory leaks but would
                have negative impact on memory usage and code size.
 
-  Title:       KERNEL MODE PAGE ALLOCATOR
-  Description: The KERNEL mode build for platforms with an MMU really needs
-               a page-oriented allocator and support for sbrk() and brk()
-  Status:      Open
-  Priority:    Low
-
 o Signals (sched/, arch/)
   ^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -238,7 +232,7 @@ o Signals (sched/, arch/)
   Description: 'Standard' signals and signal actions are not supported.
                (e.g., SIGINT, SIGSEGV, etc).
 
-               Update:  SIG_CHLD is supported if so configured.
+               Update:  SIGCHLD is supported if so configured.
   Status:      Open.  No changes are planned.
   Priority:    Low, required by standards but not so critical for an
                embedded system.
@@ -632,7 +626,7 @@ o Binary loaders (binfmt/)
   Status:      Open
   Priority:    Medium-High
 
-  Title:       READ-ONLY DATA IN RAM
+  Title:       NXFLAT READ-ONLY DATA IN RAM
   Description: At present, all .rodata must be put into RAM.  There is a
                tentative design change that might allow .rodata to be placed
                in FLASH (see Documentation/NuttXNxFlat.html).
@@ -1256,27 +1250,6 @@ o Documentation (Documentation/)
 
 o Build system
   ^^^^^^^^^^^^
-
-  Title:       NUTTX CONFIGURATION TOOL
-  Description: Need a NuttX configuration tool.  The number of configuration
-               settings has become quite large and difficult to manage manually.
-               Update:  This task is essentially completed.  But probably not for
-               all platforms and all features.  When do we know that the feature
-               is complete and that we can switch to exclusive use of the tool?
-  Status:      Open
-  Priority:    Medium-low
-
-  Title:       NATIVE WINDOWS BUILD
-  Description: This effort is underway using MinGW-GCC and GNUWin32 tools
-               for (coreutils+make+grep+sed+uname).  Current status:
-
-               1. configs/stm32f4discovery/winbuild - builds okay natively
-               2. configs/ez80f910200kitg - Can be reconfigured to build natively.
-                  Requires some manual intervention to get a clean build.
-                  See configs/ez80f910200kitg/README.txt.
-
-  Status:      Open
-  Priority:    Low
 
   Title:       WINDOWS DEPENDENCY GENERATION
   Description: Dependency generation is currently disabled when a Windows native
@@ -2205,15 +2178,6 @@ o Network Utilities (apps/netutils/)
 o NuttShell (NSH) (apps/nshlib)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  Title:       WGET UNTESTED
-  Description: The wget command has been incorporated into NSH, however
-               it is still untested as of this writing (only because I
-               have not had the correct network setup for the testing
-               yet).  Since wget depends on the also untest uIP resolv/
-               logic, it is like non-functional.
-  Status:      Open
-  Priority:    Med-High
-
   Title:       IFCONFIG AND MULTIPLE NETWORK INTERFACES
   Descripton:  The ifconfig command will not behave correctly if an interface
                is provided and there are multiple interfaces.  It should only
@@ -2250,12 +2214,6 @@ o Other Applications & Tests (apps/examples/)
                fine on the Linux-based simulation platform).
   Status:      Open
   Priority:    Low
-
-  Title:       EXAMPLES/WGET UNTESTED
-  Description: examples/wget is untested on the target (it has been tested
-               on the host, but not in the target using the uIP resolv logic).
-  Status:      Open
-  Priority:    Med
 
   Title:       EXAMPLES/SENDMAIL UNTESTED
   Description: examples/sendmail is untested on the target (it has been tested
