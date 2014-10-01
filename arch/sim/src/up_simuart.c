@@ -50,6 +50,10 @@
 
 #define SIMUART_BUFSIZE 256
 
+/* The design for how we signal UART data availability is up in the air */
+
+#undef CONFIG_SIM_UART_DATAPOST
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -57,6 +61,14 @@
 static char g_uartbuffer[SIMUART_BUFSIZE];
 static volatile int  g_uarthead;
 static volatile int  g_uarttail;
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifndef CONFIG_SIM_UART_DATAPOST
+volatile int g_uart_data_available;
+#endif
 
 /****************************************************************************
  * NuttX Domain Public Function Prototypes
@@ -115,7 +127,9 @@ static void *simuart_thread(void *arg)
 
       if (nread == 1)
         {
+#ifdef CONFIG_SIM_UART_DATAPOST
           sched_lock();
+#endif
 
           /* Get the index to the next slot in the UART buffer */
 
@@ -146,10 +160,15 @@ static void *simuart_thread(void *arg)
                    * input.
                    */
 
+#ifdef CONFIG_SIM_UART_DATAPOST
                   simuart_post();
+#else
+                  g_uart_data_available = 1;
+#endif
                 }
             }
 
+#ifdef CONFIG_SIM_UART_DATAPOST
           /* REVISIT:  This is very weird and scary here.  When sched_unlock()
            * is called, we may do a lonjmp() style context switch meaning
            * that the logic will be run running on this thread! (but with a
@@ -159,6 +178,7 @@ static void *simuart_thread(void *arg)
            */
 
           sched_unlock();
+#endif
         }
     }
 
