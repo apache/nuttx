@@ -84,6 +84,10 @@
 #  undef CONFIG_RAMLOG_SYSLOG
 #endif
 
+/* The design for how we signal UART data availability is up in the air */
+
+#undef CONFIG_SIM_UART_DATAPOST
+
 /* Context Switching Definitions ******************************************/
 /* Storage order: %ebx, $esi, %edi, %ebp, sp, and return PC */
 
@@ -142,6 +146,10 @@ extern int g_x11initialized;
 #ifdef CONFIG_SIM_TOUCHSCREEN
 extern volatile int g_eventloop;
 #endif
+#endif
+
+#if defined(CONFIG_DEV_CONSOLE) && !defined(CONFIG_SIM_UART_DATAPOST)
+extern volatile int g_uart_data_available;
 #endif
 
 /**************************************************************************
