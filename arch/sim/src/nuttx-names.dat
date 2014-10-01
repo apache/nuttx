@@ -1,4 +1,5 @@
 calloc         NXcalloc
+clock_gettime  NXclock_gettime
 close          NXclose
 closedir       NXclosedir
 dup            NXdup
@@ -18,6 +19,7 @@ mkdir          NXmkdir
 mount          NXmount
 open           NXopen
 opendir        NXopendir
+nanosleep      NXnanosleep
 pthread_create NXpthread_create
 read           NXread
 realloc        NXrealloc

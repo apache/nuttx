@@ -44,12 +44,17 @@ CSRCS  = up_initialize.c up_idle.c up_interruptcontext.c up_initialstate.c
 CSRCS += up_createstack.c up_usestack.c up_releasestack.c up_stackframe.c
 CSRCS += up_unblocktask.c up_blocktask.c up_releasepending.c
 CSRCS += up_reprioritizertr.c up_exit.c up_schedulesigaction.c up_spiflash.c
-CSRCS += up_allocateheap.c up_devconsole.c up_uartwait.c
+CSRCS += up_allocateheap.c up_devconsole.c
 
-HOSTSRCS = up_hostusleep.c up_simuart.c
+HOSTSRCS = up_hostusleep.c
 
 ifeq ($(CONFIG_SCHED_TICKLESS),y)
-CSRCS += up_tickless.c
+  CSRCS += up_tickless.c
+endif
+
+ifeq ($(CONFIG_DEV_CONSOLE),y)
+  CSRCS += up_uartwait.c
+  HOSTSRCS += up_simuart.c
 endif
 
 ifeq ($(CONFIG_NX_LCDDRIVER),y)
@@ -118,7 +123,11 @@ STDLIBS += -lpthread
 # are called only from the host OS-specific logic (HOSTOBJS)
 
 LINKOBJS = up_head$(OBJEXT)
-REQUIREDOBJS = $(LINKOBJS) up_uartwait$(OBJEXT)
+REQUIREDOBJS = $(LINKOBJS)
+
+ifeq ($(CONFIG_DEV_CONSOLE),y)
+  REQUIREDOBJS += up_uartwait$(OBJEXT)
+endif
 
 ifeq ($(CONFIG_SIM_X11FB),y)
 ifeq ($(CONFIG_SIM_TOUCHSCREEN),y)
