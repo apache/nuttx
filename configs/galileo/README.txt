@@ -42,7 +42,7 @@ Serial Console
      to 165-5.5V.
 
   2) In addition, a second UART provides RS-232 support via a MAX3232 driver
-     and is connected via a 3.5mm jack:  Sleeve = GND, RING=SERIAL1_RXD, and
+     and is connected via a 3.5mm jack:  Sleeve=GND, RING=SERIAL1_RXD, and
      TIP=SERIAL1_TXD.
 
   UART1 may be convenient because of its built-in RS232 drivers.  But if you
@@ -64,8 +64,8 @@ Running from SRAM
   To map and enable the 512KB block page, the following steps should be
   followed:
 
-    -  Set ESRAMPGCTRL_BLOCK.BLOCK_PG_SYSTEM_ADDRESS_16MB to the required
-       address value
+    - Set ESRAMPGCTRL_BLOCK.BLOCK_PG_SYSTEM_ADDRESS_16MB to the required
+      address value
     - Set ESRAMPGCTRL_BLOCK.BLOCK_ENABLE_PG to 1
 
   Once an eSRAM page is enabled, it is implicitly locked and any further
