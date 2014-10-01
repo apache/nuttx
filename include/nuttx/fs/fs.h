@@ -240,16 +240,16 @@ union inode_ops_u
 
 struct inode
 {
-  FAR struct inode *i_peer;       /* Link to same level inode */
-  FAR struct inode *i_child;      /* Link to lower level inode */
-  int16_t           i_crefs;      /* References to inode */
-  uint16_t          i_flags;      /* Flags for inode */
-  union inode_ops_u u;            /* Inode operations */
+  FAR struct inode *i_peer;     /* Link to same level inode */
+  FAR struct inode *i_child;    /* Link to lower level inode */
+  int16_t           i_crefs;    /* References to inode */
+  uint16_t          i_flags;    /* Flags for inode */
+  union inode_ops_u u;          /* Inode operations */
 #ifdef CONFIG_FILE_MODE
-  mode_t            i_mode;       /* Access mode flags */
+  mode_t            i_mode;     /* Access mode flags */
 #endif
-  FAR void         *i_private;    /* Per inode driver private data */
-  char              i_name[1];    /* Name of inode (variable) */
+  FAR void         *i_private;  /* Per inode driver private data */
+  char              i_name[1];  /* Name of inode (variable) */
 };
 #define FSNODE_SIZE(n) (sizeof(struct inode) + (n))
 
@@ -260,10 +260,10 @@ struct inode
 
 struct file
 {
-  int               f_oflags; /* Open mode flags */
-  off_t             f_pos;    /* File position */
-  FAR struct inode *f_inode;  /* Driver interface */
-  void             *f_priv;   /* Per file driver private data */
+  int               f_oflags;   /* Open mode flags */
+  off_t             f_pos;      /* File position */
+  FAR struct inode *f_inode;    /* Driver interface */
+  void             *f_priv;     /* Per file driver private data */
 };
 
 /* This defines a list of files indexed by the file descriptor */
@@ -271,7 +271,7 @@ struct file
 #if CONFIG_NFILE_DESCRIPTORS > 0
 struct filelist
 {
-  sem_t   fl_sem;             /* Manage access to the file list */
+  sem_t   fl_sem;               /* Manage access to the file list */
   struct file fl_files[CONFIG_NFILE_DESCRIPTORS];
 };
 #endif
