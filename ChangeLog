@@ -8724,4 +8724,8 @@
 	  console input.  Starts a separate, Linux domain pthread to read
 	  the console input in raw mode and provides the incoming data to
 	  NuttX via standard NuttX domain IPCs (2014-9-30).
-
+	* arch/sim/src/up_setjmp32.S, up_setjmp64.S, Kconfig, Makefile,
+	  up_initialstate.c, up_internal.h, up_stackframe.c, and include/irq.h:
+	  Add support for 64-bit lonjmp/setjmp in simulator platform.  This
+	  will permit operation of the simulation natively on a 64-bit platform
+	  (2014-10-2).
