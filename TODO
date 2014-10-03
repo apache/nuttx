@@ -22,7 +22,7 @@ nuttx/
   (6)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
-  (3)  Build system / Toolchains
+  (2)  Build system / Toolchains
   (3)  Linux/Cywgin simulation (arch/sim)
   (4)  ARM (arch/arm/)
   (1)  ARM/C5471 (arch/arm/src/c5471/)
@@ -1239,6 +1239,12 @@ o Pascal Add-On (pcode/)
   Status:      Open
   Priority:    Medium
 
+  Title:       PDBG
+  Description: Move the the pascal p-code debugger into the NuttX apps/ tree
+               where it can be used from the NSH command line.
+  Status:      Open
+  Priority:    Low
+
 o Documentation (Documentation/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1260,29 +1266,6 @@ o Build system
                dependencies needed to be quoted in the Make.dep files.
   Status:      Open
   Priority:    Low -- unless some dependency-related build issues is discovered.
-
-  Title:       SETENV.H
-  Description: Logic in most setenv.sh files can create the following problem
-               on many platforms:
-
-                 $ . ./setenv.sh
-                 basename: invalid option -- 'b'
-                 Try `basename --help' for more information.
-
-               The problem is that $0 is the current running shell which may include
-               a dash in front:
-
-                 $ echo $0
-                 -bash
-
-               But often is just /bin/bash (and the problem does not occur.  The fix
-               is:
-
-                 -if [ "$(basename $0)" = "setenv.sh" ]; then
-                 +if [ "$_" = "$0" ] ; then
-  Status:      Open
-  Priority:    Low.  Use of setenv.sh is optional and most platforms do not have
-               this problem.  Scripts will be fixed one-at-a-time as is appropriate.
 
   Title:       MAKE EXPORT LIMITATIONS
   Description: The top-level Makefile 'export' target that will bundle up all of the
@@ -1320,7 +1303,8 @@ o Linux/Cywgin simulation (arch/sim)
   Status:      Open
   Priority:    Low, unless there is a need for developing a higher fidelity simulation
                I have been thinking about how to implement simulated interrupts in
-               the simulation.  I think a solution would work like this.
+               the simulation.  I think a solution would work like this:
+               http://www.nuttx.org/doku.php?id=wiki:nxinternal:simulator
 
   Title:       ROUND-ROBIN SCHEDULING IN THE SIMULATOR
   Description: Since the simulation is not pre-emptible, you can't use round-robin
