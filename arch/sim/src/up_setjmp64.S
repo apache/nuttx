@@ -1,7 +1,7 @@
 /**************************************************************************
- * arch/sim/src/up_setjmp.S
+ * arch/sim/src/up_setjmp64.S
  *
- *   Copyright (C) 2007, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,8 @@
  **************************************************************************/
 
 #ifdef __CYGWIN__
-# define SYMBOL(s) _##s
+//# define SYMBOL(s) _##s
+# define SYMBOL(s) s
 #else
 # define SYMBOL(s) s
 #endif
@@ -58,7 +59,7 @@
  **************************************************************************/
 
 /**************************************************************************
- * Global Variables
+ * Public Variables
  **************************************************************************/
 
 /**************************************************************************
@@ -74,64 +75,74 @@
  **************************************************************************/
 
 	.text
+	.align	4
 	.globl	SYMBOL(up_setjmp)
 #ifndef __CYGWIN__
 	.type	SYMBOL(up_setjmp), @function
 #endif
 SYMBOL(up_setjmp):
 
-	/* %ebx, %esi, %edi, and %ebp must be preserved.
-	 * save %ebx, $esi, and %edi now... */
+	/* Get the return address, adjusting the stack pointer */
 
-	movl	4(%esp), %eax
-	movl	%ebx, (JB_EBX)(%eax)
-	movl	%esi, (JB_ESI)(%eax)
-	movl	%edi, (JB_EDI)(%eax)
+	pop		%rsi
 
-	/* Save the value of SP as will be after we return */
+	/* Set up the return value */
 
-	leal	4(%esp), %ecx
-	movl	%ecx, (JB_SP)(%eax)
+	xorl	%eax,%eax
 
-	/* Save the return PC */
+	/* Save 1: rbx */
 
-	movl	0(%esp), %ecx
-	movl	%ecx, (JB_PC)(%eax)
+	movq	%rbx, JB_RBX(%rdi)
 
-	/* Save the framepointer */
+	/* Save 2: Value of the rsp *after* returning */
 
-	movl	%ebp, (JB_EBP)(%eax)
+	movq	%rsp, JB_RSP(%rdi)
 
-	/* And return 0 */
+	/* Fix up the return stack */
 
-	xorl	%eax, %eax
+	push	%rsi
+
+	/* Save registers */
+   /* Storage order: %rbx, %rsp, %rbp, %r12, %r13, %r14, %r15, %rip */
+
+	movq	%rbp, JB_RBP(%rdi)	/* Save 3: rbp */
+	movq	%r12, JB_R12(%rdi)	/* Save 4: r12 */
+	movq	%r13, JB_R13(%rdi)	/* Save 5: r13 */
+	movq	%r14, JB_R14(%rdi)	/* Save 6: r14 */
+	movq	%r15, JB_R15(%rdi)	/* Save 7: r15 */
+	movq	%rsi, JB_RSI(%rdi)	/* Save 8: Return address */
+
 	ret
+
 #ifndef __CYGWIN__
 	.size	SYMBOL(up_setjmp), . - SYMBOL(up_setjmp)
 #endif
+
+	.align	4
 	.globl	SYMBOL(up_longjmp)
 #ifndef __CYGWIN__
 	.type	SYMBOL(up_longjmp), @function
 #endif
 SYMBOL(up_longjmp):
-	movl	4(%esp), %ecx      /* U_pthread_jmpbuf in %ecx.  */
-	movl	8(%esp), %eax      /* Second argument is return value.  */
 
-	/* Save the return address now.  */
+	/* Setup return value */
 
-	movl	(JB_PC)(%ecx), %edx
+	movl	%esi,%eax
 
-	/* Restore registers.  */
+	/* Restore registers */
 
-	movl	(JB_EBX)(%ecx), %ebx
-	movl	(JB_ESI)(%ecx), %esi
-	movl	(JB_EDI)(%ecx), %edi
-	movl	(JB_EBP)(%ecx), %ebp
-	movl	(JB_SP)(%ecx), %esp
+	movq	JB_RBX(%rdi),%rbx	/* Save 1: rbx */
+	movq	JB_RSP(%rdi),%rsp	/* Save 2: rsp */
+	movq	JB_RBP(%rdi),%rbp	/* Save 3: rdi */
+	movq	JB_R12(%rdi),%r12	/* Save 4: r12 */
+	movq	JB_R13(%rdi),%r13	/* Save 5: r13 */
+	movq	JB_R14(%rdi),%r14	/* Save 6: r14 */
+	movq	JB_R15(%rdi),%r15	/* Save 7: rbp */
 
-	/* Jump to saved PC.  */
+	/* And return */
 
-	jmp		*%edx
+	jmp		*JB_RSI(%rdi)	/* Save 8: rsi */
+
 #ifndef __CYGWIN__
 	.size SYMBOL(up_longjmp), . - SYMBOL(up_longjmp)
 #endif

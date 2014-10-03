@@ -45,25 +45,44 @@
  ************************************************************/
 
 /************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************/
+/* No interrupts */
 
 #define NR_IRQS 0
+
+/* Number of registers saved in context switch */
+
+#if defined(CONFIG_HOST_X86_64) && !defined(CONFIG_SIM_M32)
+   /* Storage order: %rbx, %rsp, %rbp, %r12, %r13, %r14, %r15, %rip */
+
+#  define XCPTCONTEXT_REGS    8
+#else
+   /* Storage order: %ebx, %esi, %edi, %ebp, sp, and return PC */
+
+#  define XCPTCONTEXT_REGS    6
+#endif
 
 /************************************************************
  * Public Types
  ************************************************************/
 
+#ifndef __ASSEMBLY__
+/* Number of registers saved in context switch */
+
+#if defined(CONFIG_HOST_X86_64) && !defined(CONFIG_SIM_M32)
+typedef unsigned long xcpt_reg_t;
+#else
+typedef int xcpt_reg_t;
+#endif
+
 /* This struct defines the way the registers are stored */
 
-#ifndef __ASSEMBLY__
 struct xcptcontext
 {
    void *sigdeliver; /* Actual type is sig_deliver_t */
 
-   /* Storage order: %ebx, $esi, %edi, %ebp, sp, and return PC */
-
-   int regs[6];
+   xcpt_reg_t regs[6];
 };
 #endif
 

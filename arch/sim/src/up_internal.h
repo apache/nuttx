@@ -44,6 +44,7 @@
 #include <nuttx/compiler.h>
 #include <sys/types.h>
 #include <nuttx/irq.h>
+#include <arch/irq.h>
 
 /**************************************************************************
  * Pre-processor Definitions
@@ -89,23 +90,58 @@
 #undef CONFIG_SIM_UART_DATAPOST
 
 /* Context Switching Definitions ******************************************/
+
+#if defined(CONFIG_HOST_X86_64) && !defined(CONFIG_SIM_M32)
+   /* Storage order: %rbx, %rsp, %rbp, %r12, %r13, %r14, %r15, %rip */
+
+#  ifdef __ASSEMBLY__
+#    define JB_RBX (0*8)
+#    define JB_RSP (1*8)
+#    define JB_RBP (2*8)
+#    define JB_R12 (3*8)
+#    define JB_R13 (4*8)
+#    define JB_R14 (5*8)
+#    define JB_R15 (6*8)
+#    define JB_RSI (7*8)
+
+#  else
+#    define JB_RBX (0)
+#    define JB_RSP (1)
+#    define JB_RBP (2)
+#    define JB_R12 (3)
+#    define JB_R13 (4)
+#    define JB_R14 (5)
+#    define JB_R15 (6)
+#    define JB_RSI (7)
+
+#  endif /* __ASSEMBLY__ */
+
+/* Compatibility definitions */
+
+#  define JB_SP    JB_RSI
+#  define JB_PC    JB_RSP
+
+#else
 /* Storage order: %ebx, $esi, %edi, %ebp, sp, and return PC */
 
-#ifdef __ASSEMBLY__
-#  define JB_EBX (0*4)
-#  define JB_ESI (1*4)
-#  define JB_EDI (2*4)
-#  define JB_EBP (3*4)
-#  define JB_SP  (4*4)
-#  define JB_PC  (5*4)
-#else
-#  define JB_EBX (0)
-#  define JB_ESI (1)
-#  define JB_EDI (2)
-#  define JB_EBP (3)
-#  define JB_SP  (4)
-#  define JB_PC  (5)
-#endif /* __ASSEMBLY__ */
+#  ifdef __ASSEMBLY__
+#    define JB_EBX (0*4)
+#    define JB_ESI (1*4)
+#    define JB_EDI (2*4)
+#    define JB_EBP (3*4)
+#    define JB_SP  (4*4)
+#    define JB_PC  (5*4)
+
+#  else
+#    define JB_EBX (0)
+#    define JB_ESI (1)
+#    define JB_EDI (2)
+#    define JB_EBP (3)
+#    define JB_SP  (4)
+#    define JB_PC  (5)
+
+#  endif /* __ASSEMBLY__ */
+#endif /* CONFIG_HOST_X86_64 && !CONFIG_SIM_M32 */
 
 /* Simulated Heap Definitions **********************************************/
 /* Size of the simulated heap */
@@ -156,10 +192,10 @@ extern volatile int g_uart_data_available;
  * Public Function Prototypes
  **************************************************************************/
 
-/* up_setjmp.S ************************************************************/
+/* up_setjmp32.S **********************************************************/
 
-int  up_setjmp(int *jb);
-void up_longjmp(int *jb, int val) noreturn_function;
+int  up_setjmp(xcpt_reg_t *jb);
+void up_longjmp(xcpt_reg_t *jb, int val) noreturn_function;
 
 /* up_tickless.c **********************************************************/
 

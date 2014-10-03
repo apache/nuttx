@@ -37,7 +37,18 @@
 
 CFLAGS += -I$(TOPDIR)/sched
 
-ASRCS = up_setjmp.S
+ASRCS =
+
+ifeq ($(CONFIG_HOST_X86_64),y)
+ifeq ($(CONFIG_SIM_M32),y)
+  ASRCS += up_setjmp32.S
+else
+  ASRCS += up_setjmp64.S
+endif
+else
+  ASRCS += up_setjmp32.S
+endif
+
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 
 CSRCS  = up_initialize.c up_idle.c up_interruptcontext.c up_initialstate.c
