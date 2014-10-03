@@ -86,26 +86,18 @@ Issues
 
 64-Bit Issues
 -------------
-As mentioned above, context switching is based on logic like setjmp and longjmp.
-This context switching is only available for 32-bit targets.  On 64-bit machines,
-this context switching will fail.
+As mentioned above, context switching is based on logic like setjmp() and
+longjmp().  This context switching is available for 32-bit and 64-bit
+targets.  You must, however, set the correct target in the configuration
+before you build: HOST_X86_64 or HOST_X86 for 62- and 32-bit targets,
+respectively.  On a 64-bit machine, you can also force the 32-bit build
+with CONFIG_SIM_M32=y.
 
 There are other 64-bit issues as well.  For example, addresses are retained in
 32-bit unsigned integer types in a few places.  On a 64-bit machine, the 32-bit
 address storage may correcupt 64-bit addressing.  NOTE:  This is really a bug --
 addresses should not be retained in uint32_t types but rather in uintptr_t types
 to avoid issues just like this.
-
-The workaround on 64-bit machines for now is to build for a 32-bit target on the
-64-bit machine.  The workaround for this issue has been included in NuttX 6.15 and
-beyond.  For thoses versions, you must add CONFIG_SIM_M32=y to the .config file in
-order to enable building a 32-bit image on a 64-bit platform.
-
-For older versions of NuttX, a patch also exists.  The patch the Make.defs file in the
-appropriate places so that -m32 is included in the CFLAGS and -m32 and -melf_386
-are included in the LDFLAGS. See the patch
-0001-Quick-hacks-to-build-sim-nsh-ostest-on-x86_64-as-32-.patch that can be found at
-http://tech.groups.yahoo.com/group/nuttx/files.
 
 Compiler differences
 --------------------
@@ -114,12 +106,6 @@ operator new:
 
   Problem:     "'operator new' takes size_t ('...') as first parameter"
   Workaround:   Add -fpermissive to the compilation flags
-
-Continue up_setjmp() issues:
-
-  With some newer compilers, I am now getting segmentation faults in
-  up_setjmp.S (even when built with the -m32 option).  I have not looked into
-  this yet.
 
 Stack Size Issues
 -----------------
