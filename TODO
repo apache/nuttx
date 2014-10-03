@@ -32,8 +32,8 @@ nuttx/
   (7)  ARM/LPC214x (arch/arm/src/lpc214x/)
   (2)  ARM/LPC313x (arch/arm/src/lpc313x/)
   (0)  ARM/LPC43x (arch/arm/src/lpc43xx/)
-  (3)  ARM/STR71x (arch/arm/src/str71x/)
-  (3)  ARM/LM3S6918 (arch/arm/src/lm/)
+  (2)  ARM/STR71x (arch/arm/src/str71x/)
+  (2)  ARM/LM3S6918 (arch/arm/src/tiva/)
   (x)  ARM/SAMA5D3 ((arch/arm/src/sama5/)
   (5)  ARM/STM32 (arch/arm/src/stm32/)
   (3)  AVR (arch/avr)
@@ -1615,24 +1615,13 @@ o ARM/STR71x (arch/arm/src/str71x/)
   Status:      Open
   Priority:    Medium
 
-  Title:       NO USB DRIVER
-  Description: Develop a USB driver and integrate with existing USB serial and storage
-               class drivers.
-  Status:      Open
-  Priority:    Medium
-
   Title:       SPI METHODS ARE NOT THREAD SAFE
   Description: SPI methods are not thread safe.  Needs a semaphore to protect from re-entrancy.
   Status:      Open
   Priority:    Medium -- Will be very high if you do SPI access from multiple threads.
 
-o ARM/LM3S6918 (arch/arm/src/lm/)
+o ARM/LM3S6918 (arch/arm/src/tiva/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-  Title:       I2C DRIVER
-  Description: Still need to implement I2C
-  Status:      Open
-  Priority:    Low
 
   Title:       SSI OVERRUNS
   Description: Should terminate SSI/SPI transfer if an Rx FIFO overrun occurs.
@@ -1648,7 +1637,7 @@ o ARM/LM3S6918 (arch/arm/src/lm/)
   Status:      Open.
                UPDATE: I have found that increasing the size of the CGI program stack
                from 1024 to 2048 (on the LM3S) eliminates the problem.  So the most
-               likely cause is probably a stack overflow, not a hard sofware bug.
+               likely cause is probably a stack overflow, not a hard software bug.
   Priority:    Probably Low
 
 o ARM/SAMA5D3 ((arch/arm/src/sama5/)
