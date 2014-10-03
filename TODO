@@ -23,7 +23,7 @@ nuttx/
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
   (3)  Build system / Toolchains
-  (4)  Linux/Cywgin simulation (arch/sim)
+  (3)  Linux/Cywgin simulation (arch/sim)
   (4)  ARM (arch/arm/)
   (1)  ARM/C5471 (arch/arm/src/c5471/)
   (3)  ARM/DM320 (arch/arm/src/dm320/)
@@ -1309,6 +1309,19 @@ o Linux/Cywgin simulation (arch/sim)
   Status:      Open
   Priority:    Low (unless you want to test networking features on the simulation).
 
+  Title:       SIMULATOR HAS NO INTERRUPTS (NON-PREMPTIBLE)
+  Description: The current simulator implementation is has no interrupts and, hence,
+               is non-preemptible.  Also, without simulated interrutps, there can
+               be no high-fidelity simulated device drivers.
+
+               Currently, all timing and serial input is simulated in the IDLE loop:
+               When nothing is going on in the simulation, the IDLE loop runs and
+               fakes timer and UART events.
+  Status:      Open
+  Priority:    Low, unless there is a need for developing a higher fidelity simulation
+               I have been thinking about how to implement simulated interrupts in
+               the simulation.  I think a solution would work like this.
+
   Title:       ROUND-ROBIN SCHEDULING IN THE SIMULATOR
   Description: Since the simulation is not pre-emptible, you can't use round-robin
                scheduling (no time slicing).  Currently, the timer interrupts are
@@ -1319,27 +1332,6 @@ o Linux/Cywgin simulation (arch/sim)
                irqrestore() to block and (conditionally) unblock the signal.
   Status:      Open
   Priority:    Low
-
-  Title:       NSH ISSUES ON THE SIMULATOR
-  Descripion:  The NSH example has some odd behaviors.  Mult-tasking -- for example,
-               execution of commands in background -- does not work normally.  This
-               is due to the fact that NSH uses the system standard input for the
-               console.  This means that the simulation is actually "frozen" all of
-               the time when NSH is waiting for input and background commands never
-               get the chance to run.
-  Status:      Open
-  Priority:    This will not be fixed.  This is the normal behavior in the current
-               design of the simulator.  "Real" platforms will behave correctly
-               because NSH will "sleep" when it waits for console inpu and other
-               tasks can run freely.
-
-  Title:       DOUBLE COMMAND ECHO
-  Description: In the NSH example, the host HOST echoes each command so after you
-               you enter a command, the command is repeated on the next line.  This
-               is an artifact of the simulator only.
-  Status:      Open
-  Priority:    This will not be fixed.  This is the normal behavior in the current
-               design of the simulator.  "Real" platforms will behave correctly.
 
 o ARM (arch/arm/)
   ^^^^^^^^^^^^^^^
