@@ -82,7 +82,7 @@ struct xcptcontext
 {
    void *sigdeliver; /* Actual type is sig_deliver_t */
 
-   xcpt_reg_t regs[6];
+   xcpt_reg_t regs[XCPTCONTEXT_REGS];
 };
 #endif
 
@@ -111,7 +111,8 @@ static inline void irqrestore(irqstate_t flags)
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif

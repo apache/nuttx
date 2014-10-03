@@ -118,8 +118,8 @@
 
 /* Compatibility definitions */
 
-#  define JB_SP    JB_RSI
-#  define JB_PC    JB_RSP
+#  define JB_SP    JB_RSP
+#  define JB_PC    JB_RSI
 
 #else
 /* Storage order: %ebx, $esi, %edi, %ebp, sp, and return PC */
