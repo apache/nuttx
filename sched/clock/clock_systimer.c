@@ -52,6 +52,7 @@
 /* See nuttx/clock.h */
 
 #undef clock_systimer
+#undef clock_systimer64
  
 /****************************************************************************
  * Private Data

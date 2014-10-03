@@ -66,6 +66,7 @@
 /********************************************************************************
  * Global Variables
  ********************************************************************************/
+
 #if !defined(CONFIG_SCHED_TICKLESS) && !defined(__HAVE_KERNEL_GLOBALS)
   /* The system clock exists (CONFIG_SCHED_TICKLESS), but it not prototyped
    * globally in include/nuttx/clock.h.
