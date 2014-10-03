@@ -6,10 +6,22 @@
 if ARCH_SIM
 comment "Simulation Configuration Options"
 
+choice
+	prompt "Host CPU Type"
+	default HOST_X86_64
+
+config HOST_X86_64
+	bool "x86_64"
+
+config HOST_X86
+	bool "x86"
+
+endchoice # Host CPU Type
+
 config SIM_M32
-#	bool "Build 32-bit simulation on 64-bit machine"
-	bool
+	bool "Build 32-bit simulation on 64-bit machine"
 	default n
+	depends on HOST_X86_64
 	---help---
 		Simulation context switching is based on logic like setjmp and longjmp.  This
 		context switching is only available for 32-bit targets.  On 64-bit machines,
@@ -19,19 +31,6 @@ config SIM_M32
 		64-bit machine.  The workaround for this issue has been included in NuttX 6.15 and
 		beyond.  For thoses versions, you must add SIM_M32=y to the .config file in
 		order to enable building a 32-bit image on a 64-bit platform.
-
-choice
-	prompt "Host CPU Type"
-	default HOST_X86_64
-
-config HOST_X86_64
-	bool "x86_64"
-	select SIM_M32
-
-config HOST_X86
-	bool "x86"
-
-endchoice # Host CPU Type
 
 config SIM_WALLTIME
 	bool "Execution simulation in near real-time"
