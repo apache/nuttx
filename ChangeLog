@@ -8740,3 +8740,5 @@
 	  lio_listio() will eventually be implemented (2014-10-4).
 	* libc/Kconfig, aio/aio_read.c, aio.h, and Make.defs: Implementation
 	  of aio_read() (2014-10-4).
+	* libc/aio/aio_write.c and Make.defs: Initial implementation of
+	  aio_write()(2014-10-4).
