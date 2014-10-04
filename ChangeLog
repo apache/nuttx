@@ -8738,3 +8738,5 @@
 	* include/aio.h:  Add aio.h header file (2014-10-4).
 	* libc/aio/lio_listio.c and Make.defs: Add empty skeleton file where
 	  lio_listio() will eventually be implemented (2014-10-4).
+	* libc/Kconfig, aio/aio_read.c, aio.h, and Make.defs: Add skeleton
+	  file for eventual implementation of aio_read() (2014-10-4).
