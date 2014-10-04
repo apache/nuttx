@@ -38,8 +38,8 @@ config NOPRINTF_FIELDWIDTH
 	bool "Disable sprintf support fieldwidth"
 	default n
 	---help---
-	sprintf-related logic is a
-	little smaller if we do not support fieldwidthes
+		sprintf-related logic is a little smaller if we do not support field
+		widths.
 
 config LIBC_FLOATINGPOINT
 	bool "Enable floating point in printf"
