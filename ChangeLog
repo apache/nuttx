@@ -8735,5 +8735,6 @@
 	* include/sys/syscall.h syscall/syscall.csv, syscall_lookup.h, and
 	  syscall_stublookup.c: Add pread() and pwrite() system calls
 	  (2014-10-4).
+	* include/aio.h:  Add aio.h header file (2014-10-4).
 	* libc/aio/lio_listio.c and Make.defs: Add empty skeleton file where
 	  lio_listio() will eventually be implemented (2014-10-4).
