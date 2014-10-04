@@ -13,7 +13,7 @@
       <h1><big><font color="#3c34ec"><i>NuttX Operating System<p>User's Manual</i></font></big></h1>
       <p><small>by</small></p>
       <p>Gregory Nutt<p>
-      <p>Last Updated: September 22, 2014</p>
+      <p>Last Updated: October 4, 2014</p>
     </td>
   </tr>
 </table>
@@ -29,7 +29,8 @@
 
 <p>
   This manual provides general usage information for the NuttX RTOS from the
-    perspective of the firmware developer.
+  perspective of the firmware developer.
+</p>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
@@ -7707,7 +7708,9 @@ interface of the same name.
 
 <ul><pre>
   #include &lt;fcntl.h&gt;
+  int creat(const char *path, mode_t mode);
   int open(const char *path, int oflag, ...);
+  int fcntl(int fd, int cmd, ...);
 </pre></ul>
 
 <h4><a name="drvrunistdops">2.10.2.2 unistd.h</a></h4>
@@ -7718,6 +7721,8 @@ interface of the same name.
   int     dup(int fd);
   int     dup2(int fd1, int fd2);
   off_t   lseek(int fd, off_t offset, int whence);
+  ssize_t pread(int fd, void *buf, size_t nbytes, off_t offset);
+  ssize_t pwrite(int fd, const void *buf, size_t nbytes, off_t offset);
   ssize_t read(int fd, void *buf, size_t nbytes);
   int     unlink(const char *path);
   ssize_t write(int fd, const void *buf, size_t nbytes);
@@ -9614,6 +9619,7 @@ notify a task when a message is available on a queue.
   <li><a href="#drvrunistdops">close</a></li>
   <li><a href="#dirdirentops">closedir</a></li>
   <li><a href="#connect">connect</a></li>
+  <li><a href="#drvrfcntlops">creat</a></li>
   <li><a href="#Data_Structures">Data structures</a></li>
   <li><a href="#directoryoperations">Directory operations</a></li>
   <li><a href="#dirdirentops">dirent.h</a></li>
@@ -9626,6 +9632,7 @@ notify a task when a message is available on a queue.
   <li><a href="#exit">exit</a></li>
   <li><a href="#fatsupport">FAT File System Support</a></li>
   <li><a href="#standardio">fclose</a></li>
+  <li><a href="#drvrfcntlops">fcntl</a></li>
   <li><a href="#drvrfcntlops">fcntl.h</a></li>
   <li><a href="#standardio">fdopen</a></li>
   <li><a href="#standardio">feof</a></li>
@@ -9683,9 +9690,9 @@ notify a task when a message is available on a queue.
   <li><a href="#pause">pause</a></li>
   <li><a href="#pipe">pipe</a></li>
   <li><a href="#poll">poll</a></li>
-  <li><a href="#drvrpollops">poll.h</a></li>
 </td>
 <td valign="top" width="33%">
+  <li><a href="#drvrpollops">poll.h</a></li>
   <li><a href="#posix_spawn">posix_spawn</a></li>
   <li><a href="#posix_spawn_file_actions_addclose">posix_spawn_file_actions_addclose</a></li>
   <li><a href="#posix_spawn_file_actions_adddup2">posix_spawn_file_actions_adddup2</a></li>
@@ -9703,7 +9710,9 @@ notify a task when a message is available on a queue.
   <li><a href="#posix_spawnattr_setschedpolicy">posix_spawnattr_setschedpolicy</a></li>
   <li><a href="#posix_spawnattr_setsigmask">posix_spawnattr_setsigmask</a></li>
   <li><a href="#posix_spawn">posix_spawnp</a></li>
+  <li><a href="#drvrunistdops">pread</a></li>
   <li><a href="#standardio">printf</a></li>
+  <li><a href="#drvrunistdops">pwrite</a></li>
   <li><a href="#Pthread">Pthread Interfaces</a>
   <li><a href="#pthreadattrdestroy">pthread_attr_destroy</a></li>
   <li><a href="#pthreadattrgetinheritsched">pthread_attr_getinheritsched</a></li>
@@ -9766,10 +9775,10 @@ notify a task when a message is available on a queue.
   <li><a href="#dirdirentops">readdir</a></li>
   <li><a href="#dirdirentops">readdir_r</a></li>
   <li><a href="#recv">recv</a></li>
-  <li><a href="#recvfrom">recvfrom</a></li>
-  <li><a href="#standardio">rename</a></li>
 </td>
 <td valign="top">
+  <li><a href="#recvfrom">recvfrom</a></li>
+  <li><a href="#standardio">rename</a></li>
   <li><a href="#standardio">rmdir</a></li>
   <li><a href="#dirdirentops">rewinddir</a></li>
   <li><a href="#mmapxip">ROM disk driver</a></li>
