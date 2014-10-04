@@ -133,7 +133,9 @@ struct aiocb
 
   /* Non-standard, implementation-dependent data */
 
-  struct work_s aio_work;        /* Use to defer I/O to the work thread */
+  struct work_s aio_work;        /* Used to defer I/O to the work thread */
+  pid_t aio_pid;                 /* ID of client to be notify at completion */
+  ssize_t aio_result;            /* Support aio_error() and aio_return() */
 };
 
 /****************************************************************************

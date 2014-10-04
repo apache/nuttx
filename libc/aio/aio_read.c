@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <unistd.h>
 #include <signal.h>
 #include <aio.h>
 #include <assert.h>
@@ -90,7 +91,46 @@ static void aio_read_worker(FAR void *arg)
 {
   FAR struct aiocb *aiocbp = (FAR struct aiocb *)arg;
   DEBASSERT(arg);
-#warning Missing logic
+  ssize_t nread;
+
+  /* Perform the read using:
+   *
+   *   aio_fildes  - File descriptor
+   *   aio_buf     - Location of buffer
+   *   aio_nbytes  - Length of transfer
+   *   aio_offset  - File offset
+   */
+
+ nread = pread(aiocbp->aio_fildes, aiocbp->aio_buf, aiocbp->aio_nbytes,
+               aiocbp->aio_offset);
+
+  /* Set the result of the read */
+
+  if (nread < 0)
+    {
+      int errcode = get_errno();
+      fdbg("ERROR: pread failed: %d\n", errode);
+      DEBUGASSERT(errcode > 0);
+      aicbp->result = -errcode;
+    }
+  else
+    {
+      aicbp->result = nread;
+    }
+
+  /* Signal the client */
+
+  if (aiocbp->aio_sigevent.sigev_notify == SIGEV_SIGNAL)
+    {
+      int ret;
+#ifdef CONFIG_CAN_PASS_STRUCTS
+      ret = sigqueue(aiocbp->aio_pid, aiocbp->aio_sigevent.sigev_signo,
+                     aiocbp->aio_sigevent.sigev_value);
+#else
+      ret = sigqueue(aiocbp->aio_pid, aiocbp->aio_sigevent.sigev_sign,
+                     aiocbp->aio_sigevent.sigev_value.sival_ptr);
+#endif
+    }
 }
 
 /****************************************************************************
@@ -202,11 +242,20 @@ int aio_read(FAR struct aiocb *aiocbp);
 
   DEBUGASSERT(aiocbp);
 
+  /* The result -EBUSY means that the transfer has not yet completed */
+
+  aiocbp->aio_result = -EBUSY;
+
+  /* Save the ID of the calling, client thread */
+
+  aiocbp->aio_pid = getpid();
+
   /* Defer the work to the worker thread */
 
   ret = work_queue(AIO_QUEUE, &aiocbp->aio_work, aio_read_worker, aiocbp, 0);
   if (ret < 0)
     {
+      aio->aio_result = ret;
       set_errno(ret);
       return ERROR;
     }
