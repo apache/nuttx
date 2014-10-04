@@ -43,6 +43,10 @@ ifneq ($(CONFIG_NSOCKET_DESCRIPTORS),0)
 
 CSRCS += fs_close.c fs_read.c fs_write.c fs_ioctl.c fs_poll.c fs_select.c
 
+# Support for positional file access
+
+CSRCS += fs_pread.c fs_pwrite.c
+
 # Support for network access using streams
 
 ifneq ($(CONFIG_NFILE_STREAMS),0)
@@ -69,6 +73,10 @@ CSRCS += fs_close.c fs_dup.c fs_dup2.c fs_fcntl.c fs_filedup.c fs_filedup2.c
 CSRCS += fs_fsync.c fs_ioctl.c fs_lseek.c fs_mkdir.c fs_open.c fs_poll.c
 CSRCS += fs_read.c fs_rename.c fs_rmdir.c fs_stat.c fs_statfs.c fs_select.c
 CSRCS += fs_unlink.c fs_write.c
+
+# Support for positional file access
+
+CSRCS += fs_pread.c fs_pwrite.c
 
 # Stream support
 
