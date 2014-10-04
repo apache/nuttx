@@ -232,12 +232,14 @@
 #  define SYS_ioctl                    (__SYS_descriptors+1)
 #  define SYS_read                     (__SYS_descriptors+2)
 #  define SYS_write                    (__SYS_descriptors+3)
+#  define SYS_pread                    (__SYS_descriptors+4)
+#  define SYS_pwrite                   (__SYS_descriptors+5)
 #  ifndef CONFIG_DISABLE_POLL
-#    define SYS_poll                   (__SYS_descriptors+4)
-#    define SYS_select                 (__SYS_descriptors+5)
-#    define __SYS_filedesc             (__SYS_descriptors+6)
+#    define SYS_poll                   (__SYS_descriptors+6)
+#    define SYS_select                 (__SYS_descriptors+7)
+#    define __SYS_filedesc             (__SYS_descriptors+8)
 #  else
-#    define __SYS_filedesc             (__SYS_descriptors+4)
+#    define __SYS_filedesc             (__SYS_descriptors+6)
 #  endif
 #else
 #  define __SYS_filedesc               __SYS_descriptors
