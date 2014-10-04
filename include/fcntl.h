@@ -128,6 +128,13 @@
 #define DN_RENAME   4  /* A file was renamed */
 #define DN_ATTRIB   5  /* Attributes of a file were changed */
 
+/* int creat(const char *path, mode_t mode);
+ *
+ * is equivalent to open with O_WRONLY|O_CREAT|O_TRUNC.
+ */
+
+#define creat(path, mode) open(path, O_WRONLY|O_CREAT|O_TRUNC, mode)
+
 /********************************************************************************
  * Public Type Definitions
  ********************************************************************************/
@@ -144,26 +151,26 @@ struct flock
 };
 
 /********************************************************************************
- * Public Variables
- ********************************************************************************/
-
-/********************************************************************************
  * Public Function Prototypes
  ********************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
+/********************************************************************************
+ * Public Data
+ ********************************************************************************/
+
 /* POSIX-like File System Interfaces */
 
-EXTERN int creat(const char *path, mode_t mode);
-EXTERN int open(const char *path, int oflag, ...);
-EXTERN int fcntl(int fd, int cmd, ...);
+int open(const char *path, int oflag, ...);
+int fcntl(int fd, int cmd, ...);
 
 #undef EXTERN
 #if defined(__cplusplus)
