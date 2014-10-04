@@ -47,7 +47,7 @@
 
 #include "lib_internal.h"
 
-#ifndef CONFIG_DISABLE_PTHREAD
+#if defined(CONFIG_LIBC_AIO) && !defined(CONFIG_PTHREAD_DISABLE)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -283,4 +283,4 @@ int lio_listio(int mode, FAR struct aiocb *const list[], int nent,
   return -ENOSYS;
 }
 
-#endif /* !CONFIG_DISABLE_PTHREAD */
+#endif /* CONFIG_LIBC_AIO && !CONFIG_PTHREAD_DISABLE */

@@ -51,7 +51,7 @@
 #include <nuttx/streams.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 /* This configuration directory is used in environment variable processing
  * when we need to reference the user's home directory.  There are no user
@@ -125,7 +125,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 #undef EXTERN

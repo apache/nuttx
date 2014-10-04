@@ -46,9 +46,37 @@
 #include <signal.h>
 #include <time.h>
 
+#include <nuttx/wqueue.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
+/* Work queue support is required.  In the flat, embedded build the low-
+ * priority work queue is required so that the asynchronous I/O does not
+ * interfere with high priority driver operations.  In the protected and
+ * kernel mode builds, user-space work queue support is required.  If these
+ * pre-requisites are met, then asynchronous I/O support can be enabled with
+ * CONFIG_LIBC_AIO
+ */
+
+#ifdef CONFIG_LIBC_AIO
+
+#ifndef CONFIG_SCHED_WORKQUEUE
+#  error Asynchronous I/O requiresCONFIG_SCHED_WORKQUEUE
+#else
+#  if defined (CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)
+#    ifndef CONFIG_SCHED_USRWORK
+#      error User-space asynchronous I/O requires CONFIG_SCHED_USRWORK
+#    endif
+#  else
+#    ifndef CONFIG_SCHED_LPWORK
+#      error Flat-build asynchronous I/O requires CONFIG_SCHED_LPWORK
+#    endif
+#  endif
+#endif
+
+/* Standard Definitions *****************************************************/
 /* aio_cancel return values
  *
  * AIO_ALLDONE     - Indicates that none of the requested operations could
@@ -93,6 +121,8 @@
 
 struct aiocb
 {
+  /* Standard fields required by POSIX */
+
   struct sigevent aio_sigevent;  /* Signal number and value */
   FAR volatile void *aio_buf;    /* Location of buffer */
   off_t aio_offset;              /* File offset */
@@ -100,6 +130,10 @@ struct aiocb
   int aio_fildes;                /* File descriptor */
   int aio_reqprio;               /* Request priority offset */
   int aio_lio_opcode;            /* Operation to be performed */
+
+  /* Non-standard, implementation-dependent data */
+
+  struct work_s aio_work;        /* Use to defer I/O to the work thread */
 };
 
 /****************************************************************************
@@ -126,12 +160,16 @@ ssize_t aio_return(FAR struct aiocb *aiocbp);
 int aio_suspend(FAR const struct aiocb *const list[], int nent,
                 FAR const struct timespec *timeout);
 int aio_write(FAR struct aiocb *aiocbp);
+
+#ifndef CONFIG_PTHREAD_DISABLE
 int lio_listio(int mode, FAR struct aiocb *const list[], int nent,
                FAR struct sigevent *sig);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
+#endif  /* CONFIG_LIBC_AIO */
 #endif /* __INCLUDE_AIO_H */
