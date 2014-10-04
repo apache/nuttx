@@ -8729,3 +8729,9 @@
 	  Add support for 64-bit lonjmp/setjmp in simulator platform.  This
 	  will permit operation of the simulation natively on a 64-bit platform
 	  (2014-10-2).
+	* include/fcntl.h: Implement create() as a macro (2014-10/4).
+	* fs/vfs/Make.defs,  fs_pread.c fs_pwrite.c, and include/unistd.h: Add
+	  pread() and pwrite() (2014-10-4).
+	* include/sys/syscall.h syscall/syscall.csv, syscall_lookup.h, and
+	  syscall_stublookup.c: Add pread() and pwrite() system calls
+	  (2014-10-4).
