@@ -37,7 +37,7 @@ ifneq ($(CONFIG_DISABLE_PTHREAD),y)
 
 # Add the asynchronous I/O C files to the build
 
-# CSRCS += 
+CSRCS += lio_listio.c
 
 # Add the asynchronous I/O directory to the build
 
