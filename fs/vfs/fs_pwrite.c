@@ -99,7 +99,7 @@ ssize_t pwrite(int fd, FAR const void *buf, size_t nbytes, off_t offset)
 
   /* Then seek to the correct position in the file */
 
-  pos = lseek(fd, offset, SEEK_CUR);
+  pos = lseek(fd, offset, SEEK_SET);
   if (pos == (off_t)-1)
     {
       /* This might fail is the offset is beyond the end of file */
@@ -114,7 +114,7 @@ ssize_t pwrite(int fd, FAR const void *buf, size_t nbytes, off_t offset)
 
   /* Restore the file position */
 
-  pos = lseek(fd, savepos, SEEK_CUR);
+  pos = lseek(fd, savepos, SEEK_SET);
   if (pos == (off_t)-1 && ret >= 0)
     {
       /* This really should not fail */
