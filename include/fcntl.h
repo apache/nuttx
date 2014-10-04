@@ -69,7 +69,7 @@
 /* Unsupported, but required open flags */
 
 #define O_RSYNC     0               /* Synchronize input on read */
-#define O_ACCMODE   0               /* Required by POSIX */
+#define O_ACCMODE   O_RDWR          /* Mask for access mode */
 #define O_NOCTTY    0               /* Required by POSIX */
 #define O_TEXT      0               /* Open the file in text (translated) mode. */
 

@@ -460,7 +460,7 @@ if SCHED_LPWORK
 
 config SCHED_LPWORKPRIORITY
 	int "Low priority worker thread priority"
-	default 50
+	default 100
 	---help---
 		The execution priority of the lopwer priority worker thread.  Default: 192
 

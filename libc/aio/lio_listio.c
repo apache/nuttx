@@ -164,7 +164,7 @@ static pthread_addr_t lio_thread(pthread_addr_t arg)
  *
  *   If the buffer pointed to by 'list' or the aiocb structures pointed to
  *   by the elements of the array 'list' become illegal addresses before all
- *   asynchronous I/O completed and, if necessary, the notification is 
+ *   asynchronous I/O completed and, if necessary, the notification is
  *   sent, then the behavior is undefined. If the buffers pointed to by the
  *   aio_buf member of the aiocb structure pointed to by the elements of
  *   the array 'list' become illegal addresses prior to the asynchronous

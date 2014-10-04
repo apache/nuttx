@@ -135,7 +135,7 @@ struct aiocb
 
   struct work_s aio_work;        /* Used to defer I/O to the work thread */
   pid_t aio_pid;                 /* ID of client to be notify at completion */
-  ssize_t aio_result;            /* Support aio_error() and aio_return() */
+  volatile ssize_t aio_result;   /* Support for aio_error() and aio_return() */
 };
 
 /****************************************************************************
