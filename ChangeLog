@@ -8751,3 +8751,8 @@
 	  lio_listio.c, and aio_fsync.c.  This completes this implementation
 	  of the asynchronous I/O interfaces but there are still untested
 	  (2014-9-5).
+	* fs/aio/Make.defs, aio.h, aio_cancel.c, aio_fsync.c, aio_read.c,
+	  aio_signal.c, and aio_write.c: Move all file operations from libc/aio
+	  to fs/aio.  These will need to be kernel routines in order to
+	  handler issues with using file descriptors on worker thread
+	  (2014-10-5).
