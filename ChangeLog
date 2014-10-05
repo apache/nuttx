@@ -8741,3 +8741,10 @@
 	* libc/Kconfig, aio/aio_read.c, aio_write.c, aio_return.c, aio_error.c
 	  aio.h, and Make.defs: Initial implementation of aio_read(),
 	  aio_write(), aio_return(), and aio_error() (2014-10-4).
+	* include/signal.h and sched/Kconfig:  Add definitions for SIGPOLL
+	  (2014-9-5).
+	* libc/aio/aio_signal.c, Make.defs, and aio.h: Move AIO signal logic
+	  to a common location in aio_signal.c.  Also fix several typos
+	  (2014-9-5).
+	* libc/aio/aio_suspend.c and Make.defs: Initial implementation of
+	  aio_suspend() (2014-9-5).
