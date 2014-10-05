@@ -48,6 +48,7 @@ config FS_WRITABLE
 	bool
 	default n
 
+source fs/aio/Kconfig
 source fs/semaphore/Kconfig
 source fs/mqueue/Kconfig
 source fs/shm/Kconfig

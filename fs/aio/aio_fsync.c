@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/aio/aio_fsync.c
+ * fs/aio/aio_fsync.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -43,10 +43,10 @@
 #include <aio.h>
 #include <assert.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <nuttx/wqueue.h>
 
-#include "lib_internal.h"
 #include "aio/aio.h"
 
 #ifdef CONFIG_LIBC_AIO
@@ -214,7 +214,7 @@ int aio_fsync(int op, FAR struct aiocb *aiocbp)
 
   /* Defer the work to the worker thread */
 
-  ret = work_queue(AIO_QUEUE, &aiocbp->aio_work, aio_fsync_worker, aiocbp, 0);
+  ret = work_queue(LPWORK, &aiocbp->aio_work, aio_fsync_worker, aiocbp, 0);
   if (ret < 0)
     {
       aiocbp->aio_result = ret;

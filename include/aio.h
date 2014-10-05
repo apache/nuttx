@@ -58,28 +58,20 @@
 #  undef CONFIG_LIBC_AIO
 #endif
 
-/* Work queue support is required.  In the flat, embedded build the low-
- * priority work queue is required so that the asynchronous I/O does not
- * interfere with high priority driver operations.  In the protected and
- * kernel mode builds, user-space work queue support is required.  If these
- * pre-requisites are met, then asynchronous I/O support can be enabled with
- * CONFIG_LIBC_AIO
+/* Work queue support is required.  The low-priority work queue is required
+ * so that the asynchronous I/O does not interfere with high priority driver
+ * operations.  If this pre-requisite is met, then asynchronous I/O support
+ * can be enabled with CONFIG_LIBC_AIO
  */
 
 #ifdef CONFIG_LIBC_AIO
 
 #ifndef CONFIG_SCHED_WORKQUEUE
 #  error Asynchronous I/O requires CONFIG_SCHED_WORKQUEUE
-#else
-#  if defined (CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)
-#    ifndef CONFIG_SCHED_USRWORK
-#      error User-space asynchronous I/O requires CONFIG_SCHED_USRWORK
-#    endif
-#  else
-#    ifndef CONFIG_SCHED_LPWORK
-#      error Flat-build asynchronous I/O requires CONFIG_SCHED_LPWORK
-#    endif
-#  endif
+#endif
+
+#ifndef CONFIG_SCHED_LPWORK
+#  error Asynchronous I/O requires CONFIG_SCHED_LPWORK
 #endif
 
 /* Standard Definitions *****************************************************/

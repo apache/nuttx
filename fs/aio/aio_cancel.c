@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/aio/aio_signal.c
+ * fs/aio/aio_cancel.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,12 +39,12 @@
 
 #include <nuttx/config.h>
 
-#include <sched.h>
-#include <signal.h>
 #include <aio.h>
+#include <sched.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+
+#include <nuttx/wqueue.h>
 
 #include "aio/aio.h"
 
@@ -74,75 +74,94 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
 /****************************************************************************
- * Name: aio_signal
+ * Name: aio_read
  *
  * Description:
- *   Signal the client that an I/O has completed.
+ *   The aio_cancel() function attempts to cancel one or more asynchronous
+ *   I/O requests currently outstanding against file descriptor 'fildes'.
+ *   The aiocbp argument points to the asynchronous I/O control block for
+ *   a particular request to be cancelled..
+ *
+ *   Normal asynchronous notification will occur for asynchronous I/O
+ *   operations that are successfully cancelled. If there are requests that
+ *   cannot be cancelled, then the normal asynchronous completion process
+ *   will take place for those requests when they are completed.
+ *
+ *   For requested operations that are successfully cancelled, the associated
+ *   error status will be set to ECANCELED and the return status will be -1.
+ *   For requested operations that are not successfully cancelled, the aiocbp
+ *   will not be modified by aio_cancel().
  *
  * Input Parameters:
- *   aiocbp - Pointer to the asynchronous I/O state structure that includes
- *            information about how to signal the client
+ *   fildes - Not used in this implmentation
+ *   aiocbp - Points to the asynchronous I/O control block for a particular
+ *            request to be cancelled.
  *
  * Returned Value:
- *   Zero (OK) if the client was successfully signalled.  Otherwise, a
- *   negated errno value is returned.
+ *    The aio_cancel() function will return the value AIO_CANCELED if the
+ *    requested operation(s) were cancelled. The value AIO_NOTCANCELED will
+ *    be returned if at least one of the requested operation(s) cannot be
+ *    cancelled because it is in progress. In this case, the state of the
+ *    other operations, if any, referenced in the call to aio_cancel() is
+ *    not indicated by the return value of aio_cancel(). The application
+ *    may determine the state of affairs for these operations by using
+ *    aio_error(). The value AIO_ALLDONE is returned if all of the
+ *    operations have already completed. Otherwise, the function will return
+ *    -1 and set errno to indicate the error.
  *
- * Assumptions:
- *   This function runs only in the context of the worker thread.
+ * POSIX Compliance
+ *   By standard, this function support the value of NULL for aiocbp.  If
+ *   aiocbp is NULL, then all outstanding cancelable asynchronous I/O
+ *   requests against fildes will be cancelled.  In this implementation,
+ *   nothing is done if aiocbp is NULL and the fildes parameter is always
+ *   ignored.  ENOSYS will be returned.
  *
  ****************************************************************************/
 
-int aio_signal(FAR struct aiocb *aiocbp)
+int aio_cancel(int fildes, FAR struct aiocb *aiocbp)
 {
-  int errcode;
   int status;
   int ret;
 
-  DEBUGASSERT(aiocbp);
- 
-  ret = OK; /* Assume success */
+  /* Ignore NULL AIO control blocks (see "POSIX Compliance" above) */
 
-  /* Signal the client */
-
-  if (aiocbp->aio_sigevent.sigev_notify == SIGEV_SIGNAL)
+  if (aiocbp)
     {
-#ifdef CONFIG_CAN_PASS_STRUCTS
-      status = sigqueue(aiocbp->aio_pid, aiocbp->aio_sigevent.sigev_signo,
-                        aiocbp->aio_sigevent.sigev_value);
-#else
-      status = sigqueue(aiocbp->aio_pid, aiocbp->aio_sigevent.sigev_sign,
-                        aiocbp->aio_sigevent.sigev_value.sival_ptr);
-#endif
-      if (ret < 0)
-        {
-          errcode = get_errno();
-          fdbg("ERROR: sigqueue failed: %d\n", errcode);
-          ret = ERROR;
-        }
-    }
-
-  /* Send the poll signal in any event in case the caller is waiting
-   * on sig_suspend();
-   */
-
-  status = kill(aiocbp->aio_pid, SIGPOLL);
-  if (status && ret == OK)
-    {
-      errcode = get_errno();
-      fdbg("ERROR: kill failed: %d\n", errcode);
-      ret = ERROR;
-    }
-
-  /* Make sure that errno is set correctly on return */
-
-  if (ret < 0)
-    {
-      set_errno(errcode);
+      set_errno(ENOSYS);
       return ERROR;
     }
 
-  return OK;
+  /* Lock the scheduler so that no I/O events can complete on the worker
+   * thread until we set complete this operation.
+   */
+
+  sched_lock();
+
+  /* Check if the I/O has completed */
+
+  if (aiocbp->aio_result == -EINPROGRESS)
+    {
+      /* No ... attempt to cancel the I/O.  There are two possibilities:  (1)
+       * the work has already been started and is no longer queued, or (2)
+       * the work has not been started and is still in the work queue.  Only
+       * the second case can be cancelled.  work_cancel() will return
+       * -ENOENT in the first case.
+       */
+
+      status = work_cancel(LPWORK, &aiocbp->aio_work);
+      ret = status >= 0 ? AIO_CANCELED : AIO_NOTCANCELED;
+    }
+  else
+    {
+      /* The I/O has already completed */
+
+      ret = AIO_ALLDONE;
+    }
+
+  sched_unlock();
+  return ret;
 }
 
 #endif /* CONFIG_LIBC_AIO */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/aio/aio_read.c
+ * fs/aio/aio_write.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,14 +40,15 @@
 #include <nuttx/config.h>
 
 #include <unistd.h>
+#include <fcntl.h>
 #include <sched.h>
 #include <aio.h>
 #include <assert.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <nuttx/wqueue.h>
 
-#include "lib_internal.h"
 #include "aio/aio.h"
 
 #ifdef CONFIG_LIBC_AIO
@@ -74,7 +75,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: aio_read_worker
+ * Name: aio_write_worker
  *
  * Description:
  *   This function executes on the worker thread and performs the
@@ -89,35 +90,63 @@
  *
  ****************************************************************************/
 
-static void aio_read_worker(FAR void *arg)
+static void aio_write_worker(FAR void *arg)
 {
   FAR struct aiocb *aiocbp = (FAR struct aiocb *)arg;
   DEBUGASSERT(arg);
-  ssize_t nread;
+  ssize_t nwritten;
+  int oflags;
 
-  /* Perform the read using:
-   *
-   *   aio_fildes  - File descriptor
-   *   aio_buf     - Location of buffer
-   *   aio_nbytes  - Length of transfer
-   *   aio_offset  - File offset
-   */
+  /* Call fcntl(F_GETFL) to get the file open mode. */
 
- nread = pread(aiocbp->aio_fildes, (FAR void *)aiocbp->aio_buf,
-               aiocbp->aio_nbytes, aiocbp->aio_offset);
-
-  /* Set the result of the read */
-
-  if (nread < 0)
+  oflags = fcntl(aiocbp->aio_fildes, F_GETFL);
+  if (oflags < 0)
     {
       int errcode = get_errno();
-      fdbg("ERROR: pread failed: %d\n", errode);
-      DEBUGASSERT(errcode > 0);
+      fdbg("ERROR: fcntl failed: %d\n", errode);
       aiocbp->aio_result = -errcode;
     }
   else
     {
-      aiocbp->aio_result = nread;
+      /* Perform the write using:
+       *
+       *   aio_fildes  - File descriptor
+       *   aio_buf     - Location of buffer
+       *   aio_nbytes  - Length of transfer
+       *   aio_offset  - File offset
+       */
+
+      /* Check if O_APPEND is set in the file open flags */
+
+      if ((oflags & O_APPEND) != 0)
+        {
+          /* Append to the current file position */
+
+          nwritten = write(aiocbp->aio_fildes,
+                           (FAR const void *)aiocbp->aio_buf,
+                           aiocbp->aio_nbytes);
+        }
+      else
+        {
+          nwritten = pwrite(aiocbp->aio_fildes,
+                            (FAR const void *)aiocbp->aio_buf,
+                            aiocbp->aio_nbytes,
+                            aiocbp->aio_offset);
+        }
+
+      /* Set the result of the write */
+
+      if (nwritten < 0)
+        {
+          int errcode = get_errno();
+          fdbg("ERROR: write/pwrite failed: %d\n", errode);
+          DEBUGASSERT(errcode > 0);
+          aiocbp->aio_result = -errcode;
+        }
+      else
+        {
+          aiocbp->aio_result = nwritten;
+        }
     }
 
   /* Signal the client */
@@ -130,32 +159,34 @@ static void aio_read_worker(FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: aio_read
+ * Name: aio_write
  *
  * Description:
- *   The aio_read() function reads aiocbp->aio_nbytes from the file
- *   associated with aiocbp->aio_fildes into the buffer pointed to by
- *   aiocbp->aio_buf. The function call will return when the read request
+ *   The aio_write() function writes aiocbp->aio_nbytes to the file
+ *   associated with aiocbp->aio_fildes from the buffer pointed to by
+ *   aiocbp->aio_buf. The function call will return when the write request
  *   has been initiated or queued to the file or device (even when the data
  *   cannot be delivered immediately).
  *
  *   The aiocbp value may be used as an argument to aio_error() and
  *   aio_return() in order to determine the error status and return status,
- *   respectively, of the asynchronous operation while it is proceeding. If
- *   an error condition is encountered during queuing, the function call
- *   will return without having initiated or queued the request. The
- *   requested operation takes place at the absolute position in the file as
- *   given by aio_offset, as if lseek() were called immediately prior to the
- *   operation with an offset equal to aio_offset and a whence equal to
- *   SEEK_SET. After a successful call to enqueue an asynchronous I/O
- *   operation, the value of the file offset for the file is unspecified.
- *
- *   The aiocbp->aio_lio_opcode field will be ignored by aio_read().
+ *   respectively, of the asynchronous operation while it is proceeding.
  *
  *   The aiocbp argument points to an aiocb structure. If the buffer pointed
  *   to by aiocbp->aio_buf or the control block pointed to by aiocbp becomes
  *   an illegal address prior to asynchronous I/O completion, then the
  *   behavior is undefined.
+ *
+ *   If O_APPEND is not set for the file descriptor aio_fildes, then the
+ *   requested operation will take place at the absolute position in the file
+ *   as given by aio_offset, as if lseek() were called immediately prior to the
+ *   operation with an offset equal to aio_offset and a whence equal to SEEK_SET.
+ *   If O_APPEND is set for the file descriptor, write operations append to the
+ *   file in the same order as the calls were made. After a successful call to
+ *   enqueue an asynchronous I/O operation, the value of the file offset for the
+ *   file is unspecified.
+ *
+ *   The aiocbp->aio_lio_opcode field will be ignored by aio_write().
  *
  *   Simultaneous asynchronous operations using the same aiocbp produce
  *   undefined results.
@@ -169,49 +200,49 @@ static void aio_read_worker(FAR void *arg)
  *
  * Returned Value:
  *
- *   The aio_read() function will return the value zero if the I/O operation
+ *   The aio_write() function will return the value zero if the I/O operation
  *   is successfully queued; otherwise, the function will return the value
- *   -1 and set errno to indicate the error.  The aio_read() function will
+ *   -1 and set errno to indicate the error.  The aio_write() function will
  *   ail if:
  *
  *   EAGAIN - The requested asynchronous I/O operation was not queued due to
  *     system resource limitations.
  *
  *   Each of the following conditions may be detected synchronously at the
- *   time of the call to aio_read(), or asynchronously. If any of the
- *   conditions below are detected synchronously, the aio_read() function
+ *   time of the call to aio_write(), or asynchronously. If any of the
+ *   conditions below are detected synchronously, the aio_write() function
  *   will return -1 and set errno to the corresponding value. If any of the
  *   conditions below are detected asynchronously, the return status of the
  *   asynchronous operation is set to -1, and the error status of the
  *   asynchronous operation is set to the corresponding value.
  *
  *   EBADF - The aiocbp->aio_fildes argument is not a valid file descriptor
- *     open for reading.
+ *     open for writing.
  *   EINVAL - The file offset value implied by aiocbp->aio_offset would be
  *     invalid, aiocbp->aio_reqprio is not a valid value, or
  *     aiocbp->aio_nbytes is an invalid value.
  *
- *   In the case that the aio_read() successfully queues the I/O operation
+ *   In the case that the aio_write() successfully queues the I/O operation
  *   but the operation is subsequently cancelled or encounters an error, the
  *   return status of the asynchronous operation is one of the values
- *   normally returned by the read() function call. In addition, the error
+ *   normally returned by the write() function call. In addition, the error
  *   status of the asynchronous operation is set to one of the error
- *   statuses normally set by the read() function call, or one of the
+ *   statuses normally set by the write() function call, or one of the
  *   following values:
  *
  *   EBADF - The aiocbp->aio_fildes argument is not a valid file descriptor
- *     open for reading.
- *   ECANCELED - The requested I/O was cancelled before the I/O completed
- *     due to an explicit aio_cancel() request.
+ *     open for writing.
  *   EINVAL - The file offset value implied by aiocbp->aio_offset would be
  *     invalid.
+ *   ECANCELED - The requested I/O was cancelled before the I/O completed
+ *     due to an explicit aio_cancel() request.
  *
  * The following condition may be detected synchronously or asynchronously:
  *
- *   EOVERFLOW - The file is a regular file, aiobcp->aio_nbytes is greater
- *     than 0, and the starting offset in aiobcp->aio_offset is before the
- *     end-of-file and is at or beyond the offset maximum in the open file
- *     description associated with aiocbp->aio_fildes.
+ *   EFBIG - The file is a regular file, aiobcp->aio_nbytes is greater
+ *     than 0, and the starting offset in aiobcp->aio_offset is at or
+ *     beyond the offset maximum in the open file description associated
+ *     with aiocbp->aio_fildes.
  *
  * POSIX Compliance:
  * - The POSIX specification of asynchronous I/O implies that a thread is
@@ -245,7 +276,7 @@ static void aio_read_worker(FAR void *arg)
  *
  ****************************************************************************/
 
-int aio_read(FAR struct aiocb *aiocbp)
+int aio_write(FAR struct aiocb *aiocbp)
 {
   int ret;
 
@@ -262,7 +293,7 @@ int aio_read(FAR struct aiocb *aiocbp)
 
   /* Defer the work to the worker thread */
 
-  ret = work_queue(AIO_QUEUE, &aiocbp->aio_work, aio_read_worker, aiocbp, 0);
+  ret = work_queue(LPWORK, &aiocbp->aio_work, aio_write_worker, aiocbp, 0);
   if (ret < 0)
     {
       aiocbp->aio_result = ret;

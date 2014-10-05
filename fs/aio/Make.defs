@@ -1,7 +1,7 @@
 ############################################################################
-# fs/Makefile
+# fs/aio/Make.defs
 #
-#   Copyright (C) 2007, 2008, 2011-2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,78 +33,14 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
+ifeq ($(CONFIG_LIBC_AIO),y)
 
-ASRCS =
-AOBJS = $(ASRCS:.S=$(OBJEXT))
+# Add the asynchronous I/O C files to the build
 
-CSRCS =
+CSRCS += aio_cancel.c aio_fsync.c aio_read.c aio_signal.c aio_write.c
 
-DEPPATH = --dep-path .
-VPATH = .
+# Add the asynchronous I/O directory to the build
 
-include inode/Make.defs
-include vfs/Make.defs
-include driver/Make.defs
-include dirent/Make.defs
-include aio/Make.defs
-include mmap/Make.defs
-
-# OS resources
-
-include semaphore/Make.defs
-include mqueue/Make.defs
-include shm/Make.defs
-
-# Additional files required is mount-able file systems are supported
-
-ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
-ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
-
-include mount/Make.defs
-include fat/Make.defs
-include romfs/Make.defs
-include nxffs/Make.defs
-include nfs/Make.defs
-include smartfs/Make.defs
-include binfs/Make.defs
-include procfs/Make.defs
-
+DEPPATH += --dep-path aio
+VPATH += :aio
 endif
-endif
-
-COBJS = $(CSRCS:.c=$(OBJEXT))
-
-SRCS = $(ASRCS) $(CSRCS)
-OBJS = $(AOBJS) $(COBJS)
-
-BIN = libfs$(LIBEXT)
-
-SUBDIRS = mmap fat romfs nxffs nfs binfs procfs
-
-all: $(BIN)
-
-$(AOBJS): %$(OBJEXT): %.S
-	$(call ASSEMBLE, $<, $@)
-
-$(COBJS): %$(OBJEXT): %.c
-	$(call COMPILE, $<, $@)
-
-$(BIN):	$(OBJS)
-	$(call ARCHIVE, $@, $(OBJS))
-
-.depend: Makefile $(SRCS)
-	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
-	$(Q) touch $@
-
-depend: .depend
-
-clean:
-	$(call DELFILE, $(BIN))
-	$(call CLEAN)
-
-distclean: clean
-	$(call DELFILE, Make.dep)
-	$(call DELFILE, .depend)
-
--include Make.dep

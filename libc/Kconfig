@@ -79,14 +79,6 @@ config EOL_IS_EITHER_CRLF
 
 endchoice
 
-config LIBC_AIO
-	bool "Asynchronous I/O support"
-	default n
-	depends on ((BUILD_PROTECTED || BUILD_KERNEL) && SCHED_USRWORK) || (BUILD_FLAT && SCHED_LPWORK)
-	---help---
-		Enable support for aynchronous I/O.  This selection enabled the
-		interface declared in include/aio.h.
-
 config LIBC_EXECFUNCS
 	bool "Enable exec[l|v] / posix_spawn() Support"
 	default n
