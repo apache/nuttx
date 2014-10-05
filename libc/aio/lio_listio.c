@@ -39,15 +39,16 @@
 
 #include <nuttx/config.h>
 
-#include <pthread.h>
+#include <unistd.h>
 #include <signal.h>
 #include <aio.h>
 #include <assert.h>
 #include <errno.h>
 
 #include "lib_internal.h"
+#include "aio/aio.h"
 
-#if defined(CONFIG_LIBC_AIO) && !defined(CONFIG_PTHREAD_DISABLE)
+#ifdef CONFIG_LIBC_AIO
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -57,16 +58,15 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-/* This structure is passed to lio_thread() when the it is started by
- * lio_listio().
- */
 
-struct lio_threadparm_s
+struct lio_sighand_s
 {
-  FAR struct sigevent *sig;        /* Used to notify the caller */
-  FAR struct aiocb *const *list;  /* The list of I/O operations to be performed */
-  pid_t pid;                       /* ID of caller to be notified */
-  int nent;                        /* The number of elements in the list */
+  FAR struct aiocb * const *list;  /* List of I/O operations */
+  FAR struct sigevent *sig;        /* Describes how to signal the caller */
+  int nent;                        /* Number or elements in list[] */
+  pid_t pid;                       /* ID of client */
+  sigset_t oprocmask;              /* sigprocmask to restore */
+  struct sigaction oact;           /* Signal handler to restore */
 };
 
 /****************************************************************************
@@ -82,53 +82,310 @@ struct lio_threadparm_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lio_dolistio
+ * Name: lio_checkio
  *
  * Description:
- *   This function executes the I/O list.  If lio_listio() is call with mode
- *   equal to LIO_WAIT, then this function will be called directly from
- *   lio_listio().  If lio_listio() is called with mode equal to LIO_NOWAIT,
- *   this function will be called from lio_thread.  In either case, this
- *   function will not return until all of the I/O is the list has completed.
+ *  Check if all I/O operations in the list are complete.
  *
  * Input Parameters:
  *   list - The list of I/O operations to be performed
  *   nent - The number of elements in the list
  *
  * Returned Value:
- *   Zero if the I/O list was complete successfully.  Otherwise, a negated
- *   errno value is returned.  NOTE that the errno is not set here because
- *   we may be running asynchronously on a different thread from the caller.
+ *  Zero (OK) is returned if all I/O completed successfully.
+ *  -EINPROGRESS is returned if one or more I/Os have not yet completed.
+ *  The negated errno value if first error noted in the case where all I/O
+ *  completed but one or more I/Os completed with an error.
+ *
+ * Assumptions:
+ *  The scheduler is locked and no I/O can complete asynchronously with
+ *  the logic in this function.
  *
  ****************************************************************************/
 
-static int lio_dolistio(FAR struct aiocb *const *list, int nent)
+static int lio_checkio(FAR struct aiocb * const *list, int nent)
 {
-#warning Missing logic
-  return -ENOSYS;
+  FAR struct aiocb *aiocbp;
+  int ret;
+  int i;
+
+  ret = OK; /* Assume success */
+
+  /* Check each entry in the list.  Break out of the loop if any entry
+   * has not completed.
+   */
+
+  for (i = 0; i < nent; i++)
+    {
+      /* Skip over NULL entries */
+
+      aiocbp = list[i];
+      if (aiocbp)
+        {
+          /* Check if the I/O has completed */
+
+          if (aiocbp->aio_result == -EINPROGRESS)
+            {
+              /* No.. return -EINPROGRESS */
+
+              return -EINPROGRESS;
+            }
+
+          /* Check for an I/O error */
+
+          else if (aiocbp->aio_result < 0 && ret == OK)
+            {
+              /* Some other error other than -EINPROGRESS */
+
+              ret = aiocbp->aio_result;
+            }
+        }
+    }
+
+  /* All of the I/Os have completed */
+
+  return ret;
 }
 
 /****************************************************************************
- * Name: lio_thread
+ * Name: lio_sighandler
  *
  * Description:
- *   When lio_listio() is called with LIO_NOWAIT, list I/O processing will
- *   occur on this thread.
+ *   Handle the SIGPOLL signal.
  *
  * Input Parameters:
- *   arg - An instance of struct lio_thread_parm_s cast to pthread_addr_.t
+ *   signo   - The number of the signal that we caught (SIGPOLL)
+ *   info    - Information accompanying the signal
+ *   context - Not used in NuttX
  *
  * Returned Value:
- *   NULL is returned.
+ *  None
  *
  ****************************************************************************/
 
-static pthread_addr_t lio_thread(pthread_addr_t arg)
+static void lio_sighandler(int signo, siginfo_t *info, void *ucontext)
 {
-  FAR struct lio_threadparm_s *parms = (FAR struct lio_threadparm_s *)arg;
-  DEBUGASSERT(parms && parms->list);
-#warning Missing logic
-  return NULL;
+  FAR struct aiocb *aiocbp;
+  FAR struct lio_sighand_s *sighand;
+  int ret;
+
+  DEBUGASSERT(signo == SIGPOLL && info);
+
+  /* The info structure should contain a pointer to the AIO control block */
+
+  aiocbp = (FAR struct aiocb *)info->si_value.sival_ptr;
+  DEBUGASSERT(aiocbp && aiocbp->aio_result != -EINPROGRESS);
+
+  /* Recover our private data from the AIO control block */
+
+  sighand = (FAR struct lio_sighand_s *)aiocbp->aio_priv;
+  DEBUGASSERT(sighand && sighand->list);
+  aiocbp->aio_priv = NULL;
+
+  /* Prevent any asynchronous I/O completions while the signal handler runs */
+
+  sched_lock();
+
+  /* Check if all of the pending I/O has completed */
+
+  ret = lio_checkio(sighand->list, sighand->nent);
+  if (ret != -EINPROGRESS)
+    {
+      /* All pending I/O has completed */
+      /* Restore the signal handler */
+
+      (void)sigaction(SIGPOLL, &sighand->oact, NULL);
+
+      /* Restore the sigprocmask */
+
+      (void)sigprocmask(SIG_SETMASK, &sighand->oprocmask, NULL);
+
+      /* Signal the client */
+
+      if (sighand->sig->sigev_notify == SIGEV_SIGNAL)
+        {
+#ifdef CONFIG_CAN_PASS_STRUCTS
+          (void)sigqueue(sighand->pid, sighand->sig->sigev_signo,
+                         sighand->sig->sigev_value);
+#else
+          (void)sigqueue(sighand->aio_pid, sighand->sig.sigev_sign,
+                         sighand->sig->sigev_value.sival_ptr);
+#endif
+        }
+
+      /* And free the container */
+
+      lib_free(sighand);
+    }
+
+  sched_unlock();
+}
+
+/****************************************************************************
+ * Name: lio_sigsetup
+ *
+ * Description:
+ *   Setup a signal handler to detect when until all I/O completes.
+ *
+ * Input Parameters:
+ *   list - The list of I/O operations to be performed
+ *   nent - The number of elements in the list
+ *
+ * Returned Value:
+ *  Zero (OK) is returned if all I/O completed successfully; Otherwise, a
+ *  negated errno value is returned corresponding to the first error
+ *  detected.
+ *
+ * Assumptions:
+ *  The scheduler is locked and no I/O can complete asynchronously with
+ *  the logic in this function.
+ *
+ ****************************************************************************/
+
+static int lio_sigsetup(FAR struct aiocb * const *list, int nent,
+                        FAR struct sigevent *sig)
+{
+  FAR struct aiocb *aiocbp;
+  FAR struct lio_sighand_s *sighand;
+  sigset_t sigset;
+  struct sigaction act;
+  int status;
+  int i;
+
+  /* Allocate a structure to pass data to the signal handler */
+
+  sighand = (FAR struct lio_sighand_s *)lib_zalloc(sizeof(struct lio_sighand_s));
+  if (!sighand)
+    {
+      fdbg("ERROR: lib_zalloc failed\n");
+      return -ENOMEM;
+    }
+
+  /* Initialize the allocated structure */
+
+  sighand->list = list;
+  sighand->sig  = sig;
+  sighand->nent = nent;
+  sighand->pid  = getpid();
+
+  /* Save this structure as the private data attached to each aiocb */
+
+  for (i = 0; i < nent; i++)
+    {
+      /* Skip over NULL entries in the list */
+
+      aiocbp = list[i];
+      if (aiocbp)
+        {
+          FAR void *priv = NULL;
+
+          /* Check if I/O is pending for  this entry */
+
+          if (aiocbp->aio_result == -EINPROGRESS)
+            {
+              priv = (FAR void *)sighand;
+            }
+
+          aiocbp->aio_priv = priv;
+        }
+    }
+
+  /* Make sure that SIGPOLL is not blocked */
+
+  (void)sigemptyset(&sigset);
+  (void)sigaddset(&sigset, SIGPOLL);
+  status = sigprocmask(SIG_UNBLOCK, &sigset, &sighand->oprocmask);
+  if (status != OK)
+    {
+      int errcode = get_errno();
+      fdbg("ERROR sigprocmask failed: %d\n", errcode);
+      DEBUGASSERT(errcode > 0);
+      return -errcode;
+    }
+
+  /* Attach our signal handler */
+
+  printf("waiter_main: Registering signal handler\n" );
+  act.sa_sigaction = lio_sighandler;
+  act.sa_flags = SA_SIGINFO;
+
+  (void)sigfillset(&act.sa_mask);
+  (void)sigdelset(&act.sa_mask, SIGPOLL);
+
+  status = sigaction(SIGPOLL, &act, &sighand->oact);
+  if (status != OK)
+    {
+      int errcode = get_errno();
+      fdbg("ERROR sigaction failed: %d\n", errcode);
+      DEBUGASSERT(errcode > 0);
+      return -errcode;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: lio_waitall
+ *
+ * Description:
+ *  Wait for all I/O operations in the list to be complete.
+ *
+ * Input Parameters:
+ *   list - The list of I/O operations to be performed
+ *   nent - The number of elements in the list
+ *
+ * Returned Value:
+ *  Zero (OK) is returned if all I/O completed successfully; Otherwise, a
+ *  negated errno value is returned corresponding to the first error
+ *  detected.
+ *
+ * Assumptions:
+ *  The scheduler is locked and no I/O can complete asynchronously with
+ *  the logic in this function.
+ *
+ ****************************************************************************/
+
+static int lio_waitall(FAR struct aiocb * const *list, int nent)
+{
+  sigset_t set;
+  int ret;
+
+  /* Loop until all I/O completes */
+
+  for (;;)
+    {
+      /* Check if all I/O has completed */
+
+      ret = lio_checkio(list, nent);
+      if (ret != -EINPROGRESS)
+        {
+          /* All I/O has completed.. We are finished.  */
+
+          return ret;
+        }
+
+      /* Then wait for SIGPOLL -- indefinitely.
+       *
+       * NOTE: If completion of the I/O causes other signals to be generated
+       * first, then this will wake up and return EINTR instead of success.
+       */
+
+      sigemptyset(&set);
+      sigaddset(&set, SIGPOLL);
+
+      ret = sigwaitinfo(&set, NULL);
+      if (ret < 0)
+        {
+          /* The most likely reason that we would get here is because some
+           * unrelated signal has been received.
+           */
+
+          int errcode = get_errno();
+          fdbg("ERROR: sigwaitinfo failed: %d\n", errcode);
+          DEBUGASSERT(errcode > 0);
+          return -errcode;
+        }
+    }
 }
 
 /****************************************************************************
@@ -279,8 +536,195 @@ static pthread_addr_t lio_thread(pthread_addr_t arg)
 int lio_listio(int mode, FAR struct aiocb *const list[], int nent,
                FAR struct sigevent *sig)
 {
-#warning Missing logic
-  return -ENOSYS;
+  FAR struct aiocb *aiocbp;
+  int nqueued;
+  int errcode;
+  int retcode;
+  int status;
+  int ret;
+  int i;
+
+  DEBUGASSERT(mode == LIO_WAIT || mode == LIO_NOWAIT);
+  DEBUGASSERT(list);
+
+  nqueued = 0;    /* No I/O operations yet queued */
+  ret     = OK;   /* Assume success */
+
+  /* Lock the scheduler so that no I/O events can complete on the worker
+   * thread until we set our wait set up.  Pre-emption will, of course, be
+   * re-enabled while we are waiting for the signal.
+   */
+
+  sched_lock();
+
+  /* Submit each asynchronous I/O operation in the list, skipping over NULL
+   * entries.
+   */
+
+  for (i = 0; i < nent; i++)
+    {
+      /* Skip over NULL entries */
+
+      aiocbp = list[i];
+      if (aiocbp)
+        {
+          /* Submit the operation according to its opcode */
+
+          status = OK;
+          switch (aiocbp->aio_lio_opcode)
+            {
+
+            case LIO_NOP:
+              {
+                /* Mark the do-nothing operation complete */
+
+                aiocbp->aio_result = OK;
+              }
+              break;
+
+            case LIO_READ:
+            case LIO_WRITE:
+              {
+                if (aiocbp->aio_lio_opcode == LIO_READ)
+                  {
+                    /* Submit the asynchronous read operation */
+
+                    status = aio_read(aiocbp);
+                  }
+                else
+                  {
+                    /* Submit the asynchronous write operation */
+
+                    status = aio_write(aiocbp);
+                  }
+
+                if (status < 0)
+                  {
+                    /* Failed to queue the I/O.  Set up the error return. */
+
+                    errcode = get_errno();
+                    fdbg("ERROR: aio_read/write failed: %d\n", errcode);
+                    DEBUGASSERT(errocode > 0);
+                    aiocbp->aio_result = -errcode;
+                    ret = ERROR;
+                  }
+                else
+                  {
+                    /* Increment the count of successfully queue operations */
+
+                    nqueued++;
+                  }
+              }
+              break;
+
+            default:
+              {
+                /* Make the invalid operation complete with an error */
+
+                fdbg("ERROR: Unrecognized opcode: %d\n", aiocbp->aio_lio_opcode);
+                aiocbp->aio_result = -EINVAL;
+                ret = ERROR;
+              }
+              break;
+            }
+        }
+    }
+
+  /* If there was any failure in queuing the I/O, EIO will be returned */
+
+  retcode = EIO;
+
+  /* Now what? Three possibilities:
+   *
+   * Case 1: mode == LIO_WAIT
+   *
+   *   Ignore the sig argument; Do no return until all I/O completes.
+   */
+
+  if (mode == LIO_WAIT)
+    {
+      /* Don't wait if all if no I/O was queue */
+
+      if (nqueued > 0)
+        {
+          /* Wait until all I/O completes.  The scheduler will be unlocked
+           * while we are waiting.
+           */
+
+          status = lio_waitall(list, nent);
+          if (status < 0 && ret != OK)
+            {
+              /* Something bad happened while waiting and this is the first
+               * error to be reported.
+               */
+
+              retcode = -status;
+              ret     = ERROR;
+            }
+        }
+    }
+
+  /* Case 2: mode == LIO_NOWAIT and sig != NULL
+   *
+   *   If any I/O was queued, then setup to signal the caller when all of
+   *   the transfers complete.
+   *
+   *   If no I/O was queue, then we I suppose that we need to signal the
+   *   caller ourself?
+   */
+
+  else if (sig && sig->sigev_notify == SIGEV_SIGNAL)
+    {
+      if (nqueued > 0)
+        {
+          /* Setup a signal handler to detect when until all I/O completes. */
+
+          status = lio_sigsetup(list, nent, sig);
+          if (status < 0 && ret != OK)
+            {
+              /* Something bad happened while setting up the signal and this
+               * is the first error to be reported.
+               */
+
+              retcode = -status;
+              ret     = ERROR;
+            }
+        }
+      else
+        {
+#ifdef CONFIG_CAN_PASS_STRUCTS
+          status = sigqueue(getpid(), sig->sigev_signo,
+                            sig->sigev_value);
+#else
+          status = sigqueue(getpid(), sig->sigev_signo,
+                            sig->sigev_value.sival_ptr);
+#endif
+
+          if (status < 0 && ret != OK)
+            {
+              /* Something bad happened while signalling ourself and this is
+               * the first error to be reported.
+               */
+
+              retcode = get_errno();
+              ret     = ERROR;
+            }
+        }
+    }
+
+  /* Case 3: mode == LIO_NOWAIT and sig == NULL
+   *
+   *   Just return now.
+   */
+
+  sched_unlock();
+  if (ret < 0)
+    {
+      set_errno(retcode);
+      return ERROR;
+    }
+
+  return OK;
 }
 
-#endif /* CONFIG_LIBC_AIO && !CONFIG_PTHREAD_DISABLE */
+#endif /* CONFIG_LIBC_AIO */

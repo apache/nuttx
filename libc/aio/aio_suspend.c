@@ -125,11 +125,6 @@ int aio_suspend(FAR const struct aiocb *const list[], int nent,
 
   DEBUGASSERT(aiocbp);
 
-  /* Create the signal set */
-
-  sigemptyset(&set);
-  sigaddset(&set, SIGPOLL);
-
   /* Lock the scheduler so that no I/O events can complete on the worker
    * thread until we set our wait set up.  Pre-emption will, of course, be
    * re-enabled while we are waiting for the signal.
@@ -152,20 +147,18 @@ int aio_suspend(FAR const struct aiocb *const list[], int nent,
           sched_unlock();
           return OK;
         }
-
-      /* If the caller has a signal notification setup, add that to the
-       * signals we will wait for.
-       */
-
-      if (aiocbp->aio_sigevent.sigev_notify == SIGEV_SIGNAL)
-        {
-          sigaddset(&set, aiocbp->aio_sigevent.sigev_signo);
-        }
     }
 
-  /* Then wait.  sigtimedwait() will return the signal number that cause the
-   * error.  It will set errno appropriately for this function on errors.
+  /* Then wait for SIGPOLL.  On success sigtimedwait() will return the
+   * signal number that cause the error (SIGPOLL).  It will set errno
+   * appropriately for this function on errors.
+   *
+   * NOTE: If completion of the I/O causes other signals to be generated
+   * first, then this will wake up and return EINTR instead of success.
    */
+
+  sigemptyset(&set);
+  sigaddset(&set, SIGPOLL);
 
   ret = sigtimedwait(&set, NULL, &timeout)
   sched_unlock();

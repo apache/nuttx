@@ -92,33 +92,54 @@
 
 int aio_signal(FAR struct aiocb *aiocbp)
 {
+  int errcode;
+  int status;
   int ret;
 
   DEBUGASSERT(aiocbp);
  
+  ret = OK; /* Assume success */
+
   /* Signal the client */
 
   if (aiocbp->aio_sigevent.sigev_notify == SIGEV_SIGNAL)
     {
 #ifdef CONFIG_CAN_PASS_STRUCTS
-      ret = sigqueue(aiocbp->aio_pid, aiocbp->aio_sigevent.sigev_signo,
-                     aiocbp->aio_sigevent.sigev_value);
+      status = sigqueue(aiocbp->aio_pid, aiocbp->aio_sigevent.sigev_signo,
+                        aiocbp->aio_sigevent.sigev_value);
 #else
-      ret = sigqueue(aiocbp->aio_pid, aiocbp->aio_sigevent.sigev_sign,
-                     aiocbp->aio_sigevent.sigev_value.sival_ptr);
+      status = sigqueue(aiocbp->aio_pid, aiocbp->aio_sigevent.sigev_sign,
+                        aiocbp->aio_sigevent.sigev_value.sival_ptr);
 #endif
+      if (ret < 0)
+        {
+          errcode = get_errno();
+          fdbg("ERROR: sigqueue failed: %d\n", errcode);
+          ret = ERROR;
+        }
     }
 
   /* Send the poll signal in any event in case the caller is waiting
    * on sig_suspend();
    */
 
-  else
+  status = kill(aiocbp->aio_pid, SIGPOLL);
+  if (status && ret == OK)
     {
-      ret = kill(aiocbp->aio_pid, SIGPOLL);
+      errcode = get_errno();
+      fdbg("ERROR: kill failed: %d\n", errcode);
+      ret = ERROR;
     }
 
-  return ret;
+  /* Make sure that errno is set correctly on return */
+
+  if (ret < 0)
+    {
+      set_errno(errcode);
+      return ERROR;
+    }
+
+  return OK;
 }
 
 #endif /* CONFIG_LIBC_AIO */

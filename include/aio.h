@@ -134,8 +134,8 @@ struct aiocb
   off_t aio_offset;              /* File offset */
   size_t aio_nbytes;             /* Length of transfer */
   int aio_fildes;                /* File descriptor */
-  int aio_reqprio;               /* Request priority offset */
-  int aio_lio_opcode;            /* Operation to be performed */
+  int8_t aio_reqprio;            /* Request priority offset */
+  uint8_t aio_lio_opcode;        /* Operation to be performed */
 
   /* Non-standard, implementation-dependent data.  For portability reasons,
    * application code should never reference these elements.
@@ -144,6 +144,7 @@ struct aiocb
   struct work_s aio_work;        /* Used to defer I/O to the work thread */
   pid_t aio_pid;                 /* ID of client to be notify at completion */
   volatile ssize_t aio_result;   /* Support for aio_error() and aio_return() */
+  FAR void *aio_priv;            /* Used by signal handlers */
 };
 
 /****************************************************************************
@@ -170,11 +171,8 @@ ssize_t aio_return(FAR struct aiocb *aiocbp);
 int aio_suspend(FAR const struct aiocb *const list[], int nent,
                 FAR const struct timespec *timeout);
 int aio_write(FAR struct aiocb *aiocbp);
-
-#ifndef CONFIG_PTHREAD_DISABLE /* Depends on pthread support */
 int lio_listio(int mode, FAR struct aiocb *const list[], int nent,
                FAR struct sigevent *sig);
-#endif
 
 #undef EXTERN
 #ifdef __cplusplus
