@@ -37,8 +37,8 @@ ifeq ($(CONFIG_LIBC_AIO),y)
 
 # Add the asynchronous I/O C files to the build
 
-CSRCS += aio_error.c aio_read.c aio_return.c aio_signal.c aio_write.c
-CSRCS += aio_suspend.c
+CSRCS += aio_cancel.c aio_error.c aio_read.c aio_return.c aio_signal.c
+CSRCS += aio_suspend.c aio_write.c
 
 ifneq ($(CONFIG_PTHREAD_DISABLE),y)
 CSRCS += lio_listio.c

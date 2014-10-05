@@ -162,7 +162,7 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-int aio_cancel(int, FAR struct aiocb *aiocbp);
+int aio_cancel(int fildes, FAR struct aiocb *aiocbp);
 int aio_error(FAR const struct aiocb *aiocbp);
 int aio_fsync(int, FAR struct aiocb *aiocbp);
 int aio_read(FAR struct aiocb *aiocbp);

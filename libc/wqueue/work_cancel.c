@@ -78,7 +78,7 @@
  *
  * Description:
  *   Cancel previously queued work.  This removes work from the work queue.
- *   After work has been canceled, it may be re-queue by calling work_queue()
+ *   After work has been cancelled, it may be re-queue by calling work_queue()
  *   again.
  *
  * Input parameters:
@@ -86,7 +86,10 @@
  *   work   - The previously queue work structure to cancel
  *
  * Returned Value:
- *   Zero on success, a negated errno on failure
+ *   Zero (OK) on success, a negated errno on failure.  This error may be
+ *   reported:
+ *
+ *   -ENOENT - There is no such work queued.
  *
  ****************************************************************************/
 
@@ -94,6 +97,7 @@ int work_cancel(int qid, FAR struct work_s *work)
 {
   FAR struct wqueue_s *wqueue = &g_work[qid];
   irqstate_t flags;
+  int ret = -ENOENT;
 
   DEBUGASSERT(work != NULL && (unsigned)qid < NWORKERS);
 
@@ -116,10 +120,11 @@ int work_cancel(int qid, FAR struct work_s *work)
 
       dq_rem((FAR dq_entry_t *)work, &wqueue->q);
       work->worker = NULL;
+      ret = OK;
     }
 
   irqrestore(flags);
-  return OK;
+  return ret;
 }
 
 #endif /* CONFIG_SCHED_WORKQUEUE */
