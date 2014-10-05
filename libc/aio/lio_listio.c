@@ -573,7 +573,6 @@ int lio_listio(int mode, FAR struct aiocb *const list[], int nent,
           status = OK;
           switch (aiocbp->aio_lio_opcode)
             {
-
             case LIO_NOP:
               {
                 /* Mark the do-nothing operation complete */

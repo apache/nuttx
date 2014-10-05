@@ -254,6 +254,7 @@ int aio_read(FAR struct aiocb *aiocbp)
   /* The result -EINPROGRESS means that the transfer has not yet completed */
 
   aiocbp->aio_result = -EINPROGRESS;
+  aiocbp->aio_priv   = NULL;
 
   /* Save the ID of the calling, client thread */
 
