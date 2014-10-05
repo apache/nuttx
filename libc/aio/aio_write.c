@@ -292,9 +292,9 @@ int aio_write(FAR struct aiocb *aiocbp);
 
   DEBUGASSERT(aiocbp);
 
-  /* The result -EBUSY means that the transfer has not yet completed */
+  /* The result -EINPROGRESS means that the transfer has not yet completed */
 
-  aiocbp->aio_result = -EBUSY;
+  aiocbp->aio_result = -EINPROGRESS;
 
   /* Save the ID of the calling, client thread */
 
