@@ -175,8 +175,8 @@ uintptr_t STUB_select(int nbr, uintptr_t parm1, uintptr_t parm2,
 
 uintptr_t STUB_aio_read(int nbr, uintptr_t parm1);
 uintptr_t STUB_aio_write(int nbr, uintptr_t parm1);
-uintptr_t STUB_aio_fsync(int nbr, uintptr_t parm1, uintptr_t parm1);
-uintptr_t STUB_aio_cancel(int nbr, uintptr_t parm1, uintptr_t parm1);
+uintptr_t STUB_aio_fsync(int nbr, uintptr_t parm1, uintptr_t parm2);
+uintptr_t STUB_aio_cancel(int nbr, uintptr_t parm1, uintptr_t parm2);
 
 /* The following are defined if file descriptors are enabled */
 

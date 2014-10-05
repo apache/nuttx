@@ -239,8 +239,23 @@ pid_t up_vfork(const struct vfork_s *context)
         {
           child->cmn.xcp.syscall[index].sysreturn =
             parent->xcp.syscall[index].sysreturn;
+
+          /* REVISIT:  This logic is *not* common. */
+
+#if (defined(CONFIG_ARCH_CORTEXA5) || defined(CONFIG_ARCH_CORTEXA8)) && \
+     defined(CONFIG_BUILD_KERNEL)
+
+          child->cmn.xcp.syscall[index].cpsr =
+            parent->xcp.syscall[index].cpsr;
+
+#elif defined(CONFIG_ARCH_CORTEXM3) || defined(CONFIG_ARCH_CORTEXM4) || \
+      defined(CONFIG_ARCH_CORTEXM0)
+
           child->cmn.xcp.syscall[index].excreturn =
             parent->xcp.syscall[index].excreturn;
+#else
+#  error Missing logic
+#endif
         }
 
       child->cmn.xcp.nsyscalls = parent->xcp.nsyscalls;

@@ -41,9 +41,10 @@
 
 #include <sys/wait.h>
 #include <stdint.h>
+#include <string.h>
 #include <assert.h>
-#include <queue.h>
 #include <errno.h>
+#include <queue.h>
 #include <debug.h>
 
 #include <nuttx/sched.h>
