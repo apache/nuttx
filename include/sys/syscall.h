@@ -234,12 +234,21 @@
 #  define SYS_write                    (__SYS_descriptors+3)
 #  define SYS_pread                    (__SYS_descriptors+4)
 #  define SYS_pwrite                   (__SYS_descriptors+5)
-#  ifndef CONFIG_DISABLE_POLL
-#    define SYS_poll                   (__SYS_descriptors+6)
-#    define SYS_select                 (__SYS_descriptors+7)
-#    define __SYS_filedesc             (__SYS_descriptors+8)
+#  ifdef CONFIG_FS_AIO
+#    define SYS_aio_read               (_SYS_descriptors+6)
+#    define SYS_aio_write              (_SYS_descriptors+7)
+#    define SYS_aio_fsync              (_SYS_descriptors+8)
+#    define SYS_aio_cancel             (_SYS_descriptors+9)
+#    define __SYS_poll                 (_SYS_descriptors+10)
 #  else
-#    define __SYS_filedesc             (__SYS_descriptors+6)
+#    define __SYS_poll                 (_SYS_descriptors+6)
+#  endif
+#  ifndef CONFIG_DISABLE_POLL
+#    define SYS_poll                   __SYS_poll
+#    define SYS_select                 (__SYS_poll+1)
+#    define __SYS_filedesc             (__SYS_poll+2)
+#  else
+#    define __SYS_filedesc             __SYS_poll
 #  endif
 #else
 #  define __SYS_filedesc               __SYS_descriptors

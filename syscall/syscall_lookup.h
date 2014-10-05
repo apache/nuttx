@@ -165,6 +165,12 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
   SYSCALL_LOOKUP(write,                   3, STUB_write)
   SYSCALL_LOOKUP(pread,                   4, STUB_pread)
   SYSCALL_LOOKUP(pwrite,                  4, STUB_pwrite)
+#  ifdef CONFIG_FS_AIO
+  SYSCALL_LOOKUP(aio_read,                1, SYS_aio_read)
+  SYSCALL_LOOKUP(aio_write,               1, SYS_aio_write)
+  SYSCALL_LOOKUP(aio_fsync,               2, SYS_aio_fsync)
+  SYSCALL_LOOKUP(aio_cancel,              2, SYS_aio_cancel)
+#  endif
 #  ifndef CONFIG_DISABLE_POLL
   SYSCALL_LOOKUP(poll,                    3, STUB_poll)
   SYSCALL_LOOKUP(select,                  5, STUB_select)

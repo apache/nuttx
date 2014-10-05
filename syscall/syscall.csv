@@ -1,4 +1,8 @@
 "_exit","unistd.h","","void","int"
+"aio_cancel","aio.h","defined(CONFIG_FS_AIO)","int","int","FAR struct aiocb *"
+"aio_fsync","aio.h","defined(CONFIG_FS_AIO)","int","int","FAR struct aiocb *"
+"aio_read","aio.h","defined(CONFIG_FS_AIO)","int","FAR struct aiocb *"
+"aio_write","aio.h","defined(CONFIG_FS_AIO)","int","FAR struct aiocb *"
 "accept","sys/socket.h","CONFIG_NSOCKET_DESCRIPTORS > 0 && defined(CONFIG_NET)","int","int","struct sockaddr*","socklen_t*"
 "atexit","stdlib.h","defined(CONFIG_SCHED_ATEXIT)","int","void (*)(void)"
 "bind","sys/socket.h","CONFIG_NSOCKET_DESCRIPTORS > 0 && defined(CONFIG_NET)","int","int","FAR const struct sockaddr*","socklen_t"
