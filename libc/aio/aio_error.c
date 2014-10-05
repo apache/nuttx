@@ -43,7 +43,7 @@
 #include <assert.h>
 #include <errno.h>
 
-#ifndef CONFIG_LIBC_AIO
+#ifdef CONFIG_LIBC_AIO
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -39,13 +39,16 @@
 
 #include <nuttx/config.h>
 
+#include <sched.h>
 #include <signal.h>
 #include <aio.h>
 #include <assert.h>
+#include <errno.h>
+#include <debug.h>
 
 #include "aio/aio.h"
 
-#ifndef CONFIG_LIBC_AIO
+#ifdef CONFIG_LIBC_AIO
 
 /****************************************************************************
  * Pre-processor Definitions

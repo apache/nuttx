@@ -40,12 +40,15 @@
 #include <nuttx/config.h>
 
 #include <aio.h>
+#include <sched.h>
 #include <assert.h>
 #include <errno.h>
 
 #include <nuttx/wqueue.h>
 
-#ifndef CONFIG_LIBC_AIO
+#include "aio/aio.h"
+
+#ifdef CONFIG_LIBC_AIO
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -138,7 +141,7 @@ int aio_cancel(int fildes, FAR struct aiocb *aiocbp)
 
   /* Check if the I/O has completed */
 
-  if (aiocbp == -EINPROGRESS)
+  if (aiocbp->aio_result == -EINPROGRESS)
     {
       /* No ... attempt to cancel the I/O.  There are two possibilities:  (1)
        * the work has already been started and is no longer queued, or (2)
@@ -154,7 +157,7 @@ int aio_cancel(int fildes, FAR struct aiocb *aiocbp)
     {
       /* The I/O has already completed */
 
-      ret = AIO_ALLDONE
+      ret = AIO_ALLDONE;
     }
 
   sched_unlock();

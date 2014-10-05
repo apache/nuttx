@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <unistd.h>
+#include <fcntl.h>
 #include <sched.h>
 #include <aio.h>
 #include <assert.h>
@@ -50,7 +51,7 @@
 #include "lib_internal.h"
 #include "aio/aio.h"
 
-#ifndef CONFIG_LIBC_AIO
+#ifdef CONFIG_LIBC_AIO
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -92,7 +93,7 @@
 static void aio_write_worker(FAR void *arg)
 {
   FAR struct aiocb *aiocbp = (FAR struct aiocb *)arg;
-  DEBASSERT(arg);
+  DEBUGASSERT(arg);
   ssize_t nwritten;
   int oflags;
 
@@ -104,12 +105,12 @@ static void aio_write_worker(FAR void *arg)
    * were a system call, then only one would be required.
    */
 
-  oflags = fcntl((aiocbp->aio_fildes, F_GETFL, ...)
+  oflags = fcntl(aiocbp->aio_fildes, F_GETFL);
   if (oflags < 0)
     {
       int errcode = get_errno();
       fdbg("ERROR: fcntl failed: %d\n", errode);
-      aicbp->result = -errcode;
+      aiocbp->aio_result = -errcode;
     }
   else
     {
@@ -127,13 +128,16 @@ static void aio_write_worker(FAR void *arg)
         {
           /* Append to the current file position */
 
-          nwritten = write(aiocbp->aio_fildes, aiocbp->aio_buf,
+          nwritten = write(aiocbp->aio_fildes,
+                           (FAR const void *)aiocbp->aio_buf,
                            aiocbp->aio_nbytes);
         }
       else
         {
-          nwritten = pwrite(aiocbp->aio_fildes, aiocbp->aio_buf,
-                            aiocbp->aio_nbytes, aiocbp->aio_offset);
+          nwritten = pwrite(aiocbp->aio_fildes,
+                            (FAR const void *)aiocbp->aio_buf,
+                            aiocbp->aio_nbytes,
+                            aiocbp->aio_offset);
         }
 
       /* Set the result of the write */
@@ -143,11 +147,11 @@ static void aio_write_worker(FAR void *arg)
           int errcode = get_errno();
           fdbg("ERROR: write/pwrite failed: %d\n", errode);
           DEBUGASSERT(errcode > 0);
-          aicbp->result = -errcode;
+          aiocbp->aio_result = -errcode;
         }
       else
         {
-          aicbp->result = nwritten;
+          aiocbp->aio_result = nwritten;
         }
     }
 
@@ -298,7 +302,7 @@ int aio_write(FAR struct aiocb *aiocbp)
   ret = work_queue(AIO_QUEUE, &aiocbp->aio_work, aio_write_worker, aiocbp, 0);
   if (ret < 0)
     {
-      aio->aio_result = ret;
+      aiocbp->aio_result = ret;
       set_errno(ret);
       return ERROR;
     }

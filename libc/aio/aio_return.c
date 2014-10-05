@@ -43,7 +43,7 @@
 #include <assert.h>
 #include <errno.h>
 
-#ifndef CONFIG_LIBC_AIO
+#ifdef CONFIG_LIBC_AIO
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -109,7 +109,7 @@ ssize_t aio_return(FAR struct aiocb *aiocbp)
   if (aiocbp->aio_result < 0)
     {
       set_errno((int)-aiocbp->aio_result);
-      return (ssize_t)ERROR
+      return (ssize_t)ERROR;
     }
 
   return aiocbp->aio_result;

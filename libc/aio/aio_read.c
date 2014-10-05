@@ -50,7 +50,7 @@
 #include "lib_internal.h"
 #include "aio/aio.h"
 
-#ifndef CONFIG_LIBC_AIO
+#ifdef CONFIG_LIBC_AIO
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -92,7 +92,7 @@
 static void aio_read_worker(FAR void *arg)
 {
   FAR struct aiocb *aiocbp = (FAR struct aiocb *)arg;
-  DEBASSERT(arg);
+  DEBUGASSERT(arg);
   ssize_t nread;
 
   /* Perform the read using:
@@ -103,8 +103,8 @@ static void aio_read_worker(FAR void *arg)
    *   aio_offset  - File offset
    */
 
- nread = pread(aiocbp->aio_fildes, aiocbp->aio_buf, aiocbp->aio_nbytes,
-               aiocbp->aio_offset);
+ nread = pread(aiocbp->aio_fildes, (FAR void *)aiocbp->aio_buf,
+               aiocbp->aio_nbytes, aiocbp->aio_offset);
 
   /* Set the result of the read */
 
@@ -113,11 +113,11 @@ static void aio_read_worker(FAR void *arg)
       int errcode = get_errno();
       fdbg("ERROR: pread failed: %d\n", errode);
       DEBUGASSERT(errcode > 0);
-      aicbp->result = -errcode;
+      aiocbp->aio_result = -errcode;
     }
   else
     {
-      aicbp->result = nread;
+      aiocbp->aio_result = nread;
     }
 
   /* Signal the client */
@@ -265,7 +265,7 @@ int aio_read(FAR struct aiocb *aiocbp)
   ret = work_queue(AIO_QUEUE, &aiocbp->aio_work, aio_read_worker, aiocbp, 0);
   if (ret < 0)
     {
-      aio->aio_result = ret;
+      aiocbp->aio_result = ret;
       set_errno(ret);
       return ERROR;
     }

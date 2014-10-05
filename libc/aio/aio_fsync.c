@@ -49,7 +49,7 @@
 #include "lib_internal.h"
 #include "aio/aio.h"
 
-#ifndef CONFIG_LIBC_AIO
+#ifdef CONFIG_LIBC_AIO
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -91,7 +91,7 @@
 static void aio_fsync_worker(FAR void *arg)
 {
   FAR struct aiocb *aiocbp = (FAR struct aiocb *)arg;
-  DEBASSERT(arg);
+  DEBUGASSERT(arg);
   int ret;
 
   /* Perform the fsync using aio_fildes */
@@ -102,11 +102,11 @@ static void aio_fsync_worker(FAR void *arg)
       int errcode = get_errno();
       fdbg("ERROR: fsync failed: %d\n", errode);
       DEBUGASSERT(errcode > 0);
-      aicbp->result = -errcode;
+      aiocbp->aio_result = -errcode;
     }
   else
     {
-      aicbp->result = OK;
+      aiocbp->aio_result = OK;
     }
 
   /* Signal the client */
@@ -217,7 +217,7 @@ int aio_fsync(int op, FAR struct aiocb *aiocbp)
   ret = work_queue(AIO_QUEUE, &aiocbp->aio_work, aio_fsync_worker, aiocbp, 0);
   if (ret < 0)
     {
-      aio->aio_result = ret;
+      aiocbp->aio_result = ret;
       set_errno(ret);
       return ERROR;
     }

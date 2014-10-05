@@ -39,12 +39,13 @@
 
 #include <nuttx/config.h>
 
+#include <sched.h>
 #include <signal.h>
 #include <aio.h>
 #include <assert.h>
 #include <errno.h>
 
-#ifndef CONFIG_LIBC_AIO
+#ifdef CONFIG_LIBC_AIO
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -160,7 +161,7 @@ int aio_suspend(FAR const struct aiocb *const list[], int nent,
   sigemptyset(&set);
   sigaddset(&set, SIGPOLL);
 
-  ret = sigtimedwait(&set, NULL, &timeout)
+  ret = sigtimedwait(&set, NULL, timeout);
   sched_unlock();
   return ret >= 0 ? OK : ERROR;
 }
