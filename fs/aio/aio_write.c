@@ -45,10 +45,10 @@
 #include <aio.h>
 #include <assert.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <nuttx/wqueue.h>
 
-#include "lib_internal.h"
 #include "aio/aio.h"
 
 #ifdef CONFIG_FS_AIO
