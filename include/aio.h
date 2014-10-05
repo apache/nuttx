@@ -52,6 +52,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
+/* These interfaces are not available to kernel code */
+
+#if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && defined(__KERNEL__)
+#  undef CONFIG_LIBC_AIO
+#endif
+
 /* Work queue support is required.  In the flat, embedded build the low-
  * priority work queue is required so that the asynchronous I/O does not
  * interfere with high priority driver operations.  In the protected and
@@ -63,7 +69,7 @@
 #ifdef CONFIG_LIBC_AIO
 
 #ifndef CONFIG_SCHED_WORKQUEUE
-#  error Asynchronous I/O requiresCONFIG_SCHED_WORKQUEUE
+#  error Asynchronous I/O requires CONFIG_SCHED_WORKQUEUE
 #else
 #  if defined (CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)
 #    ifndef CONFIG_SCHED_USRWORK
@@ -163,7 +169,7 @@ int aio_suspend(FAR const struct aiocb *const list[], int nent,
                 FAR const struct timespec *timeout);
 int aio_write(FAR struct aiocb *aiocbp);
 
-#ifndef CONFIG_PTHREAD_DISABLE
+#ifndef CONFIG_PTHREAD_DISABLE /* Depends on pthread support */
 int lio_listio(int mode, FAR struct aiocb *const list[], int nent,
                FAR struct sigevent *sig);
 #endif
@@ -173,5 +179,5 @@ int lio_listio(int mode, FAR struct aiocb *const list[], int nent,
 }
 #endif
 
-#endif  /* CONFIG_LIBC_AIO */
+#endif /* CONFIG_LIBC_AIO */
 #endif /* __INCLUDE_AIO_H */

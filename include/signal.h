@@ -101,6 +101,15 @@
 #  endif
 #endif
 
+#ifdef CONFIG_LIBC_AIO
+#  ifndef CONFIG_SIG_POLL
+#    define SIGPOLL     5  /* Sent when an asynchronous I/O event occurs */
+#  else
+#    define SIGPOLL     CONFIG_SIG_POLL
+#  endif
+#endif
+#endif
+
 /* The following are non-standard signal definitions */
 
 #ifndef CONFIG_DISABLE_PTHREAD

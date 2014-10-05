@@ -767,6 +767,14 @@ config SIG_SIGCHLD
 		exits, is interrupted (stopped), or resumes after being interrupted.
 		Default: 4
 
+config SIG_POLL
+	int "SIGPOLL"
+	default 5
+	depends on LIBC_AIO
+	---help---
+		The SIGPOLL signal is sent to a process when an asynchronous I/O
+		event occurs (meaning it has been polled).  Default: 5
+
 config SIG_SIGCONDTIMEDOUT
 	int "SIGCONDTIMEDOUT"
 	default 16
