@@ -108,7 +108,6 @@
 #    define SIGPOLL     CONFIG_SIG_POLL
 #  endif
 #endif
-#endif
 
 /* The following are non-standard signal definitions */
 

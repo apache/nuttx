@@ -137,7 +137,9 @@ struct aiocb
   int aio_reqprio;               /* Request priority offset */
   int aio_lio_opcode;            /* Operation to be performed */
 
-  /* Non-standard, implementation-dependent data */
+  /* Non-standard, implementation-dependent data.  For portability reasons,
+   * application code should never reference these elements.
+   */
 
   struct work_s aio_work;        /* Used to defer I/O to the work thread */
   pid_t aio_pid;                 /* ID of client to be notify at completion */

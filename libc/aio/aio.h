@@ -77,4 +77,22 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: aio_signal
+ *
+ * Description:
+ *   Signal the client that an I/O has completed.
+ *
+ * Input Parameters:
+ *   aiocbp - Pointer to the asynchronous I/O state structure that includes
+ *            information about how to signal the client
+ *
+ * Returned Value:
+ *   Zero (OK) if the client was successfully signalled.  Otherwise, a
+ *   negated errno value is returned.
+ *
+ ****************************************************************************/
+
+int aio_signal(FAR struct aiocb *aiocbp);
+
 #endif /* __LIBC_AIO_AIO_H */

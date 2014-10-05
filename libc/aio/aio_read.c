@@ -40,7 +40,7 @@
 #include <nuttx/config.h>
 
 #include <unistd.h>
-#include <signal.h>
+#include <sched.h>
 #include <aio.h>
 #include <assert.h>
 #include <errno.h>
@@ -120,17 +120,7 @@ static void aio_read_worker(FAR void *arg)
 
   /* Signal the client */
 
-  if (aiocbp->aio_sigevent.sigev_notify == SIGEV_SIGNAL)
-    {
-      int ret;
-#ifdef CONFIG_CAN_PASS_STRUCTS
-      ret = sigqueue(aiocbp->aio_pid, aiocbp->aio_sigevent.sigev_signo,
-                     aiocbp->aio_sigevent.sigev_value);
-#else
-      ret = sigqueue(aiocbp->aio_pid, aiocbp->aio_sigevent.sigev_sign,
-                     aiocbp->aio_sigevent.sigev_value.sival_ptr);
-#endif
-    }
+  (void)aio_signal(aiocbp);
 }
 
 /****************************************************************************
@@ -253,7 +243,7 @@ static void aio_read_worker(FAR void *arg)
  *
  ****************************************************************************/
 
-int aio_read(FAR struct aiocb *aiocbp);
+int aio_read(FAR struct aiocb *aiocbp)
 {
   int ret;
 
