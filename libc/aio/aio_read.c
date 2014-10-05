@@ -45,6 +45,8 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/wqueue.h>
+
 #include "lib_internal.h"
 #include "aio/aio.h"
 

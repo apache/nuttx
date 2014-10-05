@@ -164,7 +164,7 @@ extern "C"
 
 int aio_cancel(int fildes, FAR struct aiocb *aiocbp);
 int aio_error(FAR const struct aiocb *aiocbp);
-int aio_fsync(int, FAR struct aiocb *aiocbp);
+int aio_fsync(int op, FAR struct aiocb *aiocbp);
 int aio_read(FAR struct aiocb *aiocbp);
 ssize_t aio_return(FAR struct aiocb *aiocbp);
 int aio_suspend(FAR const struct aiocb *const list[], int nent,

@@ -71,7 +71,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: aio_read
+ * Name: aio_return
  *
  * Description:
  *   The aio_return() function returns the return status associated with

@@ -71,7 +71,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: aio_read
+ * Name: aio_error
  *
  * Description:
  *   The aio_error() function returns the error status associated with the

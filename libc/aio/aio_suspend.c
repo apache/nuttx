@@ -72,7 +72,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: aio_read
+ * Name: aio_suspend
  *
  * Description:
  *   The aio_suspend() function suspends the calling thread until at least

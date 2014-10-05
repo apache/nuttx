@@ -43,6 +43,8 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/wqueue.h>
+
 #ifndef CONFIG_LIBC_AIO
 
 /****************************************************************************
