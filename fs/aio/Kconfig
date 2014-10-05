@@ -1,0 +1,15 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+config FS_AIO
+	bool "Asynchronous I/O support"
+	default n
+	depends on SCHED_LPWORK
+	---help---
+		Enable support for aynchronous I/O.  This selection enables the
+		interfaces declared in include/aio.h.
+
+if FS_AIO
+endif

@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/aio/aio_signal.c
+ * libc/aio/aio_signal.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,7 +48,7 @@
 
 #include "aio/aio.h"
 
-#ifdef CONFIG_LIBC_AIO
+#ifdef CONFIG_FS_AIO
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -145,4 +145,4 @@ int aio_signal(FAR struct aiocb *aiocbp)
   return OK;
 }
 
-#endif /* CONFIG_LIBC_AIO */
+#endif /* CONFIG_FS_AIO */

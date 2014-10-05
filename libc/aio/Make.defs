@@ -33,7 +33,7 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_LIBC_AIO),y)
+ifeq ($(CONFIG_FS_AIO),y)
 
 # Add the asynchronous I/O C files to the build
 

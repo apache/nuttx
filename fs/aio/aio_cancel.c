@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/aio/aio_cancel.c
+ * libc/aio/aio_cancel.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,7 +48,7 @@
 
 #include "aio/aio.h"
 
-#ifdef CONFIG_LIBC_AIO
+#ifdef CONFIG_FS_AIO
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -164,4 +164,4 @@ int aio_cancel(int fildes, FAR struct aiocb *aiocbp)
   return ret;
 }
 
-#endif /* CONFIG_LIBC_AIO */
+#endif /* CONFIG_FS_AIO */

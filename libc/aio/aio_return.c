@@ -43,7 +43,7 @@
 #include <assert.h>
 #include <errno.h>
 
-#ifdef CONFIG_LIBC_AIO
+#ifdef CONFIG_FS_AIO
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -115,4 +115,4 @@ ssize_t aio_return(FAR struct aiocb *aiocbp)
   return aiocbp->aio_result;
 }
 
-#endif /* CONFIG_LIBC_AIO */
+#endif /* CONFIG_FS_AIO */

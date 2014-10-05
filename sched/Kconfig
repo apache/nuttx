@@ -770,7 +770,7 @@ config SIG_SIGCHLD
 config SIG_POLL
 	int "SIGPOLL"
 	default 5
-	depends on LIBC_AIO
+	depends on FS_AIO
 	---help---
 		The SIGPOLL signal is sent to a process when an asynchronous I/O
 		event occurs (meaning it has been polled).  Default: 5

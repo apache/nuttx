@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/aio/aio_write.c
+ * libc/aio/aio_write.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -45,13 +45,13 @@
 #include <aio.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
 
 #include <nuttx/wqueue.h>
 
+#include "lib_internal.h"
 #include "aio/aio.h"
 
-#ifdef CONFIG_LIBC_AIO
+#ifdef CONFIG_FS_AIO
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -304,4 +304,4 @@ int aio_write(FAR struct aiocb *aiocbp)
   return OK;
 }
 
-#endif /* CONFIG_LIBC_AIO */
+#endif /* CONFIG_FS_AIO */

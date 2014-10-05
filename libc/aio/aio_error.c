@@ -43,7 +43,7 @@
 #include <assert.h>
 #include <errno.h>
 
-#ifdef CONFIG_LIBC_AIO
+#ifdef CONFIG_FS_AIO
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -111,4 +111,4 @@ int aio_error(FAR const struct aiocb *aiocbp)
   return OK;
 }
 
-#endif /* CONFIG_LIBC_AIO */
+#endif /* CONFIG_FS_AIO */

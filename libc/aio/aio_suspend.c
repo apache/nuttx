@@ -45,7 +45,7 @@
 #include <assert.h>
 #include <errno.h>
 
-#ifdef CONFIG_LIBC_AIO
+#ifdef CONFIG_FS_AIO
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -166,4 +166,4 @@ int aio_suspend(FAR const struct aiocb *const list[], int nent,
   return ret >= 0 ? OK : ERROR;
 }
 
-#endif /* CONFIG_LIBC_AIO */
+#endif /* CONFIG_FS_AIO */

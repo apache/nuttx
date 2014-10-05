@@ -55,16 +55,16 @@
 /* These interfaces are not available to kernel code */
 
 #if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && defined(__KERNEL__)
-#  undef CONFIG_LIBC_AIO
+#  undef CONFIG_FS_AIO
 #endif
 
 /* Work queue support is required.  The low-priority work queue is required
  * so that the asynchronous I/O does not interfere with high priority driver
  * operations.  If this pre-requisite is met, then asynchronous I/O support
- * can be enabled with CONFIG_LIBC_AIO
+ * can be enabled with CONFIG_FS_AIO
  */
 
-#ifdef CONFIG_LIBC_AIO
+#ifdef CONFIG_FS_AIO
 
 #ifndef CONFIG_SCHED_WORKQUEUE
 #  error Asynchronous I/O requires CONFIG_SCHED_WORKQUEUE
@@ -171,5 +171,5 @@ int lio_listio(int mode, FAR struct aiocb *const list[], int nent,
 }
 #endif
 
-#endif /* CONFIG_LIBC_AIO */
+#endif /* CONFIG_FS_AIO */
 #endif /* __INCLUDE_AIO_H */

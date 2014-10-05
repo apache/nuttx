@@ -48,7 +48,7 @@
 #include "lib_internal.h"
 #include "aio/aio.h"
 
-#ifdef CONFIG_LIBC_AIO
+#ifdef CONFIG_FS_AIO
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -726,4 +726,4 @@ int lio_listio(int mode, FAR struct aiocb *const list[], int nent,
   return OK;
 }
 
-#endif /* CONFIG_LIBC_AIO */
+#endif /* CONFIG_FS_AIO */
