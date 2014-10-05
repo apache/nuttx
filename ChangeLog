@@ -8746,5 +8746,8 @@
 	* libc/aio/aio_signal.c, Make.defs, and aio.h: Move AIO signal logic
 	  to a common location in aio_signal.c.  Also fix several typos
 	  (2014-9-5).
-	* libc/aio/aio_suspend.c and Make.defs: Initial implementation of
-	  aio_suspend() (2014-9-5).
+	* libc/aio/aio_suspend.c, aio_cancel.c, aio_fsync.c, lio_listio.c and
+	  Make.defs:  Initial implementation of aio_suspend(), aio_cancel(),
+	  lio_listio.c, and aio_fsync.c.  This completes this implementation
+	  of the asynchronous I/O interfaces but there are still untested
+	  (2014-9-5).
