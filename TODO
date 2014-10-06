@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated October 3, 2014)
+NuttX TODO List (Last updated October 6, 2014)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -18,7 +18,7 @@ nuttx/
  (13)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
  (10)  Libraries (libc/, )
- (12)  File system/Generic drivers (fs/, drivers/)
+ (13)  File system/Generic drivers (fs/, drivers/)
   (6)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
@@ -1163,7 +1163,7 @@ o File system / Generic drivers (fs/, drivers/)
   Status:      Open
   Priority:    Medium
 
-  Title:       ASYNCHRONOUS IMPLEMENTATION ISSUES
+  Title:       ASYNCHRONOUS I/O IMPLEMENTATION PRIORITY ISSUES
   Description: The POSIX specification of asynchronous I/O implies that a
                thread is created for each I/O operation.  The standard
                requires that if prioritized I/O is supported for this file,
@@ -1195,6 +1195,14 @@ o File system / Generic drivers (fs/, drivers/)
   Status:      Open
   Priority:    Low, I think.  In fact the current solution might be the
                correct one but this issue still needs to be tracked.
+
+  Title:       ASYNCHRONOUX I/O DOES NOT WORK WITH SOCKETS
+  Description: The current asynchronous I/O logic will only work with
+               file descriptions.  If given a socket descriptor, the
+               AIO interfaces will fail with EBADF.  The existing logic
+               should be extended to handle socket descriptors.
+  Status:      Open
+  Low:         Low unless you need the capability.
 
 o Graphics subystem (graphics/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
