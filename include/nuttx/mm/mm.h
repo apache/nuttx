@@ -204,15 +204,8 @@ struct mm_freenode_s
 
 /* What is the size of the freenode? */
 
-#ifdef CONFIG_MM_SMALL
-#  ifdef CONFIG_SMALL_MEMORY
-#     define SIZEOF_MM_FREENODE 8
-#  else
-#     define SIZEOF_MM_FREENODE 12
-#  endif
-#else
-# define SIZEOF_MM_FREENODE     16
-#endif
+#define MM_PTR_SIZE sizeof(FAR struct mm_freenode_s *)
+#define SIZEOF_MM_FREENODE (SIZEOF_MM_ALLOCNODE + 2*MM_PTR_SIZE)
 
 #define CHECK_FREENODE_SIZE \
   DEBUGASSERT(sizeof(struct mm_freenode_s) == SIZEOF_MM_FREENODE)
