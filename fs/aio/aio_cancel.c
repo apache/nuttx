@@ -160,11 +160,19 @@ int aio_cancel(int fildes, FAR struct aiocb *aiocbp)
                */
 
               status = work_cancel(LPWORK, &aioc->aioc_work);
+              if (status >= 0)
+                {
+                  aiocbp->aio_result = -ECANCELED;
+                  ret = AIO_CANCELED;
+                }
+              else
+                {
+                  ret = AIO_NOTCANCELED;
+                }
 
               /* Remove the container from the list of pending transfers */
 
               (void)aioc_decant(aioc);
-              ret = status >= 0 ? AIO_CANCELED : AIO_NOTCANCELED;
             }
         }
     }
@@ -201,14 +209,21 @@ int aio_cancel(int fildes, FAR struct aiocb *aiocbp)
 
               /* Remove the container from the list of pending transfers */
 
-              next = (FAR struct aio_container_s *)aioc->aioc_link.flink;
-              (void)aioc_decant(aioc);
+              next   = (FAR struct aio_container_s *)aioc->aioc_link.flink;
+              aiocbp = aioc_decant(aioc);
+              DEBUGASSERT(aiocbp);
 
-              /* Keep track of the return status */
-
-              if (ret != AIO_NOTCANCELED)
+              if (status >= 0)
                 {
-                  ret = status >= 0 ? AIO_CANCELED : AIO_NOTCANCELED;
+                  aiocbp->aio_result = -ECANCELED;
+                  if (ret != AIO_NOTCANCELED)
+                    {
+                      ret = AIO_CANCELED;
+                    }
+                }
+              else
+                {
+                  ret = AIO_NOTCANCELED;
                 }
             }
         }
