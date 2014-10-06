@@ -135,7 +135,7 @@ void aio_initialize(void)
     {
       /* Add the container to the free list */
 
-      dq_addlast(&g_aioc_alloc[i], &g_aioc_free);
+      dq_addlast(&g_aioc_alloc[i].aioc_link, &g_aioc_free);
     }
 }
 
