@@ -459,12 +459,7 @@ void os_start(void)
 #if CONFIG_NFILE_DESCRIPTORS > 0
   /* Initialize the file system (needed to support device drivers) */
 
-#ifdef CONFIG_HAVE_WEAKFUNCTIONS
-  if (fs_initialize != NULL)
-#endif
-    {
-      fs_initialize();
-    }
+  fs_initialize();
 #endif
 
 #ifdef CONFIG_NET
