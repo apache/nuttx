@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/aio/aio_signal.c
+ * fs/aio/aio_signal.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <sched.h>
 #include <signal.h>
 #include <aio.h>
@@ -53,18 +54,17 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ************************************************************/
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -81,6 +81,7 @@
  *   Signal the client that an I/O has completed.
  *
  * Input Parameters:
+ *   pid    - ID of the task to signal
  *   aiocbp - Pointer to the asynchronous I/O state structure that includes
  *            information about how to signal the client
  *
@@ -93,14 +94,14 @@
  *
  ****************************************************************************/
 
-int aio_signal(FAR struct aiocb *aiocbp)
+int aio_signal(pid_t pid, FAR struct aiocb *aiocbp)
 {
   int errcode;
   int status;
   int ret;
 
   DEBUGASSERT(aiocbp);
- 
+
   ret = OK; /* Assume success */
 
   /* Signal the client */
@@ -108,10 +109,10 @@ int aio_signal(FAR struct aiocb *aiocbp)
   if (aiocbp->aio_sigevent.sigev_notify == SIGEV_SIGNAL)
     {
 #ifdef CONFIG_CAN_PASS_STRUCTS
-      status = sigqueue(aiocbp->aio_pid, aiocbp->aio_sigevent.sigev_signo,
+      status = sigqueue(pid, aiocbp->aio_sigevent.sigev_signo,
                         aiocbp->aio_sigevent.sigev_value);
 #else
-      status = sigqueue(aiocbp->aio_pid, aiocbp->aio_sigevent.sigev_sign,
+      status = sigqueue(pid, aiocbp->aio_sigevent.sigev_sign,
                         aiocbp->aio_sigevent.sigev_value.sival_ptr);
 #endif
       if (ret < 0)
@@ -126,7 +127,7 @@ int aio_signal(FAR struct aiocb *aiocbp)
    * on sig_suspend();
    */
 
-  status = kill(aiocbp->aio_pid, SIGPOLL);
+  status = kill(pid, SIGPOLL);
   if (status && ret == OK)
     {
       errcode = get_errno();

@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/aio/aio_fsync.c
+ * fs/aio/aio_fsync.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -54,18 +54,17 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ************************************************************/
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
 /****************************************************************************
- * Private Variables
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -90,9 +89,19 @@
 
 static void aio_fsync_worker(FAR void *arg)
 {
-  FAR struct aiocb *aiocbp = (FAR struct aiocb *)arg;
-  DEBUGASSERT(arg);
+  FAR struct aio_container_s *aioc = (FAR struct aio_container_s *)arg;
+  FAR struct aiocb *aiocbp;
+  pid_t pid;
   int ret;
+
+  /* Get the information from the container, decant the AIO control block,
+   * and free the container before starting any I/O.  That will minimize
+   * the delays by any other threads waiting for a pre-allocated container.
+   */
+
+  DEBUGASSERT(aioc && aioc->aioc_aiocbp);
+  pid    = aioc->aioc_pid;
+  aiocbp = aioc_decant(aioc);
 
   /* Perform the fsync using aio_fildes */
 
@@ -111,7 +120,7 @@ static void aio_fsync_worker(FAR void *arg)
 
   /* Signal the client */
 
-  (void)aio_signal(aiocbp);
+  (void)aio_signal(pid, aiocbp);
 }
 
 /****************************************************************************
@@ -169,7 +178,7 @@ static void aio_fsync_worker(FAR void *arg)
  *   aiocbp - A pointer to an instance of struct aiocb
  *
  * Returned Value:
- *   The aio_fsync() function will return the value 0 if the I/O operation is 
+ *   The aio_fsync() function will return the value 0 if the I/O operation is
  *   successfully queued; otherwise, the function will return the value -1 and
  *   set errno to indicate the error.
  *
@@ -198,6 +207,7 @@ static void aio_fsync_worker(FAR void *arg)
 
 int aio_fsync(int op, FAR struct aiocb *aiocbp)
 {
+  FAR struct aio_container_s *aioc;
   int ret;
 
   DEBUGASSERT(op == O_SYNC /* || op == O_DSYNC */);
@@ -208,13 +218,16 @@ int aio_fsync(int op, FAR struct aiocb *aiocbp)
   aiocbp->aio_result = -EINPROGRESS;
   aiocbp->aio_priv   = NULL;
 
-  /* Save the ID of the calling, client thread */
+  /* Create a container for the AIO control block.  This will not fail but
+   * may cause us to block if there are insufficient resources to satisfy
+   * the request.
+   */
 
-  aiocbp->aio_pid = getpid();
+  aioc = aio_contain(aiocbp);
 
   /* Defer the work to the worker thread */
 
-  ret = work_queue(LPWORK, &aiocbp->aio_work, aio_fsync_worker, aiocbp, 0);
+  ret = work_queue(LPWORK, &aioc->aioc_work, aio_fsync_worker, aioc, 0);
   if (ret < 0)
     {
       aiocbp->aio_result = ret;
