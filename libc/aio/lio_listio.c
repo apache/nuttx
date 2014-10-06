@@ -208,7 +208,7 @@ static void lio_sighandler(int signo, siginfo_t *info, void *ucontext)
           (void)sigqueue(sighand->pid, sighand->sig->sigev_signo,
                          sighand->sig->sigev_value);
 #else
-          (void)sigqueue(sighand->aio_pid, sighand->sig.sigev_sign,
+          (void)sigqueue(sighand->pid, sighand->sig->sigev_signo,
                          sighand->sig->sigev_value.sival_ptr);
 #endif
         }
