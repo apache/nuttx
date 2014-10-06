@@ -122,7 +122,9 @@ void aio_initialize(void);
  * Name: aio_lock/aio_unlock
  *
  * Description:
- *   Take/give the lock on the pending asynchronous I/O list
+ *   Take/give the lock on the pending asynchronous I/O list.  These locks
+ *   are implemented with re-entrant semaphores -- deadlocks will not occur
+ *   if the lock is taken multiple times on the same thread.
  *
  * Input Parameters:
  *   None

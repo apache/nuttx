@@ -130,6 +130,7 @@ int aio_cancel(int fildes, FAR struct aiocb *aiocbp)
 
   ret = AIO_ALLDONE;
   sched_lock();
+  aio_lock();
 
   if (aiocbp)
     {
@@ -139,11 +140,9 @@ int aio_cancel(int fildes, FAR struct aiocb *aiocbp)
         {
           /* No.. Find the container for this AIO control block */
 
-          aio_lock();
           for (aioc = (FAR struct aio_container_s *)g_aio_pending.head;
                aioc && aioc->aioc_aiocbp != aiocbp;
                aioc = (FAR struct aio_container_s *)aioc->aioc_link.flink);
-          aio_unlock();
 
           /* Did we find a container for this fildes?  We should; the aio_result says
            * that the transfer is pending.  If not we return AIO_ALLDONE.
@@ -185,11 +184,9 @@ int aio_cancel(int fildes, FAR struct aiocb *aiocbp)
         {
           /* Find the next container with this AIO control block */
 
-          aio_lock();
           for (aioc = next;
                aioc && aioc->aioc_aiocbp->aio_fildes != fildes;
                aioc = (FAR struct aio_container_s *)aioc->aioc_link.flink);
-          aio_unlock();
 
           /* Did we find the container?  We should; the aio_result says
            * that the transfer is pending.  If not we return AIO_ALLDONE.
@@ -230,6 +227,7 @@ int aio_cancel(int fildes, FAR struct aiocb *aiocbp)
       while (aioc);
     }
 
+  aio_unlock();
   sched_unlock();
   return ret;
 }

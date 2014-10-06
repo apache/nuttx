@@ -44,6 +44,8 @@
 #include <errno.h>
 #include <queue.h>
 
+#include <nuttx/sched.h>
+
 #include "aio/aio.h"
 
 #ifdef CONFIG_FS_AIO
@@ -73,10 +75,13 @@ static dq_queue_t g_aioc_free;
 static sem_t g_aioc_freesem;
 
 /* This binary semaphore supports exclusive access to the list of pending
- * asynchronous I/O.
+ * asynchronous I/O.  g_aio_holder and a_aio_count support the reentrant
+ * lock.
  */
 
 static sem_t g_aio_exclsem;
+static pid_t g_aio_holder;
+static uint16_t g_aio_count;
 
 /****************************************************************************
  * Public Data
@@ -114,8 +119,10 @@ void aio_initialize(void)
 
   /* Initialize counting semaphores */
 
-  (void)sem_init(&g_aioc_freesem, 0, 0);
+  (void)sem_init(&g_aioc_freesem, 0, CONFIG_FS_NAIOC);
   (void)sem_init(&g_aio_exclsem, 0, 1);
+
+  g_aio_holder = INVALID_PROCESS_ID;
 
   /* Initialize the container queues */
 
@@ -126,11 +133,9 @@ void aio_initialize(void)
 
   for (i = 0; i < CONFIG_FS_NAIOC; i++)
     {
-      /* "Free" the entry, adding it to the free list and bumping up the
-       * semaphore count.
-       */
+      /* Add the container to the free list */
 
-      aioc_free(&g_aioc_alloc[i]);
+      dq_addlast(&g_aioc_alloc[i], &g_aioc_free);
     }
 }
 
@@ -150,15 +155,53 @@ void aio_initialize(void)
 
 void aio_lock(void)
 {
-  while (sem_wait(&g_aio_exclsem) < 0)
+  pid_t me = getpid();
+
+  /* Does this thread already hold the semaphore? */
+
+  if (g_aio_holder == me)
     {
-      DEBUGASSERT(get_errno() == EINTR);
+      /* Yes, just increment the counts held */
+
+      DEBUGASSERT(g_aio_count > 0 && g_aio_count < UINT16_MAX);
+      g_aio_count++;
+    }
+  else
+    {
+      /* No.. take the semaphore */
+
+      while (sem_wait(&g_aio_exclsem) < 0)
+        {
+          DEBUGASSERT(get_errno() == EINTR);
+        }
+
+      /* And mark it as ours */
+
+      g_aio_holder = me;
+      g_aio_count  = 1;
     }
 }
 
 void aio_unlock(void)
 {
-  sem_post(&g_aio_exclsem);
+  DEBUGASSERT(g_aio_holder == getpid() && g_aio_count > 0);
+
+  /* Would decrementing the count release the lock? */
+
+  if (g_aio_count <= 1)
+    {
+      /* Yes.. that we will no longer be the holder */
+
+      g_aio_holder = INVALID_PROCESS_ID;
+      g_aio_count  = 0;
+      sem_post(&g_aio_exclsem);
+    }
+  else
+    {
+      /* Otherwise, just decrement the count.  We still hold the lock. */
+
+      g_aio_count--;
+    }
 }
 
 /****************************************************************************
@@ -184,8 +227,8 @@ FAR struct aio_container_s *aioc_alloc(void)
 {
   FAR struct aio_container_s *aioc;
 
-  /* Take a semaphore, thus guaranteeing that we have an AIO container
-   * set aside for us.
+  /* Take a count from semaphore, thus guaranteeing that we have an AIO
+   * container set aside for us.
    */
 
   while (sem_wait(&g_aioc_freesem) < 0)
