@@ -82,7 +82,9 @@
  *   The aio_cancel() function attempts to cancel one or more asynchronous
  *   I/O requests currently outstanding against file descriptor 'fildes'.
  *   The aiocbp argument points to the asynchronous I/O control block for
- *   a particular request to be cancelled..
+ *   a particular request to be cancelled. If aiocbp is NULL, then all
+ *   outstanding cancelable asynchronous I/O requests against fildes will
+ *   be cancelled.
  *
  *   Normal asynchronous notification will occur for asynchronous I/O
  *   operations that are successfully cancelled. If there are requests that
@@ -111,76 +113,106 @@
  *    operations have already completed. Otherwise, the function will return
  *    -1 and set errno to indicate the error.
  *
- * POSIX Compliance
- *   By standard, this function support the value of NULL for aiocbp.  If
- *   aiocbp is NULL, then all outstanding cancelable asynchronous I/O
- *   requests against fildes will be cancelled.  In this implementation,
- *   nothing is done if aiocbp is NULL and the fildes parameter is always
- *   ignored.  ENOSYS will be returned.
- *
  ****************************************************************************/
 
 int aio_cancel(int fildes, FAR struct aiocb *aiocbp)
 {
   FAR struct aio_container_s *aioc;
+  FAR struct aio_container_s *next;
   int status;
   int ret;
 
-  /* Ignore NULL AIO control blocks (see "POSIX Compliance" above) */
-
-  if (aiocbp)
-    {
-      set_errno(ENOSYS);
-      return ERROR;
-    }
+  /* Check if a non-NULL aiocbp was provided */
 
   /* Lock the scheduler so that no I/O events can complete on the worker
    * thread until we set complete this operation.
    */
 
+  ret = AIO_ALLDONE;
   sched_lock();
 
-  /* Check if the I/O has completed */
-
-  if (aiocbp->aio_result == -EINPROGRESS)
+  if (aiocbp)
     {
-      /* No.. Find the container for this AIO control block */
+      /* Check if the I/O has completed */
 
-      aio_lock();
-      for (aioc = (FAR struct aio_container_s *)g_aio_pending.head;
-           aioc && aioc->aioc_aiocbp != aiocbp;
-           aioc = (FAR struct aio_container_s *)aioc->aioc_link.flink);
-      aio_unlock();
-
-      /* Did we find the container? */
-
-      if (!aioc)
+      if (aiocbp->aio_result == -EINPROGRESS)
         {
-          /* No.. the aio_result says that that the transfer is pending,
-           * but there is no container in the pending I/O list.  I am
-           * confused.
+          /* No.. Find the container for this AIO control block */
+
+          aio_lock();
+          for (aioc = (FAR struct aio_container_s *)g_aio_pending.head;
+               aioc && aioc->aioc_aiocbp != aiocbp;
+               aioc = (FAR struct aio_container_s *)aioc->aioc_link.flink);
+          aio_unlock();
+
+          /* Did we find a container for this fildes?  We should; the aio_result says
+           * that the transfer is pending.  If not we return AIO_ALLDONE.
            */
 
-          ret = AIO_ALLDONE;
-        }
-      else
-        {
-          /* Yes... attempt to cancel the I/O.  There are two possibilities:
-           * (1) the work has already been started and is no longer queued,
-           * or (2) the work has not been started and is still in the work
-           * queue.  Only the second case can be cancelled.  work_cancel()
-           * will return -ENOENT in the first case.
-           */
+          if (aioc)
+            {
+              /* Yes... attempt to cancel the I/O.  There are two
+               * possibilities:* (1) the work has already been started and
+               * is no longer queued, or (2) the work has not been started
+               * and is still in the work queue.  Only the second case can
+               * be cancelled.  work_cancel() will return -ENOENT in the
+               * first case.
+               */
 
-          status = work_cancel(LPWORK, &aioc->aioc_work);
-          ret = status >= 0 ? AIO_CANCELED : AIO_NOTCANCELED;
+              status = work_cancel(LPWORK, &aioc->aioc_work);
+
+              /* Remove the container from the list of pending transfers */
+
+              (void)aioc_decant(aioc);
+              ret = status >= 0 ? AIO_CANCELED : AIO_NOTCANCELED;
+            }
         }
     }
   else
     {
-      /* The I/O has already completed */
+      /* No aiocbp.. cancel all outstanding I/O for the fildes */
 
-      ret = AIO_ALLDONE;
+      next = (FAR struct aio_container_s *)g_aio_pending.head;
+      do
+        {
+          /* Find the next container with this AIO control block */
+
+          aio_lock();
+          for (aioc = next;
+               aioc && aioc->aioc_aiocbp->aio_fildes != fildes;
+               aioc = (FAR struct aio_container_s *)aioc->aioc_link.flink);
+          aio_unlock();
+
+          /* Did we find the container?  We should; the aio_result says
+           * that the transfer is pending.  If not we return AIO_ALLDONE.
+           */
+
+          if (aioc)
+            {
+              /* Yes... attempt to cancel the I/O.  There are two
+               * possibilities:* (1) the work has already been started and
+               * is no longer queued, or (2) the work has not been started
+               * and is still in the work queue.  Only the second case can
+               * be cancelled.  work_cancel() will return -ENOENT in the
+               * first case.
+               */
+
+              status = work_cancel(LPWORK, &aioc->aioc_work);
+
+              /* Remove the container from the list of pending transfers */
+
+              next = (FAR struct aio_container_s *)aioc->aioc_link.flink;
+              (void)aioc_decant(aioc);
+
+              /* Keep track of the return status */
+
+              if (ret != AIO_NOTCANCELED)
+                {
+                  ret = status >= 0 ? AIO_CANCELED : AIO_NOTCANCELED;
+                }
+            }
+        }
+      while (aioc);
     }
 
   sched_unlock();
